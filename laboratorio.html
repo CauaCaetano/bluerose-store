@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; frame-src 'self'; worker-src 'self'; child-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratório: rode as automações | BLUE ROSE</title>
+<meta name="description" content="Rode no seu navegador os scripts Python reais da BLUE ROSE: relatório de vendas com o seu CSV, organizador de arquivos, qualificador de leads, recuperação de PIX e gerador de descrições. Nada é instalado e nada sai do seu computador.">
+<link rel="canonical" href="https://bluerose-store.com/laboratorio.html">
+<link rel="alternate" hreflang="pt-BR" href="https://bluerose-store.com/laboratorio.html">
+<link rel="alternate" hreflang="en" href="https://bluerose-store.com/lab-en.html">
+<meta name="theme-color" content="#0b0e13" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BLUE ROSE">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Laboratório BLUE ROSE: rode as automações no navegador">
+<meta property="og:description" content="Os scripts Python reais rodando no seu navegador, com os seus dados. Sem instalar nada.">
+<meta property="og:url" content="https://bluerose-store.com/laboratorio.html">
+<meta property="og:image" content="https://bluerose-store.com/img/og-blue-rose.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="img/blue-rose-favicon.png">
+<link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="css/site.css?v=13">
+<script>document.documentElement.classList.add('js')</script>
+<script src="js/site.js?v=10" defer></script>
+<script src="js/lab.js?v=7" defer></script>
+</head>
+<body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="BLUE ROSE, página inicial">
+      <img src="img/blue-rose-favicon.png" alt="" width="30" height="30">BLUE ROSE
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir menu">
+      <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-list"/></svg>
+    </button>
+    <nav class="nav-links" id="menu" aria-label="Principal">
+      <a href="projetos.html">Projetos</a>
+      <a href="exemplos.html">Sites</a>
+      <a href="laboratorio.html" aria-current="page">Laboratório</a>
+      <a href="./#processo">Como funciona</a>
+      <a href="./#precos">Preços</a>
+      <div class="idioma-br" data-idioma-br><button type="button" class="idioma-br-btn" aria-expanded="false" aria-haspopup="true" aria-label="Idioma"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-globe"/></svg><span>PT</span></button><div class="idioma-br-menu"><a href="laboratorio.html" hreflang="pt-BR" lang="pt-BR" data-lang="pt" aria-current="true">Português</a><a href="lab-en.html" hreflang="en" lang="en" data-lang="en">English</a></div></div>
+      <a class="btn btn-primary" href="./#contato">Falar sobre meu projeto</a>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo">
+  <div class="p-hero">
+    <div class="wrap">
+      <h1 class="reveal">Rode as automações aqui mesmo.</h1>
+      <p class="sub reveal">Os scripts Python reais do portfólio, executados no seu navegador. Use os seus dados: nada é instalado e nada sai do seu computador.</p>
+    </div>
+  </div>
+
+  <section style="padding-top:8px" aria-label="Laboratório">
+    <div class="wrap">
+      <div class="lab reveal" data-lab>
+        <div class="demo-tabs" role="tablist" aria-label="Scripts">
+          <button type="button" role="tab" id="t-rel" aria-controls="p-rel" aria-selected="true"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-chart-line-up"/></svg>Relatório de vendas</button>
+          <button type="button" role="tab" id="t-org" aria-controls="p-org" aria-selected="false" tabindex="-1"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-files"/></svg>Organizador de arquivos</button>
+          <button type="button" role="tab" id="t-lead" aria-controls="p-lead" aria-selected="false" tabindex="-1"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-user-focus"/></svg>Qualificador de leads</button>
+          <button type="button" role="tab" id="t-pix" aria-controls="p-pix" aria-selected="false" tabindex="-1"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-receipt"/></svg>Recuperação de PIX</button>
+          <button type="button" role="tab" id="t-ger" aria-controls="p-ger" aria-selected="false" tabindex="-1"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-robot"/></svg>Descrições de produto</button>
+        </div>
+        <div class="lab-corpo">
+          <div class="lab-controles">
+            <div role="tabpanel" id="p-rel" aria-labelledby="t-rel">
+              <form data-comando="relatorio">
+                <p class="desc">Cole um CSV de vendas (colunas <code>data,produto,categoria,valor</code>) ou escolha um arquivo seu. O script soma por categoria e por mês e gera <code>resumo.csv</code>.</p>
+                <div class="campo">
+                  <label for="l-csv">vendas.csv</label>
+                  <textarea id="l-csv" name="csv" spellcheck="false">data,produto,categoria,valor
+2026-08-03,Limpeza de pele,Estética facial,120
+2026-08-11,Massagem relaxante,Corporal,150
+2026-08-19,Design de sobrancelha,Estética facial,60
+2026-09-02,Limpeza de pele,Estética facial,120
+2026-09-09,Drenagem linfática,Corporal,140
+2026-09-23,Peeling,Estética facial,180</textarea>
+                </div>
+                <label class="arquivo">Ou use um CSV do seu computador: <input type="file" accept=".csv,text/csv" data-csv-arquivo></label>
+                <p class="aviso" data-aviso aria-live="polite"></p>
+                <div class="linha-acoes"><button class="btn btn-primary" type="submit"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg>Rodar relatorio_vendas.py</button></div>
+              </form>
+            </div>
+            <div role="tabpanel" id="p-org" aria-labelledby="t-org" hidden>
+              <form data-comando="organizador">
+                <p class="desc">Uma pasta bagunçada vira subpastas por tipo. Escreva nomes de arquivos ou escolha arquivos do seu computador: só os <b>nomes</b> são lidos, o conteúdo não sai daqui.</p>
+                <div class="campo">
+                  <label for="l-nomes">Arquivos da pasta (um por linha)</label>
+                  <textarea id="l-nomes" name="nomes" spellcheck="false">foto-fachada.jpg
+cardapio-setembro.pdf
+vendas-agosto.xlsx
+video-instagram.mp4
+contrato-aluguel.docx
+logo-final.png
+notas.txt
+backup-site.zip</textarea>
+                </div>
+                <label class="arquivo">Ou pegue os nomes de arquivos seus: <input type="file" multiple data-nomes-arquivos></label>
+                <label class="opcao" style="display:flex;gap:8px;align-items:center;font-size:14.5px;color:var(--ink-2)"><input type="checkbox" name="executar" style="width:16px;height:16px;accent-color:var(--accent-solid)"> Mover de verdade (dentro de uma pasta virtual no navegador)</label>
+                <p class="aviso" data-aviso aria-live="polite"></p>
+                <div class="linha-acoes"><button class="btn btn-primary" type="submit"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg>Rodar organizador_arquivos.py</button></div>
+              </form>
+            </div>
+            <div role="tabpanel" id="p-lead" aria-labelledby="t-lead" hidden>
+              <form data-comando="qualificador">
+                <p class="desc">Simula um lead de imobiliária respondendo às quatro perguntas pelo WhatsApp e mostra o resumo que chegaria ao corretor, com a classificação QUENTE, MORNO ou FRIO.</p>
+                <p class="desc">O envio real fica isolado na função <code>enviar_mensagem_whatsapp</code>: em produção, ela chama a API oficial do WhatsApp.</p>
+                <div class="linha-acoes"><button class="btn btn-primary" type="submit"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg>Rodar qualificador_leads_whatsapp.py --demo</button></div>
+              </form>
+            </div>
+            <div role="tabpanel" id="p-pix" aria-labelledby="t-pix" hidden>
+              <form data-comando="pix">
+                <p class="desc">O cliente gera um PIX e some. Depois do prazo, o script consulta o pagamento e só manda lembrete se continuar pendente.</p>
+                <div class="campo">
+                  <label for="l-pago">O cliente pagou?</label>
+                  <select id="l-pago" name="pago">
+                    <option value="nunca">Não pagou: deve mandar o lembrete</option>
+                    <option value="1">Pagou antes do prazo: não deve incomodar</option>
+                  </select>
+                </div>
+                <div class="linha-acoes"><button class="btn btn-primary" type="submit"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg>Rodar recuperador_pix_whatsapp.py</button></div>
+              </form>
+            </div>
+            <div role="tabpanel" id="p-ger" aria-labelledby="t-ger" hidden>
+              <form data-comando="gerador">
+                <p class="desc">Monta o pedido para a IA e escreve a descrição. Aqui no navegador ele roda sem chave da API, então usa o texto local e avisa a origem; com a chave, quem escreve é o Claude.</p>
+                <div class="campo"><label for="l-nome">Produto</label><input id="l-nome" name="nome" type="text" value="Kit skincare noturno"></div>
+                <div class="campo"><label for="l-car">Características (separadas por vírgula)</label><input id="l-car" name="caracteristicas" type="text" value="sérum, hidratante, máscara de argila"></div>
+                <div class="campo"><label for="l-pub">Público</label><input id="l-pub" name="publico" type="text" value="presente de aniversário"></div>
+                <p class="aviso" data-aviso aria-live="polite"></p>
+                <div class="linha-acoes"><button class="btn btn-primary" type="submit"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg>Rodar gerador_descricoes.py</button></div>
+              </form>
+            </div>
+          </div>
+          <div class="lab-saida">
+            <div class="barra"><span data-status-py data-estado="desligado">Python desligado.</span></div>
+            <pre class="lab-term" data-terminal aria-live="polite" aria-label="Saída do script"><span class="lab-vazio">A saída do script aparece aqui.</span></pre>
+          </div>
+        </div>
+      </div>
+      <p class="demo-nota">Como funciona: o Pyodide (Python compilado para WebAssembly) roda dentro de um Web Worker no seu navegador e executa os mesmos arquivos <code>.py</code> usados nos projetos. Na primeira vez ele baixa cerca de 10 MB; depois fica em cache.</p>
+    </div>
+  </section>
+
+  <section class="fim-cta">
+    <div class="wrap">
+      <h2 class="reveal">Tem uma planilha ou uma tarefa assim no seu negócio? Ela vira um script desses.</h2>
+      <a class="btn btn-primary reveal" href="./#contato">Falar sobre meu projeto <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape-site">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="img/blue-rose-favicon.png" alt="" width="30" height="30" loading="lazy">BLUE ROSE</a>
+    <nav aria-label="Rodapé">
+      <a href="./">Início</a>
+      <a href="projetos.html">Projetos</a>
+      <a href="exemplos.html">Exemplos de sites</a>
+      <a href="termos.html">Termos de Serviço</a>
+      <a href="privacidade.html">Privacidade</a>
+      <a href="lab-en.html" hreflang="en" lang="en">English</a>
+    </nav>
+    <div class="linha2">
+      <span>© 2026 BLUE ROSE.</span>
+      <span>Sem cookies. A contagem de visitas é anônima.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; frame-src 'self'; worker-src 'self'; child-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab: run the automations | BLUE ROSE</title>
+<meta name="description" content="Run the real BLUE ROSE Python scripts in your browser: a sales report from your CSV, a file organizer, a lead qualifier, payment recovery and a product description generator. Nothing to install, nothing leaves your computer.">
+<link rel="canonical" href="https://bluerose-store.com/lab-en.html">
+<link rel="alternate" hreflang="pt-BR" href="https://bluerose-store.com/laboratorio.html">
+<link rel="alternate" hreflang="en" href="https://bluerose-store.com/lab-en.html">
+<meta name="theme-color" content="#0b0e13" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BLUE ROSE">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="BLUE ROSE Lab: run the automations in your browser">
+<meta property="og:description" content="The real Python scripts running in your browser, with your data. Nothing to install.">
+<meta property="og:url" content="https://bluerose-store.com/lab-en.html">
+<meta property="og:image" content="https://bluerose-store.com/img/og-blue-rose-en.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="img/blue-rose-favicon.png">
+<link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="css/site.css?v=13">
+<script>document.documentElement.classList.add('js')</script>
+<script src="js/site.js?v=10" defer></script>
+<script src="js/lab.js?v=7" defer></script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="clinicas-en.html" aria-label="BLUE ROSE, home">
+      <img src="img/blue-rose-favicon.png" alt="" width="30" height="30">BLUE ROSE
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
+      <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-list"/></svg>
+    </button>
+    <nav class="nav-links" id="menu" aria-label="Main">
+      <a href="projects-en.html">Projects</a>
+      <a href="exemplos-en.html">Websites</a>
+      <a href="lab-en.html" aria-current="page">Lab</a>
+      <a href="clinicas-en.html#process">How it works</a>
+      <a href="clinicas-en.html#pricing">Pricing</a>
+      <div class="idioma-br" data-idioma-br><button type="button" class="idioma-br-btn" aria-expanded="false" aria-haspopup="true" aria-label="Language"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-globe"/></svg><span>EN</span></button><div class="idioma-br-menu"><a href="laboratorio.html" hreflang="pt-BR" lang="pt-BR" data-lang="pt">Português</a><a href="lab-en.html" hreflang="en" lang="en" data-lang="en" aria-current="true">English</a></div></div>
+      <a class="btn btn-primary" href="clinicas-en.html#contact">Talk about my project</a>
+    </nav>
+  </div>
+</header>
+
+<main id="content">
+  <div class="p-hero">
+    <div class="wrap">
+      <h1 class="reveal">Run the automations right here.</h1>
+      <p class="sub reveal">The real Python scripts from the portfolio, running in your browser. Use your own data: nothing is installed and nothing leaves your computer. The scripts answer in English here and in Portuguese on the Portuguese page.</p>
+    </div>
+  </div>
+
+  <section style="padding-top:8px" aria-label="Lab">
+    <div class="wrap">
+      <div class="lab reveal" data-lab>
+        <div class="demo-tabs" role="tablist" aria-label="Scripts">
+          <button type="button" role="tab" id="t-rel" aria-controls="p-rel" aria-selected="true"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-chart-line-up"/></svg>Sales report</button>
+          <button type="button" role="tab" id="t-org" aria-controls="p-org" aria-selected="false" tabindex="-1"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-files"/></svg>File organizer</button>
+          <button type="button" role="tab" id="t-lead" aria-controls="p-lead" aria-selected="false" tabindex="-1"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-user-focus"/></svg>Lead qualifier</button>
+          <button type="button" role="tab" id="t-pix" aria-controls="p-pix" aria-selected="false" tabindex="-1"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-receipt"/></svg>Payment recovery</button>
+          <button type="button" role="tab" id="t-ger" aria-controls="p-ger" aria-selected="false" tabindex="-1"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-robot"/></svg>Product descriptions</button>
+        </div>
+        <div class="lab-corpo">
+          <div class="lab-controles">
+            <div role="tabpanel" id="p-rel" aria-labelledby="t-rel">
+              <form data-comando="relatorio">
+                <p class="desc">Paste a sales CSV (columns <code>date,product,category,amount</code>) or pick a file. The script totals by category and month and writes <code>resumo.csv</code>.</p>
+                <div class="campo">
+                  <label for="l-csv">vendas.csv</label>
+                  <textarea id="l-csv" name="csv" spellcheck="false">date,product,category,amount
+2026-08-03,Facial cleansing,Facial,120
+2026-08-11,Relaxing massage,Body,150
+2026-08-19,Brow design,Facial,60
+2026-09-02,Facial cleansing,Facial,120
+2026-09-09,Lymphatic drainage,Body,140
+2026-09-23,Peeling,Facial,180</textarea>
+                </div>
+                <label class="arquivo">Or use a CSV from your computer: <input type="file" accept=".csv,text/csv" data-csv-arquivo></label>
+                <p class="aviso" data-aviso aria-live="polite"></p>
+                <div class="linha-acoes"><button class="btn btn-primary" type="submit"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg>Run relatorio_vendas.py</button></div>
+              </form>
+            </div>
+            <div role="tabpanel" id="p-org" aria-labelledby="t-org" hidden>
+              <form data-comando="organizador">
+                <p class="desc">A messy folder becomes subfolders by type. Type file names or pick files from your computer: only the <b>names</b> are read, the content never leaves this page.</p>
+                <div class="campo">
+                  <label for="l-nomes">Files in the folder (one per line)</label>
+                  <textarea id="l-nomes" name="nomes" spellcheck="false">storefront-photo.jpg
+september-menu.pdf
+august-sales.xlsx
+instagram-video.mp4
+lease-contract.docx
+final-logo.png
+notes.txt
+site-backup.zip</textarea>
+                </div>
+                <label class="arquivo">Or take file names from your computer: <input type="file" multiple data-nomes-arquivos></label>
+                <label class="opcao" style="display:flex;gap:8px;align-items:center;font-size:14.5px;color:var(--ink-2)"><input type="checkbox" name="executar" style="width:16px;height:16px;accent-color:var(--accent-solid)"> Really move them (inside a virtual folder in the browser)</label>
+                <p class="aviso" data-aviso aria-live="polite"></p>
+                <div class="linha-acoes"><button class="btn btn-primary" type="submit"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg>Run organizador_arquivos.py</button></div>
+              </form>
+            </div>
+            <div role="tabpanel" id="p-lead" aria-labelledby="t-lead" hidden>
+              <form data-comando="qualificador">
+                <p class="desc">Simulates a real-estate lead answering four WhatsApp questions and shows the summary the agent would receive, scored HOT, WARM or COLD.</p>
+                <p class="desc">Real sending is isolated in the <code>enviar_mensagem_whatsapp</code> function: in production it calls the official WhatsApp API.</p>
+                <div class="linha-acoes"><button class="btn btn-primary" type="submit"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg>Run qualificador_leads_whatsapp.py --demo</button></div>
+              </form>
+            </div>
+            <div role="tabpanel" id="p-pix" aria-labelledby="t-pix" hidden>
+              <form data-comando="pix">
+                <p class="desc">The customer generates a PIX payment and disappears. After the waiting time, the script checks the payment and only sends a reminder if it is still pending.</p>
+                <div class="campo">
+                  <label for="l-pago">Did the customer pay?</label>
+                  <select id="l-pago" name="pago">
+                    <option value="never">No: it should send the reminder</option>
+                    <option value="1">Yes, before the deadline: it should stay silent</option>
+                  </select>
+                </div>
+                <div class="linha-acoes"><button class="btn btn-primary" type="submit"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg>Run recuperador_pix_whatsapp.py</button></div>
+              </form>
+            </div>
+            <div role="tabpanel" id="p-ger" aria-labelledby="t-ger" hidden>
+              <form data-comando="gerador">
+                <p class="desc">Builds the AI prompt and writes the description. Here in the browser it runs without an API key, so it uses the local text and says so; with the key, Claude writes it.</p>
+                <div class="campo"><label for="l-nome">Product</label><input id="l-nome" name="nome" type="text" value="Night skincare kit"></div>
+                <div class="campo"><label for="l-car">Features (comma separated)</label><input id="l-car" name="caracteristicas" type="text" value="serum, moisturizer, clay mask"></div>
+                <div class="campo"><label for="l-pub">Audience</label><input id="l-pub" name="publico" type="text" value="a birthday gift"></div>
+                <p class="aviso" data-aviso aria-live="polite"></p>
+                <div class="linha-acoes"><button class="btn btn-primary" type="submit"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg>Run gerador_descricoes.py</button></div>
+              </form>
+            </div>
+          </div>
+          <div class="lab-saida">
+            <div class="barra"><span data-status-py data-estado="desligado">Python is off.</span></div>
+            <pre class="lab-term" data-terminal aria-live="polite" aria-label="Script output"><span class="lab-vazio">The script output shows up here.</span></pre>
+          </div>
+        </div>
+      </div>
+      <p class="demo-nota">How it works: Pyodide (Python compiled to WebAssembly) runs inside a Web Worker in your browser and executes the same <code>.py</code> files used in the projects. The first time it downloads about 10 MB; after that it is cached.</p>
+    </div>
+  </section>
+
+  <section class="fim-cta">
+    <div class="wrap">
+      <h2 class="reveal">Got a spreadsheet or a task like this in your business? It can become one of these scripts.</h2>
+      <a class="btn btn-primary reveal" href="clinicas-en.html#contact">Talk about my project <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape-site">
+  <div class="wrap">
+    <a class="brand" href="clinicas-en.html"><img src="img/blue-rose-favicon.png" alt="" width="30" height="30" loading="lazy">BLUE ROSE</a>
+    <nav aria-label="Footer">
+      <a href="clinicas-en.html">Home</a>
+      <a href="projects-en.html">Projects</a>
+      <a href="exemplos-en.html">Example websites</a>
+      <a href="terms-en.html">Terms of Service</a>
+      <a href="privacy-en.html">Privacy</a>
+      <a href="laboratorio.html" hreflang="pt-BR" lang="pt-BR">Português</a>
+    </nav>
+    <div class="linha2">
+      <span>© 2026 BLUE ROSE.</span>
+      <span>No cookies. Visit counts are anonymous.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
