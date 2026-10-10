@@ -910,10 +910,12 @@ h1 em,h2 em,.h1 em{font-style:italic;color:var(--acc)}
 .ft .logo-img{height:44px}
 .sim-av.com-logo{background:#fff center/contain no-repeat;border:1px solid rgba(0,0,0,.08)}
 @media(max-width:600px){.logo-img{height:34px;max-width:110px}.logo.so-logo .logo-img{height:38px;max-width:150px}}
-/* a logo do cliente ganha um fundo claro para aparecer em qualquer cabeçalho (claro, escuro ou sobre foto) */
-.logo-img{background:rgba(255,255,255,.94);padding:5px 9px;border-radius:9px;box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.05);box-sizing:content-box;height:32px}
-.logo.so-logo .logo-img{height:38px}
-@media(max-width:600px){.logo-img{height:28px;max-width:100px}.logo.so-logo .logo-img{height:32px;max-width:140px}}
+/* a logo do cliente aparece solta (o fundo liso é removido no envio); só ganha plaquinha quando sumiria no fundo */
+.logo-img{border-radius:0;transition:background .25s,box-shadow .25s,padding .25s}
+.logo-img.sobre-escuro{filter:drop-shadow(0 1px 6px rgba(0,0,0,.35))}
+.logo-img.caixa{background:rgba(255,255,255,.94);box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.05);padding:5px 9px;border-radius:9px;box-sizing:content-box;height:32px;filter:none}
+.logo.so-logo .logo-img.caixa{height:38px}
+@media(max-width:600px){.logo-img.caixa{height:28px;max-width:100px}.logo.so-logo .logo-img.caixa{height:32px;max-width:140px}}
 .logo.com-logo:not(.so-logo) .logo-img{max-width:92px}
 .logo.com-logo:not(.so-logo) .logo-txt small{display:none}
 .nav-aperta .hd-nav{gap:clamp(12px,1.3vw,20px);font-size:13.5px}

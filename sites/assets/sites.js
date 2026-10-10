@@ -127,7 +127,65 @@
     var fav = $('link[rel="icon"]');
     if (fav) fav.href = src;
     body.classList.add('tem-logo');
+    analisarLogo(src);
   }
+
+  // logo sem fundo aparece solta; escura sobre fundo escuro vira a versão branca (e clara sobre claro, a preta);
+  // só ganha plaquinha quando a imagem ainda tem fundo próprio (foto, fundo variado)
+  var infoLogo = null;
+  function analisarLogo(src) {
+    var im = new Image();
+    im.onload = function () {
+      try {
+        var W = Math.min(160, im.naturalWidth || 160), H = Math.max(1, Math.round(W * (im.naturalHeight || 1) / (im.naturalWidth || 1)));
+        var c = doc.createElement('canvas'); c.width = W; c.height = H;
+        var ctx = c.getContext('2d'); ctx.drawImage(im, 0, 0, W, H);
+        var p = ctx.getImageData(0, 0, W, H).data, borda = 0, transp = 0, soma = 0, peso = 0, x, y, i;
+        for (y = 0; y < H; y++) for (x = 0; x < W; x++) {
+          i = (y * W + x) * 4;
+          if (x === 0 || y === 0 || x === W - 1 || y === H - 1) { borda++; if (p[i + 3] < 24) transp++; }
+          if (p[i + 3] > 24) { var a = p[i + 3] / 255; soma += a * (0.2126 * p[i] + 0.7152 * p[i + 1] + 0.0722 * p[i + 2]) / 255; peso += a; }
+        }
+        infoLogo = { solta: transp >= borda * 0.6, luz: peso ? soma / peso : 0.5, orig: src };
+        // versões de uma cor só: o escuro vira a cor e o claro fica vazado (como a marca faz em fundo invertido)
+        var mono = function (r, g, bl, claroVira) {
+          var k = doc.createElement('canvas'); k.width = im.naturalWidth; k.height = im.naturalHeight;
+          var kx = k.getContext('2d'); kx.drawImage(im, 0, 0);
+          var dd = kx.getImageData(0, 0, k.width, k.height), q = dd.data;
+          for (var j = 0; j < q.length; j += 4) {
+            var l = (0.2126 * q[j] + 0.7152 * q[j + 1] + 0.0722 * q[j + 2]) / 255;
+            var f = claroVira ? l : 1 - l;
+            q[j + 3] = Math.round(q[j + 3] * Math.min(1, Math.max(0, (f - 0.12) / 0.6)));
+            q[j] = r; q[j + 1] = g; q[j + 2] = bl;
+          }
+          kx.putImageData(dd, 0, 0);
+          return k.toDataURL('image/png');
+        };
+        if (infoLogo.solta) { infoLogo.branca = mono(255, 255, 255, false); infoLogo.preta = mono(17, 20, 28, true); }
+      } catch (e) { infoLogo = { solta: false, luz: 0.5 }; }
+      tomLogo();
+    };
+    im.src = src;
+  }
+  function luzCor(cor) {
+    var m = String(cor).match(/[\d.]+/g); if (!m || m.length < 3) return 0;
+    return (0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2]) / 255;
+  }
+  function tomLogo() {
+    if (!infoLogo) return;
+    $$('.logo-img').forEach(function (img) {
+      var fundoEscuro = luzCor(getComputedStyle(img.parentNode).color) > 0.6;
+      var tom = !infoLogo.solta ? 'caixa' : (fundoEscuro && infoLogo.luz < 0.36 ? 'branca' : (!fundoEscuro && infoLogo.luz > 0.86 ? 'preta' : ''));
+      ['caixa', 'branca', 'preta'].forEach(function (k) { img.classList.toggle(k, tom === k); });
+      var alvo = tom === 'branca' ? infoLogo.branca : (tom === 'preta' ? infoLogo.preta : infoLogo.orig);
+      if (alvo && img.getAttribute('src') !== alvo) img.src = alvo;
+      img.classList.toggle('sobre-escuro', fundoEscuro);
+    });
+  }
+  (function () {
+    var hd = $('.hd'), espera;
+    if (hd && 'MutationObserver' in window) new MutationObserver(function () { clearTimeout(espera); espera = setTimeout(tomLogo, 320); }).observe(hd, { attributes: true, attributeFilter: ['class'] });
+  })();
 
   function aplicarNome(nome) {
     var apelidos = [];

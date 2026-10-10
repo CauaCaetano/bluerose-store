@@ -59,6 +59,55 @@
   var querHref = function (s) { return (en ? 'clinicas-en.html' : 'index.html') + '?modelo=' + encodeURIComponent(s.nome) + (perso.nome ? '&nome=' + encodeURIComponent(perso.nome) : '') + '#contato'; };
   var temPerso = function () { return !!(perso.nome || perso.cor || perso.cor2 || perso.logo); };
 
+  // tira o fundo liso da logo (branco ou de uma cor só) e corta as sobras; foto ou fundo variado fica como está
+  function tirarFundo(c) {
+    var W = c.width, H = c.height, ctx = c.getContext('2d');
+    var d = ctx.getImageData(0, 0, W, H), p = d.data, i, x, y;
+    var borda = [];
+    for (x = 0; x < W; x++) { borda.push(x, (H - 1) * W + x); }
+    for (y = 1; y < H - 1; y++) { borda.push(y * W, y * W + W - 1); }
+    var transp = 0, rs = [], gs = [], bs = [];
+    borda.forEach(function (k) {
+      if (p[k * 4 + 3] < 24) transp++;
+      else { rs.push(p[k * 4]); gs.push(p[k * 4 + 1]); bs.push(p[k * 4 + 2]); }
+    });
+    var mediana = function (a) { a.sort(function (m, n) { return m - n; }); return a[a.length >> 1]; };
+    if (transp < borda.length * 0.6) {
+      if (rs.length < 8) return c;
+      var R = mediana(rs), G = mediana(gs), B = mediana(bs);
+      var dist = function (k) { var dr = p[k] - R, dg = p[k + 1] - G, db = p[k + 2] - B; return Math.sqrt(dr * dr + dg * dg + db * db); };
+      var iguais = 0;
+      borda.forEach(function (k) { if (p[k * 4 + 3] >= 24 && dist(k * 4) < 48) iguais++; });
+      if (iguais < (borda.length - transp) * 0.8) return c; // fundo não é liso: mantém
+      // inunda a partir das bordas: o que é parecido com o fundo some, a beirada fica suave
+      var visto = new Uint8Array(W * H), fila = [];
+      borda.forEach(function (k) { if (!visto[k]) { visto[k] = 1; fila.push(k); } });
+      while (fila.length) {
+        var k = fila.pop(), q = k * 4, dd = dist(q);
+        if (p[q + 3] >= 24 && dd > 64) continue;
+        p[q + 3] = dd <= 34 ? 0 : Math.round(p[q + 3] * Math.min(1, (dd - 34) / 30));
+        x = k % W; y = (k / W) | 0;
+        if (x > 0 && !visto[k - 1]) { visto[k - 1] = 1; fila.push(k - 1); }
+        if (x < W - 1 && !visto[k + 1]) { visto[k + 1] = 1; fila.push(k + 1); }
+        if (y > 0 && !visto[k - W]) { visto[k - W] = 1; fila.push(k - W); }
+        if (y < H - 1 && !visto[k + W]) { visto[k + W] = 1; fila.push(k + W); }
+      }
+      // miolos de letras (o, a, e…) com a mesma cor do fundo também somem
+      for (i = 0; i < p.length; i += 4) if (p[i + 3] >= 24 && dist(i) <= 20) p[i + 3] = 0;
+      ctx.putImageData(d, 0, 0);
+    }
+    // corta a área vazia em volta
+    var x0 = W, y0 = H, x1 = -1, y1 = -1;
+    for (y = 0; y < H; y++) for (x = 0; x < W; x++) if (p[(y * W + x) * 4 + 3] > 16) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return c;
+    x0 = Math.max(0, x0 - 2); y0 = Math.max(0, y0 - 2); x1 = Math.min(W - 1, x1 + 2); y1 = Math.min(H - 1, y1 + 2);
+    if (x0 === 0 && y0 === 0 && x1 === W - 1 && y1 === H - 1) return c;
+    var n = document.createElement('canvas');
+    n.width = x1 - x0 + 1; n.height = y1 - y0 + 1;
+    n.getContext('2d').drawImage(c, x0, y0, n.width, n.height, 0, 0, n.width, n.height);
+    return n;
+  }
+
   // reduz a imagem para no máximo 480×200 e devolve PNG (mantém transparência), ou WEBP se ficar grande
   function prepararLogo(arquivo, pronto, falhou) {
     if (!/^image\/(png|jpeg|webp|svg\+xml)$/.test(arquivo.type)) return falhou(en ? 'Use a PNG, JPG, WEBP or SVG image.' : 'Use uma imagem PNG, JPG, WEBP ou SVG.');
@@ -74,6 +123,7 @@
         var c = document.createElement('canvas');
         c.width = Math.max(1, Math.round(w * esc)); c.height = Math.max(1, Math.round(h * esc));
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        try { c = tirarFundo(c); } catch (e) {}
         var dado = c.toDataURL('image/png');
         if (dado.length > 350000) dado = c.toDataURL('image/webp', 0.9);
         pronto(dado);
