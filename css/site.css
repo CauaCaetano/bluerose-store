@@ -792,6 +792,7 @@ section { padding: clamp(84px, 10vw, 136px) 0; }
 .perso-envio.cheio { border-style: solid; background: repeating-conic-gradient(color-mix(in srgb, var(--ink) 6%, transparent) 0 25%, transparent 0 50%) 0 0 / 16px 16px, var(--surface); }
 .perso-envio.cheio .perso-envio-vazio { display: none; }
 .perso-envio img { max-height: 64px; max-width: 100%; object-fit: contain; pointer-events: none; }
+.perso-envio img[hidden] { display: none; }
 .perso-logo-op { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .perso-logo-op[hidden] { display: none; }
 .perso-check { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink-2); cursor: pointer; }
