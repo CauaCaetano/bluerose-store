@@ -800,4 +800,130 @@
       res.innerHTML = achou ? '<span class="ok">' + T('cobOk') + ' ' + esc(achou[0]) + ' (' + esc(achou[1].n) + ') · ' + (achou[1].taxa ? T('deslocDe') + ' ' + dinheiro(achou[1].taxa) : T('gratis')) + '</span>' : '<span class="nao">' + T('cobNao') + '</span>';
     });
   });
+  // ---------- simulação de baixar e usar o app (App Store / Google Play) ----------
+  // Nada é baixado: mostra o caminho do cliente — loja, download, abrir, agendar e o lembrete.
+  (function () {
+    var lojas = $$('[data-app-sim]');
+    if (!lojas.length) return;
+    var A = function (pt, en) { return EN ? en : pt; };
+    var ACADEMIA = /treino|pulso|atlas|academia|rafa|caio/.test(SLUG);
+    var SERV = ACADEMIA
+      ? [[A('Treino do dia', 'Daily workout'), A('Pernas e glúteos · 45 min', 'Legs and glutes · 45 min')], [A('Aula coletiva', 'Group class'), A('Funcional · 50 min', 'HIIT · 50 min')], [A('Avaliação física', 'Fitness assessment'), A('Com o seu professor', 'With your coach')]]
+      : [[A('Manicure', 'Manicure'), A('Em casa · 50 min', 'At home · 50 min')], [A('Mão e pé', 'Mani + pedi'), A('Em casa · 1h30', 'At home · 1h30')], [A('Esmaltação em gel', 'Gel polish'), A('Dura até 3 semanas', 'Lasts up to 3 weeks')]];
+    var DIAS = [A('Hoje', 'Today'), A('Amanhã', 'Tomorrow'), A('Sábado', 'Saturday')];
+    var HORAS = EN ? ['9:00 am', '10:30 am', '2:00 pm', '4:30 pm'] : ['09:00', '10:30', '14:00', '16:30'];
+    var caixa, tela, timers = [], focoAntes = null, plat = 'ios', escolha = {};
+    function limpa() { timers.forEach(function (t) { clearTimeout(t); clearInterval(t); }); timers = []; }
+    function icone(tam) {
+      var logo = perso && perso.logoImg;
+      return '<span class="as-ic" style="width:' + tam + 'px;height:' + tam + 'px' + (logo ? ';background-image:url(&quot;' + logo + '&quot;)' : '') + '">' + (logo ? '' : esc(MARCA.charAt(0).toUpperCase())) + '</span>';
+    }
+    function montar() {
+      caixa = doc.createElement('div');
+      caixa.className = 'sim app-sim'; caixa.hidden = true;
+      caixa.setAttribute('role', 'dialog'); caixa.setAttribute('aria-modal', 'true'); caixa.setAttribute('aria-labelledby', 'as-titulo');
+      caixa.innerHTML = '<div class="sim-caixa"><button type="button" class="sim-x" aria-label="' + A('Fechar', 'Close') + '"><svg class="ic" aria-hidden="true"><use href="' + RAIZ + 'sites/assets/icones.svg#i-x"/></svg></button>' +
+        '<div class="as-fone"><div class="as-status"><span>9:41</span><i></i></div><div class="as-tela" aria-live="polite"></div><div class="as-notif" hidden></div></div>' +
+        '<div class="sim-txt"><p class="sim-tag">' + A('Simulação', 'Simulation') + '</p><h3 id="as-titulo"></h3><p>' +
+        A('No site real, estes botões levam para o app na App Store e no Google Play. Aqui você vê o caminho do cliente: baixar, abrir, agendar e receber o lembrete. Nada é baixado nem instalado.',
+          'On a real site, these buttons open the app on the App Store and Google Play. Here you can see the customer journey: download, open, book and get the reminder. Nothing is downloaded or installed.') +
+        '</p><a class="btn btn-pri sim-cta" href="#">' + A('Quero um app assim', 'I want an app like this') + '</a><button type="button" class="sim-volta">' + A('Fechar', 'Close') + '</button></div></div>';
+      body.appendChild(caixa);
+      tela = $('.as-tela', caixa);
+      caixa.addEventListener('click', function (e) { if (e.target === caixa || e.target.closest('.sim-x,.sim-volta')) fechar(); });
+      $('.sim-cta', caixa).addEventListener('click', function () { contar('quero', 'app'); });
+      tela.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-as]');
+        if (b) passo(b.getAttribute('data-as'), b);
+      });
+      doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !caixa.hidden) fechar(); });
+    }
+    function fechar() { if (!caixa || caixa.hidden) return; limpa(); caixa.hidden = true; body.classList.remove('sim-aberta'); if (focoAntes) focoAntes.focus(); }
+    function abrir(p) {
+      if (!caixa) montar();
+      limpa(); plat = p; escolha = {};
+      focoAntes = doc.activeElement;
+      caixa.classList.toggle('as-android', plat === 'android');
+      $('#as-titulo', caixa).textContent = A('Como seria baixar o app da ', 'What downloading the ') + MARCA + A('', ' app would look like');
+      $('.sim-cta', caixa).href = urlQuero();
+      $('.as-notif', caixa).hidden = true;
+      caixa.hidden = false; body.classList.add('sim-aberta');
+      contar('simulacao', 'app');
+      loja();
+      $('.sim-x', caixa).focus();
+    }
+    function loja() {
+      var ios = plat === 'ios';
+      var sub = ACADEMIA ? A('Treinos, aulas e check-in', 'Workouts, classes and check-in') : A('Beleza em casa, sem fila', 'Beauty at home, no waiting');
+      tela.className = 'as-tela as-loja';
+      tela.innerHTML = (ios ? '<p class="as-volta">‹ ' + A('Buscar', 'Search') + '</p>' : '<p class="as-volta">← Google Play</p>') +
+        '<div class="as-app">' + icone(78) + '<div><strong>' + esc(MARCA) + '</strong><small>' + sub + '</small>' +
+        (ios ? '<button type="button" class="as-obter" data-as="baixar">' + A('Obter', 'Get') + '</button>' : '') + '</div></div>' +
+        (ios ? '' : '<button type="button" class="as-instalar" data-as="baixar">' + A('Instalar', 'Install') + '</button>') +
+        '<div class="as-info"><span><b>' + A('Grátis', 'Free') + '</b>' + A('preço', 'price') + '</span><span><b>' + A('Livre', 'All ages') + '</b>' + A('idade', 'age') + '</span><span><b>' + (ios ? 'iPhone' : 'Android') + '</b>' + A('aparelho', 'device') + '</span></div>' +
+        '<div class="as-prints"><i></i><i></i><i></i></div>';
+    }
+    function passo(acao, b) {
+      if (acao === 'baixar') {
+        var ios = plat === 'ios', pct = 0;
+        b.disabled = true;
+        b.classList.add('baixando');
+        b.innerHTML = ios ? '<span class="as-anel" style="--p:0"></span>' : '<span class="as-barra"><i style="width:0"></i></span><small>' + A('Baixando… ', 'Downloading… ') + '0%</small>';
+        var t = setInterval(function () {
+          pct = Math.min(100, pct + 4 + Math.round(Math.random() * 6));
+          if (ios) $('.as-anel', b).style.setProperty('--p', pct);
+          else { $('.as-barra i', b).style.width = pct + '%'; $('small', b).textContent = (pct < 100 ? A('Baixando… ', 'Downloading… ') : A('Instalando…', 'Installing…')) + (pct < 100 ? pct + '%' : ''); }
+          if (pct >= 100) {
+            clearInterval(t);
+            timers.push(setTimeout(function () { b.disabled = false; b.classList.remove('baixando'); b.setAttribute('data-as', 'abrir'); b.textContent = A('Abrir', 'Open'); b.focus(); }, ios ? 300 : 700));
+          }
+        }, 110);
+        timers.push(t);
+      } else if (acao === 'abrir') {
+        tela.className = 'as-tela as-splash';
+        tela.innerHTML = icone(96) + '<strong>' + esc(MARCA) + '</strong>';
+        timers.push(setTimeout(inicio, 1300));
+      } else if (acao === 'servico') {
+        escolha.s = b.getAttribute('data-i'); horario();
+      } else if (acao === 'dia' || acao === 'hora') {
+        $$('[data-as="' + acao + '"]', tela).forEach(function (x) { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        escolha[acao] = b.textContent;
+        $('.as-confirmar', tela).disabled = !(escolha.dia && escolha.hora);
+      } else if (acao === 'confirmar') {
+        pronto();
+      } else if (acao === 'voltar') {
+        inicio();
+      } else if (acao === 'denovo') {
+        $('.as-notif', caixa).hidden = true; limpa(); escolha = {}; loja();
+      }
+    }
+    function inicio() {
+      tela.className = 'as-tela as-app-tela';
+      tela.innerHTML = '<div class="as-cab">' + icone(34) + '<span>' + esc(MARCA) + '</span></div>' +
+        '<p class="as-ola">' + A('Olá! Que bom ter você aqui.', 'Hi! Great to have you here.') + '</p><h4>' + (ACADEMIA ? A('O que vai ser hoje?', 'What’s it going to be today?') : A('O que vamos agendar?', 'What should we book?')) + '</h4>' +
+        '<ul class="as-lista">' + SERV.map(function (s, i) { return '<li><button type="button" data-as="servico" data-i="' + i + '"><strong>' + esc(s[0]) + '</strong><small>' + esc(s[1]) + '</small><span>›</span></button></li>'; }).join('') + '</ul>';
+    }
+    function horario() {
+      var s = SERV[escolha.s];
+      tela.className = 'as-tela as-app-tela';
+      tela.innerHTML = '<button type="button" class="as-volta-app" data-as="voltar">‹ ' + A('Voltar', 'Back') + '</button><h4>' + esc(s[0]) + '</h4><p class="as-ola">' + esc(s[1]) + '</p>' +
+        '<p class="as-rot">' + A('Dia', 'Day') + '</p><div class="as-chips">' + DIAS.map(function (d) { return '<button type="button" data-as="dia" aria-pressed="false">' + d + '</button>'; }).join('') + '</div>' +
+        '<p class="as-rot">' + A('Horário', 'Time') + '</p><div class="as-chips">' + HORAS.map(function (h) { return '<button type="button" data-as="hora" aria-pressed="false">' + h + '</button>'; }).join('') + '</div>' +
+        '<button type="button" class="as-confirmar" data-as="confirmar" disabled>' + A('Confirmar', 'Confirm') + '</button>';
+    }
+    function pronto() {
+      var s = SERV[escolha.s];
+      tela.className = 'as-tela as-app-tela as-ok';
+      tela.innerHTML = '<span class="as-check">✓</span><h4>' + (ACADEMIA ? A('Reservado!', 'Booked!') : A('Agendado!', 'Booked!')) + '</h4><p>' + esc(s[0]) + ' · ' + esc(escolha.dia) + ', ' + esc(escolha.hora) + '</p>' +
+        '<p class="as-ola">' + A('Você recebe um lembrete 1 hora antes.', 'You’ll get a reminder 1 hour before.') + '</p><button type="button" class="as-confirmar" data-as="denovo">' + A('Ver de novo', 'Watch again') + '</button>';
+      timers.push(setTimeout(function () {
+        var n = $('.as-notif', caixa);
+        n.innerHTML = icone(28) + '<div><b>' + esc(MARCA) + ' <small>' + A('agora', 'now') + '</small></b><span>' + A('Lembrete: ', 'Reminder: ') + esc(s[0]) + ' · ' + esc(escolha.dia) + ', ' + esc(escolha.hora) + '.</span></div>';
+        n.hidden = false;
+      }, 1800));
+    }
+    lojas.forEach(function (a) {
+      a.addEventListener('click', function (e) { e.preventDefault(); abrir(a.getAttribute('data-app-sim')); });
+    });
+  })();
 })();
