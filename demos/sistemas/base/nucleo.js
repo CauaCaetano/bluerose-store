@@ -221,7 +221,7 @@ export function criarApp(cfg) {
   document.body.innerHTML = `
     <div class="demo-faixa"><span>Demonstração do <b>${esc(cfg.nome)}</b> · os dados ficam só neste navegador</span>
       <button type="button" data-recomecar>Recomeçar com os dados de exemplo</button>
-      <a class="demo-cta" href="${site}sistemas.html#${cfg.id}">Comprar ${moeda(cfg.produto.compra)} ou alugar ${moeda(cfg.produto.mensal)}/mês</a></div>
+      <a class="demo-cta" href="${site}sistemas.html#${cfg.id}">Comprar ${moeda(cfg.produto.compra).replace(',00', '')} ou alugar ${moeda(cfg.produto.mensal).replace(',00', '')}/mês</a></div>
     <div class="app" id="app">
       <nav class="menu" aria-label="Menu">
         <div class="marca"><div class="marca-ic">${esc(cfg.inicial || cfg.nome.split(' ').pop()[0])}</div><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.sub)}</small></div></div>

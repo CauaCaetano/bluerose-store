@@ -139,7 +139,7 @@ function semanaPagina(app) {
 
 const app = criarApp({
   id: 'juridico', nome: 'Nexo Jurídico', sub: 'Advocacia', cor: '#0f766e', inicial: 'J', empresa: 'Castro & Moura Advogados', empresaSub: '3 advogados · Belo Horizonte/MG',
-  produto: { compra: 2990, mensal: 149 },
+  produto: { compra: 3290, mensal: 149 },
   colecoes,
   menu: [
     { grupo: 'Escritório' },

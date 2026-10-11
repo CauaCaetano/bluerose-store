@@ -162,7 +162,7 @@ function relatorios(app) {
 
 const app = criarApp({
   id: 'crm', nome: 'Nexo CRM', sub: 'Vendas', cor: '#7c3aed', inicial: 'C', empresa: 'Solar Sistemas Ltda', empresaSub: 'Equipe comercial · 3 vendedores',
-  produto: { compra: 2990, mensal: 149 },
+  produto: { compra: 2290, mensal: 99 },
   colecoes,
   menu: [
     { grupo: 'Vendas' },

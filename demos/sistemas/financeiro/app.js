@@ -163,7 +163,7 @@ async function imprimirOS(app, id) {
 
 const app = criarApp({
   id: 'financeiro', nome: 'Nexo Financeiro', sub: 'Financeiro & OS', cor: '#0369a1', inicial: 'F', empresa: 'Refrigeração Polo Frio', empresaSub: 'Assistência técnica · Goiânia/GO',
-  produto: { compra: 2990, mensal: 149 },
+  produto: { compra: 2490, mensal: 109 },
   colecoes,
   menu: [
     { grupo: 'Financeiro' },

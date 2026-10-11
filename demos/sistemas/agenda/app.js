@@ -171,7 +171,7 @@ function comissoes(app) {
 
 const app = criarApp({
   id: 'agenda', nome: 'Nexo Agenda', sub: 'Salão & estética', cor: '#db2777', inicial: 'A', empresa: 'Studio Lumière', empresaSub: '4 profissionais · Rua das Flores, 120',
-  produto: { compra: 2990, mensal: 149 },
+  produto: { compra: 1690, mensal: 79 },
   colecoes,
   menu: [
     { grupo: 'Atendimento' },
