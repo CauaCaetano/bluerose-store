@@ -1026,3 +1026,16 @@ dialog.contratar::backdrop { background: rgba(5, 8, 13, .66); backdrop-filter: b
   .nexo-faixa .eyebrow, .nexo-faixa > span:not(.eyebrow):not(.ir), .nexo-faixa .ir { grid-column: 1; grid-row: auto; }
   .nexo-faixa .ir { margin-top: 6px; }
 }
+
+/* ---------- vídeo "como funciona" ---------- */
+.tem-video { position: relative; }
+.tem-video .play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 8px; padding: 11px 16px 11px 13px; border-radius: 999px; background: rgba(10, 13, 19, 0.82); color: #fff; font-weight: 600; font-size: 14.5px; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.6); transition: transform .25s var(--ease), background .2s; pointer-events: none; white-space: nowrap; right: auto; bottom: auto; }
+.tem-video .play .ico { width: 18px; height: 18px; color: #fff; }
+.tem-video:hover .play { transform: translate(-50%, -50%) scale(1.06); background: var(--sis, var(--accent-solid)); }
+.video-dlg { width: min(1040px, calc(100vw - 24px)); max-width: none; padding: 0; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--surface); color: var(--ink); }
+.video-dlg::backdrop { background: rgba(4, 6, 10, 0.78); backdrop-filter: blur(4px); }
+.video-cab { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.video-x { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--line-2); background: none; color: var(--ink); font-size: 22px; line-height: 1; cursor: pointer; }
+.video-dlg video { display: block; width: 100%; aspect-ratio: 16 / 10; background: #0b0e13; }
+.video-pe { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; padding: 12px 16px; border-top: 1px solid var(--line); }
+@media (max-width: 560px) { .video-pe .btn { flex: 1; } }
