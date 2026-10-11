@@ -46,6 +46,15 @@
     'a-automacao': ['R$ 199 por mês', 'Sem entrada · fidelidade de 12 meses'],
   };
 
+  // Linha Nexo: cada sistema traz o próprio preço no botão (data-total / data-mensal).
+  function reais(n) { return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
+  function valoresSistema(b) {
+    var mensal = Number(b.getAttribute('data-mensal')), total = Number(b.getAttribute('data-total'));
+    if (mensal) return [reais(mensal) + ' por mês', 'Sem entrada · hospedagem e suporte inclusos · fidelidade de 12 meses'];
+    if (total) return ['Entrada de ' + reais(total / 2) + ' agora', 'Total ' + reais(total) + ' · o saldo de ' + reais(total / 2) + ' só na entrega'];
+    return ['', ''];
+  }
+
   function estado() {
     var ok = aceite.checked && pagar.dataset.link;
     pagar.setAttribute('aria-disabled', ok ? 'false' : 'true');
@@ -63,7 +72,7 @@
       var link = links[plano];
       if (!link || typeof dlg.showModal !== 'function') { location.hash = 'contato'; return; }
       var assinatura = plano.indexOf('a-') === 0;
-      var v = VALORES[plano] || (plano.indexOf('a-sis-') === 0 ? ['R$ 149 por mês', 'Sem entrada · hospedagem e suporte inclusos · fidelidade de 12 meses'] : plano.indexOf('sis-') === 0 ? ['Entrada de R$ 1.495 agora', 'Total R$ 2.990 · o saldo de R$ 1.495 só na entrega'] : ['', '']);
+      var v = VALORES[plano] || valoresSistema(b);
       $('ct-titulo').textContent = b.getAttribute('data-nome');
       $('ct-valor').innerHTML = '<b>' + v[0] + '</b><small>' + v[1] + '</small>';
       $('ct-meios').textContent = assinatura ? '(cartão de crédito, cobrado todo mês)' : '(PIX, cartão em até 6x ou boleto)';
