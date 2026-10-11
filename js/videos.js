@@ -22,8 +22,8 @@
       dlg.querySelector('.video-cab b').textContent = b.getAttribute('data-video-nome') || 'Como funciona';
       dlg.querySelector('[data-v-testar]').href = b.getAttribute('data-video-demo') || b.getAttribute('href') || 'sistemas.html';
       dlg.querySelector('[data-v-planos]').href = 'sistemas.html#' + id;
-      video.poster = 'video/sistemas/' + id + '.webp';
-      video.src = 'video/sistemas/' + id + '.mp4';
+      video.poster = 'video/sistemas/' + id + '.webp?v=2';
+      video.src = 'video/sistemas/' + id + '.mp4?v=2';
       dlg.showModal();
       video.muted = false;
       var p = video.play();
