@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; frame-src 'self'; worker-src 'self'; child-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pagamento | Blue Rose Express</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="/img/blue-rose-favicon.png">
+<link rel="stylesheet" href="/css/site.css?v=15">
+<script src="/js/pagamento.js?v=1" defer></script>
+<style>
+  .pag { min-height: 100dvh; display: grid; place-items: center; padding: 48px 0; }
+  .pag .wrap { max-width: 640px; }
+  .pag .selo { display: grid; place-items: center; width: 64px; height: 64px; margin-top: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 30px; }
+  .pag h1 { margin-top: 18px; font-size: clamp(32px, 5vw, 48px); letter-spacing: -0.035em; }
+  .pag p { margin-top: 14px; color: var(--ink-2); font-size: 17px; }
+  .pag ol { margin-top: 22px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--ink-2); }
+  .pag .ctas { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; }
+</style>
+</head>
+<body>
+<main class="pag">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/img/blue-rose-favicon.png" alt="" width="30" height="30">BLUE ROSE</a>
+    <div class="selo" id="pg-selo" aria-hidden="true">✓</div>
+    <h1 id="pg-titulo">Pagamento recebido.</h1>
+    <p id="pg-texto">Obrigado pela confiança. O seu projeto já está na fila.</p>
+    <ol id="pg-passos">
+      <li>Em até 1 dia útil você recebe um e-mail no endereço usado no Mercado Pago.</li>
+      <li>Nele, levantamos juntos o que você precisa: marca, serviços, páginas e referências.</li>
+      <li>Você acompanha a prévia e pede os ajustes incluídos no plano.</li>
+    </ol>
+    <div class="ctas">
+      <a class="btn btn-primary" href="/">Voltar ao início</a>
+      <a class="btn btn-ghost" href="/#contato">Falar comigo</a>
+    </div>
+  </div>
+</main>
+</body>
+</html>
