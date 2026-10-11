@@ -921,3 +921,11 @@ dialog.contratar::backdrop { background: rgba(5, 8, 13, .66); backdrop-filter: b
 @media (min-width: 1100px) { .precos2-5 .preco2 h3 { min-height: 2.5em; } .precos2-5 .preco2-d { min-height: 6em; } }
 .preco2-valor .apartir { display: block; margin-bottom: 2px; font-size: 0.42em; }
 @media (max-width: 620px) { .modo-preco { display: flex; } .modo-preco button { flex: 1; padding: 0 10px; } .modo-preco button span { display: block; margin: 3px 0 0; } }
+.preco2-entrada { margin-top: 4px; font-size: 13.5px; color: var(--ink-2); text-align: center; }
+.preco2-entrada b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.preco2 .btn { white-space: normal; text-align: center; line-height: 1.2; }
+.hero-marca { margin-bottom: 14px; }
+.preco2-obs { margin-top: -2px; }
+.preco2-acao { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+.preco2-acao .preco2-entrada { min-height: 2.9em; text-wrap: balance; }
+.preco2-vazio { visibility: hidden; text-decoration: none; }
