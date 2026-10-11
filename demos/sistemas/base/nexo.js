@@ -9,6 +9,8 @@
 // com grade de horários, linha do tempo, formulários e impressão.
 // =============================================================
 
+import { resumoDoDia, resumoTexto } from './resumos.js';
+
 // ---------------------------------------------------------------- utilidades
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
 export const moeda = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -53,7 +55,7 @@ export const normal = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g
 const CORES_AV = ['#6366f1', '#0ea5e9', '#14b8a6', '#22a06b', '#d97706', '#e11d48', '#9333ea', '#64748b', '#0891b2', '#c2410c', '#4f46e5', '#be185d'];
 export const corDe = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return CORES_AV[h % CORES_AV.length]; };
 export const av = (nome, cls = '') => `<span class="av ${cls}" style="background:${corDe(nome)}" title="${esc(nome)}">${esc(iniciais(nome))}</span>`;
-let SPRITE = '../base/icones.svg';
+let SPRITE = new URL('icones.svg', import.meta.url).href;
 export const ic = (nome, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="${SPRITE}#i-${nome}"/></svg>`;
 export const et = (texto, tom = '', extra = '') => `<span class="et ${tom} ${extra}">${esc(texto)}</span>`;
 export const prog = (p, tom = '') => `<div class="prog ${tom}"><i style="width:${Math.max(0, Math.min(100, p || 0)).toFixed(1)}%"></i></div>`;
@@ -74,8 +76,9 @@ export const diaUtil = (s) => !fimDeSemana(s) && !nomeFeriado(s);
 
 // ---------------------------------------------------------------- dados (localStorage)
 export class Banco {
-  constructor(chave, semente) {
+  constructor(chave, semente, inicial = null) {
     this.chave = chave; this.semente = semente;
+    if (inicial) { this.dados = inicial; return; }
     try { this.dados = JSON.parse(localStorage.getItem(chave) || 'null'); } catch { this.dados = null; }
     if (!this.dados || !this.dados._ok) this.recomecar();
   }
@@ -350,7 +353,7 @@ export function tabela(app, cfg) {
     <button type="button" class="btn fant ic-so peq" data-tab-csv="${cfg.id}" title="Exportar planilha (CSV)" aria-label="Exportar planilha">${ic('download-simple')}</button>
     ${cfg.novo ? `<button type="button" class="btn pri peq" ${cfg.novo.attrs || ''}>${ic('plus')}${esc(cfg.novo.rot)}</button>` : ''}</div>`;
   const ths = `${massa ? `<th class="chk"><input type="checkbox" data-tab-todos="${cfg.id}" ${pagina.length && pagina.every((x) => st.sel.includes(x.id)) ? 'checked' : ''} aria-label="Selecionar todos"></th>` : ''}${cfg.colunas.map((c) => `<th class="${c.n ? 'n' : ''} ${c.oc ? 'oc' : ''} ${c.ord === false ? '' : 'ord'}" ${c.ord === false ? '' : `data-tab-ord="${cfg.id}:${c.k}"`} ${c.w ? `style="width:${c.w}"` : ''}>${esc(c.rot)}${st.ordem === c.k ? `<span class="seta">${st.desc ? '↓' : '↑'}</span>` : ''}</th>`).join('')}${cfg.acoesLinha ? '<th></th>' : ''}`;
-  const corpo = pagina.map((x) => `<tr class="${cfg.aoClicar !== false ? 'clicavel' : ''} ${st.sel.includes(x.id) ? 'sel' : ''}" data-tab-linha="${cfg.id}:${x.id}">${massa ? `<td class="chk"><input type="checkbox" data-tab-sel="${cfg.id}:${x.id}" ${st.sel.includes(x.id) ? 'checked' : ''} aria-label="Selecionar"></td>` : ''}${cfg.colunas.map((c) => `<td class="${c.n ? 'n' : ''} ${c.oc ? 'oc' : ''} ${c.cls || ''}">${c.render ? c.render(x, app) : esc(x[c.k] ?? '—')}</td>`).join('')}${cfg.acoesLinha ? `<td class="acoes">${cfg.acoesLinha(x, app)}</td>` : ''}</tr>`).join('');
+  const corpo = pagina.map((x) => `<tr class="${cfg.aoClicar !== false ? 'clicavel' : ''} ${st.sel.includes(x.id) ? 'sel' : ''}" data-tab-linha="${cfg.id}:${x.id}">${massa ? `<td class="chk"><input type="checkbox" data-tab-sel="${cfg.id}:${x.id}" ${st.sel.includes(x.id) ? 'checked' : ''} aria-label="Selecionar"></td>` : ''}${cfg.colunas.map((c) => `<td class="${c.n ? 'n' : ''} ${c.oc ? 'oc' : ''} ${c.cls || ''}">${c.render ? c.render(x, app) : esc((c.valor ? c.valor(x, app) : x[c.k]) ?? '—')}</td>`).join('')}${cfg.acoesLinha ? `<td class="acoes">${cfg.acoesLinha(x, app)}</td>` : ''}</tr>`).join('');
   const rodape = cfg.rodape ? `<tfoot><tr>${cfg.rodape(itens, app)}</tr></tfoot>` : '';
   const vaz = itens.length ? '' : vazio(cfg.vazio?.icone || 'tray', st.busca || Object.values(st.filtros).some(Boolean) ? 'Nada encontrado com esse filtro' : cfg.vazio?.titulo || 'Nada por aqui ainda', cfg.vazio?.texto || '');
   return `<div class="cartao" data-tabela="${cfg.id}">${cab}<div class="tabela-caixa">${itens.length ? `<table class="tabela"><thead><tr>${ths}</tr></thead><tbody>${corpo}</tbody>${rodape}</table>` : vaz}</div>
@@ -404,26 +407,43 @@ export function criarApp(cfg) {
   const raiz = document.documentElement;
   raiz.style.setProperty('--acc', cfg.cor);
   try { raiz.dataset.tema = localStorage.getItem('nexo-tema') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro'); } catch { raiz.dataset.tema = 'claro'; }
-  document.title = `${cfg.nome} · demonstração · Blue Rose Express`;
-  const app = { ...cfg, estado: {}, acoes: {}, db: new Banco(`nexo2-${cfg.id}`, cfg.semente), kanbans: {}, cals: {} };
+  const nuvem = !!window.NEXO_NUVEM;
+  document.title = nuvem ? `${cfg.nome} · Blue Rose Express` : `${cfg.nome} · demonstração · Blue Rose Express`;
+  const app = { ...cfg, estado: {}, acoes: {}, db: null, kanbans: {}, cals: {}, nuvem };
+  if (nuvem) {
+    // versão na nuvem: entrar, escolher a empresa e carregar os dados antes de montar a tela
+    import('./nuvem.js').then((m) => m.iniciarNuvem(app, cfg)).then((sessao) => { app.sessao = sessao; app.db = sessao.db; if (app.db.cfg.empresa) app.empresa = app.db.cfg.empresa; montar(app, cfg); sessao.depoisDeMontar?.(); })
+      .catch((e) => { document.body.innerHTML = `<div style="padding:40px;font-family:system-ui">Não foi possível abrir o sistema: ${esc(e.message || e)}. <a href="">Tentar de novo</a></div>`; });
+    return app;
+  }
+  app.db = new Banco(`nexo2-${cfg.id}`, cfg.semente);
   if (app.db.cfg.empresa) app.empresa = app.db.cfg.empresa;
+  montar(app, cfg);
+  return app;
+}
+
+function montar(app, cfg) {
+  const raiz = document.documentElement;
   const site = 'https://bluerose-store.com/';
   const paginas = cfg.paginas.filter((p) => p.id);
   const preco = (v) => moeda(v).replace(',00', '');
-  document.body.innerHTML = `
-    <div class="faixa nao-imprime"><span class="so-larga">Demonstração do <b>${esc(cfg.nome)}</b> · dados de exemplo, só neste navegador</span><span class="sep so-larga"></span>
+  const faixaDemo = `<div class="faixa nao-imprime"><span class="so-larga">Demonstração do <b>${esc(cfg.nome)}</b> · dados de exemplo, só neste navegador</span><span class="sep so-larga"></span>
       <button type="button" data-acao="recomecar">Recomeçar</button>
-      <a class="cta" href="${site}sistemas.html#${cfg.id}" target="_top">Comprar ${preco(cfg.produto.compra)} ou alugar ${preco(cfg.produto.mensal)}/mês</a></div>
+      <a class="cta" href="${site}app/${cfg.id}/" target="_top">Testar grátis 7 dias com os seus dados</a></div>`;
+  document.body.innerHTML = `
+    ${app.nuvem ? app.sessao.faixa() : faixaDemo}
     <div class="app" id="app">
       <nav class="lat" aria-label="Menu principal">
         <div class="marca"><div class="marca-ic">${ic(cfg.icone || 'squares-four')}</div><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.sub)}</small></div></div>
-        <div class="conta">${av(app.empresa)}<div class="cresce"><b class="corta" data-empresa>${esc(app.empresa)}</b><small class="corta">${esc(cfg.conta || 'Conta de demonstração')}</small></div></div>
+        <div class="conta">${av(app.empresa)}<div class="cresce"><b class="corta" data-empresa>${esc(app.empresa)}</b><small class="corta">${esc(app.nuvem ? app.sessao.subConta() : cfg.conta || 'Conta de demonstração')}</small></div></div>
         <button type="button" class="busca-lat" data-acao="paleta">${ic('magnifying-glass')}Buscar ou ir para…<kbd>Ctrl K</kbd></button>
         ${cfg.paginas.map((p) => (p.grupo && !p.id ? `<div class="grupo">${esc(p.grupo)}</div>` : `<a class="item" href="#/${p.id}" data-pag="${p.id}">${ic(p.icone || 'circle')}<span class="corta">${esc(p.rot)}</span><span class="cont" data-cont="${p.id}" hidden></span></a>`)).join('')}
         <div class="lat-pe">
+          <a class="item" href="#" data-acao="resumoDia">${ic('notepad')}Resumo do dia</a>
           <a class="item" href="#/config" data-pag="config">${ic('gear-six')}Configurações</a>
           <a class="item" href="javascript:void 0" data-acao="tema">${ic('moon')}<span data-tema-rot>Tema escuro</span></a>
           <a class="item" href="javascript:void 0" data-acao="atalhos">${ic('keyboard')}Atalhos</a>
+          ${app.nuvem ? `<a class="item" href="javascript:void 0" data-acao="sair">${ic('sign-out')}Sair</a>` : ''}
           <div class="feito">Feito pela <a href="${site}" target="_top">Blue Rose Express</a></div>
         </div>
       </nav>
@@ -501,6 +521,18 @@ export function criarApp(cfg) {
     paleta,
     atalhos: () => modal({ titulo: 'Atalhos do teclado', largura: 460, corpo: `<div class="col" style="gap:9px">${[['Ctrl K', 'Buscar ou ir para qualquer lugar'], ['/', 'Buscar na lista'], ['N', 'Criar novo na página atual'], ...paginas.filter((p) => p.atalho).map((p) => [`G ${p.atalho.toUpperCase()}`, `Ir para ${p.rot}`]), ['Esc', 'Fechar janela ou ficha'], ['Ctrl Enter', 'Salvar o formulário aberto']].map(([k, t]) => `<div class="entre"><span class="mute-2">${esc(t)}</span><span>${k.split(' ').map((x) => `<kbd>${esc(x)}</kbd>`).join(' ')}</span></div>`).join('')}</div>`, botoes: [{ rotulo: 'Fechar', classe: 'pri', valor: true }] }),
     exportarDados: () => baixar(`${cfg.id}-dados.json`, JSON.stringify(app.db.dados, null, 1), 'application/json'),
+    resumoDia: () => {
+      const r = resumoDoDia(cfg.id, app.db.dados, hoje()), texto = resumoTexto(cfg.nome, app.empresa, r, hoje());
+      const zap = app.db.cfg.whats_dono ? String(app.db.cfg.whats_dono).replace(/\D/g, '') : '';
+      modal({ titulo: `Resumo do dia · ${dataCurta(hoje())}`, largura: 560, corpo: `<div class="col" style="gap:12px">
+        <div class="grade g3" style="gap:8px">${r.destaques.map(([k, v]) => `<div style="padding:10px;border:1px solid var(--borda);border-radius:8px"><div class="mute" style="font-size:12px">${esc(k)}</div><b class="num" style="font-size:14.5px">${esc(v)}</b></div>`).join('')}</div>
+        ${r.alertas.length ? `<div class="alerta-linha al" style="flex-direction:column;align-items:flex-start;gap:4px">${r.alertas.map((x) => `<span>${ic('warning', 'p')} ${esc(x)}</span>`).join('')}</div>` : `<div class="dica">${ic('check-circle')}<span>Nada urgente hoje.</span></div>`}
+        ${r.itens.length ? `<div><h4 style="font-size:12.5px;color:var(--tx-3);font-weight:500;margin-bottom:6px">${esc(r.tituloItens || 'Hoje')}</h4><ul class="lista" style="margin:0 -18px">${r.itens.map((x) => `<li style="min-height:34px;padding:6px 18px">${esc(x)}</li>`).join('')}</ul></div>` : ''}
+        <label class="campo">Seu WhatsApp (para mandar o resumo)<input data-zap type="tel" value="${esc(app.db.cfg.whats_dono || '')}" placeholder="(11) 99999-9999"></label></div>`,
+        botoes: [{ rotulo: 'Copiar', icone: 'copy', classe: 'fant', acao: () => { navigator.clipboard?.writeText(texto).catch(() => {}); avisar('Resumo copiado'); return false; } },
+          { rotulo: 'E-mail', icone: 'envelope-simple', acao: () => { location.href = `mailto:?subject=${encodeURIComponent(`Resumo do dia · ${app.empresa}`)}&body=${encodeURIComponent(texto.replace(/\*/g, ''))}`; return false; } },
+          { rotulo: 'Enviar no WhatsApp', icone: 'whatsapp-logo', classe: 'pri', acao: (f) => { const n = f.querySelector('[data-zap]').value; if (n) { app.db.cfg.whats_dono = n; app.db.gravar(); } const num = String(n || zap).replace(/\D/g, ''); window.open(`https://wa.me/${num ? `55${num.replace(/^55/, '')}` : ''}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener'); return false; } }] });
+    },
   });
 
   // página de configurações (comum)
@@ -515,11 +547,12 @@ export function criarApp(cfg) {
         <div class="campo largo" style="flex-direction:row;justify-content:flex-end"><button type="button" class="btn pri" data-acao="salvarEmpresa">Salvar</button></div></form></div></div>
       <div class="cartao"><div class="cartao-cab"><div><h3>Aparência</h3><div class="sub">Preferências deste navegador</div></div></div><div class="cartao-corpo col" style="gap:14px">
         <div class="entre"><span>Tema</span><div class="grupo-btn"><button type="button" data-acao="tema" aria-pressed="${raiz.dataset.tema !== 'escuro'}">${ic('sun', 'p')}Claro</button><button type="button" data-acao="tema" aria-pressed="${raiz.dataset.tema === 'escuro'}">${ic('moon', 'p')}Escuro</button></div></div>
-        <div class="dica">${ic('info')}<span>Na versão contratada, a cor, o logotipo e os cadastros são os da sua empresa, e cada pessoa da equipe tem o próprio acesso.</span></div></div></div>
-      <div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">Quem usa o sistema</div></div></div><ul class="lista">${(cfg.equipe || []).map(([n, papel]) => `<li>${av(n)}<div><div class="t">${esc(n)}</div><div class="s">${esc(papel)}</div></div><span class="dir">${et('Ativo', 'ok')}</span></li>`).join('')}</ul></div>
+        ${a.nuvem ? '' : `<div class="dica">${ic('info')}<span>Na versão contratada, a cor, o logotipo e os cadastros são os da sua empresa, e cada pessoa da equipe tem o próprio acesso.</span></div>`}</div></div>
+      ${a.nuvem ? a.sessao.cartaoEquipe() : `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">Quem usa o sistema</div></div></div><ul class="lista">${(cfg.equipe || []).map(([n, papel]) => `<li>${av(n)}<div><div class="t">${esc(n)}</div><div class="s">${esc(papel)}</div></div><span class="dir">${et('Ativo', 'ok')}</span></li>`).join('')}</ul></div>`}
       <div class="cartao"><div class="cartao-cab"><div><h3>Dados</h3><div class="sub">Cópia e restauração</div></div></div><div class="cartao-corpo col" style="gap:10px">
         <div class="entre"><span class="mute-2">Baixar uma cópia de tudo (JSON)</span><button type="button" class="btn" data-acao="exportarDados">${ic('download-simple')}Exportar</button></div>
-        <div class="entre"><span class="mute-2">Voltar aos dados de exemplo</span><button type="button" class="btn perigo" data-acao="recomecar">${ic('arrow-counter-clockwise')}Recomeçar</button></div></div></div></div>`,
+        ${a.nuvem ? a.sessao.linhasDados() : `<div class="entre"><span class="mute-2">Voltar aos dados de exemplo</span><button type="button" class="btn perigo" data-acao="recomecar">${ic('arrow-counter-clockwise')}Recomeçar</button></div>`}</div></div>
+      ${a.nuvem ? a.sessao.cartaoResumo() : ''}${cfg.configExtra ? cfg.configExtra(a) : ''}</div>`,
   };
   app.acoes.salvarEmpresa = () => { const f = $('[data-form-empresa]'); const d = Object.fromEntries(new FormData(f)); Object.assign(app.db.cfg, d); app.db.gravar(); app.empresa = d.empresa || app.empresa; $('[data-empresa]').textContent = app.empresa; avisar('Dados da empresa salvos'); };
 

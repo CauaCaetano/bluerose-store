@@ -1,0 +1,31 @@
+{
+ "name": "Nexo Academia · Blue Rose Express",
+ "short_name": "Nexo Academia",
+ "description": "Alunos, mensalidades, check-in e treinos",
+ "lang": "pt-BR",
+ "id": "/app/academia/",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#f7f7f5",
+ "theme_color": "#ea580c",
+ "icons": [
+  {
+   "src": "icone-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icone-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icone-mascara.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

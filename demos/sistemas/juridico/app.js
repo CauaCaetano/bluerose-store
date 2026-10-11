@@ -29,6 +29,37 @@ function calcPrazo(disp, dias, uteis = true) {
 }
 const uteisAte = (d) => { if (d < hoje()) return -1; let n = 0, x = hoje(); while (x < d) { x = diaMais(1, x); if (contaDia(x)) n++; } return n; };
 
+// ---------------------------------------------------------------- DJEN: captura das intimações (API pública do CNJ, sem chave)
+// a consulta passa por uma função do Supabase (o DJEN não aceita chamadas direto do navegador)
+const DJEN = 'https://yihnfzwtkqdfnwziutqa.supabase.co/functions/v1/nexo-djen';
+const soDigitos = (s) => String(s || '').replace(/\D/g, '');
+const limparTexto = (html) => { const d = new DOMParser().parseFromString(String(html || '').replace(/<br\s*\/?>/gi, '\n'), 'text/html'); return (d.body.textContent || '').replace(/\n{3,}/g, '\n\n').trim(); };
+async function capturarDJEN(a, { silencioso = false } = {}) {
+  const oabs = a.db.cfg.oabs || [];
+  if (!oabs.length) { if (!silencioso) avisar('Cadastre as OABs da equipe em Configurações para capturar as intimações', { tipo: 'erro' }); return 0; }
+  const fim = hoje(), ini = [a.db.cfg.djen_ultima ? diaMais(-2, a.db.cfg.djen_ultima) : diaMais(-15), diaMais(-60)].sort().pop();
+  const pubs = a.db.lista('publicacoes'), ja = new Set(pubs.map((x) => x.djen_id).filter(Boolean));
+  const porNumero = new Map(a.db.lista('processos').map((p) => [soDigitos(p.numero), p.id]));
+  let novas = 0;
+  for (const o of oabs) {
+    for (let pag = 1; pag <= 20; pag++) {
+      const q = new URLSearchParams({ numeroOab: soDigitos(o.numero), ufOab: o.uf, dataDisponibilizacaoInicio: ini, dataDisponibilizacaoFim: fim, pagina: String(pag) });
+      const r = await fetch(`${DJEN}?${q}`); if (!r.ok) throw new Error(`DJEN respondeu ${r.status}`);
+      const d = await r.json(); const itens = d.items || [];
+      for (const it of itens) {
+        if (ja.has(it.id)) continue; ja.add(it.id);
+        pubs.unshift({ id: `djen${it.id}`, djen_id: it.id, processo: porNumero.get(soDigitos(it.numero_processo)) || null, numero: it.numeroprocessocommascara || it.numero_processo, data: it.data_disponibilizacao,
+          diario: `DJEN · ${it.siglaTribunal} · ${it.nomeOrgao || ''}`.trim(), tipo: it.tipoComunicacao, texto: limparTexto(it.texto).slice(0, 6000), link: it.link || '', status: 'nova', advogado: o.advogado || '' });
+        novas++;
+      }
+      if (itens.length < 100) break;
+    }
+  }
+  a.db.cfg.djen_ultima = fim; a.db.gravar();
+  if (!silencioso || novas) avisar(novas ? `${novas} intimações novas capturadas do DJEN` : 'Nenhuma intimação nova no DJEN');
+  return novas;
+}
+
 // ---------------------------------------------------------------- dados de exemplo (fictícios)
 function semente() {
   const r = sorteio(20261011), esc1 = (l) => l[Math.floor(r() * l.length)], ent = (a, b) => a + Math.floor(r() * (b - a + 1));
@@ -168,11 +199,14 @@ function intimacoes(a) {
   if (!st.sel || !lista.find((x) => x.id === st.sel)) st.sel = lista[0]?.id || null;
   const pub = a.db.obter('publicacoes', st.sel), p = pub ? proc(a, pub.processo) : null;
   const dias = st.dias ?? 15, uteis = st.uteis ?? true, c = pub ? calcPrazo(pub.data, dias, uteis) : null;
-  return `<div class="grade g12" style="align-items:start">
+  const oabs = a.db.cfg.oabs || [];
+  return `<div class="entre"><div class="dica" style="flex:1">${ic('envelope-open')}<span>${oabs.length ? `Captura automática no <b>DJEN</b> (Diário de Justiça Eletrônico Nacional) para ${oabs.map((o) => `OAB ${esc(o.numero)}/${esc(o.uf)}`).join(', ')}${a.db.cfg.djen_ultima ? ` · última busca ${relativo(a.db.cfg.djen_ultima)}` : ''}.` : 'Cadastre as OABs da equipe em <a href="#/config">Configurações</a> e as intimações do DJEN chegam aqui sozinhas.'}</span></div><button type="button" class="btn pri" data-acao="capturarDJEN">${ic('arrows-clockwise')}Buscar no DJEN</button></div>
+  <div class="grade g12" style="align-items:start">
     <div class="cartao"><div class="visoes">${[['nova', 'Novas'], ['tratada', 'Tratadas'], ['todas', 'Todas']].map(([k, n]) => `<button type="button" data-acao="filtroPub" data-f="${k}" aria-selected="${st.filtro === k}">${n}<span class="n">${a.db.lista('publicacoes').filter((x) => k === 'todas' || x.status === k).length}</span></button>`).join('')}</div>
       ${lista.length ? `<ul class="lista">${lista.map((x) => `<li class="clicavel" data-acao="selPub" data-id="${x.id}" style="${x.id === st.sel ? 'background:var(--acc-suave)' : ''};align-items:flex-start"><span class="av p" style="background:${x.status === 'nova' ? 'var(--info)' : 'var(--tx-3)'};margin-top:2px">${ic('envelope-open', 'p')}</span><div class="cresce"><div class="entre"><span class="mono" style="font-size:12px">${esc(x.numero)}</span><span class="s">${dataCurta(x.data)}</span></div><div class="s" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(x.texto)}</div></div></li>`).join('')}</ul>` : vazio('tray', 'Nada por aqui')}</div>
-    ${pub ? `<div class="col" style="gap:16px"><div class="cartao"><div class="cartao-cab"><div><h3>${esc(pub.diario)}</h3><div class="sub">Disponibilizada em ${dataBR(pub.data)} · <a href="javascript:void 0" data-abrir="processo:${p?.id}">${esc(pub.numero)}</a></div></div>${pub.status === 'nova' ? et('Nova', 'info') : et('Tratada', 'ok')}</div>
-        <div class="cartao-corpo col" style="gap:12px"><div style="font-size:14px;line-height:1.6;padding:12px 14px;background:var(--painel-2);border:1px solid var(--borda);border-radius:8px">${esc(pub.texto)}</div>
+    ${pub ? `<div class="col" style="gap:16px"><div class="cartao"><div class="cartao-cab"><div><h3>${esc(pub.diario)}</h3><div class="sub">Disponibilizada em ${dataBR(pub.data)} · ${p ? `<a href="javascript:void 0" data-abrir="processo:${p.id}">${esc(pub.numero)}</a>` : `<span class="mono">${esc(pub.numero)}</span>`}${pub.link ? ` · <a href="${esc(pub.link)}" target="_blank" rel="noopener">ver no tribunal</a>` : ''}</div></div>${pub.status === 'nova' ? et('Nova', 'info') : et('Tratada', 'ok')}</div>
+        <div class="cartao-corpo col" style="gap:12px"><div style="font-size:14px;line-height:1.6;padding:12px 14px;background:var(--painel-2);border:1px solid var(--borda);border-radius:8px;white-space:pre-wrap;max-height:320px;overflow:auto">${esc(pub.texto)}</div>
+        ${p ? '' : `<div class="alerta-linha al">${ic('warning')}Este processo ainda não está cadastrado no escritório.<a href="javascript:void 0" data-acao="cadastrarDaPub" data-id="${pub.id}">Cadastrar processo</a></div>`}
         ${props([['scales', 'Processo', esc(rotProc(a, p))], ['user', 'Cliente', esc(cli(a, p?.cliente)?.nome || '—')], ['user-circle', 'Responsável', esc(nomeA(p?.responsavel))]])}</div></div>
       <div class="cartao"><div class="cartao-cab"><div><h3>Calcular prazo e agendar</h3><div class="sub">CPC: contagem em dias úteis (art. 219), excluindo feriados e o recesso forense (art. 220)</div></div></div>
         <div class="cartao-corpo col" style="gap:14px"><div class="form-grade tres"><label class="campo">Prazo<input type="number" min="1" value="${dias}" data-mudar="diasPub"></label><label class="campo">Contagem<select data-mudar="uteisPub"><option value="1" ${uteis ? 'selected' : ''}>Dias úteis</option><option value="0" ${uteis ? '' : 'selected'}>Dias corridos</option></select></label><label class="campo">Atalhos<div class="flex">${[5, 10, 15, 30].map((n) => `<button type="button" class="btn peq" data-acao="atalhoPub" data-n="${n}">${n}</button>`).join('')}</div></label></div>
@@ -366,6 +400,9 @@ const fichas = {
 const app = criarApp({
   id: 'juridico', nome: 'Nexo Jurídico', sub: 'Gestão do escritório', cor: '#0f766e', icone: 'scales', empresa: 'Castro & Moura Advogados', conta: '4 pessoas · Belo Horizonte, MG',
   produto: { compra: 3290, mensal: 149 }, semente, colecoes, fichas, buscaDica: 'processos (número), clientes',
+  configExtra: (a) => { const oabs = a.db.cfg.oabs || []; return `<div class="cartao"><div class="cartao-cab"><div><h3>Captura de intimações (DJEN)</h3><div class="sub">Diário de Justiça Eletrônico Nacional · busca diária pelas OABs</div></div></div>
+    <ul class="lista">${oabs.map((o, i) => `<li>${av(nomeA(o.advogado) === '—' ? `OAB ${o.numero}` : nomeA(o.advogado))}<div class="cresce"><div class="t">OAB ${esc(o.numero)}/${esc(o.uf)}</div><div class="s">${esc(nomeA(o.advogado))}</div></div><button type="button" class="btn fant peq" data-acao="tirarOAB" data-i="${i}">Remover</button></li>`).join('') || `<li><span class="mute">Nenhuma OAB cadastrada</span></li>`}</ul>
+    <div class="cartao-corpo" style="border-top:1px solid var(--borda)"><form class="flex" data-oab style="flex-wrap:wrap"><input name="numero" placeholder="Nº da OAB" inputmode="numeric" required style="width:120px"><select name="uf" style="width:90px">${'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ').map((u) => `<option ${u === 'MG' ? 'selected' : ''}>${u}</option>`).join('')}</select><select name="advogado" style="flex:1;min-width:150px">${ADV.slice(0, 3).map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')}</select><button type="button" class="btn pri" data-acao="addOAB">${ic('plus')}Adicionar</button></form></div></div>`; },
   equipe: ADV.map(([, n, p]) => [n, p]),
   busca: [{ colecao: 'processos', grupo: 'Processos', icone: 'scales', ficha: 'processo', rot: (p) => p.numero, sub: (p, a) => rotProc(a, p) }, { colecao: 'clientes', grupo: 'Clientes', icone: 'user', ficha: 'cliente', rot: (c) => c.nome, sub: (c) => c.doc }],
   comandos: [{ rot: 'Novo processo', icone: 'plus', acao: (a) => a.acoes.novoProcesso() }, { rot: 'Novo prazo ou audiência', icone: 'calendar-plus', acao: (a) => a.acoes.novoPrazo({}) }, { rot: 'Calcular prazo', icone: 'calculator', acao: (a) => a.ir('#/calculadora') }, { rot: 'Lançar horas', icone: 'timer', acao: (a) => a.acoes.novaHora({}) }],
@@ -412,6 +449,7 @@ Object.assign(app.acoes, {
   tratarPub: (d) => { app.db.salvar('publicacoes', { id: d.id, status: 'tratada' }); avisar('Intimação tratada'); app.estado.pub.sel = null; app.render(); },
   criarPrazoPub: async (d) => {
     const pub = app.db.obter('publicacoes', d.id), p = proc(app, pub.processo), st = app.estado.pub, c = calcPrazo(pub.data, st.dias ?? 15, st.uteis ?? true);
+    if (!p) return avisar('Cadastre o processo antes de agendar o prazo', { tipo: 'erro' });
     const titulo = /audi[eê]ncia/i.test(pub.texto) ? 'Audiência de conciliação' : /contrarraz/i.test(pub.texto) ? 'Contrarrazões' : /laudo/i.test(pub.texto) ? 'Manifestação sobre laudo' : /provas/i.test(pub.texto) ? 'Especificação de provas' : /contesta/i.test(pub.texto) ? 'Réplica à contestação' : 'Manifestação';
     const x = app.db.salvar('prazos', { processo: p.id, tipo: 'prazo', titulo, data: c.fim, responsavel: p.responsavel, status: 'pendente', dias: c.dias, origem: pub.id });
     app.db.salvar('publicacoes', { id: d.id, status: 'tratada', prazo: x.id });
@@ -419,6 +457,10 @@ Object.assign(app.acoes, {
     avisar(`Prazo "${titulo}" agendado para ${dataBR(c.fim)} · ${nomeA(p.responsavel)}`); app.estado.pub.sel = null; app.render();
   },
   quemTar: (d) => { app.estado.tar.quem = d.q; app.render(); },
+  capturarDJEN: async (d, el) => { el.disabled = true; try { await capturarDJEN(app); app.estado.pub = { sel: null, filtro: 'nova' }; } catch (e) { avisar(`Não foi possível consultar o DJEN agora (${e.message})`, { tipo: 'erro' }); } app.render(); },
+  addOAB: () => { const f = document.querySelector('[data-oab]'); const n = soDigitos(f.numero.value); if (!n) return f.numero.focus(); app.db.cfg.oabs = [...(app.db.cfg.oabs || []), { numero: n, uf: f.uf.value, advogado: f.advogado.value }]; app.db.gravar(); avisar(`OAB ${n}/${f.uf.value} cadastrada`); app.render(); },
+  tirarOAB: (d) => { app.db.cfg.oabs = (app.db.cfg.oabs || []).filter((_, i) => i !== Number(d.i)); app.db.gravar(); app.render(); },
+  cadastrarDaPub: async (d) => { const pub = app.db.obter('publicacoes', d.id); const p = await editar(app, 'processos', null, { numero: pub.numero }); if (p) { app.db.salvar('publicacoes', { id: pub.id, processo: p.id }); app.render(); } },
   iniciarCron: async (d = {}) => {
     let pid = d.processo;
     if (!pid) { const r = await modal({ titulo: 'Iniciar cronômetro', largura: 480, corpo: `<form class="form-grade" onsubmit="return false"><label class="campo largo">Processo<select name="p">${app.db.lista('processos').filter((p) => p.status !== 'encerrado').map((p) => `<option value="${p.id}">${esc(p.numero)} · ${esc(rotProc(app, p))}</option>`).join('')}</select></label><label class="campo largo">O que você vai fazer<input name="d" value="Elaboração de petição"></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Iniciar', classe: 'pri', acao: (f) => Object.fromEntries(new FormData(f.querySelector('form'))) }] }); if (!r) return; pid = r.p; app.db.cfg.cronometro = { processo: pid, inicio: Date.now(), descricao: r.d }; } else app.db.cfg.cronometro = { processo: pid, inicio: Date.now(), descricao: 'Trabalho no processo' };
@@ -446,3 +488,6 @@ Object.assign(app.acoes, {
   imprimirModelo: () => imprimir(document.querySelector('[data-doc]').innerHTML),
   docCliente: (d) => { fecharGaveta(); app.estado.mod = { modelo: 'procuracao', cliente: d.id, processo: '' }; app.ir('#/modelos'); },
 });
+
+// busca automática no DJEN uma vez por dia ao abrir o sistema
+setTimeout(() => { if (app.db?.cfg?.oabs?.length && app.db.cfg.djen_ultima !== hoje()) capturarDJEN(app, { silencioso: true }).then((n) => { if (n) app.render(); }).catch(() => {}); }, 2500);

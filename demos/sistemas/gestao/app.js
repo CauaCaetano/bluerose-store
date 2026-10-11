@@ -32,7 +32,8 @@ function semente() {
     return { id: `p${i}`, sku: `${categoria.slice(0, 3).toUpperCase()}-${String(100 + i)}`, ean: comDigito(`789${String(4567000 + i * 37).padStart(9, '0')}`), nome, categoria, fornecedor, custo, preco, unidade, giro, minimo: giro * 8, localizacao: `${String.fromCharCode(65 + (i % 5))}-${String(1 + (i % 9)).padStart(2, '0')}`,
       estoque: { d0: Math.max(0, Math.round(giro * ent(4, 22) - (i === 5 || i === 16 ? 200 : 0))), d1: Math.max(0, Math.round(giro * ent(1, 5) - (i === 12 ? 60 : 0))) } };
   });
-  const clientes = ['Mercado Bom Preço', 'Mercearia do Zé', 'Restaurante Sabor Caseiro', 'Padaria Trigo Bom', 'Hotel Alvorada', 'Lanchonete Ponto Certo', 'Escola Pequeno Saber', 'Condomínio Jardim das Flores', 'Supermercado Família', 'Cantina Universitária', 'Bar do Português', 'Empório Natural'].map((nome, i) => ({ id: `c${i}`, nome, doc: `${20 + i}.${310 + i}.${420 + i}/0001-${40 + i}`, telefone: `(41) 9${8500 + i * 31}-${2200 + i * 43}`, cidade: esc1(['Curitiba/PR', 'São José dos Pinhais/PR', 'Colombo/PR', 'Pinhais/PR']), vendedor: VEND[i % 2][0], limite: ent(5, 30) * 1000 }));
+  const clientes = ['Mercado Bom Preço', 'Mercearia do Zé', 'Restaurante Sabor Caseiro', 'Padaria Trigo Bom', 'Hotel Alvorada', 'Lanchonete Ponto Certo', 'Escola Pequeno Saber', 'Condomínio Jardim das Flores', 'Supermercado Família', 'Cantina Universitária', 'Bar do Português', 'Empório Natural'].map((nome, i) => ({ id: `c${i}`, nome, doc: `${20 + i}.${310 + i}.${420 + i}/0001-${40 + i}`, telefone: `(41) 9${8500 + i * 31}-${2200 + i * 43}`, cidade: esc1(['Curitiba/PR', 'São José dos Pinhais/PR', 'Colombo/PR', 'Pinhais/PR']), vendedor: VEND[i % 2][0], limite: ent(5, 30) * 1000,
+    cep: `8${String(1000000 + i * 3711).slice(0, 7)}`, logradouro: ['Rua XV de Novembro', 'Av. Sete de Setembro', 'Rua Marechal Deodoro', 'Av. República Argentina'][i % 4], numero: String(100 + i * 37), bairro: ['Centro', 'Batel', 'Água Verde', 'Portão'][i % 4], municipio: 'Curitiba', uf: 'PR' }));
   const vendas = [], movimentos = [];
   let nv = 4100;
   for (let d = -120; d <= 0; d++) {
@@ -57,6 +58,8 @@ function semente() {
     p.giro = Math.max(1, Math.round(dia)); p.minimo = Math.max(6, Math.ceil(dia * 7));
     p.estoque = { d0: Math.round(dia * ent(16, 42)), d1: Math.round(dia * ent(3, 7)) };
   });
+  const NCM = ['10063021', '07133319', '17019900', '15079011', '09012100', '19021900', '11010010', '04012010', '22021000', '22011000', '20096100', '22030000', '34022000', '28289011', '34022000', '38089419', '39249000', '48181000', '34011190', '33061000', '33051000', '39241000', '48183000', '39232190'];
+  produtos.forEach((p, i) => { p.ncm = NCM[i]; p.cfop = '5102'; });
   produtos[5].estoque = { d0: 0, d1: 0 }; produtos[16].estoque = { d0: Math.ceil(produtos[16].minimo * 0.4), d1: 0 }; produtos[12].estoque.d1 = 0; produtos[20].estoque = { d0: Math.ceil(produtos[20].minimo * 0.7), d1: 0 };
   const compras = []; let nc = 820;
   for (let i = 0; i < 26; i++) {
@@ -141,9 +144,11 @@ const colecoes = {
   produtos: { singular: 'produto', plural: 'produtos', largura: 680, tres: true, campos: [
     { nome: 'nome', rotulo: 'Descrição', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'sku', rotulo: 'Código (SKU)', tipo: 'texto', obrigatorio: true }, { nome: 'ean', rotulo: 'Código de barras (EAN-13)', tipo: 'texto', ajuda: 'Deixe em branco para gerar um código interno' },
     { nome: 'categoria', rotulo: 'Categoria', tipo: 'selecao', opcoes: CATEG, obrigatorio: true }, { nome: 'unidade', rotulo: 'Unidade', tipo: 'selecao', opcoes: ['UN', 'CX', 'PK', 'FD', 'PC', 'KG'], padrao: 'UN' }, { nome: 'fornecedor', rotulo: 'Fornecedor', tipo: 'relacao', colecao: 'fornecedores' },
-    { nome: 'custo', rotulo: 'Custo', tipo: 'moeda', obrigatorio: true }, { nome: 'preco', rotulo: 'Preço de venda', tipo: 'moeda', obrigatorio: true }, { nome: 'minimo', rotulo: 'Estoque mínimo', tipo: 'numero', padrao: 10 }, { nome: 'localizacao', rotulo: 'Localização', tipo: 'texto', dica: 'Ex.: A-03' }],
+    { nome: 'custo', rotulo: 'Custo', tipo: 'moeda', obrigatorio: true }, { nome: 'preco', rotulo: 'Preço de venda', tipo: 'moeda', obrigatorio: true }, { nome: 'minimo', rotulo: 'Estoque mínimo', tipo: 'numero', padrao: 10 }, { nome: 'localizacao', rotulo: 'Localização', tipo: 'texto', dica: 'Ex.: A-03' },
+    { nome: 'ncm', rotulo: 'NCM (nota fiscal)', tipo: 'texto', dica: '8 dígitos', ajuda: 'Classificação fiscal do produto' }, { nome: 'cfop', rotulo: 'CFOP', tipo: 'texto', padrao: '5102' }],
     validar: (d) => (d.preco < d.custo ? 'O preço de venda está abaixo do custo' : d.ean && !eanValido(d.ean) ? 'Código de barras inválido: confira os 13 dígitos (o último é o verificador)' : null), antesDeSalvar: (d, a, antes) => ({ ...d, ean: d.ean || comDigito(`200${String(Date.now()).slice(-9)}`), estoque: antes?.estoque || { d0: 0, d1: 0 }, giro: antes?.giro || 2 }) },
-  clientes: { singular: 'cliente', plural: 'clientes', campos: [{ nome: 'nome', rotulo: 'Razão social / nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'doc', rotulo: 'CNPJ / CPF', tipo: 'texto' }, { nome: 'telefone', rotulo: 'Telefone', tipo: 'tel' }, { nome: 'cidade', rotulo: 'Cidade', tipo: 'texto' }, { nome: 'vendedor', rotulo: 'Vendedor', tipo: 'selecao', opcoes: VEND.slice(0, 2).map((v) => [v[0], v[1]]) }, { nome: 'limite', rotulo: 'Limite de crédito', tipo: 'moeda' }] },
+  clientes: { singular: 'cliente', plural: 'clientes', campos: [{ nome: 'nome', rotulo: 'Razão social / nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'doc', rotulo: 'CNPJ / CPF', tipo: 'texto' }, { nome: 'ie', rotulo: 'Inscrição estadual', tipo: 'texto', ajuda: 'Deixe em branco se for isento' }, { nome: 'telefone', rotulo: 'Telefone', tipo: 'tel' }, { nome: 'cidade', rotulo: 'Cidade', tipo: 'texto' },
+    { nome: 'cep', rotulo: 'CEP', tipo: 'texto' }, { nome: 'logradouro', rotulo: 'Endereço', tipo: 'texto' }, { nome: 'numero', rotulo: 'Número', tipo: 'texto' }, { nome: 'bairro', rotulo: 'Bairro', tipo: 'texto' }, { nome: 'municipio', rotulo: 'Município', tipo: 'texto' }, { nome: 'uf', rotulo: 'UF', tipo: 'texto', max: 2 }, { nome: 'vendedor', rotulo: 'Vendedor', tipo: 'selecao', opcoes: VEND.slice(0, 2).map((v) => [v[0], v[1]]) }, { nome: 'limite', rotulo: 'Limite de crédito', tipo: 'moeda' }] },
   fornecedores: { singular: 'fornecedor', plural: 'fornecedores', campos: [{ nome: 'nome', rotulo: 'Razão social', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'doc', rotulo: 'CNPJ', tipo: 'texto' }, { nome: 'telefone', rotulo: 'Telefone', tipo: 'tel' }, { nome: 'contato', rotulo: 'Contato', tipo: 'texto' }, { nome: 'prazo', rotulo: 'Prazo de entrega (dias)', tipo: 'numero', padrao: 7 }] },
 };
 
@@ -318,6 +323,37 @@ function faturar(a, id, silencioso = false) {
   a.db.registrar(`vendas:${id}`, `NF-e ${numero} emitida (homologação) e estoque baixado`, { icone: 'receipt', tom: 'ok' });
   return true;
 }
+// NF-e de verdade pela Focus NFe (versão na nuvem, com o token configurado)
+const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
+async function emitirNFe(a, id) {
+  const v = a.db.obter('vendas', id), c = cli(a, v.cliente), cfg = a.db.cfg, homolog = a.estado.nfe?.ambiente !== 'producao';
+  const doc = String(c?.doc || '').replace(/\D/g, ''), cnpjEmit = String(cfg.cnpj || '').replace(/\D/g, '');
+  const faltas = [];
+  if (cnpjEmit.length !== 14) faltas.push('CNPJ da sua empresa (Configurações › Empresa)');
+  if (c && (!c.logradouro || !c.municipio || !c.uf || !c.cep)) faltas.push(`endereço completo do cliente ${c.nome}`);
+  v.itens.forEach((x) => { const p = prod(a, x.produto); if (String(p.ncm || '').replace(/\D/g, '').length !== 8) faltas.push(`NCM de ${p.nome}`); });
+  if (faltas.length) { avisar(`Para emitir a nota falta: ${faltas.slice(0, 4).join(', ')}`, { tipo: 'erro', tempo: 9000 }); return false; }
+  const nfe = {
+    natureza_operacao: 'Venda de mercadoria', data_emissao: new Date().toISOString(), tipo_documento: 1, finalidade_emissao: 1, consumidor_final: doc.length === 14 ? 0 : 1, presenca_comprador: v.canal === 'balcao' ? 1 : v.canal === 'representante' ? 9 : 2,
+    cnpj_emitente: cnpjEmit, nome_destinatario: homolog ? 'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL' : (c?.nome || 'Consumidor'),
+    ...(doc.length === 14 ? { cnpj_destinatario: doc } : doc.length === 11 ? { cpf_destinatario: doc } : {}),
+    indicador_inscricao_estadual_destinatario: c?.ie ? 1 : 9, ...(c?.ie ? { inscricao_estadual_destinatario: String(c.ie).replace(/\D/g, '') } : {}),
+    ...(c ? { logradouro_destinatario: c.logradouro, numero_destinatario: c.numero || 'S/N', bairro_destinatario: c.bairro || 'Centro', municipio_destinatario: c.municipio, uf_destinatario: c.uf, cep_destinatario: String(c.cep).replace(/\D/g, ''), pais_destinatario: 'Brasil' } : {}),
+    modalidade_frete: v.frete ? 0 : 9, valor_frete: v.frete || 0, valor_desconto: v.desconto || 0,
+    items: v.itens.map((x, i) => { const p = prod(a, x.produto); return { numero_item: i + 1, codigo_produto: p.sku, descricao: p.nome, cfop: p.cfop || '5102', unidade_comercial: p.unidade, quantidade_comercial: x.qtd, valor_unitario_comercial: x.preco, valor_bruto: Math.round(x.qtd * x.preco * 100) / 100, unidade_tributavel: p.unidade, quantidade_tributavel: x.qtd, valor_unitario_tributavel: x.preco, codigo_ncm: String(p.ncm).replace(/\D/g, ''), icms_origem: 0, icms_situacao_tributaria: '102', pis_situacao_tributaria: '07', cofins_situacao_tributaria: '07' }; }),
+  };
+  const ref = `${a.sessao.espaco.id.slice(0, 8)}-${v.numero}`;
+  avisar('Enviando a nota para a SEFAZ…', { tempo: 3000 });
+  let r = await a.sessao.funcao('nexo-nfe', { acao: 'emitir', ref, nfe });
+  for (let i = 0; i < 25 && /processando/.test(r.status || ''); i++) { await espera(3000); r = await a.sessao.funcao('nexo-nfe', { acao: 'consultar', ref }); }
+  if (r.status !== 'autorizado') { avisar(`Nota não autorizada: ${r.mensagem_sefaz || r.mensagem || (r.erros || []).map((e) => e.mensagem).join('; ') || r.status || 'erro'}`, { tipo: 'erro', tempo: 12000 }); a.db.registrar(`vendas:${id}`, `NF-e recusada: ${r.mensagem_sefaz || r.mensagem || r.status}`, { icone: 'warning', tom: 'er' }); return false; }
+  v.itens.forEach((x) => movimentar(a, { produto: x.produto, deposito: v.deposito, qtd: x.qtd, tipo: 'saida', motivo: `NF-e ${r.numero} · pedido #${v.numero}` }));
+  a.db.salvar('vendas', { id, status: 'faturado', nfe: { numero: Number(r.numero), serie: r.serie, chave: r.chave_nfe, emissao: hoje(), danfe: r.caminho_danfe, xml: r.caminho_xml_nota_fiscal, real: true, ambiente: r.ambiente, ref } });
+  a.db.registrar(`vendas:${id}`, `NF-e ${r.numero} autorizada pela SEFAZ${r.ambiente === 'homologacao' ? ' (homologação)' : ''}`, { icone: 'seal-check', tom: 'ok' });
+  avisar(`NF-e ${r.numero} autorizada`);
+  return true;
+}
+
 function danfe(a, v) {
   const c = cli(a, v.cliente), cfg = a.db.cfg;
   return `<div class="doc"><div style="border:2px solid #111;padding:10px;text-align:center;margin-bottom:10px;font-weight:700;letter-spacing:.04em">DOCUMENTO SEM VALOR FISCAL · DEMONSTRAÇÃO (AMBIENTE DE HOMOLOGAÇÃO)</div>
@@ -396,6 +432,18 @@ const fichas = {
 const app = criarApp({
   id: 'gestao', nome: 'Nexo Gestão', sub: 'Estoque, compras e vendas', cor: '#4646d8', icone: 'warehouse', empresa: 'Atlas Distribuidora', conta: '2 depósitos · Curitiba, PR',
   produto: { compra: 2790, mensal: 129 }, semente, colecoes, fichas, buscaDica: 'produtos (nome, SKU, EAN), pedidos, clientes',
+  configExtra: (a) => {
+    if (!a.nuvem) return `<div class="cartao"><div class="cartao-cab"><div><h3>Nota fiscal eletrônica</h3><div class="sub">NF-e autorizada pela SEFAZ</div></div></div><div class="cartao-corpo"><div class="dica">${ic('receipt')}<span>Na versão contratada, o Nexo Gestão emite NF-e de verdade pela Focus NFe, emissor homologado. Nesta demonstração, as notas são simuladas.</span></div></div></div>`;
+    if (!a.estado.nfeCarregando && !a.estado.nfe) { a.estado.nfeCarregando = true; a.sessao.funcao('nexo-nfe', { acao: 'status' }).then((r) => { a.estado.nfe = r; a.render(); }).catch(() => { a.estado.nfe = { configurado: false }; a.render(); }); }
+    const n = a.estado.nfe || {}, cfg = a.db.cfg;
+    return `<div class="cartao"><div class="cartao-cab"><div><h3>Nota fiscal eletrônica (Focus NFe)</h3><div class="sub">${n.configurado ? `Configurada · ambiente de ${n.ambiente === 'producao' ? 'produção' : 'homologação (testes, sem valor fiscal)'}` : 'Não configurada: as notas são simuladas'}</div></div>${n.configurado ? et('Ativa', 'ok') : et('Pendente', 'al')}</div>
+      <div class="cartao-corpo col" style="gap:12px">${a.sessao.dono ? `<div class="dica">${ic('info')}<span>Crie a conta da empresa na <a href="https://focusnfe.com.br" target="_blank" rel="noopener">Focus NFe</a>, envie o certificado digital A1 por lá e cole aqui o token. O token fica num cofre: nem a equipe consegue ver.</span></div>
+        <form class="form-grade" data-nfe><label class="campo largo">Token da Focus NFe<input name="token" type="password" autocomplete="off" placeholder="${n.configurado ? '•••••••• (deixe em branco para manter)' : 'cole o token'}"></label>
+        <label class="campo">Ambiente<select name="ambiente"><option value="homologacao" ${n.ambiente !== 'producao' ? 'selected' : ''}>Homologação (testes)</option><option value="producao" ${n.ambiente === 'producao' ? 'selected' : ''}>Produção (vale de verdade)</option></select></label>
+        <label class="campo">Inscrição estadual<input name="ie" value="${esc(cfg.ie || '')}"></label>
+        <div class="campo largo" style="flex-direction:row;justify-content:flex-end;gap:8px">${n.configurado ? '<button type="button" class="btn fant perigo" data-acao="desligarNFe">Desligar</button>' : ''}<button type="button" class="btn pri" data-acao="salvarNFe">Salvar</button></div></form>` : '<p class="mute-2">Só o dono da empresa configura a emissão de notas.</p>'}
+        <p class="mute" style="font-size:12.5px">Regime: Simples Nacional (CSOSN 102). O CNPJ do emitente é o de Configurações › Empresa. NCM e CFOP ficam no cadastro de cada produto.</p></div></div>`;
+  },
   equipe: [['Ricardo Tavares', 'Dono'], ['Marcos Vieira', 'Vendedor externo'], ['Júlia Andrade', 'Vendedora interna'], ['Everton Lima', 'Estoquista']],
   busca: [{ colecao: 'produtos', grupo: 'Produtos', icone: 'package', ficha: 'produto', rot: (p) => p.nome, sub: (p) => `${p.sku} · ${p.ean}` }, { colecao: 'vendas', grupo: 'Pedidos', icone: 'shopping-cart', ficha: 'venda', rot: (v) => `Pedido #${v.numero}`, sub: (v, a) => cli(a, v.cliente)?.nome || 'Consumidor' }, { colecao: 'clientes', grupo: 'Clientes', icone: 'storefront', ficha: 'cliente', rot: (c) => c.nome, sub: (c) => c.cidade }],
   comandos: [{ rot: 'Novo pedido de venda', icone: 'shopping-cart', acao: (a) => a.acoes.novoPedido() }, { rot: 'Abrir frente de caixa (PDV)', icone: 'cash-register', acao: (a) => a.ir('#/pdv') }, { rot: 'Nova compra', icone: 'truck', acao: (a) => a.acoes.novaCompra() }, { rot: 'Novo produto', icone: 'package', acao: (a) => a.acoes.novoProduto() }],
@@ -436,15 +484,15 @@ Object.assign(app.acoes, {
   },
   addItemV: async (d) => { const r = await escolherProduto('Adicionar produto ao pedido', { qtd: 12 }); if (!r) return; const v = app.db.obter('vendas', d.id), p = prod(app, r.p); const ex = v.itens.find((x) => x.produto === p.id); const itens = ex ? v.itens.map((x) => (x.produto === p.id ? { ...x, qtd: x.qtd + Number(r.q) } : x)) : [...v.itens, { produto: p.id, qtd: Number(r.q) || 1, preco: r.v ? Number(r.v) : p.preco, custo: p.custo }]; app.db.salvar('vendas', { id: d.id, itens }); reab(); },
   tirarItemV: (d) => { const v = app.db.obter('vendas', d.id); app.db.salvar('vendas', { id: d.id, itens: v.itens.filter((_, k) => k !== Number(d.i)) }); reab(); },
-  avancarV: (d) => {
+  avancarV: async (d) => {
     const v = app.db.obter('vendas', d.id);
-    if (d.s === 'faturar') { if (!v.itens.length) return avisar('Pedido sem itens', { tipo: 'erro' }); faturar(app, d.id); avisar(`NF-e emitida para o pedido #${v.numero} · estoque baixado`); return reab(); }
+    if (d.s === 'faturar') { if (!v.itens.length) return avisar('Pedido sem itens', { tipo: 'erro' }); if (app.nuvem && app.estado.nfe?.configurado) { try { await emitirNFe(app, d.id); } catch (e) { avisar(e.message, { tipo: 'erro', tempo: 9000 }); } return reab(); } faturar(app, d.id); avisar(`Nota de demonstração gerada para o pedido #${v.numero} · estoque baixado`); return reab(); }
     if (d.s === 'aprovado' && !v.itens.length) return avisar('Adicione produtos antes de aprovar', { tipo: 'erro' });
     app.db.salvar('vendas', { id: d.id, status: d.s, ...(d.s === 'enviado' ? { rastreio: v.canal === 'ecommerce' || v.canal === 'marketplace' ? `BR${String(Date.now()).slice(-9)}BR` : 'Entrega própria' } : {}) });
     app.db.registrar(`vendas:${d.id}`, `Situação: ${stV(d.s)[1]}`, { icone: 'arrow-right', tom: 'acc' }); avisar(`Pedido #${v.numero}: ${stV(d.s)[1]}`); reab();
   },
   menuV: (d, el) => pop(el, [{ rotulo: 'Cancelar pedido', icone: 'x-circle', perigo: true, acao: async () => { if (await confirmar('Cancelar este pedido?', { rotulo: 'Cancelar pedido', perigo: true })) { app.db.salvar('vendas', { id: d.id, status: 'cancelado' }); reab(); } } }]),
-  danfe: (d) => imprimir(danfe(app, app.db.obter('vendas', d.id))),
+  danfe: (d) => { const v = app.db.obter('vendas', d.id); if (v.nfe?.danfe) window.open(v.nfe.danfe, '_blank', 'noopener'); else imprimir(danfe(app, v)); },
   imprimirPedido: (d) => { const v = app.db.obter('vendas', d.id), c = cli(app, v.cliente); imprimir(`<div class="doc"><div class="entre"><h1>${esc(app.empresa)}</h1><b>Pedido #${v.numero}</b></div><div style="color:#555">${dataBR(v.data)} · ${esc(c?.nome || 'Consumidor')} · ${esc(v.pagamento)}</div><table style="margin-top:12px"><thead><tr><th>Produto</th><th class="n">Qtd.</th><th class="n">Unit.</th><th class="n">Total</th></tr></thead><tbody>${v.itens.map((x) => `<tr><td>${esc(prod(app, x.produto).nome)}</td><td class="n">${x.qtd}</td><td class="n">${moeda(x.preco)}</td><td class="n">${moeda(x.qtd * x.preco)}</td></tr>`).join('')}<tr><td colspan="3"><b>Total</b></td><td class="n"><b>${moeda(totalV(v))}</b></td></tr></tbody></table><div class="ass"><div>${esc(nomeV(v.vendedor))}</div><div>${esc(c?.nome || 'Cliente')}</div></div></div>`); },
   pdvAdd: (d) => { const st = app.estado.pdv, p = prod(app, d.id); const ex = st.itens.find((x) => x.produto === p.id); if (ex) ex.qtd++; else st.itens.push({ produto: p.id, qtd: 1, preco: p.preco, custo: p.custo }); app.render(); },
   pdvQtd: (d) => { const st = app.estado.pdv, it = st.itens[Number(d.i)]; it.qtd += Number(d.d); if (it.qtd <= 0) st.itens.splice(Number(d.i), 1); app.render(); },
@@ -508,6 +556,8 @@ Object.assign(app.acoes, {
   },
   imprimirInv: () => { const st = app.estado.inv; imprimir(`<div class="doc"><h1>Folha de contagem · ${esc(nomeDep(st.dep))} · ${esc(st.cat)}</h1><div style="color:#555">${dataBR(hoje())} · conferente: ______________________</div><table style="margin-top:12px"><thead><tr><th>Local</th><th>SKU</th><th>Produto</th><th>Un.</th><th style="width:120px">Contado</th></tr></thead><tbody>${app.db.lista('produtos').filter((p) => p.categoria === st.cat).sort((x, y) => x.localizacao.localeCompare(y.localizacao)).map((p) => `<tr><td>${esc(p.localizacao)}</td><td>${esc(p.sku)}</td><td>${esc(p.nome)}</td><td>${esc(p.unidade)}</td><td style="border-bottom:1px solid #999"></td></tr>`).join('')}</tbody></table></div>`); },
   relDias: (d) => { app.estado.rel.dias = Number(d.d); app.render(); },
+  salvarNFe: async () => { const f = document.querySelector('[data-nfe]'); try { if (f.token.value.trim()) await app.sessao.salvarSegredo('focus_token', f.token.value.trim()); await app.sessao.salvarSegredo('focus_ambiente', f.ambiente.value); app.db.cfg.ie = f.ie.value.trim(); app.db.gravar(); app.estado.nfe = null; app.estado.nfeCarregando = false; avisar('Nota fiscal configurada'); app.render(); } catch (e) { avisar(e.message, { tipo: 'erro' }); } },
+  desligarNFe: async () => { if (!(await confirmar('Desligar a emissão de notas? O token é apagado do cofre.', { rotulo: 'Desligar', perigo: true }))) return; await app.sessao.salvarSegredo('focus_token', ''); app.estado.nfe = null; app.estado.nfeCarregando = false; app.render(); },
   usarForn: (d) => { const p = prod(app, d.p), f = forn(app, d.f); app.db.salvar('produtos', { id: d.p, fornecedor: d.f }); avisar(`${p.nome}: agora com ${f.nome}`, { desfazer: () => { app.db.salvar('produtos', { id: d.p, fornecedor: p.fornecedor }); reab(); } }); reab(); },
   trocarTodos: async () => { const l = app.db.lista('produtos').map((p) => ({ p, m: melhorForn(app, p.id) })).filter((x) => x.m && x.m.fornecedor !== x.p.fornecedor && x.m.preco < (cotacaoAtual(app, x.p)?.preco || x.p.custo)); if (!(await confirmar(`Trocar o fornecedor padrão de ${l.length} produtos para a melhor opção?`, { rotulo: 'Trocar' }))) return; l.forEach((x) => app.db.salvar('produtos', { id: x.p.id, fornecedor: x.m.fornecedor })); avisar(`${l.length} produtos com o melhor fornecedor`); app.render(); },
   novaCotacao: async (d) => { if (await editar(app, 'cotacoes', null, { produto: d.id })) reab(); },

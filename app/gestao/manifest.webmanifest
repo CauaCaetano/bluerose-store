@@ -1,0 +1,31 @@
+{
+ "name": "Nexo Gestão · Blue Rose Express",
+ "short_name": "Nexo Gestão",
+ "description": "Estoque, compras, vendas e nota fiscal",
+ "lang": "pt-BR",
+ "id": "/app/gestao/",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#f7f7f5",
+ "theme_color": "#4646d8",
+ "icons": [
+  {
+   "src": "icone-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icone-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icone-mascara.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
