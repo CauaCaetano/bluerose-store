@@ -29,7 +29,7 @@ function semente() {
   ];
   const produtos = base.map(([nome, categoria, fornecedor, custo, preco, unidade], i) => {
     const giro = [9, 6, 5, 6, 4, 5, 3, 8, 7, 5, 3, 4, 6, 4, 3, 3, 2, 5, 3, 3, 2, 2, 2, 3][i];
-    return { id: `p${i}`, sku: `${categoria.slice(0, 3).toUpperCase()}-${String(100 + i)}`, ean: `789${String(1000000000 + i * 7919337).slice(0, 10)}`, nome, categoria, fornecedor, custo, preco, unidade, giro, minimo: giro * 8, localizacao: `${String.fromCharCode(65 + (i % 5))}-${String(1 + (i % 9)).padStart(2, '0')}`,
+    return { id: `p${i}`, sku: `${categoria.slice(0, 3).toUpperCase()}-${String(100 + i)}`, ean: comDigito(`789${String(4567000 + i * 37).padStart(9, '0')}`), nome, categoria, fornecedor, custo, preco, unidade, giro, minimo: giro * 8, localizacao: `${String.fromCharCode(65 + (i % 5))}-${String(1 + (i % 9)).padStart(2, '0')}`,
       estoque: { d0: Math.max(0, Math.round(giro * ent(4, 22) - (i === 5 || i === 16 ? 200 : 0))), d1: Math.max(0, Math.round(giro * ent(1, 5) - (i === 12 ? 60 : 0))) } };
   });
   const clientes = ['Mercado Bom Preço', 'Mercearia do Zé', 'Restaurante Sabor Caseiro', 'Padaria Trigo Bom', 'Hotel Alvorada', 'Lanchonete Ponto Certo', 'Escola Pequeno Saber', 'Condomínio Jardim das Flores', 'Supermercado Família', 'Cantina Universitária', 'Bar do Português', 'Empório Natural'].map((nome, i) => ({ id: `c${i}`, nome, doc: `${20 + i}.${310 + i}.${420 + i}/0001-${40 + i}`, telefone: `(41) 9${8500 + i * 31}-${2200 + i * 43}`, cidade: esc1(['Curitiba/PR', 'São José dos Pinhais/PR', 'Colombo/PR', 'Pinhais/PR']), vendedor: VEND[i % 2][0], limite: ent(5, 30) * 1000 }));
@@ -70,13 +70,48 @@ function semente() {
   compras.filter((c) => c.status !== 'rascunho').forEach((c) => c.itens.filter((x) => x.recebido).forEach((x) => movimentos.push({ produto: x.produto, deposito: c.deposito, tipo: 'entrada', qtd: x.recebido, motivo: `Compra #${c.numero}`, data: `${c.previsao}T10:00`, custo: x.custo })));
   vendas.filter((v) => v.nfe && diasAte(v.data) > -40).forEach((v) => v.itens.forEach((x) => movimentos.push({ produto: x.produto, deposito: v.deposito, tipo: 'saida', qtd: x.qtd, motivo: `${v.canal === 'balcao' ? 'Cupom' : 'NF-e'} ${v.nfe.numero} · pedido #${v.numero}`, data: `${v.data}T${String(ent(8, 18)).padStart(2, '0')}:${esc1(['05', '20', '40'])}` })));
   movimentos.push({ produto: 'p3', deposito: 'd0', tipo: 'ajuste', qtd: -3, motivo: 'Avaria (embalagem furada)', data: `${diaMais(-6)}T15:00` }, { produto: 'p9', deposito: 'd1', tipo: 'transferencia', qtd: 20, motivo: 'Transferência CD Principal → Loja Centro', data: `${diaMais(-3)}T09:30` });
-  return { _cfg: { empresa: 'Atlas Distribuidora', endereco: 'Rod. BR-116, 15.400 · Barracão 3 · Curitiba/PR', cnpj: '45.678.901/0001-32', telefone: '(41) 3029-7700' }, produtos, fornecedores, clientes, vendas, compras, movimentos };
+  // atacadistas gerais e cotações de cada produto em 3 ou 4 fornecedores (números próprios para não mexer no resto)
+  const r2 = sorteio(77), ent2 = (a, b) => a + Math.floor(r2() * (b - a + 1));
+  const gerais = [['Atacadão do Comércio', 'Diego', 2], ['Distribuidora Mega Sul', 'Patrícia', 4], ['Rede Paraná Atacado', 'Wagner', 6], ['Makro Atacadista', 'Luana', 1], ['Limpex Distribuidora', 'Caio', 5]];
+  gerais.forEach(([nome, contato, prazo], i) => fornecedores.push({ id: `f${7 + i}`, nome, doc: `${60 + i}.${720 + i}.${830 + i}/0001-${50 + i}`, telefone: `(41) 3${450 + i * 11}-${5200 + i * 23}`, prazo, contato }));
+  fornecedores.forEach((f, i) => { f.pontualidade = [0.94, 0.88, 0.79, 0.91, 0.97, 0.9, 0.98, 0.83, 0.92, 0.86, 0.95, 0.89][i] || 0.9; f.avaliacao = [4.6, 4.2, 3.8, 4.4, 4.8, 4.5, 4.9, 4.0, 4.5, 4.1, 4.7, 4.3][i] || 4.3; });
+  const cotacoes = [];
+  produtos.forEach((p) => {
+    const outros = ['f7', 'f8', 'f9', 'f10'].concat(p.categoria === 'Limpeza' ? ['f11'] : []).sort(() => r2() - 0.5).slice(0, ent2(2, 3));
+    [p.fornecedor, ...outros].forEach((fid, k) => { const f = fornecedores.find((x) => x.id === fid);
+      cotacoes.push({ produto: p.id, fornecedor: fid, preco: Math.round(p.custo * (k ? 0.86 + r2() * 0.24 : 1) * 100) / 100, prazo: Math.max(1, f.prazo + ent2(-1, 2)), minimo: [6, 12, 24, 48][ent2(0, 3)], atualizado: diaMais(-ent2(1, 40)) }); });
+  });
+  return { _cfg: { empresa: 'Atlas Distribuidora', endereco: 'Rod. BR-116, 15.400 · Barracão 3 · Curitiba/PR', cnpj: '45.678.901/0001-32', telefone: '(41) 3029-7700' }, produtos, fornecedores, clientes, vendas, compras, movimentos, cotacoes };
 }
 
 // ---------------------------------------------------------------- regras
 const prod = (a, id) => a.db.obter('produtos', id);
 const cli = (a, id) => a.db.obter('clientes', id);
 const forn = (a, id) => a.db.obter('fornecedores', id);
+
+// código de barras EAN-13 (com dígito verificador) desenhado em SVG
+const comDigito = (d12) => d12 + String((10 - (d12.split('').reduce((t, c, i) => t + Number(c) * (i % 2 ? 3 : 1), 0) % 10)) % 10);
+const eanValido = (e) => /^\d{13}$/.test(e) && comDigito(e.slice(0, 12)) === e;
+const EAN_L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
+const EAN_G = ['0100111', '0110011', '0011011', '0100001', '0011101', '0111001', '0000101', '0010001', '0001001', '0010111'];
+const EAN_R = EAN_L.map((x) => x.replace(/./g, (b) => (b === '0' ? '1' : '0')));
+const PARIDADE = ['LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG', 'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'];
+function codigoBarras(ean, { altura = 54, m = 2 } = {}) {
+  if (!/^\d{13}$/.test(ean || '')) return '<span class="mute">sem código</span>';
+  const d = ean.split('').map(Number), par = PARIDADE[d[0]];
+  let bits = '101'; for (let i = 1; i <= 6; i++) bits += (par[i - 1] === 'L' ? EAN_L : EAN_G)[d[i]]; bits += '01010'; for (let i = 7; i <= 12; i++) bits += EAN_R[d[i]]; bits += '101';
+  const guarda = (i) => i < 3 || (i >= 45 && i < 50) || i >= 92;
+  let barras = ''; for (let i = 0; i < bits.length; i++) if (bits[i] === '1') barras += `<rect x="${(i + 9) * m}" y="2" width="${m}" height="${guarda(i) ? altura + 7 : altura}"/>`;
+  return `<svg class="ean" viewBox="0 0 ${113 * m} ${altura + 22}" role="img" aria-label="Código de barras ${ean}"><rect width="100%" height="100%" fill="#fff"/><g fill="#111">${barras}</g><g fill="#111" style="font:600 ${m * 6}px var(--mono)" text-anchor="middle"><text x="${4 * m}" y="${altura + 19}">${d[0]}</text><text x="${33 * m}" y="${altura + 19}">${ean.slice(1, 7)}</text><text x="${80 * m}" y="${altura + 19}">${ean.slice(7)}</text></g></svg>`;
+}
+// ranking de fornecedores de um produto: preço (50%), prazo (25%) e pontualidade nas entregas (25%)
+function ranking(a, pid) {
+  const cs = a.db.lista('cotacoes').filter((c) => c.produto === pid); if (!cs.length) return [];
+  const pmin = Math.min(...cs.map((c) => c.preco)), zmin = Math.min(...cs.map((c) => c.prazo));
+  return cs.map((c) => { const f = forn(a, c.fornecedor); return { ...c, f, nota: Math.round(50 * (pmin / c.preco) + 25 * (zmin / Math.max(1, c.prazo)) + 25 * (f?.pontualidade || 0.85)) }; }).sort((x, y) => y.nota - x.nota);
+}
+const melhorForn = (a, pid) => ranking(a, pid)[0] || null;
+const cotacaoAtual = (a, p) => a.db.lista('cotacoes').find((c) => c.produto === p.id && c.fornecedor === p.fornecedor);
 const estTotal = (p) => soma(Object.values(p.estoque || {}));
 const totalV = (v) => soma(v.itens, (x) => x.qtd * x.preco) - (v.desconto || 0) + (v.frete || 0);
 const custoV = (v) => soma(v.itens, (x) => x.qtd * (x.custo || 0));
@@ -99,11 +134,15 @@ function curvaABC(a, dias = 90) {
 
 // ---------------------------------------------------------------- coleções
 const colecoes = {
+  cotacoes: { singular: 'cotação', genero: 'f', plural: 'cotações', campos: [
+    { nome: 'produto', rotulo: 'Produto', tipo: 'relacao', colecao: 'produtos', obrigatorio: true }, { nome: 'fornecedor', rotulo: 'Fornecedor', tipo: 'relacao', colecao: 'fornecedores', obrigatorio: true },
+    { nome: 'preco', rotulo: 'Preço unitário', tipo: 'moeda', obrigatorio: true }, { nome: 'prazo', rotulo: 'Prazo de entrega (dias)', tipo: 'numero', padrao: 7, min: 0 }, { nome: 'minimo', rotulo: 'Pedido mínimo (un.)', tipo: 'numero', padrao: 12 }],
+    antesDeSalvar: (d) => ({ ...d, atualizado: hoje() }) },
   produtos: { singular: 'produto', plural: 'produtos', largura: 680, tres: true, campos: [
-    { nome: 'nome', rotulo: 'Descrição', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'sku', rotulo: 'Código (SKU)', tipo: 'texto', obrigatorio: true }, { nome: 'ean', rotulo: 'Código de barras (EAN)', tipo: 'texto' },
+    { nome: 'nome', rotulo: 'Descrição', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'sku', rotulo: 'Código (SKU)', tipo: 'texto', obrigatorio: true }, { nome: 'ean', rotulo: 'Código de barras (EAN-13)', tipo: 'texto', ajuda: 'Deixe em branco para gerar um código interno' },
     { nome: 'categoria', rotulo: 'Categoria', tipo: 'selecao', opcoes: CATEG, obrigatorio: true }, { nome: 'unidade', rotulo: 'Unidade', tipo: 'selecao', opcoes: ['UN', 'CX', 'PK', 'FD', 'PC', 'KG'], padrao: 'UN' }, { nome: 'fornecedor', rotulo: 'Fornecedor', tipo: 'relacao', colecao: 'fornecedores' },
     { nome: 'custo', rotulo: 'Custo', tipo: 'moeda', obrigatorio: true }, { nome: 'preco', rotulo: 'Preço de venda', tipo: 'moeda', obrigatorio: true }, { nome: 'minimo', rotulo: 'Estoque mínimo', tipo: 'numero', padrao: 10 }, { nome: 'localizacao', rotulo: 'Localização', tipo: 'texto', dica: 'Ex.: A-03' }],
-    validar: (d) => (d.preco < d.custo ? 'O preço de venda está abaixo do custo' : null), antesDeSalvar: (d, a, antes) => ({ ...d, estoque: antes?.estoque || { d0: 0, d1: 0 }, giro: antes?.giro || 2 }) },
+    validar: (d) => (d.preco < d.custo ? 'O preço de venda está abaixo do custo' : d.ean && !eanValido(d.ean) ? 'Código de barras inválido: confira os 13 dígitos (o último é o verificador)' : null), antesDeSalvar: (d, a, antes) => ({ ...d, ean: d.ean || comDigito(`200${String(Date.now()).slice(-9)}`), estoque: antes?.estoque || { d0: 0, d1: 0 }, giro: antes?.giro || 2 }) },
   clientes: { singular: 'cliente', plural: 'clientes', campos: [{ nome: 'nome', rotulo: 'Razão social / nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'doc', rotulo: 'CNPJ / CPF', tipo: 'texto' }, { nome: 'telefone', rotulo: 'Telefone', tipo: 'tel' }, { nome: 'cidade', rotulo: 'Cidade', tipo: 'texto' }, { nome: 'vendedor', rotulo: 'Vendedor', tipo: 'selecao', opcoes: VEND.slice(0, 2).map((v) => [v[0], v[1]]) }, { nome: 'limite', rotulo: 'Limite de crédito', tipo: 'moeda' }] },
   fornecedores: { singular: 'fornecedor', plural: 'fornecedores', campos: [{ nome: 'nome', rotulo: 'Razão social', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'doc', rotulo: 'CNPJ', tipo: 'texto' }, { nome: 'telefone', rotulo: 'Telefone', tipo: 'tel' }, { nome: 'contato', rotulo: 'Contato', tipo: 'texto' }, { nome: 'prazo', rotulo: 'Prazo de entrega (dias)', tipo: 'numero', padrao: 7 }] },
 };
@@ -171,12 +210,35 @@ function compras(a) {
       { k: 'status', rot: 'Situação', valor: (c) => c.status, render: (c) => et(...ST_COMPRA[c.status]), csv: (c) => ST_COMPRA[c.status][0] }, { k: 'total', rot: 'Total', n: true, valor: totalC, render: (c) => moeda(totalC(c)) }] });
 }
 
+function melhoresForn(a) {
+  const linhasF = a.db.lista('produtos').map((p) => { const m = melhorForn(a, p.id), at = cotacaoAtual(a, p); const vendaMes = vendidoQtd(a, p.id, 30); const eco = m && at && m.fornecedor !== p.fornecedor ? Math.max(0, (at.preco - m.preco) * vendaMes) : 0; return { p, m, at, eco, vendaMes }; });
+  const total = soma(linhasF, (x) => x.eco), trocas = linhasF.filter((x) => x.eco > 0);
+  return `${kpis([{ rot: 'Economia possível por mês', icone: 'coins', val: moeda(total), nota: `trocando o fornecedor de ${trocas.length} produtos` }, { rot: 'Cotações registradas', icone: 'clipboard-text', val: num(a.db.lista('cotacoes').length), nota: `${a.db.lista('fornecedores').length} fornecedores` }, { rot: 'Fornecedor mais pontual', icone: 'seal-check', val: esc([...a.db.lista('fornecedores')].sort((x, y) => y.pontualidade - x.pontualidade)[0]?.nome || '—'), nota: 'entregas no prazo' }])}
+    <div class="entre"><div class="dica" style="flex:1">${ic('lightning')}<span>Para cada produto, o sistema compara as cotações dos fornecedores por preço, prazo e pontualidade e mostra quanto você economiza por mês trocando para a melhor opção.</span></div>${trocas.length ? `<button type="button" class="btn pri" data-acao="trocarTodos">${ic('arrows-clockwise')}Usar a melhor opção em ${trocas.length} produtos</button>` : ''}</div>
+    ${a.tab({ id: 'melhores', itens: () => linhasF.map((x) => ({ ...x, id: x.p.id })), singular: 'produto', plural: 'produtos', ordem: 'eco', desc: true, aoClicar: (id) => a.abrir('produto', id, 'forn'),
+      textoBusca: (x) => `${x.p.nome} ${x.m?.f?.nome || ''}`, filtros: [{ k: 'cat', rot: 'Categoria', opcoes: CATEG, valor: (x) => x.p.categoria }],
+      colunas: [{ k: 'nome', rot: 'Produto', valor: (x) => x.p.nome, render: (x) => `<span class="prim">${esc(x.p.nome)}</span><span class="sub">${num(x.vendaMes)} ${esc(x.p.unidade)} vendidos por mês</span>` },
+        { k: 'atual', rot: 'Fornecedor atual', oc: true, valor: (x) => forn(a, x.p.fornecedor)?.nome, render: (x) => `${esc(forn(a, x.p.fornecedor)?.nome || '—')}<span class="sub">${x.at ? `${moeda(x.at.preco)} · ${x.at.prazo} dias` : ''}</span>` },
+        { k: 'melhor', rot: 'Melhor opção', valor: (x) => x.m?.f?.nome, render: (x) => (x.m ? `<span class="prim">${esc(x.m.f?.nome || '')}</span><span class="sub">${moeda(x.m.preco)} · ${x.m.prazo} dias · nota ${x.m.nota}</span>` : '—') },
+        { k: 'eco', rot: 'Economia/mês', n: true, valor: (x) => x.eco, render: (x) => (x.eco > 0 ? `<b class="ok-tx">${moeda(x.eco)}</b>` : x.m?.fornecedor === x.p.fornecedor ? et('Já é o melhor', 'ok', 'sem-ponto') : '<span class="mute">—</span>') },
+        { k: 'acao', rot: '', ord: false, csv: false, render: (x) => (x.eco > 0 ? `<button type="button" class="btn peq" data-acao="usarForn" data-p="${x.p.id}" data-f="${x.m.fornecedor}">Trocar</button>` : '') }] })}`;
+}
+
+function etiquetas(a) {
+  const st = a.estado.etq ||= { cat: 'Limpeza', qtd: {} };
+  const ps = a.db.lista('produtos').filter((p) => p.categoria === st.cat);
+  return `<div class="entre"><select data-mudar="etqCat" style="width:auto">${CATEG.map((c) => `<option ${c === st.cat ? 'selected' : ''}>${c}</option>`).join('')}</select><button type="button" class="btn pri" data-acao="imprimirEtq">${ic('printer')}Imprimir etiquetas</button></div>
+    <div class="dica">${ic('barcode')}<span>Etiquetas de gôndola com nome, preço e código de barras EAN-13. Defina quantas imprimir de cada produto; a leitura funciona em qualquer leitor da frente de caixa.</span></div>
+    <div class="grade g3">${ps.map((p) => `<div class="cartao"><div class="cartao-corpo col" style="gap:8px"><div class="entre"><b class="corta">${esc(p.nome)}</b><span class="mono mute">${esc(p.sku)}</span></div><div class="entre" style="align-items:flex-end"><div style="width:180px">${codigoBarras(p.ean, { altura: 44 })}</div><b style="font-size:20px" class="num">${moeda(p.preco)}</b></div><label class="campo" style="flex-direction:row;align-items:center;justify-content:space-between">Quantidade<input type="number" min="0" value="${st.qtd[p.id] ?? 1}" data-mudar="etqQtd" data-id="${p.id}" style="width:90px;height:28px;text-align:right"></label></div></div>`).join('')}</div>`;
+}
+
 function sugestao(a) {
   const ps = a.db.lista('produtos').map((p) => { const dia = vendidoQtd(a, p.id, 30) / 30; const chegando = soma(a.db.lista('compras').filter((c) => ['enviado', 'parcial'].includes(c.status)).flatMap((c) => c.itens).filter((x) => x.produto === p.id), (x) => x.qtd - x.recebido); const alvo = Math.ceil(dia * 30 + p.minimo); return { p, dia, chegando, sugerido: Math.max(0, alvo - estTotal(p) - chegando) }; }).filter((x) => x.sugerido > 0 && (estTotal(x.p) <= x.p.minimo || cobertura(a, x.p) < 15));
-  const porF = agrupar(ps, (x) => x.p.fornecedor);
+  ps.forEach((x) => { const m = melhorForn(a, x.p.id); x.fid = m?.fornecedor || x.p.fornecedor; x.custo = m?.preco || x.p.custo; x.nota = m?.nota; });
+  const porF = agrupar(ps, (x) => x.fid);
   return `<div class="dica">${ic('lightning')}<span>A sugestão olha a venda média dos últimos 30 dias, o estoque atual, o que já está a caminho e o estoque mínimo, e calcula quanto comprar para cobrir os próximos 30 dias.</span></div>
-    ${Object.keys(porF).length ? Object.entries(porF).map(([fid, l]) => `<div class="cartao"><div class="cartao-cab"><div><h3>${esc(forn(a, fid)?.nome || 'Sem fornecedor')}</h3><div class="sub">Entrega em ${forn(a, fid)?.prazo || '—'} dias · ${l.length} produtos · ${moeda(soma(l, (x) => x.sugerido * x.p.custo))}</div></div><button type="button" class="btn pri" data-acao="gerarCompra" data-f="${fid}">${ic('shopping-cart')}Gerar pedido de compra</button></div>
-      <div class="tabela-caixa"><table class="tabela"><thead><tr><th>Produto</th><th class="n">Estoque</th><th class="n oc">Mínimo</th><th class="n oc">Venda/dia</th><th class="n oc">Chegando</th><th class="n">Comprar</th><th class="n">Custo</th></tr></thead><tbody>${l.map((x) => `<tr><td><span class="prim">${esc(x.p.nome)}</span><span class="sub mono">${esc(x.p.sku)}</span></td><td class="n">${estTotal(x.p) <= 0 ? et('0', 'er') : estTotal(x.p)}</td><td class="n oc">${x.p.minimo}</td><td class="n oc">${num(x.dia, 1)}</td><td class="n oc">${x.chegando || '—'}</td><td class="n"><b>${x.sugerido} ${esc(x.p.unidade)}</b></td><td class="n">${moeda(x.sugerido * x.p.custo)}</td></tr>`).join('')}</tbody></table></div></div>`).join('') : `<div class="cartao">${vazio('check-circle', 'Nada para comprar agora', 'O estoque cobre os próximos 30 dias.')}</div>`}`;
+    ${Object.keys(porF).length ? Object.entries(porF).map(([fid, l]) => `<div class="cartao"><div class="cartao-cab"><div><h3>${esc(forn(a, fid)?.nome || 'Sem fornecedor')}</h3><div class="sub">Entrega em ${forn(a, fid)?.prazo || '—'} dias · ${l.length} produtos · ${moeda(soma(l, (x) => x.sugerido * x.custo))} · melhor nota de preço, prazo e pontualidade</div></div><button type="button" class="btn pri" data-acao="gerarCompra" data-f="${fid}">${ic('shopping-cart')}Gerar pedido de compra</button></div>
+      <div class="tabela-caixa"><table class="tabela"><thead><tr><th>Produto</th><th class="n">Estoque</th><th class="n oc">Mínimo</th><th class="n oc">Venda/dia</th><th class="n oc">Chegando</th><th class="n">Comprar</th><th class="n">Custo</th></tr></thead><tbody>${l.map((x) => `<tr><td><span class="prim">${esc(x.p.nome)}</span><span class="sub mono">${esc(x.p.sku)}</span></td><td class="n">${estTotal(x.p) <= 0 ? et('0', 'er') : estTotal(x.p)}</td><td class="n oc">${x.p.minimo}</td><td class="n oc">${num(x.dia, 1)}</td><td class="n oc">${x.chegando || '—'}</td><td class="n"><b>${x.sugerido} ${esc(x.p.unidade)}</b></td><td class="n">${moeda(x.sugerido * x.custo)}<span class="sub">${moeda(x.custo)} un.</span></td></tr>`).join('')}</tbody></table></div></div>`).join('') : `<div class="cartao">${vazio('check-circle', 'Nada para comprar agora', 'O estoque cobre os próximos 30 dias.')}</div>`}`;
 }
 
 function produtos(a) {
@@ -300,11 +362,18 @@ const fichas = {
     let corpo = '';
     if (aba === 'resumo') corpo = `<div class="gav-sec"><div class="grade g4" style="gap:8px">${[['Estoque', `${num(estTotal(p))} ${p.unidade}`], ['Venda (30 dias)', `${num(vendidoQtd(a, id, 30))} ${p.unidade}`], ['Cobertura', cobertura(a, p) >= 999 ? 'sem giro' : `${cobertura(a, p)} dias`], ['Margem', pct(((p.preco - p.custo) / p.preco) * 100)]].map(([t, v]) => `<div style="padding:10px;border:1px solid var(--borda);border-radius:8px"><div class="mute" style="font-size:12px">${t}</div><b class="num" style="font-size:15px">${v}</b></div>`).join('')}</div></div>
       <div class="gav-sec">${props([['barcode', 'SKU / EAN', `<span class="mono">${esc(p.sku)} · ${esc(p.ean)}</span>`], ['tag', 'Categoria', esc(p.categoria)], ['truck', 'Fornecedor', esc(forn(a, p.fornecedor)?.nome || '—')], ['currency-circle-dollar', 'Custo médio', moeda(p.custo)], ['receipt', 'Preço de venda', moeda(p.preco)], ['map-pin', 'Localização', `<span class="mono">${esc(p.localizacao)}</span>`], ['warning', 'Estoque mínimo', `${p.minimo} ${p.unidade}`]])}</div>
+      <div class="gav-sec"><h4>Código de barras</h4><div class="entre" style="align-items:flex-end"><div style="width:230px">${codigoBarras(p.ean)}</div><button type="button" class="btn peq" data-acao="etiquetaProd" data-id="${id}">${ic('printer')}Imprimir etiquetas</button></div></div>
       <div class="gav-sec"><h4>Por depósito</h4>${DEP.map(([d, n]) => `<div class="entre" style="padding:5px 0"><span>${esc(n)}</span><b class="num">${num(p.estoque[d] || 0)} ${esc(p.unidade)}</b></div>`).join('')}</div>`;
+    if (aba === 'forn') {
+      const rk = ranking(a, id), atual = p.fornecedor;
+      corpo = `<div class="gav-sec"><div class="dica" style="margin-bottom:12px">${ic('info')}<span>Nota de 0 a 100: preço pesa 50%, prazo de entrega 25% e pontualidade nas entregas anteriores 25%.</span></div>
+        ${rk.length ? `<table class="tabela"><thead><tr><th>Fornecedor</th><th class="n">Preço</th><th class="n">Prazo</th><th class="n">Pontual</th><th class="n">Nota</th><th></th></tr></thead><tbody>${rk.map((c, k) => `<tr><td><span class="prim">${esc(c.f?.nome || '—')}</span><span class="sub">${k === 0 ? et('Melhor opção', 'ok', 'sem-ponto') : ''}${c.fornecedor === atual ? ` ${et('Atual', 'info', 'sem-ponto')}` : ''} mín. ${c.minimo} · cotado ${relativo(c.atualizado)}</span></td><td class="n"><b>${moeda(c.preco)}</b>${c.preco < (cotacaoAtual(a, p)?.preco || p.custo) - 0.005 ? `<span class="sub ok-tx">−${pct((1 - c.preco / (cotacaoAtual(a, p)?.preco || p.custo)) * 100)}</span>` : ''}</td><td class="n">${c.prazo} dias</td><td class="n">${pct((c.f?.pontualidade || 0) * 100)}</td><td class="n"><b class="${k === 0 ? 'ok-tx' : ''}">${c.nota}</b></td><td class="acoes">${c.fornecedor === atual ? '' : `<button type="button" class="btn peq" data-acao="usarForn" data-p="${id}" data-f="${c.fornecedor}">Usar</button>`}</td></tr>`).join('')}</tbody></table>` : vazio('truck', 'Sem cotações')}
+        <div class="flex" style="margin-top:12px;flex-wrap:wrap"><button type="button" class="btn" data-acao="pedirCotacao" data-id="${id}">${ic('whatsapp-logo')}Pedir cotação</button><button type="button" class="btn" data-acao="novaCotacao" data-id="${id}">${ic('plus')}Registrar cotação</button><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(`fornecedor atacado ${p.nome} Curitiba`)}">${ic('magnifying-glass')}Buscar novos fornecedores</a></div></div>`;
+    }
     if (aba === 'kardex') corpo = `<div class="gav-sec">${movs.length ? `<table class="tabela"><thead><tr><th>Data</th><th>Movimento</th><th class="n">Qtd.</th></tr></thead><tbody>${movs.slice(0, 40).map((m) => `<tr><td>${dataCurta(m.data)}</td><td>${esc(m.motivo)}<span class="sub">${esc(nomeDep(m.deposito))}</span></td><td class="n"><b class="${m.tipo === 'saida' || m.qtd < 0 ? 'er-tx' : 'ok-tx'}">${m.tipo === 'saida' ? '−' : m.qtd > 0 ? '+' : ''}${m.qtd}</b></td></tr>`).join('')}</tbody></table>` : vazio('stack', 'Sem movimentações')}</div>`;
     return { html: ficha({ tipo: 'Produto', icone: 'package', titulo: esc(p.nome), sub: `${et(sit, tom)}<span class="mono">${esc(p.sku)}</span><span>· ${moeda(p.preco)}</span>`,
       extra: `<div class="flex" style="margin-top:12px"><button type="button" class="btn peq" data-acao="ajustar" data-id="${id}">${ic('pencil-simple')}Ajustar estoque</button><button type="button" class="btn peq" data-acao="transferir" data-id="${id}">${ic('arrows-left-right')}Transferir</button></div>`,
-      aba, abas: [['resumo', 'Resumo'], ['kardex', 'Movimentações', movs.length]], corpo,
+      aba, abas: [['resumo', 'Resumo'], ['forn', 'Fornecedores', ranking(a, id).length], ['kardex', 'Movimentações', movs.length]], corpo,
       acoes: `<button type="button" class="btn fant peq" data-acao="editarCad" data-c="produtos" data-id="${id}">${ic('pencil-simple')}Editar</button>` }), estreita: true, montar: (g) => (g.dataset.aba = aba) };
   },
   cliente(a, id) {
@@ -341,9 +410,11 @@ const app = criarApp({
     { id: 'estoque', rot: 'Movimentações', icone: 'stack', render: estoque },
     { id: 'inventario', rot: 'Inventário', icone: 'list-checks', render: inventario },
     { id: 'abc', rot: 'Curva ABC', icone: 'chart-pie-slice', render: abc },
+    { id: 'etiquetas', rot: 'Etiquetas', icone: 'barcode', titulo: 'Etiquetas com código de barras', render: etiquetas },
     { grupo: 'Compras' },
     { id: 'compras', rot: 'Pedidos de compra', icone: 'truck', render: compras, atalho: 'c', novo: (a) => a.acoes.novaCompra(), cont: (a) => a.db.lista('compras').filter((c) => ['enviado', 'parcial'].includes(c.status) && c.previsao < hoje()).length },
     { id: 'sugestao', rot: 'Sugestão de compra', icone: 'lightning', render: sugestao },
+    { id: 'melhores', rot: 'Melhores fornecedores', icone: 'seal-check', render: melhoresForn },
     { id: 'fornecedores', rot: 'Fornecedores', icone: 'buildings', render: cadastroPag('fornecedores', 'fornecedor', 'fornecedores', 'fornecedor') },
     { grupo: 'Gestão' },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios, atalho: 'r' },
@@ -351,6 +422,7 @@ const app = criarApp({
 });
 
 const reab = () => { app.render(); app.reabrir(); };
+const a_cot = (pid, fid) => app.db.lista('cotacoes').find((c) => c.produto === pid && c.fornecedor === fid)?.preco;
 async function escolherProduto(titulo, { qtd = 1, preco = true } = {}) {
   const ps = app.db.lista('produtos');
   return modal({ titulo, largura: 520, corpo: `<form class="form-grade" onsubmit="return false"><label class="campo largo">Produto<select name="p">${ps.map((p) => `<option value="${p.id}">${esc(p.nome)} · ${esc(p.sku)} · estoque ${estTotal(p)}</option>`).join('')}</select></label><label class="campo">Quantidade<input name="q" type="number" min="1" value="${qtd}"></label>${preco ? '<label class="campo">Preço (opcional)<input name="v" type="number" step="0.01" placeholder="do cadastro"></label>' : ''}</form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Adicionar', classe: 'pri', acao: (f) => Object.fromEntries(new FormData(f.querySelector('form'))) }] });
@@ -394,8 +466,8 @@ Object.assign(app.acoes, {
     app.render(); app.abrir('compra', c.id);
   },
   gerarCompra: (d) => {
-    const f = forn(app, d.f); const ps = app.db.lista('produtos').filter((p) => p.fornecedor === d.f).map((p) => { const dia = vendidoQtd(app, p.id, 30) / 30; const chegando = soma(app.db.lista('compras').filter((c) => ['enviado', 'parcial'].includes(c.status)).flatMap((c) => c.itens).filter((x) => x.produto === p.id), (x) => x.qtd - x.recebido); return { p, q: Math.max(0, Math.ceil(dia * 30 + p.minimo) - estTotal(p) - chegando) }; }).filter((x) => x.q > 0 && (estTotal(x.p) <= x.p.minimo || cobertura(app, x.p) < 15));
-    const c = app.db.salvar('compras', { numero: Math.max(...app.db.lista('compras').map((x) => x.numero)) + 1, fornecedor: d.f, data: hoje(), previsao: diaMais(f.prazo), deposito: 'd0', status: 'rascunho', frete: 0, itens: ps.map((x) => ({ produto: x.p.id, qtd: x.q, custo: x.p.custo, recebido: 0 })) });
+    const f = forn(app, d.f); const ps = app.db.lista('produtos').filter((p) => (melhorForn(app, p.id)?.fornecedor || p.fornecedor) === d.f).map((p) => { const dia = vendidoQtd(app, p.id, 30) / 30; const chegando = soma(app.db.lista('compras').filter((c) => ['enviado', 'parcial'].includes(c.status)).flatMap((c) => c.itens).filter((x) => x.produto === p.id), (x) => x.qtd - x.recebido); return { p, q: Math.max(0, Math.ceil(dia * 30 + p.minimo) - estTotal(p) - chegando) }; }).filter((x) => x.q > 0 && (estTotal(x.p) <= x.p.minimo || cobertura(app, x.p) < 15));
+    const c = app.db.salvar('compras', { numero: Math.max(...app.db.lista('compras').map((x) => x.numero)) + 1, fornecedor: d.f, data: hoje(), previsao: diaMais(f.prazo), deposito: 'd0', status: 'rascunho', frete: 0, itens: ps.map((x) => ({ produto: x.p.id, qtd: x.q, custo: a_cot(x.p.id, d.f) || x.p.custo, recebido: 0 })) });
     avisar(`Pedido de compra #${c.numero} criado com ${ps.length} produtos`); app.ir('#/compras'); setTimeout(() => app.abrir('compra', c.id), 50);
   },
   enviarCompra: (d) => { app.db.salvar('compras', { id: d.id, status: 'enviado', data: hoje() }); avisar('Pedido enviado ao fornecedor'); reab(); },
@@ -436,6 +508,18 @@ Object.assign(app.acoes, {
   },
   imprimirInv: () => { const st = app.estado.inv; imprimir(`<div class="doc"><h1>Folha de contagem · ${esc(nomeDep(st.dep))} · ${esc(st.cat)}</h1><div style="color:#555">${dataBR(hoje())} · conferente: ______________________</div><table style="margin-top:12px"><thead><tr><th>Local</th><th>SKU</th><th>Produto</th><th>Un.</th><th style="width:120px">Contado</th></tr></thead><tbody>${app.db.lista('produtos').filter((p) => p.categoria === st.cat).sort((x, y) => x.localizacao.localeCompare(y.localizacao)).map((p) => `<tr><td>${esc(p.localizacao)}</td><td>${esc(p.sku)}</td><td>${esc(p.nome)}</td><td>${esc(p.unidade)}</td><td style="border-bottom:1px solid #999"></td></tr>`).join('')}</tbody></table></div>`); },
   relDias: (d) => { app.estado.rel.dias = Number(d.d); app.render(); },
+  usarForn: (d) => { const p = prod(app, d.p), f = forn(app, d.f); app.db.salvar('produtos', { id: d.p, fornecedor: d.f }); avisar(`${p.nome}: agora com ${f.nome}`, { desfazer: () => { app.db.salvar('produtos', { id: d.p, fornecedor: p.fornecedor }); reab(); } }); reab(); },
+  trocarTodos: async () => { const l = app.db.lista('produtos').map((p) => ({ p, m: melhorForn(app, p.id) })).filter((x) => x.m && x.m.fornecedor !== x.p.fornecedor && x.m.preco < (cotacaoAtual(app, x.p)?.preco || x.p.custo)); if (!(await confirmar(`Trocar o fornecedor padrão de ${l.length} produtos para a melhor opção?`, { rotulo: 'Trocar' }))) return; l.forEach((x) => app.db.salvar('produtos', { id: x.p.id, fornecedor: x.m.fornecedor })); avisar(`${l.length} produtos com o melhor fornecedor`); app.render(); },
+  novaCotacao: async (d) => { if (await editar(app, 'cotacoes', null, { produto: d.id })) reab(); },
+  pedirCotacao: (d) => { const p = prod(app, d.id); const fs = [...new Set(ranking(app, d.id).map((c) => c.fornecedor))].map((id) => forn(app, id));
+    const msg = (f) => `Olá, ${f.contato}! Aqui é da ${app.empresa}. Pode me passar o preço e o prazo de entrega para ${Math.max(p.minimo * 2, 24)} ${p.unidade} de ${p.nome}? Obrigado!`;
+    modal({ titulo: `Pedir cotação · ${p.nome}`, largura: 520, corpo: `<ul class="lista" style="margin:-16px -18px">${fs.map((f) => `<li>${av(f.nome)}<div class="cresce"><div class="t">${esc(f.nome)}</div><div class="s">${esc(f.contato)} · ${esc(f.telefone)}</div></div><a class="btn peq" target="_blank" rel="noopener" href="${telLink(f.telefone)}?text=${encodeURIComponent(msg(f))}">${ic('whatsapp-logo')}Enviar</a></li>`).join('')}</ul>`, botoes: [{ rotulo: 'Fechar', valor: null, classe: 'pri' }] }); },
+  etiquetaProd: (d) => { app.estado.etq = { cat: prod(app, d.id).categoria, qtd: { [d.id]: 6 } }; app.db.lista('produtos').filter((p) => p.categoria === app.estado.etq.cat && p.id !== d.id).forEach((p) => (app.estado.etq.qtd[p.id] = 0)); fecharGaveta(); app.ir('#/etiquetas'); },
+  etqCat: (d, el) => { app.estado.etq.cat = el.value; app.render(); },
+  etqQtd: (d, el) => { app.estado.etq.qtd[d.id] = Math.max(0, Number(el.value) || 0); },
+  imprimirEtq: () => { const st = app.estado.etq; const l = app.db.lista('produtos').filter((p) => p.categoria === st.cat).flatMap((p) => Array.from({ length: st.qtd[p.id] ?? 1 }, () => p));
+    if (!l.length) return avisar('Defina a quantidade de etiquetas', { tipo: 'erro' });
+    imprimir(`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${l.map((p) => `<div style="border:1px dashed #999;padding:8px 10px;page-break-inside:avoid;font-family:sans-serif"><div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.nome)}</div><div style="display:flex;justify-content:space-between;align-items:flex-end;gap:6px"><div style="width:62%">${codigoBarras(p.ean, { altura: 40 })}</div><div style="font-size:20px;font-weight:800">${moeda(p.preco)}</div></div></div>`).join('')}</div>`); },
 });
 
 // leitor de código de barras no PDV: Enter adiciona o produto com EAN/SKU exato
