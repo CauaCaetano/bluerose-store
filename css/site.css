@@ -947,3 +947,37 @@ dialog.contratar::backdrop { background: rgba(5, 8, 13, .66); backdrop-filter: b
   .precos2-dica { margin-top: 6px; text-align: center; font-size: 12.5px; color: var(--ink-3); }
 }
 @media (min-width: 761px) { .precos2-pontos, .precos2-dica { display: none; } }
+
+/* Linha Nexo (sistemas.html) */
+.sis-hero { padding-bottom: 8px; }
+.sis-selos { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 18px; color: var(--ink-2); font-size: 14px; }
+.sis-selos span { display: inline-flex; align-items: center; gap: 6px; }
+.sis-selos .ico { width: 16px; height: 16px; color: var(--accent); }
+.sis-lista .wrap { display: flex; flex-direction: column; gap: 22px; padding-block: 24px 40px; }
+.sis { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 26px; align-items: center; padding: 18px; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: rgba(20, 25, 34, 0.6); }
+.sis:nth-child(even) .sis-foto { order: 2; }
+.sis-foto { position: relative; display: block; border-radius: 12px; overflow: hidden; border: 1px solid var(--line-2); box-shadow: 0 30px 60px -30px color-mix(in srgb, var(--sis) 70%, transparent); }
+.sis-foto img { display: block; width: 100%; height: auto; transition: transform .4s var(--ease); }
+.sis-foto span { position: absolute; right: 12px; bottom: 12px; padding: 7px 12px; border-radius: 8px; background: var(--sis); color: #fff; font-weight: 600; font-size: 13.5px; }
+.sis-foto:hover img { transform: scale(1.02); }
+.sis-tag { display: inline-block; padding: 4px 9px; border-radius: 6px; background: color-mix(in srgb, var(--sis) 22%, transparent); color: color-mix(in srgb, var(--sis) 55%, #fff); font: 600 11.5px var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+.sis h2 { margin-top: 10px; font-size: clamp(24px, 2.4vw, 32px); letter-spacing: -0.03em; }
+.sis-para { margin-top: 6px; color: var(--ink-2); }
+.sis ul { display: flex; flex-direction: column; gap: 7px; margin: 14px 0; }
+.sis li { display: flex; gap: 8px; font-size: 14.5px; color: var(--ink-2); }
+.sis li .ico { width: 16px; height: 16px; flex: none; margin-top: 3px; color: var(--sis); }
+.sis-precos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sis-precos div { padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 10px; }
+.sis-precos small { display: block; color: var(--ink-3); font-size: 12px; }
+.sis-precos b { display: block; font-size: 22px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.sis-precos b small { display: inline; font-size: 13px; color: var(--ink-2); }
+.sis-precos span { font-size: 12.5px; color: var(--ink-3); }
+.sis-botoes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+.sis-botoes .btn { justify-content: center; padding: 0 10px; font-family: inherit; cursor: pointer; }
+.sis-comparar .wrap { padding-block: 10px 60px; }
+.sis-duas { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+.sis-duas > div { padding: 20px; border: 1px solid var(--line-2); border-radius: var(--r-lg); }
+.sis-duas h3 { font-size: 18px; }
+.sis-duas ul { margin: 10px 0 0; padding-left: 18px; color: var(--ink-2); display: flex; flex-direction: column; gap: 6px; font-size: 14.5px; }
+@media (max-width: 860px) { .sis { grid-template-columns: 1fr; } .sis:nth-child(even) .sis-foto { order: 0; } .sis-duas { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .sis-botoes { grid-template-columns: 1fr 1fr; } .sis-botoes .btn-primary { grid-column: 1 / -1; grid-row: 1; } }

@@ -63,7 +63,7 @@
       var link = links[plano];
       if (!link || typeof dlg.showModal !== 'function') { location.hash = 'contato'; return; }
       var assinatura = plano.indexOf('a-') === 0;
-      var v = VALORES[plano] || ['', ''];
+      var v = VALORES[plano] || (plano.indexOf('a-sis-') === 0 ? ['R$ 149 por mês', 'Sem entrada · hospedagem e suporte inclusos · fidelidade de 12 meses'] : plano.indexOf('sis-') === 0 ? ['Entrada de R$ 1.495 agora', 'Total R$ 2.990 · o saldo de R$ 1.495 só na entrega'] : ['', '']);
       $('ct-titulo').textContent = b.getAttribute('data-nome');
       $('ct-valor').innerHTML = '<b>' + v[0] + '</b><small>' + v[1] + '</small>';
       $('ct-meios').textContent = assinatura ? '(cartão de crédito, cobrado todo mês)' : '(PIX, cartão em até 6x ou boleto)';
