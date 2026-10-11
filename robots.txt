@@ -2,7 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /previas/
 Disallow: /midia/
-Disallow: /painel/
 
 Sitemap: https://bluerose-store.com/sitemap.xml
 Sitemap: https://bluerose-store.com/clientes/sitemap.xml
