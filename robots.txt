@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /previas/
+Disallow: /midia/
 
 Sitemap: https://bluerose-store.com/sitemap.xml
