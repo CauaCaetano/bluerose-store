@@ -76,3 +76,25 @@
   });
   dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
 })();
+
+/* celular: pontos que mostram qual cartão de preço está na tela */
+(function () {
+  document.querySelectorAll('.precos2').forEach(function (trilho) {
+    var cards = trilho.querySelectorAll('.preco2');
+    if (cards.length < 2) return;
+    var pontos = document.createElement('div');
+    pontos.className = 'precos2-pontos'; pontos.setAttribute('aria-hidden', 'true');
+    cards.forEach(function () { pontos.appendChild(document.createElement('i')); });
+    var dica = document.createElement('p');
+    dica.className = 'precos2-dica'; dica.textContent = (document.documentElement.lang || '').indexOf('en') === 0 ? 'Swipe to see all plans →' : 'Deslize para ver todos os planos →';
+    trilho.insertAdjacentElement('afterend', dica);
+    trilho.insertAdjacentElement('afterend', pontos);
+    function marcar() {
+      var meio = trilho.scrollLeft + trilho.clientWidth / 2, atual = 0;
+      cards.forEach(function (c, i) { if (c.offsetLeft <= meio) atual = i; });
+      pontos.querySelectorAll('i').forEach(function (p, i) { p.classList.toggle('on', i === atual); });
+    }
+    trilho.addEventListener('scroll', function () { window.requestAnimationFrame(marcar); }, { passive: true });
+    marcar();
+  });
+})();
