@@ -151,6 +151,7 @@ function telaEmpresa(sb, cfg, espacos) {
         <label class="opcao-inicio"><input type="radio" name="modo" value="branco" checked><span><b>Em branco</b><small>Para usar com os dados da sua empresa. Você pode importar planilhas.</small></span></label>
         <label class="opcao-inicio"><input type="radio" name="modo" value="exemplo"><span><b>Com dados de exemplo</b><small>Para explorar tudo antes. Dá para apagar depois.</small></span></label></fieldset>
       ${cfg.modelos?.length ? `<label class="campo">Tipo de negócio<select name="ramo">${cfg.modelos.map((m) => `<option value="${m.id}">${esc(m.nome)}</option>`).join('')}</select><span class="ajuda">Já começa com os serviços e cadastros típicos do seu ramo</span></label>` : ''}
+      <label class="campo">Chave PIX da empresa <span class="mute">(opcional)</span><input name="pix" placeholder="CNPJ, e-mail, celular ou chave aleatória"><span class="ajuda">Para as cobranças e links de pagamento já saírem com o QR code. Dá para colocar depois.</span></label>
       <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Criar e começar o teste de 7 dias</button></form>
       <div class="entrada-links"><a href="#" data-sair>Sair desta conta</a></div>`);
     document.querySelectorAll('[data-esp]').forEach((li) => (li.onclick = () => resolver({ id: li.dataset.esp, novo: false })));
@@ -160,7 +161,7 @@ function telaEmpresa(sb, cfg, espacos) {
       const d = Object.fromEntries(new FormData(f)), btn = f.querySelector('button'); btn.disabled = true;
       const { data, error } = await sb.rpc('nexo_criar_espaco', { p_app: cfg.id, p_nome: d.nome.trim() });
       if (error) { f.querySelector('[data-erro]').textContent = /limite/.test(error.message) ? 'Você já tem 3 empresas de teste neste sistema.' : error.message; btn.disabled = false; return; }
-      resolver({ id: data, novo: true, exemplo: d.modo === 'exemplo', nome: d.nome.trim(), ramo: d.ramo || '' });
+      resolver({ id: data, novo: true, exemplo: d.modo === 'exemplo', nome: d.nome.trim(), ramo: d.ramo || '', pix: (d.pix || '').trim() });
     };
   });
 }
@@ -219,7 +220,7 @@ export async function iniciarNuvem(app, cfg) {
   const db = new BancoNuvem(sb, escolha.id, uid, linhas);
   if (escolha.novo) {
     if (escolha.exemplo) { const s = cfg.semente(); for (const [k, v] of Object.entries(s)) if (k !== '_cfg') db.dados[k] = v.map((x) => ({ id: x.id || Math.random().toString(36).slice(2, 10), ...x })); }
-    db.dados._cfg = { ...(escolha.exemplo ? cfg.semente()._cfg || {} : {}), empresa: escolha.nome, ...(escolha.ramo && !escolha.exemplo ? { ramo_pendente: escolha.ramo } : {}) };
+    db.dados._cfg = { ...(escolha.exemplo ? cfg.semente()._cfg || {} : {}), empresa: escolha.nome, ...(escolha.ramo && !escolha.exemplo ? { ramo_pendente: escolha.ramo } : {}), ...(escolha.pix ? { pix: { chave: escolha.pix, nome: escolha.nome.slice(0, 25), cidade: '' } } : {}) };
     await db.enviar();
   }
   const dono = esp.dono === uid;

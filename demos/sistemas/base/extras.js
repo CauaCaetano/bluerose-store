@@ -29,12 +29,25 @@ export function prepararExtras(app, cfg) {
   const tipos = { ...(cfg.portal || {}) };
 
   // ------------------------------------------------------------ PIX da empresa
-  app.pix = (valor, txid, descricao) => {
+  // na demonstração, uma chave de exemplo (domínio reservado, não recebe dinheiro) para o QR code aparecer
+  const PIX_DEMO = 'pix-demonstracao@example.com';
+  /** Dados do PIX para as páginas do cliente: { chave, nome, cidade, demo } ou null */
+  app.pixDados = () => {
     const p = db().cfg.pix || {};
-    if (!p.chave) return '';
-    return pixCopiaECola({ chave: p.chave, nome: p.nome || app.empresa, cidade: p.cidade || 'BRASIL', valor, txid, descricao });
+    if (p.chave) return { chave: p.chave, nome: p.nome || app.empresa, cidade: p.cidade || 'BRASIL' };
+    return app.nuvem ? null : { chave: PIX_DEMO, nome: app.empresa, cidade: 'BRASIL', demo: true };
   };
-  app.temPix = () => !!db().cfg.pix?.chave;
+  app.pix = (valor, txid, descricao) => { const p = app.pixDados(); return p ? pixCopiaECola({ ...p, valor, txid, descricao }) : ''; };
+  app.temPix = () => !!db().cfg.pix?.chave || !app.nuvem;
+  /** Pede a chave PIX na hora em que ela faz falta. Devolve true se ficou configurada. */
+  app.pedirPix = async (motivo = 'Para o cliente pagar pelo PIX, cadastre a chave da empresa.') => {
+    if (db().cfg.pix?.chave) return true;
+    if (!app.nuvem) return true;
+    const r = await modal({ titulo: 'Chave PIX da empresa', largura: 460, corpo: `<p class="mute-2" style="margin-bottom:10px">${esc(motivo)} O dinheiro cai direto na sua conta: o sistema só monta o código do PIX.</p><form class="form-grade" data-pix-rapido><label class="campo largo">Chave PIX<input name="chave" required placeholder="CNPJ, e-mail, celular ou chave aleatória"></label><label class="campo">Nome do recebedor<input name="nome" value="${esc(app.empresa)}" maxlength="25"></label><label class="campo">Cidade<input name="cidade" maxlength="15"></label></form>`,
+      botoes: [{ rotulo: 'Agora não', valor: null, classe: 'fant' }, { rotulo: 'Salvar chave', classe: 'pri', acao: (f) => { const d = Object.fromEntries(new FormData(f.querySelector('form'))); if (!d.chave.trim() || !pixCopiaECola({ chave: d.chave, nome: d.nome })) { avisar('Chave PIX inválida', { tipo: 'erro' }); return false; } return d; } }] });
+    if (!r) return false;
+    db().cfg.pix = r; db().gravar(); avisar('Chave PIX salva'); republicar(); return true;
+  };
 
   // ------------------------------------------------------------ 1. link do cliente
   const assinadas = (() => { try { return JSON.parse(localStorage.getItem('nexo-assinadas') || '{}'); } catch { return {}; } })();

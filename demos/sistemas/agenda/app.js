@@ -509,7 +509,7 @@ const app = criarApp({
       montar: (a) => {
         const ss = a.db.lista('servicos'), ps = a.db.lista('profissionais');
         const livres = Object.fromEntries(ps.map((pr) => [pr.id, Object.fromEntries(Array.from({ length: 14 }, (_, i) => diaMais(i)).map((d) => [d, horariosLivres(a, pr.id, d, 30)]))]));
-        const pix = a.db.cfg.pix?.chave ? { chave: a.db.cfg.pix.chave, nome: a.db.cfg.pix.nome || a.empresa, cidade: a.db.cfg.pix.cidade || 'BRASIL' } : null;
+        const pix = a.pixDados();
         return { servicos: ss.map((x) => ({ id: x.id, nome: x.nome, duracao: x.duracao, preco: x.preco })), profissionais: ps.map((pr) => ({ id: pr.id, nome: pr.nome, servicos: ss.filter((x) => profsDoServ(a, x).some((y) => y.id === pr.id)).map((x) => x.id) })), livres,
           sinal: { pct: Number(a.db.cfg.sinal_pct || 0), regra: 'Se não puder vir, avise com 24 horas de antecedência para remarcar sem perder o sinal.' }, pix };
       },
@@ -623,7 +623,7 @@ Object.assign(app.acoes, {
   },
   copiarLink: () => app.acoes.linkAgendar(),
   linkAgendar: () => app.portal.compartilhar('agendar', '', { titulo: 'Página de agendamento online', qr: true, texto: `Agende o seu horário no ${app.empresa} pelo link:` }),
-  sinalPct: (d, el) => { app.db.cfg.sinal_pct = Number(el.value); app.db.gravar(); app.portal.publicar(); avisar(Number(el.value) ? `Sinal de ${el.value}% ligado` : 'Sinal desligado'); app.render(); },
+  sinalPct: async (d, el) => { if (Number(el.value) && !(await app.pedirPix('Para cobrar o sinal no agendamento online, cadastre a chave PIX do salão.'))) { el.value = '0'; return; } app.db.cfg.sinal_pct = Number(el.value); app.db.gravar(); app.portal.publicar(); avisar(Number(el.value) ? `Sinal de ${el.value}% ligado` : 'Sinal desligado'); app.render(); },
   salvarFidel: () => { const f = document.querySelector('[data-fidel]'); app.db.cfg.fidelidade = { a_cada: Math.max(3, Number(f.a_cada.value) || 10), premio: f.premio.value }; app.db.gravar(); avisar('Cartão fidelidade salvo'); },
   resgatar: (d) => { const c = cli(app, d.id); app.db.salvar('clientes', { id: d.id, resgates: (c.resgates || 0) + 1 }); app.db.registrar(`clientes:${d.id}`, `Prêmio do cartão fidelidade resgatado: ${fidel(app).premio}`, { icone: 'gift', tom: 'ok' }); avisar('Prêmio resgatado · cartão zerado'); reab(); },
   novaEspera: async () => {

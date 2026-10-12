@@ -61,7 +61,7 @@ const pronto = (titulo, texto) => { raiz.innerHTML = `${cab(E().nome || '', titu
 const pixBloco = (pix, valor, txid, desc) => {
   if (!pix?.chave) return '';
   const cod = pixCopiaECola({ ...pix, valor, txid, descricao: desc });
-  return `<div class="p-pix">${qrSVG(cod, 220)}<textarea readonly data-pix>${esc(cod)}</textarea><button type="button" class="p-bt" data-a="copiarPix">Copiar código PIX</button></div>`;
+  return `<div class="p-pix">${pix.demo ? '<p class="p-aviso" style="margin:0">PIX de demonstração: não pague. Na versão contratada, aqui aparece a chave da empresa.</p>' : ''}${qrSVG(cod, 220)}<textarea readonly data-pix>${esc(cod)}</textarea><button type="button" class="p-bt" data-a="copiarPix">Copiar código PIX</button></div>`;
 };
 
 // ---------------------------------------------------------------- telas por tipo

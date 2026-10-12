@@ -353,7 +353,7 @@ const app = criarApp({
       explica: 'A página de pagamento da cobrança: valor, vencimento e o PIX copia e cola com QR code. Quando o cliente avisa que pagou, aparece aqui para você conferir.',
       montar: (a, id) => {
         const l = a.db.obter('lancamentos', id); if (!l) return null;
-        const pix = a.db.cfg.pix?.chave ? { chave: a.db.cfg.pix.chave, nome: a.db.cfg.pix.nome || a.empresa, cidade: a.db.cfg.pix.cidade || 'BRASIL' } : null;
+        const pix = a.pixDados();
         return { descricao: l.descricao, valor: l.valor, vencimento: l.vencimento, status: l.status, cliente: pessoa(a, l.pessoa)?.nome || '', pix, txid: `L${String(l.id).replace(/[^A-Za-z0-9]/g, '').slice(-12)}` };
       },
       responder: (a, r) => {
@@ -412,7 +412,7 @@ Object.assign(app.acoes, {
   simFx: (d, el) => { app.estado.simFx[d.k] = Math.max(0, Number(el.value) || 0); app.render(); },
   cobrarLink: async (d) => {
     const l = app.db.obter('lancamentos', d.id), p = pessoa(app, l.pessoa);
-    if (!app.temPix()) avisar('Dica: cadastre a chave PIX em Configurações para o link já trazer o QR code.', { tipo: 'erro', tempo: 6000 });
+    await app.pedirPix('Para a cobrança já ir com o PIX copia e cola e o QR code, cadastre a chave da empresa.');
     const url = await app.portal.link('cobranca', d.id), passo = REGUA.find((x) => x[1] === d.passo) || (vencido(l) ? REGUA[2] : REGUA[1]);
     window.open(`${telLink(p?.telefone)}?text=${encodeURIComponent(textoRegua(app, l, passo, url))}`, '_blank', 'noopener');
     app.db.salvar('lancamentos', { id: d.id, regua: { ...(l.regua || {}), [passo[1]]: hoje() } }); app.db.registrar(`lancamentos:${d.id}`, `Cobrança enviada (${passo[2]})`, { icone: 'whatsapp-logo' }); app.render();

@@ -224,7 +224,7 @@ const app = criarApp({
         const x = aluno(a, id); if (!x) return null;
         const ts = a.db.lista('treinos').filter((t) => t.aluno === id), ck = cks(a).filter((c) => c.aluno === id);
         const m = mens(a).filter((y) => y.aluno === id && y.status === 'aberto').sort((u, v) => u.vencimento.localeCompare(v.vencimento))[0];
-        const pix = a.db.cfg.pix?.chave ? { chave: a.db.cfg.pix.chave, nome: a.db.cfg.pix.nome || a.empresa, cidade: a.db.cfg.pix.cidade || 'BRASIL' } : null;
+        const pix = a.pixDados();
         return { nome: x.nome, plano: plano(a, x.plano)?.nome || '', treinos: ts.map((t) => ({ nome: t.nome, foco: t.foco, exercicios: t.exercicios })), treinoHoje: ts.length ? ck.length % ts.length : 0,
           avaliacoes: avals(a, id).map((v) => ({ data: v.data, peso: v.peso, gordura: v.gordura })), checkinHoje: ck.some((c) => c.data === hoje()), frequencia30: ck.filter((c) => diasAte(c.data) > -30).length,
           mensalidade: m ? { valor: m.valor, vencimento: m.vencimento, status: m.status, atrasada: m.vencimento < hoje(), pix, txid: `MS${String(m.id).replace(/[^A-Za-z0-9]/g, '').slice(-10)}` } : { valor: plano(a, x.plano)?.valor || 0, vencimento: '', status: 'pago' } };
@@ -272,7 +272,7 @@ const reab = () => { app.render(); app.reabrir(); };
 Object.assign(app.acoes, {
   buscaRec: (d, el) => { app.estado.rec.busca = el.value; app.render(); const i = document.querySelector('[data-mudar="buscaRec"]'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } },
   checkin: (d) => { const x = aluno(app, d.id); if (cks(app).some((c) => c.aluno === d.id && c.data === hoje())) { avisar(`${x.nome.split(' ')[0]} já entrou hoje`); return; } const c = app.db.salvar('checkins', { aluno: d.id, data: hoje(), hora: new Date().toTimeString().slice(0, 5) }); avisar(`Entrada liberada: ${x.nome.split(' ')[0]}`, { desfazer: () => { app.db.apagar('checkins', c.id); reab(); } }); if (app.estado.rec) app.estado.rec.busca = ''; reab(); },
-  linkAluno: (d) => { const x = aluno(app, d.id); app.portal.compartilhar('aluno', d.id, { titulo: `Área do aluno · ${x.nome}`, telefone: x.telefone, texto: `Oi, ${x.nome.split(' ')[0]}! Esta é a sua área na ${app.empresa}: treino do dia, check-in e evolução. Salve na tela inicial do celular 💪` }); },
+  linkAluno: async (d) => { await app.pedirPix('Para o aluno pagar a mensalidade pela área dele, cadastre a chave PIX da academia.'); const x = aluno(app, d.id); app.portal.compartilhar('aluno', d.id, { titulo: `Área do aluno · ${x.nome}`, telefone: x.telefone, texto: `Oi, ${x.nome.split(' ')[0]}! Esta é a sua área na ${app.empresa}: treino do dia, check-in e evolução. Salve na tela inicial do celular 💪` }); },
   novaAval: async (d) => {
     const ult = avals(app, d.id)[0] || {};
     const r = await modal({ titulo: `Avaliação física · ${aluno(app, d.id).nome}`, largura: 520, corpo: `<form class="form-grade"><label class="campo">Data<input type="date" name="data" value="${hoje()}"></label><label class="campo">Altura (cm)<input type="number" name="altura" value="${ult.altura || ''}"></label><label class="campo">Peso (kg)<input type="number" step="0.1" name="peso" value="${ult.peso || ''}" required></label><label class="campo">Gordura (%)<input type="number" step="0.1" name="gordura" value="${ult.gordura || ''}" required></label><label class="campo">Cintura (cm)<input type="number" name="cintura" value="${ult.cintura || ''}"></label><label class="campo">Braço (cm)<input type="number" name="braco" value="${ult.braco || ''}"></label></form>`,
