@@ -132,7 +132,7 @@ function painel(a) {
   const minimo = Math.min(...proj);
   const vencR = ab.filter((l) => l.tipo === 'receita' && vencido(l)), hojeL = ab.filter((l) => diasAte(l.vencimento) >= 0 && diasAte(l.vencimento) <= 3).sort((x, y) => x.vencimento.localeCompare(y.vencimento));
   const ords = a.db.lista('ordens').filter((o) => o.status !== 'entregue');
-  return `${cartaoRegua(a)}${kpis([
+  return `${cartaoRegua(a)}${a.cartaoAlertas ? a.cartaoAlertas() : ''}${kpis([
     { rot: 'Saldo em contas', icone: 'bank', val: moeda(saldoTotal(a)), nota: `${a.db.lista('contas').length} contas`, spark: Array.from({ length: 30 }, (_, i) => saldoTotal(a, diaMais(i - 29))) },
     { rot: 'A receber (30 dias)', icone: 'arrow-down-left', val: moeda(soma(rec30, (l) => l.valor)), nota: vencR.length ? `<span class="er-tx">${moeda(soma(vencR, (l) => l.valor))} vencido</span>` : 'nada vencido' },
     { rot: 'A pagar (30 dias)', icone: 'arrow-up-right', val: moeda(soma(pag30, (l) => l.valor)), nota: `${pag30.length} contas` },

@@ -10,10 +10,12 @@
 // 3. Modelos por ramo, aplicados ao começar ou em Configurações.
 // 4. Primeiros passos no painel, para quem está começando.
 // 5. Chave PIX da empresa (cobranças, sinal e mensalidades).
+// 6. Alertas financeiros no painel (Financeiro e Gestão), com limites em Configurações.
 // =============================================================
 import { esc, ic, et, avisar, modal, confirmar, novoId, hoje, dataCurta, normal } from './nexo.js';
 import { qrSVG } from './qr.js';
 import { pixCopiaECola } from './pix.js';
+import { alertasDoDia } from './resumos.js';
 
 const raizSite = () => {
   const [antes] = location.pathname.split(/\/(?:demos|app)\//);
@@ -251,6 +253,19 @@ export function prepararExtras(app, cfg) {
   };
   app.acoes.ocultarPassos = () => { db().cfg.passos_ocultos = true; db().gravar(); app.render(); };
 
+  // ------------------------------------------------------------ alertas financeiros (regras em resumos.js)
+  const temAlertas = ['financeiro', 'gestao'].includes(cfg.id);
+  app.cartaoAlertas = () => {
+    if (!temAlertas) return '';
+    const l = alertasDoDia(cfg.id, db().dados, hoje());
+    const cab = `<div class="cartao-cab"><div><h3>Alertas</h3><div class="sub">O sistema vigia margem, caixa, atrasos e gastos fora do padrão</div></div><a class="btn peq" href="#/config">Ajustar limites</a></div>`;
+    if (!l.length) return `<div class="cartao alertas-card">${cab}<div class="cartao-corpo"><div class="dica">${ic('check-circle')}<span>Nenhum alerta hoje. Margem, caixa e recebimentos dentro do combinado.</span></div></div></div>`;
+    return `<div class="cartao alertas-card">${cab}<ul class="lista">${l.map((x) => `<li><span class="av p" style="background:var(--${x.nivel === 'alto' ? 'er' : 'al'})">${ic(x.nivel === 'alto' ? 'warning' : 'warning-circle', 'p')}</span><div class="cresce"><div class="t">${esc(x.titulo)}</div><div class="s">${esc(x.acao)}</div></div></li>`).join('')}</ul></div>`;
+  };
+  Object.assign(app.acoes, {
+    salvarAlertas: () => { const f = document.querySelector('[data-form-alertas]'); const d = Object.fromEntries(new FormData(f)); const n = (v) => Math.max(0, Number(String(v || '0').replace(/\./g, '').replace(',', '.')) || 0); db().cfg.alertas = { margem_min: n(d.margem_min), saldo_min: n(d.saldo_min), meta_receita: n(d.meta_receita) }; db().gravar(); avisar('Limites dos alertas salvos'); app.render(); },
+  });
+
   // ------------------------------------------------------------ cartões em Configurações
   app.extrasConfig = (a) => {
     const p = db().cfg.pix || {};
@@ -259,7 +274,13 @@ export function prepararExtras(app, cfg) {
       <label class="campo">Nome do recebedor<input name="nome" value="${esc(p.nome || a.empresa)}" maxlength="25"></label><label class="campo">Cidade<input name="cidade" value="${esc(p.cidade || '')}" maxlength="15"></label>
       <div class="campo largo" style="flex-direction:row;justify-content:flex-end"><button type="button" class="btn pri" data-acao="salvarPix">Salvar</button></div></form></div></div>`;
     const ramos = app.modelos.length ? `<div class="cartao"><div class="cartao-cab"><div><h3>Modelo do seu ramo</h3><div class="sub">Cadastra serviços, produtos e etapas típicos do seu tipo de negócio</div></div></div><ul class="lista">${app.modelos.map((m) => `<li><div class="cresce"><div class="t">${esc(m.nome)} ${db().cfg.ramo === m.id ? et('Em uso', 'ok') : ''}</div><div class="s">${esc(m.desc || '')}</div></div><button type="button" class="btn peq" data-acao="aplicarModelo" data-m="${m.id}">Aplicar</button></li>`).join('')}</ul></div>` : '';
-    return pixCard + ramos;
+    const al = { margem_min: 15, saldo_min: 0, meta_receita: 0, ...(db().cfg.alertas || {}) };
+    const alertasCard = temAlertas ? `<div class="cartao"><div class="cartao-cab"><div><h3>Limites dos alertas</h3><div class="sub">Quando passar destes números, o painel e o resumo diário avisam</div></div></div><div class="cartao-corpo"><form class="form-grade" data-form-alertas>
+      <label class="campo">${cfg.id === 'gestao' ? 'Margem bruta' : 'Margem líquida'} mínima (%)<input name="margem_min" inputmode="decimal" value="${esc(String(al.margem_min).replace('.', ','))}"></label>
+      ${cfg.id === 'financeiro' ? `<label class="campo">Saldo mínimo em caixa (R$)<input name="saldo_min" inputmode="decimal" value="${esc(String(al.saldo_min))}"></label>` : ''}
+      <label class="campo">Meta de ${cfg.id === 'gestao' ? 'vendas' : 'receita'} do mês (R$, 0 = sem meta)<input name="meta_receita" inputmode="decimal" value="${esc(String(al.meta_receita))}"></label>
+      <div class="campo largo" style="flex-direction:row;justify-content:flex-end"><button type="button" class="btn pri" data-acao="salvarAlertas">Salvar</button></div></form></div></div>` : '';
+    return pixCard + alertasCard + ramos;
   };
   Object.assign(app.acoes, {
     salvarPix: () => { const f = document.querySelector('[data-form-pix]'); const d = Object.fromEntries(new FormData(f)); if (d.chave && !pixCopiaECola({ chave: d.chave, nome: d.nome })) { avisar('Chave PIX inválida', { tipo: 'erro' }); return; } db().cfg.pix = d; db().gravar(); avisar('PIX salvo'); republicar(); app.render(); },

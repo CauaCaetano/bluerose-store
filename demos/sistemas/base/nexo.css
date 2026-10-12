@@ -617,3 +617,7 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .btn-google:disabled { opacity: .6; cursor: progress; }
 .entrada-ou { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; font-size: 12.5px; color: var(--tx-3, #6b7280); }
 .entrada-ou::before, .entrada-ou::after { content: ""; flex: 1; height: 1px; background: var(--bd, #e5e7eb); }
+
+/* alertas financeiros */
+.alertas-card { margin-bottom: 16px; }
+.alertas-card .lista .s { white-space: normal; }

@@ -248,6 +248,21 @@ function converter(c, v) {
   return v;
 }
 
+// ---------------------------------------------------------------- erros na tela do cliente (tabela nexo_erros)
+function vigiarErros(sb, cfg) {
+  const vistos = new Set();
+  const nosso = (url) => !url || String(url).startsWith(location.origin);
+  const enviar = (mensagem, origem) => {
+    const m = String(mensagem || '').slice(0, 500);
+    if (!m || vistos.has(m) || vistos.size >= 20 || /ResizeObserver loop|Script error\.?$/i.test(m)) return;
+    vistos.add(m);
+    sb.rpc('nexo_registrar_erro', { p_app: cfg.id, p_mensagem: m, p_origem: origem || null, p_pagina: location.hash.slice(0, 200), p_navegador: navigator.userAgent.slice(0, 200), p_versao: document.documentElement.dataset.versao || null }).then(() => {}, () => {});
+  };
+  addEventListener('error', (e) => { if (e.message && nosso(e.filename)) enviar(e.message, `${String(e.filename || '').replace(location.origin, '')}:${e.lineno}:${e.colno}`); });
+  addEventListener('unhandledrejection', (e) => { const r = e.reason; enviar(r?.message || String(r), (r?.stack || '').split('
+').find((l) => l.includes(location.origin))?.trim().replace(location.origin, '')); });
+}
+
 // ---------------------------------------------------------------- início
 export async function iniciarNuvem(app, cfg) {
   const conf = window.NEXO_NUVEM;
@@ -260,6 +275,7 @@ export async function iniciarNuvem(app, cfg) {
   if (session && recuperacao) { await telaNovaSenha(sb, cfg); history.replaceState(null, '', location.pathname); }
   if (!session) session = await telaConta(sb, cfg, new URLSearchParams(location.search).get('entrar') ? 'entrar' : 'criar');
   const uid = session.user.id, email = session.user.email;
+  vigiarErros(sb, cfg);
   await sb.rpc('nexo_aceitar_convites');
   const { data: espacos, error } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono,criado').eq('app', cfg.id).order('criado');
   if (error) throw error;

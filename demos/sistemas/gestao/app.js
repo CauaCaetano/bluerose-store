@@ -162,7 +162,7 @@ function painel(a) {
   const dias = Array.from({ length: 30 }, (_, i) => diaMais(i - 29));
   const top = ps.map((p) => ({ p, v: soma(mes.flatMap((v) => v.itens).filter((x) => x.produto === p.id), (x) => x.qtd * x.preco) })).sort((x, y) => y.v - x.v).slice(0, 6);
   const chegando = a.db.lista('compras').filter((c) => ['enviado', 'parcial'].includes(c.status)).sort((x, y) => x.previsao.localeCompare(y.previsao));
-  return `${kpis([
+  return `${a.cartaoAlertas ? a.cartaoAlertas() : ''}${kpis([
     { rot: 'Vendas no mês', icone: 'shopping-cart', val: moeda(vMes), var: soma(ant, totalV) ? ((vMes - soma(ant, totalV)) / soma(ant, totalV)) * 100 : null, nota: `${mes.length} pedidos faturados`, spark: dias.map((d) => soma(fat.filter((v) => v.data === d), totalV)) },
     { rot: 'Margem bruta', icone: 'percent', val: pct(marg, 1), nota: `lucro bruto ${moedaC(vMes - soma(mes, custoV))}` },
     { rot: 'Estoque (a custo)', icone: 'warehouse', val: moeda(soma(ps, (p) => p.custo * estTotal(p))), nota: `${num(soma(ps, estTotal))} unidades em ${DEP.length} depósitos` },

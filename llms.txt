@@ -1,0 +1,31 @@
+# Blue Rose Express
+
+> Empresa brasileira de software para pequenas e médias empresas: a Linha Nexo (10 sistemas de gestão prontos, com teste grátis de 7 dias), sites profissionais, automações de WhatsApp e software sob medida. Atende todo o Brasil, com pagamento pelo Mercado Pago.
+
+## Linha Nexo (sistemas prontos)
+
+Cada sistema pode ser comprado ou alugado por mês, sem fidelidade, e tem demonstração sem cadastro.
+
+- [Todos os sistemas](https://bluerose-store.com/sistemas.html): comparação e preços dos 10 sistemas
+- [Nexo Gestão](https://bluerose-store.com/nexo-gestao.html): estoque, compras, vendas e NF-e para distribuidoras, lojas e mercados
+- [Nexo CRM](https://bluerose-store.com/nexo-crm.html): funil de vendas, propostas online e metas para equipes comerciais
+- [Nexo Agenda](https://bluerose-store.com/nexo-agenda.html): agenda, comandas e agendamento online para salões, barbearias e estética
+- [Nexo Jurídico](https://bluerose-store.com/nexo-juridico.html): intimações do DJEN, prazos e honorários para advocacia
+- [Nexo Financeiro](https://bluerose-store.com/nexo-financeiro.html): contas, fluxo de caixa, DRE e ordem de serviço
+- [Nexo Clínica](https://bluerose-store.com/nexo-clinica.html): agenda médica, prontuário e convênios para clínicas e consultórios
+- [Nexo Academia](https://bluerose-store.com/nexo-academia.html): check-in, mensalidades e treinos para academias e estúdios
+- [Nexo Restaurante](https://bluerose-store.com/nexo-restaurante.html): mesas, comandas, cozinha e cardápio com QR code
+- [Nexo Imobiliária](https://bluerose-store.com/nexo-imobiliaria.html): imóveis, visitas, aluguéis e repasses
+- [Nexo Oficina](https://bluerose-store.com/nexo-oficina.html): pátio, orçamento por WhatsApp e revisões para oficinas mecânicas
+
+## Sites e automações
+
+- [Página inicial](https://bluerose-store.com/): serviços, preços e contato
+- [Sites de exemplo](https://bluerose-store.com/exemplos.html): modelos por nicho, com prévia usando o nome da empresa
+- [Automação de WhatsApp](https://bluerose-store.com/automacao-express.html)
+- [Projetos](https://bluerose-store.com/projetos.html)
+
+## Informações
+
+- [Termos de Serviço](https://bluerose-store.com/termos.html)
+- [Política de Privacidade](https://bluerose-store.com/privacidade.html)

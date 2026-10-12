@@ -11,6 +11,86 @@ const soma = (l, f) => l.reduce((s, x) => s + (Number(f(x)) || 0), 0);
 const L = (d, k) => (Array.isArray(d[k]) ? d[k] : []);
 const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 
+// -------------------------------------------------------------
+// Alertas financeiros: regras que vigiam os números e sugerem a ação.
+// Limites em _cfg.alertas: { margem_min (%), saldo_min (R$), meta_receita (R$/mês) }.
+// -------------------------------------------------------------
+const mesDe = (iso, n) => { const [a, m] = iso.split('-').map(Number); const d = new Date(a, m - 1 + n, 15); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; };
+const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const nomeMesA = (ym) => MESES[Number(ym.slice(5)) - 1];
+const pctA = (v) => `${v.toFixed(1).replace('.', ',')}%`;
+const ddmm = (iso) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
+const NOMES_CAT = { servicos: 'Serviços prestados', pecas: 'Venda de peças', contratos: 'Contratos', fornecedores: 'Peças e materiais', salarios: 'Salários e encargos', prolabore: 'Pró-labore', aluguel: 'Aluguel', energia: 'Energia e água', internet: 'Internet e telefone', combustivel: 'Combustível e veículos', marketing: 'Marketing', contador: 'Contabilidade', tarifas: 'Tarifas bancárias', impostos: 'Impostos' };
+const limites = (d) => ({ margem_min: 15, saldo_min: 0, meta_receita: 0, ...((d._cfg || {}).alertas || {}) });
+const ritmoMeta = (feito, meta, hoje) => { const dia = Number(hoje.slice(8)), dm = new Date(Number(hoje.slice(0, 4)), Number(hoje.slice(5, 7)), 0).getDate(); return dia >= 10 && meta > 0 && feito < meta * (dia / dm) * 0.85 ? { proj: (feito / dia) * dm } : null; };
+
+const ALERTAS = {
+  financeiro(d, hoje) {
+    const lim = limites(d), lanc = L(d, 'lancamentos'), out = [];
+    const pessoa = new Map(L(d, 'pessoas').map((p) => [p.id, p.nome]));
+    const sinal = (l) => (l.tipo === 'receita' ? 1 : -1), ab = lanc.filter((l) => l.status === 'aberto');
+    // 1. margem líquida do último mês fechado (competência: vencimento)
+    const m1 = mesDe(hoje, -1), m2 = mesDe(hoje, -2);
+    const margem = (ym) => { const ls = lanc.filter((l) => String(l.vencimento).startsWith(ym)), r = soma(ls.filter((l) => l.tipo === 'receita'), (l) => l.valor); return r ? ((r - soma(ls.filter((l) => l.tipo === 'despesa'), (l) => l.valor)) / r) * 100 : null; };
+    const g1 = margem(m1), g2 = margem(m2);
+    if (g1 !== null && (g1 < lim.margem_min || (g2 !== null && g2 - g1 > 2))) out.push({ nivel: g1 < 0 ? 'alto' : 'medio', regra: 'margem', titulo: g1 < lim.margem_min ? `Margem de ${nomeMesA(m1)} ficou em ${pctA(g1)}, abaixo da meta de ${pctA(lim.margem_min)}` : `Margem caiu de ${pctA(g2)} em ${nomeMesA(m2)} para ${pctA(g1)} em ${nomeMesA(m1)}`, acao: 'Revise as maiores despesas do mês e os preços e descontos.' });
+    // 2. caixa projetado nas próximas 4 semanas
+    let saldo = soma(L(d, 'contas'), (c) => c.saldo_inicial) + soma(lanc.filter((l) => l.status === 'pago' && l.pago_em <= hoje), (l) => sinal(l) * l.valor);
+    let menor = Infinity, quando = hoje;
+    for (let i = 0; i <= 28; i++) { const dia = mais(hoje, i); saldo += soma(ab.filter((l) => (l.vencimento < hoje ? hoje : l.vencimento) === dia), (l) => sinal(l) * l.valor); if (saldo < menor) { menor = saldo; quando = dia; } }
+    if (menor < lim.saldo_min) out.push({ nivel: 'alto', regra: 'caixa', titulo: `O caixa chega a ${R$(menor)} em ${ddmm(quando)}${lim.saldo_min ? ` (mínimo combinado: ${R$(lim.saldo_min)})` : ''}`, acao: 'Antecipe recebimentos, renegocie ou adie pagamentos antes dessa data.' });
+    // 3. contas a receber vencidas
+    const aRec = ab.filter((l) => l.tipo === 'receita'), venc = aRec.filter((l) => l.vencimento < hoje), tv = soma(venc, (l) => l.valor), ta = soma(aRec, (l) => l.valor);
+    if (ta && tv / ta > 0.1) {
+      const porCli = {}; venc.forEach((l) => { porCli[l.pessoa] = (porCli[l.pessoa] || 0) + l.valor; });
+      const top = Object.entries(porCli).sort((a, b) => b[1] - a[1]).slice(0, 2);
+      out.push({ nivel: tv / ta > 0.25 ? 'alto' : 'medio', regra: 'vencidos', titulo: `${R$(tv)} a receber estão vencidos (${pctA((tv / ta) * 100)} do total a receber)`, acao: `Cobre primeiro: ${top.map(([p, v]) => `${pessoa.get(p) || 'cliente'} (${R$(v)})`).join(' e ')}.` });
+    }
+    // 4. despesas fora do padrão: categoria acima da média e fornecedor novo
+    const desp = lanc.filter((l) => l.tipo === 'despesa' && l.vencimento <= hoje), ini30 = mais(hoje, -30), ini120 = mais(hoje, -120);
+    const cats = [...new Set(desp.map((l) => l.categoria))];
+    for (const c of cats) {
+      const at = soma(desp.filter((l) => l.categoria === c && l.vencimento > ini30), (l) => l.valor), base = soma(desp.filter((l) => l.categoria === c && l.vencimento > ini120 && l.vencimento <= ini30), (l) => l.valor) / 3;
+      if (base > 0 && at > base * 1.3 && at - base > 300) out.push({ nivel: 'medio', regra: 'categoria', titulo: `${NOMES_CAT[c] || c}: ${R$(at)} nos últimos 30 dias, ${Math.round((at / base - 1) * 100)}% acima da média`, acao: 'Confira se é um gasto pontual ou se virou recorrente.' });
+    }
+    const vistos = new Set(desp.filter((l) => l.vencimento <= mais(hoje, -15)).map((l) => l.pessoa));
+    const novos = lanc.filter((l) => l.tipo === 'despesa' && l.pessoa && !vistos.has(l.pessoa) && l.vencimento > mais(hoje, -15) && l.vencimento <= mais(hoje, 15) && l.valor >= 1000);
+    for (const l of novos.slice(0, 2)) out.push({ nivel: 'medio', regra: 'fornecedor', titulo: `Fornecedor novo com valor alto: ${pessoa.get(l.pessoa) || 'sem nome'}, ${R$(l.valor)} (${l.descricao})`, acao: 'Confirme a origem e o valor antes de pagar.' });
+    // 5. capital de giro: o que entra em 30 dias cobre o que sai?
+    const s0 = soma(L(d, 'contas'), (c) => c.saldo_inicial) + soma(lanc.filter((l) => l.status === 'pago' && l.pago_em <= hoje), (l) => sinal(l) * l.valor);
+    const r30 = soma(aRec.filter((l) => l.vencimento <= mais(hoje, 30)), (l) => l.valor), p30 = soma(ab.filter((l) => l.tipo === 'despesa' && l.vencimento <= mais(hoje, 30)), (l) => l.valor);
+    if (s0 + r30 - p30 < 0 && !out.some((x) => x.regra === 'caixa')) out.push({ nivel: 'alto', regra: 'giro', titulo: `Faltam ${R$(p30 - s0 - r30)} para cobrir as contas dos próximos 30 dias`, acao: 'Acelere os recebimentos, reduza prazos dados aos clientes ou negocie prazo com fornecedores.' });
+    // 6. receita x meta do mês
+    const ym = hoje.slice(0, 7), rMes = soma(lanc.filter((l) => l.tipo === 'receita' && String(l.vencimento).startsWith(ym) && l.vencimento <= hoje), (l) => l.valor), rit = ritmoMeta(rMes, lim.meta_receita, hoje);
+    if (rit) out.push({ nivel: 'medio', regra: 'meta', titulo: `No ritmo atual o mês fecha em ${R$(rit.proj)}, abaixo da meta de ${R$(lim.meta_receita)}`, acao: 'Puxe orçamentos parados e clientes recorrentes.' });
+    return out;
+  },
+  gestao(d, hoje) {
+    const lim = limites(d), out = [], fat = L(d, 'vendas').filter((v) => ['faturado', 'enviado', 'entregue'].includes(v.status));
+    const total = (v) => soma(v.itens || [], (x) => x.qtd * x.preco) - (v.desconto || 0) + (v.frete || 0), custo = (v) => soma(v.itens || [], (x) => x.qtd * (x.custo || 0));
+    const m1 = mesDe(hoje, -1), m2 = mesDe(hoje, -2);
+    const margem = (ym) => { const vs = fat.filter((v) => String(v.data).startsWith(ym)), t = soma(vs, total); return t ? ((t - soma(vs, custo)) / t) * 100 : null; };
+    const g1 = margem(m1), g2 = margem(m2);
+    if (g1 !== null && (g1 < lim.margem_min || (g2 !== null && g2 - g1 > 2))) out.push({ nivel: 'medio', regra: 'margem', titulo: g1 < lim.margem_min ? `Margem bruta de ${nomeMesA(m1)} ficou em ${pctA(g1)}, abaixo da meta de ${pctA(lim.margem_min)}` : `Margem bruta caiu de ${pctA(g2)} em ${nomeMesA(m2)} para ${pctA(g1)} em ${nomeMesA(m1)}`, acao: 'Veja descontos dados, frete e produtos vendidos abaixo do custo de reposição.' });
+    const dia = Number(hoje.slice(8)), ym = hoje.slice(0, 7);
+    const ate = (ymx) => soma(fat.filter((v) => String(v.data).startsWith(ymx) && Number(String(v.data).slice(8, 10)) <= dia), total);
+    const agora = ate(ym), antes = ate(m1);
+    if (dia >= 7 && antes > 0 && agora < antes * 0.8) out.push({ nivel: 'medio', regra: 'ritmo', titulo: `Vendas do mês ${Math.round((1 - agora / antes) * 100)}% abaixo do mesmo ponto de ${nomeMesA(m1)} (${R$(agora)} contra ${R$(antes)})`, acao: 'Contate os clientes que compravam todo mês e não compraram ainda.' });
+    const rit = ritmoMeta(soma(fat.filter((v) => String(v.data).startsWith(ym)), total), lim.meta_receita, hoje);
+    if (rit) out.push({ nivel: 'medio', regra: 'meta', titulo: `No ritmo atual o mês fecha em ${R$(rit.proj)}, abaixo da meta de ${R$(lim.meta_receita)}`, acao: 'Ative representantes e clientes parados.' });
+    const est = (p) => soma(Object.values(p.estoque || {}), (x) => x), ini = mais(hoje, -90);
+    const vendeu = new Set(fat.filter((v) => v.data >= ini).flatMap((v) => (v.itens || []).map((x) => x.produto)));
+    const ps = L(d, 'produtos'), parados = ps.filter((p) => est(p) > 0 && !vendeu.has(p.id)), vParado = soma(parados, (p) => est(p) * (p.custo || 0)), vTotal = soma(ps, (p) => Math.max(0, est(p)) * (p.custo || 0));
+    if (vTotal && vParado / vTotal > 0.1) out.push({ nivel: 'medio', regra: 'parado', titulo: `${R$(vParado)} em estoque parado: ${plural(parados.length, 'produto', 'produtos')} sem venda há 90 dias`, acao: 'Faça promoção, devolva ao fornecedor ou pare de comprar esses itens.' });
+    return out;
+  },
+};
+/** Alertas do dia: [{ nivel: 'alto' | 'medio', regra, titulo, acao }] */
+export function alertasDoDia(app, dados, hoje) {
+  const f = ALERTAS[app] || ALERTAS[String(app).replace(/^nexo-?/, '')];
+  try { return f ? f(dados || {}, hoje) : []; } catch { return []; }
+}
+
 const RESUMOS = {
   crm(d, hoje) {
     const ontem = mais(hoje, -1), ym = hoje.slice(0, 7);
@@ -131,8 +211,12 @@ const RESUMOS = {
 
 /** Resumo do dia de um sistema: { destaques, itens, tituloItens, alertas } */
 export function resumoDoDia(app, dados, hoje) {
-  const f = RESUMOS[app] || RESUMOS[app.replace(/^nexo-?/, '')];
-  return f ? f(dados, hoje) : { destaques: [], itens: [], alertas: [] };
+  const id = RESUMOS[app] ? app : app.replace(/^nexo-?/, ''), f = RESUMOS[id];
+  if (!f) return { destaques: [], itens: [], alertas: [] };
+  const r = f(dados, hoje), novos = alertasDoDia(id, dados, hoje);
+  // o alerta novo de vencidos já traz o valor e quem cobrar primeiro
+  const antigos = novos.some((x) => x.regra === 'vencidos') ? r.alertas.filter((x) => !/clientes em atraso/.test(x)) : r.alertas;
+  return { ...r, alertas: [...novos.map((x) => `${x.titulo}. ${x.acao}`), ...antigos] };
 }
 export function resumoTexto(nomeSistema, empresa, r, hoje) {
   const [a, m, dd] = hoje.split('-');
