@@ -316,7 +316,7 @@
       aceite: 'Confirme que concorda com a Política de Privacidade e os Termos.', tambemWa: 'Mandar pelo WhatsApp também',
       ola: 'Oi! Vim pelo site da BLUE ROSE.', nomeL: 'Nome', negocioL: 'Negócio', interesseL: 'Interesse', msgL: 'Mensagem', refL: 'Código do link', assunto: 'Projeto pelo site da BLUE ROSE',
     };
-    var VERSAO_TERMOS = '2026-10-09'; // data da versão em vigor dos Termos e da Política de Privacidade
+    var VERSAO_TERMOS = '2026-10-12'; // data da versão em vigor dos Termos e da Política de Privacidade
     var status = form.querySelector('[data-status]');
     var botaoEnviar = form.querySelector('button[type="submit"]');
     var LEADS = window.BR_LEADS && window.BR_LEADS.url && window.BR_LEADS.chave ? window.BR_LEADS : null;
