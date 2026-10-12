@@ -107,7 +107,7 @@ const erroAuth = (e) => {
 
 function telaConta(sb, cfg, modo = 'criar', aviso = '') {
   return new Promise((resolver) => {
-    const titulos = { criar: ['Teste grátis por 7 dias', 'Crie sua conta e use o sistema com os dados da sua empresa. Sem cartão de crédito.'], entrar: ['Entrar', 'Acesse o sistema da sua empresa.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] };
+    const titulos = { criar: ['Teste grátis por 7 dias', 'Crie sua conta. No próximo passo você cadastra o cartão: nada é cobrado nos 7 dias e dá para cancelar quando quiser.'], entrar: ['Entrar', 'Acesse o sistema da sua empresa.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] };
     const [t, s] = titulos[modo];
     const f = tela(cfg, `<h1 class="entrada-t">${t}</h1><p class="entrada-s">${s}</p>${aviso ? `<div class="dica" style="margin-bottom:14px">${ic('info')}<span>${aviso}</span></div>` : ''}
       <form class="col" style="gap:12px" novalidate>
@@ -160,8 +160,43 @@ function telaEmpresa(sb, cfg, espacos) {
       e.preventDefault(); if (!f.reportValidity()) return;
       const d = Object.fromEntries(new FormData(f)), btn = f.querySelector('button'); btn.disabled = true;
       const { data, error } = await sb.rpc('nexo_criar_espaco', { p_app: cfg.id, p_nome: d.nome.trim() });
-      if (error) { f.querySelector('[data-erro]').textContent = /limite/.test(error.message) ? 'Você já tem 3 empresas de teste neste sistema.' : error.message; btn.disabled = false; return; }
+      if (error) { if (/cartão/.test(error.message)) { location.reload(); return; } f.querySelector('[data-erro]').textContent = /limite/.test(error.message) ? 'Você já tem 3 empresas neste sistema.' : error.message; btn.disabled = false; return; }
       resolver({ id: data, novo: true, exemplo: d.modo === 'exemplo', nome: d.nome.trim(), ramo: d.ramo || '', pix: (d.pix || '').trim() });
+    };
+  });
+}
+
+// ---------------------------------------------------------------- teste grátis com cartão (Mercado Pago)
+const pagamentos = async (sb, corpo) => {
+  const { data, error } = await sb.functions.invoke('nexo-pagamentos', { body: corpo });
+  if (error) { let j = {}; try { j = await error.context.json(); } catch { /* ok */ } const e = new Error(j.erro || error.message); e.dados = j; throw e; }
+  return data;
+};
+/** O cliente tem teste, assinatura ou compra valendo para este sistema? */
+async function temAcesso(sb, cfg) {
+  const r = await pagamentos(sb, { acao: 'status' }).catch(() => ({ assinaturas: [] }));
+  const h = hoje();
+  return (r.assinaturas || []).some((a) => a.app === cfg.id && (['ativa', 'paga'].includes(a.status) || (a.status === 'teste' && a.teste_ate >= h) || (a.status === 'cancelada' && [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop() >= h)));
+}
+function telaTeste(sb, cfg, email) {
+  return new Promise(() => {
+    const preco = cfg.produto?.mensal || 0;
+    const f = tela(cfg, `<h1 class="entrada-t">Teste grátis de 7 dias</h1><p class="entrada-s">Use o ${esc(cfg.nome)} com os dados da sua empresa por 7 dias sem pagar nada.</p>
+      <ul class="lista-teste"><li>${ic('credit-card', 'p')}Para começar, cadastre o cartão no Mercado Pago.</li><li>${ic('calendar-check', 'p')}Se não cancelar, a assinatura de <b>R$ ${preco}/mês</b> começa sozinha no 8º dia.</li><li>${ic('x-circle', 'p')}Cancele quando quiser em <a href="${SITE}conta.html" target="_top">Minha conta</a>. Cancelando no teste, nada é cobrado.</li><li>${ic('info', 'p')}O teste grátis vale uma vez por cartão e por pessoa.</li></ul>
+      <form class="col" style="gap:12px" novalidate><label class="campo">E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="${esc(email)}" required><span class="ajuda">A assinatura fica na conta do Mercado Pago com este e-mail.</span></label>
+        <label class="flex" style="gap:8px;align-items:flex-start;font-size:13px;color:var(--tx-2)"><input type="checkbox" name="ok" required style="margin-top:3px"><span>Li e aceito os <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática depois do teste.</span></label>
+        <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Cadastrar cartão e começar</button></form>
+      <div class="entrada-links"><a href="${SITE}demos/sistemas/${cfg.id}/" target="_top">Ver a demonstração antes</a><span>·</span><a href="#" data-sair>Sair desta conta</a></div>`);
+    document.querySelector('[data-sair]').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.reload(); };
+    f.onsubmit = async (e) => {
+      e.preventDefault(); if (!f.reportValidity()) return;
+      const btn = f.querySelector('button'), erro = f.querySelector('[data-erro]'); btn.disabled = true; btn.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
+      try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}`, teste: true, email_mp: f.mp.value.trim() }); location.href = j.link; }
+      catch (x) {
+        btn.disabled = false; btn.textContent = 'Cadastrar cartão e começar';
+        if (x.dados?.sem_teste) { erro.innerHTML = `${esc(x.message)} <a href="#" data-assinar>Assinar por R$ ${preco}/mês</a>`; erro.querySelector('[data-assinar]').onclick = async (ev) => { ev.preventDefault(); try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}`, email_mp: f.mp.value.trim() }); location.href = j.link; } catch (y) { erro.textContent = y.message; } }; }
+        else erro.textContent = x.message;
+      }
     };
   });
 }
@@ -212,6 +247,10 @@ export async function iniciarNuvem(app, cfg) {
   const { data: espacos, error } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono,criado').eq('app', cfg.id).order('criado');
   if (error) throw error;
   const lembrado = (() => { try { return localStorage.getItem(`nexo-espaco-${cfg.id}`); } catch { return null; } })();
+  if (!espacos.length || new URLSearchParams(location.search).has('trocar')) {
+    tela(cfg, `<div class="vazio" style="padding:30px 0">${ic('circle')}<b>Conferindo o seu teste…</b></div>`);
+    if (!(await temAcesso(sb, cfg))) await telaTeste(sb, cfg, email);
+  }
   let escolha = espacos.length === 1 ? { id: espacos[0].id } : espacos.find((s) => s.id === lembrado) && !new URLSearchParams(location.search).has('trocar') ? { id: lembrado } : await telaEmpresa(sb, cfg, espacos);
   try { localStorage.setItem(`nexo-espaco-${cfg.id}`, escolha.id); } catch { /* ok */ }
   tela(cfg, `<div class="vazio" style="padding:30px 0">${ic('circle')}<b>${escolha.exemplo ? 'Preparando os dados de exemplo…' : 'Abrindo…'}</b></div>`);
@@ -238,7 +277,7 @@ export async function iniciarNuvem(app, cfg) {
     integracoes: async () => { const { data } = await sb.rpc('nexo_integracoes', { p_espaco: esp.id }); return Object.fromEntries((data || []).map((x) => [x.chave, x.atualizado])); },
     faixa: () => `<div class="faixa nao-imprime"><span class="so-larga">${encerrado ? '<b>Seu teste terminou.</b> Os dados continuam aqui, só para consulta.' : teste ? `Teste grátis · <b>${restam === 0 ? 'último dia' : `${restam} ${restam === 1 ? 'dia' : 'dias'} restantes`}</b>` : `<b>${esc(esp.nome)}</b> · plano ativo`}</span><span class="sep so-larga"></span>
       <span data-sync class="so-larga" style="opacity:.8">Salvo</span><span class="sep so-larga"></span><span class="so-larga" style="opacity:.8">${esc(email)}</span>
-      ${teste || encerrado ? `<a class="cta" href="${SITE}sistemas.html#${cfg.id}" target="_top">${encerrado ? 'Contratar para continuar' : 'Contratar'}</a>` : ''}</div>`,
+      <a class="cta" href="${SITE}conta.html" target="_top">${encerrado ? 'Assinar para continuar' : 'Minha conta'}</a></div>`,
     subConta: () => (teste ? `Teste até ${dataCurta(esp.teste_ate)}` : 'Plano ativo'),
     cartaoEquipe: () => `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">Cada pessoa entra com o próprio e-mail e senha</div></div></div>
       <ul class="lista">${equipe.map((m) => `<li>${av(m.email)}<div class="cresce"><div class="t corta">${esc(m.email)}${m.usuario === uid ? ' <span class="mute">(você)</span>' : ''}</div><div class="s">${m.papel === 'dono' ? 'Dono' : 'Equipe'}</div></div>${dono && m.usuario !== uid ? `<button type="button" class="btn fant peq" data-acao="removerMembro" data-u="${m.usuario}">Remover</button>` : et('Ativo', 'ok')}</li>`).join('')}
@@ -296,7 +335,7 @@ export async function iniciarNuvem(app, cfg) {
         },
       });
       carregarEquipe();
-      if (encerrado) modal({ titulo: 'Seu teste terminou', largura: 460, corpo: `<p class="mute-2">Os dados da <b>${esc(esp.nome)}</b> continuam guardados. Para voltar a usar, contrate o ${esc(cfg.nome)}: alugue por mês ou compre.</p>`, botoes: [{ rotulo: 'Só consultar', valor: null, classe: 'fant' }, { rotulo: 'Ver planos', classe: 'pri', acao: () => { location.href = `${SITE}sistemas.html#${cfg.id}`; return true; } }] });
+      if (encerrado) modal({ titulo: 'Seu teste terminou', largura: 460, corpo: `<p class="mute-2">Os dados da <b>${esc(esp.nome)}</b> continuam guardados. Para voltar a usar, contrate o ${esc(cfg.nome)}: alugue por mês ou compre.</p>`, botoes: [{ rotulo: 'Só consultar', valor: null, classe: 'fant' }, { rotulo: 'Assinar', classe: 'pri', acao: () => { location.href = `${SITE}conta.html`; return true; } }] });
       else if (escolha.novo) modal({ titulo: `Bem-vindo ao ${cfg.nome}`, largura: 520, corpo: `<div class="col" style="gap:10px"><p class="mute-2">Seu teste vai até <b>${dataCurta(esp.teste_ate)}</b>. Três passos para começar:</p><div class="dica">${ic('upload-simple')}<span><b>Traga seus cadastros:</b> em Configurações, importe uma planilha (CSV) de clientes, produtos ou o que precisar.</span></div><div class="dica">${ic('user-plus')}<span><b>Convide a equipe:</b> cada pessoa entra com o próprio e-mail e vê tudo atualizado na hora.</span></div><div class="dica">${ic('phone')}<span><b>Use no celular:</b> abra este endereço no celular e toque em "Adicionar à tela inicial".</span></div></div>`, botoes: [{ rotulo: 'Começar', classe: 'pri', valor: true }] });
     },
   };

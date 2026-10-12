@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; frame-src 'self'; worker-src 'self'; child-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minha conta | Blue Rose Express</title>
+<meta name="description" content="Seus testes, assinaturas e compras na Blue Rose Express.">
+<link rel="canonical" href="https://bluerose-store.com/conta.html">
+<link rel="alternate" hreflang="pt-BR" href="https://bluerose-store.com/conta.html">
+<meta name="theme-color" content="#0b0e13" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Blue Rose Express">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Linha Nexo: sistemas prontos para testar, comprar ou alugar">
+<meta property="og:description" content="10 sistemas prontos: teste 7 dias grátis com os seus dados.">
+<meta property="og:url" content="https://bluerose-store.com/conta.html">
+<meta property="og:image" content="https://bluerose-store.com/img/og-blue-rose.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="/img/favicon-96.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/site.css?v=22">
+<script>document.documentElement.classList.add('js')</script>
+<script src="js/contato.js?v=6" defer></script>
+<script src="js/site.js?v=10" defer></script>
+<script src="js/planos.js?v=3" defer></script>
+<script src="js/contratar.js?v=4" defer></script>
+<script src="js/videos.js?v=4" defer></script>
+<script src="js/conta.js?v=1" defer></script>
+<script src="js/conta-pagina.js?v=1" defer></script>
+<meta name="robots" content="noindex">
+</head>
+<body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Blue Rose Express, página inicial">
+      <img src="img/blue-rose-favicon.png" alt="" width="30" height="30">BLUE ROSE
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir menu">
+      <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-list"/></svg>
+    </button>
+    <nav class="nav-links" id="menu" aria-label="Principal">
+      <a href="sistemas.html">Produtos</a>
+      <a href="./#solucoes">Soluções</a>
+      <a href="projetos.html">Cases</a>
+      <a href="exemplos.html">Sites</a>
+      <a href="./#precos">Preços</a>
+      <a class="btn btn-primary" href="./#contato">Agendar demonstração</a>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo" class="conta-pag">
+  <section class="wrap conta-topo"><div><span class="eyebrow">Minha conta</span><h1>Seus sistemas e assinaturas</h1><p class="conta-sub" id="conta-email"></p></div><button type="button" class="btn btn-ghost" id="conta-sair">Sair</button></section>
+  <section class="wrap" id="conta-raiz" aria-live="polite"></section>
+  <section class="wrap conta-ajuda"><p>Dúvidas sobre cobrança? Fale com a gente pelo <a href="./#contato">formulário</a>. Os pagamentos são processados pelo Mercado Pago; você também pode ver as suas assinaturas no app do Mercado Pago.</p></section>
+</main>
+
+  <dialog class="contratar" id="contratar" aria-labelledby="ct-titulo">
+    <form method="dialog" class="contratar-caixa">
+      <button class="contratar-x" value="fechar" aria-label="Fechar">×</button>
+      <span class="eyebrow">Contratar</span>
+      <h3 id="ct-titulo"></h3>
+      <p class="contratar-valor" id="ct-valor"></p>
+      <ol class="contratar-passos">
+        <li>Você paga com segurança no <b>Mercado Pago</b> <span id="ct-meios"></span>.</li>
+        <li>Em até 1 dia útil chega um e-mail para levantarmos os seus cadastros e o seu jeito de trabalhar.</li>
+        <li>Em até 10 dias úteis o sistema está no ar com a sua marca, e treinamos a equipe.</li>
+      </ol>
+      <label class="contratar-aceite"><input type="checkbox" id="ct-aceite"> <span>Li e aceito os <a href="termos.html" target="_blank" rel="noopener">Termos de Serviço</a><span id="ct-fidelidade"></span>.</span></label>
+      <a class="btn btn-primary" id="ct-pagar" href="#" aria-disabled="true">Ir para o pagamento</a>
+      <a class="contratar-falar" href="./#contato" id="ct-falar">Prefiro tirar uma dúvida antes</a>
+    </form>
+  </dialog>
+
+<footer class="rodape-site">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="img/blue-rose-favicon.png" alt="" width="30" height="30" loading="lazy">BLUE ROSE</a>
+    <nav aria-label="Rodapé">
+      <a href="./">Início</a>
+      <a href="laboratorio.html">Laboratório</a>
+      <a href="exemplos.html">Exemplos de sites</a>
+      <a href="sistemas.html">Sistemas prontos</a>
+      <a href="https://www.instagram.com/cau4caetano/" target="_blank" rel="noopener">Instagram</a>
+      <a href="termos.html">Termos de Serviço</a>
+      <a href="privacidade.html">Privacidade</a>
+    </nav>
+    <div class="linha2">
+      <span>© 2026 Blue Rose Express.</span>
+      <span>Sem cookies. A contagem de visitas é anônima.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

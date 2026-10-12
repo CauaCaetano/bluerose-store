@@ -50,19 +50,31 @@
   function reais(n) { return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
   function valoresSistema(b) {
     var mensal = Number(b.getAttribute('data-mensal')), total = Number(b.getAttribute('data-total'));
-    if (mensal) return [reais(mensal) + ' por mês', 'Sem entrada · hospedagem e suporte inclusos · fidelidade de 12 meses'];
+    if (mensal) return [reais(mensal) + ' por mês', 'Sem entrada · hospedagem e suporte inclusos · sem fidelidade, cancele quando quiser'];
     if (total) return ['Entrada de ' + reais(total / 2) + ' agora', 'Total ' + reais(total) + ' · o saldo de ' + reais(total / 2) + ' só na entrega'];
     return ['', ''];
   }
 
+  // e-mail da conta do Mercado Pago (assinaturas) e mensagem de erro, criados uma vez
+  var mpCampo = document.createElement('label'); mpCampo.className = 'contratar-mp';
+  mpCampo.innerHTML = 'E-mail da sua conta do Mercado Pago<input type="email" id="ct-mp" autocomplete="email"><small>A assinatura fica na conta do Mercado Pago com este e-mail.</small>';
+  var erroCt = document.createElement('p'); erroCt.className = 'conta-erro'; erroCt.setAttribute('role', 'alert');
+  aceite.closest('label').insertAdjacentElement('beforebegin', mpCampo);
+  pagar.insertAdjacentElement('beforebegin', erroCt);
   function estado() {
-    var ok = aceite.checked && pagar.dataset.link;
+    var ok = aceite.checked;
     pagar.setAttribute('aria-disabled', ok ? 'false' : 'true');
-    pagar.href = ok ? pagar.dataset.link : '#';
+    pagar.href = '#';
   }
   aceite.addEventListener('change', estado);
   pagar.addEventListener('click', function (e) {
-    if (pagar.getAttribute('aria-disabled') === 'true') { e.preventDefault(); aceite.focus(); }
+    e.preventDefault();
+    if (pagar.getAttribute('aria-disabled') === 'true') { aceite.focus(); return; }
+    if (!window.BR_CONTA) { location.href = pagar.dataset.link; return; }
+    var txt = pagar.textContent; pagar.textContent = 'Abrindo o Mercado Pago…'; pagar.setAttribute('aria-disabled', 'true'); erroCt.textContent = '';
+    window.BR_CONTA.pagar(pagar.dataset.plano, { emailMp: (document.getElementById('ct-mp') || {}).value || '' }).catch(function (x) {
+      erroCt.textContent = x.message || 'Não foi possível abrir o pagamento. Tente de novo.'; pagar.textContent = txt; estado();
+    });
   });
   $('ct-falar').addEventListener('click', function () { dlg.close(); });
 
@@ -71,14 +83,20 @@
       var plano = b.getAttribute('data-contratar');
       var link = links[plano];
       if (!link || typeof dlg.showModal !== 'function') { location.hash = 'contato'; return; }
+      // comprar e alugar exigem conta: entra primeiro, depois mostra o resumo
+      if (window.BR_CONTA && !window.BR_CONTA.sessao()) { window.BR_CONTA.exigirLogin('Para contratar, entre ou crie a sua conta. É grátis e leva menos de um minuto.').then(function () { b.click(); }); return; }
       var assinatura = plano.indexOf('a-') === 0;
       var v = VALORES[plano] || valoresSistema(b);
       $('ct-titulo').textContent = b.getAttribute('data-nome');
       $('ct-valor').innerHTML = '<b>' + v[0] + '</b><small>' + v[1] + '</small>';
       $('ct-meios').textContent = assinatura ? '(cartão de crédito, cobrado todo mês)' : '(PIX, cartão em até 6x ou boleto)';
-      $('ct-fidelidade').textContent = assinatura ? ', incluindo a fidelidade mínima de 12 meses' : '';
+      $('ct-fidelidade').textContent = assinatura ? (/^a-sis-/.test(plano) ? ' (sistemas da Linha Nexo: sem fidelidade)' : ', incluindo a fidelidade mínima de 12 meses') : '';
       aceite.checked = false;
       pagar.dataset.link = link;
+      pagar.dataset.plano = plano;
+      erroCt.textContent = '';
+      mpCampo.hidden = !assinatura;
+      var s = window.BR_CONTA && window.BR_CONTA.sessao(); var mp = document.getElementById('ct-mp'); if (mp && !mp.value && s) mp.value = s.user.email;
       estado();
       dlg.showModal();
     });

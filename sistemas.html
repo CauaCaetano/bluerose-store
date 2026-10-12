@@ -24,13 +24,14 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=21">
+<link rel="stylesheet" href="css/site.css?v=22">
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=6" defer></script>
 <script src="js/site.js?v=10" defer></script>
 <script src="js/planos.js?v=3" defer></script>
 <script src="js/contratar.js?v=4" defer></script>
 <script src="js/videos.js?v=4" defer></script>
+<script src="js/conta.js?v=1" defer></script>
 </head>
 <body>
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -75,7 +76,7 @@
           <div class="sis-precos"><div><small>Comprar</small><b>R$&nbsp;2.790</b><span>entrada de R$&nbsp;1.395</span></div><div><small>Alugar</small><b>R$&nbsp;129<small>/mês</small></b><span>sem entrada</span></div></div>
           <div class="sis-botoes">
             <a class="btn btn-ghost" href="demos/sistemas/gestao/" target="_blank" rel="noopener">Ver demonstração</a>
-            <a class="btn btn-ghost" href="app/gestao/">Testar 7 dias grátis</a>
+            <a class="btn btn-ghost" href="app/gestao/" data-teste="gestao" data-teste-nome="Nexo Gestão" data-teste-mensal="129">Testar 7 dias grátis</a>
             <button type="button" class="btn btn-ghost" data-contratar="a-sis-gestao" data-mensal="129" data-nome="Nexo Gestão · aluguel">Alugar</button>
             <button type="button" class="btn btn-primary" data-contratar="sis-gestao" data-total="2790" data-nome="Nexo Gestão · compra">Comprar</button>
           </div>
@@ -92,7 +93,7 @@
           <div class="sis-precos"><div><small>Comprar</small><b>R$&nbsp;2.290</b><span>entrada de R$&nbsp;1.145</span></div><div><small>Alugar</small><b>R$&nbsp;99<small>/mês</small></b><span>sem entrada</span></div></div>
           <div class="sis-botoes">
             <a class="btn btn-ghost" href="demos/sistemas/crm/" target="_blank" rel="noopener">Ver demonstração</a>
-            <a class="btn btn-ghost" href="app/crm/">Testar 7 dias grátis</a>
+            <a class="btn btn-ghost" href="app/crm/" data-teste="crm" data-teste-nome="Nexo CRM" data-teste-mensal="99">Testar 7 dias grátis</a>
             <button type="button" class="btn btn-ghost" data-contratar="a-sis-crm" data-mensal="99" data-nome="Nexo CRM · aluguel">Alugar</button>
             <button type="button" class="btn btn-primary" data-contratar="sis-crm" data-total="2290" data-nome="Nexo CRM · compra">Comprar</button>
           </div>
@@ -109,7 +110,7 @@
           <div class="sis-precos"><div><small>Comprar</small><b>R$&nbsp;1.690</b><span>entrada de R$&nbsp;845</span></div><div><small>Alugar</small><b>R$&nbsp;79<small>/mês</small></b><span>sem entrada</span></div></div>
           <div class="sis-botoes">
             <a class="btn btn-ghost" href="demos/sistemas/agenda/" target="_blank" rel="noopener">Ver demonstração</a>
-            <a class="btn btn-ghost" href="app/agenda/">Testar 7 dias grátis</a>
+            <a class="btn btn-ghost" href="app/agenda/" data-teste="agenda" data-teste-nome="Nexo Agenda" data-teste-mensal="79">Testar 7 dias grátis</a>
             <button type="button" class="btn btn-ghost" data-contratar="a-sis-agenda" data-mensal="79" data-nome="Nexo Agenda · aluguel">Alugar</button>
             <button type="button" class="btn btn-primary" data-contratar="sis-agenda" data-total="1690" data-nome="Nexo Agenda · compra">Comprar</button>
           </div>
@@ -126,7 +127,7 @@
           <div class="sis-precos"><div><small>Comprar</small><b>R$&nbsp;3.290</b><span>entrada de R$&nbsp;1.645</span></div><div><small>Alugar</small><b>R$&nbsp;149<small>/mês</small></b><span>sem entrada</span></div></div>
           <div class="sis-botoes">
             <a class="btn btn-ghost" href="demos/sistemas/juridico/" target="_blank" rel="noopener">Ver demonstração</a>
-            <a class="btn btn-ghost" href="app/juridico/">Testar 7 dias grátis</a>
+            <a class="btn btn-ghost" href="app/juridico/" data-teste="juridico" data-teste-nome="Nexo Jurídico" data-teste-mensal="149">Testar 7 dias grátis</a>
             <button type="button" class="btn btn-ghost" data-contratar="a-sis-juridico" data-mensal="149" data-nome="Nexo Jurídico · aluguel">Alugar</button>
             <button type="button" class="btn btn-primary" data-contratar="sis-juridico" data-total="3290" data-nome="Nexo Jurídico · compra">Comprar</button>
           </div>
@@ -143,7 +144,7 @@
           <div class="sis-precos"><div><small>Comprar</small><b>R$&nbsp;2.490</b><span>entrada de R$&nbsp;1.245</span></div><div><small>Alugar</small><b>R$&nbsp;109<small>/mês</small></b><span>sem entrada</span></div></div>
           <div class="sis-botoes">
             <a class="btn btn-ghost" href="demos/sistemas/financeiro/" target="_blank" rel="noopener">Ver demonstração</a>
-            <a class="btn btn-ghost" href="app/financeiro/">Testar 7 dias grátis</a>
+            <a class="btn btn-ghost" href="app/financeiro/" data-teste="financeiro" data-teste-nome="Nexo Financeiro" data-teste-mensal="109">Testar 7 dias grátis</a>
             <button type="button" class="btn btn-ghost" data-contratar="a-sis-financeiro" data-mensal="109" data-nome="Nexo Financeiro · aluguel">Alugar</button>
             <button type="button" class="btn btn-primary" data-contratar="sis-financeiro" data-total="2490" data-nome="Nexo Financeiro · compra">Comprar</button>
           </div>
@@ -160,7 +161,7 @@
           <div class="sis-precos"><div><small>Comprar</small><b>R$&nbsp;2.490</b><span>entrada de R$&nbsp;1.245</span></div><div><small>Alugar</small><b>R$&nbsp;109<small>/mês</small></b><span>sem entrada</span></div></div>
           <div class="sis-botoes">
             <a class="btn btn-ghost" href="demos/sistemas/clinica/" target="_blank" rel="noopener">Ver demonstração</a>
-            <a class="btn btn-ghost" href="app/clinica/">Testar 7 dias grátis</a>
+            <a class="btn btn-ghost" href="app/clinica/" data-teste="clinica" data-teste-nome="Nexo Clínica" data-teste-mensal="109">Testar 7 dias grátis</a>
             <button type="button" class="btn btn-ghost" data-contratar="a-sis-clinica" data-mensal="109" data-nome="Nexo Clínica · aluguel">Alugar</button>
             <button type="button" class="btn btn-primary" data-contratar="sis-clinica" data-total="2490" data-nome="Nexo Clínica · compra">Comprar</button>
           </div>
@@ -177,7 +178,7 @@
           <div class="sis-precos"><div><small>Comprar</small><b>R$&nbsp;2.290</b><span>entrada de R$&nbsp;1.145</span></div><div><small>Alugar</small><b>R$&nbsp;99<small>/mês</small></b><span>sem entrada</span></div></div>
           <div class="sis-botoes">
             <a class="btn btn-ghost" href="demos/sistemas/academia/" target="_blank" rel="noopener">Ver demonstração</a>
-            <a class="btn btn-ghost" href="app/academia/">Testar 7 dias grátis</a>
+            <a class="btn btn-ghost" href="app/academia/" data-teste="academia" data-teste-nome="Nexo Academia" data-teste-mensal="99">Testar 7 dias grátis</a>
             <button type="button" class="btn btn-ghost" data-contratar="a-sis-academia" data-mensal="99" data-nome="Nexo Academia · aluguel">Alugar</button>
             <button type="button" class="btn btn-primary" data-contratar="sis-academia" data-total="2290" data-nome="Nexo Academia · compra">Comprar</button>
           </div>
@@ -194,7 +195,7 @@
           <div class="sis-precos"><div><small>Comprar</small><b>R$&nbsp;1.990</b><span>entrada de R$&nbsp;995</span></div><div><small>Alugar</small><b>R$&nbsp;89<small>/mês</small></b><span>sem entrada</span></div></div>
           <div class="sis-botoes">
             <a class="btn btn-ghost" href="demos/sistemas/restaurante/" target="_blank" rel="noopener">Ver demonstração</a>
-            <a class="btn btn-ghost" href="app/restaurante/">Testar 7 dias grátis</a>
+            <a class="btn btn-ghost" href="app/restaurante/" data-teste="restaurante" data-teste-nome="Nexo Restaurante" data-teste-mensal="89">Testar 7 dias grátis</a>
             <button type="button" class="btn btn-ghost" data-contratar="a-sis-restaurante" data-mensal="89" data-nome="Nexo Restaurante · aluguel">Alugar</button>
             <button type="button" class="btn btn-primary" data-contratar="sis-restaurante" data-total="1990" data-nome="Nexo Restaurante · compra">Comprar</button>
           </div>
@@ -211,7 +212,7 @@
           <div class="sis-precos"><div><small>Comprar</small><b>R$&nbsp;2.790</b><span>entrada de R$&nbsp;1.395</span></div><div><small>Alugar</small><b>R$&nbsp;129<small>/mês</small></b><span>sem entrada</span></div></div>
           <div class="sis-botoes">
             <a class="btn btn-ghost" href="demos/sistemas/imobiliaria/" target="_blank" rel="noopener">Ver demonstração</a>
-            <a class="btn btn-ghost" href="app/imobiliaria/">Testar 7 dias grátis</a>
+            <a class="btn btn-ghost" href="app/imobiliaria/" data-teste="imobiliaria" data-teste-nome="Nexo Imobiliária" data-teste-mensal="129">Testar 7 dias grátis</a>
             <button type="button" class="btn btn-ghost" data-contratar="a-sis-imobiliaria" data-mensal="129" data-nome="Nexo Imobiliária · aluguel">Alugar</button>
             <button type="button" class="btn btn-primary" data-contratar="sis-imobiliaria" data-total="2790" data-nome="Nexo Imobiliária · compra">Comprar</button>
           </div>
@@ -228,7 +229,7 @@
           <div class="sis-precos"><div><small>Comprar</small><b>R$&nbsp;1.990</b><span>entrada de R$&nbsp;995</span></div><div><small>Alugar</small><b>R$&nbsp;89<small>/mês</small></b><span>sem entrada</span></div></div>
           <div class="sis-botoes">
             <a class="btn btn-ghost" href="demos/sistemas/oficina/" target="_blank" rel="noopener">Ver demonstração</a>
-            <a class="btn btn-ghost" href="app/oficina/">Testar 7 dias grátis</a>
+            <a class="btn btn-ghost" href="app/oficina/" data-teste="oficina" data-teste-nome="Nexo Oficina" data-teste-mensal="89">Testar 7 dias grátis</a>
             <button type="button" class="btn btn-ghost" data-contratar="a-sis-oficina" data-mensal="89" data-nome="Nexo Oficina · aluguel">Alugar</button>
             <button type="button" class="btn btn-primary" data-contratar="sis-oficina" data-total="1990" data-nome="Nexo Oficina · compra">Comprar</button>
           </div>
@@ -242,7 +243,7 @@
       <h2 class="sec-title reveal">Comprar ou alugar?</h2>
       <div class="sis-duas reveal">
         <div><h3>Comprar · de R$ 1.690 a R$ 3.290</h3><ul><li>Pagamento único: 50% para começar e 50% na entrega (ou parcelado no cartão)</li><li>Adaptação com a sua marca e os seus cadastros iniciais</li><li>Treinamento da equipe e 90 dias de garantia</li><li>Hospedagem e suporte depois disso: plano de cuidado opcional de R$ 79/mês</li></ul></div>
-        <div><h3>Alugar · de R$ 79 a R$ 149/mês</h3><ul><li>Sem entrada: começa a pagar só a mensalidade, no cartão</li><li>Hospedagem, cópias de segurança, atualizações e suporte inclusos</li><li>Mesma adaptação e o mesmo treinamento da compra</li><li>Fidelidade mínima de 12 meses (veja os <a href="termos.html#assinatura">Termos</a>)</li></ul></div>
+        <div><h3>Alugar · de R$ 79 a R$ 149/mês</h3><ul><li>Sem entrada: começa a pagar só a mensalidade, no cartão</li><li>Hospedagem, cópias de segurança, atualizações e suporte inclusos</li><li>Mesma adaptação e o mesmo treinamento da compra</li><li>Sem fidelidade: cancele quando quiser em Minha conta (veja os <a href="termos.html#nexo">Termos</a>)</li><li>Comece com 7 dias grátis: cadastre o cartão e só paga se continuar</li></ul></div>
       </div>
       <p class="planos-nota reveal">Precisa de algo além do que o sistema faz? Personalizações são orçadas antes, por escrito. Sistemas feitos do zero: <a href="./#precos">a partir de R$ 4.900</a>.</p>
     </div>

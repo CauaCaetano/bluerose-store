@@ -1,0 +1,138 @@
+/*
+ * Conta do cliente no site (Supabase Auth, a mesma dos sistemas em /app/).
+ * Navegar não exige login. Comprar, alugar e começar o teste grátis exigem:
+ * BR_CONTA.exigirLogin() abre a janela de entrar/criar conta e devolve a sessão.
+ * BR_CONTA.pagar(produto, { teste, emailMp }) cria o pagamento no servidor e leva ao Mercado Pago.
+ * BR_CONTA.teste(app, nome, mensal) abre a janela do teste grátis de 7 dias com cartão.
+ */
+(function () {
+  var CHAVE = 'nexo-sessao';
+  var FUNC = 'https://yihnfzwtkqdfnwziutqa.supabase.co/functions/v1/nexo-pagamentos';
+  var raiz = (document.querySelector('script[src*="js/conta.js"]').getAttribute('src').split('js/conta.js')[0]) || '';
+  var cliente = null;
+
+  function sessaoGuardada() { try { var s = JSON.parse(localStorage.getItem(CHAVE) || 'null'); return s && s.user ? s : null; } catch (e) { return null; } }
+  function carregar(src) { return new Promise(function (ok, falha) { if (document.querySelector('script[src="' + src + '"]')) return ok(); var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = falha; document.head.appendChild(s); }); }
+  function sb() {
+    if (cliente) return Promise.resolve(cliente);
+    return carregar(raiz + 'app/config.js').then(function () { return carregar(raiz + 'demos/sistemas/base/supabase.js'); }).then(function () {
+      var c = window.NEXO_NUVEM;
+      cliente = window.supabase.createClient(c.url, c.chave, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: CHAVE } });
+      cliente.auth.onAuthStateChange(function () { marcarMenu(); });
+      return cliente;
+    });
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); }
+  function reais(n) { return 'R$ ' + Number(n).toLocaleString('pt-BR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
+
+  // ------------------------------------------------ menu: "Entrar" ou "Minha conta"
+  function marcarMenu() {
+    var nav = document.querySelector('.nav-links'); if (!nav) return;
+    var a = nav.querySelector('.nav-conta');
+    if (!a) { a = document.createElement('a'); a.className = 'nav-conta'; a.href = raiz + 'conta.html'; var cta = nav.querySelector('.btn'); nav.insertBefore(a, cta || null); }
+    var s = sessaoGuardada();
+    a.textContent = s ? 'Minha conta' : 'Entrar';
+    a.title = s ? s.user.email : 'Entrar ou criar conta';
+  }
+
+  // ------------------------------------------------ janela de entrar / criar conta
+  var dlg = null;
+  function janela(html) {
+    if (!dlg) {
+      dlg = document.createElement('dialog'); dlg.className = 'conta-dlg'; dlg.setAttribute('aria-labelledby', 'conta-t');
+      document.body.appendChild(dlg);
+      dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+    }
+    dlg.innerHTML = '<div class="conta-caixa"><button class="conta-x" type="button" aria-label="Fechar">×</button>' + html + '</div>';
+    dlg.querySelector('.conta-x').onclick = function () { dlg.close(); };
+    if (!dlg.open) dlg.showModal();
+    var i = dlg.querySelector('input'); if (i) i.focus();
+    return dlg;
+  }
+  var erroAuth = function (e) {
+    var m = String((e && e.message) || e || '');
+    if (/invalid login/i.test(m)) return 'E-mail ou senha incorretos.';
+    if (/email not confirmed/i.test(m)) return 'Confirme o seu e-mail pelo link que enviamos antes de entrar.';
+    if (/already registered|already been registered/i.test(m)) return 'Já existe uma conta com esse e-mail. Use "Entrar".';
+    if (/password/i.test(m)) return 'A senha precisa ter pelo menos 8 caracteres.';
+    if (/rate limit|too many/i.test(m)) return 'Muitas tentativas seguidas. Espere um minuto e tente de novo.';
+    return m || 'Algo deu errado. Tente de novo.';
+  };
+  function telaLogin(modo, motivo, resolver) {
+    var t = { entrar: ['Entrar', 'Acesse a sua conta da Blue Rose.'], criar: ['Criar conta', 'Leva menos de um minuto.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] }[modo];
+    var d = janela('<span class="eyebrow">Sua conta</span><h3 id="conta-t">' + t[0] + '</h3>' + (motivo ? '<p class="conta-motivo">' + esc(motivo) + '</p>' : '<p class="conta-sub">' + t[1] + '</p>') +
+      '<form class="conta-form" novalidate>' + (modo === 'criar' ? '<label>Seu nome<input name="nome" autocomplete="name" required></label>' : '') +
+      '<label>E-mail<input name="email" type="email" autocomplete="email" required></label>' +
+      (modo !== 'esqueci' ? '<label>Senha<input name="senha" type="password" minlength="8" autocomplete="' + (modo === 'criar' ? 'new-password' : 'current-password') + '" required></label>' : '') +
+      '<p class="conta-erro" role="alert"></p><button class="btn btn-primary" type="submit">' + (modo === 'criar' ? 'Criar conta' : modo === 'entrar' ? 'Entrar' : 'Enviar link') + '</button></form>' +
+      '<p class="conta-links">' + (modo === 'entrar' ? '<a href="#" data-m="criar">Criar conta</a> · <a href="#" data-m="esqueci">Esqueci a senha</a>' : '<a href="#" data-m="entrar">Já tenho conta</a>') + '</p>');
+    d.querySelectorAll('[data-m]').forEach(function (a) { a.onclick = function (e) { e.preventDefault(); telaLogin(a.getAttribute('data-m'), motivo, resolver); }; });
+    var f = d.querySelector('form'), erro = d.querySelector('.conta-erro'), bt = f.querySelector('button');
+    f.onsubmit = function (e) {
+      e.preventDefault(); if (!f.reportValidity()) return;
+      var v = { nome: f.nome && f.nome.value.trim(), email: f.email.value.trim(), senha: f.senha && f.senha.value };
+      bt.disabled = true; erro.textContent = '';
+      try { localStorage.setItem('nexo-volta', location.href); } catch (x) { /* ok */ }
+      sb().then(function (c) {
+        if (modo === 'entrar') return c.auth.signInWithPassword({ email: v.email, password: v.senha }).then(function (r) { if (r.error) throw r.error; marcarMenu(); dlg.close(); resolver(r.data.session); });
+        if (modo === 'esqueci') return c.auth.resetPasswordForEmail(v.email, { redirectTo: location.origin + '/app/' }).then(function (r) { if (r.error) throw r.error; janela('<h3 id="conta-t">Confira o seu e-mail</h3><p class="conta-sub">Se existir uma conta com ' + esc(v.email) + ', o link para criar uma senha nova chega em instantes.</p>'); });
+        return c.auth.signUp({ email: v.email, password: v.senha, options: { data: { nome: v.nome }, emailRedirectTo: location.origin + '/app/' } }).then(function (r) {
+          if (r.error) throw r.error;
+          if (r.data.session) { marcarMenu(); dlg.close(); return resolver(r.data.session); }
+          janela('<span class="eyebrow">Quase lá</span><h3 id="conta-t">Confirme o seu e-mail</h3><p class="conta-sub">Enviamos um link para <b>' + esc(v.email) + '</b>. Abra o link e você volta para cá, já com a conta ativa.</p><p class="conta-sub">Não chegou? Veja a caixa de spam ou promoções.</p>');
+        });
+      }).catch(function (x) { erro.textContent = erroAuth(x); bt.disabled = false; });
+    };
+  }
+  function exigirLogin(motivo) {
+    return sb().then(function (c) { return c.auth.getSession(); }).then(function (r) {
+      if (r.data.session) return r.data.session;
+      return new Promise(function (ok) { telaLogin('criar', motivo || 'Para continuar, entre ou crie a sua conta. É grátis e leva menos de um minuto.', ok); });
+    });
+  }
+
+  // ------------------------------------------------ pagamento (servidor cria o link no Mercado Pago)
+  function chamar(corpo) {
+    return sb().then(function (c) { return c.auth.getSession(); }).then(function (r) {
+      return fetch(FUNC, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (r.data.session ? r.data.session.access_token : '') }, body: JSON.stringify(corpo) });
+    }).then(function (r) { return r.json().then(function (j) { if (!r.ok) { var e = new Error(j.erro || 'Erro ' + r.status); e.dados = j; throw e; } return j; }); });
+  }
+  function pagar(produto, op) {
+    op = op || {};
+    return exigirLogin().then(function () { return chamar({ acao: 'iniciar', produto: produto, teste: !!op.teste, email_mp: op.emailMp || '' }); })
+      .then(function (j) { location.href = j.link; return j; });
+  }
+
+  // ------------------------------------------------ teste grátis de 7 dias com cartão
+  function teste(app, nome, mensal) {
+    return exigirLogin('Para começar o teste grátis do ' + nome + ', entre ou crie a sua conta.').then(function (s) {
+      var d = janela('<span class="eyebrow">Teste grátis de 7 dias</span><h3 id="conta-t">' + esc(nome) + '</h3>' +
+        '<ul class="conta-lista"><li>Use com os dados da sua empresa por <b>7 dias sem pagar nada</b>.</li><li>Para começar, cadastre o cartão no Mercado Pago. Se não cancelar, a assinatura de <b>' + reais(mensal) + '/mês</b> começa sozinha no 8º dia.</li><li>Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>. Cancelando no teste, nada é cobrado.</li><li>O teste grátis vale uma vez por cartão e por pessoa.</li></ul>' +
+        '<form class="conta-form" novalidate><label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="' + esc(s.user.email) + '" required><small>A assinatura fica na conta do Mercado Pago com este e-mail.</small></label>' +
+        '<label class="conta-aceite"><input type="checkbox" name="ok" required> <span>Li e aceito os <a href="' + raiz + 'termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática depois do teste.</span></label>' +
+        '<p class="conta-erro" role="alert"></p><button class="btn btn-primary" type="submit">Cadastrar cartão e começar</button></form>');
+      var f = d.querySelector('form'), erro = d.querySelector('.conta-erro'), bt = f.querySelector('button');
+      f.onsubmit = function (e) {
+        e.preventDefault(); if (!f.reportValidity()) return;
+        bt.disabled = true; bt.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
+        chamar({ acao: 'iniciar', produto: 'a-sis-' + app, teste: true, email_mp: f.mp.value.trim() }).then(function (j) { location.href = j.link; }).catch(function (x) {
+          bt.disabled = false; bt.textContent = 'Cadastrar cartão e começar';
+          if (x.dados && x.dados.sem_teste) {
+            erro.innerHTML = esc(x.message) + ' <a href="#" data-assinar>Assinar por ' + reais(mensal) + '/mês</a>';
+            erro.querySelector('[data-assinar]').onclick = function (ev) { ev.preventDefault(); chamar({ acao: 'iniciar', produto: 'a-sis-' + app, email_mp: f.mp.value.trim() }).then(function (j) { location.href = j.link; }).catch(function (y) { erro.textContent = y.message; }); };
+          } else erro.textContent = x.message;
+        });
+      };
+    });
+  }
+
+  // botões "Testar 7 dias grátis" (links para app/<sistema>/ marcados com data-teste)
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-teste]'); if (!b) return;
+    e.preventDefault();
+    teste(b.getAttribute('data-teste'), b.getAttribute('data-teste-nome') || 'sistema', Number(b.getAttribute('data-teste-mensal')) || 0);
+  });
+
+  window.BR_CONTA = { sb: sb, exigirLogin: exigirLogin, pagar: pagar, teste: teste, chamar: chamar, sessao: sessaoGuardada, janela: janela, esc: esc, reais: reais };
+  marcarMenu();
+})();

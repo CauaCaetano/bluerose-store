@@ -605,3 +605,7 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .selos i { aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed var(--borda-2); display: grid; place-items: center; color: #fff; }
 .selos i.on { background: var(--acc); border: 0; }
 .selos .ic { width: 14px; height: 14px; }
+/* teste grátis com cartão (tela de entrada da nuvem) */
+.lista-teste { list-style: none; margin: 4px 0 16px; padding: 0; display: grid; gap: 8px; font-size: 13.5px; color: var(--tx-2); }
+.lista-teste li { display: flex; gap: 8px; align-items: flex-start; }
+.lista-teste .ic { color: var(--acc); margin-top: 2px; flex-shrink: 0; }
