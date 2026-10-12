@@ -118,6 +118,10 @@ function resumoCli(a, id) {
   const datas = feitos.map((x) => x.data).sort(); const freq = datas.length > 1 ? Math.round(diasEntre(datas[0], datas.at(-1)) / (datas.length - 1)) : null;
   return { visitas: feitos.length, gasto, ticket: feitos.length ? gasto / feitos.length : 0, ultima, prox, freq, faltas: h.filter((x) => x.status === 'faltou').length };
 }
+const profsDoServ = (a, s) => a.db.lista('profissionais').filter((p) => !s.profissional || p.id === s.profissional || (s.categoria === 'Unhas' && p.id === 'p1'));
+const fidel = (a) => ({ a_cada: 10, premio: 'um serviço de até R$ 60', ...(a.db.cfg.fidelidade || {}) });
+const selos = (a, c) => { const n = fechadas(a).filter((k) => k.cliente === c.id).length - (c.resgates || 0) * fidel(a).a_cada; return Math.max(0, n); };
+const esperaPara = (a, x) => a.db.lista('espera').filter((e) => !e.atendida && (x.servicos || []).includes(e.servico));
 const aniversario = (c, dias = 7) => { if (!c.nascimento) return false; for (let i = 0; i < dias; i++) if (diaMais(i).slice(5) === c.nascimento.slice(5)) return i + 1; return false; };
 const etStatus = (s) => { const [n, , t] = STATUS[s] || STATUS.agendado; return et(n, t); };
 const msgConfirma = (a, ag) => { const c = cli(a, ag.cliente); return `Olá, ${c.nome.split(' ')[0]}! Passando para confirmar seu horário no ${a.empresa}: ${DIAS_L[paraData(ag.data).getDay()]}, ${dataBR(ag.data)}, às ${ag.ini}, com ${prof(a, ag.profissional)?.nome.split(' ')[0]} (${nomesServ(a, ag)}). Responda SIM para confirmar ou nos avise se precisar remarcar.`; };
@@ -423,9 +427,16 @@ function online(a) {
       ${st.passo === 5 ? `<div class="vazio" style="padding-top:70px">${ic('check-circle')}<b style="font-size:16px">Agendado!</b><span>Você vai receber a confirmação pelo WhatsApp.</span><button type="button" class="btn" data-acao="onlineNovo" style="margin-top:10px">Fazer outro agendamento</button><a class="btn fant" href="#/agenda">Ver na agenda do salão</a></div>` : ''}
     </div></div>`;
   return `<div class="grade g12" style="align-items:start"><div class="col" style="gap:12px"><div class="cartao"><div class="cartao-corpo col" style="gap:10px"><h3>Sua página de agendamento</h3><p class="mute-2">As clientes escolhem serviço, profissional e horário sozinhas, 24 horas por dia, só entre os horários realmente livres. O agendamento cai direto na agenda.</p>
-      <div class="flex"><span class="mono" style="padding:6px 9px;border:1px solid var(--borda);border-radius:6px;background:var(--painel-2)">agenda.studiolumiere.com.br</span><button type="button" class="btn peq" data-acao="copiarLink">${ic('copy')}Copiar</button></div>
+      <div class="flex" style="flex-wrap:wrap"><button type="button" class="btn pri" data-acao="linkAgendar">${ic('link')}Link e QR code da página</button></div>
+      <div class="form-grade" style="margin-top:6px"><label class="campo">Sinal para garantir o horário<select data-mudar="sinalPct">${[0, 20, 30, 50, 100].map((v) => `<option value="${v}" ${Number(a.db.cfg.sinal_pct || 0) === v ? 'selected' : ''}>${v ? `${v}% do serviço pelo PIX` : 'Sem sinal'}</option>`).join('')}</select><span class="ajuda">${a.temPix() ? 'A cliente paga pelo PIX da empresa e o valor é descontado no dia.' : 'Cadastre a chave PIX em Configurações para usar o sinal.'}</span></label></div>
       <div class="dica">${ic('info')}<span>Coloque o link na bio do Instagram e no WhatsApp Business. Teste ao lado: o agendamento aparece na agenda.</span></div></div></div>
       ${kpis([{ rot: 'Agendados online (30 dias)', icone: 'globe', val: num(ags(a).filter((x) => x.origem === 'online' && diasAte(x.criado || x.data) > -30).length) }])}</div>${telaCel}</div>`;
+}
+function esperaPag(a) {
+  return `<div class="dica">${ic('info')}<span>Quem queria um horário que estava cheio fica aqui. Quando alguém cancela, o sistema mostra quem chamar para ocupar a vaga.</span></div>` + a.tab({ id: 'espera', colecao: 'espera', singular: 'pessoa', plural: 'pessoas', ordem: 'criado',
+    visoes: [{ id: 'aguardando', rot: 'Aguardando', filtro: (e) => !e.atendida }, { id: 'todas', rot: 'Todas' }], novo: { rot: 'Adicionar', attrs: 'data-acao="novaEspera"' }, aoClicar: false,
+    colunas: [{ k: 'cliente', rot: 'Cliente', valor: (e) => cli(a, e.cliente)?.nome, render: (e) => `<span class="prim">${esc(cli(a, e.cliente)?.nome || '')}</span><span class="sub">${esc(cli(a, e.cliente)?.telefone || '')}</span>` }, { k: 'servico', rot: 'Serviço', valor: (e) => serv(a, e.servico)?.nome }, { k: 'preferencia', rot: 'Preferência', oc: true }, { k: 'criado', rot: 'Desde', render: (e) => relativo(e.criado) },
+      { k: 'acao', rot: '', ord: false, csv: false, render: (e) => (e.atendida ? et('Atendida', 'ok') : `<span class="flex" style="gap:6px;justify-content:flex-end"><a class="btn peq" target="_blank" rel="noopener" href="${telLink(cli(a, e.cliente)?.telefone)}?text=${encodeURIComponent(`Oi, ${cli(a, e.cliente)?.nome.split(' ')[0]}! Abriu um horário para ${serv(a, e.servico)?.nome} no ${a.empresa}. Quer que eu reserve para você?`)}">${ic('whatsapp-logo')}Chamar</a><button type="button" class="btn peq" data-acao="esperaFeita" data-id="${e.id}">${ic('check')}Agendada</button></span>`) }] });
 }
 function relatorios(a) {
   const meses = Array.from({ length: 4 }, (_, i) => mesMais(i - 3));
@@ -469,6 +480,7 @@ const fichas = {
     let corpo = '';
     if (aba === 'resumo') corpo = `${c.alergias ? `<div class="gav-sec"><div class="alerta-linha">${ic('warning')}${esc(c.alergias)}</div></div>` : ''}<div class="gav-sec"><div class="grade g4" style="gap:8px">${[['Visitas', num(r.visitas)], ['Total gasto', moedaC(r.gasto)], ['Ticket médio', moedaC(r.ticket)], ['Volta a cada', r.freq ? `${r.freq} dias` : '—']].map(([t, v]) => `<div style="padding:10px;border:1px solid var(--borda);border-radius:8px"><div class="mute" style="font-size:12px">${t}</div><b class="num" style="font-size:16px">${v}</b></div>`).join('')}</div></div>
       <div class="gav-sec">${props([['phone', 'WhatsApp', `${esc(c.telefone)} · <a href="${telLink(c.telefone)}" target="_blank" rel="noopener">abrir conversa</a>`], ['envelope-simple', 'E-mail', c.email ? esc(c.email) : null], ['cake', 'Aniversário', c.nascimento ? `${dataCurta(`${hoje().slice(0, 4)}${c.nascimento.slice(4)}`).replace(/ \d{4}$/, '')} · ${new Date().getFullYear() - Number(c.nascimento.slice(0, 4))} anos` : null], ['heart', 'Preferências', c.preferencias ? esc(c.preferencias) : null], ['globe', 'Como conheceu', esc(c.origem || '—')], ['calendar-blank', 'Próximo horário', r.prox ? `${relativo(r.prox.data)}, ${r.prox.ini} · ${esc(nomesServ(a, r.prox))}` : null], ['clock', 'Cliente desde', dataCurta(c.criado)], ['user-focus', 'Faltas', String(r.faltas)]])}</div>`;
+    if (aba === 'resumo') { const f = fidel(a), n = selos(a, c); corpo += `<div class="gav-sec"><div class="entre"><h4>Cartão fidelidade</h4><span class="mute" style="font-size:12.5px">${Math.min(n, f.a_cada)} de ${f.a_cada} · prêmio: ${esc(f.premio)}</span></div><div class="selos">${Array.from({ length: f.a_cada }, (_, i) => `<i class="${i < n ? 'on' : ''}">${i < n ? ic('star') : ''}</i>`).join('')}</div>${n >= f.a_cada ? `<button type="button" class="btn pri peq" style="margin-top:10px" data-acao="resgatar" data-id="${id}">${ic('gift')}Resgatar prêmio</button>` : ''}</div>`; }
     if (aba === 'hist') corpo = `<div class="gav-sec">${h.length ? `<ul class="lista" style="margin:0 -20px">${h.slice(0, 40).map((x) => `<li class="clicavel" data-abrir="agendamento:${x.id}"><div style="width:62px"><b class="num" style="font-size:12.5px">${dataBR(x.data).slice(0, 5)}</b><div class="s">${x.ini}</div></div><div class="cresce"><div class="t corta">${esc(nomesServ(a, x))}</div><div class="s">${esc(prof(a, x.profissional)?.nome || '')}</div></div>${etStatus(x.status)}<b class="num" style="min-width:76px;text-align:right">${moeda(x.valor)}</b></li>`).join('')}</ul>` : vazio('calendar-blank', 'Sem atendimentos')}</div>`;
     if (aba === 'pacotes') corpo = `<div class="gav-sec">${pacs.length ? pacs.map((k) => `<div style="padding:12px;border:1px solid var(--borda);border-radius:8px;margin-bottom:8px"><div class="entre"><b>${esc(serv(a, k.servico)?.nome)}</b><span class="${k.validade < hoje() ? 'er-tx' : 'mute'}" style="font-size:12.5px">válido até ${dataCurta(k.validade)}</span></div><div style="margin:8px 0 4px">${prog((k.usadas / k.sessoes) * 100, k.usadas >= k.sessoes ? 'ok' : '')}</div><div class="entre mute" style="font-size:12.5px"><span>${k.usadas} de ${k.sessoes} sessões usadas</span><span>${moeda(k.valor)}</span></div></div>`).join('') : vazio('ticket', 'Nenhum pacote')}<button type="button" class="btn" data-acao="novoPacote" data-cliente="${id}">${ic('plus')}Vender pacote</button></div>`;
     if (aba === 'compras') corpo = `<div class="gav-sec">${ks.length ? `<ul class="lista" style="margin:0 -20px">${ks.slice(0, 30).map((k) => `<li class="clicavel" data-abrir="comanda:${k.id}"><span class="mono mute-2">#${k.numero}</span><div class="cresce"><div class="t corta">${esc(k.itens.map((i) => i.nome).join(', '))}</div><div class="s">${dataCurta(k.data)}</div></div><b class="num">${moeda(totalK(k))}</b></li>`).join('')}</ul>` : vazio('receipt', 'Nenhuma compra')}</div>`;
@@ -491,6 +503,38 @@ const fichas = {
 const app = criarApp({
   id: 'agenda', nome: 'Nexo Agenda', sub: 'Salão e estética', cor: '#c2417a', icone: 'scissors', empresa: 'Studio Lumière', conta: '4 profissionais · Jardins, SP',
   produto: { compra: 1690, mensal: 79 }, semente, colecoes, fichas, buscaDica: 'clientes',
+  portal: {
+    agendar: {
+      explica: 'A página de agendamento do salão: a cliente escolhe serviço, profissional e horário livre. Se o sinal estiver ligado, ela paga pelo PIX para garantir o horário.',
+      montar: (a) => {
+        const ss = a.db.lista('servicos'), ps = a.db.lista('profissionais');
+        const livres = Object.fromEntries(ps.map((pr) => [pr.id, Object.fromEntries(Array.from({ length: 14 }, (_, i) => diaMais(i)).map((d) => [d, horariosLivres(a, pr.id, d, 30)]))]));
+        const pix = a.db.cfg.pix?.chave ? { chave: a.db.cfg.pix.chave, nome: a.db.cfg.pix.nome || a.empresa, cidade: a.db.cfg.pix.cidade || 'BRASIL' } : null;
+        return { servicos: ss.map((x) => ({ id: x.id, nome: x.nome, duracao: x.duracao, preco: x.preco })), profissionais: ps.map((pr) => ({ id: pr.id, nome: pr.nome, servicos: ss.filter((x) => profsDoServ(a, x).some((y) => y.id === pr.id)).map((x) => x.id) })), livres,
+          sinal: { pct: Number(a.db.cfg.sinal_pct || 0), regra: 'Se não puder vir, avise com 24 horas de antecedência para remarcar sem perder o sinal.' }, pix };
+      },
+      responder: (a, r) => {
+        if (r.acao !== 'agendar') return '';
+        const d = r.dados, x = serv(a, d.servico), pr = prof(a, d.profissional); if (!x || !pr || !/^\d{4}-\d{2}-\d{2}$/.test(d.data || '') || !/^\d{2}:\d{2}$/.test(d.hora || '')) return '';
+        const tel = String(d.telefone || '').replace(/\D/g, '');
+        let c = a.db.lista('clientes').find((y) => tel && String(y.telefone).replace(/\D/g, '') === tel);
+        if (!c) c = a.db.salvar('clientes', { nome: String(d.nome || 'Cliente').slice(0, 80), telefone: d.telefone || '', origem: 'Instagram', criado: hoje(), tags: [] });
+        const choque = livre(a, pr.id, d.data, d.hora, x.duracao);
+        const ag = a.db.salvar('agendamentos', { cliente: c.id, profissional: pr.id, data: d.data, ini: d.hora, servicos: [x.id], duracao: x.duracao, valor: x.preco, origem: 'online', status: 'agendado', criado: hoje(), sinal: d.sinal ? 'informado' : null, obs: d.sinal ? `Sinal de ${moeda((x.preco * Number(a.db.cfg.sinal_pct || 0)) / 100)} informado pelo PIX: conferir` : '' });
+        a.db.registrar(`agendamentos:${ag.id}`, `Agendado pela página online${d.sinal ? ' · sinal pago pelo PIX (conferir)' : ''}`, { icone: 'globe', tom: 'acc' });
+        return `${c.nome.split(' ')[0]} agendou ${x.nome} com ${pr.nome.split(' ')[0]} · ${dataCurta(d.data)} às ${d.hora}${choque ? ` (atenção: ${choque})` : ''}${d.sinal ? ' · sinal informado' : ''}`;
+      },
+    },
+  },
+  modelos: [
+    { id: 'salao', nome: 'Salão de beleza', desc: 'Cabelo, unhas e estética', dados: {} },
+    { id: 'barbearia', nome: 'Barbearia', desc: 'Corte, barba, pigmentação e combos', dados: { servicos: [['Corte degradê', 'Barbearia', 40, 50], ['Barba na toalha quente', 'Barbearia', 30, 40], ['Corte + barba', 'Barbearia', 60, 80], ['Pigmentação de barba', 'Barbearia', 30, 35], ['Sobrancelha na navalha', 'Barbearia', 15, 20]].map(([nome, categoria, duracao, preco]) => ({ nome, categoria, duracao, preco })) } },
+    { id: 'estetica', nome: 'Clínica de estética', desc: 'Faciais, corporais e depilação', dados: { servicos: [['Limpeza de pele profunda', 'Estética', 80, 180], ['Microagulhamento', 'Estética', 60, 350], ['Drenagem linfática', 'Corporal', 60, 140], ['Depilação a laser (axila)', 'Estética', 20, 120], ['Massagem modeladora', 'Corporal', 50, 130]].map(([nome, categoria, duracao, preco]) => ({ nome, categoria, duracao, preco })) } },
+    { id: 'unhas', nome: 'Esmalteria e nail design', desc: 'Mão, pé, gel e alongamento', dados: { servicos: [['Alongamento em fibra', 'Unhas', 120, 180], ['Manutenção de alongamento', 'Unhas', 90, 120], ['Blindagem', 'Unhas', 60, 70], ['Spa dos pés', 'Unhas', 60, 80]].map(([nome, categoria, duracao, preco]) => ({ nome, categoria, duracao, preco })) } },
+    { id: 'cilios', nome: 'Cílios e sobrancelhas', desc: 'Extensão de cílios, lash lifting e design', dados: { servicos: [['Extensão de cílios fio a fio', 'Estética', 120, 180], ['Manutenção de cílios', 'Estética', 60, 100], ['Lash lifting', 'Estética', 60, 130], ['Brow lamination', 'Estética', 50, 120], ['Design com henna', 'Estética', 40, 55]].map(([nome, categoria, duracao, preco]) => ({ nome, categoria, duracao, preco })) } },
+  ],
+  passos: (a) => [{ id: 'online', rot: 'Coloque o link de agendamento na bio do Instagram', feito: !!a.db.cfg.links?.['agendar:'], acao: 'linkAgendar' }, { id: 'sinal', rot: 'Ligue o sinal por PIX para diminuir faltas', feito: !!Number(a.db.cfg.sinal_pct || 0) && a.temPix(), href: '#/online' }],
+  configExtra: (a) => { const f = fidel(a); return `<div class="cartao"><div class="cartao-cab"><div><h3>Cartão fidelidade</h3><div class="sub">A cada atendimento pago a cliente ganha um selo</div></div></div><div class="cartao-corpo"><form class="form-grade" data-fidel><label class="campo">Selos para ganhar o prêmio<input type="number" name="a_cada" min="3" max="30" value="${f.a_cada}"></label><label class="campo">Prêmio<input name="premio" value="${esc(f.premio)}"></label><div class="campo largo" style="flex-direction:row;justify-content:flex-end"><button type="button" class="btn pri" data-acao="salvarFidel">Salvar</button></div></form></div></div>`; },
   equipe: [['Patrícia Duarte', 'Dona do salão'], ['Larissa Mendes', 'Cabeleireira'], ['Tainá Rocha', 'Manicure'], ['Bruna Vieira', 'Esteticista'], ['Marcos Lima', 'Barbeiro']],
   busca: [{ colecao: 'clientes', grupo: 'Clientes', icone: 'user', ficha: 'cliente', rot: (c) => c.nome, sub: (c) => c.telefone }],
   comandos: [{ rot: 'Novo agendamento', icone: 'calendar-plus', acao: (a) => agendar(a) }, { rot: 'Nova cliente', icone: 'user-plus', acao: (a) => a.acoes.novaCliente() }, { rot: 'Venda avulsa no caixa', icone: 'shopping-cart', acao: (a) => a.acoes.vendaAvulsa() }],
@@ -504,6 +548,7 @@ const app = criarApp({
     { id: 'clientes', rot: 'Clientes', icone: 'users', render: clientes, atalho: 'l', novo: (a) => a.acoes.novaCliente() },
     { id: 'pacotes', rot: 'Pacotes', icone: 'ticket', render: pacotesPag },
     { id: 'online', rot: 'Agendamento online', icone: 'globe', render: online },
+    { id: 'espera', rot: 'Lista de espera', icone: 'list-plus', render: esperaPag, cont: (a) => a.db.lista('espera').filter((e) => !e.atendida).length },
     { grupo: 'Salão' },
     { id: 'servicos', rot: 'Serviços', icone: 'scissors', render: catalogoPag },
     { id: 'produtos', rot: 'Produtos', icone: 'package', titulo: 'Produtos de revenda', render: produtosPag, cont: (a) => { const n = a.db.lista('produtos').filter((p) => p.estoque <= p.minimo).length; return n ? { n, tom: 'er' } : 0; } },
@@ -522,7 +567,7 @@ Object.assign(app.acoes, {
   dataAg: (d, el) => { if (el.value) { app.estado.agenda.data = el.value; app.render(); } },
   modoAg: (d) => { app.estado.agenda.modo = d.m; app.render(); },
   profAg: (d, el) => { app.estado.agenda.prof = el.value; app.render(); },
-  statusAg: (d) => { const x = app.db.obter('agendamentos', d.id); if (d.s === 'concluido' && !x.comanda) return app.acoes.cobrar(d); app.db.salvar('agendamentos', { id: d.id, status: d.s }); app.db.registrar(`agendamentos:${d.id}`, `Situação: ${STATUS[d.s][0]}`, { icone: 'check', tom: STATUS[d.s][2] === 'er' ? 'er' : 'ok' }); avisar(`${cli(app, x.cliente).nome.split(' ')[0]}: ${STATUS[d.s][0].toLowerCase()}`); reab(); },
+  statusAg: (d) => { const x = app.db.obter('agendamentos', d.id); if (d.s === 'concluido' && !x.comanda) return app.acoes.cobrar(d); app.db.salvar('agendamentos', { id: d.id, status: d.s }); if (d.s === 'cancelado' && x.data >= hoje() && esperaPara(app, x).length) setTimeout(() => app.acoes.oferecerVaga({ id: d.id }), 400); app.db.registrar(`agendamentos:${d.id}`, `Situação: ${STATUS[d.s][0]}`, { icone: 'check', tom: STATUS[d.s][2] === 'er' ? 'er' : 'ok' }); avisar(`${cli(app, x.cliente).nome.split(' ')[0]}: ${STATUS[d.s][0].toLowerCase()}`); reab(); },
   marcarEnviado: (d) => { setTimeout(() => { app.db.registrar(`agendamentos:${d.id}`, 'Confirmação enviada por WhatsApp', { icone: 'whatsapp-logo' }); }, 100); },
   cobrar: (d) => { fecharGaveta(); app.estado.pdv = null; app.ir(`#/caixa/${d.id}`); },
   irPdv: (d) => { app.estado.pdv = null; app.ir(`#/caixa/${d.id}`); },
@@ -576,5 +621,19 @@ Object.assign(app.acoes, {
     app.db.registrar(`agendamentos:${ag.id}`, 'Agendado pela página online', { icone: 'globe' });
     st.passo = 5; avisar(`Novo agendamento online: ${nome.split(' ')[0]}, ${dataCurta(st.data)} às ${st.hora}`); app.render();
   },
-  copiarLink: () => { navigator.clipboard?.writeText('https://agenda.studiolumiere.com.br').catch(() => {}); avisar('Link copiado'); },
+  copiarLink: () => app.acoes.linkAgendar(),
+  linkAgendar: () => app.portal.compartilhar('agendar', '', { titulo: 'Página de agendamento online', qr: true, texto: `Agende o seu horário no ${app.empresa} pelo link:` }),
+  sinalPct: (d, el) => { app.db.cfg.sinal_pct = Number(el.value); app.db.gravar(); app.portal.publicar(); avisar(Number(el.value) ? `Sinal de ${el.value}% ligado` : 'Sinal desligado'); app.render(); },
+  salvarFidel: () => { const f = document.querySelector('[data-fidel]'); app.db.cfg.fidelidade = { a_cada: Math.max(3, Number(f.a_cada.value) || 10), premio: f.premio.value }; app.db.gravar(); avisar('Cartão fidelidade salvo'); },
+  resgatar: (d) => { const c = cli(app, d.id); app.db.salvar('clientes', { id: d.id, resgates: (c.resgates || 0) + 1 }); app.db.registrar(`clientes:${d.id}`, `Prêmio do cartão fidelidade resgatado: ${fidel(app).premio}`, { icone: 'gift', tom: 'ok' }); avisar('Prêmio resgatado · cartão zerado'); reab(); },
+  novaEspera: async () => {
+    const r = await modal({ titulo: 'Adicionar à lista de espera', largura: 480, corpo: `<form class="form-grade"><label class="campo largo">Cliente<select name="c">${app.db.lista('clientes').sort((x, y) => x.nome.localeCompare(y.nome)).map((c) => `<option value="${c.id}">${esc(c.nome)}</option>`).join('')}</select></label><label class="campo largo">Serviço<select name="s">${app.db.lista('servicos').map((x) => `<option value="${x.id}">${esc(x.nome)}</option>`).join('')}</select></label><label class="campo largo">Preferência de dia e horário<input name="p" placeholder="Ex.: sábado de manhã"></label></form>`,
+      botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Adicionar', classe: 'pri', acao: (f) => Object.fromEntries(new FormData(f.querySelector('form'))) }] });
+    if (!r) return; app.db.salvar('espera', { cliente: r.c, servico: r.s, preferencia: r.p, criado: hoje(), atendida: false }); avisar('Adicionada à lista de espera'); app.render();
+  },
+  esperaFeita: (d) => { app.db.salvar('espera', { id: d.id, atendida: true }); app.render(); },
+  oferecerVaga: (d) => {
+    const x = app.db.obter('agendamentos', d.id), l = esperaPara(app, x);
+    modal({ titulo: 'Horário liberado', largura: 520, corpo: `<p class="mute-2">${esc(nomesServ(app, x))} · ${dataCurta(x.data)} às ${x.ini} com ${esc(prof(app, x.profissional)?.nome || '')}. Quem está na lista de espera:</p><ul class="lista" style="margin:8px -18px 0">${l.map((e) => { const c = cli(app, e.cliente); return `<li>${av(c?.nome || '?')}<div class="cresce"><div class="t">${esc(c?.nome || '')}</div><div class="s">${esc(e.preferencia || 'qualquer horário')}</div></div><a class="btn peq pri" target="_blank" rel="noopener" href="${telLink(c?.telefone)}?text=${encodeURIComponent(`Oi, ${c?.nome.split(' ')[0]}! Abriu um horário para ${serv(app, e.servico)?.nome}: ${dataBR(x.data)} às ${x.ini}. Quer que eu reserve para você?`)}">${ic('whatsapp-logo')}Oferecer</a></li>`; }).join('')}</ul>`, botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }] });
+  },
 });

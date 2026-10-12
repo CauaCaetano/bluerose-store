@@ -4,12 +4,13 @@ import {
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, linhas, rosca, barrasH, DIAS, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, pop, imprimir, fecharGaveta,
 } from '../base/nexo.js';
+import { baixar } from '../base/nexo.js';
 
 const DEP = [['d0', 'CD Principal'], ['d1', 'Loja Centro']];
 const nomeDep = (id) => (DEP.find((d) => d[0] === id) || [, '—'])[1];
 const VEND = [['marcos', 'Marcos Vieira'], ['julia', 'Júlia Andrade'], ['loja', 'Balcão da loja']];
 const nomeV = (id) => (VEND.find((v) => v[0] === id) || [, '—'])[1];
-const CANAIS = { balcao: 'Balcão / PDV', representante: 'Representante', ecommerce: 'Loja virtual', marketplace: 'Marketplace' };
+const CANAIS = { balcao: 'Balcão / PDV', representante: 'Representante', ecommerce: 'Loja virtual', marketplace: 'Marketplace', catalogo: 'Catálogo online' };
 const ST_VENDA = [['orcamento', 'Orçamento', '#94a3b8'], ['aprovado', 'Aprovado', '#3b82f6'], ['separacao', 'Em separação', '#f59e0b'], ['faturado', 'Faturado', '#8b5cf6'], ['enviado', 'Enviado', '#0ea5e9'], ['entregue', 'Entregue', '#16a34a'], ['cancelado', 'Cancelado', '#a8a29e']];
 const stV = (id) => ST_VENDA.find((x) => x[0] === id) || ST_VENDA[0];
 const ST_COMPRA = { rascunho: ['Rascunho', ''], enviado: ['Enviado ao fornecedor', 'info'], parcial: ['Recebido parcial', 'al'], recebido: ['Recebido', 'ok'], cancelado: ['Cancelado', ''] };
@@ -175,7 +176,7 @@ function painel(a) {
 }
 
 function vendas(a) {
-  return a.tab({ id: 'vendas', colecao: 'vendas', singular: 'pedido', plural: 'pedidos', ordem: 'numero', desc: true, buscaDica: 'Buscar por número, cliente ou NF-e…',
+  return `<div class="entre"><span class="mute" style="font-size:12.5px">Seus clientes revendedores também podem fazer pedidos sozinhos pelo catálogo online, com preço e disponibilidade do estoque.</span><button type="button" class="btn" data-acao="linkCatalogo">${ic('storefront')}Catálogo online</button></div>` + a.tab({ id: 'vendas', colecao: 'vendas', singular: 'pedido', plural: 'pedidos', ordem: 'numero', desc: true, buscaDica: 'Buscar por número, cliente ou NF-e…',
     visoes: [{ id: 'abertos', rot: 'Em andamento', filtro: (v) => ['orcamento', 'aprovado', 'separacao', 'faturado', 'enviado'].includes(v.status) }, { id: 'separar', rot: 'Para separar', filtro: (v) => ['aprovado', 'separacao'].includes(v.status) }, { id: 'orc', rot: 'Orçamentos', filtro: (v) => v.status === 'orcamento' }, { id: 'mes', rot: 'Faturados no mês', filtro: (v) => v.nfe && v.data.startsWith(hoje().slice(0, 7)) }, { id: 'todos', rot: 'Todos' }],
     filtros: [{ k: 'canal', rot: 'Canal', opcoes: Object.entries(CANAIS) }, { k: 'vendedor', rot: 'Vendedor', opcoes: VEND.map((v) => [v[0], v[1]]) }, { k: 'status', rot: 'Situação', opcoes: ST_VENDA.map(([k, n]) => [k, n]) }],
     textoBusca: (v) => `${v.numero} ${cli(a, v.cliente)?.nome || ''} ${v.nfe?.numero || ''}`, total: (l) => moeda(soma(l, totalV)),
@@ -203,8 +204,28 @@ function pdv(a) {
         <button type="button" class="btn pri ok" style="height:44px;font-size:14.5px" data-acao="pdvFinalizar" ${st.itens.length ? '' : 'disabled'}>${ic('check-circle')}Finalizar venda · ${moeda(tot)}</button></div></div></div>`;
 }
 
+/** Lê o XML de uma NF-e (do fornecedor) e devolve emitente, número e itens. */
+function lerNFe(xml) {
+  const d = new DOMParser().parseFromString(xml, 'application/xml');
+  if (d.querySelector('parsererror')) throw new Error('arquivo não é um XML válido');
+  const t = (el, tag) => el?.getElementsByTagName(tag)[0]?.textContent?.trim() || '';
+  const inf = d.getElementsByTagName('infNFe')[0]; if (!inf) throw new Error('não é o XML de uma NF-e');
+  const emit = inf.getElementsByTagName('emit')[0], ide = inf.getElementsByTagName('ide')[0], tot = inf.getElementsByTagName('ICMSTot')[0];
+  const itens = [...inf.getElementsByTagName('det')].map((det) => { const pr = det.getElementsByTagName('prod')[0]; const ean = t(pr, 'cEAN'); return { codigo: t(pr, 'cProd'), ean: /^\d{8,14}$/.test(ean) ? ean : '', nome: t(pr, 'xProd'), ncm: t(pr, 'NCM'), un: t(pr, 'uCom').toUpperCase(), qtd: Number(t(pr, 'qCom')) || 0, custo: Number(t(pr, 'vUnCom')) || 0 }; });
+  return { cnpj: t(emit, 'CNPJ'), fornecedor: t(emit, 'xNome'), fantasia: t(emit, 'xFant'), numero: t(ide, 'nNF'), serie: t(ide, 'serie'), data: (t(ide, 'dhEmi') || t(ide, 'dEmi')).slice(0, 10), frete: Number(t(tot, 'vFrete')) || 0, total: Number(t(tot, 'vNF')) || 0, itens };
+}
+const casarProduto = (a, it) => a.db.lista('produtos').find((x) => (it.ean && x.ean === it.ean) || (it.codigo && normal(x.sku) === normal(it.codigo))) || a.db.lista('produtos').find((x) => normal(x.nome) === normal(it.nome));
+/** XML de exemplo (demonstração): uma nota de um fornecedor cadastrado, com um produto novo. */
+function xmlExemplo(a) {
+  const f = a.db.lista('fornecedores')[1] || a.db.lista('fornecedores')[0], ps = a.db.lista('produtos').filter((x) => x.fornecedor === f.id).slice(0, 3);
+  const linhas = [...ps.map((x) => ({ c: x.sku, e: x.ean, n: x.nome, u: x.unidade || 'UN', q: 24, v: x.custo })), { c: 'NOVO-901', e: '7891234567895', n: 'Água de coco 1 L', u: 'UN', q: 36, v: 6.4 }];
+  return `<?xml version="1.0" encoding="UTF-8"?><nfeProc><NFe><infNFe Id="NFe41261000000000000155550010000123451000012345" versao="4.00"><ide><nNF>12345</nNF><serie>1</serie><dhEmi>${hoje()}T09:30:00-03:00</dhEmi></ide>
+<emit><CNPJ>${String(f.doc).replace(/\D/g, '')}</CNPJ><xNome>${f.nome}</xNome></emit>${linhas.map((l, i) => `<det nItem="${i + 1}"><prod><cProd>${l.c}</cProd><cEAN>${l.e}</cEAN><xProd>${l.n}</xProd><NCM>22029900</NCM><uCom>${l.u}</uCom><qCom>${l.q}.0000</qCom><vUnCom>${l.v.toFixed(2)}</vUnCom></prod></det>`).join('')}
+<total><ICMSTot><vFrete>45.00</vFrete><vNF>${(linhas.reduce((s, l) => s + l.q * l.v, 0) + 45).toFixed(2)}</vNF></ICMSTot></total></infNFe></NFe></nfeProc>`;
+}
+
 function compras(a) {
-  return a.tab({ id: 'compras', colecao: 'compras', singular: 'pedido de compra', plural: 'pedidos de compra', ordem: 'numero', desc: true,
+  return `<div class="entre"><span class="mute" style="font-size:12.5px">Recebeu mercadoria? Importe o XML da nota do fornecedor: o sistema confere os produtos, cadastra os novos e dá entrada no estoque.</span><span class="flex"><button type="button" class="btn fant peq" data-acao="xmlExemplo">${ic('download-simple')}XML de exemplo</button><label class="btn pri">${ic('file-arrow-up')}Importar XML da nota<input type="file" accept=".xml,text/xml" hidden data-mudar="importarXML"></label></span></div>` + a.tab({ id: 'compras', colecao: 'compras', singular: 'pedido de compra', plural: 'pedidos de compra', ordem: 'numero', desc: true,
     visoes: [{ id: 'abertas', rot: 'A receber', filtro: (c) => ['enviado', 'parcial'].includes(c.status) }, { id: 'rasc', rot: 'Rascunhos', filtro: (c) => c.status === 'rascunho' }, { id: 'atrasadas', rot: 'Atrasadas', filtro: (c) => ['enviado', 'parcial'].includes(c.status) && c.previsao < hoje() }, { id: 'todas', rot: 'Todas' }],
     filtros: [{ k: 'fornecedor', rot: 'Fornecedor', opcoes: (aa) => aa.db.lista('fornecedores').map((f) => [f.id, f.nome]) }],
     textoBusca: (c) => `${c.numero} ${forn(a, c.fornecedor)?.nome}`, total: (l) => moeda(soma(l, totalC)),
@@ -432,6 +453,30 @@ const fichas = {
 const app = criarApp({
   id: 'gestao', nome: 'Nexo Gestão', sub: 'Estoque, compras e vendas', cor: '#4646d8', icone: 'warehouse', empresa: 'Atlas Distribuidora', conta: '2 depósitos · Curitiba, PR',
   produto: { compra: 2790, mensal: 129 }, semente, colecoes, fichas, buscaDica: 'produtos (nome, SKU, EAN), pedidos, clientes',
+  portal: {
+    catalogo: {
+      explica: 'O catálogo de produtos para os seus clientes revendedores pedirem pelo celular, com preço e disponibilidade do estoque. O pedido entra como orçamento.',
+      montar: (a) => ({ produtos: a.db.lista('produtos').filter((x) => x.ativo !== false).sort((x, y) => x.nome.localeCompare(y.nome)).map((x) => ({ id: x.id, nome: x.nome, codigo: x.sku, preco: x.preco, un: x.unidade || 'UN', cat: x.categoria, disponivel: estTotal(x) > 0 })), minimo: Number(a.db.cfg.pedido_minimo ?? 300) }),
+      responder: (a, r) => {
+        if (r.acao !== 'pedido') return '';
+        const d = r.dados, doc = String(d.documento || '').replace(/\D/g, ''), tel = String(d.telefone || '').replace(/\D/g, '');
+        let c = a.db.lista('clientes').find((x) => (doc && String(x.doc).replace(/\D/g, '') === doc) || (tel && String(x.telefone).replace(/\D/g, '') === tel));
+        if (!c) c = a.db.salvar('clientes', { nome: String(d.nome || 'Cliente').slice(0, 100), doc: d.documento || '', telefone: d.telefone || '', vendedor: 'marcos' });
+        const itens = (d.itens || []).map((x) => { const pr = prod(a, x.id); return pr ? { produto: pr.id, qtd: Math.max(1, Math.min(9999, Number(x.qtd) || 1)), preco: pr.preco, custo: pr.custo } : null; }).filter(Boolean);
+        if (!itens.length) return '';
+        const numero = Math.max(1000, ...a.db.lista('vendas').map((v) => v.numero)) + 1;
+        a.db.salvar('vendas', { numero, cliente: c.id, canal: 'catalogo', vendedor: c.vendedor || 'marcos', data: hoje(), itens, frete: 0, desconto: 0, deposito: 'd0', status: 'orcamento', pagamento: 'A combinar', obs: String(d.obs || '').slice(0, 300) });
+        return `Pedido #${numero} pelo catálogo online: ${c.nome} · ${moeda(soma(itens, (x) => x.qtd * x.preco))}`;
+      },
+    },
+  },
+  modelos: [
+    { id: 'distribuidora', nome: 'Distribuidora e atacado', desc: 'Pedidos de representantes, separação e entrega', dados: {} },
+    { id: 'varejo', nome: 'Loja de varejo', desc: 'Frente de caixa, etiquetas e reposição', dados: {} },
+    { id: 'materiais', nome: 'Material de construção', desc: 'Produtos por metro, saco e unidade', dados: { produtos: [['Cimento CP II 50 kg', 'SC', 31, 42], ['Areia média (m³)', 'M3', 95, 140], ['Tijolo 6 furos (milheiro)', 'MIL', 620, 850], ['Argamassa AC-I 20 kg', 'SC', 14, 22]].map(([nome, unidade, custo, preco], i) => ({ nome, unidade, custo, preco, sku: `MC-${100 + i}`, categoria: 'Mercearia', minimo: 10, estoque: {}, ean: '' })) } },
+    { id: 'autopecas', nome: 'Autopeças', desc: 'Código do fabricante, aplicação e reposição', dados: { produtos: [['Filtro de óleo PSL55', 'UN', 14, 29], ['Pastilha de freio dianteira', 'JG', 62, 119], ['Vela de ignição', 'UN', 16, 34]].map(([nome, unidade, custo, preco], i) => ({ nome, unidade, custo, preco, sku: `AP-${100 + i}`, categoria: 'Mercearia', minimo: 6, estoque: {}, ean: '' })) } },
+  ],
+  passos: (a) => [{ id: 'xml', rot: 'Dê entrada em uma nota pelo XML do fornecedor', feito: a.db.lista('compras').some((c) => c.nf), href: '#/compras' }, { id: 'catalogo', rot: 'Mande o catálogo online para um cliente', feito: !!a.db.cfg.links?.['catalogo:'], acao: 'linkCatalogo' }],
   configExtra: (a) => {
     if (!a.nuvem) return `<div class="cartao"><div class="cartao-cab"><div><h3>Nota fiscal eletrônica</h3><div class="sub">NF-e autorizada pela SEFAZ</div></div></div><div class="cartao-corpo"><div class="dica">${ic('receipt')}<span>Na versão contratada, o Nexo Gestão emite NF-e de verdade pela Focus NFe, emissor homologado. Nesta demonstração, as notas são simuladas.</span></div></div></div>`;
     if (!a.estado.nfeCarregando && !a.estado.nfe) { a.estado.nfeCarregando = true; a.sessao.funcao('nexo-nfe', { acao: 'status' }).then((r) => { a.estado.nfe = r; a.render(); }).catch(() => { a.estado.nfe = { configurado: false }; a.render(); }); }
@@ -476,6 +521,34 @@ async function escolherProduto(titulo, { qtd = 1, preco = true } = {}) {
   return modal({ titulo, largura: 520, corpo: `<form class="form-grade" onsubmit="return false"><label class="campo largo">Produto<select name="p">${ps.map((p) => `<option value="${p.id}">${esc(p.nome)} · ${esc(p.sku)} · estoque ${estTotal(p)}</option>`).join('')}</select></label><label class="campo">Quantidade<input name="q" type="number" min="1" value="${qtd}"></label>${preco ? '<label class="campo">Preço (opcional)<input name="v" type="number" step="0.01" placeholder="do cadastro"></label>' : ''}</form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Adicionar', classe: 'pri', acao: (f) => Object.fromEntries(new FormData(f.querySelector('form'))) }] });
 }
 Object.assign(app.acoes, {
+  linkCatalogo: () => app.portal.compartilhar('catalogo', '', { titulo: 'Catálogo online para revendedores', qr: true, texto: `Faça seus pedidos na ${app.empresa} pelo catálogo online, com preço e estoque atualizados:` }),
+  xmlExemplo: () => { baixar('nfe-exemplo.xml', xmlExemplo(app), 'application/xml'); avisar('XML de exemplo baixado. Agora clique em "Importar XML da nota".'); },
+  importarXML: (d, el) => {
+    const arq = el.files?.[0]; if (!arq) return; const rd = new FileReader();
+    rd.onload = async () => {
+      let nf; try { nf = lerNFe(String(rd.result)); } catch (e) { avisar(`Não deu para ler a nota: ${e.message}`, { tipo: 'erro' }); return; }
+      if (app.db.lista('compras').some((c) => c.nf === nf.numero && c.nf_cnpj === nf.cnpj)) { avisar(`A nota ${nf.numero} já foi lançada`, { tipo: 'erro' }); return; }
+      const f = app.db.lista('fornecedores').find((x) => String(x.doc).replace(/\D/g, '') === nf.cnpj);
+      const linhas = nf.itens.map((it) => ({ it, p: casarProduto(app, it) }));
+      const r = await modal({ titulo: `Nota ${nf.numero} · ${nf.fantasia || nf.fornecedor}`, largura: 760, corpo: `<div class="col" style="gap:10px"><div class="dica">${ic('info')}<span>${f ? `Fornecedor <b>${esc(f.nome)}</b>` : `Fornecedor novo: <b>${esc(nf.fornecedor)}</b> (será cadastrado)`} · emitida em ${dataBR(nf.data)} · ${moeda(nf.total)}. Confira os produtos antes de dar entrada.</span></div>
+        <table class="tabela"><thead><tr><th>Na nota</th><th>No sistema</th><th class="n">Qtd.</th><th class="n">Custo</th></tr></thead><tbody>${linhas.map(({ it, p: pr }, i) => `<tr><td><span class="prim">${esc(it.nome)}</span><span class="sub mono">${esc(it.ean || it.codigo)}</span></td><td><select name="p${i}" style="width:100%">${pr ? '' : '<option value="novo">+ Cadastrar como produto novo</option>'}${app.db.lista('produtos').sort((x, y) => x.nome.localeCompare(y.nome)).map((x) => `<option value="${x.id}" ${pr?.id === x.id ? 'selected' : ''}>${esc(x.nome)}</option>`).join('')}${pr ? '<option value="novo">+ Cadastrar como produto novo</option>' : ''}</select></td><td class="n">${num(it.qtd, 2)} ${esc(it.un)}</td><td class="n">${moeda(it.custo)}</td></tr>`).join('')}</tbody></table>
+        <label class="campo">Dar entrada no depósito<select name="dep">${DEP.map(([id, n]) => `<option value="${id}">${n}</option>`).join('')}</select></label></div>`,
+        botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Dar entrada no estoque', classe: 'pri', acao: (fm) => Object.fromEntries([...fm.querySelectorAll('select')].map((x) => [x.name, x.value])) }] });
+      if (!r) return;
+      const fo = f || app.db.salvar('fornecedores', { nome: nf.fantasia || nf.fornecedor, doc: nf.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5'), telefone: '', contato: '', prazo: 7 });
+      let novos = 0;
+      const itens = linhas.map(({ it }, i) => {
+        let pid = r[`p${i}`];
+        if (pid === 'novo') { pid = app.db.salvar('produtos', { nome: it.nome, sku: it.codigo, ean: it.ean, ncm: it.ncm, unidade: it.un || 'UN', categoria: CATEG[0], fornecedor: fo.id, custo: it.custo, preco: Math.round(it.custo * 1.35 * 100) / 100, minimo: 0, estoque: {}, ativo: true }).id; novos++; }
+        movimentar(app, { produto: pid, deposito: r.dep, qtd: it.qtd, tipo: 'entrada', motivo: `NF-e ${nf.numero} · ${fo.nome}`, custo: it.custo });
+        return { produto: pid, qtd: it.qtd, custo: it.custo, recebido: it.qtd };
+      });
+      const numero = Math.max(100, ...app.db.lista('compras').map((c) => c.numero)) + 1;
+      app.db.salvar('compras', { numero, fornecedor: fo.id, data: nf.data || hoje(), previsao: nf.data || hoje(), deposito: r.dep, status: 'recebido', itens, frete: nf.frete, nf: nf.numero, nf_cnpj: nf.cnpj });
+      avisar(`Nota ${nf.numero} lançada: ${itens.length} itens no estoque${novos ? `, ${novos} produto${novos > 1 ? 's' : ''} novo${novos > 1 ? 's' : ''} cadastrado${novos > 1 ? 's' : ''}` : ''}`, { tempo: 6000 }); app.render();
+    };
+    rd.readAsText(arq); el.value = '';
+  },
   novoPedido: async () => {
     const r = await modal({ titulo: 'Novo pedido de venda', largura: 560, corpo: `<form class="form-grade" onsubmit="return false"><label class="campo largo">Cliente<select name="c">${app.db.lista('clientes').map((c) => `<option value="${c.id}">${esc(c.nome)}</option>`).join('')}</select></label><label class="campo">Canal<select name="canal">${Object.entries(CANAIS).filter(([k]) => k !== 'balcao').map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select></label><label class="campo">Pagamento<select name="pg">${['Boleto 28 dias', 'Boleto 14/28 dias', 'PIX', 'Cartão de crédito'].map((x) => `<option>${x}</option>`).join('')}</select></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Criar e adicionar produtos', classe: 'pri', acao: (f) => Object.fromEntries(new FormData(f.querySelector('form'))) }] });
     if (!r) return; const c = cli(app, r.c);

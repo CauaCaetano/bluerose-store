@@ -10,6 +10,7 @@
 // =============================================================
 
 import { resumoDoDia, resumoTexto } from './resumos.js';
+import { prepararExtras } from './extras.js';
 
 // ---------------------------------------------------------------- utilidades
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
@@ -427,6 +428,8 @@ function montar(app, cfg) {
   const site = 'https://bluerose-store.com/';
   const paginas = cfg.paginas.filter((p) => p.id);
   const preco = (v) => moeda(v).replace(',00', '');
+  prepararExtras(app, cfg);
+  if (app.db.cfg.ramo_pendente && !app.db.cfg.ramo) { app.aplicarModelo(app.db.cfg.ramo_pendente, true); delete app.db.cfg.ramo_pendente; app.db.gravar(); }
   const faixaDemo = `<div class="faixa nao-imprime"><span class="so-larga">Demonstração do <b>${esc(cfg.nome)}</b> · dados de exemplo, só neste navegador</span><span class="sep so-larga"></span>
       <button type="button" data-acao="recomecar">Recomeçar</button>
       <a class="cta" href="${site}app/${cfg.id}/" target="_top">Testar grátis 7 dias com os seus dados</a></div>`;
@@ -467,6 +470,7 @@ function montar(app, cfg) {
     const c = $('#conteudo'); c.className = `conteudo ${p.cheio ? 'cheio' : ''}`;
     const rolagem = scrollY;
     c.innerHTML = p.render(app, params);
+    if (p.id === paginas[0].id && app.passosHTML) c.insertAdjacentHTML('afterbegin', app.passosHTML());
     p.montar?.(app, c, params);
     if (app._mesmaPagina === `${p.id}/${params.join('/')}`) scrollTo(0, rolagem); else scrollTo(0, 0);
     app._mesmaPagina = `${p.id}/${params.join('/')}`;
@@ -552,9 +556,9 @@ function montar(app, cfg) {
       <div class="cartao"><div class="cartao-cab"><div><h3>Dados</h3><div class="sub">Cópia e restauração</div></div></div><div class="cartao-corpo col" style="gap:10px">
         <div class="entre"><span class="mute-2">Baixar uma cópia de tudo (JSON)</span><button type="button" class="btn" data-acao="exportarDados">${ic('download-simple')}Exportar</button></div>
         ${a.nuvem ? a.sessao.linhasDados() : `<div class="entre"><span class="mute-2">Voltar aos dados de exemplo</span><button type="button" class="btn perigo" data-acao="recomecar">${ic('arrow-counter-clockwise')}Recomeçar</button></div>`}</div></div>
-      ${a.nuvem ? a.sessao.cartaoResumo() : ''}${cfg.configExtra ? cfg.configExtra(a) : ''}</div>`,
+      ${a.nuvem ? a.sessao.cartaoResumo() : ''}${a.extrasConfig ? a.extrasConfig(a) : ''}${cfg.configExtra ? cfg.configExtra(a) : ''}</div>`,
   };
-  app.acoes.salvarEmpresa = () => { const f = $('[data-form-empresa]'); const d = Object.fromEntries(new FormData(f)); Object.assign(app.db.cfg, d); app.db.gravar(); app.empresa = d.empresa || app.empresa; $('[data-empresa]').textContent = app.empresa; avisar('Dados da empresa salvos'); };
+  app.acoes.salvarEmpresa = () => { const f = $('[data-form-empresa]'); const d = Object.fromEntries(new FormData(f)); Object.assign(app.db.cfg, d, { empresa_ok: true }); app.db.gravar(); app.empresa = d.empresa || app.empresa; $('[data-empresa]').textContent = app.empresa; avisar('Dados da empresa salvos'); };
 
   // ---------------- eventos (delegação)
   document.addEventListener('click', async (e) => {

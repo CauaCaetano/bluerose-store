@@ -80,10 +80,15 @@ const sinal = (l) => (l.tipo === 'receita' ? 1 : -1);
 const saldoConta = (a, id, ate = hoje()) => (conta(a, id)?.saldo_inicial || 0) + soma(lancs(a).filter((l) => l.conta === id && l.status === 'pago' && l.pago_em <= ate), (l) => sinal(l) * l.valor);
 const saldoTotal = (a, ate = hoje()) => soma(a.db.lista('contas'), (c) => saldoConta(a, c.id, ate));
 const vencido = (l) => l.status === 'aberto' && l.vencimento < hoje();
-const etL = (l) => (l.status === 'pago' ? et(l.tipo === 'receita' ? 'Recebido' : 'Pago', 'ok') : vencido(l) ? et(`Vencido há ${-diasAte(l.vencimento)}d`, 'er') : diasAte(l.vencimento) === 0 ? et('Vence hoje', 'al') : et('Em aberto', 'info'));
+const etL = (l) => (l.status !== 'pago' && l.informado ? et('Pagamento informado', 'info') : l.status === 'pago' ? et(l.tipo === 'receita' ? 'Recebido' : 'Pago', 'ok') : vencido(l) ? et(`Vencido há ${-diasAte(l.vencimento)}d`, 'er') : diasAte(l.vencimento) === 0 ? et('Vence hoje', 'al') : et('Em aberto', 'info'));
 const totalOS = (o) => soma(o.itens, (x) => x.qtd * x.preco) - (o.desconto || 0);
 const os = (a, id) => a.db.obter('ordens', id);
 const valorFmt = (l) => `<span class="${l.tipo === 'receita' ? 'ok-tx' : ''}">${l.tipo === 'receita' ? '' : '− '}${moeda(l.valor)}</span>`;
+
+// régua de cobrança: lembrete 3 dias antes, no dia e depois de 3 e 7 dias de atraso
+const REGUA = [[-3, 'antes', 'Lembrete: vence em 3 dias'], [0, 'dia', 'Vence hoje'], [3, 'a3', '3 dias de atraso'], [7, 'a7', '7 dias de atraso']];
+const reguaHoje = (a) => lancs(a).filter((l) => l.tipo === 'receita' && l.status === 'aberto' && !l.informado && l.pessoa).map((l) => { const atraso = -diasAte(l.vencimento); const passo = REGUA.find(([d]) => d === atraso); return passo && !(l.regua || {})[passo[1]] ? { l, passo } : null; }).filter(Boolean);
+const textoRegua = (a, l, passo, url) => { const p = pessoa(a, l.pessoa), nome = p?.nome.split(' ')[0] || ''; const base = passo[1] === 'antes' ? `Olá, ${nome}! Passando para lembrar que ${l.descricao} (${moeda(l.valor)}) vence em ${dataBR(l.vencimento)}.` : passo[1] === 'dia' ? `Olá, ${nome}! ${l.descricao} (${moeda(l.valor)}) vence hoje.` : `Olá, ${nome}, tudo bem? Consta em aberto ${l.descricao} (${moeda(l.valor)}), vencido em ${dataBR(l.vencimento)}.`; return `${base} Para pagar pelo PIX: ${url}\n${a.empresa}`; };
 
 // ---------------------------------------------------------------- coleções
 const colecoes = {
@@ -112,6 +117,11 @@ const colecoes = {
 };
 
 // ---------------------------------------------------------------- páginas
+function cartaoRegua(a) {
+  const l = reguaHoje(a);
+  if (!l.length) return '';
+  return `<div class="cartao"><div class="cartao-cab"><div><h3>Régua de cobrança de hoje</h3><div class="sub">Lembretes automáticos: antes de vencer, no dia e nos atrasos. Cada mensagem já vai com o link de pagamento PIX.</div></div><span class="et info">${l.length}</span></div><ul class="lista">${l.slice(0, 10).map(({ l: x, passo }) => `<li>${av(pessoa(a, x.pessoa)?.nome || '?')}<div class="cresce"><div class="t corta">${esc(pessoa(a, x.pessoa)?.nome || '')}</div><div class="s corta">${esc(passo[2])} · ${esc(x.descricao)}</div></div><b class="num">${moeda(x.valor)}</b><button type="button" class="btn peq pri" data-acao="cobrarLink" data-id="${x.id}" data-passo="${passo[1]}">${ic('whatsapp-logo')}Mandar</button></li>`).join('')}</ul></div>`;
+}
 function painel(a) {
   const ab = lancs(a).filter((l) => l.status === 'aberto'), ym = hoje().slice(0, 7);
   const rec30 = ab.filter((l) => l.tipo === 'receita' && diasAte(l.vencimento) <= 30), pag30 = ab.filter((l) => l.tipo === 'despesa' && diasAte(l.vencimento) <= 30);
@@ -122,7 +132,7 @@ function painel(a) {
   const minimo = Math.min(...proj);
   const vencR = ab.filter((l) => l.tipo === 'receita' && vencido(l)), hojeL = ab.filter((l) => diasAte(l.vencimento) >= 0 && diasAte(l.vencimento) <= 3).sort((x, y) => x.vencimento.localeCompare(y.vencimento));
   const ords = a.db.lista('ordens').filter((o) => o.status !== 'entregue');
-  return `${kpis([
+  return `${cartaoRegua(a)}${kpis([
     { rot: 'Saldo em contas', icone: 'bank', val: moeda(saldoTotal(a)), nota: `${a.db.lista('contas').length} contas`, spark: Array.from({ length: 30 }, (_, i) => saldoTotal(a, diaMais(i - 29))) },
     { rot: 'A receber (30 dias)', icone: 'arrow-down-left', val: moeda(soma(rec30, (l) => l.valor)), nota: vencR.length ? `<span class="er-tx">${moeda(soma(vencR, (l) => l.valor))} vencido</span>` : 'nada vencido' },
     { rot: 'A pagar (30 dias)', icone: 'arrow-up-right', val: moeda(soma(pag30, (l) => l.valor)), nota: `${pag30.length} contas` },
@@ -134,7 +144,7 @@ function painel(a) {
     <div class="cartao"><div class="cartao-cab"><div><h3>Contas</h3><div class="sub">Saldo de hoje</div></div><a class="btn peq" href="#/conciliacao">Conciliar</a></div><ul class="lista">${a.db.lista('contas').map((c) => { const pend = a.db.lista('extrato').filter((e) => e.conta === c.id && !e.conciliado).length; return `<li><span class="av" style="background:var(--acc)">${ic(c.icone, 'p')}</span><div class="cresce"><div class="t">${esc(c.nome)}</div><div class="s">${pend ? `<span class="al-tx">${pend} lançamentos do extrato para conciliar</span>` : 'conciliada'}</div></div><b class="num">${moeda(saldoConta(a, c.id))}</b></li>`; }).join('')}<li><div class="cresce t">Total</div><b class="num">${moeda(saldoTotal(a))}</b></li></ul></div></div>
   <div class="grade g2"><div class="cartao"><div class="cartao-cab"><div><h3>Vencendo nos próximos 3 dias</h3></div><a class="btn peq" href="#/lancamentos">Ver todos</a></div>${hojeL.length ? `<ul class="lista">${hojeL.slice(0, 7).map((l) => `<li class="clicavel" data-abrir="lanc:${l.id}"><span class="av p" style="background:${l.tipo === 'receita' ? 'var(--ok)' : 'var(--er)'}">${ic(l.tipo === 'receita' ? 'arrow-down-left' : 'arrow-up-right', 'p')}</span><div class="cresce"><div class="t corta">${esc(l.descricao)}</div><div class="s">${esc(pessoa(a, l.pessoa)?.nome || CAT[l.categoria]?.nome || '')} · ${relativo(l.vencimento)}</div></div><b class="num">${valorFmt(l)}</b></li>`).join('')}</ul>` : vazio('check-circle', 'Nada vencendo')}</div>
     <div class="cartao"><div class="cartao-cab"><div><h3>Ordens de serviço em andamento</h3><div class="sub">${ords.length} abertas · ${moedaC(soma(ords, totalOS))}</div></div><a class="btn peq" href="#/os">Abrir quadro</a></div><div class="cartao-corpo">${barrasH(STATUS_OS.slice(0, 5).map(([id, n, c]) => ({ html: `<span class="flex"><i style="width:9px;height:9px;border-radius:3px;background:${c}"></i>${n}</span>`, v: ords.filter((o) => o.status === id).length, extra: moedaC(soma(ords.filter((o) => o.status === id), totalOS)) })))}</div></div></div>
-  ${vencR.length ? `<div class="cartao"><div class="cartao-cab"><div><h3>Clientes em atraso</h3><div class="sub">Cobre com um clique pelo WhatsApp</div></div></div><ul class="lista">${vencR.sort((x, y) => x.vencimento.localeCompare(y.vencimento)).map((l) => { const p = pessoa(a, l.pessoa); return `<li>${av(p?.nome || '?')}<div class="cresce"><div class="t corta">${esc(p?.nome || '—')}</div><div class="s corta">${esc(l.descricao)} · venceu ${dataCurta(l.vencimento)}</div></div><b class="num er-tx">${moeda(l.valor)}</b>${p?.telefone ? `<a class="btn peq" target="_blank" rel="noopener" href="${telLink(p.telefone)}?text=${encodeURIComponent(`Olá! Tudo bem? Aqui é da ${a.empresa}. Consta em aberto ${moeda(l.valor)} (${l.descricao}), vencido em ${dataBR(l.vencimento)}. Posso te mandar a chave PIX? Obrigado!`)}">${ic('whatsapp-logo')}Cobrar</a>` : ''}<button type="button" class="btn peq" data-acao="baixar" data-id="${l.id}">${ic('check')}Recebido</button></li>`; }).join('')}</ul></div>` : ''}`;
+  ${vencR.length ? `<div class="cartao"><div class="cartao-cab"><div><h3>Clientes em atraso</h3><div class="sub">Cobre com um clique pelo WhatsApp</div></div></div><ul class="lista">${vencR.sort((x, y) => x.vencimento.localeCompare(y.vencimento)).map((l) => { const p = pessoa(a, l.pessoa); return `<li>${av(p?.nome || '?')}<div class="cresce"><div class="t corta">${esc(p?.nome || '—')}</div><div class="s corta">${esc(l.descricao)} · venceu ${dataCurta(l.vencimento)}</div></div><b class="num er-tx">${moeda(l.valor)}</b>${p?.telefone ? `<button type="button" class="btn peq" data-acao="cobrarLink" data-id="${l.id}">${ic('whatsapp-logo')}Cobrar com PIX</button>` : ''}<button type="button" class="btn peq" data-acao="baixar" data-id="${l.id}">${ic('check')}Recebido</button></li>`; }).join('')}</ul></div>` : ''}`;
 }
 
 function lancamentosPag(a, [modo]) {
@@ -176,7 +186,19 @@ function fluxo(a) {
     linhasT = dias.map((d, i) => { const l = lancs(a).filter((x) => x.status === 'aberto' && (i === 0 ? x.vencimento <= d : x.vencimento === d)); const e = soma(l.filter((x) => x.tipo === 'receita'), (x) => x.valor), s = soma(l.filter((x) => x.tipo === 'despesa'), (x) => x.valor); saldo += e - s; return { rot: `${DIAS[paraData(d).getDay()]}, ${dataCurta(d)}${i === 0 ? ' (inclui vencidos)' : ''}`, curto: dataCurta(d), e, s, r: e - s, saldo, futuro: true }; });
   }
   a.estado.fxLinhas = linhasT;
-  return `${topo}<div class="cartao"><div class="cartao-corpo">${barras({ dados: linhasT.map((x) => ({ rot: x.curto, v: [x.e, x.s] })), series: [{ nome: 'Entradas', cor: '#16a34a' }, { nome: 'Saídas', cor: '#e11d48' }], fmt: moedaC, altura: 260, largura: 1150 })}</div></div>
+  const sim = a.estado.simFx ||= { despesa: 0, receita: 0, atraso: 0 };
+  const meses6 = Array.from({ length: 6 }, (_, i) => mesMais(i + 1)), base3 = Array.from({ length: 3 }, (_, i) => mesMais(i - 3));
+  const res = (m) => soma(lancs(a).filter((l) => l.vencimento.startsWith(m)), (l) => sinal(l) * l.valor), rec = (m) => soma(lancs(a).filter((l) => l.tipo === 'receita' && l.vencimento.startsWith(m)), (l) => l.valor);
+  const medRes = soma(base3, res) / 3, medRec = soma(base3, rec) / 3;
+  let s1 = saldoTotal(a), s2 = saldoTotal(a); const serieA = [], serieB = [];
+  meses6.forEach(() => { s1 += medRes; s2 += medRes - sim.despesa + sim.receita - (medRec * sim.atraso) / 100; serieA.push(Math.round(s1)); serieB.push(Math.round(s2)); });
+  const simulacao = `<div class="cartao"><div class="cartao-cab"><div><h3>E se…?</h3><div class="sub">Simule uma decisão e veja o efeito no caixa dos próximos 6 meses (média dos últimos 3 meses como base)</div></div></div><div class="cartao-corpo">
+    <div class="form-grade tres"><label class="campo">Nova despesa por mês<div class="prefixo"><span>R$</span><input type="number" min="0" step="100" value="${sim.despesa}" data-mudar="simFx" data-k="despesa"></div><span class="ajuda">Ex.: contratar alguém, alugar mais um espaço</span></label>
+      <label class="campo">Receita extra por mês<div class="prefixo"><span>R$</span><input type="number" min="0" step="100" value="${sim.receita}" data-mudar="simFx" data-k="receita"></div><span class="ajuda">Ex.: novo contrato, aumento de preço</span></label>
+      <label class="campo">Clientes que atrasam (%)<input type="number" min="0" max="100" value="${sim.atraso}" data-mudar="simFx" data-k="atraso"><span class="ajuda">Parte da receita que não entra no mês</span></label></div>
+    ${linhas({ rotulos: meses6.map((m) => nomeMes(m)), series: [{ nome: 'Como está', cor: '#94a3b8', v: serieA }, { nome: 'Com a mudança', cor: 'var(--acc)', v: serieB }], fmt: moedaC, altura: 200, largura: 1100, zero: false })}
+    <div class="${serieB.some((v) => v < 0) ? 'alerta-linha' : 'dica'}" style="margin-top:10px">${ic(serieB.some((v) => v < 0) ? 'warning' : 'info')}<span>${serieB.some((v) => v < 0) ? `Com a mudança, o caixa fica negativo em ${nomeMes(meses6[serieB.findIndex((v) => v < 0)], true)}.` : `Em 6 meses, o saldo fica em ${moeda(serieB.at(-1))}: ${moeda(Math.abs(serieB.at(-1) - serieA.at(-1)))} ${serieB.at(-1) >= serieA.at(-1) ? 'a mais' : 'a menos'} do que sem a mudança.`}</span></div></div></div>`;
+  return `${topo}${simulacao}<div class="cartao"><div class="cartao-corpo">${barras({ dados: linhasT.map((x) => ({ rot: x.curto, v: [x.e, x.s] })), series: [{ nome: 'Entradas', cor: '#16a34a' }, { nome: 'Saídas', cor: '#e11d48' }], fmt: moedaC, altura: 260, largura: 1150 })}</div></div>
     <div class="cartao"><div class="tabela-caixa"><table class="tabela"><thead><tr><th>${st.modo === 'mensal' ? 'Mês' : 'Dia'}</th><th class="n">Entradas</th><th class="n">Saídas</th><th class="n">Resultado</th><th class="n">Saldo final</th></tr></thead><tbody>
       ${linhasT.filter((x) => st.modo === 'mensal' || x.e || x.s).map((x) => `<tr style="${x.atual ? 'background:var(--acc-suave)' : ''}"><td>${esc(x.rot)} ${x.futuro && st.modo === 'mensal' ? et('previsto', '', 'sem-ponto') : ''}</td><td class="n ok-tx">${moeda(x.e)}</td><td class="n er-tx">${moeda(x.s)}</td><td class="n"><b class="${x.r < 0 ? 'er-tx' : ''}">${moeda(x.r)}</b></td><td class="n"><b class="${x.saldo < 0 ? 'er-tx' : ''}">${moeda(x.saldo)}</b></td></tr>`).join('')}</tbody></table></div></div>`;
 }
@@ -292,7 +314,7 @@ const fichas = {
   lanc(a, id) {
     const l = a.db.obter('lancamentos', id); if (!l) return null; const p = pessoa(a, l.pessoa), o = l.os ? os(a, l.os) : null;
     return { estreita: true, html: ficha({ tipo: l.tipo === 'receita' ? 'Receita' : 'Despesa', icone: l.tipo === 'receita' ? 'arrow-down-left' : 'arrow-up-right', titulo: esc(l.descricao), sub: `${etL(l)}<b class="num" style="font-size:15px;color:var(--tx)">${valorFmt(l)}</b>`,
-      extra: l.status === 'aberto' ? `<div class="flex" style="margin-top:12px"><button type="button" class="btn ok pri" data-acao="baixar" data-id="${id}">${ic('check')}${l.tipo === 'receita' ? 'Receber' : 'Pagar'}</button>${l.tipo === 'receita' && p?.telefone ? `<a class="btn" target="_blank" rel="noopener" href="${telLink(p.telefone)}?text=${encodeURIComponent(`Olá! Aqui é da ${a.empresa}. Segue o lembrete do pagamento de ${moeda(l.valor)} (${l.descricao}) com vencimento em ${dataBR(l.vencimento)}. Chave PIX: ${a.db.cfg.cnpj}.`)}">${ic('whatsapp-logo')}Enviar cobrança</a>` : ''}</div>` : '',
+      extra: l.status === 'aberto' ? `<div class="flex" style="margin-top:12px"><button type="button" class="btn ok pri" data-acao="baixar" data-id="${id}">${ic('check')}${l.tipo === 'receita' ? 'Receber' : 'Pagar'}</button>${l.tipo === 'receita' ? `<button type="button" class="btn" data-acao="cobrarLink" data-id="${id}">${ic('qr-code')}Link de pagamento PIX</button>` : ''}${l.tipo === 'receita' && p?.telefone ? `<a class="btn" target="_blank" rel="noopener" href="${telLink(p.telefone)}?text=${encodeURIComponent(`Olá! Aqui é da ${a.empresa}. Segue o lembrete do pagamento de ${moeda(l.valor)} (${l.descricao}) com vencimento em ${dataBR(l.vencimento)}. Chave PIX: ${a.db.cfg.cnpj}.`)}">${ic('whatsapp-logo')}Enviar cobrança</a>` : ''}</div>` : '',
       corpo: `<div class="gav-sec">${props([['calendar-blank', 'Vencimento', `${dataBR(l.vencimento)} · ${relativo(l.vencimento)}`], l.pago_em ? ['check-circle', l.tipo === 'receita' ? 'Recebido em' : 'Pago em', dataBR(l.pago_em)] : null, ['tag', 'Categoria', esc(CAT[l.categoria]?.nome || '—')], ['user', l.tipo === 'receita' ? 'Cliente' : 'Fornecedor', p ? `<a href="javascript:void 0" data-abrir="pessoa:${p.id}">${esc(p.nome)}</a>` : null], ['bank', 'Conta', esc(conta(a, l.conta)?.nome || '—')], ['credit-card', 'Forma', esc(l.forma || '—')], ['arrows-clockwise', 'Recorrente', l.recorrente ? 'Sim, todo mês' : null], o ? ['wrench', 'Ordem de serviço', `<a href="javascript:void 0" data-abrir="os:${o.id}">#${o.numero}</a>`] : null, ['link', 'Conciliação', l.status === 'pago' ? (l.conciliado ? et('Conciliado com o extrato', 'ok') : et('Não conciliado', 'al')) : null]])}</div>`,
       acoes: `<button type="button" class="btn fant peq" data-acao="editarLanc" data-id="${id}">${ic('pencil-simple')}Editar</button><button type="button" class="btn fant peq ic-so" data-acao="menuLanc" data-id="${id}" aria-label="Mais">${ic('dots-three')}</button>` }) };
   },
@@ -326,6 +348,27 @@ const fichas = {
 const app = criarApp({
   id: 'financeiro', nome: 'Nexo Financeiro', sub: 'Financeiro e OS', cor: '#0b6fb8', icone: 'currency-circle-dollar', empresa: 'Refrigeração Polo Frio', conta: 'Assistência técnica · Florianópolis',
   produto: { compra: 2490, mensal: 109 }, semente, colecoes, fichas, buscaDica: 'OS, clientes, lançamentos',
+  portal: {
+    cobranca: {
+      explica: 'A página de pagamento da cobrança: valor, vencimento e o PIX copia e cola com QR code. Quando o cliente avisa que pagou, aparece aqui para você conferir.',
+      montar: (a, id) => {
+        const l = a.db.obter('lancamentos', id); if (!l) return null;
+        const pix = a.db.cfg.pix?.chave ? { chave: a.db.cfg.pix.chave, nome: a.db.cfg.pix.nome || a.empresa, cidade: a.db.cfg.pix.cidade || 'BRASIL' } : null;
+        return { descricao: l.descricao, valor: l.valor, vencimento: l.vencimento, status: l.status, cliente: pessoa(a, l.pessoa)?.nome || '', pix, txid: `L${String(l.id).replace(/[^A-Za-z0-9]/g, '').slice(-12)}` };
+      },
+      responder: (a, r) => {
+        const l = a.db.obter('lancamentos', r.ref); if (!l || r.acao !== 'paguei' || l.status === 'pago') return '';
+        a.db.salvar('lancamentos', { id: l.id, informado: hoje() });
+        return `${pessoa(a, l.pessoa)?.nome.split(' ')[0] || 'O cliente'} avisou que pagou ${moeda(l.valor)} pelo PIX (${l.descricao}): confira no extrato e dê baixa`;
+      },
+    },
+  },
+  modelos: [
+    { id: 'assistencia', nome: 'Assistência técnica', desc: 'Ordens de serviço, peças e contratos de manutenção', dados: {} },
+    { id: 'prestador', nome: 'Prestador de serviços', desc: 'Serviços avulsos e mensalidades de clientes', dados: { servicos: [['Visita técnica', 150], ['Hora de serviço', 120], ['Mensalidade de manutenção', 450]].map(([nome, preco]) => ({ nome, preco })) } },
+    { id: 'eletronicos', nome: 'Conserto de celulares e eletrônicos', desc: 'Troca de tela, bateria e reparos', dados: { servicos: [['Troca de tela de celular (mão de obra)', 120], ['Troca de bateria', 90], ['Limpeza de placa (oxidação)', 150]].map(([nome, preco]) => ({ nome, preco })), produtos: [['Tela iPhone 11 (compatível)', 'TEL-IP11', 180, 390, 3, 2], ['Bateria Samsung A32', 'BAT-A32', 60, 150, 4, 2]].map(([nome, codigo, custo, preco, estoque, minimo]) => ({ nome, codigo, custo, preco, estoque, minimo })) } },
+  ],
+  passos: (a) => [{ id: 'pix', rot: 'Cadastre a chave PIX da empresa', feito: a.temPix(), href: '#/config' }, { id: 'cobranca', rot: 'Mande um link de pagamento para um cliente', feito: Object.keys(a.db.cfg.links || {}).some((k) => k.startsWith('cobranca:')) }],
   equipe: [['Rodrigo Martins', 'Dono'], ['Cláudia Neves', 'Financeiro'], ...TEC.map(([, n]) => [n, 'Técnico'])],
   busca: [{ colecao: 'ordens', grupo: 'Ordens de serviço', icone: 'wrench', ficha: 'os', rot: (o) => `#${o.numero} · ${o.equipamento}`, sub: (o, a) => pessoa(a, o.cliente)?.nome || '' }, { colecao: 'pessoas', grupo: 'Clientes e fornecedores', icone: 'user', ficha: 'pessoa', rot: (p) => p.nome, sub: (p) => p.tipo }, { colecao: 'lancamentos', grupo: 'Lançamentos', icone: 'receipt', ficha: 'lanc', rot: (l) => l.descricao, sub: (l) => moeda(l.valor) }],
   comandos: [{ rot: 'Nova ordem de serviço', icone: 'wrench', acao: (a) => a.acoes.novaOS() }, { rot: 'Nova receita', icone: 'arrow-down-left', acao: (a) => a.acoes.novoLanc({ t: 'receita' }) }, { rot: 'Nova despesa', icone: 'arrow-up-right', acao: (a) => a.acoes.novoLanc({ t: 'despesa' }) }],
@@ -366,6 +409,14 @@ Object.assign(app.acoes, {
     { sep: true }, { rotulo: 'Excluir', icone: 'trash', perigo: true, acao: () => excluir(app, 'lancamentos', d.id) },
   ]),
   modoFx: (d) => { app.estado.fx.modo = d.m; app.render(); },
+  simFx: (d, el) => { app.estado.simFx[d.k] = Math.max(0, Number(el.value) || 0); app.render(); },
+  cobrarLink: async (d) => {
+    const l = app.db.obter('lancamentos', d.id), p = pessoa(app, l.pessoa);
+    if (!app.temPix()) avisar('Dica: cadastre a chave PIX em Configurações para o link já trazer o QR code.', { tipo: 'erro', tempo: 6000 });
+    const url = await app.portal.link('cobranca', d.id), passo = REGUA.find((x) => x[1] === d.passo) || (vencido(l) ? REGUA[2] : REGUA[1]);
+    window.open(`${telLink(p?.telefone)}?text=${encodeURIComponent(textoRegua(app, l, passo, url))}`, '_blank', 'noopener');
+    app.db.salvar('lancamentos', { id: d.id, regua: { ...(l.regua || {}), [passo[1]]: hoje() } }); app.db.registrar(`lancamentos:${d.id}`, `Cobrança enviada (${passo[2]})`, { icone: 'whatsapp-logo' }); app.render();
+  },
   csvFluxo: () => { const l = app.estado.fxLinhas || []; baixar('fluxo-de-caixa.csv', `﻿Período;Entradas;Saídas;Resultado;Saldo\n${l.map((x) => [x.rot, x.e, x.s, x.r, x.saldo].map((v) => String(typeof v === 'number' ? v.toFixed(2).replace('.', ',') : v)).join(';')).join('\n')}`); avisar('Planilha baixada'); },
   contaConc: (d, el) => { app.estado.conc.conta = el.value; app.render(); },
   conciliar: (d) => { app.db.salvar('extrato', { id: d.e, conciliado: d.l }); const l = app.db.obter('lancamentos', d.l); const e = app.db.obter('extrato', d.e); app.db.salvar('lancamentos', { id: d.l, conciliado: true, status: 'pago', pago_em: l.pago_em || e.data }); avisar('Conciliado'); app.render(); },

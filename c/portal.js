@@ -1,0 +1,356 @@
+// =============================================================
+// Linha Nexo · página do cliente final
+// -------------------------------------------------------------
+// Abre pelo link que a empresa manda: /c/#<token> (versão na nuvem)
+// ou /c/#d=<dados> (demonstração). Mostra o orçamento, o cardápio,
+// a proposta, o processo… e manda a resposta do cliente de volta.
+// =============================================================
+import { qrSVG } from '../demos/sistemas/base/qr.js';
+import { pixCopiaECola } from '../demos/sistemas/base/pix.js';
+
+const raiz = document.getElementById('p');
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+const moeda = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const DIAS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+const dt = (s) => { if (!s) return '—'; const [a, m, d] = String(s).slice(0, 10).split('-'); return `${Number(d)} ${MESES[Number(m) - 1]}${a !== String(new Date().getFullYear()) ? ` ${a}` : ''}`; };
+const wa = (t, msg = '') => `https://wa.me/${String(t || '').replace(/\D/g, '') ? `55${String(t).replace(/\D/g, '').replace(/^55/, '')}` : ''}${msg ? `?text=${encodeURIComponent(msg)}` : ''}`;
+const q = new URLSearchParams(location.search);
+
+let ctx = null; // { tipo, app, empresa, dados, demo, token }
+const st = {}; // estado da tela
+
+// ---------------------------------------------------------------- dados
+async function carregar() {
+  const h = location.hash.slice(1);
+  if (h.startsWith('d=')) {
+    const json = decodeURIComponent(escape(atob(h.slice(2).replace(/-/g, '+').replace(/_/g, '/'))));
+    const d = JSON.parse(json);
+    return { ...d, empresa: d.dados?._empresa?.nome || '' };
+  }
+  if (h.startsWith('t=')) {
+    const pac = localStorage.getItem(`nexo-portal-demo-${h.slice(2)}`);
+    if (!pac) throw new Error('Este QR code é da demonstração e só abre no navegador onde o sistema está aberto.');
+    const d = JSON.parse(pac); return { ...d, empresa: d.dados?._empresa?.nome || '' };
+  }
+  if (!/^[A-Za-z0-9_-]{16,64}$/.test(h)) throw new Error('Link incompleto. Peça um novo link para a empresa.');
+  const conf = window.NEXO_NUVEM;
+  const sb = window.supabase.createClient(conf.url, conf.chave, { auth: { persistSession: false } });
+  const { data, error } = await sb.rpc('nexo_portal_ler', { p_token: h });
+  if (error) throw new Error('Não foi possível abrir agora. Tente de novo em instantes.');
+  if (data?.erro) throw new Error(data.erro);
+  return { ...data, token: h, sb };
+}
+async function responder(acao, dados = {}) {
+  if (ctx.demo) {
+    try { new BroadcastChannel(`nexo-demo-${ctx.app}`).postMessage({ token: ctx.token, acao, dados }); } catch { /* sem canal */ }
+    return { ok: true };
+  }
+  const { data, error } = await ctx.sb.rpc('nexo_portal_responder', { p_token: ctx.token, p_acao: acao, p_dados: dados });
+  if (error) return { erro: 'Sem conexão. Tente de novo.' };
+  return data || { ok: true };
+}
+
+// ---------------------------------------------------------------- pedaços
+const E = () => ctx.dados._empresa || {};
+const cab = (pre, titulo, sub = '') => `<header class="p-cab"><small>${esc(pre)}</small><h1>${esc(titulo)}</h1>${sub ? `<p>${sub}</p>` : ''}</header>`;
+const rod = () => `<footer class="p-rod">${esc(E().nome)}${E().telefone ? ` · <a href="${wa(E().telefone)}" target="_blank" rel="noopener">${esc(E().telefone)}</a>` : ''}<br>${E().endereco ? `${esc(E().endereco)}<br>` : ''}Feito com o ${esc(E().sistema || 'Linha Nexo')} · <a href="https://bluerose-store.com/" target="_blank" rel="noopener">Blue Rose Express</a></footer>`;
+const avisoDemo = () => (ctx.demo ? '<div class="p-aviso">Demonstração: a sua resposta aparece na aba do sistema aberta neste navegador.</div>' : '');
+const fotos = (l) => (l?.length ? `<div class="p-fotos">${l.map((f) => `<a href="${esc(f.url)}" target="_blank" rel="noopener"><img src="${esc(f.url)}" alt="${esc(f.legenda || 'Foto')}" loading="lazy"></a>`).join('')}</div>` : '');
+const pronto = (titulo, texto) => { raiz.innerHTML = `${cab(E().nome || '', titulo)}<section class="p-sec p-ok"><div class="p-ic">✓</div><h2>${esc(titulo)}</h2><p class="p-s">${esc(texto)}</p>${E().telefone ? `<p><a class="p-bt" href="${wa(E().telefone)}" target="_blank" rel="noopener">Falar no WhatsApp</a></p>` : ''}</section>${avisoDemo()}${rod()}`; scrollTo(0, 0); };
+const pixBloco = (pix, valor, txid, desc) => {
+  if (!pix?.chave) return '';
+  const cod = pixCopiaECola({ ...pix, valor, txid, descricao: desc });
+  return `<div class="p-pix">${qrSVG(cod, 220)}<textarea readonly data-pix>${esc(cod)}</textarea><button type="button" class="p-bt" data-a="copiarPix">Copiar código PIX</button></div>`;
+};
+
+// ---------------------------------------------------------------- telas por tipo
+const T = {};
+
+// Oficina: acompanhamento e aprovação do orçamento
+T.os = {
+  titulo: (d) => `${d.modelo} · ${d.placa}`,
+  render(d) {
+    st.aprov ||= Object.fromEntries(d.itens.filter((x) => x.aprovado == null).map((x) => [x.k, true]));
+    const i = d.etapas.findIndex(([id]) => id === d.etapa), pend = d.itens.some((x) => x.aprovado == null);
+    const valendo = d.itens.filter((x) => (x.aprovado == null ? st.aprov[x.k] : x.aprovado));
+    const total = valendo.reduce((s, x) => s + x.qtd * x.preco, 0) - (d.desconto || 0);
+    return `${cab(E().nome, `${d.modelo}`, `Placa ${esc(d.placa)} · Ordem de serviço nº ${esc(d.numero)}`)}
+      <section class="p-sec"><h2>Onde está o seu carro</h2><div class="p-passos">${d.etapas.map((_, k) => `<i class="${k <= i ? 'feito' : ''}"></i>`).join('')}</div><div class="p-passos-rot"><span>Entrada</span><b style="color:var(--acc)">${esc(d.etapas[i]?.[1] || '')}</b><span>Entrega</span></div>
+        ${d.aguardando ? `<p class="p-s" style="margin-top:10px">Aguardando: ${esc(d.aguardando)}</p>` : ''}${d.previsao ? `<p class="p-s" style="margin-top:6px">Previsão de entrega: <b>${dt(d.previsao)}</b></p>` : ''}</section>
+      <section class="p-sec"><h2>${pend ? 'Orçamento para aprovar' : 'Serviços e peças'}</h2>${pend ? '<p class="p-sub">Marque o que você quer fazer agora. O que não for aprovado fica anotado para depois.</p>' : ''}
+        ${d.itens.map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.descricao)}${x.qtd > 1 ? ` <span class="p-s">× ${x.qtd}</span>` : ''}</div>${x.sugerido ? '<div class="p-s">Recomendado pelo mecânico</div>' : ''}</div><span class="p-num">${moeda(x.qtd * x.preco)}</span>
+          ${x.aprovado == null ? `<button type="button" class="p-bt peq" aria-pressed="${!!st.aprov[x.k]}" data-a="marcar" data-k="${x.k}">${st.aprov[x.k] ? 'Aprovado' : 'Não agora'}</button>` : x.aprovado ? '<span class="p-et ok">Aprovado</span>' : '<span class="p-et">Recusado</span>'}</div>`).join('')}
+        ${d.desconto ? `<div class="p-linha"><div class="p-cresce">Desconto</div><span class="p-num">− ${moeda(d.desconto)}</span></div>` : ''}
+        <div class="p-total"><span>Total</span><span>${moeda(total)}</span></div></section>
+      ${d.fotos?.length ? `<section class="p-sec"><h2>Fotos</h2>${fotos(d.fotos)}</section>` : ''}
+      ${d.relato ? `<section class="p-sec"><h2>O que você relatou</h2><p class="p-s" style="margin:0">${esc(d.relato)}</p></section>` : ''}
+      ${avisoDemo()}${rod()}${pend ? `<div class="p-fixo"><button type="button" class="p-bt pri" data-a="aprovar">Confirmar · ${moeda(total)}</button></div>` : ''}`;
+  },
+  acoes: {
+    marcar: (el) => { st.aprov[el.dataset.k] = !st.aprov[el.dataset.k]; desenhar(); },
+    aprovar: async () => { const r = await responder('aprovar', { itens: st.aprov }); if (r.erro) return alert(r.erro); pronto('Orçamento enviado', 'A oficina já recebeu a sua resposta e vai seguir com o serviço.'); },
+  },
+};
+
+// Restaurante: cardápio por QR code na mesa e pedido online
+T.cardapio = {
+  titulo: () => 'Cardápio',
+  render(d) {
+    st.carrinho ||= {}; st.cat ||= d.cats[0]?.[0];
+    const mesa = q.get('mesa');
+    const itens = d.itens.filter((x) => x.cat === st.cat);
+    const n = Object.values(st.carrinho).reduce((s, x) => s + x, 0), tot = Object.entries(st.carrinho).reduce((s, [id, k]) => s + k * (d.itens.find((x) => x.id === id)?.preco || 0), 0);
+    if (st.fechar) return T.cardapio.fechar(d, mesa, tot);
+    return `${cab(mesa ? `Mesa ${mesa}` : 'Peça pelo celular', E().nome, mesa ? 'Escolha e mande direto para a cozinha.' : d.delivery ? `Entrega${d.taxa ? ` · taxa de ${moeda(d.taxa)}` : ''} ou retirada no balcão.` : '')}
+      <nav class="p-chips">${d.cats.filter(([id]) => d.itens.some((x) => x.cat === id)).map(([id, nm]) => `<button type="button" class="p-bt" aria-pressed="${st.cat === id}" data-a="cat" data-c="${esc(id)}">${esc(nm)}</button>`).join('')}</nav>
+      <section class="p-sec">${itens.map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.nome)}</div><div class="p-s">${moeda(x.preco)}${x.tempo ? ` · ${x.tempo} min` : ''}</div></div>
+        <span class="p-qtd">${st.carrinho[x.id] ? `<button type="button" data-a="menos" data-i="${esc(x.id)}" aria-label="Menos">−</button><b>${st.carrinho[x.id]}</b>` : ''}<button type="button" data-a="mais" data-i="${esc(x.id)}" aria-label="Mais">+</button></span></div>`).join('')}</section>
+      ${avisoDemo()}${rod()}${n ? `<div class="p-fixo"><button type="button" class="p-bt pri" data-a="revisar">Ver pedido · ${n} ${n === 1 ? 'item' : 'itens'} · ${moeda(tot)}</button></div>` : ''}`;
+  },
+  fechar(d, mesa, tot) {
+    const linhas = Object.entries(st.carrinho).map(([id, k]) => { const x = d.itens.find((y) => y.id === id); return `<div class="p-linha"><div class="p-cresce p-t">${k}× ${esc(x.nome)}</div><span class="p-num">${moeda(k * x.preco)}</span></div>`; }).join('');
+    const entrega = !mesa && st.modo !== 'retirada';
+    return `${cab(mesa ? `Mesa ${mesa}` : 'Seu pedido', E().nome)}<section class="p-sec"><h2>Seu pedido</h2>${linhas}${entrega && d.taxa ? `<div class="p-linha"><div class="p-cresce">Entrega</div><span class="p-num">${moeda(d.taxa)}</span></div>` : ''}<div class="p-total"><span>Total</span><span>${moeda(tot + (entrega ? d.taxa || 0 : 0))}</span></div>
+      <label class="p-campo">Observação para a cozinha<input data-f="obs" placeholder="Ex.: sem cebola" value="${esc(st.obs || '')}"></label></section>
+      <section class="p-sec"><h2>${mesa ? 'Quem está pedindo' : 'Entrega'}</h2>${mesa ? '' : `<div class="p-grade2"><button type="button" class="p-bt" aria-pressed="${st.modo !== 'retirada'}" data-a="modo" data-m="entrega">Entregar</button><button type="button" class="p-bt" aria-pressed="${st.modo === 'retirada'}" data-a="modo" data-m="retirada">Vou retirar</button></div>`}
+        <label class="p-campo">Seu nome<input data-f="nome" autocomplete="name" value="${esc(st.nome || '')}"></label>
+        ${mesa ? '' : `<label class="p-campo">WhatsApp<input data-f="telefone" type="tel" autocomplete="tel" value="${esc(st.telefone || '')}"></label>${entrega ? `<label class="p-campo">Endereço com número e bairro<input data-f="endereco" autocomplete="street-address" value="${esc(st.endereco || '')}"></label>` : ''}
+        <label class="p-campo">Pagamento<select data-f="pagamento">${['PIX', 'Cartão na entrega', 'Dinheiro'].map((x) => `<option ${st.pagamento === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label>`}</section>
+      <p style="text-align:center"><button type="button" class="p-bt" data-a="voltar">Continuar escolhendo</button></p>${avisoDemo()}${rod()}
+      <div class="p-fixo"><button type="button" class="p-bt pri" data-a="enviar">Enviar pedido</button></div>`;
+  },
+  acoes: {
+    cat: (el) => { st.cat = el.dataset.c; desenhar(); },
+    mais: (el) => { st.carrinho[el.dataset.i] = (st.carrinho[el.dataset.i] || 0) + 1; desenhar(); },
+    menos: (el) => { const k = (st.carrinho[el.dataset.i] || 0) - 1; if (k > 0) st.carrinho[el.dataset.i] = k; else delete st.carrinho[el.dataset.i]; desenhar(); },
+    revisar: () => { st.fechar = true; desenhar(); scrollTo(0, 0); },
+    voltar: () => { lerCampos(); st.fechar = false; desenhar(); },
+    modo: (el) => { lerCampos(); st.modo = el.dataset.m; desenhar(); },
+    enviar: async () => {
+      lerCampos(); const mesa = q.get('mesa');
+      if (!st.nome?.trim()) return alert('Informe o seu nome.');
+      if (!mesa && !st.telefone?.trim()) return alert('Informe o seu WhatsApp.');
+      if (!mesa && st.modo !== 'retirada' && !st.endereco?.trim()) return alert('Informe o endereço de entrega.');
+      const r = await responder('pedido', { mesa: mesa || null, itens: Object.entries(st.carrinho).map(([id, qtd]) => ({ id, qtd })), obs: st.obs || '', nome: st.nome, telefone: st.telefone || '', endereco: st.modo === 'retirada' ? '' : st.endereco || '', retirada: st.modo === 'retirada', pagamento: st.pagamento || 'PIX' });
+      if (r.erro) return alert(r.erro);
+      pronto('Pedido enviado', mesa ? 'Já está na cozinha. Logo chega na sua mesa.' : 'O restaurante recebeu e já vai começar o preparo. Você recebe a confirmação no WhatsApp.');
+    },
+  },
+};
+
+// Clínica: ficha de anamnese antes da consulta
+T.anamnese = {
+  titulo: () => 'Ficha de saúde',
+  render(d) {
+    if (d.respondido) return `${cab(E().nome, 'Ficha já enviada', `Obrigado, ${esc(d.paciente.split(' ')[0])}.`)}<section class="p-sec p-ok"><div class="p-ic">✓</div><p class="p-s">A clínica já recebeu as suas respostas. Até a consulta!</p></section>${rod()}`;
+    return `${cab(E().nome, `Olá, ${d.paciente.split(' ')[0]}`, d.consulta ? `Consulta ${esc(d.consulta)}. Responda antes de chegar: leva 2 minutos.` : 'Responda antes da consulta: leva 2 minutos.')}
+      <section class="p-sec"><h2>Ficha de saúde</h2>${d.perguntas.map((p) => `<label class="p-campo">${esc(p.rot)}${p.tipo === 'sim_nao' ? `<select data-r="${esc(p.id)}"><option value="">Selecione</option><option>Não</option><option>Sim</option></select>` : p.tipo === 'longo' ? `<textarea data-r="${esc(p.id)}"></textarea>` : `<input data-r="${esc(p.id)}">`}</label>`).join('')}</section>
+      ${d.termo ? `<section class="p-sec"><h2>Termo de consentimento</h2><p class="p-s" style="white-space:pre-wrap">${esc(d.termo)}</p><label class="p-campo">Digite seu nome completo para concordar<input data-aceite autocomplete="name"></label></section>` : ''}
+      ${avisoDemo()}${rod()}<div class="p-fixo"><button type="button" class="p-bt pri" data-a="enviar">Enviar para a clínica</button></div>`;
+  },
+  acoes: {
+    enviar: async () => {
+      const respostas = Object.fromEntries([...raiz.querySelectorAll('[data-r]')].map((x) => [x.dataset.r, x.value.trim()]));
+      const aceite = raiz.querySelector('[data-aceite]')?.value.trim() || '';
+      if (ctx.dados.termo && aceite.length < 5) return alert('Digite o seu nome completo para concordar com o termo.');
+      const r = await responder('anamnese', { respostas, aceite }); if (r.erro) return alert(r.erro);
+      pronto('Ficha enviada', 'A clínica já recebeu as suas respostas. Até a consulta!');
+    },
+  },
+};
+
+// Academia: área do aluno (treino do dia, check-in, evolução e mensalidade)
+T.aluno = {
+  titulo: (d) => d.nome,
+  render(d) {
+    st.t ??= d.treinoHoje || 0;
+    const t = d.treinos[st.t], m = d.mensalidade, av = d.avaliacoes || [];
+    return `${cab(E().nome, `Olá, ${d.nome.split(' ')[0]}`, `${esc(d.plano || '')}${d.frequencia30 != null ? ` · ${d.frequencia30} treinos nos últimos 30 dias` : ''}`)}
+      ${m ? `<section class="p-sec"><h2>Mensalidade</h2><div class="p-linha"><div class="p-cresce"><div class="p-t">${moeda(m.valor)}</div><div class="p-s">vence ${dt(m.vencimento)}</div></div>${m.status === 'pago' ? '<span class="p-et ok">Em dia</span>' : m.atrasada ? '<span class="p-et er">Em atraso</span>' : '<span class="p-et">Em aberto</span>'}</div>
+        ${m.status !== 'pago' && m.pix?.chave ? (st.pix ? pixBloco(m.pix, m.valor, m.txid, 'Mensalidade') + '<p style="text-align:center;margin-top:10px"><button type="button" class="p-bt ok" data-a="paguei">Já paguei</button></p>' : '<button type="button" class="p-bt pri largo" data-a="verPix">Pagar com PIX</button>') : ''}</section>` : ''}
+      ${t ? `<section class="p-sec"><h2>Treino de hoje</h2><nav class="p-chips" style="margin:0 -16px 8px;padding:0 16px">${d.treinos.map((x, k) => `<button type="button" class="p-bt" aria-pressed="${k === st.t}" data-a="treino" data-k="${k}">${esc(x.nome)}</button>`).join('')}</nav>
+        <p class="p-sub" style="margin:0 0 6px">${esc(t.foco || '')}</p>${t.exercicios.map((e) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(e.nome)}</div><div class="p-s">${e.series} × ${esc(e.reps)}</div></div><span class="p-num">${e.carga ? `${e.carga} kg` : ''}</span></div>`).join('')}</section>` : ''}
+      ${av.length ? `<section class="p-sec"><h2>Sua evolução</h2><div class="p-grade2"><div class="p-kpi"><small>Peso</small><b>${av[0].peso} kg</b><span class="p-s">${av.length > 1 ? `${(av[0].peso - av[av.length - 1].peso).toFixed(1).replace('.', ',')} kg desde ${dt(av[av.length - 1].data)}` : dt(av[0].data)}</span></div><div class="p-kpi"><small>Gordura</small><b>${av[0].gordura}%</b><span class="p-s">${av.length > 1 ? `${(av[0].gordura - av[av.length - 1].gordura).toFixed(1).replace('.', ',')} pontos` : ''}</span></div></div></section>` : ''}
+      ${avisoDemo()}${rod()}<div class="p-fixo">${d.checkinHoje || st.entrou ? '<button type="button" class="p-bt ok" disabled>Check-in feito hoje ✓</button>' : `<button type="button" class="p-bt pri" data-a="checkin" ${m?.atrasada ? 'disabled' : ''}>${m?.atrasada ? 'Regularize a mensalidade para entrar' : 'Fazer check-in'}</button>`}</div>`;
+  },
+  acoes: {
+    treino: (el) => { st.t = Number(el.dataset.k); desenhar(); },
+    verPix: () => { st.pix = true; desenhar(); },
+    checkin: async () => { const r = await responder('checkin', {}); if (r.erro) return alert(r.erro); st.entrou = true; desenhar(); },
+    paguei: async () => { const r = await responder('paguei', {}); if (r.erro) return alert(r.erro); pronto('Pagamento informado', 'A academia vai conferir e dar baixa na sua mensalidade.'); },
+  },
+};
+
+// Imobiliária: vitrine pública, simulador de financiamento e pedido de visita
+const parcela = (valor, entrada, anos, taxa) => { const n = anos * 12, i = taxa / 100 / 12, p = valor - entrada; return p <= 0 ? 0 : (p * i) / (1 - (1 + i) ** -n); };
+T.vitrine = {
+  titulo: () => 'Imóveis',
+  render(d) {
+    const cod = q.get('i') || st.i;
+    const x = cod && d.imoveis.find((y) => y.codigo === cod);
+    if (x) return T.vitrine.imovel(d, x);
+    st.f ||= 'todos';
+    const l = d.imoveis.filter((y) => st.f === 'todos' || y.finalidade === st.f);
+    return `${cab(E().nome, 'Imóveis disponíveis', `${d.imoveis.length} imóveis para comprar ou alugar`)}
+      <nav class="p-chips">${[['todos', 'Todos'], ['venda', 'Comprar'], ['aluguel', 'Alugar']].map(([k, n]) => `<button type="button" class="p-bt" aria-pressed="${st.f === k}" data-a="fin" data-f="${k}">${n}</button>`).join('')}</nav>
+      <section class="p-sec">${l.map((y) => `<a class="p-imovel" href="#" data-a="abrir" data-c="${esc(y.codigo)}">${y.fotos?.[0] ? `<img src="${esc(y.fotos[0])}" alt="" loading="lazy">` : ''}<div class="p-t">${esc(y.titulo)}</div><div class="p-s">${y.area} m²${y.quartos ? ` · ${y.quartos} quartos` : ''}${y.vagas ? ` · ${y.vagas} vagas` : ''} · ${esc(y.codigo)}</div><div class="p-num" style="margin-top:4px">${moeda(y.valor)}${y.finalidade === 'aluguel' ? '/mês' : ''}</div></a>`).join('') || '<p class="p-s">Nenhum imóvel nessa busca.</p>'}</section>${rod()}`;
+  },
+  imovel(d, x) {
+    st.ent ??= Math.round(x.valor * 0.2); st.anos ??= 30; st.taxa ??= 10.5;
+    const p = parcela(x.valor, st.ent, st.anos, st.taxa);
+    return `${cab(x.codigo, x.titulo, `${x.area} m²${x.quartos ? ` · ${x.quartos} quartos` : ''}${x.vagas ? ` · ${x.vagas} vagas` : ''}`)}
+      ${x.fotos?.length ? `<section class="p-sec">${x.fotos.length > 1 ? fotos(x.fotos.map((u) => ({ url: u }))) : `<img class="p-foto-grande" src="${esc(x.fotos[0])}" alt="">`}</section>` : ''}
+      <section class="p-sec"><div class="p-grade2"><div class="p-kpi"><small>${x.finalidade === 'aluguel' ? 'Aluguel' : 'Valor'}</small><b>${moeda(x.valor)}</b></div><div class="p-kpi"><small>Condomínio</small><b>${x.condominio ? moeda(x.condominio) : '—'}</b></div></div><p class="p-s" style="margin:12px 0 0">${esc(x.descricao || '')}</p></section>
+      ${x.finalidade === 'venda' ? `<section class="p-sec"><h2>Simule o financiamento</h2><p class="p-sub">Tabela Price, estimativa. A aprovação e a taxa dependem do banco.</p>
+        <label class="p-campo">Entrada<input type="number" data-sim="ent" value="${st.ent}" step="1000" min="0"></label><div class="p-grade2"><label class="p-campo">Prazo (anos)<input type="number" data-sim="anos" value="${st.anos}" min="5" max="35"></label><label class="p-campo">Juros ao ano (%)<input type="number" data-sim="taxa" value="${st.taxa}" step="0.1" min="1"></label></div>
+        <div class="p-total"><span>Parcela estimada</span><span>${moeda(p)}</span></div><p class="p-s" style="margin-top:6px">Renda familiar sugerida: ${moeda(p / 0.3)} por mês.</p></section>` : ''}
+      <section class="p-sec"><h2>Quero visitar</h2><label class="p-campo">Seu nome<input data-f="nome" autocomplete="name"></label><label class="p-campo">WhatsApp<input data-f="telefone" type="tel" autocomplete="tel"></label><label class="p-campo">Melhor dia e horário<input data-f="quando" placeholder="Ex.: sábado de manhã"></label></section>
+      <p style="text-align:center"><button type="button" class="p-bt" data-a="lista">Ver outros imóveis</button></p>${avisoDemo()}${rod()}<div class="p-fixo"><button type="button" class="p-bt pri" data-a="visita" data-c="${esc(x.codigo)}">Pedir visita</button></div>`;
+  },
+  acoes: {
+    fin: (el) => { st.f = el.dataset.f; desenhar(); },
+    abrir: (el, e) => { e.preventDefault(); st.i = el.dataset.c; desenhar(); scrollTo(0, 0); },
+    lista: () => { st.i = null; if (q.get('i')) history.replaceState(null, '', location.pathname + location.hash); q.delete('i'); desenhar(); },
+    visita: async (el) => { lerCampos(); if (!st.nome?.trim() || !st.telefone?.trim()) return alert('Informe nome e WhatsApp.'); const r = await responder('visita', { codigo: el.dataset.c, nome: st.nome, telefone: st.telefone, quando: st.quando || '' }); if (r.erro) return alert(r.erro); pronto('Pedido de visita enviado', 'Um corretor vai chamar você no WhatsApp para combinar o horário.'); },
+  },
+  entrada: (el) => { st[el.dataset.sim] = Number(el.value) || 0; const pos = el.selectionStart; desenhar(); const n = raiz.querySelector(`[data-sim="${el.dataset.sim}"]`); n?.focus(); try { n?.setSelectionRange(pos, pos); } catch { /* number */ } },
+};
+
+// Agenda: agendamento online com sinal por PIX
+T.agendar = {
+  titulo: () => 'Agendar horário',
+  render(d) {
+    const s = d.servicos.find((x) => x.id === st.s), profs = d.profissionais.filter((p) => !s || !p.servicos || p.servicos.includes(st.s));
+    // horários em que cabe o serviço inteiro (blocos livres de 30 minutos seguidos)
+    const cabe = (l, h) => { const m = (x) => Number(x.slice(0, 2)) * 60 + Number(x.slice(3)); const need = Math.ceil((s?.duracao || 30) / 30); for (let k = 0; k < need; k++) { const t = m(h) + k * 30; if (!l.includes(`${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`)) return false; } return true; };
+    const livres = st.p ? Object.fromEntries(Object.entries(d.livres[st.p] || {}).map(([k, l]) => [k, l.filter((h) => cabe(l, h))])) : {};
+    const dias = Object.keys(livres).filter((k) => livres[k].length).sort().slice(0, 14);
+    if (st.passo === 'sinal') return T.agendar.sinal(d, s);
+    return `${cab(E().nome, 'Agende o seu horário', 'Escolha o serviço, o profissional e o horário.')}
+      <section class="p-sec"><h2>1. Serviço</h2>${d.servicos.map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.nome)}</div><div class="p-s">${x.duracao} min · ${moeda(x.preco)}</div></div><button type="button" class="p-bt peq" aria-pressed="${st.s === x.id}" data-a="s" data-v="${esc(x.id)}">${st.s === x.id ? 'Escolhido' : 'Escolher'}</button></div>`).join('')}</section>
+      ${st.s ? `<section class="p-sec"><h2>2. Profissional</h2><div class="p-chips" style="margin:0;padding:0">${profs.map((p) => `<button type="button" class="p-bt" aria-pressed="${st.p === p.id}" data-a="p" data-v="${esc(p.id)}">${esc(p.nome)}</button>`).join('')}</div></section>` : ''}
+      ${st.p ? `<section class="p-sec"><h2>3. Dia e horário</h2>${dias.length ? `<div class="p-dias">${dias.map((k) => { const x = new Date(`${k}T12:00`); return `<button type="button" class="p-bt" aria-pressed="${st.d === k}" data-a="d" data-v="${k}"><span>${DIAS[x.getDay()]}</span><b>${x.getDate()}</b></button>`; }).join('')}</div>
+        ${st.d ? `<div class="p-horas" style="margin-top:10px">${(livres[st.d] || []).map((h) => `<button type="button" class="p-bt" aria-pressed="${st.h === h}" data-a="h" data-v="${h}">${h}</button>`).join('')}</div>` : ''}` : '<p class="p-s">Sem horários livres nos próximos dias com este profissional.</p>'}</section>` : ''}
+      ${st.h ? `<section class="p-sec"><h2>4. Seus dados</h2><label class="p-campo">Nome<input data-f="nome" autocomplete="name" value="${esc(st.nome || '')}"></label><label class="p-campo">WhatsApp<input data-f="telefone" type="tel" autocomplete="tel" value="${esc(st.telefone || '')}"></label></section>` : ''}
+      ${avisoDemo()}${rod()}${st.h ? `<div class="p-fixo"><button type="button" class="p-bt pri" data-a="confirmar">${d.sinal?.pct && d.pix?.chave ? `Continuar · sinal de ${moeda((s.preco * d.sinal.pct) / 100)}` : 'Confirmar agendamento'}</button></div>` : ''}`;
+  },
+  sinal(d, s) {
+    const v = Math.round(s.preco * d.sinal.pct) / 100;
+    return `${cab(E().nome, 'Sinal para garantir o horário', `${esc(s.nome)} · ${dt(st.d)} às ${st.h}`)}<section class="p-sec"><h2>Pague ${moeda(v)} pelo PIX</h2><p class="p-sub">O valor é descontado no dia do atendimento.${d.sinal.regra ? ` ${esc(d.sinal.regra)}` : ''}</p>${pixBloco(d.pix, v, `AG${Date.now().toString(36).slice(-8)}`, 'Sinal')}</section>
+      ${avisoDemo()}${rod()}<div class="p-fixo"><button type="button" class="p-bt ok" data-a="enviar" data-sinal="1">Já paguei o sinal</button></div>`;
+  },
+  acoes: {
+    s: (el) => { lerCampos(); st.s = el.dataset.v; st.p = st.d = st.h = null; desenhar(); },
+    p: (el) => { lerCampos(); st.p = el.dataset.v; st.d = st.h = null; desenhar(); },
+    d: (el) => { lerCampos(); st.d = el.dataset.v; st.h = null; desenhar(); },
+    h: (el) => { lerCampos(); st.h = el.dataset.v; desenhar(); },
+    confirmar: () => { lerCampos(); if (!st.nome?.trim() || !st.telefone?.trim()) return alert('Informe nome e WhatsApp.'); if (ctx.dados.sinal?.pct && ctx.dados.pix?.chave) { st.passo = 'sinal'; desenhar(); scrollTo(0, 0); return; } T.agendar.acoes.enviar(); },
+    enviar: async (el) => {
+      const r = await responder('agendar', { servico: st.s, profissional: st.p, data: st.d, hora: st.h, nome: st.nome, telefone: st.telefone, sinal: !!el?.dataset?.sinal });
+      if (r.erro) return alert(r.erro);
+      pronto('Horário agendado', `${dt(st.d)} às ${st.h}. Você recebe a confirmação no WhatsApp na véspera.`);
+    },
+  },
+};
+
+// Jurídico: acompanhamento do processo pelo cliente
+T.processo = {
+  titulo: (d) => `Processo ${d.numero}`,
+  render(d) {
+    return `${cab(E().nome, d.assunto || 'Seu processo', `Nº ${esc(d.numero)}${d.vara ? ` · ${esc(d.vara)}` : ''}`)}
+      <section class="p-sec"><h2>Situação</h2><p style="margin:0">${esc(d.situacao || 'Em andamento')}</p>${d.advogado ? `<p class="p-s" style="margin:6px 0 0">Responsável: ${esc(d.advogado)}</p>` : ''}</section>
+      ${d.proximos?.length ? `<section class="p-sec"><h2>Próximas datas</h2>${d.proximos.map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.titulo)}</div><div class="p-s">${dt(x.data)}${x.hora ? ` às ${esc(x.hora)}` : ''}</div></div></div>`).join('')}</section>` : ''}
+      <section class="p-sec"><h2>Andamentos</h2>${d.andamentos?.length ? `<ul class="p-tempo">${d.andamentos.map((x) => `<li><div class="p-s">${dt(x.data)}</div><div>${esc(x.texto)}</div></li>`).join('')}</ul>` : '<p class="p-s">Nenhum andamento publicado ainda.</p>'}</section>
+      <section class="p-sec"><h2>Falar com o escritório</h2><label class="p-campo">Mensagem<textarea data-f="msg" placeholder="Sua dúvida sobre o processo"></textarea></label><button type="button" class="p-bt pri largo" style="margin-top:10px" data-a="msg">Enviar mensagem</button></section>
+      ${avisoDemo()}${rod()}`;
+  },
+  acoes: { msg: async () => { lerCampos(); if (!st.msg?.trim()) return; const r = await responder('mensagem', { texto: st.msg.slice(0, 1500) }); if (r.erro) return alert(r.erro); pronto('Mensagem enviada', 'O escritório responde pelo WhatsApp ou e-mail.'); } },
+};
+
+// CRM: proposta online com aceite
+T.proposta = {
+  titulo: (d) => d.titulo,
+  render(d) {
+    if (d.status === 'aceita') return `${cab(E().nome, d.titulo)}<section class="p-sec p-ok"><div class="p-ic">✓</div><h2>Proposta aceita</h2><p class="p-s">Obrigado! ${esc(E().nome)} já está cuidando dos próximos passos.</p></section>${rod()}`;
+    const vencida = d.validade && d.validade < new Date().toISOString().slice(0, 10);
+    return `${cab(`Proposta ${d.numero ? `nº ${d.numero}` : ''} · ${E().nome}`, d.titulo, `Para ${esc(d.cliente)}${d.validade ? ` · válida até ${dt(d.validade)}` : ''}`)}
+      <section class="p-sec"><h2>O que está incluído</h2>${d.itens.map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.nome)}</div>${x.qtd > 1 ? `<div class="p-s">${x.qtd} × ${moeda(x.preco)}</div>` : ''}</div><span class="p-num">${moeda(x.qtd * x.preco)}</span></div>`).join('')}
+        ${d.desconto ? `<div class="p-linha"><div class="p-cresce">Desconto</div><span class="p-num">− ${moeda(d.desconto)}</span></div>` : ''}<div class="p-total"><span>Total</span><span>${moeda(d.total)}</span></div></section>
+      ${d.condicoes ? `<section class="p-sec"><h2>Condições</h2><p class="p-s" style="white-space:pre-wrap;margin:0">${esc(d.condicoes)}</p></section>` : ''}
+      ${vencida ? '<div class="p-aviso">Esta proposta venceu. Fale com o vendedor para atualizar.</div>' : `<section class="p-sec"><h2>Aceitar a proposta</h2><label class="p-campo">Nome completo<input data-f="nome" autocomplete="name"></label><label class="p-campo">CPF ou CNPJ<input data-f="doc" inputmode="numeric"></label><p class="p-s" style="margin-top:8px">Ao aceitar, você concorda com os itens e as condições acima.</p></section>
+      <section class="p-sec"><h2>Ficou com alguma dúvida?</h2><label class="p-campo">Escreva aqui<textarea data-f="duvida"></textarea></label><button type="button" class="p-bt largo" style="margin-top:10px" data-a="duvida">Enviar dúvida</button></section>`}
+      ${avisoDemo()}${rod()}${vencida ? '' : '<div class="p-fixo"><button type="button" class="p-bt pri" data-a="aceitar">Aceitar proposta</button></div>'}`;
+  },
+  acoes: {
+    aceitar: async () => { lerCampos(); if ((st.nome || '').trim().length < 5 || (st.doc || '').replace(/\D/g, '').length < 11) return alert('Informe o nome completo e o CPF ou CNPJ.'); const r = await responder('aceitar', { nome: st.nome.trim(), documento: st.doc.trim() }); if (r.erro) return alert(r.erro); pronto('Proposta aceita', `Obrigado, ${st.nome.split(' ')[0]}! Já avisamos ${E().nome}.`); },
+    duvida: async () => { lerCampos(); if (!st.duvida?.trim()) return; const r = await responder('duvida', { texto: st.duvida.slice(0, 1500) }); if (r.erro) return alert(r.erro); pronto('Dúvida enviada', 'O vendedor vai responder em breve.'); },
+  },
+  abriu: true,
+};
+
+// Gestão: catálogo para clientes revendedores
+T.catalogo = {
+  titulo: () => 'Catálogo',
+  render(d) {
+    st.qtd ||= {}; st.busca ??= '';
+    const b = st.busca.toLowerCase(), l = d.produtos.filter((x) => !b || `${x.nome} ${x.codigo}`.toLowerCase().includes(b));
+    const tot = Object.entries(st.qtd).reduce((s, [id, k]) => s + k * (d.produtos.find((x) => x.id === id)?.preco || 0), 0), n = Object.values(st.qtd).filter(Boolean).length;
+    if (st.fechar) return `${cab(E().nome, 'Seu pedido', `${n} produtos · ${moeda(tot)}`)}<section class="p-sec">${Object.entries(st.qtd).filter(([, k]) => k).map(([id, k]) => { const x = d.produtos.find((y) => y.id === id); return `<div class="p-linha"><div class="p-cresce p-t">${k} ${esc(x.un)} · ${esc(x.nome)}</div><span class="p-num">${moeda(k * x.preco)}</span></div>`; }).join('')}<div class="p-total"><span>Total</span><span>${moeda(tot)}</span></div></section>
+      <section class="p-sec"><h2>Seus dados</h2><label class="p-campo">Empresa ou nome<input data-f="nome" value="${esc(st.nome || '')}"></label><label class="p-campo">CNPJ ou CPF<input data-f="doc" value="${esc(st.doc || '')}"></label><label class="p-campo">WhatsApp<input data-f="telefone" type="tel" value="${esc(st.telefone || '')}"></label><label class="p-campo">Observação<input data-f="obs" value="${esc(st.obs || '')}"></label></section>
+      ${d.minimo && tot < d.minimo ? `<div class="p-aviso">Pedido mínimo de ${moeda(d.minimo)}.</div>` : ''}<p style="text-align:center"><button type="button" class="p-bt" data-a="voltar">Continuar comprando</button></p>${avisoDemo()}${rod()}<div class="p-fixo"><button type="button" class="p-bt pri" data-a="enviar" ${d.minimo && tot < d.minimo ? 'disabled' : ''}>Enviar pedido</button></div>`;
+    return `${cab(E().nome, 'Catálogo de produtos', d.minimo ? `Pedido mínimo de ${moeda(d.minimo)}` : 'Faça o seu pedido pelo celular')}
+      <section class="p-sec"><label class="p-campo" style="margin:0"><input type="search" data-busca placeholder="Buscar produto ou código" value="${esc(st.busca)}"></label>
+        ${l.slice(0, 80).map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.nome)}</div><div class="p-s">${moeda(x.preco)}/${esc(x.un)} · ${x.disponivel ? 'disponível' : '<span style="color:var(--al)">sob consulta</span>'}</div></div>
+          <span class="p-qtd">${st.qtd[x.id] ? `<button type="button" data-a="menos" data-i="${esc(x.id)}" aria-label="Menos">−</button><b>${st.qtd[x.id]}</b>` : ''}<button type="button" data-a="mais" data-i="${esc(x.id)}" aria-label="Mais">+</button></span></div>`).join('')}</section>
+      ${avisoDemo()}${rod()}${n ? `<div class="p-fixo"><button type="button" class="p-bt pri" data-a="revisar">Revisar pedido · ${moeda(tot)}</button></div>` : ''}`;
+  },
+  acoes: {
+    mais: (el) => { st.qtd[el.dataset.i] = (st.qtd[el.dataset.i] || 0) + 1; desenhar(); },
+    menos: (el) => { st.qtd[el.dataset.i] = Math.max(0, (st.qtd[el.dataset.i] || 0) - 1); desenhar(); },
+    revisar: () => { st.fechar = true; desenhar(); scrollTo(0, 0); },
+    voltar: () => { lerCampos(); st.fechar = false; desenhar(); },
+    enviar: async () => { lerCampos(); if (!st.nome?.trim() || !st.telefone?.trim()) return alert('Informe o nome e o WhatsApp.'); const r = await responder('pedido', { nome: st.nome, documento: st.doc || '', telefone: st.telefone, obs: st.obs || '', itens: Object.entries(st.qtd).filter(([, k]) => k).map(([id, qtd]) => ({ id, qtd })) }); if (r.erro) return alert(r.erro); pronto('Pedido enviado', 'Recebemos o seu pedido. Vamos confirmar os valores e o prazo de entrega pelo WhatsApp.'); },
+  },
+};
+
+// Financeiro: cobrança com PIX
+T.cobranca = {
+  titulo: (d) => d.descricao,
+  render(d) {
+    if (d.status === 'pago') return `${cab(E().nome, d.descricao)}<section class="p-sec p-ok"><div class="p-ic">✓</div><h2>Pagamento recebido</h2><p class="p-s">Obrigado!</p></section>${rod()}`;
+    const venc = d.vencimento < new Date().toISOString().slice(0, 10);
+    return `${cab(E().nome, moeda(d.valor), `${esc(d.descricao)} · ${venc ? 'venceu' : 'vence'} em ${dt(d.vencimento)}`)}
+      <section class="p-sec"><h2>Pague com PIX</h2>${d.pix?.chave ? pixBloco(d.pix, d.valor, d.txid, d.descricao) : '<p class="p-s">Fale com a empresa para receber os dados de pagamento.</p>'}</section>
+      ${d.cliente ? `<p class="p-s" style="text-align:center;margin-top:12px">Para ${esc(d.cliente)}</p>` : ''}${avisoDemo()}${rod()}<div class="p-fixo"><button type="button" class="p-bt ok" data-a="paguei">Já paguei</button></div>`;
+  },
+  acoes: { paguei: async () => { const r = await responder('paguei', {}); if (r.erro) return alert(r.erro); pronto('Pagamento informado', 'A empresa vai conferir e confirmar o recebimento.'); } },
+};
+
+// ---------------------------------------------------------------- motor
+function lerCampos() { raiz.querySelectorAll('[data-f]').forEach((x) => { st[x.dataset.f] = x.value; }); }
+function desenhar() {
+  const t = T[ctx.tipo];
+  raiz.innerHTML = t ? t.render(ctx.dados) : '<p class="p-erro">Este link não é suportado.</p>';
+}
+raiz.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-a]'); if (!el) return;
+  if (el.dataset.a === 'copiarPix') { const t = raiz.querySelector('[data-pix]'); navigator.clipboard?.writeText(t.value).catch(() => { t.select(); document.execCommand('copy'); }); el.textContent = 'Código copiado ✓'; return; }
+  const f = T[ctx.tipo]?.acoes?.[el.dataset.a]; if (f) f(el, e);
+});
+raiz.addEventListener('input', (e) => {
+  if (e.target.matches('[data-busca]')) { st.busca = e.target.value; const pos = e.target.selectionStart; desenhar(); const n = raiz.querySelector('[data-busca]'); n.focus(); n.setSelectionRange(pos, pos); }
+  if (e.target.matches('[data-sim]')) T.vitrine.entrada(e.target);
+});
+
+(async () => {
+  try {
+    ctx = await carregar();
+    document.documentElement.style.setProperty('--acc', ctx.dados?._empresa?.cor || '#2f6fed');
+    document.title = `${T[ctx.tipo]?.titulo?.(ctx.dados) || 'Página do cliente'} · ${ctx.dados?._empresa?.nome || ctx.empresa || ''}`;
+    desenhar();
+    if (T[ctx.tipo]?.abriu) responder('abriu', {});
+  } catch (e) {
+    raiz.innerHTML = `<p class="p-erro">${esc(e.message || 'Não foi possível abrir este link.')}</p>`;
+  }
+})();

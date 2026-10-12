@@ -87,6 +87,14 @@ const indAtiv = (a, n) => { const [cls, icone, t] = estadoAtiv(a, n); return `<s
 const etStatus = (n) => (n.status === 'ganho' ? et('Ganho', 'ok') : n.status === 'perdido' ? et('Perdido', 'er') : et(etapa(n.etapa).nome, 'acc'));
 
 // ---------------------------------------------------------------- coleções (formulários)
+const numProposta = (id) => String(Math.abs(String(id).split('').reduce((s, ch) => s * 31 + ch.charCodeAt(0), 7)) % 9000 + 1000);
+const CONDICOES = 'Pagamento em até 3x no boleto ou PIX à vista. Implantação em até 10 dias úteis após o aceite. Suporte por e-mail e WhatsApp em horário comercial.';
+const SEQUENCIAS = {
+  posproposta: ['Depois da proposta', [[1, 'whatsapp', 'Perguntar se a proposta chegou e tirar dúvidas'], [3, 'ligacao', 'Ligar para entender a decisão'], [7, 'email', 'Enviar caso de sucesso parecido'], [12, 'ligacao', 'Última conversa antes de a proposta vencer']]],
+  leadnovo: ['Contato novo', [[0, 'ligacao', 'Primeira ligação de qualificação'], [2, 'whatsapp', 'Mandar apresentação curta'], [5, 'email', 'Enviar material e convite para reunião'], [10, 'ligacao', 'Nova tentativa de contato']]],
+  reativar: ['Reativar cliente parado', [[0, 'whatsapp', 'Mensagem de reaproximação'], [4, 'ligacao', 'Ligar para entender o momento'], [14, 'email', 'Enviar novidade ou condição especial']]],
+};
+
 const colecoes = {
   negocios: {
     singular: 'negócio', plural: 'negócios', largura: 640,
@@ -368,13 +376,14 @@ const fichas = {
     if (aba === 'tempo') corpo = `<div class="gav-sec">${compositor(`negocios:${id}`)}</div>
       ${pend.length ? `<div class="gav-sec"><h4>Planejado</h4>${listaAtiv(a, pend)}</div>` : `<div class="gav-sec"><div class="alerta-linha al">${ic('warning')}Nenhuma próxima atividade. Todo negócio aberto precisa de um próximo passo.<a href="javascript:void 0" data-acao="novaAtividade" data-negocio="${id}">Agendar</a></div></div>`}
       <div class="gav-sec"><h4>Histórico</h4>${linhaDoTempo(linhaDoTempoDe(a, `negocios:${id}`, (x) => x.negocio === id))}</div>`;
-    if (aba === 'ativ') corpo = `<div class="gav-sec"><div class="entre" style="margin-bottom:10px"><h4 style="margin:0">Atividades</h4><button type="button" class="btn peq" data-acao="novaAtividade" data-negocio="${id}">${ic('plus')}Agendar</button></div>${listaAtiv(a, ativs)}</div>`;
+    if (aba === 'ativ') corpo = `<div class="gav-sec"><div class="entre" style="margin-bottom:10px"><h4 style="margin:0">Atividades</h4><span class="flex"><button type="button" class="btn peq" data-acao="sequencia" data-id="${id}">${ic('list-plus')}Sequência de retornos</button><button type="button" class="btn peq" data-acao="novaAtividade" data-negocio="${id}">${ic('plus')}Agendar</button></span></div>${listaAtiv(a, ativs)}</div>`;
     if (aba === 'prod') {
       const itens = n.itens || [];
       corpo = `<div class="gav-sec"><table class="tabela" style="margin:0 -8px;width:calc(100% + 16px)"><thead><tr><th>Produto</th><th class="n">Qtd.</th><th class="n">Preço</th><th class="n">Desc.</th><th class="n">Total</th><th></th></tr></thead><tbody>
         ${itens.map((x, i) => `<tr><td>${esc(x.produto)}</td><td class="n">${x.qtd}</td><td class="n">${moeda(x.preco)}</td><td class="n">${x.desc ? pct(x.desc) : '—'}</td><td class="n"><b>${moeda(x.qtd * x.preco * (1 - (x.desc || 0) / 100))}</b></td><td class="acoes"><button type="button" class="btn fant peq ic-so" data-acao="tirarItem" data-id="${id}" data-i="${i}" aria-label="Remover">${ic('trash')}</button></td></tr>`).join('') || `<tr><td colspan="6">${vazio('package', 'Sem produtos', 'Adicione itens para montar a proposta e calcular o valor.')}</td></tr>`}</tbody>
         ${itens.length ? `<tfoot><tr><td colspan="4">Total</td><td class="n">${moeda(totalItens(itens))}</td><td></td></tr></tfoot>` : ''}</table>
-        <div class="flex" style="margin-top:12px"><button type="button" class="btn" data-acao="addItem" data-id="${id}">${ic('plus')}Adicionar produto</button><button type="button" class="btn" data-acao="proposta" data-id="${id}" ${itens.length ? '' : 'disabled'}>${ic('printer')}Gerar proposta</button></div></div>`;
+        <div class="flex" style="margin-top:12px"><button type="button" class="btn" data-acao="addItem" data-id="${id}">${ic('plus')}Adicionar produto</button><button type="button" class="btn" data-acao="proposta" data-id="${id}" ${itens.length ? '' : 'disabled'}>${ic('printer')}Gerar proposta</button><button type="button" class="btn pri" data-acao="propostaOnline" data-id="${id}">${ic('link')}Proposta online</button></div>
+        ${n.proposta_aberta ? `<div class="dica" style="margin-top:10px">${ic('eye')}<span>O cliente abriu a proposta ${n.proposta_aberturas > 1 ? `${n.proposta_aberturas} vezes · a última ` : ''}${relativo(n.proposta_aberta.slice(0, 10))}, às ${n.proposta_aberta.slice(11, 16)}.</span></div>` : ''}${n.aceite ? `<div class="dica" style="margin-top:10px">${ic('seal-check')}<span>Aceita online por <b>${esc(n.aceite.nome)}</b> (${esc(n.aceite.documento)}) em ${dataCurta(n.aceite.quando.slice(0, 10))}.</span></div>` : ''}</div>`;
     }
     if (aba === 'det') corpo = `<div class="gav-sec">${props([
       ['buildings', 'Empresa', em ? `<a href="javascript:void 0" data-abrir="empresa:${em.id}">${esc(em.nome)}</a>` : null],
@@ -390,7 +399,7 @@ const fichas = {
     ])}</div>`;
     const extra = n.status === 'aberto' ? `<div class="etapas" role="group" aria-label="Etapa">${ETAPAS.map((e, i) => `<button type="button" class="${i < iEt ? 'feita' : i === iEt ? 'atual' : ''}" data-acao="mudarEtapa" data-id="${id}" data-e="${e.id}" title="${esc(e.nome)} · ${e.prob}%">${esc(e.nome)}</button>`).join('')}</div>` : `<div style="margin-top:12px">${n.status === 'ganho' ? `<div class="alerta-linha" style="background:var(--ok-bg);color:var(--ok);border-color:transparent">${ic('trophy')}Ganho em ${dataCurta(n.fechado)}<a href="javascript:void 0" data-acao="reabrir" data-id="${id}">Reabrir</a></div>` : `<div class="alerta-linha">${ic('x-circle')}Perdido em ${dataCurta(n.fechado)} · ${esc(n.motivo || '')}<a href="javascript:void 0" data-acao="reabrir" data-id="${id}">Reabrir</a></div>`}</div>`;
     return { html: ficha({ tipo: 'Negócio', icone: 'handshake', titulo: esc(n.titulo), avatar: av(em?.nome || '?', 'g'),
-      sub: `<b class="num" style="color:var(--tx);font-size:15px">${moeda(n.valor)}</b>${em ? `<span>${esc(em.nome)}</span>` : ''}${c ? `<span>· ${esc(c.nome)}</span>` : ''}<span class="flex" style="gap:5px">· ${av(nomeV(n.responsavel), 'p')}${esc(nomeV(n.responsavel))}</span>`,
+      sub: `<b class="num" style="color:var(--tx);font-size:15px">${moeda(n.valor)}</b>${n.proposta_aberta && n.status === 'aberto' ? et('Abriu a proposta', 'info') : ''}${em ? `<span>${esc(em.nome)}</span>` : ''}${c ? `<span>· ${esc(c.nome)}</span>` : ''}<span class="flex" style="gap:5px">· ${av(nomeV(n.responsavel), 'p')}${esc(nomeV(n.responsavel))}</span>`,
       extra, aba, abas: [['tempo', 'Linha do tempo'], ['ativ', 'Atividades', ativs.length], ['prod', 'Produtos', (n.itens || []).length], ['det', 'Detalhes']], corpo,
       acoes: `${n.status === 'aberto' ? `<button type="button" class="btn ok pri peq" data-acao="ganhar" data-id="${id}">${ic('trophy')}Ganho</button><button type="button" class="btn perigo peq" data-acao="perder" data-id="${id}">Perdido</button>` : ''}<button type="button" class="btn fant peq ic-so" data-acao="menuNegocio" data-id="${id}" aria-label="Mais ações">${ic('dots-three')}</button>` }),
       montar: (g) => { g.dataset.aba = aba; const t = g.querySelector('[data-nota-txt]'); t?.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) g.querySelector('[data-acao="salvarNota"]').click(); }); } };
@@ -432,6 +441,40 @@ async function novaAtividade(a, extra = {}) { const x = await editar(a, 'ativida
 const app = criarApp({
   id: 'crm', nome: 'Nexo CRM', sub: 'Vendas', cor: '#5b4fe0', icone: 'handshake', empresa: 'Solar Sistemas Ltda', conta: 'Equipe comercial · 3 pessoas',
   produto: { compra: 2290, mensal: 99 }, semente, colecoes, fichas, buscaDica: 'negócios, pessoas, empresas',
+  portal: {
+    proposta: {
+      explica: 'A proposta abre no celular do cliente, com os itens, o total e o botão de aceite. Você recebe aviso quando ele abre e quando aceita.',
+      montar: (a, id) => {
+        const n = a.db.obter('negocios', id); if (!n) return null; const em = empresaDe(a, n.empresa), c = contatoDe(a, n.contato);
+        const itens = (n.itens || []).map((x) => ({ nome: x.produto, qtd: x.qtd, preco: Math.round(x.preco * (1 - (x.desc || 0) / 100) * 100) / 100 }));
+        return { numero: numProposta(id), titulo: n.titulo, cliente: em?.nome || c?.nome || '', itens: itens.length ? itens : [{ nome: n.titulo, qtd: 1, preco: n.valor }], desconto: 0, total: itens.length ? totalItens(n.itens) : n.valor,
+          validade: n.proposta_validade || diaMais(15), condicoes: a.db.cfg.condicoes || CONDICOES, vendedor: nomeV(n.responsavel), status: n.status === 'ganho' ? 'aceita' : 'aberta' };
+      },
+      responder: (a, r) => {
+        const n = a.db.obter('negocios', r.ref); if (!n) return '';
+        const quem = contatoDe(a, n.contato)?.nome?.split(' ')[0] || empresaDe(a, n.empresa)?.nome || 'O cliente';
+        if (r.acao === 'abriu') { a.db.salvar('negocios', { id: n.id, proposta_aberta: r.criado.slice(0, 16), proposta_aberturas: (n.proposta_aberturas || 0) + 1 }); a.db.registrar(`negocios:${n.id}`, 'Cliente abriu a proposta online', { icone: 'eye', tom: 'acc' }); return `${quem} abriu a proposta "${n.titulo}"`; }
+        if (r.acao === 'aceitar' && n.status === 'aberto') {
+          a.db.salvar('negocios', { id: n.id, status: 'ganho', fechado: hoje(), aceite: { nome: String(r.dados.nome || '').slice(0, 120), documento: String(r.dados.documento || '').slice(0, 30), quando: r.criado.slice(0, 16) } });
+          a.db.registrar(`negocios:${n.id}`, `Proposta aceita online por ${String(r.dados.nome || '').slice(0, 80)} (${String(r.dados.documento || '').slice(0, 30)})`, { icone: 'trophy', tom: 'ok' });
+          return `Proposta aceita! ${n.titulo} · ${moeda(n.valor)}`;
+        }
+        if (r.acao === 'duvida') {
+          a.db.salvar('atividades', { tipo: 'whatsapp', titulo: `Responder dúvida da proposta: ${String(r.dados.texto || '').slice(0, 90)}`, negocio: n.id, contato: n.contato, responsavel: n.responsavel, quando: agoraISO(), duracao: 15, feita: false });
+          a.db.registrar(`negocios:${n.id}`, `Dúvida enviada pela proposta online: ${String(r.dados.texto || '').slice(0, 300)}`, { icone: 'chat-circle', tom: 'acc' });
+          return `${quem} mandou uma dúvida sobre a proposta "${n.titulo}"`;
+        }
+        return '';
+      },
+    },
+  },
+  modelos: [
+    { id: 'servicos', nome: 'Serviços B2B', desc: 'Consultoria, manutenção, terceirização', dados: { produtos: [['Diagnóstico inicial', 'SRV-01', 1500], ['Pacote mensal de serviços', 'SRV-02', 3200], ['Hora técnica extra', 'SRV-03', 180]].map(([nome, codigo, preco]) => ({ nome, codigo, preco })) } },
+    { id: 'agencia', nome: 'Agência de marketing', desc: 'Gestão de redes, tráfego pago e sites', dados: { produtos: [['Gestão de redes sociais (mensal)', 'AG-01', 1800], ['Gestão de tráfego pago (mensal)', 'AG-02', 1500], ['Site institucional', 'AG-03', 3900], ['Identidade visual', 'AG-04', 2400]].map(([nome, codigo, preco]) => ({ nome, codigo, preco })) } },
+    { id: 'software', nome: 'Software e assinaturas', desc: 'Planos mensais, implantação e treinamento', dados: { produtos: [['Plano Essencial (mensal)', 'SW-01', 299], ['Plano Profissional (mensal)', 'SW-02', 599], ['Implantação', 'SW-03', 2500], ['Treinamento da equipe', 'SW-04', 900]].map(([nome, codigo, preco]) => ({ nome, codigo, preco })) } },
+    { id: 'industria', nome: 'Indústria e distribuição', desc: 'Pedidos recorrentes, tabelas e representantes', dados: { produtos: [['Lote padrão', 'IND-01', 12000], ['Frete dedicado', 'IND-02', 1800]].map(([nome, codigo, preco]) => ({ nome, codigo, preco })) } },
+  ],
+  passos: (a) => [{ id: 'proposta', rot: 'Mande uma proposta online para um cliente', feito: Object.keys(a.db.cfg.links || {}).some((k) => k.startsWith('proposta:')) }, { id: 'seq', rot: 'Crie uma sequência de retornos num negócio', feito: !!a.db.cfg.usou_sequencia }],
   equipe: VEND.map(([, n, p]) => [n, p]),
   busca: [
     { colecao: 'negocios', grupo: 'Negócios', icone: 'handshake', ficha: 'negocio', rot: (n) => n.titulo, sub: (n) => moeda(n.valor) },
@@ -485,6 +528,16 @@ Object.assign(app.acoes, {
     app.db.salvar('negocios', { id: d.id, itens, valor: totalItens(itens) }); avisar('Produto adicionado · valor atualizado'); app.render(); app.reabrir();
   },
   tirarItem: (d) => { const n = app.db.obter('negocios', d.id); const itens = (n.itens || []).filter((_, i) => i !== Number(d.i)); app.db.salvar('negocios', { id: d.id, itens, valor: itens.length ? totalItens(itens) : n.valor }); app.render(); app.reabrir(); },
+  propostaOnline: (d) => { const n = app.db.obter('negocios', d.id), c = contatoDe(app, n.contato); if (!n.proposta_validade) app.db.salvar('negocios', { id: d.id, proposta_validade: diaMais(15) }); app.portal.compartilhar('proposta', d.id, { titulo: `Proposta online · ${n.titulo}`, telefone: c?.telefone, texto: `Olá, ${c?.nome?.split(' ')[0] || ''}! Segue a proposta da ${app.empresa}. Você pode ver os detalhes e aceitar por aqui:` }); },
+  sequencia: async (d) => {
+    const n = app.db.obter('negocios', d.id);
+    const r = await modal({ titulo: 'Sequência de retornos', largura: 520, corpo: `<p class="mute-2" style="margin-bottom:10px">Cria as próximas atividades de uma vez, com as datas certas, para ninguém esquecer de voltar ao cliente.</p>${Object.entries(SEQUENCIAS).map(([k, [nm, passos]], i) => `<label class="opcao-inicio"><input type="radio" name="seq" value="${k}" ${i === 0 ? 'checked' : ''}><span><b>${nm}</b><small>${passos.map(([dd, t, tt]) => `dia ${dd}: ${tt}`).join(' · ')}</small></span></label>`).join('')}`,
+      botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Criar atividades', classe: 'pri', acao: (f) => f.querySelector('[name=seq]:checked').value }] });
+    if (!r) return; const [, passos] = SEQUENCIAS[r];
+    passos.forEach(([dd, tipo, titulo]) => app.db.salvar('atividades', { tipo, titulo, negocio: n.id, contato: n.contato, responsavel: n.responsavel, quando: `${diaMais(dd)}T10:00`, duracao: 30, feita: false }));
+    app.db.cfg.usou_sequencia = true; app.db.gravar(); app.db.registrar(`negocios:${n.id}`, `Sequência "${SEQUENCIAS[r][0]}" criada (${passos.length} atividades)`, { icone: 'list-plus' });
+    avisar(`${passos.length} atividades agendadas`); app.render(); app.reabrir();
+  },
   proposta: async (d) => {
     const n = app.db.obter('negocios', d.id), em = empresaDe(app, n.empresa), c = contatoDe(app, n.contato), cfg = app.db.cfg;
     const doc = `<div class="doc"><div class="entre" style="align-items:flex-start"><div><h1>Proposta comercial</h1><div style="color:#555;margin-top:4px">Nº ${String(Math.abs(d.id.split('').reduce((s, ch) => s * 31 + ch.charCodeAt(0), 7)) % 9000 + 1000)} · ${dataCurta(hoje())} · válida por 15 dias</div></div><div style="text-align:right"><b>${esc(app.empresa)}</b><div style="color:#555">${esc(cfg.cnpj || '12.345.678/0001-90')}<br>${esc(cfg.telefone || '(11) 4002-8922')}</div></div></div>

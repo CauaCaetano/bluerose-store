@@ -117,6 +117,27 @@ function semente() {
 }
 
 // ---------------------------------------------------------------- regras
+/** Explica uma intimação ou andamento em linguagem simples, para mandar ao cliente. */
+function explicar(texto) {
+  const t = normal(texto), dt = String(texto).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/), hr = String(texto).match(/(\d{1,2})[:h](\d{2})/);
+  const prazo = t.match(/prazo de (\d{1,3})/)?.[1], quando = dt ? `${dt[1].padStart(2, '0')}/${dt[2].padStart(2, '0')}/${dt[3]}${hr ? ` às ${hr[1].padStart(2, '0')}h${hr[2]}` : ''}` : '';
+  if (/sentenca/.test(t) && /parcialmente procedente/.test(t)) return 'Saiu a sentença: o juiz deu razão em parte ao pedido. Vamos analisar se vale recorrer da parte que não foi aceita e explicamos os próximos passos.';
+  if (/sentenca/.test(t) && /improcedente/.test(t)) return 'Saiu a sentença e, desta vez, o juiz não aceitou o pedido. Ainda cabe recurso: vamos avaliar e conversar com você sobre recorrer.';
+  if (/sentenca/.test(t) && /procedente/.test(t)) return 'Boa notícia: saiu a sentença e o juiz deu razão ao pedido. A outra parte ainda pode recorrer; acompanhamos tudo.';
+  if (/sentenca/.test(t)) return 'Saiu a sentença do processo. Vamos ler com atenção e explicar o que foi decidido.';
+  if (/homolog/.test(t) && /acordo/.test(t)) return 'O juiz aprovou o acordo. Agora é cumprir o que foi combinado; avisamos sobre os pagamentos.';
+  if (/audiencia/.test(t) && /(design|marcad|redesign)/.test(t)) return `Foi marcada uma audiência${quando ? ` para ${quando}` : ''}. Vamos combinar com você os detalhes e o que levar.`;
+  if (/pericia|perito/.test(t) && /laudo/.test(t)) return 'O perito entregou o laudo. Vamos analisar e, se for o caso, contestar os pontos que não estiverem corretos.';
+  if (/pericia|perito/.test(t)) return `Foi determinada uma perícia${quando ? ` (${quando})` : ''}. Avisaremos onde e quando você precisa comparecer, se for necessário.`;
+  if (/alvara/.test(t)) return 'Foi expedido o alvará: o dinheiro do processo foi liberado para saque. Vamos orientar você sobre o recebimento.';
+  if (/cite-se|citacao/.test(t)) return 'O juiz mandou avisar oficialmente a outra parte sobre o processo (citação). É um passo normal do início.';
+  if (/apelac|recurso|agravo/.test(t)) return 'Houve um recurso no processo. Ele vai ser analisado pelo tribunal; acompanhamos e respondemos no prazo.';
+  if (/arquiv/.test(t)) return 'O processo foi arquivado. Se tiver alguma dúvida sobre o encerramento, fale com a gente.';
+  if (/(intime-se|intimem-se|intimad|manifest|especifi|querendo)/.test(t)) return `O juiz pediu uma manifestação nossa${prazo ? ` em ${prazo} dias` : ''}. Já estamos cuidando disso: você não precisa fazer nada agora.`;
+  if (/conclus/.test(t)) return 'O processo foi para o juiz analisar. É uma etapa normal e não depende de você.';
+  if (/juntad/.test(t)) return 'Um documento foi anexado ao processo. É uma movimentação de rotina.';
+  return 'Houve uma movimentação de rotina no processo. Não há nada que você precise fazer agora.';
+}
 const proc = (a, id) => a.db.obter('processos', id);
 const cli = (a, id) => a.db.obter('clientes', id);
 const pend = (a) => a.db.lista('prazos').filter((p) => p.status === 'pendente');
@@ -208,6 +229,9 @@ function intimacoes(a) {
         <div class="cartao-corpo col" style="gap:12px"><div style="font-size:14px;line-height:1.6;padding:12px 14px;background:var(--painel-2);border:1px solid var(--borda);border-radius:8px;white-space:pre-wrap;max-height:320px;overflow:auto">${esc(pub.texto)}</div>
         ${p ? '' : `<div class="alerta-linha al">${ic('warning')}Este processo ainda não está cadastrado no escritório.<a href="javascript:void 0" data-acao="cadastrarDaPub" data-id="${pub.id}">Cadastrar processo</a></div>`}
         ${props([['scales', 'Processo', esc(rotProc(a, p))], ['user', 'Cliente', esc(cli(a, p?.cliente)?.nome || '—')], ['user-circle', 'Responsável', esc(nomeA(p?.responsavel))]])}</div></div>
+      <div class="cartao"><div class="cartao-cab"><div><h3>Para o cliente, em linguagem simples</h3><div class="sub">Revise o texto e mande, ou publique no portal do processo</div></div></div><div class="cartao-corpo col" style="gap:10px">
+        <textarea data-simples style="min-height:70px">${esc(pub.simples || explicar(pub.texto))}</textarea>
+        <div class="flex" style="justify-content:flex-end;flex-wrap:wrap">${p ? `<button type="button" class="btn" data-acao="publicarSimples" data-id="${pub.id}">${ic('share-network')}Publicar no portal do cliente</button>` : ''}<button type="button" class="btn pri" data-acao="zapSimples" data-id="${pub.id}">${ic('whatsapp-logo')}Mandar ao cliente</button></div></div></div>
       <div class="cartao"><div class="cartao-cab"><div><h3>Calcular prazo e agendar</h3><div class="sub">CPC: contagem em dias úteis (art. 219), excluindo feriados e o recesso forense (art. 220)</div></div></div>
         <div class="cartao-corpo col" style="gap:14px"><div class="form-grade tres"><label class="campo">Prazo<input type="number" min="1" value="${dias}" data-mudar="diasPub"></label><label class="campo">Contagem<select data-mudar="uteisPub"><option value="1" ${uteis ? 'selected' : ''}>Dias úteis</option><option value="0" ${uteis ? '' : 'selected'}>Dias corridos</option></select></label><label class="campo">Atalhos<div class="flex">${[5, 10, 15, 30].map((n) => `<button type="button" class="btn peq" data-acao="atalhoPub" data-n="${n}">${n}</button>`).join('')}</div></label></div>
           <div class="grade g4" style="gap:8px">${[['Disponibilização', c.disp], ['Publicação', c.pub], ['Início da contagem', c.inicio], ['Prazo final', c.fim]].map(([t, d], i) => `<div style="padding:10px;border:1px solid ${i === 3 ? 'var(--acc-borda)' : 'var(--borda)'};border-radius:8px;background:${i === 3 ? 'var(--acc-suave)' : 'var(--painel)'}"><div class="mute" style="font-size:12px">${t}</div><b class="num" style="font-size:15px">${dataBR(d)}</b><div class="mute" style="font-size:11.5px">${DIAS_L[paraData(d).getDay()]}</div></div>`).join('')}</div>
@@ -380,7 +404,7 @@ const fichas = {
     if (aba === 'tarefas') corpo = `<div class="gav-sec"><div class="entre" style="margin-bottom:8px"><h4 style="margin:0">Tarefas</h4><button type="button" class="btn peq" data-acao="novaTarefa" data-processo="${id}">${ic('plus')}Nova</button></div>${ts.length ? `<ul class="lista" style="margin:0 -20px">${ts.map((t) => `<li>${av(nomeA(t.responsavel), 'p')}<div class="cresce"><div class="t">${esc(t.titulo)}</div><div class="s">prazo ${dataCurta(t.prazo)}</div></div>${et(COLUNAS_TAREFA.find((c2) => c2[0] === t.status)[1], t.status === 'feita' ? 'ok' : '')}</li>`).join('')}</ul>` : vazio('list-checks', 'Nenhuma tarefa')}</div>`;
     if (aba === 'horas') corpo = `<div class="gav-sec"><div class="entre" style="margin-bottom:8px"><h4 style="margin:0">${hrs(soma(hs, (h) => h.minutos))} trabalhadas</h4><button type="button" class="btn peq" data-acao="novaHora" data-processo="${id}">${ic('plus')}Lançar</button></div>${hs.length ? `<ul class="lista" style="margin:0 -20px">${hs.sort((x, y) => y.data.localeCompare(x.data)).slice(0, 25).map((h) => `<li>${av(nomeA(h.advogado), 'p')}<div class="cresce"><div class="t">${esc(h.descricao)}</div><div class="s">${dataCurta(h.data)}</div></div><b class="num">${hrs(h.minutos)}</b></li>`).join('')}</ul>` : vazio('timer', 'Nenhuma hora lançada')}</div>`;
     return { html: ficha({ tipo: 'Processo', icone: 'scales', titulo: `<span class="mono" style="font-size:17px">${esc(p.numero)}</span>`, sub: `${etArea(p.area)}<span>${esc(p.acao)}</span><span>· ${esc(c?.nome || '')} × ${esc(p.contraria || '')}</span>`,
-      extra: `<div class="flex" style="margin-top:12px;flex-wrap:wrap">${p.status === 'encerrado' ? et(`Encerrado · ${p.resultado}`, 'ok') : `<select data-mudar="faseProc" data-id="${id}" style="width:auto;height:28px">${FASES.map((f) => `<option ${f === p.fase ? 'selected' : ''}>${f}</option>`).join('')}</select>`}${p.status === 'suspenso' ? et('Suspenso', 'al') : ''}<button type="button" class="btn peq" data-acao="iniciarCron" data-processo="${id}">${ic('play')}Cronômetro</button></div>`,
+      extra: `<div class="flex" style="margin-top:12px;flex-wrap:wrap">${p.status === 'encerrado' ? et(`Encerrado · ${p.resultado}`, 'ok') : `<select data-mudar="faseProc" data-id="${id}" style="width:auto;height:28px">${FASES.map((f) => `<option ${f === p.fase ? 'selected' : ''}>${f}</option>`).join('')}</select>`}${p.status === 'suspenso' ? et('Suspenso', 'al') : ''}<button type="button" class="btn peq" data-acao="iniciarCron" data-processo="${id}">${ic('play')}Cronômetro</button><button type="button" class="btn peq" data-acao="linkProcesso" data-id="${id}">${ic('link')}Portal do cliente</button></div>`,
       aba, abas: [['resumo', 'Resumo'], ['and', 'Andamentos', ands.length], ['prazos', 'Prazos', przs.filter((x) => x.status === 'pendente').length], ['tarefas', 'Tarefas', ts.length], ['horas', 'Horas']], corpo,
       acoes: `<button type="button" class="btn fant peq" data-acao="editarProc" data-id="${id}">${ic('pencil-simple')}Editar</button><button type="button" class="btn fant peq ic-so" data-acao="menuProc" data-id="${id}" aria-label="Mais">${ic('dots-three')}</button>` }), montar: (g) => (g.dataset.aba = aba) };
   },
@@ -400,6 +424,32 @@ const fichas = {
 const app = criarApp({
   id: 'juridico', nome: 'Nexo Jurídico', sub: 'Gestão do escritório', cor: '#0f766e', icone: 'scales', empresa: 'Castro & Moura Advogados', conta: '4 pessoas · Belo Horizonte, MG',
   produto: { compra: 3290, mensal: 149 }, semente, colecoes, fichas, buscaDica: 'processos (número), clientes',
+  portal: {
+    processo: {
+      explica: 'O cliente acompanha o processo pelo celular, com cada andamento explicado em linguagem simples, as próximas audiências e um canal para mandar dúvidas.',
+      montar: (a, id) => {
+        const pr = proc(a, id); if (!pr) return null;
+        const ands = a.db.lista('andamentos').filter((x) => x.processo === id && x.fonte !== 'Interno').sort((x, y) => y.data.localeCompare(x.data)).slice(0, 20);
+        const prox = a.db.lista('prazos').filter((x) => x.processo === id && x.status === 'pendente' && x.tipo !== 'prazo' && x.data >= hoje()).sort((x, y) => x.data.localeCompare(y.data));
+        return { numero: pr.numero, cliente: cli(a, pr.cliente)?.nome || '', assunto: pr.acao, vara: pr.vara, advogado: nomeA(pr.responsavel), situacao: pr.status === 'encerrado' ? `Encerrado · ${pr.resultado || ''}` : `${pr.status === 'suspenso' ? 'Suspenso' : 'Em andamento'} · fase: ${pr.fase}`,
+          andamentos: ands.map((x) => ({ data: x.data, texto: x.simples || explicar(x.texto) })), proximos: prox.map((x) => ({ data: x.data, hora: x.hora || '', titulo: TIPOS_PRAZO[x.tipo]?.[0] || x.titulo })) };
+      },
+      responder: (a, r) => {
+        const pr = proc(a, r.ref); if (!pr || r.acao !== 'mensagem') return '';
+        const c = cli(a, pr.cliente), txt = String(r.dados.texto || '').slice(0, 1500);
+        a.db.salvar('tarefas', { titulo: `Responder ${c?.nome.split(' ')[0] || 'cliente'}: ${txt.slice(0, 80)}`, processo: pr.id, responsavel: pr.responsavel, status: 'afazer', prazo: diaMais(1), descricao: txt, criado: hoje() });
+        a.db.salvar('andamentos', { processo: pr.id, data: hoje(), texto: `Mensagem do cliente pelo portal: ${txt}`, fonte: 'Interno' });
+        return `${c?.nome.split(' ')[0] || 'Cliente'} mandou uma dúvida pelo portal do processo ${pr.numero}: virou tarefa para ${nomeA(pr.responsavel)}`;
+      },
+    },
+  },
+  modelos: [
+    { id: 'generalista', nome: 'Escritório generalista', desc: 'Cível, família, consumidor e contratos', dados: {} },
+    { id: 'trabalhista', nome: 'Trabalhista', desc: 'Reclamações, cálculos e audiências na Justiça do Trabalho', dados: {}, aoAplicar: (a) => { a.db.cfg.prazo_padrao = 8; } },
+    { id: 'previdenciario', nome: 'Previdenciário', desc: 'INSS, aposentadorias, benefícios e perícias', dados: {} },
+    { id: 'empresarial', nome: 'Empresarial', desc: 'Contratos, societário e cobranças de empresas', dados: {} },
+  ],
+  passos: (a) => [{ id: 'oab', rot: 'Cadastre as OABs para receber as intimações sozinho', feito: (a.db.cfg.oabs || []).length > 0, href: '#/config' }, { id: 'portal', rot: 'Mande o portal do processo para um cliente', feito: Object.keys(a.db.cfg.links || {}).some((k) => k.startsWith('processo:')) }],
   configExtra: (a) => { const oabs = a.db.cfg.oabs || []; return `<div class="cartao"><div class="cartao-cab"><div><h3>Captura de intimações (DJEN)</h3><div class="sub">Diário de Justiça Eletrônico Nacional · busca diária pelas OABs</div></div></div>
     <ul class="lista">${oabs.map((o, i) => `<li>${av(nomeA(o.advogado) === '—' ? `OAB ${o.numero}` : nomeA(o.advogado))}<div class="cresce"><div class="t">OAB ${esc(o.numero)}/${esc(o.uf)}</div><div class="s">${esc(nomeA(o.advogado))}</div></div><button type="button" class="btn fant peq" data-acao="tirarOAB" data-i="${i}">Remover</button></li>`).join('') || `<li><span class="mute">Nenhuma OAB cadastrada</span></li>`}</ul>
     <div class="cartao-corpo" style="border-top:1px solid var(--borda)"><form class="flex" data-oab style="flex-wrap:wrap"><input name="numero" placeholder="Nº da OAB" inputmode="numeric" required style="width:120px"><select name="uf" style="width:90px">${'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ').map((u) => `<option ${u === 'MG' ? 'selected' : ''}>${u}</option>`).join('')}</select><select name="advogado" style="flex:1;min-width:150px">${ADV.slice(0, 3).map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')}</select><button type="button" class="btn pri" data-acao="addOAB">${ic('plus')}Adicionar</button></form></div></div>`; },
@@ -428,6 +478,9 @@ let tCron;
 const tickCron = () => { clearInterval(tCron); tCron = setInterval(() => { const el = document.querySelector('[data-cron]'); if (!el) return; const s = Math.floor((Date.now() - Number(el.dataset.cron)) / 1000); el.textContent = `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; }, 1000); };
 tickCron();
 Object.assign(app.acoes, {
+  linkProcesso: (d) => { const pr = proc(app, d.id), c = cli(app, pr.cliente); app.portal.compartilhar('processo', d.id, { titulo: `Portal do cliente · ${pr.numero}`, telefone: c?.telefone, texto: `Olá, ${c?.nome.split(' ')[0]}! Acompanhe o seu processo por aqui, com cada novidade explicada de forma simples:` }); },
+  zapSimples: (d) => { const pub = app.db.obter('publicacoes', d.id), pr = proc(app, pub.processo), c = cli(app, pr?.cliente), txt = document.querySelector('[data-simples]')?.value || explicar(pub.texto); app.db.salvar('publicacoes', { id: d.id, simples: txt }); window.open(`${telLink(c?.telefone)}?text=${encodeURIComponent(`Olá, ${c?.nome.split(' ')[0] || ''}! Novidade no seu processo ${pub.numero}:\n\n${txt}\n\n${app.empresa}`)}`, '_blank', 'noopener'); },
+  publicarSimples: (d) => { const pub = app.db.obter('publicacoes', d.id), txt = document.querySelector('[data-simples]')?.value || explicar(pub.texto); app.db.salvar('publicacoes', { id: d.id, simples: txt }); app.db.salvar('andamentos', { processo: pub.processo, data: pub.data, texto: pub.texto.slice(0, 300), simples: txt, fonte: 'Diário Oficial' }); app.portal.publicar(); avisar('Publicado no portal do cliente'); },
   novoProcesso: async () => { const p = await editar(app, 'processos'); if (p) { app.render(); app.abrir('processo', p.id); } },
   editarProc: async (d) => { if (await editar(app, 'processos', proc(app, d.id))) reab(); },
   novoCliente: async () => { const c = await editar(app, 'clientes'); if (c) { app.render(); app.abrir('cliente', c.id); } },

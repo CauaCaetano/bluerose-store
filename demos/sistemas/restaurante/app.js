@@ -4,11 +4,12 @@ import {
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, kanban, DIAS, telLink, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
+import { qrSVG } from '../base/qr.js';
 
-const CATS = [['entradas', 'Entradas'], ['pratos', 'Pratos principais'], ['massas', 'Massas'], ['lanches', 'Lanches'], ['sobremesas', 'Sobremesas'], ['bebidas', 'Bebidas'], ['drinks', 'Drinks']];
+const CATS = [['entradas', 'Entradas'], ['pratos', 'Pratos principais'], ['pizzas', 'Pizzas'], ['massas', 'Massas'], ['lanches', 'Lanches'], ['porcoes', 'Porções'], ['sobremesas', 'Sobremesas'], ['cafes', 'Cafés'], ['bebidas', 'Bebidas'], ['drinks', 'Drinks']];
 const nomeCat = (k) => (CATS.find((c) => c[0] === k) || [, k])[1];
 const ETAPAS = [['novo', 'Novo', '#3b82f6'], ['preparo', 'Em preparo', '#f59e0b'], ['pronto', 'Pronto', '#16a34a'], ['rota', 'Saiu para entrega', '#a855f7'], ['entregue', 'Entregue', '#64748b']];
-const CANAIS = { salao: ['Salão', '#0ea5e9'], balcao: ['Balcão', '#64748b'], delivery: ['Delivery próprio', '#e11d48'], ifood: ['iFood', '#ea1d2c'], whatsapp: ['WhatsApp', '#16a34a'] };
+const CANAIS = { salao: ['Salão', '#0ea5e9'], balcao: ['Balcão', '#64748b'], delivery: ['Delivery próprio', '#e11d48'], ifood: ['iFood', '#ea1d2c'], whatsapp: ['WhatsApp', '#16a34a'], site: ['Pedido online', '#7c3aed'] };
 const FORMAS = ['PIX', 'Crédito', 'Débito', 'Dinheiro', 'Vale-refeição', 'Pago no app'];
 const SERVICO = 0.1;
 
@@ -104,7 +105,7 @@ function painel(a) {
 
 function mesas(a) {
   const ms = a.db.lista('mesas');
-  return `<div class="entre"><span class="mute" style="font-size:12.5px">${ms.filter((m) => mesaAberta(a, m.id)).length} ocupadas · ${ms.filter((m) => !mesaAberta(a, m.id)).length} livres · clique numa mesa para abrir ou ver a comanda</span><div class="flex"><button type="button" class="btn" data-acao="novoBalcao">${ic('storefront')}Pedido no balcão</button></div></div>
+  return `<div class="entre"><span class="mute" style="font-size:12.5px">${ms.filter((m) => mesaAberta(a, m.id)).length} ocupadas · ${ms.filter((m) => !mesaAberta(a, m.id)).length} livres · clique numa mesa para abrir ou ver a comanda</span><div class="flex"><button type="button" class="btn" data-acao="qrMesas">${ic('qr-code')}QR codes das mesas</button><button type="button" class="btn" data-acao="novoBalcao">${ic('storefront')}Pedido no balcão</button></div></div>
     ${['Salão', 'Varanda'].map((area) => `<div class="cartao"><div class="cartao-cab"><h3>${area}</h3></div><div class="cartao-corpo" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">${ms.filter((m) => m.area === area).map((m) => { const p = mesaAberta(a, m.id), t = p ? minDesde(p) : 0; return `<button type="button" class="mesa-bt" data-acao="abrirMesa" data-id="${m.id}" style="text-align:left;padding:12px;border-radius:10px;border:1px solid ${p ? 'color-mix(in srgb,var(--acc) 45%,var(--borda))' : 'var(--borda)'};background:${p ? 'var(--acc-suave)' : 'var(--painel)'};cursor:pointer;min-height:92px;display:flex;flex-direction:column;gap:4px">
       <span class="entre"><b style="font-size:17px">Mesa ${m.numero}</b><span class="mute" style="font-size:11.5px">${m.lugares} lug.</span></span>${p ? `<span class="num" style="font-weight:600">${moeda(totalP(p))}</span><span class="mute" style="font-size:12px">${p.pessoas} pessoas · ${p.garcom} · <span class="${t > 90 ? 'al-tx' : ''}">${t} min</span></span>` : '<span class="ok-tx" style="font-size:12.5px">Livre</span>'}</button>`; }).join('')}</div></div>`).join('')}`;
 }
@@ -121,7 +122,7 @@ function delivery(a) {
   a.kanbans.dlv = (id, s) => { const p = a.db.obter('pedidos', id); a.db.salvar('pedidos', { id, etapa: s, ...(s === 'entregue' ? { status: 'entregue', pago: true } : {}) }); a.db.registrar(`pedidos:${id}`, ETAPAS.find((e) => e[0] === s)[1], { icone: 'arrow-right' }); avisar(`#${p.numero} → ${ETAPAS.find((e) => e[0] === s)[1]}`); if (s === 'rota' && p.cliente) { const c = cli(a, p.cliente); window.open(`${telLink(c.telefone)}?text=${encodeURIComponent(`Oi, ${c.nome.split(' ')[0]}! Seu pedido #${p.numero} da ${a.empresa} saiu para entrega e chega em uns 20 minutos. Bom apetite!`)}`, '_blank', 'noopener'); } };
   a.kanbans['dlv:abrir'] = (id) => a.abrir('pedido', id);
   const l = peds(a).filter((p) => p.etapa && (p.etapa !== 'entregue' || (p.data === hoje())));
-  return `<div class="entre"><span class="mute" style="font-size:12.5px">Delivery próprio, WhatsApp, iFood e balcão no mesmo quadro. Ao marcar “Saiu para entrega”, o cliente recebe aviso no WhatsApp.</span><button type="button" class="btn pri" data-acao="novoDelivery">${ic('plus')}Novo pedido</button></div>`
+  return `<div class="entre"><span class="mute" style="font-size:12.5px">Delivery próprio, WhatsApp, iFood e balcão no mesmo quadro. Ao marcar “Saiu para entrega”, o cliente recebe aviso no WhatsApp.</span><div class="flex"><button type="button" class="btn" data-acao="linkCardapio">${ic('link')}Link do pedido online</button><button type="button" class="btn pri" data-acao="novoDelivery">${ic('plus')}Novo pedido</button></div></div>`
     + kanban({ id: 'dlv', itens: l, campo: 'etapa', colunas: ETAPAS.map(([id, nome, cor]) => ({ id, nome, cor, sub: (x) => moeda(soma(x, totalP)), classe: (p) => (emCurso(p) && minDesde(p) > 45 ? 'parado' : '') })),
       ficha: (p) => `<div class="entre"><span class="mono" style="font-size:12px;color:var(--tx-3)">#${p.numero}</span><span class="et sem-ponto" style="background:color-mix(in srgb,${CANAIS[p.canal][1]} 14%,var(--painel));color:${CANAIS[p.canal][1]}">${CANAIS[p.canal][0]}</span></div><div class="t">${esc(cli(a, p.cliente)?.nome || 'Balcão')}</div><div class="s corta">${p.itens.map((i) => `${i.qtd}× ${esc(i.nome)}`).join(', ')}</div><div class="linha"><span class="mute" style="font-size:11.5px">${p.hora}${emCurso(p) ? ` · ${minDesde(p)} min` : ''}</span><b class="num" style="color:var(--tx)">${moeda(totalP(p))}</b></div>` });
 }
@@ -208,6 +209,39 @@ const fichas = {
 const app = criarApp({
   id: 'restaurante', nome: 'Nexo Restaurante', sub: 'Restaurantes e delivery', cor: '#b45309', icone: 'fork-knife', empresa: 'Bistrô Alecrim', conta: 'Salão e delivery · Rio de Janeiro',
   produto: { compra: 1990, mensal: 89 }, semente, colecoes, fichas, buscaDica: 'pratos e clientes',
+  portal: {
+    cardapio: {
+      explica: 'Cardápio no celular do cliente. Na mesa (pelo QR code), o pedido vai direto para a cozinha. Fora dela, vira pedido de entrega ou retirada, sem a taxa dos aplicativos.',
+      montar: (a) => ({ cats: CATS, itens: a.db.lista('cardapio').filter((it) => it.ativo).map((it) => ({ id: it.id, nome: it.nome, preco: it.preco, cat: it.cat, tempo: it.tempo })), taxa: a.db.cfg.taxa_entrega ?? 7, delivery: true }),
+      responder: (a, r) => {
+        if (r.acao !== 'pedido') return '';
+        const d = r.dados, itens = (d.itens || []).map((x) => { const it = item(a, x.id); return it ? { item: it.id, nome: it.nome, qtd: Math.max(1, Math.min(50, Number(x.qtd) || 1)), preco: it.preco, obs: String(d.obs || '').slice(0, 120) } : null; }).filter(Boolean);
+        if (!itens.length) return '';
+        const agora = new Date().toTimeString().slice(0, 5), numero = Math.max(1000, ...peds(a).map((x) => x.numero)) + 1;
+        if (d.mesa) {
+          const m = a.db.lista('mesas').find((x) => String(x.numero) === String(d.mesa)); if (!m) return '';
+          const ab = mesaAberta(a, m.id);
+          if (ab) a.db.salvar('pedidos', { id: ab.id, itens: [...ab.itens, ...itens], cozinha: 'pendente', enviado: agora });
+          else a.db.salvar('pedidos', { numero, canal: 'salao', mesa: m.id, data: hoje(), hora: agora, itens, status: 'aberta', pessoas: 1, garcom: 'QR code', servico: true, pago: false, cozinha: 'pendente', enviado: agora });
+          return `Mesa ${m.numero} pediu pelo QR code: ${itens.map((x) => `${x.qtd}× ${x.nome}`).join(', ')}`;
+        }
+        const tel = String(d.telefone || '').replace(/\D/g, '');
+        let c = a.db.lista('clientes').find((x) => String(x.telefone).replace(/\D/g, '') === tel && tel);
+        if (!c) c = a.db.salvar('clientes', { nome: String(d.nome || 'Cliente').slice(0, 80), telefone: d.telefone || '', endereco: String(d.endereco || '').slice(0, 160), pedidos: 0 });
+        else if (d.endereco) a.db.salvar('clientes', { id: c.id, endereco: String(d.endereco).slice(0, 160) });
+        a.db.salvar('pedidos', { numero, canal: 'site', data: hoje(), hora: agora, itens, etapa: 'novo', cliente: c.id, taxa: d.retirada ? 0 : a.db.cfg.taxa_entrega ?? 7, forma: d.pagamento || 'PIX', pago: false, retirada: !!d.retirada });
+        return `Pedido online #${numero} de ${c.nome.split(' ')[0]} (${d.retirada ? 'retirada' : 'entrega'})`;
+      },
+    },
+  },
+  modelos: [
+    { id: 'restaurante', nome: 'Restaurante', desc: 'Pratos executivos, à la carte e bebidas', dados: { cardapio: [['Prato executivo do dia', 'pratos', 34], ['Filé à parmegiana', 'pratos', 69], ['Salada Caesar', 'entradas', 36]].map(([nome, cat, preco]) => ({ nome, cat, preco, ficha: [], ativo: true, tempo: 20 })) } },
+    { id: 'pizzaria', nome: 'Pizzaria', desc: 'Pizzas, bordas e bebidas', dados: { cardapio: [['Pizza margherita (grande)', 'pizzas', 64], ['Pizza calabresa (grande)', 'pizzas', 62], ['Pizza quatro queijos (grande)', 'pizzas', 72], ['Pizza portuguesa (grande)', 'pizzas', 69], ['Borda recheada de catupiry', 'pizzas', 12], ['Refrigerante 2 L', 'bebidas', 14]].map(([nome, cat, preco]) => ({ nome, cat, preco, ficha: [], ativo: true, tempo: 25 })) } },
+    { id: 'hamburgueria', nome: 'Hamburgueria', desc: 'Burgers, porções e milk-shakes', dados: { cardapio: [['Smash burger', 'lanches', 32], ['Burger bacon e cheddar', 'lanches', 42], ['Batata frita com cheddar e bacon', 'porcoes', 34], ['Onion rings', 'porcoes', 28], ['Milk-shake de Ovomaltine', 'sobremesas', 24]].map(([nome, cat, preco]) => ({ nome, cat, preco, ficha: [], ativo: true, tempo: 15 })) } },
+    { id: 'cafe', nome: 'Cafeteria e padaria', desc: 'Cafés, salgados, doces e lanches rápidos', dados: { cardapio: [['Espresso', 'cafes', 7], ['Cappuccino', 'cafes', 12], ['Pão de queijo (porção)', 'porcoes', 14], ['Misto quente', 'lanches', 16], ['Bolo de cenoura (fatia)', 'sobremesas', 12]].map(([nome, cat, preco]) => ({ nome, cat, preco, ficha: [], ativo: true, tempo: 6 })) } },
+    { id: 'bar', nome: 'Bar e petiscaria', desc: 'Petiscos, porções e drinks', dados: { cardapio: [['Porção de fritas', 'porcoes', 32], ['Isca de frango', 'porcoes', 46], ['Bolinho de bacalhau (10 un.)', 'porcoes', 48], ['Chopp 300 ml', 'bebidas', 12], ['Caipirinha', 'drinks', 24]].map(([nome, cat, preco]) => ({ nome, cat, preco, ficha: [], ativo: true, tempo: 12 })) } },
+  ],
+  passos: (a) => [{ id: 'qr', rot: 'Imprima os QR codes das mesas', feito: !!a.db.cfg.qr_impresso, acao: 'qrMesas' }, { id: 'online', rot: 'Divulgue o link do pedido online', feito: !!a.db.cfg.links?.['cardapio:'], acao: 'linkCardapio' }],
   equipe: [['Sofia Almeida', 'Dona'], ['Chef Bruno Leal', 'Cozinha'], ['Lucas', 'Garçom'], ['Renata', 'Garçonete'], ['Diego', 'Garçom'], ['Paula', 'Caixa']],
   busca: [{ colecao: 'cardapio', grupo: 'Cardápio', icone: 'fork-knife', ficha: 'item', rot: (it) => it.nome, sub: (it) => moeda(it.preco) }],
   comandos: [{ rot: 'Novo pedido de delivery', icone: 'motorcycle', acao: (a) => a.acoes.novoDelivery() }, { rot: 'Pedido no balcão', icone: 'storefront', acao: (a) => a.acoes.novoBalcao() }],
@@ -256,6 +290,15 @@ async function novoPedido(canal) {
 }
 Object.assign(app.acoes, {
   ir: (d) => app.ir(d.h),
+  linkCardapio: () => app.portal.compartilhar('cardapio', '', { titulo: 'Pedido online, sem taxa de aplicativo', qr: true, texto: `Faça o seu pedido na ${app.empresa} direto pelo nosso cardápio:` }),
+  qrMesas: async () => {
+    const base = await app.portal.link('cardapio', '', { curto: true }), [antes, depois] = base.split('#');
+    const url = (n) => `${antes}?mesa=${n}#${depois}`;
+    app.db.cfg.qr_impresso = true; app.db.gravar();
+    imprimir(`<div class="doc"><h1 style="text-align:center">${esc(app.empresa)} · QR codes das mesas</h1><p style="text-align:center;color:#555">Recorte e cole em cada mesa. O cliente aponta a câmera, escolhe e o pedido vai direto para a cozinha.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px">${app.db.lista('mesas').map((m) => `<div style="border:1px dashed #999;border-radius:12px;padding:14px;text-align:center;page-break-inside:avoid">${qrSVG(url(m.numero), 170)}<div style="font-size:20px;font-weight:700;margin-top:6px">Mesa ${m.numero}</div><div style="font-size:12px;color:#555">Aponte a câmera para pedir</div></div>`).join('')}</div></div>`);
+    app.render();
+  },
   abrirMesa: async (d) => {
     const p = mesaAberta(app, d.id); if (p) { app.abrir('pedido', p.id); return; }
     const m = app.db.obter('mesas', d.id);
