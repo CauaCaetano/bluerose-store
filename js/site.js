@@ -431,7 +431,9 @@
     b.addEventListener('click', function () { preencher(b.getAttribute('data-plano')); setTimeout(function () { msg.focus({ preventScroll: true }); }, 500); });
   });
   var q = new URLSearchParams(location.search);
-  var modelo = q.get('modelo'), nome = q.get('nome');
+  /* valores vindos do link: sem quebra de linha e no máximo 60 caracteres */
+  var limpaLink = function (v) { return String(v || '').replace(/[\r\n\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, 60); };
+  var modelo = limpaLink(q.get('modelo')), nome = limpaLink(q.get('nome'));
   if (modelo) {
     preencher(en
       ? 'Hi! I liked the "' + modelo + '" website model' + (nome ? ' for ' + nome : '') + ' and want one like it.'

@@ -4,6 +4,7 @@
   if (!C || !raiz) return;
   var esc = C.esc, reais = C.reais;
   var params = new URLSearchParams(location.search), volta = params.get('volta');
+  if (volta && !/^[A-Za-z0-9_-]{1,64}$/.test(volta)) volta = null; /* id de assinatura: só caracteres seguros (UUID ou número) */
   var NOMES = { teste: 'Teste grátis', assinatura: 'Assinatura', compra: 'Compra' };
   function data(s) { if (!s) return '—'; var p = String(s).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
   function etiqueta(a) {

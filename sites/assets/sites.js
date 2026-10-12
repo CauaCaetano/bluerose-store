@@ -95,7 +95,7 @@
     if (perso.nome) aplicarNome(perso.nome);
     if (HEX.test(perso.cor || '')) aplicarCor(perso.cor.charAt(0) === '#' ? perso.cor : '#' + perso.cor);
     if (HEX.test(perso.cor2 || '')) doc.documentElement.style.setProperty('--acc2', perso.cor2.charAt(0) === '#' ? perso.cor2 : '#' + perso.cor2);
-    if (/^data:image\/(png|jpeg|webp);base64,/.test(perso.logoImg || '')) aplicarLogo(perso.logoImg, !!perso.soLogo);
+    if (/^data:image\/(png|jpeg|webp);base64,[a-z0-9+\/=]+$/i.test(perso.logoImg || '')) aplicarLogo(perso.logoImg, !!perso.soLogo);
     ajustarCabecalho();
     if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(ajustarCabecalho);
     var tAj; window.addEventListener('resize', function () { clearTimeout(tAj); tAj = setTimeout(ajustarCabecalho, 150); });
@@ -198,7 +198,7 @@
     var nos = []; while (w.nextNode()) nos.push(w.currentNode);
     nos.forEach(function (n) { if (re.test(n.nodeValue)) { re.lastIndex = 0; n.nodeValue = troca(n.nodeValue); } re.lastIndex = 0; });
     $$('[alt],[aria-label],[title],[placeholder],[data-wa],[data-quiz]').forEach(function (el) {
-      ['alt', 'aria-label', 'title', 'placeholder', 'data-wa', 'data-quiz'].forEach(function (a) { var v = el.getAttribute(a); if (v && re.test(v)) { re.lastIndex = 0; el.setAttribute(a, troca(v)); } re.lastIndex = 0; });
+      ['alt', 'aria-label', 'title', 'placeholder', 'data-wa', 'data-quiz'].forEach(function (a) { var v = el.getAttribute(a); if (v && re.test(v)) { re.lastIndex = 0; el.setAttribute(a, a === 'data-quiz' ? v.replace(re, JSON.stringify(nome).slice(1, -1)) : troca(v)); } re.lastIndex = 0; });
     });
     doc.title = troca(doc.title);
     MARCA = nome;
@@ -267,7 +267,7 @@
     timers.forEach(clearTimeout); timers = [];
     focoAntes = doc.activeElement;
     var av = $('.sim-av', sim);
-    if (perso && perso.logoImg) { av.textContent = ''; av.style.backgroundImage = 'url("' + perso.logoImg + '")'; av.classList.add('com-logo'); } else av.textContent = MARCA.charAt(0).toUpperCase();
+    if (perso && /^data:image\/(png|jpeg|webp);base64,[a-z0-9+\/=]+$/i.test(perso.logoImg || '')) { av.textContent = ''; av.style.backgroundImage = 'url("' + perso.logoImg + '")'; av.classList.add('com-logo'); } else av.textContent = MARCA.charAt(0).toUpperCase();
     $('.sim-marca', sim).textContent = MARCA;
     $('.sim-status', sim).textContent = TS('online');
     $('.sim-cta', sim).href = urlQuero();
@@ -815,7 +815,7 @@
     var caixa, tela, timers = [], focoAntes = null, plat = 'ios', escolha = {};
     function limpa() { timers.forEach(function (t) { clearTimeout(t); clearInterval(t); }); timers = []; }
     function icone(tam) {
-      var logo = perso && perso.logoImg;
+      var logo = perso && /^data:image\/(png|jpeg|webp);base64,[a-z0-9+\/=]+$/i.test(perso.logoImg || '') ? perso.logoImg : '';
       return '<span class="as-ic" style="width:' + tam + 'px;height:' + tam + 'px' + (logo ? ';background-image:url(&quot;' + logo + '&quot;)' : '') + '">' + (logo ? '' : esc(MARCA.charAt(0).toUpperCase())) + '</span>';
     }
     function montar() {
