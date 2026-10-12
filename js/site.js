@@ -264,6 +264,42 @@
     montar();
   }
 
+  /* ---------------- sites de exemplo: filtro por ramo ---------------- */
+  (function () {
+    var filtro = document.querySelector('.sites-filtro');
+    if (!filtro) return;
+    var cards = [].slice.call(document.querySelectorAll('.sites-grade .site-c'));
+    filtro.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-cat]');
+      if (!b) return;
+      var cat = b.getAttribute('data-cat');
+      [].forEach.call(filtro.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      cards.forEach(function (c) { c.hidden = cat === 'todos' ? !c.hasAttribute('data-destaque') : c.getAttribute('data-cat') !== cat; });
+    });
+  })();
+
+  /* ---------------- carrosséis no celular: pontos com a posição ---------------- */
+  (function () {
+    [].forEach.call(document.querySelectorAll('.prod, .sites-grade'), function (trilho) {
+      var pontos = document.createElement('div');
+      pontos.className = 'carrossel-pontos';
+      pontos.setAttribute('aria-hidden', 'true');
+      trilho.parentNode.insertBefore(pontos, trilho.nextSibling);
+      function itens() { return [].filter.call(trilho.children, function (c) { return !c.hidden; }); }
+      function desenhar() {
+        var l = itens(), passo = l.length > 1 ? l[1].offsetLeft - l[0].offsetLeft : 1;
+        var atual = Math.min(l.length - 1, Math.max(0, Math.round(trilho.scrollLeft / (passo || 1))));
+        pontos.innerHTML = l.map(function (_, i) { return '<i' + (i === atual ? ' class="on"' : '') + '></i>'; }).join('') + '<span>' + (atual + 1) + ' de ' + l.length + '</span>';
+      }
+      var agendado = false;
+      trilho.addEventListener('scroll', function () { if (agendado) return; agendado = true; requestAnimationFrame(function () { agendado = false; desenhar(); }); }, { passive: true });
+      // o filtro dos sites muda quantos aparecem: volta ao começo e redesenha
+      var filtro = document.querySelector('.sites-filtro');
+      if (filtro && trilho.classList.contains('sites-grade')) filtro.addEventListener('click', function () { setTimeout(function () { trilho.scrollLeft = 0; desenhar(); }, 0); });
+      desenhar();
+    });
+  })();
+
   /* ---------------- vitrine de sites (nicho e dispositivo) ---------------- */
   document.querySelectorAll('[data-vitrine]').forEach(function (v) {
     var frame = v.querySelector('iframe');
