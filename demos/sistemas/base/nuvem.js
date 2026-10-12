@@ -259,8 +259,7 @@ function vigiarErros(sb, cfg) {
     sb.rpc('nexo_registrar_erro', { p_app: cfg.id, p_mensagem: m, p_origem: origem || null, p_pagina: location.hash.slice(0, 200), p_navegador: navigator.userAgent.slice(0, 200), p_versao: document.documentElement.dataset.versao || null }).then(() => {}, () => {});
   };
   addEventListener('error', (e) => { if (e.message && nosso(e.filename)) enviar(e.message, `${String(e.filename || '').replace(location.origin, '')}:${e.lineno}:${e.colno}`); });
-  addEventListener('unhandledrejection', (e) => { const r = e.reason; enviar(r?.message || String(r), (r?.stack || '').split('
-').find((l) => l.includes(location.origin))?.trim().replace(location.origin, '')); });
+  addEventListener('unhandledrejection', (e) => { const r = e.reason; enviar(r?.message || String(r), (r?.stack || '').split('\n').find((l) => l.includes(location.origin))?.trim().replace(location.origin, '')); });
 }
 
 // ---------------------------------------------------------------- início
