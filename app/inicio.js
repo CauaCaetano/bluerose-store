@@ -14,9 +14,13 @@
     return;
   }
   if (session) {
-    caixa.innerHTML = `<h1 class="entrada-t">Conta confirmada</h1><p class="entrada-s">Tudo certo, ${esc(session.user.email)}. Voltando para onde você estava…</p><a class="btn pri" href="${esc(volta)}">Continuar</a>`;
+    caixa.innerHTML = `<h1 class="entrada-t">Pronto, você entrou</h1><p class="entrada-s">Conta ${esc(session.user.email)}. Voltando para onde você estava…</p><a class="btn pri" href="${esc(volta)}">Continuar</a>`;
     try { localStorage.removeItem('nexo-volta'); } catch { /* ok */ }
-    setTimeout(() => { location.href = volta; }, 1800);
+    setTimeout(() => { location.href = volta; }, 1200);
+    return;
+  }
+  if (/error=/.test(location.hash + location.search)) {
+    caixa.innerHTML = `<h1 class="entrada-t">Não foi possível entrar</h1><p class="entrada-s">O login foi cancelado ou não foi autorizado. Tente de novo ou use e-mail e senha.</p><a class="btn pri" href="${esc(volta)}">Voltar</a>`;
     return;
   }
   if (!location.hash) { location.replace('../conta.html'); return; }

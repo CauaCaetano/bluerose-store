@@ -609,3 +609,11 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .lista-teste { list-style: none; margin: 4px 0 16px; padding: 0; display: grid; gap: 8px; font-size: 13.5px; color: var(--tx-2); }
 .lista-teste li { display: flex; gap: 8px; align-items: flex-start; }
 .lista-teste .ic { color: var(--acc); margin-top: 2px; flex-shrink: 0; }
+
+/* entrar com o Google */
+.entrada-google { margin-bottom: 4px; }
+.btn-google { width: 100%; height: 40px; justify-content: center; gap: 10px; background: #fff; color: #1f1f1f; border: 1px solid #dadce0; font-weight: 600; }
+.btn-google:hover { background: #f7f8fa; border-color: #c6c9ce; }
+.btn-google:disabled { opacity: .6; cursor: progress; }
+.entrada-ou { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; font-size: 12.5px; color: var(--tx-3, #6b7280); }
+.entrada-ou::before, .entrada-ou::after { content: ""; flex: 1; height: 1px; background: var(--bd, #e5e7eb); }

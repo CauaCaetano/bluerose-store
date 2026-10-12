@@ -58,9 +58,26 @@
     if (/rate limit|too many/i.test(m)) return 'Muitas tentativas seguidas. Espere um minuto e tente de novo.';
     return m || 'Algo deu errado. Tente de novo.';
   };
+  // ------------------------------------------------ entrar com o Google (aparece só quando o Google está ligado no Supabase)
+  var googleOk = null;
+  function googleLigado() {
+    if (googleOk) return googleOk;
+    googleOk = sb().then(function () { var c = window.NEXO_NUVEM; return fetch(c.url + '/auth/v1/settings', { headers: { apikey: c.chave } }); })
+      .then(function (r) { return r.json(); }).then(function (j) { return !!(j.external && j.external.google); }).catch(function () { return false; });
+    return googleOk;
+  }
+  function entrarGoogle(bt, erro) {
+    bt.disabled = true; erro.textContent = '';
+    try { localStorage.setItem('nexo-volta', location.href); } catch (x) { /* ok */ }
+    sb().then(function (c) { return c.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/app/', queryParams: { prompt: 'select_account' } } }); })
+      .then(function (r) { if (r.error) throw r.error; }).catch(function (x) { erro.textContent = erroAuth(x); bt.disabled = false; });
+  }
+  var G = '<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+
   function telaLogin(modo, motivo, resolver) {
     var t = { entrar: ['Entrar', 'Acesse a sua conta da Blue Rose.'], criar: ['Criar conta', 'Leva menos de um minuto.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] }[modo];
     var d = janela('<span class="eyebrow">Sua conta</span><h3 id="conta-t">' + t[0] + '</h3>' + (motivo ? '<p class="conta-motivo">' + esc(motivo) + '</p>' : '<p class="conta-sub">' + t[1] + '</p>') +
+      (modo !== 'esqueci' ? '<div class="conta-google" hidden><button type="button" class="btn conta-g">' + G + 'Continuar com o Google</button><p class="conta-ou"><span>ou com e-mail e senha</span></p></div>' : '') +
       '<form class="conta-form" novalidate>' + (modo === 'criar' ? '<label>Seu nome<input name="nome" autocomplete="name" required></label>' : '') +
       '<label>E-mail<input name="email" type="email" autocomplete="email" required></label>' +
       (modo !== 'esqueci' ? '<label>Senha<input name="senha" type="password" minlength="8" autocomplete="' + (modo === 'criar' ? 'new-password' : 'current-password') + '" required></label>' : '') +
@@ -68,6 +85,8 @@
       '<p class="conta-links">' + (modo === 'entrar' ? '<a href="#" data-m="criar">Criar conta</a> · <a href="#" data-m="esqueci">Esqueci a senha</a>' : '<a href="#" data-m="entrar">Já tenho conta</a>') + '</p>');
     d.querySelectorAll('[data-m]').forEach(function (a) { a.onclick = function (e) { e.preventDefault(); telaLogin(a.getAttribute('data-m'), motivo, resolver); }; });
     var f = d.querySelector('form'), erro = d.querySelector('.conta-erro'), bt = f.querySelector('button');
+    var gb = d.querySelector('.conta-google');
+    if (gb) googleLigado().then(function (ok) { if (!ok) return; gb.hidden = false; gb.querySelector('button').onclick = function () { entrarGoogle(this, erro); }; });
     f.onsubmit = function (e) {
       e.preventDefault(); if (!f.reportValidity()) return;
       var v = { nome: f.nome && f.nome.value.trim(), email: f.email.value.trim(), senha: f.senha && f.senha.value };
