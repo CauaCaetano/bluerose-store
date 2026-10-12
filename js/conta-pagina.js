@@ -87,6 +87,19 @@
     }
     if (a) { a.disabled = true; C.pagar(a.getAttribute('data-assinar')).catch(function (x) { alert(x.message); a.disabled = false; }); }
   });
+  var fx = document.querySelector('[data-excluir]');
+  if (fx) fx.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var ex = fx.querySelector('[data-erro-ex]'), b = fx.querySelector('button');
+    if (fx.ok.value.trim().toUpperCase() !== 'EXCLUIR') { ex.textContent = 'Digite EXCLUIR para confirmar.'; return; }
+    if (!confirm('Excluir a sua conta e todos os dados agora? Não dá para desfazer.')) return;
+    b.disabled = true; b.textContent = 'Excluindo…'; ex.textContent = '';
+    C.chamar({ acao: 'excluir_conta', confirmar: 'EXCLUIR' }).then(function () {
+      return C.sb().then(function (c) { return c.auth.signOut(); }).catch(function () {});
+    }).then(function () {
+      document.getElementById('conteudo').innerHTML = '<section class="wrap conta-topo"><div><span class="eyebrow">Minha conta</span><h1>Conta excluída</h1><p class="conta-sub">O seu login e os seus dados foram apagados. Obrigado por ter usado a Blue Rose.</p></div></section>';
+    }).catch(function (x) { ex.textContent = x.message || 'Não foi possível excluir agora.'; b.disabled = false; b.textContent = 'Excluir minha conta'; });
+  });
   document.getElementById('conta-sair').addEventListener('click', function () {
     C.sb().then(function (c) { return c.auth.signOut(); }).then(function () { location.href = './'; });
   });

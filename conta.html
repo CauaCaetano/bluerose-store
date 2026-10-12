@@ -24,7 +24,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=26">
+<link rel="stylesheet" href="css/site.css?v=27">
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=6" defer></script>
 <script src="js/site.js?v=12" defer></script>
@@ -32,7 +32,7 @@
 <script src="js/contratar.js?v=5" defer></script>
 <script src="js/videos.js?v=4" defer></script>
 <script src="js/conta.js?v=2" defer></script>
-<script src="js/conta-pagina.js?v=2" defer></script>
+<script src="js/conta-pagina.js?v=3" defer></script>
 <meta name="robots" content="noindex">
 </head>
 <body>
@@ -83,6 +83,11 @@
           <li>Cancele quando quiser, aqui mesmo. O acesso continua até o fim do período pago.</li>
           <li>Os pagamentos são processados pelo Mercado Pago. As assinaturas também aparecem no app do Mercado Pago.</li>
         </ul>
+      </div>
+      <div class="conta-bloco conta-perigo" id="excluir">
+        <h2>Excluir minha conta</h2>
+        <p>Apaga o seu login e as empresas de que você é dono, com todos os cadastros, e cancela as cobranças. Não dá para desfazer. O registro dos pagamentos já feitos fica guardado pelo prazo da lei fiscal.</p>
+        <form data-excluir novalidate><label>Digite EXCLUIR para confirmar<input name="ok" autocomplete="off" required></label><p class="conta-erro" data-erro-ex role="alert"></p><button type="submit" class="btn conta-bt-perigo">Excluir minha conta</button></form>
       </div>
     </aside>
   </div>

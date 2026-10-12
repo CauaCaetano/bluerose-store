@@ -1,0 +1,38 @@
+/* Linha Nexo · entrada do app (Google Play): marca Blue Rose, escuro, uma coluna */
+body.play { min-height: 100dvh; margin: 0; display: grid; place-items: start center; padding: max(28px, env(safe-area-inset-top)) 16px 32px; color-scheme: dark;
+  background: radial-gradient(90% 40% at 50% 0%, rgba(61, 107, 240, 0.28), transparent 70%), #0b0e13; color: #edf1f7;
+  --tx: #edf1f7; --tx-2: #aab3c3; --tx-3: #8a93a5; --painel: #141922; --borda: #232a36; --borda-2: #313a49; --hover: rgba(214, 224, 245, .06); --acc: #3d6bf0; }
+.play-caixa { width: 100%; max-width: 440px; }
+.play-marca { display: flex; align-items: center; gap: 12px; margin: 8px 0 26px; }
+.play-marca img { border-radius: 12px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .08), 0 10px 24px -10px rgba(61, 107, 240, .9); }
+.play-marca b { display: block; font-size: 19px; letter-spacing: -.02em; }
+.play-marca small { color: #8fb0ff; font-size: 13px; }
+.play h1 { font-size: 24px; letter-spacing: -.02em; margin: 0 0 6px; }
+.play-s { color: var(--tx-2); font-size: 14.5px; margin: 0 0 20px; }
+.play form { display: grid; gap: 12px; }
+.play label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--tx-2); }
+.play input { font: inherit; font-size: 16px; color: var(--tx); background: #0f131a; border: 1px solid var(--borda-2); border-radius: 10px; padding: 12px; }
+.play input:focus { outline: 2px solid var(--acc); outline-offset: 1px; }
+.play .btn-grande { height: 48px; width: 100%; justify-content: center; font-size: 15.5px; border-radius: 10px; }
+.play .erro { color: #ffa39c; font-size: 13.5px; min-height: 1em; margin: 0; }
+.play .ok-tx { color: #6ee7a8; font-size: 13.5px; }
+.play-google { width: 100%; height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border-radius: 10px; border: 1px solid #dadce0; background: #fff; color: #1f1f1f; font: 600 15px var(--f); cursor: pointer; }
+.play-ou { display: flex; align-items: center; gap: 10px; margin: 14px 0; color: var(--tx-3); font-size: 12.5px; }
+.play-ou::before, .play-ou::after { content: ""; flex: 1; height: 1px; background: var(--borda); }
+.play-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin-top: 18px; font-size: 13.5px; }
+.play-links a, .play-links button { color: #8fb0ff; background: none; border: 0; padding: 4px 0; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.play-sis { display: grid; gap: 10px; margin: 0 0 20px; padding: 0; list-style: none; }
+.play-sis a { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding: 14px; border-radius: 14px; background: var(--painel); border: 1px solid var(--borda); color: var(--tx); text-decoration: none; transition: border-color .2s, transform .2s; }
+.play-sis a:hover, .play-sis a:focus-visible { border-color: var(--acc); transform: translateY(-1px); }
+.play-sis img { width: 44px; height: 44px; border-radius: 11px; }
+.play-sis b { display: block; font-size: 16px; }
+.play-sis small { color: var(--tx-3); font-size: 13px; }
+.play-sis .seta { width: 9px; height: 9px; border-top: 2px solid var(--tx-3); border-right: 2px solid var(--tx-3); transform: rotate(45deg); margin-right: 6px; }
+.play-conta { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0 0 16px; color: var(--tx-3); font-size: 13.5px; }
+.play-vazio { padding: 20px; border-radius: 14px; background: var(--painel); border: 1px solid var(--borda); color: var(--tx-2); font-size: 14.5px; margin-bottom: 20px; }
+.play-perigo { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--borda); }
+.play-perigo summary { color: var(--tx-3); font-size: 13.5px; cursor: pointer; }
+.play-perigo p { color: var(--tx-2); font-size: 13.5px; margin: 10px 0; }
+.play-perigo .btn-perigo { height: 44px; width: 100%; border-radius: 10px; border: 1px solid rgba(240, 120, 111, .5); background: rgba(240, 120, 111, .12); color: #ffa39c; font: 600 14.5px var(--f); cursor: pointer; }
+.play-pe { margin-top: 28px; text-align: center; color: var(--tx-3); font-size: 12.5px; }
+.play-pe a { color: var(--tx-2); }

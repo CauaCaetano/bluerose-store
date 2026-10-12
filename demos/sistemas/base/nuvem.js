@@ -11,6 +11,10 @@
 import { esc, ic, av, et, avisar, modal, confirmar, Banco, hoje, diasAte, dataCurta, normal, agrupar } from './nexo.js';
 
 const SITE = 'https://bluerose-store.com/';
+// Dentro do app da Google Play (Linha Nexo) não há venda nem teste com cartão: a regra de pagamentos da loja
+// não permite levar a compra para fora. O app abre /app/play/?origem=play, que marca este aparelho.
+const PLAY = (() => { try { return localStorage.getItem('nexo-play') === '1'; } catch { return false; } })();
+const LOGO = new URL('blue-rose.png', import.meta.url).href;
 const SEP = '\u0001';
 
 // ---------------------------------------------------------------- banco sincronizado
@@ -64,7 +68,7 @@ class BancoNuvem extends Banco {
     } catch (e) {
       this.estado('erro');
       const rls = /row-level security|42501|permission/i.test(`${e.message} ${e.code}`);
-      avisar(rls ? 'Não foi possível salvar: o período de teste terminou. Contrate para continuar usando.' : `Não foi possível salvar agora (${e.message || 'sem conexão'}). Vamos tentar de novo.`, { tipo: 'erro', tempo: 7000 });
+      avisar(rls ? PLAY ? 'Não foi possível salvar: o acesso a este sistema terminou.' : 'Não foi possível salvar: o período de teste terminou. Contrate para continuar usando.' : `Não foi possível salvar agora (${e.message || 'sem conexão'}). Vamos tentar de novo.`, { tipo: 'erro', tempo: 7000 });
       if (!rls) setTimeout(() => this.gravar(), 5000);
     } finally { this.enviando = false; }
   }
@@ -89,8 +93,8 @@ class BancoNuvem extends Banco {
 
 // ---------------------------------------------------------------- telas de entrada
 function tela(cfg, conteudo) {
-  document.body.innerHTML = `<div class="entrada" style="--acc:${cfg.cor}"><div class="entrada-caixa">
-    <div class="marca" style="padding:0 0 18px"><div class="marca-ic">${ic(cfg.icone || 'squares-four')}</div><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.sub)} · Blue Rose Express</small></div></div>
+  document.body.innerHTML = `<div class="entrada"><div class="entrada-caixa">
+    <div class="marca" style="padding:0 0 18px"><img class="marca-logo" src="${LOGO}" alt="Blue Rose" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>Blue Rose · ${esc(cfg.sub)}</small></div></div>
     ${conteudo}</div><p class="entrada-pe">Seus dados ficam guardados com segurança e só a sua equipe tem acesso. <a href="${SITE}privacidade.html" target="_blank" rel="noopener">Privacidade</a> · <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos</a></p></div>`;
   const f = document.querySelector('.entrada form'); f?.querySelector('input')?.focus();
   return f;
@@ -113,7 +117,7 @@ const LOGO_G = '<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="tru
 
 function telaConta(sb, cfg, modo = 'criar', aviso = '') {
   return new Promise((resolver) => {
-    const titulos = { criar: ['Teste grátis por 7 dias', 'Crie sua conta. No próximo passo você cadastra o cartão: nada é cobrado nos 7 dias e dá para cancelar quando quiser.'], entrar: ['Entrar', 'Acesse o sistema da sua empresa.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] };
+    const titulos = { criar: ['Teste grátis por 7 dias', 'Crie sua conta. No próximo passo você cadastra o cartão: nada é cobrado nos 7 dias e dá para cancelar quando quiser.'], entrar: ['Entrar', PLAY ? 'Use o mesmo e-mail e senha da sua conta Blue Rose.' : 'Acesse o sistema da sua empresa.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] };
     const [t, s] = titulos[modo];
     const f = tela(cfg, `<h1 class="entrada-t">${t}</h1><p class="entrada-s">${s}</p>${aviso ? `<div class="dica" style="margin-bottom:14px">${ic('info')}<span>${aviso}</span></div>` : ''}
       ${modo !== 'esqueci' ? `<div class="entrada-google" hidden><button type="button" class="btn btn-google">${LOGO_G}Continuar com o Google</button><p class="entrada-ou"><span>ou com e-mail e senha</span></p></div>` : ''}
@@ -124,7 +128,7 @@ function telaConta(sb, cfg, modo = 'criar', aviso = '') {
         <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p>
         <button class="btn pri" style="height:40px">${modo === 'criar' ? 'Criar conta e começar o teste' : modo === 'entrar' ? 'Entrar' : 'Enviar link'}</button>
       </form>
-      <div class="entrada-links">${modo === 'criar' ? '<span>Já tem conta?</span> <a href="#" data-modo="entrar">Entrar</a>' : modo === 'entrar' ? '<a href="#" data-modo="esqueci">Esqueci a senha</a><span>·</span><a href="#" data-modo="criar">Criar conta grátis</a>' : '<a href="#" data-modo="entrar">Voltar para entrar</a>'}</div>`);
+      <div class="entrada-links">${modo === 'criar' ? '<span>Já tem conta?</span> <a href="#" data-modo="entrar">Entrar</a>' : modo === 'entrar' ? `<a href="#" data-modo="esqueci">Esqueci a senha</a>${PLAY ? '' : '<span>·</span><a href="#" data-modo="criar">Criar conta grátis</a>'}` : '<a href="#" data-modo="entrar">Voltar para entrar</a>'}</div>`);
     document.querySelectorAll('[data-modo]').forEach((a) => (a.onclick = (e) => { e.preventDefault(); telaConta(sb, cfg, a.dataset.modo).then(resolver); }));
     const gb = document.querySelector('.entrada-google');
     if (gb) googleLigado(sb).then((ok) => {
@@ -196,6 +200,11 @@ async function temAcesso(sb, cfg) {
   return (r.assinaturas || []).some((a) => a.app === cfg.id && (['ativa', 'paga'].includes(a.status) || (a.status === 'teste' && a.teste_ate >= h) || (a.status === 'cancelada' && [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop() >= h)));
 }
 function telaTeste(sb, cfg, email) {
+  if (PLAY) return new Promise(() => {
+    tela(cfg, `<h1 class="entrada-t">Sistema não liberado</h1><p class="entrada-s">O ${esc(cfg.nome)} ainda não está liberado na conta ${esc(email)}.</p>
+      <div class="entrada-links"><a href="../play/">Voltar aos meus sistemas</a><span>·</span><a href="#" data-sair>Sair desta conta</a></div>`);
+    document.querySelector('[data-sair]').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.href = '../play/'; };
+  });
   return new Promise(() => {
     const preco = cfg.produto?.mensal || 0;
     const f = tela(cfg, `<h1 class="entrada-t">Teste grátis de 7 dias</h1><p class="entrada-s">Use o ${esc(cfg.nome)} com os dados da sua empresa por 7 dias sem pagar nada.</p>
@@ -272,7 +281,7 @@ export async function iniciarNuvem(app, cfg) {
   tela(cfg, `<div class="vazio" style="padding:30px 0">${ic('circle')}<b>Carregando…</b></div>`);
   let { data: { session } } = await sb.auth.getSession();
   if (session && recuperacao) { await telaNovaSenha(sb, cfg); history.replaceState(null, '', location.pathname); }
-  if (!session) session = await telaConta(sb, cfg, new URLSearchParams(location.search).get('entrar') ? 'entrar' : 'criar');
+  if (!session) session = await telaConta(sb, cfg, PLAY || new URLSearchParams(location.search).get('entrar') ? 'entrar' : 'criar');
   const uid = session.user.id, email = session.user.email;
   vigiarErros(sb, cfg);
   await sb.rpc('nexo_aceitar_convites');
@@ -309,7 +318,7 @@ export async function iniciarNuvem(app, cfg) {
     integracoes: async () => { const { data } = await sb.rpc('nexo_integracoes', { p_espaco: esp.id }); return Object.fromEntries((data || []).map((x) => [x.chave, x.atualizado])); },
     faixa: () => `<div class="faixa nao-imprime"><span class="so-larga">${encerrado ? '<b>Seu teste terminou.</b> Os dados continuam aqui, só para consulta.' : teste ? `Teste grátis · <b>${restam === 0 ? 'último dia' : `${restam} ${restam === 1 ? 'dia' : 'dias'} restantes`}</b>` : `<b>${esc(esp.nome)}</b> · plano ativo`}</span><span class="sep so-larga"></span>
       <span data-sync class="so-larga" style="opacity:.8">Salvo</span><span class="sep so-larga"></span><span class="so-larga" style="opacity:.8">${esc(email)}</span>
-      <a class="cta" href="${SITE}conta.html" target="_top">${encerrado ? 'Assinar para continuar' : 'Minha conta'}</a></div>`,
+      ${PLAY ? '<a class="cta" href="../play/">Meus sistemas</a>' : `<a class="cta" href="${SITE}conta.html" target="_top">${encerrado ? 'Assinar para continuar' : 'Minha conta'}</a>`}</div>`,
     subConta: () => (teste ? `Teste até ${dataCurta(esp.teste_ate)}` : 'Plano ativo'),
     cartaoEquipe: () => `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">Cada pessoa entra com o próprio e-mail e senha</div></div></div>
       <ul class="lista">${equipe.map((m) => `<li>${av(m.email)}<div class="cresce"><div class="t corta">${esc(m.email)}${m.usuario === uid ? ' <span class="mute">(você)</span>' : ''}</div><div class="s">${m.papel === 'dono' ? 'Dono' : 'Equipe'}</div></div>${dono && m.usuario !== uid ? `<button type="button" class="btn fant peq" data-acao="removerMembro" data-u="${m.usuario}">Remover</button>` : et('Ativo', 'ok')}</li>`).join('')}
@@ -367,7 +376,8 @@ export async function iniciarNuvem(app, cfg) {
         },
       });
       carregarEquipe();
-      if (encerrado) modal({ titulo: 'Seu teste terminou', largura: 460, corpo: `<p class="mute-2">Os dados da <b>${esc(esp.nome)}</b> continuam guardados. Para voltar a usar, contrate o ${esc(cfg.nome)}: alugue por mês ou compre.</p>`, botoes: [{ rotulo: 'Só consultar', valor: null, classe: 'fant' }, { rotulo: 'Assinar', classe: 'pri', acao: () => { location.href = `${SITE}conta.html`; return true; } }] });
+      if (encerrado && PLAY) modal({ titulo: 'Acesso encerrado', largura: 460, corpo: `<p class="mute-2">Os dados da <b>${esc(esp.nome)}</b> continuam guardados e você pode consultá-los.</p>`, botoes: [{ rotulo: 'Entendi', valor: null, classe: 'pri' }] });
+      else if (encerrado) modal({ titulo: 'Seu teste terminou', largura: 460, corpo: `<p class="mute-2">Os dados da <b>${esc(esp.nome)}</b> continuam guardados. Para voltar a usar, contrate o ${esc(cfg.nome)}: alugue por mês ou compre.</p>`, botoes: [{ rotulo: 'Só consultar', valor: null, classe: 'fant' }, { rotulo: 'Assinar', classe: 'pri', acao: () => { location.href = `${SITE}conta.html`; return true; } }] });
       else if (escolha.novo) modal({ titulo: `Bem-vindo ao ${cfg.nome}`, largura: 520, corpo: `<div class="col" style="gap:10px"><p class="mute-2">Seu teste vai até <b>${dataCurta(esp.teste_ate)}</b>. Três passos para começar:</p><div class="dica">${ic('upload-simple')}<span><b>Traga seus cadastros:</b> em Configurações, importe uma planilha (CSV) de clientes, produtos ou o que precisar.</span></div><div class="dica">${ic('user-plus')}<span><b>Convide a equipe:</b> cada pessoa entra com o próprio e-mail e vê tudo atualizado na hora.</span></div><div class="dica">${ic('phone')}<span><b>Use no celular:</b> abra este endereço no celular e toque em "Adicionar à tela inicial".</span></div></div>`, botoes: [{ rotulo: 'Começar', classe: 'pri', valor: true }] });
     },
   };

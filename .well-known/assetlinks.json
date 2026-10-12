@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.bluerosestore.linhanexo",
+    "sha256_cert_fingerprints": ["92:72:0F:A7:A7:A8:7C:98:6C:9E:68:9D:29:A5:75:56:7C:FB:0F:91:28:AF:F8:7E:B5:F2:A9:08:EB:59:D8:FC"]
+  }
+}]
