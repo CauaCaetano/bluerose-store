@@ -72,7 +72,14 @@
     if (pagar.getAttribute('aria-disabled') === 'true') { aceite.focus(); return; }
     if (!window.BR_CONTA) { location.href = pagar.dataset.link; return; }
     var txt = pagar.textContent; pagar.textContent = 'Abrindo o Mercado Pago…'; pagar.setAttribute('aria-disabled', 'true'); erroCt.textContent = '';
-    window.BR_CONTA.pagar(pagar.dataset.plano, { emailMp: (document.getElementById('ct-mp') || {}).value || '' }).catch(function (x) {
+    var emailMp = (document.getElementById('ct-mp') || {}).value || '';
+    var plano = pagar.dataset.plano;
+    // aluguel da Linha Nexo começa com os 7 dias grátis prometidos na página; quem já usou o teste vai direto para a assinatura
+    var nexo = /^a-sis-/.test(plano);
+    window.BR_CONTA.pagar(plano, { emailMp: emailMp, teste: nexo }).catch(function (x) {
+      if (nexo && x.dados && x.dados.sem_teste) return window.BR_CONTA.pagar(plano, { emailMp: emailMp });
+      throw x;
+    }).catch(function (x) {
       erroCt.textContent = x.message || 'Não foi possível abrir o pagamento. Tente de novo.'; pagar.textContent = txt; estado();
     });
   });
