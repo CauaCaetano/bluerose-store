@@ -2,14 +2,23 @@
 (function () {
   var C = window.BR_CONTA, raiz = document.getElementById('conta-raiz');
   if (!C || !raiz) return;
-  var esc = C.esc, reais = C.reais;
+  var esc = C.esc, reais = C.reais, resumo = document.getElementById('conta-resumo');
   var params = new URLSearchParams(location.search), volta = params.get('volta');
   if (volta && !/^[A-Za-z0-9_-]{1,64}$/.test(volta)) volta = null; /* id de assinatura: só caracteres seguros (UUID ou número) */
   var NOMES = { teste: 'Teste grátis', assinatura: 'Assinatura', compra: 'Compra' };
+  var APPS = ['crm', 'agenda', 'financeiro', 'gestao', 'juridico', 'clinica', 'academia', 'restaurante', 'imobiliaria', 'oficina'];
+  var hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   function data(s) { if (!s) return '—'; var p = String(s).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+  function dias(ate) { return Math.round((new Date(String(ate).slice(0, 10) + 'T12:00:00') - new Date(hojeISO + 'T12:00:00')) / 864e5); }
   function etiqueta(a) {
-    var m = { pendente: ['Aguardando o Mercado Pago', 'al'], teste: ['Teste até ' + data(a.teste_ate), 'ok'], ativa: ['Ativa', 'ok'], paga: ['Paga', 'ok'], cancelada: ['Cancelada', ''], recusada: ['Não liberada', 'er'], expirada: ['Não concluída', ''] }[a.status] || [a.status, ''];
+    var m = { pendente: ['Aguardando o Mercado Pago', 'al'], teste: ['Em teste', 'ok'], ativa: ['Ativa', 'ok'], paga: ['Paga', 'ok'], cancelada: ['Cancelada', ''], recusada: ['Não liberada', 'er'], expirada: ['Não concluída', ''] }[a.status] || [a.status, ''];
     return '<span class="conta-et ' + m[1] + '">' + esc(m[0]) + '</span>';
+  }
+  function barraTeste(a) {
+    if (a.status !== 'teste' || !a.teste_ate) return '';
+    var resta = Math.max(0, dias(a.teste_ate)), usado = Math.min(100, Math.max(4, Math.round(((7 - resta) / 7) * 100)));
+    return '<div class="conta-prazo"><div class="conta-prazo-txt"><b>' + (resta === 0 ? 'Último dia de teste' : resta === 1 ? 'Falta 1 dia de teste' : 'Faltam ' + resta + ' dias de teste') + '</b><span>até ' + data(a.teste_ate) + '</span></div>' +
+      '<div class="conta-prazo-barra" role="progressbar" aria-label="Dias de teste usados" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + usado + '"><i style="width:' + usado + '%"></i></div></div>';
   }
   function cartao(a) {
     var linhas = [];
@@ -18,17 +27,42 @@
     if (a.status === 'cancelada') { var ate = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop(); linhas.push(ate ? 'Sem novas cobranças. O acesso continua até ' + data(ate) + '.' : 'Sem novas cobranças.'); }
     if (a.tipo === 'compra') linhas.push(a.status === 'paga' ? 'Entrada de ' + reais(a.valor) + ' paga. Em até 1 dia útil entramos em contato para a implantação.' : 'Entrada de ' + reais(a.valor) + '.');
     if (a.motivo) linhas.push(a.motivo);
-    var abrir = a.app && ['teste', 'ativa', 'paga', 'cancelada'].indexOf(a.status) >= 0 ? '<a class="btn btn-primary" href="app/' + esc(a.app) + '/">Abrir o sistema</a>' : '';
-    var cancelar = a.tipo !== 'compra' && ['teste', 'ativa'].indexOf(a.status) >= 0 ? '<button type="button" class="btn btn-ghost" data-cancelar="' + esc(a.id) + '">' + (a.status === 'teste' ? 'Cancelar o teste' : 'Cancelar a assinatura') + '</button>' : '';
-    var fim = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop(), hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
-    var assinar = a.app && a.tipo !== 'compra' && (a.status === 'recusada' || (a.status === 'cancelada' && (!fim || fim < hojeISO) )) ? '<button type="button" class="btn btn-primary" data-assinar="a-sis-' + esc(a.app) + '">Assinar por ' + reais(a.valor) + '/mês</button>' : '';
-    return '<article class="conta-item"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
-      (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></article>';
+    var fim = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop();
+    var pode = a.app && (['teste', 'ativa', 'paga'].indexOf(a.status) >= 0 || (a.status === 'cancelada' && fim && fim >= hojeISO)); /* cancelada: só enquanto o período pago vale */
+    var abrir = pode ? '<a class="btn btn-primary" href="app/' + esc(a.app) + '/">Abrir o sistema <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>' : '';
+    var cancelar = a.tipo !== 'compra' && ['teste', 'ativa'].indexOf(a.status) >= 0 ? '<button type="button" class="conta-link" data-cancelar="' + esc(a.id) + '">' + (a.status === 'teste' ? 'Cancelar o teste' : 'Cancelar a assinatura') + '</button>' : '';
+    var assinar = a.app && a.tipo !== 'compra' && (a.status === 'recusada' || (a.status === 'cancelada' && (!fim || fim < hojeISO))) ? '<button type="button" class="btn btn-primary" data-assinar="a-sis-' + esc(a.app) + '">Assinar por ' + reais(a.valor) + '/mês</button>' : '';
+    var foto = APPS.indexOf(a.app) >= 0 ? '<a class="conta-thumb" href="' + (pode ? 'app/' + esc(a.app) + '/' : 'nexo-' + esc(a.app) + '.html') + '" tabindex="-1" aria-hidden="true"><img src="img/sistemas/' + esc(a.app) + '.webp" alt="" width="1200" height="750" loading="lazy"></a>' : '';
+    var apagado = ['cancelada', 'expirada', 'recusada'].indexOf(a.status) >= 0 ? ' conta-item-off' : '';
+    return '<article class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
+      barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></div></article>';
+  }
+  function mostrarResumo(l) {
+    if (!resumo) return;
+    var ativos = l.filter(function (a) { return ['teste', 'ativa', 'paga'].indexOf(a.status) >= 0; });
+    var cobrancas = l.filter(function (a) { return a.tipo !== 'compra' && (a.status === 'ativa' || a.status === 'teste'); })
+      .map(function (a) { return { quando: a.proxima_cobranca || a.teste_ate, valor: a.valor }; }).filter(function (x) { return x.quando; })
+      .sort(function (x, y) { return String(x.quando).localeCompare(String(y.quando)); });
+    var mensal = l.filter(function (a) { return a.tipo !== 'compra' && a.status === 'ativa'; }).reduce(function (s, a) { return s + Number(a.valor || 0); }, 0);
+    if (!l.length) { resumo.hidden = true; return; }
+    resumo.innerHTML =
+      '<div><small>Sistemas liberados</small><b>' + ativos.length + '</b><span>' + (l.filter(function (a) { return a.status === 'teste'; }).length ? l.filter(function (a) { return a.status === 'teste'; }).length + ' em teste grátis' : 'prontos para usar') + '</span></div>' +
+      '<div><small>Próxima cobrança</small><b>' + (cobrancas[0] ? data(cobrancas[0].quando) : '—') + '</b><span>' + (cobrancas[0] ? reais(cobrancas[0].valor) : 'nenhuma agendada') + '</span></div>' +
+      '<div><small>Total por mês</small><b>' + reais(mensal) + '</b><span>assinaturas ativas</span></div>';
+    resumo.hidden = false;
+  }
+  function perfil(u) {
+    var m = u.user_metadata || {}, nome = String(m.nome || m.full_name || m.name || '').trim(), primeiro = nome.split(' ')[0];
+    document.getElementById('conta-email').textContent = u.email;
+    if (primeiro) document.getElementById('conta-ola').textContent = 'Olá, ' + primeiro;
+    var av = document.getElementById('conta-avatar');
+    if (av) av.textContent = (primeiro || u.email || '?').charAt(0).toUpperCase();
   }
   function carregar() {
-    raiz.innerHTML = '<p class="conta-sub">Carregando…</p>';
+    raiz.innerHTML = '<div class="conta-carregando" aria-label="Carregando"><i></i><i></i></div>';
     C.exigirLogin('Entre para ver os seus testes, assinaturas e compras.').then(function (s) {
-      document.getElementById('conta-email').textContent = s.user.email;
+      perfil(s.user);
+      document.body.classList.add('conta-logado');
       return C.chamar({ acao: 'status', id: volta || undefined });
     }).then(function (j) {
       var l = j.assinaturas || [], v = volta && l.filter(function (x) { return x.id === volta; })[0], aviso = '';
@@ -39,7 +73,9 @@
           : '<div class="conta-aviso">Ainda não recebemos a confirmação do Mercado Pago. Se você terminou o pagamento, ela chega em alguns minutos: atualize esta página.</div>';
         history.replaceState(null, '', 'conta.html');
       }
-      raiz.innerHTML = aviso + (l.length ? l.map(cartao).join('') : '<div class="conta-vazio"><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um sistema e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
+      mostrarResumo(l);
+      raiz.innerHTML = aviso + (l.length ? '<h2 class="conta-titulo">Seus sistemas</h2>' + l.map(cartao).join('') :
+        '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp" alt="" loading="lazy"><img src="img/sistemas/agenda.webp" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp" alt="" loading="lazy"></div><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um dos 10 sistemas e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
     }).catch(function (x) { raiz.innerHTML = '<div class="conta-aviso er">' + esc(x.message || 'Não foi possível carregar.') + '</div>'; });
   }
   raiz.addEventListener('click', function (e) {

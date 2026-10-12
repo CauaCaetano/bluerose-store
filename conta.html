@@ -24,7 +24,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=23">
+<link rel="stylesheet" href="css/site.css?v=24">
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=6" defer></script>
 <script src="js/site.js?v=11" defer></script>
@@ -32,7 +32,7 @@
 <script src="js/contratar.js?v=5" defer></script>
 <script src="js/videos.js?v=4" defer></script>
 <script src="js/conta.js?v=2" defer></script>
-<script src="js/conta-pagina.js?v=1" defer></script>
+<script src="js/conta-pagina.js?v=2" defer></script>
 <meta name="robots" content="noindex">
 </head>
 <body>
@@ -57,10 +57,35 @@
   </div>
 </header>
 
-<main id="conteudo" class="conta-pag">
-  <section class="wrap conta-topo"><div><span class="eyebrow">Minha conta</span><h1>Seus sistemas e assinaturas</h1><p class="conta-sub" id="conta-email"></p></div><button type="button" class="btn btn-ghost" id="conta-sair">Sair</button></section>
-  <section class="wrap" id="conta-raiz" aria-live="polite"></section>
-  <section class="wrap conta-ajuda"><p>Dúvidas sobre cobrança? Fale com a gente pelo <a href="./#contato">formulário</a>. Os pagamentos são processados pelo Mercado Pago; você também pode ver as suas assinaturas no app do Mercado Pago.</p></section>
+<main id="conteudo" class="conta-pag conta-v2">
+  <div class="conta-fundo" aria-hidden="true"></div>
+  <section class="wrap conta-topo">
+    <div class="conta-perfil"><span class="conta-avatar" id="conta-avatar" aria-hidden="true">B</span><div><span class="eyebrow">Minha conta</span><h1 id="conta-ola">Seus sistemas e assinaturas</h1><p class="conta-sub" id="conta-email"></p></div></div>
+    <button type="button" class="btn btn-ghost" id="conta-sair">Sair</button>
+  </section>
+  <section class="wrap conta-resumo" id="conta-resumo" aria-label="Resumo da conta" hidden></section>
+  <div class="wrap conta-grade">
+    <section id="conta-raiz" aria-live="polite"></section>
+    <aside class="conta-lado" aria-label="Ajuda">
+      <div class="conta-bloco">
+        <h2>Atalhos</h2>
+        <ul class="conta-atalhos">
+          <li><a href="sistemas.html"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg>Ver todos os sistemas</a></li>
+          <li><a href="./#contato"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg>Falar com a gente</a></li>
+          <li><a href="privacidade.html#direitos"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg>Seus dados e privacidade</a></li>
+          <li><a href="termos.html"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg>Termos de serviço</a></li>
+        </ul>
+      </div>
+      <div class="conta-bloco">
+        <h2>Como funciona a cobrança</h2>
+        <ul class="conta-regras">
+          <li>O teste grátis dura 7 dias. Nada é cobrado se você cancelar antes.</li>
+          <li>Cancele quando quiser, aqui mesmo. O acesso continua até o fim do período pago.</li>
+          <li>Os pagamentos são processados pelo Mercado Pago. As assinaturas também aparecem no app do Mercado Pago.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
 </main>
 
   <dialog class="contratar" id="contratar" aria-labelledby="ct-titulo">
