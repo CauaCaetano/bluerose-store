@@ -1,0 +1,96 @@
+/* Isca · identidade própria: papel de laudo, verde-floresta, trilho de ícones à esquerda, títulos em letra de relatório */
+:root[data-produto="pragas"] {
+  --acc: #1f6a46;
+  --acc-tx: #fff;
+  --floresta: #173d2c;
+  --ambar: #f2c14e;
+  --bg: #f1efe7;
+  --lateral: #e6e3d8;
+  --painel: #fffefa;
+  --painel-2: #f8f6ee;
+  --hover: rgba(23, 61, 44, 0.05);
+  --ativo: rgba(23, 61, 44, 0.08);
+  --borda: #dcd8c9;
+  --borda-2: #c9c4b1;
+  --tx: #1b241f;
+  --tx-2: #4b554e;
+  --tx-3: #6b746c;
+  --info: #1f6a46; --info-bg: #e3efe6;
+  --neutro-bg: #ebe8dd;
+  --rel: 'Cascadia Mono', 'Consolas', 'Geist Mono', ui-monospace, monospace;
+  --sombra-1: 0 1px 0 rgba(23, 61, 44, .05);
+  --sombra-2: 0 1px 0 rgba(23, 61, 44, .05), 0 10px 26px -14px rgba(23, 61, 44, .3);
+  --r1: 3px; --r2: 5px; --r3: 7px;
+  --lat: 84px;
+}
+:root[data-produto="pragas"][data-tema="escuro"] {
+  --acc: #6cc596; --acc-tx: #0f1f17;
+  --bg: #0f1512; --lateral: #121915; --painel: #161e1a; --painel-2: #1a231e; --borda: #26322b; --borda-2: #33423a;
+  --tx: #e9efe9; --tx-2: #aebbb1; --tx-3: #86948a; --info: #6cc596; --info-bg: rgba(108, 197, 150, .13); --neutro-bg: #202a24;
+}
+[data-produto="pragas"] .faixa { background: var(--floresta); }
+[data-produto="pragas"] .topo h1, [data-produto="pragas"] .cartao-cab h3 { font-family: var(--rel); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+[data-produto="pragas"] .topo h1 { font-size: 13.5px; }
+[data-produto="pragas"] .cartao-cab h3 { font-size: 12.5px; }
+[data-produto="pragas"] .cartao { border-radius: 6px; box-shadow: none; }
+[data-produto="pragas"] .btn.pri { box-shadow: none; }
+
+/* trilho de ícones */
+[data-produto="pragas"] .lat {
+  color-scheme: dark; --tx: #e6efe6; --tx-2: #a9bfae; --tx-3: #7f9886; --hover: rgba(230, 245, 230, .07); --painel: rgba(230, 245, 230, .1); --borda: rgba(230, 245, 230, .12); --neutro-bg: rgba(230, 245, 230, .14);
+  background: var(--floresta); border-right: 0; color: var(--tx); padding: 12px 8px; gap: 4px; align-items: stretch;
+}
+[data-produto="pragas"] .lat .marca { justify-content: center; padding: 2px 0 10px; }
+[data-produto="pragas"] .lat .marca > div, [data-produto="pragas"] .lat .conta, [data-produto="pragas"] .lat .busca-lat, [data-produto="pragas"] .lat .grupo, [data-produto="pragas"] .lat-pe .feito { display: none; }
+[data-produto="pragas"] .marca-logo { width: 40px; height: 40px; background: none; box-shadow: none; border-radius: 9px; }
+[data-produto="pragas"] .lat a.item { height: auto; min-height: 58px; flex-direction: column; justify-content: center; gap: 4px; padding: 6px 2px; font-size: 10.5px; line-height: 1.15; text-align: center; font-weight: 500; white-space: normal; }
+[data-produto="pragas"] .lat a.item .corta { white-space: normal; overflow: visible; }
+[data-produto="pragas"] .lat a.item .ic { width: 20px; height: 20px; }
+[data-produto="pragas"] .lat a.item.ativo { background: rgba(242, 193, 78, .14); color: #fff; box-shadow: inset 3px 0 0 var(--ambar); }
+[data-produto="pragas"] .lat a.item.ativo .ic { color: var(--ambar); }
+[data-produto="pragas"] .lat a.item .cont { position: absolute; top: 4px; right: 8px; margin: 0; min-width: 16px; height: 16px; font-size: 10px; background: var(--ambar); color: var(--floresta); }
+[data-produto="pragas"] .lat a.item .cont.er { background: #e5675c; color: #fff; }
+[data-produto="pragas"] .lat-pe a.item { min-height: 40px; font-size: 0; gap: 0; }
+@media (max-width: 900px) {
+  [data-produto="pragas"] .lat { width: 96px; }
+}
+
+/* tela inicial: mapa de iscas e o dia */
+.is-cab { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--tx); padding-bottom: 10px; }
+.is-cab h2 { font-family: var(--rel); font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+.is-cab .s { font-family: var(--rel); font-size: 11.5px; color: var(--tx-3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+.is-selos { display: flex; gap: 6px; flex-wrap: wrap; }
+.is-selo { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--borda-2); border-radius: 3px; font-family: var(--rel); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; background: var(--painel); }
+.is-selo i { width: 8px; height: 8px; border-radius: 50%; background: #2e9a5f; }
+.is-selo.al i { background: #d8941d; } .is-selo.er i { background: #d0463b; }
+.is-grade { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr); gap: 16px; align-items: start; }
+.is-mapa { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.is-cli { background: var(--painel); border: 1px solid var(--borda); border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.is-cli:hover { border-color: var(--acc); box-shadow: var(--sombra-2); }
+.is-cli .t { font-weight: 600; font-size: 13.5px; }
+.is-cli .s { font-size: 11.5px; color: var(--tx-3); font-family: var(--rel); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+.is-pts { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 10px 0 8px; }
+.is-pt { height: 30px; border-radius: 3px; display: grid; place-items: center; font-family: var(--rel); font-size: 10.5px; font-weight: 600; color: #fff; }
+.is-pt.intacta { background: #2e9a5f; } .is-pt.consumida { background: #d0463b; } .is-pt.substituida { background: #3f6fb5; } .is-pt.ausente { background: #d8941d; } .is-pt.sem { background: var(--neutro-bg); color: var(--tx-3); }
+.is-cli .pe { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+.is-cli .pc { font-family: var(--rel); font-weight: 700; font-size: 15px; }
+.is-cli.alto { border-color: #d0463b; box-shadow: inset 4px 0 0 #d0463b; }
+.is-leg { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--tx-2); }
+.is-leg span { display: inline-flex; align-items: center; gap: 5px; }
+.is-leg i { width: 10px; height: 10px; border-radius: 2px; }
+.is-dia { background: var(--painel); border: 1px solid var(--borda); border-radius: 6px; }
+.is-dia h3 { font-family: var(--rel); text-transform: uppercase; letter-spacing: .06em; font-size: 12.5px; padding: 12px 14px; border-bottom: 1px solid var(--borda); }
+.is-lin { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; padding: 11px 14px; border-bottom: 1px dashed var(--borda); cursor: pointer; }
+.is-lin:last-child { border-bottom: 0; }
+.is-lin:hover { background: var(--hover); }
+.is-lin .h { font-family: var(--rel); font-weight: 700; font-size: 13px; }
+.is-lin .t { font-weight: 600; font-size: 13px; }
+.is-lin .s { font-size: 12px; color: var(--tx-3); }
+.is-tit { font-family: var(--rel); text-transform: uppercase; letter-spacing: .08em; font-size: 11.5px; color: var(--tx-2); margin: 4px 0 -6px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 1100px) { .is-grade { grid-template-columns: 1fr; } }
+
+@media (max-width: 900px) { [data-produto="pragas"] .app:not(.menu-aberto) .lat { box-shadow: none; } }
+
+[data-produto="pragas"] .faixa a.cta, [data-produto="pragas"] .faixa a.cta:hover { background: var(--ambar); color: var(--floresta); font-weight: 700; }
+[data-produto="pragas"] .entrada .marca b { font-family: var(--rel); text-transform: uppercase; letter-spacing: .06em; }
+[data-produto="pragas"] .entrada .marca small { color: var(--acc); }

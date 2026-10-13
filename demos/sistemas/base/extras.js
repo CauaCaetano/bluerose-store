@@ -72,7 +72,7 @@ export function prepararExtras(app, cfg) {
     const t = tipos[tipo]; if (!t) return null;
     const d = await t.montar(app, ref, { fotos: fotosPublicas });
     if (!d) return null;
-    return { ...d, _empresa: { nome: app.empresa, telefone: db().cfg.telefone || '', cor: cfg.cor, sistema: cfg.nome, endereco: db().cfg.endereco || '' } };
+    return { ...d, _empresa: { nome: app.empresa, telefone: db().cfg.telefone || '', cor: cfg.cor, produto: cfg.id, sistema: cfg.nome, endereco: db().cfg.endereco || '' } };
   }
   async function publicar(chave, forcar = false) {
     if (!app.nuvem) return;

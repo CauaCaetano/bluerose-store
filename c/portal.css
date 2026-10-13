@@ -67,3 +67,23 @@ label.p-campo { display: grid; gap: 4px; font-size: 13.5px; font-weight: 600; ma
 .p-tempo li::before { content: ""; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--acc); }
 .p-tempo li:last-child { padding-bottom: 0; }
 @media (prefers-color-scheme: dark) { :root { --tx: #f2f2f5; --tx-2: #c7c7cf; --tx-3: #9a9aa5; --bg: #111114; --painel: #1b1b20; --borda: #2b2b33; color-scheme: dark; } .p-campo input, .p-campo select, .p-campo textarea, .p-qtd button, .p-pix textarea { background: #15151a; color: var(--tx); } .p-total { border-color: var(--tx); } }
+
+/* identidade própria dos produtos avulsos (Sim, aceito · Canteiro · Isca) */
+[data-produto="cerimonial"] { --bg: #f7f2e8; --painel: #fffdf8; --borda: #e7dcc8; --tx: #2b2619; --tx-2: #5e5643; --tx-3: #8a806a; --ouro: #b08d4f; }
+[data-produto="cerimonial"] .p-cab { background: radial-gradient(120% 140% at 100% 0%, rgba(232, 211, 166, .35), transparent 60%), #4f5a2e; border-radius: 0 0 28px 28px; text-align: center; padding: 30px 22px 32px; }
+[data-produto="cerimonial"] .p-cab small { color: #e8d3a6; opacity: 1; letter-spacing: .16em; }
+[data-produto="cerimonial"] .p-cab h1, [data-produto="cerimonial"] .p-sec h2 { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif; font-weight: 600; }
+[data-produto="cerimonial"] .p-cab h1 { font-size: 30px; font-style: italic; font-weight: 500; }
+[data-produto="cerimonial"] .p-sec h2 { font-size: 19px; }
+[data-produto="cerimonial"] .p-sec { border-radius: 18px; }
+[data-produto="obras"] { --bg: #efede8; --borda: #dedad2; --tx: #1c1a17; }
+[data-produto="obras"] .p-cab { background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .05) 0 14px, transparent 14px 28px), #1c1a17; border-radius: 0; border-bottom: 5px solid #f26b1d; }
+[data-produto="obras"] .p-cab small { color: #f7a46b; opacity: 1; }
+[data-produto="obras"] .p-cab h1, [data-produto="obras"] .p-sec h2 { font-family: 'Bahnschrift', 'Arial Narrow', 'Segoe UI', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: .01em; }
+[data-produto="obras"] .p-sec { border-radius: 8px; }
+[data-produto="obras"] .p-passos i.feito { background: #f26b1d; }
+[data-produto="pragas"] { --bg: #f1efe7; --painel: #fffefa; --borda: #dcd8c9; --tx: #1b241f; }
+[data-produto="pragas"] .p-cab { background: #173d2c; border-radius: 0; border-bottom: 4px solid #f2c14e; }
+[data-produto="pragas"] .p-cab small { color: #f2c14e; opacity: 1; font-family: 'Cascadia Mono', Consolas, monospace; }
+[data-produto="pragas"] .p-sec h2 { font-family: 'Cascadia Mono', Consolas, monospace; text-transform: uppercase; letter-spacing: .06em; font-size: 13.5px; font-weight: 600; }
+[data-produto="pragas"] .p-sec { border-radius: 6px; }

@@ -409,6 +409,7 @@ export function criarApp(cfg) {
   raiz.style.setProperty('--sis', cfg.cor); // a cor de destaque é o azul da Blue Rose (nexo.css); a do sistema fica como apoio
   try { raiz.dataset.tema = localStorage.getItem('nexo-tema') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro'); } catch { raiz.dataset.tema = 'claro'; }
   const nuvem = !!window.NEXO_NUVEM;
+  document.documentElement.dataset.produto = cfg.id;
   document.title = nuvem ? `${cfg.nome} · Blue Rose Express` : `${cfg.nome} · demonstração · Blue Rose Express`;
   const app = { ...cfg, estado: {}, acoes: {}, db: null, kanbans: {}, cals: {}, nuvem };
   if (nuvem) {
@@ -425,6 +426,7 @@ export function criarApp(cfg) {
 
 function montar(app, cfg) {
   const raiz = document.documentElement;
+  raiz.dataset.produto = cfg.id;
   const site = 'https://bluerose-store.com/';
   const paginas = cfg.paginas.filter((p) => p.id);
   const preco = (v) => moeda(v).replace(',00', '');
@@ -432,12 +434,12 @@ function montar(app, cfg) {
   if (app.db.cfg.ramo_pendente && !app.db.cfg.ramo) { app.aplicarModelo(app.db.cfg.ramo_pendente, true); delete app.db.cfg.ramo_pendente; app.db.gravar(); }
   const faixaDemo = `<div class="faixa nao-imprime"><span class="so-larga">Demonstração do <b>${esc(cfg.nome)}</b> · dados de exemplo, só neste navegador</span><span class="sep so-larga"></span>
       <button type="button" data-acao="recomecar">Recomeçar</button>
-      <a class="cta" href="${site}app/${cfg.id}/" target="_top">Testar grátis 7 dias com os seus dados</a></div>`;
+      ${cfg.cta === false ? '' : `<a class="cta" href="${site}app/${cfg.id}/" target="_top">Testar grátis 7 dias com os seus dados</a>`}</div>`;
   document.body.innerHTML = `
     ${app.nuvem ? app.sessao.faixa() : faixaDemo}
     <div class="app" id="app">
       <nav class="lat" aria-label="Menu principal">
-        <div class="marca"><img class="marca-logo" src="${new URL('blue-rose.png', import.meta.url).href}" alt="Blue Rose" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>Blue Rose · ${esc(cfg.sub)}</small></div></div>
+        <div class="marca"><img class="marca-logo" src="${cfg.logo || new URL('blue-rose.png', import.meta.url).href}" alt="${cfg.logo ? esc(cfg.nome) : 'Blue Rose'}" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.marcaSub || `Blue Rose · ${cfg.sub}`)}</small></div></div>
         <div class="conta">${av(app.empresa)}<div class="cresce"><b class="corta" data-empresa>${esc(app.empresa)}</b><small class="corta">${esc(app.nuvem ? app.sessao.subConta() : cfg.conta || 'Conta de demonstração')}</small></div></div>
         <button type="button" class="busca-lat" data-acao="paleta">${ic('magnifying-glass')}Buscar ou ir para…<kbd>Ctrl K</kbd></button>
         ${cfg.paginas.map((p) => (p.grupo && !p.id ? `<div class="grupo">${esc(p.grupo)}</div>` : `<a class="item" href="#/${p.id}" data-pag="${p.id}">${ic(p.icone || 'circle')}<span class="corta">${esc(p.rot)}</span><span class="cont" data-cont="${p.id}" hidden></span></a>`)).join('')}

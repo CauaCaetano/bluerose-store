@@ -207,6 +207,46 @@ const RESUMOS = {
       alertas: [ab.filter((o) => o.etapa === 'orcamento').length && `${plural(ab.filter((o) => o.etapa === 'orcamento').length, 'orçamento esperando resposta', 'orçamentos esperando resposta')}`, ab.filter((o) => o.previsao < hoje && !['pronto'].includes(o.etapa)).length && `${plural(ab.filter((o) => o.previsao < hoje && !['pronto'].includes(o.etapa)).length, 'carro atrasado', 'carros atrasados')} no pátio`].filter(Boolean),
     };
   },
+  // Sim, aceito · assessoria de casamentos
+  cerimonial(d, hoje) {
+    const evs = L(d, 'eventos').filter((e) => e.data >= hoje && e.etapa !== 'negociacao').sort((a, b) => a.data.localeCompare(b.data));
+    const dias = (iso) => Math.round((new Date(`${iso}T12:00:00`) - new Date(`${hoje}T12:00:00`)) / 864e5);
+    const atras = L(d, 'tarefas').filter((t) => !t.feita && t.prazo < hoje && evs.some((e) => e.id === t.evento));
+    const venc = L(d, 'contratacoes').filter((c) => c.status !== 'pago' && c.vencimento && c.vencimento <= mais(hoje, 7));
+    const semResp = L(d, 'convidados').filter((c) => c.rsvp === 'pendente' && evs.some((e) => e.id === c.evento && dias(e.data) <= 30));
+    return {
+      destaques: [['Próximo evento', evs[0] ? `${evs[0].nome} · ${dias(evs[0].data) === 0 ? 'hoje' : `em ${dias(evs[0].data)} dias`}` : 'nenhum'], ['Eventos a caminho', String(evs.length)], ['Pagamentos a fornecedores (7 dias)', R$(soma(venc, (c) => c.valor - (c.pago || 0)))]],
+      itens: evs.filter((e) => dias(e.data) <= 30).map((e) => `${ddmm(e.data)} · ${e.nome} · ${e.local || ''}`), tituloItens: 'Eventos nos próximos 30 dias',
+      alertas: [atras.length && plural(atras.length, 'tarefa atrasada', 'tarefas atrasadas'), semResp.length && `${plural(semResp.length, 'convidado sem resposta', 'convidados sem resposta')} em eventos deste mês`, venc.length && plural(venc.length, 'pagamento a fornecedor vence esta semana', 'pagamentos a fornecedores vencem esta semana')].filter(Boolean),
+    };
+  },
+  // Canteiro · reformas e obras
+  obras(d, hoje) {
+    const obs = L(d, 'obras'), and = obs.filter((o) => o.status === 'andamento');
+    const cobrar = obs.flatMap((o) => (o.etapas || []).filter((e) => e.status === 'feita' && !e.pago));
+    const ultimo = (id) => L(d, 'diario').filter((x) => x.obra === id).map((x) => x.data).sort().pop();
+    const parado = and.filter((o) => !ultimo(o.id) || ultimo(o.id) < mais(hoje, -2));
+    const dev = L(d, 'diarias').filter((x) => !x.pago), extras = L(d, 'aditivos').filter((x) => x.status === 'pendente');
+    return {
+      destaques: [['Obras em andamento', String(and.length)], ['Pronto para cobrar', R$(soma(cobrar, (e) => e.valor))], ['Diárias a pagar', R$(soma(dev, (x) => x.valor))]],
+      itens: and.map((o) => `${o.titulo} · ${(o.etapas || []).find((e) => e.status === 'andamento')?.nome || 'próxima etapa a definir'} · entrega ${ddmm(o.previsao)}`), tituloItens: 'Obras rodando',
+      alertas: [cobrar.length && plural(cobrar.length, 'etapa pronta para cobrar', 'etapas prontas para cobrar'), parado.length && `${plural(parado.length, 'obra sem diário', 'obras sem diário')} há mais de 2 dias`, and.filter((o) => o.previsao < hoje).length && plural(and.filter((o) => o.previsao < hoje).length, 'obra com prazo vencido', 'obras com prazo vencido'), extras.length && plural(extras.length, 'serviço extra esperando o cliente', 'serviços extras esperando o cliente')].filter(Boolean),
+    };
+  },
+  // Isca · controle de pragas
+  pragas(d, hoje) {
+    const os = L(d, 'ordens'), cli = new Map(L(d, 'clientes').map((c) => [c.id, c])), cfg = d._cfg || {};
+    const hojeL = os.filter((o) => o.status === 'agendada' && o.data === hoje).sort((a, b) => a.hora.localeCompare(b.hora));
+    const mes = hoje.slice(0, 7), exec = os.filter((o) => o.status === 'executada' && o.data.startsWith(mes));
+    const receber = os.filter((o) => o.status === 'executada' && !o.pago), ret = os.filter((o) => o.retorno_de && o.status === 'agendada');
+    const lic = [['Licença sanitária', cfg.licenca_sanitaria_validade], ['Licença ambiental', cfg.licenca_ambiental_validade]].filter(([, v]) => v && v <= mais(hoje, 30));
+    const repor = L(d, 'produtos').filter((p) => p.estoque <= p.minimo);
+    return {
+      destaques: [['Serviços hoje', String(hojeL.length)], [`Executados no mês`, `${exec.length} · ${R$(soma(exec, (o) => o.valor))}`], ['A receber', R$(soma(receber, (o) => o.valor))]],
+      itens: hojeL.map((o) => `${o.hora} · ${cli.get(o.cliente)?.nome || ''} · ${o.servico}${o.retorno_de ? ' (garantia)' : ''}`), tituloItens: 'Serviços de hoje',
+      alertas: [...lic.map(([n, v]) => `${n} vence em ${ddmm(v)}`), ret.length && plural(ret.length, 'retorno em garantia agendado', 'retornos em garantia agendados'), repor.length && plural(repor.length, 'produto para repor', 'produtos para repor')].filter(Boolean),
+    };
+  },
 };
 
 /** Resumo do dia de um sistema: { destaques, itens, tituloItens, alertas } */

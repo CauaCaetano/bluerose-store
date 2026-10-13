@@ -94,7 +94,7 @@ class BancoNuvem extends Banco {
 // ---------------------------------------------------------------- telas de entrada
 function tela(cfg, conteudo) {
   document.body.innerHTML = `<div class="entrada"><div class="entrada-caixa">
-    <div class="marca" style="padding:0 0 18px"><img class="marca-logo" src="${LOGO}" alt="Blue Rose" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>Blue Rose · ${esc(cfg.sub)}</small></div></div>
+    <div class="marca" style="padding:0 0 18px"><img class="marca-logo" src="${cfg.logo || LOGO}" alt="${cfg.logo ? esc(cfg.nome) : 'Blue Rose'}" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.marcaSub || `Blue Rose · ${cfg.sub}`)}</small></div></div>
     ${conteudo}</div><p class="entrada-pe">Seus dados ficam guardados com segurança e só a sua equipe tem acesso. <a href="${SITE}privacidade.html" target="_blank" rel="noopener">Privacidade</a> · <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos</a></p></div>`;
   const f = document.querySelector('.entrada form'); f?.querySelector('input')?.focus();
   return f;

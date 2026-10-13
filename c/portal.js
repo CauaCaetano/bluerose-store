@@ -328,6 +328,103 @@ T.cobranca = {
   acoes: { paguei: async () => { const r = await responder('paguei', {}); if (r.erro) return alert(r.erro); pronto('Pagamento informado', 'A empresa vai conferir e confirmar o recebimento.'); } },
 };
 
+// Cerimonial: a página dos noivos (contagem, tarefas deles, fornecedores, pagamentos e roteiro)
+T.noivos = {
+  titulo: (d) => d.nome,
+  render(d) {
+    const dias = Math.round((new Date(`${d.data}T12:00:00`) - new Date(`${new Date().toISOString().slice(0, 10)}T12:00:00`)) / 864e5);
+    const deles = d.tarefas.filter((t) => t.quem === 'noivos'), falta = d.fornecedores.filter((f) => f.falta > 0);
+    return `${cab(E().nome, d.nome, `${esc(d.tipo)} · ${dt(d.data)} às ${esc(d.hora)}${d.local ? ` · ${esc(d.local)}` : ''}`)}
+      <section class="p-sec" style="text-align:center"><div style="font-size:44px;font-weight:700;letter-spacing:-.03em;color:var(--acc)">${dias > 0 ? dias : dias === 0 ? 'Hoje!' : '♥'}</div><p class="p-s" style="margin:0">${dias > 0 ? `dias para o grande dia` : dias === 0 ? 'É hoje. Aproveitem cada minuto!' : 'Obrigado por nos deixar fazer parte!'}</p>
+        <div class="p-passos" style="margin-top:14px"><i class="feito" style="flex:${d.progresso || 1}"></i><i style="flex:${100 - (d.progresso || 0)}"></i></div><p class="p-s" style="margin-top:6px">Planejamento ${esc(d.progresso)}% concluído · assessora ${esc(d.assessora)}</p></section>
+      ${deles.length ? `<section class="p-sec"><h2>Suas tarefas</h2><p class="p-sub">Toque para marcar como feita. A assessoria vê na hora.</p>${deles.map((t) => `<div class="p-linha"><div class="p-cresce"><div class="p-t" style="${t.feita ? 'text-decoration:line-through;opacity:.6' : ''}">${esc(t.titulo)}</div><div class="p-s">até ${dt(t.prazo)}</div></div><button type="button" class="p-bt peq" aria-pressed="${t.feita}" data-a="tarefa" data-id="${esc(t.id)}" data-f="${t.feita ? '0' : '1'}">${t.feita ? 'Feita ✓' : 'Marcar'}</button></div>`).join('')}</section>` : ''}
+      ${d.fornecedores.length ? `<section class="p-sec"><h2>Fornecedores</h2>${d.fornecedores.map((f) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(f.nome)}</div><div class="p-s">${esc(f.categoria)}${f.instagram ? ` · ${esc(f.instagram)}` : ''}</div></div>${f.telefone ? `<a class="p-bt peq" href="${wa(f.telefone)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</div>`).join('')}</section>` : ''}
+      ${falta.length ? `<section class="p-sec"><h2>Pagamentos que faltam</h2>${falta.map((f) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(f.nome)}</div><div class="p-s">${f.vencimento ? `próximo em ${dt(f.vencimento)}` : ''}</div></div><span class="p-num">${moeda(f.falta)}</span></div>`).join('')}<div class="p-total"><span>Total a pagar</span><span>${moeda(falta.reduce((s, f) => s + f.falta, 0))}</span></div></section>` : ''}
+      ${d.rsvp ? `<section class="p-sec"><h2>Convidados</h2><p class="p-sub">${esc(d.rsvp.convites)} convites enviados · atualiza quando cada convidado responde.</p><div class="p-linha"><div class="p-cresce p-t">Confirmados</div><span class="p-num">${esc(d.rsvp.sim)} pessoas</span></div><div class="p-linha"><div class="p-cresce p-t">Sem resposta</div><span class="p-num">${esc(d.rsvp.pend)} pessoas</span></div><div class="p-linha"><div class="p-cresce p-t">Não vão</div><span class="p-num">${esc(d.rsvp.nao)} pessoas</span></div></section>` : ''}
+      ${d.roteiro.length ? `<section class="p-sec"><h2>Roteiro do dia</h2>${d.roteiro.map((x) => `<div class="p-linha"><b class="p-num" style="min-width:52px">${esc(x.hora)}</b><div class="p-cresce"><div class="p-t" style="${x.feito ? 'opacity:.55' : ''}">${esc(x.atividade)}</div></div>${x.feito ? '<span class="p-et ok">Aconteceu</span>' : ''}</div>`).join('')}</section>` : ''}
+      ${avisoDemo()}${rod()}`;
+  },
+  acoes: {
+    tarefa: async (el) => { const feita = el.dataset.f === '1'; const r = await responder('tarefa', { id: el.dataset.id, feita }); if (r.erro) return alert(r.erro); const t = ctx.dados.tarefas.find((x) => x.id === el.dataset.id); if (t) t.feita = feita; desenhar(); },
+  },
+};
+
+// Cerimonial: convite individual com confirmação de presença (RSVP)
+T.convite = {
+  titulo: (d) => d.evento,
+  render(d) {
+    const ac = st.ac ?? d.acompanhantes ?? 0;
+    const resp = st.resp || (d.rsvp !== 'pendente' ? d.rsvp : '');
+    return `${cab(E().nome, d.evento, `${esc(d.tipo)} · ${dt(d.data)} às ${esc(d.hora)}`)}
+      <section class="p-sec" style="text-align:center"><p class="p-s" style="margin:0">Olá,</p><h2 style="margin:4px 0 10px">${esc(d.convidado)}</h2><p class="p-s" style="margin:0">Você está convidado(a)!${d.local ? `<br>${esc(d.local)}` : ''}</p>
+        ${d.local ? `<p style="margin-top:12px"><a class="p-bt peq" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.local)}" target="_blank" rel="noopener">Ver no mapa</a></p>` : ''}</section>
+      ${resp ? `<section class="p-sec p-ok"><div class="p-ic">${resp === 'sim' ? '✓' : '♥'}</div><h2>${resp === 'sim' ? 'Presença confirmada' : 'Resposta registrada'}</h2><p class="p-s">${resp === 'sim' ? `Esperamos você${ac ? ` e mais ${esc(ac)}` : ''}!` : 'Obrigado por avisar. Sentiremos sua falta.'}</p><button type="button" class="p-bt peq" data-a="mudar">Mudar resposta</button></section>`
+        : `<section class="p-sec"><h2>Você vai?</h2><label class="p-campo">Acompanhantes (além de você)<select data-f="ac">${[0, 1, 2, 3, 4].map((n) => `<option value="${n}" ${Number(ac) === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+        <div style="display:flex;gap:8px;margin-top:12px"><button type="button" class="p-bt ok largo" data-a="vou">Vou</button><button type="button" class="p-bt largo" data-a="naoVou">Não vou</button></div></section>`}
+      ${avisoDemo()}${rod()}`;
+  },
+  acoes: {
+    vou: async () => { lerCampos(); const ac = Number(st.ac) || 0; const r = await responder('rsvp', { vai: true, acompanhantes: ac }); if (r.erro) return alert(r.erro); st.ac = ac; st.resp = 'sim'; desenhar(); },
+    naoVou: async () => { const r = await responder('rsvp', { vai: false, acompanhantes: 0 }); if (r.erro) return alert(r.erro); st.resp = 'nao'; desenhar(); },
+    mudar: () => { st.resp = ''; ctx.dados.rsvp = 'pendente'; desenhar(); },
+  },
+};
+
+// Obras: a página do dono da obra (etapas, pagamento por PIX, diário com fotos e gastos)
+T.obra = {
+  titulo: (d) => d.titulo,
+  render(d) {
+    const cobrar = d.etapas.filter((e) => e.status === 'feita' && !e.pago);
+    return `${cab(E().nome, d.titulo, `${d.endereco ? `${esc(d.endereco)} · ` : ''}entrega prevista ${dt(d.previsao)}`)}
+      <section class="p-sec"><h2>Andamento</h2><div class="p-passos">${d.etapas.map((e) => `<i class="${e.status === 'feita' ? 'feito' : ''}"></i>`).join('')}</div><p class="p-s" style="margin-top:8px">${esc(d.progresso)}% concluído · ${d.etapas.filter((e) => e.status === 'feita').length} de ${d.etapas.length} etapas</p>
+        ${d.etapas.map((e) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(e.nome)}</div><div class="p-s">${e.status === 'feita' ? 'Concluída' : e.status === 'andamento' ? 'Em andamento agora' : 'A fazer'}</div></div><span class="p-num">${moeda(e.valor)}</span>${e.pago ? '<span class="p-et ok">Paga</span>' : e.avisou ? '<span class="p-et">Conferindo</span>' : ''}</div>`).join('')}
+        <div class="p-total"><span>Valor da obra</span><span>${moeda(d.valor)}</span></div></section>
+      ${cobrar.map((e) => `<section class="p-sec"><h2>Pagar: ${esc(e.nome)}</h2>${e.avisou ? '<p class="p-s">Você avisou que pagou. Assim que conferirmos, a etapa aparece como paga.</p>' : st[`pix${e.k}`] ? `${pixBloco(d.pix, e.valor, e.txid, e.nome)}<p style="text-align:center;margin-top:10px"><button type="button" class="p-bt ok" data-a="paguei" data-k="${esc(e.k)}">Já paguei</button></p>` : `<p class="p-s">Etapa concluída. Valor: <b>${moeda(e.valor)}</b></p><button type="button" class="p-bt pri largo" data-a="verPix" data-k="${esc(e.k)}">Pagar com PIX</button>`}</section>`).join('')}
+      ${(d.aditivos || []).map((x) => `<section class="p-sec"><h2>Serviço extra: ${esc(x.descricao)}</h2>${x.motivo ? `<p class="p-s">${esc(x.motivo)}</p>` : ''}<div class="p-linha"><div class="p-cresce p-t">Valor</div><span class="p-num">${moeda(x.valor)}</span></div>${x.prazo_dias ? `<div class="p-linha"><div class="p-cresce p-t">Prazo a mais</div><span class="p-num">${esc(x.prazo_dias)} dias</span></div>` : ''}
+        ${x.status === 'pendente' ? `<div style="display:flex;gap:8px;margin-top:12px"><button type="button" class="p-bt ok largo" data-a="aditivo" data-k="${esc(x.id)}" data-v="1">Aprovar</button><button type="button" class="p-bt largo" data-a="aditivo" data-k="${esc(x.id)}" data-v="0">Recusar</button></div>` : `<p style="margin-top:8px">${x.status === 'aprovado' ? '<span class="p-et ok">Aprovado</span>' : '<span class="p-et">Recusado</span>'}</p>`}</section>`).join('')}
+      ${d.compras?.length ? `<section class="p-sec"><h2>Materiais a comprar</h2><p class="p-sub">Itens que ainda faltam para a obra.</p>${d.compras.map((c) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(c.item)}</div><div class="p-s">${esc(c.quantidade || '')}${c.quem === 'cliente' ? ' · você compra' : ' · nós compramos'}</div></div>${c.estimado ? `<span class="p-num">${moeda(c.estimado)}</span>` : ''}</div>`).join('')}</section>` : ''}
+      ${d.diario.length ? `<section class="p-sec"><h2>Diário da obra</h2>${d.diario.map((x) => `<div style="padding:10px 0;border-top:1px solid var(--borda,#eee)"><div class="p-t">${dt(x.data)}${x.etapa ? ` · ${esc(x.etapa)}` : ''}</div><p class="p-s" style="margin:4px 0">${esc(x.texto)}</p>${fotos(x.fotos)}</div>`).join('')}</section>` : ''}
+      ${d.gastos?.length ? `<section class="p-sec"><h2>Gastos da obra</h2>${d.gastos.map((g) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(g.descricao)}</div><div class="p-s">${dt(g.data)} · ${esc(g.categoria)}${g.cliente_paga ? ' · pago por você' : ''}</div></div><span class="p-num">${moeda(g.valor)}</span></div>`).join('')}</section>` : ''}
+      ${avisoDemo()}${rod()}`;
+  },
+  acoes: {
+    verPix: (el) => { st[`pix${el.dataset.k}`] = true; desenhar(); },
+    paguei: async (el) => { const r = await responder('paguei', { k: el.dataset.k }); if (r.erro) return alert(r.erro); const e = ctx.dados.etapas.find((x) => String(x.k) === el.dataset.k); if (e) e.avisou = true; desenhar(); },
+    aditivo: async (el) => { const aprovado = el.dataset.v === '1'; if (!confirm(aprovado ? 'Aprovar este serviço extra? O valor entra no total da obra.' : 'Recusar este serviço extra?')) return; const r = await responder('aditivo', { id: el.dataset.k, aprovado }); if (r.erro) return alert(r.erro); const x = ctx.dados.aditivos.find((y) => y.id === el.dataset.k); if (x) x.status = aprovado ? 'aprovado' : 'recusado'; if (aprovado && x) ctx.dados.valor += x.valor; desenhar(); },
+  },
+};
+
+// Pragas: comprovante de execução do serviço (produtos, garantia, licenças e emergência)
+T.comprovante = {
+  titulo: (d) => `Comprovante nº ${d.numero}`,
+  render(d) {
+    const hojeISO = new Date().toISOString().slice(0, 10);
+    return `${cab(E().nome, `Comprovante de execução nº ${esc(d.numero)}`, `${esc(d.servico)} · ${dt(d.data)} às ${esc(d.hora)}`)}
+      <section class="p-sec"><h2>Serviço</h2>
+        <div class="p-linha"><div class="p-cresce"><div class="p-s">Contratante</div><div class="p-t">${esc(d.cliente)}${d.documento ? ` · ${esc(d.documento)}` : ''}</div><div class="p-s">${esc(d.endereco)}</div></div></div>
+        <div class="p-linha"><div class="p-cresce"><div class="p-s">Pragas-alvo</div><div class="p-t">${esc(d.pragas.join(', ') || '—')}</div></div></div>
+        <div class="p-linha"><div class="p-cresce"><div class="p-s">Áreas tratadas</div><div class="p-t">${esc(d.areas || '—')}</div></div></div>
+        <div class="p-linha"><div class="p-cresce"><div class="p-s">Técnico</div><div class="p-t">${esc(d.tecnico)}</div></div></div>
+        <div class="p-linha"><div class="p-cresce"><div class="p-s">Garantia</div><div class="p-t">${esc(d.garantia)} dias · até ${dt(d.garantia_ate)}</div></div>${d.garantia_ate >= hojeISO ? '<span class="p-et ok">Valendo</span>' : '<span class="p-et">Vencida</span>'}</div></section>
+      <section class="p-sec"><h2>Produtos utilizados</h2>${d.produtos.length ? d.produtos.map((p) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(p.nome)}</div><div class="p-s">${esc(p.ingrediente)} ${esc(p.concentracao || '')} · ${esc(p.grupo || '')}</div><div class="p-s">Registro MS ${esc(p.registro || '—')} · lote ${esc(p.lote || '—')}</div></div><span class="p-num">${esc(String(p.quantidade).replace('.', ','))} ${esc(p.unidade)}</span></div>`).join('') : '<p class="p-s">Nenhum produto químico aplicado.</p>'}</section>
+      <section class="p-sec"><h2>Em caso de acidente</h2><p class="p-s" style="margin:0 0 6px">${esc([...new Set(d.produtos.map((p) => p.antidoto).filter(Boolean))].join('; ') || 'Procure atendimento médico levando este comprovante.')}</p><p class="p-t" style="margin:0">${esc(d.emergencia)}</p></section>
+      <section class="p-sec"><h2>Empresa responsável</h2>${d.licencas.map(([n, numero, ate]) => `<div class="p-linha"><div class="p-cresce"><div class="p-s">${esc(n)}</div><div class="p-t">${esc(numero || '—')}</div></div><span class="p-s">até ${dt(ate)}</span></div>`).join('')}<div class="p-linha"><div class="p-cresce"><div class="p-s">Responsável técnico</div><div class="p-t">${esc(d.responsavel)} · ${esc(d.conselho)}</div></div></div>${d.cnpj ? `<p class="p-s" style="margin-top:8px">CNPJ ${esc(d.cnpj)}</p>` : ''}</section>
+      ${d.pontos?.length ? `<section class="p-sec"><h2>Pontos de monitoramento</h2><p class="p-sub">${d.pontos.filter((x) => x.status === 'consumida').length} de ${d.pontos.length} iscas com consumo nesta visita.</p>${d.pontos.map((x) => `<div class="p-linha"><b class="p-num" style="min-width:52px">${esc(x.codigo)}</b><div class="p-cresce"><div class="p-t">${esc(x.local)}</div></div><span class="p-et ${{ intacta: 'ok', consumida: 'er', ausente: 'al' }[x.status] || ''}">${esc({ intacta: 'Intacta', consumida: 'Consumida', substituida: 'Substituída', ausente: 'Ausente' }[x.status] || x.status)}</span></div>`).join('')}</section>` : ''}
+      ${d.ocorrencias?.length ? `<section class="p-sec"><h2>O que encontramos</h2><p class="p-sub">Ajustes no local que ajudam a manter as pragas longe.</p>${d.ocorrencias.map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.problema)}</div><div class="p-s">${esc(x.recomendacao)}</div></div></div>`).join('')}</section>` : ''}
+      ${d.fotos?.length ? `<section class="p-sec"><h2>Fotos</h2>${fotos(d.fotos)}</section>` : ''}
+      ${d.garantia_ate >= hojeISO ? d.retorno ? `<section class="p-sec p-ok"><p class="p-s" style="margin:0">Retorno em garantia pedido${d.retorno_data ? ` · agendado para ${dt(d.retorno_data)}` : ''}. A empresa vai confirmar o horário.</p></section>` : st.pedirRetorno ? `<section class="p-sec"><h2>Pedir retorno em garantia</h2><label class="p-campo">O que está acontecendo?<textarea data-f="motivo" rows="3" placeholder="Ex.: voltaram a aparecer baratas na cozinha">${esc(st.motivo || '')}</textarea></label><button type="button" class="p-bt pri largo" data-a="retorno" style="margin-top:10px">Enviar pedido</button></section>` : `<p style="text-align:center;margin-top:12px"><button type="button" class="p-bt" data-a="abrirRetorno">A praga voltou? Pedir retorno em garantia</button></p>` : ''}
+      ${d.confirmado ? `<section class="p-sec p-ok"><p class="p-s" style="margin:0">Recebimento confirmado${d.recebido_por ? ` por ${esc(d.recebido_por)}` : ''}.</p></section>` : `<section class="p-sec"><h2>Confirmar recebimento</h2><label class="p-campo">Seu nome<input data-f="nome" value="${esc(st.nome ?? d.recebido_por ?? '')}"></label><button type="button" class="p-bt pri largo" data-a="confirmar" style="margin-top:10px">Confirmar que recebi</button></section>`}
+      <p style="text-align:center;margin-top:12px"><button type="button" class="p-bt" data-a="imprimir">Imprimir ou salvar em PDF</button></p>
+      ${avisoDemo()}${rod()}`;
+  },
+  acoes: {
+    confirmar: async () => { lerCampos(); const r = await responder('confirmar', { nome: (st.nome || '').trim() }); if (r.erro) return alert(r.erro); ctx.dados.confirmado = true; ctx.dados.recebido_por = (st.nome || '').trim(); desenhar(); },
+    imprimir: () => window.print(),
+    abrirRetorno: () => { st.pedirRetorno = true; desenhar(); },
+    retorno: async () => { lerCampos(); if (!(st.motivo || '').trim()) return alert('Conte rapidamente o que está acontecendo.'); const r = await responder('retorno', { motivo: st.motivo.trim() }); if (r.erro) return alert(r.erro); ctx.dados.retorno = true; desenhar(); },
+  },
+};
+
 // ---------------------------------------------------------------- motor
 function lerCampos() { raiz.querySelectorAll('[data-f]').forEach((x) => { st[x.dataset.f] = x.value; }); }
 function desenhar() {
@@ -348,6 +445,7 @@ raiz.addEventListener('input', (e) => {
   try {
     ctx = await carregar();
     document.documentElement.style.setProperty('--acc', ctx.dados?._empresa?.cor || '#2f6fed');
+    if (ctx.dados?._empresa?.produto) document.documentElement.dataset.produto = ctx.dados._empresa.produto;
     document.title = `${T[ctx.tipo]?.titulo?.(ctx.dados) || 'Página do cliente'} · ${ctx.dados?._empresa?.nome || ctx.empresa || ''}`;
     desenhar();
     if (T[ctx.tipo]?.abriu) responder('abriu', {});

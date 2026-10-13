@@ -1,0 +1,31 @@
+{
+ "name": "Canteiro",
+ "short_name": "Canteiro",
+ "description": "Reformas e obras: etapas pagas por PIX, diário com fotos, equipe e compras",
+ "lang": "pt-BR",
+ "id": "/app/obras/",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#efede8",
+ "theme_color": "#1c1a17",
+ "icons": [
+  {
+   "src": "icone-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icone-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icone-mascara.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
