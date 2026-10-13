@@ -696,3 +696,6 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .faixa a.cta { background: #3d6bf0; }
 .faixa a.cta:hover { background: #2f5fe6; }
 .btn.pri { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 6px 16px -8px rgba(47, 95, 230, 0.7); }
+
+/* permissões: área "só ver" esconde os botões de criar e apagar (o sistema também bloqueia a gravação) */
+[data-so-ver="1"] .conteudo .btn.pri, [data-so-ver="1"] .gaveta .btn.pri, [data-so-ver="1"] [data-acao^="novo"], [data-so-ver="1"] [data-acao^="excluir"], [data-so-ver="1"] [data-acao="editarCad"] { display: none !important; }

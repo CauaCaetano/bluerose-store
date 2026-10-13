@@ -87,3 +87,6 @@ label.p-campo { display: grid; gap: 4px; font-size: 13.5px; font-weight: 600; ma
 [data-produto="pragas"] .p-cab small { color: #f2c14e; opacity: 1; font-family: 'Cascadia Mono', Consolas, monospace; }
 [data-produto="pragas"] .p-sec h2 { font-family: 'Cascadia Mono', Consolas, monospace; text-transform: uppercase; letter-spacing: .06em; font-size: 13.5px; font-weight: 600; }
 [data-produto="pragas"] .p-sec { border-radius: 6px; }
+
+.p-logo { display: block; height: 44px; max-width: 180px; object-fit: contain; margin: 0 0 10px; background: #fff; border-radius: 8px; padding: 4px; }
+[data-produto="cerimonial"] .p-logo { margin: 0 auto 12px; }

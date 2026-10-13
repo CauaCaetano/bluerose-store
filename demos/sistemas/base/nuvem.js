@@ -16,6 +16,41 @@ const SITE = 'https://bluerose-store.com/';
 const PLAY = (() => { try { return localStorage.getItem('nexo-play') === '1'; } catch { return false; } })();
 const LOGO = new URL('blue-rose.png', import.meta.url).href;
 const SEP = '\u0001';
+// Plano Pro: equipe sem limite (Básico: 8 pessoas além do dono), histórico da equipe, marca da empresa nos links e documentos,
+// até 10 empresas por sistema e suporte prioritário. Custa R$ 60 a mais por mês (catálogo a-sis-<app>-pro).
+const LIMITE_BASICO = 8, EXTRA_PRO = 60;
+const SUPORTE = [64, 64, 60, 65, 68, 68, 60, 61, 59, 62, 66, 59, 59].map((c) => String.fromCharCode(c - 11)).join(''); // WhatsApp da Blue Rose (mesmo do site)
+const BENEFICIOS_PRO = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 8).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['camera', 'Sua marca nos links e documentos', 'O logo da sua empresa nas páginas que o cliente recebe e nos impressos, sem o "Feito com".'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.']];
+const NIVEIS = [['editar', 'Ver e editar'], ['ver', 'Só ver'], ['nenhum', 'Sem acesso']];
+
+// resumo de uma permissão para a lista da equipe
+function resumoAcesso(perm) {
+  if (!perm) return 'Acesso total';
+  const v = Object.values(perm.paginas || {}), ed = v.filter((x) => x === 'editar').length, so = v.filter((x) => x === 'ver').length;
+  if (perm.so_leitura) return `Só ver · ${so} ${so === 1 ? 'área' : 'áreas'}`;
+  return `Personalizado · edita ${ed}, só vê ${so}${perm.excluir ? '' : ' · não apaga'}`;
+}
+
+// editor de permissões: devolve { email, perm } (perm null = acesso total) ou null se cancelou
+async function editarPermissoes(app, cfg, { titulo, atual, comEmail = false }) {
+  const paginas = [...cfg.paginas.filter((x) => x.id), { id: 'config', rot: 'Configurações' }];
+  const val = (id) => (atual?.paginas?.[id]) || (id === 'config' ? 'ver' : 'editar');
+  const corpo = `<form class="col" style="gap:12px" data-perm>
+    ${comEmail ? '<label class="campo">E-mail de quem vai usar<input name="email" type="email" required placeholder="nome@empresa.com.br"></label>' : ''}
+    <div class="grupo-btn" role="radiogroup"><button type="button" data-modo-perm="total" aria-pressed="${!atual}">${ic('lock-open', 'p')}Acesso total</button><button type="button" data-modo-perm="personalizado" aria-pressed="${!!atual}">${ic('key', 'p')}Escolher o que pode</button></div>
+    <div data-perm-lista ${atual ? '' : 'hidden'}><p class="mute-2" style="font-size:12.5px;margin:0 0 8px">Para cada área do sistema, escolha o que esta pessoa pode fazer. "Sem acesso" esconde a área do menu.</p>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;max-height:46vh;overflow:auto">${paginas.map((pg) => `<span>${ic(pg.icone || 'gear-six', 'p')} ${esc(pg.rot)}</span><select data-pg="${esc(pg.id)}" style="width:auto;height:30px">${NIVEIS.map(([k, n]) => `<option value="${k}" ${val(pg.id) === k ? 'selected' : ''}>${n}</option>`).join('')}</select>`).join('')}</div>
+      <label class="flex" style="gap:8px;margin-top:12px;font-size:13px"><input type="checkbox" name="excluir" ${atual?.excluir ? 'checked' : ''}> Pode apagar registros</label></div></form>`;
+  const r = await modal({ titulo, largura: 520, corpo, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: comEmail ? 'Convidar' : 'Salvar', classe: 'pri', acao: (f) => {
+    const fm = f.querySelector('[data-perm]'); if (comEmail && !fm.reportValidity()) return false;
+    const email = comEmail ? fm.email.value.trim().toLowerCase() : '';
+    if (f.querySelector('[data-modo-perm="total"]').getAttribute('aria-pressed') === 'true') return { email, perm: null };
+    const pags = Object.fromEntries([...f.querySelectorAll('[data-pg]')].map((x) => [x.dataset.pg, x.value]));
+    if (Object.values(pags).every((x) => x === 'nenhum')) { avisar('Deixe pelo menos uma área com acesso', { tipo: 'erro' }); return false; }
+    return { email, perm: { paginas: pags, excluir: fm.excluir.checked, so_leitura: !Object.values(pags).includes('editar'), padrao: 'ver' } };
+  } }], aoAbrir: (f) => f.querySelectorAll('[data-modo-perm]').forEach((b) => (b.onclick = () => { f.querySelectorAll('[data-modo-perm]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); f.querySelector('[data-perm-lista]').hidden = b.dataset.modoPerm === 'total'; })) });
+  return r;
+}
 
 // ---------------------------------------------------------------- banco sincronizado
 class BancoNuvem extends Banco {
@@ -210,7 +245,7 @@ function telaTeste(sb, cfg, email) {
   return new Promise(() => {
     const preco = cfg.produto?.mensal || 0;
     const f = tela(cfg, `<h1 class="entrada-t">Teste grátis de 7 dias</h1><p class="entrada-s">Use o ${esc(cfg.nome)} com os dados da sua empresa por 7 dias sem pagar nada.</p>
-      <ul class="lista-teste"><li>${ic('credit-card', 'p')}Para começar, cadastre o cartão no Mercado Pago.</li><li>${ic('calendar-check', 'p')}Se não cancelar, a assinatura de <b>R$ ${preco}/mês</b> começa sozinha no 8º dia.</li><li>${ic('x-circle', 'p')}Cancele quando quiser em <a href="${SITE}conta.html" target="_top">Minha conta</a>. Cancelando no teste, nada é cobrado.</li><li>${ic('info', 'p')}O teste grátis vale uma vez por cartão e por pessoa.</li></ul>
+      <ul class="lista-teste"><li>${ic('credit-card', 'p')}<span>Para começar, cadastre o cartão no Mercado Pago.</span></li><li>${ic('calendar-check', 'p')}<span>Se não cancelar, a assinatura de <b>R$ ${preco}/mês</b> começa sozinha no 8º dia.</span></li><li>${ic('x-circle', 'p')}<span>Cancele quando quiser em <a href="${SITE}conta.html" target="_top">Minha conta</a>. Cancelando no teste, nada é cobrado.</span></li><li>${ic('info', 'p')}<span>O teste grátis vale uma vez por cartão e por pessoa.</span></li></ul>
       <form class="col" style="gap:12px" novalidate><label class="campo">E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="${esc(email)}" required><span class="ajuda">A assinatura fica na conta do Mercado Pago com este e-mail.</span></label>
         <label class="flex" style="gap:8px;align-items:flex-start;font-size:13px;color:var(--tx-2)"><input type="checkbox" name="ok" required style="margin-top:3px"><span>Li e aceito os <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática depois do teste.</span></label>
         <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Cadastrar cartão e começar</button></form>
@@ -297,7 +332,8 @@ export async function iniciarNuvem(app, cfg) {
   let escolha = espacos.length === 1 ? { id: espacos[0].id } : espacos.find((s) => s.id === lembrado) && !new URLSearchParams(location.search).has('trocar') ? { id: lembrado } : await telaEmpresa(sb, cfg, espacos);
   try { localStorage.setItem(`nexo-espaco-${cfg.id}`, escolha.id); } catch { /* ok */ }
   tela(cfg, `<div class="vazio" style="padding:30px 0">${ic('circle')}<b>${escolha.exemplo ? 'Preparando os dados de exemplo…' : 'Abrindo…'}</b></div>`);
-  const { data: esp } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono').eq('id', escolha.id).single();
+  const { data: esp } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono,nivel').eq('id', escolha.id).single();
+  const { data: eu } = await sb.from('nexo_membros').select('permissoes').eq('espaco', escolha.id).eq('usuario', session.user.id).maybeSingle();
   const linhas = escolha.novo ? [] : await lerTudo(sb, escolha.id);
   const db = new BancoNuvem(sb, escolha.id, uid, linhas);
   if (escolha.novo) {
@@ -305,27 +341,43 @@ export async function iniciarNuvem(app, cfg) {
     db.dados._cfg = { ...(escolha.exemplo ? cfg.semente()._cfg || {} : {}), empresa: escolha.nome, ...(escolha.ramo && !escolha.exemplo ? { ramo_pendente: escolha.ramo } : {}), ...(escolha.pix ? { pix: { chave: escolha.pix, nome: escolha.nome.slice(0, 25), cidade: '' } } : {}) };
     await db.enviar();
   }
-  const dono = esp.dono === uid;
+  const dono = esp.dono === uid, pro = esp.nivel === 'pro', minhas = dono ? null : eu?.permissoes || null;
   const teste = esp.plano === 'teste', restam = diasAte(esp.teste_ate), encerrado = esp.plano === 'suspenso' || (teste && restam < 0);
   let equipe = [], convites = [];
   const carregarEquipe = async () => {
-    const [m, c] = await Promise.all([sb.from('nexo_membros').select('usuario,email,papel').eq('espaco', esp.id), dono ? sb.from('nexo_convites').select('email,papel,criado').eq('espaco', esp.id) : { data: [] }]);
+    const [m, c] = await Promise.all([sb.from('nexo_membros').select('usuario,email,papel,permissoes').eq('espaco', esp.id), dono ? sb.from('nexo_convites').select('email,papel,criado,permissoes').eq('espaco', esp.id) : { data: [] }]);
     equipe = m.data || []; convites = c.data || []; if (app.pagina?.id === 'config') app.render();
   };
 
   const sessao = {
-    db, sb, uid, email, espaco: esp, dono,
+    db, sb, uid, email, espaco: esp, dono, pro,
+    acesso: (pagina) => (!minhas ? 'editar' : minhas.paginas?.[pagina] || minhas.padrao || 'ver'),
+    podeExcluir: () => !minhas || !!minhas.excluir,
     funcao: async (nome, corpo) => { const { data, error } = await sb.functions.invoke(nome, { body: { espaco: esp.id, ...corpo } }); if (error) { let msg = error.message; try { msg = (await error.context.json()).erro || msg; } catch { /* ok */ } throw new Error(msg); } return data; },
     salvarSegredo: async (chave, valor) => { const { error } = await sb.rpc('nexo_salvar_segredo', { p_espaco: esp.id, p_chave: chave, p_valor: valor || '' }); if (error) throw error; },
     integracoes: async () => { const { data } = await sb.rpc('nexo_integracoes', { p_espaco: esp.id }); return Object.fromEntries((data || []).map((x) => [x.chave, x.atualizado])); },
-    faixa: () => `<div class="faixa nao-imprime"><span class="so-larga">${encerrado ? '<b>Seu teste terminou.</b> Os dados continuam aqui, só para consulta.' : teste ? `Teste grátis · <b>${restam === 0 ? 'último dia' : `${restam} ${restam === 1 ? 'dia' : 'dias'} restantes`}</b>` : `<b>${esc(esp.nome)}</b> · plano ativo`}</span><span class="sep so-larga"></span>
+    faixa: () => `<div class="faixa nao-imprime"><span class="so-larga">${encerrado ? '<b>Seu teste terminou.</b> Os dados continuam aqui, só para consulta.' : teste ? `Teste grátis · <b>${restam === 0 ? 'último dia' : `${restam} ${restam === 1 ? 'dia' : 'dias'} restantes`}</b>` : `<b>${esc(esp.nome)}</b> · ${pro ? 'plano Pro' : 'plano ativo'}`}</span><span class="sep so-larga"></span>
       <span data-sync class="so-larga" style="opacity:.8">Salvo</span><span class="sep so-larga"></span><span class="so-larga" style="opacity:.8">${esc(email)}</span>
       ${PLAY ? '<a class="cta" href="../play/">Meus sistemas</a>' : `<a class="cta" href="${SITE}conta.html" target="_top">${encerrado ? 'Assinar para continuar' : 'Minha conta'}</a>`}</div>`,
-    subConta: () => (teste ? `Teste até ${dataCurta(esp.teste_ate)}` : 'Plano ativo'),
-    cartaoEquipe: () => `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">Cada pessoa entra com o próprio e-mail e senha</div></div></div>
-      <ul class="lista">${equipe.map((m) => `<li>${av(m.email)}<div class="cresce"><div class="t corta">${esc(m.email)}${m.usuario === uid ? ' <span class="mute">(você)</span>' : ''}</div><div class="s">${m.papel === 'dono' ? 'Dono' : 'Equipe'}</div></div>${dono && m.usuario !== uid ? `<button type="button" class="btn fant peq" data-acao="removerMembro" data-u="${m.usuario}">Remover</button>` : et('Ativo', 'ok')}</li>`).join('')}
-      ${convites.map((c) => `<li>${av(c.email)}<div class="cresce"><div class="t corta">${esc(c.email)}</div><div class="s">Convite enviado em ${dataCurta(c.criado)}: entra ao criar a conta com este e-mail</div></div><button type="button" class="btn fant peq" data-acao="cancelarConvite" data-e="${esc(c.email)}">Cancelar</button></li>`).join('')}</ul>
-      ${dono ? `<div class="cartao-corpo" style="border-top:1px solid var(--borda)"><form class="flex" data-convite><input type="email" name="email" placeholder="e-mail de quem vai usar" required style="flex:1"><button type="button" class="btn pri" data-acao="convidar">${ic('user-plus')}Convidar</button></form></div>` : ''}</div>`,
+    subConta: () => (teste ? `Teste até ${dataCurta(esp.teste_ate)}` : pro ? 'Plano Pro' : 'Plano ativo'),
+    cartaoEquipe: () => {
+      const outros = equipe.filter((m) => m.papel !== 'dono').length + convites.length, cheio = !pro && outros >= LIMITE_BASICO;
+      const linha = (av_, t_, s_, botoes) => `<li>${av_}<div class="cresce"><div class="t corta">${t_}</div><div class="s">${s_}</div></div>${botoes}</li>`;
+      return `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">${pro ? 'Plano Pro · equipe sem limite' : `${outros} de ${LIMITE_BASICO} pessoas convidadas`} · cada pessoa entra com o próprio e-mail</div></div>${pro ? et('Pro', 'ok') : ''}</div>
+      <ul class="lista">${equipe.map((m) => linha(av(m.email), `${esc(m.email)}${m.usuario === uid ? ' <span class="mute">(você)</span>' : ''}`, m.papel === 'dono' ? 'Dono · acesso total' : esc(resumoAcesso(m.permissoes)),
+        dono && m.usuario !== uid ? `<button type="button" class="btn fant peq" data-acao="acessoMembro" data-u="${m.usuario}">${ic('key')}Acesso</button><button type="button" class="btn fant peq" data-acao="removerMembro" data-u="${m.usuario}">Remover</button>` : '')).join('')}
+      ${convites.map((c) => linha(av(c.email), esc(c.email), `Convite de ${dataCurta(c.criado)} · ${esc(resumoAcesso(c.permissoes))}`, `<button type="button" class="btn fant peq" data-acao="linkConvite" data-e="${esc(c.email)}">${ic('link')}Link</button><button type="button" class="btn fant peq" data-acao="acessoConvite" data-e="${esc(c.email)}">${ic('key')}Acesso</button><button type="button" class="btn fant peq" data-acao="cancelarConvite" data-e="${esc(c.email)}">Cancelar</button>`)).join('')}</ul>
+      ${dono ? `<div class="cartao-corpo" style="border-top:1px solid var(--borda)">${cheio ? `<div class="dica">${ic('users-three')}<span>Você chegou a ${LIMITE_BASICO} pessoas, o limite do plano Básico. <a href="#" data-acao="verPro">Veja o Pro</a> para convidar sem limite.</span></div>` : `<div class="entre"><span class="mute-2" style="font-size:12.5px">Escolha na hora do convite o que a pessoa pode ver e editar.</span><button type="button" class="btn pri" data-acao="convidar">${ic('user-plus')}Convidar pessoa</button></div>`}</div>` : ''}</div>
+      ${dono || pro ? sessao.cartaoPro() : ''}`;
+    },
+    cartaoPro: () => pro
+      ? `<div class="cartao"><div class="cartao-cab"><div><h3>Plano Pro</h3><div class="sub">O que a sua empresa tem a mais</div></div>${et('Ativo', 'ok')}</div><div class="cartao-corpo col" style="gap:10px">
+        <div class="entre"><span class="mute-2">Quem fez o quê no sistema</span><button type="button" class="btn" data-acao="atividadeEquipe">${ic('clock')}Histórico da equipe</button></div>
+        ${dono ? `<div class="entre"><span class="mute-2">Logo nas páginas do cliente e nos documentos</span><span class="flex">${db.cfg.marca_logo ? `<img src="${esc(db.cfg.marca_logo)}" alt="Logo" style="height:30px;max-width:90px;object-fit:contain;border-radius:4px">` : ''}<label class="btn">${ic('camera')}${db.cfg.marca_logo ? 'Trocar logo' : 'Enviar logo'}<input type="file" accept="image/png,image/jpeg,image/webp" data-mudar="marcaLogo" hidden></label>${db.cfg.marca_logo ? `<button type="button" class="btn fant ic-so" data-acao="tirarLogo" aria-label="Tirar logo">${ic('trash')}</button>` : ''}</span></div>` : ''}
+        <div class="entre"><span class="mute-2">Dúvida ou problema? Fale direto com a Blue Rose</span><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${SUPORTE}?text=${encodeURIComponent(`Olá! Sou cliente Pro do ${cfg.nome} (${esp.nome}) e preciso de ajuda com: `)}">${ic('whatsapp-logo')}Suporte prioritário</a></div></div></div>`
+      : `<div class="cartao"><div class="cartao-cab"><div><h3>Plano Pro</h3><div class="sub">Para equipes maiores, por R$ ${EXTRA_PRO} a mais por mês</div></div></div><div class="cartao-corpo col" style="gap:8px">
+        ${BENEFICIOS_PRO.map(([i, t_, d]) => `<div class="flex" style="gap:10px;align-items:flex-start">${ic(i)}<span><b>${t_}.</b> <span class="mute-2">${d}</span></span></div>`).join('')}
+        <div class="entre" style="margin-top:6px"><span class="mute-2" style="font-size:12.5px">${PLAY ? 'Disponível na versão pelo site.' : 'O plano atual é cancelado sozinho quando o Pro começa: você não paga dois.'}</span>${PLAY ? '' : `<button type="button" class="btn pri" data-acao="mudarPro">${ic('crown')}Mudar para o Pro · R$ ${(cfg.produto?.mensal || 0) + EXTRA_PRO}/mês</button>`}</div></div></div>`,
     cartaoResumo: () => { const rs = db.cfg.resumo || {}; return `<div class="cartao"><div class="cartao-cab"><div><h3>Resumo diário por e-mail</h3><div class="sub">Um e-mail de manhã com o que importa no dia</div></div>${rs.ativo ? et('Ligado', 'ok') : et('Desligado', '')}</div><div class="cartao-corpo"><form class="form-grade" data-resumo>
       <label class="campo">Enviar para<input name="email" type="email" value="${esc(rs.email || email)}"></label><label class="campo">Horário<select name="hora">${[6, 7, 8, 9, 10, 12, 18].map((h) => `<option value="${h}" ${Number(rs.hora || 7) === h ? 'selected' : ''}>${h}h</option>`).join('')}</select></label>
       <div class="campo largo" style="flex-direction:row;justify-content:flex-end;gap:8px">${rs.ativo ? '<button type="button" class="btn fant" data-acao="resumoDesligar">Desligar</button>' : ''}<button type="button" class="btn pri" data-acao="resumoLigar">${rs.ativo ? 'Salvar' : 'Ligar o resumo diário'}</button></div></form></div></div>`; },
@@ -347,15 +399,51 @@ export async function iniciarNuvem(app, cfg) {
         resumoDesligar: () => { db.cfg.resumo = { ...(db.cfg.resumo || {}), ativo: false }; db.gravar(); avisar('Resumo diário desligado'); app.render(); },
         sair: async () => { if (await confirmar('Sair da sua conta neste aparelho?', { rotulo: 'Sair' })) { await db.enviar(); await sb.auth.signOut(); location.reload(); } },
         convidar: async () => {
-          const f = document.querySelector('[data-convite]'); if (!f.reportValidity()) return;
-          const em = f.email.value.trim().toLowerCase();
-          const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: em });
-          if (er) return avisar(/duplicate/.test(er.message) ? 'Esse e-mail já foi convidado' : er.message, { tipo: 'erro' });
-          db.cfg.convidou = true; db.gravar(); f.reset(); carregarEquipe();
-          const link = `${location.origin + location.pathname}?convite=${encodeURIComponent(em)}`, msg = `Oi! Te adicionei na equipe da ${db.cfg.empresa || esp.nome} no ${cfg.nome}. Crie a sua conta com este e-mail (${em}) por aqui: ${link}`;
-          modal({ titulo: 'Convite criado', largura: 480, corpo: `<p class="mute-2" style="margin-bottom:10px">Mande o link para <b>${esc(em)}</b>. A pessoa cria a conta com esse e-mail e já entra na empresa, sem pagar nada. Se ela já tiver conta, é só entrar.</p><input readonly value="${esc(link)}" data-link-convite style="width:100%">`,
+          const r = await editarPermissoes(app, cfg, { titulo: 'Convidar pessoa', comEmail: true }); if (!r) return;
+          const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: r.email, permissoes: r.perm });
+          if (er) { if (/LIMITE_EQUIPE/.test(er.message)) return app.acoes.verPro(); return avisar(/duplicate/.test(er.message) ? 'Esse e-mail já foi convidado' : er.message, { tipo: 'erro' }); }
+          db.cfg.convidou = true; db.gravar(); await carregarEquipe(); app.acoes.linkConvite({ e: r.email });
+        },
+        linkConvite: (d) => {
+          const em = d.e, link = `${location.origin + location.pathname}?convite=${encodeURIComponent(em)}`, msg = `Oi! Te adicionei na equipe da ${db.cfg.empresa || esp.nome} no ${cfg.nome}. Crie a sua conta com este e-mail (${em}) por aqui: ${link}`;
+          modal({ titulo: 'Convite pronto', largura: 480, corpo: `<p class="mute-2" style="margin-bottom:10px">Mande o link para <b>${esc(em)}</b>. A pessoa cria a conta com esse e-mail e já entra na empresa, sem pagar nada. Se ela já tiver conta, é só entrar.</p><input readonly value="${esc(link)}" style="width:100%">`,
             botoes: [{ rotulo: 'Copiar link', classe: 'fant', acao: () => { navigator.clipboard?.writeText(link).then(() => avisar('Link copiado')).catch(() => {}); return false; } }, { rotulo: 'Mandar no WhatsApp', classe: 'pri', acao: () => { window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank', 'noopener'); return true; } }] });
         },
+        acessoMembro: async (d) => {
+          const m = equipe.find((x) => x.usuario === d.u); if (!m) return;
+          const r = await editarPermissoes(app, cfg, { titulo: `Acesso de ${m.email}`, atual: m.permissoes }); if (!r) return;
+          const { error: er } = await sb.rpc('nexo_definir_permissoes', { p_espaco: esp.id, p_usuario: m.usuario, p_permissoes: r.perm });
+          if (er) return avisar(er.message, { tipo: 'erro' }); avisar('Acesso atualizado. Vale a partir da próxima vez que a pessoa abrir o sistema.'); carregarEquipe();
+        },
+        acessoConvite: async (d) => {
+          const c = convites.find((x) => x.email === d.e); if (!c) return;
+          const r = await editarPermissoes(app, cfg, { titulo: `Acesso de ${c.email}`, atual: c.permissoes }); if (!r) return;
+          await sb.from('nexo_convites').delete().eq('espaco', esp.id).eq('email', c.email);
+          const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: c.email, permissoes: r.perm });
+          if (er) return avisar(er.message, { tipo: 'erro' }); avisar('Acesso do convite atualizado'); carregarEquipe();
+        },
+        verPro: () => modal({ titulo: `${cfg.nome} Pro`, largura: 520, corpo: `<div class="col" style="gap:10px">${BENEFICIOS_PRO.map(([i, t_, d]) => `<div class="dica">${ic(i)}<span><b>${t_}.</b> ${d}</span></div>`).join('')}<p class="mute-2" style="font-size:13px">R$ ${(cfg.produto?.mensal || 0) + EXTRA_PRO}/mês. O plano atual é cancelado sozinho quando o Pro começa.</p></div>`,
+          botoes: [{ rotulo: 'Agora não', valor: null, classe: 'fant' }, ...(PLAY || !dono ? [] : [{ rotulo: 'Mudar para o Pro', classe: 'pri', acao: () => { app.acoes.mudarPro(); return true; } }])] }),
+        mudarPro: async () => {
+          if (!dono) return avisar('Só o dono da empresa muda o plano', { tipo: 'erro' });
+          if (!(await confirmar(`Mudar para o ${cfg.nome} Pro por R$ ${(cfg.produto?.mensal || 0) + EXTRA_PRO}/mês? Você vai para o Mercado Pago confirmar. Quando o Pro começar, o plano atual é cancelado sozinho.`, { rotulo: 'Ir para o Mercado Pago', titulo: 'Plano Pro' }))) return;
+          try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}-pro`, email_mp: email }); location.href = j.link; } catch (x) { avisar(x.message, { tipo: 'erro' }); }
+        },
+        atividadeEquipe: async () => {
+          if (!pro) return app.acoes.verPro();
+          const { data: l } = await sb.from('nexo_registros').select('colecao,id,autor,atualizado,dados').eq('espaco', esp.id).neq('colecao', '_cfg').order('atualizado', { ascending: false }).limit(120);
+          const quem = new Map(equipe.map((m) => [m.usuario, m.email])), nome = (x) => x.dados?.nome || x.dados?.titulo || x.dados?.descricao || x.dados?.placa || x.dados?.numero || `#${x.id}`;
+          const porDia = agrupar(l || [], (x) => String(x.atualizado).slice(0, 10));
+          modal({ titulo: 'Histórico da equipe', largura: 620, corpo: (l || []).length ? `<div style="max-height:60vh;overflow:auto">${Object.entries(porDia).map(([dia, xs]) => `<h4 style="margin:12px 0 4px">${dataCurta(dia)}</h4><ul class="lista" style="margin:0 -20px">${xs.map((x) => `<li>${av(quem.get(x.autor) || '?')}<div class="cresce"><div class="t corta">${esc(String(nome(x)))}</div><div class="s">${esc(quem.get(x.autor) || 'pessoa que saiu da equipe')} · ${esc(app.colecoes?.[x.colecao]?.singular || x.colecao)} · ${new Date(x.atualizado).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div></div></li>`).join('')}</ul>`).join('')}</div>` : '<p class="mute-2">Nada registrado ainda.</p>', botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }] });
+        },
+        marcaLogo: (d, el) => {
+          const arq = el.files?.[0]; if (!arq) return; if (arq.size > 4e6) return avisar('Imagem grande demais (máximo 4 MB)', { tipo: 'erro' });
+          const img = new Image(), url = URL.createObjectURL(arq);
+          img.onload = () => { const k = Math.min(1, 320 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+            db.cfg.marca_logo = c.toDataURL('image/webp', 0.86); db.gravar(); avisar('Logo salvo. Ele aparece nas páginas do cliente e nos documentos.'); app.render(); };
+          img.onerror = () => avisar('Não consegui abrir essa imagem', { tipo: 'erro' }); img.src = url;
+        },
+        tirarLogo: () => { delete db.cfg.marca_logo; db.gravar(); app.render(); },
         cancelarConvite: async (d) => { await sb.from('nexo_convites').delete().eq('espaco', esp.id).eq('email', d.e); carregarEquipe(); },
         removerMembro: async (d) => { if (!(await confirmar('Remover esta pessoa? Ela perde o acesso na hora.', { rotulo: 'Remover', perigo: true }))) return; await sb.from('nexo_membros').delete().eq('espaco', esp.id).eq('usuario', d.u); carregarEquipe(); },
         importarCSV: (d, el) => {

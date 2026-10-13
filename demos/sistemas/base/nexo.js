@@ -196,6 +196,7 @@ export function lerCampos(raiz, campos) {
 }
 /** Abre o formulário de uma coleção (novo ou edição). Devolve o registro salvo ou null. */
 export async function editar(app, nome, registro = null, extra = {}) {
+  if (app.podeMexer && !app.podeMexer('salvar')) return null;
   const col = app.colecoes[nome];
   const campos = (typeof col.campos === 'function' ? col.campos(app) : col.campos).filter((c) => !c.oculto);
   const corpo = `<form class="form-grade ${col.tres ? 'tres' : ''}" novalidate onsubmit="return false">${campos.map((c) => campoHTML(c, registro?.[c.nome] ?? extra[c.nome], app)).join('')}</form>`;
@@ -220,6 +221,7 @@ export async function editar(app, nome, registro = null, extra = {}) {
   return salvo;
 }
 export async function excluir(app, nome, id, aoFim = null) {
+  if (app.podeMexer && !app.podeMexer('apagar')) return false;
   const col = app.colecoes[nome];
   if (!(await confirmar(`Excluir ${col.genero === 'f' ? 'esta' : 'este'} ${col.singular}? Você pode desfazer logo em seguida.`, { rotulo: 'Excluir', perigo: true, titulo: `Excluir ${col.singular}` }))) return false;
   const r = app.db.apagar(nome, id);
@@ -400,6 +402,8 @@ export function calMes({ ym, itens, aoClicar = 'abrirEvento' }) {
 export function imprimir(html) {
   let area = document.getElementById('area-impressao');
   if (!area) { area = document.createElement('div'); area.id = 'area-impressao'; document.body.appendChild(area); const st = document.createElement('style'); st.textContent = '#area-impressao{display:none}@media print{body>*:not(#area-impressao){display:none!important}#area-impressao{display:block}}'; document.head.appendChild(st); }
+  const logo = imprimir.logo?.();
+  if (logo) html = html.replace('<div class="doc">', `<div class="doc"><img src="${esc(logo)}" alt="" style="height:52px;max-width:200px;object-fit:contain;display:block;margin-bottom:10px">`);
   area.innerHTML = html; setTimeout(() => window.print(), 60);
 }
 
@@ -427,6 +431,21 @@ export function criarApp(cfg) {
 function montar(app, cfg) {
   const raiz = document.documentElement;
   raiz.dataset.produto = cfg.id;
+  // permissões da pessoa (versão na nuvem): 'editar' | 'ver' | 'nenhum' por área; o dono tem tudo
+  app.acesso = (id) => app.sessao?.acesso?.(id) || 'editar';
+  app.podeMexer = (tipo) => {
+    if (app._sistema) return true;
+    const ac = app.acesso(app.pagina?.id || '');
+    if (ac === 'editar' && (tipo !== 'apagar' || !app.sessao?.podeExcluir || app.sessao.podeExcluir())) return true;
+    avisar(ac === 'editar' ? 'Você não tem permissão para apagar registros. Fale com o dono da empresa.' : 'Você tem acesso só para ver esta área. Fale com o dono da empresa para poder editar.', { tipo: 'erro', tempo: 5000 });
+    return false;
+  };
+  if (app.sessao?.acesso) {
+    const db = app.db, salvar = db.salvar.bind(db), apagar = db.apagar.bind(db);
+    db.salvar = (nome, obj) => (app.podeMexer('salvar') ? salvar(nome, obj) : (setTimeout(() => app.render(), 0), { ...obj }));
+    db.apagar = (nome, id) => (app.podeMexer('apagar') ? apagar(nome, id) : (setTimeout(() => app.render(), 0), null));
+  }
+  imprimir.logo = () => (app.sessao?.pro && app.db.cfg.marca_logo) || null;
   const site = 'https://bluerose-store.com/';
   const paginas = cfg.paginas.filter((p) => p.id);
   const preco = (v) => moeda(v).replace(',00', '');
@@ -442,7 +461,7 @@ function montar(app, cfg) {
         <div class="marca"><img class="marca-logo" src="${cfg.logo || new URL('blue-rose.png', import.meta.url).href}" alt="${cfg.logo ? esc(cfg.nome) : 'Blue Rose'}" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.marcaSub || `Blue Rose · ${cfg.sub}`)}</small></div></div>
         <div class="conta">${av(app.empresa)}<div class="cresce"><b class="corta" data-empresa>${esc(app.empresa)}</b><small class="corta">${esc(app.nuvem ? app.sessao.subConta() : cfg.conta || 'Conta de demonstração')}</small></div></div>
         <button type="button" class="busca-lat" data-acao="paleta">${ic('magnifying-glass')}Buscar ou ir para…<kbd>Ctrl K</kbd></button>
-        ${cfg.paginas.map((p) => (p.grupo && !p.id ? `<div class="grupo">${esc(p.grupo)}</div>` : `<a class="item" href="#/${p.id}" data-pag="${p.id}">${ic(p.icone || 'circle')}<span class="corta">${esc(p.rot)}</span><span class="cont" data-cont="${p.id}" hidden></span></a>`)).join('')}
+        ${cfg.paginas.filter((p) => !p.id || app.acesso(p.id) !== 'nenhum').map((p) => (p.grupo && !p.id ? `<div class="grupo">${esc(p.grupo)}</div>` : `<a class="item" href="#/${p.id}" data-pag="${p.id}">${ic(p.icone || 'circle')}<span class="corta">${esc(p.rot)}</span><span class="cont" data-cont="${p.id}" hidden></span></a>`)).join('')}
         <div class="lat-pe">
           <a class="item" href="#" data-acao="resumoDia">${ic('notepad')}Resumo do dia</a>
           <a class="item" href="#/config" data-pag="config">${ic('gear-six')}Configurações</a>
@@ -464,7 +483,8 @@ function montar(app, cfg) {
   app.render = () => {
     const { id, params } = rota();
     const p = id === 'config' ? paginaConfig : paginas.find((x) => x.id === id) || paginas[0];
-    app.pagina = p; app.params = params;
+    if (app.acesso(p.id) === 'nenhum') { const ok = paginas.find((x) => app.acesso(x.id) !== 'nenhum'); if (ok && ok !== p) { location.hash = `#/${ok.id}`; return; } }
+    app.pagina = p; app.params = params; raiz.dataset.soVer = app.acesso(p.id) === 'ver' ? '1' : '';
     document.querySelectorAll('.lat a.item[data-pag]').forEach((a) => a.classList.toggle('ativo', a.dataset.pag === p.id));
     const titulo = typeof p.titulo === 'function' ? p.titulo(app, params) : p.titulo || p.rot;
     $('#trilha').innerHTML = (p.trilha ? p.trilha(app, params) : '') + `<h1>${esc(titulo)}</h1>`;
@@ -472,7 +492,8 @@ function montar(app, cfg) {
     const c = $('#conteudo'); c.className = `conteudo ${p.cheio ? 'cheio' : ''}`;
     const rolagem = scrollY;
     c.innerHTML = p.render(app, params);
-    if (p.id === paginas[0].id && app.passosHTML) c.insertAdjacentHTML('afterbegin', app.passosHTML());
+    if (p.id === paginas[0].id && app.passosHTML && app.acesso(p.id) === 'editar') c.insertAdjacentHTML('afterbegin', app.passosHTML());
+    if (raiz.dataset.soVer) c.insertAdjacentHTML('afterbegin', `<div class="dica">${ic('eye')}<span>Você pode <b>ver</b> esta área, mas não editar. Para mudar isso, fale com o dono da empresa.</span></div>`);
     p.montar?.(app, c, params);
     if (app._mesmaPagina === `${p.id}/${params.join('/')}`) scrollTo(0, rolagem); else scrollTo(0, 0);
     app._mesmaPagina = `${p.id}/${params.join('/')}`;
