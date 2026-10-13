@@ -349,7 +349,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'obras', nome: 'Canteiro', sub: 'Reformas e obras', marcaSub: 'Reformas e obras', logo: new URL('logo.svg', import.meta.url).href, produto: { mensal: 79 }, cor: '#c84a0c', icone: 'house-line', empresa: 'Reforma Certa · Davi Nunes', conta: 'Reformas residenciais · Belo Horizonte',
+  id: 'obras', nome: 'Canteiro', sub: 'Reformas e obras', marcaSub: 'Reformas e obras', logo: new URL('logo.svg', import.meta.url).href, produto: { mensal: 119, unico: true }, cor: '#c84a0c', icone: 'house-line', empresa: 'Reforma Certa · Davi Nunes', conta: 'Reformas residenciais · Belo Horizonte',
   semente, colecoes, fichas, buscaDica: 'obras e clientes',
   portal: {
     obra: {

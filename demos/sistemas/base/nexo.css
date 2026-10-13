@@ -716,3 +716,10 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .planos-escolha small { color: var(--tx-3); font-size: 12px; }
 .entrada-pe .entrada-br { display: inline-flex; align-items: center; gap: 6px; margin-right: 6px; font-weight: 600; color: var(--tx-2); text-decoration: none; }
 .entrada-pe .entrada-br img { width: 18px; height: 18px; border-radius: 5px; }
+/* importar planilha */
+.imp-zona { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 28px 16px; border: 2px dashed var(--borda); border-radius: 14px; cursor: pointer; text-align: center; color: var(--tx-2); background: var(--painel); transition: border-color .15s, background .15s; }
+.imp-zona:hover, .imp-zona.arrastando { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 6%, var(--painel)); }
+.imp-zona .ic { width: 28px; height: 28px; color: var(--acc); }
+.imp-zona b { color: var(--tx); font-size: 15px; }
+.imp-zona span { font-size: 12.5px; color: var(--tx-3); }
+.ok-fundo { border-color: color-mix(in srgb, var(--ok) 40%, transparent); background: color-mix(in srgb, var(--ok) 8%, transparent); }

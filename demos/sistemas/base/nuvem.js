@@ -186,11 +186,18 @@ function telaEmpresa(sb, cfg, espacos, precisaToken = false) {
         <label class="opcao-inicio"><input type="radio" name="modo" value="branco" checked><span><b>Em branco</b><small>Para usar com os dados da sua empresa. Você pode importar planilhas.</small></span></label>
         <label class="opcao-inicio"><input type="radio" name="modo" value="exemplo"><span><b>Com dados de exemplo</b><small>Para explorar tudo antes. Dá para apagar depois.</small></span></label></fieldset>
       ${cfg.modelos?.length ? `<label class="campo">Tipo de negócio<select name="ramo">${cfg.modelos.map((m) => `<option value="${m.id}">${esc(m.nome)}</option>`).join('')}</select><span class="ajuda">Já começa com os serviços e cadastros típicos do seu ramo</span></label>` : ''}
-      ${precisaToken ? `<label class="campo">Token de dono<input name="token" required autocomplete="off" spellcheck="false" placeholder="${esc(cfg.id.toUpperCase().slice(0, 6))}-XXXX-XXXX-XXXX" style="font-family:var(--mono);text-transform:uppercase"><span class="ajuda">Enviamos para o seu e-mail quando o teste ou a assinatura começou, e ele também aparece em <a href="${SITE}conta.html" target="_blank" rel="noopener">Minha conta</a>. Só é pedido agora, na primeira vez.</span></label>` : ''}
+      ${precisaToken ? `<label class="campo">Token de dono<input name="token" required autocomplete="off" spellcheck="false" placeholder="${esc(cfg.id.toUpperCase().slice(0, 6))}-XXXX-XXXX-XXXX" style="font-family:var(--mono);text-transform:uppercase"><span class="ajuda">Enviamos para o seu e-mail quando o teste ou a assinatura começou, e ele também aparece em <a href="${SITE}conta.html" target="_blank" rel="noopener">Minha conta</a>. Só é pedido agora, na primeira vez. <a href="#" data-reenviar>Não recebeu? Enviar de novo para o meu e-mail</a></span></label>` : ''}
       <label class="campo">Chave PIX da empresa <span class="mute">(opcional)</span><input name="pix" placeholder="CNPJ, e-mail, celular ou chave aleatória"><span class="ajuda">Para as cobranças e links de pagamento já saírem com o QR code. Dá para colocar depois.</span></label>
       <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Criar e começar o teste de 7 dias</button></form>
       <div class="entrada-links"><a href="#" data-sair>Sair desta conta</a></div>`);
     document.querySelectorAll('[data-esp]').forEach((li) => (li.onclick = () => resolver({ id: li.dataset.esp, novo: false })));
+    // manda o token de dono de novo para o e-mail da conta usada na assinatura
+    document.querySelector('[data-reenviar]')?.addEventListener('click', async (ev) => {
+      ev.preventDefault(); const a = ev.currentTarget, erro = f.querySelector('[data-erro]');
+      const { data, error } = await sb.rpc('nexo_reenviar_token', { p_app: cfg.id });
+      if (error) { erro.textContent = /MUITOS/.test(error.message) ? 'Você já pediu algumas vezes. Espere um pouco e confira a caixa de spam.' : /SEM_TOKEN/.test(error.message) ? 'O token é criado quando o teste ou a assinatura começa. Atualize a página em alguns minutos.' : error.message; return; }
+      a.replaceWith(Object.assign(document.createElement('b'), { textContent: `Pedido feito: o token chega em ${data} em alguns minutos (confira o spam). Ele também aparece em Minha conta.` }));
+    });
     document.querySelector('[data-sair]').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.reload(); };
     f.onsubmit = async (e) => {
       e.preventDefault(); if (!f.reportValidity()) return;
@@ -338,20 +345,20 @@ export async function iniciarNuvem(app, cfg) {
 
   const sessao = {
     db, sb, uid, email, espaco: esp, dono, pro, papel, gestor,
-    acesso: (pagina) => (pagina === 'dono' ? (gestor ? 'editar' : 'nenhum') : !minhas || minhas.total ? 'editar' : minhas.paginas?.[pagina] || minhas.padrao || 'ver'),
+    acesso: (pagina) => (pagina === 'dono' || pagina === 'importar' ? (gestor ? 'editar' : 'nenhum') : !minhas || minhas.total ? 'editar' : minhas.paginas?.[pagina] || minhas.padrao || 'ver'),
     podeExcluir: () => !minhas || !!minhas.total || !!minhas.excluir,
     funcao: async (nome, corpo) => { const { data, error } = await sb.functions.invoke(nome, { body: { espaco: esp.id, ...corpo } }); if (error) { let msg = error.message; try { msg = (await error.context.json()).erro || msg; } catch { /* ok */ } throw new Error(msg); } return data; },
     salvarSegredo: async (chave, valor) => { const { error } = await sb.rpc('nexo_salvar_segredo', { p_espaco: esp.id, p_chave: chave, p_valor: valor || '' }); if (error) throw error; },
     integracoes: async () => { const { data } = await sb.rpc('nexo_integracoes', { p_espaco: esp.id }); return Object.fromEntries((data || []).map((x) => [x.chave, x.atualizado])); },
-    faixa: () => `<div class="faixa nao-imprime"><span class="so-larga">${encerrado ? '<b>Seu teste terminou.</b> Os dados continuam aqui, só para consulta.' : teste ? `Teste grátis · <b>${restam === 0 ? 'último dia' : `${restam} ${restam === 1 ? 'dia' : 'dias'} restantes`}</b>` : `<b>${esc(esp.nome)}</b> · ${pro ? 'plano Pro' : 'plano ativo'}`}</span><span class="sep so-larga"></span>
+    faixa: () => `<div class="faixa nao-imprime"><span class="so-larga">${encerrado ? '<b>Seu teste terminou.</b> Os dados continuam aqui, só para consulta.' : teste ? `Teste grátis · <b>${restam === 0 ? 'último dia' : `${restam} ${restam === 1 ? 'dia' : 'dias'} restantes`}</b>` : `<b>${esc(esp.nome)}</b> · ${pro && !cfg.produto?.unico ? 'plano Pro' : 'plano ativo'}`}</span><span class="sep so-larga"></span>
       <span data-sync class="so-larga" style="opacity:.8">Salvo</span><span class="sep so-larga"></span><span class="so-larga" style="opacity:.8">${esc(email)}</span>
       ${PLAY ? '<a class="cta" href="../play/">Meus sistemas</a>' : `<a class="cta" href="${SITE}conta.html" target="_top">${encerrado ? 'Assinar para continuar' : 'Minha conta'}</a>`}</div>`,
-    subConta: () => (teste ? `Teste até ${dataCurta(esp.teste_ate)}` : pro ? 'Plano Pro' : 'Plano ativo'),
+    subConta: () => (teste ? `Teste até ${dataCurta(esp.teste_ate)}` : pro && !cfg.produto?.unico ? 'Plano Pro' : 'Plano ativo'),
     cartaoEquipe: () => {
       const outros = equipe.filter((m) => m.papel !== 'dono').length + convites.length, cheio = !pro && outros >= LIMITE_BASICO;
       const linha = (av_, t_, s_, botoes) => `<li>${av_}<div class="cresce"><div class="t corta">${t_}</div><div class="s">${s_}</div></div>${botoes}</li>`;
       const mexe = (pp) => pp === 'membro' || (pp === 'admin' && dono);
-      return `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">${pro ? 'Plano Pro · equipe sem limite' : `${outros} de ${LIMITE_BASICO} pessoas convidadas`} · cada pessoa entra com o próprio e-mail</div></div>${pro ? et('Pro', 'ok') : ''}</div>
+      return `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">${pro ? 'Equipe sem limite' : `${outros} de ${LIMITE_BASICO} pessoas convidadas`} · cada pessoa entra com o próprio e-mail</div></div>${pro && !cfg.produto?.unico ? et('Pro', 'ok') : ''}</div>
       <ul class="lista">${equipe.sort((x, y) => ({ dono: 0, admin: 1 }[x.papel] ?? 2) - ({ dono: 0, admin: 1 }[y.papel] ?? 2)).map((m) => linha(av(m.email), `${esc(m.email)}${m.usuario === uid ? ' <span class="mute">(você)</span>' : ''} ${m.papel === 'dono' ? et('Dono', 'acc') : m.papel === 'admin' ? et('Administrador', 'info') : ''}`, esc(resumoAcesso(m.permissoes, m.papel)),
         gestor && m.usuario !== uid && mexe(m.papel) ? `<button type="button" class="btn fant peq" data-acao="acessoMembro" data-u="${m.usuario}">${ic('key')}Cargo e acesso</button><button type="button" class="btn fant peq" data-acao="removerMembro" data-u="${m.usuario}">Remover</button>` : '')).join('')}
       ${convites.map((c) => linha(av(c.email), `${esc(c.email)} ${c.papel === 'admin' ? et('Administrador', 'info') : ''}`, `Convite de ${dataCurta(c.criado)} · ${esc(resumoAcesso(c.permissoes, c.papel === 'admin' ? 'admin' : ''))}`, mexe(c.papel) ? `<button type="button" class="btn fant peq" data-acao="linkConvite" data-e="${esc(c.email)}">${ic('link')}Link</button><button type="button" class="btn fant peq" data-acao="acessoConvite" data-e="${esc(c.email)}">${ic('key')}Acesso</button><button type="button" class="btn fant peq" data-acao="cancelarConvite" data-e="${esc(c.email)}">Cancelar</button>` : '')).join('')}</ul>
@@ -363,15 +370,16 @@ export async function iniciarNuvem(app, cfg) {
       if (!gestor) return '';
       if (dono && !plano) sessao.carregarPlano();
       const meus = equipe.filter((m) => m.papel !== 'dono').length, nConv = convites.length, adms = equipe.filter((m) => m.papel === 'admin').length;
-      const p = plano?.assinatura, nomePlano = p ? `${String(p.produto).includes('-pro') ? 'Pro' : 'Básico'} ${String(p.produto).endsWith('-anual') ? 'anual' : 'mensal'}` : pro ? 'Pro' : 'Básico';
+      const unico = !!cfg.produto?.unico, p = plano?.assinatura, periodo = String(p?.produto || '').endsWith('-anual') ? 'anual' : 'mensal';
+      const nomePlano = unico ? `Plano único ${p ? periodo : ''}`.trim() : p ? `${String(p.produto).includes('-pro') ? 'Pro' : 'Básico'} ${periodo}` : pro ? 'Pro' : 'Básico';
       const tk = plano?.token;
       const cartoes = [
         ['crown', 'Sua função', dono ? 'Dono' : 'Administrador', dono ? 'Acesso a tudo, inclusive plano e administradores' : 'Organiza a equipe; o plano é com o dono'],
-        ['users-three', 'Equipe', `${meus + 1} ${meus ? 'pessoas' : 'pessoa'}`, pro ? 'Pro: sem limite' : `${meus + nConv} de ${LIMITE_BASICO} convites usados${adms ? ` · ${adms} admin` : ''}`],
+        ['users-three', 'Equipe', `${meus + 1} ${meus ? 'pessoas' : 'pessoa'}`, pro ? 'Sem limite de pessoas' : `${meus + nConv} de ${LIMITE_BASICO} convites usados${adms ? ` · ${adms} admin` : ''}`],
         ['shield-check', 'Token de dono', dono ? (tk?.ativado ? 'Ativado' : plano ? 'Pendente' : '…') : 'Do dono', dono ? (tk?.ativado ? `desde ${dataCurta(String(tk.ativado).slice(0, 10))}` : 'Ativado no primeiro acesso') : 'Só o dono tem o token'],
         ['calendar-check', 'Plano', nomePlano, teste ? `Teste até ${dataCurta(esp.teste_ate)}` : p?.proxima_cobranca ? `Próxima cobrança ${dataCurta(p.proxima_cobranca)}` : 'Plano ativo'],
       ];
-      const precoBase = cfg.produto?.mensal || 0, precoPro = precoBase + EXTRA_PRO, ehAnual = String(p?.produto || '').endsWith('-anual');
+      const precoBase = cfg.produto?.mensal || 0, precoPro = unico ? precoBase : precoBase + EXTRA_PRO, ehAnual = String(p?.produto || '').endsWith('-anual');
       return `<div class="dica">${ic('crown')}<span>Só o dono${dono ? '' : ' e os administradores'} veem este painel. ${dono ? 'Os administradores que você escolher também entram aqui para organizar a equipe.' : ''}</span></div>
         <div class="grade g4" style="gap:12px">${cartoes.map(([i, t_, v, s_]) => `<div class="cartao" style="padding:14px 16px"><div class="flex" style="gap:8px;color:var(--tx-3);font-size:12.5px">${ic(i, 'p')}${t_}</div><b style="display:block;font-size:19px;margin-top:6px">${esc(v)}</b><div class="mute-2" style="font-size:12px;margin-top:2px">${esc(s_)}</div></div>`).join('')}</div>
         <div class="grade g2" style="align-items:start">
@@ -391,7 +399,7 @@ export async function iniciarNuvem(app, cfg) {
       if (app.pagina?.id === 'dono') app.render();
     },
     cartaoPro: () => pro
-      ? `<div class="cartao"><div class="cartao-cab"><div><h3>Plano Pro</h3><div class="sub">O que a sua empresa tem a mais</div></div>${et('Ativo', 'ok')}</div><div class="cartao-corpo col" style="gap:10px">
+      ? `<div class="cartao"><div class="cartao-cab"><div><h3>${cfg.produto?.unico ? 'Tudo incluso no seu plano' : 'Plano Pro'}</h3><div class="sub">${cfg.produto?.unico ? 'Equipe sem limite, histórico, sua marca e suporte prioritário' : 'O que a sua empresa tem a mais'}</div></div>${et('Ativo', 'ok')}</div><div class="cartao-corpo col" style="gap:10px">
         <div class="entre"><span class="mute-2">Quem fez o quê no sistema</span><button type="button" class="btn" data-acao="atividadeEquipe">${ic('clock')}Histórico da equipe</button></div>
         ${dono ? `<div class="entre"><span class="mute-2">Logo nas páginas do cliente e nos documentos</span><span class="flex">${db.cfg.marca_logo ? `<img src="${esc(db.cfg.marca_logo)}" alt="Logo" style="height:30px;max-width:90px;object-fit:contain;border-radius:4px">` : ''}<label class="btn">${ic('camera')}${db.cfg.marca_logo ? 'Trocar logo' : 'Enviar logo'}<input type="file" accept="image/png,image/jpeg,image/webp" data-mudar="marcaLogo" hidden></label>${db.cfg.marca_logo ? `<button type="button" class="btn fant ic-so" data-acao="tirarLogo" aria-label="Tirar logo">${ic('trash')}</button>` : ''}</span></div>` : ''}
         <div class="entre"><span class="mute-2">Dúvida ou problema? Fale direto com a Blue Rose</span><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${SUPORTE}?text=${encodeURIComponent(`Olá! Sou cliente Pro do ${cfg.nome} (${esp.nome}) e preciso de ajuda com: `)}">${ic('whatsapp-logo')}Suporte prioritário</a></div></div></div>`
@@ -401,7 +409,7 @@ export async function iniciarNuvem(app, cfg) {
     cartaoResumo: () => { const rs = db.cfg.resumo || {}; return `<div class="cartao"><div class="cartao-cab"><div><h3>Resumo diário por e-mail</h3><div class="sub">Um e-mail de manhã com o que importa no dia</div></div>${rs.ativo ? et('Ligado', 'ok') : et('Desligado', '')}</div><div class="cartao-corpo"><form class="form-grade" data-resumo>
       <label class="campo">Enviar para<input name="email" type="email" value="${esc(rs.email || email)}"></label><label class="campo">Horário<select name="hora">${[6, 7, 8, 9, 10, 12, 18].map((h) => `<option value="${h}" ${Number(rs.hora || 7) === h ? 'selected' : ''}>${h}h</option>`).join('')}</select></label>
       <div class="campo largo" style="flex-direction:row;justify-content:flex-end;gap:8px">${rs.ativo ? '<button type="button" class="btn fant" data-acao="resumoDesligar">Desligar</button>' : ''}<button type="button" class="btn pri" data-acao="resumoLigar">${rs.ativo ? 'Salvar' : 'Ligar o resumo diário'}</button></div></form></div></div>`; },
-    linhasDados: () => `<div class="entre"><span class="mute-2">Importar uma planilha (CSV) de</span><span class="flex"><select data-csv-col style="width:auto;height:30px">${Object.entries(app.colecoes || {}).filter(([, c]) => c.campos).map(([k, c]) => `<option value="${k}">${esc(c.plural)}</option>`).join('')}</select><label class="btn">${ic('upload-simple')}Escolher arquivo<input type="file" accept=".csv,.txt" data-mudar="importarCSV" hidden></label></span></div>
+    linhasDados: () => `${gestor ? `<div class="entre"><span class="mute-2">Trazer os seus cadastros de uma planilha do Excel ou CSV</span><a class="btn" href="#/importar">${ic('table')}Importar planilha</a></div>` : ''}
       <div class="entre"><span class="mute-2">Usar outra empresa ou criar uma nova</span><a class="btn" href="?trocar=1">${ic('arrows-left-right')}Trocar de empresa</a></div>`,
     depoisDeMontar: () => {
       const sync = document.querySelector('[data-sync]');
@@ -455,9 +463,9 @@ export async function iniciarNuvem(app, cfg) {
         },
         mudarAnual: async () => {
           if (!dono) return avisar('Só o dono da empresa muda o plano', { tipo: 'erro' });
-          const base = (cfg.produto?.mensal || 0) + (pro ? EXTRA_PRO : 0);
-          if (!(await confirmar(`Mudar para o ${cfg.nome}${pro ? ' Pro' : ''} anual por ${reais(anual(base))}/ano (sai ${reais(Math.round(anual(base) / 12))} por mês, 20% a menos)? Você vai para o Mercado Pago confirmar. Quando o anual começar, o plano mensal é cancelado sozinho.`, { rotulo: 'Ir para o Mercado Pago', titulo: 'Plano anual' }))) return;
-          try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${pro ? '-pro' : ''}-anual`, email_mp: email }); location.href = j.link; } catch (x) { avisar(x.message, { tipo: 'erro' }); }
+          const unico = !!cfg.produto?.unico, base = (cfg.produto?.mensal || 0) + (pro && !unico ? EXTRA_PRO : 0);
+          if (!(await confirmar(`Mudar para o ${cfg.nome}${pro && !unico ? ' Pro' : ''} anual por ${reais(anual(base))}/ano (sai ${reais(Math.round(anual(base) / 12))} por mês, 20% a menos)? Você vai para o Mercado Pago confirmar. Quando o anual começar, o plano mensal é cancelado sozinho.`, { rotulo: 'Ir para o Mercado Pago', titulo: 'Plano anual' }))) return;
+          try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${pro && !unico ? '-pro' : ''}-anual`, email_mp: email }); location.href = j.link; } catch (x) { avisar(x.message, { tipo: 'erro' }); }
         },
         atividadeEquipe: async () => {
           if (!pro) return app.acoes.verPro();
