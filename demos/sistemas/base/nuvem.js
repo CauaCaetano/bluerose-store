@@ -10,6 +10,9 @@
 // =============================================================
 import { esc, ic, av, et, avisar, modal, confirmar, Banco, hoje, diasAte, dataCurta, normal, agrupar } from './nexo.js';
 
+// não abre dentro de página de outro site (proteção contra clickjacking; o GitHub Pages não deixa mandar X-Frame-Options)
+if (window.top !== window.self) { try { if (window.top.location.origin !== location.origin) throw 0; } catch { window.top.location.href = location.href; } }
+
 const SITE = 'https://bluerose-store.com/';
 // Dentro do app da Google Play (Linha Nexo) não há venda nem teste com cartão: a regra de pagamentos da loja
 // não permite levar a compra para fora. O app abre /app/play/?origem=play, que marca este aparelho.

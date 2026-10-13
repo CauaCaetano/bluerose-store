@@ -5,6 +5,8 @@
  * BR_CONTA.pagar(produto, { teste, emailMp }) cria o pagamento no servidor e leva ao Mercado Pago.
  * BR_CONTA.teste(app, nome, mensal) abre a janela do teste grátis de 7 dias com cartão.
  */
+// não abre dentro de página de outro site (clickjacking)
+if (window.top !== window.self) { try { if (window.top.location.origin !== location.origin) throw 0; } catch (e) { window.top.location.href = location.href; } }
 (function () {
   var CHAVE = 'nexo-sessao';
   var FUNC = 'https://yihnfzwtkqdfnwziutqa.supabase.co/functions/v1/nexo-pagamentos';
