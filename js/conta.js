@@ -130,7 +130,7 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       var d = janela('<span class="eyebrow">Teste grátis de 7 dias</span><h3 id="conta-t">' + esc(nome) + '</h3>' +
         '<ul class="conta-lista"><li>Use com os dados da sua empresa por <b>7 dias sem pagar nada</b>.</li><li>Para começar, cadastre o cartão no Mercado Pago. Se não cancelar, a assinatura de <b>' + reais(mensal) + '/mês</b> começa sozinha no 8º dia.</li><li>Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>. Cancelando no teste, nada é cobrado.</li><li>O teste grátis vale uma vez por cartão e por pessoa.</li></ul>' +
         '<form class="conta-form" novalidate><label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="' + esc(s.user.email) + '" required><small>A assinatura fica na conta do Mercado Pago com este e-mail.</small></label>' +
-        '<label class="conta-aceite"><input type="checkbox" name="ok" required> <span>Li e aceito os <a href="' + raiz + 'termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática depois do teste.</span></label>' +
+        '<label class="conta-aceite"><input type="checkbox" name="ok" required> <span>Tenho 18 anos ou mais. Li e aceito os <a href="' + raiz + 'termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática depois do teste.</span></label>' +
         '<p class="conta-erro" role="alert"></p><button class="btn btn-primary" type="submit">Cadastrar cartão e começar</button></form>');
       var f = d.querySelector('form'), erro = d.querySelector('.conta-erro'), bt = f.querySelector('button');
       f.onsubmit = function (e) {
