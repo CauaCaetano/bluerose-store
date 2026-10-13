@@ -23,10 +23,10 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=28">
+<link rel="stylesheet" href="css/site.css?v=29">
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=6" defer></script>
-<script src="js/site.js?v=13" defer></script>
+<script src="js/site.js?v=14" defer></script>
 <script src="js/conta.js?v=3" defer></script>
 </head>
 <body>
@@ -75,7 +75,7 @@
 <li><b>Equipe e links para clientes nos sistemas Nexo:</b> o e-mail das pessoas que você convida e as permissões de cada uma; e as respostas que os seus clientes enviam pelos links do sistema (por exemplo, aprovar um orçamento ou confirmar presença), que ficam guardadas na sua conta. Nesses casos você é o controlador e nós somos operadores (veja os Termos).</li>
 <li><b>Registros técnicos de erro:</b> quando algo falha num sistema Nexo, guardamos a mensagem de erro, a página, o navegador e a versão do sistema, ligados à conta, só para corrigir o problema. São apagados em até 90 dias.</li>
 <li><b>E-mails que enviamos:</b> resumo do dia (só quando você liga essa opção) e avisos antes do fim do teste grátis e antes de cada mensalidade.</li>
-<li><b>Pagamento:</b> o cartão e os dados de cobrança são digitados direto no Mercado Pago. Nós recebemos só a confirmação do pagamento, o valor, o plano e o e-mail do pagador.</li>
+<li><b>Pagamento:</b> o cartão e os dados de cobrança são digitados direto no Mercado Pago. Nós recebemos só a confirmação do pagamento, o valor, o plano, o e-mail do pagador e dois códigos internos do Mercado Pago (o da conta e o do cartão, nunca o número do cartão), usados só para o teste grátis valer uma vez.</li>
 <li><b>Quando viramos clientes:</b> os dados da proposta e do contrato (identificação, contato, dados de cobrança e do seu negócio).</li></ul></section><section id="finalidade"><h2>3. Para que usamos e com qual base legal</h2>
 <ul><li>Responder o seu contato e preparar orçamento ou proposta: <b>procedimentos preliminares a um contrato</b>, a seu pedido (art. 7º, V, da LGPD).</li>
 <li>Executar o serviço contratado, oferecer o teste grátis e o aluguel dos sistemas Nexo e cobrar: <b>execução de contrato</b> (art. 7º, V).</li>
@@ -93,18 +93,22 @@
 <p>Alguns desses fornecedores (como GitHub, Anthropic, Meta e Mercado Pago) podem tratar dados fora do Brasil. Nesses casos, a transferência segue o art. 33 da LGPD, com fornecedores que adotam cláusulas contratuais e medidas de segurança compatíveis com a lei.</p></section><section id="retencao"><h2>6. Por quanto tempo guardamos</h2>
 <ul><li>Contatos que não viraram contrato: até <b>12 meses</b> depois da última conversa, prazo usado para retomar orçamentos pedidos e evitar contatos repetidos. Depois disso, são apagados ou anonimizados.</li>
 <li>Contas de teste grátis que não viraram assinatura: os cadastros feitos no sistema são apagados até <b>90 dias</b> depois do fim do teste, e a conta de login até <b>12 meses</b> depois do último acesso, salvo se você pedir antes.</li>
-<li>Assinaturas canceladas: os cadastros ficam disponíveis por <b>90 dias</b> para você exportar e depois são apagados; os registros de pagamento seguem os prazos fiscais.</li>
+<li>Assinaturas canceladas: os cadastros ficam disponíveis por <b>90 dias</b> para você exportar e depois são apagados; os registros de pagamento seguem os prazos fiscais. Mesmo depois de apagar a conta, guardamos sem o login a marca de que o e-mail, a conta do Mercado Pago e o cartão já usaram o teste grátis, para evitar uso repetido (legítimo interesse, art. 7º, IX).</li>
 <li>Clientes: pelo tempo do contrato e pelos prazos legais depois dele (por exemplo, obrigações fiscais).</li>
 <li>Contagem de visitas: não identifica ninguém e pode ser mantida para estatística.</li></ul></section><section id="direitos"><h2>7. Seus direitos</h2>
 <p>Você pode pedir a qualquer momento: confirmação de que tratamos seus dados, acesso, correção, anonimização, bloqueio ou eliminação de dados desnecessários, portabilidade, informação sobre com quem compartilhamos, eliminação dos dados tratados com consentimento e revogação do consentimento (art. 18 da LGPD). Para apagar a sua conta dos sistemas Nexo e os dados ligados a ela, use <b>Excluir minha conta</b> em <a href="conta.html#excluir">Minha conta</a> ou no app Linha Nexo: a exclusão é imediata, e só o registro dos pagamentos já feitos fica guardado pelo prazo da lei fiscal. Respondemos em até <b>15 dias</b>. Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).</p></section><section id="seguranca"><h2>8. Segurança</h2>
 <p>O formulário grava os dados num banco protegido em que o público só consegue <b>inserir</b> um pedido novo, sem ler, alterar ou apagar nada. Chaves de acesso privadas nunca ficam no código do site. O acesso interno é restrito a quem cuida do seu atendimento.</p></section><section id="cookies"><h2>9. Cookies</h2>
-<p>Este site <b>não grava cookies</b> nem usa rastreamento ou publicidade. Usamos o armazenamento do seu navegador (que fica no seu aparelho) só para o site funcionar:</p>
+<p>Este site <b>não usa cookies de rastreamento, de estatística de terceiros nem de publicidade</b>. Para o site e os sistemas funcionarem, guardamos algumas informações no armazenamento do seu navegador, que fica no seu aparelho e funciona como um cookie essencial. Na primeira visita mostramos um aviso sobre isso. Por serem necessárias para o serviço que você pediu, essas informações não dependem de consentimento (art. 7º, V, da LGPD):</p>
 <ul><li><code>nexo-sessao</code>: mantém você conectado à sua conta dos sistemas Nexo, quando você entra.</li>
 <li><code>br-lang</code>: o idioma escolhido.</li>
 <li><code>br-perso</code> e <code>br-perso-logo</code>: nome, cores e logo da prévia ao vivo.</li>
 <li><code>br-origem</code>: o código do link que te trouxe, enquanto a aba está aberta.</li>
 <li><code>br-cookies-&lt;exemplo&gt;</code>: lembra que você fechou o aviso de demonstração nos sites de exemplo.</li>
-<li><code>nexo-volta</code> e <code>nexo-pwa-dispensado</code>: a página para voltar depois do login e se você dispensou o aviso de instalar o app.</li></ul>
+<li><code>nexo-volta</code> e <code>nexo-pwa-dispensado</code>: a página para voltar depois do login e se você dispensou o aviso de instalar o app.</li>
+<li><code>nexo-espaco-&lt;sistema&gt;</code>, <code>nexo-tema</code>, <code>nexo-assinadas</code> e <code>nexo-play</code>: a empresa aberta por último em cada sistema, o tema claro ou escuro, os avisos já vistos e se o sistema foi aberto pelo app da Google Play.</li>
+<li>Demonstrações do Nexo: os dados de exemplo que você altera ficam só no seu navegador, até você clicar em Recomeçar.</li>
+<li><code>br-aviso-cookies</code>: lembra que você já viu o aviso de cookies.</li></ul>
+<p>Se um dia usarmos estatísticas ou anúncios que dependam de cookies, eles só serão ligados depois de você aceitar no aviso, e esta política será atualizada antes.</p>
 <p>Você pode apagar esses dados nas configurações do navegador quando quiser.</p></section><section id="menores"><h2>10. Público</h2>
 <p>Nossos serviços são voltados a negócios e a maiores de 18 anos. Não coletamos dados de crianças de propósito.</p></section><section id="mudancas"><h2>11. Mudanças nesta política</h2>
 <p>Esta política pode ser atualizada. A data no topo mostra a versão em vigor. Mudanças importantes são avisadas neste site.</p></section></div>
@@ -119,7 +123,7 @@
     <nav aria-label="Rodapé">
       <a href="projetos.html">Projetos</a>
       <a href="laboratorio.html">Laboratório</a>
-      <a href="demos/stockmaster/?lang=pt">Nexo Gestão ao vivo</a>
+      <a href="demos/sistemas/gestao/">Nexo Gestão ao vivo</a>
       <a href="exemplos.html">Exemplos de sites</a>
       <a href="https://www.instagram.com/cau4caetano/" target="_blank" rel="noopener">Instagram</a>
       <a href="termos.html">Termos de Serviço</a>
@@ -127,7 +131,7 @@
     </nav>
     <div class="linha2">
       <span>© 2026 Blue Rose Express.</span>
-      <span>Sem cookies. A contagem de visitas é anônima.</span>
+      <span>Sem cookies de rastreamento. A contagem de visitas é anônima.</span>
     </div>
   </div>
 </footer>

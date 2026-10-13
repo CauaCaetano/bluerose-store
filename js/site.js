@@ -524,3 +524,24 @@
     var r = a.querySelector('[data-play-rot]'); if (r) r.textContent = 'Disponível no';
   });
 })();
+
+/* Aviso de cookies e privacidade (LGPD): o site só usa armazenamento essencial no navegador
+   (idioma, login e preferências) e nenhum cookie de rastreamento ou publicidade. O aviso aparece
+   uma vez; a escolha fica em 'br-aviso-cookies'. Se um dia entrar estatística ou anúncio, carregue
+   o script só quando window.brConsentimento('estatistica') for verdadeiro. */
+(function () {
+  var CHAVE = 'br-aviso-cookies';
+  var ler = function () { try { return JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) { return null; } };
+  window.brConsentimento = function (tipo) { var c = ler(); return tipo === 'essencial' || !!(c && c[tipo]); };
+  if (ler() || /\/(app|c|demos)\//.test(location.pathname)) return;
+  var raiz = /\/sites\//.test(location.pathname) ? '../../' : '';
+  var d = document.createElement('div');
+  d.className = 'aviso-cookies'; d.setAttribute('role', 'region'); d.setAttribute('aria-label', 'Aviso de cookies');
+  d.innerHTML = '<p><b>Cookies e privacidade.</b> Usamos só o essencial para o site funcionar: o idioma, o login da sua conta e as suas preferências, guardados no seu navegador. Não usamos cookies de rastreamento nem de publicidade. <a href="' + raiz + 'privacidade.html#cookies">Saiba mais</a></p>' +
+    '<button type="button" class="btn btn-primary">Entendi</button>';
+  d.querySelector('button').addEventListener('click', function () {
+    try { localStorage.setItem(CHAVE, JSON.stringify({ essencial: true, estatistica: false, publicidade: false, em: new Date().toISOString().slice(0, 10) })); } catch (e) { /* navegador sem armazenamento */ }
+    d.remove();
+  });
+  document.body.appendChild(d);
+})();
