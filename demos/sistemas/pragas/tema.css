@@ -94,3 +94,6 @@
 [data-produto="pragas"] .faixa a.cta, [data-produto="pragas"] .faixa a.cta:hover { background: var(--ambar); color: var(--floresta); font-weight: 700; }
 [data-produto="pragas"] .entrada .marca b { font-family: var(--rel); text-transform: uppercase; letter-spacing: .06em; }
 [data-produto="pragas"] .entrada .marca small { color: var(--acc); }
+/* marca Blue Rose no trilho estreito: só o emblema */
+[data-produto="pragas"] .lat-pe .feito-br { justify-content: center; margin: 8px 4px 0; padding: 6px; border-color: rgba(230, 245, 230, .14); }
+[data-produto="pragas"] .lat-pe .feito-br span { display: none; }

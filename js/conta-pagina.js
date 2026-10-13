@@ -6,7 +6,8 @@
   var params = new URLSearchParams(location.search), volta = params.get('volta');
   if (volta && !/^[A-Za-z0-9_-]{1,64}$/.test(volta)) volta = null; /* id de assinatura: só caracteres seguros (UUID ou número) */
   var NOMES = { teste: 'Teste grátis', assinatura: 'Assinatura', compra: 'Compra' };
-  var APPS = ['crm', 'agenda', 'financeiro', 'gestao', 'juridico', 'clinica', 'academia', 'restaurante', 'imobiliaria', 'oficina'];
+  var APPS = ['crm', 'agenda', 'financeiro', 'gestao', 'juridico', 'clinica', 'academia', 'restaurante', 'imobiliaria', 'oficina', 'obras', 'cerimonial', 'pragas'];
+  var PAGINA = { obras: 'canteiro.html', cerimonial: 'sim-aceito.html', pragas: 'isca.html' };
   var hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   function data(s) { if (!s) return '—'; var p = String(s).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
   function dias(ate) { return Math.round((new Date(String(ate).slice(0, 10) + 'T12:00:00') - new Date(hojeISO + 'T12:00:00')) / 864e5); }
@@ -20,10 +21,12 @@
     return '<div class="conta-prazo"><div class="conta-prazo-txt"><b>' + (resta === 0 ? 'Último dia de teste' : resta === 1 ? 'Falta 1 dia de teste' : 'Faltam ' + resta + ' dias de teste') + '</b><span>até ' + data(a.teste_ate) + '</span></div>' +
       '<div class="conta-prazo-barra" role="progressbar" aria-label="Dias de teste usados" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + usado + '"><i style="width:' + usado + '%"></i></div></div>';
   }
+  var TOKENS = {}, tokenMostrado = {};
+  function anual(a) { return /-anual$/.test(String(a.produto || '')); }
   function cartao(a) {
     var linhas = [];
     if (a.tipo === 'teste' && a.status === 'teste') linhas.push('Primeira cobrança de ' + reais(a.valor) + ' em ' + data(a.proxima_cobranca || a.teste_ate) + ', se você não cancelar antes.');
-    if (a.tipo !== 'compra' && a.status === 'ativa') linhas.push(reais(a.valor) + ' por mês · próxima cobrança em ' + data(a.proxima_cobranca));
+    if (a.tipo !== 'compra' && a.status === 'ativa') linhas.push(reais(a.valor) + (anual(a) ? ' por ano (plano anual, 20% de desconto)' : ' por mês') + ' · próxima cobrança em ' + data(a.proxima_cobranca));
     if (a.status === 'cancelada') { var ate = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop(); linhas.push(ate ? 'Sem novas cobranças. O acesso continua até ' + data(ate) + '.' : 'Sem novas cobranças.'); }
     if (a.tipo === 'compra') linhas.push(a.status === 'paga' ? 'Entrada de ' + reais(a.valor) + ' paga. Em até 1 dia útil entramos em contato para a implantação.' : 'Entrada de ' + reais(a.valor) + '.');
     if (a.motivo) linhas.push(a.motivo);
@@ -32,10 +35,13 @@
     var abrir = pode ? '<a class="btn btn-primary" href="app/' + esc(a.app) + '/">Abrir o sistema <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>' : '';
     var cancelar = a.tipo !== 'compra' && ['teste', 'ativa'].indexOf(a.status) >= 0 ? '<button type="button" class="conta-link" data-cancelar="' + esc(a.id) + '">' + (a.status === 'teste' ? 'Cancelar o teste' : 'Cancelar a assinatura') + '</button>' : '';
     var assinar = a.app && a.tipo !== 'compra' && (a.status === 'recusada' || (a.status === 'cancelada' && (!fim || fim < hojeISO))) ? '<button type="button" class="btn btn-primary" data-assinar="a-sis-' + esc(a.app) + '">Assinar por ' + reais(a.valor) + '/mês</button>' : '';
-    var foto = APPS.indexOf(a.app) >= 0 ? '<a class="conta-thumb" href="' + (pode ? 'app/' + esc(a.app) + '/' : 'nexo-' + esc(a.app) + '.html') + '" tabindex="-1" aria-hidden="true"><img src="img/sistemas/' + esc(a.app) + '.webp" alt="" width="1200" height="750" loading="lazy"></a>' : '';
+    var foto = APPS.indexOf(a.app) >= 0 ? '<a class="conta-thumb" href="' + (pode ? 'app/' + esc(a.app) + '/' : PAGINA[a.app] || 'nexo-' + esc(a.app) + '.html') + '" tabindex="-1" aria-hidden="true"><img src="img/sistemas/' + esc(a.app) + '.webp" alt="" width="1200" height="750" loading="lazy"></a>' : '';
     var apagado = ['cancelada', 'expirada', 'recusada'].indexOf(a.status) >= 0 ? ' conta-item-off' : '';
+    /* token de dono: pedido uma vez, quando a empresa é criada no sistema */
+    var tk = pode && TOKENS[a.app] && !tokenMostrado[a.app] ? TOKENS[a.app] : null; if (tk) tokenMostrado[a.app] = true;
+    var token = tk ? '<div class="conta-token"><small>Token de dono</small><code>' + esc(tk.token) + '</code><span>' + (tk.ativado ? 'Já ativado em ' + data(tk.ativado) + '. Não precisa usar de novo.' : 'Use uma vez, ao criar a sua empresa no sistema. Não compartilhe: a equipe entra pelos convites.') + '</span></div>' : '';
     return '<article class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
-      barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></div></article>';
+      barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></div></article>';
   }
   function mostrarResumo(l) {
     if (!resumo) return;
@@ -43,7 +49,7 @@
     var cobrancas = l.filter(function (a) { return a.tipo !== 'compra' && (a.status === 'ativa' || a.status === 'teste'); })
       .map(function (a) { return { quando: a.proxima_cobranca || a.teste_ate, valor: a.valor }; }).filter(function (x) { return x.quando; })
       .sort(function (x, y) { return String(x.quando).localeCompare(String(y.quando)); });
-    var mensal = l.filter(function (a) { return a.tipo !== 'compra' && a.status === 'ativa'; }).reduce(function (s, a) { return s + Number(a.valor || 0); }, 0);
+    var mensal = l.filter(function (a) { return a.tipo !== 'compra' && a.status === 'ativa'; }).reduce(function (s, a) { return s + Number(a.valor || 0) / (anual(a) ? 12 : 1); }, 0);
     if (!l.length) { resumo.hidden = true; return; }
     resumo.innerHTML =
       '<div><small>Sistemas liberados</small><b>' + ativos.length + '</b><span>' + (l.filter(function (a) { return a.status === 'teste'; }).length ? l.filter(function (a) { return a.status === 'teste'; }).length + ' em teste grátis' : 'prontos para usar') + '</span></div>' +
@@ -66,6 +72,7 @@
       return C.chamar({ acao: 'status', id: volta || undefined });
     }).then(function (j) {
       var l = j.assinaturas || [], v = volta && l.filter(function (x) { return x.id === volta; })[0], aviso = '';
+      TOKENS = j.tokens || {}; tokenMostrado = {};
       if (v) {
         aviso = v.status === 'teste' ? '<div class="conta-aviso ok">Cartão cadastrado. O seu teste grátis está valendo até ' + data(v.teste_ate) + '. <a href="app/' + esc(v.app) + '/">Abrir o sistema agora →</a></div>'
           : v.status === 'ativa' || v.status === 'paga' ? '<div class="conta-aviso ok">Pagamento confirmado. Obrigado!' + (v.app ? ' <a href="app/' + esc(v.app) + '/">Abrir o sistema →</a>' : '') + '</div>'
@@ -75,7 +82,7 @@
       }
       mostrarResumo(l);
       raiz.innerHTML = aviso + (l.length ? '<h2 class="conta-titulo">Seus sistemas</h2>' + l.map(cartao).join('') :
-        '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp" alt="" loading="lazy"><img src="img/sistemas/agenda.webp" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp" alt="" loading="lazy"></div><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um dos 10 sistemas e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
+        '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp" alt="" loading="lazy"><img src="img/sistemas/agenda.webp" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp" alt="" loading="lazy"></div><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um dos sistemas e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
     }).catch(function (x) { raiz.innerHTML = '<div class="conta-aviso er">' + esc(x.message || 'Não foi possível carregar.') + '</div>'; });
   }
   raiz.addEventListener('click', function (e) {

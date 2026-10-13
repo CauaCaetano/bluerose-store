@@ -9,6 +9,7 @@
 // Tabelas e regras de acesso: migração nexo_nuvem_espacos_e_registros.
 // =============================================================
 import { esc, ic, av, et, avisar, modal, confirmar, Banco, hoje, diasAte, dataCurta, normal, agrupar } from './nexo.js';
+import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 
 // não abre dentro de página de outro site (proteção contra clickjacking; o GitHub Pages não deixa mandar X-Frame-Options)
 if (window.top !== window.self) { try { if (window.top.location.origin !== location.origin) throw 0; } catch { window.top.location.href = location.href; } }
@@ -24,36 +25,9 @@ const SEP = '\u0001';
 const LIMITE_BASICO = 8, EXTRA_PRO = 60;
 const SUPORTE = [64, 64, 60, 65, 68, 68, 60, 61, 59, 62, 66, 59, 59].map((c) => String.fromCharCode(c - 11)).join(''); // WhatsApp da Blue Rose (mesmo do site)
 const BENEFICIOS_PRO = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 8).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['camera', 'Sua marca nos links e documentos', 'O logo da sua empresa nas páginas que o cliente recebe e nos impressos, sem o "Feito com".'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.']];
-const NIVEIS = [['editar', 'Ver e editar'], ['ver', 'Só ver'], ['nenhum', 'Sem acesso']];
-
-// resumo de uma permissão para a lista da equipe
-function resumoAcesso(perm) {
-  if (!perm) return 'Acesso total';
-  const v = Object.values(perm.paginas || {}), ed = v.filter((x) => x === 'editar').length, so = v.filter((x) => x === 'ver').length;
-  if (perm.so_leitura) return `Só ver · ${so} ${so === 1 ? 'área' : 'áreas'}`;
-  return `Personalizado · edita ${ed}, só vê ${so}${perm.excluir ? '' : ' · não apaga'}`;
-}
-
-// editor de permissões: devolve { email, perm } (perm null = acesso total) ou null se cancelou
-async function editarPermissoes(app, cfg, { titulo, atual, comEmail = false }) {
-  const paginas = [...cfg.paginas.filter((x) => x.id), { id: 'config', rot: 'Configurações' }];
-  const val = (id) => (atual?.paginas?.[id]) || (id === 'config' ? 'ver' : 'editar');
-  const corpo = `<form class="col" style="gap:12px" data-perm>
-    ${comEmail ? '<label class="campo">E-mail de quem vai usar<input name="email" type="email" required placeholder="nome@empresa.com.br"></label>' : ''}
-    <div class="grupo-btn" role="radiogroup"><button type="button" data-modo-perm="total" aria-pressed="${!atual}">${ic('lock-open', 'p')}Acesso total</button><button type="button" data-modo-perm="personalizado" aria-pressed="${!!atual}">${ic('key', 'p')}Escolher o que pode</button></div>
-    <div data-perm-lista ${atual ? '' : 'hidden'}><p class="mute-2" style="font-size:12.5px;margin:0 0 8px">Para cada área do sistema, escolha o que esta pessoa pode fazer. "Sem acesso" esconde a área do menu.</p>
-      <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;max-height:46vh;overflow:auto">${paginas.map((pg) => `<span>${ic(pg.icone || 'gear-six', 'p')} ${esc(pg.rot)}</span><select data-pg="${esc(pg.id)}" style="width:auto;height:30px">${NIVEIS.map(([k, n]) => `<option value="${k}" ${val(pg.id) === k ? 'selected' : ''}>${n}</option>`).join('')}</select>`).join('')}</div>
-      <label class="flex" style="gap:8px;margin-top:12px;font-size:13px"><input type="checkbox" name="excluir" ${atual?.excluir ? 'checked' : ''}> Pode apagar registros</label></div></form>`;
-  const r = await modal({ titulo, largura: 520, corpo, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: comEmail ? 'Convidar' : 'Salvar', classe: 'pri', acao: (f) => {
-    const fm = f.querySelector('[data-perm]'); if (comEmail && !fm.reportValidity()) return false;
-    const email = comEmail ? fm.email.value.trim().toLowerCase() : '';
-    if (f.querySelector('[data-modo-perm="total"]').getAttribute('aria-pressed') === 'true') return { email, perm: null };
-    const pags = Object.fromEntries([...f.querySelectorAll('[data-pg]')].map((x) => [x.dataset.pg, x.value]));
-    if (Object.values(pags).every((x) => x === 'nenhum')) { avisar('Deixe pelo menos uma área com acesso', { tipo: 'erro' }); return false; }
-    return { email, perm: { paginas: pags, excluir: fm.excluir.checked, so_leitura: !Object.values(pags).includes('editar'), padrao: 'ver' } };
-  } }], aoAbrir: (f) => f.querySelectorAll('[data-modo-perm]').forEach((b) => (b.onclick = () => { f.querySelectorAll('[data-modo-perm]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); f.querySelector('[data-perm-lista]').hidden = b.dataset.modoPerm === 'total'; })) });
-  return r;
-}
+// plano anual: 12 meses com 20% de desconto (catálogo a-sis-<app>[-pro]-anual)
+const anual = (mensal) => Math.round(mensal * 12 * 0.8);
+const reais = (v) => `R$ ${Number(v).toLocaleString('pt-BR')}`;
 
 // ---------------------------------------------------------------- banco sincronizado
 class BancoNuvem extends Banco {
@@ -133,7 +107,7 @@ class BancoNuvem extends Banco {
 function tela(cfg, conteudo) {
   document.body.innerHTML = `<div class="entrada"><div class="entrada-caixa">
     <div class="marca" style="padding:0 0 18px"><img class="marca-logo" src="${cfg.logo || LOGO}" alt="${cfg.logo ? esc(cfg.nome) : 'Blue Rose'}" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.marcaSub || `Blue Rose · ${cfg.sub}`)}</small></div></div>
-    ${conteudo}</div><p class="entrada-pe">Seus dados ficam guardados com segurança e só a sua equipe tem acesso. <a href="${SITE}privacidade.html" target="_blank" rel="noopener">Privacidade</a> · <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos</a></p></div>`;
+    ${conteudo}</div><p class="entrada-pe"><a class="entrada-br" href="${SITE}" target="_blank" rel="noopener"><img src="${LOGO}" alt="" width="18" height="18">Blue Rose Express</a> Seus dados ficam guardados com segurança e só a sua equipe tem acesso. <a href="${SITE}privacidade.html" target="_blank" rel="noopener">Privacidade</a> · <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos</a></p></div>`;
   const f = document.querySelector('.entrada form'); f?.querySelector('input')?.focus();
   return f;
 }
@@ -203,7 +177,7 @@ function telaNovaSenha(sb, cfg) {
     f.onsubmit = async (e) => { e.preventDefault(); if (!f.reportValidity()) return; const { error } = await sb.auth.updateUser({ password: new FormData(f).get('senha') }); if (error) { f.querySelector('[data-erro]').textContent = erroAuth(error); return; } avisar('Senha alterada'); resolver(); };
   });
 }
-function telaEmpresa(sb, cfg, espacos) {
+function telaEmpresa(sb, cfg, espacos, precisaToken = false) {
   return new Promise((resolver) => {
     const lista = espacos.length ? `<h2 style="font-size:14px;margin:4px 0 8px">Suas empresas</h2><ul class="lista entrada-lista">${espacos.map((s) => `<li class="clicavel" data-esp="${s.id}">${av(s.nome)}<div class="cresce"><div class="t corta">${esc(s.nome)}</div><div class="s">${s.plano === 'ativo' ? 'Plano ativo' : diasAte(s.teste_ate) >= 0 ? `Teste até ${dataCurta(s.teste_ate)}` : 'Teste encerrado'}</div></div>${ic('caret-right')}</li>`).join('')}</ul><div class="entrada-ou">ou</div>` : '';
     const f = tela(cfg, `<h1 class="entrada-t">${espacos.length ? 'Escolha a empresa' : 'Vamos configurar sua empresa'}</h1><p class="entrada-s">${espacos.length ? '' : 'Leva menos de um minuto. Depois você convida a sua equipe.'}</p>${lista}
@@ -212,6 +186,7 @@ function telaEmpresa(sb, cfg, espacos) {
         <label class="opcao-inicio"><input type="radio" name="modo" value="branco" checked><span><b>Em branco</b><small>Para usar com os dados da sua empresa. Você pode importar planilhas.</small></span></label>
         <label class="opcao-inicio"><input type="radio" name="modo" value="exemplo"><span><b>Com dados de exemplo</b><small>Para explorar tudo antes. Dá para apagar depois.</small></span></label></fieldset>
       ${cfg.modelos?.length ? `<label class="campo">Tipo de negócio<select name="ramo">${cfg.modelos.map((m) => `<option value="${m.id}">${esc(m.nome)}</option>`).join('')}</select><span class="ajuda">Já começa com os serviços e cadastros típicos do seu ramo</span></label>` : ''}
+      ${precisaToken ? `<label class="campo">Token de dono<input name="token" required autocomplete="off" spellcheck="false" placeholder="${esc(cfg.id.toUpperCase().slice(0, 6))}-XXXX-XXXX-XXXX" style="font-family:var(--mono);text-transform:uppercase"><span class="ajuda">Enviamos para o seu e-mail quando o teste ou a assinatura começou, e ele também aparece em <a href="${SITE}conta.html" target="_blank" rel="noopener">Minha conta</a>. Só é pedido agora, na primeira vez.</span></label>` : ''}
       <label class="campo">Chave PIX da empresa <span class="mute">(opcional)</span><input name="pix" placeholder="CNPJ, e-mail, celular ou chave aleatória"><span class="ajuda">Para as cobranças e links de pagamento já saírem com o QR code. Dá para colocar depois.</span></label>
       <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Criar e começar o teste de 7 dias</button></form>
       <div class="entrada-links"><a href="#" data-sair>Sair desta conta</a></div>`);
@@ -220,8 +195,12 @@ function telaEmpresa(sb, cfg, espacos) {
     f.onsubmit = async (e) => {
       e.preventDefault(); if (!f.reportValidity()) return;
       const d = Object.fromEntries(new FormData(f)), btn = f.querySelector('button'); btn.disabled = true;
-      const { data, error } = await sb.rpc('nexo_criar_espaco', { p_app: cfg.id, p_nome: d.nome.trim() });
-      if (error) { if (/cartão/.test(error.message)) { location.reload(); return; } f.querySelector('[data-erro]').textContent = /limite/.test(error.message) ? 'Você já tem 3 empresas neste sistema.' : error.message; btn.disabled = false; return; }
+      const { data, error } = await sb.rpc('nexo_criar_espaco', { p_app: cfg.id, p_nome: d.nome.trim(), p_token: (d.token || '').trim() || null });
+      if (error) {
+        if (/cartão/.test(error.message)) { location.reload(); return; }
+        f.querySelector('[data-erro]').textContent = /TOKEN_INVALIDO/.test(error.message) ? 'Token de dono incorreto. Confira no e-mail ou em Minha conta.' : /TOKEN_DONO/.test(error.message) ? 'Informe o token de dono que enviamos para o seu e-mail.' : /limite/.test(error.message) ? 'Você chegou ao limite de empresas do seu plano neste sistema.' : error.message;
+        btn.disabled = false; return;
+      }
       resolver({ id: data, novo: true, exemplo: d.modo === 'exemplo', nome: d.nome.trim(), ramo: d.ramo || '', pix: (d.pix || '').trim() });
     };
   });
@@ -248,8 +227,9 @@ function telaTeste(sb, cfg, email) {
   return new Promise(() => {
     const preco = cfg.produto?.mensal || 0;
     const f = tela(cfg, `<h1 class="entrada-t">Teste grátis de 7 dias</h1><p class="entrada-s">Use o ${esc(cfg.nome)} com os dados da sua empresa por 7 dias sem pagar nada.</p>
-      <ul class="lista-teste"><li>${ic('credit-card', 'p')}<span>Para começar, cadastre o cartão no Mercado Pago.</span></li><li>${ic('calendar-check', 'p')}<span>Se não cancelar, a assinatura de <b>R$ ${preco}/mês</b> começa sozinha no 8º dia.</span></li><li>${ic('x-circle', 'p')}<span>Cancele quando quiser em <a href="${SITE}conta.html" target="_top">Minha conta</a>. Cancelando no teste, nada é cobrado.</span></li><li>${ic('info', 'p')}<span>O teste grátis vale uma vez por cartão e por pessoa.</span></li></ul>
-      <form class="col" style="gap:12px" novalidate><label class="campo">E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="${esc(email)}" required><span class="ajuda">A assinatura fica na conta do Mercado Pago com este e-mail.</span></label>
+      <div class="planos-escolha" role="radiogroup" aria-label="Plano depois do teste"><label><input type="radio" name="plano" value="" checked form="form-teste"><span><b>Mensal</b><small>R$ ${preco}/mês</small></span></label><label><input type="radio" name="plano" value="-anual" form="form-teste"><span><b>Anual <em>−20%</em></b><small>${reais(anual(preco))}/ano · sai ${reais(Math.round(anual(preco) / 12))}/mês</small></span></label></div>
+      <ul class="lista-teste"><li>${ic('credit-card', 'p')}<span>Para começar, cadastre o cartão no Mercado Pago.</span></li><li>${ic('calendar-check', 'p')}<span>Se não cancelar, a assinatura do plano escolhido começa sozinha no 8º dia.</span></li><li>${ic('x-circle', 'p')}<span>Cancele quando quiser em <a href="${SITE}conta.html" target="_top">Minha conta</a>. Cancelando no teste, nada é cobrado.</span></li><li>${ic('info', 'p')}<span>O teste grátis vale uma vez por cartão e por pessoa.</span></li></ul>
+      <form class="col" style="gap:12px" novalidate id="form-teste"><label class="campo">E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="${esc(email)}" required><span class="ajuda">A assinatura fica na conta do Mercado Pago com este e-mail.</span></label>
         <label class="flex" style="gap:8px;align-items:flex-start;font-size:13px;color:var(--tx-2)"><input type="checkbox" name="ok" required style="margin-top:3px"><span>Tenho 18 anos ou mais. Li e aceito os <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática depois do teste.</span></label>
         <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Cadastrar cartão e começar</button></form>
       <div class="entrada-links"><a href="${SITE}demos/sistemas/${cfg.id}/" target="_top">Ver a demonstração antes</a><span>·</span><a href="#" data-sair>Sair desta conta</a></div>`);
@@ -257,10 +237,11 @@ function telaTeste(sb, cfg, email) {
     f.onsubmit = async (e) => {
       e.preventDefault(); if (!f.reportValidity()) return;
       const btn = f.querySelector('button'), erro = f.querySelector('[data-erro]'); btn.disabled = true; btn.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
-      try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}`, teste: true, email_mp: f.mp.value.trim() }); location.href = j.link; }
+      const sufixo = document.querySelector('[name=plano]:checked')?.value || '';
+      try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${sufixo}`, teste: true, email_mp: f.mp.value.trim() }); location.href = j.link; }
       catch (x) {
         btn.disabled = false; btn.textContent = 'Cadastrar cartão e começar';
-        if (x.dados?.sem_teste) { erro.innerHTML = `${esc(x.message)} <a href="#" data-assinar>Assinar por R$ ${preco}/mês</a>`; erro.querySelector('[data-assinar]').onclick = async (ev) => { ev.preventDefault(); try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}`, email_mp: f.mp.value.trim() }); location.href = j.link; } catch (y) { erro.textContent = y.message; } }; }
+        if (x.dados?.sem_teste) { erro.innerHTML = `${esc(x.message)} <a href="#" data-assinar>Assinar ${sufixo ? `por ${reais(anual(preco))}/ano` : `por R$ ${preco}/mês`}</a>`; erro.querySelector('[data-assinar]').onclick = async (ev) => { ev.preventDefault(); try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${sufixo}`, email_mp: f.mp.value.trim() }); location.href = j.link; } catch (y) { erro.textContent = y.message; } }; }
         else erro.textContent = x.message;
       }
     };
@@ -332,11 +313,12 @@ export async function iniciarNuvem(app, cfg) {
     tela(cfg, `<div class="vazio" style="padding:30px 0">${ic('circle')}<b>Conferindo o seu teste…</b></div>`);
     if (!(await temAcesso(sb, cfg))) await telaTeste(sb, cfg, email);
   }
-  let escolha = espacos.length === 1 ? { id: espacos[0].id } : espacos.find((s) => s.id === lembrado) && !new URLSearchParams(location.search).has('trocar') ? { id: lembrado } : await telaEmpresa(sb, cfg, espacos);
+  const precisaToken = async () => { const { data: tk } = await sb.from('nexo_tokens_dono').select('ativado').eq('app', cfg.id).maybeSingle(); return !tk?.ativado; };
+  let escolha = espacos.length === 1 && !new URLSearchParams(location.search).has('trocar') ? { id: espacos[0].id } : espacos.find((s) => s.id === lembrado) && !new URLSearchParams(location.search).has('trocar') ? { id: lembrado } : await telaEmpresa(sb, cfg, espacos, await precisaToken());
   try { localStorage.setItem(`nexo-espaco-${cfg.id}`, escolha.id); } catch { /* ok */ }
   tela(cfg, `<div class="vazio" style="padding:30px 0">${ic('circle')}<b>${escolha.exemplo ? 'Preparando os dados de exemplo…' : 'Abrindo…'}</b></div>`);
   const { data: esp } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono,nivel').eq('id', escolha.id).single();
-  const { data: eu } = await sb.from('nexo_membros').select('permissoes').eq('espaco', escolha.id).eq('usuario', session.user.id).maybeSingle();
+  const { data: eu } = await sb.from('nexo_membros').select('permissoes,papel').eq('espaco', escolha.id).eq('usuario', session.user.id).maybeSingle();
   const linhas = escolha.novo ? [] : await lerTudo(sb, escolha.id);
   const db = new BancoNuvem(sb, escolha.id, uid, linhas);
   if (escolha.novo) {
@@ -344,18 +326,20 @@ export async function iniciarNuvem(app, cfg) {
     db.dados._cfg = { ...(escolha.exemplo ? cfg.semente()._cfg || {} : {}), empresa: escolha.nome, ...(escolha.ramo && !escolha.exemplo ? { ramo_pendente: escolha.ramo } : {}), ...(escolha.pix ? { pix: { chave: escolha.pix, nome: escolha.nome.slice(0, 25), cidade: '' } } : {}) };
     await db.enviar();
   }
-  const dono = esp.dono === uid, pro = esp.nivel === 'pro', minhas = dono ? null : eu?.permissoes || null;
+  const dono = esp.dono === uid, pro = esp.nivel === 'pro', papel = dono ? 'dono' : eu?.papel === 'admin' ? 'admin' : 'membro', gestor = papel !== 'membro';
+  const minhas = gestor ? null : eu?.permissoes || null;
+  let plano = null; // assinatura atual do dono (mensal ou anual, Básico ou Pro), lida quando abre o Painel do dono
   const teste = esp.plano === 'teste', restam = diasAte(esp.teste_ate), encerrado = esp.plano === 'suspenso' || (teste && restam < 0);
   let equipe = [], convites = [];
   const carregarEquipe = async () => {
-    const [m, c] = await Promise.all([sb.from('nexo_membros').select('usuario,email,papel,permissoes').eq('espaco', esp.id), dono ? sb.from('nexo_convites').select('email,papel,criado,permissoes').eq('espaco', esp.id) : { data: [] }]);
-    equipe = m.data || []; convites = c.data || []; if (app.pagina?.id === 'config') app.render();
+    const [m, c] = await Promise.all([sb.from('nexo_membros').select('usuario,email,papel,permissoes').eq('espaco', esp.id), gestor ? sb.from('nexo_convites').select('email,papel,criado,permissoes').eq('espaco', esp.id) : { data: [] }]);
+    equipe = m.data || []; convites = c.data || []; if (['config', 'dono'].includes(app.pagina?.id)) app.render();
   };
 
   const sessao = {
-    db, sb, uid, email, espaco: esp, dono, pro,
-    acesso: (pagina) => (!minhas ? 'editar' : minhas.paginas?.[pagina] || minhas.padrao || 'ver'),
-    podeExcluir: () => !minhas || !!minhas.excluir,
+    db, sb, uid, email, espaco: esp, dono, pro, papel, gestor,
+    acesso: (pagina) => (pagina === 'dono' ? (gestor ? 'editar' : 'nenhum') : !minhas || minhas.total ? 'editar' : minhas.paginas?.[pagina] || minhas.padrao || 'ver'),
+    podeExcluir: () => !minhas || !!minhas.total || !!minhas.excluir,
     funcao: async (nome, corpo) => { const { data, error } = await sb.functions.invoke(nome, { body: { espaco: esp.id, ...corpo } }); if (error) { let msg = error.message; try { msg = (await error.context.json()).erro || msg; } catch { /* ok */ } throw new Error(msg); } return data; },
     salvarSegredo: async (chave, valor) => { const { error } = await sb.rpc('nexo_salvar_segredo', { p_espaco: esp.id, p_chave: chave, p_valor: valor || '' }); if (error) throw error; },
     integracoes: async () => { const { data } = await sb.rpc('nexo_integracoes', { p_espaco: esp.id }); return Object.fromEntries((data || []).map((x) => [x.chave, x.atualizado])); },
@@ -366,12 +350,45 @@ export async function iniciarNuvem(app, cfg) {
     cartaoEquipe: () => {
       const outros = equipe.filter((m) => m.papel !== 'dono').length + convites.length, cheio = !pro && outros >= LIMITE_BASICO;
       const linha = (av_, t_, s_, botoes) => `<li>${av_}<div class="cresce"><div class="t corta">${t_}</div><div class="s">${s_}</div></div>${botoes}</li>`;
+      const mexe = (pp) => pp === 'membro' || (pp === 'admin' && dono);
       return `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">${pro ? 'Plano Pro · equipe sem limite' : `${outros} de ${LIMITE_BASICO} pessoas convidadas`} · cada pessoa entra com o próprio e-mail</div></div>${pro ? et('Pro', 'ok') : ''}</div>
-      <ul class="lista">${equipe.map((m) => linha(av(m.email), `${esc(m.email)}${m.usuario === uid ? ' <span class="mute">(você)</span>' : ''}`, m.papel === 'dono' ? 'Dono · acesso total' : esc(resumoAcesso(m.permissoes)),
-        dono && m.usuario !== uid ? `<button type="button" class="btn fant peq" data-acao="acessoMembro" data-u="${m.usuario}">${ic('key')}Acesso</button><button type="button" class="btn fant peq" data-acao="removerMembro" data-u="${m.usuario}">Remover</button>` : '')).join('')}
-      ${convites.map((c) => linha(av(c.email), esc(c.email), `Convite de ${dataCurta(c.criado)} · ${esc(resumoAcesso(c.permissoes))}`, `<button type="button" class="btn fant peq" data-acao="linkConvite" data-e="${esc(c.email)}">${ic('link')}Link</button><button type="button" class="btn fant peq" data-acao="acessoConvite" data-e="${esc(c.email)}">${ic('key')}Acesso</button><button type="button" class="btn fant peq" data-acao="cancelarConvite" data-e="${esc(c.email)}">Cancelar</button>`)).join('')}</ul>
-      ${dono ? `<div class="cartao-corpo" style="border-top:1px solid var(--borda)">${cheio ? `<div class="dica">${ic('users-three')}<span>Você chegou a ${LIMITE_BASICO} pessoas, o limite do plano Básico. <a href="#" data-acao="verPro">Veja o Pro</a> para convidar sem limite.</span></div>` : `<div class="entre"><span class="mute-2" style="font-size:12.5px">Escolha na hora do convite o que a pessoa pode ver e editar.</span><button type="button" class="btn pri" data-acao="convidar">${ic('user-plus')}Convidar pessoa</button></div>`}</div>` : ''}</div>
+      <ul class="lista">${equipe.sort((x, y) => ({ dono: 0, admin: 1 }[x.papel] ?? 2) - ({ dono: 0, admin: 1 }[y.papel] ?? 2)).map((m) => linha(av(m.email), `${esc(m.email)}${m.usuario === uid ? ' <span class="mute">(você)</span>' : ''} ${m.papel === 'dono' ? et('Dono', 'acc') : m.papel === 'admin' ? et('Administrador', 'info') : ''}`, esc(resumoAcesso(m.permissoes, m.papel)),
+        gestor && m.usuario !== uid && mexe(m.papel) ? `<button type="button" class="btn fant peq" data-acao="acessoMembro" data-u="${m.usuario}">${ic('key')}Cargo e acesso</button><button type="button" class="btn fant peq" data-acao="removerMembro" data-u="${m.usuario}">Remover</button>` : '')).join('')}
+      ${convites.map((c) => linha(av(c.email), `${esc(c.email)} ${c.papel === 'admin' ? et('Administrador', 'info') : ''}`, `Convite de ${dataCurta(c.criado)} · ${esc(resumoAcesso(c.permissoes, c.papel === 'admin' ? 'admin' : ''))}`, mexe(c.papel) ? `<button type="button" class="btn fant peq" data-acao="linkConvite" data-e="${esc(c.email)}">${ic('link')}Link</button><button type="button" class="btn fant peq" data-acao="acessoConvite" data-e="${esc(c.email)}">${ic('key')}Acesso</button><button type="button" class="btn fant peq" data-acao="cancelarConvite" data-e="${esc(c.email)}">Cancelar</button>` : '')).join('')}</ul>
+      ${gestor ? `<div class="cartao-corpo" style="border-top:1px solid var(--borda)">${cheio ? `<div class="dica">${ic('users-three')}<span>Você chegou a ${LIMITE_BASICO} pessoas, o limite do plano Básico. <a href="#" data-acao="verPro">Veja o Pro</a> para convidar sem limite.</span></div>` : `<div class="entre"><span class="mute-2" style="font-size:12.5px">No convite você escolhe o cargo e o que a pessoa pode ver e editar.</span><button type="button" class="btn pri" data-acao="convidar">${ic('user-plus')}Convidar pessoa</button></div>`}</div>` : ''}</div>
       ${dono || pro ? sessao.cartaoPro() : ''}`;
+    },
+    // Painel do dono: só o dono e os administradores veem
+    painelDono: () => {
+      if (!gestor) return '';
+      if (dono && !plano) sessao.carregarPlano();
+      const meus = equipe.filter((m) => m.papel !== 'dono').length, nConv = convites.length, adms = equipe.filter((m) => m.papel === 'admin').length;
+      const p = plano?.assinatura, nomePlano = p ? `${String(p.produto).includes('-pro') ? 'Pro' : 'Básico'} ${String(p.produto).endsWith('-anual') ? 'anual' : 'mensal'}` : pro ? 'Pro' : 'Básico';
+      const tk = plano?.token;
+      const cartoes = [
+        ['crown', 'Sua função', dono ? 'Dono' : 'Administrador', dono ? 'Acesso a tudo, inclusive plano e administradores' : 'Organiza a equipe; o plano é com o dono'],
+        ['users-three', 'Equipe', `${meus + 1} ${meus ? 'pessoas' : 'pessoa'}`, pro ? 'Pro: sem limite' : `${meus + nConv} de ${LIMITE_BASICO} convites usados${adms ? ` · ${adms} admin` : ''}`],
+        ['shield-check', 'Token de dono', dono ? (tk?.ativado ? 'Ativado' : plano ? 'Pendente' : '…') : 'Do dono', dono ? (tk?.ativado ? `desde ${dataCurta(String(tk.ativado).slice(0, 10))}` : 'Ativado no primeiro acesso') : 'Só o dono tem o token'],
+        ['calendar-check', 'Plano', nomePlano, teste ? `Teste até ${dataCurta(esp.teste_ate)}` : p?.proxima_cobranca ? `Próxima cobrança ${dataCurta(p.proxima_cobranca)}` : 'Plano ativo'],
+      ];
+      const precoBase = cfg.produto?.mensal || 0, precoPro = precoBase + EXTRA_PRO, ehAnual = String(p?.produto || '').endsWith('-anual');
+      return `<div class="dica">${ic('crown')}<span>Só o dono${dono ? '' : ' e os administradores'} veem este painel. ${dono ? 'Os administradores que você escolher também entram aqui para organizar a equipe.' : ''}</span></div>
+        <div class="grade g4" style="gap:12px">${cartoes.map(([i, t_, v, s_]) => `<div class="cartao" style="padding:14px 16px"><div class="flex" style="gap:8px;color:var(--tx-3);font-size:12.5px">${ic(i, 'p')}${t_}</div><b style="display:block;font-size:19px;margin-top:6px">${esc(v)}</b><div class="mute-2" style="font-size:12px;margin-top:2px">${esc(s_)}</div></div>`).join('')}</div>
+        <div class="grade g2" style="align-items:start">
+          <div class="col" style="gap:16px">${sessao.cartaoEquipe()}</div>
+          <div class="col" style="gap:16px">
+            <div class="cartao"><div class="cartao-cab"><div><h3>Cargos sugeridos</h3><div class="sub">No convite, o cargo já marca o que a pessoa pode fazer</div></div></div><ul class="lista">${cargosDe(cfg).map(([n, pr]) => `<li><div class="cresce"><div class="t">${esc(n)}</div><div class="s">${esc(resumoAcesso({ ...pr, cargo: '' }))}</div></div></li>`).join('')}<li><div class="cresce"><div class="t">Administrador</div><div class="s">Acesso total e entra neste painel${dono ? '' : ' · só o dono escolhe'}</div></div></li></ul></div>
+            ${dono && !PLAY ? `<div class="cartao"><div class="cartao-cab"><div><h3>Plano e pagamento</h3><div class="sub">${esc(nomePlano)}${p?.valor ? ` · ${reais(p.valor)}${ehAnual ? '/ano' : '/mês'}` : ''}</div></div></div><div class="cartao-corpo col" style="gap:10px">
+              ${ehAnual ? `<div class="dica">${ic('check-circle')}<span>Você está no plano anual e já economiza 20%.</span></div>` : `<div class="entre"><span class="mute-2">Pague por ano e economize 20%: ${reais(anual(pro ? precoPro : precoBase))}/ano no lugar de ${reais((pro ? precoPro : precoBase) * 12)}</span><button type="button" class="btn pri" data-acao="mudarAnual">${ic('calendar-check')}Mudar para o anual</button></div>`}
+              <div class="entre"><span class="mute-2">Ver cobranças, cancelar ou trocar o cartão</span><a class="btn" href="${SITE}conta.html" target="_top">${ic('user')}Minha conta</a></div></div></div>` : ''}
+          </div></div>`;
+    },
+    carregarPlano: async () => {
+      if (sessao._lendoPlano) return; sessao._lendoPlano = true;
+      const [r, { data: tk }] = await Promise.all([pagamentos(sb, { acao: 'status' }).catch(() => ({ assinaturas: [] })), sb.from('nexo_tokens_dono').select('ativado').eq('app', cfg.id).maybeSingle()]);
+      const valendo = (r.assinaturas || []).filter((a) => a.app === cfg.id && ['ativa', 'teste', 'paga'].includes(a.status));
+      plano = { assinatura: valendo[0] || null, token: tk || null };
+      if (app.pagina?.id === 'dono') app.render();
     },
     cartaoPro: () => pro
       ? `<div class="cartao"><div class="cartao-cab"><div><h3>Plano Pro</h3><div class="sub">O que a sua empresa tem a mais</div></div>${et('Ativo', 'ok')}</div><div class="cartao-corpo col" style="gap:10px">
@@ -402,8 +419,8 @@ export async function iniciarNuvem(app, cfg) {
         resumoDesligar: () => { db.cfg.resumo = { ...(db.cfg.resumo || {}), ativo: false }; db.gravar(); avisar('Resumo diário desligado'); app.render(); },
         sair: async () => { if (await confirmar('Sair da sua conta neste aparelho?', { rotulo: 'Sair' })) { await db.enviar(); await sb.auth.signOut(); location.reload(); } },
         convidar: async () => {
-          const r = await editarPermissoes(app, cfg, { titulo: 'Convidar pessoa', comEmail: true }); if (!r) return;
-          const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: r.email, permissoes: r.perm });
+          const r = await editarPermissoes(app, cfg, { titulo: 'Convidar pessoa', comEmail: true, podeAdmin: dono }); if (!r) return;
+          const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: r.email, permissoes: r.perm, papel: r.papel });
           if (er) { if (/LIMITE_EQUIPE/.test(er.message)) return app.acoes.verPro(); return avisar(/duplicate/.test(er.message) ? 'Esse e-mail já foi convidado' : er.message, { tipo: 'erro' }); }
           db.cfg.convidou = true; db.gravar(); await carregarEquipe(); app.acoes.linkConvite({ e: r.email });
         },
@@ -414,23 +431,33 @@ export async function iniciarNuvem(app, cfg) {
         },
         acessoMembro: async (d) => {
           const m = equipe.find((x) => x.usuario === d.u); if (!m) return;
-          const r = await editarPermissoes(app, cfg, { titulo: `Acesso de ${m.email}`, atual: m.permissoes }); if (!r) return;
+          const r = await editarPermissoes(app, cfg, { titulo: `Cargo e acesso de ${m.email}`, atual: m.permissoes, papel: m.papel, podeAdmin: dono }); if (!r) return;
+          if (dono && r.papel !== m.papel) { const { error: e1 } = await sb.rpc('nexo_definir_papel', { p_espaco: esp.id, p_usuario: m.usuario, p_papel: r.papel }); if (e1) return avisar(e1.message, { tipo: 'erro' }); }
           const { error: er } = await sb.rpc('nexo_definir_permissoes', { p_espaco: esp.id, p_usuario: m.usuario, p_permissoes: r.perm });
-          if (er) return avisar(er.message, { tipo: 'erro' }); avisar('Acesso atualizado. Vale a partir da próxima vez que a pessoa abrir o sistema.'); carregarEquipe();
+          if (er) return avisar(er.message, { tipo: 'erro' }); avisar('Cargo e acesso atualizados. Valem a partir da próxima vez que a pessoa abrir o sistema.'); carregarEquipe();
         },
         acessoConvite: async (d) => {
           const c = convites.find((x) => x.email === d.e); if (!c) return;
-          const r = await editarPermissoes(app, cfg, { titulo: `Acesso de ${c.email}`, atual: c.permissoes }); if (!r) return;
+          const r = await editarPermissoes(app, cfg, { titulo: `Acesso de ${c.email}`, atual: c.permissoes, papel: c.papel, podeAdmin: dono }); if (!r) return;
           await sb.from('nexo_convites').delete().eq('espaco', esp.id).eq('email', c.email);
-          const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: c.email, permissoes: r.perm });
+          const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: c.email, permissoes: r.perm, papel: r.papel });
           if (er) return avisar(er.message, { tipo: 'erro' }); avisar('Acesso do convite atualizado'); carregarEquipe();
         },
         verPro: () => modal({ titulo: `${cfg.nome} Pro`, largura: 520, corpo: `<div class="col" style="gap:10px">${BENEFICIOS_PRO.map(([i, t_, d]) => `<div class="dica">${ic(i)}<span><b>${t_}.</b> ${d}</span></div>`).join('')}<p class="mute-2" style="font-size:13px">R$ ${(cfg.produto?.mensal || 0) + EXTRA_PRO}/mês. O plano atual é cancelado sozinho quando o Pro começa.</p></div>`,
-          botoes: [{ rotulo: 'Agora não', valor: null, classe: 'fant' }, ...(PLAY || !dono ? [] : [{ rotulo: 'Mudar para o Pro', classe: 'pri', acao: () => { app.acoes.mudarPro(); return true; } }])] }),
+          botoes: [{ rotulo: 'Agora não', valor: null, classe: 'fant' }, ...(PLAY || !dono ? [] : [{ rotulo: 'Mudar para o Pro', classe: 'pri', acao: () => { setTimeout(() => app.acoes.mudarPro(), 50); return true; } }])] }),
         mudarPro: async () => {
           if (!dono) return avisar('Só o dono da empresa muda o plano', { tipo: 'erro' });
-          if (!(await confirmar(`Mudar para o ${cfg.nome} Pro por R$ ${(cfg.produto?.mensal || 0) + EXTRA_PRO}/mês? Você vai para o Mercado Pago confirmar. Quando o Pro começar, o plano atual é cancelado sozinho.`, { rotulo: 'Ir para o Mercado Pago', titulo: 'Plano Pro' }))) return;
-          try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}-pro`, email_mp: email }); location.href = j.link; } catch (x) { avisar(x.message, { tipo: 'erro' }); }
+          const mp = (cfg.produto?.mensal || 0) + EXTRA_PRO;
+          const escolha = await modal({ titulo: `${cfg.nome} Pro`, largura: 460, corpo: `<p class="mute-2" style="margin-bottom:12px">Você vai para o Mercado Pago confirmar. Quando o Pro começar, o plano atual é cancelado sozinho: você não paga dois.</p>`,
+            botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: `Mensal · R$ ${mp}/mês`, valor: '-pro' }, { rotulo: `Anual · ${reais(anual(mp))}/ano (−20%)`, classe: 'pri', valor: '-pro-anual' }] });
+          if (!escolha) return;
+          try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${escolha}`, email_mp: email }); location.href = j.link; } catch (x) { avisar(x.message, { tipo: 'erro' }); }
+        },
+        mudarAnual: async () => {
+          if (!dono) return avisar('Só o dono da empresa muda o plano', { tipo: 'erro' });
+          const base = (cfg.produto?.mensal || 0) + (pro ? EXTRA_PRO : 0);
+          if (!(await confirmar(`Mudar para o ${cfg.nome}${pro ? ' Pro' : ''} anual por ${reais(anual(base))}/ano (sai ${reais(Math.round(anual(base) / 12))} por mês, 20% a menos)? Você vai para o Mercado Pago confirmar. Quando o anual começar, o plano mensal é cancelado sozinho.`, { rotulo: 'Ir para o Mercado Pago', titulo: 'Plano anual' }))) return;
+          try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${pro ? '-pro' : ''}-anual`, email_mp: email }); location.href = j.link; } catch (x) { avisar(x.message, { tipo: 'erro' }); }
         },
         atividadeEquipe: async () => {
           if (!pro) return app.acoes.verPro();
@@ -474,7 +501,7 @@ export async function iniciarNuvem(app, cfg) {
       carregarEquipe();
       if (encerrado && PLAY) modal({ titulo: 'Acesso encerrado', largura: 460, corpo: `<p class="mute-2">Os dados da <b>${esc(esp.nome)}</b> continuam guardados e você pode consultá-los.</p>`, botoes: [{ rotulo: 'Entendi', valor: null, classe: 'pri' }] });
       else if (encerrado) modal({ titulo: 'Seu teste terminou', largura: 460, corpo: `<p class="mute-2">Os dados da <b>${esc(esp.nome)}</b> continuam guardados. Para voltar a usar, contrate o ${esc(cfg.nome)}: alugue por mês ou compre.</p>`, botoes: [{ rotulo: 'Só consultar', valor: null, classe: 'fant' }, { rotulo: 'Assinar', classe: 'pri', acao: () => { location.href = `${SITE}conta.html`; return true; } }] });
-      else if (escolha.novo) modal({ titulo: `Bem-vindo ao ${cfg.nome}`, largura: 520, corpo: `<div class="col" style="gap:10px"><p class="mute-2">Seu teste vai até <b>${dataCurta(esp.teste_ate)}</b>. Três passos para começar:</p><div class="dica">${ic('upload-simple')}<span><b>Traga seus cadastros:</b> em Configurações, importe uma planilha (CSV) de clientes, produtos ou o que precisar.</span></div><div class="dica">${ic('user-plus')}<span><b>Convide a equipe:</b> cada pessoa entra com o próprio e-mail e vê tudo atualizado na hora.</span></div><div class="dica">${ic('phone')}<span><b>Use no celular:</b> abra este endereço no celular e toque em "Adicionar à tela inicial".</span></div></div>`, botoes: [{ rotulo: 'Começar', classe: 'pri', valor: true }] });
+      else if (escolha.novo) modal({ titulo: `Bem-vindo ao ${cfg.nome}`, largura: 520, corpo: `<div class="col" style="gap:10px"><p class="mute-2">Seu teste vai até <b>${dataCurta(esp.teste_ate)}</b>. Três passos para começar:</p><div class="dica">${ic('upload-simple')}<span><b>Traga seus cadastros:</b> em Configurações, importe uma planilha (CSV) de clientes, produtos ou o que precisar.</span></div><div class="dica">${ic('crown')}<span><b>Convide a equipe no Painel do dono:</b> cada pessoa entra com o próprio e-mail, com o cargo e as permissões que você escolher.</span></div><div class="dica">${ic('phone')}<span><b>Use no celular:</b> abra este endereço no celular e toque em "Adicionar à tela inicial".</span></div></div>`, botoes: [{ rotulo: 'Começar', classe: 'pri', valor: true }] });
     },
   };
   return sessao;

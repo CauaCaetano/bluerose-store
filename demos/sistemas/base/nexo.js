@@ -11,6 +11,7 @@
 
 import { resumoDoDia, resumoTexto } from './resumos.js';
 import { prepararExtras } from './extras.js';
+import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 
 // ---------------------------------------------------------------- utilidades
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
@@ -464,11 +465,12 @@ function montar(app, cfg) {
         ${cfg.paginas.filter((p) => !p.id || app.acesso(p.id) !== 'nenhum').map((p) => (p.grupo && !p.id ? `<div class="grupo">${esc(p.grupo)}</div>` : `<a class="item" href="#/${p.id}" data-pag="${p.id}">${ic(p.icone || 'circle')}<span class="corta">${esc(p.rot)}</span><span class="cont" data-cont="${p.id}" hidden></span></a>`)).join('')}
         <div class="lat-pe">
           <a class="item" href="#" data-acao="resumoDia">${ic('notepad')}Resumo do dia</a>
+          ${!app.nuvem || app.sessao.gestor ? `<a class="item item-dono" href="#/dono" data-pag="dono">${ic('crown')}Painel do dono</a>` : ''}
           <a class="item" href="#/config" data-pag="config">${ic('gear-six')}Configurações</a>
           <a class="item" href="javascript:void 0" data-acao="tema">${ic('moon')}<span data-tema-rot>Tema escuro</span></a>
           <a class="item" href="javascript:void 0" data-acao="atalhos">${ic('keyboard')}Atalhos</a>
           ${app.nuvem ? `<a class="item" href="javascript:void 0" data-acao="sair">${ic('sign-out')}Sair</a>` : ''}
-          <div class="feito">Feito pela <a href="${site}" target="_top">Blue Rose Express</a></div>
+          <a class="feito-br" href="${site}" target="_blank" rel="noopener" title="Blue Rose Express"><img src="${new URL('blue-rose.png', import.meta.url).href}" alt="" width="20" height="20"><span>Feito pela <b>Blue Rose</b></span></a>
         </div>
       </nav>
       <main class="principal"><header class="topo"><button type="button" class="btn fant ic-so btn-menu" data-acao="menu" aria-label="Abrir menu">${ic('list')}</button><div class="trilha" id="trilha"></div><div class="acoes" id="acoes-topo"></div></header>
@@ -482,7 +484,7 @@ function montar(app, cfg) {
   app.ir = (h) => { if (location.hash === h) app.render(); else location.hash = h; };
   app.render = () => {
     const { id, params } = rota();
-    const p = id === 'config' ? paginaConfig : paginas.find((x) => x.id === id) || paginas[0];
+    const p = id === 'config' ? paginaConfig : id === 'dono' ? paginaDono : paginas.find((x) => x.id === id) || paginas[0];
     if (app.acesso(p.id) === 'nenhum') { const ok = paginas.find((x) => app.acesso(x.id) !== 'nenhum'); if (ok && ok !== p) { location.hash = `#/${ok.id}`; return; } }
     app.pagina = p; app.params = params; raiz.dataset.soVer = app.acesso(p.id) === 'ver' ? '1' : '';
     document.querySelectorAll('.lat a.item[data-pag]').forEach((a) => a.classList.toggle('ativo', a.dataset.pag === p.id));
@@ -575,12 +577,28 @@ function montar(app, cfg) {
       <div class="cartao"><div class="cartao-cab"><div><h3>Aparência</h3><div class="sub">Preferências deste navegador</div></div></div><div class="cartao-corpo col" style="gap:14px">
         <div class="entre"><span>Tema</span><div class="grupo-btn"><button type="button" data-acao="tema" aria-pressed="${raiz.dataset.tema !== 'escuro'}">${ic('sun', 'p')}Claro</button><button type="button" data-acao="tema" aria-pressed="${raiz.dataset.tema === 'escuro'}">${ic('moon', 'p')}Escuro</button></div></div>
         ${a.nuvem ? '' : `<div class="dica">${ic('info')}<span>Na versão contratada, a cor, o logotipo e os cadastros são os da sua empresa, e cada pessoa da equipe tem o próprio acesso.</span></div>`}</div></div>
-      ${a.nuvem ? a.sessao.cartaoEquipe() : `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">Quem usa o sistema</div></div></div><ul class="lista">${(cfg.equipe || []).map(([n, papel]) => `<li>${av(n)}<div><div class="t">${esc(n)}</div><div class="s">${esc(papel)}</div></div><span class="dir">${et('Ativo', 'ok')}</span></li>`).join('')}</ul></div>`}
+      ${!a.nuvem || a.sessao.gestor ? `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe, cargos e permissões</h3><div class="sub">Ficam no Painel do dono, que só o dono e os administradores veem</div></div></div><div class="cartao-corpo"><div class="entre"><span class="mute-2">Convide pessoas, escolha o cargo e o que cada uma pode ver e editar.</span><a class="btn pri" href="#/dono">${ic('crown')}Abrir o Painel do dono</a></div></div></div>` : ''}
       <div class="cartao"><div class="cartao-cab"><div><h3>Dados</h3><div class="sub">Cópia e restauração</div></div></div><div class="cartao-corpo col" style="gap:10px">
         <div class="entre"><span class="mute-2">Baixar uma cópia de tudo (JSON)</span><button type="button" class="btn" data-acao="exportarDados">${ic('download-simple')}Exportar</button></div>
         ${a.nuvem ? a.sessao.linhasDados() : `<div class="entre"><span class="mute-2">Voltar aos dados de exemplo</span><button type="button" class="btn perigo" data-acao="recomecar">${ic('arrow-counter-clockwise')}Recomeçar</button></div>`}</div></div>
       ${a.nuvem ? a.sessao.cartaoResumo() : ''}${a.extrasConfig ? a.extrasConfig(a) : ''}${cfg.configExtra ? cfg.configExtra(a) : ''}</div>`,
   };
+  const paginaDono = {
+    id: 'dono', rot: 'Painel do dono', titulo: 'Painel do dono',
+    render: (a) => (a.nuvem ? a.sessao.painelDono() : painelDonoDemo(a, cfg)),
+  };
+  app.acoes.convidarDemo = async () => {
+    const r = await editarPermissoes(app, cfg, { titulo: 'Convidar pessoa', comEmail: true, podeAdmin: true }); if (!r) return;
+    app.db.cfg.equipe_demo = [...(app.db.cfg.equipe_demo || []), { email: r.email, papel: r.papel, perm: r.perm, convite: true }]; app.db.gravar();
+    avisar('Convite criado. Na versão contratada, a pessoa recebe o link no WhatsApp e entra com o próprio e-mail.'); app.render();
+  };
+  app.acoes.acessoDemo = async (d) => {
+    const l = app.db.cfg.equipe_demo || [], m = l[Number(d.i)]; if (!m) return;
+    const r = await editarPermissoes(app, cfg, { titulo: `Cargo e acesso de ${m.email}`, atual: m.perm, papel: m.papel, podeAdmin: true }); if (!r) return;
+    l[Number(d.i)] = { ...m, papel: r.papel, perm: r.perm }; app.db.gravar(); avisar('Cargo e acesso atualizados'); app.render();
+  };
+  app.acoes.avisoDemo = () => avisar('Na versão contratada, o dono troca o plano por aqui e confirma no Mercado Pago.');
+  app.acoes.tirarDemo = (d) => { const l = app.db.cfg.equipe_demo || []; l.splice(Number(d.i), 1); app.db.gravar(); app.render(); };
   app.acoes.salvarEmpresa = () => { const f = $('[data-form-empresa]'); const d = Object.fromEntries(new FormData(f)); Object.assign(app.db.cfg, d, { empresa_ok: true }); app.db.gravar(); app.empresa = d.empresa || app.empresa; $('[data-empresa]').textContent = app.empresa; avisar('Dados da empresa salvos'); };
 
   // ---------------- eventos (delegação)
@@ -695,4 +713,25 @@ function montar(app, cfg) {
   if (!location.hash) history.replaceState(null, '', `#/${paginas[0].id}`);
   queueMicrotask(() => app.render());
   return app;
+}
+
+// Painel do dono na demonstração: mostra a equipe com cargos e o que só o dono vê (na nuvem, quem monta é a sessão)
+function painelDonoDemo(a, cfg) {
+  if (!a.db.cfg.equipe_demo) {
+    const cg = cargosDe(cfg).map(([n]) => n);
+    a.db.cfg.equipe_demo = (cfg.equipe || []).slice(1).map(([n, cargo], i) => ({ email: `${normal(n).split(' ')[0]}@${normal(cfg.empresa || 'empresa').replace(/[^a-z]/g, '').slice(0, 14) || 'empresa'}.com.br`, nome: n, papel: i === 0 ? 'admin' : 'membro', perm: i === 0 ? { total: true, cargo } : { ...(cargosDe(cfg).find(([x]) => x === cg[Math.min(i, cg.length - 1)])?.[1] || {}), cargo } }));
+  }
+  const eq = a.db.cfg.equipe_demo, preco = cfg.produto?.mensal || 0, ano = Math.round(preco * 12 * 0.8);
+  const kp = [['crown', 'Sua função', 'Dono', 'Acesso a tudo, inclusive plano'], ['users-three', 'Equipe', `${eq.length + 1} pessoas`, `${eq.length} de 8 convites no Básico`], ['shield-check', 'Token de dono', 'Ativado', 'Pedido só no primeiro acesso'], ['calendar-check', 'Plano', 'Básico mensal', `R$ ${preco}/mês ou R$ ${ano.toLocaleString('pt-BR')}/ano`]];
+  return `<div class="dica">${ic('crown')}<span>Só o dono e os administradores veem este painel. A equipe usa o sistema com o cargo e as permissões que você escolher.</span></div>
+    <div class="grade g4" style="gap:12px">${kp.map(([i, t, v, s_]) => `<div class="cartao" style="padding:14px 16px"><div class="flex" style="gap:8px;color:var(--tx-3);font-size:12.5px">${ic(i, 'p')}${t}</div><b style="display:block;font-size:19px;margin-top:6px">${esc(v)}</b><div class="mute-2" style="font-size:12px;margin-top:2px">${esc(s_)}</div></div>`).join('')}</div>
+    <div class="grade g2" style="align-items:start">
+      <div class="cartao"><div class="cartao-cab"><div><h3>Equipe</h3><div class="sub">Cada pessoa entra com o próprio e-mail</div></div></div><ul class="lista">
+        <li>${av((cfg.equipe || [['Você']])[0][0])}<div class="cresce"><div class="t corta">${esc((cfg.equipe || [['Você']])[0][0])} <span class="mute">(você)</span> ${et('Dono', 'acc')}</div><div class="s">Dono · acesso total</div></div></li>
+        ${eq.map((m, i) => `<li>${av(m.nome || m.email)}<div class="cresce"><div class="t corta">${esc(m.nome || m.email)} ${m.papel === 'admin' ? et('Administrador', 'info') : ''}${m.convite ? ` ${et('Convite enviado', 'al')}` : ''}</div><div class="s">${esc(resumoAcesso(m.perm, m.papel))}</div></div><button type="button" class="btn fant peq" data-acao="acessoDemo" data-i="${i}">${ic('key')}Cargo e acesso</button><button type="button" class="btn fant peq ic-so" data-acao="tirarDemo" data-i="${i}" aria-label="Remover">${ic('trash')}</button></li>`).join('')}</ul>
+        <div class="cartao-corpo" style="border-top:1px solid var(--borda)"><div class="entre"><span class="mute-2" style="font-size:12.5px">No convite você escolhe o cargo e o que a pessoa pode ver e editar.</span><button type="button" class="btn pri" data-acao="convidarDemo">${ic('user-plus')}Convidar pessoa</button></div></div></div>
+      <div class="col" style="gap:16px">
+        <div class="cartao"><div class="cartao-cab"><div><h3>Cargos sugeridos</h3><div class="sub">O cargo já marca o que a pessoa pode fazer</div></div></div><ul class="lista">${cargosDe(cfg).map(([n, pr]) => `<li><div class="cresce"><div class="t">${esc(n)}</div><div class="s">${esc(resumoAcesso({ ...pr, cargo: '' }))}</div></div></li>`).join('')}<li><div class="cresce"><div class="t">Administrador</div><div class="s">Acesso total e entra neste painel · só o dono escolhe</div></div></li></ul></div>
+        <div class="cartao"><div class="cartao-cab"><div><h3>Plano e pagamento</h3><div class="sub">Básico mensal · R$ ${preco}/mês</div></div></div><div class="cartao-corpo"><div class="entre"><span class="mute-2">Pague por ano e economize 20%: R$ ${ano.toLocaleString('pt-BR')}/ano</span><button type="button" class="btn" data-acao="avisoDemo">${ic('calendar-check')}Mudar para o anual</button></div></div></div>
+      </div></div>`;
 }

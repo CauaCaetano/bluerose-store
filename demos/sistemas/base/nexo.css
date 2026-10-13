@@ -699,3 +699,20 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 
 /* permissões: área "só ver" esconde os botões de criar e apagar (o sistema também bloqueia a gravação) */
 [data-so-ver="1"] .conteudo .btn.pri, [data-so-ver="1"] .gaveta .btn.pri, [data-so-ver="1"] [data-acao^="novo"], [data-so-ver="1"] [data-acao^="excluir"], [data-so-ver="1"] [data-acao="editarCad"] { display: none !important; }
+
+/* Painel do dono e marca Blue Rose no menu */
+.lat-pe .item-dono .ic { color: #d4a017; }
+.lat-pe .feito-br { display: flex; align-items: center; gap: 8px; margin: 8px 6px 0; padding: 7px 9px; border-radius: 9px; font-size: 11.5px; color: var(--tx-3); text-decoration: none; border: 1px solid var(--borda); background: color-mix(in srgb, #3d6bf0 6%, transparent); transition: background .15s, color .15s; }
+.lat-pe .feito-br:hover { color: var(--tx); background: color-mix(in srgb, #3d6bf0 12%, transparent); }
+.lat-pe .feito-br img { width: 20px; height: 20px; border-radius: 6px; flex: none; }
+.lat-pe .feito-br b { color: var(--tx-2); font-weight: 600; }
+.planos-escolha { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 12px; }
+.planos-escolha label { cursor: pointer; }
+.planos-escolha input { position: absolute; opacity: 0; pointer-events: none; }
+.planos-escolha span { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1.5px solid var(--borda); border-radius: 10px; }
+.planos-escolha input:checked + span { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 7%, transparent); }
+.planos-escolha input:focus-visible + span { outline: 2px solid var(--acc); outline-offset: 2px; }
+.planos-escolha em { font-style: normal; font-size: 11px; font-weight: 700; color: var(--ok, #2e7d4f); margin-left: 4px; }
+.planos-escolha small { color: var(--tx-3); font-size: 12px; }
+.entrada-pe .entrada-br { display: inline-flex; align-items: center; gap: 6px; margin-right: 6px; font-weight: 600; color: var(--tx-2); text-decoration: none; }
+.entrada-pe .entrada-br img { width: 18px; height: 18px; border-radius: 5px; }

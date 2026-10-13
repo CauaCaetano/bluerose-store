@@ -24,12 +24,12 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=29">
+<link rel="stylesheet" href="css/site.css?v=30">
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=6" defer></script>
 <script src="js/site.js?v=14" defer></script>
 <script src="js/planos.js?v=3" defer></script>
-<script src="js/contratar.js?v=6" defer></script>
+<script src="js/contratar.js?v=7" defer></script>
 <script src="js/videos.js?v=4" defer></script>
 <script src="js/conta.js?v=3" defer></script>
 </head>
@@ -238,9 +238,65 @@
       </article>
     </div>
   </section>
+  <section class="sis-lista" id="tambem">
+    <div class="wrap">
+      <h2 class="sec-title reveal">Também da Blue Rose</h2>
+      <p class="planos-nota reveal" style="margin-bottom:24px">Sistemas com marca própria para nichos que pedem um jeito específico de trabalhar. Mesma nuvem, mesmo Painel do dono e o mesmo teste grátis de 7 dias.</p>
+      <article class="sis reveal" id="obras" style="--sis:#c84a0c;--i:0">
+        <a class="sis-foto" href="demos/sistemas/obras/" target="_blank" rel="noopener"><img src="img/sistemas/obras.webp" alt="Tela do Canteiro" width="1200" height="750" loading="lazy"></a>
+        <div class="sis-corpo">
+          <span class="sis-tag">Obras e reformas</span>
+          <h2><a href="canteiro.html">Canteiro</a></h2>
+          <p class="sis-para">Para empreiteiros e empresas de reforma.</p>
+          <ul><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Orçamento por itens aprovado pelo cliente no celular</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Etapas pagas por PIX pelo link da obra</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Diário com fotos que o cliente acompanha</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Equipe com diárias, vales e recibo</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Cronograma, terceirizados e garantia pós-obra</span></li></ul>
+          <div class="sis-precos"><div><small>Básico</small><b>R$&nbsp;79<small>/mês</small></b><span>ou R$&nbsp;758 por ano</span></div><div><small>Pro</small><b>R$&nbsp;139<small>/mês</small></b><span>equipe sem limite</span></div></div>
+          <div class="sis-botoes">
+            <a class="btn btn-ghost" href="demos/sistemas/obras/" target="_blank" rel="noopener">Ver demonstração</a>
+            <a class="btn btn-ghost" href="app/obras/" data-teste="obras" data-teste-nome="Canteiro" data-teste-mensal="79">Testar 7 dias grátis</a>
+            <button type="button" class="btn btn-primary" data-contratar="a-sis-obras" data-mensal="79" data-nome="Canteiro · Básico">Assinar</button>
+          </div>
+          <a class="sis-mais" href="canteiro.html">Tudo sobre o Canteiro →</a>
+        </div>
+      </article>
+      <article class="sis reveal" id="cerimonial" style="--sis:#5b6633;--i:1">
+        <a class="sis-foto" href="demos/sistemas/cerimonial/" target="_blank" rel="noopener"><img src="img/sistemas/cerimonial.webp" alt="Tela do Sim, aceito" width="1200" height="750" loading="lazy"></a>
+        <div class="sis-corpo">
+          <span class="sis-tag">Casamentos e eventos</span>
+          <h2><a href="sim-aceito.html">Sim, aceito</a></h2>
+          <p class="sis-para">Para assessoria e cerimonial de casamentos.</p>
+          <ul><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Convidados confirmam a presença pelo link</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Mapa de mesas e roteiro do grande dia</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Orçamento do casal por categoria</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Fornecedores e pagamentos no prazo</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Página do casal para acompanhar tudo</span></li></ul>
+          <div class="sis-precos"><div><small>Básico</small><b>R$&nbsp;89<small>/mês</small></b><span>ou R$&nbsp;854 por ano</span></div><div><small>Pro</small><b>R$&nbsp;149<small>/mês</small></b><span>equipe sem limite</span></div></div>
+          <div class="sis-botoes">
+            <a class="btn btn-ghost" href="demos/sistemas/cerimonial/" target="_blank" rel="noopener">Ver demonstração</a>
+            <a class="btn btn-ghost" href="app/cerimonial/" data-teste="cerimonial" data-teste-nome="Sim, aceito" data-teste-mensal="89">Testar 7 dias grátis</a>
+            <button type="button" class="btn btn-primary" data-contratar="a-sis-cerimonial" data-mensal="89" data-nome="Sim, aceito · Básico">Assinar</button>
+          </div>
+          <a class="sis-mais" href="sim-aceito.html">Tudo sobre o Sim, aceito →</a>
+        </div>
+      </article>
+      <article class="sis reveal" id="pragas" style="--sis:#1f6a46;--i:2">
+        <a class="sis-foto" href="demos/sistemas/pragas/" target="_blank" rel="noopener"><img src="img/sistemas/pragas.webp" alt="Tela do Isca" width="1200" height="750" loading="lazy"></a>
+        <div class="sis-corpo">
+          <span class="sis-tag">Controle de pragas</span>
+          <h2><a href="isca.html">Isca</a></h2>
+          <p class="sis-para">Para dedetizadoras e controle de pragas.</p>
+          <ul><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Comprovante com produtos e licenças pelo link</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Pontos de isca com consumo por visita</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Rota do dia e relatório mensal</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Retorno em garantia pelo cliente</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Contratos com aviso de renovação</span></li></ul>
+          <div class="sis-precos"><div><small>Básico</small><b>R$&nbsp;99<small>/mês</small></b><span>ou R$&nbsp;950 por ano</span></div><div><small>Pro</small><b>R$&nbsp;159<small>/mês</small></b><span>equipe sem limite</span></div></div>
+          <div class="sis-botoes">
+            <a class="btn btn-ghost" href="demos/sistemas/pragas/" target="_blank" rel="noopener">Ver demonstração</a>
+            <a class="btn btn-ghost" href="app/pragas/" data-teste="pragas" data-teste-nome="Isca" data-teste-mensal="99">Testar 7 dias grátis</a>
+            <button type="button" class="btn btn-primary" data-contratar="a-sis-pragas" data-mensal="99" data-nome="Isca · Básico">Assinar</button>
+          </div>
+          <a class="sis-mais" href="isca.html">Tudo sobre o Isca →</a>
+        </div>
+      </article>
+      
+    </div>
+  </section>
   <section class="sis-comparar">
     <div class="wrap">
       <h2 class="sec-title reveal">Comprar ou alugar?</h2>
+      <p class="planos-nota reveal" style="margin:-6px 0 18px">Assinando por ano, você paga 20% a menos que no mensal, no Básico e no Pro.</p>
       <div class="sis-tres reveal"><div><h3>Comprar · de R$ 1.690 a R$ 3.290</h3><ul><li>Pagamento único: 50% para começar e 50% na entrega (ou parcelado no cartão)</li><li>Adaptação com a sua marca e os seus cadastros iniciais</li><li>Treinamento da equipe e 90 dias de garantia</li><li>Hospedagem e suporte depois disso: plano de cuidado opcional de R$ 79/mês</li></ul></div><div><h3>Alugar no Básico · de R$ 79 a R$ 149/mês</h3><ul><li>Sem entrada: começa a pagar só a mensalidade, no cartão</li><li>Hospedagem, cópias de segurança, atualizações e suporte inclusos</li><li>Mesma adaptação e o mesmo treinamento da compra</li><li>Sem fidelidade: cancele quando quiser em Minha conta (veja os <a href="termos.html#nexo">Termos</a>)</li><li>Comece com 7 dias grátis: cadastre o cartão e só paga se continuar</li><li>Você e mais 8 pessoas da equipe</li></ul></div><div class="plano-pro"><h3>Alugar no Pro · R$ 60 a mais por mês</h3><ul><li>Tudo do Básico</li><li>Equipe sem limite de pessoas</li><li>Histórico da equipe: quem fez o quê</li><li>O logo da sua empresa nos links e documentos</li><li>Até 10 empresas ou filiais e suporte prioritário</li></ul></div></div>
       <p class="planos-nota reveal">Em todos os planos, o dono escolhe o que cada pessoa da equipe pode ver e editar. Precisa de algo além do que o sistema faz? Personalizações são orçadas antes, por escrito. Sistemas feitos do zero: <a href="./#precos">a partir de R$ 4.900</a>.</p>
     </div>

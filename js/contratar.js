@@ -50,6 +50,7 @@
   function reais(n) { return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
   function valoresSistema(b) {
     var mensal = Number(b.getAttribute('data-mensal')), total = Number(b.getAttribute('data-total'));
+    if (mensal && /-anual$/.test(b.getAttribute('data-contratar') || '')) return [reais(mensal) + ' por ano', 'Plano anual com 20% de desconto · renova a cada 12 meses · avisamos antes de cada cobrança'];
     if (mensal) return [reais(mensal) + ' por mês', 'Sem entrada · hospedagem e suporte inclusos · sem fidelidade, cancele quando quiser'];
     if (total) return ['Entrada de ' + reais(total / 2) + ' agora', 'Total ' + reais(total) + ' · o saldo de ' + reais(total / 2) + ' só na entrega'];
     return ['', ''];

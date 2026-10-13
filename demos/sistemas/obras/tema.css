@@ -124,3 +124,29 @@
 [data-produto="obras"] .faixa a.cta, [data-produto="obras"] .faixa a.cta:hover { background: var(--laranja); color: var(--carvao); font-weight: 700; }
 [data-produto="obras"] .entrada .marca b { font-family: var(--forte); text-transform: uppercase; letter-spacing: .04em; font-size: 19px; }
 [data-produto="obras"] .entrada .marca small { color: var(--acc); }
+/* marca Blue Rose no menu de cima: só o emblema */
+@media (min-width: 901px) {
+  [data-produto="obras"] .lat-pe .feito-br { margin: 0 0 0 8px; padding: 6px; border-color: rgba(255, 255, 255, .14); }
+  [data-produto="obras"] .lat-pe .feito-br span { display: none; }
+}
+
+/* cronograma (Gantt simples) */
+.cn-gantt { padding: 12px 16px 14px; overflow-x: auto; }
+.cn-gantt > div { display: grid; grid-template-columns: 230px minmax(520px, 1fr); align-items: center; gap: 12px; min-height: 26px; }
+.cn-g-cab { min-height: 30px !important; border-bottom: 1px solid var(--borda); margin-bottom: 4px; }
+.cn-g-escala { position: relative; height: 22px; }
+.cn-g-escala span { position: absolute; top: 3px; font-size: 11px; color: var(--tx-3); transform: translateX(-2px); white-space: nowrap; }
+.cn-g-obra { margin-top: 10px; padding: 4px 0; border-radius: 6px; }
+.cn-g-obra .t { font-weight: 700; font-size: 13.5px; }
+.cn-g-etapa > span { font-size: 12.5px; color: var(--tx-2); padding-left: 14px; }
+.cn-g-trilho { position: relative; height: 16px; border-radius: 4px; background: repeating-linear-gradient(90deg, transparent 0 calc(100% / 8 - 1px), var(--borda) calc(100% / 8 - 1px) calc(100% / 8)); }
+.cn-g-trilho b { position: absolute; top: 3px; height: 10px; border-radius: 3px; background: color-mix(in srgb, var(--tx-3) 45%, transparent); }
+.cn-g-trilho b.and { background: var(--laranja, #f26b1d); }
+.cn-g-trilho b.ok { background: #2e7d4f; }
+.cn-g-trilho b.er { background: #c0392b; }
+.cn-g-trilho b.cn-g-total { top: 1px; height: 14px; background: color-mix(in srgb, var(--laranja, #f26b1d) 22%, transparent); border: 1.5px solid var(--laranja, #f26b1d); }
+.cn-g-trilho b.cn-g-total.er { border-color: #c0392b; background: color-mix(in srgb, #c0392b 15%, transparent); }
+.cn-g-hoje { position: absolute; top: -4px; bottom: -4px; left: var(--hoje); width: 2px; background: #2563eb; z-index: 1; }
+.cn-g-leg { display: flex !important; flex-wrap: wrap; gap: 14px; margin-top: 14px; font-size: 12px; color: var(--tx-3); }
+.cn-g-leg i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; margin-right: 6px; background: color-mix(in srgb, var(--tx-3) 45%, transparent); }
+.cn-g-leg i.ok { background: #2e7d4f; } .cn-g-leg i.and { background: var(--laranja, #f26b1d); } .cn-g-leg i.er { background: #c0392b; } .cn-g-leg i.hj { width: 2px; height: 12px; background: #2563eb; }

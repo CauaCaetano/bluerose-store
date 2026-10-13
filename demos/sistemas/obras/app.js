@@ -1,4 +1,5 @@
-// Canteiro · reformas e obras: etapas com pagamento, diário com fotos, equipe e diárias, compras, serviços extras e a página do dono da obra
+// Canteiro · reformas e obras: etapas com pagamento, diário com fotos, equipe e diárias, compras, serviços extras e a página do dono da obra.
+// Gestão: orçamento por itens com aprovação do cliente, cronograma, checklist de qualidade, terceirizados, ferramentas, depósito de sobras e garantia pós-obra.
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, diasEntre,
   sorteio, soma, agrupar, av, ic, et, prog, kpis, barras, barrasH, kanban, telLink,
@@ -57,7 +58,22 @@ function semente() {
   diarias.forEach((x, k) => { if (k % 9 === 4) Object.assign(x, { tipo: 'meia', valor: x.valor / 2 }); else x.tipo = 'inteira'; });
   [['eq1', 3], ['eq2', 1]].forEach(([pid, n]) => { for (let k = n; k < n + 6; k++) { const data = diaMais(-k); if (diarias.some((x) => x.pessoa === pid && x.data === data)) continue; const o = diarias.find((x) => !x.pago && x.data >= diaMais(-7)); if (o) { diarias.push({ id: `dr${diarias.length}`, obra: o.obra, data, pessoa: pid, valor: 0, tipo: 'falta', pago: false }); break; } } });
   const vales = [{ id: 'va0', pessoa: 'eq0', data: diaMais(-3), valor: 200, obs: 'Adiantamento para material da casa', descontado: false }, { id: 'va1', pessoa: 'eq1', data: diaMais(-2), valor: 100, obs: '', descontado: false }];
-  return { equipe, diarias, vales, _cfg: { empresa: 'Reforma Certa · Davi Nunes', telefone: '(31) 98877-4410', endereco: 'Belo Horizonte/MG', cnpj: '' }, clientes, obras, diario, gastos, compras, aditivos };
+  // orçamento por itens, datas das etapas, qualidade, terceiros, ferramentas, depósito e garantia
+  const ITENS = { banheiro: [['Demolição e retirada de entulho', 'vb', 1, 1400, 'mao'], ['Porcelanato 60x60', 'm²', 14, 92, 'material'], ['Argamassa AC-III', 'sc', 8, 45, 'material'], ['Impermeabilização (manta líquida)', 'm²', 9, 68, 'material'], ['Mão de obra de revestimento', 'm²', 23, 95, 'mao'], ['Louças e metais (instalação)', 'vb', 1, 950, 'mao'], ['Hidráulica (pontos novos)', 'un.', 6, 260, 'mao']], cozinha: [['Demolição', 'vb', 1, 1600, 'mao'], ['Revestimento 30x60', 'm²', 18, 85, 'material'], ['Granito para bancada', 'm', 3.2, 720, 'material'], ['Elétrica (pontos e quadro)', 'un.', 10, 210, 'mao'], ['Hidráulica e gás', 'vb', 1, 2400, 'mao'], ['Marcenaria (instalação)', 'vb', 1, 3200, 'mao'], ['Pintura e acabamento', 'm²', 42, 38, 'mao']] };
+  obras.forEach((o, i) => {
+    const modelo = planos[i][1];
+    if (o.status === 'orcamento' && ITENS[modelo]) { o.itens = ITENS[modelo].map(([desc, unidade, qtd, unit, tipo]) => ({ desc, unidade, qtd, unit, tipo })); o.margem = 18; o.validade = diaMais(i === 5 ? 9 : 2); o.enviado_em = diaMais(-3); o.valor = Math.round(soma(o.itens, (x) => x.qtd * x.unit) * 1.18); }
+    o.etapas.forEach((e) => { if (e.status === 'feita') e.quali = Object.fromEntries(checklistDe(e.nome).map((t) => [t, true])); });
+    if (o.status === 'concluida') o.entregue_em = diaMais(i === 2 ? -25 : -60);
+  });
+  const ob0 = obras[0], k0 = ob0.etapas.findIndex((e) => e.status === 'andamento'); if (k0 >= 0) Object.assign(ob0.etapas[k0], { quali: { [checklistDe(ob0.etapas[k0].nome)[0]]: true }, ini: diaMais(-9), fim: diaMais(-2) });
+  const terceiros = [{ id: 'te0', nome: 'Gesso & Cia · Wanderson', servico: 'Forro de gesso da cozinha', obra: 'ob1', valor: 3200, telefone: '(31) 98450-2210', medicoes: [{ data: diaMais(-4), pct: 50, valor: 1600, pago: true, pago_em: diaMais(-3) }] },
+    { id: 'te1', nome: 'Vidraçaria Cristal', servico: 'Box de vidro temperado', obra: 'ob0', valor: 1450, telefone: '(31) 99120-8877', medicoes: [] },
+    { id: 'te2', nome: 'Marmoraria Pedra Fina', servico: 'Bancada de granito', obra: 'ob1', valor: 2300, telefone: '(31) 98711-4005', medicoes: [{ data: diaMais(-2), pct: 100, valor: 2300, pago: false }] }];
+  const ferramentas = [['Betoneira 400 L', 'PAT-01', 3200, 'deposito'], ['Furadeira de impacto', 'PAT-02', 680, 'obra', 'ob0', 'eq0', -6], ['Serra mármore', 'PAT-03', 540, 'obra', 'ob1', 'eq3', -4], ['Andaime (2 peças)', 'PAT-04', 1900, 'obra', 'ob3', null, -22], ['Nível a laser', 'PAT-05', 1250, 'deposito'], ['Lixadeira de parede', 'PAT-06', 890, 'manutencao']].map(([nome, patrimonio, valor, local, obra, pes, d], i) => ({ id: `fe${i}`, nome, patrimonio, valor, local, obra: obra || null, pessoa: pes || null, desde: d ? diaMais(d) : null }));
+  const deposito = [['Porcelanato 60x60', 3, 'm²', 92, 'ob2'], ['Argamassa AC-III', 4, 'sc', 45, 'ob2'], ['Tinta acrílica fosca 18 L', 1, 'lt', 360, 'ob6'], ['Cabo flexível 2,5 mm', 40, 'm', 3.2, 'ob6']].map(([item, qtd, unidade, unit, origem], i) => ({ id: `dp${i}`, item, qtd, unidade, unit, origem }));
+  const chamadosL = [{ id: 'ch0', obra: 'ob2', descricao: 'Mancha de umidade perto do rodapé da sala', data: diaMais(-2), status: 'aberto', pelo_cliente: true }, { id: 'ch1', obra: 'ob6', descricao: 'Tinta descascando perto da janela da fachada', data: diaMais(-40), status: 'resolvido', resolvido_em: diaMais(-35) }];
+  return { terceiros, ferramentas, deposito, chamados: chamadosL, equipe, diarias, vales, _cfg: { empresa: 'Reforma Certa · Davi Nunes', telefone: '(31) 98877-4410', endereco: 'Belo Horizonte/MG', cnpj: '' }, clientes, obras, diario, gastos, compras, aditivos };
 }
 
 // ---------------------------------------------------------------- regras
@@ -86,6 +102,9 @@ const colecoes = {
   clientes: { singular: 'cliente', plural: 'clientes', campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel', obrigatorio: true }, { nome: 'endereco', rotulo: 'Endereço', tipo: 'texto', largo: true }] },
   equipe: { singular: 'pessoa da equipe', genero: 'f', plural: 'equipe', campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'funcao', rotulo: 'Função', tipo: 'texto', padrao: 'Ajudante' }, { nome: 'diaria', rotulo: 'Valor da diária', tipo: 'moeda', obrigatorio: true }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }] },
   vales: { singular: 'vale', plural: 'vales', campos: [{ nome: 'valor', rotulo: 'Valor', tipo: 'moeda', obrigatorio: true }, { nome: 'data', rotulo: 'Data', tipo: 'data', padrao: () => hoje() }, { nome: 'obs', rotulo: 'Observação', tipo: 'texto', largo: true }] },
+  terceiros: { singular: 'terceirizado', plural: 'terceirizados', campos: [{ nome: 'servico', rotulo: 'Serviço', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'nome', rotulo: 'Quem faz (empresa ou pessoa)', tipo: 'texto', obrigatorio: true }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }, { nome: 'obra', rotulo: 'Obra', tipo: 'relacao', colecao: 'obras', mostrar: 'titulo', obrigatorio: true }, { nome: 'valor', rotulo: 'Valor combinado', tipo: 'moeda', obrigatorio: true }], antesDeSalvar: (d, a, antigo) => ({ medicoes: antigo?.medicoes || [], ...d }) },
+  ferramentas: { singular: 'ferramenta', genero: 'f', plural: 'ferramentas', campos: [{ nome: 'nome', rotulo: 'Ferramenta', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'patrimonio', rotulo: 'Patrimônio ou etiqueta', tipo: 'texto' }, { nome: 'valor', rotulo: 'Valor', tipo: 'moeda' }], antesDeSalvar: (d, a, antigo) => ({ local: antigo?.local || 'deposito', ...d }) },
+  deposito: { singular: 'material do depósito', plural: 'materiais', campos: [{ nome: 'item', rotulo: 'Material', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'qtd', rotulo: 'Quantidade', tipo: 'numero', obrigatorio: true }, { nome: 'unidade', rotulo: 'Unidade', tipo: 'texto', padrao: 'un.' }, { nome: 'unit', rotulo: 'Valor por unidade', tipo: 'moeda' }, { nome: 'origem', rotulo: 'Sobrou de', tipo: 'relacao', colecao: 'obras', mostrar: 'titulo' }] },
   obras: { singular: 'obra', genero: 'f', plural: 'obras', campos: [{ nome: 'cliente', rotulo: 'Cliente', tipo: 'relacao', colecao: 'clientes', obrigatorio: true }, { nome: 'titulo', rotulo: 'O que é (ex.: Reforma do banheiro)', tipo: 'texto', obrigatorio: true }, { nome: 'endereco', rotulo: 'Endereço da obra', tipo: 'texto', largo: true }, { nome: 'valor', rotulo: 'Valor fechado', tipo: 'moeda', obrigatorio: true }, { nome: 'inicio', rotulo: 'Início', tipo: 'data', padrao: () => hoje() }, { nome: 'previsao', rotulo: 'Previsão de entrega', tipo: 'data', padrao: () => diaMais(30) }, { nome: 'mostrar_gastos', rotulo: 'Mostrar os gastos ao cliente', tipo: 'booleano', texto: 'Sim, na página do cliente' }],
     antesDeSalvar: (d, a, antigo) => ({ status: antigo?.status || 'orcamento', etapas: antigo?.etapas || [], ...d, endereco: d.endereco || cli(a, d.cliente)?.endereco || '' }) },
 };
@@ -117,7 +136,7 @@ function painel(a) {
 }
 
 function obrasPag(a) {
-  a.kanbans.obras = (id, s) => { a.db.salvar('obras', { id, status: s }); a.db.registrar(`obras:${id}`, stt(s)[1], { icone: 'arrow-right', tom: 'acc' }); avisar(`${ob(a, id).titulo} → ${stt(s)[1]}`); };
+  a.kanbans.obras = (id, s) => { a.db.salvar('obras', { id, status: s, ...(s === 'concluida' && !ob(a, id)?.entregue_em ? { entregue_em: hoje() } : {}) }); a.db.registrar(`obras:${id}`, stt(s)[1], { icone: 'arrow-right', tom: 'acc' }); avisar(`${ob(a, id).titulo} → ${stt(s)[1]}`); };
   a.kanbans['obras:abrir'] = (id) => a.abrir('obra', id);
   return `<div class="entre"><span class="mute" style="font-size:12.5px">Arraste as obras conforme avançam. Abra uma obra para lançar o diário, os gastos e cobrar as etapas.</span><button type="button" class="btn pri" data-acao="novaObra">${ic('plus')}Nova obra</button></div>`
     + kanban({ id: 'obras', itens: obs(a).filter((o) => o.status !== 'concluida' || diasAte(o.previsao) > -45), campo: 'status', colunas: STATUS.map(([id, nome, cor]) => ({ id, nome, cor, sub: (l) => moedaC(soma(l, (o) => o.valor)), classe: (o) => (atrasada(o) ? 'parado' : '') })),
@@ -169,13 +188,103 @@ function relatoriosPag(a) {
       <div class="cartao"><div class="cartao-cab"><div><h3>Para onde vão os gastos</h3></div></div><div class="cartao-corpo">${barrasH(Object.entries(agrupar(a.db.lista('gastos').filter((g) => !g.cliente_paga), (g) => g.categoria)).map(([k, l]) => ({ rot: nomeCat(k), v: soma(l, (g) => g.valor) })).sort((x, y) => y.v - x.v), { fmt: moedaC })}</div></div></div>`;
 }
 
+// ---------------------------------------------------------------- funções de gestão (orçamento, cronograma, qualidade, terceiros, ferramentas, depósito, garantia)
+const UNIDADES = ['un.', 'm²', 'm', 'sc', 'lt', 'kg', 'dia', 'vb'];
+const totalItens = (o) => soma(o.itens || [], (x) => (Number(x.qtd) || 0) * (Number(x.unit) || 0));
+const totalOrc = (o) => Math.round(totalItens(o) * (1 + (Number(o.margem) || 0) / 100));
+// etapas com datas: as que não têm data dividem o prazo da obra em partes iguais
+function planoEtapas(o) {
+  const n = o.etapas.length || 1, ini = o.inicio || hoje(), dur = Math.max(n, diasEntre(ini, o.previsao || diaMais(30, ini)));
+  return o.etapas.map((e, k) => ({ ...e, k, ini: e.ini || diaMais(Math.round((dur * k) / n), ini), fim: e.fim || diaMais(Math.round((dur * (k + 1)) / n) - 1, ini) }));
+}
+const atrasoEtapa = (e) => e.status !== 'feita' && e.fim < hoje();
+// checklist de qualidade sugerido pelo nome da etapa
+const CHECK = [
+  [/hidr|encan|gás/i, ['Teste de pressão sem vazamento', 'Registros e ralos funcionando', 'Caimento para o ralo conferido']],
+  [/el[eé]tri/i, ['Disjuntores identificados no quadro', 'Tomadas e interruptores testados', 'Fios dentro do padrão de bitola']],
+  [/imperme/i, ['Teste de estanqueidade de 72 horas', 'Rodapé impermeabilizado até 30 cm', 'Fotos antes de cobrir']],
+  [/revest|piso|porcel|cer[aâ]m/i, ['Nível e prumo conferidos', 'Sem peças ocas (teste do toque)', 'Rejunte uniforme e limpo']],
+  [/pintur|dem[aã]o|massa/i, ['Cobertura uniforme, sem manchas', 'Recortes limpos em rodapés e tomadas', 'Piso e móveis protegidos e limpos']],
+  [/telh|madeir|calha|rufo/i, ['Telhas alinhadas e travadas', 'Teste com água nas calhas', 'Sem goteiras após chuva ou teste']],
+  [/demol|entulho/i, ['Entulho retirado da obra', 'Instalações escondidas protegidas']],
+];
+const checklistDe = (nome) => (CHECK.find(([re]) => re.test(nome)) || [, ['Serviço conferido com o projeto', 'Local limpo ao fim da etapa']])[1].concat('Conferido com o cliente');
+const qualiDe = (o, k) => { const e = o.etapas[k]; const itens = checklistDe(e.nome); return itens.map((t) => ({ t, ok: !!(e.quali || {})[t] })); };
+const LOCAIS_F = [['deposito', 'No depósito'], ['obra', 'Em obra'], ['manutencao', 'Na manutenção']];
+const ferr = (a) => a.db.lista('ferramentas').sort((x, y) => x.nome.localeCompare(y.nome));
+const foraHa = (f) => (f.local === 'obra' && f.desde ? -diasAte(f.desde) : 0);
+const terc = (a) => a.db.lista('terceiros');
+const pagoTerc = (t) => soma(t.medicoes || [], (m) => (m.pago ? m.valor : 0));
+const medidoTerc = (t) => soma(t.medicoes || [], (m) => m.valor);
+const chamados = (a) => a.db.lista('chamados').sort((x, y) => (x.status === 'resolvido') - (y.status === 'resolvido') || y.data.localeCompare(x.data));
+const emGarantia = (o) => o.status === 'concluida' && o.entregue_em && diasAte(diaMais(90, o.entregue_em)) >= 0;
+
+function orcamentosPag(a) {
+  const l = obs(a).filter((o) => o.status === 'orcamento'), feitos = obs(a).filter((o) => o.itens?.length), aprov = feitos.filter((o) => o.status !== 'orcamento');
+  return `<div class="entre"><span class="mute" style="font-size:12.5px">Monte o orçamento por itens (material e mão de obra), coloque a sua margem e mande o link: o cliente aprova pelo celular e a obra já começa com as etapas prontas.</span><button type="button" class="btn pri" data-acao="novaObra">${ic('plus')}Novo orçamento</button></div>
+    ${kpis([{ rot: 'Orçamentos em aberto', icone: 'clipboard-text', val: num(l.length), nota: moeda(soma(l, (o) => o.valor)) }, { rot: 'Taxa de aprovação', icone: 'thumbs-up', val: pct((aprov.length / (feitos.length || 1)) * 100), nota: `${aprov.length} de ${feitos.length} por itens` }, { rot: 'Margem média', icone: 'percent', val: pct(feitos.length ? soma(feitos, (o) => Number(o.margem) || 0) / feitos.length : 0) }])}
+    <div class="cartao">${l.length ? `<ul class="lista">${l.map((o) => { const vence = o.validade ? diasAte(o.validade) : null; return `<li class="clicavel" data-abrir="obra:${o.id}:orcamento"><div class="cresce"><div class="t corta">${esc(o.titulo)}</div><div class="s corta">${esc(cli(a, o.cliente)?.nome || '')} · ${(o.itens || []).length} itens${o.margem ? ` · margem ${o.margem}%` : ''}${o.enviado_em ? ` · enviado ${relativo(o.enviado_em)}` : ''}</div></div>${vence != null ? (vence < 0 ? et('Vencido', 'er') : vence <= 3 ? et(`Vence em ${vence} d`, 'al') : '') : ''}<b class="num">${moeda(o.valor)}</b></li>`; }).join('')}</ul>` : vazio('clipboard-text', 'Nenhum orçamento em aberto', 'Crie uma obra: ela começa como orçamento até o cliente aprovar.')}</div>`;
+}
+
+function cronogramaPag(a) {
+  const l = obs(a).filter((o) => ['andamento', 'pausada', 'orcamento'].includes(o.status) && o.etapas.length).sort((x, y) => x.inicio.localeCompare(y.inicio));
+  if (!l.length) return vazio('chart-bar-horizontal', 'Nada no cronograma', 'As obras com etapas aparecem aqui, com o prazo de cada etapa.');
+  const ini = l.reduce((m, o) => (o.inicio < m ? o.inicio : m), diaMais(-7)), fim = l.reduce((m, o) => (o.previsao > m ? o.previsao : m), diaMais(21));
+  const dias = Math.max(14, diasEntre(ini, fim) + 1), x = (d) => `${(Math.max(0, diasEntre(ini, d)) / dias) * 100}%`, w = (d1, d2) => `${(Math.max(1, diasEntre(d1, d2) + 1) / dias) * 100}%`;
+  const semanas = Array.from({ length: Math.ceil(dias / 7) }, (_, i) => diaMais(i * 7, ini));
+  const atrasos = l.flatMap((o) => planoEtapas(o).filter(atrasoEtapa).map((e) => ({ o, e })));
+  return `${atrasos.length ? `<div class="dica">${ic('warning')}<span><b>${atrasos.length} ${atrasos.length === 1 ? 'etapa atrasada' : 'etapas atrasadas'}:</b> ${atrasos.slice(0, 4).map(({ o, e }) => `${esc(e.nome)} (${esc(o.titulo)})`).join(', ')}${atrasos.length > 4 ? '…' : ''}. Avise o cliente pelo link da obra antes que ele pergunte.</span></div>` : `<div class="dica">${ic('check-circle')}<span>Todas as etapas dentro do prazo.</span></div>`}
+    <div class="cartao cn-gantt" style="--hoje:${x(hoje())}"><div class="cn-g-cab"><span></span><div class="cn-g-escala">${semanas.map((d) => `<span style="left:${x(d)}">${dataCurta(d)}</span>`).join('')}</div></div>
+      ${l.map((o) => `<div class="cn-g-obra clicavel" data-abrir="obra:${o.id}:cronograma"><span class="t corta">${esc(o.titulo)}</span><div class="cn-g-trilho"><i class="cn-g-hoje"></i><b style="left:${x(o.inicio)};width:${w(o.inicio, o.previsao)}" class="cn-g-total ${atrasada(o) ? 'er' : ''}"></b></div></div>
+        ${planoEtapas(o).map((e) => `<div class="cn-g-etapa"><span class="corta">${esc(e.nome)}</span><div class="cn-g-trilho"><i class="cn-g-hoje"></i><b style="left:${x(e.ini)};width:${w(e.ini, e.fim)}" class="${e.status === 'feita' ? 'ok' : atrasoEtapa(e) ? 'er' : e.status === 'andamento' ? 'and' : ''}" title="${esc(e.nome)}: ${dataCurta(e.ini)} a ${dataCurta(e.fim)}"></b></div></div>`).join('')}`).join('')}
+      <div class="cn-g-leg"><span><i class="ok"></i>Concluída</span><span><i class="and"></i>Em andamento</span><span><i></i>A fazer</span><span><i class="er"></i>Atrasada</span><span><i class="hj"></i>Hoje</span></div></div>`;
+}
+
+function terceirosPag(a) {
+  const l = terc(a), aberto = soma(l, (t) => medidoTerc(t) - pagoTerc(t)), contratado = soma(l, (t) => t.valor);
+  return `<div class="entre"><span class="mute" style="font-size:12.5px">Gesseiro, vidraceiro, marmoraria: combine o valor do serviço e pague por medição (o quanto foi feito). O pago entra nos gastos da obra.</span><button type="button" class="btn pri" data-acao="novoCad" data-c="terceiros">${ic('plus')}Terceirizado</button></div>
+    ${kpis([{ rot: 'Contratado', icone: 'handshake', val: moeda(contratado), nota: `${l.length} serviços` }, { rot: 'Medido e não pago', icone: 'hand-coins', val: moeda(aberto), alerta: aberto > 0 }, { rot: 'Falta medir', icone: 'ruler', val: moeda(soma(l, (t) => t.valor - medidoTerc(t))) }])}
+    <div class="cartao" style="overflow-x:auto">${l.length ? `<table class="tabela"><thead><tr><th>Serviço</th><th>Obra</th><th style="width:170px">Executado</th><th class="n">Contratado</th><th class="n">Pago</th><th></th></tr></thead><tbody>${l.map((t) => { const pc = t.valor ? (medidoTerc(t) / t.valor) * 100 : 0, devo = medidoTerc(t) - pagoTerc(t); return `<tr><td><span class="prim">${esc(t.servico)}</span><span class="sub">${esc(t.nome)}${t.telefone ? ` · <a href="${telLink(t.telefone)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</span></td><td>${esc(ob(a, t.obra)?.titulo || '')}</td><td>${prog(pc, pc >= 100 ? 'ok' : '')}<span class="sub">${pct(pc)}</span></td><td class="n">${moeda(t.valor)}</td><td class="n">${moeda(pagoTerc(t))}${devo > 0 ? `<span class="sub al-tx">${moeda(devo)} a pagar</span>` : ''}</td><td class="acoes">${medidoTerc(t) < t.valor ? `<button type="button" class="btn peq" data-acao="medir" data-id="${t.id}">${ic('ruler')}Medição</button>` : ''}${devo > 0 ? `<button type="button" class="btn peq pri" data-acao="pagarTerc" data-id="${t.id}">${ic('currency-circle-dollar')}Pagar</button>` : ''}<button type="button" class="btn fant peq ic-so" data-acao="editarCad" data-c="terceiros" data-id="${t.id}" aria-label="Editar">${ic('pencil-simple')}</button></td></tr>`; }).join('')}</tbody></table>` : vazio('handshake', 'Nenhum terceirizado', 'Cadastre os serviços que você contrata de parceiros.')}</div>`;
+}
+
+function ferramentasPag(a) {
+  const l = ferr(a), fora = l.filter((f) => f.local === 'obra'), esquecidas = fora.filter((f) => foraHa(f) > 15);
+  return `<div class="entre"><span class="mute" style="font-size:12.5px">Saiba onde está cada ferramenta e com quem. Ferramenta parada em obra há mais de 15 dias aparece em destaque.</span><button type="button" class="btn pri" data-acao="novoCad" data-c="ferramentas">${ic('plus')}Ferramenta</button></div>
+    ${kpis([{ rot: 'Ferramentas', icone: 'toolbox', val: num(l.length), nota: moeda(soma(l, (f) => f.valor || 0)) + ' em patrimônio' }, { rot: 'Em obra', icone: 'house-line', val: num(fora.length) }, { rot: 'Há mais de 15 dias fora', icone: 'warning', val: num(esquecidas.length), alerta: esquecidas.length > 0 }])}
+    <div class="cartao" style="overflow-x:auto">${l.length ? `<table class="tabela"><thead><tr><th>Ferramenta</th><th>Onde está</th><th>Com quem</th><th class="n">Valor</th><th></th></tr></thead><tbody>${l.map((f) => `<tr><td><span class="prim">${esc(f.nome)}</span><span class="sub">${esc(f.patrimonio || '')}</span></td><td>${f.local === 'obra' ? `${esc(ob(a, f.obra)?.titulo || 'Obra')}<span class="sub ${foraHa(f) > 15 ? 'al-tx' : ''}">há ${foraHa(f)} dias</span>` : f.local === 'manutencao' ? et('Na manutenção', 'al') : et('No depósito', 'ok')}</td><td>${esc(pessoa(a, f.pessoa)?.nome || '—')}</td><td class="n">${f.valor ? moeda(f.valor) : '—'}</td><td class="acoes">${f.local === 'obra' ? `<button type="button" class="btn peq" data-acao="devolverFerr" data-id="${f.id}">${ic('arrow-u-down-left')}Voltou</button>` : `<button type="button" class="btn peq" data-acao="levarFerr" data-id="${f.id}">${ic('truck')}Levar para obra</button>`}<button type="button" class="btn fant peq ic-so" data-acao="editarCad" data-c="ferramentas" data-id="${f.id}" aria-label="Editar">${ic('pencil-simple')}</button></td></tr>`).join('')}</tbody></table>` : vazio('toolbox', 'Nenhuma ferramenta', 'Cadastre betoneira, andaime, furadeira e o que mais você leva para as obras.')}</div>`;
+}
+
+function depositoPag(a) {
+  const l = a.db.lista('deposito').filter((x) => Number(x.qtd) > 0).sort((x, y) => x.item.localeCompare(y.item));
+  return `<div class="entre"><span class="mute" style="font-size:12.5px">Sobrou material numa obra? Guarde aqui e use na próxima. O que sai do depósito entra na lista de compras da obra como já comprado, sem gastar de novo.</span><button type="button" class="btn pri" data-acao="novoCad" data-c="deposito">${ic('plus')}Material</button></div>
+    ${kpis([{ rot: 'Itens guardados', icone: 'warehouse', val: num(l.length) }, { rot: 'Valor guardado', icone: 'piggy-bank', val: moeda(soma(l, (x) => (Number(x.qtd) || 0) * (Number(x.unit) || 0))), nota: 'dinheiro parado que pode virar lucro' }])}
+    <div class="cartao" style="overflow-x:auto">${l.length ? `<table class="tabela"><thead><tr><th>Material</th><th>Quantidade</th><th>Sobrou de</th><th class="n">Valor</th><th></th></tr></thead><tbody>${l.map((x) => `<tr><td><span class="prim">${esc(x.item)}</span></td><td>${num(x.qtd)} ${esc(x.unidade || '')}</td><td>${esc(ob(a, x.origem)?.titulo || '—')}</td><td class="n">${x.unit ? moeda(x.qtd * x.unit) : '—'}</td><td class="acoes"><button type="button" class="btn peq pri" data-acao="usarDeposito" data-id="${x.id}">${ic('truck')}Usar em obra</button><button type="button" class="btn fant peq ic-so" data-acao="editarCad" data-c="deposito" data-id="${x.id}" aria-label="Editar">${ic('pencil-simple')}</button></td></tr>`).join('')}</tbody></table>` : vazio('warehouse', 'Depósito vazio', 'Guarde as sobras das obras para usar nas próximas.')}</div>`;
+}
+
+function garantiaPag(a) {
+  const l = chamados(a), abertos = l.filter((x) => x.status !== 'resolvido'), garantia = obs(a).filter(emGarantia);
+  return `<div class="entre"><span class="mute" style="font-size:12.5px">Depois da entrega, o cliente abre o chamado pelo link da obra. Atender rápido vira indicação.</span><button type="button" class="btn pri" data-acao="novoChamado">${ic('plus')}Chamado</button></div>
+    ${kpis([{ rot: 'Chamados abertos', icone: 'lifebuoy', val: num(abertos.length), alerta: abertos.length > 0 }, { rot: 'Obras na garantia', icone: 'shield-check', val: num(garantia.length), nota: '90 dias depois da entrega' }, { rot: 'Resolvidos', icone: 'check-circle', val: num(l.length - abertos.length) }])}
+    <div class="cartao">${l.length ? `<ul class="lista">${l.map((x) => { const o = ob(a, x.obra); return `<li><div class="cresce"><div class="t corta">${esc(x.descricao)}</div><div class="s corta">${esc(o?.titulo || '')} · ${esc(cli(a, o?.cliente)?.nome || '')} · aberto ${relativo(x.data)}${x.pelo_cliente ? ' pelo cliente' : ''}${x.agendado ? ` · visita ${dataCurta(x.agendado)}` : ''}</div></div>${x.status === 'resolvido' ? et('Resolvido', 'ok') : x.status === 'agendado' ? et('Visita marcada', 'info') : et('Aberto', 'al')}${x.status !== 'resolvido' ? `<button type="button" class="btn peq" data-acao="agendarChamado" data-id="${x.id}">${ic('calendar-blank')}Marcar visita</button><button type="button" class="btn peq pri" data-acao="resolverChamado" data-id="${x.id}">${ic('check')}Resolvido</button>` : ''}</li>`; }).join('')}</ul>` : vazio('lifebuoy', 'Nenhum chamado', 'Quando o cliente pedir um reparo pelo link da obra, ele aparece aqui.')}</div>`;
+}
+
 // ---------------------------------------------------------------- documentos
 function docOrcamento(a, o) {
   const c = cli(a, o.cliente), cfg = a.db.cfg;
   return `<div class="doc"><div class="entre" style="align-items:flex-start"><div><h1>${esc(a.empresa)}</h1><div style="color:#555">${esc(cfg.endereco || '')} · ${esc(cfg.telefone || '')}</div></div><div style="text-align:right"><b style="font-size:16px">${o.status === 'orcamento' ? 'Orçamento' : 'Contrato de obra'}</b><div style="color:#555">${dataBR(hoje())}</div></div></div>
     <h2>Cliente e obra</h2><table><tr><td>${esc(c?.nome || '')}</td><td>${esc(c?.telefone || '')}</td></tr><tr><td colspan="2"><b>${esc(o.titulo)}</b> · ${esc(o.endereco || '')}</td></tr><tr><td>Início: ${dataBR(o.inicio)}</td><td>Previsão de entrega: ${dataBR(o.previsao)}</td></tr></table>
-    <h2>Etapas e pagamento</h2><table><thead><tr><th>Etapa</th><th class="n">Valor</th></tr></thead><tbody>${o.etapas.map((e) => `<tr><td>${esc(e.nome)}</td><td class="n">${moeda(e.valor)}</td></tr>`).join('')}<tr><td><b>Total</b></td><td class="n"><b>${moeda(o.valor)}</b></td></tr></tbody></table>
+    ${o.itens?.length ? `<h2>Itens do orçamento</h2><table><thead><tr><th>Item</th><th class="n">Qtd.</th><th class="n">Unitário</th><th class="n">Total</th></tr></thead><tbody>${o.itens.map((x) => `<tr><td>${esc(x.desc)}</td><td class="n">${num(x.qtd)} ${esc(x.unidade || '')}</td><td class="n">${moeda(x.unit * (1 + (Number(o.margem) || 0) / 100))}</td><td class="n">${moeda(x.qtd * x.unit * (1 + (Number(o.margem) || 0) / 100))}</td></tr>`).join('')}<tr><td colspan="3"><b>Total</b>${o.validade ? ` · proposta válida até ${dataBR(o.validade)}` : ''}</td><td class="n"><b>${moeda(o.valor)}</b></td></tr></tbody></table>` : ''}
+    ${o.etapas.length ? `<h2>Etapas e pagamento</h2><table><thead><tr><th>Etapa</th><th class="n">Valor</th></tr></thead><tbody>${o.etapas.map((e) => `<tr><td>${esc(e.nome)}</td><td class="n">${moeda(e.valor)}</td></tr>`).join('')}<tr><td><b>Total</b></td><td class="n"><b>${moeda(o.valor)}</b></td></tr></tbody></table>` : ''}
     <div style="margin-top:10px;color:#444;font-size:11px">Cada etapa é paga quando concluída, pelo PIX enviado no link de acompanhamento da obra. Material comprado pelo cliente não está incluso no valor. Garantia de 90 dias para a mão de obra.</div><div class="ass"><div>${esc(a.empresa)}</div><div>${esc(c?.nome || 'Cliente')}</div></div></div>`;
+}
+
+function aprovarOrcamento(a, o, quem) {
+  const etapas = o.etapas.length ? o.etapas : (o.itens || []).filter((x) => x.tipo !== 'material').map((x) => ({ nome: x.desc, valor: Math.round(x.qtd * x.unit * (1 + (Number(o.margem) || 0) / 100)), status: 'pendente', pago: false }));
+  const resto = o.valor - soma(etapas, (e) => e.valor);
+  if (!o.etapas.length && resto > 0) etapas.unshift({ nome: 'Entrada para material', valor: resto, status: 'pendente', pago: false });
+  if (etapas[0]) etapas[0] = { ...etapas[0], status: 'andamento' };
+  a.db.salvar('obras', { id: o.id, status: 'andamento', etapas, aprovado_em: hoje(), aprovado_por: quem === 'manualmente' ? '' : quem });
+  a.db.registrar(`obras:${o.id}`, `Orçamento aprovado ${quem === 'manualmente' ? 'manualmente' : `pelo cliente (${quem})`}: ${moeda(o.valor)}`, { icone: 'check', tom: 'ok' });
 }
 
 function decidirExtra(a, x, aprovado, quem) {
@@ -199,6 +308,7 @@ function docTermo(a, o) {
 const fichas = {
   obra(a, id, aba = 'etapas') {
     const o = ob(a, id); if (!o) return null; const c = cli(a, o.cliente), di = diaDe(a, id), ga = gasDe(a, id), i = STATUS.findIndex((s) => s[0] === o.status);
+    if (aba === 'etapas' && o.status === 'orcamento' && o.itens?.length) aba = 'orcamento';
     let corpo = '';
     if (aba === 'etapas') corpo = `<div class="gav-sec">${prog(progresso(o))}<p class="mute" style="font-size:12.5px;margin:6px 0 10px">${o.etapas.filter((e) => e.status === 'feita').length} de ${o.etapas.length} etapas concluídas · recebido ${moeda(recebido(o))} de ${moeda(o.valor)}</p>
       ${o.etapas.length ? `<table class="tabela"><thead><tr><th>Etapa</th><th class="n">Valor</th><th>Situação</th><th></th></tr></thead><tbody>${o.etapas.map((e, k) => `<tr><td>${esc(e.nome)}</td><td class="n">${moeda(e.valor)}</td><td>${e.status === 'feita' ? et('Concluída', 'ok') : e.status === 'andamento' ? et('Em andamento', 'info') : et('A fazer', '')} ${e.pago ? et('Paga', 'ok', 'sem-ponto') : ''}</td><td class="acoes">${e.status !== 'feita' ? `<button type="button" class="btn peq" data-acao="etapaFeita" data-id="${id}" data-k="${k}">${ic('check')}Concluir</button>` : !e.pago ? `<button type="button" class="btn peq pri" data-acao="cobrarEtapa" data-id="${id}" data-k="${k}">${ic('qr-code')}Cobrar</button><button type="button" class="btn peq" data-acao="etapaPaga" data-id="${id}" data-k="${k}">${ic('check')}Recebi</button>` : ''}</td></tr>`).join('')}</tbody></table>` : vazio('list-checks', 'Sem etapas', 'Divida a obra em etapas: o cliente paga cada uma quando ela fica pronta.')}
@@ -219,12 +329,20 @@ const fichas = {
         ${ad.length ? ad.map((x) => `<div class="gav-sec"><div class="entre"><b>${esc(x.descricao)}</b><b class="num">${moeda(x.valor)}</b></div><p class="mute" style="font-size:12.5px;margin:4px 0 8px">${esc(x.motivo || '')}${x.prazo_dias ? ` · +${x.prazo_dias} dias de prazo` : ''} · ${dataCurta(x.data)}</p>
           <div class="flex" style="flex-wrap:wrap">${x.status === 'pendente' ? `${et('Esperando o cliente', 'al')}<button type="button" class="btn peq pri" data-acao="pedirAprovacao" data-id="${x.id}">${ic('paper-plane-tilt')}Pedir aprovação</button><button type="button" class="btn peq" data-acao="aprovarExtra" data-id="${x.id}">${ic('check')}Aprovado</button><button type="button" class="btn fant peq" data-acao="recusarExtra" data-id="${x.id}">Recusado</button>` : x.status === 'aprovado' ? et('Aprovado · virou etapa', 'ok') : et('Recusado', '')}</div></div>`).join('') : `<div class="gav-sec">${vazio('plus-circle', 'Nenhum serviço extra')}</div>`}`;
     }
+    if (aba === 'orcamento') {
+      const it = o.itens || [], mat = soma(it.filter((x) => x.tipo === 'material'), (x) => x.qtd * x.unit), mao = soma(it.filter((x) => x.tipo !== 'material'), (x) => x.qtd * x.unit);
+      corpo = `<div class="gav-sec">${kpis([{ rot: 'Material', icone: 'package', val: moeda(mat) }, { rot: 'Mão de obra', icone: 'hammer', val: moeda(mao) }, { rot: `Total com margem de ${Number(o.margem) || 0}%`, icone: 'currency-circle-dollar', val: moeda(totalOrc(o)), nota: o.validade ? `vale até ${dataCurta(o.validade)}` : '' }])}</div>
+        <div class="gav-sec">${it.length ? `<table class="tabela"><thead><tr><th>Item</th><th class="n">Qtd.</th><th class="n">Unitário</th><th class="n">Total</th><th></th></tr></thead><tbody>${it.map((x, k) => `<tr><td>${esc(x.desc)}<span class="sub">${x.tipo === 'material' ? 'Material' : 'Mão de obra'}</span></td><td class="n">${num(x.qtd)} ${esc(x.unidade || '')}</td><td class="n">${moeda(x.unit)}</td><td class="n">${moeda(x.qtd * x.unit)}</td><td class="acoes">${o.status === 'orcamento' ? `<button type="button" class="btn fant peq ic-so" data-acao="tirarItem" data-id="${id}" data-k="${k}" aria-label="Remover">${ic('trash')}</button>` : ''}</td></tr>`).join('')}</tbody></table>` : vazio('clipboard-text', 'Orçamento sem itens', 'Liste material e mão de obra: o total já sai com a sua margem.')}
+          ${o.status === 'orcamento' ? `<div class="flex" style="margin-top:12px;flex-wrap:wrap"><button type="button" class="btn" data-acao="novoItem" data-id="${id}">${ic('plus')}Item</button><button type="button" class="btn" data-acao="margemOrc" data-id="${id}">${ic('percent')}Margem e validade</button>${it.length ? `<button type="button" class="btn pri" data-acao="enviarOrc" data-id="${id}">${ic('paper-plane-tilt')}Mandar para aprovar</button><button type="button" class="btn" data-acao="aprovarOrc" data-id="${id}">${ic('check')}Cliente aprovou</button>` : ''}</div>` : `<p class="mute" style="font-size:12.5px;margin-top:10px">${o.aprovado_em ? `Aprovado em ${dataCurta(o.aprovado_em)}${o.aprovado_por ? ` por ${esc(o.aprovado_por)}` : ''}.` : 'Orçamento fechado.'}</p>`}</div>`;
+    }
+    if (aba === 'cronograma') corpo = `<div class="gav-sec"><p class="mute" style="font-size:12.5px;margin:0 0 10px">Datas de cada etapa. Sem data, a etapa divide o prazo da obra em partes iguais.</p><table class="tabela"><thead><tr><th>Etapa</th><th>Início</th><th>Fim</th><th></th></tr></thead><tbody>${planoEtapas(o).map((e) => `<tr><td>${esc(e.nome)}${atrasoEtapa(e) ? ` ${et('Atrasada', 'er')}` : ''}</td><td>${dataCurta(e.ini)}</td><td>${dataCurta(e.fim)}</td><td class="acoes"><button type="button" class="btn fant peq" data-acao="datasEtapa" data-id="${id}" data-k="${e.k}">${ic('calendar-blank')}Datas</button></td></tr>`).join('')}</tbody></table></div>`;
+    if (aba === 'qualidade') corpo = o.etapas.length ? o.etapas.map((e, k) => { const q = qualiDe(o, k), ok = q.filter((x) => x.ok).length; return `<div class="gav-sec"><div class="entre"><b>${esc(e.nome)}</b>${ok === q.length ? et('Conferida', 'ok') : et(`${ok} de ${q.length}`, e.status === 'feita' ? 'al' : '')}</div><div class="col" style="gap:4px;margin-top:8px">${q.map((x, j) => `<label class="flex" style="gap:8px;font-size:13px"><input type="checkbox" data-mudar="quali" data-id="${id}" data-k="${k}" data-j="${j}" ${x.ok ? 'checked' : ''}>${esc(x.t)}</label>`).join('')}</div></div>`; }).join('') : `<div class="gav-sec">${vazio('list-checks', 'Sem etapas', 'Crie as etapas para ter o checklist de qualidade de cada uma.')}</div>`;
     if (aba === 'dados') corpo = `<div class="gav-sec">${props([['user', 'Cliente', c ? `${esc(c.nome)} · <a href="${telLink(c.telefone)}" target="_blank" rel="noopener">WhatsApp</a>` : null], ['map-pin', 'Endereço', esc(o.endereco || '')], ['calendar-blank', 'Início e entrega', `${dataCurta(o.inicio)} → <span class="${atrasada(o) ? 'er-tx' : ''}">${dataCurta(o.previsao)}</span>`], ['currency-circle-dollar', 'Valor fechado', moeda(o.valor)], ['eye', 'Gastos na página do cliente', o.mostrar_gastos ? 'aparecem' : 'escondidos']])}</div>
       <div class="gav-sec"><h4>Histórico</h4>${linhaDoTempo(a.db.historico(`obras:${id}`).map((h) => ({ quando: h.quando, icone: h.icone, tom: h.tom, html: esc(h.texto) })))}</div>`;
     return { html: ficha({ tipo: 'Obra', icone: 'house-line', titulo: esc(o.titulo), avatar: av(c?.nome || '?', 'g'), sub: `<span>${esc(c?.nome || '')}</span><b class="num" style="color:var(--tx)">· ${moeda(o.valor)}</b>${atrasada(o) ? et('Prazo vencido', 'al') : ''}`,
       extra: `<div class="etapas" style="margin-top:12px">${STATUS.map(([s, n], j) => `<button type="button" class="${j < i ? 'feita' : j === i ? 'atual' : ''}" data-acao="statusObra" data-id="${id}" data-s="${s}">${n}</button>`).join('')}</div>
         <div class="flex" style="margin-top:12px;flex-wrap:wrap"><button type="button" class="btn pri" data-acao="linkObra" data-id="${id}">${ic('link')}Página do cliente</button><button type="button" class="btn" data-acao="novoDiario" data-id="${id}">${ic('camera')}Registrar o dia</button><button type="button" class="btn" data-acao="imprimirObra" data-id="${id}">${ic('printer')}${o.status === 'orcamento' ? 'Orçamento' : 'Contrato'}</button>${o.status === 'concluida' || (o.etapas.length && o.etapas.every((e) => e.status === 'feita')) ? `<button type="button" class="btn" data-acao="imprimirTermo" data-id="${id}">${ic('seal-check')}Termo de entrega</button>` : ''}</div>`,
-      aba, abas: [['etapas', 'Etapas e pagamento', o.etapas.length], ['diario', 'Diário', di.length], ['gastos', 'Gastos', ga.length], ['compras', 'Compras', cpDe(a, id).filter((x) => x.status === 'comprar').length || ''], ['extras', 'Extras', adDe(a, id).filter((x) => x.status === 'pendente').length || ''], ['dados', 'Dados']], corpo,
+      aba, abas: [...(o.status === 'orcamento' || o.itens?.length ? [['orcamento', 'Orçamento', (o.itens || []).length || '']] : []), ['etapas', 'Etapas e pagamento', o.etapas.length], ['cronograma', 'Cronograma', planoEtapas(o).filter(atrasoEtapa).length || ''], ['qualidade', 'Qualidade', ''], ['diario', 'Diário', di.length], ['gastos', 'Gastos', ga.length], ['compras', 'Compras', cpDe(a, id).filter((x) => x.status === 'comprar').length || ''], ['extras', 'Extras', adDe(a, id).filter((x) => x.status === 'pendente').length || ''], ['dados', 'Dados']], corpo,
       acoes: `<button type="button" class="btn fant peq" data-acao="editarCad" data-c="obras" data-id="${id}">${ic('pencil-simple')}Editar</button><button type="button" class="btn fant peq ic-so" data-acao="excluirObra" data-id="${id}" aria-label="Excluir">${ic('trash')}</button>` }), montar: (g) => (g.dataset.aba = aba) };
   },
 };
@@ -240,6 +358,9 @@ const app = criarApp({
         const o = ob(a, id); if (!o) return null;
         const dia = await Promise.all(diaDe(a, id).slice(0, 12).map(async (x) => ({ data: x.data, etapa: x.etapa, texto: x.texto, clima: x.clima, fotos: await fotos(x, 6) })));
         return { titulo: o.titulo, endereco: o.endereco, inicio: o.inicio, previsao: o.previsao, valor: o.valor, status: o.status, progresso: Math.round(progresso(o)),
+          orcamento: o.status === 'orcamento' && o.itens?.length ? { itens: o.itens.map((x) => ({ desc: x.desc, qtd: x.qtd, unidade: x.unidade, total: Math.round(x.qtd * x.unit * (1 + (Number(o.margem) || 0) / 100) * 100) / 100 })), validade: o.validade || null } : null,
+          qualidade: o.etapas.filter((e) => e.status === 'feita').map((e) => ({ nome: e.nome, itens: checklistDe(e.nome).filter((t) => (e.quali || {})[t]) })).filter((x) => x.itens.length),
+          garantia: emGarantia(o) ? { ate: diaMais(90, o.entregue_em), chamados: a.db.lista('chamados').filter((x) => x.obra === id).map((x) => ({ descricao: x.descricao, status: x.status, agendado: x.agendado || null })) } : null,
           etapas: o.etapas.map((e, k) => ({ k, nome: e.nome, valor: e.valor, status: e.status, pago: !!e.pago, avisou: !!e.avisou_pago, txid: `OB${id}E${k}`.replace(/[^A-Za-z0-9]/g, '').slice(0, 25) })),
           aditivos: adDe(a, id).map((x) => ({ id: x.id, descricao: x.descricao, motivo: x.motivo, valor: x.valor, prazo_dias: x.prazo_dias, status: x.status })),
           compras: cpDe(a, id).filter((x) => x.status === 'comprar').map((x) => ({ item: x.item, quantidade: x.quantidade, estimado: x.quem === 'cliente' ? x.estimado : 0, quem: x.quem })),
@@ -248,6 +369,8 @@ const app = criarApp({
       responder: (a, r) => {
         const o = ob(a, r.ref); if (!o) return '';
         if (r.acao === 'aditivo') { const x = a.db.obter('aditivos', r.dados.id); if (!x || x.obra !== o.id || x.status !== 'pendente') return ''; decidirExtra(a, x, !!r.dados.aprovado, 'pelo cliente'); return `${o.titulo}: o cliente ${r.dados.aprovado ? 'aprovou' : 'recusou'} o serviço extra "${x.descricao}" (${moeda(x.valor)})`; }
+        if (r.acao === 'aprovar_orc') { if (o.status !== 'orcamento') return ''; aprovarOrcamento(a, o, String(r.dados.nome || '').slice(0, 80)); return `${o.titulo}: ${r.dados.nome || 'o cliente'} aprovou o orçamento de ${moeda(o.valor)} pelo link. A obra já está em andamento.`; }
+        if (r.acao === 'chamado') { const d = String(r.dados.descricao || '').trim().slice(0, 500); if (!d || !emGarantia(o)) return ''; a.db.salvar('chamados', { obra: o.id, descricao: d, data: hoje(), status: 'aberto', pelo_cliente: true }); return `${o.titulo}: o cliente abriu um chamado de garantia: "${d}"`; }
         if (r.acao !== 'paguei') return '';
         const k = Number(r.dados.k), e = o.etapas[k]; if (!e || e.pago) return '';
         a.db.salvar('obras', { id: o.id, etapas: o.etapas.map((x, j) => (j === k ? { ...x, avisou_pago: true } : x)) });
@@ -257,16 +380,30 @@ const app = criarApp({
     },
   },
   passos: (a) => [{ id: 'obra', rot: 'Cadastre a primeira obra', feito: obs(a).length > 0, acao: 'novaObra' }, { id: 'pix', rot: 'Cadastre a sua chave PIX', feito: a.temPix(), href: '#/config' }, { id: 'diario', rot: 'Registre o dia com fotos', feito: a.db.lista('diario').length > 0, acao: 'novoDiario' }],
-  equipe: [['Davi Nunes', 'Dono'], ['Robson Silva', 'Pedreiro'], ['Elias Prado', 'Ajudante']],
+  equipe: [['Davi Nunes', 'Dono'], ['Robson Silva', 'Mestre de obras'], ['Elias Prado', 'Pedreiro ou ajudante'], ['Carla Menezes', 'Financeiro']],
+  // cargos de obra: o que cada um pode fazer em cada área (o dono ajusta no Painel do dono)
+  cargos: [
+    ['Mestre de obras', (id) => (['gastos', 'relatorios', 'orcamentos', 'terceiros'].includes(id) ? 'ver' : 'editar')],
+    ['Encarregado', (id) => (['painel', 'obras', 'diario', 'equipe', 'cronograma', 'ferramentas', 'deposito'].includes(id) ? 'editar' : ['gastos', 'relatorios', 'orcamentos', 'terceiros'].includes(id) ? 'nenhum' : 'ver')],
+    ['Pedreiro ou ajudante', (id) => (id === 'diario' ? 'editar' : ['painel', 'obras', 'cronograma'].includes(id) ? 'ver' : 'nenhum')],
+    ['Engenheiro ou arquiteto', (id) => (['obras', 'diario', 'cronograma', 'orcamentos', 'garantia'].includes(id) ? 'editar' : 'ver')],
+    ['Comprador', (id) => (['gastos', 'deposito', 'ferramentas'].includes(id) ? 'editar' : ['relatorios', 'terceiros'].includes(id) ? 'nenhum' : 'ver')],
+  ],
   busca: [{ colecao: 'obras', grupo: 'Obras', icone: 'house-line', ficha: 'obra', rot: (o) => o.titulo, sub: (o, a) => cli(a, o.cliente)?.nome || '' }],
   comandos: [{ rot: 'Nova obra', icone: 'plus', acao: (a) => a.acoes.novaObra() }, { rot: 'Registrar o dia', icone: 'camera', acao: (a) => a.acoes.novoDiario({}) }, { rot: 'Lançar gasto', icone: 'receipt', acao: (a) => a.acoes.novoGasto({}) }],
   paginas: [
     { id: 'painel', rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
     { id: 'obras', rot: 'Obras', icone: 'kanban', titulo: 'Obras', render: obrasPag, cheio: true, atalho: 'o', novo: (a) => a.acoes.novaObra(), cont: (a) => obs(a).filter((o) => o.status === 'andamento').length },
+    { id: 'orcamentos', rot: 'Orçamentos', icone: 'clipboard-text', render: orcamentosPag, cont: (a) => obs(a).filter((o) => o.status === 'orcamento').length },
+    { id: 'cronograma', rot: 'Cronograma', icone: 'chart-bar-horizontal', render: cronogramaPag, cont: (a) => { const n = obs(a).filter((o) => ['andamento', 'pausada'].includes(o.status)).flatMap(planoEtapas).filter(atrasoEtapa).length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'diario', rot: 'Diário', titulo: 'Diário de obra', icone: 'camera', render: diarioPag, atalho: 'd' },
     { id: 'gastos', rot: 'Gastos', icone: 'receipt', render: gastosPag, atalho: 'g' },
     { id: 'equipe', rot: 'Equipe', icone: 'wrench', render: equipePag, cont: (a) => { const n = new Set(a.db.lista('diarias').filter((x) => !x.pago).map((x) => x.pessoa)).size; return n ? { n, tom: 'al' } : 0; } },
     { grupo: 'Gestão' },
+    { id: 'terceiros', rot: 'Terceiros', titulo: 'Terceirizados', icone: 'handshake', render: terceirosPag, cont: (a) => { const n = terc(a).filter((t) => medidoTerc(t) > pagoTerc(t)).length; return n ? { n, tom: 'al' } : 0; } },
+    { id: 'ferramentas', rot: 'Ferramentas', icone: 'toolbox', render: ferramentasPag, cont: (a) => { const n = ferr(a).filter((f) => foraHa(f) > 15).length; return n ? { n, tom: 'al' } : 0; } },
+    { id: 'deposito', rot: 'Depósito', titulo: 'Depósito de sobras', icone: 'warehouse', render: depositoPag },
+    { id: 'garantia', rot: 'Garantia', titulo: 'Garantia pós-obra', icone: 'lifebuoy', render: garantiaPag, cont: (a) => { const n = chamados(a).filter((x) => x.status !== 'resolvido').length; return n ? { n, tom: 'al' } : 0; } },
     { id: 'clientes', rot: 'Clientes', icone: 'users', render: clientesPag },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatoriosPag },
   ],
@@ -277,10 +414,11 @@ const escolherObra = (atual) => `<label class="campo largo">Obra<select name="ob
 const salvarEtapas = (o, etapas, msg) => { app.db.salvar('obras', { id: o.id, etapas }); if (msg) app.db.registrar(`obras:${o.id}`, msg, { icone: 'check', tom: 'ok' }); reab(); };
 Object.assign(app.acoes, {
   novaObra: async () => { const o = await editar(app, 'obras'); if (o) { app.render(); app.abrir('obra', o.id); } },
-  statusObra: (d) => { app.kanbans.obras ? app.kanbans.obras(d.id, d.s) : app.db.salvar('obras', { id: d.id, status: d.s }); reab(); },
+  statusObra: (d) => { app.kanbans.obras ? app.kanbans.obras(d.id, d.s) : app.db.salvar('obras', { id: d.id, status: d.s }); if (d.s === 'concluida' && !ob(app, d.id).entregue_em) app.db.salvar('obras', { id: d.id, entregue_em: hoje() }); reab(); },
   etapasModelo: (d) => { const o = ob(app, d.id), nomes = MODELOS_ETAPAS[d.m], cada = Math.round(o.valor / nomes.length / 10) * 10; salvarEtapas(o, nomes.map((nome, k) => ({ nome, valor: k === nomes.length - 1 ? o.valor - cada * (nomes.length - 1) : cada, status: 'pendente', pago: false })), `Etapas do modelo "${d.m}" criadas`); },
   novaEtapa: async (d) => { const o = ob(app, d.id); const r = await modal({ titulo: 'Nova etapa', largura: 420, corpo: '<form class="form-grade"><label class="campo largo">Etapa<input name="n" required placeholder="Ex.: Instalação elétrica"></label><label class="campo">Valor<input type="number" name="v" min="0" step="10" required></label></form>', botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Adicionar', classe: 'pri', acao: (f) => { const fm = f.querySelector('form'); return fm.reportValidity() ? Object.fromEntries(new FormData(fm)) : false; } }] }); if (!r) return; salvarEtapas(o, [...o.etapas, { nome: r.n, valor: Number(r.v), status: 'pendente', pago: false }]); },
-  etapaFeita: (d) => { const o = ob(app, d.id), k = Number(d.k); const etapas = o.etapas.map((e, j) => (j === k ? { ...e, status: 'feita', feita_em: hoje() } : j === k + 1 && e.status === 'pendente' ? { ...e, status: 'andamento' } : e)); if (o.status === 'orcamento') app.db.salvar('obras', { id: o.id, status: 'andamento' }); salvarEtapas(o, etapas, `Etapa concluída: ${o.etapas[k].nome}`); if (etapas.every((e) => e.status === 'feita')) avisar('Todas as etapas concluídas. Marque a obra como concluída quando entregar.'); },
+  etapaFeita: async (d) => { const o = ob(app, d.id), k = Number(d.k), q = qualiDe(o, k), falta = q.filter((x) => !x.ok);
+    if (falta.length && !(await confirmar(`O checklist de qualidade desta etapa tem ${falta.length} ${falta.length === 1 ? 'item' : 'itens'} sem conferir: ${falta.map((x) => x.t).join('; ')}. Concluir mesmo assim?`, { rotulo: 'Concluir', titulo: 'Qualidade' }))) { app.abrir('obra', d.id, 'qualidade'); return; } const etapas = o.etapas.map((e, j) => (j === k ? { ...e, status: 'feita', feita_em: hoje() } : j === k + 1 && e.status === 'pendente' ? { ...e, status: 'andamento' } : e)); if (o.status === 'orcamento') app.db.salvar('obras', { id: o.id, status: 'andamento' }); salvarEtapas(o, etapas, `Etapa concluída: ${o.etapas[k].nome}`); if (etapas.every((e) => e.status === 'feita')) avisar('Todas as etapas concluídas. Marque a obra como concluída quando entregar.'); },
   etapaPaga: (d) => { const o = ob(app, d.id), k = Number(d.k); salvarEtapas(o, o.etapas.map((e, j) => (j === k ? { ...e, pago: true, pago_em: hoje() } : e)), `Recebido: ${o.etapas[k].nome} (${moeda(o.etapas[k].valor)})`); avisar(`${moeda(o.etapas[k].valor)} recebido`); },
   cobrarEtapa: async (d) => { const o = ob(app, d.id), e = o.etapas[Number(d.k)], c = cli(app, o.cliente); if (!(await app.pedirPix('Para o cliente pagar a etapa pelo PIX, cadastre a sua chave.'))) return; app.portal.compartilhar('obra', d.id, { titulo: `Cobrar · ${e.nome}`, telefone: c?.telefone, texto: `Olá, ${c?.nome.split(' ')[0]}! A etapa "${e.nome}" da ${o.titulo.toLowerCase()} ficou pronta. Veja as fotos e pague ${moeda(e.valor)} pelo PIX aqui:` }); },
   novoDiario: async (d = {}) => {
@@ -353,6 +491,71 @@ Object.assign(app.acoes, {
   linkObra: (d) => { const o = ob(app, d.id), c = cli(app, o.cliente); app.portal.compartilhar('obra', d.id, { titulo: `Página do cliente · ${o.titulo}`, telefone: c?.telefone, texto: `Olá, ${c?.nome.split(' ')[0]}! Acompanhe a sua obra por aqui: etapas, fotos do dia a dia e pagamentos.` }); },
   imprimirObra: (d) => imprimir(docOrcamento(app, ob(app, d.id))),
   excluirObra: (d) => excluir(app, 'obras', d.id),
+  // orçamento por itens
+  novoItem: async (d) => {
+    const o = ob(app, d.id);
+    const r = await modal({ titulo: 'Item do orçamento', largura: 480, corpo: `<form class="form-grade"><label class="campo largo">Descrição<input name="desc" required placeholder="Ex.: Porcelanato 60x60"></label><label class="campo">Tipo<select name="tipo"><option value="material">Material</option><option value="mao">Mão de obra</option></select></label><label class="campo">Unidade<select name="unidade">${UNIDADES.map((u) => `<option>${u}</option>`).join('')}</select></label><label class="campo">Quantidade<input type="number" name="qtd" min="0" step="0.01" value="1" required></label><label class="campo">Valor unitário (custo)<input type="number" name="unit" min="0" step="0.01" required></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Adicionar', classe: 'pri', acao: (f) => { const fm = f.querySelector('form'); return fm.reportValidity() ? Object.fromEntries(new FormData(fm)) : false; } }] });
+    if (!r) return; const itens = [...(o.itens || []), { ...r, qtd: Number(r.qtd), unit: Number(r.unit) }];
+    app.db.salvar('obras', { id: o.id, itens, margem: o.margem ?? 15, validade: o.validade || diaMais(10), valor: totalOrc({ ...o, itens, margem: o.margem ?? 15 }) }); reab();
+  },
+  tirarItem: (d) => { const o = ob(app, d.id), itens = (o.itens || []).filter((_, k) => k !== Number(d.k)); app.db.salvar('obras', { id: o.id, itens, valor: totalOrc({ ...o, itens }) }); reab(); },
+  margemOrc: async (d) => {
+    const o = ob(app, d.id);
+    const r = await modal({ titulo: 'Margem e validade', largura: 420, corpo: `<form class="form-grade"><label class="campo">Margem (lucro e impostos)<input type="number" name="margem" min="0" max="200" step="0.5" value="${Number(o.margem) || 15}"><span class="ajuda">Somada ao custo de todos os itens</span></label><label class="campo">Proposta válida até<input type="date" name="validade" value="${o.validade || diaMais(10)}"></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Salvar', classe: 'pri', acao: (f) => Object.fromEntries(new FormData(f.querySelector('form'))) }] });
+    if (!r) return; const margem = Number(r.margem) || 0; app.db.salvar('obras', { id: o.id, margem, validade: r.validade, valor: totalOrc({ ...o, margem }) }); reab();
+  },
+  enviarOrc: async (d) => { const o = ob(app, d.id), c = cli(app, o.cliente); app.db.salvar('obras', { id: o.id, enviado_em: hoje() }); app.portal.compartilhar('obra', o.id, { titulo: `Orçamento · ${o.titulo}`, telefone: c?.telefone, texto: `Olá, ${c?.nome.split(' ')[0]}! Segue o orçamento da ${o.titulo.toLowerCase()}: ${moeda(o.valor)}, com todos os itens. Você aprova por aqui mesmo:` }); },
+  aprovarOrc: (d) => { aprovarOrcamento(app, ob(app, d.id), 'manualmente'); avisar('Orçamento aprovado: a obra está em andamento'); reab(); },
+  // cronograma e qualidade
+  datasEtapa: async (d) => {
+    const o = ob(app, d.id), k = Number(d.k), e = planoEtapas(o)[k];
+    const r = await modal({ titulo: `Datas · ${esc(e.nome)}`, largura: 400, corpo: `<form class="form-grade"><label class="campo">Início<input type="date" name="ini" value="${e.ini}" required></label><label class="campo">Fim<input type="date" name="fim" value="${e.fim}" required></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Salvar', classe: 'pri', acao: (f) => { const fm = f.querySelector('form'); if (!fm.reportValidity()) return false; const v = Object.fromEntries(new FormData(fm)); if (v.fim < v.ini) { avisar('O fim precisa ser depois do início', { tipo: 'erro' }); return false; } return v; } }] });
+    if (!r) return; salvarEtapas(o, o.etapas.map((x, j) => (j === k ? { ...x, ini: r.ini, fim: r.fim } : x)));
+  },
+  quali: (d, el) => { const o = ob(app, d.id), k = Number(d.k), t = qualiDe(o, k)[Number(d.j)].t; app.db.salvar('obras', { id: o.id, etapas: o.etapas.map((x, j) => (j === k ? { ...x, quali: { ...(x.quali || {}), [t]: el.checked } } : x)) }); setTimeout(reab, 0); },
+  // terceirizados
+  medir: async (d) => {
+    const t = app.db.obter('terceiros', d.id), feito = medidoTerc(t), falta = t.valor - feito;
+    const r = await modal({ titulo: `Medição · ${esc(t.servico)}`, largura: 440, corpo: `<p class="mute-2" style="margin-bottom:10px">Contratado ${moeda(t.valor)} · já medido ${moeda(feito)}. Informe quanto do serviço ficou pronto nesta medição.</p><form class="form-grade"><label class="campo">Porcentagem desta medição<input type="number" name="pct" min="1" max="${Math.max(1, Math.round((falta / (t.valor || 1)) * 100))}" value="${Math.min(50, Math.round((falta / (t.valor || 1)) * 100))}" required></label><label class="campo">Data<input type="date" name="data" value="${hoje()}"></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Registrar', classe: 'pri', acao: (f) => { const fm = f.querySelector('form'); return fm.reportValidity() ? Object.fromEntries(new FormData(fm)) : false; } }] });
+    if (!r) return; const valor = Math.min(falta, Math.round((t.valor * Number(r.pct)) / 100));
+    app.db.salvar('terceiros', { id: t.id, medicoes: [...(t.medicoes || []), { data: r.data, pct: Number(r.pct), valor, pago: false }] }); avisar(`Medição de ${moeda(valor)} registrada`); app.render();
+  },
+  pagarTerc: async (d) => {
+    const t = app.db.obter('terceiros', d.id), devo = medidoTerc(t) - pagoTerc(t);
+    if (!(await confirmar(`Pagar ${moeda(devo)} a ${t.nome}? O valor entra nos gastos da obra.`, { rotulo: 'Paguei', titulo: 'Pagar terceirizado' }))) return;
+    app.db.salvar('terceiros', { id: t.id, medicoes: (t.medicoes || []).map((m) => (m.pago ? m : { ...m, pago: true, pago_em: hoje() })) });
+    app.db.salvar('gastos', { obra: t.obra, data: hoje(), categoria: 'mao', descricao: `${t.servico} · ${t.nome}`, valor: devo, cliente_paga: false }); avisar(`${moeda(devo)} pagos a ${t.nome}`); app.render();
+  },
+  // ferramentas
+  levarFerr: async (d) => {
+    const f = app.db.obter('ferramentas', d.id), eq = app.db.lista('equipe');
+    const r = await modal({ titulo: `Levar · ${esc(f.nome)}`, largura: 460, corpo: `<form class="form-grade">${escolherObra()}<label class="campo largo">Com quem fica<select name="pessoa"><option value="">Ninguém em especial</option>${eq.map((p) => `<option value="${p.id}">${esc(p.nome)}</option>`).join('')}</select></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Levar', classe: 'pri', acao: (fm) => Object.fromEntries(new FormData(fm.querySelector('form'))) }] });
+    if (!r) return; app.db.salvar('ferramentas', { id: f.id, local: 'obra', obra: r.obra, pessoa: r.pessoa || null, desde: hoje() }); avisar(`${f.nome} foi para ${ob(app, r.obra)?.titulo}`); app.render();
+  },
+  devolverFerr: (d) => { const f = app.db.obter('ferramentas', d.id); app.db.salvar('ferramentas', { id: f.id, local: 'deposito', obra: null, pessoa: null, desde: null }); avisar(`${f.nome} voltou para o depósito`); app.render(); },
+  // depósito de sobras
+  usarDeposito: async (d) => {
+    const x = app.db.obter('deposito', d.id);
+    const r = await modal({ titulo: `Usar · ${esc(x.item)}`, largura: 440, corpo: `<form class="form-grade">${escolherObra()}<label class="campo">Quantidade<input type="number" name="qtd" min="0.01" max="${x.qtd}" step="0.01" value="${x.qtd}" required><span class="ajuda">Disponível: ${num(x.qtd)} ${esc(x.unidade || '')}</span></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Usar', classe: 'pri', acao: (f) => { const fm = f.querySelector('form'); return fm.reportValidity() ? Object.fromEntries(new FormData(fm)) : false; } }] });
+    if (!r) return; const q = Math.min(Number(r.qtd), Number(x.qtd));
+    app.db.salvar('deposito', { id: x.id, qtd: Math.round((x.qtd - q) * 100) / 100 });
+    app.db.salvar('compras', { obra: r.obra, item: `${x.item} (do depósito)`, quantidade: `${num(q)} ${x.unidade || ''}`.trim(), estimado: 0, quem: 'eu', status: 'comprado', comprado_em: hoje(), criado: hoje() });
+    app.db.registrar(`obras:${r.obra}`, `Material do depósito: ${x.item} (${num(q)} ${x.unidade || ''})${x.unit ? `, economia de ${moeda(q * x.unit)}` : ''}`, { icone: 'warehouse', tom: 'ok' });
+    avisar(x.unit ? `Economia de ${moeda(q * x.unit)}: o material saiu do depósito` : 'Material saiu do depósito'); app.render();
+  },
+  // garantia pós-obra
+  novoChamado: async () => {
+    const lo = obs(app).filter((o) => o.status === 'concluida'); if (!lo.length) return avisar('Nenhuma obra entregue ainda', { tipo: 'erro' });
+    const r = await modal({ titulo: 'Chamado de garantia', largura: 480, corpo: `<form class="form-grade"><label class="campo largo">Obra<select name="obra">${lo.map((o) => `<option value="${o.id}">${esc(o.titulo)} · ${esc(cli(app, o.cliente)?.nome || '')}</option>`).join('')}</select></label><label class="campo largo">O que aconteceu<textarea name="descricao" required></textarea></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Abrir', classe: 'pri', acao: (f) => { const fm = f.querySelector('form'); return fm.reportValidity() ? Object.fromEntries(new FormData(fm)) : false; } }] });
+    if (!r) return; app.db.salvar('chamados', { ...r, data: hoje(), status: 'aberto' }); app.render();
+  },
+  agendarChamado: async (d) => {
+    const x = app.db.obter('chamados', d.id), o = ob(app, x.obra), c = cli(app, o?.cliente);
+    const r = await modal({ titulo: 'Marcar visita', largura: 380, corpo: `<form class="form-grade"><label class="campo largo">Dia da visita<input type="date" name="dia" value="${diaMais(2)}" required></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Marcar e avisar', classe: 'pri', acao: (f) => Object.fromEntries(new FormData(f.querySelector('form'))) }] });
+    if (!r) return; app.db.salvar('chamados', { id: x.id, status: 'agendado', agendado: r.dia }); app.render();
+    if (c?.telefone) window.open(`${telLink(c.telefone)}?text=${encodeURIComponent(`Olá, ${c.nome.split(' ')[0]}! Recebemos o seu chamado ("${x.descricao}") e vamos passar aí no dia ${dataBR(r.dia)} para resolver.`)}`, '_blank', 'noopener');
+  },
+  resolverChamado: (d) => { app.db.salvar('chamados', { id: d.id, status: 'resolvido', resolvido_em: hoje() }); avisar('Chamado resolvido'); app.render(); },
   novoCad: async (d) => { if (await editar(app, d.c)) app.render(); },
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
 });
