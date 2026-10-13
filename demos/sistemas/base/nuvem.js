@@ -118,15 +118,17 @@ const LOGO_G = '<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="tru
 function telaConta(sb, cfg, modo = 'criar', aviso = '') {
   return new Promise((resolver) => {
     const titulos = { criar: ['Teste grátis por 7 dias', 'Crie sua conta. No próximo passo você cadastra o cartão: nada é cobrado nos 7 dias e dá para cancelar quando quiser.'], entrar: ['Entrar', PLAY ? 'Use o mesmo e-mail e senha da sua conta Blue Rose.' : 'Acesse o sistema da sua empresa.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] };
+    const convite = modo === 'criar' ? (new URLSearchParams(location.search).get('convite') || '').trim().toLowerCase() : '';
+    if (convite) titulos.criar = ['Você foi convidado', `Crie a sua conta com o e-mail <b>${esc(convite)}</b> para entrar na equipe da empresa no ${esc(cfg.nome)}. Não precisa cadastrar cartão: quem paga é o dono da empresa.`];
     const [t, s] = titulos[modo];
     const f = tela(cfg, `<h1 class="entrada-t">${t}</h1><p class="entrada-s">${s}</p>${aviso ? `<div class="dica" style="margin-bottom:14px">${ic('info')}<span>${aviso}</span></div>` : ''}
       ${modo !== 'esqueci' ? `<div class="entrada-google" hidden><button type="button" class="btn btn-google">${LOGO_G}Continuar com o Google</button><p class="entrada-ou"><span>ou com e-mail e senha</span></p></div>` : ''}
       <form class="col" style="gap:12px" novalidate>
         ${modo === 'criar' ? '<label class="campo">Seu nome<input name="nome" autocomplete="name" required></label>' : ''}
-        <label class="campo">E-mail<input name="email" type="email" autocomplete="email" required></label>
+        <label class="campo">E-mail<input name="email" type="email" autocomplete="email" required value="${esc(convite)}"></label>
         ${modo !== 'esqueci' ? `<label class="campo">Senha<input name="senha" type="password" autocomplete="${modo === 'criar' ? 'new-password' : 'current-password'}" minlength="8" required>${modo === 'criar' ? '<span class="ajuda">Pelo menos 8 caracteres</span>' : ''}</label>` : ''}
         <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p>
-        <button class="btn pri" style="height:40px">${modo === 'criar' ? 'Criar conta e começar o teste' : modo === 'entrar' ? 'Entrar' : 'Enviar link'}</button>
+        <button class="btn pri" style="height:40px">${modo === 'criar' ? (convite ? 'Criar conta e entrar na equipe' : 'Criar conta e começar o teste') : modo === 'entrar' ? 'Entrar' : 'Enviar link'}</button>
       </form>
       <div class="entrada-links">${modo === 'criar' ? '<span>Já tem conta?</span> <a href="#" data-modo="entrar">Entrar</a>' : modo === 'entrar' ? `<a href="#" data-modo="esqueci">Esqueci a senha</a>${PLAY ? '' : '<span>·</span><a href="#" data-modo="criar">Criar conta grátis</a>'}` : '<a href="#" data-modo="entrar">Voltar para entrar</a>'}</div>`);
     document.querySelectorAll('[data-modo]').forEach((a) => (a.onclick = (e) => { e.preventDefault(); telaConta(sb, cfg, a.dataset.modo).then(resolver); }));
@@ -349,7 +351,10 @@ export async function iniciarNuvem(app, cfg) {
           const em = f.email.value.trim().toLowerCase();
           const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: em });
           if (er) return avisar(/duplicate/.test(er.message) ? 'Esse e-mail já foi convidado' : er.message, { tipo: 'erro' });
-          db.cfg.convidou = true; db.gravar(); f.reset(); avisar(`Convite criado. Peça para ${em} criar a conta em ${location.origin + location.pathname} com este e-mail.`, { tempo: 8000 }); carregarEquipe();
+          db.cfg.convidou = true; db.gravar(); f.reset(); carregarEquipe();
+          const link = `${location.origin + location.pathname}?convite=${encodeURIComponent(em)}`, msg = `Oi! Te adicionei na equipe da ${db.cfg.empresa || esp.nome} no ${cfg.nome}. Crie a sua conta com este e-mail (${em}) por aqui: ${link}`;
+          modal({ titulo: 'Convite criado', largura: 480, corpo: `<p class="mute-2" style="margin-bottom:10px">Mande o link para <b>${esc(em)}</b>. A pessoa cria a conta com esse e-mail e já entra na empresa, sem pagar nada. Se ela já tiver conta, é só entrar.</p><input readonly value="${esc(link)}" data-link-convite style="width:100%">`,
+            botoes: [{ rotulo: 'Copiar link', classe: 'fant', acao: () => { navigator.clipboard?.writeText(link).then(() => avisar('Link copiado')).catch(() => {}); return false; } }, { rotulo: 'Mandar no WhatsApp', classe: 'pri', acao: () => { window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank', 'noopener'); return true; } }] });
         },
         cancelarConvite: async (d) => { await sb.from('nexo_convites').delete().eq('espaco', esp.id).eq('email', d.e); carregarEquipe(); },
         removerMembro: async (d) => { if (!(await confirmar('Remover esta pessoa? Ela perde o acesso na hora.', { rotulo: 'Remover', perigo: true }))) return; await sb.from('nexo_membros').delete().eq('espaco', esp.id).eq('usuario', d.u); carregarEquipe(); },
