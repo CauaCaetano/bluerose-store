@@ -53,8 +53,11 @@ function semente() {
   const equipe = [['Robson Silva', 'Pedreiro', 250], ['Elias Prado', 'Ajudante', 150], ['Marcos Lima', 'Eletricista', 300], ['Jair Souza', 'Encanador', 280]].map(([nome, funcao, diaria], i) => ({ id: `eq${i}`, nome, funcao, diaria, telefone: `(31) 9${ent(8100, 9899)}-${ent(1000, 9999)}` }));
   const segunda = diaMais(-((new Date().getDay() + 6) % 7)), diarias = [];
   diario.filter((x) => x.data >= diaMais(-20)).forEach((x) => { const m = obras.find((o) => o.id === x.obra); const quem = m.titulo.includes('cozinha') || m.titulo.includes('Banheiro') ? [0, 1, 3] : [0, 1, 2];
-    quem.slice(0, Math.max(1, x.equipe)).forEach((k) => diarias.push({ id: `dr${diarias.length}`, obra: x.obra, data: x.data, pessoa: `eq${k}`, valor: equipe[k].diaria, pago: x.data < diaMais(-7, segunda), pago_em: x.data < diaMais(-7, segunda) ? diaMais(-9, segunda) : null })); });
-  return { equipe, diarias, _cfg: { empresa: 'Reforma Certa · Davi Nunes', telefone: '(31) 98877-4410', endereco: 'Belo Horizonte/MG', cnpj: '' }, clientes, obras, diario, gastos, compras, aditivos };
+    quem.slice(0, Math.max(1, x.equipe)).forEach((k) => !diarias.some((y) => y.pessoa === `eq${k}` && y.data === x.data) && diarias.push({ id: `dr${diarias.length}`, obra: x.obra, data: x.data, pessoa: `eq${k}`, valor: equipe[k].diaria, pago: x.data < diaMais(-7, segunda), pago_em: x.data < diaMais(-7, segunda) ? diaMais(-9, segunda) : null })); });
+  diarias.forEach((x, k) => { if (k % 9 === 4) Object.assign(x, { tipo: 'meia', valor: x.valor / 2 }); else x.tipo = 'inteira'; });
+  [['eq1', 3], ['eq2', 1]].forEach(([pid, n]) => { for (let k = n; k < n + 6; k++) { const data = diaMais(-k); if (diarias.some((x) => x.pessoa === pid && x.data === data)) continue; const o = diarias.find((x) => !x.pago && x.data >= diaMais(-7)); if (o) { diarias.push({ id: `dr${diarias.length}`, obra: o.obra, data, pessoa: pid, valor: 0, tipo: 'falta', pago: false }); break; } } });
+  const vales = [{ id: 'va0', pessoa: 'eq0', data: diaMais(-3), valor: 200, obs: 'Adiantamento para material da casa', descontado: false }, { id: 'va1', pessoa: 'eq1', data: diaMais(-2), valor: 100, obs: '', descontado: false }];
+  return { equipe, diarias, vales, _cfg: { empresa: 'Reforma Certa · Davi Nunes', telefone: '(31) 98877-4410', endereco: 'Belo Horizonte/MG', cnpj: '' }, clientes, obras, diario, gastos, compras, aditivos };
 }
 
 // ---------------------------------------------------------------- regras
@@ -65,6 +68,10 @@ const diaDe = (a, id) => a.db.lista('diario').filter((x) => x.obra === id).sort(
 const gasDe = (a, id) => a.db.lista('gastos').filter((x) => x.obra === id).sort((x, y) => y.data.localeCompare(x.data));
 const pessoa = (a, id) => a.db.obter('equipe', id);
 const abertas = (a, pid) => a.db.lista('diarias').filter((x) => x.pessoa === pid && !x.pago).sort((x, y) => x.data.localeCompare(y.data));
+const valesAbertos = (a, pid) => a.db.lista('vales').filter((x) => x.pessoa === pid && !x.descontado).sort((x, y) => x.data.localeCompare(y.data));
+const TIPO_DIA = { inteira: 'Diária inteira', meia: 'Meia diária', falta: 'Falta' };
+const saldoPessoa = (a, pid) => soma(abertas(a, pid), (x) => x.valor) - soma(valesAbertos(a, pid), (x) => x.valor);
+const contaDias = (l) => { const i = l.filter((x) => (x.tipo || 'inteira') === 'inteira').length, m = l.filter((x) => x.tipo === 'meia').length, f = l.filter((x) => x.tipo === 'falta').length; return [i && `${i} ${i === 1 ? 'inteira' : 'inteiras'}`, m && `${m} ${m === 1 ? 'meia' : 'meias'}`, f && `${f} ${f === 1 ? 'falta' : 'faltas'}`].filter(Boolean).join(' · '); };
 const cpDe = (a, id) => a.db.lista('compras').filter((x) => x.obra === id).sort((x, y) => (x.status === 'comprado') - (y.status === 'comprado') || x.item.localeCompare(y.item));
 const adDe = (a, id) => a.db.lista('aditivos').filter((x) => x.obra === id).sort((x, y) => y.data.localeCompare(x.data));
 const recebido = (o) => soma(o.etapas.filter((e) => e.pago), (e) => e.valor);
@@ -78,6 +85,7 @@ const stE = (o) => `<span class="et sem-ponto" style="background:color-mix(in sr
 const colecoes = {
   clientes: { singular: 'cliente', plural: 'clientes', campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel', obrigatorio: true }, { nome: 'endereco', rotulo: 'Endereço', tipo: 'texto', largo: true }] },
   equipe: { singular: 'pessoa da equipe', genero: 'f', plural: 'equipe', campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'funcao', rotulo: 'Função', tipo: 'texto', padrao: 'Ajudante' }, { nome: 'diaria', rotulo: 'Valor da diária', tipo: 'moeda', obrigatorio: true }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }] },
+  vales: { singular: 'vale', plural: 'vales', campos: [{ nome: 'valor', rotulo: 'Valor', tipo: 'moeda', obrigatorio: true }, { nome: 'data', rotulo: 'Data', tipo: 'data', padrao: () => hoje() }, { nome: 'obs', rotulo: 'Observação', tipo: 'texto', largo: true }] },
   obras: { singular: 'obra', genero: 'f', plural: 'obras', campos: [{ nome: 'cliente', rotulo: 'Cliente', tipo: 'relacao', colecao: 'clientes', obrigatorio: true }, { nome: 'titulo', rotulo: 'O que é (ex.: Reforma do banheiro)', tipo: 'texto', obrigatorio: true }, { nome: 'endereco', rotulo: 'Endereço da obra', tipo: 'texto', largo: true }, { nome: 'valor', rotulo: 'Valor fechado', tipo: 'moeda', obrigatorio: true }, { nome: 'inicio', rotulo: 'Início', tipo: 'data', padrao: () => hoje() }, { nome: 'previsao', rotulo: 'Previsão de entrega', tipo: 'data', padrao: () => diaMais(30) }, { nome: 'mostrar_gastos', rotulo: 'Mostrar os gastos ao cliente', tipo: 'booleano', texto: 'Sim, na página do cliente' }],
     antesDeSalvar: (d, a, antigo) => ({ status: antigo?.status || 'orcamento', etapas: antigo?.etapas || [], ...d, endereco: d.endereco || cli(a, d.cliente)?.endereco || '' }) },
 };
@@ -132,11 +140,22 @@ function gastosPag(a) {
 
 function equipePag(a) {
   const eq = a.db.lista('equipe').sort((x, y) => x.nome.localeCompare(y.nome)), seg = diaMais(-((new Date().getDay() + 6) % 7));
-  const semana = a.db.lista('diarias').filter((x) => x.data >= seg), aberto = a.db.lista('diarias').filter((x) => !x.pago);
-  return `<div class="entre"><span class="mute" style="font-size:12.5px">Marque quem foi à obra quando registrar o dia. As diárias somam aqui e, ao pagar, viram gasto de cada obra.</span><button type="button" class="btn pri" data-acao="novoCad" data-c="equipe">${ic('user-plus')}Pessoa</button></div>
-    ${kpis([{ rot: 'A pagar à equipe', icone: 'hand-coins', val: moeda(soma(aberto, (x) => x.valor)), nota: `${aberto.length} diárias em aberto`, alerta: aberto.length > 0 }, { rot: 'Diárias nesta semana', icone: 'calendar-check', val: num(semana.length), nota: moeda(soma(semana, (x) => x.valor)) }, { rot: 'Pessoas na equipe', icone: 'users-three', val: num(eq.length) }])}
-    <div class="cartao" style="overflow-x:auto">${eq.length ? `<table class="tabela"><thead><tr><th>Pessoa</th><th>Diária</th><th>Dias em aberto</th><th class="n">A pagar</th><th></th></tr></thead><tbody>${eq.map((p) => { const ab = abertas(a, p.id); return `<tr><td><span class="prim">${esc(p.nome)}</span><span class="sub">${esc(p.funcao || '')}</span></td><td>${moeda(p.diaria)}</td><td>${ab.length ? `${ab.length} · ${[...new Set(ab.map((x) => ob(a, x.obra)?.titulo).filter(Boolean))].map(esc).join(', ')}` : '<span class="mute">tudo pago</span>'}</td><td class="n"><b>${moeda(soma(ab, (x) => x.valor))}</b></td><td class="acoes">${ab.length ? `<button type="button" class="btn peq pri" data-acao="pagarEquipe" data-id="${p.id}">${ic('currency-circle-dollar')}Pagar</button>` : ''}<button type="button" class="btn fant peq ic-so" data-acao="editarCad" data-c="equipe" data-id="${p.id}" aria-label="Editar">${ic('pencil-simple')}</button></td></tr>`; }).join('')}</tbody></table>` : vazio('users-three', 'Cadastre a sua equipe', 'Pedreiro, ajudantes, eletricista: com a diária de cada um.')}</div>`;
+  const semana = a.db.lista('diarias').filter((x) => x.data >= seg && x.tipo !== 'falta'), aberto = a.db.lista('diarias').filter((x) => !x.pago), vales = a.db.lista('vales').filter((x) => !x.descontado);
+  return `<div class="entre"><span class="mute" style="font-size:12.5px">Marque a presença do dia (inteira, meia ou falta) e lance os vales. O saldo de cada um já sai com os vales descontados.</span><span class="flex"><button type="button" class="btn" data-acao="novoCad" data-c="equipe">${ic('user-plus')}Pessoa</button><button type="button" class="btn pri" data-acao="marcarPresenca">${ic('check-circle')}Marcar presença</button></span></div>
+    ${kpis([{ rot: 'Saldo a pagar à equipe', icone: 'hand-coins', val: moeda(soma(aberto, (x) => x.valor) - soma(vales, (x) => x.valor)), nota: `${moeda(soma(aberto, (x) => x.valor))} em diárias − ${moeda(soma(vales, (x) => x.valor))} em vales`, alerta: aberto.length > 0 }, { rot: 'Diárias nesta semana', icone: 'calendar-check', val: num(semana.length), nota: moeda(soma(semana, (x) => x.valor)) }, { rot: 'Vales em aberto', icone: 'money', val: moeda(soma(vales, (x) => x.valor)), nota: `${vales.length} ${vales.length === 1 ? 'vale' : 'vales'}` }])}
+    <div class="cartao" style="overflow-x:auto">${eq.length ? `<table class="tabela"><thead><tr><th>Pessoa</th><th>Diária</th><th>Dias em aberto</th><th class="n">Diárias</th><th class="n">Vales</th><th class="n">Saldo</th><th></th></tr></thead><tbody>${eq.map((p) => { const ab = abertas(a, p.id), vl = valesAbertos(a, p.id); return `<tr><td><span class="prim">${esc(p.nome)}</span><span class="sub">${esc(p.funcao || '')}</span></td><td>${moeda(p.diaria)}</td><td>${ab.length ? `${contaDias(ab)}<span class="sub">${[...new Set(ab.map((x) => ob(a, x.obra)?.titulo).filter(Boolean))].map(esc).join(', ')}</span>` : '<span class="mute">tudo pago</span>'}</td><td class="n">${moeda(soma(ab, (x) => x.valor))}</td><td class="n" style="white-space:nowrap">${vl.length ? `− ${moeda(soma(vl, (x) => x.valor))}` : '—'}</td><td class="n"><b>${moeda(saldoPessoa(a, p.id))}</b></td><td class="acoes"><button type="button" class="btn peq" data-acao="novoVale" data-id="${p.id}">${ic('money')}Vale</button><button type="button" class="btn peq" data-acao="comprovanteEquipe" data-id="${p.id}">${ic('receipt')}Comprovante</button>${ab.length || vl.length ? `<button type="button" class="btn peq pri" data-acao="pagarEquipe" data-id="${p.id}">${ic('currency-circle-dollar')}Pagar</button>` : ''}<button type="button" class="btn fant peq ic-so" data-acao="editarCad" data-c="equipe" data-id="${p.id}" aria-label="Editar">${ic('pencil-simple')}</button></td></tr>`; }).join('')}</tbody></table>` : vazio('users-three', 'Cadastre a sua equipe', 'Pedreiro, ajudantes, eletricista: com a diária de cada um.')}</div>`;
 }
+
+function docComprovanteEquipe(a, p, ab, vl, pago = false) {
+  const cfg = a.db.cfg, tot = soma(ab, (x) => x.valor), tv = soma(vl, (x) => x.valor);
+  return `<div class="doc"><div class="entre" style="align-items:flex-start"><div><h1>${esc(a.empresa)}</h1><div style="color:#555">${esc(cfg.endereco || '')} · ${esc(cfg.telefone || '')}</div></div><div style="text-align:right"><b style="font-size:16px">${pago ? 'Recibo de pagamento' : 'Fechamento de diárias'}</b><div style="color:#555">${dataBR(hoje())}</div></div></div>
+    <h2>${esc(p.nome)} · ${esc(p.funcao || '')}</h2><p style="margin:0 0 8px;color:#555">Diária combinada: ${moeda(p.diaria)}${ab.length ? ` · período de ${dataBR(ab[0].data)} a ${dataBR(ab[ab.length - 1].data)}` : ''}</p>
+    <table><thead><tr><th>Data</th><th>Obra</th><th>Presença</th><th class="n">Valor</th></tr></thead><tbody>${ab.map((x) => `<tr><td>${dataBR(x.data)}</td><td>${esc(ob(a, x.obra)?.titulo || '')}</td><td>${TIPO_DIA[x.tipo || 'inteira']}</td><td class="n">${moeda(x.valor)}</td></tr>`).join('') || '<tr><td colspan="4">Nenhuma diária em aberto</td></tr>'}<tr><td colspan="3"><b>Total de diárias</b> (${contaDias(ab) || '0'})</td><td class="n"><b>${moeda(tot)}</b></td></tr></tbody></table>
+    ${vl.length ? `<h2>Vales (adiantamentos)</h2><table><tbody>${vl.map((x) => `<tr><td>${dataBR(x.data)}</td><td>${esc(x.obs || 'Vale')}</td><td class="n">− ${moeda(x.valor)}</td></tr>`).join('')}<tr><td colspan="2"><b>Total de vales</b></td><td class="n"><b>− ${moeda(tv)}</b></td></tr></tbody></table>` : ''}
+    <h2>Saldo ${pago ? 'pago' : 'a pagar'}</h2><table><tbody><tr><td>${moeda(tot)} em diárias − ${moeda(tv)} em vales</td><td class="n"><b style="font-size:16px">${moeda(tot - tv)}</b></td></tr></tbody></table>
+    <div class="ass"><div>${esc(a.empresa)}</div><div>${esc(p.nome)} · ${pago ? 'recebi' : 'conferi'}</div></div></div>`;
+}
+const textoFechamento = (a, p, ab, vl) => [`*Fechamento · ${p.nome}*`, ...ab.map((x) => `${dataCurta(x.data)} · ${TIPO_DIA[x.tipo || 'inteira']}${x.valor ? ` · ${moeda(x.valor)}` : ''}`), `Total de diárias: ${moeda(soma(ab, (x) => x.valor))}`, ...(vl.length ? [`Vales: − ${moeda(soma(vl, (x) => x.valor))}`] : []), `*Saldo: ${moeda(soma(ab, (x) => x.valor) - soma(vl, (x) => x.valor))}*`].join('\n');
 
 function clientesPag(a) {
   return a.tab({ id: 'clientes', colecao: 'clientes', singular: 'cliente', plural: 'clientes', ordem: 'nome', novo: { rot: 'Novo cliente', attrs: 'data-acao="novoCad" data-c="clientes"' }, aoClicar: async (id) => { if (await editar(a, 'clientes', cli(a, id))) a.render(); },
@@ -280,12 +299,34 @@ Object.assign(app.acoes, {
   tirarGasto: (d) => { app.db.apagar('gastos', d.id); reab(); },
   imprimirTermo: (d) => imprimir(docTermo(app, ob(app, d.id))),
   pagarEquipe: async (d) => {
-    const p = pessoa(app, d.id), ab = abertas(app, d.id), tot = soma(ab, (x) => x.valor);
-    if (!(await confirmar(`Pagar ${ab.length} diárias a ${p.nome} (${moeda(tot)})? O valor entra nos gastos de cada obra.`, { rotulo: 'Paguei', titulo: 'Pagar a equipe' }))) return;
-    Object.entries(agrupar(ab, (x) => x.obra)).forEach(([oid, l]) => app.db.salvar('gastos', { obra: oid, data: hoje(), categoria: 'mao', descricao: `Diárias · ${p.nome} (${l.length} ${l.length === 1 ? 'dia' : 'dias'})`, valor: soma(l, (x) => x.valor), cliente_paga: false }));
+    const p = pessoa(app, d.id), ab = abertas(app, d.id), vl = valesAbertos(app, d.id), tot = soma(ab, (x) => x.valor), tv = soma(vl, (x) => x.valor), saldo = tot - tv;
+    if (!(await confirmar(`Pagar ${p.nome}: ${moeda(tot)} em diárias${tv ? ` − ${moeda(tv)} em vales` : ''} = ${moeda(saldo)}. As diárias entram nos gastos de cada obra.`, { rotulo: 'Paguei', titulo: 'Pagar a equipe' }))) return;
+    Object.entries(agrupar(ab.filter((x) => x.valor), (x) => x.obra)).forEach(([oid, l]) => app.db.salvar('gastos', { obra: oid, data: hoje(), categoria: 'mao', descricao: `Diárias · ${p.nome} (${contaDias(l)})`, valor: soma(l, (x) => x.valor), cliente_paga: false }));
+    const texto = textoFechamento(app, p, ab, vl), doc = docComprovanteEquipe(app, p, ab, vl, true);
     ab.forEach((x) => app.db.salvar('diarias', { id: x.id, pago: true, pago_em: hoje() }));
-    avisar(`${moeda(tot)} pagos a ${p.nome}`); app.render();
-    if (p.telefone) window.open(`${telLink(p.telefone)}?text=${encodeURIComponent(`Oi, ${p.nome.split(' ')[0]}! Paguei ${moeda(tot)} das suas ${ab.length} diárias (${ab.map((x) => dataCurta(x.data)).join(', ')}). Valeu pelo trabalho!`)}`, '_blank', 'noopener');
+    vl.forEach((x) => app.db.salvar('vales', { id: x.id, descontado: true, descontado_em: hoje() }));
+    avisar(`${moeda(saldo)} pagos a ${p.nome}`); app.render();
+    const r = await modal({ titulo: 'Recibo pronto', largura: 440, corpo: `<p class="mute-2">Mande o fechamento para ${esc(p.nome.split(' ')[0])} ou imprima o recibo para assinar.</p>`, botoes: [{ rotulo: 'Imprimir recibo', classe: 'fant', valor: 'imprimir' }, ...(p.telefone ? [{ rotulo: 'Mandar no WhatsApp', classe: 'pri', valor: 'zap' }] : [])] });
+    if (r === 'imprimir') imprimir(doc);
+    if (r === 'zap') window.open(`${telLink(p.telefone)}?text=${encodeURIComponent(`${texto}\n\nPago em ${dataBR(hoje())}. Valeu pelo trabalho!`)}`, '_blank', 'noopener');
+  },
+  novoVale: async (d) => { const p = pessoa(app, d.id); if (await editar(app, 'vales', null, { pessoa: p.id })) { avisar(`Vale lançado para ${p.nome}: sai do próximo pagamento`); app.render(); } },
+  comprovanteEquipe: async (d) => {
+    const p = pessoa(app, d.id), ab = abertas(app, d.id), vl = valesAbertos(app, d.id);
+    const r = await modal({ titulo: `Fechamento · ${esc(p.nome)}`, largura: 480, corpo: `<pre style="white-space:pre-wrap;font:13px/1.5 var(--mono);background:var(--painel-2);border:1px solid var(--borda);border-radius:8px;padding:12px;margin:0">${esc(textoFechamento(app, p, ab, vl).replace(/\*/g, ''))}</pre>`, botoes: [{ rotulo: 'Imprimir (PDF)', classe: 'fant', valor: 'imprimir' }, ...(p.telefone ? [{ rotulo: 'Mandar no WhatsApp', classe: 'pri', valor: 'zap' }] : [])] });
+    if (r === 'imprimir') imprimir(docComprovanteEquipe(app, p, ab, vl));
+    if (r === 'zap') window.open(`${telLink(p.telefone)}?text=${encodeURIComponent(textoFechamento(app, p, ab, vl))}`, '_blank', 'noopener');
+  },
+  marcarPresenca: async () => {
+    const eq = app.db.lista('equipe').sort((x, y) => x.nome.localeCompare(y.nome)); if (!eq.length) return avisar('Cadastre a equipe primeiro', { tipo: 'erro' });
+    const r = await modal({ titulo: 'Marcar presença', largura: 560, corpo: `<form class="form-grade">${escolherObra()}<label class="campo">Data<input type="date" name="data" value="${hoje()}"></label>
+      <div class="campo largo"><span style="margin-bottom:6px">Quem veio</span><div style="display:grid;gap:6px">${eq.map((p) => `<div class="entre" style="gap:8px"><span>${esc(p.nome)} <span class="mute">${esc(p.funcao || '')} · ${moeda(p.diaria)}</span></span><select name="p_${p.id}" style="width:auto;height:30px"><option value="">Não estava</option><option value="inteira">Diária inteira</option><option value="meia">Meia diária</option><option value="falta">Falta</option></select></div>`).join('')}</div></div></form>`,
+      botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Salvar', classe: 'pri', acao: (f) => Object.fromEntries(new FormData(f.querySelector('form'))) }] });
+    if (!r) return; let n = 0;
+    eq.forEach((p) => { const tipo = r[`p_${p.id}`]; if (!tipo) return; const ja = app.db.lista('diarias').find((x) => x.pessoa === p.id && x.data === r.data);
+      const reg = { obra: r.obra, data: r.data, pessoa: p.id, tipo, valor: tipo === 'inteira' ? p.diaria : tipo === 'meia' ? p.diaria / 2 : 0, pago: false };
+      if (ja && ja.pago) return; app.db.salvar('diarias', ja ? { ...reg, id: ja.id } : reg); n++; });
+    avisar(`Presença de ${n} ${n === 1 ? 'pessoa' : 'pessoas'} marcada`); app.render();
   },
   novaCompra: async (d) => {
     const r = await modal({ titulo: 'Item para comprar', largura: 460, corpo: '<form class="form-grade"><label class="campo largo">Item<input name="item" required placeholder="Ex.: Argamassa AC-III"></label><label class="campo">Quantidade<input name="quantidade" placeholder="Ex.: 8 sacos"></label><label class="campo">Valor estimado<input type="number" name="estimado" min="0" step="0.01"></label><label class="campo largo">Quem compra<select name="quem"><option value="eu">Eu (entra nos meus gastos)</option><option value="cliente">O cliente</option></select></label></form>', botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Adicionar', classe: 'pri', acao: (f) => { const fm = f.querySelector('form'); return fm.reportValidity() ? Object.fromEntries(new FormData(fm)) : false; } }] });
