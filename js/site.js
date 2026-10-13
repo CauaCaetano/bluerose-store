@@ -510,3 +510,17 @@
   aviso.querySelector('button').addEventListener('click', function () { try { localStorage.setItem('br-lang', 'pt'); } catch (e) {} aviso.remove(); });
   document.body.appendChild(aviso);
 })();
+
+/* App Linha Nexo na Play Store: enquanto o endereço estiver vazio, o selo mostra "Em breve".
+   Quando o app for publicado, cole o link da Play Store aqui e publique o site. */
+(function () {
+  var BR_PLAY = '';
+  if (!BR_PLAY) {
+    document.querySelectorAll('[data-play][aria-disabled="true"]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); }); });
+    return;
+  }
+  document.querySelectorAll('[data-play]').forEach(function (a) {
+    a.href = BR_PLAY; a.target = '_blank'; a.rel = 'noopener'; a.removeAttribute('aria-disabled'); a.title = 'Baixar o app na Play Store';
+    var r = a.querySelector('[data-play-rot]'); if (r) r.textContent = 'Disponível no';
+  });
+})();

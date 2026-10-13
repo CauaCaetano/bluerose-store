@@ -89,7 +89,7 @@
     b.addEventListener('click', function () {
       var plano = b.getAttribute('data-contratar');
       var link = links[plano];
-      if (!link || typeof dlg.showModal !== 'function') { location.hash = 'contato'; return; }
+      if ((!link && !/^a-sis-/.test(plano)) || typeof dlg.showModal !== 'function') { location.hash = 'contato'; return; }
       // comprar e alugar exigem conta: entra primeiro, depois mostra o resumo
       if (window.BR_CONTA && !window.BR_CONTA.sessao()) { window.BR_CONTA.exigirLogin('Para contratar, entre ou crie a sua conta. É grátis e leva menos de um minuto.').then(function () { b.click(); }); return; }
       var assinatura = plano.indexOf('a-') === 0;
