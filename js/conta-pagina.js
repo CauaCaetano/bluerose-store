@@ -64,6 +64,28 @@
     var av = document.getElementById('conta-avatar');
     if (av) av.textContent = (primeiro || u.email || '?').charAt(0).toUpperCase();
   }
+  // "Indique e ganhe": link único da conta, progresso e prêmio
+  function indicacao() {
+    var bloco = document.getElementById('indique'); if (!bloco) return;
+    C.sb().then(function (c) { return c.rpc('nexo_minha_indicacao'); }).then(function (r) {
+      var d = r && r.data; if (!d || !d.codigo) return;
+      var link = 'https://bluerose-store.com/?indica=' + d.codigo, naRoda = d.confirmados % 3;
+      document.getElementById('ind-link').value = link;
+      document.getElementById('ind-zap').href = 'https://wa.me/?text=' + encodeURIComponent('Conheci os sistemas da Blue Rose e recomendo. Dá para testar 7 dias grátis por este link: ' + link);
+      document.getElementById('ind-barra').style.width = Math.round((naRoda / 3) * 100) + '%';
+      document.getElementById('ind-texto').textContent = d.confirmados + (d.confirmados === 1 ? ' assinou' : ' assinaram') + ' · ' + naRoda + ' de 3 para o próximo mês de Pro · ' + d.cadastrados + ' entraram pelo link';
+      var fim = (d.pro_ate || []).map(function (x) { return x.ate; }).sort().pop(), pr = document.getElementById('ind-premio');
+      if (fim) { pr.hidden = false; pr.textContent = 'Pro de cortesia até ' + data(fim) + ', pelas suas indicações. Você continua pagando o Básico.'; }
+      else if (d.meses_guardados) { pr.hidden = false; pr.textContent = d.meses_guardados + (d.meses_guardados === 1 ? ' mês' : ' meses') + ' de Pro guardado: entra assim que você tiver uma empresa no plano Básico.'; }
+      bloco.hidden = false;
+    }).catch(function () {});
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.id !== 'ind-copiar') return;
+    var el = document.getElementById('ind-link');
+    (navigator.clipboard ? navigator.clipboard.writeText(el.value) : Promise.reject()).catch(function () { el.select(); document.execCommand('copy'); });
+    e.target.textContent = 'Copiado'; setTimeout(function () { e.target.textContent = 'Copiar'; }, 1800);
+  });
   function carregar() {
     raiz.innerHTML = '<div class="conta-carregando" aria-label="Carregando"><i></i><i></i></div>';
     C.exigirLogin('Entre para ver os seus testes, assinaturas e compras.').then(function (s) {
@@ -81,6 +103,7 @@
         history.replaceState(null, '', 'conta.html');
       }
       mostrarResumo(l);
+      indicacao();
       raiz.innerHTML = aviso + (l.length ? '<h2 class="conta-titulo">Seus sistemas</h2>' + l.map(cartao).join('') :
         '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp" alt="" loading="lazy"><img src="img/sistemas/agenda.webp" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp" alt="" loading="lazy"></div><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um dos sistemas e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
     }).catch(function (x) { raiz.innerHTML = '<div class="conta-aviso er">' + esc(x.message || 'Não foi possível carregar.') + '</div>'; });

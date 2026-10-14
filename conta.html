@@ -24,18 +24,19 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=34">
+<link rel="stylesheet" href="css/site.css?v=36">
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=9" defer></script>
-<script src="js/site.js?v=17" defer></script>
+<script src="js/site.js?v=19" defer></script>
 <script src="js/planos.js?v=3" defer></script>
 <script src="js/contratar.js?v=7" defer></script>
 <script src="js/videos.js?v=4" defer></script>
-<script src="js/conta.js?v=3" defer></script>
-<script src="js/conta-pagina.js?v=4" defer></script>
+<script src="js/conta.js?v=4" defer></script>
+<script src="js/conta-pagina.js?v=5" defer></script>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="css/assistente.css?v=2">
-<script src="js/assistente.js?v=5" defer></script>
+<script src="js/assistente.js?v=6" defer></script>
+<script src="js/cookies.js?v=1" defer></script>
 </head>
 <body>
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -77,6 +78,15 @@
           <li><a href="privacidade.html#direitos"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg>Seus dados e privacidade</a></li>
           <li><a href="termos.html"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg>Termos de serviço</a></li>
         </ul>
+      </div>
+      <div class="conta-bloco conta-indica" id="indique" hidden>
+        <h2>Indique e ganhe</h2>
+        <p>A cada <b>3 pessoas</b> que assinarem pelo seu link, você ganha <b>1 mês de Pro pagando o Básico</b>. Com 6, são 2 meses; com 9, 3 meses, e assim por diante.</p>
+        <div class="ind-link"><input readonly id="ind-link" aria-label="Seu link de indicação"><button type="button" class="btn btn-ghost" id="ind-copiar">Copiar</button></div>
+        <a class="btn btn-primary ind-zap" id="ind-zap" href="#" target="_blank" rel="noopener">Compartilhar no WhatsApp</a>
+        <div class="ind-progresso"><div class="ind-barra"><i id="ind-barra"></i></div><span id="ind-texto"></span></div>
+        <p class="ind-premio" id="ind-premio" hidden></p>
+        <p class="ind-regras">Conta quando a pessoa cria uma conta nova pelo seu link e paga a primeira mensalidade, depois do teste grátis. <a href="termos.html#indicacao">Regras do programa</a></p>
       </div>
       <div class="conta-bloco">
         <h2>Como funciona a cobrança</h2>
@@ -126,7 +136,7 @@
     </nav>
     <div class="linha2">
       <span>© 2026 Blue Rose Express.</span>
-      <span>Sem cookies de rastreamento. A contagem de visitas é anônima.</span>
+      <span>Medição própria, só com o seu aceite. Sem anúncios e sem venda de dados.</span>
     </div>
   </div>
 </footer>

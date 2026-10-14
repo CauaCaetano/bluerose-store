@@ -20,11 +20,11 @@ const SITE = 'https://bluerose-store.com/';
 const PLAY = (() => { try { return localStorage.getItem('nexo-play') === '1'; } catch { return false; } })();
 const LOGO = new URL('blue-rose.png', import.meta.url).href, LOGO_NEXO = new URL('linha-nexo.png', import.meta.url).href;
 const SEP = '\u0001';
-// Plano Pro: equipe sem limite (Básico: 8 pessoas além do dono), histórico da equipe, marca da empresa nos links e documentos,
+// Plano Pro: equipe sem limite (Básico: 5 pessoas além do dono), histórico da equipe, marca da empresa nos links e documentos,
 // até 10 empresas por sistema e suporte prioritário. Custa R$ 60 a mais por mês (catálogo a-sis-<app>-pro).
-const LIMITE_BASICO = 8, EXTRA_PRO = 60;
-const SUPORTE = [64, 64, 60, 65, 68, 68, 60, 61, 59, 62, 66, 59, 59].map((c) => String.fromCharCode(c - 11)).join(''); // WhatsApp da Blue Rose (mesmo do site)
-const BENEFICIOS_PRO = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 8).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['camera', 'Sua marca nos links e documentos', 'O logo da sua empresa nas páginas que o cliente recebe e nos impressos, sem o "Feito com".'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.']];
+const LIMITE_BASICO = 5, EXTRA_PRO = 60;
+const SUPORTE = [64, 64, 60, 65, 68, 68, 60, 64, 59, 59, 66, 63, 65].map((c) => String.fromCharCode(c - 11)).join(''); // WhatsApp da Blue Rose (mesmo do site)
+const BENEFICIOS_PRO = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 5 além de você).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['camera', 'Sua marca nos links e documentos', 'O logo da sua empresa nas páginas que o cliente recebe e nos impressos, sem o "Feito com".'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.']];
 // plano anual: 12 meses com 20% de desconto (catálogo a-sis-<app>[-pro]-anual)
 const anual = (mensal) => Math.round(mensal * 12 * 0.8);
 const reais = (v) => `R$ ${Number(v).toLocaleString('pt-BR')}`;
@@ -312,6 +312,11 @@ export async function iniciarNuvem(app, cfg) {
   if (!session) session = await telaConta(sb, cfg, PLAY || new URLSearchParams(location.search).get('entrar') ? 'entrar' : 'criar');
   const uid = session.user.id, email = session.user.email;
   vigiarErros(sb, cfg);
+  // programa de indicação: quem chegou por um link de indicação fica ligado a quem indicou (uma vez por conta)
+  try {
+    const m = document.cookie.match(/(?:^|; )br_indica=([A-Z0-9]{6,16})/);
+    if (m && localStorage.getItem(`nexo-indicacao-${uid}`) == null) { const { data: r } = await sb.rpc('nexo_registrar_indicacao', { p_codigo: m[1] }); if (r && r !== 'login') localStorage.setItem(`nexo-indicacao-${uid}`, r); }
+  } catch { /* segue sem indicação */ }
   await sb.rpc('nexo_aceitar_convites');
   const { data: espacos, error } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono,criado').eq('app', cfg.id).order('criado');
   if (error) throw error;
@@ -324,7 +329,7 @@ export async function iniciarNuvem(app, cfg) {
   let escolha = espacos.length === 1 && !new URLSearchParams(location.search).has('trocar') ? { id: espacos[0].id } : espacos.find((s) => s.id === lembrado) && !new URLSearchParams(location.search).has('trocar') ? { id: lembrado } : await telaEmpresa(sb, cfg, espacos, await precisaToken());
   try { localStorage.setItem(`nexo-espaco-${cfg.id}`, escolha.id); } catch { /* ok */ }
   tela(cfg, `<div class="vazio" style="padding:30px 0">${ic('circle')}<b>${escolha.exemplo ? 'Preparando os dados de exemplo…' : 'Abrindo…'}</b></div>`);
-  const { data: esp } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono,nivel').eq('id', escolha.id).single();
+  const { data: esp } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono,nivel,pro_ate').eq('id', escolha.id).single();
   const { data: eu } = await sb.from('nexo_membros').select('permissoes,papel').eq('espaco', escolha.id).eq('usuario', session.user.id).maybeSingle();
   const linhas = escolha.novo ? [] : await lerTudo(sb, escolha.id);
   const db = new BancoNuvem(sb, escolha.id, uid, linhas);
@@ -333,7 +338,8 @@ export async function iniciarNuvem(app, cfg) {
     db.dados._cfg = { ...(escolha.exemplo ? cfg.semente()._cfg || {} : {}), empresa: escolha.nome, ...(escolha.ramo && !escolha.exemplo ? { ramo_pendente: escolha.ramo } : {}), ...(escolha.pix ? { pix: { chave: escolha.pix, nome: escolha.nome.slice(0, 25), cidade: '' } } : {}) };
     await db.enviar();
   }
-  const dono = esp.dono === uid, pro = esp.nivel === 'pro', papel = dono ? 'dono' : eu?.papel === 'admin' ? 'admin' : 'membro', gestor = papel !== 'membro';
+  const proCortesia = esp.nivel !== 'pro' && esp.pro_ate && diasAte(esp.pro_ate) >= 0 ? esp.pro_ate : null;
+  const dono = esp.dono === uid, pro = esp.nivel === 'pro' || !!proCortesia, papel = dono ? 'dono' : eu?.papel === 'admin' ? 'admin' : 'membro', gestor = papel !== 'membro';
   const minhas = gestor ? null : eu?.permissoes || null;
   let plano = null; // assinatura atual do dono (mensal ou anual, Básico ou Pro), lida quando abre o Painel do dono
   const teste = esp.plano === 'teste', restam = diasAte(esp.teste_ate), encerrado = esp.plano === 'suspenso' || (teste && restam < 0);
@@ -383,13 +389,34 @@ export async function iniciarNuvem(app, cfg) {
       return `<div class="dica">${ic('crown')}<span>Só o dono${dono ? '' : ' e os administradores'} veem este painel. ${dono ? 'Os administradores que você escolher também entram aqui para organizar a equipe.' : ''}</span></div>
         <div class="grade g4" style="gap:12px">${cartoes.map(([i, t_, v, s_]) => `<div class="cartao" style="padding:14px 16px"><div class="flex" style="gap:8px;color:var(--tx-3);font-size:12.5px">${ic(i, 'p')}${t_}</div><b style="display:block;font-size:19px;margin-top:6px">${esc(v)}</b><div class="mute-2" style="font-size:12px;margin-top:2px">${esc(s_)}</div></div>`).join('')}</div>
         <div class="grade g2" style="align-items:start">
-          <div class="col" style="gap:16px">${sessao.cartaoEquipe()}</div>
+          <div class="col" style="gap:16px">${sessao.cartaoEquipe()}${sessao.cartaoIndicacao()}</div>
           <div class="col" style="gap:16px">
             <div class="cartao"><div class="cartao-cab"><div><h3>Cargos sugeridos</h3><div class="sub">No convite, o cargo já marca o que a pessoa pode fazer</div></div></div><ul class="lista">${cargosDe(cfg).map(([n, pr]) => `<li><div class="cresce"><div class="t">${esc(n)}</div><div class="s">${esc(resumoAcesso({ ...pr, cargo: '' }))}</div></div></li>`).join('')}<li><div class="cresce"><div class="t">Administrador</div><div class="s">Acesso total e entra neste painel${dono ? '' : ' · só o dono escolhe'}</div></div></li></ul></div>
             ${dono && !PLAY ? `<div class="cartao"><div class="cartao-cab"><div><h3>Plano e pagamento</h3><div class="sub">${esc(nomePlano)}${p?.valor ? ` · ${reais(p.valor)}${ehAnual ? '/ano' : '/mês'}` : ''}</div></div></div><div class="cartao-corpo col" style="gap:10px">
               ${ehAnual ? `<div class="dica">${ic('check-circle')}<span>Você está no plano anual e já economiza 20%.</span></div>` : `<div class="entre"><span class="mute-2">Pague por ano e economize 20%: ${reais(anual(pro ? precoPro : precoBase))}/ano no lugar de ${reais((pro ? precoPro : precoBase) * 12)}</span><button type="button" class="btn pri" data-acao="mudarAnual">${ic('calendar-check')}Mudar para o anual</button></div>`}
               <div class="entre"><span class="mute-2">Ver cobranças, cancelar ou trocar o cartão</span><a class="btn" href="${SITE}conta.html" target="_top">${ic('user')}Minha conta</a></div></div></div>` : ''}
           </div></div>`;
+    },
+    carregarIndicacao: async () => {
+      if (sessao._lendoInd) return; sessao._lendoInd = true;
+      let data = null; try { ({ data } = await sb.rpc('nexo_minha_indicacao')); } catch { data = null; }
+      sessao.indicacao = data || { erro: true };
+      if (app.pagina?.id === 'dono') app.render();
+    },
+    cartaoIndicacao: () => {
+      if (!dono) return '';
+      const r = sessao.indicacao; if (!r) { sessao.carregarIndicacao(); return ''; }
+      if (r.erro) return '';
+      const link = `${SITE}?indica=${r.codigo}`, texto = `Uso o ${cfg.nome} da Blue Rose na minha empresa e recomendo. Teste 7 dias grátis por este link: ${link}`;
+      const naRoda = r.confirmados % 3, cortesia = (r.pro_ate || []).map((x) => x.ate).sort().pop();
+      return `<div class="cartao"><div class="cartao-cab"><div><h3>Indique e ganhe</h3><div class="sub">A cada 3 indicações que assinam, você ganha 1 mês de Pro pagando o Básico</div></div>${et(`${r.confirmados} ${r.confirmados === 1 ? 'assinou' : 'assinaram'}`, r.confirmados ? 'ok' : '')}</div>
+        <div class="cartao-corpo col" style="gap:12px">
+          <div class="flex" style="gap:8px"><input readonly value="${esc(link)}" aria-label="Seu link de indicação" style="flex:1;min-width:0" data-ind-link><button type="button" class="btn" data-acao="copiarIndicacao">${ic('copy')}Copiar</button><a class="btn pri" href="https://wa.me/?text=${encodeURIComponent(texto)}" target="_blank" rel="noopener">${ic('whatsapp-logo')}WhatsApp</a></div>
+          <div><div class="entre" style="font-size:12.5px;margin-bottom:6px"><span class="mute-2">${naRoda} de 3 para o próximo mês de Pro</span><span class="mute-2">${r.cadastrados} ${r.cadastrados === 1 ? 'pessoa entrou' : 'pessoas entraram'} pelo seu link</span></div><div class="prog"><i style="width:${Math.round((naRoda / 3) * 100)}%"></i></div></div>
+          ${cortesia ? `<div class="dica ok-fundo">${ic('crown')}<span>Pro de cortesia até <b>${dataCurta(cortesia)}</b>, pelas suas indicações. Você continua pagando o Básico.</span></div>` : ''}
+          ${r.meses_guardados ? `<div class="dica">${ic('gift')}<span>${r.meses_guardados} ${r.meses_guardados === 1 ? 'mês' : 'meses'} de Pro guardado${r.meses_guardados === 1 ? '' : 's'}: entra${r.meses_guardados === 1 ? '' : 'm'} assim que você tiver uma empresa no plano Básico.</span></div>` : ''}
+          <p class="mute" style="font-size:12px;margin:0">Conta quando a pessoa cria uma conta nova pelo seu link e paga a primeira mensalidade (depois do teste grátis). <a href="${SITE}termos.html#indicacao" target="_blank" rel="noopener">Regras</a></p>
+        </div></div>`;
     },
     carregarPlano: async () => {
       if (sessao._lendoPlano) return; sessao._lendoPlano = true;
@@ -461,6 +488,7 @@ export async function iniciarNuvem(app, cfg) {
           if (!escolha) return;
           try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${escolha}`, email_mp: email }); location.href = j.link; } catch (x) { avisar(x.message, { tipo: 'erro' }); }
         },
+        copiarIndicacao: async () => { const el = document.querySelector('[data-ind-link]'); if (!el) return; try { await navigator.clipboard.writeText(el.value); } catch { el.select(); document.execCommand('copy'); } avisar('Link copiado. Mande para quem pode usar o sistema.'); },
         mudarAnual: async () => {
           if (!dono) return avisar('Só o dono da empresa muda o plano', { tipo: 'erro' });
           const unico = !!cfg.produto?.unico, base = (cfg.produto?.mensal || 0) + (pro && !unico ? EXTRA_PRO : 0);

@@ -105,10 +105,19 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       }).catch(function (x) { erro.textContent = erroAuth(x); bt.disabled = false; });
     };
   }
+  // programa de indicação: quem chegou por um link de indicação fica ligado a quem indicou (uma vez por conta)
+  function registrarIndicacao(s) {
+    try {
+      var m = document.cookie.match(/(?:^|; )br_indica=([A-Z0-9]{6,16})/), chave = 'nexo-indicacao-' + s.user.id;
+      if (!m || localStorage.getItem(chave) != null) return s;
+      sb().then(function (c) { return c.rpc('nexo_registrar_indicacao', { p_codigo: m[1] }); }).then(function (r) { if (r && r.data && r.data !== 'login') localStorage.setItem(chave, r.data); }).catch(function () {});
+    } catch (e) { /* segue sem indicação */ }
+    return s;
+  }
   function exigirLogin(motivo) {
     return sb().then(function (c) { return c.auth.getSession(); }).then(function (r) {
-      if (r.data.session) return r.data.session;
-      return new Promise(function (ok) { telaLogin('criar', motivo || 'Para continuar, entre ou crie a sua conta. É grátis e leva menos de um minuto.', ok); });
+      if (r.data.session) return registrarIndicacao(r.data.session);
+      return new Promise(function (ok) { telaLogin('criar', motivo || 'Para continuar, entre ou crie a sua conta. É grátis e leva menos de um minuto.', ok); }).then(registrarIndicacao);
     });
   }
 

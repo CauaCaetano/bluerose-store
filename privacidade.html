@@ -23,13 +23,14 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=34">
+<link rel="stylesheet" href="css/site.css?v=36">
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=9" defer></script>
-<script src="js/site.js?v=17" defer></script>
-<script src="js/conta.js?v=3" defer></script>
+<script src="js/site.js?v=19" defer></script>
+<script src="js/conta.js?v=4" defer></script>
 <link rel="stylesheet" href="css/assistente.css?v=2">
-<script src="js/assistente.js?v=5" defer></script>
+<script src="js/assistente.js?v=6" defer></script>
+<script src="js/cookies.js?v=1" defer></script>
 </head>
 <body>
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -58,7 +59,7 @@
     <div class="wrap legal-wrap">
       <span class="eyebrow">Política de Privacidade</span>
       <h1 class="sec-title">Seus dados, sem letra miúda.</h1>
-      <p class="legal-data">Versão em vigor: 13 de outubro de 2026</p>
+      <p class="legal-data">Versão em vigor: 14 de outubro de 2026</p>
       <p class="sec-lede">O que coletamos, por que coletamos, com quem compartilhamos e como você exerce seus direitos pela LGPD.</p>
       <div class="legal-resumo"><h2>Resumo em 30 segundos</h2><ul>
         <li>Guardamos o que você escreve no formulário, para responder e fazer seu orçamento, e os dados da sua conta quando você testa ou contrata um sistema Nexo.</li>
@@ -79,11 +80,18 @@
 <li><b>Registros técnicos de erro:</b> quando algo falha num sistema Nexo, guardamos a mensagem de erro, a página, o navegador e a versão do sistema, ligados à conta, só para corrigir o problema. São apagados em até 90 dias.</li>
 <li><b>E-mails que enviamos:</b> resumo do dia (só quando você liga essa opção) e avisos antes do fim do teste grátis e antes de cada mensalidade.</li>
 <li><b>Pagamento:</b> o cartão e os dados de cobrança são digitados direto no Mercado Pago. Nós recebemos só a confirmação do pagamento, o valor, o plano, o e-mail do pagador e dois códigos internos do Mercado Pago (o da conta e o do cartão, nunca o número do cartão), usados só para o teste grátis valer uma vez.</li>
-<li><b>Quando viramos clientes:</b> os dados da proposta e do contrato (identificação, contato, dados de cobrança e do seu negócio).</li></ul></section><section id="finalidade"><h2>3. Para que usamos e com qual base legal</h2>
+<li><b>Quando viramos clientes:</b> os dados da proposta e do contrato (identificação, contato, dados de cobrança e do seu negócio).</li><li><b>Medição de visitas (só com o seu aceite de estatística):</b> páginas visitadas e cliques importantes, com um identificador aleatório do navegador, idioma e tipo de tela. Sem nome, sem e-mail e sem IP.</li>
+<li><b>Origem da visita (só com o seu aceite de marketing):</b> de onde você chegou ao site (por exemplo, Instagram, Google ou o nome de uma campanha).</li>
+<li><b>Registro do consentimento de cookies:</b> data, versão desta política e as categorias que você aceitou ou recusou.</li>
+<li><b>Programa Indique e ganhe:</b> o código do seu link, quais contas foram criadas por ele, se essas contas assinaram e os meses de Pro ganhos. Quem indica vê só a quantidade e a situação das indicações, nunca o nome ou o e-mail de quem foi indicado.</li>
+</ul></section><section id="finalidade"><h2>3. Para que usamos e com qual base legal</h2>
 <ul><li>Responder o seu contato e preparar orçamento ou proposta: <b>procedimentos preliminares a um contrato</b>, a seu pedido (art. 7º, V, da LGPD).</li>
 <li>Executar o serviço contratado, oferecer o teste grátis e o aluguel dos sistemas Nexo e cobrar: <b>execução de contrato</b> (art. 7º, V).</li>
 <li>Entender quais exemplos interessam mais e melhorar o site, com dados anônimos: <b>legítimo interesse</b> (art. 7º, IX).</li>
-<li>Cumprir obrigações legais e fiscais: <b>obrigação legal</b> (art. 7º, II).</li></ul>
+<li>Cumprir obrigações legais e fiscais: <b>obrigação legal</b> (art. 7º, II).</li><li><b>Medir as visitas e saber quais divulgações trazem clientes</b> (cookies de estatística e de marketing): <b>consentimento</b> (art. 7º, I), que você pode retirar a qualquer momento em Preferências de cookies.</li>
+<li><b>Programa Indique e ganhe:</b> execução de contrato, conforme as regras dos Termos (art. 7º, V), e legítimo interesse para evitar fraude, como contas falsas ou indicação da própria conta (art. 7º, IX).</li>
+<li><b>Comprovar o consentimento de cookies:</b> obrigação legal e exercício regular de direitos (art. 7º, II e VI).</li>
+</ul>
 <p>Não usamos os seus dados para propaganda de terceiros e <b>não vendemos dados</b>.</p></section><section id="compartilhamento"><h2>4. Com quem compartilhamos</h2>
 <ul><li><b>Supabase:</b> login das contas e banco de dados onde ficam os contatos do formulário, a contagem de visitas e os cadastros dos sistemas Nexo, com servidores em São Paulo.</li>
 <li><b>Mercado Pago:</b> processa os pagamentos e assinaturas. Atua como controlador próprio dos dados de pagamento que você informa a ele, conforme a política de privacidade do Mercado Pago.</li>
@@ -98,21 +106,36 @@
 <li>Contas de teste grátis que não viraram assinatura: os cadastros feitos no sistema são apagados até <b>90 dias</b> depois do fim do teste, e a conta de login até <b>12 meses</b> depois do último acesso, salvo se você pedir antes.</li>
 <li>Assinaturas canceladas: os cadastros ficam disponíveis por <b>90 dias</b> para você exportar e depois são apagados; os registros de pagamento seguem os prazos fiscais. Mesmo depois de apagar a conta, guardamos sem o login a marca de que o e-mail, a conta do Mercado Pago e o cartão já usaram o teste grátis, para evitar uso repetido (legítimo interesse, art. 7º, IX).</li>
 <li>Clientes: pelo tempo do contrato e pelos prazos legais depois dele (por exemplo, obrigações fiscais).</li>
-<li>Contagem de visitas: não identifica ninguém e pode ser mantida para estatística.</li></ul></section><section id="direitos"><h2>7. Seus direitos</h2>
+<li>Contagem de visitas: não identifica ninguém e pode ser mantida para estatística.</li><li><b>Medição de visitas:</b> até 13 meses e depois apagada automaticamente. A origem da visita fica só no seu navegador por até 90 dias e vai junto no contato que você nos mandar.</li>
+<li><b>Registros de consentimento de cookies:</b> enquanto for preciso comprová-los, por até 5 anos.</li>
+<li><b>Indicações e prêmios:</b> enquanto as contas envolvidas existirem; ao excluir a conta, as indicações dela são apagadas.</li>
+</ul></section><section id="direitos"><h2>7. Seus direitos</h2>
 <p>Você pode pedir a qualquer momento: confirmação de que tratamos seus dados, acesso, correção, anonimização, bloqueio ou eliminação de dados desnecessários, portabilidade, informação sobre com quem compartilhamos, eliminação dos dados tratados com consentimento e revogação do consentimento (art. 18 da LGPD). Para apagar a sua conta dos sistemas Nexo e os dados ligados a ela, use <b>Excluir minha conta</b> em <a href="conta.html#excluir">Minha conta</a> ou no app Linha Nexo: a exclusão é imediata, e só o registro dos pagamentos já feitos fica guardado pelo prazo da lei fiscal. Respondemos em até <b>15 dias</b>. Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).</p></section><section id="seguranca"><h2>8. Segurança</h2>
 <p>O formulário grava os dados num banco protegido em que o público só consegue <b>inserir</b> um pedido novo, sem ler, alterar ou apagar nada. Chaves de acesso privadas nunca ficam no código do site. O acesso interno é restrito a quem cuida do seu atendimento.</p></section><section id="cookies"><h2>9. Cookies</h2>
-<p>Este site <b>não usa cookies de rastreamento, de estatística de terceiros nem de publicidade</b>. Para o site e os sistemas funcionarem, guardamos algumas informações no armazenamento do seu navegador, que fica no seu aparelho e funciona como um cookie essencial. Na primeira visita mostramos um aviso sobre isso. Por serem necessárias para o serviço que você pediu, essas informações não dependem de consentimento (art. 7º, V, da LGPD):</p>
-<ul><li><code>nexo-sessao</code>: mantém você conectado à sua conta dos sistemas Nexo, quando você entra.</li>
-<li><code>br-lang</code>: o idioma escolhido.</li>
-<li><code>br-perso</code> e <code>br-perso-logo</code>: nome, cores e logo da prévia ao vivo.</li>
-<li><code>br-origem</code>: o código do link que te trouxe, enquanto a aba está aberta.</li>
-<li><code>br-cookies-&lt;exemplo&gt;</code>: lembra que você fechou o aviso de demonstração nos sites de exemplo.</li>
-<li><code>nexo-volta</code> e <code>nexo-pwa-dispensado</code>: a página para voltar depois do login e se você dispensou o aviso de instalar o app.</li>
-<li><code>nexo-espaco-&lt;sistema&gt;</code>, <code>nexo-tema</code>, <code>nexo-assinadas</code> e <code>nexo-play</code>: a empresa aberta por último em cada sistema, o tema claro ou escuro, os avisos já vistos e se o sistema foi aberto pelo app da Google Play.</li>
-<li>Demonstrações do Nexo: os dados de exemplo que você altera ficam só no seu navegador, até você clicar em Recomeçar.</li>
-<li><code>br-aviso-cookies</code>: lembra que você já viu o aviso de cookies.</li></ul>
-<p>Se um dia usarmos estatísticas ou anúncios que dependam de cookies, eles só serão ligados depois de você aceitar no aviso, e esta política será atualizada antes.</p>
-<p>Você pode apagar esses dados nas configurações do navegador quando quiser.</p></section><section id="menores"><h2>10. Público</h2>
+<p>Usamos cookies e o armazenamento do navegador em três categorias. Na primeira visita, o aviso deixa você escolher: <b>Aceitar todos</b>, <b>Só necessários</b> ou <b>Personalizar</b>. Você muda a escolha quando quiser pelo link <b>Preferências de cookies</b>, no rodapé de todas as páginas. Se o seu navegador enviar o sinal <i>Global Privacy Control</i>, as opções de estatística e marketing já aparecem desligadas.</p>
+<h3>Necessários (sempre ligados)</h3>
+<p>Fazem o site e os sistemas funcionarem e não dependem de consentimento (art. 7º, V e IX, da LGPD):</p>
+<ul>
+<li><code>br_consent</code> (cookie, 12 meses): guarda a sua escolha sobre cookies.</li>
+<li><code>br_indica</code> (cookie, 90 dias): o código de indicação do link que você usou, para o programa Indique e ganhe reconhecer quem indicou. Só existe se você chegou por um link de indicação.</li>
+<li><code>nexo-sessao</code>: mantém você conectado à sua conta, quando você entra.</li>
+<li><code>br-lang</code>, <code>br-perso</code> e <code>br-perso-logo</code>: idioma e a prévia ao vivo dos sites de exemplo (nome, cores e logo, que ficam só no seu aparelho).</li>
+<li><code>br-origem</code>: o código do link enviado pela nossa equipe, enquanto a aba está aberta.</li>
+<li><code>nexo-volta</code>, <code>nexo-pwa-dispensado</code>, <code>nexo-espaco-&lt;sistema&gt;</code>, <code>nexo-tema</code>, <code>nexo-assinadas</code>, <code>nexo-play</code>, <code>nexo-indicacao-&lt;conta&gt;</code>, <code>br-cookies-&lt;exemplo&gt;</code> e as conversas do assistente do site (<code>br-assist-*</code>, só durante a visita): lembram onde você estava, a empresa aberta, o tema, os avisos já vistos e se a indicação já foi registrada.</li>
+<li>Demonstrações dos sistemas: os dados de exemplo que você altera ficam só no seu navegador, até você clicar em Recomeçar.</li>
+</ul>
+<h3>Estatística (só com o seu aceite)</h3>
+<ul>
+<li><code>br_vid</code> (cookie, 13 meses): um identificador aleatório do navegador, que não tem seu nome, e-mail nem IP.</li>
+<li><code>br_sessao</code> (cookie, 30 minutos): agrupa as páginas de uma mesma visita.</li>
+</ul>
+<p>Com eles registramos, no nosso próprio banco de dados (Supabase, em São Paulo), as páginas visitadas e os cliques em teste grátis, demonstração, WhatsApp, e-mail e contratar, junto com o idioma e o tipo de tela (celular, tablet ou computador). <b>Não usamos Google Analytics nem ferramentas de terceiros, não guardamos IP e não vendemos esses dados.</b></p>
+<h3>Marketing (só com o seu aceite)</h3>
+<ul>
+<li><code>br_origem</code> (cookie, 90 dias): de onde você veio (por exemplo, Instagram, Google ou uma campanha, pelos parâmetros <i>utm</i> do link) para sabermos quais divulgações trazem clientes. Se você nos mandar um contato pelo formulário, essa origem vai junto.</li>
+</ul>
+<p>Não usamos cookies de publicidade de terceiros (como pixel de redes sociais). Se um dia usarmos, eles só serão ligados com o seu aceite, e esta política será atualizada antes.</p>
+<p>Registramos cada escolha feita no aviso (data, versão desta política e categorias aceitas, com o identificador aleatório do navegador) para comprovar o consentimento, como pede a LGPD.</p></section><section id="menores"><h2>10. Público</h2>
 <p>Nossos serviços são voltados a negócios e a maiores de 18 anos. Não coletamos dados de crianças de propósito.</p></section><section id="mudancas"><h2>11. Mudanças nesta política</h2>
 <p>Esta política pode ser atualizada. A data no topo mostra a versão em vigor. Mudanças importantes são avisadas neste site.</p></section></div>
       <p class="legal-rodape">Veja também os <a href="termos.html">Termos de Serviço</a>.</p>
@@ -134,7 +157,7 @@
     </nav>
     <div class="linha2">
       <span>© 2026 Blue Rose Express.</span>
-      <span>Sem cookies de rastreamento. A contagem de visitas é anônima.</span>
+      <span>Medição própria, só com o seu aceite. Sem anúncios e sem venda de dados.</span>
     </div>
   </div>
 </footer>

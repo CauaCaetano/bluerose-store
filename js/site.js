@@ -331,6 +331,16 @@
     if (/^[a-z0-9-]{1,60}$/i.test(daUrl)) { origem = daUrl.toLowerCase(); sessionStorage.setItem('br-origem', origem); }
     else origem = sessionStorage.getItem('br-origem') || '';
   } catch (e) { origem = ''; }
+  // com consentimento de marketing, o pedido também diz de qual divulgação a pessoa veio (cookie br_origem)
+  try {
+    var ck = document.cookie.match(/(?:^|; )br_origem=([^;]*)/);
+    if (!origem && ck && window.brConsentimento && window.brConsentimento('marketing')) {
+      var o = JSON.parse(decodeURIComponent(ck[1]));
+      origem = ['campanha', o.s, o.m, o.c].filter(Boolean).join(':').replace(/[^\w:. -]/g, '').slice(0, 60);
+    }
+  } catch (e) { /* sem cookie de origem */ }
+  var ind = document.cookie.match(/(?:^|; )br_indica=([A-Z0-9]{6,16})/);
+  if (ind) origem = (origem ? origem + ' · ' : '') + 'indicacao:' + ind[1];
 
   /* ---------------- formulário de contato ---------------- */
   var form = document.querySelector('[data-form-contato]');
@@ -352,7 +362,7 @@
       aceite: 'Confirme que concorda com a Política de Privacidade e os Termos.', tambemWa: 'Mandar pelo WhatsApp também',
       ola: 'Oi! Vim pelo site da BLUE ROSE.', nomeL: 'Nome', negocioL: 'Negócio', interesseL: 'Interesse', msgL: 'Mensagem', refL: 'Código do link', assunto: 'Projeto pelo site da BLUE ROSE',
     };
-    var VERSAO_TERMOS = '2026-10-12'; // data da versão em vigor dos Termos e da Política de Privacidade
+    var VERSAO_TERMOS = '2026-10-14'; // data da versão em vigor dos Termos e da Política de Privacidade
     var status = form.querySelector('[data-status]');
     var botaoEnviar = form.querySelector('button[type="submit"]');
     var LEADS = window.BR_LEADS && window.BR_LEADS.url && window.BR_LEADS.chave ? window.BR_LEADS : null;
@@ -526,26 +536,7 @@
   });
 })();
 
-/* Aviso de cookies e privacidade (LGPD): o site só usa armazenamento essencial no navegador
-   (idioma, login e preferências) e nenhum cookie de rastreamento ou publicidade. O aviso aparece
-   uma vez; a escolha fica em 'br-aviso-cookies'. Se um dia entrar estatística ou anúncio, carregue
-   o script só quando window.brConsentimento('estatistica') for verdadeiro. */
-(function () {
-  var CHAVE = 'br-aviso-cookies';
-  var ler = function () { try { return JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) { return null; } };
-  window.brConsentimento = function (tipo) { var c = ler(); return tipo === 'essencial' || !!(c && c[tipo]); };
-  if (ler() || /\/(app|c|demos)\//.test(location.pathname)) return;
-  var raiz = /\/sites\//.test(location.pathname) ? '../../' : '';
-  var d = document.createElement('div');
-  d.className = 'aviso-cookies'; d.setAttribute('role', 'region'); d.setAttribute('aria-label', 'Aviso de cookies');
-  d.innerHTML = '<p><b>Cookies e privacidade.</b> Usamos só o essencial para o site funcionar: o idioma, o login da sua conta e as suas preferências, guardados no seu navegador. Não usamos cookies de rastreamento nem de publicidade. <a href="' + raiz + 'privacidade.html#cookies">Saiba mais</a></p>' +
-    '<button type="button" class="btn btn-primary">Entendi</button>';
-  d.querySelector('button').addEventListener('click', function () {
-    try { localStorage.setItem(CHAVE, JSON.stringify({ essencial: true, estatistica: false, publicidade: false, em: new Date().toISOString().slice(0, 10) })); } catch (e) { /* navegador sem armazenamento */ }
-    d.remove();
-  });
-  document.body.appendChild(d);
-})();
+/* Aviso de cookies e preferências: ver js/cookies.js (carregado em todas as páginas). */
 
 /* Sistemas na página inicial: destaques e categorias */
 (function () {
