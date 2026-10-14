@@ -453,7 +453,7 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .cal-mes .d:nth-child(7n) { border-right: 0; }
 .cal-mes .d .n { font-size: 12px; color: var(--tx-2); font-weight: 500; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; }
 .cal-mes .d.outro { background: var(--painel-2); } .cal-mes .d.outro .n { color: var(--tx-3); }
-.cal-mes .d.hoje .n { background: var(--acc); color: #fff; }
+.cal-mes .d.hoje .n { background: var(--acc); color: var(--acc-tx); }
 .cal-mes .pill { font-size: 11.5px; padding: 2px 6px; border-radius: 4px; background: color-mix(in srgb, var(--c, var(--acc)) 13%, var(--painel)); border-left: 2px solid var(--c, var(--acc)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 
 /* ---------- PDV / comanda ---------- */

@@ -207,7 +207,7 @@ const RESUMOS = {
       alertas: [ab.filter((o) => o.etapa === 'orcamento').length && `${plural(ab.filter((o) => o.etapa === 'orcamento').length, 'orçamento esperando resposta', 'orçamentos esperando resposta')}`, ab.filter((o) => o.previsao < hoje && !['pronto'].includes(o.etapa)).length && `${plural(ab.filter((o) => o.previsao < hoje && !['pronto'].includes(o.etapa)).length, 'carro atrasado', 'carros atrasados')} no pátio`].filter(Boolean),
     };
   },
-  // Sim, aceito · assessoria de casamentos
+  // Blue Rose Eternize · assessoria de casamentos
   cerimonial(d, hoje) {
     const evs = L(d, 'eventos').filter((e) => e.data >= hoje && e.etapa !== 'negociacao').sort((a, b) => a.data.localeCompare(b.data));
     const dias = (iso) => Math.round((new Date(`${iso}T12:00:00`) - new Date(`${hoje}T12:00:00`)) / 864e5);
@@ -233,7 +233,7 @@ const RESUMOS = {
       alertas: [cobrar.length && plural(cobrar.length, 'etapa pronta para cobrar', 'etapas prontas para cobrar'), parado.length && `${plural(parado.length, 'obra sem diário', 'obras sem diário')} há mais de 2 dias`, and.filter((o) => o.previsao < hoje).length && plural(and.filter((o) => o.previsao < hoje).length, 'obra com prazo vencido', 'obras com prazo vencido'), extras.length && plural(extras.length, 'serviço extra esperando o cliente', 'serviços extras esperando o cliente')].filter(Boolean),
     };
   },
-  // Isca · controle de pragas
+  // Blue Rose Guard · controle de pragas
   pragas(d, hoje) {
     const os = L(d, 'ordens'), cli = new Map(L(d, 'clientes').map((c) => [c.id, c])), cfg = d._cfg || {};
     const hojeL = os.filter((o) => o.status === 'agendada' && o.data === hoje).sort((a, b) => a.hora.localeCompare(b.hora));

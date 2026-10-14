@@ -1,4 +1,4 @@
-// Sim, aceito · assessoria de casamentos: eventos, checklist, orçamento, fornecedores, convidados com confirmação, roteiro do dia e a página do casal
+// Blue Rose Eternize · assessoria de casamentos: eventos, checklist, orçamento, fornecedores, convidados com confirmação, roteiro do dia e a página do casal
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte,
   sorteio, soma, agrupar, av, ic, et, prog, kpis, barrasH, kanban, calMes, telLink,
@@ -210,7 +210,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'cerimonial', nome: 'Sim, aceito', sub: 'Assessoria de casamentos', marcaSub: 'Assessoria de casamentos', logo: new URL('logo.svg', import.meta.url).href, produto: { mensal: 89 }, cor: '#5b6633', icone: 'heart', empresa: 'Laços Assessoria & Cerimonial', conta: 'Casamentos e eventos · São Paulo',
+  id: 'cerimonial', nome: 'Blue Rose Eternize', sub: 'Do planejamento ao sim', marcaSub: 'Do planejamento ao sim', logo: new URL('logo.svg', import.meta.url).href, produto: { mensal: 89 }, cor: '#1d3f9e', icone: 'heart', empresa: 'Laços Assessoria & Cerimonial', conta: 'Casamentos e eventos · São Paulo',
   semente, colecoes, fichas, buscaDica: 'eventos e fornecedores',
   portal: {
     noivos: {

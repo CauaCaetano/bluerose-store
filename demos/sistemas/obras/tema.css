@@ -14,7 +14,7 @@
   --borda-2: #c2cde0;
   --tx: #0d1f3c;
   --tx-2: #44526a;
-  --tx-3: #66738a;
+  --tx-3: #56627a;
   --info: #1556c0; --info-bg: #e6effc;
   --neutro-bg: #e6ebf3;
   --forte: 'Bahnschrift', 'Barlow Semi Condensed', 'Arial Narrow', 'Segoe UI', sans-serif;
@@ -24,7 +24,7 @@
   --barra: 60px;
 }
 :root[data-produto="obras"][data-tema="escuro"] {
-  --acc: #4d9bff; --acc-tx: #071328;
+  --acc: #4d9bff; --acc-tx: #071328; --laranja: #5aa5ff;
   --bg: #0a1220; --lateral: #0d1628; --painel: #0d1f3c; --painel-2: #152238; --borda: #23324d; --borda-2: #2e4060;
   --tx: #e9effa; --tx-2: #aebbd2; --tx-3: #8392ad; --info: #4d9bff; --info-bg: rgba(77, 155, 255, .14); --neutro-bg: #1a2740;
 }
@@ -40,7 +40,7 @@
 
 /* menu no topo (computador) */
 [data-produto="obras"] .lat {
-  color-scheme: dark; --tx: #eef3fb; --tx-2: #c9c3b6; --tx-3: #9c958a; --hover: rgba(255, 255, 255, .07); --painel: rgba(255, 255, 255, .08); --borda: rgba(255, 255, 255, .12); --neutro-bg: rgba(255, 255, 255, .12);
+  color-scheme: dark; --tx: #eef3fb; --tx-2: #c3cde0; --tx-3: #9aa8c2; --hover: rgba(255, 255, 255, .07); --painel: rgba(255, 255, 255, .08); --borda: rgba(255, 255, 255, .12); --neutro-bg: rgba(255, 255, 255, .12);
   background: var(--carvao); color: var(--tx);
 }
 [data-produto="obras"] .lat .marca b { color: #fff; font-family: var(--forte); font-size: 19px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
@@ -153,3 +153,9 @@
 /* logo do RoseConstruct: emblema em fundo branco e o nome como na marca (Rose + Construct) */
 [data-produto="obras"] .marca-logo { background: #fff; padding: 3px; border-radius: 9px; width: 36px; height: 36px; object-fit: contain; }
 [data-produto="obras"] .lat .marca b, [data-produto="obras"] .entrada .marca b { text-transform: none; letter-spacing: -.01em; }
+
+/* barra azul-marinho: subtítulo, busca e contadores legíveis nos dois temas */
+[data-produto="obras"] .lat .marca small { color: #8cc0ff; }
+[data-produto="obras"] .lat .busca-lat { color: #b9c6dc; }
+[data-produto="obras"] .lat a.item .cont, [data-produto="obras"] .faixa a.cta, [data-produto="obras"] .faixa a.cta:hover { background: #5aa5ff; color: #071328; }
+[data-produto="obras"] .lat a.item.ativo { background: #5aa5ff; color: #071328; }

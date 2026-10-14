@@ -55,7 +55,7 @@ export const novoId = () => Math.random().toString(36).slice(2, 9) + Date.now().
 export const soma = (l, f = (x) => x) => l.reduce((s, x) => s + (Number(f(x)) || 0), 0);
 export const agrupar = (l, f) => l.reduce((m, x) => { const k = f(x); (m[k] ||= []).push(x); return m; }, {});
 export const normal = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-const CORES_AV = ['#6366f1', '#0ea5e9', '#14b8a6', '#22a06b', '#d97706', '#e11d48', '#9333ea', '#64748b', '#0891b2', '#c2410c', '#4f46e5', '#be185d'];
+const CORES_AV = ['#4f46e5', '#0369a1', '#0f766e', '#15803d', '#b45309', '#be123c', '#7e22ce', '#475569', '#0e7490', '#c2410c', '#4338ca', '#be185d'];
 export const corDe = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return CORES_AV[h % CORES_AV.length]; };
 export const av = (nome, cls = '') => `<span class="av ${cls}" style="background:${corDe(nome)}" title="${esc(nome)}">${esc(iniciais(nome))}</span>`;
 let SPRITE = new URL('icones.svg', import.meta.url).href;

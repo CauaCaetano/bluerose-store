@@ -1,6 +1,6 @@
 {
- "name": "Sim, aceito",
- "short_name": "Sim, aceito",
+ "name": "Blue Rose Eternize",
+ "short_name": "Blue Rose Eternize",
  "description": "Assessoria de casamentos: checklist, orçamento, convidados, roteiro do dia e a página do casal",
  "lang": "pt-BR",
  "id": "/app/cerimonial/",
@@ -8,8 +8,8 @@
  "scope": "./",
  "display": "standalone",
  "orientation": "any",
- "background_color": "#f7f2e8",
- "theme_color": "#4f5a2e",
+ "background_color": "#f5f6fb",
+ "theme_color": "#142c6e",
  "icons": [
   {
    "src": "icone-192.png",

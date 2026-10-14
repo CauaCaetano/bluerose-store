@@ -1,6 +1,6 @@
 {
- "name": "Isca",
- "short_name": "Isca",
+ "name": "Blue Rose Guard",
+ "short_name": "Blue Rose Guard",
  "description": "Controle de pragas: agenda, comprovante, pontos de isca e relatório mensal",
  "lang": "pt-BR",
  "id": "/app/pragas/",
@@ -8,8 +8,8 @@
  "scope": "./",
  "display": "standalone",
  "orientation": "any",
- "background_color": "#f1efe7",
- "theme_color": "#173d2c",
+ "background_color": "#eef1f7",
+ "theme_color": "#0c1d45",
  "icons": [
   {
    "src": "icone-192.png",

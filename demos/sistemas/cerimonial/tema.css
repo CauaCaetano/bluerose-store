@@ -1,39 +1,39 @@
-/* Sim, aceito · identidade própria: papel marfim, verde-oliva e champanhe, títulos serifados como um convite */
+/* Blue Rose Eternize · identidade própria: branco, azul-royal e dourado, títulos serifados como um convite */
 :root[data-produto="cerimonial"] {
-  --acc: #5b6633;
+  --acc: #1d3f9e;
   --acc-tx: #fffdf6;
-  --ouro: #b08d4f;
-  --bg: #f7f2e8;
-  --painel: #fffdf8;
-  --painel-2: #fbf7ef;
-  --lateral: #efe7d8;
-  --hover: rgba(70, 58, 30, 0.05);
-  --ativo: rgba(70, 58, 30, 0.08);
-  --borda: #e7dcc8;
-  --borda-2: #d8c9ad;
-  --tx: #2b2619;
-  --tx-2: #5e5643;
-  --tx-3: #7f7660;
-  --info: #5b6633; --info-bg: #edefdf;
-  --neutro-bg: #f1eadb;
+  --ouro: #8f6c22;
+  --bg: #f5f6fb;
+  --painel: #ffffff;
+  --painel-2: #f9fafd;
+  --lateral: #eceff7;
+  --hover: rgba(20, 30, 60, 0.05);
+  --ativo: rgba(20, 30, 60, 0.08);
+  --borda: #dfe3ef;
+  --borda-2: #cdd3e3;
+  --tx: #141c35;
+  --tx-2: #4a5470;
+  --tx-3: #5a6380;
+  --info: #1d3f9e; --info-bg: #e4eafb;
+  --neutro-bg: #eef0f7;
   --serif: 'Cormorant Garamond', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
-  --sombra-1: 0 1px 2px rgba(70, 55, 20, 0.06);
-  --sombra-2: 0 1px 2px rgba(70, 55, 20, 0.05), 0 10px 28px -10px rgba(70, 55, 20, 0.18);
+  --sombra-1: 0 1px 2px rgba(20, 30, 60, 0.06);
+  --sombra-2: 0 1px 2px rgba(20, 30, 60, 0.05), 0 10px 28px -10px rgba(20, 30, 60, 0.18);
   --r1: 7px; --r2: 10px; --r3: 16px;
 }
 :root[data-produto="cerimonial"][data-tema="escuro"] {
-  --acc: #b7c27f; --acc-tx: #1d2010; --ouro: #d7b878;
-  --bg: #17150f; --painel: #1f1c15; --painel-2: #242018; --lateral: #13110c;
-  --borda: #332e22; --borda-2: #443d2d; --tx: #f1eadb; --tx-2: #c4b9a0; --tx-3: #988e76;
-  --info: #b7c27f; --info-bg: rgba(183, 194, 127, .14); --neutro-bg: #2a261c;
+  --acc: #dcbd7a; --acc-tx: #17120a; --ouro: #e3c78c;
+  --bg: #0e1220; --painel: #151a2b; --painel-2: #1a2033; --lateral: #0b0f1b;
+  --borda: #28304a; --borda-2: #353f5c; --tx: #eef0f7; --tx-2: #b4bdd3; --tx-3: #8a93ad;
+  --info: #8fb0ff; --info-bg: rgba(143, 176, 255, .14); --neutro-bg: #1f2539;
 }
 [data-produto="cerimonial"] .lat {
   color-scheme: light;
-  --tx: #2b2619; --tx-2: #5e5643; --tx-3: #8a806a;
-  --hover: rgba(70, 58, 30, 0.06); --painel: #fffdf8; --borda: #e2d5bc; --neutro-bg: #e6dcc8;
+  --tx: #141c35; --tx-2: #4a5470; --tx-3: #5f6884;
+  --hover: rgba(20, 30, 60, 0.06); --painel: #ffffff; --borda: #d6dcea; --neutro-bg: #dfe3ef;
   background: var(--lateral); border-right: 1px solid var(--borda); color: var(--tx);
 }
-[data-produto="cerimonial"][data-tema="escuro"] .lat { color-scheme: dark; --tx: #f1eadb; --tx-2: #c4b9a0; --tx-3: #988e76; --painel: #221f17; --borda: #332e22; --neutro-bg: #2a261c; }
+[data-produto="cerimonial"][data-tema="escuro"] .lat { color-scheme: dark; --tx: #eef0f7; --tx-2: #b4bdd3; --tx-3: #8a93ad; --painel: #171c2d; --borda: #28304a; --neutro-bg: #1f2539; }
 [data-produto="cerimonial"] .lat a.item.ativo { background: var(--painel); color: var(--tx); box-shadow: 0 0 0 1px var(--borda), var(--sombra-1); }
 [data-produto="cerimonial"] .lat a.item.ativo .ic { color: var(--acc); }
 [data-produto="cerimonial"] .lat a.item .cont { background: var(--acc); color: var(--acc-tx); }
@@ -42,9 +42,9 @@
 [data-produto="cerimonial"] .lat .conta { background: transparent; border: 1px solid var(--borda); }
 [data-produto="cerimonial"] .lat-pe .feito a { color: var(--acc); }
 [data-produto="cerimonial"] .marca-logo { background: none; box-shadow: none; border-radius: 9px; }
-[data-produto="cerimonial"] .faixa { background: #4f5a2e; color: #f4ecd9; }
-[data-produto="cerimonial"] .faixa button { color: #f4ecd9; }
-[data-produto="cerimonial"] .btn.pri { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 6px 16px -8px rgba(80, 90, 40, .7); }
+[data-produto="cerimonial"] .faixa { background: #142c6e; color: #eef1f8; }
+[data-produto="cerimonial"] .faixa button { color: #eef1f8; }
+[data-produto="cerimonial"] .btn.pri { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 6px 16px -8px rgba(20, 44, 110, .7); }
 [data-produto="cerimonial"] .topo h1,
 [data-produto="cerimonial"] .cartao-cab h3,
 [data-produto="cerimonial"] .gav h2, [data-produto="cerimonial"] .gaveta h2 { font-family: var(--serif); font-weight: 600; font-size: 20px; letter-spacing: 0; }
@@ -54,7 +54,7 @@
 /* tela inicial: o próximo casamento em destaque */
 .sa-hero { position: relative; overflow: hidden; border-radius: 20px; padding: 34px 36px; background:
   radial-gradient(90% 120% at 100% 0%, rgba(176, 141, 79, .22), transparent 60%),
-  radial-gradient(70% 90% at 0% 100%, rgba(91, 102, 51, .16), transparent 60%), var(--painel);
+  radial-gradient(70% 90% at 0% 100%, rgba(29, 63, 158, .16), transparent 60%), var(--painel);
   border: 1px solid var(--borda); box-shadow: var(--sombra-2); display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; align-items: center; }
 .sa-hero::after { content: ''; position: absolute; inset: 10px; border: 1px solid color-mix(in srgb, var(--ouro) 35%, transparent); border-radius: 14px; pointer-events: none; }
 .sa-hero .rot { font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--ouro); font-weight: 600; }
@@ -98,6 +98,6 @@
 
 @media (max-width: 900px) { [data-produto="cerimonial"] .app:not(.menu-aberto) .lat { box-shadow: none; } }
 
-[data-produto="cerimonial"] .faixa a.cta, [data-produto="cerimonial"] .faixa a.cta:hover { background: #b08d4f; color: #fff; }
+[data-produto="cerimonial"] .faixa a.cta, [data-produto="cerimonial"] .faixa a.cta:hover { background: #d4af5f; color: #141026; }
 [data-produto="cerimonial"] .entrada .marca b { font-family: var(--serif); font-style: italic; font-size: 20px; }
 [data-produto="cerimonial"] .entrada .marca small { color: var(--ouro); }

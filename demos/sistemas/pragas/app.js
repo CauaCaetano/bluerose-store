@@ -1,4 +1,4 @@
-// Isca · controle de pragas: agenda, comprovante, pontos de isca, ocorrências, relatório mensal, garantia e renovações
+// Blue Rose Guard · controle de pragas: agenda, comprovante, pontos de isca, ocorrências, relatório mensal, garantia e renovações
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, paraData,
   sorteio, soma, agrupar, av, ic, et, kpis, barras, barrasH, DIAS, telLink,
@@ -96,7 +96,7 @@ function painel(a) {
   return `<div class="is-cab"><div><div class="s">Relatório do dia · ${DS[new Date().getDay()]}, ${dataBR(hoje())}</div><h2>${num(prox.filter((o) => o.data === hoje()).length)} serviços hoje · ${num(exec.length)} feitos em ${nomeMes(ym)}</h2></div>
       <div class="is-selos">${selo('Licença sanitária', cfg.licenca_sanitaria_validade)}${selo('Licença ambiental', cfg.licenca_ambiental_validade)}</div></div>
     <div class="is-grade"><div style="display:flex;flex-direction:column;gap:12px">
-      <div class="is-tit"><span>Mapa de iscas · última leitura de cada cliente</span><span class="is-leg"><span><i style="background:#2e9a5f"></i>intacta</span><span><i style="background:#d0463b"></i>consumida</span><span><i style="background:#3f6fb5"></i>substituída</span><span><i style="background:#d8941d"></i>ausente</span></span></div>
+      <div class="is-tit"><span>Mapa de iscas · última leitura de cada cliente</span><span class="is-leg"><span><i style="background:#1b7a48"></i>intacta</span><span><i style="background:#d0463b"></i>consumida</span><span><i style="background:#3f6fb5"></i>substituída</span><span><i style="background:#d8941d"></i>ausente</span></span></div>
       ${comPontos.length ? `<div class="is-mapa">${comPontos.map(({ c, o }) => { const pts = ptsDe(a, c.id), alto = o && consumo(o) >= 0.3;
         return `<article class="is-cli ${alto ? 'alto' : ''}" data-abrir="cliente:${c.id}"><div class="t corta">${esc(c.nome)}</div><div class="s">${esc(c.tipo)} · ${pts.length} pontos${o ? ` · lido ${dataCurta(o.data)}` : ''}</div>
           <div class="is-pts">${pts.map((pt) => { const l = o?.leituras.find((x) => x.ponto === pt.id); return `<span class="is-pt ${l ? l.status : 'sem'}" title="${esc(pt.codigo)} · ${esc(pt.local)}${l ? ` · ${esc(nomeL(l.status))}` : ''}">${esc(pt.codigo.replace(/^[A-Z]+-/, ''))}</span>`; }).join('')}</div>
@@ -218,7 +218,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'pragas', nome: 'Isca', sub: 'Controle de pragas', marcaSub: 'Controle de pragas', logo: new URL('logo.svg', import.meta.url).href, produto: { mensal: 99 }, cor: '#1f6a46', icone: 'flask', empresa: 'Escudo Controle de Pragas', conta: 'Controle de pragas · Campinas',
+  id: 'pragas', nome: 'Blue Rose Guard', sub: 'Controle inteligente de pragas', marcaSub: 'Controle inteligente de pragas', logo: new URL('logo.svg', import.meta.url).href, produto: { mensal: 99 }, cor: '#1a47a8', icone: 'flask', empresa: 'Escudo Controle de Pragas', conta: 'Controle de pragas · Campinas',
   semente, colecoes, fichas, buscaDica: 'clientes e serviços',
   portal: {
     comprovante: {
