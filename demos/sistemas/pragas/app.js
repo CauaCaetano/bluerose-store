@@ -6,12 +6,17 @@ import {
 } from '../base/nexo.js';
 import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
+import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
 
 const SERVICOS = ['Desinsetização', 'Desratização', 'Descupinização', 'Limpeza de caixa d\'água', 'Controle de pombos', 'Sanitização de ambientes'];
 const PRAGAS = ['Baratas', 'Formigas', 'Ratos', 'Cupins', 'Escorpiões', 'Mosquitos', 'Pulgas', 'Traças', 'Aranhas', 'Pombos'];
 const TIPOS = ['Restaurante', 'Condomínio', 'Residência', 'Indústria', 'Escola', 'Comércio', 'Clínica'];
 const PLANOS = [['avulso', 'Avulso', 0], ['mensal', 'Mensal', 30], ['bimestral', 'Bimestral', 60], ['trimestral', 'Trimestral', 90], ['semestral', 'Semestral', 180]];
 const TECNICOS = [['te0', 'Anderson Lima'], ['te1', 'Rogério Batista'], ['te2', 'Wellington Sousa']];
+const EQUIPE = { colecao: 'tecnicos', rot: 'Técnicos', icone: 'user-gear', singular: 'técnico', plural: 'técnicos', vazio: 'os técnicos de campo', lista: TECNICOS,
+  campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }],
+  linha: (r) => [r.id, r.nome], registro: ([id, nome]) => ({ id, nome }) };
+const padraoEquipe = (eu) => (TECNICOS.find((x) => x[0] === eu) || TECNICOS[0] || [''])[0];
 const freqP = (k) => (PLANOS.find((p) => p[0] === k) || PLANOS[0])[2];
 const nomeT = (id) => (TECNICOS.find((t) => t[0] === id) || [, '—'])[1];
 const STATUS = [['agendada', 'Agendada', 'info'], ['executada', 'Executada', 'ok'], ['cancelada', 'Cancelada', '']];
@@ -123,7 +128,7 @@ function agendaPag(a) {
 function ordensPag(a) {
   return a.tab({ id: 'ordens', colecao: 'ordens', singular: 'serviço', plural: 'serviços', ordem: 'data', desc: true, buscaDica: 'Cliente, serviço ou nº…', aoClicar: (id) => a.abrir('os', id), total: (l) => moeda(soma(l.filter((o) => o.status === 'executada'), (o) => o.valor)),
     visoes: [{ id: 'mes', rot: 'Este mês', filtro: (o) => o.data.startsWith(hoje().slice(0, 7)) }, { id: 'apagar', rot: 'A receber', filtro: (o) => o.status === 'executada' && !o.pago }, { id: 'todas', rot: 'Todos' }],
-    filtros: [{ k: 'status', rot: 'Situação', opcoes: STATUS.map(([k, n]) => [k, n]) }, { k: 'servico', rot: 'Serviço', opcoes: SERVICOS.map((s) => [s, s]) }, { k: 'tecnico', rot: 'Técnico', opcoes: TECNICOS }],
+    filtros: [{ k: 'status', rot: 'Situação', opcoes: STATUS.map(([k, n]) => [k, n]) }, { k: 'servico', rot: 'Serviço', opcoes: SERVICOS.map((s) => [s, s]) }, { k: 'tecnico', rot: 'Técnico', opcoes: () => TECNICOS }],
     textoBusca: (o) => `${o.numero} ${cli(a, o.cliente)?.nome} ${o.servico}`,
     colunas: [{ k: 'numero', rot: 'Nº', render: (o) => `<span class="mono prim">#${o.numero}</span>` }, { k: 'data', rot: 'Data', render: (o) => `${dataCurta(o.data)}<span class="sub">${o.hora}</span>` }, { k: 'cliente', rot: 'Cliente', valor: (o) => cli(a, o.cliente)?.nome, render: (o) => `<span class="prim">${esc(cli(a, o.cliente)?.nome || '')}</span><span class="sub">${esc(o.servico)}</span>` }, { k: 'tecnico', rot: 'Técnico', oc: true, valor: (o) => nomeT(o.tecnico) }, { k: 'valor', rot: 'Valor', n: true, render: (o) => `${moeda(o.valor)}${o.status === 'executada' && !o.pago ? '<span class="sub er-tx">a receber</span>' : ''}` }, { k: 'status', rot: 'Situação', render: (o) => et(stt(o.status)[1], stt(o.status)[2]) }] });
 }
@@ -263,6 +268,7 @@ const app = criarApp({
     { grupo: 'Gestão' },
     { id: 'produtos', rot: 'Produtos e estoque', icone: 'flask', render: produtosPag, cont: (a) => { const n = a.db.lista('produtos').filter((p) => p.estoque <= p.minimo).length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatoriosPag },
+    paginaEquipe(EQUIPE),
     ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
@@ -313,5 +319,6 @@ Object.assign(app.acoes, {
 });
 
 // ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+equipeViva(app, EQUIPE);
 Object.assign(app.acoes, acoesLado());
 app.travarLado = travarPro;

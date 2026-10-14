@@ -88,7 +88,8 @@ function semente() {
 }
 
 // ---------------------------------------------------------------- regras
-const prof = (a, id) => a.db.obter('profissionais', id);
+const SEM_PROF = { nome: 'Profissional removido', funcao: '', comissao: 0, ini: '09:00', fim: '19:00', dias: [], almoco: ['12:00', '13:00'], cor: '' };
+const prof = (a, id) => a.db.obter('profissionais', id) || SEM_PROF;
 const serv = (a, id) => a.db.obter('servicos', id);
 const cli = (a, id) => a.db.obter('clientes', id);
 const fimDe = (ag) => hhmm(minutos(ag.ini) + (ag.duracao || 30));
@@ -162,8 +163,9 @@ const colecoes = {
 
 // ---------------------------------------------------------------- agendar (formulário próprio)
 async function agendar(a, inicial = {}) {
+  if (!a.db.lista('profissionais').length) { avisar('Cadastre um profissional antes de agendar.', { tipo: 'erro' }); if (await editar(a, 'profissionais')) a.render(); return; }
   const ag = inicial.id ? a.db.obter('agendamentos', inicial.id) : null;
-  const v = { cliente: '', profissional: a.db.lista('profissionais')[0].id, data: hoje(), ini: '10:00', servicos: [], origem: 'balcao', obs: '', ...(ag || {}), ...inicial };
+  const v = { cliente: '', profissional: a.db.lista('profissionais')[0]?.id || '', data: hoje(), ini: '10:00', servicos: [], origem: 'balcao', obs: '', ...(ag || {}), ...inicial };
   const ps = a.db.lista('profissionais'), ss = a.db.lista('servicos'), cs = [...a.db.lista('clientes')].sort((x, y) => x.nome.localeCompare(y.nome));
   const corpo = `<form class="form-grade" onsubmit="return false" data-ag>
     <label class="campo largo">Cliente <span class="er-tx">*</span><div class="flex"><select name="cliente" required class="cresce"><option value="">Selecione…</option>${cs.map((c) => `<option value="${c.id}" ${c.id === v.cliente ? 'selected' : ''}>${esc(c.nome)} · ${esc(c.telefone)}</option>`).join('')}</select><button type="button" class="btn" data-nova-cli>${ic('user-plus')}Nova</button></div></label>
@@ -217,9 +219,11 @@ async function agendar(a, inicial = {}) {
 }
 
 // ---------------------------------------------------------------- páginas
+const semProf = (a) => vazio('identification-card', 'Cadastre a sua equipe', 'Adicione quem atende no salão para a agenda ganhar uma coluna por profissional.', `<button type="button" class="btn pri" data-acao="novoProf">${ic('plus')}Adicionar profissional</button>`);
 function agenda(a) {
   const st = a.estado.agenda ||= { data: hoje(), modo: 'dia' };
   const ps = a.db.lista('profissionais'), lista = doDia(a, st.data);
+  if (!ps.length) return semProf(a);
   a.cals.agenda = {
     aoClicar: (id) => a.abrir('agendamento', id),
     aoMover: (id, col, hora) => {
@@ -386,6 +390,7 @@ function pacotesPag(a) {
       { k: 'valor', rot: 'Valor', n: true, oc: true, render: (k) => moeda(k.valor) }, { k: 'validade', rot: 'Validade', render: (k) => `<span class="${k.validade < hoje() ? 'er-tx' : diasAte(k.validade) <= 30 ? 'al-tx' : ''}">${dataCurta(k.validade)}</span>` }] });
 }
 function profissionaisPag(a) {
+  if (!a.db.lista('profissionais').length) return semProf(a);
   return `<div class="grade g2">${a.db.lista('profissionais').map((p) => { const ym = hoje().slice(0, 7); const feitos = ags(a).filter((x) => x.profissional === p.id && x.status === 'concluido' && x.data.startsWith(ym)); const fat = soma(feitos, (x) => x.valor);
     return `<div class="cartao"><div class="cartao-cab"><div class="flex"><span class="av g" style="background:${corSegura(p.cor)}">${esc(p.nome.split(' ').map((x) => x[0]).join(''))}</span><div><h3>${esc(p.nome)}</h3><div class="sub">${esc(p.funcao)} · comissão ${p.comissao}%</div></div></div><button type="button" class="btn peq" data-acao="editarProf" data-id="${p.id}">${ic('pencil-simple')}Editar</button></div>
       <div class="cartao-corpo col" style="gap:12px"><div class="flex" style="gap:4px">${DIAS.map((d, i) => `<span class="et ${p.dias.includes(i) ? 'acc' : ''} sem-ponto" style="width:38px;justify-content:center">${d}</span>`).join('')}</div>
@@ -555,7 +560,7 @@ const app = criarApp({
     { grupo: 'Salão' },
     { id: 'servicos', rot: 'Serviços', icone: 'scissors', render: catalogoPag },
     { id: 'produtos', rot: 'Produtos', icone: 'package', titulo: 'Produtos de revenda', render: produtosPag, cont: (a) => { const n = a.db.lista('produtos').filter((p) => p.estoque <= p.minimo).length; return n ? { n, tom: 'er' } : 0; } },
-    { id: 'equipe', rot: 'Profissionais', icone: 'identification-card', render: profissionaisPag },
+    { id: 'equipe', rot: 'Profissionais', icone: 'identification-card', render: profissionaisPag, novo: (a) => a.acoes.novoProf(), acoes: () => `<button type="button" class="btn pri" data-acao="novoProf">${ic('plus')}<span class="so-larga">Adicionar profissional</span></button>` },
     { id: 'comissoes', rot: 'Comissões', icone: 'hand-coins', render: comissoes },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios, atalho: 'r' },
     ...ferramentaPaginas(FERR, FERR_ITENS),
@@ -604,6 +609,7 @@ Object.assign(app.acoes, {
   novoServico: async () => { if (await editar(app, 'servicos')) app.render(); },
   novoProduto: async () => { if (await editar(app, 'produtos')) app.render(); },
   novoPacote: async (d = {}) => { if (await editar(app, 'pacotes', null, d.cliente ? { cliente: d.cliente } : {})) reab(); },
+  novoProf: async () => { if (await editar(app, 'profissionais')) app.render(); },
   editarProf: async (d) => { if (await editar(app, 'profissionais', prof(app, d.id))) app.render(); },
   mesCom: (d, el) => { app.estado.com.mes = el.value; app.render(); },
   imprimirCom: () => window.print(),

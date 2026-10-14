@@ -6,10 +6,15 @@ import {
 } from '../base/nexo.js';
 import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
+import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
 
 const ETAPAS = [['entrada', 'Entrada e diagnóstico', '#94a3b8'], ['orcamento', 'Orçamento enviado', '#f59e0b'], ['aprovado', 'Aprovado', '#3b82f6'], ['servico', 'Em serviço', '#8b5cf6'], ['peca', 'Aguardando peça', '#e11d48'], ['pronto', 'Pronto', '#16a34a'], ['entregue', 'Entregue', '#64748b']];
 const etp = (id) => ETAPAS.find((e) => e[0] === id) || ETAPAS[0];
 const MECANICOS = [['me0', 'Sérgio Lima', 35], ['me1', 'Wagner Costa', 35], ['me2', 'Júnior Prado', 30], ['me3', 'Alan Freitas', 30]];
+const EQUIPE = { colecao: 'mecanicos', rot: 'Mecânicos', icone: 'wrench', singular: 'mecânico', plural: 'mecânicos', vazio: 'os mecânicos', lista: MECANICOS,
+  campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true }, { nome: 'comissao', rotulo: 'Comissão (%)', tipo: 'porcentagem', padrao: 30 }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }],
+  linha: (r) => [r.id, r.nome, Number(r.comissao || 0)], registro: ([id, nome, comissao]) => ({ id, nome, comissao }) };
+const padraoEquipe = (eu) => (MECANICOS.find((x) => x[0] === eu) || MECANICOS[0] || [''])[0];
 const nomeM = (id) => (MECANICOS.find((m) => m[0] === id) || [, '—'])[1];
 const FORMAS = ['PIX', 'Crédito', 'Crédito parcelado', 'Débito', 'Dinheiro'];
 const CHECK = ['Arranhões na lataria', 'Amassado', 'Estepe', 'Macaco e chave de roda', 'Documento no veículo', 'Objetos de valor', 'Luz de injeção acesa', 'Rádio funcionando'];
@@ -113,7 +118,7 @@ function patio(a) {
 function ordensPag(a) {
   return a.tab({ id: 'ordens', colecao: 'ordens', singular: 'OS', plural: 'OS', ordem: 'numero', desc: true, buscaDica: 'Placa, cliente, modelo ou nº da OS…', aoClicar: (id) => a.abrir('os', id), total: (l) => moeda(soma(l, totalOS)),
     visoes: [{ id: 'abertas', rot: 'No pátio', filtro: (o) => o.etapa !== 'entregue' }, { id: 'mes', rot: 'Entregues no mês', filtro: (o) => o.etapa === 'entregue' && String(o.entregue_em).startsWith(hoje().slice(0, 7)) }, { id: 'todas', rot: 'Todas' }],
-    filtros: [{ k: 'etapa', rot: 'Etapa', opcoes: ETAPAS.map(([k, n]) => [k, n]) }, { k: 'mecanico', rot: 'Mecânico', opcoes: MECANICOS.map((m) => [m[0], m[1]]) }],
+    filtros: [{ k: 'etapa', rot: 'Etapa', opcoes: ETAPAS.map(([k, n]) => [k, n]) }, { k: 'mecanico', rot: 'Mecânico', opcoes: () => MECANICOS.map((m) => [m[0], m[1]]) }],
     textoBusca: (o) => { const v = veic(a, o.veiculo); return `${o.numero} ${v?.placa} ${v?.modelo} ${cli(a, o.cliente)?.nome}`; },
     colunas: [{ k: 'numero', rot: 'OS', render: (o) => `<span class="mono prim">#${o.numero}</span>` }, { k: 'veiculo', rot: 'Veículo', valor: (o) => nomeV(veic(a, o.veiculo)), render: (o) => `<span class="prim">${esc(veic(a, o.veiculo)?.modelo || '')}</span><span class="sub mono">${esc(veic(a, o.veiculo)?.placa || '')}</span>` }, { k: 'cliente', rot: 'Cliente', oc: true, valor: (o) => cli(a, o.cliente)?.nome }, { k: 'entrada', rot: 'Entrada', oc: true, render: (o) => dataCurta(o.entrada) }, { k: 'mecanico', rot: 'Mecânico', oc: true, valor: (o) => nomeM(o.mecanico) }, { k: 'total', rot: 'Total', n: true, valor: totalOS, render: (o) => moeda(totalOS(o)) }, { k: 'etapa', rot: 'Etapa', valor: (o) => ETAPAS.findIndex((e) => e[0] === o.etapa), render: etE, csv: (o) => etp(o.etapa)[1] }] });
 }
@@ -237,6 +242,7 @@ const app = criarApp({
     { grupo: 'Gestão' },
     { id: 'estoque', lado: FERR.estoque, rot: 'Peças e serviços', icone: 'package', render: estoque, cont: (a) => { const n = a.db.lista('pecas').filter((p) => p.estoque <= p.minimo).length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
+    paginaEquipe(EQUIPE),
     ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
@@ -282,5 +288,6 @@ Object.assign(app.acoes, {
 });
 
 // ferramentas do painel ao lado das telas (WhatsApp e copiar)
+equipeViva(app, EQUIPE);
 Object.assign(app.acoes, acoesLado());
 app.travarLado = travarPro;   // avisos e mensagens prontas: plano Pro (calculadoras: Básico)

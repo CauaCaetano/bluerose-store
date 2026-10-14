@@ -241,7 +241,8 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--acc); marg
 .lista .s { color: var(--tx-3); font-size: 12.5px; }
 .lista .dir { margin-left: auto; text-align: right; flex: none; }
 .vazio { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px; padding: 36px 20px; color: var(--tx-3); }
-.vazio .ic { width: 26px; height: 26px; color: var(--borda-2); margin-bottom: 4px; }
+.vazio > .ic { width: 26px; height: 26px; color: var(--borda-2); margin-bottom: 4px; }
+.vazio > .btn { margin-top: 8px; }
 .vazio b { color: var(--tx-2); font-weight: 550; }
 .dica { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: var(--r1); background: var(--acc-suave); border: 1px solid var(--acc-borda); color: var(--tx-2); font-size: 13px; }
 .dica .ic { color: var(--acc); margin-top: 1px; }

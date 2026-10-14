@@ -6,12 +6,17 @@ import {
 } from '../base/nexo.js';
 import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
+import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
 
 const ETAPAS = [['lead', 'Novo contato', '#94a3b8'], ['atendimento', 'Em atendimento', '#3b82f6'], ['visita', 'Visita marcada', '#8b5cf6'], ['proposta', 'Proposta', '#f59e0b'], ['documentacao', 'Documentação', '#0ea5e9'], ['fechado', 'Fechado', '#16a34a']];
 const ORIGENS = ['ZAP Imóveis', 'Viva Real', 'OLX', 'Site', 'Instagram', 'Indicação', 'Placa'];
 const TIPOS = ['Apartamento', 'Casa', 'Cobertura', 'Sala comercial', 'Terreno', 'Studio'];
 const BAIRROS = ['Água Verde', 'Batel', 'Bigorrilho', 'Centro', 'Cabral', 'Ecoville', 'Juvevê', 'Portão'];
 const CORRETORES = [['co0', 'Aline Martins', 'CRECI 31.880'], ['co1', 'Bruno Kowalski', 'CRECI 28.114'], ['co2', 'Carla Nunes', 'CRECI 35.207'], ['co3', 'Diego Ramos', 'CRECI 33.560']];
+const EQUIPE = { colecao: 'corretores', rot: 'Corretores', icone: 'identification-badge', singular: 'corretor', plural: 'corretores', vazio: 'os corretores', lista: CORRETORES,
+  campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true }, { nome: 'creci', rotulo: 'CRECI', tipo: 'texto' }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }],
+  linha: (r) => [r.id, r.nome, r.creci || ''], registro: ([id, nome, creci]) => ({ id, nome, creci }) };
+const padraoEquipe = (eu) => (CORRETORES.find((x) => x[0] === eu) || CORRETORES[0] || [''])[0];
 const nomeCor = (id) => (CORRETORES.find((c) => c[0] === id) || [, '—'])[1];
 const COMISSAO_VENDA = 0.06;
 
@@ -101,13 +106,13 @@ const colecoes = {
     { nome: 'tipo', rotulo: 'Tipo', tipo: 'selecao', opcoes: TIPOS, obrigatorio: true }, { nome: 'finalidade', rotulo: 'Finalidade', tipo: 'selecao', opcoes: [['venda', 'Venda'], ['aluguel', 'Aluguel']], obrigatorio: true }, { nome: 'valor', rotulo: 'Valor', tipo: 'moeda', obrigatorio: true },
     { nome: 'endereco', rotulo: 'Endereço', tipo: 'texto', largo: true }, { nome: 'bairro', rotulo: 'Bairro', tipo: 'selecao', opcoes: BAIRROS, obrigatorio: true }, { nome: 'area', rotulo: 'Área (m²)', tipo: 'numero' }, { nome: 'quartos', rotulo: 'Quartos', tipo: 'numero', padrao: 2 },
     { nome: 'vagas', rotulo: 'Vagas', tipo: 'numero', padrao: 1 }, { nome: 'condominio', rotulo: 'Condomínio', tipo: 'moeda' }, { nome: 'iptu', rotulo: 'IPTU (anual)', tipo: 'moeda' },
-    { nome: 'proprietario', rotulo: 'Proprietário', tipo: 'relacao', colecao: 'pessoas', filtrar: (p) => p.tipo === 'proprietario' }, { nome: 'corretor', rotulo: 'Corretor captador', tipo: 'selecao', opcoes: CORRETORES.map((c) => [c[0], c[1]]) },
+    { nome: 'proprietario', rotulo: 'Proprietário', tipo: 'relacao', colecao: 'pessoas', filtrar: (p) => p.tipo === 'proprietario' }, { nome: 'corretor', rotulo: 'Corretor captador', tipo: 'selecao', opcoes: () => CORRETORES.map((c) => [c[0], c[1]]) },
     { nome: 'descricao', rotulo: 'Descrição para os portais', tipo: 'texto-longo' }],
     antesDeSalvar: (d, a, antes) => ({ ...d, cidade: 'Curitiba', codigo: antes?.codigo || `${d.finalidade === 'venda' ? 'V' : 'L'}${2100 + a.db.lista('imoveis').length}`, status: antes?.status || 'disponivel', captado: antes?.captado || hoje(), visualizacoes: antes?.visualizacoes || 0 }) },
   pessoas: { singular: 'pessoa', genero: 'f', plural: 'pessoas', campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'tipo', rotulo: 'Tipo', tipo: 'selecao', opcoes: [['interessado', 'Interessado'], ['proprietario', 'Proprietário'], ['inquilino', 'Inquilino']], padrao: 'interessado' }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel', obrigatorio: true }, { nome: 'email', rotulo: 'E-mail', tipo: 'email' }, { nome: 'cpf', rotulo: 'CPF', tipo: 'texto' }] },
   negocios: { singular: 'atendimento', plural: 'atendimentos', campos: (a) => [
     { nome: 'cliente', rotulo: 'Cliente', tipo: 'relacao', colecao: 'pessoas', obrigatorio: true }, { nome: 'finalidade', rotulo: 'Procura', tipo: 'selecao', opcoes: [['venda', 'Comprar'], ['aluguel', 'Alugar']], obrigatorio: true },
-    { nome: 'origem', rotulo: 'Origem', tipo: 'selecao', opcoes: ORIGENS }, { nome: 'corretor', rotulo: 'Corretor', tipo: 'selecao', opcoes: CORRETORES.map((c) => [c[0], c[1]]) },
+    { nome: 'origem', rotulo: 'Origem', tipo: 'selecao', opcoes: ORIGENS }, { nome: 'corretor', rotulo: 'Corretor', tipo: 'selecao', opcoes: () => CORRETORES.map((c) => [c[0], c[1]]) },
     { nome: 'b_tipo', rotulo: 'Tipo de imóvel', tipo: 'selecao', opcoes: TIPOS }, { nome: 'b_ate', rotulo: 'Valor até', tipo: 'moeda' }, { nome: 'b_quartos', rotulo: 'Quartos (mínimo)', tipo: 'numero', padrao: 2 }],
     antesDeSalvar: (d, a, antes) => ({ ...(antes ? { id: antes.id } : {}), cliente: d.cliente, finalidade: d.finalidade, origem: d.origem, corretor: d.corretor, busca: { tipo: d.b_tipo, ate: d.b_ate, quartos: d.b_quartos, bairros: antes?.busca?.bairros || [] }, ...(antes ? {} : { etapa: 'lead', criado: hoje(), atualizado: hoje(), imovel: null, valor: d.b_ate || 0 }) }) },
 };
@@ -136,7 +141,7 @@ function imoveisPag(a) {
     <div class="flex"><div class="grupo-btn"><button type="button" data-acao="modoIm" data-m="cards" aria-pressed="${st.modo === 'cards'}">${ic('squares-four', 'p')}Vitrine</button><button type="button" data-acao="modoIm" data-m="lista" aria-pressed="${st.modo === 'lista'}">${ic('list', 'p')}Lista</button></div><button type="button" class="btn" data-acao="linkVitrine">${ic('globe')}Vitrine online</button><button type="button" class="btn pri" data-acao="novoCad" data-c="imoveis">${ic('plus')}Captar imóvel</button></div></div>`;
   if (st.modo === 'lista') return topo + a.tab({ id: 'imoveis', itens: () => l, singular: 'imóvel', plural: 'imóveis', ordem: 'codigo', aoClicar: (id) => a.abrir('imovel', id), textoBusca: (x) => `${x.codigo} ${x.tipo} ${x.bairro} ${x.endereco}`,
     visoes: [{ id: 'disp', rot: 'Disponíveis', filtro: (x) => x.status === 'disponivel' }, { id: 'res', rot: 'Reservados', filtro: (x) => x.status === 'reservado' }, { id: 'neg', rot: 'Vendidos e alugados', filtro: (x) => ['vendido', 'alugado'].includes(x.status) }, { id: 'todos', rot: 'Todos' }],
-    filtros: [{ k: 'tipo', rot: 'Tipo', opcoes: TIPOS }, { k: 'corretor', rot: 'Corretor', opcoes: CORRETORES.map((c) => [c[0], c[1]]) }],
+    filtros: [{ k: 'tipo', rot: 'Tipo', opcoes: TIPOS }, { k: 'corretor', rot: 'Corretor', opcoes: () => CORRETORES.map((c) => [c[0], c[1]]) }],
     colunas: [{ k: 'codigo', rot: 'Cód.', render: (x) => `<span class="mono prim">${esc(x.codigo)}</span>` }, { k: 'tipo', rot: 'Imóvel', valor: titulo, render: (x) => `<span class="prim">${esc(titulo(x))}</span><span class="sub">${x.area} m² · ${x.vagas} vagas</span>` }, { k: 'valor', rot: 'Valor', n: true, render: valorFmt }, { k: 'visualizacoes', rot: 'Visualizações', n: true, oc: true, render: (x) => num(x.visualizacoes) }, { k: 'corretor', rot: 'Corretor', oc: true, valor: (x) => nomeCor(x.corretor) }, { k: 'status', rot: 'Situação', render: etSt }] });
   l = l.filter((x) => x.status !== 'vendido').sort((x, y) => Number(y.destaque) - Number(x.destaque) || (x.status === 'disponivel' ? -1 : 1));
   return `${topo}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px">${l.map((x) => `<article class="cartao clicavel" data-abrir="imovel:${x.id}" style="margin:0;padding:10px;cursor:pointer">${capa(x)}<div style="padding:10px 4px 4px"><div class="entre"><b>${valorFmt(x)}</b>${etSt(x)}</div><div style="margin-top:4px">${esc(titulo(x))}</div><div class="mute" style="font-size:12.5px;margin-top:4px">${x.area} m²${x.vagas ? ` · ${x.vagas} vaga${x.vagas === 1 ? '' : 's'}` : ''}${x.condominio ? ` · cond. ${moedaC(x.condominio)}` : ''}</div></div></article>`).join('')}</div>`;
@@ -154,7 +159,7 @@ function visitasPag(a) {
   const st = a.estado.vis ||= { data: paraData(hoje()).getDay() === 0 ? diaMais(1) : hoje() };
   const seg = diaMais(-((paraData(st.data).getDay() + 6) % 7), st.data), dias = Array.from({ length: 7 }, (_, i) => diaMais(i, seg));
   a.cals.visitas = { aoClicar: (id) => a.abrir('visita', id), aoMover: (id, col, hora) => { a.db.salvar('visitas', { id, data: col, hora }); avisar(`Visita remarcada para ${dataCurta(col)}, ${hora}`); a.render(); }, aoClicarVazio: (col, hora) => a.acoes.novaVisita({ data: col, hora }) };
-  const cor = { co0: '#0f766e', co1: '#7c3aed', co2: '#db2777', co3: '#ea580c' };
+  const cor = Object.fromEntries(CORRETORES.map(([id], i) => [id, ['#0f766e', '#7c3aed', '#db2777', '#ea580c', '#2563eb', '#65a30d'][i % 6]]));
   return `<div class="cal"><div class="cal-barra"><div class="grupo-btn"><button type="button" data-acao="semVis" data-d="-7" aria-label="Semana anterior">${ic('caret-left', 'p')}</button><button type="button" data-acao="semVis" data-d="0">Esta semana</button><button type="button" data-acao="semVis" data-d="7" aria-label="Próxima semana">${ic('caret-right', 'p')}</button></div><h3>Semana de ${dataCurta(seg)}</h3>
     <span class="flex mute" style="font-size:12px;gap:10px;margin-left:auto">${CORRETORES.map(([id, n]) => `<span class="flex" style="gap:5px"><i style="width:9px;height:9px;border-radius:3px;background:${cor[id]}"></i>${n.split(' ')[0]}</span>`).join('')}</span><button type="button" class="btn pri peq" data-acao="novaVisita">${ic('plus')}Visita</button></div>
     ${calGrade({ id: 'visitas', inicio: 8, fim: 20, hh: 52, larguraCol: 140, agora: { col: hoje(), hora: new Date().toTimeString().slice(0, 5) }, colunas: dias.map((d) => ({ id: d, rot: `${DIAS[paraData(d).getDay()]} ${Number(d.slice(8))}`, hoje: d === hoje() })),
@@ -259,6 +264,7 @@ const app = criarApp({
     { grupo: 'Gestão' },
     { id: 'pessoas', rot: 'Clientes e proprietários', icone: 'users', render: (a) => a.tab({ id: 'pessoas', colecao: 'pessoas', singular: 'pessoa', plural: 'pessoas', ordem: 'nome', novo: { rot: 'Nova pessoa', attrs: 'data-acao="novoCad" data-c="pessoas"' }, aoClicar: async (id) => { if (await editar(a, 'pessoas', pessoa(a, id))) a.render(); }, visoes: [{ id: 'int', rot: 'Interessados', filtro: (p) => p.tipo === 'interessado' }, { id: 'prop', rot: 'Proprietários', filtro: (p) => p.tipo === 'proprietario' }, { id: 'inq', rot: 'Inquilinos', filtro: (p) => p.tipo === 'inquilino' }, { id: 'todos', rot: 'Todos' }], colunas: [{ k: 'nome', rot: 'Nome', render: (p) => `<span class="flex" style="gap:9px">${av(p.nome)}<span class="prim">${esc(p.nome)}</span></span>` }, { k: 'telefone', rot: 'WhatsApp' }, { k: 'email', rot: 'E-mail', oc: true }, { k: 'tipo', rot: 'Tipo', render: (p) => et({ interessado: 'Interessado', proprietario: 'Proprietário', inquilino: 'Inquilino' }[p.tipo], '', 'sem-ponto') }] }) },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
+    paginaEquipe(EQUIPE),
     ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
@@ -320,5 +326,6 @@ if (!app.nuvem && app.db) {
 }
 
 // ferramentas do painel ao lado das telas (WhatsApp e copiar)
+equipeViva(app, EQUIPE);
 Object.assign(app.acoes, acoesLado());
 app.travarLado = travarPro;   // avisos e mensagens prontas: plano Pro (calculadoras: Básico)

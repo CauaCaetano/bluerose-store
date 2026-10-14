@@ -6,12 +6,17 @@ import {
 } from '../base/nexo.js';
 import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
+import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
 
 const ETAPAS = [['negociacao', 'Em negociação', '#a39b86'], ['fechado', 'Contrato fechado', '#b08d4f'], ['planejamento', 'Planejamento', '#7c8a45'], ['reta', 'Reta final (30 dias)', '#c0692e'], ['realizado', 'Realizado', '#4f5a2e']];
 const etp = (id) => ETAPAS.find((e) => e[0] === id) || ETAPAS[0];
 const TIPOS = ['Casamento', 'Bodas', '15 anos', 'Corporativo', 'Batizado', 'Formatura'];
 const CATEGORIAS = ['Local', 'Buffet', 'Decoração', 'Fotografia', 'Filmagem', 'Música / DJ', 'Banda', 'Bolo e doces', 'Bebidas', 'Convites', 'Vestido', 'Traje do noivo', 'Beleza', 'Celebrante', 'Iluminação', 'Lembrancinhas', 'Transporte'];
 const ASSESSORAS = [['as0', 'Juliana Paiva'], ['as1', 'Camila Rocha'], ['as2', 'Bianca Moura']];
+const EQUIPE = { colecao: 'assessoras', rot: 'Assessoras', icone: 'user-circle', singular: 'assessora', plural: 'assessoras', genero: 'f', vazio: 'as assessoras', lista: ASSESSORAS,
+  campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }],
+  linha: (r) => [r.id, r.nome], registro: ([id, nome]) => ({ id, nome }) };
+const padraoEquipe = (eu) => (ASSESSORAS.find((x) => x[0] === eu) || ASSESSORAS[0] || [''])[0];
 const nomeA = (id) => (ASSESSORAS.find((x) => x[0] === id) || [, '—'])[1];
 // checklist padrão: [tarefa, dias antes do evento, quem faz]
 const CHECK_PADRAO = [['Definir data e estimativa de convidados', 365, 'noivos'], ['Fechar o local da cerimônia e da festa', 330, 'assessoria'], ['Contratar buffet', 300, 'assessoria'], ['Contratar fotografia e filmagem', 290, 'assessoria'], ['Escolher a decoração', 240, 'assessoria'], ['Lista de convidados (primeira versão)', 210, 'noivos'], ['Contratar música (DJ ou banda)', 200, 'assessoria'], ['Escolher o vestido', 180, 'noivos'], ['Save the date', 160, 'noivos'], ['Degustação do buffet', 120, 'noivos'], ['Enviar os convites', 90, 'noivos'], ['Definir o roteiro da cerimônia', 60, 'assessoria'], ['Prova final do vestido', 30, 'noivos'], ['Confirmar presença dos convidados (RSVP)', 25, 'noivos'], ['Reunião final com todos os fornecedores', 15, 'assessoria'], ['Mapa de mesas', 10, 'noivos'], ['Entregar o roteiro aos fornecedores', 5, 'assessoria']];
@@ -77,7 +82,7 @@ const contagem = (d) => { const n = diasAte(d); return n < 0 ? 'realizado' : n =
 const etE = (e) => `<span class="et sem-ponto" style="background:color-mix(in srgb,${etp(e.etapa)[2]} 14%,var(--painel));color:${etp(e.etapa)[2]}">${etp(e.etapa)[1]}</span>`;
 
 const colecoes = {
-  eventos: { singular: 'evento', plural: 'eventos', campos: [{ nome: 'nome', rotulo: 'Nome do evento (ex.: Ana & Pedro)', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'tipo', rotulo: 'Tipo', tipo: 'selecao', opcoes: TIPOS }, { nome: 'data', rotulo: 'Data', tipo: 'data', obrigatorio: true }, { nome: 'hora', rotulo: 'Horário', tipo: 'texto', padrao: '17:00' }, { nome: 'local', rotulo: 'Local', tipo: 'texto', largo: true }, { nome: 'convidados', rotulo: 'Convidados', tipo: 'numero' }, { nome: 'orcamento', rotulo: 'Orçamento total dos clientes', tipo: 'moeda' }, { nome: 'contratante', rotulo: 'Contato principal', tipo: 'texto', obrigatorio: true }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel', obrigatorio: true }, { nome: 'valor_assessoria', rotulo: 'Valor da assessoria', tipo: 'moeda' }, { nome: 'assessora', rotulo: 'Assessora responsável', tipo: 'selecao', opcoes: ASSESSORAS.map(([id, n]) => [id, n]) }],
+  eventos: { singular: 'evento', plural: 'eventos', campos: [{ nome: 'nome', rotulo: 'Nome do evento (ex.: Ana & Pedro)', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'tipo', rotulo: 'Tipo', tipo: 'selecao', opcoes: TIPOS }, { nome: 'data', rotulo: 'Data', tipo: 'data', obrigatorio: true }, { nome: 'hora', rotulo: 'Horário', tipo: 'texto', padrao: '17:00' }, { nome: 'local', rotulo: 'Local', tipo: 'texto', largo: true }, { nome: 'convidados', rotulo: 'Convidados', tipo: 'numero' }, { nome: 'orcamento', rotulo: 'Orçamento total dos clientes', tipo: 'moeda' }, { nome: 'contratante', rotulo: 'Contato principal', tipo: 'texto', obrigatorio: true }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel', obrigatorio: true }, { nome: 'valor_assessoria', rotulo: 'Valor da assessoria', tipo: 'moeda' }, { nome: 'assessora', rotulo: 'Assessora responsável', tipo: 'selecao', opcoes: () => ASSESSORAS.map(([id, n]) => [id, n]) }],
     antesDeSalvar: (d, _a, antigo) => ({ etapa: antigo?.etapa || 'negociacao', assessoria_pago: antigo?.assessoria_pago || 0, ...d }) },
   convidados: { singular: 'convidado', plural: 'convidados', campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'lado', rotulo: 'Lado', tipo: 'selecao', opcoes: [['noiva', 'Noiva / família 1'], ['noivo', 'Noivo / família 2'], ['ambos', 'Amigos do casal']] }, { nome: 'acompanhantes', rotulo: 'Acompanhantes', tipo: 'numero', padrao: 0 }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }, { nome: 'mesa', rotulo: 'Mesa', tipo: 'texto' }, { nome: 'rsvp', rotulo: 'Presença', tipo: 'selecao', opcoes: [['pendente', 'Sem resposta'], ['sim', 'Confirmado'], ['nao', 'Não vai']], padrao: 'pendente' }] },
   fornecedores: { singular: 'fornecedor', plural: 'fornecedores', campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'categoria', rotulo: 'Categoria', tipo: 'selecao', opcoes: CATEGORIAS }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }, { nome: 'instagram', rotulo: 'Instagram', tipo: 'texto' }, { nome: 'nota', rotulo: 'Avaliação (1 a 5)', tipo: 'numero', padrao: 5 }] },
@@ -258,6 +263,7 @@ const app = criarApp({
     { grupo: 'Gestão' },
     { id: 'fornecedores', rot: 'Fornecedores', icone: 'storefront', render: fornecedoresPag },
     { id: 'financeiro', rot: 'Financeiro', icone: 'coins', render: financeiroPag },
+    paginaEquipe(EQUIPE),
     ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
@@ -312,5 +318,6 @@ Object.assign(app.acoes, {
 });
 
 // ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+equipeViva(app, EQUIPE);
 Object.assign(app.acoes, acoesLado());
 app.travarLado = travarPro;

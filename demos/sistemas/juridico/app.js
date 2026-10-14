@@ -6,8 +6,13 @@ import {
 } from '../base/nexo.js';
 import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
+import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
 
 const ADV = [['paulo', 'Dr. Paulo Moura', 'Sócio · OAB/MG 98.412', 450], ['ana', 'Dra. Ana Castro', 'Sócia · OAB/MG 101.337', 450], ['lia', 'Dra. Lia Fontes', 'Associada · OAB/MG 187.205', 300], ['rafael', 'Rafael Teles', 'Estagiário · controladoria', 120]];
+const EQUIPE = { colecao: 'advogados', rot: 'Advogados', icone: 'scales', singular: 'advogado', plural: 'advogados', vazio: 'os advogados do escritório', lista: ADV,
+  campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true }, { nome: 'cargo', rotulo: 'Cargo e OAB', tipo: 'texto' }, { nome: 'valor_hora', rotulo: 'Valor da hora', tipo: 'moeda', padrao: 300 }],
+  linha: (r) => [r.id, r.nome, r.cargo || '', Number(r.valor_hora || 0)], registro: ([id, nome, cargo, valor_hora]) => ({ id, nome, cargo, valor_hora }) };
+const padraoEquipe = (eu) => (ADV.find((x) => x[0] === eu) || ADV[0] || [''])[0];
 const nomeA = (id) => (ADV.find((x) => x[0] === id) || [, '—'])[1];
 const valorHora = (id) => (ADV.find((x) => x[0] === id) || [, , , 300])[3];
 const EU = 'ana';
@@ -160,24 +165,24 @@ const colecoes = {
     { nome: 'acao', rotulo: 'Tipo de ação', tipo: 'texto', obrigatorio: true }, { nome: 'area', rotulo: 'Área', tipo: 'selecao', opcoes: AREAS, obrigatorio: true },
     { nome: 'contraria', rotulo: 'Parte contrária', tipo: 'texto' }, { nome: 'polo', rotulo: 'Nosso cliente é', tipo: 'selecao', opcoes: ['Autor', 'Réu', 'Terceiro'], padrao: 'Autor' },
     { nome: 'vara', rotulo: 'Vara / tribunal', tipo: 'texto', largo: true }, { nome: 'fase', rotulo: 'Fase', tipo: 'selecao', opcoes: FASES, padrao: 'Inicial' },
-    { nome: 'valor', rotulo: 'Valor da causa', tipo: 'moeda' }, { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: ADV.map((x) => [x[0], x[1]]), padrao: EU }, { nome: 'exito', rotulo: 'Honorários de êxito (%)', tipo: 'porcentagem', padrao: 20 }],
+    { nome: 'valor', rotulo: 'Valor da causa', tipo: 'moeda' }, { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: () => ADV.map((x) => [x[0], x[1]]), padrao: () => padraoEquipe(EU) }, { nome: 'exito', rotulo: 'Honorários de êxito (%)', tipo: 'porcentagem', padrao: 20 }],
     antesDeSalvar: (d, a, antes) => ({ ...d, status: antes?.status || 'ativo', distribuido: antes?.distribuido || hoje() }) },
   clientes: { singular: 'cliente', plural: 'clientes', campos: [
     { nome: 'nome', rotulo: 'Nome / razão social', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'tipo', rotulo: 'Tipo', tipo: 'selecao', opcoes: [['PF', 'Pessoa física'], ['PJ', 'Pessoa jurídica']], padrao: 'PF' }, { nome: 'doc', rotulo: 'CPF / CNPJ', tipo: 'texto' },
-    { nome: 'telefone', rotulo: 'Telefone', tipo: 'tel' }, { nome: 'email', rotulo: 'E-mail', tipo: 'email' }, { nome: 'cidade', rotulo: 'Cidade', tipo: 'texto' }, { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: ADV.map((x) => [x[0], x[1]]), padrao: EU }],
+    { nome: 'telefone', rotulo: 'Telefone', tipo: 'tel' }, { nome: 'email', rotulo: 'E-mail', tipo: 'email' }, { nome: 'cidade', rotulo: 'Cidade', tipo: 'texto' }, { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: () => ADV.map((x) => [x[0], x[1]]), padrao: () => padraoEquipe(EU) }],
     antesDeSalvar: (d, a, antes) => ({ ...d, desde: antes?.desde || hoje() }) },
   prazos: { singular: 'compromisso', plural: 'compromissos', campos: [
     { nome: 'tipo', rotulo: 'Tipo', tipo: 'selecao', opcoes: Object.entries(TIPOS_PRAZO).map(([k, [n]]) => [k, n]), padrao: 'prazo', obrigatorio: true }, { nome: 'titulo', rotulo: 'Descrição', tipo: 'texto', obrigatorio: true },
     { nome: 'processo', rotulo: 'Processo', tipo: 'relacao', colecao: 'processos', mostrar: (p, a) => `${p.numero} · ${rotProc(a, p)}`, filtrar: (p) => p.status !== 'encerrado' }, { nome: 'data', rotulo: 'Data (fatal)', tipo: 'data', obrigatorio: true, padrao: () => diaMais(7) },
-    { nome: 'hora', rotulo: 'Hora (audiências)', tipo: 'hora' }, { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: ADV.map((x) => [x[0], x[1]]), padrao: EU }, { nome: 'local', rotulo: 'Local / link', tipo: 'texto', largo: true }],
+    { nome: 'hora', rotulo: 'Hora (audiências)', tipo: 'hora' }, { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: () => ADV.map((x) => [x[0], x[1]]), padrao: () => padraoEquipe(EU) }, { nome: 'local', rotulo: 'Local / link', tipo: 'texto', largo: true }],
     antesDeSalvar: (d, a, antes) => ({ ...d, status: antes?.status || 'pendente' }) },
   tarefas: { singular: 'tarefa', genero: 'f', plural: 'tarefas', campos: [
     { nome: 'titulo', rotulo: 'Tarefa', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'processo', rotulo: 'Processo', tipo: 'relacao', colecao: 'processos', mostrar: (p, a) => `${p.numero} · ${rotProc(a, p)}`, filtrar: (p) => p.status !== 'encerrado' },
-    { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: ADV.map((x) => [x[0], x[1]]), padrao: EU }, { nome: 'prazo', rotulo: 'Prazo interno', tipo: 'data', padrao: () => diaMais(3) },
+    { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: () => ADV.map((x) => [x[0], x[1]]), padrao: () => padraoEquipe(EU) }, { nome: 'prazo', rotulo: 'Prazo interno', tipo: 'data', padrao: () => diaMais(3) },
     { nome: 'prioridade', rotulo: 'Prioridade', tipo: 'selecao', opcoes: ['alta', 'média', 'baixa'], padrao: 'média' }, { nome: 'status', rotulo: 'Situação', tipo: 'selecao', opcoes: COLUNAS_TAREFA.map(([k, n]) => [k, n]), padrao: 'afazer' }] },
   horas: { singular: 'lançamento de horas', plural: 'horas', campos: [
     { nome: 'processo', rotulo: 'Processo', tipo: 'relacao', colecao: 'processos', mostrar: (p, a) => `${p.numero} · ${rotProc(a, p)}`, obrigatorio: true }, { nome: 'data', rotulo: 'Data', tipo: 'data', padrao: hoje },
-    { nome: 'minutos', rotulo: 'Tempo (minutos)', tipo: 'numero', obrigatorio: true, padrao: 60, min: 5 }, { nome: 'advogado', rotulo: 'Quem', tipo: 'selecao', opcoes: ADV.map((x) => [x[0], x[1]]), padrao: EU },
+    { nome: 'minutos', rotulo: 'Tempo (minutos)', tipo: 'numero', obrigatorio: true, padrao: 60, min: 5 }, { nome: 'advogado', rotulo: 'Quem', tipo: 'selecao', opcoes: () => ADV.map((x) => [x[0], x[1]]), padrao: () => padraoEquipe(EU) },
     { nome: 'descricao', rotulo: 'O que foi feito', tipo: 'texto', largo: true, obrigatorio: true }, { nome: 'faturavel', rotulo: 'Faturável', tipo: 'booleano', texto: 'Cobrar do cliente', padrao: true }],
     antesDeSalvar: (d, a) => ({ ...d, cliente: proc(a, d.processo)?.cliente, faturado: false }) },
   honorarios: { singular: 'lançamento', plural: 'lançamentos', campos: [
@@ -250,7 +255,7 @@ function prazosPag(a) {
   return topo + a.tab({
     id: 'prazos', colecao: 'prazos', singular: 'compromisso', plural: 'compromissos', ordem: 'data',
     visoes: [{ id: 'pend', rot: 'Pendentes', filtro: (x) => x.status === 'pendente' }, { id: 'venc', rot: 'Vencidos', filtro: (x) => x.status === 'pendente' && x.data < hoje() }, { id: 'hoje', rot: 'Hoje', filtro: (x) => x.status === 'pendente' && x.data === hoje() }, { id: 'sem', rot: 'Próximos 7 dias', filtro: (x) => x.status === 'pendente' && diasAte(x.data) > 0 && diasAte(x.data) <= 7 }, { id: 'aud', rot: 'Audiências', filtro: (x) => x.tipo === 'audiencia' && x.status === 'pendente' }, { id: 'feitos', rot: 'Cumpridos', filtro: (x) => x.status === 'cumprido' }],
-    filtros: [{ k: 'tipo', rot: 'Tipo', opcoes: Object.entries(TIPOS_PRAZO).map(([k, [n]]) => [k, n]) }, { k: 'responsavel', rot: 'Responsável', opcoes: ADV.map((x) => [x[0], x[1]]) }],
+    filtros: [{ k: 'tipo', rot: 'Tipo', opcoes: Object.entries(TIPOS_PRAZO).map(([k, [n]]) => [k, n]) }, { k: 'responsavel', rot: 'Responsável', opcoes: () => ADV.map((x) => [x[0], x[1]]) }],
     textoBusca: (x) => `${x.titulo} ${proc(a, x.processo)?.numero} ${rotProc(a, proc(a, x.processo))}`,
     aoClicar: (id) => a.abrir('processo', a.db.obter('prazos', id).processo, 'prazos'),
     massa: [{ rot: 'Marcar como cumprido', icone: 'check', acao: (ids) => { ids.forEach((id) => a.db.salvar('prazos', { id, status: 'cumprido', cumprido_em: hoje() })); avisar(`${ids.length} compromissos cumpridos`); } }],
@@ -269,7 +274,7 @@ function processos(a) {
   return a.tab({
     id: 'processos', colecao: 'processos', singular: 'processo', plural: 'processos', ordem: 'proximo', buscaDica: 'Buscar por número, cliente ou parte…',
     visoes: [{ id: 'ativos', rot: 'Ativos', filtro: (p) => p.status === 'ativo' }, { id: 'meus', rot: 'Meus', filtro: (p) => p.responsavel === EU && p.status !== 'encerrado' }, { id: 'susp', rot: 'Suspensos', filtro: (p) => p.status === 'suspenso' }, { id: 'enc', rot: 'Encerrados', filtro: (p) => p.status === 'encerrado' }, { id: 'todos', rot: 'Todos' }],
-    filtros: [{ k: 'area', rot: 'Área', opcoes: AREAS }, { k: 'fase', rot: 'Fase', opcoes: FASES }, { k: 'responsavel', rot: 'Responsável', opcoes: ADV.map((x) => [x[0], x[1]]) }],
+    filtros: [{ k: 'area', rot: 'Área', opcoes: AREAS }, { k: 'fase', rot: 'Fase', opcoes: FASES }, { k: 'responsavel', rot: 'Responsável', opcoes: () => ADV.map((x) => [x[0], x[1]]) }],
     textoBusca: (p) => `${p.numero} ${p.acao} ${cli(a, p.cliente)?.nome} ${p.contraria} ${p.vara}`,
     total: (l) => `${moedaC(soma(l, (p) => p.valor))} em causas`,
     novo: { rot: 'Novo processo', attrs: 'data-acao="novoProcesso"' }, aoClicar: (id) => a.abrir('processo', id),
@@ -305,7 +310,7 @@ function timesheet(a) {
     <div class="entre"><div class="flex"><select data-mudar="mesTs" style="width:auto">${meses.map((m) => `<option value="${m}" ${m === st.mes ? 'selected' : ''}>${esc(nomeMes(m, true))}</option>`).join('')}</select></div><div class="flex">${cron ? '' : `<button type="button" class="btn" data-acao="iniciarCron">${ic('play')}Iniciar cronômetro</button>`}<button type="button" class="btn pri" data-acao="novaHora">${ic('plus')}Lançar horas</button></div></div>
     ${kpis([{ rot: 'Horas lançadas', icone: 'timer', val: hrs(soma(hs, (h) => h.minutos)) }, { rot: 'Faturáveis', icone: 'currency-circle-dollar', val: hrs(soma(hs.filter((h) => h.faturavel), (h) => h.minutos)), nota: `${pct((soma(hs.filter((h) => h.faturavel), (h) => h.minutos) / (soma(hs, (h) => h.minutos) || 1)) * 100)} do total` }, { rot: 'Valor a faturar (todos os meses)', icone: 'hand-coins', val: moeda(soma(Object.values(naoFat).flat(), (h) => (h.minutos / 60) * valorHora(h.advogado))) }])}
     <div class="grade g21">${a.tab({ id: 'horas', itens: () => hs, singular: 'lançamento', plural: 'lançamentos', ordem: 'data', desc: true, porPagina: 20,
-      filtros: [{ k: 'advogado', rot: 'Quem', opcoes: ADV.map((x) => [x[0], x[1]]) }],
+      filtros: [{ k: 'advogado', rot: 'Quem', opcoes: () => ADV.map((x) => [x[0], x[1]]) }],
       aoClicar: async (id) => { if (await editar(a, 'horas', a.db.obter('horas', id))) a.render(); },
       total: (l) => hrs(soma(l, (h) => h.minutos)),
       colunas: [{ k: 'data', rot: 'Data', render: (h) => dataCurta(h.data) }, { k: 'descricao', rot: 'Atividade', render: (h) => `<span class="prim">${esc(h.descricao)}</span><span class="sub corta" style="max-width:260px">${esc(rotProc(a, proc(a, h.processo)))}</span>` },
@@ -317,7 +322,7 @@ function timesheet(a) {
 
 function clientes(a) {
   return a.tab({ id: 'clientes', colecao: 'clientes', singular: 'cliente', plural: 'clientes', ordem: 'nome',
-    filtros: [{ k: 'tipo', rot: 'Tipo', opcoes: [['PF', 'Pessoa física'], ['PJ', 'Pessoa jurídica']] }, { k: 'responsavel', rot: 'Responsável', opcoes: ADV.map((x) => [x[0], x[1]]) }],
+    filtros: [{ k: 'tipo', rot: 'Tipo', opcoes: [['PF', 'Pessoa física'], ['PJ', 'Pessoa jurídica']] }, { k: 'responsavel', rot: 'Responsável', opcoes: () => ADV.map((x) => [x[0], x[1]]) }],
     textoBusca: (c) => `${c.nome} ${c.doc} ${c.email}`, novo: { rot: 'Novo cliente', attrs: 'data-acao="novoCliente"' }, aoClicar: (id) => a.abrir('cliente', id),
     colunas: [{ k: 'nome', rot: 'Cliente', render: (c) => `<span class="flex" style="gap:9px">${av(c.nome)}<span><span class="prim">${esc(c.nome)}</span><span class="sub mono">${esc(c.doc || '')}</span></span></span>` }, { k: 'tipo', rot: 'Tipo', render: (c) => et(c.tipo === 'PJ' ? 'Empresa' : 'Pessoa física', c.tipo === 'PJ' ? 'roxo' : '', 'sem-ponto') },
       { k: 'proc', rot: 'Processos ativos', n: true, valor: (c) => a.db.lista('processos').filter((p) => p.cliente === c.id && p.status !== 'encerrado').length, render: (c) => num(a.db.lista('processos').filter((p) => p.cliente === c.id && p.status !== 'encerrado').length) },
@@ -472,6 +477,7 @@ const app = criarApp({
     { id: 'calculadora', lado: FERR.calculadora, rot: 'Calculadora de prazos', icone: 'calculator', render: calculadora },
     { id: 'modelos', rot: 'Modelos de documentos', icone: 'file-text', render: modelos },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
+    paginaEquipe(EQUIPE),
     ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
@@ -549,5 +555,6 @@ Object.assign(app.acoes, {
 setTimeout(() => { if (app.db?.cfg?.oabs?.length && app.db.cfg.djen_ultima !== hoje()) capturarDJEN(app, { silencioso: true }).then((n) => { if (n) app.render(); }).catch(() => {}); }, 2500);
 
 // ferramentas do painel ao lado das telas (WhatsApp e copiar)
+equipeViva(app, EQUIPE);
 Object.assign(app.acoes, acoesLado());
 app.travarLado = travarPro;   // avisos e mensagens prontas: plano Pro (calculadoras: Básico)

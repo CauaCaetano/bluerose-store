@@ -490,6 +490,7 @@ function montar(app, cfg) {
   const rota = () => { const h = location.hash.replace(/^#\/?/, '').split('?')[0]; const [id, ...params] = h.split('/'); return { id: id || paginas[0].id, params: params.map(decodeURIComponent) }; };
   app.ir = (h) => { if (location.hash === h) app.render(); else location.hash = h; };
   app.render = () => {
+    app.antesDeRender?.();
     const { id, params } = rota();
     const p = id === 'config' ? paginaConfig : id === 'dono' ? paginaDono : id === 'importar' ? paginaPlanilha : paginas.find((x) => x.id === id) || paginas[0];
     if (app.acesso(p.id) === 'nenhum') { const ok = paginas.find((x) => app.acesso(x.id) !== 'nenhum'); if (ok && ok !== p) { location.hash = `#/${ok.id}`; return; } }

@@ -6,6 +6,7 @@ import {
 } from '../base/nexo.js';
 import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
+import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
 
 const ETAPAS = [
   { id: 'contato', nome: 'Contato feito', prob: 10, rot: 7, cor: '#a5b4fc' },
@@ -16,6 +17,10 @@ const ETAPAS = [
 ];
 const etapa = (id) => ETAPAS.find((e) => e.id === id) || ETAPAS[0];
 const VEND = [['ana', 'Ana Ribeiro', 'Gerente comercial'], ['bruno', 'Bruno Lacerda', 'Executivo de vendas'], ['carla', 'Carla Menezes', 'Executiva de vendas']];
+const EQUIPE = { colecao: 'vendedores', rot: 'Vendedores', icone: 'users-three', singular: 'vendedor', plural: 'vendedores', vazio: 'a equipe de vendas', lista: VEND,
+  campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true }, { nome: 'cargo', rotulo: 'Cargo', tipo: 'texto' }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }],
+  linha: (r) => [r.id, r.nome, r.cargo || ''], registro: ([id, nome, cargo]) => ({ id, nome, cargo }) };
+const padraoEquipe = (eu) => (VEND.find((x) => x[0] === eu) || VEND[0] || [''])[0];
 const nomeV = (id) => (VEND.find((v) => v[0] === id) || [, '—'])[1];
 const EU = 'ana';
 const ORIGENS = ['Site', 'Indicação', 'Instagram', 'Google Ads', 'Evento', 'Prospecção ativa', 'LinkedIn'];
@@ -107,7 +112,7 @@ const colecoes = {
       { nome: 'valor', rotulo: 'Valor', tipo: 'moeda', obrigatorio: true, ajuda: 'Se você incluir produtos, o valor é calculado por eles' },
       { nome: 'previsao', rotulo: 'Previsão de fechamento', tipo: 'data', padrao: () => diaMais(21) },
       { nome: 'etapa', rotulo: 'Etapa', tipo: 'selecao', opcoes: ETAPAS.map((e) => [e.id, e.nome]), obrigatorio: true, padrao: 'contato' },
-      { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: VEND.map((v) => [v[0], v[1]]), obrigatorio: true, padrao: EU },
+      { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: () => VEND.map((v) => [v[0], v[1]]), get obrigatorio() { return VEND.length > 0; }, padrao: () => padraoEquipe(EU) },
       { nome: 'origem', rotulo: 'Origem', tipo: 'selecao', opcoes: ORIGENS },
     ],
     antesDeSalvar: (d, a, antes) => ({ ...d, status: antes?.status || 'aberto', etapa_desde: !antes || antes.etapa !== d.etapa ? hoje() : antes.etapa_desde, criado: antes?.criado || hoje(), itens: antes?.itens || [] }),
@@ -121,7 +126,7 @@ const colecoes = {
       { nome: 'email', rotulo: 'E-mail', tipo: 'email' },
       { nome: 'telefone', rotulo: 'Telefone / WhatsApp', tipo: 'tel' },
       { nome: 'origem', rotulo: 'Origem', tipo: 'selecao', opcoes: ORIGENS },
-      { nome: 'dono', rotulo: 'Responsável', tipo: 'selecao', opcoes: VEND.map((v) => [v[0], v[1]]), padrao: EU },
+      { nome: 'dono', rotulo: 'Responsável', tipo: 'selecao', opcoes: () => VEND.map((v) => [v[0], v[1]]), padrao: () => padraoEquipe(EU) },
     ],
   },
   empresas: {
@@ -133,7 +138,7 @@ const colecoes = {
       { nome: 'funcionarios', rotulo: 'Funcionários', tipo: 'numero', min: 0 },
       { nome: 'telefone', rotulo: 'Telefone', tipo: 'tel' },
       { nome: 'site', rotulo: 'Site', tipo: 'texto' },
-      { nome: 'dono', rotulo: 'Responsável', tipo: 'selecao', opcoes: VEND.map((v) => [v[0], v[1]]), padrao: EU },
+      { nome: 'dono', rotulo: 'Responsável', tipo: 'selecao', opcoes: () => VEND.map((v) => [v[0], v[1]]), padrao: () => padraoEquipe(EU) },
     ],
   },
   atividades: {
@@ -144,7 +149,7 @@ const colecoes = {
       { nome: 'quando', rotulo: 'Quando', tipo: 'datahora', obrigatorio: true, padrao: () => `${diaMais(1)}T10:00` },
       { nome: 'duracao', rotulo: 'Duração (min)', tipo: 'numero', padrao: 30, min: 5 },
       { nome: 'negocio', rotulo: 'Negócio', tipo: 'relacao', colecao: 'negocios', mostrar: 'titulo', filtrar: (n) => n.status === 'aberto' },
-      { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: VEND.map((v) => [v[0], v[1]]), obrigatorio: true, padrao: EU },
+      { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: () => VEND.map((v) => [v[0], v[1]]), get obrigatorio() { return VEND.length > 0; }, padrao: () => padraoEquipe(EU) },
       { nome: 'nota', rotulo: 'Observação', tipo: 'texto-longo', dica: 'Pauta, contexto, o que levar…' },
     ],
     antesDeSalvar: (d, a) => ({ ...d, feita: d.feita ?? false, contato: d.contato || a.db.obter('negocios', d.negocio)?.contato }),
@@ -214,7 +219,7 @@ function negocios(a) {
   return a.tab({
     id: 'negocios', colecao: 'negocios', singular: 'negócio', plural: 'negócios', ordem: 'previsao', buscaDica: 'Buscar por título, empresa ou pessoa…',
     visoes: [{ id: 'abertos', rot: 'Em aberto', filtro: (n) => n.status === 'aberto' }, { id: 'parados', rot: 'Parados', filtro: (n) => parado(a, n) }, { id: 'ganhos', rot: 'Ganhos', filtro: (n) => n.status === 'ganho' }, { id: 'perdidos', rot: 'Perdidos', filtro: (n) => n.status === 'perdido' }, { id: 'todos', rot: 'Todos' }],
-    filtros: [{ k: 'responsavel', rot: 'Responsável', opcoes: VEND.map((v) => [v[0], v[1]]) }, { k: 'etapa', rot: 'Etapa', opcoes: ETAPAS.map((e) => [e.id, e.nome]) }, { k: 'origem', rot: 'Origem', opcoes: ORIGENS }],
+    filtros: [{ k: 'responsavel', rot: 'Responsável', opcoes: () => VEND.map((v) => [v[0], v[1]]) }, { k: 'etapa', rot: 'Etapa', opcoes: ETAPAS.map((e) => [e.id, e.nome]) }, { k: 'origem', rot: 'Origem', opcoes: ORIGENS }],
     textoBusca: (n) => `${n.titulo} ${empresaDe(a, n.empresa)?.nome} ${contatoDe(a, n.contato)?.nome}`,
     total: (l) => moeda(soma(l, (n) => n.valor)),
     novo: { rot: 'Novo negócio', attrs: 'data-acao="novoNegocio"' },
@@ -253,7 +258,7 @@ function atividades(a) {
   return topo + a.tab({
     id: 'atividades', colecao: 'atividades', singular: 'atividade', plural: 'atividades', ordem: 'quando',
     visoes: [{ id: 'pend', rot: 'A fazer', filtro: (x) => !x.feita }, { id: 'atras', rot: 'Atrasadas', filtro: (x) => !x.feita && diasAte(x.quando) < 0 }, { id: 'hoje', rot: 'Hoje', filtro: (x) => !x.feita && diasAte(x.quando) === 0 }, { id: 'semana', rot: 'Próximos 7 dias', filtro: (x) => !x.feita && diasAte(x.quando) > 0 && diasAte(x.quando) <= 7 }, { id: 'feitas', rot: 'Concluídas', filtro: (x) => x.feita }],
-    filtros: [{ k: 'tipo', rot: 'Tipo', opcoes: Object.entries(TIPOS).map(([k, [n]]) => [k, n]) }, { k: 'responsavel', rot: 'Responsável', opcoes: VEND.map((v) => [v[0], v[1]]) }],
+    filtros: [{ k: 'tipo', rot: 'Tipo', opcoes: Object.entries(TIPOS).map(([k, [n]]) => [k, n]) }, { k: 'responsavel', rot: 'Responsável', opcoes: () => VEND.map((v) => [v[0], v[1]]) }],
     textoBusca: (x) => `${x.titulo} ${a.db.obter('negocios', x.negocio)?.titulo || ''}`,
     aoClicar: (id) => a.abrir('atividade', id),
     massa: [{ rot: 'Concluir', icone: 'check', acao: (ids) => { ids.forEach((id) => a.db.salvar('atividades', { id, feita: true, feita_em: agoraISO() })); avisar(`${ids.length} atividades concluídas`); } }, { rot: 'Adiar 1 dia', icone: 'clock', acao: (ids) => { ids.forEach((id) => { const x = a.db.obter('atividades', id); a.db.salvar('atividades', { id, quando: `${diaMais(Math.max(1, diasAte(x.quando) + 1))}T${horaBR(x.quando)}` }); }); avisar(`${ids.length} atividades adiadas`); } }],
@@ -270,7 +275,7 @@ function atividades(a) {
 function pessoas(a) {
   return a.tab({
     id: 'contatos', colecao: 'contatos', singular: 'pessoa', plural: 'pessoas', ordem: 'nome', buscaDica: 'Buscar por nome, e-mail ou empresa…',
-    filtros: [{ k: 'origem', rot: 'Origem', opcoes: ORIGENS }, { k: 'dono', rot: 'Responsável', opcoes: VEND.map((v) => [v[0], v[1]]) }],
+    filtros: [{ k: 'origem', rot: 'Origem', opcoes: ORIGENS }, { k: 'dono', rot: 'Responsável', opcoes: () => VEND.map((v) => [v[0], v[1]]) }],
     textoBusca: (c) => `${c.nome} ${c.email} ${empresaDe(a, c.empresa)?.nome}`,
     novo: { rot: 'Nova pessoa', attrs: 'data-acao="novaPessoa"' }, aoClicar: (id) => a.abrir('pessoa', id),
     colunas: [
@@ -499,6 +504,7 @@ const app = criarApp({
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios, atalho: 'r' },
     { id: 'metas', rot: 'Metas', icone: 'target', titulo: 'Metas de vendas', render: metas },
     { id: 'produtos', rot: 'Produtos', icone: 'package', titulo: 'Produtos e serviços', render: produtos },
+    paginaEquipe(EQUIPE),
     ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
@@ -564,5 +570,6 @@ Object.assign(app.acoes, {
 });
 
 // ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+equipeViva(app, EQUIPE);
 Object.assign(app.acoes, acoesLado());
 app.travarLado = travarPro;

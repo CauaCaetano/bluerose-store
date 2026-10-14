@@ -6,11 +6,16 @@ import {
 } from '../base/nexo.js';
 import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
+import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
 import { baixar } from '../base/nexo.js';
 
 const DEP = [['d0', 'CD Principal'], ['d1', 'Loja Centro']];
 const nomeDep = (id) => (DEP.find((d) => d[0] === id) || [, '—'])[1];
 const VEND = [['marcos', 'Marcos Vieira'], ['julia', 'Júlia Andrade'], ['loja', 'Balcão da loja']];
+const EQUIPE = { colecao: 'vendedores', rot: 'Vendedores', icone: 'users-three', singular: 'vendedor', plural: 'vendedores', vazio: 'os vendedores', lista: VEND,
+  campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }],
+  linha: (r) => [r.id, r.nome], registro: ([id, nome]) => ({ id, nome }) };
+const padraoEquipe = (eu) => (VEND.find((x) => x[0] === eu) || VEND[0] || [''])[0];
 const nomeV = (id) => (VEND.find((v) => v[0] === id) || [, '—'])[1];
 const CANAIS = { balcao: 'Balcão / PDV', representante: 'Representante', ecommerce: 'Loja virtual', marketplace: 'Marketplace', catalogo: 'Catálogo online' };
 const ST_VENDA = [['orcamento', 'Orçamento', '#94a3b8'], ['aprovado', 'Aprovado', '#3b82f6'], ['separacao', 'Em separação', '#f59e0b'], ['faturado', 'Faturado', '#8b5cf6'], ['enviado', 'Enviado', '#0ea5e9'], ['entregue', 'Entregue', '#16a34a'], ['cancelado', 'Cancelado', '#a8a29e']];
@@ -151,7 +156,7 @@ const colecoes = {
     { nome: 'ncm', rotulo: 'NCM (nota fiscal)', tipo: 'texto', dica: '8 dígitos', ajuda: 'Classificação fiscal do produto' }, { nome: 'cfop', rotulo: 'CFOP', tipo: 'texto', padrao: '5102' }],
     validar: (d) => (d.preco < d.custo ? 'O preço de venda está abaixo do custo' : d.ean && !eanValido(d.ean) ? 'Código de barras inválido: confira os 13 dígitos (o último é o verificador)' : null), antesDeSalvar: (d, a, antes) => ({ ...d, ean: d.ean || comDigito(`200${String(Date.now()).slice(-9)}`), estoque: antes?.estoque || { d0: 0, d1: 0 }, giro: antes?.giro || 2 }) },
   clientes: { singular: 'cliente', plural: 'clientes', campos: [{ nome: 'nome', rotulo: 'Razão social / nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'doc', rotulo: 'CNPJ / CPF', tipo: 'texto' }, { nome: 'ie', rotulo: 'Inscrição estadual', tipo: 'texto', ajuda: 'Deixe em branco se for isento' }, { nome: 'telefone', rotulo: 'Telefone', tipo: 'tel' }, { nome: 'cidade', rotulo: 'Cidade', tipo: 'texto' },
-    { nome: 'cep', rotulo: 'CEP', tipo: 'texto' }, { nome: 'logradouro', rotulo: 'Endereço', tipo: 'texto' }, { nome: 'numero', rotulo: 'Número', tipo: 'texto' }, { nome: 'bairro', rotulo: 'Bairro', tipo: 'texto' }, { nome: 'municipio', rotulo: 'Município', tipo: 'texto' }, { nome: 'uf', rotulo: 'UF', tipo: 'texto', max: 2 }, { nome: 'vendedor', rotulo: 'Vendedor', tipo: 'selecao', opcoes: VEND.slice(0, 2).map((v) => [v[0], v[1]]) }, { nome: 'limite', rotulo: 'Limite de crédito', tipo: 'moeda' }] },
+    { nome: 'cep', rotulo: 'CEP', tipo: 'texto' }, { nome: 'logradouro', rotulo: 'Endereço', tipo: 'texto' }, { nome: 'numero', rotulo: 'Número', tipo: 'texto' }, { nome: 'bairro', rotulo: 'Bairro', tipo: 'texto' }, { nome: 'municipio', rotulo: 'Município', tipo: 'texto' }, { nome: 'uf', rotulo: 'UF', tipo: 'texto', max: 2 }, { nome: 'vendedor', rotulo: 'Vendedor', tipo: 'selecao', opcoes: () => VEND.map((v) => [v[0], v[1]]) }, { nome: 'limite', rotulo: 'Limite de crédito', tipo: 'moeda' }] },
   fornecedores: { singular: 'fornecedor', plural: 'fornecedores', campos: [{ nome: 'nome', rotulo: 'Razão social', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'doc', rotulo: 'CNPJ', tipo: 'texto' }, { nome: 'telefone', rotulo: 'Telefone', tipo: 'tel' }, { nome: 'contato', rotulo: 'Contato', tipo: 'texto' }, { nome: 'prazo', rotulo: 'Prazo de entrega (dias)', tipo: 'numero', padrao: 7 }] },
 };
 
@@ -180,7 +185,7 @@ function painel(a) {
 function vendas(a) {
   return `<div class="entre"><span class="mute" style="font-size:12.5px">Seus clientes revendedores também podem fazer pedidos sozinhos pelo catálogo online, com preço e disponibilidade do estoque.</span><button type="button" class="btn" data-acao="linkCatalogo">${ic('storefront')}Catálogo online</button></div>` + a.tab({ id: 'vendas', colecao: 'vendas', singular: 'pedido', plural: 'pedidos', ordem: 'numero', desc: true, buscaDica: 'Buscar por número, cliente ou NF-e…',
     visoes: [{ id: 'abertos', rot: 'Em andamento', filtro: (v) => ['orcamento', 'aprovado', 'separacao', 'faturado', 'enviado'].includes(v.status) }, { id: 'separar', rot: 'Para separar', filtro: (v) => ['aprovado', 'separacao'].includes(v.status) }, { id: 'orc', rot: 'Orçamentos', filtro: (v) => v.status === 'orcamento' }, { id: 'mes', rot: 'Faturados no mês', filtro: (v) => v.nfe && v.data.startsWith(hoje().slice(0, 7)) }, { id: 'todos', rot: 'Todos' }],
-    filtros: [{ k: 'canal', rot: 'Canal', opcoes: Object.entries(CANAIS) }, { k: 'vendedor', rot: 'Vendedor', opcoes: VEND.map((v) => [v[0], v[1]]) }, { k: 'status', rot: 'Situação', opcoes: ST_VENDA.map(([k, n]) => [k, n]) }],
+    filtros: [{ k: 'canal', rot: 'Canal', opcoes: Object.entries(CANAIS) }, { k: 'vendedor', rot: 'Vendedor', opcoes: () => VEND.map((v) => [v[0], v[1]]) }, { k: 'status', rot: 'Situação', opcoes: ST_VENDA.map(([k, n]) => [k, n]) }],
     textoBusca: (v) => `${v.numero} ${cli(a, v.cliente)?.nome || ''} ${v.nfe?.numero || ''}`, total: (l) => moeda(soma(l, totalV)),
     novo: { rot: 'Novo pedido', attrs: 'data-acao="novoPedido"' }, aoClicar: (id) => a.abrir('venda', id),
     massa: [{ rot: 'Faturar (emitir NF-e)', icone: 'receipt', acao: (ids) => { let n = 0; ids.forEach((id) => { if (faturar(a, id, true)) n++; }); avisar(`${n} pedidos faturados`); } }],
@@ -513,6 +518,7 @@ const app = criarApp({
     { id: 'fornecedores', rot: 'Fornecedores', icone: 'buildings', render: cadastroPag('fornecedores', 'fornecedor', 'fornecedores', 'fornecedor') },
     { grupo: 'Gestão' },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios, atalho: 'r' },
+    paginaEquipe(EQUIPE),
     ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
@@ -658,5 +664,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+equipeViva(app, EQUIPE);
 Object.assign(app.acoes, acoesLado());
 app.travarLado = travarPro;

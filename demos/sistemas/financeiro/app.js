@@ -6,8 +6,13 @@ import {
 } from '../base/nexo.js';
 import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
+import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
 
 const TEC = [['diego', 'Diego Araújo', 30], ['renan', 'Renan Souza', 30], ['paulo', 'Paulo Henrique', 25]];
+const EQUIPE = { colecao: 'tecnicos', rot: 'Técnicos', icone: 'toolbox', singular: 'técnico', plural: 'técnicos', vazio: 'os técnicos', lista: TEC,
+  campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true }, { nome: 'comissao', rotulo: 'Comissão (%)', tipo: 'porcentagem', padrao: 30 }, { nome: 'telefone', rotulo: 'WhatsApp', tipo: 'tel' }],
+  linha: (r) => [r.id, r.nome, Number(r.comissao || 0)], registro: ([id, nome, comissao]) => ({ id, nome, comissao }) };
+const padraoEquipe = (eu) => (TEC.find((x) => x[0] === eu) || TEC[0] || [''])[0];
 const nomeT = (id) => (TEC.find((x) => x[0] === id) || [, '—'])[1];
 const STATUS_OS = [['orcamento', 'Orçamento', '#94a3b8'], ['aprovada', 'Aprovada', '#3b82f6'], ['execucao', 'Em execução', '#f59e0b'], ['aguardando', 'Aguardando peça', '#a855f7'], ['pronta', 'Pronta p/ retirada', '#16a34a'], ['entregue', 'Entregue', '#64748b']];
 const stOS = (id) => STATUS_OS.find((x) => x[0] === id) || STATUS_OS[0];
@@ -111,7 +116,7 @@ const colecoes = {
     { nome: 'estoque', rotulo: 'Estoque', tipo: 'numero', padrao: 0 }, { nome: 'minimo', rotulo: 'Estoque mínimo', tipo: 'numero', padrao: 2 }] },
   servicos: { singular: 'serviço', plural: 'serviços', campos: [{ nome: 'nome', rotulo: 'Nome', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'preco', rotulo: 'Preço', tipo: 'moeda', obrigatorio: true }] },
   ordens: { singular: 'ordem de serviço', genero: 'f', plural: 'ordens', largura: 680, campos: [
-    { nome: 'cliente', rotulo: 'Cliente', tipo: 'relacao', colecao: 'pessoas', filtrar: (p) => p.tipo === 'cliente', obrigatorio: true }, { nome: 'tecnico', rotulo: 'Técnico', tipo: 'selecao', opcoes: TEC.map((t) => [t[0], t[1]]), padrao: 'diego' },
+    { nome: 'cliente', rotulo: 'Cliente', tipo: 'relacao', colecao: 'pessoas', filtrar: (p) => p.tipo === 'cliente', obrigatorio: true }, { nome: 'tecnico', rotulo: 'Técnico', tipo: 'selecao', opcoes: () => TEC.map((t) => [t[0], t[1]]), padrao: () => padraoEquipe('diego') },
     { nome: 'equipamento', rotulo: 'Equipamento', tipo: 'texto', obrigatorio: true, dica: 'Ex.: Ar-condicionado split 12.000 BTU' }, { nome: 'marca', rotulo: 'Marca / modelo', tipo: 'texto' },
     { nome: 'serie', rotulo: 'Nº de série', tipo: 'texto' }, { nome: 'previsao', rotulo: 'Previsão de entrega', tipo: 'data', padrao: () => diaMais(3) },
     { nome: 'defeito', rotulo: 'Defeito relatado pelo cliente', tipo: 'texto-longo', obrigatorio: true }],
@@ -251,7 +256,7 @@ function ordensPag(a) {
   const topo = `<div class="entre"><div class="grupo-btn"><button type="button" data-acao="modoOS" data-m="quadro" aria-pressed="${st.modo === 'quadro'}">${ic('kanban', 'p')}Quadro</button><button type="button" data-acao="modoOS" data-m="lista" aria-pressed="${st.modo === 'lista'}">${ic('list', 'p')}Lista</button></div><button type="button" class="btn pri" data-acao="novaOS">${ic('plus')}Nova OS</button></div>`;
   if (st.modo === 'lista') return topo + a.tab({ id: 'os', colecao: 'ordens', singular: 'OS', plural: 'OS', ordem: 'numero', desc: true,
     visoes: [{ id: 'abertas', rot: 'Abertas', filtro: (o) => o.status !== 'entregue' }, { id: 'atrasadas', rot: 'Atrasadas', filtro: (o) => o.status !== 'entregue' && o.previsao < hoje() }, { id: 'entregues', rot: 'Entregues', filtro: (o) => o.status === 'entregue' }, { id: 'todas', rot: 'Todas' }],
-    filtros: [{ k: 'status', rot: 'Situação', opcoes: STATUS_OS.map(([k, n]) => [k, n]) }, { k: 'tecnico', rot: 'Técnico', opcoes: TEC.map((t) => [t[0], t[1]]) }],
+    filtros: [{ k: 'status', rot: 'Situação', opcoes: STATUS_OS.map(([k, n]) => [k, n]) }, { k: 'tecnico', rot: 'Técnico', opcoes: () => TEC.map((t) => [t[0], t[1]]) }],
     textoBusca: (o) => `${o.numero} ${o.equipamento} ${o.marca} ${pessoa(a, o.cliente)?.nome} ${o.defeito}`, total: (l) => moeda(soma(l, totalOS)), aoClicar: (id) => a.abrir('os', id),
     colunas: [{ k: 'numero', rot: 'OS', render: (o) => `<span class="mono prim">#${o.numero}</span>` }, { k: 'equipamento', rot: 'Equipamento', render: (o) => `<span class="prim">${esc(o.equipamento)}</span><span class="sub">${esc(pessoa(a, o.cliente)?.nome || '')}</span>` },
       { k: 'status', rot: 'Situação', valor: (o) => STATUS_OS.findIndex((x) => x[0] === o.status), render: (o) => `<span class="et sem-ponto" style="background:color-mix(in srgb,${stOS(o.status)[2]} 14%,var(--painel));color:${stOS(o.status)[2]}">${stOS(o.status)[1]}</span>`, csv: (o) => stOS(o.status)[1] },
@@ -388,6 +393,7 @@ const app = criarApp({
     { id: 'estoque', rot: 'Peças e serviços', icone: 'package', render: estoque, cont: (a) => { const n = a.db.lista('produtos').filter((p) => p.estoque <= p.minimo).length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'pessoas', rot: 'Clientes e fornecedores', icone: 'users', render: pessoasPag, atalho: 'c' },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
+    paginaEquipe(EQUIPE),
     ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
@@ -459,5 +465,6 @@ Object.assign(app.acoes, {
 });
 
 // ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+equipeViva(app, EQUIPE);
 Object.assign(app.acoes, acoesLado());
 app.travarLado = travarPro;
