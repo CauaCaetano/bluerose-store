@@ -349,7 +349,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'obras', nome: 'RoseConstruct', sub: 'Gestão inteligente de obras', marcaSub: 'Gestão inteligente de obras', logo: new URL('logo.png', import.meta.url).href, produto: { mensal: 119, unico: true }, cor: '#c84a0c', icone: 'house-line', empresa: 'Reforma Certa · Davi Nunes', conta: 'Reformas residenciais · Belo Horizonte',
+  id: 'obras', paginaSite: 'roseconstruct.html', nome: 'RoseConstruct', sub: 'Gestão inteligente de obras', marcaSub: 'Gestão inteligente de obras', logo: new URL('logo.png', import.meta.url).href, produto: { mensal: 119, unico: true }, cor: '#c84a0c', icone: 'house-line', empresa: 'Reforma Certa · Davi Nunes', conta: 'Reformas residenciais · Belo Horizonte',
   semente, colecoes, fichas, buscaDica: 'obras e clientes',
   portal: {
     obra: {

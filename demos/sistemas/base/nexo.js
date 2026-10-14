@@ -453,9 +453,10 @@ function montar(app, cfg) {
   const preco = (v) => moeda(v).replace(',00', '');
   prepararExtras(app, cfg);
   if (app.db.cfg.ramo_pendente && !app.db.cfg.ramo) { app.aplicarModelo(app.db.cfg.ramo_pendente, true); delete app.db.cfg.ramo_pendente; app.db.gravar(); }
-  const faixaDemo = `<div class="faixa nao-imprime"><span class="so-larga">Demonstração do <b>${esc(cfg.nome)}</b> · dados de exemplo, só neste navegador</span><span class="sep so-larga"></span>
+  const voltar = cfg.paginaSite ? `<a class="faixa-voltar" href="${site}${cfg.paginaSite}" target="_top">${ic('arrow-left')}Voltar<span class="so-larga">&nbsp;ao site</span></a><span class="sep so-larga"></span>` : '';
+  const faixaDemo = `<div class="faixa nao-imprime">${voltar}<span class="so-larga">Demonstração do <b>${esc(cfg.nome)}</b> · dados de exemplo, só neste navegador</span><span class="sep so-larga"></span>
       <button type="button" data-acao="recomecar">Recomeçar</button>
-      ${cfg.cta === false ? '' : `<a class="cta" href="${site}app/${cfg.id}/" target="_top">Testar grátis 7 dias com os seus dados</a>`}</div>`;
+      ${cfg.cta === false ? '' : `<a class="cta" href="${site}app/${cfg.id}/" target="_top">Testar grátis<span class="so-larga">&nbsp;7 dias com os seus dados</span></a>`}</div>`;
   document.body.innerHTML = `
     ${app.nuvem ? app.sessao.faixa() : faixaDemo}
     <div class="app" id="app">

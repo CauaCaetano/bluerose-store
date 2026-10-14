@@ -723,3 +723,8 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .imp-zona b { color: var(--tx); font-size: 15px; }
 .imp-zona span { font-size: 12.5px; color: var(--tx-3); }
 .ok-fundo { border-color: color-mix(in srgb, var(--ok) 40%, transparent); background: color-mix(in srgb, var(--ok) 8%, transparent); }
+
+/* produtos avulsos: botão para voltar à página do produto no site */
+.faixa a.faixa-voltar { display: inline-flex; align-items: center; gap: 6px; color: #fff; font-weight: 600; text-decoration: none; padding: 3px 10px 3px 6px; border-radius: 6px; background: rgba(255, 255, 255, .12); white-space: nowrap; flex: none; }
+.faixa a.faixa-voltar:hover { background: rgba(255, 255, 255, .22); }
+.faixa a.faixa-voltar .ic { width: 14px; height: 14px; }
