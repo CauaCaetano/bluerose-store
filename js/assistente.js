@@ -162,28 +162,21 @@
     if (!forcar && this.ultimoT && t - this.ultimoT < passoMs) return;
     this.ultimoT = t;
     var m = this.movimentos(t, this.estado);
-    var k = 1, tr = this.trans;
-    var mudanca = 0;
+    // troca de pose sem transparência (pixel art não mistura imagens):
+    // antecipação na pose antiga (desce 1 px), troca já abaixada e acomodação (sobe 1 px)
+    var tr = this.trans, poseVez = this.pose, mudanca = 0, mov = m;
     if (tr) {
       var d = t - tr.inicio;
-      // antecipação (desce 1 px), troca suave e acomodação (sobe 1 px)
-      if (d < 90) { k = 0; mudanca = 1; }
-      else if (d < 250) { k = (d - 90) / 160; mudanca = 1; }
-      else if (d < 330) { k = 1; mudanca = -1; }
-      else { this.trans = tr = null; }
+      if (d < 100) { poseVez = tr.de; mudanca = 1; mov = this.movimentos(t, tr.deEstado || 'idle'); }
+      else if (d < 200) mudanca = 1;
+      else if (d < 280) mudanca = -1;
+      else this.trans = tr = null;
     }
-    var chave = JSON.stringify([this.pose, this.estado, m, tr ? Math.round(k * 6) : -1, mudanca]);
+    var chave = JSON.stringify([poseVez, this.estado, mov, mudanca]);
     if (chave === this.ultimaChave) return;
     this.ultimaChave = chave;
-    var ctx = this.ctx;
-    ctx.clearRect(0, 0, this.cv.width, this.cv.height);
-    if (tr && k < 1) {
-      ctx.globalAlpha = 1 - k;
-      this.desenharPose(tr.de, this.movimentos(t, tr.deEstado || 'idle'), mudanca);
-    }
-    ctx.globalAlpha = tr ? Math.max(k, 0.001) : 1;
-    if (!tr || k > 0) this.desenharPose(this.pose, m, mudanca);
-    ctx.globalAlpha = 1;
+    this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
+    this.desenharPose(poseVez, mov, mudanca);
   };
 
   // desenha uma pose por partes: pernas, tronco, cabeça (com cabelo) e a parte móvel da pose
@@ -212,6 +205,7 @@
 
     if (parte) {
       var px = parte[0] + m.parte[0], py = parte[1] + tronco + m.parte[1];
+      if (m.parte[0] || m.parte[1]) ctx.drawImage(f, sx + parte[0], parte[1], parte[2], parte[3], parte[0], parte[1] + tronco, parte[2], parte[3]);
       ctx.drawImage(f, sx + parte[0], parte[1], parte[2], parte[3], px, py, parte[2], parte[3]);
       if (pose === 3 && m.faisca) ctx.drawImage(this.faisca, FAISCA[0], FAISCA[1] + tronco);
     }
@@ -410,21 +404,21 @@
     }, atraso);
   };
 
-  VirtualAssistant.prototype.estado = function (e, texto) {
-    if (this.anim) this.anim.definir(e);
+  // a pose só muda enquanto ele está falando (balão ou resposta); depois volta a ficar parado
+  var tempoDeFala = function (txt) {
+    var palavras = String(txt || '').split(/\s+/).length;
+    return Math.min(9000, 1600 + palavras * 260);
+  };
+  VirtualAssistant.prototype.estado = function (e, texto, fala) {
     if (texto) this.status.textContent = texto;
-    var self = this;
+    var self = this, parado = function () { return self.painel.hidden ? 'idle' : 'listening'; };
     clearTimeout(this.voltaT);
-    if (e !== 'idle' && e !== 'minimized' && e !== 'listening') {
-      this.voltaT = setTimeout(function () { if (self.anim) self.anim.definir(self.painel.hidden ? 'idle' : 'listening'); }, e === 'error' ? 2600 : 4200);
-    }
+    if (!fala) { if (this.anim) this.anim.definir(e === 'minimized' ? 'idle' : e); return; }
+    if (this.anim) this.anim.definir(e);
+    this.voltaT = setTimeout(function () { if (self.anim) self.anim.definir(parado()); }, tempoDeFala(fala));
   };
 
-  VirtualAssistant.prototype.reagir = function () {
-    if (!this.painel.hidden || this.reagiuEm > Date.now() - 6000) return;
-    this.reagiuEm = Date.now();
-    this.estado('greeting');
-  };
+  VirtualAssistant.prototype.reagir = function () { /* passar o mouse só levanta o personagem (CSS); não troca a pose */ };
 
   VirtualAssistant.prototype.mostrarBalao = function (estado) {
     clearTimeout(this.balaoT);
@@ -432,7 +426,7 @@
     this.balao.classList.remove('va-novo'); void this.balao.offsetWidth; this.balao.classList.add('va-novo');
     var self = this;
     this.balaoT = setTimeout(function () { self.esconderBalao(); }, 9000);
-    this.estado(estado || 'greeting', this.balaoTxt.textContent);
+    this.estado(estado || 'greeting', this.balaoTxt.textContent, this.balaoTxt.textContent);
   };
   VirtualAssistant.prototype.esconderBalao = function () { clearTimeout(this.balaoT); this.balao.hidden = true; };
 
@@ -451,7 +445,7 @@
       var p = self.rapidas.querySelector('button');
       setTimeout(function () { (p || self.painel.querySelector('.va-btn-cab')).focus({ preventScroll: true }); }, 30);
     });
-    this.estado('greeting', 'Assistente aberto.');
+    this.estado(this.lista.childElementCount ? 'listening' : 'greeting', 'Assistente aberto.', this.lista.childElementCount ? '' : 'Olá! Sou o assistente virtual da Blue Rose Express.');
   };
 
   VirtualAssistant.prototype.fechar = function () {
@@ -459,7 +453,7 @@
     this.raiz.setAttribute('data-aberto', 'false');
     this.botao.setAttribute('aria-expanded', 'false');
     this.botao.setAttribute('aria-label', 'Abrir o assistente virtual da Blue Rose Express');
-    this.estado('minimized', 'Assistente minimizado.');
+    this.estado('idle', 'Assistente minimizado.');
     this.botao.focus({ preventScroll: true });
   };
 
@@ -541,7 +535,7 @@
       self.digitando(false);
       self.desenharMsg({ de: 'bot', texto: r.texto, lista: r.lista, links: r.links });
       self.mostrarRapidas(botoes || null);
-      self.estado(r.estado || 'explaining', 'Resposta pronta.');
+      self.estado(r.estado || 'explaining', 'Resposta pronta.', (r.texto || []).join(' ') + ' ' + (r.lista || []).join(' '));
       self.ocupado = false;
     }, semMovimento() ? 0 : 650);
   };
@@ -575,7 +569,6 @@
       this.dig = el('div', { classe: 'va-msg va-bot va-dig', 'aria-label': 'O assistente está respondendo' }, [el('span'), el('span'), el('span')]);
       this.lista.appendChild(this.dig);
       this.lista.scrollTop = this.lista.scrollHeight;
-      this.estado('thinking');
     } else if (this.dig) { this.dig.remove(); this.dig = null; }
   };
 
@@ -590,7 +583,6 @@
       if (alvo) {
         e.preventDefault();
         alvo.scrollIntoView({ behavior: semMovimento() ? 'auto' : 'smooth', block: 'start' });
-        this.estado('success');
         if (window.matchMedia('(max-width: 640px)').matches) this.fechar();
       }
     }
