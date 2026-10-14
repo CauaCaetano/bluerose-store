@@ -56,6 +56,9 @@ export const soma = (l, f = (x) => x) => l.reduce((s, x) => s + (Number(f(x)) ||
 export const agrupar = (l, f) => l.reduce((m, x) => { const k = f(x); (m[k] ||= []).push(x); return m; }, {});
 export const normal = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const CORES_AV = ['#4f46e5', '#0369a1', '#0f766e', '#15803d', '#b45309', '#be123c', '#7e22ce', '#475569', '#0e7490', '#c2410c', '#4338ca', '#be185d'];
+// cor vinda de dado (profissional, etapa…) só entra no estilo se for uma cor de verdade: evita injeção de HTML/CSS
+const COR_OK = /^(#[0-9a-f]{3,8}|var\(--[a-z0-9-]+\)|(rgb|hsl)a?\([0-9\s.,%/]+\)|[a-z]{3,20})$/i;
+export const corSegura = (v, padrao = 'var(--acc)') => (typeof v === 'string' && COR_OK.test(v.trim()) ? v.trim() : padrao);
 export const corDe = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return CORES_AV[h % CORES_AV.length]; };
 export const av = (nome, cls = '') => `<span class="av ${cls}" style="background:${corDe(nome)}" title="${esc(nome)}">${esc(iniciais(nome))}</span>`;
 let SPRITE = new URL('icones.svg', import.meta.url).href;
@@ -96,6 +99,7 @@ export class Banco {
   lista(nome) { return this.dados[nome] || (this.dados[nome] = []); }
   obter(nome, id) { return id ? this.lista(nome).find((x) => x.id === id) || null : null; }
   salvar(nome, obj) {
+    if (obj && typeof obj.cor === 'string' && !COR_OK.test(obj.cor.trim())) { obj = { ...obj }; delete obj.cor; }
     const l = this.lista(nome);
     if (obj.id) { const i = l.findIndex((x) => x.id === obj.id); if (i >= 0) { l[i] = { ...l[i], ...obj }; this.gravar(); return l[i]; } }
     const { id: _sem, ...resto } = obj;
@@ -269,7 +273,7 @@ export const vazio = (icone, titulo, texto = '', acao = '') => `<div class="vazi
 export const kpis = (lista) => `<div class="kpis" style="--n:${lista.length}">${lista.map((k) => `<div class="kpi ${k.alerta ? 'alerta' : ''}">
   <div class="rot">${k.icone ? ic(k.icone) : ''}${esc(k.rot)}</div><div class="val">${k.val}</div>
   ${k.nota || k.var != null ? `<div class="nota">${k.var != null && isFinite(k.var) ? `<span class="var ${k.var >= 0 ? 'sobe' : 'desce'}">${ic(k.var >= 0 ? 'trend-up' : 'trend-down', 'p')}${pct(Math.abs(k.var))}</span>` : ''}${k.nota ? `<span>${k.nota}</span>` : ''}</div>` : ''}
-  ${k.spark ? sparkline(k.spark, k.cor) : ''}</div>`).join('')}</div>`;
+  ${k.spark ? sparkline(k.spark, corSegura(k.cor)) : ''}</div>`).join('')}</div>`;
 export function sparkline(vals, cor = 'var(--acc)') {
   if (!vals?.length) return '';
   const mx = Math.max(...vals), mn = Math.min(...vals), W = 72, H = 26, x = (i) => (i / Math.max(1, vals.length - 1)) * W, y = (v) => H - 2 - ((v - mn) / (mx - mn || 1)) * (H - 4);
@@ -290,7 +294,7 @@ export function barras({ dados, series, altura = 220, fmt = num, empilhado = fal
     const x0 = ml + i * slot + (slot - gw) / 2; let acc = 0;
     d.v.forEach((v, j) => {
       const bh = Math.max(0, (v / max) * h), x = empilhado ? x0 : x0 + j * bw, y = empilhado ? Y(acc + v) : Y(v);
-      if (v > 0) s += `<rect class="barra" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${Math.max(2, bw - (empilhado ? 0 : 3)).toFixed(1)}" height="${bh.toFixed(1)}" rx="${empilhado ? 2 : 4}" fill="${series[j].cor}"><title>${esc(d.rot)} · ${esc(series[j].nome)}: ${fmt(v)}</title></rect>`;
+      if (v > 0) s += `<rect class="barra" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${Math.max(2, bw - (empilhado ? 0 : 3)).toFixed(1)}" height="${bh.toFixed(1)}" rx="${empilhado ? 2 : 4}" fill="${corSegura(series[j].cor)}"><title>${esc(d.rot)} · ${esc(series[j].nome)}: ${fmt(v)}</title></rect>`;
       acc += v;
     });
     s += `<text x="${(ml + i * slot + slot / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle">${esc(d.rot)}</text>`;
@@ -298,7 +302,7 @@ export function barras({ dados, series, altura = 220, fmt = num, empilhado = fal
   if (linhaMeta) s += `<line x1="${ml}" x2="${L - 6}" y1="${Y(linhaMeta)}" y2="${Y(linhaMeta)}" stroke="var(--tx-3)" stroke-dasharray="4 4"/><text x="${L - 8}" y="${Y(linhaMeta) - 5}" text-anchor="end">meta ${fmt(linhaMeta)}</text>`;
   return `${s}</svg>${series.length > 1 ? legenda(series) : ''}`;
 }
-export const legenda = (series) => `<div class="legenda">${series.map((s) => `<span><i style="background:${s.cor}"></i>${esc(s.nome)}</span>`).join('')}</div>`;
+export const legenda = (series) => `<div class="legenda">${series.map((s) => `<span><i style="background:${corSegura(s.cor)}"></i>${esc(s.nome)}</span>`).join('')}</div>`;
 /** Linhas/áreas. rotulos: [..], series: [{nome, cor, v:[..], tracejada}] */
 export function linhas({ rotulos, series, altura = 220, fmt = num, area = true, zero = true, largura = 680 }) {
   const L = largura, H = altura, ml = 60, mb = 24, mt = 10, w = L - ml - 8, h = H - mb - mt;
@@ -313,8 +317,8 @@ export function linhas({ rotulos, series, altura = 220, fmt = num, area = true, 
     const pts = se.v.map((v, i) => (v == null ? null : [X(i), Y(v)])).filter(Boolean);
     if (!pts.length) return;
     const d = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('');
-    if (area && !se.tracejada) s += `<path d="${d}L${pts.at(-1)[0]},${Y(Math.max(mn, 0))}L${pts[0][0]},${Y(Math.max(mn, 0))}Z" fill="${se.cor}" opacity=".09"/>`;
-    s += `<path d="${d}" fill="none" stroke="${se.cor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${se.tracejada ? 'stroke-dasharray="5 5"' : ''}/>`;
+    if (area && !se.tracejada) s += `<path d="${d}L${pts.at(-1)[0]},${Y(Math.max(mn, 0))}L${pts[0][0]},${Y(Math.max(mn, 0))}Z" fill="${corSegura(se.cor)}" opacity=".09"/>`;
+    s += `<path d="${d}" fill="none" stroke="${corSegura(se.cor)}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${se.tracejada ? 'stroke-dasharray="5 5"' : ''}/>`;
   });
   const cada = Math.ceil(rotulos.length / 9);
   rotulos.forEach((r, i) => { if (i % cada === 0 || i === rotulos.length - 1) s += `<text x="${X(i).toFixed(1)}" y="${H - 6}" text-anchor="middle">${esc(r)}</text>`; });
@@ -323,10 +327,10 @@ export function linhas({ rotulos, series, altura = 220, fmt = num, area = true, 
 /** Rosca (donut). itens: [{rot, v, cor}] */
 export function rosca({ itens, centro = '', sub = '', fmt = num }) {
   const tot = soma(itens, (x) => x.v) || 1, R = 52, C = 2 * Math.PI * R; let off = 0;
-  const arcos = itens.filter((x) => x.v > 0).map((x) => { const l = (x.v / tot) * C; const a = `<circle cx="66" cy="66" r="${R}" fill="none" stroke="${x.cor}" stroke-width="16" stroke-dasharray="${Math.max(0, l - 1.5)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 66 66)"><title>${esc(x.rot)}: ${fmt(x.v)}</title></circle>`; off += l; return a; }).join('');
+  const arcos = itens.filter((x) => x.v > 0).map((x) => { const l = (x.v / tot) * C; const a = `<circle cx="66" cy="66" r="${R}" fill="none" stroke="${corSegura(x.cor)}" stroke-width="16" stroke-dasharray="${Math.max(0, l - 1.5)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 66 66)"><title>${esc(x.rot)}: ${fmt(x.v)}</title></circle>`; off += l; return a; }).join('');
   return `<div class="rosca"><svg viewBox="0 0 132 132" role="img"><circle cx="66" cy="66" r="${R}" fill="none" stroke="var(--neutro-bg)" stroke-width="16"/>${arcos}
     <text x="66" y="${sub ? 64 : 70}" text-anchor="middle" style="font-size:17px;font-weight:650;fill:var(--tx)">${esc(centro)}</text>${sub ? `<text x="66" y="81" text-anchor="middle" style="font-size:10.5px">${esc(sub)}</text>` : ''}</svg>
-    <div class="itens">${itens.map((x) => `<div><i style="background:${x.cor}"></i><span class="corta">${esc(x.rot)}</span><b>${fmt(x.v)}</b><span class="mute" style="width:38px;text-align:right">${pct((x.v / tot) * 100)}</span></div>`).join('')}</div></div>`;
+    <div class="itens">${itens.map((x) => `<div><i style="background:${corSegura(x.cor)}"></i><span class="corta">${esc(x.rot)}</span><b>${fmt(x.v)}</b><span class="mute" style="width:38px;text-align:right">${pct((x.v / tot) * 100)}</span></div>`).join('')}</div></div>`;
 }
 export const barrasH = (itens, { fmt = num, tom = '' } = {}) => { const mx = Math.max(1, ...itens.map((x) => x.v)); return `<div class="barras-h">${itens.map((x) => `<div class="l"><span class="corta">${x.html || esc(x.rot)}</span><b>${fmt(x.v)}${x.extra ? ` <span class="mute" style="font-weight:400">${x.extra}</span>` : ''}</b>${prog((x.v / mx) * 100, x.tom ?? tom)}</div>`).join('')}</div>`; };
 export const funilH = (itens, { fmt = num } = {}) => { const mx = Math.max(1, ...itens.map((x) => x.v)); return `<div class="funil-h">${itens.map((x, i) => `<div class="f"><span class="corta">${esc(x.rot)}</span><div><div class="b" style="width:${Math.max(4, (x.v / mx) * 100)}%;opacity:${1 - i * 0.12}">${fmt(x.v)}</div></div><span class="r">${x.r || ''}</span></div>`).join('')}</div>`; };
@@ -374,7 +378,7 @@ export { baixar };
 export function kanban({ id, colunas, itens, campo, ficha: desenhar }) {
   return `<div class="kanban" data-kanban="${id}">${colunas.map((c) => {
     const l = itens.filter((x) => x[campo] === c.id);
-    return `<section class="coluna" data-coluna="${esc(c.id)}" style="--c:${c.cor || 'var(--borda-2)'}"><div class="coluna-cab"><div class="barra-cor"></div><div class="t">${esc(c.nome)}<span class="n">${l.length}</span></div>${c.sub ? `<div class="v">${c.sub(l)}</div>` : ''}</div>
+    return `<section class="coluna" data-coluna="${esc(c.id)}" style="--c:${corSegura(c.cor, 'var(--borda-2)')}"><div class="coluna-cab"><div class="barra-cor"></div><div class="t">${esc(c.nome)}<span class="n">${l.length}</span></div>${c.sub ? `<div class="v">${c.sub(l)}</div>` : ''}</div>
       <div class="coluna-corpo">${l.map((x) => `<article class="ficha ${c.classe?.(x) || ''}" draggable="true" data-ficha="${x.id}" tabindex="0">${desenhar(x)}</article>`).join('') || '<div class="mute" style="font-size:12px;text-align:center;padding:14px 4px">Arraste para cá</div>'}</div></section>`;
   }).join('')}</div>`;
 }
@@ -390,14 +394,14 @@ export function calGrade({ id, colunas, eventos, inicio = 7, fim = 21, hh = 56, 
     ${colunas.map((c) => `<div class="cal-dia" data-cal-col="${esc(c.id)}" style="height:${alt}px">
       ${(c.fora || []).map(([de, ate]) => `<div class="fora" style="top:${Math.max(0, Y(de))}px;height:${Math.max(0, Y(ate) - Math.max(0, Y(de)))}px"></div>`).join('')}
       ${agora && agora.col === c.id && minutos(agora.hora) >= inicio * 60 && minutos(agora.hora) <= fim * 60 ? `<div class="agora" style="top:${Y(agora.hora)}px"></div>` : ''}
-      ${eventos.filter((e) => e.col === c.id).map((e) => { const t = Y(e.ini), h = Math.max(22, Y(e.fim) - t - 2); return `<div class="evento ${e.cls || ''}" data-evento="${e.id}" style="top:${t + 1}px;height:${h}px;--c:${e.cor || 'var(--acc)'}" title="${esc(`${e.ini}–${e.fim} · ${e.titulo}`)}"><b>${esc(e.titulo)}</b>${h > 34 ? `<span>${esc(e.ini)}–${esc(e.fim)}${e.sub ? ` · ${esc(e.sub)}` : ''}</span>` : ''}${h > 52 && e.sub2 ? `<span>${esc(e.sub2)}</span>` : ''}</div>`; }).join('')}
+      ${eventos.filter((e) => e.col === c.id).map((e) => { const t = Y(e.ini), h = Math.max(22, Y(e.fim) - t - 2); return `<div class="evento ${e.cls || ''}" data-evento="${e.id}" style="top:${t + 1}px;height:${h}px;--c:${corSegura(e.cor)}" title="${esc(`${e.ini}–${e.fim} · ${e.titulo}`)}"><b>${esc(e.titulo)}</b>${h > 34 ? `<span>${esc(e.ini)}–${esc(e.fim)}${e.sub ? ` · ${esc(e.sub)}` : ''}</span>` : ''}${h > 52 && e.sub2 ? `<span>${esc(e.sub2)}</span>` : ''}</div>`; }).join('')}
     </div>`).join('')}</div></div>`;
 }
 /** Mês: itens [{data, titulo, cor, id}] */
 export function calMes({ ym, itens, aoClicar = 'abrirEvento' }) {
   const [a, m] = ym.split('-').map(Number), pri = new Date(a, m - 1, 1), ini = new Date(pri); ini.setDate(1 - pri.getDay());
   const dias = Array.from({ length: 42 }, (_, i) => { const d = new Date(ini); d.setDate(ini.getDate() + i); return iso(d); });
-  return `<div class="cal-mes">${DIAS.map((d) => `<div class="dsem">${d}</div>`).join('')}${dias.map((d) => { const l = itens.filter((x) => x.data === d); return `<div class="d ${d.slice(0, 7) !== ym ? 'outro' : ''} ${d === hoje() ? 'hoje' : ''}"><span class="n">${Number(d.slice(8))}</span>${l.slice(0, 4).map((x) => `<div class="pill" style="--c:${x.cor || 'var(--acc)'}" data-acao="${aoClicar}" data-id="${x.id}" title="${esc(x.titulo)}">${esc(x.titulo)}</div>`).join('')}${l.length > 4 ? `<span class="mute" style="font-size:11px">+${l.length - 4}</span>` : ''}</div>`; }).join('')}</div>`;
+  return `<div class="cal-mes">${DIAS.map((d) => `<div class="dsem">${d}</div>`).join('')}${dias.map((d) => { const l = itens.filter((x) => x.data === d); return `<div class="d ${d.slice(0, 7) !== ym ? 'outro' : ''} ${d === hoje() ? 'hoje' : ''}"><span class="n">${Number(d.slice(8))}</span>${l.slice(0, 4).map((x) => `<div class="pill" style="--c:${corSegura(x.cor)}" data-acao="${aoClicar}" data-id="${x.id}" title="${esc(x.titulo)}">${esc(x.titulo)}</div>`).join('')}${l.length > 4 ? `<span class="mute" style="font-size:11px">+${l.length - 4}</span>` : ''}</div>`; }).join('')}</div>`;
 }
 
 // ---------------------------------------------------------------- impressão

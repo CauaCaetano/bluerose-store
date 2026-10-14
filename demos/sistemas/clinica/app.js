@@ -3,6 +3,7 @@ import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, paraData, minutos, hhmm,
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, calGrade, DIAS, DIAS_L, telLink,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
+  corSegura,
 } from '../base/nexo.js';
 
 const ABRE = 7, FECHA = 20;
@@ -123,7 +124,7 @@ function agenda(a) {
   };
   const fora = (p) => (atende(p, st.data) ? [[`0${ABRE}:00`, p.ini], ['12:00', '13:00'], [p.fim, `${FECHA}:00`]] : [[`0${ABRE}:00`, `${FECHA}:00`]]);
   const grade = calGrade({ id: 'agenda', inicio: ABRE, fim: FECHA, hh: 60, larguraCol: 200, agora: st.data === hoje() ? { col: '*', hora: new Date().toTimeString().slice(0, 5) } : null,
-    colunas: ps.map((p) => ({ id: p.id, rot: p.nome, sub: atende(p, st.data) ? `${p.especialidade} · ${lista.filter((c) => c.profissional === p.id && ativos(c)).length} consultas` : 'não atende', avatar: `<span class="av" style="background:${p.cor}">${esc(p.nome.replace(/^Dra?\. /, '').split(' ').map((x) => x[0]).slice(0, 2).join(''))}</span>`, fora: fora(p) })),
+    colunas: ps.map((p) => ({ id: p.id, rot: p.nome, sub: atende(p, st.data) ? `${p.especialidade} · ${lista.filter((c) => c.profissional === p.id && ativos(c)).length} consultas` : 'não atende', avatar: `<span class="av" style="background:${corSegura(p.cor)}">${esc(p.nome.replace(/^Dra?\. /, '').split(' ').map((x) => x[0]).slice(0, 2).join(''))}</span>`, fora: fora(p) })),
     eventos: lista.filter((c) => c.status !== 'cancelado').map((c) => ({ id: c.id, col: c.profissional, ini: c.ini, fim: fimDe(c), titulo: pac(a, c.paciente)?.nome || '—', sub: proc(a, c.procedimento)?.nome, sub2: c.tipo === 'convenio' ? conv(a, c.convenio)?.nome : 'Particular', cor: STATUS[c.status][1], cls: c.status === 'faltou' ? 'cancelado' : c.status === 'atendido' ? 'feito' : '' })) });
   const at = lista.filter(ativos), d = paraData(st.data);
   return `<div class="cal"><div class="cal-barra">
