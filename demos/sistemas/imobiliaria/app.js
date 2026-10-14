@@ -4,6 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, funilH, kanban, calGrade, DIAS, DIAS_L, telLink, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
+import { LADOS as FERR } from './ferramentas.js';
+import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
 
 const ETAPAS = [['lead', 'Novo contato', '#94a3b8'], ['atendimento', 'Em atendimento', '#3b82f6'], ['visita', 'Visita marcada', '#8b5cf6'], ['proposta', 'Proposta', '#f59e0b'], ['documentacao', 'Documentação', '#0ea5e9'], ['fechado', 'Fechado', '#16a34a']];
 const ORIGENS = ['ZAP Imóveis', 'Viva Real', 'OLX', 'Site', 'Instagram', 'Indicação', 'Placa'];
@@ -248,15 +250,16 @@ const app = criarApp({
   busca: [{ colecao: 'imoveis', grupo: 'Imóveis', icone: 'buildings', ficha: 'imovel', rot: (x) => `${x.codigo} · ${titulo(x)}`, sub: (x) => moeda(x.valor) }, { colecao: 'negocios', grupo: 'Atendimentos', icone: 'handshake', ficha: 'negocio', rot: (n, a) => pessoa(a, n.cliente)?.nome || '', sub: (n) => ETAPAS.find((e) => e[0] === n.etapa)?.[1] }],
   comandos: [{ rot: 'Captar imóvel', icone: 'buildings', acao: (a) => a.acoes.novoCad({ c: 'imoveis' }) }, { rot: 'Novo atendimento', icone: 'handshake', acao: (a) => a.acoes.novoCad({ c: 'negocios' }) }, { rot: 'Marcar visita', icone: 'calendar-plus', acao: (a) => a.acoes.novaVisita({}) }],
   paginas: [
-    { id: 'painel', rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
-    { id: 'imoveis', rot: 'Imóveis', icone: 'buildings', render: imoveisPag, atalho: 'm', novo: (a) => a.acoes.novoCad({ c: 'imoveis' }) },
+    { id: 'painel', lado: FERR.visitas, rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
+    { id: 'imoveis', lado: FERR.imoveis, rot: 'Imóveis', icone: 'buildings', render: imoveisPag, atalho: 'm', novo: (a) => a.acoes.novoCad({ c: 'imoveis' }) },
     { id: 'funil', rot: 'Funil de clientes', icone: 'funnel', render: funil, cheio: true, atalho: 'f', cont: (a) => negs(a).filter((n) => n.etapa === 'lead').length },
     { id: 'visitas', rot: 'Visitas', icone: 'calendar-blank', render: visitasPag, cheio: true, atalho: 'v' },
     { grupo: 'Locação' },
-    { id: 'locacao', rot: 'Aluguéis e repasses', icone: 'key', render: locacao, cont: (a) => { const n = cobs(a).filter((c) => c.status === 'aberto' && c.vencimento < hoje()).length; return n ? { n, tom: 'er' } : 0; } },
+    { id: 'locacao', lado: FERR.locacao, rot: 'Aluguéis e repasses', icone: 'key', render: locacao, cont: (a) => { const n = cobs(a).filter((c) => c.status === 'aberto' && c.vencimento < hoje()).length; return n ? { n, tom: 'er' } : 0; } },
     { grupo: 'Gestão' },
     { id: 'pessoas', rot: 'Clientes e proprietários', icone: 'users', render: (a) => a.tab({ id: 'pessoas', colecao: 'pessoas', singular: 'pessoa', plural: 'pessoas', ordem: 'nome', novo: { rot: 'Nova pessoa', attrs: 'data-acao="novoCad" data-c="pessoas"' }, aoClicar: async (id) => { if (await editar(a, 'pessoas', pessoa(a, id))) a.render(); }, visoes: [{ id: 'int', rot: 'Interessados', filtro: (p) => p.tipo === 'interessado' }, { id: 'prop', rot: 'Proprietários', filtro: (p) => p.tipo === 'proprietario' }, { id: 'inq', rot: 'Inquilinos', filtro: (p) => p.tipo === 'inquilino' }, { id: 'todos', rot: 'Todos' }], colunas: [{ k: 'nome', rot: 'Nome', render: (p) => `<span class="flex" style="gap:9px">${av(p.nome)}<span class="prim">${esc(p.nome)}</span></span>` }, { k: 'telefone', rot: 'WhatsApp' }, { k: 'email', rot: 'E-mail', oc: true }, { k: 'tipo', rot: 'Tipo', render: (p) => et({ interessado: 'Interessado', proprietario: 'Proprietário', inquilino: 'Inquilino' }[p.tipo], '', 'sem-ponto') }] }) },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
+    ...paginasFerramentas(Object.values(FERR)),
   ],
 });
 
@@ -315,3 +318,7 @@ if (!app.nuvem && app.db) {
   }
   if (mudou) { app.db.gravar(); if (typeof app.render === 'function') app.render(); }
 }
+
+// ferramentas do painel ao lado das telas (WhatsApp e copiar)
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;   // avisos e mensagens prontas: plano Pro (calculadoras: Básico)

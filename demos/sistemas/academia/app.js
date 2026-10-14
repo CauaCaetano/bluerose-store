@@ -4,6 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, kpis, barras, linhas, rosca, barrasH, calGrade, kanban, DIAS, DIAS_L, telLink, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
+import { LADOS as FERR } from './ferramentas.js';
+import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
 
 const FORMAS = ['PIX', 'Cartão de crédito', 'Cartão recorrente', 'Cartão de débito', 'Dinheiro'];
 const ETAPAS = [['agendada', 'Aula marcada', '#94a3b8'], ['fez', 'Fez a aula', '#3b82f6'], ['proposta', 'Proposta enviada', '#f59e0b'], ['matriculou', 'Matriculou', '#16a34a'], ['perdido', 'Não fechou', '#64748b']];
@@ -256,15 +258,16 @@ const app = criarApp({
   busca: [{ colecao: 'alunos', grupo: 'Alunos', icone: 'user', ficha: 'aluno', rot: (x) => x.nome, sub: (x) => x.telefone }],
   comandos: [{ rot: 'Matricular aluno', icone: 'user-plus', acao: (a) => a.acoes.novoCad({ c: 'alunos' }) }, { rot: 'Check-in', icone: 'qr-code', acao: (a) => a.ir('#/recepcao') }],
   paginas: [
-    { id: 'painel', rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
+    { id: 'painel', lado: (a) => FERR.painel(a) + FERR.experimentais(a), rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
     { id: 'recepcao', rot: 'Check-in', icone: 'qr-code', titulo: 'Recepção e check-in', render: recepcao, atalho: 'r' },
-    { id: 'alunos', rot: 'Alunos', icone: 'users-three', render: alunosPag, atalho: 'a', novo: (a) => a.acoes.novoCad({ c: 'alunos' }), cont: (a) => { const n = a.db.lista('alunos').filter((x) => sumido(a, x)).length; return n ? { n, tom: 'al' } : 0; } },
+    { id: 'alunos', lado: FERR.alunos, rot: 'Alunos', icone: 'users-three', render: alunosPag, atalho: 'a', novo: (a) => a.acoes.novoCad({ c: 'alunos' }), cont: (a) => { const n = a.db.lista('alunos').filter((x) => sumido(a, x)).length; return n ? { n, tom: 'al' } : 0; } },
     { id: 'aulas', rot: 'Aulas e turmas', icone: 'calendar-blank', render: aulas, cheio: true },
     { id: 'experimentais', rot: 'Aulas experimentais', icone: 'funnel', render: experimentaisPag, cheio: true, cont: (a) => a.db.lista('experimentais').filter((x) => x.etapa === 'agendada').length },
     { grupo: 'Gestão' },
-    { id: 'financeiro', rot: 'Mensalidades', icone: 'currency-circle-dollar', render: financeiro, atalho: 'f', cont: (a) => { const n = new Set(mens(a).filter((m) => m.status === 'aberto' && m.vencimento < hoje()).map((m) => m.aluno)).size; return n ? { n, tom: 'er' } : 0; } },
+    { id: 'financeiro', lado: FERR.financeiro, rot: 'Mensalidades', icone: 'currency-circle-dollar', render: financeiro, atalho: 'f', cont: (a) => { const n = new Set(mens(a).filter((m) => m.status === 'aberto' && m.vencimento < hoje()).map((m) => m.aluno)).size; return n ? { n, tom: 'er' } : 0; } },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
     { id: 'planos', rot: 'Planos', icone: 'identification-card', render: (a) => a.tab({ id: 'planos', colecao: 'planos', singular: 'plano', plural: 'planos', ordem: 'valor', novo: { rot: 'Novo plano', attrs: 'data-acao="novoCad" data-c="planos"' }, aoClicar: async (id) => { if (await editar(a, 'planos', a.db.obter('planos', id))) a.render(); }, colunas: [{ k: 'nome', rot: 'Plano', render: (p) => `<span class="prim">${esc(p.nome)}</span>` }, { k: 'meses', rot: 'Fidelidade', n: true, render: (p) => (p.meses > 1 ? `${p.meses} meses` : 'sem') }, { k: 'valor', rot: 'Mensal', n: true, render: (p) => moeda(p.valor) }, { k: 'alunos', rot: 'Alunos ativos', n: true, valor: (p) => a.db.lista('alunos').filter((x) => x.status === 'ativo' && x.plano === p.id).length, render: (p) => num(a.db.lista('alunos').filter((x) => x.status === 'ativo' && x.plano === p.id).length) }] }) },
+    ...paginasFerramentas(Object.values(FERR)),
   ],
 });
 
@@ -298,3 +301,7 @@ Object.assign(app.acoes, {
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
   excluirCad: (d) => excluir(app, d.c, d.id),
 });
+
+// ferramentas do painel ao lado das telas (WhatsApp e copiar)
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;   // avisos e mensagens prontas: plano Pro (calculadoras: Básico)

@@ -24,7 +24,9 @@ const SEP = '\u0001';
 // até 10 empresas por sistema e suporte prioritário. Custa R$ 60 a mais por mês (catálogo a-sis-<app>-pro).
 const LIMITE_BASICO = 5, EXTRA_PRO = 60;
 const SUPORTE = [64, 64, 60, 65, 68, 68, 60, 64, 59, 59, 66, 63, 65].map((c) => String.fromCharCode(c - 11)).join(''); // WhatsApp da Blue Rose (mesmo do site)
-const BENEFICIOS_PRO = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 5 além de você).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.']];
+const BENEFICIOS_BASE = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 5 além de você).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.']];
+const BENEFICIOS_AVISOS = ['bell-ringing', 'Avisos e mensagens prontas', 'Quem cobrar, confirmar e chamar de volta, com a mensagem pronta no WhatsApp.'];
+const beneficiosPro = (cfg) => (cfg.paginas || []).some((p) => p.id === 'avisos') ? [BENEFICIOS_BASE[0], BENEFICIOS_AVISOS, ...BENEFICIOS_BASE.slice(1)] : BENEFICIOS_BASE;
 // plano anual: 12 meses com 20% de desconto (catálogo a-sis-<app>[-pro]-anual)
 const anual = (mensal) => Math.round(mensal * 12 * 0.8);
 const reais = (v) => `R$ ${Number(v).toLocaleString('pt-BR')}`;
@@ -52,6 +54,36 @@ class BancoNuvem extends Banco {
     return out;
   }
   fotografar() { this.foto = new Map([...this.registrosAtuais()].map(([k, [, , x]]) => [k, JSON.stringify(x)])); }
+  /** O que mudou aqui e ainda não está na nuvem: [registros alterados, registros apagados] */
+  diferenca() {
+    const atual = this.registrosAtuais(), ups = [], dels = [];
+    for (const [k, [c, i, x]] of atual) { const j = JSON.stringify(x); if (this.foto.get(k) !== j) ups.push([c, i, x]); }
+    for (const k of this.foto.keys()) if (!atual.has(k)) dels.push(k.split(SEP));
+    return [ups, dels];
+  }
+  /** Guarda no aparelho o que ainda não subiu (internet caiu ou o sistema foi fechado no meio do envio) */
+  guardarPendente() {
+    try {
+      const [ups, dels] = this.diferenca(), chave = `nuvem-pendente-${this.espaco}`;
+      if (ups.length || dels.length) localStorage.setItem(chave, JSON.stringify({ quando: Date.now(), ups, dels }));
+      else localStorage.removeItem(chave);
+    } catch { /* sem espaço no aparelho: segue tentando pela internet */ }
+  }
+  /** Na abertura: devolve para a tela o que ficou guardado no aparelho e manda para a nuvem */
+  recuperarPendente() {
+    let p = null;
+    try { p = JSON.parse(localStorage.getItem(`nuvem-pendente-${this.espaco}`) || 'null'); } catch { p = null; }
+    if (!p || Date.now() - p.quando > 30 * 864e5) return 0;
+    for (const [c, i, x] of p.ups || []) {
+      if (c === '_cfg') { this.dados._cfg = x; continue; }
+      const l = (this.dados[c] ||= []), k = l.findIndex((y) => String(y.id) === String(i));
+      if (k >= 0) l[k] = { ...x, id: l[k].id }; else l.unshift(x);
+    }
+    for (const [c, i] of p.dels || []) { const l = this.dados[c]; if (Array.isArray(l)) { const k = l.findIndex((y) => String(y.id) === String(i)); if (k >= 0) l.splice(k, 1); } }
+    const n = (p.ups || []).length + (p.dels || []).length;
+    if (n) this.gravar();
+    return n;
+  }
   estado(s) { this.situacao = s; this.ouvintes.forEach((f) => f(s)); }
   gravar() { clearTimeout(this.t); this.estado('pendente'); this.t = setTimeout(() => this.enviar(), 450); }
   recomecar() { avisar('Na versão na nuvem não dá para apagar tudo por aqui.', { tipo: 'erro' }); }
@@ -77,8 +109,9 @@ class BancoNuvem extends Banco {
         ids.forEach((i) => this.foto.delete(`${c}${SEP}${i}`));
       }
       this.estado('salvo');
+      if (this.situacao === 'salvo' && !this.diferenca().flat().length) try { localStorage.removeItem(`nuvem-pendente-${this.espaco}`); } catch { /* ok */ }
     } catch (e) {
-      this.estado('erro');
+      this.estado('erro'); this.guardarPendente();
       const rls = /row-level security|42501|permission/i.test(`${e.message} ${e.code}`);
       avisar(rls ? PLAY ? 'Não foi possível salvar: o acesso a este sistema terminou.' : 'Não foi possível salvar: o período de teste terminou. Contrate para continuar usando.' : `Não foi possível salvar agora (${e.message || 'sem conexão'}). Vamos tentar de novo.`, { tipo: 'erro', tempo: 7000 });
       if (!rls) setTimeout(() => this.gravar(), 5000);
@@ -345,6 +378,8 @@ export async function iniciarNuvem(app, cfg) {
   const { data: eu } = await sb.from('nexo_membros').select('permissoes,papel').eq('espaco', escolha.id).eq('usuario', session.user.id).maybeSingle();
   const linhas = escolha.novo ? [] : await lerTudo(sb, escolha.id);
   const db = new BancoNuvem(sb, escolha.id, uid, linhas);
+  const recuperados = db.recuperarPendente();
+  if (recuperados) setTimeout(() => avisar(`${recuperados} ${recuperados === 1 ? 'alteração que não tinha subido foi enviada' : 'alterações que não tinham subido foram enviadas'} agora para a nuvem.`), 1500);
   if (escolha.novo) {
     if (escolha.exemplo) { const s = cfg.semente(); for (const [k, v] of Object.entries(s)) if (k !== '_cfg') db.dados[k] = v.map((x) => ({ id: x.id || Math.random().toString(36).slice(2, 10), ...x })); }
     db.dados._cfg = { ...(escolha.exemplo ? cfg.semente()._cfg || {} : {}), empresa: escolha.nome, ...(escolha.ramo && !escolha.exemplo ? { ramo_pendente: escolha.ramo } : {}), ...(escolha.pix ? { pix: { chave: escolha.pix, nome: escolha.nome.slice(0, 25), cidade: '' } } : {}) };
@@ -443,7 +478,7 @@ export async function iniciarNuvem(app, cfg) {
 
         <div class="entre"><span class="mute-2">Dúvida ou problema? Fale direto com a Blue Rose</span><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${SUPORTE}?text=${encodeURIComponent(`Olá! Sou cliente Pro do ${cfg.nome} (${esp.nome}) e preciso de ajuda com: `)}">${ic('whatsapp-logo')}Suporte prioritário</a></div></div></div>`
       : `<div class="cartao"><div class="cartao-cab"><div><h3>Plano Pro</h3><div class="sub">Para equipes maiores, por R$ ${EXTRA_PRO} a mais por mês</div></div></div><div class="cartao-corpo col" style="gap:8px">
-        ${BENEFICIOS_PRO.map(([i, t_, d]) => `<div class="flex" style="gap:10px;align-items:flex-start">${ic(i)}<span><b>${t_}.</b> <span class="mute-2">${d}</span></span></div>`).join('')}
+        ${beneficiosPro(cfg).map(([i, t_, d]) => `<div class="flex" style="gap:10px;align-items:flex-start">${ic(i)}<span><b>${t_}.</b> <span class="mute-2">${d}</span></span></div>`).join('')}
         <div class="entre" style="margin-top:6px"><span class="mute-2" style="font-size:12.5px">${PLAY ? 'Disponível na versão pelo site.' : 'O plano atual é cancelado sozinho quando o Pro começa: você não paga dois.'}</span>${PLAY ? '' : `<button type="button" class="btn pri" data-acao="mudarPro">${ic('crown')}Mudar para o Pro · R$ ${(cfg.produto?.mensal || 0) + EXTRA_PRO}/mês</button>`}</div></div></div>`,
     cartaoResumo: () => { const rs = db.cfg.resumo || {}; return `<div class="cartao"><div class="cartao-cab"><div><h3>Resumo diário por e-mail</h3><div class="sub">Um e-mail de manhã com o que importa no dia</div></div>${rs.ativo ? et('Ligado', 'ok') : et('Desligado', '')}</div><div class="cartao-corpo"><form class="form-grade" data-resumo>
       <label class="campo">Enviar para<input name="email" type="email" value="${esc(rs.email || email)}"></label><label class="campo">Horário<select name="hora">${[6, 7, 8, 9, 10, 12, 18].map((h) => `<option value="${h}" ${Number(rs.hora || 7) === h ? 'selected' : ''}>${h}h</option>`).join('')}</select></label>
@@ -459,8 +494,10 @@ export async function iniciarNuvem(app, cfg) {
         clearTimeout(tRender);
         tRender = setTimeout(() => { if (document.querySelector('.fundo-modal') || document.activeElement?.matches('input,textarea,select')) return; app.render(); if (document.querySelector('.gaveta.on')) app.reabrir(); }, 350);
       }).subscribe();
-      addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && db.situacao === 'pendente') db.enviar(); });
-      addEventListener('beforeunload', (e) => { if (['pendente', 'salvando'].includes(db.situacao)) { db.enviar(); e.preventDefault(); e.returnValue = ''; } });
+      addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && ['pendente', 'erro'].includes(db.situacao)) { db.guardarPendente(); db.enviar(); } });
+      addEventListener('pagehide', () => { if (db.situacao !== 'salvo') db.guardarPendente(); });
+      addEventListener('online', () => { if (db.situacao === 'erro') db.enviar(); });
+      addEventListener('beforeunload', (e) => { if (['pendente', 'salvando', 'erro'].includes(db.situacao)) { db.guardarPendente(); db.enviar(); e.preventDefault(); e.returnValue = ''; } });
       Object.assign(app.acoes, {
         resumoLigar: () => { const f = document.querySelector('[data-resumo]'); if (!f.reportValidity()) return; db.cfg.resumo = { ativo: true, email: f.email.value.trim(), hora: Number(f.hora.value) }; db.gravar(); avisar(`Resumo diário ligado: chega todo dia às ${f.hora.value}h`); app.render(); },
         resumoDesligar: () => { db.cfg.resumo = { ...(db.cfg.resumo || {}), ativo: false }; db.gravar(); avisar('Resumo diário desligado'); app.render(); },
@@ -490,7 +527,7 @@ export async function iniciarNuvem(app, cfg) {
           const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: c.email, permissoes: r.perm, papel: r.papel });
           if (er) return avisar(er.message, { tipo: 'erro' }); avisar('Acesso do convite atualizado'); carregarEquipe();
         },
-        verPro: () => modal({ titulo: `${cfg.nome} Pro`, largura: 520, corpo: `<div class="col" style="gap:10px">${BENEFICIOS_PRO.map(([i, t_, d]) => `<div class="dica">${ic(i)}<span><b>${t_}.</b> ${d}</span></div>`).join('')}<p class="mute-2" style="font-size:13px">R$ ${(cfg.produto?.mensal || 0) + EXTRA_PRO}/mês. O plano atual é cancelado sozinho quando o Pro começa.</p></div>`,
+        verPro: () => modal({ titulo: `${cfg.nome} Pro`, largura: 520, corpo: `<div class="col" style="gap:10px">${beneficiosPro(cfg).map(([i, t_, d]) => `<div class="dica">${ic(i)}<span><b>${t_}.</b> ${d}</span></div>`).join('')}<p class="mute-2" style="font-size:13px">R$ ${(cfg.produto?.mensal || 0) + EXTRA_PRO}/mês. O plano atual é cancelado sozinho quando o Pro começa.</p></div>`,
           botoes: [{ rotulo: 'Agora não', valor: null, classe: 'fant' }, ...(PLAY || !dono ? [] : [{ rotulo: 'Mudar para o Pro', classe: 'pri', acao: () => { setTimeout(() => app.acoes.mudarPro(), 50); return true; } }])] }),
         mudarPro: async () => {
           if (!dono) return avisar('Só o dono da empresa muda o plano', { tipo: 'erro' });

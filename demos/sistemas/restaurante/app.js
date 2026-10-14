@@ -4,6 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, kanban, DIAS, telLink, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
+import { LADOS as FERR } from './ferramentas.js';
+import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
 import { qrSVG } from '../base/qr.js';
 
 const CATS = [['entradas', 'Entradas'], ['pratos', 'Pratos principais'], ['pizzas', 'Pizzas'], ['massas', 'Massas'], ['lanches', 'Lanches'], ['porcoes', 'Porções'], ['sobremesas', 'Sobremesas'], ['cafes', 'Cafés'], ['bebidas', 'Bebidas'], ['drinks', 'Drinks']];
@@ -247,15 +249,16 @@ const app = criarApp({
   comandos: [{ rot: 'Novo pedido de delivery', icone: 'motorcycle', acao: (a) => a.acoes.novoDelivery() }, { rot: 'Pedido no balcão', icone: 'storefront', acao: (a) => a.acoes.novoBalcao() }],
   paginas: [
     { id: 'painel', rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
-    { id: 'mesas', rot: 'Mesas e comandas', icone: 'chair', render: mesas, atalho: 'm', cont: (a) => peds(a).filter((p) => p.status === 'aberta').length },
+    { id: 'mesas', lado: FERR.mesas, rot: 'Mesas e comandas', icone: 'chair', render: mesas, atalho: 'm', cont: (a) => peds(a).filter((p) => p.status === 'aberta').length },
     { id: 'delivery', rot: 'Delivery e balcão', icone: 'motorcycle', render: delivery, cheio: true, atalho: 'd', cont: (a) => { const n = peds(a).filter((p) => p.etapa === 'novo').length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'cozinha', rot: 'Tela da cozinha', icone: 'cooking-pot', render: cozinha, atalho: 'k' },
     { grupo: 'Gestão' },
-    { id: 'cardapio', rot: 'Cardápio e fichas técnicas', icone: 'fork-knife', render: cardapioPag, atalho: 'c' },
-    { id: 'estoque', rot: 'Estoque de insumos', icone: 'package', render: estoque, cont: (a) => { const n = a.db.lista('insumos').filter((x) => x.estoque <= x.minimo).length; return n ? { n, tom: 'er' } : 0; } },
+    { id: 'cardapio', lado: FERR.cardapio, rot: 'Cardápio e fichas técnicas', icone: 'fork-knife', render: cardapioPag, atalho: 'c' },
+    { id: 'estoque', lado: FERR.estoque, rot: 'Estoque de insumos', icone: 'package', render: estoque, cont: (a) => { const n = a.db.lista('insumos').filter((x) => x.estoque <= x.minimo).length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'caixa', rot: 'Caixa do dia', icone: 'cash-register', render: caixa },
-    { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
-    { id: 'clientes', rot: 'Clientes do delivery', icone: 'users', render: (a) => a.tab({ id: 'clientes', colecao: 'clientes', singular: 'cliente', plural: 'clientes', ordem: 'nome', novo: { rot: 'Novo cliente', attrs: 'data-acao="novoCad" data-c="clientes"' }, aoClicar: async (id) => { if (await editar(a, 'clientes', cli(a, id))) a.render(); }, colunas: [{ k: 'nome', rot: 'Cliente', render: (c) => `<span class="flex" style="gap:9px">${av(c.nome)}<span class="prim">${esc(c.nome)}</span></span>` }, { k: 'telefone', rot: 'WhatsApp' }, { k: 'endereco', rot: 'Endereço', oc: true }, { k: 'pedidos', rot: 'Pedidos', n: true, valor: (c) => peds(a).filter((p) => p.cliente === c.id).length }, { k: 'gasto', rot: 'Gasto total', n: true, valor: (c) => soma(peds(a).filter((p) => p.cliente === c.id), totalP), render: (c) => moeda(soma(peds(a).filter((p) => p.cliente === c.id), totalP)) }] }) },
+    { id: 'relatorios', lado: FERR.relatorios, rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
+    { id: 'clientes', lado: (a) => FERR.clientes(a) + FERR.delivery(a), rot: 'Clientes do delivery', icone: 'users', render: (a) => a.tab({ id: 'clientes', colecao: 'clientes', singular: 'cliente', plural: 'clientes', ordem: 'nome', novo: { rot: 'Novo cliente', attrs: 'data-acao="novoCad" data-c="clientes"' }, aoClicar: async (id) => { if (await editar(a, 'clientes', cli(a, id))) a.render(); }, colunas: [{ k: 'nome', rot: 'Cliente', render: (c) => `<span class="flex" style="gap:9px">${av(c.nome)}<span class="prim">${esc(c.nome)}</span></span>` }, { k: 'telefone', rot: 'WhatsApp' }, { k: 'endereco', rot: 'Endereço', oc: true }, { k: 'pedidos', rot: 'Pedidos', n: true, valor: (c) => peds(a).filter((p) => p.cliente === c.id).length }, { k: 'gasto', rot: 'Gasto total', n: true, valor: (c) => soma(peds(a).filter((p) => p.cliente === c.id), totalP), render: (c) => moeda(soma(peds(a).filter((p) => p.cliente === c.id), totalP)) }] }) },
+    ...paginasFerramentas(Object.values(FERR)),
   ],
 });
 
@@ -323,3 +326,7 @@ Object.assign(app.acoes, {
   novoCad: async (d) => { if (await editar(app, d.c)) app.render(); },
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
 });
+
+// ferramentas do painel ao lado das telas (WhatsApp e copiar)
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;   // avisos e mensagens prontas: plano Pro (calculadoras: Básico)

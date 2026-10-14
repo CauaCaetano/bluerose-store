@@ -4,6 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, rosca, barrasH, kanban, calMes, DIAS, DIAS_L, diaUtil, nomeFeriado, fimDeSemana, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, pop, imprimir, fecharGaveta,
 } from '../base/nexo.js';
+import { LADOS as FERR } from './ferramentas.js';
+import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
 
 const ADV = [['paulo', 'Dr. Paulo Moura', 'Sócio · OAB/MG 98.412', 450], ['ana', 'Dra. Ana Castro', 'Sócia · OAB/MG 101.337', 450], ['lia', 'Dra. Lia Fontes', 'Associada · OAB/MG 187.205', 300], ['rafael', 'Rafael Teles', 'Estagiário · controladoria', 120]];
 const nomeA = (id) => (ADV.find((x) => x[0] === id) || [, '—'])[1];
@@ -457,19 +459,20 @@ const app = criarApp({
   busca: [{ colecao: 'processos', grupo: 'Processos', icone: 'scales', ficha: 'processo', rot: (p) => p.numero, sub: (p, a) => rotProc(a, p) }, { colecao: 'clientes', grupo: 'Clientes', icone: 'user', ficha: 'cliente', rot: (c) => c.nome, sub: (c) => c.doc }],
   comandos: [{ rot: 'Novo processo', icone: 'plus', acao: (a) => a.acoes.novoProcesso() }, { rot: 'Novo prazo ou audiência', icone: 'calendar-plus', acao: (a) => a.acoes.novoPrazo({}) }, { rot: 'Calcular prazo', icone: 'calculator', acao: (a) => a.ir('#/calculadora') }, { rot: 'Lançar horas', icone: 'timer', acao: (a) => a.acoes.novaHora({}) }],
   paginas: [
-    { id: 'painel', rot: 'Painel', icone: 'house', titulo: 'Painel do escritório', render: painel, atalho: 'i' },
+    { id: 'painel', lado: FERR.tarefas, rot: 'Painel', icone: 'house', titulo: 'Painel do escritório', render: painel, atalho: 'i' },
     { id: 'intimacoes', rot: 'Intimações', icone: 'tray', render: intimacoes, cheio: true, atalho: 'm', cont: (a) => { const n = a.db.lista('publicacoes').filter((x) => x.status === 'nova').length; return n ? { n, tom: 'er' } : 0; } },
-    { id: 'prazos', rot: 'Prazos e agenda', icone: 'hourglass', titulo: 'Prazos e agenda', render: prazosPag, atalho: 'p', novo: (a) => a.acoes.novoPrazo({}), cont: (a) => { const n = pend(a).filter((x) => x.tipo === 'prazo' && diasAte(x.data) <= 1).length; return n ? { n, tom: 'er' } : 0; } },
+    { id: 'prazos', lado: FERR.prazos, rot: 'Prazos e agenda', icone: 'hourglass', titulo: 'Prazos e agenda', render: prazosPag, atalho: 'p', novo: (a) => a.acoes.novoPrazo({}), cont: (a) => { const n = pend(a).filter((x) => x.tipo === 'prazo' && diasAte(x.data) <= 1).length; return n ? { n, tom: 'er' } : 0; } },
     { grupo: 'Escritório' },
-    { id: 'processos', rot: 'Processos', icone: 'scales', render: processos, atalho: 'r', novo: (a) => a.acoes.novoProcesso() },
+    { id: 'processos', lado: FERR.processos, rot: 'Processos', icone: 'scales', render: processos, atalho: 'r', novo: (a) => a.acoes.novoProcesso() },
     { id: 'clientes', rot: 'Clientes', icone: 'users', render: clientes, atalho: 'c', novo: (a) => a.acoes.novoCliente() },
     { id: 'tarefas', rot: 'Tarefas', icone: 'kanban', render: tarefas, cheio: true, atalho: 't', novo: (a) => a.acoes.novaTarefa({}) },
     { id: 'horas', rot: 'Horas (timesheet)', icone: 'timer', titulo: 'Horas trabalhadas', render: timesheet, cont: (a) => (a.db.cfg.cronometro ? { n: '●', tom: 'er' } : 0) },
     { grupo: 'Gestão' },
-    { id: 'financeiro', rot: 'Honorários', icone: 'hand-coins', render: financeiro, atalho: 'h', cont: (a) => { const n = a.db.lista('honorarios').filter((h) => honStatus(h) === 'atrasado').length; return n ? { n, tom: 'er' } : 0; } },
-    { id: 'calculadora', rot: 'Calculadora de prazos', icone: 'calculator', render: calculadora },
+    { id: 'financeiro', lado: FERR.financeiro, rot: 'Honorários', icone: 'hand-coins', render: financeiro, atalho: 'h', cont: (a) => { const n = a.db.lista('honorarios').filter((h) => honStatus(h) === 'atrasado').length; return n ? { n, tom: 'er' } : 0; } },
+    { id: 'calculadora', lado: FERR.calculadora, rot: 'Calculadora de prazos', icone: 'calculator', render: calculadora },
     { id: 'modelos', rot: 'Modelos de documentos', icone: 'file-text', render: modelos },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
+    ...paginasFerramentas(Object.values(FERR)),
   ],
 });
 
@@ -544,3 +547,7 @@ Object.assign(app.acoes, {
 
 // busca automática no DJEN uma vez por dia ao abrir o sistema
 setTimeout(() => { if (app.db?.cfg?.oabs?.length && app.db.cfg.djen_ultima !== hoje()) capturarDJEN(app, { silencioso: true }).then((n) => { if (n) app.render(); }).catch(() => {}); }, 2500);
+
+// ferramentas do painel ao lado das telas (WhatsApp e copiar)
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;   // avisos e mensagens prontas: plano Pro (calculadoras: Básico)

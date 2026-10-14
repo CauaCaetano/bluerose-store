@@ -9,6 +9,7 @@
 // com grade de horários, linha do tempo, formulários e impressão.
 // =============================================================
 
+import { ligarCalcs } from './lado.js';
 import { resumoDoDia, resumoTexto } from './resumos.js';
 import { prepararExtras } from './extras.js';
 import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
@@ -471,6 +472,7 @@ function montar(app, cfg) {
         <div class="lat-pe">
           <a class="item" href="#" data-acao="resumoDia">${ic('notepad')}Resumo do dia</a>
           ${!app.nuvem || app.sessao.gestor ? `<a class="item item-dono" href="#/dono" data-pag="dono">${ic('crown')}Painel do dono</a><a class="item" href="#/importar" data-pag="importar">${ic('table')}Importar planilha</a>` : ''}
+          ${app.nuvem ? `<a class="item" href="javascript:void 0" data-pwa-instalar hidden>${ic('download-simple')}Instalar o app</a>` : ''}
           <a class="item" href="#/config" data-pag="config">${ic('gear-six')}Configurações</a>
           <a class="item" href="javascript:void 0" data-acao="tema">${ic('moon')}<span data-tema-rot>Tema escuro</span></a>
           <a class="item" href="javascript:void 0" data-acao="atalhos">${ic('keyboard')}Atalhos</a>
@@ -502,12 +504,13 @@ function montar(app, cfg) {
     // painel lateral da aba (opcional): ferramentas e atalhos daquela área; no celular fica recolhido em cima
     if (p.lado) {
       const aberto = app.estado.ladoFechado ? false : innerWidth >= 1100;
-      c.innerHTML = `<div class="com-lado"><div class="com-lado-princ">${corpo}</div><details class="lado nao-imprime" ${aberto ? 'open' : ''}><summary>${ic('sidebar-simple')}<span>Ferramentas desta aba</span>${ic('caret-down', 'seta')}</summary><div class="lado-corpo">${p.lado(app, params)}</div></details></div>`;
+      c.innerHTML = `<div class="com-lado"><div class="com-lado-princ">${corpo}</div><details class="lado nao-imprime" ${aberto ? 'open' : ''}><summary>${ic('sidebar-simple')}<span>Ferramentas desta aba</span>${ic('caret-down', 'seta')}</summary><div class="lado-corpo">${app.travarLado ? app.travarLado(app, p.lado(app, params)) : p.lado(app, params)}</div></details></div>`;
       c.querySelector('details.lado').addEventListener('toggle', (e) => { if (innerWidth >= 1100) app.estado.ladoFechado = !e.target.open; });
     } else c.innerHTML = corpo;
     if (p.id === paginas[0].id && app.passosHTML && app.acesso(p.id) === 'editar') c.insertAdjacentHTML('afterbegin', app.passosHTML());
     if (raiz.dataset.soVer) c.insertAdjacentHTML('afterbegin', `<div class="dica">${ic('eye')}<span>Você pode <b>ver</b> esta área, mas não editar. Para mudar isso, fale com o dono da empresa.</span></div>`);
     p.montar?.(app, c, params);
+    if (p.lado) ligarCalcs(c);
     if (app._mesmaPagina === `${p.id}/${params.join('/')}`) scrollTo(0, rolagem); else scrollTo(0, 0);
     app._mesmaPagina = `${p.id}/${params.join('/')}`;
     for (const m of paginas) { const el = document.querySelector(`[data-cont="${m.id}"]`); const r = m.cont?.(app); if (el) { const n = typeof r === 'object' ? r?.n : r; el.hidden = !n; el.textContent = n || ''; el.className = `cont ${r?.tom || ''}`; } }

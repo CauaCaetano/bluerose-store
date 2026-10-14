@@ -4,6 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, kanban, DIAS, telLink, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
+import { LADOS as FERR } from './ferramentas.js';
+import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
 
 const ETAPAS = [['entrada', 'Entrada e diagnóstico', '#94a3b8'], ['orcamento', 'Orçamento enviado', '#f59e0b'], ['aprovado', 'Aprovado', '#3b82f6'], ['servico', 'Em serviço', '#8b5cf6'], ['peca', 'Aguardando peça', '#e11d48'], ['pronto', 'Pronto', '#16a34a'], ['entregue', 'Entregue', '#64748b']];
 const etp = (id) => ETAPAS.find((e) => e[0] === id) || ETAPAS[0];
@@ -226,15 +228,16 @@ const app = criarApp({
   busca: [{ colecao: 'veiculos', grupo: 'Veículos', icone: 'car', ficha: 'veiculo', rot: (v) => `${v.placa} · ${v.modelo}`, sub: (v, a) => cli(a, v.cliente)?.nome || '' }, { colecao: 'ordens', grupo: 'Ordens de serviço', icone: 'wrench', ficha: 'os', rot: (o, a) => `#${o.numero} · ${veic(a, o.veiculo)?.placa || ''}`, sub: (o) => etp(o.etapa)[1] }],
   comandos: [{ rot: 'Entrada de veículo', icone: 'sign-in', acao: (a) => checkin(a) }, { rot: 'Agendar', icone: 'calendar-plus', acao: (a) => a.acoes.agendar({}) }],
   paginas: [
-    { id: 'painel', rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
+    { id: 'painel', lado: FERR.patio, rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
     { id: 'patio', rot: 'Pátio', icone: 'garage', titulo: 'Pátio · carros na oficina', render: patio, cheio: true, atalho: 'p', novo: (a) => checkin(a), cont: (a) => ords(a).filter((o) => o.etapa !== 'entregue').length },
-    { id: 'agenda', rot: 'Agendamentos', icone: 'calendar-blank', render: agenda, cont: (a) => a.db.lista('agendamentos').filter((x) => x.data === diaMais(1)).length },
-    { id: 'ordens', rot: 'Ordens de serviço', icone: 'clipboard-text', render: ordensPag, atalho: 'o' },
-    { id: 'veiculos', rot: 'Veículos e clientes', icone: 'car', render: veiculosPag, atalho: 'v' },
+    { id: 'agenda', lado: FERR.agenda, rot: 'Agendamentos', icone: 'calendar-blank', render: agenda, cont: (a) => a.db.lista('agendamentos').filter((x) => x.data === diaMais(1)).length },
+    { id: 'ordens', lado: FERR.ordens, rot: 'Ordens de serviço', icone: 'clipboard-text', render: ordensPag, atalho: 'o' },
+    { id: 'veiculos', lado: FERR.veiculos, rot: 'Veículos e clientes', icone: 'car', render: veiculosPag, atalho: 'v' },
     { id: 'revisoes', rot: 'Revisões a vencer', icone: 'bell-ringing', render: revisoes, cont: (a) => { const n = a.db.lista('veiculos').filter(precisaRevisao).length; return n ? { n, tom: 'al' } : 0; } },
     { grupo: 'Gestão' },
-    { id: 'estoque', rot: 'Peças e serviços', icone: 'package', render: estoque, cont: (a) => { const n = a.db.lista('pecas').filter((p) => p.estoque <= p.minimo).length; return n ? { n, tom: 'er' } : 0; } },
+    { id: 'estoque', lado: FERR.estoque, rot: 'Peças e serviços', icone: 'package', render: estoque, cont: (a) => { const n = a.db.lista('pecas').filter((p) => p.estoque <= p.minimo).length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
+    ...paginasFerramentas(Object.values(FERR)),
   ],
 });
 
@@ -277,3 +280,7 @@ Object.assign(app.acoes, {
   novoCad: async (d) => { if (await editar(app, d.c)) app.render(); },
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
 });
+
+// ferramentas do painel ao lado das telas (WhatsApp e copiar)
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;   // avisos e mensagens prontas: plano Pro (calculadoras: Básico)

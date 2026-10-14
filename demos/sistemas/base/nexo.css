@@ -539,7 +539,7 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 }
 
 /* ajustes */
-.cont[hidden] { display: none !important; }
+.cont[hidden], .lat .item[hidden] { display: none !important; }
 .lista a, .tabela a, .props a, .tempo a { color: var(--tx); text-decoration: none; border-bottom: 1px solid var(--borda-2); }
 .lista a:hover, .tabela a:hover, .props a:hover, .tempo a:hover { border-color: var(--tx-2); }
 .caixa-busca { min-width: 260px; }
@@ -771,3 +771,9 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
   .com-lado, .com-lado:has(> .lado:not([open])) { grid-template-columns: minmax(0, 1fr); }
   .com-lado > .lado { order: -1; position: static; max-height: none; }
 }
+.ld-pre { white-space: pre-wrap; font: 500 12.5px/1.5 var(--mono, monospace); background: var(--painel-2); border: 1px solid var(--borda, rgba(0,0,0,.08)); border-radius: 8px; padding: 8px 10px; margin: 0 0 8px; max-height: 220px; overflow: auto; }
+.ld-pagina { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; align-items: start; margin-top: 14px; }
+.ld-pagina .ld-bloco { background: var(--painel); border: 1px solid var(--borda, rgba(0,0,0,.08)); border-radius: 12px; padding: 14px 16px; margin: 0; }
+.ld-tag-pro { margin-left: auto; font: 700 10px/1 var(--fonte, inherit); letter-spacing: .06em; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #2557d6, #6d4ae0); padding: 3px 7px; border-radius: 999px; }
+.ld-bloco h3:has(.ld-tag-pro) { display: flex; align-items: center; gap: 6px; }
+.ld-trancado p { color: var(--tx-2); display: flex; gap: 6px; align-items: flex-start; }

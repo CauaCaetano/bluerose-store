@@ -1,51 +1,11 @@
 {
  "crm": {
-  "duracao": 203,
+  "duracao": 217,
   "capitulos": [
    [
     "pedido",
     "Pedir o teste grátis",
     11.4
-   ],
-   [
-    "conta",
-    "Minha conta e o token de dono",
-    53.9
-   ],
-   [
-    "empresa",
-    "Criar a sua empresa",
-    70.9
-   ],
-   [
-    "planilha",
-    "Subir as suas planilhas",
-    81.9
-   ],
-   [
-    "equipe",
-    "Convidar a sua equipe",
-    120.8
-   ],
-   [
-    "indique",
-    "Indique e ganhe o Pro",
-    146.9
-   ],
-   [
-    "celular",
-    "Usar no celular e pedir ajuda",
-    172.5
-   ]
-  ]
- },
- "agenda": {
-  "duracao": 203,
-  "capitulos": [
-   [
-    "pedido",
-    "Pedir o teste grátis",
-    11.3
    ],
    [
     "conta",
@@ -60,27 +20,67 @@
    [
     "planilha",
     "Subir as suas planilhas",
+    81.8
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    120.6
+   ],
+   [
+    "indique",
+    "Indique e ganhe o Pro",
+    146.6
+   ],
+   [
+    "celular",
+    "Instalar no computador e no celular",
+    172.3
+   ]
+  ]
+ },
+ "agenda": {
+  "duracao": 218,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.3
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    53.7
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    70.8
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
     82.0
    ],
    [
     "equipe",
     "Convidar a sua equipe",
-    120.9
+    121.1
    ],
    [
     "indique",
     "Indique e ganhe o Pro",
-    147.2
+    147.3
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
+    "Instalar no computador e no celular",
     172.9
    ]
   ]
  },
  "juridico": {
-  "duracao": 203,
+  "duracao": 218,
   "capitulos": [
    [
     "pedido",
@@ -110,17 +110,17 @@
    [
     "indique",
     "Indique e ganhe o Pro",
-    147.2
+    147.3
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
-    172.8
+    "Instalar no computador e no celular",
+    172.9
    ]
   ]
  },
  "financeiro": {
-  "duracao": 202,
+  "duracao": 217,
   "capitulos": [
    [
     "pedido",
@@ -140,7 +140,7 @@
    [
     "planilha",
     "Subir as suas planilhas",
-    81.9
+    81.8
    ],
    [
     "equipe",
@@ -150,17 +150,17 @@
    [
     "indique",
     "Indique e ganhe o Pro",
-    146.5
+    146.4
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
-    172.1
+    "Instalar no computador e no celular",
+    172.0
    ]
   ]
  },
  "gestao": {
-  "duracao": 203,
+  "duracao": 218,
   "capitulos": [
    [
     "pedido",
@@ -170,37 +170,37 @@
    [
     "conta",
     "Minha conta e o token de dono",
-    53.5
+    53.4
    ],
    [
     "empresa",
     "Criar a sua empresa",
-    70.5
+    70.4
    ],
    [
     "planilha",
     "Subir as suas planilhas",
-    82.1
+    82.0
    ],
    [
     "equipe",
     "Convidar a sua equipe",
-    121.0
+    120.9
    ],
    [
     "indique",
     "Indique e ganhe o Pro",
-    147.0
+    146.8
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
-    172.6
+    "Instalar no computador e no celular",
+    172.4
    ]
   ]
  },
  "clinica": {
-  "duracao": 205,
+  "duracao": 220,
   "capitulos": [
    [
     "pedido",
@@ -220,27 +220,27 @@
    [
     "planilha",
     "Subir as suas planilhas",
-    82.1
+    82.0
    ],
    [
     "equipe",
     "Convidar a sua equipe",
-    122.9
+    122.8
    ],
    [
     "indique",
     "Indique e ganhe o Pro",
-    149.1
+    149.0
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
-    174.7
+    "Instalar no computador e no celular",
+    174.6
    ]
   ]
  },
  "academia": {
-  "duracao": 205,
+  "duracao": 220,
   "capitulos": [
    [
     "pedido",
@@ -255,32 +255,32 @@
    [
     "empresa",
     "Criar a sua empresa",
-    70.7
+    70.8
    ],
    [
     "planilha",
     "Subir as suas planilhas",
-    82.0
+    82.2
    ],
    [
     "equipe",
     "Convidar a sua equipe",
-    122.8
+    123.0
    ],
    [
     "indique",
     "Indique e ganhe o Pro",
-    148.8
+    149.0
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
-    174.4
+    "Instalar no computador e no celular",
+    174.6
    ]
   ]
  },
  "restaurante": {
-  "duracao": 204,
+  "duracao": 219,
   "capitulos": [
    [
     "pedido",
@@ -290,22 +290,22 @@
    [
     "conta",
     "Minha conta e o token de dono",
-    54.4
+    54.3
    ],
    [
     "empresa",
     "Criar a sua empresa",
-    71.4
+    71.3
    ],
    [
     "planilha",
     "Subir as suas planilhas",
-    82.6
+    82.5
    ],
    [
     "equipe",
     "Convidar a sua equipe",
-    121.5
+    121.4
    ],
    [
     "indique",
@@ -314,13 +314,13 @@
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
+    "Instalar no computador e no celular",
     173.3
    ]
   ]
  },
  "imobiliaria": {
-  "duracao": 205,
+  "duracao": 220,
   "capitulos": [
    [
     "pedido",
@@ -335,32 +335,32 @@
    [
     "empresa",
     "Criar a sua empresa",
-    71.1
+    71.2
    ],
    [
     "planilha",
     "Subir as suas planilhas",
-    82.4
+    82.5
    ],
    [
     "equipe",
     "Convidar a sua equipe",
-    123.2
+    123.3
    ],
    [
     "indique",
     "Indique e ganhe o Pro",
-    149.2
+    149.4
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
-    174.8
+    "Instalar no computador e no celular",
+    175.0
    ]
   ]
  },
  "oficina": {
-  "duracao": 203,
+  "duracao": 218,
   "capitulos": [
    [
     "pedido",
@@ -370,7 +370,7 @@
    [
     "conta",
     "Minha conta e o token de dono",
-    53.7
+    53.8
    ],
    [
     "empresa",
@@ -380,27 +380,27 @@
    [
     "planilha",
     "Subir as suas planilhas",
-    82.0
+    81.9
    ],
    [
     "equipe",
     "Convidar a sua equipe",
-    120.9
+    120.8
    ],
    [
     "indique",
     "Indique e ganhe o Pro",
-    146.9
+    146.7
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
-    172.5
+    "Instalar no computador e no celular",
+    172.4
    ]
   ]
  },
  "obras": {
-  "duracao": 204,
+  "duracao": 219,
   "capitulos": [
    [
     "pedido",
@@ -415,7 +415,7 @@
    [
     "empresa",
     "Criar a sua empresa",
-    71.0
+    70.9
    ],
    [
     "planilha",
@@ -434,13 +434,13 @@
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
+    "Instalar no computador e no celular",
     173.7
    ]
   ]
  },
  "pragas": {
-  "duracao": 206,
+  "duracao": 221,
   "capitulos": [
    [
     "pedido",
@@ -465,22 +465,22 @@
    [
     "equipe",
     "Convidar a sua equipe",
-    123.5
+    123.4
    ],
    [
     "indique",
     "Indique e ganhe o Pro",
-    149.9
+    149.8
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
-    175.5
+    "Instalar no computador e no celular",
+    175.4
    ]
   ]
  },
  "cerimonial": {
-  "duracao": 204,
+  "duracao": 219,
   "capitulos": [
    [
     "pedido",
@@ -495,7 +495,7 @@
    [
     "empresa",
     "Criar a sua empresa",
-    71.5
+    71.4
    ],
    [
     "planilha",
@@ -514,7 +514,7 @@
    ],
    [
     "celular",
-    "Usar no celular e pedir ajuda",
+    "Instalar no computador e no celular",
     173.9
    ]
   ]

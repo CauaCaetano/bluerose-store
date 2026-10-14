@@ -5,6 +5,8 @@ import {
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
   corSegura,
 } from '../base/nexo.js';
+import { LADOS as FERR } from './ferramentas.js';
+import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
 
 const ABRE = 7, FECHA = 20;
 const STATUS = { agendado: ['Agendado', '#94a3b8'], confirmado: ['Confirmado', '#3b82f6'], chegou: ['Na recepção', '#f59e0b'], atendimento: ['Em atendimento', '#a855f7'], atendido: ['Atendido', '#16a34a'], faltou: ['Faltou', '#e11d48'], cancelado: ['Cancelado', '#64748b'] };
@@ -285,16 +287,17 @@ const app = criarApp({
   busca: [{ colecao: 'pacientes', grupo: 'Pacientes', icone: 'user', ficha: 'paciente', rot: (p) => p.nome, sub: (p) => p.telefone }],
   comandos: [{ rot: 'Nova consulta', icone: 'calendar-plus', acao: (a) => marcar(a) }, { rot: 'Novo paciente', icone: 'user-plus', acao: (a) => a.acoes.novoCad({ c: 'pacientes' }) }],
   paginas: [
-    { id: 'painel', rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
+    { id: 'painel', lado: FERR.painel, rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
     { id: 'agenda', rot: 'Agenda', icone: 'calendar-blank', render: agenda, cheio: true, atalho: 'a', novo: (a) => marcar(a) },
-    { id: 'recepcao', rot: 'Recepção', icone: 'door-open', titulo: 'Recepção e sala de espera', render: recepcao, atalho: 'r', cont: (a) => cons(a).filter((c) => c.data === hoje() && c.status === 'chegou').length },
-    { id: 'pacientes', rot: 'Pacientes e prontuários', icone: 'users', render: pacientesPag, atalho: 'p', novo: (a) => a.acoes.novoCad({ c: 'pacientes' }) },
+    { id: 'recepcao', lado: FERR.agenda, rot: 'Recepção', icone: 'door-open', titulo: 'Recepção e sala de espera', render: recepcao, atalho: 'r', cont: (a) => cons(a).filter((c) => c.data === hoje() && c.status === 'chegou').length },
+    { id: 'pacientes', lado: FERR.pacientes, rot: 'Pacientes e prontuários', icone: 'users', render: pacientesPag, atalho: 'p', novo: (a) => a.acoes.novoCad({ c: 'pacientes' }) },
     { grupo: 'Financeiro' },
-    { id: 'caixa', rot: 'Caixa (particular)', icone: 'cash-register', render: caixa, cont: (a) => { const n = cons(a).filter((c) => c.tipo === 'particular' && c.status === 'atendido' && !c.pago).length; return n ? { n, tom: 'er' } : 0; } },
+    { id: 'caixa', lado: FERR.caixa, rot: 'Caixa (particular)', icone: 'cash-register', render: caixa, cont: (a) => { const n = cons(a).filter((c) => c.tipo === 'particular' && c.status === 'atendido' && !c.pago).length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'convenios', rot: 'Faturamento de convênios', icone: 'identification-card', render: faturamento, cont: (a) => cons(a).filter((c) => c.guia === 'pendente').length },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
     { grupo: 'Cadastros' },
     { id: 'cadastros', rot: 'Profissionais e tabelas', icone: 'list-checks', render: cadastros },
+    ...paginasFerramentas(Object.values(FERR)),
   ],
 });
 
@@ -332,3 +335,7 @@ Object.assign(app.acoes, {
   novoCad: async (d) => { if (await editar(app, d.c)) app.render(); },
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
 });
+
+// ferramentas do painel ao lado das telas (WhatsApp e copiar)
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;   // avisos e mensagens prontas: plano Pro (calculadoras: Básico)
