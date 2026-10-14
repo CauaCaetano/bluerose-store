@@ -504,13 +504,17 @@ export async function iniciarNuvem(app, cfg) {
         sair: async () => { if (await confirmar('Sair da sua conta neste aparelho?', { rotulo: 'Sair' })) { await db.enviar(); await sb.auth.signOut(); location.reload(); } },
         convidar: async () => {
           const r = await editarPermissoes(app, cfg, { titulo: 'Convidar pessoa', comEmail: true, podeAdmin: dono }); if (!r) return;
-          const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: r.email, permissoes: r.perm, papel: r.papel });
+          r.email = String(r.email || '').trim().toLowerCase();
+          // convidar o próprio e-mail não faz nada (a pessoa já é da empresa): avisa em vez de sumir com o convite
+          if (r.email === String(email || '').toLowerCase()) return avisar('Esse é o seu próprio e-mail: você já está na empresa. Convide outra pessoa.', { tipo: 'erro', tempo: 6000 });
+          if (equipe.some((m) => String(m.email || '').toLowerCase() === r.email)) return avisar('Essa pessoa já está na equipe.', { tipo: 'erro' });
+          const { error: er } = await sb.from('nexo_convites').insert({ espaco: esp.id, email: r.email, permissoes: r.perm, papel: r.papel, convidado_por: (session.user.user_metadata?.nome || '').trim() || email });
           if (er) { if (/LIMITE_EQUIPE/.test(er.message)) return app.acoes.verPro(); return avisar(/duplicate/.test(er.message) ? 'Esse e-mail já foi convidado' : er.message, { tipo: 'erro' }); }
           db.cfg.convidou = true; db.gravar(); await carregarEquipe(); app.acoes.linkConvite({ e: r.email });
         },
         linkConvite: (d) => {
           const em = d.e, link = `${location.origin + location.pathname}?convite=${encodeURIComponent(em)}`, msg = `Oi! Te adicionei na equipe da ${db.cfg.empresa || esp.nome} no ${cfg.nome}. Crie a sua conta com este e-mail (${em}) por aqui: ${link}`;
-          modal({ titulo: 'Convite pronto', largura: 480, corpo: `<p class="mute-2" style="margin-bottom:10px">Mande o link para <b>${esc(em)}</b>. A pessoa cria a conta com esse e-mail e já entra na empresa, sem pagar nada. Se ela já tiver conta, é só entrar.</p><input readonly value="${esc(link)}" style="width:100%">`,
+          modal({ titulo: 'Convite enviado', largura: 480, corpo: `<p class="mute-2" style="margin-bottom:10px">Enviamos o convite para <b>${esc(em)}</b> por e-mail (chega em alguns minutos; peça para conferir o spam). A pessoa cria a conta com esse e-mail e já entra na empresa, sem pagar nada. Se ela já tiver conta, é só entrar.</p><p class="mute-2" style="margin-bottom:10px">Para ser mais rápido, mande também pelo WhatsApp ou copie o link:</p><input readonly value="${esc(link)}" style="width:100%">`,
             botoes: [{ rotulo: 'Copiar link', classe: 'fant', acao: () => { navigator.clipboard?.writeText(link).then(() => avisar('Link copiado')).catch(() => {}); return false; } }, { rotulo: 'Mandar no WhatsApp', classe: 'pri', acao: () => { window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank', 'noopener'); return true; } }] });
         },
         acessoMembro: async (d) => {
