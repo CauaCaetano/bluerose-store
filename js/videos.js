@@ -31,3 +31,23 @@
     });
   });
 })();
+
+/* Vídeo tutorial das páginas dos sistemas: os passos ao lado levam o vídeo direto para o trecho e acendem conforme ele toca. */
+(function () {
+  document.querySelectorAll('.np-tut').forEach(function (caixa) {
+    var video = caixa.querySelector('video'), passos = caixa.querySelectorAll('[data-pular]');
+    if (!video || !passos.length) return;
+    passos.forEach(function (b) {
+      b.addEventListener('click', function () {
+        video.preload = 'auto';
+        var ir = function () { video.currentTime = Number(b.getAttribute('data-pular')) || 0; var p = video.play(); if (p && p.catch) p.catch(function () {}); };
+        if (video.readyState >= 1) ir(); else { video.addEventListener('loadedmetadata', ir, { once: true }); video.load(); }
+      });
+    });
+    video.addEventListener('timeupdate', function () {
+      var t = video.currentTime, atual = null;
+      passos.forEach(function (b) { if (t + 0.3 >= Number(b.getAttribute('data-pular'))) atual = b; });
+      passos.forEach(function (b) { b.classList.toggle('on', b === atual); if (b === atual) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    });
+  });
+})();

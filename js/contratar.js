@@ -99,6 +99,15 @@
       $('ct-valor').innerHTML = '<b>' + v[0] + '</b><small>' + v[1] + '</small>';
       $('ct-meios').textContent = assinatura ? '(cartão de crédito, cobrado todo mês)' : '(PIX, cartão em até 6x ou boleto)';
       $('ct-fidelidade').textContent = assinatura ? (/^a-sis-/.test(plano) ? ' (sistemas da Linha Nexo: sem fidelidade)' : ', incluindo a fidelidade mínima de 12 meses') : '';
+      // sistemas prontos: ficam prontos na hora, com vídeos tutoriais (sites e automações seguem com implantação feita por nós)
+      var passos = dlg.querySelector('.contratar-passos');
+      if (passos) {
+        if (!passos.dataset.original) passos.dataset.original = passos.innerHTML;
+        passos.innerHTML = /^a-sis-/.test(plano)
+          ? '<li>Você paga com segurança no <b>Mercado Pago</b> <span id="ct-meios"></span>.</li><li>O sistema fica pronto na hora: você cria a empresa em branco e sobe as suas planilhas.</li><li>Os vídeos tutoriais mostram cada passo. Precisa de ajuda? Escreva para o nosso e-mail e respondemos em até 1 dia útil.</li>'
+          : passos.dataset.original;
+        $('ct-meios').textContent = assinatura ? '(cartão de crédito, cobrado todo mês)' : '(PIX, cartão em até 6x ou boleto)';
+      }
       aceite.checked = false;
       pagar.dataset.link = link;
       pagar.dataset.plano = plano;

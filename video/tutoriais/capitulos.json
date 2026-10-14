@@ -1,0 +1,457 @@
+{
+ "crm": {
+  "duracao": 177,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.4
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    53.9
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    70.9
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    81.8
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    120.7
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    146.7
+   ]
+  ]
+ },
+ "agenda": {
+  "duracao": 177,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.3
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    53.7
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    70.7
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    81.9
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    120.7
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    147.0
+   ]
+  ]
+ },
+ "juridico": {
+  "duracao": 177,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.5
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    53.7
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    70.7
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    82.2
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    121.1
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    147.1
+   ]
+  ]
+ },
+ "financeiro": {
+  "duracao": 177,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.6
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    53.7
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    70.7
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    81.9
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    120.7
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    146.5
+   ]
+  ]
+ },
+ "gestao": {
+  "duracao": 177,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.3
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    53.4
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    70.5
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    82.0
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    120.8
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    146.7
+   ]
+  ]
+ },
+ "clinica": {
+  "duracao": 177,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.4
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    53.8
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    70.9
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    82.0
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    120.9
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    147.1
+   ]
+  ]
+ },
+ "academia": {
+  "duracao": 177,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.4
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    53.7
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    71.0
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    82.2
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    121.1
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    147.0
+   ]
+  ]
+ },
+ "restaurante": {
+  "duracao": 178,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.6
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    54.2
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    71.2
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    82.3
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    121.2
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    147.4
+   ]
+  ]
+ },
+ "imobiliaria": {
+  "duracao": 179,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.7
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    54.1
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    71.2
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    82.3
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    123.1
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    149.1
+   ]
+  ]
+ },
+ "oficina": {
+  "duracao": 177,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.4
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    53.7
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    70.8
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    81.9
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    120.7
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    146.7
+   ]
+  ]
+ },
+ "obras": {
+  "duracao": 177,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.5
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    53.8
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    70.8
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    81.6
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    120.5
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    147.0
+   ]
+  ]
+ },
+ "pragas": {
+  "duracao": 178,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.6
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    54.3
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    71.3
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    82.7
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    121.5
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    147.8
+   ]
+  ]
+ },
+ "cerimonial": {
+  "duracao": 178,
+  "capitulos": [
+   [
+    "pedido",
+    "Pedir o teste grátis",
+    11.8
+   ],
+   [
+    "conta",
+    "Minha conta e o token de dono",
+    54.4
+   ],
+   [
+    "empresa",
+    "Criar a sua empresa",
+    71.4
+   ],
+   [
+    "planilha",
+    "Subir as suas planilhas",
+    83.1
+   ],
+   [
+    "equipe",
+    "Convidar a sua equipe",
+    122.0
+   ],
+   [
+    "celular",
+    "Usar no celular e pedir ajuda",
+    148.0
+   ]
+  ]
+ }
+}
