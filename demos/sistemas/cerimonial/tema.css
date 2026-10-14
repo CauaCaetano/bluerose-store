@@ -101,3 +101,6 @@
 [data-produto="cerimonial"] .faixa a.cta, [data-produto="cerimonial"] .faixa a.cta:hover { background: #d4af5f; color: #141026; }
 [data-produto="cerimonial"] .entrada .marca b { font-family: var(--serif); font-style: italic; font-size: 20px; }
 [data-produto="cerimonial"] .entrada .marca small { color: var(--ouro); }
+
+/* logo da marca (rosa com alianças) */
+[data-produto="cerimonial"] .marca-logo { width: 40px; height: 40px; object-fit: contain; background: none; box-shadow: none; border-radius: 0; }

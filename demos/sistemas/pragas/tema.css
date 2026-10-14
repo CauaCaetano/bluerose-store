@@ -97,3 +97,6 @@
 /* marca Blue Rose no trilho estreito: só o emblema */
 [data-produto="pragas"] .lat-pe .feito-br { justify-content: center; margin: 8px 4px 0; padding: 6px; border-color: rgba(230, 236, 250, .14); }
 [data-produto="pragas"] .lat-pe .feito-br span { display: none; }
+
+/* logo da marca (rosa com escudo) */
+[data-produto="pragas"] .marca-logo { width: 44px; height: 44px; object-fit: contain; background: none; box-shadow: none; border-radius: 0; }
