@@ -20,11 +20,11 @@ const SITE = 'https://bluerose-store.com/';
 const PLAY = (() => { try { return localStorage.getItem('nexo-play') === '1'; } catch { return false; } })();
 const LOGO = new URL('blue-rose.png', import.meta.url).href, LOGO_NEXO = new URL('linha-nexo.png', import.meta.url).href;
 const SEP = '\u0001';
-// Plano Pro: equipe sem limite (Básico: 5 pessoas além do dono), histórico da equipe, marca da empresa nos links e documentos,
+// Plano Pro: equipe sem limite (Básico: 5 pessoas além do dono), histórico da equipe (os sistemas usam sempre a marca Blue Rose),
 // até 10 empresas por sistema e suporte prioritário. Custa R$ 60 a mais por mês (catálogo a-sis-<app>-pro).
 const LIMITE_BASICO = 5, EXTRA_PRO = 60;
 const SUPORTE = [64, 64, 60, 65, 68, 68, 60, 64, 59, 59, 66, 63, 65].map((c) => String.fromCharCode(c - 11)).join(''); // WhatsApp da Blue Rose (mesmo do site)
-const BENEFICIOS_PRO = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 5 além de você).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['camera', 'Sua marca nos links e documentos', 'O logo da sua empresa nas páginas que o cliente recebe e nos impressos, sem o "Feito com".'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.']];
+const BENEFICIOS_PRO = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 5 além de você).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.']];
 // plano anual: 12 meses com 20% de desconto (catálogo a-sis-<app>[-pro]-anual)
 const anual = (mensal) => Math.round(mensal * 12 * 0.8);
 const reais = (v) => `R$ ${Number(v).toLocaleString('pt-BR')}`;
@@ -438,9 +438,9 @@ export async function iniciarNuvem(app, cfg) {
       if (app.pagina?.id === 'dono') app.render();
     },
     cartaoPro: () => pro
-      ? `<div class="cartao"><div class="cartao-cab"><div><h3>${cfg.produto?.unico ? 'Tudo incluso no seu plano' : 'Plano Pro'}</h3><div class="sub">${cfg.produto?.unico ? 'Equipe sem limite, histórico, sua marca e suporte prioritário' : 'O que a sua empresa tem a mais'}</div></div>${et('Ativo', 'ok')}</div><div class="cartao-corpo col" style="gap:10px">
+      ? `<div class="cartao"><div class="cartao-cab"><div><h3>${cfg.produto?.unico ? 'Tudo incluso no seu plano' : 'Plano Pro'}</h3><div class="sub">${cfg.produto?.unico ? 'Equipe sem limite, histórico e suporte prioritário' : 'O que a sua empresa tem a mais'}</div></div>${et('Ativo', 'ok')}</div><div class="cartao-corpo col" style="gap:10px">
         <div class="entre"><span class="mute-2">Quem fez o quê no sistema</span><button type="button" class="btn" data-acao="atividadeEquipe">${ic('clock')}Histórico da equipe</button></div>
-        ${dono ? `<div class="entre"><span class="mute-2">Logo nas páginas do cliente e nos documentos</span><span class="flex">${db.cfg.marca_logo ? `<img src="${esc(db.cfg.marca_logo)}" alt="Logo" style="height:30px;max-width:90px;object-fit:contain;border-radius:4px">` : ''}<label class="btn">${ic('camera')}${db.cfg.marca_logo ? 'Trocar logo' : 'Enviar logo'}<input type="file" accept="image/png,image/jpeg,image/webp" data-mudar="marcaLogo" hidden></label>${db.cfg.marca_logo ? `<button type="button" class="btn fant ic-so" data-acao="tirarLogo" aria-label="Tirar logo">${ic('trash')}</button>` : ''}</span></div>` : ''}
+
         <div class="entre"><span class="mute-2">Dúvida ou problema? Fale direto com a Blue Rose</span><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${SUPORTE}?text=${encodeURIComponent(`Olá! Sou cliente Pro do ${cfg.nome} (${esp.nome}) e preciso de ajuda com: `)}">${ic('whatsapp-logo')}Suporte prioritário</a></div></div></div>`
       : `<div class="cartao"><div class="cartao-cab"><div><h3>Plano Pro</h3><div class="sub">Para equipes maiores, por R$ ${EXTRA_PRO} a mais por mês</div></div></div><div class="cartao-corpo col" style="gap:8px">
         ${BENEFICIOS_PRO.map(([i, t_, d]) => `<div class="flex" style="gap:10px;align-items:flex-start">${ic(i)}<span><b>${t_}.</b> <span class="mute-2">${d}</span></span></div>`).join('')}
@@ -514,14 +514,6 @@ export async function iniciarNuvem(app, cfg) {
           const porDia = agrupar(l || [], (x) => String(x.atualizado).slice(0, 10));
           modal({ titulo: 'Histórico da equipe', largura: 620, corpo: (l || []).length ? `<div style="max-height:60vh;overflow:auto">${Object.entries(porDia).map(([dia, xs]) => `<h4 style="margin:12px 0 4px">${dataCurta(dia)}</h4><ul class="lista" style="margin:0 -20px">${xs.map((x) => `<li>${av(quem.get(x.autor) || '?')}<div class="cresce"><div class="t corta">${esc(String(nome(x)))}</div><div class="s">${esc(quem.get(x.autor) || 'pessoa que saiu da equipe')} · ${esc(app.colecoes?.[x.colecao]?.singular || x.colecao)} · ${new Date(x.atualizado).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div></div></li>`).join('')}</ul>`).join('')}</div>` : '<p class="mute-2">Nada registrado ainda.</p>', botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }] });
         },
-        marcaLogo: (d, el) => {
-          const arq = el.files?.[0]; if (!arq) return; if (arq.size > 4e6) return avisar('Imagem grande demais (máximo 4 MB)', { tipo: 'erro' });
-          const img = new Image(), url = URL.createObjectURL(arq);
-          img.onload = () => { const k = Math.min(1, 320 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
-            db.cfg.marca_logo = c.toDataURL('image/webp', 0.86); db.gravar(); avisar('Logo salvo. Ele aparece nas páginas do cliente e nos documentos.'); app.render(); };
-          img.onerror = () => avisar('Não consegui abrir essa imagem', { tipo: 'erro' }); img.src = url;
-        },
-        tirarLogo: () => { delete db.cfg.marca_logo; db.gravar(); app.render(); },
         cancelarConvite: async (d) => { await sb.from('nexo_convites').delete().eq('espaco', esp.id).eq('email', d.e); carregarEquipe(); },
         removerMembro: async (d) => { if (!(await confirmar('Remover esta pessoa? Ela perde o acesso na hora.', { rotulo: 'Remover', perigo: true }))) return; await sb.from('nexo_membros').delete().eq('espaco', esp.id).eq('usuario', d.u); carregarEquipe(); },
         importarCSV: (d, el) => {

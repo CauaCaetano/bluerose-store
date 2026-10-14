@@ -451,7 +451,6 @@ function montar(app, cfg) {
     db.salvar = (nome, obj) => (app.podeMexer('salvar') ? salvar(nome, obj) : (setTimeout(() => app.render(), 0), { ...obj }));
     db.apagar = (nome, id) => (app.podeMexer('apagar') ? apagar(nome, id) : (setTimeout(() => app.render(), 0), null));
   }
-  imprimir.logo = () => (app.sessao?.pro && app.db.cfg.marca_logo) || null;
   const site = 'https://bluerose-store.com/';
   const paginas = cfg.paginas.filter((p) => p.id);
   const preco = (v) => moeda(v).replace(',00', '');
@@ -588,7 +587,7 @@ function montar(app, cfg) {
         <div class="campo largo" style="flex-direction:row;justify-content:flex-end"><button type="button" class="btn pri" data-acao="salvarEmpresa">Salvar</button></div></form></div></div>
       <div class="cartao"><div class="cartao-cab"><div><h3>Aparência</h3><div class="sub">Preferências deste navegador</div></div></div><div class="cartao-corpo col" style="gap:14px">
         <div class="entre"><span>Tema</span><div class="grupo-btn"><button type="button" data-acao="tema" aria-pressed="${raiz.dataset.tema !== 'escuro'}">${ic('sun', 'p')}Claro</button><button type="button" data-acao="tema" aria-pressed="${raiz.dataset.tema === 'escuro'}">${ic('moon', 'p')}Escuro</button></div></div>
-        ${a.nuvem ? '' : `<div class="dica">${ic('info')}<span>Na versão contratada, a cor, o logotipo e os cadastros são os da sua empresa, e cada pessoa da equipe tem o próprio acesso.</span></div>`}</div></div>
+        ${a.nuvem ? '' : `<div class="dica">${ic('info')}<span>Na versão contratada, os cadastros são os da sua empresa, e cada pessoa da equipe tem o próprio acesso.</span></div>`}</div></div>
       ${!a.nuvem || a.sessao.gestor ? `<div class="cartao"><div class="cartao-cab"><div><h3>Equipe, cargos e permissões</h3><div class="sub">Ficam no Painel do dono, que só o dono e os administradores veem</div></div></div><div class="cartao-corpo"><div class="entre"><span class="mute-2">Convide pessoas, escolha o cargo e o que cada uma pode ver e editar.</span><a class="btn pri" href="#/dono">${ic('crown')}Abrir o Painel do dono</a></div></div></div>` : ''}
       <div class="cartao"><div class="cartao-cab"><div><h3>Dados</h3><div class="sub">Cópia e restauração</div></div></div><div class="cartao-corpo col" style="gap:10px">
         <div class="entre"><span class="mute-2">Baixar uma cópia de tudo (JSON)</span><button type="button" class="btn" data-acao="exportarDados">${ic('download-simple')}Exportar</button></div>
