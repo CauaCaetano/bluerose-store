@@ -27,11 +27,11 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=31">
+<link rel="stylesheet" href="css/site.css?v=33">
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=5" defer></script>
 <script src="js/leads-config.js?v=6" defer></script>
-<script src="js/site.js?v=14" defer></script>
+<script src="js/site.js?v=16" defer></script>
 <script src="js/orcamento.js?v=2" defer></script>
 <script src="js/planos.js?v=3" defer></script>
 <script src="js/contratar.js?v=7" defer></script>
@@ -111,14 +111,47 @@
     <div class="wrap">
       <div class="prod-cab">
         <div>
-          <span class="eyebrow reveal">Linha Nexo</span>
-          <h2 id="t-prod" class="sec-title reveal">10 sistemas prontos para o seu tipo de negócio.</h2>
+          <span class="eyebrow reveal">Sistemas prontos</span>
+          <h2 id="t-prod" class="sec-title reveal">Sistemas prontos para o seu tipo de negócio.</h2>
           <p class="sec-lede reveal">Cada um já vem pronto para o seu ramo. Teste 7 dias grátis com os seus dados. Se servir, colocamos a sua marca e os seus cadastros em até 10 dias úteis.</p>
         </div>
         <a class="btn btn-ghost reveal" href="sistemas.html">Comparar os sistemas <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>
       </div>
-      <div class="prod">
-        <article class="prod-c reveal" style="--sis:#5b4fe0;--i:0">
+      <div class="prod-filtro reveal" role="group" aria-label="Escolher a categoria de sistemas"><button type="button" data-pcat="destaque" aria-pressed="true">Destaques</button><button type="button" data-pcat="nexo" aria-pressed="false"><img src="img/linha-nexo.png" alt="" width="18" height="18">Linha Nexo <small>10</small></button><button type="button" data-pcat="outros" aria-pressed="false">Outros sistemas <small>3</small></button></div>
+      <p class="prod-cat-info" data-info="nexo" hidden><img src="img/linha-nexo.png" alt="" width="40" height="40"><span><b>Linha Nexo</b> Dez sistemas com a mesma base: CRM, agenda, financeiro, estoque, jurídico, clínica, academia, restaurante, imobiliária e oficina. Preço fixo para a empresa toda.</span></p>
+      <p class="prod-cat-info" data-info="outros" hidden><span><b>Outros sistemas</b> Marcas próprias da Blue Rose para nichos que pedem um jeito específico de trabalhar: obras, casamentos e controle de pragas. Mesma nuvem e o mesmo teste grátis de 7 dias.</span></p>
+      <div class="prod prod-cat so-destaque">
+        <article class="prod-c reveal" data-cat="outros" hidden style="--sis:#1556c0">
+          <a class="prod-foto" href="demos/sistemas/obras/"><img src="img/sistemas/obras.webp" width="1200" height="750" loading="lazy" alt="Tela do RoseConstruct"></a>
+          <div class="prod-txt">
+            <span class="prod-tag">Obras e reformas</span>
+            <h3><a href="roseconstruct.html">RoseConstruct</a></h3>
+            <p>Para empreiteiros e empresas de reforma.</p>
+            <p class="prod-preco"><b>R$&nbsp;119</b>/mês <span>plano único com tudo incluso, ou R$&nbsp;1.142 por ano</span></p>
+            <div class="prod-links"><a href="app/obras/" data-teste="obras" data-teste-nome="RoseConstruct" data-teste-mensal="119">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/obras/">Demonstração</a><a href="roseconstruct.html">Detalhes</a></div>
+          </div>
+        </article>
+        <article class="prod-c reveal" data-cat="outros" hidden style="--sis:#5b6633">
+          <a class="prod-foto" href="demos/sistemas/cerimonial/"><img src="img/sistemas/cerimonial.webp" width="1200" height="750" loading="lazy" alt="Tela do Sim, aceito"></a>
+          <div class="prod-txt">
+            <span class="prod-tag">Casamentos e eventos</span>
+            <h3><a href="sim-aceito.html">Sim, aceito</a></h3>
+            <p>Para assessoria e cerimonial de casamentos.</p>
+            <p class="prod-preco"><b>R$&nbsp;89</b>/mês <span>ou R$&nbsp;854 por ano</span></p>
+            <div class="prod-links"><a href="app/cerimonial/" data-teste="cerimonial" data-teste-nome="Sim, aceito" data-teste-mensal="89">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/cerimonial/">Demonstração</a><a href="sim-aceito.html">Detalhes</a></div>
+          </div>
+        </article>
+        <article class="prod-c reveal" data-cat="outros" hidden style="--sis:#1f6a46">
+          <a class="prod-foto" href="demos/sistemas/pragas/"><img src="img/sistemas/pragas.webp" width="1200" height="750" loading="lazy" alt="Tela do Isca"></a>
+          <div class="prod-txt">
+            <span class="prod-tag">Controle de pragas</span>
+            <h3><a href="isca.html">Isca</a></h3>
+            <p>Para dedetizadoras e controle de pragas.</p>
+            <p class="prod-preco"><b>R$&nbsp;99</b>/mês <span>ou R$&nbsp;950 por ano</span></p>
+            <div class="prod-links"><a href="app/pragas/" data-teste="pragas" data-teste-nome="Isca" data-teste-mensal="99">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/pragas/">Demonstração</a><a href="isca.html">Detalhes</a></div>
+          </div>
+        </article>
+        <article class="prod-c reveal" data-cat="nexo" hidden style="--sis:#5b4fe0;--i:0">
           <a class="prod-foto tem-video" href="demos/sistemas/crm/" data-video="crm" data-video-nome="Nexo CRM · como funciona" data-video-demo="demos/sistemas/crm/"><img src="img/sistemas/crm.webp" width="1200" height="750" loading="lazy" alt="Tela do Nexo CRM"><span class="play"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg><span class="vh">Vídeo de </span>1:36</span></a>
           <div class="prod-txt">
             <span class="prod-tag">Funil de vendas</span>
@@ -128,7 +161,7 @@
             <div class="prod-links"><a href="app/crm/" data-teste="crm" data-teste-nome="Nexo CRM" data-teste-mensal="99">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/crm/">Demonstração</a><a href="nexo-crm.html">Detalhes</a></div>
           </div>
         </article>
-        <article class="prod-c reveal" style="--sis:#c2417a;--i:1">
+        <article class="prod-c reveal" data-cat="nexo" hidden style="--sis:#c2417a;--i:1">
           <a class="prod-foto tem-video" href="demos/sistemas/agenda/" data-video="agenda" data-video-nome="Nexo Agenda · como funciona" data-video-demo="demos/sistemas/agenda/"><img src="img/sistemas/agenda.webp" width="1200" height="750" loading="lazy" alt="Tela do Nexo Agenda"><span class="play"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg><span class="vh">Vídeo de </span>1:16</span></a>
           <div class="prod-txt">
             <span class="prod-tag">Agenda e atendimento</span>
@@ -138,7 +171,7 @@
             <div class="prod-links"><a href="app/agenda/" data-teste="agenda" data-teste-nome="Nexo Agenda" data-teste-mensal="79">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/agenda/">Demonstração</a><a href="nexo-agenda.html">Detalhes</a></div>
           </div>
         </article>
-        <article class="prod-c reveal" style="--sis:#0b6fb8;--i:2">
+        <article class="prod-c reveal" data-cat="nexo" data-destaque style="--sis:#0b6fb8;--i:2">
           <a class="prod-foto tem-video" href="demos/sistemas/financeiro/" data-video="financeiro" data-video-nome="Nexo Financeiro · como funciona" data-video-demo="demos/sistemas/financeiro/"><img src="img/sistemas/financeiro.webp" width="1200" height="750" loading="lazy" alt="Tela do Nexo Financeiro"><span class="play"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg><span class="vh">Vídeo de </span>1:06</span></a>
           <div class="prod-txt">
             <span class="prod-tag">Caixa e ordens de serviço</span>
@@ -148,7 +181,7 @@
             <div class="prod-links"><a href="app/financeiro/" data-teste="financeiro" data-teste-nome="Nexo Financeiro" data-teste-mensal="109">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/financeiro/">Demonstração</a><a href="nexo-financeiro.html">Detalhes</a></div>
           </div>
         </article>
-        <article class="prod-c reveal" style="--sis:#4646d8;--i:3">
+        <article class="prod-c reveal" data-cat="nexo" data-destaque style="--sis:#4646d8;--i:3">
           <a class="prod-foto tem-video" href="demos/sistemas/gestao/" data-video="gestao" data-video-nome="Nexo Gestão · como funciona" data-video-demo="demos/sistemas/gestao/"><img src="img/sistemas/gestao.webp" width="1200" height="750" loading="lazy" alt="Tela do Nexo Gestão"><span class="play"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg><span class="vh">Vídeo de </span>1:15</span></a>
           <div class="prod-txt">
             <span class="prod-tag">Estoque, compras e vendas</span>
@@ -158,7 +191,7 @@
             <div class="prod-links"><a href="app/gestao/" data-teste="gestao" data-teste-nome="Nexo Gestão" data-teste-mensal="129">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/gestao/">Demonstração</a><a href="nexo-gestao.html">Detalhes</a></div>
           </div>
         </article>
-        <article class="prod-c reveal" style="--sis:#0f766e;--i:0">
+        <article class="prod-c reveal" data-cat="nexo" data-destaque style="--sis:#0f766e;--i:0">
           <a class="prod-foto tem-video" href="demos/sistemas/juridico/" data-video="juridico" data-video-nome="Nexo Jurídico · como funciona" data-video-demo="demos/sistemas/juridico/"><img src="img/sistemas/juridico.webp" width="1200" height="750" loading="lazy" alt="Tela do Nexo Jurídico"><span class="play"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg><span class="vh">Vídeo de </span>1:15</span></a>
           <div class="prod-txt">
             <span class="prod-tag">Processos e prazos</span>
@@ -168,7 +201,7 @@
             <div class="prod-links"><a href="app/juridico/" data-teste="juridico" data-teste-nome="Nexo Jurídico" data-teste-mensal="149">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/juridico/">Demonstração</a><a href="nexo-juridico.html">Detalhes</a></div>
           </div>
         </article>
-        <article class="prod-c reveal" style="--sis:#0e7490;--i:1">
+        <article class="prod-c reveal" data-cat="nexo" hidden style="--sis:#0e7490;--i:1">
           <a class="prod-foto tem-video" href="demos/sistemas/clinica/" data-video="clinica" data-video-nome="Nexo Clínica · como funciona" data-video-demo="demos/sistemas/clinica/"><img src="img/sistemas/clinica.webp" width="1200" height="750" loading="lazy" alt="Tela do Nexo Clínica"><span class="play"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg><span class="vh">Vídeo de </span>1:22</span></a>
           <div class="prod-txt">
             <span class="prod-tag">Agenda médica e prontuário</span>
@@ -178,7 +211,7 @@
             <div class="prod-links"><a href="app/clinica/" data-teste="clinica" data-teste-nome="Nexo Clínica" data-teste-mensal="109">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/clinica/">Demonstração</a><a href="nexo-clinica.html">Detalhes</a></div>
           </div>
         </article>
-        <article class="prod-c reveal" style="--sis:#b45309;--i:2">
+        <article class="prod-c reveal" data-cat="nexo" hidden style="--sis:#b45309;--i:2">
           <a class="prod-foto tem-video" href="demos/sistemas/restaurante/" data-video="restaurante" data-video-nome="Nexo Restaurante · como funciona" data-video-demo="demos/sistemas/restaurante/"><img src="img/sistemas/restaurante.webp" width="1200" height="750" loading="lazy" alt="Tela do Nexo Restaurante"><span class="play"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg><span class="vh">Vídeo de </span>1:20</span></a>
           <div class="prod-txt">
             <span class="prod-tag">Mesas, delivery e cozinha</span>
@@ -188,7 +221,7 @@
             <div class="prod-links"><a href="app/restaurante/" data-teste="restaurante" data-teste-nome="Nexo Restaurante" data-teste-mensal="89">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/restaurante/">Demonstração</a><a href="nexo-restaurante.html">Detalhes</a></div>
           </div>
         </article>
-        <article class="prod-c reveal" style="--sis:#ea580c;--i:3">
+        <article class="prod-c reveal" data-cat="nexo" hidden style="--sis:#ea580c;--i:3">
           <a class="prod-foto tem-video" href="demos/sistemas/academia/" data-video="academia" data-video-nome="Nexo Academia · como funciona" data-video-demo="demos/sistemas/academia/"><img src="img/sistemas/academia.webp" width="1200" height="750" loading="lazy" alt="Tela do Nexo Academia"><span class="play"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg><span class="vh">Vídeo de </span>1:20</span></a>
           <div class="prod-txt">
             <span class="prod-tag">Alunos e mensalidades</span>
@@ -198,7 +231,7 @@
             <div class="prod-links"><a href="app/academia/" data-teste="academia" data-teste-nome="Nexo Academia" data-teste-mensal="99">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/academia/">Demonstração</a><a href="nexo-academia.html">Detalhes</a></div>
           </div>
         </article>
-        <article class="prod-c reveal" style="--sis:#15803d;--i:0">
+        <article class="prod-c reveal" data-cat="nexo" hidden style="--sis:#15803d;--i:0">
           <a class="prod-foto tem-video" href="demos/sistemas/imobiliaria/" data-video="imobiliaria" data-video-nome="Nexo Imobiliária · como funciona" data-video-demo="demos/sistemas/imobiliaria/"><img src="img/sistemas/imobiliaria.webp" width="1200" height="750" loading="lazy" alt="Tela do Nexo Imobiliária"><span class="play"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg><span class="vh">Vídeo de </span>1:14</span></a>
           <div class="prod-txt">
             <span class="prod-tag">Imóveis, clientes e aluguéis</span>
@@ -208,7 +241,7 @@
             <div class="prod-links"><a href="app/imobiliaria/" data-teste="imobiliaria" data-teste-nome="Nexo Imobiliária" data-teste-mensal="129">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/imobiliaria/">Demonstração</a><a href="nexo-imobiliaria.html">Detalhes</a></div>
           </div>
         </article>
-        <article class="prod-c reveal" style="--sis:#475569;--i:1">
+        <article class="prod-c reveal" data-cat="nexo" hidden style="--sis:#475569;--i:1">
           <a class="prod-foto tem-video" href="demos/sistemas/oficina/" data-video="oficina" data-video-nome="Nexo Oficina · como funciona" data-video-demo="demos/sistemas/oficina/"><img src="img/sistemas/oficina.webp" width="1200" height="750" loading="lazy" alt="Tela do Nexo Oficina"><span class="play"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-play"/></svg><span class="vh">Vídeo de </span>1:06</span></a>
           <div class="prod-txt">
             <span class="prod-tag">Pátio e ordens de serviço</span>
@@ -218,8 +251,13 @@
             <div class="prod-links"><a href="app/oficina/" data-teste="oficina" data-teste-nome="Nexo Oficina" data-teste-mensal="89">7 dias grátis <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a href="demos/sistemas/oficina/">Demonstração</a><a href="nexo-oficina.html">Detalhes</a></div>
           </div>
         </article>
+        <a class="prod-c prod-mais reveal" data-cat="mais" data-destaque href="#produtos" data-ir-cat="nexo">
+          <img src="img/linha-nexo.png" alt="" width="72" height="72">
+          <b>Ver a Linha Nexo completa</b>
+          <span>10 sistemas: CRM, agenda, financeiro, estoque, jurídico, clínica, academia, restaurante, imobiliária e oficina.</span>
+          <em>Ver os 10 sistemas <svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></em>
+        </a>
       </div>
-      <div class="app-play tambem-br reveal"><div class="app-play-txt"><b>Também da Blue Rose</b><span>Sistemas com marca própria para nichos: <a href="canteiro.html">Canteiro</a> para obras e reformas, <a href="sim-aceito.html">Sim, aceito</a> para casamentos e <a href="isca.html">Isca</a> para controle de pragas. Mesmo teste grátis de 7 dias.</span></div><a class="btn btn-ghost" href="sistemas.html#tambem">Conhecer os três</a></div>
       <div class="app-play reveal" id="app-android"><div class="app-play-txt"><b>App Linha Nexo para Android</b><span>Os sistemas da Linha Nexo num app só, entrando com a mesma conta do site. Está chegando à Play Store.</span></div><a class="play-badge" data-play href="sistemas.html#app-android" aria-disabled="true" title="O app chega em breve à Play Store"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.2v17.6c0 .6.6 1 1.1.7l14.6-8.8a.8.8 0 0 0 0-1.4L6.1 2.5C5.6 2.2 5 2.6 5 3.2Z" fill="currentColor"/></svg><span><small data-play-rot>Em breve no</small><b>Google Play</b></span></a></div>
     </div>
   </section>

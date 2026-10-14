@@ -1,38 +1,38 @@
-/* Canteiro · identidade própria: concreto claro, laranja de segurança, menu no topo (no celular, barra embaixo), letras fortes */
+/* RoseConstruct · identidade própria: azuis da logo (rosa e prédios), menu no topo (no celular, barra embaixo), letras fortes */
 :root[data-produto="obras"] {
-  --acc: #c84a0c;
+  --acc: #1556c0;
   --acc-tx: #fff;
-  --laranja: #f26b1d;
-  --carvao: #1c1a17;
-  --bg: #efede8;
-  --lateral: #e4e1d9;
+  --laranja: #1e78d6;
+  --carvao: #0d1f3c;
+  --bg: #eef2f8;
+  --lateral: #e2e9f4;
   --painel: #ffffff;
-  --painel-2: #faf9f6;
-  --hover: rgba(28, 26, 23, 0.05);
-  --ativo: rgba(28, 26, 23, 0.08);
-  --borda: #dedad2;
-  --borda-2: #cbc5b9;
-  --tx: #1c1a17;
-  --tx-2: #4e4a42;
-  --tx-3: #6f6a5f;
-  --info: #c84a0c; --info-bg: #fdeee4;
-  --neutro-bg: #ebe8e1;
+  --painel-2: #f7f9fd;
+  --hover: rgba(13, 31, 60, 0.05);
+  --ativo: rgba(13, 31, 60, 0.08);
+  --borda: #d6deea;
+  --borda-2: #c2cde0;
+  --tx: #0d1f3c;
+  --tx-2: #44526a;
+  --tx-3: #66738a;
+  --info: #1556c0; --info-bg: #e6effc;
+  --neutro-bg: #e6ebf3;
   --forte: 'Bahnschrift', 'Barlow Semi Condensed', 'Arial Narrow', 'Segoe UI', sans-serif;
-  --sombra-1: 0 1px 0 rgba(28, 26, 23, .06);
-  --sombra-2: 0 2px 0 rgba(28, 26, 23, .05), 0 10px 24px -12px rgba(28, 26, 23, .25);
+  --sombra-1: 0 1px 0 rgba(13, 31, 60, .06);
+  --sombra-2: 0 2px 0 rgba(13, 31, 60, .05), 0 10px 24px -12px rgba(13, 31, 60, .25);
   --r1: 4px; --r2: 6px; --r3: 8px;
   --barra: 60px;
 }
 :root[data-produto="obras"][data-tema="escuro"] {
-  --acc: #ff8a3d; --acc-tx: #1c1a17;
-  --bg: #131210; --lateral: #181613; --painel: #1c1a17; --painel-2: #211f1b; --borda: #2f2c27; --borda-2: #3d3a33;
-  --tx: #f1eee8; --tx-2: #bdb7ab; --tx-3: #918b7f; --info: #ff8a3d; --info-bg: rgba(255, 138, 61, .14); --neutro-bg: #29261f;
+  --acc: #4d9bff; --acc-tx: #071328;
+  --bg: #0a1220; --lateral: #0d1628; --painel: #0d1f3c; --painel-2: #152238; --borda: #23324d; --borda-2: #2e4060;
+  --tx: #e9effa; --tx-2: #aebbd2; --tx-3: #8392ad; --info: #4d9bff; --info-bg: rgba(77, 155, 255, .14); --neutro-bg: #1a2740;
 }
 [data-produto="obras"] body { font-size: 14px; }
 [data-produto="obras"] .faixa { background: var(--carvao); }
 [data-produto="obras"] .btn { font-weight: 600; }
-[data-produto="obras"] .btn.pri { background: var(--acc); border-color: var(--acc); box-shadow: 0 3px 0 #8f3507; }
-[data-produto="obras"] .btn.pri:active { transform: translateY(2px); box-shadow: 0 1px 0 #8f3507; }
+[data-produto="obras"] .btn.pri { background: var(--acc); border-color: var(--acc); box-shadow: 0 3px 0 #0b3a85; }
+[data-produto="obras"] .btn.pri:active { transform: translateY(2px); box-shadow: 0 1px 0 #0b3a85; }
 [data-produto="obras"] .topo h1, [data-produto="obras"] .cartao-cab h3, [data-produto="obras"] .gaveta h2 { font-family: var(--forte); font-weight: 700; letter-spacing: .01em; }
 [data-produto="obras"] .topo h1 { font-size: 18px; text-transform: uppercase; }
 [data-produto="obras"] .cartao-cab h3 { font-size: 16px; text-transform: uppercase; }
@@ -40,7 +40,7 @@
 
 /* menu no topo (computador) */
 [data-produto="obras"] .lat {
-  color-scheme: dark; --tx: #f4f1ea; --tx-2: #c9c3b6; --tx-3: #9c958a; --hover: rgba(255, 255, 255, .07); --painel: rgba(255, 255, 255, .08); --borda: rgba(255, 255, 255, .12); --neutro-bg: rgba(255, 255, 255, .12);
+  color-scheme: dark; --tx: #eef3fb; --tx-2: #c9c3b6; --tx-3: #9c958a; --hover: rgba(255, 255, 255, .07); --painel: rgba(255, 255, 255, .08); --borda: rgba(255, 255, 255, .12); --neutro-bg: rgba(255, 255, 255, .12);
   background: var(--carvao); color: var(--tx);
 }
 [data-produto="obras"] .lat .marca b { color: #fff; font-family: var(--forte); font-size: 19px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
@@ -79,7 +79,7 @@
 .cn-hoje h2 { font-family: var(--forte); font-size: 26px; font-weight: 700; text-transform: uppercase; letter-spacing: .01em; margin-right: auto; line-height: 1.05; }
 .cn-hoje h2 small { display: block; font-size: 13px; font-weight: 500; text-transform: none; color: var(--tx-3); letter-spacing: 0; font-family: var(--f); }
 .cn-hoje .btn { height: 42px; padding: 0 16px; font-size: 14px; }
-.cn-num { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; background: var(--carvao); color: #f4f1ea; border-radius: 8px; overflow: hidden; }
+.cn-num { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; background: var(--carvao); color: #eef3fb; border-radius: 8px; overflow: hidden; }
 .cn-num div { padding: 14px 18px; border-left: 1px solid rgba(255, 255, 255, .1); }
 .cn-num div:first-child { border-left: 0; }
 .cn-num b { display: block; font-family: var(--forte); font-size: 26px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
@@ -89,14 +89,14 @@
 .cn-obra { background: var(--painel); border: 1px solid var(--borda); border-radius: 8px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; transition: transform .18s var(--ease), box-shadow .18s var(--ease); }
 .cn-obra:hover { transform: translateY(-2px); box-shadow: var(--sombra-2); }
 .cn-capa { position: relative; height: 112px; padding: 14px 16px; color: #fff; display: flex; flex-direction: column; justify-content: space-between;
-  background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .05) 0 14px, transparent 14px 28px), linear-gradient(135deg, #2a2722, #1c1a17); }
+  background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .05) 0 14px, transparent 14px 28px), linear-gradient(135deg, #2a2722, #0d1f3c); }
 .cn-capa.foto { background-size: cover; background-position: center; }
 .cn-capa.foto::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, .15), rgba(0, 0, 0, .65)); }
 .cn-capa > * { position: relative; }
 .cn-capa .pc { font-family: var(--forte); font-size: 40px; font-weight: 700; line-height: 1; }
 .cn-capa .pc small { font-size: 16px; opacity: .7; }
 .cn-capa .et { align-self: flex-start; }
-.cn-capa .agora { font-size: 12.5px; color: #f7d3bd; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.cn-capa .agora { font-size: 12.5px; color: #c8dcf7; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
 .cn-corpo { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .cn-corpo .t { font-family: var(--forte); font-size: 17px; font-weight: 700; line-height: 1.15; }
 .cn-corpo .s { font-size: 12.5px; color: var(--tx-3); }
@@ -108,7 +108,7 @@
 :root[data-tema="escuro"] .cn-etapas i.f { background: #e9e4da; }
 .cn-pe { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; font-size: 12.5px; }
 .cn-pe b { font-variant-numeric: tabular-nums; }
-.cn-fab { display: none; position: fixed; z-index: 50; right: 16px; bottom: calc(80px + env(safe-area-inset-bottom)); height: 54px; padding: 0 20px; border-radius: 27px; border: 0; align-items: center; gap: 8px; background: var(--laranja); color: var(--carvao); font: 700 15px var(--forte); text-transform: uppercase; letter-spacing: .03em; box-shadow: 0 10px 24px -8px rgba(200, 74, 12, .8); cursor: pointer; }
+.cn-fab { display: none; position: fixed; z-index: 50; right: 16px; bottom: calc(80px + env(safe-area-inset-bottom)); height: 54px; padding: 0 20px; border-radius: 27px; border: 0; align-items: center; gap: 8px; background: var(--laranja); color: var(--carvao); font: 700 15px var(--forte); text-transform: uppercase; letter-spacing: .03em; box-shadow: 0 10px 24px -8px rgba(21, 86, 192, .8); cursor: pointer; }
 .cn-fab .ic { width: 22px; height: 22px; }
 @media (max-width: 900px) {
   .cn-num { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -141,12 +141,15 @@
 .cn-g-etapa > span { font-size: 12.5px; color: var(--tx-2); padding-left: 14px; }
 .cn-g-trilho { position: relative; height: 16px; border-radius: 4px; background: repeating-linear-gradient(90deg, transparent 0 calc(100% / 8 - 1px), var(--borda) calc(100% / 8 - 1px) calc(100% / 8)); }
 .cn-g-trilho b { position: absolute; top: 3px; height: 10px; border-radius: 3px; background: color-mix(in srgb, var(--tx-3) 45%, transparent); }
-.cn-g-trilho b.and { background: var(--laranja, #f26b1d); }
+.cn-g-trilho b.and { background: var(--laranja, #1e78d6); }
 .cn-g-trilho b.ok { background: #2e7d4f; }
 .cn-g-trilho b.er { background: #c0392b; }
-.cn-g-trilho b.cn-g-total { top: 1px; height: 14px; background: color-mix(in srgb, var(--laranja, #f26b1d) 22%, transparent); border: 1.5px solid var(--laranja, #f26b1d); }
+.cn-g-trilho b.cn-g-total { top: 1px; height: 14px; background: color-mix(in srgb, var(--laranja, #1e78d6) 22%, transparent); border: 1.5px solid var(--laranja, #1e78d6); }
 .cn-g-trilho b.cn-g-total.er { border-color: #c0392b; background: color-mix(in srgb, #c0392b 15%, transparent); }
 .cn-g-hoje { position: absolute; top: -4px; bottom: -4px; left: var(--hoje); width: 2px; background: #2563eb; z-index: 1; }
 .cn-g-leg { display: flex !important; flex-wrap: wrap; gap: 14px; margin-top: 14px; font-size: 12px; color: var(--tx-3); }
 .cn-g-leg i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; margin-right: 6px; background: color-mix(in srgb, var(--tx-3) 45%, transparent); }
-.cn-g-leg i.ok { background: #2e7d4f; } .cn-g-leg i.and { background: var(--laranja, #f26b1d); } .cn-g-leg i.er { background: #c0392b; } .cn-g-leg i.hj { width: 2px; height: 12px; background: #2563eb; }
+.cn-g-leg i.ok { background: #2e7d4f; } .cn-g-leg i.and { background: var(--laranja, #1e78d6); } .cn-g-leg i.er { background: #c0392b; } .cn-g-leg i.hj { width: 2px; height: 12px; background: #2563eb; }
+/* logo do RoseConstruct: emblema em fundo branco e o nome como na marca (Rose + Construct) */
+[data-produto="obras"] .marca-logo { background: #fff; padding: 3px; border-radius: 9px; width: 36px; height: 36px; object-fit: contain; }
+[data-produto="obras"] .lat .marca b, [data-produto="obras"] .entrada .marca b { text-transform: none; letter-spacing: -.01em; }

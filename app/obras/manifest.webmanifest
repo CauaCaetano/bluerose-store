@@ -1,6 +1,6 @@
 {
- "name": "Canteiro",
- "short_name": "Canteiro",
+ "name": "RoseConstruct",
+ "short_name": "RoseConstruct",
  "description": "Reformas e obras: etapas pagas por PIX, diário com fotos, equipe e compras",
  "lang": "pt-BR",
  "id": "/app/obras/",
@@ -8,8 +8,8 @@
  "scope": "./",
  "display": "standalone",
  "orientation": "any",
- "background_color": "#efede8",
- "theme_color": "#1c1a17",
+ "background_color": "#eef2f8",
+ "theme_color": "#0d1f3c",
  "icons": [
   {
    "src": "icone-192.png",

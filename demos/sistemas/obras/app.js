@@ -1,4 +1,4 @@
-// Canteiro · reformas e obras: etapas com pagamento, diário com fotos, equipe e diárias, compras, serviços extras e a página do dono da obra.
+// RoseConstruct · gestão inteligente de obras: etapas com pagamento, diário com fotos, equipe e diárias, compras, serviços extras e a página do dono da obra.
 // Gestão: orçamento por itens com aprovação do cliente, cronograma, checklist de qualidade, terceirizados, ferramentas, depósito de sobras e garantia pós-obra.
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, diasEntre,
@@ -349,7 +349,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'obras', nome: 'Canteiro', sub: 'Reformas e obras', marcaSub: 'Reformas e obras', logo: new URL('logo.svg', import.meta.url).href, produto: { mensal: 119, unico: true }, cor: '#c84a0c', icone: 'house-line', empresa: 'Reforma Certa · Davi Nunes', conta: 'Reformas residenciais · Belo Horizonte',
+  id: 'obras', nome: 'RoseConstruct', sub: 'Gestão inteligente de obras', marcaSub: 'Gestão inteligente de obras', logo: new URL('logo.png', import.meta.url).href, produto: { mensal: 119, unico: true }, cor: '#c84a0c', icone: 'house-line', empresa: 'Reforma Certa · Davi Nunes', conta: 'Reformas residenciais · Belo Horizonte',
   semente, colecoes, fichas, buscaDica: 'obras e clientes',
   portal: {
     obra: {

@@ -18,7 +18,7 @@ const SITE = 'https://bluerose-store.com/';
 // Dentro do app da Google Play (Linha Nexo) não há venda nem teste com cartão: a regra de pagamentos da loja
 // não permite levar a compra para fora. O app abre /app/play/?origem=play, que marca este aparelho.
 const PLAY = (() => { try { return localStorage.getItem('nexo-play') === '1'; } catch { return false; } })();
-const LOGO = new URL('blue-rose.png', import.meta.url).href;
+const LOGO = new URL('blue-rose.png', import.meta.url).href, LOGO_NEXO = new URL('linha-nexo.png', import.meta.url).href;
 const SEP = '\u0001';
 // Plano Pro: equipe sem limite (Básico: 8 pessoas além do dono), histórico da equipe, marca da empresa nos links e documentos,
 // até 10 empresas por sistema e suporte prioritário. Custa R$ 60 a mais por mês (catálogo a-sis-<app>-pro).
@@ -106,7 +106,7 @@ class BancoNuvem extends Banco {
 // ---------------------------------------------------------------- telas de entrada
 function tela(cfg, conteudo) {
   document.body.innerHTML = `<div class="entrada"><div class="entrada-caixa">
-    <div class="marca" style="padding:0 0 18px"><img class="marca-logo" src="${cfg.logo || LOGO}" alt="${cfg.logo ? esc(cfg.nome) : 'Blue Rose'}" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.marcaSub || `Blue Rose · ${cfg.sub}`)}</small></div></div>
+    <div class="marca" style="padding:0 0 18px"><img class="marca-logo" src="${cfg.logo || LOGO_NEXO}" alt="${cfg.logo ? esc(cfg.nome) : 'Blue Rose'}" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.marcaSub || `Blue Rose · ${cfg.sub}`)}</small></div></div>
     ${conteudo}</div><p class="entrada-pe"><a class="entrada-br" href="${SITE}" target="_blank" rel="noopener"><img src="${LOGO}" alt="" width="18" height="18">Blue Rose Express</a> Seus dados ficam guardados com segurança e só a sua equipe tem acesso. <a href="${SITE}privacidade.html" target="_blank" rel="noopener">Privacidade</a> · <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos</a></p></div>`;
   const f = document.querySelector('.entrada form'); f?.querySelector('input')?.focus();
   return f;
