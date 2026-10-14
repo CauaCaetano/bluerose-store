@@ -412,11 +412,19 @@
   VirtualAssistant.prototype.estado = function (e, texto, fala) {
     if (texto) this.status.textContent = texto;
     var self = this, parado = function () { return self.painel.hidden ? 'idle' : 'listening'; };
-    clearTimeout(this.voltaT);
+    (this.falaTs || []).forEach(clearTimeout);
+    this.falaTs = [];
     if (!fala) { if (this.anim) this.anim.definir(e === 'minimized' ? 'idle' : e); return; }
-    if (this.anim) this.anim.definir(e);
-    this.voltaT = setTimeout(function () { if (self.anim) self.anim.definir(parado()); }, tempoDeFala(fala));
+    // durante a fala ele alterna os gestos: mão aberta apresentando e dedo para cima no ponto principal
+    var total = tempoDeFala(fala), seq = SEQUENCIAS[e] || [e];
+    if (total < 2600) seq = seq.slice(0, 1);
+    var parte = total / seq.length;
+    seq.forEach(function (est, i) {
+      self.falaTs.push(setTimeout(function () { if (self.anim) self.anim.definir(est); }, Math.round(i * parte)));
+    });
+    this.falaTs.push(setTimeout(function () { if (self.anim) self.anim.definir(parado()); }, total));
   };
+  var SEQUENCIAS = { explaining: ['explaining', 'idea'], idea: ['idea', 'explaining', 'idea'], confident: ['confident', 'idea'] };
 
   VirtualAssistant.prototype.reagir = function () { /* passar o mouse só levanta o personagem (CSS); não troca a pose */ };
 
