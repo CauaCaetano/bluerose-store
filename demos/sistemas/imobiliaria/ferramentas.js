@@ -46,3 +46,15 @@ export const LADOS = {
       return ldItem(esc(c.nome || ''), `${v.hora || ''} · ${esc(titulo(im))}`, { dir: zap(c.telefone, `Olá, ${primeiro(c.nome)}! Confirmando a visita amanhã, ${dataCurta(amanha)}, às ${v.hora}, no imóvel ${im?.endereco || ''} (${im?.bairro || ''}). Posso confirmar?`, 'Confirmar') }); }), 'Nenhuma visita marcada para amanhã.'));
   },
 };
+
+// cada ferramenta como item próprio no menu da esquerda: [id, rótulo, ícone, aba de origem, começo do título do bloco]
+export const ITENS = [
+  ['financiamento', 'Simular financiamento', 'bank', 'imoveis', 'Simular'],
+  ['custos', 'Custos da compra', 'receipt', 'imoveis', 'Custos'],
+  ['comissao', 'Comissão', 'hand-coins', 'imoveis', 'Comissão'],
+  ['reajuste', 'Reajuste do aluguel', 'trend-up', 'locacao', 'Reajuste'],
+  ['parados', 'Imóveis parados', 'hourglass', 'imoveis', 'Disponíveis'],
+  ['vencendo', 'Contratos vencendo', 'calendar-dots', 'locacao', 'Contratos'],
+  ['atraso', 'Aluguéis em atraso', 'warning', 'locacao', 'Aluguéis em atraso'],
+  ['visitas', 'Confirmar visitas', 'calendar-check', 'visitas', 'Confirmar as visitas'],
+];

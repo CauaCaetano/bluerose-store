@@ -54,3 +54,15 @@ export const LADOS = {
       dir: zap(c.telefone, `Oi, ${primeiro(c.nome)}! Aqui é do ${a.empresa}. Faz tempo que você não pede com a gente, e a gente sente falta! No seu próximo pedido pelo WhatsApp, a sobremesa é por nossa conta. É só responder esta mensagem.`, 'Convidar') })), 'Nenhum cliente sumido.')}`);
   },
 };
+
+// cada ferramenta como item próprio no menu da esquerda: [id, rótulo, ícone, aba de origem, começo do título do bloco]
+export const ITENS = [
+  ['cmv', 'Preço pelo CMV', 'calculator', 'cardapio', 'Preço pelo CMV'],
+  ['rendimento', 'Rendimento da receita', 'cooking-pot', 'cardapio', 'Rendimento'],
+  ['conta', 'Dividir a conta', 'users-three', 'mesas', 'Dividir a conta'],
+  ['entrega', 'Taxa de entrega', 'motorcycle', 'delivery', 'Taxa de entrega'],
+  ['compras', 'Lista de compras', 'shopping-cart', 'estoque', 'Lista de compras'],
+  ['vendidos', 'Mais vendidos', 'trophy', 'relatorios', 'Mais vendidos'],
+  ['parados', 'Pratos sem venda', 'hourglass', 'cardapio', 'Sem venda'],
+  ['sumidos', 'Clientes sumidos', 'megaphone', 'clientes', 'Clientes sumidos'],
+];

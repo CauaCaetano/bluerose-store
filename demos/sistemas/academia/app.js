@@ -4,8 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, kpis, barras, linhas, rosca, barrasH, calGrade, kanban, DIAS, DIAS_L, telLink, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
-import { LADOS as FERR } from './ferramentas.js';
-import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 
 const FORMAS = ['PIX', 'Cartão de crédito', 'Cartão recorrente', 'Cartão de débito', 'Dinheiro'];
 const ETAPAS = [['agendada', 'Aula marcada', '#94a3b8'], ['fez', 'Fez a aula', '#3b82f6'], ['proposta', 'Proposta enviada', '#f59e0b'], ['matriculou', 'Matriculou', '#16a34a'], ['perdido', 'Não fechou', '#64748b']];
@@ -267,7 +267,7 @@ const app = criarApp({
     { id: 'financeiro', lado: FERR.financeiro, rot: 'Mensalidades', icone: 'currency-circle-dollar', render: financeiro, atalho: 'f', cont: (a) => { const n = new Set(mens(a).filter((m) => m.status === 'aberto' && m.vencimento < hoje()).map((m) => m.aluno)).size; return n ? { n, tom: 'er' } : 0; } },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
     { id: 'planos', rot: 'Planos', icone: 'identification-card', render: (a) => a.tab({ id: 'planos', colecao: 'planos', singular: 'plano', plural: 'planos', ordem: 'valor', novo: { rot: 'Novo plano', attrs: 'data-acao="novoCad" data-c="planos"' }, aoClicar: async (id) => { if (await editar(a, 'planos', a.db.obter('planos', id))) a.render(); }, colunas: [{ k: 'nome', rot: 'Plano', render: (p) => `<span class="prim">${esc(p.nome)}</span>` }, { k: 'meses', rot: 'Fidelidade', n: true, render: (p) => (p.meses > 1 ? `${p.meses} meses` : 'sem') }, { k: 'valor', rot: 'Mensal', n: true, render: (p) => moeda(p.valor) }, { k: 'alunos', rot: 'Alunos ativos', n: true, valor: (p) => a.db.lista('alunos').filter((x) => x.status === 'ativo' && x.plano === p.id).length, render: (p) => num(a.db.lista('alunos').filter((x) => x.status === 'ativo' && x.plano === p.id).length) }] }) },
-    ...paginasFerramentas(Object.values(FERR)),
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 

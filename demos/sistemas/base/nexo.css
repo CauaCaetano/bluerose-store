@@ -777,3 +777,5 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .ld-tag-pro { margin-left: auto; font: 700 10px/1 var(--fonte, inherit); letter-spacing: .06em; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #2557d6, #6d4ae0); padding: 3px 7px; border-radius: 999px; }
 .ld-bloco h3:has(.ld-tag-pro) { display: flex; align-items: center; gap: 6px; }
 .ld-trancado p { color: var(--tx-2); display: flex; gap: 6px; align-items: flex-start; }
+.lat .cont.pro { background: linear-gradient(135deg, #2557d6, #6d4ae0); color: #fff; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
+.ld-pagina.ld-uma { grid-template-columns: minmax(0, 640px); }

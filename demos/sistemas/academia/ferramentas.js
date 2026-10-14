@@ -58,3 +58,16 @@ export const LADOS = {
     return bloco('Ocupação das turmas', 'users-three', ldLista(tu.map(({ t, n, v }) => ldItem(esc(t.nome), `${esc(t.professor || '')} · ${t.hora || ''}`, { dir: `<b class="num" style="color:${v && n >= v ? 'var(--er)' : v && n / v >= 0.8 ? 'var(--al)' : 'inherit'}">${n}/${v || '—'}</b>` })), 'Nenhuma turma cadastrada.'));
   },
 };
+
+// cada ferramenta como item próprio no menu da esquerda: [id, rótulo, ícone, aba de origem, começo do título do bloco]
+export const ITENS = [
+  ['imc', 'IMC', 'scales', 'alunos', 'Calcular IMC'],
+  ['fc', 'Zonas de frequência cardíaca', 'heartbeat', 'alunos', 'Zonas'],
+  ['rm', 'Carga máxima (1RM)', 'barbell', 'alunos', 'Carga máxima'],
+  ['calorias', 'Gasto calórico', 'fire', 'alunos', 'Gasto calórico'],
+  ['sumidos', 'Alunos sumidos', 'person-simple-run', 'alunos', 'Sumidos'],
+  ['atraso', 'Mensalidades em atraso', 'warning', 'financeiro', 'Mensalidades em atraso'],
+  ['aniversarios', 'Aniversariantes', 'cake', 'painel', 'Aniversariantes'],
+  ['experimentais', 'Experimentais sem fechar', 'user-plus', 'experimentais', 'Fizeram a aula'],
+  ['turmas', 'Ocupação das turmas', 'users-three', 'aulas', 'Ocupação'],
+];

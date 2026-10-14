@@ -4,8 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, kanban, DIAS, telLink, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
-import { LADOS as FERR } from './ferramentas.js';
-import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 
 const ETAPAS = [['entrada', 'Entrada e diagnóstico', '#94a3b8'], ['orcamento', 'Orçamento enviado', '#f59e0b'], ['aprovado', 'Aprovado', '#3b82f6'], ['servico', 'Em serviço', '#8b5cf6'], ['peca', 'Aguardando peça', '#e11d48'], ['pronto', 'Pronto', '#16a34a'], ['entregue', 'Entregue', '#64748b']];
 const etp = (id) => ETAPAS.find((e) => e[0] === id) || ETAPAS[0];
@@ -237,7 +237,7 @@ const app = criarApp({
     { grupo: 'Gestão' },
     { id: 'estoque', lado: FERR.estoque, rot: 'Peças e serviços', icone: 'package', render: estoque, cont: (a) => { const n = a.db.lista('pecas').filter((p) => p.estoque <= p.minimo).length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
-    ...paginasFerramentas(Object.values(FERR)),
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 

@@ -54,3 +54,15 @@ export const LADOS = {
     return bloco('Tarefas atrasadas por pessoa', 'list-checks', ldNums(Object.entries(por).map(([k, l]) => [String(l.length), quem(k)]).concat(atr.length ? [] : [['0', 'atrasadas']])) + ldLista(atr.sort((x, y) => x.prazo.localeCompare(y.prazo)).slice(0, 8).map((t) => ldItem(esc(t.titulo), `${quem(t.responsavel)} · prazo era ${dataCurta(t.prazo)}`)), 'Nenhuma tarefa atrasada.'));
   },
 };
+
+// cada ferramenta como item próprio no menu da esquerda: [id, rótulo, ícone, aba de origem, começo do título do bloco]
+export const ITENS = [
+  ['atualizar', 'Atualizar valores', 'trend-up', 'calculadora', 'Atualizar um valor'],
+  ['honorarios', 'Calcular honorários', 'hand-coins', 'calculadora', 'Honorários'],
+  ['dias', 'Dias entre datas', 'calendar-dots', 'calculadora', 'Dias entre'],
+  ['pensao', 'Pensão alimentícia', 'users-three', 'calculadora', 'Pensão'],
+  ['parados', 'Processos parados', 'hourglass', 'processos', 'Sem andamento'],
+  ['audiencias', 'Avisar audiências', 'gavel', 'prazos', 'Audiências'],
+  ['vencidos', 'Honorários vencidos', 'warning', 'financeiro', 'Honorários vencidos'],
+  ['atrasadas', 'Tarefas atrasadas', 'list-checks', 'tarefas', 'Tarefas atrasadas'],
+];

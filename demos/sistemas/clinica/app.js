@@ -5,8 +5,8 @@ import {
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
   corSegura,
 } from '../base/nexo.js';
-import { LADOS as FERR } from './ferramentas.js';
-import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 
 const ABRE = 7, FECHA = 20;
 const STATUS = { agendado: ['Agendado', '#94a3b8'], confirmado: ['Confirmado', '#3b82f6'], chegou: ['Na recepção', '#f59e0b'], atendimento: ['Em atendimento', '#a855f7'], atendido: ['Atendido', '#16a34a'], faltou: ['Faltou', '#e11d48'], cancelado: ['Cancelado', '#64748b'] };
@@ -297,7 +297,7 @@ const app = criarApp({
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
     { grupo: 'Cadastros' },
     { id: 'cadastros', rot: 'Profissionais e tabelas', icone: 'list-checks', render: cadastros },
-    ...paginasFerramentas(Object.values(FERR)),
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 

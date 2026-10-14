@@ -53,3 +53,15 @@ export const LADOS = {
       + bloco('Converter unidades', 'gauge', calc('unidades', campoN('valor', 'Valor', 32) + campoS('tipo', 'De', [['psi', 'psi → bar (pneu)'], ['bar', 'bar → psi (pneu)'], ['nm', 'N·m → kgf·m (torque)'], ['kgfm', 'kgf·m → N·m (torque)']])));
   },
 };
+
+// cada ferramenta como item próprio no menu da esquerda: [id, rótulo, ícone, aba de origem, começo do título do bloco]
+export const ITENS = [
+  ['orcamento', 'Orçamento rápido', 'calculator', 'ordens', 'Orçamento rápido'],
+  ['consumo', 'Consumo e custo por km', 'gas-pump', 'veiculos', 'Consumo'],
+  ['unidades', 'Converter unidades', 'gauge', 'veiculos', 'Converter'],
+  ['prontos', 'Prontos para retirar', 'check-circle', 'patio', 'Prontos'],
+  ['parados', 'Parados no pátio', 'hourglass', 'patio', 'No pátio'],
+  ['agendamentos', 'Confirmar agendamentos', 'calendar-check', 'agenda', 'Confirmar os agendamentos'],
+  ['pecas', 'Pedido de peças', 'shopping-cart', 'estoque', 'Pedido de peças'],
+  ['sumidos', 'Clientes sumidos', 'megaphone', 'veiculos', 'Clientes sem voltar'],
+];

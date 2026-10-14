@@ -4,8 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, rosca, barrasH, kanban, calMes, DIAS, DIAS_L, diaUtil, nomeFeriado, fimDeSemana, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, pop, imprimir, fecharGaveta,
 } from '../base/nexo.js';
-import { LADOS as FERR } from './ferramentas.js';
-import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 
 const ADV = [['paulo', 'Dr. Paulo Moura', 'Sócio · OAB/MG 98.412', 450], ['ana', 'Dra. Ana Castro', 'Sócia · OAB/MG 101.337', 450], ['lia', 'Dra. Lia Fontes', 'Associada · OAB/MG 187.205', 300], ['rafael', 'Rafael Teles', 'Estagiário · controladoria', 120]];
 const nomeA = (id) => (ADV.find((x) => x[0] === id) || [, '—'])[1];
@@ -472,7 +472,7 @@ const app = criarApp({
     { id: 'calculadora', lado: FERR.calculadora, rot: 'Calculadora de prazos', icone: 'calculator', render: calculadora },
     { id: 'modelos', rot: 'Modelos de documentos', icone: 'file-text', render: modelos },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
-    ...paginasFerramentas(Object.values(FERR)),
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 

@@ -60,3 +60,20 @@ export const paginasFerramentas = (fns) => [
   { id: 'avisos', rot: 'Avisos e mensagens', icone: 'bell-ringing', titulo: 'Avisos e mensagens prontas', render: (a) => paginaAvisos(a, fns), cont: (a) => contarAvisos(a, fns) },
   { id: 'calculadoras', rot: 'Calculadoras', icone: 'calculator', render: (a) => paginaCalculadoras(a, fns), montar: (a, c) => ligarCalcs(c) },
 ];
+
+// Cada ferramenta como um item próprio no menu da esquerda (grupo "Ferramentas"):
+// lista = [[id, rótulo, ícone, aba de LADOS onde o bloco nasce, começo do título do bloco], ...]
+const textoH3 = (b) => ((b.match(/<h3>([\s\S]*?)<\/h3>/) || ['', ''])[1]).replace(/<[^>]+>/g, '').trim();
+const blocoDe = (a, fn, prefixo) => blocos(a, [fn]).find((b) => textoH3(b).startsWith(prefixo)) || '';
+export const ferramentaPaginas = (L, lista) => [
+  { grupo: 'Ferramentas' },
+  ...lista.map(([id, rot, icone, aba, prefixo]) => ({
+    id: `f-${id}`, rot, icone, titulo: rot,
+    render: (a) => { const b = blocoDe(a, L[aba], prefixo);
+      return `<div class="ld-pagina ld-uma">${b ? travarPro(a, b) : `<div class="ld-vazio">${ic('check-circle')}Nada por aqui agora.</div>`}</div>`; },
+    montar: (a, c) => ligarCalcs(c),
+    cont: (a) => { const b = blocoDe(a, L[aba], prefixo); if (!b || ehCalc(b)) return 0;
+      if (!a.nuvem || !temPro(a)) return { n: 'Pro', tom: 'pro' };
+      return (b.match(/data-acao="ldZap"/g) || []).length; },
+  })),
+];

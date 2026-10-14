@@ -4,8 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, kanban, DIAS, telLink, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
-import { LADOS as FERR } from './ferramentas.js';
-import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 import { qrSVG } from '../base/qr.js';
 
 const CATS = [['entradas', 'Entradas'], ['pratos', 'Pratos principais'], ['pizzas', 'Pizzas'], ['massas', 'Massas'], ['lanches', 'Lanches'], ['porcoes', 'Porções'], ['sobremesas', 'Sobremesas'], ['cafes', 'Cafés'], ['bebidas', 'Bebidas'], ['drinks', 'Drinks']];
@@ -258,7 +258,7 @@ const app = criarApp({
     { id: 'caixa', rot: 'Caixa do dia', icone: 'cash-register', render: caixa },
     { id: 'relatorios', lado: FERR.relatorios, rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
     { id: 'clientes', lado: (a) => FERR.clientes(a) + FERR.delivery(a), rot: 'Clientes do delivery', icone: 'users', render: (a) => a.tab({ id: 'clientes', colecao: 'clientes', singular: 'cliente', plural: 'clientes', ordem: 'nome', novo: { rot: 'Novo cliente', attrs: 'data-acao="novoCad" data-c="clientes"' }, aoClicar: async (id) => { if (await editar(a, 'clientes', cli(a, id))) a.render(); }, colunas: [{ k: 'nome', rot: 'Cliente', render: (c) => `<span class="flex" style="gap:9px">${av(c.nome)}<span class="prim">${esc(c.nome)}</span></span>` }, { k: 'telefone', rot: 'WhatsApp' }, { k: 'endereco', rot: 'Endereço', oc: true }, { k: 'pedidos', rot: 'Pedidos', n: true, valor: (c) => peds(a).filter((p) => p.cliente === c.id).length }, { k: 'gasto', rot: 'Gasto total', n: true, valor: (c) => soma(peds(a).filter((p) => p.cliente === c.id), totalP), render: (c) => moeda(soma(peds(a).filter((p) => p.cliente === c.id), totalP)) }] }) },
-    ...paginasFerramentas(Object.values(FERR)),
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 

@@ -4,8 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, funilH, kanban, calGrade, DIAS, DIAS_L, telLink, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
-import { LADOS as FERR } from './ferramentas.js';
-import { acoesLado, paginasFerramentas, travarPro } from '../base/lado.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 
 const ETAPAS = [['lead', 'Novo contato', '#94a3b8'], ['atendimento', 'Em atendimento', '#3b82f6'], ['visita', 'Visita marcada', '#8b5cf6'], ['proposta', 'Proposta', '#f59e0b'], ['documentacao', 'Documentação', '#0ea5e9'], ['fechado', 'Fechado', '#16a34a']];
 const ORIGENS = ['ZAP Imóveis', 'Viva Real', 'OLX', 'Site', 'Instagram', 'Indicação', 'Placa'];
@@ -259,7 +259,7 @@ const app = criarApp({
     { grupo: 'Gestão' },
     { id: 'pessoas', rot: 'Clientes e proprietários', icone: 'users', render: (a) => a.tab({ id: 'pessoas', colecao: 'pessoas', singular: 'pessoa', plural: 'pessoas', ordem: 'nome', novo: { rot: 'Nova pessoa', attrs: 'data-acao="novoCad" data-c="pessoas"' }, aoClicar: async (id) => { if (await editar(a, 'pessoas', pessoa(a, id))) a.render(); }, visoes: [{ id: 'int', rot: 'Interessados', filtro: (p) => p.tipo === 'interessado' }, { id: 'prop', rot: 'Proprietários', filtro: (p) => p.tipo === 'proprietario' }, { id: 'inq', rot: 'Inquilinos', filtro: (p) => p.tipo === 'inquilino' }, { id: 'todos', rot: 'Todos' }], colunas: [{ k: 'nome', rot: 'Nome', render: (p) => `<span class="flex" style="gap:9px">${av(p.nome)}<span class="prim">${esc(p.nome)}</span></span>` }, { k: 'telefone', rot: 'WhatsApp' }, { k: 'email', rot: 'E-mail', oc: true }, { k: 'tipo', rot: 'Tipo', render: (p) => et({ interessado: 'Interessado', proprietario: 'Proprietário', inquilino: 'Inquilino' }[p.tipo], '', 'sem-ponto') }] }) },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
-    ...paginasFerramentas(Object.values(FERR)),
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 

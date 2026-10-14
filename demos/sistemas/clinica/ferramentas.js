@@ -59,3 +59,16 @@ export const LADOS = {
       return ldItem(esc(p.nome || ''), `${dataCurta(c.data)} · ${moeda(c.valor)}`, { dir: zap(p.telefone, `Olá, ${primeiro(p.nome)}! Aqui é da ${a.empresa}. Ficou em aberto o valor de ${moeda(c.valor)} da consulta de ${dataCurta(c.data)}. Posso te mandar a chave PIX?`, 'Cobrar') }); }), 'Nada em aberto.')}`);
   },
 };
+
+// cada ferramenta como item próprio no menu da esquerda: [id, rótulo, ícone, aba de origem, começo do título do bloco]
+export const ITENS = [
+  ['imc', 'IMC', 'scales', 'pacientes', 'Calcular IMC'],
+  ['gestacao', 'Gestação e data do parto', 'baby', 'pacientes', 'Gestação'],
+  ['dose', 'Dose por peso', 'syringe', 'pacientes', 'Dose por peso'],
+  ['confirmar', 'Confirmar consultas', 'chat-circle-text', 'agenda', 'Confirmar as consultas'],
+  ['livres', 'Horários livres', 'clock', 'agenda', 'Horários livres'],
+  ['faltas', 'Faltas para remarcar', 'user-minus', 'painel', 'Faltaram'],
+  ['aniversarios', 'Aniversariantes', 'cake', 'painel', 'Aniversariantes'],
+  ['sumidos', 'Pacientes sumidos', 'arrows-clockwise', 'pacientes', 'Sem consulta'],
+  ['receber', 'Particular a receber', 'hand-coins', 'caixa', 'Particular a receber'],
+];
