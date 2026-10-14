@@ -1477,3 +1477,8 @@ section.caminhos { padding: 8px 0 clamp(40px, 5vw, 64px); }
 .np-tut-passos button.on b { background: var(--accent-solid, var(--accent)); color: #fff; }
 .np-tut-ajuda { margin-top: 16px; color: var(--ink-2); font-size: 15px; }
 @media (max-width: 900px) { .np-tut { grid-template-columns: 1fr; } }
+
+.np-direto { flex-basis: 100%; font-size: 14px; color: var(--ink-3); text-decoration: underline; text-underline-offset: 3px; }
+.np-direto:hover { color: var(--ink); }
+.np-final .np-direto { text-align: center; }
+.conta-direto { display: block; margin: 12px auto 0; }

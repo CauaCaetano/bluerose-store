@@ -148,34 +148,85 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
   }
 
   // ------------------------------------------------ teste grátis de 7 dias com cartão
-  function teste(app, nome, mensal) {
-    return exigirLogin('Para começar o teste grátis do ' + nome + ', entre ou crie a sua conta.').then(function (s) {
-      var d = janela('<span class="eyebrow">Teste grátis de 7 dias</span><h3 id="conta-t">' + esc(nome) + '</h3>' +
-        '<ul class="conta-lista"><li>Use com os dados da sua empresa por <b>7 dias sem pagar nada</b>.</li><li>Para começar, cadastre o cartão no Mercado Pago. Se não cancelar, a assinatura de <b>' + reais(mensal) + '/mês</b> começa sozinha no 8º dia.</li><li>Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>. Cancelando no teste, nada é cobrado.</li><li>O teste grátis vale uma vez por cartão e por pessoa.</li></ul>' +
+  // sistemas que a pessoa já pode abrir (teste valendo, assinatura, compra ou cortesia): lido uma vez por página
+  var acessoCache = null;
+  function hojeBR() { return new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10); }
+  function acessos() {
+    if (!acessoCache) acessoCache = chamar({ acao: 'status' }).then(function (j) {
+      var h = hojeBR(), m = {};
+      (j.assinaturas || []).forEach(function (a) {
+        var fim = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop();
+        if (a.app && (['ativa', 'paga'].indexOf(a.status) >= 0 || (a.status === 'teste' && a.teste_ate >= h) || (a.status === 'cancelada' && fim && fim >= h))) m[a.app] = a.status === 'teste' ? 'teste' : 'assinado';
+      });
+      return m;
+    }).catch(function () { acessoCache = null; return {}; });
+    return acessoCache;
+  }
+  function assinarDireto(app, emailMp) { return chamar({ acao: 'iniciar', produto: 'a-sis-' + app, email_mp: emailMp || '' }).then(function (j) { location.href = j.link; }); }
+  function teste(app, nome, mensal, direto) {
+    return exigirLogin((direto ? 'Para assinar o ' : 'Para começar o teste grátis do ') + nome + ', entre ou crie a sua conta.').then(function (s) {
+      return acessos().then(function (m) { return [s, m]; });
+    }).then(function (sm) {
+      var s = sm[0];
+      if (sm[1][app]) { location.href = raiz + 'app/' + app + '/'; return; }
+      var d = janela('<span class="eyebrow">' + (direto ? 'Assinatura' : 'Teste grátis de 7 dias') + '</span><h3 id="conta-t">' + esc(nome) + '</h3>' + (direto ?
+        '<ul class="conta-lista"><li>Assinatura de <b>' + reais(mensal) + '/mês</b> no cartão, pelo Mercado Pago. Sem fidelidade.</li><li>O sistema fica liberado assim que o pagamento é confirmado.</li><li>Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>.</li></ul>' :
+        '<ul class="conta-lista"><li>Use com os dados da sua empresa por <b>7 dias sem pagar nada</b>.</li><li>Para começar, cadastre o cartão no Mercado Pago. Se não cancelar, a assinatura de <b>' + reais(mensal) + '/mês</b> começa sozinha no 8º dia.</li><li>Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>. Cancelando no teste, nada é cobrado.</li><li>O teste grátis vale uma vez por cartão e por pessoa.</li></ul>') +
         '<form class="conta-form" novalidate><label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="' + esc(s.user.email) + '" required><small>A assinatura fica na conta do Mercado Pago com este e-mail.</small></label>' +
-        '<label class="conta-aceite"><input type="checkbox" name="ok" required> <span>Tenho 18 anos ou mais. Li e aceito os <a href="' + raiz + 'termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática depois do teste.</span></label>' +
-        '<p class="conta-erro" role="alert"></p><button class="btn btn-primary" type="submit">Cadastrar cartão e começar</button></form>');
+        '<label class="conta-aceite"><input type="checkbox" name="ok" required> <span>Tenho 18 anos ou mais. Li e aceito os <a href="' + raiz + 'termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança ' + (direto ? 'mensal' : 'automática depois do teste') + '.</span></label>' +
+        '<p class="conta-erro" role="alert"></p><button class="btn btn-primary" type="submit">' + (direto ? 'Assinar agora' : 'Cadastrar cartão e começar o teste') + '</button>' +
+        (direto ? '' : '<button type="button" class="conta-link conta-direto" data-direto>Prefiro assinar agora, sem o teste grátis</button>') + '</form>');
       var f = d.querySelector('form'), erro = d.querySelector('.conta-erro'), bt = f.querySelector('button');
       f.onsubmit = function (e) {
         e.preventDefault(); if (!f.reportValidity()) return;
         bt.disabled = true; bt.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
-        chamar({ acao: 'iniciar', produto: 'a-sis-' + app, teste: true, email_mp: f.mp.value.trim() }).then(function (j) { location.href = j.link; }).catch(function (x) {
-          bt.disabled = false; bt.textContent = 'Cadastrar cartão e começar';
+        (direto ? assinarDireto(app, f.mp.value.trim()) : chamar({ acao: 'iniciar', produto: 'a-sis-' + app, teste: true, email_mp: f.mp.value.trim() }).then(function (j) { location.href = j.link; })).catch(function (x) {
+          bt.disabled = false; bt.textContent = direto ? 'Assinar agora' : 'Cadastrar cartão e começar o teste';
           if (x.dados && x.dados.sem_teste) {
             erro.innerHTML = esc(x.message) + ' <a href="#" data-assinar>Assinar por ' + reais(mensal) + '/mês</a>';
             erro.querySelector('[data-assinar]').onclick = function (ev) { ev.preventDefault(); chamar({ acao: 'iniciar', produto: 'a-sis-' + app, email_mp: f.mp.value.trim() }).then(function (j) { location.href = j.link; }).catch(function (y) { erro.textContent = y.message; }); };
           } else erro.textContent = x.message;
         });
       };
+      var bd = f.querySelector('[data-direto]');
+      if (bd) bd.onclick = function () {
+        if (!f.reportValidity()) return;
+        bd.disabled = true; bd.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
+        assinarDireto(app, f.mp.value.trim()).catch(function (x) { bd.disabled = false; bd.textContent = 'Prefiro assinar agora, sem o teste grátis'; erro.textContent = x.message; });
+      };
     });
   }
 
   // botões "Testar 7 dias grátis" (links para app/<sistema>/ marcados com data-teste)
   document.addEventListener('click', function (e) {
-    var b = e.target.closest && e.target.closest('[data-teste]'); if (!b) return;
+    var b = e.target.closest && e.target.closest('[data-teste],[data-assinar-app]'); if (!b) return;
     e.preventDefault();
-    teste(b.getAttribute('data-teste'), b.getAttribute('data-teste-nome') || 'sistema', Number(b.getAttribute('data-teste-mensal')) || 0);
+    var direto = b.hasAttribute('data-assinar-app');
+    teste(b.getAttribute(direto ? 'data-assinar-app' : 'data-teste'), b.getAttribute('data-teste-nome') || 'sistema', Number(b.getAttribute('data-teste-mensal')) || 0, direto);
   });
+
+  // páginas dos sistemas: quem já tem o sistema vê "Abrir o sistema" no lugar do teste; quem não tem ganha a opção de assinar sem teste
+  function ajustarBotoes() {
+    var bts = [].slice.call(document.querySelectorAll('a[data-teste]')); if (!bts.length) return;
+    document.querySelectorAll('.np-cta a[data-teste]').forEach(function (b) {
+      if (b.parentNode.querySelector('[data-assinar-app]')) return;
+      var l = document.createElement('a'); l.href = '#'; l.className = 'np-direto'; l.textContent = 'ou assine agora, sem teste';
+      l.setAttribute('data-assinar-app', b.getAttribute('data-teste')); l.setAttribute('data-teste-nome', b.getAttribute('data-teste-nome') || ''); l.setAttribute('data-teste-mensal', b.getAttribute('data-teste-mensal') || '');
+      b.parentNode.appendChild(l);
+    });
+    if (!sessaoGuardada()) return;
+    acessos().then(function (m) {
+      bts.forEach(function (b) {
+        var app = b.getAttribute('data-teste'); if (!m[app]) return;
+        b.removeAttribute('data-teste'); b.href = raiz + 'app/' + app + '/'; b.textContent = 'Abrir o sistema';
+        var cta = b.closest('.np-cta'); if (!cta) return;
+        var d = cta.querySelector('[data-assinar-app]'); if (d) d.remove();
+        var sec = cta.closest('.np-final'), h = sec && sec.querySelector('h2');
+        if (h) h.textContent = m[app] === 'teste' ? 'O seu teste está valendo.' : 'O seu sistema está pronto.';
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ajustarBotoes); else ajustarBotoes();
 
   window.BR_CONTA = { sb: sb, exigirLogin: exigirLogin, pagar: pagar, teste: teste, chamar: chamar, sessao: sessaoGuardada, janela: janela, esc: esc, reais: reais };
   marcarMenu();

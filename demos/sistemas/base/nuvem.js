@@ -162,7 +162,7 @@ const LOGO_G = '<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="tru
 
 function telaConta(sb, cfg, modo = 'criar', aviso = '') {
   return new Promise((resolver) => {
-    const titulos = { criar: ['Teste grátis por 7 dias', 'Crie sua conta. No próximo passo você cadastra o cartão: nada é cobrado nos 7 dias e dá para cancelar quando quiser.'], entrar: ['Entrar', PLAY ? 'Use o mesmo e-mail e senha da sua conta Blue Rose.' : 'Acesse o sistema da sua empresa.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] };
+    const titulos = { criar: ['Crie a sua conta', 'Leva menos de um minuto. No próximo passo você escolhe: testar 7 dias grátis ou assinar direto.'], entrar: ['Entrar', PLAY ? 'Use o mesmo e-mail e senha da sua conta Blue Rose.' : 'Acesse o sistema da sua empresa.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] };
     const convite = modo === 'criar' ? (new URLSearchParams(location.search).get('convite') || '').trim().toLowerCase() : '';
     if (convite) titulos.criar = ['Você foi convidado', `Crie a sua conta com o e-mail <b>${esc(convite)}</b> para entrar na equipe da empresa no ${esc(cfg.nome)}. Não precisa cadastrar cartão: quem paga é o dono da empresa.`];
     const [t, s] = titulos[modo];
@@ -199,7 +199,7 @@ function telaConta(sb, cfg, modo = 'criar', aviso = '') {
         const { data, error } = await sb.auth.signUp({ email: d.email.trim(), password: d.senha, options: { data: { nome: d.nome.trim() }, emailRedirectTo: location.origin + location.pathname } });
         if (error) throw error;
         if (data.session) { resolver(data.session); return; }
-        tela(cfg, `<h1 class="entrada-t">Confirme o seu e-mail</h1><p class="entrada-s">Enviamos um link para <b>${esc(d.email)}</b>. Abra o link para ativar a conta e o seu teste de 7 dias começa na hora.</p><div class="dica">${ic('envelope-open')}<span>Não chegou? Confira a caixa de spam ou promoções.</span></div><div class="entrada-links"><a href="#" data-modo="entrar">Já confirmei, quero entrar</a></div>`);
+        tela(cfg, `<h1 class="entrada-t">Confirme o seu e-mail</h1><p class="entrada-s">Enviamos um link para <b>${esc(d.email)}</b>. Abra o link para ativar a conta e continuar.</p><div class="dica">${ic('envelope-open')}<span>Não chegou? Confira a caixa de spam ou promoções.</span></div><div class="entrada-links"><a href="#" data-modo="entrar">Já confirmei, quero entrar</a></div>`);
         document.querySelector('[data-modo]').onclick = (e) => { e.preventDefault(); telaConta(sb, cfg, 'entrar').then(resolver); };
       } catch (ex) { erro.textContent = erroAuth(ex); btn.disabled = false; }
     };
@@ -233,7 +233,7 @@ function telaEmpresa(sb, cfg, espacos, precisaToken = false) {
       ${cfg.modelos?.length ? `<label class="campo">Tipo de negócio<select name="ramo">${cfg.modelos.map((m) => `<option value="${m.id}">${esc(m.nome)}</option>`).join('')}</select><span class="ajuda">Já começa com os serviços e cadastros típicos do seu ramo</span></label>` : ''}
       ${precisaToken ? `<label class="campo">Token de dono<input name="token" required autocomplete="off" spellcheck="false" placeholder="${esc(cfg.id.toUpperCase().slice(0, 6))}-XXXX-XXXX-XXXX" style="font-family:var(--mono);text-transform:uppercase"><span class="ajuda">Enviamos para o seu e-mail quando o teste ou a assinatura começou, e ele também aparece em <a href="${SITE}conta.html" target="_blank" rel="noopener">Minha conta</a>. Só é pedido agora, na primeira vez. <a href="#" data-reenviar>Não recebeu? Enviar de novo para o meu e-mail</a></span></label>` : ''}
       <label class="campo">Chave PIX da empresa <span class="mute">(opcional)</span><input name="pix" placeholder="CNPJ, e-mail, celular ou chave aleatória"><span class="ajuda">Para as cobranças e links de pagamento já saírem com o QR code. Dá para colocar depois.</span></label>
-      <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Criar e começar o teste de 7 dias</button></form>
+      <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Criar a empresa</button></form>
       <div class="entrada-links"><a href="#" data-sair>Sair desta conta</a></div>`);
     document.querySelectorAll('[data-esp]').forEach((li) => (li.onclick = () => resolver({ id: li.dataset.esp, novo: false })));
     // manda o token de dono de novo para o e-mail da conta usada na assinatura
@@ -278,12 +278,13 @@ function telaTeste(sb, cfg, email) {
   });
   return new Promise(() => {
     const preco = cfg.produto?.mensal || 0;
-    const f = tela(cfg, `<h1 class="entrada-t">Teste grátis de 7 dias</h1><p class="entrada-s">Use o ${esc(cfg.nome)} com os dados da sua empresa por 7 dias sem pagar nada.</p>
+    const f = tela(cfg, `<h1 class="entrada-t">Comece a usar o ${esc(cfg.nome)}</h1><p class="entrada-s">Teste 7 dias grátis com os dados da sua empresa ou, se já decidiu, assine direto.</p>
       <div class="planos-escolha" role="radiogroup" aria-label="Plano depois do teste"><label><input type="radio" name="plano" value="" checked form="form-teste"><span><b>Mensal</b><small>R$ ${preco}/mês</small></span></label><label><input type="radio" name="plano" value="-anual" form="form-teste"><span><b>Anual <em>−20%</em></b><small>${reais(anual(preco))}/ano · sai ${reais(Math.round(anual(preco) / 12))}/mês</small></span></label></div>
       <ul class="lista-teste"><li>${ic('credit-card', 'p')}<span>Para começar, cadastre o cartão no Mercado Pago.</span></li><li>${ic('calendar-check', 'p')}<span>Se não cancelar, a assinatura do plano escolhido começa sozinha no 8º dia.</span></li><li>${ic('x-circle', 'p')}<span>Cancele quando quiser em <a href="${SITE}conta.html" target="_top">Minha conta</a>. Cancelando no teste, nada é cobrado.</span></li><li>${ic('info', 'p')}<span>O teste grátis vale uma vez por cartão e por pessoa.</span></li></ul>
       <form class="col" style="gap:12px" novalidate id="form-teste"><label class="campo">E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="${esc(email)}" required><span class="ajuda">A assinatura fica na conta do Mercado Pago com este e-mail.</span></label>
-        <label class="flex" style="gap:8px;align-items:flex-start;font-size:13px;color:var(--tx-2)"><input type="checkbox" name="ok" required style="margin-top:3px"><span>Tenho 18 anos ou mais. Li e aceito os <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática depois do teste.</span></label>
-        <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Cadastrar cartão e começar</button></form>
+        <label class="flex" style="gap:8px;align-items:flex-start;font-size:13px;color:var(--tx-2)"><input type="checkbox" name="ok" required style="margin-top:3px"><span>Tenho 18 anos ou mais. Li e aceito os <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática (depois do teste, se eu escolher o teste).</span></label>
+        <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Cadastrar cartão e começar o teste</button>
+        <button type="button" class="btn" style="height:40px" data-direto>Assinar agora, sem o teste grátis</button></form>
       <div class="entrada-links"><a href="${SITE}demos/sistemas/${cfg.id}/" target="_top">Ver a demonstração antes</a><span>·</span><a href="#" data-sair>Sair desta conta</a></div>`);
     document.querySelector('[data-sair]').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.reload(); };
     f.onsubmit = async (e) => {
@@ -292,10 +293,19 @@ function telaTeste(sb, cfg, email) {
       const sufixo = document.querySelector('[name=plano]:checked')?.value || '';
       try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${sufixo}`, teste: true, email_mp: f.mp.value.trim() }); location.href = j.link; }
       catch (x) {
-        btn.disabled = false; btn.textContent = 'Cadastrar cartão e começar';
+        btn.disabled = false; btn.textContent = 'Cadastrar cartão e começar o teste';
         if (x.dados?.sem_teste) { erro.innerHTML = `${esc(x.message)} <a href="#" data-assinar>Assinar ${sufixo ? `por ${reais(anual(preco))}/ano` : `por R$ ${preco}/mês`}</a>`; erro.querySelector('[data-assinar]').onclick = async (ev) => { ev.preventDefault(); try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${sufixo}`, email_mp: f.mp.value.trim() }); location.href = j.link; } catch (y) { erro.textContent = y.message; } }; }
         else erro.textContent = x.message;
       }
+    };
+    // quem já decidiu assinar não precisa passar pelo teste
+    const direto = f.querySelector('[data-direto]');
+    direto.onclick = async () => {
+      if (!f.reportValidity()) return;
+      const erro = f.querySelector('[data-erro]'), sufixo = document.querySelector('[name=plano]:checked')?.value || '';
+      direto.disabled = true; direto.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
+      try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${sufixo}`, email_mp: f.mp.value.trim() }); location.href = j.link; }
+      catch (x) { direto.disabled = false; direto.textContent = 'Assinar agora, sem o teste grátis'; erro.textContent = x.message; }
     };
   });
 }
