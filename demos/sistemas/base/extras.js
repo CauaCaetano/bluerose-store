@@ -176,32 +176,40 @@ export function prepararExtras(app, cfg) {
     });
   }).observe(document.body, { childList: true, subtree: true });
 
+  /** Anexa fotos ou PDFs a um registro (botão de anexar e importação de planilha). Devolve { ok, enviados }. */
+  app.anexarArquivos = async (colecao, id, arqs, { silencioso = false } = {}) => {
+    const reg = db().obter(colecao, id); if (!reg) return { ok: false, enviados: 0 };
+    const lista = [...(reg._anexos || [])];
+    if (!app.nuvem && lista.length + arqs.length > 6) { if (!silencioso) avisar('Na demonstração, até 6 fotos por registro.', { tipo: 'erro' }); arqs = arqs.slice(0, Math.max(0, 6 - lista.length)); }
+    let enviados = 0;
+    for (const f of arqs) {
+      try {
+        const img = /^image\//.test(f.type);
+        if (!img && f.type !== 'application/pdf') { if (!silencioso) avisar(`${f.name}: só fotos ou PDF`, { tipo: 'erro' }); continue; }
+        const blob = img ? await reduzir(f, app.nuvem ? 1600 : 900) : f;
+        if (blob.size > 5 * 1024 * 1024) { if (!silencioso) avisar(`${f.name}: maior que 5 MB`, { tipo: 'erro' }); continue; }
+        const a = { id: novoId(), nome: f.name || 'foto', tipo: img ? 'image/webp' : f.type, criado: hoje() };
+        if (app.nuvem) {
+          a.path = `${app.sessao.espaco.id}/${colecao}/${id}/${a.id}.${img ? 'webp' : 'pdf'}`;
+          const { error } = await app.sessao.sb.storage.from('nexo-anexos').upload(a.path, blob, { contentType: a.tipo, upsert: false });
+          if (error) throw error;
+        } else {
+          if (!img) { if (!silencioso) avisar('Na demonstração, só fotos (PDF na versão contratada).', { tipo: 'erro' }); continue; }
+          a.data = await paraDataURL(blob);
+        }
+        lista.push(a); enviados++;
+      } catch (e) { if (!silencioso) avisar(`Não foi possível enviar ${f.name}: ${e.message || e}`, { tipo: 'erro' }); }
+    }
+    try { db().salvar(colecao, { id, _anexos: lista }); } catch { if (!silencioso) avisar('Sem espaço no navegador para mais fotos (demonstração).', { tipo: 'erro' }); return { ok: false, enviados: 0 }; }
+    return { ok: true, enviados };
+  };
+
   Object.assign(app.acoes, {
     anexoEnviar: async (d, el) => {
       const arqs = [...(el.files || [])]; if (!arqs.length) return;
-      const reg = db().obter(d.c, d.id); if (!reg) return;
-      const lista = [...(reg._anexos || [])];
-      if (!app.nuvem && lista.length + arqs.length > 6) { avisar('Na demonstração, até 6 fotos por registro.', { tipo: 'erro' }); return; }
       avisar(arqs.length > 1 ? `Enviando ${arqs.length} arquivos…` : 'Enviando…', { tempo: 2000 });
-      for (const f of arqs) {
-        try {
-          const img = /^image\//.test(f.type);
-          if (!img && f.type !== 'application/pdf') { avisar(`${f.name}: só fotos ou PDF`, { tipo: 'erro' }); continue; }
-          const blob = img ? await reduzir(f, app.nuvem ? 1600 : 900) : f;
-          if (blob.size > 5 * 1024 * 1024) { avisar(`${f.name}: maior que 5 MB`, { tipo: 'erro' }); continue; }
-          const a = { id: novoId(), nome: f.name, tipo: img ? 'image/webp' : f.type, criado: hoje() };
-          if (app.nuvem) {
-            a.path = `${app.sessao.espaco.id}/${d.c}/${d.id}/${a.id}.${img ? 'webp' : 'pdf'}`;
-            const { error } = await app.sessao.sb.storage.from('nexo-anexos').upload(a.path, blob, { contentType: a.tipo, upsert: false });
-            if (error) throw error;
-          } else {
-            if (!img) { avisar('Na demonstração, só fotos (PDF na versão contratada).', { tipo: 'erro' }); continue; }
-            a.data = await paraDataURL(blob);
-          }
-          lista.push(a);
-        } catch (e) { avisar(`Não foi possível enviar ${f.name}: ${e.message || e}`, { tipo: 'erro' }); }
-      }
-      try { db().salvar(d.c, { id: d.id, _anexos: lista }); } catch { avisar('Sem espaço no navegador para mais fotos (demonstração).', { tipo: 'erro' }); return; }
+      const r = await app.anexarArquivos(d.c, d.id, arqs);
+      if (!r.ok) return;
       avisar('Anexos salvos'); app.render(); app.reabrir(); republicar();
     },
     anexoVer: async (d) => {
