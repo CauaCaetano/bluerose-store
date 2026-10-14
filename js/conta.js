@@ -39,6 +39,17 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
 
   // ------------------------------------------------ janela de entrar / criar conta
   var dlg = null;
+  // senha que já apareceu em vazamentos (Have I Been Pwned): só os 5 primeiros caracteres do SHA-1 saem do aparelho; se o serviço falhar, deixa passar
+  var SENHA_VAZADA = 'Essa senha já apareceu em vazamentos de dados na internet e é fácil de adivinhar. Escolha outra.';
+  function senhaVazada(senha) {
+    if (!window.crypto || !crypto.subtle || !window.fetch) return Promise.resolve(false);
+    return crypto.subtle.digest('SHA-1', new TextEncoder().encode(senha)).then(function (buf) {
+      var h = Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('').toUpperCase();
+      return fetch('https://api.pwnedpasswords.com/range/' + h.slice(0, 5), { headers: { 'Add-Padding': 'true' } }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (t) {
+        return t.split('\n').some(function (l) { var x = l.trim().split(':'); return x[0] === h.slice(5) && Number(x[1]) > 0; });
+      });
+    }).catch(function () { return false; });
+  }
   function janela(html) {
     if (!dlg) {
       dlg = document.createElement('dialog'); dlg.className = 'conta-dlg'; dlg.setAttribute('aria-labelledby', 'conta-t');
@@ -97,10 +108,13 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       sb().then(function (c) {
         if (modo === 'entrar') return c.auth.signInWithPassword({ email: v.email, password: v.senha }).then(function (r) { if (r.error) throw r.error; marcarMenu(); dlg.close(); resolver(r.data.session); });
         if (modo === 'esqueci') return c.auth.resetPasswordForEmail(v.email, { redirectTo: location.origin + '/app/' }).then(function (r) { if (r.error) throw r.error; janela('<h3 id="conta-t">Confira o seu e-mail</h3><p class="conta-sub">Se existir uma conta com ' + esc(v.email) + ', o link para criar uma senha nova chega em instantes.</p>'); });
-        return c.auth.signUp({ email: v.email, password: v.senha, options: { data: { nome: v.nome }, emailRedirectTo: location.origin + '/app/' } }).then(function (r) {
+        return senhaVazada(v.senha).then(function (vazou) {
+          if (vazou) { var e = new Error(SENHA_VAZADA); e.vazada = true; throw e; }
+          return c.auth.signUp({ email: v.email, password: v.senha, options: { data: { nome: v.nome }, emailRedirectTo: location.origin + '/app/' } }).then(function (r) {
           if (r.error) throw r.error;
           if (r.data.session) { marcarMenu(); dlg.close(); return resolver(r.data.session); }
           janela('<span class="eyebrow">Quase lá</span><h3 id="conta-t">Confirme o seu e-mail</h3><p class="conta-sub">Enviamos um link para <b>' + esc(v.email) + '</b>. Abra o link e você volta para cá, já com a conta ativa.</p><p class="conta-sub">Não chegou? Veja a caixa de spam ou promoções.</p>');
+          });
         });
       }).catch(function (x) { erro.textContent = erroAuth(x); bt.disabled = false; });
     };

@@ -162,6 +162,7 @@ function telaConta(sb, cfg, modo = 'criar', aviso = '') {
       try {
         if (modo === 'entrar') { const { data, error } = await sb.auth.signInWithPassword({ email: d.email.trim(), password: d.senha }); if (error) throw error; resolver(data.session); return; }
         if (modo === 'esqueci') { const { error } = await sb.auth.resetPasswordForEmail(d.email.trim(), { redirectTo: location.origin + location.pathname }); if (error) throw error; telaConta(sb, cfg, 'entrar', `Se existir uma conta com ${esc(d.email)}, o link para criar uma senha nova chega em alguns minutos.`).then(resolver); return; }
+        if (await senhaVazada(d.senha)) { erro.textContent = SENHA_VAZADA; btn.disabled = false; return; }
         const { data, error } = await sb.auth.signUp({ email: d.email.trim(), password: d.senha, options: { data: { nome: d.nome.trim() }, emailRedirectTo: location.origin + location.pathname } });
         if (error) throw error;
         if (data.session) { resolver(data.session); return; }
@@ -171,10 +172,23 @@ function telaConta(sb, cfg, modo = 'criar', aviso = '') {
     };
   });
 }
+// senha que já apareceu em vazamentos (Have I Been Pwned): só os 5 primeiros caracteres do SHA-1 saem do aparelho; se o serviço falhar, deixa passar
+const SENHA_VAZADA = 'Essa senha já apareceu em vazamentos de dados na internet e é fácil de adivinhar. Escolha outra.';
+async function senhaVazada(senha) {
+  try {
+    const h = [...new Uint8Array(await crypto.subtle.digest('SHA-1', new TextEncoder().encode(senha)))].map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 4000);
+    const r = await fetch(`https://api.pwnedpasswords.com/range/${h.slice(0, 5)}`, { headers: { 'Add-Padding': 'true' }, signal: ctrl.signal });
+    clearTimeout(t);
+    if (!r.ok) return false;
+    const resto = h.slice(5);
+    return (await r.text()).split('\n').some((l) => { const [suf, n] = l.trim().split(':'); return suf === resto && Number(n) > 0; });
+  } catch { return false; }
+}
 function telaNovaSenha(sb, cfg) {
   return new Promise((resolver) => {
     const f = tela(cfg, `<h1 class="entrada-t">Crie uma senha nova</h1><form class="col" style="gap:12px" novalidate><label class="campo">Senha nova<input name="senha" type="password" autocomplete="new-password" minlength="8" required></label><p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Salvar senha</button></form>`);
-    f.onsubmit = async (e) => { e.preventDefault(); if (!f.reportValidity()) return; const { error } = await sb.auth.updateUser({ password: new FormData(f).get('senha') }); if (error) { f.querySelector('[data-erro]').textContent = erroAuth(error); return; } avisar('Senha alterada'); resolver(); };
+    f.onsubmit = async (e) => { e.preventDefault(); if (!f.reportValidity()) return; if (await senhaVazada(new FormData(f).get('senha'))) { f.querySelector('[data-erro]').textContent = SENHA_VAZADA; return; } const { error } = await sb.auth.updateUser({ password: new FormData(f).get('senha') }); if (error) { f.querySelector('[data-erro]').textContent = erroAuth(error); return; } avisar('Senha alterada'); resolver(); };
   });
 }
 function telaEmpresa(sb, cfg, espacos, precisaToken = false) {
