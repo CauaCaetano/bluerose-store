@@ -222,7 +222,7 @@ const fichas = {
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
   id: 'imobiliaria', nome: 'Nexo Imobiliária', sub: 'Imobiliárias e corretores', cor: '#15803d', icone: 'buildings', empresa: 'Alto Padrão Imóveis', conta: 'Venda e locação · Curitiba',
-  produto: { compra: 2790, mensal: 129 }, semente, colecoes, fichas, buscaDica: 'imóveis, clientes e códigos',
+  produto: { mensal: 129 }, semente, colecoes, fichas, buscaDica: 'imóveis, clientes e códigos',
   portal: {
     vitrine: {
       explica: 'A vitrine online da imobiliária: todos os imóveis disponíveis, com fotos e simulador de financiamento. O pedido de visita entra direto no funil.',

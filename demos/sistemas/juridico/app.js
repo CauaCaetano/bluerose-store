@@ -423,7 +423,7 @@ const fichas = {
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
   id: 'juridico', nome: 'Nexo Jurídico', sub: 'Gestão do escritório', cor: '#0f766e', icone: 'scales', empresa: 'Castro & Moura Advogados', conta: '4 pessoas · Belo Horizonte, MG',
-  produto: { compra: 3290, mensal: 149 }, semente, colecoes, fichas, buscaDica: 'processos (número), clientes',
+  produto: { mensal: 149 }, semente, colecoes, fichas, buscaDica: 'processos (número), clientes',
   portal: {
     processo: {
       explica: 'O cliente acompanha o processo pelo celular, com cada andamento explicado em linguagem simples, as próximas audiências e um canal para mandar dúvidas.',

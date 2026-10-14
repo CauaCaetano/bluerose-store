@@ -216,7 +216,7 @@ const fichas = {
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
   id: 'academia', nome: 'Nexo Academia', sub: 'Academias e estúdios', cor: '#ea580c', icone: 'barbell', empresa: 'Arena Fit', conta: 'Musculação e aulas · São Paulo',
-  produto: { compra: 2290, mensal: 99 }, semente, colecoes, fichas, buscaDica: 'alunos',
+  produto: { mensal: 99 }, semente, colecoes, fichas, buscaDica: 'alunos',
   portal: {
     aluno: {
       explica: 'A área do aluno no celular: treino do dia, check-in, evolução das avaliações e a mensalidade com PIX. O aluno pode salvar na tela inicial.',

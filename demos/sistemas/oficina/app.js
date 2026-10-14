@@ -195,7 +195,7 @@ const fichas = {
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
   id: 'oficina', nome: 'Nexo Oficina', sub: 'Oficinas e auto centers', cor: '#475569', icone: 'car', empresa: 'Auto Center Torque', conta: 'Mecânica geral · Goiânia',
-  produto: { compra: 1990, mensal: 89 }, semente, colecoes, fichas, buscaDica: 'placas, clientes e OS',
+  produto: { mensal: 89 }, semente, colecoes, fichas, buscaDica: 'placas, clientes e OS',
   portal: {
     os: {
       explica: 'O cliente acompanha em que etapa está o carro, vê as fotos e aprova ou recusa cada item do orçamento pelo celular.',

@@ -253,7 +253,7 @@ const fichas = {
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
   id: 'clinica', nome: 'Nexo Clínica', sub: 'Clínicas e consultórios', cor: '#0e7490', icone: 'stethoscope', empresa: 'Clínica Vitta', conta: 'Multiespecialidades · Belo Horizonte',
-  produto: { compra: 2490, mensal: 109 }, semente, colecoes, fichas, buscaDica: 'pacientes e consultas',
+  produto: { mensal: 109 }, semente, colecoes, fichas, buscaDica: 'pacientes e consultas',
   portal: {
     anamnese: {
       explica: 'O paciente preenche a ficha de saúde e aceita o termo pelo celular antes da consulta. As respostas entram no prontuário.',

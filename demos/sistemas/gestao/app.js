@@ -452,7 +452,7 @@ const fichas = {
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
   id: 'gestao', nome: 'Nexo Gestão', sub: 'Estoque, compras e vendas', cor: '#4646d8', icone: 'warehouse', empresa: 'Atlas Distribuidora', conta: '2 depósitos · Curitiba, PR',
-  produto: { compra: 2790, mensal: 129 }, semente, colecoes, fichas, buscaDica: 'produtos (nome, SKU, EAN), pedidos, clientes',
+  produto: { mensal: 129 }, semente, colecoes, fichas, buscaDica: 'produtos (nome, SKU, EAN), pedidos, clientes',
   portal: {
     catalogo: {
       explica: 'O catálogo de produtos para os seus clientes revendedores pedirem pelo celular, com preço e disponibilidade do estoque. O pedido entra como orçamento.',

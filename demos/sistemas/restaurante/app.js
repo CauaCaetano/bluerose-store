@@ -208,7 +208,7 @@ const fichas = {
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
   id: 'restaurante', nome: 'Nexo Restaurante', sub: 'Restaurantes e delivery', cor: '#b45309', icone: 'fork-knife', empresa: 'Bistrô Alecrim', conta: 'Salão e delivery · Rio de Janeiro',
-  produto: { compra: 1990, mensal: 89 }, semente, colecoes, fichas, buscaDica: 'pratos e clientes',
+  produto: { mensal: 89 }, semente, colecoes, fichas, buscaDica: 'pratos e clientes',
   portal: {
     cardapio: {
       explica: 'Cardápio no celular do cliente. Na mesa (pelo QR code), o pedido vai direto para a cozinha. Fora dela, vira pedido de entrega ou retirada, sem a taxa dos aplicativos.',

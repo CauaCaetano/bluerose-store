@@ -347,7 +347,7 @@ const fichas = {
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
   id: 'financeiro', nome: 'Nexo Financeiro', sub: 'Financeiro e OS', cor: '#0b6fb8', icone: 'currency-circle-dollar', empresa: 'Refrigeração Polo Frio', conta: 'Assistência técnica · Florianópolis',
-  produto: { compra: 2490, mensal: 109 }, semente, colecoes, fichas, buscaDica: 'OS, clientes, lançamentos',
+  produto: { mensal: 109 }, semente, colecoes, fichas, buscaDica: 'OS, clientes, lançamentos',
   portal: {
     cobranca: {
       explica: 'A página de pagamento da cobrança: valor, vencimento e o PIX copia e cola com QR code. Quando o cliente avisa que pagou, aparece aqui para você conferir.',

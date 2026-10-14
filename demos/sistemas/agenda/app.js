@@ -503,7 +503,7 @@ const fichas = {
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
   id: 'agenda', nome: 'Nexo Agenda', sub: 'Salão e estética', cor: '#c2417a', icone: 'scissors', empresa: 'Studio Lumière', conta: '4 profissionais · Jardins, SP',
-  produto: { compra: 1690, mensal: 79 }, semente, colecoes, fichas, buscaDica: 'clientes',
+  produto: { mensal: 79 }, semente, colecoes, fichas, buscaDica: 'clientes',
   portal: {
     agendar: {
       explica: 'A página de agendamento do salão: a cliente escolhe serviço, profissional e horário livre. Se o sinal estiver ligado, ela paga pelo PIX para garantir o horário.',

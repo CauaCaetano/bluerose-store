@@ -440,7 +440,7 @@ async function novaAtividade(a, extra = {}) { const x = await editar(a, 'ativida
 
 const app = criarApp({
   id: 'crm', nome: 'Nexo CRM', sub: 'Vendas', cor: '#5b4fe0', icone: 'handshake', empresa: 'Solar Sistemas Ltda', conta: 'Equipe comercial · 3 pessoas',
-  produto: { compra: 2290, mensal: 99 }, semente, colecoes, fichas, buscaDica: 'negócios, pessoas, empresas',
+  produto: { mensal: 99 }, semente, colecoes, fichas, buscaDica: 'negócios, pessoas, empresas',
   portal: {
     proposta: {
       explica: 'A proposta abre no celular do cliente, com os itens, o total e o botão de aceite. Você recebe aviso quando ele abre e quando aceita.',
