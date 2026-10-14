@@ -3,7 +3,7 @@
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, diasEntre,
   sorteio, soma, agrupar, av, ic, et, prog, kpis, barras, barrasH, kanban, telLink,
-  modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
+  modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir, diaUtil, DIAS_L, paraData, normal,
 } from '../base/nexo.js';
 
 const STATUS = [['orcamento', 'Orçamento', '#8a8478'], ['andamento', 'Em andamento', '#f26b1d'], ['pausada', 'Pausada', '#c9971c'], ['concluida', 'Concluída', '#2e7d4f']];
@@ -268,6 +268,140 @@ function garantiaPag(a) {
     <div class="cartao">${l.length ? `<ul class="lista">${l.map((x) => { const o = ob(a, x.obra); return `<li><div class="cresce"><div class="t corta">${esc(x.descricao)}</div><div class="s corta">${esc(o?.titulo || '')} · ${esc(cli(a, o?.cliente)?.nome || '')} · aberto ${relativo(x.data)}${x.pelo_cliente ? ' pelo cliente' : ''}${x.agendado ? ` · visita ${dataCurta(x.agendado)}` : ''}</div></div>${x.status === 'resolvido' ? et('Resolvido', 'ok') : x.status === 'agendado' ? et('Visita marcada', 'info') : et('Aberto', 'al')}${x.status !== 'resolvido' ? `<button type="button" class="btn peq" data-acao="agendarChamado" data-id="${x.id}">${ic('calendar-blank')}Marcar visita</button><button type="button" class="btn peq pri" data-acao="resolverChamado" data-id="${x.id}">${ic('check')}Resolvido</button>` : ''}</li>`; }).join('')}</ul>` : vazio('lifebuoy', 'Nenhum chamado', 'Quando o cliente pedir um reparo pelo link da obra, ele aparece aqui.')}</div>`;
 }
 
+// ---------------------------------------------------------------- painel lateral de cada aba: atalhos, alertas e calculadoras daquela área
+const bloco = (titulo, icone, corpo) => `<section class="ld-bloco"><h3>${ic(icone)}${esc(titulo)}</h3>${corpo}</section>`;
+const atalhos = (l) => `<div class="ld-atalhos">${l.map(([rot, icone, attrs, pri]) => `<button type="button" class="btn ${pri ? 'pri' : 'sec'} peq" ${attrs}>${ic(icone)}${esc(rot)}</button>`).join('')}</div>`;
+const ldLista = (itens, vazioTxt) => (itens.length ? `<ul class="ld-lista">${itens.join('')}</ul>` : `<div class="ld-vazio">${ic('check-circle')}${esc(vazioTxt)}</div>`);
+const ldItem = (t, s, { attrs = '', dir = '' } = {}) => `<li ${attrs ? `class="clicavel" ${attrs}` : ''}><div class="cresce" style="min-width:0"><div class="t corta">${t}</div><div class="s corta">${s}</div></div>${dir}</li>`;
+const ldNums = (l) => `<div class="ld-num">${l.map(([v, r]) => `<div><b>${v}</b><span>${esc(r)}</span></div>`).join('')}</div>`;
+const campoN = (nome, rot, valor, extra = '') => `<label>${esc(rot)}<input type="number" name="${nome}" value="${valor}" min="0" step="any" inputmode="decimal" ${extra}></label>`;
+const calc = (tipo, campos) => `<form class="ld-calc" data-calc="${tipo}" onsubmit="return false">${campos}<div class="ld-res" aria-live="polite"></div></form>`;
+const n0 = (v) => Number(String(v).replace(',', '.')) || 0;
+const fmtN = (v, d = 1) => num(v, d);
+
+// contas das calculadoras (estimativas médias de obra; o resultado lembra de conferir com o fabricante)
+const CALCS = {
+  piso: (f) => { const area = n0(f.area.value), perda = n0(f.perda.value), cx = n0(f.caixa.value), cons = f.colagem.value === 'dupla' ? 8 : 5;
+    const comPerda = area * (1 + perda / 100), arg = Math.ceil((area * cons) / 20), rej = Math.ceil((area * 0.3) / 1) ;
+    return area ? `Comprar <b>${fmtN(comPerda)} m²</b> de piso${cx ? ` (<b>${Math.ceil(comPerda / cx)} caixas</b> de ${fmtN(cx, 2)} m²)` : ''}.<br>Argamassa: <b>${arg} sacos de 20 kg</b> (${f.colagem.value === 'dupla' ? 'colagem dupla' : 'colagem simples'}).<br>Rejunte: cerca de <b>${fmtN(rej, 0)} kg</b>.<br><span class="mute">Estimativa média: confira o consumo na embalagem.</span>` : 'Informe a área.'; },
+  tinta: (f) => { const area = n0(f.area.value), dem = Math.max(1, n0(f.demaos.value)), rend = Math.max(1, n0(f.rend.value)), litros = (area * dem) / rend;
+    return area ? `Precisa de <b>${fmtN(litros)} litros</b> de tinta (${dem} ${dem === 1 ? 'demão' : 'demãos'}).<br>Em latas: <b>${Math.ceil(litros / 18)} lata(s) de 18 L</b> ou <b>${Math.ceil(litros / 3.6)} galão(ões) de 3,6 L</b>.<br><span class="mute">O rendimento muda com a tinta e a parede: confira na lata.</span>` : 'Informe a área das paredes.'; },
+  concreto: (f) => { const v = n0(f.comp.value) * n0(f.larg.value) * (n0(f.esp.value) / 100);
+    return v ? `Volume: <b>${fmtN(v, 2)} m³</b> de concreto.<br>Traço 1:2:3 (aprox.): <b>${Math.ceil(v * 7)} sacos de cimento</b> de 50 kg, <b>${fmtN(v * 0.55, 2)} m³</b> de areia e <b>${fmtN(v * 0.8, 2)} m³</b> de brita.<br><span class="mute">Para estrutura, siga o projeto do engenheiro.</span>` : 'Informe as medidas.'; },
+  preco: (f) => { const custo = n0(f.custo.value), m = n0(f.margem.value), preco = custo * (1 + m / 100);
+    return custo ? `Preço para o cliente: <b>${moeda(preco)}</b>.<br>Lucro bruto: <b>${moeda(preco - custo)}</b> (${pct(preco ? ((preco - custo) / preco) * 100 : 0, 1)} do preço).` : 'Informe o custo.'; },
+  prazo: (f) => { let d = f.ini.value || hoje(), n = Math.round(n0(f.dias.value)), uteis = f.uteis.checked; if (!n) return 'Informe quantos dias de serviço.';
+    let k = 0; while (k < n) { if (!uteis || diaUtil(d)) k++; if (k < n) d = diaMais(1, d); }
+    return `Entrega em <b>${dataBR(d)}</b> (${DIAS_L[paraData(d).getDay()]}).${uteis ? '<br><span class="mute">Pulando sábados, domingos e feriados nacionais.</span>' : ''}`; },
+  diarias: (f) => { const v = n0(f.diaria.value), t = v * n0(f.inteiras.value) + (v / 2) * n0(f.meias.value) - n0(f.vales.value);
+    return v ? `Saldo a pagar: <b>${moeda(t)}</b>.<br>${fmtN(n0(f.inteiras.value), 0)} inteira(s) e ${fmtN(n0(f.meias.value), 0)} meia(s), menos ${moeda(n0(f.vales.value))} em vales.` : 'Informe o valor da diária.'; },
+};
+function montarLado(a, c) {
+  // celular: a barra de abas de baixo rola até a aba aberta
+  const lat = document.querySelector('.lat'), at = lat?.querySelector('a.item.ativo');
+  if (lat && at && lat.scrollWidth > lat.clientWidth) lat.scrollLeft = at.offsetLeft - (lat.clientWidth - at.offsetWidth) / 2;
+  c.querySelectorAll('[data-calc]').forEach((f) => { const r = () => { f.querySelector('.ld-res').innerHTML = CALCS[f.dataset.calc](f); }; f.addEventListener('input', r); f.addEventListener('change', r); r(); });
+}
+
+const msgZap = (tel, texto) => (tel ? `${telLink(tel)}?text=${encodeURIComponent(texto)}` : '');
+const proxEntregas = (a, dias) => obs(a).filter((o) => o.status === 'andamento' && diasAte(o.previsao) >= 0 && diasAte(o.previsao) <= dias).sort((x, y) => x.previsao.localeCompare(y.previsao));
+
+const LADOS = {
+  painel: (a) => {
+    const ent = proxEntregas(a, 30), etapasSemana = obs(a).filter((o) => o.status === 'andamento').flatMap((o) => planoEtapas(o).filter((e) => e.status !== 'feita' && diasAte(e.fim) >= 0 && diasAte(e.fim) <= 7).map((e) => ({ o, e })));
+    return bloco('Atalhos do dia', 'lightning', atalhos([['Registrar o dia', 'camera', 'data-acao="novoDiario"', true], ['Marcar presença', 'check-circle', 'data-acao="marcarPresenca"'], ['Lançar gasto', 'receipt', 'data-acao="novoGasto"'], ['Nova obra', 'plus', 'data-acao="novaObra"'], ['Resumo do dia', 'notepad', 'data-acao="resumoDia"']]))
+      + bloco('Próximas entregas (30 dias)', 'calendar-check', ldLista(ent.map((o) => ldItem(esc(o.titulo), `${esc(cli(a, o.cliente)?.nome || '')} · ${Math.round(progresso(o))}% pronto`, { attrs: `data-abrir="obra:${o.id}"`, dir: `<b class="num">${dataCurta(o.previsao)}</b>` })), 'Nenhuma entrega nos próximos 30 dias'))
+      + bloco('Etapas que terminam nesta semana', 'list-checks', ldLista(etapasSemana.slice(0, 6).map(({ o, e }) => ldItem(esc(e.nome), esc(o.titulo), { attrs: `data-abrir="obra:${o.id}:cronograma"`, dir: `<b class="num">${dataCurta(e.fim)}</b>` })), 'Nenhuma etapa vence nesta semana'));
+  },
+  obras: (a) => {
+    const l = obs(a), atr = l.filter(atrasada), parado = l.filter((o) => o.status === 'andamento' && (!diaDe(a, o.id)[0] || diasAte(diaDe(a, o.id)[0].data) < -2));
+    return bloco('Resumo', 'kanban', ldNums(STATUS.map(([id, nome]) => [num(l.filter((o) => o.status === id).length), nome])))
+      + bloco('Atrasadas', 'warning', ldLista(atr.map((o) => ldItem(esc(o.titulo), `entrega era ${dataCurta(o.previsao)}`, { attrs: `data-abrir="obra:${o.id}"`, dir: `<button type="button" class="btn peq" data-acao="avisarAtraso" data-id="${o.id}" title="Avisar o cliente">${ic('whatsapp-logo')}</button>` })), 'Nenhuma obra atrasada'))
+      + bloco('Sem diário há mais de 2 dias', 'camera', ldLista(parado.map((o) => ldItem(esc(o.titulo), esc(cli(a, o.cliente)?.nome || ''), { dir: `<button type="button" class="btn peq" data-acao="novoDiario" data-id="${o.id}">${ic('camera')}Registrar</button>` })), 'Todas com registro recente'))
+      + bloco('Atalhos', 'lightning', atalhos([['Nova obra', 'plus', 'data-acao="novaObra"', true], ['Exportar lista (planilha)', 'download-simple', 'data-acao="exportarCSV" data-t="obras"']]));
+  },
+  orcamentos: (a) => {
+    const vencendo = obs(a).filter((o) => o.status === 'orcamento' && o.validade && diasAte(o.validade) <= 3).sort((x, y) => x.validade.localeCompare(y.validade));
+    const semResposta = obs(a).filter((o) => o.status === 'orcamento' && o.enviado_em && diasAte(o.enviado_em) <= -3);
+    return bloco('Calcular o preço', 'calculator', `<p>Do custo ao preço final com a sua margem.</p>${calc('preco', campoN('custo', 'Custo (R$)', 10000) + campoN('margem', 'Margem (%)', Number(a.db.cfg.margem_padrao) || 15))}`)
+      + bloco('Calcular material de piso', 'ruler', calc('piso', campoN('area', 'Área (m²)', 20) + campoN('perda', 'Perda (%)', 10) + campoN('caixa', 'm² por caixa', 2.3) + `<label>Colagem<select name="colagem"><option value="simples">Simples</option><option value="dupla">Dupla (peças grandes)</option></select></label>`))
+      + bloco('Calcular tinta', 'drop', calc('tinta', campoN('area', 'Paredes (m²)', 60) + campoN('demaos', 'Demãos', 2) + campoN('rend', 'Rende m²/litro', 10)))
+      + bloco('Calcular concreto', 'stack', calc('concreto', campoN('comp', 'Comprimento (m)', 4) + campoN('larg', 'Largura (m)', 3) + campoN('esp', 'Espessura (cm)', 8, 'class="largo"')))
+      + bloco('Vencendo ou sem resposta', 'hourglass', ldLista([...vencendo.map((o) => ldItem(esc(o.titulo), diasAte(o.validade) < 0 ? 'proposta vencida' : `vence ${dataCurta(o.validade)}`, { attrs: `data-abrir="obra:${o.id}:orcamento"` })), ...semResposta.filter((o) => !vencendo.includes(o)).map((o) => ldItem(esc(o.titulo), `enviado ${relativo(o.enviado_em)}, sem resposta`, { dir: `<button type="button" class="btn peq" data-acao="enviarOrc" data-id="${o.id}" title="Mandar de novo">${ic('whatsapp-logo')}</button>` }))], 'Nenhum orçamento parado'));
+  },
+  cronograma: (a) => {
+    const atr = obs(a).filter((o) => ['andamento', 'pausada'].includes(o.status)).flatMap((o) => planoEtapas(o).filter(atrasoEtapa).map((e) => ({ o, e })));
+    return bloco('Calcular data de entrega', 'calendar-check', `<p>Some dias de serviço a partir do início.</p>${calc('prazo', `<label>Início<input type="date" name="ini" value="${hoje()}"></label>${campoN('dias', 'Dias de serviço', 20)}<label class="largo" style="flex-direction:row;align-items:center;gap:6px;font-weight:500;color:var(--tx)"><input type="checkbox" name="uteis" checked style="height:auto"> Só dias úteis</label>`)}`)
+      + bloco('Etapas atrasadas', 'warning', ldLista(atr.map(({ o, e }) => ldItem(esc(e.nome), `${esc(o.titulo)} · era até ${dataCurta(e.fim)}`, { attrs: `data-abrir="obra:${o.id}:cronograma"`, dir: `<button type="button" class="btn peq" data-acao="avisarAtraso" data-id="${o.id}" title="Avisar o cliente">${ic('whatsapp-logo')}</button>` })), 'Tudo dentro do prazo'))
+      + bloco('Entregas no mês', 'flag', ldLista(proxEntregas(a, 31).map((o) => ldItem(esc(o.titulo), `${Math.round(progresso(o))}% pronto`, { attrs: `data-abrir="obra:${o.id}"`, dir: `<b class="num">${dataCurta(o.previsao)}</b>` })), 'Nenhuma entrega nos próximos 30 dias'));
+  },
+  diario: (a) => {
+    const rodando = obs(a).filter((o) => o.status === 'andamento'), semHoje = rodando.filter((o) => !diaDe(a, o.id).some((x) => x.data === hoje()));
+    const semana = a.db.lista('diario').filter((x) => diasAte(x.data) >= -6);
+    return bloco('Ainda sem registro hoje', 'camera', ldLista(semHoje.map((o) => ldItem(esc(o.titulo), esc(cli(a, o.cliente)?.nome || ''), { dir: `<button type="button" class="btn peq pri" data-acao="novoDiario" data-id="${o.id}">${ic('camera')}Registrar</button>` })), 'Todas as obras rodando já têm o registro de hoje'))
+      + bloco('Últimos 7 dias', 'chart-bar', ldNums([[num(semana.length), 'registros'], [num(soma(semana, (x) => (x._anexos || []).length)), 'fotos'], [num(semana.filter((x) => x.clima === 'Chuva').length), 'dias de chuva'], [num(new Set(semana.map((x) => x.obra)).size), 'obras com registro']]))
+      + bloco('Dica', 'sparkle', '<p>Registre o dia com 2 ou 3 fotos: elas aparecem na página do cliente, e o cliente que vê a obra andando paga as etapas em dia.</p>');
+  },
+  gastos: (a) => {
+    const ym = hoje().slice(0, 7), mes = a.db.lista('gastos').filter((g) => g.data.startsWith(ym) && !g.cliente_paga);
+    const porObra = Object.entries(agrupar(mes, (g) => g.obra)).map(([id, l]) => ({ o: ob(a, id), v: soma(l, (g) => g.valor) })).sort((x, y) => y.v - x.v);
+    const estouro = obs(a).filter((o) => o.status === 'andamento' && meus(a, o.id) > o.valor * 0.7);
+    return bloco(`Gastos de ${nomeMes(ym)}`, 'receipt', ldNums([[moedaC(soma(mes, (g) => g.valor)), 'total do mês'], [num(mes.length), 'lançamentos']]) + `<div style="margin-top:10px">${barrasH(CATS.map(([k, n]) => ({ rot: n, v: soma(mes.filter((g) => g.categoria === k), (g) => g.valor) })).filter((x) => x.v).sort((x, y) => y.v - x.v), { fmt: moedaC })}</div>`)
+      + bloco('Por obra no mês', 'house-line', ldLista(porObra.slice(0, 6).map(({ o, v }) => ldItem(esc(o?.titulo || 'Obra'), '', { attrs: o ? `data-abrir="obra:${o.id}:gastos"` : '', dir: `<b class="num">${moedaC(v)}</b>` })), 'Nenhum gasto neste mês'))
+      + bloco('Gasto perto do valor da obra', 'warning', ldLista(estouro.map((o) => ldItem(esc(o.titulo), `${pct((meus(a, o.id) / o.valor) * 100)} do valor já gasto`, { attrs: `data-abrir="obra:${o.id}:gastos"` })), 'Nenhuma obra passou de 70% do valor em gastos'))
+      + bloco('Atalhos', 'lightning', atalhos([['Lançar gasto', 'receipt', 'data-acao="novoGasto"', true], ['Exportar gastos do mês', 'download-simple', 'data-acao="exportarCSV" data-t="gastos"']]));
+  },
+  equipe: (a) => {
+    const hojeL = a.db.lista('diarias').filter((x) => x.data === hoje()), eq = a.db.lista('equipe'), semPres = eq.filter((p) => !hojeL.some((x) => x.pessoa === p.id));
+    const p0 = eq[0];
+    return bloco('Presença de hoje', 'check-circle', `${ldNums([[num(hojeL.filter((x) => x.tipo !== 'falta').length), 'trabalhando'], [num(hojeL.filter((x) => x.tipo === 'falta').length), 'faltas']])}<div style="margin-top:8px">${semPres.length ? `<p>Sem marcação hoje: ${semPres.map((p) => esc(p.nome.split(' ')[0])).join(', ')}.</p>` : ''}${atalhos([['Marcar presença', 'check-circle', 'data-acao="marcarPresenca"', true]])}</div>`)
+      + bloco('Calcular o pagamento', 'calculator', calc('diarias', campoN('diaria', 'Diária (R$)', p0?.diaria || 180) + campoN('inteiras', 'Diárias inteiras', 5) + campoN('meias', 'Meias diárias', 0) + campoN('vales', 'Vales (R$)', 0)))
+      + bloco('Maiores saldos a pagar', 'hand-coins', ldLista(eq.map((p) => ({ p, s: saldoPessoa(a, p.id) })).filter((x) => x.s > 0).sort((x, y) => y.s - x.s).slice(0, 5).map(({ p, s }) => ldItem(esc(p.nome), esc(p.funcao || ''), { dir: `<button type="button" class="btn peq pri" data-acao="pagarEquipe" data-id="${p.id}">${moedaC(s)}</button>` })), 'Ninguém com saldo a receber'))
+      + bloco('Atalhos', 'lightning', atalhos([['Nova pessoa', 'user-plus', 'data-acao="novoCad" data-c="equipe"']]));
+  },
+  terceiros: (a) => {
+    const l = terc(a), devo = l.filter((t) => medidoTerc(t) > pagoTerc(t)), falta = l.filter((t) => medidoTerc(t) < t.valor);
+    return bloco('Medido e não pago', 'hand-coins', ldLista(devo.map((t) => ldItem(esc(t.servico), esc(t.nome), { dir: `<button type="button" class="btn peq pri" data-acao="pagarTerc" data-id="${t.id}">${moedaC(medidoTerc(t) - pagoTerc(t))}</button>` })), 'Nada a pagar agora'))
+      + bloco('Falta medir', 'ruler', ldLista(falta.map((t) => ldItem(esc(t.servico), `${esc(ob(a, t.obra)?.titulo || '')} · ${pct(t.valor ? (medidoTerc(t) / t.valor) * 100 : 0)} feito`, { dir: `<button type="button" class="btn peq" data-acao="medir" data-id="${t.id}">${ic('ruler')}Medir</button>` })), 'Todos os serviços medidos'))
+      + bloco('Atalhos', 'lightning', atalhos([['Novo terceirizado', 'plus', 'data-acao="novoCad" data-c="terceiros"', true]]))
+      + bloco('Dica', 'sparkle', '<p>Pague por medição: só o que ficou pronto. Assim o serviço não para no meio com o dinheiro todo adiantado.</p>');
+  },
+  ferramentas: (a) => {
+    const l = ferr(a), esquecidas = l.filter((f) => foraHa(f) > 15), porObra = Object.entries(agrupar(l.filter((f) => f.local === 'obra'), (f) => f.obra));
+    return bloco('Fora há mais de 15 dias', 'warning', ldLista(esquecidas.map((f) => ldItem(esc(f.nome), `${esc(ob(a, f.obra)?.titulo || '')} · há ${foraHa(f)} dias`, { dir: `<button type="button" class="btn peq" data-acao="devolverFerr" data-id="${f.id}">${ic('arrow-u-down-left')}Voltou</button>` })), 'Nenhuma ferramenta esquecida'))
+      + bloco('Em cada obra', 'house-line', ldLista(porObra.map(([oid, fs]) => ldItem(esc(ob(a, oid)?.titulo || 'Obra'), fs.map((f) => esc(f.nome)).join(', '), { dir: `<b class="num">${fs.length}</b>` })), 'Todas no depósito'))
+      + bloco('Atalhos', 'lightning', atalhos([['Nova ferramenta', 'plus', 'data-acao="novoCad" data-c="ferramentas"', true]]));
+  },
+  deposito: (a) => {
+    const dep = a.db.lista('deposito').filter((x) => Number(x.qtd) > 0), compras = a.db.lista('compras').filter((c) => c.status === 'comprar');
+    const palavra = (s) => normal(s).split(/\s+/).find((w) => w.length > 3) || '';
+    const usar = dep.flatMap((x) => compras.filter((c) => palavra(x.item) && normal(c.item).includes(palavra(x.item))).map((c) => ({ x, c })));
+    return bloco('Dá para usar agora', 'piggy-bank', `<p>Itens do depósito parecidos com o que as obras precisam comprar.</p>${ldLista(usar.map(({ x, c }) => ldItem(esc(x.item), `pedido em ${esc(ob(a, c.obra)?.titulo || '')}: ${esc(c.item)}`, { dir: `<button type="button" class="btn peq pri" data-acao="usarDeposito" data-id="${x.id}">${ic('truck')}Usar</button>` })), 'Nenhuma compra pendente bate com o depósito')}`)
+      + bloco('Valor parado', 'warehouse', ldNums([[moedaC(soma(dep, (x) => (Number(x.qtd) || 0) * (Number(x.unit) || 0))), 'em material'], [num(dep.length), 'itens']]))
+      + bloco('Atalhos', 'lightning', atalhos([['Guardar material', 'plus', 'data-acao="novoCad" data-c="deposito"', true]]));
+  },
+  garantia: (a) => {
+    const venc = obs(a).filter((o) => emGarantia(o)).map((o) => ({ o, fim: diaMais(90, o.entregue_em) })).sort((x, y) => x.fim.localeCompare(y.fim));
+    const recentes = obs(a).filter((o) => o.status === 'concluida' && o.entregue_em && diasAte(o.entregue_em) >= -30);
+    return bloco('Garantias em vigor', 'shield-check', ldLista(venc.map(({ o, fim }) => ldItem(esc(o.titulo), `até ${dataCurta(fim)} · ${diasAte(fim)} dias`, { attrs: `data-abrir="obra:${o.id}"` })), 'Nenhuma obra na garantia'))
+      + bloco('Pedir avaliação e indicação', 'star', `<p>Obras entregues nos últimos 30 dias. Cliente satisfeito indica: peça enquanto a obra está fresca.</p>${ldLista(recentes.map((o) => ldItem(esc(o.titulo), esc(cli(a, o.cliente)?.nome || ''), { dir: `<button type="button" class="btn peq" data-acao="pedirIndicacao" data-id="${o.id}">${ic('whatsapp-logo')}Pedir</button>` })), 'Nenhuma entrega recente')}`)
+      + bloco('Atalhos', 'lightning', atalhos([['Abrir chamado', 'plus', 'data-acao="novoChamado"', true]]));
+  },
+  clientes: (a) => {
+    const fech = (c) => obs(a).filter((o) => o.cliente === c.id && o.status !== 'orcamento');
+    const top = a.db.lista('clientes').map((c) => ({ c, v: soma(fech(c), (o) => o.valor) })).filter((x) => x.v).sort((x, y) => y.v - x.v).slice(0, 5);
+    const voltar = a.db.lista('clientes').filter((c) => { const l = obs(a).filter((o) => o.cliente === c.id); return l.length && l.every((o) => o.status === 'concluida' && o.entregue_em && diasAte(o.entregue_em) <= -120); });
+    return bloco('Quem mais fechou', 'trend-up', ldLista(top.map(({ c, v }) => ldItem(esc(c.nome), `${fech(c).length} ${fech(c).length === 1 ? 'obra' : 'obras'}`, { dir: `<b class="num">${moedaC(v)}</b>` })), 'Nenhuma obra fechada ainda'))
+      + bloco('Chamar de volta', 'chat-circle-text', `<p>Clientes com obra entregue há mais de 4 meses: uma mensagem pode virar a próxima reforma.</p>${ldLista(voltar.map((c) => ldItem(esc(c.nome), esc(c.endereco || ''), { dir: `<button type="button" class="btn peq" data-acao="chamarDeVolta" data-id="${c.id}">${ic('whatsapp-logo')}Mandar</button>` })), 'Ninguém para chamar agora')}`)
+      + bloco('Atalhos', 'lightning', atalhos([['Novo cliente', 'user-plus', 'data-acao="novoCad" data-c="clientes"', true], ['Exportar clientes', 'download-simple', 'data-acao="exportarCSV" data-t="clientes"']]));
+  },
+  relatorios: (a) => {
+    const ym = hoje().slice(0, 7), rec = soma(obs(a).flatMap((o) => o.etapas.filter((e) => e.pago && e.pago_em?.startsWith(ym))), (e) => e.valor), gas = soma(a.db.lista('gastos').filter((g) => g.data.startsWith(ym) && !g.cliente_paga), (g) => g.valor);
+    return bloco(`Resultado de ${nomeMes(ym)}`, 'chart-bar', ldNums([[moedaC(rec), 'recebido'], [moedaC(gas), 'gasto'], [moedaC(rec - gas), 'sobrou'], [num(obs(a).filter((o) => o.entregue_em?.startsWith(ym)).length), 'obras entregues']]))
+      + bloco('Levar para o contador', 'printer', atalhos([['Imprimir o mês (PDF)', 'printer', 'data-acao="imprimirMes"', true], ['Exportar gastos (planilha)', 'download-simple', 'data-acao="exportarCSV" data-t="gastos-todos"'], ['Exportar obras (planilha)', 'download-simple', 'data-acao="exportarCSV" data-t="obras"']]));
+  },
+};
+
 // ---------------------------------------------------------------- documentos
 function docOrcamento(a, o) {
   const c = cli(a, o.cliente), cfg = a.db.cfg;
@@ -392,20 +526,20 @@ const app = criarApp({
   busca: [{ colecao: 'obras', grupo: 'Obras', icone: 'house-line', ficha: 'obra', rot: (o) => o.titulo, sub: (o, a) => cli(a, o.cliente)?.nome || '' }],
   comandos: [{ rot: 'Nova obra', icone: 'plus', acao: (a) => a.acoes.novaObra() }, { rot: 'Registrar o dia', icone: 'camera', acao: (a) => a.acoes.novoDiario({}) }, { rot: 'Lançar gasto', icone: 'receipt', acao: (a) => a.acoes.novoGasto({}) }],
   paginas: [
-    { id: 'painel', rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
-    { id: 'obras', rot: 'Obras', icone: 'kanban', titulo: 'Obras', render: obrasPag, cheio: true, atalho: 'o', novo: (a) => a.acoes.novaObra(), cont: (a) => obs(a).filter((o) => o.status === 'andamento').length },
-    { id: 'orcamentos', rot: 'Orçamentos', icone: 'clipboard-text', render: orcamentosPag, cont: (a) => obs(a).filter((o) => o.status === 'orcamento').length },
-    { id: 'cronograma', rot: 'Cronograma', icone: 'chart-bar-horizontal', render: cronogramaPag, cont: (a) => { const n = obs(a).filter((o) => ['andamento', 'pausada'].includes(o.status)).flatMap(planoEtapas).filter(atrasoEtapa).length; return n ? { n, tom: 'er' } : 0; } },
-    { id: 'diario', rot: 'Diário', titulo: 'Diário de obra', icone: 'camera', render: diarioPag, atalho: 'd' },
-    { id: 'gastos', rot: 'Gastos', icone: 'receipt', render: gastosPag, atalho: 'g' },
-    { id: 'equipe', rot: 'Equipe', icone: 'wrench', render: equipePag, cont: (a) => { const n = new Set(a.db.lista('diarias').filter((x) => !x.pago).map((x) => x.pessoa)).size; return n ? { n, tom: 'al' } : 0; } },
+    { id: 'painel', lado: LADOS.painel, montar: montarLado, rot: 'Painel', icone: 'house', titulo: 'Visão geral', render: painel, atalho: 'i' },
+    { id: 'obras', lado: LADOS.obras, montar: montarLado, rot: 'Obras', icone: 'kanban', titulo: 'Obras', render: obrasPag, cheio: true, atalho: 'o', novo: (a) => a.acoes.novaObra(), cont: (a) => obs(a).filter((o) => o.status === 'andamento').length },
+    { id: 'orcamentos', lado: LADOS.orcamentos, montar: montarLado, rot: 'Orçamentos', icone: 'clipboard-text', render: orcamentosPag, cont: (a) => obs(a).filter((o) => o.status === 'orcamento').length },
+    { id: 'cronograma', lado: LADOS.cronograma, montar: montarLado, rot: 'Cronograma', icone: 'chart-bar-horizontal', render: cronogramaPag, cont: (a) => { const n = obs(a).filter((o) => ['andamento', 'pausada'].includes(o.status)).flatMap(planoEtapas).filter(atrasoEtapa).length; return n ? { n, tom: 'er' } : 0; } },
+    { id: 'diario', lado: LADOS.diario, montar: montarLado, rot: 'Diário', titulo: 'Diário de obra', icone: 'camera', render: diarioPag, atalho: 'd' },
+    { id: 'gastos', lado: LADOS.gastos, montar: montarLado, rot: 'Gastos', icone: 'receipt', render: gastosPag, atalho: 'g' },
+    { id: 'equipe', lado: LADOS.equipe, montar: montarLado, rot: 'Equipe', icone: 'wrench', render: equipePag, cont: (a) => { const n = new Set(a.db.lista('diarias').filter((x) => !x.pago).map((x) => x.pessoa)).size; return n ? { n, tom: 'al' } : 0; } },
     { grupo: 'Gestão' },
-    { id: 'terceiros', rot: 'Terceiros', titulo: 'Terceirizados', icone: 'handshake', render: terceirosPag, cont: (a) => { const n = terc(a).filter((t) => medidoTerc(t) > pagoTerc(t)).length; return n ? { n, tom: 'al' } : 0; } },
-    { id: 'ferramentas', rot: 'Ferramentas', icone: 'toolbox', render: ferramentasPag, cont: (a) => { const n = ferr(a).filter((f) => foraHa(f) > 15).length; return n ? { n, tom: 'al' } : 0; } },
-    { id: 'deposito', rot: 'Depósito', titulo: 'Depósito de sobras', icone: 'warehouse', render: depositoPag },
-    { id: 'garantia', rot: 'Garantia', titulo: 'Garantia pós-obra', icone: 'lifebuoy', render: garantiaPag, cont: (a) => { const n = chamados(a).filter((x) => x.status !== 'resolvido').length; return n ? { n, tom: 'al' } : 0; } },
-    { id: 'clientes', rot: 'Clientes', icone: 'users', render: clientesPag },
-    { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatoriosPag },
+    { id: 'terceiros', lado: LADOS.terceiros, montar: montarLado, rot: 'Terceiros', titulo: 'Terceirizados', icone: 'handshake', render: terceirosPag, cont: (a) => { const n = terc(a).filter((t) => medidoTerc(t) > pagoTerc(t)).length; return n ? { n, tom: 'al' } : 0; } },
+    { id: 'ferramentas', lado: LADOS.ferramentas, montar: montarLado, rot: 'Ferramentas', icone: 'toolbox', render: ferramentasPag, cont: (a) => { const n = ferr(a).filter((f) => foraHa(f) > 15).length; return n ? { n, tom: 'al' } : 0; } },
+    { id: 'deposito', lado: LADOS.deposito, montar: montarLado, rot: 'Depósito', titulo: 'Depósito de sobras', icone: 'warehouse', render: depositoPag },
+    { id: 'garantia', lado: LADOS.garantia, montar: montarLado, rot: 'Garantia', titulo: 'Garantia pós-obra', icone: 'lifebuoy', render: garantiaPag, cont: (a) => { const n = chamados(a).filter((x) => x.status !== 'resolvido').length; return n ? { n, tom: 'al' } : 0; } },
+    { id: 'clientes', lado: LADOS.clientes, montar: montarLado, rot: 'Clientes', icone: 'users', render: clientesPag },
+    { id: 'relatorios', lado: LADOS.relatorios, montar: montarLado, rot: 'Relatórios', icone: 'chart-bar', render: relatoriosPag },
   ],
 });
 
@@ -556,6 +690,34 @@ Object.assign(app.acoes, {
     if (c?.telefone) window.open(`${telLink(c.telefone)}?text=${encodeURIComponent(`Olá, ${c.nome.split(' ')[0]}! Recebemos o seu chamado ("${x.descricao}") e vamos passar aí no dia ${dataBR(r.dia)} para resolver.`)}`, '_blank', 'noopener');
   },
   resolverChamado: (d) => { app.db.salvar('chamados', { id: d.id, status: 'resolvido', resolvido_em: hoje() }); avisar('Chamado resolvido'); app.render(); },
+  // painéis laterais
+  avisarAtraso: (d) => { const o = ob(app, d.id), c = cli(app, o.cliente), e = planoEtapas(o).find(atrasoEtapa) || o.etapas.find((x) => x.status !== 'feita');
+    const url = msgZap(c?.telefone, `Olá, ${c?.nome.split(' ')[0]}! Passando para dar uma posição da ${o.titulo.toLowerCase()}: ${e ? `a etapa "${e.nome}" atrasou um pouco` : 'tivemos um atraso'} e já estamos ajustando o cronograma. Qualquer dúvida, me chame. Você acompanha tudo pelo link da obra.`);
+    if (url) window.open(url, '_blank', 'noopener'); else avisar('O cliente não tem WhatsApp cadastrado', { tipo: 'erro' }); },
+  pedirIndicacao: (d) => { const o = ob(app, d.id), c = cli(app, o.cliente);
+    const url = msgZap(c?.telefone, `Olá, ${c?.nome.split(' ')[0]}! Obrigado por confiar a ${o.titulo.toLowerCase()} à ${app.empresa}. Se gostou do serviço, poderia deixar uma avaliação e indicar a gente para algum conhecido? Isso ajuda muito o nosso trabalho. Lembrando: a mão de obra tem garantia de 90 dias.`);
+    if (url) window.open(url, '_blank', 'noopener'); else avisar('O cliente não tem WhatsApp cadastrado', { tipo: 'erro' }); },
+  chamarDeVolta: (d) => { const c = cli(app, d.id);
+    const url = msgZap(c?.telefone, `Olá, ${c?.nome.split(' ')[0]}! Aqui é da ${app.empresa}. Como está a obra que fizemos aí? Se estiver pensando em outra reforma ou precisar de algum reparo, é só me chamar que eu passo para fazer o orçamento.`);
+    if (url) window.open(url, '_blank', 'noopener'); else avisar('O cliente não tem WhatsApp cadastrado', { tipo: 'erro' }); },
+  exportarCSV: (d) => {
+    const csv = (cab, linhas) => '\ufeff' + [cab, ...linhas].map((l) => l.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';')).join('\n');
+    const ym = hoje().slice(0, 7), dinheiro = (v) => String(Math.round(Number(v || 0) * 100) / 100).replace('.', ',');
+    let nome, conteudo;
+    if (d.t === 'obras') { nome = 'obras.csv'; conteudo = csv(['Obra', 'Cliente', 'Situação', 'Valor', 'Recebido', 'A receber', 'Gastos', 'Início', 'Entrega'], obs(app).map((o) => [o.titulo, cli(app, o.cliente)?.nome, stt(o.status)[1], dinheiro(o.valor), dinheiro(recebido(o)), dinheiro(aReceber(o)), dinheiro(meus(app, o.id)), dataBR(o.inicio), dataBR(o.previsao)])); }
+    else if (d.t === 'clientes') { nome = 'clientes.csv'; conteudo = csv(['Cliente', 'WhatsApp', 'Endereço', 'Obras'], app.db.lista('clientes').map((c) => [c.nome, c.telefone, c.endereco, obs(app).filter((o) => o.cliente === c.id).length])); }
+    else { const todos = d.t === 'gastos-todos'; nome = todos ? 'gastos.csv' : `gastos-${ym}.csv`; conteudo = csv(['Data', 'Gasto', 'Categoria', 'Obra', 'Quem pagou', 'Valor'], app.db.lista('gastos').filter((g) => todos || g.data.startsWith(ym)).sort((x, y) => x.data.localeCompare(y.data)).map((g) => [dataBR(g.data), g.descricao, nomeCat(g.categoria), ob(app, g.obra)?.titulo, g.cliente_paga ? 'Cliente' : 'Empresa', dinheiro(g.valor)])); }
+    const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([conteudo], { type: 'text/csv;charset=utf-8' })); el.download = nome; document.body.appendChild(el); el.click(); setTimeout(() => { URL.revokeObjectURL(el.href); el.remove(); }, 500);
+    avisar(`${nome} baixado: abre no Excel`); },
+  imprimirMes: () => {
+    const ym = hoje().slice(0, 7), cfg = app.db.cfg;
+    const receb = obs(app).flatMap((o) => o.etapas.filter((e) => e.pago && e.pago_em?.startsWith(ym)).map((e) => ({ o, e })));
+    const gastos = app.db.lista('gastos').filter((g) => g.data.startsWith(ym) && !g.cliente_paga).sort((x, y) => x.data.localeCompare(y.data));
+    const tr = soma(receb, ({ e }) => e.valor), tg = soma(gastos, (g) => g.valor);
+    imprimir(`<div class="doc"><div class="entre" style="align-items:flex-start"><div><h1>${esc(app.empresa)}</h1><div style="color:#555">${esc(cfg.endereco || '')}</div></div><div style="text-align:right"><b style="font-size:16px">Resumo de ${nomeMes(ym, true)}</b><div style="color:#555">emitido em ${dataBR(hoje())}</div></div></div>
+      <h2>Resultado</h2><table><tbody><tr><td>Recebido dos clientes</td><td class="n">${moeda(tr)}</td></tr><tr><td>Gastos da empresa</td><td class="n">${moeda(tg)}</td></tr><tr><td><b>Sobrou no mês</b></td><td class="n"><b>${moeda(tr - tg)}</b></td></tr></tbody></table>
+      <h2>Recebimentos</h2><table><thead><tr><th>Data</th><th>Obra</th><th>Etapa</th><th class="n">Valor</th></tr></thead><tbody>${receb.map(({ o, e }) => `<tr><td>${dataBR(e.pago_em)}</td><td>${esc(o.titulo)}</td><td>${esc(e.nome)}</td><td class="n">${moeda(e.valor)}</td></tr>`).join('') || '<tr><td colspan="4">Nenhum recebimento no mês</td></tr>'}</tbody></table>
+      <h2>Gastos</h2><table><thead><tr><th>Data</th><th>Gasto</th><th>Obra</th><th class="n">Valor</th></tr></thead><tbody>${gastos.map((g) => `<tr><td>${dataBR(g.data)}</td><td>${esc(g.descricao)} <span style="color:#777">(${esc(nomeCat(g.categoria))})</span></td><td>${esc(ob(app, g.obra)?.titulo || '')}</td><td class="n">${moeda(g.valor)}</td></tr>`).join('') || '<tr><td colspan="4">Nenhum gasto no mês</td></tr>'}</tbody></table></div>`); },
   novoCad: async (d) => { if (await editar(app, d.c)) app.render(); },
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
 });

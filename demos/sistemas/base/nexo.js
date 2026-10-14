@@ -453,7 +453,7 @@ function montar(app, cfg) {
   const preco = (v) => moeda(v).replace(',00', '');
   prepararExtras(app, cfg);
   if (app.db.cfg.ramo_pendente && !app.db.cfg.ramo) { app.aplicarModelo(app.db.cfg.ramo_pendente, true); delete app.db.cfg.ramo_pendente; app.db.gravar(); }
-  const voltar = cfg.paginaSite ? `<a class="faixa-voltar" href="${site}${cfg.paginaSite}" target="_top">${ic('arrow-left')}Voltar<span class="so-larga">&nbsp;ao site</span></a><span class="sep so-larga"></span>` : '';
+  const voltar = cfg.paginaSite ? `<a class="faixa-voltar" href="${site}${cfg.paginaSite}" target="_top">${ic('arrow-left')}<span>Voltar<span class="so-larga"> ao site</span></span></a><span class="sep so-larga"></span>` : '';
   const faixaDemo = `<div class="faixa nao-imprime">${voltar}<span class="so-larga">Demonstração do <b>${esc(cfg.nome)}</b> · dados de exemplo, só neste navegador</span><span class="sep so-larga"></span>
       <button type="button" data-acao="recomecar">Recomeçar</button>
       ${cfg.cta === false ? '' : `<a class="cta" href="${site}app/${cfg.id}/" target="_top">Testar grátis<span class="so-larga">&nbsp;7 dias com os seus dados</span></a>`}</div>`;
@@ -495,7 +495,13 @@ function montar(app, cfg) {
     $('#acoes-topo').innerHTML = p.acoes ? p.acoes(app, params) : '';
     const c = $('#conteudo'); c.className = `conteudo ${p.cheio ? 'cheio' : ''}`;
     const rolagem = scrollY;
-    c.innerHTML = p.render(app, params);
+    const corpo = p.render(app, params);
+    // painel lateral da aba (opcional): ferramentas e atalhos daquela área; no celular fica recolhido em cima
+    if (p.lado) {
+      const aberto = app.estado.ladoFechado ? false : innerWidth >= 1100;
+      c.innerHTML = `<div class="com-lado"><div class="com-lado-princ">${corpo}</div><details class="lado nao-imprime" ${aberto ? 'open' : ''}><summary>${ic('sidebar-simple')}<span>Ferramentas desta aba</span>${ic('caret-down', 'seta')}</summary><div class="lado-corpo">${p.lado(app, params)}</div></details></div>`;
+      c.querySelector('details.lado').addEventListener('toggle', (e) => { if (innerWidth >= 1100) app.estado.ladoFechado = !e.target.open; });
+    } else c.innerHTML = corpo;
     if (p.id === paginas[0].id && app.passosHTML && app.acesso(p.id) === 'editar') c.insertAdjacentHTML('afterbegin', app.passosHTML());
     if (raiz.dataset.soVer) c.insertAdjacentHTML('afterbegin', `<div class="dica">${ic('eye')}<span>Você pode <b>ver</b> esta área, mas não editar. Para mudar isso, fale com o dono da empresa.</span></div>`);
     p.montar?.(app, c, params);

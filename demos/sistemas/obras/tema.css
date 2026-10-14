@@ -159,3 +159,11 @@
 [data-produto="obras"] .lat .busca-lat { color: #b9c6dc; }
 [data-produto="obras"] .lat a.item .cont, [data-produto="obras"] .faixa a.cta, [data-produto="obras"] .faixa a.cta:hover { background: #5aa5ff; color: #071328; }
 [data-produto="obras"] .lat a.item.ativo { background: #5aa5ff; color: #071328; }
+
+/* celular: 13 abas não cabem lado a lado; a barra de baixo rola para o lado, cada aba com largura própria */
+@media (max-width: 900px) {
+  [data-produto="obras"] .lat { justify-content: flex-start; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-snap-type: x proximity; }
+  [data-produto="obras"] .lat::-webkit-scrollbar { display: none; }
+  [data-produto="obras"] .lat a.item { flex: 0 0 76px; scroll-snap-align: start; position: relative; }
+  [data-produto="obras"] .lat a.item .corta { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
