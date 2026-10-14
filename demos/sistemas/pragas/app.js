@@ -4,6 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, kpis, barras, barrasH, DIAS, telLink,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 
 const SERVICOS = ['Desinsetização', 'Desratização', 'Descupinização', 'Limpeza de caixa d\'água', 'Controle de pombos', 'Sanitização de ambientes'];
 const PRAGAS = ['Baratas', 'Formigas', 'Ratos', 'Cupins', 'Escorpiões', 'Mosquitos', 'Pulgas', 'Traças', 'Aranhas', 'Pombos'];
@@ -261,6 +263,7 @@ const app = criarApp({
     { grupo: 'Gestão' },
     { id: 'produtos', rot: 'Produtos e estoque', icone: 'flask', render: produtosPag, cont: (a) => { const n = a.db.lista('produtos').filter((p) => p.estoque <= p.minimo).length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatoriosPag },
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 
@@ -308,3 +311,7 @@ Object.assign(app.acoes, {
   novoCad: async (d) => { if (await editar(app, d.c)) app.render(); },
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
 });
+
+// ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;

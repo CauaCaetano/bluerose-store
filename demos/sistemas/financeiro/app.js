@@ -4,6 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, linhas, rosca, barrasH, kanban, DIAS, normal, baixar,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, pop, imprimir, fecharGaveta,
 } from '../base/nexo.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 
 const TEC = [['diego', 'Diego Araújo', 30], ['renan', 'Renan Souza', 30], ['paulo', 'Paulo Henrique', 25]];
 const nomeT = (id) => (TEC.find((x) => x[0] === id) || [, '—'])[1];
@@ -386,6 +388,7 @@ const app = criarApp({
     { id: 'estoque', rot: 'Peças e serviços', icone: 'package', render: estoque, cont: (a) => { const n = a.db.lista('produtos').filter((p) => p.estoque <= p.minimo).length; return n ? { n, tom: 'er' } : 0; } },
     { id: 'pessoas', rot: 'Clientes e fornecedores', icone: 'users', render: pessoasPag, atalho: 'c' },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios },
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 
@@ -454,3 +457,7 @@ Object.assign(app.acoes, {
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
   entradaEst: async (d) => { const p = app.db.obter('produtos', d.id); const r = await modal({ titulo: `Entrada de estoque · ${p.nome}`, largura: 420, corpo: `<form class="form-grade" onsubmit="return false"><label class="campo">Quantidade<input type="number" min="1" name="q" value="5"></label><label class="campo">Custo unitário<input type="number" step="0.01" name="c" value="${p.custo}"></label><label class="campo largo flex" style="flex-direction:row;gap:8px;align-items:center;font-weight:400;color:var(--tx)"><input type="checkbox" name="l" checked> Lançar em Contas a pagar</label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Dar entrada', classe: 'pri', acao: (f) => { const fm = f.querySelector('form'); return { q: Number(fm.q.value), c: Number(fm.c.value), l: fm.l.checked }; } }] }); if (!r) return; app.db.salvar('produtos', { id: d.id, estoque: p.estoque + r.q, custo: r.c }); if (r.l) app.db.salvar('lancamentos', { tipo: 'despesa', descricao: `Compra: ${r.q}× ${p.nome}`, categoria: 'fornecedores', conta: 'ct0', valor: Math.round(r.q * r.c * 100) / 100, vencimento: diaMais(28), status: 'aberto', forma: 'Boleto', conciliado: false }); avisar(`+${r.q} ${p.nome}`); app.render(); },
 });
+
+// ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;

@@ -5,6 +5,7 @@ import {
   sorteio, soma, agrupar, av, ic, et, prog, kpis, barras, barrasH, kanban, telLink,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir, diaUtil, DIAS_L, paraData, normal,
 } from '../base/nexo.js';
+import { ferramentaPaginas, registrarCalcs } from '../base/lado.js';
 
 const STATUS = [['orcamento', 'Orçamento', '#8a8478'], ['andamento', 'Em andamento', '#f26b1d'], ['pausada', 'Pausada', '#c9971c'], ['concluida', 'Concluída', '#2e7d4f']];
 const stt = (id) => STATUS.find((s) => s[0] === id) || STATUS[0];
@@ -306,6 +307,19 @@ function montarLado(a, c) {
 const msgZap = (tel, texto) => (tel ? `${telLink(tel)}?text=${encodeURIComponent(texto)}` : '');
 const proxEntregas = (a, dias) => obs(a).filter((o) => o.status === 'andamento' && diasAte(o.previsao) >= 0 && diasAte(o.previsao) <= dias).sort((x, y) => x.previsao.localeCompare(y.previsao));
 
+const ITENS_MENU = [
+  ['preco', 'Calcular o preço', 'calculator', 'orcamentos', 'Calcular o preço'],
+  ['piso', 'Material de piso', 'ruler', 'orcamentos', 'Calcular material de piso'],
+  ['tinta', 'Tinta', 'drop', 'orcamentos', 'Calcular tinta'],
+  ['concreto', 'Concreto', 'stack', 'orcamentos', 'Calcular concreto'],
+  ['prazo', 'Data de entrega', 'calendar-check', 'cronograma', 'Calcular data de entrega'],
+  ['pagamento', 'Pagamento da equipe', 'hand-coins', 'equipe', 'Calcular o pagamento'],
+  ['atrasadas', 'Etapas atrasadas', 'warning', 'cronograma', 'Etapas atrasadas'],
+  ['estouro', 'Gasto perto do valor', 'receipt', 'gastos', 'Gasto perto do valor'],
+  ['terceiros', 'Medido e não pago', 'hand-coins', 'terceiros', 'Medido e não pago'],
+  ['voltar', 'Chamar clientes de volta', 'megaphone', 'clientes', 'Chamar de volta'],
+];
+
 const LADOS = {
   painel: (a) => {
     const ent = proxEntregas(a, 30), etapasSemana = obs(a).filter((o) => o.status === 'andamento').flatMap((o) => planoEtapas(o).filter((e) => e.status !== 'feita' && diasAte(e.fim) >= 0 && diasAte(e.fim) <= 7).map((e) => ({ o, e })));
@@ -540,6 +554,7 @@ const app = criarApp({
     { id: 'garantia', lado: LADOS.garantia, montar: montarLado, rot: 'Garantia', titulo: 'Garantia pós-obra', icone: 'lifebuoy', render: garantiaPag, cont: (a) => { const n = chamados(a).filter((x) => x.status !== 'resolvido').length; return n ? { n, tom: 'al' } : 0; } },
     { id: 'clientes', lado: LADOS.clientes, montar: montarLado, rot: 'Clientes', icone: 'users', render: clientesPag },
     { id: 'relatorios', lado: LADOS.relatorios, montar: montarLado, rot: 'Relatórios', icone: 'chart-bar', render: relatoriosPag },
+    ...ferramentaPaginas(LADOS, ITENS_MENU, { semPro: true }),
   ],
 });
 
@@ -721,3 +736,6 @@ Object.assign(app.acoes, {
   novoCad: async (d) => { if (await editar(app, d.c)) app.render(); },
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
 });
+
+// as calculadoras das abas também funcionam nos itens do menu
+registrarCalcs(CALCS);

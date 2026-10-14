@@ -5,6 +5,8 @@ import {
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, pop, imprimir, campoHTML, lerCampos, fecharGaveta,
   corSegura,
 } from '../base/nexo.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 
 const STATUS = {
   agendado: ['Agendado', '#94a3b8', 'info'], confirmado: ['Confirmado', '#3b82f6', 'info'], chegou: ['Chegou', '#8b5cf6', 'roxo'], atendimento: ['Em atendimento', '#f59e0b', 'al'],
@@ -556,6 +558,7 @@ const app = criarApp({
     { id: 'equipe', rot: 'Profissionais', icone: 'identification-card', render: profissionaisPag },
     { id: 'comissoes', rot: 'Comissões', icone: 'hand-coins', render: comissoes },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios, atalho: 'r' },
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 
@@ -638,3 +641,7 @@ Object.assign(app.acoes, {
     modal({ titulo: 'Horário liberado', largura: 520, corpo: `<p class="mute-2">${esc(nomesServ(app, x))} · ${dataCurta(x.data)} às ${x.ini} com ${esc(prof(app, x.profissional)?.nome || '')}. Quem está na lista de espera:</p><ul class="lista" style="margin:8px -18px 0">${l.map((e) => { const c = cli(app, e.cliente); return `<li>${av(c?.nome || '?')}<div class="cresce"><div class="t">${esc(c?.nome || '')}</div><div class="s">${esc(e.preferencia || 'qualquer horário')}</div></div><a class="btn peq pri" target="_blank" rel="noopener" href="${telLink(c?.telefone)}?text=${encodeURIComponent(`Oi, ${c?.nome.split(' ')[0]}! Abriu um horário para ${serv(app, e.servico)?.nome}: ${dataBR(x.data)} às ${x.ini}. Quer que eu reserve para você?`)}">${ic('whatsapp-logo')}Oferecer</a></li>`; }).join('')}</ul>`, botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }] });
   },
 });
+
+// ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;

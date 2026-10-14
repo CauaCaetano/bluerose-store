@@ -4,6 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, linhas, rosca, barrasH, funilH, kanban, calGrade, DIAS, paraData,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, pop, imprimir,
 } from '../base/nexo.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 
 const ETAPAS = [
   { id: 'contato', nome: 'Contato feito', prob: 10, rot: 7, cor: '#a5b4fc' },
@@ -497,6 +499,7 @@ const app = criarApp({
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios, atalho: 'r' },
     { id: 'metas', rot: 'Metas', icone: 'target', titulo: 'Metas de vendas', render: metas },
     { id: 'produtos', rot: 'Produtos', icone: 'package', titulo: 'Produtos e serviços', render: produtos },
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 
@@ -559,3 +562,7 @@ Object.assign(app.acoes, {
   excluirReg: (d) => excluir(app, d.c, d.id),
   salvarMeta: (d, el) => { const l = app.db.lista('metas'); const m = l.find((x) => x.vendedor === d.v && x.mes === d.m); if (m) app.db.salvar('metas', { id: m.id, valor: Number(el.value) || 0 }); else app.db.salvar('metas', { vendedor: d.v, mes: d.m, valor: Number(el.value) || 0 }); avisar(`Meta de ${nomeV(d.v)} salva`); app.render(); },
 });
+
+// ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;

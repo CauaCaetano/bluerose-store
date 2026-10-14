@@ -4,6 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, prog, kpis, barrasH, kanban, calMes, telLink,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, imprimir,
 } from '../base/nexo.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 
 const ETAPAS = [['negociacao', 'Em negociação', '#a39b86'], ['fechado', 'Contrato fechado', '#b08d4f'], ['planejamento', 'Planejamento', '#7c8a45'], ['reta', 'Reta final (30 dias)', '#c0692e'], ['realizado', 'Realizado', '#4f5a2e']];
 const etp = (id) => ETAPAS.find((e) => e[0] === id) || ETAPAS[0];
@@ -256,6 +258,7 @@ const app = criarApp({
     { grupo: 'Gestão' },
     { id: 'fornecedores', rot: 'Fornecedores', icone: 'storefront', render: fornecedoresPag },
     { id: 'financeiro', rot: 'Financeiro', icone: 'coins', render: financeiroPag },
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 
@@ -307,3 +310,7 @@ Object.assign(app.acoes, {
   novoCad: async (d) => { if (await editar(app, d.c)) app.render(); },
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
 });
+
+// ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;

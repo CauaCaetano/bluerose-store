@@ -4,6 +4,8 @@ import {
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, linhas, rosca, barrasH, DIAS, normal,
   modal, confirmar, avisar, editar, excluir, ficha, props, linhaDoTempo, vazio, pop, imprimir, fecharGaveta,
 } from '../base/nexo.js';
+import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
+import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 import { baixar } from '../base/nexo.js';
 
 const DEP = [['d0', 'CD Principal'], ['d1', 'Loja Centro']];
@@ -511,6 +513,7 @@ const app = criarApp({
     { id: 'fornecedores', rot: 'Fornecedores', icone: 'buildings', render: cadastroPag('fornecedores', 'fornecedor', 'fornecedores', 'fornecedor') },
     { grupo: 'Gestão' },
     { id: 'relatorios', rot: 'Relatórios', icone: 'chart-bar', render: relatorios, atalho: 'r' },
+    ...ferramentaPaginas(FERR, FERR_ITENS),
   ],
 });
 
@@ -653,3 +656,7 @@ document.addEventListener('keydown', (e) => {
   if (!p) return avisar('Produto não encontrado', { tipo: 'erro' });
   app.estado.pdv.busca = ''; const st = app.estado['tab:pdvbusca']; if (st) st.busca = ''; app.acoes.pdvAdd({ id: p.id }); setTimeout(() => document.querySelector('[data-pdv-busca]')?.focus(), 30);
 });
+
+// ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
+Object.assign(app.acoes, acoesLado());
+app.travarLado = travarPro;

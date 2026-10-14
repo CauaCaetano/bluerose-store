@@ -65,15 +65,16 @@ export const paginasFerramentas = (fns) => [
 // lista = [[id, rótulo, ícone, aba de LADOS onde o bloco nasce, começo do título do bloco], ...]
 const textoH3 = (b) => ((b.match(/<h3>([\s\S]*?)<\/h3>/) || ['', ''])[1]).replace(/<[^>]+>/g, '').trim();
 const blocoDe = (a, fn, prefixo) => blocos(a, [fn]).find((b) => textoH3(b).startsWith(prefixo)) || '';
-export const ferramentaPaginas = (L, lista) => [
+// semPro: sistemas de plano único (RoseConstruct), em que tudo está incluso e nada leva a marca Pro
+export const ferramentaPaginas = (L, lista, { semPro = false } = {}) => [
   { grupo: 'Ferramentas' },
   ...lista.map(([id, rot, icone, aba, prefixo]) => ({
     id: `f-${id}`, rot, icone, titulo: rot,
     render: (a) => { const b = blocoDe(a, L[aba], prefixo);
-      return `<div class="ld-pagina ld-uma">${b ? travarPro(a, b) : `<div class="ld-vazio">${ic('check-circle')}Nada por aqui agora.</div>`}</div>`; },
+      return `<div class="ld-pagina ld-uma">${b ? (semPro ? b : travarPro(a, b)) : `<div class="ld-vazio">${ic('check-circle')}Nada por aqui agora.</div>`}</div>`; },
     montar: (a, c) => ligarCalcs(c),
     cont: (a) => { const b = blocoDe(a, L[aba], prefixo); if (!b || ehCalc(b)) return 0;
-      if (!a.nuvem || !temPro(a)) return { n: 'Pro', tom: 'pro' };
+      if (!semPro && (!a.nuvem || !temPro(a))) return { n: 'Pro', tom: 'pro' };
       return (b.match(/data-acao="ldZap"/g) || []).length; },
   })),
 ];
