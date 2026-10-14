@@ -39,4 +39,66 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', aplicar);
   else aplicar();
+
+  /*
+   * "Mandar um e-mail": muita gente não tem um programa de e-mail configurado no computador, e aí o
+   * link mailto: só abre uma aba vazia. Em vez dele, abrimos uma janela com três caminhos que sempre
+   * funcionam: escrever no Gmail (já com assunto e texto), copiar o endereço ou usar o app de e-mail.
+   */
+  var en = (document.documentElement.lang || '').indexOf('en') === 0;
+  var T = en
+    ? { titulo: 'Send an email', sub: 'Choose how you prefer to write to Blue Rose:', gmail: 'Write in Gmail', copiar: 'Copy', copiado: 'Copied', app: 'Use my email app', fechar: 'Close' }
+    : { titulo: 'Mandar um e-mail', sub: 'Escolha como prefere escrever para a Blue Rose:', gmail: 'Escrever no Gmail', copiar: 'Copiar', copiado: 'Copiado', app: 'Usar o app de e-mail do computador', fechar: 'Fechar' };
+
+  function abrirEmail(assunto, corpo) {
+    var antigo = document.querySelector('.br-email'); if (antigo) antigo.remove();
+    var q = function (k, v) { return v ? k + '=' + encodeURIComponent(v) : ''; };
+    var gmail = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(EMAIL) + (assunto ? '&' + q('su', assunto) : '') + (corpo ? '&' + q('body', corpo) : '');
+    var mailto = 'mailto:' + EMAIL + '?' + [q('subject', assunto), q('body', corpo)].filter(Boolean).join('&');
+    var d = document.createElement('dialog');
+    d.className = 'br-email';
+    d.setAttribute('aria-labelledby', 'br-email-t');
+    d.innerHTML =
+      '<h2 id="br-email-t"></h2><p class="br-email-sub"></p>' +
+      '<div class="br-email-end"><span class="br-email-addr"></span><button type="button" class="br-email-copiar"></button></div>' +
+      '<a class="br-email-gmail" target="_blank" rel="noopener"></a>' +
+      '<a class="br-email-app" data-direto></a>' +
+      '<button type="button" class="br-email-fechar"></button>';
+    d.querySelector('h2').textContent = T.titulo;
+    d.querySelector('.br-email-sub').textContent = T.sub;
+    d.querySelector('.br-email-addr').textContent = EMAIL;
+    var copiar = d.querySelector('.br-email-copiar'); copiar.textContent = T.copiar;
+    var g = d.querySelector('.br-email-gmail'); g.href = gmail; g.textContent = T.gmail;
+    var app = d.querySelector('.br-email-app'); app.href = mailto; app.textContent = T.app;
+    var fechar = d.querySelector('.br-email-fechar'); fechar.textContent = T.fechar;
+    copiar.addEventListener('click', function () {
+      var ok = function () { copiar.textContent = T.copiado; setTimeout(function () { copiar.textContent = T.copiar; }, 1800); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(EMAIL).then(ok, function () {});
+      else {
+        var r = document.createRange(); r.selectNodeContents(d.querySelector('.br-email-addr'));
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        try { document.execCommand('copy'); ok(); } catch (e) { /* o endereço fica selecionado para copiar à mão */ }
+      }
+    });
+    fechar.addEventListener('click', function () { d.close(); });
+    g.addEventListener('click', function () { setTimeout(function () { d.close(); }, 300); });
+    d.addEventListener('close', function () { d.remove(); });
+    d.addEventListener('click', function (e) { if (e.target === d) d.close(); });   // clique fora fecha
+    document.body.appendChild(d);
+    if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+    g.focus();
+  }
+  window.BR_abrirEmail = abrirEmail;
+
+  // qualquer link de e-mail do site (contato, rodapé, assistente) usa a janela
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="mailto:"]');
+    if (!a || a.hasAttribute('data-direto') || a.hasAttribute('data-email-form') || !EMAIL) return;
+    var url = a.getAttribute('href'), params = {};
+    (url.split('?')[1] || '').split('&').forEach(function (par) {
+      var kv = par.split('='); if (kv[0]) params[kv[0].toLowerCase()] = decodeURIComponent((kv[1] || '').replace(/\+/g, ' '));
+    });
+    e.preventDefault();
+    abrirEmail(params.subject, params.body);
+  }, true);
 })();

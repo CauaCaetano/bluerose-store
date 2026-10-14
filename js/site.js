@@ -447,7 +447,8 @@
         if (!window.BR_EMAIL) return;
         e.preventDefault();
         if (!validar()) return;
-        window.location.href = 'mailto:' + window.BR_EMAIL + '?subject=' + encodeURIComponent(M.assunto) + '&body=' + encodeURIComponent(montarTexto());
+        if (window.BR_abrirEmail) window.BR_abrirEmail(M.assunto, montarTexto());
+        else window.location.href = 'mailto:' + window.BR_EMAIL + '?subject=' + encodeURIComponent(M.assunto) + '&body=' + encodeURIComponent(montarTexto());
       });
     }
   }

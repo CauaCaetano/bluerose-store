@@ -1404,3 +1404,21 @@ section.caminhos { padding: 8px 0 clamp(40px, 5vw, 64px); }
 .prod-mais:hover em { transform: translateX(3px); }
 .prod-mais:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 @media (min-width: 1180px) { .prod.prod-cat.so-destaque { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, .85fr); } }
+
+/* janela "Mandar um e-mail" (js/contato.js): Gmail, copiar o endereço ou app de e-mail */
+.br-email { width: min(420px, calc(100vw - 32px)); padding: 22px 22px 18px; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--surface); color: var(--ink); box-shadow: 0 30px 70px -24px rgba(3, 8, 20, .85); font-family: var(--font); }
+.br-email::backdrop { background: rgba(5, 8, 14, .6); backdrop-filter: blur(2px); }
+.br-email h2 { margin: 0; font-size: 20px; letter-spacing: -.01em; }
+.br-email-sub { margin: 4px 0 16px; color: var(--ink-2); font-size: 14.5px; }
+.br-email-end { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 14px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--bg); margin-bottom: 12px; }
+.br-email-addr { flex: 1; min-width: 0; overflow-wrap: anywhere; font: 600 14px/1.3 var(--font); letter-spacing: -.005em; color: var(--ink); user-select: all; }
+.br-email-copiar, .br-email-fechar { font: 600 13.5px/1 var(--font); color: var(--ink); background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 9px 12px; cursor: pointer; }
+.br-email-copiar:hover, .br-email-fechar:hover { border-color: var(--accent); }
+.br-email-gmail, .br-email-app { display: flex; justify-content: center; align-items: center; min-height: 44px; border-radius: 10px; font-weight: 600; font-size: 15px; text-decoration: none; margin-top: 8px; }
+.br-email-gmail { background: var(--accent-solid); color: #fff; }
+.br-email-gmail:hover { filter: brightness(1.1); }
+.br-email-app { border: 1px solid var(--line-2); color: var(--ink-2); font-weight: 500; font-size: 14px; }
+.br-email-app:hover { color: var(--ink); border-color: var(--accent); }
+.br-email-fechar { display: block; margin: 12px auto 0; background: transparent; border-color: transparent; color: var(--ink-3); }
+.br-email :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 480px) { .br-email { padding: 20px 16px 14px; } .br-email-addr { font-size: 12.5px; } .br-email-end { padding-left: 10px; } }

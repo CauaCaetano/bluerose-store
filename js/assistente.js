@@ -237,7 +237,7 @@
   AssistantKnowledge.prototype.contatos = function () {
     var l = [];
     if (window.BR_WA) l.push({ rotulo: 'Chamar no WhatsApp', href: 'https://wa.me/' + window.BR_WA, externo: true });
-    if (window.BR_EMAIL) l.push({ rotulo: 'Mandar um e-mail', href: 'mailto:' + window.BR_EMAIL, externo: true });
+    if (window.BR_EMAIL) l.push({ rotulo: 'Mandar um e-mail', href: 'mailto:' + window.BR_EMAIL });
     l.push({ rotulo: 'Formulário de contato', href: 'index.html#contato' });
     return l;
   };
