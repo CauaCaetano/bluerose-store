@@ -485,7 +485,7 @@ function montar(app, cfg) {
           <a class="feito-br" href="${site}" target="_blank" rel="noopener" title="Blue Rose Express"><img src="${new URL('blue-rose.png', import.meta.url).href}" alt="" width="20" height="20"><span>Feito pela <b>Blue Rose</b></span></a>
         </div>
       </nav>
-      <main class="principal"><header class="topo"><button type="button" class="btn fant ic-so btn-menu" data-acao="menu" aria-label="Abrir menu">${ic('list')}</button><div class="trilha" id="trilha"></div><div class="acoes" id="acoes-topo"></div></header>
+      <main class="principal"><header class="topo"><button type="button" class="btn fant ic-so btn-menu" data-acao="menu" aria-label="Abrir menu">${ic('list')}</button><img class="topo-logo" src="${cfg.logo || new URL('linha-nexo.png', import.meta.url).href}" alt="${esc(cfg.nome)}" width="26" height="26"><div class="trilha" id="trilha"></div><div class="acoes" id="acoes-topo"></div></header>
         <div class="conteudo" id="conteudo"></div></main>
     </div>`;
   const $ = (s) => document.querySelector(s);

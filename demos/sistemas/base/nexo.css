@@ -134,6 +134,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .topo h1 { font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .topo .acoes { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .btn-menu { display: none !important; }
+.topo-logo { display: none; width: 26px; height: 26px; border-radius: 7px; flex: none; object-fit: contain; } /* no celular, o logo do sistema fica no topo (no computador ele está na barra lateral) */
 .conteudo { padding: 20px 22px 60px; display: flex; flex-direction: column; gap: 16px; max-width: 1480px; width: 100%; }
 .conteudo.cheio { max-width: none; }
 .cab-pag { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -508,6 +509,8 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
   .lat { position: fixed; z-index: 55; left: 0; top: var(--faixa); bottom: 0; width: 264px; height: auto; transform: translateX(-102%); transition: transform .25s var(--ease); box-shadow: var(--sombra-3); }
   .app.menu-aberto .lat { transform: none; }
   .btn-menu { display: inline-flex !important; }
+  .topo-logo { display: block; margin-left: -6px; }
+  .topo { gap: 10px; }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kpi:nth-child(3) { border-left: 0; }
   .kpi:nth-child(n+3) { border-top: 1px solid var(--borda); }
