@@ -3,7 +3,7 @@
 // No iPhone (Safari não tem botão de instalar), mostra como adicionar à Tela de Início.
 // O item "Instalar o app" do menu do sistema fica sempre à mão enquanto o app não estiver instalado.
 (() => {
-  if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {}));
+  if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('../sw.js', { scope: '../', updateViaCache: 'none' }).then((r) => r.update()).catch(() => {}));
   const instalado = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   let dispensado = false;
   try { dispensado = localStorage.getItem('nexo-pwa-dispensado') === '1'; } catch { /* sem armazenamento */ }

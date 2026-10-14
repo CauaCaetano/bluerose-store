@@ -780,3 +780,23 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .ld-trancado p { color: var(--tx-2); display: flex; gap: 6px; align-items: flex-start; }
 .lat .cont.pro { background: linear-gradient(135deg, #2557d6, #6d4ae0); color: #fff; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
 .ld-pagina.ld-uma { grid-template-columns: minmax(0, 640px); }
+
+/* campo de dias da semana (ex.: dias de trabalho do profissional) */
+.dias-sel { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.dias-sel label { display: inline-flex; align-items: center; justify-content: center; min-width: 46px; height: 34px; padding: 0 10px; border: 1px solid var(--borda-2); border-radius: 8px; font-weight: 500; color: var(--tx-2); cursor: pointer; user-select: none; }
+.dias-sel input { position: absolute; opacity: 0; pointer-events: none; }
+.dias-sel label:has(input:checked) { background: var(--acc); border-color: var(--acc); color: #fff; }
+.dias-sel label:has(input:focus-visible) { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+/* celular: nada passa da borda. O que não cabe na linha desce para a de baixo (títulos com botões, listas, abas),
+   e a página nunca fica mais larga que a tela (senão o celular afasta tudo e corta a faixa do topo). */
+@media (max-width: 760px) {
+  body { overflow-x: clip; }
+  .entre { flex-wrap: wrap; row-gap: 8px; }
+  .entre > .flex, .flex:has(> .btn), .flex.mute { flex-wrap: wrap; }
+  .lista > li { flex-wrap: wrap; row-gap: 6px; }
+  .lista > li > :not(.dir):not(.av):not(.ic) { min-width: 0; }
+  .btn { max-width: 100%; }
+  .visoes, .abas-pag { flex-wrap: wrap; overflow-x: visible; }
+  img, video, canvas, iframe { max-width: 100%; }
+}

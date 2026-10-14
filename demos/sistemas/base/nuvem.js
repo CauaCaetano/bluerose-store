@@ -337,6 +337,7 @@ function converter(c, v) {
   if (['moeda', 'numero', 'porcentagem'].includes(c.tipo)) { const n = Number(v.replace(/[R$\s%]/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.')); return Number.isFinite(n) ? n : null; }
   if (c.tipo === 'data') { const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/); if (m) return `${m[3].length === 2 ? `20${m[3]}` : m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; return /^\d{4}-\d{2}-\d{2}/.test(v) ? v.slice(0, 10) : null; }
   if (c.tipo === 'booleano') return /^(s|sim|y|yes|1|true|x)$/i.test(v);
+  if (c.tipo === 'dias') { const m = { dom: 0, seg: 1, ter: 2, qua: 3, qui: 4, sex: 5, sab: 6, 'sáb': 6 }; const l = v.toLowerCase().split(/[\s,;/]+/).map((x) => (/^\d$/.test(x) ? Number(x) : m[x.slice(0, 3)])).filter((x) => x >= 0 && x <= 6); return l.length ? [...new Set(l)].sort() : null; }
   return v;
 }
 

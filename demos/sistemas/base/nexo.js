@@ -176,9 +176,13 @@ function opcoesDe(c, app) {
   const o = typeof c.opcoes === 'function' ? c.opcoes(app) : c.opcoes || [];
   return o.map((x) => (Array.isArray(x) ? x : [x, x]));
 }
+const DIAS_CAMPO = [[1, 'Seg'], [2, 'Ter'], [3, 'Qua'], [4, 'Qui'], [5, 'Sex'], [6, 'Sáb'], [0, 'Dom']];
 export function campoHTML(c, v, app) {
   const id = `f-${c.nome}`, req = c.obrigatorio ? 'required' : '';
   const val = v ?? (typeof c.padrao === 'function' ? c.padrao(app) : c.padrao) ?? '';
+  // dias da semana: um botão por dia (guarda os números de 0 = domingo a 6 = sábado)
+  if (c.tipo === 'dias') { const marc = Array.isArray(val) ? val.map(Number) : [];
+    return `<div class="campo largo" role="group" aria-label="${esc(c.rotulo)}">${esc(c.rotulo)}<div class="dias-sel">${DIAS_CAMPO.map(([n, r]) => `<label><input type="checkbox" name="${c.nome}" value="${n}" ${marc.includes(n) ? 'checked' : ''}><span>${r}</span></label>`).join('')}</div>${c.ajuda ? `<span class="ajuda">${esc(c.ajuda)}</span>` : ''}</div>`; }
   let ctl;
   if (c.tipo === 'selecao' || c.tipo === 'relacao') ctl = `<select id="${id}" name="${c.nome}" ${req}>${c.obrigatorio && val ? '' : '<option value="">Selecione…</option>'}${opcoesDe(c, app).map(([k, r]) => `<option value="${esc(k)}" ${String(k) === String(val) ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select>`;
   else if (c.tipo === 'texto-longo') ctl = `<textarea id="${id}" name="${c.nome}" ${req} placeholder="${esc(c.dica || '')}">${esc(val)}</textarea>`;
@@ -194,6 +198,7 @@ export function campoHTML(c, v, app) {
 export function lerCampos(raiz, campos) {
   const o = {};
   for (const c of campos) {
+    if (c.tipo === 'dias') { const ls = [...raiz.querySelectorAll(`[name="${c.nome}"]`)]; if (ls.length) o[c.nome] = ls.filter((x) => x.checked).map((x) => Number(x.value)).sort(); continue; }
     const el = raiz.querySelector(`[name="${c.nome}"]`); if (!el) continue;
     let v = el.type === 'checkbox' ? el.checked : el.value;
     if (['moeda', 'numero', 'porcentagem'].includes(c.tipo)) v = v === '' ? null : Number(v);

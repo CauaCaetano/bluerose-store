@@ -286,6 +286,7 @@ function converter(c, v, app) {
     const r = dataTexto(v); return r ? `${r.d}T${r.h || '00:00'}` : null;
   }
   if (c.tipo === 'hora') return horaTexto(v);
+  if (c.tipo === 'dias') { const m = { dom: 0, seg: 1, ter: 2, qua: 3, qui: 4, sex: 5, sab: 6, 'sáb': 6 }; const l = String(v).toLowerCase().split(/[\s,;/]+/).map((x) => (/^\d$/.test(x) ? Number(x) : m[x.slice(0, 3)])).filter((x) => x >= 0 && x <= 6); return l.length ? [...new Set(l)].sort() : null; }
   if (c.tipo === 'booleano') return typeof v === 'boolean' ? v : /^(s|sim|y|yes|1|true|x|ok|pago|feito)$/i.test(String(v).trim());
   if (c.tipo === 'selecao') { const o = opcoes(c, app), alvo = chave(v); const achou = o.find(([k, r]) => chave(k) === alvo || chave(r) === alvo) || o.find(([, r]) => chave(r).startsWith(alvo) || alvo.startsWith(chave(r))); return achou ? achou[0] : null; }
   if (c.tipo === 'tel') return typeof v === 'number' ? String(Math.round(v)) : String(v).trim();

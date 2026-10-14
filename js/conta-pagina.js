@@ -86,14 +86,24 @@
     (navigator.clipboard ? navigator.clipboard.writeText(el.value) : Promise.reject()).catch(function () { el.select(); document.execCommand('copy'); });
     e.target.textContent = 'Copiado'; setTimeout(function () { e.target.textContent = 'Copiar'; }, 1800);
   });
+  // a última lista fica guardada neste aparelho: aparece na hora e é atualizada assim que o servidor responde
+  var guardada = C.sessao && C.sessao(), CHAVE_CACHE = guardada ? 'br-conta-' + guardada.user.id : null;
+  function lerCache() { try { return CHAVE_CACHE ? JSON.parse(localStorage.getItem(CHAVE_CACHE) || 'null') : null; } catch (e) { return null; } }
+  function gravarCache(j) { try { if (CHAVE_CACHE) localStorage.setItem(CHAVE_CACHE, JSON.stringify({ assinaturas: j.assinaturas || [], tokens: j.tokens || {} })); } catch (e) { /* sem armazenamento */ } }
   function carregar() {
-    raiz.innerHTML = '<div class="conta-carregando" aria-label="Carregando"><i></i><i></i></div>';
+    var cache = !volta && lerCache();
+    if (cache && guardada) { perfil(guardada.user); document.body.classList.add('conta-logado'); mostrar(cache, true); }
+    else raiz.innerHTML = '<div class="conta-carregando" aria-label="Carregando"><i></i><i></i></div>';
     C.exigirLogin('Entre para ver os seus testes, assinaturas e compras.').then(function (s) {
       perfil(s.user);
       document.body.classList.add('conta-logado');
       return C.chamar({ acao: 'status', id: volta || undefined });
-    }).then(function (j) {
-      var l = j.assinaturas || [], v = volta && l.filter(function (x) { return x.id === volta; })[0], aviso = '';
+    }).then(function (j) { gravarCache(j); mostrar(j, false); })
+      .catch(function (x) { if (!cache) raiz.innerHTML = '<div class="conta-aviso er">' + esc(x.message || 'Não foi possível carregar.') + '</div>'; });
+  }
+  function mostrar(j, doCache) {
+    {
+      var l = j.assinaturas || [], v = !doCache && volta && l.filter(function (x) { return x.id === volta; })[0], aviso = '';
       TOKENS = j.tokens || {}; tokenMostrado = {};
       if (v) {
         aviso = v.status === 'teste' ? '<div class="conta-aviso ok">Cartão cadastrado. O seu teste grátis está valendo até ' + data(v.teste_ate) + '. <a href="app/' + esc(v.app) + '/">Abrir o sistema agora →</a></div>'
@@ -103,10 +113,10 @@
         history.replaceState(null, '', 'conta.html');
       }
       mostrarResumo(l);
-      indicacao();
+      if (!doCache) indicacao();
       raiz.innerHTML = aviso + (l.length ? '<h2 class="conta-titulo">Seus sistemas</h2>' + l.map(cartao).join('') :
         '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp" alt="" loading="lazy"><img src="img/sistemas/agenda.webp" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp" alt="" loading="lazy"></div><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um dos sistemas e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
-    }).catch(function (x) { raiz.innerHTML = '<div class="conta-aviso er">' + esc(x.message || 'Não foi possível carregar.') + '</div>'; });
+    }
   }
   raiz.addEventListener('click', function (e) {
     var c = e.target.closest('[data-cancelar]'), a = e.target.closest('[data-assinar]');
