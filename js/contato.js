@@ -10,7 +10,7 @@
   var decodificar = function (codigos) {
     return codigos.map(function (c) { return String.fromCharCode(c - 11); }).join('');
   };
-  var WA = decodificar([64, 64, 60, 65, 68, 68, 60, 61, 59, 62, 66, 59, 59]);
+  var WA = decodificar([64, 64, 60, 65, 68, 68, 60, 64, 59, 59, 66, 63, 65]);
   var EMAIL = decodificar([109, 119, 128, 112, 125, 122, 126, 112, 112, 131, 123, 125, 112, 126, 126, 122, 113, 116, 110, 116, 108, 119, 75, 114, 120, 108, 116, 119, 57, 110, 122, 120]);
 
   // Disponível para os scripts das páginas (ex.: calculadora de orçamento)
