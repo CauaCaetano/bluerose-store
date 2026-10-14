@@ -218,7 +218,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'pragas', paginaSite: 'guard.html', nome: 'Blue Rose Guard', sub: 'Controle inteligente de pragas', marcaSub: 'Controle inteligente de pragas', logo: new URL('logo.png', import.meta.url).href, produto: { mensal: 99 }, cor: '#1a47a8', icone: 'flask', empresa: 'Escudo Controle de Pragas', conta: 'Controle de pragas · Campinas',
+  id: 'pragas', paginaSite: 'guard.html', nome: 'Blue Rose Guard', sub: 'Controle inteligente de pragas', marcaSub: 'Controle inteligente de pragas', logo: new URL('logo.webp', import.meta.url).href, produto: { mensal: 99 }, cor: '#1a47a8', icone: 'flask', empresa: 'Escudo Controle de Pragas', conta: 'Controle de pragas · Campinas',
   semente, colecoes, fichas, buscaDica: 'clientes e serviços',
   portal: {
     comprovante: {

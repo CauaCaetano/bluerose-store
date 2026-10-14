@@ -104,3 +104,9 @@
 
 /* logo da marca (rosa com alianças) */
 [data-produto="cerimonial"] .marca-logo { width: 40px; height: 40px; object-fit: contain; background: none; box-shadow: none; border-radius: 0; }
+
+/* logo completa (rosa, alianças, nome e frase) num cartão branco, legível nos dois temas */
+[data-produto="cerimonial"] .lat .marca { padding: 4px 4px 12px; }
+[data-produto="cerimonial"] .lat .marca-logo, [data-produto="cerimonial"] .entrada .marca-logo { width: 100%; max-width: 200px; height: auto; object-fit: contain; background: #fff; border-radius: 12px; padding: 8px 10px; box-shadow: 0 0 0 1px var(--borda); }
+[data-produto="cerimonial"] .entrada .marca-logo { max-width: 240px; }
+[data-produto="cerimonial"] .lat .marca > div, [data-produto="cerimonial"] .entrada .marca > div { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

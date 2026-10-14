@@ -100,3 +100,9 @@
 
 /* logo da marca (rosa com escudo) */
 [data-produto="pragas"] .marca-logo { width: 44px; height: 44px; object-fit: contain; background: none; box-shadow: none; border-radius: 0; }
+
+/* logo completa (rosa, escudo, nome e frase), sem recorte */
+[data-produto="pragas"] .lat .marca-logo { width: 74px; height: auto; aspect-ratio: auto; object-fit: contain; }
+[data-produto="pragas"] .entrada .marca { flex-direction: column; align-items: flex-start; }
+[data-produto="pragas"] .entrada .marca-logo { width: 220px; height: auto; }
+[data-produto="pragas"] .entrada .marca > div { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

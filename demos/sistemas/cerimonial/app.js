@@ -210,7 +210,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'cerimonial', paginaSite: 'eternize.html', nome: 'Blue Rose Eternize', sub: 'Do planejamento ao sim', marcaSub: 'Do planejamento ao sim', logo: new URL('logo.png', import.meta.url).href, produto: { mensal: 89 }, cor: '#1d3f9e', icone: 'heart', empresa: 'Laços Assessoria & Cerimonial', conta: 'Casamentos e eventos · São Paulo',
+  id: 'cerimonial', paginaSite: 'eternize.html', nome: 'Blue Rose Eternize', sub: 'Do planejamento ao sim', marcaSub: 'Do planejamento ao sim', logo: new URL('logo.webp', import.meta.url).href, produto: { mensal: 89 }, cor: '#1d3f9e', icone: 'heart', empresa: 'Laços Assessoria & Cerimonial', conta: 'Casamentos e eventos · São Paulo',
   semente, colecoes, fichas, buscaDica: 'eventos e fornecedores',
   portal: {
     noivos: {
