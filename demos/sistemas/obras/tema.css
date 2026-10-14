@@ -38,7 +38,7 @@
 [data-produto="obras"] .cartao-cab h3 { font-size: 16px; text-transform: uppercase; }
 [data-produto="obras"] .cartao { border-radius: 8px; }
 
-/* menu no topo (computador) */
+/* menu lateral em azul-marinho */
 [data-produto="obras"] .lat {
   color-scheme: dark; --tx: #eef3fb; --tx-2: #c3cde0; --tx-3: #9aa8c2; --hover: rgba(255, 255, 255, .07); --painel: rgba(255, 255, 255, .08); --borda: rgba(255, 255, 255, .12); --neutro-bg: rgba(255, 255, 255, .12);
   background: var(--carvao); color: var(--tx);
@@ -50,17 +50,8 @@
 [data-produto="obras"] .lat a.item.ativo .ic { color: var(--carvao); }
 [data-produto="obras"] .lat a.item .cont { background: var(--laranja); color: var(--carvao); }
 [data-produto="obras"] .lat a.item.ativo .cont { background: var(--carvao); color: #fff; }
-@media (min-width: 901px) {
-  [data-produto="obras"] .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
-  [data-produto="obras"] .lat { position: sticky; top: var(--faixa); z-index: 40; height: var(--barra); flex-direction: row; align-items: center; gap: 2px; padding: 0 18px; overflow-x: auto; overflow-y: hidden; border-right: 0; border-bottom: 4px solid var(--laranja); }
-  [data-produto="obras"] .lat .marca { padding: 0 18px 0 0; flex: none; }
-  [data-produto="obras"] .lat .conta, [data-produto="obras"] .lat .grupo, [data-produto="obras"] .lat-pe .feito { display: none; }
-  [data-produto="obras"] .lat a.item { height: 38px; padding: 0 13px; flex: none; font-weight: 600; font-size: 13.5px; text-transform: uppercase; letter-spacing: .03em; font-family: var(--forte); }
-  [data-produto="obras"] .lat .busca-lat { order: 9; margin-left: auto; width: 220px; flex: none; }
-  [data-produto="obras"] .lat-pe { order: 10; margin: 0 0 0 6px; padding: 0; flex-direction: row; flex: none; }
-  [data-produto="obras"] .lat-pe a.item { font-size: 0; padding: 0 9px; gap: 0; }
-  [data-produto="obras"] .topo { top: calc(var(--faixa) + var(--barra) + 4px); }
-  [data-produto="obras"] .conteudo { max-width: 1320px; margin: 0 auto; }
+/* computador: menu na lateral esquerda (como nos outros sistemas), em azul-marinho */
+[data-produto="obras"] .lat a.item { font-weight: 600; }
 }
 /* barra embaixo (celular), como um aplicativo */
 @media (max-width: 900px) {
@@ -124,11 +115,6 @@
 [data-produto="obras"] .faixa a.cta, [data-produto="obras"] .faixa a.cta:hover { background: var(--laranja); color: var(--carvao); font-weight: 700; }
 [data-produto="obras"] .entrada .marca b { font-family: var(--forte); text-transform: uppercase; letter-spacing: .04em; font-size: 19px; }
 [data-produto="obras"] .entrada .marca small { color: var(--acc); }
-/* marca Blue Rose no menu de cima: só o emblema */
-@media (min-width: 901px) {
-  [data-produto="obras"] .lat-pe .feito-br { margin: 0 0 0 8px; padding: 6px; border-color: rgba(255, 255, 255, .14); }
-  [data-produto="obras"] .lat-pe .feito-br span { display: none; }
-}
 
 /* cronograma (Gantt simples) */
 .cn-gantt { padding: 12px 16px 14px; overflow-x: auto; }
