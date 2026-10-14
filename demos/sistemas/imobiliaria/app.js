@@ -28,6 +28,15 @@ function semente() {
     const status = i < 30 ? 'disponivel' : i < 33 ? 'reservado' : fin === 'venda' ? 'vendido' : 'alugado';
     imoveis.push({ id: `im${i}`, codigo: `${fin === 'venda' ? 'V' : 'L'}${String(2100 + i)}`, tipo, finalidade: fin, bairro, cidade: 'Curitiba', endereco: `${esc1(['Rua Padre Anchieta', 'Av. Silva Jardim', 'Rua Saldanha Marinho', 'Rua Bruno Filgueira', 'Av. Água Verde', 'Rua Martim Afonso', 'Rua Fernando Simas'])}, ${ent(50, 2400)}`, area, quartos, suites: quartos > 1 ? ent(1, quartos - 1) : 0, vagas: tipo === 'Terreno' ? 0 : tipo === 'Studio' ? 1 : ent(1, 3), valor, condominio: ['Casa', 'Terreno'].includes(tipo) ? 0 : ent(380, 1400), iptu: Math.round(valor * (fin === 'venda' ? 0.0007 : 0.12)), status, proprietario: `ps${i % 8}`, corretor: CORRETORES[i % 4][0], captado: diaMais(-ent(5, 260)), visualizacoes: ent(40, 1900), destaque: i % 7 === 0, descricao: `${tipo} ${quartos ? `com ${quartos} quarto${quartos > 1 ? 's' : ''}` : ''} no ${bairro}, ${area} m². Próximo a comércio, parques e transporte.` });
   }
+  // fotos de demonstração (ilustrações em imobiliaria/fotos): fachada do tipo e, nos residenciais, sala, cozinha e quarto
+  const FOTOS = { Apartamento: ['apartamento', 4], Casa: ['casa', 4], Cobertura: ['cobertura', 2], Studio: ['studio', 2], 'Sala comercial': ['sala-comercial', 2], Terreno: ['terreno', 2] };
+  const foto = (arq, i, k, legenda) => ({ id: `fd${i}-${k}`, nome: `${arq}.webp`, tipo: 'image/webp', tamanho: 40000, legenda, data: new URL(`fotos/${arq}.webp`, import.meta.url).href });
+  imoveis.forEach((im, i) => {
+    const [base, n] = FOTOS[im.tipo] || FOTOS.Apartamento;
+    const l = [foto(`${base}-${(i % n) + 1}`, i, 0, 'Fachada')];
+    if (!['Terreno', 'Sala comercial'].includes(im.tipo)) l.push(foto(`interior-sala-${(i % 3) + 1}`, i, 1, 'Sala'), foto(`interior-cozinha-${((i + 1) % 3) + 1}`, i, 2, 'Cozinha'), foto(`interior-quarto-${((i + 2) % 3) + 1}`, i, 3, 'Quarto'));
+    im._anexos = l;
+  });
   const negocios = [];
   for (let i = 0; i < 38; i++) {
     const p = pessoas[14 + (i % 16)], fin = i % 3 === 0 ? 'aluguel' : 'venda', cand = imoveis.filter((x) => x.finalidade === fin && x.status !== 'vendido'), im = esc1(cand);
@@ -296,3 +305,13 @@ Fotos e simulação de financiamento: ${ini}?i=${x.codigo}#${fim}`)}`, '_blank',
   novoCad: async (d) => { const s = await editar(app, d.c); if (s) { app.render(); if (d.c === 'negocios') app.abrir('negocio', s.id); } },
   editarCad: async (d) => { if (await editar(app, d.c, app.db.obter(d.c, d.id))) reab(); },
 });
+
+// demonstração aberta antes das fotos de exemplo: coloca as fotos nos imóveis originais que ainda não têm nenhuma
+if (!app.nuvem && app.db) {
+  let mudou = false;
+  for (const im of semente().imoveis) {
+    const x = app.db.obter('imoveis', im.id);
+    if (x && !(x._anexos || []).length) { x._anexos = im._anexos; mudou = true; }
+  }
+  if (mudou) { app.db.gravar(); if (typeof app.render === 'function') app.render(); }
+}
