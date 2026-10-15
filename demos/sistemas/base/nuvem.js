@@ -8,7 +8,7 @@
 // demonstrações: só o Banco muda (BancoNuvem).
 // Tabelas e regras de acesso: migração nexo_nuvem_espacos_e_registros.
 // =============================================================
-import { esc, ic, av, et, avisar, modal, confirmar, Banco, hoje, diasAte, dataCurta, normal, agrupar } from './nexo.js';
+import { esc, ic, av, et, avisar, modal, confirmar, Banco, hoje, diasAte, dataCurta, normal, agrupar, imprimir } from './nexo.js';
 import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 
 // não abre dentro de página de outro site (proteção contra clickjacking; o GitHub Pages não deixa mandar X-Frame-Options)
@@ -24,7 +24,7 @@ const SEP = '\u0001';
 // até 10 empresas por sistema e suporte prioritário. Custa R$ 60 a mais por mês (catálogo a-sis-<app>-pro).
 const LIMITE_BASICO = 5, EXTRA_PRO = 60;
 const SUPORTE = [64, 64, 60, 65, 68, 68, 60, 64, 59, 59, 66, 63, 65].map((c) => String.fromCharCode(c - 11)).join(''); // WhatsApp da Blue Rose (mesmo do site)
-const BENEFICIOS_BASE = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 5 além de você).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.']];
+const BENEFICIOS_BASE = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 5 além de você).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.'], ['printer', 'Impressos só com a sua marca', 'Orçamentos, recibos e relatórios sem o rodapé da Blue Rose.']];
 const BENEFICIOS_AVISOS = ['bell-ringing', 'Avisos e mensagens prontas', 'Quem cobrar, confirmar e chamar de volta, com a mensagem pronta no WhatsApp.'];
 const beneficiosPro = (cfg) => (cfg.paginas || []).some((p) => p.id === 'avisos') ? [BENEFICIOS_BASE[0], BENEFICIOS_AVISOS, ...BENEFICIOS_BASE.slice(1)] : BENEFICIOS_BASE;
 // plano anual: 12 meses com 20% de desconto (catálogo a-sis-<app>[-pro]-anual)
@@ -397,7 +397,8 @@ export async function iniciarNuvem(app, cfg) {
     await db.enviar();
   }
   const proCortesia = esp.nivel !== 'pro' && esp.pro_ate && diasAte(esp.pro_ate) >= 0 ? esp.pro_ate : null;
-  const dono = esp.dono === uid, pro = esp.nivel === 'pro' || !!proCortesia, papel = dono ? 'dono' : eu?.papel === 'admin' ? 'admin' : 'membro', gestor = papel !== 'membro';
+  const dono = esp.dono === uid, pro = esp.nivel === 'pro' || !!proCortesia; imprimir.semRodape = () => pro;
+  const papel = dono ? 'dono' : eu?.papel === 'admin' ? 'admin' : 'membro', gestor = papel !== 'membro';
   const minhas = gestor ? null : eu?.permissoes || null;
   let plano = null; // assinatura atual do dono (mensal ou anual, Básico ou Pro), lida quando abre o Painel do dono
   const teste = esp.plano === 'teste', restam = diasAte(esp.teste_ate), encerrado = esp.plano === 'suspenso' || (teste && restam < 0);

@@ -416,11 +416,14 @@ export function imprimir(html) {
   if (!area) { area = document.createElement('div'); area.id = 'area-impressao'; document.body.appendChild(area); const st = document.createElement('style'); st.textContent = '#area-impressao{display:none}@media print{body>*:not(#area-impressao){display:none!important}#area-impressao{display:block}}'; document.head.appendChild(st); }
   const logo = imprimir.logo?.();
   if (logo) html = html.replace('<div class="doc">', `<div class="doc"><img src="${esc(logo)}" alt="" style="height:52px;max-width:200px;object-fit:contain;display:block;margin-bottom:10px">`);
+  // selo nos impressos do Básico: o documento vai para o cliente do nosso cliente e mostra de onde veio (o Pro sai sem)
+  if (!imprimir.semRodape?.()) html += `<div style="margin-top:26px;padding-top:9px;border-top:1px solid #d9dee8;font:11px/1.4 system-ui,sans-serif;color:#6b7590;text-align:center">Documento gerado no ${esc(imprimir.produto || 'sistema')} da Blue Rose · organize o seu negócio também: <b>bluerose-store.com</b> · teste 7 dias grátis</div>`;
   area.innerHTML = html; setTimeout(() => window.print(), 60);
 }
 
 // ---------------------------------------------------------------- aplicativo
 export function criarApp(cfg) {
+  imprimir.produto = cfg.nome;
   const raiz = document.documentElement;
   raiz.style.setProperty('--sis', cfg.cor); // a cor de destaque é o azul da Blue Rose (nexo.css); a do sistema fica como apoio
   try { raiz.dataset.tema = localStorage.getItem('nexo-tema') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro'); } catch { raiz.dataset.tema = 'claro'; }
