@@ -216,6 +216,8 @@ export async function editar(app, nome, registro = null, extra = {}) {
   if (app.podeMexer && !app.podeMexer('salvar')) return null;
   const col = app.colecoes[nome];
   const campos = (typeof col.campos === 'function' ? col.campos(app) : col.campos).filter((c) => !c.oculto);
+  // o que veio da planilha sem campo próprio aparece (e pode ser corrigido) na edição, em todos os sistemas
+  if (registro?._planilha) campos.push({ nome: '_planilha', rotulo: 'Da planilha', tipo: 'texto-longo', largo: true, ajuda: 'Colunas importadas que não têm campo próprio no sistema.' });
   const corpo = `<form class="form-grade ${col.tres ? 'tres' : ''}" novalidate onsubmit="return false">${campos.map((c) => campoHTML(c, registro?.[c.nome] ?? extra[c.nome], app)).join('')}</form>`;
   const r = await modal({
     titulo: registro ? `Editar ${col.singular}` : `${col.genero === 'f' ? 'Nova' : 'Novo'} ${col.singular}`, corpo, largura: col.largura || 600,
@@ -544,7 +546,13 @@ function montar(app, cfg) {
   app.abrir = (tipo, id, aba) => {
     const f = cfg.fichas?.[tipo]; if (!f) return;
     const r = f(app, id, aba); if (!r) return;
-    gaveta(r.html, { estreita: r.estreita, aoMontar: (g) => { g.dataset.tipo = tipo; g.dataset.id = id; r.montar?.(g); } });
+    gaveta(r.html, { estreita: r.estreita, aoMontar: (g) => { g.dataset.tipo = tipo; g.dataset.id = id; r.montar?.(g); notaDaPlanilha(g, id); } });
+  };
+  // colunas da planilha que não tinham campo próprio ficam guardadas no registro e aparecem aqui, na ficha
+  const notaDaPlanilha = (g, id) => {
+    const reg = Object.keys(app.colecoes || {}).map((c) => app.db.obter(c, id)).find(Boolean);
+    if (!reg?._planilha || g.querySelector('[data-da-planilha]')) return;
+    g.querySelector('.gav-corpo')?.insertAdjacentHTML('beforeend', `<div class="cartao" data-da-planilha style="margin-top:14px"><div class="cartao-cab"><div><h3>Da planilha</h3><div class="sub">Colunas importadas que não têm campo próprio no sistema</div></div></div><div class="cartao-corpo" style="white-space:pre-line">${esc(reg._planilha)}</div></div>`);
   };
   app.reabrir = () => { const g = document.querySelector('.gaveta.on'); if (g) app.abrir(g.dataset.tipo, g.dataset.id, g.dataset.aba); };
 

@@ -303,9 +303,15 @@ function chaveRegistro(campos, o, deduzida) {
   return partes.length >= 2 ? partes.join('|') : null;
 }
 const linksDeFoto = (v) => String(v || '').split(/[\s,;]+/).filter((x) => /^https?:\/\/\S+$/i.test(x));
+/** Campo de texto livre do cadastro (obs, notas, descrição…) que recebe as colunas sem lugar próprio, para nada da planilha se perder */
+const NOTAS = ['obs', 'observacoes', 'observacao', 'notas', 'anotacoes', 'descricao', 'detalhes'];
+export const campoNotas = (campos) => NOTAS.map((n) => campos.find((c) => c.nome === n && ['texto', 'texto-longo'].includes(c.tipo))).find(Boolean) || null;
+const colunasDeFora = (cab, mapa) => { const usados = new Set(mapa.map(([, i]) => i)); return cab.map((h, i) => [String(h || '').trim(), i]).filter(([h, i]) => h && !usados.has(i) && !ehColunaFoto(h)); };
+
 export function importarAba(app, aba, colecao, { pularRepetidos = true, fotosPendentes = [] } = {}) {
   const tab = tabelas(app)[colecao], col = app.colecoes[colecao] || {}, campos = camposDe(app, colecao), { ini, cab } = aba, mapa = mapear(cab, campos);
   const colFotos = cab.map((h, i) => (ehColunaFoto(h) ? i : -1)).filter((i) => i >= 0);
+  const notas = campoNotas(campos) || { nome: '_planilha', tipo: 'texto-longo' }, fora = colunasDeFora(cab, mapa);
   const nomesForm = new Set((col.campos ? (typeof col.campos === 'function' ? col.campos(app) : col.campos) : []).map((c) => c.nome));
   const existentes = new Set(app.db.lista(colecao).map((x) => chaveRegistro(campos, x, tab.deduzida)).filter(Boolean));
   let n = 0, pulados = 0, criados = 0, fotos = 0;
@@ -330,6 +336,9 @@ export function importarAba(app, aba, colecao, { pularRepetidos = true, fotosPen
       } else v = converter(c, v, app);
       if (v != null && v !== '') o[c.nome] = v;
     }
+    // colunas sem lugar próprio vão para as observações ("Coluna: valor"), junto com o que já houver lá
+    const extras = fora.map(([h, i]) => [h, l[i]]).filter(([, v]) => v !== '' && v != null).map(([h, v]) => `${h}: ${String(v).trim()}`);
+    if (extras.length && Object.keys(o).length) o[notas.nome] = [o[notas.nome], ...extras].filter(Boolean).join(notas.tipo === 'texto-longo' ? '\n' : ' · ');
     // números que vêm da soma das ligações (ex.: duração = soma da duração dos serviços)
     for (const r of campos.filter((x) => x.tipo === 'relacoes' && Array.isArray(o[x.nome]))) {
       const alvos = o[r.nome].map((id) => app.db.obter(r.colecao, id)).filter(Boolean);
@@ -392,7 +401,7 @@ export function paginaImportar(app) {
       const previa = mapa.length ? `<div style="overflow-x:auto;margin-top:10px"><table class="tabela"><thead><tr>${mapa.map(([c]) => `<th>${esc(c.rotulo || c.nome)}</th>`).join('')}</tr></thead><tbody>${a.linhas.slice(a.ini + 1, a.ini + 4).map((l) => `<tr>${mapa.map(([c, i]) => `<td>${esc(c.tipo === 'relacao' ? l[i] : mostrarValor(c, converter(c, l[i], app), app))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : '';
       return `<div class="cartao"><div class="cartao-cab"><div><h3>Aba "${esc(a.nome)}"</h3><div class="sub">${num(linhas)} ${linhas === 1 ? 'linha' : 'linhas'}${mapa.length ? ` · ${mapa.length} colunas reconhecidas` : ''}${nFotos ? ` · ${nFotos} ${nFotos === 1 ? 'foto' : 'fotos'} na planilha` : ''}</div></div>
         <label class="flex" style="gap:8px;font-size:13px">Vai para<select data-mudar="impColecao" data-k="${k}" style="width:auto;height:32px"><option value="">Não importar</option>${cols.map(([c, col]) => `<option value="${c}" ${c === a.colecao ? 'selected' : ''}>${esc(cap(col.plural || c))}</option>`).join('')}</select></label></div>
-        <div class="cartao-corpo">${a.colecao ? `<div class="flex" style="flex-wrap:wrap;gap:6px">${mapa.map(([c, i]) => `<span class="et ok sem-ponto">${esc(a.cab[i])} → ${esc(c.rotulo || c.nome)}</span>`).join('')}${colFotos.map(([h]) => `<span class="et ok sem-ponto">${esc(h)} → fotos</span>`).join('')}${fora.map(([h]) => `<span class="et sem-ponto" title="Coluna não reconhecida: fica de fora">${esc(h)} (de fora)</span>`).join('')}</div>${previa}` : '<p class="mute-2" style="margin:0">Esta aba não vai ser importada. Escolha para onde ela vai, se quiser.</p>'}</div></div>`;
+        <div class="cartao-corpo">${a.colecao ? `<div class="flex" style="flex-wrap:wrap;gap:6px">${mapa.map(([c, i]) => `<span class="et ok sem-ponto">${esc(a.cab[i])} → ${esc(c.rotulo || c.nome)}</span>`).join('')}${colFotos.map(([h]) => `<span class="et ok sem-ponto">${esc(h)} → fotos</span>`).join('')}${fora.map(([h]) => `<span class="et sem-ponto" title="Sem campo próprio: fica guardada como 'coluna: valor'${campoNotas(campos) ? ` em ${esc(campoNotas(campos).rotulo || 'Observações')}` : ' e aparece na ficha, no bloco Da planilha'}">${esc(h)} → ${esc(campoNotas(campos)?.rotulo || 'Da planilha (na ficha)')}</span>`).join('')}</div>${previa}` : '<p class="mute-2" style="margin:0">Esta aba não vai ser importada. Escolha para onde ela vai, se quiser.</p>'}</div></div>`;
     }).join('');
     const acoes = st.abas.some((a) => a.colecao) ? `<div class="entre"><label class="flex" style="gap:8px;font-size:13px"><input type="checkbox" data-mudar="impPular" ${st.pular ? 'checked' : ''}> Não repetir o que já está cadastrado</label><button type="button" class="btn pri" data-acao="impConfirmar">${ic('check')}Importar tudo</button></div>` : '';
     const modelos = `<div class="cartao"><div class="cartao-cab"><div><h3>Modelos de planilha</h3><div class="sub">Baixe, preencha no Excel e suba aqui: as colunas já vêm com os nomes certos</div></div></div><div class="cartao-corpo flex" style="flex-wrap:wrap;gap:8px">${cols.map(([c, col]) => `<button type="button" class="btn" data-acao="impModelo" data-c="${c}">${ic('download-simple')}${esc(cap(col.plural || c))}</button>`).join('')}</div></div>`;
