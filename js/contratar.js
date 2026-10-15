@@ -41,9 +41,9 @@
     completo: ['Entrada de R$ 995 agora', 'Total R$ 1.990 · o saldo de R$ 995 só na entrega'],
     automacao: ['Entrada de R$ 645 agora', 'Total R$ 1.290 · o saldo de R$ 645 só na entrega'],
     combo: ['Entrada de R$ 1.495 agora', 'Total R$ 2.990 · o saldo de R$ 1.495 só na entrega'],
-    'a-presenca': ['R$ 89 por mês', 'Sem entrada · fidelidade de 12 meses'],
-    'a-completo': ['R$ 149 por mês', 'Sem entrada · fidelidade de 12 meses'],
-    'a-automacao': ['R$ 199 por mês', 'Sem entrada · fidelidade de 12 meses'],
+    'a-presenca': ['R$ 89 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
+    'a-completo': ['R$ 149 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
+    'a-automacao': ['R$ 199 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
   };
 
   // Linha Nexo: cada sistema traz o próprio preço no botão (data-total / data-mensal).
@@ -104,7 +104,7 @@
       $('ct-titulo').textContent = b.getAttribute('data-nome');
       $('ct-valor').innerHTML = '<b>' + v[0] + '</b><small>' + v[1] + '</small>';
       $('ct-meios').textContent = assinatura ? '(cartão de crédito, cobrado todo mês)' : '(PIX, cartão em até 6x ou boleto)';
-      $('ct-fidelidade').textContent = assinatura ? (/^a-sis-/.test(plano) ? ' (sistemas da Linha Nexo: sem fidelidade)' : ', incluindo a fidelidade mínima de 12 meses') : '';
+      $('ct-fidelidade').textContent = assinatura ? (/^a-sis-/.test(plano) ? ' (sistemas da Linha Nexo: sem fidelidade)' : ' (sem fidelidade)') : '';
       // sistemas prontos: ficam prontos na hora, com vídeos tutoriais (sites e automações seguem com implantação feita por nós)
       var passos = dlg.querySelector('.contratar-passos');
       if (passos) {
