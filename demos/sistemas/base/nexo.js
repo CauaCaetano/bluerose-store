@@ -133,6 +133,7 @@ export function modal({ titulo, corpo, botoes = [], largura = 560, classe = '', 
     const anterior = document.activeElement;
     const fechar = (v) => { f.remove(); document.removeEventListener('keydown', tecla, true); anterior?.focus?.(); resolver(v); };
     const tecla = (e) => {
+      if ([...document.querySelectorAll('.fundo-modal')].pop() !== f) return; // janela sobre janela: só a de cima responde
       if (e.key === 'Escape') { e.stopPropagation(); fechar(null); }
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { const p = f.querySelector('.btn.pri'); if (p) { e.preventDefault(); p.click(); } }
     };
@@ -193,7 +194,11 @@ export function campoHTML(c, v, app) {
     const extra = c.tipo === 'numero' || c.tipo === 'porcentagem' ? `step="${c.passo || 'any'}" ${c.min != null ? `min="${c.min}"` : ''} inputmode="decimal"` : '';
     ctl = `<input id="${id}" name="${c.nome}" type="${t}" ${extra} value="${esc(c.tipo === 'datahora' ? String(val).slice(0, 16) : val)}" ${req} placeholder="${esc(c.dica || '')}" ${c.max ? `maxlength="${c.max}"` : ''}>`;
   }
-  return `<label class="campo ${c.largo || c.tipo === 'texto-longo' ? 'largo' : ''}" for="${id}">${esc(c.rotulo)}${c.obrigatorio ? ' <span class="er-tx">*</span>' : ''}${ctl}${c.ajuda ? `<span class="ajuda">${esc(c.ajuda)}</span>` : ''}</label>`;
+  // empresa nova: a lista de onde escolher ainda está vazia; em vez de travar o formulário, deixa cadastrar ali mesmo
+  const alvo = c.tipo === 'relacao' && app?.colecoes?.[c.colecao];
+  const semOpcao = alvo && !opcoesDe(c, app).length
+    ? `<span class="ajuda" data-sem-opcao>${alvo.genero === 'f' ? 'Nenhuma' : 'Nenhum'} ${esc(alvo.singular)} ${alvo.genero === 'f' ? 'cadastrada' : 'cadastrado'} ainda. <button type="button" class="btn peq" data-novo-rel="${esc(c.colecao)}" data-campo="${esc(c.nome)}">${ic('plus')}Cadastrar agora</button></span>` : '';
+  return `<label class="campo ${c.largo || c.tipo === 'texto-longo' ? 'largo' : ''}" for="${id}">${esc(c.rotulo)}${c.obrigatorio ? ' <span class="er-tx">*</span>' : ''}${ctl}${c.ajuda ? `<span class="ajuda">${esc(c.ajuda)}</span>` : ''}${semOpcao}</label>`;
 }
 export function lerCampos(raiz, campos) {
   const o = {};
@@ -214,6 +219,14 @@ export async function editar(app, nome, registro = null, extra = {}) {
   const corpo = `<form class="form-grade ${col.tres ? 'tres' : ''}" novalidate onsubmit="return false">${campos.map((c) => campoHTML(c, registro?.[c.nome] ?? extra[c.nome], app)).join('')}</form>`;
   const r = await modal({
     titulo: registro ? `Editar ${col.singular}` : `${col.genero === 'f' ? 'Nova' : 'Novo'} ${col.singular}`, corpo, largura: col.largura || 600,
+    aoAbrir: (f) => f.querySelectorAll('[data-novo-rel]').forEach((b) => b.addEventListener('click', async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const novo = await editar(app, b.dataset.novoRel);
+      if (!novo) return;
+      const c = campos.find((x) => x.nome === b.dataset.campo), sel = f.querySelector(`select[name="${b.dataset.campo}"]`);
+      if (c && sel) { sel.innerHTML = opcoesDe(c, app).map(([k, rot]) => `<option value="${esc(k)}" ${k === novo.id ? 'selected' : ''}>${esc(rot)}</option>`).join(''); sel.value = novo.id; }
+      b.closest('[data-sem-opcao]')?.remove();
+    })),
     botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: registro ? 'Salvar' : 'Criar', classe: 'pri', acao: (f) => {
       const form = f.querySelector('form');
       if (!form.reportValidity()) return false;
