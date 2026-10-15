@@ -77,8 +77,14 @@
     var plano = pagar.dataset.plano;
     // aluguel da Linha Nexo começa com os 7 dias grátis prometidos na página; quem já usou o teste vai direto para a assinatura
     var nexo = /^a-sis-/.test(plano);
-    window.BR_CONTA.pagar(plano, { emailMp: emailMp, teste: nexo }).catch(function (x) {
-      if (nexo && x.dados && x.dados.sem_teste) return window.BR_CONTA.pagar(plano, { emailMp: emailMp });
+    // quem já usou o teste não é levado à cobrança sem saber: avisa e só segue no segundo clique
+    var semTesteConfirmado = pagar.dataset.semTeste === plano;
+    window.BR_CONTA.pagar(plano, { emailMp: emailMp, teste: nexo && !semTesteConfirmado }).catch(function (x) {
+      if (nexo && x.dados && x.dados.sem_teste) {
+        pagar.dataset.semTeste = plano;
+        var aviso = new Error('Esta conta já usou os 7 dias grátis. Se continuar, a assinatura começa hoje e a primeira mensalidade é cobrada agora. Clique de novo para continuar.');
+        throw aviso;
+      }
       throw x;
     }).catch(function (x) {
       erroCt.textContent = x.message || 'Não foi possível abrir o pagamento. Tente de novo.'; pagar.textContent = txt; estado();
