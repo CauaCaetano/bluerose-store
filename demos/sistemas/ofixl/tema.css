@@ -1,4 +1,4 @@
-/* Blue Rose Ofixl · app de celular: vidro fosco (glassmorphism), vidro líquido nos botões e relevo (skeuomorfismo) nos controles */
+/* Blue Rose Ofixl · app de celular: vidro fosco (glassmorphism) nos painéis, botões sólidos e relevo (skeuomorfismo) nos controles */
 :root[data-produto="ofixl"] {
   --acc: #2f7bff;
   --acc-tx: #fff;
@@ -18,6 +18,7 @@
   --neutro-bg: rgba(255, 255, 255, .55);
   --info: #1f6feb; --info-bg: rgba(47, 123, 255, .13);
   --r1: 12px; --r2: 18px; --r3: 24px;
+  --painel-solido: #ffffff;
   --vidro: blur(22px) saturate(170%);
   --brilho: inset 0 1px 0 rgba(255, 255, 255, .85), inset 0 -1px 0 rgba(255, 255, 255, .25);
   --sombra-1: 0 1px 2px rgba(20, 45, 90, .08), 0 8px 24px -14px rgba(20, 45, 90, .35);
@@ -32,6 +33,7 @@
 :root[data-produto="ofixl"][data-tema="escuro"] {
   --acc: #4d90ff; --acc-tx: #fff;
   --bg: #050c1c;
+  --painel-solido: #172a4d;
   --lateral: rgba(14, 28, 56, .5);
   --painel: rgba(22, 40, 76, .5);
   --painel-2: rgba(16, 32, 62, .55);
@@ -89,32 +91,12 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 -2px 3px rgba(0, 0, 0, .3), 0 4px 10px -4px rgba(20, 70, 180, .8);
 }
 
-/* ---------- botões: vidro líquido (brilho na metade de cima, relevo e reflexo) ---------- */
-[data-produto="ofixl"] .btn {
-  height: 36px; padding: 0 14px; border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .8), rgba(255, 255, 255, .42));
-  border: 1px solid var(--borda);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -2px 4px rgba(30, 60, 120, .08), 0 4px 12px -6px rgba(20, 45, 90, .35);
-  -webkit-backdrop-filter: blur(12px) saturate(160%); backdrop-filter: blur(12px) saturate(160%);
-  transition: transform .18s var(--ease), box-shadow .18s, background .18s;
-}
-[data-produto="ofixl"][data-tema="escuro"] .btn {
-  background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .05));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), inset 0 -2px 4px rgba(0, 0, 0, .25), 0 4px 12px -6px rgba(0, 0, 0, .6);
-}
-[data-produto="ofixl"] .btn:hover { transform: translateY(-1px); }
-[data-produto="ofixl"] .btn:active { transform: translateY(1px) scale(.98); box-shadow: inset 0 2px 5px rgba(20, 45, 90, .22); }
-[data-produto="ofixl"] .btn.pri {
-  position: relative; overflow: hidden; border-color: rgba(20, 70, 190, .6);
-  background: linear-gradient(180deg, #6aa8ff 0%, #2f7bff 48%, #1a5ee6 52%, #1f69f0 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -3px 6px rgba(0, 20, 80, .35), 0 8px 20px -8px rgba(30, 100, 255, .9);
-  text-shadow: 0 1px 1px rgba(0, 20, 80, .35);
-}
-[data-produto="ofixl"] .btn.pri::after {
-  content: ''; position: absolute; left: 8%; right: 8%; top: 1px; height: 46%; border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0)); pointer-events: none;
-}
-[data-produto="ofixl"] .btn.pri:hover { background: linear-gradient(180deg, #7bb3ff 0%, #3d86ff 48%, #2468ee 52%, #2a72f5 100%); }
+/* ---------- botões sólidos, sem efeito de vidro ---------- */
+[data-produto="ofixl"] .btn { height: 36px; padding: 0 14px; border-radius: 12px; background: var(--painel-solido); border: 1px solid var(--borda-2); box-shadow: 0 1px 2px rgba(20, 45, 90, .12); }
+[data-produto="ofixl"] .btn:hover { background: color-mix(in srgb, var(--painel-solido) 92%, var(--acc)); }
+[data-produto="ofixl"] .btn:active { transform: translateY(1px); }
+[data-produto="ofixl"] .btn.pri { background: var(--acc); border-color: color-mix(in srgb, var(--acc) 80%, #000); color: var(--acc-tx); box-shadow: 0 4px 12px -6px rgba(30, 100, 255, .7); }
+[data-produto="ofixl"] .btn.pri:hover { background: color-mix(in srgb, var(--acc) 88%, #000); }
 
 /* ---------- controles com relevo ---------- */
 [data-produto="ofixl"] input:not([type=checkbox]):not([type=radio]):not([type=range]),
@@ -175,6 +157,6 @@
 .of-soapp img { border-radius: 28px; box-shadow: 0 20px 50px -16px rgba(30, 120, 255, .8); }
 .of-soapp h1 { font-size: 24px; max-width: 22ch; text-wrap: balance; }
 .of-soapp p { max-width: 42ch; color: #b3c4e2; font-size: 15px; line-height: 1.55; }
-.of-soapp .of-play { position: relative; overflow: hidden; margin-top: 6px; padding: 14px 26px; border-radius: 999px; color: #fff; font-weight: 600; text-decoration: none;
-  background: linear-gradient(180deg, #6aa8ff 0%, #2f7bff 48%, #1a5ee6 52%, #1f69f0 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -3px 6px rgba(0, 20, 80, .35), 0 10px 24px -8px rgba(30, 100, 255, .9); }
+.of-soapp .of-play { margin-top: 6px; padding: 14px 26px; border-radius: 12px; opacity: .75; cursor: default; color: #fff; font-weight: 600; text-decoration: none;
+  background: #2f7bff; }
 .of-soapp .of-volta { color: #b3c4e2; font-size: 14px; }

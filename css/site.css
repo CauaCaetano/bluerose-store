@@ -3,7 +3,7 @@
    -------------------------------------------------------------
    Tipografia: Geist (texto e títulos) + Geist Mono (dados, código)
    Cor: grafite + um único destaque azul (a cor da marca)
-   Formas: botões em pílula de vidro líquido, campos 10px, painéis 16px de vidro
+   Formas: botões e campos 10px, painéis 16px de vidro
    Tema: segue o sistema (claro/escuro)
    Camadas (z-index): 10 conteúdo elevado, 50 navegação, 60 menu móvel
    ============================================================= */
@@ -1485,8 +1485,8 @@ section.caminhos { padding: 8px 0 clamp(40px, 5vw, 64px); }
 .conta-direto { display: block; margin: 12px auto 0; }
 
 /* =============================================================
-   Vidro (glassmorphism), vidro líquido nos botões e relevo leve
-   (skeuomorfismo) nos cartões. Camada final: só muda superfícies.
+   Vidro (glassmorphism) e relevo leve nos cartões e no cabeçalho.
+   Botões continuam sólidos. Camada final: só muda superfícies.
    ============================================================= */
 :root {
   --vidro: rgba(26, 34, 50, 0.48);
@@ -1516,17 +1516,6 @@ html[data-theme="light"] body::before {
 }
 /* cabeçalho de vidro */
 .nav { background: color-mix(in srgb, var(--bg) 55%, transparent); border-bottom: 1px solid var(--vidro-borda); box-shadow: var(--vidro-brilho); -webkit-backdrop-filter: var(--desfoque); backdrop-filter: var(--desfoque); }
-/* botão principal: vidro líquido (reflexo na metade de cima e relevo embaixo) */
-.btn-primary {
-  position: relative; overflow: hidden; border-radius: 999px;
-  background: linear-gradient(180deg, #6f9dff 0%, #3d6bf0 50%, #2f5be0 51%, #3563ea 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -3px 6px rgba(0, 20, 80, 0.3), 0 12px 30px -12px rgba(61, 107, 240, 0.9);
-}
-.btn-primary::after { content: ''; position: absolute; left: 10%; right: 10%; top: 1px; height: 45%; border-radius: 999px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0)); pointer-events: none; }
-.btn-primary:hover { background: linear-gradient(180deg, #7eaaff 0%, #4a77f5 50%, #3a66e8 51%, #4170f0 100%); }
-html[data-theme="light"] .btn-primary { background: linear-gradient(180deg, #5c8bff 0%, #2b57d9 50%, #2450cc 51%, #2b57d9 100%); }
-/* botão secundário: vidro */
-.btn-ghost { border-radius: 999px; background: var(--vidro); border-color: var(--vidro-borda); box-shadow: var(--vidro-brilho); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 /* cartões de vidro com relevo */
 .sis, .prod-c, .sis-duas > div, .np-grade, .np-faq details {
   background: var(--vidro); border-color: var(--vidro-borda);
