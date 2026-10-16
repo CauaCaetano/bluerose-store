@@ -1,33 +1,180 @@
-/* Blue Rose Ofixl · azul-marinho, azul elétrico e ciano; feito para o celular do técnico */
+/* Blue Rose Ofixl · app de celular: vidro fosco (glassmorphism), vidro líquido nos botões e relevo (skeuomorfismo) nos controles */
 :root[data-produto="ofixl"] {
-  --acc: #1f6feb;
+  --acc: #2f7bff;
   --acc-tx: #fff;
-  --marinho: #0f2a52;
-  --ciano: #17b6d8;
-  --bg: #f3f6fb;
-  --lateral: #0b1d38;
-  --painel: #ffffff;
-  --painel-2: #f6f9fd;
-  --borda: #dbe3ef;
-  --borda-2: #c4d0e2;
-  --tx: #13213a;
-  --tx-2: #44536d;
-  --tx-3: #5c6a84;
-  --info: #1f6feb; --info-bg: #e5efff;
-  --r1: 6px; --r2: 10px; --r3: 14px;
+  --marinho: #0a1a36;
+  --ciano: #3cc8ff;
+  --bg: #dfe8f6;
+  --lateral: rgba(255, 255, 255, .42);
+  --painel: rgba(255, 255, 255, .62);
+  --painel-2: rgba(255, 255, 255, .42);
+  --hover: rgba(47, 123, 255, .08);
+  --ativo: rgba(47, 123, 255, .14);
+  --borda: rgba(255, 255, 255, .7);
+  --borda-2: rgba(120, 150, 200, .45);
+  --tx: #0d1b33;
+  --tx-2: #34476a;
+  --tx-3: #55678a;
+  --neutro-bg: rgba(255, 255, 255, .55);
+  --info: #1f6feb; --info-bg: rgba(47, 123, 255, .13);
+  --r1: 12px; --r2: 18px; --r3: 24px;
+  --vidro: blur(22px) saturate(170%);
+  --brilho: inset 0 1px 0 rgba(255, 255, 255, .85), inset 0 -1px 0 rgba(255, 255, 255, .25);
+  --sombra-1: 0 1px 2px rgba(20, 45, 90, .08), 0 8px 24px -14px rgba(20, 45, 90, .35);
+  --sombra-2: 0 2px 4px rgba(20, 45, 90, .08), 0 18px 40px -18px rgba(20, 45, 90, .45);
+  --sombra-3: 0 30px 80px -20px rgba(10, 30, 70, .55), 0 0 0 1px rgba(255, 255, 255, .5);
+  --fundo:
+    radial-gradient(60% 45% at 8% 0%, rgba(60, 200, 255, .55), transparent 70%),
+    radial-gradient(55% 50% at 100% 18%, rgba(47, 123, 255, .5), transparent 70%),
+    radial-gradient(70% 55% at 50% 110%, rgba(110, 90, 255, .32), transparent 70%),
+    linear-gradient(160deg, #eaf1fb, #d5e1f3);
 }
 :root[data-produto="ofixl"][data-tema="escuro"] {
-  --acc: #4c8dff; --acc-tx: #06111f;
-  --bg: #0a1424; --lateral: #08152a; --painel: #111f36; --painel-2: #152540; --borda: #22334f; --borda-2: #2e4366;
-  --tx: #e8eef8; --tx-2: #a9b8cf; --tx-3: #8798b3; --info: #7fb0ff; --info-bg: rgba(127, 176, 255, .13);
+  --acc: #4d90ff; --acc-tx: #fff;
+  --bg: #050c1c;
+  --lateral: rgba(14, 28, 56, .5);
+  --painel: rgba(22, 40, 76, .5);
+  --painel-2: rgba(16, 32, 62, .55);
+  --hover: rgba(120, 170, 255, .09);
+  --ativo: rgba(120, 170, 255, .16);
+  --borda: rgba(150, 190, 255, .16);
+  --borda-2: rgba(150, 190, 255, .26);
+  --tx: #eef4ff; --tx-2: #b3c4e2; --tx-3: #8fa2c6;
+  --neutro-bg: rgba(255, 255, 255, .07);
+  --info: #8db8ff; --info-bg: rgba(127, 176, 255, .14);
+  --brilho: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 -1px 0 rgba(255, 255, 255, .04);
+  --sombra-1: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 26px -14px rgba(0, 0, 0, .7);
+  --sombra-2: 0 2px 4px rgba(0, 0, 0, .3), 0 20px 44px -18px rgba(0, 0, 0, .8);
+  --sombra-3: 0 30px 80px -20px rgba(0, 0, 0, .85), 0 0 0 1px rgba(150, 190, 255, .14);
+  --fundo:
+    radial-gradient(60% 45% at 5% 0%, rgba(30, 140, 255, .38), transparent 70%),
+    radial-gradient(50% 45% at 100% 22%, rgba(60, 200, 255, .22), transparent 70%),
+    radial-gradient(70% 55% at 50% 110%, rgba(100, 70, 255, .26), transparent 70%),
+    linear-gradient(170deg, #071430, #040915);
 }
-[data-produto="ofixl"] .faixa { background: var(--marinho); }
-/* modo do técnico: cartões grandes, um botão principal por vez */
-[data-produto="ofixl"] .of-visita { border-left: 4px solid var(--borda-2); }
-[data-produto="ofixl"] .of-visita.caminho { border-left-color: var(--acc); }
-[data-produto="ofixl"] .of-visita.atendimento { border-left-color: var(--ciano); }
-[data-produto="ofixl"] .of-visita.concluida { border-left-color: #1f9d55; opacity: .85; }
-[data-produto="ofixl"] .of-visita .btn { min-height: 42px; }
+
+/* fundo com luzes, fixo atrás do vidro */
+[data-produto="ofixl"] body { background-color: var(--bg); background-image: var(--fundo); background-attachment: fixed; min-height: 100vh; }
+
+/* ---------- vidro: lateral, topo, cartões, gaveta, modal ---------- */
+[data-produto="ofixl"] .lat,
+[data-produto="ofixl"] .topo,
+[data-produto="ofixl"] .cartao,
+[data-produto="ofixl"] .gaveta,
+[data-produto="ofixl"] .modal,
+[data-produto="ofixl"] .pop {
+  -webkit-backdrop-filter: var(--vidro); backdrop-filter: var(--vidro);
+}
+[data-produto="ofixl"] .lat { border-right: 1px solid var(--borda); box-shadow: var(--brilho); }
+[data-produto="ofixl"] .topo { background: var(--lateral); border-bottom: 1px solid var(--borda); box-shadow: var(--brilho), 0 10px 30px -22px rgba(10, 30, 70, .5); }
+[data-produto="ofixl"] .cartao { border: 1px solid var(--borda); box-shadow: var(--brilho), var(--sombra-1); }
+[data-produto="ofixl"] .gaveta, [data-produto="ofixl"] .modal { background: color-mix(in srgb, var(--painel) 70%, var(--bg)); box-shadow: var(--brilho), var(--sombra-3); }
+[data-produto="ofixl"][data-tema="escuro"] .gaveta, [data-produto="ofixl"][data-tema="escuro"] .modal { background: rgba(12, 24, 48, .78); }
+[data-produto="ofixl"] .modal-pe { background: transparent; }
+[data-produto="ofixl"] .fundo-modal { background: rgba(5, 15, 35, .35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+[data-produto="ofixl"] .faixa { background: rgba(6, 16, 36, .82); -webkit-backdrop-filter: var(--vidro); backdrop-filter: var(--vidro); border-bottom: 1px solid rgba(150, 190, 255, .15); }
+
+/* item ativo do menu: pílula de vidro líquido */
+[data-produto="ofixl"] .lat a.item { height: 38px; border-radius: 14px; }
+[data-produto="ofixl"] .lat a.item.ativo {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .75), rgba(255, 255, 255, .35));
+  box-shadow: var(--brilho), 0 6px 16px -10px rgba(20, 60, 140, .6), 0 0 0 1px var(--borda);
+}
+[data-produto="ofixl"][data-tema="escuro"] .lat a.item.ativo { background: linear-gradient(180deg, rgba(120, 170, 255, .26), rgba(120, 170, 255, .08)); }
+
+/* marca: ícone em relevo */
+[data-produto="ofixl"] .marca-ic {
+  width: 34px; height: 34px; border-radius: 11px;
+  background: linear-gradient(160deg, #5aa2ff, #1f5fe0 55%, #123f9e);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 -2px 3px rgba(0, 0, 0, .3), 0 4px 10px -4px rgba(20, 70, 180, .8);
+}
+
+/* ---------- botões: vidro líquido (brilho na metade de cima, relevo e reflexo) ---------- */
+[data-produto="ofixl"] .btn {
+  height: 36px; padding: 0 14px; border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .8), rgba(255, 255, 255, .42));
+  border: 1px solid var(--borda);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -2px 4px rgba(30, 60, 120, .08), 0 4px 12px -6px rgba(20, 45, 90, .35);
+  -webkit-backdrop-filter: blur(12px) saturate(160%); backdrop-filter: blur(12px) saturate(160%);
+  transition: transform .18s var(--ease), box-shadow .18s, background .18s;
+}
+[data-produto="ofixl"][data-tema="escuro"] .btn {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .05));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), inset 0 -2px 4px rgba(0, 0, 0, .25), 0 4px 12px -6px rgba(0, 0, 0, .6);
+}
+[data-produto="ofixl"] .btn:hover { transform: translateY(-1px); }
+[data-produto="ofixl"] .btn:active { transform: translateY(1px) scale(.98); box-shadow: inset 0 2px 5px rgba(20, 45, 90, .22); }
+[data-produto="ofixl"] .btn.pri {
+  position: relative; overflow: hidden; border-color: rgba(20, 70, 190, .6);
+  background: linear-gradient(180deg, #6aa8ff 0%, #2f7bff 48%, #1a5ee6 52%, #1f69f0 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -3px 6px rgba(0, 20, 80, .35), 0 8px 20px -8px rgba(30, 100, 255, .9);
+  text-shadow: 0 1px 1px rgba(0, 20, 80, .35);
+}
+[data-produto="ofixl"] .btn.pri::after {
+  content: ''; position: absolute; left: 8%; right: 8%; top: 1px; height: 46%; border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0)); pointer-events: none;
+}
+[data-produto="ofixl"] .btn.pri:hover { background: linear-gradient(180deg, #7bb3ff 0%, #3d86ff 48%, #2468ee 52%, #2a72f5 100%); }
+
+/* ---------- controles com relevo ---------- */
+[data-produto="ofixl"] input:not([type=checkbox]):not([type=radio]):not([type=range]),
+[data-produto="ofixl"] select, [data-produto="ofixl"] textarea {
+  border-radius: 12px; background: rgba(255, 255, 255, .55); border: 1px solid var(--borda-2);
+  box-shadow: inset 0 2px 4px rgba(20, 45, 90, .1), 0 1px 0 rgba(255, 255, 255, .8);
+}
+[data-produto="ofixl"][data-tema="escuro"] input:not([type=checkbox]):not([type=radio]):not([type=range]),
+[data-produto="ofixl"][data-tema="escuro"] select, [data-produto="ofixl"][data-tema="escuro"] textarea {
+  background: rgba(0, 0, 0, .25); box-shadow: inset 0 2px 5px rgba(0, 0, 0, .45), 0 1px 0 rgba(255, 255, 255, .06);
+}
+[data-produto="ofixl"] input[type=checkbox] {
+  -webkit-appearance: none; appearance: none; width: 20px; height: 20px; margin: 0; border-radius: 7px; cursor: pointer; flex: none;
+  background: linear-gradient(180deg, #fff, #e3eaf5); border: 1px solid var(--borda-2);
+  box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(20, 45, 90, .25); display: inline-grid; place-items: center;
+}
+[data-produto="ofixl"] input[type=checkbox]:checked {
+  background: linear-gradient(180deg, #5ea0ff, #1f64ea); border-color: #1a52c4;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 -2px 3px rgba(0, 20, 80, .3), 0 2px 6px -2px rgba(30, 100, 255, .8);
+}
+[data-produto="ofixl"] input[type=checkbox]:checked::after { content: ''; width: 6px; height: 11px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
+
+/* números do painel gravados no vidro */
+[data-produto="ofixl"] .kpi .val { text-shadow: 0 1px 0 rgba(255, 255, 255, .7); }
+[data-produto="ofixl"][data-tema="escuro"] .kpi .val { text-shadow: 0 0 18px rgba(77, 144, 255, .35); }
+[data-produto="ofixl"] .et { border-radius: 999px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5); }
+
+/* ---------- modo do técnico: cartões grandes, um botão principal por vez ---------- */
+[data-produto="ofixl"] .of-visita { position: relative; overflow: hidden; }
+[data-produto="ofixl"] .of-visita::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 4px; border-radius: 0 4px 4px 0; background: var(--borda-2); }
+[data-produto="ofixl"] .of-visita.caminho::before { background: linear-gradient(180deg, #6aa8ff, #1f64ea); box-shadow: 0 0 12px rgba(47, 123, 255, .8); }
+[data-produto="ofixl"] .of-visita.atendimento::before { background: linear-gradient(180deg, #7fe0ff, #17a6d8); box-shadow: 0 0 12px rgba(60, 200, 255, .8); }
+[data-produto="ofixl"] .of-visita.concluida::before { background: #1f9d55; }
+[data-produto="ofixl"] .of-visita.concluida { opacity: .85; }
+[data-produto="ofixl"] .of-visita .btn { min-height: 44px; }
+
+/* celular: o app ocupa a tela, topo de vidro e toques maiores */
+@media (max-width: 900px) {
+  [data-produto="ofixl"] .lat { background: color-mix(in srgb, var(--painel) 85%, var(--bg)); }
+  [data-produto="ofixl"] .topo { height: 58px; }
+  [data-produto="ofixl"] .lat a.item { height: 44px; font-size: 14.5px; }
+  [data-produto="ofixl"] .btn { height: 40px; }
+  [data-produto="ofixl"] .cartao { border-radius: 20px; }
+}
 @media (max-width: 700px) {
   [data-produto="ofixl"] .of-visita .flex .btn { flex: 1 1 100%; justify-content: center; }
 }
+/* sem suporte a desfoque: vidro vira painel sólido para manter a leitura */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-produto="ofixl"] { --painel: #f7faff; --lateral: #eef3fb; }
+  :root[data-produto="ofixl"][data-tema="escuro"] { --painel: #13234a; --lateral: #0d1a38; }
+}
+@media print { [data-produto="ofixl"] body { background: #fff; } }
+
+/* tela "baixe o app" (fora do app do Google Play) */
+.of-soapp { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 32px 20px; text-align: center; color: #eef4ff; font-family: var(--f);
+  background: radial-gradient(60% 45% at 5% 0%, rgba(30, 140, 255, .45), transparent 70%), radial-gradient(70% 55% at 50% 110%, rgba(100, 70, 255, .3), transparent 70%), linear-gradient(170deg, #071430, #040915); }
+.of-soapp img { border-radius: 28px; box-shadow: 0 20px 50px -16px rgba(30, 120, 255, .8); }
+.of-soapp h1 { font-size: 24px; max-width: 22ch; text-wrap: balance; }
+.of-soapp p { max-width: 42ch; color: #b3c4e2; font-size: 15px; line-height: 1.55; }
+.of-soapp .of-play { position: relative; overflow: hidden; margin-top: 6px; padding: 14px 26px; border-radius: 999px; color: #fff; font-weight: 600; text-decoration: none;
+  background: linear-gradient(180deg, #6aa8ff 0%, #2f7bff 48%, #1a5ee6 52%, #1f69f0 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -3px 6px rgba(0, 20, 80, .35), 0 10px 24px -8px rgba(30, 100, 255, .9); }
+.of-soapp .of-volta { color: #b3c4e2; font-size: 14px; }

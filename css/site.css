@@ -3,7 +3,7 @@
    -------------------------------------------------------------
    Tipografia: Geist (texto e títulos) + Geist Mono (dados, código)
    Cor: grafite + um único destaque azul (a cor da marca)
-   Formas: botões e campos 10px, painéis 16px, nada em pílula
+   Formas: botões em pílula de vidro líquido, campos 10px, painéis 16px de vidro
    Tema: segue o sistema (claro/escuro)
    Camadas (z-index): 10 conteúdo elevado, 50 navegação, 60 menu móvel
    ============================================================= */
@@ -1483,3 +1483,62 @@ section.caminhos { padding: 8px 0 clamp(40px, 5vw, 64px); }
 .np-direto:hover { color: var(--ink); }
 .np-final .np-direto { text-align: center; }
 .conta-direto { display: block; margin: 12px auto 0; }
+
+/* =============================================================
+   Vidro (glassmorphism), vidro líquido nos botões e relevo leve
+   (skeuomorfismo) nos cartões. Camada final: só muda superfícies.
+   ============================================================= */
+:root {
+  --vidro: rgba(26, 34, 50, 0.48);
+  --vidro-borda: rgba(170, 200, 255, 0.14);
+  --vidro-brilho: inset 0 1px 0 rgba(255, 255, 255, 0.09), inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+  --vidro-sombra: 0 2px 6px rgba(0, 0, 0, 0.25), 0 24px 50px -28px rgba(0, 0, 0, 0.9);
+  --desfoque: blur(18px) saturate(160%);
+}
+html[data-theme="light"] {
+  --vidro: rgba(255, 255, 255, 0.58);
+  --vidro-borda: rgba(255, 255, 255, 0.85);
+  --vidro-brilho: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(255, 255, 255, 0.35);
+  --vidro-sombra: 0 2px 6px rgba(16, 40, 90, 0.06), 0 24px 50px -28px rgba(16, 40, 90, 0.35);
+}
+/* luzes azuis atrás do vidro */
+body::before {
+  opacity: 1;
+  background:
+    radial-gradient(800px 520px at 88% -8%, rgba(61, 107, 240, 0.22), transparent 70%),
+    radial-gradient(640px 460px at -8% 18%, rgba(60, 200, 255, 0.1), transparent 70%),
+    radial-gradient(900px 600px at 50% 120%, rgba(110, 90, 255, 0.1), transparent 70%);
+}
+html[data-theme="light"] body::before {
+  background:
+    radial-gradient(800px 520px at 88% -8%, rgba(61, 107, 240, 0.16), transparent 70%),
+    radial-gradient(640px 460px at -8% 18%, rgba(60, 200, 255, 0.12), transparent 70%);
+}
+/* cabeçalho de vidro */
+.nav { background: color-mix(in srgb, var(--bg) 55%, transparent); border-bottom: 1px solid var(--vidro-borda); box-shadow: var(--vidro-brilho); -webkit-backdrop-filter: var(--desfoque); backdrop-filter: var(--desfoque); }
+/* botão principal: vidro líquido (reflexo na metade de cima e relevo embaixo) */
+.btn-primary {
+  position: relative; overflow: hidden; border-radius: 999px;
+  background: linear-gradient(180deg, #6f9dff 0%, #3d6bf0 50%, #2f5be0 51%, #3563ea 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -3px 6px rgba(0, 20, 80, 0.3), 0 12px 30px -12px rgba(61, 107, 240, 0.9);
+}
+.btn-primary::after { content: ''; position: absolute; left: 10%; right: 10%; top: 1px; height: 45%; border-radius: 999px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0)); pointer-events: none; }
+.btn-primary:hover { background: linear-gradient(180deg, #7eaaff 0%, #4a77f5 50%, #3a66e8 51%, #4170f0 100%); }
+html[data-theme="light"] .btn-primary { background: linear-gradient(180deg, #5c8bff 0%, #2b57d9 50%, #2450cc 51%, #2b57d9 100%); }
+/* botão secundário: vidro */
+.btn-ghost { border-radius: 999px; background: var(--vidro); border-color: var(--vidro-borda); box-shadow: var(--vidro-brilho); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+/* cartões de vidro com relevo */
+.sis, .prod-c, .sis-duas > div, .np-grade, .np-faq details {
+  background: var(--vidro); border-color: var(--vidro-borda);
+  box-shadow: var(--vidro-brilho), var(--vidro-sombra);
+  -webkit-backdrop-filter: var(--desfoque); backdrop-filter: var(--desfoque);
+}
+.np-grade { gap: 0; background: var(--vidro); }
+.np-grade article { background: transparent; border: 0 solid var(--vidro-borda); border-width: 0 1px 1px 0; }
+.sis-duas > .plano-pro { border-color: color-mix(in srgb, var(--sis, #3d6bf0) 55%, transparent); box-shadow: var(--vidro-brilho), 0 0 0 1px color-mix(in srgb, var(--sis, #3d6bf0) 25%, transparent), 0 26px 60px -30px color-mix(in srgb, var(--sis, #3d6bf0) 80%, transparent); }
+.prod-c:hover, .sis:hover { border-color: color-mix(in srgb, var(--sis, #3d6bf0) 45%, var(--vidro-borda)); }
+.sis-foto img, .prod-foto img { box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --vidro: rgba(20, 25, 34, 0.94); }
+  html[data-theme="light"] { --vidro: rgba(255, 255, 255, 0.96); }
+}
