@@ -1,8 +1,26 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.bluerosestore.linhanexo",
-    "sha256_cert_fingerprints": ["92:72:0F:A7:A7:A8:7C:98:6C:9E:68:9D:29:A5:75:56:7C:FB:0F:91:28:AF:F8:7E:B5:F2:A9:08:EB:59:D8:FC"]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bluerosestore.linhanexo",
+      "sha256_cert_fingerprints": [
+        "92:72:0F:A7:A7:A8:7C:98:6C:9E:68:9D:29:A5:75:56:7C:FB:0F:91:28:AF:F8:7E:B5:F2:A9:08:EB:59:D8:FC"
+      ]
+    }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bluerosestore.ofixl",
+      "sha256_cert_fingerprints": [
+        "60:CA:D4:12:2F:3A:17:05:4E:9E:81:35:A8:A0:F2:EC:36:7A:8F:13:01:97:6A:39:BE:54:0B:AE:D6:16:55:61"
+      ]
+    }
   }
-}]
+]

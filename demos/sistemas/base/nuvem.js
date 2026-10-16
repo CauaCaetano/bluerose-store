@@ -17,7 +17,8 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
 const SITE = 'https://bluerose-store.com/';
 // Dentro do app da Google Play (Linha Nexo) não há venda nem teste com cartão: a regra de pagamentos da loja
 // não permite levar a compra para fora. O app abre /app/play/?origem=play, que marca este aparelho.
-const PLAY = (() => { try { return localStorage.getItem('nexo-play') === '1'; } catch { return false; } })();
+// versão da Play Store: o app abre com ?origem=play (Linha Nexo e Ofixl); a assinatura é só pelo site, nada de compra dentro do app
+const PLAY = (() => { try { if (new URLSearchParams(location.search).get('origem') === 'play') localStorage.setItem('nexo-play', '1'); return localStorage.getItem('nexo-play') === '1'; } catch { return false; } })();
 const LOGO = new URL('blue-rose.png', import.meta.url).href, LOGO_NEXO = new URL('linha-nexo.png', import.meta.url).href;
 const SEP = '\u0001';
 // Plano Pro: equipe sem limite (Básico: 5 pessoas além do dono), histórico da equipe (os sistemas usam sempre a marca Blue Rose),
