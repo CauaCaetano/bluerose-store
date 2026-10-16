@@ -602,7 +602,7 @@ function montar(app, cfg) {
       const contexto = { destaques: r?.destaques || [], alertas: r?.alertas || [], contagens };
       const sugestoes = ['O que eu devo priorizar hoje?', 'Como está o meu mês?', 'Escreva uma mensagem de cobrança educada', 'Como eu consigo mais clientes?', `Como funciona o ${cfg.nome}?`];
       const desenhar = (resp = '', carregando = false) => `<div class="col" style="gap:10px">
-        <p class="mute-2" style="font-size:12.5px;margin:0">Pergunte sobre o seu negócio ou sobre como usar o sistema. A IA vê só os números do resumo (sem nomes nem telefones dos seus clientes). ${app.sessao ? 'São 20 perguntas grátis por dia.' : 'Na demonstração, a resposta é um exemplo.'}</p>
+        <p class="mute-2" style="font-size:12.5px;margin:0">Pergunte sobre o seu negócio ou sobre como usar o sistema. A IA vê só os números e avisos do resumo do dia, nunca telefones, e-mails ou documentos dos seus clientes. ${app.sessao ? 'São 20 perguntas grátis por dia.' : 'Na demonstração, a resposta é um exemplo.'}</p>
         <div class="flex" style="flex-wrap:wrap;gap:6px">${sugestoes.map((x) => `<button type="button" class="btn peq" data-ia-sug="${esc(x)}">${esc(x)}</button>`).join('')}</div>
         <label class="campo largo">Sua pergunta<textarea data-ia-perg rows="2" maxlength="600" placeholder="Ex.: quais clientes eu devo cobrar primeiro?">${esc(d.p || '')}</textarea></label>
         <div data-ia-resp class="cartao" style="padding:12px;white-space:pre-wrap;${resp || carregando ? '' : 'display:none'}">${carregando ? 'Pensando…' : esc(resp)}</div></div>`;
