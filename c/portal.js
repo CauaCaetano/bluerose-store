@@ -442,6 +442,41 @@ T.comprovante = {
   },
 };
 
+// Ofixl: acompanhamento da visita técnica, aprovação do orçamento, comprovante, PIX e avaliação
+T.atendimento = {
+  titulo: (d) => `${d.status === 'orcamento' ? 'Orçamento' : 'Ordem de serviço'} nº ${d.numero}`,
+  render(d) {
+    st.aprov ||= Object.fromEntries(d.itens.filter((x) => x.aprovado == null).map((x) => [x.k, true]));
+    const etapas = d.etapas.filter(([k]) => k !== 'orcamento'), i = etapas.findIndex(([k]) => k === d.status), pend = d.itens.some((x) => x.aprovado == null);
+    const valendo = d.itens.filter((x) => (x.aprovado == null ? st.aprov[x.k] : x.aprovado));
+    const total = valendo.reduce((s, x) => s + x.qtd * x.preco, 0) - (d.desconto || 0);
+    const hojeISO = new Date().toISOString().slice(0, 10), concluida = d.status === 'concluida';
+    return `${cab(E().nome, `${esc(d.tipo)}`, `${d.status === 'orcamento' ? 'Orçamento' : 'Ordem de serviço'} nº ${esc(d.numero)} · ${dt(d.data)}${d.hora ? ` às ${esc(d.hora)}` : ''}`)}
+      ${d.status !== 'orcamento' ? `<section class="p-sec"><h2>${concluida ? 'Serviço concluído' : d.status === 'caminho' ? 'O técnico está a caminho' : d.status === 'atendimento' ? 'Em atendimento' : 'Visita agendada'}</h2><div class="p-passos">${etapas.map((_, k) => `<i class="${k <= i ? 'feito' : ''}"></i>`).join('')}</div><div class="p-passos-rot"><span>Agendada</span><b style="color:var(--acc)">${esc(etapas[i]?.[1] || '')}</b><span>Concluída</span></div>
+        <p class="p-s" style="margin-top:10px">Técnico: <b>${esc(d.tecnico)}</b>${d.endereco ? ` · ${esc(d.endereco)}` : ''}</p>${d.aparelhos?.length ? `<p class="p-s" style="margin-top:4px">Aparelhos: ${esc(d.aparelhos.join('; '))}</p>` : ''}</section>` : ''}
+      <section class="p-sec"><h2>${pend ? 'Orçamento para aprovar' : 'Serviços e materiais'}</h2>${pend ? '<p class="p-sub">Marque o que você quer fazer. O que não for aprovado fica anotado para depois.</p>' : ''}
+        ${d.itens.map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.descricao)}${x.qtd !== 1 ? ` <span class="p-s">× ${esc(x.qtd)}</span>` : ''}</div></div><span class="p-num">${moeda(x.qtd * x.preco)}</span>
+          ${x.aprovado == null ? `<button type="button" class="p-bt peq" aria-pressed="${!!st.aprov[x.k]}" data-a="marcar" data-k="${esc(x.k)}">${st.aprov[x.k] ? 'Aprovado' : 'Não agora'}</button>` : x.aprovado ? '' : '<span class="p-et">Recusado</span>'}</div>`).join('')}
+        ${d.desconto ? `<div class="p-linha"><div class="p-cresce">Desconto</div><span class="p-num">− ${moeda(d.desconto)}</span></div>` : ''}
+        <div class="p-total"><span>Total</span><span>${moeda(pend ? total : d.total)}</span></div></section>
+      ${d.relato || d.diagnostico ? `<section class="p-sec"><h2>O que foi visto</h2>${d.relato ? `<p class="p-s" style="margin:0 0 6px">Você relatou: ${esc(d.relato)}</p>` : ''}${d.diagnostico ? `<p class="p-s" style="margin:0">Técnico: ${esc(d.diagnostico)}</p>` : ''}</section>` : ''}
+      ${d.checklist?.length ? `<section class="p-sec"><h2>Checklist do serviço</h2>${d.checklist.map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.item)}</div></div><span class="p-et ${x.feito ? 'ok' : ''}">${x.feito ? 'Feito' : '—'}</span></div>`).join('')}${d.garantia_ate ? `<p class="p-s" style="margin-top:10px">Garantia de ${esc(d.garantia)} dias, até <b>${dt(d.garantia_ate)}</b>${d.garantia_ate >= hojeISO ? '' : ' (vencida)'}.</p>` : ''}</section>` : ''}
+      ${d.fotos?.length ? `<section class="p-sec"><h2>Fotos</h2>${fotos(d.fotos)}</section>` : ''}
+      ${concluida && !d.pago ? `<section class="p-sec"><h2>Pagamento</h2>${d.informado ? '<p class="p-s">Você avisou que pagou. Assim que a empresa conferir, aparece como pago.</p>' : d.pix?.chave ? `${pixBloco(d.pix, d.total, d.txid, `${d.tipo} nº ${d.numero}`)}<p style="margin-top:10px"><button type="button" class="p-bt ok largo" data-a="paguei">Já paguei</button></p>` : '<p class="p-s">Fale com a empresa para receber os dados de pagamento.</p>'}</section>` : concluida ? '<section class="p-sec p-ok"><p class="p-s" style="margin:0">Pagamento recebido. Obrigado!</p></section>' : ''}
+      ${concluida ? d.avaliacao ? `<section class="p-sec p-ok"><p class="p-s" style="margin:0">Obrigado pela avaliação: ${'★'.repeat(d.avaliacao)}${'☆'.repeat(5 - d.avaliacao)}</p></section>` : `<section class="p-sec"><h2>Como foi o atendimento?</h2><div style="display:flex;gap:6px;justify-content:center;margin:8px 0">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="p-bt peq" aria-pressed="${st.nota === n}" data-a="nota" data-n="${n}">${n <= (st.nota || 0) ? '★' : '☆'}</button>`).join('')}</div><label class="p-campo">Quer deixar um comentário?<textarea data-f="comentario" rows="2">${esc(st.comentario || '')}</textarea></label><p style="margin-top:10px"><button type="button" class="p-bt largo" data-a="avaliar">Enviar avaliação</button></p></section>` : ''}
+      ${concluida ? '<p style="text-align:center;margin-top:12px"><button type="button" class="p-bt" data-a="imprimir">Imprimir ou salvar em PDF</button></p>' : ''}
+      ${avisoDemo()}${rod()}${pend ? `<div class="p-fixo"><button type="button" class="p-bt pri" data-a="aprovar">Aprovar · ${moeda(total)}</button></div>` : ''}`;
+  },
+  acoes: {
+    marcar: (el) => { st.aprov[el.dataset.k] = !st.aprov[el.dataset.k]; desenhar(); },
+    aprovar: async () => { if (!Object.values(st.aprov).some(Boolean) && !confirm('Recusar todo o orçamento?')) return; const r = await responder('aprovar', { itens: st.aprov }); if (r.erro) return alert(r.erro); pronto('Resposta enviada', 'A empresa já recebeu e vai combinar o dia da visita.'); },
+    paguei: async () => { const r = await responder('paguei', {}); if (r.erro) return alert(r.erro); ctx.dados.informado = true; desenhar(); },
+    nota: (el) => { lerCampos(); st.nota = Number(el.dataset.n); desenhar(); },
+    avaliar: async () => { lerCampos(); if (!st.nota) return alert('Escolha de 1 a 5 estrelas.'); const r = await responder('avaliar', { nota: st.nota, comentario: (st.comentario || '').trim().slice(0, 300) }); if (r.erro) return alert(r.erro); ctx.dados.avaliacao = st.nota; desenhar(); },
+    imprimir: () => window.print(),
+  },
+};
+
 // ---------------------------------------------------------------- motor
 function lerCampos() { raiz.querySelectorAll('[data-f]').forEach((x) => { st[x.dataset.f] = x.value; }); }
 function desenhar() {

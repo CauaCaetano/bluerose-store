@@ -233,6 +233,20 @@ const RESUMOS = {
       alertas: [cobrar.length && plural(cobrar.length, 'etapa pronta para cobrar', 'etapas prontas para cobrar'), parado.length && `${plural(parado.length, 'obra sem diário', 'obras sem diário')} há mais de 2 dias`, and.filter((o) => o.previsao < hoje).length && plural(and.filter((o) => o.previsao < hoje).length, 'obra com prazo vencido', 'obras com prazo vencido'), extras.length && plural(extras.length, 'serviço extra esperando o cliente', 'serviços extras esperando o cliente')].filter(Boolean),
     };
   },
+  // Blue Rose Ofixl · serviços técnicos em campo
+  ofixl(d, hoje) {
+    const os = L(d, 'ordens'), cli = new Map(L(d, 'clientes').map((c) => [c.id, c])), abertas = ['agendada', 'caminho', 'atendimento'];
+    const tot = (o) => soma((o.itens || []).filter((x) => x.aprovado !== false), (x) => Number(x.qtd || 1) * Number(x.preco || 0)) - Number(o.desconto || 0);
+    const hojeL = os.filter((o) => abertas.includes(o.status) && o.data === hoje).sort((a, b) => String(a.hora).localeCompare(String(b.hora)));
+    const mes = hoje.slice(0, 7), feitas = os.filter((o) => o.status === 'concluida' && String(o.concluida_em || o.data).startsWith(mes));
+    const receber = os.filter((o) => o.status === 'concluida' && !o.pago), orc = os.filter((o) => o.status === 'orcamento' && String(o.orcado_em || o.data) <= mais(hoje, -3));
+    const prev = L(d, 'equipamentos').filter((x) => Number(x.periodicidade) && x.ultima && mais(x.ultima, Number(x.periodicidade)) <= mais(hoje, 15) && !os.some((o) => abertas.includes(o.status) && (o.equipamentos || []).includes(x.id)));
+    return {
+      destaques: [['Atendimentos hoje', String(hojeL.length)], ['Concluídos no mês', `${feitas.length} · ${R$(soma(feitas, tot))}`], ['A receber', R$(soma(receber, tot))]],
+      itens: hojeL.map((o) => `${o.hora || ''} · ${cli.get(o.cliente)?.nome || ''} · ${o.tipo}`), tituloItens: 'Atendimentos de hoje',
+      alertas: [prev.length && plural(prev.length, 'preventiva para oferecer', 'preventivas para oferecer'), orc.length && plural(orc.length, 'orçamento sem resposta', 'orçamentos sem resposta'), receber.length && plural(receber.length, 'serviço a receber', 'serviços a receber')].filter(Boolean),
+    };
+  },
   // Blue Rose Guard · controle de pragas
   pragas(d, hoje) {
     const os = L(d, 'ordens'), cli = new Map(L(d, 'clientes').map((c) => [c.id, c])), cfg = d._cfg || {};

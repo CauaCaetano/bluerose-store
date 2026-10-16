@@ -494,6 +494,7 @@ function montar(app, cfg) {
         ${cfg.paginas.filter((p) => !p.id || app.acesso(p.id) !== 'nenhum').map((p) => (p.grupo && !p.id ? `<div class="grupo">${esc(p.grupo)}</div>` : `<a class="item" href="#/${p.id}" data-pag="${p.id}">${ic(p.icone || 'circle')}<span class="corta">${esc(p.rot)}</span><span class="cont" data-cont="${p.id}" hidden></span></a>`)).join('')}
         <div class="lat-pe">
           <a class="item" href="#" data-acao="resumoDia">${ic('notepad')}Resumo do dia</a>
+          <a class="item" href="#" data-acao="assistenteIA">${ic('sparkle')}Assistente IA <span class="et ok sem-ponto" style="margin-left:auto;font-size:10px">grátis</span></a>
           ${!app.nuvem || app.sessao.gestor ? `<a class="item item-dono" href="#/dono" data-pag="dono">${ic('crown')}Painel do dono</a><a class="item" href="#/importar" data-pag="importar">${ic('table')}Importar planilha</a>` : ''}
           ${app.nuvem ? `<a class="item" href="javascript:void 0" data-pwa-instalar hidden>${ic('download-simple')}Instalar o app</a>` : ''}
           <a class="item" href="#/config" data-pag="config">${ic('gear-six')}Configurações</a>
@@ -594,6 +595,30 @@ function montar(app, cfg) {
     paleta,
     atalhos: () => modal({ titulo: 'Atalhos do teclado', largura: 460, corpo: `<div class="col" style="gap:9px">${[['Ctrl K', 'Buscar ou ir para qualquer lugar'], ['/', 'Buscar na lista'], ['N', 'Criar novo na página atual'], ...paginas.filter((p) => p.atalho).map((p) => [`G ${p.atalho.toUpperCase()}`, `Ir para ${p.rot}`]), ['Esc', 'Fechar janela ou ficha'], ['Ctrl Enter', 'Salvar o formulário aberto']].map(([k, t]) => `<div class="entre"><span class="mute-2">${esc(t)}</span><span>${k.split(' ').map((x) => `<kbd>${esc(x)}</kbd>`).join(' ')}</span></div>`).join('')}</div>`, botoes: [{ rotulo: 'Fechar', classe: 'pri', valor: true }] }),
     exportarDados: () => baixar(`${cfg.id}-dados.json`, JSON.stringify(app.db.dados, null, 1), 'application/json'),
+    // assistente com IA grátis: manda só os números do resumo (sem nomes nem telefones) e a pergunta
+    assistenteIA: async (d = {}) => {
+      const r = resumoDoDia(cfg.id, app.db.dados, hoje());
+      const contagens = Object.fromEntries(Object.entries(app.db.dados).filter(([k, v]) => Array.isArray(v) && !k.startsWith('_')).map(([k, v]) => [k, v.length]));
+      const contexto = { destaques: r?.destaques || [], alertas: r?.alertas || [], contagens };
+      const sugestoes = ['O que eu devo priorizar hoje?', 'Como está o meu mês?', 'Escreva uma mensagem de cobrança educada', 'Como eu consigo mais clientes?', `Como funciona o ${cfg.nome}?`];
+      const desenhar = (resp = '', carregando = false) => `<div class="col" style="gap:10px">
+        <p class="mute-2" style="font-size:12.5px;margin:0">Pergunte sobre o seu negócio ou sobre como usar o sistema. A IA vê só os números do resumo (sem nomes nem telefones dos seus clientes). ${app.sessao ? 'São 20 perguntas grátis por dia.' : 'Na demonstração, a resposta é um exemplo.'}</p>
+        <div class="flex" style="flex-wrap:wrap;gap:6px">${sugestoes.map((x) => `<button type="button" class="btn peq" data-ia-sug="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+        <label class="campo largo">Sua pergunta<textarea data-ia-perg rows="2" maxlength="600" placeholder="Ex.: quais clientes eu devo cobrar primeiro?">${esc(d.p || '')}</textarea></label>
+        <div data-ia-resp class="cartao" style="padding:12px;white-space:pre-wrap;${resp || carregando ? '' : 'display:none'}">${carregando ? 'Pensando…' : esc(resp)}</div></div>`;
+      const exemplo = () => `${r?.destaques?.length ? `Pelo que o sistema mostra agora: ${r.destaques.map(([a, b]) => `${a.toLowerCase()}: ${b}`).join('; ')}.` : 'O sistema ainda tem poucos dados.'}${r?.alertas?.length ? `\n\nComece por aqui: ${r.alertas.join('; ')}.` : '\n\nNada urgente agora: use o tempo para chamar clientes antigos e pedir indicações.'}\n\n(Exemplo da demonstração. Na versão contratada, a IA responde a sua pergunta com os números da sua empresa.)`;
+      const perguntar = async (f) => {
+        const t = f.querySelector('[data-ia-perg]'), out = f.querySelector('[data-ia-resp]'), pergunta = t.value.trim();
+        if (pergunta.length < 3) { t.focus(); return false; }
+        out.style.display = ''; out.textContent = 'Pensando…';
+        if (!app.sessao?.funcao) { setTimeout(() => { out.textContent = exemplo(); }, 500); return false; }
+        try { const x = await app.sessao.funcao('nexo-ia', { pergunta, sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes} perguntas restantes hoje.` : ''}`; }
+        catch (e) { out.textContent = e.message || 'Não foi possível responder agora.'; }
+        return false;
+      };
+      modal({ titulo: 'Assistente IA', largura: 620, corpo: desenhar(), botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }, { rotulo: 'Perguntar', classe: 'pri', acao: perguntar }],
+        aoAbrir: (f) => { f.addEventListener('click', (e) => { const b2 = e.target.closest('[data-ia-sug]'); if (!b2) return; f.querySelector('[data-ia-perg]').value = b2.dataset.iaSug; perguntar(f); }); f.querySelector('[data-ia-perg]')?.focus(); } });
+    },
     resumoDia: () => {
       const r = resumoDoDia(cfg.id, app.db.dados, hoje()), texto = resumoTexto(cfg.nome, app.empresa, r, hoje());
       const zap = app.db.cfg.whats_dono ? String(app.db.cfg.whats_dono).replace(/\D/g, '') : '';

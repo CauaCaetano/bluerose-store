@@ -1,0 +1,33 @@
+/* Blue Rose Ofixl · azul-marinho, azul elétrico e ciano; feito para o celular do técnico */
+:root[data-produto="ofixl"] {
+  --acc: #1f6feb;
+  --acc-tx: #fff;
+  --marinho: #0f2a52;
+  --ciano: #17b6d8;
+  --bg: #f3f6fb;
+  --lateral: #0b1d38;
+  --painel: #ffffff;
+  --painel-2: #f6f9fd;
+  --borda: #dbe3ef;
+  --borda-2: #c4d0e2;
+  --tx: #13213a;
+  --tx-2: #44536d;
+  --tx-3: #5c6a84;
+  --info: #1f6feb; --info-bg: #e5efff;
+  --r1: 6px; --r2: 10px; --r3: 14px;
+}
+:root[data-produto="ofixl"][data-tema="escuro"] {
+  --acc: #4c8dff; --acc-tx: #06111f;
+  --bg: #0a1424; --lateral: #08152a; --painel: #111f36; --painel-2: #152540; --borda: #22334f; --borda-2: #2e4366;
+  --tx: #e8eef8; --tx-2: #a9b8cf; --tx-3: #8798b3; --info: #7fb0ff; --info-bg: rgba(127, 176, 255, .13);
+}
+[data-produto="ofixl"] .faixa { background: var(--marinho); }
+/* modo do técnico: cartões grandes, um botão principal por vez */
+[data-produto="ofixl"] .of-visita { border-left: 4px solid var(--borda-2); }
+[data-produto="ofixl"] .of-visita.caminho { border-left-color: var(--acc); }
+[data-produto="ofixl"] .of-visita.atendimento { border-left-color: var(--ciano); }
+[data-produto="ofixl"] .of-visita.concluida { border-left-color: #1f9d55; opacity: .85; }
+[data-produto="ofixl"] .of-visita .btn { min-height: 42px; }
+@media (max-width: 700px) {
+  [data-produto="ofixl"] .of-visita .flex .btn { flex: 1 1 100%; justify-content: center; }
+}
