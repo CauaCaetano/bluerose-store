@@ -415,12 +415,13 @@ fieldset.campo { border: none; margin: 0; padding: 0; }
 
 /* ---------- rodapé ---------- */
 .rodape-site { border-top: 1px solid var(--line); padding: 40px 0 48px; color: var(--ink-3); font-size: 14px; }
-.rodape-site .wrap { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start; }
-.rodape-site nav { display: flex; flex-wrap: wrap; gap: 22px; }
+.rodape-site .wrap { display: grid; grid-template-columns: auto 1fr; gap: 24px 40px; align-items: start; }
+.rodape-site .brand { white-space: nowrap; }
+.rodape-site nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px 22px; }
 .rodape-site a { color: var(--ink-2); text-decoration: none; }
 .rodape-site a:hover { color: var(--ink); }
 .rodape-site .linha2 { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 20px; }
-@media (max-width: 700px) { .rodape-site .wrap { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .rodape-site .wrap { grid-template-columns: 1fr; } .rodape-site nav { justify-content: flex-start; } }
 
 /* ---------- página de projetos ---------- */
 .p-hero { padding: 64px 0 24px; }
