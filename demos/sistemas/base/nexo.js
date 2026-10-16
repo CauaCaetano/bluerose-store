@@ -14,6 +14,8 @@ import { resumoDoDia, resumoTexto } from './resumos.js';
 import { prepararExtras } from './extras.js';
 import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 import { paginaImportar } from './planilha.js';
+// Assistente IA: fica em breve até o dono liberar (trocar para true quando a chave do Gemini estiver nos segredos do Supabase)
+const IA_LIBERADA = false;
 
 // ---------------------------------------------------------------- utilidades
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
@@ -494,7 +496,7 @@ function montar(app, cfg) {
         ${cfg.paginas.filter((p) => !p.id || app.acesso(p.id) !== 'nenhum').map((p) => (p.grupo && !p.id ? `<div class="grupo">${esc(p.grupo)}</div>` : `<a class="item" href="#/${p.id}" data-pag="${p.id}">${ic(p.icone || 'circle')}<span class="corta">${esc(p.rot)}</span><span class="cont" data-cont="${p.id}" hidden></span></a>`)).join('')}
         <div class="lat-pe">
           <a class="item" href="#" data-acao="resumoDia">${ic('notepad')}Resumo do dia</a>
-          <a class="item" href="#" data-acao="assistenteIA">${ic('sparkle')}Assistente IA <span class="et ok sem-ponto" style="margin-left:auto;font-size:10px">grátis</span></a>
+          <a class="item" href="#" data-acao="assistenteIA">${ic('sparkle')}Assistente IA <span class="et sem-ponto" style="margin-left:auto;font-size:10px">em breve</span></a>
           ${!app.nuvem || app.sessao.gestor ? `<a class="item item-dono" href="#/dono" data-pag="dono">${ic('crown')}Painel do dono</a><a class="item" href="#/importar" data-pag="importar">${ic('table')}Importar planilha</a>` : ''}
           ${app.nuvem ? `<a class="item" href="javascript:void 0" data-pwa-instalar hidden>${ic('download-simple')}Instalar o app</a>` : ''}
           <a class="item" href="#/config" data-pag="config">${ic('gear-six')}Configurações</a>
@@ -597,6 +599,8 @@ function montar(app, cfg) {
     exportarDados: () => baixar(`${cfg.id}-dados.json`, JSON.stringify(app.db.dados, null, 1), 'application/json'),
     // assistente com IA grátis: manda só os números do resumo (sem nomes nem telefones) e a pergunta
     assistenteIA: async (d = {}) => {
+      // a IA ainda não foi liberada pelo dono: mostra só o aviso de em breve
+      if (!IA_LIBERADA) { modal({ titulo: 'Assistente IA · em breve', largura: 460, corpo: '<p class="mute-2">Em breve você vai poder perguntar ao assistente o que priorizar no dia, como está o mês e pedir mensagens prontas, grátis e dentro do sistema.</p>', botoes: [{ rotulo: 'Entendi', valor: null, classe: 'pri' }] }); return; }
       const r = resumoDoDia(cfg.id, app.db.dados, hoje());
       const contagens = Object.fromEntries(Object.entries(app.db.dados).filter(([k, v]) => Array.isArray(v) && !k.startsWith('_')).map(([k, v]) => [k, v.length]));
       const contexto = { destaques: r?.destaques || [], alertas: r?.alertas || [], contagens };
