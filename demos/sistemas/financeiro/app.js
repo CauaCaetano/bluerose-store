@@ -21,7 +21,20 @@ const CATS = {
   receita: [['servicos', 'Serviços prestados', 'receita'], ['pecas', 'Venda de peças', 'receita'], ['contratos', 'Contratos de manutenção', 'receita'], ['outras_r', 'Outras receitas', 'receita']],
   despesa: [['fornecedores', 'Peças e materiais', 'custo'], ['salarios', 'Salários e encargos', 'pessoal'], ['prolabore', 'Pró-labore', 'pessoal'], ['aluguel', 'Aluguel', 'operacional'], ['energia', 'Energia e água', 'operacional'], ['internet', 'Internet e telefone', 'operacional'], ['combustivel', 'Combustível e veículos', 'operacional'], ['marketing', 'Marketing', 'operacional'], ['contador', 'Contabilidade', 'operacional'], ['tarifas', 'Tarifas bancárias', 'financeiro'], ['impostos', 'Impostos (Simples)', 'impostos']],
 };
-const CAT = Object.fromEntries([...CATS.receita, ...CATS.despesa].map(([id, n, g]) => [id, { nome: n, grupo: g }]));
+const CATS_PADRAO = { receita: CATS.receita.map((c) => [...c]), despesa: CATS.despesa.map((c) => [...c]) };
+const CAT = {};
+// tipos de gasto (decidem em que linha do resultado do mês a despesa entra)
+const GRUPOS = [['custo', 'Custo do que você vende (peças, materiais, mercadoria)'], ['pessoal', 'Pessoal (salários, pró-labore, encargos)'], ['operacional', 'Despesas do dia a dia (aluguel, contas, marketing…)'], ['financeiro', 'Financeiro (tarifas, juros)'], ['impostos', 'Impostos']];
+const nomeGrupo = (g) => (GRUPOS.find((x) => x[0] === g) || [, 'Despesas do dia a dia'])[1].split(' (')[0];
+const CAT_PADRAO_IDS = new Set([...CATS.receita, ...CATS.despesa].map(([id]) => id));
+function carregarCats(a) {
+  const c = a?.db?.cfg?.categorias;
+  for (const t of ['receita', 'despesa']) CATS[t].splice(0, CATS[t].length, ...((c && c[t]) || CATS_PADRAO[t]).map((x) => [...x]));
+  for (const k of Object.keys(CAT)) delete CAT[k];
+  for (const [id, n, g] of [...CATS.receita, ...CATS.despesa]) CAT[id] = { nome: n, grupo: g };
+}
+function gravarCats(a) { a.db.cfg.categorias = { receita: CATS.receita.map((x) => [...x]), despesa: CATS.despesa.map((x) => [...x]) }; a.db.gravar(); carregarCats(a); }
+carregarCats(null);
 const COR_CAT = ['#6366f1', '#0ea5e9', '#14b8a6', '#f59e0b', '#e11d48', '#8b5cf6', '#64748b', '#22a06b', '#f97316', '#0891b2', '#a3a3a3'];
 
 // ---------------------------------------------------------------- dados de exemplo (fictícios)
@@ -104,7 +117,7 @@ const colecoes = {
   lancamentos: { singular: 'lançamento', plural: 'lançamentos', largura: 640, campos: (a) => [
     { nome: 'tipo', rotulo: 'Tipo', tipo: 'selecao', opcoes: [['receita', 'Receita (a receber)'], ['despesa', 'Despesa (a pagar)']], obrigatorio: true, padrao: 'despesa' },
     { nome: 'descricao', rotulo: 'Descrição', tipo: 'texto', obrigatorio: true },
-    { nome: 'categoria', rotulo: 'Categoria', tipo: 'selecao', opcoes: [...CATS.receita, ...CATS.despesa].map(([id, n]) => [id, n]), obrigatorio: true },
+    { nome: 'categoria', rotulo: 'Categoria', tipo: 'selecao', opcoes: [...CATS.receita, ...CATS.despesa].map(([id, n]) => [id, n]), obrigatorio: true, ajuda: 'Crie, renomeie ou apague categorias em Financeiro › Categorias' },
     { nome: 'pessoa', rotulo: 'Cliente / fornecedor', tipo: 'relacao', colecao: 'pessoas' },
     { nome: 'valor', rotulo: 'Valor', tipo: 'moeda', obrigatorio: true }, { nome: 'vencimento', rotulo: 'Vencimento', tipo: 'data', obrigatorio: true, padrao: hoje },
     { nome: 'conta', rotulo: 'Conta', tipo: 'relacao', colecao: 'contas', obrigatorio: true, padrao: (a) => garantirConta(a) }, { nome: 'forma', rotulo: 'Forma de pagamento', tipo: 'selecao', opcoes: FORMAS },
@@ -174,7 +187,8 @@ function lancamentosPag(a, [modo]) {
     novo: { rot: modo === 'receber' ? 'Nova receita' : modo === 'pagar' ? 'Nova despesa' : 'Novo lançamento', attrs: `data-acao="novoLanc" data-t="${modo === 'receber' ? 'receita' : 'despesa'}"` },
     aoClicar: (lid) => a.abrir('lanc', lid),
     massa: [{ rot: modo === 'pagar' ? 'Pagar selecionados' : 'Dar baixa', icone: 'check', acao: (ids) => { ids.forEach((x) => { const l = a.db.obter('lancamentos', x); if (l.status === 'aberto') a.db.salvar('lancamentos', { id: x, status: 'pago', pago_em: hoje() }); }); avisar(`${ids.length} lançamentos baixados hoje`); } },
-      { rot: 'Adiar 7 dias', icone: 'clock', acao: (ids) => { ids.forEach((x) => { const l = a.db.obter('lancamentos', x); if (l.status === 'aberto') a.db.salvar('lancamentos', { id: x, vencimento: diaMais(7, l.vencimento) }); }); avisar('Vencimentos adiados'); } }],
+      { rot: 'Adiar 7 dias', icone: 'clock', acao: (ids) => { ids.forEach((x) => { const l = a.db.obter('lancamentos', x); if (l.status === 'aberto') a.db.salvar('lancamentos', { id: x, vencimento: diaMais(7, l.vencimento) }); }); avisar('Vencimentos adiados'); } },
+      { rot: 'Mudar categoria', icone: 'tag', acao: (ids) => a.acoes.mudarCatEmMassa({ ids }) }],
     colunas: [
       { k: 'vencimento', rot: 'Vencimento', render: (l) => `<span class="${vencido(l) ? 'er-tx' : ''}">${dataCurta(l.vencimento)}</span>` },
       { k: 'descricao', rot: 'Descrição', render: (l) => `<span class="prim">${esc(l.descricao)}</span><span class="sub">${esc(pessoa(a, l.pessoa)?.nome || '')}${l.recorrente ? ` ${ic('arrows-clockwise', 'p')}` : ''}</span>` },
@@ -185,6 +199,19 @@ function lancamentosPag(a, [modo]) {
       { k: 'acao', rot: '', ord: false, csv: false, render: (l) => (l.status === 'aberto' ? `<button type="button" class="btn peq" data-acao="baixar" data-id="${l.id}">${ic('check')}${l.tipo === 'receita' ? 'Receber' : 'Pagar'}</button>` : `<span class="mute" style="font-size:12px">${dataCurta(l.pago_em)}</span>`) },
     ],
   });
+}
+
+function categoriasPag(a) {
+  const usos = (id) => lancs(a).filter((l) => l.categoria === id).length;
+  const bloco = (t) => {
+    const lista = CATS[t];
+    return `<div class="cartao"><div class="cartao-cab"><div><h3>${t === 'receita' ? 'Receitas' : 'Despesas'}</h3><div class="sub">${t === 'receita' ? 'De onde vem o dinheiro' : 'Para onde vai o dinheiro'} · ${lista.length} categorias</div></div><button type="button" class="btn peq pri" data-acao="novaCat" data-t="${t}">${ic('plus')}Nova categoria</button></div>
+      <ul class="lista">${lista.map(([id, n, g], i) => `<li><span class="av p" style="background:${COR_CAT[i % COR_CAT.length]}">${ic(t === 'receita' ? 'arrow-down-left' : 'arrow-up-right', 'p')}</span><div class="cresce"><div class="t">${esc(n)}</div><div class="s">${t === 'despesa' ? `${esc(nomeGrupo(g))} · ` : ''}${usos(id) ? `${usos(id)} lançamentos` : 'nenhum lançamento'}</div></div>
+        <button type="button" class="btn fant peq" data-acao="editarCat" data-t="${t}" data-id="${id}">${ic('pencil-simple')}Editar</button><button type="button" class="btn fant peq ic-so" data-acao="apagarCat" data-t="${t}" data-id="${id}" aria-label="Apagar ${esc(n)}">${ic('trash')}</button></li>`).join('')}</ul></div>`;
+  };
+  return `<div class="dica">${ic('info')}<span>Monte a lista do seu jeito: crie, renomeie ou apague categorias. Ao renomear, os lançamentos acompanham; ao apagar uma categoria em uso, você escolhe para onde os lançamentos vão.</span></div>
+    <div class="flex" style="justify-content:flex-end"><button type="button" class="btn peq fant" data-acao="padraoCats">${ic('arrow-counter-clockwise')}Voltar à lista padrão</button></div>
+    <div class="grade g2">${bloco('despesa')}${bloco('receita')}</div>`;
 }
 
 function fluxo(a) {
@@ -394,6 +421,7 @@ const app = criarApp({
     { id: 'lancamentos', rot: 'Todos os lançamentos', icone: 'list', render: (a) => lancamentosPag(a, []), novo: (a) => a.acoes.novoLanc({ t: 'despesa' }) },
     { id: 'fluxo', rot: 'Fluxo de caixa', icone: 'chart-line-up', render: fluxo, atalho: 'f' },
     { id: 'dre', rot: 'Resultado (DRE)', icone: 'equals', titulo: 'Resultado do mês (DRE gerencial)', render: dre },
+    { id: 'categorias', rot: 'Categorias', icone: 'tag', titulo: 'Categorias de receitas e despesas', render: categoriasPag },
     { id: 'conciliacao', rot: 'Conciliação bancária', icone: 'arrows-left-right', render: conciliacao, cont: (a) => a.db.lista('extrato').filter((e) => !e.conciliado).length },
     { grupo: 'Serviços' },
     { id: 'os', rot: 'Ordens de serviço', icone: 'wrench', render: ordensPag, cheio: true, atalho: 'o', novo: (a) => a.acoes.novaOS(), cont: (a) => { const n = a.db.lista('ordens').filter((o) => o.status !== 'entregue' && o.previsao < hoje()).length; return n ? { n, tom: 'er' } : 0; } },
@@ -409,7 +437,55 @@ const reab = () => { app.render(); app.reabrir(); };
 async function escolherConta(titulo, padrao = 'ct0') {
   return modal({ titulo, largura: 420, corpo: `<form class="form-grade" onsubmit="return false"><label class="campo">Conta<select name="c">${app.db.lista('contas').map((c) => `<option value="${c.id}" ${c.id === padrao ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}</select></label><label class="campo">Data<input type="date" name="d" value="${hoje()}"></label></form>`, botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Confirmar', classe: 'pri', acao: (f) => Object.fromEntries(new FormData(f.querySelector('form'))) }] });
 }
+app.antesDeRender = () => carregarCats(app);
+async function formCat(t, atual) {
+  const desp = t === 'despesa';
+  return modal({ titulo: atual ? `Editar categoria · ${atual[1]}` : `Nova categoria de ${desp ? 'despesa' : 'receita'}`, largura: 480,
+    corpo: `<form class="form-grade" onsubmit="return false"><label class="campo largo">Nome<input name="n" required maxlength="60" value="${esc(atual?.[1] || '')}" placeholder="${desp ? 'Ex.: Manutenção da van, Material de escritório' : 'Ex.: Instalações, Consultoria'}"></label>
+      ${desp ? `<label class="campo largo">Tipo de gasto<select name="g">${GRUPOS.map(([g, r]) => `<option value="${g}" ${(atual?.[2] || 'operacional') === g ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select><small class="mute">Define em que linha do Resultado (DRE) ela aparece.</small></label>` : ''}</form>`,
+    botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Salvar', classe: 'pri', acao: (f) => { const fm = f.querySelector('form'); const n = fm.n.value.trim(); if (!n) { fm.n.focus(); return false; } return { n, g: desp ? fm.g.value : 'receita' }; } }] });
+}
+async function escolherCat(t, titulo, fora = null) {
+  const ops = CATS[t].filter(([id]) => id !== fora);
+  return modal({ titulo, largura: 420, corpo: `<form class="form-grade" onsubmit="return false"><label class="campo largo">Categoria<select name="c">${ops.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')}</select></label></form>`,
+    botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Confirmar', classe: 'pri', acao: (f) => f.querySelector('form').c.value }] });
+}
 Object.assign(app.acoes, {
+  novaCat: async (d) => {
+    const r = await formCat(d.t); if (!r) return;
+    if (CATS[d.t].some(([, n]) => normal(n) === normal(r.n))) { avisar('Já existe uma categoria com esse nome', { tipo: 'erro' }); return; }
+    CATS[d.t].push([`c${Date.now().toString(36)}`, r.n, r.g]); gravarCats(app); avisar(`Categoria "${r.n}" criada`); app.render();
+  },
+  editarCat: async (d) => {
+    const i = CATS[d.t].findIndex(([id]) => id === d.id); if (i < 0) return;
+    const r = await formCat(d.t, CATS[d.t][i]); if (!r) return;
+    CATS[d.t][i] = [d.id, r.n, r.g]; gravarCats(app); avisar('Categoria atualizada'); app.render();
+  },
+  apagarCat: async (d) => {
+    const cat = CATS[d.t].find(([id]) => id === d.id); if (!cat) return;
+    if (CATS[d.t].length <= 1) { avisar('Deixe pelo menos uma categoria', { tipo: 'erro' }); return; }
+    const em = lancs(app).filter((l) => l.categoria === d.id);
+    if (em.length) {
+      const para = await escolherCat(d.t, `"${cat[1]}" tem ${em.length} lançamentos. Para qual categoria eles vão?`, d.id); if (!para) return;
+      em.forEach((l) => app.db.salvar('lancamentos', { id: l.id, categoria: para }));
+    } else if (!(await confirmar(`Apagar a categoria "${cat[1]}"?`, { rotulo: 'Apagar' }))) return;
+    CATS[d.t].splice(CATS[d.t].indexOf(cat), 1); gravarCats(app); avisar(`Categoria "${cat[1]}" apagada`); app.render();
+  },
+  padraoCats: async () => {
+    const usadas = new Set(lancs(app).map((l) => l.categoria));
+    const perdidas = [...CATS.receita, ...CATS.despesa].filter(([id]) => usadas.has(id) && !CAT_PADRAO_IDS.has(id));
+    if (perdidas.length) { avisar(`Antes, mude os lançamentos de: ${perdidas.map((x) => x[1]).join(', ')}`, { tipo: 'erro', tempo: 7000 }); return; }
+    if (!(await confirmar('Voltar à lista padrão de categorias? Os nomes que você mudou voltam ao original.', { rotulo: 'Voltar ao padrão' }))) return;
+    delete app.db.cfg.categorias; app.db.gravar(); carregarCats(app); app.render();
+  },
+  mudarCatEmMassa: async ({ ids }) => {
+    const ls = ids.map((x) => app.db.obter('lancamentos', x)).filter(Boolean); if (!ls.length) return;
+    const tipos = new Set(ls.map((l) => l.tipo));
+    if (tipos.size > 1) { avisar('Selecione só receitas ou só despesas para mudar a categoria', { tipo: 'erro' }); return; }
+    const t = [...tipos][0];
+    const c = await escolherCat(t, `Mudar a categoria de ${ls.length} ${ls.length === 1 ? 'lançamento' : 'lançamentos'}`); if (!c) return;
+    ls.forEach((l) => app.db.salvar('lancamentos', { id: l.id, categoria: c })); avisar(`Categoria trocada para "${CAT[c]?.nome}"`); app.render();
+  },
   novoLanc: async (d = {}) => {
     const r = await editar(app, 'lancamentos', null, { tipo: d.t || 'despesa', categoria: d.t === 'receita' ? 'servicos' : 'fornecedores' }); if (!r) return;
     const n = r.parcelas === 'rec' ? 12 : Number(r.parcelas) || 1;
