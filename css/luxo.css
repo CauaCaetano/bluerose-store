@@ -138,7 +138,9 @@ h1, h2, h3, .sec-title, .preco2-valor, .prod-preco b, .lx-numeros b { font-varia
 html { position: relative; min-height: 100%; }
 html::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: url("../img/rosas-lateral-esq.webp") left top / 380px auto repeat-y, url("../img/rosas-lateral-dir.webp") right top / 380px auto repeat-y; }
-@media (max-width: 900px) { html::before { background-size: 170px auto, 170px auto; opacity: .55; } }
+/* a faixa ocupa só a margem livre ao lado do conteúdo (1200px); com pouca margem, some */
+html::before { background-size: min(380px, calc((100vw - 1200px) / 2 + 30px)) auto; }
+@media (max-width: 1499px) { html::before { display: none; } }
 .rodape-site { border-top-color: transparent; }
 
 /* celular: o cartão do sistema não pode passar da largura da tela */
