@@ -1533,36 +1533,6 @@ html[data-theme="light"] body::before {
 }
 .conta-lista li.conta-oferta { padding: 10px 12px; border-radius: 10px; background: rgba(76, 195, 138, 0.1); border: 1px solid rgba(76, 195, 138, 0.35); list-style: none; margin-left: -18px; }
 
-/* =============================================================
-   Trepadeiras de rosas azuis (js/rosas.js), em todas as páginas.
-   O caule se desenha quando o trecho aparece, as folhas brotam e
-   as rosas desabrocham em camadas; depois só "respiram". Nada gira.
-   ============================================================= */
-body { position: relative; }
-.trep { position: absolute; left: 0; right: 0; top: 0; z-index: -1; pointer-events: none; overflow: hidden; }
-.trep svg { position: absolute; top: 0; overflow: visible; }
-.trep .tp-l { left: 0; }
-.trep .tp-r { right: 0; transform: scaleX(-1); }
-.tp-c1, .tp-c2 { fill: none; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 2.4s cubic-bezier(.45, .05, .3, 1); }
-.tp-c1 { stroke: url(#tp-caule); stroke-width: 4; filter: drop-shadow(0 0 4px rgba(60, 140, 255, .55)); }
-.tp-c2 { stroke: #0a1d4f; stroke-width: 6.5; transition-delay: 0s; }
-.tp-seg.on .tp-c1, .tp-seg.on .tp-c2 { stroke-dashoffset: 0; }
-.tp-esp { fill: #4f9bff; opacity: 0; transition: opacity .5s ease var(--d, 0s); }
-.tp-seg.on .tp-esp { opacity: 1; }
-.tp-folha { transform: scale(0); transform-box: fill-box; transform-origin: 0 50%; transition: transform 1s cubic-bezier(.2, .9, .3, 1.25) var(--d, 0s); }
-.tp-seg.on .tp-folha { transform: scale(1); }
-.tp-rosa { transform: scale(.15); opacity: 0; transform-box: fill-box; transform-origin: 50% 80%; filter: blur(6px); transition: transform 1.8s cubic-bezier(.2, .9, .25, 1.12) var(--d, 0s), opacity 1s ease var(--d, 0s), filter 1.6s ease var(--d, 0s); }
-.tp-seg.on .tp-rosa { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 8px rgba(70, 140, 255, .55)); }
-/* depois de aberta, a rosa respira devagar (abre e fecha um pouco as pétalas de fora) */
-.tp-seg.on .tp-rosa:not(.tp-botao) image { animation: tp-respira 7s ease-in-out 4s infinite; transform-box: fill-box; transform-origin: center; }
-@keyframes tp-respira { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-.tp-petala { position: absolute; width: 13px; height: 10px; border-radius: 75% 0 75% 0; background: radial-gradient(circle at 30% 30%, #e3ecff, #6b97ff 55%, #1d3f99); box-shadow: 0 0 10px rgba(110, 150, 255, .55); will-change: transform, opacity; }
-html[data-theme="light"] .tp-c2 { stroke: #8fa9db; }
-@media (max-width: 700px) { .trep { opacity: .5; } }
-@media (prefers-reduced-motion: reduce) {
-  .tp-c1, .tp-c2, .tp-esp, .tp-folha, .tp-rosa { transition: none; }
-  .tp-seg.on .tp-rosa image { animation: none; }
-}
 /* rosinha antes dos títulos de seção */
 .eyebrow::before { content: ""; display: inline-block; width: 15px; height: 15px; margin-right: 9px; vertical-align: -3px; background: url("../img/rosa-flor.webp") center / contain no-repeat; filter: drop-shadow(0 0 6px rgba(110, 150, 255, .5)); }
 /* três planos: centralizados */
