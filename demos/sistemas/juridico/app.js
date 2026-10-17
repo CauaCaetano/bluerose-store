@@ -179,7 +179,7 @@ const colecoes = {
   tarefas: { singular: 'tarefa', genero: 'f', plural: 'tarefas', campos: [
     { nome: 'titulo', rotulo: 'Tarefa', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'processo', rotulo: 'Processo', tipo: 'relacao', colecao: 'processos', mostrar: (p, a) => `${p.numero} · ${rotProc(a, p)}`, filtrar: (p) => p.status !== 'encerrado' },
     { nome: 'responsavel', rotulo: 'Responsável', tipo: 'selecao', opcoes: () => ADV.map((x) => [x[0], x[1]]), padrao: () => padraoEquipe(EU) }, { nome: 'prazo', rotulo: 'Prazo interno', tipo: 'data', padrao: () => diaMais(3) },
-    { nome: 'prioridade', rotulo: 'Prioridade', tipo: 'selecao', opcoes: ['alta', 'média', 'baixa'], padrao: 'média' }, { nome: 'status', rotulo: 'Situação', tipo: 'selecao', opcoes: COLUNAS_TAREFA.map(([k, n]) => [k, n]), padrao: 'afazer' }] },
+    { nome: 'prioridade', rotulo: 'Prioridade', tipo: 'selecao', fixo: true, opcoes: ['alta', 'média', 'baixa'], padrao: 'média' }, { nome: 'status', rotulo: 'Situação', tipo: 'selecao', opcoes: COLUNAS_TAREFA.map(([k, n]) => [k, n]), padrao: 'afazer' }] },
   horas: { singular: 'lançamento de horas', plural: 'horas', campos: [
     { nome: 'processo', rotulo: 'Processo', tipo: 'relacao', colecao: 'processos', mostrar: (p, a) => `${p.numero} · ${rotProc(a, p)}`, obrigatorio: true }, { nome: 'data', rotulo: 'Data', tipo: 'data', padrao: hoje },
     { nome: 'minutos', rotulo: 'Tempo (minutos)', tipo: 'numero', obrigatorio: true, padrao: 60, min: 5 }, { nome: 'advogado', rotulo: 'Quem', tipo: 'selecao', opcoes: () => ADV.map((x) => [x[0], x[1]]), padrao: () => padraoEquipe(EU) },

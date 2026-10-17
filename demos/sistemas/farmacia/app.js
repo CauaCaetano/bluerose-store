@@ -8,6 +8,7 @@ import {
 import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
+import { conferirNota } from '../base/nota-xml.js';
 
 // ---------------------------------------------------------------- tabelas do ramo
 const ATEND = [['ana', 'Ana Paula (farmacêutica)'], ['bruno', 'Bruno Costa (balconista)'], ['carla', 'Carla Mendes (balconista)']];
@@ -16,6 +17,7 @@ const EQUIPE = { colecao: 'atendentes', rot: 'Atendentes', icone: 'users-three',
   linha: (r) => [r.id, r.nome], registro: ([id, nome]) => ({ id, nome }) };
 const nomeA = (id) => (ATEND.find((v) => v[0] === id) || [, '—'])[1];
 const CATEG = ['Medicamentos', 'Controlados', 'Perfumaria', 'Higiene e bebê', 'Correlatos', 'Vitaminas e suplementos'];
+const cats = (a) => [...new Set([...CATEG, ...a.db.lista('produtos').map((p) => p.categoria).filter(Boolean)])];
 const COR_CAT = ['#0f766e', '#be123c', '#a855f7', '#0ea5e9', '#f59e0b', '#22a06b'];
 const TIPOS = ['Referência', 'Genérico', 'Similar', 'Isento de prescrição (MIP)', 'Fitoterápico', 'Correlato', 'Perfumaria e higiene'];
 const TARJAS = ['Sem tarja', 'Vermelha', 'Vermelha · retém receita', 'Preta'];
@@ -27,8 +29,10 @@ const CONTROLE = {
   C4: ['Antirretroviral (C4)', 'Receita de Controle Especial (2 vias)', 30], C5: ['Anabolizante (C5)', 'Receita de Controle Especial (2 vias)', 30],
   ATM: ['Antimicrobiano', 'Receita de antimicrobiano (2 vias)', 10],
 };
+// controle escrito à mão (fora das listas conhecidas) também exige receita retida, com validade de 30 dias
+const infoCtrl = (c) => CONTROLE[c] || [`Controlado (${c})`, 'Receita retida (2 vias)', 30];
 const pedeNotificacao = (c) => ['A1', 'A2', 'A3', 'B1', 'B2', 'C2'].includes(c);
-const etControle = (c) => (c ? et(c === 'ATM' ? 'Antimicrobiano' : `Controlado ${c}`, c === 'ATM' ? 'al' : 'er', 'sem-ponto') : '');
+const etControle = (c) => (c ? et(c === 'ATM' ? 'Antimicrobiano' : CONTROLE[c] ? `Controlado ${c}` : String(c).slice(0, 24), c === 'ATM' ? 'al' : 'er', 'sem-ponto') : '');
 const PAG = { pix: ['PIX', 'qr-code', '17'], credito: ['Crédito', 'credit-card', '03'], debito: ['Débito', 'credit-card', '04'], dinheiro: ['Dinheiro', 'money', '01'], convenio: ['Convênio', 'buildings', '05'], crediario: ['Crediário', 'notebook', '05'], farmpop: ['Farmácia Popular', 'first-aid-kit', '99'] };
 const SERVICOS = ['Aferição de pressão arterial', 'Glicemia capilar', 'Medição de temperatura', 'Aplicação de injetável', 'Perfuração de lóbulo auricular', 'Vacinação', 'Teste rápido', 'Nebulização'];
 const ST_ENT = [['separando', 'Separando', 'al'], ['saiu', 'Saiu para entrega', 'info'], ['entregue', 'Entregue', 'ok']];
@@ -119,7 +123,7 @@ function semente() {
       if (r() < 0.07 && cl) v.entrega = { endereco: cl.endereco, taxa: 5, status: d < 0 ? 'entregue' : esc1(['separando', 'saiu']), entregador: 'Moto 1' };
       itens.forEach((x) => { const p = produtos.find((y) => y.id === x.produto); if (!p.controle) return;
         const [pn, cons, reg, uf] = esc1(prescritores), pac = cl?.nome || esc1(nomes);
-        const rc = { id: `r${receitas.length}`, numero: nr++, data, venda: v.id, tipo: CONTROLE[p.controle][1], controle: p.controle, notificacao: pedeNotificacao(p.controle) ? `SP${ent(1000000, 9999999)}` : '', data_prescricao: diaMais(-ent(0, CONTROLE[p.controle][2] - 1), data), prescritor: pn, conselho: cons, registro: reg, uf, paciente: pac, comprador: pac, comprador_doc: `${ent(10, 59)}.${ent(100, 999)}.${ent(100, 999)}-${ent(0, 9)}`, comprador_tel: cl?.telefone || '', comprador_end: cl?.endereco || 'Rua Visconde de Inhaúma, 40 · Centro', itens: [{ produto: p.id, lote: x.lotes[0].lote, qtd: x.qtd }] };
+        const rc = { id: `r${receitas.length}`, numero: nr++, data, venda: v.id, tipo: infoCtrl(p.controle)[1], controle: p.controle, notificacao: pedeNotificacao(p.controle) ? `SP${ent(1000000, 9999999)}` : '', data_prescricao: diaMais(-ent(0, CONTROLE[p.controle][2] - 1), data), prescritor: pn, conselho: cons, registro: reg, uf, paciente: pac, comprador: pac, comprador_doc: `${ent(10, 59)}.${ent(100, 999)}.${ent(100, 999)}-${ent(0, 9)}`, comprador_tel: cl?.telefone || '', comprador_end: cl?.endereco || 'Rua Visconde de Inhaúma, 40 · Centro', itens: [{ produto: p.id, lote: x.lotes[0].lote, qtd: x.qtd }] };
         receitas.push(rc); x.receita = rc.id;
         movimentos.push({ id: `m${movimentos.length}`, produto: p.id, lote: x.lotes[0].lote, tipo: 'saida', qtd: x.qtd, motivo: `Venda ${v.numero} · receita ${rc.numero}`, data: `${data}T${hora}`, receita: rc.id });
       });
@@ -209,7 +213,7 @@ function recompras(a) {
   Object.entries(ult).forEach(([k, u]) => { const [c, pid] = k.split('|'), p = prod(a, pid), quando = diaMais(p.dias_caixa * u.qtd, u.data), d = diasAte(quando); if (d <= 7 && d >= -30) out.push({ id: k, cliente: c, produto: pid, ultima: u.data, quando, dias: d }); });
   return out.sort((x, y) => x.quando.localeCompare(y.quando));
 }
-const receitaVencida = (p, dataPresc) => diasAte(diaMais(CONTROLE[p.controle][2], dataPresc)) < 0;
+const receitaVencida = (p, dataPresc) => diasAte(diaMais(infoCtrl(p.controle)[2], dataPresc)) < 0;
 // a receber: convênios (fechamento mensal), crediário do cliente e Farmácia Popular
 const emAberto = (a) => validas(a).filter((v) => ['convenio', 'crediario', 'farmpop'].includes(v.pagamento) && !v.pago);
 
@@ -218,8 +222,8 @@ const colecoes = {
   produtos: { singular: 'produto', plural: 'produtos', largura: 760, tres: true, campos: [
     { nome: 'nome', rotulo: 'Descrição (como sai no cupom)', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'principio', rotulo: 'Princípio ativo (DCB)', tipo: 'texto', ajuda: 'Usado para achar genéricos e similares' }, { nome: 'apresentacao', rotulo: 'Apresentação', tipo: 'texto', dica: 'Ex.: 50 mg · 30 comprimidos' },
     { nome: 'laboratorio', rotulo: 'Laboratório / fabricante', tipo: 'texto' }, { nome: 'tipo', rotulo: 'Tipo', tipo: 'selecao', opcoes: TIPOS, padrao: 'Genérico' }, { nome: 'tarja', rotulo: 'Tarja', tipo: 'selecao', opcoes: TARJAS, padrao: 'Sem tarja' },
-    { nome: 'controle', rotulo: 'Controle (Portaria 344 / antimicrobiano)', tipo: 'selecao', opcoes: [['', 'Não é controlado'], ...Object.entries(CONTROLE).map(([k, v]) => [k, v[0]])], ajuda: 'Controlados só saem no caixa com a receita registrada' },
-    { nome: 'categoria', rotulo: 'Categoria', tipo: 'selecao', opcoes: CATEG, obrigatorio: true }, { nome: 'registro_ms', rotulo: 'Registro na Anvisa (13 dígitos)', tipo: 'texto', ajuda: 'Vai no cupom fiscal de medicamentos' }, { nome: 'ean', rotulo: 'Código de barras (EAN-13)', tipo: 'texto', ajuda: 'Em branco: gera um código interno' },
+    { nome: 'controle', rotulo: 'Controle (Portaria 344 / antimicrobiano)', tipo: 'selecao', livre: true, dica: 'Em branco se não for controlado', opcoes: [['', 'Não é controlado'], ...Object.entries(CONTROLE).map(([k, v]) => [k, v[0]])], ajuda: 'Escolha a lista ou escreva. Controlados só saem no caixa com a receita registrada' },
+    { nome: 'categoria', rotulo: 'Categoria', tipo: 'selecao', livre: true, opcoes: (a) => cats(a), obrigatorio: true }, { nome: 'registro_ms', rotulo: 'Registro na Anvisa (13 dígitos)', tipo: 'texto', ajuda: 'Vai no cupom fiscal de medicamentos' }, { nome: 'ean', rotulo: 'Código de barras (EAN-13)', tipo: 'texto', ajuda: 'Em branco: gera um código interno' },
     { nome: 'sku', rotulo: 'Código interno', tipo: 'texto', obrigatorio: true }, { nome: 'fornecedor', rotulo: 'Distribuidora', tipo: 'relacao', colecao: 'fornecedores' }, { nome: 'custo', rotulo: 'Custo', tipo: 'moeda', obrigatorio: true },
     { nome: 'preco', rotulo: 'Preço de venda', tipo: 'moeda', obrigatorio: true }, { nome: 'pmc', rotulo: 'PMC (preço máximo da CMED)', tipo: 'moeda', ajuda: 'O sistema não deixa vender acima' }, { nome: 'minimo', rotulo: 'Estoque mínimo', tipo: 'numero', padrao: 5 },
     { nome: 'dias_caixa', rotulo: 'Uso contínuo: a caixa dura (dias)', tipo: 'numero', padrao: 0, ajuda: '0 se não for de uso contínuo' }, { nome: 'localizacao', rotulo: 'Localização', tipo: 'texto', dica: 'Ex.: B-03 ou ARM-01' }, { nome: 'termolabil', rotulo: 'Termolábil (geladeira)', tipo: 'booleano', texto: 'Guardar entre 2 e 8 °C' },
@@ -334,7 +338,7 @@ function validade(a) {
     <div class="dica">${ic('info')}<span>Vencido não pode ficar na área de venda: separe, identifique e dê baixa. O caixa nunca vende lote vencido e sempre tira primeiro o que vence antes.</span></div>
     ${a.tab({ id: 'validade', itens, singular: 'lote', plural: 'lotes', ordem: 'dias', aoClicar: (id) => a.abrir('produto', id.split('|')[0], 'lotes'), textoBusca: (x) => `${x.p.nome} ${x.l.lote} ${x.p.principio}`,
       visoes: [{ id: 'risco', rot: 'Até 90 dias', filtro: (x) => x.dias <= 90 }, { id: 'venc', rot: 'Vencidos', filtro: (x) => x.dias < 0 }, { id: 'v30', rot: 'Até 30 dias', filtro: (x) => x.dias >= 0 && x.dias <= 30 }, { id: 'todos', rot: 'Todos os lotes' }],
-      filtros: [{ k: 'cat', rot: 'Categoria', opcoes: CATEG, valor: (x) => x.p.categoria }],
+      filtros: [{ k: 'cat', rot: 'Categoria', opcoes: (aa) => cats(aa), valor: (x) => x.p.categoria }],
       colunas: [{ k: 'nome', rot: 'Produto', valor: (x) => x.p.nome, render: (x) => `<span class="prim">${esc(x.p.nome)}</span><span class="sub">${esc(x.p.laboratorio || '')}${x.p.controle ? ' · controlado' : ''}</span>` }, { k: 'lote', rot: 'Lote', valor: (x) => x.l.lote, render: (x) => `<span class="mono">${esc(x.l.lote)}</span>` },
         { k: 'dias', rot: 'Validade', valor: (x) => x.dias, render: (x) => { const [t, tom] = faixaVal(x.l.validade); return `${dataBR(x.l.validade)}${tom ? `<span class="sub">${et(t, tom, 'sem-ponto')}</span>` : ''}`; } }, { k: 'qtd', rot: 'Qtd.', n: true, valor: (x) => x.l.qtd, render: (x) => num(x.l.qtd) }, { k: 'valor', rot: 'A custo', n: true, oc: true, valor: (x) => x.l.qtd * x.p.custo, render: (x) => moeda(x.l.qtd * x.p.custo) },
         { k: 'acao', rot: '', ord: false, csv: false, render: (x) => (x.dias < 0 ? `<button type="button" class="btn peq perigo" data-acao="baixaLote" data-p="${x.p.id}" data-l="${esc(x.l.lote)}">Dar baixa</button>` : x.dias <= 90 ? `<button type="button" class="btn peq" data-acao="devolverLote" data-p="${x.p.id}" data-l="${esc(x.l.lote)}">Devolver</button>` : '') }] })}`;
@@ -414,7 +418,7 @@ function melhoresForn(a) {
 function produtos(a) {
   return a.tab({ id: 'produtos', colecao: 'produtos', singular: 'produto', plural: 'produtos', ordem: 'nome', buscaDica: 'Buscar por nome, princípio ativo, laboratório ou código de barras…',
     visoes: [{ id: 'todos', rot: 'Todos' }, { id: 'repor', rot: 'Repor', filtro: (p) => vendavel(p) <= p.minimo }, { id: 'ctrl', rot: 'Controlados', filtro: (p) => !!p.controle }, { id: 'gen', rot: 'Genéricos', filtro: (p) => p.tipo === 'Genérico' }, { id: 'pmc', rot: 'Acima do PMC', filtro: (p) => p.pmc && p.preco > p.pmc }, { id: 'termo', rot: 'Geladeira', filtro: (p) => p.termolabil }],
-    filtros: [{ k: 'categoria', rot: 'Categoria', opcoes: CATEG }, { k: 'tipo', rot: 'Tipo', opcoes: TIPOS }, { k: 'fornecedor', rot: 'Distribuidora', opcoes: (aa) => aa.db.lista('fornecedores').map((f) => [f.id, f.nome]) }],
+    filtros: [{ k: 'categoria', rot: 'Categoria', opcoes: (aa) => cats(aa) }, { k: 'tipo', rot: 'Tipo', opcoes: TIPOS }, { k: 'fornecedor', rot: 'Distribuidora', opcoes: (aa) => aa.db.lista('fornecedores').map((f) => [f.id, f.nome]) }],
     textoBusca: (p) => `${p.nome} ${p.principio} ${p.laboratorio} ${p.sku} ${p.ean}`, novo: { rot: 'Novo produto', attrs: 'data-acao="novoProduto"' }, aoClicar: (id) => a.abrir('produto', id), total: (l) => `${moedaC(soma(l, (p) => p.custo * estTotal(p)))} em estoque`,
     colunas: [{ k: 'nome', rot: 'Produto', render: (p) => `<span class="prim">${esc(p.nome)}</span><span class="sub">${esc(p.laboratorio || '')} · ${esc(p.tipo || '')} ${p.controle ? etControle(p.controle) : ''}</span>` },
       { k: 'preco', rot: 'Preço', n: true, render: (p) => `${moeda(p.preco)}${p.pmc ? `<span class="sub ${p.preco > p.pmc ? 'er-tx' : ''}">PMC ${moeda(p.pmc)}</span>` : ''}` }, { k: 'margem', rot: 'Margem', n: true, oc: true, valor: (p) => (p.preco - p.custo) / p.preco, render: (p) => pct(((p.preco - p.custo) / p.preco) * 100) },
@@ -436,7 +440,7 @@ function inventario(a) {
   const st = a.estado.inv ||= { cat: 'Controlados', cont: {} };
   const ls = a.db.lista('produtos').filter((p) => p.categoria === st.cat).flatMap((p) => (p.lotes || []).filter((l) => l.qtd !== 0).map((l) => ({ p, l, k: `${p.id}|${l.lote}` })));
   const difs = ls.filter((x) => st.cont[x.k] !== undefined && st.cont[x.k] !== '' && Number(st.cont[x.k]) !== x.l.qtd);
-  return `<div class="entre"><select data-mudar="invCat" style="width:auto">${CATEG.map((c) => `<option ${c === st.cat ? 'selected' : ''}>${c}</option>`).join('')}</select><div class="flex"><button type="button" class="btn" data-acao="imprimirInv">${ic('printer')}Folha de contagem</button><button type="button" class="btn pri" data-acao="aplicarInv" ${difs.length ? '' : 'disabled'}>${ic('check')}Aplicar ${difs.length} ajustes</button></div></div>
+  return `<div class="entre"><select data-mudar="invCat" style="width:auto">${cats(a).map((c) => `<option ${c === st.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select><div class="flex"><button type="button" class="btn" data-acao="imprimirInv">${ic('printer')}Folha de contagem</button><button type="button" class="btn pri" data-acao="aplicarInv" ${difs.length ? '' : 'disabled'}>${ic('check')}Aplicar ${difs.length} ajustes</button></div></div>
     <div class="dica">${ic('info')}<span>Conte por lote. Nos controlados, toda diferença vira perda ou sobra no livro: confira duas vezes antes de aplicar.</span></div>
     <div class="cartao"><div class="tabela-caixa"><table class="tabela"><thead><tr><th>Produto</th><th>Lote</th><th class="oc">Validade</th><th class="n">No sistema</th><th class="n" style="width:130px">Contado</th><th class="n">Diferença</th></tr></thead><tbody>
       ${ls.map((x) => { const c = st.cont[x.k]; const d = c === undefined || c === '' ? null : Number(c) - x.l.qtd; return `<tr><td><span class="prim">${esc(x.p.nome)}</span><span class="sub mono">${esc(x.p.localizacao || '')}</span></td><td class="mono">${esc(x.l.lote)}</td><td class="oc">${dataBR(x.l.validade)}</td><td class="n">${num(x.l.qtd)}</td><td class="n"><input type="number" min="0" value="${c ?? ''}" data-mudar="invCont" data-id="${esc(x.k)}" style="height:28px;text-align:right" placeholder="—"></td><td class="n">${d === null ? '<span class="mute">—</span>' : d === 0 ? et('confere', 'ok') : `<b class="${d < 0 ? 'er-tx' : 'ok-tx'}">${d > 0 ? '+' : ''}${d}</b>`}</td></tr>`; }).join('')}
@@ -453,7 +457,7 @@ function abc(a) {
 function etiquetas(a) {
   const st = a.estado.etq ||= { cat: 'Medicamentos', qtd: {} };
   const ps = a.db.lista('produtos').filter((p) => p.categoria === st.cat);
-  return `<div class="entre"><select data-mudar="etqCat" style="width:auto">${CATEG.map((c) => `<option ${c === st.cat ? 'selected' : ''}>${c}</option>`).join('')}</select><button type="button" class="btn pri" data-acao="imprimirEtq">${ic('printer')}Imprimir etiquetas</button></div>
+  return `<div class="entre"><select data-mudar="etqCat" style="width:auto">${cats(a).map((c) => `<option ${c === st.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select><button type="button" class="btn pri" data-acao="imprimirEtq">${ic('printer')}Imprimir etiquetas</button></div>
     <div class="dica">${ic('barcode')}<span>Etiqueta de gôndola com nome, preço, código de barras e, nos medicamentos, o PMC (o consumidor tem direito de ver).</span></div>
     <div class="grade g3">${ps.map((p) => `<div class="cartao"><div class="cartao-corpo col" style="gap:8px"><b class="corta">${esc(p.nome)}</b><div class="entre" style="align-items:flex-end"><div style="width:170px">${codigoBarras(p.ean, { altura: 40 })}</div><div style="text-align:right"><b style="font-size:20px" class="num">${moeda(p.preco)}</b>${p.pmc ? `<div class="mute" style="font-size:11px">PMC ${moeda(p.pmc)}</div>` : ''}</div></div><label class="campo" style="flex-direction:row;align-items:center;justify-content:space-between">Quantidade<input type="number" min="0" value="${st.qtd[p.id] ?? 1}" data-mudar="etqQtd" data-id="${p.id}" style="width:90px;height:28px;text-align:right"></label></div></div>`).join('')}</div>`;
 }
@@ -470,7 +474,7 @@ function cadastroPag(colecao, sing, plur, ficha_) {
 function relatorios(a) {
   const st = a.estado.rel ||= { dias: 30 };
   const vs = validas(a).filter((v) => diasAte(v.data) > -st.dias), meses = Array.from({ length: 3 }, (_, i) => mesMais(i - 2));
-  const porCat = CATEG.map((c, i) => ({ rot: c, v: soma(vs.flatMap((v) => v.itens).filter((x) => prod(a, x.produto)?.categoria === c), (x) => x.qtd * x.preco), cor: COR_CAT[i] }));
+  const porCat = cats(a).map((c, i) => ({ rot: c, v: soma(vs.flatMap((v) => v.itens).filter((x) => prod(a, x.produto)?.categoria === c), (x) => x.qtd * x.preco), cor: COR_CAT[i % COR_CAT.length] }));
   const gen = soma(vs.flatMap((v) => v.itens).filter((x) => prod(a, x.produto)?.tipo === 'Genérico'), (x) => x.qtd * x.preco), med = soma(vs.flatMap((v) => v.itens).filter((x) => ['Medicamentos', 'Controlados'].includes(prod(a, x.produto)?.categoria)), (x) => x.qtd * x.preco);
   return `<div class="grupo-btn">${[7, 30, 60].map((d) => `<button type="button" data-acao="relDias" data-d="${d}" aria-pressed="${st.dias === d}">${d} dias</button>`).join('')}</div>
     ${kpis([{ rot: 'Faturamento', icone: 'shopping-cart', val: moeda(soma(vs, totalV)), nota: `${vs.length} cupons` }, { rot: 'Ticket médio', icone: 'receipt', val: moeda(soma(vs, totalV) / (vs.length || 1)) }, { rot: 'Margem bruta', icone: 'percent', val: pct(((soma(vs, totalV) - soma(vs, custoV)) / (soma(vs, totalV) || 1)) * 100, 1) }, { rot: 'Genéricos', icone: 'pill', val: pct((gen / (med || 1)) * 100), nota: 'dos medicamentos vendidos' }])}
@@ -550,7 +554,7 @@ const fichas = {
     const movs = a.db.lista('movimentos').filter((m) => m.produto === id).sort((x, y) => y.data.localeCompare(x.data));
     let corpo = '';
     if (aba === 'resumo') corpo = `<div class="gav-sec"><div class="grade g4" style="gap:8px">${[['Vendável', `${num(vendavel(p))} un`], ['Venda (30 dias)', `${num(vendidoQtd(a, id, 30))} un`], ['Cobertura', cobertura(a, p) >= 999 ? 'sem giro' : `${cobertura(a, p)} dias`], ['Margem', pct(((p.preco - p.custo) / p.preco) * 100)]].map(([t, v]) => `<div style="padding:10px;border:1px solid var(--borda);border-radius:8px"><div class="mute" style="font-size:12px">${t}</div><b class="num" style="font-size:15px">${v}</b></div>`).join('')}</div></div>
-      <div class="gav-sec">${props([['flask', 'Princípio ativo', esc(p.principio || '—')], ['package', 'Apresentação', esc(p.apresentacao || '—')], ['buildings', 'Laboratório', esc(p.laboratorio || '—')], ['tag', 'Tipo e tarja', `${esc(p.tipo || '')} · ${esc(p.tarja || '')}`], p.controle ? ['prescription', 'Controle', `${esc(CONTROLE[p.controle][0])} · exige ${esc(CONTROLE[p.controle][1])}`] : null, ['seal-check', 'Registro Anvisa', `<span class="mono">${esc(p.registro_ms || '—')}</span>`], ['receipt', 'Preço · PMC', `${moeda(p.preco)} · ${p.pmc ? moeda(p.pmc) : '—'}`], ['currency-circle-dollar', 'Custo médio', moeda(p.custo)], p.dias_caixa ? ['heart', 'Uso contínuo', `a caixa dura ${p.dias_caixa} dias`] : null, p.termolabil ? ['thermometer', 'Armazenagem', 'Geladeira, entre 2 e 8 °C'] : null, ['map-pin', 'Localização', `<span class="mono">${esc(p.localizacao || '—')}</span>`], ['barcode', 'EAN', `<span class="mono">${esc(p.ean)}</span>`]])}</div>
+      <div class="gav-sec">${props([['flask', 'Princípio ativo', esc(p.principio || '—')], ['package', 'Apresentação', esc(p.apresentacao || '—')], ['buildings', 'Laboratório', esc(p.laboratorio || '—')], ['tag', 'Tipo e tarja', `${esc(p.tipo || '')} · ${esc(p.tarja || '')}`], p.controle ? ['prescription', 'Controle', `${esc(infoCtrl(p.controle)[0])} · exige ${esc(infoCtrl(p.controle)[1])}`] : null, ['seal-check', 'Registro Anvisa', `<span class="mono">${esc(p.registro_ms || '—')}</span>`], ['receipt', 'Preço · PMC', `${moeda(p.preco)} · ${p.pmc ? moeda(p.pmc) : '—'}`], ['currency-circle-dollar', 'Custo médio', moeda(p.custo)], p.dias_caixa ? ['heart', 'Uso contínuo', `a caixa dura ${p.dias_caixa} dias`] : null, p.termolabil ? ['thermometer', 'Armazenagem', 'Geladeira, entre 2 e 8 °C'] : null, ['map-pin', 'Localização', `<span class="mono">${esc(p.localizacao || '—')}</span>`], ['barcode', 'EAN', `<span class="mono">${esc(p.ean)}</span>`]])}</div>
       ${equivalentes(a, p).length ? `<div class="gav-sec"><h4>Mesmo princípio ativo e apresentação</h4><ul class="lista" style="margin:0 -20px">${equivalentes(a, p).map((e) => `<li class="clicavel" data-abrir="produto:${e.id}"><div class="cresce"><div class="t">${esc(e.nome)}</div><div class="s">${esc(e.tipo)} · ${esc(e.laboratorio)}</div></div><b class="num">${moeda(e.preco)}</b></li>`).join('')}</ul></div>` : ''}`;
     if (aba === 'lotes') corpo = `<div class="gav-sec">${(p.lotes || []).length ? `<table class="tabela"><thead><tr><th>Lote</th><th>Fabricação</th><th>Validade</th><th class="n">Qtd.</th><th></th></tr></thead><tbody>${[...p.lotes].sort((x, y) => x.validade.localeCompare(y.validade)).map((l) => { const [t, tm] = faixaVal(l.validade); return `<tr><td class="mono">${esc(l.lote)}</td><td>${dataBR(l.fab)}</td><td>${dataBR(l.validade)}${tm ? `<span class="sub">${et(t, tm, 'sem-ponto')}</span>` : ''}</td><td class="n">${num(l.qtd)}</td><td class="acoes">${l.qtd > 0 && diasAte(l.validade) < 0 ? `<button type="button" class="btn peq perigo" data-acao="baixaLote" data-p="${id}" data-l="${esc(l.lote)}">Baixa</button>` : ''}</td></tr>`; }).join('')}</tbody></table>` : vazio('stack', 'Sem lotes', 'Os lotes entram pela nota da distribuidora ou pelo recebimento da compra.')}
       <div class="flex" style="margin-top:12px"><button type="button" class="btn peq" data-acao="entradaManual" data-id="${id}">${ic('plus')}Entrada manual de lote</button></div></div>`;
@@ -585,16 +589,16 @@ function lerNFe(xml) {
   const inf = d.getElementsByTagName('infNFe')[0]; if (!inf) throw new Error('não é o XML de uma NF-e');
   const emit = inf.getElementsByTagName('emit')[0], ide = inf.getElementsByTagName('ide')[0], tot = inf.getElementsByTagName('ICMSTot')[0];
   const itens = [...inf.getElementsByTagName('det')].map((det) => { const pr = det.getElementsByTagName('prod')[0], ean = t(pr, 'cEAN'), med = pr.getElementsByTagName('med')[0];
-    return { codigo: t(pr, 'cProd'), ean: /^\d{8,14}$/.test(ean) ? ean : '', nome: t(pr, 'xProd'), ncm: t(pr, 'NCM'), qtd: Number(t(pr, 'qCom')) || 0, custo: Number(t(pr, 'vUnCom')) || 0, anvisa: med ? t(med, 'cProdANVISA') : '', pmc: med ? Number(t(med, 'vPMC')) || 0 : 0,
+    return { codigo: t(pr, 'cProd'), ean: /^\d{8,14}$/.test(ean) ? ean : '', nome: t(pr, 'xProd'), ncm: t(pr, 'NCM'), un: t(pr, 'uCom').toUpperCase(), qtd: Number(t(pr, 'qCom')) || 0, custo: Number(t(pr, 'vUnCom')) || 0, anvisa: med ? t(med, 'cProdANVISA') : '', pmc: med ? Number(t(med, 'vPMC')) || 0 : 0,
       lotes: [...pr.getElementsByTagName('rastro')].map((r) => ({ lote: t(r, 'nLote'), qtd: Number(t(r, 'qLote')) || 0, fab: t(r, 'dFab'), validade: t(r, 'dVal') })) }; });
   return { cnpj: t(emit, 'CNPJ'), fornecedor: t(emit, 'xNome'), fantasia: t(emit, 'xFant'), numero: t(ide, 'nNF'), data: (t(ide, 'dhEmi') || t(ide, 'dEmi')).slice(0, 10), frete: Number(t(tot, 'vFrete')) || 0, total: Number(t(tot, 'vNF')) || 0, itens };
 }
 const casarProduto = (a, it) => a.db.lista('produtos').find((x) => (it.ean && x.ean === it.ean) || (it.codigo && normal(x.sku) === normal(it.codigo))) || a.db.lista('produtos').find((x) => normal(x.nome) === normal(it.nome));
 function xmlExemplo(a) {
   const f = a.db.lista('fornecedores')[0], ps = a.db.lista('produtos').filter((x) => x.fornecedor === f.id).slice(0, 3);
-  const l = [...ps.map((x) => ({ c: x.sku, e: x.ean, n: x.nome, q: 20, v: x.custo, a: x.registro_ms, pmc: x.pmc, ncm: x.ncm })), { c: 'NOVO-77', e: '7891234567895', n: 'Atenolol 25 mg · 30 comp.', q: 30, v: 4.1, a: '1234567890123', pmc: 12.4, ncm: '30049069' }];
+  const l = [...ps.map((x) => ({ c: x.sku, e: x.ean, n: x.nome, q: 20, v: x.custo, a: x.registro_ms, pmc: x.pmc, ncm: x.ncm })), { c: 'NOVO-77', e: '7891234567895', n: 'Atenolol 25 mg · 30 comp.', q: 30, v: 4.1, a: '1234567890123', pmc: 12.4, ncm: '30049069' }, { c: 'SORO-CX', e: '', n: 'Soro fisiológico 0,9% 500 ml CX C/24', q: 2, v: 74.4, a: '', pmc: 0, ncm: '30049099', u: 'CX' }];
   return `<?xml version="1.0" encoding="UTF-8"?><nfeProc><NFe><infNFe Id="NFe35261000000000000155550010000456781000045678" versao="4.00"><ide><nNF>45678</nNF><serie>1</serie><dhEmi>${hoje()}T08:10:00-03:00</dhEmi></ide>
-<emit><CNPJ>${String(f.doc).replace(/\D/g, '')}</CNPJ><xNome>${f.nome}</xNome></emit>${l.map((x, i) => `<det nItem="${i + 1}"><prod><cProd>${x.c}</cProd><cEAN>${x.e}</cEAN><xProd>${x.n}</xProd><NCM>${x.ncm}</NCM><uCom>UN</uCom><qCom>${x.q}.0000</qCom><vUnCom>${x.v.toFixed(2)}</vUnCom>
+<emit><CNPJ>${String(f.doc).replace(/\D/g, '')}</CNPJ><xNome>${f.nome}</xNome></emit>${l.map((x, i) => `<det nItem="${i + 1}"><prod><cProd>${x.c}</cProd><cEAN>${x.e}</cEAN><xProd>${x.n}</xProd><NCM>${x.ncm}</NCM><uCom>${x.u || 'UN'}</uCom><qCom>${x.q}.0000</qCom><vUnCom>${x.v.toFixed(2)}</vUnCom>
 <rastro><nLote>EX${4100 + i}</nLote><qLote>${x.q}.000</qLote><dFab>${diaMais(-40)}</dFab><dVal>${diaMais(540 + i * 30)}</dVal></rastro>${x.a ? `<med><cProdANVISA>${x.a}</cProdANVISA><vPMC>${(x.pmc || 0).toFixed(2)}</vPMC></med>` : ''}</prod></det>`).join('')}
 <total><ICMSTot><vFrete>0.00</vFrete><vNF>${l.reduce((s, x) => s + x.q * x.v, 0).toFixed(2)}</vNF></ICMSTot></total></infNFe></NFe></nfeProc>`;
 }
@@ -667,8 +671,8 @@ const proxNumero = (col, campo = 'numero', min = 1) => Math.max(min, ...app.db.l
 
 /** Pede a receita de um item controlado. Devolve os dados ou null. */
 async function pedirReceita(p, qtd, anterior = {}) {
-  const [, tipo, dias] = CONTROLE[p.controle];
-  const r = await modal({ titulo: `Receita · ${p.nome}`, largura: 640, corpo: `<div class="dica" style="margin-bottom:10px">${ic('prescription')}<span>${esc(CONTROLE[p.controle][0])}: exige <b>${esc(tipo)}</b>, válida por ${dias} dias a partir da data da prescrição. A receita fica retida na farmácia.</span></div>
+  const [, tipo, dias] = infoCtrl(p.controle);
+  const r = await modal({ titulo: `Receita · ${p.nome}`, largura: 640, corpo: `<div class="dica" style="margin-bottom:10px">${ic('prescription')}<span>${esc(infoCtrl(p.controle)[0])}: exige <b>${esc(tipo)}</b>, válida por ${dias} dias a partir da data da prescrição. A receita fica retida na farmácia.</span></div>
     <form class="form-grade" onsubmit="return false">${pedeNotificacao(p.controle) ? '<label class="campo">Número da notificação *<input name="notificacao" required></label>' : ''}<label class="campo">Data da prescrição *<input name="data_prescricao" type="date" required max="${hoje()}"></label>
     <label class="campo">Prescritor *<input name="prescritor" required value="${esc(anterior.prescritor || '')}"></label><label class="campo">Conselho<select name="conselho">${['CRM', 'CRO', 'CRMV', 'COREN'].map((c) => `<option ${c === anterior.conselho ? 'selected' : ''}>${c}</option>`).join('')}</select></label><label class="campo">Nº do registro *<input name="registro" required value="${esc(anterior.registro || '')}"></label><label class="campo">UF *<input name="uf" required maxlength="2" value="${esc(anterior.uf || 'SP')}"></label>
     <label class="campo largo">Paciente *<input name="paciente" required value="${esc(anterior.paciente || '')}"></label>
@@ -770,19 +774,22 @@ Object.assign(app.acoes, {
       let nf; try { nf = lerNFe(String(rd.result)); } catch (e) { avisar(`Não deu para ler a nota: ${e.message}`, { tipo: 'erro' }); return; }
       if (app.db.lista('compras').some((c) => c.nf === nf.numero && c.nf_cnpj === nf.cnpj)) { avisar(`A nota ${nf.numero} já foi lançada`, { tipo: 'erro' }); return; }
       const f = app.db.lista('fornecedores').find((x) => String(x.doc).replace(/\D/g, '') === nf.cnpj), ls = nf.itens.map((it) => ({ it, p: casarProduto(app, it) }));
-      const r = await modal({ titulo: `Nota ${nf.numero} · ${nf.fantasia || nf.fornecedor}`, largura: 820, corpo: `<div class="col" style="gap:10px"><div class="dica">${ic('info')}<span>${f ? `Distribuidora <b>${esc(f.nome)}</b>` : `Distribuidora nova: <b>${esc(nf.fornecedor)}</b> (será cadastrada)`} · ${dataBR(nf.data)} · ${moeda(nf.total)}. Lote e validade vêm da própria nota.</span></div>
-        <table class="tabela"><thead><tr><th>Na nota</th><th>No sistema</th><th>Lote · validade</th><th class="n">Qtd.</th><th class="n">Custo</th></tr></thead><tbody>${ls.map(({ it, p: pr }, i) => `<tr><td><span class="prim">${esc(it.nome)}</span><span class="sub mono">${esc(it.ean || it.codigo)}</span></td><td><select name="p${i}" style="width:100%">${pr ? '' : '<option value="novo">+ Cadastrar como novo</option>'}${app.db.lista('produtos').sort((x, y) => x.nome.localeCompare(y.nome)).map((x) => `<option value="${x.id}" ${pr?.id === x.id ? 'selected' : ''}>${esc(x.nome)}</option>`).join('')}${pr ? '<option value="novo">+ Cadastrar como novo</option>' : ''}</select></td><td class="mono" style="font-size:12px">${it.lotes.length ? it.lotes.map((l) => `${esc(l.lote)} · ${dataBR(l.validade)}`).join('<br>') : '<span class="al-tx">sem lote na nota</span>'}</td><td class="n">${num(it.qtd, 2)}</td><td class="n">${moeda(it.custo)}</td></tr>`).join('')}</tbody></table></div>`,
-        botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Dar entrada no estoque', classe: 'pri', acao: (fm) => Object.fromEntries([...fm.querySelectorAll('select')].map((x) => [x.name, x.value])) }] });
+      const todos = app.db.lista('produtos').sort((x, y) => x.nome.localeCompare(y.nome));
+      const r = await conferirNota(app, { titulo: `Nota ${nf.numero} · ${nf.fantasia || nf.fornecedor}`, cnpj: nf.cnpj, margem: 45,
+        dica: `${f ? `Distribuidora <b>${esc(f.nome)}</b>` : `Distribuidora nova: <b>${esc(nf.fornecedor)}</b> (será cadastrada)`} · ${dataBR(nf.data)} · ${moeda(nf.total)}. Lote e validade vêm da própria nota.`,
+        linhas: ls.map(({ it, p: pr }) => ({ nome: it.nome, codigo: it.codigo, ean: it.ean, qtd: it.qtd, un: it.un, custo: it.custo, pmc: it.pmc || pr?.pmc || 0, preco: pr?.preco || 0, unidadeVenda: 'un',
+          extra: it.lotes.length ? it.lotes.map((l) => `lote ${esc(l.lote)} · ${dataBR(l.validade)}`).join(', ') : '<span class="al-tx">sem lote na nota</span>',
+          produtos: `${pr ? '' : '<option value="novo">+ Cadastrar como produto novo</option>'}${todos.map((x) => `<option value="${x.id}" ${pr?.id === x.id ? 'selected' : ''}>${esc(x.nome)}</option>`).join('')}${pr ? '<option value="novo">+ Cadastrar como produto novo</option>' : ''}` })) });
       if (!r) return;
       const fo = f || app.db.salvar('fornecedores', { nome: nf.fantasia || nf.fornecedor, doc: nf.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5'), telefone: '', contato: '', prazo: 1 });
       let novos = 0;
       const itens = ls.map(({ it }, i) => {
-        let pid = r[`p${i}`];
-        if (pid === 'novo') { pid = app.db.salvar('produtos', { nome: it.nome, sku: it.codigo, ean: it.ean, ncm: it.ncm, registro_ms: it.anvisa, pmc: it.pmc || 0, categoria: /^300[34]/.test(it.ncm) ? 'Medicamentos' : 'Perfumaria', tipo: /^300[34]/.test(it.ncm) ? 'Genérico' : 'Perfumaria e higiene', tarja: 'Sem tarja', controle: '', fornecedor: fo.id, custo: it.custo, preco: Math.round(Math.min(it.pmc || 1e9, it.custo * 1.45) * 100) / 100, minimo: 3, lotes: [], cfop: '5102', csosn: '102' }).id; novos++; }
-        else if (it.anvisa || it.pmc) app.db.salvar('produtos', { id: pid, ...(it.anvisa ? { registro_ms: it.anvisa } : {}), ...(it.pmc ? { pmc: it.pmc } : {}) });
+        const c = r[i]; let pid = c.produto;
+        if (pid === 'novo') { pid = app.db.salvar('produtos', { nome: it.nome, sku: it.codigo, ean: it.ean, ncm: it.ncm, registro_ms: it.anvisa, pmc: it.pmc || 0, categoria: /^300[34]/.test(it.ncm) ? 'Medicamentos' : 'Perfumaria', tipo: /^300[34]/.test(it.ncm) ? 'Genérico' : 'Perfumaria e higiene', tarja: 'Sem tarja', controle: '', fornecedor: fo.id, custo: c.custo, preco: c.preco, minimo: 3, lotes: [], cfop: '5102', csosn: '102' }).id; novos++; }
+        else app.db.salvar('produtos', { id: pid, ...(it.anvisa ? { registro_ms: it.anvisa } : {}), ...(it.pmc ? { pmc: it.pmc } : {}), ...(c.preco ? { preco: c.preco } : {}) });
         const lotes = it.lotes.length ? it.lotes : [{ lote: '', qtd: it.qtd, validade: '', fab: '' }];
-        lotes.forEach((l) => movimentar(app, { produto: pid, lote: l.lote, qtd: l.qtd || it.qtd, tipo: 'entrada', motivo: `NF-e ${nf.numero} · ${fo.nome}`, custo: it.custo, validade: l.validade, fab: l.fab }));
-        return { produto: pid, qtd: it.qtd, custo: it.custo, recebido: it.qtd };
+        lotes.forEach((l) => movimentar(app, { produto: pid, lote: l.lote, qtd: (l.qtd || it.qtd) * c.fator, tipo: 'entrada', motivo: `NF-e ${nf.numero} · ${fo.nome}${c.fator > 1 ? ` (${c.fator} un por embalagem)` : ''}`, custo: c.custo, validade: l.validade, fab: l.fab }));
+        return { produto: pid, qtd: c.entra, custo: c.custo, recebido: c.entra };
       });
       app.db.salvar('compras', { numero: proxNumero('compras', 'numero', 100), fornecedor: fo.id, data: nf.data || hoje(), previsao: nf.data || hoje(), status: 'recebido', itens, frete: nf.frete, nf: nf.numero, nf_cnpj: nf.cnpj });
       avisar(`Nota ${nf.numero} lançada: ${itens.length} itens com lote e validade${novos ? `, ${novos} produto${novos > 1 ? 's' : ''} novo${novos > 1 ? 's' : ''} (confira tarja e controle)` : ''}`, { tempo: 7000 }); app.render();

@@ -8,6 +8,7 @@ import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
 import { baixar } from '../base/nexo.js';
+import { conferirNota } from '../base/nota-xml.js';
 
 const DEP = [['d0', 'CD Principal'], ['d1', 'Loja Centro']];
 const nomeDep = (id) => (DEP.find((d) => d[0] === id) || [, '—'])[1];
@@ -22,6 +23,7 @@ const ST_VENDA = [['orcamento', 'Orçamento', '#94a3b8'], ['aprovado', 'Aprovado
 const stV = (id) => ST_VENDA.find((x) => x[0] === id) || ST_VENDA[0];
 const ST_COMPRA = { rascunho: ['Rascunho', ''], enviado: ['Enviado ao fornecedor', 'info'], parcial: ['Recebido parcial', 'al'], recebido: ['Recebido', 'ok'], cancelado: ['Cancelado', ''] };
 const CATEG = ['Mercearia', 'Bebidas', 'Limpeza', 'Higiene', 'Descartáveis', 'Hortifrúti'];
+const cats = (a) => [...new Set([...CATEG, ...a.db.lista('produtos').map((p) => p.categoria).filter(Boolean)])];
 const COR_CAT = ['#6366f1', '#0ea5e9', '#14b8a6', '#f59e0b', '#e11d48', '#22a06b'];
 
 // ---------------------------------------------------------------- dados de exemplo (fictícios)
@@ -151,7 +153,7 @@ const colecoes = {
     antesDeSalvar: (d) => ({ ...d, atualizado: hoje() }) },
   produtos: { singular: 'produto', plural: 'produtos', largura: 680, tres: true, campos: [
     { nome: 'nome', rotulo: 'Descrição', tipo: 'texto', obrigatorio: true, largo: true }, { nome: 'sku', rotulo: 'Código (SKU)', tipo: 'texto', obrigatorio: true }, { nome: 'ean', rotulo: 'Código de barras (EAN-13)', tipo: 'texto', ajuda: 'Deixe em branco para gerar um código interno' },
-    { nome: 'categoria', rotulo: 'Categoria', tipo: 'selecao', opcoes: CATEG, obrigatorio: true }, { nome: 'unidade', rotulo: 'Unidade', tipo: 'selecao', opcoes: ['UN', 'CX', 'PK', 'FD', 'PC', 'KG'], padrao: 'UN' }, { nome: 'fornecedor', rotulo: 'Fornecedor', tipo: 'relacao', colecao: 'fornecedores' },
+    { nome: 'categoria', rotulo: 'Categoria', tipo: 'selecao', livre: true, opcoes: (a) => cats(a), obrigatorio: true }, { nome: 'unidade', rotulo: 'Unidade', tipo: 'selecao', opcoes: ['UN', 'CX', 'PK', 'FD', 'PC', 'KG'], padrao: 'UN' }, { nome: 'fornecedor', rotulo: 'Fornecedor', tipo: 'relacao', colecao: 'fornecedores' },
     { nome: 'custo', rotulo: 'Custo', tipo: 'moeda', obrigatorio: true }, { nome: 'preco', rotulo: 'Preço de venda', tipo: 'moeda', obrigatorio: true }, { nome: 'minimo', rotulo: 'Estoque mínimo', tipo: 'numero', padrao: 10 }, { nome: 'localizacao', rotulo: 'Localização', tipo: 'texto', dica: 'Ex.: A-03' },
     { nome: 'ncm', rotulo: 'NCM (nota fiscal)', tipo: 'texto', dica: '8 dígitos', ajuda: 'Classificação fiscal do produto' }, { nome: 'cfop', rotulo: 'CFOP', tipo: 'texto', padrao: '5102' }],
     validar: (d) => (d.preco < d.custo ? 'O preço de venda está abaixo do custo' : d.ean && !eanValido(d.ean) ? 'Código de barras inválido: confira os 13 dígitos (o último é o verificador)' : null), antesDeSalvar: (d, a, antes) => ({ ...d, ean: d.ean || comDigito(`200${String(Date.now()).slice(-9)}`), estoque: antes?.estoque || { d0: 0, d1: 0 }, giro: antes?.giro || 2 }) },
@@ -225,7 +227,7 @@ const casarProduto = (a, it) => a.db.lista('produtos').find((x) => (it.ean && x.
 /** XML de exemplo (demonstração): uma nota de um fornecedor cadastrado, com um produto novo. */
 function xmlExemplo(a) {
   const f = a.db.lista('fornecedores')[1] || a.db.lista('fornecedores')[0], ps = a.db.lista('produtos').filter((x) => x.fornecedor === f.id).slice(0, 3);
-  const linhas = [...ps.map((x) => ({ c: x.sku, e: x.ean, n: x.nome, u: x.unidade || 'UN', q: 24, v: x.custo })), { c: 'NOVO-901', e: '7891234567895', n: 'Água de coco 1 L', u: 'UN', q: 36, v: 6.4 }];
+  const linhas = [...ps.map((x) => ({ c: x.sku, e: x.ean, n: x.nome, u: x.unidade || 'UN', q: 24, v: x.custo })), { c: 'NOVO-901', e: '7891234567895', n: 'Água de coco 1 L', u: 'UN', q: 36, v: 6.4 }, { c: 'NOVO-902', e: '7891234567901', n: 'Biscoito recheado 130 g CX C/48', u: 'CX', q: 2, v: 86.4 }];
   return `<?xml version="1.0" encoding="UTF-8"?><nfeProc><NFe><infNFe Id="NFe41261000000000000155550010000123451000012345" versao="4.00"><ide><nNF>12345</nNF><serie>1</serie><dhEmi>${hoje()}T09:30:00-03:00</dhEmi></ide>
 <emit><CNPJ>${String(f.doc).replace(/\D/g, '')}</CNPJ><xNome>${f.nome}</xNome></emit>${linhas.map((l, i) => `<det nItem="${i + 1}"><prod><cProd>${l.c}</cProd><cEAN>${l.e}</cEAN><xProd>${l.n}</xProd><NCM>22029900</NCM><uCom>${l.u}</uCom><qCom>${l.q}.0000</qCom><vUnCom>${l.v.toFixed(2)}</vUnCom></prod></det>`).join('')}
 <total><ICMSTot><vFrete>45.00</vFrete><vNF>${(linhas.reduce((s, l) => s + l.q * l.v, 0) + 45).toFixed(2)}</vNF></ICMSTot></total></infNFe></NFe></nfeProc>`;
@@ -249,7 +251,7 @@ function melhoresForn(a) {
   return `${kpis([{ rot: 'Economia possível por mês', icone: 'coins', val: moeda(total), nota: `trocando o fornecedor de ${trocas.length} produtos` }, { rot: 'Cotações registradas', icone: 'clipboard-text', val: num(a.db.lista('cotacoes').length), nota: `${a.db.lista('fornecedores').length} fornecedores` }, { rot: 'Fornecedor mais pontual', icone: 'seal-check', val: esc([...a.db.lista('fornecedores')].sort((x, y) => y.pontualidade - x.pontualidade)[0]?.nome || '—'), nota: 'entregas no prazo' }])}
     <div class="entre"><div class="dica" style="flex:1">${ic('lightning')}<span>Para cada produto, o sistema compara as cotações dos fornecedores por preço, prazo e pontualidade e mostra quanto você economiza por mês trocando para a melhor opção.</span></div>${trocas.length ? `<button type="button" class="btn pri" data-acao="trocarTodos">${ic('arrows-clockwise')}Usar a melhor opção em ${trocas.length} produtos</button>` : ''}</div>
     ${a.tab({ id: 'melhores', itens: () => linhasF.map((x) => ({ ...x, id: x.p.id })), singular: 'produto', plural: 'produtos', ordem: 'eco', desc: true, aoClicar: (id) => a.abrir('produto', id, 'forn'),
-      textoBusca: (x) => `${x.p.nome} ${x.m?.f?.nome || ''}`, filtros: [{ k: 'cat', rot: 'Categoria', opcoes: CATEG, valor: (x) => x.p.categoria }],
+      textoBusca: (x) => `${x.p.nome} ${x.m?.f?.nome || ''}`, filtros: [{ k: 'cat', rot: 'Categoria', opcoes: (aa) => cats(aa), valor: (x) => x.p.categoria }],
       colunas: [{ k: 'nome', rot: 'Produto', valor: (x) => x.p.nome, render: (x) => `<span class="prim">${esc(x.p.nome)}</span><span class="sub">${num(x.vendaMes)} ${esc(x.p.unidade)} vendidos por mês</span>` },
         { k: 'atual', rot: 'Fornecedor atual', oc: true, valor: (x) => forn(a, x.p.fornecedor)?.nome, render: (x) => `${esc(forn(a, x.p.fornecedor)?.nome || '—')}<span class="sub">${x.at ? `${moeda(x.at.preco)} · ${x.at.prazo} dias` : ''}</span>` },
         { k: 'melhor', rot: 'Melhor opção', valor: (x) => x.m?.f?.nome, render: (x) => (x.m ? `<span class="prim">${esc(x.m.f?.nome || '')}</span><span class="sub">${moeda(x.m.preco)} · ${x.m.prazo} dias · nota ${x.m.nota}</span>` : '—') },
@@ -260,7 +262,7 @@ function melhoresForn(a) {
 function etiquetas(a) {
   const st = a.estado.etq ||= { cat: 'Limpeza', qtd: {} };
   const ps = a.db.lista('produtos').filter((p) => p.categoria === st.cat);
-  return `<div class="entre"><select data-mudar="etqCat" style="width:auto">${CATEG.map((c) => `<option ${c === st.cat ? 'selected' : ''}>${c}</option>`).join('')}</select><button type="button" class="btn pri" data-acao="imprimirEtq">${ic('printer')}Imprimir etiquetas</button></div>
+  return `<div class="entre"><select data-mudar="etqCat" style="width:auto">${cats(a).map((c) => `<option ${c === st.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select><button type="button" class="btn pri" data-acao="imprimirEtq">${ic('printer')}Imprimir etiquetas</button></div>
     <div class="dica">${ic('barcode')}<span>Etiquetas de gôndola com nome, preço e código de barras EAN-13. Defina quantas imprimir de cada produto; a leitura funciona em qualquer leitor da frente de caixa.</span></div>
     <div class="grade g3">${ps.map((p) => `<div class="cartao"><div class="cartao-corpo col" style="gap:8px"><div class="entre"><b class="corta">${esc(p.nome)}</b><span class="mono mute">${esc(p.sku)}</span></div><div class="entre" style="align-items:flex-end"><div style="width:180px">${codigoBarras(p.ean, { altura: 44 })}</div><b style="font-size:20px" class="num">${moeda(p.preco)}</b></div><label class="campo" style="flex-direction:row;align-items:center;justify-content:space-between">Quantidade<input type="number" min="0" value="${st.qtd[p.id] ?? 1}" data-mudar="etqQtd" data-id="${p.id}" style="width:90px;height:28px;text-align:right"></label></div></div>`).join('')}</div>`;
 }
@@ -277,7 +279,7 @@ function sugestao(a) {
 function produtos(a) {
   return a.tab({ id: 'produtos', colecao: 'produtos', singular: 'produto', plural: 'produtos', ordem: 'nome', buscaDica: 'Buscar por nome, SKU ou código de barras…',
     visoes: [{ id: 'todos', rot: 'Todos' }, { id: 'repor', rot: 'Repor', filtro: (p) => estTotal(p) <= p.minimo }, { id: 'zerado', rot: 'Sem estoque', filtro: (p) => estTotal(p) <= 0 }, { id: 'parado', rot: 'Parados (sem venda 30 dias)', filtro: (p) => vendidoQtd(a, p.id, 30) === 0 }],
-    filtros: [{ k: 'categoria', rot: 'Categoria', opcoes: CATEG }, { k: 'fornecedor', rot: 'Fornecedor', opcoes: (aa) => aa.db.lista('fornecedores').map((f) => [f.id, f.nome]) }],
+    filtros: [{ k: 'categoria', rot: 'Categoria', opcoes: (aa) => cats(aa) }, { k: 'fornecedor', rot: 'Fornecedor', opcoes: (aa) => aa.db.lista('fornecedores').map((f) => [f.id, f.nome]) }],
     textoBusca: (p) => `${p.nome} ${p.sku} ${p.ean}`, novo: { rot: 'Novo produto', attrs: 'data-acao="novoProduto"' }, aoClicar: (id) => a.abrir('produto', id),
     total: (l) => `${moedaC(soma(l, (p) => p.custo * estTotal(p)))} em estoque`,
     colunas: [{ k: 'nome', rot: 'Produto', render: (p) => `<span class="prim">${esc(p.nome)}</span><span class="sub"><span class="mono">${esc(p.sku)}</span> · ${esc(p.categoria)}</span>` },
@@ -303,7 +305,7 @@ function inventario(a) {
   const st = a.estado.inv ||= { dep: 'd0', cat: 'Limpeza', cont: {} };
   const ps = a.db.lista('produtos').filter((p) => p.categoria === st.cat);
   const difs = ps.filter((p) => st.cont[p.id] !== undefined && st.cont[p.id] !== '' && Number(st.cont[p.id]) !== (p.estoque[st.dep] || 0));
-  return `<div class="entre"><div class="flex"><select data-mudar="invDep" style="width:auto">${DEP.map(([id, n]) => `<option value="${id}" ${id === st.dep ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select><select data-mudar="invCat" style="width:auto">${CATEG.map((c) => `<option ${c === st.cat ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+  return `<div class="entre"><div class="flex"><select data-mudar="invDep" style="width:auto">${DEP.map(([id, n]) => `<option value="${id}" ${id === st.dep ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select><select data-mudar="invCat" style="width:auto">${cats(a).map((c) => `<option ${c === st.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
       <div class="flex"><button type="button" class="btn" data-acao="imprimirInv">${ic('printer')}Folha de contagem</button><button type="button" class="btn pri" data-acao="aplicarInv" ${difs.length ? '' : 'disabled'}>${ic('check')}Aplicar ${difs.length} ajustes</button></div></div>
     <div class="dica">${ic('info')}<span>Conte fisicamente as prateleiras e digite a quantidade encontrada. O sistema mostra a diferença em unidades e em reais antes de ajustar.</span></div>
     <div class="cartao"><div class="tabela-caixa"><table class="tabela"><thead><tr><th>Produto</th><th class="oc">Local</th><th class="n">No sistema</th><th class="n" style="width:140px">Contado</th><th class="n">Diferença</th><th class="n oc">Valor</th></tr></thead><tbody>
@@ -332,7 +334,7 @@ function relatorios(a) {
   const st = a.estado.rel ||= { dias: 90 };
   const fat = faturadas(a).filter((v) => diasAte(v.data) > -st.dias);
   const meses = Array.from({ length: 4 }, (_, i) => mesMais(i - 3));
-  const porCat = CATEG.map((c, i) => ({ rot: c, v: soma(fat.flatMap((v) => v.itens).filter((x) => prod(a, x.produto)?.categoria === c), (x) => x.qtd * x.preco), cor: COR_CAT[i] }));
+  const porCat = cats(a).map((c, i) => ({ rot: c, v: soma(fat.flatMap((v) => v.itens).filter((x) => prod(a, x.produto)?.categoria === c), (x) => x.qtd * x.preco), cor: COR_CAT[i % COR_CAT.length] }));
   return `<div class="grupo-btn">${[30, 90].map((d) => `<button type="button" data-acao="relDias" data-d="${d}" aria-pressed="${st.dias === d}">${d} dias</button>`).join('')}</div>
     ${kpis([{ rot: 'Faturamento', icone: 'shopping-cart', val: moeda(soma(fat, totalV)), nota: `${fat.length} pedidos` }, { rot: 'Ticket médio', icone: 'receipt', val: moeda(soma(fat, totalV) / (fat.length || 1)) }, { rot: 'Margem bruta', icone: 'percent', val: pct(((soma(fat, totalV) - soma(fat, custoV)) / (soma(fat, totalV) || 1)) * 100, 1) }, { rot: 'Giro do estoque', icone: 'arrows-clockwise', val: `${num((soma(fat, custoV) / (soma(a.db.lista('produtos'), (p) => p.custo * estTotal(p)) || 1)) * (365 / st.dias), 1)}× ao ano` }])}
     <div class="grade g21"><div class="cartao"><div class="cartao-cab"><div><h3>Faturamento por mês e canal</h3></div></div><div class="cartao-corpo">${barras({ dados: meses.map((m) => ({ rot: nomeMes(m), v: Object.keys(CANAIS).map((c) => soma(faturadas(a).filter((v) => v.data.startsWith(m) && v.canal === c), totalV)) })), series: Object.values(CANAIS).map((n, i) => ({ nome: n, cor: ['#4f46e5', '#0ea5e9', '#14b8a6', '#f59e0b'][i] })), empilhado: true, fmt: moedaC })}</div></div>
@@ -539,21 +541,25 @@ Object.assign(app.acoes, {
       if (app.db.lista('compras').some((c) => c.nf === nf.numero && c.nf_cnpj === nf.cnpj)) { avisar(`A nota ${nf.numero} já foi lançada`, { tipo: 'erro' }); return; }
       const f = app.db.lista('fornecedores').find((x) => String(x.doc).replace(/\D/g, '') === nf.cnpj);
       const linhas = nf.itens.map((it) => ({ it, p: casarProduto(app, it) }));
-      const r = await modal({ titulo: `Nota ${nf.numero} · ${nf.fantasia || nf.fornecedor}`, largura: 760, corpo: `<div class="col" style="gap:10px"><div class="dica">${ic('info')}<span>${f ? `Fornecedor <b>${esc(f.nome)}</b>` : `Fornecedor novo: <b>${esc(nf.fornecedor)}</b> (será cadastrado)`} · emitida em ${dataBR(nf.data)} · ${moeda(nf.total)}. Confira os produtos antes de dar entrada.</span></div>
-        <table class="tabela"><thead><tr><th>Na nota</th><th>No sistema</th><th class="n">Qtd.</th><th class="n">Custo</th></tr></thead><tbody>${linhas.map(({ it, p: pr }, i) => `<tr><td><span class="prim">${esc(it.nome)}</span><span class="sub mono">${esc(it.ean || it.codigo)}</span></td><td><select name="p${i}" style="width:100%">${pr ? '' : '<option value="novo">+ Cadastrar como produto novo</option>'}${app.db.lista('produtos').sort((x, y) => x.nome.localeCompare(y.nome)).map((x) => `<option value="${x.id}" ${pr?.id === x.id ? 'selected' : ''}>${esc(x.nome)}</option>`).join('')}${pr ? '<option value="novo">+ Cadastrar como produto novo</option>' : ''}</select></td><td class="n">${num(it.qtd, 2)} ${esc(it.un)}</td><td class="n">${moeda(it.custo)}</td></tr>`).join('')}</tbody></table>
-        <label class="campo">Dar entrada no depósito<select name="dep">${DEP.map(([id, n]) => `<option value="${id}">${n}</option>`).join('')}</select></label></div>`,
-        botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Dar entrada no estoque', classe: 'pri', acao: (fm) => Object.fromEntries([...fm.querySelectorAll('select')].map((x) => [x.name, x.value])) }] });
+      const todos = app.db.lista('produtos').sort((x, y) => x.nome.localeCompare(y.nome));
+      const r = await conferirNota(app, { titulo: `Nota ${nf.numero} · ${nf.fantasia || nf.fornecedor}`, cnpj: nf.cnpj, margem: 35,
+        dica: `${f ? `Fornecedor <b>${esc(f.nome)}</b>` : `Fornecedor novo: <b>${esc(nf.fornecedor)}</b> (será cadastrado)`} · emitida em ${dataBR(nf.data)} · ${moeda(nf.total)}.`,
+        linhas: linhas.map(({ it, p: pr }) => ({ nome: it.nome, codigo: it.codigo, ean: it.ean, qtd: it.qtd, un: it.un, custo: it.custo, preco: pr?.preco || 0, unidadeVenda: pr?.unidade || 'UN',
+          produtos: `${pr ? '' : '<option value="novo">+ Cadastrar como produto novo</option>'}${todos.map((x) => `<option value="${x.id}" ${pr?.id === x.id ? 'selected' : ''}>${esc(x.nome)}</option>`).join('')}${pr ? '<option value="novo">+ Cadastrar como produto novo</option>' : ''}` })),
+        rodape: `<label class="campo" style="max-width:280px">Dar entrada no depósito<select name="dep" data-extra>${DEP.map(([id, n]) => `<option value="${id}">${n}</option>`).join('')}</select></label>` });
       if (!r) return;
       const fo = f || app.db.salvar('fornecedores', { nome: nf.fantasia || nf.fornecedor, doc: nf.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5'), telefone: '', contato: '', prazo: 7 });
+      const dep = r.extra?.dep || 'd0';
       let novos = 0;
       const itens = linhas.map(({ it }, i) => {
-        let pid = r[`p${i}`];
-        if (pid === 'novo') { pid = app.db.salvar('produtos', { nome: it.nome, sku: it.codigo, ean: it.ean, ncm: it.ncm, unidade: it.un || 'UN', categoria: CATEG[0], fornecedor: fo.id, custo: it.custo, preco: Math.round(it.custo * 1.35 * 100) / 100, minimo: 0, estoque: {}, ativo: true }).id; novos++; }
-        movimentar(app, { produto: pid, deposito: r.dep, qtd: it.qtd, tipo: 'entrada', motivo: `NF-e ${nf.numero} · ${fo.nome}`, custo: it.custo });
-        return { produto: pid, qtd: it.qtd, custo: it.custo, recebido: it.qtd };
+        const c = r[i]; let pid = c.produto;
+        if (pid === 'novo') { pid = app.db.salvar('produtos', { nome: it.nome, sku: it.codigo, ean: it.ean, ncm: it.ncm, unidade: c.fator > 1 ? 'UN' : (it.un || 'UN'), categoria: CATEG[0], fornecedor: fo.id, custo: c.custo, preco: c.preco, minimo: 0, estoque: {}, ativo: true }).id; novos++; }
+        else if (c.preco) app.db.salvar('produtos', { id: pid, preco: c.preco });
+        movimentar(app, { produto: pid, deposito: dep, qtd: c.entra, tipo: 'entrada', motivo: `NF-e ${nf.numero} · ${fo.nome}${c.fator > 1 ? ` (${c.fator} un por embalagem)` : ''}`, custo: c.custo });
+        return { produto: pid, qtd: c.entra, custo: c.custo, recebido: c.entra };
       });
       const numero = Math.max(100, ...app.db.lista('compras').map((c) => c.numero)) + 1;
-      app.db.salvar('compras', { numero, fornecedor: fo.id, data: nf.data || hoje(), previsao: nf.data || hoje(), deposito: r.dep, status: 'recebido', itens, frete: nf.frete, nf: nf.numero, nf_cnpj: nf.cnpj });
+      app.db.salvar('compras', { numero, fornecedor: fo.id, data: nf.data || hoje(), previsao: nf.data || hoje(), deposito: dep, status: 'recebido', itens, frete: nf.frete, nf: nf.numero, nf_cnpj: nf.cnpj });
       avisar(`Nota ${nf.numero} lançada: ${itens.length} itens no estoque${novos ? `, ${novos} produto${novos > 1 ? 's' : ''} novo${novos > 1 ? 's' : ''} cadastrado${novos > 1 ? 's' : ''}` : ''}`, { tempo: 6000 }); app.render();
     };
     rd.readAsText(arq); el.value = '';

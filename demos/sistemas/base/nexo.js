@@ -188,7 +188,14 @@ export function campoHTML(c, v, app) {
   if (c.tipo === 'dias') { const marc = Array.isArray(val) ? val.map(Number) : [];
     return `<div class="campo largo" role="group" aria-label="${esc(c.rotulo)}">${esc(c.rotulo)}<div class="dias-sel">${DIAS_CAMPO.map(([n, r]) => `<label><input type="checkbox" name="${c.nome}" value="${n}" ${marc.includes(n) ? 'checked' : ''}><span>${r}</span></label>`).join('')}</div>${c.ajuda ? `<span class="ajuda">${esc(c.ajuda)}</span>` : ''}</div>`; }
   let ctl;
-  if (c.tipo === 'selecao' || c.tipo === 'relacao') ctl = `<select id="${id}" name="${c.nome}" ${req}>${c.obrigatorio && val ? '' : '<option value="">Selecione…</option>'}${opcoesDe(c, app).map(([k, r]) => `<option value="${esc(k)}" ${String(k) === String(val) ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select>`;
+  // escolha livre: lista simples de textos (ou campo marcado com livre) vira texto com sugestões; a pessoa escreve o que quiser
+  // ou escolhe da lista para completar. Campos que mandam em regras do sistema (situação, etapa, pessoas) usam fixo ou pares e continuam lista fechada.
+  const livre = c.tipo === 'selecao' && !c.fixo && (c.livre || (Array.isArray(c.opcoes) && c.opcoes.every((x) => typeof x === 'string')));
+  if (livre) {
+    const ops = opcoesDe(c, app), achada = ops.find(([k]) => String(k) === String(val)), mapa = {};
+    ops.forEach(([k, r]) => { mapa[normal(r)] = k; mapa[normal(k)] = k; });
+    ctl = `<input id="${id}" name="${c.nome}" list="dl-${id}" value="${esc(achada ? achada[1] : val)}" ${req} autocomplete="off" placeholder="${esc(c.dica || 'Escreva ou escolha na lista')}" data-mapa="${esc(JSON.stringify(mapa))}"><datalist id="dl-${id}">${ops.map(([, r]) => `<option value="${esc(r)}"></option>`).join('')}</datalist>`;
+  } else if (c.tipo === 'selecao' || c.tipo === 'relacao') ctl = `<select id="${id}" name="${c.nome}" ${req}>${c.obrigatorio && val ? '' : '<option value="">Selecione…</option>'}${opcoesDe(c, app).map(([k, r]) => `<option value="${esc(k)}" ${String(k) === String(val) ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select>`;
   else if (c.tipo === 'texto-longo') ctl = `<textarea id="${id}" name="${c.nome}" ${req} placeholder="${esc(c.dica || '')}">${esc(val)}</textarea>`;
   else if (c.tipo === 'booleano') ctl = `<label class="flex" style="height:32px;font-weight:400;color:var(--tx)"><input type="checkbox" id="${id}" name="${c.nome}" ${val ? 'checked' : ''}> ${esc(c.texto || 'Sim')}</label>`;
   else if (c.tipo === 'moeda') ctl = `<div class="prefixo"><span>R$</span><input id="${id}" name="${c.nome}" type="number" step="0.01" min="${c.min ?? 0}" inputmode="decimal" value="${esc(val)}" ${req}></div>`;
@@ -209,6 +216,7 @@ export function lerCampos(raiz, campos) {
     if (c.tipo === 'dias') { const ls = [...raiz.querySelectorAll(`[name="${c.nome}"]`)]; if (ls.length) o[c.nome] = ls.filter((x) => x.checked).map((x) => Number(x.value)).sort(); continue; }
     const el = raiz.querySelector(`[name="${c.nome}"]`); if (!el) continue;
     let v = el.type === 'checkbox' ? el.checked : el.value;
+    if (el.dataset.mapa) { v = v.trim(); try { const m = JSON.parse(el.dataset.mapa); if (Object.prototype.hasOwnProperty.call(m, normal(v))) v = m[normal(v)]; } catch { /* fica o texto escrito */ } }
     if (['moeda', 'numero', 'porcentagem'].includes(c.tipo)) v = v === '' ? null : Number(v);
     o[c.nome] = v;
   }
