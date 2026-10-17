@@ -1531,3 +1531,4 @@ html[data-theme="light"] body::before {
   :root { --vidro: rgba(20, 25, 34, 0.94); }
   html[data-theme="light"] { --vidro: rgba(255, 255, 255, 0.96); }
 }
+.conta-lista li.conta-oferta { padding: 10px 12px; border-radius: 10px; background: rgba(76, 195, 138, 0.1); border: 1px solid rgba(76, 195, 138, 0.35); list-style: none; margin-left: -18px; }

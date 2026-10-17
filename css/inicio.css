@@ -144,3 +144,12 @@ html[data-theme="light"] .ini-res .perde b { color: #c0392b; }
   .ini-bag-palco { aspect-ratio: auto; }
   .ini-bag-passos li { color: var(--ink); }
 }
+
+/* oferta de lançamento */
+.ini-selo { display: inline-flex; align-items: center; gap: 10px; margin-top: 14px; padding: 7px 14px 7px 10px; border-radius: 999px; border: 1px solid rgba(76, 195, 138, .45); background: rgba(76, 195, 138, .1); color: var(--ink); font: 600 13.5px/1.2 var(--font); text-decoration: none; transition: background .2s, transform .2s var(--ease); }
+.ini-selo:hover { background: rgba(76, 195, 138, .18); transform: translateY(-1px); }
+.ini-selo i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(76, 195, 138, .6); animation: pulso-oferta 2s infinite; }
+@keyframes pulso-oferta { 70% { box-shadow: 0 0 0 9px rgba(76, 195, 138, 0); } 100% { box-shadow: 0 0 0 0 rgba(76, 195, 138, 0); } }
+.ini-oferta { margin: 18px 0 0; padding: 14px 18px; border-radius: 14px; border: 1px solid rgba(76, 195, 138, .4); background: rgba(76, 195, 138, .08); color: var(--ink-2); max-width: 62ch; }
+.ini-oferta b { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .ini-selo i { animation: none; } }

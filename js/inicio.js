@@ -117,6 +117,17 @@
     quadro();
   }
 
+  /* ---------- oferta de lançamento: só aparece enquanto houver vaga (número real do servidor) ---------- */
+  fetch('https://yihnfzwtkqdfnwziutqa.supabase.co/functions/v1/nexo-pagamentos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"acao":"vagas"}' })
+    .then(function (r) { return r.json(); }).then(function (j) {
+      var n = Number(j.vagas) || 0; if (!n) return;
+      var txt = 'Lançamento: 50% nos 3 primeiros meses · restam ' + n + (n === 1 ? ' vaga' : ' vagas');
+      var h1 = document.querySelector('.ini-hero h1');
+      if (h1) { var a = document.createElement('a'); a.className = 'ini-selo'; a.href = '#precos'; a.innerHTML = '<i aria-hidden="true"></i>' + txt; h1.parentNode.insertBefore(a, h1); }
+      var lede = document.querySelector('#precos .sec-lede');
+      if (lede) { var o = document.createElement('p'); o.className = 'ini-oferta'; o.innerHTML = '<b>Oferta de lançamento:</b> os 30 primeiros assinantes pagam metade nos 3 primeiros meses de qualquer sistema. Restam <b>' + n + '</b> de 30 vagas.'; lede.after(o); }
+    }).catch(function () {});
+
   /* ---------- quanto a bagunça custa ---------- */
   var calc = document.querySelector('[data-calc]');
   if (calc) {
