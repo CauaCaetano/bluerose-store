@@ -1,4 +1,4 @@
-/* Página inicial: topo que muda com o ramo, cena "da bagunça ao sistema" e calculadora do prejuízo. */
+/* Página inicial: topo que muda com o ramo, a animação "tudo num lugar só" e a oferta de lançamento. */
 (function () {
   var calmo = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var reais = function (n) { return 'R$ ' + Math.round(n).toLocaleString('pt-BR'); };
@@ -54,7 +54,6 @@
       hero.querySelector('[data-ramo-demo]').setAttribute('href', r.pagina);
       h1.classList.remove('trocando'); sub.classList.remove('trocando'); tela.classList.remove('trocando');
     }, calmo ? 0 : 280);
-    if (window.BR_RAMO) window.BR_RAMO(id, r);
   }
 
   if (hero && grupo) {
@@ -79,42 +78,16 @@
     }
   }
 
-  /* ---------- da bagunça ao sistema ---------- */
-  var bag = document.querySelector('.ini-bag');
-  if (bag && !calmo) {
-    var papeis = bag.querySelectorAll('.pp'), app = bag.querySelector('.ini-bag-app'), passos = bag.querySelectorAll('.ini-bag-passos li');
-    var ini = [];
-    papeis.forEach(function (p, k) { ini.push({ r: [-8, 7, -5, 4][k] || 0 }); });
-    var lerp = function (a, b, t) { return a + (b - a) * t; };
-    var faixa = function (p, a, b) { return Math.min(1, Math.max(0, (p - a) / (b - a))); };
-    var suave = function (t) { return t * t * (3 - 2 * t); };
-    var pedido = false;
-    function quadro() {
-      pedido = false;
-      var r = bag.getBoundingClientRect(), total = r.height - innerHeight;
-      var p = total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 0;
-      var palco = app.parentElement;
-      papeis.forEach(function (el, k) {
-        // cada papel entra numa fase, depois todos voam para o centro do sistema (posição de layout, sem o transform)
-        var entra = suave(faixa(p, 0.02 + k * 0.08, 0.14 + k * 0.08));
-        var some = suave(faixa(p, 0.5 + k * 0.03, 0.72 + k * 0.03));
-        var dx = palco.offsetWidth / 2 - (el.offsetLeft + el.offsetWidth / 2);
-        var dy = palco.offsetHeight / 2 - (el.offsetTop + el.offsetHeight / 2);
-        var tx = lerp(0, dx, some), ty = lerp(lerp(-40, 0, entra), dy, some);
-        el.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) rotate(' + lerp(ini[k].r * 2.4, ini[k].r, entra) * (1 - some) + 'deg) scale(' + lerp(1, 0.25, some) + ')';
-        el.style.opacity = String(Math.min(entra, 1 - some));
+  /* ---------- tudo num lugar só: a animação roda em loop pelo CSS; aqui só mede para onde cada papel voa ---------- */
+  var palco = document.querySelector('.ini-bag-palco');
+  if (palco) {
+    var medir = function () {
+      palco.querySelectorAll('.pp').forEach(function (el) {
+        el.style.setProperty('--dx', (palco.offsetWidth / 2 - (el.offsetLeft + el.offsetWidth / 2)).toFixed(0) + 'px');
+        el.style.setProperty('--dy', (palco.offsetHeight / 2 - (el.offsetTop + el.offsetHeight / 2)).toFixed(0) + 'px');
       });
-      var mostra = suave(faixa(p, 0.6, 0.86));
-      app.style.setProperty('--app-op', String(lerp(0.18, 1, mostra)));
-      app.style.setProperty('--app-esc', String(lerp(0.86, 1, mostra)));
-      app.style.setProperty('--app-blur', lerp(3, 0, mostra).toFixed(2) + 'px');
-      var ativo = p < 0.12 ? 0 : p < 0.24 ? 1 : p < 0.5 ? 2 : 3;
-      passos.forEach(function (li, k) { li.classList.toggle('on', k === ativo); });
-    }
-    var pedir = function () { if (!pedido) { pedido = true; requestAnimationFrame(quadro); } };
-    addEventListener('scroll', pedir, { passive: true });
-    addEventListener('resize', pedir);
-    quadro();
+    };
+    medir(); addEventListener('resize', medir);
   }
 
   /* ---------- oferta de lançamento: só aparece enquanto houver vaga (número real do servidor) ---------- */
@@ -128,26 +101,4 @@
       if (lede) { var o = document.createElement('p'); o.className = 'ini-oferta'; o.innerHTML = '<b>Oferta de lançamento:</b> os 30 primeiros assinantes pagam metade nos 3 primeiros meses de qualquer sistema. Restam <b>' + n + '</b> de 30 vagas.'; lede.after(o); }
     }).catch(function () {});
 
-  /* ---------- quanto a bagunça custa ---------- */
-  var calc = document.querySelector('[data-calc]');
-  if (calc) {
-    var campo = function (n) { return calc.querySelector('[name="' + n + '"]'); };
-    var mensal = 109, nome = 'o sistema';
-    window.BR_RAMO = function (id, r) { mensal = r.mensal; nome = 'o ' + r.nome; conta(); };
-    function conta() {
-      var horas = +campo('horas').value || 0, hora = Math.max(0, +campo('hora').value || 0);
-      var perdidos = +campo('perdidos').value || 0, ticket = Math.max(0, +campo('ticket').value || 0);
-      calc.querySelector('output[for="c-horas"]').textContent = horas + (horas === 1 ? ' hora' : ' horas');
-      calc.querySelector('output[for="c-perdidos"]').textContent = perdidos + (perdidos === 1 ? ' por mês' : ' por mês');
-      var perde = horas * 4.33 * hora + perdidos * ticket;
-      calc.querySelector('[data-perde]').textContent = reais(perde) + ' por mês';
-      var dias = perde > 0 ? Math.max(1, Math.ceil(mensal / (perde / 30))) : null;
-      calc.querySelector('[data-paga]').innerHTML = dias
-        ? 'Com ' + nome + ' a ' + reais(mensal) + '/mês, o sistema <b>se paga em ' + dias + (dias === 1 ? ' dia' : ' dias') + '</b> e o resto vira lucro.'
-        : 'Ajuste os números acima para ver em quantos dias o sistema se paga.';
-    }
-    calc.addEventListener('input', conta);
-    calc.addEventListener('submit', function (e) { e.preventDefault(); });
-    if (atual) window.BR_RAMO(atual, RAMOS[atual]); else conta();
-  }
 })();

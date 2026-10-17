@@ -4,7 +4,7 @@
 
 Fatos para responder sobre a empresa:
 
-- Os sistemas funcionam no navegador e no celular, com dados na nuvem, demonstração sem cadastro e teste grátis de 7 dias (o Blue Rose Ofixl é só app Android e ainda não foi lançado).
+- Os sistemas funcionam no navegador e no celular, com dados na nuvem, demonstração sem cadastro e teste grátis de 7 dias sem cartão (o Blue Rose Ofixl é só app Android e ainda não foi lançado).
 - Sem fidelidade em nenhum plano: o cliente cancela quando quiser.
 - Plano Básico: o dono e mais 5 pessoas da equipe, cada uma com o próprio login. Plano Pro: equipe sem limite, avisos prontos no WhatsApp, histórico da equipe e suporte prioritário.
 - Plano anual sai 20% mais barato que o mensal.
@@ -27,6 +27,8 @@ Fatos para responder sobre a empresa:
 - [Blue Rose Guard](https://bluerose-store.com/guard.html): controle de pragas e dedetizadoras. R$ 99 / R$ 159
 - [Blue Rose Ofixl](https://bluerose-store.com/ofixl.html): app Android para serviços técnicos em campo (ar-condicionado, refrigeração, elétrica e hidráulica). Em breve no Google Play. R$ 49,90 / R$ 109,90
 - [Comparar todos os sistemas](https://bluerose-store.com/sistemas.html)
+- Sistema ou ERP sob medida: preço fechado para criar, a partir de R$ 2.000 (metade para começar e metade na entrega), ou por assinatura a partir de R$ 299/mês.
+- [Sites e automação de WhatsApp](https://bluerose-store.com/servicos.html): sites a partir de R$ 690 (prontos em 3 dias úteis) e automação a partir de R$ 890.
 
 ## Comparações com concorrentes
 

@@ -57,52 +57,52 @@ html[data-theme="light"] .ini-rosa { opacity: .22; }
 .ini-aviso.a2 .ic { background: rgba(76, 195, 138, .14); color: var(--ok); }
 .ini-tela.trocando .ini-aviso { opacity: 0; transform: translateY(10px) scale(.97); }
 
-/* ---------- da bagunça ao sistema ---------- */
-.ini-bag { position: relative; height: 260vh; }
-.ini-bag-pin { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; overflow: hidden; }
+/* ---------- tudo num lugar só: animação que roda sozinha, em loop (não depende da rolagem) ---------- */
+.ini-bag { padding: 96px 0; }
 .ini-bag-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 56px; align-items: center; }
-.ini-bag h2 { font-size: clamp(32px, 3.8vw, 54px); line-height: 1.04; letter-spacing: -0.035em; max-width: 13ch; }
+.ini-bag h2 { font-size: clamp(32px, 3.8vw, 54px); line-height: 1.04; letter-spacing: -0.035em; max-width: 14ch; }
 .ini-bag-passos { list-style: none; margin: 30px 0 0; padding: 0; display: grid; gap: 14px; counter-reset: p; }
-.ini-bag-passos li { position: relative; padding-left: 44px; font-size: 18px; color: var(--ink-3); transition: color .3s ease, transform .4s var(--ease); counter-increment: p; }
+.ini-bag-passos li { position: relative; padding-left: 44px; font-size: 18px; color: var(--ink-3); counter-increment: p; animation: passo var(--ciclo-bag) infinite; animation-delay: var(--d, 0s); }
 .ini-bag-passos li::before { content: counter(p, decimal-leading-zero); position: absolute; left: 0; top: 2px; font: 500 13px/1.6 var(--mono); color: var(--ink-3); }
 .ini-bag-passos li s { text-decoration-color: #ff4d6d; text-decoration-thickness: 2px; }
-.ini-bag-passos li.on { color: var(--ink); transform: translateX(4px); }
-.ini-bag-passos li.fim { margin-top: 10px; font-size: 21px; font-weight: 600; }
+.ini-bag-passos li.fim { margin-top: 10px; font-size: 21px; font-weight: 600; animation-name: passo-fim; }
 .ini-bag-passos li.fim::before { content: '✓'; color: var(--ok); font-size: 16px; }
-.ini-bag-passos li.fim.on { color: var(--accent); }
+@keyframes passo { 0%, 100% { color: var(--ink-3); transform: none; } 6%, 22% { color: var(--ink); transform: translateX(4px); } 30% { color: var(--ink-3); transform: none; } }
+@keyframes passo-fim { 0%, 52% { color: var(--ink-3); } 62%, 92% { color: var(--accent); } 100% { color: var(--ink-3); } }
+:root { --ciclo-bag: 11s; }
 
 .ini-bag-palco { position: relative; aspect-ratio: 1.15; }
-.ini-bag-app { position: absolute; inset: 12% 4% 12% 4%; border-radius: 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--line-2); box-shadow: 0 40px 90px -30px rgba(3, 8, 20, .9), 0 0 140px -30px rgba(61, 107, 240, .5); opacity: var(--app-op, .18); transform: scale(var(--app-esc, .86)); filter: blur(var(--app-blur, 3px)); }
+.ini-bag-app { position: absolute; inset: 12% 4% 12% 4%; border-radius: 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--line-2); box-shadow: 0 40px 90px -30px rgba(3, 8, 20, .9), 0 0 140px -30px rgba(61, 107, 240, .5); animation: app-aparece var(--ciclo-bag) var(--ease) infinite; }
 .ini-bag-app img { width: 100%; height: 100%; object-fit: cover; object-position: left top; display: block; }
-.pp { position: absolute; z-index: 2; padding: 16px 18px; border-radius: 12px; box-shadow: 0 22px 44px -14px rgba(0, 0, 0, .6); font-size: 15px; line-height: 1.35; will-change: transform, opacity; }
-.pp.planilha { left: 0; top: 4%; width: 46%; padding: 0; overflow: hidden; background: #f7f9fb; color: #1d2733; font: 500 12.5px/1.2 var(--mono); }
+@keyframes app-aparece { 0%, 50% { opacity: .18; transform: scale(.88); filter: blur(3px); } 62%, 94% { opacity: 1; transform: none; filter: none; } 100% { opacity: .18; transform: scale(.88); filter: blur(3px); } }
+.pp { position: absolute; z-index: 2; padding: 16px 18px; border-radius: 12px; box-shadow: 0 22px 44px -14px rgba(0, 0, 0, .6); font-size: 15px; line-height: 1.35; opacity: 0; animation: papel var(--ciclo-bag) var(--ease) infinite; animation-delay: var(--d, 0s); }
+/* cada papel entra, flutua e voa para o centro do sistema (--dx/--dy medidos no layout pelo inicio.js) */
+@keyframes papel {
+  0% { opacity: 0; transform: translateY(-36px) rotate(calc(var(--r) * 2.4)); }
+  7% { opacity: 1; transform: rotate(var(--r)); }
+  28% { opacity: 1; transform: translateY(-6px) rotate(var(--r)); }
+  44% { opacity: 1; transform: rotate(var(--r)); }
+  56% { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(.22) rotate(0deg); }
+  100% { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(.22); }
+}
+.pp.planilha { --r: -8deg; --d: 0s; left: 0; top: 4%; width: 46%; padding: 0; overflow: hidden; background: #f7f9fb; color: #1d2733; font: 500 12.5px/1.2 var(--mono); }
 .pp.planilha .bar { background: #1f7a4a; color: #fff; padding: 9px 12px; font: 600 12.5px/1 var(--font); }
 .pp.planilha table { width: 100%; border-collapse: collapse; }
 .pp.planilha td { border: 1px solid #d5dde5; padding: 6px 8px; }
 .pp.planilha td.v { color: #c0392b; font-weight: 700; }
-.pp.postit { right: 2%; top: 0; width: 34%; background: #ffe066; color: #3a3000; font-weight: 700; }
-.pp.caderno { left: 8%; bottom: 2%; width: 40%; background: #fbf6e9; color: #2b2b2b; font: 500 14px/1.7 var(--mono); background-image: repeating-linear-gradient(#fbf6e9 0 22px, #c9d6ea 22px 23px); }
+.pp.postit { --r: 7deg; --d: .35s; right: 2%; top: 0; width: 34%; background: #ffe066; color: #3a3000; font-weight: 700; }
+.pp.caderno { --r: -5deg; --d: .7s; left: 8%; bottom: 2%; width: 40%; background: #fbf6e9; color: #2b2b2b; font: 500 14px/1.7 var(--mono); background-image: repeating-linear-gradient(#fbf6e9 0 22px, #c9d6ea 22px 23px); }
 .pp.caderno s { text-decoration-color: #c0392b; }
-.pp.zap { right: 0; bottom: 8%; width: 50%; background: #202c33; color: #e9edef; }
+.pp.zap { --r: 4deg; --d: 1.05s; right: 0; bottom: 8%; width: 50%; background: #202c33; color: #e9edef; }
 .pp.zap small { display: block; color: #53bdeb; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.ini-bag-passos li:nth-child(1) { --d: 0s; } .ini-bag-passos li:nth-child(2) { --d: 1.4s; } .ini-bag-passos li:nth-child(3) { --d: 2.8s; }
 
-/* ---------- calculadora ---------- */
-.ini-calc-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 56px; align-items: center; }
-.ini-calc h2 { font-size: clamp(30px, 3.4vw, 48px); line-height: 1.05; letter-spacing: -0.035em; max-width: 14ch; }
-.ini-calc-card { border: 1px solid var(--line-2); border-radius: 20px; background: var(--surface); padding: 28px; box-shadow: var(--shadow); }
-.ini-campo { display: grid; gap: 10px; padding: 14px 0; border-bottom: 1px dashed var(--line); }
-.ini-campo label { display: flex; justify-content: space-between; gap: 16px; font-size: 15px; color: var(--ink-2); }
-.ini-campo label output { font: 600 15px/1.4 var(--mono); color: var(--ink); white-space: nowrap; }
-.ini-campo input[type=range] { width: 100%; accent-color: var(--accent-solid); height: 28px; }
-.ini-campo .moeda { display: flex; align-items: center; gap: 8px; }
-.ini-campo .moeda span { color: var(--ink-3); font: 500 15px var(--mono); }
-.ini-campo input[type=number] { width: 130px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--ink); font: 600 16px var(--mono); }
-.ini-res { margin-top: 22px; display: grid; gap: 6px; }
-.ini-res .perde { font-size: 16px; color: var(--ink-2); }
-.ini-res .perde b { display: block; margin-top: 4px; font-size: clamp(36px, 4vw, 52px); letter-spacing: -0.04em; color: #ff8a8a; font-weight: 700; }
-.ini-res .paga { margin-top: 8px; padding: 14px 16px; border-radius: 12px; background: rgba(76, 195, 138, .1); border: 1px solid rgba(76, 195, 138, .35); color: var(--ink); font-size: 15.5px; }
-.ini-res .paga b { color: var(--ok); }
-html[data-theme="light"] .ini-res .perde b { color: #c0392b; }
+/* movimento leve e constante no topo */
+.ini-aviso.a1 { animation: flutua 6s ease-in-out infinite; }
+.ini-aviso.a2 { animation: flutua 7s ease-in-out -3s infinite; }
+@keyframes flutua { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+.ini-note { animation: respira-tela 9s ease-in-out infinite; }
+@keyframes respira-tela { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
 
 /* ---------- planos dos sistemas ---------- */
 .ini-mais { margin-top: 28px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 26px; border-radius: 18px; border: 1px solid var(--line-2); background: linear-gradient(120deg, var(--accent-soft), transparent 70%); }
@@ -112,36 +112,30 @@ html[data-theme="light"] .ini-res .perde b { color: #c0392b; }
 /* ---------- celular ---------- */
 @media (max-width: 900px) {
   .ini-hero { padding: 40px 0 64px; }
-  .ini-hero-grid, .ini-bag-grid, .ini-calc-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; }
+  .ini-hero-grid, .ini-bag-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; }
   .ini-rosa { right: -30%; top: -4%; width: 110vw; opacity: .32; }
   .ini-note { transform: none; }
   .ini-aviso { max-width: 230px; font-size: 13px; padding: 10px 12px 10px 10px; }
   .ini-aviso .ic { width: 30px; height: 30px; }
   .ini-aviso.a1 { left: -4px; bottom: 0; }
   .ini-aviso.a2 { right: -4px; top: -4px; }
-  .ini-bag { height: 230vh; }
-  .ini-bag-grid { gap: 18px; }
-  .ini-bag-pin { align-items: flex-start; padding-top: 84px; }
-  .ini-bag-palco { order: -1; width: min(100%, 420px); margin: 0 auto; aspect-ratio: 1.45; }
+  .ini-bag { padding: 64px 0; }
+  .ini-bag-palco { width: min(100%, 440px); margin: 0 auto; aspect-ratio: 1.3; }
   .ini-bag h2 { font-size: 30px; }
   .ini-bag-passos { margin-top: 16px; gap: 8px; }
   .ini-bag-passos li { font-size: 16px; padding-left: 36px; }
   .ini-bag-passos li.fim { font-size: 18px; margin-top: 4px; }
   .pp { font-size: 12.5px; padding: 10px 12px; }
   .pp.planilha, .pp.caderno { font-size: 11px; }
-  .ini-calc-card { padding: 20px; }
 }
 @media (max-width: 520px) {
   .ini-ramos button { min-height: 38px; padding: 0 13px; font-size: 14px; }
   .ini-hero .sub { font-size: 17px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ini-rosa img { animation: none; }
-  .ini-bag { height: auto; }
-  .ini-bag-pin { position: static; height: auto; padding: 80px 0; }
+  .ini-rosa img, .ini-aviso, .ini-note, .ini-bag-passos li { animation: none; }
   .ini-bag .pp { display: none; }
-  .ini-bag-app { --app-op: 1; --app-esc: 1; --app-blur: 0px; position: relative; inset: auto; aspect-ratio: 16 / 10; }
-  .ini-bag-palco { aspect-ratio: auto; }
+  .ini-bag-app { animation: none; }
   .ini-bag-passos li { color: var(--ink); }
 }
 
