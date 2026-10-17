@@ -411,7 +411,7 @@ export async function iniciarNuvem(app, cfg) {
 
   const sessao = {
     db, sb, uid, email, espaco: esp, dono, pro, papel, gestor,
-    acesso: (pagina) => (pagina === 'dono' || pagina === 'importar' ? (gestor ? 'editar' : 'nenhum') : !minhas || minhas.total ? 'editar' : minhas.paginas?.[pagina] || minhas.padrao || 'ver'),
+    acesso: (pagina) => (pagina === 'suporte' ? 'editar' : pagina === 'dono' || pagina === 'importar' ? (gestor ? 'editar' : 'nenhum') : !minhas || minhas.total ? 'editar' : minhas.paginas?.[pagina] || minhas.padrao || 'ver'),
     podeExcluir: () => !minhas || !!minhas.total || !!minhas.excluir,
     funcao: async (nome, corpo) => { const { data, error } = await sb.functions.invoke(nome, { body: { espaco: esp.id, ...corpo } }); if (error) { let msg = error.message; try { msg = (await error.context.json()).erro || msg; } catch { /* ok */ } throw new Error(msg); } return data; },
     salvarSegredo: async (chave, valor) => { const { error } = await sb.rpc('nexo_salvar_segredo', { p_espaco: esp.id, p_chave: chave, p_valor: valor || '' }); if (error) throw error; },

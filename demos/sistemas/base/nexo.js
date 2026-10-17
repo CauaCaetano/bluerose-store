@@ -14,8 +14,9 @@ import { resumoDoDia, resumoTexto } from './resumos.js';
 import { prepararExtras } from './extras.js';
 import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 import { paginaImportar } from './planilha.js';
-// Assistente IA: fica em breve até o dono liberar (trocar para true quando a chave do Gemini estiver nos segredos do Supabase)
-const IA_LIBERADA = false;
+import { prepararSuporte } from './suporte.js';
+// Assistente IA: liberado em 17/10 (sem a chave do Gemini, a função nexo-ia responde que está sendo ativado)
+const IA_LIBERADA = true;
 
 // ---------------------------------------------------------------- utilidades
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
@@ -481,6 +482,7 @@ function montar(app, cfg) {
   const paginas = cfg.paginas.filter((p) => p.id);
   const preco = (v) => moeda(v).replace(',00', '');
   prepararExtras(app, cfg);
+  prepararSuporte(app, cfg);
   if (app.db.cfg.ramo_pendente && !app.db.cfg.ramo) { app.aplicarModelo(app.db.cfg.ramo_pendente, true); delete app.db.cfg.ramo_pendente; app.db.gravar(); }
   const voltar = cfg.paginaSite ? `<a class="faixa-voltar" href="${site}${cfg.paginaSite}" target="_top">${ic('arrow-left')}<span>Voltar<span class="so-larga"> ao site</span></span></a><span class="sep so-larga"></span>` : '';
   const faixaDemo = `<div class="faixa nao-imprime">${voltar}<span class="so-larga">Demonstração do <b>${esc(cfg.nome)}</b> · dados de exemplo, só neste navegador</span><span class="sep so-larga"></span>
@@ -496,7 +498,9 @@ function montar(app, cfg) {
         ${cfg.paginas.filter((p) => !p.id || app.acesso(p.id) !== 'nenhum').map((p) => (p.grupo && !p.id ? `<div class="grupo">${esc(p.grupo)}</div>` : `<a class="item" href="#/${p.id}" data-pag="${p.id}">${ic(p.icone || 'circle')}<span class="corta">${esc(p.rot)}</span><span class="cont" data-cont="${p.id}" hidden></span></a>`)).join('')}
         <div class="lat-pe">
           <a class="item" href="#" data-acao="resumoDia">${ic('notepad')}Resumo do dia</a>
-          <a class="item" href="#" data-acao="assistenteIA">${ic('sparkle')}Assistente IA <span class="et sem-ponto" style="margin-left:auto;font-size:10px">em breve</span></a>
+          <a class="item" href="#" data-acao="assistenteIA">${ic('sparkle')}Assistente IA <span class="et ok sem-ponto" style="margin-left:auto;font-size:10px">grátis</span></a>
+          <a class="item" href="#/suporte" data-pag="suporte">${ic('lifebuoy')}Suporte</a>
+          <a class="item" href="#" data-acao="feedback">${ic('chat-circle-text')}Enviar feedback</a>
           ${!app.nuvem || app.sessao.gestor ? `<a class="item item-dono" href="#/dono" data-pag="dono">${ic('crown')}Painel do dono</a><a class="item" href="#/importar" data-pag="importar">${ic('table')}Importar planilha</a>` : ''}
           ${app.nuvem ? `<a class="item" href="javascript:void 0" data-pwa-instalar hidden>${ic('download-simple')}Instalar o app</a>` : ''}
           <a class="item" href="#/config" data-pag="config">${ic('gear-six')}Configurações</a>
@@ -518,7 +522,7 @@ function montar(app, cfg) {
   app.render = () => {
     app.antesDeRender?.();
     const { id, params } = rota();
-    const p = id === 'config' ? paginaConfig : id === 'dono' ? paginaDono : id === 'importar' ? paginaPlanilha : paginas.find((x) => x.id === id) || paginas[0];
+    const p = id === 'config' ? paginaConfig : id === 'suporte' ? app.paginaSuporte : id === 'dono' ? paginaDono : id === 'importar' ? paginaPlanilha : paginas.find((x) => x.id === id) || paginas[0];
     if (app.acesso(p.id) === 'nenhum') { const ok = paginas.find((x) => app.acesso(x.id) !== 'nenhum'); if (ok && ok !== p) { location.hash = `#/${ok.id}`; return; } }
     app.pagina = p; app.params = params; raiz.dataset.soVer = app.acesso(p.id) === 'ver' ? '1' : '';
     document.querySelectorAll('.lat a.item[data-pag]').forEach((a) => a.classList.toggle('ativo', a.dataset.pag === p.id));

@@ -166,3 +166,33 @@ main::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; 
 .prod.so-destaque .prod-novo .prod-foto { height: 100%; }
 .prod.so-destaque .prod-novo .prod-foto img { height: 100%; object-fit: cover; object-position: left top; }
 @media (max-width: 760px) { .prod.so-destaque .prod-novo { grid-template-columns: minmax(0, 1fr); } }
+/* Minha conta · suporte e feedback */
+.conta-suporte { margin-top: 28px; margin-bottom: 40px; }
+.sup p { color: var(--ink-2); }
+.sup-form, .sup-fb-form form { display: grid; gap: 10px; margin: 14px 0 6px; }
+.sup-form label, .sup-fb-form label { display: grid; gap: 5px; font-size: 13px; color: var(--ink-2); }
+.sup-form input, .sup-form select, .sup-form textarea, .sup-fb-form select, .sup-fb-form textarea, .sup-resp textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--line-2); border-radius: 8px; background: rgba(255,255,255,.03); color: var(--ink); font: inherit; }
+.sup-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sup-form .btn, .sup-fb-form .btn { justify-self: start; }
+.sup-erro { color: #f87171; font-size: 13px; min-height: 1em; margin: 0; }
+.sup-h3 { font-size: 15px; margin: 22px 0 8px; }
+.sup-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sup-item { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.sup-cab { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; }
+.sup-cab:hover, .sup-cab:focus-visible { background: rgba(255,255,255,.03); }
+.sup-tit { flex: 1; min-width: 0; display: grid; }
+.sup-tit b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sup-tit small, .sup-fb small { color: var(--ink-3); font-size: 12px; }
+.sup-conversa { padding: 6px 14px 14px; display: grid; gap: 8px; border-top: 1px solid var(--line); }
+.sup-msg { padding: 9px 12px; border-radius: 8px; background: rgba(255,255,255,.03); }
+.sup-msg.suporte { border-left: 3px solid #4f8cff; }
+.sup-msg small { color: var(--ink-3); font-size: 11.5px; }
+.sup-msg p { margin: 4px 0 0; white-space: pre-wrap; color: var(--ink); }
+.sup-resp { display: grid; gap: 8px; } .sup-botoes { display: flex; gap: 8px; flex-wrap: wrap; }
+.sup-ctx pre { white-space: pre-wrap; font-size: 11.5px; color: var(--ink-3); max-height: 220px; overflow: auto; }
+.sup-fb { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.sup-fb span { color: var(--ink-2); white-space: pre-wrap; }
+.sup-fb-form { margin-top: 18px; } .sup-fb-form summary { cursor: pointer; color: var(--ink-2); }
+.sup-vazio { color: var(--ink-3); }
+@media (max-width: 600px) { .sup-campos { grid-template-columns: 1fr; } }
+.sup h2 { font-size: clamp(24px, 3vw, 32px); margin: 0 0 6px; } .sup-h3 { font-size: 19px; }
