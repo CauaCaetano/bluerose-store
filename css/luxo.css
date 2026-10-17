@@ -131,3 +131,28 @@ h1, h2, h3, .sec-title, .preco2-valor, .prod-preco b, .lx-numeros b { font-varia
   .cf-dia li::after { left: 46px; }
   .cf-dia b { font-size: 22px; }
 }
+
+/* ---------- artes enviadas pelo dono: trepadeira de rosas e estampa de rosas (imagens paradas, sem script) ---------- */
+.lx-com-arte { position: relative; overflow: clip; isolation: isolate; }
+/* a arte fica numa camada comum e o conteúdo da seção logo acima (z-index negativo + máscara some no Chrome) */
+.lx-com-arte > .wrap { position: relative; z-index: 1; }
+.lx-trep { position: absolute; z-index: 0; bottom: 0; right: max(0px, calc((100vw - 1440px) / 2)); height: min(88%, 760px); width: auto; pointer-events: none;
+  filter: drop-shadow(0 0 1.5px rgba(210, 222, 245, .95)) drop-shadow(0 0 12px rgba(120, 160, 255, .35));
+  -webkit-mask: linear-gradient(0deg, transparent 0, #000 12%, #000 90%, transparent 100%) bottom / 100% 100% no-repeat;
+  mask: linear-gradient(0deg, transparent 0, #000 12%, #000 90%, transparent 100%) bottom / 100% 100% no-repeat; }
+.lx-trep.esq { right: auto; left: max(0px, calc((100vw - 1440px) / 2)); transform: scaleX(-1); }
+/* a trepadeira "cresce" de baixo para cima quando aparece (uma vez só; a máscara não esconde a imagem do observador) */
+.js .lx-trep.reveal { opacity: 1; filter: drop-shadow(0 0 1.5px rgba(210, 222, 245, .95)) drop-shadow(0 0 12px rgba(120, 160, 255, .35)); transform: none; -webkit-mask-size: 100% 0%; mask-size: 100% 0%; transition: -webkit-mask-size 3.2s cubic-bezier(.65, 0, .35, 1) .3s, mask-size 3.2s cubic-bezier(.65, 0, .35, 1) .3s; }
+.js .lx-trep.esq.reveal { transform: scaleX(-1); }
+.js .lx-trep.reveal.visto { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+.lx-estampa { position: absolute; z-index: 0; top: 0; bottom: 0; left: 0; width: min(46vw, 620px); pointer-events: none; opacity: .8;
+  background: url("../img/estampa-rosas.webp") left top / cover no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, .6) 45%, transparent 100%), linear-gradient(180deg, transparent, #000 15%, #000 85%, transparent);
+  mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, .6) 45%, transparent 100%), linear-gradient(180deg, transparent, #000 15%, #000 85%, transparent);
+  -webkit-mask-composite: source-in; mask-composite: intersect; }
+.lx-estampa.dir { left: auto; right: 0; transform: scaleX(-1); }
+@media (max-width: 900px) {
+  .lx-trep { height: 52%; opacity: .55; }
+  .js .lx-trep.reveal { opacity: .55; }
+  .lx-estampa { width: 80vw; opacity: .4; }
+}
