@@ -225,6 +225,10 @@ input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--acc); marg
 .kpi .var { font-weight: 600; display: inline-flex; align-items: center; gap: 2px; }
 .kpi .var.sobe { color: var(--ok); } .kpi .var.desce { color: var(--er); }
 .kpi .spark { position: absolute; right: 14px; top: 16px; width: 72px; height: 26px; opacity: .9; }
+/* o rótulo não passa por baixo do minigráfico; em cartão estreito o gráfico some */
+.kpi:has(.spark) .rot { padding-right: 82px; }
+@container (max-width: 200px) { .kpi .spark { display: none; } .kpi:has(.spark) .rot { padding-right: 0; } }
+.kpi { container-type: inline-size; }
 .kpi.alerta .val { color: var(--er); }
 
 /* barra de progresso */
@@ -550,7 +554,7 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .kanban { grid-auto-columns: minmax(218px, 1fr); }
 .filtro-chip select { max-width: 220px; }
 .cal-horas div:first-child { visibility: hidden; }
-@media (max-width: 900px) { .kpi .spark { display: none; } }
+@media (max-width: 900px) { .kpi .spark { display: none; } .kpi:has(.spark) .rot { padding-right: 0; } }
 @media (max-width: 1100px) and (min-width: 901px) { .kpis { grid-template-columns: repeat(min(var(--n, 4), 4), minmax(0, 1fr)); } }
 .prod-bt { flex-shrink: 0; }
 
