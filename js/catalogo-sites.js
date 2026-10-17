@@ -12,7 +12,7 @@
   var en = (document.documentElement.lang || '').indexOf('en') === 0;
   var T = en
     ? { sites: function (n) { return n + (n > 1 ? ' websites' : ' website'); }, abrir: 'Open website', paginas: 'pages', escolha: 'Choose a website to explore', ver: 'See the websites', plano: 'This model in the Complete plan', prazo: 'ready in 10 business days', preco: '$1,190', quero: 'I want this one', comNome: 'Opens as' }
-    : { sites: function (n) { return n + (n > 1 ? ' sites' : ' site'); }, abrir: 'Abrir site', paginas: 'páginas', escolha: 'Escolha um site para navegar', ver: 'Ver os sites', plano: 'Este modelo no plano Completo', prazo: 'pronto em 10 dias úteis', preco: 'R$ 1.990', quero: 'Quero este', comNome: 'Abre como' };
+    : { sites: function (n) { return n + (n > 1 ? ' sites' : ' site'); }, abrir: 'Abrir site', paginas: 'páginas', escolha: 'Escolha um site para navegar', ver: 'Ver os sites', plano: 'Este modelo no plano Completo', prazo: 'pronto em 7 dias úteis', preco: 'R$ 1.490', quero: 'Quero este', comNome: 'Abre como' };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); };
   var lang = en ? 'en' : 'pt';
   var todos = dados.sites.filter(function (s) { return (s.lang || 'pt') === lang; });

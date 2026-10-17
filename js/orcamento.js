@@ -9,10 +9,10 @@
   var EN = (document.documentElement.lang || '').indexOf('en') === 0;
 
   var BASES = [
-    { id: 'presenca', n: ['Presença', 'Presence'], p: [990, 590], dias: 5, d: ['Site de 1 página', '1-page website'], site: true },
-    { id: 'completo', n: ['Completo', 'Complete'], p: [1990, 1190], dias: 10, d: ['Site de até 6 páginas com agenda e orçamento', 'Up to 6 pages with booking and quotes'], site: true, gmn: true },
-    { id: 'automacao', n: ['Completo + Automação', 'Complete + Automation'], p: [2990, 1790], dias: 15, d: ['O Completo + WhatsApp automático', 'Complete + automated WhatsApp'], site: true, gmn: true, auto: true },
-    { id: 'so-automacao', n: ['Só automação de WhatsApp', 'WhatsApp automation only'], p: [1290, 790], dias: 7, d: ['Para quem já tem site', 'For businesses that already have a website'], auto: true },
+    { id: 'presenca', n: ['Presença', 'Presence'], p: [690, 590], dias: 3, d: ['Site de 1 página', '1-page website'], site: true },
+    { id: 'completo', n: ['Completo', 'Complete'], p: [1490, 1190], dias: 7, d: ['Site de até 6 páginas com agenda e orçamento', 'Up to 6 pages with booking and quotes'], site: true, gmn: true },
+    { id: 'automacao', n: ['Completo + Automação', 'Complete + Automation'], p: [2290, 1790], dias: 10, d: ['O Completo + WhatsApp automático', 'Complete + automated WhatsApp'], site: true, gmn: true, auto: true },
+    { id: 'so-automacao', n: ['Só automação de WhatsApp', 'WhatsApp automation only'], p: [890, 790], dias: 5, d: ['Para quem já tem site', 'For businesses that already have a website'], auto: true },
   ];
   // q: aceita quantidade; so: só aparece com site / com automação; nao: some quando a base já inclui
   var EXTRAS = [

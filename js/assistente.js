@@ -395,6 +395,8 @@
     if (!this.painel.hidden) { this.mostrarRapidas(); return; }
     // puxa assunto uma vez por parte do site, se o visitante não pediu silêncio
     if (this.calado || this.falados[id]) return;
+    // no celular o balão cobre o conteúdo: puxa assunto uma vez só
+    if (innerWidth < 700 && Object.keys(this.falados).length) return;
     var self = this, atraso = inicial ? 2500 : 300;
     clearTimeout(this.falaT);
     this.falaT = setTimeout(function () {
@@ -433,7 +435,7 @@
     this.balao.hidden = false;
     this.balao.classList.remove('va-novo'); void this.balao.offsetWidth; this.balao.classList.add('va-novo');
     var self = this;
-    this.balaoT = setTimeout(function () { self.esconderBalao(); }, 9000);
+    this.balaoT = setTimeout(function () { self.esconderBalao(); }, innerWidth < 700 ? 5000 : 9000);
     this.estado(estado || 'greeting', this.balaoTxt.textContent, this.balaoTxt.textContent);
   };
   VirtualAssistant.prototype.esconderBalao = function () { clearTimeout(this.balaoT); this.balao.hidden = true; };

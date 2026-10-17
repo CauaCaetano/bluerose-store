@@ -37,10 +37,10 @@
   var $ = function (id) { return document.getElementById(id); };
   var aceite = $('ct-aceite'), pagar = $('ct-pagar');
   var VALORES = {
-    presenca: ['Entrada de R$ 495 agora', 'Total R$ 990 · o saldo de R$ 495 só na entrega'],
-    completo: ['Entrada de R$ 995 agora', 'Total R$ 1.990 · o saldo de R$ 995 só na entrega'],
-    automacao: ['Entrada de R$ 645 agora', 'Total R$ 1.290 · o saldo de R$ 645 só na entrega'],
-    combo: ['Entrada de R$ 1.495 agora', 'Total R$ 2.990 · o saldo de R$ 1.495 só na entrega'],
+    presenca: ['Entrada de R$ 345 agora', 'Total R$ 690 · o saldo de R$ 345 só na entrega'],
+    completo: ['Entrada de R$ 745 agora', 'Total R$ 1.490 · o saldo de R$ 745 só na entrega'],
+    automacao: ['Entrada de R$ 445 agora', 'Total R$ 890 · o saldo de R$ 445 só na entrega'],
+    combo: ['Entrada de R$ 1.145 agora', 'Total R$ 2.290 · o saldo de R$ 1.145 só na entrega'],
     'a-presenca': ['R$ 89 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
     'a-completo': ['R$ 149 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
     'a-automacao': ['R$ 199 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
