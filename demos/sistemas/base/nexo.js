@@ -619,7 +619,8 @@ function montar(app, cfg) {
       const contexto = { destaques: r?.destaques || [], alertas: r?.alertas || [], contagens };
       const sugestoes = ['O que eu devo priorizar hoje?', 'Como está o meu mês?', 'Escreva uma mensagem de cobrança educada', 'Como eu consigo mais clientes?', `Como funciona o ${cfg.nome}?`];
       const desenhar = (resp = '', carregando = false) => `<div class="col" style="gap:10px">
-        <p class="mute-2" style="font-size:12.5px;margin:0">Pergunte sobre o seu negócio ou sobre como usar o sistema. A IA vê só os números e avisos do resumo do dia, nunca telefones, e-mails ou documentos dos seus clientes. ${app.sessao ? 'São 20 perguntas grátis por dia.' : 'Na demonstração, a resposta é um exemplo.'}</p>
+        <p class="mute-2" style="font-size:12.5px;margin:0">Pergunte sobre o seu negócio ou sobre como usar o sistema. A IA vê só os números e avisos do resumo do dia, nunca telefones, e-mails ou documentos dos seus clientes.${app.sessao ? '' : ' Na demonstração, a resposta é um exemplo.'}</p>
+        <div class="dica" style="margin:0">${ic('sparkle')}<span>Você tem <b>20 perguntas grátis por dia</b>${app.sessao ? `. Restam <b data-ia-rest>…</b> hoje.` : ' na versão com conta.'}</span></div>
         <div class="flex" style="flex-wrap:wrap;gap:6px">${sugestoes.map((x) => `<button type="button" class="btn peq" data-ia-sug="${esc(x)}">${esc(x)}</button>`).join('')}</div>
         <label class="campo largo">Sua pergunta<textarea data-ia-perg rows="2" maxlength="600" placeholder="Ex.: quais clientes eu devo cobrar primeiro?">${esc(d.p || '')}</textarea></label>
         <div data-ia-resp class="cartao" style="padding:12px;white-space:pre-wrap;${resp || carregando ? '' : 'display:none'}">${carregando ? 'Pensando…' : esc(resp)}</div></div>`;
@@ -629,12 +630,12 @@ function montar(app, cfg) {
         if (pergunta.length < 3) { t.focus(); return false; }
         out.style.display = ''; out.textContent = 'Pensando…';
         if (!app.sessao?.funcao) { setTimeout(() => { out.textContent = exemplo(); }, 500); return false; }
-        try { const x = await app.sessao.funcao('nexo-ia', { pergunta, sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes} perguntas restantes hoje.` : ''}`; }
+        try { const x = await app.sessao.funcao('nexo-ia', { pergunta, sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes === 0 ? 'Esta foi a última pergunta grátis de hoje. Amanhã você tem mais 20.' : `Restam ${x.restantes} de 20 perguntas grátis hoje.`}` : ''}`; const rr = f.querySelector('[data-ia-rest]'); if (rr && typeof x.restantes === 'number') rr.textContent = x.restantes; }
         catch (e) { out.textContent = e.message || 'Não foi possível responder agora.'; }
         return false;
       };
       modal({ titulo: 'Assistente IA', largura: 620, corpo: desenhar(), botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }, { rotulo: 'Perguntar', classe: 'pri', acao: perguntar }],
-        aoAbrir: (f) => { f.addEventListener('click', (e) => { const b2 = e.target.closest('[data-ia-sug]'); if (!b2) return; f.querySelector('[data-ia-perg]').value = b2.dataset.iaSug; perguntar(f); }); f.querySelector('[data-ia-perg]')?.focus(); } });
+        aoAbrir: (f) => { if (app.sessao?.sb) app.sessao.sb.rpc('nexo_ia_restantes', { p_espaco: app.sessao.espaco?.id }).then(({ data }) => { const rr = f.querySelector('[data-ia-rest]'); if (rr) rr.textContent = typeof data === 'number' ? data : 20; }, () => {}); f.addEventListener('click', (e) => { const b2 = e.target.closest('[data-ia-sug]'); if (!b2) return; f.querySelector('[data-ia-perg]').value = b2.dataset.iaSug; perguntar(f); }); f.querySelector('[data-ia-perg]')?.focus(); } });
     },
     resumoDia: () => {
       const r = resumoDoDia(cfg.id, app.db.dados, hoje()), texto = resumoTexto(cfg.nome, app.empresa, r, hoje());
