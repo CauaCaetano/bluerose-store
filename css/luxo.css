@@ -153,3 +153,9 @@ main::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; 
   main::before { height: 260px; background-size: 210px auto, 210px auto; opacity: .7; }
   .rodape-site { background-size: 210px auto, 210px auto; }
 }
+
+/* páginas Produtos, Sites e automação, Como funciona, Preços (inicial) e Minha conta: rosas em todas as seções, alternando os lados */
+.lx-rosas > section { background-repeat: no-repeat; background-size: auto min(820px, 100%); }
+.lx-rosas > section:nth-of-type(odd) { background-image: url("../img/estampa-dir.webp"); background-position: right center; }
+.lx-rosas > section:nth-of-type(even) { background-image: url("../img/estampa-esq.webp"); background-position: left center; }
+@media (max-width: 900px) { .lx-rosas > section { background-size: auto min(480px, 100%); } }
