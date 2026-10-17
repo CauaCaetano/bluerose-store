@@ -44,7 +44,7 @@
     /* token de dono: pedido uma vez, quando a empresa é criada no sistema */
     var tk = pode && TOKENS[a.app] && !tokenMostrado[a.app] ? TOKENS[a.app] : null; if (tk) tokenMostrado[a.app] = true;
     var token = tk ? '<div class="conta-token"><small>Token de dono</small><code>' + esc(tk.token) + '</code><span>' + (tk.ativado ? 'Já ativado em ' + data(tk.ativado) + '. Não precisa usar de novo.' : 'Use uma vez, ao criar a sua empresa no sistema. Não compartilhe: a equipe entra pelos convites.') + '</span></div>' : '';
-    return '<article data-busca="' + esc(normal((a.nome || '') + ' ' + (a.app || '') + ' ' + (CAT[a.app] ? CAT[a.app][0] : ''))) + '" class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
+    return '<article data-busca="' + esc(normal((a.nome || '') + ' ' + (a.app || '') + ' ' + (CAT[a.app] ? CAT[a.app][0] + ' ' + CAT[a.app][1] : ''))) + '" class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
       barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + (pode ? '<p class="conta-ajuda"><a href="' + (PAGINA[a.app] || 'nexo-' + esc(a.app) + '.html') + '#tutorial">Assista ao vídeo tutorial</a>: mostra cada passo, da criação da empresa à importação das suas planilhas. ' + 'Prefere como programa? <a href="app/' + esc(a.app) + '/?instalar=1">Instale no computador ou no celular</a>: ganha ícone e abre em janela própria. ' + 'Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda.</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></div></article>';
   }
   function mostrarResumo(l) {
@@ -121,23 +121,28 @@
         history.replaceState(null, '', 'conta.html');
       }
       mostrarResumo(l);
+      meusApps = {}; l.forEach(function (x) { if (x.app && ['teste', 'ativa', 'paga', 'pendente'].indexOf(x.status) >= 0) meusApps[x.app] = 1; });
       if (!doCache) indicacao();
       raiz.innerHTML = aviso + (doCache ? '<div class="conta-aviso" data-aviso-cache>Atualizando a lista…</div>' : '') + busca() + (l.length ? '<h2 class="conta-titulo">Seus sistemas</h2>' + l.map(cartao).join('') :
         '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp" alt="" loading="lazy"><img src="img/sistemas/agenda.webp" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp" alt="" loading="lazy"></div><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um dos sistemas e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
+      if (termo) filtrar();
     }
   }
   function busca() {
-    return '<div class="conta-busca"><label class="vh" for="conta-q">Procurar sistema</label><input id="conta-q" type="search" placeholder="Procurar sistema pelo nome ou ramo (ex.: farmácia, obra, salão)" autocomplete="off"><div class="conta-busca-res" data-busca-res></div></div>';
+    return '<div class="conta-busca"><label class="vh" for="conta-q">Procurar sistema</label><input id="conta-q" type="search" value="' + esc(termo) + '" placeholder="Procurar sistema pelo nome ou ramo (ex.: farmácia, obra, salão)" autocomplete="off"><div class="conta-busca-res" data-busca-res></div></div>';
   }
-  raiz.addEventListener('input', function (e) {
-    if (e.target.id !== 'conta-q') return;
-    var q = normal(e.target.value.trim()), meus = {}, vistos = 0;
-    raiz.querySelectorAll('.conta-item').forEach(function (it) { var ok = !q || (it.getAttribute('data-busca') || '').indexOf(q) >= 0; it.hidden = !ok; if (ok) vistos++; var m = (it.getAttribute('data-busca') || '').split(' '); m.forEach(function (w) { meus[w] = 1; }); });
+  // busca: compara com o começo das palavras (nome do sistema, ramo); sugestões de outros sistemas só com 2 letras ou mais
+  var termo = '', meusApps = {};
+  function bate(texto, q) { var ps = q.split(/\s+/).filter(Boolean); var ws = normal(texto).split(/[^a-z0-9]+/); return ps.every(function (t) { return ws.some(function (w) { return w.indexOf(t) === 0; }); }); }
+  function filtrar() {
+    var q = normal(termo.trim()), vistos = 0;
+    raiz.querySelectorAll('.conta-item').forEach(function (it) { var ok = !q || bate(it.getAttribute('data-busca') || '', q); it.hidden = !ok; if (ok) vistos++; });
     var res = raiz.querySelector('[data-busca-res]'); if (!res) return;
     if (!q) { res.innerHTML = ''; return; }
-    var outros = Object.keys(CAT).filter(function (k) { return normal(CAT[k][0] + ' ' + k + ' ' + CAT[k][1]).indexOf(q) >= 0 && !raiz.querySelector('.conta-item[data-busca*="' + k + '"]'); });
+    var outros = q.length < 2 ? [] : Object.keys(CAT).filter(function (k) { return !meusApps[k] && bate(CAT[k][0] + ' ' + k + ' ' + CAT[k][1], q); });
     res.innerHTML = (vistos ? '' : '<p class="conta-busca-nada">Nenhum dos seus sistemas tem esse nome.</p>') + outros.map(function (k) { var pg = PAGINA[k] || 'nexo-' + k + '.html'; return '<div class="conta-busca-item"><b>' + esc(CAT[k][0]) + '</b><span>Você ainda não tem este sistema.</span><a class="btn btn-primary" href="' + pg + '">Ver e testar 7 dias grátis</a></div>'; }).join('');
-  });
+  }
+  raiz.addEventListener('input', function (e) { if (e.target.id !== 'conta-q') return; termo = e.target.value; filtrar(); });
   raiz.addEventListener('click', function (e) {
     if (e.target.closest('[data-recarregar]')) { carregar(); return; }
     var c = e.target.closest('[data-cancelar]'), a = e.target.closest('[data-assinar]');
