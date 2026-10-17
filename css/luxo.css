@@ -196,3 +196,10 @@ main::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; 
 .sup-vazio { color: var(--ink-3); }
 @media (max-width: 600px) { .sup-campos { grid-template-columns: 1fr; } }
 .sup h2 { font-size: clamp(24px, 3vw, 32px); margin: 0 0 6px; } .sup-h3 { font-size: 19px; }
+/* Minha conta · procurar sistema */
+.conta-busca { margin: 4px 0 18px; }
+.conta-busca input { width: 100%; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 10px; background: rgba(255,255,255,.03); color: var(--ink); font: inherit; }
+.conta-busca-res { display: grid; gap: 8px; margin-top: 10px; }
+.conta-busca-item { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; }
+.conta-busca-item b { font-size: 15px; } .conta-busca-item span { color: var(--ink-3); font-size: 13px; flex: 1; min-width: 160px; }
+.conta-busca-nada { color: var(--ink-3); margin: 0; }

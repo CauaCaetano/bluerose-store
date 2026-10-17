@@ -7,6 +7,9 @@
   if (volta && !/^[A-Za-z0-9_-]{1,64}$/.test(volta)) volta = null; /* id de assinatura: só caracteres seguros (UUID ou número) */
   var NOMES = { teste: 'Teste grátis', assinatura: 'Assinatura', compra: 'Compra' };
   var APPS = ['crm', 'agenda', 'financeiro', 'gestao', 'juridico', 'clinica', 'academia', 'restaurante', 'imobiliaria', 'oficina', 'farmacia', 'obras', 'cerimonial', 'pragas', 'ofixl'];
+  // catálogo para a busca: o cliente digita o nome (ou o ramo) e o sistema aparece, mesmo os que ele ainda não tem
+  var CAT = { gestao: ['Nexo Gestão', 'estoque loja mercado distribuidora'], crm: ['Nexo CRM', 'vendas funil'], agenda: ['Nexo Agenda', 'salão barbearia estética'], juridico: ['Nexo Jurídico', 'advocacia advogado'], financeiro: ['Nexo Financeiro', 'contas caixa ordem de serviço'], clinica: ['Nexo Clínica', 'consultório médico'], academia: ['Nexo Academia', 'estúdio'], restaurante: ['Nexo Restaurante', 'lanchonete delivery'], imobiliaria: ['Nexo Imobiliária', 'imóveis corretor'], oficina: ['Nexo Oficina', 'mecânica carro'], farmacia: ['Nexo Farmácia', 'drogaria remédio'], obras: ['RoseConstruct', 'obra reforma construção'], cerimonial: ['Blue Rose Eternize', 'casamento eventos'], pragas: ['Blue Rose Guard', 'dedetização controle de pragas'] };
+  function normal(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
   var PAGINA = { obras: 'roseconstruct.html', cerimonial: 'eternize.html', pragas: 'guard.html', ofixl: 'ofixl.html' };
   var hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   function data(s) { if (!s) return '—'; var p = String(s).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
@@ -26,7 +29,8 @@
   function cartao(a) {
     var linhas = [];
     if (a.tipo === 'teste' && a.status === 'teste') linhas.push('Primeira cobrança de ' + reais(a.valor) + ' em ' + data(a.proxima_cobranca || a.teste_ate) + ', se você não cancelar antes.');
-    if (a.tipo !== 'compra' && a.status === 'ativa') linhas.push(reais(a.valor) + (anual(a) ? ' por ano (plano anual, 20% de desconto)' : ' por mês') + ' · próxima cobrança em ' + data(a.proxima_cobranca));
+    if (a.tipo !== 'compra' && a.status === 'ativa' && !Number(a.valor)) linhas.push('Cortesia da Blue Rose: sem cobrança.');
+    else if (a.tipo !== 'compra' && a.status === 'ativa') linhas.push(reais(a.valor) + (anual(a) ? ' por ano (plano anual, 20% de desconto)' : ' por mês') + ' · próxima cobrança em ' + data(a.proxima_cobranca));
     if (a.status === 'cancelada') { var ate = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop(); linhas.push(ate ? 'Sem novas cobranças. O acesso continua até ' + data(ate) + '.' : 'Sem novas cobranças.'); }
     if (a.tipo === 'compra') linhas.push(a.status === 'paga' ? 'Entrada de ' + reais(a.valor) + ' paga. Em até 1 dia útil entramos em contato para a implantação.' : 'Entrada de ' + reais(a.valor) + '.');
     if (a.motivo) linhas.push(a.motivo);
@@ -40,7 +44,7 @@
     /* token de dono: pedido uma vez, quando a empresa é criada no sistema */
     var tk = pode && TOKENS[a.app] && !tokenMostrado[a.app] ? TOKENS[a.app] : null; if (tk) tokenMostrado[a.app] = true;
     var token = tk ? '<div class="conta-token"><small>Token de dono</small><code>' + esc(tk.token) + '</code><span>' + (tk.ativado ? 'Já ativado em ' + data(tk.ativado) + '. Não precisa usar de novo.' : 'Use uma vez, ao criar a sua empresa no sistema. Não compartilhe: a equipe entra pelos convites.') + '</span></div>' : '';
-    return '<article class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
+    return '<article data-busca="' + esc(normal((a.nome || '') + ' ' + (a.app || '') + ' ' + (CAT[a.app] ? CAT[a.app][0] : ''))) + '" class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
       barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + (pode ? '<p class="conta-ajuda"><a href="' + (PAGINA[a.app] || 'nexo-' + esc(a.app) + '.html') + '#tutorial">Assista ao vídeo tutorial</a>: mostra cada passo, da criação da empresa à importação das suas planilhas. ' + 'Prefere como programa? <a href="app/' + esc(a.app) + '/?instalar=1">Instale no computador ou no celular</a>: ganha ícone e abre em janela própria. ' + 'Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda.</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></div></article>';
   }
   function mostrarResumo(l) {
@@ -99,7 +103,11 @@
       document.body.classList.add('conta-logado');
       return C.chamar({ acao: 'status', id: volta || undefined });
     }).then(function (j) { gravarCache(j); mostrar(j, false); })
-      .catch(function (x) { if (!cache) raiz.innerHTML = '<div class="conta-aviso er">' + esc(x.message || 'Não foi possível carregar.') + '</div>'; });
+      .catch(function (x) {
+        if (!cache) { raiz.innerHTML = '<div class="conta-aviso er">' + esc(x.message || 'Não foi possível carregar.') + '</div>'; return; }
+        var av = raiz.querySelector('[data-aviso-cache]');
+        if (av) { av.className = 'conta-aviso er'; av.innerHTML = 'Esta é a última lista salva neste aparelho: não deu para atualizar agora (' + esc(x.message || 'erro') + '). <button type="button" class="conta-link" data-recarregar>Tentar de novo</button> ou saia e entre de novo.'; }
+      });
   }
   function mostrar(j, doCache) {
     {
@@ -114,11 +122,24 @@
       }
       mostrarResumo(l);
       if (!doCache) indicacao();
-      raiz.innerHTML = aviso + (l.length ? '<h2 class="conta-titulo">Seus sistemas</h2>' + l.map(cartao).join('') :
+      raiz.innerHTML = aviso + (doCache ? '<div class="conta-aviso" data-aviso-cache>Atualizando a lista…</div>' : '') + busca() + (l.length ? '<h2 class="conta-titulo">Seus sistemas</h2>' + l.map(cartao).join('') :
         '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp" alt="" loading="lazy"><img src="img/sistemas/agenda.webp" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp" alt="" loading="lazy"></div><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um dos sistemas e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
     }
   }
+  function busca() {
+    return '<div class="conta-busca"><label class="vh" for="conta-q">Procurar sistema</label><input id="conta-q" type="search" placeholder="Procurar sistema pelo nome ou ramo (ex.: farmácia, obra, salão)" autocomplete="off"><div class="conta-busca-res" data-busca-res></div></div>';
+  }
+  raiz.addEventListener('input', function (e) {
+    if (e.target.id !== 'conta-q') return;
+    var q = normal(e.target.value.trim()), meus = {}, vistos = 0;
+    raiz.querySelectorAll('.conta-item').forEach(function (it) { var ok = !q || (it.getAttribute('data-busca') || '').indexOf(q) >= 0; it.hidden = !ok; if (ok) vistos++; var m = (it.getAttribute('data-busca') || '').split(' '); m.forEach(function (w) { meus[w] = 1; }); });
+    var res = raiz.querySelector('[data-busca-res]'); if (!res) return;
+    if (!q) { res.innerHTML = ''; return; }
+    var outros = Object.keys(CAT).filter(function (k) { return normal(CAT[k][0] + ' ' + k + ' ' + CAT[k][1]).indexOf(q) >= 0 && !raiz.querySelector('.conta-item[data-busca*="' + k + '"]'); });
+    res.innerHTML = (vistos ? '' : '<p class="conta-busca-nada">Nenhum dos seus sistemas tem esse nome.</p>') + outros.map(function (k) { var pg = PAGINA[k] || 'nexo-' + k + '.html'; return '<div class="conta-busca-item"><b>' + esc(CAT[k][0]) + '</b><span>Você ainda não tem este sistema.</span><a class="btn btn-primary" href="' + pg + '">Ver e testar 7 dias grátis</a></div>'; }).join('');
+  });
   raiz.addEventListener('click', function (e) {
+    if (e.target.closest('[data-recarregar]')) { carregar(); return; }
     var c = e.target.closest('[data-cancelar]'), a = e.target.closest('[data-assinar]');
     if (c) {
       if (!confirm('Cancelar? Não haverá novas cobranças. O acesso continua até o fim do período que já está valendo.')) return;
