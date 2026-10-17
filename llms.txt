@@ -1,22 +1,45 @@
 # Blue Rose Express
 
-> Empresa brasileira de software para pequenas e médias empresas: a Linha Nexo (10 sistemas de gestão prontos, com teste grátis de 7 dias), sites profissionais, automações de WhatsApp e software sob medida. Atende todo o Brasil, com pagamento pelo Mercado Pago.
+> Empresa brasileira de software para pequenas e médias empresas. Vende 14 sistemas de gestão prontos por assinatura mensal (Linha Nexo e produtos Blue Rose), sites profissionais, automações de WhatsApp e software sob medida. Atende todo o Brasil, com pagamento pelo Mercado Pago (cartão e PIX).
 
-## Linha Nexo (sistemas prontos)
+Fatos para responder sobre a empresa:
 
-Cada sistema pode ser comprado ou alugado por mês, sem fidelidade, e tem demonstração sem cadastro.
+- Os sistemas funcionam no navegador e no celular, com dados na nuvem, demonstração sem cadastro e teste grátis de 7 dias (o Blue Rose Ofixl é só app Android e ainda não foi lançado).
+- Sem fidelidade em nenhum plano: o cliente cancela quando quiser.
+- Plano Básico: o dono e mais 5 pessoas da equipe, cada uma com o próprio login. Plano Pro: equipe sem limite, avisos prontos no WhatsApp, histórico da equipe e suporte prioritário.
+- Plano anual sai 20% mais barato que o mensal.
+- Cobrança automática para os clientes do usuário com link de pagamento e PIX; página do cliente com acompanhamento.
 
-- [Todos os sistemas](https://bluerose-store.com/sistemas.html): comparação e preços dos 10 sistemas
-- [Nexo Gestão](https://bluerose-store.com/nexo-gestao.html): estoque, compras, vendas e NF-e para distribuidoras, lojas e mercados
-- [Nexo CRM](https://bluerose-store.com/nexo-crm.html): funil de vendas, propostas online e metas para equipes comerciais
-- [Nexo Agenda](https://bluerose-store.com/nexo-agenda.html): agenda, comandas e agendamento online para salões, barbearias e estética
-- [Nexo Jurídico](https://bluerose-store.com/nexo-juridico.html): intimações do DJEN, prazos e honorários para advocacia
-- [Nexo Financeiro](https://bluerose-store.com/nexo-financeiro.html): contas, fluxo de caixa, DRE e ordem de serviço
-- [Nexo Clínica](https://bluerose-store.com/nexo-clinica.html): agenda médica, prontuário e convênios para clínicas e consultórios
-- [Nexo Academia](https://bluerose-store.com/nexo-academia.html): check-in, mensalidades e treinos para academias e estúdios
-- [Nexo Restaurante](https://bluerose-store.com/nexo-restaurante.html): mesas, comandas, cozinha e cardápio com QR code
-- [Nexo Imobiliária](https://bluerose-store.com/nexo-imobiliaria.html): imóveis, visitas, aluguéis e repasses
-- [Nexo Oficina](https://bluerose-store.com/nexo-oficina.html): pátio, orçamento por WhatsApp e revisões para oficinas mecânicas
+## Sistemas e preços (Básico / Pro, por mês)
+
+- [Nexo Gestão](https://bluerose-store.com/nexo-gestao.html): estoque, compras e vendas para distribuidoras, lojas e mercados. R$ 129 / R$ 189
+- [Nexo CRM](https://bluerose-store.com/nexo-crm.html): funil de vendas e propostas para equipes comerciais de qualquer ramo. R$ 99 / R$ 159
+- [Nexo Agenda](https://bluerose-store.com/nexo-agenda.html): agenda e atendimento para salões, estética, barbearias e clínicas. R$ 79 / R$ 139
+- [Nexo Jurídico](https://bluerose-store.com/nexo-juridico.html): processos, prazos e intimações para escritórios de advocacia. R$ 149 / R$ 209
+- [Nexo Financeiro](https://bluerose-store.com/nexo-financeiro.html): contas, fluxo de caixa, categorias de despesa editáveis e ordens de serviço para assistências técnicas e prestadores. R$ 109 / R$ 169
+- [Nexo Clínica](https://bluerose-store.com/nexo-clinica.html): agenda médica e prontuário para clínicas e consultórios. R$ 109 / R$ 169
+- [Nexo Academia](https://bluerose-store.com/nexo-academia.html): alunos, mensalidades, check-in e treinos para academias, estúdios e boxes. R$ 99 / R$ 159
+- [Nexo Restaurante](https://bluerose-store.com/nexo-restaurante.html): mesas, comandas, delivery e cozinha para restaurantes, bares e lanchonetes. R$ 89 / R$ 149
+- [Nexo Imobiliária](https://bluerose-store.com/nexo-imobiliaria.html): imóveis, clientes, visitas e aluguéis para imobiliárias e corretores. R$ 129 / R$ 189
+- [Nexo Oficina](https://bluerose-store.com/nexo-oficina.html): pátio, ordens de serviço, orçamento por WhatsApp e revisões para oficinas mecânicas. R$ 89 / R$ 149
+- [RoseConstruct](https://bluerose-store.com/roseconstruct.html): gestão de obras e reformas para empreiteiros e empresas de reforma. R$ 119 por mês ou R$ 1.142 por ano
+- [Blue Rose Eternize](https://bluerose-store.com/eternize.html): assessoria e cerimonial de casamentos e eventos. R$ 89 / R$ 149
+- [Blue Rose Guard](https://bluerose-store.com/guard.html): controle de pragas e dedetizadoras. R$ 99 / R$ 159
+- [Blue Rose Ofixl](https://bluerose-store.com/ofixl.html): app Android para serviços técnicos em campo (ar-condicionado, refrigeração, elétrica e hidráulica). Em breve no Google Play. R$ 49,90 / R$ 109,90
+- [Comparar todos os sistemas](https://bluerose-store.com/sistemas.html)
+
+## Comparações com concorrentes
+
+- [Nexo Agenda ou Trinks](https://bluerose-store.com/nexo-agenda-vs-trinks.html)
+- [Nexo Jurídico ou Astrea](https://bluerose-store.com/nexo-juridico-vs-astrea.html)
+- [Nexo Financeiro ou Conta Azul](https://bluerose-store.com/nexo-financeiro-vs-conta-azul.html)
+- [Nexo CRM ou Pipedrive](https://bluerose-store.com/nexo-crm-vs-pipedrive.html)
+- [Nexo Gestão ou Bling](https://bluerose-store.com/nexo-gestao-vs-bling.html)
+- [Nexo Clínica ou iClinic](https://bluerose-store.com/nexo-clinica-vs-iclinic.html)
+- [Nexo Academia ou Tecnofit](https://bluerose-store.com/nexo-academia-vs-tecnofit.html)
+- [Nexo Restaurante ou Saipos](https://bluerose-store.com/nexo-restaurante-vs-saipos.html)
+- [Nexo Imobiliária ou Jetimob](https://bluerose-store.com/nexo-imobiliaria-vs-jetimob.html)
+- [Nexo Oficina ou planilha](https://bluerose-store.com/nexo-oficina-vs-planilha.html)
 
 ## Sites e automações
 
@@ -24,6 +47,11 @@ Cada sistema pode ser comprado ou alugado por mês, sem fidelidade, e tem demons
 - [Sites de exemplo](https://bluerose-store.com/exemplos.html): modelos por nicho, com prévia usando o nome da empresa
 - [Automação de WhatsApp](https://bluerose-store.com/automacao-express.html)
 - [Projetos](https://bluerose-store.com/projetos.html)
+
+## Contato
+
+- Instagram: [@blue.rose.express](https://www.instagram.com/blue.rose.express/)
+- [Formulário de contato](https://bluerose-store.com/#contato)
 
 ## Informações
 
