@@ -12,7 +12,7 @@ h1 .serif, h2 .serif { color: var(--accent); }
 .ini-hero { position: relative; overflow: hidden; padding: 72px 0 88px; isolation: isolate; }
 .ini-rosa { position: absolute; z-index: -1; right: -8%; top: -6%; width: min(760px, 70vw); aspect-ratio: 1; pointer-events: none; opacity: .5; filter: blur(2px) saturate(1.2); -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent 75%); mask-image: radial-gradient(closest-side, #000 30%, transparent 75%); }
 .ini-rosa img { width: 100%; height: 100%; object-fit: contain; animation: rosa-respira 9s ease-in-out infinite alternate; }
-@keyframes rosa-respira { from { transform: rotate(-4deg) scale(1); } to { transform: rotate(3deg) scale(1.06); } }
+@keyframes rosa-respira { from { transform: scale(1); opacity: .85; } to { transform: scale(1.05); opacity: 1; } }
 html[data-theme="light"] .ini-rosa { opacity: .22; }
 .ini-hero::after { content: ''; position: absolute; z-index: -1; inset: auto 0 0; height: 1px; background: linear-gradient(90deg, transparent, var(--line-2), transparent); }
 
