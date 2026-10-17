@@ -132,41 +132,18 @@ h1, h2, h3, .sec-title, .preco2-valor, .prod-preco b, .lx-numeros b { font-varia
   .cf-dia b { font-size: 22px; }
 }
 
-/* ---------- arte enviada pelo dono: estampa de rosas (já esmaecida na própria imagem; fundo parado, sem script) ---------- */
-#ramos, #produtos, #precos, #perguntas, #contato, .cf-ramo, .cf-outros, .np-recursos, .sis-lista, .fim-cta { background-repeat: no-repeat; background-size: auto min(860px, 100%); }
-/* rosas à esquerda */
-#precos, #contato, .cf-ramo.inv, .cf-outros, .np-recursos, .sis-lista { background-image: url("../img/estampa-esq.webp"); background-position: left center; }
-/* rosas à direita */
-#ramos, #produtos, #perguntas, .cf-ramo:not(.inv), .fim-cta { background-image: url("../img/estampa-dir.webp"); background-position: right center; }
-/* nas páginas internas o topo e as listas ficam dentro do .wrap: a estampa sai para a borda da tela */
-.np-recursos, .sis-lista { background-origin: border-box; }
-@media (max-width: 900px) {
-  #ramos, #produtos, #precos, #perguntas, #contato, .cf-ramo, .cf-outros, .np-recursos, .sis-lista, .fim-cta { background-size: auto min(520px, 100%); }
-}
+/* ---------- arte enviada pelo dono: estampa de rosas ----------
+   Uma faixa contínua em cada lateral, da primeira linha ao fim do rodapé, que rola junto com a página.
+   A imagem é a estampa repetida em espelho (sem emenda); fica atrás de todo o conteúdo. */
+body { position: relative; }
+body::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: url("../img/rosas-lateral-esq.webp") left top / 380px auto repeat-y, url("../img/rosas-lateral-dir.webp") right top / 380px auto repeat-y; }
+@media (max-width: 900px) { body::before { background-size: 170px auto, 170px auto; opacity: .55; } }
+.rodape-site { border-top-color: transparent; }
 
-/* rosas nos quatro cantos de todas as páginas: em cima no início e embaixo no rodapé */
-main { position: relative; }
-main::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: 460px; pointer-events: none;
-  background: url("../img/canto-se.webp") left top / 400px auto no-repeat, url("../img/canto-sd.webp") right top / 400px auto no-repeat; }
-.rodape-site { position: relative; background: url("../img/canto-ie.webp") left bottom / 400px auto no-repeat, url("../img/canto-id.webp") right bottom / 400px auto no-repeat; }
-@media (max-width: 700px) {
-  main::before { height: 260px; background-size: 210px auto, 210px auto; opacity: .7; }
-  .rodape-site { background-size: 210px auto, 210px auto; }
-}
-
-/* páginas Produtos, Sites e automação, Como funciona, Preços (inicial) e Minha conta: rosas em todas as seções, alternando os lados */
-.lx-rosas > section { background-repeat: no-repeat; background-size: auto min(820px, 100%); }
-.lx-rosas > section:nth-of-type(odd) { background-image: url("../img/estampa-dir.webp"); background-position: right center; }
-.lx-rosas > section:nth-of-type(even) { background-image: url("../img/estampa-esq.webp"); background-position: left center; }
-@media (max-width: 900px) { .lx-rosas > section { background-size: auto min(480px, 100%); } }
-/* rosas fixas nas duas laterais da tela nessas páginas: sempre visíveis enquanto rola, atrás de todo o conteúdo */
-main.lx-rosas { background: url("../img/estampa-forte-esq.webp") left center / auto 100vh no-repeat fixed, url("../img/estampa-forte-dir.webp") right center / auto 100vh no-repeat fixed; }
-@media (max-width: 900px) { main.lx-rosas { background-size: auto 70vh, auto 70vh; } }
 /* celular: o cartão do sistema não pode passar da largura da tela */
 @media (max-width: 860px) {
   .sis { grid-template-columns: minmax(0, 1fr); }
   .sis-precos, .sis-botoes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .sis-botoes .btn { white-space: normal; letter-spacing: .06em; padding-inline: 10px; text-align: center; }
 }
-/* topo da inicial: rosas iguais dos dois lados */
-.lx-rosas > section.lx-hero { background-image: url("../img/estampa-esq.webp"), url("../img/estampa-dir.webp"); background-position: left center, right center; background-repeat: no-repeat; background-size: auto min(820px, 100%); }
