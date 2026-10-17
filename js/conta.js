@@ -163,13 +163,8 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
     return acessoCache;
   }
   function assinarDireto(app, emailMp) { return chamar({ acao: 'iniciar', produto: 'a-sis-' + app, email_mp: emailMp || '' }).then(function (j) { location.href = j.link; }); }
-  // vagas da oferta de lançamento (50% nas 3 primeiras cobranças): lido uma vez por página
-  var vagasCache = null;
-  function vagas() {
-    if (!vagasCache) vagasCache = fetch(FUNC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"acao":"vagas"}' })
-      .then(function (r) { return r.json(); }).then(function (j) { return Number(j.vagas) || 0; }).catch(function () { return 0; });
-    return vagasCache;
-  }
+  // a oferta de lançamento (50% nos 3 primeiros meses) foi encerrada em 17/10/2026
+  function vagas() { return Promise.resolve(0); }
   function teste(app, nome, mensal, direto) {
     return exigirLogin((direto ? 'Para assinar o ' : 'Para começar o teste grátis do ') + nome + ', entre ou crie a sua conta.').then(function (s) {
       return Promise.all([s, acessos(), vagas()]);

@@ -539,7 +539,8 @@ function montar(app, cfg) {
     $('#acoes-topo').innerHTML = p.acoes ? p.acoes(app, params) : '';
     const c = $('#conteudo'); c.className = `conteudo ${p.cheio ? 'cheio' : ''}`;
     const rolagem = scrollY;
-    const corpo = p.render(app, params);
+    // aviso para o dono ligar o backup semanal: aparece na primeira aba até ele ligar ou adiar
+    const corpo = (app.nuvem && p.id === paginas[0]?.id && app.sessao.avisoBackup ? app.sessao.avisoBackup() : '') + p.render(app, params);
     // painel lateral da aba (opcional): ferramentas e atalhos daquela área; no celular fica recolhido em cima
     if (p.lado) {
       const aberto = app.estado.ladoFechado ? false : innerWidth >= 1100;
@@ -666,7 +667,7 @@ function montar(app, cfg) {
       <div class="cartao"><div class="cartao-cab"><div><h3>Dados</h3><div class="sub">Cópia e restauração</div></div></div><div class="cartao-corpo col" style="gap:10px">
         <div class="entre"><span class="mute-2">Baixar uma cópia de tudo (JSON)</span><button type="button" class="btn" data-acao="exportarDados">${ic('download-simple')}Exportar</button></div>
         ${a.nuvem ? a.sessao.linhasDados() : `<div class="entre"><span class="mute-2">Voltar aos dados de exemplo</span><button type="button" class="btn perigo" data-acao="recomecar">${ic('arrow-counter-clockwise')}Recomeçar</button></div>`}</div></div>
-      ${a.nuvem ? a.sessao.cartaoResumo() : ''}${a.extrasConfig ? a.extrasConfig(a) : ''}${cfg.configExtra ? cfg.configExtra(a) : ''}</div>`,
+      ${a.nuvem ? a.sessao.cartaoResumo() + (a.sessao.cartaoBackup ? a.sessao.cartaoBackup() : '') : ''}${a.extrasConfig ? a.extrasConfig(a) : ''}${cfg.configExtra ? cfg.configExtra(a) : ''}</div>`,
   };
   const paginaPlanilha = paginaImportar(app);
   const paginaDono = {
