@@ -135,10 +135,10 @@ h1, h2, h3, .sec-title, .preco2-valor, .prod-preco b, .lx-numeros b { font-varia
 /* ---------- arte enviada pelo dono: estampa de rosas ----------
    Uma faixa contínua em cada lateral, da primeira linha ao fim do rodapé, que rola junto com a página.
    A imagem é a estampa repetida em espelho (sem emenda); fica atrás de todo o conteúdo. */
-body { position: relative; }
-body::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+html { position: relative; min-height: 100%; }
+html::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: url("../img/rosas-lateral-esq.webp") left top / 380px auto repeat-y, url("../img/rosas-lateral-dir.webp") right top / 380px auto repeat-y; }
-@media (max-width: 900px) { body::before { background-size: 170px auto, 170px auto; opacity: .55; } }
+@media (max-width: 900px) { html::before { background-size: 170px auto, 170px auto; opacity: .55; } }
 .rodape-site { border-top-color: transparent; }
 
 /* celular: o cartão do sistema não pode passar da largura da tela */
