@@ -133,13 +133,23 @@ h1, h2, h3, .sec-title, .preco2-valor, .prod-preco b, .lx-numeros b { font-varia
 }
 
 /* ---------- arte enviada pelo dono: estampa de rosas (já esmaecida na própria imagem; fundo parado, sem script) ---------- */
-.lx-hero, #ramos, #produtos, #precos, #perguntas, #contato, .cf-hero, .cf-ramo, .cf-outros, .hero, .np-hero, .np-recursos, .p-hero, .sis-lista, .fim-cta, .rodape-site { background-repeat: no-repeat; background-size: auto min(860px, 100%); }
+#ramos, #produtos, #precos, #perguntas, #contato, .cf-ramo, .cf-outros, .np-recursos, .sis-lista, .fim-cta { background-repeat: no-repeat; background-size: auto min(860px, 100%); }
 /* rosas à esquerda */
-.lx-hero, #precos, #contato, .cf-ramo.inv, .cf-outros, .np-recursos, .sis-lista, .rodape-site { background-image: url("../img/estampa-esq.webp"); background-position: left center; }
+#precos, #contato, .cf-ramo.inv, .cf-outros, .np-recursos, .sis-lista { background-image: url("../img/estampa-esq.webp"); background-position: left center; }
 /* rosas à direita */
-#ramos, #produtos, #perguntas, .cf-hero, .cf-ramo:not(.inv), .hero, .np-hero, .p-hero, .fim-cta { background-image: url("../img/estampa-dir.webp"); background-position: right center; }
+#ramos, #produtos, #perguntas, .cf-ramo:not(.inv), .fim-cta { background-image: url("../img/estampa-dir.webp"); background-position: right center; }
 /* nas páginas internas o topo e as listas ficam dentro do .wrap: a estampa sai para a borda da tela */
-.np-hero, .np-recursos, .sis-lista { background-origin: border-box; }
+.np-recursos, .sis-lista { background-origin: border-box; }
 @media (max-width: 900px) {
-  .lx-hero, #ramos, #produtos, #precos, #perguntas, #contato, .cf-hero, .cf-ramo, .cf-outros, .hero, .np-hero, .np-recursos, .p-hero, .sis-lista, .fim-cta, .rodape-site { background-size: auto min(520px, 100%); }
+  #ramos, #produtos, #precos, #perguntas, #contato, .cf-ramo, .cf-outros, .np-recursos, .sis-lista, .fim-cta { background-size: auto min(520px, 100%); }
+}
+
+/* rosas nos quatro cantos de todas as páginas: em cima no início e embaixo no rodapé */
+main { position: relative; }
+main::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: 460px; pointer-events: none;
+  background: url("../img/canto-se.webp") left top / 400px auto no-repeat, url("../img/canto-sd.webp") right top / 400px auto no-repeat; }
+.rodape-site { position: relative; background: url("../img/canto-ie.webp") left bottom / 400px auto no-repeat, url("../img/canto-id.webp") right bottom / 400px auto no-repeat; }
+@media (max-width: 700px) {
+  main::before { height: 260px; background-size: 210px auto, 210px auto; opacity: .7; }
+  .rodape-site { background-size: 210px auto, 210px auto; }
 }
