@@ -161,3 +161,8 @@ main::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; 
   .sis-precos, .sis-botoes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .sis-botoes .btn { white-space: normal; letter-spacing: .06em; padding-inline: 10px; text-align: center; }
 }
+/* inicial: sistema novo em destaque ocupa a linha inteira (foto ao lado do texto) */
+.prod.so-destaque .prod-novo { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: center; }
+.prod.so-destaque .prod-novo .prod-foto { height: 100%; }
+.prod.so-destaque .prod-novo .prod-foto img { height: 100%; object-fit: cover; object-position: left top; }
+@media (max-width: 760px) { .prod.so-destaque .prod-novo { grid-template-columns: minmax(0, 1fr); } }

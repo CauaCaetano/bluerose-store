@@ -6,7 +6,7 @@
   var params = new URLSearchParams(location.search), volta = params.get('volta');
   if (volta && !/^[A-Za-z0-9_-]{1,64}$/.test(volta)) volta = null; /* id de assinatura: só caracteres seguros (UUID ou número) */
   var NOMES = { teste: 'Teste grátis', assinatura: 'Assinatura', compra: 'Compra' };
-  var APPS = ['crm', 'agenda', 'financeiro', 'gestao', 'juridico', 'clinica', 'academia', 'restaurante', 'imobiliaria', 'oficina', 'obras', 'cerimonial', 'pragas', 'ofixl'];
+  var APPS = ['crm', 'agenda', 'financeiro', 'gestao', 'juridico', 'clinica', 'academia', 'restaurante', 'imobiliaria', 'oficina', 'farmacia', 'obras', 'cerimonial', 'pragas', 'ofixl'];
   var PAGINA = { obras: 'roseconstruct.html', cerimonial: 'eternize.html', pragas: 'guard.html', ofixl: 'ofixl.html' };
   var hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   function data(s) { if (!s) return '—'; var p = String(s).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
