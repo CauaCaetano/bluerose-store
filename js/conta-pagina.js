@@ -8,7 +8,23 @@
   var NOMES = { teste: 'Teste grátis', assinatura: 'Assinatura', compra: 'Compra' };
   var APPS = ['crm', 'agenda', 'financeiro', 'gestao', 'juridico', 'clinica', 'academia', 'restaurante', 'imobiliaria', 'oficina', 'farmacia', 'obras', 'cerimonial', 'pragas', 'ofixl'];
   // catálogo para a busca: o cliente digita o nome (ou o ramo) e o sistema aparece, mesmo os que ele ainda não tem
-  var CAT = { gestao: ['Nexo Gestão', 'estoque loja mercado distribuidora'], crm: ['Nexo CRM', 'vendas funil'], agenda: ['Nexo Agenda', 'salão barbearia estética'], juridico: ['Nexo Jurídico', 'advocacia advogado'], financeiro: ['Nexo Financeiro', 'contas caixa ordem de serviço'], clinica: ['Nexo Clínica', 'consultório médico'], academia: ['Nexo Academia', 'estúdio'], restaurante: ['Nexo Restaurante', 'lanchonete delivery'], imobiliaria: ['Nexo Imobiliária', 'imóveis corretor'], oficina: ['Nexo Oficina', 'mecânica carro'], farmacia: ['Nexo Farmácia', 'drogaria remédio'], obras: ['RoseConstruct', 'obra reforma construção'], cerimonial: ['Blue Rose Eternize', 'casamento eventos'], pragas: ['Blue Rose Guard', 'dedetização controle de pragas'] };
+  var CAT = {
+    gestao: ['Nexo Gestão', 'estoque loja mercado distribuidora atacado varejo vendas pedidos compras fornecedores nota fiscal nfe xml código de barras etiquetas caixa pdv inventário'],
+    crm: ['Nexo CRM', 'vendas funil clientes propostas orçamentos metas leads negociações agenda atividades whatsapp'],
+    agenda: ['Nexo Agenda', 'agenda agendamento horários salão barbearia estética manicure comanda comissão caixa clientes whatsapp lembrete'],
+    juridico: ['Nexo Jurídico', 'advocacia advogado processos prazos agenda audiências intimações honorários clientes'],
+    financeiro: ['Nexo Financeiro', 'financeiro contas pagar receber caixa fluxo dre conciliação extrato banco cobrança boleto pix ordem de serviço assistência técnica'],
+    clinica: ['Nexo Clínica', 'clínica consultório médico dentista agenda consultas pacientes prontuário receitas convênios'],
+    academia: ['Nexo Academia', 'academia estúdio alunos mensalidades check-in aulas agenda treinos personal'],
+    restaurante: ['Nexo Restaurante', 'restaurante lanchonete pizzaria delivery mesas comandas cozinha cardápio estoque caixa'],
+    imobiliaria: ['Nexo Imobiliária', 'imobiliária imóveis corretor aluguel venda contratos visitas agenda'],
+    oficina: ['Nexo Oficina', 'oficina mecânica carro veículos ordem de serviço orçamento peças estoque agenda revisões'],
+    farmacia: ['Nexo Farmácia', 'farmácia drogaria remédio medicamentos controlados receitas validade lotes estoque caixa pdv nota fiscal nfc-e convênios'],
+    obras: ['RoseConstruct', 'obra obras reforma construção empreiteiro diário cronograma gastos orçamento equipe'],
+    cerimonial: ['Blue Rose Eternize', 'casamento eventos cerimonial festas convidados fornecedores agenda orçamento'],
+    pragas: ['Blue Rose Guard', 'dedetização controle de pragas visitas agenda ordem de serviço certificados contratos'],
+    ofixl: ['Blue Rose Ofixl', 'serviços técnicos ar-condicionado manutenção ordem de serviço agenda técnicos orçamento']
+  };
   function normal(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
   var PAGINA = { obras: 'roseconstruct.html', cerimonial: 'eternize.html', pragas: 'guard.html', ofixl: 'ofixl.html' };
   var hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
@@ -44,7 +60,7 @@
     /* token de dono: pedido uma vez, quando a empresa é criada no sistema */
     var tk = pode && TOKENS[a.app] && !tokenMostrado[a.app] ? TOKENS[a.app] : null; if (tk) tokenMostrado[a.app] = true;
     var token = tk ? '<div class="conta-token"><small>Token de dono</small><code>' + esc(tk.token) + '</code><span>' + (tk.ativado ? 'Já ativado em ' + data(tk.ativado) + '. Não precisa usar de novo.' : 'Use uma vez, ao criar a sua empresa no sistema. Não compartilhe: a equipe entra pelos convites.') + '</span></div>' : '';
-    return '<article data-busca="' + esc(normal((a.nome || '') + ' ' + (a.app || '') + ' ' + (CAT[a.app] ? CAT[a.app][0] + ' ' + CAT[a.app][1] : ''))) + '" class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
+    return '<article data-busca="' + esc(normal((a.nome || '') + ' ' + (CAT[a.app] ? CAT[a.app][0] : ''))) + '" class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
       barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + (pode ? '<p class="conta-ajuda"><a href="' + (PAGINA[a.app] || 'nexo-' + esc(a.app) + '.html') + '#tutorial">Assista ao vídeo tutorial</a>: mostra cada passo, da criação da empresa à importação das suas planilhas. ' + 'Prefere como programa? <a href="app/' + esc(a.app) + '/?instalar=1">Instale no computador ou no celular</a>: ganha ícone e abre em janela própria. ' + 'Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda.</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></div></article>';
   }
   function mostrarResumo(l) {
@@ -129,19 +145,19 @@
     }
   }
   function busca() {
-    return '<div class="conta-busca"><label class="vh" for="conta-q">Procurar sistema</label><input id="conta-q" type="search" value="' + esc(termo) + '" placeholder="Procurar sistema pelo nome ou ramo (ex.: farmácia, obra, salão)" autocomplete="off"><div class="conta-busca-res" data-busca-res></div></div>';
+    return '<div class="conta-busca"><label class="vh" for="conta-q">Procurar sistema</label><input id="conta-q" type="search" value="' + esc(termo) + '" placeholder="Procurar sistema pelo nome (ex.: agenda, farmácia, CRM)" autocomplete="off"><div class="conta-busca-res" data-busca-res></div></div>';
   }
   // busca: compara com o começo das palavras (nome do sistema, ramo); sugestões de outros sistemas só com 2 letras ou mais
   var termo = '', meusApps = {};
-  function bate(texto, q) { var ps = q.split(/\s+/).filter(Boolean); var ws = normal(texto).split(/[^a-z0-9]+/); return ps.every(function (t) { return ws.some(function (w) { return w.indexOf(t) === 0; }); }); }
+  function bate(texto, q) { var n = normal(texto); return q.split(/\s+/).filter(Boolean).every(function (t) { return n.indexOf(t) >= 0; }); }
   function filtrar() {
     var q = normal(termo.trim()), vistos = 0;
     raiz.querySelectorAll('.conta-item').forEach(function (it) { var ok = !q || bate(it.getAttribute('data-busca') || '', q); it.style.display = ok ? '' : 'none'; if (ok) vistos++; /* o cartão tem display próprio: o atributo hidden não esconde */ });
     var tit = raiz.querySelector('.conta-titulo'); if (tit) tit.style.display = q && !vistos ? 'none' : '';
     var res = raiz.querySelector('[data-busca-res]'); if (!res) return;
     if (!q) { res.innerHTML = ''; return; }
-    var outros = q.length < 2 ? [] : Object.keys(CAT).filter(function (k) { return !meusApps[k] && bate(CAT[k][0] + ' ' + k + ' ' + CAT[k][1], q); });
-    res.innerHTML = (vistos ? '' : '<p class="conta-busca-nada">Nenhum dos seus sistemas tem esse nome.</p>') + outros.map(function (k) { var pg = PAGINA[k] || 'nexo-' + k + '.html'; return '<div class="conta-busca-item"><b>' + esc(CAT[k][0]) + '</b><span>Você ainda não tem este sistema.</span><a class="btn btn-primary" href="' + pg + '">Ver e testar 7 dias grátis</a></div>'; }).join('');
+    var outros = q.length < 2 ? [] : Object.keys(CAT).filter(function (k) { return !meusApps[k] && bate(CAT[k][0], q); });
+    res.innerHTML = (vistos ? '' : '<p class="conta-busca-nada">Nenhum dos seus sistemas tem esse nome.</p>') + outros.map(function (k) { var pg = PAGINA[k] || 'nexo-' + k + '.html'; return '<div class="conta-busca-item"><b>' + esc(CAT[k][0]) + '</b><span>' + 'Você ainda não tem este sistema.</span><a class="btn btn-primary" href="' + pg + '">Ver e testar 7 dias grátis</a></div>'; }).join('');
   }
   raiz.addEventListener('input', function (e) { if (e.target.id !== 'conta-q') return; termo = e.target.value; filtrar(); });
   raiz.addEventListener('click', function (e) {
