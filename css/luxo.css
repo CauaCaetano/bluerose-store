@@ -168,3 +168,5 @@ main.lx-rosas { background: url("../img/estampa-forte-esq.webp") left center / a
   .sis-precos, .sis-botoes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .sis-botoes .btn { white-space: normal; letter-spacing: .06em; padding-inline: 10px; text-align: center; }
 }
+/* topo da inicial: rosas iguais dos dois lados */
+.lx-rosas > section.lx-hero { background-image: url("../img/estampa-esq.webp"), url("../img/estampa-dir.webp"); background-position: left center, right center; background-repeat: no-repeat; background-size: auto min(820px, 100%); }
