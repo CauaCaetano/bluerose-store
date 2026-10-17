@@ -136,7 +136,8 @@
   function bate(texto, q) { var ps = q.split(/\s+/).filter(Boolean); var ws = normal(texto).split(/[^a-z0-9]+/); return ps.every(function (t) { return ws.some(function (w) { return w.indexOf(t) === 0; }); }); }
   function filtrar() {
     var q = normal(termo.trim()), vistos = 0;
-    raiz.querySelectorAll('.conta-item').forEach(function (it) { var ok = !q || bate(it.getAttribute('data-busca') || '', q); it.hidden = !ok; if (ok) vistos++; });
+    raiz.querySelectorAll('.conta-item').forEach(function (it) { var ok = !q || bate(it.getAttribute('data-busca') || '', q); it.style.display = ok ? '' : 'none'; if (ok) vistos++; /* o cartão tem display próprio: o atributo hidden não esconde */ });
+    var tit = raiz.querySelector('.conta-titulo'); if (tit) tit.style.display = q && !vistos ? 'none' : '';
     var res = raiz.querySelector('[data-busca-res]'); if (!res) return;
     if (!q) { res.innerHTML = ''; return; }
     var outros = q.length < 2 ? [] : Object.keys(CAT).filter(function (k) { return !meusApps[k] && bate(CAT[k][0] + ' ' + k + ' ' + CAT[k][1], q); });
