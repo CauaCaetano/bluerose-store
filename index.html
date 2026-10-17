@@ -27,8 +27,11 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/cormorant-500-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/site.css?v=46">
-<link rel="stylesheet" href="css/inicio.css?v=4">
+<script src="js/luxo.js?v=2" defer></script>
+<link rel="stylesheet" href="css/inicio.css?v=7">
+<link rel="stylesheet" href="css/luxo.css?v=2">
 <link rel="preload" href="fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin>
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=9" defer></script>
@@ -43,7 +46,7 @@
 <link rel="stylesheet" href="css/assistente.css?v=2">
 <script src="js/assistente.js?v=9" defer></script>
 <script src="js/cookies.js?v=2" defer></script>
-<script src="js/inicio.js?v=3" defer></script>
+<script src="js/inicio.js?v=4" defer></script>
 </head>
 <body>
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -59,7 +62,7 @@
     <nav class="nav-links" id="menu" aria-label="Principal">
       <a href="sistemas.html">Produtos</a>
       <a href="servicos.html">Sites e automação</a>
-      <a href="projetos.html">Cases</a>
+      <a href="como-funciona.html">Como funciona</a>
       <a href="#precos">Preços</a>
       <a class="btn btn-primary" href="#contato">Agendar demonstração</a>
     </nav>
@@ -67,12 +70,37 @@
 </header>
 
 <main id="conteudo">
-  <section class="ini-hero" aria-labelledby="titulo">
-    <div class="ini-rosa" aria-hidden="true"><img src="img/blue-rose-emblem-glow.webp" alt="" width="240" height="240"></div>
+  <section class="lx-hero" aria-labelledby="titulo">
+    <div class="wrap lx-hero-grid">
+      <div class="lx-hero-txt">
+        <p class="eyebrow">Blue Rose Express · software para empresas</p>
+        <h1 id="titulo">13 sistemas prontos. <em>Um deles é o seu.</em></h1>
+        <p class="sub">Gestão para obras, advocacia, salões, clínicas, oficinas e mais. Teste 7 dias com os seus dados, sem cartão, e assine por mês, sem entrada e sem fidelidade.</p>
+        <div class="ctas">
+          <a class="btn btn-primary" href="#ramos">Escolher o meu sistema</a>
+          <a class="btn btn-ghost" href="sistemas.html">Ver os 13 sistemas</a>
+        </div>
+      </div>
+      <div class="lx-hero-arte"><div class="lx-redoma" role="img" aria-label="Rosa azul da Blue Rose dentro de uma redoma de vidro">
+        <span class="lx-aura" aria-hidden="true"></span><span class="lx-feixe" aria-hidden="true"></span>
+        <img src="img/redoma-rosa.webp" width="488" height="573" alt="" fetchpriority="high">
+        <span class="lx-reflexo" aria-hidden="true"></span>
+        <span class="lx-poeira" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      </div></div>
+    </div>
+    <div class="wrap lx-numeros">
+      <div><b data-conta="13">13</b><span>sistemas prontos, um para cada ramo</span></div>
+      <div><b data-conta="7">7</b><span>dias grátis, sem cartão</span></div>
+      <div><b>R$&nbsp;<i data-conta="79">79</i></b><span>por mês, sem entrada e sem fidelidade</span></div>
+      <div><b data-conta="3">3</b><span>dias úteis para o seu site ficar no ar</span></div>
+    </div>
+  </section>
+
+  <section class="ini-hero" id="ramos" aria-labelledby="t-ramos">
     <div class="wrap ini-hero-grid">
       <div>
-        <p class="eyebrow">Blue Rose Express · sistemas para pequenas empresas</p>
-        <h1 id="titulo"><span data-ramo-l1>Sua empresa no controle,</span> <span class="serif" data-ramo-l2>de onde você estiver.</span></h1>
+        <p class="eyebrow reveal">Feito para o seu ramo</p>
+        <h2 id="t-ramos" class="lx-ramo-tit" data-ramo-titulo><span data-ramo-l1>Sua empresa no controle,</span> <span class="serif" data-ramo-l2>de onde você estiver.</span></h2>
         <div class="ini-ramos" role="group" aria-label="Escolha o seu ramo para ver o sistema certo">
           <span>Para</span>
           <button type="button" data-ramo="obras" aria-pressed="false">Obras<i class="barra"></i></button>
@@ -448,7 +476,7 @@
     <a class="brand" href="./"><img src="img/blue-rose-favicon.png" alt="" width="30" height="30" loading="lazy">BLUE ROSE</a>
     <nav aria-label="Rodapé">
       <a href="sistemas.html">Produtos</a>
-      <a href="projetos.html">Cases</a>
+      <a href="como-funciona.html">Como funciona</a>
       <a href="exemplos.html">Sites</a>
       <a href="laboratorio.html">Laboratório</a>
       <a href="demos/sistemas/gestao/">Nexo Gestão ao vivo</a>

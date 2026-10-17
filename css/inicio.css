@@ -147,3 +147,73 @@ html[data-theme="light"] .ini-rosa { opacity: .22; }
 .ini-oferta { margin: 18px 0 0; padding: 14px 18px; border-radius: 14px; border: 1px solid rgba(76, 195, 138, .4); background: rgba(76, 195, 138, .08); color: var(--ink-2); max-width: 62ch; }
 .ini-oferta b { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .ini-selo i { animation: none; } }
+
+/* =============================================================
+   Topo de luxo: a rosa na redoma (17/10/2026)
+   ============================================================= */
+.lx-hero { position: relative; padding: 96px 0 40px; overflow: hidden; }
+.lx-hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(700px 520px at 74% 38%, rgba(58, 110, 240, .16), transparent 70%); pointer-events: none; }
+.lx-hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 40px; align-items: center; }
+.lx-hero h1 { font-size: clamp(52px, 6.6vw, 108px); line-height: .95; margin: 22px 0 0; max-width: 11ch; }
+.lx-hero h1 em { display: inline; }
+.lx-hero .sub { margin-top: 30px; font-size: 19px; line-height: 1.65; color: var(--ink-2); max-width: 44ch; }
+.lx-hero .ctas { margin-top: 38px; display: flex; flex-wrap: wrap; gap: 14px; }
+.lx-hero-txt > .eyebrow, .lx-hero-txt > .sub, .lx-hero-txt > .ctas, .lx-hero-txt > .ini-selo { opacity: 0; transform: translateY(24px); animation: lx-sobe 1.1s cubic-bezier(.16, 1, .3, 1) forwards; }
+.lx-hero-txt > .eyebrow { animation-delay: .1s; }
+.lx-hero-txt > .ini-selo { animation-delay: .25s; }
+.lx-hero-txt > .sub { animation-delay: .9s; }
+.lx-hero-txt > .ctas { animation-delay: 1.1s; }
+@keyframes lx-sobe { to { opacity: 1; transform: none; } }
+
+.lx-hero-arte { position: relative; display: flex; justify-content: center; }
+.lx-redoma { position: relative; width: min(100%, 470px); aspect-ratio: 488 / 573; transform-origin: 50% 85%; will-change: transform; }
+.lx-redoma img { position: relative; z-index: 2; display: block; width: 100%; height: auto; opacity: 0; transform: translateY(30px) scale(.96); filter: blur(12px); animation: lx-surge 2.2s cubic-bezier(.16, 1, .3, 1) .2s forwards; }
+@keyframes lx-surge { to { opacity: 1; transform: none; filter: drop-shadow(0 30px 60px rgba(0, 0, 0, .8)); } }
+/* aura azul atrás da rosa, respirando */
+.lx-redoma .lx-aura { position: absolute; z-index: 1; left: 50%; top: 22%; width: 78%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(110, 160, 255, .55), rgba(58, 110, 240, .18) 55%, transparent); filter: blur(10px); opacity: 0; animation: lx-acende 2s ease 1.2s forwards, lx-pulsa 6s ease-in-out 3.2s infinite; }
+@keyframes lx-acende { to { opacity: 1; } }
+@keyframes lx-pulsa { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.14); opacity: .65; } }
+/* feixe de luz vindo de cima */
+.lx-redoma .lx-feixe { position: absolute; z-index: 0; left: 50%; top: -18%; width: 70%; height: 95%; translate: -50% 0; background: linear-gradient(180deg, rgba(207, 224, 255, 0), rgba(207, 224, 255, .14) 28%, rgba(207, 224, 255, 0)); clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%); opacity: 0; animation: lx-acende 2.4s ease 1s forwards; }
+/* brilho que atravessa só o desenho (máscara com a própria imagem) */
+.lx-redoma .lx-reflexo { position: absolute; z-index: 3; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .45) 50%, transparent 65%); background-size: 260% 100%; background-position: 160% 0; -webkit-mask: url("../img/redoma-rosa.webp") center / contain no-repeat; mask: url("../img/redoma-rosa.webp") center / contain no-repeat; mix-blend-mode: screen; animation: lx-reflexo 7s cubic-bezier(.45, .05, .3, 1) 3s infinite; }
+@keyframes lx-reflexo { 0% { background-position: 160% 0; } 55%, 100% { background-position: -60% 0; } }
+/* partículas de luz subindo dentro da redoma */
+.lx-redoma .lx-poeira { position: absolute; z-index: 3; left: 26%; right: 26%; top: 18%; bottom: 22%; pointer-events: none; }
+.lx-redoma .lx-poeira i { position: absolute; bottom: 0; width: 3px; height: 3px; border-radius: 50%; background: #d8e6ff; box-shadow: 0 0 8px #9dbcff; opacity: 0; animation: lx-poeira 9s linear infinite; }
+.lx-redoma .lx-poeira i:nth-child(1) { left: 10%; animation-delay: -1s; }
+.lx-redoma .lx-poeira i:nth-child(2) { left: 32%; animation-delay: -4s; animation-duration: 11s; }
+.lx-redoma .lx-poeira i:nth-child(3) { left: 55%; animation-delay: -6s; animation-duration: 8s; }
+.lx-redoma .lx-poeira i:nth-child(4) { left: 75%; animation-delay: -2.5s; animation-duration: 12s; }
+.lx-redoma .lx-poeira i:nth-child(5) { left: 88%; animation-delay: -7.5s; animation-duration: 10s; }
+.lx-redoma .lx-poeira i:nth-child(6) { left: 45%; animation-delay: -9s; animation-duration: 9.5s; }
+@keyframes lx-poeira { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .9; } 85% { opacity: .5; } 100% { transform: translateY(-220px); opacity: 0; } }
+
+.lx-numeros { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 64px; border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+.lx-numeros > div { padding: 30px 24px 28px; border-left: 1px solid var(--line); }
+.lx-numeros > div:first-child { border-left: 0; padding-left: 0; }
+.lx-numeros b { display: block; font-family: var(--serif); font-weight: 500; font-size: clamp(44px, 4.6vw, 68px); line-height: 1; color: transparent; background: linear-gradient(180deg, #fff, #9fb0cc); -webkit-background-clip: text; background-clip: text; }
+.lx-numeros b i { font-style: normal; }
+.lx-numeros span { display: block; margin-top: 10px; color: var(--ink-2); font-size: 14.5px; line-height: 1.45; max-width: 22ch; }
+.lx-ramo-tit { font-size: clamp(36px, 4.4vw, 62px); line-height: 1; margin: 14px 0 0; max-width: 14ch; }
+#ramos { padding-top: 110px; }
+#ramos .ini-hero-grid { gap: 64px; }
+
+@media (max-width: 900px) {
+  .lx-hero { padding: 24px 0 24px; }
+  .lx-hero-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .lx-hero-arte { order: -1; }
+  .lx-redoma { width: min(56vw, 240px); margin: 0 auto 18px; }
+  .lx-hero h1 { margin-top: 14px; }
+  .lx-hero .sub { margin-top: 20px; font-size: 17px; }
+  .lx-hero h1 { font-size: clamp(46px, 13vw, 64px); }
+  .lx-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 40px; }
+  .lx-numeros > div { padding: 22px 14px; }
+  .lx-numeros > div:nth-child(3) { border-left: 0; padding-left: 0; }
+  .lx-numeros > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  #ramos { padding-top: 64px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lx-hero-txt > *, .lx-redoma * { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
+  .lx-redoma .lx-reflexo, .lx-redoma .lx-poeira { display: none; }
+}

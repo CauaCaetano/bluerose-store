@@ -33,7 +33,7 @@
   function escolher(id) {
     var r = RAMOS[id]; if (!r || id === atual) return;
     atual = id;
-    var h1 = hero.querySelector('h1'), sub = hero.querySelector('[data-ramo-sub]'), tela = hero.querySelector('.ini-tela');
+    var h1 = hero.querySelector('[data-ramo-titulo]'), sub = hero.querySelector('[data-ramo-sub]'), tela = hero.querySelector('.ini-tela');
     grupo.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.ramo === id)); });
     hero.querySelectorAll('.ini-note-img img').forEach(function (img) { img.classList.toggle('on', img.dataset.ramo === id); });
     h1.classList.add('trocando'); sub.classList.add('trocando'); tela.classList.add('trocando');
@@ -95,7 +95,7 @@
     .then(function (r) { return r.json(); }).then(function (j) {
       var n = Number(j.vagas) || 0; if (!n) return;
       var txt = 'Lançamento: 50% nos 3 primeiros meses · restam ' + n + (n === 1 ? ' vaga' : ' vagas');
-      var h1 = document.querySelector('.ini-hero h1');
+      var h1 = document.querySelector('.lx-hero h1');
       if (h1) { var a = document.createElement('a'); a.className = 'ini-selo'; a.href = '#precos'; a.innerHTML = '<i aria-hidden="true"></i>' + txt; h1.parentNode.insertBefore(a, h1); }
       var lede = document.querySelector('#precos .sec-lede');
       if (lede) { var o = document.createElement('p'); o.className = 'ini-oferta'; o.innerHTML = '<b>Oferta de lançamento:</b> os 30 primeiros assinantes pagam metade nos 3 primeiros meses de qualquer sistema. Restam <b>' + n + '</b> de 30 vagas.'; lede.after(o); }
