@@ -65,6 +65,25 @@ const ALERTAS = {
     if (rit) out.push({ nivel: 'medio', regra: 'meta', titulo: `No ritmo atual o mês fecha em ${R$(rit.proj)}, abaixo da meta de ${R$(lim.meta_receita)}`, acao: 'Puxe orçamentos parados e clientes recorrentes.' });
     return out;
   },
+  farmacia(d, hoje) {
+    const lim = limites(d), out = [], vs = L(d, 'vendas').filter((v) => v.status !== 'cancelada');
+    const total = (v) => soma(v.itens || [], (x) => x.qtd * x.preco) - (v.desconto || 0) + ((v.entrega || {}).taxa || 0), custo = (v) => soma(v.itens || [], (x) => x.qtd * (x.custo || 0));
+    const m1 = mesDe(hoje, -1), m2 = mesDe(hoje, -2);
+    const margem = (ym) => { const l = vs.filter((v) => String(v.data).startsWith(ym)), t = soma(l, total); return t ? ((t - soma(l, custo)) / t) * 100 : null; };
+    const g1 = margem(m1), g2 = margem(m2);
+    if (g1 !== null && (g1 < lim.margem_min || (g2 !== null && g2 - g1 > 2))) out.push({ nivel: 'medio', regra: 'margem', titulo: g1 < lim.margem_min ? `Margem bruta de ${nomeMesA(m1)} ficou em ${pctA(g1)}, abaixo da meta de ${pctA(lim.margem_min)}` : `Margem bruta caiu de ${pctA(g2)} em ${nomeMesA(m2)} para ${pctA(g1)} em ${nomeMesA(m1)}`, acao: 'Veja descontos de convênio, genéricos vendidos abaixo da margem e custo das distribuidoras.' });
+    const lotes = L(d, 'produtos').flatMap((p) => (p.lotes || []).filter((l) => l.qtd > 0).map((l) => ({ p, l })));
+    const venc = lotes.filter((x) => x.l.validade < hoje), em60 = lotes.filter((x) => x.l.validade >= hoje && x.l.validade <= mais(hoje, 60));
+    if (venc.length) out.push({ nivel: 'alto', regra: 'vencidos', titulo: `${plural(venc.length, 'lote vencido', 'lotes vencidos')} no estoque (${R$(soma(venc, (x) => x.l.qtd * (x.p.custo || 0)))} a custo)`, acao: 'Separe da área de venda, identifique e dê baixa em Lotes e validade.' });
+    if (em60.length) out.push({ nivel: 'medio', regra: 'validade', titulo: `${plural(em60.length, 'lote vence', 'lotes vencem')} em até 60 dias (${R$(soma(em60, (x) => x.l.qtd * (x.p.custo || 0)))} a custo)`, acao: 'Peça troca à distribuidora ou faça promoção antes de virar perda.' });
+    const temps = L(d, 'temperaturas').filter((t) => t.data >= mais(hoje, -2)), fora = temps.filter((t) => Number(t.maxima ?? t.atual) > 8 || Number(t.minima ?? t.atual) < 2);
+    if (fora.length) out.push({ nivel: 'alto', regra: 'geladeira', titulo: `Geladeira fora de 2 a 8 °C em ${plural(fora.length, 'leitura', 'leituras')} nos últimos 3 dias`, acao: 'Confira os termolábeis e registre a ação tomada.' });
+    const pmc = L(d, 'produtos').filter((p) => p.pmc && p.preco > p.pmc);
+    if (pmc.length) out.push({ nivel: 'alto', regra: 'pmc', titulo: `${plural(pmc.length, 'produto', 'produtos')} com preço acima do PMC`, acao: 'Ajuste o preço: vender acima do PMC da CMED é proibido.' });
+    const rit = ritmoMeta(soma(vs.filter((v) => String(v.data).startsWith(hoje.slice(0, 7))), total), lim.meta_receita, hoje);
+    if (rit) out.push({ nivel: 'medio', regra: 'meta', titulo: `No ritmo atual o mês fecha em ${R$(rit.proj)}, abaixo da meta de ${R$(lim.meta_receita)}`, acao: 'Lembre os clientes de uso contínuo e os convênios.' });
+    return out;
+  },
   gestao(d, hoje) {
     const lim = limites(d), out = [], fat = L(d, 'vendas').filter((v) => ['faturado', 'enviado', 'entregue'].includes(v.status));
     const total = (v) => soma(v.itens || [], (x) => x.qtd * x.preco) - (v.desconto || 0) + (v.frete || 0), custo = (v) => soma(v.itens || [], (x) => x.qtd * (x.custo || 0));
@@ -140,6 +159,19 @@ const RESUMOS = {
       destaques: [['Saldo em contas', R$(saldo)], ['A pagar hoje (e vencidas)', R$(soma(pagarHoje, (l) => l.valor))], ['A receber hoje', R$(soma(receberHoje, (l) => l.valor))]],
       itens: pagarHoje.slice(0, 8).map((l) => `Pagar ${R$(l.valor)} · ${l.descricao}`), tituloItens: 'Contas para pagar hoje',
       alertas: [receberVenc.length && `${R$(soma(receberVenc, (l) => l.valor))} de clientes em atraso (${receberVenc.length})`, os.filter((o) => o.status === 'pronta').length && `${plural(os.filter((o) => o.status === 'pronta').length, 'OS pronta', 'OS prontas')} esperando retirada`, os.filter((o) => o.previsao < hoje).length && `${plural(os.filter((o) => o.previsao < hoje).length, 'OS atrasada', 'OS atrasadas')}`].filter(Boolean),
+    };
+  },
+  farmacia(d, hoje) {
+    const ontem = mais(hoje, -1), vs = L(d, 'vendas').filter((v) => v.status !== 'cancelada'), total = (v) => soma(v.itens || [], (x) => x.qtd * x.preco) - (v.desconto || 0) + ((v.entrega || {}).taxa || 0);
+    const vOntem = vs.filter((v) => v.data === ontem), vMes = vs.filter((v) => String(v.data).startsWith(hoje.slice(0, 7)));
+    const est = (p) => soma((p.lotes || []).filter((l) => l.validade >= hoje), (l) => l.qtd);
+    const zerados = L(d, 'produtos').filter((p) => est(p) <= 0), baixos = L(d, 'produtos').filter((p) => est(p) > 0 && est(p) <= p.minimo);
+    const venc = L(d, 'produtos').flatMap((p) => (p.lotes || []).filter((l) => l.qtd > 0 && l.validade < hoje).map(() => 1)).length;
+    const receitas = L(d, 'receitas').filter((r) => r.data === ontem).length;
+    return {
+      destaques: [['Vendido ontem', `${R$(soma(vOntem, total))} em ${plural(vOntem.length, 'cupom', 'cupons')}`], ['Vendido no mês', R$(soma(vMes, total))], ['Receitas retidas ontem', String(receitas)]],
+      itens: [...zerados.slice(0, 5).map((p) => `SEM ESTOQUE · ${p.nome}`), ...baixos.slice(0, 5).map((p) => `Abaixo do mínimo · ${p.nome}`)], tituloItens: 'Repor no balcão',
+      alertas: [venc && `${plural(venc, 'lote vencido', 'lotes vencidos')} ainda no estoque`].filter(Boolean),
     };
   },
   gestao(d, hoje) {

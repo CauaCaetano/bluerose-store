@@ -262,7 +262,7 @@ export function prepararExtras(app, cfg) {
   app.acoes.ocultarPassos = () => { db().cfg.passos_ocultos = true; db().gravar(); app.render(); };
 
   // ------------------------------------------------------------ alertas financeiros (regras em resumos.js)
-  const temAlertas = ['financeiro', 'gestao'].includes(cfg.id);
+  const temAlertas = ['financeiro', 'gestao', 'farmacia'].includes(cfg.id);
   app.cartaoAlertas = () => {
     if (!temAlertas) return '';
     const l = alertasDoDia(cfg.id, db().dados, hoje());
@@ -284,9 +284,9 @@ export function prepararExtras(app, cfg) {
     const ramos = app.modelos.length ? `<div class="cartao"><div class="cartao-cab"><div><h3>Modelo do seu ramo</h3><div class="sub">Cadastra serviços, produtos e etapas típicos do seu tipo de negócio</div></div></div><ul class="lista">${app.modelos.map((m) => `<li><div class="cresce"><div class="t">${esc(m.nome)} ${db().cfg.ramo === m.id ? et('Em uso', 'ok') : ''}</div><div class="s">${esc(m.desc || '')}</div></div><button type="button" class="btn peq" data-acao="aplicarModelo" data-m="${m.id}">Aplicar</button></li>`).join('')}</ul></div>` : '';
     const al = { margem_min: 15, saldo_min: 0, meta_receita: 0, ...(db().cfg.alertas || {}) };
     const alertasCard = temAlertas ? `<div class="cartao"><div class="cartao-cab"><div><h3>Limites dos alertas</h3><div class="sub">Quando passar destes números, o painel e o resumo diário avisam</div></div></div><div class="cartao-corpo"><form class="form-grade" data-form-alertas>
-      <label class="campo">${cfg.id === 'gestao' ? 'Margem bruta' : 'Margem líquida'} mínima (%)<input name="margem_min" inputmode="decimal" value="${esc(String(al.margem_min).replace('.', ','))}"></label>
+      <label class="campo">${cfg.id !== 'financeiro' ? 'Margem bruta' : 'Margem líquida'} mínima (%)<input name="margem_min" inputmode="decimal" value="${esc(String(al.margem_min).replace('.', ','))}"></label>
       ${cfg.id === 'financeiro' ? `<label class="campo">Saldo mínimo em caixa (R$)<input name="saldo_min" inputmode="decimal" value="${esc(String(al.saldo_min))}"></label>` : ''}
-      <label class="campo">Meta de ${cfg.id === 'gestao' ? 'vendas' : 'receita'} do mês (R$, 0 = sem meta)<input name="meta_receita" inputmode="decimal" value="${esc(String(al.meta_receita))}"></label>
+      <label class="campo">Meta de ${cfg.id !== 'financeiro' ? 'vendas' : 'receita'} do mês (R$, 0 = sem meta)<input name="meta_receita" inputmode="decimal" value="${esc(String(al.meta_receita))}"></label>
       <div class="campo largo" style="flex-direction:row;justify-content:flex-end"><button type="button" class="btn pri" data-acao="salvarAlertas">Salvar</button></div></form></div></div>` : '';
     return pixCard + alertasCard + ramos;
   };

@@ -6,7 +6,7 @@
   const raiz = document.getElementById('play');
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
   const SITE = 'https://bluerose-store.com/';
-  const NOMES = { crm: 'Nexo CRM', agenda: 'Nexo Agenda', financeiro: 'Nexo Financeiro', gestao: 'Nexo Gestão', juridico: 'Nexo Jurídico', clinica: 'Nexo Clínica', academia: 'Nexo Academia', restaurante: 'Nexo Restaurante', imobiliaria: 'Nexo Imobiliária', oficina: 'Nexo Oficina' };
+  const NOMES = { crm: 'Nexo CRM', agenda: 'Nexo Agenda', financeiro: 'Nexo Financeiro', gestao: 'Nexo Gestão', juridico: 'Nexo Jurídico', clinica: 'Nexo Clínica', academia: 'Nexo Academia', restaurante: 'Nexo Restaurante', imobiliaria: 'Nexo Imobiliária', oficina: 'Nexo Oficina', farmacia: 'Nexo Farmácia' };
   const params = new URLSearchParams(location.search);
   if (params.get('origem') === 'play') {
     try { localStorage.setItem('nexo-play', '1'); } catch { /* ok */ }
