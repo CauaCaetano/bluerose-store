@@ -159,3 +159,12 @@ main::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; 
 .lx-rosas > section:nth-of-type(odd) { background-image: url("../img/estampa-dir.webp"); background-position: right center; }
 .lx-rosas > section:nth-of-type(even) { background-image: url("../img/estampa-esq.webp"); background-position: left center; }
 @media (max-width: 900px) { .lx-rosas > section { background-size: auto min(480px, 100%); } }
+/* rosas fixas nas duas laterais da tela nessas páginas: sempre visíveis enquanto rola, atrás de todo o conteúdo */
+main.lx-rosas { background: url("../img/estampa-forte-esq.webp") left center / auto 100vh no-repeat fixed, url("../img/estampa-forte-dir.webp") right center / auto 100vh no-repeat fixed; }
+@media (max-width: 900px) { main.lx-rosas { background-size: auto 70vh, auto 70vh; } }
+/* celular: o cartão do sistema não pode passar da largura da tela */
+@media (max-width: 860px) {
+  .sis { grid-template-columns: minmax(0, 1fr); }
+  .sis-precos, .sis-botoes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .sis-botoes .btn { white-space: normal; letter-spacing: .06em; padding-inline: 10px; text-align: center; }
+}
