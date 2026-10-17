@@ -133,15 +133,27 @@ h1, h2, h3, .sec-title, .preco2-valor, .prod-preco b, .lx-numeros b { font-varia
 }
 
 /* ---------- arte enviada pelo dono: estampa de rosas ----------
-   Uma faixa contínua em cada lateral, da primeira linha ao fim do rodapé, que rola junto com a página.
-   A imagem é a estampa repetida em espelho (sem emenda); fica atrás de todo o conteúdo. */
-html { position: relative; min-height: 100%; }
-html::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background: url("../img/rosas-lateral-esq.webp") left top / 380px auto repeat-y, url("../img/rosas-lateral-dir.webp") right top / 380px auto repeat-y; }
-/* a faixa ocupa só a margem livre ao lado do conteúdo (1200px); com pouca margem, some */
-html::before { background-size: min(380px, calc((100vw - 1200px) / 2 + 30px)) auto; }
-@media (max-width: 1499px) { html::before { display: none; } }
-.rodape-site { border-top-color: transparent; }
+   Todas as páginas: cada seção leva a estampa num lado só, intercalando direita e esquerda (o topo da inicial leva dos dois lados).
+   A rosa sai até a borda da tela e ocupa só a margem livre ao lado do conteúdo; em tela estreita, some.
+   Cantos de cima no início da página e cantos de baixo no rodapé, dos dois lados. Tudo parado, sem script. */
+main > section { position: relative; isolation: isolate; }
+main > section:not(.ini-hero)::after, main > section.ini-hero::before {
+  content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; pointer-events: none;
+  width: calc(50vw - 600px + 60px); left: calc(50% - 50vw);
+  background: url("../img/estampa-esq.webp") left center / auto min(820px, 100%) no-repeat; }
+main > section:nth-of-type(odd):not(.ini-hero)::after, main > section.ini-hero:nth-of-type(odd)::before {
+  left: auto; right: calc(50% - 50vw); background-image: url("../img/estampa-dir.webp"); background-position: right center; }
+main > section.lx-hero::after { left: calc(50% - 50vw); right: calc(50% - 50vw); width: auto;
+  background: url("../img/estampa-esq.webp") left center / auto min(820px, 100%) no-repeat, url("../img/estampa-dir.webp") right center / auto min(820px, 100%) no-repeat; }
+main { position: relative; }
+main::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: 460px; pointer-events: none;
+  background: url("../img/canto-se.webp") left top / 400px auto no-repeat, url("../img/canto-sd.webp") right top / 400px auto no-repeat; }
+.rodape-site { position: relative; background: url("../img/canto-ie.webp") left bottom / 400px auto no-repeat, url("../img/canto-id.webp") right bottom / 400px auto no-repeat; }
+@media (max-width: 1299px) {
+  main > section:not(.ini-hero)::after, main > section.ini-hero::before { display: none; }
+  main::before { height: 260px; background-size: 210px auto, 210px auto; opacity: .7; }
+  .rodape-site { background-size: 210px auto, 210px auto; }
+}
 
 /* celular: o cartão do sistema não pode passar da largura da tela */
 @media (max-width: 860px) {
