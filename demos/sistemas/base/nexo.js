@@ -15,7 +15,6 @@ import { prepararExtras } from './extras.js';
 import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 import { paginaImportar } from './planilha.js';
 import { prepararSuporte } from './suporte.js';
-import { personagemIA } from './assistente-ia.js?v=11';
 // Assistente IA: liberado em 17/10 (sem a chave do Gemini, a função nexo-ia responde que está sendo ativado)
 const IA_LIBERADA = true;
 
@@ -627,9 +626,8 @@ function montar(app, cfg) {
       const contagens = Object.fromEntries(Object.entries(app.db.dados).filter(([k, v]) => Array.isArray(v) && !k.startsWith('_')).map(([k, v]) => [k, v.length]));
       const contexto = { destaques: r?.destaques || [], alertas: r?.alertas || [], contagens };
       const sugestoes = ['O que eu devo priorizar hoje?', 'Como está o meu mês?', 'Escreva uma mensagem de cobrança educada', 'Como eu consigo mais clientes?', `Como funciona o ${cfg.nome}?`];
-      let boneco = null; // personagem que reage: olá, pensando, explicando, não sei
       const desenhar = (resp = '', carregando = false) => `<div class="col" style="gap:10px">
-        <div class="ia-cab"><div class="ia-boneco-caixa" data-ia-boneco></div><div class="col" style="gap:10px;flex:1;min-width:0">
+        <div class="ia-cab"><img class="ia-logo" src="${new URL('blue-rose.png', import.meta.url).href}" alt="Blue Rose" width="76" height="76"><div class="col" style="gap:10px;flex:1;min-width:0">
         <p class="mute-2" style="font-size:12.5px;margin:0">Pergunte sobre o seu negócio ou sobre como usar o sistema. A IA vê só os números e avisos do resumo do dia, nunca telefones, e-mails ou documentos dos seus clientes.${app.sessao ? '' : ' Na demonstração, a resposta é um exemplo.'}</p>
         <div class="dica" style="margin:0">${ic('sparkle')}<span>Você tem <b>20 perguntas grátis por dia</b>${app.sessao ? `. Restam <b data-ia-rest>…</b> hoje.` : ' na versão com conta.'}</span></div></div></div>
         <details data-ia-conta style="border:1px solid var(--borda);border-radius:8px;padding:8px 12px"><summary style="cursor:pointer;font-size:13px;font-weight:500">Usar a minha conta do Gemini ou do ChatGPT <span class="mute" style="font-weight:400">(só para você)</span></summary>
@@ -644,20 +642,32 @@ function montar(app, cfg) {
         <div class="flex" style="flex-wrap:wrap;gap:6px">${sugestoes.map((x) => `<button type="button" class="btn peq" data-ia-sug="${esc(x)}">${esc(x)}</button>`).join('')}</div>
         <label class="campo largo">Sua pergunta<textarea data-ia-perg rows="2" maxlength="600" placeholder="Ex.: quais clientes eu devo cobrar primeiro?">${esc(d.p || '')}</textarea></label>
         <div data-ia-resp class="cartao" style="padding:12px;white-space:pre-wrap;${resp || carregando ? '' : 'display:none'}">${carregando ? 'Pensando…' : esc(resp)}</div></div>`;
-      const exemplo = () => `${r?.destaques?.length ? `Pelo que o sistema mostra agora: ${r.destaques.map(([a, b]) => `${a.toLowerCase()}: ${b}`).join('; ')}.` : 'O sistema ainda tem poucos dados.'}${r?.alertas?.length ? `\n\nComece por aqui: ${r.alertas.join('; ')}.` : '\n\nNada urgente agora: use o tempo para chamar clientes antigos e pedir indicações.'}\n\n(Exemplo da demonstração. Na versão contratada, a IA responde a sua pergunta com os números da sua empresa.)`;
+      // demonstração: resposta de exemplo conforme o assunto da pergunta, com os números de exemplo do sistema
+      const numeros = () => (r?.destaques?.length ? r.destaques.map(([a, b]) => `${a.toLowerCase()}: ${b}`).join('; ') : 'ainda há poucos dados');
+      const telas = cfg.paginas.filter((p) => p.id && p.rot).slice(0, 8).map((p) => p.rot.toLowerCase());
+      const exemplo = (pg) => {
+        const q = pg.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        let t;
+        if (/prioriz|hoje|urgente|primeiro|agora/.test(q)) t = r?.alertas?.length ? `Hoje, comece por aqui:\n- ${r.alertas.join('\n- ')}\n\nDepois disso, confira ${numeros()}.` : `Nada urgente agora (${numeros()}). Bom momento para chamar clientes antigos e pedir indicações.`;
+        else if (/mes|vend|fatur|lucro|caixa|resultado|numero/.test(q)) t = `Resumo do momento: ${numeros()}.\n\nPara ver o mês inteiro e comparar com o anterior, abra o painel e os relatórios.${r?.alertas?.length ? ` Atenção: ${r.alertas[0]}.` : ''}`;
+        else if (/cobr|mensagem|whats|lembrete|atras/.test(q)) t = 'Mensagem pronta para mandar no WhatsApp:\n\n"Olá, tudo bem? Passando para lembrar do pagamento em aberto. Se já pagou, desconsidere. Se preferir, te mando o PIX agora mesmo. Obrigado!"\n\nDica: mande no começo da manhã e ofereça o PIX junto.';
+        else if (/cliente|vender mais|divulg|marketing|indica|instagram/.test(q)) t = 'Três ações para esta semana:\n1. Chame os clientes que não voltam há mais de 60 dias com uma oferta simples.\n2. Peça indicação para os clientes mais satisfeitos, com um mimo para quem indicar.\n3. Poste 2 fotos reais do seu trabalho no Instagram e no status do WhatsApp.';
+        else if (/como (funciona|usa|faco|cadastr)|onde|tela|menu|sistema/.test(q)) t = `O ${cfg.nome} é dividido em telas no menu da esquerda: ${telas.join(', ')} e outras. Comece cadastrando os seus dados (ou suba a sua planilha em Importar), depois use o painel para acompanhar o dia. Se travar em algo, abra um chamado em Suporte.`;
+        else if (/estoque|produto|repor|validade|lote/.test(q)) t = `Olhe a tela de estoque: ali aparecem os itens abaixo do mínimo e os que vencem primeiro. Agora: ${numeros()}.`;
+        else t = `Pelos números de agora (${numeros()}), o melhor caminho é ${r?.alertas?.length ? `resolver primeiro: ${r.alertas[0]}` : 'manter a rotina e acompanhar o painel todo dia'}.`;
+        return `${t}\n\n(Exemplo da demonstração. Na versão contratada, a IA responde exatamente à sua pergunta, com os números da sua empresa.)`;
+      };
       const perguntar = async (f) => {
         const t = f.querySelector('[data-ia-perg]'), out = f.querySelector('[data-ia-resp]'), pergunta = t.value.trim();
         if (pergunta.length < 3) { t.focus(); return false; }
-        out.style.display = ''; out.textContent = 'Pensando…'; boneco?.estado('pensando');
-        if (!app.sessao?.funcao) { setTimeout(() => { out.textContent = exemplo(); boneco?.estado('explicando', 6000); }, 1800); return false; }
-        try { const x = await app.sessao.funcao('nexo-ia', { pergunta, sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes === 0 ? (x.propria ? 'Limite de segurança de hoje atingido.' : 'Esta foi a última pergunta grátis de hoje. Amanhã você tem mais 20, ou conecte a sua conta do Gemini ou do ChatGPT aqui, em Usar a minha conta.') : `Restam ${x.restantes} de ${x.propria ? 300 : 20} perguntas${x.propria ? '' : ' grátis'} hoje.`}` : ''}`; const rr = f.querySelector('[data-ia-rest]'); if (rr && typeof x.restantes === 'number') rr.textContent = x.restantes; boneco?.estado(x.bloqueada ? 'negativo' : 'explicando', 6000); }
-        catch (e) { out.textContent = e.message || 'Não foi possível responder agora.'; boneco?.estado(/limite|já usou/i.test(e.message || '') ? 'pausa' : 'naosei', 5000); }
+        out.style.display = ''; out.textContent = 'Pensando…';
+        if (!app.sessao?.funcao) { setTimeout(() => { out.textContent = exemplo(pergunta); }, 1200); return false; }
+        try { const x = await app.sessao.funcao('nexo-ia', { pergunta, sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes === 0 ? (x.propria ? 'Limite de segurança de hoje atingido.' : 'Esta foi a última pergunta grátis de hoje. Amanhã você tem mais 20, ou conecte a sua conta do Gemini ou do ChatGPT aqui, em Usar a minha conta.') : `Restam ${x.restantes} de ${x.propria ? 300 : 20} perguntas${x.propria ? '' : ' grátis'} hoje.`}` : ''}`; const rr = f.querySelector('[data-ia-rest]'); if (rr && typeof x.restantes === 'number') rr.textContent = x.restantes; }
+        catch (e) { out.textContent = e.message || 'Não foi possível responder agora.'; }
         return false;
       };
       modal({ titulo: 'Assistente IA', largura: 620, corpo: desenhar(), botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }, { rotulo: 'Perguntar', classe: 'pri', acao: perguntar }],
         aoAbrir: (f) => {
-          boneco = personagemIA(f.querySelector('[data-ia-boneco]'), 'ola'); boneco.estado('ola', 2600);
-          f.querySelector('[data-ia-perg]')?.addEventListener('input', () => { if (!/pensando|explicando/.test(boneco.atual || '')) boneco.estado('ouvindo', 2500); });
           const dica = f.querySelector('.dica span'), btSalvar = f.querySelector('[data-ia-salvar]'), btRemover = f.querySelector('[data-ia-remover]');
           const status = () => app.sessao?.funcao && app.sessao.funcao('nexo-ia', { acao: 'status' }).then((x) => {
             dica.innerHTML = x.propria ? `Usando a <b>sua conta ${x.provedor === 'openai' ? 'do ChatGPT' : 'do Gemini'}</b>. Restam <b data-ia-rest>${x.restantes}</b> de ${x.limite} perguntas hoje.` : `Você tem <b>20 perguntas grátis por dia</b>. Restam <b data-ia-rest>${x.restantes}</b> hoje.`;
@@ -673,8 +683,8 @@ function montar(app, cfg) {
             btSalvar.disabled = true; btSalvar.textContent = 'Testando a chave…';
             try {
               const t = await app.sessao.funcao('nexo-ia', { acao: 'salvar', provedor: f.querySelector('[data-ia-prov]').value, chave, modelo });
-              if (t.ok) { f.querySelector('[data-ia-chave]').value = ''; avisar(`Conta conectada: a IA agora usa o seu ${t.provedor === 'openai' ? 'ChatGPT' : 'Gemini'}`); boneco.estado('sucesso', 3500); } else { avisar(t.erro, { tipo: 'erro', tempo: 10000 }); boneco.estado('naosei', 4000); }
-            } catch (e) { avisar(e.message, { tipo: 'erro', tempo: 10000 }); boneco.estado('naosei', 4000); }
+              if (t.ok) { f.querySelector('[data-ia-chave]').value = ''; avisar(`Conta conectada: a IA agora usa o seu ${t.provedor === 'openai' ? 'ChatGPT' : 'Gemini'}`); } else { avisar(t.erro, { tipo: 'erro', tempo: 10000 }); }
+            } catch (e) { avisar(e.message, { tipo: 'erro', tempo: 10000 }); }
             btSalvar.disabled = false; status();
           });
           btRemover.addEventListener('click', async () => {
@@ -713,7 +723,7 @@ function montar(app, cfg) {
       <div class="cartao"><div class="cartao-cab"><div><h3>Dados</h3><div class="sub">Cópia e restauração</div></div></div><div class="cartao-corpo col" style="gap:10px">
         <div class="entre"><span class="mute-2">Baixar uma cópia de tudo (JSON)</span><button type="button" class="btn" data-acao="exportarDados">${ic('download-simple')}Exportar</button></div>
         ${a.nuvem ? a.sessao.linhasDados() : `<div class="entre"><span class="mute-2">Voltar aos dados de exemplo</span><button type="button" class="btn perigo" data-acao="recomecar">${ic('arrow-counter-clockwise')}Recomeçar</button></div>`}</div></div>
-      ${a.nuvem ? a.sessao.cartaoResumo() + (a.sessao.cartaoBackup ? a.sessao.cartaoBackup() : '') : ''}${a.extrasConfig ? a.extrasConfig(a) : ''}${cfg.configExtra ? cfg.configExtra(a) : ''}</div>`,
+      ${a.nuvem ? (a.sessao.cartaoLocal ? a.sessao.cartaoLocal() : '') + a.sessao.cartaoResumo() + (a.sessao.cartaoBackup ? a.sessao.cartaoBackup() : '') : ''}${a.extrasConfig ? a.extrasConfig(a) : ''}${cfg.configExtra ? cfg.configExtra(a) : ''}</div>`,
   };
   const paginaPlanilha = paginaImportar(app);
   const paginaDono = {

@@ -225,11 +225,34 @@ function telaNovaSenha(sb, cfg) {
     f.onsubmit = async (e) => { e.preventDefault(); if (!f.reportValidity()) return; if (await senhaVazada(new FormData(f).get('senha'))) { f.querySelector('[data-erro]').textContent = SENHA_VAZADA; return; } const { error } = await sb.auth.updateUser({ password: new FormData(f).get('senha') }); if (error) { f.querySelector('[data-erro]').textContent = erroAuth(error); return; } avisar('Senha alterada'); resolver(); };
   });
 }
+// ---------------------------------------------------------------- onde a empresa atua (cidade e estado)
+// Pedido no primeiro acesso depois de assinar: a Blue Rose e os fornecedores parceiros sabem a região da empresa.
+const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
+const camposLocal = (v = {}) => `<div class="form-grade"><label class="campo">Cidade onde a empresa atua<input name="cidade" required minlength="2" maxlength="80" autocomplete="address-level2" placeholder="Ex.: Ribeirão Preto" value="${esc(v.cidade || '')}"></label>
+  <label class="campo">Estado<select name="uf" required><option value="">Escolha</option>${UFS.map((u) => `<option ${v.uf === u ? 'selected' : ''}>${u}</option>`).join('')}</select></label>
+  <label class="campo largo">Também atende <span class="mute">(opcional)</span><input name="regiao" maxlength="160" placeholder="Ex.: toda a região de Ribeirão Preto, ou online para o Brasil" value="${esc(v.regiao || '')}"></label></div>`;
+const salvarLocal = (sb, espaco, d) => sb.rpc('nexo_definir_local', { p_espaco: espaco, p_cidade: (d.cidade || '').trim(), p_uf: d.uf || '', p_regiao: (d.regiao || '').trim() || null });
+function telaLocal(sb, cfg, esp) {
+  return new Promise((resolver) => {
+    const f = tela(cfg, `<h1 class="entrada-t">Onde a ${esc(esp.nome)} atua?</h1><p class="entrada-s">Pedimos uma vez só. Assim a Blue Rose e os fornecedores parceiros sabem a sua região (entregas, visitas e ofertas da sua cidade). Dá para mudar depois em Configurações.</p>
+      <form class="col" style="gap:12px" novalidate>${camposLocal(esp)}<p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Continuar</button></form>`);
+    f.querySelector('[name=cidade]')?.focus();
+    f.onsubmit = async (e) => {
+      e.preventDefault(); if (!f.reportValidity()) return;
+      const d = Object.fromEntries(new FormData(f)), btn = f.querySelector('button'); btn.disabled = true;
+      const { error } = await salvarLocal(sb, esp.id, d);
+      if (error) { f.querySelector('[data-erro]').textContent = error.message.replace(/^.*?: /, ''); btn.disabled = false; return; }
+      resolver({ cidade: d.cidade.trim(), uf: d.uf, regiao: (d.regiao || '').trim() || null });
+    };
+  });
+}
+
 function telaEmpresa(sb, cfg, espacos, precisaToken = false) {
   return new Promise((resolver) => {
     const lista = espacos.length ? `<h2 style="font-size:14px;margin:4px 0 8px">Suas empresas</h2><ul class="lista entrada-lista">${espacos.map((s) => `<li class="clicavel" data-esp="${s.id}">${av(s.nome)}<div class="cresce"><div class="t corta">${esc(s.nome)}</div><div class="s">${s.plano === 'ativo' ? 'Plano ativo' : diasAte(s.teste_ate) >= 0 ? `Teste até ${dataCurta(s.teste_ate)}` : 'Teste encerrado'}</div></div>${ic('caret-right')}</li>`).join('')}</ul><div class="entrada-ou">ou</div>` : '';
     const f = tela(cfg, `<h1 class="entrada-t">${espacos.length ? 'Escolha a empresa' : 'Vamos configurar sua empresa'}</h1><p class="entrada-s">${espacos.length ? '' : 'Leva menos de um minuto. Depois você convida a sua equipe.'}</p>${lista}
       <form class="col" style="gap:12px" novalidate><label class="campo">Nome da empresa<input name="nome" required maxlength="120" placeholder="Ex.: ${esc(cfg.empresa)}"></label>
+      ${camposLocal()}
       <div class="dica">${ic('upload-simple')}<span>A empresa começa <b>em branco</b>. Logo depois de criar, você sobe as suas planilhas (Excel) e o sistema preenche os cadastros sozinho.</span></div>
       ${cfg.modelos?.length ? `<label class="campo">Tipo de negócio<select name="ramo">${cfg.modelos.map((m) => `<option value="${m.id}">${esc(m.nome)}</option>`).join('')}</select><span class="ajuda">Já começa com os serviços e cadastros típicos do seu ramo</span></label>` : ''}
       ${precisaToken ? `<label class="campo">Token de dono<input name="token" required autocomplete="off" spellcheck="false" placeholder="${esc(cfg.id.toUpperCase().slice(0, 6))}-XXXX-XXXX-XXXX" style="font-family:var(--mono);text-transform:uppercase"><span class="ajuda">Enviamos para o seu e-mail quando o teste ou a assinatura começou, e ele também aparece em <a href="${SITE}conta.html" target="_blank" rel="noopener">Minha conta</a>. Só é pedido agora, na primeira vez. <a href="#" data-reenviar>Não recebeu? Enviar de novo para o meu e-mail</a></span></label>` : ''}
@@ -254,6 +277,7 @@ function telaEmpresa(sb, cfg, espacos, precisaToken = false) {
         f.querySelector('[data-erro]').textContent = /TOKEN_INVALIDO/.test(error.message) ? 'Token de dono incorreto. Confira no e-mail ou em Minha conta.' : /TOKEN_DONO/.test(error.message) ? 'Informe o token de dono que enviamos para o seu e-mail.' : /limite/.test(error.message) ? 'Você chegou ao limite de empresas do seu plano neste sistema.' : error.message;
         btn.disabled = false; return;
       }
+      await salvarLocal(sb, data, d).then(() => {}, () => {}); // se falhar, é pedido de novo ao abrir
       resolver({ id: data, novo: true, exemplo: false, nome: d.nome.trim(), ramo: d.ramo || '', pix: (d.pix || '').trim() });
     };
   });
@@ -386,7 +410,8 @@ export async function iniciarNuvem(app, cfg) {
   let escolha = espacos.length === 1 && !new URLSearchParams(location.search).has('trocar') ? { id: espacos[0].id } : espacos.find((s) => s.id === lembrado) && !new URLSearchParams(location.search).has('trocar') ? { id: lembrado } : await telaEmpresa(sb, cfg, espacos, await precisaToken());
   try { localStorage.setItem(`nexo-espaco-${cfg.id}`, escolha.id); } catch { /* ok */ }
   tela(cfg, `<div class="vazio" style="padding:30px 0">${ic('circle')}<b>${escolha.exemplo ? 'Preparando os dados de exemplo…' : 'Abrindo…'}</b></div>`);
-  const { data: esp } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono,nivel,pro_ate').eq('id', escolha.id).single();
+  const { data: esp } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono,nivel,pro_ate,cidade,uf,regiao').eq('id', escolha.id).single();
+  if (esp.dono === uid && !esp.cidade) { Object.assign(esp, await telaLocal(sb, cfg, esp)); tela(cfg, `<div class="vazio" style="padding:30px 0">${ic('circle')}<b>Abrindo…</b></div>`); }
   const { data: eu } = await sb.from('nexo_membros').select('permissoes,papel').eq('espaco', escolha.id).eq('usuario', session.user.id).maybeSingle();
   const linhas = escolha.novo ? [] : await lerTudo(sb, escolha.id);
   const db = new BancoNuvem(sb, escolha.id, uid, linhas);
@@ -497,6 +522,7 @@ export async function iniciarNuvem(app, cfg) {
       <label class="campo">Enviar para<input name="email" type="email" value="${esc(rs.email || email)}"></label><label class="campo">Horário<select name="hora">${[6, 7, 8, 9, 10, 12, 18].map((h) => `<option value="${h}" ${Number(rs.hora || 7) === h ? 'selected' : ''}>${h}h</option>`).join('')}</select></label>
       <div class="campo largo" style="flex-direction:row;justify-content:flex-end;gap:8px">${rs.ativo ? '<button type="button" class="btn fant" data-acao="resumoDesligar">Desligar</button>' : ''}<button type="button" class="btn pri" data-acao="resumoLigar">${rs.ativo ? 'Salvar' : 'Ligar o resumo diário'}</button></div></form></div></div>`; },
     // backup semanal por e-mail: o Escritório da Blue Rose manda toda semana uma cópia de tudo (JSON) para o e-mail escolhido
+    cartaoLocal: () => (dono ? `<div class="cartao" id="local"><div class="cartao-cab"><div><h3>Onde a empresa atua</h3><div class="sub">${esp.cidade ? `${esc(esp.cidade)}/${esc(esp.uf)}${esp.regiao ? ` · também atende: ${esc(esp.regiao)}` : ''}` : 'Ainda não informado'}</div></div><button class="btn peq" data-acao="localAlterar">${ic('map-pin')}Alterar</button></div></div>` : ''),
     cartaoBackup: () => { if (!gestor) return ''; const bk = db.cfg.backup || {}; return `<div class="cartao" id="backup"><div class="cartao-cab"><div><h3>Backup semanal por e-mail</h3><div class="sub">Toda semana, uma cópia completa dos seus dados chega no seu e-mail. Se algo der errado, você tem tudo guardado.</div></div>${bk.ativo ? et('Ligado', 'ok') : et('Desligado', 'al')}</div><div class="cartao-corpo"><form class="form-grade" data-backup>
       <label class="campo">Enviar para<input name="email" type="email" required value="${esc(bk.email || email)}"></label><label class="campo">Dia da semana<select name="dia">${[[1, 'Segunda'], [2, 'Terça'], [3, 'Quarta'], [4, 'Quinta'], [5, 'Sexta'], [6, 'Sábado'], [0, 'Domingo']].map(([n, r]) => `<option value="${n}" ${Number(bk.dia ?? 1) === n ? 'selected' : ''}>${r}</option>`).join('')}</select></label>
       <p class="mute largo" style="margin:0;font-size:12.5px">O arquivo vem em anexo (.json) e pode ser restaurado com a nossa ajuda. Só pessoas da equipe podem receber.</p>
@@ -519,6 +545,12 @@ export async function iniciarNuvem(app, cfg) {
       addEventListener('online', () => { if (db.situacao === 'erro') db.enviar(); });
       addEventListener('beforeunload', (e) => { if (['pendente', 'salvando', 'erro'].includes(db.situacao)) { db.guardarPendente(); db.enviar(); e.preventDefault(); e.returnValue = ''; } });
       Object.assign(app.acoes, {
+        localAlterar: () => modal({ titulo: 'Onde a empresa atua', largura: 520, corpo: `<form class="col" style="gap:10px" onsubmit="return false">${camposLocal(esp)}</form>`,
+          botoes: [{ rotulo: 'Cancelar', valor: null, classe: 'fant' }, { rotulo: 'Salvar', classe: 'pri', acao: async (f) => {
+            const fo = f.querySelector('form'); if (!fo.reportValidity()) return false;
+            const d = Object.fromEntries(new FormData(fo)); const { error } = await salvarLocal(sb, esp.id, d);
+            if (error) { avisar(error.message.replace(/^.*?: /, ''), { tipo: 'erro' }); return false; }
+            Object.assign(esp, { cidade: d.cidade.trim(), uf: d.uf, regiao: (d.regiao || '').trim() || null }); avisar('Cidade salva'); app.render(); return true; } }] }),
         resumoLigar: () => { const f = document.querySelector('[data-resumo]'); if (!f.reportValidity()) return; db.cfg.resumo = { ativo: true, email: f.email.value.trim(), hora: Number(f.hora.value) }; db.gravar(); avisar(`Resumo diário ligado: chega todo dia às ${f.hora.value}h`); app.render(); },
         backupLigar: () => { const f = document.querySelector('[data-backup]'); if (!f.reportValidity()) return; db.cfg.backup = { ...(db.cfg.backup || {}), ativo: true, email: f.email.value.trim(), dia: Number(f.dia.value) }; db.gravar(); avisar('Backup semanal ligado: a cópia chega toda semana no seu e-mail'); app.render(); },
         backupLigarRapido: () => { db.cfg.backup = { ...(db.cfg.backup || {}), ativo: true, email: (db.cfg.backup || {}).email || email, dia: 1 }; db.gravar(); avisar(`Backup semanal ligado: toda segunda-feira em ${email}. Dá para mudar em Configurações.`, { tempo: 7000 }); app.render(); },
