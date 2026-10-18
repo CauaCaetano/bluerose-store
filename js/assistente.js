@@ -3,8 +3,8 @@
  *
  * Partes:
  *   CharacterAnimator                   desenha o personagem num <canvas> a partir de img/assistente-pessoa.webp
- *                                       (10 poses do dono, sem redesenho): troca de pose conforme a conversa
- *                                       e respiração (tronco e cabeça sobem 1 pixel).
+ *                                       (10 poses do dono, sem redesenho): uma pose por situação, movimento
+ *                                       contínuo e suave (respiração, aceno, pensar, falar, pulinho) e troca suave.
  *   AssistantKnowledge                  dúvidas e respostas prontas de cada parte do site, em
  *                                       js/assistente-dados.json (gerado do próprio site; nada é inventado).
  *   VirtualAssistant / AssistantChat    balão que muda de fala conforme a página e a seção na tela,
@@ -18,9 +18,9 @@
   window.__assistenteBR = true;
 
   var CFG = {
-    sprite: 'img/assistente-pessoa.webp?v=1',
+    sprite: 'img/assistente-pessoa.webp?v=2',
     dados: 'js/assistente-dados.json?v=8',
-    W: 165, H: 347, MARGEM: 3,           // tamanho de cada pose na folha; margem para a respiração
+    W: 165, H: 347, MARGEM: 20,          // tamanho de cada pose na folha; folga (metade em cima, metade embaixo) para o pulinho
   };
   var reduzMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   var semMovimento = function () { return !!(reduzMov && reduzMov.matches); };
@@ -35,40 +35,55 @@
   // folha img/assistente-pessoa.webp (scratchpad/iaass/montar_preto.py): poses do dono recortadas, 5 por linha, sem redesenho
   var POSES = ['padrao', 'ola', 'joia', 'apontando', 'duvida', 'ideia', 'explicando', 'bracos', 'celular', 'lupa'];
   var CINTURA = {'padrao': 159, 'ola': 168, 'joia': 171, 'apontando': 170, 'duvida': 170, 'ideia': 169, 'explicando': 172, 'bracos': 173, 'celular': 174, 'lupa': 171};     // linha do cinto de cada pose: dali para cima respira
-  // estado da conversa -> poses em sequência (cada uma ~1,2 s)
+  // estado da conversa -> [pose, movimento]: uma pose por situação; o movimento é contínuo e suave
   var ESTADOS = {
-    idle:      ['padrao'],
-    minimized: ['padrao'],
-    greeting:  ['ola'],
-    listening: ['bracos'],
-    thinking:  ['duvida', 'celular', 'lupa'],
-    explaining:['explicando', 'apontando'],
-    idea:      ['ideia'],
-    confident: ['bracos'],
-    success:   ['joia'],
-    error:     ['duvida'],
+    idle:      ['padrao', 'calmo'],
+    minimized: ['padrao', 'calmo'],
+    greeting:  ['ola', 'aceno'],
+    listening: ['padrao', 'calmo'],
+    thinking:  ['duvida', 'pensa'],
+    explaining:['explicando', 'fala'],
+    idea:      ['ideia', 'ideia'],
+    confident: ['bracos', 'calmo'],
+    success:   ['joia', 'pulo'],
+    error:     ['duvida', 'nega'],
   };
+  var suave = function (x) { return x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x); };
+  // respiração (o tronco sobe), aceno, cabeça pensando, aceno de cabeça ao falar, pulinho e um "não" curto
+  function movimento(mov, t, dt) {
+    var r = { dx: 0, dy: 0, sobe: 1.3 * (1 - Math.cos(2 * Math.PI * t / 3600)) / 2, ang: 0 };
+    if (mov === 'aceno') r.ang = Math.sin(dt / 190) * 1.6 * (1 - suave((dt - 1400) / 600));
+    else if (mov === 'pensa') r.ang = Math.sin(t / 1500) * 0.9;
+    else if (mov === 'fala') r.sobe += 0.9 * Math.max(0, Math.sin(dt / 230));
+    else if (mov === 'pulo') r.dy = -7 * Math.sin(Math.PI * Math.min(dt / 460, 1));
+    else if (mov === 'ideia') r.dy = -4 * Math.sin(Math.PI * Math.min(dt / 360, 1));
+    else if (mov === 'nega') r.dx = 2 * Math.sin(dt / 45) * Math.max(0, 1 - dt / 520);
+    return r;
+  }
 
   function CharacterAnimator(canvas, folha) {
     this.cv = canvas;
     this.ctx = canvas.getContext('2d');
-    this.ctx.imageSmoothingEnabled = false;
     this.folha = folha;
     this.estado = 'idle';
+    this.atual = ESTADOS.idle;
+    this.antes = null;
+    this.tTroca = 0;
     this.inicioEstado = 0;
-    this.ultimaChave = '';
     this.rodando = false;
     var self = this;
     this.passo = function (t) { self.quadro(t); };
     document.addEventListener('visibilitychange', function () { document.hidden ? self.parar() : self.iniciar(); });
-    if (reduzMov && reduzMov.addEventListener) reduzMov.addEventListener('change', function () { self.ultimaChave = ''; self.desenharAgora(); });
+    if (reduzMov && reduzMov.addEventListener) reduzMov.addEventListener('change', function () { self.desenharAgora(); });
   }
 
   CharacterAnimator.prototype.definir = function (estado) {
     if (!ESTADOS[estado]) estado = 'idle';
+    var novo = ESTADOS[estado], agora = performance.now();
+    if (novo[0] !== this.atual[0]) { this.antes = this.atual[0]; this.tTroca = agora; }
+    if (novo[0] !== this.atual[0] || novo[1] !== this.atual[1]) this.inicioEstado = agora;
+    this.atual = novo;
     this.estado = estado;
-    this.inicioEstado = performance.now();
-    this.ultimaChave = '';
     this.cv.setAttribute('data-estado', estado);
     this.desenharAgora();
   };
@@ -84,19 +99,27 @@
   };
   CharacterAnimator.prototype.desenharAgora = function () { this.quadro(performance.now(), true); };
 
+  // uma pose: pernas paradas; tronco e cabeça sobem (respiração) e giram no cinto
+  CharacterAnimator.prototype.pose = function (nome, alfa, m, entra) {
+    var W = CFG.W, H = CFG.H, i = POSES.indexOf(nome), sx = (i % 5) * W, sy = Math.floor(i / 5) * H, c = CINTURA[nome];
+    var ctx = this.ctx, x = m.dx, y = CFG.MARGEM / 2 + m.dy + entra;
+    ctx.globalAlpha = alfa;
+    ctx.drawImage(this.folha, sx, sy + c - 2, W, H - c + 2, x, y + c - 2, W, H - c + 2);
+    ctx.save(); ctx.translate(x + W / 2, y + c); ctx.rotate(m.ang * Math.PI / 180);
+    ctx.drawImage(this.folha, sx, sy, W, c, -W / 2, -c - m.sobe, W, c);
+    ctx.restore();
+  };
+
   CharacterAnimator.prototype.quadro = function (t, forcar) {
     if (this.rodando && !forcar) this.raf = requestAnimationFrame(this.passo);
-    var seq = ESTADOS[this.estado], parado = semMovimento();
-    var pose = parado ? seq[0] : seq[Math.floor((t - this.inicioEstado) / 1200) % seq.length];
-    var respira = !parado && (t % 2600) < 1100 ? 1 : 0;      // tronco e cabeça sobem 1 pixel em parte do ciclo
-    var chave = pose + respira;
-    if (chave === this.ultimaChave) return;
-    this.ultimaChave = chave;
-    var W = CFG.W, H = CFG.H, i = POSES.indexOf(pose), sx = (i % 5) * W, sy = Math.floor(i / 5) * H, c = CINTURA[pose], oy = CFG.MARGEM;
-    var ctx = this.ctx;
-    ctx.clearRect(0, 0, this.cv.width, this.cv.height);
-    ctx.drawImage(this.folha, sx, sy + c - 1, W, H - c + 1, 0, oy + c - 1, W, H - c + 1);   // pernas paradas (com a linha do cinto)
-    ctx.drawImage(this.folha, sx, sy, W, c, 0, oy - respira, W, c);                         // tronco e cabeça
+    var parado = semMovimento();
+    var m = parado ? { dx: 0, dy: 0, sobe: 0, ang: 0 } : movimento(this.atual[1], t, t - this.inicioEstado);
+    var k = this.antes && !parado ? suave((t - this.tTroca) / 280) : 1;   // troca de pose suave (uma some, a outra aparece)
+    if (k >= 1) this.antes = null;
+    this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
+    if (k < 1) this.pose(this.antes, 1 - k, m, 0);
+    this.pose(this.atual[0], k, m, (1 - k) * 3);
+    this.ctx.globalAlpha = 1;
   };
 
   /* ===================================================================== */
@@ -314,7 +337,7 @@
     });
     this.falaTs.push(setTimeout(function () { if (self.anim) self.anim.definir(parado()); }, total));
   };
-  var SEQUENCIAS = { explaining: ['explaining', 'idea'], idea: ['idea', 'explaining', 'idea'], confident: ['confident', 'idea'] };
+  var SEQUENCIAS = {};   // uma pose por fala (sem ficar trocando)
 
   VirtualAssistant.prototype.reagir = function () { /* passar o mouse só levanta o personagem (CSS); não troca a pose */ };
 
