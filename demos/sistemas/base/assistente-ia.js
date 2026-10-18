@@ -12,7 +12,7 @@ const ESTADOS = {
   naosei: ['naosei', 'nega'], negativo: ['negativo', 'nega'], pausa: ['pausa', 'calmo'],
 };
 let folha = null;
-const carregar = () => folha || (folha = new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = new URL('./assistente-ia.webp?v=8', import.meta.url).href; }));
+const carregar = () => folha || (folha = new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = new URL('./assistente-ia.webp?v=9', import.meta.url).href; }));
 
 /** Quadro q (8 por segundo, contado desde o começo do estado) -> deslocamento em pixels inteiros: corpo (dx, dy) e tronco (sobe). */
 function passo(mov, q) {
