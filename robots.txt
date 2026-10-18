@@ -1,3 +1,89 @@
+# Assistentes de IA e buscadores: liberados para ler e citar o site (ChatGPT, Claude, Perplexity, Gemini, Grok, Copilot…)
+User-agent: GPTBot
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: Claude-User
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: xAI-Bot
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: Grok
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: Meta-ExternalAgent
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: CCBot
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
+User-agent: MistralAI-User
+Allow: /
+Disallow: /previas/
+Disallow: /midia/
+
 User-agent: *
 Allow: /
 Disallow: /previas/
