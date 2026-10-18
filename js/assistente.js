@@ -18,9 +18,9 @@
   window.__assistenteBR = true;
 
   var CFG = {
-    sprite: 'img/assistente-pessoa.webp?v=4',
+    sprite: 'img/assistente-pessoa.webp?v=5',
     dados: 'js/assistente-dados.json?v=8',
-    W: 196, H: 432, MARGEM: 52,          // tamanho de cada pose na folha; folga (metade em cima, metade embaixo) para o pulinho
+    W: 195, H: 432, MARGEM: 52,          // tamanho de cada pose na folha; folga (metade em cima, metade embaixo) para o pulinho
   };
   var reduzMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   var semMovimento = function () { return !!(reduzMov && reduzMov.matches); };
@@ -35,7 +35,7 @@
   // folha img/assistente-pessoa.webp (scratchpad/iaass/montar_novas.py): poses do dono, sem redesenho, 4 por linha
   var POSES = ['celular', 'ola', 'explicando', 'joia', 'ideia', 'duvida', 'notebook', 'agradecendo'];
   var CINTURA = { celular: 198, ola: 186, explicando: 159, joia: 189, ideia: 184, duvida: 182, notebook: 172, agradecendo: 186 };
-  var POR_LINHA = 4, PE_X = 114, TAU = 2 * Math.PI;
+  var POR_LINHA = 4, PE_X = 113, TAU = 2 * Math.PI;
   // estado da conversa -> [pose, movimento]: uma pose por situação; o movimento é contínuo e liso
   var ESTADOS = {
     idle:      ['celular', 'calmo'],

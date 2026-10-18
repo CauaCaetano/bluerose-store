@@ -3,7 +3,7 @@
 // leve balanço do corpo, aceno, pensar, falar, digitar no notebook, pulinho ao dar certo, "não" no erro e agradecer.
 // A pose só troca quando algo acontece, com transição suave.
 // Folha gerada por scratchpad/iaass/montar_novas.py: célula W×H, 4 por linha, linha do cinto de cada pose e o x dos pés.
-const W = 196, H = 432, POR_LINHA = 4, M = 26, PE_X = 114; // M: folga em cima e embaixo para o pulinho
+const W = 195, H = 432, POR_LINHA = 4, M = 26, PE_X = 113; // M: folga em cima e embaixo para o pulinho
 const POSES = ['celular', 'ola', 'explicando', 'joia', 'ideia', 'duvida', 'notebook', 'agradecendo'];
 const CINTURA = { celular: 198, ola: 186, explicando: 159, joia: 189, ideia: 184, duvida: 182, notebook: 172, agradecendo: 186 };
 const ESTADOS = {
@@ -12,7 +12,7 @@ const ESTADOS = {
   sucesso: ['joia', 'pulo'], naosei: ['duvida', 'nega'], negativo: ['duvida', 'nega'], pausa: ['agradecendo', 'agradece'],
 };
 let folha = null;
-const carregar = () => folha || (folha = new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = new URL('./assistente-ia.webp?v=6', import.meta.url).href; }));
+const carregar = () => folha || (folha = new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = new URL('./assistente-ia.webp?v=7', import.meta.url).href; }));
 const suave = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 const TAU = 2 * Math.PI;
 
