@@ -807,9 +807,3 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
   .visoes, .abas-pag { flex-wrap: wrap; overflow-x: visible; }
   img, video, canvas, iframe { max-width: 100%; }
 }
-
-/* personagem do Assistente IA (assistente-ia.js) */
-.ia-cab { display: flex; gap: 14px; align-items: flex-end; }
-.ia-boneco-caixa { flex: none; width: 96px; }
-.ia-boneco { display: block; width: 96px; height: auto; aspect-ratio: 195 / 484; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); }
-@media (max-width: 560px) { .ia-boneco-caixa, .ia-boneco { width: 64px; } .ia-cab { gap: 10px; } }

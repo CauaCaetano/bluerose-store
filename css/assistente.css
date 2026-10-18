@@ -1,8 +1,8 @@
 /* Assistente virtual (personagem em pixel art no canto inferior direito). Usa as cores do site (css/site.css). */
 .va {
   --va-esc: 1;                                   /* escala do personagem */
-  --va-w: calc(87px * var(--va-esc));
-  --va-h: calc(215px * var(--va-esc));
+  --va-w: calc(111px * var(--va-esc));
+  --va-h: calc(171px * var(--va-esc));
   position: fixed; z-index: 58;                  /* acima do conteúdo e da navegação; abaixo do menu do celular e dos avisos */
   right: max(14px, env(safe-area-inset-right));
   bottom: calc(max(6px, env(safe-area-inset-bottom)) + var(--va-sobe, 0px));
@@ -16,7 +16,7 @@
 
 /* personagem */
 .va-boneco { position: relative; width: var(--va-w); height: var(--va-h); }
-.va-cv { display: block; width: 100%; height: 100%; opacity: 0; transition: opacity .35s ease, transform .2s var(--ease, ease), filter .2s ease; filter: drop-shadow(0 8px 10px rgba(3, 8, 20, .45)); }
+.va-cv { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; opacity: 0; transition: opacity .35s ease, transform .2s var(--ease, ease), filter .2s ease; filter: drop-shadow(0 8px 10px rgba(3, 8, 20, .45)); }
 .va-pronto .va-cv { opacity: 1; }
 .va-boneco::after { content: ''; position: absolute; left: 44%; right: 8%; bottom: 1px; height: calc(8px * var(--va-esc)); border-radius: 50%; background: radial-gradient(closest-side, rgba(3, 8, 20, .45), transparent); z-index: -1; }
 .va-alvo {

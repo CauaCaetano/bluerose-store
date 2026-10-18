@@ -2,9 +2,9 @@
  * Assistente virtual da Blue Rose Express (personagem em pixel art no canto da tela).
  *
  * Partes:
- *   CharacterAnimator                   desenha o personagem num <canvas> a partir de img/assistente-pessoa.webp
- *                                       (10 poses do dono, sem redesenho): uma pose por situação, movimento
- *                                       contínuo e suave (respiração, aceno, pensar, falar, pulinho) e troca suave.
+ *   PixelCharacter / CharacterAnimator  desenha o personagem num <canvas> a partir de img/assistente.png
+ *                                       (4 poses na 1ª linha, as mesmas piscando na 2ª) e anima cabeça,
+ *                                       cabelo, tronco (respiração), braço, mão e olhos por partes.
  *   AssistantKnowledge                  dúvidas e respostas prontas de cada parte do site, em
  *                                       js/assistente-dados.json (gerado do próprio site; nada é inventado).
  *   VirtualAssistant / AssistantChat    balão que muda de fala conforme a página e a seção na tela,
@@ -18,9 +18,9 @@
   window.__assistenteBR = true;
 
   var CFG = {
-    sprite: 'img/assistente-pessoa.webp?v=5',
+    sprite: 'img/assistente.png?v=1',
     dados: 'js/assistente-dados.json?v=8',
-    W: 195, H: 432, MARGEM: 52,          // tamanho de cada pose na folha; folga (metade em cima, metade embaixo) para o pulinho
+    W: 111, H: 168, MARGEM: 3,           // tamanho de cada pose na folha; margem para o pulinho
   };
   var reduzMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   var semMovimento = function () { return !!(reduzMov && reduzMov.matches); };
@@ -32,60 +32,82 @@
   /* ===================================================================== */
   /* PixelCharacter + CharacterAnimator                                    */
   /* ===================================================================== */
-  // folha img/assistente-pessoa.webp (scratchpad/iaass/montar_novas.py): poses do dono, sem redesenho, 4 por linha
-  var POSES = ['celular', 'ola', 'explicando', 'joia', 'ideia', 'duvida', 'notebook', 'agradecendo'];
-  var CINTURA = { celular: 198, ola: 186, explicando: 159, joia: 189, ideia: 184, duvida: 182, notebook: 172, agradecendo: 186 };
-  var POR_LINHA = 4, PE_X = 113, TAU = 2 * Math.PI;
-  // estado da conversa -> [pose, movimento]: uma pose por situação; o movimento é contínuo e liso
+  var CABECA = 47, CINTURA = 100, CABELO = 13;      // linhas de corte (pixels da arte)
+  // partes que se movem sozinhas em cada pose: [x, y, largura, altura]
+  var PARTES = { 2: [0, 49, 38, 37], 3: [23, 22, 19, 42] };
+  var FAISCA = [23, 22, 15, 18];                     // traços amarelos da pose 3 ("ideia")
+  // estado da conversa -> pose e movimentos
   var ESTADOS = {
-    idle:      ['celular', 'calmo'],
-    minimized: ['celular', 'calmo'],
-    greeting:  ['ola', 'aceno'],
-    listening: ['celular', 'calmo'],
-    thinking:  ['duvida', 'pensa'],
-    explaining:['explicando', 'fala'],
-    idea:      ['ideia', 'ideia'],
-    confident: ['agradecendo', 'agradece'],
-    success:   ['joia', 'pulo'],
-    error:     ['duvida', 'nega'],
+    idle:      { pose: 1 },
+    minimized: { pose: 1 },
+    greeting:  { pose: 2, braco: 'aceno' },
+    listening: { pose: 1, cabeca: 'atento' },
+    thinking:  { pose: 3, faisca: false, cabeca: 'pensa' },
+    explaining:{ pose: 2, braco: 'fala', cabeca: 'fala' },
+    idea:      { pose: 3, faisca: true, mao: 'ponto' },
+    confident: { pose: 4, cabeca: 'inclina' },
+    success:   { pose: 2, pulo: true, braco: 'fala' },
+    error:     { pose: 4, cabeca: 'nega' },
   };
-  var suave = function (x) { return x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x); };
-  // respiração, balanço leve, aceno, pensar, falar, pulinho, "não" curto e agradecer (pixels e graus da folha)
-  function movimento(mov, t, dt) {
-    var r = { dx: 0, dy: 0, sobe: 3.2 * (1 - Math.cos(TAU * t / 2600)) / 2, ang: 0, giro: 0.6 * Math.sin(TAU * t / 5200) };
-    if (mov === 'aceno') r.ang = Math.sin(dt / 150) * 3.2 * (1 - suave((dt - 1500) / 700));
-    else if (mov === 'pensa') r.ang = Math.sin(TAU * t / 2600) * 1.8;
-    else if (mov === 'fala') { r.sobe += 2.4 * Math.max(0, Math.sin(TAU * dt / 650)); r.ang = Math.sin(TAU * dt / 2600) * 0.9; }
-    else if (mov === 'pulo') r.dy = -20 * Math.sin(Math.PI * Math.min(dt / 520, 1));
-    else if (mov === 'ideia') r.dy = -11 * Math.sin(Math.PI * Math.min(dt / 420, 1));
-    else if (mov === 'nega') r.dx = 6 * Math.sin(dt / 42) * Math.max(0, 1 - dt / 560);
-    else if (mov === 'agradece') r.ang = 2.2 * Math.sin(Math.PI * Math.min(dt / 1400, 1));
-    return r;
-  }
 
   function CharacterAnimator(canvas, folha) {
     this.cv = canvas;
     this.ctx = canvas.getContext('2d');
+    this.ctx.imageSmoothingEnabled = false;
     this.folha = folha;
+    this.prepararFaisca();
     this.estado = 'idle';
-    this.atual = ESTADOS.idle;
-    this.antes = null;
-    this.tTroca = 0;
+    this.pose = 1;
+    this.trans = null;                 // { de, inicio }
     this.inicioEstado = 0;
+    this.proxPiscada = 0;
+    this.piscaAte = 0;
+    this.proxCabelo = 0;
+    this.cabeloAte = 0;
+    this.ultimaChave = '';
     this.rodando = false;
     var self = this;
     this.passo = function (t) { self.quadro(t); };
     document.addEventListener('visibilitychange', function () { document.hidden ? self.parar() : self.iniciar(); });
-    if (reduzMov && reduzMov.addEventListener) reduzMov.addEventListener('change', function () { self.desenharAgora(); });
+    if (reduzMov && reduzMov.addEventListener) reduzMov.addEventListener('change', function () { self.ultimaChave = ''; self.desenharAgora(); });
   }
+
+  // separa os traços da pose 3 ("ideia") numa camada própria, para piscarem sem mexer na mão
+  CharacterAnimator.prototype.prepararFaisca = function () {
+    var W = CFG.W, H = CFG.H;
+    var base = document.createElement('canvas'); base.width = this.folha.width; base.height = this.folha.height;
+    var b = base.getContext('2d'); b.drawImage(this.folha, 0, 0);
+    var faisca = document.createElement('canvas'); faisca.width = FAISCA[2]; faisca.height = FAISCA[3];
+    var f = faisca.getContext('2d');
+    for (var linha = 0; linha < 2; linha++) {
+      var x0 = 2 * W + FAISCA[0], y0 = linha * H + FAISCA[1];
+      var dados = b.getImageData(x0, y0, FAISCA[2], FAISCA[3]);
+      var so = f.createImageData(FAISCA[2], FAISCA[3]);
+      for (var i = 0; i < dados.data.length; i += 4) {
+        var px = (i / 4) % FAISCA[2], py = Math.floor(i / 4 / FAISCA[2]);
+        var naFaisca = FAISCA[1] + py < 36 || FAISCA[0] + px < 35;        // traços com contorno; o dedo fica de fora
+        if (dados.data[i + 3] && naFaisca) {
+          so.data.set(dados.data.subarray(i, i + 4), i);
+          dados.data[i + 3] = 0;
+        }
+      }
+      b.putImageData(dados, x0, y0);
+      if (linha === 0) f.putImageData(so, 0, 0);
+    }
+    this.fonte = base;           // folha sem os traços
+    this.faisca = faisca;        // só os traços
+  };
 
   CharacterAnimator.prototype.definir = function (estado) {
     if (!ESTADOS[estado]) estado = 'idle';
-    var novo = ESTADOS[estado], agora = performance.now();
-    if (novo[0] !== this.atual[0]) { this.antes = this.atual[0]; this.tTroca = agora; }
-    if (novo[0] !== this.atual[0] || novo[1] !== this.atual[1]) this.inicioEstado = agora;
-    this.atual = novo;
+    var nova = ESTADOS[estado].pose;
+    if (nova !== this.pose) {
+      this.trans = semMovimento() ? null : { de: this.pose, deEstado: this.estado, inicio: performance.now() };
+      this.pose = nova;
+    }
     this.estado = estado;
+    this.inicioEstado = performance.now();
+    this.ultimaChave = '';
     this.cv.setAttribute('data-estado', estado);
     this.desenharAgora();
   };
@@ -101,34 +123,92 @@
   };
   CharacterAnimator.prototype.desenharAgora = function () { this.quadro(performance.now(), true); };
 
-  // uma pose: o corpo balança nos pés; pernas paradas; tronco e cabeça sobem (respiração) e giram no cinto
-  CharacterAnimator.prototype.pose = function (nome, alfa, m, entra) {
-    var W = CFG.W, H = CFG.H, Mg = CFG.MARGEM / 2, i = POSES.indexOf(nome), sx = (i % POR_LINHA) * W, sy = Math.floor(i / POR_LINHA) * H, c = CINTURA[nome];
-    var ctx = this.ctx;
-    ctx.globalAlpha = alfa;
-    ctx.save();
-    ctx.translate(PE_X + m.dx, Mg + H + m.dy + entra); ctx.rotate(m.giro * Math.PI / 180); ctx.translate(-PE_X, -(Mg + H));
-    ctx.drawImage(this.folha, sx, sy + c - 3, W, H - c + 3, 0, Mg + c - 3, W, H - c + 3);
-    ctx.translate(PE_X, Mg + c); ctx.rotate(m.ang * Math.PI / 180);
-    ctx.drawImage(this.folha, sx, sy, W, c, -PE_X, -c - m.sobe, W, c);
-    ctx.restore();
+  // calcula os movimentos do instante t (em pixels da arte, sempre inteiros)
+  CharacterAnimator.prototype.movimentos = function (t, estado) {
+    var e = ESTADOS[estado], m = { respira: 0, cabeca: [0, 0], cabelo: 0, parte: [0, 0], faisca: e.faisca !== false, pisca: false, corpo: 0 };
+    if (semMovimento()) return m;
+    var dt = t - this.inicioEstado;
+    // respiração: tronco e cabeça sobem 1 pixel em parte do ciclo
+    m.respira = (t % 2600) < 1100 ? 1 : 0;
+    // piscadas em intervalos variados (às vezes duas seguidas)
+    if (t > this.proxPiscada) {
+      this.piscaAte = t + 120;
+      this.proxPiscada = t + (Math.random() < 0.2 ? 260 : 2400 + Math.random() * 3800);
+    }
+    m.pisca = t < this.piscaAte && e.pose !== 3;
+    // cabelo: um balanço curto de vez em quando
+    if (t > this.proxCabelo) { this.cabeloAte = t + 380; this.proxCabelo = t + 2800 + Math.random() * 3500; }
+    m.cabelo = t < this.cabeloAte ? 1 : 0;
+    // cabeça
+    var c = e.cabeca;
+    if (c === 'fala') m.cabeca = [0, Math.floor(dt / 260) % 3 === 1 ? 1 : 0];
+    else if (c === 'atento') m.cabeca = [Math.floor(t / 1800) % 2, 0];
+    else if (c === 'inclina') m.cabeca = [Math.floor(t / 2200) % 3 === 0 ? 1 : 0, 0];
+    else if (c === 'pensa') m.cabeca = [0, Math.floor(t / 700) % 2];
+    else if (c === 'nega') m.cabeca = dt < 720 ? [[-1, 1, -1, 1, 0, 0][Math.floor(dt / 120)] || 0, 0] : [0, 0];
+    else if (estado === 'idle' || estado === 'minimized') m.cabeca = [0, (t % 7000) < 900 ? 1 : 0];   // olhar rápido para baixo
+    // braço da pose 2 e mão da pose 3
+    if (e.braco === 'aceno') m.parte = [Math.floor(dt / 160) % 2 ? -1 : 0, Math.floor(dt / 160) % 2 ? -1 : 0];
+    else if (e.braco === 'fala') m.parte = [0, Math.floor(dt / 420) % 2 ? -1 : 0];
+    if (e.mao === 'ponto') m.parte = [0, Math.floor(dt / 340) % 3 === 0 ? -1 : 0];
+    if (e.faisca) m.faisca = Math.floor(t / 300) % 4 !== 3;
+    if (e.pulo) m.corpo = dt < 640 ? [-2, -1, 0, 0, -1, 0, 0, 0][Math.floor(dt / 80)] || 0 : 0;
+    return m;
   };
 
   CharacterAnimator.prototype.quadro = function (t, forcar) {
     if (this.rodando && !forcar) this.raf = requestAnimationFrame(this.passo);
-    var cv = this.cv, ctx = this.ctx;
-    // desenha na resolução real da tela: o movimento fica liso e nítido
-    var w = Math.round((cv.clientWidth || CFG.W / 2) * (window.devicePixelRatio || 1));
-    if (w && w !== cv.width) { cv.width = w; cv.height = Math.round(w * (CFG.H + CFG.MARGEM) / CFG.W); }
-    var parado = semMovimento();
-    var m = parado ? { dx: 0, dy: 0, sobe: 0, ang: 0, giro: 0 } : movimento(this.atual[1], t, t - this.inicioEstado);
-    var k = this.antes && !parado ? suave((t - this.tTroca) / 320) : 1;   // troca de pose suave
-    if (k >= 1) this.antes = null;
-    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
-    var s = cv.width / CFG.W; ctx.setTransform(s, 0, 0, s, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-    if (k < 1) this.pose(this.antes, 1 - k, m, 0);
-    this.pose(this.atual[0], k, m, (1 - k) * 6);
-    ctx.globalAlpha = 1;
+    var passoMs = 1000 / 12;                                   // ritmo de pixel art
+    if (!forcar && this.ultimoT && t - this.ultimoT < passoMs) return;
+    this.ultimoT = t;
+    var m = this.movimentos(t, this.estado);
+    // troca de pose sem transparência (pixel art não mistura imagens):
+    // antecipação na pose antiga (desce 1 px), troca já abaixada e acomodação (sobe 1 px)
+    var tr = this.trans, poseVez = this.pose, mudanca = 0, mov = m;
+    if (tr) {
+      var d = t - tr.inicio;
+      if (d < 100) { poseVez = tr.de; mudanca = 1; mov = this.movimentos(t, tr.deEstado || 'idle'); }
+      else if (d < 200) mudanca = 1;
+      else if (d < 280) mudanca = -1;
+      else this.trans = tr = null;
+    }
+    var chave = JSON.stringify([poseVez, this.estado, mov, mudanca]);
+    if (chave === this.ultimaChave) return;
+    this.ultimaChave = chave;
+    this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
+    this.desenharPose(poseVez, mov, mudanca);
+  };
+
+  // desenha uma pose por partes: pernas, tronco, cabeça (com cabelo) e a parte móvel da pose
+  CharacterAnimator.prototype.desenharPose = function (pose, m, extraY) {
+    var ctx = this.ctx, W = CFG.W, H = CFG.H, f = this.fonte;
+    var sx = (pose - 1) * W, oy = CFG.MARGEM + (m.corpo || 0) + (extraY || 0);
+    var linhaCab = m.pisca ? H : 0;
+    var parte = PARTES[pose];
+    var tronco = oy - m.respira;
+    var blit = function (x, y, w, h, dx, dy, linha) { if (w > 0 && h > 0) ctx.drawImage(f, sx + x, (linha || 0) + y, w, h, dx + x, dy + y, w, h); };
+
+    ctx.save();
+    if (parte) {                         // a parte móvel não entra nas camadas de base
+      ctx.beginPath();
+      ctx.rect(0, 0, this.cv.width, this.cv.height);
+      ctx.rect(parte[0], parte[1] + tronco, parte[2], parte[3]);
+      ctx.clip('evenodd');
+    }
+    blit(0, CINTURA, W, H - CINTURA, 0, oy);                                   // pernas (paradas)
+    blit(0, CABECA, W, CINTURA - CABECA, 0, tronco);                           // tronco
+    if (m.respira) blit(0, CINTURA - 1, W, 1, 0, oy);                          // tapa a fresta da respiração
+    var cx = m.cabeca[0], cy = tronco + m.cabeca[1];
+    blit(0, CABELO, W, CABECA - CABELO, cx, cy, linhaCab);                     // rosto
+    blit(0, 0, W, CABELO, cx + m.cabelo, cy, linhaCab);                        // pontas do cabelo
+    ctx.restore();
+
+    if (parte) {
+      var px = parte[0] + m.parte[0], py = parte[1] + tronco + m.parte[1];
+      if (m.parte[0] || m.parte[1]) ctx.drawImage(f, sx + parte[0], parte[1], parte[2], parte[3], parte[0], parte[1] + tronco, parte[2], parte[3]);
+      ctx.drawImage(f, sx + parte[0], parte[1], parte[2], parte[3], px, py, parte[2], parte[3]);
+      if (pose === 3 && m.faisca) ctx.drawImage(this.faisca, FAISCA[0], FAISCA[1] + tronco);
+    }
   };
 
   /* ===================================================================== */
@@ -346,7 +426,7 @@
     });
     this.falaTs.push(setTimeout(function () { if (self.anim) self.anim.definir(parado()); }, total));
   };
-  var SEQUENCIAS = {};   // uma pose por fala (sem ficar trocando)
+  var SEQUENCIAS = { explaining: ['explaining', 'idea'], idea: ['idea', 'explaining', 'idea'], confident: ['confident', 'idea'] };
 
   VirtualAssistant.prototype.reagir = function () { /* passar o mouse só levanta o personagem (CSS); não troca a pose */ };
 

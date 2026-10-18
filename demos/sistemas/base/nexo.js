@@ -15,7 +15,6 @@ import { prepararExtras } from './extras.js';
 import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 import { paginaImportar } from './planilha.js';
 import { prepararSuporte } from './suporte.js';
-import { personagemIA } from './assistente-ia.js';
 // Assistente IA: liberado em 17/10 (sem a chave do Gemini, a função nexo-ia responde que está sendo ativado)
 const IA_LIBERADA = true;
 
@@ -627,11 +626,9 @@ function montar(app, cfg) {
       const contagens = Object.fromEntries(Object.entries(app.db.dados).filter(([k, v]) => Array.isArray(v) && !k.startsWith('_')).map(([k, v]) => [k, v.length]));
       const contexto = { destaques: r?.destaques || [], alertas: r?.alertas || [], contagens };
       const sugestoes = ['O que eu devo priorizar hoje?', 'Como está o meu mês?', 'Escreva uma mensagem de cobrança educada', 'Como eu consigo mais clientes?', `Como funciona o ${cfg.nome}?`];
-      let boneco = null; // personagem que reage: olá, pensando, explicando, não sei
       const desenhar = (resp = '', carregando = false) => `<div class="col" style="gap:10px">
-        <div class="ia-cab"><div class="ia-boneco-caixa" data-ia-boneco></div><div class="col" style="gap:10px;flex:1;min-width:0">
         <p class="mute-2" style="font-size:12.5px;margin:0">Pergunte sobre o seu negócio ou sobre como usar o sistema. A IA vê só os números e avisos do resumo do dia, nunca telefones, e-mails ou documentos dos seus clientes.${app.sessao ? '' : ' Na demonstração, a resposta é um exemplo.'}</p>
-        <div class="dica" style="margin:0">${ic('sparkle')}<span>Você tem <b>20 perguntas grátis por dia</b>${app.sessao ? `. Restam <b data-ia-rest>…</b> hoje.` : ' na versão com conta.'}</span></div></div></div>
+        <div class="dica" style="margin:0">${ic('sparkle')}<span>Você tem <b>20 perguntas grátis por dia</b>${app.sessao ? `. Restam <b data-ia-rest>…</b> hoje.` : ' na versão com conta.'}</span></div>
         <details data-ia-conta style="border:1px solid var(--borda);border-radius:8px;padding:8px 12px"><summary style="cursor:pointer;font-size:13px;font-weight:500">Usar a minha conta do Gemini ou do ChatGPT <span class="mute" style="font-weight:400">(só para você)</span></summary>
           <div class="col" style="gap:10px;margin-top:10px">
             <p class="mute-2" style="font-size:12.5px;margin:0">Com a sua própria chave você pergunta até 300 vezes por dia, pela sua conta. Vale só para o seu usuário: cada pessoa da equipe conecta a dela, se quiser. Funciona com <b>chave de API</b>, não com a assinatura do app (ChatGPT Plus ou Gemini Advanced não servem). <b>Gemini:</b> chave grátis em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. <b>ChatGPT:</b> em <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a> (a OpenAI cobra pelo uso, na sua conta).</p>
@@ -648,16 +645,14 @@ function montar(app, cfg) {
       const perguntar = async (f) => {
         const t = f.querySelector('[data-ia-perg]'), out = f.querySelector('[data-ia-resp]'), pergunta = t.value.trim();
         if (pergunta.length < 3) { t.focus(); return false; }
-        out.style.display = ''; out.textContent = 'Pensando…'; boneco?.estado('pensando');
-        if (!app.sessao?.funcao) { setTimeout(() => { out.textContent = exemplo(); boneco?.estado('explicando', 6000); }, 1800); return false; }
-        try { const x = await app.sessao.funcao('nexo-ia', { pergunta, sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes === 0 ? (x.propria ? 'Limite de segurança de hoje atingido.' : 'Esta foi a última pergunta grátis de hoje. Amanhã você tem mais 20, ou conecte a sua conta do Gemini ou do ChatGPT aqui, em Usar a minha conta.') : `Restam ${x.restantes} de ${x.propria ? 300 : 20} perguntas${x.propria ? '' : ' grátis'} hoje.`}` : ''}`; const rr = f.querySelector('[data-ia-rest]'); if (rr && typeof x.restantes === 'number') rr.textContent = x.restantes; boneco?.estado(x.bloqueada ? 'negativo' : 'explicando', 6000); }
-        catch (e) { out.textContent = e.message || 'Não foi possível responder agora.'; boneco?.estado(/limite|já usou/i.test(e.message || '') ? 'pausa' : 'naosei', 5000); }
+        out.style.display = ''; out.textContent = 'Pensando…';
+        if (!app.sessao?.funcao) { setTimeout(() => { out.textContent = exemplo(); }, 500); return false; }
+        try { const x = await app.sessao.funcao('nexo-ia', { pergunta, sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes === 0 ? (x.propria ? 'Limite de segurança de hoje atingido.' : 'Esta foi a última pergunta grátis de hoje. Amanhã você tem mais 20, ou conecte a sua conta do Gemini ou do ChatGPT aqui, em Usar a minha conta.') : `Restam ${x.restantes} de ${x.propria ? 300 : 20} perguntas${x.propria ? '' : ' grátis'} hoje.`}` : ''}`; const rr = f.querySelector('[data-ia-rest]'); if (rr && typeof x.restantes === 'number') rr.textContent = x.restantes; }
+        catch (e) { out.textContent = e.message || 'Não foi possível responder agora.'; }
         return false;
       };
       modal({ titulo: 'Assistente IA', largura: 620, corpo: desenhar(), botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }, { rotulo: 'Perguntar', classe: 'pri', acao: perguntar }],
         aoAbrir: (f) => {
-          boneco = personagemIA(f.querySelector('[data-ia-boneco]'), 'ola'); boneco.estado('ola', 2600);
-          f.querySelector('[data-ia-perg]')?.addEventListener('input', () => { if (!/pensando|explicando/.test(boneco.atual || '')) boneco.estado('ouvindo', 2500); });
           const dica = f.querySelector('.dica span'), btSalvar = f.querySelector('[data-ia-salvar]'), btRemover = f.querySelector('[data-ia-remover]');
           const status = () => app.sessao?.funcao && app.sessao.funcao('nexo-ia', { acao: 'status' }).then((x) => {
             dica.innerHTML = x.propria ? `Usando a <b>sua conta ${x.provedor === 'openai' ? 'do ChatGPT' : 'do Gemini'}</b>. Restam <b data-ia-rest>${x.restantes}</b> de ${x.limite} perguntas hoje.` : `Você tem <b>20 perguntas grátis por dia</b>. Restam <b data-ia-rest>${x.restantes}</b> hoje.`;
@@ -673,8 +668,8 @@ function montar(app, cfg) {
             btSalvar.disabled = true; btSalvar.textContent = 'Testando a chave…';
             try {
               const t = await app.sessao.funcao('nexo-ia', { acao: 'salvar', provedor: f.querySelector('[data-ia-prov]').value, chave, modelo });
-              if (t.ok) { f.querySelector('[data-ia-chave]').value = ''; avisar(`Conta conectada: a IA agora usa o seu ${t.provedor === 'openai' ? 'ChatGPT' : 'Gemini'}`); boneco.estado('sucesso', 3500); } else { avisar(t.erro, { tipo: 'erro', tempo: 10000 }); boneco.estado('naosei', 4000); }
-            } catch (e) { avisar(e.message, { tipo: 'erro', tempo: 10000 }); boneco.estado('naosei', 4000); }
+              if (t.ok) { f.querySelector('[data-ia-chave]').value = ''; avisar(`Conta conectada: a IA agora usa o seu ${t.provedor === 'openai' ? 'ChatGPT' : 'Gemini'}`); } else avisar(t.erro, { tipo: 'erro', tempo: 10000 });
+            } catch (e) { avisar(e.message, { tipo: 'erro', tempo: 10000 }); }
             btSalvar.disabled = false; status();
           });
           btRemover.addEventListener('click', async () => {
