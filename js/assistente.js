@@ -18,9 +18,9 @@
   window.__assistenteBR = true;
 
   var CFG = {
-    sprite: 'img/assistente-pessoa.webp?v=3',
+    sprite: 'img/assistente-pessoa.webp?v=4',
     dados: 'js/assistente-dados.json?v=8',
-    W: 165, H: 347, MARGEM: 20,          // tamanho de cada pose na folha; folga (metade em cima, metade embaixo) para o pulinho
+    W: 196, H: 432, MARGEM: 52,          // tamanho de cada pose na folha; folga (metade em cima, metade embaixo) para o pulinho
   };
   var reduzMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   var semMovimento = function () { return !!(reduzMov && reduzMov.matches); };
@@ -32,32 +32,34 @@
   /* ===================================================================== */
   /* PixelCharacter + CharacterAnimator                                    */
   /* ===================================================================== */
-  // folha img/assistente-pessoa.webp (scratchpad/iaass/montar_preto.py): poses do dono recortadas, 5 por linha, sem redesenho
-  var POSES = ['padrao', 'ola', 'joia', 'duvida', 'ideia', 'explicando', 'bracos', 'celular', 'lupa'];
-  var CINTURA = {'padrao': 159, 'ola': 168, 'joia': 171, 'duvida': 170, 'ideia': 169, 'explicando': 172, 'bracos': 173, 'celular': 174, 'lupa': 171};     // linha do cinto de cada pose: dali para cima respira
-  // estado da conversa -> [pose, movimento]: uma pose por situação; o movimento é contínuo e suave
+  // folha img/assistente-pessoa.webp (scratchpad/iaass/montar_novas.py): poses do dono, sem redesenho, 4 por linha
+  var POSES = ['celular', 'ola', 'explicando', 'joia', 'ideia', 'duvida', 'notebook', 'agradecendo'];
+  var CINTURA = { celular: 198, ola: 186, explicando: 159, joia: 189, ideia: 184, duvida: 182, notebook: 172, agradecendo: 186 };
+  var POR_LINHA = 4, PE_X = 114, TAU = 2 * Math.PI;
+  // estado da conversa -> [pose, movimento]: uma pose por situação; o movimento é contínuo e liso
   var ESTADOS = {
-    idle:      ['padrao', 'calmo'],
-    minimized: ['padrao', 'calmo'],
+    idle:      ['celular', 'calmo'],
+    minimized: ['celular', 'calmo'],
     greeting:  ['ola', 'aceno'],
-    listening: ['padrao', 'calmo'],
+    listening: ['celular', 'calmo'],
     thinking:  ['duvida', 'pensa'],
     explaining:['explicando', 'fala'],
     idea:      ['ideia', 'ideia'],
-    confident: ['bracos', 'calmo'],
+    confident: ['agradecendo', 'agradece'],
     success:   ['joia', 'pulo'],
     error:     ['duvida', 'nega'],
   };
   var suave = function (x) { return x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x); };
-  // respiração (o tronco sobe), aceno, cabeça pensando, aceno de cabeça ao falar, pulinho e um "não" curto
+  // respiração, balanço leve, aceno, pensar, falar, pulinho, "não" curto e agradecer (pixels e graus da folha)
   function movimento(mov, t, dt) {
-    var r = { dx: 0, dy: 0, sobe: 1.3 * (1 - Math.cos(2 * Math.PI * t / 3600)) / 2, ang: 0 };
-    if (mov === 'aceno') r.ang = Math.sin(dt / 190) * 1.6 * (1 - suave((dt - 1400) / 600));
-    else if (mov === 'pensa') r.ang = Math.sin(t / 1500) * 0.9;
-    else if (mov === 'fala') r.sobe += 0.9 * Math.max(0, Math.sin(dt / 230));
-    else if (mov === 'pulo') r.dy = -7 * Math.sin(Math.PI * Math.min(dt / 460, 1));
-    else if (mov === 'ideia') r.dy = -4 * Math.sin(Math.PI * Math.min(dt / 360, 1));
-    else if (mov === 'nega') r.dx = 2 * Math.sin(dt / 45) * Math.max(0, 1 - dt / 520);
+    var r = { dx: 0, dy: 0, sobe: 3.2 * (1 - Math.cos(TAU * t / 2600)) / 2, ang: 0, giro: 0.6 * Math.sin(TAU * t / 5200) };
+    if (mov === 'aceno') r.ang = Math.sin(dt / 150) * 3.2 * (1 - suave((dt - 1500) / 700));
+    else if (mov === 'pensa') r.ang = Math.sin(TAU * t / 2600) * 1.8;
+    else if (mov === 'fala') { r.sobe += 2.4 * Math.max(0, Math.sin(TAU * dt / 650)); r.ang = Math.sin(TAU * dt / 2600) * 0.9; }
+    else if (mov === 'pulo') r.dy = -20 * Math.sin(Math.PI * Math.min(dt / 520, 1));
+    else if (mov === 'ideia') r.dy = -11 * Math.sin(Math.PI * Math.min(dt / 420, 1));
+    else if (mov === 'nega') r.dx = 6 * Math.sin(dt / 42) * Math.max(0, 1 - dt / 560);
+    else if (mov === 'agradece') r.ang = 2.2 * Math.sin(Math.PI * Math.min(dt / 1400, 1));
     return r;
   }
 
@@ -99,27 +101,34 @@
   };
   CharacterAnimator.prototype.desenharAgora = function () { this.quadro(performance.now(), true); };
 
-  // uma pose: pernas paradas; tronco e cabeça sobem (respiração) e giram no cinto
+  // uma pose: o corpo balança nos pés; pernas paradas; tronco e cabeça sobem (respiração) e giram no cinto
   CharacterAnimator.prototype.pose = function (nome, alfa, m, entra) {
-    var W = CFG.W, H = CFG.H, i = POSES.indexOf(nome), sx = (i % 5) * W, sy = Math.floor(i / 5) * H, c = CINTURA[nome];
-    var ctx = this.ctx, x = m.dx, y = CFG.MARGEM / 2 + m.dy + entra;
+    var W = CFG.W, H = CFG.H, Mg = CFG.MARGEM / 2, i = POSES.indexOf(nome), sx = (i % POR_LINHA) * W, sy = Math.floor(i / POR_LINHA) * H, c = CINTURA[nome];
+    var ctx = this.ctx;
     ctx.globalAlpha = alfa;
-    ctx.drawImage(this.folha, sx, sy + c - 2, W, H - c + 2, x, y + c - 2, W, H - c + 2);
-    ctx.save(); ctx.translate(x + W / 2, y + c); ctx.rotate(m.ang * Math.PI / 180);
-    ctx.drawImage(this.folha, sx, sy, W, c, -W / 2, -c - m.sobe, W, c);
+    ctx.save();
+    ctx.translate(PE_X + m.dx, Mg + H + m.dy + entra); ctx.rotate(m.giro * Math.PI / 180); ctx.translate(-PE_X, -(Mg + H));
+    ctx.drawImage(this.folha, sx, sy + c - 3, W, H - c + 3, 0, Mg + c - 3, W, H - c + 3);
+    ctx.translate(PE_X, Mg + c); ctx.rotate(m.ang * Math.PI / 180);
+    ctx.drawImage(this.folha, sx, sy, W, c, -PE_X, -c - m.sobe, W, c);
     ctx.restore();
   };
 
   CharacterAnimator.prototype.quadro = function (t, forcar) {
     if (this.rodando && !forcar) this.raf = requestAnimationFrame(this.passo);
+    var cv = this.cv, ctx = this.ctx;
+    // desenha na resolução real da tela: o movimento fica liso e nítido
+    var w = Math.round((cv.clientWidth || CFG.W / 2) * (window.devicePixelRatio || 1));
+    if (w && w !== cv.width) { cv.width = w; cv.height = Math.round(w * (CFG.H + CFG.MARGEM) / CFG.W); }
     var parado = semMovimento();
-    var m = parado ? { dx: 0, dy: 0, sobe: 0, ang: 0 } : movimento(this.atual[1], t, t - this.inicioEstado);
-    var k = this.antes && !parado ? suave((t - this.tTroca) / 280) : 1;   // troca de pose suave (uma some, a outra aparece)
+    var m = parado ? { dx: 0, dy: 0, sobe: 0, ang: 0, giro: 0 } : movimento(this.atual[1], t, t - this.inicioEstado);
+    var k = this.antes && !parado ? suave((t - this.tTroca) / 320) : 1;   // troca de pose suave
     if (k >= 1) this.antes = null;
-    this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+    var s = cv.width / CFG.W; ctx.setTransform(s, 0, 0, s, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     if (k < 1) this.pose(this.antes, 1 - k, m, 0);
-    this.pose(this.atual[0], k, m, (1 - k) * 3);
-    this.ctx.globalAlpha = 1;
+    this.pose(this.atual[0], k, m, (1 - k) * 6);
+    ctx.globalAlpha = 1;
   };
 
   /* ===================================================================== */
