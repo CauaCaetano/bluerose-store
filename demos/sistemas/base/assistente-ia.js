@@ -1,15 +1,15 @@
 // Personagem do Assistente IA (poses do dono em assistente-ia.webp, sem redesenho): troca de pose por estado e respira (o tronco sobe 1 px).
 // Gerado por scratchpad/iaass/montar.py: W/H da célula, ordem das poses (5 por linha) e a linha da cintura de cada uma.
 const W = 139, H = 209, POR_LINHA = 5;
-const POSES = ['analisando', 'concluido', 'confirmado', 'conversando', 'duvida', 'explicacao', 'explicando', 'ideia', 'joia', 'listando', 'naosei', 'negativo', 'ola', 'pausa', 'pensando', 'pesquisando', 'podedeixar', 'processando', 'tchau'];
-const CINTURA = { analisando: 111, concluido: 115, confirmado: 112, conversando: 112, duvida: 111, explicacao: 111, explicando: 111, ideia: 108, joia: 111, listando: 111, naosei: 112, negativo: 112, ola: 111, pausa: 119, pensando: 112, pesquisando: 110, podedeixar: 119, processando: 112, tchau: 118 };
+const POSES = ['analisando', 'concluido', 'confirmado', 'conversando', 'duvida', 'ideia', 'joia', 'listando', 'naosei', 'negativo', 'ola', 'pausa', 'pensando', 'pesquisando', 'podedeixar', 'processando', 'tchau'];
+const CINTURA = { analisando: 111, concluido: 115, confirmado: 112, conversando: 112, duvida: 111, ideia: 108, joia: 111, listando: 111, naosei: 112, negativo: 112, ola: 111, pausa: 119, pensando: 112, pesquisando: 110, podedeixar: 119, processando: 112, tchau: 118 };
 const ESTADOS = {
   parado: ['conversando'], ola: ['ola', 'joia'], ouvindo: ['conversando', 'listando'],
-  pensando: ['pensando', 'processando', 'pesquisando', 'analisando'], explicando: ['explicacao', 'explicando', 'ideia', 'explicando'],
+  pensando: ['pensando', 'processando', 'pesquisando', 'analisando'], explicando: ['conversando', 'ideia', 'listando', 'conversando'],
   sucesso: ['concluido', 'confirmado'], naosei: ['naosei', 'duvida'], negativo: ['negativo', 'naosei'], pausa: ['pausa'], tchau: ['tchau', 'podedeixar'],
 };
 let folha = null;
-const carregar = () => folha || (folha = new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = new URL('./assistente-ia.webp', import.meta.url).href; }));
+const carregar = () => folha || (folha = new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = new URL('./assistente-ia.webp?v=2', import.meta.url).href; }));
 
 /** Põe o personagem dentro de `el` e devolve { estado(nome, depois?), parar() }. `depois` volta a um estado após ms. */
 export function personagemIA(el, inicial = 'ola') {
