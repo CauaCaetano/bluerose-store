@@ -1,8 +1,8 @@
 /* Assistente virtual (personagem em pixel art no canto inferior direito). Usa as cores do site (css/site.css). */
 .va {
   --va-esc: 1;                                   /* escala do personagem */
-  --va-w: calc(111px * var(--va-esc));
-  --va-h: calc(171px * var(--va-esc));
+  --va-w: calc(94px * var(--va-esc));
+  --va-h: calc(200px * var(--va-esc));
   position: fixed; z-index: 58;                  /* acima do conteúdo e da navegação; abaixo do menu do celular e dos avisos */
   right: max(14px, env(safe-area-inset-right));
   bottom: calc(max(6px, env(safe-area-inset-bottom)) + var(--va-sobe, 0px));

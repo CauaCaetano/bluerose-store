@@ -810,6 +810,6 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 
 /* personagem do Assistente IA (assistente-ia.js) */
 .ia-cab { display: flex; gap: 14px; align-items: flex-end; }
-.ia-boneco-caixa { flex: none; width: 120px; }
-.ia-boneco { display: block; width: 120px; height: auto; aspect-ratio: 139 / 209; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); }
-@media (max-width: 560px) { .ia-boneco-caixa, .ia-boneco { width: 76px; } .ia-cab { gap: 10px; } }
+.ia-boneco-caixa { flex: none; width: 100px; }
+.ia-boneco { display: block; width: 100px; height: auto; aspect-ratio: 165 / 347; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); }
+@media (max-width: 560px) { .ia-boneco-caixa, .ia-boneco { width: 64px; } .ia-cab { gap: 10px; } }
