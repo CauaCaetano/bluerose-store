@@ -638,12 +638,12 @@ function montar(app, cfg) {
         if (pergunta.length < 3) { t.focus(); return false; }
         out.style.display = ''; out.textContent = 'Pensando…';
         if (!app.sessao?.funcao) { setTimeout(() => { out.textContent = exemplo(); }, 500); return false; }
-        try { const x = await app.sessao.funcao('nexo-ia', { pergunta, sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes === 0 ? 'Esta foi a última pergunta grátis de hoje. Amanhã você tem mais 20.' : `Restam ${x.restantes} de 20 perguntas grátis hoje.`}` : ''}`; const rr = f.querySelector('[data-ia-rest]'); if (rr && typeof x.restantes === 'number') rr.textContent = x.restantes; }
+        try { const x = await app.sessao.funcao('nexo-ia', { pergunta, sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes === 0 ? (x.propria ? 'Limite de segurança de hoje atingido.' : 'Esta foi a última pergunta grátis de hoje. Amanhã você tem mais 20, ou conecte a sua conta do Gemini ou do ChatGPT em Configurações.') : `Restam ${x.restantes} de ${x.propria ? 300 : 20} perguntas${x.propria ? '' : ' grátis'} hoje.`}` : ''}`; const rr = f.querySelector('[data-ia-rest]'); if (rr && typeof x.restantes === 'number') rr.textContent = x.restantes; }
         catch (e) { out.textContent = e.message || 'Não foi possível responder agora.'; }
         return false;
       };
       modal({ titulo: 'Assistente IA', largura: 620, corpo: desenhar(), botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }, { rotulo: 'Perguntar', classe: 'pri', acao: perguntar }],
-        aoAbrir: (f) => { if (app.sessao?.sb) app.sessao.sb.rpc('nexo_ia_restantes', { p_espaco: app.sessao.espaco?.id }).then(({ data }) => { const rr = f.querySelector('[data-ia-rest]'); if (rr) rr.textContent = typeof data === 'number' ? data : 20; }, () => {}); f.addEventListener('click', (e) => { const b2 = e.target.closest('[data-ia-sug]'); if (!b2) return; f.querySelector('[data-ia-perg]').value = b2.dataset.iaSug; perguntar(f); }); f.querySelector('[data-ia-perg]')?.focus(); } });
+        aoAbrir: (f) => { if (app.sessao?.funcao) app.sessao.funcao('nexo-ia', { acao: 'status' }).then((x) => { const rr = f.querySelector('[data-ia-rest]'), dica = rr?.closest('span'); if (!rr) return; if (x.propria) { dica.innerHTML = `Usando a <b>sua conta ${x.provedor === 'openai' ? 'do ChatGPT' : 'do Gemini'}</b>. Restam <b data-ia-rest>${x.restantes}</b> de ${x.limite} perguntas hoje.`; } else rr.textContent = x.restantes; }, () => {}); f.addEventListener('click', (e) => { const b2 = e.target.closest('[data-ia-sug]'); if (!b2) return; f.querySelector('[data-ia-perg]').value = b2.dataset.iaSug; perguntar(f); }); f.querySelector('[data-ia-perg]')?.focus(); } });
     },
     resumoDia: () => {
       const r = resumoDoDia(cfg.id, app.db.dados, hoje()), texto = resumoTexto(cfg.nome, app.empresa, r, hoje());
@@ -656,6 +656,42 @@ function montar(app, cfg) {
         botoes: [{ rotulo: 'Copiar', icone: 'copy', classe: 'fant', acao: () => { navigator.clipboard?.writeText(texto).catch(() => {}); avisar('Resumo copiado'); return false; } },
           { rotulo: 'E-mail', icone: 'envelope-simple', acao: () => { location.href = `mailto:?subject=${encodeURIComponent(`Resumo do dia · ${app.empresa}`)}&body=${encodeURIComponent(texto.replace(/\*/g, ''))}`; return false; } },
           { rotulo: 'Enviar no WhatsApp', icone: 'whatsapp-logo', classe: 'pri', acao: (f) => { const n = f.querySelector('[data-zap]').value; if (n) { app.db.cfg.whats_dono = n; app.db.gravar(); } const num = String(n || zap).replace(/\D/g, ''); window.open(`https://wa.me/${num ? `55${num.replace(/^55/, '')}` : ''}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener'); return false; } }] });
+    },
+  });
+
+  // Assistente IA com a conta da própria empresa (Gemini ou ChatGPT). A chave vai para o cofre do servidor e nunca volta.
+  function cartaoIA(a) {
+    const st = a.estado.ia;
+    if (!st && !a.estado.iaCarregando) { a.estado.iaCarregando = true; a.sessao.funcao('nexo-ia', { acao: 'status' }).then((x) => { a.estado.ia = x; a.estado.iaCarregando = false; a.render(); }, () => { a.estado.ia = { propria: false, restantes: 20, limite: 20 }; a.estado.iaCarregando = false; a.render(); }); }
+    const x = st || {}, prov = x.provedor === 'openai' ? 'ChatGPT (OpenAI)' : 'Gemini (Google)';
+    return `<div class="cartao" id="ia"><div class="cartao-cab"><div><h3>Assistente IA</h3><div class="sub">${x.propria ? `Usando a sua conta do ${prov}: até ${x.limite} perguntas por dia` : 'Grátis pela Blue Rose: 20 perguntas por dia. Conecte a sua conta para usar mais.'}</div></div>${x.propria ? et('Conta própria', 'ok') : et('Grátis', '')}</div><div class="cartao-corpo col" style="gap:12px">
+      <div class="dica">${ic('info')}<span>Funciona com uma <b>chave de API</b>, não com a assinatura do app (ChatGPT Plus ou Gemini Advanced não servem aqui). <b>Gemini:</b> crie a chave grátis em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. <b>ChatGPT:</b> crie em <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a> (a OpenAI cobra pelo uso, na sua conta).</span></div>
+      <form class="form-grade" data-ia-form onsubmit="return false"><label class="campo">Conta<select name="provedor"><option value="gemini" ${x.provedor !== 'openai' ? 'selected' : ''}>Gemini (Google)</option><option value="openai" ${x.provedor === 'openai' ? 'selected' : ''}>ChatGPT (OpenAI)</option></select></label>
+        <label class="campo">Modelo (opcional)<input name="modelo" placeholder="${x.provedor === 'openai' ? 'gpt-5-mini' : 'gemini-3.5-flash-lite'}" value="${x.propria && x.modelo ? esc(x.modelo) : ''}" maxlength="60"></label>
+        <label class="campo largo">Chave de API<input name="chave" type="password" autocomplete="off" placeholder="${x.propria ? '•••••••• (deixe em branco para manter)' : 'cole a chave'}"></label>
+        <p class="mute largo" style="margin:0;font-size:12.5px">A chave fica guardada num cofre no servidor: não aparece de novo para ninguém, nem para a sua equipe. A IA recebe só os números do resumo do sistema e a pergunta, nunca os dados dos seus clientes, o código do sistema ou chaves.</p>
+        <div class="campo largo" style="flex-direction:row;justify-content:flex-end;gap:8px;flex-wrap:wrap">${x.propria ? '<button type="button" class="btn fant perigo" data-acao="iaRemover">Voltar para a IA grátis</button><button type="button" class="btn" data-acao="iaTestar">Testar conexão</button>' : ''}<button type="button" class="btn pri" data-acao="iaSalvar">${x.propria ? 'Salvar' : 'Conectar a minha conta'}</button></div></form></div></div>`;
+  }
+  Object.assign(app.acoes, {
+    iaSalvar: async () => {
+      const f = document.querySelector('[data-ia-form]'), chave = f.chave.value.trim(), modelo = f.modelo.value.trim();
+      if (!chave && !app.estado.ia?.propria) return avisar('Cole a chave de API', { tipo: 'erro' });
+      if (chave && (chave.length < 20 || /\s/.test(chave))) return avisar('Essa chave não parece completa: confira e cole de novo', { tipo: 'erro' });
+      if (modelo && !/^[a-z0-9][a-z0-9.\-]{1,60}$/i.test(modelo)) return avisar('Nome do modelo inválido', { tipo: 'erro' });
+      try {
+        await app.sessao.salvarSegredo('ia_provedor', f.provedor.value); await app.sessao.salvarSegredo('ia_modelo', modelo);
+        if (chave) await app.sessao.salvarSegredo('ia_chave', chave);
+        f.chave.value = '';
+        const t = await app.sessao.funcao('nexo-ia', { acao: 'testar' });
+        app.estado.ia = null; app.estado.iaCarregando = false;
+        if (t.ok) avisar(`Conta conectada: a IA agora usa o seu ${t.provedor === 'openai' ? 'ChatGPT' : 'Gemini'}`); else avisar(`${t.erro} A chave ficou salva: confira e salve de novo.`, { tipo: 'erro', tempo: 10000 });
+        app.render();
+      } catch (e) { avisar(e.message, { tipo: 'erro' }); }
+    },
+    iaTestar: async () => { try { const t = await app.sessao.funcao('nexo-ia', { acao: 'testar' }); avisar(t.ok ? 'Conexão funcionando' : t.erro, { tipo: t.ok ? 'ok' : 'erro', tempo: 8000 }); } catch (e) { avisar(e.message, { tipo: 'erro' }); } },
+    iaRemover: async () => {
+      if (!(await confirmar('Desconectar a sua conta e voltar para a IA grátis (20 perguntas por dia)? A chave é apagada do cofre.', { rotulo: 'Desconectar', perigo: true }))) return;
+      try { await app.sessao.salvarSegredo('ia_chave', ''); await app.sessao.salvarSegredo('ia_modelo', ''); app.estado.ia = null; app.estado.iaCarregando = false; avisar('Voltou para a IA grátis'); app.render(); } catch (e) { avisar(e.message, { tipo: 'erro' }); }
     },
   });
 
@@ -676,7 +712,7 @@ function montar(app, cfg) {
       <div class="cartao"><div class="cartao-cab"><div><h3>Dados</h3><div class="sub">Cópia e restauração</div></div></div><div class="cartao-corpo col" style="gap:10px">
         <div class="entre"><span class="mute-2">Baixar uma cópia de tudo (JSON)</span><button type="button" class="btn" data-acao="exportarDados">${ic('download-simple')}Exportar</button></div>
         ${a.nuvem ? a.sessao.linhasDados() : `<div class="entre"><span class="mute-2">Voltar aos dados de exemplo</span><button type="button" class="btn perigo" data-acao="recomecar">${ic('arrow-counter-clockwise')}Recomeçar</button></div>`}</div></div>
-      ${a.nuvem ? a.sessao.cartaoResumo() + (a.sessao.cartaoBackup ? a.sessao.cartaoBackup() : '') : ''}${a.extrasConfig ? a.extrasConfig(a) : ''}${cfg.configExtra ? cfg.configExtra(a) : ''}</div>`,
+      ${a.nuvem ? a.sessao.cartaoResumo() + (a.sessao.cartaoBackup ? a.sessao.cartaoBackup() : '') : ''}${a.nuvem && a.sessao.dono ? cartaoIA(a) : ''}${a.extrasConfig ? a.extrasConfig(a) : ''}${cfg.configExtra ? cfg.configExtra(a) : ''}</div>`,
   };
   const paginaPlanilha = paginaImportar(app);
   const paginaDono = {
