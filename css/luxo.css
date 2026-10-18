@@ -203,3 +203,8 @@ main::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; 
 .conta-busca-item { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; }
 .conta-busca-item b { font-size: 15px; } .conta-busca-item span { color: var(--ink-3); font-size: 13px; flex: 1; min-width: 160px; }
 .conta-busca-nada { color: var(--ink-3); margin: 0; }
+/* listas de escolha no fundo escuro: as opções abertas também ficam escuras com letra clara (antes: fundo branco, letra clara) */
+.conta-pag select, .sup select, .sup-fb-form select, .conta-busca input { color-scheme: dark; }
+.conta-pag select option, .sup select option, .sup-fb-form select option { background: #10141c; color: #eef2f8; }
+.conta-pag select option:checked, .sup select option:checked { background: #2a4f9e; color: #fff; }
+select { color-scheme: dark; } select option { background: #10141c; color: #eef2f8; }
