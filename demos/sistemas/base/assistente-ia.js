@@ -3,15 +3,15 @@
 // pulinho ao dar certo e um "não" curto no erro. Troca de pose só quando algo acontece, com transição suave.
 // Folha gerada por scratchpad/iaass/montar_preto.py: W/H da célula, ordem das poses (5 por linha) e a linha do cinto de cada uma.
 const W = 165, H = 347, POR_LINHA = 5, M = 10; // M: folga em cima e embaixo para o pulinho
-const POSES = ['padrao', 'ola', 'joia', 'apontando', 'duvida', 'ideia', 'explicando', 'bracos', 'celular', 'lupa'];
-const CINTURA = { padrao: 159, ola: 168, joia: 171, apontando: 170, duvida: 170, ideia: 169, explicando: 172, bracos: 173, celular: 174, lupa: 171 };
+const POSES = ['padrao', 'ola', 'joia', 'duvida', 'ideia', 'explicando', 'bracos', 'celular', 'lupa'];
+const CINTURA = { padrao: 159, ola: 168, joia: 171, duvida: 170, ideia: 169, explicando: 172, bracos: 173, celular: 174, lupa: 171 };
 const ESTADOS = {
   parado: ['padrao', 'calmo'], ouvindo: ['padrao', 'calmo'], ola: ['ola', 'aceno'], tchau: ['ola', 'aceno'],
   pensando: ['duvida', 'pensa'], explicando: ['explicando', 'fala'], ideia: ['ideia', 'ideia'],
   sucesso: ['joia', 'pulo'], naosei: ['duvida', 'nega'], negativo: ['bracos', 'nega'], pausa: ['bracos', 'calmo'],
 };
 let folha = null;
-const carregar = () => folha || (folha = new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = new URL('./assistente-ia.webp?v=4', import.meta.url).href; }));
+const carregar = () => folha || (folha = new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = new URL('./assistente-ia.webp?v=5', import.meta.url).href; }));
 const suave = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 
 /** Movimento do instante: deslocamento do corpo (dx, dy), do tronco (sobe) e inclinação do tronco (graus). */

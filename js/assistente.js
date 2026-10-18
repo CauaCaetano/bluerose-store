@@ -18,7 +18,7 @@
   window.__assistenteBR = true;
 
   var CFG = {
-    sprite: 'img/assistente-pessoa.webp?v=2',
+    sprite: 'img/assistente-pessoa.webp?v=3',
     dados: 'js/assistente-dados.json?v=8',
     W: 165, H: 347, MARGEM: 20,          // tamanho de cada pose na folha; folga (metade em cima, metade embaixo) para o pulinho
   };
@@ -33,8 +33,8 @@
   /* PixelCharacter + CharacterAnimator                                    */
   /* ===================================================================== */
   // folha img/assistente-pessoa.webp (scratchpad/iaass/montar_preto.py): poses do dono recortadas, 5 por linha, sem redesenho
-  var POSES = ['padrao', 'ola', 'joia', 'apontando', 'duvida', 'ideia', 'explicando', 'bracos', 'celular', 'lupa'];
-  var CINTURA = {'padrao': 159, 'ola': 168, 'joia': 171, 'apontando': 170, 'duvida': 170, 'ideia': 169, 'explicando': 172, 'bracos': 173, 'celular': 174, 'lupa': 171};     // linha do cinto de cada pose: dali para cima respira
+  var POSES = ['padrao', 'ola', 'joia', 'duvida', 'ideia', 'explicando', 'bracos', 'celular', 'lupa'];
+  var CINTURA = {'padrao': 159, 'ola': 168, 'joia': 171, 'duvida': 170, 'ideia': 169, 'explicando': 172, 'bracos': 173, 'celular': 174, 'lupa': 171};     // linha do cinto de cada pose: dali para cima respira
   // estado da conversa -> [pose, movimento]: uma pose por situação; o movimento é contínuo e suave
   var ESTADOS = {
     idle:      ['padrao', 'calmo'],
