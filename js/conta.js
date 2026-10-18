@@ -15,14 +15,17 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
 
   function sessaoGuardada() { try { var s = JSON.parse(localStorage.getItem(CHAVE) || 'null'); return s && s.user ? s : null; } catch (e) { return null; } }
   function carregar(src) { return new Promise(function (ok, falha) { if (document.querySelector('script[src="' + src + '"]')) return ok(); var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = falha; document.head.appendChild(s); }); }
+  // uma conexão só, mesmo quando várias partes da página pedem ao mesmo tempo (lista, suporte, indicação)
+  var clientePromessa = null;
   function sb() {
     if (cliente) return Promise.resolve(cliente);
-    return carregar(raiz + 'app/config.js').then(function () { return carregar(raiz + 'demos/sistemas/base/supabase.js'); }).then(function () {
+    if (clientePromessa) return clientePromessa;
+    return (clientePromessa = carregar(raiz + 'app/config.js').then(function () { return carregar(raiz + 'demos/sistemas/base/supabase.js'); }).then(function () {
       var c = window.NEXO_NUVEM;
       cliente = window.supabase.createClient(c.url, c.chave, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: CHAVE } });
       cliente.auth.onAuthStateChange(function () { marcarMenu(); });
       return cliente;
-    });
+    }).catch(function (e) { clientePromessa = null; throw e; }));
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); }
   function reais(n) { return 'R$ ' + Number(n).toLocaleString('pt-BR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
