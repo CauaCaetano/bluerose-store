@@ -807,3 +807,10 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
   .visoes, .abas-pag { flex-wrap: wrap; overflow-x: visible; }
   img, video, canvas, iframe { max-width: 100%; }
 }
+
+/* personagem do Assistente IA (assistente-ia.js) */
+.ia-cab { display: flex; gap: 14px; align-items: flex-end; }
+.ia-boneco-caixa { flex: none; width: 161px; margin: -6px -10px -4px -14px; }
+/* pixel art: tamanho natural (1 pixel da arte = 1 pixel da tela), sem suavizar */
+.ia-boneco { display: block; width: 161px; height: auto; aspect-ratio: 161 / 225; image-rendering: pixelated; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); }
+@media (max-width: 560px) { .ia-boneco-caixa, .ia-boneco { width: 81px; } .ia-boneco-caixa { margin: 0 -4px 0 -6px; } .ia-cab { gap: 10px; } }
