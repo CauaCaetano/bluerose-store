@@ -109,7 +109,8 @@
   // a última lista fica guardada neste aparelho: aparece na hora e é atualizada assim que o servidor responde
   var guardada = C.sessao && C.sessao(), CHAVE_CACHE = guardada ? 'br-conta-' + guardada.user.id : null;
   function lerCache() { try { return CHAVE_CACHE ? JSON.parse(localStorage.getItem(CHAVE_CACHE) || 'null') : null; } catch (e) { return null; } }
-  function gravarCache(j) { try { if (CHAVE_CACHE) localStorage.setItem(CHAVE_CACHE, JSON.stringify({ assinaturas: j.assinaturas || [], tokens: j.tokens || {} })); } catch (e) { /* sem armazenamento */ } }
+  // o token de dono nunca fica guardado no aparelho (só a lista de assinaturas)
+  function gravarCache(j) { try { if (CHAVE_CACHE) localStorage.setItem(CHAVE_CACHE, JSON.stringify({ assinaturas: j.assinaturas || [] })); } catch (e) { /* sem armazenamento */ } }
   function carregar() {
     var cache = !volta && lerCache();
     if (cache && guardada) { perfil(guardada.user); document.body.classList.add('conta-logado'); mostrar(cache, true); }
