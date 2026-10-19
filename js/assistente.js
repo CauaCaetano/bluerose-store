@@ -20,6 +20,7 @@
   var CFG = {
     sprite: 'img/assistente.png?v=1',
     dados: 'js/assistente-dados.json?v=8',
+    ia: 'https://yihnfzwtkqdfnwziutqa.supabase.co/functions/v1/site-assistente',   // perguntas livres (Gemini, com limite)
     W: 111, H: 168, MARGEM: 3,           // tamanho de cada pose na folha; margem para o pulinho
   };
   var reduzMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -308,7 +309,9 @@
         el('button', { classe: 'va-btn-cab', type: 'button', 'data-va': 'fechar', title: 'Fechar', 'aria-label': 'Fechar o painel', texto: '×' }),
       ]),
     ]);
-    var rodape = el('div', { classe: 'va-rodape' }, [this.rapidas, this.mais]);
+    this.campo = el('input', { type: 'text', classe: 'va-campo', maxlength: '500', autocomplete: 'off', placeholder: 'Ou escreva a sua dúvida…', 'aria-label': 'Escreva a sua dúvida para o assistente' });
+    this.form = el('form', { classe: 'va-form' }, [this.campo, el('button', { type: 'submit', 'aria-label': 'Enviar pergunta', texto: '➤' })]);
+    var rodape = el('div', { classe: 'va-rodape' }, [this.rapidas, this.mais, this.form]);
     this.painel = el('div', { classe: 'va-painel', id: 'va-painel', role: 'dialog', 'aria-modal': 'false', 'aria-labelledby': 'va-titulo', hidden: '' }, [cab, this.lista, rodape]);
     raiz.appendChild(this.painel); raiz.appendChild(this.balao); raiz.appendChild(boneco); raiz.appendChild(this.status);
     document.body.appendChild(raiz);
@@ -331,6 +334,7 @@
     });
     this.painel.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); self.fechar(); } });
     this.lista.addEventListener('click', function (e) { self.cliqueLink(e); });
+    this.form.addEventListener('submit', function (e) { e.preventDefault(); var t = self.campo.value.trim(); if (t.length < 2 || self.ocupado) return; self.campo.value = ''; self.perguntarIA(t); });
     this.rapidas.addEventListener('click', function (e) {
       var b = e.target.closest('button[data-i]'); if (!b) return;
       if (b.hasAttribute('data-sis')) { self.mostrarSistema(b.getAttribute('data-sis'), b.textContent); return; }
@@ -523,6 +527,34 @@
     var self = this, resp = this.k.resposta(q);
     this.desenharMsg({ de: 'eu', texto: [q.p] });
     this.responder(resp, resp.ramos ? this.ramos() : null);
+  };
+
+  // pergunta escrita: a IA responde só com as informações do site; se falhar, oferece a equipe
+  VirtualAssistant.prototype.perguntarIA = function (texto) {
+    var self = this;
+    var hist = this.historico.slice(-6).map(function (m) { return { de: m.de, texto: (m.texto || []).join(' ') }; });
+    this.desenharMsg({ de: 'eu', texto: [texto] });
+    this.ocupado = true;
+    this.digitando(true);
+    this.estado('thinking');
+    var ctl = window.AbortController ? new AbortController() : null, t = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
+    var contato = [{ rotulo: 'Falar com a equipe', href: 'index.html#contato' }];
+    fetch(CFG.ia, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta: texto, historico: hist }), signal: ctl && ctl.signal })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, j: j }; }); })
+      .then(function (x) {
+        if (x.status === 200 && x.j.texto) return { texto: x.j.texto.split(/\n+/).filter(Boolean), links: x.j.links || [], estado: 'explaining' };
+        if (x.status === 429) return { texto: ['Você fez muitas perguntas seguidas. Espere alguns minutos ou fale direto com a equipe, que responde em até 1 dia útil.'], links: contato, estado: 'confident' };
+        throw new Error();
+      })
+      .catch(function () { return { texto: ['Não consegui responder agora. Escolha uma dúvida acima ou fale com a equipe, que responde em até 1 dia útil.'], links: contato, estado: 'error' }; })
+      .then(function (r) {
+        clearTimeout(t);
+        self.digitando(false);
+        self.desenharMsg({ de: 'bot', texto: r.texto, links: r.links });
+        self.estado(r.estado, 'Resposta pronta.', r.texto.join(' '));
+        self.ocupado = false;
+        self.campo.focus({ preventScroll: true });
+      });
   };
 
   VirtualAssistant.prototype.ramos = function () {
