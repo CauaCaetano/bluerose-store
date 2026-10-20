@@ -255,7 +255,7 @@ function telaEmpresa(sb, cfg, espacos, precisaToken = false) {
       ${camposLocal()}
       <div class="dica">${ic('upload-simple')}<span>A empresa começa <b>em branco</b>. Logo depois de criar, você sobe as suas planilhas (Excel) e o sistema preenche os cadastros sozinho.</span></div>
       ${cfg.modelos?.length ? `<label class="campo">Tipo de negócio<select name="ramo">${cfg.modelos.map((m) => `<option value="${m.id}">${esc(m.nome)}</option>`).join('')}<option value="__outro">Outro (escrever o meu)</option></select><span class="ajuda">Já começa com os serviços e cadastros típicos do seu ramo</span></label>
-      <label class="campo" data-ramo-outro hidden>Qual é o seu ramo?<input name="ramo_outro" maxlength="60" placeholder="Ex.: conserto de bicicletas"><span class="ajuda">A empresa começa em branco, e você cadastra os seus serviços do seu jeito</span></label>` : ''}
+      <label class="campo" data-ramo-outro style="display:none">Qual é o seu ramo?<input name="ramo_outro" maxlength="60" placeholder="Ex.: conserto de bicicletas"><span class="ajuda">A empresa começa em branco, e você cadastra os seus serviços do seu jeito</span></label>` : ''}
       ${precisaToken ? `<label class="campo">Token de dono<input name="token" required autocomplete="off" spellcheck="false" placeholder="${esc(cfg.id.toUpperCase().slice(0, 6))}-XXXX-XXXX-XXXX" style="font-family:var(--mono);text-transform:uppercase"><span class="ajuda">Enviamos para o seu e-mail quando o teste ou a assinatura começou, e ele também aparece em <a href="${SITE}conta.html" target="_blank" rel="noopener">Minha conta</a>. Só é pedido agora, na primeira vez. <a href="#" data-reenviar>Não recebeu? Enviar de novo para o meu e-mail</a></span></label>` : ''}
       <label class="campo">Chave PIX da empresa <span class="mute">(opcional)</span><input name="pix" placeholder="CNPJ, e-mail, celular ou chave aleatória"><span class="ajuda">Para as cobranças e links de pagamento já saírem com o QR code. Dá para colocar depois.</span></label>
       <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Criar a empresa</button></form>
@@ -263,7 +263,8 @@ function telaEmpresa(sb, cfg, espacos, precisaToken = false) {
     document.querySelectorAll('[data-esp]').forEach((li) => (li.onclick = () => resolver({ id: li.dataset.esp, novo: false })));
     // "Outro": a pessoa escreve o ramo dela em vez de escolher um modelo pronto
     const selRamo = f.querySelector('[name="ramo"]'), boxOutro = f.querySelector('[data-ramo-outro]');
-    selRamo?.addEventListener('change', () => { const outro = selRamo.value === '__outro'; boxOutro.hidden = !outro; boxOutro.querySelector('input').required = outro; if (outro) boxOutro.querySelector('input').focus(); });
+    // (style.display e não hidden: o .campo tem display:flex, que anula o atributo hidden)
+    selRamo?.addEventListener('change', () => { const outro = selRamo.value === '__outro'; boxOutro.style.display = outro ? '' : 'none'; boxOutro.querySelector('input').required = outro; if (outro) boxOutro.querySelector('input').focus(); });
     // manda o token de dono de novo para o e-mail da conta usada na assinatura
     document.querySelector('[data-reenviar]')?.addEventListener('click', async (ev) => {
       ev.preventDefault(); const a = ev.currentTarget, erro = f.querySelector('[data-erro]');
