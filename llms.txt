@@ -18,7 +18,7 @@ Fatos para responder sobre a empresa:
 - [Nexo CRM](https://bluerose-store.com/nexo-crm.html): funil de vendas e propostas para equipes comerciais de qualquer ramo. R$ 99 / R$ 159
 - [Nexo Agenda](https://bluerose-store.com/nexo-agenda.html): agenda e atendimento para salões, estética, barbearias e clínicas. R$ 79 / R$ 139
 - [Nexo Jurídico](https://bluerose-store.com/nexo-juridico.html): processos, prazos e intimações para escritórios de advocacia. R$ 149 / R$ 209
-- [Nexo Financeiro](https://bluerose-store.com/nexo-financeiro.html): contas, fluxo de caixa, conciliação com OFX, categorias com limite de gasto, ordens de serviço com orçamento aprovado pelo celular e contratos de manutenção com PMOC, para assistências técnicas e prestadores. R$ 109 / R$ 169
+- [Nexo Financeiro](https://bluerose-store.com/nexo-financeiro.html): contas, fluxo de caixa, conciliação com OFX, categorias com limite de gasto, ordens de serviço com orçamento aprovado pelo celular, agenda e tela do técnico, assinatura do cliente, recibo, nota de serviço (NFS-e), lucro por OS, estimativa do Simples e contratos de manutenção com PMOC, para assistências técnicas e prestadores. R$ 109 / R$ 169
 - [Nexo Clínica](https://bluerose-store.com/nexo-clinica.html): agenda médica e prontuário para clínicas e consultórios. R$ 109 / R$ 169
 - [Nexo Academia](https://bluerose-store.com/nexo-academia.html): alunos, mensalidades, check-in e treinos para academias, estúdios e boxes. R$ 99 / R$ 159
 - [Nexo Restaurante](https://bluerose-store.com/nexo-restaurante.html): mesas, comandas, delivery e cozinha para restaurantes, bares e lanchonetes. R$ 89 / R$ 149

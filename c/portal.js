@@ -107,7 +107,12 @@ T.orcamento = {
     const total = Math.max(0, valendo.reduce((s, x) => s + x.qtd * x.preco, 0) - (d.desconto || 0));
     return `${cab(E().nome, d.equipamento, `${d.marca ? `${esc(d.marca)} · ` : ''}Ordem de serviço nº ${esc(d.numero)}`)}
       <section class="p-sec"><h2>Onde está o seu equipamento</h2><div class="p-passos">${d.etapas.map((_, k) => `<i class="${k <= i ? 'feito' : ''}"></i>`).join('')}</div><div class="p-passos-rot"><span>Entrada</span><b style="color:var(--acc)">${esc(d.etapas[i]?.[1] || '')}</b><span>Entrega</span></div>
-        ${d.previsao ? `<p class="p-s" style="margin-top:10px">Previsão: <b>${dt(d.previsao)}</b></p>` : ''}${d.garantia ? `<p class="p-s" style="margin-top:6px">Garantia do serviço até <b>${dt(d.garantia)}</b></p>` : ''}</section>
+        ${d.previsao ? `<p class="p-s" style="margin-top:10px">Previsão: <b>${dt(d.previsao)}</b></p>` : ''}${d.garantia ? `<p class="p-s" style="margin-top:6px">Garantia do serviço até <b>${dt(d.garantia)}</b></p>` : ''}${d.validade && pend ? `<p class="p-s" style="margin-top:6px">Orçamento válido até <b>${dt(d.validade)}</b></p>` : ''}</section>
+      ${d.etapa === 'pronta' && !d.assinado && !st.assinou ? `<section class="p-sec"><h2>Retirada do equipamento</h2><p class="p-sub">Confirme que recebeu o equipamento funcionando e que está de acordo com a garantia de ${esc(d.garantiaDias || 90)} dias. A assinatura fica no termo de entrega.</p>
+        <label class="p-s" style="display:block;margin:8px 0 4px">Seu nome completo</label><input data-f="nomeAss" value="${esc(st.nomeAss || '')}" autocomplete="name" style="width:100%;padding:10px;border-radius:10px;border:1px solid #ccd3df;font:inherit">
+        <canvas data-quadro width="720" height="264" style="width:100%;height:180px;margin-top:10px;border:1.5px dashed #9aa4b5;border-radius:12px;background:#fff;touch-action:none" aria-label="Assine aqui com o dedo"></canvas>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><span class="p-s">Assine com o dedo</span><button type="button" class="p-bt peq" data-a="limparAss">Limpar</button></div>
+        <button type="button" class="p-bt pri" style="width:100%;margin-top:10px" data-a="assinar">Assinar a retirada</button></section>` : d.assinado || st.assinou ? '<section class="p-sec"><p class="p-s" style="margin:0">Termo de entrega assinado ✓</p></section>' : ''}
       <section class="p-sec"><h2>${pend ? 'Orçamento para aprovar' : 'Serviços e peças'}</h2>${pend ? '<p class="p-sub">Marque o que você quer fazer agora. O que ficar de fora não é cobrado.</p>' : ''}
         ${d.itens.map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.descricao)}${x.qtd > 1 ? ` <span class="p-s">× ${esc(x.qtd)}</span>` : ''}</div></div><span class="p-num">${x.preco ? moeda(x.qtd * x.preco) : 'incluso'}</span>
           ${x.aprovado == null ? (pend ? `<button type="button" class="p-bt peq" aria-pressed="${!!st.aprov[x.k]}" data-a="marcar" data-k="${esc(x.k)}">${st.aprov[x.k] ? 'Aprovado' : 'Não agora'}</button>` : '') : x.aprovado ? '<span class="p-et ok">Aprovado</span>' : '<span class="p-et">Recusado</span>'}</div>`).join('')}
@@ -118,8 +123,22 @@ T.orcamento = {
       ${d.laudo && !pend ? `<section class="p-sec"><h2>O que foi feito</h2><p class="p-s" style="margin:0">${esc(d.laudo)}</p></section>` : ''}
       ${avisoDemo()}${rod()}${pend ? `<div class="p-fixo"><button type="button" class="p-bt pri" data-a="aprovar">Confirmar · ${moeda(total)}</button></div>` : ''}`;
   },
+  depois: () => { const cv = raiz.querySelector('[data-quadro]'); if (!cv || cv._ligado) return; cv._ligado = true; const g = cv.getContext('2d'); g.lineWidth = 3; g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = '#111'; let des = false;
+    const pt = (e) => { const b = cv.getBoundingClientRect(); return [((e.clientX - b.left) / b.width) * cv.width, ((e.clientY - b.top) / b.height) * cv.height]; };
+    cv.addEventListener('pointerdown', (e) => { des = true; cv.setPointerCapture(e.pointerId); g.beginPath(); g.moveTo(...pt(e)); e.preventDefault(); });
+    cv.addEventListener('pointermove', (e) => { if (!des) return; g.lineTo(...pt(e)); g.stroke(); cv._tracos = (cv._tracos || 0) + 1; e.preventDefault(); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach((t) => cv.addEventListener(t, () => { des = false; })); },
   acoes: {
     marcar: (el) => { st.aprov[el.dataset.k] = !st.aprov[el.dataset.k]; desenhar(); },
+    limparAss: () => { const cv = raiz.querySelector('[data-quadro]'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); cv._tracos = 0; },
+    assinar: async () => {
+      lerCampos(); const cv = raiz.querySelector('[data-quadro]'), nome = String(st.nomeAss || '').trim();
+      if (nome.length < 5) return alert('Escreva o seu nome completo.');
+      if ((cv._tracos || 0) < 8) return alert('Assine no quadro branco.');
+      const c = document.createElement('canvas'); c.width = 360; c.height = 132; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 360, 132); x.drawImage(cv, 0, 0, 360, 132);
+      const r = await responder('assinar', { img: c.toDataURL('image/png'), nome: nome.slice(0, 80) }); if (r.erro) return alert(r.erro);
+      st.assinou = true; pronto('Retirada assinada', `Obrigado, ${nome.split(' ')[0]}! O termo de entrega com a garantia fica guardado na ${E().nome || 'empresa'}.`);
+    },
     aprovar: async () => { const r = await responder('aprovar', { itens: st.aprov }); if (r.erro) return alert(r.erro); const algum = Object.values(st.aprov).some(Boolean); pronto(algum ? 'Orçamento aprovado' : 'Resposta enviada', algum ? `${E().nome || 'A empresa'} já recebeu a sua resposta e vai seguir com o serviço.` : 'Avisamos a empresa que você não quer fazer o serviço agora.'); },
   },
 };
@@ -509,6 +528,7 @@ function lerCampos() { raiz.querySelectorAll('[data-f]').forEach((x) => { st[x.d
 function desenhar() {
   const t = T[ctx.tipo];
   raiz.innerHTML = t ? t.render(ctx.dados) : '<p class="p-erro">Este link não é suportado.</p>';
+  t?.depois?.(ctx.dados);
 }
 raiz.addEventListener('click', (e) => {
   const el = e.target.closest('[data-a]'); if (!el) return;
