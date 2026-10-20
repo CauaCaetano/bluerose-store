@@ -7,6 +7,7 @@ import {
 import { LADOS as FERR, ITENS as FERR_ITENS } from './ferramentas.js';
 import { acoesLado, ferramentaPaginas, travarPro } from '../base/lado.js';
 import { equipeViva, paginaEquipe } from '../base/equipe-viva.js';
+import { baixarXlsx } from '../base/xlsx.js';
 
 const TEC = [['diego', 'Diego Araújo', 30], ['renan', 'Renan Souza', 30], ['paulo', 'Paulo Henrique', 25]];
 const EQUIPE = { colecao: 'tecnicos', rot: 'Técnicos', icone: 'toolbox', singular: 'técnico', plural: 'técnicos', vazio: 'os técnicos', lista: TEC,
@@ -270,7 +271,7 @@ function categoriasPag(a) {
 
 function fluxo(a) {
   const st = a.estado.fx ||= { modo: 'mensal' };
-  const topo = `<div class="entre"><div class="grupo-btn"><button type="button" data-acao="modoFx" data-m="mensal" aria-pressed="${st.modo === 'mensal'}">Mensal</button><button type="button" data-acao="modoFx" data-m="diario" aria-pressed="${st.modo === 'diario'}">Diário (30 dias)</button></div><button type="button" class="btn" data-acao="csvFluxo">${ic('download-simple')}Planilha</button></div>`;
+  const topo = `<div class="entre"><div class="grupo-btn"><button type="button" data-acao="modoFx" data-m="mensal" aria-pressed="${st.modo === 'mensal'}">Mensal</button><button type="button" data-acao="modoFx" data-m="diario" aria-pressed="${st.modo === 'diario'}">Diário (30 dias)</button></div><button type="button" class="btn" data-acao="csvFluxo">${ic('table')}Baixar em Excel</button></div>`;
   let linhasT;
   if (st.modo === 'mensal') {
     const meses = Array.from({ length: 9 }, (_, i) => mesMais(i - 6));
@@ -398,7 +399,8 @@ function cartaoContador(a) {
   const meses = Array.from({ length: 6 }, (_, i) => mesMais(-i));
   return `<div class="cartao"><div class="cartao-cab"><div><h3>Pacote do mês para o contador</h3><div class="sub">Uma planilha com tudo o que entrou e saiu no mês: data, categoria, linha do DRE, cliente ou fornecedor com CPF/CNPJ, conta, forma, situação e as transferências entre contas</div></div></div><div class="cartao-corpo flex" style="flex-wrap:wrap">
     <select data-mudar="mesContador" style="width:auto">${meses.map((m, i) => `<option value="${m}" ${m === (a.estado.mesCont || mesMais(-1)) ? 'selected' : ''}>${nomeMes(m, true)}${i === 0 ? ' (até hoje)' : ''}</option>`).join('')}</select>
-    <button type="button" class="btn pri" data-acao="pacoteContador">${ic('download-simple')}Baixar a planilha</button><span class="mute" style="font-size:12.5px">Mande junto com o extrato do banco e as notas fiscais do mês.</span></div></div>`;
+    <button type="button" class="btn pri" data-acao="pacoteContador">${ic('table')}Baixar em Excel</button><span class="mute" style="font-size:12.5px">Mande junto com o extrato do banco e as notas fiscais do mês.</span></div></div>
+    <div class="cartao"><div class="cartao-cab"><div><h3>Tudo em uma planilha do Excel</h3><div class="sub">Para mandar a um sócio, ao banco ou a quem for ajudar: resumo, contas a receber e a pagar, lançamentos, fluxo por mês, DRE, transferências, OS, contratos, clientes e estoque, cada um numa aba</div></div><button type="button" class="btn pri" data-acao="excelCompleto">${ic('table')}Baixar em Excel</button></div></div>`;
 }
 function relatorios(a) {
   const ent = a.db.lista('ordens').filter((o) => o.status === 'entregue' && diasAte(o.entregue_em) > -90);
@@ -698,7 +700,31 @@ Object.assign(app.acoes, {
     window.open(`${telLink(p?.telefone)}?text=${encodeURIComponent(textoRegua(app, l, passo, url))}`, '_blank', 'noopener');
     app.db.salvar('lancamentos', { id: d.id, regua: { ...(l.regua || {}), [passo[1]]: hoje() } }); app.db.registrar(`lancamentos:${d.id}`, `Cobrança enviada (${passo[2]})`, { icone: 'whatsapp-logo' }); app.render();
   },
-  csvFluxo: () => { const l = app.estado.fxLinhas || []; baixar('fluxo-de-caixa.csv', `﻿Período;Entradas;Saídas;Resultado;Saldo\n${l.map((x) => [x.rot, x.e, x.s, x.r, x.saldo].map((v) => String(typeof v === 'number' ? v.toFixed(2).replace('.', ',') : v)).join(';')).join('\n')}`); avisar('Planilha baixada'); },
+  csvFluxo: () => { const l = app.estado.fxLinhas || [], m = (v) => ({ v: Math.round(v * 100) / 100, t: 'moeda' }); baixarXlsx(`fluxo-de-caixa-${hoje()}`, [{ nome: 'Fluxo de caixa', linhas: [['Período', 'Entradas', 'Saídas', 'Resultado', 'Saldo final', 'Previsto'], ...l.map((x) => [x.rot, m(x.e), m(x.s), m(x.r), m(x.saldo), x.futuro ? 'previsto' : ''])] }]); avisar('Planilha do Excel baixada'); },
+  excelCompleto: () => {
+    const m = (v) => ({ v: Math.round((Number(v) || 0) * 100) / 100, t: 'moeda' }), ym = hoje().slice(0, 7), sit = (l) => (l.status === 'pago' ? (l.tipo === 'receita' ? 'Recebido' : 'Pago') : vencido(l) ? 'Vencido' : 'Em aberto');
+    const linhaL = (l) => { const p = pessoa(app, l.pessoa); return [l.vencimento, l.pago_em || '', l.tipo === 'receita' ? 'Receita' : 'Despesa', l.descricao, CAT[l.categoria]?.nome || '', p?.nome || '', p?.doc || '', conta(app, l.conta)?.nome || '', l.forma || '', m(sinal(l) * l.valor), sit(l)]; };
+    const cabL = ['Vencimento', 'Pago em', 'Tipo', 'Descrição', 'Categoria', 'Cliente / fornecedor', 'CPF / CNPJ', 'Conta', 'Forma', 'Valor', 'Situação'];
+    const todos = [...lancs(app)].sort((x, y) => x.vencimento.localeCompare(y.vencimento)), ab = todos.filter((l) => l.status === 'aberto');
+    const meses = Array.from({ length: 12 }, (_, i) => mesMais(i - 11));
+    const resM = (mm, f) => soma(lancs(app).filter((l) => (l.status === 'pago' ? l.pago_em : l.vencimento).startsWith(mm) && f(l)), (l) => l.valor);
+    const dreM = (mm, g) => soma(lancs(app).filter((l) => l.vencimento.startsWith(mm) && l.tipo === 'despesa' && CAT[l.categoria]?.grupo === g), (l) => l.valor);
+    const recM = (mm) => soma(lancs(app).filter((l) => l.vencimento.startsWith(mm) && l.tipo === 'receita'), (l) => l.valor);
+    const abas = [
+      { nome: 'Resumo', linhas: [['Item', 'Valor'], ['Empresa', app.empresa], ['Gerado em', hoje()], ['Saldo em todas as contas', m(saldoTotal(app))], ...app.db.lista('contas').map((c) => [`  ${c.nome}`, m(saldoConta(app, c.id))]), ['A receber em aberto', m(soma(ab.filter((l) => l.tipo === 'receita'), (l) => l.valor))], ['  dos quais vencidos', m(soma(ab.filter((l) => l.tipo === 'receita' && vencido(l)), (l) => l.valor))], ['A pagar em aberto', m(soma(ab.filter((l) => l.tipo === 'despesa'), (l) => l.valor))], [`Recebido em ${nomeMes(ym, true)}`, m(resM(ym, (l) => l.tipo === 'receita' && l.status === 'pago'))], [`Pago em ${nomeMes(ym, true)}`, m(resM(ym, (l) => l.tipo === 'despesa' && l.status === 'pago'))], ['Contratos ativos (por mês)', m(soma(app.db.lista('contratos').filter((c) => ctrAtivo(c)), (c) => c.valor))], ['OS abertas', app.db.lista('ordens').filter((o) => o.status !== 'entregue').length]] },
+      { nome: 'A receber', linhas: [cabL, ...ab.filter((l) => l.tipo === 'receita').map(linhaL)] },
+      { nome: 'A pagar', linhas: [cabL, ...ab.filter((l) => l.tipo === 'despesa').map(linhaL)] },
+      { nome: 'Todos os lançamentos', linhas: [cabL, ...todos.map(linhaL)] },
+      { nome: 'Fluxo por mês', linhas: [['Mês', 'Entradas', 'Saídas', 'Resultado'], ...meses.map((mm) => { const e = resM(mm, (l) => l.tipo === 'receita'), s = resM(mm, (l) => l.tipo === 'despesa'); return [nomeMes(mm, true), m(e), m(s), m(e - s)]; })] },
+      { nome: 'DRE', linhas: [['Linha', ...meses.slice(-6).map((mm) => nomeMes(mm, true))], ['Receita bruta', ...meses.slice(-6).map((mm) => m(recM(mm)))], ...GRUPOS.map(([g, r]) => [`(−) ${r.split(' (')[0]}`, ...meses.slice(-6).map((mm) => m(dreM(mm, g)))]), ['= Resultado', ...meses.slice(-6).map((mm) => m(recM(mm) - soma(GRUPOS, ([g]) => dreM(mm, g))))]] },
+      { nome: 'Transferências', linhas: [['Data', 'Sai de', 'Entra em', 'Valor', 'Descrição'], ...transfs(app).map((t) => [t.data, conta(app, t.de)?.nome || '', conta(app, t.para)?.nome || '', m(t.valor), t.obs || ''])] },
+      { nome: 'Ordens de serviço', linhas: [['OS', 'Entrada', 'Cliente', 'Equipamento', 'Marca', 'Série', 'Técnico', 'Situação', 'Previsão', 'Entregue em', 'Total'], ...app.db.lista('ordens').sort((x, y) => y.numero - x.numero).map((o) => [o.numero, o.entrada, pessoa(app, o.cliente)?.nome || '', o.equipamento, o.marca || '', { v: o.serie || '', t: 'texto' }, nomeT(o.tecnico), stOS(o.status)[1], o.previsao || '', o.entregue_em || '', m(totalOS(o))])] },
+      { nome: 'Contratos', linhas: [['Cliente', 'Descrição', 'Mensalidade', 'Dia', 'Início', 'Fim', 'Visitas', 'Próxima visita', 'PMOC', 'Situação'], ...app.db.lista('contratos').map((c) => [pessoa(app, c.cliente)?.nome || '', c.descricao, m(c.valor), Number(c.dia) || '', c.inicio || '', c.fim || '', (VISITAS.find((v) => v[0] === String(c.visitas)) || VISITAS[0])[1], c.proxima || '', !!c.pmoc, ctrAtivo(c) ? 'Ativo' : c.status])] },
+      { nome: 'Clientes e fornecedores', linhas: [['Nome', 'Tipo', 'CPF / CNPJ', 'Telefone', 'E-mail', 'Em aberto'], ...app.db.lista('pessoas').map((p) => [p.nome, p.tipo === 'fornecedor' ? 'Fornecedor' : 'Cliente', { v: p.doc || '', t: 'texto' }, { v: p.telefone || '', t: 'texto' }, p.email || '', m(soma(ab.filter((l) => l.pessoa === p.id), (l) => l.valor))])] },
+      { nome: 'Estoque', linhas: [['Peça', 'Código', 'Custo', 'Venda', 'Estoque', 'Mínimo'], ...app.db.lista('produtos').map((p) => [p.nome, { v: p.codigo || '', t: 'texto' }, m(p.custo), m(p.preco), Number(p.estoque) || 0, Number(p.minimo) || 0])] },
+    ];
+    baixarXlsx(`${normal(app.empresa).replace(/[^a-z0-9]+/g, '-')}-financeiro-${hoje()}`, abas); avisar('Planilha do Excel baixada, com 11 abas');
+  },
   contaConc: (d, el) => { app.estado.conc.conta = el.value; app.render(); },
   conciliar: (d) => { if (d.t) { const t = app.db.obter('transferencias', d.t), e = app.db.obter('extrato', d.e); app.db.salvar('transferencias', { id: t.id, conc: { ...(t.conc || {}), [e.conta]: e.id } }); app.db.salvar('extrato', { id: e.id, conciliado: `t:${t.id}` }); avisar('Conciliado com a transferência'); app.render(); return; } app.db.salvar('extrato', { id: d.e, conciliado: d.l }); const l = app.db.obter('lancamentos', d.l); const e = app.db.obter('extrato', d.e); app.db.salvar('lancamentos', { id: d.l, conciliado: true, status: 'pago', pago_em: l.pago_em || e.data }); avisar('Conciliado'); app.render(); },
   concTodos: () => { let n = 0; app.db.lista('extrato').filter((e) => e.conta === app.estado.conc.conta && !e.conciliado).forEach((e) => { const s = sugerir(app, e); if (s?.t) { app.db.salvar('transferencias', { id: s.t.id, conc: { ...(s.t.conc || {}), [e.conta]: e.id } }); app.db.salvar('extrato', { id: e.id, conciliado: `t:${s.t.id}` }); n++; } else if (s) { app.db.salvar('extrato', { id: e.id, conciliado: s.id }); app.db.salvar('lancamentos', { id: s.id, conciliado: true, status: 'pago', pago_em: s.pago_em || e.data }); n++; } }); avisar(`${n} lançamentos conciliados`); app.render(); },
@@ -758,7 +784,8 @@ Object.assign(app.acoes, {
     const linhasL = ls.map((l) => { const p = pessoa(app, l.pessoa), g = CAT[l.categoria]?.grupo; return [dataBR(l.vencimento), l.pago_em ? dataBR(l.pago_em) : '', l.tipo === 'receita' ? 'Receita' : 'Despesa', l.descricao, CAT[l.categoria]?.nome || '', g === 'receita' ? 'Receita bruta' : nomeGrupo(g), p?.nome || '', p?.doc || '', conta(app, l.conta)?.nome || '', l.forma || '', n2(sinal(l) * l.valor), l.status === 'pago' ? (l.tipo === 'receita' ? 'Recebido' : 'Pago') : vencido(l) ? 'Vencido' : 'Em aberto', l.os ? `OS #${os(app, l.os)?.numero || ''}` : '']; });
     const linhasT = transfs(app).filter((t) => t.data.startsWith(ym)).map((t) => [dataBR(t.data), dataBR(t.data), 'Transferência', t.obs || 'Transferência entre contas', '', '', '', '', `${conta(app, t.de)?.nome || ''} → ${conta(app, t.para)?.nome || ''}`, '', n2(t.valor), 'Feita', '']);
     const cab = ['Vencimento (competência)', 'Pago em', 'Tipo', 'Descrição', 'Categoria', 'Linha do DRE', 'Cliente / fornecedor', 'CPF / CNPJ', 'Conta', 'Forma', 'Valor', 'Situação', 'Referência'];
-    baixar(`contador-${ym}-${normal(app.empresa).replace(/[^a-z0-9]+/g, '-')}.csv`, `﻿${[cab, ...linhasL, ...linhasT].map((r) => r.map(cel).join(';')).join('\n')}`);
+    const xl = (r) => r.map((v, i) => (i === 10 ? { v: Number(String(v).replace(',', '.')), t: 'moeda' } : (i === 0 || i === 1) && /^\d{2}\/\d{2}\/\d{4}$/.test(v) ? v.split('/').reverse().join('-') : i === 7 ? { v, t: 'texto' } : v));
+    baixarXlsx(`contador-${ym}-${normal(app.empresa).replace(/[^a-z0-9]+/g, '-')}`, [{ nome: `Lançamentos ${ym}`, linhas: [cab, ...linhasL.map(xl)] }, { nome: 'Transferências', linhas: [cab, ...linhasT.map(xl)] }]); void cel;
     avisar(`Planilha de ${nomeMes(ym, true)} baixada: ${ls.length} lançamentos e ${linhasT.length} transferências`);
   },
   cfgAtraso: (d, el) => { const lim = d.k === 'multa' ? 20 : 10; app.db.cfg.atraso = { ...regraAtraso(app), [d.k]: Math.min(lim, Math.max(0, Number(el.value) || 0)) }; app.db.gravar(); avisar('Multa e juros salvos'); },

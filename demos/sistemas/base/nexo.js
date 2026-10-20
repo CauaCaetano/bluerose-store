@@ -15,6 +15,7 @@ import { prepararExtras } from './extras.js';
 import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 import { paginaImportar } from './planilha.js';
 import { prepararSuporte } from './suporte.js';
+import { baixarXlsx } from './xlsx.js';
 // Assistente IA: liberado em 17/10 (sem a chave do Gemini, a função nexo-ia responde que está sendo ativado)
 const IA_LIBERADA = true;
 
@@ -428,7 +429,7 @@ export function tabela(app, cfg) {
     ${(cfg.filtros || []).map((f) => { const ops = typeof f.opcoes === 'function' ? f.opcoes(app) : f.opcoes; return `<span class="filtro-chip ${st.filtros[f.k] ? 'ativo' : ''}"><select data-tab-filtro="${cfg.id}:${f.k}" aria-label="${esc(f.rot)}"><option value="">${esc(f.rot)}</option>${ops.map((o) => { const [v, r] = Array.isArray(o) ? o : [o, o]; return `<option value="${esc(v)}" ${st.filtros[f.k] === String(v) ? 'selected' : ''}>${esc(f.rot)}: ${esc(r)}</option>`; }).join('')}</select></span>`; }).join('')}
     ${Object.values(st.filtros).some(Boolean) || st.busca ? `<button type="button" class="btn fant peq" data-tab-limpar="${cfg.id}">Limpar</button>` : ''}
     <span class="mute" style="margin-left:auto;font-size:12.5px">${num(itens.length)} ${itens.length === 1 ? cfg.singular || 'item' : cfg.plural || 'itens'}${cfg.total ? ` · ${cfg.total(itens, app)}` : ''}</span>
-    <button type="button" class="btn fant ic-so peq" data-tab-csv="${cfg.id}" title="Exportar planilha (CSV)" aria-label="Exportar planilha">${ic('download-simple')}</button>
+    <button type="button" class="btn fant ic-so peq" data-tab-csv="${cfg.id}" title="Baixar planilha (Excel ou CSV)" aria-label="Baixar planilha">${ic('download-simple')}</button>
     ${cfg.novo ? `<button type="button" class="btn pri peq" ${cfg.novo.attrs || ''}>${ic('plus')}${esc(cfg.novo.rot)}</button>` : ''}</div>`;
   const ths = `${massa ? `<th class="chk"><input type="checkbox" data-tab-todos="${cfg.id}" ${pagina.length && pagina.every((x) => st.sel.includes(x.id)) ? 'checked' : ''} aria-label="Selecionar todos"></th>` : ''}${cfg.colunas.map((c) => `<th class="${c.n ? 'n' : ''} ${c.oc ? 'oc' : ''} ${c.ord === false ? '' : 'ord'}" ${c.ord === false ? '' : `data-tab-ord="${cfg.id}:${c.k}"`} ${c.w ? `style="width:${c.w}"` : ''}>${esc(c.rot)}${st.ordem === c.k ? `<span class="seta">${st.desc ? '↓' : '↑'}</span>` : ''}</th>`).join('')}${cfg.acoesLinha ? '<th></th>' : ''}`;
   const corpo = pagina.map((x) => `<tr class="${cfg.aoClicar !== false ? 'clicavel' : ''} ${st.sel.includes(x.id) ? 'sel' : ''}" data-tab-linha="${cfg.id}:${x.id}">${massa ? `<td class="chk"><input type="checkbox" data-tab-sel="${cfg.id}:${x.id}" ${st.sel.includes(x.id) ? 'checked' : ''} aria-label="Selecionar"></td>` : ''}${cfg.colunas.map((c) => `<td class="${c.n ? 'n' : ''} ${c.oc ? 'oc' : ''} ${c.cls || ''}">${c.render ? c.render(x, app) : esc((c.valor ? c.valor(x, app) : x[c.k]) ?? '—')}</td>`).join('')}${cfg.acoesLinha ? `<td class="acoes">${cfg.acoesLinha(x, app)}</td>` : ''}</tr>`).join('');
@@ -797,9 +798,14 @@ function montar(app, cfg) {
     if (t.dataset.tabCsv) {
       const cfgT = app.tabelas?.[tid]; const itens = app.estado[`tab:${tid}:itens`] || [];
       const cols = cfgT.colunas.filter((c) => c.csv !== false);
+      const bruto = (c, x) => (c.csv ? c.csv(x, app) : c.valor ? c.valor(x, app) : x[c.k]);
       const cel = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-      const linhas = [cols.map((c) => cel(c.rot)).join(';'), ...itens.map((x) => cols.map((c) => cel(c.csv ? c.csv(x, app) : c.valor ? c.valor(x, app) : x[c.k])).join(';'))];
-      baixar(`${cfg.id}-${tid}.csv`, `﻿${linhas.join('\n')}`); avisar(`Planilha com ${itens.length} linhas baixada`); return;
+      const moedaCol = (c) => c.n && /valor|preco|total|saldo|custo|aberto|mensal|fatur|comiss|receb|pago|venda/i.test(`${c.k} ${c.rot}`);
+      const nomeArq = `${normal(app.empresa || cfg.id).replace(/[^a-z0-9]+/g, '-')}-${tid}-${hoje()}`;
+      pop(t, [
+        { rotulo: 'Excel (.xlsx)', icone: 'table', acao: () => { baixarXlsx(nomeArq, [{ nome: cfgT.plural || tid, linhas: [cols.map((c) => c.rot || c.k), ...itens.map((x) => cols.map((c) => { const v = bruto(c, x); return moedaCol(c) && typeof v === 'number' ? { v, t: 'moeda' } : v; }))] }]); avisar(`Planilha do Excel com ${itens.length} linhas baixada`); } },
+        { rotulo: 'CSV (texto)', icone: 'file-text', acao: () => { const linhas = [cols.map((c) => cel(c.rot)).join(';'), ...itens.map((x) => cols.map((c) => cel(bruto(c, x))).join(';'))]; baixar(`${nomeArq}.csv`, `﻿${linhas.join('\n')}`); avisar(`Planilha com ${itens.length} linhas baixada`); } },
+      ]); return;
     }
     if (t.dataset.tabMassa) { const m = app.tabelas?.[tid]?.massa?.[Number(arg)]; if (m) { const ids = [...st.sel]; const r = await m.acao(ids, app); if (r !== false) st.sel = []; } }
     app.render();
