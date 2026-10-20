@@ -87,15 +87,16 @@ export const diaUtil = (s) => !fimDeSemana(s) && !nomeFeriado(s);
 
 // ---------------------------------------------------------------- dados (localStorage)
 export class Banco {
-  constructor(chave, semente, inicial = null) {
-    this.chave = chave; this.semente = semente;
+  // versao: quando os dados de exemplo de um sistema mudam muito, sobe o número e a demonstração recomeça uma vez
+  constructor(chave, semente, inicial = null, versao = 1) {
+    this.chave = chave; this.semente = semente; this.versao = versao;
     if (inicial) { this.dados = inicial; return; }
     try { this.dados = JSON.parse(localStorage.getItem(chave) || 'null'); } catch { this.dados = null; }
-    if (!this.dados || !this.dados._ok) this.recomecar();
+    if (!this.dados || !this.dados._ok || (this.dados._v || 1) !== versao) this.recomecar();
   }
   recomecar() {
     const s = this.semente();
-    this.dados = { _ok: 1, _cfg: { ...(s._cfg || {}) }, _log: [] };
+    this.dados = { _ok: 1, _v: this.versao || 1, _cfg: { ...(s._cfg || {}) }, _log: [] };
     for (const [nome, lista] of Object.entries(s)) if (nome !== '_cfg') this.dados[nome] = lista.map((x) => ({ id: novoId(), ...x }));
     this.gravar();
   }
@@ -501,7 +502,7 @@ export function criarApp(cfg) {
       .catch((e) => { document.body.innerHTML = `<div style="padding:40px;font-family:system-ui">Não foi possível abrir o sistema: ${esc(e.message || e)}. <a href="">Tentar de novo</a></div>`; });
     return app;
   }
-  app.db = new Banco(`nexo2-${cfg.id}`, cfg.semente);
+  app.db = new Banco(`nexo2-${cfg.id}`, cfg.semente, null, cfg.versaoDemo || 1);
   if (app.db.cfg.empresa) app.empresa = app.db.cfg.empresa;
   montar(app, cfg);
   return app;
