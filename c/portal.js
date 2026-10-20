@@ -143,6 +143,81 @@ T.orcamento = {
   },
 };
 
+// Financeiro (Pro): área do cliente, pedido de visita, pesquisa de satisfação e aceite do contrato
+const formVisita = (comDados) => `${comDados ? `<label class="p-campo">Seu nome<input data-f="nome" autocomplete="name" value="${esc(st.nome || '')}"></label><label class="p-campo">WhatsApp<input data-f="telefone" inputmode="tel" autocomplete="tel" value="${esc(st.telefone || '')}" placeholder="(48) 99999-9999"></label>
+    <label class="p-campo">Endereço do atendimento<input data-f="endereco" autocomplete="street-address" value="${esc(st.endereco || '')}" placeholder="Rua e número"></label><label class="p-campo">Bairro<input data-f="bairro" value="${esc(st.bairro || '')}"></label>` : ''}
+    <label class="p-campo">Equipamento<input data-f="equipamento" value="${esc(st.equipamento || '')}" placeholder="Ex.: ar-condicionado split 12.000 BTU"></label>
+    <label class="p-campo">O que está acontecendo?<textarea data-f="texto" placeholder="Ex.: não gela, pinga água, faz barulho">${esc(st.texto || '')}</textarea></label>
+    <label class="p-campo">Melhor dia<input type="date" data-f="data" value="${esc(st.data || '')}" min="${new Date().toISOString().slice(0, 10)}"></label>
+    <div class="p-chips" style="margin:6px 0 0;padding:0">${['manhã', 'tarde'].map((p) => `<button type="button" class="p-bt" aria-pressed="${st.periodo === p}" data-a="periodo" data-v="${p}">De ${p}</button>`).join('')}</div>`;
+T.cliente = {
+  titulo: (d) => d.nome,
+  render(d) {
+    const conta = d.contas.find((x) => x.id === st.pagar);
+    if (conta) return `${cab(E().nome, moeda(conta.valor), `${esc(conta.descricao)} · ${conta.vencimento < new Date().toISOString().slice(0, 10) ? 'venceu' : 'vence'} em ${dt(conta.vencimento)}`)}<section class="p-sec"><h2>Pague com PIX</h2>${d.pix?.chave ? pixBloco(d.pix, conta.valor, conta.txid, conta.descricao) : '<p class="p-s">Fale com a empresa para receber os dados de pagamento.</p>'}</section>
+      <p style="text-align:center;margin-top:10px"><button type="button" class="p-bt" data-a="voltar">Voltar</button></p>${avisoDemo()}${rod()}<div class="p-fixo"><button type="button" class="p-bt ok" data-a="paguei" data-l="${esc(conta.id)}">Já paguei</button></div>`;
+    if (st.visita) return `${cab(E().nome, 'Pedir uma visita', `Para ${esc(d.nome)}`)}<section class="p-sec">${formVisita(false)}</section><p style="text-align:center;margin-top:10px"><button type="button" class="p-bt" data-a="voltar">Voltar</button></p>${avisoDemo()}${rod()}<div class="p-fixo"><button type="button" class="p-bt pri" data-a="enviarVisita">Pedir a visita</button></div>`;
+    return `${cab(E().nome, `Olá, ${esc(d.saudacao || String(d.nome).split(' ')[0])}`, 'Sua área: equipamentos, garantias, contratos e pagamentos')}
+      ${d.andamento.length ? `<section class="p-sec"><h2>Em serviço agora</h2>${d.andamento.map((o) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(o.equipamento)}</div><div class="p-s">OS ${esc(o.numero)} · ${esc(o.etapa)}${o.previsao ? ` · previsão ${dt(o.previsao)}` : ''}</div></div><span class="p-num">${moeda(o.total)}</span></div>`).join('')}</section>` : ''}
+      <section class="p-sec"><h2>Contas em aberto</h2>${d.contas.length ? d.contas.map((c) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(c.descricao)}</div><div class="p-s">${c.informado ? 'pagamento informado, a empresa vai conferir' : `vence em ${dt(c.vencimento)}`}</div></div><span class="p-num">${moeda(c.valor)}</span>${c.informado ? '' : `<button type="button" class="p-bt peq pri" data-a="pagar" data-l="${esc(c.id)}">Pagar</button>`}</div>`).join('') : '<p class="p-s" style="margin:0">Nada em aberto. Obrigado!</p>'}</section>
+      ${d.garantias.length ? `<section class="p-sec"><h2>Na garantia</h2>${d.garantias.map((g) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(g.equipamento)}</div><div class="p-s">OS ${esc(g.numero)}</div></div><span class="p-et ok">até ${dt(g.ate)}</span></div>`).join('')}</section>` : ''}
+      ${d.contratos.length ? `<section class="p-sec"><h2>Contrato de manutenção</h2>${d.contratos.map((c) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(c.descricao)}</div><div class="p-s">${c.proxima ? `próxima visita em ${dt(c.proxima)}` : ''}${c.fim ? ` · vigente até ${dt(c.fim)}` : ''}</div></div><span class="p-num">${moeda(c.valor)}/mês</span></div>`).join('')}</section>` : ''}
+      ${avisoDemo()}${rod()}<div class="p-fixo"><button type="button" class="p-bt pri" data-a="abrirVisita">Pedir uma visita</button></div>`;
+  },
+  acoes: {
+    pagar: (el) => { st.pagar = el.dataset.l; desenhar(); scrollTo(0, 0); },
+    voltar: () => { lerCampos(); st.pagar = null; st.visita = false; desenhar(); },
+    paguei: async (el) => { const r = await responder('paguei', { l: el.dataset.l }); if (r.erro) return alert(r.erro); pronto('Pagamento informado', 'A empresa vai conferir e confirmar o recebimento.'); },
+    abrirVisita: () => { st.visita = true; desenhar(); scrollTo(0, 0); },
+    periodo: (el) => { lerCampos(); st.periodo = el.dataset.v; desenhar(); },
+    enviarVisita: async () => { lerCampos(); if ((st.texto || '').trim().length < 5) return alert('Conte o que está acontecendo com o equipamento.'); const r = await responder('visita', { equipamento: (st.equipamento || '').slice(0, 80), texto: st.texto.slice(0, 600), data: st.data || '', periodo: st.periodo || '' }); if (r.erro) return alert(r.erro); pronto('Visita pedida', 'A empresa vai confirmar o dia e o horário pelo WhatsApp.'); },
+  },
+};
+T.visita = {
+  titulo: () => 'Pedir visita técnica',
+  render: () => `${cab(E().nome, 'Peça a sua visita técnica', 'Conte o que está acontecendo. A gente confirma o dia e o horário pelo WhatsApp.')}<section class="p-sec">${formVisita(true)}</section>${avisoDemo()}${rod()}<div class="p-fixo"><button type="button" class="p-bt pri" data-a="enviar">Pedir a visita</button></div>`,
+  acoes: {
+    periodo: (el) => { lerCampos(); st.periodo = el.dataset.v; desenhar(); },
+    enviar: async () => {
+      lerCampos();
+      if ((st.nome || '').trim().length < 3) return alert('Escreva o seu nome.');
+      if (String(st.telefone || '').replace(/\D/g, '').length < 10) return alert('Escreva o seu WhatsApp com DDD.');
+      if ((st.texto || '').trim().length < 5) return alert('Conte o que está acontecendo com o equipamento.');
+      const r = await responder('pedir', { nome: st.nome.trim().slice(0, 80), telefone: st.telefone.slice(0, 20), endereco: (st.endereco || '').slice(0, 120), bairro: (st.bairro || '').slice(0, 60), equipamento: (st.equipamento || '').slice(0, 80), texto: st.texto.slice(0, 600), data: st.data || '', periodo: st.periodo || '' });
+      if (r.erro) return alert(r.erro); pronto('Pedido enviado', `Obrigado, ${st.nome.trim().split(' ')[0]}! A ${E().nome || 'empresa'} vai chamar você no WhatsApp para confirmar a visita.`);
+    },
+  },
+};
+T.nps = {
+  titulo: () => 'Como foi o atendimento?',
+  render(d) {
+    if (d.respondida || st.enviada) return `${cab(E().nome, 'Obrigado!')}<section class="p-sec p-ok"><div class="p-ic">✓</div><h2>Resposta recebida</h2>${st.nota >= 9 && d.google ? `<p class="p-s">Que bom que gostou! Pode contar isso no Google? Ajuda muito outras pessoas a nos encontrar.</p><p><a class="p-bt pri" href="${esc(urlSegura(d.google))}" target="_blank" rel="noopener">Avaliar no Google</a></p>` : '<p class="p-s">A sua opinião ajuda a melhorar o atendimento.</p>'}</section>${rod()}`;
+    return `${cab(E().nome, 'Como foi o atendimento?', `OS ${esc(d.numero)} · ${esc(d.equipamento)}${d.tecnico ? ` · técnico ${esc(d.tecnico)}` : ''}`)}
+      <section class="p-sec"><h2>De 0 a 10, quanto você nos recomendaria a um amigo?</h2><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">${Array.from({ length: 11 }, (_, n) => `<button type="button" class="p-bt" aria-pressed="${st.nota === n}" data-a="nota" data-v="${n}" style="padding:10px 0">${n}</button>`).join('')}</div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px" class="p-s"><span>nada provável</span><span>com certeza</span></div></section>
+      <section class="p-sec"><label class="p-campo">Quer contar algo? (opcional)<textarea data-f="comentario">${esc(st.comentario || '')}</textarea></label></section>
+      ${avisoDemo()}${rod()}${st.nota != null ? '<div class="p-fixo"><button type="button" class="p-bt pri" data-a="enviar">Enviar</button></div>' : ''}`;
+  },
+  acoes: {
+    nota: (el) => { lerCampos(); st.nota = Number(el.dataset.v); desenhar(); },
+    enviar: async () => { lerCampos(); const r = await responder('nota', { nota: st.nota, comentario: (st.comentario || '').slice(0, 500) }); if (r.erro) return alert(r.erro); st.enviada = true; desenhar(); scrollTo(0, 0); },
+  },
+};
+T.contrato = {
+  titulo: (d) => d.descricao,
+  render(d) {
+    if (d.aceito || st.aceito) return `${cab(E().nome, d.descricao)}<section class="p-sec p-ok"><div class="p-ic">✓</div><h2>Contrato aceito</h2><p class="p-s">${d.aceito ? `Aceito por ${esc(d.aceito.nome)}.` : 'Obrigado! A empresa já recebeu o seu aceite.'}</p></section>${rod()}`;
+    return `${cab(`Contrato · ${E().nome}`, d.descricao, `Para ${esc(d.cliente)} · ${moeda(d.valor)} por mês · ${dt(d.inicio)} a ${dt(d.fim)}`)}
+      ${d.equipamentos.length ? `<section class="p-sec"><h2>Equipamentos</h2>${d.equipamentos.map((e) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(e)}</div></div></div>`).join('')}</section>` : ''}
+      <section class="p-sec"><h2>Condições</h2><ol style="margin:0;padding-left:18px;line-height:1.6" class="p-s">${d.clausulas.map((c) => `<li style="margin-bottom:6px">${esc(c)}</li>`).join('')}</ol></section>
+      <section class="p-sec"><h2>Aceitar o contrato</h2><label class="p-campo">Nome completo<input data-f="nome" autocomplete="name" value="${esc(st.nome || '')}"></label><label class="p-campo">CPF ou CNPJ<input data-f="doc" inputmode="numeric" value="${esc(st.doc || '')}"></label><p class="p-s" style="margin-top:8px">Ao aceitar, você concorda com as condições acima. A data e a hora do aceite ficam registradas.</p></section>
+      ${avisoDemo()}${rod()}<div class="p-fixo"><button type="button" class="p-bt pri" data-a="aceitar">Aceitar o contrato</button></div>`;
+  },
+  acoes: {
+    aceitar: async () => { lerCampos(); if ((st.nome || '').trim().length < 5 || (st.doc || '').replace(/\D/g, '').length < 11) return alert('Informe o nome completo e o CPF ou CNPJ.'); const r = await responder('aceitar', { nome: st.nome.trim(), documento: st.doc.trim() }); if (r.erro) return alert(r.erro); st.aceito = true; desenhar(); scrollTo(0, 0); },
+  },
+};
+
 // Restaurante: cardápio por QR code na mesa e pedido online
 T.cardapio = {
   titulo: () => 'Cardápio',

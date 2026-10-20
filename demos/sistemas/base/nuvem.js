@@ -27,7 +27,8 @@ const LIMITE_BASICO = 5, EXTRA_PRO = 60;
 const SUPORTE = [64, 64, 60, 65, 68, 68, 60, 64, 59, 59, 66, 63, 65].map((c) => String.fromCharCode(c - 11)).join(''); // WhatsApp da Blue Rose (mesmo do site)
 const BENEFICIOS_BASE = [['users-three', 'Equipe sem limite', 'Convide quantas pessoas quiser (o Básico vai até 5 além de você).'], ['clock', 'Histórico da equipe', 'Veja quem criou ou mudou cada registro, e quando.'], ['buildings', 'Até 10 empresas ou filiais', 'Cada uma com os próprios dados e equipe (o Básico vai até 3).'], ['chat-circle', 'Suporte prioritário', 'Atendimento pelo WhatsApp com resposta no mesmo dia útil.'], ['printer', 'Impressos só com a sua marca', 'Orçamentos, recibos e relatórios sem o rodapé da Blue Rose.']];
 const BENEFICIOS_AVISOS = ['bell-ringing', 'Avisos e mensagens prontas', 'Quem cobrar, confirmar e chamar de volta, com a mensagem pronta no WhatsApp.'];
-const beneficiosPro = (cfg) => (cfg.paginas || []).some((p) => p.id === 'avisos') ? [BENEFICIOS_BASE[0], BENEFICIOS_AVISOS, ...BENEFICIOS_BASE.slice(1)] : BENEFICIOS_BASE;
+// cada sistema pode trazer os recursos Pro dele (cfg.beneficiosPro), que aparecem primeiro
+const beneficiosPro = (cfg) => [...(cfg.beneficiosPro || []), ...((cfg.paginas || []).some((p) => p.id === 'avisos') ? [BENEFICIOS_BASE[0], BENEFICIOS_AVISOS, ...BENEFICIOS_BASE.slice(1)] : BENEFICIOS_BASE)];
 // plano anual: 12 meses com 20% de desconto (catálogo a-sis-<app>[-pro]-anual)
 const anual = (mensal) => Math.round(mensal * 12 * 0.8);
 const reais = (v) => `R$ ${Number(v).toLocaleString('pt-BR')}`;
