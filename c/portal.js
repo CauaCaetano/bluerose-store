@@ -97,6 +97,33 @@ T.os = {
   },
 };
 
+// Financeiro (assistência técnica): orçamento da OS para aprovar item por item e acompanhamento do equipamento
+T.orcamento = {
+  titulo: (d) => `OS ${d.numero} · ${d.equipamento}`,
+  render(d) {
+    st.aprov ||= Object.fromEntries(d.itens.filter((x) => x.aprovado == null).map((x) => [x.k, true]));
+    const i = d.etapas.findIndex(([id]) => id === d.etapa), pend = d.etapa === 'orcamento' && d.itens.some((x) => x.aprovado == null);
+    const valendo = d.itens.filter((x) => (x.aprovado == null ? (pend ? st.aprov[x.k] : true) : x.aprovado));
+    const total = Math.max(0, valendo.reduce((s, x) => s + x.qtd * x.preco, 0) - (d.desconto || 0));
+    return `${cab(E().nome, d.equipamento, `${d.marca ? `${esc(d.marca)} · ` : ''}Ordem de serviço nº ${esc(d.numero)}`)}
+      <section class="p-sec"><h2>Onde está o seu equipamento</h2><div class="p-passos">${d.etapas.map((_, k) => `<i class="${k <= i ? 'feito' : ''}"></i>`).join('')}</div><div class="p-passos-rot"><span>Entrada</span><b style="color:var(--acc)">${esc(d.etapas[i]?.[1] || '')}</b><span>Entrega</span></div>
+        ${d.previsao ? `<p class="p-s" style="margin-top:10px">Previsão: <b>${dt(d.previsao)}</b></p>` : ''}${d.garantia ? `<p class="p-s" style="margin-top:6px">Garantia do serviço até <b>${dt(d.garantia)}</b></p>` : ''}</section>
+      <section class="p-sec"><h2>${pend ? 'Orçamento para aprovar' : 'Serviços e peças'}</h2>${pend ? '<p class="p-sub">Marque o que você quer fazer agora. O que ficar de fora não é cobrado.</p>' : ''}
+        ${d.itens.map((x) => `<div class="p-linha"><div class="p-cresce"><div class="p-t">${esc(x.descricao)}${x.qtd > 1 ? ` <span class="p-s">× ${esc(x.qtd)}</span>` : ''}</div></div><span class="p-num">${x.preco ? moeda(x.qtd * x.preco) : 'incluso'}</span>
+          ${x.aprovado == null ? (pend ? `<button type="button" class="p-bt peq" aria-pressed="${!!st.aprov[x.k]}" data-a="marcar" data-k="${esc(x.k)}">${st.aprov[x.k] ? 'Aprovado' : 'Não agora'}</button>` : '') : x.aprovado ? '<span class="p-et ok">Aprovado</span>' : '<span class="p-et">Recusado</span>'}</div>`).join('')}
+        ${d.desconto ? `<div class="p-linha"><div class="p-cresce">Desconto</div><span class="p-num">− ${moeda(d.desconto)}</span></div>` : ''}
+        <div class="p-total"><span>Total</span><span>${moeda(total)}</span></div></section>
+      ${d.fotos?.length ? `<section class="p-sec"><h2>Fotos</h2>${fotos(d.fotos)}</section>` : ''}
+      ${d.defeito ? `<section class="p-sec"><h2>Defeito relatado</h2><p class="p-s" style="margin:0">${esc(d.defeito)}</p></section>` : ''}
+      ${d.laudo && !pend ? `<section class="p-sec"><h2>O que foi feito</h2><p class="p-s" style="margin:0">${esc(d.laudo)}</p></section>` : ''}
+      ${avisoDemo()}${rod()}${pend ? `<div class="p-fixo"><button type="button" class="p-bt pri" data-a="aprovar">Confirmar · ${moeda(total)}</button></div>` : ''}`;
+  },
+  acoes: {
+    marcar: (el) => { st.aprov[el.dataset.k] = !st.aprov[el.dataset.k]; desenhar(); },
+    aprovar: async () => { const r = await responder('aprovar', { itens: st.aprov }); if (r.erro) return alert(r.erro); const algum = Object.values(st.aprov).some(Boolean); pronto(algum ? 'Orçamento aprovado' : 'Resposta enviada', algum ? `${E().nome || 'A empresa'} já recebeu a sua resposta e vai seguir com o serviço.` : 'Avisamos a empresa que você não quer fazer o serviço agora.'); },
+  },
+};
+
 // Restaurante: cardápio por QR code na mesa e pedido online
 T.cardapio = {
   titulo: () => 'Cardápio',
