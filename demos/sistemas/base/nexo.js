@@ -15,6 +15,7 @@ import { prepararExtras } from './extras.js';
 import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 import { paginaImportar } from './planilha.js';
 import { prepararSuporte } from './suporte.js';
+import { prepararAdicionar } from './adicionar.js';
 import { baixarXlsx } from './xlsx.js';
 // Assistente IA: liberado em 17/10 (sem a chave do Gemini, a função nexo-ia responde que está sendo ativado)
 const IA_LIBERADA = true;
@@ -596,6 +597,8 @@ function montar(app, cfg) {
     $('#app').classList.remove('menu-aberto');
   };
   window.addEventListener('hashchange', () => { fecharGaveta(); app.render(); });
+  // botão "Adicionar" (manual, planilha, texto colado e foto) no topo de todas as páginas
+  prepararAdicionar(app, cfg);
 
   // fichas (painel lateral)
   app.abrir = (tipo, id, aba) => {

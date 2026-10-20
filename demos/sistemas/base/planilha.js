@@ -389,8 +389,10 @@ export function paginaImportar(app) {
   // consulta só de leitura usada nos testes automáticos: quais tabelas e colunas a importação reconhece
   window.__nexoImport = { tabelas: () => colecoesImportaveis(app).map(([k]) => k), campos: (c) => camposDe(app, c).map((x) => ({ nome: x.nome, rotulo: x.rotulo, tipo: x.tipo, colecao: x.colecao, mostrar: x.mostrar, opcoes: x.tipo === 'selecao' ? opcoes(x, app) : undefined })) };
   const cap = (t) => String(t).charAt(0).toUpperCase() + String(t).slice(1), nomeCol = (k) => tabelas(app)[k]?.plural || k;
-  const render = () => {
+  const render = (_a, params = []) => {
     const cols = colecoesImportaveis(app);
+    // vindo do botão "Adicionar" de uma página (#/importar/<cadastro>): a planilha vai para esse cadastro
+    if (params[0] !== undefined) st.preferida = cols.some(([k]) => k === params[0]) ? params[0] : '';
     const topo = `<div class="dica">${ic('table')}<span>Suba a planilha do Excel (.xlsx) ou um CSV. O sistema reconhece cada aba e cada coluna pelo nome (Nome, Telefone, Data, Hora, Valor…) e preenche tudo sozinho: cadastros e também o dia a dia (agenda, vendas, lançamentos). Fotos coladas nas células ou numa coluna "Fotos" com links entram como anexos. Você confere antes de importar.</span></div>`;
     const envio = `<label class="imp-zona" data-imp-zona>${ic('upload-simple')}<b>${st.arquivo ? `Trocar o arquivo (${esc(st.arquivo)})` : 'Escolher a planilha'}</b><span>Excel (.xlsx) ou CSV · as abas viram cadastros</span><input type="file" accept=".xlsx,.xlsm,.csv,.txt,.xls" data-mudar="impArquivo" hidden></label>`;
     const feito = st.feito ? `<div class="dica ok-fundo">${ic('check-circle')}<span><b>Importação concluída:</b> ${st.feito.map((x) => `${num(x.n)} ${esc(nomeCol(x.colecao))}${x.criados ? ` (+${x.criados} cadastros ligados)` : ''}${x.pulados ? `, ${x.pulados} já existiam` : ''}`).join(' · ')}${st.fotosFeitas ? ` · ${num(st.fotosFeitas.ok)} ${st.fotosFeitas.ok === 1 ? 'foto anexada' : 'fotos anexadas'}${st.fotosFeitas.falhou ? ` (${st.fotosFeitas.falhou} links de foto não abriram: o site de origem não permite baixar)` : ''}` : ''}.</span></div>` : '';
@@ -405,14 +407,16 @@ export function paginaImportar(app) {
     }).join('');
     const acoes = st.abas.some((a) => a.colecao) ? `<div class="entre"><label class="flex" style="gap:8px;font-size:13px"><input type="checkbox" data-mudar="impPular" ${st.pular ? 'checked' : ''}> Não repetir o que já está cadastrado</label><button type="button" class="btn pri" data-acao="impConfirmar">${ic('check')}Importar tudo</button></div>` : '';
     const modelos = `<div class="cartao"><div class="cartao-cab"><div><h3>Modelos de planilha</h3><div class="sub">Baixe, preencha no Excel e suba aqui: as colunas já vêm com os nomes certos</div></div></div><div class="cartao-corpo flex" style="flex-wrap:wrap;gap:8px">${cols.map(([c, col]) => `<button type="button" class="btn" data-acao="impModelo" data-c="${c}">${ic('download-simple')}${esc(cap(col.plural || c))}</button>`).join('')}</div></div>`;
-    return `${topo}${feito}${envio}${abas}${acoes}${modelos}`;
+    const pref = st.preferida && tabelas(app)[st.preferida] ? `<div class="dica ok-fundo">${ic('arrow-right')}<span>A planilha vai para <b>${esc(nomeCol(st.preferida))}</b>. <a href="javascript:void 0" data-acao="impModelo" data-c="${esc(st.preferida)}">Baixar o modelo dessa planilha</a> para ver as colunas.</span></div>` : '';
+    return `${topo}${pref}${feito}${envio}${abas}${acoes}${modelos}`;
   };
   Object.assign(app.acoes, {
     impArquivo: async (d, el) => {
       const arq = el.files?.[0]; if (!arq) return; if (arq.size > 25e6) return avisar('Planilha grande demais (máximo 25 MB)', { tipo: 'erro' });
       try {
         const abas = await lerPlanilha(arq);
-        st.abas = abas.filter((a) => a.linhas.length > 1).map((a) => ({ ...a, ...adivinhar(app, a) })); st.arquivo = arq.name; st.feito = null; st.fotosFeitas = null;
+        const vale = abas.filter((a) => a.linhas.length > 1);
+        st.abas = vale.map((a) => { const g = adivinhar(app, a); return { ...a, ...g, ...(st.preferida && (vale.length === 1 || !g.colecao) ? { colecao: st.preferida } : {}) }; }); st.arquivo = arq.name; st.feito = null; st.fotosFeitas = null;
         if (!st.abas.length) avisar('A planilha está vazia', { tipo: 'erro' }); else avisar(`${st.abas.length} ${st.abas.length === 1 ? 'aba lida' : 'abas lidas'}. Confira e importe.`);
       } catch (x) { avisar(x.message || 'Não consegui ler esse arquivo', { tipo: 'erro', tempo: 8000 }); }
       app.render();
