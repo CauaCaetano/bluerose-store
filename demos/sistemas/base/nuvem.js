@@ -254,12 +254,16 @@ function telaEmpresa(sb, cfg, espacos, precisaToken = false) {
       <form class="col" style="gap:12px" novalidate><label class="campo">Nome da empresa<input name="nome" required maxlength="120" placeholder="Ex.: ${esc(cfg.empresa)}"></label>
       ${camposLocal()}
       <div class="dica">${ic('upload-simple')}<span>A empresa começa <b>em branco</b>. Logo depois de criar, você sobe as suas planilhas (Excel) e o sistema preenche os cadastros sozinho.</span></div>
-      ${cfg.modelos?.length ? `<label class="campo">Tipo de negócio<select name="ramo">${cfg.modelos.map((m) => `<option value="${m.id}">${esc(m.nome)}</option>`).join('')}</select><span class="ajuda">Já começa com os serviços e cadastros típicos do seu ramo</span></label>` : ''}
+      ${cfg.modelos?.length ? `<label class="campo">Tipo de negócio<select name="ramo">${cfg.modelos.map((m) => `<option value="${m.id}">${esc(m.nome)}</option>`).join('')}<option value="__outro">Outro (escrever o meu)</option></select><span class="ajuda">Já começa com os serviços e cadastros típicos do seu ramo</span></label>
+      <label class="campo" data-ramo-outro hidden>Qual é o seu ramo?<input name="ramo_outro" maxlength="60" placeholder="Ex.: conserto de bicicletas"><span class="ajuda">A empresa começa em branco, e você cadastra os seus serviços do seu jeito</span></label>` : ''}
       ${precisaToken ? `<label class="campo">Token de dono<input name="token" required autocomplete="off" spellcheck="false" placeholder="${esc(cfg.id.toUpperCase().slice(0, 6))}-XXXX-XXXX-XXXX" style="font-family:var(--mono);text-transform:uppercase"><span class="ajuda">Enviamos para o seu e-mail quando o teste ou a assinatura começou, e ele também aparece em <a href="${SITE}conta.html" target="_blank" rel="noopener">Minha conta</a>. Só é pedido agora, na primeira vez. <a href="#" data-reenviar>Não recebeu? Enviar de novo para o meu e-mail</a></span></label>` : ''}
       <label class="campo">Chave PIX da empresa <span class="mute">(opcional)</span><input name="pix" placeholder="CNPJ, e-mail, celular ou chave aleatória"><span class="ajuda">Para as cobranças e links de pagamento já saírem com o QR code. Dá para colocar depois.</span></label>
       <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Criar a empresa</button></form>
       <div class="entrada-links"><a href="#" data-sair>Sair desta conta</a></div>`);
     document.querySelectorAll('[data-esp]').forEach((li) => (li.onclick = () => resolver({ id: li.dataset.esp, novo: false })));
+    // "Outro": a pessoa escreve o ramo dela em vez de escolher um modelo pronto
+    const selRamo = f.querySelector('[name="ramo"]'), boxOutro = f.querySelector('[data-ramo-outro]');
+    selRamo?.addEventListener('change', () => { const outro = selRamo.value === '__outro'; boxOutro.hidden = !outro; boxOutro.querySelector('input').required = outro; if (outro) boxOutro.querySelector('input').focus(); });
     // manda o token de dono de novo para o e-mail da conta usada na assinatura
     document.querySelector('[data-reenviar]')?.addEventListener('click', async (ev) => {
       ev.preventDefault(); const a = ev.currentTarget, erro = f.querySelector('[data-erro]');
@@ -278,7 +282,8 @@ function telaEmpresa(sb, cfg, espacos, precisaToken = false) {
         btn.disabled = false; return;
       }
       await salvarLocal(sb, data, d).then(() => {}, () => {}); // se falhar, é pedido de novo ao abrir
-      resolver({ id: data, novo: true, exemplo: false, nome: d.nome.trim(), ramo: d.ramo || '', pix: (d.pix || '').trim() });
+      const outro = d.ramo === '__outro';
+      resolver({ id: data, novo: true, exemplo: false, nome: d.nome.trim(), ramo: outro ? '' : d.ramo || '', ramoNome: outro ? String(d.ramo_outro || '').trim().slice(0, 60) : '', pix: (d.pix || '').trim() });
     };
   });
 }
@@ -419,7 +424,7 @@ export async function iniciarNuvem(app, cfg) {
   if (recuperados) setTimeout(() => avisar(`${recuperados} ${recuperados === 1 ? 'alteração que não tinha subido foi enviada' : 'alterações que não tinham subido foram enviadas'} agora para a nuvem.`), 1500);
   if (escolha.novo) {
     if (escolha.exemplo) { const s = cfg.semente(); for (const [k, v] of Object.entries(s)) if (k !== '_cfg') db.dados[k] = v.map((x) => ({ id: x.id || Math.random().toString(36).slice(2, 10), ...x })); }
-    db.dados._cfg = { ...(escolha.exemplo ? cfg.semente()._cfg || {} : {}), empresa: escolha.nome, ...(escolha.ramo && !escolha.exemplo ? { ramo_pendente: escolha.ramo } : {}), ...(escolha.pix ? { pix: { chave: escolha.pix, nome: escolha.nome.slice(0, 25), cidade: '' } } : {}) };
+    db.dados._cfg = { ...(escolha.exemplo ? cfg.semente()._cfg || {} : {}), empresa: escolha.nome, ...(escolha.ramo && !escolha.exemplo ? { ramo_pendente: escolha.ramo } : {}), ...(escolha.ramoNome ? { ramo_nome: escolha.ramoNome } : {}), ...(escolha.pix ? { pix: { chave: escolha.pix, nome: escolha.nome.slice(0, 25), cidade: '' } } : {}) };
     await db.enviar();
   }
   const proCortesia = esp.nivel !== 'pro' && esp.pro_ate && diasAte(esp.pro_ate) >= 0 ? esp.pro_ate : null;
