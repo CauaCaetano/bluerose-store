@@ -218,6 +218,35 @@ document.addEventListener('change', (e) => {
   txt.hidden = !outro; txt.required = outro && !!txt.dataset.obrig;
   if (outro) { txt.value = ''; txt.focus(); } else txt.value = sel.value;
 });
+// CNPJ (14 dígitos) ou CEP digitado: preenche pela BrasilAPI (dados públicos, grátis) só os campos que ainda estão vazios.
+// CPF nunca sai daqui. Sem internet ou sem resposta, não faz nada.
+const BRASILAPI = 'https://brasilapi.com.br/api';
+const capitular = (t) => String(t || '').toLowerCase().replace(/(^|[\s/(-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase()).replace(/(?<=\s)(De|Da|Do|Das|Dos|E)(?=\s)/g, (x) => x.toLowerCase()).replace(/(?<=[\s,])(Ii|Iii|Iv|Vi|Vii|Viii|Ix|Xi|Xii)(?=[\s,]|$)/g, (x) => x.toUpperCase());
+document.addEventListener('change', async (e) => {
+  const el = e.target, form = el.closest?.('form, .modal, .gaveta'); if (!form || el.tagName !== 'INPUT') return;
+  const nome = el.name || '', dig = String(el.value || '').replace(/\D/g, '');
+  const pegar = (...ns) => ns.map((n) => form.querySelector(`[name="${n}"]`)).find(Boolean);
+  const pôr = (campo, v) => { if (campo && v && !String(campo.value || '').trim()) { campo.value = String(v).trim(); campo.dispatchEvent(new Event('input', { bubbles: true })); } };
+  try {
+    if (/^(doc|documento|cnpj|cpf_cnpj)$/.test(nome) && dig.length === 14) {
+      const r = await fetch(`${BRASILAPI}/cnpj/v1/${dig}`); if (!r.ok) return;
+      const j = await r.json();
+      const fone = String(j.ddd_telefone_1 || '').replace(/\D/g, '');
+      pôr(pegar('nome', 'empresa', 'razao'), capitular((j.nome_fantasia || '').trim() || j.razao_social));
+      pôr(pegar('endereco'), capitular([j.descricao_tipo_de_logradouro, j.logradouro].filter(Boolean).join(' ')) + (j.numero ? `, ${j.numero}` : '') + (j.complemento ? ` ${capitular(j.complemento)}` : ''));
+      pôr(pegar('bairro'), capitular(j.bairro)); pôr(pegar('cep'), j.cep); pôr(pegar('uf'), j.uf);
+      const cid = pegar('cidade'); pôr(cid, cid && /uf/i.test(cid.closest('label')?.textContent || '') ? `${capitular(j.municipio)}/${j.uf}` : capitular(j.municipio));
+      if (fone.length >= 10) pôr(pegar('telefone', 'whatsapp', 'celular'), `(${fone.slice(0, 2)}) ${fone.slice(2, -4)}-${fone.slice(-4)}`);
+      pôr(pegar('email'), String(j.email || '').toLowerCase());
+      avisar(`Dados da empresa preenchidos pelo CNPJ (situação ${String(j.descricao_situacao_cadastral || 'na Receita').toLowerCase()}). Confira antes de salvar.`);
+    } else if (nome === 'cep' && dig.length === 8) {
+      const r = await fetch(`${BRASILAPI}/cep/v1/${dig}`); if (!r.ok) return;
+      const j = await r.json();
+      pôr(pegar('endereco'), j.street); pôr(pegar('bairro'), j.neighborhood); pôr(pegar('uf'), j.state);
+      const cid = pegar('cidade'); pôr(cid, cid && /uf/i.test(cid.closest('label')?.textContent || '') ? `${j.city}/${j.state}` : j.city);
+    }
+  } catch { /* sem internet: segue sem preencher */ }
+});
 export function lerCampos(raiz, campos) {
   const o = {};
   for (const c of campos) {
