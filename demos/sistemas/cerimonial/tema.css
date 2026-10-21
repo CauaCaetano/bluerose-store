@@ -4,7 +4,7 @@
   --acc-tx: #fffdf6;
   --ouro: #8f6c22;
   --bg: #f5f6fb;
-  --painel: #ffffff;
+  --painel: #fdfbf5;
   --painel-2: #f9fafd;
   --lateral: #eceff7;
   --hover: rgba(20, 30, 60, 0.05);
@@ -30,7 +30,7 @@
 [data-produto="cerimonial"] .lat {
   color-scheme: light;
   --tx: #141c35; --tx-2: #4a5470; --tx-3: #5f6884;
-  --hover: rgba(20, 30, 60, 0.06); --painel: #ffffff; --borda: #d6dcea; --neutro-bg: #dfe3ef;
+  --hover: rgba(20, 30, 60, 0.06); --painel: #fdfbf5; --borda: #d6dcea; --neutro-bg: #dfe3ef;
   background: var(--lateral); border-right: 1px solid var(--borda); color: var(--tx);
 }
 [data-produto="cerimonial"][data-tema="escuro"] .lat { color-scheme: dark; --tx: #eef0f7; --tx-2: #b4bdd3; --tx-3: #8a93ad; --painel: #171c2d; --borda: #28304a; --neutro-bg: #1f2539; }
