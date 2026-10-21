@@ -99,3 +99,8 @@ select option, .conta-pag select option, .sup select option, .sup-fb-form select
 }
 /* botão principal creme nas faixas: letra azul-marinho (uma regra antiga forçava branco) */
 :is(.nav, .lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .btn-primary { color: var(--marinho) !important; -webkit-text-fill-color: var(--marinho); }
+/* atalhos de ramo dentro da faixa azul-marinho (Como funciona): letra creme legível */
+:is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .cf-atalhos a { color: #e9e2d2; border-color: rgba(230, 222, 205, 0.35); }
+:is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .cf-atalhos a:hover { color: #fff; border-color: #e9e2d2; background: rgba(255, 255, 255, 0.06); }
+/* rótulo pequeno do topo nas páginas de produto (cor própria do produto): claro na faixa azul-marinho */
+:is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .eyebrow { color: var(--prata) !important; }

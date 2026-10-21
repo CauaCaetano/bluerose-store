@@ -217,3 +217,5 @@ html[data-theme="light"] .ini-rosa { opacity: .22; }
   .lx-hero-txt > *, .lx-redoma * { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
   .lx-redoma .lx-reflexo, .lx-redoma .lx-poeira { display: none; }
 }
+/* topo sem a redoma (21/10, pedido do dono): o texto ocupa a largura toda */
+.lx-hero-grid:not(:has(.lx-hero-arte)) { grid-template-columns: minmax(0, 1fr); }
