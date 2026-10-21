@@ -812,3 +812,72 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .ia-cab { display: flex; gap: 14px; align-items: flex-end; }
 .ia-logo { flex: none; width: 76px; height: 76px; align-self: center; filter: drop-shadow(0 0 14px rgba(70, 150, 255, .35)); }
 @media (max-width: 560px) { .ia-logo { width: 52px; height: 52px; } .ia-cab { gap: 10px; } }
+
+/* =============================================================
+   Creme e azul-marinho (21/10/2026, pedido do dono, igual ao site)
+   Fundo e cartões creme; menu lateral e faixa do topo azul-marinho; botões e destaques azul-marinho.
+   ============================================================= */
+:root {
+  --acc: #1d3b85;
+  --acc-tx: #fbf7ef;
+  --bg: #f4eee2;
+  --painel: #fdfaf3;
+  --painel-2: #f8f2e7;
+  --lateral: #0c1a38;
+  --hover: rgba(16, 32, 70, 0.05);
+  --ativo: rgba(16, 32, 70, 0.08);
+  --borda: #e3dac8;
+  --borda-2: #d1c6b1;
+  --tx: #0f1d3a;
+  --tx-2: #3d4a66;
+  --tx-3: #5c6680;
+  --info: #1d3b85; --info-bg: #e7ecf6;
+  --neutro-bg: #ece4d4;
+  --sombra-1: 0 1px 2px rgba(16, 32, 70, 0.06);
+  --sombra-2: 0 1px 2px rgba(16, 32, 70, 0.05), 0 8px 24px -8px rgba(16, 32, 70, 0.16);
+  --sombra-3: 0 24px 70px -18px rgba(16, 32, 70, 0.34), 0 0 0 1px rgba(16, 32, 70, 0.06);
+}
+:root[data-tema="escuro"] {
+  --acc: #8aa8f0;
+  --acc-tx: #0a1430;
+  --bg: #0a1224;
+  --painel: #111c33;
+  --painel-2: #15213b;
+  --lateral: #08112a;
+  --borda: #22304d;
+  --borda-2: #2f3f60;
+  --info: #9db6f5; --info-bg: rgba(138, 168, 240, .14);
+  --neutro-bg: #1a2640;
+}
+.lat { background: radial-gradient(120% 40% at 0% 0%, rgba(90, 130, 220, 0.22), transparent 70%), var(--lateral); }
+.lat a.item.ativo { background: rgba(244, 238, 226, 0.12); color: #fff; box-shadow: inset 2px 0 0 #e9dcc0; }
+.lat a.item.ativo .ic { color: #e9dcc0; }
+.lat .marca small, .lat-pe .feito a { color: #d9cdb2; }
+.marca-logo { background: #fdfaf3; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 6px 16px -6px rgba(0, 0, 0, 0.5); }
+.faixa { background: #0c1a38; border-bottom-color: rgba(244, 238, 226, 0.1); }
+.faixa a.cta { background: #f4eee2; color: #0c1a38; }
+.faixa a.cta:hover { background: #fffaf0; }
+.btn.pri { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 6px 16px -8px rgba(16, 32, 70, 0.6); }
+.lat-pe .feito-br:hover { background: rgba(244, 238, 226, 0.08); }
+
+/* menu lateral em creme (21/10, o dono achou o lateral escuro "desconexo"): um tom abaixo do conteúdo, letras azul-marinho,
+   item selecionado em azul-marinho com letra creme. No tema escuro o lateral continua escuro. */
+:root:not([data-tema="escuro"]) .lat {
+  color-scheme: light;
+  --tx: #0f1d3a; --tx-2: #3d4a66; --tx-3: #66718a;
+  --hover: rgba(16, 32, 70, 0.06);
+  --painel: rgba(255, 255, 255, 0.5);
+  --borda: #ddd3c0; --borda-2: #cfc4ae;
+  --neutro-bg: rgba(16, 32, 70, 0.07);
+  background: #ece4d4; border-right: 1px solid #ddd3c0; color: var(--tx);
+}
+:root:not([data-tema="escuro"]) .lat a.item.ativo { background: #1d3b85; color: #fbf7ef; box-shadow: 0 4px 12px -6px rgba(16, 32, 70, 0.55); }
+:root:not([data-tema="escuro"]) .lat a.item.ativo .ic { color: #e9dcc0; }
+:root:not([data-tema="escuro"]) .lat a.item .cont { background: rgba(16, 32, 70, 0.08); color: #24324f; }
+:root:not([data-tema="escuro"]) .lat a.item.ativo .cont { background: rgba(255, 255, 255, 0.18); color: #fff; }
+:root:not([data-tema="escuro"]) .lat a.item .cont.er { background: #f7dcd8; color: #a3302a; }
+:root:not([data-tema="escuro"]) .lat .conta { background: rgba(255, 255, 255, 0.45); }
+:root:not([data-tema="escuro"]) .lat .marca b { color: #0f1d3a; }
+:root:not([data-tema="escuro"]) .lat .marca small, :root:not([data-tema="escuro"]) .lat-pe .feito a { color: #1d3b85; }
+:root:not([data-tema="escuro"]) .marca-logo { box-shadow: 0 0 0 1px #ddd3c0, 0 4px 10px -6px rgba(16, 32, 70, 0.35); }
+:root:not([data-tema="escuro"]) .lat-pe .feito-br:hover { background: rgba(16, 32, 70, 0.06); }

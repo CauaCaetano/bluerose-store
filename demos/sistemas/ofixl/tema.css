@@ -1,34 +1,34 @@
 /* Blue Rose Ofixl · app de celular: vidro fosco (glassmorphism) nos painéis, botões sólidos e relevo (skeuomorfismo) nos controles */
 :root[data-produto="ofixl"] {
-  --acc: #2f7bff;
+  --acc: #1d3b85;
   --acc-tx: #fff;
-  --marinho: #0a1a36;
+  --marinho: #0c1a38;
   --ciano: #3cc8ff;
-  --bg: #dfe8f6;
+  --bg: #efe7d8;
   --lateral: rgba(255, 255, 255, .42);
   --painel: rgba(255, 255, 255, .62);
   --painel-2: rgba(255, 255, 255, .42);
-  --hover: rgba(47, 123, 255, .08);
-  --ativo: rgba(47, 123, 255, .14);
+  --hover: rgba(29, 59, 133, .07);
+  --ativo: rgba(29, 59, 133, .13);
   --borda: rgba(255, 255, 255, .7);
   --borda-2: rgba(120, 150, 200, .45);
-  --tx: #0d1b33;
-  --tx-2: #34476a;
-  --tx-3: #55678a;
+  --tx: #0f1d3a;
+  --tx-2: #3d4a66;
+  --tx-3: #5c6680;
   --neutro-bg: rgba(255, 255, 255, .55);
-  --info: #1f6feb; --info-bg: rgba(47, 123, 255, .13);
+  --info: #1d3b85; --info-bg: rgba(29, 59, 133, .12);
   --r1: 12px; --r2: 18px; --r3: 24px;
-  --painel-solido: #fdfbf5;
+  --painel-solido: #fdfaf3;
   --vidro: blur(22px) saturate(170%);
   --brilho: inset 0 1px 0 rgba(255, 255, 255, .85), inset 0 -1px 0 rgba(255, 255, 255, .25);
   --sombra-1: 0 1px 2px rgba(20, 45, 90, .08), 0 8px 24px -14px rgba(20, 45, 90, .35);
   --sombra-2: 0 2px 4px rgba(20, 45, 90, .08), 0 18px 40px -18px rgba(20, 45, 90, .45);
   --sombra-3: 0 30px 80px -20px rgba(10, 30, 70, .55), 0 0 0 1px rgba(255, 255, 255, .5);
   --fundo:
-    radial-gradient(60% 45% at 8% 0%, rgba(60, 200, 255, .55), transparent 70%),
-    radial-gradient(55% 50% at 100% 18%, rgba(47, 123, 255, .5), transparent 70%),
-    radial-gradient(70% 55% at 50% 110%, rgba(110, 90, 255, .32), transparent 70%),
-    linear-gradient(160deg, #eaf1fb, #d5e1f3);
+    radial-gradient(60% 45% at 8% 0%, rgba(29, 59, 133, .16), transparent 70%),
+    radial-gradient(55% 50% at 100% 18%, rgba(201, 170, 110, .18), transparent 70%),
+    radial-gradient(70% 55% at 50% 110%, rgba(29, 59, 133, .12), transparent 70%),
+    linear-gradient(160deg, #f7f1e6, #ece3d2);
 }
 :root[data-produto="ofixl"][data-tema="escuro"] {
   --acc: #4d90ff; --acc-tx: #fff;
@@ -160,3 +160,7 @@
 .of-soapp .of-play { margin-top: 6px; padding: 14px 26px; border-radius: 12px; opacity: .75; cursor: default; color: #fff; font-weight: 600; text-decoration: none;
   background: #2f7bff; }
 .of-soapp .of-volta { color: #b3c4e2; font-size: 14px; }
+
+/* creme e azul-marinho (21/10): menu lateral em vidro creme com letra azul-marinho, item ativo em azul-marinho */
+[data-produto="ofixl"]:not([data-tema="escuro"]) .lat { background: rgba(236, 228, 212, .72); border-right-color: rgba(209, 198, 177, .8); }
+[data-produto="ofixl"]:not([data-tema="escuro"]) .lat a.item.ativo { background: linear-gradient(180deg, #2a4f9e, #1d3b85); color: #fbf7ef; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 6px 14px -8px rgba(16, 32, 70, .6); }

@@ -1,22 +1,22 @@
 /* Blue Rose Guard · identidade própria: papel de laudo, azul-marinho e dourado, trilho de ícones à esquerda, títulos em letra de relatório */
 :root[data-produto="pragas"] {
-  --acc: #1a47a8;
+  --acc: #1d3b85;
   --acc-tx: #fff;
-  --floresta: #0c1d45;
+  --floresta: #0c1a38;
   --ambar: #d9ad45;
-  --bg: #eef1f7;
-  --lateral: #e2e7f1;
-  --painel: #fdfdff;
-  --painel-2: #f6f8fc;
-  --hover: rgba(12, 29, 69, 0.05);
-  --ativo: rgba(12, 29, 69, 0.08);
-  --borda: #d5dbe8;
-  --borda-2: #bfc8da;
-  --tx: #141b2d;
-  --tx-2: #465068;
-  --tx-3: #586179;
-  --info: #1a47a8; --info-bg: #e3eafb;
-  --neutro-bg: #e7ebf3;
+  --bg: #f4eee2;
+  --lateral: #ebe3d3;
+  --painel: #fdfaf3;
+  --painel-2: #f8f2e7;
+  --hover: rgba(16, 32, 70, 0.05);
+  --ativo: rgba(16, 32, 70, 0.08);
+  --borda: #e3dac8;
+  --borda-2: #d1c6b1;
+  --tx: #0f1d3a;
+  --tx-2: #3d4a66;
+  --tx-3: #5c6680;
+  --info: #1d3b85; --info-bg: #e7ecf6;
+  --neutro-bg: #ece4d4;
   --rel: 'Cascadia Mono', 'Consolas', 'Geist Mono', ui-monospace, monospace;
   --sombra-1: 0 1px 0 rgba(12, 29, 69, .05);
   --sombra-2: 0 1px 0 rgba(12, 29, 69, .05), 0 10px 26px -14px rgba(12, 29, 69, .3);

@@ -1,21 +1,21 @@
 /* Blue Rose Eternize · identidade própria: branco, azul-royal e dourado, títulos serifados como um convite */
 :root[data-produto="cerimonial"] {
-  --acc: #1d3f9e;
+  --acc: #1d3b85;
   --acc-tx: #fffdf6;
   --ouro: #8f6c22;
-  --bg: #f5f6fb;
-  --painel: #fdfbf5;
-  --painel-2: #f9fafd;
-  --lateral: #eceff7;
-  --hover: rgba(20, 30, 60, 0.05);
-  --ativo: rgba(20, 30, 60, 0.08);
-  --borda: #dfe3ef;
-  --borda-2: #cdd3e3;
-  --tx: #141c35;
-  --tx-2: #4a5470;
-  --tx-3: #5a6380;
-  --info: #1d3f9e; --info-bg: #e4eafb;
-  --neutro-bg: #eef0f7;
+  --bg: #f4eee2;
+  --painel: #fdfaf3;
+  --painel-2: #f8f2e7;
+  --lateral: #ebe3d3;
+  --hover: rgba(16, 32, 70, 0.05);
+  --ativo: rgba(16, 32, 70, 0.08);
+  --borda: #e3dac8;
+  --borda-2: #d1c6b1;
+  --tx: #0f1d3a;
+  --tx-2: #3d4a66;
+  --tx-3: #5c6680;
+  --info: #1d3b85; --info-bg: #e7ecf6;
+  --neutro-bg: #ece4d4;
   --serif: 'Cormorant Garamond', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
   --sombra-1: 0 1px 2px rgba(20, 30, 60, 0.06);
   --sombra-2: 0 1px 2px rgba(20, 30, 60, 0.05), 0 10px 28px -10px rgba(20, 30, 60, 0.18);

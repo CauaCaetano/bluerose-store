@@ -1,22 +1,22 @@
 /* RoseConstruct · identidade própria: azuis da logo (rosa e prédios), menu no topo (no celular, barra embaixo), letras fortes */
 :root[data-produto="obras"] {
-  --acc: #1556c0;
+  --acc: #1d3b85;
   --acc-tx: #fff;
-  --laranja: #1e78d6;
-  --carvao: #0d1f3c;
-  --bg: #eef2f8;
-  --lateral: #e2e9f4;
-  --painel: #fdfbf5;
-  --painel-2: #f7f9fd;
-  --hover: rgba(13, 31, 60, 0.05);
-  --ativo: rgba(13, 31, 60, 0.08);
-  --borda: #d6deea;
-  --borda-2: #c2cde0;
-  --tx: #0d1f3c;
-  --tx-2: #44526a;
-  --tx-3: #56627a;
-  --info: #1556c0; --info-bg: #e6effc;
-  --neutro-bg: #e6ebf3;
+  --laranja: #2a4f9e;
+  --carvao: #0c1a38;
+  --bg: #f4eee2;
+  --lateral: #ebe3d3;
+  --painel: #fdfaf3;
+  --painel-2: #f8f2e7;
+  --hover: rgba(16, 32, 70, 0.05);
+  --ativo: rgba(16, 32, 70, 0.08);
+  --borda: #e3dac8;
+  --borda-2: #d1c6b1;
+  --tx: #0f1d3a;
+  --tx-2: #3d4a66;
+  --tx-3: #5c6680;
+  --info: #1d3b85; --info-bg: #e7ecf6;
+  --neutro-bg: #ece4d4;
   --forte: 'Bahnschrift', 'Barlow Semi Condensed', 'Arial Narrow', 'Segoe UI', sans-serif;
   --sombra-1: 0 1px 0 rgba(13, 31, 60, .06);
   --sombra-2: 0 2px 0 rgba(13, 31, 60, .05), 0 10px 24px -12px rgba(13, 31, 60, .25);
