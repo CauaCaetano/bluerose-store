@@ -219,3 +219,42 @@ html[data-theme="light"] .ini-rosa { opacity: .22; }
 }
 /* topo sem a redoma (21/10, pedido do dono): o texto ocupa a largura toda */
 .lx-hero-grid:not(:has(.lx-hero-arte)) { grid-template-columns: minmax(0, 1fr); }
+/* =============================================================
+   Notebook com os sistemas rodando no topo (21/10, pedido do dono)
+   4 telas reais (Agenda, Jurídico, Financeiro, RoseConstruct) que rolam devagar e trocam a cada 6 s
+   ============================================================= */
+.nb-arte { perspective: 1600px; }
+.nb { position: relative; width: min(100%, 640px); opacity: 0; transform: translateY(30px) rotateX(8deg); animation: nb-chega 1.6s cubic-bezier(.16, 1, .3, 1) .3s forwards; }
+@keyframes nb-chega { to { opacity: 1; transform: none; } }
+.nb::before { content: ""; position: absolute; left: 6%; right: 6%; top: 10%; bottom: -6%; background: radial-gradient(closest-side, rgba(90, 140, 255, .35), transparent); filter: blur(30px); z-index: -1; animation: lx-pulsa 7s ease-in-out infinite; }
+.nb-tampa { padding: 2.2% 2.2% 2.6%; border-radius: 18px 18px 6px 6px; background: linear-gradient(180deg, #2a3550, #151d30); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14), 0 40px 80px -30px rgba(0, 0, 0, .8); }
+.nb-tela { position: relative; aspect-ratio: 16 / 10.4; border-radius: 6px; overflow: hidden; background: #f4eee2; }
+.nb-barra { position: absolute; z-index: 2; inset: 0 0 auto; height: 7.5%; display: flex; align-items: center; gap: 1.1%; padding: 0 2%; background: #e9e1d1; border-bottom: 1px solid #d6ccb8; }
+.nb-barra i { width: 1.6%; aspect-ratio: 1; border-radius: 50%; background: #cfc4ae; }
+.nb-url { position: relative; flex: 0 1 46%; height: 62%; margin-left: 3%; border-radius: 999px; background: #fbf7ef; }
+.nb-url b { position: absolute; inset: 0; display: grid; place-items: center; font: 600 clamp(9px, 1.15vw, 12.5px)/1 var(--sans, system-ui); color: #1d3b85; opacity: 0; animation: nb-troca 24s infinite; }
+.nb-telas { position: absolute; inset: 7.5% 0 0; overflow: hidden; }
+.nb-telas img { position: absolute; left: 0; top: 0; width: 100%; height: auto; opacity: 0; animation: nb-troca 24s infinite, nb-rola 24s cubic-bezier(.45, 0, .35, 1) infinite; }
+.nb-url b:nth-child(2), .nb-telas img:nth-child(2) { animation-delay: 6s; }
+.nb-url b:nth-child(3), .nb-telas img:nth-child(3) { animation-delay: 12s; }
+.nb-url b:nth-child(4), .nb-telas img:nth-child(4) { animation-delay: 18s; }
+.nb-url b:first-child, .nb-telas img:first-child { opacity: 1; }
+@keyframes nb-troca { 0% { opacity: 0; } 3%, 25% { opacity: 1; } 28%, 100% { opacity: 0; } }
+@keyframes nb-rola { 0%, 6% { transform: translateY(0); } 24%, 100% { transform: translateY(-36%); } }
+/* cursor que passeia e "clica" pela tela */
+.nb-cursor { position: absolute; z-index: 3; left: 0; top: 0; width: 3.4%; aspect-ratio: 12 / 18; background: #0f1d3a; clip-path: polygon(0 0, 0 78%, 26% 60%, 44% 100%, 58% 94%, 40% 56%, 76% 56%); filter: drop-shadow(0 0 1px #fff) drop-shadow(0 2px 3px rgba(0, 0, 0, .35)); animation: nb-cursor 6s ease-in-out infinite; }
+@keyframes nb-cursor { 0% { translate: 340% 260%; } 30% { translate: 1550% 1500%; scale: 1; } 36% { scale: .8; } 42% { scale: 1; } 70% { translate: 2400% 420%; } 100% { translate: 340% 260%; } }
+.nb-base { position: relative; height: 0; padding-top: 3.6%; margin: 0 -7%; border-radius: 2px 2px 18px 18px; background: linear-gradient(180deg, #3a4663, #1b2338 60%, #10172a); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 30px 50px -20px rgba(0, 0, 0, .8); }
+.nb-base::before { content: ""; position: absolute; left: 50%; top: 0; width: 16%; height: 40%; translate: -50% 0; border-radius: 0 0 10px 10px; background: rgba(0, 0, 0, .35); }
+.lx-hero-grid:has(.nb-arte) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 56px; }
+.lx-hero-grid:has(.nb-arte) h1 { font-size: clamp(48px, 5.4vw, 92px); }
+@media (max-width: 900px) {
+  .lx-hero-grid:has(.nb-arte) { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .nb-arte { order: 0; }
+  .nb { width: calc(100% - 28px); margin: 0 auto 10px; }
+  .lx-hero-grid:has(.nb-arte) h1 { font-size: clamp(46px, 13vw, 64px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nb, .nb-telas img, .nb-url b, .nb-cursor, .nb::before { animation: none !important; opacity: 1; transform: none; }
+  .nb-telas img:not(:first-child), .nb-url b:not(:first-child), .nb-cursor { display: none; }
+}
