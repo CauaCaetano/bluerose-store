@@ -1,0 +1,101 @@
+/* =============================================================
+   Blue Rose · creme e azul-marinho (escolha do dono em 21/10/2026)
+   Páginas em creme com textos e botões azul-marinho; o menu do topo, o topo de cada página
+   (a redoma na inicial) e o rodapé ficam numa faixa azul-marinho escura, para a rosa continuar brilhando.
+   Carregado depois do luxo.css (que segue valendo para fontes, espaços e animações).
+   ============================================================= */
+:root, html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4eee2;
+  --bg-2: #eee6d6;
+  --surface: #fbf7ef;
+  --surface-2: #f2ebdd;
+  --line: rgba(16, 32, 70, 0.11);
+  --line-2: rgba(16, 32, 70, 0.2);
+  --ink: #0f1d3a;
+  --ink-2: #3d4a66;
+  --ink-3: #66718a;
+  --accent: #1d3b85;
+  --accent-solid: #152e6b;
+  --accent-soft: rgba(29, 59, 133, 0.08);
+  --prata: #5c6c90;
+  --prata-2: #8a93a8;
+  --marinho: #0c1a38;
+  --marinho-2: #12234a;
+  --ok: #18794e;
+  --warn: #9a6400;
+  --shadow: 0 1px 2px rgba(16, 32, 70, 0.05), 0 24px 50px -30px rgba(16, 32, 70, 0.28);
+  --vidro: rgba(251, 247, 239, 0.72);
+  --vidro-borda: rgba(16, 32, 70, 0.12);
+  --vidro-brilho: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --vidro-sombra: 0 2px 6px rgba(16, 32, 70, 0.06), 0 24px 50px -28px rgba(16, 32, 70, 0.3);
+}
+body { background: radial-gradient(1200px 700px at 50% 0%, #fbf7ef, transparent 60%), var(--bg); background-attachment: fixed; }
+::selection { background: rgba(29, 59, 133, 0.18); }
+
+/* destaques em itálico: degradê azul-marinho no creme (no lugar do prateado) */
+.serif, h1 em, h2 em, .sec-title em,
+.serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span { background: linear-gradient(180deg, #2a51a8 0%, #1d3b85 50%, #0f1d3a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* botões */
+.btn-primary { background: linear-gradient(180deg, #24499a, #142c66); border: 1px solid rgba(255, 255, 255, 0.14); color: #fbf7ef; box-shadow: 0 16px 36px -18px rgba(20, 44, 102, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.16); }
+.btn-primary:hover { background: linear-gradient(180deg, #2c55ad, #19357a); }
+.btn-ghost { border: 1px solid rgba(16, 32, 70, 0.32); color: var(--accent-solid); }
+.btn-ghost:hover { border-color: var(--accent-solid); color: var(--marinho); background: rgba(29, 59, 133, 0.05); }
+
+/* cartões: creme mais claro, borda fina azul e sombra suave */
+.preco2, .prod-c, .sis, .caminho, .sis-duas > div, .np-grade, .np-faq details, .ini-mais, .ini-oferta, .orc, .conta-caixa, .ini-calc-card {
+  background: linear-gradient(180deg, #fdfaf4, #f8f2e6); border-color: var(--line-2); box-shadow: 0 1px 2px rgba(16, 32, 70, 0.04), 0 18px 40px -30px rgba(16, 32, 70, 0.3);
+}
+.preco2::after, .prod-c::after, .caminho::after { background: linear-gradient(90deg, transparent, rgba(29, 59, 133, 0.45), transparent); }
+.preco2:hover, .prod-c:hover, .caminho:hover { border-color: rgba(29, 59, 133, 0.35); box-shadow: 0 30px 60px -40px rgba(20, 44, 102, 0.45); }
+.preco2.dest { border-color: rgba(29, 59, 133, 0.45); background: linear-gradient(180deg, rgba(29, 59, 133, 0.07), #fdfaf4 55%); }
+.eyebrow::before { background: linear-gradient(90deg, transparent, var(--prata)); }
+.cf-atalhos a { color: var(--accent-solid); } .cf-atalhos a:hover { color: var(--marinho); border-color: var(--accent-solid); background: rgba(29, 59, 133, 0.05); }
+.cf-dia li::after { background: var(--bg); box-shadow: none; }
+.cf-tela { box-shadow: 0 50px 100px -50px rgba(16, 32, 70, 0.5); }
+
+/* listas e campos no creme (antes forçados para o escuro) */
+select, .conta-pag select, .sup select, .sup-fb-form select, .conta-busca input { color-scheme: light; }
+select option, .conta-pag select option, .sup select option, .sup-fb-form select option { background: #fbf7ef; color: var(--ink); }
+.conta-busca input, .sup-form input, .sup-form select, .sup-form textarea, .sup-fb-form select, .sup-fb-form textarea, .sup-resp textarea { background: #fffdf8; color: var(--ink); }
+.sup-cab:hover, .sup-cab:focus-visible, .sup-msg { background: rgba(29, 59, 133, 0.04); }
+
+/* =============================================================
+   Faixas azul-marinho: menu do topo, topo de cada página e rodapé.
+   Dentro delas as cores voltam ao jeito escuro (texto creme, detalhes prata).
+   ============================================================= */
+.nav, .lx-hero, .p-hero, .np-trilha, .np-hero, main > .hero, .cf-hero, .rodape-site {
+  color-scheme: dark;
+  --bg: var(--marinho);
+  --surface: #13254d;
+  --surface-2: #182c58;
+  --line: rgba(230, 222, 205, 0.12);
+  --line-2: rgba(230, 222, 205, 0.2);
+  --ink: #f4eee2;
+  --ink-2: #c9cedb;
+  --ink-3: #98a1b6;
+  --accent: #a9c2ff;
+  --prata: #d8dde8;
+  --prata-2: #9aa3b5;
+  color: var(--ink);
+}
+/* faixa de ponta a ponta da tela, mesmo quando a seção é estreita */
+.lx-hero, .p-hero, .np-trilha, .np-hero, main > .hero, .cf-hero { background: var(--marinho); box-shadow: 0 0 0 100vmax var(--marinho); clip-path: inset(0 -100vmax); }
+.lx-hero { background: radial-gradient(900px 520px at 72% 30%, rgba(58, 110, 240, 0.22), transparent 65%), var(--marinho); }
+.nav { background: rgba(12, 26, 56, 0.92); border-bottom-color: rgba(230, 222, 205, 0.1); }
+.rodape-site { background-color: var(--marinho); }
+.nav .serif, .lx-hero h1 em, .lx-hero .serif, .p-hero h1 em, .np-hero h1 em, .hero h1 em, .cf-hero h1 em,
+.lx-hero h1 em .lx-p > span, .p-hero h1 em .lx-p > span, .np-hero h1 em .lx-p > span, .cf-hero h1 em .lx-p > span {
+  background: linear-gradient(180deg, #ffffff 0%, #dfe6f4 45%, #9fb2d6 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.lx-hero .btn-ghost, .p-hero .btn-ghost, .np-hero .btn-ghost, .hero .btn-ghost, .cf-hero .btn-ghost, .rodape-site .btn-ghost { border-color: rgba(230, 222, 205, 0.4); color: #f4eee2; }
+.lx-hero .btn-primary, .p-hero .btn-primary, .np-hero .btn-primary, .hero .btn-primary, .cf-hero .btn-primary, .nav .btn-primary { background: linear-gradient(180deg, #f8f2e6, #e9dfcb); color: var(--marinho); border-color: rgba(255, 255, 255, 0.5); box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.6); }
+.lx-hero .btn-primary:hover, .p-hero .btn-primary:hover, .np-hero .btn-primary:hover, .hero .btn-primary:hover, .cf-hero .btn-primary:hover, .nav .btn-primary:hover { background: #fffaf0; }
+.rodape-site a { color: var(--ink-2); } .rodape-site a:hover { color: #fff; }
+/* destaques em itálico dentro das faixas azul-marinho: sempre claros (inclusive palavra por palavra) */
+:is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero, .rodape-site) :is(.serif, h1 em, h2 em, .sec-title em, .serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span) {
+  background: linear-gradient(180deg, #ffffff 0%, #dfe6f4 45%, #9fb2d6 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+/* botão principal creme nas faixas: letra azul-marinho (uma regra antiga forçava branco) */
+:is(.nav, .lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .btn-primary { color: var(--marinho) !important; -webkit-text-fill-color: var(--marinho); }
