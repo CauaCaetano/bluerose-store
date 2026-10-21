@@ -49,6 +49,7 @@
 <script src="js/assistente.js?v=18" defer></script>
 <script src="js/cookies.js?v=2" defer></script>
 <script src="js/inicio.js?v=5" defer></script>
+<script src="js/ramo-topo.js?v=1" defer></script>
 </head>
 <body>
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -83,49 +84,24 @@
           <a class="btn btn-ghost" href="sistemas.html">Ver os 14 sistemas</a>
         </div>
       </div>
-
+      <div class="rt" id="ramos" data-ramo-topo>
+        <p class="rt-pergunta">Qual é o seu ramo?</p>
+        <div class="rt-ramos" role="group" aria-label="Escolha o seu ramo"><button type="button" class="rt-mais">Outros ramos +</button></div>
+        <div class="rt-quadro">
+          <div class="rt-tela"><div class="rt-barra"><i></i><i></i><i></i><span class="rt-url">roseconstruct · painel</span></div><img src="img/sistemas/obras.webp?v=2" width="1200" height="750" alt="Tela do RoseConstruct" fetchpriority="high"></div>
+          <div class="rt-info">
+            <div><b class="rt-nome">RoseConstruct</b><span class="rt-para">Para empreiteiros e empresas de reforma.</span></div>
+            <p class="rt-preco">a partir de <b>R$ 119</b>/mês</p>
+          </div>
+          <div class="rt-botoes"><a class="btn btn-primary rt-teste" href="app/obras/" data-teste="obras" data-teste-nome="RoseConstruct" data-teste-mensal="119">Testar 7 dias grátis</a><a class="rt-conhecer" href="roseconstruct.html">Conhecer o RoseConstruct</a></div>
+        </div>
+      </div>
     </div>
     <div class="wrap lx-numeros">
       <div><b data-conta="14">14</b><span>sistemas prontos, um para cada ramo</span></div>
       <div><b data-conta="7">7</b><span>dias grátis, sem cartão</span></div>
       <div><b>R$&nbsp;<i data-conta="79">79</i></b><span>por mês, sem entrada e sem fidelidade</span></div>
       <div><b data-conta="3">3</b><span>dias úteis para o seu site ficar no ar</span></div>
-    </div>
-  </section>
-
-  <section class="ini-hero lx-com-arte" id="ramos" aria-labelledby="t-ramos">
-    <div class="wrap ini-hero-grid">
-      <div>
-        <p class="eyebrow reveal">Feito para o seu ramo</p>
-        <h2 id="t-ramos" class="lx-ramo-tit" data-ramo-titulo><span data-ramo-l1>Sua empresa no controle,</span> <span class="serif" data-ramo-l2>de onde você estiver.</span></h2>
-        <div class="ini-ramos" role="group" aria-label="Escolha o seu ramo para ver o sistema certo">
-          <span>Para</span>
-          <button type="button" data-ramo="obras" aria-pressed="false">Obras<i class="barra"></i></button>
-          <button type="button" data-ramo="juridico" aria-pressed="false">Advocacia<i class="barra"></i></button>
-          <button type="button" data-ramo="agenda" aria-pressed="false">Salão e estética<i class="barra"></i></button>
-          <button type="button" data-ramo="financeiro" aria-pressed="false">Empresa de serviço<i class="barra"></i></button>
-        </div>
-        <p class="sub" data-ramo-sub>14 sistemas prontos para o seu ramo. Veja funcionando agora, teste 7 dias grátis com os seus dados e assine por mês, sem entrada e sem fidelidade.</p>
-        <div class="ctas">
-          <a class="btn btn-primary" data-ramo-teste href="#produtos">Testar 7 dias grátis <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>
-          <a class="btn btn-ghost" data-ramo-demo href="sistemas.html">Ver todos os sistemas</a>
-        </div>
-        <p class="ini-preco" data-ramo-preco>A partir de <b>R$ 79/mês</b> · 7 dias grátis · sem fidelidade</p>
-      </div>
-      <div class="ini-tela" aria-hidden="true">
-        <div class="ini-note">
-          <div class="ini-note-barra"><i></i><i></i><i></i><span data-ramo-url>bluerose-store.com</span></div>
-          <div class="ini-note-img">
-            <img class="on" src="img/sistemas/crm.webp" width="1200" height="750" alt="" fetchpriority="high">
-            <img data-ramo="obras" src="img/sistemas/obras.webp" width="1200" height="750" alt="" loading="lazy">
-            <img data-ramo="juridico" src="img/sistemas/juridico.webp" width="1200" height="750" alt="" loading="lazy">
-            <img data-ramo="agenda" src="img/sistemas/agenda.webp" width="1200" height="750" alt="" loading="lazy">
-            <img data-ramo="financeiro" src="img/sistemas/financeiro.webp" width="1200" height="750" alt="" loading="lazy">
-          </div>
-        </div>
-        <div class="ini-aviso a1"><span class="ic"><svg class="ico"><use href="img/icones.svg#i-check"/></svg></span><span><b>14 sistemas prontos</b><small>obras, advocacia, salão, clínica e mais</small></span></div>
-        <div class="ini-aviso a2"><span class="ic"><svg class="ico"><use href="img/icones.svg#i-lightning"/></svg></span><span><b>Pronto na hora</b><small>teste com os seus dados por 7 dias</small></span></div>
-      </div>
     </div>
   </section>
 
