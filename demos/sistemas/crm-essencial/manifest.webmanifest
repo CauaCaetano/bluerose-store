@@ -1,0 +1,16 @@
+{
+  "name": "Veltria CRM Essencial",
+  "short_name": "Meu Baralho",
+  "description": "O vendedor autônomo com os clientes do dia num baralho, funil, rota de visitas e meta.",
+  "lang": "pt-BR",
+  "start_url": "app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1ebdd",
+  "theme_color": "#1c3557",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
