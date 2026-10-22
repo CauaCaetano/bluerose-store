@@ -1,0 +1,16 @@
+{
+  "name": "Veltria Farmácia Essencial",
+  "short_name": "Meu Balcão",
+  "description": "A farmácia de bairro no celular: venda com scanner, lote e validade, genérico, receitas e uso contínuo.",
+  "lang": "pt-BR",
+  "start_url": "app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f1ea",
+  "theme_color": "#2e4a42",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

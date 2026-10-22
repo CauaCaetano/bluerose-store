@@ -1,0 +1,101 @@
+/* Veltria Farmácia Essencial · "painel do balcão" (app de celular da farmácia de bairro)
+   Paleta nova 22 · Sálvia & Âmbar: sálvia escura #2E4A42, algodão #F4F1EA, menta #9FC2B4, âmbar #E0C9A6, cinza-verde #7D8C88.
+   Sem barra de abas: a tela inicial é um painel de botões grandes, cada um abre uma tarefa do balcão. */
+:root {
+  --sal: #2e4a42; --sal-2: #3e6157; --sal-3: #1f332d; --alg: #f4f1ea; --alg-2: #fbfaf6; --menta: #9fc2b4; --ambar: #e0c9a6; --ambar-esc: #a5824d; --cinza: #7d8c88;
+  --tx: #1f2d29; --tx-2: #55635f; --tx-3: #879490; --verm: #b0473d; --amar: #c08a2a; --verde: #3f7a5d;
+  --serif: 'Literata', Georgia, serif; --sans: 'Albert Sans', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--alg); color: var(--tx); font: 16px/1.45 var(--sans); padding-bottom: 30px; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--ambar-esc); outline-offset: 2px; }
+a { color: var(--sal-2); }
+.faixa { display: flex; gap: 12px; justify-content: center; align-items: center; padding: 6px; background: var(--sal-3); font-size: .82rem; }
+.faixa a { color: var(--ambar); } .faixa button { background: none; border: 1px solid #3b5a51; color: var(--alg); border-radius: 6px; padding: 2px 10px; }
+.no-celular .faixa { display: none; }
+.no-celular, .no-celular * { scrollbar-width: none; } .no-celular ::-webkit-scrollbar { display: none; }
+
+.cruz-topo { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--sal); color: var(--alg); }
+.volta { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--sal-2); color: var(--alg); text-decoration: none; font-size: 1.6rem; line-height: 1; flex: none; }
+.volta[hidden] { display: none; }
+.farm { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cruz { width: 34px; height: 34px; flex: none; background: var(--menta); clip-path: polygon(35% 0, 65% 0, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0 65%, 0 35%, 35% 35%); }
+.farm b { display: block; font: 600 1.08rem var(--serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .farm small { color: var(--menta); font-size: .78rem; }
+.ia-c { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid var(--ambar); background: transparent; color: var(--ambar); font: 600 1.2rem var(--serif); cursor: pointer; flex: none; }
+
+main { max-width: 600px; margin: 0 auto; padding: 16px; outline: none; }
+h1 { font: 600 1.6rem/1.15 var(--serif); margin: 4px 0 4px; }
+h2 { font: 700 .9rem var(--sans); margin: 20px 0 8px; color: var(--sal-2); }
+.sub { color: var(--tx-2); margin: 0 0 14px; }
+.mini { color: var(--tx-3); font-size: .82rem; }
+
+/* painel inicial */
+.hoje { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.hoje div { background: var(--sal); color: var(--alg); border-radius: 16px; padding: 12px 14px; }
+.hoje small { color: var(--menta); font-size: .76rem; display: block; } .hoje b { font: 600 1.4rem var(--serif); font-variant-numeric: lining-nums; }
+.painel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.botao { position: relative; display: grid; align-content: space-between; min-height: 112px; padding: 14px; border-radius: 20px; background: var(--alg-2); border: 1px solid #e2dccd; text-decoration: none; color: var(--tx); }
+.botao.grande { grid-column: 1 / -1; min-height: 92px; background: var(--ambar); border-color: var(--ambar); grid-template-columns: 1fr auto; align-items: center; }
+.botao b { font: 600 1.12rem var(--serif); } .botao small { color: var(--tx-3); font-size: .8rem; display: block; }
+.botao svg { width: 30px; height: 30px; fill: none; stroke: var(--sal-2); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.botao.grande svg { width: 40px; height: 40px; stroke: var(--sal-3); }
+.botao .bolinha { position: absolute; top: 10px; right: 10px; min-width: 22px; height: 22px; border-radius: 11px; background: var(--verm); color: #fff; font-size: .74rem; font-weight: 700; display: grid; place-items: center; padding: 0 6px; }
+
+.cartao { background: var(--alg-2); border: 1px solid #e2dccd; border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; }
+.item { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid #ebe5d8; }
+.item:last-child { border-bottom: 0; }
+.item small { display: block; color: var(--tx-3); font-size: .8rem; }
+.etq { display: inline-block; font-size: .72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: #ebe5d8; color: var(--tx-2); white-space: nowrap; }
+.etq.ru { background: #f3d9d5; color: #8e372e; } .etq.am { background: #f4e5c6; color: #7a5716; } .etq.ok { background: #dbe9e1; color: #33634b; } .etq.mt { background: #dcebe5; color: var(--sal); }
+.semaforo { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+.semaforo button { border: 0; border-radius: 14px; padding: 10px 6px; cursor: pointer; color: #fff; background: var(--c); text-align: center; }
+.semaforo button b { display: block; font: 600 1.4rem var(--serif); } .semaforo button small { font-size: .72rem; }
+.semaforo button[aria-pressed="true"] { outline: 3px solid var(--sal-3); outline-offset: 2px; }
+
+.bt { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 46px; padding: 0 16px; border-radius: 14px; border: 1.5px solid var(--sal); background: transparent; color: var(--sal); font-weight: 600; cursor: pointer; text-decoration: none; }
+.bt.cheio { background: var(--sal); color: var(--alg); }
+.bt.ambar { background: var(--ambar); border-color: var(--ambar); color: var(--sal-3); }
+.bt.pq { min-height: 34px; padding: 0 12px; font-size: .84rem; border-radius: 10px; }
+.bt.largo { width: 100%; }
+.bt:disabled { opacity: .45; }
+.linha { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+/* venda no balcão */
+.leitor { display: flex; gap: 8px; margin-bottom: 10px; }
+.leitor input { flex: 1; min-height: 50px; border: 2px solid var(--sal); border-radius: 14px; padding: 0 14px; background: #fff; font-size: 1rem; }
+.sugestoes { display: grid; gap: 6px; margin-bottom: 10px; }
+.sugestoes button { display: grid; grid-template-columns: 1fr auto; text-align: left; border: 1px solid #e2dccd; background: #fff; border-radius: 12px; padding: 9px 12px; cursor: pointer; }
+.sugestoes small { color: var(--tx-3); font-size: .78rem; display: block; }
+.cesta .linha-c { padding: 10px 0; border-bottom: 1px dashed #dcd5c5; }
+.cesta .linha-c:last-child { border-bottom: 0; }
+.cesta .topo-l { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; }
+.cesta .lote { font-size: .76rem; color: var(--tx-3); margin-top: 2px; }
+.cesta .dica { margin-top: 6px; padding: 6px 10px; border-radius: 10px; background: #e6f0eb; font-size: .82rem; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.cesta .alerta { margin-top: 6px; padding: 6px 10px; border-radius: 10px; background: #f6e7cf; font-size: .82rem; }
+.cesta .x { border: 0; background: none; color: var(--tx-3); font-size: 1.1rem; cursor: pointer; }
+.total { display: flex; justify-content: space-between; align-items: baseline; font: 600 1.6rem var(--serif); margin: 12px 0; font-variant-numeric: lining-nums; }
+.qtd { display: inline-flex; align-items: center; gap: 6px; } .qtd button { width: 28px; height: 28px; border-radius: 8px; border: 1px solid #d9d2c1; background: #fff; cursor: pointer; }
+
+.campo { display: grid; gap: 4px; margin-bottom: 12px; font-size: .86rem; color: var(--tx-2); }
+.campo input, .campo select { min-height: 48px; border: 1px solid #d9d2c1; border-radius: 14px; padding: 0 14px; background: #fff; color: var(--tx); font-size: 1rem; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.chips button { border: 1px solid #d9d2c1; background: #fff; border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: .86rem; }
+.chips button[aria-pressed="true"] { background: var(--sal); color: var(--alg); border-color: var(--sal); }
+.lista-mais a { display: grid; grid-template-columns: 1fr auto; padding: 14px 4px; border-bottom: 1px solid #ebe5d8; text-decoration: none; color: var(--tx); }
+.lista-mais small { display: block; color: var(--tx-3); font-size: .8rem; }
+.conversa { display: grid; gap: 8px; margin-bottom: 12px; }
+.fala { padding: 10px 14px; border-radius: 18px; max-width: 88%; white-space: pre-wrap; font-size: .94rem; }
+.fala.ia { background: var(--alg-2); border: 1px solid #e2dccd; border-bottom-left-radius: 4px; }
+.fala.eu { background: var(--sal); color: var(--alg); justify-self: end; border-bottom-right-radius: 4px; }
+.form-ia { display: flex; gap: 8px; } .form-ia input { flex: 1; min-height: 46px; border-radius: 14px; border: 1px solid #d9d2c1; padding: 0 14px; background: #fff; }
+.cupom { background: #fff; border: 1px dashed var(--cinza); border-radius: 8px; padding: 14px; font: 400 .82rem ui-monospace, monospace; white-space: pre-wrap; }
+
+.veu { position: fixed; inset: 0; z-index: 40; background: rgba(31, 51, 45, .55); display: flex; align-items: flex-end; justify-content: center; }
+.folha { background: var(--alg); width: min(600px, 100%); max-height: 90vh; overflow-y: auto; border-radius: 24px 24px 0 0; padding: 20px 18px calc(20px + env(safe-area-inset-bottom)); }
+.folha h2 { margin-top: 0; font: 600 1.3rem var(--serif); color: var(--tx); }
+.trava { z-index: 60; align-items: center; } .trava .folha { border-radius: 24px; margin: 16px; }
+.avisos { position: fixed; left: 50%; translate: -50% 0; bottom: 24px; z-index: 70; display: grid; gap: 6px; width: min(92vw, 420px); }
+.aviso { background: var(--sal-3); color: var(--alg); padding: 12px 16px; border-radius: 14px; font-size: .9rem; border-left: 4px solid var(--menta); }
+video.camera { width: 100%; border-radius: 14px; background: #000; margin-bottom: 10px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
