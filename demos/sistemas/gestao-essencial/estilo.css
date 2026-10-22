@@ -267,3 +267,22 @@ h2 { margin: 0 0 6px; font: 600 1.25rem/1.25 var(--titulo); letter-spacing: -.01
 .cupom-papel .tot { font-weight: 700; font-size: 15px; }
 .camera-caixa video { width: 100%; border-radius: 10px; background: #000; aspect-ratio: 4 / 3; object-fit: cover; }
 @media print { body * { visibility: hidden; } #cupom-papel, #cupom-papel * { visibility: visible; } #cupom-papel { position: absolute; left: 0; top: 0; width: 80mm; border: 0; } }
+
+/* 22/10/2026: scanner, código de barras no estoque e configurações */
+:root { --aba-7: #46505e; }
+.divisorias a:nth-child(7) { background: var(--aba-7); }
+.camera svg { stroke-width: 2; }
+.cod-barras { display: inline-flex; align-items: center; gap: 6px; margin: 3px 0 2px; padding: 2px 8px; border-radius: 6px; background: var(--papel-2); border: 1px solid var(--pauta); font: 600 .82rem/1.3 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .04em; color: var(--tinta); width: fit-content; }
+.cod-barras svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.cod-barras.sem { font-family: inherit; letter-spacing: 0; font-weight: 500; color: var(--tijolo); border-style: dashed; }
+.tabela .nome small { display: block; }
+.cfg { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.cfg section { background: var(--papel); border: 1.5px solid var(--pauta); border-radius: 12px; padding: 18px; display: grid; gap: 12px; align-content: start; }
+.cfg h2 { margin: 0; }
+.cfg .campo input:disabled { opacity: .7; }
+.cfg-ch { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.cfg-ch input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--veltria); flex: none; }
+.cfg-ch b { display: block; }
+.cfg-ch small { color: var(--tinta-3); }
+@media (max-width: 860px) { .divisorias a { font-size: .72rem; } }
+.tabela .nome .cod-barras { display: flex; }

@@ -45,9 +45,11 @@ function semente() {
   }
   if (mins > 10 * 60) diario.push({ tipo: 'entrada', hora: '10:05', texto: 'Chegou mercadoria: 24 Refrigerante cola 2 L', valor: 139.2 });
   diario.sort((a, b) => a.hora.localeCompare(b.hora));
-  return { produtos: P, clientes, pagar, diario, caixaInicial: 350, ontemAteAgora: 0.86, comanda: [], forma: 'Pix', fiadoDe: '', desconto: 0, recebido: '', cpf: '', proxNfce: 18431 };
+  return { produtos: P, clientes, pagar, diario, caixaInicial: 350, ontemAteAgora: 0.86, eu: { nome: 'Marquinhos', letra: 'normal', som: true, abrir: 'hoje', imprimir: false, cpf: false, confirmarFiado: true }, comanda: [], forma: 'Pix', fiadoDe: '', desconto: 0, recebido: '', cpf: '', proxNfce: 18431 };
 }
+const EU_PADRAO = { nome: 'Marquinhos', letra: 'normal', som: true, abrir: 'hoje', imprimir: false, cpf: false, confirmarFiado: true };
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semente(); } catch { return semente(); } })();
+db.eu = { ...EU_PADRAO, ...(db.eu || {}) };
 const gravar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { /* sem espaço: segue na memória */ } };
 
 // contas do dia
@@ -89,7 +91,7 @@ const TELAS = {
     let lista = b ? db.produtos.filter((p) => norm(p.nome).includes(b) || p.ean.includes(b)) : f === 'Mais vendidos' ? [...db.produtos].sort((x, y) => y.vendidos30 - x.vendidos30).slice(0, 12) : db.produtos.filter((p) => p.cat === f);
     const q = (id) => db.comanda.find((x) => x.id === id)?.qtd || 0, sub = subtotal(), desc = Math.min(db.desconto || 0, sub), total = sub - desc, n = db.comanda.reduce((t, x) => t + (prod(x.id).kg ? 1 : x.qtd), 0), troco = db.forma === 'Dinheiro' && num(db.recebido) >= total ? num(db.recebido) - total : null;
     return `<div class="vender"><section>
-        <div class="linha-pdv"><label class="busca-pdv"><svg viewBox="0 0 24 24"><path d="M4 6v12M7 6v12M11 6v12M14 6v12M18 6v12M20 6v12"/></svg><input data-busca placeholder="Bipe o código, digite o produto ou 3*código" value="${esc(estado.busca || '')}" autocomplete="off" aria-label="Buscar produto ou ler código de barras"></label><button type="button" class="btn camera" data-camera aria-label="Ler o código com a câmera"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Câmera</span></button></div>
+        <div class="linha-pdv"><label class="busca-pdv"><svg viewBox="0 0 24 24"><path d="M4 6v12M7 6v12M11 6v12M14 6v12M18 6v12M20 6v12"/></svg><input data-busca placeholder="Bipe o código, digite o produto ou 3*código" value="${esc(estado.busca || '')}" autocomplete="off" aria-label="Buscar produto ou ler código de barras"></label><button type="button" class="btn camera" data-camera aria-label="Abrir o scanner de código de barras"><svg viewBox="0 0 24 24"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg><span>Scanner</span></button></div>
         <p class="dica-pdv">Leitor de código de barras ligado: é só bipar, mesmo sem clicar aqui. Produto por peso: bipe a etiqueta da balança. <kbd>F2</kbd> busca · <kbd>F9</kbd> fecha a venda</p>
         <div class="chips" role="group" aria-label="Categorias">${cats.map((c) => `<button type="button" class="chip" data-cat="${c}" aria-pressed="${!b && c === f}">${c}</button>`).join('')}</div>
         <div class="produtos">${lista.map((p) => `<button type="button" class="prod" data-add="${p.id}" ${p.tem <= 0 ? 'aria-disabled="true"' : ''}><span class="ini" style="background:${CORES[p.cat]}">${ini(p.nome)}</span><b>${esc(p.nome)}</b>${p.tem <= 0 ? '<span class="sem">Sem estoque</span>' : p.kg ? '<span class="sem peso">por peso</span>' : ''}<span class="p">${R(p.preco)}${p.kg ? '<small>/kg</small>' : ''}</span>${q(p.id) ? `<span class="q">${p.kg ? '✓' : q(p.id)}</span>` : ''}</button>`).join('') || '<p class="sub">Nenhum produto com esse nome.</p>'}</div></section>
@@ -111,7 +113,7 @@ const TELAS = {
     return `<div class="cabeca"><h1 class="frase">${ac.length ? `<span class="mt ambar">${ac.length} produtos</span> estão acabando.` : 'Nada acabando no estoque.'}<small>${db.produtos.length} produtos, ${R(valor)} em mercadoria (pelo custo).</small></h1><span class="botoes"><button type="button" class="btn" data-novo-prod>Novo produto</button><button type="button" class="btn pri" data-chegou>Chegou mercadoria</button></span></div>
       <div class="chips" role="group" aria-label="Mostrar">${[['todos', 'Todos'], ['acabando', `Acabando (${ac.length})`], ['parado', `Parados há 30 dias (${pa.length})`]].map(([k, t]) => `<button type="button" class="chip" data-filtro="${k}" aria-pressed="${f === k}">${t}</button>`).join('')}</div>
       <p class="leg"><span>A barra mostra quanto tem. O risquinho é o mínimo que você quer ter. Toque no nome para mudar preço, código ou mínimo.</span></p>
-      <ul class="tabela">${lista.map((p) => { const max = Math.max(p.minimo * 3, p.tem, 1), cls = p.tem <= 0 ? 'er' : p.tem <= p.minimo ? 'al' : ''; return `<li><span class="nome"><button type="button" class="nome-btn" data-editar="${p.id}"><b>${esc(p.nome)}</b></button><small>${p.cat} · ${R(p.preco)}${p.kg ? '/kg' : ''} · ${p.kg ? `balança ${p.plu}` : p.ean ? `cód. ${p.ean}` : 'sem código'} · vende uns ${p.kg ? qtdTxt(p, Math.round(p.vendidos30 / 4 * 10) / 10) : Math.round(p.vendidos30 / 4)} por semana</small></span><span class="regua ${cls}" style="--min:${(p.minimo / max) * 100}%"><i style="width:${(p.tem / max) * 100}%"></i></span><span class="qtd-est"><button type="button" data-est="${p.id}" data-d="-1" aria-label="Tirar um de ${esc(p.nome)}">−</button><b>${p.kg ? qtdTxt(p, p.tem) : p.tem}</b><button type="button" data-est="${p.id}" data-d="1" aria-label="Pôr mais um de ${esc(p.nome)}">+</button></span></li>`; }).join('') || '<li><span class="sub">Nenhum produto aqui.</span></li>'}</ul>`;
+      <ul class="tabela">${lista.map((p) => { const max = Math.max(p.minimo * 3, p.tem, 1), cls = p.tem <= 0 ? 'er' : p.tem <= p.minimo ? 'al' : ''; return `<li><span class="nome"><button type="button" class="nome-btn" data-editar="${p.id}"><b>${esc(p.nome)}</b></button><span class="cod-barras ${p.ean || p.kg ? '' : 'sem'}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6v12M7 6v12M11 6v12M14 6v12M18 6v12M20 6v12"/></svg>${p.kg ? `Balança · PLU ${p.plu}` : p.ean ? p.ean : 'sem código: toque no nome para cadastrar'}</span><small>${p.cat} · ${R(p.preco)}${p.kg ? '/kg' : ''} · vende uns ${p.kg ? qtdTxt(p, Math.round(p.vendidos30 / 4 * 10) / 10) : Math.round(p.vendidos30 / 4)} por semana</small></span><span class="regua ${cls}" style="--min:${(p.minimo / max) * 100}%"><i style="width:${(p.tem / max) * 100}%"></i></span><span class="qtd-est"><button type="button" data-est="${p.id}" data-d="-1" aria-label="Tirar um de ${esc(p.nome)}">−</button><b>${p.kg ? qtdTxt(p, p.tem) : p.tem}</b><button type="button" data-est="${p.id}" data-d="1" aria-label="Pôr mais um de ${esc(p.nome)}">+</button></span></li>`; }).join('') || '<li><span class="sub">Nenhum produto aqui.</span></li>'}</ul>`;
   },
   dinheiro() {
     return `<div class="cabeca"><h1 class="frase">No caixa agora: <span class="mt">${R(noCaixa())}</span><small>Começou o dia com ${R(db.caixaInicial)}. O fiado só entra quando o cliente pagar.</small></h1><span class="botoes"><button type="button" class="btn" data-despesa>Lançar despesa</button><button type="button" class="btn" data-sangria>Sangria</button><button type="button" class="btn" data-suprimento>Suprimento</button><button type="button" class="btn pri" data-fechar-caixa>Fechar o caixa</button></span></div>
@@ -120,6 +122,25 @@ const TELAS = {
       <div class="duas"><section><h2>Contas para pagar</h2><p class="sub">Da que vence primeiro para a última.</p>
         <ul class="lista">${db.pagar.sort((a, b) => a.vence - b.vence).map((b) => `<li><span>${esc(b.nome)}<small>${b.vence <= 1 ? 'Vence amanhã' : `Vence em ${b.vence} dias`}</small></span><span class="v ${b.vence <= 1 ? 'er' : ''}">${R(b.valor)}</span><button type="button" class="btn peq" data-pagar="${b.id}">Paguei</button></li>`).join('') || '<li><span class="sub">Nenhuma conta para pagar.</span></li>'}</ul></section>
         <section><h2>Para receber</h2><p class="sub">Fiado dos clientes.</p><ul class="lista"><li><span>Total no fiado<small>${db.clientes.length} clientes</small></span><span class="v">${R(fiadoTotal())}</span><a class="btn peq" href="#fiado">Abrir o fiado</a></li></ul></section></div>`;
+  },
+  config() {
+    const e = db.eu, op = (n, v, t) => `<option value="${v}" ${e[n] === v ? 'selected' : ''}>${t}</option>`, ch = (n, t, d) => `<label class="cfg-ch"><input type="checkbox" data-eu="${n}" ${e[n] ? 'checked' : ''}><span><b>${t}</b><small>${d}</small></span></label>`;
+    return `<div class="cabeca"><h1 class="frase">Suas configurações<small>Valem só para você, neste aparelho e na sua conta. O que é da loja inteira fica no Painel do dono.</small></h1></div>
+      <div class="cfg">
+        <section><h2>Você</h2>
+          <label class="campo">Seu nome<input data-eu="nome" maxlength="40" value="${esc(e.nome)}" placeholder="Como você quer ser chamado"><span class="sub">Aparece no topo, no cupom e no caderno de cada dia.</span></label>
+          <label class="campo">E-mail de entrada<input value="${esc(norm(e.nome).split(' ')[0] || 'voce')}@mercadobompreco.com.br" disabled><span class="sub">Para trocar o e-mail ou a senha, use Minha conta no site.</span></label></section>
+        <section><h2>Tela</h2>
+          <label class="campo">Tamanho das letras<select data-eu="letra">${op('letra', 'normal', 'Normal')}${op('letra', 'grande', 'Grande')}${op('letra', 'maior', 'Bem grande')}</select></label>
+          <label class="campo">Abrir o sistema em<select data-eu="abrir">${op('abrir', 'hoje', 'Hoje (resumo do dia)')}${op('abrir', 'vender', 'Vender (direto no caixa)')}</select></label></section>
+        <section><h2>Caixa</h2>
+          ${ch('som', 'Bipe ao ler o código', 'Toca um bipe curto a cada produto lido; um som grave quando o código não existe.')}
+          ${ch('imprimir', 'Imprimir o cupom sozinho', 'Ao fechar a venda, já abre a impressão do cupom.')}
+          ${ch('cpf', 'Perguntar o CPF na nota', 'Antes de fechar, pergunta se o cliente quer CPF na nota.')}
+          ${ch('confirmarFiado', 'Confirmar antes de pôr no fiado', 'Evita lançar no fiado da pessoa errada.')}</section>
+        <section><h2>Seus dados</h2><p class="sub">Baixe a lista de produtos com códigos, preços e estoque, para abrir no Excel.</p><button type="button" class="btn" data-exportar>Baixar planilha de produtos</button>
+          <p class="sub" style="margin-top:14px">Teste do leitor: bipe qualquer produto agora para conferir se o leitor está funcionando.</p><p class="troco" data-teste-leitor>Esperando a leitura…</p></section>
+      </div>`;
   },
   dono() {
     return `<div class="cabeca"><h1 class="frase">Painel do dono<small>Equipe, cargos, o que cada um pode ver e o seu plano. Só você e os administradores veem esta parte.</small></h1></div><div id="gx-dono"></div>`;
@@ -134,13 +155,14 @@ const estado = { busca: '', cat: '', filtro: '' };
 
 // ---------------------------------------------------------------- navegação pelas divisórias
 function mostrar() {
-  const [aba, extra] = (location.hash.slice(1) || 'hoje').split('/');
+  const [aba, extra] = (location.hash.slice(1) || db.eu.abrir || 'hoje').split('/');
   const tela = TELAS[aba] ? aba : 'hoje';
   if (tela === 'estoque' && extra) estado.filtro = extra;
   pag.classList.remove('entrou'); pag.innerHTML = TELAS[tela](); void pag.offsetWidth; pag.classList.add('entrou');
   if (tela === 'dono') painelDono(pag.querySelector('#gx-dono'), DONO);
+  aplicarEu();
   document.querySelectorAll('.divisorias a').forEach((a) => (a.dataset.aba === tela ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
-  document.title = `${tela === 'dono' ? 'Painel do dono' : tela[0].toUpperCase() + tela.slice(1)} · Veltria Gestão Essencial`;
+  document.title = `${tela === 'dono' ? 'Painel do dono' : tela === 'config' ? 'Configurações' : tela[0].toUpperCase() + tela.slice(1)} · Veltria Gestão Essencial`;
 }
 function redesenhar(foco) { const sel = foco && document.activeElement?.matches(foco) ? foco : null, pos = sel && document.activeElement.selectionStart; mostrar(); if (sel) { const el = pag.querySelector(sel); el?.focus(); if (el && pos != null) el.setSelectionRange(pos, pos); } }
 addEventListener('hashchange', () => { if (location.hash !== '#comanda') { estado.busca = ''; mostrar(); pag.focus({ preventScroll: true }); scrollTo({ top: 0 }); } });
@@ -169,6 +191,11 @@ pag.addEventListener('click', (e) => {
   else if ('sangria' in d) movimentoCaixa('sangria');
   else if ('suprimento' in d) movimentoCaixa('suprimento');
   else if ('fecharCaixa' in d) fecharCaixa();
+  else if ('exportar' in d) {
+    const linhas = [['Código de barras', 'PLU balança', 'Produto', 'Categoria', 'Custo', 'Preço', 'Por kg', 'Estoque', 'Mínimo'], ...db.produtos.map((p) => [p.ean, p.plu || '', p.nome, p.cat, p.custo, p.preco, p.kg ? 'sim' : 'não', p.tem, p.minimo].map((v) => (typeof v === 'number' ? String(v).replace('.', ',') : v)))];
+    const csv = '\ufeff' + linhas.map((l) => l.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';')).join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'produtos-mercado.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
   else if (d.cat) { estado.cat = d.cat; estado.busca = ''; redesenhar(); }
   else if (d.forma) { db.forma = d.forma; gravar(); redesenhar(); }
   else if ('fechar' in d) fecharVenda();
@@ -184,8 +211,15 @@ pag.addEventListener('input', (e) => {
   if (e.target.matches('[data-busca]')) { estado.busca = e.target.value; redesenhar('[data-busca]'); }
   if (e.target.matches('[data-recebido]')) { db.recebido = e.target.value; gravar(); redesenhar('[data-recebido]'); }
   if (e.target.matches('[data-cpf]')) { db.cpf = e.target.value; gravar(); }
+  if (e.target.matches('[data-eu="nome"]')) { db.eu.nome = e.target.value.trim() || 'Você'; gravar(); aplicarEu(); }
 });
-pag.addEventListener('change', (e) => { if (e.target.matches('[data-fiado]')) { db.fiadoDe = e.target.value; gravar(); redesenhar(); } });
+function aplicarEu() {
+  document.documentElement.style.fontSize = { normal: '', grande: '112.5%', maior: '125%' }[db.eu.letra] || '';
+  const q = document.getElementById('quem'); if (q) q.textContent = `Caixa: ${db.eu.nome}`;
+}
+pag.addEventListener('change', (e) => {
+  const k = e.target.dataset?.eu;
+  if (k) { db.eu[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; gravar(); aplicarEu(); avisar('Configuração salva'); return; } if (e.target.matches('[data-fiado]')) { db.fiadoDe = e.target.value; gravar(); redesenhar(); } });
 // leitor de código de barras: Enter na busca põe o produto na comanda
 pag.addEventListener('keydown', (e) => {
   if (!e.target.matches('[data-busca]') || e.key !== 'Enter') return;
@@ -196,6 +230,8 @@ pag.addEventListener('keydown', (e) => {
 function fecharVenda() {
   if (!db.comanda.length) return;
   if (db.forma === 'Fiado' && !db.fiadoDe) return avisar('Escolha o cliente do fiado');
+  if (db.eu.cpf && !db.cpf && !confirm('O cliente quer CPF na nota? Clique em Cancelar para voltar e digitar, ou OK para seguir sem CPF.')) { pag.querySelector('[data-cpf]')?.focus(); return; }
+  if (db.forma === 'Fiado' && db.eu.confirmarFiado && !confirm(`Pôr ${R(subtotal() - Math.min(db.desconto || 0, subtotal()))} no fiado de ${db.clientes.find((c) => c.id === db.fiadoDe)?.nome}?`)) return;
   const sub = subtotal(), desc = Math.min(db.desconto || 0, sub), total = sub - desc, lucro = db.comanda.reduce((t, x) => t + x.qtd * (prod(x.id).preco - prod(x.id).custo), 0) - desc;
   if (db.forma === 'Dinheiro' && db.recebido && num(db.recebido) < total) return avisar('O valor recebido é menor que o total');
   const troco = db.forma === 'Dinheiro' && num(db.recebido) > total ? num(db.recebido) - total : 0;
@@ -211,7 +247,7 @@ function fecharVenda() {
 const num = (v) => Number(String(v ?? '').replace(/\./g, '').replace(',', '.')) || 0;
 const subtotal = () => db.comanda.reduce((t, x) => t + x.qtd * prod(x.id).preco, 0);
 let audio;
-function bipe(ok = true) { try { audio ||= new AudioContext(); const o = audio.createOscillator(), g = audio.createGain(); o.frequency.value = ok ? 1650 : 320; g.gain.value = .06; o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime + (ok ? .08 : .25)); } catch { /* sem som */ } }
+function bipe(ok = true) { if (!db.eu.som) return; try { audio ||= new AudioContext(); const o = audio.createOscillator(), g = audio.createGain(); o.frequency.value = ok ? 1650 : 320; g.gain.value = .06; o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime + (ok ? .08 : .25)); } catch { /* sem som */ } }
 function porNaComanda(p, qtd) {
   const x = db.comanda.find((i) => i.id === p.id), ja = x?.qtd || 0;
   if (p.tem <= 0 || ja + qtd > p.tem + 1e-9) { bipe(false); return avisar(p.tem <= 0 ? `${p.nome} está sem estoque` : `Só tem ${qtdTxt(p, p.tem)} de ${p.nome}`); }
@@ -220,6 +256,8 @@ function porNaComanda(p, qtd) {
 }
 // código lido: "3*789..." (quantidade), etiqueta da balança (2 + PLU de 4 + 0 + valor em centavos + dígito) ou código/nome do produto
 function lerCodigo(texto, digitado = false) {
+  const teste = location.hash === '#config' && pag.querySelector('[data-teste-leitor]');
+  if (teste) { const p = db.produtos.find((x) => x.ean === String(texto).trim()); teste.textContent = p ? `Leitor funcionando: ${p.nome} (${texto})` : `Leitor funcionando. Código ${texto} não está cadastrado.`; bipe(!!p); return; }
   const m = String(texto).trim().match(/^(\d+(?:[.,]\d+)?)\s*[*x]\s*(.+)$/i), mult = m ? num(m[1]) : 1, cod = (m ? m[2] : String(texto)).trim();
   if (/^2\d{12}$/.test(cod)) {
     const p = db.produtos.find((x) => x.kg && x.plu === cod.slice(1, 5));
@@ -250,12 +288,13 @@ function darDesconto() {
 }
 function mostrarCupom(c) {
   const f = document.createElement('div'); f.className = 'fundo';
-  f.innerHTML = `<div class="janela cupom" role="dialog" aria-modal="true" aria-label="Cupom da venda"><div class="cupom-papel" id="cupom-papel"><b>MERCADO BOM PREÇO</b><small>CNPJ 12.345.678/0001-90 · Rua das Flores, 120</small><hr><small>NFC-e nº ${c.n} · série 1 · ${new Date().toLocaleDateString('pt-BR')} ${c.hora}</small><hr>
+  f.innerHTML = `<div class="janela cupom" role="dialog" aria-modal="true" aria-label="Cupom da venda"><div class="cupom-papel" id="cupom-papel"><b>MERCADO BOM PREÇO</b><small>CNPJ 12.345.678/0001-90 · Rua das Flores, 120</small><hr><small>NFC-e nº ${c.n} · série 1 · ${new Date().toLocaleDateString('pt-BR')} ${c.hora}</small><small>Caixa: ${esc(db.eu.nome)}</small><hr>
     ${c.itens.map((i) => `<div class="cl"><span>${esc(i.nome)}<small>${esc(String(i.q))}</small></span><span>${R(i.v)}</span></div>`).join('')}<hr>
     ${c.desc ? `<div class="cl"><span>Subtotal</span><span>${R(c.sub)}</span></div><div class="cl"><span>Desconto</span><span>− ${R(c.desc)}</span></div>` : ''}<div class="cl tot"><span>TOTAL</span><span>${R(c.total)}</span></div><div class="cl"><span>${esc(c.forma)}</span><span>${R(c.total + c.troco)}</span></div>${c.troco ? `<div class="cl"><span>Troco</span><span>${R(c.troco)}</span></div>` : ''}<hr>
     <small>${c.cpf ? `CPF do consumidor: ${esc(c.cpf)}` : 'Consumidor não identificado'}</small><small>Autorizada (demonstração). Na versão contratada a NFC-e sai pela SEFAZ do seu estado, com QR Code de consulta.</small></div>
     <div class="acoes"><button type="button" class="btn" data-imprimir>Imprimir cupom</button><button type="button" class="btn pri" data-x>Próxima venda</button></div></div>`;
   document.body.append(f); f.querySelector('[data-x]').focus();
+  if (db.eu.imprimir) setTimeout(print, 200);
   const fechar = () => { f.remove(); pag.querySelector('[data-busca]')?.focus(); };
   f.addEventListener('click', (e) => { if (e.target === f || e.target.closest('[data-x]')) fechar(); if (e.target.closest('[data-imprimir]')) print(); });
   f.addEventListener('keydown', (e) => { if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); fechar(); } });
@@ -306,9 +345,9 @@ function fecharCaixa() {
 }
 // câmera do celular: lê o código de barras com o leitor do navegador (Chrome no Android e no computador)
 async function camera() {
-  if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) return avisar('Este navegador não lê código pela câmera. Use o Chrome no Android ou um leitor USB.');
+  if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) return avisar('O scanner pela câmera funciona no Chrome do Android. No computador, use um leitor USB: é só bipar.');
   const f = document.createElement('div'); f.className = 'fundo';
-  f.innerHTML = '<div class="janela camera-caixa"><h2>Aponte para o código de barras</h2><video playsinline muted></video><div class="acoes"><button type="button" class="btn" data-x>Fechar</button></div></div>';
+  f.innerHTML = '<div class="janela camera-caixa"><h2>Scanner: aponte a câmera para o código de barras</h2><video playsinline muted></video><div class="acoes"><button type="button" class="btn" data-x>Fechar</button></div></div>';
   document.body.append(f);
   let stream, ligado = true;
   const fechar = () => { ligado = false; stream?.getTracks().forEach((t) => t.stop()); f.remove(); };
@@ -374,6 +413,7 @@ const ACOES = [
   ['sangria retirar tirar dinheiro cofre', 'Fazer sangria', () => { location.hash = '#dinheiro'; setTimeout(() => movimentoCaixa('sangria'), 60); }],
   ['ia assistente perguntar ajuda', 'Perguntar ao Assistente IA', () => ia()],
   ['dono equipe funcionario cargo permissao plano convidar', 'Painel do dono', () => (location.hash = '#dono')],
+  ['configuracoes config meu nome letra som bipe imprimir ajustes', 'Minhas configurações', () => (location.hash = '#config')],
 ];
 let opcoes = [], sel = 0;
 function sugerir() {
