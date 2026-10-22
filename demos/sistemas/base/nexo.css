@@ -737,7 +737,7 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .faixa a.faixa-voltar:hover { background: rgba(255, 255, 255, .22); }
 .faixa a.faixa-voltar .ic { width: 14px; height: 14px; }
 
-/* painel lateral de ferramentas da aba (usado pelo RoseConstruct) */
+/* painel lateral de ferramentas da aba (usado pelo Veltria Obras) */
 .com-lado { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
 .com-lado-princ { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .lado { position: sticky; top: calc(var(--faixa, 0px) + 12px); border: 1px solid var(--borda); border-radius: var(--r3); background: var(--painel); box-shadow: var(--sombra-1); max-height: calc(100vh - var(--faixa, 0px) - 24px); overflow: auto; }

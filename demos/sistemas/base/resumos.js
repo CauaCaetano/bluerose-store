@@ -252,7 +252,7 @@ const RESUMOS = {
       alertas: [atras.length && plural(atras.length, 'tarefa atrasada', 'tarefas atrasadas'), semResp.length && `${plural(semResp.length, 'convidado sem resposta', 'convidados sem resposta')} em eventos deste mês`, venc.length && plural(venc.length, 'pagamento a fornecedor vence esta semana', 'pagamentos a fornecedores vencem esta semana')].filter(Boolean),
     };
   },
-  // RoseConstruct · reformas e obras
+  // Veltria Obras · reformas e obras
   obras(d, hoje) {
     const obs = L(d, 'obras'), and = obs.filter((o) => o.status === 'andamento');
     const cobrar = obs.flatMap((o) => (o.etapas || []).filter((e) => e.status === 'feita' && !e.pago));

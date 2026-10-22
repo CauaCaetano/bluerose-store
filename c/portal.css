@@ -68,7 +68,7 @@ label.p-campo { display: grid; gap: 4px; font-size: 13.5px; font-weight: 600; ma
 .p-tempo li:last-child { padding-bottom: 0; }
 @media (prefers-color-scheme: dark) { :root { --tx: #f2f2f5; --tx-2: #c7c7cf; --tx-3: #9a9aa5; --bg: #111114; --painel: #1b1b20; --borda: #2b2b33; color-scheme: dark; } .p-campo input, .p-campo select, .p-campo textarea, .p-qtd button, .p-pix textarea { background: #15151a; color: var(--tx); } .p-total { border-color: var(--tx); } }
 
-/* identidade própria dos produtos avulsos (Blue Rose Eternize · RoseConstruct · Blue Rose Guard) */
+/* identidade própria dos produtos avulsos (Blue Rose Eternize · Veltria Obras · Blue Rose Guard) */
 [data-produto="cerimonial"] { --bg: #f5f2ea; --painel: #fdfbf5; --borda: #e5e0d4; --tx: #141c35; --tx-2: #4a5470; --tx-3: #77809a; --ouro: #b8913f; }
 [data-produto="cerimonial"] .p-cab { background: radial-gradient(120% 140% at 100% 0%, rgba(232, 211, 166, .35), transparent 60%), #142c6e; border-radius: 0 0 28px 28px; text-align: center; padding: 30px 22px 32px; }
 [data-produto="cerimonial"] .p-cab small { color: #e8d3a6; opacity: 1; letter-spacing: .16em; }

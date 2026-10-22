@@ -9,7 +9,7 @@
   var TIPOFB = { sugestao: 'Sugestão', elogio: 'Elogio', problema: 'Problema', outro: 'Outro' };
   var CATEG = { erro: 'Erro no sistema', duvida: 'Dúvida de uso', pagamento: 'Pagamento ou plano', sugestao: 'Pedido de melhoria' };
   var ST = { aberto: ['Aguardando o suporte', 'al'], respondido: ['Respondido', 'ok'], resolvido: ['Resolvido', ''] };
-  var SIS = { '': 'Site ou conta', gestao: 'Veltria Gestão', crm: 'Veltria CRM', agenda: 'Veltria Agenda', juridico: 'Veltria Jurídico', financeiro: 'Veltria Financeiro', clinica: 'Veltria Clínica', academia: 'Veltria Academia', restaurante: 'Veltria Restaurante', imobiliaria: 'Veltria Imobiliária', oficina: 'Veltria Oficina', farmacia: 'Veltria Farmácia', obras: 'RoseConstruct', cerimonial: 'Blue Rose Eternize', pragas: 'Blue Rose Guard', ofixl: 'Blue Rose Ofixl' };
+  var SIS = { '': 'Site ou conta', gestao: 'Veltria Gestão', crm: 'Veltria CRM', agenda: 'Veltria Agenda', juridico: 'Veltria Jurídico', financeiro: 'Veltria Financeiro', clinica: 'Veltria Clínica', academia: 'Veltria Academia', restaurante: 'Veltria Restaurante', imobiliaria: 'Veltria Imobiliária', oficina: 'Veltria Oficina', farmacia: 'Veltria Farmácia', obras: 'Veltria Obras', cerimonial: 'Blue Rose Eternize', pragas: 'Blue Rose Guard', ofixl: 'Blue Rose Ofixl' };
   var cli = null, suporte = false, aberto = null;
   function data(s) { var d = new Date(s); return d.toLocaleDateString('pt-BR') + ' ' + d.toTimeString().slice(0, 5); }
   function etiqueta(s) { var m = ST[s] || ST.aberto; return '<span class="conta-et ' + m[1] + '">' + m[0] + '</span>'; }

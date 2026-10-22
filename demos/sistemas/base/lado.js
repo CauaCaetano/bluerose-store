@@ -65,7 +65,7 @@ export const paginasFerramentas = (fns) => [
 // lista = [[id, rótulo, ícone, aba de LADOS onde o bloco nasce, começo do título do bloco], ...]
 const textoH3 = (b) => ((b.match(/<h3>([\s\S]*?)<\/h3>/) || ['', ''])[1]).replace(/<[^>]+>/g, '').trim();
 const blocoDe = (a, fn, prefixo) => blocos(a, [fn]).find((b) => textoH3(b).startsWith(prefixo)) || '';
-// semPro: sistemas de plano único (RoseConstruct), em que tudo está incluso e nada leva a marca Pro
+// semPro: sistemas de plano único (Veltria Obras), em que tudo está incluso e nada leva a marca Pro
 export const ferramentaPaginas = (L, lista, { semPro = false } = {}) => [
   { grupo: 'Ferramentas' },
   ...lista.map(([id, rot, icone, aba, prefixo]) => ({

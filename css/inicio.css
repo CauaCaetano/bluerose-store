@@ -221,7 +221,7 @@ html[data-theme="light"] .ini-rosa { opacity: .22; }
 .lx-hero-grid:not(:has(.lx-hero-arte)) { grid-template-columns: minmax(0, 1fr); }
 /* =============================================================
    Notebook com os sistemas rodando no topo (21/10, pedido do dono)
-   4 telas reais (Agenda, Jurídico, Financeiro, RoseConstruct) que rolam devagar e trocam a cada 6 s
+   4 telas reais (Agenda, Jurídico, Financeiro, Veltria Obras) que rolam devagar e trocam a cada 6 s
    ============================================================= */
 .nb-arte { perspective: 1600px; }
 .nb { position: relative; width: min(100%, 640px); opacity: 0; transform: translateY(30px) rotateX(8deg); animation: nb-chega 1.6s cubic-bezier(.16, 1, .3, 1) .3s forwards; }

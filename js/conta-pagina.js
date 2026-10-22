@@ -20,13 +20,15 @@
     imobiliaria: ['Veltria Imobiliária', 'imobiliária imóveis corretor aluguel venda contratos visitas agenda'],
     oficina: ['Veltria Oficina', 'oficina mecânica carro veículos ordem de serviço orçamento peças estoque agenda revisões'],
     farmacia: ['Veltria Farmácia', 'farmácia drogaria remédio medicamentos controlados receitas validade lotes estoque caixa pdv nota fiscal nfc-e convênios'],
-    obras: ['RoseConstruct', 'obra obras reforma construção empreiteiro diário cronograma gastos orçamento equipe'],
+    obras: ['Veltria Obras', 'obra obras reforma construção empreiteiro diário cronograma gastos orçamento equipe'],
     cerimonial: ['Blue Rose Eternize', 'casamento eventos cerimonial festas convidados fornecedores agenda orçamento'],
     pragas: ['Blue Rose Guard', 'dedetização controle de pragas visitas agenda ordem de serviço certificados contratos'],
     ofixl: ['Blue Rose Ofixl', 'serviços técnicos ar-condicionado manutenção ordem de serviço agenda técnicos orçamento']
   };
   function normal(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
-  var PAGINA = { obras: 'roseconstruct.html', cerimonial: 'eternize.html', pragas: 'guard.html', ofixl: 'ofixl.html' };
+  // saíram da vitrine em 22/10/2026: quem já usa continua vendo, mas não aparecem como sugestão
+  var FORA_DE_VENDA = ['academia', 'restaurante', 'imobiliaria', 'cerimonial', 'pragas'];
+  var PAGINA = { obras: 'veltria-obras.html', cerimonial: 'eternize.html', pragas: 'guard.html', ofixl: 'ofixl.html' };
   var hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   function data(s) { if (!s) return '—'; var p = String(s).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
   function dias(ate) { return Math.round((new Date(String(ate).slice(0, 10) + 'T12:00:00') - new Date(hojeISO + 'T12:00:00')) / 864e5); }
@@ -157,7 +159,7 @@
     var tit = raiz.querySelector('.conta-titulo'); if (tit) tit.style.display = q && !vistos ? 'none' : '';
     var res = raiz.querySelector('[data-busca-res]'); if (!res) return;
     if (!q) { res.innerHTML = ''; return; }
-    var outros = q.length < 2 ? [] : Object.keys(CAT).filter(function (k) { return !meusApps[k] && bate(CAT[k][0], q); });
+    var outros = q.length < 2 ? [] : Object.keys(CAT).filter(function (k) { return !meusApps[k] && FORA_DE_VENDA.indexOf(k) < 0 && bate(CAT[k][0], q); });
     res.innerHTML = (vistos ? '' : '<p class="conta-busca-nada">Nenhum dos seus sistemas tem esse nome.</p>') + outros.map(function (k) { var pg = PAGINA[k] || 'veltria-' + k + '.html'; return '<div class="conta-busca-item"><b>' + esc(CAT[k][0]) + '</b><span>' + 'Você ainda não tem este sistema.</span><a class="btn btn-primary" href="' + pg + '">Ver e testar 7 dias grátis</a></div>'; }).join('');
   }
   raiz.addEventListener('input', function (e) { if (e.target.id !== 'conta-q') return; termo = e.target.value; filtrar(); });

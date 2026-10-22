@@ -5,8 +5,8 @@
 
   /* ---------- topo por ramo ---------- */
   var RAMOS = {
-    obras: { l1: 'Sua obra no prazo,', l2: 'sem gasto escondido.', sub: 'O RoseConstruct junta cronograma, gastos, equipe e o que falta receber de cada obra. Do escritório ou do canteiro, pelo celular.',
-      nome: 'RoseConstruct', mensal: 119, pagina: 'roseconstruct.html', url: 'roseconstruct · painel',
+    obras: { l1: 'Sua obra no prazo,', l2: 'sem gasto escondido.', sub: 'O Veltria Obras junta cronograma, gastos, equipe e o que falta receber de cada obra. Do escritório ou do canteiro, pelo celular.',
+      nome: 'Veltria Obras', mensal: 119, pagina: 'veltria-obras.html', url: 'veltria obras · painel',
       a1: ['i-check', 'Etapa concluída', 'Reforma do banheiro · cliente avisado'], a2: ['i-receipt', 'R$ 8.590 a receber', 'nesta semana, em 3 obras'] },
     juridico: { l1: 'Seu escritório em dia,', l2: 'sem prazo perdido.', sub: 'O Veltria Jurídico busca as intimações do DJEN sozinho, conta os prazos e põe tudo na agenda de cada advogado.',
       nome: 'Veltria Jurídico', mensal: 149, pagina: 'veltria-juridico.html', url: 'nexo jurídico · painel',
