@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Veltria Financeiro Essencial</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#123d35">
+<link rel="icon" href="icone-192.png" type="image/png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meus Potes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css?v=1">
+</head>
+<body>
+<div class="faixa-demo"><a href="../../../veltria-financeiro.html">Voltar ao site</a><button type="button" id="recomecar">Recomeçar</button><a href="index.html?celular=1">Ver no celular</a></div>
+<header class="cabeca">
+  <div><small id="saudacao">Bom dia</small><b id="nome-neg">Ana Paula · Design de sobrancelhas</b></div>
+  <button type="button" class="bt-ia" data-ir="ia" aria-label="Assistente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg></button>
+</header>
+<main id="tela" tabindex="-1"></main>
+<button type="button" class="fab" data-ir="lancar" aria-label="Lançar entrada ou saída">+</button>
+<nav class="doca" aria-label="Partes do app">
+  <a href="#potes" data-aba="potes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10M8 4v3a5 5 0 0 0-3 4.6V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7.4A5 5 0 0 0 16 7V4"/><path d="M5 14h14"/></svg>Potes</a>
+  <a href="#receber" data-aba="receber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>A receber</a>
+  <a href="#mei" data-aba="mei"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Meu MEI</a>
+  <a href="#mais" data-aba="mais"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>Mais</a>
+</nav>
+<div class="avisos" id="avisos" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veltria Financeiro Essencial · app para celular</title>
+<meta name="description" content="Veltria Financeiro Essencial: app de celular para autônomo e MEI. Cada real que entra é dividido em potes (imposto, contas, salário, reserva), cobrança por PIX com lembrete no WhatsApp, limite do MEI e DAS.">
+<meta name="theme-color" content="#123d35">
+<link rel="icon" href="icone-192.png" type="image/png">
+<link rel="manifest" href="manifest.webmanifest">
+<script>
+  if (matchMedia('(max-width: 760px)').matches || (matchMedia('(pointer: coarse)').matches && innerWidth < 900)) location.replace('app.html' + location.search + location.hash);
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --esm: #123d35; --marfim: #f2efe5; --jade: #6e9883; --palha: #c9b995; --nevoa: #a9b8b0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 20% 10%, #1c5247 0, #0b2a24 60%); color: var(--marfim); font: 16px/1.55 'Figtree', system-ui, sans-serif; display: grid; grid-template-columns: minmax(320px, 520px) auto; gap: 64px; align-items: center; justify-content: center; padding: 28px 40px; }
+  a { color: var(--palha); }
+  .voltar { position: fixed; top: 16px; left: 20px; font-size: .9rem; }
+  .selo { display: inline-block; border: 1px solid var(--palha); color: var(--palha); font-size: .8rem; font-weight: 600; padding: 3px 12px; border-radius: 999px; }
+  h1 { font: 400 3.1rem/1.04 'DM Serif Display', Georgia, serif; margin: 14px 0 12px; }
+  .lead { color: var(--nevoa); font-size: 1.06rem; margin: 0 0 16px; }
+  .preco { font: 400 1.8rem 'DM Serif Display', serif; margin: 0 0 18px; font-variant-numeric: lining-nums; } .preco small { font: 400 .95rem 'Figtree', sans-serif; color: var(--nevoa); }
+  .bts { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+  .bt { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border-radius: 999px; border: 1.5px solid var(--palha); color: var(--palha); text-decoration: none; font-weight: 700; }
+  .bt.cheio { background: var(--palha); color: #0b2a24; }
+  .caixa { background: rgba(18, 61, 53, .7); border: 1px solid #2c5a50; border-radius: 18px; padding: 16px; margin-bottom: 14px; }
+  .caixa h2 { margin: 0 0 6px; font: 400 1.2rem 'DM Serif Display', serif; color: var(--palha); }
+  .caixa p { margin: 0 0 10px; font-size: .92rem; }
+  .sim { display: flex; gap: 8px; flex-wrap: wrap; } .sim button { border: 1px solid var(--nevoa); background: transparent; color: var(--marfim); border-radius: 999px; padding: 7px 13px; cursor: pointer; font-weight: 600; font-family: inherit; }
+  .qr { display: flex; gap: 14px; align-items: center; } .qr p { margin: 0; } #qr { background: #fff; padding: 8px; border-radius: 12px; flex: none; }
+  .fone { position: relative; width: 390px; height: 820px; border-radius: 56px; background: #d9d4c4; padding: 12px; box-shadow: inset 0 0 0 2px #fff6, 0 0 0 6px #0a1f1b, 0 50px 90px -30px rgba(0, 0, 0, .8); transform-origin: center; }
+  .fone::before { content: ""; position: absolute; right: -8px; top: 190px; width: 4px; height: 76px; border-radius: 0 3px 3px 0; background: #bdb7a5; }
+  .visor { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; background: var(--marfim); }
+  .ilha { position: absolute; top: 10px; left: 50%; translate: -50% 0; width: 104px; height: 28px; border-radius: 16px; background: #000; z-index: 2; }
+  .st-bar { position: absolute; top: 0; left: 0; right: 0; height: 46px; display: flex; justify-content: space-between; align-items: center; padding: 0 30px; font: 600 .84rem system-ui, sans-serif; color: var(--marfim); background: var(--esm); z-index: 1; }
+  .visor iframe { position: absolute; top: 46px; left: 0; width: 100%; height: calc(100% - 46px); border: 0; }
+  @media (max-width: 1100px) { body { grid-template-columns: 1fr; justify-items: center; } }
+</style>
+</head>
+<body>
+<a class="voltar" href="../../../veltria-financeiro.html">← Voltar ao site</a>
+<section>
+  <span class="selo">App para celular · Android e iPhone</span>
+  <h1>Cada real no pote certo, antes de gastar.</h1>
+  <p class="lead">Veltria Financeiro Essencial, para autônomo e MEI: tudo que entra é dividido sozinho entre imposto, contas, seu salário e a reserva. Cobrança com PIX e lembrete no WhatsApp, limite do MEI e DAS à vista, recibo na hora. Funciona sem internet.</p>
+  <p class="preco">R$ 59/mês <small>· ou R$ 566 por ano · sem fidelidade</small></p>
+  <div class="bts"><a class="bt cheio" href="../../../veltria-financeiro.html#versoes">Assinar e baixar o app</a><a class="bt" href="app.html" target="_blank" rel="noopener">Abrir em tela cheia</a></div>
+  <div class="caixa qr"><div id="qr" aria-label="QR code para abrir no celular"></div><p><b>Teste no seu celular.</b><br>Aponte a câmera. Para instalar: no Android, menu ⋮ e "Instalar app"; no iPhone, Compartilhar e "Adicionar à Tela de Início".</p></div>
+  <div class="caixa"><h2>E a assinatura?</h2><p>É a mesma da sua conta no site. Veja no celular ao lado:</p><div class="sim"><button type="button" data-sim="cancelar">Cancelei</button><button type="button" data-sim="recusado">O pagamento não caiu</button><button type="button" data-sim="normal">Tudo em dia</button></div></div>
+</section>
+<div class="fone" aria-label="Demonstração do app num celular"><div class="visor"><span class="ilha"></span><div class="st-bar"><span id="hora">9:41</span><span>5G ▮▮▮ 82%</span></div><iframe id="app" src="app.html" title="App Veltria Financeiro Essencial funcionando"></iframe></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  const app = document.getElementById('app');
+  if (location.search) app.src = 'app.html' + location.search;
+  document.querySelectorAll('[data-sim]').forEach((b) => b.addEventListener('click', () => app.contentWindow.postMessage({ simular: b.dataset.sim }, location.origin)));
+  const relogio = () => { document.getElementById('hora').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); };
+  relogio(); setInterval(relogio, 30000);
+  const f = document.querySelector('.fone'), caber = () => { const k = Math.min(1, (innerHeight - 40) / 840); f.style.transform = `scale(${k})`; f.style.margin = `${(k - 1) * 410}px 0`; };
+  caber(); addEventListener('resize', caber);
+  try { new QRCode(document.getElementById('qr'), { text: new URL('app.html', location.href).href, width: 116, height: 116, colorDark: '#123d35' }); } catch (e) { /* sem QR */ }
+</script>
+</body>
+</html>

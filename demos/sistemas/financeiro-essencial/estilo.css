@@ -1,0 +1,117 @@
+/* Veltria Financeiro Essencial · "potes" (app de celular do autônomo e do MEI)
+   Emerald Executive: esmeralda #123D35, marfim #F2EFE5, jade #6E9883, palha #C9B995, névoa #A9B8B0.
+   Todo dinheiro que entra é dividido em potes de vidro: imposto, contas, meu salário, reserva e livre. */
+:root {
+  --esm: #123d35; --esm-2: #1c5247; --esm-3: #0b2a24; --marfim: #f2efe5; --marfim-2: #faf8f2; --jade: #6e9883; --palha: #c9b995; --nevoa: #a9b8b0;
+  --tx: #17302a; --tx-2: #4c625b; --tx-3: #7a8b85; --vermelho: #a8473b; --ouro: #9c7d3c;
+  --serifa: 'DM Serif Display', Georgia, serif; --sans: 'Figtree', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--marfim); color: var(--tx); font: 16px/1.45 var(--sans); padding-bottom: 96px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+:focus-visible { outline: 3px solid var(--palha); outline-offset: 2px; }
+a { color: var(--esm-2); }
+.num { font-family: var(--serifa); font-variant-numeric: lining-nums tabular-nums; letter-spacing: .01em; }
+
+.faixa-demo { display: flex; gap: 12px; justify-content: center; align-items: center; padding: 6px; background: var(--esm-3); font-size: .82rem; }
+.faixa-demo a { color: var(--palha); } .faixa-demo button { background: none; border: 1px solid #2c5a50; color: var(--marfim); border-radius: 6px; padding: 2px 10px; }
+.no-celular .faixa-demo { display: none; }
+.no-celular, .no-celular * { scrollbar-width: none; } .no-celular ::-webkit-scrollbar { display: none; }
+
+.cabeca { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; background: var(--esm); color: var(--marfim); }
+.cabeca small { display: block; color: var(--nevoa); font-size: .8rem; } .cabeca b { font-weight: 600; font-size: .98rem; }
+.bt-ia { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--jade); background: var(--esm-2); color: var(--palha); display: grid; place-items: center; cursor: pointer; flex: none; }
+
+main { max-width: 620px; margin: 0 auto; padding: 0 0 16px; outline: none; }
+.miolo { padding: 16px 18px 0; }
+h1 { font: 400 1.9rem/1.1 var(--serifa); margin: 0 0 4px; }
+h2 { font: 600 .95rem var(--sans); margin: 22px 0 8px; color: var(--esm-2); }
+.sub { color: var(--tx-2); margin: 0 0 14px; }
+.mini { color: var(--tx-3); font-size: .82rem; }
+
+/* topo dos potes: saldo total e a prateleira */
+.saldo { background: var(--esm); color: var(--marfim); padding: 6px 18px 26px; border-radius: 0 0 28px 28px; }
+.saldo small { color: var(--nevoa); } .saldo .num { font-size: 2.6rem; display: block; line-height: 1.1; margin: 2px 0 6px; }
+.saldo .mes { display: flex; gap: 16px; font-size: .86rem; color: var(--nevoa); } .saldo .mes b { color: var(--marfim); font-weight: 600; }
+.prateleira { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 14px 10px; padding: 18px; }
+.pote { border: 0; background: none; padding: 0; cursor: pointer; text-align: center; }
+.vidro { position: relative; height: 128px; margin: 0 auto 6px; width: 84px; border: 2px solid var(--nevoa); border-top: 0; border-radius: 6px 6px 22px 22px; overflow: hidden; background: var(--marfim-2); }
+.vidro::before { content: ""; position: absolute; top: 0; left: -8px; right: -8px; height: 12px; background: var(--palha); border-radius: 4px; z-index: 2; }
+.vidro i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--c, var(--jade)); transition: height .6s cubic-bezier(.3, 1.3, .5, 1); }
+.vidro i::after { content: ""; position: absolute; top: -4px; left: 0; right: 0; height: 8px; border-radius: 50%; background: inherit; filter: brightness(1.12); }
+.vidro span { position: absolute; inset: auto 0 8px; z-index: 1; font: 600 .74rem var(--sans); color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .3); }
+.pote b { display: block; font-size: .86rem; } .pote .num { font-size: 1.08rem; }
+.pote small { display: block; color: var(--tx-3); font-size: .74rem; }
+.pote.baixo .vidro { border-color: var(--vermelho); }
+
+.cartao { background: var(--marfim-2); border: 1px solid #ddd7c6; border-radius: 18px; padding: 14px 16px; margin-bottom: 10px; }
+.mov { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid #e6e0cf; }
+.mov:last-child { border-bottom: 0; }
+.mov .ic { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #e4ece6; color: var(--esm-2); }
+.mov .ic.sai { background: #f2e1dc; color: var(--vermelho); }
+.mov small { display: block; color: var(--tx-3); font-size: .78rem; }
+.mov .num { font-size: 1.05rem; } .mov .num.sai { color: var(--vermelho); }
+
+.bt { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 46px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--esm); background: transparent; color: var(--esm); font-weight: 600; cursor: pointer; text-decoration: none; }
+.bt.cheio { background: var(--esm); color: var(--marfim); }
+.bt.ouro { background: var(--palha); border-color: var(--palha); color: var(--esm-3); }
+.bt.pq { min-height: 34px; padding: 0 12px; font-size: .84rem; }
+.bt.largo { width: 100%; }
+.linha { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+/* lançar: um teclado grande e a divisão ao vivo */
+.alterna { display: grid; grid-template-columns: 1fr 1fr; background: #e4dfd0; border-radius: 999px; padding: 4px; margin-bottom: 14px; }
+.alterna button { border: 0; background: none; border-radius: 999px; min-height: 42px; font-weight: 600; cursor: pointer; color: var(--tx-2); }
+.alterna button[aria-pressed="true"] { background: var(--esm); color: var(--marfim); }
+.alterna button.sai[aria-pressed="true"] { background: var(--vermelho); }
+.visor-valor { text-align: center; font: 400 3rem/1 var(--serifa); margin: 6px 0 12px; font-variant-numeric: lining-nums; }
+.teclado { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.teclado button { min-height: 54px; border-radius: 16px; border: 1px solid #ddd7c6; background: var(--marfim-2); font: 400 1.5rem var(--serifa); cursor: pointer; }
+.teclado button:active { background: #e4ece6; }
+.divisao { display: grid; gap: 6px; margin: 4px 0 14px; }
+.divisao div { display: grid; grid-template-columns: 12px 1fr auto; gap: 8px; align-items: center; font-size: .9rem; }
+.divisao div::before { content: ""; width: 12px; height: 12px; border-radius: 4px; background: var(--c); }
+.campo { display: grid; gap: 4px; margin-bottom: 10px; font-size: .86rem; color: var(--tx-2); }
+.campo input, .campo select { min-height: 46px; border: 1px solid #d3ccb8; border-radius: 12px; padding: 0 12px; background: #fff; color: var(--tx); font-size: 1rem; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.chips button { border: 1px solid #d3ccb8; background: #fff; border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: .86rem; }
+.chips button[aria-pressed="true"] { background: var(--esm); border-color: var(--esm); color: var(--marfim); }
+
+.regua { display: flex; gap: 4px; margin-top: 8px; }
+.regua span { flex: 1; text-align: center; font-size: .68rem; padding: 4px 2px; border-radius: 6px; background: #e8e3d4; color: var(--tx-3); }
+.regua span.feito { background: var(--jade); color: #fff; } .regua span.hoje { background: var(--palha); color: var(--esm-3); font-weight: 700; }
+.etq { display: inline-block; font-size: .72rem; font-weight: 700; padding: 1px 8px; border-radius: 6px; background: #e8e3d4; color: var(--tx-2); }
+.etq.ok { background: #dbe8e0; color: #2d5e4b; } .etq.at { background: #f1e5c8; color: #74591f; } .etq.ru { background: #f2dcd7; color: #8b3a2f; }
+
+.medidor { position: relative; height: 18px; border-radius: 9px; background: #e4dfd0; overflow: hidden; margin: 8px 0 4px; }
+.medidor i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--jade), var(--palha)); border-radius: 9px; }
+.medidor i.perto { background: linear-gradient(90deg, var(--palha), var(--vermelho)); }
+
+.lista-mais a { display: grid; grid-template-columns: 1fr auto; padding: 14px 4px; border-bottom: 1px solid #e6e0cf; text-decoration: none; color: var(--tx); }
+.lista-mais small { display: block; color: var(--tx-3); font-size: .8rem; }
+
+.chat { display: grid; gap: 8px; margin-bottom: 12px; }
+.bolha { padding: 10px 14px; border-radius: 18px; max-width: 88%; white-space: pre-wrap; font-size: .94rem; }
+.bolha.ia { background: var(--marfim-2); border: 1px solid #ddd7c6; border-bottom-left-radius: 4px; }
+.bolha.eu { background: var(--esm); color: var(--marfim); justify-self: end; border-bottom-right-radius: 4px; }
+.form-ia { display: flex; gap: 8px; } .form-ia input { flex: 1; min-height: 46px; border-radius: 999px; border: 1px solid #d3ccb8; padding: 0 16px; background: #fff; }
+
+.recibo { background: #fff; border: 1px dashed var(--nevoa); border-radius: 12px; padding: 16px; font-size: .92rem; }
+.recibo h3 { font: 400 1.3rem var(--serifa); margin: 0 0 8px; }
+
+/* doca e botão de lançar */
+.fab { position: fixed; right: max(18px, calc(50% - 292px)); bottom: 86px; z-index: 20; width: 62px; height: 62px; border-radius: 50%; border: 0; background: var(--palha); color: var(--esm-3); font: 400 2.2rem/1 var(--serifa); cursor: pointer; box-shadow: 0 10px 24px -8px rgba(11, 42, 36, .55); }
+.fab:active { transform: scale(.96); }
+.doca { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--marfim-2); border-top: 1px solid #ddd7c6; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); }
+.doca a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; text-decoration: none; color: var(--tx-3); font-size: .74rem; font-weight: 600; border-radius: 14px; }
+.doca a[aria-current="page"] { color: var(--esm); background: #e4ece6; }
+
+.veu { position: fixed; inset: 0; z-index: 40; background: rgba(11, 42, 36, .55); display: flex; align-items: flex-end; justify-content: center; }
+.folha { background: var(--marfim); width: min(620px, 100%); max-height: 90vh; overflow-y: auto; border-radius: 24px 24px 0 0; padding: 20px 18px calc(20px + env(safe-area-inset-bottom)); }
+.folha h2 { margin-top: 0; font: 400 1.4rem var(--serifa); color: var(--tx); }
+.trava { z-index: 60; align-items: center; } .trava .folha { border-radius: 24px; margin: 16px; }
+.avisos { position: fixed; left: 50%; translate: -50% 0; bottom: 160px; z-index: 70; display: grid; gap: 6px; width: min(92vw, 420px); }
+.aviso { background: var(--esm-3); color: var(--marfim); padding: 12px 16px; border-radius: 14px; font-size: .9rem; box-shadow: 0 10px 24px -10px rgba(0, 0, 0, .5); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media print { .faixa-demo, .cabeca, .doca, .fab { display: none !important; } }
