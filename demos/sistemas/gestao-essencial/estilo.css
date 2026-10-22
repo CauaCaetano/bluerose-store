@@ -302,3 +302,7 @@ h2 { margin: 0 0 6px; font: 600 1.25rem/1.25 var(--titulo); letter-spacing: -.01
 .pix-falso { width: 170px; height: 170px; margin: 0 auto 12px; background: repeating-conic-gradient(var(--tinta) 0 25%, #fff 0 50%) 0 0 / 22px 22px; border: 10px solid #fff; outline: 2px solid var(--tinta); }
 .janela .acoes { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; flex-wrap: wrap; }
 @media (max-width: 520px) { .linha-dono { grid-template-columns: 1fr repeat(4, 34px); } .linha-dono > :last-child:is(button, span:empty) { grid-column: 1 / -1; justify-self: start; } }
+
+/* dentro do celular da demonstração, sem barras de rolagem (como num celular de verdade) */
+.no-celular, .no-celular * { scrollbar-width: none; }
+.no-celular ::-webkit-scrollbar { display: none; }

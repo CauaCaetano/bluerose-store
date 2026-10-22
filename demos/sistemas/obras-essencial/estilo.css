@@ -153,3 +153,7 @@ h2 { font: 700 1.35rem/1.1 var(--t1); margin: 22px 0 10px; letter-spacing: .02em
 .no-celular .faixa { display: none; }
 .no-celular body { padding-bottom: 86px; }
 .bloqueio { z-index: 55; background: rgba(58, 38, 32, .82); }
+
+/* dentro do celular da demonstração, sem barras de rolagem (como num celular de verdade) */
+.no-celular, .no-celular * { scrollbar-width: none; }
+.no-celular ::-webkit-scrollbar { display: none; }

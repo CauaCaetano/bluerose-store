@@ -1,0 +1,114 @@
+/* Veltria Jurídico Essencial · "contagem dos prazos" (app de celular do advogado autônomo)
+   Royal Navy & Gold: marinho #101C3A, pergaminho #F5EDDB, ouro #C5A45D, azul névoa #9EACC4, linho #D7D1C4.
+   A tela principal é uma contagem regressiva em dias úteis: o número grande diz quantos dias faltam. */
+:root {
+  --marinho: #101c3a; --marinho-2: #1b2a50; --perg: #f5eddb; --perg-2: #fbf7ec; --ouro: #c5a45d; --ouro-esc: #8f7230;
+  --nevoa: #9eacc4; --linho: #d7d1c4; --tx: #18213a; --tx-2: #4a5470; --tx-3: #737b90; --urgente: #9b2f2f; --ok: #3f6b4e;
+  --serif: 'Cormorant Garamond', Georgia, serif; --sans: 'Inter Tight', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--perg); color: var(--tx); font: 16px/1.45 var(--sans); padding-bottom: 84px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+:focus-visible { outline: 2px solid var(--ouro); outline-offset: 2px; }
+a { color: var(--marinho); }
+
+.tira { display: flex; gap: 12px; justify-content: center; align-items: center; padding: 6px 12px; background: #070d1d; font-size: .82rem; }
+.tira a { color: var(--ouro); } .tira button { background: none; border: 1px solid #39456a; color: var(--perg); border-radius: 6px; padding: 2px 10px; }
+.no-celular .tira { display: none; }
+
+.cabeca { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--marinho); color: var(--perg); border-bottom: 3px solid var(--ouro); }
+.selo-ouro { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 35% 30%, #e5c983, var(--ouro) 55%, var(--ouro-esc)); color: var(--marinho); font: 700 1.4rem var(--serif); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .25); flex: none; }
+.quem { flex: 1; min-width: 0; } .quem b { display: block; font: 700 1.25rem/1.1 var(--serif); } .quem small { color: var(--nevoa); font-size: .78rem; letter-spacing: .06em; }
+.botao-ia { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--ouro); background: transparent; color: var(--ouro); display: grid; place-items: center; cursor: pointer; }
+
+main { max-width: 640px; margin: 0 auto; padding: 16px 16px 20px; outline: none; }
+h1 { font: 700 2rem/1.05 var(--serif); margin: 2px 0 4px; }
+h2 { font: 700 1.3rem/1.2 var(--serif); margin: 22px 0 8px; color: var(--marinho); }
+.sub { color: var(--tx-2); margin: 0 0 14px; font-size: .95rem; }
+.mini { color: var(--tx-3); font-size: .82rem; }
+
+/* contagem regressiva: o coração do app */
+.contagem { display: grid; gap: 10px; }
+.prazo { display: grid; grid-template-columns: 74px 1fr; gap: 12px; align-items: center; background: var(--perg-2); border: 1px solid var(--linho); border-radius: 16px; padding: 12px; text-decoration: none; color: inherit; position: relative; }
+.prazo .dias { height: 74px; border-radius: 14px; background: var(--marinho); color: var(--perg); display: grid; place-items: center; align-content: center; text-align: center; }
+.prazo .dias b { font: 700 2.1rem/1 var(--serif); }
+.prazo .dias small { font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--nevoa); }
+.prazo.vermelho .dias { background: var(--urgente); } .prazo.vermelho .dias small { color: #f3c9c0; }
+.prazo.ouro .dias { background: var(--ouro); color: var(--marinho); } .prazo.ouro .dias small { color: var(--marinho-2); }
+.prazo.feito { opacity: .55; } .prazo.feito .dias { background: var(--ok); }
+.prazo b.t { display: block; font-weight: 600; }
+.prazo span.s { color: var(--tx-3); font-size: .85rem; }
+.prazo .feito-bt { position: absolute; top: 10px; right: 10px; border: 1px solid var(--linho); background: #fff; border-radius: 999px; padding: 3px 10px; font-size: .78rem; cursor: pointer; }
+.faixa-dia { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin: 6px 0 14px; }
+.faixa-dia button { flex: none; border: 1px solid var(--linho); background: var(--perg-2); border-radius: 12px; padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: .88rem; }
+.faixa-dia button[aria-pressed="true"] { background: var(--marinho); color: var(--perg); border-color: var(--marinho); }
+
+/* cartões e listas */
+.cartao { background: var(--perg-2); border: 1px solid var(--linho); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+.cartao.escuro { background: var(--marinho); color: var(--perg); border-color: var(--marinho); }
+.cartao.escuro .mini { color: var(--nevoa); }
+.lista { list-style: none; margin: 0; padding: 0; background: var(--perg-2); border: 1px solid var(--linho); border-radius: 16px; overflow: hidden; }
+.lista li { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--linho); }
+.lista li:last-child { border-bottom: 0; }
+.lista .cresce { flex: 1; min-width: 0; } .lista .cresce b { display: block; font-weight: 600; } .lista .cresce small { color: var(--tx-3); }
+.lista a.cresce { text-decoration: none; color: inherit; }
+.etiq { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .72rem; font-weight: 700; background: var(--linho); color: var(--tx-2); white-space: nowrap; }
+.etiq.ouro { background: #efe2bf; color: var(--ouro-esc); } .etiq.verm { background: #f3d6d0; color: var(--urgente); } .etiq.ok { background: #dce8de; color: var(--ok); }
+.nova { position: relative; } .nova::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: var(--ouro); }
+.juridiques { font-family: Georgia, serif; font-size: .9rem; color: var(--tx-2); background: #fff; border-left: 3px solid var(--linho); padding: 8px 10px; margin: 8px 0; }
+.simples { background: #fffdf6; border: 1px solid var(--ouro); border-radius: 12px; padding: 10px 12px; margin: 8px 0; white-space: pre-wrap; }
+.numeros { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
+.numeros > div { background: var(--perg-2); border: 1px solid var(--linho); border-radius: 14px; padding: 12px; }
+.numeros > div.escuro { background: var(--marinho); color: var(--perg); }
+.numeros small { display: block; color: var(--tx-3); font-size: .78rem; } .numeros .escuro small { color: var(--nevoa); }
+.numeros b { font: 700 1.5rem/1.2 var(--serif); }
+
+/* botões */
+.bt { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 46px; padding: 0 16px; border-radius: 12px; border: 1.5px solid var(--marinho); background: transparent; color: var(--marinho); font-weight: 600; cursor: pointer; text-decoration: none; }
+.bt.cheio { background: var(--marinho); color: var(--perg); }
+.bt.ouro { background: var(--ouro); border-color: var(--ouro); color: var(--marinho); }
+.bt.peq { min-height: 36px; padding: 0 12px; font-size: .88rem; }
+.bt.largo { width: 100%; }
+.linha-bts { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+
+/* formulário */
+.campo { display: grid; gap: 4px; margin-bottom: 12px; font-weight: 600; font-size: .9rem; }
+.campo input, .campo select, .campo textarea { min-height: 46px; border: 1px solid var(--linho); border-radius: 12px; background: #fff; padding: 10px 12px; font-weight: 400; }
+.campo textarea { min-height: 90px; }
+.dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.calc-res { background: var(--marinho); color: var(--perg); border-radius: 14px; padding: 14px; }
+.calc-res b { font: 700 1.8rem var(--serif); color: var(--ouro); display: block; }
+
+/* folha que sobe */
+.veu { position: fixed; inset: 0; z-index: 40; background: rgba(16, 28, 58, .55); display: flex; align-items: flex-end; justify-content: center; }
+.folha { width: min(640px, 100%); max-height: 90vh; overflow: auto; background: var(--perg); border-radius: 22px 22px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); border-top: 3px solid var(--ouro); animation: subir .2s ease; }
+@keyframes subir { from { transform: translateY(24px); opacity: 0; } }
+.folha h2 { margin-top: 0; }
+.trava { z-index: 60; background: rgba(16, 28, 58, .88); align-items: center; padding: 16px; }
+.trava .folha { border-radius: 22px; }
+.pix { width: 170px; height: 170px; margin: 6px auto 12px; background: repeating-conic-gradient(var(--marinho) 0 25%, #fff 0 50%) 0 0 / 20px 20px; border: 10px solid #fff; outline: 2px solid var(--marinho); }
+
+/* conversa do assistente */
+.conversa { display: grid; gap: 8px; margin-bottom: 12px; }
+.fala { padding: 10px 12px; border-radius: 14px; white-space: pre-wrap; max-width: 92%; font-size: .94rem; }
+.fala.eu { justify-self: end; background: var(--marinho); color: var(--perg); border-bottom-right-radius: 4px; }
+.fala.ela { background: var(--perg-2); border: 1px solid var(--linho); border-bottom-left-radius: 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.chips button { border: 1px solid var(--ouro); background: #fff; color: var(--marinho); border-radius: 999px; padding: 6px 11px; font-size: .84rem; cursor: pointer; }
+
+.menu { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; background: var(--marinho); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+.menu a { flex: 1; max-width: 130px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px; color: var(--nevoa); text-decoration: none; font-size: .72rem; font-weight: 600; border-radius: 12px; }
+.menu a[aria-current="page"] { color: var(--ouro); background: var(--marinho-2); }
+
+.recados { position: fixed; z-index: 70; left: 50%; bottom: 90px; translate: -50% 0; display: grid; gap: 8px; width: max-content; max-width: 92vw; }
+.recado { background: var(--marinho); color: var(--perg); border: 1px solid var(--ouro); padding: 10px 14px; border-radius: 12px; font-weight: 500; }
+.vazio { text-align: center; color: var(--tx-3); padding: 16px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+
+/* números alinhados e, dentro do celular da demonstração, sem barras de rolagem (como num celular de verdade) */
+.prazo .dias b, .numeros b, .calc-res b { font-variant-numeric: lining-nums tabular-nums; }
+.faixa-dia { scrollbar-width: none; }
+.no-celular, .no-celular * { scrollbar-width: none; }
+.no-celular ::-webkit-scrollbar { display: none; }
+h1, h2 { font-variant-numeric: lining-nums; }
