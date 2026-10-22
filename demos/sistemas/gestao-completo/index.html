@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Veltria Gestão Completo · demonstração</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../../../demos/sistemas/base/icone.png?v=6" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css?v=3">
+</head>
+<body>
+<div class="faixa-demo"><a href="../../../sistemas.html">Voltar<span class="so-pc"> ao site</span></a><span class="so-pc">Demonstração do <b>Veltria Gestão Completo</b>, com dados de exemplo guardados só neste navegador</span><span class="so-cel">Demonstração</span><button type="button" id="recomecar">Recomeçar</button><a class="cta" href="../../../app/gestao/">Testar grátis<span class="so-pc"> 7 dias</span></a></div>
+<header class="topo">
+  <div class="topo-in">
+    <a class="marca" href="#painel"><img src="../../../demos/sistemas/base/veltria.png" alt="" width="34" height="34"><span><b id="loja-nome">Casa Aurora Utilidades</b><small>Veltria Gestão Completo</small></span></a>
+    <label class="busca"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="busca" type="search" placeholder="Buscar produto, cliente ou conta" autocomplete="off" aria-label="Buscar"></label>
+    <button type="button" class="btn vinho" data-acao="ir" data-v="vender"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nova venda</button>
+  </div>
+</header>
+<main id="tela" tabindex="-1"></main>
+<nav class="doca" aria-label="Partes do sistema" id="doca"></nav>
+<div class="gaveta-fundo" id="gaveta-fundo" hidden></div>
+<aside class="gaveta" id="gaveta" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="gaveta-titulo"></aside>
+<div class="avisos" id="avisos" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=3"></script>
+</body>
+</html>

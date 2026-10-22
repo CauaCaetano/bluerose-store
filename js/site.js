@@ -547,7 +547,7 @@
     var b = e.target.closest('button[data-pcat]'); if (!b) return;
     var cat = b.getAttribute('data-pcat');
     [].forEach.call(filtro.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-    cards.forEach(function (c) { c.hidden = cat === 'destaque' ? !c.hasAttribute('data-destaque') : c.getAttribute('data-cat') !== cat; if (!c.hidden) c.classList.add('visto'); });
+    cards.forEach(function (c) { c.hidden = cat === 'destaque' ? !c.hasAttribute('data-destaque') : (c.getAttribute('data-cat') || '').split(' ').indexOf(cat) < 0; /* um cartão pode estar em mais de uma aba */ if (!c.hidden) c.classList.add('visto'); });
     infos.forEach(function (p) { p.hidden = p.getAttribute('data-info') !== cat; });
     var trilho = document.querySelector('.prod-cat'); if (trilho) { trilho.classList.toggle('so-destaque', cat === 'destaque'); trilho.scrollLeft = 0; trilho.dispatchEvent(new Event('scroll')); }
   });

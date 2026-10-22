@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Veltria Gestão Avançado · demonstração</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../../../demos/sistemas/base/icone.png?v=6" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css?v=3">
+</head>
+<body>
+<div class="faixa-demo"><a href="../../../sistemas.html">Voltar<span class="so-pc"> ao site</span></a><span class="so-pc">Demonstração do <b>Veltria Gestão Avançado</b>, com dados de exemplo guardados só neste navegador</span><span class="so-cel">Demonstração</span><button type="button" id="recomecar">Recomeçar</button><a class="cta" href="../../../app/gestao/">Testar grátis<span class="so-pc"> 7 dias</span></a></div>
+<div class="estacao">
+  <header class="barra">
+    <a class="marca" href="#" data-acao="abrir" data-m="cockpit" aria-label="Cockpit"><img src="../../../demos/sistemas/base/veltria.png" alt="" width="30" height="30"><span><b>Empório Vila Nobre</b><small>Veltria Gestão Avançado</small></span></a>
+    <div class="abas" id="abas" role="tablist" aria-label="Módulos abertos"></div>
+    <button type="button" class="cmd-btn" data-acao="paleta" aria-keyshortcuts="Control+K"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>Buscar ou fazer</span><kbd>Ctrl K</kbd></button>
+    <label class="filial"><span class="vh">Unidade</span><select id="filial"><option value="todas">Todas as unidades</option><option value="matriz">Matriz · Centro</option><option value="filial">Filial · Jardim Europa</option></select></label>
+  </header>
+  <main id="area" tabindex="-1"></main>
+  <footer class="status" id="status"></footer>
+</div>
+<div class="paleta-fundo" id="paleta-fundo" hidden>
+  <div class="paleta" role="dialog" aria-modal="true" aria-label="Buscar ou fazer">
+    <input id="paleta-q" type="text" placeholder="Digite um módulo, produto, cliente ou ação (ex.: transferir, pedido, DRE)" autocomplete="off" aria-controls="paleta-lista">
+    <ul id="paleta-lista" role="listbox"></ul>
+    <p class="paleta-pe"><kbd>↑</kbd><kbd>↓</kbd> escolher · <kbd>Enter</kbd> abrir · <kbd>Esc</kbd> fechar</p>
+  </div>
+</div>
+<div class="janela-fundo" id="janela-fundo" hidden><div class="janela" id="janela" role="dialog" aria-modal="true" aria-labelledby="janela-titulo"></div></div>
+<div class="avisos" id="avisos" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=4"></script>
+</body>
+</html>
