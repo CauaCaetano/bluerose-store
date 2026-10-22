@@ -6,16 +6,16 @@
   /* ---------- topo por ramo ---------- */
   var RAMOS = {
     obras: { l1: 'Sua obra no prazo,', l2: 'sem gasto escondido.', sub: 'O Veltria Obras junta cronograma, gastos, equipe e o que falta receber de cada obra. Do escritório ou do canteiro, pelo celular.',
-      nome: 'Veltria Obras', mensal: 119, pagina: 'veltria-obras.html', url: 'veltria obras · painel',
+      nome: 'Veltria Obras Completo', mensal: 119, pagina: 'veltria-obras.html', url: 'veltria obras · painel',
       a1: ['i-check', 'Etapa concluída', 'Reforma do banheiro · cliente avisado'], a2: ['i-receipt', 'R$ 8.590 a receber', 'nesta semana, em 3 obras'] },
     juridico: { l1: 'Seu escritório em dia,', l2: 'sem prazo perdido.', sub: 'O Veltria Jurídico busca as intimações do DJEN sozinho, conta os prazos e põe tudo na agenda de cada advogado.',
-      nome: 'Veltria Jurídico', mensal: 149, pagina: 'veltria-juridico.html', url: 'nexo jurídico · painel',
+      nome: 'Veltria Jurídico Completo', mensal: 149, pagina: 'veltria-juridico.html', url: 'veltria jurídico · painel',
       a1: ['i-lightning', 'Intimação nova', 'TRT 2ª Região · prazo de 15 dias'], a2: ['i-lightning', 'Prazo em 2 dias', 'Contestação · já na agenda'] },
     agenda: { l1: 'Seu salão cheio,', l2: 'sem cliente esquecida.', sub: 'O Veltria Agenda organiza os horários de cada profissional, confirma pelo WhatsApp e deixa a cliente marcar sozinha pelo link.',
-      nome: 'Veltria Agenda', mensal: 79, pagina: 'veltria-agenda.html', url: 'nexo agenda · hoje',
+      nome: 'Veltria Agenda Completo', mensal: 79, pagina: 'veltria-agenda.html', url: 'veltria agenda · hoje',
       a1: ['i-lightning', 'Novo horário pelo link', 'Hidratação · hoje às 14h'], a2: ['i-check', 'Caixa do dia fechado', 'R$ 949 · conferido'] },
     financeiro: { l1: 'Seu caixa no azul,', l2: 'sem conta esquecida.', sub: 'O Veltria Financeiro mostra o saldo, o que entra e o que sai, cobra quem atrasou e prevê o caixa dos próximos meses.',
-      nome: 'Veltria Financeiro', mensal: 109, pagina: 'veltria-financeiro.html', url: 'nexo financeiro · painel',
+      nome: 'Veltria Financeiro Completo', mensal: 109, pagina: 'veltria-financeiro.html', url: 'veltria financeiro · painel',
       a1: ['i-check', 'PIX recebido', 'R$ 722,00 · Hotel Bela Vista'], a2: ['i-lightning', '3 contas esta semana', 'lembrete enviado no WhatsApp'] },
   };
   var ORDEM = ['obras', 'juridico', 'agenda', 'financeiro'];
@@ -47,8 +47,8 @@
       var preco = hero.querySelector('[data-ramo-preco]');
       preco.innerHTML = '<b>' + r.nome + '</b> · ' + reais(r.mensal) + '/mês · 7 dias grátis · sem fidelidade';
       var teste = hero.querySelector('[data-ramo-teste]');
-      teste.setAttribute('href', 'app/' + id + '/');
-      teste.setAttribute('data-teste', id);
+      teste.setAttribute('href', 'app/' + id + 'completo/');
+      teste.setAttribute('data-teste', id + 'completo');
       teste.setAttribute('data-teste-nome', r.nome);
       teste.setAttribute('data-teste-mensal', String(r.mensal));
       hero.querySelector('[data-ramo-demo]').setAttribute('href', r.pagina);

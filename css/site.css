@@ -1538,3 +1538,7 @@ html[data-theme="light"] body::before {
 /* três planos: centralizados */
 .precos2:not(:has(> :nth-child(4))) { grid-template-columns: repeat(3, minmax(0, 340px)); justify-content: center; }
 @media (max-width: 1100px) { .precos2:not(:has(> :nth-child(4))) { grid-template-columns: repeat(auto-fit, minmax(260px, 340px)); } }
+/* logo de cada sistema no canto da foto do cartão (22/10/2026) */
+.prod-foto { position: relative; }
+.prod-foto img.prod-selo { position: absolute; top: 12px; left: 12px; z-index: 1; width: 52px; height: 52px; border-radius: 12px; object-fit: cover; box-shadow: 0 8px 18px -8px rgba(0, 0, 0, .55); transform: none !important; }
+.np-hero-txt .np-logo { box-shadow: 0 14px 30px -16px rgba(0, 0, 0, .5); }
