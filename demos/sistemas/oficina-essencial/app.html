@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Veltria Oficina Essencial</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#153c43">
+<link rel="icon" href="icone-192.png" type="image/png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Minha Oficina">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css?v=1">
+</head>
+<body>
+<div class="tarja-demo"><a href="../../../veltria-oficina.html">Voltar ao site</a><button type="button" id="recomecar">Recomeçar</button><a href="index.html?celular=1">Ver no celular</a></div>
+<header class="painel-topo">
+  <span class="chave-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.3-.6-.6-2.3z"/></svg></span>
+  <div class="oficina-nome"><b id="nome-oficina">Auto Mecânica do Tião</b><small id="sub-oficina">Sebastião Moreira · mecânico</small></div>
+  <button type="button" class="bt-ia" data-ir="ia" aria-label="Assistente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></button>
+</header>
+<main id="tela" tabindex="-1"></main>
+<nav class="rodape-nav" aria-label="Partes do app">
+  <a href="#patio" data-aba="patio"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="7" rx="1"/><rect x="13" y="4" width="8" height="7" rx="1"/><rect x="3" y="13" width="8" height="7" rx="1"/><rect x="13" y="13" width="8" height="7" rx="1"/></svg>Pátio</a>
+  <a href="#clientes" data-aba="clientes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16l1.5-5h11L19 16M4 16h16v3H4zM7 19v1M17 19v1"/><circle cx="8" cy="16.5" r=".6"/><circle cx="16" cy="16.5" r=".6"/></svg>Carros</a>
+  <a href="#nova" data-aba="nova" class="central"><span>+</span>Entrada</a>
+  <a href="#caixa" data-aba="caixa"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/></svg>Caixa</a>
+  <a href="#mais" data-aba="mais"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Mais</a>
+</nav>
+<div class="avisos" id="avisos" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=1"></script>
+</body>
+</html>

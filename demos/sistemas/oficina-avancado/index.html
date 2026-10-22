@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veltria Oficina Avançado · demonstração</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#343d52">
+<link rel="icon" href="../base/icone.png?v=6" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css?v=1">
+</head>
+<body>
+<div class="faixa-demo"><a href="../../../veltria-oficina.html#versoes">Voltar ao site</a><span class="so-lg">Demonstração do <b>Veltria Oficina Avançado</b> · dados de exemplo neste navegador</span><button type="button" id="recomecar">Recomeçar</button><a class="quero" href="../../../veltria-oficina.html#contato">Quero o Avançado</a></div>
+<header class="cabine">
+  <div class="marca"><span class="pistao" aria-hidden="true"></span><div><b id="rede">Rede Torque Auto Center</b><small>Veltria Oficina Avançado</small></div></div>
+  <div class="unidades" id="unidades" role="group" aria-label="Unidade"></div>
+</header>
+<nav class="instrumentos" id="instrumentos" aria-label="Módulos"></nav>
+<main id="area" tabindex="-1"></main>
+<section class="console" aria-label="Console de comandos e assistente">
+  <div class="saida" id="saida" hidden></div>
+  <form id="f-console"><span class="prompt" aria-hidden="true">›</span><input id="cmd" autocomplete="off" placeholder="Pergunte ou mande: frotas, curva abc, quem está abaixo da meta?  (tecla /)" aria-label="Comando ou pergunta"><button>Enviar</button></form>
+</section>
+<div class="avisos" id="avisos" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=2"></script>
+</body>
+</html>
