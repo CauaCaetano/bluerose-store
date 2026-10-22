@@ -1,5 +1,5 @@
 // =============================================================
-// Linha Nexo · PIX copia e cola (BR Code estático do Banco Central)
+// Cerula · PIX copia e cola (BR Code estático do Banco Central)
 // -------------------------------------------------------------
 // Monta o texto do "PIX copia e cola" a partir da chave da empresa.
 // O mesmo texto vira o QR code (base/qr.js). Não passa por banco

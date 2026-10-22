@@ -1,5 +1,5 @@
 // =============================================================
-// Linha Nexo · botão "Adicionar" no topo de todas as páginas
+// Cerula · botão "Adicionar" no topo de todas as páginas
 // -------------------------------------------------------------
 // Manual: o formulário da página (ou os atalhos do sistema).
 // Automático:

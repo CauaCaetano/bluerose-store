@@ -1,4 +1,4 @@
-// Nexo Jurídico · ferramentas ao lado das telas: atualização de valores, honorários, dias entre datas, pensão,
+// Cerula Jurídico · ferramentas ao lado das telas: atualização de valores, honorários, dias entre datas, pensão,
 // processos parados, audiências da semana com aviso ao cliente, honorários vencidos e tarefas atrasadas.
 import { esc, moeda, hoje, diaMais, diasAte, dataCurta, diaUtil } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, ldNums, campoN, campoD, campoS, calc, n0, fmtN, zap, registrarCalcs } from '../base/lado.js';

@@ -1,5 +1,5 @@
 // =============================================================
-// Linha Nexo · Suporte (chamados) e Feedback, comuns a todos os sistemas
+// Cerula · Suporte (chamados) e Feedback, comuns a todos os sistemas
 // -------------------------------------------------------------
 // Suporte: o cliente abre um chamado quando encontra um erro ou tem uma dúvida. O chamado leva
 // sozinho os dados técnicos (sistema, tela, navegador e os últimos erros da tela) e a conversa

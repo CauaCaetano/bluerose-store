@@ -522,7 +522,7 @@
   document.body.appendChild(aviso);
 })();
 
-/* App Linha Nexo na Play Store: enquanto o endereço estiver vazio, o selo mostra "Em breve".
+/* App Cerula na Play Store: enquanto o endereço estiver vazio, o selo mostra "Em breve".
    Quando o app for publicado, cole o link da Play Store aqui e publique o site. */
 (function () {
   var BR_PLAY = '';

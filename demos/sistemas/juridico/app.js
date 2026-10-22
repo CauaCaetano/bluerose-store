@@ -1,4 +1,4 @@
-// Nexo Jurídico · escritórios de advocacia (referências: Astrea, ADVBOX, Projuris, Clio)
+// Cerula Jurídico · escritórios de advocacia (referências: Astrea, ADVBOX, Projuris, Clio)
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, agoraISO, diaMais, mesMais, nomeMes, dataCurta, dataBR, dataHoraBR, relativo, horaBR, diasAte, diasEntre, paraData,
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, rosca, barrasH, kanban, calMes, DIAS, DIAS_L, diaUtil, nomeFeriado, fimDeSemana, normal,
@@ -432,7 +432,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'juridico', nome: 'Nexo Jurídico', sub: 'Gestão do escritório', cor: '#0f766e', icone: 'scales', empresa: 'Castro & Moura Advogados', conta: '4 pessoas · Belo Horizonte, MG',
+  id: 'juridico', nome: 'Cerula Jurídico', sub: 'Gestão do escritório', cor: '#0f766e', icone: 'scales', empresa: 'Castro & Moura Advogados', conta: '4 pessoas · Belo Horizonte, MG',
   produto: { mensal: 149 }, semente, colecoes, fichas, buscaDica: 'processos (número), clientes',
   portal: {
     processo: {

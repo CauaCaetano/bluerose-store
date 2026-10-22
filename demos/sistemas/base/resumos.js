@@ -1,5 +1,5 @@
 // =============================================================
-// Linha Nexo · resumo diário do dono
+// Cerula · resumo diário do dono
 // -------------------------------------------------------------
 // Funções puras (sem tela): recebem os dados do sistema e a data de hoje
 // e devolvem o resumo do dia. Usadas dentro do sistema (botão "Resumo do

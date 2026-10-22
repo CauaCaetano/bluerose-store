@@ -1,5 +1,5 @@
 // =============================================================
-// Linha Nexo · núcleo comum (v2)
+// Cerula · núcleo comum (v2)
 // -------------------------------------------------------------
 // Tudo roda no navegador: os dados ficam no localStorage deste aparelho,
 // com dados de exemplo e um botão "Recomeçar". Cada sistema descreve
@@ -540,7 +540,7 @@ function montar(app, cfg) {
     ${app.nuvem ? app.sessao.faixa() : faixaDemo}
     <div class="app" id="app">
       <nav class="lat" aria-label="Menu principal">
-        <div class="marca"><img class="marca-logo" src="${cfg.logo || new URL('linha-nexo.png?v=4', import.meta.url).href}" alt="${cfg.logo ? esc(cfg.nome) : 'Blue Rose'}" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.marcaSub || `Blue Rose · ${cfg.sub}`)}</small></div></div>
+        <div class="marca"><img class="marca-logo" src="${cfg.logo || new URL('cerula.png?v=1', import.meta.url).href}" alt="${cfg.logo ? esc(cfg.nome) : 'Blue Rose'}" width="30" height="30"><div><b>${esc(cfg.nome)}</b><small>${esc(cfg.marcaSub || `Blue Rose · ${cfg.sub}`)}</small></div></div>
         <div class="conta">${av(app.empresa)}<div class="cresce"><b class="corta" data-empresa>${esc(app.empresa)}</b><small class="corta">${esc(app.nuvem ? app.sessao.subConta() : cfg.conta || 'Conta de demonstração')}</small></div></div>
         <button type="button" class="busca-lat" data-acao="paleta">${ic('magnifying-glass')}Buscar ou ir para…<kbd>Ctrl K</kbd></button>
         ${cfg.paginas.filter((p) => !p.id || app.acesso(p.id) !== 'nenhum').map((p) => (p.grupo && !p.id ? `<div class="grupo">${esc(p.grupo)}</div>` : `<a class="item" href="#/${p.id}" data-pag="${p.id}">${ic(p.icone || 'circle')}<span class="corta">${esc(p.rot)}</span><span class="cont" data-cont="${p.id}" hidden></span></a>`)).join('')}
@@ -558,7 +558,7 @@ function montar(app, cfg) {
           <a class="feito-br" href="${site}" target="_blank" rel="noopener" title="Blue Rose Express"><img src="${new URL('blue-rose.png', import.meta.url).href}" alt="" width="20" height="20"><span>Feito pela <b>Blue Rose</b></span></a>
         </div>
       </nav>
-      <main class="principal"><header class="topo"><button type="button" class="btn fant ic-so btn-menu" data-acao="menu" aria-label="Abrir menu">${ic('list')}</button><img class="topo-logo" src="${cfg.logo || new URL('linha-nexo.png?v=4', import.meta.url).href}" alt="${esc(cfg.nome)}" width="26" height="26"><div class="trilha" id="trilha"></div><div class="acoes" id="acoes-topo"></div></header>
+      <main class="principal"><header class="topo"><button type="button" class="btn fant ic-so btn-menu" data-acao="menu" aria-label="Abrir menu">${ic('list')}</button><img class="topo-logo" src="${cfg.logo || new URL('cerula.png?v=1', import.meta.url).href}" alt="${esc(cfg.nome)}" width="26" height="26"><div class="trilha" id="trilha"></div><div class="acoes" id="acoes-topo"></div></header>
         <div class="conteudo" id="conteudo"></div></main>
     </div>`;
   const $ = (s) => document.querySelector(s);

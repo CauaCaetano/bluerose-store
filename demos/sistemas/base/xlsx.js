@@ -1,5 +1,5 @@
 // =============================================================
-// Linha Nexo · gerar planilha do Excel (.xlsx) no navegador
+// Cerula · gerar planilha do Excel (.xlsx) no navegador
 // -------------------------------------------------------------
 // O .xlsx é um zip com XML: montamos os arquivos e o zip aqui mesmo,
 // sem biblioteca. Cada aba tem cabeçalho em negrito, filtro, primeira

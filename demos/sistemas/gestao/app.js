@@ -1,4 +1,4 @@
-// Nexo Gestão · estoque, compras e vendas (referências: Bling, Tiny, Omie)
+// Cerula Gestão · estoque, compras e vendas (referências: Bling, Tiny, Omie)
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, agoraISO, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, diasEntre, paraData,
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, linhas, rosca, barrasH, DIAS, normal,
@@ -460,7 +460,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'gestao', nome: 'Nexo Gestão', sub: 'Estoque, compras e vendas', cor: '#4646d8', icone: 'warehouse', empresa: 'Atlas Distribuidora', conta: '2 depósitos · Curitiba, PR',
+  id: 'gestao', nome: 'Cerula Gestão', sub: 'Estoque, compras e vendas', cor: '#4646d8', icone: 'warehouse', empresa: 'Atlas Distribuidora', conta: '2 depósitos · Curitiba, PR',
   produto: { mensal: 129 }, semente, colecoes, fichas, buscaDica: 'produtos (nome, SKU, EAN), pedidos, clientes',
   portal: {
     catalogo: {
@@ -487,7 +487,7 @@ const app = criarApp({
   ],
   passos: (a) => [{ id: 'xml', rot: 'Dê entrada em uma nota pelo XML do fornecedor', feito: a.db.lista('compras').some((c) => c.nf), href: '#/compras' }, { id: 'catalogo', rot: 'Mande o catálogo online para um cliente', feito: !!a.db.cfg.links?.['catalogo:'], acao: 'linkCatalogo' }],
   configExtra: (a) => {
-    if (!a.nuvem) return `<div class="cartao"><div class="cartao-cab"><div><h3>Nota fiscal eletrônica</h3><div class="sub">NF-e autorizada pela SEFAZ</div></div></div><div class="cartao-corpo"><div class="dica">${ic('receipt')}<span>Na versão contratada, o Nexo Gestão emite NF-e de verdade pela Focus NFe, emissor homologado. Nesta demonstração, as notas são simuladas.</span></div></div></div>`;
+    if (!a.nuvem) return `<div class="cartao"><div class="cartao-cab"><div><h3>Nota fiscal eletrônica</h3><div class="sub">NF-e autorizada pela SEFAZ</div></div></div><div class="cartao-corpo"><div class="dica">${ic('receipt')}<span>Na versão contratada, o Cerula Gestão emite NF-e de verdade pela Focus NFe, emissor homologado. Nesta demonstração, as notas são simuladas.</span></div></div></div>`;
     if (!a.estado.nfeCarregando && !a.estado.nfe) { a.estado.nfeCarregando = true; a.sessao.funcao('nexo-nfe', { acao: 'status' }).then((r) => { a.estado.nfe = r; a.render(); }).catch(() => { a.estado.nfe = { configurado: false }; a.render(); }); }
     const n = a.estado.nfe || {}, cfg = a.db.cfg;
     return `<div class="cartao"><div class="cartao-cab"><div><h3>Nota fiscal eletrônica (Focus NFe)</h3><div class="sub">${n.configurado ? `Configurada · ambiente de ${n.ambiente === 'producao' ? 'produção' : 'homologação (testes, sem valor fiscal)'}` : 'Não configurada: as notas são simuladas'}</div></div>${n.configurado ? et('Ativa', 'ok') : et('Pendente', 'al')}</div>

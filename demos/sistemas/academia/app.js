@@ -1,4 +1,4 @@
-// Nexo Academia · alunos, mensalidades, check-in, aulas e treinos (referências: Tecnofit, Next Fit, EVO)
+// Cerula Academia · alunos, mensalidades, check-in, aulas e treinos (referências: Tecnofit, Next Fit, EVO)
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, paraData, minutos, hhmm,
   sorteio, soma, agrupar, av, ic, et, kpis, barras, linhas, rosca, barrasH, calGrade, kanban, DIAS, DIAS_L, telLink, normal,
@@ -217,7 +217,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'academia', nome: 'Nexo Academia', sub: 'Academias e estúdios', cor: '#ea580c', icone: 'barbell', empresa: 'Arena Fit', conta: 'Musculação e aulas · São Paulo',
+  id: 'academia', nome: 'Cerula Academia', sub: 'Academias e estúdios', cor: '#ea580c', icone: 'barbell', empresa: 'Arena Fit', conta: 'Musculação e aulas · São Paulo',
   produto: { mensal: 99 }, semente, colecoes, fichas, buscaDica: 'alunos',
   portal: {
     aluno: {

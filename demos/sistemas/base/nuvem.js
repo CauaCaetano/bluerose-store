@@ -1,5 +1,5 @@
 // =============================================================
-// Linha Nexo · versão na nuvem (Supabase)
+// Cerula · versão na nuvem (Supabase)
 // -------------------------------------------------------------
 // Entrada (e-mail e senha), escolha/criação da empresa ("espaço"),
 // teste grátis de 7 dias, equipe com convites, importação de planilha
@@ -15,11 +15,11 @@ import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 if (window.top !== window.self) { try { if (window.top.location.origin !== location.origin) throw 0; } catch { window.top.location.href = location.href; } }
 
 const SITE = 'https://bluerose-store.com/';
-// Dentro do app da Google Play (Linha Nexo) não há venda nem teste com cartão: a regra de pagamentos da loja
+// Dentro do app da Google Play (Cerula) não há venda nem teste com cartão: a regra de pagamentos da loja
 // não permite levar a compra para fora. O app abre /app/play/?origem=play, que marca este aparelho.
-// versão da Play Store: o app abre com ?origem=play (Linha Nexo e Ofixl); a assinatura é só pelo site, nada de compra dentro do app
+// versão da Play Store: o app abre com ?origem=play (Cerula e Ofixl); a assinatura é só pelo site, nada de compra dentro do app
 const PLAY = (() => { try { if (new URLSearchParams(location.search).get('origem') === 'play') localStorage.setItem('nexo-play', '1'); return localStorage.getItem('nexo-play') === '1'; } catch { return false; } })();
-const LOGO = new URL('blue-rose.png', import.meta.url).href, LOGO_NEXO = new URL('linha-nexo.png?v=4', import.meta.url).href;
+const LOGO = new URL('blue-rose.png', import.meta.url).href, LOGO_NEXO = new URL('cerula.png?v=1', import.meta.url).href;
 const SEP = '\u0001';
 // Plano Pro: equipe sem limite (Básico: 5 pessoas além do dono), histórico da equipe (os sistemas usam sempre a marca Blue Rose),
 // até 10 empresas por sistema e suporte prioritário. Custa R$ 60 a mais por mês (catálogo a-sis-<app>-pro).
@@ -646,7 +646,7 @@ export async function iniciarNuvem(app, cfg) {
       if (encerrado && PLAY) modal({ titulo: 'Acesso encerrado', largura: 460, corpo: `<p class="mute-2">Os dados da <b>${esc(esp.nome)}</b> continuam guardados e você pode consultá-los.</p>`, botoes: [{ rotulo: 'Entendi', valor: null, classe: 'pri' }] });
       else if (encerrado) modal({ titulo: 'Seu teste terminou', largura: 460, corpo: `<p class="mute-2">Os dados da <b>${esc(esp.nome)}</b> continuam guardados. Para voltar a usar, assine o ${esc(cfg.nome)}${cfg.produto?.unico ? "" : ", no Básico ou no Pro"}.</p>`, botoes: [{ rotulo: 'Só consultar', valor: null, classe: 'fant' }, { rotulo: 'Assinar', classe: 'pri', acao: () => { location.href = `${SITE}conta.html`; return true; } }] });
       else if (escolha.novo) {
-        const tutorial = `${SITE}${cfg.paginaSite || `nexo-${cfg.id}.html`}#tutorial`;
+        const tutorial = `${SITE}${cfg.paginaSite || `cerula-${cfg.id}.html`}#tutorial`;
         modal({ titulo: `Bem-vindo ao ${cfg.nome}`, largura: 540, corpo: `<div class="col" style="gap:10px"><p class="mute-2">Seu teste vai até <b>${dataCurta(esp.teste_ate)}</b>. A empresa está em branco: comece trazendo os seus dados.</p><div class="dica">${ic('upload-simple')}<span><b>Suba as suas planilhas:</b> em Importar planilha, envie o arquivo do Excel (clientes, produtos, agenda…) e o sistema preenche nomes, datas, horários, valores e fotos. Se não tiver planilha, baixe o modelo pronto.</span></div><div class="dica">${ic('crown')}<span><b>Convide a equipe no Painel do dono:</b> cada pessoa entra com o próprio e-mail, com o cargo e as permissões que você escolher.</span></div><div class="dica">${ic('play')}<span><b>Vídeo tutorial passo a passo:</b> <a href="${tutorial}" target="_blank" rel="noopener">assista aqui</a>. Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com?subject=Ajuda%20com%20o%20${encodeURIComponent(cfg.nome)}">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda na implantação.</span></div></div>`,
           botoes: [{ rotulo: 'Começar em branco', classe: 'fant', valor: true }, { rotulo: 'Subir minhas planilhas', classe: 'pri', acao: () => { location.hash = '#/importar'; return true; } }] });
       }

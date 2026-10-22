@@ -1,4 +1,4 @@
-// Linha Nexo · instalar como app (celular e computador)
+// Cerula · instalar como app (celular e computador)
 // Registra o service worker e mostra o convite "Instalar o app" quando o navegador permite.
 // No iPhone (Safari não tem botão de instalar), mostra como adicionar à Tela de Início.
 // O item "Instalar o app" do menu do sistema fica sempre à mão enquanto o app não estiver instalado.

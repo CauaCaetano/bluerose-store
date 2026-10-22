@@ -46,7 +46,7 @@
     'a-automacao': ['R$ 199 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
   };
 
-  // Linha Nexo: cada sistema traz o próprio preço no botão (data-total / data-mensal).
+  // Cerula: cada sistema traz o próprio preço no botão (data-total / data-mensal).
   function reais(n) { return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
   function valoresSistema(b) {
     var mensal = Number(b.getAttribute('data-mensal')), total = Number(b.getAttribute('data-total'));
@@ -75,7 +75,7 @@
     var txt = pagar.textContent; pagar.textContent = 'Abrindo o Mercado Pago…'; pagar.setAttribute('aria-disabled', 'true'); erroCt.textContent = '';
     var emailMp = (document.getElementById('ct-mp') || {}).value || '';
     var plano = pagar.dataset.plano;
-    // aluguel da Linha Nexo começa com os 7 dias grátis prometidos na página; quem já usou o teste vai direto para a assinatura
+    // aluguel da Cerula começa com os 7 dias grátis prometidos na página; quem já usou o teste vai direto para a assinatura
     var nexo = /^a-sis-/.test(plano);
     // quem já usou o teste não é levado à cobrança sem saber: avisa e só segue no segundo clique
     var semTesteConfirmado = pagar.dataset.semTeste === plano;
@@ -104,7 +104,7 @@
       $('ct-titulo').textContent = b.getAttribute('data-nome');
       $('ct-valor').innerHTML = '<b>' + v[0] + '</b><small>' + v[1] + '</small>';
       $('ct-meios').textContent = assinatura ? '(cartão de crédito, cobrado todo mês)' : '(PIX, cartão em até 6x ou boleto)';
-      $('ct-fidelidade').textContent = assinatura ? (/^a-sis-/.test(plano) ? ' (sistemas da Linha Nexo: sem fidelidade)' : ' (sem fidelidade)') : '';
+      $('ct-fidelidade').textContent = assinatura ? (/^a-sis-/.test(plano) ? ' (sistemas da Cerula: sem fidelidade)' : ' (sem fidelidade)') : '';
       // sistemas prontos: ficam prontos na hora, com vídeos tutoriais (sites e automações seguem com implantação feita por nós)
       var passos = dlg.querySelector('.contratar-passos');
       if (passos) {

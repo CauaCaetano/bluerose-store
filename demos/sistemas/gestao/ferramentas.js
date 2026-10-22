@@ -1,4 +1,4 @@
-// Nexo Gestão · ferramentas: markup e margem, preço com impostos, ponto de pedido e desconto máximo (Básico)
+// Cerula Gestão · ferramentas: markup e margem, preço com impostos, ponto de pedido e desconto máximo (Básico)
 // e pedido ao fornecedor, clientes sem comprar, compras atrasadas e produtos parados (Pro).
 import { esc, moeda, hoje, diasAte, dataCurta } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, campoN, calc, n0, fmtN, zap, registrarCalcs } from '../base/lado.js';

@@ -1,4 +1,4 @@
-// Nexo Imobiliária · imóveis, funil de clientes, visitas, locação e repasses (referências: Jetimob, Kenlo, Imobzi)
+// Cerula Imobiliária · imóveis, funil de clientes, visitas, locação e repasses (referências: Jetimob, Kenlo, Imobzi)
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, paraData, minutos, hhmm,
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, funilH, kanban, calGrade, DIAS, DIAS_L, telLink, normal,
@@ -228,7 +228,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'imobiliaria', nome: 'Nexo Imobiliária', sub: 'Imobiliárias e corretores', cor: '#15803d', icone: 'buildings', empresa: 'Alto Padrão Imóveis', conta: 'Venda e locação · Curitiba',
+  id: 'imobiliaria', nome: 'Cerula Imobiliária', sub: 'Imobiliárias e corretores', cor: '#15803d', icone: 'buildings', empresa: 'Alto Padrão Imóveis', conta: 'Venda e locação · Curitiba',
   produto: { mensal: 129 }, semente, colecoes, fichas, buscaDica: 'imóveis, clientes e códigos',
   portal: {
     vitrine: {

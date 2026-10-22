@@ -1,5 +1,5 @@
 /* =============================================================
-   Linha Nexo · sistema visual (v2)
+   Cerula · sistema visual (v2)
    -------------------------------------------------------------
    Referências: Linear, Attio, Pipedrive. Neutros quentes, um único
    destaque por sistema (--acc), densidade de software de trabalho,
@@ -603,12 +603,12 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 .passos-lista li.feito .ic { color: var(--ok); }
 .passos-lista a { color: var(--acc); text-decoration: none; font-weight: 500; }
 .passos-lista a:hover { text-decoration: underline; }
-/* odontograma (Nexo Clínica) */
+/* odontograma (Cerula Clínica) */
 .odonto { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)) 6px repeat(8, minmax(0, 1fr)); gap: 3px; margin-bottom: 6px; }
 .odonto .dente { aspect-ratio: .78; border: 1px solid var(--borda-2); border-radius: 6px 6px 10px 10px; background: var(--d); cursor: pointer; display: grid; place-items: end center; padding: 0 0 3px; font-size: 10px; color: var(--tx-2); }
 .odonto .dente:nth-child(9) { grid-column-start: 10; }
 .odonto .dente span { background: var(--painel); border-radius: 4px; padding: 0 2px; font-variant-numeric: tabular-nums; }
-/* cartão fidelidade (Nexo Agenda) */
+/* cartão fidelidade (Cerula Agenda) */
 .selos { display: grid; grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 6px; margin-top: 8px; }
 .selos i { aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed var(--borda-2); display: grid; place-items: center; color: #fff; }
 .selos i.on { background: var(--acc); border: 0; }

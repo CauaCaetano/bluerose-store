@@ -9,7 +9,7 @@
   var TIPOFB = { sugestao: 'Sugestão', elogio: 'Elogio', problema: 'Problema', outro: 'Outro' };
   var CATEG = { erro: 'Erro no sistema', duvida: 'Dúvida de uso', pagamento: 'Pagamento ou plano', sugestao: 'Pedido de melhoria' };
   var ST = { aberto: ['Aguardando o suporte', 'al'], respondido: ['Respondido', 'ok'], resolvido: ['Resolvido', ''] };
-  var SIS = { '': 'Site ou conta', gestao: 'Nexo Gestão', crm: 'Nexo CRM', agenda: 'Nexo Agenda', juridico: 'Nexo Jurídico', financeiro: 'Nexo Financeiro', clinica: 'Nexo Clínica', academia: 'Nexo Academia', restaurante: 'Nexo Restaurante', imobiliaria: 'Nexo Imobiliária', oficina: 'Nexo Oficina', farmacia: 'Nexo Farmácia', obras: 'RoseConstruct', cerimonial: 'Blue Rose Eternize', pragas: 'Blue Rose Guard', ofixl: 'Blue Rose Ofixl' };
+  var SIS = { '': 'Site ou conta', gestao: 'Cerula Gestão', crm: 'Cerula CRM', agenda: 'Cerula Agenda', juridico: 'Cerula Jurídico', financeiro: 'Cerula Financeiro', clinica: 'Cerula Clínica', academia: 'Cerula Academia', restaurante: 'Cerula Restaurante', imobiliaria: 'Cerula Imobiliária', oficina: 'Cerula Oficina', farmacia: 'Cerula Farmácia', obras: 'RoseConstruct', cerimonial: 'Blue Rose Eternize', pragas: 'Blue Rose Guard', ofixl: 'Blue Rose Ofixl' };
   var cli = null, suporte = false, aberto = null;
   function data(s) { var d = new Date(s); return d.toLocaleDateString('pt-BR') + ' ' + d.toTimeString().slice(0, 5); }
   function etiqueta(s) { var m = ST[s] || ST.aberto; return '<span class="conta-et ' + m[1] + '">' + m[0] + '</span>'; }

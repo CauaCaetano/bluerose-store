@@ -1,4 +1,4 @@
-// Nexo Agenda · salões, estética, barbearias e clínicas (referências: Fresha, Booksy, Trinks, Avec)
+// Cerula Agenda · salões, estética, barbearias e clínicas (referências: Fresha, Booksy, Trinks, Avec)
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, agoraISO, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, diasEntre, paraData, minutos, hhmm,
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, linhas, rosca, barrasH, calGrade, DIAS, DIAS_L, normal,
@@ -509,7 +509,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'agenda', nome: 'Nexo Agenda', sub: 'Salão e estética', cor: '#c2417a', icone: 'scissors', empresa: 'Studio Lumière', conta: '4 profissionais · Jardins, SP',
+  id: 'agenda', nome: 'Cerula Agenda', sub: 'Salão e estética', cor: '#c2417a', icone: 'scissors', empresa: 'Studio Lumière', conta: '4 profissionais · Jardins, SP',
   produto: { mensal: 79 }, semente, colecoes, fichas, buscaDica: 'clientes',
   portal: {
     agendar: {

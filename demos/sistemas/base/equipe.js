@@ -1,5 +1,5 @@
 // =============================================================
-// Linha Nexo · equipe: cargos sugeridos, resumo do acesso e o editor
+// Cerula · equipe: cargos sugeridos, resumo do acesso e o editor
 // de cargo, papel e permissões. Usado pela versão na nuvem (Painel do
 // dono) e pela demonstração.
 // =============================================================

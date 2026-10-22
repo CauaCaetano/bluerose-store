@@ -9,17 +9,17 @@
   var APPS = ['crm', 'agenda', 'financeiro', 'gestao', 'juridico', 'clinica', 'academia', 'restaurante', 'imobiliaria', 'oficina', 'farmacia', 'obras', 'cerimonial', 'pragas', 'ofixl'];
   // catálogo para a busca: o cliente digita o nome (ou o ramo) e o sistema aparece, mesmo os que ele ainda não tem
   var CAT = {
-    gestao: ['Nexo Gestão', 'estoque loja mercado distribuidora atacado varejo vendas pedidos compras fornecedores nota fiscal nfe xml código de barras etiquetas caixa pdv inventário'],
-    crm: ['Nexo CRM', 'vendas funil clientes propostas orçamentos metas leads negociações agenda atividades whatsapp'],
-    agenda: ['Nexo Agenda', 'agenda agendamento horários salão barbearia estética manicure comanda comissão caixa clientes whatsapp lembrete'],
-    juridico: ['Nexo Jurídico', 'advocacia advogado processos prazos agenda audiências intimações honorários clientes'],
-    financeiro: ['Nexo Financeiro', 'financeiro contas pagar receber caixa fluxo dre conciliação extrato banco cobrança boleto pix ordem de serviço assistência técnica'],
-    clinica: ['Nexo Clínica', 'clínica consultório médico dentista agenda consultas pacientes prontuário receitas convênios'],
-    academia: ['Nexo Academia', 'academia estúdio alunos mensalidades check-in aulas agenda treinos personal'],
-    restaurante: ['Nexo Restaurante', 'restaurante lanchonete pizzaria delivery mesas comandas cozinha cardápio estoque caixa'],
-    imobiliaria: ['Nexo Imobiliária', 'imobiliária imóveis corretor aluguel venda contratos visitas agenda'],
-    oficina: ['Nexo Oficina', 'oficina mecânica carro veículos ordem de serviço orçamento peças estoque agenda revisões'],
-    farmacia: ['Nexo Farmácia', 'farmácia drogaria remédio medicamentos controlados receitas validade lotes estoque caixa pdv nota fiscal nfc-e convênios'],
+    gestao: ['Cerula Gestão', 'estoque loja mercado distribuidora atacado varejo vendas pedidos compras fornecedores nota fiscal nfe xml código de barras etiquetas caixa pdv inventário'],
+    crm: ['Cerula CRM', 'vendas funil clientes propostas orçamentos metas leads negociações agenda atividades whatsapp'],
+    agenda: ['Cerula Agenda', 'agenda agendamento horários salão barbearia estética manicure comanda comissão caixa clientes whatsapp lembrete'],
+    juridico: ['Cerula Jurídico', 'advocacia advogado processos prazos agenda audiências intimações honorários clientes'],
+    financeiro: ['Cerula Financeiro', 'financeiro contas pagar receber caixa fluxo dre conciliação extrato banco cobrança boleto pix ordem de serviço assistência técnica'],
+    clinica: ['Cerula Clínica', 'clínica consultório médico dentista agenda consultas pacientes prontuário receitas convênios'],
+    academia: ['Cerula Academia', 'academia estúdio alunos mensalidades check-in aulas agenda treinos personal'],
+    restaurante: ['Cerula Restaurante', 'restaurante lanchonete pizzaria delivery mesas comandas cozinha cardápio estoque caixa'],
+    imobiliaria: ['Cerula Imobiliária', 'imobiliária imóveis corretor aluguel venda contratos visitas agenda'],
+    oficina: ['Cerula Oficina', 'oficina mecânica carro veículos ordem de serviço orçamento peças estoque agenda revisões'],
+    farmacia: ['Cerula Farmácia', 'farmácia drogaria remédio medicamentos controlados receitas validade lotes estoque caixa pdv nota fiscal nfc-e convênios'],
     obras: ['RoseConstruct', 'obra obras reforma construção empreiteiro diário cronograma gastos orçamento equipe'],
     cerimonial: ['Blue Rose Eternize', 'casamento eventos cerimonial festas convidados fornecedores agenda orçamento'],
     pragas: ['Blue Rose Guard', 'dedetização controle de pragas visitas agenda ordem de serviço certificados contratos'],
@@ -55,13 +55,13 @@
     var abrir = pode ? '<a class="btn btn-primary" href="app/' + esc(a.app) + '/">Abrir o sistema <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>' : '';
     var cancelar = a.tipo !== 'compra' && ['teste', 'ativa'].indexOf(a.status) >= 0 ? '<button type="button" class="conta-link" data-cancelar="' + esc(a.id) + '">' + (a.status === 'teste' ? 'Cancelar o teste' : 'Cancelar a assinatura') + '</button>' : '';
     var assinar = a.app && a.tipo !== 'compra' && (a.status === 'recusada' || (a.status === 'cancelada' && (!fim || fim < hojeISO))) ? '<button type="button" class="btn btn-primary" data-assinar="a-sis-' + esc(a.app) + '">Assinar por ' + reais(a.valor) + '/mês</button>' : '';
-    var foto = APPS.indexOf(a.app) >= 0 ? '<a class="conta-thumb" href="' + (pode ? 'app/' + esc(a.app) + '/' : PAGINA[a.app] || 'nexo-' + esc(a.app) + '.html') + '" tabindex="-1" aria-hidden="true"><img src="img/sistemas/' + esc(a.app) + '.webp" alt="" width="1200" height="750" loading="lazy"></a>' : '';
+    var foto = APPS.indexOf(a.app) >= 0 ? '<a class="conta-thumb" href="' + (pode ? 'app/' + esc(a.app) + '/' : PAGINA[a.app] || 'cerula-' + esc(a.app) + '.html') + '" tabindex="-1" aria-hidden="true"><img src="img/sistemas/' + esc(a.app) + '.webp" alt="" width="1200" height="750" loading="lazy"></a>' : '';
     var apagado = ['cancelada', 'expirada', 'recusada'].indexOf(a.status) >= 0 ? ' conta-item-off' : '';
     /* token de dono: pedido uma vez, quando a empresa é criada no sistema */
     var tk = pode && TOKENS[a.app] && !tokenMostrado[a.app] ? TOKENS[a.app] : null; if (tk) tokenMostrado[a.app] = true;
     var token = tk ? '<div class="conta-token"><small>Token de dono</small><code>' + esc(tk.token) + '</code><span>' + (tk.ativado ? 'Já ativado em ' + data(tk.ativado) + '. Não precisa usar de novo.' : 'Use uma vez, ao criar a sua empresa no sistema. Não compartilhe: a equipe entra pelos convites.') + '</span></div>' : '';
     return '<article data-busca="' + esc(normal((a.nome || '') + ' ' + (CAT[a.app] ? CAT[a.app][0] : ''))) + '" class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
-      barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + (pode ? '<p class="conta-ajuda"><a href="' + (PAGINA[a.app] || 'nexo-' + esc(a.app) + '.html') + '#tutorial">Assista ao vídeo tutorial</a>: mostra cada passo, da criação da empresa à importação das suas planilhas. ' + 'Prefere como programa? <a href="app/' + esc(a.app) + '/?instalar=1">Instale no computador ou no celular</a>: ganha ícone e abre em janela própria. ' + 'Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda.</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></div></article>';
+      barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + (pode ? '<p class="conta-ajuda"><a href="' + (PAGINA[a.app] || 'cerula-' + esc(a.app) + '.html') + '#tutorial">Assista ao vídeo tutorial</a>: mostra cada passo, da criação da empresa à importação das suas planilhas. ' + 'Prefere como programa? <a href="app/' + esc(a.app) + '/?instalar=1">Instale no computador ou no celular</a>: ganha ícone e abre em janela própria. ' + 'Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda.</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></div></article>';
   }
   function mostrarResumo(l) {
     if (!resumo) return;
@@ -141,7 +141,7 @@
       meusApps = {}; l.forEach(function (x) { if (x.app && ['teste', 'ativa', 'paga', 'pendente'].indexOf(x.status) >= 0) meusApps[x.app] = 1; });
       if (!doCache) indicacao();
       raiz.innerHTML = aviso + (doCache ? '<div class="conta-aviso" data-aviso-cache>Atualizando a lista…</div>' : '') + busca() + (l.length ? '<h2 class="conta-titulo">Seus sistemas</h2>' + l.map(cartao).join('') :
-        '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp" alt="" loading="lazy"><img src="img/sistemas/agenda.webp" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp" alt="" loading="lazy"></div><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um dos sistemas e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
+        '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp?v=10" alt="" loading="lazy"><img src="img/sistemas/agenda.webp?v=10" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp?v=10" alt="" loading="lazy"></div><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um dos sistemas e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
       if (termo) filtrar();
     }
   }
@@ -158,7 +158,7 @@
     var res = raiz.querySelector('[data-busca-res]'); if (!res) return;
     if (!q) { res.innerHTML = ''; return; }
     var outros = q.length < 2 ? [] : Object.keys(CAT).filter(function (k) { return !meusApps[k] && bate(CAT[k][0], q); });
-    res.innerHTML = (vistos ? '' : '<p class="conta-busca-nada">Nenhum dos seus sistemas tem esse nome.</p>') + outros.map(function (k) { var pg = PAGINA[k] || 'nexo-' + k + '.html'; return '<div class="conta-busca-item"><b>' + esc(CAT[k][0]) + '</b><span>' + 'Você ainda não tem este sistema.</span><a class="btn btn-primary" href="' + pg + '">Ver e testar 7 dias grátis</a></div>'; }).join('');
+    res.innerHTML = (vistos ? '' : '<p class="conta-busca-nada">Nenhum dos seus sistemas tem esse nome.</p>') + outros.map(function (k) { var pg = PAGINA[k] || 'cerula-' + k + '.html'; return '<div class="conta-busca-item"><b>' + esc(CAT[k][0]) + '</b><span>' + 'Você ainda não tem este sistema.</span><a class="btn btn-primary" href="' + pg + '">Ver e testar 7 dias grátis</a></div>'; }).join('');
   }
   raiz.addEventListener('input', function (e) { if (e.target.id !== 'conta-q') return; termo = e.target.value; filtrar(); });
   raiz.addEventListener('click', function (e) {

@@ -1,4 +1,4 @@
-// Nexo CRM · ferramentas: comissão, meta do mês, desconto máximo, contatos necessários (Básico)
+// Cerula CRM · ferramentas: comissão, meta do mês, desconto máximo, contatos necessários (Básico)
 // e negócios parados, atividades atrasadas, previsões vencidas e clientes para nova venda (Pro).
 import { esc, moeda, hoje, diaMais, diasAte, dataCurta, diaUtil } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, ldNums, campoN, calc, n0, fmtN, zap, registrarCalcs } from '../base/lado.js';

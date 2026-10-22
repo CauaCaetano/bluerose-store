@@ -1,5 +1,5 @@
 // =============================================================
-// Linha Nexo · conferência da nota do fornecedor (XML) antes de dar entrada
+// Cerula · conferência da nota do fornecedor (XML) antes de dar entrada
 // -------------------------------------------------------------
 // Muitas notas vêm por embalagem fechada (1 CX, 1 FD, 1 PCT) e a loja vende por unidade.
 // A nota entra como veio; em cada item, o botão Modificar abre:

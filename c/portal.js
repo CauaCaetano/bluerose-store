@@ -1,5 +1,5 @@
 // =============================================================
-// Linha Nexo · página do cliente final
+// Cerula · página do cliente final
 // -------------------------------------------------------------
 // Abre pelo link que a empresa manda: /c/#<token> (versão na nuvem)
 // ou /c/#d=<dados> (demonstração). Mostra o orçamento, o cardápio,
@@ -57,7 +57,7 @@ async function responder(acao, dados = {}) {
 // ---------------------------------------------------------------- pedaços
 const E = () => ctx.dados._empresa || {};
 const cab = (pre, titulo, sub = '') => `<header class="p-cab">${E().logo && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(E().logo) ? `<img class="p-logo" src="${E().logo}" alt="${esc(E().nome || '')}">` : ''}<small>${esc(pre)}</small><h1>${esc(titulo)}</h1>${sub ? `<p>${sub}</p>` : ''}</header>`;
-const rod = () => `<footer class="p-rod">${esc(E().nome)}${E().telefone ? ` · <a href="${wa(E().telefone)}" target="_blank" rel="noopener">${esc(E().telefone)}</a>` : ''}<br>${E().endereco ? `${esc(E().endereco)}<br>` : ''}Feito com o ${esc(E().sistema || 'Linha Nexo')} · <a href="https://bluerose-store.com/" target="_blank" rel="noopener">Blue Rose Express</a></footer>`;
+const rod = () => `<footer class="p-rod">${esc(E().nome)}${E().telefone ? ` · <a href="${wa(E().telefone)}" target="_blank" rel="noopener">${esc(E().telefone)}</a>` : ''}<br>${E().endereco ? `${esc(E().endereco)}<br>` : ''}Feito com o ${esc(E().sistema || 'Cerula')} · <a href="https://bluerose-store.com/" target="_blank" rel="noopener">Blue Rose Express</a></footer>`;
 const avisoDemo = () => (ctx.demo ? '<div class="p-aviso">Demonstração: a sua resposta aparece na aba do sistema aberta neste navegador.</div>' : '');
 const urlSegura = (u) => { const s = String(u ?? '').trim(); return /^(https:\/\/|blob:|data:image\/(png|jpeg|webp|gif);)/i.test(s) ? s : ''; }; /* só https, blob e imagem em data: (c/index.html permite esses); javascript: e outros viram vazio */
 const fotos = (lista) => { const l = (lista || []).map((f) => ({ ...f, url: urlSegura(f?.url) })).filter((f) => f.url); return (l.length ? `<div class="p-fotos">${l.map((f) => `<a href="${esc(f.url)}" target="_blank" rel="noopener"><img src="${esc(f.url)}" alt="${esc(f.legenda || 'Foto')}" loading="lazy"></a>`).join('')}</div>` : ''); };

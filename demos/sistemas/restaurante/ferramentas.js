@@ -1,4 +1,4 @@
-// Nexo Restaurante · ferramentas ao lado das telas: preço pelo CMV, rendimento da receita, pratos parados,
+// Cerula Restaurante · ferramentas ao lado das telas: preço pelo CMV, rendimento da receita, pratos parados,
 // divisão da conta, taxa de entrega, lista de compras para o fornecedor, mais vendidos e clientes sumidos.
 import { esc, moeda, diasAte, dataCurta } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, ldNums, campoN, calc, n0, fmtN, zap, copiar, registrarCalcs } from '../base/lado.js';

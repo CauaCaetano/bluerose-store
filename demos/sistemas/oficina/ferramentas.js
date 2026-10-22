@@ -1,4 +1,4 @@
-// Nexo Oficina · ferramentas ao lado das telas: orçamento rápido, carros parados no pátio, prontos para retirar,
+// Cerula Oficina · ferramentas ao lado das telas: orçamento rápido, carros parados no pátio, prontos para retirar,
 // confirmação dos agendamentos de amanhã, pedido de peças, consumo do carro, conversor de unidades e clientes sumidos.
 import { esc, moeda, diaMais, diasAte, dataCurta } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, campoN, campoS, calc, n0, fmtN, zap, copiar, registrarCalcs } from '../base/lado.js';

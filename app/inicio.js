@@ -1,4 +1,4 @@
-// Linha Nexo · volta do e-mail de confirmação ou de nova senha (único endereço liberado no login: /app/**)
+// Cerula · volta do e-mail de confirmação ou de nova senha (único endereço liberado no login: /app/**)
 (async () => {
   const caixa = document.getElementById('caixa');
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);

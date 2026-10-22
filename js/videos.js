@@ -1,4 +1,4 @@
-/* Vídeos "como funciona" da Linha Nexo: qualquer elemento com data-video="crm" abre o vídeo numa janela. */
+/* Vídeos "como funciona" da Cerula: qualquer elemento com data-video="crm" abre o vídeo numa janela. */
 (function () {
   var botoes = document.querySelectorAll('[data-video]');
   if (!botoes.length) return;
