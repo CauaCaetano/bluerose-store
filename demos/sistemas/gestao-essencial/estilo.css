@@ -229,3 +229,41 @@ h2 { margin: 0 0 6px; font: 600 1.25rem/1.25 var(--titulo); letter-spacing: -.01
   .barra-comanda .btn { background: #fff; color: var(--veltria); border-color: #fff; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* 22/10/2026: caixa de mercado, IA e Painel do dono */
+:root { --aba-6: #2b3a4f; --gx-papel: var(--papel); --gx-tinta: var(--tinta); --gx-tinta-2: var(--tinta-2); --gx-borda: var(--pauta); --gx-acento: var(--veltria); --gx-acento-tx: #fff; --gx-suave: rgba(82, 109, 98, .1); --gx-raio: 12px; }
+.divisorias a:nth-child(6) { background: var(--aba-6); }
+.ia-btn { flex: none; gap: 6px; }
+.ia-btn svg { width: 18px; height: 18px; }
+@media (max-width: 860px) { .ia-btn { padding: 0 10px; font-size: 0; } .ia-btn svg { width: 20px; height: 20px; } }
+.linha-pdv { display: flex; gap: 8px; align-items: stretch; }
+.linha-pdv .busca-pdv { flex: 1; min-width: 0; }
+.camera { flex: none; gap: 6px; }
+.camera svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+@media (max-width: 520px) { .camera span { display: none; } }
+.dica-pdv { margin: 6px 0 10px; color: var(--tinta-3); font-size: .82rem; }
+.dica-pdv kbd { font: 600 .72rem/1 ui-monospace, monospace; padding: 2px 5px; border: 1px solid var(--pauta); border-radius: 5px; }
+.prod .p small { font-size: .75em; font-weight: 500; margin-left: 1px; }
+.prod .sem.peso { background: rgba(82, 109, 98, .14); color: var(--veltria-escuro); }
+.itens li small { display: block; color: var(--tinta-3); font-size: .78rem; }
+.subt { display: flex; justify-content: space-between; color: var(--tinta-2); font-size: .92rem; padding: 2px 0; }
+.extras-cupom { display: flex; gap: 8px; align-items: end; margin: 8px 0; flex-wrap: wrap; }
+.extras-cupom .cpf { flex: 1; min-width: 140px; display: grid; gap: 3px; font-size: .8rem; color: var(--tinta-2); }
+.extras-cupom .cpf input { border: 1.5px solid var(--pauta); border-radius: 9px; padding: 7px 10px; font: inherit; background: var(--papel); }
+.troco { margin: 6px 0; font-size: 1.05rem; }
+.troco b { color: var(--veltria-escuro); }
+.cancelar { width: 100%; margin-top: 6px; }
+.botoes { display: flex; gap: 8px; flex-wrap: wrap; }
+.nome-btn { all: unset; cursor: pointer; text-decoration: underline; text-decoration-color: var(--pauta); text-underline-offset: 3px; }
+.nome-btn:focus-visible { outline: 2px solid var(--veltria); }
+.dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.campo.check { display: flex; align-items: center; gap: 8px; }
+.cupom { max-width: 380px; }
+.cupom-papel { background: #fff; color: #111; font: 13px/1.45 ui-monospace, Menlo, monospace; padding: 16px; border-radius: 8px; border: 1px dashed var(--pauta); display: grid; gap: 4px; }
+.cupom-papel b { text-align: center; } .cupom-papel > small { display: block; text-align: center; color: #555; }
+.cupom-papel hr { border: 0; border-top: 1px dashed #bbb; margin: 6px 0; width: 100%; }
+.cupom-papel .cl { display: flex; justify-content: space-between; gap: 10px; }
+.cupom-papel .cl small { display: block; color: #666; }
+.cupom-papel .tot { font-weight: 700; font-size: 15px; }
+.camera-caixa video { width: 100%; border-radius: 10px; background: #000; aspect-ratio: 4 / 3; object-fit: cover; }
+@media print { body * { visibility: hidden; } #cupom-papel, #cupom-papel * { visibility: visible; } #cupom-papel { position: absolute; left: 0; top: 0; width: 80mm; border: 0; } }

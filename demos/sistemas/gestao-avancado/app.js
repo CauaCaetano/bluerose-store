@@ -3,6 +3,8 @@
 // compras com sugestão automática, fluxo de caixa projetado, DRE, metas e comissões, notas fiscais, curva ABC e auditoria.
 // Dados de exemplo guardados só neste navegador (?novo no endereço recomeça).
 
+import { abrirIA, painelDono, limparDono } from '../base/gestao-extras.js';
+
 const CHAVE = 'veltria-gestao-avancado-v1';
 const R = (v) => `R$ ${Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const Rk = (v) => (Math.abs(v) >= 1000 ? `R$ ${(v / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} mil` : R(v));
@@ -26,6 +28,7 @@ const I = {
   relatorios: svg('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
   auditoria: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
   modulos: svg('<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>'),
+  dono: svg('<path d="M4 18h16l-1.5-9-4.5 4-2-6-2 6-4.5-4z"/>'), ia: svg('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'),
   x: svg('<path d="M6 6l12 12M18 6 6 18"/>'), mais: svg('<path d="M12 5v14M5 12h14"/>'),
 };
 const MOD = {
@@ -39,6 +42,7 @@ const MOD = {
   fiscal: { nome: 'Notas fiscais', desc: 'NFC-e e NF-e, rejeições e contingência', k: 'F8' },
   relatorios: { nome: 'Relatórios', desc: 'Curva ABC, margem por categoria, horários', k: 'F7' },
   auditoria: { nome: 'Auditoria', desc: 'Quem fez o quê e quando', k: 'F9' },
+  dono: { nome: 'Painel do dono', desc: 'Equipe, cargos, permissões por módulo e plano', k: '' },
   modulos: { nome: 'Todos os módulos', desc: '', k: '' },
 };
 const TECLAS = { F1: 'cockpit', F2: 'pdv', F3: 'estoque', F4: 'compras', F6: 'financeiro', F7: 'relatorios', F8: 'fiscal', F9: 'auditoria' };
@@ -341,11 +345,28 @@ function mModulos() {
   return `<div class="mod-cab"><div><h1>Módulos</h1><p>Abra quantos quiser: cada um fica numa aba lá em cima.</p></div></div><div class="lancador">${Object.entries(MOD).filter(([k]) => k !== 'modulos').map(([k, m]) => `<button class="mod" data-acao="abrir" data-m="${k}"><span class="ico">${I[k]}</span><b>${m.nome}</b><small>${m.desc}${m.k ? ` · <kbd>${m.k}</kbd>` : ''}</small></button>`).join('')}</div>`;
 }
 
-const RENDER = { cockpit: mCockpit, pdv: mPdv, estoque: mEstoque, compras: mCompras, financeiro: mFinanceiro, clientes: mClientes, equipe: mEquipe, fiscal: mFiscal, relatorios: mRelatorios, auditoria: mAuditoria, modulos: mModulos };
+const mDono = () => `<div class="mod-cab"><div><h1>Painel do dono</h1><p>Equipe das duas unidades, cargos, o que cada pessoa pode fazer em cada módulo e o seu plano. Só o dono e os administradores veem.</p></div></div><div id="gx-dono"></div>`;
+const DONO = { sistema: 'Veltria Gestão Avançado', preco: 199, chave: CHAVE, empresa: 'Emporio Vila Nobre', dono: OPERADOR,
+  areas: [['pdv', 'Frente de caixa'], ['estoque', 'Estoque'], ['compras', 'Compras'], ['financeiro', 'Financeiro'], ['clientes', 'Clientes'], ['equipe', 'Equipe e metas'], ['fiscal', 'Notas fiscais'], ['relatorios', 'Relatórios']],
+  cargos: {
+    'Operador de caixa': { pdv: 'editar', estoque: 'ver', compras: 'nenhum', financeiro: 'nenhum', clientes: 'ver', equipe: 'nenhum', fiscal: 'ver', relatorios: 'nenhum' },
+    Vendedor: { pdv: 'editar', estoque: 'ver', compras: 'nenhum', financeiro: 'nenhum', clientes: 'editar', equipe: 'ver', fiscal: 'nenhum', relatorios: 'nenhum' },
+    Comprador: { pdv: 'nenhum', estoque: 'editar', compras: 'editar', financeiro: 'ver', clientes: 'nenhum', equipe: 'nenhum', fiscal: 'ver', relatorios: 'ver' },
+    Financeiro: { pdv: 'ver', estoque: 'ver', compras: 'ver', financeiro: 'editar', clientes: 'editar', equipe: 'ver', fiscal: 'editar', relatorios: 'editar' },
+    'Gerente de loja': { pdv: 'editar', estoque: 'editar', compras: 'editar', financeiro: 'ver', clientes: 'editar', equipe: 'editar', fiscal: 'editar', relatorios: 'editar' } },
+  equipe: [['Diego Albuquerque', 'Gerente de loja'], ['Paula Moraes', 'Gerente de loja'], ['Caio Teixeira', 'Vendedor'], ['Marta Lins', 'Financeiro'], ['Jonas Reis', 'Comprador']] };
+function ia() {
+  const mes = doMes();
+  abrirIA({ sistema: 'Veltria Gestão Avançado', telas: Object.values(MOD).filter((m) => m.desc).map((m) => m.nome),
+    numeros: () => [['faturamento do mês', Rk(soma(mes, (v) => v.total))], ['meta do mês', Rk(metaMes())], ['menor saldo previsto em 30 dias', R(fluxo().reduce((a, b) => (b.s < a.s ? b : a)).s)], ['capital em estoque', Rk(soma(db.produtos, (p) => totalEst(p) * p.custo))]],
+    alertas: () => [...db.produtos.filter((p) => totalEst(p) < p.min).slice(0, 3).map((p) => `${p.nome} abaixo do mínimo`), ...lotesVencendo(7).slice(0, 2).map(({ p, l }) => `lote ${l.lote} de ${p.nome} vence em ${l.vence} dias`), ...db.contas.filter((k) => !k.pago && k.vence < 0).map((k) => `conta vencida: ${k.nome}`), ...(vendasUn().some((v) => v.nota.status === 'Rejeitada') ? ['há notas fiscais rejeitadas para reenviar'] : [])] });
+}
+const RENDER = { dono: mDono, cockpit: mCockpit, pdv: mPdv, estoque: mEstoque, compras: mCompras, financeiro: mFinanceiro, clientes: mClientes, equipe: mEquipe, fiscal: mFiscal, relatorios: mRelatorios, auditoria: mAuditoria, modulos: mModulos };
 
 function desenhar() {
   $('#abas').innerHTML = db.abas.map((m) => `<div class="aba" role="tab" tabindex="0" aria-selected="${m === db.ativa}" data-acao="abrir" data-m="${m}">${I[m]}<span>${MOD[m].nome}</span>${db.abas.length > 1 ? `<span class="fechar-aba" role="button" aria-label="Fechar ${MOD[m].nome}" data-acao="fechar-aba" data-m="${m}">${I.x}</span>` : ''}</div>`).join('') + `<button class="aba-nova" data-acao="abrir" data-m="modulos" aria-label="Abrir módulo">${I.mais}</button>`;
   $('#area').innerHTML = RENDER[db.ativa]();
+  if (db.ativa === 'dono') painelDono($('#gx-dono'), DONO);
   $('#filial').value = db.un;
   document.title = `${MOD[db.ativa].nome} · Veltria Gestão Avançado`;
   status();
@@ -437,7 +458,8 @@ function exportarAbc() {
 
 // ---------------------------------------------------------------- busca de comandos
 const ACOES = [
-  { n: 'Nova venda', t: 'ação', f: () => abrir('pdv') }, { n: 'Transferir estoque entre unidades', t: 'ação', f: () => transferir() },
+  { n: 'Nova venda', t: 'ação', f: () => abrir('pdv') }, { n: 'Perguntar ao Assistente IA', t: 'ação · grátis', f: () => ia() },
+  { n: 'Convidar pessoa para a equipe', t: 'ação', f: () => abrir('dono') }, { n: 'Transferir estoque entre unidades', t: 'ação', f: () => transferir() },
   { n: 'Gerar pedidos pela sugestão de compra', t: 'ação', f: () => { abrir('compras'); gerarPedidos(); } }, { n: 'Lançar conta a pagar ou a receber', t: 'ação', f: () => novaConta() },
   { n: 'Ver DRE do mês', t: 'ação', f: () => { db.finAba = 'dre'; abrir('financeiro'); } }, { n: 'Ver lotes vencendo', t: 'ação', f: () => { db.estoqueAba = 'lotes'; abrir('estoque'); } },
   { n: 'Exportar curva ABC (planilha)', t: 'ação', f: exportarAbc }, { n: 'Reenviar notas rejeitadas', t: 'ação', f: () => { db.busca.fiscal = 'atencao'; abrir('fiscal'); } },
@@ -477,7 +499,7 @@ document.addEventListener('click', (e) => {
   const F = {
     abrir: () => { if (a.dataset.aba) { if (a.dataset.m === 'estoque') db.estoqueAba = a.dataset.aba; else db.finAba = a.dataset.aba; } abrir(a.dataset.m); },
     'fechar-aba': () => fecharAba(a.dataset.m),
-    paleta, 'fechar-janela': fecharJanela,
+    paleta, ia, 'fechar-janela': fecharJanela,
     'ok-janela': () => { if (janelaOk && janelaOk() !== false) { fecharJanela(); gravar(); desenhar(); } },
     'estoque-aba': () => { db.estoqueAba = a.dataset.v; desenhar(); }, 'fin-aba': () => { db.finAba = a.dataset.v; desenhar(); },
     'fiscal-filtro': () => { db.busca.fiscal = a.dataset.v; desenhar(); },
@@ -538,6 +560,6 @@ document.addEventListener('keydown', (e) => {
   if (db.ativa === 'pdv' && e.key === 'F5') { e.preventDefault(); pagar('Pix'); }
   if (e.key === 'Enter' && e.target.classList?.contains('aba')) e.target.click();
 });
-$('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE); db = semente(); fecharJanela(); fecharPaleta(); desenhar(); avisar('Demonstração recomeçada.'); });
+$('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE); limparDono(CHAVE); db = semente(); fecharJanela(); fecharPaleta(); desenhar(); avisar('Demonstração recomeçada.'); });
 setInterval(status, 30000);
 desenhar();

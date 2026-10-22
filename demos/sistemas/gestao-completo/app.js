@@ -2,6 +2,8 @@
 // Seis partes na doca (Painel, Vender, Produtos, Clientes, Contas, Relatórios); cadastros e detalhes abrem na gaveta.
 // Dados de exemplo guardados só neste navegador (?novo no endereço recomeça).
 
+import { abrirIA, painelDono, limparDono } from '../base/gestao-extras.js';
+
 const CHAVE = 'veltria-gestao-completo-v1';
 const R = (v) => `R$ ${Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const Rk = (v) => (v >= 10000 ? `R$ ${(v / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mil` : R(v));
@@ -18,10 +20,11 @@ const ic = {
   clientes: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/></svg>',
   contas: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
   relatorios: '<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  dono: '<svg viewBox="0 0 24 24"><path d="M4 18h16l-1.5-9-4.5 4-2-6-2 6-4.5-4z"/></svg>',
   x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
   mais: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
 };
-const PARTES = [['painel', 'Painel'], ['vender', 'Vender'], ['produtos', 'Produtos'], ['clientes', 'Clientes'], ['contas', 'Contas'], ['relatorios', 'Relatórios']];
+const PARTES = [['painel', 'Painel'], ['vender', 'Vender'], ['produtos', 'Produtos'], ['clientes', 'Clientes'], ['contas', 'Contas'], ['relatorios', 'Relatórios'], ['dono', 'Dono']];
 const CATS = ['Cozinha', 'Mesa', 'Limpeza', 'Organização', 'Decoração'];
 const COR_CAT = { Cozinha: '#773c45', Mesa: '#17243a', Limpeza: '#7f8696', Organização: '#c6ad91', Decoração: '#a8737b' };
 
@@ -215,11 +218,22 @@ function telaRelatorios() {
   </div>`;
 }
 
-const TELAS = { painel: telaPainel, vender: telaVender, produtos: telaProdutos, clientes: telaClientes, contas: telaContas, relatorios: telaRelatorios };
+function telaDono() { return `<div class="cab"><div><h1>Painel do dono</h1><p>Equipe, cargos, o que cada pessoa pode ver e o seu plano. Só você e os administradores veem esta parte.</p></div></div><div id="gx-dono"></div>`; }
+const DONO = { sistema: 'Veltria Gestão Completo', preco: 119, chave: CHAVE, empresa: 'Casa Aurora', dono: 'Helena Prado',
+  areas: [['vender', 'Vender'], ['produtos', 'Produtos e estoque'], ['clientes', 'Clientes e fiado'], ['contas', 'Contas'], ['relatorios', 'Relatórios']],
+  cargos: { Vendedor: { vender: 'editar', produtos: 'ver', clientes: 'editar', contas: 'nenhum', relatorios: 'nenhum' }, Estoquista: { vender: 'nenhum', produtos: 'editar', clientes: 'nenhum', contas: 'nenhum', relatorios: 'ver' }, Financeiro: { vender: 'ver', produtos: 'ver', clientes: 'ver', contas: 'editar', relatorios: 'editar' }, Gerente: { vender: 'editar', produtos: 'editar', clientes: 'editar', contas: 'editar', relatorios: 'editar' } },
+  equipe: [['Rafael Prado', 'Gerente'], ['Bianca Souza', 'Vendedor'], ['Tiago Lemos', 'Estoquista']] };
+function ia() {
+  abrirIA({ sistema: 'Veltria Gestão Completo', telas: PARTES.map((p) => p[1]),
+    numeros: () => [['vendido hoje', R(totalDia(0))], ['lucro de hoje', R(lucroDia(0))], ['dinheiro na gaveta', R(noCaixa())], ['a receber', R(aReceber())]],
+    alertas: () => [...acabando().slice(0, 3).map((p) => `${p.nome} está acabando (tem ${p.estoque})`), ...pagarAte(3).map((k) => `pagar ${k.nome} (${R(k.valor)})`), ...db.clientes.filter((c) => c.limite && c.deve / c.limite > .8).map((c) => `${c.nome} usou quase todo o limite de fiado`)] });
+}
+const TELAS = { dono: telaDono, painel: telaPainel, vender: telaVender, produtos: telaProdutos, clientes: telaClientes, contas: telaContas, relatorios: telaRelatorios };
 function desenhar() {
   const nome = PARTES.find((p) => p[0] === parte)[1];
   document.title = `${nome} · Veltria Gestão Completo`;
   $('#tela').innerHTML = TELAS[parte]();
+  if (parte === 'dono') painelDono($('#gx-dono'), DONO);
   const badges = { produtos: acabando().length, contas: pagarAte(3).length, vender: db.cupom.length };
   $('#doca').innerHTML = PARTES.map(([id, n]) => `<a href="#${id}" ${id === parte ? 'aria-current="page"' : ''}>${ic[id]}<span>${n}</span>${badges[id] ? `<i>${badges[id]}</i>` : ''}</a>`).join('');
 }
@@ -339,6 +353,7 @@ document.addEventListener('click', (e) => {
   e.preventDefault();
   const acoes = {
     ir: () => ir(v),
+    ia,
     fechar: () => { fecharGaveta(); if (a.dataset.depois) ir(a.dataset.depois); },
     confirmar: () => { if (gavetaAcao && gavetaAcao() !== false) { fecharGaveta(); gravar(); desenhar(); } },
     cat: () => { filtroCat = v; desenhar(); },
@@ -387,6 +402,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && $('#gaveta').classList.contains('aberta')) fecharGaveta();
   if (e.key === 'Enter' && e.target.closest('#gaveta form') && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); $('#gaveta [data-acao="confirmar"]')?.click(); }
 });
-$('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE); db = semente(); fecharGaveta(); ir('painel'); avisar('Demonstração recomeçada.'); });
+$('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE); limparDono(CHAVE); db = semente(); fecharGaveta(); ir('painel'); avisar('Demonstração recomeçada.'); });
 
 ir(location.hash.slice(1) || 'painel');

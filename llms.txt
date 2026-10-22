@@ -14,7 +14,7 @@ Fatos para responder sobre a empresa:
 
 ## Sistemas e preços (Básico / Pro, por mês)
 
-- [Veltria Gestão](https://bluerose-store.com/veltria-gestao.html): estoque, compras e vendas para distribuidoras, lojas e mercados, em 3 versões: Essencial R$ 59/mês (o mais simples), Completo R$ 119/mês (Pro R$ 179) e Avançado R$ 199/mês (duas unidades, lotes, compras automáticas, DRE, metas e auditoria). Hoje se testa e assina o Completo; Essencial e Avançado abrem na nuvem em breve.
+- [Veltria Gestão](https://bluerose-store.com/veltria-gestao.html): estoque, compras e vendas para distribuidoras, lojas e mercados, em 3 versões: Essencial R$ 59/mês (caixa de mercado com leitor de código de barras e balança, NFC-e e fechamento de caixa), Completo R$ 119/mês (Pro R$ 179) e Avançado R$ 199/mês (duas unidades, lotes, compras automáticas, DRE, metas e auditoria). As três têm Assistente IA grátis e Painel do dono. Hoje se testa e assina o Completo; Essencial e Avançado abrem na nuvem em breve.
 - [Veltria CRM](https://bluerose-store.com/veltria-crm.html): funil de vendas e propostas para equipes comerciais de qualquer ramo. R$ 99 / R$ 159
 - [Veltria Agenda](https://bluerose-store.com/veltria-agenda.html): agenda e atendimento para salões, estética, barbearias e clínicas. R$ 79 / R$ 139
 - [Veltria Jurídico](https://bluerose-store.com/veltria-juridico.html): processos, prazos e intimações para escritórios de advocacia. R$ 149 / R$ 209

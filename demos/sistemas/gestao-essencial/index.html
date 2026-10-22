@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=3">
+<link rel="stylesheet" href="estilo.css?v=4">
 </head>
 <body>
 <div class="faixa-demo"><a href="../../../veltria-gestao.html">Voltar<span class="so-pc"> ao site</span></a><span class="so-pc">Demonstração do <b>Veltria Gestão Essencial</b>, com dados de exemplo guardados só neste navegador</span><span class="so-cel">Demonstração</span><button type="button" id="recomecar">Recomeçar</button><a class="cta" href="../../../app/gestao/">Testar grátis<span class="so-pc"> 7 dias com os seus dados</span></a></div>
@@ -18,6 +18,7 @@
     <a class="marca" href="#hoje" aria-label="Veltria Gestão, ir para Hoje"><img src="veltria.png" alt="" width="40" height="40"><span><b>Mercado Bom Preço</b><small>Veltria Gestão Essencial</small></span></a>
     <label class="comando"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="comando" type="search" placeholder="O que você quer fazer? Ex.: vender arroz, chegou mercadoria" autocomplete="off" aria-label="O que você quer fazer"><kbd>/</kbd></label>
     <ul class="sugestoes" id="sugestoes" role="listbox" hidden></ul>
+    <button type="button" class="btn ia-btn" id="abrir-ia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>Assistente IA</button>
   </header>
   <main class="pagina" id="pagina" tabindex="-1"></main>
   <nav class="divisorias" aria-label="Partes do caderno">
@@ -26,9 +27,10 @@
     <a href="#estoque" data-aba="estoque"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/></svg><span>Estoque</span></a>
     <a href="#dinheiro" data-aba="dinheiro"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/></svg><span>Dinheiro</span></a>
     <a href="#fiado" data-aba="fiado"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h10l2 2v14H6z"/><path d="M9 9h6M9 13h6M9 17h3"/></svg><span>Fiado</span></a>
+    <a href="#dono" data-aba="dono"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16l-1.5-9-4.5 4-2-6-2 6-4.5-4z"/></svg><span>Dono</span></a>
   </nav>
 </div>
 <div class="avisos" id="avisos" role="status" aria-live="polite"></div>
-<script type="module" src="app.js?v=2"></script>
+<script type="module" src="app.js?v=4"></script>
 </body>
 </html>

@@ -1,13 +1,15 @@
 // Veltria Gestão · protótipo do layout "caderno da loja"
 // Cinco divisórias (Hoje, Vender, Estoque, Dinheiro, Fiado) e uma caixa "O que você quer fazer?" que leva a qualquer lugar.
 // Dados de exemplo guardados só neste navegador (?novo no endereço recomeça).
+// Caixa de mercado: leitor de código de barras (USB ou câmera), pesáveis pela etiqueta da balança, desconto, troco, NFC-e e fechamento de caixa.
+import { abrirIA, painelDono, limparDono } from '../base/gestao-extras.js';
 
-const textoItens = (l) => l.map((x) => `${x.qtd}× ${x.nome}`).join(', ');
+const textoItens = (l) => l.map((x) => (x.kg ? `${Number(x.qtd).toLocaleString('pt-BR', { maximumFractionDigits: 3 })} kg de ${x.nome}` : `${x.qtd}× ${x.nome}`)).join(', ');
 const R = (v) => `R$ ${Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const hora = (d = new Date()) => d.toTimeString().slice(0, 5);
-const CORES = { Mercearia: '#526d62', Bebidas: '#34485a', Limpeza: '#6f8a7f', Higiene: '#8a7f6c', Descartáveis: '#a0663f' };
+const CORES = { Mercearia: '#526d62', Bebidas: '#34485a', Limpeza: '#6f8a7f', Higiene: '#8a7f6c', Descartáveis: '#a0663f', Hortifrúti: '#5f7d4e', Padaria: '#9a7b55' };
 const CHAVE = 'veltria-gestao-simples-v1';
 
 // ---------------------------------------------------------------- dados de exemplo
@@ -21,6 +23,8 @@ function semente() {
     ['Papel higiênico 12 rolos', 'Higiene', 12.9, 19.9, 15, 12, 18], ['Sabonete 90 g', 'Higiene', 1.3, 2.49, 88, 30, 24], ['Creme dental 90 g', 'Higiene', 2.8, 4.99, 41, 20, 17],
     ['Shampoo 350 ml', 'Higiene', 8.9, 15.9, 13, 8, 0], ['Copo descartável 200 ml', 'Descartáveis', 4.2, 7.49, 30, 10, 6], ['Saco de lixo 100 L', 'Descartáveis', 5.6, 9.9, 0, 10, 12],
   ].map(([nome, cat, custo, preco, tem, minimo, vendidos30], i) => ({ id: `p${i}`, nome, cat, custo, preco, tem, minimo, vendidos30, ean: `78945${String(10000 + i * 37).padStart(8, '0')}` }));
+  P.push(...[['Banana prata', 'Hortifrúti', 3.2, 6.98, 38.5, 15, 120, '0101'], ['Tomate italiano', 'Hortifrúti', 4.9, 8.99, 21.2, 10, 64, '0102'], ['Pão francês', 'Padaria', 6.5, 16.9, 9.4, 6, 180, '0201'], ['Queijo muçarela fatiado', 'Padaria', 31, 54.9, 4.1, 3, 22, '0202']]
+    .map(([nome, cat, custo, preco, tem, minimo, vendidos30, plu], i) => ({ id: `k${i}`, nome, cat, custo, preco, tem, minimo, vendidos30, kg: true, plu, ean: '' })));
   const clientes = [
     { id: 'c0', nome: 'Dona Cida', tel: '16991110001', deve: 86.4, desde: 3 }, { id: 'c1', nome: 'Seu Jorge da oficina', tel: '16991110002', deve: 212.9, desde: 19 },
     { id: 'c2', nome: 'Padaria Trigo Bom', tel: '16991110003', deve: 540, desde: 34 }, { id: 'c3', nome: 'Marcelo (vizinho)', tel: '16991110004', deve: 37.5, desde: 8 },
@@ -41,7 +45,7 @@ function semente() {
   }
   if (mins > 10 * 60) diario.push({ tipo: 'entrada', hora: '10:05', texto: 'Chegou mercadoria: 24 Refrigerante cola 2 L', valor: 139.2 });
   diario.sort((a, b) => a.hora.localeCompare(b.hora));
-  return { produtos: P, clientes, pagar, diario, caixaInicial: 350, ontemAteAgora: 0.86, comanda: [], forma: 'Pix', fiadoDe: '' };
+  return { produtos: P, clientes, pagar, diario, caixaInicial: 350, ontemAteAgora: 0.86, comanda: [], forma: 'Pix', fiadoDe: '', desconto: 0, recebido: '', cpf: '', proxNfce: 18431 };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semente(); } catch { return semente(); } })();
 const gravar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { /* sem espaço: segue na memória */ } };
@@ -50,8 +54,11 @@ const gravar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } 
 const vendasHoje = () => db.diario.filter((x) => x.tipo === 'venda');
 const vendidoHoje = () => vendasHoje().reduce((t, x) => t + x.valor, 0);
 const lucroHoje = () => vendasHoje().reduce((t, x) => t + (x.lucro || 0), 0);
-const saiuHoje = () => db.diario.filter((x) => x.tipo === 'entrada' || x.tipo === 'pagamento').reduce((t, x) => t + x.valor, 0);
+const saiuHoje = () => db.diario.filter((x) => x.tipo === 'entrada' || x.tipo === 'pagamento' || x.tipo === 'sangria').reduce((t, x) => t + x.valor, 0);
 const recebidoNoCaixa = () => vendasHoje().filter((x) => x.forma !== 'Fiado').reduce((t, x) => t + x.valor, 0) + db.diario.filter((x) => x.tipo === 'recebido').reduce((t, x) => t + x.valor, 0);
+const gaveta = () => db.caixaInicial + vendasHoje().filter((x) => x.forma === 'Dinheiro').reduce((t, x) => t + x.valor, 0) + db.diario.filter((x) => x.tipo === 'suprimento').reduce((t, x) => t + x.valor, 0) - db.diario.filter((x) => x.tipo === 'sangria' || x.tipo === 'pagamento').reduce((t, x) => t + x.valor, 0);
+const porForma = () => ['Dinheiro', 'Pix', 'Cartão', 'Fiado'].map((f) => [f, vendasHoje().filter((x) => x.forma === f).reduce((t, x) => t + x.valor, 0)]);
+const qtdTxt = (p, q) => (p.kg ? `${Number(q).toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} kg` : `${q}`);
 const noCaixa = () => db.caixaInicial + recebidoNoCaixa() - saiuHoje();
 const acabando = () => db.produtos.filter((p) => p.tem <= p.minimo).sort((a, b) => a.tem / a.minimo - b.tem / b.minimo);
 const parados = () => db.produtos.filter((p) => p.vendidos30 === 0 && p.tem > 0);
@@ -70,45 +77,52 @@ const TELAS = {
       venc.length && `<li class="er"><svg viewBox="0 0 24 24"><path d="M6 4h10l2 2v14H6z"/><path d="M9 9h6M9 13h6"/></svg><div><b>${R(venc.reduce((t, c) => t + c.deve, 0))} de fiado atrasado</b><p>${esc(venc.map((c) => c.nome).join(' e '))}, há mais de 15 dias</p></div><a class="btn peq" href="#fiado">Cobrar</a></li>`,
       conta.length && `<li><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/></svg><div><b>${esc(conta[0].nome)}: ${R(conta[0].valor)}</b><p>Vence ${conta[0].vence === 1 ? 'amanhã' : `em ${conta[0].vence} dias`}</p></div><a class="btn peq" href="#dinheiro">Ver contas</a></li>`,
     ].filter(Boolean).join('');
-    const top = Object.values(v.flatMap((x) => x.itens || []).reduce((m, i) => { (m[i.nome] ||= { n: i.nome, q: 0 }).q += i.qtd; return m; }, {})).sort((a, b) => b.q - a.q).slice(0, 5);
+    const top = Object.values(v.flatMap((x) => x.itens || []).reduce((m, i) => { (m[i.nome] ||= { n: i.nome, q: 0, kg: i.kg }).q += i.qtd; return m; }, {})).sort((a, b) => b.q - a.q).slice(0, 5);
     return `<div class="cabeca"><h1 class="frase">Hoje você vendeu <span class="mt">${R(vendidoHoje())}</span> em ${v.length} vendas.<small>Lucro de ${R(lucroHoje())} até agora. No mesmo horário de ontem: ${R(vendidoHoje() * db.ontemAteAgora)}.</small></h1><a class="btn pri" href="#vender">Nova venda</a></div>
       ${lembretes ? `<ul class="lembretes">${lembretes}</ul>` : ''}
       <div class="duas"><section><h2>Caderno de hoje</h2><p class="sub">Tudo o que aconteceu na loja, na ordem.</p>
-        <ol class="diario">${[...db.diario].reverse().map((x, i) => `<li${i === 0 && x.novo ? ' class="novo"' : ''}><time>${x.hora}</time><span>${x.tipo === 'venda' ? `Venda no ${x.forma.toLowerCase()}: ` : ''}${esc(x.texto)}</span><span class="v ${x.tipo === 'venda' || x.tipo === 'recebido' ? '' : 'sai'}">${x.tipo === 'venda' || x.tipo === 'recebido' ? '+' : '−'} ${R(x.valor)}</span></li>`).join('') || '<li class="vazio">Nenhuma venda ainda hoje. Toque em Nova venda para começar.</li>'}</ol></section>
-        <section><h2>O que mais saiu hoje</h2><p class="sub">Contando todas as vendas do dia.</p><ol class="lista">${top.map((t) => `<li><span>${esc(t.n)}</span><span></span><span class="v">${t.q} un.</span></li>`).join('')}</ol></section></div>`;
+        <ol class="diario">${[...db.diario].reverse().map((x, i) => `<li${i === 0 && x.novo ? ' class="novo"' : ''}><time>${x.hora}</time><span>${x.tipo === 'venda' ? `Venda no ${x.forma.toLowerCase()}: ` : ''}${esc(x.texto)}</span><span class="v ${['venda', 'recebido', 'suprimento'].includes(x.tipo) ? '' : 'sai'}">${x.valor ? `${['venda', 'recebido', 'suprimento'].includes(x.tipo) ? '+' : '−'} ${R(x.valor)}` : ''}</span></li>`).join('') || '<li class="vazio">Nenhuma venda ainda hoje. Toque em Nova venda para começar.</li>'}</ol></section>
+        <section><h2>O que mais saiu hoje</h2><p class="sub">Contando todas as vendas do dia.</p><ol class="lista">${top.map((t) => `<li><span>${esc(t.n)}</span><span></span><span class="v">${t.kg ? `${t.q.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} kg` : `${t.q} un.`}</span></li>`).join('')}</ol></section></div>`;
   },
   vender() {
     const cats = ['Mais vendidos', ...Object.keys(CORES)], f = estado.cat || 'Mais vendidos', b = norm(estado.busca);
     let lista = b ? db.produtos.filter((p) => norm(p.nome).includes(b) || p.ean.includes(b)) : f === 'Mais vendidos' ? [...db.produtos].sort((x, y) => y.vendidos30 - x.vendidos30).slice(0, 12) : db.produtos.filter((p) => p.cat === f);
-    const q = (id) => db.comanda.find((x) => x.id === id)?.qtd || 0, total = db.comanda.reduce((t, x) => t + x.qtd * prod(x.id).preco, 0), n = db.comanda.reduce((t, x) => t + x.qtd, 0);
+    const q = (id) => db.comanda.find((x) => x.id === id)?.qtd || 0, sub = subtotal(), desc = Math.min(db.desconto || 0, sub), total = sub - desc, n = db.comanda.reduce((t, x) => t + (prod(x.id).kg ? 1 : x.qtd), 0), troco = db.forma === 'Dinheiro' && num(db.recebido) >= total ? num(db.recebido) - total : null;
     return `<div class="vender"><section>
-        <label class="busca-pdv"><svg viewBox="0 0 24 24"><path d="M4 6v12M7 6v12M11 6v12M14 6v12M18 6v12M20 6v12"/></svg><input data-busca placeholder="Bipe o código ou digite o produto" value="${esc(estado.busca || '')}" autocomplete="off" aria-label="Buscar produto"></label>
+        <div class="linha-pdv"><label class="busca-pdv"><svg viewBox="0 0 24 24"><path d="M4 6v12M7 6v12M11 6v12M14 6v12M18 6v12M20 6v12"/></svg><input data-busca placeholder="Bipe o código, digite o produto ou 3*código" value="${esc(estado.busca || '')}" autocomplete="off" aria-label="Buscar produto ou ler código de barras"></label><button type="button" class="btn camera" data-camera aria-label="Ler o código com a câmera"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Câmera</span></button></div>
+        <p class="dica-pdv">Leitor de código de barras ligado: é só bipar, mesmo sem clicar aqui. Produto por peso: bipe a etiqueta da balança. <kbd>F2</kbd> busca · <kbd>F9</kbd> fecha a venda</p>
         <div class="chips" role="group" aria-label="Categorias">${cats.map((c) => `<button type="button" class="chip" data-cat="${c}" aria-pressed="${!b && c === f}">${c}</button>`).join('')}</div>
-        <div class="produtos">${lista.map((p) => `<button type="button" class="prod" data-add="${p.id}" ${p.tem <= 0 ? 'aria-disabled="true"' : ''}><span class="ini" style="background:${CORES[p.cat]}">${ini(p.nome)}</span><b>${esc(p.nome)}</b>${p.tem <= 0 ? '<span class="sem">Sem estoque</span>' : ''}<span class="p">${R(p.preco)}</span>${q(p.id) ? `<span class="q">${q(p.id)}</span>` : ''}</button>`).join('') || '<p class="sub">Nenhum produto com esse nome.</p>'}</div></section>
+        <div class="produtos">${lista.map((p) => `<button type="button" class="prod" data-add="${p.id}" ${p.tem <= 0 ? 'aria-disabled="true"' : ''}><span class="ini" style="background:${CORES[p.cat]}">${ini(p.nome)}</span><b>${esc(p.nome)}</b>${p.tem <= 0 ? '<span class="sem">Sem estoque</span>' : p.kg ? '<span class="sem peso">por peso</span>' : ''}<span class="p">${R(p.preco)}${p.kg ? '<small>/kg</small>' : ''}</span>${q(p.id) ? `<span class="q">${p.kg ? '✓' : q(p.id)}</span>` : ''}</button>`).join('') || '<p class="sub">Nenhum produto com esse nome.</p>'}</div></section>
       <aside class="comanda" id="comanda"><h2>Comanda <small>${n ? `${n} ${n === 1 ? 'item' : 'itens'}` : ''}</small></h2>
-        ${db.comanda.length ? `<ul class="itens">${db.comanda.map((x) => { const p = prod(x.id); return `<li><span>${esc(p.nome)}</span><span class="lv">${R(x.qtd * p.preco)}</span><span class="qtd"><button type="button" data-menos="${x.id}" aria-label="Tirar um">−</button><span>${x.qtd}</span><button type="button" data-add="${x.id}" aria-label="Pôr mais um">+</button></span></li>`; }).join('')}</ul>
-          <div class="total"><span>Total</span>${R(total)}</div>
+        ${db.comanda.length ? `<ul class="itens">${db.comanda.map((x) => { const p = prod(x.id); return `<li><span>${esc(p.nome)}${p.kg ? `<small>${qtdTxt(p, x.qtd)} × ${R(p.preco)}/kg</small>` : ''}</span><span class="lv">${R(x.qtd * p.preco)}</span>${p.kg ? `<span class="qtd"><button type="button" data-menos="${x.id}" aria-label="Tirar ${esc(p.nome)}">×</button></span>` : `<span class="qtd"><button type="button" data-menos="${x.id}" aria-label="Tirar um">−</button><span>${x.qtd}</span><button type="button" data-add="${x.id}" aria-label="Pôr mais um">+</button></span>`}</li>`; }).join('')}</ul>
+          ${desc ? `<div class="subt"><span>Subtotal</span><span>${R(sub)}</span></div><div class="subt"><span>Desconto</span><span>− ${R(desc)}</span></div>` : ''}<div class="total"><span>Total</span>${R(total)}</div>
+          <div class="extras-cupom"><button type="button" class="btn peq" data-desconto>${desc ? 'Mudar desconto' : 'Dar desconto'}</button><label class="cpf">CPF na nota<input data-cpf inputmode="numeric" maxlength="14" placeholder="opcional" value="${esc(db.cpf || '')}"></label></div>
           <div class="pagamentos" role="group" aria-label="Forma de pagamento">${['Pix', 'Dinheiro', 'Cartão', 'Fiado'].map((x) => `<button type="button" data-forma="${x}" aria-pressed="${db.forma === x}">${x}</button>`).join('')}</div>
           ${db.forma === 'Fiado' ? `<label class="campo">Pôr no fiado de<select data-fiado><option value="">Escolha o cliente</option>${db.clientes.map((c) => `<option value="${c.id}" ${db.fiadoDe === c.id ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}</select></label>` : ''}
-          <button type="button" class="btn pri grande" data-fechar ${db.forma === 'Fiado' && !db.fiadoDe ? 'disabled' : ''}>Fechar venda de ${R(total)}</button>`
-        : '<p class="vazio">Toque nos produtos para pôr na comanda.</p>'}</aside></div>
+          ${db.forma === 'Dinheiro' ? `<label class="campo">Quanto o cliente deu<input data-recebido inputmode="decimal" placeholder="${R(Math.ceil(total / 10) * 10)}" value="${esc(db.recebido || '')}"></label>${troco != null ? `<p class="troco">Troco: <b>${R(troco)}</b></p>` : ''}` : ''}
+          <button type="button" class="btn pri grande" data-fechar ${db.forma === 'Fiado' && !db.fiadoDe ? 'disabled' : ''}>Fechar venda de ${R(total)}</button><button type="button" class="btn fant peq cancelar" data-cancelar-venda>Cancelar esta venda</button>`
+        : '<p class="vazio">Bipe um produto ou toque nele para pôr na comanda.</p>'}</aside></div>
       ${db.comanda.length ? `<div class="barra-comanda so-cel"><span>${n} ${n === 1 ? 'item' : 'itens'} <b>${R(total)}</b></span><a class="btn peq" href="#comanda" data-ir-comanda>Ver comanda</a></div>` : ''}`;
   },
   estoque() {
     const f = estado.filtro || 'todos', ac = acabando(), pa = parados();
     const lista = f === 'acabando' ? ac : f === 'parado' ? pa : [...db.produtos].sort((a, b) => a.nome.localeCompare(b.nome));
     const valor = db.produtos.reduce((t, p) => t + p.tem * p.custo, 0);
-    return `<div class="cabeca"><h1 class="frase">${ac.length ? `<span class="mt ambar">${ac.length} produtos</span> estão acabando.` : 'Nada acabando no estoque.'}<small>${db.produtos.length} produtos, ${R(valor)} em mercadoria (pelo custo).</small></h1><button type="button" class="btn pri" data-chegou>Chegou mercadoria</button></div>
+    return `<div class="cabeca"><h1 class="frase">${ac.length ? `<span class="mt ambar">${ac.length} produtos</span> estão acabando.` : 'Nada acabando no estoque.'}<small>${db.produtos.length} produtos, ${R(valor)} em mercadoria (pelo custo).</small></h1><span class="botoes"><button type="button" class="btn" data-novo-prod>Novo produto</button><button type="button" class="btn pri" data-chegou>Chegou mercadoria</button></span></div>
       <div class="chips" role="group" aria-label="Mostrar">${[['todos', 'Todos'], ['acabando', `Acabando (${ac.length})`], ['parado', `Parados há 30 dias (${pa.length})`]].map(([k, t]) => `<button type="button" class="chip" data-filtro="${k}" aria-pressed="${f === k}">${t}</button>`).join('')}</div>
-      <p class="leg"><span>A barra mostra quanto tem. O risquinho é o mínimo que você quer ter.</span></p>
-      <ul class="tabela">${lista.map((p) => { const max = Math.max(p.minimo * 3, p.tem, 1), cls = p.tem <= 0 ? 'er' : p.tem <= p.minimo ? 'al' : ''; return `<li><span class="nome"><b>${esc(p.nome)}</b><small>${p.cat}, vende uns ${Math.round(p.vendidos30 / 4)} por semana</small></span><span class="regua ${cls}" style="--min:${(p.minimo / max) * 100}%"><i style="width:${(p.tem / max) * 100}%"></i></span><span class="qtd-est"><button type="button" data-est="${p.id}" data-d="-1" aria-label="Tirar um de ${esc(p.nome)}">−</button><b>${p.tem}</b><button type="button" data-est="${p.id}" data-d="1" aria-label="Pôr mais um de ${esc(p.nome)}">+</button></span></li>`; }).join('') || '<li><span class="sub">Nenhum produto aqui.</span></li>'}</ul>`;
+      <p class="leg"><span>A barra mostra quanto tem. O risquinho é o mínimo que você quer ter. Toque no nome para mudar preço, código ou mínimo.</span></p>
+      <ul class="tabela">${lista.map((p) => { const max = Math.max(p.minimo * 3, p.tem, 1), cls = p.tem <= 0 ? 'er' : p.tem <= p.minimo ? 'al' : ''; return `<li><span class="nome"><button type="button" class="nome-btn" data-editar="${p.id}"><b>${esc(p.nome)}</b></button><small>${p.cat} · ${R(p.preco)}${p.kg ? '/kg' : ''} · ${p.kg ? `balança ${p.plu}` : p.ean ? `cód. ${p.ean}` : 'sem código'} · vende uns ${p.kg ? qtdTxt(p, Math.round(p.vendidos30 / 4 * 10) / 10) : Math.round(p.vendidos30 / 4)} por semana</small></span><span class="regua ${cls}" style="--min:${(p.minimo / max) * 100}%"><i style="width:${(p.tem / max) * 100}%"></i></span><span class="qtd-est"><button type="button" data-est="${p.id}" data-d="-1" aria-label="Tirar um de ${esc(p.nome)}">−</button><b>${p.kg ? qtdTxt(p, p.tem) : p.tem}</b><button type="button" data-est="${p.id}" data-d="1" aria-label="Pôr mais um de ${esc(p.nome)}">+</button></span></li>`; }).join('') || '<li><span class="sub">Nenhum produto aqui.</span></li>'}</ul>`;
   },
   dinheiro() {
-    return `<div class="cabeca"><h1 class="frase">No caixa agora: <span class="mt">${R(noCaixa())}</span><small>Começou o dia com ${R(db.caixaInicial)}. O fiado só entra quando o cliente pagar.</small></h1><button type="button" class="btn" data-despesa>Lançar despesa</button></div>
+    return `<div class="cabeca"><h1 class="frase">No caixa agora: <span class="mt">${R(noCaixa())}</span><small>Começou o dia com ${R(db.caixaInicial)}. O fiado só entra quando o cliente pagar.</small></h1><span class="botoes"><button type="button" class="btn" data-despesa>Lançar despesa</button><button type="button" class="btn" data-sangria>Sangria</button><button type="button" class="btn" data-suprimento>Suprimento</button><button type="button" class="btn pri" data-fechar-caixa>Fechar o caixa</button></span></div>
+      <div class="contas"><div><span>Dinheiro na gaveta</span><b>${R(gaveta())}</b></div>${porForma().map(([f, v]) => `<div><span>Vendas no ${f.toLowerCase()}</span><b>${R(v)}</b></div>`).join('')}</div>
       <div class="contas"><div><span>Entrou hoje</span><b>${R(recebidoNoCaixa())}</b></div><div><span>Saiu hoje</span><b class="sai">${R(saiuHoje())}</b></div><div><span>Lucro das vendas de hoje</span><b>${R(lucroHoje())}</b></div></div>
       <div class="duas"><section><h2>Contas para pagar</h2><p class="sub">Da que vence primeiro para a última.</p>
         <ul class="lista">${db.pagar.sort((a, b) => a.vence - b.vence).map((b) => `<li><span>${esc(b.nome)}<small>${b.vence <= 1 ? 'Vence amanhã' : `Vence em ${b.vence} dias`}</small></span><span class="v ${b.vence <= 1 ? 'er' : ''}">${R(b.valor)}</span><button type="button" class="btn peq" data-pagar="${b.id}">Paguei</button></li>`).join('') || '<li><span class="sub">Nenhuma conta para pagar.</span></li>'}</ul></section>
         <section><h2>Para receber</h2><p class="sub">Fiado dos clientes.</p><ul class="lista"><li><span>Total no fiado<small>${db.clientes.length} clientes</small></span><span class="v">${R(fiadoTotal())}</span><a class="btn peq" href="#fiado">Abrir o fiado</a></li></ul></section></div>`;
+  },
+  dono() {
+    return `<div class="cabeca"><h1 class="frase">Painel do dono<small>Equipe, cargos, o que cada um pode ver e o seu plano. Só você e os administradores veem esta parte.</small></h1></div><div id="gx-dono"></div>`;
   },
   fiado() {
     const l = [...db.clientes].sort((a, b) => b.desde - a.desde);
@@ -124,8 +138,9 @@ function mostrar() {
   const tela = TELAS[aba] ? aba : 'hoje';
   if (tela === 'estoque' && extra) estado.filtro = extra;
   pag.classList.remove('entrou'); pag.innerHTML = TELAS[tela](); void pag.offsetWidth; pag.classList.add('entrou');
+  if (tela === 'dono') painelDono(pag.querySelector('#gx-dono'), DONO);
   document.querySelectorAll('.divisorias a').forEach((a) => (a.dataset.aba === tela ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
-  document.title = `${tela[0].toUpperCase()}${tela.slice(1)} · Veltria Gestão`;
+  document.title = `${tela === 'dono' ? 'Painel do dono' : tela[0].toUpperCase() + tela.slice(1)} · Veltria Gestão Essencial`;
 }
 function redesenhar(foco) { const sel = foco && document.activeElement?.matches(foco) ? foco : null, pos = sel && document.activeElement.selectionStart; mostrar(); if (sel) { const el = pag.querySelector(sel); el?.focus(); if (el && pos != null) el.setSelectionRange(pos, pos); } }
 addEventListener('hashchange', () => { if (location.hash !== '#comanda') { estado.busca = ''; mostrar(); pag.focus({ preventScroll: true }); scrollTo({ top: 0 }); } });
@@ -144,8 +159,16 @@ function janela(html, aoSalvar) {
 pag.addEventListener('click', (e) => {
   const t = e.target.closest('button, a'); if (!t) return;
   const d = t.dataset;
-  if (d.add) { const p = prod(d.add); if (p.tem <= 0) return avisar(`${p.nome} está sem estoque`); const x = db.comanda.find((i) => i.id === d.add); x ? x.qtd++ : db.comanda.push({ id: d.add, qtd: 1 }); gravar(); redesenhar(); }
-  else if (d.menos) { const x = db.comanda.find((i) => i.id === d.menos); if (--x.qtd <= 0) db.comanda = db.comanda.filter((i) => i !== x); gravar(); redesenhar(); }
+  if (d.add) { const p = prod(d.add); if (p.kg) pedirPeso(p); else porNaComanda(p, 1); }
+  else if (d.menos) { const x = db.comanda.find((i) => i.id === d.menos); x.qtd = prod(x.id).kg ? 0 : x.qtd - 1; if (x.qtd <= 0) db.comanda = db.comanda.filter((i) => i !== x); gravar(); redesenhar(); }
+  else if ('camera' in d) camera();
+  else if ('desconto' in d) darDesconto();
+  else if ('cancelarVenda' in d) { if (confirm('Cancelar esta venda? Os itens saem da comanda.')) { db.comanda = []; db.desconto = 0; db.recebido = ''; db.cpf = ''; gravar(); redesenhar(); avisar('Venda cancelada'); } }
+  else if ('novoProd' in d) editarProduto(null);
+  else if (d.editar) editarProduto(prod(d.editar));
+  else if ('sangria' in d) movimentoCaixa('sangria');
+  else if ('suprimento' in d) movimentoCaixa('suprimento');
+  else if ('fecharCaixa' in d) fecharCaixa();
   else if (d.cat) { estado.cat = d.cat; estado.busca = ''; redesenhar(); }
   else if (d.forma) { db.forma = d.forma; gravar(); redesenhar(); }
   else if ('fechar' in d) fecharVenda();
@@ -157,26 +180,168 @@ pag.addEventListener('click', (e) => {
   else if (d.pagar) { const b = db.pagar.find((x) => x.id === d.pagar); db.pagar = db.pagar.filter((x) => x !== b); db.diario.push({ tipo: 'pagamento', hora: hora(), texto: `Pagou ${b.nome}`, valor: b.valor, novo: true }); gravar(); avisar(`Pago: ${b.nome}`); redesenhar(); }
   else if (d.recebi) { const c = db.clientes.find((x) => x.id === d.recebi); db.diario.push({ tipo: 'recebido', hora: hora(), texto: `Recebeu o fiado de ${c.nome}`, valor: c.deve, novo: true }); avisar(`Recebido: ${R(c.deve)} de ${c.nome}`); c.deve = 0; c.desde = 0; gravar(); redesenhar(); }
 });
-pag.addEventListener('input', (e) => { if (e.target.matches('[data-busca]')) { estado.busca = e.target.value; redesenhar('[data-busca]'); } });
+pag.addEventListener('input', (e) => {
+  if (e.target.matches('[data-busca]')) { estado.busca = e.target.value; redesenhar('[data-busca]'); }
+  if (e.target.matches('[data-recebido]')) { db.recebido = e.target.value; gravar(); redesenhar('[data-recebido]'); }
+  if (e.target.matches('[data-cpf]')) { db.cpf = e.target.value; gravar(); }
+});
 pag.addEventListener('change', (e) => { if (e.target.matches('[data-fiado]')) { db.fiadoDe = e.target.value; gravar(); redesenhar(); } });
 // leitor de código de barras: Enter na busca põe o produto na comanda
 pag.addEventListener('keydown', (e) => {
   if (!e.target.matches('[data-busca]') || e.key !== 'Enter') return;
-  const b = norm(e.target.value), p = db.produtos.find((x) => x.ean === b) || db.produtos.find((x) => norm(x.nome).includes(b));
-  if (!p) return avisar('Produto não encontrado');
-  estado.busca = ''; pag.querySelector(`[data-add="${p.id}"]`)?.click() ?? (db.comanda.push({ id: p.id, qtd: 1 }), gravar(), redesenhar()); pag.querySelector('[data-busca]')?.focus();
+  e.preventDefault(); const v = e.target.value.trim(); if (!v) return;
+  estado.busca = ''; lerCodigo(v, true);
 });
 
 function fecharVenda() {
-  const total = db.comanda.reduce((t, x) => t + x.qtd * prod(x.id).preco, 0), lucro = db.comanda.reduce((t, x) => t + x.qtd * (prod(x.id).preco - prod(x.id).custo), 0);
-  db.comanda.forEach((x) => { prod(x.id).tem -= x.qtd; prod(x.id).vendidos30 += x.qtd; });
+  if (!db.comanda.length) return;
+  if (db.forma === 'Fiado' && !db.fiadoDe) return avisar('Escolha o cliente do fiado');
+  const sub = subtotal(), desc = Math.min(db.desconto || 0, sub), total = sub - desc, lucro = db.comanda.reduce((t, x) => t + x.qtd * (prod(x.id).preco - prod(x.id).custo), 0) - desc;
+  if (db.forma === 'Dinheiro' && db.recebido && num(db.recebido) < total) return avisar('O valor recebido é menor que o total');
+  const troco = db.forma === 'Dinheiro' && num(db.recebido) > total ? num(db.recebido) - total : 0;
+  const cupom = { n: db.proxNfce++, hora: hora(), itens: db.comanda.map((x) => ({ nome: prod(x.id).nome, q: qtdTxt(prod(x.id), x.qtd), v: x.qtd * prod(x.id).preco })), sub, desc, total, forma: db.forma, troco, cpf: db.cpf };
+  db.comanda.forEach((x) => { const p = prod(x.id); p.tem = Math.max(0, Math.round((p.tem - x.qtd) * 1000) / 1000); p.vendidos30 += x.qtd; });
   const cli = db.clientes.find((c) => c.id === db.fiadoDe);
   if (db.forma === 'Fiado' && cli) { if (!cli.deve) cli.desde = 0; cli.deve += total; }
-  const itens = db.comanda.map((x) => ({ nome: prod(x.id).nome, qtd: x.qtd }));
+  const itens = db.comanda.map((x) => ({ nome: prod(x.id).nome, qtd: x.qtd, kg: !!prod(x.id).kg }));
   db.diario.push({ tipo: 'venda', hora: hora(), texto: textoItens(itens) + (cli && db.forma === 'Fiado' ? ` (fiado de ${cli.nome})` : ''), itens, forma: db.forma, valor: total, lucro, novo: true });
-  db.comanda = []; db.fiadoDe = ''; db.forma = 'Pix'; gravar();
-  avisar(`Venda fechada: ${R(total)}`); location.hash = '#hoje';
+  db.comanda = []; db.fiadoDe = ''; db.forma = 'Pix'; db.desconto = 0; db.recebido = ''; db.cpf = ''; gravar();
+  redesenhar(); mostrarCupom(cupom);
 }
+const num = (v) => Number(String(v ?? '').replace(/\./g, '').replace(',', '.')) || 0;
+const subtotal = () => db.comanda.reduce((t, x) => t + x.qtd * prod(x.id).preco, 0);
+let audio;
+function bipe(ok = true) { try { audio ||= new AudioContext(); const o = audio.createOscillator(), g = audio.createGain(); o.frequency.value = ok ? 1650 : 320; g.gain.value = .06; o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime + (ok ? .08 : .25)); } catch { /* sem som */ } }
+function porNaComanda(p, qtd) {
+  const x = db.comanda.find((i) => i.id === p.id), ja = x?.qtd || 0;
+  if (p.tem <= 0 || ja + qtd > p.tem + 1e-9) { bipe(false); return avisar(p.tem <= 0 ? `${p.nome} está sem estoque` : `Só tem ${qtdTxt(p, p.tem)} de ${p.nome}`); }
+  x ? (x.qtd = Math.round((x.qtd + qtd) * 1000) / 1000) : db.comanda.push({ id: p.id, qtd });
+  bipe(); gravar(); redesenhar(); pag.querySelector('[data-busca]')?.focus();
+}
+// código lido: "3*789..." (quantidade), etiqueta da balança (2 + PLU de 4 + 0 + valor em centavos + dígito) ou código/nome do produto
+function lerCodigo(texto, digitado = false) {
+  const m = String(texto).trim().match(/^(\d+(?:[.,]\d+)?)\s*[*x]\s*(.+)$/i), mult = m ? num(m[1]) : 1, cod = (m ? m[2] : String(texto)).trim();
+  if (/^2\d{12}$/.test(cod)) {
+    const p = db.produtos.find((x) => x.kg && x.plu === cod.slice(1, 5));
+    if (!p) { bipe(false); return avisar('Etiqueta da balança sem produto cadastrado'); }
+    const valor = Number(cod.slice(6, 12)) / 100; location.hash = '#vender';
+    return porNaComanda(p, Math.round(valor / p.preco * 1000) / 1000);
+  }
+  const p = db.produtos.find((x) => x.ean && x.ean === cod) || (digitado && db.produtos.find((x) => norm(x.nome).includes(norm(cod))));
+  if (!p) { bipe(false); return avisar(/^\d{6,}$/.test(cod) ? `Código ${cod} não cadastrado. Cadastre em Estoque › Novo produto.` : 'Produto não encontrado'); }
+  if (location.hash !== '#vender') location.hash = '#vender';
+  if (p.kg) return pedirPeso(p);
+  porNaComanda(p, mult);
+}
+function pedirPeso(p) {
+  janela(`<h2>${esc(p.nome)}</h2><p class="sub">${R(p.preco)} o quilo. Digite o peso da balança ou bipe a etiqueta dela.</p>
+    <label class="campo">Peso em kg<input name="kg" inputmode="decimal" required placeholder="Ex.: 0,850"></label><p class="troco" data-peso-valor></p>`, (f) => {
+    const kg = num(f.get('kg')); if (!(kg > 0)) return false;
+    porNaComanda(p, Math.round(kg * 1000) / 1000);
+  });
+  const i = document.querySelector('.janela [name=kg]'), out = document.querySelector('[data-peso-valor]');
+  i.addEventListener('input', () => { const kg = num(i.value); out.textContent = kg > 0 ? `Valor: ${R(kg * p.preco)}` : ''; });
+}
+function darDesconto() {
+  const sub = subtotal();
+  janela(`<h2>Desconto</h2><p class="sub">Subtotal de ${R(sub)}. Use reais ou porcentagem.</p><label class="campo">Em reais<input name="r" inputmode="decimal" value="${db.desconto ? String(db.desconto).replace('.', ',') : ''}"></label><label class="campo">Ou em %<input name="p" inputmode="decimal" placeholder="Ex.: 5"></label>`, (f) => {
+    const p = num(f.get('p')), r = num(f.get('r')); db.desconto = Math.min(sub, p > 0 ? Math.round(sub * p) / 100 : r); gravar(); redesenhar();
+  });
+}
+function mostrarCupom(c) {
+  const f = document.createElement('div'); f.className = 'fundo';
+  f.innerHTML = `<div class="janela cupom" role="dialog" aria-modal="true" aria-label="Cupom da venda"><div class="cupom-papel" id="cupom-papel"><b>MERCADO BOM PREÇO</b><small>CNPJ 12.345.678/0001-90 · Rua das Flores, 120</small><hr><small>NFC-e nº ${c.n} · série 1 · ${new Date().toLocaleDateString('pt-BR')} ${c.hora}</small><hr>
+    ${c.itens.map((i) => `<div class="cl"><span>${esc(i.nome)}<small>${esc(String(i.q))}</small></span><span>${R(i.v)}</span></div>`).join('')}<hr>
+    ${c.desc ? `<div class="cl"><span>Subtotal</span><span>${R(c.sub)}</span></div><div class="cl"><span>Desconto</span><span>− ${R(c.desc)}</span></div>` : ''}<div class="cl tot"><span>TOTAL</span><span>${R(c.total)}</span></div><div class="cl"><span>${esc(c.forma)}</span><span>${R(c.total + c.troco)}</span></div>${c.troco ? `<div class="cl"><span>Troco</span><span>${R(c.troco)}</span></div>` : ''}<hr>
+    <small>${c.cpf ? `CPF do consumidor: ${esc(c.cpf)}` : 'Consumidor não identificado'}</small><small>Autorizada (demonstração). Na versão contratada a NFC-e sai pela SEFAZ do seu estado, com QR Code de consulta.</small></div>
+    <div class="acoes"><button type="button" class="btn" data-imprimir>Imprimir cupom</button><button type="button" class="btn pri" data-x>Próxima venda</button></div></div>`;
+  document.body.append(f); f.querySelector('[data-x]').focus();
+  const fechar = () => { f.remove(); pag.querySelector('[data-busca]')?.focus(); };
+  f.addEventListener('click', (e) => { if (e.target === f || e.target.closest('[data-x]')) fechar(); if (e.target.closest('[data-imprimir]')) print(); });
+  f.addEventListener('keydown', (e) => { if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); fechar(); } });
+  avisar(`Venda fechada: ${R(c.total)}${c.troco ? ` · troco ${R(c.troco)}` : ''}`);
+}
+function editarProduto(p) {
+  const novo = !p; p ||= { nome: '', cat: 'Mercearia', custo: '', preco: '', tem: 0, minimo: 10, ean: '', kg: false, plu: '' };
+  janela(`<h2>${novo ? 'Novo produto' : 'Editar produto'}</h2>
+    <label class="campo">Código de barras<input name="ean" inputmode="numeric" value="${esc(p.ean || '')}" placeholder="Bipe o produto aqui"></label>
+    <label class="campo">Nome<input name="nome" required value="${esc(p.nome)}"></label>
+    <label class="campo">Categoria<select name="cat">${Object.keys(CORES).map((c) => `<option ${c === p.cat ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
+    <div class="dupla"><label class="campo">Custo<input name="custo" inputmode="decimal" value="${p.custo === '' ? '' : String(p.custo).replace('.', ',')}" required></label><label class="campo">Preço de venda<input name="preco" inputmode="decimal" value="${p.preco === '' ? '' : String(p.preco).replace('.', ',')}" required></label></div>
+    <div class="dupla"><label class="campo">Estoque${novo ? ' inicial' : ''}<input name="tem" inputmode="decimal" value="${String(p.tem).replace('.', ',')}"></label><label class="campo">Avisar quando chegar a<input name="minimo" inputmode="decimal" value="${String(p.minimo).replace('.', ',')}"></label></div>
+    <label class="campo check"><input type="checkbox" name="kg" ${p.kg ? 'checked' : ''}> Vendido por peso (preço por kg)</label>
+    <label class="campo">Código na balança (PLU)<input name="plu" inputmode="numeric" maxlength="4" value="${esc(p.plu || '')}" placeholder="4 números, só para produto por peso"></label><p class="sub" data-margem></p>`, (f) => {
+    const dados = { nome: String(f.get('nome')).trim(), cat: f.get('cat'), custo: num(f.get('custo')), preco: num(f.get('preco')), tem: num(f.get('tem')), minimo: num(f.get('minimo')), ean: String(f.get('ean')).replace(/\D/g, ''), kg: !!f.get('kg'), plu: String(f.get('plu')).replace(/\D/g, '').padStart(4, '0') };
+    if (!dados.nome || !(dados.preco > 0)) { avisar('Coloque o nome e o preço'); return false; }
+    if (dados.ean && db.produtos.some((x) => x !== p && x.ean === dados.ean)) { avisar('Esse código já está em outro produto'); return false; }
+    if (!dados.kg) dados.plu = '';
+    if (novo) db.produtos.unshift({ id: `p${Date.now()}`, vendidos30: 0, ...dados }); else Object.assign(p, dados);
+    gravar(); avisar(novo ? 'Produto cadastrado' : 'Produto salvo'); redesenhar();
+  });
+  const fm = document.querySelector('.janela'), mg = fm.querySelector('[data-margem]');
+  const calc = () => { const c = num(fm.querySelector('[name=custo]').value), v = num(fm.querySelector('[name=preco]').value); mg.textContent = c > 0 && v > 0 ? `Lucro de ${R(v - c)} por ${fm.querySelector('[name=kg]').checked ? 'kg' : 'unidade'} (margem de ${Math.round((v - c) / v * 100)}%).` : ''; };
+  fm.addEventListener('input', calc); calc();
+  // o leitor digita no campo e aperta Enter: segura o Enter para não salvar antes de preencher o resto
+  fm.querySelector('[name=ean]').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); fm.querySelector('[name=nome]').focus(); } });
+}
+function movimentoCaixa(tipo) {
+  janela(`<h2>${tipo === 'sangria' ? 'Sangria' : 'Suprimento'}</h2><p class="sub">${tipo === 'sangria' ? 'Tirar dinheiro da gaveta (ex.: levar ao cofre ou ao banco).' : 'Pôr dinheiro na gaveta (ex.: troco que chegou).'} Na gaveta agora: ${R(gaveta())}.</p>
+    <label class="campo">Valor<input name="v" inputmode="decimal" required></label><label class="campo">Motivo<input name="t" placeholder="${tipo === 'sangria' ? 'Ex.: depósito no banco' : 'Ex.: troco do cofre'}"></label>`, (f) => {
+    const v = num(f.get('v')); if (!(v > 0)) return false;
+    if (tipo === 'sangria' && v > gaveta()) { avisar('Não tem tudo isso na gaveta'); return false; }
+    db.diario.push({ tipo, hora: hora(), texto: `${tipo === 'sangria' ? 'Sangria' : 'Suprimento'}${f.get('t') ? `: ${f.get('t')}` : ''}`, valor: v, novo: true }); gravar(); avisar(`${tipo === 'sangria' ? 'Sangria' : 'Suprimento'} de ${R(v)} registrado`); redesenhar();
+  });
+}
+function fecharCaixa() {
+  const esperado = gaveta();
+  janela(`<h2>Fechar o caixa</h2><p class="sub">Conte o dinheiro da gaveta e digite abaixo. O sistema compara com o que deveria ter.</p>
+    <ul class="lista">${porForma().map(([f, v]) => `<li><span>Vendas no ${f.toLowerCase()}</span><span class="v">${R(v)}</span></li>`).join('')}<li><span><b>Deveria ter na gaveta</b><small>abertura ${R(db.caixaInicial)} + dinheiro + suprimentos − sangrias e despesas</small></span><span class="v">${R(esperado)}</span></li></ul>
+    <label class="campo">Quanto tem na gaveta (contado)<input name="c" inputmode="decimal" required></label><p class="troco" data-dif></p>`, (f) => {
+    const c = num(f.get('c')), dif = c - esperado;
+    db.diario.push({ tipo: 'fechamento', hora: hora(), texto: `Caixa fechado: contado ${R(c)}, ${Math.abs(dif) < 0.01 ? 'sem diferença' : dif > 0 ? `sobrou ${R(dif)}` : `faltou ${R(-dif)}`}`, valor: 0, novo: true });
+    db.caixaInicial = c; gravar(); avisar(Math.abs(dif) < 0.01 ? 'Caixa fechado, sem diferença' : `Caixa fechado com diferença de ${R(dif)}`); redesenhar();
+  });
+  const i = document.querySelector('.janela [name=c]'), o = document.querySelector('[data-dif]');
+  i.addEventListener('input', () => { const d = num(i.value) - esperado; o.textContent = i.value ? (Math.abs(d) < 0.01 ? 'Bateu certinho.' : d > 0 ? `Sobrando ${R(d)}` : `Faltando ${R(-d)}`) : ''; });
+}
+// câmera do celular: lê o código de barras com o leitor do navegador (Chrome no Android e no computador)
+async function camera() {
+  if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) return avisar('Este navegador não lê código pela câmera. Use o Chrome no Android ou um leitor USB.');
+  const f = document.createElement('div'); f.className = 'fundo';
+  f.innerHTML = '<div class="janela camera-caixa"><h2>Aponte para o código de barras</h2><video playsinline muted></video><div class="acoes"><button type="button" class="btn" data-x>Fechar</button></div></div>';
+  document.body.append(f);
+  let stream, ligado = true;
+  const fechar = () => { ligado = false; stream?.getTracks().forEach((t) => t.stop()); f.remove(); };
+  f.addEventListener('click', (e) => { if (e.target === f || e.target.closest('[data-x]')) fechar(); });
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const v = f.querySelector('video'); v.srcObject = stream; await v.play();
+    const det = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'code_128'] });
+    const ler = async () => { if (!ligado) return; try { const r = await det.detect(v); if (r[0]) { fechar(); lerCodigo(r[0].rawValue); return; } } catch { /* tenta de novo */ } requestAnimationFrame(ler); };
+    ler();
+  } catch { fechar(); avisar('Não foi possível abrir a câmera. Libere o acesso nas permissões do navegador.'); }
+}
+// leitor USB: digita muito rápido e termina com Enter. Funciona em qualquer tela, sem precisar clicar na busca.
+let buf = '', ultimo = 0;
+addEventListener('keydown', (e) => {
+  if (document.querySelector('.fundo')) return;
+  if (e.key === 'F2') { e.preventDefault(); if (location.hash !== '#vender') location.hash = '#vender'; setTimeout(() => pag.querySelector('[data-busca]')?.focus(), 30); return; }
+  if (e.key === 'F9' && location.hash === '#vender') { e.preventDefault(); fecharVenda(); return; }
+  if (e.target.closest?.('input, select, textarea')) return;
+  const agora = performance.now();
+  if (e.key === 'Enter') { if (buf.length >= 6 && /^[\d*]+$/.test(buf)) { e.preventDefault(); lerCodigo(buf); } buf = ''; return; }
+  if (e.key.length === 1) { buf = agora - ultimo > 60 ? e.key : buf + e.key; ultimo = agora; }
+});
+const DONO = { sistema: 'Veltria Gestão Essencial', preco: 59, chave: CHAVE, empresa: 'Mercado Bom Preço', dono: 'Seu Antônio',
+  areas: [['vender', 'Vender (caixa)'], ['estoque', 'Estoque e produtos'], ['dinheiro', 'Dinheiro e contas'], ['fiado', 'Fiado']],
+  cargos: { 'Operador de caixa': { vender: 'editar', estoque: 'ver', dinheiro: 'nenhum', fiado: 'ver' }, Repositor: { vender: 'nenhum', estoque: 'editar', dinheiro: 'nenhum', fiado: 'nenhum' }, Gerente: { vender: 'editar', estoque: 'editar', dinheiro: 'editar', fiado: 'editar' } },
+  equipe: [['Dona Lurdes', 'Gerente'], ['Marquinhos', 'Operador de caixa'], ['Júlia', 'Operador de caixa'], ['Seu Zé', 'Repositor']] };
+function ia() {
+  abrirIA({ sistema: 'Veltria Gestão Essencial', telas: ['Hoje', 'Vender', 'Estoque', 'Dinheiro', 'Fiado', 'Painel do dono'],
+    numeros: () => [['vendido hoje', R(vendidoHoje())], ['lucro de hoje', R(lucroHoje())], ['na gaveta', R(gaveta())], ['fiado a receber', R(fiadoTotal())]],
+    alertas: () => [...acabando().slice(0, 3).map((p) => `${p.nome} está acabando (tem ${qtdTxt(p, p.tem)})`), ...db.clientes.filter((c) => c.deve && c.desde > 15).map((c) => `cobrar ${R(c.deve)} de ${c.nome}`), ...db.pagar.filter((b) => b.vence <= 2).map((b) => `pagar ${b.nome} (${R(b.valor)})`)] });
+}
+document.getElementById('abrir-ia')?.addEventListener('click', ia);
 function chegou() {
   janela(`<h2>Chegou mercadoria</h2><p class="sub">O estoque sobe e o valor entra como saída do caixa.</p>
     <label class="campo">Produto<select name="p" required>${[...db.produtos].sort((a, b) => a.tem / a.minimo - b.tem / b.minimo).map((p) => `<option value="${p.id}">${esc(p.nome)} (tem ${p.tem})</option>`).join('')}</select></label>
@@ -204,6 +369,11 @@ const ACOES = [
   ['quanto vendi hoje resumo lucro dia', 'Quanto vendi hoje', () => (location.hash = '#hoje')],
   ['dinheiro caixa pagar conta boleto despesa', 'Ver o dinheiro e as contas', () => (location.hash = '#dinheiro')],
   ['despesa gasto saida frete', 'Lançar despesa', () => { location.hash = '#dinheiro'; setTimeout(despesa, 60); }],
+  ['novo produto cadastrar codigo barras', 'Cadastrar produto', () => { location.hash = '#estoque'; setTimeout(() => editarProduto(null), 60); }],
+  ['fechar caixa fechamento conferir gaveta', 'Fechar o caixa', () => { location.hash = '#dinheiro'; setTimeout(fecharCaixa, 60); }],
+  ['sangria retirar tirar dinheiro cofre', 'Fazer sangria', () => { location.hash = '#dinheiro'; setTimeout(() => movimentoCaixa('sangria'), 60); }],
+  ['ia assistente perguntar ajuda', 'Perguntar ao Assistente IA', () => ia()],
+  ['dono equipe funcionario cargo permissao plano convidar', 'Painel do dono', () => (location.hash = '#dono')],
 ];
 let opcoes = [], sel = 0;
 function sugerir() {
@@ -229,4 +399,4 @@ cmd.addEventListener('blur', () => setTimeout(() => (sug.hidden = true), 120));
 addEventListener('keydown', (e) => { if (e.key === '/' && !e.target.closest('input, select, textarea')) { e.preventDefault(); cmd.focus(); } });
 
 mostrar();
-document.getElementById('recomecar')?.addEventListener('click', () => { localStorage.removeItem(CHAVE); location.replace(location.pathname); });
+document.getElementById('recomecar')?.addEventListener('click', () => { localStorage.removeItem(CHAVE); limparDono(CHAVE); location.replace(location.pathname); });
