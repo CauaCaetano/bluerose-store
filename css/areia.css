@@ -1,0 +1,82 @@
+/* =============================================================
+   Blue Rose · marinho, creme, areia e taupe (escolha do dono em 22/10/2026)
+   Marinho #101D32 · Creme #F4EBDD · Areia #D8C8AE · Taupe #B5A58D
+   Carregado depois do creme.css. Para voltar às cores anteriores, basta tirar o <link> deste arquivo das páginas.
+   ============================================================= */
+:root, html[data-theme="light"] {
+  --bg: #f4ebdd;
+  --bg-2: #ede2d0;
+  --surface: #f9f3e9;
+  --surface-2: #efe5d4;
+  --line: rgba(16, 29, 50, 0.1);
+  --line-2: rgba(140, 122, 94, 0.32);
+  --ink: #101d32;
+  --ink-2: #3f4757;
+  --ink-3: #6b6355;
+  --accent: #101d32;
+  --accent-solid: #101d32;
+  --accent-soft: rgba(16, 29, 50, 0.06);
+  --prata: #85755c;
+  --prata-2: #b5a58d;
+  --marinho: #101d32;
+  --marinho-2: #182740;
+  --shadow: 0 1px 2px rgba(16, 29, 50, 0.05), 0 24px 50px -30px rgba(16, 29, 50, 0.3);
+  --vidro: rgba(249, 243, 233, 0.74);
+  --vidro-borda: rgba(140, 122, 94, 0.28);
+  --vidro-sombra: 0 2px 6px rgba(16, 29, 50, 0.06), 0 24px 50px -28px rgba(16, 29, 50, 0.3);
+}
+body { background: radial-gradient(1200px 700px at 50% 0%, #f9f3e9, transparent 60%), var(--bg); background-attachment: fixed; }
+::selection { background: rgba(216, 200, 174, 0.7); }
+
+/* destaques em itálico: do marinho ao taupe escuro */
+.serif, h1 em, h2 em, .sec-title em,
+.serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span { background: linear-gradient(180deg, #23324d 0%, #101d32 45%, #6e5f47 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* botões: marinho sólido, contorno em taupe */
+.btn-primary { background: #101d32; border: 1px solid #101d32; color: #f4ebdd; box-shadow: 0 16px 34px -20px rgba(16, 29, 50, 0.8), inset 0 1px 0 rgba(244, 235, 221, 0.12); }
+.btn-primary:hover { background: #1c2b45; }
+.btn-ghost { border: 1px solid #b5a58d; color: #101d32; }
+.btn-ghost:hover { border-color: #101d32; color: #101d32; background: rgba(216, 200, 174, 0.35); }
+
+/* cartões: creme claro com borda areia */
+.preco2, .prod-c, .sis, .caminho, .sis-duas > div, .np-grade, .np-faq details, .ini-mais, .ini-oferta, .orc, .conta-caixa, .ini-calc-card {
+  background: linear-gradient(180deg, #fbf7f0, #f6eee1); border-color: #d8c8ae; box-shadow: 0 1px 2px rgba(16, 29, 50, 0.04), 0 18px 40px -30px rgba(16, 29, 50, 0.28);
+}
+.preco2::after, .prod-c::after, .caminho::after { background: linear-gradient(90deg, transparent, #b5a58d, transparent); }
+.preco2:hover, .prod-c:hover, .caminho:hover { border-color: #b5a58d; box-shadow: 0 30px 60px -40px rgba(16, 29, 50, 0.45); }
+.preco2.dest { border-color: #b5a58d; background: linear-gradient(180deg, rgba(216, 200, 174, 0.45), #fbf7f0 55%); }
+.eyebrow::before { background: linear-gradient(90deg, transparent, #b5a58d); }
+.cf-atalhos a { color: #101d32; } .cf-atalhos a:hover { color: #101d32; border-color: #b5a58d; background: rgba(216, 200, 174, 0.35); }
+.cf-tela { box-shadow: 0 50px 100px -50px rgba(16, 29, 50, 0.5); }
+select option, .conta-pag select option, .sup select option, .sup-fb-form select option { background: #f9f3e9; }
+.conta-busca input, .sup-form input, .sup-form select, .sup-form textarea, .sup-fb-form select, .sup-fb-form textarea, .sup-resp textarea { background: #fdfaf4; }
+.sup-cab:hover, .sup-cab:focus-visible, .sup-msg { background: rgba(216, 200, 174, 0.25); }
+
+/* faixas marinho (menu, topo das páginas, rodapé): creme e areia no lugar do prata azulado */
+.nav, .lx-hero, .p-hero, .np-trilha, .np-hero, main > .hero, .cf-hero, .rodape-site {
+  --surface: #172640;
+  --surface-2: #1d2d4a;
+  --line: rgba(216, 200, 174, 0.14);
+  --line-2: rgba(216, 200, 174, 0.24);
+  --ink: #f4ebdd;
+  --ink-2: #d8c8ae;
+  --ink-3: #ab9d86;
+  --accent: #d8c8ae;
+  --prata: #d8c8ae;
+  --prata-2: #b5a58d;
+}
+.lx-hero { background: radial-gradient(900px 520px at 72% 30%, rgba(216, 200, 174, 0.09), transparent 65%), var(--marinho); }
+.lx-hero::before { background: radial-gradient(700px 520px at 74% 38%, rgba(181, 165, 141, 0.1), transparent 70%); }
+.nav { background: rgba(16, 29, 50, 0.94); border-bottom-color: rgba(216, 200, 174, 0.14); }
+.nav .serif, .lx-hero h1 em, .lx-hero .serif, .p-hero h1 em, .np-hero h1 em, .hero h1 em, .cf-hero h1 em,
+.lx-hero h1 em .lx-p > span, .p-hero h1 em .lx-p > span, .np-hero h1 em .lx-p > span, .cf-hero h1 em .lx-p > span,
+:is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero, .rodape-site) :is(.serif, h1 em, h2 em, .sec-title em, .serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span) {
+  background: linear-gradient(180deg, #fbf6ec 0%, #e6d8c1 50%, #b5a58d 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.lx-hero .btn-ghost, .p-hero .btn-ghost, .np-hero .btn-ghost, .hero .btn-ghost, .cf-hero .btn-ghost, .rodape-site .btn-ghost { border-color: rgba(216, 200, 174, 0.5); color: #f4ebdd; }
+.lx-hero .btn-ghost:hover, .p-hero .btn-ghost:hover, .np-hero .btn-ghost:hover, .hero .btn-ghost:hover, .cf-hero .btn-ghost:hover { background: rgba(216, 200, 174, 0.1); border-color: #d8c8ae; }
+.lx-hero .btn-primary, .p-hero .btn-primary, .np-hero .btn-primary, .hero .btn-primary, .cf-hero .btn-primary, .nav .btn-primary { background: linear-gradient(180deg, #f4ebdd, #d8c8ae); border-color: rgba(244, 235, 221, 0.6); }
+.lx-hero .btn-primary:hover, .p-hero .btn-primary:hover, .np-hero .btn-primary:hover, .hero .btn-primary:hover, .cf-hero .btn-primary:hover, .nav .btn-primary:hover { background: #f4ebdd; }
+.rodape-site a:hover { color: #f4ebdd; }
+:is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .cf-atalhos a { color: #f4ebdd; border-color: rgba(216, 200, 174, 0.4); }
+:is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .cf-atalhos a:hover { border-color: #d8c8ae; background: rgba(216, 200, 174, 0.08); }
