@@ -27,7 +27,7 @@
   };
   function normal(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
   // saíram da vitrine em 22/10/2026: quem já usa continua vendo, mas não aparecem como sugestão
-  var FORA_DE_VENDA = ['academia', 'restaurante', 'imobiliaria', 'cerimonial', 'pragas'];
+  var FORA_DE_VENDA = ['academia', 'restaurante', 'imobiliaria', 'cerimonial', 'pragas', 'clinica'];
   var PAGINA = { obras: 'veltria-obras.html', cerimonial: 'eternize.html', pragas: 'guard.html', ofixl: 'ofixl.html' };
   var hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   function data(s) { if (!s) return '—'; var p = String(s).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }

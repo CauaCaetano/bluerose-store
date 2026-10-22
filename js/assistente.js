@@ -19,7 +19,7 @@
 
   var CFG = {
     sprite: 'img/assistente.png?v=1',
-    dados: 'js/assistente-dados.json?v=9',
+    dados: 'js/assistente-dados.json?v=10',
     ia: 'https://yihnfzwtkqdfnwziutqa.supabase.co/functions/v1/site-assistente',   // perguntas livres (Gemini, com limite)
     W: 111, H: 168, MARGEM: 3,           // tamanho de cada pose na folha; margem para o pulinho
   };
