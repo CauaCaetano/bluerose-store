@@ -148,3 +148,8 @@ h2 { font: 700 1.35rem/1.1 var(--t1); margin: 22px 0 10px; letter-spacing: .02em
 .vazio { padding: 18px; text-align: center; color: var(--texto-3); }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 @media print { .faixa, .topo, .barra, .avisos, .nao-imprime { display: none !important; } body { background: #fff; padding: 0; } .fundo { position: static; background: none; } .janela { max-height: none; box-shadow: none; } }
+
+/* 22/10/2026: app de celular (dentro do celular da demonstração some a faixa de cima) */
+.no-celular .faixa { display: none; }
+.no-celular body { padding-bottom: 86px; }
+.bloqueio { z-index: 55; background: rgba(58, 38, 32, .82); }

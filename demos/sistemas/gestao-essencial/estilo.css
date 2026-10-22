@@ -286,3 +286,19 @@ h2 { margin: 0 0 6px; font: 600 1.25rem/1.25 var(--titulo); letter-spacing: -.01
 .cfg-ch small { color: var(--tinta-3); }
 @media (max-width: 860px) { .divisorias a { font-size: .72rem; } }
 .tabela .nome .cod-barras { display: flex; }
+
+/* 22/10/2026: app de celular, assistente, painel do dono e assinatura próprios */
+.no-celular .faixa-demo { display: none; }
+.resposta-ia { white-space: pre-wrap; background: var(--papel); border: 1.5px solid var(--pauta); border-left: 5px solid var(--veltria); border-radius: 4px 12px 12px 4px; padding: 14px 16px; margin-top: 14px; line-height: 1.5; }
+.tabela-dono { display: grid; gap: 0; border: 1.5px solid var(--pauta); border-radius: 12px; overflow: hidden; background: var(--papel); }
+.linha-dono { display: grid; grid-template-columns: minmax(120px, 1.4fr) repeat(4, minmax(44px, .6fr)) auto; gap: 6px; align-items: center; padding: 10px 12px; border-bottom: 1.5px solid var(--pauta); }
+.linha-dono:last-child { border-bottom: 0; }
+.linha-dono.topo { background: var(--papel-2); font-weight: 700; font-size: .82rem; color: var(--tinta-2); }
+.linha-dono span small { display: block; color: var(--tinta-3); font-weight: 400; }
+.linha-dono label, .linha-dono > span:not(:first-child) { text-align: center; }
+.linha-dono input { width: 22px; height: 22px; accent-color: var(--veltria); }
+.aviso-ass { background: #f2d3c4; border-radius: 10px; padding: 9px 12px; margin: 0 0 14px; font-weight: 600; }
+.trava { z-index: 70; background: rgba(24, 40, 62, .82); }
+.pix-falso { width: 170px; height: 170px; margin: 0 auto 12px; background: repeating-conic-gradient(var(--tinta) 0 25%, #fff 0 50%) 0 0 / 22px 22px; border: 10px solid #fff; outline: 2px solid var(--tinta); }
+.janela .acoes { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; flex-wrap: wrap; }
+@media (max-width: 520px) { .linha-dono { grid-template-columns: 1fr repeat(4, 34px); } .linha-dono > :last-child:is(button, span:empty) { grid-column: 1 / -1; justify-self: start; } }

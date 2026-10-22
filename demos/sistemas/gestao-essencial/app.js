@@ -2,7 +2,6 @@
 // Cinco divisórias (Hoje, Vender, Estoque, Dinheiro, Fiado) e uma caixa "O que você quer fazer?" que leva a qualquer lugar.
 // Dados de exemplo guardados só neste navegador (?novo no endereço recomeça).
 // Caixa de mercado: leitor de código de barras (USB ou câmera), pesáveis pela etiqueta da balança, desconto, troco, NFC-e e fechamento de caixa.
-import { abrirIA, painelDono, limparDono } from '../base/gestao-extras.js';
 
 const textoItens = (l) => l.map((x) => (x.kg ? `${Number(x.qtd).toLocaleString('pt-BR', { maximumFractionDigits: 3 })} kg de ${x.nome}` : `${x.qtd}× ${x.nome}`)).join(', ');
 const R = (v) => `R$ ${Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -50,6 +49,11 @@ function semente() {
 const EU_PADRAO = { nome: 'Marquinhos', letra: 'normal', som: true, abrir: 'hoje', imprimir: false, cpf: false, confirmarFiado: true };
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semente(); } catch { return semente(); } })();
 db.eu = { ...EU_PADRAO, ...(db.eu || {}) };
+db.equipe ||= [{ id: 'q1', nome: 'Dona Lurdes', cargo: 'Gerente', ve: { vender: true, estoque: true, dinheiro: true, fiado: true } }, { id: 'q2', nome: 'Marquinhos', cargo: 'Caixa', ve: { vender: true, estoque: false, dinheiro: false, fiado: true } }, { id: 'q3', nome: 'Júlia', cargo: 'Caixa', ve: { vender: true, estoque: false, dinheiro: false, fiado: true } }, { id: 'q4', nome: 'Seu Zé', cargo: 'Repositor', ve: { vender: false, estoque: true, dinheiro: false, fiado: false } }];
+db.plano ||= 'basico';
+const dataCurta = (d) => { if (d === 0) return 'hoje'; const x = new Date(); x.setDate(x.getDate() + d); return x.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', ''); };
+const assinaturaPadrao = () => ({ valor: 59, status: 'ativa', renova: true, proxima: 11, pagamentos: [{ dia: -19, ok: true }, { dia: -49, ok: true }] });
+db.assinatura ||= assinaturaPadrao();
 const gravar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { /* sem espaço: segue na memória */ } };
 
 // contas do dia
@@ -138,12 +142,39 @@ const TELAS = {
           ${ch('imprimir', 'Imprimir o cupom sozinho', 'Ao fechar a venda, já abre a impressão do cupom.')}
           ${ch('cpf', 'Perguntar o CPF na nota', 'Antes de fechar, pergunta se o cliente quer CPF na nota.')}
           ${ch('confirmarFiado', 'Confirmar antes de pôr no fiado', 'Evita lançar no fiado da pessoa errada.')}</section>
+        <section><h2>Assinatura e equipe</h2><p class="sub">Plano, cobranças e quem trabalha com você.</p><div class="botoes"><a class="btn" href="#assinatura">Minha assinatura</a><a class="btn" href="#dono">Painel do dono</a></div></section>
         <section><h2>Seus dados</h2><p class="sub">Baixe a lista de produtos com códigos, preços e estoque, para abrir no Excel.</p><button type="button" class="btn" data-exportar>Baixar planilha de produtos</button>
           <p class="sub" style="margin-top:14px">Teste do leitor: bipe qualquer produto agora para conferir se o leitor está funcionando.</p><p class="troco" data-teste-leitor>Esperando a leitura…</p></section>
       </div>`;
   },
+  ia() {
+    const sug = ['O que eu compro esta semana?', 'Quem eu cobro do fiado primeiro?', 'Como foi o dia hoje?', 'Qual produto está parado?', 'Escreva um aviso de promoção para o WhatsApp'];
+    return `<div class="cabeca"><h1 class="frase">Pergunte ao caderno<small>O assistente lê os números do mercado (nunca o telefone dos clientes). Na versão contratada são 20 perguntas grátis por dia; aqui as respostas são de exemplo.</small></h1></div>
+      <div class="chips" role="group" aria-label="Perguntas prontas">${sug.map((x) => `<button type="button" class="chip" data-sug="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+      <label class="campo">Sua pergunta<input data-pergunta placeholder="Ex.: o que está acabando?"></label><button type="button" class="btn pri grande" data-perguntar>Perguntar</button>
+      <div class="resposta-ia" data-resposta hidden aria-live="polite"></div>`;
+  },
+  assinatura() {
+    const a = db.assinatura, preco = db.plano === 'pro' ? 119 : 59;
+    const topo = a.status === 'vencida' ? `<span class="mt" style="background:#f2d3c4">venceu</span>. O pagamento de ${R(preco)} não foi aprovado.<small>Pague para o caixa voltar a funcionar. Nenhuma venda foi perdida.</small>`
+      : a.renova ? `<span class="mt">ativa</span>.<small>Plano ${db.plano === 'pro' ? 'Pro' : 'Básico'}, ${R(preco)} por mês. Próxima cobrança ${dataCurta(a.proxima)}, no cartão.</small>`
+      : `cancelada.<small>Nada mais é cobrado. Você usa o app até ${dataCurta(a.proxima)}.</small>`;
+    return `<div class="cabeca"><h1 class="frase">Sua assinatura está ${topo}</h1></div>
+      <div class="botoes" style="margin-bottom:18px">${a.status === 'vencida' ? '<button type="button" class="btn pri" data-pagar-ass>Pagar aqui no app</button><a class="btn" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Renovar no site</a>'
+        : a.renova ? '<a class="btn" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Trocar cartão no site</a><button type="button" class="btn" data-cancelar-ass>Cancelar assinatura</button>' : '<button type="button" class="btn pri" data-reativar>Reativar</button>'}</div>
+      <h2>Pagamentos</h2><ul class="lista">${[...a.pagamentos].sort((x, y) => y.dia - x.dia).map((p) => `<li><span>${dataCurta(p.dia)}<small>${p.ok ? 'pago no cartão' : 'recusado pelo banco'}</small></span><span class="v ${p.ok ? '' : 'er'}">${R(preco)}</span></li>`).join('')}</ul>
+      <p class="sub" style="margin-top:12px">A assinatura do app é a mesma da sua conta no site. Sem fidelidade: cancelando, você usa até o fim do mês já pago.</p>`;
+  },
   dono() {
-    return `<div class="cabeca"><h1 class="frase">Painel do dono<small>Equipe, cargos, o que cada um pode ver e o seu plano. Só você e os administradores veem esta parte.</small></h1></div><div id="gx-dono"></div>`;
+    const AREAS = [['vender', 'Caixa'], ['estoque', 'Estoque'], ['dinheiro', 'Dinheiro'], ['fiado', 'Fiado']], preco = db.plano === 'pro' ? 119 : 59;
+    return `<div class="cabeca"><h1 class="frase">Painel do dono<small>Quem trabalha no mercado e o que cada um pode abrir. Só você vê esta divisória.</small></h1><button type="button" class="btn pri" data-convidar>Pôr alguém na equipe</button></div>
+      <div class="contas"><div><span>Seu plano</span><b>${db.plano === 'pro' ? 'Pro' : 'Básico'} · ${R(preco)}/mês</b></div><div><span>Equipe</span><b>${db.equipe.length + 1} pessoas</b></div><div><span>Vagas no plano</span><b>${db.plano === 'pro' ? 'sem limite' : `${5 - db.equipe.length} de 5`}</b></div></div>
+      <h2>Quem pode abrir o quê</h2><p class="sub">Marque as divisórias de cada pessoa. O caixa não vê quanto o mercado lucra se você não deixar.</p>
+      <div class="tabela-dono"><div class="linha-dono topo"><span>Pessoa</span>${AREAS.map(([, t]) => `<span>${t}</span>`).join('')}<span></span></div>
+        <div class="linha-dono"><span><b>${esc(db.eu.nome)}</b><small>dono</small></span>${AREAS.map(() => '<span>✓</span>').join('')}<span></span></div>
+        ${db.equipe.map((p) => `<div class="linha-dono"><span><b>${esc(p.nome)}</b><small>${esc(p.cargo)}</small></span>${AREAS.map(([k, t]) => `<label><input type="checkbox" data-ve="${p.id}:${k}" ${p.ve[k] ? 'checked' : ''} aria-label="${esc(p.nome)} abre ${t}"></label>`).join('')}<button type="button" class="btn peq" data-tirar="${p.id}">Tirar</button></div>`).join('')}</div>
+      <h2>Plano</h2><div class="botoes"><button type="button" class="btn ${db.plano === 'basico' ? 'pri' : ''}" data-plano="basico">Básico · R$ 59 · até 5 pessoas</button><button type="button" class="btn ${db.plano === 'pro' ? 'pri' : ''}" data-plano="pro">Pro · R$ 119 · equipe sem limite</button></div>
+      <p class="sub" style="margin-top:10px">A assinatura e a troca de plano ficam em <a href="#assinatura">Minha assinatura</a>.</p>`;
   },
   fiado() {
     const l = [...db.clientes].sort((a, b) => b.desde - a.desde);
@@ -159,10 +190,11 @@ function mostrar() {
   const tela = TELAS[aba] ? aba : 'hoje';
   if (tela === 'estoque' && extra) estado.filtro = extra;
   pag.classList.remove('entrou'); pag.innerHTML = TELAS[tela](); void pag.offsetWidth; pag.classList.add('entrou');
-  if (tela === 'dono') painelDono(pag.querySelector('#gx-dono'), DONO);
   aplicarEu();
   document.querySelectorAll('.divisorias a').forEach((a) => (a.dataset.aba === tela ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
-  document.title = `${tela === 'dono' ? 'Painel do dono' : tela === 'config' ? 'Configurações' : tela[0].toUpperCase() + tela.slice(1)} · Veltria Gestão Essencial`;
+  document.title = `${{ dono: 'Painel do dono', config: 'Configurações', ia: 'Assistente', assinatura: 'Minha assinatura' }[tela] || tela[0].toUpperCase() + tela.slice(1)} · Veltria Gestão Essencial`;
+  if (!db.assinatura.renova && db.assinatura.status !== 'vencida' && tela !== 'assinatura') pag.insertAdjacentHTML('afterbegin', `<p class="aviso-ass">Assinatura cancelada: você usa até ${dataCurta(db.assinatura.proxima)}. <a href="#assinatura">Reativar</a></p>`);
+  travar(tela);
 }
 function redesenhar(foco) { const sel = foco && document.activeElement?.matches(foco) ? foco : null, pos = sel && document.activeElement.selectionStart; mostrar(); if (sel) { const el = pag.querySelector(sel); el?.focus(); if (el && pos != null) el.setSelectionRange(pos, pos); } }
 addEventListener('hashchange', () => { if (location.hash !== '#comanda') { estado.busca = ''; mostrar(); pag.focus({ preventScroll: true }); scrollTo({ top: 0 }); } });
@@ -204,7 +236,7 @@ pag.addEventListener('click', (e) => {
   else if (d.est) { const p = prod(d.est); p.tem = Math.max(0, p.tem + Number(d.d)); gravar(); redesenhar(); }
   else if ('chegou' in d) chegou();
   else if ('despesa' in d) despesa();
-  else if (d.pagar) { const b = db.pagar.find((x) => x.id === d.pagar); db.pagar = db.pagar.filter((x) => x !== b); db.diario.push({ tipo: 'pagamento', hora: hora(), texto: `Pagou ${b.nome}`, valor: b.valor, novo: true }); gravar(); avisar(`Pago: ${b.nome}`); redesenhar(); }
+  else if (d.pagar) { const b = db.pagar.find((x) => x.id === d.pagar); db.pagar = db.pagar.filter((x) => x !== b); db.diario.push({ tipo: 'conta', hora: hora(), texto: `Pagou ${b.nome} (pelo banco)`, valor: b.valor, novo: true }); gravar(); avisar(`Pago: ${b.nome}`); redesenhar(); }
   else if (d.recebi) { const c = db.clientes.find((x) => x.id === d.recebi); db.diario.push({ tipo: 'recebido', hora: hora(), texto: `Recebeu o fiado de ${c.nome}`, valor: c.deve, novo: true }); avisar(`Recebido: ${R(c.deve)} de ${c.nome}`); c.deve = 0; c.desde = 0; gravar(); redesenhar(); }
 });
 pag.addEventListener('input', (e) => {
@@ -371,16 +403,60 @@ addEventListener('keydown', (e) => {
   if (e.key === 'Enter') { if (buf.length >= 6 && /^[\d*]+$/.test(buf)) { e.preventDefault(); lerCodigo(buf); } buf = ''; return; }
   if (e.key.length === 1) { buf = agora - ultimo > 60 ? e.key : buf + e.key; ultimo = agora; }
 });
-const DONO = { sistema: 'Veltria Gestão Essencial', preco: 59, chave: CHAVE, empresa: 'Mercado Bom Preço', dono: 'Seu Antônio',
-  areas: [['vender', 'Vender (caixa)'], ['estoque', 'Estoque e produtos'], ['dinheiro', 'Dinheiro e contas'], ['fiado', 'Fiado']],
-  cargos: { 'Operador de caixa': { vender: 'editar', estoque: 'ver', dinheiro: 'nenhum', fiado: 'ver' }, Repositor: { vender: 'nenhum', estoque: 'editar', dinheiro: 'nenhum', fiado: 'nenhum' }, Gerente: { vender: 'editar', estoque: 'editar', dinheiro: 'editar', fiado: 'editar' } },
-  equipe: [['Dona Lurdes', 'Gerente'], ['Marquinhos', 'Operador de caixa'], ['Júlia', 'Operador de caixa'], ['Seu Zé', 'Repositor']] };
-function ia() {
-  abrirIA({ sistema: 'Veltria Gestão Essencial', telas: ['Hoje', 'Vender', 'Estoque', 'Dinheiro', 'Fiado', 'Painel do dono'],
-    numeros: () => [['vendido hoje', R(vendidoHoje())], ['lucro de hoje', R(lucroHoje())], ['na gaveta', R(gaveta())], ['fiado a receber', R(fiadoTotal())]],
-    alertas: () => [...acabando().slice(0, 3).map((p) => `${p.nome} está acabando (tem ${qtdTxt(p, p.tem)})`), ...db.clientes.filter((c) => c.deve && c.desde > 15).map((c) => `cobrar ${R(c.deve)} de ${c.nome}`), ...db.pagar.filter((b) => b.vence <= 2).map((b) => `pagar ${b.nome} (${R(b.valor)})`)] });
+function ia() { location.hash = '#ia'; }
+function respostaIA(p) {
+  const q = norm(p), ac = acabando(), par = parados(), dev = [...db.clientes].filter((c) => c.deve).sort((a, b) => b.desde - a.desde);
+  if (/compr|repor|acab|falta/.test(q)) return ac.length ? `Para esta semana, repor:\n${ac.slice(0, 6).map((x) => `• ${x.nome}: tem ${qtdTxt(x, x.tem)}, vende uns ${qtdTxt(x, Math.round(x.vendidos30 / 4))} por semana`).join('\n')}\n\nCompre o suficiente para 2 semanas: menos dinheiro parado na prateleira.` : 'Nada abaixo do mínimo. Bom momento para negociar preço com o fornecedor.';
+  if (/fiado|cobr|deve/.test(q)) return dev.length ? `Cobre primeiro quem deve há mais tempo:\n${dev.slice(0, 4).map((c) => `• ${c.nome}: ${R(c.deve)} há ${c.desde} dias`).join('\n')}\n\nNa divisória Fiado tem o botão para cobrar no WhatsApp.` : 'Ninguém devendo no fiado.';
+  if (/dia|hoje|vend/.test(q)) return `Hoje: ${R(vendidoHoje())} em ${vendasHoje().length} vendas, lucro de ${R(lucroHoje())}. Na gaveta: ${R(gaveta())}. O que mais saiu: ${Object.values(vendasHoje().flatMap((x) => x.itens || []).reduce((m, i) => { (m[i.nome] ||= { n: i.nome, q: 0 }).q += i.qtd; return m; }, {})).sort((a, b) => b.q - a.q).slice(0, 3).map((x) => x.n).join(', ') || 'ainda nada'}.`;
+  if (/parad|encalh|promo/.test(q)) return par.length ? `Parados há 30 dias: ${par.map((x) => x.nome).join(', ')}.\n\nAviso pronto para o WhatsApp:\n"Promoção no Mercado Bom Preço: ${par[0].nome} com 15% de desconto só esta semana!"` : 'Nenhum produto parado. Tudo girando.';
+  return `Resumo: vendeu ${R(vendidoHoje())} hoje, ${ac.length} produtos acabando e ${R(fiadoTotal())} no fiado.`;
 }
 document.getElementById('abrir-ia')?.addEventListener('click', ia);
+// assinatura vencida: trava o caixa (os dados ficam guardados) até pagar
+function travar(tela) {
+  document.querySelector('.trava')?.remove();
+  if (db.assinatura.status !== 'vencida' || tela === 'assinatura') return;
+  const t = document.createElement('div'); t.className = 'fundo trava';
+  t.innerHTML = `<div class="janela" role="alertdialog" aria-modal="true" aria-labelledby="trava-t"><h2 id="trava-t">Sua assinatura venceu</h2><p class="sub">O pagamento não foi aprovado pelo banco. Seus produtos, vendas e fiado estão guardados: renove para o caixa voltar a funcionar.</p>
+    <div class="botoes" style="flex-direction:column"><button type="button" class="btn pri grande" data-pagar-ass>Pagar aqui no app</button><a class="btn grande" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Renovar no site</a><a class="btn" href="#assinatura">Ver minha assinatura</a></div></div>`;
+  document.body.append(t);
+}
+function pagarAqui() {
+  const preco = db.plano === 'pro' ? 119 : 59, f = document.createElement('div'); f.className = 'fundo';
+  f.innerHTML = `<div class="janela" role="dialog" aria-modal="true"><h2>Pagar ${R(preco)}</h2><p class="sub">PIX libera na hora. No cartão abre o pagamento seguro do Mercado Pago.</p>
+    <div class="pix-falso" aria-hidden="true"></div><label class="campo">PIX copia e cola<input readonly value="00020126580014BR.GOV.BCB.PIX0136mercado-${Date.now().toString(16)}520400005303986540${preco}.005802BR"></label>
+    <div class="botoes"><button type="button" class="btn" data-copiar>Copiar código</button><a class="btn" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Pagar com cartão</a></div>
+    <div class="acoes"><button type="button" class="btn" data-x>Voltar</button><button type="button" class="btn pri" data-pago>Simular pagamento aprovado</button></div></div>`;
+  document.body.append(f);
+  f.addEventListener('click', (e) => {
+    if (e.target === f || e.target.closest('[data-x]')) f.remove();
+    if (e.target.closest('[data-copiar]')) { navigator.clipboard?.writeText(f.querySelector('input').value).catch(() => {}); avisar('Código PIX copiado'); }
+    if (e.target.closest('[data-pago]')) { const a = db.assinatura; a.status = 'ativa'; a.renova = true; a.proxima = 30; a.pagamentos.push({ dia: 0, ok: true }); gravar(); f.remove(); redesenhar(); avisar('Pagamento aprovado. O caixa voltou.'); }
+  });
+}
+addEventListener('message', (e) => {
+  if (e.origin !== location.origin || !e.data?.simular) return;
+  const a = db.assinatura;
+  if (e.data.simular === 'cancelar') { a.renova = false; a.status = 'ativa'; }
+  if (e.data.simular === 'recusado') { a.status = 'vencida'; a.renova = true; a.proxima = 0; a.pagamentos.push({ dia: 0, ok: false }); }
+  if (e.data.simular === 'normal') db.assinatura = assinaturaPadrao();
+  gravar(); redesenhar();
+});
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('button, a'); if (!t) return;
+  const d = t.dataset;
+  if ('pagarAss' in d) pagarAqui();
+  else if ('cancelarAss' in d) { if (confirm(`Cancelar? Nada mais é cobrado e você usa até ${dataCurta(db.assinatura.proxima)}.`)) { db.assinatura.renova = false; gravar(); redesenhar(); avisar('Assinatura cancelada'); } }
+  else if ('reativar' in d) { db.assinatura.renova = true; gravar(); redesenhar(); avisar('Assinatura reativada'); }
+  else if ('sug' in d) { pag.querySelector('[data-pergunta]').value = d.sug; pag.querySelector('[data-perguntar]').click(); }
+  else if ('perguntar' in d) { const p = pag.querySelector('[data-pergunta]').value.trim(); if (p.length < 3) return; const r = pag.querySelector('[data-resposta]'); r.hidden = false; r.textContent = 'Pensando…'; setTimeout(() => { r.textContent = `${respostaIA(p)}\n\n(Resposta de exemplo da demonstração.)`; }, 700); }
+  else if ('convidar' in d) { if (db.plano !== 'pro' && db.equipe.length >= 5) return avisar('No Básico são você e mais 5 pessoas. O Pro libera sem limite.'); janela('<h2>Pôr alguém na equipe</h2><label class="campo">Nome<input name="n" required></label><label class="campo">Cargo<select name="c"><option>Caixa</option><option>Repositor</option><option>Gerente</option></select></label><p class="sub">A pessoa recebe um convite no WhatsApp para entrar pelo celular dela.</p>', (f) => { const c = f.get('c'); db.equipe.push({ id: `q${Date.now()}`, nome: f.get('n'), cargo: c, ve: { vender: c !== 'Repositor', estoque: c !== 'Caixa', dinheiro: c === 'Gerente', fiado: c !== 'Repositor' } }); gravar(); avisar('Convite mandado'); redesenhar(); }); }
+  else if (d.tirar) { db.equipe = db.equipe.filter((p) => p.id !== d.tirar); gravar(); redesenhar(); avisar('Pessoa tirada da equipe'); }
+  else if (d.plano) { if (d.plano === 'basico' && db.equipe.length > 5) return avisar('Para o Básico, deixe no máximo 5 pessoas.'); db.plano = d.plano; gravar(); redesenhar(); }
+});
+document.addEventListener('change', (e) => { const v = e.target.dataset?.ve; if (v) { const [id, k] = v.split(':'); db.equipe.find((p) => p.id === id).ve[k] = e.target.checked; gravar(); avisar('Permissão salva'); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches?.('[data-pergunta]')) { e.preventDefault(); pag.querySelector('[data-perguntar]').click(); } });
 function chegou() {
   janela(`<h2>Chegou mercadoria</h2><p class="sub">O estoque sobe e o valor entra como saída do caixa.</p>
     <label class="campo">Produto<select name="p" required>${[...db.produtos].sort((a, b) => a.tem / a.minimo - b.tem / b.minimo).map((p) => `<option value="${p.id}">${esc(p.nome)} (tem ${p.tem})</option>`).join('')}</select></label>
@@ -411,7 +487,8 @@ const ACOES = [
   ['novo produto cadastrar codigo barras', 'Cadastrar produto', () => { location.hash = '#estoque'; setTimeout(() => editarProduto(null), 60); }],
   ['fechar caixa fechamento conferir gaveta', 'Fechar o caixa', () => { location.hash = '#dinheiro'; setTimeout(fecharCaixa, 60); }],
   ['sangria retirar tirar dinheiro cofre', 'Fazer sangria', () => { location.hash = '#dinheiro'; setTimeout(() => movimentoCaixa('sangria'), 60); }],
-  ['ia assistente perguntar ajuda', 'Perguntar ao Assistente IA', () => ia()],
+  ['ia assistente perguntar ajuda', 'Perguntar ao assistente', () => ia()],
+  ['assinatura plano pagar cobranca cancelar', 'Minha assinatura', () => (location.hash = '#assinatura')],
   ['dono equipe funcionario cargo permissao plano convidar', 'Painel do dono', () => (location.hash = '#dono')],
   ['configuracoes config meu nome letra som bipe imprimir ajustes', 'Minhas configurações', () => (location.hash = '#config')],
 ];
@@ -439,4 +516,6 @@ cmd.addEventListener('blur', () => setTimeout(() => (sug.hidden = true), 120));
 addEventListener('keydown', (e) => { if (e.key === '/' && !e.target.closest('input, select, textarea')) { e.preventDefault(); cmd.focus(); } });
 
 mostrar();
-document.getElementById('recomecar')?.addEventListener('click', () => { localStorage.removeItem(CHAVE); limparDono(CHAVE); location.replace(location.pathname); });
+document.getElementById('recomecar')?.addEventListener('click', () => { localStorage.removeItem(CHAVE); location.replace(location.pathname); });
+if (window !== window.top) document.documentElement.classList.add('no-celular');
+if ('serviceWorker' in navigator && window === window.top) navigator.serviceWorker.register('sw.js').catch(() => {});

@@ -2,34 +2,79 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Veltria Obras Essencial · demonstração</title>
-<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veltria Obras Essencial · app para celular</title>
+<meta name="description" content="Veltria Obras Essencial: app de celular para empreiteiro. Orçamento que vira obra, cobrança de cada etapa no PIX, diário com fotos.">
 <meta name="theme-color" content="#713f32">
-<link rel="icon" href="../base/icone.png?v=6" type="image/png">
+<link rel="icon" href="icone-192.png" type="image/png">
+<link rel="manifest" href="manifest.webmanifest">
+<script>
+  // no celular abre direto o app em tela cheia
+  if (matchMedia('(max-width: 760px)').matches || (matchMedia('(pointer: coarse)').matches && innerWidth < 900)) location.replace('app.html' + location.search + location.hash);
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=2">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --tijolo: #713f32; --tijolo-2: #4f2a21; --creme: #f5ebdd; --barro: #c77b5a; --areia: #d9c5ab; --salvia: #7e8973; --texto: #3a2620; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: radial-gradient(1200px 700px at 75% 40%, #8a4d3e, var(--tijolo-2) 70%); color: var(--creme); font: 16px/1.5 'Barlow', system-ui, sans-serif; display: grid; grid-template-columns: minmax(320px, 520px) auto; gap: 56px; align-items: center; justify-content: center; padding: 28px 40px; }
+  a { color: var(--creme); }
+  .voltar { position: fixed; top: 16px; left: 20px; font-size: .9rem; }
+  h1 { font: 700 3.1rem/0.98 'Barlow Condensed', sans-serif; margin: 10px 0 12px; text-transform: uppercase; letter-spacing: .01em; }
+  .tag { display: inline-block; background: var(--barro); color: #fff; font-weight: 700; font-size: .78rem; padding: 3px 10px; border-radius: 999px; letter-spacing: .04em; text-transform: uppercase; }
+  .lead { color: var(--areia); font-size: 1.08rem; margin: 0 0 18px; }
+  .preco { font: 700 1.7rem 'Barlow Condensed', sans-serif; margin: 0 0 18px; }
+  .preco small { font: 400 .95rem 'Barlow', sans-serif; color: var(--areia); }
+  .bts { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 26px; }
+  .bt { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 2px solid var(--creme); background: transparent; color: var(--creme); font-weight: 700; cursor: pointer; text-decoration: none; font-size: 1rem; }
+  .bt.cheio { background: var(--creme); color: var(--tijolo); }
+  .caixa { background: rgba(0, 0, 0, .18); border: 1px solid rgba(255, 255, 255, .14); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
+  .caixa h2 { margin: 0 0 8px; font: 700 1.1rem 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .04em; color: var(--areia); }
+  .caixa p { margin: 0 0 10px; font-size: .92rem; color: #ead9c9; }
+  .sim { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sim button { border: 1px solid var(--areia); background: transparent; color: var(--creme); border-radius: 10px; padding: 8px 12px; cursor: pointer; font-weight: 600; }
+  .sim button:hover { background: rgba(255, 255, 255, .08); }
+  .qr { display: flex; gap: 14px; align-items: center; }
+  .qr #qr { background: #fff; padding: 8px; border-radius: 10px; flex: none; }
+  .qr p { margin: 0; }
+
+  /* o celular */
+  .celular { position: relative; width: 390px; height: 820px; border-radius: 58px; background: #141414; padding: 14px; box-shadow: 0 0 0 2px #3a3a3a, 0 0 0 7px #0d0d0d, 0 50px 90px -30px rgba(0, 0, 0, .75), inset 0 0 6px rgba(255, 255, 255, .15); transform-origin: center; }
+  .celular::before, .celular::after { content: ""; position: absolute; left: -9px; width: 4px; border-radius: 3px 0 0 3px; background: #2a2a2a; }
+  .celular::before { top: 150px; height: 64px; } .celular::after { top: 230px; height: 64px; }
+  .lado { position: absolute; right: -9px; top: 190px; width: 4px; height: 96px; border-radius: 0 3px 3px 0; background: #2a2a2a; }
+  .tela { position: relative; width: 100%; height: 100%; border-radius: 45px; overflow: hidden; background: var(--creme); }
+  .tela iframe { position: absolute; top: 34px; left: 0; width: 100%; height: calc(100% - 34px); border: 0; display: block; background: var(--creme); }
+  .ilha { position: absolute; top: 10px; left: 50%; translate: -50% 0; width: 116px; height: 32px; border-radius: 20px; background: #000; z-index: 2; }
+  .status { position: absolute; top: 0; left: 0; right: 0; height: 34px; display: flex; justify-content: space-between; align-items: center; padding: 6px 30px 0; font: 700 .85rem system-ui, sans-serif; color: var(--creme); z-index: 1; background: var(--tijolo); }
+  @media (max-width: 1100px) { body { grid-template-columns: 1fr; justify-items: center; } .texto { max-width: 560px; } }
+</style>
 </head>
 <body>
-<div class="faixa"><a href="../../../veltria-obras.html">Voltar<span class="pc"> ao site</span></a><span class="pc">Demonstração do <b>Veltria Obras Essencial</b>, com dados de exemplo só neste aparelho</span><button type="button" id="recomecar">Recomeçar</button><a class="cta" href="../../../veltria-obras.html#versoes">Quero este</a></div>
-<header class="topo">
-  <div class="topo-in">
-    <span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-    <div class="quem"><b id="empresa-nome">Reforma Certa</b><small id="quem-sou">Davi Nunes · empreiteiro</small></div>
-    <button type="button" class="ia" data-ir="ia" aria-label="Assistente IA"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14a8 8 0 0 1 16 0v1H4z"/><path d="M2 15h20M10 6V4h4v2"/></svg><span>Assistente</span></button>
-  </div>
-</header>
-<main id="tela" tabindex="-1"></main>
-<nav class="barra" aria-label="Partes do sistema">
-  <a href="#obras" data-aba="obras"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18M5 20V10l7-5 7 5v10"/><path d="M10 20v-5h4v5"/></svg><span>Obras</span></a>
-  <a href="#orcar" data-aba="orcar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h6"/></svg><span>Orçar</span></a>
-  <a href="#dinheiro" data-aba="dinheiro"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/></svg><span>Dinheiro</span></a>
-  <a href="#contas" data-aba="contas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 19h0"/></svg><span>Calcular</span></a>
-  <a href="#mais" data-aba="mais"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>Mais</span></a>
-</nav>
-<div class="avisos" id="avisos" role="status" aria-live="polite"></div>
-<script type="module" src="app.js?v=1"></script>
+<a class="voltar" href="../../../veltria-obras.html">← Voltar ao site</a>
+<section class="texto">
+  <span class="tag">App para celular · Android e iPhone</span>
+  <h1>Veltria Obras<br>Essencial</h1>
+  <p class="lead">Para o empreiteiro que resolve tudo pelo celular. Cada obra vira uma parede de tijolos que sobe quando a etapa fica pronta e escurece quando o cliente paga.</p>
+  <p class="preco">R$ 69/mês <small>· ou R$ 662 por ano · sem fidelidade</small></p>
+  <div class="bts"><a class="bt cheio" href="../../../veltria-obras.html#versoes">Assinar e baixar o app</a><a class="bt" href="app.html" target="_blank" rel="noopener">Abrir em tela cheia</a></div>
+  <div class="caixa qr"><div id="qr" aria-label="QR code para abrir no celular"></div><p><b>Teste no seu celular.</b><br>Aponte a câmera para o código. Para instalar: no Android, menu ⋮ e "Instalar app"; no iPhone, Compartilhar e "Adicionar à Tela de Início".</p></div>
+  <div class="caixa"><h2>Veja o que acontece com a assinatura</h2><p>A assinatura do app é a mesma da sua conta no site. Teste os casos no celular ao lado:</p>
+    <div class="sim"><button type="button" data-sim="cancelar">Cancelei a assinatura</button><button type="button" data-sim="recusado">O pagamento não caiu</button><button type="button" data-sim="normal">Voltar ao normal</button></div></div>
+</section>
+<div class="celular" aria-label="Demonstração do app num celular"><span class="lado"></span><div class="tela"><div class="ilha"></div><div class="status"><span id="hora">9:41</span><span>▂▄▆ ● 100%</span></div><iframe id="app" src="app.html" title="App Veltria Obras Essencial funcionando"></iframe></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  const app = document.getElementById('app');
+  if (location.search) app.src = 'app.html' + location.search;
+  document.querySelectorAll('[data-sim]').forEach((b) => b.addEventListener('click', () => app.contentWindow.postMessage({ simular: b.dataset.sim }, location.origin)));
+  const relogio = () => { document.getElementById('hora').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); };
+  relogio(); setInterval(relogio, 30000);
+  // o celular cabe na altura da janela
+  const cel = document.querySelector('.celular'), caber = () => { const k = Math.min(1, (innerHeight - 40) / 840); cel.style.transform = `scale(${k})`; cel.style.margin = `${(k - 1) * 410}px 0`; };
+  caber(); addEventListener('resize', caber);
+  try { new QRCode(document.getElementById('qr'), { text: new URL('app.html', location.href).href, width: 116, height: 116, colorDark: '#3a2620' }); } catch (e) { document.getElementById('qr').textContent = 'QR'; }
+</script>
 </body>
 </html>

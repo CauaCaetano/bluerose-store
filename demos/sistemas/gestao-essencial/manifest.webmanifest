@@ -1,0 +1,16 @@
+{
+  "name": "Veltria Gestão Essencial",
+  "short_name": "Meu Mercado",
+  "description": "Caixa com leitor de código de barras, estoque, dinheiro e fiado do mercado, no celular.",
+  "lang": "pt-BR",
+  "start_url": "app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1ebdd",
+  "theme_color": "#18283e",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

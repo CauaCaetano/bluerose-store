@@ -42,9 +42,12 @@ function exemplo() {
     { id: 'r2', num: 40, cli: 'c1', titulo: 'Pintura do apartamento', criado: -9, validade: 15, status: 'rascunho', mao: 3200, desconto: 200, itens: [{ desc: 'Tinta acrílica 18 L', qtd: 4, un: 'lata', preco: 389 }, { desc: 'Massa corrida', qtd: 3, un: 'lata', preco: 89 }] },
   ];
   return { empresa: { nome: 'Reforma Certa', dono: 'Davi Nunes', pix: 'davi@reformacerta.com.br', tel: '31999990000' }, eu: { nome: 'Davi Nunes', letra: 'normal', cobranca: 'Olá, {cliente}! A etapa "{etapa}" da sua obra ficou pronta. O valor é {valor}. Pode pagar pelo PIX {pix}. Obrigado!' },
-    clientes, obras, orcamentos, proxOrc: 42, equipe: [{ id: 'e1', nome: 'Toninho', tel: '31991230000', funcao: 'Encarregado', pode: { valores: false, gastos: true, diario: true, orcar: false } }, { id: 'e2', nome: 'Lucas', tel: '31994560000', funcao: 'Ajudante', pode: { valores: false, gastos: false, diario: true, orcar: false } }], plano: 'basico' };
+    clientes, obras, orcamentos, proxOrc: 42, assinatura: assinaturaNova(), equipe: [{ id: 'e1', nome: 'Toninho', tel: '31991230000', funcao: 'Encarregado', pode: { valores: false, gastos: true, diario: true, orcar: false } }, { id: 'e2', nome: 'Lucas', tel: '31994560000', funcao: 'Ajudante', pode: { valores: false, gastos: false, diario: true, orcar: false } }], plano: 'basico' };
 }
+// assinatura do app: ligada à conta no site (Mercado Pago). Cancelada = usa até a próxima cobrança; pagamento recusado = app bloqueia até pagar.
+function assinaturaNova() { return { plano: 'Básico', valor: 69, status: 'ativa', proxima: 18, renova: true, historico: [{ dia: -12, valor: 69, ok: true }, { dia: -42, valor: 69, ok: true }, { dia: -72, valor: 69, ok: true }] }; }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || exemplo(); } catch { return exemplo(); } })();
+db.assinatura ||= assinaturaNova();
 function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('A memória do aparelho encheu: apague fotos antigas do diário.'); } }
 
 const cliente = (id) => db.clientes.find((c) => c.id === id) || { nome: 'Cliente', tel: '' };
@@ -156,6 +159,7 @@ const TELAS = {
       <li><a class="cresce" href="#clientes" style="text-decoration:none;color:inherit"><b>Clientes</b><small>${db.clientes.length} cadastrados</small></a><span aria-hidden="true">›</span></li>
       <li><a class="cresce" href="#dono" style="text-decoration:none;color:inherit"><b>Painel do dono</b><small>sua equipe, o que cada um pode ver e o seu plano</small></a><span aria-hidden="true">›</span></li>
       <li><a class="cresce" href="#config" style="text-decoration:none;color:inherit"><b>Minhas configurações</b><small>seu nome, chave PIX, mensagem de cobrança, letras</small></a><span aria-hidden="true">›</span></li>
+      <li><a class="cresce" href="#assinatura" style="text-decoration:none;color:inherit"><b>Minha assinatura</b><small>${rotuloAss()}</small></a><span aria-hidden="true">›</span></li>
       <li><a class="cresce" href="#ia" style="text-decoration:none;color:inherit"><b>Assistente</b><small>pergunte sobre as suas obras, grátis</small></a><span aria-hidden="true">›</span></li></ul>`;
   },
   clientes() {
@@ -184,6 +188,18 @@ const TELAS = {
       <label class="campo">Tamanho das letras<select data-eu="letra">${[['normal', 'Normal'], ['grande', 'Grande'], ['maior', 'Bem grande']].map(([v, t]) => `<option value="${v}" ${e.letra === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
       <p><button type="button" class="btn largo" data-acao="backup">Baixar cópia dos meus dados</button></p>`;
   },
+  assinatura() {
+    const a = db.assinatura, h = [...a.historico].sort((x, y) => y.dia - x.dia);
+    const estado = a.status === 'vencida' ? `<div class="numeros"><div class="forte" style="background:var(--alerta);border-color:var(--alerta)"><small>Assinatura vencida</small><b>Pagamento não aprovado</b><small>A cobrança de ${quando(a.proxima)} não caiu. Pague para voltar a usar.</small></div></div>`
+      : a.renova ? `<div class="numeros"><div class="forte"><small>Assinatura ativa</small><b>${a.plano} · ${real(a.valor)}/mês</b><small>próxima cobrança ${quando(a.proxima)}, no cartão</small></div></div>`
+      : `<div class="numeros"><div><small>Assinatura cancelada</small><b>Você usa até ${quando(a.proxima)}</b><small>depois disso o app pede para assinar de novo</small></div></div>`;
+    return `<a class="voltar" href="#mais">← Mais</a><h1>Minha assinatura</h1><p class="sub">A assinatura do app é a mesma da sua conta no site. Sem fidelidade.</p>${estado}
+      <div class="acoes" style="margin:14px 0">${a.status === 'vencida' ? '<button type="button" class="btn barro" data-acao="pagar-app">Pagar aqui no app</button><a class="btn" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Renovar no site</a>'
+        : a.renova ? '<button type="button" class="btn" data-acao="cancelar-ass">Cancelar a assinatura</button><a class="btn" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Trocar cartão ou plano no site</a>'
+        : '<button type="button" class="btn cheio" data-acao="reativar">Reativar a assinatura</button>'}</div>
+      <h2>Pagamentos</h2><ul class="lista">${h.map((x) => `<li><div class="cresce"><b>${real(x.valor)}</b><small>${quando(x.dia)} · ${x.ok ? 'pago no cartão' : 'recusado pelo banco'}</small></div><span class="selo ${x.ok ? 'ok' : 'al'}">${x.ok ? 'pago' : 'recusado'}</span></li>`).join('')}</ul>
+      <p class="mini" style="margin-top:12px">Ao cancelar, nada mais é cobrado e você continua usando até o fim do mês já pago. Seus dados ficam guardados por 90 dias caso volte.</p>`;
+  },
   ia() {
     const perguntas = ['Quanto eu tenho para receber?', 'Qual obra está dando mais lucro?', 'Alguma obra atrasada?', 'Escreva uma mensagem para cobrar com educação', 'Como faço um orçamento que fecha mais?'];
     return `<h1>Assistente</h1><p class="sub">Pergunte sobre as suas obras. Ele olha os seus números, nunca o telefone ou o endereço dos clientes. Na versão contratada são 20 perguntas grátis por dia; aqui as respostas são de exemplo.</p>
@@ -200,15 +216,18 @@ function cartaoObra(o) {
 const textoOrc = (r) => `Olá, ${cliente(r.cli).nome.split(' ')[0]}! Segue o orçamento nº ${r.num} da ${db.empresa.nome}:\n${r.titulo}\n\n${r.itens.map((i) => `• ${i.desc}: ${String(i.qtd).replace('.', ',')} ${i.un} × ${real(i.preco)}`).join('\n')}\n• Mão de obra: ${real(r.mao)}${r.desconto ? `\n• Desconto: − ${real(r.desconto)}` : ''}\n\nTotal: ${real(totalOrc(r))}\nVálido por ${r.validade} dias. Para aprovar, é só responder "aprovado".`;
 
 // ------------------------------------------------------------------ navegação
+const rotuloAss = () => { const a = db.assinatura; return a.status === 'vencida' ? 'vencida: pague para continuar' : a.renova ? `ativa · próxima cobrança ${quando(a.proxima)}` : `cancelada · usa até ${quando(a.proxima)}`; };
 const tela = $('#tela');
 function mostrar() {
   const [rota, a, b] = (location.hash.slice(1) || 'obras').split('/');
   const f = TELAS[rota] || TELAS.obras;
   tela.innerHTML = f(a, b);
-  const abaBarra = { obra: 'obras', orcamento: 'orcar', clientes: 'mais', dono: 'mais', config: 'mais', ia: 'mais' }[rota] || rota;
+  const abaBarra = { obra: 'obras', orcamento: 'orcar', clientes: 'mais', dono: 'mais', config: 'mais', ia: 'mais', assinatura: 'mais' }[rota] || rota;
   document.querySelectorAll('.barra a').forEach((x) => (x.dataset.aba === abaBarra ? x.setAttribute('aria-current', 'page') : x.removeAttribute('aria-current')));
-  document.title = `${{ obras: 'Obras', obra: 'Obra', orcar: 'Orçamentos', orcamento: 'Orçamento', dinheiro: 'Dinheiro', contas: 'Calculadoras', mais: 'Mais', clientes: 'Clientes', dono: 'Painel do dono', config: 'Configurações', ia: 'Assistente' }[rota] || 'Obras'} · Veltria Obras Essencial`;
+  document.title = `${{ assinatura: 'Minha assinatura', obras: 'Obras', obra: 'Obra', orcar: 'Orçamentos', orcamento: 'Orçamento', dinheiro: 'Dinheiro', contas: 'Calculadoras', mais: 'Mais', clientes: 'Clientes', dono: 'Painel do dono', config: 'Configurações', ia: 'Assistente' }[rota] || 'Obras'} · Veltria Obras Essencial`;
   if (rota === 'contas') tela.querySelectorAll('[data-calc]').forEach(calcular);
+  if (!db.assinatura.renova && db.assinatura.status !== 'vencida' && rota !== 'assinatura') tela.insertAdjacentHTML('afterbegin', `<p class="selo al" style="display:block;padding:8px 12px;margin-bottom:12px;border-radius:12px">Assinatura cancelada: você usa até ${quando(db.assinatura.proxima)}. <a href="#assinatura">Reativar</a></p>`);
+  bloqueio(rota);
   pintarTopo();
 }
 function pintarTopo() {
@@ -218,6 +237,39 @@ function pintarTopo() {
 addEventListener('hashchange', () => { mostrar(); tela.focus({ preventScroll: true }); scrollTo(0, 0); });
 
 // ------------------------------------------------------------------ ações
+// assinatura vencida: o app fica bloqueado (os dados continuam guardados) até a pessoa pagar
+function bloqueio(rota) {
+  document.querySelector('.bloqueio')?.remove();
+  if (db.assinatura.status !== 'vencida' || rota === 'assinatura') return;
+  const b = document.createElement('div'); b.className = 'fundo bloqueio';
+  b.innerHTML = `<div class="janela" role="alertdialog" aria-modal="true" aria-labelledby="bl-t"><h2 id="bl-t">Sua assinatura venceu</h2><p class="sub">O pagamento de ${real(db.assinatura.valor)} não foi aprovado pelo banco. Suas obras, fotos e orçamentos estão guardados: é só renovar para voltar a usar.</p>
+    <div class="acoes" style="flex-direction:column"><button type="button" class="btn barro largo" data-acao="pagar-app">Pagar aqui no app</button><a class="btn largo" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Renovar no site</a><a class="btn largo" href="#assinatura" style="border-style:dashed">Ver minha assinatura</a></div></div>`;
+  document.body.append(b);
+}
+function pagarNoApp() {
+  const a = db.assinatura, codigo = `00020126580014BR.GOV.BCB.PIX0136bluerose-${Math.random().toString(16).slice(2, 10)}5204000053039865406${a.valor.toFixed(2)}5802BR6009BH`;
+  janela(`<h2>Pagar ${real(a.valor)}</h2><p class="sub">Escolha como pagar. A liberação é na hora.</p>
+    <div class="abas" role="group" aria-label="Forma de pagamento"><button type="button" aria-pressed="true" data-forma-p="pix">PIX</button><button type="button" aria-pressed="false" data-forma-p="cartao">Cartão de crédito</button></div>
+    <div data-p="pix"><div class="cliente-vista" style="display:grid;place-items:center;gap:10px"><div aria-hidden="true" style="width:180px;height:180px;background:repeating-conic-gradient(var(--texto) 0 25%, #fff 0 50%) 0 0/24px 24px;border:10px solid #fff;outline:2px solid var(--texto)"></div><small class="mini">QR Code de exemplo</small></div>
+      <label class="campo" style="margin-top:12px">PIX copia e cola<input readonly value="${codigo}" onclick="this.select()"></label><button type="button" class="btn largo" data-copiar="${codigo}">Copiar código</button></div>
+    <div data-p="cartao" hidden><label class="campo">Número do cartão<input inputmode="numeric" placeholder="Na versão contratada abre o pagamento seguro do Mercado Pago" disabled></label><a class="btn largo" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Pagar com cartão (Mercado Pago)</a></div>
+    <div class="acoes" style="margin-top:14px"><button type="button" class="btn verde" data-pago>Simular pagamento aprovado</button><button type="button" class="btn" data-fechar>Voltar</button></div>`, (j, fechar) => {
+    j.addEventListener('click', (e) => {
+      const f = e.target.closest('[data-forma-p]'); if (f) { j.querySelectorAll('[data-forma-p]').forEach((x) => x.setAttribute('aria-pressed', x === f)); j.querySelectorAll('[data-p]').forEach((x) => { x.hidden = x.dataset.p !== f.dataset.formaP; }); }
+      const c = e.target.closest('[data-copiar]'); if (c) { navigator.clipboard?.writeText(c.dataset.copiar).catch(() => {}); aviso('Código PIX copiado'); }
+      if (e.target.closest('[data-pago]')) { a.status = 'ativa'; a.renova = true; a.historico.push({ dia: 0, valor: a.valor, ok: true }); a.proxima = 30; salvar(); fechar(); mostrar(); aviso('Pagamento aprovado. Bem-vindo de volta!'); }
+    });
+  });
+}
+// a demonstração no "celular" do site manda simular os casos da assinatura
+addEventListener('message', (e) => {
+  if (e.origin !== location.origin || !e.data?.simular) return;
+  const a = db.assinatura;
+  if (e.data.simular === 'cancelar') { a.renova = false; a.status = 'ativa'; }
+  if (e.data.simular === 'recusado') { a.status = 'vencida'; a.renova = true; a.proxima = 0; a.historico.push({ dia: 0, valor: a.valor, ok: false }); }
+  if (e.data.simular === 'normal') { db.assinatura = assinaturaNova(); }
+  salvar(); mostrar();
+});
 function cobrar(o, e) {
   const c = cliente(o.cli), msg = db.eu.cobranca.replace('{cliente}', c.nome.split(' ')[0]).replace('{etapa}', e.nome).replace('{valor}', real(e.valor)).replace('{pix}', db.empresa.pix);
   janela(`<h2>Cobrar ${html(e.nome)}</h2><p class="sub">${html(o.nome)} · ${html(c.nome)}</p><div class="cliente-vista" style="white-space:pre-wrap">${html(msg)}</div>
@@ -262,6 +314,9 @@ const ACOES = {
   'tira-equipe': (d) => { db.equipe = db.equipe.filter((p) => p.id !== d.id); salvar(); mostrar(); aviso('Pessoa tirada da equipe. O acesso dela acabou.'); },
   plano: (d) => { if (d.v === 'basico' && db.equipe.length > 5) return aviso('Para voltar ao Básico, deixe no máximo 5 pessoas na equipe.'); db.plano = d.v; salvar(); mostrar(); },
   backup: () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' })); a.download = 'minhas-obras.json'; a.click(); URL.revokeObjectURL(a.href); },
+  'pagar-app': () => pagarNoApp(),
+  'cancelar-ass': () => { if (!confirm(`Cancelar a assinatura? Nada mais será cobrado e você usa até ${quando(db.assinatura.proxima)}.`)) return; db.assinatura.renova = false; salvar(); mostrar(); aviso(`Assinatura cancelada. Você usa até ${quando(db.assinatura.proxima)}.`); },
+  reativar: () => { db.assinatura.renova = true; salvar(); mostrar(); aviso('Assinatura reativada. Nada muda na cobrança.'); },
   perguntar: () => { const p = $('#pergunta').value.trim(); if (p.length < 3) return $('#pergunta').focus(); const r = $('#resposta'); r.hidden = false; r.textContent = 'Pensando…'; setTimeout(() => { r.textContent = responder(p); }, 800); },
 };
 function responder(p) {
@@ -318,4 +373,7 @@ document.addEventListener('change', async (e) => {
   }
 });
 $('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE); db = exemplo(); location.hash = '#obras'; mostrar(); aviso('Demonstração recomeçada'); });
+// dentro do celular da demonstração, sem a faixa de cima; fora dela, instala como app e funciona sem internet
+if (window !== window.top) document.documentElement.classList.add('no-celular');
+if ('serviceWorker' in navigator && window === window.top) navigator.serviceWorker.register('sw.js').catch(() => {});
 mostrar();
