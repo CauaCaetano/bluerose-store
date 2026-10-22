@@ -1,5 +1,5 @@
 // =============================================================
-// Cerula · botão "Adicionar" no topo de todas as páginas
+// Veltria · botão "Adicionar" no topo de todas as páginas
 // -------------------------------------------------------------
 // Manual: o formulário da página (ou os atalhos do sistema).
 // Automático:

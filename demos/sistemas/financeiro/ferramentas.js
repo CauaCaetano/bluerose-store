@@ -1,4 +1,4 @@
-// Cerula Financeiro · ferramentas: juros e multa de atraso, preço com impostos, recebimento no cartão e ponto de
+// Veltria Financeiro · ferramentas: juros e multa de atraso, preço com impostos, recebimento no cartão e ponto de
 // equilíbrio (Básico) e contas vencidas a receber, contas a pagar da semana, equipamentos prontos e peças para repor (Pro).
 import { esc, moeda, hoje, diasAte, dataCurta } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, ldNums, campoN, calc, n0, fmtN, zap, copiar, registrarCalcs } from '../base/lado.js';

@@ -1,4 +1,4 @@
-// Cerula Imobiliária · ferramentas ao lado das telas: financiamento (SAC e Price), custos da compra, comissão,
+// Veltria Imobiliária · ferramentas ao lado das telas: financiamento (SAC e Price), custos da compra, comissão,
 // imóveis parados, reajuste do aluguel, contratos vencendo, aluguéis em atraso e visitas de amanhã.
 import { esc, moeda, hoje, diaMais, diasAte, dataCurta } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, ldNums, campoN, calc, n0, fmtN, zap, registrarCalcs } from '../base/lado.js';

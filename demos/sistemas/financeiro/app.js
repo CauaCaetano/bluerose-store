@@ -1,4 +1,4 @@
-// Cerula Financeiro · financeiro e ordens de serviço (referências: Omie, Conta Azul, GestãoClick)
+// Veltria Financeiro · financeiro e ordens de serviço (referências: Omie, Conta Azul, GestãoClick)
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, agoraISO, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, diasEntre, paraData,
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, linhas, rosca, barrasH, kanban, calGrade, DIAS, normal, baixar,
@@ -801,7 +801,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'financeiro', nome: 'Cerula Financeiro', sub: 'Financeiro e OS', cor: '#0b6fb8', icone: 'currency-circle-dollar', empresa: 'Refrigeração Polo Frio', conta: 'Assistência técnica · Florianópolis',
+  id: 'financeiro', nome: 'Veltria Financeiro', sub: 'Financeiro e OS', cor: '#0b6fb8', icone: 'currency-circle-dollar', empresa: 'Refrigeração Polo Frio', conta: 'Assistência técnica · Florianópolis',
   produto: { mensal: 109 }, versaoDemo: 2, beneficiosPro: BENEFICIOS_FIN, semente, colecoes, fichas, buscaDica: 'OS, clientes, lançamentos',
   portal: {
     cobranca: {
@@ -1278,7 +1278,7 @@ Object.assign(app.acoes, {
 // preenchimento automático (texto colado, foto): lançamento e OS passam pelo fluxo próprio (parcelas, garantia)
 app.criarCom = { lancamentos: (v) => app.acoes.novoLanc({ t: v.tipo || 'despesa', valores: v }), ordens: (v) => app.acoes.novaOS({ valores: v }) };
 // na demonstração não há assinatura: o convite do Pro mostra o que ele inclui e leva aos planos do site
-if (!app.acoes.verPro) app.acoes.verPro = () => modal({ titulo: 'Cerula Financeiro Pro', largura: 560, corpo: `<div class="col" style="gap:10px">${BENEFICIOS_FIN.map(([i, t, d]) => `<div class="dica">${ic(i)}<span><b>${esc(t)}.</b> ${esc(d)}</span></div>`).join('')}<p class="mute-2" style="font-size:13px">Também no Pro: equipe sem limite, avisos e mensagens prontas no WhatsApp, histórico da equipe, impressos só com a sua marca e até 10 empresas. R$ 169 por mês, ou R$ 1.622 por ano.</p></div>`, botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }, { rotulo: 'Ver os planos', classe: 'pri', acao: () => { window.open('../../../cerula-financeiro.html#precos', '_blank', 'noopener'); return true; } }] });
+if (!app.acoes.verPro) app.acoes.verPro = () => modal({ titulo: 'Veltria Financeiro Pro', largura: 560, corpo: `<div class="col" style="gap:10px">${BENEFICIOS_FIN.map(([i, t, d]) => `<div class="dica">${ic(i)}<span><b>${esc(t)}.</b> ${esc(d)}</span></div>`).join('')}<p class="mute-2" style="font-size:13px">Também no Pro: equipe sem limite, avisos e mensagens prontas no WhatsApp, histórico da equipe, impressos só com a sua marca e até 10 empresas. R$ 169 por mês, ou R$ 1.622 por ano.</p></div>`, botoes: [{ rotulo: 'Fechar', valor: null, classe: 'fant' }, { rotulo: 'Ver os planos', classe: 'pri', acao: () => { window.open('../../../veltria-financeiro.html#precos', '_blank', 'noopener'); return true; } }] });
 // ferramentas no menu da esquerda (WhatsApp e copiar); avisos e mensagens prontas: plano Pro
 equipeViva(app, EQUIPE);
 Object.assign(app.acoes, acoesLado());

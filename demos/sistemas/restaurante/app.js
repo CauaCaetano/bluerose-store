@@ -1,4 +1,4 @@
-// Cerula Restaurante · mesas, comandas, delivery, cozinha e cardápio (referências: Saipos, Consumer, Goomer)
+// Veltria Restaurante · mesas, comandas, delivery, cozinha e cardápio (referências: Saipos, Consumer, Goomer)
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, paraData, minutos, hhmm,
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, kanban, DIAS, telLink, normal,
@@ -209,7 +209,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'restaurante', nome: 'Cerula Restaurante', sub: 'Restaurantes e delivery', cor: '#b45309', icone: 'fork-knife', empresa: 'Bistrô Alecrim', conta: 'Salão e delivery · Rio de Janeiro',
+  id: 'restaurante', nome: 'Veltria Restaurante', sub: 'Restaurantes e delivery', cor: '#b45309', icone: 'fork-knife', empresa: 'Bistrô Alecrim', conta: 'Salão e delivery · Rio de Janeiro',
   produto: { mensal: 89 }, semente, colecoes, fichas, buscaDica: 'pratos e clientes',
   portal: {
     cardapio: {

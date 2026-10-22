@@ -1,4 +1,4 @@
-// Cerula Academia · ferramentas ao lado das telas: IMC, zonas de frequência cardíaca, 1RM, gasto calórico,
+// Veltria Academia · ferramentas ao lado das telas: IMC, zonas de frequência cardíaca, 1RM, gasto calórico,
 // alunos sumidos, mensalidades em atraso, aniversariantes, experimentais sem fechar e ocupação das turmas.
 import { esc, moeda, hoje, diaMais, diasAte, dataCurta } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, ldNums, campoN, campoS, calc, n0, fmtN, zap, registrarCalcs } from '../base/lado.js';

@@ -1,4 +1,4 @@
-// Cerula CRM · funil de vendas (referências: Pipedrive, Attio, HubSpot)
+// Veltria CRM · funil de vendas (referências: Pipedrive, Attio, HubSpot)
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, agoraISO, diaMais, mesMais, nomeMes, dataCurta, dataHoraBR, relativo, horaBR, diasAte, diasEntre, iniciais,
   sorteio, soma, agrupar, av, ic, et, prog, telLink, kpis, barras, linhas, rosca, barrasH, funilH, kanban, calGrade, DIAS, paraData,
@@ -32,7 +32,7 @@ const COR_TIPO = { ligacao: '#0ea5e9', reuniao: '#6366f1', email: '#64748b', wha
 function semente() {
   const r = sorteio(20261011), esc1 = (l) => l[Math.floor(r() * l.length)], ent = (a, b) => a + Math.floor(r() * (b - a + 1));
   const produtos = [
-    ['Licença Cerula Pro (anual)', 'LIC-PRO', 4800], ['Licença Cerula Equipe (anual)', 'LIC-EQ', 9600], ['Implantação e migração', 'IMP-01', 3500],
+    ['Licença Veltria Pro (anual)', 'LIC-PRO', 4800], ['Licença Veltria Equipe (anual)', 'LIC-EQ', 9600], ['Implantação e migração', 'IMP-01', 3500],
     ['Treinamento da equipe (8 h)', 'TRE-08', 1600], ['Consultoria de processos (mês)', 'CON-M', 2900], ['Integração com ERP', 'INT-ERP', 6200], ['Suporte prioritário (anual)', 'SUP-P', 2400],
   ].map(([nome, codigo, preco]) => ({ nome, codigo, preco }));
   const empresas = [
@@ -446,7 +446,7 @@ async function escolher(titulo, opcoes) {
 async function novaAtividade(a, extra = {}) { const x = await editar(a, 'atividades', null, extra); if (x) { if (x.negocio) a.db.registrar(`negocios:${x.negocio}`, `Atividade agendada: ${x.titulo}`, { icone: 'calendar-plus' }); a.render(); a.reabrir(); } }
 
 const app = criarApp({
-  id: 'crm', nome: 'Cerula CRM', sub: 'Vendas', cor: '#5b4fe0', icone: 'handshake', empresa: 'Solar Sistemas Ltda', conta: 'Equipe comercial · 3 pessoas',
+  id: 'crm', nome: 'Veltria CRM', sub: 'Vendas', cor: '#5b4fe0', icone: 'handshake', empresa: 'Solar Sistemas Ltda', conta: 'Equipe comercial · 3 pessoas',
   produto: { mensal: 99 }, semente, colecoes, fichas, buscaDica: 'negócios, pessoas, empresas',
   portal: {
     proposta: {

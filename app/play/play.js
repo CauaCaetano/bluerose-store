@@ -1,4 +1,4 @@
-// Cerula · entrada do app da Google Play
+// Veltria · entrada do app da Google Play
 // Entrar, ver os sistemas liberados na conta e abrir cada um. Sem venda: a regra de pagamentos da loja
 // não permite levar a compra para fora do app, então aqui não há preço, teste com cartão nem link de compra.
 // Também tem "Excluir minha conta", que a loja exige para apps com login.
@@ -6,7 +6,7 @@
   const raiz = document.getElementById('play');
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
   const SITE = 'https://bluerose-store.com/';
-  const NOMES = { crm: 'Cerula CRM', agenda: 'Cerula Agenda', financeiro: 'Cerula Financeiro', gestao: 'Cerula Gestão', juridico: 'Cerula Jurídico', clinica: 'Cerula Clínica', academia: 'Cerula Academia', restaurante: 'Cerula Restaurante', imobiliaria: 'Cerula Imobiliária', oficina: 'Cerula Oficina', farmacia: 'Cerula Farmácia' };
+  const NOMES = { crm: 'Veltria CRM', agenda: 'Veltria Agenda', financeiro: 'Veltria Financeiro', gestao: 'Veltria Gestão', juridico: 'Veltria Jurídico', clinica: 'Veltria Clínica', academia: 'Veltria Academia', restaurante: 'Veltria Restaurante', imobiliaria: 'Veltria Imobiliária', oficina: 'Veltria Oficina', farmacia: 'Veltria Farmácia' };
   const params = new URLSearchParams(location.search);
   if (params.get('origem') === 'play') {
     try { localStorage.setItem('nexo-play', '1'); } catch { /* ok */ }
@@ -14,7 +14,7 @@
   }
   const c = window.NEXO_NUVEM;
   const sb = window.supabase.createClient(c.url, c.chave, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'nexo-sessao' } });
-  const marca = '<div class="play-marca"><img src="icone-192.png" alt="" width="44" height="44"><div><b>Cerula</b><small>Blue Rose</small></div></div>';
+  const marca = '<div class="play-marca"><img src="icone-192.png" alt="" width="44" height="44"><div><b>Veltria</b><small>Blue Rose</small></div></div>';
   const pe = `<p class="play-pe"><a href="${SITE}privacidade.html">Privacidade</a> · <a href="${SITE}termos.html">Termos</a></p>`;
   const erroAuth = (e) => {
     const m = String(e?.message || e || '');
@@ -85,7 +85,7 @@
       const { error } = await sb.functions.invoke('nexo-pagamentos', { body: { acao: 'excluir_conta', confirmar: 'EXCLUIR' } });
       if (error) { let m = error.message; try { m = (await error.context.json()).erro || m; } catch { /* ok */ } ex.textContent = m; b.disabled = false; b.textContent = 'Excluir minha conta'; return; }
       await sb.auth.signOut().catch(() => {});
-      raiz.innerHTML = `${marca}<h1>Conta excluída</h1><p class="play-s">O seu login e os seus dados foram apagados. Obrigado por ter usado a Cerula.</p>${pe}`;
+      raiz.innerHTML = `${marca}<h1>Conta excluída</h1><p class="play-s">O seu login e os seus dados foram apagados. Obrigado por ter usado a Veltria.</p>${pe}`;
     };
   }
 

@@ -1,4 +1,4 @@
-/* Cerula · página do cliente final (/c/) */
+/* Veltria · página do cliente final (/c/) */
 :root { --acc: #2f6fed; --tx: #17171c; --tx-2: #4b4b55; --tx-3: #85858f; --bg: #f5f2ea; --painel: #fdfbf5; --borda: #e5e0d4; --ok: #16a34a; --er: #dc2626; --al: #d97706; color-scheme: light; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--tx); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }

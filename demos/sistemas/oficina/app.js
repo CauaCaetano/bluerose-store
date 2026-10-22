@@ -1,4 +1,4 @@
-// Cerula Oficina · pátio, ordens de serviço, orçamento digital, peças e revisões (referências: Tekmetric, Shop-Ware, Oficina Inteligente)
+// Veltria Oficina · pátio, ordens de serviço, orçamento digital, peças e revisões (referências: Tekmetric, Shop-Ware, Oficina Inteligente)
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, diasEntre, paraData,
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, kanban, DIAS, telLink, normal,
@@ -201,7 +201,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'oficina', nome: 'Cerula Oficina', sub: 'Oficinas e auto centers', cor: '#475569', icone: 'car', empresa: 'Auto Center Torque', conta: 'Mecânica geral · Goiânia',
+  id: 'oficina', nome: 'Veltria Oficina', sub: 'Oficinas e auto centers', cor: '#475569', icone: 'car', empresa: 'Auto Center Torque', conta: 'Mecânica geral · Goiânia',
   produto: { mensal: 89 }, semente, colecoes, fichas, buscaDica: 'placas, clientes e OS',
   portal: {
     os: {

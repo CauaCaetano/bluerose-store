@@ -1,5 +1,5 @@
 // =============================================================
-// Cerula · recursos comuns a todos os sistemas
+// Veltria · recursos comuns a todos os sistemas
 // -------------------------------------------------------------
 // 1. Link do cliente: cada sistema publica uma página que o cliente
 //    final abre no celular (orçamento, cardápio, proposta, processo…)

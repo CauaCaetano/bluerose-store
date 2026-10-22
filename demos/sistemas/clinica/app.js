@@ -1,4 +1,4 @@
-// Cerula Clínica · agenda médica, prontuário e convênios (referências: iClinic, Feegow, Amplimed)
+// Veltria Clínica · agenda médica, prontuário e convênios (referências: iClinic, Feegow, Amplimed)
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, paraData, minutos, hhmm,
   sorteio, soma, agrupar, av, ic, et, kpis, barras, rosca, barrasH, calGrade, DIAS, DIAS_L, telLink,
@@ -254,7 +254,7 @@ const fichas = {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'clinica', nome: 'Cerula Clínica', sub: 'Clínicas e consultórios', cor: '#0e7490', icone: 'stethoscope', empresa: 'Clínica Vitta', conta: 'Multiespecialidades · Belo Horizonte',
+  id: 'clinica', nome: 'Veltria Clínica', sub: 'Clínicas e consultórios', cor: '#0e7490', icone: 'stethoscope', empresa: 'Clínica Vitta', conta: 'Multiespecialidades · Belo Horizonte',
   produto: { mensal: 109 }, semente, colecoes, fichas, buscaDica: 'pacientes e consultas',
   portal: {
     anamnese: {

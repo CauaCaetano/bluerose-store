@@ -1,5 +1,5 @@
-// Cerula Farmácia · drogaria completa: balcão com lote e validade, receitas e controlados, cupom fiscal, convênios e serviços
-// Base do Cerula Gestão (estoque, compras, XML do fornecedor, etiquetas, curva ABC, melhores fornecedores) + o que é de farmácia.
+// Veltria Farmácia · drogaria completa: balcão com lote e validade, receitas e controlados, cupom fiscal, convênios e serviços
+// Base do Veltria Gestão (estoque, compras, XML do fornecedor, etiquetas, curva ABC, melhores fornecedores) + o que é de farmácia.
 import {
   criarApp, esc, moeda, moedaC, num, pct, hoje, agoraISO, diaMais, mesMais, nomeMes, dataCurta, dataBR, relativo, diasAte, paraData,
   sorteio, soma, agrupar, av, ic, et, telLink, kpis, barras, linhas, rosca, barrasH, normal,
@@ -605,7 +605,7 @@ function xmlExemplo(a) {
 
 // ---------------------------------------------------------------- aplicativo
 const app = criarApp({
-  id: 'farmacia', nome: 'Cerula Farmácia', sub: 'Drogaria completa', cor: '#0f766e', icone: 'pill', empresa: 'Drogaria Bem Viver', conta: 'Ribeirão Preto, SP',
+  id: 'farmacia', nome: 'Veltria Farmácia', sub: 'Drogaria completa', cor: '#0f766e', icone: 'pill', empresa: 'Drogaria Bem Viver', conta: 'Ribeirão Preto, SP',
   produto: { mensal: 149 }, semente, colecoes, fichas, buscaDica: 'remédios (nome, princípio ativo, EAN), clientes, receitas',
   modelos: [
     { id: 'drogaria', nome: 'Drogaria de bairro', desc: 'Balcão, convênios, uso contínuo e entregas', dados: {} },

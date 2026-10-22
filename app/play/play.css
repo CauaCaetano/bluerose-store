@@ -1,4 +1,4 @@
-/* Cerula · entrada do app (Google Play): marca Blue Rose, escuro, uma coluna */
+/* Veltria · entrada do app (Google Play): marca Blue Rose, escuro, uma coluna */
 body.play { min-height: 100dvh; margin: 0; display: grid; place-items: start center; padding: max(28px, env(safe-area-inset-top)) 16px 32px; color-scheme: dark;
   background: radial-gradient(90% 40% at 50% 0%, rgba(61, 107, 240, 0.28), transparent 70%), #0b0e13; color: #edf1f7;
   --tx: #edf1f7; --tx-2: #aab3c3; --tx-3: #8a93a5; --painel: #141922; --borda: #232a36; --borda-2: #313a49; --hover: rgba(214, 224, 245, .06); --acc: #3d6bf0; }

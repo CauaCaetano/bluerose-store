@@ -1,5 +1,5 @@
 // =============================================================
-// Cerula · equipe: cargos sugeridos, resumo do acesso e o editor
+// Veltria · equipe: cargos sugeridos, resumo do acesso e o editor
 // de cargo, papel e permissões. Usado pela versão na nuvem (Painel do
 // dono) e pela demonstração.
 // =============================================================

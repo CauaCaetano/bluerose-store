@@ -1,5 +1,5 @@
 // =============================================================
-// Cerula · importar planilha (Excel .xlsx ou CSV)
+// Veltria · importar planilha (Excel .xlsx ou CSV)
 // -------------------------------------------------------------
 // Lê o arquivo no próprio navegador (o .xlsx é um zip com XML; não
 // precisa de biblioteca), reconhece cada aba e cada coluna pelos nomes

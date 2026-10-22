@@ -1,4 +1,4 @@
-// Cerula · painel "Ferramentas desta aba" (ao lado de cada tela): blocos, listas, calculadoras e mensagens prontas.
+// Veltria · painel "Ferramentas desta aba" (ao lado de cada tela): blocos, listas, calculadoras e mensagens prontas.
 // Cada sistema registra as suas calculadoras com registrarCalcs({ nome: (form) => html }) e põe `lado: (app) => html` na página.
 import { esc, ic, num, telLink, avisar } from './nexo.js';
 

@@ -1,4 +1,4 @@
-// Cerula Farmácia · ferramentas: markup e margem, desconto até o PMC, dose em gotas e duração do tratamento (Básico)
+// Veltria Farmácia · ferramentas: markup e margem, desconto até o PMC, dose em gotas e duração do tratamento (Básico)
 // e uso contínuo, aniversariantes, crediário em atraso, validade curta e pedido à distribuidora (Pro).
 import { esc, moeda, hoje, diasAte, dataCurta, diaMais } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, campoN, calc, n0, fmtN, zap, registrarCalcs } from '../base/lado.js';

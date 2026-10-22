@@ -1,4 +1,4 @@
-// Cerula · service worker (gerado por tools/gerar_pwa.py)
+// Veltria · service worker (gerado por tools/gerar_pwa.py)
 const CACHE = 'nexo-app-v2';
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k.startsWith('nexo-app-') && k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())));

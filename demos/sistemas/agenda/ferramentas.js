@@ -1,4 +1,4 @@
-// Cerula Agenda · ferramentas: comissão, preço do serviço, sinal e rendimento do produto (Básico)
+// Veltria Agenda · ferramentas: comissão, preço do serviço, sinal e rendimento do produto (Básico)
 // e clientes sumidas, aniversariantes, pacotes acabando e produtos para repor (Pro).
 import { esc, moeda, hoje, diaMais, diasAte, dataCurta } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, campoN, calc, n0, fmtN, zap, copiar, registrarCalcs } from '../base/lado.js';

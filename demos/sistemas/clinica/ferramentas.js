@@ -1,4 +1,4 @@
-// Cerula Clínica · ferramentas ao lado das telas: faltas, aniversariantes, confirmações de amanhã, horários livres,
+// Veltria Clínica · ferramentas ao lado das telas: faltas, aniversariantes, confirmações de amanhã, horários livres,
 // calculadoras (IMC, gestação e dose por peso), pacientes sumidos e particular a receber.
 import { esc, moeda, hoje, diaMais, diasAte, dataCurta, dataBR, paraData, minutos, hhmm, DIAS_L } from '../base/nexo.js';
 import { bloco, ldLista, ldItem, ldNums, campoN, campoD, calc, n0, fmtN, zap, registrarCalcs } from '../base/lado.js';
