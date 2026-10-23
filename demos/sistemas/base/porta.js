@@ -108,10 +108,25 @@ function telaEmpresa(token) {
   });
 }
 
+// ---------------------------------------------------------------- em manutenção (Veltria Gestão, desde 23/10/2026)
+// Novos testes e assinaturas ficam fechados; a equipe libera o acesso de quem pedir. Quem já tem empresa liberada entra.
+const MANUTENCAO = V.categoria === 'gestao';
+function telaManutencao(podeEntrar) {
+  const wa = window.BR_WA ? `https://wa.me/${window.BR_WA}?text=${encodeURIComponent(`Olá! Quero liberar o acesso ao ${V.nome}.`)}` : `${RAIZ}#contato`;
+  return new Promise((ok) => {
+    const f = tela(`<h1>${esc(V.nome)} em manutenção</h1><p class="p-sub">No momento, a ${esc(V.nomeCategoria)} está em manutenção e novos acessos são liberados pela nossa equipe. Fale com a gente que liberamos o seu.</p>
+      <a class="p-bt" style="display:grid;place-items:center;text-decoration:none" href="${wa}" target="_blank" rel="noopener">Falar com a equipe no WhatsApp</a>
+      ${podeEntrar ? '<p class="p-ou">Já tem o acesso liberado?</p><button type="button" class="p-bt p-bt-2" data-entrar>Entrar</button>' : ''}
+      <p class="p-links"><a href="${RAIZ}demos/sistemas/${V.pasta}/${V.entrada}">Ver a demonstração</a><span>·</span><a href="${RAIZ}${V.pagina}">Voltar ao site</a></p>`);
+    const b = f.querySelector('[data-entrar]'); if (b) b.onclick = () => ok();
+  });
+}
+
 // ---------------------------------------------------------------- caminho
 async function entrar() {
   carregando('Abrindo…');
   let { data: { session } } = await sb.auth.getSession();
+  if (!session && MANUTENCAO) await telaManutencao(true);
   if (!session) session = await telaConta(new URLSearchParams(location.search).has('criar') ? 'criar' : 'entrar');
   carregando('Conferindo o seu acesso…');
   await sb.rpc('nexo_aceitar_convites').then(() => {}, () => {});
@@ -119,6 +134,7 @@ async function entrar() {
   espacos = espacos || [];
   const meus = espacos.filter((e) => e.dono === session.user.id);
   let esp = espacos.find((e) => e.id === localStorage.getItem(`nexo-espaco-${V.id}`) && valeEspaco(e)) || espacos.find(valeEspaco);
+  if (!esp && MANUTENCAO) { await telaManutencao(false); return; }
   if (!esp) {
     // sem empresa liberada: confere teste e assinatura do próprio login
     const r = await pagamentos({ acao: 'status' }).catch(() => ({ assinaturas: [], tokens: {} }));
