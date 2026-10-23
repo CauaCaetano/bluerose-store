@@ -37,7 +37,7 @@
   // D = data relativa (vencimento, prazo, horário marcado: diminui); H = "há X dias" (sem contato, fiado desde: aumenta).
   // Durações e dias do mês (prazo do fornecedor, validade do orçamento, dia de pagamento da conta fixa) não entram.
   var DIAS = {
-    agendaessencial: 'D clientes[].ultima ags[].dia pedidos[].dia', agendacompleto: 'D ags[].dia',
+    agendaessencial: 'D clientes[].ultima ags[].dia pedidos[].dia', agendacompleto: 'D ags[].dia bloqueios[].dia clientes[].ultima',
     crmessencial: 'D negocios[].prox.dia negocios[].notas[].dia negocios[].quando', crmcompleto: 'D atividades[].dia H deals[].sem deals[].hist[].d propostas[].enviada',
     farmaciaessencial: 'D prods[].lotes[].val clientes[].ultima receitas[].dia vendas[].dia', farmaciacompleto: 'D prods[].lotes[].val livro[].dia servicos[].dia', farmaciaavancado: 'D campanhas[].fim',
     financeiroessencial: 'D movs[].dia cobrancas[].vence cobrancas[].avisos[] contas[].vence recibos[].dia historico[].dia', financeirocompleto: 'D lancs[].venc lancs[].avisos[] lancs[].pagamentos[].dia extrato[].dia orcs[].dia transferencias[].dia', financeiroavancado: 'D pags[].venc pags[].pagoEm pags[].baixas[].dia recs[].venc recs[].baixas[].dia movs[].dia contas[].desde mutuos[].dia extrato[].dia',

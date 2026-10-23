@@ -43,7 +43,6 @@ main { padding: 18px 20px 40px; max-width: 1440px; margin: 0 auto; outline: none
 
 /* o balcão: três colunas */
 .balcao { display: grid; grid-template-columns: 250px 1fr 320px; gap: 14px; align-items: start; }
-@media (max-width: 1280px) { .balcao { grid-template-columns: 220px 1fr; } .comanda { grid-column: 1 / -1; } }
 @media (max-width: 820px) { .balcao { grid-template-columns: 1fr; } }
 .caixa-b { background: var(--papel-2); border: 1px solid var(--areia); border-radius: 12px; padding: 14px; min-width: 0; }
 .caixa-b h2 { margin: 0 0 10px; font-size: .98rem; display: flex; justify-content: space-between; align-items: center; }
@@ -162,3 +161,6 @@ td input[data-com] { min-height: 34px; border: 1px solid var(--areia); border-ra
   .balcao { grid-template-columns: 1fr; } .balcao > .caixa-b, .balcao > .grade-p { min-height: 0; max-height: none; }
   .topo-s h1 { font-size: 1.7rem; } .c4, .c5, .c6, .c7, .c8, .c3 { grid-column: span 12; }
 }
+
+/* bloqueio de horário (almoço, folga) na grade */
+.bloco.bloqueio { background: repeating-linear-gradient(135deg, #eceae4 0 6px, #f6f4ef 6px 12px); color: #6b6f7a; border-color: #d6d2c8; cursor: pointer; }
