@@ -354,11 +354,43 @@
       g.appendChild(mais);
     });
   }
+  // ---------------------------------------------------------------- Assistente IA com a personagem (a mesma do PlayCell)
+  // acha o painel do assistente de cada sistema pelo campo de pergunta; a personagem acena ao abrir, pensa enquanto a IA
+  // responde, explica quando a resposta chega e faz "não sei" no erro. A figura antiga do cabeçalho (a rosa) sai.
+  var tIA = 0, PERGUNTA = /pergunt|pergunte|o que (você|vc)|ask|copiloto/i;
+  function paineisIA(raiz) {
+    (raiz.querySelectorAll ? raiz : document).querySelectorAll('input[placeholder], textarea[placeholder]').forEach(function (i) {
+      if (i.closest('.vk-busca,.vk-menu,.vc-caixa,form.ve-form')) return;
+      var p = i.closest('aside,section,dialog,[role=dialog],[class*=ia],[class*=copiloto],[class*=assist],[class*=caixa]') || i.parentElement;
+      var tit = (p.querySelector('h1,h2,h3,strong,b') || {}).textContent || '';
+      if (!PERGUNTA.test(i.placeholder + ' ' + (i.className || '')) && !/assistente|copiloto/i.test(tit)) return;
+      if (!p || p.querySelector('.vk-ia') || p.closest('.vk-ia')) return;
+      var r = p.getBoundingClientRect(); if (r.width < 260 || r.height < 180) return;
+      p.querySelectorAll('img').forEach(function (im) { var b = im.getBoundingClientRect(); if (b.width && b.width <= 140 && b.top - r.top < 220 && /rosa|veltria|ia|assist|logo/i.test(im.src)) im.style.display = 'none'; });
+      var box = document.createElement('div'); box.className = 'vk-ia'; box.setAttribute('aria-hidden', 'true');
+      p.insertBefore(box, p.firstElementChild && p.firstElementChild.matches('h1,h2,h3,header,.cab,[class*=cab]') ? p.firstElementChild.nextSibling : p.firstChild);
+      import(BASE + 'assistente-ia.js').then(function (m) {
+        var b = m.personagemIA(box, 'ola'); b.estado('ola', 2600);
+        var esperando = false, quando = 0;
+        var pensa = function () { esperando = true; quando = Date.now(); b.estado('pensando'); };
+        p.addEventListener('submit', pensa, true);
+        i.addEventListener('keydown', function (e) { if (e.key === 'Enter' && i.value.trim().length > 1) pensa(); });
+        p.addEventListener('click', function (e) { var bt = e.target.closest('button'); if (bt && bt.closest('form') || bt && /sugest|chip|pergunta|atalho/i.test(bt.className + ' ' + (bt.parentElement || {}).className)) pensa(); });
+        new MutationObserver(function (ms) {
+          if (!esperando || Date.now() - quando < 250) return;
+          var t = ms.map(function (x) { return [].map.call(x.addedNodes, function (n) { return n.textContent || ''; }).join(' '); }).join(' ');
+          if (!t.trim() || /pensando|digitando|…$/i.test(t.trim())) return;
+          esperando = false; b.estado(/não consegui|erro|entre de novo|tente de novo/i.test(t) ? 'naosei' : 'explicando', 5000);
+        }).observe(p, { childList: true, subtree: true });
+      }).catch(function () { box.remove(); });
+    });
+  }
   // a opção de escrever aparece já na abertura do formulário, não só depois do primeiro clique no campo
   function outroAoAbrir(raiz) {
     if (!raiz.querySelectorAll) return;
     raiz.querySelectorAll('select').forEach(function (s) { if (s.closest(FORMS)) poeOutro(s); });
     chipsComOutro(raiz);
+    clearTimeout(tIA); tIA = setTimeout(function () { paineisIA(document); }, 120); // uma busca por rodada de mudanças
   }
   new MutationObserver(function (ms) { ms.forEach(function (x) { x.addedNodes.forEach(function (n) { if (n.nodeType === 1) outroAoAbrir(n.parentNode || n); }); }); }).observe(document.body, { childList: true, subtree: true });
   outroAoAbrir(document);
@@ -444,6 +476,7 @@
     '.vk-apoio .vk-num{display:grid}.vk-apoio .vk-num b{font-size:1.6rem;line-height:1.1}.vk-apoio .vk-num span,.vk-apoio .vk-rec span{opacity:.7}.vk-apoio .vk-rec{display:grid;gap:2px;min-width:180px}.vk-apoio .vk-atalhos{margin-left:auto}' +
     '@media (max-width:700px){.vk-apoio .vk-atalhos{margin-left:0}}@media print{.vk-lado,.vk-apoio{display:none!important}}' +
     '.vk-tut{margin:4px 0 14px}.vk-tut summary{cursor:pointer;font-weight:600;color:#2a4fa8}.vk-tut video{width:100%;margin-top:8px;border-radius:10px;background:#05070b}' +
+    '.vk-ia{display:flex;justify-content:center;margin:2px 0 8px}.vk-ia canvas{height:118px;width:auto;image-rendering:pixelated;image-rendering:crisp-edges}' +
     'html.no-celular .vk-mais{display:none}@media print{.vk-mais,.vk-menu{display:none}}';
   function montar() {
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
