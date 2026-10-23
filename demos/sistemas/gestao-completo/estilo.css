@@ -218,3 +218,13 @@ textarea.campo { padding: 10px 14px; min-height: 80px; }
 .semana .dia.top .barra { background: var(--navy); }
 .semana-pe { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 18px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--linha); color: var(--tinta-3); font-size: .88rem; }
 .semana-pe b { color: var(--tinta); margin-left: 4px; font-variant-numeric: tabular-nums; }
+
+/* etiquetas de preço e impressão só da gaveta */
+.etiq-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.etiq-p { border: 1px dashed var(--camelo, #c6ad91); border-radius: 6px; padding: 8px 10px; display: grid; gap: 2px; background: #fff; }
+.etiq-p b { font-size: .82rem; line-height: 1.2; } .etiq-p span { font: 700 1.25rem var(--titulo, inherit); } .etiq-p s { font-size: .8rem; opacity: .6; } .etiq-p small { font-size: .7rem; color: var(--tinta-3, #777); letter-spacing: .04em; }
+@media print { body.so-gaveta > *:not(#gaveta) { display: none !important; } body.so-gaveta #gaveta { position: static; transform: none; width: auto; box-shadow: none; max-height: none; } body.so-gaveta .gaveta-cab, body.so-gaveta .gaveta-pe, body.so-gaveta .dica { display: none; } .etiq-p { break-inside: avoid; } }
+
+/* faixa da demonstração: quebra linha e esconde o texto longo antes de estourar a largura */
+.faixa-demo { flex-wrap: wrap; }
+@media (max-width: 960px) { .faixa-demo .so-pc { display: none; } }
