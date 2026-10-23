@@ -1,5 +1,5 @@
 // Início: roteiro do filme do notebook. Cada cena: frase de abertura, a tela sobe, o cursor clica, o sistema responde, a câmera aproxima e passa para a próxima.
-// Só roda com o notebook visível; com movimento reduzido fica a primeira cena parada (o HTML já é o estado final).
+// Roda sempre em loop; com movimento reduzido fica a primeira cena parada (o HTML já é o estado final).
 (function () {
   var raiz = document.querySelector('.nb-telas.mx');
   if (!raiz || !raiz.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -228,19 +228,8 @@
     luz.animate([{ transform: 'translate(-4%,-3%)' }, { transform: 'translate(6%,5%)' }], { duration: 9000, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' });
     (function proxima() { cena(cenas[i], g).then(function () { i = (i + 1) % cenas.length; proxima(); }, function (e) { if (!(e instanceof Parou)) console.error(e); }); })();
   }
-  function para() {
-    geracao++; some();
-    cenas.forEach(limpa); luz.getAnimations().forEach(function (a) { a.cancel(); });
-    raiz.classList.remove('mx-vivo'); raiz.style.backgroundColor = '';
-    if (url) url.textContent = cenas[0].getAttribute('data-url');
-  }
 
-  var visivel = false, tocando = false;
-  function decide() {
-    var deve = visivel && !document.hidden;
-    if (deve && !tocando) { tocando = true; filme(); }
-    else if (!deve && tocando) { tocando = false; para(); }
-  }
-  new IntersectionObserver(function (es) { visivel = es[0].isIntersecting; decide(); }, { threshold: 0.25 }).observe(raiz);
-  document.addEventListener('visibilitychange', decide);
+
+  // roda sempre, do carregamento em diante, mesmo com o notebook fora da tela ou a aba em segundo plano
+  filme();
 })();
