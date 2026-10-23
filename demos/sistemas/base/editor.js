@@ -31,6 +31,8 @@
     ticket: 'Ticket médio', perdas: 'Perdas', ruptura: 'Itens em falta', vencendo: 'Vencendo', generico: 'Genéricos (0 a 1)', perf: 'Perfumaria (0 a 1)', saldo: 'Saldo', limite: 'Limite',
     cen: 'Centro', sav: 'Savassi', con: 'Contagem', bet: 'Betim', dist: 'Distribuidora', log: 'Logística', ct: 'Contagem', bt: 'Betim', pp: 'Pampulha',
     matriz: 'Matriz', filial: 'Filial', mo: 'Mão de obra', cmv: 'Custo das peças', comissoes: 'Comissões', fixas: 'Despesas fixas', pend: 'Pendentes', div: 'Divergências' };
+  // campos que a tela só entende com os valores dela (situação, etapa, unidade): lista fechada
+  var FECHADO = /^(st|status|situacao|etapa|un|fase|modo|camada|estado|nivel|papel|polo|tipo|urg|risco)$/;
   var rotulo = function (k) { return CAMPOS[k] || k.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, function (c) { return c.toUpperCase(); }); };
   var nomeLista = function (k) { return LISTAS[k] || rotulo(k); };
   var titulo = function (x) { return x && typeof x === 'object' ? (x.nome || x.cliente || x.titulo || x.desc || x.prod || x.conta || x.empresa || x.placa || x.cnj || x.serv || x.id || '') : String(x); };
@@ -38,6 +40,7 @@
   var hojeMs = function () { return Date.parse(new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)); };
   var dataDe = function (n) { return new Date(hojeMs() + n * 864e5).toISOString().slice(0, 10); };
 
+  window.veltriaEditorListas = function (dados) { var m = dados._modelos || {}; return Object.keys(dados).filter(function (k) { return Array.isArray(dados[k]) && !FORA.test(k) && (dados[k].length ? typeof dados[k][0] === 'object' : !!m[k]); }).map(function (k) { return [k, nomeLista(k)]; }); };
   window.veltriaEditor = function (o) {
     var d = JSON.parse(JSON.stringify(o.dados)), modelos = d._modelos || {};
     // campos de data relativa desta versão: "lista.campo" -> 'D' (data) ou 'H' (há quantos dias)
@@ -104,8 +107,8 @@
       aberto = l; var itens = d[l], m = itens[0] || modelos[l] || {};
       var cols = Object.keys(m).filter(function (c) { return c !== 'id' && (typeof m[c] !== 'object' || m[c] === null); }).slice(0, 4);
       cx.innerHTML = '<p><button type="button" class="ve-volta" data-ve-inicio>‹ Todas as listas</button></p><h2>' + esc(nomeLista(l)) + ' <small class="vc-mudo">(' + itens.length + ')</small></h2>' +
-        '<div class="ve-acoes"><button type="button" class="vc-bt" data-ve-novo>+ Adicionar</button><label class="vc-bt vc-2 ve-arq">Importar planilha (CSV)<input type="file" accept=".csv,text/csv" data-ve-csv hidden></label></div>' +
-        '<p class="vc-mudo ve-dica">Planilha: a primeira linha com os nomes das colunas (' + esc(Object.keys(m).filter(function (c) { return typeof m[c] !== 'object' || m[c] === null; }).join(', ')) + '). Separador vírgula ou ponto e vírgula.</p>' +
+        '<div class="ve-acoes"><button type="button" class="vc-bt" data-ve-novo>+ Adicionar</button><label class="vc-bt vc-2 ve-arq">Importar planilha (Excel ou CSV)<input type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-ve-csv hidden></label></div>' +
+        '<p class="vc-mudo ve-dica">Planilha: a primeira linha com os nomes das colunas (' + esc(Object.keys(m).filter(function (c) { return typeof m[c] !== 'object' || m[c] === null; }).join(', ')) + '). Vale planilha do Excel (.xlsx) ou CSV.</p>' +
         '<div class="ve-tab"><table><thead><tr>' + cols.map(function (c) { return '<th>' + esc(rotulo(c)) + '</th>'; }).join('') + '<th></th></tr></thead><tbody>' +
         itens.slice(0, 300).map(function (x, i) { return '<tr>' + cols.map(function (c) { return '<td>' + esc(mostra(l, c, x[c])) + '</td>'; }).join('') + '<td class="ve-bts"><button type="button" data-ve-edita="' + i + '">Editar</button><button type="button" data-ve-apaga="' + i + '">Apagar</button></td></tr>'; }).join('') +
         '</tbody></table>' + (itens.length ? '' : '<p class="vc-mudo">Nada cadastrado ainda.</p>') + (itens.length > 300 ? '<p class="vc-mudo">Mostrando os 300 primeiros.</p>' : '') + '</div><p class="vc-mudo" data-ve-salvo></p>';
@@ -123,7 +126,8 @@
           var val = base[c], rel = relativos[l + '.' + c], ref = refs[l + '.' + c], nome = 'c_' + c;
           if (ref) return '<label>' + esc(rotulo(c)) + '<select name="' + nome + '"><option value=""></option>' + opcoes(ref).map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === val ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select></label>';
           var fx = fixos[l + '.' + c];
-          if (fx && typeof val === 'string') return '<label>' + esc(rotulo(c)) + '<select name="' + nome + '">' + fx.map(function (x) { return '<option' + (x === val ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select></label>';
+          if (fx && typeof val === 'string' && FECHADO.test(c)) return '<label>' + esc(rotulo(c)) + '<select name="' + nome + '">' + fx.map(function (x) { return '<option' + (x === val ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select></label>';
+          if (fx && typeof val === 'string') return '<label>' + esc(rotulo(c)) + '<input name="' + nome + '" list="ve-dl-' + c + '" value="' + esc(novo ? '' : val) + '" placeholder="Escolha ou escreva"><datalist id="ve-dl-' + c + '">' + fx.map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist></label>';
           if (typeof val === 'boolean') return '<label class="ve-chk"><input type="checkbox" name="' + nome + '"' + (val ? ' checked' : '') + '> ' + esc(rotulo(c)) + '</label>';
           if (rel === 'D') return '<label>' + esc(rotulo(c)) + '<input type="date" name="' + nome + '" value="' + (typeof val === 'number' && !novo ? dataDe(val) : '') + '"></label>';
           if (rel === 'H') return '<label>' + esc(rotulo(c)) + ' (há quantos dias)<input type="number" name="' + nome + '" value="' + (novo ? 0 : val) + '"></label>';
@@ -139,7 +143,7 @@
           else if (typeof antes === 'number') item[c] = el.value === '' ? 0 : Number(String(el.value).replace(',', '.'));
           else item[c] = el.value;
         });
-        if (novo) { poeId(l, item); d[l].unshift(item); }
+        if (novo) { poeId(l, item); d[l].unshift(item); if (window.veltriaMarca) window.veltriaMarca('primeiro'); }
         salvarTudo().then(function () { lista(l); });
       };
     }
@@ -168,8 +172,16 @@
       return linhas;
     }
     function importa(l, arquivo) {
-      var r = new FileReader(); r.onload = function () {
-        var linhas = csv(String(r.result).replace(/^﻿/, '')); if (linhas.length < 2) { cx.querySelector('[data-ve-salvo]').textContent = 'A planilha está vazia.'; return; }
+      var aviso = function (t) { var m = cx.querySelector('[data-ve-salvo]'); if (m) m.textContent = t; };
+      var xlsx = /\.xlsx$/i.test(arquivo.name);
+      var ler = xlsx ? arquivo.arrayBuffer().then(function (b) { return (window.veltriaLerXlsx ? Promise.resolve() : new Promise(function (ok, f) { var s = document.createElement('script'); s.src = new URL('le-xlsx.js?v=1', document.querySelector('script[src*="editor.js"]').src).href; s.onload = ok; s.onerror = f; document.head.appendChild(s); })).then(function () { return window.veltriaLerXlsx(b); }); })
+        : arquivo.text().then(function (t) { return csv(t.replace(/^\uFEFF/, '')); });
+      aviso('Lendo a planilha…');
+      ler.then(function (linhas) { processa(l, linhas); }).catch(function (x) { aviso(x.message || 'Não consegui ler essa planilha.'); });
+    }
+    function processa(l, linhas) {
+      var r = { result: '' }; (function () {
+        if (linhas.length < 2) { cx.querySelector('[data-ve-salvo]').textContent = 'A planilha está vazia.'; return; }
         var m = d[l][0] || modelos[l] || {}, chaves = Object.keys(m), norm = function (s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
         var col = linhas[0].map(function (h) { var n = norm(h); return chaves.find(function (k) { return norm(k) === n || norm(rotulo(k)) === n; }) || null; });
         if (!col.some(Boolean)) { cx.querySelector('[data-ve-salvo]').textContent = 'Nenhuma coluna reconhecida. Use na primeira linha: ' + chaves.join(', ') + '.'; return; }
@@ -183,9 +195,9 @@
             else item[k] = t; });
           poeId(l, item); d[l].push(item); n++;
         });
+        if (window.veltriaMarca && n) window.veltriaMarca('importou');
         salvarTudo().then(function () { lista(l); cx.querySelector('[data-ve-salvo]').textContent = n + ' itens importados.'; });
-      };
-      r.readAsText(arquivo, 'utf-8');
+      })();
     }
     cx.addEventListener('click', function (e) {
       var b = e.target.closest('button,[data-ve-lista],[data-ve-grupo]'); if (!b) return;
@@ -197,9 +209,16 @@
       else if (b.dataset.veApaga) { var x = d[aberto][Number(b.dataset.veApaga)]; if (confirm('Apagar "' + titulo(x) + '"?')) { d[aberto].splice(Number(b.dataset.veApaga), 1); salvarTudo().then(function () { lista(aberto); }); } }
     });
     cx.addEventListener('change', function (e) { if (e.target.matches('[data-ve-csv]') && e.target.files[0]) importa(aberto, e.target.files[0]); });
-    inicio();
+    if (o.abrir && o.abrir.lista && listas.indexOf(o.abrir.lista) >= 0) {
+      lista(o.abrir.lista);
+      if (o.abrir.acao === 'novo') form(o.abrir.lista, null);
+      else if (o.abrir.acao === 'importar') setTimeout(function () { var i = cx.querySelector('[data-ve-csv]'); if (i) i.click(); }, 50);
+    } else inicio();
     var st = document.createElement('style');
-    st.textContent = '.ve-caixa{width:min(860px,100%)!important}.ve-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin:12px 0}' +
+    // a janela leva o próprio estilo (na demonstração não há o conta-nuvem.js)
+    st.textContent = '.vc-veu{position:fixed;inset:0;background:rgba(10,12,18,.6);display:grid;place-items:center;z-index:9999;padding:16px}.vc-caixa{background:#fbfaf7;color:#1d2230;border-radius:16px;max-height:88vh;overflow:auto;padding:20px 22px;font:15px/1.5 system-ui,sans-serif;box-sizing:border-box}' +
+      '.vc-caixa h2{margin:0 0 6px;font-size:1.2rem}.vc-mudo{color:#6b7080;font-size:.88rem}.vc-bt{min-height:42px;border-radius:10px;border:1px solid #1d2230;background:#1d2230;color:#fff;padding:0 16px;font:600 .95rem system-ui,sans-serif;cursor:pointer;margin:6px 6px 0 0}.vc-bt.vc-2{background:transparent;color:#1d2230}' +
+      '.ve-caixa{width:min(860px,100%)!important}.ve-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin:12px 0}' +
       '.ve-item{display:grid;gap:2px;text-align:left;padding:10px 12px;border:1px solid #e1dfd8;border-radius:12px;background:#fff;cursor:pointer;font:inherit;color:inherit}.ve-item small{color:#6b7080}.ve-num{background:#f6f3ec}' +
       '.ve-volta{border:0;background:none;color:#44506a;cursor:pointer;font:inherit;padding:0}.ve-acoes{display:flex;gap:8px;flex-wrap:wrap}.ve-arq{display:inline-flex;align-items:center}.ve-dica{font-size:.82rem}' +
       '.ve-tab{overflow:auto;max-height:52vh;border:1px solid #ecebe6;border-radius:10px;margin-top:8px}.ve-tab table{width:100%;border-collapse:collapse;font-size:.88rem}.ve-tab th,.ve-tab td{padding:7px 9px;border-bottom:1px solid #ecebe6;text-align:left;white-space:nowrap}' +

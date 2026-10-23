@@ -32,9 +32,10 @@ function semente() {
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semente(); } catch { return semente(); } })();
 window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const guarda = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('Sem espaço no navegador.'); } };
-const pro = (id) => db.pros.find((p) => p.id === id);
-const sv = (id) => db.servs.find((s) => s.id === id);
-const prod = (id) => db.prods.find((p) => p.id === id);
+// profissional, serviço ou produto apagado: um vazio no lugar, para a agenda não quebrar
+const pro = (id) => db.pros.find((p) => p.id === id) || { id: '', nome: '—', area: '', cor: '#8a8f9c', com: 0, comProd: 0 };
+const sv = (id) => db.servs.find((s) => s.id === id) || { id: '', nome: '—', min: 30, preco: 0 };
+const prod = (id) => db.prods.find((p) => p.id === id) || { id: '', nome: '—', preco: 0, custo: 0, qtd: 0, min: 0 };
 const cli = (id) => db.clientes.find((c) => c.id === id) || { nome: '—', tel: '' };
 // atendimentos de hoje (dia 0); "dia" ausente vale hoje (dados de antes desta mudança)
 const agsHoje = () => db.ags.filter((a) => (a.dia || 0) === 0);

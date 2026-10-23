@@ -67,10 +67,11 @@
   window.veltriaConta = { espaco: info.espaco, empresa: info.empresa, app: app }; // o link de agendamento da Agenda usa a empresa
 
   // recarregando: a tela ainda tem os dados antigos na memória; gravar agora apagaria o que chegou da equipe
-  var recarregando = false;
+  var recarregando = false, avisouLeitura = false;
   P.setItem = function (k, v) {
     if (this === localStorage && k === CHAVE) {
       if (recarregando) return;
+      if (window.veltriaPermissoes && window.veltriaPermissoes.so_leitura) { if (!avisouLeitura) { avisouLeitura = true; aviso('O seu acesso é só para ver: as alterações não são salvas.'); } return; }
       // primeira gravação da empresa: já marca o dia de referência das datas relativas
       if (v.indexOf('"_dia0"') < 0 && /^\{.+\}$/.test(v)) v = v.slice(0, -1) + ',"_dia0":"' + hojeSP() + '"}';
       gravar.call(this, NS, v); agendar(); return;
@@ -203,7 +204,10 @@
     '.vc-caixa .vc-bt{min-height:42px;border-radius:10px;border:1px solid #1d2230;background:#1d2230;color:#fff;padding:0 16px;font:600 .95rem system-ui,sans-serif;cursor:pointer;margin:6px 6px 0 0}.vc-caixa .vc-bt.vc-2{background:transparent;color:#1d2230}' +
     '.vc-caixa ul{list-style:none;padding:0;margin:8px 0}.vc-caixa li{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #ecebe6;font-size:.92rem}.vc-caixa .vc-planos label{display:flex;gap:8px;align-items:center;border:1px solid #e1dfd8;border-radius:10px;padding:8px 10px}' +
     '.vc-aviso{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#141820;color:#fff;padding:10px 16px;border-radius:12px;z-index:9999;max-width:90vw;font:14px system-ui,sans-serif}' +
-    'html.modo-conta.no-celular .vc-faixa{display:none}';
+    'html.modo-conta.no-celular .vc-faixa{display:none}' +
+    '.vc-mini{border:1px solid #cfd2da;background:#fff;border-radius:8px;padding:3px 9px;margin-left:4px;cursor:pointer;font:inherit;font-size:.82rem}.vc-pessoa{display:grid;gap:8px}.vc-pessoa fieldset{border:1px solid #ecebe6;border-radius:10px;padding:8px 10px;margin:0}' +
+    '.vc-pessoa legend{font-size:.85rem;color:#6b7080;padding:0 4px}.vc-telas{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 10px}.vc-pessoa label{margin:2px 0}.vc-pessoa input[list]{width:100%;min-height:40px;border:1px solid #cfd2da;border-radius:10px;padding:0 10px;font:inherit}' +
+    '.vc-convite{margin:10px 0}.vc-convite summary{display:inline-flex;align-items:center;list-style:none}.vc-convite summary::-webkit-details-marker{display:none}.vc-faixa .vc-salvo[data-e=ler]{color:#ffd58a;opacity:1}';
   function caixa(html, liga) {
     var v = document.createElement('div'); v.className = 'vc-veu'; v.innerHTML = '<div class="vc-caixa" role="dialog" aria-modal="true">' + html + '</div>'; document.body.appendChild(v);
     var fecha = function () { v.remove(); };
@@ -237,36 +241,111 @@
       };
     });
   }
+  // ---------------------------------------------------------------- equipe: convites, cargos e permissões
+  // Cada pessoa: papel (membro ou administrador, só o dono escolhe) e permissões em nexo_membros.permissoes:
+  // { cargo, so_leitura, telas: ['#rota', ...] }. "Só ver" é barrado também no servidor (nexo_privado.pode_escrever);
+  // as telas que a pessoa não vê somem do menu (aplicarPermissoes, ao abrir o sistema).
+  var CARGOS = { agenda: ['Recepção', 'Profissional', 'Gerente', 'Caixa'], crm: ['Vendedor', 'Pré-vendas', 'Gerente comercial', 'Financeiro'], farmacia: ['Balconista', 'Farmacêutico', 'Caixa', 'Gerente'],
+    financeiro: ['Financeiro', 'Contador', 'Gerente', 'Auxiliar'], gestao: ['Caixa', 'Estoquista', 'Vendedor', 'Gerente'], juridico: ['Advogado', 'Estagiário', 'Secretária', 'Financeiro'],
+    obras: ['Engenheiro', 'Mestre de obras', 'Compras', 'Financeiro'], oficina: ['Mecânico', 'Recepção', 'Peças', 'Gerente'] }[app.replace(/(essencial|completo|avancado)$/, '')] || ['Gerente', 'Atendimento', 'Financeiro'];
+  function telasDoMenu() {
+    var vistas = {}, l = [];
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      var h = a.getAttribute('href'), t = (a.textContent || '').replace(/\s+/g, ' ').trim();
+      if (h.length > 1 && t && t.length < 40 && !vistas[h] && !/assinatura|recomecar/.test(h)) { vistas[h] = 1; l.push([h, t]); }
+    });
+    return l;
+  }
+  function editorPessoa(m, salvar) {
+    var p = m.permissoes || {}, telas = telasDoMenu(), sel = p.telas || telas.map(function (t) { return t[0]; });
+    return '<form class="vc-pessoa"><label>Cargo<input name="cargo" list="vc-cargos" value="' + esc(p.cargo || '') + '" placeholder="Escolha ou escreva"><datalist id="vc-cargos">' + CARGOS.map(function (c) { return '<option value="' + esc(c) + '">'; }).join('') + '</datalist></label>' +
+      (info.dono && m.papel !== 'dono' ? '<label><input type="checkbox" name="admin"' + (m.papel === 'admin' ? ' checked' : '') + '> Administrador (vê e muda tudo, inclusive a equipe)</label>' : '') +
+      '<fieldset class="vc-acesso"><legend>Acesso</legend><label><input type="radio" name="ler" value="0"' + (p.so_leitura ? '' : ' checked') + '> Pode alterar</label><label><input type="radio" name="ler" value="1"' + (p.so_leitura ? ' checked' : '') + '> Só ver</label></fieldset>' +
+      (telas.length ? '<fieldset class="vc-telas"><legend>Telas que vê</legend>' + telas.map(function (t) { return '<label><input type="checkbox" name="tela" value="' + esc(t[0]) + '"' + (sel.indexOf(t[0]) >= 0 ? ' checked' : '') + '> ' + esc(t[1]) + '</label>'; }).join('') + '</fieldset>' : '') +
+      '<p class="vc-mudo" data-erro></p><button class="vc-bt">' + salvar + '</button></form>';
+  }
+  function lerPessoa(f, todas) {
+    var marcadas = [].slice.call(f.querySelectorAll('[name=tela]:checked')).map(function (i) { return i.value; });
+    return { cargo: f.cargo.value.trim().slice(0, 40), so_leitura: f.querySelector('[name=ler]:checked').value === '1', telas: marcadas.length === todas ? null : marcadas };
+  }
   function equipe() {
-    caixa('<h2>Equipe</h2><p class="vc-mudo">Cada pessoa entra com o próprio e-mail e vê os mesmos dados da empresa. No Básico, até 5 pessoas além de você.</p><ul id="vc-eq"><li>Carregando…</li></ul>' +
-      (info.dono ? '<form><label>Convidar por e-mail<input type="email" name="email" required></label><label><input type="checkbox" name="ler"> Só pode ver (não altera nada)</label><p class="vc-mudo" data-erro></p><button class="vc-bt">Mandar convite</button></form>' : '') + '<button class="vc-bt vc-2" data-vc-fecha>Fechar</button>', function (cx) {
+    var gestor = info.dono || info.papel === 'admin';
+    caixa('<h2>Equipe</h2><p class="vc-mudo">Cada pessoa entra com o próprio e-mail. Escolha o cargo, se pode alterar ou só ver e quais telas aparecem para ela. No Básico, até 5 pessoas além de você; no Pro, sem limite.</p><ul id="vc-eq"><li>Carregando…</li></ul><div id="vc-ed"></div>' +
+      (gestor ? '<details class="vc-convite"><summary class="vc-bt">Convidar pessoa</summary><label>E-mail<input type="email" name="email" form="vc-conv" required></label><div id="vc-conv-campos"></div></details>' : '') + '<button class="vc-bt vc-2" data-vc-fecha>Fechar</button>', function (cx) {
+      var membros = [];
       function listar() {
-        cliente().then(function (sb) { return Promise.all([sb.from('nexo_membros').select('email,papel').eq('espaco', info.espaco), info.dono ? sb.from('nexo_convites').select('email').eq('espaco', info.espaco) : { data: [] }]); }).then(function (r) {
-          cx.querySelector('#vc-eq').innerHTML = (r[0].data || []).map(function (m) { return '<li><span>' + esc(m.email) + '</span><span>' + (m.papel === 'dono' ? 'dono' : 'equipe') + '</span></li>'; }).join('') + (r[1].data || []).map(function (c) { return '<li><span>' + esc(c.email) + '</span><span>convite enviado</span></li>'; }).join('');
+        cliente().then(function (sb) { return Promise.all([sb.from('nexo_membros').select('usuario,email,papel,permissoes').eq('espaco', info.espaco), gestor ? sb.from('nexo_convites').select('email,permissoes,papel').eq('espaco', info.espaco) : { data: [] }]); }).then(function (r) {
+          membros = r[0].data || [];
+          cx.querySelector('#vc-eq').innerHTML = membros.map(function (m, i) {
+            var p = m.permissoes || {}, desc = m.papel === 'dono' ? 'dono' : m.papel === 'admin' ? 'administrador' : (p.cargo || 'equipe') + (p.so_leitura ? ' · só ver' : '') + (p.telas ? ' · ' + p.telas.length + ' telas' : '');
+            return '<li><span>' + esc(m.email) + '<small class="vc-mudo"> · ' + esc(desc) + '</small></span>' + (gestor && m.papel !== 'dono' && (info.dono || m.papel === 'membro') ? '<span><button type="button" class="vc-mini" data-ed="' + i + '">Editar</button><button type="button" class="vc-mini" data-tira="' + i + '">Remover</button></span>' : '') + '</li>';
+          }).join('') + (r[1].data || []).map(function (c) { return '<li><span>' + esc(c.email) + '<small class="vc-mudo"> · convite enviado' + (c.permissoes && c.permissoes.cargo ? ' · ' + esc(c.permissoes.cargo) : '') + '</small></span>' + (gestor ? '<button type="button" class="vc-mini" data-cancela="' + esc(c.email) + '">Cancelar</button>' : '') + '</li>'; }).join('');
         });
       }
       listar();
-      var f = cx.querySelector('form'); if (!f) return;
+      cx.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-ed],[data-tira],[data-cancela]'); if (!b) return;
+        if (b.dataset.ed) {
+          var m = membros[Number(b.dataset.ed)], ed = cx.querySelector('#vc-ed');
+          ed.innerHTML = '<h3 style="margin:12px 0 4px">' + esc(m.email) + '</h3>' + editorPessoa(m, 'Salvar acesso');
+          var f = ed.querySelector('form'); f.onsubmit = function (ev) {
+            ev.preventDefault(); var perm = lerPessoa(f, telasDoMenu().length), adm = f.admin ? f.admin.checked : m.papel === 'admin';
+            cliente().then(function (sb) {
+              var passo = adm !== (m.papel === 'admin') && info.dono ? sb.rpc('nexo_definir_papel', { p_espaco: info.espaco, p_usuario: m.usuario, p_papel: adm ? 'admin' : 'membro' }) : Promise.resolve({});
+              return passo.then(function (r) { if (r.error) throw r.error; return adm ? {} : sb.rpc('nexo_definir_permissoes', { p_espaco: info.espaco, p_usuario: m.usuario, p_permissoes: perm }); });
+            }).then(function (r) { if (r && r.error) throw r.error; ed.innerHTML = ''; listar(); aviso('Acesso salvo. Vale na próxima vez que a pessoa abrir o sistema.'); })
+              .catch(function (x) { f.querySelector('[data-erro]').textContent = x.message; });
+          };
+        } else if (b.dataset.tira) {
+          var mt = membros[Number(b.dataset.tira)]; if (!confirm('Tirar ' + mt.email + ' da equipe? A pessoa perde o acesso na hora.')) return;
+          cliente().then(function (sb) { return sb.from('nexo_membros').delete().eq('espaco', info.espaco).eq('usuario', mt.usuario); }).then(function (r) { if (r.error) throw r.error; listar(); aviso('Pessoa removida da equipe.'); }).catch(function (x) { aviso(x.message); });
+        } else if (b.dataset.cancela) {
+          cliente().then(function (sb) { return sb.from('nexo_convites').delete().eq('espaco', info.espaco).eq('email', b.dataset.cancela); }).then(function () { listar(); });
+        }
+      });
+      var campos = cx.querySelector('#vc-conv-campos'); if (!campos) return;
+      campos.innerHTML = editorPessoa({ papel: 'membro', permissoes: {} }, 'Mandar convite');
+      var f = campos.querySelector('form'); f.id = 'vc-conv';
       f.onsubmit = function (e) {
-        e.preventDefault(); if (!f.reportValidity()) return;
-        cliente().then(function (sb) { return sb.from('nexo_convites').insert({ espaco: info.espaco, email: f.email.value.trim().toLowerCase(), papel: 'membro', permissoes: f.ler.checked ? { so_leitura: true } : {} }); }).then(function (r) {
-          if (r.error) throw r.error; f.reset(); listar(); aviso('Convite enviado. A pessoa recebe o e-mail e entra com a conta dela.');
+        e.preventDefault(); var em = cx.querySelector('[name=email]'); if (!em.reportValidity()) return;
+        var perm = lerPessoa(f, telasDoMenu().length), adm = f.admin && f.admin.checked;
+        cliente().then(function (sb) { return sb.from('nexo_convites').insert({ espaco: info.espaco, email: em.value.trim().toLowerCase(), papel: adm ? 'admin' : 'membro', permissoes: adm ? {} : perm }); }).then(function (r) {
+          if (r.error) throw r.error; em.value = ''; f.reset(); listar(); if (window.veltriaMarca) window.veltriaMarca('equipe'); aviso('Convite enviado. A pessoa recebe o e-mail e entra com a conta dela.');
         }).catch(function (x) { f.querySelector('[data-erro]').textContent = /limite/i.test(x.message) ? 'O Básico vai até 5 pessoas além de você. O Pro libera sem limite.' : x.message; });
       };
     });
   }
+  // permissões de quem abriu: telas fora do acesso somem do menu; "só ver" não grava (o servidor também recusa)
+  function aplicarPermissoes() {
+    cliente().then(function (sb) { return sb.auth.getUser().then(function (u) { return u.data.user ? sb.from('nexo_membros').select('papel,permissoes').eq('espaco', info.espaco).eq('usuario', u.data.user.id).maybeSingle() : { data: null }; }); }).then(function (r) {
+      var m = r.data; if (!m) return;
+      info.papel = m.papel; var p = (m.papel === 'membro' && m.permissoes) || {}; window.veltriaPermissoes = p;
+      if (p.so_leitura) { var s = document.querySelector('.vc-salvo'); if (s) { s.textContent = 'Acesso só para ver'; s.dataset.e = 'ler'; } }
+      if (p.telas && p.telas.length) {
+        var esconde = function () {
+          document.querySelectorAll('a[href^="#"]').forEach(function (a) { var h = a.getAttribute('href'); if (h.length > 1 && !/assinatura/.test(h) && p.telas.indexOf(h) < 0) a.style.display = 'none'; });
+          if (location.hash && location.hash.length > 1 && p.telas.indexOf(location.hash) < 0 && telasDoMenu().some(function (t) { return t[0] === location.hash; })) location.hash = p.telas[0];
+        };
+        esconde(); new MutationObserver(esconde).observe(document.body, { childList: true, subtree: true });
+        addEventListener('hashchange', esconde);
+      }
+    }).catch(function () {});
+  }
   function sair() { enviar().then(function () { return cliente(); }).then(function (sb) { return sb.auth.signOut(); }).then(function () { sessionStorage.removeItem('veltria-conta'); location.href = RAIZ + 'app/' + app + '/'; }); }
 
   // ---------------------------------------------------------------- Dados (editor de todas as listas)
-  function dadosEditor() {
-    script(RAIZ + 'demos/sistemas/base/editor.js?v=3').then(function () {
+  function dadosEditor(abrir) {
+    if (window.veltriaPermissoes && window.veltriaPermissoes.so_leitura) { aviso('O seu acesso é só para ver. Peça ao dono para liberar as alterações.'); return; }
+    script(RAIZ + 'demos/sistemas/base/editor.js?v=4').then(function () {
       var atual = JSON.parse(texto(NS) || 'null') || (window.veltriaDados ? JSON.parse(JSON.stringify(window.veltriaDados())) : null); if (!atual) return;
       recarregando = true; // a tela fica com os dados antigos na memória enquanto o editor está aberto: não grava por cima
-      window.veltriaEditor({ dados: atual, dias: DIAS || '',
+      window.veltriaEditor({ dados: atual, dias: DIAS || '', abrir: abrir || null,
         salvar: function (d) { gravar.call(localStorage, NS, JSON.stringify(d)); pendente = true; marcar('salvando'); return enviar(); },
         fechou: function (salvou) { if (salvou) { pendente = false; location.reload(); } else recarregando = false; } });
     }).catch(function () { aviso('Não foi possível abrir os dados agora.'); });
   }
+
+  window.veltriaAbrirDados = dadosEditor; // o botão + das telas (camada.js) abre por aqui na conta
 
   // ---------------------------------------------------------------- começar do zero
   function zerar() {
@@ -287,7 +366,8 @@
   // empresa nova: pergunta uma vez se quer ver com exemplos ou já começar vazia
   function boasVindas() {
     caixa('<h2>Bem-vindo à ' + esc(info.empresa) + '</h2><p>O sistema abriu com dados de exemplo, para você ver como tudo funciona.</p><p>Quer apagar os exemplos e começar com os seus dados?</p><p class="vc-mudo">Dá para fazer isso depois, em <b>Começar do zero</b>, na faixa de cima.</p><p class="vc-mudo" data-erro></p>' +
-      '<button class="vc-bt" data-ok>Começar do zero</button><button class="vc-bt vc-2" data-vc-fecha>Ver com os exemplos</button>', function (cx) {
+      '<button class="vc-bt" data-ok>Começar do zero</button><button class="vc-bt vc-2" data-vc-fecha data-exemplos>Ver com os exemplos</button>', function (cx) {
+      cx.querySelector('[data-exemplos]').addEventListener('click', function () { if (window.veltriaMarca) window.veltriaMarca('exemplos'); });
       cx.querySelector('[data-ok]').onclick = function () { this.disabled = true; this.textContent = 'Preparando…'; zerar().catch(function (x) { cx.querySelector('[data-erro]').textContent = x.message; }); };
     });
   }
@@ -313,6 +393,7 @@
     return linhas.join('\n');
   }
   window.veltriaIA = function (pergunta) {
+    if (window.veltriaMarca) window.veltriaMarca('ia');
     var d = window.veltriaDados ? window.veltriaDados() : JSON.parse(texto(NS) || '{}'), ver = (window.VELTRIA_VERSOES || {})[app] || {};
     var contagens = {}; Object.keys(d || {}).forEach(function (k) { if (Array.isArray(d[k]) && !FORA.test(k)) contagens[k] = d[k].length; });
     return cliente().then(function (sb) {
@@ -333,12 +414,56 @@
     juridicoavancado: 'Monteiro Bastos Sociedade de Advogados', obrasessencial: 'Reforma Certa', obrascompleto: 'Construtora Alicerce', obrasavancado: 'Grupo Monólito Engenharia',
     oficinaessencial: 'Auto Mecânica do Tião', oficinacompleto: 'Centro Automotivo Rota Certa', oficinaavancado: 'Rede Torque Auto Center' }[app];
   var reNome = EXEMPLO ? new RegExp(EXEMPLO.replace(/[.*+?^${}()[\]\\]/g, '\\$&'), 'g') : null;
+  // na conta, nada de "na versão contratada" nem ação "(demonstração)": diz o que vale de verdade
+  // (o que depende de serviço externo, como nota fiscal, SNGPC, banco e WhatsApp oficial, a equipe ativa com o cliente)
+  var ATIVA = 'a nossa equipe ativa com você';
+  var FRASES = [
+    // assistente: na conta as respostas são da IA de verdade
+    [/\s*(Na demonstração as respostas são de exemplo; na contratada são|Na versão contratada[,:]?|Na contratada,?)\s*(são )?20 perguntas grátis por dia( por usuário)?[.;]?(\s*[Aa]qui as respostas são de exemplo\.?)?/g, ' São 20 perguntas grátis por dia.'],
+    [/Exemplo da demonstração\. Na contratada, 20 perguntas grátis por dia;/g, '20 perguntas grátis por dia;'],
+    [/\(?(Resposta de exemplo da demonstração|Exemplo da demonstração)\.?( Na versão contratada,? 20 perguntas grátis por dia\.)?\)?/g, ''],
+    [/\s*Disponível na versão contratada\./g, ''],
+    // troca de plano: na conta já abre o Mercado Pago
+    [/(Na versão contratada|Na contratada),? a troca é confirmada no Mercado Pago\.?/g, 'A troca é confirmada no Mercado Pago.'],
+    [/A troca é confirmada no Mercado Pago na versão contratada\./g, 'A troca é confirmada no Mercado Pago.'],
+    [/Na versão contratada você confirma no Mercado Pago\./g, 'Você confirma no Mercado Pago.'],
+    [/Na versão contratada abre o pagamento seguro do Mercado Pago/g, 'Abre o pagamento seguro do Mercado Pago'],
+    // integrações que dependem de conta, certificado ou convênio da empresa
+    [/Cupom fiscal \(NFC-e\) sai em cada venda na versão contratada\./g, 'Cupom fiscal (NFC-e): ' + ATIVA + ', com o certificado digital da farmácia.'],
+    [/ \(na versão contratada, lendo o XML da nota\)/g, ''],
+    [/\(na versão contratada, com sensor Wi-Fi\)/g, '(com sensor Wi-Fi, que ' + ATIVA + ')'],
+    [/Nota fiscal de serviço \(NFS-e\) sai na versão contratada\./g, 'Nota fiscal de serviço (NFS-e): ' + ATIVA + ', com a prefeitura da sua cidade.'],
+    [/Na versão contratada elas chegam sozinhas/g, 'Com a ativação da nossa equipe, elas chegam sozinhas'],
+    [/Na versão contratada, a IA adapta o texto ao caso\./g, 'Peça ao Assistente para adaptar o texto ao caso.'],
+    [/Na versão contratada saem com NFS-e e boleto\/PIX\./g, 'NFS-e e boleto/PIX: ' + ATIVA + '.'],
+    [/Na versão contratada as notas vão direto para a prefeitura e a SEFAZ\./g, 'O envio direto para a prefeitura e a SEFAZ ' + ATIVA + '.'],
+    [/: na versão contratada saem um a um pelo WhatsApp da oficina\./g, ': abra cada um no WhatsApp da oficina.'],
+    [/Na versão contratada sai uma planilha e um ZIP com os comprovantes, e vai por e-mail para[^.]*\./g, 'Use o botão + e "Exportar tudo para o Excel" para mandar ao contador.'],
+    [/Na versão contratada o celular lê o código de barras pela câmera e preenche[^.]*\./g, 'A leitura do boleto pela câmera ' + ATIVA + '.'],
+    [/Boleto lido: R\$ [\d.,]+ vence em \d+ dias \(exemplo\)\./g, 'A leitura do boleto pela câmera ' + ATIVA + '.'],
+    [/Autorizada \(demonstração\)\. Na versão contratada a NFC-e sai pela SEFAZ do seu estado, com QR Code de consulta\./g, 'Venda registrada. A NFC-e pela SEFAZ ' + ATIVA + ', com o certificado digital do mercado.'],
+    [/(Integrações da versão contratada|Na versão contratada):\s*/g, 'Integrações que ' + ATIVA + ' (algumas com custo do serviço): '],
+    [/Na versão contratada você muda os nomes e a ordem, liga o WhatsApp da empresa e importa a/g, 'Você muda os nomes e a ordem em Ajustes e importa a'],
+    // ações que na demonstração só fingiam
+    [/Três pedidos enviados às distribuidoras \(demonstração\)\. Entrega prevista em 24 h no CD\./g, 'Pedidos prontos. Mande cada um para a distribuidora pelo WhatsApp ou e-mail.'],
+    [/(\d+) movimento\(s\) enviados ao SNGPC \(demonstração\)\. Protocolo guardado\./g, '$1 movimento(s) conferidos no livro. O envio ao SNGPC ' + ATIVA + '.'],
+    [/Resumo da previsão gerado \(demonstração\): vai por e-mail para a diretoria toda segunda\./g, 'Resumo da previsão gerado. O envio por e-mail toda segunda ' + ATIVA + '.'],
+    [/Cobrança de (.+?) aprovada na segunda tentativa \(demonstração\)\./g, 'Nova tentativa de cobrança de $1 registrada.'],
+    [/Arquivo CNAB240 com (\d+) pagamento\(s\) pronto para o banco \(demonstração\)\./g, '$1 pagamento(s) marcados para remessa. O arquivo CNAB do seu banco ' + ATIVA + '.'],
+    [/Planilha \.xlsx gerada \(demonstração\)/g, 'Planilha .xlsx gerada'],
+    [/ emitidas \(demonstração\)\./g, ' registradas. A emissão na prefeitura e na SEFAZ ' + ATIVA + '.'],
+    [/Arquivo do mês gerado \(demonstração\)\. Na versão contratada vai por e-mail para o contador\./g, 'Para o contador: botão + e "Exportar tudo para o Excel".'],
+    [/gerada com boleto e notas de todas as OS do mês \(demonstração\)\./g, 'gerada. Boleto e notas: ' + ATIVA + '.'],
+    [/\s*\(demonstração\)/g, '']
+  ];
+  function honesto(t) { for (var i = 0; i < FRASES.length; i++) { FRASES[i][0].lastIndex = 0; if (FRASES[i][0].test(t)) { FRASES[i][0].lastIndex = 0; t = t.replace(FRASES[i][0], FRASES[i][1]); } } return t; }
   function semNaN(no) {
     var w = document.createTreeWalker(no, NodeFilter.SHOW_TEXT), t;
     while ((t = w.nextNode())) {
       var v = t.nodeValue, n = v;
       if (/NaN|Infinity/.test(n)) n = n.replace(/NaN%/g, '0%').replace(/-?Infinity/g, '—').replace(/NaN/g, '0');
       if (reNome && reNome.test(n)) { reNome.lastIndex = 0; n = n.replace(reNome, info.empresa); }
+      if (/contratada|demonstra|exemplo/i.test(n)) n = honesto(n);
       if (n !== v) t.nodeValue = n;
     }
     if (reNome && no.querySelectorAll) no.querySelectorAll('a[href*="wa.me"], a[href^="whatsapp:"]').forEach(function (a) {
@@ -356,7 +481,7 @@
     if (demo) { demo.hidden = true; demo.style.display = 'none'; demo.parentNode.insertBefore(f, demo); } else document.body.insertBefore(f, document.body.firstChild);
     marcar(estado);
     f.addEventListener('click', function (e) { var b = e.target.closest('[data-vc]'); if (!b) return; ({ assinatura: assinatura, equipe: equipe, dados: dadosEditor, zerar: confirmaZerar, sair: sair })[b.dataset.vc](); });
-    vigiaNaN();
+    vigiaNaN(); aplicarPermissoes();
     if (info.novo && info.dono && !sessionStorage.getItem('veltria-boas-vindas-' + info.espaco)) { sessionStorage.setItem('veltria-boas-vindas-' + info.espaco, '1'); setTimeout(boasVindas, 600); }
     // o app instalado no celular abre pela porta da conta, não pela demonstração
     var man = document.querySelector('link[rel=manifest]'); if (man) man.href = RAIZ + 'app/' + app + '/manifest.webmanifest';

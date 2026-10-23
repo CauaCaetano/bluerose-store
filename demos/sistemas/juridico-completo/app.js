@@ -63,7 +63,8 @@ window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a 
 const guarda = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('Sem espaço no navegador.'); } };
 const pessoa = (id) => db.equipe.find((x) => x.id === id) || { nome: '—', hora: 0, cargo: '' };
 const cliente = (id) => db.clientes.find((x) => x.id === id) || { nome: '—', tel: '' };
-const processo = (id) => db.processos.find((x) => x.id === id);
+// processo apagado ou não escolhido (cadastro pelo editor de Dados): um vazio no lugar, para a tela não quebrar
+const processo = (id) => db.processos.find((x) => x.id === id) || { id: '', cli: '', cnj: '—', tipo: '', vara: '', contra: '', fase: '', andamentos: [], docs: [] };
 const parcAberto = () => db.contratos.flatMap((c) => c.parcelas.filter((p) => !p.pago).map((p) => ({ c, p })));
 
 function aviso(t) { const a = document.createElement('div'); a.className = 'av'; a.textContent = t; qs('#avisos').append(a); setTimeout(() => a.remove(), 3200); }
@@ -107,7 +108,7 @@ const V = {
       ${l.map((p) => { const pz = db.prazos.filter((x) => x.proc === p.id && x.status === 'aberto').sort((a, b) => a.fatal - b.fatal)[0]; return `<tr class="linha-click" data-abre="${p.id}"><td><b>${sx(cliente(p.cli).nome)}</b></td><td class="mono">${p.cnj}</td><td>${sx(p.tipo)}</td><td>${sx(pessoa(p.resp).nome)}</td><td><span class="et">${sx(p.fase)}</span></td><td>${pz ? `${seloPrazo(pz)} ${sx(pz.desc)}` : '—'}</td></tr>`; }).join('')}</tbody></table></div>`;
   },
   processo(id) {
-    const p = processo(id); if (!p) return V.processos(); const c = cliente(p.cli);
+    const p = processo(id); if (!p.id) return V.processos(); const c = cliente(p.cli);
     const corpo = {
       andamentos: () => `<ol class="linha-tempo">${p.andamentos.map((a) => `<li><time>${quando(a.dia)}</time><div>${sx(a.texto)}</div></li>`).join('')}</ol><button class="b" data-a="andamento" data-p="${id}">+ Andamento</button>`,
       prazos: () => `<table><thead><tr><th>Prazo</th><th>Responsável</th><th>Interno</th><th>Fatal</th><th></th></tr></thead><tbody>${db.prazos.filter((x) => x.proc === id).map((x) => `<tr><td>${sx(x.desc)}</td><td>${sx(pessoa(x.resp).nome)}</td><td>${quando(x.interno)}</td><td>${quando(x.fatal)}</td><td>${seloPrazo(x)}</td></tr>`).join('')}</tbody></table>`,

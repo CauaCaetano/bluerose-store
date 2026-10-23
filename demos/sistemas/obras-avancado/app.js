@@ -328,7 +328,7 @@ document.addEventListener('change', async (e) => {
 });
 document.addEventListener('input', (e) => { const t = e.target; if (t.dataset.emp) { db.empresa[t.dataset.emp] = t.value; gravar(); $('#empresa-c').textContent = db.empresa.nome; } if (t.dataset.eu === 'nome' || t.dataset.eu === 'cargo') { db.eu[t.dataset.eu] = t.value; gravar(); } });
 document.addEventListener('keydown', (e) => {
-  if (e.target.closest('input, textarea, select') || document.querySelector('.veu') || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (!e.target.closest || e.target.closest('input, textarea, select') || document.querySelector('.veu') || e.ctrlKey || e.metaKey || e.altKey) return;
   const c = CAMADAS.find(([, , n]) => n === e.key); if (c) { db.camada = c[0]; gravar(); render(); return; }
   if (e.key === 'r' || e.key === 'R') { e.preventDefault(); db.camada = 'rdo'; render(); novoRdo([]); }
 });

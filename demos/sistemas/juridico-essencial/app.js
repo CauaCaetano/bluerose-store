@@ -60,7 +60,8 @@ let db = (() => { if (new URLSearchParams(location.search).has('novo')) localSto
 window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { recado('Sem espaço no aparelho.'); } };
 const cli = (id) => db.clientes.find((c) => c.id === id) || { nome: '—', tel: '' };
-const proc = (id) => db.processos.find((p) => p.id === id);
+// processo apagado ou não escolhido: um vazio no lugar, para a tela não quebrar
+const proc = (id) => db.processos.find((p) => p.id === id) || { id: '', cli: '', cnj: '—', tipo: '', vara: '', contra: '', fase: '', andamentos: [], docs: [] };
 const zap = (tel, t) => `https://wa.me/55${String(tel).replace(/\D/g, '')}?text=${encodeURIComponent(t)}`;
 const parcelasEmAberto = () => db.honorarios.flatMap((c) => c.parcelas.filter((p) => !p.pago).map((p) => ({ c, p })));
 
@@ -110,7 +111,7 @@ const T = {
       <p style="margin-top:12px"><button type="button" class="bt cheio largo" data-acao="novo-processo">+ Processo</button></p>`;
   },
   processo(id) {
-    const p = proc(id); if (!p) return T.processos(); const c = cli(p.cli);
+    const p = proc(id); if (!p.id) return T.processos(); const c = cli(p.cli);
     const pz = db.prazos.filter((x) => x.proc === id).sort((a, b) => a.feito - b.feito || a.fatal.localeCompare(b.fatal)), au = db.audiencias.filter((a) => a.proc === id), hn = db.honorarios.filter((x) => x.proc === id);
     return `<a href="#processos">← Processos</a><h1>${h(c.nome)}</h1><p class="sub">${h(p.tipo)} contra ${h(p.contra)}</p>
       <div class="cartao escuro"><span class="mini">Número (CNJ)</span><div style="font-family:ui-monospace,monospace;font-size:.95rem">${h(p.cnj)}</div><div class="mini" style="margin-top:6px">${h(p.vara)} · valor da causa ${din(p.valor)}</div><div class="mini">Fase: <b style="color:var(--ouro)">${h(p.fase)}</b></div></div>

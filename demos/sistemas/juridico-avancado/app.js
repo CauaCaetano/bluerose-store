@@ -48,7 +48,8 @@ const SALVA = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } c
 const LOG = (oque) => { db.auditoria.unshift({ dia: 0, hora: HORA(), quem: ADV(db.eu).nome, oque }); db.auditoria = db.auditoria.slice(0, 300); };
 const ADV = (id) => db.advs.find((a) => a.id === id) || { nome: '—', hora: 0 };
 const CLI = (id) => db.clientes.find((c) => c.id === id) || { nome: '—' };
-const PROC = (id) => db.processos.find((p) => p.id === id);
+// processo apagado ou não escolhido: um vazio no lugar, para a tela não quebrar
+const PROC = (id) => db.processos.find((p) => p.id === id) || { id: '', cli: '', cnj: '—', tipo: '', vara: '', contra: '', fase: '', andamentos: [], docs: [] };
 function NOTA(t) { const n = document.createElement('div'); n.className = 'nota'; n.textContent = t; $('#notas').append(n); setTimeout(() => n.remove(), 3400); }
 function MODAL(html, fn) {
   const c = document.createElement('div'); c.className = 'cortina'; c.innerHTML = `<div class="caixa-m" role="dialog" aria-modal="true">${html}</div>`;
@@ -231,7 +232,7 @@ document.addEventListener('change', async (e) => {
 document.addEventListener('input', (e) => { const t = e.target; if (t.id === 'busca-j') DESENHA(); if (t.dataset.banca) { db.banca[t.dataset.banca] = t.value; SALVA(); $('#banca').textContent = db.banca.nome; } if (t.dataset.meu !== undefined) { ADV(db.eu).nome = t.value; SALVA(); } });
 document.addEventListener('keydown', (e) => {
   if (e.key === '/' && !e.target.closest('input, textarea, select')) { e.preventDefault(); $('#busca-j').focus(); return; }
-  if (e.target.closest('input, textarea, select') || document.querySelector('.cortina') || e.ctrlKey || e.metaKey) return;
+  if (!e.target.closest || e.target.closest('input, textarea, select') || document.querySelector('.cortina') || e.ctrlKey || e.metaKey) return;
   if (modo === 'filas' && (e.key === 'j' || e.key === 'ArrowDown')) { e.preventDefault(); mover(1); }
   if (modo === 'filas' && (e.key === 'k' || e.key === 'ArrowUp')) { e.preventDefault(); mover(-1); }
   if (modo === 'filas' && (e.key === 'e' || e.key === 'E')) concluirAtual();
