@@ -324,7 +324,12 @@
         var perm = lerPessoa(f, telasDoMenu().length), adm = f.admin && f.admin.checked;
         cliente().then(function (sb) { return sb.from('nexo_convites').insert({ espaco: info.espaco, email: em.value.trim().toLowerCase(), papel: adm ? 'admin' : 'membro', permissoes: adm ? {} : perm }); }).then(function (r) {
           if (r.error) throw r.error; var quem = em.value.trim().toLowerCase(), cg = perm && perm.cargo; em.value = ''; f.reset(); listar(); if (window.veltriaMarca) window.veltriaMarca('equipe');
-          var pr = cx.querySelector('#vc-pronto'); if (pr) pr.innerHTML = '<p><b>Convite criado para ' + esc(quem) + '.</b> Agora mande o acesso para a pessoa:</p><p>' + botoesConvite(quem, cg, true) + '</p><p class="vc-mudo">Ela entra pelo link com esse e-mail, cria a senha e já vê só o que você liberou.</p>';
+          var pr = cx.querySelector('#vc-pronto'); if (pr) pr.innerHTML = '<p><b>Convite criado para ' + esc(quem) + '.</b> <span data-vc-envio>Mandando o e-mail…</span></p><p>' + botoesConvite(quem, cg, true) + '</p><p class="vc-mudo">Ela entra pelo link com esse e-mail, cria a senha e já vê só o que você liberou.</p>';
+          // e-mail automático pelo servidor (Resend); se não sair, os botões acima mandam pelo WhatsApp ou pelo seu e-mail
+          cliente().then(function (sb) { return sb.functions.invoke('nexo-convite', { body: { acao: 'enviar', espaco: info.espaco, email: quem } }); }).then(function (r) {
+            var s = pr && pr.querySelector('[data-vc-envio]'); if (!s) return;
+            s.textContent = r && r.data && r.data.enviado ? 'O e-mail com o link já foi enviado. Se quiser, mande também pelo WhatsApp:' : 'Mande o acesso para a pessoa:';
+          }).catch(function () { var s = pr && pr.querySelector('[data-vc-envio]'); if (s) s.textContent = 'Mande o acesso para a pessoa:'; });
         }).catch(function (x) { f.querySelector('[data-erro]').textContent = /limite/i.test(x.message) ? 'Não foi possível convidar agora. Tente de novo em instantes.' : x.message; });
       };
     });
