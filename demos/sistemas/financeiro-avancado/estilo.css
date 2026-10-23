@@ -104,3 +104,36 @@ main { padding: 14px 16px 24px; outline: none; }
 @media (max-width: 640px) { .formula .ref { display: none; } main { padding: 12px 10px; } .planilha .rot { min-width: 160px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media print { .tira-demo, .formula, .abas, .balao { display: none !important; } .planilha { max-height: none; } }
+
+/* ── redesenho 10/2026: a planilha ocupa a tela até as abas, letra maior, indicadores em 4 colunas ── */
+body { font-size: 16px; padding-bottom: 60px; }
+.faixa { padding: 12px 24px; } .logo b { font-size: 1.2rem; }
+.formula input { padding: 14px 14px; font-size: .95rem; } .formula .fx { width: 52px; font-size: 1.1rem; }
+.formula button { padding: 0 24px; transition: background .2s; } .formula button:hover { background: var(--flo-2); }
+main { padding: 22px 24px 28px; }
+.cab { margin-bottom: 16px; }
+.cab h1 { font-size: 1.95rem; font-weight: 700; letter-spacing: -.01em; line-height: 1.1; }
+.cab p { margin-top: 4px; font-size: .98rem; }
+.b { min-height: 38px; padding: 0 16px; transition: border-color .2s, background .2s, transform .15s; } .b:active { transform: translateY(1px); }
+.b.f:hover { background: var(--flo-2); }
+.seg button { padding: 8px 16px; font-size: .92rem; }
+/* a folha desce até as abas e continua quadriculada mesmo com poucas linhas, como uma planilha de verdade */
+.planilha { min-height: calc(100dvh - 300px); max-height: calc(100dvh - 300px); border-radius: 6px; box-shadow: 0 1px 2px rgba(36, 55, 45, .06), 0 12px 30px -20px rgba(36, 55, 45, .45);
+  background: var(--branco) repeating-linear-gradient(transparent 0 35px, var(--linha-2) 35px 36px) 0 0 / 100% 36px local; }
+.planilha table { font-size: .97rem; background: var(--branco); }
+.planilha th, .planilha td { height: 36px; }
+.planilha thead th { font-size: .78rem; padding: 5px 10px; }
+.planilha thead tr.nomes th { top: 27px; font-size: .9rem; }
+.planilha .rot { min-width: 240px; padding: 0 14px; }
+.planilha td.v { font-size: .92rem; padding: 0 12px; min-width: 108px; }
+.planilha td.v input { width: 100px; height: 34px; }
+.cartoes { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 18px; }
+.cartao-i { padding: 18px 20px; border-radius: 6px; box-shadow: 0 10px 26px -20px rgba(36, 55, 45, .5); transition: transform .15s, box-shadow .2s; }
+.cartao-i:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -18px rgba(36, 55, 45, .55); }
+.cartao-i small { font-size: .88rem; } .cartao-i b { font-size: 1.85rem; margin: 6px 0 2px; } .cartao-i span { font-size: .88rem; }
+.cartao-i svg { height: 54px; margin-top: 12px; }
+.abas { padding: 0 16px; }
+.abas a { padding: 10px 18px 11px; font-size: .95rem; }
+.janela { border-radius: 10px; padding: 24px 26px; box-shadow: 0 30px 60px -24px rgba(24, 38, 31, .6); }
+@media (max-width: 1100px) { .cartoes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) { main { padding: 16px; } .cab h1 { font-size: 1.5rem; } .planilha { min-height: 0; max-height: calc(100dvh - 260px); } .cartoes { grid-template-columns: 1fr; } }
