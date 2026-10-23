@@ -12,7 +12,7 @@
       out[c + v[0]] = {
         id: c + v[0], categoria: c, versao: v[0], nome: 'Veltria ' + CAT[c][0] + ' ' + v[1], nomeCategoria: 'Veltria ' + CAT[c][0], nomeVersao: v[1],
         pasta: pasta, entrada: i === 0 ? 'app.html' : 'index.html', chave: CHAVE_DIFERENTE[pasta] || 'veltria-' + pasta + '-v1',
-        mensal: CAT[c][1][i], pagina: 'veltria-' + c + '.html', logo: CAT[c][2] ? 'img/logos/veltria-' + CAT[c][2] + '-simbolo.png?v=2' : 'img/veltria-256.png',
+        mensal: CAT[c][1][i], pagina: 'veltria-' + c + '.html', logo: CAT[c][2] ? 'img/logos/veltria-' + CAT[c][2] + '-simbolo.png?v=4' : 'img/veltria-256.png',
       };
     });
   });

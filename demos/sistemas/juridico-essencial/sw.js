@@ -1,5 +1,5 @@
 // Veltria Jurídico Essencial · os prazos abrem mesmo sem internet (fórum sem sinal, metrô, avião).
-const CACHE = 'juridico-essencial-v1';
+const CACHE = 'juridico-essencial-v2';
 const ARQUIVOS = ['app.html', 'app.js?v=1', 'estilo.css?v=3', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((l) => Promise.all(l.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
