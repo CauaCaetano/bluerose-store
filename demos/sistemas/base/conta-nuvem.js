@@ -47,7 +47,7 @@
     juridicoavancado: 'D intimacoes[].dia prazos[].fatal tarefas[].vence horas[].dia auditoria[].dia audiencias[].dia pedidos[].prazo diligencias[].dia despesas[].dia',
     obrasessencial: 'D obras[].inicio obras[].entrega obras[].gastos[].dia obras[].diario[].dia orcamentos[].criado',
     obrascompleto: 'D obras[].etapas[].ini obras[].etapas[].fim orcamentos[].criado compras[].dia compras[].vence compras[].pagoEm presencas[].dia medicoes[].dia medicoes[].vence diario[].dia outras[].vence aditivos[].dia equipamentos[].desde equipamentos[].ate equipamentos[].devolvidoEm epi[].dia vales[].dia',
-    obrasavancado: 'D obras[].docs[].vence obras[].ncs[].dia contas[].vence rdos[].dia auditoria[].dia',
+    obrasavancado: 'D obras[].docs[].vence obras[].ncs[].dia contas[].vence rdos[].dia auditoria[].dia requisicoes[].dia equipamentos[].manut trabalhadores[].aso trabalhadores[].nr18 trabalhadores[].nr35 obras[].medicoes[].dia obras[].aditivos[].dia obras[].reajustes[].dia obras[].ncs[].prazo',
     oficinaessencial: 'D os[].entrada os[].entregue carros[].revisaoDia caixa[].dia', oficinacompleto: 'D agenda[].dia historico[].ultima pagar[].vence'
   }[app];
   var hojeSP = function () { return new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10); };
