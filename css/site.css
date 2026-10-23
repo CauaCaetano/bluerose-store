@@ -1568,3 +1568,14 @@ html[data-theme="light"] body::before {
   :root, html[data-theme] { --desfoque: none !important; }
   .sis, .prod-c, .sis-duas > div, .np-grade, .np-faq details, .preco2, .vs-card { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 }
+/* Sistemas: um preço só (assinatura) ocupa a largura toda; no celular os botões ficam lado a lado, sem buraco */
+.sis-precos:has(> div:only-child) { grid-template-columns: 1fr !important; }
+.sis-precos > div:only-child { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 2px 12px; }
+.sis-precos > div:only-child small:first-child { grid-column: 1 / -1; }
+.sis-precos > div:only-child b { white-space: nowrap; }
+.sis-precos > div:only-child span { grid-column: 1 / -1; }
+@media (max-width: 760px) {
+  .sis-botoes { grid-template-columns: 1fr 1fr !important; }
+  .sis-botoes .btn-primary { grid-column: 1 / -1 !important; grid-row: 1 !important; }
+  .sis-botoes .btn { min-height: 48px; }
+}
