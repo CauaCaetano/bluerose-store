@@ -22,6 +22,26 @@
     if (x && typeof x === 'object') { var o = {}; for (var k in x) o[k] = typeof x[k] === 'number' && !CONFIG.test(k) ? 0 : zeraNumeros(x[k]); return o; }
     return x;
   }
+  function opcoesDe(dados, guardadas) {
+    var o = JSON.parse(JSON.stringify(guardadas || {}));
+    Object.keys(dados).forEach(function (l) {
+      var lista = dados[l]; if (!Array.isArray(lista) || !lista.length || typeof lista[0] !== 'object' || !lista[0]) return;
+      Object.keys(lista[0]).forEach(function (c) {
+        if (c === 'id' || typeof lista[0][c] !== 'string') return;
+        var vals = []; lista.forEach(function (x) { if (x && typeof x[c] === 'string' && x[c] && vals.indexOf(x[c]) < 0) vals.push(x[c]); });
+        var porNome = /^(st|status|situacao|etapa|tipo|un|fase|cat|forma|origem|prioridade|risco|urg|polo|canal|estado|modo|nivel|papel|pag|area|camada|causa)$/i.test(c);
+        if (vals.length && vals.length <= 12 && (porNome || (vals.length <= 4 && lista.length >= 4 && vals.length < lista.length))) {
+          var antes = o[l + '.' + c] || []; vals.forEach(function (v) { if (antes.indexOf(v) < 0) antes.push(v); }); o[l + '.' + c] = antes;
+        }
+      });
+    });
+    return o;
+  }
+  function branco(x) {
+    if (Array.isArray(x)) return [];
+    if (x && typeof x === 'object') { var o = {}; for (var k in x) o[k] = branco(x[k]); return o; }
+    return typeof x === 'number' ? 0 : typeof x === 'boolean' ? false : x === null ? null : '';
+  }
   function limpa(x, chave, prof, manter, pai) {
     if (Array.isArray(x)) {
       if (prof === 0 && manter.indexOf(chave) >= 0) return zeraNumeros(x);
@@ -46,9 +66,27 @@
     var manter = MANTER[app] || [], o = {};
     for (var k in dados) {
       // a assinatura de exemplo e as preferências de tela ficam como estão
-      if (/^(assinatura|plano|ajustes|un|loja|modo|filtro|ativa|camada\w*|foco|\w+Aba|lateral)$/.test(k)) { o[k] = dados[k]; continue; }
+      if (/^(assinatura|plano|ajustes|un|loja|modo|filtro|ativa|camada\w*|foco|\w+Aba|lateral|_dia0)$/.test(k)) { o[k] = dados[k]; continue; }
+      if (k === '_modelos' || k === '_refs' || k === '_opcoes') continue;
       o[k] = limpa(dados[k], k, 0, manter, '');
     }
+    // modelo de cada lista (os campos do primeiro item de exemplo, em branco): o editor de Dados usa para cadastrar
+    o._modelos = JSON.parse(JSON.stringify(dados._modelos || {})); // zerar de novo não perde os modelos
+    Object.keys(dados).forEach(function (k) { if (Array.isArray(dados[k]) && dados[k][0] && typeof dados[k][0] === 'object') o._modelos[k] = branco(dados[k][0]); });
+    // relações de cada lista (cliente de um agendamento, loja de uma perda...): o editor de Dados mostra como lista de escolha
+    o._refs = JSON.parse(JSON.stringify(dados._refs || {}));
+    Object.keys(dados).forEach(function (l) {
+      var it = Array.isArray(dados[l]) && dados[l][0]; if (!it || typeof it !== 'object') return;
+      Object.keys(it).forEach(function (c) {
+        var v = it[c]; if (typeof v !== 'string' || !v || c === 'id') return;
+        Object.keys(dados).forEach(function (l2) {
+          var x = dados[l2]; if (l2 === l) return;
+          if (Array.isArray(x) && x.some(function (y) { return y && y.id === v; })) o._refs[l + '.' + c] = l2;
+          else if (x && typeof x === 'object' && !Array.isArray(x) && Object.prototype.hasOwnProperty.call(x, v) && typeof x[v] === 'object') o._refs[l + '.' + c] = l2;
+        });
+      });
+    });
+    o._opcoes = opcoesDe(dados, dados._opcoes);
     var lista = EU[app];
     if (lista && Array.isArray(dados[lista])) o[lista] = dados[lista].filter(function (p) { return p.id === dados.eu; }).map(function (p) { var c = zeraNumeros(p); c.nome = 'Você'; return c; });
     // nome da empresa e do usuário: os da conta

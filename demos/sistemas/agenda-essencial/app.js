@@ -11,6 +11,8 @@ const uid = () => `g${Date.now().toString(36)}${Math.random().toString(36).slice
 const hh = (h) => `${Math.floor(h)}:${String(Math.round((h % 1) * 60)).padStart(2, '0')}`;
 const data = (o) => { const d = new Date(); d.setDate(d.getDate() + o); return d; };
 const nomeDia = (o) => (o === 0 ? 'hoje' : o === 1 ? 'amanhã' : o === -1 ? 'ontem' : data(o).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' }));
+// link de agendamento da bio: o da empresa no modo conta (conta-nuvem.js expõe veltriaConta), o de exemplo na demonstração
+const LINK = `https://bluerose-store.com/agendar/?e=${window.veltriaConta ? window.veltriaConta.espaco : 'demo'}`;
 const zap = (tel, m) => `https://wa.me/55${String(tel).replace(/\D/g, '')}?text=${encodeURIComponent(m)}`;
 const $ = (s) => document.querySelector(s);
 
@@ -85,11 +87,11 @@ const T = {
     const chamar = l.filter((c) => c.atraso >= 0 && !c.marcada);
     return `<h1>Clientes</h1><p class="sub">${chamar.length} cliente(s) já passaram do tempo de voltar e não têm horário marcado.</p>
       ${l.map((c) => `<div class="cartao"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>${t(c.nome)}</b><small class="mini" style="display:block">${t(c.s.nome)} há ${-c.ultima} dias · volta a cada ${c.s.retorno} dias${c.faltas ? ` · ${c.faltas} falta(s)` : ''}</small></div>${c.marcada ? '<span class="selo ok">tem horário</span>' : c.atraso >= 0 ? '<span class="selo rs">hora de chamar</span>' : `<span class="selo">em ${-c.atraso} dias</span>`}</div>
-        ${!c.marcada && c.atraso >= 0 ? `<div class="linha"><a class="bt pq rose" target="_blank" rel="noopener" href="${zap(c.tel, `Oi, ${c.nome.split(' ')[0]}! Aqui é a ${db.pro.split(' ')[0]}. Já faz ${-c.ultima} dias da sua ${c.s.nome.toLowerCase()}: bora marcar? Escolha o horário aqui: https://bluerose-store.com/agendar/lia`)}">Chamar no WhatsApp</a></div>` : ''}</div>`).join('')}`;
+        ${!c.marcada && c.atraso >= 0 ? `<div class="linha"><a class="bt pq rose" target="_blank" rel="noopener" href="${zap(c.tel, `Oi, ${c.nome.split(' ')[0]}! Aqui é a ${db.pro.split(' ')[0]}. Já faz ${-c.ultima} dias da sua ${c.s.nome.toLowerCase()}: bora marcar? Escolha o horário aqui: ${LINK}`)}">Chamar no WhatsApp</a></div>` : ''}</div>`).join('')}`;
   },
   link() {
     return `<h1>Seu link de agendamento</h1><p class="sub">Coloque na bio do Instagram. A cliente escolhe serviço e horário; você só aprova.</p>
-      <div class="linha" style="margin-bottom:14px"><button type="button" class="bt cheio" data-acao="copiar">Copiar link</button><a class="bt" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Marque seu horário comigo por aqui: https://bluerose-store.com/agendar/lia')}">Mandar no WhatsApp</a></div>
+      <div class="linha" style="margin-bottom:14px"><button type="button" class="bt cheio" data-acao="copiar">Copiar link</button><a class="bt" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`Marque seu horário comigo por aqui: ${LINK}`)}">Mandar no WhatsApp</a></div>
       ${db.pedidos.length ? `<h2>Pedidos que chegaram</h2>${db.pedidos.map((p) => `<div class="cartao"><b>${t(p.nome)}</b><small class="mini" style="display:block">${t(serv(p.serv).nome)} · ${nomeDia(p.dia)} às ${hh(p.ini)}</small><div class="linha"><button type="button" class="bt pq cheio" data-acao="aceitar" data-p="${p.id}">Aceitar</button><button type="button" class="bt pq" data-acao="recusar" data-p="${p.id}">Sugerir outro horário</button></div></div>`).join('')}` : ''}
       <h2>O que a cliente vê</h2><div class="vitrine"><header><b>${t(db.studio)}</b><small>${t(db.pro)} · ${t(db.ramo)}</small></header><div class="corpo">${db.servicos.slice(0, 4).map((s) => `<div class="hora" style="cursor:default"><span class="h" style="font-size:.9rem">${s.min}′</span><span><b>${t(s.nome)}</b><small>${livres(1, s.min).slice(0, 3).map(hh).join(' · ')} amanhã</small></span><span>${din(s.preco)}</span></div>`).join('')}<p class="mini">Serviço acima de ${din(db.sinalAcima)} pede sinal de ${db.sinalPct}% no PIX para garantir o horário.</p></div></div>`;
   },
@@ -185,7 +187,7 @@ const ACOES = {
     const msg = `Marcado: ${s.nome.toLowerCase()} ${nomeDia(rasc.dia).split(',')[0]} às ${hh(rasc.ini)}${sinal ? `. Sinal de ${din(sinal.valor)} pedido no PIX` : ''}.`;
     dia = rasc.dia; rasc = { serv: rasc.serv, cli: '', dia: rasc.dia, ini: null, sinal: false }; grava(); location.hash = '#dia'; toast(msg);
   },
-  copiar: () => { navigator.clipboard?.writeText('https://bluerose-store.com/agendar/lia').catch(() => {}); toast('Link copiado. Cole na bio do Instagram.'); },
+  copiar: () => { navigator.clipboard?.writeText(LINK).catch(() => {}); toast('Link copiado. Cole na bio do Instagram.'); },
   aceitar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); let c = db.clientes.find((x) => x.nome === p.nome); if (!c) { c = { id: uid(), nome: p.nome, tel: p.tel, ultima: 0, serv: p.serv, faltas: 0 }; db.clientes.push(c); } db.ags.push({ id: uid(), dia: p.dia, ini: p.ini, cli: c.id, serv: p.serv, st: 'confirmado', pago: 0, sinal: serv(p.serv).preco >= db.sinalAcima ? { valor: Math.round(serv(p.serv).preco * db.sinalPct / 100), pago: true } : null }); db.pedidos = db.pedidos.filter((x) => x !== p); grava(); mostra(); toast(`${p.nome.split(' ')[0]} marcada. Abrindo o WhatsApp para mandar a confirmação.`); window.open(zap(p.tel, `Oi, ${p.nome.split(' ')[0]}! Seu horário de ${serv(p.serv).nome} está confirmado para ${nomeDia(p.dia)} às ${hh(p.ini)}. Qualquer coisa, é só chamar por aqui. ${db.studio}`), '_blank', 'noopener'); },
   recusar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); window.open(zap(p.tel, `Oi, ${p.nome.split(' ')[0]}! Esse horário não vai dar. Tenho ${livres(p.dia, serv(p.serv).min).slice(0, 3).map(hh).join(', ')}. Algum serve?`), '_blank', 'noopener'); },
   'tira-espera': (d) => { db.espera = db.espera.filter((e) => e.id !== d.e); grava(); mostra(); },

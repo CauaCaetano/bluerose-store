@@ -36,7 +36,9 @@ function semear() {
   };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semear(); } catch { return semear(); } })();
-window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
+window.veltriaDados = () => db;
+// nota da avaliação entre 0 e 5 (digitada no editor de Dados pode vir fora disso)
+const estrelas = (n) => Math.max(0, Math.min(5, Math.round(Number(n) || 0))); // modo conta: começar do zero e resumo para a IA
 const salva = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { recado('Sem espaço no navegador.'); } };
 const anota = (o) => { db.log.unshift({ q: quando(), quem: 'Você (dona)', o }); db.log = db.log.slice(0, 50); };
 const unidades = () => (db.un === 'todas' ? Object.keys(UN) : [db.un]);
@@ -101,7 +103,7 @@ const L = {
   avaliacoes() {
     const pend = db.avaliacoes.filter((a) => !a.resp);
     return `<div class="abre"><div><h1>O que dizem no <i>Google</i></h1><p>Depois de cada atendimento a cliente recebe o pedido de avaliação. Nota baixa vai primeiro para a gerente, antes de virar pública.</p></div></div>
-      <section class="peca"><ul class="lista">${db.avaliacoes.filter((a) => db.un === 'todas' || a.un === db.un).map((a) => `<li><span><b>${'★'.repeat(a.nota)}${'☆'.repeat(5 - a.nota)}</b> ${x(a.nome)} · ${UN[a.un].nome}<small>“${x(a.texto)}”</small></span>${a.resp ? '<span class="pilha ok">respondida</span>' : `<button class="bt mini ${a.nota <= 3 ? 'm' : ''}" data-a="responder" data-id="${a.id}">Responder</button>`}</li>`).join('')}</ul><p class="leve">${pend.length} sem resposta.</p></section>`;
+      <section class="peca"><ul class="lista">${db.avaliacoes.filter((a) => db.un === 'todas' || a.un === db.un).map((a) => `<li><span><b>${'★'.repeat(estrelas(a.nota))}${'☆'.repeat(5 - estrelas(a.nota))}</b> ${x(a.nome)} · ${UN[a.un].nome}<small>“${x(a.texto)}”</small></span>${a.resp ? '<span class="pilha ok">respondida</span>' : `<button class="bt mini ${a.nota <= 3 ? 'm' : ''}" data-a="responder" data-id="${a.id}">Responder</button>`}</li>`).join('')}</ul><p class="leve">${pend.length} sem resposta.</p></section>`;
   },
   auditoria() { return `<div class="abre"><div><h1>Auditoria</h1><p>Descontos fora da regra, ofertas, preços, campanhas e cobranças: quem, quando e o quê.</p></div></div><section class="peca rolar"><table><thead><tr><th>Quando</th><th>Quem</th><th>O quê</th></tr></thead><tbody>${db.log.map((l) => `<tr><td>${x(l.q)}</td><td>${x(l.quem)}</td><td>${x(l.o)}</td></tr>`).join('')}</tbody></table></section>`; },
   equipe() {

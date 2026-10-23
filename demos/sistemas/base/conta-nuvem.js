@@ -20,9 +20,63 @@
   document.documentElement.classList.add('modo-conta');
   var CHAVE = info.chave, NS = 'conta:' + info.espaco + ':' + CHAVE, P = Storage.prototype, ler = P.getItem, gravar = P.setItem, tirar = P.removeItem;
   P.getItem = function (k) { return ler.call(this, this === localStorage && k === CHAVE ? NS : k); };
+  // ---------------------------------------------------------------- os dias andam sozinhos
+  // As telas guardam datas como "dias a partir de hoje" (0 = hoje, 1 = amanhã, -3 = três dias atrás). Os dados guardam
+  // em _dia0 o dia em que esses números valiam; ao abrir num dia depois, cada campo anda os dias que passaram:
+  // D = data relativa (vencimento, prazo, horário marcado: diminui); H = "há X dias" (sem contato, fiado desde: aumenta).
+  // Durações e dias do mês (prazo do fornecedor, validade do orçamento, dia de pagamento da conta fixa) não entram.
+  var DIAS = {
+    agendaessencial: 'D clientes[].ultima ags[].dia pedidos[].dia', agendacompleto: 'D ags[].dia',
+    crmessencial: 'D negocios[].prox.dia negocios[].notas[].dia negocios[].quando', crmcompleto: 'D atividades[].dia H deals[].sem deals[].hist[].d propostas[].enviada',
+    farmaciaessencial: 'D prods[].lotes[].val clientes[].ultima receitas[].dia vendas[].dia', farmaciacompleto: 'D prods[].lotes[].val livro[].dia servicos[].dia', farmaciaavancado: 'D campanhas[].fim',
+    financeiroessencial: 'D movs[].dia cobrancas[].vence cobrancas[].avisos[]', financeirocompleto: 'D lancs[].venc lancs[].avisos[] extrato[].dia orcs[].dia', financeiroavancado: 'D pags[].venc',
+    gestaoessencial: 'D pagar[].vence H clientes[].desde', gestaocompleto: 'D vendas[].dia contas[].vence',
+    gestaoavancado: 'D produtos[].lotes[].vence vendas[].dia contas[].vence pedidos[].dia movs[].dia log[].dia H clientes[].ultima',
+    juridicocompleto: 'D processos[].andamentos[].dia prazos[].fatal prazos[].interno intimacoes[].dia audiencias[].dia horas[].dia contratos[].parcelas[].dia',
+    juridicoavancado: 'D intimacoes[].dia prazos[].fatal tarefas[].vence horas[].dia auditoria[].dia',
+    obrasessencial: 'D obras[].inicio obras[].entrega obras[].gastos[].dia obras[].diario[].dia orcamentos[].criado',
+    obrascompleto: 'D obras[].etapas[].ini obras[].etapas[].fim orcamentos[].criado compras[].dia compras[].vence compras[].pagoEm presencas[].dia medicoes[].dia medicoes[].vence diario[].dia outras[].vence',
+    obrasavancado: 'D obras[].docs[].vence obras[].ncs[].dia contas[].vence rdos[].dia auditoria[].dia',
+    oficinaessencial: 'D os[].entrada os[].entregue carros[].revisaoDia caixa[].dia', oficinacompleto: 'D agenda[].dia historico[].ultima pagar[].vence'
+  }[app];
+  var hojeSP = function () { return new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10); };
+  function andaDias(d, regra, passaram) {
+    var sinal = -1;
+    regra.split(' ').forEach(function (c) {
+      if (c === 'D') { sinal = -1; return; } if (c === 'H') { sinal = 1; return; }
+      (function vai(x, partes) {
+        if (x == null) return;
+        var p = partes[0], resto = partes.slice(1), lista = /\[\]$/.test(p), k = p.replace('[]', '');
+        if (!resto.length && !lista) { if (typeof x[k] === 'number') x[k] += sinal * passaram; return; }
+        if (!resto.length && lista) { if (Array.isArray(x[k])) x[k] = x[k].map(function (v) { return typeof v === 'number' ? v + sinal * passaram : v; }); return; }
+        if (lista) (Array.isArray(x[k]) ? x[k] : []).forEach(function (y) { vai(y, resto); }); else vai(x[k], resto);
+      })(d, c.split('.'));
+    });
+  }
+  (function alinharDias() {
+    var txt = ler.call(localStorage, NS); if (!txt) return;
+    var d; try { d = JSON.parse(txt); } catch (e) { return; }
+    var hoje = hojeSP();
+    if (!d._dia0) { d._dia0 = hoje; gravar.call(localStorage, NS, JSON.stringify(d)); return; }
+    var passaram = Math.round((Date.parse(hoje) - Date.parse(d._dia0)) / 864e5);
+    if (passaram <= 0) return;
+    if (DIAS) andaDias(d, DIAS, passaram);
+    d._dia0 = hoje; gravar.call(localStorage, NS, JSON.stringify(d)); info.pendente = true;
+  })();
+  window.veltriaAndaDias = andaDias; // usado pelo teste (scratchpad/teste_dias.mjs)
+  window.veltriaConta = { espaco: info.espaco, empresa: info.empresa, app: app }; // o link de agendamento da Agenda usa a empresa
+
   // recarregando: a tela ainda tem os dados antigos na memória; gravar agora apagaria o que chegou da equipe
   var recarregando = false;
-  P.setItem = function (k, v) { if (this === localStorage && k === CHAVE) { if (recarregando) return; gravar.call(this, NS, v); agendar(); return; } return gravar.call(this, k, v); };
+  P.setItem = function (k, v) {
+    if (this === localStorage && k === CHAVE) {
+      if (recarregando) return;
+      // primeira gravação da empresa: já marca o dia de referência das datas relativas
+      if (v.indexOf('"_dia0"') < 0 && /^\{.+\}$/.test(v)) v = v.slice(0, -1) + ',"_dia0":"' + hojeSP() + '"}';
+      gravar.call(this, NS, v); agendar(); return;
+    }
+    return gravar.call(this, k, v);
+  };
   // "Recomeçar" e ?novo apagariam os dados da empresa: no modo conta, nunca
   P.removeItem = function (k) { if (this === localStorage && k === CHAVE) return; return tirar.call(this, k); };
 
@@ -94,7 +148,7 @@
   });
   // o que outra pessoa da equipe salvou: confere a cada 30 s (com a tela aberta) e ao voltar para a aba
   function puxar() {
-    if (document.visibilityState !== 'visible' || pendente) return;
+    if (document.visibilityState !== 'visible' || pendente || recarregando) return; // recarregando: editor de Dados aberto ou tela já recarregando
     Promise.all([cliente(), fusao]).then(function (x) { return registro(x[0]); }).then(function (r) {
       if (!r.data || r.data.atualizado === ultimo || pendente) return;
       var txt = texto(NS), base = JSON.parse(texto(BASE) || 'null');
@@ -103,8 +157,30 @@
       if (JSON.stringify(final) !== txt) recarrega('Chegaram alterações de outra pessoa da equipe. Atualizando a tela…');
     }).catch(function () {});
   }
+  // Agenda Essencial: pedidos de horário feitos pelo link da bio (/agendar/) entram em "Pedidos que chegaram"
+  function trazerPedidos() {
+    if (app !== 'agendaessencial' || recarregando) return;
+    cliente().then(function (sb) {
+      return sb.from('veltria_pedidos').select('id,nome,tel,serv,data,ini').eq('espaco', info.espaco).order('criado').then(function (r) {
+        if (r.error || !r.data || !r.data.length) return;
+        var txt = texto(NS), d = txt ? JSON.parse(txt) : (window.veltriaDados ? JSON.parse(JSON.stringify(window.veltriaDados())) : null); if (!d) return;
+        d.pedidos = d.pedidos || [];
+        var hoje = Date.parse(hojeSP()), novos = 0;
+        r.data.forEach(function (p) {
+          if (d.pedidos.some(function (x) { return x.id === 'w' + p.id; })) return;
+          d.pedidos.push({ id: 'w' + p.id, nome: p.nome, tel: p.tel, serv: p.serv, dia: Math.round((Date.parse(p.data) - hoje) / 864e5), ini: Number(p.ini) }); novos++;
+        });
+        if (novos) { gravar.call(localStorage, NS, JSON.stringify(d)); pendente = true; }
+        // já estão nos dados da empresa: sai da fila do link
+        return sb.from('veltria_pedidos').delete().in('id', r.data.map(function (p) { return p.id; })).then(function () {
+          if (novos) enviar().then(function () { recarrega(novos === 1 ? 'Chegou um pedido de horário pelo seu link.' : 'Chegaram ' + novos + ' pedidos de horário pelo seu link.'); });
+        });
+      });
+    }).catch(function () {});
+  }
   document.addEventListener('visibilitychange', puxar);
-  setInterval(puxar, 30000);
+  setInterval(function () { puxar(); trazerPedidos(); }, 30000);
+  setTimeout(trazerPedidos, 3000);
   if (info.novo || info.pendente) agendar(); // empresa nova, ou alterações deste aparelho que ainda não tinham subido
   if (info.pendente) { delete info.pendente; sessionStorage.setItem('veltria-conta', JSON.stringify(info)); }
   cliente(); // já deixa a conexão pronta
@@ -181,9 +257,20 @@
   }
   function sair() { enviar().then(function () { return cliente(); }).then(function (sb) { return sb.auth.signOut(); }).then(function () { sessionStorage.removeItem('veltria-conta'); location.href = RAIZ + 'app/' + app + '/'; }); }
 
+  // ---------------------------------------------------------------- Dados (editor de todas as listas)
+  function dadosEditor() {
+    script(RAIZ + 'demos/sistemas/base/editor.js?v=3').then(function () {
+      var atual = JSON.parse(texto(NS) || 'null') || (window.veltriaDados ? JSON.parse(JSON.stringify(window.veltriaDados())) : null); if (!atual) return;
+      recarregando = true; // a tela fica com os dados antigos na memória enquanto o editor está aberto: não grava por cima
+      window.veltriaEditor({ dados: atual, dias: DIAS || '',
+        salvar: function (d) { gravar.call(localStorage, NS, JSON.stringify(d)); pendente = true; marcar('salvando'); return enviar(); },
+        fechou: function (salvou) { if (salvou) { pendente = false; location.reload(); } else recarregando = false; } });
+    }).catch(function () { aviso('Não foi possível abrir os dados agora.'); });
+  }
+
   // ---------------------------------------------------------------- começar do zero
   function zerar() {
-    return script(RAIZ + 'demos/sistemas/base/zerar.js?v=1').then(function () {
+    return script(RAIZ + 'demos/sistemas/base/zerar.js?v=3').then(function () {
       var atual = window.veltriaDados ? window.veltriaDados() : JSON.parse(texto(NS) || 'null');
       if (!atual) throw new Error('A tela ainda está abrindo. Tente de novo em instantes.');
       gravar.call(localStorage, NS, JSON.stringify(window.veltriaZerar(atual, app, info.empresa)));
@@ -265,10 +352,10 @@
     // tira a faixa de demonstração (a que tem o "Recomeçar") e põe a da conta no lugar
     var rec = document.getElementById('recomecar'), demo = rec && rec.closest('body > *');
     var f = document.createElement('div'); f.className = 'vc-faixa';
-    f.innerHTML = '<b>' + esc(info.empresa) + '</b><span class="vc-prazo">' + esc(prazo()) + '</span><span class="vc-salvo" data-e="salvo">Salvo na nuvem</span><button type="button" data-vc="assinatura">' + (info.plano === 'ativo' ? 'Assinatura' : 'Assinar') + '</button><button type="button" data-vc="equipe">Equipe</button>' + (info.dono ? '<button type="button" data-vc="zerar">Começar do zero</button>' : '') + '<button type="button" data-vc="sair">Sair</button>';
+    f.innerHTML = '<b>' + esc(info.empresa) + '</b><span class="vc-prazo">' + esc(prazo()) + '</span><span class="vc-salvo" data-e="salvo">Salvo na nuvem</span><button type="button" data-vc="assinatura">' + (info.plano === 'ativo' ? 'Assinatura' : 'Assinar') + '</button><button type="button" data-vc="equipe">Equipe</button><button type="button" data-vc="dados">Dados</button>' + (info.dono ?'<button type="button" data-vc="zerar">Começar do zero</button>' : '') + '<button type="button" data-vc="sair">Sair</button>';
     if (demo) { demo.hidden = true; demo.style.display = 'none'; demo.parentNode.insertBefore(f, demo); } else document.body.insertBefore(f, document.body.firstChild);
     marcar(estado);
-    f.addEventListener('click', function (e) { var b = e.target.closest('[data-vc]'); if (!b) return; ({ assinatura: assinatura, equipe: equipe, zerar: confirmaZerar, sair: sair })[b.dataset.vc](); });
+    f.addEventListener('click', function (e) { var b = e.target.closest('[data-vc]'); if (!b) return; ({ assinatura: assinatura, equipe: equipe, dados: dadosEditor, zerar: confirmaZerar, sair: sair })[b.dataset.vc](); });
     vigiaNaN();
     if (info.novo && info.dono && !sessionStorage.getItem('veltria-boas-vindas-' + info.espaco)) { sessionStorage.setItem('veltria-boas-vindas-' + info.espaco, '1'); setTimeout(boasVindas, 600); }
     // o app instalado no celular abre pela porta da conta, não pela demonstração
