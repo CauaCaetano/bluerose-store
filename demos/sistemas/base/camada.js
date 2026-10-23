@@ -162,10 +162,16 @@
   function apoioTela() {
     var velho = document.querySelector('.vk-apoio'); if (velho) velho.remove();
     if (document.querySelector('.vk-vazio') || !window.veltriaEditorListas) return;
-    var d = window.veltriaDados(), t = listaDaTela(window.veltriaEditorListas(d)); if (!t) return;
-    var l = d[t[0]]; if (!Array.isArray(l) || !l.length) return;
+    var d = window.veltriaDados(), listas = window.veltriaEditorListas(d), t = listaDaTela(listas);
     var col = document.querySelector('main') || document.querySelector('#app') || document.querySelector('.area'); if (!col) return;
     var fim = col.getBoundingClientRect().bottom; if (fim > innerHeight * 0.62 || document.documentElement.scrollHeight > innerHeight * 1.05) return;
+    var l = t && d[t[0]];
+    if (!Array.isArray(l) || !l.length) { // tela de ajuste ou sem lista: o panorama da empresa ocupa o espaço
+      var cheias = listas.filter(function (p) { return Array.isArray(d[p[0]]) && d[p[0]].length; }).slice(0, 4); if (!cheias.length) return;
+      var pn = document.createElement('section'); pn.className = 'vk-apoio'; pn.setAttribute('aria-label', 'Panorama da empresa');
+      pn.innerHTML = cheias.map(function (p) { return '<div class="vk-num"><b>' + d[p[0]].length + '</b><span>' + esc(p[1].toLowerCase()) + '</span></div>'; }).join('') + atalhos(null);
+      liga(pn, null); col.appendChild(pn); return;
+    }
     var x = numerosDe(l), recentes = l.slice(0, 3).map(tituloDe).filter(Boolean);
     var a = document.createElement('section'); a.className = 'vk-apoio'; a.setAttribute('aria-label', 'Resumo de ' + t[1]);
     a.innerHTML = '<div class="vk-num"><b>' + x.n + '</b><span>' + esc(t[1].toLowerCase()) + '</span></div>' + (x.soma ? '<div class="vk-num"><b>' + brl(x.soma) + '</b><span>no total</span></div>' : '') +
@@ -341,11 +347,13 @@
     if (bt) { bt.textContent = feitos.length >= PASSOS.length ? 'Tudo pronto ✓' : 'Primeiros passos ' + feitos.length + '/' + PASSOS.length; bt.style.setProperty('--p', Math.round(feitos.length / PASSOS.length * 100) + '%'); }
     if (novos.length && antes.length) { confete(); toast(feitos.length >= PASSOS.length ? 'Tudo configurado. A sua empresa está pronta no ' + (ver.nomeCategoria || 'sistema') + '.' : 'Passo concluído: ' + PASSOS.find(function (p) { return p[0] === novos[0]; })[1] + ' (' + feitos.length + ' de ' + PASSOS.length + ')'); }
   }
+  var TUTORIAL = new URL('../../../video/versoes/' + m[1] + '-' + m[2] + '-tutorial', BASE).href + '?v=1';
   function painelPassos() {
     var d = window.veltriaDados(), v = document.createElement('div'); v.className = 'vk-veu';
     v.innerHTML = '<div class="vk-caixa" role="dialog" aria-modal="true" aria-label="Primeiros passos"><h2>Primeiros passos</h2><p class="vk-mudo">Em poucos minutos a sua empresa fica pronta para o dia a dia.</p><ol class="vk-passos">' +
       PASSOS.map(function (p) { var ok = p[2](d); return '<li class="' + (ok ? 'ok' : '') + '"><span aria-hidden="true">' + (ok ? '✓' : '') + '</span>' + esc(p[1]) + '</li>'; }).join('') +
-      '</ol><p class="vk-mudo">' + (ritmo.serie > 1 ? 'Você está há <b>' + ritmo.serie + ' dias seguidos</b> com o sistema em dia.' : 'Abra todo dia: o resumo do dia anterior aparece aqui.') + '</p><button type="button" class="vk-bt" data-vk-fecha>Fechar</button></div>';
+      '</ol><p class="vk-mudo">' + (ritmo.serie > 1 ? 'Você está há <b>' + ritmo.serie + ' dias seguidos</b> com o sistema em dia.' : 'Abra todo dia: o resumo do dia anterior aparece aqui.') + '</p>' +
+      '<details class="vk-tut"><summary>Ver o vídeo: o que fazer depois de assinar (1 min)</summary><video controls playsinline preload="none" poster="' + TUTORIAL.replace('?v=1', '.webp?v=1') + '" src="' + TUTORIAL.replace('?v=1', '.mp4?v=1') + '"></video></details><button type="button" class="vk-bt" data-vk-fecha>Fechar</button></div>';
     v.addEventListener('click', function (e) { if (e.target === v || e.target.closest('[data-vk-fecha]')) v.remove(); });
     document.body.appendChild(v); v.querySelector('button').focus();
   }
@@ -388,6 +396,7 @@
     '.vk-apoio{display:flex;flex-wrap:wrap;align-items:center;gap:14px 26px;margin:22px 0 90px;padding:18px 20px;border:1px solid rgba(127,127,127,.25);border-radius:16px;font:14px/1.4 system-ui,sans-serif}' +
     '.vk-apoio .vk-num{display:grid}.vk-apoio .vk-num b{font-size:1.6rem;line-height:1.1}.vk-apoio .vk-num span,.vk-apoio .vk-rec span{opacity:.7}.vk-apoio .vk-rec{display:grid;gap:2px;min-width:180px}.vk-apoio .vk-atalhos{margin-left:auto}' +
     '@media (max-width:700px){.vk-apoio .vk-atalhos{margin-left:0}}@media print{.vk-lado,.vk-apoio{display:none!important}}' +
+    '.vk-tut{margin:4px 0 14px}.vk-tut summary{cursor:pointer;font-weight:600;color:#2a4fa8}.vk-tut video{width:100%;margin-top:8px;border-radius:10px;background:#05070b}' +
     'html.no-celular .vk-mais{display:none}@media print{.vk-mais,.vk-menu{display:none}}';
   function montar() {
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);

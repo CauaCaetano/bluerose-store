@@ -251,7 +251,8 @@
   function telasDoMenu() {
     var vistas = {}, l = [];
     document.querySelectorAll('a[href^="#"]').forEach(function (a) {
-      var h = a.getAttribute('href'), t = (a.textContent || '').replace(/\s+/g, ' ').trim();
+      var h = a.getAttribute('href'), c = a.cloneNode(true); c.querySelectorAll('*').forEach(function (x) { if (/^\s*\d+\s*$/.test(x.textContent)) x.remove(); }); // sem o número do aviso (Balcão 3)
+      var t = (c.textContent || '').replace(/\s+/g, ' ').trim().replace(/([^\d\s])\d+$/, '$1');
       if (h.length > 1 && t && t.length < 40 && !vistas[h] && !/assinatura|recomecar/.test(h)) { vistas[h] = 1; l.push([h, t]); }
     });
     return l;

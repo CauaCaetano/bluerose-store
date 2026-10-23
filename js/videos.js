@@ -21,9 +21,11 @@
       var id = b.getAttribute('data-video');
       dlg.querySelector('.video-cab b').textContent = b.getAttribute('data-video-nome') || 'Como funciona';
       dlg.querySelector('[data-v-testar]').href = b.getAttribute('data-video-demo') || b.getAttribute('href') || 'sistemas.html';
-      dlg.querySelector('[data-v-planos]').href = 'sistemas.html#' + id;
-      video.poster = 'video/sistemas/' + id + '.webp?v=9';
-      video.src = 'video/sistemas/' + id + '.mp4?v=9';
+      dlg.querySelector('[data-v-planos]').href = b.getAttribute('data-video-planos') || 'sistemas.html#' + id;
+      // vídeos por versão (agenda-completo-apresentacao, agenda-completo-tutorial) ficam em video/versoes/
+      var pasta = id.indexOf('-') > 0 ? 'video/versoes/' : 'video/sistemas/', v = id.indexOf('-') > 0 ? '1' : '9';
+      video.poster = pasta + id + '.webp?v=' + v;
+      video.src = pasta + id + '.mp4?v=' + v;
       dlg.showModal();
       video.muted = false;
       var p = video.play();
