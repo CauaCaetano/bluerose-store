@@ -191,3 +191,7 @@ tr.sel td { background: var(--lavanda-2) !important; }
 /* 22/10/2026: Assistente IA e Painel do dono */
 :root { --ga-papel: var(--branco); --ga-tinta: var(--tinta); --ga-tinta-2: var(--tinta-3); --ga-borda: var(--linha-2); --ga-acento: var(--ameixa); --ga-acento-tx: var(--porcelana); --ga-suave: var(--lavanda-2); --ga-raio: 14px; }
 .ia-btn { color: var(--ouro); }
+
+/* faixa da demonstração: quebra linha e esconde o texto longo antes de estourar a largura */
+.faixa-demo { flex-wrap: wrap; }
+@media (max-width: 960px) { .faixa-demo .so-pc { display: none; } }
