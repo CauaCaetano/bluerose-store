@@ -124,3 +124,7 @@ tbody tr { transition: background .15s; } tbody tr:hover td { background: #fbf4e
 .lista li { padding: 14px 0; }
 .bt { transition: background .2s, border-color .2s, transform .15s; } .bt:active { transform: translateY(1px); } .bt.b:hover { background: var(--ber-3); }
 @media (max-width: 760px) { main { padding: 20px 16px 32px; } .abre h1 { font-size: 2rem; } }
+
+/* campos de número dentro das tabelas (comissão, meta, custos fixos) */
+.num-a { width: 64px; min-height: 34px; border: 1px solid var(--areia); border-radius: 10px; padding: 0 8px; background: #fff; color: var(--tx); text-align: right; font: inherit; }
+.doca a, .doca button { width: 70px; white-space: nowrap; }
