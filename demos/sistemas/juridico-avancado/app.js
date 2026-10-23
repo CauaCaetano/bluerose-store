@@ -43,6 +43,7 @@ function banca() {
     auditoria: [{ dia: -1, hora: '18:02', quem: 'Dr. Otávio Bastos', oque: 'Revisou e liberou a contestação do processo do Banco Meridional' }, { dia: -1, hora: '10:14', quem: 'Paula Nogueira', oque: 'Aprovou 12,5 h da Rede Bom Lar' }], conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || banca(); } catch { return banca(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const SALVA = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { NOTA('Sem espaço no navegador.'); } };
 const LOG = (oque) => { db.auditoria.unshift({ dia: 0, hora: HORA(), quem: ADV(db.eu).nome, oque }); db.auditoria = db.auditoria.slice(0, 300); };
 const ADV = (id) => db.advs.find((a) => a.id === id) || { nome: '—', hora: 0 };
@@ -213,7 +214,7 @@ document.addEventListener('click', (e) => {
   const sg = t.closest('[data-sug]'); if (sg) { $('#q-cop').value = sg.dataset.sug; $('#f-cop').requestSubmit(); return; }
   const f = t.closest('[data-f]'); if (f && FAZ[f.dataset.f]) FAZ[f.dataset.f](f.dataset);
 });
-document.addEventListener('submit', (e) => { if (e.target.id !== 'f-cop') return; e.preventDefault(); const p = $('#q-cop').value.trim(); if (p.length < 3) return; db.conversa.push({ t: p }, { ia: 1, t: `${RESP(p)}\n\n(Exemplo da demonstração.)` }); db.conversa = db.conversa.slice(-10); SALVA(); COPILOTO(); });
+document.addEventListener('submit', (e) => { if (e.target.id !== 'f-cop') return; e.preventDefault(); const p = $('#q-cop').value.trim(); if (p.length < 3) return; const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : `${RESP(p)}\n\n(Exemplo da demonstração.)` }; db.conversa.push({ t: p }, resp); db.conversa = db.conversa.slice(-10); SALVA(); COPILOTO(); if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; SALVA(); COPILOTO(); }); });
 document.addEventListener('change', async (e) => {
   const t = e.target;
   if (t.dataset.intResp) { const i = db.intimacoes.find((x) => x.id === t.dataset.intResp); i.resp = t.value; LOG(`Distribuiu intimação para ${ADV(t.value).nome}`); SALVA(); DESENHA(); NOTA(`Com ${ADV(t.value).nome}.`); }

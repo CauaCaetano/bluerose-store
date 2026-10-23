@@ -36,6 +36,7 @@ function semear() {
   };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semear(); } catch { return semear(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const salva = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { recado('Sem espaço no navegador.'); } };
 const anota = (o) => { db.log.unshift({ q: quando(), quem: 'Você (dona)', o }); db.log = db.log.slice(0, 50); };
 const unidades = () => (db.un === 'todas' ? Object.keys(UN) : [db.un]);
@@ -157,7 +158,7 @@ document.addEventListener('click', (e) => {
   const c = t.closest('[data-cel]'); if (c) { db.celSel = c.dataset.cel; salva(); monta(); return; }
   const a = t.closest('[data-a]'); if (a && A[a.dataset.a]) A[a.dataset.a](a.dataset);
 });
-document.addEventListener('submit', (e) => { if (e.target.id !== 'f-c') return; e.preventDefault(); const p = $('#q-c').value.trim(); if (p.length < 3) return; db.conversa.push({ t: p }, { ia: 1, t: `${responde(p)}\n\n(Exemplo da demonstração.)` }); db.conversa = db.conversa.slice(-10); salva(); conselheira(); });
+document.addEventListener('submit', (e) => { if (e.target.id !== 'f-c') return; e.preventDefault(); const p = $('#q-c').value.trim(); if (p.length < 3) return; const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : `${responde(p)}\n\n(Exemplo da demonstração.)` }; db.conversa.push({ t: p }, resp); db.conversa = db.conversa.slice(-10); salva(); conselheira(); if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; salva(); conselheira(); }); });
 document.addEventListener('change', (e) => {
   const d = e.target.dataset;
   if (d.preco) { const f = db.fichas.find((y) => y.id === d.preco), ant = f.preco; f.preco = nv(e.target.value); anota(`mudou o preço de ${f.serv} de ${R$(ant)} para ${R$(f.preco)}`); salva(); monta(); }

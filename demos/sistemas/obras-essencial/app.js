@@ -47,6 +47,7 @@ function exemplo() {
 // assinatura do app: ligada à conta no site (Mercado Pago). Cancelada = usa até a próxima cobrança; pagamento recusado = app bloqueia até pagar.
 function assinaturaNova() { return { plano: 'Básico', valor: 69, status: 'ativa', proxima: 18, renova: true, historico: [{ dia: -12, valor: 69, ok: true }, { dia: -42, valor: 69, ok: true }, { dia: -72, valor: 69, ok: true }] }; }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || exemplo(); } catch { return exemplo(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 db.assinatura ||= assinaturaNova();
 function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('A memória do aparelho encheu: apague fotos antigas do diário.'); } }
 
@@ -317,7 +318,7 @@ const ACOES = {
   'pagar-app': () => pagarNoApp(),
   'cancelar-ass': () => { if (!confirm(`Cancelar a assinatura? Nada mais será cobrado e você usa até ${quando(db.assinatura.proxima)}.`)) return; db.assinatura.renova = false; salvar(); mostrar(); aviso(`Assinatura cancelada. Você usa até ${quando(db.assinatura.proxima)}.`); },
   reativar: () => { db.assinatura.renova = true; salvar(); mostrar(); aviso('Assinatura reativada. Nada muda na cobrança.'); },
-  perguntar: () => { const p = $('#pergunta').value.trim(); if (p.length < 3) return $('#pergunta').focus(); const r = $('#resposta'); r.hidden = false; r.textContent = 'Pensando…'; setTimeout(() => { r.textContent = responder(p); }, 800); },
+  perguntar: () => { const p = $('#pergunta').value.trim(); if (p.length < 3) return $('#pergunta').focus(); const r = $('#resposta'); r.hidden = false; r.textContent = 'Pensando…'; if (window.veltriaIA) window.veltriaIA(p).then((t) => { r.textContent = t; }); else setTimeout(() => { r.textContent = responder(p); }, 800); },
 };
 function responder(p) {
   const q = semAcento(p), cobrar = cobrarAgora(), soma = cobrar.reduce((t, x) => t + x.e.valor, 0);

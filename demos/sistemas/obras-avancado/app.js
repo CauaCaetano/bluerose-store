@@ -85,6 +85,7 @@ function semear() {
     conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semear(); } catch { return semear(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const gravar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { toast('Sem espaço no navegador para guardar.'); } };
 const registrar = (oque) => { const h = new Date(); db.auditoria.unshift({ dia: 0, hora: h.toTimeString().slice(0, 5), quem: db.eu.nome, oque }); db.auditoria = db.auditoria.slice(0, 200); };
 const foco = () => db.obras.find((o) => o.id === db.foco) || db.obras[0];
@@ -220,6 +221,8 @@ const V = {
 
 // ------------------------------------------------------------------ painel lateral: Raio-X e Copiloto
 function lateral() {
+  // começou do zero: sem obra em foco, a lateral só convida a cadastrar
+  if (!foco()) return '<div class="lat-vazio" style="padding:18px;opacity:.8">Cadastre a primeira obra na Carteira para ver o Raio-X e o Copiloto.</div>';
   const o = foco(), s = saude(o), aba = db.latAba || db.eu.lateral || 'raio';
   const abas = `<div class="lat-abas"><button data-a="lat" data-v="raio" aria-pressed="${aba === 'raio'}">Raio-X</button><button data-a="lat" data-v="ia" aria-pressed="${aba === 'ia'}">Copiloto IA</button></div>`;
   if (aba === 'ia') {
@@ -248,9 +251,9 @@ function copiloto(p) {
 
 // ------------------------------------------------------------------ desenho
 function render() {
-  const c = CAMADAS.find(([k]) => k === db.camada) ? db.camada : 'carteira';
+  const c = foco() && CAMADAS.find(([k]) => k === db.camada) ? db.camada : 'carteira';
   $('#foco').innerHTML = db.obras.map((o) => `<option value="${o.id}" ${o.id === db.foco ? 'selected' : ''}>${E(o.nome)}</option>`).join('');
-  const contagem = { qualidade: foco().ncs.filter((n) => n.aberta).length, documentos: db.obras.reduce((t, o) => t + o.docs.filter((d) => d.vence < 0).length, 0), suprimentos: db.cotacoes.filter((x) => x.escolhido == null).length };
+  const contagem = { qualidade: foco() ? foco().ncs.filter((n) => n.aberta).length : 0, documentos: db.obras.reduce((t, o) => t + o.docs.filter((d) => d.vence < 0).length, 0), suprimentos: db.cotacoes.filter((x) => x.escolhido == null).length };
   $('#camadas').innerHTML = CAMADAS.map(([k, t, n]) => `<button data-camada="${k}" ${k === c ? 'aria-current="page"' : ''}>${n ? `<kbd>${n}</kbd>` : '<kbd>⚙</kbd>'}${t}${contagem[k] ? ` <span class="q">${contagem[k]}</span>` : ''}</button>`).join('');
   $('#area').innerHTML = V[c]();
   $('#lateral').innerHTML = lateral();
@@ -312,7 +315,8 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('submit', (e) => {
   if (e.target.id !== 'f-ia') return; e.preventDefault(); const p = $('#q-ia').value.trim(); if (p.length < 3) return;
-  db.conversa.push({ t: p }); db.conversa.push({ ia: true, t: copiloto(p) }); db.conversa = db.conversa.slice(-10); gravar(); render(); $('#q-ia')?.focus();
+  const resp = { ia: true, t: window.veltriaIA ? 'Pensando…' : copiloto(p) }; db.conversa.push({ t: p }); db.conversa.push(resp); db.conversa = db.conversa.slice(-10); gravar(); render(); $('#q-ia')?.focus();
+  if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; gravar(); render(); });
 });
 document.addEventListener('change', async (e) => {
   const t = e.target;

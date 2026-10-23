@@ -4,8 +4,11 @@
  * Com ?conta=<id> (vindo da porta app/<id>/, que já conferiu login, teste ou assinatura e trouxe os dados):
  *  - os dados da tela ficam numa chave só desta empresa neste navegador (nunca se misturam com a demonstração);
  *  - cada alteração sobe para a nuvem (nexo_registros, coleção _estado) em segundos, e de novo ao fechar a página;
- *  - some a faixa de demonstração e o "Recomeçar"; entra a faixa da conta (empresa, prazo, equipe, assinatura);
- *  - os botões de assinatura e plano das telas abrem a assinatura de verdade (Mercado Pago), não a simulação.
+ *  - equipe mexendo ao mesmo tempo: antes de gravar, junta com o que outra pessoa salvou, item por item (mesclar.js),
+ *    e só grava se ninguém salvou no meio; o que os outros salvam chega sozinho a cada 30 segundos;
+ *  - some a faixa de demonstração e o "Recomeçar"; entra a faixa da conta (empresa, prazo, equipe, assinatura, começar do zero);
+ *  - os botões de assinatura e plano das telas abrem a assinatura de verdade (Mercado Pago), não a simulação;
+ *  - window.veltriaIA(pergunta): o Assistente das telas responde com a IA (nexo-ia) usando um resumo dos dados da empresa.
  * Carregado como script comum no <head>, antes do app.js, para a troca de chave valer desde a primeira leitura.
  */
 (function () {
@@ -17,13 +20,18 @@
   document.documentElement.classList.add('modo-conta');
   var CHAVE = info.chave, NS = 'conta:' + info.espaco + ':' + CHAVE, P = Storage.prototype, ler = P.getItem, gravar = P.setItem, tirar = P.removeItem;
   P.getItem = function (k) { return ler.call(this, this === localStorage && k === CHAVE ? NS : k); };
-  P.setItem = function (k, v) { if (this === localStorage && k === CHAVE) { gravar.call(this, NS, v); agendar(); return; } return gravar.call(this, k, v); };
+  // recarregando: a tela ainda tem os dados antigos na memória; gravar agora apagaria o que chegou da equipe
+  var recarregando = false;
+  P.setItem = function (k, v) { if (this === localStorage && k === CHAVE) { if (recarregando) return; gravar.call(this, NS, v); agendar(); return; } return gravar.call(this, k, v); };
   // "Recomeçar" e ?novo apagariam os dados da empresa: no modo conta, nunca
   P.removeItem = function (k) { if (this === localStorage && k === CHAVE) return; return tirar.call(this, k); };
 
   // ---------------------------------------------------------------- nuvem
-  var cli = null, pendente = false, timer = null, estado = 'salvo', ultimo = info.atualizado;
+  var BASE = NS + ':base'; // a última versão que veio da nuvem neste aparelho (ponto de partida da fusão)
+  var cli = null, pendente = false, timer = null, estado = 'salvo', ultimo = info.atualizado, tentativas = 0;
   function script(src) { return new Promise(function (ok, falha) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = falha; document.head.appendChild(s); }); }
+  var fusao = script(RAIZ + 'demos/sistemas/base/mesclar.js?v=1');
+  var texto = function (k) { return ler.call(localStorage, k); };
   function cliente() {
     if (cli) return cli;
     cli = script(RAIZ + 'app/config.js').then(function () { return script(RAIZ + 'demos/sistemas/base/supabase.js'); }).then(function () {
@@ -32,38 +40,73 @@
     return cli;
   }
   function agendar() { pendente = true; marcar('salvando'); clearTimeout(timer); timer = setTimeout(enviar, 1500); }
+  function registro(sb) { return sb.from('nexo_registros').select('dados,atualizado').eq('espaco', info.espaco).eq('colecao', '_estado').eq('id', 'estado').maybeSingle(); }
+  function guardaVersao(dados, quando) {
+    gravar.call(localStorage, BASE, JSON.stringify(dados)); ultimo = quando; info.atualizado = quando; info.novo = false;
+    sessionStorage.setItem('veltria-conta', JSON.stringify(info));
+  }
+  // recarrega a tela com os dados juntados; o que ainda não subiu sobe logo depois (info.pendente)
+  function recarrega(msg) { info.pendente = pendente; sessionStorage.setItem('veltria-conta', JSON.stringify(info)); recarregando = true; pendente = false; aviso(msg); setTimeout(function () { location.reload(); }, 1600); }
   function enviar() {
     clearTimeout(timer);
     // nada gravado ainda (empresa nova, antes da primeira alteração): não há o que subir
-    var txt = ler.call(localStorage, NS); if (!txt) { pendente = false; marcar('salvo'); return Promise.resolve(); }
-    var agora = new Date().toISOString();
-    return cliente().then(function (sb) {
-      return sb.from('nexo_registros').upsert({ espaco: info.espaco, colecao: '_estado', id: 'estado', dados: JSON.parse(txt), atualizado: agora });
-    }).then(function (r) {
-      if (r.error) throw r.error;
-      pendente = false; ultimo = agora; marcar('salvo');
+    var txt = texto(NS); if (!txt) { pendente = false; marcar('salvo'); return Promise.resolve(); }
+    var agora = new Date().toISOString(), local = JSON.parse(txt), juntou = false, final = local;
+    return Promise.all([cliente(), fusao]).then(function (x) {
+      var sb = x[0];
+      return registro(sb).then(function (r) {
+        if (r.error) throw r.error;
+        var rem = r.data;
+        // alguém da equipe salvou depois da versão que este aparelho tem: junta item por item antes de gravar
+        if (rem && rem.atualizado !== ultimo) {
+          var base = JSON.parse(texto(BASE) || 'null');
+          if (base) { final = window.veltriaMesclar(base, local, rem.dados); juntou = JSON.stringify(final) !== txt; }
+        }
+        // só grava se ninguém salvou no meio (se salvou, volta e junta de novo)
+        var q = rem ? sb.from('nexo_registros').update({ dados: final, atualizado: agora }).eq('espaco', info.espaco).eq('colecao', '_estado').eq('id', 'estado').eq('atualizado', rem.atualizado).select('atualizado')
+          : sb.from('nexo_registros').insert({ espaco: info.espaco, colecao: '_estado', id: 'estado', dados: final, atualizado: agora }).select('atualizado');
+        return q;
+      });
+    }).then(function (w) {
+      var corrida = (w.error && /duplicate|23505/i.test((w.error.code || '') + (w.error.message || ''))) || (!w.error && (!w.data || !w.data.length));
+      if (w.error && !corrida) throw w.error;
+      if (corrida) { if (++tentativas > 5) throw new Error('muitas gravações ao mesmo tempo'); return enviar(); }
+      tentativas = 0; guardaVersao(final, agora);
+      if (texto(NS) === txt) { gravar.call(localStorage, NS, JSON.stringify(final)); pendente = false; marcar('salvo'); }
+      else { gravar.call(localStorage, NS, JSON.stringify(window.veltriaMesclar(local, JSON.parse(texto(NS)), final))); agendar(); } // mudou de novo enquanto subia: junta e sobe na próxima
+      if (juntou) recarrega('Juntei as suas alterações com as de outra pessoa da equipe. Atualizando a tela…');
     }).catch(function (e) {
       marcar('erro', /row-level|policy|permission/i.test(e.message || '') ? 'O acesso venceu ou é só de leitura: as alterações ficam neste aparelho até renovar.' : 'Sem conexão: salvo neste aparelho, sobe quando a internet voltar.');
       clearTimeout(timer); timer = setTimeout(enviar, 30000);
     });
   }
-  // ao fechar ou trocar de aba: sobe o que faltou (fetch com keepalive continua depois da página fechar)
+  // ao fechar ou trocar de aba: sobe o que faltou (fetch com keepalive continua depois da página fechar).
+  // Só grava se ninguém salvou no meio; se salvou, fica no aparelho e a porta junta na próxima abertura.
   addEventListener('pagehide', function () {
     if (!pendente) return;
     try {
       var s = JSON.parse(localStorage.getItem('nexo-sessao') || 'null'), c = window.NEXO_NUVEM; if (!s || !c) return;
-      fetch(c.url + '/rest/v1/nexo_registros?on_conflict=espaco,colecao,id', { method: 'POST', keepalive: true, headers: { apikey: c.chave, Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ espaco: info.espaco, colecao: '_estado', id: 'estado', dados: JSON.parse(ler.call(localStorage, NS)), atualizado: new Date().toISOString() }) });
+      var h = { apikey: c.chave, Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'application/json', Prefer: 'return=minimal' };
+      var corpo = { dados: JSON.parse(texto(NS)), atualizado: new Date().toISOString() };
+      if (ultimo) fetch(c.url + '/rest/v1/nexo_registros?espaco=eq.' + info.espaco + '&colecao=eq._estado&id=eq.estado&atualizado=eq.' + encodeURIComponent(ultimo), { method: 'PATCH', keepalive: true, headers: h, body: JSON.stringify(corpo) });
+      else fetch(c.url + '/rest/v1/nexo_registros', { method: 'POST', keepalive: true, headers: h, body: JSON.stringify(Object.assign({ espaco: info.espaco, colecao: '_estado', id: 'estado' }, corpo)) });
     } catch (e) { /* fica no aparelho e sobe na próxima abertura */ }
   });
-  // outra pessoa da equipe salvou: ao voltar para a aba, traz a versão nova (se não houver alteração esperando)
-  document.addEventListener('visibilitychange', function () {
+  // o que outra pessoa da equipe salvou: confere a cada 30 s (com a tela aberta) e ao voltar para a aba
+  function puxar() {
     if (document.visibilityState !== 'visible' || pendente) return;
-    cliente().then(function (sb) { return sb.from('nexo_registros').select('dados,atualizado').eq('espaco', info.espaco).eq('colecao', '_estado').eq('id', 'estado').maybeSingle(); }).then(function (r) {
-      if (!r.data || !ultimo || r.data.atualizado <= ultimo) return;
-      gravar.call(localStorage, NS, JSON.stringify(r.data.dados)); info.atualizado = r.data.atualizado; sessionStorage.setItem('veltria-conta', JSON.stringify(info)); location.reload();
+    Promise.all([cliente(), fusao]).then(function (x) { return registro(x[0]); }).then(function (r) {
+      if (!r.data || r.data.atualizado === ultimo || pendente) return;
+      var txt = texto(NS), base = JSON.parse(texto(BASE) || 'null');
+      var final = txt && base ? window.veltriaMesclar(base, JSON.parse(txt), r.data.dados) : r.data.dados;
+      gravar.call(localStorage, NS, JSON.stringify(final)); guardaVersao(r.data.dados, r.data.atualizado);
+      if (JSON.stringify(final) !== txt) recarrega('Chegaram alterações de outra pessoa da equipe. Atualizando a tela…');
     }).catch(function () {});
-  });
-  if (info.novo) agendar(); // empresa nova: a primeira gravação leva os dados iniciais para a nuvem
+  }
+  document.addEventListener('visibilitychange', puxar);
+  setInterval(puxar, 30000);
+  if (info.novo || info.pendente) agendar(); // empresa nova, ou alterações deste aparelho que ainda não tinham subido
+  if (info.pendente) { delete info.pendente; sessionStorage.setItem('veltria-conta', JSON.stringify(info)); }
   cliente(); // já deixa a conexão pronta
 
   // ---------------------------------------------------------------- faixa da conta
@@ -138,15 +181,96 @@
   }
   function sair() { enviar().then(function () { return cliente(); }).then(function (sb) { return sb.auth.signOut(); }).then(function () { sessionStorage.removeItem('veltria-conta'); location.href = RAIZ + 'app/' + app + '/'; }); }
 
+  // ---------------------------------------------------------------- começar do zero
+  function zerar() {
+    return script(RAIZ + 'demos/sistemas/base/zerar.js?v=1').then(function () {
+      var atual = window.veltriaDados ? window.veltriaDados() : JSON.parse(texto(NS) || 'null');
+      if (!atual) throw new Error('A tela ainda está abrindo. Tente de novo em instantes.');
+      gravar.call(localStorage, NS, JSON.stringify(window.veltriaZerar(atual, app, info.empresa)));
+      pendente = true; marcar('salvando');
+      return enviar();
+    }).then(function () { recarregando = true; location.hash = ''; location.reload(); });
+  }
+  function confirmaZerar() {
+    caixa('<h2>Começar do zero</h2><p>Apaga todos os dados desta empresa no sistema: os de exemplo e o que já foi lançado. Ficam as configurações e a equipe com acesso.</p><p class="vc-mudo">Não dá para desfazer. Vale para todas as pessoas da equipe.</p><p class="vc-mudo" data-erro></p>' +
+      '<button class="vc-bt" data-ok>Apagar tudo e começar do zero</button><button class="vc-bt vc-2" data-vc-fecha>Cancelar</button>', function (cx) {
+      cx.querySelector('[data-ok]').onclick = function () { this.disabled = true; this.textContent = 'Apagando…'; zerar().catch(function (x) { cx.querySelector('[data-erro]').textContent = x.message; }); };
+    });
+  }
+  // empresa nova: pergunta uma vez se quer ver com exemplos ou já começar vazia
+  function boasVindas() {
+    caixa('<h2>Bem-vindo à ' + esc(info.empresa) + '</h2><p>O sistema abriu com dados de exemplo, para você ver como tudo funciona.</p><p>Quer apagar os exemplos e começar com os seus dados?</p><p class="vc-mudo">Dá para fazer isso depois, em <b>Começar do zero</b>, na faixa de cima.</p><p class="vc-mudo" data-erro></p>' +
+      '<button class="vc-bt" data-ok>Começar do zero</button><button class="vc-bt vc-2" data-vc-fecha>Ver com os exemplos</button>', function (cx) {
+      cx.querySelector('[data-ok]').onclick = function () { this.disabled = true; this.textContent = 'Preparando…'; zerar().catch(function (x) { cx.querySelector('[data-erro]').textContent = x.message; }); };
+    });
+  }
+
+  // ---------------------------------------------------------------- assistente com IA
+  // resumo dos dados da empresa para a IA: listas com até 25 itens, sem telefone, documentos, endereços, observações e textos longos
+  var SENSIVEL = /tel|fone|whats|cpf|cnpj|doc|email|end$|endereco|obs|nota|texto|hist|andament|receita|medico|crm$|crf|oab|foto|senha|pix|msg|cor$|ean|cod$|sku/i;
+  var FORA = /^(conversa|assinatura|ajudantes|audit|auditoria|log|resp|ajustes|eu|plano|acessos|equipe|cesta|comanda|cupom|pdv|busca|abas)$/;
+  function resumo(d) {
+    var linhas = [], tam = 0;
+    var val = function (v) { return typeof v === 'string' ? v.slice(0, 40) : typeof v === 'number' || typeof v === 'boolean' ? String(Math.round(v * 100) / 100) : null; };
+    var item = function (o) { if (typeof o !== 'object' || !o) return val(o); return Object.keys(o).filter(function (k) { return !SENSIVEL.test(k) && k !== 'id'; }).map(function (k) { var v = val(o[k]); return v === null || v === '' ? null : k + '=' + v; }).filter(Boolean).join(', '); };
+    var poe = function (t) { if (tam + t.length > 7000) return false; linhas.push(t); tam += t.length + 1; return true; };
+    (function anda(o, pre, prof) {
+      Object.keys(o).forEach(function (k) {
+        if (FORA.test(k) || SENSIVEL.test(k)) return;
+        var v = o[k], nome = pre + k;
+        if (Array.isArray(v)) { if (!poe(nome + ' (' + v.length + '):')) return; v.slice(0, 25).forEach(function (x) { var t = item(x); if (t) poe('- ' + t); }); }
+        else if (v && typeof v === 'object') { if (prof < 2) anda(v, nome + '.', prof + 1); }
+        else { var t = val(v); if (t !== null && t !== '') poe(nome + ': ' + t); }
+      });
+    })(d || {}, '', 0);
+    return linhas.join('\n');
+  }
+  window.veltriaIA = function (pergunta) {
+    var d = window.veltriaDados ? window.veltriaDados() : JSON.parse(texto(NS) || '{}'), ver = (window.VELTRIA_VERSOES || {})[app] || {};
+    var contagens = {}; Object.keys(d || {}).forEach(function (k) { if (Array.isArray(d[k]) && !FORA.test(k)) contagens[k] = d[k].length; });
+    return cliente().then(function (sb) {
+      return sb.functions.invoke('nexo-ia', { body: { pergunta: String(pergunta).slice(0, 600), espaco: info.espaco, sistema: ver.nome || 'Veltria', hoje: new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10), contexto: { contagens: contagens }, resumo: resumo(d) } });
+    }).then(function (r) {
+      if (r.error) return r.error.context.json().catch(function () { return {}; }).then(function (j) { return j.erro || 'O assistente não respondeu agora. Tente de novo em instantes.'; });
+      var x = r.data || {};
+      return (x.resposta || 'Não consegui responder agora.') + (typeof x.restantes === 'number' && !x.propria ? '\n\n(' + x.restantes + ' perguntas grátis restantes hoje)' : '');
+    }).catch(function () { return 'Sem conexão com o assistente agora. Tente de novo em instantes.'; });
+  };
+
+  // empresa vazia: contas com zero dividido por zero não mostram "NaN%" nem "Infinity" na tela
+  // shortcut: corrige só o texto exibido; se aparecer em cálculo que grava dado, corrigir no app.js daquela versão
+  // e o nome da empresa de exemplo (escrito direto em algumas telas e nas mensagens de WhatsApp) vira o da conta
+  var EXEMPLO = { agendaessencial: 'Studio Lia Nails', agendacompleto: 'Salão Ateliê Bela Vista', agendaavancado: 'Maison Íris', crmcompleto: 'Solaris Energia Solar', crmavancado: 'Nuvra Software B2B',
+    farmaciaessencial: 'Drogaria Santa Clara', farmaciacompleto: 'Farmácia Vida Plena', farmaciaavancado: 'Rede FarmaJá', financeirocompleto: 'Climatiza BH Refrigeração|Climatiza BH',
+    gestaoessencial: 'Mercado Bom Preço', gestaocompleto: 'Casa Aurora Utilidades|Casa Aurora', gestaoavancado: 'Empório Vila Nobre', juridicocompleto: 'Ferraz & Albuquerque Advogados',
+    juridicoavancado: 'Monteiro Bastos Sociedade de Advogados', obrasessencial: 'Reforma Certa', obrascompleto: 'Construtora Alicerce', obrasavancado: 'Grupo Monólito Engenharia',
+    oficinaessencial: 'Auto Mecânica do Tião', oficinacompleto: 'Centro Automotivo Rota Certa', oficinaavancado: 'Rede Torque Auto Center' }[app];
+  var reNome = EXEMPLO ? new RegExp(EXEMPLO.replace(/[.*+?^${}()[\]\\]/g, '\\$&'), 'g') : null;
+  function semNaN(no) {
+    var w = document.createTreeWalker(no, NodeFilter.SHOW_TEXT), t;
+    while ((t = w.nextNode())) {
+      var v = t.nodeValue, n = v;
+      if (/NaN|Infinity/.test(n)) n = n.replace(/NaN%/g, '0%').replace(/-?Infinity/g, '—').replace(/NaN/g, '0');
+      if (reNome && reNome.test(n)) { reNome.lastIndex = 0; n = n.replace(reNome, info.empresa); }
+      if (n !== v) t.nodeValue = n;
+    }
+    if (reNome && no.querySelectorAll) no.querySelectorAll('a[href*="wa.me"], a[href^="whatsapp:"]').forEach(function (a) {
+      var h = decodeURIComponent(a.getAttribute('href')); if (reNome.test(h)) { reNome.lastIndex = 0; var u = a.getAttribute('href').split('text=')[0]; a.setAttribute('href', u + 'text=' + encodeURIComponent(h.split('text=').slice(1).join('text=').replace(reNome, info.empresa))); }
+    });
+  }
+  function vigiaNaN() { semNaN(document.body); new MutationObserver(function (ms) { ms.forEach(function (m) { semNaN(m.target.nodeType === 3 ? m.target.parentNode || document.body : m.target); }); }).observe(document.body, { childList: true, subtree: true, characterData: true }); }
+
   function montar() {
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     // tira a faixa de demonstração (a que tem o "Recomeçar") e põe a da conta no lugar
     var rec = document.getElementById('recomecar'), demo = rec && rec.closest('body > *');
     var f = document.createElement('div'); f.className = 'vc-faixa';
-    f.innerHTML = '<b>' + esc(info.empresa) + '</b><span class="vc-prazo">' + esc(prazo()) + '</span><span class="vc-salvo" data-e="salvo">Salvo na nuvem</span><button type="button" data-vc="assinatura">' + (info.plano === 'ativo' ? 'Assinatura' : 'Assinar') + '</button><button type="button" data-vc="equipe">Equipe</button><button type="button" data-vc="sair">Sair</button>';
+    f.innerHTML = '<b>' + esc(info.empresa) + '</b><span class="vc-prazo">' + esc(prazo()) + '</span><span class="vc-salvo" data-e="salvo">Salvo na nuvem</span><button type="button" data-vc="assinatura">' + (info.plano === 'ativo' ? 'Assinatura' : 'Assinar') + '</button><button type="button" data-vc="equipe">Equipe</button>' + (info.dono ? '<button type="button" data-vc="zerar">Começar do zero</button>' : '') + '<button type="button" data-vc="sair">Sair</button>';
     if (demo) { demo.hidden = true; demo.style.display = 'none'; demo.parentNode.insertBefore(f, demo); } else document.body.insertBefore(f, document.body.firstChild);
     marcar(estado);
-    f.addEventListener('click', function (e) { var b = e.target.closest('[data-vc]'); if (!b) return; ({ assinatura: assinatura, equipe: equipe, sair: sair })[b.dataset.vc](); });
+    f.addEventListener('click', function (e) { var b = e.target.closest('[data-vc]'); if (!b) return; ({ assinatura: assinatura, equipe: equipe, zerar: confirmaZerar, sair: sair })[b.dataset.vc](); });
+    vigiaNaN();
+    if (info.novo && info.dono && !sessionStorage.getItem('veltria-boas-vindas-' + info.espaco)) { sessionStorage.setItem('veltria-boas-vindas-' + info.espaco, '1'); setTimeout(boasVindas, 600); }
     // o app instalado no celular abre pela porta da conta, não pela demonstração
     var man = document.querySelector('link[rel=manifest]'); if (man) man.href = RAIZ + 'app/' + app + '/manifest.webmanifest';
     // links internos da demonstração (voltar ao site, ver no celular) mantêm o modo conta ou levam à conta

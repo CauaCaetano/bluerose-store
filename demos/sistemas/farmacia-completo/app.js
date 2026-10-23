@@ -29,6 +29,7 @@ function inicial() {
   return { farm: 'Farmácia Vida Plena', prods, clientes, livro, temps, entregas, servicos, cesta: [{ p: 'los', q: 1 }, { p: 'met', q: 1 }, { p: 'dipi', q: 2 }, { p: 'rivo', q: 1 }], cli: clientes[0].id, popular: true, vendas: [{ total: 1284.6, forma: 'Cartão' }, { total: 642.3, forma: 'PIX' }, { total: 211.0, forma: 'Dinheiro' }, { total: 186.4, forma: 'Crediário' }], plano: 'basico', conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || inicial(); } catch { return inicial(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const salva = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('Sem espaço no navegador.'); } };
 const prod = (id) => db.prods.find((p) => p.id === id);
 const qtd = (p) => p.lotes.filter((l) => l.val >= 0).reduce((s, l) => s + l.qtd, 0);
@@ -132,7 +133,7 @@ function poe(id) { const p = prod(id); if (!qtd(p)) return aviso('Sem estoque v�
 function ia() {
   const fs = db.conversa.length ? db.conversa : [{ ia: 1, t: 'Vejo caixa, estoque, controlados, geladeira e crediário. Na versão contratada, 20 perguntas grátis por dia. Não substituo a avaliação do farmacêutico.' }];
   dlg(`<h2>Assistente da farmácia</h2><div class="chat">${fs.map((m) => `<div class="f ${m.ia ? 'ia' : 'eu'}">${h(m.t)}</div>`).join('')}</div><div class="sug">${['O que falta mandar ao SNGPC?', 'Quem está devendo no crediário?', 'O que preciso comprar?', 'A geladeira teve problema?'].map((s) => `<button type="button" data-s="${h(s)}">${h(s)}</button>`).join('')}</div><form id="f-ia" class="grp"><input id="q-ia" style="flex:1;min-height:40px;border:1px solid var(--rosa);border-radius:9px;padding:0 10px" placeholder="Pergunte" aria-label="Pergunta"><button class="bt am">Enviar</button></form>`, (d, fecha) => {
-    const envia = (q) => { db.conversa.push({ t: q }, { ia: 1, t: `${responde(q)}\n\n(Exemplo da demonstração.)` }); db.conversa = db.conversa.slice(-10); salva(); fecha(); ia(); };
+    const envia = (q) => { const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : `${responde(q)}\n\n(Exemplo da demonstração.)` }; db.conversa.push({ t: q }, resp); db.conversa = db.conversa.slice(-10); salva(); fecha(); ia(); if (window.veltriaIA) window.veltriaIA(q).then((t) => { resp.t = t; salva(); fecha(); ia(); }); };
     d.querySelectorAll('[data-s]').forEach((b) => b.addEventListener('click', () => envia(b.dataset.s)));
     d.querySelector('#f-ia').addEventListener('submit', (e) => { e.preventDefault(); const q = d.querySelector('#q-ia').value.trim(); if (q.length > 2) envia(q); });
     const c = d.querySelector('.chat'); c.scrollTop = 1e6;

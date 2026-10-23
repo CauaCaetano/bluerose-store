@@ -44,6 +44,7 @@ function base() {
   return { empresa: 'Climatiza BH Refrigeração', saldo: 18430, lancs, extrato, contratos, orcs, regua: [-3, 0, 3, 10], imposto: 6, equipe: [['Rafael (dono)', 'tudo'], ['Cíntia (financeiro)', 'receber, pagar, conciliar'], ['Juninho (técnico)', 'orçamentos e OS']], plano: 'basico', conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || base(); } catch { return base(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const salva = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { nota('Sem espaço no navegador.'); } };
 const lanc = (id) => db.lancs.find((l) => l.id === id);
 const abertos = (tipo) => db.lancs.filter((l) => l.tipo === tipo && l.status === 'aberto');
@@ -198,7 +199,7 @@ document.addEventListener('click', (e) => {
   const dd = t.closest('[data-dia]'); if (dd) { diaSel = Number(dd.dataset.dia); tela(); return; }
   const a = t.closest('[data-a]'); if (a && A[a.dataset.a]) A[a.dataset.a](a.dataset);
 });
-document.addEventListener('submit', (e) => { if (e.target.id !== 'f-g') return; e.preventDefault(); const p = $('#q-g').value.trim(); if (p.length < 3) return; db.conversa.push({ t: p }, { ia: 1, t: `${responde(p)}\n\n(Exemplo da demonstração.)` }); db.conversa = db.conversa.slice(-10); salva(); gaveta(); });
+document.addEventListener('submit', (e) => { if (e.target.id !== 'f-g') return; e.preventDefault(); const p = $('#q-g').value.trim(); if (p.length < 3) return; const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : `${responde(p)}\n\n(Exemplo da demonstração.)` }; db.conversa.push({ t: p }, resp); db.conversa = db.conversa.slice(-10); salva(); gaveta(); if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; salva(); gaveta(); }); });
 document.addEventListener('change', (e) => {
   const k = e.target.dataset.aj; if (!k) return;
   if (k === 'regua') db.regua = e.target.value.split(',').map((x) => Number(x.trim())).filter((x) => !Number.isNaN(x)).sort((a, b) => a - b);

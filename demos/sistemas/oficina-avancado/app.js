@@ -29,6 +29,7 @@ function fabrica() {
   return { rede: 'Rede Torque Auto Center', un: 'todas', mec, boxes, carros, dre, pecas, frotas, nps, detratores, recalls, garantias, meta: { efic: 0.95, ticket: 820 }, plano: 'basico', auditoria: [[quando(), 'Marina (gerente Betim)', 'deu desconto de 12% na OS 1184'], [quando(), 'Renan', 'estourou o tempo padrão da OS 2051 em 1,6 h'], [quando(), 'Sistema', 'importou 312 notas de entrada da SEFAZ']].map(([q1, quem, o]) => ({ q: q1, quem, o })), conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || fabrica(); } catch { return fabrica(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const guarda = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('Sem espaço no navegador.'); } };
 const registra = (o) => { db.auditoria.unshift({ q: quando(), quem: 'Você (dono)', o }); db.auditoria = db.auditoria.slice(0, 40); };
 const daUn = (x) => db.un === 'todas' || x.un === db.un;
@@ -176,7 +177,7 @@ function responde(p) {
 function console_(p) {
   const x = sa(p).trim(), destino = DESTINOS.find(([r]) => r.test(x) && x.split(' ').length <= 3);
   db.conversa.push({ eu: 1, t: p });
-  if (destino) { location.hash = `#${destino[1]}`; db.conversa.push({ t: `Abrindo ${NOMES[destino[1]]}.` }); } else db.conversa.push({ t: `${responde(p)}\n\n(Resposta de exemplo da demonstração.)` });
+  if (destino) { location.hash = `#${destino[1]}`; db.conversa.push({ t: `Abrindo ${NOMES[destino[1]]}.` }); } else if (window.veltriaIA) { const resp = { t: 'Pensando…' }; db.conversa.push(resp); window.veltriaIA(p).then((t) => { resp.t = t; guarda(); mostraSaida(); }); } else db.conversa.push({ t: `${responde(p)}\n\n(Resposta de exemplo da demonstração.)` });
   db.conversa = db.conversa.slice(-12); guarda(); mostraSaida();
 }
 function mostraSaida() {

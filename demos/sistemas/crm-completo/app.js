@@ -32,6 +32,7 @@ function base() {
   return { empresa: 'Solaris Energia Solar', vend, deals, perdidos, atividades, propostas, sequencias, filtro: 'todos', plano: 'basico', conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || base(); } catch { return base(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const salva = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { nota('Sem espaço no navegador.'); } };
 const deal = (id) => db.deals.find((d) => d.id === id);
 const vend = (id) => db.vend.find((v) => v.id === id) || { nome: '—' };
@@ -159,7 +160,7 @@ document.addEventListener('click', (e) => {
   const ab = t.closest('[data-abrir]'); if (ab) { abrir(ab.dataset.abrir); return; }
   const a = t.closest('[data-a]'); if (a && A[a.dataset.a]) A[a.dataset.a](a.dataset);
 });
-document.addEventListener('submit', (e) => { if (e.target.id !== 'f-p') return; e.preventDefault(); const q = $('#q-p').value.trim(); if (q.length < 3) return; db.conversa.push({ t: q }, { ia: 1, t: `${responde(q)}\n\n(Exemplo da demonstração.)` }); db.conversa = db.conversa.slice(-10); salva(); painel(); });
+document.addEventListener('submit', (e) => { if (e.target.id !== 'f-p') return; e.preventDefault(); const q = $('#q-p').value.trim(); if (q.length < 3) return; const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : `${responde(q)}\n\n(Exemplo da demonstração.)` }; db.conversa.push({ t: q }, resp); db.conversa = db.conversa.slice(-10); salva(); painel(); if (window.veltriaIA) window.veltriaIA(q).then((t) => { resp.t = t; salva(); painel(); }); });
 document.addEventListener('change', (e) => {
   const t = e.target, d = t.dataset;
   if ('filtro' in d) { db.filtro = t.value; salva(); tela(); }

@@ -3,7 +3,7 @@
 // compras com sugestão automática, fluxo de caixa projetado, DRE, metas e comissões, notas fiscais, curva ABC e auditoria.
 // Dados de exemplo guardados só neste navegador (?novo no endereço recomeça).
 
-import { abrirIA, painelDono, limparDono } from '../base/gestao-extras.js';
+import { abrirIA, painelDono, limparDono } from './extras.js';
 
 const CHAVE = 'veltria-gestao-avancado-v1';
 const R = (v) => `R$ ${Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -123,6 +123,7 @@ function semente() {
   return { produtos, fornecedores, vendedores, clientes, vendas, contas, pedidos, movs, log, abas: ['cockpit'], ativa: 'cockpit', un: 'todas', pdv: { itens: [], cli: '', vend: 'v0' }, proxVenda: n, proxNota: nf, proxPedido: 773, saldoBanco: 38450, metaMesExtra: 0, estoqueAba: 'posicao', finAba: 'fluxo', busca: {} };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semente(); } catch { return semente(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const gravar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { /* sem espaço: segue na memória */ } };
 const prod = (id) => db.produtos.find((p) => p.id === id);
 const forn = (id) => db.fornecedores.find((f) => f.id === id);
@@ -345,7 +346,7 @@ function mModulos() {
   return `<div class="mod-cab"><div><h1>Módulos</h1><p>Abra quantos quiser: cada um fica numa aba lá em cima.</p></div></div><div class="lancador">${Object.entries(MOD).filter(([k]) => k !== 'modulos').map(([k, m]) => `<button class="mod" data-acao="abrir" data-m="${k}"><span class="ico">${I[k]}</span><b>${m.nome}</b><small>${m.desc}${m.k ? ` · <kbd>${m.k}</kbd>` : ''}</small></button>`).join('')}</div>`;
 }
 
-const mDono = () => `<div class="mod-cab"><div><h1>Painel do dono</h1><p>Equipe das duas unidades, cargos, o que cada pessoa pode fazer em cada módulo e o seu plano. Só o dono e os administradores veem.</p></div></div><div id="gx-dono"></div>`;
+const mDono = () => `<div class="mod-cab"><div><h1>Painel do dono</h1><p>Equipe das duas unidades, cargos, o que cada pessoa pode fazer em cada módulo e o seu plano. Só o dono e os administradores veem.</p></div></div><div id="ga-dono"></div>`;
 const DONO = { sistema: 'Veltria Gestão Avançado', preco: 199, chave: CHAVE, empresa: 'Emporio Vila Nobre', dono: OPERADOR,
   areas: [['pdv', 'Frente de caixa'], ['estoque', 'Estoque'], ['compras', 'Compras'], ['financeiro', 'Financeiro'], ['clientes', 'Clientes'], ['equipe', 'Equipe e metas'], ['fiscal', 'Notas fiscais'], ['relatorios', 'Relatórios']],
   cargos: {
@@ -366,7 +367,7 @@ const RENDER = { dono: mDono, cockpit: mCockpit, pdv: mPdv, estoque: mEstoque, c
 function desenhar() {
   $('#abas').innerHTML = db.abas.map((m) => `<div class="aba" role="tab" tabindex="0" aria-selected="${m === db.ativa}" data-acao="abrir" data-m="${m}">${I[m]}<span>${MOD[m].nome}</span>${db.abas.length > 1 ? `<span class="fechar-aba" role="button" aria-label="Fechar ${MOD[m].nome}" data-acao="fechar-aba" data-m="${m}">${I.x}</span>` : ''}</div>`).join('') + `<button class="aba-nova" data-acao="abrir" data-m="modulos" aria-label="Abrir módulo">${I.mais}</button>`;
   $('#area').innerHTML = RENDER[db.ativa]();
-  if (db.ativa === 'dono') painelDono($('#gx-dono'), DONO);
+  if (db.ativa === 'dono') painelDono($('#ga-dono'), DONO);
   $('#filial').value = db.un;
   document.title = `${MOD[db.ativa].nome} · Veltria Gestão Avançado`;
   status();

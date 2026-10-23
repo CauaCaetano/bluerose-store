@@ -25,6 +25,7 @@ function inicial() {
   return { studio: 'Studio Lia Nails', pro: 'Lia Santos', ramo: 'manicure e nail designer', pix: '31988870000', abre: 8, fecha: 20, sinalPct: 30, sinalAcima: 100, servicos, clientes, ags, espera: [{ id: uid(), nome: 'Marina Duarte', tel: '31988870020', quer: 'Mão e pé', quando: 'qualquer tarde' }, { id: uid(), nome: 'Lúcia Faria', tel: '31988870021', quer: 'Manicure', quando: 'sábado de manhã' }], pedidos: [{ id: uid(), nome: 'Gabriela Nunes', tel: '31988870022', serv: 'gel', dia: 2, ini: 15.5 }], plano: 'basico', ajudantes: [{ nome: 'Camila (ajudante)', ve: { agenda: true, valores: false, clientes: true } }], assinatura: { valor: 49, status: 'ativa', renova: true, proxima: 9, pagos: [-21, -51, -81] }, conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || inicial(); } catch { return inicial(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { toast('Sem espaço no celular.'); } };
 const serv = (id) => db.servicos.find((s) => s.id === id) || db.servicos[0];
 const cli = (id) => db.clientes.find((c) => c.id === id) || { nome: '—', tel: '' };
@@ -185,7 +186,7 @@ const ACOES = {
     dia = rasc.dia; rasc = { serv: rasc.serv, cli: '', dia: rasc.dia, ini: null, sinal: false }; grava(); location.hash = '#dia'; toast(msg);
   },
   copiar: () => { navigator.clipboard?.writeText('https://bluerose-store.com/agendar/lia').catch(() => {}); toast('Link copiado. Cole na bio do Instagram.'); },
-  aceitar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); let c = db.clientes.find((x) => x.nome === p.nome); if (!c) { c = { id: uid(), nome: p.nome, tel: p.tel, ultima: 0, serv: p.serv, faltas: 0 }; db.clientes.push(c); } db.ags.push({ id: uid(), dia: p.dia, ini: p.ini, cli: c.id, serv: p.serv, st: 'confirmado', pago: 0, sinal: serv(p.serv).preco >= db.sinalAcima ? { valor: Math.round(serv(p.serv).preco * db.sinalPct / 100), pago: true } : null }); db.pedidos = db.pedidos.filter((x) => x !== p); grava(); mostra(); toast(`${p.nome.split(' ')[0]} marcada. Ela recebe a confirmação no WhatsApp.`); },
+  aceitar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); let c = db.clientes.find((x) => x.nome === p.nome); if (!c) { c = { id: uid(), nome: p.nome, tel: p.tel, ultima: 0, serv: p.serv, faltas: 0 }; db.clientes.push(c); } db.ags.push({ id: uid(), dia: p.dia, ini: p.ini, cli: c.id, serv: p.serv, st: 'confirmado', pago: 0, sinal: serv(p.serv).preco >= db.sinalAcima ? { valor: Math.round(serv(p.serv).preco * db.sinalPct / 100), pago: true } : null }); db.pedidos = db.pedidos.filter((x) => x !== p); grava(); mostra(); toast(`${p.nome.split(' ')[0]} marcada. Abrindo o WhatsApp para mandar a confirmação.`); window.open(zap(p.tel, `Oi, ${p.nome.split(' ')[0]}! Seu horário de ${serv(p.serv).nome} está confirmado para ${nomeDia(p.dia)} às ${hh(p.ini)}. Qualquer coisa, é só chamar por aqui. ${db.studio}`), '_blank', 'noopener'); },
   recusar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); window.open(zap(p.tel, `Oi, ${p.nome.split(' ')[0]}! Esse horário não vai dar. Tenho ${livres(p.dia, serv(p.serv).min).slice(0, 3).map(hh).join(', ')}. Algum serve?`), '_blank', 'noopener'); },
   'tira-espera': (d) => { db.espera = db.espera.filter((e) => e.id !== d.e); grava(); mostra(); },
   'add-espera': () => folha('<h2>Lista de espera</h2><form><label class="campo">Nome<input name="n" required></label><label class="campo">WhatsApp<input name="t" inputmode="tel"></label><label class="campo">Quer<input name="q" placeholder="Mão e pé"></label><label class="campo">Quando pode<input name="w" placeholder="qualquer tarde"></label><button class="bt cheio largo">Pôr na lista</button></form>', (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); const x = new FormData(e.target); db.espera.push({ id: uid(), nome: x.get('n'), tel: x.get('t'), quer: x.get('q') || 'qualquer serviço', quando: x.get('w') || 'qualquer horário' }); grava(); fecha(); mostra(); })),
@@ -211,7 +212,7 @@ document.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key ==
 document.addEventListener('submit', (e) => {
   if (e.target.id !== 'f-ia') return; e.preventDefault();
   const p = $('#q-ia').value.trim(); if (p.length < 3) return;
-  db.conversa.push({ t: p }, { ia: 1, t: responde(p) }); db.conversa = db.conversa.slice(-12); grava(); mostra(); scrollTo(0, document.body.scrollHeight);
+  const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : responde(p) }; db.conversa.push({ t: p }, resp); db.conversa = db.conversa.slice(-12); grava(); mostra(); if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; grava(); mostra(); }); scrollTo(0, document.body.scrollHeight);
 });
 document.addEventListener('change', (e) => {
   const el = e.target;

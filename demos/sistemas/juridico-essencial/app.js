@@ -57,6 +57,7 @@ function exemplo() {
 }
 function assinaturaInicial() { return { valor: 89, status: 'ativa', renova: true, proxima: diaRel(14), cobrancas: [{ dia: diaRel(-16), ok: true }, { dia: diaRel(-46), ok: true }] }; }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || exemplo(); } catch { return exemplo(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { recado('Sem espaço no aparelho.'); } };
 const cli = (id) => db.clientes.find((c) => c.id === id) || { nome: '—', tel: '' };
 const proc = (id) => db.processos.find((p) => p.id === id);
@@ -263,7 +264,7 @@ document.addEventListener('click', (e) => {
   const s = e.target.closest('[data-sug]'); if (s) { el('#q-ia').value = s.dataset.sug; el('#f-ia').requestSubmit(); return; }
   const a = e.target.closest('[data-acao]'); if (a && A[a.dataset.acao]) { e.preventDefault(); A[a.dataset.acao](a.dataset); }
 });
-document.addEventListener('submit', (e) => { if (e.target.id !== 'f-ia') return; e.preventDefault(); const p = el('#q-ia').value.trim(); if (p.length < 3) return; db.conversa.push({ t: p }, { ela: true, t: `${responder(p)}\n\n(Exemplo da demonstração.)` }); db.conversa = db.conversa.slice(-10); salvar(); mostrar(); });
+document.addEventListener('submit', (e) => { if (e.target.id !== 'f-ia') return; e.preventDefault(); const p = el('#q-ia').value.trim(); if (p.length < 3) return; const resp = { ela: true, t: window.veltriaIA ? 'Pensando…' : `${responder(p)}\n\n(Exemplo da demonstração.)` }; db.conversa.push({ t: p }, resp); db.conversa = db.conversa.slice(-10); salvar(); mostrar(); if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; salvar(); mostrar(); }); });
 document.addEventListener('input', (e) => { if (e.target.id === 'c-ini' || e.target.id === 'c-n') calcular(); if (e.target.dataset.eu) { db.eu[e.target.dataset.eu] = e.target.dataset.eu === 'antecedencia' ? Number(e.target.value) : e.target.value; salvar(); el('#nome-adv').textContent = db.eu.nome; el('#oab').textContent = db.eu.oab; } });
 document.addEventListener('change', (e) => { const t = e.target; if (t.dataset.pode) { const [id, k] = t.dataset.pode.split(':'); db.equipe.find((x) => x.id === id).pode[k] = t.checked; salvar(); recado('Permissão salva'); } if (t.dataset.eu === 'letra') mostrar(); });
 addEventListener('message', (e) => {

@@ -38,6 +38,7 @@ function patio() {
   return { oficina: { nome: 'Centro Automotivo Rota Certa', cnpj: '28.004.911/0001-63', abre: 8, fecha: 18 }, mecanicos: mec, os, estoque, agenda, historico, proxOs: 520, proxNota: 2041, pagar: [{ id: novoId(), desc: 'Freios Center (boleto)', valor: 1840, vence: 3, pago: false }, { id: novoId(), desc: 'Aluguel do galpão', valor: 6500, vence: 8, pago: false }], plano: 'basico', ajustes: { abrir: 'quadro', letra: 'normal', lembrarDias: 180 }, conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || patio(); } catch { return patio(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const salva = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { toast('Sem espaço no navegador.'); } };
 const mec = (id) => db.mecanicos.find((m) => m.id === id) || { nome: '—', comissao: 0 };
 const ordem = (id) => db.os.find((o) => o.id === id);
@@ -186,7 +187,7 @@ document.addEventListener('click', (ev) => {
   const ab = t.closest('[data-abre]'); if (ab) { location.hash = `#os/${ab.dataset.abre}`; return; }
   const a = t.closest('[data-a]'); if (a && F[a.dataset.a]) F[a.dataset.a](a.dataset);
 });
-document.addEventListener('submit', (ev) => { if (ev.target.id !== 'f-ia') return; ev.preventDefault(); const p = el('#q-ia').value.trim(); if (p.length < 3) return; db.conversa.push({ t: p }, { ia: 1, t: `${responde(p)}\n\n(Exemplo da demonstração.)` }); db.conversa = db.conversa.slice(-10); salva(); painelIA(); });
+document.addEventListener('submit', (ev) => { if (ev.target.id !== 'f-ia') return; ev.preventDefault(); const p = el('#q-ia').value.trim(); if (p.length < 3) return; const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : `${responde(p)}\n\n(Exemplo da demonstração.)` }; db.conversa.push({ t: p }, resp); db.conversa = db.conversa.slice(-10); salva(); painelIA(); if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; salva(); painelIA(); }); });
 document.addEventListener('change', (ev) => {
   const t = ev.target;
   if (t.dataset.mecOs) { ordem(t.dataset.mecOs).mec = t.value; salva(); toast(`Passou para ${mec(t.value).nome}.`); }

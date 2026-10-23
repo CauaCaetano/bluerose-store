@@ -26,6 +26,7 @@ function criar() {
   return { rede: 'Rede FarmaJá', loja: 'todas', lojas, transf, compra, precos, campanhas, perdas, controlados, regraPreco: 3, audit: [[quando(), 'Gerente Contagem', 'ajustou estoque de Rivotril 2 mg (−2) sem justificativa'], [quando(), 'Sistema', 'importou 18 notas de entrada do CD']].map(([q, quem, o]) => ({ q, quem, o })), plano: 'basico', resp: null };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || criar(); } catch { return criar(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { sinal('Sem espaço no navegador.'); } };
 const anota = (o) => { db.audit.unshift({ q: quando(), quem: 'Você (diretoria)', o }); db.audit = db.audit.slice(0, 50); };
 const daLoja = (k) => db.loja === 'todas' || k === db.loja;
@@ -61,7 +62,7 @@ const M = {
       <section class="cx rolo"><table><thead><tr><th>Produto</th><th class="dir">Nosso</th>${CONC.map((c) => `<th class="dir">${c}</th>`).join('')}<th>Posição</th><th></th></tr></thead><tbody>${db.precos.map((p) => { const mn = Math.min(...p.conc), alvo = Math.max(+(mn - 0.1).toFixed(2), +(p.custo * (1 + db.regraPreco / 100)).toFixed(2)); return `<tr><td><b>${x(p.prod)}</b><br><small style="color:var(--tx-3)">custo ${R2(p.custo)}</small></td><td class="dir"><b>${R2(p.nosso)}</b></td>${p.conc.map((c) => `<td class="dir ${c < p.nosso ? 'mau' : ''}">${R2(c)}</td>`).join('')}<td>${p.nosso <= mn ? '<span class="etq ok">mais barato</span>' : `<span class="etq at">${R2(p.nosso - mn)} acima</span>`}</td><td>${p.nosso > mn ? `<button class="bt x a" data-preco="${p.id}" data-v="${alvo}">Ir para ${R2(alvo)}</button>` : ''}</td></tr>`; }).join('')}</tbody></table></section>`;
   },
   campanhas() {
-    return `<div class="topo-m"><div><h1>Verba da indústria</h1><p>O laboratório paga uma porcentagem se a rede bater a meta de unidades até o fim do mês. Faltam ${db.campanhas[0].fim} dias.</p></div></div>
+    return `<div class="topo-m"><div><h1>Verba da indústria</h1><p>O laboratório paga uma porcentagem se a rede bater a meta de unidades até o fim do mês. ${db.campanhas.length ? `Faltam ${db.campanhas[0].fim} dias.` : 'Nenhuma campanha cadastrada.'}</p></div></div>
       <div class="grade">${db.campanhas.map((c) => { const r = c.vendido / c.meta, ganho = c.vendido * 12 * c.verba; return `<section class="cx l4"><h2>${x(c.ind)} <small>· ${x(c.prod)}</small></h2><p class="nm" style="margin:0"><b>${c.vendido.toLocaleString('pt-BR')} / ${c.meta.toLocaleString('pt-BR')}</b></p><div class="barra"><i style="width:${Math.min(100, r * 100)}%;--c:${r >= 1 ? '#457a5c' : r >= 0.7 ? '#d9a441' : '#b24a3f'}"></i></div><p style="color:var(--tx-2);font-size:.86rem">${r >= 1 ? `Meta batida: verba de ${pc(c.verba)} ≈ ${R$(ganho)}.` : `Faltam ${(c.meta - c.vendido).toLocaleString('pt-BR')} un. (${Math.ceil((c.meta - c.vendido) / c.fim)} por dia). Verba em jogo ≈ ${R$(c.meta * 12 * c.verba)}.`}</p>${r < 1 ? `<button class="bt x a" data-campanha="${c.id}">Mandar às lojas: exposição e meta do dia</button>` : ''}</section>`; }).join('')}</div>`;
   },
   perdas() {
@@ -131,6 +132,6 @@ document.addEventListener('change', (e) => {
   if (d.meta) { db.lojas[d.meta].meta = nv(t.value); anota(`mudou a meta da ${nomeL(d.meta)}`); grava(); monta(); }
   if (d.aj) { db[d.aj] = t.value; grava(); monta(); }
 });
-$('#f-q').addEventListener('submit', (e) => { e.preventDefault(); const q = $('#q').value.trim(); if (q.length < 3) return; db.resp = { q, r: responde(q) }; $('#q').value = ''; grava(); monta(); scrollTo(0, 0); });
+$('#f-q').addEventListener('submit', (e) => { e.preventDefault(); const q = $('#q').value.trim(); if (q.length < 3) return; db.resp = { q, r: window.veltriaIA ? 'Pensando…' : responde(q) }; $('#q').value = ''; grava(); monta(); scrollTo(0, 0); if (window.veltriaIA) window.veltriaIA(q).then((t) => { if (db.resp && db.resp.q === q) { db.resp.r = t; grava(); monta(); } }); });
 $('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE); db = criar(); location.hash = '#mapa'; monta(); sinal('Demonstração recomeçada.'); });
 monta();

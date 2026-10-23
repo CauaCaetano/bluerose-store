@@ -31,6 +31,7 @@ function inicio() {
   return { emp: 'dist', cen: 'base', caixa, orc, pags, extrato, regras, fech, fechado: false, rateio, alcadas: { gerente: 20000, diretor: 80000 }, audit: [[agora(), 'Paula', 'importou extrato do Itaú (312 linhas)'], [agora(), 'Henrique', 'alterou orçado de Marketing de R$ 90.000 para R$ 96.000'], [agora(), 'Sistema', 'conciliou 287 linhas automaticamente por regra']].map(([q, quem, o]) => ({ q, quem, o })), plano: 'basico', conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || inicio(); } catch { return inicio(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const guarda = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { balao('Sem espaço no navegador.'); } };
 const log = (o) => { db.audit.unshift({ q: agora(), quem: 'Você (dono)', o }); db.audit = db.audit.slice(0, 50); };
 const empNome = (k) => (k === 'todas' ? 'Consolidado do grupo' : EMP.find((e) => e.k === k).nome);
@@ -152,7 +153,9 @@ $('#f-fx').addEventListener('submit', (e) => {
   e.preventDefault(); const v = $('#fx').value.trim(); if (!v) return;
   const c = v.startsWith('=') ? CMD[sa(v.slice(1)).replace(/\s/g, '')] : null;
   if (c) { location.hash = `#${c}`; $('#fx').value = ''; return; }
-  const r = $('#resposta'); r.hidden = false; r.innerHTML = `<button type="button" data-fecha-r aria-label="Fechar">×</button><span class="q">=${hx(v)}</span>${hx(responde(v))}\n\n<small style="color:var(--tx-3)">Resposta de exemplo da demonstração. Na versão contratada, 20 perguntas grátis por dia.</small>`;
+  const r = $('#resposta'), topo = `<button type="button" data-fecha-r aria-label="Fechar">×</button><span class="q">=${hx(v)}</span>`; r.hidden = false;
+  if (window.veltriaIA) { r.innerHTML = `${topo}Pensando…`; window.veltriaIA(v).then((t) => { r.innerHTML = `${topo}${hx(t)}`; }); }
+  else r.innerHTML = `${topo}${hx(responde(v))}\n\n<small style="color:var(--tx-3)">Resposta de exemplo da demonstração. Na versão contratada, 20 perguntas grátis por dia.</small>`;
   $('#fx').value = '';
 });
 

@@ -2,7 +2,7 @@
 // Seis partes na doca (Painel, Vender, Produtos, Clientes, Contas, Relatórios); cadastros e detalhes abrem na gaveta.
 // Dados de exemplo guardados só neste navegador (?novo no endereço recomeça).
 
-import { abrirIA, painelDono, limparDono } from '../base/gestao-extras.js';
+import { abrirIA, painelDono, limparDono } from './extras.js';
 
 const CHAVE = 'veltria-gestao-completo-v1';
 const R = (v) => `R$ ${Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -68,6 +68,7 @@ function semente() {
   return { produtos, clientes, vendas, contas, cupom: [], forma: 'Pix', desconto: 0, cliente: '', caixaInicial: 300, proxVenda: nv, metaDia: 2500 };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semente(); } catch { return semente(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const gravar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { /* sem espaço: segue na memória */ } };
 const prod = (id) => db.produtos.find((p) => p.id === id);
 const cli = (id) => db.clientes.find((c) => c.id === id);
@@ -218,7 +219,7 @@ function telaRelatorios() {
   </div>`;
 }
 
-function telaDono() { return `<div class="cab"><div><h1>Painel do dono</h1><p>Equipe, cargos, o que cada pessoa pode ver e o seu plano. Só você e os administradores veem esta parte.</p></div></div><div id="gx-dono"></div>`; }
+function telaDono() { return `<div class="cab"><div><h1>Painel do dono</h1><p>Equipe, cargos, o que cada pessoa pode ver e o seu plano. Só você e os administradores veem esta parte.</p></div></div><div id="gc-dono"></div>`; }
 const DONO = { sistema: 'Veltria Gestão Completo', preco: 119, chave: CHAVE, empresa: 'Casa Aurora', dono: 'Helena Prado',
   areas: [['vender', 'Vender'], ['produtos', 'Produtos e estoque'], ['clientes', 'Clientes e fiado'], ['contas', 'Contas'], ['relatorios', 'Relatórios']],
   cargos: { Vendedor: { vender: 'editar', produtos: 'ver', clientes: 'editar', contas: 'nenhum', relatorios: 'nenhum' }, Estoquista: { vender: 'nenhum', produtos: 'editar', clientes: 'nenhum', contas: 'nenhum', relatorios: 'ver' }, Financeiro: { vender: 'ver', produtos: 'ver', clientes: 'ver', contas: 'editar', relatorios: 'editar' }, Gerente: { vender: 'editar', produtos: 'editar', clientes: 'editar', contas: 'editar', relatorios: 'editar' } },
@@ -233,7 +234,7 @@ function desenhar() {
   const nome = PARTES.find((p) => p[0] === parte)[1];
   document.title = `${nome} · Veltria Gestão Completo`;
   $('#tela').innerHTML = TELAS[parte]();
-  if (parte === 'dono') painelDono($('#gx-dono'), DONO);
+  if (parte === 'dono') painelDono($('#gc-dono'), DONO);
   const badges = { produtos: acabando().length, contas: pagarAte(3).length, vender: db.cupom.length };
   $('#doca').innerHTML = PARTES.map(([id, n]) => `<a href="#${id}" ${id === parte ? 'aria-current="page"' : ''}>${ic[id]}<span>${n}</span>${badges[id] ? `<i>${badges[id]}</i>` : ''}</a>`).join('');
 }

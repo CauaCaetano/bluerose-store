@@ -59,8 +59,9 @@ function escritorio() {
     permissoes: { Sócia: 'tudo', Sócio: 'tudo', Associada: 'sem financeiro', Estagiária: 'prazos e intimações' } };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || escritorio(); } catch { return escritorio(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const guarda = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('Sem espaço no navegador.'); } };
-const pessoa = (id) => db.equipe.find((x) => x.id === id) || { nome: '—', hora: 0 };
+const pessoa = (id) => db.equipe.find((x) => x.id === id) || { nome: '—', hora: 0, cargo: '' };
 const cliente = (id) => db.clientes.find((x) => x.id === id) || { nome: '—', tel: '' };
 const processo = (id) => db.processos.find((x) => x.id === id);
 const parcAberto = () => db.contratos.flatMap((c) => c.parcelas.filter((p) => !p.pago).map((p) => ({ c, p })));
@@ -240,7 +241,7 @@ document.addEventListener('click', (e) => {
   const sb = t.closest('[data-sub]'); if (sb) { sub = sb.dataset.sub; abre(); return; }
   const a = t.closest('[data-a]'); if (a && F[a.dataset.a]) F[a.dataset.a](a.dataset);
 });
-document.addEventListener('submit', (e) => { if (e.target.id !== 'f-ia') return; e.preventDefault(); const p = qs('#q-ia').value.trim(); if (p.length < 3) return; db.conversa.push({ t: p }, { ia: 1, t: `${resposta(p)}\n\n(Exemplo da demonstração.)` }); db.conversa = db.conversa.slice(-10); guarda(); gavetaIA(); });
+document.addEventListener('submit', (e) => { if (e.target.id !== 'f-ia') return; e.preventDefault(); const p = qs('#q-ia').value.trim(); if (p.length < 3) return; const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : `${resposta(p)}\n\n(Exemplo da demonstração.)` }; db.conversa.push({ t: p }, resp); db.conversa = db.conversa.slice(-10); guarda(); gavetaIA(); if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; guarda(); gavetaIA(); }); });
 document.addEventListener('change', (e) => {
   const t = e.target;
   if (t.dataset.resp) { db.prazos.find((x) => x.id === t.dataset.resp).resp = t.value; guarda(); aviso('Responsável trocado.'); }

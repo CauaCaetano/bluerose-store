@@ -48,6 +48,7 @@ function semente() {
 }
 const EU_PADRAO = { nome: 'Marquinhos', letra: 'normal', som: true, abrir: 'hoje', imprimir: false, cpf: false, confirmarFiado: true };
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semente(); } catch { return semente(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 db.eu = { ...EU_PADRAO, ...(db.eu || {}) };
 db.equipe ||= [{ id: 'q1', nome: 'Dona Lurdes', cargo: 'Gerente', ve: { vender: true, estoque: true, dinheiro: true, fiado: true } }, { id: 'q2', nome: 'Marquinhos', cargo: 'Caixa', ve: { vender: true, estoque: false, dinheiro: false, fiado: true } }, { id: 'q3', nome: 'Júlia', cargo: 'Caixa', ve: { vender: true, estoque: false, dinheiro: false, fiado: true } }, { id: 'q4', nome: 'Seu Zé', cargo: 'Repositor', ve: { vender: false, estoque: true, dinheiro: false, fiado: false } }];
 db.plano ||= 'basico';
@@ -450,7 +451,7 @@ document.addEventListener('click', (e) => {
   else if ('cancelarAss' in d) { if (confirm(`Cancelar? Nada mais é cobrado e você usa até ${dataCurta(db.assinatura.proxima)}.`)) { db.assinatura.renova = false; gravar(); redesenhar(); avisar('Assinatura cancelada'); } }
   else if ('reativar' in d) { db.assinatura.renova = true; gravar(); redesenhar(); avisar('Assinatura reativada'); }
   else if ('sug' in d) { pag.querySelector('[data-pergunta]').value = d.sug; pag.querySelector('[data-perguntar]').click(); }
-  else if ('perguntar' in d) { const p = pag.querySelector('[data-pergunta]').value.trim(); if (p.length < 3) return; const r = pag.querySelector('[data-resposta]'); r.hidden = false; r.textContent = 'Pensando…'; setTimeout(() => { r.textContent = `${respostaIA(p)}\n\n(Resposta de exemplo da demonstração.)`; }, 700); }
+  else if ('perguntar' in d) { const p = pag.querySelector('[data-pergunta]').value.trim(); if (p.length < 3) return; const r = pag.querySelector('[data-resposta]'); r.hidden = false; r.textContent = 'Pensando…'; if (window.veltriaIA) window.veltriaIA(p).then((t) => { r.textContent = t; }); else setTimeout(() => { r.textContent = `${respostaIA(p)}\n\n(Resposta de exemplo da demonstração.)`; }, 700); }
   else if ('convidar' in d) { if (db.plano !== 'pro' && db.equipe.length >= 5) return avisar('No Básico são você e mais 5 pessoas. O Pro libera sem limite.'); janela('<h2>Pôr alguém na equipe</h2><label class="campo">Nome<input name="n" required></label><label class="campo">Cargo<select name="c"><option>Caixa</option><option>Repositor</option><option>Gerente</option></select></label><p class="sub">A pessoa recebe um convite no WhatsApp para entrar pelo celular dela.</p>', (f) => { const c = f.get('c'); db.equipe.push({ id: `q${Date.now()}`, nome: f.get('n'), cargo: c, ve: { vender: c !== 'Repositor', estoque: c !== 'Caixa', dinheiro: c === 'Gerente', fiado: c !== 'Repositor' } }); gravar(); avisar('Convite mandado'); redesenhar(); }); }
   else if (d.tirar) { db.equipe = db.equipe.filter((p) => p.id !== d.tirar); gravar(); redesenhar(); avisar('Pessoa tirada da equipe'); }
   else if (d.plano) { if (d.plano === 'basico' && db.equipe.length > 5) return avisar('Para o Básico, deixe no máximo 5 pessoas.'); db.plano = d.plano; gravar(); redesenhar(); }

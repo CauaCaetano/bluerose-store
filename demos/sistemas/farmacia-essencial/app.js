@@ -30,6 +30,7 @@ function abrir() {
   return { farm: 'Drogaria Santa Clara', resp: 'Dr. Renato', crf: 'CRF-MG 34.112', pix: '28.114.902/0001-55', prods, clientes, receitas: [{ id: uid(), dia: -2, cliente: 'Paulo Reis', medico: 'Dra. Ana Lima', crm: 'CRM-MG 55.210', prod: 'amox', qtd: 1 }], vendas: [{ dia: 0, total: 486.4, forma: 'PIX' }, { dia: 0, total: 212.9, forma: 'Cartão' }, { dia: 0, total: 94.5, forma: 'Dinheiro' }], cesta: [], plano: 'basico', ajudantes: [{ nome: 'Larissa (balconista)', ve: { vender: true, caixa: false, validade: true } }], assinatura: { valor: 89, status: 'ativa', renova: true, proxima: 11, pagos: [-19, -49, -79] }, conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || abrir(); } catch { return abrir(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('Sem espaço no celular.'); } };
 const prod = (id) => db.prods.find((p) => p.id === id);
 const qtdTotal = (p) => p.lotes.filter((l) => l.val >= 0).reduce((s, l) => s + l.qtd, 0);
@@ -194,7 +195,7 @@ document.addEventListener('click', (e) => {
 document.addEventListener('submit', (e) => {
   if (e.target.id !== 'f-ia') return; e.preventDefault();
   const p = $('#q-ia').value.trim(); if (p.length < 3) return;
-  db.conversa.push({ t: p }, { ia: 1, t: responde(p) }); db.conversa = db.conversa.slice(-12); grava(); mostra(); scrollTo(0, document.body.scrollHeight);
+  const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : responde(p) }; db.conversa.push({ t: p }, resp); db.conversa = db.conversa.slice(-12); grava(); mostra(); if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; grava(); mostra(); }); scrollTo(0, document.body.scrollHeight);
 });
 document.addEventListener('change', (e) => {
   const el = e.target;

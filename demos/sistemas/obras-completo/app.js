@@ -75,12 +75,15 @@ function base() {
     acessos: [{ id: 'a1', nome: 'Gilmar Souza', email: 'gilmar@alicerce.com.br', cargo: 'Mestre de obras' }, { id: 'a2', nome: 'Beatriz Antunes', email: 'beatriz@alicerce.com.br', cargo: 'Financeiro' }] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || base(); } catch { return base(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const guardar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { avisar('O navegador ficou sem espaço para guardar.'); } };
 
 const cli = (id) => db.clientes.find((c) => c.id === id) || { nome: '—', tel: '' };
 const obra = (id) => db.obras.find((o) => o.id === id);
 const valor = (o) => o.etapas.reduce((t, e) => t + e.valor, 0);
 const custoPrev = (o) => o.etapas.reduce((t, e) => t + e.custo, 0);
+// sem obra cadastrada (começou do zero): as telas da obra pedem a primeira
+const semObra = (t) => `<div class="titulo"><div><h1>${t}</h1><p>Aprove um orçamento em Orçamentos e ele vira a primeira obra.</p></div></div>`;
 const executado = (o) => o.etapas.reduce((t, e) => t + e.valor * e.exec / 100, 0);
 const medido = (o) => o.etapas.reduce((t, e) => t + e.valor * e.medido / 100, 0);
 const maoObra = (o) => db.presencas.filter((p) => p.obra === o.id).reduce((t, p) => t + (db.equipe.find((x) => x.id === p.p)?.diaria || 0), 0);
@@ -155,11 +158,14 @@ const TELA = {
   },
   cronograma() {
     const o = obra(db.obraSel) || db.obras[0];
+    if (!o) return semObra('Cronograma');
     return `<div class="titulo"><div><h1>Cronograma</h1><p>Clique na barra para mudar as datas ou o quanto foi feito. A linha vermelha é hoje.</p></div><div class="botoes"><button class="b" data-acao="nova-etapa">+ Etapa</button></div></div>
       ${seletorObra()}<div class="f">${regua(o.etapas.map((e) => ({ nome: e.nome, sub: `${brl(e.valor)} · ${e.exec}% feito`, ini: e.ini, fim: e.fim, feito: e.exec / 100, atrasada: e.fim < 0 && e.exec < 100, etapa: e.id })))}</div>`;
   },
   medicoes() {
-    const o = obra(db.obraSel) || db.obras[0], novo = executado(o) - medido(o);
+    const o = obra(db.obraSel) || db.obras[0];
+    if (!o) return semObra('Medições');
+    const novo = executado(o) - medido(o);
     return `<div class="titulo"><div><h1>Medições</h1><p>Meça o que foi executado e cobre só isso. O boletim vai para o cliente aprovar.</p></div></div>${seletorObra()}
       <div class="folhas"><section class="f f7"><h2>${esc(o.nome)}</h2><div class="tab"><table><thead><tr><th>Etapa</th><th class="n">Valor</th><th class="n">Executado</th><th class="n">Já medido</th><th class="n">A medir</th></tr></thead><tbody>
         ${o.etapas.map((e) => `<tr><td>${esc(e.nome)}</td><td class="n">${brl(e.valor)}</td><td class="n">${e.exec}%</td><td class="n">${e.medido}%</td><td class="n"><b>${brl(e.valor * (e.exec - e.medido) / 100)}</b></td></tr>`).join('')}
@@ -198,7 +204,9 @@ const TELA = {
       </tbody></table></div></section></div>`;
   },
   diario() {
-    const o = obra(db.obraSel) || db.obras[0], l = db.diario.filter((d) => d.obra === o.id).sort((a, b) => b.dia - a.dia);
+    const o = obra(db.obraSel) || db.obras[0];
+    if (!o) return semObra('Diário de obra');
+    const l = db.diario.filter((d) => d.obra === o.id).sort((a, b) => b.dia - a.dia);
     return `<div class="titulo"><div><h1>Diário de obra</h1><p>Clima, efetivo, o que foi feito e fotos. O cliente vê no link da obra.</p></div><div class="botoes"><label class="b cafe" style="cursor:pointer">+ Registro com fotos<input type="file" accept="image/*" multiple hidden id="foto-diario"></label><button class="b" data-acao="registro">+ Registro sem foto</button></div></div>
       ${seletorObra()}<div class="f"><ul class="lista">${l.map((d) => `<li style="align-items:flex-start"><div style="min-width:70px"><b>${dia(d.dia)}</b><br><small>${esc(d.clima)}</small></div><div class="cresce"><b>${d.efetivo} ${d.efetivo === 1 ? 'pessoa' : 'pessoas'} na obra</b><span>${esc(d.texto)}</span>${d.fotos.length ? `<div class="fotos">${d.fotos.map((f) => (f.startsWith('data:') ? `<img src="${f}" alt="Foto do diário">` : `<span class="ff">${esc(f)}</span>`)).join('')}</div>` : ''}</div></li>`).join('') || '<li class="vazio">Nada registrado nesta obra.</li>'}</ul></div>`;
   },
@@ -322,7 +330,8 @@ document.addEventListener('submit', (e) => {
   if (e.target.id !== 'form-ia') return; e.preventDefault();
   const p = q('#perg').value.trim(); if (p.length < 3) return;
   db.conversa.push({ eu: true, t: p }); desenhar(); const c = q('#conversa'); c.insertAdjacentHTML('beforeend', '<div class="balao ela">Pensando…</div>');
-  setTimeout(() => { db.conversa.push({ eu: false, t: `${responder(p)}\n\n(Exemplo da demonstração.)` }); db.conversa = db.conversa.slice(-12); guardar(); desenhar(); }, 800);
+  const fala = (t) => { db.conversa.push({ eu: false, t }); db.conversa = db.conversa.slice(-12); guardar(); desenhar(); };
+  if (window.veltriaIA) window.veltriaIA(p).then(fala); else setTimeout(() => fala(`${responder(p)}\n\n(Exemplo da demonstração.)`), 800);
 });
 document.addEventListener('change', async (e) => {
   const t = e.target;

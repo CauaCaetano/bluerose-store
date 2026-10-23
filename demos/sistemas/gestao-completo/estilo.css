@@ -208,7 +208,7 @@ textarea.campo { padding: 10px 14px; min-height: 80px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 
 /* 22/10/2026: Assistente IA e Painel do dono */
-:root { --gx-papel: var(--papel); --gx-tinta: var(--tinta); --gx-tinta-2: var(--tinta-2); --gx-borda: var(--camelo-2); --gx-acento: var(--vinho); --gx-acento-tx: #fff; --gx-suave: var(--vinho-suave); --gx-raio: 16px; }
+:root { --gc-papel: var(--papel); --gc-tinta: var(--tinta); --gc-tinta-2: var(--tinta-2); --gc-borda: var(--camelo-2); --gc-acento: var(--vinho); --gc-acento-tx: #fff; --gc-suave: var(--vinho-suave); --gc-raio: 16px; }
 .topo .ia-btn { background: var(--navy-2); border-color: rgba(243, 235, 221, .2); color: var(--marfim); }
 .topo .ia-btn:hover { border-color: var(--camelo); }
 @media (max-width: 760px) { .topo .ia-btn { margin-left: auto; padding: 0 12px; } .topo .ia-btn span { display: none; } .topo .ia-btn + .btn { margin-left: 0; } }

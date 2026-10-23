@@ -31,6 +31,7 @@ function inicio() {
   return { vendedor: 'Marcos Teixeira', ramo: 'representante comercial · iluminação', meta: 60000, comissao: 5, negocios: [...negocios, ...fechados], feitosHoje: 0, plano: 'basico', ajudantes: [{ nome: 'Júlia (assistente)', ve: { valores: false, contatos: true, metas: false } }], assinatura: { valor: 59, status: 'ativa', renova: true, proxima: 14, pagos: [-16, -46, -76] }, conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || inicio(); } catch { return inicio(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('Sem espaço no celular.'); } };
 const neg = (id) => db.negocios.find((n) => n.id === id);
 const abertos = () => db.negocios.filter((n) => !['ganho', 'perdido'].includes(n.etapa));
@@ -177,7 +178,7 @@ document.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key ==
 document.addEventListener('submit', (e) => {
   if (e.target.id !== 'f-ia') return; e.preventDefault();
   const p = $('#q-ia').value.trim(); if (p.length < 3) return;
-  db.conversa.push({ t: p }, { ia: 1, t: responde(p) }); db.conversa = db.conversa.slice(-12); grava(); mostra(); scrollTo(0, document.body.scrollHeight);
+  const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : responde(p) }; db.conversa.push({ t: p }, resp); db.conversa = db.conversa.slice(-12); grava(); mostra(); if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; grava(); mostra(); }); scrollTo(0, document.body.scrollHeight);
 });
 document.addEventListener('change', (e) => {
   const el = e.target;

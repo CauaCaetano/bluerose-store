@@ -26,6 +26,7 @@ function gerar() {
   return { empresa: 'Nuvra Software B2B', meta: 1800000, realizado: 512000, pessoas, deals, regras, corte: 60, leads, cadencias, fila, novos, modo: 'territorio', sla: 15, audit: [[agora(), 'Sistema', 'distribuiu 41 leads por território'], [agora(), 'Fernando', 'mudou Grupo Vitalle de melhor caso para commit']].map(([q, quem, o]) => ({ q, quem, o })), plano: 'basico', conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || gerar(); } catch { return gerar(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const guarda = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { toque('Sem espaço no navegador.'); } };
 const regist = (o) => { db.audit.unshift({ q: agora(), quem: 'Você (diretor comercial)', o }); db.audit = db.audit.slice(0, 50); };
 const pessoa = (id) => db.pessoas.find((p) => p.id === id) || { nome: '—' };
@@ -124,7 +125,7 @@ function abrePaleta() { $('#paleta').hidden = false; $('#p-in').value = ''; $('#
 function fechaPaleta() { $('#paleta').hidden = true; }
 function filtrados() { const q = sa($('#p-in').value); return ACOES_P.filter((a) => !q || sa(a.t).includes(q)); }
 function listaPaleta() { const l = filtrados(), q = $('#p-in').value.trim(); $('#p-lista').innerHTML = l.map((a, i) => `<li role="option" data-pi="${i}" aria-selected="${i === pSel}">${e(a.t)}<small>${a.d}</small></li>`).join('') + (q.length > 2 ? `<li role="option" data-pi="${l.length}" aria-selected="${pSel === l.length}">Perguntar à IA: “${e(q)}”<small>pergunta</small></li>` : ''); }
-function executa(i) { const l = filtrados(); if (i < l.length) { fechaPaleta(); l[i].f(); return; } const q = $('#p-in').value.trim(); const r = responde(q); db.conversa.push({ t: q }, { ia: 1, t: r }); db.conversa = db.conversa.slice(-10); guarda(); $('#p-resp').hidden = false; $('#p-resp').textContent = `${r}\n\n(Resposta de exemplo da demonstração. Na versão contratada, 20 perguntas grátis por dia.)`; }
+function executa(i) { const l = filtrados(); if (i < l.length) { fechaPaleta(); l[i].f(); return; } const q = $('#p-in').value.trim(); const r = responde(q); const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : r }; db.conversa.push({ t: q }, resp); db.conversa = db.conversa.slice(-10); guarda(); if (window.veltriaIA) window.veltriaIA(q).then((t) => { resp.t = t; guarda(); }); $('#p-resp').hidden = false; $('#p-resp').textContent = `${r}\n\n(Resposta de exemplo da demonstração. Na versão contratada, 20 perguntas grátis por dia.)`; }
 function responde(q) {
   const x = sa(q);
   if (/meta|bater|trimestre|previs/.test(x)) { const b = db.realizado + soma('commit'), a = b + soma('melhor'); return `Só com commit fechamos em ${k$(b)} (${Math.round(b / db.meta * 100)}% da meta). Com o melhor caso, ${k$(a)}. Para garantir, puxe a Cooperativa Agrovale (${k$(264000)}) para commit: ela depende de uma reunião com o diretor financeiro.`; }

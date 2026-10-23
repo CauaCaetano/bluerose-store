@@ -40,6 +40,7 @@ function oficina() {
     assinatura: { valor: 69, status: 'ativa', renova: true, proxima: 17, pagos: [-13, -43, -73] }, conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || oficina(); } catch { return oficina(); } })();
+window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('Memória do celular cheia: apague fotos antigas.'); } };
 const osPor = (id) => db.os.find((o) => o.id === id);
 const totalOs = (o, soAprovado = false) => o.itens.filter((i) => !soAprovado || i.aprovado !== false).reduce((s, i) => s + i.qtd * i.valor, 0);
@@ -220,7 +221,7 @@ document.addEventListener('click', (e) => {
   const a = e.target.closest('[data-acao]'); if (a && A[a.dataset.acao]) { e.preventDefault(); A[a.dataset.acao](a.dataset); }
 });
 document.addEventListener('submit', (e) => {
-  if (e.target.id === 'f-ia') { e.preventDefault(); const p = q('#q-ia').value.trim(); if (p.length < 3) return; db.conversa.push({ t: p }, { ia: 1, t: `${responde(p)}\n\n(Exemplo da demonstração.)` }); db.conversa = db.conversa.slice(-10); grava(); mostra(); }
+  if (e.target.id === 'f-ia') { e.preventDefault(); const p = q('#q-ia').value.trim(); if (p.length < 3) return; const resp = { ia: 1, t: window.veltriaIA ? 'Pensando…' : `${responde(p)}\n\n(Exemplo da demonstração.)` }; db.conversa.push({ t: p }, resp); db.conversa = db.conversa.slice(-10); grava(); mostra(); if (window.veltriaIA) window.veltriaIA(p).then((t) => { resp.t = t; grava(); mostra(); }); }
   if (e.target.id === 'f-entrada') {
     e.preventDefault(); const f = new FormData(e.target), ocup = db.os.filter((x) => x.status !== 'entregue' && x.box).map((x) => x.box), livre = Array.from({ length: db.oficina.boxes }, (_, i) => i + 1).find((b) => !ocup.includes(b)) || null;
     const o = { id: cod(), num: db.proxOs++, placa: String(f.get('placa')).toUpperCase().replace(/[^A-Z0-9]/g, ''), modelo: f.get('modelo'), cor: '#5d6d7e', cliente: f.get('cliente'), tel: String(f.get('tel')).replace(/\D/g, ''), km: num(f.get('km')), comb: Number(f.get('comb')), entrada: 0, box: livre, status: 'orcamento', avarias: f.getAll('avaria'), fotos: fotosEntrada, garantia: db.eu.garantia, itens: f.get('queixa') ? [{ id: cod(), tipo: 'serviço', desc: `Diagnóstico: ${f.get('queixa')}`, qtd: 1, valor: 120, aprovado: null }] : [], pago: false };
