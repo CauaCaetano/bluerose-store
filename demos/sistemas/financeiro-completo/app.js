@@ -81,9 +81,16 @@ const V = {
     const W = 900, cw = W / 30, yS = (v) => 70 - v / maxS * 58, bar = (v) => v / maxB * 52;
     const linha = p.map((x, i) => `${i ? 'L' : 'M'}${(i + 0.5) * cw},${yS(x.saldo)}`).join(' ');
     const sel = p[diaSel] || p[0], doDia = db.lancs.filter((l) => l.status === 'aberto' && (diaSel === 0 ? l.venc <= 0 : l.venc === diaSel));
-    return `<div class="titulo"><div><h1>Fluxo do mês</h1><p>O saldo do banco hoje mais tudo que vence nos próximos 30 dias. Clique num dia para ver o que entra e sai.</p></div><div class="grupo"><button class="bt" data-a="novo" data-t="r">+ A receber</button><button class="bt" data-a="novo" data-t="p">+ A pagar</button></div></div>
-      ${min.saldo < 0 ? `<div class="alerta-neg"><span>⚠</span><div><b>O caixa fica negativo em ${data(min.d)}: ${R$(min.saldo)}.</b><br><small>Cobre os atrasados (${R$(abertos('r').filter((l) => l.venc < 0).reduce((a, l) => a + l.valor, 0))}) ou adie a compra de material. Pergunte ao assistente.</small></div></div>` : ''}
-      <section class="pl" style="margin-bottom:14px"><div class="regua-mes"><svg viewBox="0 0 ${W} 210" role="img" aria-label="Saldo projetado e movimentos dos próximos 30 dias">
+    const aRec = abertos('r'), aPag = abertos('p'), atras = aRec.filter((l) => l.venc < 0), fim = p[p.length - 1];
+    return `<div class="titulo"><div><h1>Fluxo do mês</h1><p>O saldo de hoje mais tudo que vence nos próximos 30 dias. Clique num dia do gráfico para ver o que entra e sai.</p></div><div class="grupo"><button class="bt" data-a="novo" data-t="r">+ A receber</button><button class="bt p" data-a="novo" data-t="p">+ A pagar</button></div></div>
+      ${min.saldo < 0 ? `<div class="alerta-neg"><span aria-hidden="true">!</span><div><b>O caixa fica negativo em ${data(min.d)}: ${R$(min.saldo)}.</b><small>Cobre os atrasados (${R$(atras.reduce((a, l) => a + l.valor, 0))}) ou adie a compra de material. Pergunte ao assistente.</small></div></div>` : ''}
+      <div class="numeros">
+        <div class="num destaque"><small>Saldo no fim de hoje</small><b class="m">${R0(p[0].saldo)}</b><span>banco + o que vence hoje e os atrasados</span></div>
+        <div class="num"><small>Daqui a 30 dias</small><b class="m ${fim.saldo < 0 ? 'v-sai' : ''}">${R0(fim.saldo)}</b><span>menor saldo ${R0(min.saldo)} em ${data(min.d)}</span></div>
+        <div class="num"><small>A receber em 30 dias</small><b class="m v-entra">${R0(aRec.reduce((a, l) => a + l.valor, 0))}</b><span>${aRec.length} cobranças · ${atras.length} atrasada(s)</span></div>
+        <div class="num"><small>A pagar em 30 dias</small><b class="m v-sai">${R0(aPag.reduce((a, l) => a + l.valor, 0))}</b><span>${aPag.length} contas</span></div>
+      </div>
+      <div class="fluxo-corpo"><section class="pl grafico"><h2>Saldo dia a dia <small>· próximos 30 dias</small></h2><div class="regua-mes"><svg viewBox="0 0 ${W} 210" role="img" aria-label="Saldo projetado e movimentos dos próximos 30 dias">
         <line x1="0" x2="${W}" y1="${yS(0)}" y2="${yS(0)}" stroke="#a5533f" stroke-dasharray="4 4" stroke-width="1"/>
         ${p.map((x, i) => `<g class="dia-col" data-dia="${i}"><rect class="fundo" x="${i * cw + 1}" y="0" width="${cw - 2}" height="210" rx="4" fill="${i === diaSel ? '#ece5d4' : 'transparent'}"/>
           ${x.ent ? `<rect x="${i * cw + cw * 0.22}" y="${150 - bar(x.ent)}" width="${cw * 0.56}" height="${bar(x.ent)}" rx="2" fill="#3f7a5f"/>` : ''}${x.sai ? `<rect x="${i * cw + cw * 0.22}" y="150" width="${cw * 0.56}" height="${bar(x.sai)}" rx="2" fill="#c08a73"/>` : ''}
@@ -92,10 +99,8 @@ const V = {
         <path d="${linha}" fill="none" stroke="#203b32" stroke-width="2.5" stroke-linejoin="round"/>
         ${p.filter((x) => x.saldo < 0).map((x) => `<circle cx="${(x.d + 0.5) * cw}" cy="${yS(x.saldo)}" r="3.5" fill="#a5533f"/>`).join('')}
       </svg></div><div class="legenda"><span style="--c:#203b32">saldo projetado</span><span style="--c:#3f7a5f">entra</span><span style="--c:#c08a73">sai</span><span style="--c:#a5533f">linha do zero</span></div></section>
-      <div class="grade"><section class="pl s5"><h2>${data(diaSel)} <small>· ${semana(diaSel)}${diaSel === 0 ? ' · inclui atrasados' : ''}</small></h2><p class="m" style="margin:0 0 8px">Saldo no fim do dia: <b class="${sel.saldo < 0 ? 'v-sai' : ''}">${R$(sel.saldo)}</b></p>
-        <table><tbody>${doDia.map((l) => `<tr><td>${h(l.desc)}<br><small class="vazio">${h(l.quem)}${l.venc < 0 ? ` · atrasado ${-l.venc} dia(s)` : ''}</small></td><td class="dir ${l.tipo === 'r' ? 'v-entra' : 'v-sai'}">${l.tipo === 'r' ? '+' : '−'}${R$(l.valor)}</td><td><button class="bt x" data-a="baixa" data-id="${l.id}">${l.tipo === 'r' ? 'Recebi' : 'Paguei'}</button></td></tr>`).join('') || '<tr><td class="vazio">Nada vence neste dia.</td></tr>'}</tbody></table></section>
-      <div class="pl s3 kpi"><small>A receber em 30 dias</small><b class="v-entra">${R0(abertos('r').reduce((a, l) => a + l.valor, 0))}</b><span>${abertos('r').filter((l) => l.venc < 0).length} atrasado(s)</span></div>
-      <div class="pl s4 kpi"><small>A pagar em 30 dias</small><b class="v-sai">${R0(abertos('p').reduce((a, l) => a + l.valor, 0))}</b><span>menor saldo: ${R0(min.saldo)} em ${data(min.d)}</span></div></div>`;
+      <section class="pl dia-escolhido"><h2>${diaSel === 0 ? 'Hoje' : data(diaSel)} <small>· ${semana(diaSel)}${diaSel === 0 ? ' · com atrasados' : ''}</small></h2><p class="fim-dia">Saldo no fim do dia <b class="m ${sel.saldo < 0 ? 'v-sai' : ''}">${R$(sel.saldo)}</b></p>
+        <ul class="movs">${doDia.map((l) => `<li><span class="sinal ${l.tipo === 'r' ? 'e' : 's'}" aria-hidden="true">${l.tipo === 'r' ? '↓' : '↑'}</span><div><b>${h(l.desc)}</b><small>${h(l.quem)}${l.venc < 0 ? ` · atrasado ${-l.venc} dia(s)` : ''}</small></div><div class="lado"><span class="m ${l.tipo === 'r' ? 'v-entra' : 'v-sai'}">${l.tipo === 'r' ? '+' : '−'}${R$(l.valor)}</span><button class="bt x" data-a="baixa" data-id="${l.id}">${l.tipo === 'r' ? 'Recebi' : 'Paguei'}</button></div></li>`).join('') || '<li class="vazio">Nada vence neste dia. Escolha outro dia no gráfico.</li>'}</ul></section></div>`;
   },
   receber() {
     const l = [...db.lancs.filter((x) => x.tipo === 'r')].sort((a, b) => (a.status === 'pago') - (b.status === 'pago') || a.venc - b.venc);
