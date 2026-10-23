@@ -164,3 +164,11 @@ td input[data-com] { min-height: 34px; border: 1px solid var(--areia); border-ra
 
 /* bloqueio de horário (almoço, folga) na grade */
 .bloco.bloqueio { background: repeating-linear-gradient(135deg, #eceae4 0 6px, #f6f4ef 6px 12px); color: #6b6f7a; border-color: #d6d2c8; cursor: pointer; }
+
+/* funções de 10/2026 (2ª leva) */
+.alerta-c { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 4px; background: #a5533f; color: #fff; font: 600 .62rem/1.5 var(--mono, monospace); text-transform: uppercase; vertical-align: middle; }
+.alerta-f { margin: -4px 0 8px; padding: 6px 10px; border-radius: 6px; background: #f6e3dc; color: #7d3524; font-weight: 600; font-size: .88rem; }
+.recibo-t { white-space: pre-wrap; font: .9rem/1.5 var(--mono, monospace); background: #fbf8f2; padding: 12px; border-radius: 8px; max-height: 50vh; overflow: auto; }
+@media print { body.so-dialogo > *:not(.sombra) { display: none !important; } body.so-dialogo .sombra { position: static; background: none; } body.so-dialogo .pe { display: none; }
+  body.imprime-dia .barra-demo, body.imprime-dia .recepcao, body.imprime-dia .fila, body.imprime-dia .comanda, body.imprime-dia .acoes { display: none !important; } }
+.barras.metas .l { grid-template-columns: 110px 1fr auto; } .barras.metas input { width: 76px; padding: 4px 6px; }
