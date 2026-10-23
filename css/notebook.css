@@ -151,3 +151,4 @@
 .mx-ge .mx-bt { justify-self: end; padding: 1.8cqh 2.4cqw; font-size: 1.6cqw; }
 .mx-fim .mx-selos { gap: 2cqw; }
 .nb-telas.mx .mx-selos img { height: 10.5cqh; }
+.nb-telas.mx img[src*="veltria-agenda"] { background: #f7f2e8; border-radius: 1cqw; padding: .6cqh .6cqw; box-sizing: content-box; }

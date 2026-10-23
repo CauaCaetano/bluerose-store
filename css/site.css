@@ -1546,3 +1546,5 @@ html[data-theme="light"] body::before {
 .prod-foto img.prod-selo { background: #161a22; padding: 6px; object-fit: contain; box-sizing: border-box; width: 58px; height: 58px; }
 .prod-cat-info img[src*="logos/"] { background: #161a22; border-radius: 10px; padding: 5px; object-fit: contain; box-sizing: border-box; }
 .np-hero-txt .np-logo { width: 230px; height: auto; display: block; margin-bottom: 16px; background: radial-gradient(circle at 30% 20%, #262c3a, #12151c); border-radius: 18px; padding: 16px 20px; box-sizing: border-box; }
+/* logo da Agenda é escura: plaquinha creme */
+.np-hero-txt .np-logo[src*="veltria-agenda"], .prod-cat-info img[src*="veltria-agenda"] { background: #f7f2e8; }

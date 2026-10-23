@@ -28,3 +28,4 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid 
 .p-links a { color: #44506a; } .p-links span { color: #b8bcc6; }
 .p-carrega { color: #6b7080; text-align: center; padding: 30px 0; }
 @media (max-width: 420px) { .p-planos { grid-template-columns: 1fr; } }
+.p-topo img[src*="veltria-agenda"] { background: #f7f2e8; }
