@@ -248,6 +248,69 @@
   new MutationObserver(function (ms) { ms.forEach(function (x) { x.addedNodes.forEach(function (n) { if (n.nodeType === 1) buscaNosSelects(n); }); }); }).observe(document.body, { childList: true, subtree: true });
   buscaNosSelects(document);
 
+  // ---------------------------------------------------------------- nenhuma lista prende: "Outro (escrever)…" nos campos de texto dos formulários
+  // só onde o valor é o próprio texto (serviço, categoria, cidade); ids de cadastro e situações seguem fechados
+  var FECHADO = /^(st|status|situacao|etapa|un|fase|modo|camada|estado|nivel|papel|polo|tipo|urg|risco|filtro|ordem|ver|mes|ano|dia|periodo)$/i;
+  var reaisDe = function (s) { return [].filter.call(s.options, function (o) { return o.value && o.value !== '__vk_outro'; }); };
+  function aceitaOutro(s) {
+    if (s.multiple || s.closest('.vk-menu,.vc-caixa,.vk-lado')) return false;
+    if (!s.closest('form,dialog,[role=dialog],.modal,.folha,.gaveta,[class~=form],.painel-form')) return false;
+    if (FECHADO.test(s.name || '') || FECHADO.test(s.id || '')) return false;
+    var reais = reaisDe(s); if (reais.length < 2) return false;
+    if (reais.every(function (o) { return o.value === o.text.trim(); })) return 'texto';
+    return listaDosIds(reais) ? 'cadastro' : false;
+  }
+  // a lista do banco cujos ids são os valores do campo (cliente, profissional, processo…)
+  function listaDosIds(reais) {
+    var db = window.veltriaDados(), ids = reais.map(function (o) { return o.value; });
+    for (var k in db) { var l = db[k]; if (!Array.isArray(l) || !l.length || typeof l[0] !== 'object' || !l[0] || l[0].id == null) continue;
+      var tem = {}; l.forEach(function (it) { if (it) tem[String(it.id)] = 1; });
+      if (ids.filter(function (v) { return tem[v]; }).length >= Math.max(2, ids.length * 0.8)) return k; }
+    return null;
+  }
+  // registro novo com o mesmo formato dos outros (textos vazios, números zero), para as telas não quebrarem
+  function vazioComo(v) { if (Array.isArray(v)) return []; if (v && typeof v === 'object') { var o = {}; for (var k in v) o[k] = vazioComo(v[k]); return o; } return typeof v === 'number' ? 0 : typeof v === 'boolean' ? false : ''; }
+  function cadastraNovo(s, nome) {
+    var db = window.veltriaDados(), k = listaDosIds(reaisDe(s)); if (!k) return null; var l = db[k], mod = l[0];
+    var op = reaisDe(s).find(function (o) { return l.some(function (it) { return String(it.id) === o.value; }); });
+    var exemplo = l.find(function (it) { return String(it.id) === op.value; }) || mod;
+    var campo = Object.keys(exemplo).find(function (c) { return typeof exemplo[c] === 'string' && exemplo[c].length > 1 && op.text.indexOf(exemplo[c]) === 0; }) || ['nome', 'n', 'cli', 'titulo', 'desc'].find(function (c) { return c in mod; }) || 'nome';
+    var novo = vazioComo(mod), num = typeof mod.id === 'number';
+    novo.id = num ? l.reduce(function (a, it) { return Math.max(a, +it.id || 0); }, 0) + 1 : (String(mod.id).replace(/[0-9a-z]{6,}$|\d+$/, '') || 'n') + Date.now().toString(36);
+    novo[campo] = nome; l.push(novo);
+    try { if (CHAVE) localStorage.setItem(CHAVE, JSON.stringify(db)); } catch (e) {}
+    marca('primeiro');
+    return String(novo.id);
+  }
+  function poeOutro(s) {
+    if (s.dataset.vkOutro) return; var t = aceitaOutro(s); s.dataset.vkOutro = t ? 'sim' : 'nao'; if (!t) return;
+    if (t === 'cadastro' && soLeitura()) { s.dataset.vkOutro = 'nao'; return; }
+    s.dataset.vkModo = t;
+    var o = document.createElement('option'); o.value = '__vk_outro'; o.textContent = t === 'cadastro' ? '+ Cadastrar novo…' : 'Outro (escrever)…'; s.appendChild(o);
+  }
+  document.addEventListener('focusin', function (e) { if (e.target.tagName === 'SELECT') poeOutro(e.target); });
+  document.addEventListener('pointerdown', function (e) { if (e.target.tagName === 'SELECT') poeOutro(e.target); }, true);
+  document.addEventListener('change', function (e) {
+    var s = e.target; if (s.tagName !== 'SELECT' || s.value !== '__vk_outro') return;
+    e.stopImmediatePropagation();
+    var antes = s.querySelector('option:not([value="__vk_outro"])'), i = document.createElement('input');
+    i.type = 'text'; i.className = s.className; i.placeholder = s.dataset.vkModo === 'cadastro' ? 'Nome do novo cadastro e Enter' : 'Escreva e aperte Enter'; i.setAttribute('aria-label', 'Escrever outra opção'); i.style.width = '100%';
+    s.value = antes ? antes.value : ''; s.hidden = true; s.parentNode.insertBefore(i, s.nextSibling); i.focus();
+    var feito = false;
+    function fim(ok) {
+      if (feito) return; feito = true; var t = i.value.trim(); i.remove(); s.hidden = false;
+      if (ok && t && s.dataset.vkModo === 'cadastro') {
+        var nid = cadastraNovo(s, t); if (!nid) { s.focus(); return; }
+        var c = document.createElement('option'); c.value = nid; c.textContent = t; s.insertBefore(c, s.querySelector('option[value="__vk_outro"]'));
+        s.value = nid; s.dispatchEvent(new Event('change', { bubbles: true })); toast('"' + t + '" cadastrado. Complete os dados depois pelo botão +.'); s.focus(); return;
+      }
+      if (ok && t) { var n = [].find.call(s.options, function (o) { return o.value === t; }); if (!n) { n = document.createElement('option'); n.value = n.textContent = t; s.insertBefore(n, s.querySelector('option[value="__vk_outro"]')); } s.value = t; s.dispatchEvent(new Event('change', { bubbles: true })); s.dispatchEvent(new Event('input', { bubbles: true })); }
+      s.focus();
+    }
+    i.addEventListener('keydown', function (k) { if (k.key === 'Enter') { k.preventDefault(); fim(true); } if (k.key === 'Escape') { k.preventDefault(); k.stopPropagation(); fim(false); } });
+    i.addEventListener('blur', function () { fim(true); });
+  }, true);
+
   // ---------------------------------------------------------------- primeiros passos, dias seguidos e resumo (só na conta)
   var CH = 'veltria-ritmo:' + (conta ? conta.espaco : 'demo') + ':' + app, ritmo = {};
   try { ritmo = JSON.parse(localStorage.getItem(CH) || '{}'); } catch (e) { ritmo = {}; }
