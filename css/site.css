@@ -1542,3 +1542,7 @@ html[data-theme="light"] body::before {
 .prod-foto { position: relative; }
 .prod-foto img.prod-selo { position: absolute; top: 12px; left: 12px; z-index: 1; width: 52px; height: 52px; border-radius: 12px; object-fit: cover; box-shadow: 0 8px 18px -8px rgba(0, 0, 0, .55); transform: none !important; }
 .np-hero-txt .np-logo { box-shadow: 0 14px 30px -16px rgba(0, 0, 0, .5); }
+/* logos sem fundo do dono sobre selo escuro (o desenho é feito para fundo escuro) */
+.prod-foto img.prod-selo { background: #161a22; padding: 6px; object-fit: contain; box-sizing: border-box; width: 58px; height: 58px; }
+.prod-cat-info img[src*="logos/"] { background: #161a22; border-radius: 10px; padding: 5px; object-fit: contain; box-sizing: border-box; }
+.np-hero-txt .np-logo { width: 230px; height: auto; display: block; margin-bottom: 16px; background: radial-gradient(circle at 30% 20%, #262c3a, #12151c); border-radius: 18px; padding: 16px 20px; box-sizing: border-box; }

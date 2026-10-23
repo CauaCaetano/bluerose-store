@@ -147,7 +147,7 @@ const V = {
 function tela() {
   const r = location.hash.slice(1) || 'fluxo', atrasados = abertos('r').filter((l) => l.venc < 0).length, pend = db.extrato.filter((e) => !e.ok).length;
   const n = { receber: atrasados, conciliar: pend, orcamentos: db.orcs.filter((o) => o.st === 'aprovado').length };
-  $('#trilho').innerHTML = `<div class="marca">Veltria<br>Financeiro</div>${SECOES.map(([k, t]) => `<a href="#${k}" ${k === r ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICONES[k]}</svg>${t}${n[k] ? `<span class="n">${n[k]}</span>` : ''}</a>`).join('')}`;
+  $('#trilho').innerHTML = `<div class="marca"><img class="v-logo" src="../../../img/logos/veltria-financeiro-simbolo.png?v=2" alt="Veltria Financeiro" width="256" height="180" style="height:auto;width:62px;margin:0 auto"></div>${SECOES.map(([k, t]) => `<a href="#${k}" ${k === r ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICONES[k]}</svg>${t}${n[k] ? `<span class="n">${n[k]}</span>` : ''}</a>`).join('')}`;
   const p = projecao(), fim = p[29].saldo;
   $('#saldos').innerHTML = `<div><small>No banco hoje</small><b>${R0(db.saldo)}</b></div><div class="${fim < 0 ? 'neg' : ''}"><small>Em 30 dias</small><b>${R0(fim)}</b></div>`;
   $('#empresa').textContent = db.empresa; $('#hoje').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });

@@ -1,0 +1,58 @@
+/* Páginas dos sistemas da Veltria: escolha da versão e tabela de planos (22/10/2026) */
+.vs { padding-top: 24px; }
+.vs-intro { color: var(--ink-2); max-width: 60ch; margin: 10px 0 0; font-size: 17px; }
+.vs-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 34px; align-items: stretch; }
+.vs-card { position: relative; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line-2); border-radius: 20px; padding: 30px 28px 26px; box-shadow: var(--shadow); }
+.vs-card.vs-destaque { border: 2px solid var(--ink); transform: translateY(-6px); }
+.vs-chip { align-self: flex-start; font-size: 12.5px; font-weight: 600; letter-spacing: .01em; padding: 4px 11px; border-radius: 999px; background: var(--accent-soft); color: var(--ink-2); margin-bottom: 18px; }
+.vs-destaque .vs-chip { background: var(--ink); color: var(--surface); }
+.vs-nome { font-size: 28px; line-height: 1.1; margin: 0; }
+.vs-para { margin: 6px 0 0; color: var(--ink-3); font-size: 15px; min-height: 2.6em; }
+.vs-preco { display: flex; align-items: baseline; gap: 4px; margin: 18px 0 0; color: var(--ink); white-space: nowrap; }
+.vs-preco span { font-size: 16px; color: var(--ink-2); }
+.vs-preco b { font-size: 46px; line-height: 1; letter-spacing: -.03em; font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
+.vs-ano { margin: 6px 0 0; font-size: 14px; color: var(--ink-3); }
+.vs-lista { list-style: none; margin: 22px 0 26px; padding: 22px 0 0; border-top: 1px solid var(--line); display: grid; gap: 12px; flex: 1; align-content: start; }
+.vs-lista li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 15px; line-height: 1.45; color: var(--ink-2); }
+.vs-lista li .ico { width: 16px; height: 16px; margin-top: 3px; color: var(--ink); }
+.vs-bts { display: grid; gap: 12px; justify-items: center; }
+.vs-bts .btn { width: 100%; justify-content: center; text-align: center; white-space: nowrap; }
+.vs-demo { font-size: 14.5px; color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+.vs-demo:hover { color: var(--ink); }
+.vs-rodape { margin: 26px 0 0; color: var(--ink-3); font-size: 14.5px; max-width: 75ch; }
+
+.pl { padding-top: 10px; }
+.pl-caixa { margin-top: 28px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
+.pl-tabela { width: 100%; border-collapse: collapse; }
+.pl-tabela th, .pl-tabela td { padding: 20px 24px; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--line); }
+.pl-tabela tbody tr:last-child th, .pl-tabela tbody tr:last-child td { border-bottom: 0; }
+.pl-tabela thead th { background: var(--surface-2); font-size: 15px; font-weight: 600; color: var(--ink); }
+.pl-tabela thead small { display: block; font-weight: 400; color: var(--ink-3); font-size: 13px; margin-top: 2px; }
+.pl-tabela tbody th { font-size: 19px; font-weight: 600; color: var(--ink); width: 22%; }
+.pl-tabela tbody th small { display: block; font-size: 13px; font-weight: 400; color: var(--ink-3); margin-top: 2px; }
+.pl-preco { display: inline-flex; align-items: baseline; gap: 3px; background: none; border: 1px solid var(--line-2); border-radius: 10px; padding: 8px 14px; cursor: pointer; color: var(--ink); font: inherit; white-space: nowrap; transition: border-color .2s, background .2s; }
+.pl-preco b { font-size: 19px; font-variant-numeric: lining-nums tabular-nums; }
+.pl-preco span { font-size: 13.5px; color: var(--ink-3); }
+.pl-preco:hover { border-color: var(--ink); background: var(--accent-soft); }
+.pl-ano { display: block; margin-top: 6px; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; font-size: 13.5px; color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.pl-ano:hover { color: var(--ink); }
+.pl-notas { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-wrap: wrap; gap: 10px 26px; color: var(--ink-3); font-size: 14px; }
+.pl-notas li { display: inline-flex; gap: 8px; align-items: center; }
+.pl-notas .ico { width: 15px; height: 15px; color: var(--ink-2); }
+
+@media (max-width: 980px) {
+  .vs-grade { grid-template-columns: 1fr; max-width: 520px; }
+  .vs-card.vs-destaque { transform: none; }
+  .vs-para { min-height: 0; }
+}
+@media (max-width: 700px) {
+  .pl-tabela thead { display: none; }
+  .pl-tabela tr { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
+  .pl-tabela tbody tr:last-child { border-bottom: 0; }
+  .pl-tabela tbody th { grid-column: 1 / -1; width: auto; padding-bottom: 4px; border: 0; }
+  .pl-tabela td { border: 0; padding: 8px 12px 18px 20px; }
+  .pl-tabela tbody th { padding-left: 20px; }
+  .pl-preco { padding: 7px 10px; }
+  .pl-tabela td::before { content: attr(data-plano); display: block; font-size: 12.5px; color: var(--ink-3); margin-bottom: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .pl-preco { transition: none; } }
