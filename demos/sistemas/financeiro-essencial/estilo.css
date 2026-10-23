@@ -4,7 +4,7 @@
    conteúdo no meio e as pendências do dia numa coluna à direita. */
 :root {
   --esm: #123d35; --esm-2: #1c5247; --esm-3: #0b2a24; --marfim: #f2efe5; --sup: #fbf9f4; --sup-2: #f6f2e8; --linha: #e4ddcc; --linha-2: #d3cbb6;
-  --palha: #c9b995; --jade: #6e9883; --tx: #17302a; --tx-2: #4c625b; --tx-3: #6f817a; --vermelho: #a8473b; --ouro: #9c7d3c; --ok: #2d6a52;
+  --palha: #c9b995; --jade: #6e9883; --tx: #17302a; --tx-2: #4c625b; --tx-3: #56675f; --vermelho: #a8473b; --ouro: #7d632c; --ok: #2d6a52;
   --serifa: 'DM Serif Display', Georgia, serif; --sans: 'Figtree', system-ui, sans-serif;
   --r-g: 22px; --r-m: 14px; --r-p: 10px;
   --sombra: 0 1px 2px rgba(18, 61, 53, .06), 0 8px 24px -14px rgba(18, 61, 53, .35);
@@ -144,7 +144,7 @@ h2 .ver { margin-left: auto; font-weight: 600; font-size: .86rem; }
 .salvar-fixo .bt { box-shadow: 0 12px 24px -12px rgba(11, 42, 36, .6); min-height: 54px; font-size: 1.02rem; }
 
 /* campos e escolhas */
-.campo { display: grid; gap: 6px; margin-bottom: 14px; font-size: .88rem; font-weight: 600; color: var(--tx-2); }
+.campo { display: grid; gap: 6px; margin-bottom: 14px; font-size: .88rem; font-weight: 600; color: var(--tx-2); } .campo[hidden] { display: none; }
 .campo input, .campo select, .campo textarea { min-height: 50px; border: 1.5px solid var(--linha-2); border-radius: var(--r-m); padding: 0 14px; background: #fff; color: var(--tx); font-size: 1rem; font-weight: 500; }
 .campo input:focus, .campo select:focus { border-color: var(--esm-2); outline: none; box-shadow: 0 0 0 3px rgba(28, 82, 71, .15); }
 .campo textarea { padding: 10px 12px; font: .8rem/1.4 ui-monospace, monospace; resize: none; word-break: break-all; min-height: 0; }

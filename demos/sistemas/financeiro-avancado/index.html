@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Veltria Financeiro Avançado · demonstração</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#24372d">
+<meta name="theme-color" content="#123D35">
 <link rel="icon" href="../../../img/logos/veltria-financeiro-192.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=5">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css?v=13">
 <script src="../base/versoes.js?v=6"></script>
 <script src="../base/conta-nuvem.js?v=12"></script>
 <style>.v-logo{height:42px;width:auto;flex:none;display:block;object-fit:contain}.v-logo.v-claro{background:#161a22;padding:5px 9px;border-radius:10px;box-sizing:content-box}</style>
@@ -19,19 +19,24 @@
 <a class="pular" href="#folha">Pular para a planilha</a>
 <div class="tira-demo"><a href="../../../veltria-financeiro.html#versoes">Voltar ao site</a><span class="so-lg">Demonstração do <b>Veltria Financeiro Avançado</b> · dados de exemplo neste navegador</span><button type="button" id="recomecar">Recomeçar</button><a class="quero" href="../../../app/financeiroavancado/">Testar 7 dias grátis</a></div>
 <div class="mesa">
+  <aside class="lado-nav">
+    <div class="logo"><img class="v-logo" src="../../../img/logos/veltria-financeiro-simbolo.png?v=2" alt="" width="256" height="180"><div><b>VELTRIA</b><small>Financeiro Avançado</small></div></div>
+    <label class="empresa"><small>Empresa ativa</small><select id="empresa" aria-label="Empresa ativa"></select></label>
+    <nav class="abas" id="abas" aria-label="Planilhas"></nav>
+  </aside>
   <header class="faixa">
-    <div class="logo"><img class="v-logo" src="../../../img/logos/veltria-financeiro-simbolo.png?v=2" alt="" width="256" height="180"><b>Veltria Financeiro <i>Avançado</i></b></div>
-    <label class="empresa"><span>Empresa</span><select id="empresa" aria-label="Empresa"></select></label>
+    <form class="formula busca-topo" id="f-fx" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span class="ref" id="ref" aria-hidden="true">A1</span><input id="fx" autocomplete="off" placeholder="Buscar pagamento, extrato, linha… ou escreva =caixa, =aprovar" aria-label="Busca global ou comando"><button aria-label="Buscar">↵</button><div class="resultados" id="resultados" hidden></div></form>
+    <select class="empresa-cel" id="empresa2" aria-label="Empresa ativa"></select>
     <span class="periodo" id="periodo"></span>
-    <form class="formula" id="f-fx"><span class="fx" aria-hidden="true">fx</span><span class="ref" id="ref">A1</span><input id="fx" autocomplete="off" placeholder="Pergunte ou escreva: =caixa, =aprovar, quanto falta para fechar o mês?" aria-label="Barra de fórmula: comando ou pergunta"><button>Calcular</button></form>
+    <div class="sino-w"><button type="button" class="sino" id="sino" aria-haspopup="true" aria-expanded="false" aria-label="Notificações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="n" hidden>0</span></button><div class="notif" id="notif" hidden></div></div>
+    <a class="usuario" id="usuario" href="#equipe" title="Quem está usando (troque em Equipe e alçadas)"></a>
   </header>
   <div class="resposta" id="resposta" hidden></div>
-  <nav class="abas" id="abas" aria-label="Planilhas"></nav>
   <main id="folha" tabindex="-1"></main>
   <footer class="status" id="status" aria-label="Situação"></footer>
 </div>
 <div class="balao" id="balao" role="status" aria-live="polite"></div>
-<script type="module" src="app.js?v=7"></script>
+<script type="module" src="app.js?v=15"></script>
 <script src="../base/camada.js?v=12" defer></script>
 </body>
 </html>

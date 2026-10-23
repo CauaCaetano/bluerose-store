@@ -38,16 +38,20 @@ export function novaConta(db, d) {
   exigeValor(d.c); if (!['r', 'p'].includes(d.tipo)) throw new Error('Tipo inválido.');
   const quem = String(d.quem || '').trim(), desc = String(d.desc || '').trim(); if (!quem || !desc) throw new Error(`Preencha ${d.tipo === 'r' ? 'o cliente' : 'o fornecedor'} e o que é.`);
   if (!Number.isInteger(d.venc)) throw new Error('Escolha o vencimento.');
-  const rep = Math.max(1, Math.min(36, Number(d.rep) || 1)), criados = [], base = dataDe(d.venc), grupo = rep > 1 ? nid('g') : undefined;
+  const parc = Math.max(1, Math.min(36, Number(d.parcelas) || 1)), repetir = Math.max(1, Math.min(36, Number(d.rep) || 1));
+  if (parc > 1 && repetir > 1) throw new Error('Escolha repetir todo mês ou parcelar o valor, não os dois.');
+  if (parc > d.c) throw new Error('Valor pequeno demais para tantas parcelas.');
+  const rep = Math.max(parc, repetir), criados = [], base = dataDe(d.venc), grupo = rep > 1 ? nid('g') : undefined;
   for (let i = 0; i < rep; i++) {
     // repetir mês a mês no mesmo dia do calendário (31 vira o último dia do mês curto)
     const alvo = new Date(base.getFullYear(), base.getMonth() + i, 1, 12), ult = new Date(alvo.getFullYear(), alvo.getMonth() + 1, 0).getDate(); alvo.setDate(Math.min(base.getDate(), ult));
     const h = new Date(); h.setHours(12, 0, 0, 0);
-    const l = { id: nid(), tipo: d.tipo, quem: quem.slice(0, 80), desc: (desc + (rep > 1 ? ` (${i + 1}/${rep})` : '')).slice(0, 120), c: d.c, venc: Math.round((alvo - h) / DIA_MS), cat: d.cat || CATS[d.tipo][0], cc: d.cc || '', tel: d.tel || '', status: 'aberto', avisos: [], pagamentos: [], origem: d.origem || 'manual' };
-    if (grupo) l.grupo = grupo; ['contrato', 'comp', 'orc', 'boleto'].forEach((k) => d[k] && (l[k] = d[k]));
+    const valor = parc > 1 ? Math.floor(d.c / parc) + (i < d.c % parc ? 1 : 0) : d.c; // parcelas: as primeiras levam o centavo que sobra
+    const l = { id: nid(), tipo: d.tipo, quem: quem.slice(0, 80), desc: (desc + (rep > 1 ? ` (${i + 1}/${rep})` : '')).slice(0, 120), c: valor, venc: Math.round((alvo - h) / DIA_MS), cat: d.cat || CATS[d.tipo][0], cc: d.cc || '', tel: d.tel || '', status: 'aberto', avisos: [], pagamentos: [], origem: d.origem || 'manual' };
+    if (grupo) l.grupo = grupo; if (parc > 1) l.parcela = { n: i + 1, de: parc, total: d.c }; ['contrato', 'comp', 'orc', 'boleto'].forEach((k) => d[k] && (l[k] = d[k]));
     db.lancs.push(l); criados.push(l);
   }
-  registra(db, `Lançou ${d.tipo === 'r' ? 'a receber' : 'a pagar'}: ${quem} · ${reais(d.c)}${rep > 1 ? ` × ${rep} meses` : ''}`);
+  registra(db, `Lançou ${d.tipo === 'r' ? 'a receber' : 'a pagar'}: ${quem} · ${reais(d.c)}${parc > 1 ? ` em ${parc} parcelas` : rep > 1 ? ` × ${rep} meses` : ''}`);
   return criados;
 }
 export function editarConta(db, id, mud) {
@@ -57,6 +61,11 @@ export function editarConta(db, id, mud) {
   ['quem', 'desc', 'c', 'venc', 'cat', 'cc', 'tel'].forEach((k) => { if (mud[k] !== undefined) l[k] = mud[k]; });
   registra(db, `Editou ${l.quem} · ${l.desc} (antes: ${antes})`);
   return l;
+}
+/** Parcelas do mesmo parcelamento, em ordem, com o que falta no total. */
+export function parcelas(db, l) {
+  if (!l?.parcela) return null; const g = db.lancs.filter((x) => x.grupo === l.grupo && x.parcela).sort((a, b) => a.parcela.n - b.parcela.n);
+  return { lista: g, total: l.parcela.total, pago: g.reduce((a, x) => a + pago(x), 0), falta: g.reduce((a, x) => a + situacao(x).falta, 0) };
 }
 /** Baixa (recebimento ou pagamento), inteira ou parcial. chave evita lançar a mesma baixa duas vezes. */
 export function baixar(db, id, c, { dia = 0, forma = '', chave, ext, origem = 'manual' } = {}) {
@@ -195,11 +204,43 @@ export function pendencias(db, agora = new Date()) {
   const pv = abertos(db, 'p').filter((x) => x.venc <= 2); if (pv.length) l.push({ tipo: 'vence', id: 'pag-vence', txt: `${pv.length} conta(s) a pagar vencida(s) ou vencendo em até 2 dias: ${reais(pv.reduce((s, x) => s + situacao(x).falta, 0))}.`, ir: 'pagar' });
   const reg = abertos(db, 'r').filter((x) => lembreteHoje(db, x)); if (reg.length) l.push({ tipo: 'cobrar', id: 'regua', txt: `${reg.length} cliente(s) para lembrar hoje pela régua de cobrança.`, ir: 'receber' });
   const pend = db.extrato.filter((e) => !e.conc).length; if (pend) l.push({ tipo: 'vence', id: 'conc', txt: `${pend} linha(s) do banco para conciliar.`, ir: 'conciliar' });
+  orcamentoMes(db, hojeISO(agora).slice(0, 7), agora).filter((o) => o.st !== 'ok').forEach((o) => l.push({ tipo: o.st === 'estourou' ? 'estouro' : 'orc', id: `orc:${o.cat}`, txt: o.st === 'estourou' ? `Orçamento de ${o.cat} estourado: pago ${reais(o.pago)} de ${reais(o.orcado)}.` : o.st === 'vai estourar' ? `Orçamento de ${o.cat} vai estourar: pago ${reais(o.pago)} + em aberto ${reais(o.previsto)} passa de ${reais(o.orcado)}.` : `Orçamento de ${o.cat} em ${String(o.pct).replace('.', ',')}% (pago ${reais(o.pago)} de ${reais(o.orcado)}).`, ir: 'orcamento' }));
   comps(agora).forEach((c, i) => { const g = aGerar(db, c, agora).length; if (g && (i === 0 || agora.getDate() >= 20)) l.push({ tipo: 'vence', id: `contr:${c}`, txt: `${g} contrato(s) sem a cobrança de ${c.slice(5)}/${c.slice(0, 4)}.`, ir: 'contratos' }); });
   return l;
 }
 /** A régua manda lembrar hoje? (marcos em dias relativos ao vencimento; já lembrou hoje = aviso com dia 0) */
 export function lembreteHoje(db, l) { return situacao(l).falta > 0 && (db.regua || []).some((d) => l.venc + d === 0) && !(l.avisos || []).includes(0); }
+
+// ------------------------------------------------------------------ orçamento por categoria (limite por mês)
+/**
+ * Para cada categoria de despesa com limite: orçado, pago no mês (baixas, caixa), em aberto com vencimento no mês
+ * (previsto, ainda não pago), disponível = orçado − pago, % usado e situação. Pago e previsto nunca se misturam.
+ * Situação: "estourou" (pago > orçado), "vai estourar" (pago + em aberto > orçado), "atenção" (pago ≥ tolerância), "ok".
+ */
+export function orcamentoMes(db, comp, agora = new Date()) {
+  const [de, ate] = mesEmDias(comp, agora), dentro = (d) => d >= de && d <= ate, tol = Number.isInteger(db.orcTol) ? db.orcTol : 80;
+  return CATS.p.filter((cat) => Number.isInteger(db.orcCat?.[cat]) && db.orcCat[cat] > 0).map((cat) => {
+    const lim = db.orcCat[cat], ls = db.lancs.filter((l) => l.tipo === 'p' && l.status !== 'cancelado' && l.cat === cat);
+    const baixasMes = ls.flatMap((l) => (l.pagamentos || []).filter((b) => dentro(b.dia)).map((b) => ({ ...b, l })));
+    const abertasMes = ls.filter((l) => dentro(l.venc) && situacao(l).falta > 0);
+    const pago_ = baixasMes.reduce((a, b) => a + b.c, 0), previsto = abertasMes.reduce((a, l) => a + situacao(l).falta, 0), pct = Math.round(pago_ / lim * 1000) / 10;
+    const st = pago_ > lim ? 'estourou' : pago_ + previsto > lim ? 'vai estourar' : pct >= tol ? 'atenção' : 'ok';
+    return { cat, orcado: lim, pago: pago_, previsto, disponivel: lim - pago_, desvio: pago_ - lim, pct, st, baixas: baixasMes, abertas: abertasMes };
+  });
+}
+export function definirOrcamento(db, cat, c) {
+  if (!CATS.p.includes(cat)) throw new Error('Categoria de despesa inválida.');
+  if (!Number.isInteger(c) || c < 0) throw new Error('Digite um limite válido (zero tira o orçamento).');
+  const antes = db.orcCat?.[cat] || 0; (db.orcCat ||= {}); if (c) db.orcCat[cat] = c; else delete db.orcCat[cat];
+  registra(db, `Orçamento de ${cat}: ${antes ? reais(antes) : 'sem limite'} → ${c ? reais(c) : 'sem limite'} por mês`);
+}
+
+// ------------------------------------------------------------------ notificações: lidas por pessoa, reaparecem se mudarem
+/** Prioridade de cada aviso; "lida" vale para o texto lido: se o valor ou a situação mudar, o aviso volta. */
+export const PRIORIDADE = { erro: 'alta', atraso: 'alta', estouro: 'alta', vence: 'média', cobrar: 'média', orc: 'média' };
+export const lida = (db, p) => db.lidas?.[p.id] === p.txt;
+export function marcarLida(db, p) { (db.lidas ||= {})[p.id] = p.txt; }
+export function desmarcarLida(db, id) { if (db.lidas) delete db.lidas[id]; }
 
 // ------------------------------------------------------------------ exportação para o contador
 export function csvContador(db, comp, agora = new Date()) {

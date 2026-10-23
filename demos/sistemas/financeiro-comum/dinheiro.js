@@ -8,6 +8,7 @@ export function centavos(v) {
   if (!s) return NaN;
   const neg = /^-|^\(.*\)$|-$/.test(s); s = s.replace(/[-()]/g, '');
   if (/,\d{1,2}$/.test(s)) s = s.replace(/\./g, '').replace(',', '.');
+  else if (s.includes(',') && !s.includes('.')) return NaN; // vírgula é a casa decimal: "10,005" ou "12,3456" é erro de digitação, não milhar
   else if (/\.\d{3}(\.|$)/.test(s) && !/\.\d{1,2}$/.test(s)) s = s.replace(/\./g, '');
   else s = s.replace(/,/g, '');
   if (!/^\d+(\.\d{1,2})?$/.test(s)) return NaN;

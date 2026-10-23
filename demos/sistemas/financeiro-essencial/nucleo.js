@@ -112,6 +112,42 @@ export const recebido = (db, cob) => db.movs.filter((m) => m.tipo === 'entra' &&
 export const pagoConta = (db, conta) => db.movs.filter((m) => m.tipo === 'sai' && m.conta === conta.id).reduce((s, m) => s + m.c, 0);
 export const pagoFixa = (db, fixa, comp) => fixa.pagaAntes === comp ? fixa.c : db.movs.filter((m) => m.tipo === 'sai' && m.fixa === fixa.id && m.comp === comp).reduce((s, m) => s + m.c, 0);
 
+// Frequência da conta fixa: mensal (padrão, no dia do mês), semanal (num dia da semana) ou anual (dia e mês).
+// "comp" é a chave do período pago: AAAA-MM (mensal), AAAA (anual) ou AAAA-MM-DD da segunda-feira (semanal).
+export const FREQS = { mensal: 'todo mês', semanal: 'toda semana', anual: 'todo ano' };
+export const DIAS_SEMANA = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+const meioDia = (d) => { const x = new Date(d); x.setHours(12, 0, 0, 0); return x; };
+const ultDia = (a, m) => new Date(a, m + 1, 0).getDate();
+const dm = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+/** Período da conta fixa que contém a data (desloc −1 = o anterior, 1 = o seguinte), com o vencimento dentro dele. */
+export function periodoFixa(f, agora = new Date(), desloc = 0) {
+  const h = meioDia(agora), freq = f.freq || 'mensal';
+  if (freq === 'semanal') {
+    const ini = new Date(h); ini.setDate(h.getDate() - ((h.getDay() + 6) % 7) + 7 * desloc);
+    const vence = new Date(ini); vence.setDate(ini.getDate() + (((f.dow ?? 1) + 6) % 7)); const fim = new Date(ini); fim.setDate(ini.getDate() + 6);
+    return { comp: hojeISO(ini), vence, fim, rot: `semana de ${dm(ini)}` };
+  }
+  if (freq === 'anual') { const a = h.getFullYear() + desloc, m = Math.min(11, Math.max(0, (Number(f.mes) || 1) - 1)); return { comp: String(a), vence: new Date(a, m, Math.min(f.dia, ultDia(a, m)), 12), fim: new Date(a, 11, 31, 12), rot: String(a) }; }
+  const b = new Date(h.getFullYear(), h.getMonth() + desloc, 1, 12), a = b.getFullYear(), m = b.getMonth();
+  return { comp: hojeISO(b).slice(0, 7), vence: new Date(a, m, Math.min(f.dia, ultDia(a, m)), 12), fim: new Date(a, m, ultDia(a, m), 12), rot: `${String(m + 1).padStart(2, '0')}/${a}` };
+}
+/** Nome do período pela chave (para a descrição do pagamento). */
+export function rotuloComp(f, comp) {
+  if ((f.freq || 'mensal') === 'semanal') return `semana de ${comp.slice(8)}/${comp.slice(5, 7)}`;
+  if (f.freq === 'anual') return comp;
+  return `${comp.slice(5)}/${comp.slice(0, 4)}`;
+}
+/** Como a conta se repete, em palavras. */
+export function descFreq(f) {
+  if (f.freq === 'semanal') return `toda ${DIAS_SEMANA[f.dow ?? 1]}`;
+  if (f.freq === 'anual') return `todo ano em ${String(f.dia).padStart(2, '0')}/${String(f.mes || 1).padStart(2, '0')}`;
+  return `todo dia ${f.dia}`;
+}
+// o período conta a partir de quando a conta foi criada: mensal pelo mês (como sempre foi); semanal e anual pelo vencimento
+const desdeISO = (f) => (!f.desde ? '' : f.desde.length === 7 ? `${f.desde}-01` : f.desde);
+const valePeriodo = (f, p) => !desdeISO(f) || hojeISO((f.freq || 'mensal') === 'mensal' ? p.fim : p.vence) >= desdeISO(f);
+const NOME_ANT = { mensal: 'mês passado', semanal: 'semana passada', anual: 'ano passado' }, DO_ANT = { mensal: 'do mês passado', semanal: 'da semana passada', anual: 'do ano passado' };
+
 /** Situação de uma cobrança: recebida, cancelada, atrasada, vence hoje ou aberta. */
 export function situacaoCob(db, cob) {
   const r = recebido(db, cob), falta = Math.max(0, cob.c - r);
@@ -126,15 +162,16 @@ export function situacaoConta(db, conta) {
   if (falta === 0) return { st: 'paga', p, falta };
   return { st: conta.vence < 0 ? 'atrasada' : conta.vence === 0 ? 'hoje' : 'aberta', p, falta, parcial: p > 0 };
 }
-/** Conta fixa no mês (competência). Começa no mês em que foi criada; nunca cobra mês anterior a isso. */
+/** Conta fixa no período atual (mês, semana ou ano). Nunca cobra período anterior à criação da conta. */
 export function situacaoFixa(db, fixa, agora = new Date()) {
-  const comp = hojeISO(agora).slice(0, 7), hoje = agora.getDate(), ult = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).getDate();
-  const venceDia = Math.min(fixa.dia, ult), p = pagoFixa(db, fixa, comp), falta = Math.max(0, fixa.c - p);
-  const ant = new Date(agora.getFullYear(), agora.getMonth() - 1, 15), compAnt = hojeISO(ant).slice(0, 7);
-  const antAberta = fixa.ativa !== false && (fixa.desde || comp) <= compAnt && fixa.c > 0 && pagoFixa(db, fixa, compAnt) < fixa.c;
-  if (fixa.ativa === false) return { st: 'pausada', comp, falta: 0, venceEm: venceDia - hoje, antAberta: false };
-  const st = falta === 0 ? 'paga' : hoje > venceDia ? 'atrasada' : hoje === venceDia ? 'hoje' : 'aberta';
-  return { st, comp, p, falta, venceEm: venceDia - hoje, antAberta, compAnt };
+  let p0 = periodoFixa(fixa, agora); const pa = periodoFixa(fixa, agora, -1);
+  if (!valePeriodo(fixa, p0)) p0 = periodoFixa(fixa, agora, 1); // criada depois do vencimento deste período: o próximo é o que vale
+  const venceEm = Math.round((p0.vence - meioDia(agora)) / DIA_MS), p = pagoFixa(db, fixa, p0.comp), falta = Math.max(0, fixa.c - p);
+  const antAberta = fixa.ativa !== false && valePeriodo(fixa, pa) && pa.comp !== p0.comp && fixa.c > 0 && pagoFixa(db, fixa, pa.comp) < fixa.c;
+  const base = { comp: p0.comp, rot: p0.rot, venceEm, compAnt: pa.comp, rotAnt: NOME_ANT[fixa.freq || 'mensal'] };
+  if (fixa.ativa === false) return { ...base, st: 'pausada', falta: 0, antAberta: false };
+  const st = falta === 0 ? 'paga' : venceEm < 0 ? 'atrasada' : venceEm === 0 ? 'hoje' : 'aberta';
+  return { ...base, st, p, falta, antAberta };
 }
 
 export function receber(db, cobId, c, chave) {
@@ -152,9 +189,9 @@ export function pagarConta(db, contaId, c, chave) {
 }
 export function pagarFixa(db, fixaId, c, agora = new Date(), compAlvo) {
   const f = db.fixas.find((x) => x.id === fixaId); if (!f) throw new Error('Conta fixa não encontrada.');
-  const comp = compAlvo || hojeISO(agora).slice(0, 7);
-  // a chave é a conta + o mês: pagar duas vezes o mesmo mês não lança duas saídas
-  return lancar(db, 'sai', { c, desc: `${f.desc} (${comp.slice(5)}/${comp.slice(0, 4)})`, pote: f.pote, cat: f.cat || (f.das ? 'Impostos' : 'Contas fixas'), fixa: f.id, comp }, `fixa:${f.id}:${comp}`);
+  const comp = compAlvo || situacaoFixa(db, f, agora).comp;
+  // a chave é a conta + o período: pagar duas vezes o mesmo período não lança duas saídas
+  return lancar(db, 'sai', { c, desc: `${f.desc} (${rotuloComp(f, comp)})`, pote: f.pote, cat: f.cat || (f.das ? 'Impostos' : 'Contas fixas'), fixa: f.id, comp }, `fixa:${f.id}:${comp}`);
 }
 
 // ------------------------------------------------------------------ categorias e relatórios
@@ -193,12 +230,11 @@ export function projecao(db, n = 30, agora = new Date()) {
   db.cobrancas.forEach((x) => { const s = situacaoCob(db, x); if (s.falta > 0 && x.vence <= n) itens.push({ dia: Math.max(0, x.vence), c: s.falta, sinal: 1, desc: `${x.cli} · ${x.desc}`, atrasada: x.vence < 0 }); });
   db.contas.forEach((x) => { const s = situacaoConta(db, x); if (s.falta > 0 && x.vence <= n) itens.push({ dia: Math.max(0, x.vence), c: s.falta, sinal: -1, desc: x.desc, atrasada: x.vence < 0 }); });
   db.fixas.filter((f) => f.ativa !== false && f.c > 0).forEach((f) => {
-    for (let mes = 0; mes <= Math.ceil(n / 28); mes++) {
-      const ult = new Date(agora.getFullYear(), agora.getMonth() + mes + 1, 0).getDate(), alvo = new Date(agora.getFullYear(), agora.getMonth() + mes, Math.min(f.dia, ult), 12);
-      const h = new Date(agora); h.setHours(12, 0, 0, 0); const dia = Math.round((alvo - h) / DIA_MS), comp = hojeISO(alvo).slice(0, 7);
-      if (comp < (f.desde || comp)) continue;
-      const falta = Math.max(0, f.c - pagoFixa(db, f, comp));
-      if (falta && dia <= n && (dia >= 0 || mes === 0)) itens.push({ dia: Math.max(0, dia), c: falta, sinal: -1, desc: f.desc, atrasada: dia < 0 });
+    for (let k = 0; k < 60; k++) {
+      const p = periodoFixa(f, agora, k), dia = Math.round((p.vence - meioDia(agora)) / DIA_MS);
+      if (dia > n) break; if (!valePeriodo(f, p)) continue;
+      const falta = Math.max(0, f.c - pagoFixa(db, f, p.comp));
+      if (falta && (dia >= 0 || k === 0)) itens.push({ dia: Math.max(0, dia), c: falta, sinal: -1, desc: f.desc, atrasada: dia < 0 });
     }
   });
   itens.sort((a, b) => a.dia - b.dia);
@@ -210,15 +246,15 @@ export function projecao(db, n = 30, agora = new Date()) {
 // ------------------------------------------------------------------ automações: o que pede atenção agora
 /** Lista de pendências calculada dos dados (nada é enviado sozinho: o app mostra, a pessoa decide). */
 export function pendencias(db, agora = new Date()) {
-  const l = [];
+  const l = [], antes = Number.isInteger(db.avisoDias) ? db.avisoDias : 3; // antecedência dos avisos de vencimento (dias), configurável
   const pv = validarPcts(db.potes); if (pv) l.push({ tipo: 'erro', id: 'pcts', txt: pv, ir: 'pote/' + db.potes[0]?.k });
   const sd = saldos(db); db.potes.forEach((p) => { if (sd[p.k] < 0) l.push({ tipo: 'erro', id: 'neg:' + p.k, txt: `O pote ${p.nome} está negativo (${reais(sd[p.k])}).`, ir: 'pote/' + p.k }); });
   (db.migracao?.divergencias || []).filter((d) => !d.resolvida).forEach((d) => l.push({ tipo: 'erro', id: 'div:' + d.pote, txt: `Conferir o pote ${d.nome}: antes da atualização ele mostrava ${reais(d.gravado)}, o extrato soma ${reais(d.calculado)}.`, ir: 'conferir' }));
   db.fixas.forEach((f) => { const s = situacaoFixa(db, f, agora); if (f.c <= 0) return;
-    if (s.st === 'atrasada') l.push({ tipo: 'atraso', id: 'fixa:' + f.id, txt: `${f.desc} venceu dia ${f.dia} e não foi paga.`, ir: 'contas' });
-    else if ((s.st === 'hoje' || s.st === 'aberta') && s.venceEm <= 3) l.push({ tipo: 'vence', id: 'fixa:' + f.id, txt: `${f.desc} vence ${s.venceEm === 0 ? 'hoje' : `em ${s.venceEm} dia(s)`}: ${reais(s.falta)}.`, ir: 'contas' });
-    if (s.antAberta) l.push({ tipo: 'atraso', id: 'fixa-ant:' + f.id, txt: `${f.desc} do mês passado ficou sem pagamento registrado.`, ir: 'contas' }); });
-  db.contas.forEach((x) => { const s = situacaoConta(db, x); if (s.falta && x.vence <= 3) l.push({ tipo: x.vence < 0 ? 'atraso' : 'vence', id: 'conta:' + x.id, txt: `${x.desc}: ${reais(s.falta)} ${x.vence < 0 ? `atrasada ${-x.vence} dia(s)` : x.vence === 0 ? 'vence hoje' : `vence em ${x.vence} dia(s)`}.`, ir: 'contas' }); });
+    if (s.st === 'atrasada') l.push({ tipo: 'atraso', id: 'fixa:' + f.id, txt: `${f.desc} venceu ${-s.venceEm === 1 ? 'ontem' : `há ${-s.venceEm} dias`} e não foi paga.`, ir: 'contas' });
+    else if ((s.st === 'hoje' || s.st === 'aberta') && s.venceEm <= antes) l.push({ tipo: 'vence', id: 'fixa:' + f.id, txt: `${f.desc} vence ${s.venceEm === 0 ? 'hoje' : `em ${s.venceEm} dia(s)`}: ${reais(s.falta)}.`, ir: 'contas' });
+    if (s.antAberta) l.push({ tipo: 'atraso', id: 'fixa-ant:' + f.id, txt: `${f.desc} ${DO_ANT[f.freq || 'mensal']} ficou sem pagamento registrado.`, ir: 'contas' }); });
+  db.contas.forEach((x) => { const s = situacaoConta(db, x); if (s.falta && x.vence <= antes) l.push({ tipo: x.vence < 0 ? 'atraso' : 'vence', id: 'conta:' + x.id, txt: `${x.desc}: ${reais(s.falta)} ${x.vence < 0 ? `atrasada ${-x.vence} dia(s)` : x.vence === 0 ? 'vence hoje' : `vence em ${x.vence} dia(s)`}.`, ir: 'contas' }); });
   db.cobrancas.forEach((x) => { const s = situacaoCob(db, x); if (!s.falta) return; const m = lembreteDoDia(x);
     if (m) l.push({ tipo: 'cobrar', id: 'cob:' + x.id, txt: `Lembrar ${x.cli} de ${reais(s.falta)} (${m}).`, ir: 'receber', cob: x.id }); });
   return l;
