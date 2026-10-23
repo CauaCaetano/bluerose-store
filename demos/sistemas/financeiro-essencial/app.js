@@ -60,7 +60,7 @@ function carregar() {
 }
 let db = carregar();
 window.veltriaDados = () => db;
-window.veltriaEditorFora = ['movs', 'cobrancas', 'contas', 'fixas', 'recibos', 'historico', 'potes', 'migracao'];
+window.veltriaEditorFora = ['equipe', 'movs', 'cobrancas', 'contas', 'fixas', 'recibos', 'historico', 'potes', 'migracao'];
 window.veltriaSemMaisComum = true;
 window.veltriaDadosProprio = () => { location.hash = '#dados'; };
 window.veltriaResumoIA = () => {
@@ -92,6 +92,8 @@ function folha(html, liga) {
   return fecha;
 }
 /** Formulário em folha: valida, mostra o erro dentro da folha e só fecha se deu certo. */
+// equipe da demonstração (com a conta, a equipe de verdade fica na nuvem e abre pela faixa da conta)
+const equipeDemo = () => (db.equipe ||= [{ id: 'eq1', nome: 'Júlia Ramos (contadora)', contato: '(31) 99812-4410', acesso: 'ver', st: 'ativo' }]);
 function formFolha(html, enviar) {
   folha(`<form novalidate>${html}<p class="erro" role="alert" hidden></p></form>`, (f, fecha) => {
     const form = f.querySelector('form'), err = f.querySelector('.erro'); mostraFreq(form);
@@ -288,7 +290,7 @@ const T = {
   dono() {
     const real = !!document.querySelector('[data-vc="equipe"]');
     return `${voltar('mais', 'Mais')}<h1>Equipe</h1><p class="sub">Quem te ajuda entra com o próprio login e só vê e mexe no que você liberar. O convite sai por e-mail ou WhatsApp.</p>
-      ${real ? '<button type="button" class="bt cheio largo" data-acao="equipe">Abrir a equipe e os convites</button>' : '<p class="cartao mini">Na demonstração não há convites. Com a sua conta, este botão abre a equipe de verdade: convite por e-mail ou WhatsApp, acesso só para ver ou para mexer, e quem fez cada alteração.</p>'}`;
+      ${real ? '<button type="button" class="bt cheio largo" data-acao="equipe">Abrir a equipe e os convites</button>' : `<section class="cartao liso">${equipeDemo().map((p) => `<div class="mov"><span>${t(p.nome)}<small>${t(p.contato)} · ${p.acesso === 'ver' ? 'só ver' : 'ver e mexer'} · ${p.st === 'ativo' ? 'entrou' : 'convite enviado'}</small></span><button type="button" class="bt" data-acao="tira-pessoa" data-id="${p.id}">Tirar</button></div>`).join('') || '<p class="mini" style="padding:12px 0">Só você por enquanto.</p>'}</section><button type="button" class="bt cheio largo" data-acao="convidar">+ Convidar pessoa</button><p class="mini">Na demonstração o convite é simulado; com a sua conta ele sai por e-mail ou WhatsApp.</p>`}`;
   },
   config() {
     const f = N.faturamentoAno(db);
@@ -449,6 +451,14 @@ const ACOES = {
   'div-extrato': (d) => { const x = db.migracao.divergencias.find((y) => y.pote === d.p); x.resolvida = 'extrato'; db.historico.unshift({ quando: new Date().toISOString(), dia: 0, oque: `Conferiu o pote ${x.nome}: vale o extrato` }); grava(); mostra(); },
   'div-acerto': (d) => { const x = db.migracao.divergencias.find((y) => y.pote === d.p), dif = x.gravado - x.calculado; if (faz(() => N.lancar(db, 'ajuste', { c: Math.abs(dif), pote: x.pote, sinal: dif < 0 ? -1 : 1, desc: 'Acerto de saldo (conferido após a atualização)' }), 'Acerto lançado no extrato.')) { x.resolvida = 'acerto'; grava(); mostra(); } },
   equipe: () => document.querySelector('[data-vc="equipe"]')?.click(),
+  convidar: () => formFolha(`<h2>Convidar para a equipe</h2><label class="campo">Nome<input name="n" required maxlength="60"></label><label class="campo">E-mail ou WhatsApp<input name="c" required maxlength="80"></label><label class="campo">Acesso<select name="a"><option value="ver">Só ver (contador, sócio)</option><option value="mexer">Ver e mexer</option></select></label><button class="bt cheio largo">Enviar convite</button>`, (f) => {
+    const nome = String(f.get('n') || '').trim(), c = String(f.get('c') || '').trim();
+    if (!nome) throw new Error('Digite o nome.'); if (!/^\S+@\S+\.\S+$/.test(c) && c.replace(/\D/g, '').length < 10) throw new Error('Digite um e-mail ou um WhatsApp com DDD.');
+    if (equipeDemo().some((p) => p.contato.toLowerCase() === c.toLowerCase())) throw new Error('Essa pessoa já está na equipe.');
+    db.equipe.push({ id: `eq${Date.now().toString(36)}`, nome: nome.slice(0, 60), contato: c.slice(0, 80), acesso: f.get('a') === 'mexer' ? 'mexer' : 'ver', st: 'convidado' });
+    return `Convite enviado para ${nome} (simulado na demonstração).`;
+  }),
+  'tira-pessoa': (d) => { const p = equipeDemo().find((x) => x.id === d.id); db.equipe = equipeDemo().filter((x) => x !== p); grava(); mostra(); aviso(`${p.nome} saiu da equipe.`); },
   pagar: () => folha(`<h2>Pagar ${din(db.assinatura.valor * 100)}</h2><p class="sub">Demonstração: nenhum pagamento de verdade acontece aqui.</p><button type="button" class="bt cheio largo" data-pago>Simular pagamento aprovado</button>`, (f, fecha) => f.querySelector('[data-pago]').addEventListener('click', () => { const a = db.assinatura; a.status = 'ativa'; a.renova = true; a.pagos.unshift(0); a.proxima = 30; grava(); fecha(); mostra(); aviso('Pagamento simulado aprovado.'); })),
   cancelar: () => { if (confirm(`Cancelar? Você usa até ${dia(db.assinatura.proxima)} e nada mais é cobrado.`)) { db.assinatura.renova = false; grava(); mostra(); } },
   reativar: () => { db.assinatura.renova = true; grava(); mostra(); aviso('Assinatura reativada.'); },
