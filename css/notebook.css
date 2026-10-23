@@ -1,0 +1,109 @@
+/* Início: filme do notebook (22/10/2026). Medidas em cqw/cqh da tela do notebook.
+   Sem JS (ou com movimento reduzido) fica a primeira cena parada, já no estado final. O roteiro está em js/notebook.js. */
+.nb-telas.mx { position: absolute; inset: 7.5% 0 0; overflow: hidden; container-type: size; background: #141c33; font-family: var(--sans, system-ui); color: #f4ecdf; isolation: isolate; }
+.nb-telas.mx img { position: static; inset: auto; width: auto; max-width: none; opacity: 1; transform: none; animation: none; }
+.nb-url .mx-url { opacity: 1; animation: none; transition: opacity .35s; }
+.mx-luz { position: absolute; inset: -20%; z-index: -1; background: radial-gradient(40% 50% at var(--lx, 30%) var(--ly, 30%), color-mix(in srgb, var(--luz, #d8a7a3) 30%, transparent), transparent 70%), radial-gradient(50% 60% at 85% 90%, rgba(255, 255, 255, .06), transparent 70%); }
+
+.mx-cena { position: absolute; inset: 0; padding: 7cqh 6cqw; background: var(--fundo); display: none; }
+.mx-cena:first-of-type { display: block; }
+.mx.mx-vivo .mx-cena { display: none; background: transparent; }
+.mx.mx-vivo .mx-cena.ativa { display: block; }
+.mx.mx-vivo { transition: background-color .8s ease; }
+
+/* frase de abertura (só aparece no filme) */
+.mx-frase { position: absolute; inset: 0; z-index: 3; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 0 1.6cqw; margin: 0; padding: 0 8cqw; font: 500 7.4cqw/1.05 var(--serif, Georgia, serif); letter-spacing: -.02em; text-align: center; text-wrap: balance; color: #fff; opacity: 0; pointer-events: none; }
+.mx-frase .w { display: inline-block; will-change: transform, filter, opacity; }
+
+/* janela do sistema */
+.mx-app { position: relative; height: 100%; display: flex; flex-direction: column; border-radius: 1.8cqw; background: linear-gradient(180deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .035)); border: 1px solid rgba(255, 255, 255, .13); box-shadow: 0 3cqw 6cqw -2cqw rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .12); overflow: hidden; will-change: transform; }
+.mx-topo { display: flex; align-items: center; gap: 1.6cqw; padding: 2.6cqh 2.6cqw; border-bottom: 1px solid rgba(255, 255, 255, .09); }
+.nb-telas.mx .mx-topo img { height: 8cqh; width: auto; }
+.mx-topo b { display: block; font: 600 2.5cqw/1.1 var(--serif, Georgia, serif); }
+.mx-topo small { font-size: 1.45cqw; color: rgba(244, 236, 223, .55); }
+.mx-pilula { margin-left: auto; padding: .9cqh 1.4cqw; border-radius: 99px; font-size: 1.5cqw; font-weight: 600; color: var(--fundo); background: var(--acento); }
+.mx-pilula i { font-style: normal; }
+.mx-corpo { flex: 1; display: grid; gap: 2.4cqw; padding: 3cqh 2.6cqw; min-height: 0; }
+
+/* agenda */
+.mx-ag { grid-template-columns: 1fr 30%; }
+.mx-h { position: relative; display: grid; grid-template-columns: 6.4cqw 1fr; align-items: center; height: 9.6cqh; border-top: 1px solid rgba(255, 255, 255, .07); font-size: 1.5cqw; color: rgba(244, 236, 223, .5); }
+.mx-ev, .mx-livre { grid-column: 2; grid-row: 1; display: block; height: 76%; border-radius: .9cqw; padding: 0 1.3cqw; font-style: normal; font-size: 1.55cqw; line-height: 7.3cqh; white-space: nowrap; overflow: hidden; }
+.mx-ev { color: #191420; background: var(--c); }
+.mx-ev b { margin-right: .7cqw; }
+.mx-livre { border: 1px dashed rgba(255, 255, 255, .28); color: rgba(244, 236, 223, .55); }
+.mx-novo { box-shadow: 0 0 0 .3cqw rgba(185, 211, 168, .35); }
+.mx-lado { align-self: start; padding: 2.4cqh 1.8cqw; border-radius: 1.2cqw; background: rgba(255, 255, 255, .06); }
+.mx-lado small, .mx-caixa small, .mx-cal small { display: block; font-size: 1.4cqw; color: rgba(244, 236, 223, .55); }
+.mx-lado b { display: block; margin: .8cqh 0; font: 600 4.2cqw/1 var(--serif, Georgia, serif); font-variant-numeric: lining-nums tabular-nums; }
+.mx-lado span { font-size: 1.4cqw; color: #b9d3a8; }
+.mx-zap { position: absolute; right: 4cqw; bottom: 5cqh; z-index: 2; max-width: 34cqw; padding: 1.6cqh 1.6cqw; border-radius: 1.4cqw 1.4cqw .3cqw 1.4cqw; font-size: 1.6cqw; line-height: 1.35; color: #0f2a1d; background: #d6f5c9; box-shadow: 0 2cqw 4cqw -1cqw rgba(0, 0, 0, .5); }
+.mx-zap small { display: block; font-size: 1.2cqw; font-weight: 700; color: #1f7a45; margin-bottom: .4cqh; }
+
+/* jurídico */
+.mx-ju { grid-template-columns: 1fr 32%; }
+.mx-lista { display: grid; gap: 1.6cqh; align-content: start; }
+.mx-int { position: relative; display: flex; align-items: center; gap: 1.4cqw; padding: 1.8cqh 1.6cqw; border-radius: 1.2cqw; background: rgba(255, 255, 255, .06); border: 1px solid transparent; }
+.mx-int p { margin: 0; flex: 1; font-size: 1.45cqw; color: rgba(244, 236, 223, .6); }
+.mx-int p b { display: block; font-size: 1.75cqw; color: #f4ecdf; }
+.mx-int button, .mx-bt { font: 600 1.5cqw/1 var(--sans, system-ui); padding: 1.3cqh 1.6cqw; border: 0; border-radius: .8cqw; color: var(--fundo); background: var(--acento); cursor: default; }
+.mx-int-ok { border-color: color-mix(in srgb, var(--acento) 60%, transparent); background: color-mix(in srgb, var(--acento) 14%, transparent); }
+.mx-prazo { position: absolute; left: 1.6cqw; bottom: -1.3cqh; padding: .5cqh 1cqw; border-radius: 99px; font-size: 1.25cqw; font-weight: 700; color: var(--fundo); background: #f3e3bd; }
+.mx-cal { align-self: start; padding: 2.2cqh 1.6cqw; border-radius: 1.2cqw; background: rgba(255, 255, 255, .06); }
+.mx-cal div { display: grid; grid-template-columns: repeat(7, 1fr); gap: .5cqw; margin-top: 1.4cqh; }
+.mx-cal i { display: grid; place-items: center; aspect-ratio: 1; border-radius: 50%; font-style: normal; font-size: 1.3cqw; color: rgba(244, 236, 223, .6); }
+.mx-cal .mx-hoje { color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .4); }
+.mx-cal .mx-dia { color: var(--fundo); background: var(--acento); font-weight: 700; }
+
+/* financeiro */
+.mx-fi { grid-template-columns: 1fr 34%; grid-template-rows: 1fr auto; }
+.mx-caixa { grid-row: 1 / 3; display: flex; flex-direction: column; padding: 2.4cqh 2cqw; border-radius: 1.2cqw; background: rgba(255, 255, 255, .06); }
+.mx-caixa b { margin: .8cqh 0 0; font: 600 5.6cqw/1 var(--serif, Georgia, serif); font-variant-numeric: lining-nums tabular-nums; }
+.mx-caixa svg { flex: 1; width: 100%; margin-top: 2cqh; overflow: visible; }
+.mx-linha { fill: none; stroke: var(--acento); stroke-width: 2.2; stroke-linecap: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--acento) 60%, transparent)); }
+.mx-potes { display: flex; gap: 1.4cqw; align-items: flex-end; }
+.mx-pote { flex: 1; text-align: center; font-size: 1.3cqw; color: rgba(244, 236, 223, .6); }
+.mx-pote i { position: relative; display: block; height: 26cqh; margin-bottom: 1cqh; border-radius: 1cqw 1cqw 1.4cqw 1.4cqw; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); overflow: hidden; }
+.mx-pote i::after { content: ""; position: absolute; inset: auto 0 0; height: var(--n); background: linear-gradient(180deg, color-mix(in srgb, var(--acento) 80%, #fff), var(--acento)); }
+.mx-pote-imp i::after { background: linear-gradient(180deg, #ecd08f, #c79a45); }
+.mx-fi .mx-bt { justify-self: stretch; padding: 1.8cqh 0; }
+.mx-toast { position: absolute; left: 50%; bottom: 4.5cqh; z-index: 2; translate: -50% 0; padding: 1.5cqh 2.2cqw; border-radius: 99px; white-space: nowrap; font-size: 1.6cqw; font-weight: 600; color: #fff; background: rgba(12, 14, 20, .82); border: 1px solid rgba(255, 255, 255, .16); box-shadow: 0 2cqw 4cqw -1cqw rgba(0, 0, 0, .6); backdrop-filter: blur(8px); }
+
+/* obras */
+.mx-ob { grid-template-rows: 1fr auto; }
+.mx-obra { padding: 2.4cqh 2cqw; border-radius: 1.2cqw; background: rgba(255, 255, 255, .06); }
+.mx-obra p { display: flex; justify-content: space-between; margin: 0 0 2cqh; font-size: 1.9cqw; }
+.mx-obra p span { font: 600 3cqw/1 var(--serif, Georgia, serif); color: var(--acento); }
+.mx-obra p i { font-style: normal; }
+.mx-obra small { display: block; margin-top: 1.6cqh; font-size: 1.4cqw; color: rgba(244, 236, 223, .55); }
+.mx-parede { display: flex; flex-wrap: wrap-reverse; gap: .55cqw; padding: 1cqw; border-radius: .8cqw; background: rgba(0, 0, 0, .28); }
+.mx-parede i { flex: 0 0 calc((100% - 3.85cqw) / 8); height: 4.6cqh; border-radius: .3cqw; background: #d9825f; }
+.mx-parede i:nth-child(n + 9) { background: #c06e4e; }
+.mx-parede i:nth-child(n + 17) { background: #a65b3f; }
+.mx-parede i:nth-child(n + 25) { background: #8a4a33; }
+.mx-cobrar { position: relative; justify-self: end; padding: 1.8cqh 2.4cqw; font-size: 1.7cqw; overflow: hidden; }
+.mx-pago { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; background: #2f8a57; }
+
+/* final */
+.mx-fim { display: none; text-align: center; }
+.mx-fim .mx-selos { display: flex; justify-content: center; gap: 3cqw; margin-top: 10cqh; }
+.nb-telas.mx .mx-selos img { height: 13cqh; width: auto; }
+.mx-marca { margin: 6cqh 0 0; font: 500 10cqw/1 var(--serif, Georgia, serif); letter-spacing: -.02em; }
+.mx-assina { margin: 3cqh 0 0; font-size: 2.2cqw; color: rgba(244, 236, 223, .7); }
+.mx.mx-vivo .mx-fim.ativa { display: block; }
+
+/* cursor e toque */
+.mx-cursor { position: absolute; left: 0; top: 0; z-index: 5; width: 2.6cqw; fill: #fff; stroke: #0b0f18; stroke-width: 1.4; filter: drop-shadow(0 .4cqw .6cqw rgba(0, 0, 0, .45)); opacity: 0; pointer-events: none; }
+.mx-toque { position: absolute; left: 0; top: 0; z-index: 4; width: 6cqw; aspect-ratio: 1; margin: -3cqw 0 0 -3cqw; border-radius: 50%; border: .3cqw solid #fff; opacity: 0; pointer-events: none; }
+
+/* no filme, o que acontece depois do clique começa escondido */
+.mx.mx-vivo [data-depois], .mx.mx-vivo .mx-frase .w { opacity: 0; }
+.mx.mx-vivo .mx-app { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mx-zap, .mx-toast { display: none; }
+}
+.mx.mx-vivo .mx-int-ok:not(.on) { border-color: transparent; background: rgba(255, 255, 255, .06); }
+.mx.mx-vivo .mx-dia:not(.on) { color: rgba(244, 236, 223, .6); background: none; font-weight: 400; }
+.mx-int, .mx-dia { transition: background-color .5s, border-color .5s, color .5s; }
+.mx-cursor { transition: opacity .35s; }
