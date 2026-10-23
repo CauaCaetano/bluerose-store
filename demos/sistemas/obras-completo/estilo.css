@@ -161,3 +161,11 @@ td input.n { text-align: right; }
 .aviso { background: var(--cafe); color: var(--marfim); padding: 10px 16px; border-left: 4px solid var(--mocha); box-shadow: 3px 4px 0 var(--mocha); font-weight: 600; max-width: 360px; }
 .vazio { color: var(--tx-3); padding: 12px 0; }
 @media print { .demo, .trena, .carimbo, .avisos, .rodape-j { display: none !important; } .fundo { position: static; background: none; padding: 0; } .janela { border: 0; box-shadow: none; max-height: none; } .mesa { display: block; } }
+
+/* funções de 10/2026 (2ª leva) */
+.chk-o { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; font-size: .9rem; }
+.curva-s { width: 100%; height: auto; display: block; }
+.lin-o { display: grid; grid-template-columns: 110px 1fr 90px; gap: 10px; align-items: center; margin: 6px 0; font-size: .88rem; } .lin-o b { text-align: right; }
+.barra-o { height: 10px; border-radius: 99px; background: #eee5d9; overflow: hidden; } .barra-o i { display: block; height: 100%; background: #6b4b2f; border-radius: 99px; }
+.recibo-o { white-space: pre-wrap; font: .86rem/1.5 ui-monospace, monospace; background: #fbf6ee; padding: 12px; border-radius: 8px; max-height: 55vh; overflow: auto; }
+@media print { body.so-janela > *:not(.fundo) { display: none !important; } body.so-janela .fundo { position: static; background: none; } body.so-janela .rodape-j { display: none; } }
