@@ -39,7 +39,7 @@
   var DIAS = {
     agendaessencial: 'D clientes[].ultima ags[].dia pedidos[].dia', agendacompleto: 'D ags[].dia bloqueios[].dia clientes[].ultima',
     crmessencial: 'D negocios[].prox.dia negocios[].notas[].dia negocios[].quando', crmcompleto: 'D atividades[].dia deals[].prev perdidos[].dia deals[].impl.projeto deals[].impl.homologacao deals[].impl.instalacao deals[].impl.vistoria deals[].impl.ativo H deals[].sem deals[].hist[].d propostas[].enviada', crmavancado: 'D deals[].prox deals[].fecha base[].renova perdas[].dia H deals[].parado',
-    farmaciaessencial: 'D prods[].lotes[].val clientes[].ultima receitas[].dia vendas[].dia', farmaciacompleto: 'D prods[].lotes[].val livro[].dia servicos[].dia', farmaciaavancado: 'D campanhas[].fim',
+    farmaciaessencial: 'D prods[].lotes[].val clientes[].ultima receitas[].dia vendas[].dia', farmaciacompleto: 'D prods[].lotes[].val livro[].dia servicos[].dia clientes[].ultima perdas[].dia prods[].promo.ate', farmaciaavancado: 'D campanhas[].fim',
     financeiroessencial: 'D movs[].dia cobrancas[].vence cobrancas[].avisos[] contas[].vence recibos[].dia historico[].dia', financeirocompleto: 'D lancs[].venc lancs[].avisos[] lancs[].pagamentos[].dia extrato[].dia orcs[].dia transferencias[].dia', financeiroavancado: 'D pags[].venc pags[].pagoEm pags[].baixas[].dia recs[].venc recs[].baixas[].dia movs[].dia contas[].desde mutuos[].dia extrato[].dia',
     gestaoessencial: 'D pagar[].vence H clientes[].desde', gestaocompleto: 'D vendas[].dia contas[].vence',
     gestaoavancado: 'D produtos[].lotes[].vence vendas[].dia contas[].vence pedidos[].dia movs[].dia log[].dia H clientes[].ultima',
