@@ -47,22 +47,23 @@
   function cartao(a) {
     var linhas = [];
     if (a.tipo === 'teste' && a.status === 'teste') linhas.push('Primeira cobrança de ' + reais(a.valor) + ' em ' + data(a.proxima_cobranca || a.teste_ate) + ', se você não cancelar antes.');
-    if (a.tipo !== 'compra' && a.status === 'ativa' && !Number(a.valor)) linhas.push('Cortesia da Blue Rose: sem cobrança.');
+    if (a.brinde) { /* brinde do Completo ou do Avançado: o motivo já explica */ }
+    else if (a.tipo !== 'compra' && a.status === 'ativa' && !Number(a.valor)) linhas.push('Cortesia da Blue Rose: sem cobrança.');
     else if (a.tipo !== 'compra' && a.status === 'ativa') linhas.push(reais(a.valor) + (anual(a) ? ' por ano (plano anual, 20% de desconto)' : ' por mês') + ' · próxima cobrança em ' + data(a.proxima_cobranca));
-    if (a.status === 'cancelada') { var ate = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop(); linhas.push(ate ? 'Sem novas cobranças. O acesso continua até ' + data(ate) + '.' : 'Sem novas cobranças.'); }
+    if (a.status === 'cancelada' && !a.brinde) { var ate = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop(); linhas.push(ate ? 'Sem novas cobranças. O acesso continua até ' + data(ate) + '.' : 'Sem novas cobranças.'); }
     if (a.tipo === 'compra') linhas.push(a.status === 'paga' ? 'Entrada de ' + reais(a.valor) + ' paga. Em até 1 dia útil entramos em contato para a implantação.' : 'Entrada de ' + reais(a.valor) + '.');
     if (a.motivo) linhas.push(a.motivo);
     var fim = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop();
     var pode = a.app && (['teste', 'ativa', 'paga'].indexOf(a.status) >= 0 || (a.status === 'cancelada' && fim && fim >= hojeISO)); /* cancelada: só enquanto o período pago vale */
     var abrir = pode ? '<a class="btn btn-primary" href="app/' + esc(a.app) + '/">Abrir o sistema <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>' : '';
-    var cancelar = a.tipo !== 'compra' && ['teste', 'ativa'].indexOf(a.status) >= 0 ? '<button type="button" class="conta-link" data-cancelar="' + esc(a.id) + '">' + (a.status === 'teste' ? 'Cancelar o teste' : 'Cancelar a assinatura') + '</button>' : '';
-    var assinar = a.app && a.tipo !== 'compra' && (a.status === 'recusada' || (a.status === 'cancelada' && (!fim || fim < hojeISO))) ? '<button type="button" class="btn btn-primary" data-assinar="a-sis-' + esc(a.app) + '">Assinar por ' + reais(a.valor) + '/mês</button>' : '';
+    var cancelar = !a.brinde && a.tipo !== 'compra' && ['teste', 'ativa'].indexOf(a.status) >= 0 ? '<button type="button" class="conta-link" data-cancelar="' + esc(a.id) + '">' + (a.status === 'teste' ? 'Cancelar o teste' : 'Cancelar a assinatura') + '</button>' : '';
+    var assinar = a.app && a.tipo !== 'compra' && !(a.brinde && a.status === 'cancelada' && fim && fim >= hojeISO) && (a.status === 'recusada' || (a.status === 'cancelada' && (!fim || fim < hojeISO))) ? '<button type="button" class="btn btn-primary" data-assinar="a-sis-' + esc(a.app) + '">Assinar por ' + reais(a.valor) + '/mês</button>' : '';
     var foto = APPS.indexOf(a.app) >= 0 ? '<a class="conta-thumb" href="' + (pode ? 'app/' + esc(a.app) + '/' : PAGINA[a.app] || 'veltria-' + esc(a.app) + '.html') + '" tabindex="-1" aria-hidden="true"><img src="img/sistemas/' + esc(a.app) + '.webp" alt="" width="1200" height="750" loading="lazy"></a>' : '';
     var apagado = ['cancelada', 'expirada', 'recusada'].indexOf(a.status) >= 0 ? ' conta-item-off' : '';
     /* token de dono: pedido uma vez, quando a empresa é criada no sistema */
     var tk = pode && TOKENS[a.app] && !tokenMostrado[a.app] ? TOKENS[a.app] : null; if (tk) tokenMostrado[a.app] = true;
     var token = tk ? '<div class="conta-token"><small>Token de dono</small><code>' + esc(tk.token) + '</code><span>' + (tk.ativado ? 'Já ativado em ' + data(tk.ativado) + '. Não precisa usar de novo.' : 'Use uma vez, ao criar a sua empresa no sistema. Não compartilhe: a equipe entra pelos convites.') + '</span></div>' : '';
-    return '<article data-busca="' + esc(normal((a.nome || '') + ' ' + (CAT[a.app] ? CAT[a.app][0] : ''))) + '" class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
+    return '<article data-busca="' + esc(normal((a.nome || '') + ' ' + (CAT[a.app] ? CAT[a.app][0] : ''))) + '" class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div><small>' + esc(a.brinde ? 'Brinde' : NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, '')) + '</h3></div>' + etiqueta(a) + '</div>' +
       barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + (pode ? '<p class="conta-ajuda"><a href="' + (PAGINA[a.app] || 'veltria-' + esc(a.app) + '.html') + '#tutorial">Assista ao vídeo tutorial</a>: mostra cada passo, da criação da empresa à importação das suas planilhas. ' + 'Prefere como programa? <a href="app/' + esc(a.app) + '/?instalar=1">Instale no computador ou no celular</a>: ganha ícone e abre em janela própria. ' + 'Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda.</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></div></article>';
   }
   function mostrarResumo(l) {
