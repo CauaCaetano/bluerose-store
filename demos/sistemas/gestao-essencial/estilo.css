@@ -1,3 +1,5 @@
+/* algarismos sem o zero cortado da Atkinson (o Ø parecia preço riscado): só os dígitos vêm da fonte do sistema */
+@font-face { font-family: 'Algarismos'; src: local('Segoe UI'), local('Roboto'), local('Helvetica Neue'), local('Arial'); unicode-range: U+0030-0039; }
 /* Veltria Gestão · layout "caderno da loja"
    O sistema é um caderno: cada parte é uma divisória de fichário (abas na lateral; no celular, embaixo).
    Os números que importam ganham marca-texto ciano, a cor clara da logo. */
@@ -17,7 +19,7 @@
   --verde: #3d6b55;
   --aba-1: #a7a49d; --aba-2: #7a8f84; --aba-3: #526d62; --aba-4: #34485a; --aba-5: #18283e;
   --titulo: 'Bricolage Grotesque', system-ui, sans-serif;
-  --texto: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --texto: 'Algarismos', 'Atkinson Hyperlegible', system-ui, sans-serif;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -105,7 +107,7 @@ h2 { margin: 0 0 6px; font: 600 1.25rem/1.25 var(--titulo); letter-spacing: -.01
 .diario .v.sai { color: var(--tinta-2); }
 .diario li.novo { animation: novo 1.4s ease; }
 @keyframes novo { 0% { background: rgba(134, 168, 150, .35); } 100% { background: transparent; } }
-.diario .vazio { color: var(--tinta-3); }
+.diario .vazio { display: block; color: var(--tinta-3); } /* frase única: fora da grade de 3 colunas (quebrava uma palavra por linha) */
 
 /* ---------- botões */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 1.5px solid var(--tinta); border-radius: 12px;

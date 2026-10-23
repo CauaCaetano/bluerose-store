@@ -89,9 +89,10 @@ const ABAS = [['pauta', 'Pauta'], ['processos', 'Processos'], ['prazos', 'Prazos
 let sub = 'andamentos';
 const V = {
   pauta() {
-    const seg = zero(); seg.setDate(seg.getDate() - ((seg.getDay() + 6) % 7)); const dias = Array.from({ length: 5 }, (_, i) => { const d = new Date(seg); d.setDate(d.getDate() + i); return emDias(d); });
+    // os próximos 5 dias úteis a partir de hoje (na sexta, a semana do calendário já tinha passado quase toda)
+    const dias = []; for (const d = zero(); dias.length < 5; d.setDate(d.getDate() + 1)) if (d.getDay() % 6) dias.push(emDias(d));
     const abertos = db.prazos.filter((p) => p.status === 'aberto'), novos = db.intimacoes.filter((i) => !i.resp);
-    return `<div class="titulo"><div><h1>Pauta da semana</h1><p>${abertos.length} prazos abertos · ${novos.length} intimações esperando responsável · ${db.audiencias.filter((a) => a.dia >= 0 && a.dia <= 7).length} audiências em 7 dias</p></div><div class="bts"><button class="b bordo" data-a="novo-prazo">+ Prazo</button><button class="b" data-a="nova-aud">+ Audiência</button></div></div>
+    return `<div class="titulo"><div><h1>Pauta dos próximos dias</h1><p>${abertos.length} prazos abertos · ${novos.length} intimações esperando responsável · ${db.audiencias.filter((a) => a.dia >= 0 && a.dia <= 7).length} audiências em 7 dias</p></div><div class="bts"><button class="b bordo" data-a="novo-prazo">+ Prazo</button><button class="b" data-a="nova-aud">+ Audiência</button></div></div>
       <div class="grade" style="margin-bottom:16px">
         <div class="ficha num bordo c3"><small>Vencem em até 2 dias úteis</small><b>${abertos.filter((p) => uteisFaltam(p.fatal) <= 2).length}</b><span>prazos fatais</span></div>
         <div class="ficha num c3"><small>Passaram do prazo interno</small><b>${abertos.filter((p) => p.interno <= 0).length}</b><span>revisar hoje</span></div>
