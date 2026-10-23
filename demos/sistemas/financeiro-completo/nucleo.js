@@ -376,3 +376,108 @@ export function porCentro(db, comp, agora = new Date()) {
   db.lancs.filter((l) => l.status !== 'cancelado' && l.venc >= de && l.venc <= ate).forEach((l) => { const k = l.cc || 'Sem centro de custo', o = (out[k] ||= { cc: k, receita: 0, despesa: 0, aberto: 0 }); if (l.tipo === 'r') o.receita += l.c; else o.despesa += l.c; o.aberto += situacao(l).falta * sinal(l); });
   return Object.values(out).map((o) => ({ ...o, resultado: o.receita - o.despesa })).sort((a, b) => (a.cc === 'Sem centro de custo') - (b.cc === 'Sem centro de custo') || b.resultado - a.resultado);
 }
+
+// ------------------------------------------------------------------ funções de 10/2026 (2ª leva)
+/** Valor por extenso, para o recibo (centavos, até 999 milhões). */
+export function extenso(c) {
+  const U = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'], D = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'], C = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+  const ate999 = (n) => { if (n === 100) return 'cem'; const k = Math.floor(n / 100), r = n % 100, p = []; if (k) p.push(C[k]); if (r) p.push(r < 20 ? U[r] : D[Math.floor(r / 10)] + (r % 10 ? ` e ${U[r % 10]}` : '')); return p.join(' e '); };
+  const n = Math.floor(c / 100), cent = c % 100, mi = Math.floor(n / 1e6), mil = Math.floor(n / 1000) % 1000, r = n % 1000, g = [];
+  if (mi) g.push(mi === 1 ? 'um milhão' : `${ate999(mi)} milhões`); if (mil) g.push(mil === 1 ? 'mil' : `${ate999(mil)} mil`); if (r) g.push(ate999(r));
+  let t = g.reduce((s, x, i) => (!i ? x : `${s}${i === g.length - 1 && r && (r < 100 || r % 100 === 0) ? ' e ' : ' '}${x}`), '');
+  if (n) t += n === 1 ? ' real' : !mil && !r ? ' de reais' : ' reais';
+  if (cent) t += `${n ? ' e ' : ''}${ate999(cent)} ${cent === 1 ? 'centavo' : 'centavos'}`;
+  return t || 'zero real';
+}
+/** Recibo de uma conta recebida: o que foi pago até agora, com o valor por extenso. */
+export function recibo(db, id) {
+  const l = db.lancs.find((x) => x.id === id); if (!l || l.tipo !== 'r') throw new Error('Recebível não encontrado.'); const v = pago(l); if (!v) throw new Error('Nada recebido nesta conta ainda.');
+  return { quem: l.quem, desc: l.desc, c: v, extenso: extenso(v), dia: Math.max(...l.pagamentos.map((p) => p.dia)), formas: [...new Set(l.pagamentos.map((p) => p.forma).filter(Boolean))] };
+}
+// Simples Nacional, serviços: anexos III e V. Alíquota efetiva = (RBT12 × alíquota − parcela a deduzir) ÷ RBT12; Fator R (folha ÷ receita, 12 meses) de 28% ou mais leva ao anexo III.
+const FAIXAS = { III: [[18000000, 6, 0], [36000000, 11.2, 936000], [72000000, 13.5, 1764000], [180000000, 16, 3564000], [360000000, 21, 12564000], [480000000, 33, 64800000]], V: [[18000000, 15.5, 0], [36000000, 18, 450000], [72000000, 19.5, 990000], [180000000, 20.5, 1710000], [360000000, 23, 6210000], [480000000, 30.5, 54000000]] };
+export function simples(rbt12, folha12) {
+  exigeValor(rbt12); if (!Number.isInteger(folha12) || folha12 < 0) throw new Error('Folha dos 12 meses inválida.'); if (rbt12 > 480000000) throw new Error('Acima de R$ 4,8 milhões em 12 meses a empresa sai do Simples.');
+  const ef = (anx) => { const [, aliq, ded] = FAIXAS[anx].find(([lim]) => rbt12 <= lim); return (rbt12 * aliq / 100 - ded) / rbt12; }, fatorR = folha12 / rbt12, anexo = fatorR >= 0.28 ? 'III' : 'V';
+  return { fatorR, anexo, efIII: ef('III'), efV: ef('V'), efetiva: ef(anexo), dasMes: Math.round(rbt12 / 12 * ef(anexo)), folhaPara28: Math.max(0, Math.ceil(rbt12 * 28 / 100) - folha12) };
+}
+/** Quanto separar de imposto do que entrou no mês, e quanto já foi separado (db.reservas). */
+export function reservaImposto(db, comp, pct = db.imposto || 0, agora = new Date()) {
+  const [de, ate] = mesEmDias(comp, agora), entrou = baixas(db).filter((b) => b.s > 0 && b.dia >= de && b.dia <= ate).reduce((s, b) => s + b.s, 0), devido = Math.round(entrou * pct / 100), reservado = (db.reservas || []).filter((r) => r.comp === comp).reduce((s, r) => s + r.c, 0);
+  return { entrou, devido, reservado, falta: Math.max(0, devido - reservado) };
+}
+export function reservar(db, comp, c) { exigeValor(c); (db.reservas ||= []).push({ id: nid('v'), comp, c, dia: 0 }); registra(db, `Separou ${reais(c)} para os impostos de ${comp}`); }
+/** Comissão sobre o que já foi recebido no mês, pelo responsável de cada conta (l.resp) e a % dele (db.comissionados). */
+export function comissoes(db, comp, agora = new Date()) {
+  const [de, ate] = mesEmDias(comp, agora);
+  return (db.comissionados || []).map((p) => { const base = db.lancs.filter((l) => l.tipo === 'r' && l.resp === p.id).flatMap((l) => l.pagamentos || []).filter((b) => b.dia >= de && b.dia <= ate).reduce((s, b) => s + b.c, 0); return { ...p, base, valor: Math.round(base * p.pct / 100) }; });
+}
+/** Rentabilidade por cliente: o que ele pagou (ou vai pagar) menos os custos lançados no centro de custo com o nome dele. */
+export function rentabilidade(db) {
+  const o = {}; db.lancs.filter((l) => l.status !== 'cancelado').forEach((l) => { const k = l.tipo === 'r' ? l.quem : l.cc; if (!k) return; const x = (o[norm(k)] ||= { quem: k, receita: 0, custo: 0 }); if (l.tipo === 'r') { x.receita += l.c; x.quem = l.quem; } else x.custo += l.c; });
+  return Object.values(o).filter((x) => x.receita > 0).map((x) => ({ ...x, margem: x.receita - x.custo, pct: (x.receita - x.custo) / x.receita })).sort((a, b) => b.margem - a.margem);
+}
+export const FIXAS = ['Pessoal', 'Estrutura', 'Veículos', 'Tarifas bancárias'];
+/** Ponto de equilíbrio do mês: custos fixos ÷ margem de contribuição (receita menos material, outras despesas e imposto). */
+export function equilibrio(db, comp, agora = new Date()) {
+  const r = resultado(db, comp, db.imposto, agora), fixos = r.desCat.filter(([c]) => FIXAS.includes(c)).reduce((s, [, v]) => s + v, 0), variaveis = r.desCat.filter(([c]) => !FIXAS.includes(c)).reduce((s, [, v]) => s + v, 0) + r.impostoEst, mc = r.receita - variaveis, mcPct = r.receita ? mc / r.receita : null;
+  return { receita: r.receita, fixos, variaveis, mc, mcPct, pe: mcPct > 0 ? Math.round(fixos / mcPct) : null };
+}
+/** Saúde financeira: inadimplência, concentração dos 3 maiores clientes e prazo médio (ponderado pelo valor) do que falta receber; atrasado conta como hoje. */
+export function saude(db, agora = new Date()) {
+  const ab = abertos(db, 'r'), totalAb = ab.reduce((s, l) => s + situacao(l).falta, 0), atrasado = ab.filter((l) => l.venc < 0).reduce((s, l) => s + situacao(l).falta, 0);
+  const rec90 = db.lancs.filter((l) => l.tipo === 'r' && l.status !== 'cancelado' && l.venc >= -90 && l.venc <= 0), tot90 = rec90.reduce((s, l) => s + l.c, 0), porCli = {}; rec90.forEach((l) => { porCli[l.quem] = (porCli[l.quem] || 0) + l.c; });
+  const top3 = Object.values(porCli).sort((a, b) => b - a).slice(0, 3).reduce((s, v) => s + v, 0);
+  return { inadimplencia: totalAb ? atrasado / totalAb : 0, atrasado, concentracao: tot90 ? top3 / tot90 : 0, ticket: rec90.length ? Math.round(tot90 / rec90.length) : 0, prazoMedio: totalAb ? Math.round(ab.reduce((t, l) => t + situacao(l).falta * Math.max(0, l.venc), 0) / totalAb) : null };
+}
+/** Capital de giro que falta: o que vence a pagar em n dias menos o saldo de hoje e o que entra no período. */
+export function capitalGiro(db, n = 30) { const ab = (t) => abertos(db, t).filter((l) => l.venc <= n).reduce((s, l) => s + situacao(l).falta, 0), pagar = ab('p'), receber = ab('r'), saldo = saldoHoje(db); return { pagar, receber, saldo, falta: Math.max(0, pagar - receber - saldo) }; }
+/** Cenário do caixa: parte do a receber não entra (perda %) e o resto atrasa (dias). Devolve o menor saldo e o saldo no fim. */
+export function cenario(db, { n = 90, perda = 0, atraso = 0 } = {}) {
+  let s = saldoHoje(db), menor = s, diaMenor = 0;
+  for (let d = 0; d < n; d++) { const doDia = abertos(db).filter((l) => (l.tipo === 'r' ? Math.max(0, l.venc) + atraso : Math.max(0, l.venc)) === d); s += doDia.reduce((t, l) => t + (l.tipo === 'r' ? Math.round(situacao(l).falta * (1 - perda / 100)) : -situacao(l).falta), 0); if (s < menor) { menor = s; diaMenor = d; } }
+  return { fim: s, menor, diaMenor };
+}
+/** Acordo com cliente: junta contas em aberto dele, cancela as originais e parcela o total com juros simples ao mês. */
+export function acordo(db, ids, { n, juros = 0, venc = 7 }) {
+  const ls = ids.map((id) => db.lancs.find((l) => l.id === id)); if (!ls.length || ls.some((l) => !l || l.tipo !== 'r' || !situacao(l).falta)) throw new Error('Escolha contas a receber em aberto.');
+  if (new Set(ls.map((l) => norm(l.quem))).size > 1) throw new Error('Um acordo é de um cliente só.'); const k = Number(n); if (!Number.isInteger(k) || k < 1 || k > 24) throw new Error('Parcelas de 1 a 24.'); if (!(juros >= 0 && juros <= 10)) throw new Error('Juros de 0 a 10% ao mês.');
+  const falta = ls.reduce((s, l) => s + situacao(l).falta, 0), total = Math.round(falta * (1 + juros / 100 * k)), grupo = nid('a');
+  ls.forEach((l) => { l.status = 'cancelado'; l.motivo = 'Renegociado em acordo'; l.acordo = grupo; });
+  const novas = novaConta(db, { tipo: 'r', quem: ls[0].quem, desc: `Acordo (${ls.length} conta(s))`, c: total, venc, parcelas: k, cat: ls[0].cat, tel: ls[0].tel, pessoa: ls[0].pessoa }); novas.forEach((l) => { l.acordo = grupo; });
+  registra(db, `Fez acordo com ${ls[0].quem}: ${reais(falta)} em ${k}x (total ${reais(total)})`); return { falta, total, parcelas: novas };
+}
+/** Adiantamento (sinal) do cliente: entra no caixa agora e fica de crédito para abater na conta do serviço. */
+export function adiantar(db, { quem, c, forma = 'PIX' }) {
+  exigeValor(c); const nome = String(quem || '').trim(); if (!nome) throw new Error('Diga o cliente.');
+  const [l] = novaConta(db, { tipo: 'r', quem: nome, desc: 'Adiantamento (sinal)', c, venc: 0, cat: 'Outras receitas' }); l.adiantamento = true; baixar(db, l.id, c, { forma });
+  (db.creditos ||= {})[norm(nome)] = (db.creditos[norm(nome)] || 0) + c; return l;
+}
+export const creditoDe = (db, quem) => (db.creditos || {})[norm(quem)] || 0;
+export function usarCredito(db, id) {
+  const l = db.lancs.find((x) => x.id === id); if (!l || l.tipo !== 'r') throw new Error('Recebível não encontrado.'); const cr = creditoDe(db, l.quem), f = situacao(l).falta; if (!cr) throw new Error('Este cliente não tem adiantamento.'); if (!f) throw new Error('Esta conta já está quitada.');
+  const v = Math.min(cr, f); l.c -= v; l.abatido = (l.abatido || 0) + v; db.creditos[norm(l.quem)] = cr - v; registra(db, `Abateu ${reais(v)} do adiantamento de ${l.quem} em ${l.desc}`); return v;
+}
+/** Reembolso de despesa da equipe: pedido → aprovado (vira conta a pagar) → pago pela baixa normal. */
+export function pedirReembolso(db, { quem, desc, c }) { exigeValor(c); if (!String(quem || '').trim() || !String(desc || '').trim()) throw new Error('Diga quem gastou e com o quê.'); const r = { id: nid('e'), quem: String(quem).trim(), desc: String(desc).trim(), c, dia: 0, st: 'pedido' }; (db.reembolsos ||= []).push(r); return r; }
+export function aprovarReembolso(db, id) { const r = (db.reembolsos || []).find((x) => x.id === id); if (!r || r.st !== 'pedido') throw new Error('Reembolso não está esperando aprovação.'); const [l] = novaConta(db, { tipo: 'p', quem: r.quem, desc: `Reembolso: ${r.desc}`, c: r.c, venc: 0, cat: 'Outras despesas' }); r.st = 'aprovado'; r.lanc = l.id; registra(db, `Aprovou reembolso de ${reais(r.c)} para ${r.quem}`); return l; }
+/** Cartão de crédito da empresa: compras do mês e a fatura que vira conta a pagar no vencimento. */
+export function compraCartao(db, { desc, c, cat = 'Outras despesas', parcelas = 1 }) {
+  exigeValor(c); const n = Math.max(1, Math.min(12, Number(parcelas) || 1)); if (!String(desc || '').trim()) throw new Error('Diga o que foi comprado.'); const cart = (db.cartao ||= { limite: 1500000, vence: 10, compras: [] });
+  const usado = cart.compras.filter((x) => !x.faturada).reduce((s, x) => s + x.c, 0); if (usado + c > cart.limite) throw new Error(`Passa do limite do cartão (${reais(cart.limite)}).`);
+  for (let i = 0; i < n; i++) cart.compras.push({ id: nid('k'), desc: `${String(desc).trim()}${n > 1 ? ` (${i + 1}/${n})` : ''}`, c: Math.floor(c / n) + (i < c % n ? 1 : 0), cat, mes: i, faturada: false });
+}
+export function fecharFatura(db) {
+  const cart = db.cartao; const l = (cart?.compras || []).filter((x) => !x.faturada && !x.mes); if (!l.length) throw new Error('Nenhuma compra para fechar.');
+  const tot = l.reduce((s, x) => s + x.c, 0), [conta] = novaConta(db, { tipo: 'p', quem: 'Cartão de crédito da empresa', desc: `Fatura (${l.length} compra(s))`, c: tot, venc: cart.vence, cat: 'Outras despesas' });
+  l.forEach((x) => { x.faturada = true; }); cart.compras.filter((x) => !x.faturada && x.mes).forEach((x) => { x.mes--; }); registra(db, `Fechou a fatura do cartão: ${reais(tot)}`); return conta;
+}
+/** Caixinha (fundo fixo em dinheiro): gastos pequenos e a reposição, que sai do banco. */
+export function gastoCaixinha(db, { desc, c }) { exigeValor(c); const cx = (db.caixinha ||= { fundo: 50000, mov: [] }), saldo = cx.fundo + cx.mov.reduce((s, m) => s + m.c, 0); if (c > saldo) throw new Error(`A caixinha só tem ${reais(saldo)}.`); cx.mov.push({ id: nid('x'), dia: 0, desc: String(desc || 'Gasto').trim(), c: -c }); }
+export const saldoCaixinha = (db) => (db.caixinha ? db.caixinha.fundo + db.caixinha.mov.reduce((s, m) => s + m.c, 0) : 0);
+export function reporCaixinha(db) { const cx = db.caixinha, falta = cx.fundo - saldoCaixinha(db); if (falta <= 0) throw new Error('A caixinha está cheia.'); const [l] = novaConta(db, { tipo: 'p', quem: 'Caixinha', desc: 'Reposição da caixinha', c: falta, venc: 0, cat: 'Outras despesas' }); baixar(db, l.id, falta, { forma: 'Saque' }); cx.mov.push({ id: nid('x'), dia: 0, desc: 'Reposição', c: falta }); return falta; }
+/** Despesas que subiram: o mesmo fornecedor cobrou mais de 10% acima do mês anterior. */
+export function subiram(db, agora = new Date()) {
+  const [c0, c1] = [hojeISO(new Date(agora.getFullYear(), agora.getMonth() - 1, 15)).slice(0, 7), compDe(0, agora)], porMes = (comp) => { const [de, ate] = mesEmDias(comp, agora), o = {}; db.lancs.filter((l) => l.tipo === 'p' && l.status !== 'cancelado' && l.venc >= de && l.venc <= ate).forEach((l) => { o[norm(l.quem)] = { quem: l.quem, c: (o[norm(l.quem)]?.c || 0) + l.c }; }); return o; };
+  const a = porMes(c0), b = porMes(c1); return Object.keys(b).filter((k) => a[k] && b[k].c > a[k].c * 1.1).map((k) => ({ quem: b[k].quem, antes: a[k].c, agora: b[k].c, pct: b[k].c / a[k].c - 1 })).sort((x, y) => y.pct - x.pct);
+}
