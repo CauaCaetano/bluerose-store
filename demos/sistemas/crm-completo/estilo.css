@@ -18,15 +18,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .tarja .testar { background: var(--salvia); color: var(--oc-3); text-decoration: none; padding: 3px 12px; border-radius: 6px; font-weight: 700; }
 @media (max-width: 800px) { .tarja .so-lg { display: none; } }
 
-.palco { display: grid; grid-template-columns: 1fr 64px; min-height: calc(100vh - 32px); }
+.palco { display: block; min-height: calc(100vh - 32px); }
 .coluna-principal { min-width: 0; }
-/* índice na borda direita: abas verticais como num caderno */
-.indice { position: sticky; top: 0; height: 100vh; background: var(--oc); display: flex; flex-direction: column; gap: 3px; padding: 14px 0; overflow-y: auto; scrollbar-width: none; }
-.indice a { writing-mode: vertical-rl; transform: rotate(180deg); padding: 14px 10px; margin-left: 8px; border-radius: 0 10px 10px 0; color: var(--areia); text-decoration: none; font-weight: 600; font-size: .82rem; letter-spacing: .02em; background: var(--oc-2); position: relative; }
+/* índice como abas de fichário, na horizontal logo abaixo do cabeçalho (antes ficavam em pé na borda direita) */
+.indice { position: sticky; top: 0; z-index: 20; display: flex; gap: 4px; align-items: flex-end; padding: 10px 24px 0; background: var(--oc); overflow-x: auto; scrollbar-width: none; }
+.indice::-webkit-scrollbar { display: none; }
+.indice a { position: relative; flex: 0 0 auto; padding: 10px 16px 11px; border-radius: 10px 10px 0 0; color: var(--areia); text-decoration: none; font-weight: 600; font-size: .9rem; background: var(--oc-2); white-space: nowrap; }
 .indice a:hover { background: #2e6371; color: #fff; }
-.indice a[aria-current="page"] { background: var(--linho); color: var(--oc); margin-left: 0; padding-right: 18px; }
-.indice a .n { writing-mode: horizontal-tb; position: absolute; top: 4px; left: 50%; translate: -50% 0; background: var(--quente); color: #fff; border-radius: 999px; font: 600 .62rem var(--mono); padding: 0 5px; }
-.indice .ia-ind { writing-mode: vertical-rl; transform: rotate(180deg); margin: 10px 0 0 8px; border: 0; border-radius: 0 10px 10px 0; background: var(--salvia); color: var(--oc-3); font-weight: 700; font-size: .82rem; padding: 14px 10px; cursor: pointer; }
+.indice a[aria-current="page"] { background: var(--linho); color: var(--oc); padding-bottom: 13px; }
+.indice a:focus-visible, .indice .ia-ind:focus-visible { outline: 3px solid var(--salvia); outline-offset: -3px; }
+.indice a .n { display: inline-block; margin-left: 7px; background: var(--quente); color: #fff; border-radius: 999px; font: 600 .66rem/1.5 var(--mono); padding: 0 6px; vertical-align: 1px; }
+.indice .ia-ind { flex: 0 0 auto; margin: 0 0 6px auto; border: 0; border-radius: 10px; background: var(--salvia); color: var(--oc-3); font-weight: 700; font-size: .9rem; padding: 9px 16px; cursor: pointer; white-space: nowrap; }
+@media (max-width: 700px) { .indice { padding: 8px 12px 0; } .indice a { padding: 9px 12px 10px; font-size: .86rem; } }
 
 .cimo { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 24px; border-bottom: 1px solid var(--areia); background: var(--linho-2); }
 .cimo b { display: block; font-size: 1.15rem; font-weight: 800; letter-spacing: -.01em; } .cimo small { color: var(--tx-3); }
@@ -97,7 +100,7 @@ tr:last-child td { border-bottom: 0; }
 .janela .pe { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 .linha-tempo { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--areia); } .linha-tempo li { padding: 4px 0 8px 12px; position: relative; font-size: .86rem; } .linha-tempo li::before { content: ""; position: absolute; left: -6px; top: 9px; width: 10px; height: 10px; border-radius: 50%; background: var(--musgo); }
 
-.painel-ia { position: fixed; top: 0; right: 64px; bottom: 0; width: min(390px, calc(100% - 64px)); background: var(--linho-2); border-left: 1px solid var(--areia); z-index: 45; display: flex; flex-direction: column; box-shadow: -16px 0 36px -24px rgba(15, 42, 49, .6); }
+.painel-ia { position: fixed; top: 0; right: 0; bottom: 0; width: min(400px, 100%); background: var(--linho-2); border-left: 1px solid var(--areia); z-index: 45; display: flex; flex-direction: column; box-shadow: -16px 0 36px -24px rgba(15, 42, 49, .6); }
 .painel-ia[hidden] { display: none; }
 .painel-ia header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: var(--oc); color: var(--linho); }
 .painel-ia header button { background: none; border: 1px solid var(--oc-2); color: var(--linho); border-radius: 6px; cursor: pointer; padding: 1px 10px; }
@@ -108,6 +111,6 @@ tr:last-child td { border-bottom: 0; }
 .painel-ia form { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--areia); } .painel-ia input { flex: 1; min-height: 40px; border: 1px solid var(--areia); border-radius: 9px; padding: 0 12px; background: #fff; }
 .notas { position: fixed; right: 84px; bottom: 18px; display: grid; gap: 8px; z-index: 60; }
 .nota { background: var(--oc); color: var(--linho); border-left: 4px solid var(--salvia); padding: 10px 14px; border-radius: 9px; max-width: 360px; font-size: .88rem; }
-@media (max-width: 700px) { .palco { grid-template-columns: 1fr 48px; } .indice a, .indice .ia-ind { padding: 12px 6px; font-size: .74rem; } main, .cimo { padding-left: 14px; padding-right: 14px; } .painel-ia { right: 48px; width: calc(100% - 48px); } }
+@media (max-width: 700px) { main, .cimo { padding-left: 14px; padding-right: 14px; } .painel-ia { right: 0; width: 100%; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media print { .tarja, .indice, .painel-ia, .notas { display: none !important; } .palco { display: block; } }
