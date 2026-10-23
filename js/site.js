@@ -554,3 +554,21 @@
   var mais = document.querySelector('[data-ir-cat]');
   if (mais) mais.addEventListener('click', function (e) { e.preventDefault(); var b = filtro.querySelector('[data-pcat="' + mais.getAttribute('data-ir-cat') + '"]'); if (b) { b.click(); filtro.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
 })();
+
+// Página publicada de novo chega sozinha: o navegador guarda cada página por até 10 minutos e uma aba aberta não recarrega.
+// Ao abrir e ao voltar para a aba, compara a data da página com a do servidor; se houver uma mais nova, busca e recarrega.
+// Uma tentativa por versão (se o servidor ainda não trocou, não fica recarregando).
+(function () {
+  var minha = Date.parse(document.lastModified);
+  if (!minha || location.protocol !== 'https:') return;
+  var confere = function () {
+    if (document.hidden) return;
+    fetch(location.pathname + location.search, { method: 'HEAD', cache: 'no-store' }).then(function (r) {
+      var srv = Date.parse(r.headers.get('last-modified') || ''); if (!srv || srv - minha < 2000) return;
+      var k = 'site-tentou:' + location.pathname; try { if (sessionStorage.getItem(k) === String(srv)) return; sessionStorage.setItem(k, String(srv)); } catch (e) { /* sem sessão */ }
+      fetch(location.href, { cache: 'reload' }).catch(function () {}).then(function () { location.reload(); });
+    }).catch(function () { /* sem internet */ });
+  };
+  setTimeout(confere, 1500);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) confere(); });
+})();
