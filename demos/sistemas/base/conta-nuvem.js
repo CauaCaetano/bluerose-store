@@ -269,6 +269,18 @@
     var marcadas = [].slice.call(f.querySelectorAll('[name=tela]:checked')).map(function (i) { return i.value; });
     return { cargo: f.cargo.value.trim().slice(0, 40), so_leitura: f.querySelector('[name=ler]:checked').value === '1', telas: marcadas.length === todas ? null : marcadas };
   }
+  // convite: a mensagem sai pelo WhatsApp ou pelo e-mail do próprio dono (o envio automático por e-mail depende do serviço de e-mail da Blue Rose)
+  function textoConvite(email, cargo) {
+    var V2 = (window.VELTRIA_VERSOES || {})[app] || {}, link = location.origin + '/app/' + app + '/';
+    return 'Olá! Você foi convidado(a) para a equipe da ' + (info.empresa || 'empresa') + ' no ' + (V2.nome || 'sistema Veltria') + (cargo ? ', como ' + cargo : '') + '.\n\nPara entrar: abra ' + link + ' e crie a sua senha com este e-mail: ' + email + '\n\nDepois de entrar você já vê o que foi liberado para você.';
+  }
+  function botoesConvite(email, cargo, grandes) {
+    var t = textoConvite(email, cargo), cls = grandes ? 'vc-bt' : 'vc-mini';
+    return '<a class="' + cls + '" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(t) + '">WhatsApp</a>' +
+      '<a class="' + cls + (grandes ? ' vc-2' : '') + '" href="mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent('Convite para a equipe da ' + (info.empresa || 'empresa')) + '&body=' + encodeURIComponent(t) + '">E-mail</a>' +
+      '<button type="button" class="' + cls + (grandes ? ' vc-2' : '') + '" data-copia-convite="' + esc(t) + '">Copiar convite</button>';
+  }
+  document.addEventListener('click', function (e) { var b = e.target.closest('[data-copia-convite]'); if (!b) return; (navigator.clipboard ? navigator.clipboard.writeText(b.dataset.copiaConvite) : Promise.reject()).then(function () { b.textContent = 'Copiado'; }).catch(function () { prompt('Copie o convite:', b.dataset.copiaConvite); }); });
   function equipe() {
     var gestor = info.dono || info.papel === 'admin';
     caixa('<h2>Equipe</h2><p class="vc-mudo">Cada pessoa entra com o próprio e-mail. Escolha o cargo, se pode alterar ou só ver e quais telas aparecem para ela. Equipe sem limite de pessoas.</p><ul id="vc-eq"><li>Carregando…</li></ul><div id="vc-ed"></div>' +
@@ -280,7 +292,7 @@
           cx.querySelector('#vc-eq').innerHTML = membros.map(function (m, i) {
             var p = m.permissoes || {}, desc = m.papel === 'dono' ? 'dono' : m.papel === 'admin' ? 'administrador' : (p.cargo || 'equipe') + (p.so_leitura ? ' · só ver' : '') + (p.telas ? ' · ' + p.telas.length + ' telas' : '');
             return '<li><span>' + esc(m.email) + '<small class="vc-mudo"> · ' + esc(desc) + '</small></span>' + (gestor && m.papel !== 'dono' && (info.dono || m.papel === 'membro') ? '<span><button type="button" class="vc-mini" data-ed="' + i + '">Editar</button><button type="button" class="vc-mini" data-tira="' + i + '">Remover</button></span>' : '') + '</li>';
-          }).join('') + (r[1].data || []).map(function (c) { return '<li><span>' + esc(c.email) + '<small class="vc-mudo"> · convite enviado' + (c.permissoes && c.permissoes.cargo ? ' · ' + esc(c.permissoes.cargo) : '') + '</small></span>' + (gestor ? '<button type="button" class="vc-mini" data-cancela="' + esc(c.email) + '">Cancelar</button>' : '') + '</li>'; }).join('');
+          }).join('') + (r[1].data || []).map(function (c) { return '<li><span>' + esc(c.email) + '<small class="vc-mudo"> · convite esperando a pessoa entrar' + (c.permissoes && c.permissoes.cargo ? ' · ' + esc(c.permissoes.cargo) : '') + '</small></span>' + (gestor ? '<span>' + botoesConvite(c.email, c.permissoes && c.permissoes.cargo) + '<button type="button" class="vc-mini" data-cancela="' + esc(c.email) + '">Cancelar</button></span>' : '') + '</li>'; }).join('');
         });
       }
       listar();
@@ -305,13 +317,14 @@
         }
       });
       var campos = cx.querySelector('#vc-conv-campos'); if (!campos) return;
-      campos.innerHTML = editorPessoa({ papel: 'membro', permissoes: {} }, 'Mandar convite');
+      campos.innerHTML = editorPessoa({ papel: 'membro', permissoes: {} }, 'Criar convite') + '<div id="vc-pronto" aria-live="polite"></div>';
       var f = campos.querySelector('form'); f.id = 'vc-conv';
       f.onsubmit = function (e) {
         e.preventDefault(); var em = cx.querySelector('[name=email]'); if (!em.reportValidity()) return;
         var perm = lerPessoa(f, telasDoMenu().length), adm = f.admin && f.admin.checked;
         cliente().then(function (sb) { return sb.from('nexo_convites').insert({ espaco: info.espaco, email: em.value.trim().toLowerCase(), papel: adm ? 'admin' : 'membro', permissoes: adm ? {} : perm }); }).then(function (r) {
-          if (r.error) throw r.error; em.value = ''; f.reset(); listar(); if (window.veltriaMarca) window.veltriaMarca('equipe'); aviso('Convite enviado. A pessoa recebe o e-mail e entra com a conta dela.');
+          if (r.error) throw r.error; var quem = em.value.trim().toLowerCase(), cg = perm && perm.cargo; em.value = ''; f.reset(); listar(); if (window.veltriaMarca) window.veltriaMarca('equipe');
+          var pr = cx.querySelector('#vc-pronto'); if (pr) pr.innerHTML = '<p><b>Convite criado para ' + esc(quem) + '.</b> Agora mande o acesso para a pessoa:</p><p>' + botoesConvite(quem, cg, true) + '</p><p class="vc-mudo">Ela entra pelo link com esse e-mail, cria a senha e já vê só o que você liberou.</p>';
         }).catch(function (x) { f.querySelector('[data-erro]').textContent = /limite/i.test(x.message) ? 'Não foi possível convidar agora. Tente de novo em instantes.' : x.message; });
       };
     });
@@ -337,7 +350,7 @@
   // ---------------------------------------------------------------- Dados (editor de todas as listas)
   function dadosEditor(abrir) {
     if (window.veltriaPermissoes && window.veltriaPermissoes.so_leitura) { aviso('O seu acesso é só para ver. Peça ao dono para liberar as alterações.'); return; }
-    script(RAIZ + 'demos/sistemas/base/editor.js?v=6').then(function () {
+    script(RAIZ + 'demos/sistemas/base/editor.js?v=7').then(function () {
       var atual = JSON.parse(texto(NS) || 'null') || (window.veltriaDados ? JSON.parse(JSON.stringify(window.veltriaDados())) : null); if (!atual) return;
       recarregando = true; // a tela fica com os dados antigos na memória enquanto o editor está aberto: não grava por cima
       window.veltriaEditor({ dados: atual, dias: DIAS || '', abrir: abrir || null,

@@ -99,6 +99,7 @@
 
     function inicio() {
       cx.innerHTML = '<h2>Dados da empresa</h2><p class="vc-mudo">Cadastre, corrija ou traga de uma planilha qualquer lista do sistema, inclusive os painéis que a tela só mostra. Cada item é salvo na hora; ao fechar, a tela recarrega com os dados novos.</p>' +
+        '<div class="ve-imp"><div><b>Já tem uma planilha?</b><span class="vc-mudo">Excel ou CSV. O sistema descobre a lista pelas colunas e mostra antes de gravar.</span></div><label class="vc-bt">Importar planilha<input type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-ve-csv-qualquer hidden></label></div>' +
         '<div class="ve-grade">' + listas.map(function (l) { return '<button type="button" class="ve-item" data-ve-lista="' + l + '"><b>' + esc(nomeLista(l)) + '</b><small>' + d[l].length + (d[l].length === 1 ? ' item' : ' itens') + '</small></button>'; }).join('') +
         grupos.map(function (g, i) { return '<button type="button" class="ve-item ve-num" data-ve-grupo="' + i + '"><b>' + esc(g.cam.map(nomeLista).join(' › ')) + '</b><small>números</small></button>'; }).join('') + '</div>' +
         '<button type="button" class="vc-bt vc-2" data-ve-fecha>Fechar</button>';
@@ -107,7 +108,7 @@
       aberto = l; var itens = d[l], m = itens[0] || modelos[l] || {};
       var cols = Object.keys(m).filter(function (c) { return c !== 'id' && (typeof m[c] !== 'object' || m[c] === null); }).slice(0, 4);
       cx.innerHTML = '<p><button type="button" class="ve-volta" data-ve-inicio>‹ Todas as listas</button></p><h2>' + esc(nomeLista(l)) + ' <small class="vc-mudo">(' + itens.length + ')</small></h2>' +
-        '<div class="ve-acoes"><button type="button" class="vc-bt" data-ve-novo>+ Adicionar</button><label class="vc-bt vc-2 ve-arq">Importar planilha (Excel ou CSV)<input type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-ve-csv hidden></label></div>' +
+        '<div class="ve-acoes"><button type="button" class="vc-bt" data-ve-novo>+ Adicionar</button><button type="button" class="vc-bt vc-2" data-ve-modelo="' + l + '">Baixar planilha modelo</button><label class="vc-bt vc-2 ve-arq">Importar planilha (Excel ou CSV)<input type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-ve-csv hidden></label></div>' +
         '<p class="vc-mudo ve-dica">Planilha: a primeira linha com os nomes das colunas (' + esc(Object.keys(m).filter(function (c) { return typeof m[c] !== 'object' || m[c] === null; }).join(', ')) + '). Vale planilha do Excel (.xlsx) ou CSV.</p>' +
         '<div class="ve-tab"><table><thead><tr>' + cols.map(function (c) { return '<th>' + esc(rotulo(c)) + '</th>'; }).join('') + '<th></th></tr></thead><tbody>' +
         itens.slice(0, 300).map(function (x, i) { return '<tr>' + cols.map(function (c) { return '<td>' + esc(mostra(l, c, x[c])) + '</td>'; }).join('') + '<td class="ve-bts"><button type="button" data-ve-edita="' + i + '">Editar</button><button type="button" data-ve-apaga="' + i + '">Apagar</button></td></tr>'; }).join('') +
@@ -194,18 +195,56 @@
       return linhas;
     }
     function importa(l, arquivo) {
-      var aviso = function (t) { var m = cx.querySelector('[data-ve-salvo]'); if (m) m.textContent = t; };
+      var aviso = function (t) { var m = cx.querySelector('[data-ve-salvo]'); if (m) m.textContent = t; else cx.insertAdjacentHTML('beforeend', '<p class="vc-mudo" data-ve-salvo>' + esc(t) + '</p>'); };
       var xlsx = /\.xlsx$/i.test(arquivo.name);
       var ler = xlsx ? arquivo.arrayBuffer().then(function (b) { return (window.veltriaLerXlsx ? Promise.resolve() : new Promise(function (ok, f) { var s = document.createElement('script'); s.src = new URL('le-xlsx.js?v=1', document.querySelector('script[src*="editor.js"]').src).href; s.onload = ok; s.onerror = f; document.head.appendChild(s); })).then(function () { return window.veltriaLerXlsx(b); }); })
         : arquivo.text().then(function (t) { return csv(t.replace(/^\uFEFF/, '')); });
       aviso('Lendo a planilha…');
-      ler.then(function (linhas) { processa(l, linhas); }).catch(function (x) { aviso(x.message || 'Não consegui ler essa planilha.'); });
+      ler.then(function (linhas) { previa(l, linhas, arquivo.name); }).catch(function (x) { aviso(x.message || 'Não consegui ler essa planilha.'); });
+    }
+    // nomes de coluna que as planilhas do dia a dia usam para o mesmo campo
+    var SINONIMOS = { nome: ['nomecompleto', 'cliente', 'razaosocial', 'paciente', 'contato', 'descricao', 'produto', 'item'], tel: ['telefone', 'celular', 'whatsapp', 'whats', 'fone', 'contato'], email: ['email', 'mail'],
+      doc: ['cpf', 'cnpj', 'cpfcnpj', 'documento'], cpf: ['cpfcnpj', 'documento'], valor: ['preco', 'total', 'valortotal', 'vlr'], preco: ['valor', 'precovenda', 'precodevenda', 'vlr'], qtd: ['quantidade', 'qtde', 'estoque'], cod: ['codigo', 'sku', 'codigodebarras', 'ean'],
+      cidade: ['municipio'], obs: ['observacao', 'observacoes', 'anotacoes', 'notas'], venc: ['vencimento', 'datavencimento'], data: ['dia', 'datadia'] };
+    var normC = function (s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+    function colunas(l, cab) {
+      var m = d[l][0] || modelos[l] || {}, chaves = Object.keys(m).filter(function (k) { return k !== 'id' && (typeof m[k] !== 'object' || m[k] === null); }), usadas = {};
+      return cab.map(function (h) { var n = normC(h); if (!n) return null;
+        var k = chaves.find(function (c) { return !usadas[c] && (normC(c) === n || normC(rotulo(c)) === n); }) ||
+          chaves.find(function (c) { return !usadas[c] && (SINONIMOS[c] || []).indexOf(n) >= 0; }) ||
+          chaves.find(function (c) { return !usadas[c] && n.length >= 4 && (normC(rotulo(c)).indexOf(n) === 0 || n.indexOf(normC(rotulo(c))) === 0); }) || null;
+        if (k) usadas[k] = 1; return k; });
+    }
+    // planilha sem lista escolhida: a lista com mais colunas reconhecidas (empate: a que o nome do arquivo cita)
+    function adivinha(cab, nomeArq) {
+      var na = normC(nomeArq || '');
+      return listas.map(function (l) { var c = colunas(l, cab).filter(Boolean).length; return { l: l, n: c + (na.indexOf(normC(nomeLista(l)).slice(0, 5)) >= 0 ? 0.5 : 0) }; }).sort(function (a, b) { return b.n - a.n; });
+    }
+    var pendente = null;
+    // prévia: mostra para qual lista vai, o que cada coluna vira e as primeiras linhas, antes de gravar
+    function previa(l, linhas, nomeArq) {
+      if (linhas.length < 2) { cx.innerHTML = '<h2>Importar planilha</h2><p>A planilha está vazia (precisa da linha de títulos e pelo menos uma linha de dados).</p><button type="button" class="vc-bt vc-2" data-ve-inicio>Voltar</button>'; return; }
+      var ranking = adivinha(linhas[0], nomeArq); l = l || (ranking[0] && ranking[0].n ? ranking[0].l : listas[0]);
+      var col = colunas(l, linhas[0]), ok = col.filter(Boolean).length; pendente = { l: l, linhas: linhas, nomeArq: nomeArq };
+      cx.innerHTML = '<h2>Importar planilha</h2><p class="vc-mudo">' + esc(nomeArq || '') + ' · ' + (linhas.length - 1) + ' linha(s)</p>' +
+        '<label style="display:grid;gap:4px;max-width:360px;margin:8px 0">Vai para a lista<select data-ve-destino>' + listas.map(function (x) { return '<option value="' + x + '"' + (x === l ? ' selected' : '') + '>' + esc(nomeLista(x)) + '</option>'; }).join('') + '</select></label>' +
+        '<p>' + (ok ? ok + ' de ' + linhas[0].length + ' colunas reconhecidas.' : '<b>Nenhuma coluna reconhecida nesta lista.</b> Baixe a planilha modelo para ver os nomes certos.') + '</p>' +
+        '<div class="ve-tab"><table><thead><tr>' + linhas[0].map(function (h, j) { return '<th>' + esc(h) + '<br><small class="vc-mudo">' + (col[j] ? '→ ' + esc(rotulo(col[j])) : 'não entra') + '</small></th>'; }).join('') + '</tr></thead><tbody>' +
+        linhas.slice(1, 6).map(function (r) { return '<tr>' + linhas[0].map(function (_, j) { return '<td>' + esc(r[j] == null ? '' : r[j]) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>' +
+        '<p class="vc-mudo" data-ve-salvo></p><button type="button" class="vc-bt" data-ve-confirma' + (ok ? '' : ' disabled') + '>Importar ' + (linhas.length - 1) + ' linha(s) para ' + esc(nomeLista(l)) + '</button><button type="button" class="vc-bt vc-2" data-ve-modelo="' + l + '">Baixar planilha modelo</button><button type="button" class="vc-bt vc-2" data-ve-inicio>Cancelar</button>';
+    }
+    function modelo(l) {
+      var m = d[l][0] || modelos[l] || {}, cs = Object.keys(m).filter(function (k) { return k !== 'id' && (typeof m[k] !== 'object' || m[k] === null); });
+      var ex = d[l][0] ? cs.map(function (c) { var v = mostra(l, c, d[l][0][c]); return v == null ? '' : v; }) : cs.map(function () { return ''; });
+      import(new URL('xlsx.js', document.querySelector('script[src*="editor.js"]').src).href).then(function (x) {
+        x.baixarXlsx('Modelo - ' + nomeLista(l), [{ nome: nomeLista(l).slice(0, 31), linhas: [cs.map(rotulo), ex] }]);
+      });
     }
     function processa(l, linhas) {
       var r = { result: '' }; (function () {
         if (linhas.length < 2) { cx.querySelector('[data-ve-salvo]').textContent = 'A planilha está vazia.'; return; }
-        var m = d[l][0] || modelos[l] || {}, chaves = Object.keys(m), norm = function (s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
-        var col = linhas[0].map(function (h) { var n = norm(h); return chaves.find(function (k) { return norm(k) === n || norm(rotulo(k)) === n; }) || null; });
+        var m = d[l][0] || modelos[l] || {}, chaves = Object.keys(m);
+        var col = colunas(l, linhas[0]);
         if (!col.some(Boolean)) { cx.querySelector('[data-ve-salvo]').textContent = 'Nenhuma coluna reconhecida. Use na primeira linha: ' + chaves.join(', ') + '.'; return; }
         var n = 0;
         linhas.slice(1).forEach(function (cel) {
@@ -227,15 +266,21 @@
       else if (b.dataset.veLista) lista(b.dataset.veLista);
       else if (b.dataset.veGrupo) grupo(Number(b.dataset.veGrupo));
       else if (b.hasAttribute('data-ve-novo')) form(aberto, null);
+      else if (b.dataset.veModelo) modelo(b.dataset.veModelo);
+      else if (b.hasAttribute('data-ve-confirma') && pendente) { var pl = pendente; pendente = null; aberto = pl.l; cx.innerHTML = '<p class="vc-mudo" data-ve-salvo>Importando…</p>'; processa(pl.l, pl.linhas); }
       else if (b.dataset.veEdita) form(aberto, Number(b.dataset.veEdita));
       else if (b.dataset.veApaga) { var x = d[aberto][Number(b.dataset.veApaga)]; if (confirm('Apagar "' + titulo(x) + '"?')) { d[aberto].splice(Number(b.dataset.veApaga), 1); salvarTudo().then(function () { lista(aberto); }); } }
     });
-    cx.addEventListener('change', function (e) { if (e.target.matches('[data-ve-csv]') && e.target.files[0]) importa(aberto, e.target.files[0]); });
+    cx.addEventListener('change', function (e) {
+      if (e.target.matches('[data-ve-csv]') && e.target.files[0]) importa(aberto, e.target.files[0]);
+      if (e.target.matches('[data-ve-csv-qualquer]') && e.target.files[0]) importa(null, e.target.files[0]);
+      if (e.target.matches('[data-ve-destino]') && pendente) previa(e.target.value, pendente.linhas, pendente.nomeArq);
+    });
     if (o.abrir && o.abrir.lista && listas.indexOf(o.abrir.lista) >= 0) {
       lista(o.abrir.lista);
       if (o.abrir.acao === 'novo') form(o.abrir.lista, null);
       else if (o.abrir.acao === 'importar') setTimeout(function () { var i = cx.querySelector('[data-ve-csv]'); if (i) i.click(); }, 50);
-    } else inicio();
+    } else { inicio(); if (o.abrir && o.abrir.acao === 'importar-qualquer') setTimeout(function () { var i = cx.querySelector('[data-ve-csv-qualquer]'); if (i) i.click(); }, 50); }
     var st = document.createElement('style');
     // a janela leva o próprio estilo (na demonstração não há o conta-nuvem.js)
     st.textContent = '.vc-veu{position:fixed;inset:0;background:rgba(10,12,18,.6);display:grid;place-items:center;z-index:9999;padding:16px}.vc-caixa{background:#fbfaf7;color:#1d2230;border-radius:16px;max-height:88vh;overflow:auto;padding:20px 22px;font:15px/1.5 system-ui,sans-serif;box-sizing:border-box}' +
@@ -246,6 +291,7 @@
       '.ve-tab{overflow:auto;max-height:52vh;border:1px solid #ecebe6;border-radius:10px;margin-top:8px}.ve-tab table{width:100%;border-collapse:collapse;font-size:.88rem}.ve-tab th,.ve-tab td{padding:7px 9px;border-bottom:1px solid #ecebe6;text-align:left;white-space:nowrap}' +
       '.ve-tab th{position:sticky;top:0;background:#f6f5f1}.ve-bts{text-align:right}.ve-bts button{border:1px solid #cfd2da;background:#fff;border-radius:8px;padding:3px 9px;margin-left:4px;cursor:pointer;font:inherit;font-size:.82rem}' +
       '.ve-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}.ve-form label{display:grid;gap:4px;font-size:.88rem;margin:0}.ve-form input,.ve-form select{min-height:40px;border:1px solid #cfd2da;border-radius:10px;padding:0 10px;font:inherit;background:#fff}' +
+      '.ve-imp{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border:1px dashed #b9bfcc;border-radius:12px;background:#f6f8fc;margin:10px 0}.ve-imp div{display:grid;gap:2px}.ve-imp .vc-bt{display:inline-flex;align-items:center;margin:0}' +
       '.ve-form .ve-chk{display:flex;align-items:center;gap:8px}.ve-form .ve-chk input{min-height:0}.ve-form .vc-bt,.ve-form [data-ve-salvo]{grid-column:1/-1;justify-self:start}';
     v.appendChild(st);
   };

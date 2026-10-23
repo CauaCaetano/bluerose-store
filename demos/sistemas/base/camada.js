@@ -21,7 +21,7 @@
   function editor(abrir) {
     if (soLeitura()) { toast('O seu acesso é só para ver. Peça ao dono para liberar as alterações.'); return; }
     if (window.veltriaAbrirDados) { window.veltriaAbrirDados(abrir); return; } // modo conta: o conta-nuvem grava na nuvem
-    script('editor.js?v=6').then(function () {
+    script('editor.js?v=7').then(function () {
       var salvou = false;
       window.veltriaEditor({ dados: dados(), dias: '', abrir: abrir,
         salvar: function (d) { salvou = true; localStorage.setItem(CHAVE, JSON.stringify(d)); return Promise.resolve(); },
@@ -94,14 +94,14 @@
       var listas = window.veltriaEditorListas ? window.veltriaEditorListas(window.veltriaDados()) : [], daTela = listaDaTela(listas);
       var mn = document.createElement('div'); mn.className = 'vk-menu'; mn.setAttribute('role', 'menu');
       mn.innerHTML = (daTela ? '<button type="button" role="menuitem" data-vk="novo">+ Adicionar em ' + esc(daTela[1]) + '</button><button type="button" role="menuitem" data-vk="importar">Importar planilha para ' + esc(daTela[1]) + '</button>' : '') +
-        '<button type="button" role="menuitem" data-vk="procurar">Procurar nesta tela <small>Ctrl+K</small></button><button type="button" role="menuitem" data-vk="dados">Todos os dados (adicionar, editar, importar)</button>' +
+        (daTela ? '' : '<button type="button" role="menuitem" data-vk="importarQualquer">Importar planilha (Excel ou CSV)</button>') + '<button type="button" role="menuitem" data-vk="procurar">Procurar nesta tela <small>Ctrl+K</small></button><button type="button" role="menuitem" data-vk="dados">Todos os dados (adicionar, editar, importar)</button>' +
         '<button type="button" role="menuitem" data-vk="exportar">Exportar tudo para o Excel</button><button type="button" role="menuitem" data-vk="imprimir">Imprimir esta tela</button>';
       mn.addEventListener('click', function (e) { var b = e.target.closest('[data-vk]'); if (!b) return; mn.remove();
-        ({ novo: function () { editor({ lista: daTela[0], acao: 'novo' }); }, importar: function () { editor({ lista: daTela[0], acao: 'importar' }); }, dados: function () { editor(null); }, exportar: exportar, procurar: procurar, imprimir: function () { window.print(); } })[b.dataset.vk](); });
+        ({ novo: function () { editor({ lista: daTela[0], acao: 'novo' }); }, importar: function () { editor({ lista: daTela[0], acao: 'importar' }); }, importarQualquer: function () { editor({ acao: 'importar-qualquer' }); }, dados: function () { editor(null); }, exportar: exportar, procurar: procurar, imprimir: function () { window.print(); } })[b.dataset.vk](); });
       document.body.appendChild(mn); var p = mn.querySelector('button'); if (p) p.focus();
       setTimeout(function () { document.addEventListener('click', function fora(e) { if (!e.target.closest('.vk-menu,.vk-mais')) { mn.remove(); document.removeEventListener('click', fora); } }); }, 0);
     };
-    window.veltriaEditorListas ? go() : script('editor.js?v=6').then(go);
+    window.veltriaEditorListas ? go() : script('editor.js?v=7').then(go);
   }
   var mais = document.createElement('button'); mais.type = 'button'; mais.className = 'vk-mais'; mais.setAttribute('aria-label', 'Adicionar, importar ou exportar'); mais.title = 'Adicionar, importar planilha ou exportar';
   mais.innerHTML = '<span aria-hidden="true">+</span>'; mais.addEventListener('click', menu);
@@ -147,12 +147,12 @@
   }
   var tituloDe = function (x) { return x && typeof x === 'object' ? (x.nome || x.cliente || x.titulo || x.desc || x.prod || x.conta || x.empresa || x.placa || x.cnj || '') : ''; };
   function atalhos(t) {
-    return '<div class="vk-atalhos">' + (t ? '<button type="button" data-vka="novo">+ Adicionar</button><button type="button" data-vka="importar">Importar planilha</button>' : '') +
+    return '<div class="vk-atalhos">' + (t ? '<button type="button" data-vka="novo">+ Adicionar</button><button type="button" data-vka="importar">Importar planilha</button>' : '<button type="button" data-vka="importarQualquer">Importar planilha</button>') +
       '<button type="button" data-vka="procurar">Procurar <small>Ctrl+K</small></button><button type="button" data-vka="exportar">Exportar para o Excel</button></div>';
   }
   function liga(el, t) {
     el.addEventListener('click', function (e) { var b = e.target.closest('[data-vka]'); if (!b) return; var a = b.dataset.vka;
-      if (a === 'procurar') procurar(); else if (a === 'exportar') exportar(); else editor({ lista: t[0], acao: a }); });
+      if (a === 'procurar') procurar(); else if (a === 'exportar') exportar(); else if (a === 'importarQualquer') editor({ acao: 'importar-qualquer' }); else editor({ lista: t[0], acao: a }); });
   }
   // Essencial no computador: o app é uma coluna de celular; o espaço dos lados ganha um painel útil
   function painelLado() {
@@ -450,7 +450,7 @@
     document.body.appendChild(mais);
     subirMais(); setTimeout(subirMais, 900); addEventListener('resize', subirMais); addEventListener('hashchange', function () { setTimeout(subirMais, 60); });
     // tela vazia: só faz sentido quando a empresa tem a lista vazia (começou do zero); carrega o editor para saber as listas
-    script('editor.js?v=6').then(function () { vigiaVazio(); arrumaEspaco(); addEventListener('hashchange', function () { vigiaVazio(); arrumaEspaco(); }); addEventListener('resize', arrumaEspaco); new MutationObserver(function () { if (!document.querySelector('.vk-vazio')) { vazioFeito = ''; } vigiaVazio(); if (!document.querySelector('.vk-apoio')) arrumaEspaco(); }).observe(document.querySelector('main') || document.body, { childList: true }); }).catch(function () {});
+    script('editor.js?v=7').then(function () { vigiaVazio(); arrumaEspaco(); addEventListener('hashchange', function () { vigiaVazio(); arrumaEspaco(); }); addEventListener('resize', arrumaEspaco); new MutationObserver(function () { if (!document.querySelector('.vk-vazio')) { vazioFeito = ''; } vigiaVazio(); if (!document.querySelector('.vk-apoio')) arrumaEspaco(); }).observe(document.querySelector('main') || document.body, { childList: true }); }).catch(function () {});
     if (conta) {
       ritmoDoDia();
       var faixa = document.querySelector('.vc-faixa');
