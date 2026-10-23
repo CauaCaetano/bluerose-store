@@ -6,7 +6,8 @@
   const raiz = document.getElementById('play');
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
   const SITE = 'https://bluerose-store.com/';
-  const NOMES = { crm: 'Veltria CRM', agenda: 'Veltria Agenda', financeiro: 'Veltria Financeiro', gestao: 'Veltria Gestão', juridico: 'Veltria Jurídico', clinica: 'Veltria Clínica', academia: 'Veltria Academia', restaurante: 'Veltria Restaurante', imobiliaria: 'Veltria Imobiliária', oficina: 'Veltria Oficina', farmacia: 'Veltria Farmácia' };
+  // os 24 sistemas Veltria (8 ramos × Essencial, Completo e Avançado), da mesma lista que o site usa (base/versoes.js)
+  const V = window.VELTRIA_VERSOES || {}, NOMES = Object.fromEntries(Object.values(V).map((v) => [v.id, v.nome]));
   const params = new URLSearchParams(location.search);
   if (params.get('origem') === 'play') {
     try { localStorage.setItem('nexo-play', '1'); } catch { /* ok */ }
@@ -68,7 +69,7 @@
       const vale = ['ativa', 'paga'].includes(a.status) || (a.status === 'teste' && a.teste_ate >= hoje) || (a.status === 'cancelada' && [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop() >= hoje);
       if (vale && NOMES[a.app] && !apps.has(a.app)) apps.set(a.app, []);
     }
-    const lista = [...apps.entries()].map(([app, empresas]) => `<li><a href="../${app}/"><img src="../${app}/icone-192.png" alt="" width="44" height="44"><span><b>${esc(NOMES[app])}</b><small>${empresas.length ? esc(empresas.join(' · ')) : 'Toque para começar'}</small></span><i class="seta" aria-hidden="true"></i></a></li>`).join('');
+    const lista = [...apps.entries()].map(([app, empresas]) => `<li><a href="../${app}/"><img src="../../${V[app].logo}" alt="" width="44" height="44"><span><b>${esc(NOMES[app])}</b><small>${empresas.length ? esc(empresas.join(' · ')) : 'Toque para começar'}</small></span><i class="seta" aria-hidden="true"></i></a></li>`).join('');
     raiz.innerHTML = `${marca}<div class="play-conta"><span>${esc(session.user.email)}</span><button type="button" class="btn fant" data-sair>Sair</button></div>
       <h1>Seus sistemas</h1>
       ${lista ? `<ul class="play-sis">${lista}</ul>` : '<div class="play-vazio">Esta conta ainda não tem sistemas liberados. Se você faz parte da equipe de uma empresa, peça para quem administra a conta convidar o seu e-mail.</div>'}
