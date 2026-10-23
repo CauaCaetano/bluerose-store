@@ -30,7 +30,7 @@
   }
   // lista da tela aberta: pelo nome da tela (#clientes -> clientes) ou por apelidos (#balcao -> agendamentos)
   var APELIDOS = { balcao: 'ags', dia: 'ags', agenda: 'agenda ags', pauta: 'prazos', funil: 'deals negocios', baralho: 'negocios', hoje: 'negocios vendas', patio: 'os', quadro: 'os', ordens: 'os', nova: 'os',
-    contatos: 'clientes negocios', receber: 'cobrancas lancs', pagar: 'pagar pags contas', contas: 'contas pagar fixas lancs', caixa: 'movs caixa vendas', estoque: 'produtos prods estoque', pecas: 'pecas estoque',
+    contatos: 'clientes negocios deals', receber: 'cobrancas lancs', pagar: 'pagar pags contas', contas: 'contas pagar fixas lancs', caixa: 'movs caixa vendas', estoque: 'produtos prods estoque', pecas: 'pecas estoque',
     vender: 'vendas produtos', orcar: 'orcamentos', orcamentos: 'orcamentos orcs', fiado: 'clientes', dinheiro: 'movs', mapa: 'transf', metas: 'equipe vend vendedores', intimacoes: 'intimacoes',
     filas: 'intimacoes prazos', fluxo: 'lancs', conciliar: 'extrato', aprovar: 'pags', obras: 'obras', carteira: 'obras', suprimentos: 'cotacoes', ocupacao: 'ofertas', clube: 'planos', reativar: 'rfm',
     produtividade: 'mec', boxes: 'carros', posvenda: 'detratores', frotas: 'frotas', previsao: 'deals', cadencias: 'cadencias', pontuacao: 'leads', distribuicao: 'novos', ganhos: 'deals', times: 'pessoas',
@@ -42,6 +42,16 @@
     var cand = (APELIDOS[rota] || '').split(' ').filter(Boolean).concat([rota]);
     for (var i = 0; i < cand.length; i++) if (chaves.indexOf(cand[i]) >= 0) return listas[chaves.indexOf(cand[i])];
     if (rota.length >= 4) for (var j = 0; j < listas.length; j++) { var k = norm(listas[j][0]), n = norm(listas[j][1]); if (k.indexOf(rota.slice(0, 5)) === 0 || rota.indexOf(k.slice(0, 5)) === 0 || n.indexOf(rota) >= 0) return listas[j]; }
+    // telas que não mudam o endereço: pelo botão ativo do menu e pelo título da tela
+    var ativo = document.querySelector('nav [aria-current]:not([aria-current=false]), nav .on, nav .ativo, [aria-selected=true], [aria-pressed=true], [data-m].on, [data-modulo].on, [data-camada].on, [data-fila].on');
+    var titulo = document.querySelector('main h1, main h2, #app h1, .area h1, h1');
+    var textos = [ativo && ativo.textContent, titulo && titulo.textContent].filter(Boolean).map(function (t) { return norm(t.replace(/\d+/g, ' ')); });
+    for (var a = 0; a < textos.length; a++) {
+      var ali = Object.keys(APELIDOS).filter(function (x) { return textos[a].indexOf(x) === 0; })[0];
+      if (ali) { var ca = APELIDOS[ali].split(' '); for (var b = 0; b < ca.length; b++) if (chaves.indexOf(ca[b]) >= 0) return listas[chaves.indexOf(ca[b])]; }
+      var porNome = listas.slice().sort(function (x, y) { return y[1].length - x[1].length; }).filter(function (l) { var n5 = norm(l[1]).slice(0, 5); return n5.length >= 4 && textos[a].indexOf(n5) >= 0; })[0];
+      if (porNome) return porNome;
+    }
     return null;
   }
   function exportar() {
