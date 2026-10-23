@@ -430,7 +430,7 @@
       p.querySelectorAll('img').forEach(function (im) { var b = im.getBoundingClientRect(); if (b.width && b.width <= 140 && b.top - r.top < 220 && /rosa|veltria|ia|assist|logo/i.test(im.src)) im.style.display = 'none'; });
       var box = document.createElement('div'); box.className = 'vk-ia'; box.setAttribute('aria-hidden', 'true');
       p.insertBefore(box, p.firstElementChild && p.firstElementChild.matches('h1,h2,h3,header,.cab,[class*=cab]') ? p.firstElementChild.nextSibling : p.firstChild);
-      import(BASE + 'assistente-ia.js').then(function (m) {
+      import(BASE + 'assistente-ia.js?v=2').then(function (m) {
         var b = m.personagemIA(box, 'ola'); b.estado('ola', 2600);
         var esperando = false, quando = 0;
         var pensa = function () { esperando = true; quando = Date.now(); b.estado('pensando'); };

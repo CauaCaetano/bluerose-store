@@ -67,6 +67,9 @@ export function personagemIA(el, inicial = 'ola') {
       ctx.drawImage(folha.img, tx, ty + y, x0 - 2, 1, dx, oy + y, x0 - 2, 1);
       ctx.drawImage(folha.img, tx + x1 + 3, ty + y, W - x1 - 3, 1, dx + x1 + 3, oy + y, W - x1 - 3, 1);
       ctx.drawImage(folha.img, tx + x0 - 2, ty + y, x1 - x0 + 5, 1, dx + x0 - 2 + v, oy + y, x1 - x0 + 5, 1);
+      // o pedaço que andou deixa um vão do tamanho do deslocamento: preenche com os pixels originais (senão o fundo aparece como risco)
+      if (v > 0) ctx.drawImage(folha.img, tx + x0 - 2, ty + y, v, 1, dx + x0 - 2, oy + y, v, 1);
+      if (v < 0) ctx.drawImage(folha.img, tx + x1 + 3 + v, ty + y, -v, 1, dx + x1 + 3 + v, oy + y, -v, 1);
     }
   };
   carregar().then((img) => { folha.img = img; folha.pronta = true; desenhar(); }, () => { cv.remove(); });
