@@ -14,14 +14,14 @@
   function espera(ms, g) { return new Promise(function (ok) { setTimeout(ok, ms); }).then(function () { checa(g); }); }
   function anima(el, kf, o) { var op = { fill: 'both', easing: EXPO, duration: 800 }; for (var k in o) op[k] = o[k]; return el.animate(kf, op); }
   function q(c, s) { return c.querySelector(s); }
-  function fmt(v, moeda) { v = Math.round(v); return moeda ? 'R$ ' + v.toLocaleString('pt-BR') : String(v); }
+  function fmt(v, moeda, cent) { if (cent) return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); v = Math.round(v); return moeda ? 'R$ ' + v.toLocaleString('pt-BR') : String(v); }
   function conta(el, ms) {
-    var p = el.getAttribute('data-mx-conta').split('|').map(Number), moeda = el.hasAttribute('data-moeda'), t0 = performance.now();
+    var p = el.getAttribute('data-mx-conta').split('|').map(Number), moeda = el.hasAttribute('data-moeda'), cent = el.hasAttribute('data-cent'), t0 = performance.now();
     return new Promise(function (ok) {
-      (function passo(t) { var x = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - x, 3); el.textContent = fmt(p[0] + (p[1] - p[0]) * e, moeda); x < 1 ? requestAnimationFrame(passo) : ok(); })(t0);
+      (function passo(t) { var x = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - x, 3); el.textContent = fmt(p[0] + (p[1] - p[0]) * e, moeda, cent); x < 1 ? requestAnimationFrame(passo) : ok(); })(t0);
     });
   }
-  function zera(c) { [].forEach.call(c.querySelectorAll('[data-mx-conta]'), function (el) { el.textContent = fmt(+el.getAttribute('data-mx-conta').split('|')[0], el.hasAttribute('data-moeda')); }); }
+  function zera(c) { [].forEach.call(c.querySelectorAll('[data-mx-conta]'), function (el) { el.textContent = fmt(+el.getAttribute('data-mx-conta').split('|')[0], el.hasAttribute('data-moeda'), el.hasAttribute('data-cent')); }); }
 
   // cursor: anda até o elemento e clica
   function centro(el) { var r = raiz.getBoundingClientRect(), b = el.getBoundingClientRect(); return [b.left - r.left + b.width * 0.5, b.top - r.top + b.height * 0.55]; }
@@ -45,10 +45,10 @@
   function frase(c, g) {
     var f = q(c, '.mx-frase'), ws = [].slice.call(f.querySelectorAll('.w'));
     f.style.opacity = 1;
-    ws.forEach(function (w, i) { anima(w, [{ opacity: 0, transform: 'translateY(50%)', filter: 'blur(14px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 1000, delay: i * 110 }); });
-    return espera(1000 + ws.length * 110 + 650, g).then(function () {
-      anima(f, [{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: 'translateY(-14%) scale(.94)', filter: 'blur(10px)' }], { duration: 650, easing: SAI });
-      return espera(420, g);
+    ws.forEach(function (w, i) { anima(w, [{ opacity: 0, transform: 'translateY(50%)', filter: 'blur(14px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 850, delay: i * 80 }); });
+    return espera(850 + ws.length * 80 + 450, g).then(function () {
+      anima(f, [{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: 'translateY(-14%) scale(.94)', filter: 'blur(10px)' }], { duration: 550, easing: SAI });
+      return espera(340, g);
     });
   }
   function sobe(c, g) {
@@ -57,7 +57,7 @@
     [].forEach.call(app.querySelectorAll('.mx-topo > *, .mx-corpo > *, .mx-h, .mx-int'), function (el, i) {
       anima(el, [{ opacity: 0, transform: 'translateY(30%)' }, { opacity: 1, transform: 'none' }], { duration: 900, delay: 180 + i * 55 });
     });
-    return espera(1100, g);
+    return espera(900, g);
   }
   function camera(c, el, s) {
     var app = q(c, '.mx-app'), a = app.getBoundingClientRect(), b = el.getBoundingClientRect();
@@ -70,7 +70,7 @@
     agenda: function (c, g) {
       return frase(c, g).then(function () { return sobe(c, g); }).then(function () {
         mostraCursor(); return espera(150, g);
-      }).then(function () { return anda(q(c, '.mx-livre'), 1100, g); }).then(function () { return clica(g); }).then(function () {
+      }).then(function () { return anda(q(c, '.mx-livre'), 900, g); }).then(function () { return clica(g); }).then(function () {
         anima(q(c, '.mx-livre'), [{ opacity: 1 }, { opacity: 0 }], { duration: 250 });
         var novo = q(c, '.mx-novo'); novo.style.transformOrigin = 'left center';
         anima(novo, [{ opacity: 0, transform: 'scaleX(.15)' }, { opacity: 1, transform: 'none' }], { duration: 900 });
@@ -78,11 +78,11 @@
         anima(q(c, '.mx-lado'), [{ boxShadow: '0 0 0 0 rgba(185,211,168,0)' }, { boxShadow: '0 0 0 .4cqw rgba(185,211,168,.35)' }, { boxShadow: '0 0 0 0 rgba(185,211,168,0)' }], { duration: 1400, easing: 'ease-out' });
         return espera(500, g);
       }).then(function () { some(); camera(c, q(c, '.mx-novo'), 1.05); return espera(500, g); })
-        .then(function () { aparece(q(c, '.mx-zap'), 'translate(20%,30%) scale(.85)'); return espera(2600, g); });
+        .then(function () { aparece(q(c, '.mx-zap'), 'translate(20%,30%) scale(.85)'); return espera(1800, g); });
     },
     juridico: function (c, g) {
       return frase(c, g).then(function () { return sobe(c, g); }).then(function () { mostraCursor(); return espera(150, g); })
-        .then(function () { return anda(q(c, '.mx-int-ok button'), 1100, g); }).then(function () { return clica(g); }).then(function () {
+        .then(function () { return anda(q(c, '.mx-int-ok button'), 900, g); }).then(function () { return clica(g); }).then(function () {
           q(c, '.mx-int-ok').classList.add('on');
           aparece(q(c, '.mx-prazo'), 'translateY(60%) scale(.7)');
           conta(q(c, '.mx-pilula [data-mx-conta]'), 400);
@@ -92,7 +92,7 @@
           var dia = q(c, '.mx-dia'); dia.classList.add('on');
           anima(dia, [{ transform: 'scale(1)' }, { transform: 'scale(1.5)' }, { transform: 'scale(1)' }], { duration: 800, easing: 'ease-out', fill: 'none' });
           camera(c, q(c, '.mx-cal'), 1.06);
-          return espera(3000, g);
+          return espera(2200, g);
         });
     },
     financeiro: function (c, g) {
@@ -104,12 +104,12 @@
         anima(linha, [{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 2200, easing: SUAVE });
         conta(q(c, '.mx-caixa [data-mx-conta]'), 2200);
         mostraCursor(); return espera(500, g);
-      }).then(function () { return anda(q(c, '.mx-bt'), 1100, g); }).then(function () { return clica(g); }).then(function () {
+      }).then(function () { return anda(q(c, '.mx-bt'), 900, g); }).then(function () { return clica(g); }).then(function () {
         anima(q(c, '.mx-bt'), [{ transform: 'scale(1)' }, { transform: 'scale(.96)' }, { transform: 'scale(1)' }], { duration: 300, fill: 'none' });
         anima(imp, [{ height: '22%' }, { height: '100%' }], { duration: 1500, easing: SUAVE, pseudoElement: '::after' });
         some(); camera(c, q(c, '.mx-potes'), 1.06);
         return espera(1100, g);
-      }).then(function () { aparece(q(c, '.mx-toast')); return espera(2400, g); });
+      }).then(function () { aparece(q(c, '.mx-toast')); return espera(1800, g); });
     },
     obras: function (c, g) {
       var tij = [].slice.call(c.querySelectorAll('.mx-parede i')), ja = 15;
@@ -123,13 +123,83 @@
           aparece(q(c, '.mx-pago'), 'translateY(100%)');
           some(); camera(c, q(c, '.mx-cobrar'), 1.05);
           return espera(900, g);
-        }).then(function () { aparece(q(c, '.mx-toast')); return espera(2500, g); });
+        }).then(function () { aparece(q(c, '.mx-toast')); return espera(1800, g); });
+    },
+    oficina: function (c, g) {
+      return frase(c, g).then(function () { return sobe(c, g); }).then(function () { mostraCursor(); return espera(120, g); })
+        .then(function () { return anda(q(c, '.mx-box .mx-livre'), 900, g); }).then(function () { return clica(g); }).then(function () {
+          anima(q(c, '.mx-box .mx-livre'), [{ opacity: 1 }, { opacity: 0 }], { duration: 250 });
+          aparece(q(c, '.mx-entra'), 'translateX(-70%) rotate(-4deg)');
+          conta(q(c, '.mx-pilula [data-mx-conta]'), 500);
+          some(); camera(c, q(c, '.mx-entra'), 1.05);
+          return espera(900, g);
+        }).then(function () { aparece(q(c, '.mx-toast')); return espera(1800, g); });
+    },
+    crm: function (c, g) {
+      var card = q(c, '.mx-arrasta'), vaga = q(c, '.mx-vaga');
+      return frase(c, g).then(function () { return sobe(c, g); }).then(function () { mostraCursor(); return espera(120, g); })
+        .then(function () { return anda(card, 900, g); }).then(function () {
+          // arrasta o cartão de Negociação para Fechado, com o cursor junto
+          var a = card.getBoundingClientRect(), b = vaga.getBoundingClientRect(), dx = b.left - a.left, dy = b.top - a.top;
+          card.classList.add('on');
+          anima(card, [{ transform: 'none' }, { transform: 'translate(0,-6%) rotate(-3deg) scale(1.04)', offset: 0.2 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(-2deg) scale(1.04)', offset: 0.85 }, { transform: 'translate(' + dx + 'px,' + dy + 'px)' }], { duration: 1200, easing: SUAVE });
+          var de = 'translate(' + cx + 'px,' + cy + 'px)', ate = 'translate(' + (cx + dx) + 'px,' + (cy + dy) + 'px)';
+          cursor.animate([{ transform: de + ' scale(.85)' }, { transform: ate + ' scale(.85)', offset: 0.85 }, { transform: ate }], { duration: 1200, easing: SUAVE, fill: 'forwards' });
+          cx += dx; cy += dy;
+          return espera(1100, g);
+        }).then(function () {
+          anima(vaga, [{ opacity: 1 }, { opacity: 0 }], { duration: 200 });
+          conta(q(c, '.mx-col:last-child [data-mx-conta]'), 1200);
+          some(); camera(c, q(c, '.mx-col:last-child'), 1.05);
+          return espera(700, g);
+        }).then(function () { aparece(q(c, '.mx-toast')); return espera(1800, g); });
+    },
+    farmacia: function (c, g) {
+      var itens = [].slice.call(c.querySelectorAll('.mx-item')), laser = q(c, '.mx-laser'), total = q(c, '.mx-lado [data-mx-conta]');
+      itens.forEach(function (it) { anima(it, [{ opacity: 0 }, { opacity: 0 }], { duration: 1 }); });
+      return frase(c, g).then(function () { return sobe(c, g); }).then(function () {
+        // cada produto passa pelo leitor
+        itens.forEach(function (it, i) {
+          var y = it.offsetTop + it.offsetHeight / 2;
+          laser.animate([{ opacity: 0, transform: 'translateY(' + y + 'px) scaleX(.3)' }, { opacity: 1, transform: 'translateY(' + y + 'px) scaleX(1)', offset: 0.4 }, { opacity: 0, transform: 'translateY(' + y + 'px) scaleX(1)' }], { duration: 420, delay: i * 480 });
+          anima(it, [{ opacity: 0, transform: 'translateX(-8%)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: i * 480 + 200 });
+        });
+        conta(total, itens.length * 480 + 300);
+        return espera(itens.length * 480 + 200, g);
+      }).then(function () { mostraCursor(); return espera(100, g); })
+        .then(function () { return anda(q(c, '.mx-cobrar'), 900, g); }).then(function () { return clica(g); }).then(function () {
+          aparece(q(c, '.mx-pago'), 'translateY(100%)');
+          some(); camera(c, q(c, '.mx-lado'), 1.05);
+          return espera(2000, g);
+        });
+    },
+    gestao: function (c, g) {
+      var falta = q(c, '.mx-falta'), barras = [].slice.call(c.querySelectorAll('.mx-prod i'));
+      barras.forEach(function (b) { anima(b, [{ width: '0%' }, { width: '0%' }], { duration: 1, pseudoElement: '::after' }); });
+      return frase(c, g).then(function () { return sobe(c, g); }).then(function () {
+        // o feijão enche e depois esvazia até ficar no vermelho
+        barras.forEach(function (b, i) {
+          var n = getComputedStyle(b).getPropertyValue('--n').trim(), eFalta = b.parentNode === falta;
+          var kf = eFalta ? [{ width: '0%' }, { width: '62%', offset: 0.45 }, { width: n }] : [{ width: '0%' }, { width: n }];
+          anima(b, kf, { duration: eFalta ? 2000 : 1000, delay: i * 90, easing: SUAVE, pseudoElement: '::after' });
+        });
+        return espera(1900, g);
+      }).then(function () {
+        falta.classList.add('on');
+        aparece(q(falta, 'em'), 'scale(.6)');
+        return espera(500, g);
+      }).then(function () { mostraCursor(); return espera(100, g); })
+        .then(function () { return anda(q(c, '.mx-ge .mx-bt'), 900, g); }).then(function () { return clica(g); }).then(function () {
+          some(); camera(c, falta, 1.05);
+          aparece(q(c, '.mx-toast'));
+          return espera(1900, g);
+        });
     },
     fim: function (c, g) {
       [].forEach.call(c.querySelectorAll('.mx-selos img'), function (im, i) { anima(im, [{ opacity: 0, transform: 'translateY(40%) scale(.6)', filter: 'blur(8px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 1000, delay: i * 140 }); });
       anima(q(c, '.mx-marca'), [{ opacity: 0, letterSpacing: '.18em', filter: 'blur(10px)' }, { opacity: 1, letterSpacing: '-.02em', filter: 'blur(0)' }], { duration: 1600, delay: 500 });
       anima(q(c, '.mx-assina'), [{ opacity: 0, transform: 'translateY(40%)' }, { opacity: 1, transform: 'none' }], { duration: 900, delay: 1200 });
-      return espera(4200, g);
+      return espera(3600, g);
     }
   };
 

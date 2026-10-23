@@ -107,3 +107,47 @@
 .mx.mx-vivo .mx-dia:not(.on) { color: rgba(244, 236, 223, .6); background: none; font-weight: 400; }
 .mx-int, .mx-dia { transition: background-color .5s, border-color .5s, color .5s; }
 .mx-cursor { transition: opacity .35s; }
+
+/* oficina: pátio com 4 boxes */
+.mx-of { grid-template-columns: repeat(4, 1fr); align-content: start; }
+.mx-box { position: relative; height: 46cqh; display: flex; flex-direction: column; gap: 1.2cqh; padding: 1.8cqh 1.2cqw; border-radius: 1.2cqw; border: 1px dashed rgba(255, 255, 255, .2); background: repeating-linear-gradient(135deg, rgba(255, 255, 255, .025) 0 1.2cqw, transparent 1.2cqw 2.4cqw); }
+.mx-box small { font-size: 1.3cqw; letter-spacing: .04em; color: rgba(244, 236, 223, .55); }
+.mx-carro { display: grid; gap: 1cqh; padding: 1.6cqh 1.1cqw; border-radius: 1cqw; background: #f3ece0; color: #1b1a1e; }
+.mx-placa { justify-self: start; padding: .5cqh .8cqw .4cqh; border: 1px solid #1b1a1e; border-top: .7cqh solid #2a5bb8; border-radius: .4cqw; font: 700 1.35cqw/1 ui-monospace, monospace; letter-spacing: .06em; background: #fff; }
+.mx-carro b { font-size: 1.55cqw; }
+.mx-carro em { justify-self: start; padding: .4cqh .8cqw; border-radius: 99px; font-style: normal; font-size: 1.2cqw; font-weight: 600; background: color-mix(in srgb, var(--e) 30%, #fff); }
+.mx-box .mx-livre { position: static; height: auto; flex: 1; display: grid; place-items: center; line-height: 1.2; text-align: center; font-size: 1.4cqw; }
+.mx-box .mx-entra { position: absolute; left: 1.2cqw; right: 1.2cqw; top: 5.6cqh; box-shadow: 0 0 0 .3cqw color-mix(in srgb, var(--acento) 60%, transparent); }
+/* crm: funil em colunas */
+.mx-crm { grid-template-columns: repeat(4, 1fr); gap: 1.4cqw; align-content: start; }
+.mx-col { display: grid; gap: 1.2cqh; align-content: start; padding: 1.6cqh 1cqw; border-radius: 1.2cqw; background: rgba(255, 255, 255, .05); min-height: 52cqh; }
+.mx-col p { display: flex; justify-content: space-between; margin: 0 0 .6cqh; font-size: 1.45cqw; font-weight: 600; color: var(--acento); }
+.mx-col p span { color: rgba(244, 236, 223, .7); font-weight: 500; }
+.mx-col p i { font-style: normal; }
+.mx-neg { padding: 1.4cqh 1cqw; border-radius: .9cqw; font-size: 1.35cqw; color: rgba(27, 27, 43, .7); background: #f2eee6; border-left: .35cqw solid var(--acento); }
+.mx-neg b { display: block; margin-bottom: .3cqh; font-size: 1.45cqw; color: #1b1b2b; }
+.mx-arrasta { position: relative; z-index: 2; border-left-color: #e0b44a; }
+.mx-vaga { height: 7.6cqh; border-radius: .9cqw; border: 1px dashed rgba(255, 255, 255, .22); }
+.mx.mx-vivo .mx-arrasta.on { box-shadow: 0 1.6cqw 3cqw -1cqw rgba(0, 0, 0, .7); }
+/* farmácia: caixa com leitor */
+.mx-fa { grid-template-columns: 1fr 34%; }
+.mx-cesta { position: relative; display: grid; gap: 1.2cqh; align-content: start; padding: 2cqh 1.6cqw; border-radius: 1.2cqw; background: rgba(255, 255, 255, .05); overflow: hidden; }
+.mx-item { display: flex; justify-content: space-between; margin: 0; padding: 1.6cqh 1.4cqw; border-radius: .9cqw; font-size: 1.6cqw; background: rgba(255, 255, 255, .06); }
+.mx-item b { font-variant-numeric: tabular-nums; }
+.mx-laser { position: absolute; left: 0; right: 0; top: 0; height: .35cqh; background: #ff5a4f; box-shadow: 0 0 1.2cqw .3cqw rgba(255, 90, 79, .7); opacity: 0; }
+.mx-fa .mx-lado { display: flex; flex-direction: column; gap: .6cqh; }
+.mx-fa .mx-lado span { color: rgba(244, 236, 223, .6); }
+.mx-fa .mx-cobrar { justify-self: stretch; margin-top: 2.4cqh; width: 100%; }
+/* gestão: estoque */
+.mx-ge { grid-template-rows: 1fr auto; }
+.mx-estoque { display: grid; gap: 1.4cqh; align-content: start; }
+.mx-prod { position: relative; display: grid; grid-template-columns: 26% 1fr 9cqw; align-items: center; gap: 1.6cqw; padding: 1.7cqh 1.6cqw; border-radius: 1cqw; font-size: 1.6cqw; background: rgba(255, 255, 255, .05); }
+.mx-prod i { height: 1.6cqh; border-radius: 99px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.mx-prod i::after { content: ""; display: block; width: var(--n); height: 100%; border-radius: inherit; background: var(--acento); }
+.mx-prod.mx-falta i::after { background: #e0604f; }
+.mx-prod b { text-align: right; font-variant-numeric: tabular-nums; }
+.mx-prod em { position: absolute; right: 12cqw; top: 50%; translate: 0 -50%; padding: .5cqh 1cqw; border-radius: 99px; font-style: normal; font-size: 1.2cqw; font-weight: 700; color: #fff; background: #e0604f; }
+.mx.mx-vivo .mx-falta:not(.on) i::after { background: var(--acento); }
+.mx-ge .mx-bt { justify-self: end; padding: 1.8cqh 2.4cqw; font-size: 1.6cqw; }
+.mx-fim .mx-selos { gap: 2cqw; }
+.nb-telas.mx .mx-selos img { height: 10.5cqh; }
