@@ -40,7 +40,7 @@
     agendaessencial: 'D clientes[].ultima ags[].dia pedidos[].dia', agendacompleto: 'D ags[].dia',
     crmessencial: 'D negocios[].prox.dia negocios[].notas[].dia negocios[].quando', crmcompleto: 'D atividades[].dia H deals[].sem deals[].hist[].d propostas[].enviada',
     farmaciaessencial: 'D prods[].lotes[].val clientes[].ultima receitas[].dia vendas[].dia', farmaciacompleto: 'D prods[].lotes[].val livro[].dia servicos[].dia', farmaciaavancado: 'D campanhas[].fim',
-    financeiroessencial: 'D movs[].dia cobrancas[].vence cobrancas[].avisos[] contas[].vence recibos[].dia historico[].dia', financeirocompleto: 'D lancs[].venc lancs[].avisos[] lancs[].pagamentos[].dia extrato[].dia orcs[].dia', financeiroavancado: 'D pags[].venc pags[].pagoEm pags[].baixas[].dia recs[].venc recs[].baixas[].dia movs[].dia contas[].desde mutuos[].dia extrato[].dia',
+    financeiroessencial: 'D movs[].dia cobrancas[].vence cobrancas[].avisos[] contas[].vence recibos[].dia historico[].dia', financeirocompleto: 'D lancs[].venc lancs[].avisos[] lancs[].pagamentos[].dia extrato[].dia orcs[].dia transferencias[].dia', financeiroavancado: 'D pags[].venc pags[].pagoEm pags[].baixas[].dia recs[].venc recs[].baixas[].dia movs[].dia contas[].desde mutuos[].dia extrato[].dia',
     gestaoessencial: 'D pagar[].vence H clientes[].desde', gestaocompleto: 'D vendas[].dia contas[].vence',
     gestaoavancado: 'D produtos[].lotes[].vence vendas[].dia contas[].vence pedidos[].dia movs[].dia log[].dia H clientes[].ultima',
     juridicocompleto: 'D processos[].andamentos[].dia prazos[].fatal prazos[].interno intimacoes[].dia audiencias[].dia horas[].dia contratos[].parcelas[].dia',

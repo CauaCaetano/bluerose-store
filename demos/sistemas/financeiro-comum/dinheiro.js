@@ -111,3 +111,11 @@ export function lerBoleto(linha, agora = new Date()) {
   throw new Error(`A linha digitável tem ${s.length} números; boleto tem 47 e conta de consumo tem 48.`);
 }
 export const _dv = { mod10, mod11 }; // para os testes montarem linhas válidas
+
+/** CPF ou CNPJ válido pelos dígitos verificadores (sequências repetidas são recusadas). */
+export function docValido(doc) {
+  const d = String(doc || '').replace(/\D/g, '');
+  if (d.length === 11 && !/^(\d)\1+$/.test(d)) { const dv = (n) => { let s = 0; for (let i = 0; i < n; i++) s += Number(d[i]) * (n + 1 - i); const r = (s * 10) % 11; return r === 10 ? 0 : r; }; return dv(9) === Number(d[9]) && dv(10) === Number(d[10]); }
+  if (d.length === 14 && !/^(\d)\1+$/.test(d)) { const dv = (n) => { const p = n === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2], r = p.reduce((a, w, i) => a + w * Number(d[i]), 0) % 11; return r < 2 ? 0 : 11 - r; }; return dv(12) === Number(d[12]) && dv(13) === Number(d[13]); }
+  return false;
+}
