@@ -94,7 +94,9 @@ const S = {
   comissoes() {
     const l = db.pros.map((p) => { const its = agsHoje().filter((a) => a.pago).flatMap((a) => a.itens.filter((i) => i.pro === p.id)); const s = its.filter((i) => i.tipo === 's').reduce((t, i) => t + valorItem(i), 0), pr = its.filter((i) => i.tipo === 'p').reduce((t, i) => t + valorItem(i), 0); return { p, s, pr, c: s * p.com / 100 + pr * p.comProd / 100 }; });
     return `<div class="topo-s"><div><h1>Comissões de hoje</h1><p>Sobre o que já foi pago. Serviço e produto têm porcentagens separadas.</p></div><button class="bt" data-a="vale">Lançar vale</button></div>
-      <div class="caixa-b tab"><table><thead><tr><th>Profissional</th><th class="d">Serviços</th><th class="d">% serv.</th><th class="d">Produtos</th><th class="d">% prod.</th><th class="d">Comissão</th></tr></thead><tbody>${l.map((x) => `<tr><td><b>${es(x.p.nome)}</b></td><td class="d">${R$(x.s)}</td><td class="d"><input data-com="${x.p.id}" value="${x.p.com}" style="width:46px;text-align:right" aria-label="Comissão de serviço de ${es(x.p.nome)}">%</td><td class="d">${R$(x.pr)}</td><td class="d">${x.p.comProd}%</td><td class="d"><b>${R$(x.c)}</b></td></tr>`).join('')}</tbody></table></div>`;
+      <div class="caixa-b tab"><table><thead><tr><th>Profissional</th><th class="d">Serviços</th><th class="d">% serv.</th><th class="d">Produtos</th><th class="d">% prod.</th><th class="d">Comissão</th></tr></thead><tbody>${l.map((x) => `<tr><td><b>${es(x.p.nome)}</b></td><td class="d">${R$(x.s)}</td><td class="d"><input data-com="${x.p.id}" value="${x.p.com}" style="width:46px;text-align:right" aria-label="Comissão de serviço de ${es(x.p.nome)}">%</td><td class="d">${R$(x.pr)}</td><td class="d">${x.p.comProd}%</td><td class="d"><b>${R$(x.c)}</b></td></tr>`).join('')}</tbody></table></div>
+      <div class="cols" style="margin-top:16px"><section class="caixa-b c8"><h2>Quanto cada um gerou hoje</h2><div class="barras">${l.map((x) => `<div class="l"><span>${es(x.p.nome)}</span><span class="t"><i style="--c:${x.p.cor};width:${Math.round((x.s + x.pr) / (Math.max(...l.map((y) => y.s + y.pr)) || 1) * 100)}%"></i></span><span class="d">${R$(x.s + x.pr)}</span></div>`).join('')}</div></section>
+      <section class="caixa-b c4 total-com"><h2>Total de comissões hoje</h2><p class="num">${R$(l.reduce((t, x) => t + x.c, 0))}</p><p class="rot">somando a equipe toda, sobre o que já foi pago</p></section></div>`;
   },
   caixa() {
     const pagos = agsHoje().filter((a) => a.pago), porForma = {}; pagos.forEach((a) => { porForma[a.pago.forma] = (porForma[a.pago.forma] || 0) + a.pago.total; });
@@ -131,7 +133,10 @@ const S = {
 
 function comanda() {
   const a = sel && ag(sel);
-  if (!a) return '<section class="caixa-b comanda"><h2>Comanda</h2><p class="vazio">Escolha um cliente na fila ou na grade para abrir a comanda.</p></section>';
+  if (!a) {
+    const vem = agsHoje().filter((x) => !x.pago && ['agendado', 'chegou', 'atendendo', 'pagar'].includes(x.st)).sort((x, y) => x.ini - y.ini).slice(0, 4);
+    return `<section class="caixa-b comanda vazia"><h2>Comanda</h2><p class="vazio">Toque num cliente para abrir a comanda dele.</p>${vem.length ? `<small class="rot">A seguir</small>${vem.map((x) => `<button type="button" class="cartela" data-sel="${x.id}" style="--c:${pro(x.pro).cor}"><b>${hm(x.ini)} ${es(cli(x.cli).nome)}</b><small>${es(x.itens.filter((i) => i.tipo === 's').map((i) => sv(i.ref).nome).join(' + '))} · ${es(pro(x.pro).nome)}</small></button>`).join('')}` : '<p class="vazio">Ninguém marcado para o resto do dia.</p>'}</section>`;
+  }
   const c = cli(a.cli), pac = db.pacotes.find((p) => p.cli === a.cli && p.usadas < p.total), prox = { agendado: ['Chegou', 'chegou'], chegou: ['Sentar na cadeira', 'atendendo'], atendendo: ['Terminou: ir pagar', 'pagar'] }[a.st];
   return `<section class="caixa-b comanda"><h2>${es(c.nome)} <span class="etq ${ST[a.st][1]}">${ST[a.st][0]}</span></h2>${c.obs ? `<p class="vazio" style="margin:-4px 0 8px">Ficha: ${es(c.obs)}</p>` : ''}
     ${a.itens.map((i, ix) => `<div class="linha-c"><span>${es(i.tipo === 's' ? sv(i.ref).nome : prod(i.ref).nome)}<small>${es(pro(i.pro)?.nome || '')}${i.pacote ? ' · do pacote' : ''}${i.tipo === 'p' ? ' · produto' : ''}</small></span><span class="m">${R$(valorItem(i))}</span>${a.st === 'pago' ? '<span></span>' : `<button type="button" class="x" data-tira="${ix}" aria-label="Tirar item">×</button>`}</div>`).join('')}

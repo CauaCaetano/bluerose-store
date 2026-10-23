@@ -109,3 +109,56 @@ tr:last-child td { border-bottom: 0; }
 .aviso { background: var(--azul-3); color: var(--papel); border-left: 4px solid var(--argila); padding: 10px 14px; border-radius: 8px; max-width: 360px; font-size: .88rem; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media print { .barra-demo, .recepcao, .lateral-ia, .avisos { display: none !important; } }
+
+/* ── redesenho 10/2026: balcão ocupa a tela, fichas maiores, painéis com profundidade ── */
+:root { --sombra: 0 1px 2px rgba(47, 67, 82, .06), 0 10px 28px -16px rgba(47, 67, 82, .32); }
+.recepcao { padding: 14px 28px 0; gap: 14px 18px; }
+.salao b { font-size: 1.2rem; letter-spacing: -.01em; }
+.fichas { gap: 4px; padding: 6px 0 0; }
+.fichas a { padding: 11px 20px 12px 22px; font-size: .95rem; border-radius: 10px 10px 0 0; background: transparent; color: #dfe6eb; transition: background .2s, color .2s; }
+.fichas a:hover { background: var(--azul-2); color: #fff; }
+.fichas a[aria-current="page"] { background: var(--papel); color: var(--azul-3); }
+.bt-ia { padding: 9px 18px; transition: transform .15s, filter .2s; } .bt-ia:hover { filter: brightness(1.06); } .bt-ia:active { transform: translateY(1px); }
+main { padding: 28px 28px 56px; max-width: 1520px; }
+.topo-s { margin-bottom: 22px; }
+.topo-s h1 { font-size: 2.1rem; letter-spacing: -.03em; line-height: 1.1; }
+.topo-s p { margin-top: 6px; font-size: 1rem; }
+.bt { min-height: 42px; padding: 0 18px; border-radius: 10px; transition: background .2s, border-color .2s, transform .15s; }
+.bt:active { transform: translateY(1px); }
+.bt.az:hover { background: var(--azul-3); } .bt.ar:hover { background: var(--argila-esc); }
+.caixa-b { border-radius: 16px; padding: 20px 22px; border-color: #e4d9c9; box-shadow: var(--sombra); }
+.caixa-b h2 { font-size: 1.08rem; margin-bottom: 14px; }
+.cols { gap: 18px; }
+/* balcão: as três colunas descem até o fim da tela */
+.balcao { grid-template-columns: 280px minmax(0, 1fr) 340px; gap: 18px; align-items: stretch; }
+.balcao > .caixa-b { min-height: calc(100dvh - 250px); }
+.balcao > .grade-p { max-height: calc(100dvh - 250px); overflow: auto; }
+.grade-p .cab-p { background: var(--papel-2); z-index: 3; }
+.grade-p .cab-p div { padding: 8px 10px; font-size: .92rem; }
+.grade-p .bloco { border-radius: 9px; padding: 6px 9px; font-size: .8rem; transition: transform .15s, box-shadow .2s; }
+.grade-p .bloco:hover { transform: translateY(-1px); box-shadow: 0 6px 14px -6px rgba(36, 48, 58, .5); }
+.cartela { padding: 10px 12px; margin-bottom: 8px; border-radius: 10px; transition: transform .15s, box-shadow .2s; }
+.cartela:hover { transform: translateX(2px); box-shadow: 0 4px 12px -8px rgba(47, 67, 82, .5); }
+.cartela b { font-size: .95rem; }
+.fila .etapa > small { font-size: .8rem; font-weight: 600; color: var(--tx-2); margin-bottom: 6px; }
+.comanda.vazia > .vazio:first-of-type { padding: 18px; border: 1.5px dashed var(--areia); border-radius: 12px; text-align: center; margin: 0 0 16px; background: #fffdf9; }
+.comanda.vazia > .rot { display: block; margin-bottom: 8px; font-weight: 600; }
+.comanda .linha-c { padding: 10px 0; font-size: .93rem; }
+.comanda .tot { font-size: 1.45rem; margin: 16px 0; }
+/* tabelas com linhas mais altas */
+th { padding: 10px 14px; font-size: .8rem; }
+td { padding: 14px; font-size: .93rem; }
+tbody tr { transition: background .15s; } tbody tr:hover td { background: #fbf6ee; }
+td input[data-com] { min-height: 34px; border: 1px solid var(--areia); border-radius: 8px; padding: 0 8px; background: #fff; }
+.num { font-size: 1.9rem; letter-spacing: -.02em; }
+.total-com { background: var(--azul); color: var(--papel); border-color: var(--azul); }
+.total-com .num { font-size: 2.4rem; margin-top: 12px; } .total-com .rot { color: var(--areia); }
+.barras .l { grid-template-columns: 130px 1fr 110px; padding: 8px 0; font-size: .93rem; }
+.barras .t { height: 14px; border-radius: 7px; }
+.dialogo { border-radius: 18px; padding: 26px 28px; box-shadow: 0 30px 60px -20px rgba(36, 48, 58, .5); }
+@media (max-width: 1180px) { .balcao { grid-template-columns: 250px minmax(0, 1fr); } .balcao > .comanda { grid-column: 1 / -1; min-height: 0; } }
+@media (max-width: 900px) {
+  main { padding: 20px 16px 48px; } .recepcao { padding: 12px 16px 0; }
+  .balcao { grid-template-columns: 1fr; } .balcao > .caixa-b, .balcao > .grade-p { min-height: 0; max-height: none; }
+  .topo-s h1 { font-size: 1.7rem; } .c4, .c5, .c6, .c7, .c8, .c3 { grid-column: span 12; }
+}
