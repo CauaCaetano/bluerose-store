@@ -207,7 +207,7 @@ function telaRelatorios() {
   return `<div class="cab"><div><h1>Relatórios</h1><p>Os últimos 7 dias em uma página: o que vendeu, como pagaram e onde está o lucro.</p></div></div>
   <div class="etiquetas">
     <div class="etiqueta vinho"><span class="rot">Vendas em 7 dias</span><span class="val">${R(tot7)}</span><span class="det">${db.vendas.length} vendas</span></div>
-    <div class="etiqueta"><span class="rot">Lucro bruto</span><span class="val">${R(luc7)}</span><span class="det">margem de ${Math.round(luc7 / tot7 * 100)}%</span></div>
+    <div class="etiqueta"><span class="rot">Lucro bruto</span><span class="val">${R(luc7)}</span><span class="det">margem de ${tot7 ? Math.round(luc7 / tot7 * 100) : 0}%</span></div>
     <div class="etiqueta navy"><span class="rot">Ticket médio</span><span class="val">${R(tot7 / db.vendas.length)}</span><span class="det">por venda</span></div>
   </div>
   <div class="grade-2">

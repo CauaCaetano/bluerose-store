@@ -14,7 +14,12 @@ const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toL
 const $ = (s, el = document) => el.querySelector(s);
 const data = (off) => { const d = new Date(); d.setDate(d.getDate() + off); return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); };
 const agoraTxt = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-const UN = { matriz: 'Matriz', filial: 'Filial' };
+// unidades da loja: ficam nos dados (db.unidades); estas são as do exemplo
+const UN_EXEMPLO = { matriz: 'Matriz · Centro', filial: 'Filial · Jardim Europa' };
+const UN = {};
+const KS = () => Object.keys(UN), k0 = () => KS()[0];
+const estTot = (p) => KS().reduce((t, k) => t + (p.est[k] || 0), 0);
+const curto = (k) => String(UN[k] || k).split(' · ')[0];
 const svg = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
 const I = {
   cockpit: svg('<path d="M3 13a9 9 0 0 1 18 0"/><path d="m12 13 4-4"/><path d="M3 17h18"/>'),
@@ -120,10 +125,26 @@ function semente() {
     { dia: -1, hora: '11:21', quem: 'Renata Saldanha', txt: 'Mudou o preço de Azeite extravirgem 500 ml de R$ 56,90 para R$ 59,90' },
     { dia: 0, hora: '08:02', quem: OPERADOR, txt: 'Abriu o caixa 01 da Matriz com R$ 400,00' },
   ];
-  return { produtos, fornecedores, vendedores, clientes, vendas, contas, pedidos, movs, log, abas: ['cockpit'], ativa: 'cockpit', un: 'todas', pdv: { itens: [], cli: '', vend: 'v0' }, proxVenda: n, proxNota: nf, proxPedido: 773, saldoBanco: 38450, metaMesExtra: 0, estoqueAba: 'posicao', finAba: 'fluxo', busca: {} };
+  return { produtos, fornecedores, vendedores, clientes, vendas, contas, pedidos, movs, log, abas: ['cockpit'], ativa: 'cockpit', un: 'todas', unidades: { ...UN_EXEMPLO }, pdv: { itens: [], cli: '', vend: 'v0' }, proxVenda: n, proxNota: nf, proxPedido: 773, saldoBanco: 38450, metaMesExtra: 0, estoqueAba: 'posicao', finAba: 'fluxo', busca: {} };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || semente(); } catch { return semente(); } })();
-window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
+window.veltriaDados = () => db;
+// loja que começou do zero trabalha com uma unidade, que dá para renomear; cada produto ganha estoque zerado na unidade nova
+function lerUnidades() {
+  const u = db.unidades && typeof db.unidades === 'object' ? db.unidades : { ...UN_EXEMPLO };
+  Object.keys(UN).forEach((k) => delete UN[k]); Object.assign(UN, Object.keys(u).length ? u : { principal: 'Loja principal' });
+  (db.produtos || []).forEach((p) => { p.est = p.est || {}; KS().forEach((k) => { if (p.est[k] == null) p.est[k] = 0; }); });
+  if (db.un !== 'todas' && !UN[db.un]) db.un = 'todas';
+}
+lerUnidades();
+function formUnidade(k) {
+  janela(k ? 'Renomear unidade' : 'Nova unidade', `<form class="form" id="f"><label>Nome da unidade<input class="campo" name="n" required value="${k ? esc(UN[k]) : ''}" placeholder="Ex.: Filial · Savassi"></label></form>`, k ? 'Salvar' : 'Cadastrar', () => {
+    const nome = String(new FormData($('#f')).get('n') || '').trim(); if (!nome) return erroJanela('Coloque o nome da unidade.');
+    const chave = k || nome.toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '').slice(0, 10) + Date.now().toString(36).slice(-3);
+    db.unidades = { ...UN, [chave]: nome }; lerUnidades(); if (!k) db.un = chave;
+    registrar(k ? `Renomeou a unidade para ${nome}` : `Cadastrou a unidade ${nome}`); gravar(); desenhar(); avisar(k ? 'Unidade renomeada.' : 'Unidade cadastrada. O estoque dela começa zerado: use Transferir ou Entrada.'); return true;
+  });
+} // modo conta: começar do zero e resumo para a IA
 const gravar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { /* sem espaço: segue na memória */ } };
 const prod = (id) => db.produtos.find((p) => p.id === id);
 const forn = (id) => db.fornecedores.find((f) => f.id === id);
@@ -137,7 +158,7 @@ const vendasUn = () => db.vendas.filter((v) => db.un === 'todas' || v.un === db.
 const doMes = () => vendasUn().filter((v) => v.dia > -diaMes());
 const soma = (l, f) => l.reduce((t, x) => t + f(x), 0);
 const custoVenda = (v) => soma(v.itens, (x) => x.qtd * x.custo);
-const totalEst = (p) => (db.un === 'todas' ? p.est.matriz + p.est.filial : p.est[db.un]);
+const totalEst = (p) => (db.un === 'todas' ? estTot(p) : p.est[db.un] || 0);
 const vendidos30 = () => { const m = {}; vendasUn().forEach((v) => v.itens.forEach((x) => { m[x.id] = (m[x.id] || 0) + x.qtd; })); return m; };
 const cobertura = (p, v30) => { const g = (v30[p.id] || 0) / 30; return g ? totalEst(p) / g : Infinity; };
 const metaMes = () => soma(db.vendedores.filter((v) => db.un === 'todas' || v.un === db.un), (v) => v.meta);
@@ -186,14 +207,14 @@ function fecharAba(m) {
 
 // ---------------------------------------------------------------- módulos
 const kpi = (rot, val, det, cls = '') => `<div class="pn kpi c3 ${cls}"><span class="rot">${rot}</span><span class="val">${val}</span><span class="det">${det}</span></div>`;
-const unTxt = () => (db.un === 'todas' ? 'nas duas unidades' : `na ${UN[db.un]}`);
+const unTxt = () => (db.un === 'todas' ? (KS().length > 1 ? `nas ${KS().length} unidades` : `na ${curto(k0())}`) : `na ${curto(db.un)}`);
 
 function mCockpit() {
   const mes = doMes(), fat = soma(mes, (v) => v.total), cmv = soma(mes, custoVenda), meta = metaMes();
   const hoje = vendasUn().filter((v) => v.dia === 0);
   const fh = soma(hoje, (v) => v.total);
   const v30 = vendidos30(), capital = soma(db.produtos, (p) => totalEst(p) * p.custo);
-  const frac = Math.min(1, fat / meta), prev = fat / diaMes() * new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+  const frac = meta > 0 ? Math.min(1, fat / meta) : 0, prev = fat / diaMes() * new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
   const L = Math.PI * 60;
   const fl = fluxo(), mn = Math.min(...fl.map((x) => x.s), 0), mx = Math.max(...fl.map((x) => x.s)), W = 600, H = 150;
   const X = (d) => 30 + d / 30 * (W - 40), Y = (s) => 10 + (1 - (s - mn) / (mx - mn || 1)) * (H - 30);
@@ -221,13 +242,13 @@ function mCockpit() {
     <section class="pn c8 grafico"><div class="pn-cab"><h2>Saldo projetado: próximos 30 dias</h2><span class="sub">menor saldo ${R(menor.s)} em ${data(menor.d)}</span></div>
       <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Saldo projetado"><path d="${linha} L${X(30)},${H - 20} L${X(0)},${H - 20}Z" fill="rgba(183,161,201,.25)" stroke="none"/>${mn < 0 ? `<line x1="30" x2="${W - 10}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--erro)" stroke-dasharray="4 4"/>` : ''}<path d="${linha}" stroke="var(--ameixa)" stroke-width="2.2" fill="none"/><circle cx="${X(menor.d)}" cy="${Y(menor.s)}" r="4.5" fill="var(--ouro)" stroke="var(--ameixa)"/>${[0, 10, 20, 30].map((d) => `<text x="${X(d)}" y="${H - 4}" text-anchor="middle">${data(d)}</text>`).join('')}<text x="2" y="${Y(mx) + 4}">${Rk(mx).replace('R$ ', '')}</text><text x="2" y="${Y(mn) + 4}">${Rk(mn).replace('R$ ', '')}</text></svg></section>
     <section class="pn c5"><div class="pn-cab"><h2>Alertas</h2><span class="tag ${alertas.length ? 'erro' : 'ok'}">${alertas.length}</span></div>${alertas.length ? `<ul class="lista">${alertas.map((a) => `<li><span class="tag ${a.tag}">●</span><div class="cresce"><b>${a.t}</b><span>${esc(a.s)}</span></div><button class="btn peq" data-acao="abrir" data-m="${a.m}" ${a.aba ? `data-aba="${a.aba}"` : ''}>Resolver</button></li>`).join('')}</ul>` : '<p class="vazio">Sem alertas.</p>'}</section>
-    <section class="pn c3"><div class="pn-cab"><h2>Vendedores no mês</h2></div><ul class="lista">${ranking.map(({ v, f }) => `<li><div class="cresce"><b>${esc(v.nome.split(' ')[0])} <span class="tag">${UN[v.un]}</span></b><div class="barra-h ${f >= v.meta * diaMes() / 30 ? '' : 'ouro'}"><i style="width:${Math.min(100, f / v.meta * 100)}%"></i></div></div><span class="mono">${Math.round(f / v.meta * 100)}%</span></li>`).join('')}</ul></section>
+    <section class="pn c3"><div class="pn-cab"><h2>Vendedores no mês</h2></div><ul class="lista">${ranking.map(({ v, f }) => `<li><div class="cresce"><b>${esc(v.nome.split(' ')[0])} <span class="tag">${UN[v.un]}</span></b><div class="barra-h ${f >= v.meta * diaMes() / 30 ? '' : 'ouro'}"><i style="width:${Math.min(100, f / v.meta * 100)}%"></i></div></div><span class="mono">${Math.round(v.meta ? f / v.meta * 100 : 0)}%</span></li>`).join('')}</ul></section>
     <section class="pn c4"><div class="pn-cab"><h2>Quando a loja vende</h2><span class="sub">30 dias, por hora</span></div><div class="mapa">${mapa.map((l, dw) => `<span>${dn[dw]}</span>${l.map((x, hh) => `<i style="opacity:${(0.08 + x / mmax * .92).toFixed(2)}" title="${dn[dw]} ${hh + 8}h: ${R(x)}"></i>`).join('')}`).join('')}<span></span>${Array.from({ length: 13 }, (_, i) => `<span style="text-align:center">${i % 3 === 0 ? i + 8 : ''}</span>`).join('')}</div></section>
   </div>`;
 }
 
 function mPdv() {
-  const it = db.pdv.itens, total = soma(it, (x) => x.qtd * prod(x.id).preco), un = db.un === 'todas' ? 'matriz' : db.un;
+  const it = db.pdv.itens, total = soma(it, (x) => x.qtd * prod(x.id).preco), un = db.un === 'todas' ? k0() : db.un;
   return `<div class="mod-cab"><div><h1>Frente de caixa · ${UN[un]}</h1><p>Leia o código ou digite o SKU. Para várias unidades use <span class="mono">3*CF-401</span>. Enter põe na venda.</p></div><div class="acoes"><button class="btn" data-acao="limpar-pdv" ${it.length ? '' : 'disabled'}>Cancelar venda</button></div></div>
   <div class="pdv"><div>
     <form class="leitor" id="leitor"><input class="campo" id="leitor-in" placeholder="Código, SKU ou nome do produto" autocomplete="off" aria-label="Código do produto" list="lista-prod"><button class="btn prim">Pôr</button></form>
@@ -250,8 +271,8 @@ function mEstoque() {
   let corpo = '';
   if (aba === 'posicao') {
     const lista = db.produtos.filter((p) => !q || norm(p.nome).includes(q) || norm(p.sku).includes(q));
-    corpo = `<div class="tab-caixa"><table><thead><tr><th>SKU</th><th>Produto</th><th>Categoria</th><th class="n">Matriz</th><th class="n">Filial</th><th class="n">Mínimo</th><th class="n">Giro 30 dias</th><th class="n">Cobertura</th><th>Situação</th><th></th></tr></thead><tbody>
-    ${lista.map((p) => { const c = cobertura(p, v30), t = totalEst(p); return `<tr><td class="mono">${p.sku}</td><td>${esc(p.nome)}</td><td>${p.cat}</td><td class="n">${p.est.matriz}</td><td class="n">${p.est.filial}</td><td class="n">${p.min}</td><td class="n">${v30[p.id] || 0}</td><td class="n">${c === Infinity ? '—' : `${Math.round(c)} d`}</td><td>${t < p.min ? '<span class="tag erro">abaixo do mínimo</span>' : c < 12 ? '<span class="tag alerta">repor logo</span>' : c > 90 ? '<span class="tag ard">parado</span>' : '<span class="tag ok">ok</span>'}</td><td class="n"><button class="btn peq" data-acao="transferir" data-id="${p.id}">Transferir</button> <button class="btn peq" data-acao="ajustar" data-id="${p.id}">Ajustar</button></td></tr>`; }).join('')}</tbody></table></div>`;
+    corpo = `<div class="tab-caixa"><table><thead><tr><th>SKU</th><th>Produto</th><th>Categoria</th>${KS().map((k) => `<th class="n">${esc(curto(k))}</th>`).join('')}<th class="n">Mínimo</th><th class="n">Giro 30 dias</th><th class="n">Cobertura</th><th>Situação</th><th></th></tr></thead><tbody>
+    ${lista.map((p) => { const c = cobertura(p, v30), t = totalEst(p); return `<tr><td class="mono">${p.sku}</td><td>${esc(p.nome)}</td><td>${p.cat}</td>${KS().map((k) => `<td class="n">${p.est[k] || 0}</td>`).join('')}<td class="n">${p.min}</td><td class="n">${v30[p.id] || 0}</td><td class="n">${c === Infinity ? '—' : `${Math.round(c)} d`}</td><td>${t < p.min ? '<span class="tag erro">abaixo do mínimo</span>' : c < 12 ? '<span class="tag alerta">repor logo</span>' : c > 90 ? '<span class="tag ard">parado</span>' : '<span class="tag ok">ok</span>'}</td><td class="n"><button class="btn peq" data-acao="transferir" data-id="${p.id}">Transferir</button> <button class="btn peq" data-acao="ajustar" data-id="${p.id}">Ajustar</button></td></tr>`; }).join('')}</tbody></table></div>`;
   } else if (aba === 'lotes') {
     const ls = db.produtos.flatMap((p) => p.lotes.filter((l) => l.qtd > 0 && (db.un === 'todas' || l.un === db.un)).map((l) => ({ p, l }))).sort((a, b) => a.l.vence - b.l.vence);
     corpo = `<p class="sub">O caixa vende primeiro o lote que vence antes. Lotes vencidos ou perdidos saem por baixa, com registro na auditoria.</p><div class="tab-caixa"><table><thead><tr><th>Lote</th><th>Produto</th><th>Unidade</th><th class="n">Qtd</th><th class="n">Vence</th><th class="n">Valor (custo)</th><th>Situação</th><th></th></tr></thead><tbody>
@@ -265,14 +286,14 @@ function mEstoque() {
 
 function sugestao() {
   const v30 = vendidos30();
-  return db.produtos.map((p) => { const g = (v30[p.id] || 0) / 30, alvo = Math.max(p.min * 2, Math.ceil(g * 30)), t = p.est.matriz + p.est.filial; return { p, q: Math.max(0, alvo - t), cob: g ? t / g : Infinity }; }).filter((x) => x.q > 0 && (x.cob < 15 || x.p.est.matriz + x.p.est.filial < x.p.min));
+  return db.produtos.map((p) => { const g = (v30[p.id] || 0) / 30, alvo = Math.max(p.min * 2, Math.ceil(g * 30)), t = estTot(p); return { p, q: Math.max(0, alvo - t), cob: g ? t / g : Infinity }; }).filter((x) => x.q > 0 && (x.cob < 15 || x.p.est.matriz + x.p.est.filial < x.p.min));
 }
 function mCompras() {
   const sug = sugestao(), porF = {}; sug.forEach((x) => { (porF[x.p.forn] ||= []).push(x); });
   return `<div class="mod-cab"><div><h1>Compras</h1><p>A sugestão olha o giro dos últimos 30 dias e o estoque mínimo, para comprar o suficiente para 1 mês.</p></div><div class="acoes"><button class="btn prim" data-acao="gerar-pedidos" ${sug.length ? '' : 'disabled'}>Gerar ${Object.keys(porF).length} pedidos da sugestão</button></div></div>
   <div class="bento">
     <section class="pn c7"><div class="pn-cab"><h2>Sugestão de compra</h2><span class="tag lav">${sug.length} itens · ${R(soma(sug, (x) => x.q * x.p.custo))}</span></div>
-      ${sug.length ? `<div class="tab-caixa"><table><thead><tr><th>Fornecedor</th><th>Produto</th><th class="n">Tem</th><th class="n">Cobertura</th><th class="n">Comprar</th><th class="n">Custo</th></tr></thead><tbody>${sug.map((x) => `<tr><td>${esc(forn(x.p.forn).nome)}</td><td>${esc(x.p.nome)}</td><td class="n">${x.p.est.matriz + x.p.est.filial}</td><td class="n">${x.cob === Infinity ? '—' : `${Math.round(x.cob)} d`}</td><td class="n"><b>${x.q}</b></td><td class="n">${R(x.q * x.p.custo)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="vazio">Nada para comprar agora: todos os produtos têm mais de 15 dias de estoque.</p>'}
+      ${sug.length ? `<div class="tab-caixa"><table><thead><tr><th>Fornecedor</th><th>Produto</th><th class="n">Tem</th><th class="n">Cobertura</th><th class="n">Comprar</th><th class="n">Custo</th></tr></thead><tbody>${sug.map((x) => `<tr><td>${esc(forn(x.p.forn).nome)}</td><td>${esc(x.p.nome)}</td><td class="n">${estTot(x.p)}</td><td class="n">${x.cob === Infinity ? '—' : `${Math.round(x.cob)} d`}</td><td class="n"><b>${x.q}</b></td><td class="n">${R(x.q * x.p.custo)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="vazio">Nada para comprar agora: todos os produtos têm mais de 15 dias de estoque.</p>'}
     </section>
     <section class="pn c5"><div class="pn-cab"><h2>Pedidos</h2><button class="btn peq" data-acao="novo-pedido">${I.mais}Pedido manual</button></div>
       <ul class="lista">${[...db.pedidos].sort((a, b) => b.num - a.num).map((o) => `<li><div class="cresce"><b>Pedido ${o.num} · ${esc(forn(o.forn).nome)}</b><span>${o.itens.length} itens · ${R(soma(o.itens, (x) => x.qtd * x.custo))} · ${data(o.dia)}</span></div><span class="tag ${o.status === 'Recebido' ? 'ok' : o.status === 'Enviado' ? 'lav' : ''}">${o.status}</span>${o.status === 'Rascunho' ? `<button class="btn peq" data-acao="enviar-pedido" data-id="${o.id}">Enviar</button>` : o.status === 'Enviado' ? `<button class="btn peq prim" data-acao="receber-pedido" data-id="${o.id}">Receber</button>` : ''}</li>`).join('') || '<li class="vazio">Nenhum pedido.</li>'}</ul></section>
@@ -314,7 +335,7 @@ function mEquipe() {
   const mes = db.vendas.filter((v) => v.dia > -diaMes());
   return `<div class="mod-cab"><div><h1>Equipe e metas</h1><p>Metas do mês e comissões calculadas sobre o que cada um vendeu.</p></div></div>
   <div class="tab-caixa"><table><thead><tr><th>Vendedor</th><th>Unidade</th><th class="n">Vendas</th><th class="n">Vendido no mês</th><th class="n">Meta</th><th>Andamento</th><th class="n">Ticket médio</th><th class="n">Comissão</th><th class="n">A pagar</th><th></th></tr></thead><tbody>
-  ${db.vendedores.map((v) => { const vs = mes.filter((x) => x.vend === v.id), f = soma(vs, (x) => x.total), ritmo = f / v.meta >= diaMes() / 30; return `<tr><td><b>${esc(v.nome)}</b></td><td>${UN[v.un]}</td><td class="n">${vs.length}</td><td class="n">${R(f)}</td><td class="n">${R(v.meta)}</td><td style="min-width:150px"><div class="barra-h ${ritmo ? '' : 'ouro'}"><i style="width:${Math.min(100, f / v.meta * 100)}%"></i></div><span class="sub">${pct(f / v.meta)} · ${ritmo ? 'no ritmo' : 'abaixo do ritmo'}</span></td><td class="n">${R(f / Math.max(1, vs.length))}</td><td class="n">${v.comissao.toLocaleString('pt-BR')}%</td><td class="n"><b>${R(f * v.comissao / 100)}</b></td><td class="n"><button class="btn peq" data-acao="editar-vend" data-id="${v.id}">Editar</button></td></tr>`; }).join('')}</tbody></table></div>`;
+  ${db.vendedores.map((v) => { const vs = mes.filter((x) => x.vend === v.id), f = soma(vs, (x) => x.total), ritmo = v.meta > 0 && f / v.meta >= diaMes() / 30; return `<tr><td><b>${esc(v.nome)}</b></td><td>${UN[v.un]}</td><td class="n">${vs.length}</td><td class="n">${R(f)}</td><td class="n">${R(v.meta)}</td><td style="min-width:150px"><div class="barra-h ${ritmo ? '' : 'ouro'}"><i style="width:${Math.min(100, f / v.meta * 100)}%"></i></div><span class="sub">${pct(f / v.meta)} · ${ritmo ? 'no ritmo' : 'abaixo do ritmo'}</span></td><td class="n">${R(f / Math.max(1, vs.length))}</td><td class="n">${v.comissao.toLocaleString('pt-BR')}%</td><td class="n"><b>${R(f * v.comissao / 100)}</b></td><td class="n"><button class="btn peq" data-acao="editar-vend" data-id="${v.id}">Editar</button></td></tr>`; }).join('')}</tbody></table></div>`;
 }
 
 function mFiscal() {
@@ -368,6 +389,7 @@ function desenhar() {
   $('#abas').innerHTML = db.abas.map((m) => `<div class="aba" role="tab" tabindex="0" aria-selected="${m === db.ativa}" data-acao="abrir" data-m="${m}">${I[m]}<span>${MOD[m].nome}</span>${db.abas.length > 1 ? `<span class="fechar-aba" role="button" aria-label="Fechar ${MOD[m].nome}" data-acao="fechar-aba" data-m="${m}">${I.x}</span>` : ''}</div>`).join('') + `<button class="aba-nova" data-acao="abrir" data-m="modulos" aria-label="Abrir módulo">${I.mais}</button>`;
   $('#area').innerHTML = RENDER[db.ativa]();
   if (db.ativa === 'dono') painelDono($('#ga-dono'), DONO);
+  $('#filial').innerHTML = `<option value="todas">${KS().length > 1 ? 'Todas as unidades' : 'A loja toda'}</option>${KS().map((k) => `<option value="${k}">${esc(UN[k])}</option>`).join('')}<option value="__nova">+ Nova unidade…</option>${db.un !== 'todas' ? '<option value="__renomear">Renomear esta unidade…</option>' : ''}`;
   $('#filial').value = db.un;
   document.title = `${MOD[db.ativa].nome} · Veltria Gestão Avançado`;
   status();
@@ -382,14 +404,14 @@ function porNoPdv(texto) {
   if (!q) return;
   const p = db.produtos.find((x) => norm(x.sku) === q) || db.produtos.find((x) => norm(x.nome).includes(q));
   if (!p) { avisar(`Nenhum produto com "${texto}".`); return; }
-  const un = db.un === 'todas' ? 'matriz' : db.un, it = db.pdv.itens.find((x) => x.id === p.id), ja = it?.qtd || 0;
+  const un = db.un === 'todas' ? k0() : db.un, it = db.pdv.itens.find((x) => x.id === p.id), ja = it?.qtd || 0;
   if (ja + qtd > p.est[un]) { avisar(`${p.nome}: só há ${p.est[un]} na ${UN[un]}.`); return; }
   if (it) it.qtd += qtd; else db.pdv.itens.push({ id: p.id, qtd });
   gravar(); desenhar(); $('#leitor-in')?.focus();
 }
 function pagar(forma) {
   const it = db.pdv.itens; if (!it.length) return;
-  const total = soma(it, (x) => x.qtd * prod(x.id).preco), un = db.un === 'todas' ? 'matriz' : db.un;
+  const total = soma(it, (x) => x.qtd * prod(x.id).preco), un = db.un === 'todas' ? k0() : db.un;
   const formas = ['Pix', 'Crédito', 'Débito', 'Dinheiro', 'A prazo'];
   janela(`Pagamento · ${R(total)}`, `<form class="form" id="f"><p class="dica" style="margin:0">Divida entre as formas que o cliente usar. A nota sai assim que o total fechar.</p>${formas.map((f) => `<label>${f}${f === 'A prazo' ? ' <span class="dica">(precisa de cliente com crédito)</span>' : ''}<input class="campo" name="${f}" inputmode="decimal" value="${f === forma ? total.toFixed(2).replace('.', ',') : ''}" placeholder="0,00"></label>`).join('')}<p class="mono" id="falta"></p></form>`, 'Emitir nota e concluir', () => {
     const fd = new FormData($('#f')), parts = formas.map((f) => [f, num(fd.get(f)) || 0]).filter((x) => x[1] > 0), pago = soma(parts, (x) => x[1]);
@@ -413,12 +435,13 @@ function pagar(forma) {
 }
 function transferir(id) {
   const p = id ? prod(id) : db.produtos[0];
-  janela('Transferir entre unidades', `<form class="form" id="f"><label>Produto<select class="campo" name="id">${db.produtos.map((x) => `<option value="${x.id}" ${x.id === p.id ? 'selected' : ''}>${x.sku} · ${esc(x.nome)} (M ${x.est.matriz} / F ${x.est.filial})</option>`).join('')}</select></label>
-    <div class="dupla"><label>De<select class="campo" name="de"><option value="matriz">Matriz</option><option value="filial">Filial</option></select></label><label>Quantidade<input class="campo" name="qtd" type="number" min="1" value="1"></label></div></form>`, 'Transferir', () => {
-    const fd = new FormData($('#f')), x = prod(fd.get('id')), de = fd.get('de'), para = de === 'matriz' ? 'filial' : 'matriz', q = Math.floor(num(fd.get('qtd')));
+  janela('Transferir entre unidades', `<form class="form" id="f"><label>Produto<select class="campo" name="id">${db.produtos.map((x) => `<option value="${x.id}" ${x.id === p.id ? 'selected' : ''}>${x.sku} · ${esc(x.nome)} (${KS().map((k) => `${esc(curto(k))} ${x.est[k] || 0}`).join(' / ')})</option>`).join('')}</select></label>
+    <div class="dupla"><label>De<select class="campo" name="de">${KS().map((k) => `<option value="${k}">${esc(curto(k))}</option>`).join('')}</select></label><label>Para<select class="campo" name="para">${KS().map((k, i) => `<option value="${k}" ${i === 1 ? 'selected' : ''}>${esc(curto(k))}</option>`).join('')}</select></label><label>Quantidade<input class="campo" name="qtd" type="number" min="1" value="1"></label></div></form>`, 'Transferir', () => {
+    const fd = new FormData($('#f')), x = prod(fd.get('id')), de = fd.get('de'), para = fd.get('para'), q = Math.floor(num(fd.get('qtd')));
+    if (de === para) return erroJanela('Escolha unidades diferentes.');
     if (!(q > 0)) return erroJanela('Coloque a quantidade.');
-    if (q > x.est[de]) return erroJanela(`A ${UN[de]} só tem ${x.est[de]}.`);
-    x.est[de] -= q; x.est[para] += q;
+    if (q > (x.est[de] || 0)) return erroJanela(`A ${curto(de)} só tem ${x.est[de] || 0}.`);
+    x.est[de] -= q; x.est[para] = (x.est[para] || 0) + q;
     let r = q; x.lotes.filter((l) => l.un === de && l.qtd > 0).sort((a, b) => a.vence - b.vence).forEach((l) => { const t = Math.min(r, l.qtd); if (t) { l.qtd -= t; x.lotes.push({ ...l, qtd: t, un: para }); r -= t; } });
     db.movs.push({ dia: 0, hora: agoraTxt(), tipo: 'Transferência', txt: `${q}× ${x.nome}: ${UN[de]} → ${UN[para]}`, quem: OPERADOR });
     registrar(`Transferiu ${q}× ${x.nome} da ${UN[de]} para a ${UN[para]}`); avisar('Transferência registrada.'); return true;
@@ -426,10 +449,10 @@ function transferir(id) {
 }
 function ajustar(id) {
   const p = prod(id);
-  janela(`Ajustar estoque · ${esc(p.nome)}`, `<form class="form" id="f"><p class="dica" style="margin:0">Use depois de contar a prateleira (inventário). O motivo fica na auditoria.</p><div class="dupla"><label>Matriz (contado)<input class="campo" name="matriz" type="number" min="0" value="${p.est.matriz}"></label><label>Filial (contado)<input class="campo" name="filial" type="number" min="0" value="${p.est.filial}"></label></div><label>Motivo<select class="campo" name="motivo"><option>Inventário</option><option>Avaria</option><option>Furto ou perda</option><option>Consumo interno</option></select></label></form>`, 'Salvar ajuste', () => {
-    const fd = new FormData($('#f')), m = Math.floor(num(fd.get('matriz'))), f = Math.floor(num(fd.get('filial')));
-    if (!(m >= 0 && f >= 0)) return erroJanela('Quantidades inválidas.');
-    const dif = m + f - p.est.matriz - p.est.filial; p.est.matriz = m; p.est.filial = f;
+  janela(`Ajustar estoque · ${esc(p.nome)}`, `<form class="form" id="f"><p class="dica" style="margin:0">Use depois de contar a prateleira (inventário). O motivo fica na auditoria.</p><div class="dupla">${KS().map((k) => `<label>${esc(curto(k))} (contado)<input class="campo" name="u_${k}" type="number" min="0" value="${p.est[k] || 0}"></label>`).join('')}</div><label>Motivo<select class="campo" name="motivo"><option>Inventário</option><option>Avaria</option><option>Furto ou perda</option><option>Consumo interno</option></select></label></form>`, 'Salvar ajuste', () => {
+    const fd = new FormData($('#f')), novo = Object.fromEntries(KS().map((k) => [k, Math.floor(num(fd.get(`u_${k}`)))]));
+    if (!Object.values(novo).every((v) => v >= 0)) return erroJanela('Quantidades inválidas.');
+    const dif = Object.values(novo).reduce((t, v) => t + v, 0) - estTot(p); Object.assign(p.est, novo);
     db.movs.push({ dia: 0, hora: agoraTxt(), tipo: dif < 0 ? 'Perda' : 'Ajuste', txt: `${p.nome}: ${dif >= 0 ? '+' : ''}${dif} (${fd.get('motivo')})`, quem: OPERADOR });
     registrar(`Ajustou o estoque de ${p.nome} em ${dif >= 0 ? '+' : ''}${dif} un. (${fd.get('motivo')})`); avisar('Estoque ajustado.'); return true;
   });
@@ -443,7 +466,7 @@ function gerarPedidos() {
 function receberPedido(id) {
   const o = db.pedidos.find((x) => x.id === id), f = forn(o.forn), tot = soma(o.itens, (x) => x.qtd * x.custo);
   janela(`Receber pedido ${o.num}`, `<p>${esc(f.nome)} · ${o.itens.length} itens · ${R(tot)}</p><ul class="lista">${o.itens.map((x) => `<li><div class="cresce"><b>${esc(prod(x.id).nome)}</b><span>${x.qtd} un. a ${R(x.custo)}${prod(x.id).perecivel ? ' · entra com lote novo (validade 60 dias)' : ''}</span></div></li>`).join('')}</ul><p class="dica">Entra no estoque da Matriz e lança ${R(tot)} a pagar em ${f.prazo} dias.</p>`, 'Confirmar recebimento', () => {
-    o.itens.forEach((x) => { const p = prod(x.id); p.est.matriz += x.qtd; p.custo = x.custo; if (p.perecivel) p.lotes.push({ lote: `L${String(30000 + o.num).padStart(5, '0')}`, vence: 60, qtd: x.qtd, un: 'matriz' }); });
+    o.itens.forEach((x) => { const p = prod(x.id); p.est[k0()] = (p.est[k0()] || 0) + x.qtd; p.custo = x.custo; if (p.perecivel) p.lotes.push({ lote: `L${String(30000 + o.num).padStart(5, '0')}`, vence: 60, qtd: x.qtd, un: k0() }); });
     o.status = 'Recebido';
     db.contas.push({ id: `k${Date.now()}`, tipo: 'pagar', nome: `${f.nome} (pedido ${o.num})`, valor: tot, vence: f.prazo, cat: 'Fornecedor', pago: false });
     db.movs.push({ dia: 0, hora: agoraTxt(), tipo: 'Entrada', txt: `Pedido ${o.num} recebido (${f.nome})`, quem: OPERADOR });
@@ -471,7 +494,7 @@ const fecharPaleta = () => { $('#paleta-fundo').hidden = true; };
 function filtrarPaleta() {
   const q = norm($('#paleta-q').value);
   const mods = Object.entries(MOD).filter(([k]) => k !== 'modulos').map(([k, m]) => ({ n: m.nome, t: `módulo${m.k ? ` · ${m.k}` : ''}`, ic: I[k], f: () => abrir(k) }));
-  const prods = db.produtos.map((p) => ({ n: `${p.sku} · ${p.nome}`, t: `produto · ${R(p.preco)} · M ${p.est.matriz} / F ${p.est.filial}`, f: () => { db.estoqueAba = 'posicao'; db.busca.estoque = p.sku; abrir('estoque'); } }));
+  const prods = db.produtos.map((p) => ({ n: `${p.sku} · ${p.nome}`, t: `produto · ${R(p.preco)} · ${KS().map((k) => `${curto(k)} ${p.est[k] || 0}`).join(' / ')}`, f: () => { db.estoqueAba = 'posicao'; db.busca.estoque = p.sku; abrir('estoque'); } }));
   const clis = db.clientes.map((c) => ({ n: c.nome, t: 'cliente', f: () => abrir('clientes') }));
   const todos = [...ACOES.map((a) => ({ ...a, ic: I.mais })), ...mods, ...prods, ...clis];
   pItens = (q ? todos.filter((x) => q.split(/\s+/).every((w) => norm(`${x.n} ${x.t}`).includes(w))) : [...ACOES.map((a) => ({ ...a, ic: I.mais })), ...mods]).slice(0, 12);
@@ -525,7 +548,7 @@ document.addEventListener('click', (e) => {
       const fd = new FormData($('#f')), sku = String(fd.get('sku')).trim().toUpperCase(), nome = String(fd.get('nome')).trim(), custo = num(fd.get('custo')), preco = num(fd.get('preco'));
       if (!sku || !nome || !(preco > 0) || !(custo >= 0)) return erroJanela('Preencha SKU, nome, custo e preço.');
       if (db.produtos.some((p) => p.sku === sku)) return erroJanela('Já existe um produto com esse SKU.');
-      db.produtos.push({ id: `p${Date.now()}`, sku, nome, cat: fd.get('cat'), forn: fd.get('forn'), custo, preco, perecivel: !!fd.get('perec'), min: Math.floor(num(fd.get('min'))) || 0, est: { matriz: 0, filial: 0 }, lotes: [] });
+      db.produtos.push({ id: `p${Date.now()}`, sku, nome, cat: fd.get('cat'), forn: fd.get('forn'), custo, preco, perecivel: !!fd.get('perec'), min: Math.floor(num(fd.get('min'))) || 0, est: Object.fromEntries(KS().map((k) => [k, 0])), lotes: [] });
       registrar(`Cadastrou o produto ${sku} · ${nome}`); avisar('Produto cadastrado.'); return true;
     }),
     'novo-cliente': () => janela('Novo cliente', `<form class="form" id="f"><label>Nome ou razão social<input class="campo" name="nome"></label><div class="dupla"><label>CPF ou CNPJ<input class="campo" name="doc" inputmode="numeric"></label><label>Crédito (R$)<input class="campo" name="lim" inputmode="decimal" value="0"></label></div></form>`, 'Cadastrar', () => {
@@ -538,7 +561,7 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('submit', (e) => { if (e.target.id === 'leitor') { e.preventDefault(); porNoPdv($('#leitor-in').value); } else if (e.target.closest('#janela')) { e.preventDefault(); $('#janela [data-acao="ok-janela"]')?.click(); } });
 document.addEventListener('change', (e) => {
-  if (e.target.id === 'filial') { db.un = e.target.value; gravar(); desenhar(); }
+  if (e.target.id === 'filial') { const v = e.target.value; if (v === '__nova' || v === '__renomear') { e.target.value = db.un; formUnidade(v === '__renomear' ? db.un : null); return; } db.un = v; gravar(); desenhar(); }
   if (e.target.id === 'pdv-vend') { db.pdv.vend = e.target.value; gravar(); }
   if (e.target.id === 'pdv-cli') { db.pdv.cli = e.target.value; gravar(); }
 });
