@@ -338,6 +338,7 @@ export function novoRecebivel(db, d, quem, papel) {
   if (d.cc && !(db.centros || []).some((c) => c.id === d.cc)) throw new Error('Centro de custo não encontrado.');
   const ret = Object.fromEntries(Object.keys(RETENCOES).map((k) => [k, Number(d.retencoes?.[k]) || 0]).filter(([, v]) => v)), totRet = Object.values(ret).reduce((a, b) => a + b, 0);
   if (Object.values(ret).some((v) => !Number.isInteger(v) || v < 0)) throw new Error('Retenção inválida.'); if (totRet && n > 1) throw new Error('Retenções valem para nota à vista; para parcelar, lance cada parcela.'); if (totRet >= d.c) throw new Error('As retenções passam do valor da nota.');
+  if (d.pessoa && !d.semLimite) { const k = creditoPessoa(db, d.pessoa); if (k.limite !== null && k.usado + d.c - totRet > k.limite) { if (!d.liberarLimite) throw new Error(`Passa do limite de crédito de ${d.cliente} (${reais(k.limite)}; deve ${reais(k.usado)}). Diretor ou dono pode liberar.`); if (papel === 'gerente') throw new Error('Só diretor ou dono libera acima do limite de crédito.'); registra(db, quem, `liberou ${d.cliente} acima do limite de crédito (${reais(k.limite)})`, { ref: `pessoa:${d.pessoa}`, antes: reais(k.usado), depois: reais(k.usado + d.c - totRet) }); } }
   if (totRet) d = { ...d, c: d.c - totRet };
   const grupo = n > 1 ? nid('g') : undefined;
   const criados = parcelar(d.c, n, d.venc).map((p, i) => { const x = { id: nid('r'), emp: d.emp, cliente: String(d.cliente).trim().slice(0, 80), desc: (String(d.desc).trim() + (n > 1 ? ` (${i + 1}/${n})` : '')).slice(0, 120), c: p.c, venc: p.venc, st: 'aberto', criadoPor: quem, baixas: [] }; if (d.cat) x.cat = d.cat; EXTRAS.forEach((k) => { if (d[k]) x[k] = d[k]; }); if (totRet) { x.bruto = d.c + totRet; x.ret = ret; } if (grupo) { x.grupo = grupo; x.parcela = { n: i + 1, de: n, total: d.c }; } hist(x, quem, `lançou ${reais(p.c)} a receber`); (db.recs ||= []).push(x); return x; });
@@ -396,7 +397,7 @@ export function baixarLote(db, ids, { dia = 0, conta } = {}, quem, papel) {
 export function estornarBaixa(db, k, id, baixaId, quem, papel, motivo) {
   exige(db, papel, 'pagar'); const t = titulo(db, k, id), i = (t.baixas || []).findIndex((b) => b.id === baixaId); if (i < 0) throw new Error('Baixa não encontrada.');
   const m = String(motivo || '').trim(); if (!m) throw new Error('Diga o motivo do estorno.'); const b = t.baixas[i]; exigeDia(db, b.dia);
-  t.baixas.splice(i, 1); if (b.mov) db.movs = db.movs.filter((x) => x.id !== b.mov);
+  t.baixas.splice(i, 1); if (b.mov) db.movs = db.movs.filter((x) => x.id !== b.mov); if (b.adiant) { const a = (db.adiantamentos || []).find((x) => x.id === b.adiant); if (a) a.usado -= b.c; }
   if (b.ext) { const e = db.extrato.find((x) => x.id === b.ext); if (e) { delete e.pag; delete e.rec; delete e.mov; delete e.criou; } }
   if (k === 'pag' && t.st === 'pago') { t.st = t.remessa ? 'remessa' : 'aprovado'; delete t.pagoEm; }
   hist(t, quem, `estornou ${reais(b.total)}: ${m}`); registra(db, quem, `estornou ${reais(b.total)} de ${k === 'pag' ? t.forn : t.cliente}: ${m.slice(0, 120)}`, { ref: `${k}:${t.id}`, antes: `baixado ${reais(baixado(t) + b.c)}`, depois: `baixado ${reais(baixado(t))}` });
@@ -602,10 +603,11 @@ export function salvarPessoa(db, d, quem, papel) {
   if (!['cliente', 'fornecedor', 'ambos', 'funcionario'].includes(d.tipo)) throw new Error('Escolha o tipo.');
   const doc = String(d.doc || '').replace(/\D/g, ''); if (doc && !docValido(doc)) throw new Error('CPF ou CNPJ inválido (confira os dígitos).');
   const prazo = d.prazo === '' || d.prazo === undefined ? null : Number(d.prazo); if (prazo !== null && (!Number.isInteger(prazo) || prazo < 0 || prazo > 365)) throw new Error('Prazo em dias, de 0 a 365.');
+  const limite = d.limite === '' || d.limite === undefined || d.limite === null ? null : d.limite; if (limite !== null && (!Number.isInteger(limite) || limite < 0)) throw new Error('Limite de crédito inválido.');
   const lista = (db.pessoas ||= []), atual = d.id && lista.find((p) => p.id === d.id);
   if (doc && lista.some((p) => p !== atual && p.doc === doc)) throw new Error('Esse CPF/CNPJ já está cadastrado.');
   if (!doc && lista.some((p) => p !== atual && !p.doc && norm(p.nome) === norm(nome))) throw new Error('Já existe um cadastro com esse nome.');
-  const v = { nome, tipo: d.tipo, doc, pix: String(d.pix || '').trim().slice(0, 77), banco: String(d.banco || '').trim().slice(0, 80), email: String(d.email || '').trim().slice(0, 80), tel: String(d.tel || '').replace(/[^\d+]/g, '').slice(0, 16), prazo };
+  const v = { nome, tipo: d.tipo, doc, pix: String(d.pix || '').trim().slice(0, 77), banco: String(d.banco || '').trim().slice(0, 80), email: String(d.email || '').trim().slice(0, 80), tel: String(d.tel || '').replace(/[^\d+]/g, '').slice(0, 16), prazo, limite };
   if (atual) { const antes = atual.nome; Object.assign(atual, v); if (antes !== nome) { db.pags.forEach((p) => { if (p.pessoa === atual.id) p.forn = nome; }); (db.recs || []).forEach((r) => { if (r.pessoa === atual.id) r.cliente = nome; }); } registra(db, quem, `editou o cadastro de ${nome}`, { ref: `pessoa:${atual.id}`, antes, depois: nome }); return atual; }
   const p = { id: nid('h'), ...v }; lista.push(p); registra(db, quem, `cadastrou ${nome}${doc ? ` (${docFormatado(doc)})` : ''}`, { ref: `pessoa:${p.id}` }); return p;
 }
@@ -701,8 +703,8 @@ export function realDasBaixas(db, emp, comp = compAtual()) {
 export function dre(db, emp, comp = compAtual(), { regime = 'competencia', cc = '' } = {}) {
   usarPlano(db); const mes = (d) => compDoDia(d) === comp, ok = (x) => (emp === 'todas' || x.emp === emp) && (!cc || x.cc === cc), v = {}, soma = (cat, c) => { if (cat) v[cat] = (v[cat] || 0) + c; };
   let retencoes = 0;
-  if (regime === 'caixa') { db.pags.filter(ok).forEach((p) => (p.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(p.cat || 'Sem conta', b.total))); (db.recs || []).filter(ok).forEach((r) => (r.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(r.cat || 'Receita de vendas', b.total))); }
-  else { db.pags.filter((p) => ok(p) && !['cancelado', 'rejeitado'].includes(p.st) && mes(p.venc)).forEach((p) => soma(p.cat || 'Sem conta', p.c)); (db.recs || []).filter((r) => ok(r) && r.st !== 'cancelado' && mes(r.venc)).forEach((r) => { soma(r.cat || 'Receita de vendas', r.bruto || r.c); retencoes += (r.bruto || r.c) - r.c; }); }
+  if (regime === 'caixa') { db.pags.filter(ok).forEach((p) => (p.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(p.cat || 'Sem conta', p.emprestimo ? Math.round((b.total * p.juros) / p.c) : b.total))); (db.recs || []).filter(ok).forEach((r) => (r.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(r.cat || 'Receita de vendas', b.total))); }
+  else { db.pags.filter((p) => ok(p) && !['cancelado', 'rejeitado'].includes(p.st) && mes(p.venc)).forEach((p) => soma(p.cat || 'Sem conta', p.emprestimo ? p.juros : p.c)); (db.recs || []).filter((r) => ok(r) && (r.st !== 'cancelado' || r.acordo) && mes(r.venc)).forEach((r) => { if (r.reneg) return soma(r.cat || 'Receita de vendas', r.juros || 0); soma(r.cat || 'Receita de vendas', r.bruto || r.c); retencoes += (r.bruto || r.c) - r.c; }); }
   (db.movs || []).filter((m) => ['avulso', 'cartao'].includes(m.tipo) && mes(m.dia) && (!cc || m.cc === cc) && (emp === 'todas' || (db.contas || []).find((c) => c.id === m.conta)?.emp === emp)).forEach((m) => soma(m.cat || 'Sem conta', Math.abs(m.c)));
   const tipo = (c) => db.plano.find((p) => p.c === c)?.t || (c === 'Sem conta' ? 'c' : 'c'), grupo = (c) => db.plano.find((p) => p.c === c)?.grupo || 'Sem conta';
   const linhas = Object.entries(v).map(([c, x]) => ({ c, t: tipo(c), grupo: grupo(c), v: x })).sort((a, b) => (a.t === b.t ? 0 : a.t === 'r' ? -1 : 1) || a.grupo.localeCompare(b.grupo) || b.v - a.v);
@@ -832,4 +834,139 @@ export function importarTitulos(db, linhas, emps, quem, papel, simular = false) 
     } catch (x) { erros.push({ linha: i + 2, motivo: x.message }); } });
   if (!simular && ok.length) registra(db, quem, `importou ${ok.length} título(s) de planilha (${erros.length} recusado[s])`, { ref: 'importacao' });
   usarPlano(db); return { ok, erros };
+}
+
+// ------------------------------------------------------------------ crédito e dívida: empréstimo, aplicação, antecipação, adiantamento e acordo
+const pctOk = (v, max, nome) => { const x = Number(String(v ?? '').replace(',', '.')); if (String(v ?? '').trim() === '' || !Number.isFinite(x) || x < 0 || x > max) throw new Error(`${nome}: de 0 a ${String(max).replace('.', ',')}%.`); return x; };
+const corrente = (db, id, rotulo = 'Escolha a conta corrente.') => { const c = (db.contas || []).find((x) => x.id === id); if (!c || c.tipo === 'cartao') throw new Error(rotulo); return c; };
+/** Tabela do empréstimo em centavos: Price (parcela fixa) ou SAC (amortização fixa); taxa em % ao mês; a última parcela zera o saldo. */
+export function tabelaEmprestimo(c, taxa, n, sistema = 'price') {
+  const i = taxa / 100, pmt = i ? (c * i) / (1 - (1 + i) ** -n) : c / n; let saldo = c;
+  return Array.from({ length: n }, (_, k) => { const juros = Math.round(saldo * i), amort = k === n - 1 ? saldo : sistema === 'sac' ? Math.floor(c / n) : Math.round(pmt) - juros; saldo -= amort; return { n: k + 1, juros, amort, parcela: juros + amort, saldo }; });
+}
+/** Empréstimo bancário: o dinheiro entra na conta e as parcelas viram pagamentos já aprovados (contrato assinado); a DRE só leva os juros. */
+export function contratarEmprestimo(db, d, quem, papel) {
+  exige(db, papel, 'tesouraria'); const ct = corrente(db, d.conta, 'Escolha a conta que recebe o dinheiro.'), dia = Number.isInteger(d.dia) ? d.dia : 0, banco = String(d.banco || '').trim().slice(0, 60);
+  if (!banco) throw new Error('Diga o banco ou credor.'); if (!Number.isInteger(d.c) || d.c <= 0) throw new Error('Digite o valor contratado.');
+  const taxa = pctOk(d.taxa, 15, 'Taxa ao mês'), n = Number(d.n); if (!Number.isInteger(n) || n < 1 || n > 120) throw new Error('Parcelas de 1 a 120.'); if (!['price', 'sac'].includes(d.sistema)) throw new Error('Escolha Price ou SAC.');
+  if (dia > 0) throw new Error('A data não pode ser no futuro.'); if (dia < ct.desde) throw new Error('A data é anterior ao saldo inicial da conta.'); exigeDia(db, dia);
+  const venc = Number.isInteger(d.venc) ? d.venc : dia + 30; if (venc <= dia) throw new Error('A 1ª parcela vence depois da contratação.');
+  usarPlano(db); const id = nid('e'), tab = tabelaEmprestimo(d.c, taxa, n, d.sistema), datas = parcelar(n, n, venc), cat = CATS.some(([c]) => c === 'Despesas financeiras') ? 'Despesas financeiras' : undefined;
+  (db.movs ||= []).push({ id: nid('m'), conta: ct.id, dia, c: d.c, tipo: 'emprestimo', emprestimo: id, desc: `Empréstimo ${banco}` });
+  const parcelas = tab.map((p, k) => { const x = { id: nid('p'), emp: ct.emp, forn: banco, desc: `Parcela ${p.n}/${n} do empréstimo`, c: p.parcela, venc: datas[k].venc, st: 'aprovado', sel: false, criadoPor: quem, baixas: [], emprestimo: id, juros: p.juros, amort: p.amort }; if (cat) x.cat = cat; hist(x, quem, `parcela do empréstimo: juros ${reais(p.juros)}, amortização ${reais(p.amort)}`); db.pags.push(x); return x.id; });
+  const e = { id, emp: ct.emp, conta: ct.id, banco, c: d.c, taxa, n, sistema: d.sistema, dia, parcelas }; (db.emprestimos ||= []).push(e);
+  registra(db, quem, `contratou empréstimo de ${reais(d.c)} com ${banco} em ${n}x (${d.sistema === 'sac' ? 'SAC' : 'Price'}, ${String(taxa).replace('.', ',')}% a.m.)`, { ref: `emprestimo:${id}`, depois: reais(tab.reduce((s, p) => s + p.parcela, 0)) }); return e;
+}
+/** Quanto falta do principal e dos juros: soma das parcelas que ainda não foram pagas (proporcional quando pagou só uma parte). */
+export function saldoEmprestimo(db, id) {
+  const ps = db.pags.filter((p) => p.emprestimo === id && p.st !== 'cancelado'), f = (p) => faltaTitulo(p) / p.c;
+  return { principal: Math.round(ps.reduce((s, p) => s + p.amort * f(p), 0)), juros: Math.round(ps.reduce((s, p) => s + p.juros * f(p), 0)), pagas: ps.filter((p) => !faltaTitulo(p)).length, de: ps.length };
+}
+export const aliquotaIR = (dias) => (dias <= 180 ? 22.5 : dias <= 360 ? 20 : dias <= 720 ? 17.5 : 15);
+/** Posição da aplicação: rende a taxa ao ano sobre dias corridos; o IR regressivo incide só no rendimento. shortcut: dias corridos/365, não dias úteis/252; serve para planejar, o extrato do banco manda. */
+export function posicaoAplicacao(a, hoje = 0) {
+  const dias = Math.max(0, (a.resgate ? a.resgate.dia : hoje) - a.dia), bruto = Math.round(a.c * (1 + a.taxaAno / 100) ** (dias / 365)), rend = bruto - a.c, aliq = aliquotaIR(dias), ir = Math.round((rend * aliq) / 100);
+  return { dias, bruto, rend, aliq, ir, liquido: bruto - ir };
+}
+export function aplicar(db, d, quem, papel) {
+  exige(db, papel, 'tesouraria'); const ct = corrente(db, d.conta), dia = Number.isInteger(d.dia) ? d.dia : 0, nome = String(d.nome || '').trim().slice(0, 60);
+  if (!nome) throw new Error('Dê um nome à aplicação (ex.: CDB 102% CDI).'); if (!Number.isInteger(d.c) || d.c <= 0) throw new Error('Digite o valor.');
+  const taxaAno = pctOk(d.taxaAno, 40, 'Rendimento ao ano'); if (dia > 0) throw new Error('A data não pode ser no futuro.'); if (dia < ct.desde) throw new Error('A data é anterior ao saldo inicial da conta.'); exigeDia(db, dia);
+  if (d.c > saldoConta(db, ct.id, dia)) throw new Error(`Saldo insuficiente em ${ct.nome}.`);
+  const a = { id: nid('i'), emp: ct.emp, conta: ct.id, nome, c: d.c, taxaAno, dia }; (db.aplicacoes ||= []).push(a);
+  (db.movs ||= []).push({ id: nid('m'), conta: ct.id, dia, c: -d.c, tipo: 'aplicacao', aplicacao: a.id, desc: `Aplicação ${nome}` });
+  registra(db, quem, `aplicou ${reais(d.c)} em ${nome} (${String(taxaAno).replace('.', ',')}% a.a.)`, { ref: `aplicacao:${a.id}`, depois: reais(d.c) }); return a;
+}
+export function resgatar(db, id, quem, papel, dia = 0) {
+  exige(db, papel, 'tesouraria'); const a = (db.aplicacoes || []).find((x) => x.id === id); if (!a) throw new Error('Aplicação não encontrada.'); if (a.resgate) throw new Error('Esta aplicação já foi resgatada.');
+  if (dia > 0 || dia < a.dia) throw new Error('Resgate entre a data da aplicação e hoje.'); exigeDia(db, dia);
+  const p = posicaoAplicacao(a, dia); a.resgate = { dia, ...p, em: new Date().toISOString(), quem };
+  db.movs.push({ id: nid('m'), conta: a.conta, dia, c: p.liquido, tipo: 'aplicacao', aplicacao: a.id, desc: `Resgate ${a.nome} (IR ${String(p.aliq).replace('.', ',')}%)` });
+  registra(db, quem, `resgatou ${a.nome}: ${reais(p.liquido)} líquido (rendeu ${reais(p.rend)}, IR ${reais(p.ir)})`, { ref: `aplicacao:${a.id}`, antes: reais(a.c), depois: reais(p.liquido) }); return p;
+}
+/** Antecipação de recebíveis: desconto = valor × taxa ao mês × dias até o vencimento ÷ 30, título a título. */
+export function simularAntecipacao(db, ids, taxa) {
+  const tx = pctOk(taxa, 10, 'Taxa ao mês'), l = ids.map((id) => titulo(db, 'rec', id));
+  if (!l.length) throw new Error('Escolha os recebíveis a antecipar.'); if (new Set(l.map((r) => r.emp)).size > 1) throw new Error('Antecipe recebíveis de uma empresa por vez.');
+  const itens = l.map((r) => { const falta = faltaTitulo(r); if (r.st === 'cancelado' || !falta) throw new Error(`${r.cliente}: não está em aberto.`); if (r.venc <= 0) throw new Error(`${r.cliente}: já venceu; antecipação é de título a vencer.`); return { id: r.id, cliente: r.cliente, venc: r.venc, falta, desconto: Math.round((falta * tx * r.venc) / 3000) }; });
+  const bruto = itens.reduce((s, x) => s + x.falta, 0), desconto = itens.reduce((s, x) => s + x.desconto, 0);
+  return { emp: l[0].emp, taxa: tx, itens, bruto, desconto, liquido: bruto - desconto, prazoMedio: Math.round(itens.reduce((s, x) => s + x.falta * x.venc, 0) / bruto) };
+}
+export function anteciparRecebiveis(db, ids, d, quem, papel) {
+  exige(db, papel, 'pagar'); const s = simularAntecipacao(db, ids, d.taxa), ct = corrente(db, d.conta); if (ct.emp !== s.emp) throw new Error('A conta é de outra empresa.');
+  const banco = String(d.banco || 'banco').trim().slice(0, 40);
+  s.itens.forEach((x) => { baixar(db, 'rec', x.id, { c: x.falta, desconto: x.desconto, dia: 0, conta: ct.id, origem: 'antecipacao' }, quem, papel); titulo(db, 'rec', x.id).antecipado = { banco, taxa: s.taxa, desconto: x.desconto }; });
+  registra(db, quem, `antecipou ${s.itens.length} recebível(is) com ${banco}: ${reais(s.bruto)} por ${reais(s.liquido)} (custo ${reais(s.desconto)})`, { ref: `conta:${ct.id}`, antes: reais(s.bruto), depois: reais(s.liquido) }); return s;
+}
+/** Adiantamento a fornecedor: o dinheiro sai agora e vira crédito para abater dos próximos pagamentos dele. */
+export function adiantar(db, d, quem, papel) {
+  exige(db, papel, 'pagar'); const ct = corrente(db, d.conta), dia = Number.isInteger(d.dia) ? d.dia : 0, forn = String(d.forn || '').trim().slice(0, 80);
+  if (!forn) throw new Error('Diga o fornecedor.'); if (!Number.isInteger(d.c) || d.c <= 0) throw new Error('Digite o valor.'); if (dia > 0) throw new Error('A data não pode ser no futuro.'); if (dia < ct.desde) throw new Error('A data é anterior ao saldo inicial da conta.'); exigeDia(db, dia);
+  const a = { id: nid('d'), emp: ct.emp, conta: ct.id, forn, c: d.c, usado: 0, dia, desc: String(d.desc || '').trim().slice(0, 80) }; if (d.pessoa) a.pessoa = d.pessoa; (db.adiantamentos ||= []).push(a);
+  (db.movs ||= []).push({ id: nid('m'), conta: ct.id, dia, c: -d.c, tipo: 'adiantamento', adiantamento: a.id, desc: `Adiantamento a ${forn}` });
+  registra(db, quem, `adiantou ${reais(d.c)} a ${forn}`, { ref: `adiantamento:${a.id}`, depois: reais(d.c) }); return a;
+}
+const mesmoForn = (a, p) => (a.pessoa && p.pessoa ? a.pessoa === p.pessoa : norm(a.forn) === norm(p.forn));
+export const pagamentosParaAbater = (db, a) => db.pags.filter((p) => p.emp === a.emp && ['aprovado', 'remessa'].includes(p.st) && faltaTitulo(p) && !p.emprestimo && mesmoForn(a, p));
+export function compensarAdiantamento(db, adId, pagId, quem, papel) {
+  exige(db, papel, 'pagar'); exigeDia(db, 0); const a = (db.adiantamentos || []).find((x) => x.id === adId); if (!a) throw new Error('Adiantamento não encontrado.');
+  const p = titulo(db, 'pag', pagId); if (!pagamentosParaAbater(db, a).includes(p)) throw new Error('Só abate pagamento aprovado e em aberto do mesmo fornecedor e da mesma empresa.');
+  const v = Math.min(a.c - a.usado, faltaTitulo(p)); if (v <= 0) throw new Error('Este adiantamento já foi todo usado.');
+  const b = { id: nid('b'), c: v, juros: 0, multa: 0, desconto: 0, total: v, dia: 0, conta: null, em: new Date().toISOString(), quem, origem: 'adiantamento', adiant: a.id };
+  (p.baixas ||= []).push(b); a.usado += v; if (!faltaTitulo(p)) { p.st = 'pago'; p.pagoEm = 0; }
+  hist(p, quem, `abateu ${reais(v)} do adiantamento a ${a.forn}`); registra(db, quem, `abateu ${reais(v)} do adiantamento a ${a.forn}`, { ref: `pag:${p.id}`, antes: `crédito ${reais(a.c - a.usado + v)}`, depois: `crédito ${reais(a.c - a.usado)}` }); return v;
+}
+/** Acordo com cliente: junta títulos em aberto de um cliente, cancela os originais (a receita fica no mês de origem) e parcela o saldo com juros (Price). */
+export function renegociar(db, ids, d, quem, papel) {
+  exige(db, papel, 'criar'); exigeAberto(db); const l = ids.map((id) => titulo(db, 'rec', id)); if (!l.length) throw new Error('Escolha os títulos do acordo.');
+  if (new Set(l.map((r) => `${r.emp}|${r.pessoa || norm(r.cliente)}`)).size > 1) throw new Error('Um acordo é de um cliente e uma empresa só.');
+  l.forEach((r) => { if (r.st === 'cancelado' || !faltaTitulo(r)) throw new Error(`${r.desc}: não está em aberto.`); if (baixado(r)) throw new Error(`${r.desc}: já recebeu uma parte; receba o resto ou faça o acordo só dos títulos sem baixa.`); if (r.reneg) throw new Error(`${r.desc}: já é parcela de um acordo.`); });
+  const n = Number(d.n); if (!Number.isInteger(n) || n < 1 || n > 24) throw new Error('Parcelas de 1 a 24.'); const taxa = pctOk(d.taxa, 10, 'Juros ao mês'), venc = Number(d.venc); if (!Number.isInteger(venc) || venc < 0) throw new Error('A 1ª parcela vence hoje ou depois.');
+  const falta = l.reduce((s, r) => s + faltaTitulo(r), 0), tab = tabelaEmprestimo(falta, taxa, n), total = tab.reduce((s, p) => s + p.parcela, 0), id = nid('k');
+  l.forEach((r) => { cancelarRecebivel(db, r.id, quem, papel, `renegociado no acordo ${id}`); r.acordo = id; });
+  const novos = novoRecebivel(db, { emp: l[0].emp, cliente: l[0].cliente, desc: `Acordo de ${l.length} título(s)`, c: total, venc, parcelas: n, cat: l[0].cat, pessoa: l[0].pessoa, semLimite: true }, quem, papel);
+  novos.forEach((x, i) => { x.reneg = id; x.juros = Math.min(x.c, tab[i].juros); });
+  const k = { id, emp: l[0].emp, cliente: l[0].cliente, origem: l.map((r) => r.id), falta, juros: total - falta, n, taxa, em: new Date().toISOString(), quem }; (db.acordos ||= []).push(k);
+  registra(db, quem, `fez acordo com ${k.cliente}: ${reais(falta)} em ${n}x com ${String(taxa).replace('.', ',')}% a.m. (total ${reais(total)})`, { ref: `acordo:${id}`, antes: reais(falta), depois: reais(total) }); return k;
+}
+/** Limite de crédito do cliente: o que ele ainda deve (títulos em aberto) contra o limite do cadastro (null = sem limite). */
+export function creditoPessoa(db, id) {
+  const p = (db.pessoas || []).find((x) => x.id === id), usado = (db.recs || []).filter((r) => r.pessoa === id && r.st !== 'cancelado').reduce((s, r) => s + faltaTitulo(r), 0), limite = p?.limite ?? null;
+  return { limite, usado, livre: limite === null ? null : limite - usado };
+}
+
+// ------------------------------------------------------------------ análises: reajuste de contratos, provisões da folha, ciclo financeiro e ponto de equilíbrio
+export function reajustarRecorrencias(db, ids, pct, indice, quem, papel) {
+  exige(db, papel, 'criar'); const p = Number(String(pct ?? '').replace(',', '.')); if (String(pct ?? '').trim() === '' || !Number.isFinite(p) || p < -30 || p > 50) throw new Error('Reajuste de -30% a 50%.');
+  const ind = String(indice || '').trim().slice(0, 30) || 'índice', l = (db.recorrentes || []).filter((r) => ids.includes(r.id)); if (!l.length) throw new Error('Escolha as recorrências.');
+  l.forEach((r) => { const antes = r.c; r.c = Math.max(1, Math.round((r.c * (100 + p)) / 100)); (r.reajustes ||= []).push({ em: new Date().toISOString(), quem, indice: ind, pct: p, antes, depois: r.c }); registra(db, quem, `reajustou ${r.desc} em ${String(p).replace('.', ',')}% (${ind})`, { ref: `rec-fixa:${r.id}`, antes: reais(antes), depois: reais(r.c) }); });
+  return l;
+}
+/** Provisão mensal da folha: 13º = folha ÷ 12; férias + 1/3 = folha ÷ 12 × 4/3; encargos (FGTS, e INSS fora do Simples) sobre as duas. Folha: a informada (real do mês) ou a da DRE. */
+export function provisoesFolha(db, emp, comp = compAtual(), folhaReal = null) {
+  const encPct = db.encProvisao ?? 8, folha = folhaReal ?? (dre(db, emp, comp).grupos.flatMap((g) => g.contas).find((c) => c.c === 'Folha e encargos')?.v || 0), decimo = Math.round(folha / 12), ferias = Math.round((folha * 4) / 36), enc = Math.round(((decimo + ferias) * encPct) / 100);
+  return { folha, decimo, ferias, enc, encPct, total: decimo + ferias + enc };
+}
+export function registrarProvisao(db, emp, comp, quem, papel, folhaReal = null) {
+  exige(db, papel, 'criar'); exigeAberto(db, comp); if (!emp || emp === 'todas') throw new Error('Escolha uma empresa.');
+  if ((db.provisoes || []).some((p) => p.emp === emp && p.comp === comp)) throw new Error('A provisão deste mês já foi registrada.');
+  const p = provisoesFolha(db, emp, comp, folhaReal); if (!p.folha) throw new Error('Não há folha lançada neste mês (conta Folha e encargos).');
+  const x = { id: nid('v'), emp, comp, ...p, em: new Date().toISOString(), quem }; (db.provisoes ||= []).push(x);
+  registra(db, quem, `registrou a provisão de 13º e férias de ${nomeComp(comp)}: ${reais(p.total)}`, { ref: `provisao:${emp}:${comp}`, depois: reais(p.total) }); return x;
+}
+export const provisaoAcumulada = (db, emp, ano = compAtual().slice(0, 4)) => (db.provisoes || []).filter((p) => (emp === 'todas' || p.emp === emp) && p.comp.startsWith(ano)).reduce((s, p) => s + p.total, 0);
+/** Ciclo financeiro = estoque (dias, informado) + prazo médio de recebimento − prazo médio de pagamento. Prazos do cadastro, pesados pelo volume de 90 dias atrás a 30 à frente. */
+export function cicloFinanceiro(db, emp, pme = Number(db.pme?.[emp]) || 0) {
+  const ok = (x) => (emp === 'todas' || x.emp === emp) && x.venc >= -90 && x.venc <= 30, prazo = (id) => (db.pessoas || []).find((p) => p.id === id)?.prazo || 0;
+  const medio = (l, val) => { const tot = l.reduce((s, x) => s + val(x), 0); return tot ? Math.round(l.reduce((s, x) => s + val(x) * prazo(x.pessoa), 0) / tot) : null; };
+  const recs = (db.recs || []).filter((r) => ok(r) && r.st !== 'cancelado' && !r.reneg), pags = db.pags.filter((p) => ok(p) && !['cancelado', 'rejeitado'].includes(p.st) && !p.emprestimo);
+  const pmr = medio(recs, (r) => r.bruto || r.c), pmp = medio(pags, (p) => p.c);
+  return { pme, pmr, pmp, ciclo: pmr === null || pmp === null ? null : pme + pmr - pmp, vendas: recs.reduce((s, r) => s + (r.bruto || r.c), 0), compras: pags.reduce((s, p) => s + p.c, 0) };
+}
+export const VARIAVEIS = ['Custo das mercadorias', 'Fretes', 'Impostos e taxas'];
+/** Margem de contribuição e ponto de equilíbrio do mês: custos variáveis (lista editável) e o resto é fixo. Linhas {c, t, v}: as informadas (real do mês) ou as da DRE. */
+export function equilibrio(db, emp, comp = compAtual(), linhas = null) {
+  const D = linhas ? null : dre(db, emp, comp), l = linhas || D.grupos.flatMap((g) => g.contas), vars = db.variaveis || VARIAVEIS, custos = l.filter((c) => c.t === 'c');
+  const receita = linhas ? l.filter((c) => c.t === 'r').reduce((s, c) => s + c.v, 0) : D.receita - D.retencoes, variaveis = custos.filter((c) => vars.includes(c.c)).reduce((s, c) => s + c.v, 0), fixos = custos.reduce((s, c) => s + c.v, 0) - variaveis, mc = receita - variaveis, mcPct = receita ? mc / receita : null;
+  const pe = mcPct > 0 ? Math.round(fixos / mcPct) : null; return { receita, variaveis, fixos, mc, mcPct, pe, seguranca: pe !== null && receita ? (receita - pe) / receita : null };
 }
