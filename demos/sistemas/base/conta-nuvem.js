@@ -46,7 +46,7 @@
     juridicocompleto: 'D processos[].andamentos[].dia prazos[].fatal prazos[].interno intimacoes[].dia audiencias[].dia horas[].dia contratos[].parcelas[].dia contratos[].parcelas[].pagoDia tarefas[].ate',
     juridicoavancado: 'D intimacoes[].dia prazos[].fatal tarefas[].vence horas[].dia auditoria[].dia audiencias[].dia pedidos[].prazo diligencias[].dia despesas[].dia',
     obrasessencial: 'D obras[].inicio obras[].entrega obras[].gastos[].dia obras[].diario[].dia orcamentos[].criado',
-    obrascompleto: 'D obras[].etapas[].ini obras[].etapas[].fim orcamentos[].criado compras[].dia compras[].vence compras[].pagoEm presencas[].dia medicoes[].dia medicoes[].vence diario[].dia outras[].vence',
+    obrascompleto: 'D obras[].etapas[].ini obras[].etapas[].fim orcamentos[].criado compras[].dia compras[].vence compras[].pagoEm presencas[].dia medicoes[].dia medicoes[].vence diario[].dia outras[].vence aditivos[].dia equipamentos[].desde equipamentos[].ate equipamentos[].devolvidoEm epi[].dia vales[].dia',
     obrasavancado: 'D obras[].docs[].vence obras[].ncs[].dia contas[].vence rdos[].dia auditoria[].dia',
     oficinaessencial: 'D os[].entrada os[].entregue carros[].revisaoDia caixa[].dia', oficinacompleto: 'D agenda[].dia historico[].ultima pagar[].vence'
   }[app];
