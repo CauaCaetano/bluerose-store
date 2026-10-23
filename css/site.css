@@ -1547,4 +1547,4 @@ html[data-theme="light"] body::before {
 .prod-cat-info img[src*="logos/"] { background: #161a22; border-radius: 10px; padding: 5px; object-fit: contain; box-sizing: border-box; }
 .np-hero-txt .np-logo { width: 230px; height: auto; display: block; margin-bottom: 16px; background: radial-gradient(circle at 30% 20%, #262c3a, #12151c); border-radius: 18px; padding: 16px 20px; box-sizing: border-box; }
 /* logo da Agenda é escura: plaquinha creme */
-.np-hero-txt .np-logo[src*="veltria-agenda"], .prod-cat-info img[src*="veltria-agenda"], .np-hero-txt .np-logo[src*="veltria-gestao"], .prod-cat-info img[src*="veltria-gestao"] { background: #f7f2e8; }
+.np-hero-txt .np-logo[src*="veltria-agenda"], .prod-cat-info img[src*="veltria-agenda"], .np-hero-txt .np-logo[src*="veltria-gestao"], .prod-cat-info img[src*="veltria-gestao"], .np-hero-txt .np-logo[src*="veltria-farmacia"], .prod-cat-info img[src*="veltria-farmacia"] { background: #f7f2e8; }
