@@ -95,10 +95,11 @@
       document.getElementById('ind-link').value = link;
       document.getElementById('ind-zap').href = 'https://wa.me/?text=' + encodeURIComponent('Conheci os sistemas da Blue Rose e recomendo. Dá para testar 7 dias grátis por este link: ' + link);
       document.getElementById('ind-barra').style.width = Math.round((naRoda / 3) * 100) + '%';
-      document.getElementById('ind-texto').textContent = d.confirmados + (d.confirmados === 1 ? ' assinou' : ' assinaram') + ' · ' + naRoda + ' de 3 para o próximo mês de Pro · ' + d.cadastrados + ' entraram pelo link';
-      var fim = (d.pro_ate || []).map(function (x) { return x.ate; }).sort().pop(), pr = document.getElementById('ind-premio');
-      if (fim) { pr.hidden = false; pr.textContent = 'Pro de cortesia até ' + data(fim) + ', pelas suas indicações. Você continua pagando o Básico.'; }
-      else if (d.meses_guardados) { pr.hidden = false; pr.textContent = d.meses_guardados + (d.meses_guardados === 1 ? ' mês' : ' meses') + ' de Pro guardado: entra assim que você tiver uma empresa no plano Básico.'; }
+      document.getElementById('ind-texto').textContent = d.confirmados + (d.confirmados === 1 ? ' assinou' : ' assinaram') + ' · ' + naRoda + ' de 3 para o próximo mês grátis · ' + d.cadastrados + ' entraram pelo link';
+      var dev = (d.devolvidos || [])[0], pr = document.getElementById('ind-premio'), txt = [];
+      if (d.meses_guardados) txt.push(d.meses_guardados + (d.meses_guardados === 1 ? ' mês grátis guardado' : ' meses grátis guardados') + ': a sua próxima mensalidade paga volta para o cartão.');
+      if (dev) txt.push('Último mês grátis: ' + reais(dev.valor) + ' devolvidos em ' + data(dev.quando) + '.');
+      if (txt.length) { pr.hidden = false; pr.textContent = txt.join(' '); }
       bloco.hidden = false;
     }).catch(function () {});
   }
