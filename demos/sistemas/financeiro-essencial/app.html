@@ -14,9 +14,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=2">
+<link rel="stylesheet" href="estilo.css?v=3">
 <script src="../base/versoes.js?v=6"></script>
-<script src="../base/conta-nuvem.js?v=11"></script>
+<script src="../base/conta-nuvem.js?v=12"></script>
 <style>.v-logo{height:42px;width:auto;flex:none;display:block;object-fit:contain}.v-logo.v-claro{background:#161a22;padding:5px 9px;border-radius:10px;box-sizing:content-box}</style>
 </head>
 <body>
@@ -28,13 +28,14 @@
 <main id="tela" tabindex="-1"></main>
 <button type="button" class="fab" data-ir="lancar" aria-label="Lançar entrada ou saída">+</button>
 <nav class="doca" aria-label="Partes do app">
-  <a href="#potes" data-aba="potes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10M8 4v3a5 5 0 0 0-3 4.6V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7.4A5 5 0 0 0 16 7V4"/><path d="M5 14h14"/></svg>Potes</a>
-  <a href="#receber" data-aba="receber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>A receber</a>
-  <a href="#mei" data-aba="mei"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Meu MEI</a>
+  <a href="#potes" data-aba="potes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10M8 4v3a5 5 0 0 0-3 4.6V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7.4A5 5 0 0 0 16 7V4"/><path d="M5 14h14"/></svg>Potes<span class="n" hidden></span></a>
+  <a href="#contas" data-aba="contas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 9h6M9 13h4"/></svg>Contas</a>
+  <a href="#resumo" data-aba="resumo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Resumo</a>
+  <a href="#mei" data-aba="mei"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>Meu MEI</a>
   <a href="#mais" data-aba="mais"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>Mais</a>
 </nav>
 <div class="avisos" id="avisos" role="status" aria-live="polite"></div>
-<script type="module" src="app.js?v=5"></script>
-<script src="../base/camada.js?v=11" defer></script>
+<script type="module" src="app.js?v=6"></script>
+<script src="../base/camada.js?v=12" defer></script>
 </body>
 </html>

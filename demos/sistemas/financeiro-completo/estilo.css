@@ -183,3 +183,21 @@ tbody tr:hover { background: #f6f0e3; }
 @media (max-width: 900px) { .moldura { grid-template-columns: 1fr; } .trilho a { flex-direction: column; gap: 3px; font-size: .7rem; padding: 8px 6px; } .trilho .n { position: absolute; top: 2px; right: 6px; } main { padding: 18px 14px 40px; } .topo-f { padding: 10px 14px; } .titulo h1 { font-size: 1.6rem; } }
 @media (max-width: 560px) { .numeros { grid-template-columns: 1fr 1fr; gap: 10px; } .num b { font-size: 1.25rem; } .saldos > div { padding: 4px 10px; } }
 .movs .lado { display: grid; justify-items: end; gap: 4px; } .movs .lado .m { font-weight: 600; white-space: nowrap; }
+
+/* ── formato 2 (10/2026): pendências, busca, baixas, conciliação com recusa, erros dentro do formulário ── */
+.nota.ruim { background: var(--sai, #a5533f); border-left-color: #fff; }
+.erro-f { color: #a5533f; font-weight: 600; font-size: .88rem; margin: 6px 0 0; } .erro-f[hidden] { display: none; }
+.pend { margin-bottom: 18px; } .pend h2 small { font-weight: 400; color: var(--tx-3); font-size: .8rem; }
+.pend-i { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0 10px 14px; border-bottom: 1px solid #eee6d6; color: var(--tx); text-decoration: none; position: relative; font-size: .93rem; }
+.pend-i:last-child { border-bottom: 0; } .pend-i::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 4px; border-radius: 4px; background: #c9a85f; }
+.pend-i.erro::before, .pend-i.atraso::before { background: #a5533f; } .pend-i.cobrar::before { background: #3f7a5f; } .pend-i:hover { background: #faf6ee; }
+.lk { border: 0; background: none; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; } .lk:hover b { text-decoration: underline; }
+.busca, .sel-mes { min-height: 40px; border: 1px solid #ddd3bf; border-radius: 10px; padding: 0 12px; background: #fff; font: inherit; min-width: 220px; }
+tr.feito td { opacity: .55; }
+.cx-f h3 { margin: 16px 0 6px; font-size: .95rem; } .cx-f table { width: 100%; }
+.cmp textarea { border: 1px solid #ddd3bf; border-radius: 9px; padding: 8px 10px; font: .78rem/1.4 ui-monospace, monospace; resize: none; word-break: break-all; }
+.qr-pix { display: grid; place-items: center; background: #fff; border-radius: 12px; padding: 10px; margin: 8px 0 12px; } .qr-pix svg { width: 180px; height: 180px; }
+.par .meio { display: grid; gap: 6px; align-content: center; }
+.bt:disabled { opacity: .45; cursor: default; box-shadow: none; }
+@media (max-width: 900px) { .busca { min-width: 0; width: 100%; } }
+@media (min-width: 1100px) { .pend { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; } .pend h2 { grid-column: 1 / -1; } .pend-i:nth-last-child(2):nth-child(even) { border-bottom: 0; } }

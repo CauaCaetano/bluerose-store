@@ -40,17 +40,19 @@
   var hojeMs = function () { return Date.parse(new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)); };
   var dataDe = function (n) { return new Date(hojeMs() + n * 864e5).toISOString().slice(0, 10); };
 
-  window.veltriaEditorListas = function (dados) { var m = dados._modelos || {}; return Object.keys(dados).filter(function (k) { return Array.isArray(dados[k]) && !FORA.test(k) && (dados[k].length ? typeof dados[k][0] === 'object' : !!m[k]); }).map(function (k) { return [k, nomeLista(k)]; }); };
+  // um app pode tirar listas do editor genérico (ex.: o extrato do Financeiro, que tem regras próprias de saldo): window.veltriaEditorFora = ['movs', ...]
+  var fora = function (k) { return FORA.test(k) || (window.veltriaEditorFora || []).indexOf(k) >= 0; };
+  window.veltriaEditorListas = function (dados) { var m = dados._modelos || {}; return Object.keys(dados).filter(function (k) { return Array.isArray(dados[k]) && !fora(k) && (dados[k].length ? typeof dados[k][0] === 'object' : !!m[k]); }).map(function (k) { return [k, nomeLista(k)]; }); };
   window.veltriaEditor = function (o) {
     var d = JSON.parse(JSON.stringify(o.dados)), modelos = d._modelos || {};
     // campos de data relativa desta versão: "lista.campo" -> 'D' (data) ou 'H' (há quantos dias)
     var relativos = {}; (function () { var t = 'D'; (o.dias || '').split(' ').forEach(function (c) { if (c === 'D' || c === 'H') t = c; else if (c) relativos[c.replace(/\[\]/g, '')] = t; }); })();
-    var listas = Object.keys(d).filter(function (k) { return Array.isArray(d[k]) && !FORA.test(k) && (d[k].length ? typeof d[k][0] === 'object' : !!modelos[k]); });
+    var listas = Object.keys(d).filter(function (k) { return Array.isArray(d[k]) && !fora(k) && (d[k].length ? typeof d[k][0] === 'object' : !!modelos[k]); });
     // números de resultado em objetos (lojas, DRE, caixa por empresa, metas): grupos de campos numéricos
     var grupos = [];
     (function anda(x, cam, prof) {
       Object.keys(x).forEach(function (k) {
-        if (FORA.test(k) || prof > 2) return; var v = x[k];
+        if (fora(k) || prof > 2) return; var v = x[k];
         if (v && typeof v === 'object' && !Array.isArray(v)) {
           var nums = Object.keys(v).filter(function (z) { return typeof v[z] === 'number'; });
           if (nums.length) grupos.push({ cam: cam.concat(k), campos: nums });
@@ -64,7 +66,7 @@
     var refs = JSON.parse(JSON.stringify(d._refs || {}));
     listas.forEach(function (l) { var m = d[l][0] || {}; Object.keys(m).forEach(function (c) {
       var v = m[c]; if (typeof v !== 'string' || !v || c === 'id') return;
-      Object.keys(d).forEach(function (l2) { var x = d[l2]; if (l2 === l || FORA.test(l2)) return;
+      Object.keys(d).forEach(function (l2) { var x = d[l2]; if (l2 === l || fora(l2)) return;
         if (Array.isArray(x) && x.some(function (y) { return y && y.id === v; })) refs[l + '.' + c] = l2;
         else if (x && typeof x === 'object' && !Array.isArray(x) && Object.prototype.hasOwnProperty.call(x, v) && typeof x[v] === 'object') refs[l + '.' + c] = l2; });
     }); });

@@ -1,6 +1,7 @@
 // Veltria Financeiro Essencial · abre sem internet: lança agora, sobe quando a conexão voltar.
-const CACHE = 'financeiro-essencial-v4';
-const ARQUIVOS = ['app.html', 'app.js?v=4', 'estilo.css?v=1', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png'];
+const CACHE = 'financeiro-essencial-v6';
+// precisa bater com as versões que o app.html pede (tools/testes-financeiro/essencial-sw.test.mjs confere)
+const ARQUIVOS = ['app.html', 'app.js?v=6', 'nucleo.js', '../financeiro-comum/dinheiro.js', 'estilo.css?v=3', '../base/versoes.js?v=6', '../base/conta-nuvem.js?v=12', '../base/camada.js?v=12', '../base/pix.js', '../base/qr.js', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((l) => Promise.all(l.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {

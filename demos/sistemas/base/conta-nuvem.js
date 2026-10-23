@@ -29,7 +29,7 @@
     agendaessencial: 'D clientes[].ultima ags[].dia pedidos[].dia', agendacompleto: 'D ags[].dia',
     crmessencial: 'D negocios[].prox.dia negocios[].notas[].dia negocios[].quando', crmcompleto: 'D atividades[].dia H deals[].sem deals[].hist[].d propostas[].enviada',
     farmaciaessencial: 'D prods[].lotes[].val clientes[].ultima receitas[].dia vendas[].dia', farmaciacompleto: 'D prods[].lotes[].val livro[].dia servicos[].dia', farmaciaavancado: 'D campanhas[].fim',
-    financeiroessencial: 'D movs[].dia cobrancas[].vence cobrancas[].avisos[]', financeirocompleto: 'D lancs[].venc lancs[].avisos[] extrato[].dia orcs[].dia', financeiroavancado: 'D pags[].venc',
+    financeiroessencial: 'D movs[].dia cobrancas[].vence cobrancas[].avisos[] contas[].vence recibos[].dia historico[].dia', financeirocompleto: 'D lancs[].venc lancs[].avisos[] lancs[].pagamentos[].dia extrato[].dia orcs[].dia', financeiroavancado: 'D pags[].venc pags[].pagoEm extrato[].dia',
     gestaoessencial: 'D pagar[].vence H clientes[].desde', gestaocompleto: 'D vendas[].dia contas[].vence',
     gestaoavancado: 'D produtos[].lotes[].vence vendas[].dia contas[].vence pedidos[].dia movs[].dia log[].dia H clientes[].ultima',
     juridicocompleto: 'D processos[].andamentos[].dia prazos[].fatal prazos[].interno intimacoes[].dia audiencias[].dia horas[].dia contratos[].parcelas[].dia',
@@ -355,6 +355,7 @@
   // ---------------------------------------------------------------- Dados (editor de todas as listas)
   function dadosEditor(abrir) {
     if (window.veltriaPermissoes && window.veltriaPermissoes.so_leitura) { aviso('O seu acesso é só para ver. Peça ao dono para liberar as alterações.'); return; }
+    if (window.veltriaDadosProprio) return window.veltriaDadosProprio(); // o app tem a própria tela de dados (importar, exportar, cópia)
     script(RAIZ + 'demos/sistemas/base/editor.js?v=7').then(function () {
       var atual = JSON.parse(texto(NS) || 'null') || (window.veltriaDados ? JSON.parse(JSON.stringify(window.veltriaDados())) : null); if (!atual) return;
       recarregando = true; // a tela fica com os dados antigos na memória enquanto o editor está aberto: não grava por cima
@@ -396,6 +397,7 @@
   var SENSIVEL = /tel|fone|whats|cpf|cnpj|doc|email|end$|endereco|obs|nota|texto|hist|andament|receita|medico|crm$|crf|oab|foto|senha|pix|msg|cor$|ean|cod$|sku/i;
   var FORA = /^(conversa|assinatura|ajudantes|audit|auditoria|log|resp|ajustes|eu|plano|acessos|equipe|cesta|comanda|cupom|pdv|busca|abas)$/;
   function resumo(d) {
+    if (window.veltriaResumoIA) return window.veltriaResumoIA(); // o app sabe resumir os próprios números (ex.: centavos do Financeiro)
     var linhas = [], tam = 0;
     var val = function (v) { return typeof v === 'string' ? v.slice(0, 40) : typeof v === 'number' || typeof v === 'boolean' ? String(Math.round(v * 100) / 100) : null; };
     var item = function (o) { if (typeof o !== 'object' || !o) return val(o); return Object.keys(o).filter(function (k) { return !SENSIVEL.test(k) && k !== 'id'; }).map(function (k) { var v = val(o[k]); return v === null || v === '' ? null : k + '=' + v; }).filter(Boolean).join(', '); };

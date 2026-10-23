@@ -122,6 +122,7 @@
     mais.innerHTML = '<span aria-hidden="true" style="font:700 1.3rem/1 system-ui;letter-spacing:1px">•••</span>'; mais.setAttribute('aria-label', 'Mais opções: importar planilha, exportar, procurar'); mais.title = 'Importar planilha, exportar ou procurar';
   }
   function subirMais() {
+    if (window.veltriaSemMaisComum) return; // o + comum nem entrou: o + do app fica como está
     fabProprio();
     var alto = 18, dir = innerWidth - 18, esq = dir - 56;
     document.querySelectorAll('body *').forEach(function (el) {
@@ -496,7 +497,8 @@
     'html.no-celular .vk-mais{display:none}@media print{.vk-mais,.vk-menu{display:none}}';
   function montar() {
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
-    document.body.appendChild(mais);
+    // o app pode ter o próprio + com regras próprias (o Financeiro Essencial): aí o + comum não entra
+    if (!window.veltriaSemMaisComum) document.body.appendChild(mais);
     subirMais(); setTimeout(subirMais, 900); addEventListener('resize', subirMais); addEventListener('hashchange', function () { setTimeout(subirMais, 60); });
     // tela vazia: só faz sentido quando a empresa tem a lista vazia (começou do zero); carrega o editor para saber as listas
     script('editor.js?v=7').then(function () { vigiaVazio(); arrumaEspaco(); addEventListener('hashchange', function () { vigiaVazio(); arrumaEspaco(); }); addEventListener('resize', arrumaEspaco); new MutationObserver(function () { if (!document.querySelector('.vk-vazio')) { vazioFeito = ''; } vigiaVazio(); if (!document.querySelector('.vk-apoio')) arrumaEspaco(); }).observe(document.querySelector('main') || document.body, { childList: true }); }).catch(function () {});
