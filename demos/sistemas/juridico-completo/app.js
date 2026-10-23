@@ -117,7 +117,18 @@ const opcoesProc = (sel) => db.processos.map((p) => `<option value="${p.id}" ${p
 function seloPrazo(p) { if (p.status === 'protocolado') return '<span class="et ok">protocolado</span>'; const u = uteisFaltam(p.fatal); return u < 0 ? '<span class="et v">vencido</span>' : u <= 1 ? `<span class="et v">${u === 0 ? 'vence hoje' : '1 dia útil'}</span>` : p.interno <= 0 ? `<span class="et a">passou do interno · ${u} d.ú.</span>` : `<span class="et">${u} dias úteis</span>`; }
 
 // ------------------------------------------------------------------ abas
-const ABAS = [['pauta', 'Pauta'], ['processos', 'Processos'], ['clientes', 'Clientes'], ['prazos', 'Prazos'], ['audiencias', 'Audiências'], ['intimacoes', 'Intimações'], ['atendimentos', 'Atendimentos'], ['horas', 'Horas'], ['financeiro', 'Financeiro'], ['modelos', 'Modelos de peças'], ['equipe', 'Equipe'], ['ajustes', 'Ajustes']];
+const ABAS = [['pauta', 'Pauta'], ['processos', 'Processos'], ['clientes', 'Clientes'], ['prazos', 'Prazos'], ['audiencias', 'Audiências'], ['intimacoes', 'Intimações'], ['atendimentos', 'Atendimentos'], ['horas', 'Horas'], ['financeiro', 'Financeiro'], ['modelos', 'Modelos de peças'], ['equipe', 'Equipe'], ['ajustes', 'Configurações']];
+// índice lateral da pasta: seções em grupos; no celular, os 4 primeiros atalhos ficam na barra de baixo e o resto em "Mais"
+const GRUPOS_J = [['Dia a dia', ['pauta', 'prazos', 'audiencias', 'intimacoes']], ['Casos', ['processos', 'clientes', 'atendimentos', 'modelos']], ['Escritório', ['horas', 'financeiro', 'equipe', 'ajustes']]];
+const RAPIDOS_J = ['pauta', 'prazos', 'processos', 'clientes'];
+const ICO_J = { pauta: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>', prazos: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 3h6"/>', audiencias: '<path d="M4 21h16M6 18h12M12 3l8 4H4z"/><path d="M7 8v8M12 8v8M17 8v8"/>', intimacoes: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>', processos: '<path d="M4 4h6l2 2h8v14H4z"/>', clientes: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 11.5a3 3 0 1 0 0-6M21.5 20c-.4-2.4-1.7-4.1-3.6-4.9"/>', atendimentos: '<path d="M4 5h16v11H9l-5 4z"/>', modelos: '<path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/>', horas: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>', financeiro: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/>', equipe: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.3-6 8-6s7 2 8 6"/>', ajustes: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>', mais: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>' };
+const nomeAbaJ = (k) => (ABAS.find(([x]) => x === k) || [k, k])[1];
+function indiceJ(atual, cont) {
+  const item = (k) => `<a href="#${k}" ${k === atual ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICO_J[k]}</svg><span>${nomeAbaJ(k)}</span>${cont[k] ? `<span class="cont" aria-label="${cont[k]} pendente(s)">${cont[k]}</span>` : ''}</a>`;
+  const noMais = !RAPIDOS_J.includes(atual), pendMais = GRUPOS_J.flatMap(([, ks]) => ks).filter((k) => !RAPIDOS_J.includes(k)).reduce((s, k) => s + (cont[k] || 0), 0);
+  return `<div class="indice-j" id="indice-j">${GRUPOS_J.map(([g, ks]) => `<p class="grupo-j">${g}</p>${ks.map(item).join('')}`).join('')}</div>
+    <div class="rapido-j">${RAPIDOS_J.map(item).join('')}<button type="button" class="mais-j" data-mais-j aria-expanded="false" aria-controls="indice-j" ${noMais ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICO_J.mais}</svg><span>Mais</span>${pendMais ? `<span class="cont">${pendMais}</span>` : ''}</button></div>`;
+}
 let sub = 'andamentos', verEnc = false;
 const V = {
   pauta() {
@@ -213,7 +224,7 @@ const V = {
   },
   ajustes() {
     const a = db.ajustes;
-    return `<div class="titulo"><div><h1>Ajustes</h1><p>Seus e do escritório.</p></div></div><div class="grade"><section class="ficha c6"><h2>Você</h2><label class="cp">Seu nome<input data-meu-nome value="${sx(pessoa(db.eu).nome)}"></label><label class="cp">Abrir em<select data-aj="abrir">${ABAS.slice(0, 8).map(([k, t]) => `<option value="${k}" ${a.abrir === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label><label class="cp">Letras<select data-aj="letra"><option value="normal" ${a.letra === 'normal' ? 'selected' : ''}>Normal</option><option value="grande" ${a.letra === 'grande' ? 'selected' : ''}>Grande</option></select></label></section>
+    return `<div class="titulo"><div><h1>Configurações</h1><p>Seus e do escritório.</p></div></div><div class="grade"><section class="ficha c6"><h2>Você</h2><label class="cp">Seu nome<input data-meu-nome value="${sx(pessoa(db.eu).nome)}"></label><label class="cp">Abrir em<select data-aj="abrir">${ABAS.slice(0, 8).map(([k, t]) => `<option value="${k}" ${a.abrir === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label><label class="cp">Letras<select data-aj="letra"><option value="normal" ${a.letra === 'normal' ? 'selected' : ''}>Normal</option><option value="grande" ${a.letra === 'grande' ? 'selected' : ''}>Grande</option></select></label></section>
       <section class="ficha c6"><h2>Escritório</h2><label class="cp">Nome<input data-esc="nome" value="${sx(db.esc.nome)}"></label><label class="cp">OAB da sociedade<input data-esc="oab" value="${sx(db.esc.oab)}"></label><label class="cp">Prazo interno (dias úteis antes do fatal)<select data-aj="alertaInterno">${[1, 2, 3, 5].map((n) => `<option ${a.alertaInterno == n ? 'selected' : ''}>${n}</option>`).join('')}</select></label></section></div>`;
   },
 };
@@ -262,7 +273,7 @@ function abre() {
   const [s, a] = (location.hash.slice(1) || db.ajustes.abrir || 'pauta').split('/');
   const cont = { prazos: db.prazos.filter((p) => p.status === 'aberto' && uteisFaltam(p.fatal) <= 2).length, intimacoes: db.intimacoes.filter((i) => !i.tratada).length, financeiro: parcAberto().filter(({ p }) => p.dia < 0).length, audiencias: db.audiencias.filter((a) => a.dia < 0 && !a.resultado).length };
   const atual = s === 'processo' ? 'processos' : s;
-  qs('#fichario').innerHTML = ABAS.map(([k, t]) => `<a href="#${k}" ${k === atual ? 'aria-current="page"' : ''}>${t}${cont[k] ? `<span class="cont">${cont[k]}</span>` : ''}</a>`).join('');
+  qs('#fichario').innerHTML = indiceJ(atual, cont); qs('#fichario').classList.remove('aberto');
   qs('#pasta').innerHTML = (V[s] || V.pauta)(a);
   qs('#esc-nome').textContent = db.esc.nome; qs('#esc-usuario').textContent = `${pessoa(db.eu).nome} · ${pessoa(db.eu).cargo.toLowerCase()}`;
   document.documentElement.style.fontSize = db.ajustes.letra === 'grande' ? '112%' : '';
@@ -334,6 +345,8 @@ const F = {
 };
 
 document.addEventListener('click', (e) => {
+  const mj = e.target.closest('[data-mais-j]'); if (mj) { const n = qs('#fichario'), ab = n.classList.toggle('aberto'); mj.setAttribute('aria-expanded', String(ab)); return; }
+  if (!e.target.closest('#fichario')) qs('#fichario')?.classList.remove('aberto');
   const t = e.target;
   if (t.closest('[data-ia]')) { gavetaIA(); return; }
   if (t.closest('[data-fecha-ia]')) { qs('#gaveta-ia').hidden = true; return; }
