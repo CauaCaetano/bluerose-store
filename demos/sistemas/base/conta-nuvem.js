@@ -43,7 +43,7 @@
     financeiroessencial: 'D movs[].dia cobrancas[].vence cobrancas[].avisos[] contas[].vence recibos[].dia historico[].dia', financeirocompleto: 'D lancs[].venc lancs[].avisos[] lancs[].pagamentos[].dia extrato[].dia orcs[].dia transferencias[].dia', financeiroavancado: 'D pags[].venc pags[].pagoEm pags[].baixas[].dia recs[].venc recs[].baixas[].dia movs[].dia contas[].desde mutuos[].dia extrato[].dia',
     gestaoessencial: 'D pagar[].vence H clientes[].desde', gestaocompleto: 'D vendas[].dia contas[].vence',
     gestaoavancado: 'D produtos[].lotes[].vence vendas[].dia contas[].vence pedidos[].dia movs[].dia log[].dia H clientes[].ultima',
-    juridicocompleto: 'D processos[].andamentos[].dia prazos[].fatal prazos[].interno intimacoes[].dia audiencias[].dia horas[].dia contratos[].parcelas[].dia',
+    juridicocompleto: 'D processos[].andamentos[].dia prazos[].fatal prazos[].interno intimacoes[].dia audiencias[].dia horas[].dia contratos[].parcelas[].dia contratos[].parcelas[].pagoDia tarefas[].ate',
     juridicoavancado: 'D intimacoes[].dia prazos[].fatal tarefas[].vence horas[].dia auditoria[].dia',
     obrasessencial: 'D obras[].inicio obras[].entrega obras[].gastos[].dia obras[].diario[].dia orcamentos[].criado',
     obrascompleto: 'D obras[].etapas[].ini obras[].etapas[].fim orcamentos[].criado compras[].dia compras[].vence compras[].pagoEm presencas[].dia medicoes[].dia medicoes[].vence diario[].dia outras[].vence',
