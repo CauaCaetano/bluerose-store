@@ -134,3 +134,6 @@ tr.soma td { font-weight: 700; border-top: 2px solid var(--grafite); }
 .carteira div { padding: 14px 16px; border-radius: 10px; background: #252a32; color: #f4efe7; }
 .carteira b { display: block; font: 700 1.5rem var(--titulo); color: #c7ae88; } .carteira small { color: #c9ccd2; font-size: .82rem; }
 @media (max-width: 900px) { .fatos, .carteira { grid-template-columns: 1fr 1fr; } .detalhe { padding: 20px 18px; } }
+
+/* relatório e nota de débito: imprime só a janela */
+@media print { body.so-modal > *:not(.cortina) { display: none !important; } body.so-modal .cortina { position: static; background: none; } body.so-modal .caixa-m { box-shadow: none; border: 0; max-width: none; max-height: none; } body.so-modal .rod { display: none; } }

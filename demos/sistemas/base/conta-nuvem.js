@@ -44,7 +44,7 @@
     gestaoessencial: 'D pagar[].vence H clientes[].desde', gestaocompleto: 'D vendas[].dia contas[].vence',
     gestaoavancado: 'D produtos[].lotes[].vence vendas[].dia contas[].vence pedidos[].dia movs[].dia log[].dia H clientes[].ultima',
     juridicocompleto: 'D processos[].andamentos[].dia prazos[].fatal prazos[].interno intimacoes[].dia audiencias[].dia horas[].dia contratos[].parcelas[].dia contratos[].parcelas[].pagoDia tarefas[].ate',
-    juridicoavancado: 'D intimacoes[].dia prazos[].fatal tarefas[].vence horas[].dia auditoria[].dia',
+    juridicoavancado: 'D intimacoes[].dia prazos[].fatal tarefas[].vence horas[].dia auditoria[].dia audiencias[].dia pedidos[].prazo diligencias[].dia despesas[].dia',
     obrasessencial: 'D obras[].inicio obras[].entrega obras[].gastos[].dia obras[].diario[].dia orcamentos[].criado',
     obrascompleto: 'D obras[].etapas[].ini obras[].etapas[].fim orcamentos[].criado compras[].dia compras[].vence compras[].pagoEm presencas[].dia medicoes[].dia medicoes[].vence diario[].dia outras[].vence',
     obrasavancado: 'D obras[].docs[].vence obras[].ncs[].dia contas[].vence rdos[].dia auditoria[].dia',
