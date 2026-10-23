@@ -1548,3 +1548,8 @@ html[data-theme="light"] body::before {
 .np-hero-txt .np-logo { width: 230px; height: auto; display: block; margin-bottom: 16px; background: radial-gradient(circle at 30% 20%, #262c3a, #12151c); border-radius: 18px; padding: 16px 20px; box-sizing: border-box; }
 /* logo da Agenda é escura: plaquinha creme */
 .np-hero-txt .np-logo[src*="veltria-agenda"], .prod-cat-info img[src*="veltria-agenda"], .np-hero-txt .np-logo[src*="veltria-gestao"], .prod-cat-info img[src*="veltria-gestao"], .np-hero-txt .np-logo[src*="veltria-farmacia"], .prod-cat-info img[src*="veltria-farmacia"] { background: #f7f2e8; }
+/* com o plano único sobram 2 ou 3 cartões de preço: centraliza em vez de deixar coluna vazia */
+@media (min-width: 1101px) {
+  .precos2:has(> article:nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0, 440px)); justify-content: center; }
+  .precos2:has(> article:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

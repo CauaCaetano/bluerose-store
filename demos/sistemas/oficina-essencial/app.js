@@ -125,7 +125,7 @@ const T = {
   },
   assinatura() {
     const a = db.assinatura, quadro = a.status === 'vencida' ? `<div class="cartao" style="border-color:var(--perigo)"><b style="color:var(--perigo)">Assinatura vencida</b><p class="sub" style="margin:4px 0 0">O pagamento de ${din(a.valor)} não foi aprovado. Seus carros e orçamentos estão guardados.</p></div>`
-      : a.renova ? `<div class="cartao escuro"><span class="mini" style="color:var(--salvia)">Assinatura ativa</span><div class="v" style="font-size:1.4rem">${db.plano === 'pro' ? 'Pro' : 'Básico'} · ${din(a.valor)}/mês</div><span class="mini" style="color:var(--salvia)">próxima cobrança ${dia(a.proxima)}</span></div>`
+      : a.renova ? `<div class="cartao escuro"><span class="mini" style="color:var(--salvia)">Assinatura ativa</span><div class="v" style="font-size:1.4rem">Assinatura · ${din(a.valor)}/mês</div><span class="mini" style="color:var(--salvia)">próxima cobrança ${dia(a.proxima)}</span></div>`
       : `<div class="cartao"><b>Assinatura cancelada</b><p class="sub" style="margin:4px 0 0">Você usa o app até ${dia(a.proxima)}. Nada mais é cobrado.</p></div>`;
     return `<a href="#mais">← Mais</a><h1>Minha assinatura</h1><p class="sub">A mesma da sua conta no site. Sem fidelidade.</p>${quadro}
       <div class="linha">${a.status === 'vencida' ? '<button type="button" class="bt cobre" data-acao="pagar">Pagar aqui no app</button><a class="bt" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Renovar no site</a>' : a.renova ? '<a class="bt peq" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Trocar cartão ou plano</a><button type="button" class="bt peq" data-acao="cancelar">Cancelar</button>' : '<button type="button" class="bt cheio" data-acao="reativar">Reativar</button>'}</div>
@@ -134,10 +134,10 @@ const T = {
   dono() {
     const P = [['os', 'Abrir e mexer nas OS'], ['valores', 'Ver valores e lucro'], ['caixa', 'Lançar no caixa']];
     return `<a href="#mais">← Mais</a><h1>Painel do dono</h1><p class="sub">Quem trabalha com você entra pelo celular dele e só faz o que você deixar.</p>
-      <div class="quadros"><div class="cobre"><small>Plano</small><b>${db.plano === 'pro' ? 'Pro' : 'Básico'}</b></div><div><small>Equipe</small><b>${db.equipe.length + 1}</b></div></div>
+      <div class="quadros"><div class="cobre"><small>Plano</small><b>Assinatura</b></div><div><small>Equipe</small><b>${db.equipe.length + 1}</b></div></div>
       ${db.equipe.map((p) => `<div class="cartao"><div style="display:flex;justify-content:space-between;align-items:center"><b>${t(p.nome)}</b><button type="button" class="bt peq" data-acao="tirar" data-id="${p.id}">Tirar</button></div>${P.map(([k, n]) => `<label style="display:flex;gap:10px;align-items:center;margin-top:8px"><input type="checkbox" data-pode="${p.id}:${k}" ${p.pode[k] ? 'checked' : ''} style="width:20px;height:20px;accent-color:var(--cobre)">${n}</label>`).join('')}</div>`).join('')}
       <button type="button" class="bt cheio largo" data-acao="convidar">+ Chamar ajudante ou mecânico</button>
-      <h2>Plano</h2><div class="linha"><button type="button" class="bt ${db.plano === 'basico' ? 'cheio' : ''}" data-acao="plano" data-v="basico">Básico · R$ 69</button><button type="button" class="bt ${db.plano === 'pro' ? 'cheio' : ''}" data-acao="plano" data-v="pro">Pro · R$ 129</button></div><p class="mini">Básico: você + 5. Pro: equipe sem limite. Anual com 20% a menos.</p>`;
+      <h2>Plano</h2><div class="linha"><button type="button" class="bt ${db.plano === 'basico' ? 'cheio' : ''}" data-acao="plano" data-v="basico">Assinatura · R$ 69/mês</button></div><p class="mini">Equipe sem limite, histórico de quem fez o quê e até 10 empresas. Anual com 20% a menos.</p>`;
   },
   config() {
     const e = db.eu;
@@ -208,7 +208,7 @@ const A = {
   pagar,
   cancelar: () => { if (confirm(`Cancelar? Você usa até ${dia(db.assinatura.proxima)} e nada mais é cobrado.`)) { db.assinatura.renova = false; grava(); mostra(); } },
   reativar: () => { db.assinatura.renova = true; grava(); mostra(); aviso('Assinatura reativada.'); },
-  convidar: () => { if (db.plano !== 'pro' && db.equipe.length >= 5) return aviso('No Básico são você e mais 5. O Pro libera sem limite.'); formulario('Chamar para a equipe', '<label class="campo">Nome<input name="n" required></label><label class="campo">WhatsApp<input name="t" inputmode="tel" required></label>', 'Mandar convite', (f) => { db.equipe.push({ id: cod(), nome: f.get('n'), pode: { os: true, valores: false, caixa: false } }); aviso('Convite mandado pelo WhatsApp.'); }); },
+  convidar: () => { formulario('Chamar para a equipe', '<label class="campo">Nome<input name="n" required></label><label class="campo">WhatsApp<input name="t" inputmode="tel" required></label>', 'Mandar convite', (f) => { db.equipe.push({ id: cod(), nome: f.get('n'), pode: { os: true, valores: false, caixa: false } }); aviso('Convite mandado pelo WhatsApp.'); }); },
   tirar: (d) => { db.equipe = db.equipe.filter((p) => p.id !== d.id); grava(); mostra(); },
   plano: (d) => { db.plano = d.v; db.assinatura.valor = d.v === 'pro' ? 129 : 69; grava(); mostra(); },
 };

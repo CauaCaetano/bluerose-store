@@ -258,3 +258,5 @@ html[data-theme="light"] .ini-rosa { opacity: .22; }
   .nb, .nb-telas img, .nb-url b, .nb-cursor, .nb::before { animation: none !important; opacity: 1; transform: none; }
   .nb-telas img:not(:first-child), .nb-url b:not(:first-child), .nb-cursor { display: none; }
 }
+/* cartão inteiro leva à página do produto (js/versao.js) */
+.vai-produto { cursor: pointer; }

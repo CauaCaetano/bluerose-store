@@ -97,7 +97,7 @@ const T = {
   assinatura() {
     const a = db.assinatura;
     const topo = a.status === 'vencida' ? `<div class="cartao" style="border-color:var(--perda)"><b style="color:var(--perda)">Assinatura vencida</b><p class="mini" style="margin:4px 0 0">O pagamento de ${din(a.valor)} não foi aprovado. Seus clientes e o funil estão guardados.</p></div>`
-      : a.renova ? `<div class="cartao"><b>Ativa</b><p class="mini" style="margin:4px 0 0">Plano ${db.plano === 'pro' ? 'Pro' : 'Básico'} · ${din(a.valor)} por mês · próxima cobrança em ${a.proxima} dias.</p></div>`
+      : a.renova ? `<div class="cartao"><b>Ativa</b><p class="mini" style="margin:4px 0 0">Plano Assinatura · ${din(a.valor)} por mês · próxima cobrança em ${a.proxima} dias.</p></div>`
         : `<div class="cartao" style="border-color:var(--trigo)"><b>Cancelada</b><p class="mini" style="margin:4px 0 0">Você usa tudo por mais ${a.proxima} dias. Depois disso nada mais é cobrado.</p></div>`;
     return `<a href="#mais">← Mais</a><h1>Minha assinatura</h1><p class="sub">A mesma da sua conta no site. Sem fidelidade.</p>${topo}
       <div class="linha">${a.status === 'vencida' ? '<button type="button" class="bt cheio" data-acao="pagar">Pagar aqui no app</button><a class="bt" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Renovar no site</a>' : a.renova ? '<button type="button" class="bt" data-acao="cancelar">Cancelar assinatura</button>' : '<button type="button" class="bt cheio" data-acao="reativar">Reativar</button>'}</div>
@@ -107,7 +107,7 @@ const T = {
     return `<a href="#mais">← Mais</a><h1>Painel do dono</h1><p class="sub">Quem te ajuda entra com o próprio celular e só vê o que você deixar.</p>
       ${db.ajudantes.map((p, i) => `<div class="cartao"><b>${t(p.nome)}</b>${[['contatos', 'Ver e cadastrar contatos'], ['valores', 'Ver valores dos negócios'], ['metas', 'Ver meta e comissão']].map(([k, n]) => `<label style="display:flex;justify-content:space-between;padding:8px 0">${n}<input type="checkbox" data-ve="${i}.${k}" ${p.ve[k] ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--alp)"></label>`).join('')}</div>`).join('')}
       <button type="button" class="bt largo" data-acao="ajudante">+ Convidar ajudante</button>
-      <h2>Plano</h2><div class="chips"><button type="button" data-plano="basico" aria-pressed="${db.plano === 'basico'}">Básico · R$ 59</button><button type="button" data-plano="pro" aria-pressed="${db.plano === 'pro'}">Pro · R$ 119</button></div><p class="mini">Básico: você + 5 pessoas. Pro: sem limite e histórico de quem fez o quê. Anual com 20% a menos.</p>`;
+      <h2>Plano</h2><div class="chips"><button type="button" data-plano="basico" aria-pressed="${db.plano === 'basico'}">Assinatura · R$ 59/mês</button></div><p class="mini">Equipe sem limite, histórico de quem fez o quê e até 10 empresas. Anual com 20% a menos.</p>`;
   },
   config() {
     return `<a href="#mais">← Mais</a><h1>Configurações</h1><label class="campo">Seu nome<input data-cfg="vendedor" value="${t(db.vendedor)}"></label><label class="campo">O que você vende<input data-cfg="ramo" value="${t(db.ramo)}"></label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="campo">Meta do mês (R$)<input data-cfg="meta" inputmode="decimal" value="${db.meta}"></label><label class="campo">Comissão (%)<input data-cfg="comissao" type="number" value="${db.comissao}"></label></div><p class="mini">Funciona sem internet: o que você registrar na rua sobe quando a conexão voltar.</p>`;

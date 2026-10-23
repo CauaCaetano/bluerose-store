@@ -128,7 +128,7 @@ export function painelDono(el, opts) {
   if (!st) st = { plano: 'basico', anual: false, equipe: opts.equipe.map(([nome, cargo], i) => ({ id: `m${i}`, nome, email: `${norm(nome).split(' ')[0]}@${norm(opts.empresa || 'loja').replace(/[^a-z]/g, '').slice(0, 14)}.com.br`, cargo, admin: i === 0, perm: { ...(opts.cargos[cargo] || {}) } })) };
   const gravar = () => { try { localStorage.setItem(CH, JSON.stringify(st)); } catch { /* sem espaço */ } };
   const limite = () => (st.plano === 'pro' ? Infinity : 5);
-  const preco = () => (opts.preco + (st.plano === 'pro' ? 60 : 0)) * (st.anual ? 12 * 0.8 : 1);
+  const preco = () => (opts.preco + 0) * (st.anual ? 12 * 0.8 : 1);
   const resumo = (m) => { if (m.admin) return `${m.cargo} · administrador, acesso total`; const ed = opts.areas.filter(([a]) => m.perm[a] === 'editar').length, ve = opts.areas.filter(([a]) => m.perm[a] === 'ver').length; return `${m.cargo} · edita ${ed} ${ed === 1 ? 'área' : 'áreas'}, só vê ${ve}`; };
   const brl = (v) => `R$ ${Math.round(v).toLocaleString('pt-BR')}`;
   function desenhar() {
@@ -136,9 +136,9 @@ export function painelDono(el, opts) {
       <div class="gc-aviso"><span aria-hidden="true">👑</span><span>Só o dono e os administradores veem este painel. A equipe usa o sistema com o cargo e as permissões que você escolher.</span></div>
       <div class="gc-kpis">
         <div class="gc-kpi"><small>Sua função</small><b>Dono</b><span>acesso a tudo, inclusive plano</span></div>
-        <div class="gc-kpi"><small>Equipe</small><b>${st.equipe.length + 1} pessoas</b><span>${st.plano === 'pro' ? 'sem limite de pessoas' : `${st.equipe.length} de 5 convites no Básico`}</span></div>
+        <div class="gc-kpi"><small>Equipe</small><b>${st.equipe.length + 1} pessoas</b><span>sem limite de pessoas</span></div>
         <div class="gc-kpi"><small>Token de dono</small><b>Ativado</b><span>pedido só no primeiro acesso</span></div>
-        <div class="gc-kpi"><small>Plano</small><b>${st.plano === 'pro' ? 'Pro' : 'Básico'} ${st.anual ? 'anual' : 'mensal'}</b><span>${brl(preco())}/${st.anual ? 'ano' : 'mês'}</span></div>
+        <div class="gc-kpi"><small>Plano</small><b>Assinatura ${st.anual ? 'anual' : 'mensal'}</b><span>${brl(preco())}/${st.anual ? 'ano' : 'mês'}</span></div>
       </div>
       <div class="gc-duas">
         <section class="gc-cartao"><div class="gc-cartao-cab"><div><h3>Equipe</h3><p>Cada pessoa entra com o próprio e-mail e só vê o que você liberar</p></div><button type="button" class="gc-btn pri" data-gc-convidar>+ Convidar</button></div>
@@ -146,12 +146,12 @@ export function painelDono(el, opts) {
           ${st.equipe.map((m) => `<li><span class="gc-av">${iniciais(m.nome || m.email)}</span><div class="gc-cresce"><b>${esc(m.nome || m.email)}${m.admin ? ' <span class="gc-et">Administrador</span>' : ''}${m.convite ? ' <span class="gc-et">Convite enviado</span>' : ''}</b><span>${esc(resumo(m))}</span></div><button type="button" class="gc-btn peq" data-gc-acesso="${m.id}">Cargo e acesso</button></li>`).join('')}</ul></section>
         <div style="display:grid;gap:14px">
           <section class="gc-cartao"><div class="gc-cartao-cab"><div><h3>Plano e pagamento</h3><p>${esc(opts.sistema)} · sem fidelidade</p></div></div><div class="gc-cartao-corpo">
-            <div class="gc-linha" role="group" aria-label="Plano"><button type="button" class="gc-btn ${st.plano === 'basico' ? 'pri' : ''}" data-gc-plano="basico">Básico · ${brl(opts.preco)}</button><button type="button" class="gc-btn ${st.plano === 'pro' ? 'pri' : ''}" data-gc-plano="pro">Pro · ${brl(opts.preco + 60)}</button></div>
+            <div class="gc-linha" role="group" aria-label="Plano"><button type="button" class="gc-btn ${st.plano === 'basico' ? 'pri' : ''}" data-gc-plano="basico">Assinatura · ${brl(opts.preco)}/mês</button></div>
             <label class="gc-mute"><input type="checkbox" data-gc-anual ${st.anual ? 'checked' : ''}> Pagar por ano e economizar 20%</label>
-            <p class="gc-mute">O Pro libera a equipe sem limite. Na versão contratada, a troca é confirmada no Mercado Pago.</p></div></section>
-          <section class="gc-cartao"><div class="gc-cartao-cab"><div><h3>Indique e ganhe</h3><p>A cada 3 indicações que assinam, 1 mês de Pro pagando o Básico</p></div></div><div class="gc-cartao-corpo">
+            <p class="gc-mute">Equipe sem limite, histórico de quem fez o quê e até 10 empresas. Anual com 20% a menos, confirmado no Mercado Pago.</p></div></section>
+          <section class="gc-cartao"><div class="gc-cartao-cab"><div><h3>Indique e ganhe</h3><p>A cada 3 indicações que assinam, 1 mês grátis de assinatura</p></div></div><div class="gc-cartao-corpo">
             <div class="gc-linha"><input readonly value="https://bluerose-store.com/?indica=K7M2Q9XA" aria-label="Link de indicação de exemplo"><button type="button" class="gc-btn" data-gc-copiar>Copiar</button></div>
-            <span class="gc-mute">2 de 3 para o próximo mês de Pro</span><div class="gc-prog"><i style="width:67%"></i></div></div></section>
+            <span class="gc-mute">2 de 3 para o próximo mês grátis</span><div class="gc-prog"><i style="width:67%"></i></div></div></section>
           <section class="gc-cartao"><div class="gc-cartao-cab"><div><h3>Cargos sugeridos</h3><p>O cargo já marca o que a pessoa pode fazer</p></div></div><ul class="gc-lista">${Object.entries(opts.cargos).map(([n, pr]) => `<li><div class="gc-cresce"><b>${esc(n)}</b><span>edita: ${opts.areas.filter(([a]) => pr[a] === 'editar').map(([, r]) => r).join(', ') || 'nada'}</span></div></li>`).join('')}</ul></section>
         </div></div></div>`;
   }
@@ -173,7 +173,6 @@ export function painelDono(el, opts) {
         const email = f.querySelector('[data-gc-email]').value.trim().toLowerCase();
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { erro.hidden = false; erro.textContent = 'Coloque um e-mail válido.'; return; }
         if (st.equipe.some((x) => x.email === email)) { erro.hidden = false; erro.textContent = 'Essa pessoa já está na equipe.'; return; }
-        if (st.equipe.length >= limite()) { erro.hidden = false; erro.textContent = 'O Básico vai até você e mais 5 pessoas. Passe para o Pro para ter equipe sem limite.'; return; }
         st.equipe.push({ id: `m${Date.now()}`, nome: '', email, convite: true, ...dados }); toast(`Convite enviado para ${email}.`);
       } else { Object.assign(m, dados); toast('Acesso atualizado.'); }
       gravar(); fechar(); desenhar();
@@ -182,7 +181,7 @@ export function painelDono(el, opts) {
   el.onclick = (e) => {
     if (e.target.closest('[data-gc-convidar]')) editarAcesso(null);
     const a = e.target.closest('[data-gc-acesso]'); if (a) editarAcesso(st.equipe.find((x) => x.id === a.dataset.gcAcesso));
-    const p = e.target.closest('[data-gc-plano]'); if (p) { if (p.dataset.gcPlano === 'basico' && st.equipe.length > 5) { toast('Para voltar ao Básico, a equipe precisa ter no máximo 5 pessoas.'); return; } st.plano = p.dataset.gcPlano; gravar(); desenhar(); toast(`Plano ${st.plano === 'pro' ? 'Pro' : 'Básico'} escolhido. Na versão contratada você confirma no Mercado Pago.`); }
+    const p = e.target.closest('[data-gc-plano]'); if (p) { if (p.dataset.gcPlano === 'basico' && st.equipe.length > 5) { toast('Para voltar ao Básico, a equipe precisa ter no máximo 5 pessoas.'); return; } st.plano = p.dataset.gcPlano; gravar(); desenhar(); toast(`Plano Assinatura escolhido. Na versão contratada você confirma no Mercado Pago.`); }
     if (e.target.closest('[data-gc-copiar]')) { navigator.clipboard?.writeText('https://bluerose-store.com/?indica=K7M2Q9XA').catch(() => {}); toast('Link copiado.'); }
   };
   el.onchange = (e) => { if (e.target.matches('[data-gc-anual]')) { st.anual = e.target.checked; gravar(); desenhar(); } };

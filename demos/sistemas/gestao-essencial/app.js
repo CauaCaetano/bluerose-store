@@ -158,7 +158,7 @@ const TELAS = {
   assinatura() {
     const a = db.assinatura, preco = db.plano === 'pro' ? 119 : 59;
     const topo = a.status === 'vencida' ? `<span class="mt" style="background:#f2d3c4">venceu</span>. O pagamento de ${R(preco)} não foi aprovado.<small>Pague para o caixa voltar a funcionar. Nenhuma venda foi perdida.</small>`
-      : a.renova ? `<span class="mt">ativa</span>.<small>Plano ${db.plano === 'pro' ? 'Pro' : 'Básico'}, ${R(preco)} por mês. Próxima cobrança ${dataCurta(a.proxima)}, no cartão.</small>`
+      : a.renova ? `<span class="mt">ativa</span>.<small>Plano Assinatura, ${R(preco)} por mês. Próxima cobrança ${dataCurta(a.proxima)}, no cartão.</small>`
       : `cancelada.<small>Nada mais é cobrado. Você usa o app até ${dataCurta(a.proxima)}.</small>`;
     return `<div class="cabeca"><h1 class="frase">Sua assinatura está ${topo}</h1></div>
       <div class="botoes" style="margin-bottom:18px">${a.status === 'vencida' ? '<button type="button" class="btn pri" data-pagar-ass>Pagar aqui no app</button><a class="btn" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Renovar no site</a>'
@@ -169,12 +169,12 @@ const TELAS = {
   dono() {
     const AREAS = [['vender', 'Caixa'], ['estoque', 'Estoque'], ['dinheiro', 'Dinheiro'], ['fiado', 'Fiado']], preco = db.plano === 'pro' ? 119 : 59;
     return `<div class="cabeca"><h1 class="frase">Painel do dono<small>Quem trabalha no mercado e o que cada um pode abrir. Só você vê esta divisória.</small></h1><button type="button" class="btn pri" data-convidar>Pôr alguém na equipe</button></div>
-      <div class="contas"><div><span>Seu plano</span><b>${db.plano === 'pro' ? 'Pro' : 'Básico'} · ${R(preco)}/mês</b></div><div><span>Equipe</span><b>${db.equipe.length + 1} pessoas</b></div><div><span>Vagas no plano</span><b>${db.plano === 'pro' ? 'sem limite' : `${5 - db.equipe.length} de 5`}</b></div></div>
+      <div class="contas"><div><span>Seu plano</span><b>Assinatura · ${R(preco)}/mês</b></div><div><span>Equipe</span><b>${db.equipe.length + 1} pessoas</b></div><div><span>Vagas no plano</span><b>sem limite</b></div></div>
       <h2>Quem pode abrir o quê</h2><p class="sub">Marque as divisórias de cada pessoa. O caixa não vê quanto o mercado lucra se você não deixar.</p>
       <div class="tabela-dono"><div class="linha-dono topo"><span>Pessoa</span>${AREAS.map(([, t]) => `<span>${t}</span>`).join('')}<span></span></div>
         <div class="linha-dono"><span><b>${esc(db.eu.nome)}</b><small>dono</small></span>${AREAS.map(() => '<span>✓</span>').join('')}<span></span></div>
         ${db.equipe.map((p) => `<div class="linha-dono"><span><b>${esc(p.nome)}</b><small>${esc(p.cargo)}</small></span>${AREAS.map(([k, t]) => `<label><input type="checkbox" data-ve="${p.id}:${k}" ${p.ve[k] ? 'checked' : ''} aria-label="${esc(p.nome)} abre ${t}"></label>`).join('')}<button type="button" class="btn peq" data-tirar="${p.id}">Tirar</button></div>`).join('')}</div>
-      <h2>Plano</h2><div class="botoes"><button type="button" class="btn ${db.plano === 'basico' ? 'pri' : ''}" data-plano="basico">Básico · R$ 59 · até 5 pessoas</button><button type="button" class="btn ${db.plano === 'pro' ? 'pri' : ''}" data-plano="pro">Pro · R$ 119 · equipe sem limite</button></div>
+      <h2>Plano</h2><div class="botoes"><button type="button" class="btn ${db.plano === 'basico' ? 'pri' : ''}" data-plano="basico">Assinatura · R$ 59/mês</button></div>
       <p class="sub" style="margin-top:10px">A assinatura e a troca de plano ficam em <a href="#assinatura">Minha assinatura</a>.</p>`;
   },
   fiado() {
@@ -452,7 +452,7 @@ document.addEventListener('click', (e) => {
   else if ('reativar' in d) { db.assinatura.renova = true; gravar(); redesenhar(); avisar('Assinatura reativada'); }
   else if ('sug' in d) { pag.querySelector('[data-pergunta]').value = d.sug; pag.querySelector('[data-perguntar]').click(); }
   else if ('perguntar' in d) { const p = pag.querySelector('[data-pergunta]').value.trim(); if (p.length < 3) return; const r = pag.querySelector('[data-resposta]'); r.hidden = false; r.textContent = 'Pensando…'; if (window.veltriaIA) window.veltriaIA(p).then((t) => { r.textContent = t; }); else setTimeout(() => { r.textContent = `${respostaIA(p)}\n\n(Resposta de exemplo da demonstração.)`; }, 700); }
-  else if ('convidar' in d) { if (db.plano !== 'pro' && db.equipe.length >= 5) return avisar('No Básico são você e mais 5 pessoas. O Pro libera sem limite.'); janela('<h2>Pôr alguém na equipe</h2><label class="campo">Nome<input name="n" required></label><label class="campo">Cargo<select name="c"><option>Caixa</option><option>Repositor</option><option>Gerente</option></select></label><p class="sub">A pessoa recebe um convite no WhatsApp para entrar pelo celular dela.</p>', (f) => { const c = f.get('c'); db.equipe.push({ id: `q${Date.now()}`, nome: f.get('n'), cargo: c, ve: { vender: c !== 'Repositor', estoque: c !== 'Caixa', dinheiro: c === 'Gerente', fiado: c !== 'Repositor' } }); gravar(); avisar('Convite mandado'); redesenhar(); }); }
+  else if ('convidar' in d) { janela('<h2>Pôr alguém na equipe</h2><label class="campo">Nome<input name="n" required></label><label class="campo">Cargo<select name="c"><option>Caixa</option><option>Repositor</option><option>Gerente</option></select></label><p class="sub">A pessoa recebe um convite no WhatsApp para entrar pelo celular dela.</p>', (f) => { const c = f.get('c'); db.equipe.push({ id: `q${Date.now()}`, nome: f.get('n'), cargo: c, ve: { vender: c !== 'Repositor', estoque: c !== 'Caixa', dinheiro: c === 'Gerente', fiado: c !== 'Repositor' } }); gravar(); avisar('Convite mandado'); redesenhar(); }); }
   else if (d.tirar) { db.equipe = db.equipe.filter((p) => p.id !== d.tirar); gravar(); redesenhar(); avisar('Pessoa tirada da equipe'); }
   else if (d.plano) { if (d.plano === 'basico' && db.equipe.length > 5) return avisar('Para o Básico, deixe no máximo 5 pessoas.'); db.plano = d.plano; gravar(); redesenhar(); }
 });

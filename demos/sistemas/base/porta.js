@@ -63,8 +63,7 @@ function telaConta(modo = 'entrar', aviso = '') {
 // ---------------------------------------------------------------- teste grátis ou assinatura
 function telaPlano({ email, venceu, semTeste, motivo }) {
   return new Promise(() => {
-    const pro = V.mensal + 60;
-    const opcoes = [['', 'Básico', V.mensal, 'você + 5 pessoas'], ['-anual', 'Básico anual', anual(V.mensal), '12 meses com 20% a menos'], ['-pro', 'Pro', pro, 'equipe sem limite, histórico e até 10 empresas'], ['-pro-anual', 'Pro anual', anual(pro), '12 meses com 20% a menos']];
+    const opcoes = [['', 'Assinatura mensal', V.mensal, 'equipe sem limite, histórico e até 10 empresas'], ['-anual', 'Assinatura anual', anual(V.mensal), '12 meses com 20% a menos']];
     const f = tela(`<h1>${venceu ? 'O acesso venceu' : `Comece a usar o ${esc(V.nome)}`}</h1>
       <p class="p-sub">${venceu ? 'Seus dados estão guardados. Assine para voltar a usar de onde parou.' : 'Teste 7 dias grátis com os dados da sua empresa. Não pedimos cartão e nada é cobrado sozinho no fim do teste.'}</p>
       ${motivo ? `<p class="p-aviso">${esc(motivo)}</p>` : ''}

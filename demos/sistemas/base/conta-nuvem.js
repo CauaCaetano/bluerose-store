@@ -190,7 +190,7 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); };
   var V = { obras: 'Obras', juridico: 'Jurídico', oficina: 'Oficina', financeiro: 'Financeiro', agenda: 'Agenda', crm: 'CRM', farmacia: 'Farmácia', gestao: 'Gestão' };
   function prazo() {
-    if (info.plano === 'ativo') return info.nivel === 'pro' ? 'Plano Pro' : 'Plano ativo';
+    if (info.plano === 'ativo') return 'Assinatura ativa';
     var d = Math.ceil((Date.parse(info.ate + 'T23:59:59-03:00') - Date.now()) / 864e5);
     return d > 0 ? 'Teste grátis: ' + d + (d === 1 ? ' dia' : ' dias') : 'Teste encerrado';
   }
@@ -225,7 +225,7 @@
   function assinatura() {
     var VS = window.VELTRIA_VERSOES || {}, ver = VS[app] || { mensal: 0, nome: 'sistema' }, pro = ver.mensal + 60, anual = function (m) { return Math.round(m * 12 * 0.8); };
     caixa('<h2>Minha assinatura</h2><p class="vc-mudo">' + esc(ver.nome) + ' · ' + esc(info.empresa) + '</p><p><b>' + esc(prazo()) + '</b></p><ul id="vc-ass"><li>Carregando…</li></ul>' +
-      (info.dono ? '<form><p><b>Assinar ou trocar de plano</b></p><div class="vc-planos">' + [['', 'Básico', ver.mensal, '/mês'], ['-anual', 'Básico anual', anual(ver.mensal), '/ano'], ['-pro', 'Pro', pro, '/mês'], ['-pro-anual', 'Pro anual', anual(pro), '/ano']].map(function (o, i) { return '<label><input type="radio" name="p" value="' + o[0] + '"' + (i ? '' : ' checked') + '> ' + o[1] + ' · R$ ' + o[2].toLocaleString('pt-BR') + o[3] + '</label>'; }).join('') + '</div>' +
+      (info.dono ? '<form><p><b>Assinar ou trocar de plano</b></p><div class="vc-planos">' + [['', 'Assinatura mensal', ver.mensal, '/mês'], ['-anual', 'Assinatura anual', anual(ver.mensal), '/ano']].map(function (o, i) { return '<label><input type="radio" name="p" value="' + o[0] + '"' + (i ? '' : ' checked') + '> ' + o[1] + ' · R$ ' + o[2].toLocaleString('pt-BR') + o[3] + '</label>'; }).join('') + '</div>' +
         '<label>E-mail da conta do Mercado Pago<input type="email" name="mp" required></label><label><input type="checkbox" name="ok" required> Aceito os <a href="' + RAIZ + 'termos.html" target="_blank" rel="noopener">Termos</a> e a cobrança automática.</label><p class="vc-mudo" data-erro></p><button class="vc-bt">Assinar no Mercado Pago</button></form>' : '<p class="vc-mudo">A assinatura é do dono da empresa.</p>') +
       '<p><a href="' + RAIZ + 'conta.html" target="_blank" rel="noopener">Cancelar, ver cobranças e notas em Minha conta</a></p><button class="vc-bt vc-2" data-vc-fecha>Fechar</button>', function (cx) {
       pagamentos({ acao: 'status' }).then(function (r) {
@@ -271,7 +271,7 @@
   }
   function equipe() {
     var gestor = info.dono || info.papel === 'admin';
-    caixa('<h2>Equipe</h2><p class="vc-mudo">Cada pessoa entra com o próprio e-mail. Escolha o cargo, se pode alterar ou só ver e quais telas aparecem para ela. No Básico, até 5 pessoas além de você; no Pro, sem limite.</p><ul id="vc-eq"><li>Carregando…</li></ul><div id="vc-ed"></div>' +
+    caixa('<h2>Equipe</h2><p class="vc-mudo">Cada pessoa entra com o próprio e-mail. Escolha o cargo, se pode alterar ou só ver e quais telas aparecem para ela. Equipe sem limite de pessoas.</p><ul id="vc-eq"><li>Carregando…</li></ul><div id="vc-ed"></div>' +
       (gestor ? '<details class="vc-convite"><summary class="vc-bt">Convidar pessoa</summary><label>E-mail<input type="email" name="email" form="vc-conv" required></label><div id="vc-conv-campos"></div></details>' : '') + '<button class="vc-bt vc-2" data-vc-fecha>Fechar</button>', function (cx) {
       var membros = [];
       function listar() {
@@ -312,7 +312,7 @@
         var perm = lerPessoa(f, telasDoMenu().length), adm = f.admin && f.admin.checked;
         cliente().then(function (sb) { return sb.from('nexo_convites').insert({ espaco: info.espaco, email: em.value.trim().toLowerCase(), papel: adm ? 'admin' : 'membro', permissoes: adm ? {} : perm }); }).then(function (r) {
           if (r.error) throw r.error; em.value = ''; f.reset(); listar(); if (window.veltriaMarca) window.veltriaMarca('equipe'); aviso('Convite enviado. A pessoa recebe o e-mail e entra com a conta dela.');
-        }).catch(function (x) { f.querySelector('[data-erro]').textContent = /limite/i.test(x.message) ? 'O Básico vai até 5 pessoas além de você. O Pro libera sem limite.' : x.message; });
+        }).catch(function (x) { f.querySelector('[data-erro]').textContent = /limite/i.test(x.message) ? 'Não foi possível convidar agora. Tente de novo em instantes.' : x.message; });
       };
     });
   }

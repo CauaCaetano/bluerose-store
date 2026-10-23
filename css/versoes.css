@@ -58,3 +58,10 @@
 @media (prefers-reduced-motion: reduce) { .pl-preco { transition: none; } }
 
 .vs-videos { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; width: 100%; }
+/* versão de onde a pessoa veio (js/versao.js) */
+.vs-card.vs-escolhida { border: 2px solid #1d4ed8; box-shadow: 0 0 0 6px rgba(29, 78, 216, .14), var(--shadow); transform: translateY(-6px); }
+.vs-selo-escolha { position: absolute; top: -13px; right: 22px; background: #1d4ed8; color: #fff; font: 700 12.5px/1 system-ui, sans-serif; padding: 7px 12px; border-radius: 999px; box-shadow: 0 6px 16px -6px rgba(29, 78, 216, .7); }
+.pl-tabela tr.pl-escolhida th, .pl-tabela tr.pl-escolhida td { background: rgba(29, 78, 216, .07); }
+.pl-tabela tr.pl-escolhida th { box-shadow: inset 4px 0 0 #1d4ed8; }
+.pl-tabela tr.pl-escolhida .vs-selo-escolha { position: static; display: table; margin: 0 0 8px; }
+@media (prefers-reduced-motion: reduce) { .vs-card.vs-escolhida { transform: none; } }
