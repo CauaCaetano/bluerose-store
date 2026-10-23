@@ -15,14 +15,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilo.css?v=9">
-<script src="../base/versoes.js?v=4"></script>
+<script src="../base/versoes.js?v=5"></script>
 <script src="../base/conta-nuvem.js?v=1"></script>
-</head>
+<style>.v-logo-g{height:36px;width:auto;display:block;flex:none;background:#f7f2e8;padding:3px 7px;border-radius:9px;box-sizing:content-box;object-fit:contain}</style></head>
 <body>
 <div class="faixa-demo"><a href="../../../veltria-gestao.html">Voltar<span class="so-pc"> ao site</span></a><span class="so-pc">Demonstração do <b>Veltria Gestão Essencial</b>, com dados de exemplo guardados só neste navegador</span><span class="so-cel">Demonstração</span><button type="button" id="recomecar">Recomeçar</button><a class="cta" href="index.html">Ver no celular</a></div>
 <div class="caderno" id="caderno">
   <header class="capa">
-    <a class="marca" href="#hoje" aria-label="Veltria Gestão, ir para Hoje"><img src="veltria.png" alt="" width="40" height="40"><span><b>Mercado Bom Preço</b><small id="quem">Veltria Gestão Essencial</small></span></a>
+    <a class="marca" href="#hoje" aria-label="Veltria Gestão, ir para Hoje"><img class="v-logo-g" src="../../../img/logos/veltria-gestao-simbolo.png?v=1" alt="Veltria Gestão"><span><b>Mercado Bom Preço</b><small id="quem">Veltria Gestão Essencial</small></span></a>
     <label class="comando"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="comando" type="search" placeholder="O que você quer fazer? Ex.: vender arroz, chegou mercadoria" autocomplete="off" aria-label="O que você quer fazer"><kbd>/</kbd></label>
     <ul class="sugestoes" id="sugestoes" role="listbox" hidden></ul>
     <button type="button" class="btn ia-btn" id="abrir-ia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>Assistente IA</button>
