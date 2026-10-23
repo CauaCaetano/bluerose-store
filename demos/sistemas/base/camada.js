@@ -21,7 +21,7 @@
   function editor(abrir) {
     if (soLeitura()) { toast('O seu acesso é só para ver. Peça ao dono para liberar as alterações.'); return; }
     if (window.veltriaAbrirDados) { window.veltriaAbrirDados(abrir); return; } // modo conta: o conta-nuvem grava na nuvem
-    script('editor.js?v=5').then(function () {
+    script('editor.js?v=6').then(function () {
       var salvou = false;
       window.veltriaEditor({ dados: dados(), dias: '', abrir: abrir,
         salvar: function (d) { salvou = true; localStorage.setItem(CHAVE, JSON.stringify(d)); return Promise.resolve(); },
@@ -101,7 +101,7 @@
       document.body.appendChild(mn); var p = mn.querySelector('button'); if (p) p.focus();
       setTimeout(function () { document.addEventListener('click', function fora(e) { if (!e.target.closest('.vk-menu,.vk-mais')) { mn.remove(); document.removeEventListener('click', fora); } }); }, 0);
     };
-    window.veltriaEditorListas ? go() : script('editor.js?v=5').then(go);
+    window.veltriaEditorListas ? go() : script('editor.js?v=6').then(go);
   }
   var mais = document.createElement('button'); mais.type = 'button'; mais.className = 'vk-mais'; mais.setAttribute('aria-label', 'Adicionar, importar ou exportar'); mais.title = 'Adicionar, importar planilha ou exportar';
   mais.innerHTML = '<span aria-hidden="true">+</span>'; mais.addEventListener('click', menu);
@@ -450,7 +450,7 @@
     document.body.appendChild(mais);
     subirMais(); setTimeout(subirMais, 900); addEventListener('resize', subirMais); addEventListener('hashchange', function () { setTimeout(subirMais, 60); });
     // tela vazia: só faz sentido quando a empresa tem a lista vazia (começou do zero); carrega o editor para saber as listas
-    script('editor.js?v=5').then(function () { vigiaVazio(); arrumaEspaco(); addEventListener('hashchange', function () { vigiaVazio(); arrumaEspaco(); }); addEventListener('resize', arrumaEspaco); new MutationObserver(function () { if (!document.querySelector('.vk-vazio')) { vazioFeito = ''; } vigiaVazio(); if (!document.querySelector('.vk-apoio')) arrumaEspaco(); }).observe(document.querySelector('main') || document.body, { childList: true }); }).catch(function () {});
+    script('editor.js?v=6').then(function () { vigiaVazio(); arrumaEspaco(); addEventListener('hashchange', function () { vigiaVazio(); arrumaEspaco(); }); addEventListener('resize', arrumaEspaco); new MutationObserver(function () { if (!document.querySelector('.vk-vazio')) { vazioFeito = ''; } vigiaVazio(); if (!document.querySelector('.vk-apoio')) arrumaEspaco(); }).observe(document.querySelector('main') || document.body, { childList: true }); }).catch(function () {});
     if (conta) {
       ritmoDoDia();
       var faixa = document.querySelector('.vc-faixa');

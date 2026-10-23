@@ -7,12 +7,14 @@ const CHAVE = 'veltria-oficina-avancado-v1';
 const R$ = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
 const e = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const sa = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-const pct = (v) => `${Math.round(v * 100)}%`;
+const pct = (v) => (Number.isFinite(v) ? `${Math.round(v * 100)}%` : '—'); // unidade nova, sem movimento: traço em vez de NaN
 const q = (s) => document.querySelector(s);
 const soma = (l, f) => l.reduce((s, x) => s + f(x), 0);
 const quando = () => new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
-const UNIDADES = { ct: 'Contagem', bt: 'Betim', pp: 'Pampulha' };
+// unidades da rede: ficam nos dados (db.unidades); estas são as do exemplo
+const UN_EXEMPLO = { ct: 'Contagem', bt: 'Betim', pp: 'Pampulha' };
+const UNIDADES = {};
 function fabrica() {
   const mec = [['Robson', 'ct', 'Motor', 176, 171, 158], ['Diego', 'ct', 'Freios e suspensão', 176, 149, 162], ['Kauã', 'ct', 'Rápidos', 176, 120, 166], ['Fábio', 'bt', 'Elétrica e injeção', 176, 184, 160], ['Thaís', 'bt', 'Ar-condicionado', 176, 131, 150], ['Wesley', 'bt', 'Motor', 176, 97, 139], ['Renan', 'pp', 'Câmbio automático', 176, 192, 168], ['Jéssica', 'pp', 'Diagnóstico', 176, 158, 161], ['Otávio', 'pp', 'Freios e suspensão', 176, 140, 155]]
     .map(([nome, un, esp, disp, vend, trab], i) => ({ id: `m${i}`, nome, un, esp, disp, vend, trab }));
@@ -26,10 +28,19 @@ function fabrica() {
   const detratores = [{ id: 'd1', nome: 'Carla Nogueira', un: 'bt', nota: 3, motivo: 'Carro ficou 2 dias a mais esperando peça e ninguém avisou.', ligou: false }, { id: 'd2', nome: 'Sérgio Matos', un: 'bt', nota: 5, motivo: 'Cobrança diferente do orçamento.', ligou: false }, { id: 'd3', nome: 'Helena Dias', un: 'ct', nota: 4, motivo: 'Barulho voltou depois de uma semana.', ligou: false }];
   const recalls = [{ id: 'r1', titulo: 'Airbag do motorista · Honda Fit/City 2007-2014', clientes: 23, avisados: 0 }, { id: 'r2', titulo: 'Bomba de combustível · Toyota Corolla 2019', clientes: 9, avisados: 9 }];
   const garantias = [{ id: 'g1', peca: 'Bomba d’água (Compass)', fab: 'Nakata', valor: 486, status: 'enviada', dias: 12 }, { id: 'g2', peca: 'Módulo de injeção (Yaris)', fab: 'Bosch', valor: 2140, status: 'aprovada', dias: 21 }, { id: 'g3', peca: 'Amortecedor (HR-V)', fab: 'Cofap', valor: 690, status: 'a enviar', dias: 0 }];
-  return { rede: 'Rede Torque Auto Center', un: 'todas', mec, boxes, carros, dre, pecas, frotas, nps, detratores, recalls, garantias, meta: { efic: 0.95, ticket: 820 }, plano: 'basico', auditoria: [[quando(), 'Marina (gerente Betim)', 'deu desconto de 12% na OS 1184'], [quando(), 'Renan', 'estourou o tempo padrão da OS 2051 em 1,6 h'], [quando(), 'Sistema', 'importou 312 notas de entrada da SEFAZ']].map(([q1, quem, o]) => ({ q: q1, quem, o })), conversa: [] };
+  return { rede: 'Rede Torque Auto Center', un: 'todas', unidades: { ...UN_EXEMPLO }, mec, boxes, carros, dre, pecas, frotas, nps, detratores, recalls, garantias, meta: { efic: 0.95, ticket: 820 }, plano: 'basico', auditoria: [[quando(), 'Marina (gerente Betim)', 'deu desconto de 12% na OS 1184'], [quando(), 'Renan', 'estourou o tempo padrão da OS 2051 em 1,6 h'], [quando(), 'Sistema', 'importou 312 notas de entrada da SEFAZ']].map(([q1, quem, o]) => ({ q: q1, quem, o })), conversa: [] };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || fabrica(); } catch { return fabrica(); } })();
 window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
+// empresa que começou do zero trabalha com uma unidade, que dá para renomear; cada unidade nova ganha resultado, boxes e NPS zerados
+function lerUnidades() {
+  const u = db.unidades && typeof db.unidades === 'object' ? db.unidades : { ...UN_EXEMPLO };
+  Object.keys(UNIDADES).forEach((k) => delete UNIDADES[k]); Object.assign(UNIDADES, Object.keys(u).length ? u : { principal: 'Unidade principal' });
+  db.dre = db.dre || {}; db.boxes = db.boxes || {}; db.nps = db.nps || {};
+  Object.keys(UNIDADES).forEach((k) => { db.dre[k] = db.dre[k] || { mo: 0, pecas: 0, cmv: 0, comissoes: 0, fixas: 0 }; db.boxes[k] = db.boxes[k] || ['Box 1', 'Box 2', 'Box 3']; db.nps[k] = db.nps[k] || [0, 0, 0]; });
+  if (db.un !== 'todas' && !UNIDADES[db.un]) db.un = 'todas';
+}
+lerUnidades();
 const guarda = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { aviso('Sem espaço no navegador.'); } };
 const registra = (o) => { db.auditoria.unshift({ q: quando(), quem: 'Você (dono)', o }); db.auditoria = db.auditoria.slice(0, 40); };
 const daUn = (x) => db.un === 'todas' || x.un === db.un;
@@ -50,14 +61,14 @@ function janela(html, liga) {
 function ind() {
   const m = db.mec.filter(daUn), un = db.un === 'todas' ? Object.keys(UNIDADES) : [db.un];
   const d = un.reduce((a, k) => { Object.entries(db.dre[k]).forEach(([c, v]) => { a[c] = (a[c] || 0) + v; }); return a; }, {});
-  const receita = d.mo + d.pecas, os = Math.round(receita / 790);
+  const receita = d.mo + d.pecas, os = Math.round(receita / 790) || 0;
   const nps = un.reduce((a, k) => a.map((v, i) => v + db.nps[k][i]), [0, 0, 0]), totN = soma(nps, (x) => x);
   const bx = un.flatMap((k) => db.boxes[k].map((b, i) => db.carros.find((c) => c.un === k && c.box === i)));
   const p = db.pecas.filter(daUn);
   return {
     efic: soma(m, (x) => x.vend) / soma(m, (x) => x.trab), prod: soma(m, (x) => x.trab) / soma(m, (x) => x.disp),
-    ocup: bx.filter(Boolean).length / bx.length, ticket: receita / os, margem: (d.pecas - d.cmv) / d.pecas,
-    nps: Math.round((nps[0] - nps[2]) / totN * 100), giro: soma(p, (x) => x.vendas * x.custo) / soma(p, (x) => x.estoque * x.custo || 1), d, receita, os,
+    ocup: bx.filter(Boolean).length / bx.length, ticket: os ? receita / os : 0, margem: (d.pecas - d.cmv) / d.pecas,
+    nps: totN ? Math.round((nps[0] - nps[2]) / totN * 100) : 0, giro: soma(p, (x) => x.vendas * x.custo) / (soma(p, (x) => x.estoque * x.custo || 1) || 1), d, receita, os,
     resultado: receita - d.cmv - d.comissoes - d.fixas,
   };
 }
@@ -84,7 +95,7 @@ const M = {
     db.frotas.forEach((f) => f.proximas.filter((p) => p[2].includes('vencida')).forEach((p) => al.push(['#b5545c', `Preventiva vencida: ${p[1]} ${p[0]} da ${f.empresa}`, `Contrato com SLA de ${f.sla} h. Agende hoje para não pagar multa.`, 'frotas'])));
     db.detratores.filter((d) => !d.ligou && daUn(d)).forEach((d) => al.push(['#c9a45a', `${d.nome} deu nota ${d.nota} em ${UNIDADES[d.un]}`, d.motivo, 'posvenda']));
     db.garantias.filter((g) => g.status === 'a enviar').forEach((g) => al.push(['#a9a2c5', `Garantia de fabricante a enviar: ${g.peca}`, `${R$(g.valor)} para recuperar com a ${g.fab}.`, 'pecas']));
-    const un = Object.keys(UNIDADES).map((k) => { const d = db.dre[k], r = d.mo + d.pecas; return { k, r, res: r - d.cmv - d.comissoes - d.fixas, ef: soma(db.mec.filter((m) => m.un === k), (m) => m.vend) / soma(db.mec.filter((m) => m.un === k), (m) => m.trab), nps: Math.round((db.nps[k][0] - db.nps[k][2]) / (db.nps[k][0] + db.nps[k][1] + db.nps[k][2]) * 100) }; });
+    const un = Object.keys(UNIDADES).map((k) => { const d = db.dre[k], r = d.mo + d.pecas; return { k, r, res: r - d.cmv - d.comissoes - d.fixas, ef: soma(db.mec.filter((m) => m.un === k), (m) => m.vend) / soma(db.mec.filter((m) => m.un === k), (m) => m.trab), nps: Math.round((db.nps[k][0] - db.nps[k][2]) / ((db.nps[k][0] + db.nps[k][1] + db.nps[k][2]) || 1) * 100) }; });
     return `<div class="titulo"><div><h1>Cabine da rede</h1><p>${e(nomeUn())} · ${al.length} alertas para resolver hoje. Clique num mostrador para abrir o módulo.</p></div></div>
       <div class="malha"><section class="bloco c7"><h2>Alertas do turno</h2><ul class="alertas">${al.map(([c, t, s, m]) => `<li style="--c:${c}"><div><p><b>${e(t)}</b></p><small>${e(s)}</small></div><button class="bt pq" data-ir="${m}">Abrir</button></li>`).join('') || '<li style="--c:#4f8a73"><p>Nada fora do lugar.</p></li>'}</ul></section>
       <section class="bloco c5"><h2>Unidades lado a lado <small>· mês</small></h2><div class="rolagem"><table><thead><tr><th>Unidade</th><th class="d">Faturamento</th><th class="d">Resultado</th><th class="d">Efic.</th><th class="d">NPS</th></tr></thead><tbody>${un.map((u) => `<tr><td><b>${UNIDADES[u.k]}</b></td><td class="d">${R$(u.r)}</td><td class="d">${R$(u.res)}</td><td class="d">${pct(u.ef)}</td><td class="d">${u.nps}</td></tr>`).join('')}<tr><td><b>Rede</b></td><td class="d"><b>${R$(soma(un, (u) => u.r))}</b></td><td class="d"><b>${R$(soma(un, (u) => u.res))}</b></td><td></td><td></td></tr></tbody></table></div>
@@ -108,7 +119,7 @@ const M = {
       <section class="bloco c5"><h2>Onde está o lucro</h2><p class="rot" style="margin:0 0 6px">Margem da mão de obra (depois das comissões)</p><div class="trilha"><i style="width:${(d.mo - d.comissoes) / d.mo * 100}%"></i></div><p class="d" style="text-align:left">${pct((d.mo - d.comissoes) / d.mo)}</p><p class="rot" style="margin:10px 0 6px">Margem das peças</p><div class="trilha"><i class="v" style="width:${i.margem * 100}%"></i></div><p class="d" style="text-align:left">${pct(i.margem)}</p><p class="rot">Ponto de equilíbrio: ${R$(d.fixas / ((i.receita - d.cmv - d.comissoes) / i.receita))} de faturamento por mês.</p></section></div>`;
   },
   ticket(i) {
-    const un = Object.keys(UNIDADES).map((k) => ({ k, t: (db.dre[k].mo + db.dre[k].pecas) / Math.round((db.dre[k].mo + db.dre[k].pecas) / 790 * (k === 'bt' ? 1.12 : k === 'pp' ? 0.9 : 1)) }));
+    const un = Object.keys(UNIDADES).map((k) => ({ k, t: (db.dre[k].mo + db.dre[k].pecas) / (Math.round((db.dre[k].mo + db.dre[k].pecas) / 790 * (k === 'bt' ? 1.12 : k === 'pp' ? 0.9 : 1)) || 1) }));
     return `<div class="titulo"><div><h1>Ticket médio</h1><p>Valor médio por ordem de serviço. Meta: ${R$(db.meta.ticket)}.</p></div><div class="acoes"><button class="bt" data-a="meta">Mudar meta</button></div></div>
       <div class="malha"><div class="bloco c4"><span class="rot">Ticket de ${e(nomeUn())}</span><p class="num">${R$(i.ticket)}</p><span class="dif ${i.ticket >= db.meta.ticket ? 'sobe' : 'desce'}">${i.ticket >= db.meta.ticket ? 'acima' : 'abaixo'} da meta</span></div>
       <section class="bloco c8"><h2>Por unidade</h2><table><tbody>${un.map((u) => `<tr><td>${UNIDADES[u.k]}</td><td style="width:55%"><div class="trilha"><i style="width:${u.t / 1200 * 100}%"></i><b style="left:${db.meta.ticket / 1200 * 100}%"></b></div></td><td class="d">${R$(u.t)}</td></tr>`).join('')}</tbody></table>
@@ -147,13 +158,13 @@ const M = {
       <section class="bloco c5"><h2>Plano</h2><p>Assinatura · <b>${R$(pr)}/mês</b> por unidade</p><div class="acoes"><button class="bt ${db.plano === 'basico' ? 'forte' : ''}" data-a="plano" data-v="basico">Assinatura · R$ 229/mês</button></div><p class="rot">Equipe sem limite, histórico de quem fez o quê e até 10 empresas. Anual com 20% a menos. Sem fidelidade.</p></section></div>`;
   },
   ajustes() {
-    return `<div class="titulo"><div><h1>Ajustes</h1></div></div><section class="bloco" style="max-width:620px"><label class="campo">Nome da rede<input data-cfg="rede" value="${e(db.rede)}"></label><div class="par"><label class="campo">Meta de eficiência (%)<input data-cfg="efic" type="number" value="${Math.round(db.meta.efic * 100)}"></label><label class="campo">Meta de ticket (R$)<input data-cfg="ticket" type="number" value="${db.meta.ticket}"></label></div><p class="rot">Integrações da versão contratada: NF-e e NFS-e por unidade, notas de entrada da SEFAZ, WhatsApp oficial, catálogo de peças por placa e tabela de tempos da montadora (algumas têm custo à parte).</p></section>`;
+    return `<div class="titulo"><div><h1>Ajustes</h1></div></div><section class="bloco" style="max-width:620px"><label class="campo">Nome da rede<input data-cfg="rede" value="${e(db.rede)}"></label><div class="par"><label class="campo">Meta de eficiência (%)<input data-cfg="efic" type="number" value="${Math.round(db.meta.efic * 100)}"></label><label class="campo">Meta de ticket (R$)<input data-cfg="ticket" type="number" value="${db.meta.ticket}"></label></div><h2 style="margin-top:18px">Unidades</h2><ul class="alertas">${Object.entries(UNIDADES).map(([k, n]) => `<li><div><p><b>${e(n)}</b></p></div><span style="display:flex;gap:6px"><button class="bt" data-a="edita-unidade" data-k="${k}">Renomear</button>${Object.keys(UNIDADES).length > 1 ? `<button class="bt" data-a="tira-unidade" data-k="${k}">Tirar</button>` : ''}</span></li>`).join('')}</ul><p><button class="bt forte" data-a="nova-unidade">+ Nova unidade</button></p><p class="rot">Integrações da versão contratada: NF-e e NFS-e por unidade, notas de entrada da SEFAZ, WhatsApp oficial, catálogo de peças por placa e tabela de tempos da montadora (algumas têm custo à parte).</p></section>`;
   },
 };
 
 function desenha() {
   const at = location.hash.slice(1) || 'painel', i = ind();
-  q('#unidades').innerHTML = [['todas', 'Rede toda'], ...Object.entries(UNIDADES)].map(([k, n]) => `<button type="button" data-un="${k}" aria-pressed="${db.un === k}">${n}</button>`).join('');
+  q('#unidades').innerHTML = [['todas', 'Rede toda'], ...Object.entries(UNIDADES)].map(([k, n]) => `<button type="button" data-un="${k}" aria-pressed="${db.un === k}">${e(n)}</button>`).join('') + '<button type="button" data-a="nova-unidade" title="Cadastrar outra unidade">+ Unidade</button>';
   q('#instrumentos').innerHTML = MOSTRADORES.map(([k, t, f, s]) => { const [fr, txt] = f(i); return `<button type="button" class="mostrador" data-ir="${k}" ${at === k ? 'aria-current="page"' : ''}>${arco(fr, txt)}<small><b style="display:inline;font:600 .78rem Sora,sans-serif;margin:0">${t}</b><br>${e(typeof s === 'function' ? s(i) : s)}</small></button>`; }).join('')
     + `<div class="chaves"><button type="button" class="chave" data-ir="painel" ${at === 'painel' ? 'aria-current="page"' : ''}><i></i>Cabine</button>${CHAVES.map(([k, t, n]) => `<button type="button" class="chave" data-ir="${k}" ${at === k ? 'aria-current="page"' : ''}><i></i>${t}${n() ? `<span class="n-al">${n()}</span>` : ''}</button>`).join('')}</div>`;
   q('#area').innerHTML = (M[at] || M.painel)(i);
@@ -170,7 +181,7 @@ function responde(p) {
   const x = sa(p), i = ind();
   if (/abaixo|meta|lento|pior mecanic/.test(x)) { const l = db.mec.filter((m) => m.vend / m.trab < db.meta.efic); return `Abaixo da meta de ${pct(db.meta.efic)}:\n${l.map((m) => `• ${m.nome} (${UNIDADES[m.un]}): ${pct(m.vend / m.trab)}, ${m.trab - m.vend} h trabalhadas sem cobrar`).join('\n')}\n\nCada hora não cobrada é cerca de R$ 180 a menos.`; }
   if (/perd|dinheiro|vazamento/.test(x)) { const parados = db.carros.filter((c) => c.estado === 'parado'); return `Três vazamentos este mês:\n• ${soma(db.mec, (m) => Math.max(0, m.trab - m.vend))} h trabalhadas e não cobradas (≈ ${R$(soma(db.mec, (m) => Math.max(0, m.trab - m.vend)) * 180)}).\n• ${parados.length} boxes parados esperando peça (${parados.map((c) => `${c.modelo} em ${UNIDADES[c.un]}`).join(', ')}).\n• ${R$(soma(db.garantias.filter((g) => g.status === 'a enviar'), (g) => g.valor))} em garantia de fabricante ainda não pedida.`; }
-  if (/unidade|pior|melhor/.test(x)) { const l = Object.keys(UNIDADES).map((k) => { const d = db.dre[k], r = d.mo + d.pecas; return [k, (r - d.cmv - d.comissoes - d.fixas) / r]; }).sort((a, b) => a[1] - b[1]); return `Pior margem: ${UNIDADES[l[0][0]]} (${pct(l[0][1])}). Melhor: ${UNIDADES[l[2][0]]} (${pct(l[2][1])}).\nEm Betim o NPS está baixo e um box está parado há mais de um dia: comece por aí.`; }
+  if (/unidade|pior|melhor/.test(x)) { const l = Object.keys(UNIDADES).map((k) => { const d = db.dre[k], r = d.mo + d.pecas; return [k, (r - d.cmv - d.comissoes - d.fixas) / (r || 1)]; }).sort((a, b) => a[1] - b[1]); return `Pior margem: ${UNIDADES[l[0][0]]} (${pct(l[0][1])}). Melhor: ${UNIDADES[l[l.length - 1][0]]} (${pct(l[l.length - 1][1])}).\nEm Betim o NPS está baixo e um box está parado há mais de um dia: comece por aí.`; }
   if (/compr|semana|repor/.test(x)) return `Itens A com menos de 20 dias de estoque:\n${db.pecas.filter((p) => p.estoque / (p.vendas / 365) < 20).map((p) => `• ${p.nome} (${p.cod}): ${p.estoque} un.`).join('\n') || '• nenhum'}\nUse "Cotar reposição da classe A" em Peças.`;
   return `Faturamento de ${nomeUn()}: ${R$(i.receita)}, resultado ${R$(i.resultado)}, eficiência ${pct(i.efic)}, NPS ${i.nps}. Pergunte algo mais específico ou digite o nome de um módulo.`;
 }
@@ -186,6 +197,13 @@ function mostraSaida() {
   s.scrollTop = 1e6;
 }
 
+function formUnidade(k) {
+  janela(`<h2>${k ? 'Renomear unidade' : 'Nova unidade'}</h2><form><label class="campo">Nome da unidade<input name="n" required value="${k ? e(UNIDADES[k]) : ''}" placeholder="Ex.: Contagem"></label><div class="fim"><button type="button" class="bt" data-fecha>Cancelar</button><button class="bt forte">${k ? 'Salvar' : 'Cadastrar'}</button></div></form>`, (j, fecha) => j.querySelector('form').addEventListener('submit', (ev) => {
+    ev.preventDefault(); const nome = String(new FormData(ev.target).get('n')).trim();
+    const chave = k || nome.toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '').slice(0, 12) + Date.now().toString(36).slice(-3);
+    db.unidades = { ...UNIDADES, [chave]: nome }; lerUnidades(); registra(k ? `renomeou a unidade para ${nome}` : `cadastrou a unidade ${nome}`); guarda(); fecha(); desenha();
+  }));
+}
 const A = {
   meta: () => janela(`<h2>Metas</h2><form><div class="par"><label class="campo">Eficiência (%)<input name="ef" type="number" value="${Math.round(db.meta.efic * 100)}"></label><label class="campo">Ticket médio (R$)<input name="tk" type="number" value="${db.meta.ticket}"></label></div><div class="fim"><button type="button" class="bt" data-fecha>Cancelar</button><button class="bt forte">Salvar</button></div></form>`, (j, fecha) => j.querySelector('form').addEventListener('submit', (ev) => { ev.preventDefault(); const f = new FormData(ev.target); db.meta.efic = Number(f.get('ef')) / 100 || 0.95; db.meta.ticket = Number(f.get('tk')) || 820; registra(`mudou as metas para ${pct(db.meta.efic)} e ${R$(db.meta.ticket)}`); guarda(); fecha(); desenha(); })),
   liberar: (d) => { const c = db.carros.find((x) => x.un === d.k && x.box === Number(d.i)); c.box = -1; db.carros = db.carros.filter((x) => x.box >= 0); registra(`tirou ${c.modelo} do box e mandou para o pátio de espera`); guarda(); desenha(); aviso('Carro foi para o pátio de espera. Box livre para outro serviço.'); },
@@ -198,6 +216,9 @@ const A = {
   revisao: () => { registra('mandou 146 convites de revisão por km'); guarda(); aviso('146 convites de revisão programados: saem aos poucos, de manhã, pelo WhatsApp de cada unidade.'); },
   'agendar-frota': (d) => { const f = db.frotas.find((x) => x.id === d.f), p = f.proximas[Number(d.ix)]; p[2] = 'agendada amanhã 8h'; registra(`agendou preventiva do ${p[1]} ${p[0]} (${f.empresa})`); guarda(); desenha(); aviso(`Preventiva agendada e confirmação enviada ao gestor da ${f.empresa}.`); },
   fatura: (d) => { const f = db.frotas.find((x) => x.id === d.f); registra(`fechou a fatura mensal da ${f.empresa}`); guarda(); aviso(`Fatura de ${R$(f.mensal)} da ${f.empresa} gerada com boleto e notas de todas as OS do mês (demonstração).`); },
+  'nova-unidade': () => formUnidade(),
+  'edita-unidade': (d) => formUnidade(d.k),
+  'tira-unidade': (d) => { const n = UNIDADES[d.k]; if (!n || !confirm(`Tirar a unidade ${n}? O que já foi lançado nela continua guardado.`)) return; db.unidades = { ...UNIDADES }; delete db.unidades[d.k]; lerUnidades(); registra(`tirou a unidade ${n}`); guarda(); desenha(); },
   'nova-frota': () => janela('<h2>Novo contrato de frota</h2><form><label class="campo">Empresa<input name="e" required></label><div class="par"><label class="campo">Veículos<input name="v" type="number" value="5"></label><label class="campo">SLA (horas)<input name="s" type="number" value="48"></label></div><div class="par"><label class="campo">Preventiva<input name="p" value="a cada 10.000 km"></label><label class="campo">Valor mensal (R$)<input name="m" type="number" value="3000"></label></div><div class="fim"><button type="button" class="bt" data-fecha>Cancelar</button><button class="bt forte">Criar contrato</button></div></form>', (j, fecha) => j.querySelector('form').addEventListener('submit', (ev) => { ev.preventDefault(); const f = new FormData(ev.target); db.frotas.push({ id: `f${Date.now()}`, empresa: f.get('e'), veiculos: Number(f.get('v')), plano: f.get('p'), sla: Number(f.get('s')), mensal: Number(f.get('m')), proximas: [], cumprido: 1 }); registra(`criou contrato com ${f.get('e')}`); guarda(); fecha(); desenha(); })),
   plano: (d) => { db.plano = d.v; registra(`mudou o plano para ${d.v === 'pro' ? 'Pro' : 'Básico'}`); guarda(); desenha(); },
 };

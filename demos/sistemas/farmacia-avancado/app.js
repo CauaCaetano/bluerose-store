@@ -10,11 +10,13 @@ const x = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<':
 const sa = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const nv = (v) => Number(String(v ?? '').replace(/\./g, '').replace(',', '.')) || 0;
 const uid = () => `r${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
-const pc = (v) => `${Math.round(v * 100)}%`;
+const pc = (v) => (Number.isFinite(v) ? `${Math.round(v * 100)}%` : '—'); // loja nova sem meta: traço em vez de NaN
 const $ = (s) => document.querySelector(s);
 const quando = () => new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
-const LOJAS = { cd: { nome: 'Centro de distribuição', x: 380, y: 200, cd: true }, cen: { nome: 'Loja Centro', x: 150, y: 90 }, sav: { nome: 'Loja Savassi', x: 610, y: 80 }, con: { nome: 'Loja Contagem', x: 130, y: 320 }, bet: { nome: 'Loja Betim', x: 620, y: 320 } };
+// lojas da rede: ficam nos dados (db.lojasRede); estas são as do exemplo (posições do mapa são calculadas)
+const LOJAS_EXEMPLO = { cd: { nome: 'Centro de distribuição', cd: true }, cen: { nome: 'Loja Centro' }, sav: { nome: 'Loja Savassi' }, con: { nome: 'Loja Contagem' }, bet: { nome: 'Loja Betim' } };
+const LOJAS = {};
 function criar() {
   const lojas = { cen: { fat: 48200, meta: 52000, ticket: 61, generico: 0.38, perf: 0.17, ruptura: 6, vencendo: 14, perdas: 1840 }, sav: { fat: 61900, meta: 58000, ticket: 88, generico: 0.27, perf: 0.29, ruptura: 3, vencendo: 6, perdas: 920 }, con: { fat: 39400, meta: 45000, ticket: 49, generico: 0.46, perf: 0.11, ruptura: 11, vencendo: 22, perdas: 3260 }, bet: { fat: 35100, meta: 38000, ticket: 52, generico: 0.44, perf: 0.12, ruptura: 8, vencendo: 9, perdas: 1410 } };
   const transf = [['Protetor solar FPS 50', 'sav', 'cen', 18, 'parado há 94 dias na Savassi; vende 6/semana no Centro', 1078], ['Insulina glargina', 'cd', 'con', 6, 'ruptura em Contagem há 2 dias', 1290], ['Fralda geriátrica G', 'bet', 'con', 24, 'Betim com 5 meses de estoque; Contagem zerada', 1030], ['Vitamina D 50.000 UI', 'cen', 'sav', 30, 'vence em 70 dias no Centro; Savassi vende o triplo', 1170], ['Losartana 50 mg', 'cd', 'bet', 60, 'abaixo do mínimo em Betim', 590]].map(([prod, de, para, qtd, motivo, valor]) => ({ id: uid(), prod, de, para, qtd, motivo, valor, st: 'sugerida' }));
@@ -23,10 +25,34 @@ function criar() {
   const campanhas = [{ id: 'k1', ind: 'Laboratório Medley', prod: 'Linha de genéricos de uso contínuo', meta: 4000, vendido: 3120, verba: 0.06, fim: 9 }, { id: 'k2', ind: 'Nivea Sun', prod: 'Protetores solares', meta: 600, vendido: 248, verba: 0.08, fim: 9 }, { id: 'k3', ind: 'Bayer', prod: 'Analgésicos isentos de prescrição', meta: 2500, vendido: 2580, verba: 0.05, fim: 9 }];
   const perdas = [['con', 'Vencidos', 2140], ['con', 'Avaria no recebimento', 760], ['con', 'Furto (diferença de inventário)', 360], ['cen', 'Vencidos', 1320], ['cen', 'Avaria', 520], ['bet', 'Vencidos', 1110], ['bet', 'Furto (diferença de inventário)', 300], ['sav', 'Vencidos', 640], ['sav', 'Avaria', 280]].map(([loja, causa, valor]) => ({ loja, causa, valor }));
   const controlados = { cen: { pend: 0, div: 0 }, sav: { pend: 2, div: 0 }, con: { pend: 5, div: 2 }, bet: { pend: 0, div: 0 } };
-  return { rede: 'Rede FarmaJá', loja: 'todas', lojas, transf, compra, precos, campanhas, perdas, controlados, regraPreco: 3, audit: [[quando(), 'Gerente Contagem', 'ajustou estoque de Rivotril 2 mg (−2) sem justificativa'], [quando(), 'Sistema', 'importou 18 notas de entrada do CD']].map(([q, quem, o]) => ({ q, quem, o })), plano: 'basico', resp: null };
+  return { rede: 'Rede FarmaJá', loja: 'todas', lojasRede: JSON.parse(JSON.stringify(LOJAS_EXEMPLO)), lojas, transf, compra, precos, campanhas, perdas, controlados, regraPreco: 3, audit: [[quando(), 'Gerente Contagem', 'ajustou estoque de Rivotril 2 mg (−2) sem justificativa'], [quando(), 'Sistema', 'importou 18 notas de entrada do CD']].map(([q, quem, o]) => ({ q, quem, o })), plano: 'basico', resp: null };
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || criar(); } catch { return criar(); } })();
 window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
+// rede que começou do zero: o CD e uma loja, que dá para renomear; loja nova ganha números zerados
+function lerLojas() {
+  const r = db.lojasRede && typeof db.lojasRede === 'object' && Object.keys(db.lojasRede).length ? db.lojasRede : (db.lojasRede ? { cd: { nome: 'Centro de distribuição', cd: true }, principal: { nome: 'Loja principal' } } : JSON.parse(JSON.stringify(LOJAS_EXEMPLO)));
+  Object.keys(LOJAS).forEach((k) => delete LOJAS[k]); Object.assign(LOJAS, JSON.parse(JSON.stringify(r)));
+  const cds = Object.keys(LOJAS).filter((k) => LOJAS[k].cd), ls = Object.keys(LOJAS).filter((k) => !LOJAS[k].cd);
+  cds.forEach((k, i) => Object.assign(LOJAS[k], { x: 380 + i * 200, y: 200 }));
+  ls.forEach((k, i) => { const a = (i / ls.length) * Math.PI * 2 - Math.PI * 0.8; Object.assign(LOJAS[k], { x: Math.round(380 + Math.cos(a) * 255), y: Math.round(200 + Math.sin(a) * 135) }); });
+  db.lojas = db.lojas || {}; db.controlados = db.controlados || {};
+  ls.forEach((k) => { db.lojas[k] = db.lojas[k] || { fat: 0, meta: 0, ticket: 0, generico: 0, perf: 0, ruptura: 0, vencendo: 0, perdas: 0 }; db.controlados[k] = db.controlados[k] || { pend: 0, div: 0 }; });
+  Object.keys(db.lojas).forEach((k) => { if (!LOJAS[k]) delete db.lojas[k]; });
+  if (db.loja !== 'todas' && !LOJAS[db.loja]) db.loja = 'todas';
+}
+lerLojas();
+function formLoja(k) {
+  const d = document.createElement('dialog'); d.className = 'cx'; d.style.cssText = 'max-width:420px;width:calc(100% - 32px);border:0;border-radius:14px;padding:22px';
+  d.innerHTML = `<form method="dialog"><h2 style="margin-top:0">${k ? 'Renomear loja' : 'Nova loja'}</h2><label style="display:grid;gap:6px;margin-bottom:14px">Nome<input name="n" required value="${k ? x(LOJAS[k].nome) : ''}" placeholder="Ex.: Loja Barreiro" style="padding:10px;border:1px solid var(--nevoa);border-radius:8px;font:inherit"></label>${k ? '' : '<label style="display:flex;gap:8px;align-items:center;margin-bottom:14px"><input type="checkbox" name="cd"> É um centro de distribuição</label>'}<div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="bt x" data-sair>Cancelar</button><button class="bt a">${k ? 'Salvar' : 'Cadastrar'}</button></div></form>`;
+  document.body.append(d); d.showModal(); d.querySelector('input').focus();
+  d.querySelector('[data-sair]').addEventListener('click', () => d.close()); d.addEventListener('close', () => d.remove());
+  d.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); const f = new FormData(e.target), nome = String(f.get('n')).trim(); if (!nome) return;
+    const chave = k || nome.toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '').slice(0, 10) + Date.now().toString(36).slice(-3);
+    const r = {}; Object.keys(LOJAS).forEach((c) => { r[c] = { nome: LOJAS[c].nome, ...(LOJAS[c].cd ? { cd: true } : {}) }; });
+    r[chave] = { ...(r[chave] || {}), nome, ...(f.get('cd') ? { cd: true } : {}) }; db.lojasRede = r; lerLojas();
+    anota(k ? `renomeou a loja para ${nome}` : `cadastrou a loja ${nome}`); grava(); d.close(); monta(); });
+}
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { sinal('Sem espaço no navegador.'); } };
 const anota = (o) => { db.audit.unshift({ q: quando(), quem: 'Você (diretoria)', o }); db.audit = db.audit.slice(0, 50); };
 const daLoja = (k) => db.loja === 'todas' || k === db.loja;
@@ -40,9 +66,9 @@ const MODS = [['mapa', 'Mapa da rede'], ['transferencias', 'Transferências'], [
 const M = {
   mapa() {
     const ls = Object.entries(db.lojas), fat = ls.filter(([k]) => daLoja(k)).reduce((s, [, l]) => s + l.fat, 0), sug = db.transf.filter((t) => t.st === 'sugerida');
-    const no = (k) => { const p = LOJAS[k], l = db.lojas[k], sel = db.loja === k; return `<g class="no" data-loja-mapa="${k}" tabindex="0" role="button" aria-label="${p.nome}"><rect x="${p.x - 95}" y="${p.y - 40}" width="190" height="80" rx="10" fill="${p.cd ? '#1e2633' : '#fbf9f5'}" stroke="${sel ? '#d9a441' : p.cd ? '#1e2633' : '#c8cdd3'}" stroke-width="${sel ? 3 : 1.5}"/><text x="${p.x}" y="${p.y - 16}" text-anchor="middle" font-weight="700" font-size="15" fill="${p.cd ? '#f2eee6' : '#1d2430'}">${p.nome}</text>${p.cd ? `<text x="${p.x}" y="${p.y + 8}" text-anchor="middle" font-size="12" fill="#c8cdd3">abastece as 4 lojas</text><text x="${p.x}" y="${p.y + 26}" text-anchor="middle" font-size="12" fill="#d9a441">${db.transf.filter((t) => t.de === 'cd' && t.st !== 'feita').length} saídas sugeridas</text>` : `<text x="${p.x}" y="${p.y + 6}" text-anchor="middle" font-size="13" fill="#535d6b" font-family="DM Mono">${R$(l.fat)} · ${pc(l.fat / l.meta)}</text><text x="${p.x}" y="${p.y + 26}" text-anchor="middle" font-size="12" fill="${l.ruptura > 7 ? '#b24a3f' : '#535d6b'}">${l.ruptura} em falta · ${l.vencendo} vencendo</text>`}</g>`; };
+    const no = (k) => { const p = LOJAS[k], l = db.lojas[k], sel = db.loja === k; return `<g class="no" data-loja-mapa="${k}" tabindex="0" role="button" aria-label="${p.nome}"><rect x="${p.x - 95}" y="${p.y - 40}" width="190" height="80" rx="10" fill="${p.cd ? '#1e2633' : '#fbf9f5'}" stroke="${sel ? '#d9a441' : p.cd ? '#1e2633' : '#c8cdd3'}" stroke-width="${sel ? 3 : 1.5}"/><text x="${p.x}" y="${p.y - 16}" text-anchor="middle" font-weight="700" font-size="15" fill="${p.cd ? '#f2eee6' : '#1d2430'}">${p.nome}</text>${p.cd ? `<text x="${p.x}" y="${p.y + 8}" text-anchor="middle" font-size="12" fill="#c8cdd3">abastece ${Object.keys(LOJAS).filter((c) => !LOJAS[c].cd).length} loja(s)</text><text x="${p.x}" y="${p.y + 26}" text-anchor="middle" font-size="12" fill="#d9a441">${db.transf.filter((t) => t.de === 'cd' && t.st !== 'feita').length} saídas sugeridas</text>` : `<text x="${p.x}" y="${p.y + 6}" text-anchor="middle" font-size="13" fill="#535d6b" font-family="DM Mono">${R$(l.fat)} · ${pc(l.fat / l.meta)}</text><text x="${p.x}" y="${p.y + 26}" text-anchor="middle" font-size="12" fill="${l.ruptura > 7 ? '#b24a3f' : '#535d6b'}">${l.ruptura} em falta · ${l.vencendo} vencendo</text>`}</g>`; };
     const seta = (t) => { const a = LOJAS[t.de], b = LOJAS[t.para], lado = t.de < t.para ? -1 : 1, mx = (a.x + b.x) / 2 + (a.y === b.y ? 0 : lado * 40), my = (a.y + b.y) / 2 + lado * 45; const enc = (p, q) => { const dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy); const k = Math.min(108 / Math.abs(dx || 1e-6), 54 / Math.abs(dy || 1e-6)); return [p.x + dx * Math.min(k, 1), p.y + dy * Math.min(k, 1)]; }; const [x1, y1] = enc(a, { x: mx, y: my }), [x2, y2] = enc(b, { x: mx, y: my }); return `<path class="seta" d="M${x1},${y1} Q${mx},${my} ${x2},${y2}"><title>${x(t.prod)}: ${t.qtd} un. de ${nomeL(t.de)} para ${nomeL(t.para)}</title></path>`; };
-    return `<div class="topo-m"><div><h1>Mapa da rede</h1><p>As setas são transferências sugeridas: produto parado numa loja e em falta na outra. Clique numa loja para filtrar tudo por ela.</p></div><div class="bts"><a class="bt a" href="#transferencias">Ver ${sug.length} transferências</a></div></div>
+    return `<div class="topo-m"><div><h1>Mapa da rede</h1><p>As setas são transferências sugeridas: produto parado numa loja e em falta na outra. Clique numa loja para filtrar tudo por ela.</p></div><div class="bts"><button class="bt x" data-a="nova-loja">+ Nova loja</button><a class="bt a" href="#transferencias">Ver ${sug.length} transferências</a></div></div>
       <div class="grade" style="margin-bottom:14px"><div class="cx l3 nm"><small>Faturamento do mês</small><b>${R$(fat)}</b><span>${db.loja === 'todas' ? 'rede' : nomeL(db.loja)}</span></div><div class="cx l3 nm"><small>Itens em falta</small><b class="mau">${ls.filter(([k]) => daLoja(k)).reduce((s, [, l]) => s + l.ruptura, 0)}</b><span>ruptura de gôndola</span></div><div class="cx l3 nm"><small>Vencendo em 90 dias</small><b>${ls.filter(([k]) => daLoja(k)).reduce((s, [, l]) => s + l.vencendo, 0)}</b><span>lotes</span></div><div class="cx l3 nm"><small>Transferir libera</small><b class="bom">${R$(sug.reduce((s, t) => s + t.valor, 0))}</b><span>em estoque parado</span></div></div>
       <section class="cx mapa"><svg viewBox="0 0 760 400" role="img" aria-label="Mapa esquemático das lojas e do centro de distribuição"><defs><marker id="ponta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#d9a441"/></marker></defs>${sug.map(seta).join('')}${Object.keys(LOJAS).map(no).join('')}</svg></section>`;
   },
@@ -66,10 +92,10 @@ const M = {
       <div class="grade">${db.campanhas.map((c) => { const r = c.vendido / c.meta, ganho = c.vendido * 12 * c.verba; return `<section class="cx l4"><h2>${x(c.ind)} <small>· ${x(c.prod)}</small></h2><p class="nm" style="margin:0"><b>${c.vendido.toLocaleString('pt-BR')} / ${c.meta.toLocaleString('pt-BR')}</b></p><div class="barra"><i style="width:${Math.min(100, r * 100)}%;--c:${r >= 1 ? '#457a5c' : r >= 0.7 ? '#d9a441' : '#b24a3f'}"></i></div><p style="color:var(--tx-2);font-size:.86rem">${r >= 1 ? `Meta batida: verba de ${pc(c.verba)} ≈ ${R$(ganho)}.` : `Faltam ${(c.meta - c.vendido).toLocaleString('pt-BR')} un. (${Math.ceil((c.meta - c.vendido) / c.fim)} por dia). Verba em jogo ≈ ${R$(c.meta * 12 * c.verba)}.`}</p>${r < 1 ? `<button class="bt x a" data-campanha="${c.id}">Mandar às lojas: exposição e meta do dia</button>` : ''}</section>`; }).join('')}</div>`;
   },
   perdas() {
-    const l = db.perdas.filter((p) => daLoja(p.loja)), tot = l.reduce((s, p) => s + p.valor, 0), porLoja = Object.keys(db.lojas).map((k) => ({ k, v: db.perdas.filter((p) => p.loja === k).reduce((s, p) => s + p.valor, 0), fat: db.lojas[k].fat })), mx = Math.max(...porLoja.map((p) => p.v / p.fat));
+    const l = db.perdas.filter((p) => daLoja(p.loja)), tot = l.reduce((s, p) => s + p.valor, 0), porLoja = Object.keys(db.lojas).map((k) => ({ k, v: db.perdas.filter((p) => p.loja === k).reduce((s, p) => s + p.valor, 0), fat: db.lojas[k].fat })), mx = Math.max(1e-9, ...porLoja.map((p) => (p.fat ? p.v / p.fat : 0)));
     return `<div class="topo-m"><div><h1>Perdas</h1><p>Vencidos, avarias e diferença de inventário. Acima de 3% do faturamento é sinal de problema na loja.</p></div></div>
       <div class="grade"><div class="cx l4 nm"><small>Perdas no mês</small><b class="mau">${R$(tot)}</b><span>${db.loja === 'todas' ? 'rede' : nomeL(db.loja)}</span></div>
-      <section class="cx l8"><h2>Perda sobre o faturamento</h2><table><tbody>${porLoja.map((p) => `<tr><td>${nomeL(p.k)}</td><td style="width:50%"><div class="barra"><i style="width:${p.v / p.fat / mx * 100}%;--c:${p.v / p.fat > 0.03 ? '#b24a3f' : '#5e6b7a'}"></i><b style="left:${0.03 / mx * 100}%"></b></div></td><td class="dir">${(p.v / p.fat * 100).toFixed(1).replace('.', ',')}%</td></tr>`).join('')}</tbody></table></section>
+      <section class="cx l8"><h2>Perda sobre o faturamento</h2><table><tbody>${porLoja.map((p) => `<tr><td>${nomeL(p.k)}</td><td style="width:50%"><div class="barra"><i style="width:${(p.fat ? p.v / p.fat : 0) / mx * 100}%;--c:${(p.fat ? p.v / p.fat : 0) > 0.03 ? '#b24a3f' : '#5e6b7a'}"></i><b style="left:${0.03 / mx * 100}%"></b></div></td><td class="dir">${((p.fat ? p.v / p.fat : 0) * 100).toFixed(1).replace('.', ',')}%</td></tr>`).join('')}</tbody></table></section>
       <section class="cx l12 rolo"><table><thead><tr><th>Loja</th><th>Causa</th><th class="dir">Valor</th></tr></thead><tbody>${l.sort((a, b) => b.valor - a.valor).map((p) => `<tr><td>${nomeL(p.loja)}</td><td>${x(p.causa)}</td><td class="dir">${R$(p.valor)}</td></tr>`).join('')}</tbody></table></section></div>`;
   },
   controlados() {
@@ -91,7 +117,7 @@ const M = {
 
 function monta() {
   const r = location.hash.slice(1) || 'mapa', n = { transferencias: db.transf.filter((t) => t.st === 'sugerida').length, controlados: Object.values(db.controlados).filter((c) => c.pend || c.div).length };
-  $('#arvore').innerHTML = `<h3>REDE</h3><ul>${MODS.map(([k, t]) => `<li><a href="#${k}" ${k === r ? 'aria-current="page"' : ''}>${t}${n[k] ? `<span class="n">${n[k]}</span>` : ''}</a></li>`).join('')}</ul><h3>LOJAS</h3><ul>${[['todas', 'Todas'], ...Object.keys(db.lojas).map((k) => [k, nomeL(k).replace('Loja ', '')])].map(([k, t]) => `<li><button type="button" data-loja="${k}" aria-pressed="${db.loja === k}">${t}</button></li>`).join('')}</ul>`;
+  $('#arvore').innerHTML = `<h3>REDE</h3><ul>${MODS.map(([k, t]) => `<li><a href="#${k}" ${k === r ? 'aria-current="page"' : ''}>${t}${n[k] ? `<span class="n">${n[k]}</span>` : ''}</a></li>`).join('')}</ul><h3>LOJAS</h3><ul>${[['todas', 'Todas'], ...Object.keys(db.lojas).map((k) => [k, nomeL(k).replace('Loja ', '')])].map(([k, t]) => `<li><button type="button" data-loja="${k}" aria-pressed="${db.loja === k}">${x(t)}</button></li>`).join('')}<li><button type="button" data-a="nova-loja">+ Nova loja</button></li>${db.loja !== 'todas' ? `<li><button type="button" data-a="renomeia-loja" data-k="${db.loja}">Renomear ${x(nomeL(db.loja).replace('Loja ', ''))}</button></li>` : ''}</ul>`;
   $('#miolo').innerHTML = (db.resp ? `<div class="resp"><button type="button" data-fecha-r aria-label="Fechar">×</button><span class="q">${x(db.resp.q)}</span>${x(db.resp.r)}\n\n<small style="color:var(--tx-3)">Resposta de exemplo da demonstração. Na versão contratada, 20 perguntas grátis por dia.</small></div>` : '') + (M[r] || M.mapa)();
   $('#rede').textContent = db.rede;
   document.title = `${(MODS.find(([k]) => k === r) || MODS[0])[1]} · Veltria Farmácia Avançado`;
@@ -109,6 +135,8 @@ function responde(q) {
 }
 
 const A = {
+  'nova-loja': () => formLoja(),
+  'renomeia-loja': (d) => formLoja(d.k),
   'aprovar-todas': () => { const l = db.transf.filter((t) => t.st === 'sugerida' && (daLoja(t.de) || daLoja(t.para))); l.forEach((t) => { t.st = 'aprovada'; }); anota(`aprovou ${l.length} transferência(s)`); grava(); monta(); sinal(`${l.length} romaneios gerados para o motorista do CD.`); },
   pedidos: () => { anota('gerou os pedidos da compra central'); grava(); sinal('Três pedidos enviados às distribuidoras (demonstração). Entrega prevista em 24 h no CD.'); },
   plano: (d) => { db.plano = d.v; grava(); monta(); },

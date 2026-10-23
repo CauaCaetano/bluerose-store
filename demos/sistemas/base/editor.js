@@ -124,7 +124,7 @@
       cx.innerHTML = '<p><button type="button" class="ve-volta" data-ve-lista="' + l + '">‹ ' + esc(nomeLista(l)) + '</button></p><h2>' + (novo ? 'Adicionar' : 'Editar') + '</h2><form class="ve-form">' +
         campos.map(function (c) {
           var val = base[c], rel = relativos[l + '.' + c], ref = refs[l + '.' + c], nome = 'c_' + c;
-          if (ref) return '<label>' + esc(rotulo(c)) + '<select name="' + nome + '"><option value=""></option>' + opcoes(ref).map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === val ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select></label>';
+          if (ref) return '<label>' + esc(rotulo(c)) + '<select name="' + nome + '" data-ve-ref="' + esc(ref) + '"><option value=""></option>' + opcoes(ref).map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === val ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + (Array.isArray(d[ref]) ? '<option value="__ve_novo">+ Cadastrar novo…</option>' : '') + '</select></label>';
           var fx = fixos[l + '.' + c];
           if (fx && typeof val === 'string' && FECHADO.test(c)) return '<label>' + esc(rotulo(c)) + '<select name="' + nome + '">' + fx.map(function (x) { return '<option' + (x === val ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select></label>';
           if (fx && typeof val === 'string') return '<label>' + esc(rotulo(c)) + '<input name="' + nome + '" list="ve-dl-' + c + '" value="' + esc(novo ? '' : val) + '" placeholder="Escolha ou escreva"><datalist id="ve-dl-' + c + '">' + fx.map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist></label>';
@@ -134,6 +134,28 @@
           if (typeof val === 'number') return '<label>' + esc(rotulo(c)) + '<input type="number" step="any" name="' + nome + '" value="' + (novo ? '' : val) + '"></label>';
           return '<label>' + esc(rotulo(c)) + '<input name="' + nome + '" value="' + esc(novo ? '' : val) + '"></label>';
         }).join('') + '<p class="vc-mudo" data-ve-salvo></p><button class="vc-bt">Salvar</button></form>';
+      // campo de cadastro (cliente, serviço, processo…): "+ Cadastrar novo…" cria o item na outra lista sem sair deste formulário
+      cx.querySelectorAll('select[data-ve-ref]').forEach(function (s) {
+        var antes = s.value;
+        s.addEventListener('change', function () {
+          if (s.value !== '__ve_novo') { antes = s.value; return; }
+          s.value = antes; s.hidden = true;
+          var i = document.createElement('input'); i.placeholder = 'Nome do novo cadastro e Enter'; i.setAttribute('aria-label', 'Nome do novo cadastro');
+          s.parentNode.insertBefore(i, s.nextSibling); i.focus(); var feito = false;
+          function fim(ok) {
+            if (feito) return; feito = true; var t = i.value.trim(); i.remove(); s.hidden = false;
+            if (!ok || !t) return;
+            var alvo = s.dataset.veRef, mod = d[alvo][0] || modelos[alvo] || {}, item = branco(mod);
+            var campo = ['nome', 'n', 'cli', 'titulo', 'desc', 'razao', 'prod'].find(function (k) { return k in item; }) || Object.keys(item).find(function (k) { return k !== 'id' && typeof item[k] === 'string'; }) || 'nome';
+            item[campo] = t; poeId(alvo, item); d[alvo].push(item);
+            var op = document.createElement('option'); op.value = item.id; op.textContent = t; s.insertBefore(op, s.querySelector('option[value="__ve_novo"]'));
+            s.value = antes = item.id;
+            var m = cx.querySelector('[data-ve-salvo]'); if (m) m.textContent = '"' + t + '" entra em ' + nomeLista(alvo) + ' quando você salvar. Complete os dados depois.';
+          }
+          i.addEventListener('keydown', function (k) { if (k.key === 'Enter') { k.preventDefault(); fim(true); } if (k.key === 'Escape') { k.preventDefault(); k.stopPropagation(); fim(false); } });
+          i.addEventListener('blur', function () { fim(true); });
+        });
+      });
       cx.querySelector('form').onsubmit = function (e) {
         e.preventDefault(); var f = e.target, item = novo ? base : d[l][i];
         campos.forEach(function (c) {

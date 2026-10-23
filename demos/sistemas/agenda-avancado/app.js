@@ -13,18 +13,20 @@ const pc = (v) => `${Math.round(v * 100)}%`;
 const $ = (s) => document.querySelector(s);
 const quando = () => new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
-const UN = { sav: { nome: 'Savassi', cadeiras: 6 }, lou: { nome: 'Lourdes', cadeiras: 4 }, pam: { nome: 'Pampulha', cadeiras: 5 } };
+// unidades da rede: ficam nos dados (db.unidades); estas são as do exemplo
+const UN_EXEMPLO = { sav: { nome: 'Savassi', cadeiras: 6 }, lou: { nome: 'Lourdes', cadeiras: 4 }, pam: { nome: 'Pampulha', cadeiras: 5 } };
+const UN = {};
 const DIAS = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'], HORAS = Array.from({ length: 12 }, (_, i) => 8 + i), TICKET = 128;
 // ocupação de exemplo: fim de semana e fim de tarde cheios, segunda e terça de manhã vazias
 function ocup(u, d, h) {
   const bd = [0.38, 0.42, 0.55, 0.6, 0.82, 0.93, 0.2][d], bh = [-0.22, -0.12, -0.02, 0.04, -0.1, -0.14, 0, 0.06, 0.12, 0.18, 0.14, -0.04][h - 8];
-  const ru = ((u.charCodeAt(0) * 31 + d * 17 + h * 13) % 23) / 100 - 0.1, fu = { sav: 0.06, lou: -0.04, pam: -0.1 }[u];
+  const ru = ((u.charCodeAt(0) * 31 + d * 17 + h * 13) % 23) / 100 - 0.1, fu = { sav: 0.06, lou: -0.04, pam: -0.1 }[u] || 0;
   return d === 6 && h > 13 ? 0 : Math.max(0.03, Math.min(1, bd + bh + ru + fu));
 }
 
 function semear() {
   return {
-    un: 'todas', rede: 'Maison Íris', ofertas: [], desconto: 15, celSel: null,
+    un: 'todas', rede: 'Maison Íris', ofertas: [], desconto: 15, celSel: null, unidades: JSON.parse(JSON.stringify(UN_EXEMPLO)),
     planos: [{ id: 'esc', nome: 'Escova ilimitada', preco: 189, assin: 142, uso: 5.2, custoUso: 14 }, { id: 'unh', nome: 'Unhas do mês (4 mãos + 2 pés)', preco: 129, assin: 96, uso: 5.1, custoUso: 9 }, { id: 'bar', nome: 'Barba e cabelo ilimitado', preco: 109, assin: 61, uso: 3.4, custoUso: 11 }],
     recusados: [{ id: 'r1', nome: 'Paula Siqueira', plano: 'Escova ilimitada', tentativas: 1 }, { id: 'r2', nome: 'Diego Moraes', plano: 'Barba e cabelo ilimitado', tentativas: 2 }, { id: 'r3', nome: 'Ingrid Lacerda', plano: 'Unhas do mês', tentativas: 1 }],
     rfm: [{ k: 'camp', nome: 'Campeãs', c: '#39283f', n: 312, v: 214000, dica: 'vêm todo mês e gastam muito', msg: 'Convite para o lançamento antes de todo mundo', env: false }, { k: 'fieis', nome: 'Fiéis', c: '#4d3755', n: 688, v: 251000, dica: 'vêm sempre, ticket médio', msg: 'Oferta do clube de assinatura', env: false }, { k: 'risco', nome: 'Em risco', c: '#9c7a9e', n: 241, v: 88000, dica: 'eram fiéis, não vêm há 60 dias', msg: 'Sentimos sua falta: hidratação de cortesia na próxima escova', env: false }, { k: 'sumidas', nome: 'Sumidas', c: '#858a9b', n: 905, v: 0, dica: 'mais de 120 dias sem vir', msg: '20% em qualquer serviço de segunda a quarta', env: false }, { k: 'novas', nome: 'Novas', c: '#b68b45', n: 134, v: 31000, dica: 'vieram uma vez este mês', msg: 'Volte em 30 dias e ganhe a escova', env: false }],
@@ -41,6 +43,9 @@ window.veltriaDados = () => db;
 const estrelas = (n) => Math.max(0, Math.min(5, Math.round(Number(n) || 0))); // modo conta: começar do zero e resumo para a IA
 const salva = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { recado('Sem espaço no navegador.'); } };
 const anota = (o) => { db.log.unshift({ q: quando(), quem: 'Você (dona)', o }); db.log = db.log.slice(0, 50); };
+// empresa sem unidade cadastrada (começou do zero) trabalha com uma, que dá para renomear
+function lerUnidades() { const u = db.unidades && typeof db.unidades === 'object' ? db.unidades : JSON.parse(JSON.stringify(UN_EXEMPLO)); Object.keys(UN).forEach((k) => delete UN[k]); Object.assign(UN, Object.keys(u).length ? u : { principal: { nome: 'Unidade principal', cadeiras: 4 } }); if (db.un !== 'todas' && !UN[db.un]) db.un = 'todas'; }
+lerUnidades();
 const unidades = () => (db.un === 'todas' ? Object.keys(UN) : [db.un]);
 const occ = (d, h) => unidades().reduce((s, u) => s + ocup(u, d, h) * UN[u].cadeiras, 0) / unidades().reduce((s, u) => s + UN[u].cadeiras, 0);
 const nomeUn = () => (db.un === 'todas' ? 'toda a rede' : UN[db.un].nome);
@@ -97,8 +102,8 @@ const L = {
   },
   unidades() {
     const l = Object.entries(UN).map(([k, u]) => { const o = DIAS.reduce((s, _, d) => s + HORAS.reduce((t, h) => t + ocup(k, d, h), 0), 0) / 84, eq = db.equipe.filter((p) => p.un === k), av = db.avaliacoes.filter((a) => a.un === k); return { k, u, o, fat: eq.reduce((s, p) => s + p.real, 0), meta: eq.reduce((s, p) => s + p.meta, 0), nota: av.length ? av.reduce((s, a) => s + a.nota, 0) / av.length : 0 }; });
-    return `<div class="abre"><div><h1>As três <i>casas</i></h1><p>Lado a lado no mês.</p></div></div>
-      <div class="mosaico">${l.map((x1) => `<section class="peca m4"><h2>${x1.u.nome} <small>· ${x1.u.cadeiras} cadeiras</small></h2><p class="grande">${R$(x1.fat)}</p><p class="leve" style="margin:0 0 8px">${pc(x1.fat / x1.meta)} da meta · ocupação ${pc(x1.o)} · nota ${x1.nota.toFixed(1).replace('.', ',')}</p><div class="trilho"><i style="width:${x1.o * 100}%"></i></div></section>`).join('')}</div>`;
+    return `<div class="abre"><div><h1>${l.length === 1 ? 'A sua' : `As ${l.length}`} <i>${l.length === 1 ? 'casa' : 'casas'}</i></h1><p>Lado a lado no mês. Cadastre cada unidade para separar agenda, metas e avaliações.</p></div><button class="bt b" data-a="nova-unidade">+ Nova unidade</button></div>
+      <div class="mosaico">${l.map((x1) => `<section class="peca m4"><h2>${x(x1.u.nome)} <small>· ${x1.u.cadeiras} cadeiras</small></h2><p class="grande">${R$(x1.fat)}</p><p class="leve" style="margin:0 0 8px">${x1.meta ? pc(x1.fat / x1.meta) : '—'} da meta · ocupação ${pc(x1.o)} · nota ${x1.nota.toFixed(1).replace('.', ',')}</p><div class="trilho"><i style="width:${x1.o * 100}%"></i></div><p style="margin:12px 0 0;display:flex;gap:8px"><button class="bt mini" data-a="edita-unidade" data-k="${x1.k}">Editar</button>${l.length > 1 ? `<button class="bt mini" data-a="tira-unidade" data-k="${x1.k}">Tirar</button>` : ''}</p></section>`).join('')}</div>`;
   },
   avaliacoes() {
     const pend = db.avaliacoes.filter((a) => !a.resp);
@@ -117,7 +122,7 @@ const L = {
 
 function monta() {
   const r = location.hash.slice(1) || 'ocupacao', n = { clube: db.recusados.length, avaliacoes: db.avaliacoes.filter((a) => !a.resp && a.nota <= 3).length };
-  $('#unidades').innerHTML = [['todas', 'Rede toda'], ...Object.entries(UN).map(([k, u]) => [k, u.nome])].map(([k, nm]) => `<button type="button" data-un="${k}" aria-pressed="${db.un === k}">${nm}</button>`).join('');
+  $('#unidades').innerHTML = [['todas', 'Rede toda'], ...Object.entries(UN).map(([k, u]) => [k, u.nome])].map(([k, nm]) => `<button type="button" data-un="${k}" aria-pressed="${db.un === k}">${x(nm)}</button>`).join('') + '<button type="button" data-a="nova-unidade" title="Cadastrar outra unidade">+ Unidade</button>';
   $('#doca').innerHTML = LENTES.map(([k, nm], i) => `${i === 7 ? '<span class="sep"></span>' : ''}<a href="#${k}" ${k === r ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>${nm}${n[k] ? `<span class="n">${n[k]}</span>` : ''}</a>`).join('') + `<span class="sep"></span><button type="button" data-ia><svg viewBox="0 0 24 24" aria-hidden="true">${ICO.ia}</svg>Conselheira</button>`;
   $('#palco').innerHTML = (L[r] || L.ocupacao)();
   $('#rede').textContent = db.rede;
@@ -140,11 +145,23 @@ function responde(p) {
   return `Ocupação de ${nomeUn()}: ${pc(DIAS.reduce((s, _, d) => s + HORAS.reduce((t, h) => t + occ(d, h), 0), 0) / 84)}. Clube: ${db.planos.reduce((s, pl) => s + pl.assin, 0)} assinantes.`;
 }
 
+function formUnidade(k) {
+  const u = k ? UN[k] : { nome: '', cadeiras: 4 };
+  cartao(`<h2>${k ? 'Editar unidade' : 'Nova unidade'}</h2><form><label class="cp">Nome da unidade<input name="n" required value="${x(u.nome)}" placeholder="Ex.: Unidade Centro"></label><label class="cp">Cadeiras ou salas<input name="c" type="number" min="1" value="${u.cadeiras}" required></label><div class="rodape"><button type="button" class="bt" data-sair>Cancelar</button><button class="bt b">${k ? 'Salvar' : 'Cadastrar'}</button></div></form>`, (c, fecha) => c.querySelector('form').addEventListener('submit', (e) => {
+    e.preventDefault(); const f = new FormData(e.target), nome = String(f.get('n')).trim();
+    const chave = k || nome.toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '').slice(0, 12) + Date.now().toString(36).slice(-3);
+    db.unidades = { ...UN, [chave]: { nome, cadeiras: Math.max(1, Number(f.get('c')) || 1) } }; lerUnidades();
+    anota(k ? `editou a unidade ${nome}` : `cadastrou a unidade ${nome}`); salva(); fecha(); monta();
+  }));
+}
 const A = {
   'ofertar-vazios': () => { DIAS.forEach((_, d) => HORAS.forEach((h) => { const k = `${d}|${h}`; if (occ(d, h) < 0.4 && !(d === 6 && h > 13) && !db.ofertas.includes(k)) db.ofertas.push(k); })); anota(`ativou ${db.desconto}% a menos em ${db.ofertas.length} horários vazios`); salva(); monta(); recado('Ofertas publicadas no link de agendamento.'); },
   'limpar-ofertas': () => { db.ofertas = []; anota('tirou todas as ofertas de horário'); salva(); monta(); },
   'alterna-oferta': () => { const k = db.celSel; db.ofertas = db.ofertas.includes(k) ? db.ofertas.filter((o) => o !== k) : [...db.ofertas, k]; salva(); monta(); },
   recobrar: (d) => { const r = db.recusados.find((y) => y.id === d.id); db.recusados = db.recusados.filter((y) => y !== r); anota(`cobrou de novo a mensalidade de ${r.nome}`); salva(); monta(); recado(`Cobrança de ${r.nome} aprovada na segunda tentativa (demonstração).`); },
+  'nova-unidade': () => formUnidade(),
+  'edita-unidade': (d) => formUnidade(d.k),
+  'tira-unidade': (d) => { const u = UN[d.k]; if (!u || !confirm(`Tirar a unidade ${u.nome}? Agenda e avaliações dela continuam guardadas.`)) return; db.unidades = { ...UN }; delete db.unidades[d.k]; lerUnidades(); anota(`tirou a unidade ${u.nome}`); salva(); monta(); },
   'novo-plano': () => cartao('<h2>Novo plano do clube</h2><form><label class="cp">Nome<input name="n" required placeholder="Hidratação semanal"></label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="cp">Preço por mês (R$)<input name="p" inputmode="decimal" required></label><label class="cp">Custo de cada uso (R$)<input name="c" inputmode="decimal" value="10"></label></div><div class="rodape"><button type="button" class="bt" data-sair>Cancelar</button><button class="bt b">Criar</button></div></form>', (c, fecha) => c.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); const f = new FormData(e.target); db.planos.push({ id: `p${Date.now()}`, nome: f.get('n'), preco: nv(f.get('p')), assin: 0, uso: 0, custoUso: nv(f.get('c')) }); anota(`criou o plano ${f.get('n')}`); salva(); fecha(); monta(); })),
   campanha: (d) => { const s = db.rfm.find((y) => y.k === d.k); cartao(`<h2>Campanha para ${x(s.nome)}</h2><p>${s.n.toLocaleString('pt-BR')} clientes · ${x(s.dica)}</p><label class="cp">Mensagem<input id="msg-c" value="${x(s.msg)}"></label><p class="leve">Sai aos poucos pelo WhatsApp oficial de cada casa, só para quem aceitou receber.</p><div class="rodape"><button class="bt" data-sair>Cancelar</button><button class="bt m" data-ok>Mandar</button></div>`, (c, fecha) => c.querySelector('[data-ok]').addEventListener('click', () => { s.env = true; s.msg = c.querySelector('#msg-c').value; anota(`mandou campanha para ${s.nome} (${s.n})`); salva(); fecha(); monta(); recado(`Campanha programada para ${s.n.toLocaleString('pt-BR')} clientes.`); })); },
   responder: (d) => { const a = db.avaliacoes.find((y) => y.id === d.id); cartao(`<h2>Responder ${x(a.nome)}</h2><p class="leve">“${x(a.texto)}”</p><label class="cp">Resposta<input id="resp" value="${a.nota <= 3 ? 'Obrigada por avisar e desculpe. Queremos te receber de novo: pode nos chamar no WhatsApp?' : 'Muito obrigada! Esperamos você de novo.'}"></label><div class="rodape"><button class="bt" data-sair>Cancelar</button><button class="bt b" data-ok>Publicar resposta</button></div>`, (c, fecha) => c.querySelector('[data-ok]').addEventListener('click', () => { a.resp = true; anota(`respondeu a avaliação de ${a.nome}`); salva(); fecha(); monta(); })); },

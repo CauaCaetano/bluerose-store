@@ -68,6 +68,8 @@
       // a assinatura de exemplo e as preferências de tela ficam como estão
       if (/^(assinatura|plano|ajustes|un|loja|modo|filtro|ativa|camada\w*|foco|\w+Aba|lateral|_dia0)$/.test(k)) { o[k] = dados[k]; continue; }
       if (k === '_modelos' || k === '_refs' || k === '_opcoes') continue;
+      // unidades, lojas e empresas do exemplo saem; o sistema começa com uma principal, que o cliente renomeia
+      if (/^(unidades|lojasRede|empresasGrupo)$/.test(k)) { o[k] = Array.isArray(dados[k]) ? [] : {}; continue; }
       o[k] = limpa(dados[k], k, 0, manter, '');
     }
     // modelo de cada lista (os campos do primeiro item de exemplo, em branco): o editor de Dados usa para cadastrar

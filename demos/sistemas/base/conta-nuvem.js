@@ -337,7 +337,7 @@
   // ---------------------------------------------------------------- Dados (editor de todas as listas)
   function dadosEditor(abrir) {
     if (window.veltriaPermissoes && window.veltriaPermissoes.so_leitura) { aviso('O seu acesso é só para ver. Peça ao dono para liberar as alterações.'); return; }
-    script(RAIZ + 'demos/sistemas/base/editor.js?v=5').then(function () {
+    script(RAIZ + 'demos/sistemas/base/editor.js?v=6').then(function () {
       var atual = JSON.parse(texto(NS) || 'null') || (window.veltriaDados ? JSON.parse(JSON.stringify(window.veltriaDados())) : null); if (!atual) return;
       recarregando = true; // a tela fica com os dados antigos na memória enquanto o editor está aberto: não grava por cima
       window.veltriaEditor({ dados: atual, dias: DIAS || '', abrir: abrir || null,
@@ -350,7 +350,7 @@
 
   // ---------------------------------------------------------------- começar do zero
   function zerar() {
-    return script(RAIZ + 'demos/sistemas/base/zerar.js?v=3').then(function () {
+    return script(RAIZ + 'demos/sistemas/base/zerar.js?v=4').then(function () {
       var atual = window.veltriaDados ? window.veltriaDados() : JSON.parse(texto(NS) || 'null');
       if (!atual) throw new Error('A tela ainda está abrindo. Tente de novo em instantes.');
       gravar.call(localStorage, NS, JSON.stringify(window.veltriaZerar(atual, app, info.empresa)));
