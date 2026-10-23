@@ -10,26 +10,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Spline+Sans+Mono:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=4">
+<link rel="stylesheet" href="estilo.css?v=8">
 <script src="../base/versoes.js?v=6"></script>
 <script src="../base/conta-nuvem.js?v=12"></script>
 </head>
 <body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
 <div class="aviso-demo"><a href="../../../veltria-financeiro.html#versoes">Voltar ao site</a><span class="so-lg">Demonstração do <b>Veltria Financeiro Completo</b> · dados de exemplo neste navegador</span><button type="button" id="recomecar">Recomeçar</button><a class="teste" href="../../../app/financeirocompleto/">Testar 7 dias grátis</a></div>
 <div class="moldura">
+  <header class="barra">
+    <a class="marca" href="#fluxo"><img class="v-logo" src="../../../img/logos/veltria-financeiro-simbolo.png?v=2" alt="" width="256" height="180"><span><b>Veltria</b> Financeiro</span></a>
+    <div class="empresa-t"><b id="empresa">Climatiza BH Refrigeração</b><small id="hoje"></small></div>
+    <div class="busca-g"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="busca-g" type="search" autocomplete="off" placeholder="Procurar cliente, fornecedor ou conta" aria-label="Procurar cliente, fornecedor ou conta"><div class="resultados" id="resultados" hidden></div></div>
+    <div class="saldos" id="saldos"></div>
+    <div class="novo-wrap"><button type="button" class="bt p" id="bt-novo" aria-haspopup="true" aria-expanded="false">+ Novo</button>
+      <div class="menu-novo" id="menu-novo" hidden><button type="button" data-a="novo" data-t="r">Conta a receber</button><button type="button" data-a="novo" data-t="p">Conta a pagar</button><button type="button" data-a="ler-boleto">Ler código de boleto</button><button type="button" data-a="novo-contrato">Contrato mensal</button><button type="button" data-a="novo-orc">Orçamento</button></div></div>
+    <button type="button" class="bt-ia" data-ia aria-label="Assistente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg><span>Assistente</span></button>
+  </header>
   <nav class="trilho" id="trilho" aria-label="Seções"></nav>
-  <div class="corpo">
-    <header class="topo-f">
-      <div><b id="empresa">Climatiza BH Refrigeração</b><small id="hoje"></small></div>
-      <div class="saldos" id="saldos"></div>
-      <button type="button" class="bt-ia" data-ia aria-label="Assistente">Assistente</button>
-    </header>
-    <main id="conteudo" tabindex="-1"></main>
-  </div>
+  <main id="conteudo" tabindex="-1"></main>
 </div>
 <aside class="gaveta" id="gaveta" hidden aria-label="Assistente"></aside>
 <div class="notas" id="notas" role="status" aria-live="polite"></div>
-<script type="module" src="app.js?v=7"></script>
+<script type="module" src="app.js?v=9"></script>
 <script src="../base/camada.js?v=12" defer></script>
 </body>
 </html>
