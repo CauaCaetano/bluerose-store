@@ -92,8 +92,8 @@ h2 { font-size: .95rem; font-weight: 700; margin: 0; }
 /* medidor e gráficos */
 .medidor { display: flex; align-items: center; gap: 14px; }
 .medidor svg { width: 150px; height: 92px; }
-.grafico svg { width: 100%; height: 170px; display: block; }
-.grafico text { font: 10px var(--mono); fill: var(--tinta-3); }
+.grafico svg { width: 100%; height: auto; max-height: 230px; display: block; }
+.grafico text { font: 12px var(--mono); fill: var(--tinta-3); }
 .mapa { display: grid; grid-template-columns: 34px repeat(13, 1fr); gap: 3px; font: 10px var(--mono); color: var(--tinta-3); }
 .mapa i { aspect-ratio: 1.6; border-radius: 3px; background: var(--lavanda-esc); display: block; }
 

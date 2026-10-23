@@ -63,6 +63,18 @@ function MODAL(html, fn) {
 function FORM(t, campos, ok, fn) { MODAL(`<h2>${t}</h2><form>${campos}<div class="rod"><button type="button" class="bj" data-x>Cancelar</button><button class="bj gr">${ok}</button></div></form>`, (m, fecha) => m.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); if (fn(new FormData(e.target)) !== false) { SALVA(); fecha(); DESENHA(); } })); }
 const opAdv = (sel, filtro = () => true) => db.advs.filter(filtro).map((a) => `<option value="${a.id}" ${a.id === sel ? 'selected' : ''}>${X(a.nome)}</option>`).join('');
 
+// o item aberto mostra o processo inteiro embaixo: dados, o que mais corre nele e a carteira do cliente
+function fichaProc(item) {
+  const p = PROC(item.proc), outrosPz = db.prazos.filter((z) => z.proc === p.id && z !== item), outrasInt = db.intimacoes.filter((z) => z.proc === p.id && z !== item);
+  const doCli = db.processos.filter((x) => x.cli === p.cli && !x.enc), risco = { provavel: 'provável', possivel: 'possível', remota: 'remota' }[p.risco] || '—';
+  return `<section class="ficha-proc"><h3>O processo</h3><dl class="fatos">
+    <div><dt>Parte contrária</dt><dd>${X(p.parte || p.contra || '—')}</dd></div><div><dt>Polo</dt><dd>${p.polo === 'ativo' ? 'autor' : 'réu'}</dd></div>
+    <div><dt>Valor da causa</dt><dd>${RS(p.valor)}</dd></div><div><dt>Risco de perda</dt><dd><span class="tg ${p.risco === 'provavel' ? 'r' : p.risco === 'possivel' ? 'a' : 'v'}">${risco}</span></dd></div>
+    <div><dt>Responsável</dt><dd>${X(ADV(p.resp).nome)}</dd></div><div><dt>Vara</dt><dd>${X(p.vara)}</dd></div></dl>
+    <h3>Também correndo neste processo</h3>${outrosPz.length + outrasInt.length ? `<ul class="corre">${outrosPz.map((z) => `<li><span class="tg ${z.fatal <= 1 ? 'r' : 'a'}">prazo</span><b>${X(z.desc)}</b><small>fatal ${DIA(z.fatal)} · ${X(ADV(z.resp).nome)}</small></li>`).join('')}${outrasInt.map((z) => `<li><span class="tg">intimação</span><b>${X(z.texto)}</b><small>${DIA(z.dia)} · ${z.triada ? 'triada' : 'a triar'}</small></li>`).join('')}</ul>` : '<p class="meta">Nada mais aberto neste processo.</p>'}
+    <h3>Carteira de ${X(CLI(p.cli).nome)}</h3><div class="carteira"><div><b>${doCli.length}</b><small>processos ativos</small></div><div><b>${MIL(doCli.reduce((t, x) => t + (x.valor || 0), 0))}</b><small>em discussão</small></div><div><b>${doCli.filter((x) => x.risco === 'provavel').length}</b><small>com risco provável</small></div></div></section>`;
+}
+
 // ------------------------------------------------------------------ filas
 const FILAS = {
   intimacoes: { nome: 'Intimações a triar', itens: () => [...db.intimacoes].sort((a, b) => a.triada - b.triada || b.dia - a.dia), conta: () => db.intimacoes.filter((i) => !i.triada).length, alerta: () => db.intimacoes.some((i) => !i.triada && i.urg === 'alta'),
@@ -156,7 +168,7 @@ function DESENHA() {
     const atual = lista.find((i) => i.id === selecionado);
     $('#area').innerHTML = `<div class="tres"><nav class="filas" aria-label="Filas"><h2>Filas</h2>${Object.entries(FILAS).map(([k, x]) => `<button data-fila="${k}" aria-current="${k === fk}">${x.nome}<span class="n ${x.alerta() ? 'alerta' : ''}">${x.conta()}</span></button>`).join('')}<h2 style="margin-top:18px">Atalhos</h2><p class="meta" style="padding:0 10px">J/K anda · E conclui · / busca · C copiloto</p></nav>
       <section class="itens" aria-label="${f.nome}"><div class="itens-cab"><h1>${f.nome}</h1>${fk === 'tarefas' ? '<button class="bj mini" data-f="nova-tarefa">+ Tarefa</button>' : fk === 'horas' ? '<button class="bj mini" data-f="lancar-h">+ Horas</button>' : ''}</div>${lista.map((i) => { const [a, b, c] = f.linha(i); return `<button class="item ${f.feito(i) ? 'feito' : ''}" data-sel="${i.id}" aria-current="${i.id === selecionado}"><div class="l1"><span>${a}</span>${b}</div><div class="l2">${c}</div></button>`; }).join('') || '<p class="vazio-j">Fila vazia.</p>'}</section>
-      <article class="detalhe" aria-live="polite">${atual ? f.detalhe(atual) : '<p class="vazio-j">Nada selecionado.</p>'}</article></div>`;
+      <article class="detalhe" aria-live="polite">${atual ? f.detalhe(atual) + (atual.proc ? fichaProc(atual) : '') : '<p class="vazio-j">Nada selecionado.</p>'}</article></div>`;
   } else {
     $('#area').innerHTML = `<div class="paineis"><nav class="painel-nav" aria-label="Painéis"><h2>Painéis</h2>${Object.entries(PAINEIS).map(([k, [t]]) => `<button data-painel="${k}" aria-current="${k === painel}">${t}</button>`).join('')}</nav><section class="painel">${PAINEIS[painel][1]()}</section></div>`;
   }
