@@ -21,7 +21,7 @@
   function editor(abrir) {
     if (soLeitura()) { toast('O seu acesso é só para ver. Peça ao dono para liberar as alterações.'); return; }
     if (window.veltriaAbrirDados) { window.veltriaAbrirDados(abrir); return; } // modo conta: o conta-nuvem grava na nuvem
-    script('editor.js?v=4').then(function () {
+    script('editor.js?v=5').then(function () {
       var salvou = false;
       window.veltriaEditor({ dados: dados(), dias: '', abrir: abrir,
         salvar: function (d) { salvou = true; localStorage.setItem(CHAVE, JSON.stringify(d)); return Promise.resolve(); },
@@ -91,10 +91,22 @@
       document.body.appendChild(mn); var p = mn.querySelector('button'); if (p) p.focus();
       setTimeout(function () { document.addEventListener('click', function fora(e) { if (!e.target.closest('.vk-menu,.vk-mais')) { mn.remove(); document.removeEventListener('click', fora); } }); }, 0);
     };
-    window.veltriaEditorListas ? go() : script('editor.js?v=4').then(go);
+    window.veltriaEditorListas ? go() : script('editor.js?v=5').then(go);
   }
   var mais = document.createElement('button'); mais.type = 'button'; mais.className = 'vk-mais'; mais.setAttribute('aria-label', 'Adicionar, importar ou exportar'); mais.title = 'Adicionar, importar planilha ou exportar';
   mais.innerHTML = '<span aria-hidden="true">+</span>'; mais.addEventListener('click', menu);
+  // no celular muitos apps têm barra fixa embaixo (menu, campo de mensagem, bolha da IA): o + sobe acima dela em vez de cobrir
+  function subirMais() {
+    var alto = 18, dir = innerWidth - 18, esq = dir - 56;
+    document.querySelectorAll('body *').forEach(function (el) {
+      if (el === mais || el.closest('.vk-mais,.vk-menu,.vk-toast,.vk-lado,.vc-veu')) return;
+      var cs = getComputedStyle(el); if (cs.position !== 'fixed' && cs.position !== 'sticky') return; if (cs.display === 'none' || cs.visibility === 'hidden') return;
+      var b = el.getBoundingClientRect(); if (b.width < 8 || b.height < 8 || b.bottom < innerHeight - 4 - 160 || b.top < innerHeight * 0.55) return;
+      if (b.left >= dir || b.right <= esq) return;
+      alto = Math.max(alto, innerHeight - b.top + 12);
+    });
+    mais.style.bottom = alto + 'px'; document.documentElement.style.setProperty('--vk-mais-base', alto + 'px');
+  }
 
   // ---------------------------------------------------------------- tela vazia: diz o que fazer em vez de parecer quebrada
   var DICAS = { clientes: 'Cadastre os seus clientes ou traga a lista do Excel: nome e telefone já bastam.', produtos: 'Traga os produtos do Excel (nome, preço, estoque) ou cadastre um por um.',
@@ -293,7 +305,7 @@
   // ---------------------------------------------------------------- montar
   var css = '.vk-mais{position:fixed;right:18px;bottom:18px;z-index:60;width:56px;height:56px;border-radius:50%;border:0;background:#1d2230;color:#fff;font:300 2rem/1 system-ui,sans-serif;box-shadow:0 10px 26px -8px rgba(0,0,0,.55);cursor:pointer;display:grid;place-items:center;transition:transform .2s}' +
     '.vk-mais:hover{transform:scale(1.06)}.vk-mais:focus-visible,.vk-menu button:focus-visible{outline:3px solid #c9b37e;outline-offset:2px}' +
-    '.vk-menu{position:fixed;right:18px;bottom:84px;z-index:61;display:grid;min-width:260px;max-width:calc(100vw - 36px);background:#fbfaf7;color:#1d2230;border-radius:14px;padding:6px;box-shadow:0 20px 50px -18px rgba(0,0,0,.55);font:500 14.5px/1.3 system-ui,sans-serif}' +
+    '.vk-menu{position:fixed;right:18px;bottom:calc(var(--vk-mais-base,18px) + 66px);z-index:61;display:grid;min-width:260px;max-width:calc(100vw - 36px);background:#fbfaf7;color:#1d2230;border-radius:14px;padding:6px;box-shadow:0 20px 50px -18px rgba(0,0,0,.55);font:500 14.5px/1.3 system-ui,sans-serif}' +
     '.vk-menu button{border:0;background:none;text-align:left;padding:11px 12px;border-radius:9px;cursor:pointer;font:inherit;color:inherit}.vk-menu button:hover{background:#efece4}' +
     '.vk-filtro{display:block;width:100%;min-height:34px;margin:0 0 4px;border:1px solid #cfd2da;border-radius:8px;padding:0 9px;font:13.5px system-ui,sans-serif;box-sizing:border-box}' +
     '.vk-toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:9999;max-width:min(560px,90vw);background:#141820;color:#fff;padding:11px 16px;border-radius:12px;font:14px/1.4 system-ui,sans-serif;box-shadow:0 14px 34px -14px rgba(0,0,0,.6)}' +
@@ -317,8 +329,9 @@
   function montar() {
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     document.body.appendChild(mais);
+    subirMais(); setTimeout(subirMais, 900); addEventListener('resize', subirMais); addEventListener('hashchange', function () { setTimeout(subirMais, 60); });
     // tela vazia: só faz sentido quando a empresa tem a lista vazia (começou do zero); carrega o editor para saber as listas
-    script('editor.js?v=4').then(function () { vigiaVazio(); arrumaEspaco(); addEventListener('hashchange', function () { vigiaVazio(); arrumaEspaco(); }); addEventListener('resize', arrumaEspaco); new MutationObserver(function () { if (!document.querySelector('.vk-vazio')) { vazioFeito = ''; } vigiaVazio(); if (!document.querySelector('.vk-apoio')) arrumaEspaco(); }).observe(document.querySelector('main') || document.body, { childList: true }); }).catch(function () {});
+    script('editor.js?v=5').then(function () { vigiaVazio(); arrumaEspaco(); addEventListener('hashchange', function () { vigiaVazio(); arrumaEspaco(); }); addEventListener('resize', arrumaEspaco); new MutationObserver(function () { if (!document.querySelector('.vk-vazio')) { vazioFeito = ''; } vigiaVazio(); if (!document.querySelector('.vk-apoio')) arrumaEspaco(); }).observe(document.querySelector('main') || document.body, { childList: true }); }).catch(function () {});
     if (conta) {
       ritmoDoDia();
       var faixa = document.querySelector('.vc-faixa');
