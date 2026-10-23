@@ -86,9 +86,10 @@ h2 { font: 700 1.25rem/1.2 var(--titulo); margin: 0 0 12px; }
 .vazio { color: var(--tinta-3); padding: 14px 0; }
 
 /* gráfico da semana */
-.semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; align-items: end; height: 190px; padding-top: 10px; }
+.grade-2 > .bloco { display: flex; flex-direction: column; }
+.semana { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; align-items: stretch; min-height: 220px; padding-top: 10px; }
 .semana .dia { display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-.semana .barra { width: 100%; max-width: 54px; border-radius: 10px 10px 4px 4px; background: var(--prata); position: relative; transition: height .4s; }
+.semana .barra { width: 100%; max-width: 64px; max-height: calc(100% - 44px); border-radius: 10px 10px 4px 4px; background: var(--prata); position: relative; transition: height .4s; }
 .semana .dia.hoje .barra { background: var(--vinho); }
 .semana .dia small { color: var(--tinta-3); font-size: .78rem; }
 .semana .dia b { font-size: .78rem; font-variant-numeric: tabular-nums; }
@@ -213,3 +214,7 @@ textarea.campo { padding: 10px 14px; min-height: 80px; }
 .topo .ia-btn:hover { border-color: var(--camelo); }
 @media (max-width: 760px) { .topo .ia-btn { margin-left: auto; padding: 0 12px; } .topo .ia-btn span { display: none; } .topo .ia-btn + .btn { margin-left: 0; } }
 @media (max-width: 640px) { .doca a { font-size: .66rem; } }
+
+.semana .dia.top .barra { background: var(--navy); }
+.semana-pe { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 18px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--linha); color: var(--tinta-3); font-size: .88rem; }
+.semana-pe b { color: var(--tinta); margin-left: 4px; font-variant-numeric: tabular-nums; }

@@ -124,7 +124,8 @@ function telaPainel() {
   </div>
   <div class="grade-2">
     <section class="bloco"><div class="bloco-cab"><h2>Últimos 7 dias</h2><span class="selo">${Rk(sem.reduce((a, b) => a + b, 0))} na semana</span></div>
-      <div class="semana">${sem.map((v, i) => { const d = hoje0(); d.setDate(d.getDate() + i - 6); return `<div class="dia ${i === 6 ? 'hoje' : ''}"><b>${Rk(v).replace('R$ ', '')}</b><div class="barra" style="height:${Math.max(4, v / max * 140)}px" title="${R(v)}"></div><small>${i === 6 ? 'hoje' : dias[d.getDay()]}</small></div>`; }).join('')}</div>
+      <div class="semana">${sem.map((v, i) => { const d = hoje0(); d.setDate(d.getDate() + i - 6); return `<div class="dia ${i === 6 ? 'hoje' : ''} ${v === max && v > 0 ? 'top' : ''}"><b>${Rk(v).replace('R$ ', '')}</b><div class="barra" style="height:${Math.max(2, v / max * 100)}%" title="${R(v)}"></div><small>${i === 6 ? 'hoje' : dias[d.getDay()]}</small></div>`; }).join('')}</div>
+      <div class="semana-pe"><span>Média por dia <b>${R(sem.reduce((a, b) => a + b, 0) / 7)}</b></span><span>Melhor dia <b>${(() => { const k = sem.indexOf(max); const d = hoje0(); d.setDate(d.getDate() + k - 6); return k === 6 ? 'hoje' : dias[d.getDay()]; })()} · ${R(max)}</b></span></div>
     </section>
     <section class="bloco"><div class="bloco-cab"><h2>Precisa de você</h2><span class="selo vinho">${atencao.length}</span></div>
       ${atencao.length ? `<ul class="lista">${atencao.map((a) => `<li><div class="cresce">${a.txt}</div><button class="btn peq fant" ${a.acao}>${a.selo}</button></li>`).join('')}</ul>` : '<p class="vazio">Nada pendente. Bom trabalho.</p>'}

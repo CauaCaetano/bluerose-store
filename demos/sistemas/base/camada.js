@@ -326,6 +326,42 @@
     i.addEventListener('keydown', function (k) { if (k.key === 'Enter') { k.preventDefault(); fim(true); } if (k.key === 'Escape') { k.preventDefault(); k.stopPropagation(); fim(false); } });
     i.addEventListener('blur', function () { fim(true); });
   }, true);
+  // botões de escolha (chips) dentro de formulários: "+ Outro" vira um campo; o texto escrito vira um botão igual aos outros e já fica escolhido
+  // só onde o valor do botão é o próprio texto (data-v igual ao rótulo): botões que apontam para um índice ou id seguem fechados
+  var FORMS = 'form,dialog,[role=dialog],.modal,.folha,.gaveta,[class~=form],.painel-form';
+  function chipsComOutro(raiz) {
+    (raiz.querySelectorAll ? raiz : document).querySelectorAll('[role=group], .chips, .opcoes').forEach(function (g) {
+      if (g.dataset.vkOutro || !g.closest(FORMS) || g.closest('.vk-menu,.vc-caixa,.vk-lado')) return;
+      var bs = [].filter.call(g.querySelectorAll(':scope > button'), function (b) { return b.dataset.v != null && b.dataset.v !== ''; });
+      if (bs.length < 2 || !bs.every(function (b) { return b.dataset.v === b.textContent.trim(); })) { g.dataset.vkOutro = 'nao'; return; }
+      g.dataset.vkOutro = 'sim';
+      var mais = document.createElement('button'); mais.type = 'button'; mais.className = bs[0].className; mais.removeAttribute('aria-pressed'); mais.textContent = '+ Outro';
+      mais.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        var i = document.createElement('input'); i.type = 'text'; i.placeholder = 'Escreva e aperte Enter'; i.setAttribute('aria-label', 'Escrever outra opção');
+        i.style.cssText = 'min-width:160px;padding:6px 10px;border-radius:10px;border:1px solid currentColor;font:inherit';
+        mais.replaceWith(i); i.focus(); var feito = false;
+        function fim(ok) {
+          if (feito) return; feito = true; var t = i.value.trim(); i.replaceWith(mais);
+          if (!ok || !t) return;
+          var nb = [].find.call(g.querySelectorAll(':scope > button'), function (b) { return b.dataset.v === t; });
+          if (!nb) { nb = bs[bs.length - 1].cloneNode(false); nb.dataset.v = t; nb.textContent = t; nb.setAttribute('aria-pressed', 'false'); g.insertBefore(nb, mais); }
+          nb.click();
+        }
+        i.addEventListener('keydown', function (k) { if (k.key === 'Enter') { k.preventDefault(); fim(true); } if (k.key === 'Escape') { k.preventDefault(); k.stopPropagation(); fim(false); } });
+        i.addEventListener('blur', function () { fim(true); });
+      });
+      g.appendChild(mais);
+    });
+  }
+  // a opção de escrever aparece já na abertura do formulário, não só depois do primeiro clique no campo
+  function outroAoAbrir(raiz) {
+    if (!raiz.querySelectorAll) return;
+    raiz.querySelectorAll('select').forEach(function (s) { if (s.closest(FORMS)) poeOutro(s); });
+    chipsComOutro(raiz);
+  }
+  new MutationObserver(function (ms) { ms.forEach(function (x) { x.addedNodes.forEach(function (n) { if (n.nodeType === 1) outroAoAbrir(n.parentNode || n); }); }); }).observe(document.body, { childList: true, subtree: true });
+  outroAoAbrir(document);
 
   // ---------------------------------------------------------------- primeiros passos, dias seguidos e resumo (só na conta)
   var CH = 'veltria-ritmo:' + (conta ? conta.espaco : 'demo') + ':' + app, ritmo = {};
@@ -363,7 +399,8 @@
     v.innerHTML = '<div class="vk-caixa" role="dialog" aria-modal="true" aria-label="Primeiros passos"><h2>Primeiros passos</h2><p class="vk-mudo">Em poucos minutos a sua empresa fica pronta para o dia a dia.</p><ol class="vk-passos">' +
       PASSOS.map(function (p) { var ok = p[2](d); return '<li class="' + (ok ? 'ok' : '') + '"><span aria-hidden="true">' + (ok ? '✓' : '') + '</span>' + esc(p[1]) + '</li>'; }).join('') +
       '</ol><p class="vk-mudo">' + (ritmo.serie > 1 ? 'Você está há <b>' + ritmo.serie + ' dias seguidos</b> com o sistema em dia.' : 'Abra todo dia: o resumo do dia anterior aparece aqui.') + '</p>' +
-      '<details class="vk-tut"><summary>Ver o vídeo: o que fazer depois de assinar (1 min)</summary><video controls playsinline preload="none" poster="' + TUTORIAL.replace('?v=1', '.webp?v=1') + '" src="' + TUTORIAL.replace('?v=1', '.mp4?v=1') + '"></video></details><button type="button" class="vk-bt" data-vk-fecha>Fechar</button></div>';
+      // vídeo do tutorial fora do ar até segunda ordem do dono (23/10/2026)
+      '<button type="button" class="vk-bt" data-vk-fecha>Fechar</button></div>';
     v.addEventListener('click', function (e) { if (e.target === v || e.target.closest('[data-vk-fecha]')) v.remove(); });
     document.body.appendChild(v); v.querySelector('button').focus();
   }
