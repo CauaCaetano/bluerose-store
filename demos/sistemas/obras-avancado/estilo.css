@@ -146,3 +146,13 @@ td input.n { text-align: right; font-family: var(--mono); }
 /* relatório ao cliente: texto corrido e impressão só da janela */
 .rel-txt { white-space: pre-wrap; font: inherit; font-size: .9rem; line-height: 1.55; background: var(--osso-2, #f3f1ea); padding: 12px 14px; border-radius: 8px; max-height: 55vh; overflow: auto; }
 @media print { body.so-modal > *:not(.veu) { display: none !important; } body.so-modal .veu { position: static; background: none; } body.so-modal .modal { box-shadow: none; border: 0; max-height: none; } body.so-modal .pe-m { display: none; } body.so-modal .rel-txt { max-height: none; overflow: visible; } }
+
+/* funções de 10/2026 (2ª leva) */
+.duas-a { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+.chk-a { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+.rfi { padding: 8px 0; border-bottom: 1px solid #e3e0d6; } .rfi p { margin: 4px 0; }
+.hist { position: relative; display: flex; gap: 6px; align-items: flex-end; height: 160px; padding-bottom: 34px; }
+.hist > div { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; font-size: .72rem; }
+.hist i { display: block; width: 70%; background: #5e6548; border-radius: 4px 4px 0 0; } .hist i.baixo { background: #a0442e; }
+.hist small, .hist b { line-height: 1; } .hist-pl { position: absolute; left: 0; right: 0; border-top: 2px dashed #a77a1e; margin-bottom: 34px; }
+.neg { color: #a0442e; }
