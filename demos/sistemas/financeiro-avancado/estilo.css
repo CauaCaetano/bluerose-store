@@ -32,7 +32,8 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .logo .v-logo { height: 36px; width: auto; } .logo b { display: block; font: 600 1.05rem/1 var(--serif); letter-spacing: .14em; color: var(--acento); } .logo small { color: var(--tx-2); font-size: .78rem; }
 .empresa { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--borda); border-radius: var(--r); background: var(--painel); }
 .empresa small { color: var(--tx-3); font-size: .72rem; font-weight: 600; letter-spacing: .04em; }
-.empresa select { border: 0; background: transparent; font-weight: 600; padding: 0; cursor: pointer; color: var(--tx); }
+.empresa { min-width: 0; }
+.empresa select { border: 0; background: transparent; font-weight: 600; padding: 0; cursor: pointer; color: var(--tx); width: 100%; min-width: 0; max-width: 100%; text-overflow: ellipsis; outline-offset: 0; }
 .empresa select option { background: var(--painel); }
 .abas .gr { margin: 12px 10px 4px; font-size: .7rem; font-weight: 600; color: var(--tx-3); letter-spacing: .06em; } .abas .gr:first-child { margin-top: 0; }
 .abas a { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--r-p); color: var(--tx-2); text-decoration: none; font-weight: 500; font-size: .92rem; border: 1px solid transparent; }
@@ -299,3 +300,8 @@ main { grid-column: 2; padding: 24px 28px 32px; outline: none; min-width: 0; }
   .op-tab.pag td.c-chk { grid-row: 1 / span 2; } .op-tab.pag td.c-nome, .op-tab.pag td.c-venc { grid-column: 2; } .op-tab.pag td.c-val, .op-tab.pag td.c-st { grid-column: 3; }
   .op-tab td.c-val, .op-tab td.c-st { text-align: right; justify-self: end; } .op-tab td.ac { grid-column: 1 / -1; }
 }
+/* relatórios: linhas de grupo e impressão só do relatório */
+.tab-mov tr.grp td { background: var(--fundo-2); }
+@media print { body.imprimindo .mesa > :not(main), body.imprimindo #folha > :not(.cab):not(#relat), body.imprimindo .cab .ferr { display: none !important; } body.imprimindo main { padding: 0; } }
+/* menu com 16 telas: cabe em 900px de altura e a rolagem, quando houver, é discreta */
+@media (min-width: 1181px) { .lado-nav { scrollbar-width: thin; scrollbar-color: var(--borda-2) transparent; gap: 10px; } .abas a { padding: 6px 10px; } .abas .gr { margin: 8px 10px 2px; } }

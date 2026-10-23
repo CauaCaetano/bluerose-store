@@ -11,9 +11,10 @@
 // - aprovação respeita a alçada de quem aprova; toda alteração vai para a auditoria com data e hora completas.
 import { centavos, reais, hojeISO, isoDe, diaDe, dataDe, lerExtrato, norm } from '../financeiro-comum/dinheiro.js';
 export { centavos, reais, hojeISO, isoDe, diaDe, dataDe, lerExtrato };
+export { lerBoleto } from '../financeiro-comum/dinheiro.js';
 
 export const FORMATO = 2;
-export const CATS = [['Receita de vendas', 'r'], ['Receita de serviços', 'r'], ['Custo das mercadorias', 'c'], ['Fretes', 'c'], ['Folha e encargos', 'c'], ['Aluguel e condomínio', 'c'], ['Marketing', 'c'], ['Tecnologia', 'c'], ['Despesas financeiras', 'c'], ['Serviços de terceiros', 'c']];
+export let CATS = [['Receita de vendas', 'r'], ['Receita de serviços', 'r'], ['Custo das mercadorias', 'c'], ['Fretes', 'c'], ['Folha e encargos', 'c'], ['Aluguel e condomínio', 'c'], ['Marketing', 'c'], ['Tecnologia', 'c'], ['Despesas financeiras', 'c'], ['Serviços de terceiros', 'c'], ['Impostos e taxas', 'c']]; // muda com usarPlano(db)
 export const PAPEIS = { gerente: 'Gerente', diretor: 'Diretor', dono: 'Dono' };
 const nid = (p = 'a') => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 export const compAtual = (agora = new Date()) => hojeISO(agora).slice(0, 7);
@@ -29,7 +30,7 @@ export function inteiro(v, { negativo = false } = {}) {
 
 // ------------------------------------------------------------------ fechamento: o mês fechado não muda
 export const fechado = (db, comp = compAtual()) => !!db.fechados?.[comp];
-export function exigeAberto(db, comp = compAtual()) { if (fechado(db, comp)) throw new Error(`${nomeComp(comp)} está fechado. Para mudar algo, o dono reabre o mês (fica na auditoria).`); }
+export function exigeAberto(db, comp = compAtual()) { if (db.travaAte && comp < db.travaAte.slice(0, 7)) throw new Error(`Lançamentos até ${db.travaAte.split('-').reverse().join('/')} estão travados. O dono tira a trava em Equipe e alçadas.`); if (fechado(db, comp)) throw new Error(`${nomeComp(comp)} está fechado. Para mudar algo, o dono reabre o mês (fica na auditoria).`); }
 export function fecharMes(db, comp, quem, papel, justificativas = {}) {
   exigeAberto(db, comp); exige(db, papel, 'fechar'); const falta = db.fech.filter((f) => !f.ok); if (falta.length) throw new Error(`Faltam ${falta.length} etapa(s): ${falta.map((f) => f.t).join('; ')}.`);
   const v = verificacoes(db, comp), sem = v.filter((x) => !x.ok && !String(justificativas[x.id] || '').trim());
@@ -50,12 +51,13 @@ const pode = (db, papel, c) => papel === 'dono' || (papel === 'diretor' && c <= 
 /** Aprova os pagamentos que a alçada de quem aprova cobre; devolve { aprovados, recusados }. */
 export function aprovar(db, ids, quem, papel) {
   exigeAberto(db); if (!PAPEIS[papel]) throw new Error('Escolha o papel de quem aprova.'); if (!String(quem || '').trim()) throw new Error('Diga quem está aprovando.'); exige(db, papel, 'aprovar');
-  const aprovados = [], recusados = [], proprios = [];
-  ids.forEach((id) => { const p = db.pags.find((x) => x.id === id); if (!p || p.st !== 'pendente') return; if (!pode(db, papel, p.c)) { recusados.push(p); return; } if (!db.politica?.autoAprovacao && p.criadoPor && norm(p.criadoPor) === norm(quem)) { proprios.push(p); return; } p.st = 'aprovado'; p.aprov = { quem, papel, em: new Date().toISOString() }; p.sel = false; (p.hist ||= []).push({ em: p.aprov.em, quem, o: `aprovou (${PAPEIS[papel]})` }); aprovados.push(p); });
+  const aprovados = [], recusados = [], proprios = [], primeira = [], mesma = [];
+  ids.forEach((id) => { const p = db.pags.find((x) => x.id === id); if (!p || p.st !== 'pendente') return; if (!pode(db, papel, p.c)) { recusados.push(p); return; } if (!db.politica?.autoAprovacao && p.criadoPor && norm(p.criadoPor) === norm(quem)) { proprios.push(p); return; } if (db.politica?.duplaAcima && p.c > db.politica.duplaAcima * 100) { if (!p.aprov1) { p.aprov1 = { quem, papel, em: new Date().toISOString() }; p.sel = false; (p.hist ||= []).push({ em: p.aprov1.em, quem, o: `1ª aprovação (${PAPEIS[papel]}); falta a 2ª, de outra pessoa` }); primeira.push(p); return; } if (norm(p.aprov1.quem) === norm(quem)) { mesma.push(p); return; } } p.st = 'aprovado'; p.aprov = { quem, papel, em: new Date().toISOString() }; p.sel = false; (p.hist ||= []).push({ em: p.aprov.em, quem, o: `aprovou (${PAPEIS[papel]})` }); aprovados.push(p); });
   if (aprovados.length) registra(db, `${quem} (${PAPEIS[papel]})`, `aprovou ${aprovados.length} pagamento(s): ${reais(aprovados.reduce((s, p) => s + p.c, 0))}`, { ref: `pag:${aprovados.map((p) => p.id).join(',')}`, antes: 'pendente', depois: 'aprovado' });
   if (recusados.length) registra(db, `${quem} (${PAPEIS[papel]})`, `tentou aprovar ${recusados.length} pagamento(s) acima da alçada`);
   if (proprios.length) registra(db, `${quem} (${PAPEIS[papel]})`, `tentou aprovar ${proprios.length} pagamento(s) que lançou (bloqueado pela política)`);
-  return { aprovados, recusados, proprios };
+  if (primeira.length) registra(db, `${quem} (${PAPEIS[papel]})`, `deu a 1ª aprovação em ${primeira.length} pagamento(s) acima de ${reais((db.politica.duplaAcima || 0) * 100)}`, { ref: `pag:${primeira.map((p) => p.id).join(',')}`, antes: 'pendente', depois: '1ª aprovação' });
+  return { aprovados, recusados, proprios, primeira, mesma };
 }
 /** Arquivo para pagar no banco (CSV para conferência e pagamento manual; o CNAB depende do convênio de cada banco). */
 // remessa: com baixa parcial, só o que falta vai para o banco
@@ -76,7 +78,7 @@ export function importarExtrato(db, linhas, arquivo, quem, conta = '') {
   return novas;
 }
 export const categoria = (db, e) => db.regras.find((r) => norm(e.desc).includes(norm(r.se)))?.cat || '';
-export const sugerePagamento = (db, e) => (e.c < 0 && !e.pag && !e.mov ? db.pags.find((p) => ['aprovado', 'remessa', 'pago'].includes(p.st) && (((p.st !== 'pago') && faltaTitulo(p) === -e.c) || (db.movs || []).some((m) => m.ref?.k === 'pag' && m.ref.id === p.id && !m.ext && m.c === e.c))) || null : null);
+export const sugerePagamento = (db, e) => (e.c < 0 && !e.pag && !e.mov && !e.multi ? db.pags.find((p) => ['aprovado', 'remessa', 'pago'].includes(p.st) && (((p.st !== 'pago') && faltaTitulo(p) === -e.c) || (db.movs || []).some((m) => m.ref?.k === 'pag' && m.ref.id === p.id && !m.ext && m.c === e.c))) || null : null);
 export function ligarPagamento(db, extId, pagId, quem, papel) {
   const e = db.extrato.find((x) => x.id === extId), p = db.pags.find((x) => x.id === pagId);
   if (!e || !p) throw new Error('Linha ou pagamento não encontrado.'); if (e.pag || e.mov) throw new Error('Esta linha já está ligada a um pagamento.');
@@ -112,7 +114,8 @@ export function estornarRateio(db, comp, quem) {
 
 // ------------------------------------------------------------------ consolidado e indicadores (só do que está nos dados)
 export function consolidado(db, emps) {
-  const linhas = CATS.map(([c, t], i) => { const v = emps.map((e) => db.orc[e.k][i].r), el = (db.eliminacoes || []).reduce((s, x) => s + (x.receita === c || x.custo === c ? x.v : 0), 0); return { c, t, v, el, grupo: v.reduce((a, b) => a + b, 0) - el }; });
+  const auto = Object.fromEntries(emps.map((e) => [e.k, realDasBaixas(db, e.k)])); // real = ajuste à mão + baixas do mês
+  const linhas = CATS.map(([c, t], i) => { const v = emps.map((e) => (db.orc[e.k][i]?.r || 0) + (auto[e.k][c] || 0)), el = (db.eliminacoes || []).reduce((s, x) => s + (x.receita === c || x.custo === c ? x.v : 0), 0); return { c, t, v, el, grupo: v.reduce((a, b) => a + b, 0) - el }; });
   const res = (vs) => linhas.reduce((s, l, k) => s + (l.t === 'r' ? 1 : -1) * vs[k], 0);
   const porEmp = emps.map((_, j) => res(linhas.map((l) => l.v[j]))), grupo = res(linhas.map((l) => l.grupo));
   return { linhas, porEmp, grupo, eliminado: (db.eliminacoes || []).reduce((s, x) => s + x.v, 0) };
@@ -123,7 +126,7 @@ export function indicadores(db, linhasOrc, caixa, emp) {
   const rec = soma('r', 'r'), cus = soma('c', 'r'), recO = soma('r', 'o'), cusO = soma('c', 'o');
   const ebitda = rec - cus + val('Despesas financeiras', 'r'), cmv = val('Custo das mercadorias', 'r');
   const pend = db.pags.filter((p) => p.st === 'pendente' && (emp === 'todas' || p.emp === emp)), aprov = db.pags.filter((p) => ['aprovado', 'remessa'].includes(p.st) && (emp === 'todas' || p.emp === emp));
-  const ext = db.extrato, semCat = ext.filter((e) => !categoria(db, e) && !e.pag && !e.rec && !e.mov).length, min = Math.min(...caixa.fim), sMin = caixa.fim.indexOf(min);
+  const ext = db.extrato, semCat = ext.filter((e) => !categoria(db, e) && !e.pag && !e.rec && !e.mov && !e.multi).length, min = Math.min(...caixa.fim), sMin = caixa.fim.indexOf(min);
   const pct = (a, b) => (b ? `${(a / b * 100).toFixed(1).replace('.', ',')}%` : '—'), temOrc = linhasOrc.some((x) => x.o || x.r);
   const ok = (x) => emp === 'todas' || x.emp === emp, contas = (db.contas || []).filter(ok), recs = (db.recs || []).filter((r) => ok(r) && r.st !== 'cancelado');
   const vencido = recs.filter((r) => r.venc < 0).reduce((s, r) => s + faltaTitulo(r), 0), aberto = recs.reduce((s, r) => s + faltaTitulo(r), 0);
@@ -266,7 +269,8 @@ export function definirPermissao(db, papelQuem, alvo, op, valor, quem) {
 }
 export function definirPolitica(db, papelQuem, chave, valor, quem) {
   if (papelQuem !== 'dono') throw new Error('Só o dono muda a política de aprovação.');
-  if (!['autoAprovacao'].includes(chave)) throw new Error('Política inválida.');
+  if (!['autoAprovacao', 'duplaAcima'].includes(chave)) throw new Error('Política inválida.');
+  if (chave === 'duplaAcima') { const v = Number(valor) || 0; if (!Number.isInteger(v) || v < 0) throw new Error('Valor inválido.'); const antes = db.politica?.duplaAcima || 0; (db.politica ||= {}).duplaAcima = v; registra(db, quem, 'mudou a aprovação em dois níveis', { ref: 'politica:duplaAcima', antes: antes ? `acima de ${reais(antes * 100)}` : 'desligada', depois: v ? `acima de ${reais(v * 100)}` : 'desligada' }); return; }
   const antes = !!db.politica?.[chave]; (db.politica ||= {})[chave] = !!valor;
   registra(db, quem, 'mudou a política: quem lança pode aprovar o próprio pagamento', { ref: `politica:${chave}`, antes: antes ? 'sim' : 'não', depois: valor ? 'sim' : 'não' });
 }
@@ -304,8 +308,9 @@ function validaTitulo(d, rotulo) {
 export function novoPagamento(db, d, quem, papel) {
   exige(db, papel, 'criar'); exigeAberto(db); const n = validaTitulo({ ...d, quem: d.forn }, 'o fornecedor');
   if (d.cat && !CATS.some(([c, t]) => c === d.cat && t === 'c')) throw new Error('Escolha uma conta de despesa.');
+  if (d.cc && !(db.centros || []).some((c) => c.id === d.cc)) throw new Error('Centro de custo não encontrado.');
   const grupo = n > 1 ? nid('g') : undefined;
-  const criados = parcelar(d.c, n, d.venc).map((p, i) => { const x = { id: nid('p'), emp: d.emp, forn: String(d.forn).trim().slice(0, 80), desc: (String(d.desc).trim() + (n > 1 ? ` (${i + 1}/${n})` : '')).slice(0, 120), c: p.c, venc: p.venc, st: 'pendente', sel: false, criadoPor: quem, baixas: [] }; if (d.cat) x.cat = d.cat; if (grupo) { x.grupo = grupo; x.parcela = { n: i + 1, de: n, total: d.c }; } hist(x, quem, `lançou ${reais(p.c)}${n > 1 ? ` (parcela ${i + 1} de ${n})` : ''}`); db.pags.push(x); return x; });
+  const criados = parcelar(d.c, n, d.venc).map((p, i) => { const x = { id: nid('p'), emp: d.emp, forn: String(d.forn).trim().slice(0, 80), desc: (String(d.desc).trim() + (n > 1 ? ` (${i + 1}/${n})` : '')).slice(0, 120), c: p.c, venc: p.venc, st: 'pendente', sel: false, criadoPor: quem, baixas: [] }; if (d.cat) x.cat = d.cat; EXTRAS.forEach((k) => { if (d[k]) x[k] = d[k]; }); if (grupo) { x.grupo = grupo; x.parcela = { n: i + 1, de: n, total: d.c }; } hist(x, quem, `lançou ${reais(p.c)}${n > 1 ? ` (parcela ${i + 1} de ${n})` : ''}`); db.pags.push(x); return x; });
   registra(db, quem, `lançou pagamento para aprovar: ${d.forn} · ${reais(d.c)}${n > 1 ? ` em ${n} parcelas` : ''}`, { ref: `pag:${criados[0].id}`, depois: reais(d.c) });
   return criados;
 }
@@ -325,10 +330,17 @@ export function cancelarPagamento(db, id, quem, papel, motivo) {
 }
 
 // ------------------------------------------------------------------ contas a receber
+const EXTRAS = ['cc', 'pessoa', 'nfe', 'recorrente', 'comp', 'imposto', 'reembolso', 'boleto'];
+export const RETENCOES = { ir: 'IR (1,5%)', pcc: 'PIS/COFINS/CSLL (4,65%)', iss: 'ISS', inss: 'INSS (11%)' };
 export function novoRecebivel(db, d, quem, papel) {
   exige(db, papel, 'criar'); exigeAberto(db); const n = validaTitulo({ ...d, quem: d.cliente }, 'o cliente');
+  if (d.cat && !CATS.some(([c, t]) => c === d.cat && t === 'r')) throw new Error('Escolha uma conta de receita.');
+  if (d.cc && !(db.centros || []).some((c) => c.id === d.cc)) throw new Error('Centro de custo não encontrado.');
+  const ret = Object.fromEntries(Object.keys(RETENCOES).map((k) => [k, Number(d.retencoes?.[k]) || 0]).filter(([, v]) => v)), totRet = Object.values(ret).reduce((a, b) => a + b, 0);
+  if (Object.values(ret).some((v) => !Number.isInteger(v) || v < 0)) throw new Error('Retenção inválida.'); if (totRet && n > 1) throw new Error('Retenções valem para nota à vista; para parcelar, lance cada parcela.'); if (totRet >= d.c) throw new Error('As retenções passam do valor da nota.');
+  if (totRet) d = { ...d, c: d.c - totRet };
   const grupo = n > 1 ? nid('g') : undefined;
-  const criados = parcelar(d.c, n, d.venc).map((p, i) => { const x = { id: nid('r'), emp: d.emp, cliente: String(d.cliente).trim().slice(0, 80), desc: (String(d.desc).trim() + (n > 1 ? ` (${i + 1}/${n})` : '')).slice(0, 120), c: p.c, venc: p.venc, st: 'aberto', criadoPor: quem, baixas: [] }; if (grupo) { x.grupo = grupo; x.parcela = { n: i + 1, de: n, total: d.c }; } hist(x, quem, `lançou ${reais(p.c)} a receber`); (db.recs ||= []).push(x); return x; });
+  const criados = parcelar(d.c, n, d.venc).map((p, i) => { const x = { id: nid('r'), emp: d.emp, cliente: String(d.cliente).trim().slice(0, 80), desc: (String(d.desc).trim() + (n > 1 ? ` (${i + 1}/${n})` : '')).slice(0, 120), c: p.c, venc: p.venc, st: 'aberto', criadoPor: quem, baixas: [] }; if (d.cat) x.cat = d.cat; EXTRAS.forEach((k) => { if (d[k]) x[k] = d[k]; }); if (totRet) { x.bruto = d.c + totRet; x.ret = ret; } if (grupo) { x.grupo = grupo; x.parcela = { n: i + 1, de: n, total: d.c }; } hist(x, quem, `lançou ${reais(p.c)} a receber`); (db.recs ||= []).push(x); return x; });
   registra(db, quem, `lançou a receber: ${d.cliente} · ${reais(d.c)}${n > 1 ? ` em ${n} parcelas` : ''}`, { ref: `rec:${criados[0].id}`, depois: reais(d.c) });
   return criados;
 }
@@ -352,7 +364,7 @@ export function encargos(db, t, c = faltaTitulo(t)) {
  */
 export function baixar(db, k, id, d, quem, papel, op = 'pagar') {
   exige(db, papel, op); const t = titulo(db, k, id), dia = Number.isInteger(d.dia) ? d.dia : 0;
-  if (dia > 0) throw new Error('A data da baixa não pode ser no futuro.'); exigeAberto(db, compDoDia(dia));
+  if (dia > 0) throw new Error('A data da baixa não pode ser no futuro.'); exigeDia(db, dia);
   if (k === 'pag' && !['aprovado', 'remessa'].includes(t.st)) throw new Error(t.st === 'pendente' ? 'Este pagamento ainda não foi aprovado.' : 'Este pagamento não está em aberto.');
   if (k === 'rec' && t.st === 'cancelado') throw new Error('Este recebível foi cancelado.');
   const falta = faltaTitulo(t); if (!Number.isInteger(d.c) || d.c <= 0) throw new Error('Digite o valor da baixa.'); if (d.c > falta) throw new Error(`O máximo para baixar é ${reais(falta)}.`);
@@ -383,7 +395,7 @@ export function baixarLote(db, ids, { dia = 0, conta } = {}, quem, papel) {
 }
 export function estornarBaixa(db, k, id, baixaId, quem, papel, motivo) {
   exige(db, papel, 'pagar'); const t = titulo(db, k, id), i = (t.baixas || []).findIndex((b) => b.id === baixaId); if (i < 0) throw new Error('Baixa não encontrada.');
-  const m = String(motivo || '').trim(); if (!m) throw new Error('Diga o motivo do estorno.'); const b = t.baixas[i]; exigeAberto(db, compDoDia(b.dia));
+  const m = String(motivo || '').trim(); if (!m) throw new Error('Diga o motivo do estorno.'); const b = t.baixas[i]; exigeDia(db, b.dia);
   t.baixas.splice(i, 1); if (b.mov) db.movs = db.movs.filter((x) => x.id !== b.mov);
   if (b.ext) { const e = db.extrato.find((x) => x.id === b.ext); if (e) { delete e.pag; delete e.rec; delete e.mov; delete e.criou; } }
   if (k === 'pag' && t.st === 'pago') { t.st = t.remessa ? 'remessa' : 'aprovado'; delete t.pagoEm; }
@@ -407,33 +419,33 @@ export const veAnexos = (db, papel) => podeFazer(db, papel, 'criar') || podeFaze
 // ------------------------------------------------------------------ tesouraria: contas bancárias e transferências
 export function novaContaBancaria(db, d, quem, papel) {
   exige(db, papel, 'tesouraria'); const nome = String(d.nome || '').trim(); if (!nome) throw new Error('Dê um nome à conta (banco e número).');
-  if (!Number.isInteger(d.saldoIni)) throw new Error('Saldo inicial inválido.'); const desde = Number.isInteger(d.desde) ? d.desde : 0; if (desde > 0) throw new Error('A data do saldo inicial não pode ser no futuro.'); exigeAberto(db, compDoDia(desde));
+  if (!Number.isInteger(d.saldoIni)) throw new Error('Saldo inicial inválido.'); const desde = Number.isInteger(d.desde) ? d.desde : 0; if (desde > 0) throw new Error('A data do saldo inicial não pode ser no futuro.'); exigeDia(db, desde);
   if ((db.contas ||= []).some((c) => c.emp === d.emp && norm(c.nome) === norm(nome))) throw new Error('Já existe uma conta com esse nome nesta empresa.');
-  const c = { id: nid('c'), emp: d.emp, nome: nome.slice(0, 60), saldoIni: d.saldoIni, desde }; db.contas.push(c);
+  const c = { id: nid('c'), emp: d.emp, nome: nome.slice(0, 60), saldoIni: d.tipo === 'cartao' ? 0 : d.saldoIni, desde }; if (d.tipo === 'cartao') { c.tipo = 'cartao'; if (!Number.isInteger(d.limite) || d.limite <= 0) throw new Error('Digite o limite do cartão.'); c.limite = d.limite; } db.contas.push(c);
   registra(db, quem, `cadastrou a conta ${c.nome} com saldo inicial de ${reais(c.saldoIni)} em ${isoDe(desde).split('-').reverse().join('/')}`, { ref: `conta:${c.id}`, depois: reais(c.saldoIni) }); return c;
 }
 export function saldoConta(db, id, ate = 0) { const c = (db.contas || []).find((x) => x.id === id); if (!c) return 0; return c.saldoIni + (db.movs || []).filter((m) => m.conta === id && m.dia >= c.desde && m.dia <= ate).reduce((s, m) => s + m.c, 0); }
 export function transferir(db, d, quem, papel) {
   exige(db, papel, 'tesouraria'); const de = (db.contas || []).find((x) => x.id === d.de), para = (db.contas || []).find((x) => x.id === d.para), dia = Number.isInteger(d.dia) ? d.dia : 0;
   if (!de || !para) throw new Error('Escolha as duas contas.'); if (de === para) throw new Error('Escolha contas diferentes.'); if (de.emp !== para.emp) throw new Error('Transferência entre empresas do grupo é empréstimo ou aporte, não transferência: lance como pagamento e recebível.');
-  if (!Number.isInteger(d.c) || d.c <= 0) throw new Error('Digite o valor.'); if (dia > 0) throw new Error('A data não pode ser no futuro.'); if (dia < de.desde || dia < para.desde) throw new Error('A data é anterior ao saldo inicial de uma das contas.'); exigeAberto(db, compDoDia(dia));
+  if (!Number.isInteger(d.c) || d.c <= 0) throw new Error('Digite o valor.'); if (dia > 0) throw new Error('A data não pode ser no futuro.'); if (dia < de.desde || dia < para.desde) throw new Error('A data é anterior ao saldo inicial de uma das contas.'); exigeDia(db, dia);
   const tid = nid('t'), desc = String(d.desc || 'Transferência entre contas').slice(0, 80);
   (db.movs ||= []).push({ id: nid('m'), conta: de.id, dia, c: -d.c, tipo: 'transf', transf: tid, desc: `${desc} → ${para.nome}` }, { id: nid('m'), conta: para.id, dia, c: d.c, tipo: 'transf', transf: tid, desc: `${desc} ← ${de.nome}` });
   registra(db, quem, `transferiu ${reais(d.c)} de ${de.nome} para ${para.nome}`, { ref: `transf:${tid}`, depois: reais(d.c) }); return tid;
 }
 export function desfazerTransferencia(db, tid, quem, papel) {
   exige(db, papel, 'tesouraria'); const ms = (db.movs || []).filter((m) => m.transf === tid); if (ms.length !== 2) throw new Error('Transferência não encontrada.');
-  if (ms.some((m) => m.ext)) throw new Error('Esta transferência já foi conciliada com o extrato: desfaça a conciliação antes.'); exigeAberto(db, compDoDia(ms[0].dia));
+  if (ms.some((m) => m.ext)) throw new Error('Esta transferência já foi conciliada com o extrato: desfaça a conciliação antes.'); exigeDia(db, ms[0].dia);
   db.movs = db.movs.filter((m) => m.transf !== tid); registra(db, quem, `desfez a transferência de ${reais(Math.abs(ms[0].c))}`, { ref: `transf:${tid}`, antes: reais(Math.abs(ms[0].c)), depois: 'desfeita' });
 }
 /** Disponível por empresa, compromissos e recebimentos de até `dias`; transferências não mudam o total (anulam-se). */
 export function tesouraria(db, emp, dias = 7) {
   const emps = emp === 'todas' ? [...new Set([...(db.contas || []).map((c) => c.emp), ...db.pags.map((p) => p.emp)])] : [emp];
   return emps.map((e) => {
-    const contas = (db.contas || []).filter((c) => c.emp === e).map((c) => ({ ...c, saldo: saldoConta(db, c.id) })), total = contas.reduce((s, c) => s + c.saldo, 0);
+    const todas = (db.contas || []).filter((c) => c.emp === e).map((c) => ({ ...c, saldo: saldoConta(db, c.id) })), contas = todas.filter((c) => c.tipo !== 'cartao'), cartoes = todas.filter((c) => c.tipo === 'cartao'), total = contas.reduce((s, c) => s + c.saldo, 0);
     const pagar = db.pags.filter((p) => p.emp === e && ['pendente', 'aprovado', 'remessa'].includes(p.st) && p.venc <= dias).reduce((s, p) => s + faltaTitulo(p), 0);
     const receber = (db.recs || []).filter((r) => r.emp === e && r.st !== 'cancelado' && r.venc <= dias).reduce((s, r) => s + faltaTitulo(r), 0);
-    return { emp: e, contas, total, pagar, receber, depois: total - pagar + receber, insuficiente: contas.length > 0 && total - pagar < 0, semConta: !contas.length };
+    return { emp: e, contas, cartoes, fatura: -cartoes.reduce((s, c) => s + c.saldo, 0), total, pagar, receber, depois: total - pagar + receber, insuficiente: contas.length > 0 && total - pagar < 0, semConta: !contas.length };
   });
 }
 
@@ -448,14 +460,14 @@ export function agenda(db, emp, de = -30, ate = 60) {
 // ------------------------------------------------------------------ conciliação por conta (pagamentos e recebimentos)
 const movLivre = (db, k, id, valor) => (db.movs || []).find((m) => m.ref?.k === k && m.ref.id === id && !m.ext && m.c === valor);
 export function sugereRecebivel(db, e) {
-  if (e.c <= 0 || e.pag || e.rec || e.mov) return null; const pal = norm(e.desc);
+  if (e.c <= 0 || e.pag || e.rec || e.mov || e.multi) return null; const pal = norm(e.desc);
   const cands = (db.recs || []).filter((r) => r.st !== 'cancelado' && (faltaTitulo(r) === e.c || movLivre(db, 'rec', r.id, e.c)) && (!e.conta || r.emp === db.contas?.find((c) => c.id === e.conta)?.emp));
   return cands.sort((a, b) => Number(norm(b.cliente).split(' ').some((w) => w.length > 3 && pal.includes(w))) - Number(norm(a.cliente).split(' ').some((w) => w.length > 3 && pal.includes(w))) || Math.abs(a.venc - e.dia) - Math.abs(b.venc - e.dia))[0] || null;
 }
 /** Concilia a linha com um título (k): liga à baixa manual de mesmo valor se existir; senão cria a baixa (parcial se for menor). */
 export function conciliarTitulo(db, extId, k, id, quem, papel) {
   exige(db, papel, 'conciliar'); const e = db.extrato.find((x) => x.id === extId); if (!e) throw new Error('Linha do extrato não encontrada.');
-  if (e.pag || e.rec || e.mov) throw new Error('Esta linha já está conciliada.'); if ((e.c > 0) !== (k === 'rec')) throw new Error(e.c > 0 ? 'Entrada no banco concilia com recebível.' : 'Saída no banco concilia com pagamento.');
+  if (e.pag || e.rec || e.mov || e.multi) throw new Error('Esta linha já está conciliada.'); if ((e.c > 0) !== (k === 'rec')) throw new Error(e.c > 0 ? 'Entrada no banco concilia com recebível.' : 'Saída no banco concilia com pagamento.');
   const t = titulo(db, k, id), v = Math.abs(e.c), m = movLivre(db, k, id, e.c);
   if (m) { m.ext = e.id; e.mov = m.id; e[k] = t.id; const b = t.baixas.find((x) => x.mov === m.id); if (b) b.ext = e.id; hist(t, quem, 'baixa conferida com o extrato'); registra(db, quem, `conciliou ${reais(v)} do extrato (${e.desc}) com a baixa já lançada de ${k === 'pag' ? t.forn : t.cliente}`, { ref: `ext:${e.id}` }); return { ligou: m.id }; }
   if (v > faltaTitulo(t)) throw new Error(`O banco mostra ${reais(v)}, mais do que falta (${reais(faltaTitulo(t))}).`);
@@ -464,10 +476,13 @@ export function conciliarTitulo(db, extId, k, id, quem, papel) {
   e[k] = t.id; e.criou = b.id; if (b.mov) e.mov = b.mov; return { baixa: b.id };
 }
 export function desconciliar(db, extId, quem, papel) {
-  exige(db, papel, 'conciliar'); const e = db.extrato.find((x) => x.id === extId), k = e?.pag ? 'pag' : e?.rec ? 'rec' : null; if (!e || !k) throw new Error('Esta linha não está conciliada.');
+  exige(db, papel, 'conciliar'); const e0 = db.extrato.find((x) => x.id === extId);
+  if (e0?.avulso) { exigeDia(db, e0.dia); db.movs = db.movs.filter((m) => m.id !== e0.mov); delete e0.mov; delete e0.avulso; registra(db, quem, `desfez o lançamento avulso de ${e0.desc}`, { ref: `ext:${e0.id}` }); return; }
+  if (e0?.multi) { exigeDia(db, e0.dia); e0.multi.forEach((x) => { const t = titulo(db, x.k, x.id), b = t.baixas.find((y) => y.id === x.b); t.baixas = t.baixas.filter((y) => y !== b); if (b?.mov) db.movs = db.movs.filter((m) => m.id !== b.mov); if (x.k === 'pag' && t.st === 'pago') { t.st = t.remessa ? 'remessa' : 'aprovado'; delete t.pagoEm; } hist(t, quem, 'desfez a conciliação'); }); delete e0.multi; registra(db, quem, `desfez a conciliação de ${e0.desc}`, { ref: `ext:${e0.id}` }); return; }
+  const e = e0, k = e?.pag ? 'pag' : e?.rec ? 'rec' : null; if (!e || !k) throw new Error('Esta linha não está conciliada.');
   const t = titulo(db, k, e[k]);
-  if (e.criou) { const b = t.baixas.find((x) => x.id === e.criou); exigeAberto(db, compDoDia(e.dia)); t.baixas = t.baixas.filter((x) => x !== b); if (b?.mov) db.movs = db.movs.filter((x) => x.id !== b.mov); if (k === 'pag' && t.st === 'pago') { t.st = t.remessa ? 'remessa' : 'aprovado'; delete t.pagoEm; } }
-  else if (!e.mov && !(t.baixas || []).some((x) => x.ext === e.id)) { exigeAberto(db, compDoDia(e.dia)); if (k === 'pag' && t.st === 'pago' && !baixado(t)) { t.st = t.remessa ? 'remessa' : 'aprovado'; delete t.pagoEm; } } // ligação de antes das baixas: só a situação
+  if (e.criou) { const b = t.baixas.find((x) => x.id === e.criou); exigeDia(db, e.dia); t.baixas = t.baixas.filter((x) => x !== b); if (b?.mov) db.movs = db.movs.filter((x) => x.id !== b.mov); if (k === 'pag' && t.st === 'pago') { t.st = t.remessa ? 'remessa' : 'aprovado'; delete t.pagoEm; } }
+  else if (!e.mov && !(t.baixas || []).some((x) => x.ext === e.id)) { exigeDia(db, e.dia); if (k === 'pag' && t.st === 'pago' && !baixado(t)) { t.st = t.remessa ? 'remessa' : 'aprovado'; delete t.pagoEm; } } // ligação de antes das baixas: só a situação
   else { const m = (db.movs || []).find((x) => x.id === e.mov); if (m) delete m.ext; const b = (t.baixas || []).find((x) => x.ext === e.id); if (b) delete b.ext; }
   delete e[k]; delete e.mov; delete e.criou; hist(t, quem, 'desfez a conciliação'); registra(db, quem, `desfez a conciliação de ${e.desc}`, { ref: `ext:${e.id}` });
 }
@@ -475,8 +490,8 @@ export function desconciliar(db, extId, quem, papel) {
 export function conferenciaConta(db, contaId) {
   const c = (db.contas || []).find((x) => x.id === contaId); if (!c) return null;
   const sistema = saldoConta(db, contaId), inf = db.saldoBanco?.[contaId], linhas = db.extrato.filter((e) => e.conta === contaId);
-  const pend = linhas.filter((e) => !e.pag && !e.rec && !e.mov && !categoria(db, e)), semBanco = (db.movs || []).filter((m) => m.conta === contaId && !m.ext && m.tipo !== 'transf');
-  return { conta: c, sistema, banco: inf ? inf.c : null, dif: inf ? inf.c - sistema : null, justificativa: inf?.just || '', conciliadas: linhas.filter((e) => e.pag || e.rec || e.mov).length, pendentes: pend.length, semBanco: semBanco.length };
+  const pend = linhas.filter((e) => !e.pag && !e.rec && !e.mov && !e.multi && !categoria(db, e)), semBanco = (db.movs || []).filter((m) => m.conta === contaId && !m.ext && !['transf', 'fatura', 'cartao'].includes(m.tipo));
+  return { conta: c, sistema, banco: inf ? inf.c : null, dif: inf ? inf.c - sistema : null, justificativa: inf?.just || '', conciliadas: linhas.filter((e) => e.pag || e.rec || e.mov || e.multi).length, pendentes: pend.length, semBanco: semBanco.length };
 }
 export function informarSaldoBanco(db, contaId, c, quem, papel, just = '') {
   exige(db, papel, 'conciliar'); if (!(db.contas || []).some((x) => x.id === contaId)) throw new Error('Conta não encontrada.'); if (!Number.isInteger(c)) throw new Error('Saldo inválido.');
@@ -489,7 +504,7 @@ export function verificacoes(db, comp = compAtual()) {
   const v = [], conta = (id, t, ok, det) => v.push({ id, t, ok, det });
   const pend = db.pags.filter((p) => p.st === 'pendente');
   conta('aprov', 'Pagamentos sem aprovação pendente', !pend.length, pend.length ? `${pend.length} pagamento(s) esperando aprovação (${reais(pend.reduce((s, p) => s + p.c, 0))})` : 'nenhum pendente');
-  const semPar = db.extrato.filter((e) => !e.pag && !e.rec && !e.mov && !categoria(db, e));
+  const semPar = db.extrato.filter((e) => !e.pag && !e.rec && !e.mov && !e.multi && !categoria(db, e));
   conta('extrato', 'Extrato conciliado ou com categoria', !semPar.length, semPar.length ? `${semPar.length} linha(s) sem par nem regra` : `${db.extrato.length} linha(s) revisadas`);
   const cs = (db.contas || []).map((c) => conferenciaConta(db, c.id)), sem = cs.filter((x) => x.banco === null || db.saldoBanco[x.conta.id].comp !== comp), dif = cs.filter((x) => x.dif && !x.justificativa);
   conta('saldos', 'Saldos conferidos com o banco', !sem.length && !dif.length, !cs.length ? 'nenhuma conta bancária cadastrada' : sem.length ? `${sem.length} conta(s) sem o saldo do banco informado neste mês` : dif.length ? `${dif.length} conta(s) com diferença sem justificativa` : `${cs.length} conta(s) conferidas`);
@@ -524,3 +539,297 @@ export function detalheOrcado(db, emp, i, comp = compAtual(), agora = new Date()
 const faltaSoma = (l) => l.reduce((s, p) => s + faltaTitulo(p), 0);
 /** Projeção linear até o fim do mês (real ÷ dias corridos × dias do mês); no mês fechado ou passado é o próprio real. */
 export const projecaoMes = (real, fracao) => (fracao >= 1 || fracao <= 0 ? real : Math.round(real / fracao));
+
+// ================================================================== plano de contas, cadastros, recorrências e relatórios
+// Regras:
+// - plano de contas da empresa (nome, receita ou custo, linha do fluxo e grupo); renomear atualiza tudo que usa a conta;
+//   conta em uso não é apagada;
+// - cliente e fornecedor com CPF/CNPJ conferido pelos dígitos; o mesmo documento não é cadastrado duas vezes;
+// - recorrência gera o título de cada mês uma vez só (recorrência + mês); no fluxo, as próximas ocorrências entram mesmo
+//   antes de gerar;
+// - fluxo integrado: em cada linha e semana vale o maior entre o previsto à mão e o que já está lançado em títulos
+//   (o título consome a previsão; nunca soma duas vezes);
+// - real do orçado = ajuste à mão (o que não passa pelo sistema) + baixas do mês, pela conta do plano;
+// - trava por data: nada com data até o dia travado muda (baixas, transferências, lançamentos avulsos).
+export const PLANO_PADRAO = [['Receita de vendas', 'r', 'Clientes (a receber)', 'Receitas'], ['Receita de serviços', 'r', 'Clientes (a receber)', 'Receitas'], ['Custo das mercadorias', 'c', 'Fornecedores', 'Custos diretos'], ['Fretes', 'c', 'Fornecedores', 'Custos diretos'], ['Folha e encargos', 'c', 'Folha e encargos', 'Pessoal'], ['Aluguel e condomínio', 'c', 'Despesas gerais', 'Estrutura'], ['Marketing', 'c', 'Despesas gerais', 'Comercial'], ['Tecnologia', 'c', 'Despesas gerais', 'Estrutura'], ['Despesas financeiras', 'c', 'Financiamentos', 'Financeiro'], ['Serviços de terceiros', 'c', 'Despesas gerais', 'Estrutura'], ['Impostos e taxas', 'c', 'Impostos', 'Impostos']]
+  .map(([c, t, linha, grupo]) => ({ c, t, linha, grupo }));
+export const LINHAS_FLUXO = { r: ['Clientes (a receber)', 'Contratos recorrentes', 'Outras entradas'], c: ['Fornecedores', 'Folha e encargos', 'Impostos', 'Financiamentos', 'Despesas gerais'] };
+/** Liga o plano de contas da empresa (ou o padrão) às regras: CATS passa a ser a lista dele. */
+export function usarPlano(db) {
+  if (!Array.isArray(db.plano) || !db.plano.length) db.plano = PLANO_PADRAO.map((p) => ({ ...p }));
+  CATS = db.plano.map((p) => [p.c, p.t]); return db.plano;
+}
+export function linhaDe(db, cat, k) { const p = (db.plano || PLANO_PADRAO).find((x) => x.c === cat); return p?.linha || (k === 'rec' ? 'Clientes (a receber)' : 'Fornecedores'); }
+const usoDaConta = (db, c) => db.pags.filter((p) => p.cat === c).length + (db.recs || []).filter((r) => r.cat === c).length + (db.rateio || []).filter((r) => r.cat === c).length + (db.eliminacoes || []).filter((e) => e.receita === c || e.custo === c).length + (db.movs || []).filter((m) => m.cat === c).length + (db.recorrentes || []).filter((r) => r.cat === c).length + Object.values(db.orc || {}).filter((l) => l.some((x) => x.c === c && (x.o || x.r))).length;
+export function novaContaPlano(db, d, quem, papel) {
+  exige(db, papel, 'criar'); usarPlano(db); const c = String(d.c || '').trim().slice(0, 50);
+  if (!c) throw new Error('Dê um nome à conta.'); if (!['r', 'c'].includes(d.t)) throw new Error('Escolha receita ou custo.');
+  if (db.plano.some((p) => norm(p.c) === norm(c))) throw new Error('Já existe uma conta com esse nome.');
+  const linha = LINHAS_FLUXO[d.t].includes(d.linha) ? d.linha : LINHAS_FLUXO[d.t][0];
+  db.plano.push({ c, t: d.t, linha, grupo: String(d.grupo || '').trim().slice(0, 40) || (d.t === 'r' ? 'Receitas' : 'Outras despesas') }); usarPlano(db);
+  registra(db, quem, `criou a conta "${c}" no plano de contas`, { ref: `plano:${c}`, depois: `${d.t === 'r' ? 'receita' : 'custo'} · ${linha}` });
+}
+export function editarContaPlano(db, antigo, d, quem, papel) {
+  exige(db, papel, 'criar'); usarPlano(db); const p = db.plano.find((x) => x.c === antigo); if (!p) throw new Error('Conta não encontrada.');
+  const novo = String(d.c ?? antigo).trim().slice(0, 50); if (!novo) throw new Error('Dê um nome à conta.');
+  if (novo !== antigo && db.plano.some((x) => x !== p && norm(x.c) === norm(novo))) throw new Error('Já existe uma conta com esse nome.');
+  if (d.linha && LINHAS_FLUXO[p.t].includes(d.linha)) p.linha = d.linha; if (d.grupo !== undefined) p.grupo = String(d.grupo).trim().slice(0, 40) || p.grupo;
+  if (novo !== antigo) {
+    const troca = (o, k) => { if (o[k] === antigo) o[k] = novo; };
+    db.pags.forEach((x) => troca(x, 'cat')); (db.recs || []).forEach((x) => troca(x, 'cat')); (db.rateio || []).forEach((x) => troca(x, 'cat')); (db.movs || []).forEach((x) => troca(x, 'cat')); (db.recorrentes || []).forEach((x) => troca(x, 'cat'));
+    (db.eliminacoes || []).forEach((x) => { troca(x, 'receita'); troca(x, 'custo'); }); Object.values(db.orc || {}).forEach((l) => l.forEach((x) => troca(x, 'c'))); (db.regras || []).forEach((x) => troca(x, 'conta'));
+    p.c = novo;
+  }
+  usarPlano(db); registra(db, quem, 'editou uma conta do plano de contas', { ref: `plano:${novo}`, antes: antigo, depois: `${novo} · ${p.linha} · ${p.grupo}` });
+}
+export function removerContaPlano(db, c, quem, papel) {
+  exige(db, papel, 'criar'); usarPlano(db); const n = usoDaConta(db, c); if (n) throw new Error(`A conta "${c}" está em uso (${n} lançamento[s] ou linha[s]); renomeie em vez de apagar.`);
+  if (db.plano.length <= 2) throw new Error('O plano precisa de ao menos uma receita e um custo.');
+  db.plano = db.plano.filter((p) => p.c !== c);
+  Object.keys(db.orc || {}).forEach((k) => { db.orc[k] = db.orc[k].filter((x) => x.c !== c); }); usarPlano(db); registra(db, quem, `apagou a conta "${c}" do plano de contas`, { ref: `plano:${c}`, antes: c, depois: 'apagada' });
+}
+
+// ------------------------------------------------------------------ clientes e fornecedores (CPF/CNPJ conferido)
+export function docValido(doc) {
+  const d = String(doc || '').replace(/\D/g, '');
+  if (d.length === 11) { if (/^(\d)\1+$/.test(d)) return false; const dv = (n) => { let s = 0; for (let i = 0; i < n; i++) s += Number(d[i]) * (n + 1 - i); const r = (s * 10) % 11; return r === 10 ? 0 : r; }; return dv(9) === Number(d[9]) && dv(10) === Number(d[10]); }
+  if (d.length === 14) { if (/^(\d)\1+$/.test(d)) return false; const dv = (n) => { const p = n === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]; const s = p.reduce((a, w, i) => a + w * Number(d[i]), 0) % 11; return s < 2 ? 0 : 11 - s; }; return dv(12) === Number(d[12]) && dv(13) === Number(d[13]); }
+  return false;
+}
+export const docFormatado = (doc) => { const d = String(doc || '').replace(/\D/g, ''); return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : d.length === 11 ? d.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : d; };
+export function salvarPessoa(db, d, quem, papel) {
+  exige(db, papel, 'criar'); const nome = String(d.nome || '').trim().slice(0, 80); if (!nome) throw new Error('Digite o nome.');
+  if (!['cliente', 'fornecedor', 'ambos', 'funcionario'].includes(d.tipo)) throw new Error('Escolha o tipo.');
+  const doc = String(d.doc || '').replace(/\D/g, ''); if (doc && !docValido(doc)) throw new Error('CPF ou CNPJ inválido (confira os dígitos).');
+  const prazo = d.prazo === '' || d.prazo === undefined ? null : Number(d.prazo); if (prazo !== null && (!Number.isInteger(prazo) || prazo < 0 || prazo > 365)) throw new Error('Prazo em dias, de 0 a 365.');
+  const lista = (db.pessoas ||= []), atual = d.id && lista.find((p) => p.id === d.id);
+  if (doc && lista.some((p) => p !== atual && p.doc === doc)) throw new Error('Esse CPF/CNPJ já está cadastrado.');
+  if (!doc && lista.some((p) => p !== atual && !p.doc && norm(p.nome) === norm(nome))) throw new Error('Já existe um cadastro com esse nome.');
+  const v = { nome, tipo: d.tipo, doc, pix: String(d.pix || '').trim().slice(0, 77), banco: String(d.banco || '').trim().slice(0, 80), email: String(d.email || '').trim().slice(0, 80), tel: String(d.tel || '').replace(/[^\d+]/g, '').slice(0, 16), prazo };
+  if (atual) { const antes = atual.nome; Object.assign(atual, v); if (antes !== nome) { db.pags.forEach((p) => { if (p.pessoa === atual.id) p.forn = nome; }); (db.recs || []).forEach((r) => { if (r.pessoa === atual.id) r.cliente = nome; }); } registra(db, quem, `editou o cadastro de ${nome}`, { ref: `pessoa:${atual.id}`, antes, depois: nome }); return atual; }
+  const p = { id: nid('h'), ...v }; lista.push(p); registra(db, quem, `cadastrou ${nome}${doc ? ` (${docFormatado(doc)})` : ''}`, { ref: `pessoa:${p.id}` }); return p;
+}
+/** Acha o cadastro pelo documento ou pelo nome (sem diferenciar acento e maiúscula). */
+export function acharPessoa(db, { nome, doc } = {}) { const d = String(doc || '').replace(/\D/g, ''); return (db.pessoas || []).find((p) => (d && p.doc === d) || (nome && norm(p.nome) === norm(nome))) || null; }
+export function resumoPessoa(db, id) {
+  const pg = db.pags.filter((p) => p.pessoa === id), rc = (db.recs || []).filter((r) => r.pessoa === id);
+  return { aPagar: pg.reduce((s, p) => s + faltaTitulo(p), 0), pago: pg.reduce((s, p) => s + baixado(p), 0), aReceber: rc.reduce((s, r) => s + faltaTitulo(r), 0), recebido: rc.reduce((s, r) => s + baixado(r), 0), atrasado: rc.filter((r) => situacaoRec(r).st === 'atrasado').reduce((s, r) => s + faltaTitulo(r), 0), titulos: pg.length + rc.length };
+}
+
+// ------------------------------------------------------------------ centros de custo
+export function novoCentro(db, nome, quem, papel) { exige(db, papel, 'criar'); const n = String(nome || '').trim().slice(0, 40); if (!n) throw new Error('Dê um nome ao centro de custo.'); if ((db.centros ||= []).some((c) => norm(c.nome) === norm(n))) throw new Error('Já existe esse centro de custo.'); const c = { id: nid('k'), nome: n }; db.centros.push(c); registra(db, quem, `criou o centro de custo ${n}`, { ref: `cc:${c.id}` }); return c; }
+export function orcarCentro(db, cc, comp, v, quem, papel) { exige(db, papel, 'criar'); exigeAberto(db, comp); if (!(db.centros || []).some((c) => c.id === cc)) throw new Error('Centro de custo não encontrado.'); if (!Number.isInteger(v) || v < 0) throw new Error('Valor inválido.'); const k = `${cc}|${comp}`, antes = (db.orcCentros ||= {})[k] || 0; if (v) db.orcCentros[k] = v; else delete db.orcCentros[k]; registra(db, quem, 'mudou o orçamento de um centro de custo', { ref: `cc:${cc}:${comp}`, antes: reais(antes * 100), depois: reais(v * 100) }); }
+/** Por centro de custo no mês: orçado (reais), pago (baixas) e comprometido (pagamentos em aberto que vencem no mês). */
+export function resumoCentros(db, emp, comp = compAtual()) {
+  const ok = (p) => emp === 'todas' || p.emp === emp, mes = (d) => compDoDia(d) === comp;
+  return (db.centros || []).map((c) => { const ps = db.pags.filter((p) => ok(p) && p.cc === c.id), avul = (db.movs || []).filter((m) => m.cc === c.id && m.c < 0 && mes(m.dia) && (emp === 'todas' || (db.contas || []).find((x) => x.id === m.conta)?.emp === emp));
+    const pago = ps.reduce((s, p) => s + (p.baixas || []).filter((b) => mes(b.dia)).reduce((q, b) => q + b.total, 0), 0) - avul.reduce((s, m) => s + m.c, 0);
+    const comprometido = ps.filter((p) => ['pendente', 'aprovado', 'remessa'].includes(p.st) && mes(p.venc)).reduce((s, p) => s + faltaTitulo(p), 0);
+    const orcado = (db.orcCentros?.[`${c.id}|${comp}`] || 0) * 100; return { ...c, orcado, pago, comprometido, livre: orcado - pago - comprometido }; });
+}
+
+// ------------------------------------------------------------------ recorrências e impostos (gera o título de cada mês uma vez só)
+export function novaRecorrencia(db, d, quem, papel) {
+  exige(db, papel, 'criar'); if (!['pag', 'rec'].includes(d.k)) throw new Error('Escolha pagar ou receber.');
+  if (!String(d.quem || '').trim() || !String(d.desc || '').trim()) throw new Error('Preencha quem e o que é.'); if (!Number.isInteger(d.c) || d.c <= 0) throw new Error('Digite o valor.');
+  const dia = Number(d.dia); if (!Number.isInteger(dia) || dia < 1 || dia > 31) throw new Error('Dia do vencimento de 1 a 31.');
+  const r = { id: nid('q'), k: d.k, emp: d.emp, quem: String(d.quem).trim().slice(0, 80), desc: String(d.desc).trim().slice(0, 120), c: d.c, dia, cat: d.cat || '', cc: d.cc || '', imposto: !!d.imposto, ativa: true, desde: d.desde || compAtual(), ate: d.ate || '' };
+  (db.recorrentes ||= []).push(r); registra(db, quem, `criou ${r.imposto ? 'o imposto' : 'a recorrência'} ${r.desc} · ${reais(r.c)} todo dia ${dia}`, { ref: `rec-fixa:${r.id}` }); return r;
+}
+export function pausarRecorrencia(db, id, ativa, quem, papel) { exige(db, papel, 'criar'); const r = (db.recorrentes || []).find((x) => x.id === id); if (!r) throw new Error('Recorrência não encontrada.'); r.ativa = !!ativa; registra(db, quem, `${ativa ? 'reativou' : 'pausou'} ${r.desc}`, { ref: `rec-fixa:${id}`, antes: ativa ? 'pausada' : 'ativa', depois: ativa ? 'ativa' : 'pausada' }); }
+const vencNoMes = (dia, comp, agora = new Date()) => { const [a, m] = comp.split('-').map(Number), ult = new Date(a, m, 0).getDate(); return diaDe(`${comp}-${String(Math.min(dia, ult)).padStart(2, '0')}`, agora); };
+const proxComp = (comp, n = 1) => { const [a, m] = comp.split('-').map(Number), d = new Date(a, m - 1 + n, 1, 12); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; };
+const vale = (r, comp) => r.ativa !== false && comp >= (r.desde || comp) && (!r.ate || comp <= r.ate);
+export const jaGerado = (db, r, comp) => (r.k === 'pag' ? db.pags : db.recs || []).some((t) => t.recorrente === r.id && t.comp === comp);
+export function aGerarRecorrentes(db, comp = compAtual()) { return (db.recorrentes || []).filter((r) => vale(r, comp) && !jaGerado(db, r, comp)); }
+export function gerarRecorrentes(db, comp, quem, papel, emp = 'todas') {
+  exige(db, papel, 'criar'); exigeAberto(db, comp);
+  const feitos = aGerarRecorrentes(db, comp).filter((r) => emp === 'todas' || r.emp === emp).map((r) => { const base = { emp: r.emp, desc: `${r.desc} · ${comp.slice(5)}/${comp.slice(0, 4)}`, c: r.c, venc: vencNoMes(r.dia, comp), cc: r.cc || undefined, recorrente: r.id, comp };
+    return r.k === 'pag' ? novoPagamento(db, { ...base, forn: r.quem, cat: r.cat || (r.imposto ? 'Impostos e taxas' : undefined), imposto: r.imposto }, quem, papel)[0] : novoRecebivel(db, { ...base, cliente: r.quem, cat: r.cat || undefined }, quem, papel)[0]; });
+  if (feitos.length) registra(db, quem, `gerou ${feitos.length} título(s) recorrente(s) de ${nomeComp(comp)}`, { ref: `recorrentes:${comp}` }); return feitos;
+}
+/** Próximas ocorrências ainda não geradas, em dias relativos, até `ate` dias (para o fluxo). */
+export function ocorrenciasFuturas(db, ate = SEMANAS * 7, agora = new Date()) {
+  const out = []; (db.recorrentes || []).forEach((r) => { for (let i = 0, comp = compAtual(agora); i < 5; i++, comp = proxComp(comp)) { const v = vencNoMes(r.dia, comp, agora); if (v > ate) break; if (v >= 0 && vale(r, comp) && !jaGerado(db, r, comp)) out.push({ ...r, venc: v, comp }); } });
+  return out;
+}
+
+// ------------------------------------------------------------------ fluxo de 13 semanas alimentado pelos títulos
+/** Títulos em aberto e recorrências ainda não geradas, por linha do fluxo e semana, em reais inteiros (atrasado entra na semana 1). */
+export function titulosNoFluxo(db, emps, agora = new Date()) {
+  const out = {}, poe = (linha, venc, c) => { const i = Math.max(0, Math.floor(venc / 7)); if (i >= SEMANAS) return; (out[linha] ||= Array(SEMANAS).fill(0))[i] += Math.round(c / 100); };
+  const ok = (x) => emps.includes(x.emp);
+  db.pags.filter((p) => ok(p) && ['pendente', 'aprovado', 'remessa'].includes(p.st)).forEach((p) => poe(linhaDe(db, p.cat, 'pag'), p.venc, faltaTitulo(p)));
+  (db.recs || []).filter((r) => ok(r) && r.st !== 'cancelado').forEach((r) => poe(r.recorrente ? CONTRATOS : linhaDe(db, r.cat, 'rec'), r.venc, faltaTitulo(r)));
+  ocorrenciasFuturas(db, SEMANAS * 7, agora).filter(ok).forEach((r) => poe(r.k === 'rec' ? CONTRATOS : linhaDe(db, r.cat || (r.imposto ? 'Impostos e taxas' : ''), 'pag'), r.venc, r.c));
+  return out;
+}
+/** O título consome a previsão: em cada linha e semana vale o maior entre o previsto à mão e o lançado. */
+export function integrarTitulos(base, lancados) {
+  const linhas = JSON.parse(JSON.stringify(base.linhas)), vindo = {};
+  Object.entries(lancados).forEach(([r, arr]) => { if (!linhas[r]) linhas[r] = Array(SEMANAS).fill(0); arr.forEach((v, i) => { if (v > linhas[r][i]) { vindo[r] = (vindo[r] || 0) + v - linhas[r][i]; linhas[r][i] = v; } }); });
+  return { saldo: base.saldo, linhas, acimaDoPrevisto: vindo };
+}
+/** Foto da projeção (uma por semana e empresa) para comparar depois com o que de fato entrou e saiu nas contas. */
+export function fotografarFluxo(db, emp, p, agora = new Date()) {
+  const hoje = hojeISO(agora), l = ((db.fotos ||= {})[emp] ||= []), ult = l[l.length - 1];
+  if (ult && (Date.parse(hoje) - Date.parse(ult.iso)) / DIA < 7) return null;
+  const f = { iso: hoje, ent: p.ent[0] || 0, sai: p.sai[0] || 0, fim: p.fim[0] || 0 }; l.push(f); if (l.length > 26) l.shift(); return f;
+}
+const DIA = 864e5;
+/** Semanas que já passaram: previsto na foto × realizado nas contas bancárias da empresa (sem transferências entre contas). */
+export function previstoRealizado(db, emp, agora = new Date()) {
+  const hoje = hojeISO(agora), contas = new Set((db.contas || []).filter((c) => emp === 'todas' || c.emp === emp).map((c) => c.id));
+  const fotos = emp === 'todas' ? [] : (db.fotos?.[emp] || []);
+  return fotos.filter((f) => (Date.parse(hoje) - Date.parse(f.iso)) / DIA >= 7).map((f) => {
+    const ini = diaDe(f.iso, agora), ms = (db.movs || []).filter((m) => contas.has(m.conta) && m.tipo !== 'transf' && m.dia >= ini && m.dia <= ini + 6);
+    const ent = Math.round(ms.filter((m) => m.c > 0).reduce((s, m) => s + m.c, 0) / 100), sai = Math.round(-ms.filter((m) => m.c < 0).reduce((s, m) => s + m.c, 0) / 100);
+    return { iso: f.iso, prevEnt: f.ent, prevSai: f.sai, ent, sai, difEnt: ent - f.ent, difSai: sai - f.sai };
+  });
+}
+
+// ------------------------------------------------------------------ real do orçado pelas baixas; relatórios
+/** Real do mês por conta do plano, em reais: baixas de pagamentos e recebimentos + lançamentos avulsos nas contas. */
+export function realDasBaixas(db, emp, comp = compAtual()) {
+  const out = {}, mes = (d) => compDoDia(d) === comp, ok = (x) => emp === 'todas' || x.emp === emp, soma = (cat, c) => { if (cat) out[cat] = (out[cat] || 0) + c; };
+  db.pags.filter(ok).forEach((p) => (p.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(p.cat, b.total)));
+  (db.recs || []).filter(ok).forEach((r) => (r.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(r.cat || 'Receita de vendas', b.total)));
+  (db.movs || []).filter((m) => ['avulso', 'cartao'].includes(m.tipo) && mes(m.dia) && (emp === 'todas' || (db.contas || []).find((c) => c.id === m.conta)?.emp === emp)).forEach((m) => soma(m.cat, Math.abs(m.c)));
+  return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, Math.round(v / 100)]));
+}
+/** DRE gerencial do mês por grupo e conta. Competência: títulos pelo vencimento; caixa: baixas e avulsos pela data. */
+export function dre(db, emp, comp = compAtual(), { regime = 'competencia', cc = '' } = {}) {
+  usarPlano(db); const mes = (d) => compDoDia(d) === comp, ok = (x) => (emp === 'todas' || x.emp === emp) && (!cc || x.cc === cc), v = {}, soma = (cat, c) => { if (cat) v[cat] = (v[cat] || 0) + c; };
+  let retencoes = 0;
+  if (regime === 'caixa') { db.pags.filter(ok).forEach((p) => (p.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(p.cat || 'Sem conta', b.total))); (db.recs || []).filter(ok).forEach((r) => (r.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(r.cat || 'Receita de vendas', b.total))); }
+  else { db.pags.filter((p) => ok(p) && !['cancelado', 'rejeitado'].includes(p.st) && mes(p.venc)).forEach((p) => soma(p.cat || 'Sem conta', p.c)); (db.recs || []).filter((r) => ok(r) && r.st !== 'cancelado' && mes(r.venc)).forEach((r) => { soma(r.cat || 'Receita de vendas', r.bruto || r.c); retencoes += (r.bruto || r.c) - r.c; }); }
+  (db.movs || []).filter((m) => ['avulso', 'cartao'].includes(m.tipo) && mes(m.dia) && (!cc || m.cc === cc) && (emp === 'todas' || (db.contas || []).find((c) => c.id === m.conta)?.emp === emp)).forEach((m) => soma(m.cat || 'Sem conta', Math.abs(m.c)));
+  const tipo = (c) => db.plano.find((p) => p.c === c)?.t || (c === 'Sem conta' ? 'c' : 'c'), grupo = (c) => db.plano.find((p) => p.c === c)?.grupo || 'Sem conta';
+  const linhas = Object.entries(v).map(([c, x]) => ({ c, t: tipo(c), grupo: grupo(c), v: x })).sort((a, b) => (a.t === b.t ? 0 : a.t === 'r' ? -1 : 1) || a.grupo.localeCompare(b.grupo) || b.v - a.v);
+  const receita = linhas.filter((l) => l.t === 'r').reduce((s, l) => s + l.v, 0), custos = linhas.filter((l) => l.t === 'c').reduce((s, l) => s + l.v, 0);
+  const grupos = []; linhas.forEach((l) => { let g = grupos.find((x) => x.grupo === l.grupo && x.t === l.t); if (!g) grupos.push((g = { grupo: l.grupo, t: l.t, v: 0, contas: [] })); g.v += l.v; g.contas.push(l); });
+  return { comp, regime, receita, retencoes, custos, resultado: receita - retencoes - custos, grupos };
+}
+/** Contas a receber por faixa de atraso, por cliente. */
+export function aging(db, emp) {
+  const F = [['A vencer', (d) => d >= 0], ['1–30 dias', (d) => d < 0 && d >= -30], ['31–60 dias', (d) => d < -30 && d >= -60], ['61–90 dias', (d) => d < -60 && d >= -90], ['Mais de 90', (d) => d < -90]];
+  const rs = (db.recs || []).filter((r) => (emp === 'todas' || r.emp === emp) && faltaTitulo(r)), porCli = {};
+  rs.forEach((r) => { const k = r.cliente, i = F.findIndex(([, f]) => f(r.venc)); (porCli[k] ||= Array(F.length).fill(0))[i] += faltaTitulo(r); });
+  const faixas = F.map(([n], i) => ({ n, v: Object.values(porCli).reduce((s, a) => s + a[i], 0) }));
+  return { faixas, clientes: Object.entries(porCli).map(([cliente, v]) => ({ cliente, v, total: v.reduce((a, b) => a + b, 0), atrasado: v.slice(1).reduce((a, b) => a + b, 0) })).sort((a, b) => b.atrasado - a.atrasado || b.total - a.total), total: faixas.reduce((s, f) => s + f.v, 0) };
+}
+/** Extrato de uma conta com saldo depois de cada movimento (do mais antigo ao mais novo). */
+export function extratoConta(db, id) { const c = (db.contas || []).find((x) => x.id === id); if (!c) return []; let s = c.saldoIni; return (db.movs || []).filter((m) => m.conta === id && m.dia >= c.desde).sort((a, b) => a.dia - b.dia).map((m) => { s += m.c; return { ...m, saldo: s }; }); }
+/** Fluxo realizado por mês (DFC simplificada): entradas e saídas das contas bancárias, sem transferências entre contas próprias. */
+export function dfc(db, emp, meses = 6, agora = new Date()) {
+  const contas = new Set((db.contas || []).filter((c) => (emp === 'todas' || c.emp === emp) && c.tipo !== 'cartao').map((c) => c.id)), l = [];
+  for (let i = meses - 1; i >= 0; i--) { const comp = proxComp(compAtual(agora), -i), ms = (db.movs || []).filter((m) => contas.has(m.conta) && !['transf', 'fatura'].includes(m.tipo) && compDoDia(m.dia) === comp); l.push({ comp, ent: ms.filter((m) => m.c > 0).reduce((s, m) => s + m.c, 0), sai: -ms.filter((m) => m.c < 0).reduce((s, m) => s + m.c, 0) }); }
+  return l.map((x) => ({ ...x, liquido: x.ent - x.sai }));
+}
+
+// ------------------------------------------------------------------ nota fiscal de entrada (XML) → contas a pagar
+/** nota = { chave, numero, cnpj, nome, total (centavos), emissao (AAAA-MM-DD), dups: [{ n, venc: AAAA-MM-DD, c }] }. */
+export function pagamentosDaNota(db, nota, emp, { cat, cc } = {}, quem, papel) {
+  exige(db, papel, 'criar'); const ch = String(nota.chave || '').replace(/\D/g, '');
+  if (ch && db.pags.some((p) => p.nfe === ch)) throw new Error('Esta nota já foi lançada.');
+  if (!Number.isInteger(nota.total) || nota.total <= 0) throw new Error('A nota não tem valor total.');
+  const dups = (nota.dups || []).filter((d) => Number.isInteger(d.c) && d.c > 0 && d.venc);
+  if (dups.length && dups.reduce((s, d) => s + d.c, 0) !== nota.total) throw new Error('As duplicatas não somam o total da nota: confira o XML.');
+  let pes = acharPessoa(db, { doc: nota.cnpj, nome: nota.nome }); if (!pes && nota.nome) pes = salvarPessoa(db, { nome: nota.nome, tipo: 'fornecedor', doc: docValido(nota.cnpj) ? nota.cnpj : '' }, quem, papel);
+  const partes = dups.length ? dups : [{ n: '1', venc: nota.emissao, c: nota.total }];
+  const criados = partes.map((d, i) => novoPagamento(db, { emp, forn: pes?.nome || nota.nome || 'Fornecedor', desc: `NF ${nota.numero}${partes.length > 1 ? ` · dup ${d.n || i + 1}/${partes.length}` : ''}`, c: d.c, venc: diaDe(d.venc), cat, cc, pessoa: pes?.id, nfe: ch || undefined }, quem, papel)[0]);
+  registra(db, quem, `lançou a NF ${nota.numero} de ${pes?.nome || nota.nome}: ${reais(nota.total)} em ${criados.length} parcela(s)`, { ref: `nfe:${ch}` }); return criados;
+}
+
+// ------------------------------------------------------------------ régua de cobrança (o app mostra; quem usa envia)
+export function lembretesHoje(db, emp, regua = db.regua || [-3, 0, 3, 10]) {
+  return (db.recs || []).filter((r) => (emp === 'todas' || r.emp === emp) && faltaTitulo(r) && regua.some((d) => r.venc + d === 0) && !(r.avisos || []).includes(0)).map((r) => ({ ...r, marco: r.venc > 0 ? `vence em ${r.venc} dia(s)` : r.venc === 0 ? 'vence hoje' : `atrasado ${-r.venc} dia(s)` }));
+}
+export function marcarCobrado(db, id, quem) { const r = (db.recs || []).find((x) => x.id === id); if (!r) throw new Error('Recebível não encontrado.'); (r.avisos ||= []).push(0); hist(r, quem, 'enviou lembrete de cobrança'); }
+
+// ------------------------------------------------------------------ conciliação: vários títulos numa linha, lançamento avulso pela regra, em lote
+export function conciliarVarios(db, extId, alvos, quem, papel) {
+  exige(db, papel, 'conciliar'); const e = db.extrato.find((x) => x.id === extId); if (!e) throw new Error('Linha do extrato não encontrada.');
+  if (e.pag || e.rec || e.mov || e.multi) throw new Error('Esta linha já está conciliada.'); if (alvos.length < 2) throw new Error('Escolha dois ou mais títulos.');
+  const k = e.c > 0 ? 'rec' : 'pag', ts = alvos.map((id) => titulo(db, k, id)), soma = ts.reduce((s, t) => s + faltaTitulo(t), 0);
+  if (soma !== Math.abs(e.c)) throw new Error(`Os títulos somam ${reais(soma)}; o banco mostra ${reais(Math.abs(e.c))}.`);
+  const conta = e.conta || (db.contas || []).find((c) => c.emp === ts[0].emp)?.id || null;
+  e.multi = ts.map((t) => ({ k, id: t.id, b: baixar(db, k, t.id, { c: faltaTitulo(t), dia: e.dia, conta, ext: e.id, origem: 'extrato' }, quem, papel, 'conciliar').id }));
+  registra(db, quem, `conciliou ${reais(Math.abs(e.c))} do extrato com ${ts.length} títulos`, { ref: `ext:${e.id}` }); return e.multi;
+}
+/** Linha do banco sem título (tarifa, rendimento, IOF): lança direto na conta do plano, ligado ao extrato. */
+export function lancarAvulso(db, extId, cat, quem, papel, cc = '') {
+  exige(db, papel, 'conciliar'); const e = db.extrato.find((x) => x.id === extId); if (!e) throw new Error('Linha não encontrada.'); if (e.pag || e.rec || e.mov || e.multi) throw new Error('Esta linha já está conciliada.');
+  usarPlano(db); if (!db.plano.some((p) => p.c === cat)) throw new Error('Escolha uma conta do plano.'); if (!e.conta) throw new Error('A linha não tem conta bancária: importe o extrato escolhendo a conta.'); exigeDia(db, e.dia);
+  const m = { id: nid('m'), conta: e.conta, dia: e.dia, c: e.c, tipo: 'avulso', cat, ext: e.id, desc: e.desc }; if (cc) m.cc = cc; (db.movs ||= []).push(m); e.mov = m.id; e.avulso = true;
+  registra(db, quem, `lançou ${reais(e.c)} do extrato direto em ${cat}`, { ref: `ext:${e.id}`, depois: cat }); return m;
+}
+/** Lança de uma vez as linhas com regra que tem conta do plano, e aceita as sugestões de título com valor exato. */
+export function conciliarEmLote(db, quem, papel) {
+  exige(db, papel, 'conciliar'); let avulsos = 0, titulos = 0;
+  db.extrato.filter((e) => !e.pag && !e.rec && !e.mov && !e.multi).forEach((e) => {
+    const p = sugerePagamento(db, e), r = !p && sugereRecebivel(db, e);
+    try { if (p) { conciliarTitulo(db, e.id, 'pag', p.id, quem, papel); titulos++; return; } if (r) { conciliarTitulo(db, e.id, 'rec', r.id, quem, papel); titulos++; return; }
+      const rg = (db.regras || []).find((x) => x.conta && norm(e.desc).includes(norm(x.se))); if (rg && e.conta) { lancarAvulso(db, e.id, rg.conta, quem, papel); avulsos++; } } catch { /* linha que não pôde (mês fechado, sem conta): fica para a mão */ }
+  });
+  return { titulos, avulsos };
+}
+
+// ------------------------------------------------------------------ empréstimo entre empresas (mútuo) e cartão corporativo
+export function mutuo(db, d, quem, papel) {
+  exige(db, papel, 'tesouraria'); const de = (db.contas || []).find((c) => c.id === d.de), para = (db.contas || []).find((c) => c.id === d.para), dia = Number.isInteger(d.dia) ? d.dia : 0;
+  if (!de || !para) throw new Error('Escolha as duas contas.'); if (de.emp === para.emp) throw new Error('Mútuo é entre empresas diferentes; na mesma empresa use transferência.');
+  if (de.tipo === 'cartao' || para.tipo === 'cartao') throw new Error('Use contas correntes.'); if (!Number.isInteger(d.c) || d.c <= 0) throw new Error('Digite o valor.'); if (dia > 0) throw new Error('A data não pode ser no futuro.'); exigeDia(db, dia);
+  const id = nid('u'); (db.movs ||= []).push({ id: nid('m'), conta: de.id, dia, c: -d.c, tipo: 'mutuo', mutuo: id, desc: `Empréstimo para ${para.nome}` }, { id: nid('m'), conta: para.id, dia, c: d.c, tipo: 'mutuo', mutuo: id, desc: `Empréstimo de ${de.nome}` });
+  (db.mutuos ||= []).push({ id, credora: de.emp, devedora: para.emp, c: d.c, dia, devolvido: 0, desc: String(d.desc || '').slice(0, 80) });
+  registra(db, quem, `registrou empréstimo de ${reais(d.c)} entre empresas do grupo`, { ref: `mutuo:${id}`, depois: reais(d.c) }); return id;
+}
+export function devolverMutuo(db, id, d, quem, papel) {
+  exige(db, papel, 'tesouraria'); const u = (db.mutuos || []).find((x) => x.id === id); if (!u) throw new Error('Empréstimo não encontrado.');
+  const de = (db.contas || []).find((c) => c.id === d.de), para = (db.contas || []).find((c) => c.id === d.para), dia = Number.isInteger(d.dia) ? d.dia : 0, falta = u.c - u.devolvido;
+  if (!de || !para || de.emp !== u.devedora || para.emp !== u.credora) throw new Error('A devolução sai da empresa que pegou e entra na que emprestou.');
+  if (!Number.isInteger(d.c) || d.c <= 0 || d.c > falta) throw new Error(`Devolva de R$ 0,01 até ${reais(falta)}.`); exigeDia(db, dia);
+  db.movs.push({ id: nid('m'), conta: de.id, dia, c: -d.c, tipo: 'mutuo', mutuo: id, desc: 'Devolução de empréstimo' }, { id: nid('m'), conta: para.id, dia, c: d.c, tipo: 'mutuo', mutuo: id, desc: 'Devolução de empréstimo recebida' });
+  u.devolvido += d.c; registra(db, quem, `registrou devolução de ${reais(d.c)} de empréstimo entre empresas`, { ref: `mutuo:${id}`, antes: `falta ${reais(falta)}`, depois: `falta ${reais(falta - d.c)}` });
+}
+export function gastoCartao(db, d, quem, papel) {
+  exige(db, papel, 'criar'); const c = (db.contas || []).find((x) => x.id === d.conta), dia = Number.isInteger(d.dia) ? d.dia : 0;
+  if (!c || c.tipo !== 'cartao') throw new Error('Escolha o cartão.'); if (!Number.isInteger(d.c) || d.c <= 0) throw new Error('Digite o valor.'); usarPlano(db);
+  if (!db.plano.some((p) => p.c === d.cat && p.t === 'c')) throw new Error('Escolha a conta de despesa.'); if (dia > 0) throw new Error('A data não pode ser no futuro.'); exigeDia(db, dia);
+  const usado = -saldoConta(db, c.id); if (c.limite && usado + d.c > c.limite) throw new Error(`Passa do limite do cartão (${reais(c.limite)}).`);
+  const m = { id: nid('m'), conta: c.id, dia, c: -d.c, tipo: 'cartao', cat: d.cat, desc: String(d.desc || 'Gasto no cartão').slice(0, 80) }; if (d.cc) m.cc = d.cc; if (d.reembolso) m.reembolso = true; db.movs.push(m);
+  registra(db, quem, `lançou gasto de ${reais(d.c)} no cartão ${c.nome}: ${m.desc}`, { ref: `cartao:${c.id}`, depois: d.cat }); return m;
+}
+export function pagarFatura(db, d, quem, papel) {
+  exige(db, papel, 'pagar'); const cartao = (db.contas || []).find((x) => x.id === d.cartao), de = (db.contas || []).find((x) => x.id === d.de), dia = Number.isInteger(d.dia) ? d.dia : 0;
+  if (!cartao || cartao.tipo !== 'cartao') throw new Error('Escolha o cartão.'); if (!de || de.tipo === 'cartao') throw new Error('Escolha a conta corrente que paga.'); if (de.emp !== cartao.emp) throw new Error('A fatura é paga pela mesma empresa do cartão.');
+  const fat = -saldoConta(db, cartao.id); if (!Number.isInteger(d.c) || d.c <= 0 || d.c > fat) throw new Error(`Pague de R$ 0,01 até ${reais(Math.max(0, fat))}.`); exigeDia(db, dia);
+  const t = nid('t'); db.movs.push({ id: nid('m'), conta: de.id, dia, c: -d.c, tipo: 'fatura', transf: t, desc: `Fatura ${cartao.nome}` }, { id: nid('m'), conta: cartao.id, dia, c: d.c, tipo: 'fatura', transf: t, desc: 'Pagamento da fatura' });
+  registra(db, quem, `pagou ${reais(d.c)} da fatura do cartão ${cartao.nome}`, { ref: `cartao:${cartao.id}`, antes: reais(fat), depois: reais(fat - d.c) });
+}
+
+// ------------------------------------------------------------------ trava por data e importação de títulos por planilha
+export function definirTrava(db, iso, quem, papel) {
+  if (papel !== 'dono') throw new Error('Só o dono trava por data.'); if (iso && !/^\d{4}-\d{2}-\d{2}$/.test(iso)) throw new Error('Data inválida.'); if (iso && iso > hojeISO()) throw new Error('A trava não pode ser no futuro.');
+  const antes = db.travaAte || ''; if (iso) db.travaAte = iso; else delete db.travaAte; registra(db, quem, iso ? 'travou lançamentos até uma data' : 'tirou a trava por data', { ref: 'trava', antes: antes || 'sem trava', depois: iso || 'sem trava' });
+}
+export function exigeDia(db, dia) { exigeAberto(db, compDoDia(dia)); if (db.travaAte && isoDe(dia) <= db.travaAte) throw new Error(`Lançamentos até ${db.travaAte.split('-').reverse().join('/')} estão travados. O dono tira a trava em Equipe e alçadas.`); }
+const COLS = { tipo: /^tipo/, empresa: /^empresa/, nome: /^(nome|cliente|fornecedor|favorecido)/, desc: /^(descri|o qu|historico|histórico)/, valor: /^valor/, venc: /^(venc|data)/, conta: /^(conta|categoria|plano)/, cc: /^(centro|cc)/ };
+/** linhas = [[cabeçalho], [valores], ...] (CSV ou .xlsx). simular = true só confere. Devolve { ok: [títulos], erros: [{ linha, motivo }] }. */
+export function importarTitulos(db, linhas, emps, quem, papel, simular = false) {
+  exige(db, papel, 'criar'); if (!linhas.length) throw new Error('Planilha vazia.');
+  const cab = linhas[0].map((h) => norm(String(h)).trim()), col = Object.fromEntries(Object.entries(COLS).map(([k, re]) => [k, cab.findIndex((h) => re.test(h))]));
+  if ([col.valor, col.venc, col.nome].some((i) => i < 0)) throw new Error('A planilha precisa das colunas Nome, Valor e Vencimento (e de preferência Tipo, Empresa, Descrição, Conta e Centro).');
+  usarPlano(db); const ok = [], erros = [], alvo = simular ? JSON.parse(JSON.stringify(db)) : db; usarPlano(alvo);
+  linhas.slice(1).forEach((l, i) => { if (!l.some((x) => String(x || '').trim())) return; const v = (k) => (col[k] >= 0 ? String(l[col[k]] ?? '').trim() : '');
+    try { const tipo = /receb|entrada|cliente/i.test(v('tipo')) ? 'rec' : 'pag', c = centavos(v('valor').replace(/^-/, '')); if (!Number.isInteger(c) || c <= 0) throw new Error('valor inválido');
+      const dt = v('venc'), iso = /^\d{2}\/\d{2}\/\d{4}$/.test(dt) ? dt.split('/').reverse().join('-') : dt; if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) throw new Error('vencimento inválido (use DD/MM/AAAA)');
+      const e = v('empresa') ? emps.find((x) => norm(x.nome) === norm(v('empresa')) || x.k === v('empresa')) : emps[0]; if (!e) throw new Error(`empresa "${v('empresa')}" não existe`);
+      const cat = v('conta') ? alvo.plano.find((p) => norm(p.c) === norm(v('conta')))?.c : undefined; if (v('conta') && !cat) throw new Error(`conta "${v('conta')}" não está no plano`);
+      const cc = v('cc') ? (alvo.centros || []).find((x) => norm(x.nome) === norm(v('cc')))?.id : undefined; if (v('cc') && !cc) throw new Error(`centro de custo "${v('cc')}" não existe`);
+      const base = { emp: e.k, desc: v('desc') || 'Importado da planilha', c, venc: diaDe(iso), cat, cc };
+      ok.push(...(tipo === 'pag' ? novoPagamento(alvo, { ...base, forn: v('nome') }, quem, papel) : novoRecebivel(alvo, { ...base, cliente: v('nome') }, quem, papel)));
+    } catch (x) { erros.push({ linha: i + 2, motivo: x.message }); } });
+  if (!simular && ok.length) registra(db, quem, `importou ${ok.length} título(s) de planilha (${erros.length} recusado[s])`, { ref: 'importacao' });
+  usarPlano(db); return { ok, erros };
+}

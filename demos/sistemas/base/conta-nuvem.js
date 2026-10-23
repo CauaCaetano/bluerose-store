@@ -29,7 +29,7 @@
     agendaessencial: 'D clientes[].ultima ags[].dia pedidos[].dia', agendacompleto: 'D ags[].dia',
     crmessencial: 'D negocios[].prox.dia negocios[].notas[].dia negocios[].quando', crmcompleto: 'D atividades[].dia H deals[].sem deals[].hist[].d propostas[].enviada',
     farmaciaessencial: 'D prods[].lotes[].val clientes[].ultima receitas[].dia vendas[].dia', farmaciacompleto: 'D prods[].lotes[].val livro[].dia servicos[].dia', farmaciaavancado: 'D campanhas[].fim',
-    financeiroessencial: 'D movs[].dia cobrancas[].vence cobrancas[].avisos[] contas[].vence recibos[].dia historico[].dia', financeirocompleto: 'D lancs[].venc lancs[].avisos[] lancs[].pagamentos[].dia extrato[].dia orcs[].dia', financeiroavancado: 'D pags[].venc pags[].pagoEm extrato[].dia',
+    financeiroessencial: 'D movs[].dia cobrancas[].vence cobrancas[].avisos[] contas[].vence recibos[].dia historico[].dia', financeirocompleto: 'D lancs[].venc lancs[].avisos[] lancs[].pagamentos[].dia extrato[].dia orcs[].dia', financeiroavancado: 'D pags[].venc pags[].pagoEm pags[].baixas[].dia recs[].venc recs[].baixas[].dia movs[].dia contas[].desde mutuos[].dia extrato[].dia',
     gestaoessencial: 'D pagar[].vence H clientes[].desde', gestaocompleto: 'D vendas[].dia contas[].vence',
     gestaoavancado: 'D produtos[].lotes[].vence vendas[].dia contas[].vence pedidos[].dia movs[].dia log[].dia H clientes[].ultima',
     juridicocompleto: 'D processos[].andamentos[].dia prazos[].fatal prazos[].interno intimacoes[].dia audiencias[].dia horas[].dia contratos[].parcelas[].dia',
@@ -207,6 +207,8 @@
     'html.modo-conta.no-celular .vc-faixa{display:none}' +
     '.vc-mini{border:1px solid #cfd2da;background:#fff;border-radius:8px;padding:3px 9px;margin-left:4px;cursor:pointer;font:inherit;font-size:.82rem}.vc-pessoa{display:grid;gap:8px}.vc-pessoa fieldset{border:1px solid #ecebe6;border-radius:10px;padding:8px 10px;margin:0}' +
     '.vc-pessoa legend{font-size:.85rem;color:#6b7080;padding:0 4px}.vc-telas{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 10px}.vc-pessoa label{margin:2px 0}.vc-pessoa input[list]{width:100%;min-height:40px;border:1px solid #cfd2da;border-radius:10px;padding:0 10px;font:inherit}' +
+    '.vc-caixa input[type=text]{width:100%;min-height:40px;border:1px solid #cfd2da;border-radius:10px;padding:0 10px;font:inherit}.vc-caixa input:disabled{background:#f1f0ec;color:#6b7080}.vc-dois{display:grid;grid-template-columns:1fr 90px;gap:10px}.vc-h3{margin:16px 0 4px;font-size:1rem}' +
+    '.vc-av{width:48px;height:48px;border-radius:12px;background:#1d2230;color:#fff;display:grid;place-items:center;font:700 1.3rem system-ui,sans-serif;margin:4px 0 6px}' +
     '.vc-convite{margin:10px 0}.vc-convite summary{display:inline-flex;align-items:center;list-style:none}.vc-convite summary::-webkit-details-marker{display:none}.vc-faixa .vc-salvo[data-e=ler]{color:#ffd58a;opacity:1}';
   function caixa(html, liga) {
     var v = document.createElement('div'); v.className = 'vc-veu'; v.innerHTML = '<div class="vc-caixa" role="dialog" aria-modal="true">' + html + '</div>'; document.body.appendChild(v);
@@ -281,10 +283,64 @@
       '<button type="button" class="' + cls + (grandes ? ' vc-2' : '') + '" data-copia-convite="' + esc(t) + '">Copiar convite</button>';
   }
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-copia-convite]'); if (!b) return; (navigator.clipboard ? navigator.clipboard.writeText(b.dataset.copiaConvite) : Promise.reject()).then(function () { b.textContent = 'Copiado'; }).catch(function () { prompt('Copie o convite:', b.dataset.copiaConvite); }); });
-  function equipe() {
+
+  // ---------------------------------------------------------------- perfil (dono ou membro) e configurações
+  // Quem criou a empresa vê o "Perfil do dono": e-mail, assinatura, tamanho da equipe e os atalhos para convidar e
+  // adicionar pessoas. Quem entrou por convite vê "Meu perfil": cargo, acesso (ver ou alterar), telas liberadas e quem
+  // é o dono. Configurações junta empresa (nome, cidade e UF; só o dono muda, o servidor confere), ajustes do sistema,
+  // dados e cópia, assinatura, começar do zero e sair. Plano e prazo nunca mudam por aqui (trava no banco).
+  var NOME_PAPEL = { dono: 'Dono da empresa', admin: 'Administrador', membro: 'Equipe' };
+  function ajustesDoSistema() {
+    var a = document.querySelector('a[href="#ajustes"], a[href="#config"], a[href="#configuracoes"], a[href="#mais"]');
+    return a ? a.getAttribute('href') : '';
+  }
+  function linha(r, v) { return '<li><span class="vc-mudo">' + esc(r) + '</span><b>' + esc(v) + '</b></li>'; }
+  function perfil() {
+    caixa('<h2>' + (info.dono ? 'Perfil do dono' : 'Meu perfil') + '</h2><div id="vc-pf"><p class="vc-mudo">Carregando…</p></div>', function (cx, fecha) {
+      cliente().then(function (sb) { return Promise.all([sb.auth.getUser(), sb.from('nexo_membros').select('usuario,email,papel,permissoes').eq('espaco', info.espaco), info.dono || info.papel === 'admin' ? sb.from('nexo_convites').select('email').eq('espaco', info.espaco) : { data: [] }]); }).then(function (r) {
+        var u = (r[0].data && r[0].data.user) || {}, ms = r[1].data || [], conv = r[2].data || [];
+        var eu = ms.filter(function (m) { return m.usuario === u.id; })[0] || { papel: info.dono ? 'dono' : info.papel || 'membro' }, p = eu.permissoes || {}, dono = ms.filter(function (m) { return m.papel === 'dono'; })[0];
+        var gestor = eu.papel === 'dono' || eu.papel === 'admin', telas = telasDoMenu(), nomes = (p.telas || []).map(function (h) { var t = telas.filter(function (x) { return x[0] === h; })[0]; return t ? t[1] : h; });
+        var html = '<div class="vc-av" aria-hidden="true">' + esc((u.email || '?')[0].toUpperCase()) + '</div><ul>' + linha('E-mail', u.email || '—') + linha('Papel', NOME_PAPEL[eu.papel] || 'Equipe') +
+          (eu.papel === 'membro' ? linha('Cargo', p.cargo || '—') + linha('Acesso', p.so_leitura ? 'só ver' : 'ver e alterar') + linha('Telas', nomes.length ? nomes.join(', ') : 'todas') : '') +
+          linha('Empresa', info.empresa || '—') + (eu.papel !== 'dono' && dono ? linha('Dono', dono.email) : '') + (info.dono ? linha('Assinatura', prazo()) : '') +
+          linha('Equipe', ms.length + (ms.length === 1 ? ' pessoa' : ' pessoas') + (gestor && conv.length ? ' · ' + conv.length + ' convite(s) esperando' : '')) + '</ul>' +
+          (gestor ? '<p class="vc-mudo">Convide pelo e-mail da pessoa: ela recebe o link, entra com o próprio login e já cai nesta empresa com o cargo e as telas que você escolher.</p><button class="vc-bt" data-pf="convidar">Convidar ou adicionar pessoa</button><button class="vc-bt vc-2" data-pf="equipe">Ver e editar a equipe</button>'
+            : '<p class="vc-mudo">Para mudar seu cargo, seu acesso ou as telas que você vê, fale com o dono' + (dono ? ' (' + esc(dono.email) + ')' : '') + '.</p>') +
+          '<button class="vc-bt vc-2" data-pf="config">Configurações</button><button class="vc-bt vc-2" data-pf="sair">Sair</button>';
+        cx.querySelector('#vc-pf').innerHTML = html;
+      }).catch(function () { cx.querySelector('#vc-pf').innerHTML = '<p>Não consegui carregar o perfil. Confira a internet e tente de novo.</p>'; });
+      cx.addEventListener('click', function (e) { var b = e.target.closest('[data-pf]'); if (!b) return; fecha(); ({ convidar: function () { equipe(true); }, equipe: equipe, config: configuracoes, sair: sair })[b.dataset.pf](); });
+    });
+  }
+  function configuracoes() {
+    var aj = ajustesDoSistema();
+    caixa('<h2>Configurações</h2><form id="vc-emp"><p class="vc-mudo">' + (info.dono ? 'Dados da empresa (aparecem nos documentos e para a equipe).' : 'Dados da empresa: só o dono muda.') + '</p>' +
+      '<label>Nome da empresa<input type="text" name="nome" maxlength="80" required value="' + esc(info.empresa || '') + '"' + (info.dono ? '' : ' disabled') + '></label>' +
+      '<div class="vc-dois"><label>Cidade<input type="text" name="cidade" maxlength="60"' + (info.dono ? '' : ' disabled') + '></label><label>UF<input type="text" name="uf" maxlength="2" pattern="[A-Za-z]{2}"' + (info.dono ? '' : ' disabled') + '></label></div>' +
+      (info.dono ? '<button class="vc-bt">Salvar empresa</button>' : '') + '<p class="vc-mudo" data-msg></p></form>' +
+      '<h3 class="vc-h3">Sistema e conta</h3>' + (aj ? '<button class="vc-bt vc-2" data-cf="ajustes">Ajustes deste sistema</button>' : '') + '<button class="vc-bt vc-2" data-cf="perfil">' + (info.dono ? 'Perfil do dono' : 'Meu perfil') + '</button><button class="vc-bt vc-2" data-cf="equipe">Equipe</button>' +
+      (info.dono ? '<button class="vc-bt vc-2" data-cf="assinatura">Assinatura</button>' : '') + '<button class="vc-bt vc-2" data-cf="dados">Dados e cópia de segurança</button>' + (info.dono ? '<button class="vc-bt vc-2" data-cf="zerar">Começar do zero</button>' : '') + '<button class="vc-bt vc-2" data-cf="sair">Sair</button>' +
+      '<p class="vc-mudo">Plano, prazo e dono da empresa só mudam pela Veltria.</p>', function (cx, fecha) {
+      var f = cx.querySelector('#vc-emp'), msg = f.querySelector('[data-msg]');
+      cliente().then(function (sb) { return sb.from('nexo_espacos').select('nome,cidade,uf').eq('id', info.espaco).maybeSingle(); }).then(function (r) { if (r.data) { f.nome.value = r.data.nome || f.nome.value; f.cidade.value = r.data.cidade || ''; f.uf.value = (r.data.uf || '').trim(); } });
+      f.addEventListener('submit', function (e) {
+        e.preventDefault(); if (!info.dono) return;
+        var nome = f.nome.value.trim(), uf = f.uf.value.trim().toUpperCase(); if (!nome) { msg.textContent = 'Digite o nome da empresa.'; return; } if (uf && !/^[A-Z]{2}$/.test(uf)) { msg.textContent = 'UF com 2 letras, ex.: MG.'; return; }
+        msg.textContent = 'Salvando…';
+        cliente().then(function (sb) { return sb.from('nexo_espacos').update({ nome: nome.slice(0, 80), cidade: f.cidade.value.trim().slice(0, 60) || null, uf: uf || null }).eq('id', info.espaco).select('nome'); }).then(function (r) {
+          if (r.error || !r.data || !r.data.length) throw r.error || new Error('sem permissão');
+          info.empresa = nome; try { sessionStorage.setItem('veltria-conta', JSON.stringify(info)); } catch (x) { /* só a sessão */ }
+          var b = document.querySelector('.vc-faixa b'); if (b) b.textContent = nome; msg.textContent = 'Empresa salva.';
+        }).catch(function () { msg.textContent = 'Não consegui salvar. Confira a internet e tente de novo.'; });
+      });
+      cx.addEventListener('click', function (e) { var b = e.target.closest('[data-cf]'); if (!b) return; fecha(); ({ ajustes: function () { location.hash = aj; }, perfil: perfil, equipe: equipe, assinatura: assinatura, dados: dadosEditor, zerar: confirmaZerar, sair: sair })[b.dataset.cf](); });
+    });
+  }
+  function equipe(abrirConvite) {
     var gestor = info.dono || info.papel === 'admin';
     caixa('<h2>Equipe</h2><p class="vc-mudo">Cada pessoa entra com o próprio e-mail. Escolha o cargo, se pode alterar ou só ver e quais telas aparecem para ela. Equipe sem limite de pessoas.</p><ul id="vc-eq"><li>Carregando…</li></ul><div id="vc-ed"></div>' +
-      (gestor ? '<details class="vc-convite"><summary class="vc-bt">Convidar pessoa</summary><label>E-mail<input type="email" name="email" form="vc-conv" required></label><div id="vc-conv-campos"></div></details>' : '') + '<button class="vc-bt vc-2" data-vc-fecha>Fechar</button>', function (cx) {
+      (gestor ? '<details class="vc-convite"' + (abrirConvite === true ? ' open' : '') + '><summary class="vc-bt">Convidar pessoa</summary><label>E-mail<input type="email" name="email" form="vc-conv" required></label><div id="vc-conv-campos"></div></details>' : '') + '<button class="vc-bt vc-2" data-vc-fecha>Fechar</button>', function (cx) {
       var membros = [];
       function listar() {
         cliente().then(function (sb) { return Promise.all([sb.from('nexo_membros').select('usuario,email,papel,permissoes').eq('espaco', info.espaco), gestor ? sb.from('nexo_convites').select('email,permissoes,papel').eq('espaco', info.espaco) : { data: [] }]); }).then(function (r) {
@@ -498,10 +554,10 @@
     // tira a faixa de demonstração (a que tem o "Recomeçar") e põe a da conta no lugar
     var rec = document.getElementById('recomecar'), demo = rec && rec.closest('body > *');
     var f = document.createElement('div'); f.className = 'vc-faixa';
-    f.innerHTML = '<b>' + esc(info.empresa) + '</b><span class="vc-prazo">' + esc(prazo()) + '</span><span class="vc-salvo" data-e="salvo">Salvo na nuvem</span><button type="button" data-vc="assinatura">' + (info.plano === 'ativo' ? 'Assinatura' : 'Assinar') + '</button><button type="button" data-vc="equipe">Equipe</button><button type="button" data-vc="dados">Dados</button>' + (info.dono ?'<button type="button" data-vc="zerar">Começar do zero</button>' : '') + '<button type="button" data-vc="sair">Sair</button>';
+    f.innerHTML = '<b>' + esc(info.empresa) + '</b><span class="vc-prazo">' + esc(prazo()) + '</span><span class="vc-salvo" data-e="salvo">Salvo na nuvem</span><button type="button" data-vc="assinatura">' + (info.plano === 'ativo' ? 'Assinatura' : 'Assinar') + '</button><button type="button" data-vc="perfil">' + (info.dono ? 'Perfil do dono' : 'Meu perfil') + '</button><button type="button" data-vc="equipe">Equipe</button><button type="button" data-vc="config">Configurações</button><button type="button" data-vc="sair">Sair</button>';
     if (demo) { demo.hidden = true; demo.style.display = 'none'; demo.parentNode.insertBefore(f, demo); } else document.body.insertBefore(f, document.body.firstChild);
     marcar(estado);
-    f.addEventListener('click', function (e) { var b = e.target.closest('[data-vc]'); if (!b) return; ({ assinatura: assinatura, equipe: equipe, dados: dadosEditor, zerar: confirmaZerar, sair: sair })[b.dataset.vc](); });
+    f.addEventListener('click', function (e) { var b = e.target.closest('[data-vc]'); if (!b) return; ({ assinatura: assinatura, perfil: perfil, equipe: equipe, config: configuracoes, dados: dadosEditor, zerar: confirmaZerar, sair: sair })[b.dataset.vc](); });
     vigiaNaN(); aplicarPermissoes();
     if (info.novo && info.dono && !sessionStorage.getItem('veltria-boas-vindas-' + info.espaco)) { sessionStorage.setItem('veltria-boas-vindas-' + info.espaco, '1'); setTimeout(boasVindas, 600); }
     // o app instalado no celular abre pela porta da conta, não pela demonstração
