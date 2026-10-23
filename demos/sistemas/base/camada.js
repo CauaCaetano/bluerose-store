@@ -39,6 +39,16 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden) confere(); });
 })();
 
+// demonstração que acabou de receber o exemplo novo (conta-nuvem.js): avisa uma vez
+(function () {
+  var n; try { n = sessionStorage.getItem('veltria-exemplo-novo'); sessionStorage.removeItem('veltria-exemplo-novo'); } catch (e) { n = null; }
+  if (!n) return;
+  var b = document.createElement('div'); b.setAttribute('role', 'status');
+  b.style.cssText = 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;background:#141820;color:#fff;padding:10px 16px;border-radius:12px;font:14px system-ui,sans-serif;max-width:92vw;box-shadow:0 10px 30px rgba(0,0,0,.25)';
+  b.textContent = 'A demonstração do ' + n + ' foi atualizada com as novidades. O que você tinha testado antes ficou guardado neste navegador.';
+  var poe = function () { document.body.appendChild(b); setTimeout(function () { b.remove(); }, 9000); };
+  if (document.body) poe(); else addEventListener('DOMContentLoaded', poe);
+})();
 (function () {
   var V = window.VELTRIA_VERSOES || {}, m = location.pathname.match(/sistemas\/([a-z]+)-([a-z]+)\//);
   if (!m || !window.veltriaDados) return;

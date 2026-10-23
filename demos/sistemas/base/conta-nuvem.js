@@ -13,7 +13,18 @@
  */
 (function () {
   var q = new URLSearchParams(location.search), app = q.get('conta');
-  if (!app) return;
+  if (!app) { exemploAtual(); return; }
+  // Demonstração: os dados de exemplo ficam no navegador. Quando o exemplo do sistema muda (versoes.js, campo exemplo),
+  // quem tinha a demonstração aberta recebe o exemplo novo, com as novidades; o que testou antes fica guardado numa cópia.
+  function exemploAtual() {
+    var m = location.pathname.match(/sistemas\/([a-z]+)-([a-z]+)\//), v = m && (window.VELTRIA_VERSOES || {})[m[1] + m[2]];
+    if (!v || !v.chave || !v.exemplo) return;
+    try {
+      var k = v.chave, marca = k + '-exemplo', tem = localStorage.getItem(k);
+      if (tem && Number(localStorage.getItem(marca) || 0) < v.exemplo) { localStorage.setItem(k + '-antes-do-exemplo-' + v.exemplo, tem); localStorage.removeItem(k); sessionStorage.setItem('veltria-exemplo-novo', v.nome); }
+      localStorage.setItem(marca, String(v.exemplo));
+    } catch (e) { /* sem espaço ou sem acesso: fica como está */ }
+  }
   var RAIZ = new URL('../../../', document.currentScript.src).href;
   var info = null; try { info = JSON.parse(sessionStorage.getItem('veltria-conta') || 'null'); } catch (e) { info = null; }
   if (!info || info.app !== app) { location.replace(RAIZ + 'app/' + app + '/'); throw new Error('abrindo pela porta'); }
