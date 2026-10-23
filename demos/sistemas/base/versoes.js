@@ -7,7 +7,7 @@
   var CHAVE_DIFERENTE = { 'gestao-essencial': 'veltria-gestao-simples-v1' };
   // versão dos dados de exemplo da demonstração: suba o número quando o exemplo de um sistema ganhar novidades
   // (quem já tinha a demonstração aberta recebe o exemplo novo; o que testou antes fica guardado no navegador)
-  var EXEMPLO = { financeiroessencial: 2, financeirocompleto: 3, financeiroavancado: 2, agendacompleto: 2, agendaavancado: 2, juridicocompleto: 2, juridicoavancado: 2, obrascompleto: 2, obrasavancado: 2, crmcompleto: 2, crmavancado: 2, farmaciacompleto: 2, farmaciaavancado: 2, oficinacompleto: 2 };
+  var EXEMPLO = { financeiroessencial: 2, financeirocompleto: 3, financeiroavancado: 2, agendacompleto: 2, agendaavancado: 2, juridicocompleto: 2, juridicoavancado: 2, obrascompleto: 2, obrasavancado: 2, crmcompleto: 2, crmavancado: 2, farmaciacompleto: 2, farmaciaavancado: 2, oficinacompleto: 2, oficinaavancado: 2 };
   var out = {};
   Object.keys(CAT).forEach(function (c) {
     VER.forEach(function (v, i) {
