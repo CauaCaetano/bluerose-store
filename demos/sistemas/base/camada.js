@@ -93,11 +93,11 @@
     var go = function () {
       var listas = window.veltriaEditorListas ? window.veltriaEditorListas(window.veltriaDados()) : [], daTela = listaDaTela(listas);
       var mn = document.createElement('div'); mn.className = 'vk-menu'; mn.setAttribute('role', 'menu');
-      mn.innerHTML = (daTela ? '<button type="button" role="menuitem" data-vk="novo">+ Adicionar em ' + esc(daTela[1]) + '</button><button type="button" role="menuitem" data-vk="importar">Importar planilha para ' + esc(daTela[1]) + '</button>' : '') +
+      mn.innerHTML = (proprio ? '<button type="button" role="menuitem" data-vk="proprio">+ ' + esc(proprio.getAttribute('aria-label') || 'Novo') + '</button>' : '') + (daTela ? '<button type="button" role="menuitem" data-vk="novo">+ Adicionar em ' + esc(daTela[1]) + '</button><button type="button" role="menuitem" data-vk="importar">Importar planilha para ' + esc(daTela[1]) + '</button>' : '') +
         (daTela ? '' : '<button type="button" role="menuitem" data-vk="importarQualquer">Importar planilha (Excel ou CSV)</button>') + '<button type="button" role="menuitem" data-vk="procurar">Procurar nesta tela <small>Ctrl+K</small></button><button type="button" role="menuitem" data-vk="dados">Todos os dados (adicionar, editar, importar)</button>' +
         '<button type="button" role="menuitem" data-vk="exportar">Exportar tudo para o Excel</button><button type="button" role="menuitem" data-vk="imprimir">Imprimir esta tela</button>';
       mn.addEventListener('click', function (e) { var b = e.target.closest('[data-vk]'); if (!b) return; mn.remove();
-        ({ novo: function () { editor({ lista: daTela[0], acao: 'novo' }); }, importar: function () { editor({ lista: daTela[0], acao: 'importar' }); }, importarQualquer: function () { editor({ acao: 'importar-qualquer' }); }, dados: function () { editor(null); }, exportar: exportar, procurar: procurar, imprimir: function () { window.print(); } })[b.dataset.vk](); });
+        ({ proprio: function () { proprio.click(); }, novo: function () { editor({ lista: daTela[0], acao: 'novo' }); }, importar: function () { editor({ lista: daTela[0], acao: 'importar' }); }, importarQualquer: function () { editor({ acao: 'importar-qualquer' }); }, dados: function () { editor(null); }, exportar: exportar, procurar: procurar, imprimir: function () { window.print(); } })[b.dataset.vk](); });
       document.body.appendChild(mn); var p = mn.querySelector('button'); if (p) p.focus();
       setTimeout(function () { document.addEventListener('click', function fora(e) { if (!e.target.closest('.vk-menu,.vk-mais')) { mn.remove(); document.removeEventListener('click', fora); } }); }, 0);
     };
@@ -106,7 +106,23 @@
   var mais = document.createElement('button'); mais.type = 'button'; mais.className = 'vk-mais'; mais.setAttribute('aria-label', 'Adicionar, importar ou exportar'); mais.title = 'Adicionar, importar planilha ou exportar';
   mais.innerHTML = '<span aria-hidden="true">+</span>'; mais.addEventListener('click', menu);
   // no celular muitos apps têm barra fixa embaixo (menu, campo de mensagem, bolha da IA): o + sobe acima dela em vez de cobrir
+  // o app já tem o seu + (botão solto ou no meio do menu de baixo): não pode aparecer outro + igual
+  var proprio = null, ajustado = false;
+  function fabProprio() {
+    if (ajustado) return; var achou = null;
+    document.querySelectorAll('body button, body a').forEach(function (el) {
+      if (achou || el === mais || el.closest('.vk-mais,.vk-menu') || el.textContent.trim() !== '+' || !el.getClientRects().length) return;
+      var b = el.getBoundingClientRect(); if (b.width < 36 || b.top < innerHeight * 0.5) return;
+      for (var p = el; p && p !== document.body; p = p.parentElement) if (getComputedStyle(p).position === 'fixed') { achou = { el: el, solto: p === el }; return; }
+    });
+    if (!achou) return; ajustado = true;
+    // botão solto: some e a ação dele vira o primeiro item do menu do +
+    if (achou.solto) { proprio = achou.el; proprio.style.display = 'none'; return; }
+    // + no menu de baixo: o nosso vira "mais opções" (três pontos) para não repetir o sinal
+    mais.innerHTML = '<span aria-hidden="true" style="font:700 1.3rem/1 system-ui;letter-spacing:1px">•••</span>'; mais.setAttribute('aria-label', 'Mais opções: importar planilha, exportar, procurar'); mais.title = 'Importar planilha, exportar ou procurar';
+  }
   function subirMais() {
+    fabProprio();
     var alto = 18, dir = innerWidth - 18, esq = dir - 56;
     document.querySelectorAll('body *').forEach(function (el) {
       if (el === mais || el.closest('.vk-mais,.vk-menu,.vk-toast,.vk-lado,.vc-veu')) return;
