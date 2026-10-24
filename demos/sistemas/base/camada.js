@@ -513,6 +513,20 @@
     }
   }
 
+  // ---------------------------------------------------------------- guia do sistema, dentro das Configurações
+  // O texto de cada versão está em guias.js. Os dois Gestão não têm tela de Configurações: o guia fica no Painel do dono.
+  var TELA_GUIA = /^(ajustes|configuracoes|suasconfiguracoes|minhasconfiguracoes)/, TELA_GUIA_DONO = /^paineldodono/;
+  function guia() {
+    var G = (window.VELTRIA_GUIAS || {})[app]; if (!G || document.querySelector('.vk-guia')) return;
+    var h = [].slice.call(document.querySelectorAll('h1')).find(function (x) { var t = norm(x.textContent); return x.getClientRects().length && !x.closest('.vk-caixa,.vk-menu') && (TELA_GUIA.test(t) || (m[1] === 'gestao' && TELA_GUIA_DONO.test(t))); });
+    if (!h) return;
+    var b = document.createElement('details'); b.className = 'vk-guia';
+    b.innerHTML = '<summary>Guia do sistema: como funciona cada parte</summary><p>' + esc(G.intro) + '</p><h3>Primeiros passos</h3><ol>' + G.passos.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join('') +
+      '</ol><h3>O que faz cada tela</h3><dl>' + G.partes.map(function (p) { return '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>'; }).join('') + '</dl><p class="vk-mudo">Dúvida que o guia não responde? Pergunte ao Assistente com IA ou abra um chamado em Suporte.</p>';
+    (h.closest('.titulo,.cab,.mod-cab,.cab-p,.cabeca,header:not(body > header)') || h).insertAdjacentElement('afterend', b);
+  }
+  var guiaVez = 0, vigiaGuia = function () { clearTimeout(guiaVez); guiaVez = setTimeout(guia, 150); };
+
   // ---------------------------------------------------------------- montar
   var css = '.vk-mais{position:fixed;right:18px;bottom:18px;z-index:60;width:56px;height:56px;border-radius:50%;border:0;background:#1d2230;color:#fff;font:300 2rem/1 system-ui,sans-serif;box-shadow:0 10px 26px -8px rgba(0,0,0,.55);cursor:pointer;display:grid;place-items:center;transition:transform .2s}' +
     '.vk-mais:hover{transform:scale(1.06)}.vk-mais:focus-visible,.vk-menu button:focus-visible{outline:3px solid #c9b37e;outline-offset:2px}' +
@@ -536,6 +550,9 @@
     '.vk-apoio{display:flex;flex-wrap:wrap;align-items:center;gap:14px 26px;margin:22px 0 90px;padding:18px 20px;border:1px solid rgba(127,127,127,.25);border-radius:16px;font:14px/1.4 system-ui,sans-serif}' +
     '.vk-apoio .vk-num{display:grid}.vk-apoio .vk-num b{font-size:1.6rem;line-height:1.1}.vk-apoio .vk-num span,.vk-apoio .vk-rec span{opacity:.7}.vk-apoio .vk-rec{display:grid;gap:2px;min-width:180px}.vk-apoio .vk-atalhos{margin-left:auto}' +
     '@media (max-width:700px){.vk-apoio .vk-atalhos{margin-left:0}}@media print{.vk-lado,.vk-apoio{display:none!important}}' +
+    '.vk-guia{margin:12px 0 18px;padding:12px 16px;border:1px solid rgba(127,127,127,.35);border-radius:14px;font:14.5px/1.5 system-ui,sans-serif;max-width:820px}.vk-guia summary{cursor:pointer;font-weight:700;font-size:1rem;padding:2px 0}' +
+    '.vk-guia h3{margin:14px 0 6px;font-size:.95rem}.vk-guia ol{margin:0;padding-left:20px;display:grid;gap:4px}.vk-guia dl{margin:0;display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:6px 14px}.vk-guia dt{font-weight:650}.vk-guia dd{margin:0;opacity:.85}' +
+    '@media (max-width:560px){.vk-guia dl{grid-template-columns:1fr}.vk-guia dd{margin-bottom:6px}}@media print{.vk-guia{display:none}}' +
     '.vk-tut{margin:4px 0 14px}.vk-tut summary{cursor:pointer;font-weight:600;color:#2a4fa8}.vk-tut video{width:100%;margin-top:8px;border-radius:10px;background:#05070b}' +
     '.vk-ia{display:flex;justify-content:center;margin:2px 0 8px}.vk-ia canvas{height:118px;width:auto;image-rendering:pixelated;image-rendering:crisp-edges}' +
     'html.no-celular .vk-mais{display:none}@media print{.vk-mais,.vk-menu{display:none}}';
@@ -543,6 +560,7 @@
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     // o app pode ter o próprio + com regras próprias (o Financeiro Essencial): aí o + comum não entra
     if (!window.veltriaSemMaisComum) document.body.appendChild(mais);
+    script('guias.js?v=1').then(function () { vigiaGuia(); addEventListener('hashchange', vigiaGuia); new MutationObserver(vigiaGuia).observe(document.body, { childList: true, subtree: true }); }).catch(function () {});
     subirMais(); setTimeout(subirMais, 900); addEventListener('resize', subirMais); addEventListener('hashchange', function () { setTimeout(subirMais, 60); });
     // tela vazia: só faz sentido quando a empresa tem a lista vazia (começou do zero); carrega o editor para saber as listas
     script('editor.js?v=7').then(function () { vigiaVazio(); arrumaEspaco(); addEventListener('hashchange', function () { vigiaVazio(); arrumaEspaco(); }); addEventListener('resize', arrumaEspaco); new MutationObserver(function () { if (!document.querySelector('.vk-vazio')) { vazioFeito = ''; } vigiaVazio(); if (!document.querySelector('.vk-apoio')) arrumaEspaco(); }).observe(document.querySelector('main') || document.body, { childList: true }); }).catch(function () {});
