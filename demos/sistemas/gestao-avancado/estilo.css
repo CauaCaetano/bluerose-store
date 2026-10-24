@@ -195,3 +195,7 @@ tr.sel td { background: var(--lavanda-2) !important; }
 /* faixa da demonstração: quebra linha e esconde o texto longo antes de estourar a largura */
 .faixa-demo { flex-wrap: wrap; }
 @media (max-width: 960px) { .faixa-demo .so-pc { display: none; } }
+
+/* funções de 10/2026 (2ª leva) */
+.etq-f { display: grid; gap: 4px; padding: 14px 16px; border: 2px dashed currentColor; border-radius: 10px; max-width: 300px; }
+.etq-f b { font-size: 1.05rem; } .etq-f span { font: 700 1.2rem var(--mono, monospace); } .etq-f small { font-size: .78rem; opacity: .8; }
