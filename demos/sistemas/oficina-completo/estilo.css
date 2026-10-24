@@ -106,3 +106,13 @@ td input, td select { border: 1px solid var(--nevoa); border-radius: 6px; paddin
 @media print { .topo-demo, .barra-o, .toasts-o, .rodape-m, .painel-ia { display: none !important; } .fundo-o { position: static; background: none; } .modal-o { max-height: none; } }
 @media (max-width: 900px) { .segmentos { order: 3; flex-basis: 100%; justify-content: flex-start; } .logo-o { flex: 1; } .barra-o { padding: 8px 14px; gap: 10px; } }
 @media (max-width: 700px) { .q-faixa, .q-regua { min-width: 760px; } }
+
+/* funções de 10/2026 (2ª leva) */
+.insp { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 6px; }
+.insp .pt { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; background: var(--gelo); font-size: .86rem; }
+.insp .pt.v { background: #d4e4da; } .insp .pt.a { background: #f3e6c9; } .insp .pt.r { background: #f1d3cd; }
+.insp .sem { display: inline-flex; gap: 4px; } .insp .sem button { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; opacity: .45; }
+.insp .sem button.v { background: var(--verde); } .insp .sem button.a { background: var(--amar); } .insp .sem button.r { background: var(--verm); } .insp .sem button[aria-pressed="true"] { opacity: 1; box-shadow: 0 0 0 2px var(--tx); }
+.recall { margin-bottom: 14px; border-left: 4px solid var(--verm); }
+.lucro-os { margin: 10px 0; font-size: .88rem; } .lucro-os summary { cursor: pointer; } .lucro-os table { margin-top: 6px; }
+.cot-in { width: 82px; text-align: right; } .cot-in.melhor { background: #d4e4da; font-weight: 700; }
