@@ -32,12 +32,12 @@
   var T = EN ? {
     base: '1. Choose the base', extras: '2. Add what you need', cuidado: 'Care plan', cuidadoD: 'Hosting, backups, up to 1 hour of changes a month and a visits report.',
     expressa: 'Express delivery', expressaD: 'Half the time, +30% on the total', resumo: 'Your quote', total: 'Total', prazo: 'Ready in', dias: 'business days', dia: 'business day',
-    entrada: '50% to start', resto: '50% on delivery', parcelas: 'or up to 6 card payments of', mes: '/month', pedir: 'Request this quote', copiado: 'Quote added to the form below.',
+    entrada: '50% to start', resto: '50% on delivery', parcelas: 'or up to 6 card payments of', juros: ' plus Mercado Pago interest', mes: '/month', pedir: 'Request this quote', copiado: 'Quote added to the form below.',
     nota: 'Reference prices. The final quote is confirmed in writing before any payment.', so: 'only', cada: 'each', incluso: 'included', msg: 'Hi! I built a quote on the website:', mensal: 'Monthly',
   } : {
     base: '1. Escolha a base', extras: '2. Adicione o que precisar', cuidado: 'Plano de cuidado', cuidadoD: 'Hospedagem, cópias de segurança, até 1 hora de ajustes por mês e relatório de visitas.',
     expressa: 'Entrega expressa', expressaD: 'Metade do prazo, +30% no total', resumo: 'Seu orçamento', total: 'Total', prazo: 'Pronto em', dias: 'dias úteis', dia: 'dia útil',
-    entrada: '50% para começar', resto: '50% na entrega', parcelas: 'ou em até 6x no cartão de', mes: '/mês', pedir: 'Pedir este orçamento', copiado: 'Orçamento colocado no formulário abaixo.',
+    entrada: '50% para começar', resto: '50% na entrega', parcelas: 'ou em até 6x no cartão de', juros: ' mais os juros do Mercado Pago', mes: '/mês', pedir: 'Pedir este orçamento', copiado: 'Orçamento colocado no formulário abaixo.',
     nota: 'Valores de referência. O orçamento final é confirmado por escrito antes de qualquer pagamento.', so: 'só', cada: 'cada', incluso: 'incluso', msg: 'Olá! Montei um orçamento no site:', mensal: 'Mensal',
   };
   var dinheiro = function (v) { return v.toLocaleString(EN ? 'en-US' : 'pt-BR', { style: 'currency', currency: EN ? 'USD' : 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 }); };
@@ -98,7 +98,7 @@
       (estado.cuidado ? '<div class="orc-mensal"><span>' + T.cuidado + ' (' + T.mensal.toLowerCase() + ')</span><b>' + dinheiro(CUIDADO[I]) + T.mes + '</b></div>' : '');
     $('[data-total]').textContent = dinheiro(r.total);
     $('[data-prazo]').textContent = T.prazo + ' ' + r.dias + ' ' + (r.dias === 1 ? T.dia : T.dias);
-    $('[data-pag]').textContent = T.entrada + ' (' + dinheiro(Math.round(r.total / 2)) + ') · ' + T.resto + (EN ? '' : ' · ' + T.parcelas + ' ' + dinheiro(Math.ceil(r.total / 6)));
+    $('[data-pag]').textContent = T.entrada + ' (' + dinheiro(Math.round(r.total / 2)) + ') · ' + T.resto + (EN ? '' : ' · ' + T.parcelas + ' ' + dinheiro(Math.ceil(r.total / 6)) + T.juros);
   }
 
   raiz.addEventListener('change', function (e) {

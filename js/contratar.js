@@ -37,10 +37,10 @@
   var $ = function (id) { return document.getElementById(id); };
   var aceite = $('ct-aceite'), pagar = $('ct-pagar');
   var VALORES = {
-    presenca: ['Entrada de R$ 345 agora', 'Total R$ 690 · o saldo de R$ 345 só na entrega'],
-    completo: ['Entrada de R$ 745 agora', 'Total R$ 1.490 · o saldo de R$ 745 só na entrega'],
-    automacao: ['Entrada de R$ 445 agora', 'Total R$ 890 · o saldo de R$ 445 só na entrega'],
-    combo: ['Entrada de R$ 1.145 agora', 'Total R$ 2.290 · o saldo de R$ 1.145 só na entrega'],
+    presenca: ['Entrada de R$ 345 agora', 'Total R$ 690 · o saldo de R$ 345 só na entrega · à vista no Pix ou no cartão; parcelado no cartão leva os juros do Mercado Pago'],
+    completo: ['Entrada de R$ 745 agora', 'Total R$ 1.490 · o saldo de R$ 745 só na entrega · à vista no Pix ou no cartão; parcelado no cartão leva os juros do Mercado Pago'],
+    automacao: ['Entrada de R$ 445 agora', 'Total R$ 890 · o saldo de R$ 445 só na entrega · à vista no Pix ou no cartão; parcelado no cartão leva os juros do Mercado Pago'],
+    combo: ['Entrada de R$ 1.145 agora', 'Total R$ 2.290 · o saldo de R$ 1.145 só na entrega · à vista no Pix ou no cartão; parcelado no cartão leva os juros do Mercado Pago'],
     'a-presenca': ['R$ 89 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
     'a-completo': ['R$ 149 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
     'a-automacao': ['R$ 199 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
@@ -52,7 +52,7 @@
     var mensal = Number(b.getAttribute('data-mensal')), total = Number(b.getAttribute('data-total'));
     if (mensal && /-anual$/.test(b.getAttribute('data-contratar') || '')) return [reais(mensal) + ' por ano', 'Plano anual com 20% de desconto · renova a cada 12 meses · avisamos antes de cada cobrança'];
     if (mensal) return [reais(mensal) + ' por mês', 'Sem entrada · hospedagem e suporte inclusos · sem fidelidade, cancele quando quiser'];
-    if (total) return ['Entrada de ' + reais(total / 2) + ' agora', 'Total ' + reais(total) + ' · o saldo de ' + reais(total / 2) + ' só na entrega'];
+    if (total) return ['Entrada de ' + reais(total / 2) + ' agora', 'Total ' + reais(total) + ' · o saldo de ' + reais(total / 2) + ' só na entrega · à vista no Pix ou no cartão; parcelado no cartão leva os juros do Mercado Pago'];
     return ['', ''];
   }
 
