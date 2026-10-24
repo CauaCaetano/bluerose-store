@@ -185,7 +185,7 @@ tr.feito td { color: var(--tx-3); }
 }
 /* ---------------------------------------------------------------- celular */
 @media (max-width: 760px) {
-  .moldura { grid-template-columns: 1fr; }
+  .moldura { grid-template-columns: minmax(0, 1fr); }
   .barra { flex-wrap: wrap; padding: 10px 14px; gap: 10px; }
   .empresa-t { flex: 1; } .saldos { display: none; }
   .busca-g { order: 5; flex-basis: 100%; max-width: none; }
@@ -234,3 +234,7 @@ fieldset.cmp { border: 1px solid var(--linha); border-radius: var(--r-p); paddin
 @media (max-width: 760px) { .lin-f { grid-template-columns: minmax(0, 1fr) auto; } .lin-f > .bt { grid-column: 1 / -1; justify-self: start; } }
 @media print { body:has(.recibo-f) .moldura { display: none !important; } body:has(.recibo-f) .veu-f { position: static; background: none; } body:has(.recibo-f) .cx-f .rod, body:has(.recibo-f) .cx-f h2 { display: none; } }
 @media (max-width: 1180px) { .grade.plan > .s6 { grid-column: span 12; } }
+
+/* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
+@media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }
+.rolagem { overflow-x: auto; }

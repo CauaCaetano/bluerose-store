@@ -318,3 +318,6 @@ main { grid-column: 2; padding: 24px 28px 32px; outline: none; min-width: 0; }
 tr.melhor td { background: var(--pos-f); }
 @media (max-width: 1100px) { .duas-r { grid-template-columns: 1fr; } }
 @media (min-width: 1400px) { .kpis:has(> :nth-child(5):last-child) { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+/* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
+@media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }

@@ -111,3 +111,6 @@ select.cat { border: 1px solid var(--palha); border-radius: 6px; background: #ff
 .onb { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 6px 14px; } .onb label { display: flex; gap: 8px; align-items: center; font-size: .9rem; }
 .onb input { width: 18px; height: 18px; accent-color: var(--pt); }
 .mov4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 6px; } .mov4 .cp input { width: 100%; min-width: 0; box-sizing: border-box; }
+
+/* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
+@media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }

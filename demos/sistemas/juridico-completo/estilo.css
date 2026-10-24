@@ -217,3 +217,6 @@ span.cal-i { display: inline-block; width: auto; }
 .trilho-j { height: 8px; border-radius: 99px; background: #ece4d9; overflow: hidden; margin-top: 4px; } .trilho-j i { display: block; height: 100%; background: var(--bordo); border-radius: 99px; }
 .recibo-j { white-space: pre-wrap; font: .88rem/1.55 ui-monospace, monospace; background: #faf6f0; padding: 12px; border-radius: 8px; max-height: 52vh; overflow: auto; }
 @media (max-width: 760px) { .cal-d { min-height: 64px; padding: 3px; } .cal-i { font-size: .62rem; padding: 1px 3px; } .cal-s span { padding: 6px 2px; font-size: .66rem; } }
+
+/* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
+@media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }

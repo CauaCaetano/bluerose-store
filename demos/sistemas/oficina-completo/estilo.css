@@ -116,3 +116,6 @@ td input, td select { border: 1px solid var(--nevoa); border-radius: 6px; paddin
 .recall { margin-bottom: 14px; border-left: 4px solid var(--verm); }
 .lucro-os { margin: 10px 0; font-size: .88rem; } .lucro-os summary { cursor: pointer; } .lucro-os table { margin-top: 6px; }
 .cot-in { width: 82px; text-align: right; } .cot-in.melhor { background: #d4e4da; font-weight: 700; }
+
+/* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
+@media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }

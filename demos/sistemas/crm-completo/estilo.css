@@ -120,3 +120,7 @@ tr:last-child td { border-bottom: 0; }
 .docs-f { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 14px; margin-bottom: 12px; } .docs-f label { display: flex; gap: 8px; align-items: center; font-size: .9rem; }
 .docs-f input { width: 18px; height: 18px; accent-color: var(--oc); }
 .perda-t { color: var(--perda); }
+
+/* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
+@media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }
+@media (max-width: 640px) { .funil-faixa { grid-template-columns: repeat(var(--n), minmax(118px, 1fr)); overflow-x: auto; } }

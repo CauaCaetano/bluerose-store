@@ -154,3 +154,6 @@ tr:last-child td { border-bottom: 0; }
 .mapa-q { display: grid; gap: 3px; align-items: center; } .mapa-q i { font-style: normal; text-align: center; font: 600 .72rem var(--mono); padding: 8px 0; border-radius: 4px; background: rgb(169 162 197 / calc(var(--v) * 100%)); color: #1f1b2b; }
 .tarefa-o { display: flex; gap: 8px; align-items: center; padding: 6px 0; font-size: .9rem; } .tarefa-o input { width: 18px; height: 18px; }
 .peq { width: 110px; text-align: right; min-height: 32px; border: 1px solid var(--nevoa); border-radius: 6px; padding: 0 8px; font: inherit; }
+
+/* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
+@media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }

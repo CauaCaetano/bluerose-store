@@ -169,3 +169,6 @@ td input.n { text-align: right; }
 .barra-o { height: 10px; border-radius: 99px; background: #eee5d9; overflow: hidden; } .barra-o i { display: block; height: 100%; background: #6b4b2f; border-radius: 99px; }
 .recibo-o { white-space: pre-wrap; font: .86rem/1.5 ui-monospace, monospace; background: #fbf6ee; padding: 12px; border-radius: 8px; max-height: 55vh; overflow: auto; }
 @media print { body.so-janela > *:not(.fundo) { display: none !important; } body.so-janela .fundo { position: static; background: none; } body.so-janela .rodape-j { display: none; } }
+
+/* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
+@media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }
