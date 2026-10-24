@@ -85,3 +85,7 @@ tr:last-child td { border-bottom: 0; }
 .sinais { position: fixed; right: 18px; bottom: 18px; display: grid; gap: 8px; z-index: 60; }
 .sinais div { background: var(--tinta); color: var(--papel); border-left: 4px solid var(--acafrao); padding: 10px 14px; border-radius: 6px; max-width: 360px; font-size: .88rem; }
 @media print { .fio, .arvore, .sinais { display: none !important; } .casco { display: block; } }
+
+/* funções de 10/2026 (2ª leva) */
+.spark { display: inline-flex; gap: 2px; align-items: flex-end; height: 26px; } .spark i { width: 7px; background: #c8cdd3; border-radius: 2px 2px 0 0; } .spark i.p { background: var(--ouro, #d9a441); }
+.curva-nl { width: 100%; height: auto; margin-top: 6px; } .curva-nl text { font-size: 11px; fill: var(--tx-3); }
