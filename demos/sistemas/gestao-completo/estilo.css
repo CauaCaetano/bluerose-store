@@ -228,3 +228,15 @@ textarea.campo { padding: 10px 14px; min-height: 80px; }
 /* faixa da demonstração: quebra linha e esconde o texto longo antes de estourar a largura */
 .faixa-demo { flex-wrap: wrap; }
 @media (max-width: 960px) { .faixa-demo .so-pc { display: none; } }
+
+/* funções de 10/2026 (2ª leva) */
+.hub-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; padding-bottom: 90px; }
+.hub-c { position: relative; display: grid; gap: 4px; text-align: left; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--linha, #e4dccd); background: var(--marfim, #fffdf8); font: inherit; color: inherit; cursor: pointer; }
+.hub-c:hover { border-color: var(--vinho); } .hub-c span { font-size: .84rem; color: var(--tinta-3); } .hub-c i { position: absolute; top: 10px; right: 10px; font: 700 .72rem var(--mono, monospace); font-style: normal; background: var(--vinho); color: #fff; border-radius: 8px; padding: 1px 7px; }
+.gp { display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; margin-top: 10px; }
+.mk { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; } .mk label { display: grid; gap: 4px; font-size: .84rem; }
+.campo.cont { width: 96px; text-align: right; min-height: 34px; }
+.catalogo { white-space: pre-wrap; font: .9rem/1.6 var(--mono, monospace); background: var(--marfim, #fffdf8); border-radius: 10px; padding: 12px 14px; margin: 0; }
+.mapa-h { display: grid; gap: 3px; align-items: center; } .mapa-h i { font-style: normal; text-align: center; font: 600 .72rem var(--mono, monospace); padding: 8px 0; border-radius: 4px; background: rgb(119 60 69 / calc(var(--v) * 85%)); color: #1b1b22; }
+@media (max-width: 640px) { .semana { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; } .semana .dia b { font-size: .62rem; text-align: center; overflow-wrap: anywhere; } .semana .dia small { font-size: .68rem; } .bloco-cab { flex-wrap: wrap; } .bloco { padding: 16px 14px; } }
+.grade-2 > * { min-width: 0; } @media (max-width: 640px) { .grade-2 { grid-template-columns: minmax(0, 1fr); } }
