@@ -114,3 +114,9 @@ tr:last-child td { border-bottom: 0; }
 @media (max-width: 700px) { main, .cimo { padding-left: 14px; padding-right: 14px; } .painel-ia { right: 0; width: 100%; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 @media print { .tarja, .indice, .painel-ia, .notas { display: none !important; } .palco { display: block; } }
+
+/* funções de 10/2026 (2ª leva) */
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; } .tags i { font-style: normal; font-size: .68rem; font-weight: 600; padding: 0 6px; border-radius: 5px; background: #e2e8dc; color: var(--musgo); }
+.docs-f { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 14px; margin-bottom: 12px; } .docs-f label { display: flex; gap: 8px; align-items: center; font-size: .9rem; }
+.docs-f input { width: 18px; height: 18px; accent-color: var(--oc); }
+.perda-t { color: var(--perda); }
