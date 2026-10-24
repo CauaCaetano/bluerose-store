@@ -703,8 +703,8 @@ export function realDasBaixas(db, emp, comp = compAtual()) {
 export function dre(db, emp, comp = compAtual(), { regime = 'competencia', cc = '' } = {}) {
   usarPlano(db); const mes = (d) => compDoDia(d) === comp, ok = (x) => (emp === 'todas' || x.emp === emp) && (!cc || x.cc === cc), v = {}, soma = (cat, c) => { if (cat) v[cat] = (v[cat] || 0) + c; };
   let retencoes = 0;
-  if (regime === 'caixa') { db.pags.filter(ok).forEach((p) => (p.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(p.cat || 'Sem conta', p.emprestimo ? Math.round((b.total * p.juros) / p.c) : b.total))); (db.recs || []).filter(ok).forEach((r) => (r.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(r.cat || 'Receita de vendas', b.total))); }
-  else { db.pags.filter((p) => ok(p) && !['cancelado', 'rejeitado'].includes(p.st) && mes(p.venc)).forEach((p) => soma(p.cat || 'Sem conta', p.emprestimo ? p.juros : p.c)); (db.recs || []).filter((r) => ok(r) && (r.st !== 'cancelado' || r.acordo) && mes(r.venc)).forEach((r) => { if (r.reneg) return soma(r.cat || 'Receita de vendas', r.juros || 0); soma(r.cat || 'Receita de vendas', r.bruto || r.c); retencoes += (r.bruto || r.c) - r.c; }); }
+  if (regime === 'caixa') { db.pags.filter((p) => ok(p) && !p.distribuicao).forEach((p) => (p.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(p.cat || 'Sem conta', p.emprestimo ? Math.round((b.total * p.juros) / p.c) : b.total))); (db.recs || []).filter(ok).forEach((r) => (r.baixas || []).filter((b) => mes(b.dia)).forEach((b) => soma(r.cat || 'Receita de vendas', b.total))); }
+  else { db.pags.filter((p) => ok(p) && !p.distribuicao && !['cancelado', 'rejeitado'].includes(p.st) && mes(p.venc)).forEach((p) => soma(p.cat || 'Sem conta', p.emprestimo ? p.juros : p.c)); (db.recs || []).filter((r) => ok(r) && (r.st !== 'cancelado' || r.acordo) && mes(r.venc)).forEach((r) => { if (r.reneg) return soma(r.cat || 'Receita de vendas', r.juros || 0); soma(r.cat || 'Receita de vendas', r.bruto || r.c); retencoes += (r.bruto || r.c) - r.c; }); }
   (db.movs || []).filter((m) => ['avulso', 'cartao'].includes(m.tipo) && mes(m.dia) && (!cc || m.cc === cc) && (emp === 'todas' || (db.contas || []).find((c) => c.id === m.conta)?.emp === emp)).forEach((m) => soma(m.cat || 'Sem conta', Math.abs(m.c)));
   const tipo = (c) => db.plano.find((p) => p.c === c)?.t || (c === 'Sem conta' ? 'c' : 'c'), grupo = (c) => db.plano.find((p) => p.c === c)?.grupo || 'Sem conta';
   const linhas = Object.entries(v).map(([c, x]) => ({ c, t: tipo(c), grupo: grupo(c), v: x })).sort((a, b) => (a.t === b.t ? 0 : a.t === 'r' ? -1 : 1) || a.grupo.localeCompare(b.grupo) || b.v - a.v);
@@ -969,4 +969,152 @@ export function equilibrio(db, emp, comp = compAtual(), linhas = null) {
   const D = linhas ? null : dre(db, emp, comp), l = linhas || D.grupos.flatMap((g) => g.contas), vars = db.variaveis || VARIAVEIS, custos = l.filter((c) => c.t === 'c');
   const receita = linhas ? l.filter((c) => c.t === 'r').reduce((s, c) => s + c.v, 0) : D.receita - D.retencoes, variaveis = custos.filter((c) => vars.includes(c.c)).reduce((s, c) => s + c.v, 0), fixos = custos.reduce((s, c) => s + c.v, 0) - variaveis, mc = receita - variaveis, mcPct = receita ? mc / receita : null;
   const pe = mcPct > 0 ? Math.round(fixos / mcPct) : null; return { receita, variaveis, fixos, mc, mcPct, pe, seguranca: pe !== null && receita ? (receita - pe) / receita : null };
+}
+
+// ------------------------------------------------------------------ funções de 10/2026 (2ª leva)
+const diaDoMes = (comp, dd, agora = new Date()) => { const [a, m] = comp.split('-').map(Number), ult = new Date(a, m, 0).getDate(), d = new Date(a, m - 1, Math.min(dd, ult), 12); return diaDe(hojeISO(d), agora); };
+/** Vencimento federal no fim de semana antecipa para a sexta (DAS, DARF, FGTS); o municipal (ISS) e o estadual seguem a data. */
+const antecipaFds = (dia, agora = new Date()) => { const w = dataDe(dia, agora).getDay(); return w === 6 ? dia - 1 : w === 0 ? dia - 2 : dia; };
+export const OBRIGACOES = [['das', 'DAS do Simples Nacional', 20, true], ['pis', 'PIS e COFINS (DARF)', 25, true], ['irpj', 'IRPJ e CSLL (DARF)', 31, true], ['fgts', 'FGTS', 20, true], ['inss', 'INSS (GPS / DCTFWeb)', 20, true], ['irrf', 'IRRF sobre salários e serviços', 20, true], ['icms', 'ICMS', 9, false], ['iss', 'ISS', 10, false]];
+/** Calendário fiscal do mês por empresa: cada obrigação marcada na empresa (db.obrigacoes[emp]) com o vencimento e se a guia já foi lançada. */
+export function calendarioFiscal(db, emp, comp = compAtual(), agora = new Date()) {
+  const emps = emp === 'todas' ? Object.keys(db.obrigacoes || {}) : [emp];
+  return emps.flatMap((e) => (db.obrigacoes?.[e] || []).map((k) => { const o = OBRIGACOES.find(([x]) => x === k); if (!o) return null; const d0 = diaDoMes(comp, o[2], agora), venc = o[3] ? antecipaFds(d0, agora) : d0, guia = db.pags.find((p) => p.obrig === `${comp}:${e}:${k}` && !['cancelado', 'rejeitado'].includes(p.st)); return { emp: e, k, nome: o[1], venc, guia, st: guia ? (faltaTitulo(guia) ? 'lançada' : 'paga') : venc < 0 ? 'atrasada' : venc <= 5 ? 'vence logo' : 'a lançar' }; }).filter(Boolean)).sort((a, b) => a.venc - b.venc);
+}
+export function lancarGuia(db, { emp, k, c, comp = compAtual() }, quem, papel) {
+  const o = OBRIGACOES.find(([x]) => x === k); if (!o) throw new Error('Obrigação não encontrada.'); const it = calendarioFiscal(db, emp, comp).find((x) => x.k === k); if (!it) throw new Error('Esta obrigação não está marcada para a empresa.'); if (it.guia) throw new Error('A guia deste mês já foi lançada.');
+  usarPlano(db); const cat = CATS.some(([x]) => x === 'Impostos e taxas') ? 'Impostos e taxas' : undefined, [p] = novoPagamento(db, { emp, forn: o[1].split(' (')[0], desc: `${o[1]} · competência ${nomeComp(proxComp(comp, -1))}`, c, venc: it.venc, cat, imposto: true }, quem, papel); p.obrig = `${comp}:${emp}:${k}`; return p;
+}
+/** Retenções que os clientes fizeram nas notas (IR, PIS/COFINS/CSLL, INSS, ISS): crédito para abater na apuração do mês. */
+export function retencoesSofridas(db, emp, comp = compAtual()) {
+  const rs = (db.recs || []).filter((r) => (emp === 'todas' || r.emp === emp) && r.ret && r.st !== 'cancelado' && compDoDia(r.venc) === comp), t = Object.fromEntries(Object.keys(RETENCOES).map((k) => [k, 0]));
+  rs.forEach((r) => Object.entries(r.ret).forEach(([k, v]) => { t[k] = (t[k] || 0) + v; })); return { notas: rs, porTipo: t, total: Object.values(t).reduce((a, b) => a + b, 0) };
+}
+// Regimes: Simples (anexo I comércio, III serviços), Presumido e Real. Valores em centavos por ano. ICMS/ISS ficam fora da comparação nos
+// três (no Simples eles estão dentro da guia; por isso o "imposto local" informado soma no Presumido e no Real). shortcut: sem ICMS-ST, sem créditos de ICMS, sem desonerações; é para conversar com o contador.
+const SIMPLES = { comercio: [[18000000, 4, 0], [36000000, 7.3, 594000], [72000000, 9.5, 1386000], [180000000, 10.7, 2250000], [360000000, 14.3, 8730000], [480000000, 19, 37800000]], servico: [[18000000, 6, 0], [36000000, 11.2, 936000], [72000000, 13.5, 1764000], [180000000, 16, 3564000], [360000000, 21, 12564000], [480000000, 33, 64800000]] };
+export function compararRegimes({ receita, ativ = 'comercio', margem = 10, creditos = 0, local = 0 }) {
+  if (!Number.isInteger(receita) || receita <= 0) throw new Error('Digite o faturamento do ano.'); if (!['comercio', 'servico'].includes(ativ)) throw new Error('Escolha comércio ou serviço.');
+  if (!(margem >= -100 && margem <= 100)) throw new Error('Margem de lucro entre −100% e 100%.'); if (!Number.isInteger(creditos) || creditos < 0 || creditos > receita) throw new Error('Compras com crédito inválidas.');
+  const adic = (base) => Math.max(0, base - 24000000) * 0.1, loc = Math.round(receita * local / 100), r = [];
+  if (receita <= 480000000) { const [, aliq, ded] = SIMPLES[ativ].find(([lim]) => receita <= lim), ef = (receita * aliq / 100 - ded) / receita; r.push({ k: 'simples', nome: 'Simples Nacional', total: Math.round(receita * ef), ef, obs: `anexo ${ativ === 'comercio' ? 'I' : 'III'} · já inclui ${ativ === 'comercio' ? 'ICMS' : 'ISS'}` }); }
+  else r.push({ k: 'simples', nome: 'Simples Nacional', total: null, obs: 'acima de R$ 4,8 milhões não pode' });
+  const pIR = ativ === 'comercio' ? 0.08 : 0.32, pCS = ativ === 'comercio' ? 0.12 : 0.32, bIR = receita * pIR, pres = Math.round(bIR * 0.15 + adic(bIR) + receita * pCS * 0.09 + receita * 0.0365) + loc;
+  r.push(receita <= 7800000000 ? { k: 'presumido', nome: 'Lucro Presumido', total: pres, ef: pres / receita, obs: `presunção ${pIR * 100}% (IRPJ) e ${pCS * 100}% (CSLL), PIS/COFINS 3,65%` } : { k: 'presumido', nome: 'Lucro Presumido', total: null, obs: 'acima de R$ 78 milhões não pode' });
+  const lucro = Math.max(0, receita * margem / 100), real = Math.round(lucro * 0.15 + adic(lucro) + lucro * 0.09 + (receita - creditos) * 0.0925) + loc;
+  r.push({ k: 'real', nome: 'Lucro Real', total: real, ef: real / receita, obs: 'IRPJ e CSLL sobre o lucro; PIS/COFINS 9,25% não cumulativo' });
+  const ok = r.filter((x) => x.total !== null).sort((a, b) => a.total - b.total); return { regimes: r, melhor: ok[0]?.k, economia: ok.length > 1 ? ok[1].total - ok[0].total : 0 };
+}
+// Sócios: pró-labore (com o INSS de 11% retido) e distribuição de lucros limitada ao lucro do ano.
+export function proLabore(db, emp, comp = compAtual(), quem, papel) {
+  exige(db, papel, 'criar'); exigeAberto(db); const ss = (db.socios || []).filter((s) => s.emp === emp && s.proLabore > 0); if (!ss.length) throw new Error('Nenhum sócio com pró-labore nesta empresa.');
+  if (db.pags.some((p) => p.prolabore === `${comp}:${emp}`)) throw new Error(`O pró-labore de ${nomeComp(comp)} já foi lançado.`);
+  usarPlano(db); const teto = Number.isInteger(db.tetoINSS) ? db.tetoINSS : 815741, cat = CATS.some(([x]) => x === 'Folha e encargos') ? 'Folha e encargos' : undefined, venc = diaDoMes(proxComp(comp), 5);
+  let inss = 0; const criados = ss.map((s) => { const ret = Math.round(Math.min(s.proLabore, teto) * 0.11); inss += ret; const [p] = novoPagamento(db, { emp, forn: s.nome, desc: `Pró-labore de ${nomeComp(comp)} (líquido)`, c: s.proLabore - ret, venc, cat }, quem, papel); p.prolabore = `${comp}:${emp}`; return p; });
+  const [g] = novoPagamento(db, { emp, forn: 'Receita Federal', desc: `INSS retido do pró-labore · ${nomeComp(comp)}`, c: inss, venc: antecipaFds(diaDoMes(proxComp(comp), 20)), cat, imposto: true }, quem, papel); g.prolabore = `${comp}:${emp}`;
+  return { pagamentos: criados, inss };
+}
+/** Lucros acumulados até o ano passado (do balanço, informado em db.lucroAnterior) + lucro do ano até o mês (DRE por competência) − o que já foi distribuído no ano. */
+export function lucroDisponivel(db, emp, agora = new Date()) {
+  const ano = agora.getFullYear(), meses = Array.from({ length: agora.getMonth() + 1 }, (_, i) => `${ano}-${String(i + 1).padStart(2, '0')}`), lucro = meses.reduce((s, c) => s + dre(db, emp, c).resultado, 0);
+  const dist = (db.distribuicoes || []).filter((d) => d.emp === emp && d.ano === ano).reduce((s, d) => s + d.c, 0); const anterior = Number.isInteger(db.lucroAnterior?.[emp]) ? db.lucroAnterior[emp] : 0; return { anterior, lucro, distribuido: dist, livre: Math.max(0, anterior + lucro - dist) };
+}
+export function distribuirLucros(db, { emp, c, venc = 5 }, quem, papel) {
+  exige(db, papel, 'aprovar'); exigeAberto(db); if (!Number.isInteger(c) || c <= 0) throw new Error('Digite o valor a distribuir.');
+  const ss = (db.socios || []).filter((s) => s.emp === emp && s.pct > 0), tot = ss.reduce((s, x) => s + x.pct, 0); if (!ss.length) throw new Error('Cadastre os sócios e a participação de cada um.'); if (Math.abs(tot - 100) > 0.001) throw new Error(`As participações somam ${String(tot).replace('.', ',')}%; precisam somar 100%.`);
+  const L = lucroDisponivel(db, emp); if (c > L.livre) throw new Error(`Passa do lucro disponível (${reais(L.livre)}). Distribuir mais que o lucro pode ser tributado.`);
+  let resto = c; const partes = ss.map((s, i) => { const v = i === ss.length - 1 ? resto : Math.floor(c * s.pct / 100); resto -= v; return [s, v]; });
+  const id = nid('d'), ps = partes.filter(([, v]) => v > 0).map(([s, v]) => { const [p] = novoPagamento(db, { emp, forn: s.nome, desc: `Distribuição de lucros ${new Date().getFullYear()} (${String(s.pct).replace('.', ',')}%)`, c: v, venc }, quem, papel); p.distribuicao = id; return p; });
+  (db.distribuicoes ||= []).push({ id, emp, ano: new Date().getFullYear(), c, em: new Date().toISOString(), quem }); registra(db, quem, `distribuiu ${reais(c)} de lucros aos sócios`, { ref: `dist:${id}`, depois: reais(c) }); return ps;
+}
+// Carteira do BPO: situação de cada empresa atendida, honorários e rotina com prazo.
+export function carteira(db, emps, comp = compAtual()) {
+  return emps.map((e) => { const k = e.k || e, pend = db.pags.filter((p) => p.emp === k && p.st === 'pendente').length, atras = (db.recs || []).filter((r) => r.emp === k && situacaoRec(r).st === 'atrasado').length, contas = (db.contas || []).filter((c) => c.emp === k).map((c) => c.id), semCat = db.extrato.filter((x) => (!x.conta || contas.includes(x.conta)) && !categoria(db, x) && !x.pag && !x.rec && !x.mov).length, tarefas = (db.tarefas || []).filter((t) => t.emp === k && !tarefaFeita(t)).length, h = (db.honorarios || {})[k];
+    const nota = pend + atras + tarefas + (semCat ? 1 : 0); return { k, nome: e.nome || k, pend, atras, semCat, tarefas, fechado: !!db.fechados?.[comp], honorario: h?.c || 0, honorarioPago: !!h?.pagos?.[comp], st: nota === 0 ? 'em dia' : nota <= 3 ? 'atenção' : 'atrasada' }; });
+}
+export function marcarHonorario(db, emp, comp = compAtual(), quem) { const h = (db.honorarios ||= {})[emp]; if (!h?.c) throw new Error('Defina o honorário desta empresa.'); (h.pagos ||= {})[comp] = !h.pagos[comp]; registra(db, quem, `${h.pagos[comp] ? 'recebeu' : 'desmarcou'} o honorário de ${nomeComp(comp)} (${emp})`, { ref: `hon:${emp}:${comp}`, depois: reais(h.c) }); }
+const chavePeriodo = (freq, agora = new Date()) => { const d = new Date(agora); if (freq === 'diaria') return hojeISO(d); if (freq === 'mensal') return hojeISO(d).slice(0, 7); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return `s${hojeISO(d)}`; };
+export const tarefaFeita = (t, agora = new Date()) => !!t.feito?.[chavePeriodo(t.freq, agora)];
+export function novaTarefa(db, d, quem) { const t = String(d.t || '').trim(); if (!t) throw new Error('Diga a tarefa.'); if (!['diaria', 'semanal', 'mensal'].includes(d.freq)) throw new Error('Escolha a frequência.'); const x = { id: nid('t'), emp: d.emp, t: t.slice(0, 80), resp: String(d.resp || '').trim().slice(0, 40), freq: d.freq, feito: {} }; (db.tarefas ||= []).push(x); registra(db, quem, `criou a rotina "${x.t}"`, { ref: `tarefa:${x.id}` }); return x; }
+export function marcarTarefa(db, id, quem, agora = new Date()) { const t = (db.tarefas || []).find((x) => x.id === id); if (!t) throw new Error('Tarefa não encontrada.'); const k = chavePeriodo(t.freq, agora); if (t.feito[k]) delete t.feito[k]; else t.feito[k] = { quem, em: new Date().toISOString() }; registra(db, quem, `${t.feito[k] ? 'fez' : 'desmarcou'} "${t.t}"`, { ref: `tarefa:${id}` }); }
+// Riscos: covenants, PDD, duplicidade, vigências e saldo mínimo.
+/** Indicadores dos contratos de empréstimo. ebitdaMes em centavos (do real do mês); dívida e juros dos próximos 12 meses saem das parcelas. */
+export function covenants(db, emp, ebitdaMes) {
+  const da = (x) => emp === 'todas' || x.emp === emp, E = (db.emprestimos || []).filter(da), divida = E.reduce((s, e) => s + saldoEmprestimo(db, e.id).principal, 0), caixa = (db.contas || []).filter((c) => da(c) && c.tipo !== 'cartao').reduce((s, c) => s + saldoConta(db, c.id), 0), apl = (db.aplicacoes || []).filter((a) => da(a) && !a.resgate).reduce((s, a) => s + posicaoAplicacao(a).liquido, 0);
+  const parc12 = db.pags.filter((p) => da(p) && p.emprestimo && faltaTitulo(p) && p.venc <= 365), juros12 = parc12.reduce((s, p) => s + Math.round(p.juros * faltaTitulo(p) / p.c), 0), receber = (db.recs || []).filter((r) => da(r) && r.st !== 'cancelado').reduce((s, r) => s + faltaTitulo(r), 0), pagar = db.pags.filter((p) => da(p) && !p.emprestimo && ['pendente', 'aprovado', 'remessa'].includes(p.st)).reduce((s, p) => s + faltaTitulo(p), 0) + parc12.reduce((s, p) => s + faltaTitulo(p), 0);
+  const ebitda12 = ebitdaMes * 12, val = { divLiq: ebitda12 > 0 ? (divida - caixa - apl) / ebitda12 : null, liquidez: pagar ? (caixa + apl + receber) / pagar : null, cobertura: juros12 ? ebitda12 / juros12 : null };
+  const lista = (db.covenants || []).filter((k) => emp === 'todas' || !k.emp || k.emp === emp).map((k) => { const v = val[k.ind]; return { ...k, valor: v, ok: v === null ? null : k.tipo === 'max' ? v <= k.limite : v >= k.limite }; });
+  return { lista, divida, caixa: caixa + apl, ebitda12, ...val };
+}
+export const FAIXAS_PDD = [[30, 3], [90, 10], [180, 30], [Infinity, 100]];
+/** Provisão para devedores duvidosos pelos dias de atraso de cada título (% por faixa, ajustável). */
+export function pdd(db, emp, faixas = db.faixasPdd || FAIXAS_PDD) {
+  const rs = (db.recs || []).filter((r) => (emp === 'todas' || r.emp === emp) && faltaTitulo(r) && r.venc < 0), por = faixas.map(([ate, p]) => ({ ate, p, base: 0, prov: 0 }));
+  rs.forEach((r) => { const f = por.find((x) => -r.venc <= x.ate); f.base += faltaTitulo(r); }); por.forEach((f) => { f.prov = Math.round(f.base * f.p / 100); }); return { faixas: por, base: por.reduce((s, f) => s + f.base, 0), total: por.reduce((s, f) => s + f.prov, 0) };
+}
+export function registrarPdd(db, emp, comp = compAtual(), quem, papel) { exige(db, papel, 'criar'); exigeAberto(db); const p = pdd(db, emp); (db.pddReg ||= {})[`${comp}:${emp}`] = { c: p.total, em: new Date().toISOString(), quem }; registra(db, quem, `registrou a PDD de ${nomeComp(comp)}: ${reais(p.total)}`, { ref: `pdd:${emp}:${comp}`, depois: reais(p.total) }); return p.total; }
+/** Pagamentos que parecem lançados duas vezes: mesmo fornecedor e valor com até 5 dias entre os vencimentos, ou o mesmo boleto/nota. */
+export function duplicados(db, emp) {
+  const ps = db.pags.filter((p) => (emp === 'todas' || p.emp === emp) && !['cancelado', 'rejeitado'].includes(p.st) && !p.emprestimo && !p.recorrente), out = [], ok = db.dupOk || {};
+  for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) { const a = ps[i], b = ps[j], k = [a.id, b.id].sort().join('|'); if (ok[k] || a.emp !== b.emp) continue; const mesmoDoc = (a.boleto && a.boleto === b.boleto) || (a.nfe && a.nfe === b.nfe); if (mesmoDoc || (norm(a.forn) === norm(b.forn) && a.c === b.c && Math.abs(a.venc - b.venc) <= 5 && !(a.grupo && a.grupo === b.grupo))) out.push({ k, a, b, motivo: mesmoDoc ? 'mesmo boleto ou nota' : 'mesmo fornecedor e valor' }); }
+  return out;
+}
+export function naoDuplicado(db, k, quem) { (db.dupOk ||= {})[k] = true; registra(db, quem, 'marcou dois pagamentos como não duplicados', { ref: `dup:${k}` }); }
+/** Contratos, fianças, seguros e certidões com data de fim: vencido, vence em até o aviso (dias) ou em dia. */
+export function vigencias(db, emp) { return (db.vigencias || []).filter((v) => emp === 'todas' || v.emp === emp).map((v) => ({ ...v, st: v.fim < 0 ? 'vencido' : v.fim <= (v.aviso ?? 30) ? 'renovar' : 'em dia' })).sort((a, b) => a.fim - b.fim); }
+export function renovarVigencia(db, id, meses, quem) { const v = (db.vigencias || []).find((x) => x.id === id); if (!v) throw new Error('Item não encontrado.'); const n = Number(meses); if (!Number.isInteger(n) || n < 1 || n > 60) throw new Error('Renove de 1 a 60 meses.'); const d = dataDe(Math.max(v.fim, 0)); d.setMonth(d.getMonth() + n); const antes = v.fim; v.fim = diaDe(hojeISO(d)); registra(db, quem, `renovou ${v.nome} por ${n} meses`, { ref: `vig:${id}`, antes: isoDe(antes), depois: isoDe(v.fim) }); }
+/** Contas abaixo do saldo mínimo definido (db.minimos[conta], centavos). */
+export const abaixoDoMinimo = (db, emp) => (db.contas || []).filter((c) => (emp === 'todas' || c.emp === emp) && c.tipo !== 'cartao' && db.minimos?.[c.id] > 0).map((c) => ({ ...c, saldo: saldoConta(db, c.id), min: db.minimos[c.id] })).filter((c) => c.saldo < c.min);
+// Análises: intercompany, adiar pagamentos para manter o mínimo, antecipar com desconto, investimento, curva ABC e atraso por cliente.
+/** Títulos entre empresas do grupo: o que A tem a receber de B deve bater com o que B tem a pagar para A. */
+export function intercompany(db, emps) {
+  const nomeK = (n) => emps.find((e) => norm(e.nome) === norm(n))?.k, out = [];
+  emps.forEach((a) => emps.forEach((b) => { if (a.k === b.k) return; const rec = (db.recs || []).filter((r) => r.emp === a.k && r.st !== 'cancelado' && nomeK(r.cliente) === b.k).reduce((s, r) => s + faltaTitulo(r), 0), pag = db.pags.filter((p) => p.emp === b.k && !['cancelado', 'rejeitado'].includes(p.st) && nomeK(p.forn) === a.k).reduce((s, p) => s + faltaTitulo(p), 0); if (rec || pag) out.push({ credora: a.k, devedora: b.k, aReceber: rec, aPagar: pag, dif: rec - pag }); }));
+  return out;
+}
+const CRITICOS = ['Folha e encargos', 'Impostos e taxas', 'Despesas financeiras'];
+// Ao adiar para d2, os saldos de d2 em diante não mudam (o pagamento continua descontado) e os de antes só melhoram.
+/** Dias em que o saldo da empresa fica abaixo do mínimo e quais pagamentos (não críticos) adiar, maiores primeiro, para o primeiro dia em que cabem. */
+export function sugerirAdiamentos(db, emp, minimo, dias = 30) {
+  if (emp === 'todas') throw new Error('Escolha uma empresa.'); const caixa = (db.contas || []).filter((c) => c.emp === emp && c.tipo !== 'cartao').reduce((s, c) => s + saldoConta(db, c.id), 0);
+  const ent = (d) => (db.recs || []).filter((r) => r.emp === emp && r.st !== 'cancelado' && Math.max(0, r.venc) === d).reduce((s, r) => s + faltaTitulo(r), 0), venc = {}, ps = db.pags.filter((p) => p.emp === emp && ['pendente', 'aprovado', 'remessa'].includes(p.st) && faltaTitulo(p));
+  ps.forEach((p) => { venc[p.id] = Math.max(0, p.venc); }); const saldos = () => { let s = caixa; return Array.from({ length: dias + 1 }, (_, d) => { s += ent(d) - ps.filter((p) => venc[p.id] === d).reduce((t, p) => t + faltaTitulo(p), 0); return s; }); };
+  const sug = [], S0 = saldos(); let S = S0;
+  for (let d = 0; d <= dias; d++) { if (S[d] >= minimo) continue; const cand = ps.filter((p) => venc[p.id] === d && p.st !== 'remessa' && !p.imposto && !p.emprestimo && !CRITICOS.includes(p.cat)).sort((a, b) => faltaTitulo(b) - faltaTitulo(a));
+    for (const p of cand) { if (S[d] >= minimo) break; const para = Array.from({ length: dias - d }, (_, i) => d + 1 + i).find((d2) => S.slice(d2).every((s) => s >= minimo)); if (para === undefined) continue; venc[p.id] = para; sug.push({ p, de: d, para }); S = saldos(); } }
+  return { sugestoes: sug, menorAntes: Math.min(...S0), menorDepois: Math.min(...S), caixa };
+}
+export function adiarPagamento(db, id, para, quem, papel) {
+  exige(db, papel, 'criar'); exigeAberto(db); const p = titulo(db, 'pag', id); if (!['pendente', 'aprovado'].includes(p.st)) throw new Error('Só dá para adiar pagamento pendente ou aprovado (fora da remessa).'); if (!Number.isInteger(para) || para <= p.venc) throw new Error('A nova data precisa ser depois do vencimento atual.');
+  const antes = p.venc; p.venc = para; hist(p, quem, `adiou de ${isoDe(antes)} para ${isoDe(para)}`); registra(db, quem, `adiou o pagamento a ${p.forn}`, { ref: `pag:${id}`, antes: isoDe(antes), depois: isoDe(para) });
+}
+/** Pagar antes com desconto: a taxa mensal equivalente do desconto comparada com o que o dinheiro renderia parado. */
+export function valeAntecipar({ c, desc, dias, rende }) {
+  if (!Number.isInteger(c) || c <= 0) throw new Error('Digite o valor do título.'); if (!(desc > 0 && desc < 50)) throw new Error('Desconto entre 0 e 50%.'); if (!Number.isInteger(dias) || dias < 1 || dias > 360) throw new Error('Dias antecipados de 1 a 360.'); if (!(rende >= 0 && rende < 20)) throw new Error('Rendimento ao mês entre 0 e 20%.');
+  const taxa = ((1 / (1 - desc / 100)) ** (30 / dias) - 1) * 100, ganho = Math.round(c * desc / 100), rendeu = Math.round(c * (1 - desc / 100) * ((1 + rende / 100) ** (dias / 30) - 1)); return { taxa, ganho, rendeu, vale: ganho > rendeu, diferenca: ganho - rendeu };
+}
+/** Investimento: VPL pela taxa mínima, TIR (bisseção) e payback simples e descontado, em meses. fluxos[0] é o investimento (negativo). */
+export function investimento(fluxos, tma) {
+  if (!Array.isArray(fluxos) || fluxos.length < 2 || !(fluxos[0] < 0) || fluxos.some((f) => !Number.isFinite(f))) throw new Error('Informe o investimento e as entradas.'); if (!(tma >= 0 && tma < 50)) throw new Error('Taxa mínima entre 0 e 50% ao mês.');
+  const vpl = (t) => fluxos.reduce((s, f, i) => s + f / (1 + t) ** i, 0), V = vpl(tma / 100); let tir = null;
+  if (vpl(0) > 0 && vpl(10) < 0) { let lo = 0, hi = 10; for (let k = 0; k < 200; k++) { const m = (lo + hi) / 2; if (vpl(m) > 0) lo = m; else hi = m; } tir = (lo + hi) / 2 * 100; }
+  const pb = (desc) => { let s = 0; for (let i = 0; i < fluxos.length; i++) { const f = desc ? fluxos[i] / (1 + tma / 100) ** i : fluxos[i]; if (s < 0 && s + f >= 0) return i - 1 + -s / f; s += f; } return null; };
+  return { vpl: Math.round(V), tir, payback: pb(false), paybackDesc: pb(true) };
+}
+/** Curva ABC das despesas por fornecedor (últimos 90 dias e o que já está lançado para os próximos 30): A até 80% do gasto acumulado, B até 95%, C o resto. */
+export function curvaABC(db, emp, dias = 90, futuro = 30) {
+  const o = {}; db.pags.filter((p) => (emp === 'todas' || p.emp === emp) && !['cancelado', 'rejeitado'].includes(p.st) && !p.emprestimo && !p.distribuicao && p.venc >= -dias && p.venc <= futuro).forEach((p) => { const k = norm(p.forn); (o[k] ||= { forn: p.forn, c: 0, n: 0 }).c += p.c; o[k].n++; });
+  const l = Object.values(o).sort((a, b) => b.c - a.c), tot = l.reduce((s, x) => s + x.c, 0); let ac = 0; return { total: tot, lista: l.map((x) => { const antes = ac; ac += x.c; return { ...x, pct: tot ? x.c / tot : 0, acum: tot ? ac / tot : 0, classe: !tot || antes / tot < 0.8 ? 'A' : antes / tot < 0.95 ? 'B' : 'C' }; }) };
+}
+/** Atraso médio de cada cliente nos recebimentos (pesado pelo valor) e a data provável dos títulos em aberto. */
+export function atrasoClientes(db, emp) {
+  const o = {}; (db.recs || []).filter((r) => (emp === 'todas' || r.emp === emp) && r.st !== 'cancelado').forEach((r) => { const x = (o[norm(r.cliente)] ||= { cliente: r.cliente, peso: 0, soma: 0, n: 0, aberto: 0, abertos: [] }); (r.baixas || []).forEach((b) => { x.peso += b.c; x.soma += b.c * Math.max(0, b.dia - r.venc); x.n++; }); if (faltaTitulo(r)) { x.aberto += faltaTitulo(r); x.abertos.push(r); } });
+  return Object.values(o).map((x) => { const media = x.peso ? Math.round(x.soma / x.peso) : null; return { ...x, media, provavel: x.abertos.map((r) => ({ id: r.id, venc: r.venc, prevista: Math.max(0, r.venc + (media || 0)) })) }; }).sort((a, b) => (b.media ?? -1) - (a.media ?? -1));
+}
+/** Lote contábil do mês (regime de caixa): débito e crédito de cada baixa, pagamento e recebimento, para o contador importar. */
+export function loteContabil(db, emp, comp = compAtual()) {
+  const banco = (id) => (db.contas || []).find((c) => c.id === id)?.nome || 'Caixa', l = [], ok = (x) => emp === 'todas' || x.emp === emp;
+  db.pags.filter(ok).forEach((p) => (p.baixas || []).filter((b) => compDoDia(b.dia) === comp).forEach((b) => { const deb = p.emprestimo ? 'Empréstimos e financiamentos' : p.distribuicao ? 'Lucros a distribuir' : p.cat || 'Fornecedores'; if (p.emprestimo && p.juros) { const j = Math.round(b.c * p.juros / p.c); l.push([b.dia, 'Despesas financeiras', banco(b.conta), j, `Juros ${p.forn} · ${p.desc}`]); l.push([b.dia, deb, banco(b.conta), b.total - j, `Amortização ${p.forn} · ${p.desc}`]); } else l.push([b.dia, deb, banco(b.conta), b.total, `${p.forn} · ${p.desc}`]); }));
+  (db.recs || []).filter(ok).forEach((r) => (r.baixas || []).filter((b) => compDoDia(b.dia) === comp).forEach((b) => l.push([b.dia, banco(b.conta), r.cat || 'Clientes', b.total, `${r.cliente} · ${r.desc}`])));
+  return l.sort((a, b) => a[0] - b[0]).map(([dia, deb, cred, c, hist2]) => ({ data: isoDe(dia), deb, cred, c, hist: hist2 }));
 }
