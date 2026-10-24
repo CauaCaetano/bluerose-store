@@ -146,3 +146,11 @@ tr:last-child td { border-bottom: 0; }
 .chave { min-width: 0; padding: 5px 8px; font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 1150px) { .chaves { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 1151px) and (max-width: 1400px) { .chave { font-size: .72rem; padding: 5px 6px; gap: 5px; } .chave i { width: 20px; } .chave[aria-current="page"] i::after { left: 8px; } }
+
+/* funções de 10/2026 (2ª leva) */
+.hub { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.hub-i { position: relative; text-align: left; display: grid; gap: 4px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--nevoa); background: var(--papel, #fff); cursor: pointer; font: inherit; color: inherit; transition: border-color .15s, transform .15s; }
+.hub-i:hover { border-color: var(--aco-escuro); transform: translateY(-1px); } .hub-i small { color: var(--tx-3); } .hub-i .n-al { position: absolute; top: 10px; right: 10px; background: #b5545c; color: #fff; border-radius: 6px; padding: 0 7px; font: 600 .74rem var(--mono); line-height: 1.6; }
+.mapa-q { display: grid; gap: 3px; align-items: center; } .mapa-q i { font-style: normal; text-align: center; font: 600 .72rem var(--mono); padding: 8px 0; border-radius: 4px; background: rgb(169 162 197 / calc(var(--v) * 100%)); color: #1f1b2b; }
+.tarefa-o { display: flex; gap: 8px; align-items: center; padding: 6px 0; font-size: .9rem; } .tarefa-o input { width: 18px; height: 18px; }
+.peq { width: 110px; text-align: right; min-height: 32px; border: 1px solid var(--nevoa); border-radius: 6px; padding: 0 8px; font: inherit; }
