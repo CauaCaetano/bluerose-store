@@ -22,7 +22,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* topo */
 .topo { position: sticky; top: 0; z-index: 20; display: grid; grid-template-columns: auto 1fr auto; gap: 10px 18px; align-items: center; padding: 10px clamp(14px, 3vw, 32px); background: rgb(243 240 229 / .92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--linha); }
 .marca { display: flex; align-items: center; gap: 10px; }
-.marca img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; }
+.marca img { width: 46px; height: 46px; border-radius: 0; object-fit: contain; flex: none; }
 .marca-sem-logo { width: 10px; height: 38px; border-radius: 6px; background: linear-gradient(var(--royal), var(--salvia)); }
 .marca b { display: block; font: 600 20px/1 var(--tit); color: var(--marinho); letter-spacing: .01em; }
 .marca b em { font-style: normal; color: var(--royal); }
@@ -374,3 +374,6 @@ main { padding: clamp(16px, 2.4vw, 28px); max-width: 1500px; margin: 0; }
 /* conta: painel do dono dentro das Configurações */
 .painel-conta { display: grid; gap: 12px; }
 .painel-conta .acoes .bt { min-width: 0; }
+.marca img { border-radius: 12px; }
+/* celular estreito: a logo já diz VetNature; o espaço fica para o nome da clínica */
+@media (max-width: 440px) { .marca b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .marca small { font-size: 12.5px; color: var(--texto); font-weight: 500; max-width: 40vw; } }
