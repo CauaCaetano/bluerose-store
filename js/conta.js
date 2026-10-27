@@ -3,7 +3,7 @@
  * Navegar não exige login. Comprar, alugar e começar o teste grátis exigem:
  * BR_CONTA.exigirLogin() abre a janela de entrar/criar conta e devolve a sessão.
  * BR_CONTA.pagar(produto, { teste, emailMp }) cria o pagamento no servidor e leva ao Mercado Pago.
- * BR_CONTA.teste(app, nome, mensal) abre a janela do teste grátis de 7 dias (sem cartão desde 17/10/2026).
+ * BR_CONTA.teste(app, nome, mensal) abre a janela do teste grátis de 7 dias (com cartão no Mercado Pago desde 26/10/2026; nada é cobrado nos 7 dias).
  */
 // não abre dentro de página de outro site (clickjacking)
 if (window.top !== window.self) { try { if (window.top.location.origin !== location.origin) throw 0; } catch (e) { window.top.location.href = location.href; } }
@@ -150,7 +150,7 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       .then(function (j) { location.href = j.link; return j; });
   }
 
-  // ------------------------------------------------ teste grátis de 7 dias, sem cartão
+  // ------------------------------------------------ teste grátis de 7 dias, com o cartão cadastrado no Mercado Pago
   // sistemas que a pessoa já pode abrir (teste valendo, assinatura, compra ou cortesia): lido uma vez por página
   var acessoCache = null;
   function hojeBR() { return new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10); }
@@ -178,17 +178,17 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       var oferta = n > 0 ? '<li class="conta-oferta"><b>Oferta de lançamento:</b> ' + reais(metade) + '/mês nos 3 primeiros meses, depois ' + reais(mensal) + '/mês. Restam ' + n + (n === 1 ? ' vaga' : ' vagas') + '.</li>' : '';
       var d = janela('<span class="eyebrow">' + (direto ? 'Assinatura' : 'Teste grátis de 7 dias') + '</span><h3 id="conta-t">' + esc(nome) + '</h3>' + (direto ?
         '<ul class="conta-lista">' + oferta + '<li>Assinatura de <b>' + reais(n > 0 ? metade : mensal) + '/mês</b> no cartão, pelo Mercado Pago. Sem fidelidade.</li><li>O sistema fica liberado assim que o pagamento é confirmado.</li><li>Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>.</li></ul>' :
-        '<ul class="conta-lista"><li>Use com os dados da sua empresa por <b>7 dias sem pagar nada</b>.</li><li><b>Não pedimos cartão.</b> Nada é cobrado sozinho no fim do teste.</li><li>Se gostar, assine por ' + reais(mensal) + '/mês para continuar, com tudo o que você cadastrou.</li>' + oferta + '</ul>') +
-        '<form class="conta-form" novalidate>' + (direto ? '<label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="' + esc(s.user.email) + '" required><small>A assinatura fica na conta do Mercado Pago com este e-mail.</small></label>' : '') +
-        '<label class="conta-aceite"><input type="checkbox" name="ok" required> <span>Tenho 18 anos ou mais. Li e aceito os <a href="' + raiz + 'termos.html" target="_blank" rel="noopener">Termos de Serviço</a>' + (direto ? ' e a cobrança mensal' : '') + '.</span></label>' +
+        '<ul class="conta-lista"><li>Use com os dados da sua empresa por <b>7 dias sem pagar nada</b>.</li><li>Para começar, <b>cadastre o cartão no Mercado Pago</b>. Nada é cobrado nos 7 dias.</li><li>Se não cancelar, a assinatura de ' + reais(mensal) + '/mês começa no 8º dia, com tudo o que você cadastrou. Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>.</li>' + oferta + '</ul>') +
+        '<form class="conta-form" novalidate>' + (true ? '<label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="' + esc(s.user.email) + '" required><small>' + (direto ? 'A assinatura fica na conta do Mercado Pago com este e-mail.' : 'O cartão do teste fica na conta do Mercado Pago com este e-mail.') + '</small></label>' : '') +
+        '<label class="conta-aceite"><input type="checkbox" name="ok" required> <span>Tenho 18 anos ou mais. Li e aceito os <a href="' + raiz + 'termos.html" target="_blank" rel="noopener">Termos de Serviço</a>' + (direto ? ' e a cobrança mensal' : ' e a cobrança mensal depois dos 7 dias, se eu não cancelar') + '.</span></label>' +
         '<p class="conta-erro" role="alert"></p><button class="btn btn-primary" type="submit">' + (direto ? 'Assinar agora' : 'Começar o teste grátis') + '</button>' +
         (direto ? '' : '<button type="button" class="conta-link conta-direto" data-direto>Prefiro assinar agora</button>') + '</form>');
       var f = d.querySelector('form'), erro = d.querySelector('.conta-erro'), bt = f.querySelector('button');
       f.onsubmit = function (e) {
         e.preventDefault(); if (!f.reportValidity()) return;
-        bt.disabled = true; bt.textContent = direto ? 'Abrindo o Mercado Pago…' : 'Liberando o sistema…'; erro.textContent = '';
+        bt.disabled = true; bt.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
         (direto ? assinarDireto(app, f.mp.value.trim())
-          : chamar({ acao: 'iniciar', produto: 'a-sis-' + app, teste: true, sem_cartao: true }).then(function () { acessoCache = null; location.href = raiz + 'app/' + app + '/'; })
+          : chamar({ acao: 'iniciar', produto: 'a-sis-' + app, teste: true, email_mp: f.mp.value.trim() }).then(function (j) { location.href = j.link; })
         ).catch(function (x) {
           bt.disabled = false; bt.textContent = direto ? 'Assinar agora' : 'Começar o teste grátis';
           if (x.dados && x.dados.sem_teste) {

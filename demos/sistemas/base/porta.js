@@ -65,7 +65,7 @@ function telaPlano({ email, venceu, semTeste, motivo }) {
   return new Promise(() => {
     const opcoes = [['', 'Assinatura mensal', V.mensal, 'equipe sem limite, histórico e até 10 empresas'], ['-anual', 'Assinatura anual', anual(V.mensal), '12 meses com 20% a menos']];
     const f = tela(`<h1>${venceu ? 'O acesso venceu' : `Comece a usar o ${esc(V.nome)}`}</h1>
-      <p class="p-sub">${venceu ? 'Seus dados estão guardados. Assine para voltar a usar de onde parou.' : 'Teste 7 dias grátis com os dados da sua empresa. Não pedimos cartão e nada é cobrado sozinho no fim do teste.'}</p>
+      <p class="p-sub">${venceu ? 'Seus dados estão guardados. Assine para voltar a usar de onde parou.' : 'Teste 7 dias grátis com os dados da sua empresa. Cadastre o cartão no Mercado Pago: nada é cobrado nos 7 dias e, se não cancelar, a assinatura do plano escolhido começa no 8º dia.'}</p>
       ${motivo ? `<p class="p-aviso">${esc(motivo)}</p>` : ''}
       ${/(completo|avancado)$/.test(V.id) ? `<p class="p-sub"><b>Brinde:</b> assinando, você ganha o ${esc(V.nomeCategoria || 'sistema')} Essencial no celular, grátis enquanto a assinatura estiver ativa.</p>` : ''}
       ${venceu || semTeste ? '' : `<button class="p-bt" data-teste>Começar os 7 dias grátis</button><p class="p-ou">ou assine agora</p>`}
@@ -77,8 +77,9 @@ function telaPlano({ email, venceu, semTeste, motivo }) {
     f.querySelector('[data-sair]').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.reload(); };
     const form = f.querySelector('form'), erro = f.querySelector('.p-erro');
     f.querySelector('[data-teste]')?.addEventListener('click', async (e) => {
-      const bt = e.currentTarget; bt.disabled = true; bt.textContent = 'Liberando…'; erro.textContent = '';
-      try { await pagamentos({ acao: 'iniciar', produto: `a-sis-${V.id}`, teste: true, sem_cartao: true }); location.reload(); }
+      if (!form.reportValidity()) return;   // o teste também pede o e-mail do Mercado Pago e o aceite
+      const bt = e.currentTarget; bt.disabled = true; bt.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
+      try { const j = await pagamentos({ acao: 'iniciar', produto: `a-sis-${V.id}${form.plano.value}`, teste: true, email_mp: form.mp.value.trim() }); location.href = j.link; }
       catch (x) { bt.disabled = false; bt.textContent = 'Começar os 7 dias grátis'; if (x.dados?.sem_teste) { bt.remove(); f.querySelector('.p-ou')?.remove(); erro.textContent = `${x.message} Escolha um plano abaixo.`; } else erro.textContent = x.message; }
     });
     form.onsubmit = async (e) => {
