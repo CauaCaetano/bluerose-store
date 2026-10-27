@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VetNature · veterinary clinic software (demo)</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="Veterinary clinic software: schedule, patient records with photos, vaccines with text reminders, hospital, grooming, lab results, inventory, checkout and online booking.">
+<meta name="theme-color" content="#f3f0e5">
+<link rel="icon" href="../../../img/logos/vetnature-192.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../sistemas/vetnature/estilo.css?v=12">
+<style>
+  /* English labels are longer: icons only on very wide screens; times like "10:30 AM" stay on one line */
+  @media (max-width: 1640px) and (min-width: 701px) { .secoes a svg { display: none; } .secoes a { padding: 7px 7px; } }
+  .vez { grid-template-columns: 70px 1fr auto; } .vez time { white-space: nowrap; font-size: 13px; }
+  .hor { grid-template-columns: 64px minmax(0, 1fr); } .hor time { white-space: nowrap; font-size: 12px; } .hor small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .doses li b { white-space: nowrap; }
+  @media (max-width: 700px) { .vez { grid-template-columns: 62px 1fr; } }
+</style>
+</head>
+<body>
+<div class="faixa-demo"><a href="../../../portfolio.html">Back to portfolio</a><span><b>VetNature</b> demo · sample data stored only in this browser</span><button type="button" data-recomecar>Reset</button></div>
+<header class="topo">
+  <div class="marca"><img src="../../../img/logos/vetnature-simbolo.webp" width="46" height="46" alt=""><div><b>Vet<em>Nature</em></b><small id="clinica"></small></div></div>
+  <nav class="secoes" id="secoes" aria-label="Sections"></nav>
+  <div class="topo-dir"><label class="busca"><span class="sr">Search pet or owner</span><input id="busca" type="search" placeholder="Search pet or owner" autocomplete="off"></label><button type="button" class="bt bt-ia" data-ia><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9z"/></svg>Assistant</button><button type="button" class="bt bt-pri" data-novo-atendimento>+ Appointment</button><button type="button" class="conta-bt" data-conta title="My account and settings">PA</button></div>
+</header>
+<main id="tela" tabindex="-1"></main>
+<div class="janela-fundo" id="janela" hidden><div class="janela" role="dialog" aria-modal="true" aria-labelledby="janela-t"></div></div>
+<aside class="painel-ia" id="painel-ia" hidden aria-label="AI assistant"></aside>
+<div class="avisos" id="avisos" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=2"></script>
+</body>
+</html>
