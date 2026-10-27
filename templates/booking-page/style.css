@@ -1,0 +1,41 @@
+/* Booking page · colors and font come from config.js (CSS variables set by app.js) */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg, #f6f3ea); color: var(--text, #1d2b27); font: 400 16px/1.5 var(--font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.topo { background: var(--primary, #214e45); color: #fff; text-align: center; padding: 32px 20px 64px; }
+.logo { width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 50%; background: rgb(255 255 255 / .16); display: grid; place-items: center; font-weight: 700; font-size: 24px; overflow: hidden; }
+.logo img { width: 100%; height: 100%; object-fit: cover; }
+.topo h1 { margin: 0 0 4px; font-size: clamp(24px, 6vw, 32px); line-height: 1.15; }
+.topo p { margin: 0; opacity: .82; font-size: 15px; }
+
+.caixa { width: min(560px, 100% - 32px); margin: -40px auto 0; background: #fff; border-radius: 18px; box-shadow: 0 1px 2px rgb(0 0 0 / .05), 0 12px 32px -16px rgb(0 0 0 / .25); padding: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.caixa > * { min-width: 0; }
+.passo h2 { margin: 0 0 10px; font-size: 15px; font-weight: 650; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { border: 1px solid #d9d6cc; background: #fff; border-radius: 12px; padding: 10px 12px; cursor: pointer; font-weight: 500; text-align: left; transition: background .15s, border-color .15s; }
+.chips button small { display: block; font-weight: 400; opacity: .7; font-size: 12.5px; }
+.chips button:hover { border-color: var(--primary); }
+.chips button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.chips button:disabled { opacity: .35; cursor: not-allowed; text-decoration: line-through; }
+.dias { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.dias button { flex: none; text-align: center; min-width: 64px; }
+.horas button { min-width: 84px; text-align: center; }
+.campos { display: grid; gap: 12px; }
+.campos label { display: grid; gap: 4px; font-size: 13.5px; font-weight: 500; opacity: .9; }
+.campos input, .campos textarea { width: 100%; padding: 11px 12px; border: 1px solid #d9d6cc; border-radius: 10px; background: #fff; font-size: 16px; }
+.campos textarea { min-height: 80px; resize: vertical; }
+.resumo { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--soft, #dfeae2); }
+.enviar { width: 100%; padding: 14px; border: 0; border-radius: 12px; background: var(--primary); color: #fff; font-weight: 650; font-size: 16px; cursor: pointer; }
+.enviar:hover { filter: brightness(1.08); }
+.enviar:disabled { opacity: .6; cursor: wait; }
+.erro { margin: 0; padding: 10px 12px; border-radius: 10px; background: #fbe4e5; color: #9a2a33; }
+.vazio { margin: 0; opacity: .7; }
+.ok { text-align: center; padding: 18px 4px; }
+.ok .marca { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 10px; display: grid; place-items: center; background: var(--soft); color: var(--primary); font-size: 30px; }
+.ok h2 { margin: 0 0 6px; }
+.ok p { margin: 0 0 6px; }
+.rodape { text-align: center; font-size: 13px; opacity: .65; padding: 18px 16px 36px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
