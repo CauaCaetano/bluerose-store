@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agendar horário · VetNature</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="Peça um horário na clínica veterinária pelo celular: escolha o dia e o horário livre.">
+<meta name="theme-color" content="#214e45">
+<link rel="icon" href="../../../img/logos/vexorin-192.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css?v=9">
+<style>
+  body { background: var(--creme); }
+  .pag { max-width: 560px; margin: 0 auto; padding: 0 16px 48px; }
+  .pag-topo { background: var(--royal); color: #fff; padding: 28px 20px 52px; text-align: center; }
+  .pag-topo small { color: var(--salvia); font-size: 12.5px; letter-spacing: .02em; }
+  .pag-topo h1 { margin: 6px 0 4px; font: 600 26px/1.15 var(--tit); }
+  .pag-topo p { margin: 0; color: #dfeae2; font-size: 13.5px; }
+  .cartao-ag { grid-template-columns: minmax(0, 1fr); background: var(--papel); border-radius: var(--raio); box-shadow: var(--sombra); padding: 20px; margin-top: -32px; display: grid; gap: 18px; }
+  .cartao-ag > * { min-width: 0; }
+  .passo h2 { margin: 0 0 10px; font: 600 15px var(--sans); color: var(--marinho); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips button { border: 1px solid var(--linha-2); background: var(--papel); border-radius: 12px; padding: 9px 12px; cursor: pointer; font-weight: 500; min-width: 64px; transition: background .15s, border-color .15s; }
+  .chips button small { display: block; font-weight: 400; color: var(--texto-2); font-size: 11.5px; text-transform: capitalize; }
+  .chips button[aria-pressed="true"] { background: var(--royal); border-color: var(--royal); color: #fff; }
+  .chips button[aria-pressed="true"] small { color: var(--salvia); }
+  .chips button:disabled { opacity: .4; cursor: not-allowed; text-decoration: line-through; }
+  .dias button { flex: none; }
+  .dias { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+  .resumo-ag { background: var(--royal-claro); border-radius: var(--raio-p); padding: 12px 14px; color: var(--marinho); }
+  .enviar { width: 100%; padding: 13px; font-size: 15px; }
+  .ok { text-align: center; padding: 28px 8px; }
+  .ok h2 { font: 600 22px var(--tit); color: var(--marinho); margin: 10px 0 6px; }
+  .ok .selo-grande { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto; background: var(--ok-claro); color: var(--ok); font-size: 32px; }
+  .rodape-ag { text-align: center; color: var(--texto-3); font-size: 12px; margin-top: 18px; }
+</style>
+</head>
+<body>
+<div class="faixa-demo"><a href="index.html">Voltar ao sistema</a><span>Esta é a página que o <b>tutor</b> abre pelo link da clínica</span></div>
+<header class="pag-topo"><small>Agendamento online</small><h1 id="nome-clinica">Clínica veterinária</h1><p id="info-clinica"></p></header>
+<main class="pag" id="pag"></main>
+<script type="module" src="agendar.js?v=3"></script>
+</body>
+</html>

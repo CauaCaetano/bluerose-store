@@ -19,5 +19,8 @@
       };
     });
   });
+  // linha Vexorin: sistemas fora das 3 versões, com o mesmo login, teste, assinatura, equipe e nuvem
+  out.vetnature = { id: 'vetnature', categoria: 'vetnature', versao: '', nome: 'VetNature', nomeCategoria: 'VetNature', nomeVersao: '', pasta: 'vetnature', entrada: 'index.html',
+    chave: 'vetnature-demo-v2', mensal: 129, exemplo: 1, pagina: 'index.html#produtos', logo: 'img/logos/vexorin-192.png' };
   window.VELTRIA_VERSOES = out;
 })();

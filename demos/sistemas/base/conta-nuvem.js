@@ -258,7 +258,7 @@
   // Cada pessoa: papel (membro ou administrador, só o dono escolhe) e permissões em nexo_membros.permissoes:
   // { cargo, so_leitura, telas: ['#rota', ...] }. "Só ver" é barrado também no servidor (nexo_privado.pode_escrever);
   // as telas que a pessoa não vê somem do menu (aplicarPermissoes, ao abrir o sistema).
-  var CARGOS = { agenda: ['Recepção', 'Profissional', 'Gerente', 'Caixa'], crm: ['Vendedor', 'Pré-vendas', 'Gerente comercial', 'Financeiro'], farmacia: ['Balconista', 'Farmacêutico', 'Caixa', 'Gerente'],
+  var CARGOS = { vetnature: ['Veterinário(a)', 'Recepção', 'Banho e tosa', 'Gerente'], agenda: ['Recepção', 'Profissional', 'Gerente', 'Caixa'], crm: ['Vendedor', 'Pré-vendas', 'Gerente comercial', 'Financeiro'], farmacia: ['Balconista', 'Farmacêutico', 'Caixa', 'Gerente'],
     financeiro: ['Financeiro', 'Contador', 'Gerente', 'Auxiliar'], gestao: ['Caixa', 'Estoquista', 'Vendedor', 'Gerente'], juridico: ['Advogado', 'Estagiário', 'Secretária', 'Financeiro'],
     obras: ['Engenheiro', 'Mestre de obras', 'Compras', 'Financeiro'], oficina: ['Mecânico', 'Recepção', 'Peças', 'Gerente'] }[app.replace(/(essencial|completo|avancado)$/, '')] || ['Gerente', 'Atendimento', 'Financeiro'];
   function telasDoMenu() {
@@ -432,6 +432,7 @@
     }).catch(function () { aviso('Não foi possível abrir os dados agora.'); });
   }
 
+  window.veltriaCliente = cliente; // apps que leem tabelas próprias (VetNature: pedidos do link de agendamento)
   window.veltriaAbrirDados = dadosEditor; // o botão + das telas (camada.js) abre por aqui na conta
 
   // ---------------------------------------------------------------- começar do zero
@@ -496,7 +497,7 @@
   // empresa vazia: contas com zero dividido por zero não mostram "NaN%" nem "Infinity" na tela
   // shortcut: corrige só o texto exibido; se aparecer em cálculo que grava dado, corrigir no app.js daquela versão
   // e o nome da empresa de exemplo (escrito direto em algumas telas e nas mensagens de WhatsApp) vira o da conta
-  var EXEMPLO = { agendaessencial: 'Studio Lia Nails', agendacompleto: 'Salão Ateliê Bela Vista', agendaavancado: 'Maison Íris', crmcompleto: 'Solaris Energia Solar', crmavancado: 'Nuvra Software B2B',
+  var EXEMPLO = { vetnature: 'Clínica Veterinária Bem-Estar Animal', agendaessencial: 'Studio Lia Nails', agendacompleto: 'Salão Ateliê Bela Vista', agendaavancado: 'Maison Íris', crmcompleto: 'Solaris Energia Solar', crmavancado: 'Nuvra Software B2B',
     farmaciaessencial: 'Drogaria Santa Clara', farmaciacompleto: 'Farmácia Vida Plena', farmaciaavancado: 'Rede FarmaJá', financeirocompleto: 'Climatiza BH Refrigeração|Climatiza BH',
     gestaoessencial: 'Mercado Bom Preço', gestaocompleto: 'Casa Aurora Utilidades|Casa Aurora', gestaoavancado: 'Empório Vila Nobre', juridicocompleto: 'Ferraz & Albuquerque Advogados',
     juridicoavancado: 'Monteiro Bastos Sociedade de Advogados', obrasessencial: 'Reforma Certa', obrascompleto: 'Construtora Alicerce', obrasavancado: 'Grupo Monólito Engenharia',

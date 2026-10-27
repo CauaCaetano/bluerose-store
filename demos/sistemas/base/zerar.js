@@ -63,6 +63,7 @@
     return x;
   }
   window.veltriaZerar = function (dados, app, empresa) {
+    if (window.veltriaZerarProprio) return window.veltriaZerarProprio(dados, empresa); // o app sabe o que é estrutura (VetNature: serviços, pacotes, regras)
     var manter = MANTER[app] || [], o = {};
     for (var k in dados) {
       // a assinatura de exemplo e as preferências de tela ficam como estão

@@ -1391,6 +1391,11 @@ section.caminhos { padding: 8px 0 clamp(40px, 5vw, 64px); }
 .prod-filtro button:hover { color: var(--ink); border-color: var(--accent); }
 .prod-filtro button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .prod-filtro button[aria-pressed="true"] { color: #fff; background: var(--accent-solid); border-color: var(--accent-solid); }
+.prod-filtro.prod-sub { margin-top: 12px; gap: 6px; }
+.prod-filtro.prod-sub[hidden] { display: none; }
+.prod-filtro.prod-sub button { font-size: 13px; padding: 6px 12px; border-radius: 999px; gap: 6px; }
+.prod-filtro.prod-sub button img { width: 16px; height: 16px; }
+.prod-filtro.prod-sub button[aria-pressed="true"] { color: var(--ink); background: transparent; border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .prod-cat-info { display: flex; align-items: center; gap: 14px; margin: 18px 0 0; padding: 14px 18px; border: 1px solid var(--line-2); border-radius: var(--r-lg); color: var(--ink-2); font-size: 14.5px; background: linear-gradient(110deg, rgba(61, 107, 240, .08), transparent 60%); }
 .prod-cat-info img { width: 40px; height: 40px; flex: none; object-fit: contain; }
 .prod-cat-info b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 2px; }

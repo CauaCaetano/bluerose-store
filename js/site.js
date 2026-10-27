@@ -551,6 +551,21 @@
     infos.forEach(function (p) { p.hidden = p.getAttribute('data-info') !== cat; });
     var trilho = document.querySelector('.prod-cat'); if (trilho) { trilho.classList.toggle('so-destaque', cat === 'destaque'); trilho.scrollLeft = 0; trilho.dispatchEvent(new Event('scroll')); }
   });
+  // dentro da aba Veltria: fileira de ramos (Todos, Jurídico, Oficina...)
+  var sub = document.querySelector('.prod-filtro.prod-sub');
+  if (sub) {
+    var mostra = function (cat) {
+      [].forEach.call(sub.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-psub') === cat ? 'true' : 'false'); });
+      cards.forEach(function (c) { c.hidden = (c.getAttribute('data-cat') || '').split(' ').indexOf(cat) < 0; if (!c.hidden) c.classList.add('visto'); });
+      infos.forEach(function (p) { p.hidden = p.getAttribute('data-info') !== cat; });
+      var trilho = document.querySelector('.prod-cat'); if (trilho) { trilho.scrollLeft = 0; trilho.dispatchEvent(new Event('scroll')); }
+    };
+    filtro.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-pcat]'); if (!b) return;
+      var v = b.getAttribute('data-pcat') === 'veltria'; sub.hidden = !v; if (v) mostra('veltria');
+    });
+    sub.addEventListener('click', function (e) { var b = e.target.closest('button[data-psub]'); if (b) mostra(b.getAttribute('data-psub')); });
+  }
   var mais = document.querySelector('[data-ir-cat]');
   if (mais) mais.addEventListener('click', function (e) { e.preventDefault(); var b = filtro.querySelector('[data-pcat="' + mais.getAttribute('data-ir-cat') + '"]'); if (b) { b.click(); filtro.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
 })();
