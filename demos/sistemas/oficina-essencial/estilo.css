@@ -112,3 +112,11 @@ input[type="range"] { width: 100%; accent-color: var(--cobre); }
 .aviso { background: var(--petroleo-3); color: var(--papel); border-left: 4px solid var(--cobre); padding: 10px 14px; border-radius: 10px; font-weight: 600; }
 .vazio { text-align: center; color: var(--tx-3); padding: 14px; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+
+/* ver na web (base/ver-web.js): tela larga no computador */
+@media (min-width: 900px) {
+  html.web main { max-width: 1180px; display: grid; grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr); column-gap: 28px; align-items: start; }
+  html.web main > * { grid-column: 1 / -1; }
+  html.web .patio { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-column: 1; }
+  html.web main > .patio ~ .rua { grid-column: 2; grid-row: 3; margin-top: 0; }
+}

@@ -127,7 +127,7 @@ const TELAS = {
     return `<a class="voltar" href="#orcar">← Orçamentos</a><h1>Orçamento nº ${r.num}</h1>
       <div data-orc="${r.id}">
       <label class="campo">O que é<input data-orc-campo="titulo" value="${html(r.titulo)}"></label>
-      <label class="campo">Cliente<select data-orc-campo="cli">${db.clientes.map((c) => `<option value="${c.id}" ${c.id === r.cli ? 'selected' : ''}>${html(c.nome)}</option>`).join('')}</select></label>
+      <label class="campo">Cliente<select data-orc-campo="cli" data-livre="clientes">${db.clientes.map((c) => `<option value="${c.id}" ${c.id === r.cli ? 'selected' : ''}>${html(c.nome)}</option>`).join('')}</select></label>
       <h2>Material</h2><p class="mini">Descrição · quantidade · unidade · preço de cada</p>${linhas}
       <button type="button" class="btn peq" data-acao="mais-item">+ Item</button>
       <div class="dupla" style="margin-top:14px"><label class="campo">Mão de obra (R$)<input data-orc-campo="mao" inputmode="decimal" value="${String(r.mao).replace('.', ',')}"></label><label class="campo">Desconto (R$)<input data-orc-campo="desconto" inputmode="decimal" value="${String(r.desconto).replace('.', ',')}"></label></div>
@@ -299,7 +299,7 @@ const ACOES = {
       ${prox ? `<p style="margin-top:12px"><span class="btn barro largo">Pagar "${html(prox.nome)}" pelo PIX · ${real(prox.valor)}</span></p>` : ''}
       ${o.diario[0] ? `<p class="mini" style="margin-top:12px">Última novidade (${quando(o.diario[0].dia)}): ${html(o.diario[0].texto)}</p>` : ''}</div><p style="margin-top:12px"><button type="button" class="btn largo" data-fechar>Fechar</button></p>`); },
   entregar: (d) => { const o = obraPor(d.o); o.status = 'concluida'; salvar(); location.hash = '#obras'; aviso(`${o.nome} entregue. Peça uma indicação para esse cliente!`); },
-  'nova-obra': () => formulario('Nova obra', `<label class="campo">Nome da obra<input name="n" required placeholder="Ex.: Reforma da área de serviço"></label><label class="campo">Cliente<select name="c">${db.clientes.map((c) => `<option value="${c.id}">${html(c.nome)}</option>`).join('')}</select></label><label class="campo">Entrega em quantos dias<input name="e" inputmode="numeric" value="30"></label><p class="mini">Depois você põe as etapas e o valor de cada uma.</p>`, 'Criar obra', (f) => { const id = novoId(); db.obras.unshift({ id, nome: f.get('n'), cli: f.get('c'), inicio: 0, entrega: Number(f.get('e')) || 30, status: 'andamento', etapas: [], gastos: [], diario: [] }); setTimeout(() => (location.hash = `#obra/${id}`), 0); }),
+  'nova-obra': () => formulario('Nova obra', `<label class="campo">Nome da obra<input name="n" required placeholder="Ex.: Reforma da área de serviço"></label><label class="campo">Cliente<select name="c" data-livre="clientes">${db.clientes.map((c) => `<option value="${c.id}">${html(c.nome)}</option>`).join('')}</select></label><label class="campo">Entrega em quantos dias<input name="e" inputmode="numeric" value="30"></label><p class="mini">Depois você põe as etapas e o valor de cada uma.</p>`, 'Criar obra', (f) => { const id = novoId(); db.obras.unshift({ id, nome: f.get('n'), cli: f.get('c'), inicio: 0, entrega: Number(f.get('e')) || 30, status: 'andamento', etapas: [], gastos: [], diario: [] }); setTimeout(() => (location.hash = `#obra/${id}`), 0); }),
   'novo-orc': () => { const r = { id: novoId(), num: db.proxOrc++, cli: db.clientes[0].id, titulo: 'Novo orçamento', criado: 0, validade: 15, status: 'rascunho', mao: 0, desconto: 0, itens: [{ desc: '', qtd: 1, un: 'm²', preco: 0 }] }; db.orcamentos.unshift(r); salvar(); location.hash = `#orcamento/${r.id}`; },
   'mais-item': () => { const r = db.orcamentos.find((x) => x.id === $('[data-orc]').dataset.orc); r.itens.push({ desc: '', qtd: 1, un: 'un', preco: 0 }); salvar(); mostrar(); },
   'tira-item': (d) => { const r = db.orcamentos.find((x) => x.id === $('[data-orc]').dataset.orc); r.itens.splice(Number(d.k), 1); salvar(); mostrar(); },
@@ -378,3 +378,19 @@ $('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE)
 if (window !== window.top) document.documentElement.classList.add('no-celular');
 if ('serviceWorker' in navigator && window === window.top) navigator.serviceWorker.register('sw.js').catch(() => {});
 mostrar();
+
+/* veltria: campos livres */
+// Nome escrito à mão num campo de lista (js/campos-livres.js): vira cadastro novo nesta lista do db,
+// no mesmo formato dos que já existem. O formulário grava como sempre.
+window.veltriaNovoCadastro = (tipo, nome) => {
+  const lista = db && db[tipo];
+  if (!Array.isArray(lista)) return '';
+  const ja = lista.find((x) => String(x.nome || '').trim().toLowerCase() === nome.trim().toLowerCase());
+  if (ja) return ja.id;
+  const mod = lista[0] || {}, n = {};
+  Object.keys(mod).forEach((k) => { const v = mod[k]; n[k] = Array.isArray(v) ? [] : typeof v === 'number' ? 0 : typeof v === 'boolean' ? false : v && typeof v === 'object' ? {} : ''; });
+  n.id = typeof mod.id === 'number' ? Math.max(0, ...lista.map((x) => Number(x.id) || 0)) + 1 : `n${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+  n.nome = nome.trim();
+  lista.push(n);
+  return n.id;
+};

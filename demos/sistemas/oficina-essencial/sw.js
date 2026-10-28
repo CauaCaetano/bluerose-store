@@ -1,5 +1,5 @@
 // Veltria Oficina Essencial · abre sem internet (galpão sem sinal): as telas ficam guardadas no celular.
-const CACHE = 'oficina-essencial-v4';
+const CACHE = 'oficina-essencial-v5';
 const ARQUIVOS = ['app.html', 'app.js?v=4', 'estilo.css?v=1', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((l) => Promise.all(l.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });

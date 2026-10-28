@@ -67,7 +67,6 @@ function telaPlano({ email, venceu, semTeste, motivo }) {
     const f = tela(`<h1>${venceu ? 'O acesso venceu' : `Comece a usar o ${esc(V.nome)}`}</h1>
       <p class="p-sub">${venceu ? 'Seus dados estão guardados. Assine para voltar a usar de onde parou.' : 'Teste 7 dias grátis com os dados da sua empresa. Cadastre o cartão no Mercado Pago: nada é cobrado nos 7 dias e, se não cancelar, a assinatura do plano escolhido começa no 8º dia.'}</p>
       ${motivo ? `<p class="p-aviso">${esc(motivo)}</p>` : ''}
-      ${/(completo|avancado)$/.test(V.id) ? `<p class="p-sub"><b>Brinde:</b> assinando, você ganha o ${esc(V.nomeCategoria || 'sistema')} Essencial no celular, grátis enquanto a assinatura estiver ativa.</p>` : ''}
       ${venceu || semTeste ? '' : `<button class="p-bt" data-teste>Começar os 7 dias grátis</button><p class="p-ou">ou assine agora</p>`}
       <form novalidate><fieldset class="p-planos"><legend>Plano</legend>${opcoes.map(([suf, nome, valor, det], i) => `<label><input type="radio" name="plano" value="${suf}" ${i ? '' : 'checked'}><span><b>${nome}</b><em>${reais(valor)}${suf.includes('anual') ? '/ano' : '/mês'}</em><small>${det}</small></span></label>`).join('')}</fieldset>
       <label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="${esc(email)}" required><small>A assinatura fica nessa conta do Mercado Pago, no cartão. Sem fidelidade: cancele quando quiser em Minha conta.</small></label>

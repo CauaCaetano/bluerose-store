@@ -1,5 +1,5 @@
 // Veltria Gestão Essencial · o caixa funciona sem internet: as telas ficam guardadas no aparelho.
-const CACHE = 'gestao-essencial-v6';
+const CACHE = 'gestao-essencial-v7';
 const ARQUIVOS = ['app.html', 'app.js?v=10', 'estilo.css?v=10', 'veltria.png', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((l) => Promise.all(l.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });

@@ -378,7 +378,7 @@ Object.assign(A, {
   'agendar-rede': (d) => { const a = db.agendaRede.find((x) => x.id === d.id); a.st = 'marcado'; a.un = d.k; (db.carga[d.k] ||= [0, 0, 0, 0, 0])[a.dia] = ((db.carga[d.k] || [])[a.dia] || 0) + a.horas; registra(`marcou ${a.cliente} em ${UNIDADES[d.k]} (${diaTxt(a.dia)})`); guarda(); desenha(); aviso(`${a.cliente} marcado em ${UNIDADES[d.k]}. O cliente recebe a confirmação.`); },
   'transf-todas': () => { const l = sugTransf(); l.forEach((x) => { x.p.un[x.de][0] -= x.q; x.p.un[x.para][0] += x.q; }); registra(`mandou ${l.length} transferência(s) de peças entre unidades`); guarda(); desenha(); aviso(`${l.length} romaneio(s) para o motorista.`); },
   'aplicar-tabela': () => { if (!confirm('Igualar o preço de todas as unidades à tabela da rede?')) return; db.tabelaRede.forEach((s) => Object.keys(s.un).forEach((k) => { s.un[k] = s.preco; })); registra('aplicou a tabela de preços em todas as unidades'); guarda(); desenha(); aviso('Tabela aplicada.'); },
-  treino: () => form('Novo certificado', `<label class="campo">Mecânico<select name="m">${db.mec.map((m) => `<option value="${m.id}">${e(m.nome)} · ${e(UNIDADES[m.un] || '')}</option>`).join('')}</select></label><label class="campo">Curso<input name="c" required></label><label class="campo">Vence em<input name="f" type="date" required></label>`, 'Salvar', (f) => { const [a, m, dd] = String(f.get('f')).split('-').map(Number), h0 = new Date(); h0.setHours(0, 0, 0, 0); const fim = Math.round((new Date(a, m - 1, dd) - h0) / 864e5); if (!Number.isFinite(fim)) return 'Escolha a data.'; db.treinos.push({ id: `t${Date.now().toString(36)}`, mec: f.get('m'), curso: String(f.get('c')).trim(), fim }); registra(`cadastrou o certificado ${f.get('c')}`); }),
+  treino: () => form('Novo certificado', `<label class="campo">Mecânico<select name="m" data-livre="mec">${db.mec.map((m) => `<option value="${m.id}">${e(m.nome)} · ${e(UNIDADES[m.un] || '')}</option>`).join('')}</select></label><label class="campo">Curso<input name="c" required></label><label class="campo">Vence em<input name="f" type="date" required></label>`, 'Salvar', (f) => { const [a, m, dd] = String(f.get('f')).split('-').map(Number), h0 = new Date(); h0.setHours(0, 0, 0, 0); const fim = Math.round((new Date(a, m - 1, dd) - h0) / 864e5); if (!Number.isFinite(fim)) return 'Escolha a data.'; db.treinos.push({ id: `t${Date.now().toString(36)}`, mec: f.get('m'), curso: String(f.get('c')).trim(), fim }); registra(`cadastrou o certificado ${f.get('c')}`); }),
   'renovou-treino': (d) => { const t = db.treinos.find((x) => x.id === d.id); t.fim = Math.max(0, t.fim) + 365; registra(`renovou ${t.curso}`); guarda(); desenha(); },
   'responder-g': (d) => { const g = db.google.find((x) => x.id === d.id), mod = g.nota >= 4 ? `Obrigado pela avaliação, ${g.autor.split(' ')[0]}! Ficamos felizes em cuidar do seu carro. Até a próxima revisão.` : `${g.autor.split(' ')[0]}, sentimos muito pela experiência. O gerente da unidade vai te ligar hoje para resolver. Obrigado por avisar.`; form(`Responder ${e(g.autor)}`, `<p class="rot">“${e(g.txt)}”</p><label class="campo">Resposta<textarea name="r" rows="4" required style="padding:8px;border:1px solid var(--nevoa);border-radius:8px;font:inherit">${e(mod)}</textarea></label>`, 'Publicar resposta', (f) => { const r = String(f.get('r')).trim(); if (r.length < 10) return 'Escreva a resposta.'; g.resp = r; registra(`respondeu a avaliação de ${g.autor} (${g.nota}★)`); }); },
   leva: () => form('Coleta ou entrega', `<div class="par"><label class="campo">Cliente<input name="c" required></label><label class="campo">Placa<input name="p" required></label></div><label class="campo">Endereço<input name="e" required></label><div class="par"><label class="campo">O quê<select name="t"><option value="buscar">buscar</option><option value="devolver">devolver</option></select></label><label class="campo">Hora<input name="h" type="number" min="7" max="19" step="0.5" value="10"></label></div><div class="par"><label class="campo">Unidade<select name="u">${opUn(db.un !== 'todas' ? db.un : Object.keys(UNIDADES)[0])}</select></label><label class="campo">Motorista<input name="m" value="Zé Carlos"></label></div>`, 'Salvar', (f) => { db.leva.push({ id: `l${Date.now().toString(36)}`, cliente: String(f.get('c')).trim(), placa: String(f.get('p')).trim().toUpperCase(), end: String(f.get('e')).trim(), tipo: f.get('t'), hora: Number(f.get('h')), un: f.get('u'), mot: String(f.get('m')).trim(), st: 'aberto' }); }),
@@ -417,3 +417,19 @@ document.addEventListener('change', (ev) => {
 });
 q('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE); db = fabrica(); location.hash = '#painel'; q('#saida').hidden = true; desenha(); aviso('Demonstração recomeçada.'); });
 desenha();
+
+/* veltria: campos livres */
+// Nome escrito à mão num campo de lista (js/campos-livres.js): vira cadastro novo nesta lista do db,
+// no mesmo formato dos que já existem. O formulário grava como sempre.
+window.veltriaNovoCadastro = (tipo, nome) => {
+  const lista = db && db[tipo];
+  if (!Array.isArray(lista)) return '';
+  const ja = lista.find((x) => String(x.nome || '').trim().toLowerCase() === nome.trim().toLowerCase());
+  if (ja) return ja.id;
+  const mod = lista[0] || {}, n = {};
+  Object.keys(mod).forEach((k) => { const v = mod[k]; n[k] = Array.isArray(v) ? [] : typeof v === 'number' ? 0 : typeof v === 'boolean' ? false : v && typeof v === 'object' ? {} : ''; });
+  n.id = typeof mod.id === 'number' ? Math.max(0, ...lista.map((x) => Number(x.id) || 0)) + 1 : `n${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+  n.nome = nome.trim();
+  lista.push(n);
+  return n.id;
+};

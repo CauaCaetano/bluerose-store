@@ -696,7 +696,7 @@ function montar(app, cfg) {
         if (pergunta.length < 3) { t.focus(); return false; }
         out.style.display = ''; out.textContent = 'Pensando…';
         if (!app.sessao?.funcao) { setTimeout(() => { out.textContent = exemplo(pergunta); }, 1200); return false; }
-        try { const x = await app.sessao.funcao('nexo-ia', { pergunta, sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes === 0 ? (x.propria ? 'Limite de segurança de hoje atingido.' : 'Esta foi a última pergunta grátis de hoje. Amanhã você tem mais 20, ou conecte a sua conta do Gemini ou do ChatGPT aqui, em Usar a minha conta.') : `Restam ${x.restantes} de ${x.propria ? 300 : 20} perguntas${x.propria ? '' : ' grátis'} hoje.`}` : ''}`; const rr = f.querySelector('[data-ia-rest]'); if (rr && typeof x.restantes === 'number') rr.textContent = x.restantes; }
+        try { const x = await app.sessao.funcao('nexo-ia', { pergunta: (window.__brIdioma?.comIdioma || ((t) => t))(pergunta), sistema: cfg.nome, contexto, hoje: hoje() }); out.textContent = `${x.resposta}${typeof x.restantes === 'number' ? `\n\n${x.restantes === 0 ? (x.propria ? 'Limite de segurança de hoje atingido.' : 'Esta foi a última pergunta grátis de hoje. Amanhã você tem mais 20, ou conecte a sua conta do Gemini ou do ChatGPT aqui, em Usar a minha conta.') : `Restam ${x.restantes} de ${x.propria ? 300 : 20} perguntas${x.propria ? '' : ' grátis'} hoje.`}` : ''}`; const rr = f.querySelector('[data-ia-rest]'); if (rr && typeof x.restantes === 'number') rr.textContent = x.restantes; }
         catch (e) { out.textContent = e.message || 'Não foi possível responder agora.'; }
         return false;
       };

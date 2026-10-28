@@ -46,6 +46,35 @@
     'a-automacao': ['R$ 199 por mês', 'Sem entrada · sem fidelidade, cancele quando quiser'],
   };
 
+  // PayPal: quem está em outro idioma (euro ou dólar) paga pelo PayPal; em português do Brasil, Mercado Pago
+  var NUMEROS = { presenca: { total: 690 }, completo: { total: 1490 }, automacao: { total: 890 }, combo: { total: 2290 },
+    'a-presenca': { mensal: 89 }, 'a-completo': { mensal: 149 }, 'a-automacao': { mensal: 199 } };
+  function fora() { var i = window.__brIdioma; return i && i.moeda && i.moeda !== 'BRL' ? i : null; }
+  function dinheiro(i, n) {
+    var lc = i.atual === 'en' || i.atual === 'es' ? 'en-US' : i.atual;
+    return n.toLocaleString(lc, { style: 'currency', currency: i.moeda, minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  }
+  function precoPaypal(b, plano) {
+    var n = NUMEROS[plano] || { mensal: Number(b.getAttribute('data-mensal')) || 0, total: Number(b.getAttribute('data-total')) || 0 };
+    var i = fora();
+    if (n.mensal) return { valor: i.converter(n.mensal), assinatura: true, anual: /-anual$/.test(plano) };
+    if (n.total) return { valor: i.converter(n.total / 2), total: i.converter(n.total), assinatura: false };
+    return null;
+  }
+  function irParaPaypal(plano, nome, p, email) {
+    var i = fora(), conta = (window.BR_PAYPAL || {}).comerciante;
+    if (!conta || !p) throw new Error('O pagamento em ' + i.moeda + ' pelo PayPal abre em breve. Fale com a equipe e combinamos por e-mail.');
+    var LC = { 'pt-PT': 'pt_PT', es: 'es_ES', en: 'en_US', it: 'it_IT', fr: 'fr_FR' };
+    var q = { business: conta, item_name: nome, currency_code: i.moeda, no_shipping: '1', charset: 'utf-8', lc: LC[i.atual] || 'en_US',
+      custom: plano + '|' + (email || ''), 'return': location.origin + location.pathname + '?paypal=ok', cancel_return: location.href };
+    if (p.assinatura) {
+      q.cmd = '_xclick-subscriptions'; q.a3 = p.valor.toFixed(2); q.p3 = '1'; q.t3 = p.anual ? 'Y' : 'M'; q.src = '1'; q.sra = '1';
+      // sistemas da Veltria: os 7 dias grátis prometidos na página
+      if (/^a-sis-/.test(plano)) { q.a1 = '0'; q.p1 = '7'; q.t1 = 'D'; }
+    } else { q.cmd = '_xclick'; q.amount = p.valor.toFixed(2); }
+    location.href = 'https://www.paypal.com/cgi-bin/webscr?' + new URLSearchParams(q).toString();
+  }
+
   // Veltria: cada sistema traz o próprio preço no botão (data-total / data-mensal).
   function reais(n) { return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
   function valoresSistema(b) {
@@ -71,6 +100,13 @@
   pagar.addEventListener('click', function (e) {
     e.preventDefault();
     if (pagar.getAttribute('aria-disabled') === 'true') { aceite.focus(); return; }
+    if (fora()) {
+      try {
+        var s0 = window.BR_CONTA && window.BR_CONTA.sessao();
+        irParaPaypal(pagar.dataset.plano, $('ct-titulo').textContent, JSON.parse(pagar.dataset.paypal || 'null'), s0 && s0.user.email);
+      } catch (x) { erroCt.textContent = x.message; }
+      return;
+    }
     if (!window.BR_CONTA) { location.href = pagar.dataset.link; return; }
     var txt = pagar.textContent; pagar.textContent = 'Abrindo o Mercado Pago…'; pagar.setAttribute('aria-disabled', 'true'); erroCt.textContent = '';
     var emailMp = (document.getElementById('ct-mp') || {}).value || '';
@@ -96,7 +132,7 @@
     b.addEventListener('click', function () {
       var plano = b.getAttribute('data-contratar');
       var link = links[plano];
-      if ((!link && !/^a-sis-/.test(plano)) || typeof dlg.showModal !== 'function') { location.hash = 'contato'; return; }
+      if ((!link && !/^a-sis-/.test(plano) && !(fora() && NUMEROS[plano])) || typeof dlg.showModal !== 'function') { location.hash = 'contato'; return; }
       // assinar exige conta: entra primeiro, depois mostra o resumo
       if (window.BR_CONTA && !window.BR_CONTA.sessao()) { window.BR_CONTA.exigirLogin('Para contratar, entre ou crie a sua conta. É grátis e leva menos de um minuto.').then(function () { b.click(); }); return; }
       var assinatura = plano.indexOf('a-') === 0;
@@ -114,11 +150,22 @@
           : passos.dataset.original;
         $('ct-meios').textContent = assinatura ? '(cartão de crédito, cobrado todo mês)' : '(PIX, cartão em até 6x ou boleto)';
       }
+      var pp = fora() && precoPaypal(b, plano);
+      if (pp) {
+        var i = fora();
+        $('ct-valor').innerHTML = pp.assinatura
+          ? '<b>' + dinheiro(i, pp.valor) + (pp.anual ? ' por ano' : ' por mês') + '</b><small>Sem entrada · sem fidelidade, cancele quando quiser</small>'
+          : '<b>Entrada de ' + dinheiro(i, pp.valor) + ' agora</b><small>Total ' + dinheiro(i, pp.total) + ' · o saldo só na entrega</small>';
+        if (passos) passos.innerHTML = '<li>Você paga com segurança no <b>PayPal</b>, com cartão ou saldo PayPal, em ' + i.moeda + '.</li>' +
+          (/^a-sis-/.test(plano) ? '<li>Os 7 dias grátis começam agora; a primeira cobrança vem depois deles.</li><li>Em até 1 dia útil liberamos o sistema no e-mail da sua conta.</li>'
+            : '<li>Em até 1 dia útil chega um e-mail para levantarmos o que você precisa.</li><li>Você vê a prévia antes da entrega e pede os ajustes incluídos.</li>');
+      }
+      pagar.dataset.paypal = pp ? JSON.stringify(pp) : '';
       aceite.checked = false;
       pagar.dataset.link = link;
       pagar.dataset.plano = plano;
       erroCt.textContent = '';
-      mpCampo.hidden = !assinatura;
+      mpCampo.hidden = !assinatura || !!pp;
       var s = window.BR_CONTA && window.BR_CONTA.sessao(); var mp = document.getElementById('ct-mp'); if (mp && !mp.value && s) mp.value = s.user.email;
       estado();
       dlg.showModal();

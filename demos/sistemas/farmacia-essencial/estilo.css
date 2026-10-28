@@ -99,3 +99,10 @@ h2 { font: 700 .9rem var(--sans); margin: 20px 0 8px; color: var(--sal-2); }
 .aviso { background: var(--sal-3); color: var(--alg); padding: 12px 16px; border-radius: 14px; font-size: .9rem; border-left: 4px solid var(--menta); }
 video.camera { width: 100%; border-radius: 14px; background: #000; margin-bottom: 10px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ver na web (base/ver-web.js): tela larga no computador */
+@media (min-width: 900px) {
+  html.web main { max-width: 1180px; }
+  html.web .painel { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+  html.web .painel > .grande { grid-column: span 2; grid-row: span 2; }
+}

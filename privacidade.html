@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<script src="js/idioma.js?v=15"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co https://api.pwnedpasswords.com; frame-src 'self'; worker-src 'self'; child-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -27,13 +28,13 @@
 <link rel="stylesheet" href="css/site.css?v=57">
 <link rel="stylesheet" href="css/luxo.css?v=21">
 <link rel="stylesheet" href="css/creme.css?v=1"><link rel="stylesheet" href="css/areia.css?v=2">
-<script src="js/luxo.js?v=2" defer></script>
+<script src="js/luxo.js?v=4" defer></script>
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=9" defer></script>
 <script src="js/site.js?v=23" defer></script>
 <script src="js/conta.js?v=10" defer></script>
 <link rel="stylesheet" href="css/assistente.css?v=7">
-<script src="js/assistente.js?v=20" defer></script>
+<script src="js/assistente.js?v=22" defer></script>
 <script src="js/cookies.js?v=2" defer></script>
 </head>
 <body>
@@ -62,7 +63,7 @@
     <div class="wrap legal-wrap">
       <span class="eyebrow">Política de Privacidade</span>
       <h1 class="sec-title">Seus dados, sem letra miúda.</h1>
-      <p class="legal-data">Versão em vigor: 22 de outubro de 2026</p>
+      <p class="legal-data">Versão em vigor: 27 de outubro de 2026</p>
       <p class="sec-lede">O que coletamos, por que coletamos, com quem compartilhamos e como você exerce seus direitos pela LGPD.</p>
       <div class="legal-resumo"><h2>Resumo em 30 segundos</h2><ul>
         <li>Guardamos o que você escreve no formulário, para responder e fazer seu orçamento, e os dados da sua conta quando você testa ou contrata um sistema Veltria.</li>
@@ -70,7 +71,7 @@
         <li>Nome, cores e logo da prévia ao vivo ficam só no seu navegador.</li>
         <li>Não vendemos dados. Você pode pedir acesso, correção ou exclusão quando quiser.</li>
       </ul></div>
-      <nav class="legal-indice" aria-label="Índice"><ol><li><a href="#controlador">1. Quem cuida dos seus dados</a></li><li><a href="#coleta">2. Quais dados coletamos</a></li><li><a href="#finalidade">3. Para que usamos e com qual base legal</a></li><li><a href="#compartilhamento">4. Com quem compartilhamos</a></li><li><a href="#internacional">5. Transferência internacional</a></li><li><a href="#retencao">6. Por quanto tempo guardamos</a></li><li><a href="#direitos">7. Seus direitos</a></li><li><a href="#seguranca">8. Segurança</a></li><li><a href="#cookies">9. Cookies</a></li><li><a href="#menores">10. Público</a></li><li><a href="#mudancas">11. Mudanças nesta política</a></li></ol></nav>
+      <nav class="legal-indice" aria-label="Índice"><ol><li><a href="#controlador">1. Quem cuida dos seus dados</a></li><li><a href="#coleta">2. Quais dados coletamos</a></li><li><a href="#finalidade">3. Para que usamos e com qual base legal</a></li><li><a href="#compartilhamento">4. Com quem compartilhamos</a></li><li><a href="#internacional">5. Transferência internacional</a></li><li><a href="#retencao">6. Por quanto tempo guardamos</a></li><li><a href="#direitos">7. Seus direitos</a></li><li><a href="#seguranca">8. Segurança</a></li><li><a href="#cookies">9. Cookies</a></li><li><a href="#menores">10. Público</a></li><li><a href="#europa">10.1 União Europeia (RGPD)</a></li><li><a href="#mudancas">11. Mudanças nesta política</a></li></ol></nav>
       <div class="legal-texto"><section id="controlador"><h2>1. Quem cuida dos seus dados</h2>
 <p>A BLUE ROSE é a <b>controladora</b> dos dados pessoais tratados por este site (bluerose-store.com), nos termos da Lei Geral de Proteção de Dados (Lei 13.709/2018, LGPD). O <b>encarregado</b> pelo tratamento de dados pessoais (art. 41 da LGPD) é o próprio responsável pela BLUE ROSE, <b>Cauã Caetano</b>. Para falar com ele sobre os seus dados, use o <a href="./#contato">formulário de contato</a> começando a mensagem com “Privacidade”, ou responda a qualquer mensagem nossa.</p></section><section id="coleta"><h2>2. Quais dados coletamos</h2>
 <ul><li><b>Formulário de contato:</b> nome, nome do negócio, WhatsApp (opcional), interesses, mensagem, página e idioma de onde você escreveu, código do link que te trouxe (quando houver) e o registro de que você concordou com esta política e os Termos (com data e versão).</li>
@@ -82,6 +83,7 @@
 <li><b>Equipe e links para clientes nos sistemas Veltria:</b> o e-mail das pessoas que você convida, o cargo, o papel (membro ou administrador) e as permissões de cada uma; e as respostas que os seus clientes enviam pelos links do sistema (por exemplo, aprovar um orçamento ou confirmar presença), que ficam guardadas na sua conta. Nesses casos você é o controlador e nós somos operadores (veja os Termos).</li>
 <li><b>Registros técnicos de erro:</b> quando algo falha num sistema Veltria, guardamos a mensagem de erro, a página, o navegador e a versão do sistema, ligados à conta, só para corrigir o problema. São apagados em até 90 dias.</li>
 <li><b>E-mails que enviamos:</b> resumo do dia (só quando você liga essa opção) e avisos antes do fim do teste grátis e antes de cada mensalidade.</li>
+<li><b>Pagamento fora do Brasil:</b> quem paga em euro ou dólar paga direto no PayPal. Recebemos do PayPal só a confirmação, o valor, a moeda, o plano, o nome e o e-mail do pagador e o código da transação, para liberar o serviço e cumprir as obrigações fiscais.</li>
 <li><b>Pagamento:</b> o cartão e os dados de cobrança são digitados direto no Mercado Pago. Nós recebemos só a confirmação do pagamento, o valor, o plano, o e-mail do pagador e dois códigos internos do Mercado Pago (o da conta e o do cartão, nunca o número do cartão), usados só para o teste grátis valer uma vez.</li>
 <li><b>Quando viramos clientes:</b> os dados da proposta e do contrato (identificação, contato, dados de cobrança e do seu negócio).</li><li><b>Medição de visitas (só com o seu aceite de estatística):</b> páginas visitadas e cliques importantes, com um identificador aleatório do navegador, idioma e tipo de tela. Sem nome, sem e-mail e sem IP.</li>
 <li><b>Origem da visita (só com o seu aceite de marketing):</b> de onde você chegou ao site (por exemplo, Instagram, Google ou o nome de uma campanha).</li>
@@ -99,13 +101,15 @@
 <p>Não usamos os seus dados para propaganda de terceiros e <b>não vendemos dados</b>.</p></section><section id="compartilhamento"><h2>4. Com quem compartilhamos</h2>
 <ul><li><b>Supabase:</b> login das contas e banco de dados onde ficam os contatos do formulário, a contagem de visitas e os cadastros dos sistemas Veltria, com servidores em São Paulo.</li>
 <li><b>Mercado Pago:</b> processa os pagamentos e assinaturas. Atua como controlador próprio dos dados de pagamento que você informa a ele, conforme a política de privacidade do Mercado Pago.</li>
+<li><b>PayPal:</b> processa os pagamentos em euro e dólar de quem está fora do Brasil. Atua como controlador próprio dos dados que você informa a ele, conforme a política de privacidade do PayPal.</li>
+<li><b>Assistente do site:</b> as perguntas que você escreve no assistente (o personagem no canto da tela) são enviadas ao Google (Gemini) para gerar a resposta, junto com as últimas mensagens da conversa. Não escreva ali dados pessoais, de saúde ou documentos.</li>
 <li><b>GitHub Pages:</b> hospeda este site e registra dados técnicos de acesso (como IP) para segurança, conforme a política do GitHub.</li>
 <li><b>Anthropic (Claude):</b> a mensagem que você escreve no formulário (que pode conter nome, negócio e contato) pode ser usada para ajudar a preparar a resposta e a proposta.</li>
 <li><b>Meta (WhatsApp):</b> quando conversamos com você pelo WhatsApp.</li>
 <li><b>Provedores de conteúdo:</b> imagens dos exemplos (Unsplash) e o Python do Laboratório (jsDelivr) são carregados desses serviços, que recebem dados técnicos da conexão.</li>
 <li><b>Google (Gmail):</b> envia os e-mails de resumo do dia e de aviso de cobrança.</li>
 <li><b>Google (Gemini):</b> quando você faz uma pergunta ao Assistente IA dentro dos sistemas, a pergunta e um resumo dos dados necessários para responder são enviados ao Google. No plano gratuito da API, o Google pode usar esse conteúdo para melhorar os serviços dele; por isso, não escreva na pergunta dados sensíveis (de saúde, documentos ou dados de terceiros) que não sejam necessários. Autoridades, quando a lei exigir.</li></ul></section><section id="internacional"><h2>5. Transferência internacional</h2>
-<p>Alguns desses fornecedores (como GitHub, Anthropic, Meta e Mercado Pago) podem tratar dados fora do Brasil. Nesses casos, a transferência segue o art. 33 da LGPD, com fornecedores que adotam cláusulas contratuais e medidas de segurança compatíveis com a lei.</p></section><section id="retencao"><h2 id="dados-dos-seus-clientes">5.1 Dados dos clientes da sua empresa</h2>
+<p>Alguns desses fornecedores (como GitHub, Anthropic, Google, Meta, Mercado Pago e PayPal) podem tratar dados fora do Brasil. Nesses casos, a transferência segue o art. 33 da LGPD, com fornecedores que adotam cláusulas contratuais e medidas de segurança compatíveis com a lei.</p></section><section id="retencao"><h2 id="dados-dos-seus-clientes">5.1 Dados dos clientes da sua empresa</h2>
 <p>Nos sistemas da Veltria, a sua empresa é a <b>controladora</b> dos dados que cadastra sobre os clientes, pacientes, alunos e funcionários dela, e a BLUE ROSE é a <b>operadora</b>: tratamos esses dados só para o sistema funcionar, seguindo as instruções da sua empresa (art. 39 da LGPD). Pedidos de titulares (por exemplo, um cliente seu que quer ver ou apagar os dados dele) devem ser feitos à sua empresa; se chegarem até nós, encaminhamos a ela.</p>
 <p><b>Dados sensíveis.</b> Alguns ramos lidam com dados sensíveis (art. 11 da LGPD) ou sigilosos: receitas e medicamentos controlados na Farmácia (escrituração exigida pela Anvisa), informações protegidas por sigilo profissional no Jurídico e dados de saúde e estética na Agenda. Esses dados ficam com o mesmo acesso restrito por empresa e por pessoa da equipe, não são usados para nenhum outro fim e não são enviados ao Assistente IA sem que alguém da sua equipe faça uma pergunta sobre eles.</p>
 <p><b>Incidentes.</b> Se acontecer um incidente de segurança que possa afetar esses dados, avisamos a sua empresa em até 2 dias úteis depois de confirmá-lo, com o que aconteceu, quais dados foram afetados e o que foi feito, para que a comunicação à ANPD e aos titulares possa ser feita quando a lei exigir (art. 48).</p>
@@ -119,7 +123,8 @@
 <li><b>Indicações e prêmios:</b> enquanto as contas envolvidas existirem; ao excluir a conta, as indicações dela são apagadas.</li>
 </ul></section><section id="direitos"><h2>7. Seus direitos</h2>
 <p>Você pode pedir a qualquer momento: confirmação de que tratamos seus dados, acesso, correção, anonimização, bloqueio ou eliminação de dados desnecessários, portabilidade, informação sobre com quem compartilhamos, eliminação dos dados tratados com consentimento e revogação do consentimento (art. 18 da LGPD). Para apagar a sua conta dos sistemas Veltria e os dados ligados a ela, use <b>Excluir minha conta</b> em <a href="conta.html#excluir">Minha conta</a> ou no app Veltria: a exclusão é imediata, e só o registro dos pagamentos já feitos fica guardado pelo prazo da lei fiscal. Respondemos em até <b>15 dias</b>. Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).</p></section><section id="seguranca"><h2>8. Segurança</h2>
-<p>O formulário grava os dados num banco protegido em que o público só consegue <b>inserir</b> um pedido novo, sem ler, alterar ou apagar nada. Chaves de acesso privadas nunca ficam no código do site. O acesso interno é restrito a quem cuida do seu atendimento.</p><p><b>Senhas vazadas:</b> ao criar a conta ou trocar a senha, o seu navegador confere se a senha escolhida já apareceu em vazamentos públicos, usando o serviço gratuito <i>Have I Been Pwned</i>. A senha nunca sai do seu aparelho: só os 5 primeiros caracteres de um código gerado a partir dela (SHA-1) são consultados, e a comparação é feita no próprio navegador. Se a senha já vazou, pedimos que escolha outra.</p></section><section id="cookies"><h2>9. Cookies</h2>
+<p>O formulário grava os dados num banco protegido em que o público só consegue <b>inserir</b> um pedido novo, sem ler, alterar ou apagar nada. Chaves de acesso privadas nunca ficam no código do site. O acesso interno é restrito a quem cuida do seu atendimento.</p><p><b>Senhas vazadas:</b> ao criar a conta ou trocar a senha, o seu navegador confere se a senha escolhida já apareceu em vazamentos públicos, usando o serviço gratuito <i>Have I Been Pwned</i>. A senha nunca sai do seu aparelho: só os 5 primeiros caracteres de um código gerado a partir dela (SHA-1) são consultados, e a comparação é feita no próprio navegador. Se a senha já vazou, pedimos que escolha outra.</p>
+<p>Nenhum sistema conectado à internet é totalmente imune a ataques. Por isso, além do que fazemos, contamos com você: use uma senha só para a sua conta, não compartilhe o token de dono, remova da equipe quem saiu da empresa e mantenha o seu aparelho atualizado. Se acontecer um incidente que possa trazer risco a você, avisamos e informamos a ANPD (e, para quem está na União Europeia, a autoridade competente) quando a lei exigir. Os limites da nossa responsabilidade estão no item 13 dos <a href="termos.html#responsabilidade">Termos de Serviço</a>.</p></section><section id="cookies"><h2>9. Cookies</h2>
 <p>Usamos cookies e o armazenamento do navegador em três categorias. Na primeira visita, um aviso curto pede o seu aceite. <b>Enquanto você não clicar em Aceitar, só os cookies necessários são usados</b>, e nenhuma medição é feita. Você pode mudar a escolha quando quiser, inclusive desligando estatística e marketing, pelo link <b>Preferências de cookies</b>, no rodapé de todas as páginas. Se o seu navegador enviar o sinal <i>Global Privacy Control</i>, as opções de estatística e marketing já aparecem desligadas.</p>
 <h3>Necessários (sempre ligados)</h3>
 <p>Fazem o site e os sistemas funcionarem e não dependem de consentimento (art. 7º, V e IX, da LGPD):</p>
@@ -127,7 +132,7 @@
 <li><code>br_consent</code> (cookie, 12 meses): guarda a sua escolha sobre cookies.</li>
 <li><code>br_indica</code> (cookie, 90 dias): o código de indicação do link que você usou, para o programa Indique e ganhe reconhecer quem indicou. Só existe se você chegou por um link de indicação.</li>
 <li><code>nexo-sessao</code>: mantém você conectado à sua conta, quando você entra.</li>
-<li><code>br-lang</code>, <code>br-perso</code> e <code>br-perso-logo</code>: idioma e a prévia ao vivo dos sites de exemplo (nome, cores e logo, que ficam só no seu aparelho).</li>
+<li><code>br-idioma</code>, <code>br-lang</code>, <code>br-perso</code> e <code>br-perso-logo</code>: idioma escolhido no site e nos sistemas e a prévia ao vivo dos sites de exemplo (nome, cores e logo, que ficam só no seu aparelho).</li>
 <li><code>br-origem</code>: o código do link enviado pela nossa equipe, enquanto a aba está aberta.</li>
 <li><code>nexo-volta</code>, <code>nexo-pwa-dispensado</code>, <code>nexo-espaco-&lt;sistema&gt;</code>, <code>nexo-tema</code>, <code>nexo-assinadas</code>, <code>nexo-play</code>, <code>nexo-indicacao-&lt;conta&gt;</code>, <code>br-cookies-&lt;exemplo&gt;</code> e as conversas do assistente do site (<code>br-assist-*</code>, só durante a visita): lembram onde você estava, a empresa aberta, o tema, os avisos já vistos e se a indicação já foi registrada.</li>
 <li>Demonstrações dos sistemas: os dados de exemplo que você altera ficam só no seu navegador, até você clicar em Recomeçar.</li>
@@ -144,7 +149,10 @@
 </ul>
 <p>Não usamos cookies de publicidade de terceiros (como pixel de redes sociais). Se um dia usarmos, eles só serão ligados com o seu aceite, e esta política será atualizada antes.</p>
 <p>Registramos cada escolha feita no aviso (data, versão desta política e categorias aceitas, com o identificador aleatório do navegador) para comprovar o consentimento, como pede a LGPD.</p></section><section id="menores"><h2>10. Público</h2>
-<p>Nossos serviços são voltados a negócios e a maiores de 18 anos. Não coletamos dados de crianças de propósito.</p></section><section id="mudancas"><h2>11. Mudanças nesta política</h2>
+<p>Nossos serviços são voltados a negócios e a maiores de 18 anos. Não coletamos dados de crianças de propósito.</p></section><section id="europa"><h2>10.1 Visitantes e clientes da União Europeia</h2>
+<p>Se você está na União Europeia (por exemplo, em Portugal, na Itália ou na França), o Regulamento Geral sobre a Proteção de Dados (RGPD) também protege os seus dados. As bases legais são as mesmas do item 3: execução de contrato e diligências pré-contratuais (art. 6.º, n.º 1, b), obrigação legal (c), interesse legítimo (f) e consentimento para estatística e marketing (a).</p>
+<p>Os seus dados são tratados no Brasil e pelos fornecedores do item 4. A transferência é feita porque é necessária para responder ao seu pedido e executar o contrato que você pediu (art. 49.º, n.º 1, b, do RGPD) e, quando o fornecedor oferece, com cláusulas contratuais-tipo.</p>
+<p>Você tem os direitos de acesso, retificação, apagamento, limitação, portabilidade, oposição e de retirar o consentimento, pelos mesmos canais do item 7, e pode reclamar à autoridade de proteção de dados do seu país (por exemplo, a CNPD em Portugal, o Garante na Itália ou a CNIL na França).</p></section><section id="mudancas"><h2>11. Mudanças nesta política</h2>
 <p>Esta política pode ser atualizada. A data no topo mostra a versão em vigor. Mudanças importantes são avisadas neste site.</p></section></div>
       <p class="legal-rodape">Veja também os <a href="termos.html">Termos de Serviço</a>.</p>
     </div>

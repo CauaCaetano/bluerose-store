@@ -245,3 +245,4 @@ h2 .ver { margin-left: auto; font-weight: 600; font-size: .86rem; }
 .salvar-fixo .bt:disabled { opacity: 1; background: #b7c4bd; border-color: #b7c4bd; color: #f4f1e8; box-shadow: none; }
 @media (min-width: 1024px) { .nav .fab[hidden] { display: flex; } .teclado { max-width: 520px; margin-inline: auto; } .visor-valor { font-size: 3.4rem; } }
 .qr-pix svg, .qr-pix svg * { stroke: none; } /* o QR do PIX tem desenho próprio: o contorno dos ícones o deixava ilegível */
+

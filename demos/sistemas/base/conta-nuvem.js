@@ -486,7 +486,7 @@
     var d = window.veltriaDados ? window.veltriaDados() : JSON.parse(texto(NS) || '{}'), ver = (window.VELTRIA_VERSOES || {})[app] || {};
     var contagens = {}; Object.keys(d || {}).forEach(function (k) { if (Array.isArray(d[k]) && !FORA.test(k)) contagens[k] = d[k].length; });
     return cliente().then(function (sb) {
-      return sb.functions.invoke('nexo-ia', { body: { pergunta: String(pergunta).slice(0, 600), espaco: info.espaco, sistema: ver.nome || 'Veltria', hoje: new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10), contexto: { contagens: contagens }, resumo: resumo(d) } });
+      return sb.functions.invoke('nexo-ia', { body: { pergunta: (window.__brIdioma && window.__brIdioma.comIdioma ? window.__brIdioma.comIdioma : String)(String(pergunta).slice(0, 600)), espaco: info.espaco, sistema: ver.nome || 'Veltria', hoje: new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10), contexto: { contagens: contagens }, resumo: resumo(d) } });
     }).then(function (r) {
       if (r.error) return r.error.context.json().catch(function () { return {}; }).then(function (j) { return j.erro || 'O assistente não respondeu agora. Tente de novo em instantes.'; });
       var x = r.data || {};

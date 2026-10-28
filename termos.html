@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<script src="js/idioma.js?v=15"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co https://api.pwnedpasswords.com; frame-src 'self'; worker-src 'self'; child-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -27,13 +28,13 @@
 <link rel="stylesheet" href="css/site.css?v=57">
 <link rel="stylesheet" href="css/luxo.css?v=21">
 <link rel="stylesheet" href="css/creme.css?v=1"><link rel="stylesheet" href="css/areia.css?v=2">
-<script src="js/luxo.js?v=2" defer></script>
+<script src="js/luxo.js?v=4" defer></script>
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=9" defer></script>
 <script src="js/site.js?v=23" defer></script>
 <script src="js/conta.js?v=10" defer></script>
 <link rel="stylesheet" href="css/assistente.css?v=7">
-<script src="js/assistente.js?v=20" defer></script>
+<script src="js/assistente.js?v=22" defer></script>
 <script src="js/cookies.js?v=2" defer></script>
 </head>
 <body>
@@ -62,17 +63,18 @@
     <div class="wrap legal-wrap">
       <span class="eyebrow">Termos de Serviço</span>
       <h1 class="sec-title">Como trabalhamos, por escrito.</h1>
-      <p class="legal-data">Versão em vigor: 22 de outubro de 2026</p>
+      <p class="legal-data">Versão em vigor: 27 de outubro de 2026</p>
       <p class="sec-lede">Regras claras para você saber exatamente o que está contratando: preço, prazos, ajustes, responsabilidades e cancelamento.</p>
       <div class="legal-resumo"><h2>Resumo em 30 segundos</h2><ul>
         <li>Preço fechado na proposta escrita. Fora do escopo, só com novo orçamento aprovado.</li>
-        <li>Sistemas (prontos ou sob medida): só por assinatura mensal, sem entrada. Sites e automações: pagamento único (50% para começar e 50% na entrega) ou assinatura sem entrada, mensal no cartão, sem fidelidade.</li>
-        <li>Planos da tabela podem ser contratados direto no site, pelo Mercado Pago. O prazo conta a partir do pagamento e do material completo.</li>
+        <li>Sistemas prontos da Veltria: só por assinatura, sem entrada e sem fidelidade. Sites, automações e sistemas sob medida: preço fechado (50% para começar e 50% na entrega) ou, quando a proposta oferecer, assinatura sem entrada.</li>
+        <li>Planos da tabela podem ser contratados direto no site: no Brasil, pelo Mercado Pago, em reais; em outros países, pelo PayPal, em euro ou dólar. O prazo conta a partir do pagamento e do material completo.</li>
         <li>Você garante que tem direito sobre o conteúdo que envia e segue as regras da sua profissão.</li>
         <li>Automações só falam com quem autorizou. Regras da Meta e de outros fornecedores fogem do nosso controle.</li>
         <li>Garantia contra erros técnicos: 30 dias em sites e automações, 90 dias em sistemas. Não prometemos posição no Google nem vendas.</li>
         <li>Sistemas da Veltria: 7 dias grátis em qualquer versão, uma vez por conta, com o cartão cadastrado no Mercado Pago; se não cancelar, a assinatura começa no 8º dia. Cancelou, usa até o fim do período pago. Pagamento não caiu: 5 dias de tolerância, depois o sistema trava e os dados ficam guardados por 90 dias.</li>
-<li>7 dias de arrependimento com devolução integral, para consumidores.</li>
+<li>7 dias de arrependimento com devolução integral, para consumidores. Depois disso, cancelar um site ou sistema sob medida em andamento tem multa de 20% do valor total.</li>
+<li>Segurança dos dados: cuidamos da nossa parte com medidas técnicas adequadas; não respondemos por vazamentos causados por senhas, aparelhos ou pessoas da sua equipe, nem por falhas de fornecedores fora do nosso controle (veja os itens 13 e 16).</li>
       </ul></div>
       <nav class="legal-indice" aria-label="Índice"><ol><li><a href="#quem">1. Quem somos e o que estes termos cobrem</a></li><li><a href="#orcamento">2. Orçamento e proposta</a></li><li><a href="#pagamento">3. Contratação e pagamento</a></li><li><a href="#prazos">4. Prazos</a></li><li><a href="#ajustes">5. Ajustes e alterações</a></li><li><a href="#cliente">6. O que é responsabilidade sua</a></li><li><a href="#whatsapp">7. Automações de WhatsApp e mensagens</a></li><li><a href="#ia">8. Uso de inteligência artificial</a></li><li><a href="#terceiros">9. Serviços de terceiros</a></li><li><a href="#propriedade">10. Propriedade e licenças</a></li><li><a href="#garantia">11. Garantia e suporte</a></li><li><a href="#resultados">12. Resultados</a></li><li><a href="#responsabilidade">13. Limite de responsabilidade</a></li><li><a href="#cancelamento">14. Cancelamento e reembolso</a></li><li><a href="#sigilo">15. Confidencialidade</a></li><li><a href="#dados">16. Dados pessoais</a></li><li><a href="#demos">17. Exemplos e demonstrações deste site</a></li><li><a href="#indicacao">18. Programa Indique e ganhe</a></li><li><a href="#comunicacao">19. Comunicação e mudanças nestes termos</a></li><li><a href="#foro">20. Lei aplicável e foro</a></li></ol></nav>
       <div class="legal-texto"><section id="quem"><h2>1. Quem somos e o que estes termos cobrem</h2>
@@ -83,8 +85,10 @@
 <li>A proposta vale por <b>15 dias</b>. Depois disso, valores e prazos podem ser revistos.</li>
 <li>Qualquer coisa fora do escopo aprovado (nova página, nova função, novo idioma etc.) é orçada à parte e só é feita depois da sua aprovação por escrito.</li></ul></section><section id="pagamento"><h2>3. Contratação e pagamento</h2>
 <ul><li>A contratação acontece quando você aprova a proposta por escrito (WhatsApp ou e-mail valem) e paga a entrada.</li>
-<li><b>Contratação pelo site:</b> os planos com preço fixo da tabela podem ser contratados direto no site. Ao pagar a entrada (ou a primeira mensalidade) pelo Mercado Pago, você aceita estes termos, e o escopo é o descrito no plano escolhido. Em até 1 dia útil você recebe um e-mail para começarmos pelo levantamento do que você precisa.</li>
+<li><b>Contratação pelo site:</b> os planos com preço fixo da tabela podem ser contratados direto no site. Ao pagar a entrada (ou a primeira mensalidade) pelo Mercado Pago ou pelo PayPal, você aceita estes termos, e o escopo é o descrito no plano escolhido. Em até 1 dia útil você recebe um e-mail para começarmos pelo levantamento do que você precisa.</li>
 <li>Pagamento padrão: <b>50% para começar e 50% na entrega</b>, ou parcelado no cartão nas condições informadas na proposta. No parcelamento pelo Mercado Pago, os juros do parcelamento são cobrados pelo Mercado Pago de quem paga e somados às parcelas; à vista (Pix ou cartão) não há acréscimo. Nas assinaturas mensais e anuais o valor cobrado é sempre o preço do plano, sem parcelamento.</li>
+<li><b>Clientes fora do Brasil:</b> os preços aparecem na moeda do idioma escolhido no site (euro ou dólar) e são cobrados pelo PayPal, na moeda mostrada. Taxas de câmbio, IOF ou tarifas do seu banco ou cartão são de quem paga. Os sistemas da Veltria pagos pelo PayPal são liberados por nós em até 1 dia útil depois da confirmação do pagamento, no e-mail da sua conta. Impostos do seu país sobre a compra, quando houver, são de responsabilidade de quem compra.</li>
+<li><b>Idiomas:</b> o site e os sistemas podem ser vistos em português, espanhol, inglês, italiano e francês. As traduções são automáticas e servem para facilitar a leitura; em caso de dúvida ou diferença, vale o texto em português do Brasil destes termos e da proposta.</li>
 <li>O site é publicado no seu domínio e os acessos são transferidos <b>depois da quitação</b>. Até lá, a prévia fica num endereço de teste.</li>
 <li>Serviços mensais (como o plano de cuidado) podem ser suspensos depois de 30 dias de atraso, com aviso prévio.</li>
 <li id="assinatura"><b>Assinatura mensal (sites e automação):</b> sem entrada. A mensalidade é cobrada todo mês no cartão de crédito pelo Mercado Pago e inclui o projeto, a hospedagem, o domínio e a manutenção descrita no plano. <b>Não há fidelidade</b>: você cancela quando quiser, sem multa, e o serviço continua até o fim do período já pago.</li>
@@ -119,7 +123,7 @@
 <li>As taxas cobradas pela Meta pelas conversas são pagas por você, direto à Meta.</li>
 <li>As regras do que a automação pode dizer e fazer são aprovadas por você antes de ligar. Você é responsável pelo conteúdo enviado aos seus clientes.</li>
 <li>Bloqueios, suspensões de número, mudanças de preço ou de regras da Meta e de outros fornecedores estão fora do nosso controle. Quando acontecerem, ajudamos a resolver dentro do escopo contratado.</li></ul></section><section id="ia"><h2>8. Uso de inteligência artificial</h2>
-<ul><li>Alguns serviços usam IA (por exemplo, o Claude, da Anthropic) para escrever textos, resumir conversas ou responder dúvidas comuns.</li>
+<ul><li>Alguns serviços usam IA (por exemplo, o Claude, da Anthropic, e o Gemini, do Google, no assistente do site e dos sistemas) para escrever textos, resumir conversas ou responder dúvidas comuns.</li>
 <li>Textos gerados por IA podem ter erros. Tudo o que for publicado passa pela sua <b>revisão e aprovação</b>.</li>
 <li>O atendente com IA responde com base nas informações que você fornecer e passa a conversa para uma pessoa quando não souber ou quando o assunto for sensível. Ele <b>não substitui</b> orientação de profissional de saúde, jurídica ou financeira.</li></ul></section><section id="terceiros"><h2>9. Serviços de terceiros</h2>
 <ul><li>Hospedagem, domínio, banco de dados, Google, Meta, meios de pagamento e outras ferramentas seguem os termos dos próprios fornecedores.</li>
@@ -133,10 +137,18 @@
 <li>A garantia não cobre mudanças de conteúdo, alterações feitas por você ou por terceiros, nem mudanças de navegadores, plataformas ou APIs de terceiros depois da entrega.</li>
 <li>Depois desse período, o suporte é feito pelo plano de cuidado (opcional) ou por hora, sempre orçado antes.</li></ul></section><section id="resultados"><h2>12. Resultados</h2>
 <p>Fazemos o trabalho com cuidado para que o seu site e as suas automações ajudem a vender mais, mas <b>não garantimos resultados</b> como posição no Google, número de visitas, contatos ou vendas. Eles dependem de fatores fora do nosso controle, como concorrência, preço, atendimento, investimento em divulgação e mercado.</p></section><section id="responsabilidade"><h2>13. Limite de responsabilidade</h2>
-<p>Na medida permitida pela lei, a nossa responsabilidade total por qualquer reclamação ligada a um serviço fica limitada ao <b>valor pago por esse serviço</b>. Não respondemos por lucros cessantes, perdas indiretas, nem por falhas de serviços de terceiros, uso indevido por você ou por terceiros, ou conteúdo fornecido por você.</p>
+<p>Na medida permitida pela lei, a nossa responsabilidade total por qualquer reclamação ligada a um serviço fica limitada ao <b>valor pago por esse serviço</b> (nas assinaturas, ao que foi pago nos 12 meses anteriores ao fato). Não respondemos por lucros cessantes, perdas indiretas, nem por falhas de serviços de terceiros, uso indevido por você ou por terceiros, ou conteúdo fornecido por você.</p>
+<p><b>Segurança e vazamento de dados.</b> Adotamos medidas técnicas e administrativas razoáveis para proteger os dados (acesso restrito por empresa e por pessoa, senhas cifradas pelo serviço de login, conexão criptografada, cópias de segurança e registro de acessos). Nenhum sistema na internet é totalmente imune a ataques, e por isso não garantimos que incidentes nunca vão acontecer. Respondemos só por danos causados comprovadamente por falha nossa nessas medidas, nos limites do art. 43 e 44 da LGPD e do parágrafo acima. Não respondemos por acesso indevido, perda ou vazamento causados:</p>
+<ul><li>por senhas, tokens de dono, links ou acessos compartilhados, fracos ou vazados pelo seu lado;</li>
+<li>por pessoas da sua equipe ou a quem você deu acesso, inclusive ex-funcionários que você não removeu;</li>
+<li>por vírus, golpes (phishing) ou invasão no seu computador, celular, rede ou e-mail;</li>
+<li>por falhas, ataques ou incidentes nos fornecedores de infraestrutura e pagamento (como Supabase, GitHub, Google, Meta, Mercado Pago e PayPal), que seguem os próprios termos e respondem pelos próprios sistemas;</li>
+<li>por dados que a sua empresa decidiu cadastrar sem base legal ou além do necessário;</li>
+<li>por caso fortuito ou força maior.</li></ul>
+<p>Quando a sua empresa é a controladora dos dados dos clientes dela (veja o item 16), cabe a ela comunicar a ANPD e os titulares e responder perante eles; nós damos as informações que tivermos para isso. Se uma reclamação contra nós for causada por dados ou conteúdo que você cadastrou de forma irregular, você nos ressarce do que tivermos de pagar.</p>
 <p>Nada nestes termos limita direitos que a lei garante e que não podem ser renunciados, como os previstos no Código de Defesa do Consumidor.</p></section><section id="cancelamento"><h2>14. Cancelamento e reembolso</h2>
 <ul><li><b>Direito de arrependimento:</b> se você contratou como consumidor pela internet, pode desistir em até <b>7 dias</b> depois do aceite da proposta, com devolução integral do que pagou (art. 49 do Código de Defesa do Consumidor).</li>
-<li>Depois desse prazo, se você cancelar, o valor correspondente ao trabalho já feito não é devolvido. Se você pagou mais do que o trabalho feito, devolvemos a diferença em até 10 dias úteis.</li>
+<li><b>Multa de cancelamento de projetos:</b> nos sites e nos sistemas sob medida de preço fechado, se você cancelar depois do prazo de arrependimento (ou, para empresas, depois do aceite da proposta) e antes da entrega, é cobrada <b>multa de 20% do valor total do projeto</b>, além do valor do trabalho já feito até o pedido de cancelamento. Esses valores são descontados do que você já pagou; se sobrar, devolvemos a diferença em até 10 dias úteis; se faltar, a diferença é cobrada. A multa não vale para assinaturas, que continuam sem fidelidade.</li>
 <li>Se nós precisarmos cancelar, devolvemos tudo o que corresponder ao trabalho não entregue.</li>
 <li>O plano de cuidado pode ser cancelado a qualquer momento, sem multa, com aviso de 30 dias.</li>
 <li><b>Assinatura:</b> o direito de arrependimento de 7 dias vale a partir do primeiro pagamento. Depois disso, a assinatura pode ser cancelada a qualquer momento, sem multa, e o serviço continua até o fim do período já pago.</li>
@@ -156,7 +168,8 @@
 </ul></section><section id="comunicacao"><h2>19. Comunicação e mudanças nestes termos</h2>
 <ul><li>Falamos com você por WhatsApp e e-mail. Aprovações escritas nesses canais valem para o projeto.</li>
 <li>Estes termos podem mudar. A data no topo indica a versão em vigor. Propostas já aceitas continuam seguindo a versão aceita.</li></ul></section><section id="foro"><h2>20. Lei aplicável e foro</h2>
-<p>Estes termos seguem as leis do Brasil. Antes de qualquer medida judicial, as partes tentam resolver o problema por conversa. Se você for consumidor, vale o foro do seu domicílio. Nos demais casos, fica eleito o foro da comarca do domicílio do prestador.</p></section></div>
+<p>Estes termos seguem as leis do Brasil. Antes de qualquer medida judicial, as partes tentam resolver o problema por conversa. Se você for consumidor, vale o foro do seu domicílio. Nos demais casos, fica eleito o foro da comarca do domicílio do prestador.</p>
+<p>Clientes de outros países contratam um serviço prestado a partir do Brasil, sob as leis brasileiras. Se você for consumidor num país cuja lei garanta direitos que não podem ser afastados por contrato (por exemplo, na União Europeia), esses direitos continuam valendo.</p></section></div>
       <p class="legal-rodape">Dúvidas sobre estes termos? Fale com a gente pelo <a href="./#contato">formulário de contato</a>. Veja também a <a href="privacidade.html">Política de Privacidade</a>.</p>
     </div>
   </section>

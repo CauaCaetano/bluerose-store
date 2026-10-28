@@ -529,6 +529,8 @@
     this.responder(resp, resp.ramos ? this.ramos() : null);
   };
 
+  // em outro idioma do pacote de idiomas, pede à IA a resposta no idioma de quem pergunta
+  function comIdioma(texto) { return window.__brIdioma && window.__brIdioma.comIdioma ? window.__brIdioma.comIdioma(texto) : texto; }
   // pergunta escrita: a IA responde só com as informações do site; se falhar, oferece a equipe
   VirtualAssistant.prototype.perguntarIA = function (texto) {
     var self = this;
@@ -539,7 +541,7 @@
     this.estado('thinking');
     var ctl = window.AbortController ? new AbortController() : null, t = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
     var contato = [{ rotulo: 'Falar com a equipe', href: 'index.html#contato' }];
-    fetch(CFG.ia, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta: texto, historico: hist }), signal: ctl && ctl.signal })
+    fetch(CFG.ia, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta: comIdioma(texto), historico: hist }), signal: ctl && ctl.signal })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, j: j }; }); })
       .then(function (x) {
         if (x.status === 200 && x.j.texto) return { texto: x.j.texto.split(/\n+/).filter(Boolean), links: x.j.links || [], estado: 'explaining' };

@@ -179,7 +179,7 @@ const TELAS = {
   },
   fiado() {
     const l = [...db.clientes].sort((a, b) => b.desde - a.desde);
-    return `<div class="cabeca"><h1 class="frase">Seus clientes devem <span class="mt">${R(fiadoTotal())}</span> no fiado.<small>Os mais antigos estão em cima. Cobre pelo WhatsApp com um toque.</small></h1></div>
+    return `<div class="cabeca"><h1 class="frase">Seus clientes devem <span class="mt">${R(fiadoTotal())}</span> no fiado.<small>Os mais antigos estão em cima. Cobre pelo WhatsApp com um toque.</small></h1><button type="button" class="btn pri" data-novo-fiado>Anotar fiado</button></div>
       <ul class="lista">${l.map((c) => `<li><span><b>${esc(c.nome)}</b><small>${c.deve ? `Deve há ${c.desde} dias` : 'Em dia'}</small></span><span class="v ${c.desde > 15 && c.deve ? 'er' : ''}">${R(c.deve)}</span><span style="display:flex;gap:8px">${c.deve ? `<a class="btn peq" target="_blank" rel="noopener" href="${zap(c.tel, `Olá, ${c.nome.split(' ')[0]}! Tudo bem? Aqui é do Mercado Bom Preço. Ficou ${R(c.deve)} no fiado. Pode acertar pelo Pix quando der? Obrigado!`)}">Cobrar no WhatsApp</a><button type="button" class="btn peq" data-recebi="${c.id}">Recebi</button>` : ''}</span></li>`).join('')}</ul>`;
   },
 };
@@ -237,6 +237,7 @@ pag.addEventListener('click', (e) => {
   else if (d.est) { const p = prod(d.est); p.tem = Math.max(0, p.tem + Number(d.d)); gravar(); redesenhar(); }
   else if ('chegou' in d) chegou();
   else if ('despesa' in d) despesa();
+  else if ('novoFiado' in d) novoFiado();
   else if (d.pagar) { const b = db.pagar.find((x) => x.id === d.pagar); db.pagar = db.pagar.filter((x) => x !== b); db.diario.push({ tipo: 'conta', hora: hora(), texto: `Pagou ${b.nome} (pelo banco)`, valor: b.valor, novo: true }); gravar(); avisar(`Pago: ${b.nome}`); redesenhar(); }
   else if (d.recebi) { const c = db.clientes.find((x) => x.id === d.recebi); db.diario.push({ tipo: 'recebido', hora: hora(), texto: `Recebeu o fiado de ${c.nome}`, valor: c.deve, novo: true }); avisar(`Recebido: ${R(c.deve)} de ${c.nome}`); c.deve = 0; c.desde = 0; gravar(); redesenhar(); }
 });
@@ -468,6 +469,16 @@ function chegou() {
     avisar(`${p.nome}: agora tem ${p.tem}`); redesenhar();
   });
   const sel = document.querySelector('.janela select'), custo = document.querySelector('.janela [name=c]'); const pre = () => (custo.placeholder = `Última vez: ${R(prod(sel.value).custo)}`); sel.addEventListener('change', pre); pre();
+}
+// fiado anotado à mão: cliente da lista ou nome novo
+function novoFiado() {
+  janela(`<h2>Anotar fiado</h2><label class="campo">Cliente<input name="c" required list="fiado-cli" placeholder="Escolha ou escreva o nome"><datalist id="fiado-cli">${db.clientes.map((c) => `<option value="${esc(c.nome)}">`).join('')}</datalist></label><label class="campo">WhatsApp (se for cliente novo)<input name="t" inputmode="tel"></label><label class="campo">Valor<input name="v" type="number" min="0.01" step="0.01" inputmode="decimal" required></label>`, (f) => {
+    const nome = String(f.get('c')).trim(), v = Number(f.get('v'));
+    let c = db.clientes.find((x) => x.nome.toLowerCase() === nome.toLowerCase());
+    if (!c) { c = { id: `c${Date.now().toString(36)}`, nome, tel: String(f.get('t') || '').replace(/\D/g, ''), deve: 0, desde: 0 }; db.clientes.push(c); }
+    if (!c.deve) c.desde = 0;
+    c.deve = Math.round((c.deve + v) * 100) / 100; gravar(); avisar('Fiado anotado'); redesenhar();
+  });
 }
 function despesa() {
   janela(`<h2>Lançar despesa</h2><label class="campo">O que foi<input name="t" required placeholder="Ex.: frete, almoço da equipe"></label><label class="campo">Valor<input name="v" type="number" min="0.01" step="0.01" inputmode="decimal" required></label>`, (f) => {
