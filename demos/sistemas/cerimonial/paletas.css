@@ -1,0 +1,71 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de demos/sistemas/cerimonial/tema.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"][data-produto="cerimonial"] { --acc: #24567e; --acc-tx: #fdfbf8; --ouro: #8e5323; --bg: #f4ede2; --painel: #fbf9f5; --painel-2: #f7f1e8; --lateral: #ebe1d3; --hover: rgba(19, 45, 67, 0.05); --ativo: rgba(19, 45, 67, 0.08); --borda: #e8d3c3; --borda-2: #dbbea7; --tx: #142635; --tx-2: #34556f; --tx-3: #5c7080; --info: #24567e; --info-bg: #f6f0e7; --neutro-bg: #ece2d4; --sombra-1: 0 1px 2px rgba(20, 42, 60, 0.06); --sombra-2: 0 1px 2px rgba(20, 42, 60, 0.05), 0 10px 28px -10px rgba(20, 42, 60, 0.18); }
+html[data-paleta="pt-PT"][data-produto="cerimonial"][data-tema="escuro"] { --acc: #dca67a; --acc-tx: #0a1117; --ouro: #e2b38d; --bg: #0e1820; --painel: #15212b; --painel-2: #172836; --lateral: #0b141b; --borda: #233b4f; --borda-2: #2d4b64; --tx: #f7f3ee; --tx-2: #adc6da; --tx-3: #ad9f8a; --info: #9ecbf0; --info-bg: rgba(158, 203, 240, .14); --neutro-bg: #1b2e3d; }
+html[data-paleta="pt-PT"] [data-produto="cerimonial"] .lat { --tx: #142635; --tx-2: #3d607d; --tx-3: #5f7484; --hover: rgba(20, 42, 60, 0.06); --painel: #fcf9f6; --borda: #eae2d6; --neutro-bg: #efe8df; }
+html[data-paleta="pt-PT"] [data-produto="cerimonial"][data-tema="escuro"] .lat { --tx: #f7f3ee; --tx-2: #adc6da; --tx-3: #ad9f8a; --painel: #17232d; --borda: #233b4f; --neutro-bg: #1b2e3d; }
+html[data-paleta="pt-PT"] [data-produto="cerimonial"] .faixa { background: #1b4567; color: #f8f4ee; }
+html[data-paleta="pt-PT"] [data-produto="cerimonial"] .faixa button { color: #f8f4ee; }
+html[data-paleta="pt-PT"] [data-produto="cerimonial"] .btn.pri { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 6px 16px -8px rgba(27, 69, 103, .7); }
+html[data-paleta="pt-PT"] .sa-hero { background:
+  radial-gradient(90% 120% at 100% 0%, rgba(189, 121, 66, .22), transparent 60%),
+  radial-gradient(70% 90% at 0% 100%, rgba(39, 99, 148, .16), transparent 60%), var(--painel); }
+html[data-paleta="pt-PT"] [data-produto="cerimonial"] .faixa a.cta,
+html[data-paleta="pt-PT"] [data-produto="cerimonial"] .faixa a.cta:hover { background: #d5935e; color: #101c26; }
+html[data-paleta="pt-PT"] [data-produto="cerimonial"] .lat .marca-logo,
+html[data-paleta="pt-PT"] [data-produto="cerimonial"] .entrada .marca-logo { background: #ffffff; }
+html[data-paleta="es"][data-produto="cerimonial"] { --acc: #851d1d; --acc-tx: #fdfbf8; --ouro: #906e21; --bg: #f4ece2; --painel: #fcf8f4; --painel-2: #f8f0e7; --lateral: #ebe0d3; --hover: rgba(70, 16, 16, 0.05); --ativo: rgba(70, 16, 16, 0.08); --borda: #eaddc1; --borda-2: #ddcca5; --tx: #2c1d20; --tx-2: #762d2d; --tx-3: #805c63; --info: #851d1d; --info-bg: #f6efe7; --neutro-bg: #ece1d4; --sombra-1: 0 1px 2px rgba(63, 17, 17, 0.06); --sombra-2: 0 1px 2px rgba(63, 17, 17, 0.05), 0 10px 28px -10px rgba(63, 17, 17, 0.18); }
+html[data-paleta="es"][data-produto="cerimonial"][data-tema="escuro"] { --acc: #debf78; --acc-tx: #140d0e; --ouro: #e4c98b; --bg: #1c1214; --painel: #27191c; --painel-2: #391414; --lateral: #170f11; --borda: #541e1e; --borda-2: #692828; --tx: #f7f3ee; --tx-2: #dea9a9; --tx-3: #ad9d8a; --info: #f59999; --info-bg: rgba(245, 153, 153, .14); --neutro-bg: #411717; }
+html[data-paleta="es"] [data-produto="cerimonial"] .lat { --tx: #2c1d20; --tx-2: #843636; --tx-3: #845f66; --hover: rgba(63, 17, 17, 0.06); --painel: #fcf9f6; --borda: #eae1d6; --neutro-bg: #efe8df; }
+html[data-paleta="es"] [data-produto="cerimonial"][data-tema="escuro"] .lat { --tx: #f7f3ee; --tx-2: #dea9a9; --tx-3: #ad9d8a; --painel: #291b1e; --borda: #541e1e; --neutro-bg: #411717; }
+html[data-paleta="es"] [data-produto="cerimonial"] .faixa { background: #6c1616; color: #f8f3ee; }
+html[data-paleta="es"] [data-produto="cerimonial"] .faixa button { color: #f8f3ee; }
+html[data-paleta="es"] [data-produto="cerimonial"] .btn.pri { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 6px 16px -8px rgba(108, 22, 22, .7); }
+html[data-paleta="es"] .sa-hero { background:
+  radial-gradient(90% 120% at 100% 0%, rgba(193, 153, 62, .22), transparent 60%),
+  radial-gradient(70% 90% at 0% 100%, rgba(156, 31, 31, .16), transparent 60%), var(--painel); }
+html[data-paleta="es"] [data-produto="cerimonial"] .faixa a.cta,
+html[data-paleta="es"] [data-produto="cerimonial"] .faixa a.cta:hover { background: #d7b15c; color: #211517; }
+html[data-paleta="es"] [data-produto="cerimonial"] .lat .marca-logo,
+html[data-paleta="es"] [data-produto="cerimonial"] .entrada .marca-logo { background: #ffffff; }
+html[data-paleta="en"][data-produto="cerimonial"] { --acc: #102e92; --acc-tx: #f8fafd; --ouro: #8d242a; --bg: #e2e7f4; --painel: #f5f7fb; --painel-2: #e8ecf7; --lateral: #d3daeb; --hover: rgba(9, 25, 77, 0.05); --ativo: rgba(9, 25, 77, 0.08); --borda: #e8c3c5; --borda-2: #dba7aa; --tx: #0f193a; --tx-2: #203783; --tx-3: #5c6480; --info: #102e92; --info-bg: #e7ebf6; --neutro-bg: #d4dbec; --sombra-1: 0 1px 2px rgba(11, 24, 69, 0.06); --sombra-2: 0 1px 2px rgba(11, 24, 69, 0.05), 0 10px 28px -10px rgba(11, 24, 69, 0.18); }
+html[data-paleta="en"][data-produto="cerimonial"][data-tema="escuro"] { --acc: #dc7a80; --acc-tx: #0a0d17; --ouro: #e28d92; --bg: #0e1220; --painel: #151a2b; --painel-2: #0e193f; --lateral: #0b0f1b; --borda: #15265d; --borda-2: #1c3175; --tx: #eef1f7; --tx-2: #9fb0e8; --tx-3: #8a94ad; --info: #90aafe; --info-bg: rgba(144, 170, 254, .14); --neutro-bg: #101d48; }
+html[data-paleta="en"] [data-produto="cerimonial"] .lat { --tx: #141c35; --tx-2: #274093; --tx-3: #5f6884; --hover: rgba(11, 24, 69, 0.06); --painel: #f6f8fc; --borda: #d6dcea; --neutro-bg: #dfe4ef; }
+html[data-paleta="en"] [data-produto="cerimonial"][data-tema="escuro"] .lat { --tx: #eef1f7; --tx-2: #9fb0e8; --tx-3: #8a94ad; --painel: #171c2d; --borda: #15265d; --neutro-bg: #101d48; }
+html[data-paleta="en"] [data-produto="cerimonial"] .faixa { background: #0b2477; color: #eef1f8; }
+html[data-paleta="en"] [data-produto="cerimonial"] .faixa button { color: #eef1f8; }
+html[data-paleta="en"] [data-produto="cerimonial"] .btn.pri { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 6px 16px -8px rgba(11, 36, 119, .7); }
+html[data-paleta="en"] .sa-hero { background:
+  radial-gradient(90% 120% at 100% 0%, rgba(188, 67, 74, .22), transparent 60%),
+  radial-gradient(70% 90% at 0% 100%, rgba(16, 52, 171, .16), transparent 60%), var(--painel); }
+html[data-paleta="en"] [data-produto="cerimonial"] .faixa a.cta,
+html[data-paleta="en"] [data-produto="cerimonial"] .faixa a.cta:hover { background: #d45f66; color: #101526; }
+html[data-paleta="en"] [data-produto="cerimonial"] .lat .marca-logo,
+html[data-paleta="en"] [data-produto="cerimonial"] .entrada .marca-logo { background: #ffffff; }
+html[data-paleta="it"][data-produto="cerimonial"] { --acc: #567230; --acc-tx: #fcfcf9; --ouro: #86682b; --bg: #f2f0e4; --painel: #fafaf6; --painel-2: #f5f3ea; --lateral: #eae6d4; --hover: rgba(46, 60, 26, 0.05); --ativo: rgba(46, 60, 26, 0.08); --borda: #e5dbc6; --borda-2: #d6c8ac; --tx: #242c1d; --tx-2: #546340; --tx-3: #6e805c; --info: #567230; --info-bg: #f4f2e9; --neutro-bg: #ebe7d5; --sombra-1: 0 1px 2px rgba(42, 53, 27, 0.06); --sombra-2: 0 1px 2px rgba(42, 53, 27, 0.05), 0 10px 28px -10px rgba(42, 53, 27, 0.18); }
+html[data-paleta="it"][data-produto="cerimonial"][data-tema="escuro"] { --acc: #d5b981; --acc-tx: #10140d; --ouro: #dcc493; --bg: #171c12; --painel: #20261a; --painel-2: #28301d; --lateral: #13170f; --borda: #3b462c; --borda-2: #4b5839; --tx: #f7f5ee; --tx-2: #c6d0b7; --tx-3: #ada78a; --info: #cce8a6; --info-bg: rgba(204, 232, 166, .14); --neutro-bg: #2e3622; }
+html[data-paleta="it"] [data-produto="cerimonial"] .lat { --tx: #242c1d; --tx-2: #606e4c; --tx-3: #72845f; --hover: rgba(42, 53, 27, 0.06); --painel: #fbfaf7; --borda: #eae6d6; --neutro-bg: #efecdf; }
+html[data-paleta="it"] [data-produto="cerimonial"][data-tema="escuro"] .lat { --tx: #f7f5ee; --tx-2: #c6d0b7; --tx-3: #ada78a; --painel: #22291b; --borda: #3b462c; --neutro-bg: #2e3622; }
+html[data-paleta="it"] [data-produto="cerimonial"] .faixa { background: #465d25; color: #f7f6ef; }
+html[data-paleta="it"] [data-produto="cerimonial"] .faixa button { color: #f7f6ef; }
+html[data-paleta="it"] [data-produto="cerimonial"] .btn.pri { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 6px 16px -8px rgba(70, 93, 37, .7); }
+html[data-paleta="it"] .sa-hero { background:
+  radial-gradient(90% 120% at 100% 0%, rgba(179, 145, 76, .22), transparent 60%),
+  radial-gradient(70% 90% at 0% 100%, rgba(100, 134, 53, .16), transparent 60%), var(--painel); }
+html[data-paleta="it"] [data-produto="cerimonial"] .faixa a.cta,
+html[data-paleta="it"] [data-produto="cerimonial"] .faixa a.cta:hover { background: #ccaa67; color: #1b2016; }
+html[data-paleta="it"] [data-produto="cerimonial"] .lat .marca-logo,
+html[data-paleta="it"] [data-produto="cerimonial"] .entrada .marca-logo { background: #ffffff; }
+html[data-paleta="fr"][data-produto="cerimonial"] { --acc: #392979; --acc-tx: #fbf9fc; --ouro: #433081; --bg: #ebe2f4; --painel: #f8f5fb; --painel-2: #f0e9f6; --lateral: #dfd3eb; --hover: rgba(30, 22, 64, 0.05); --ativo: rgba(30, 22, 64, 0.08); --borda: #cfc8e3; --borda-2: #b8afd3; --tx: #1f1b2e; --tx-2: #43396a; --tx-3: #645c80; --info: #392979; --info-bg: #efe7f6; --neutro-bg: #e0d4ec; --sombra-1: 0 1px 2px rgba(30, 23, 57, 0.06); --sombra-2: 0 1px 2px rgba(30, 23, 57, 0.05), 0 10px 28px -10px rgba(30, 23, 57, 0.18); }
+html[data-paleta="fr"][data-produto="cerimonial"][data-tema="escuro"] { --acc: #9885d1; --acc-tx: #0e0c15; --ouro: #a797d8; --bg: #14111d; --painel: #1c1828; --painel-2: #1f1934; --lateral: #100e18; --borda: #2e274c; --borda-2: #3b325f; --tx: #f3eef7; --tx-2: #b9b1d6; --tx-3: #9c8aad; --info: #b0a1ed; --info-bg: rgba(176, 161, 237, .14); --neutro-bg: #231e3a; }
+html[data-paleta="fr"] [data-produto="cerimonial"] .lat { --tx: #1f1b2e; --tx-2: #4e4377; --tx-3: #685f84; --hover: rgba(30, 23, 57, 0.06); --painel: #f9f6fc; --borda: #e0d6ea; --neutro-bg: #e7dfef; }
+html[data-paleta="fr"] [data-produto="cerimonial"][data-tema="escuro"] .lat { --tx: #f3eef7; --tx-2: #b9b1d6; --tx-3: #9c8aad; --painel: #1d192b; --borda: #2e274c; --neutro-bg: #231e3a; }
+html[data-paleta="fr"] [data-produto="cerimonial"] .faixa { background: #2d1f63; color: #f3eef8; }
+html[data-paleta="fr"] [data-produto="cerimonial"] .faixa button { color: #f3eef8; }
+html[data-paleta="fr"] [data-produto="cerimonial"] .btn.pri { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 6px 16px -8px rgba(45, 31, 99, .7); }
+html[data-paleta="fr"] .sa-hero { background:
+  radial-gradient(90% 120% at 100% 0%, rgba(105, 84, 171, .22), transparent 60%),
+  radial-gradient(70% 90% at 0% 100%, rgba(64, 45, 142, .16), transparent 60%), var(--painel); }
+html[data-paleta="fr"] [data-produto="cerimonial"] .faixa a.cta,
+html[data-paleta="fr"] [data-produto="cerimonial"] .faixa a.cta:hover { background: #826dc6; color: #171422; }
+html[data-paleta="fr"] [data-produto="cerimonial"] .lat .marca-logo,
+html[data-paleta="fr"] [data-produto="cerimonial"] .entrada .marca-logo { background: #ffffff; }

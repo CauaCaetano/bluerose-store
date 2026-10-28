@@ -1,0 +1,76 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de demos/sistemas/pragas/tema.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"][data-produto="pragas"] { --acc: #24567e; --acc-tx: #ffffff; --floresta: #132431; --ambar: #d9ad45; --bg: #f4ede2; --lateral: #ebe1d3; --painel: #fbf9f5; --painel-2: #f7f1e8; --hover: rgba(19, 45, 67, 0.05); --ativo: rgba(19, 45, 67, 0.08); --borda: #e8d3c3; --borda-2: #d8b8aa; --tx: #142635; --tx-2: #34556f; --tx-3: #5c7080; --info: #24567e; --info-bg: #f6f0e7; --neutro-bg: #ece2d4; --sombra-1: 0 1px 0 rgba(17, 43, 64, .05); --sombra-2: 0 1px 0 rgba(17, 43, 64, .05), 0 10px 26px -14px rgba(17, 43, 64, .3); }
+html[data-paleta="pt-PT"][data-produto="pragas"][data-tema="escuro"] { --acc: #dd9c67; --acc-tx: #0a1014; --bg: #0d1922; --lateral: #111f2a; --painel: #152532; --painel-2: #172b3c; --borda: #213a4e; --borda-2: #2b4961; --tx: #f6f1e9; --tx-2: #a6bfd4; --tx-3: #779cba; --info: #90c4ee; --info-bg: rgba(144, 196, 238, .13); --neutro-bg: #1c3243; }
+html[data-paleta="pt-PT"] [data-produto="pragas"] .lat { --tx: #f5efe6; --tx-2: #a3bfd6; --tx-3: #729bbd; --hover: rgba(247, 241, 233, .07); --painel: rgba(247, 241, 233, .1); --borda: rgba(247, 241, 233, .12); --neutro-bg: rgba(247, 241, 233, .14); }
+html[data-paleta="pt-PT"] [data-produto="pragas"] .lat a.item.ativo { background: rgba(217, 173, 69, .14); color: #ffffff; }
+html[data-paleta="pt-PT"] [data-produto="pragas"] .lat a.item .cont.er { background: #d98968; color: #ffffff; }
+html[data-paleta="pt-PT"] .is-selo i { background: #317ebd; }
+html[data-paleta="pt-PT"] .is-selo.al i { background: #c65b2f; }
+html[data-paleta="pt-PT"] .is-selo.er i { background: #c76a44; }
+html[data-paleta="pt-PT"] .is-pt { color: #ffffff; }
+html[data-paleta="pt-PT"] .is-pt.intacta { background: #224f73; }
+html[data-paleta="pt-PT"] .is-pt.consumida { background: #c76a44; }
+html[data-paleta="pt-PT"] .is-pt.substituida { background: #3f80b5; }
+html[data-paleta="pt-PT"] .is-pt.ausente { background: #d17149; color: #091219; }
+html[data-paleta="pt-PT"] .is-cli.alto { border-color: #c76a44; box-shadow: inset 4px 0 0 #c76a44; }
+html[data-paleta="pt-PT"] [data-produto="pragas"] .lat-pe .feito-br { border-color: rgba(247, 241, 233, .14); }
+html[data-paleta="es"][data-produto="pragas"] { --acc: #7d2526; --acc-tx: #ffffff; --floresta: #291b1e; --ambar: #d9ad45; --bg: #f4ece2; --lateral: #ebe0d3; --painel: #fcf8f4; --painel-2: #f8f0e7; --hover: rgba(66, 20, 20, 0.05); --ativo: rgba(66, 20, 20, 0.08); --borda: #eac1c1; --borda-2: #ddcca5; --tx: #2c1d20; --tx-2: #6e3535; --tx-3: #805c63; --info: #7d2526; --info-bg: #f6efe7; --neutro-bg: #ece1d4; --sombra-1: 0 1px 0 rgba(64, 17, 18, .05); --sombra-2: 0 1px 0 rgba(64, 17, 18, .05), 0 10px 26px -14px rgba(64, 17, 18, .3); }
+html[data-paleta="es"][data-produto="pragas"][data-tema="escuro"] { --acc: #e06464; --acc-tx: #120c0d; --bg: #1d1214; --lateral: #24171a; --painel: #2b1c1f; --painel-2: #3b1818; --borda: #4d2222; --borda-2: #602c2d; --tx: #f6f0e9; --tx-2: #d3a7a7; --tx-3: #b97879; --info: #ed9192; --info-bg: rgba(237, 145, 146, .13); --neutro-bg: #421d1d; }
+html[data-paleta="es"] [data-produto="pragas"] .lat { --tx: #f5eee6; --tx-2: #d5a4a4; --tx-3: #bb7475; --hover: rgba(248, 241, 232, .07); --painel: rgba(248, 241, 232, .1); --borda: rgba(248, 241, 232, .12); --neutro-bg: rgba(248, 241, 232, .14); }
+html[data-paleta="es"] [data-produto="pragas"] .lat a.item.ativo { background: rgba(217, 173, 69, .14); color: #ffffff; }
+html[data-paleta="es"] [data-produto="pragas"] .lat a.item .cont.er { background: #e1b960; color: #ffffff; }
+html[data-paleta="es"] .is-selo i { background: #bb3335; }
+html[data-paleta="es"] .is-selo.al i { background: #d19c24; }
+html[data-paleta="es"] .is-selo.er i { background: #d2a339; }
+html[data-paleta="es"] .is-pt { color: #ffffff; }
+html[data-paleta="es"] .is-pt.intacta { background: #6a2b37; }
+html[data-paleta="es"] .is-pt.consumida { background: #d2a339; }
+html[data-paleta="es"] .is-pt.substituida { background: #b34142; }
+html[data-paleta="es"] .is-pt.ausente { background: #dbab3f; color: #150d0f; }
+html[data-paleta="es"] .is-cli.alto { border-color: #d2a339; box-shadow: inset 4px 0 0 #d2a339; }
+html[data-paleta="es"] [data-produto="pragas"] .lat-pe .feito-br { border-color: rgba(248, 241, 232, .14); }
+html[data-paleta="en"][data-produto="pragas"] { --acc: #1b3f87; --acc-tx: #ffffff; --floresta: #0c1638; --ambar: #d9ad45; --bg: #e2e7f4; --lateral: #d3daeb; --painel: #f5f7fb; --painel-2: #e8ecf7; --hover: rgba(15, 33, 71, 0.05); --ativo: rgba(15, 33, 71, 0.08); --borda: #c0cdeb; --borda-2: #dba7aa; --tx: #0f193a; --tx-2: #2b4478; --tx-3: #5c6480; --info: #1b3f87; --info-bg: #e7ebf6; --neutro-bg: #d4dbec; --sombra-1: 0 1px 0 rgba(12, 31, 69, .05); --sombra-2: 0 1px 0 rgba(12, 31, 69, .05), 0 10px 26px -14px rgba(12, 31, 69, .3); }
+html[data-paleta="en"][data-produto="pragas"][data-tema="escuro"] { --acc: #6288e2; --acc-tx: #0a0c14; --bg: #0d1222; --lateral: #11172a; --painel: #151c32; --painel-2: #132240; --borda: #1b2e54; --borda-2: #243a68; --tx: #e9edf6; --tx-2: #9fb3db; --tx-3: #6c89c5; --info: #89adf5; --info-bg: rgba(137, 173, 245, .13); --neutro-bg: #172748; }
+html[data-paleta="en"] [data-produto="pragas"] .lat { --tx: #e6eaf5; --tx-2: #9cb1dd; --tx-3: #6787c8; --hover: rgba(233, 237, 247, .07); --painel: rgba(233, 237, 247, .1); --borda: rgba(233, 237, 247, .12); --neutro-bg: rgba(233, 237, 247, .14); }
+html[data-paleta="en"] [data-produto="pragas"] .lat a.item.ativo { background: rgba(217, 173, 69, .14); color: #ffffff; }
+html[data-paleta="en"] [data-produto="pragas"] .lat a.item .cont.er { background: #de636b; color: #ffffff; }
+html[data-paleta="en"] .is-selo i { background: #255bc9; }
+html[data-paleta="en"] .is-selo.al i { background: #cc2932; }
+html[data-paleta="en"] .is-selo.er i { background: #ce3d46; }
+html[data-paleta="en"] .is-pt { color: #ffffff; }
+html[data-paleta="en"] .is-pt.intacta { background: #0f2b86; }
+html[data-paleta="en"] .is-pt.consumida { background: #ce3d46; }
+html[data-paleta="en"] .is-pt.substituida { background: #3262c2; }
+html[data-paleta="en"] .is-pt.ausente { background: #d7434c; color: #050b1d; }
+html[data-paleta="en"] .is-cli.alto { border-color: #ce3d46; box-shadow: inset 4px 0 0 #ce3d46; }
+html[data-paleta="en"] [data-produto="pragas"] .lat-pe .feito-br { border-color: rgba(233, 237, 247, .14); }
+html[data-paleta="it"][data-produto="pragas"] { --acc: #7d4125; --acc-tx: #ffffff; --floresta: #22291b; --ambar: #d9ad45; --bg: #f2f0e4; --lateral: #eae6d4; --painel: #fafaf6; --painel-2: #f5f3ea; --hover: rgba(66, 35, 20, 0.05); --ativo: rgba(66, 35, 20, 0.08); --borda: #d7e0cb; --borda-2: #d6c8ac; --tx: #242c1d; --tx-2: #6e4735; --tx-3: #6e805c; --info: #7d4125; --info-bg: #f4f2e9; --neutro-bg: #ebe7d5; --sombra-1: 0 1px 0 rgba(64, 32, 17, .05); --sombra-2: 0 1px 0 rgba(64, 32, 17, .05), 0 10px 26px -14px rgba(64, 32, 17, .3); }
+html[data-paleta="it"][data-produto="pragas"][data-tema="escuro"] { --acc: #a9ca7a; --acc-tx: #0f120c; --bg: #181c13; --lateral: #1e2318; --painel: #242b1c; --painel-2: #3b2318; --borda: #4d3022; --borda-2: #5f3d2d; --tx: #f5f3ea; --tx-2: #d3b5a7; --tx-3: #b88d79; --info: #edae91; --info-bg: rgba(237, 174, 145, .13); --neutro-bg: #42291d; }
+html[data-paleta="it"] [data-produto="pragas"] .lat { --tx: #f4f1e7; --tx-2: #d5b4a4; --tx-3: #ba8b75; --hover: rgba(245, 243, 235, .07); --painel: rgba(245, 243, 235, .1); --borda: rgba(245, 243, 235, .12); --neutro-bg: rgba(245, 243, 235, .14); }
+html[data-paleta="it"] [data-produto="pragas"] .lat a.item.ativo { background: rgba(217, 173, 69, .14); color: #ffffff; }
+html[data-paleta="it"] [data-produto="pragas"] .lat a.item .cont.er { background: #d7b36a; color: #ffffff; }
+html[data-paleta="it"] .is-selo i { background: #ba5f34; }
+html[data-paleta="it"] .is-selo.al i { background: #c39332; }
+html[data-paleta="it"] .is-selo.er i { background: #c49a47; }
+html[data-paleta="it"] .is-pt { color: #ffffff; }
+html[data-paleta="it"] .is-pt.intacta { background: #4b692c; }
+html[data-paleta="it"] .is-pt.consumida { background: #c49a47; }
+html[data-paleta="it"] .is-pt.substituida { background: #b26642; }
+html[data-paleta="it"] .is-pt.ausente { background: #cfa34b; color: #11140e; }
+html[data-paleta="it"] .is-cli.alto { border-color: #c49a47; box-shadow: inset 4px 0 0 #c49a47; }
+html[data-paleta="it"] [data-produto="pragas"] .lat-pe .feito-br { border-color: rgba(245, 243, 235, .14); }
+html[data-paleta="fr"][data-produto="pragas"] { --acc: #392979; --acc-tx: #ffffff; --floresta: #1d192b; --ambar: #d9ad45; --bg: #ebe2f4; --lateral: #dfd3eb; --painel: #f8f5fb; --painel-2: #f0e9f6; --hover: rgba(30, 22, 64, 0.05); --ativo: rgba(30, 22, 64, 0.08); --borda: #cac3e8; --borda-2: #b8afd3; --tx: #1f1b2e; --tx-2: #43396a; --tx-3: #645c80; --info: #392979; --info-bg: #efe7f6; --neutro-bg: #e0d4ec; --sombra-1: 0 1px 0 rgba(28, 19, 62, .05); --sombra-2: 0 1px 0 rgba(28, 19, 62, .05), 0 10px 26px -14px rgba(28, 19, 62, .3); }
+html[data-paleta="fr"][data-produto="pragas"][data-tema="escuro"] { --acc: #7f67dd; --acc-tx: #0d0b13; --bg: #14111e; --lateral: #191625; --painel: #1f1a2d; --painel-2: #201a39; --borda: #2c254a; --borda-2: #39305c; --tx: #f0e9f6; --tx-2: #b2aad0; --tx-3: #887db4; --info: #a594ea; --info-bg: rgba(165, 148, 234, .13); --neutro-bg: #261f40; }
+html[data-paleta="fr"] [data-produto="pragas"] .lat { --tx: #eee6f5; --tx-2: #b0a7d2; --tx-3: #8579b6; --hover: rgba(240, 233, 247, .07); --painel: rgba(240, 233, 247, .1); --borda: rgba(240, 233, 247, .12); --neutro-bg: rgba(240, 233, 247, .14); }
+html[data-paleta="fr"] [data-produto="pragas"] .lat a.item.ativo { background: rgba(217, 173, 69, .14); color: #ffffff; }
+html[data-paleta="fr"] [data-produto="pragas"] .lat a.item .cont.er { background: #8770d1; color: #ffffff; }
+html[data-paleta="fr"] .is-selo i { background: #5239b5; }
+html[data-paleta="fr"] .is-selo.al i { background: #5939bc; }
+html[data-paleta="fr"] .is-selo.er i { background: #694dbe; }
+html[data-paleta="fr"] .is-pt { color: #ffffff; }
+html[data-paleta="fr"] .is-pt.intacta { background: #38296c; }
+html[data-paleta="fr"] .is-pt.consumida { background: #694dbe; }
+html[data-paleta="fr"] .is-pt.substituida { background: #5b47ad; }
+html[data-paleta="fr"] .is-pt.ausente { background: #6f52c8; color: #0f0d15; }
+html[data-paleta="fr"] .is-cli.alto { border-color: #694dbe; box-shadow: inset 4px 0 0 #694dbe; }
+html[data-paleta="fr"] [data-produto="pragas"] .lat-pe .feito-br { border-color: rgba(240, 233, 247, .14); }

@@ -1,0 +1,91 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de demos/sistemas/obras-completo/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --cafe: #4d3126; --cafe-2: #633f30; --marfim: #f6efe6; --papel: #fdfbf8; --mocha: #c18e79; --mocha-esc: #98614a; --linho: #ddbdb0; --linho-2: #ece2d4; --musgo: #908980; --musgo-esc: #575f66; --tx: #342119; --tx-2: #4d5e6b; --tx-3: #6c7e8d; --atraso: #a4492f; --ok: #55704a; --trac: rgba(77, 49, 38, .14); }
+html[data-paleta="pt-PT"] .demo a { color: #ffffff; }
+html[data-paleta="pt-PT"] .demo button { border: 1px solid rgba(255, 255, 255, .3); color: #ffffff; }
+html[data-paleta="pt-PT"] .trena { background-image: repeating-linear-gradient(180deg, transparent 0 11px, rgba(221, 189, 176, .35) 11px 12px), repeating-linear-gradient(180deg, transparent 0 59px, rgba(221, 189, 176, .7) 59px 60px); }
+html[data-paleta="pt-PT"] .trena a:hover { color: #ffffff; }
+html[data-paleta="pt-PT"] .trena a i { color: #ffffff; }
+@media (max-width: 860px) {
+html[data-paleta="pt-PT"] .trena { background-image: repeating-linear-gradient(90deg, transparent 0 11px, rgba(221, 189, 176, .35) 11px 12px); }
+}
+html[data-paleta="pt-PT"] .b.musgo { color: #ffffff; }
+html[data-paleta="pt-PT"] .selo.ok { background: #e6e0d8; }
+html[data-paleta="pt-PT"] .selo.at { background: #efe3d3; }
+html[data-paleta="pt-PT"] .selo.mo { background: #eadecd; }
+html[data-paleta="pt-PT"] .fundo { background: rgba(52, 33, 25, .5); }
+html[data-paleta="pt-PT"] .documento { background: #ffffff; }
+html[data-paleta="pt-PT"] .barra-o { background: #eee5d9; }
+html[data-paleta="pt-PT"] .barra-o i { background: #6e3f2c; }
+html[data-paleta="pt-PT"] .recibo-o { background: #f9f5f0; }
+html[data-paleta="es"] { --cafe: #4d2627; --cafe-2: #623131; --marfim: #f6efe6; --papel: #fdfbf8; --mocha: #c07a7b; --mocha-esc: #974b4c; --linho: #dcb1b1; --linho-2: #ece1d4; --musgo: #908980; --musgo-esc: #66575a; --tx: #331a1a; --tx-2: #6b4d53; --tx-3: #8d6c73; --atraso: #a4492f; --ok: #55704a; --trac: rgba(77, 38, 39, .14); }
+html[data-paleta="es"] .demo a { color: #ffffff; }
+html[data-paleta="es"] .demo button { border: 1px solid rgba(255, 255, 255, .3); color: #ffffff; }
+html[data-paleta="es"] .trena { background-image: repeating-linear-gradient(180deg, transparent 0 11px, rgba(220, 177, 177, .35) 11px 12px), repeating-linear-gradient(180deg, transparent 0 59px, rgba(220, 177, 177, .7) 59px 60px); }
+html[data-paleta="es"] .trena a:hover { color: #ffffff; }
+html[data-paleta="es"] .trena a i { color: #ffffff; }
+@media (max-width: 860px) {
+html[data-paleta="es"] .trena { background-image: repeating-linear-gradient(90deg, transparent 0 11px, rgba(220, 177, 177, .35) 11px 12px); }
+}
+html[data-paleta="es"] .b.musgo { color: #ffffff; }
+html[data-paleta="es"] .selo.ok { background: #e6e0d8; }
+html[data-paleta="es"] .selo.at { background: #f1e2d1; }
+html[data-paleta="es"] .selo.mo { background: #eaddcd; }
+html[data-paleta="es"] .fundo { background: rgba(51, 26, 26, .5); }
+html[data-paleta="es"] .documento { background: #ffffff; }
+html[data-paleta="es"] .barra-o { background: #eee4d9; }
+html[data-paleta="es"] .barra-o i { background: #6d2d2d; }
+html[data-paleta="es"] .recibo-o { background: #faf5ef; }
+html[data-paleta="en"] { --cafe: #502325; --cafe-2: #672c30; --marfim: #e6ebf6; --papel: #f8fafd; --mocha: #c67479; --mocha-esc: #9e444a; --linho: #dfaeb1; --linho-2: #d4dbec; --musgo: #808590; --musgo-esc: #575a66; --tx: #361719; --tx-2: #4d546b; --tx-3: #6c748d; --atraso: #a4492f; --ok: #55704a; --trac: rgba(80, 35, 37, .14); }
+html[data-paleta="en"] .demo a { color: #ffffff; }
+html[data-paleta="en"] .demo button { border: 1px solid rgba(255, 255, 255, .3); color: #ffffff; }
+html[data-paleta="en"] .trena { background-image: repeating-linear-gradient(180deg, transparent 0 11px, rgba(223, 174, 177, .35) 11px 12px), repeating-linear-gradient(180deg, transparent 0 59px, rgba(223, 174, 177, .7) 59px 60px); }
+html[data-paleta="en"] .trena a:hover { color: #ffffff; }
+html[data-paleta="en"] .trena a i { color: #ffffff; }
+@media (max-width: 860px) {
+html[data-paleta="en"] .trena { background-image: repeating-linear-gradient(90deg, transparent 0 11px, rgba(223, 174, 177, .35) 11px 12px); }
+}
+html[data-paleta="en"] .b.musgo { color: #ffffff; }
+html[data-paleta="en"] .selo.ok { background: #d8dce6; }
+html[data-paleta="en"] .selo.at { background: #d3dbef; }
+html[data-paleta="en"] .selo.mo { background: #cdd5ea; }
+html[data-paleta="en"] .fundo { background: rgba(54, 23, 25, .5); }
+html[data-paleta="en"] .documento { background: #ffffff; }
+html[data-paleta="en"] .barra-o { background: #d9dfee; }
+html[data-paleta="en"] .barra-o i { background: #72282c; }
+html[data-paleta="en"] .recibo-o { background: #f0f2f9; }
+html[data-paleta="it"] { --cafe: #4c3327; --cafe-2: #624131; --marfim: #f4f2e8; --papel: #fcfcf9; --mocha: #c0917a; --mocha-esc: #96644c; --linho: #dcbfb1; --linho-2: #ebe7d5; --musgo: #908d80; --musgo-esc: #5e6657; --tx: #33221a; --tx-2: #5c6b4d; --tx-3: #7d8d6c; --atraso: #a4492f; --ok: #55704a; --trac: rgba(76, 51, 39, .14); }
+html[data-paleta="it"] .demo a { color: #ffffff; }
+html[data-paleta="it"] .demo button { border: 1px solid rgba(255, 255, 255, .3); color: #ffffff; }
+html[data-paleta="it"] .trena { background-image: repeating-linear-gradient(180deg, transparent 0 11px, rgba(220, 191, 177, .35) 11px 12px), repeating-linear-gradient(180deg, transparent 0 59px, rgba(220, 191, 177, .7) 59px 60px); }
+html[data-paleta="it"] .trena a:hover { color: #ffffff; }
+html[data-paleta="it"] .trena a i { color: #ffffff; }
+@media (max-width: 860px) {
+html[data-paleta="it"] .trena { background-image: repeating-linear-gradient(90deg, transparent 0 11px, rgba(220, 191, 177, .35) 11px 12px); }
+}
+html[data-paleta="it"] .b.musgo { color: #ffffff; }
+html[data-paleta="it"] .selo.ok { background: #e6e3d8; }
+html[data-paleta="it"] .selo.at { background: #ece8d6; }
+html[data-paleta="it"] .selo.mo { background: #e8e4cf; }
+html[data-paleta="it"] .fundo { background: rgba(51, 34, 26, .5); }
+html[data-paleta="it"] .documento { background: #ffffff; }
+html[data-paleta="it"] .barra-o { background: #edeada; }
+html[data-paleta="it"] .barra-o i { background: #6d412d; }
+html[data-paleta="it"] .recibo-o { background: #f8f7f1; }
+html[data-paleta="fr"] { --cafe: #30294a; --cafe-2: #3d345f; --marfim: #eee6f6; --papel: #fbf9fc; --mocha: #8b7fbb; --mocha-esc: #5e5191; --linho: #bbb4d9; --linho-2: #e0d4ec; --musgo: #888090; --musgo-esc: #5a5766; --tx: #201b32; --tx-2: #544d6b; --tx-3: #746c8d; --atraso: #a4492f; --ok: #55704a; --trac: rgba(48, 41, 74, .14); }
+html[data-paleta="fr"] .demo a { color: #ffffff; }
+html[data-paleta="fr"] .demo button { border: 1px solid rgba(255, 255, 255, .3); color: #ffffff; }
+html[data-paleta="fr"] .trena { background-image: repeating-linear-gradient(180deg, transparent 0 11px, rgba(187, 180, 217, .35) 11px 12px), repeating-linear-gradient(180deg, transparent 0 59px, rgba(187, 180, 217, .7) 59px 60px); }
+html[data-paleta="fr"] .trena a:hover { color: #ffffff; }
+html[data-paleta="fr"] .trena a i { color: #ffffff; }
+@media (max-width: 860px) {
+html[data-paleta="fr"] .trena { background-image: repeating-linear-gradient(90deg, transparent 0 11px, rgba(187, 180, 217, .35) 11px 12px); }
+}
+html[data-paleta="fr"] .b.musgo { color: #ffffff; }
+html[data-paleta="fr"] .selo.ok { background: #dfd8e6; }
+html[data-paleta="fr"] .selo.at { background: #e1d4ee; }
+html[data-paleta="fr"] .selo.mo { background: #dccdea; }
+html[data-paleta="fr"] .fundo { background: rgba(32, 27, 50, .5); }
+html[data-paleta="fr"] .documento { background: #ffffff; }
+html[data-paleta="fr"] .barra-o { background: #e4d9ee; }
+html[data-paleta="fr"] .barra-o i { background: #3c306a; }
+html[data-paleta="fr"] .recibo-o { background: #f4f0f9; }

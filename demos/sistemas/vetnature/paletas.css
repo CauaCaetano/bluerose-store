@@ -1,0 +1,146 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de demos/sistemas/vetnature/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --creme: #f3ede5; --creme-2: #e9e1d6; --papel: #ffffff; --linha: #e3cdc4; --linha-2: #d4b6a9; --royal: #1f3a50; --royal-2: #3d6586; --royal-claro: #eae5df; --marinho: #172b3b; --salvia: #9eb9cf; --texto: #1d252b; --texto-2: #525a61; --texto-3: #95908a; --ok: #2f7d5b; --ok-claro: #e3f2ea; --atencao: #a14823; --atencao-claro: #f4ece0; --alerta: #b3363f; --alerta-claro: #fbe4e5; }
+html[data-paleta="pt-PT"] .faixa-demo { color: #f4ede2; }
+html[data-paleta="pt-PT"] .faixa-demo a { color: #ffffff; }
+html[data-paleta="pt-PT"] .faixa-demo button { color: #ffffff; }
+html[data-paleta="pt-PT"] .secoes a[aria-current="page"] { color: #ffffff; }
+html[data-paleta="pt-PT"] .secoes .conta { color: #ffffff; }
+html[data-paleta="pt-PT"] .secoes a[aria-current="page"] .conta { background: #ffffff; }
+html[data-paleta="pt-PT"] .bt-pri { color: #ffffff; }
+html[data-paleta="pt-PT"] .bt-zap { background: #235176; border-color: #235176; color: #ffffff; }
+html[data-paleta="pt-PT"] .numero.destaque span,
+html[data-paleta="pt-PT"] .numero.destaque b { color: #ffffff; }
+html[data-paleta="pt-PT"] .tabela tbody tr:hover td { background: #f8f5f1; }
+html[data-paleta="pt-PT"] .aviso { color: #ffffff; }
+html[data-paleta="pt-PT"] .foto-pet > span { color: #ffffff; }
+html[data-paleta="pt-PT"] .hor.tipo-banho { border-left-color: #c0643e; }
+html[data-paleta="pt-PT"] .hor.tipo-exame { border-left-color: #6292b8; }
+html[data-paleta="pt-PT"] .conta-bt { color: #ffffff; }
+html[data-paleta="pt-PT"] .msg-eu { color: #ffffff; }
+html[data-paleta="pt-PT"] .cfg-menu button[aria-current="true"] { color: #ffffff; }
+html[data-paleta="pt-PT"] .zap { background: #efe7dc; }
+html[data-paleta="pt-PT"] .zap-cab { background: #235176; color: #ffffff; }
+html[data-paleta="pt-PT"] .zap-cab small { color: #efe5d6; }
+html[data-paleta="pt-PT"] .zap-cab .fechar { color: #ffffff; }
+html[data-paleta="pt-PT"] .zap-foto { background: #efe5d6; color: #235176; }
+html[data-paleta="pt-PT"] .zap-msg { background: #f3eadd; color: #111a21; }
+html[data-paleta="pt-PT"] .zap-hora { color: #667581; }
+html[data-paleta="pt-PT"] .zap-hora span { color: #64a6da; }
+html[data-paleta="pt-PT"] .zap-nota { background: #f7f1e9; color: #5d250e; }
+html[data-paleta="pt-PT"] .zap-pe { background: #ffffff; }
+html[data-paleta="es"] { --creme: #f3ede5; --creme-2: #e9e0d6; --papel: #ffffff; --linha: #e7dbc0; --linha-2: #d9c9a4; --royal: #551a1a; --royal-2: #8e3535; --royal-claro: #eae5df; --marinho: #3f1313; --salvia: #d59898; --texto: #2b1d20; --texto-2: #615255; --texto-3: #95908a; --ok: #2f7d5b; --ok-claro: #e3f2ea; --atencao: #a97d1b; --atencao-claro: #f5ebdf; --alerta: #b3363f; --alerta-claro: #fbe4e5; }
+html[data-paleta="es"] .faixa-demo { color: #f5ece1; }
+html[data-paleta="es"] .faixa-demo a { color: #ffffff; }
+html[data-paleta="es"] .faixa-demo button { color: #ffffff; }
+html[data-paleta="es"] .secoes a[aria-current="page"] { color: #ffffff; }
+html[data-paleta="es"] .secoes .conta { color: #ffffff; }
+html[data-paleta="es"] .secoes a[aria-current="page"] .conta { background: #ffffff; }
+html[data-paleta="es"] .bt-pri { color: #ffffff; }
+html[data-paleta="es"] .bt-zap { background: #7c1d1d; border-color: #7c1d1d; color: #ffffff; }
+html[data-paleta="es"] .numero.destaque span,
+html[data-paleta="es"] .numero.destaque b { color: #ffffff; }
+html[data-paleta="es"] .tabela tbody tr:hover td { background: #f8f5f1; }
+html[data-paleta="es"] .aviso { color: #ffffff; }
+html[data-paleta="es"] .foto-pet > span { color: #ffffff; }
+html[data-paleta="es"] .hor.tipo-banho { border-left-color: #ca9c34; }
+html[data-paleta="es"] .hor.tipo-exame { border-left-color: #b86263; }
+html[data-paleta="es"] .conta-bt { color: #ffffff; }
+html[data-paleta="es"] .msg-eu { color: #ffffff; }
+html[data-paleta="es"] .cfg-menu button[aria-current="true"] { color: #ffffff; }
+html[data-paleta="es"] .zap { background: #efe6dc; }
+html[data-paleta="es"] .zap-cab { background: #7c1d1d; color: #ffffff; }
+html[data-paleta="es"] .zap-cab small { color: #efe3d6; }
+html[data-paleta="es"] .zap-cab .fechar { color: #ffffff; }
+html[data-paleta="es"] .zap-foto { background: #efe3d6; color: #7c1d1d; }
+html[data-paleta="es"] .zap-msg { background: #f4e9dc; color: #1e1416; }
+html[data-paleta="es"] .zap-hora { color: #81666b; }
+html[data-paleta="es"] .zap-hora span { color: #db6365; }
+html[data-paleta="es"] .zap-nota { background: #f8f1e8; color: #61460a; }
+html[data-paleta="es"] .zap-pe { background: #ffffff; }
+html[data-paleta="en"] { --creme: #e5e9f3; --creme-2: #d6dbe9; --papel: #ffffff; --linha: #e5c2c4; --linha-2: #d7a6a9; --royal: #192d56; --royal-2: #325291; --royal-claro: #dfe2ea; --marinho: #122140; --salvia: #96acd7; --texto: #1d202b; --texto-2: #525561; --texto-3: #8a8d95; --ok: #2f7d5b; --ok-claro: #e3f2ea; --atencao: #a61e26; --atencao-claro: #e0e6f4; --alerta: #b3363f; --alerta-claro: #fbe4e5; }
+html[data-paleta="en"] .faixa-demo { color: #e2e7f4; }
+html[data-paleta="en"] .faixa-demo a { color: #ffffff; }
+html[data-paleta="en"] .faixa-demo button { color: #ffffff; }
+html[data-paleta="en"] .secoes a[aria-current="page"] { color: #ffffff; }
+html[data-paleta="en"] .secoes .conta { color: #ffffff; }
+html[data-paleta="en"] .secoes a[aria-current="page"] .conta { background: #ffffff; }
+html[data-paleta="en"] .bt-pri { color: #ffffff; }
+html[data-paleta="en"] .bt-zap { background: #1b3c7e; border-color: #1b3c7e; color: #ffffff; }
+html[data-paleta="en"] .numero.destaque span,
+html[data-paleta="en"] .numero.destaque b { color: #ffffff; }
+html[data-paleta="en"] .tabela tbody tr:hover td { background: #f1f3f8; }
+html[data-paleta="en"] .aviso { color: #ffffff; }
+html[data-paleta="en"] .foto-pet > span { color: #ffffff; }
+html[data-paleta="en"] .hor.tipo-banho { border-left-color: #c63841; }
+html[data-paleta="en"] .hor.tipo-exame { border-left-color: #5476c6; }
+html[data-paleta="en"] .conta-bt { color: #ffffff; }
+html[data-paleta="en"] .msg-eu { color: #ffffff; }
+html[data-paleta="en"] .cfg-menu button[aria-current="true"] { color: #ffffff; }
+html[data-paleta="en"] .zap { background: #dce1ef; }
+html[data-paleta="en"] .zap-cab { background: #1b3c7e; color: #ffffff; }
+html[data-paleta="en"] .zap-cab small { color: #d6ddef; }
+html[data-paleta="en"] .zap-cab .fechar { color: #ffffff; }
+html[data-paleta="en"] .zap-foto { background: #d6ddef; color: #1b3c7e; }
+html[data-paleta="en"] .zap-msg { background: #dde3f3; color: #111521; }
+html[data-paleta="en"] .zap-hora { color: #666c81; }
+html[data-paleta="en"] .zap-hora span { color: #5882e6; }
+html[data-paleta="en"] .zap-nota { background: #e9edf7; color: #600b10; }
+html[data-paleta="en"] .zap-pe { background: #ffffff; }
+html[data-paleta="it"] { --creme: #f3f0e5; --creme-2: #e9e6d6; --papel: #ffffff; --linha: #e2cec5; --linha-2: #d3b7aa; --royal: #3a4728; --royal-2: #65774c; --royal-claro: #eae8df; --marinho: #2b351d; --salvia: #b9c4a9; --texto: #242b1d; --texto-2: #5a6152; --texto-3: #95938a; --ok: #2f7d5b; --ok-claro: #e3f2ea; --atencao: #a04c24; --atencao-claro: #f1efe3; --alerta: #b3363f; --alerta-claro: #fbe4e5; }
+html[data-paleta="it"] .faixa-demo { color: #f2f0e4; }
+html[data-paleta="it"] .faixa-demo a { color: #ffffff; }
+html[data-paleta="it"] .faixa-demo button { color: #ffffff; }
+html[data-paleta="it"] .secoes a[aria-current="page"] { color: #ffffff; }
+html[data-paleta="it"] .secoes .conta { color: #ffffff; }
+html[data-paleta="it"] .secoes a[aria-current="page"] .conta { background: #ffffff; }
+html[data-paleta="it"] .bt-pri { color: #ffffff; }
+html[data-paleta="it"] .bt-zap { background: #516a2f; border-color: #516a2f; color: #ffffff; }
+html[data-paleta="it"] .numero.destaque span,
+html[data-paleta="it"] .numero.destaque b { color: #ffffff; }
+html[data-paleta="it"] .tabela tbody tr:hover td { background: #f8f7f1; }
+html[data-paleta="it"] .aviso { color: #ffffff; }
+html[data-paleta="it"] .foto-pet > span { color: #ffffff; }
+html[data-paleta="it"] .hor.tipo-banho { border-left-color: #bd6841; }
+html[data-paleta="it"] .hor.tipo-exame { border-left-color: #b79b63; }
+html[data-paleta="it"] .conta-bt { color: #ffffff; }
+html[data-paleta="it"] .msg-eu { color: #ffffff; }
+html[data-paleta="it"] .cfg-menu button[aria-current="true"] { color: #ffffff; }
+html[data-paleta="it"] .zap { background: #efebdc; }
+html[data-paleta="it"] .zap-cab { background: #516a2f; color: #ffffff; }
+html[data-paleta="it"] .zap-cab small { color: #ede9d8; }
+html[data-paleta="it"] .zap-cab .fechar { color: #ffffff; }
+html[data-paleta="it"] .zap-foto { background: #ede9d8; color: #516a2f; }
+html[data-paleta="it"] .zap-msg { background: #f0ede0; color: #191e14; }
+html[data-paleta="it"] .zap-hora { color: #748166; }
+html[data-paleta="it"] .zap-hora span { color: #d9b265; }
+html[data-paleta="it"] .zap-nota { background: #f5f3eb; color: #5c280f; }
+html[data-paleta="it"] .zap-pe { background: #ffffff; }
+html[data-paleta="fr"] { --creme: #ece5f3; --creme-2: #e0d6e9; --papel: #ffffff; --linha: #cdc8df; --linha-2: #b6aecf; --royal: #2b234c; --royal-2: #4f4380; --royal-claro: #e4dfea; --marinho: #201939; --salvia: #aba3ca; --texto: #201d2b; --texto-2: #555261; --texto-3: #908a95; --ok: #2f7d5b; --ok-claro: #e3f2ea; --atencao: #462b99; --atencao-claro: #eae1f3; --alerta: #b3363f; --alerta-claro: #fbe4e5; }
+html[data-paleta="fr"] .faixa-demo { color: #ebe2f4; }
+html[data-paleta="fr"] .faixa-demo a { color: #ffffff; }
+html[data-paleta="fr"] .faixa-demo button { color: #ffffff; }
+html[data-paleta="fr"] .secoes a[aria-current="page"] { color: #ffffff; }
+html[data-paleta="fr"] .secoes .conta { color: #ffffff; }
+html[data-paleta="fr"] .secoes a[aria-current="page"] .conta { background: #ffffff; }
+html[data-paleta="fr"] .bt-pri { color: #ffffff; }
+html[data-paleta="fr"] .bt-zap { background: #372871; border-color: #372871; color: #ffffff; }
+html[data-paleta="fr"] .numero.destaque span,
+html[data-paleta="fr"] .numero.destaque b { color: #ffffff; }
+html[data-paleta="fr"] .tabela tbody tr:hover td { background: #f4f1f8; }
+html[data-paleta="fr"] .aviso { color: #ffffff; }
+html[data-paleta="fr"] .foto-pet > span { color: #ffffff; }
+html[data-paleta="fr"] .hor.tipo-banho { border-left-color: #6349b5; }
+html[data-paleta="fr"] .hor.tipo-exame { border-left-color: #6f5bbf; }
+html[data-paleta="fr"] .conta-bt { color: #ffffff; }
+html[data-paleta="fr"] .msg-eu { color: #ffffff; }
+html[data-paleta="fr"] .cfg-menu button[aria-current="true"] { color: #ffffff; }
+html[data-paleta="fr"] .zap { background: #e6dcef; }
+html[data-paleta="fr"] .zap-cab { background: #372871; color: #ffffff; }
+html[data-paleta="fr"] .zap-cab small { color: #e3d6ef; }
+html[data-paleta="fr"] .zap-cab .fechar { color: #ffffff; }
+html[data-paleta="fr"] .zap-foto { background: #e3d6ef; color: #372871; }
+html[data-paleta="fr"] .zap-msg { background: #e8def2; color: #161220; }
+html[data-paleta="fr"] .zap-hora { color: #6c6681; }
+html[data-paleta="fr"] .zap-hora span { color: #785ee0; }
+html[data-paleta="fr"] .zap-nota { background: #f0e9f7; color: #231259; }
+html[data-paleta="fr"] .zap-pe { background: #ffffff; }

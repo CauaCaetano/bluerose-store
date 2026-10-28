@@ -51,12 +51,24 @@
     return brl % 1 ? Math.round(v * 100) / 100 : Math.round(v);
   };
 
-  // paleta do país (css/paletas.css): só no site; os sistemas e os sites de exemplo têm as cores deles
-  if (atual.id !== ORIGEM && !/\/(demos\/sistemas|sites)\//.test(location.pathname)) {
+  // paleta do país: o site usa css/paletas.css; cada sistema tem o paletas.css dele, ao lado do próprio CSS
+  // (estilo.css, tema.css ou base/nexo.css; gerado por tools/gerar_paletas_sistemas.py). Os sites de exemplo ficam com as cores deles.
+  if (atual.id !== ORIGEM && !/\/sites\//.test(location.pathname)) {
     document.documentElement.setAttribute('data-paleta', atual.id);
-    var pal = document.createElement('link');
-    pal.rel = 'stylesheet'; pal.href = RAIZ + 'css/paletas.css?v=1';
-    document.head.appendChild(pal);
+    var paleta = function (href, depois) {
+      var pal = document.createElement('link');
+      pal.rel = 'stylesheet'; pal.href = href;
+      if (depois) depois.parentNode.insertBefore(pal, depois.nextSibling); else document.head.appendChild(pal);
+    };
+    if (/\/demos\/sistemas\//.test(location.pathname)) {
+      // este script vem antes dos <link> do sistema: cada CSS de cor que o navegador ler ganha o paletas.css logo depois,
+      // antes da primeira pintura (sem piscar a cor antiga)
+      var ver = function (l) { if (l.tagName === 'LINK' && !l.__pal && /\/(estilo|tema|nexo)\.css/.test(l.href)) { l.__pal = true; paleta(l.href.replace(/(estilo|tema|nexo)\.css.*$/, 'paletas.css?v=1'), l); } };
+      [].forEach.call(document.querySelectorAll('link[rel="stylesheet"]'), ver);
+      var obs = new MutationObserver(function (ms) { ms.forEach(function (m) { [].forEach.call(m.addedNodes, ver); }); });
+      obs.observe(document.documentElement, { childList: true, subtree: true });
+      document.addEventListener('DOMContentLoaded', function () { obs.disconnect(); });
+    } else paleta(RAIZ + 'css/paletas.css?v=1');
   }
 
   // pergunta para a IA (assistente do site e dos sistemas): pede a resposta no idioma escolhido

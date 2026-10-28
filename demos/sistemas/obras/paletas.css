@@ -1,0 +1,196 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de demos/sistemas/obras/tema.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"][data-produto="obras"] { --acc: #24567e; --acc-tx: #ffffff; --laranja: #2f6999; --carvao: #132431; --bg: #f4ede2; --lateral: #ebe1d3; --painel: #fbf9f5; --painel-2: #f7f1e8; --hover: rgba(19, 45, 67, 0.05); --ativo: rgba(19, 45, 67, 0.08); --borda: #e8d3c3; --borda-2: #dbbea7; --tx: #142635; --tx-2: #34556f; --tx-3: #5c7080; --info: #24567e; --info-bg: #f6f0e7; --neutro-bg: #ece2d4; --sombra-1: 0 1px 0 rgba(20, 38, 53, .06); --sombra-2: 0 2px 0 rgba(20, 38, 53, .05), 0 10px 24px -12px rgba(20, 38, 53, .25); }
+html[data-paleta="pt-PT"][data-produto="obras"][data-tema="escuro"] { --acc: #64ade8; --acc-tx: #0d1922; --laranja: #6fb3ea; --bg: #0c161e; --lateral: #0f1c26; --painel: #142635; --painel-2: #142839; --borda: #203a50; --borda-2: #294a65; --tx: #f8f3eb; --tx-2: #a8c2d8; --tx-3: #759cbb; --info: #64ade8; --info-bg: rgba(100, 173, 232, .14); --neutro-bg: #192f41; }
+html[data-paleta="pt-PT"] [data-produto="obras"] .btn.pri { box-shadow: 0 3px 0 #184d78; }
+html[data-paleta="pt-PT"] [data-produto="obras"] .btn.pri:active { box-shadow: 0 1px 0 #184d78; }
+html[data-paleta="pt-PT"] [data-produto="obras"] .lat { --tx: #f9f5f0; --tx-2: #bfd3e4; --tx-3: #91b1cb; --hover: rgba(255, 255, 255, .07); --painel: rgba(255, 255, 255, .08); --borda: rgba(255, 255, 255, .12); --neutro-bg: rgba(255, 255, 255, .12); }
+html[data-paleta="pt-PT"] [data-produto="obras"] .lat .marca b { color: #ffffff; }
+html[data-paleta="pt-PT"] [data-produto="obras"] .lat a.item.ativo .cont { color: #ffffff; }
+html[data-paleta="pt-PT"] }
+
+@media (max-width: 900px) { box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, .5); }
+html[data-paleta="pt-PT"] .cn-num { color: #f9f5f0; }
+html[data-paleta="pt-PT"] .cn-num div { border-left: 1px solid rgba(255, 255, 255, .1); }
+html[data-paleta="pt-PT"] .cn-num span { color: #b9b1a5; }
+html[data-paleta="pt-PT"] .cn-capa { color: #ffffff; background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .05) 0 14px, transparent 14px 28px), linear-gradient(135deg, #22262a, #142635); }
+html[data-paleta="pt-PT"] .cn-capa.foto::before { background: linear-gradient(180deg, rgba(0, 0, 0, .15), rgba(0, 0, 0, .65)); }
+html[data-paleta="pt-PT"] .cn-capa .agora { color: #eee2d1; }
+html[data-paleta="pt-PT"] .cn-etapas i.p { background: #2f5a7c; }
+html[data-paleta="pt-PT"][data-tema="escuro"] .cn-etapas i.f { background: #e9e3da; }
+html[data-paleta="pt-PT"] .cn-fab { box-shadow: 0 10px 24px -8px rgba(38, 114, 175, .8); }
+@media (max-width: 900px) {
+html[data-paleta="pt-PT"] .cn-num div:nth-child(n+3) { border-top: 1px solid rgba(255, 255, 255, .1); }
+}
+html[data-paleta="pt-PT"] .cn-g-trilho b.and { background: var(--laranja, #2f82c5); }
+html[data-paleta="pt-PT"] .cn-g-trilho b.ok { background: #2f5a7c; }
+html[data-paleta="pt-PT"] .cn-g-trilho b.er { background: #bd6e2e; }
+html[data-paleta="pt-PT"] .cn-g-trilho b.cn-g-total { background: color-mix(in srgb, var(--laranja, #2f82c5) 22%, transparent); border: 1.5px solid var(--laranja, #2f82c5); }
+html[data-paleta="pt-PT"] .cn-g-trilho b.cn-g-total.er { border-color: #bd6e2e; background: color-mix(in srgb, #bd6e2e 15%, transparent); }
+html[data-paleta="pt-PT"] .cn-g-hoje { background: #3a90d6; }
+html[data-paleta="pt-PT"] .cn-g-leg i.ok { background: #2f5a7c; }
+html[data-paleta="pt-PT"] .cn-g-leg i.and { background: var(--laranja, #2f82c5); }
+html[data-paleta="pt-PT"] .cn-g-leg i.er { background: #bd6e2e; }
+html[data-paleta="pt-PT"] .cn-g-leg i.hj { background: #3a90d6; }
+html[data-paleta="pt-PT"] [data-produto="obras"] .marca-logo { background: #ffffff; }
+html[data-paleta="pt-PT"] [data-produto="obras"] .lat .marca small { color: #9bcaf0; }
+html[data-paleta="pt-PT"] [data-produto="obras"] .lat .busca-lat { color: #b5cde0; }
+html[data-paleta="pt-PT"] [data-produto="obras"] .lat a.item .cont,
+html[data-paleta="pt-PT"] [data-produto="obras"] .faixa a.cta,
+html[data-paleta="pt-PT"] [data-produto="obras"] .faixa a.cta:hover { background: #6fb3ea; color: #0d1922; }
+html[data-paleta="pt-PT"] [data-produto="obras"] .lat a.item.ativo { background: #6fb3ea; color: #0d1922; }
+html[data-paleta="es"][data-produto="obras"] { --acc: #7d2526; --acc-tx: #ffffff; --laranja: #983032; --carvao: #291b1e; --bg: #f4ece2; --lateral: #ebe0d3; --painel: #fcf8f4; --painel-2: #f8f0e7; --hover: rgba(66, 20, 20, 0.05); --ativo: rgba(66, 20, 20, 0.08); --borda: #eaddc1; --borda-2: #ddcca5; --tx: #2c1d20; --tx-2: #6e3535; --tx-3: #805c63; --info: #7d2526; --info-bg: #f6efe7; --neutro-bg: #ece1d4; --sombra-1: 0 1px 0 rgba(44, 29, 32, .06); --sombra-2: 0 2px 0 rgba(44, 29, 32, .05), 0 10px 24px -12px rgba(44, 29, 32, .25); }
+html[data-paleta="es"][data-produto="obras"][data-tema="escuro"] { --acc: #e76567; --acc-tx: #1d1214; --laranja: #e87172; --bg: #1a1012; --lateral: #201517; --painel: #2c1d20; --painel-2: #381515; --borda: #4f2121; --borda-2: #642a2b; --tx: #f9f2ea; --tx-2: #d7a9a9; --tx-3: #ba7677; --info: #e76567; --info-bg: rgba(231, 101, 103, .14); --neutro-bg: #41191a; }
+html[data-paleta="es"] [data-produto="obras"] .btn.pri { box-shadow: 0 3px 0 #77191a; }
+html[data-paleta="es"] [data-produto="obras"] .btn.pri:active { box-shadow: 0 1px 0 #77191a; }
+html[data-paleta="es"] [data-produto="obras"] .lat { --tx: #faf5ef; --tx-2: #e3c0c0; --tx-3: #ca9292; --hover: rgba(255, 255, 255, .07); --painel: rgba(255, 255, 255, .08); --borda: rgba(255, 255, 255, .12); --neutro-bg: rgba(255, 255, 255, .12); }
+html[data-paleta="es"] [data-produto="obras"] .lat .marca b { color: #ffffff; }
+html[data-paleta="es"] [data-produto="obras"] .lat a.item.ativo .cont { color: #ffffff; }
+html[data-paleta="es"] }
+
+@media (max-width: 900px) { box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, .5); }
+html[data-paleta="es"] .cn-num { color: #faf5ef; }
+html[data-paleta="es"] .cn-num div { border-left: 1px solid rgba(255, 255, 255, .1); }
+html[data-paleta="es"] .cn-num span { color: #b9b0a5; }
+html[data-paleta="es"] .cn-capa { color: #ffffff; background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .05) 0 14px, transparent 14px 28px), linear-gradient(135deg, #2a2224, #2c1d20); }
+html[data-paleta="es"] .cn-capa.foto::before { background: linear-gradient(180deg, rgba(0, 0, 0, .15), rgba(0, 0, 0, .65)); }
+html[data-paleta="es"] .cn-capa .agora { color: #f0e1cf; }
+html[data-paleta="es"] .cn-etapas i.p { background: #852626; }
+html[data-paleta="es"][data-tema="escuro"] .cn-etapas i.f { background: #e9e2da; }
+html[data-paleta="es"] .cn-fab { box-shadow: 0 10px 24px -8px rgba(173, 40, 41, .8); }
+@media (max-width: 900px) {
+html[data-paleta="es"] .cn-num div:nth-child(n+3) { border-top: 1px solid rgba(255, 255, 255, .1); }
+}
+html[data-paleta="es"] .cn-g-trilho b.and { background: var(--laranja, #c43032); }
+html[data-paleta="es"] .cn-g-trilho b.ok { background: #852626; }
+html[data-paleta="es"] .cn-g-trilho b.er { background: #c0922b; }
+html[data-paleta="es"] .cn-g-trilho b.cn-g-total { background: color-mix(in srgb, var(--laranja, #c43032) 22%, transparent); border: 1.5px solid var(--laranja, #c43032); }
+html[data-paleta="es"] .cn-g-trilho b.cn-g-total.er { border-color: #c0922b; background: color-mix(in srgb, #c0922b 15%, transparent); }
+html[data-paleta="es"] .cn-g-hoje { background: #d43c3d; }
+html[data-paleta="es"] .cn-g-leg i.ok { background: #852626; }
+html[data-paleta="es"] .cn-g-leg i.and { background: var(--laranja, #c43032); }
+html[data-paleta="es"] .cn-g-leg i.er { background: #c0922b; }
+html[data-paleta="es"] .cn-g-leg i.hj { background: #d43c3d; }
+html[data-paleta="es"] [data-produto="obras"] .marca-logo { background: #ffffff; }
+html[data-paleta="es"] [data-produto="obras"] .lat .marca small { color: #ef9c9d; }
+html[data-paleta="es"] [data-produto="obras"] .lat .busca-lat { color: #dfb6b6; }
+html[data-paleta="es"] [data-produto="obras"] .lat a.item .cont,
+html[data-paleta="es"] [data-produto="obras"] .faixa a.cta,
+html[data-paleta="es"] [data-produto="obras"] .faixa a.cta:hover { background: #e87172; color: #1d1214; }
+html[data-paleta="es"] [data-produto="obras"] .lat a.item.ativo { background: #e87172; color: #1d1214; }
+html[data-paleta="en"][data-produto="obras"] { --acc: #1b3f87; --acc-tx: #ffffff; --laranja: #244ea4; --carvao: #0c1638; --bg: #e2e7f4; --lateral: #d3daeb; --painel: #f5f7fb; --painel-2: #e8ecf7; --hover: rgba(15, 33, 71, 0.05); --ativo: rgba(15, 33, 71, 0.08); --borda: #e8c3c5; --borda-2: #dba7aa; --tx: #0f193a; --tx-2: #2b4478; --tx-3: #5c6480; --info: #1b3f87; --info-bg: #e7ebf6; --neutro-bg: #d4dbec; --sombra-1: 0 1px 0 rgba(13, 24, 60, .06); --sombra-2: 0 2px 0 rgba(13, 24, 60, .05), 0 10px 24px -12px rgba(13, 24, 60, .25); }
+html[data-paleta="en"][data-produto="obras"][data-tema="escuro"] { --acc: #5b8df1; --acc-tx: #070f28; --laranja: #6795f2; --bg: #0a0f20; --lateral: #0d1328; --painel: #0d183c; --painel-2: #101f3d; --borda: #1a2e56; --borda-2: #223a6c; --tx: #ebeff8; --tx-2: #a1b6df; --tx-3: #6a88c6; --info: #5b8df1; --info-bg: rgba(91, 141, 241, .14); --neutro-bg: #142546; }
+html[data-paleta="en"] [data-produto="obras"] .btn.pri { box-shadow: 0 3px 0 #103580; }
+html[data-paleta="en"] [data-produto="obras"] .btn.pri:active { box-shadow: 0 1px 0 #103580; }
+html[data-paleta="en"] [data-produto="obras"] .lat { --tx: #f0f2f9; --tx-2: #bacae9; --tx-3: #88a1d4; --hover: rgba(255, 255, 255, .07); --painel: rgba(255, 255, 255, .08); --borda: rgba(255, 255, 255, .12); --neutro-bg: rgba(255, 255, 255, .12); }
+html[data-paleta="en"] [data-produto="obras"] .lat .marca b { color: #ffffff; }
+html[data-paleta="en"] [data-produto="obras"] .lat a.item.ativo .cont { color: #ffffff; }
+html[data-paleta="en"] }
+
+@media (max-width: 900px) { box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, .5); }
+html[data-paleta="en"] .cn-num { color: #f0f2f9; }
+html[data-paleta="en"] .cn-num div { border-left: 1px solid rgba(255, 255, 255, .1); }
+html[data-paleta="en"] .cn-num span { color: #a5abb9; }
+html[data-paleta="en"] .cn-capa { color: #ffffff; background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .05) 0 14px, transparent 14px 28px), linear-gradient(135deg, #22242a, #0d183c); }
+html[data-paleta="en"] .cn-capa.foto::before { background: linear-gradient(180deg, rgba(0, 0, 0, .15), rgba(0, 0, 0, .65)); }
+html[data-paleta="en"] .cn-capa .agora { color: #d1d9ee; }
+html[data-paleta="en"] .cn-etapas i.p { background: #193592; }
+html[data-paleta="en"][data-tema="escuro"] .cn-etapas i.f { background: #dadee9; }
+html[data-paleta="en"] .cn-fab { box-shadow: 0 10px 24px -8px rgba(27, 80, 186, .8); }
+@media (max-width: 900px) {
+html[data-paleta="en"] .cn-num div:nth-child(n+3) { border-top: 1px solid rgba(255, 255, 255, .1); }
+}
+html[data-paleta="en"] .cn-g-trilho b.and { background: var(--laranja, #225cd2); }
+html[data-paleta="en"] .cn-g-trilho b.ok { background: #193592; }
+html[data-paleta="en"] .cn-g-trilho b.er { background: #bc2f37; }
+html[data-paleta="en"] .cn-g-trilho b.cn-g-total { background: color-mix(in srgb, var(--laranja, #225cd2) 22%, transparent); border: 1.5px solid var(--laranja, #225cd2); }
+html[data-paleta="en"] .cn-g-trilho b.cn-g-total.er { border-color: #bc2f37; background: color-mix(in srgb, #bc2f37 15%, transparent); }
+html[data-paleta="en"] .cn-g-hoje { background: #2d69e3; }
+html[data-paleta="en"] .cn-g-leg i.ok { background: #193592; }
+html[data-paleta="en"] .cn-g-leg i.and { background: var(--laranja, #225cd2); }
+html[data-paleta="en"] .cn-g-leg i.er { background: #bc2f37; }
+html[data-paleta="en"] .cn-g-leg i.hj { background: #2d69e3; }
+html[data-paleta="en"] [data-produto="obras"] .marca-logo { background: #ffffff; }
+html[data-paleta="en"] [data-produto="obras"] .lat .marca small { color: #95b5f6; }
+html[data-paleta="en"] [data-produto="obras"] .lat .busca-lat { color: #afc1e6; }
+html[data-paleta="en"] [data-produto="obras"] .lat a.item .cont,
+html[data-paleta="en"] [data-produto="obras"] .faixa a.cta,
+html[data-paleta="en"] [data-produto="obras"] .faixa a.cta:hover { background: #6795f2; color: #070f28; }
+html[data-paleta="en"] [data-produto="obras"] .lat a.item.ativo { background: #6795f2; color: #070f28; }
+html[data-paleta="it"][data-produto="obras"] { --acc: #7d4125; --acc-tx: #ffffff; --laranja: #975231; --carvao: #22291b; --bg: #f2f0e4; --lateral: #eae6d4; --painel: #fafaf6; --painel-2: #f5f3ea; --hover: rgba(66, 35, 20, 0.05); --ativo: rgba(66, 35, 20, 0.08); --borda: #e5dbc6; --borda-2: #d6c8ac; --tx: #242c1d; --tx-2: #6e4735; --tx-3: #6e805c; --info: #7d4125; --info-bg: #f4f2e9; --neutro-bg: #ebe7d5; --sombra-1: 0 1px 0 rgba(36, 44, 29, .06); --sombra-2: 0 2px 0 rgba(36, 44, 29, .05), 0 10px 24px -12px rgba(36, 44, 29, .25); }
+html[data-paleta="it"][data-produto="obras"][data-tema="escuro"] { --acc: #e68f66; --acc-tx: #181c13; --laranja: #e89771; --bg: #151911; --lateral: #1a2015; --painel: #242c1d; --painel-2: #382015; --borda: #4f3021; --borda-2: #633d2b; --tx: #f6f5ed; --tx-2: #d7b8a9; --tx-3: #b98c77; --info: #e68f66; --info-bg: rgba(230, 143, 102, .14); --neutro-bg: #40261a; }
+html[data-paleta="it"] [data-produto="obras"] .btn.pri { box-shadow: 0 3px 0 #76371a; }
+html[data-paleta="it"] [data-produto="obras"] .btn.pri:active { box-shadow: 0 1px 0 #76371a; }
+html[data-paleta="it"] [data-produto="obras"] .lat { --tx: #f8f7f1; --tx-2: #e3cbc0; --tx-3: #caa492; --hover: rgba(255, 255, 255, .07); --painel: rgba(255, 255, 255, .08); --borda: rgba(255, 255, 255, .12); --neutro-bg: rgba(255, 255, 255, .12); }
+html[data-paleta="it"] [data-produto="obras"] .lat .marca b { color: #ffffff; }
+html[data-paleta="it"] [data-produto="obras"] .lat a.item.ativo .cont { color: #ffffff; }
+html[data-paleta="it"] }
+
+@media (max-width: 900px) { box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, .5); }
+html[data-paleta="it"] .cn-num { color: #f8f7f1; }
+html[data-paleta="it"] .cn-num div { border-left: 1px solid rgba(255, 255, 255, .1); }
+html[data-paleta="it"] .cn-num span { color: #b9b5a5; }
+html[data-paleta="it"] .cn-capa { color: #ffffff; background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .05) 0 14px, transparent 14px 28px), linear-gradient(135deg, #262a22, #242c1d); }
+html[data-paleta="it"] .cn-capa.foto::before { background: linear-gradient(180deg, rgba(0, 0, 0, .15), rgba(0, 0, 0, .65)); }
+html[data-paleta="it"] .cn-capa .agora { color: #ebe7d4; }
+html[data-paleta="it"] .cn-etapas i.p { background: #5a703b; }
+html[data-paleta="it"][data-tema="escuro"] .cn-etapas i.f { background: #e9e6da; }
+html[data-paleta="it"] .cn-fab { box-shadow: 0 10px 24px -8px rgba(173, 83, 40, .8); }
+@media (max-width: 900px) {
+html[data-paleta="it"] .cn-num div:nth-child(n+3) { border-top: 1px solid rgba(255, 255, 255, .1); }
+}
+html[data-paleta="it"] .cn-g-trilho b.and { background: var(--laranja, #c36031); }
+html[data-paleta="it"] .cn-g-trilho b.ok { background: #5a703b; }
+html[data-paleta="it"] .cn-g-trilho b.er { background: #b48a37; }
+html[data-paleta="it"] .cn-g-trilho b.cn-g-total { background: color-mix(in srgb, var(--laranja, #c36031) 22%, transparent); border: 1.5px solid var(--laranja, #c36031); }
+html[data-paleta="it"] .cn-g-trilho b.cn-g-total.er { border-color: #b48a37; background: color-mix(in srgb, #b48a37 15%, transparent); }
+html[data-paleta="it"] .cn-g-hoje { background: #d46d3c; }
+html[data-paleta="it"] .cn-g-leg i.ok { background: #5a703b; }
+html[data-paleta="it"] .cn-g-leg i.and { background: var(--laranja, #c36031); }
+html[data-paleta="it"] .cn-g-leg i.er { background: #b48a37; }
+html[data-paleta="it"] .cn-g-leg i.hj { background: #d46d3c; }
+html[data-paleta="it"] [data-produto="obras"] .marca-logo { background: #ffffff; }
+html[data-paleta="it"] [data-produto="obras"] .lat .marca small { color: #efb79c; }
+html[data-paleta="it"] [data-produto="obras"] .lat .busca-lat { color: #dfc3b6; }
+html[data-paleta="it"] [data-produto="obras"] .lat a.item .cont,
+html[data-paleta="it"] [data-produto="obras"] .faixa a.cta,
+html[data-paleta="it"] [data-produto="obras"] .faixa a.cta:hover { background: #e89771; color: #181c13; }
+html[data-paleta="it"] [data-produto="obras"] .lat a.item.ativo { background: #e89771; color: #181c13; }
+html[data-paleta="fr"][data-produto="obras"] { --acc: #392979; --acc-tx: #ffffff; --laranja: #483593; --carvao: #1d192b; --bg: #ebe2f4; --lateral: #dfd3eb; --painel: #f8f5fb; --painel-2: #f0e9f6; --hover: rgba(30, 22, 64, 0.05); --ativo: rgba(30, 22, 64, 0.08); --borda: #cfc8e3; --borda-2: #b8afd3; --tx: #1f1b2e; --tx-2: #43396a; --tx-3: #645c80; --info: #392979; --info-bg: #efe7f6; --neutro-bg: #e0d4ec; --sombra-1: 0 1px 0 rgba(31, 27, 46, .06); --sombra-2: 0 2px 0 rgba(31, 27, 46, .05), 0 10px 24px -12px rgba(31, 27, 46, .25); }
+html[data-paleta="fr"][data-produto="obras"][data-tema="escuro"] { --acc: #826ae2; --acc-tx: #14111e; --laranja: #8b75e4; --bg: #12101a; --lateral: #171421; --painel: #1f1b2e; --painel-2: #1d1736; --borda: #2c244c; --borda-2: #382e60; --tx: #f2ebf8; --tx-2: #b4acd4; --tx-3: #877bb5; --info: #826ae2; --info-bg: rgba(130, 106, 226, .14); --neutro-bg: #231c3e; }
+html[data-paleta="fr"] [data-produto="obras"] .btn.pri { box-shadow: 0 3px 0 #2e1d73; }
+html[data-paleta="fr"] [data-produto="obras"] .btn.pri:active { box-shadow: 0 1px 0 #2e1d73; }
+html[data-paleta="fr"] [data-produto="obras"] .lat { --tx: #f4f0f9; --tx-2: #c8c2e1; --tx-3: #9f96c6; --hover: rgba(255, 255, 255, .07); --painel: rgba(255, 255, 255, .08); --borda: rgba(255, 255, 255, .12); --neutro-bg: rgba(255, 255, 255, .12); }
+html[data-paleta="fr"] [data-produto="obras"] .lat .marca b { color: #ffffff; }
+html[data-paleta="fr"] [data-produto="obras"] .lat a.item.ativo .cont { color: #ffffff; }
+html[data-paleta="fr"] }
+
+@media (max-width: 900px) { box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, .5); }
+html[data-paleta="fr"] .cn-num { color: #f4f0f9; }
+html[data-paleta="fr"] .cn-num div { border-left: 1px solid rgba(255, 255, 255, .1); }
+html[data-paleta="fr"] .cn-num span { color: #afa5b9; }
+html[data-paleta="fr"] .cn-capa { color: #ffffff; background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .05) 0 14px, transparent 14px 28px), linear-gradient(135deg, #24222a, #1f1b2e); }
+html[data-paleta="fr"] .cn-capa.foto::before { background: linear-gradient(180deg, rgba(0, 0, 0, .15), rgba(0, 0, 0, .65)); }
+html[data-paleta="fr"] .cn-capa .agora { color: #e0d2ee; }
+html[data-paleta="fr"] .cn-etapas i.p { background: #453774; }
+html[data-paleta="fr"][data-tema="escuro"] .cn-etapas i.f { background: #e2dae9; }
+html[data-paleta="fr"] .cn-fab { box-shadow: 0 10px 24px -8px rgba(70, 45, 168, .8); }
+@media (max-width: 900px) {
+html[data-paleta="fr"] .cn-num div:nth-child(n+3) { border-top: 1px solid rgba(255, 255, 255, .1); }
+}
+html[data-paleta="fr"] .cn-g-trilho b.and { background: var(--laranja, #5237bd); }
+html[data-paleta="fr"] .cn-g-trilho b.ok { background: #453774; }
+html[data-paleta="fr"] .cn-g-trilho b.er { background: #593ead; }
+html[data-paleta="fr"] .cn-g-trilho b.cn-g-total { background: color-mix(in srgb, var(--laranja, #5237bd) 22%, transparent); border: 1.5px solid var(--laranja, #5237bd); }
+html[data-paleta="fr"] .cn-g-trilho b.cn-g-total.er { border-color: #593ead; background: color-mix(in srgb, #593ead 15%, transparent); }
+html[data-paleta="fr"] .cn-g-hoje { background: #5e42ce; }
+html[data-paleta="fr"] .cn-g-leg i.ok { background: #453774; }
+html[data-paleta="fr"] .cn-g-leg i.and { background: var(--laranja, #5237bd); }
+html[data-paleta="fr"] .cn-g-leg i.er { background: #593ead; }
+html[data-paleta="fr"] .cn-g-leg i.hj { background: #5e42ce; }
+html[data-paleta="fr"] [data-produto="obras"] .marca-logo { background: #ffffff; }
+html[data-paleta="fr"] [data-produto="obras"] .lat .marca small { color: #ae9fec; }
+html[data-paleta="fr"] [data-produto="obras"] .lat .busca-lat { color: #c0b9dc; }
+html[data-paleta="fr"] [data-produto="obras"] .lat a.item .cont,
+html[data-paleta="fr"] [data-produto="obras"] .faixa a.cta,
+html[data-paleta="fr"] [data-produto="obras"] .faixa a.cta:hover { background: #8b75e4; color: #14111e; }
+html[data-paleta="fr"] [data-produto="obras"] .lat a.item.ativo { background: #8b75e4; color: #14111e; }

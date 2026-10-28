@@ -1,0 +1,206 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de demos/sistemas/gestao-essencial/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --mesa: #e5d4c6; --papel: #f7f2ea; --papel-2: #f1e9dd; --pauta: #e4d1c2; --tinta: #182d3e; --tinta-2: #46535e; --tinta-3: #6c7175; --veltria: #52616d; --veltria-escuro: #3f4c57; --celeste: #bfb6a9; --ambar: #d9921c; --tijolo: #b5692b; --verde: #3d6b55; --aba-1: #a7a39d; --aba-2: #8f867a; --aba-3: #52616d; --aba-4: #2e4a60; --aba-5: #182d3e; }
+html[data-paleta="pt-PT"] .faixa-demo { color: #e8e5e0; }
+html[data-paleta="pt-PT"] .faixa-demo a { color: #ffffff; }
+html[data-paleta="pt-PT"] .faixa-demo button { border: 1px solid rgba(255, 255, 255, .35); color: #ffffff; }
+html[data-paleta="pt-PT"] .caderno { box-shadow: 0 1px 0 #c9c2b8, 0 30px 60px -40px rgba(24, 45, 62, .45); }
+html[data-paleta="pt-PT"] .caderno::before { background: repeating-linear-gradient(180deg, transparent 0 14px, rgba(24, 45, 62, .18) 14px 16px), linear-gradient(90deg, #e6ded3, var(--papel)); }
+html[data-paleta="pt-PT"] .comando { background: #faf7f2; }
+html[data-paleta="pt-PT"] .comando:focus-within { box-shadow: 0 0 0 4px rgba(82, 97, 109, .1); }
+html[data-paleta="pt-PT"] .sugestoes { background: #faf7f2; box-shadow: 0 24px 40px -20px rgba(24, 45, 62, .4); }
+html[data-paleta="pt-PT"] .divisorias a { color: #ffffff; }
+html[data-paleta="pt-PT"] .divisorias a[aria-current="page"] { box-shadow: 6px 0 14px -10px rgba(24, 45, 62, .5); }
+html[data-paleta="pt-PT"] .mt { background: linear-gradient(100deg, rgba(168, 154, 134, .75), rgba(168, 154, 134, .55)) no-repeat 0 96% / 100% .62em; }
+html[data-paleta="pt-PT"] .mt.ambar { background-image: linear-gradient(100deg, rgba(220, 135, 66, .7), rgba(220, 135, 66, .5)); }
+html[data-paleta="pt-PT"] .lembretes li { background: #faf7f2; }
+html[data-paleta="pt-PT"] .btn:hover { background: rgba(24, 45, 62, .06); }
+html[data-paleta="pt-PT"] .btn.pri { color: #ffffff; }
+html[data-paleta="pt-PT"] .busca-pdv { background: #faf7f2; }
+html[data-paleta="pt-PT"] .prod { background: #faf7f2; }
+html[data-paleta="pt-PT"] .prod .ini { color: #ffffff; }
+html[data-paleta="pt-PT"] .comanda { background: #fbf9f5; -webkit-mask: radial-gradient(9px at 50% 100%, transparent 98%, #000000) 0 0 / 18px 100% repeat-x; mask: radial-gradient(9px at 50% 100%, transparent 98%, #000000) 0 0 / 18px 100% repeat-x; }
+html[data-paleta="pt-PT"] .pagamentos button[aria-pressed="true"] { background: rgba(82, 97, 109, .08); }
+html[data-paleta="pt-PT"] .campo select,
+html[data-paleta="pt-PT"] .campo input { background: #faf7f2; }
+html[data-paleta="pt-PT"] .fundo { background: rgba(24, 45, 62, .4); }
+html[data-paleta="pt-PT"] .aviso { box-shadow: 0 16px 30px -16px rgba(24, 45, 62, .7); }
+@media (max-width: 860px) {
+html[data-paleta="pt-PT"] .divisorias a[aria-current="page"] { box-shadow: 0 -6px 14px -10px rgba(24, 45, 62, .5); }
+html[data-paleta="pt-PT"] .barra-comanda { color: #ffffff; box-shadow: 0 16px 30px -14px rgba(24, 45, 62, .7); }
+html[data-paleta="pt-PT"] .barra-comanda .btn { background: #ffffff; border-color: #ffffff; }
+}
+html[data-paleta="pt-PT"] { --aba-6: #264054; --gx-acento-tx: #ffffff; --gx-suave: rgba(82, 97, 109, .1); }
+html[data-paleta="pt-PT"] .prod .sem.peso { background: rgba(82, 97, 109, .14); }
+html[data-paleta="pt-PT"] .cupom-papel { background: #ffffff; color: #111111; }
+html[data-paleta="pt-PT"] .cupom-papel > small { color: #555555; }
+html[data-paleta="pt-PT"] .cupom-papel hr { border-top: 1px dashed #bbbbbb; }
+html[data-paleta="pt-PT"] .cupom-papel .cl small { color: #666666; }
+html[data-paleta="pt-PT"] .camera-caixa video { background: #000000; }
+html[data-paleta="pt-PT"] { --aba-7: #46535e; }
+html[data-paleta="pt-PT"] .aviso-ass { background: #ecdeca; }
+html[data-paleta="pt-PT"] .trava { background: rgba(24, 45, 62, .82); }
+html[data-paleta="pt-PT"] .pix-falso { background: repeating-conic-gradient(var(--tinta) 0 25%, #ffffff 0 50%) 0 0 / 22px 22px; border: 10px solid #ffffff; }
+html[data-paleta="es"] { --mesa: #e7dcc4; --papel: #f7f1ea; --papel-2: #f1e8dd; --pauta: #e6dac0; --tinta: #391d22; --tinta-2: #5e464b; --tinta-3: #756c6e; --veltria: #6d5257; --veltria-escuro: #573f44; --celeste: #bfb5a9; --ambar: #d9921c; --tijolo: #b88c28; --verde: #3d6b55; --aba-1: #a7a29d; --aba-2: #8f857a; --aba-3: #6d5257; --aba-4: #58363d; --aba-5: #391d22; }
+html[data-paleta="es"] .faixa-demo { color: #e8e4e0; }
+html[data-paleta="es"] .faixa-demo a { color: #ffffff; }
+html[data-paleta="es"] .faixa-demo button { border: 1px solid rgba(255, 255, 255, .35); color: #ffffff; }
+html[data-paleta="es"] .caderno { box-shadow: 0 1px 0 #c9c1b8, 0 30px 60px -40px rgba(57, 29, 34, .45); }
+html[data-paleta="es"] .caderno::before { background: repeating-linear-gradient(180deg, transparent 0 14px, rgba(57, 29, 34, .18) 14px 16px), linear-gradient(90deg, #e6ddd3, var(--papel)); }
+html[data-paleta="es"] .comando { background: #fbf6f1; }
+html[data-paleta="es"] .comando:focus-within { box-shadow: 0 0 0 4px rgba(109, 82, 87, .1); }
+html[data-paleta="es"] .sugestoes { background: #fbf6f1; box-shadow: 0 24px 40px -20px rgba(57, 29, 34, .4); }
+html[data-paleta="es"] .divisorias a { color: #ffffff; }
+html[data-paleta="es"] .divisorias a[aria-current="page"] { box-shadow: 6px 0 14px -10px rgba(57, 29, 34, .5); }
+html[data-paleta="es"] .mt { background: linear-gradient(100deg, rgba(168, 152, 134, .75), rgba(168, 152, 134, .55)) no-repeat 0 96% / 100% .62em; }
+html[data-paleta="es"] .mt.ambar { background-image: linear-gradient(100deg, rgba(223, 174, 63, .7), rgba(223, 174, 63, .5)); }
+html[data-paleta="es"] .lembretes li { background: #fbf6f1; }
+html[data-paleta="es"] .btn:hover { background: rgba(57, 29, 34, .06); }
+html[data-paleta="es"] .btn.pri { color: #ffffff; }
+html[data-paleta="es"] .busca-pdv { background: #fbf6f1; }
+html[data-paleta="es"] .prod { background: #fbf6f1; }
+html[data-paleta="es"] .prod .ini { color: #ffffff; }
+html[data-paleta="es"] .comanda { background: #fcf8f4; -webkit-mask: radial-gradient(9px at 50% 100%, transparent 98%, #000000) 0 0 / 18px 100% repeat-x; mask: radial-gradient(9px at 50% 100%, transparent 98%, #000000) 0 0 / 18px 100% repeat-x; }
+html[data-paleta="es"] .pagamentos button[aria-pressed="true"] { background: rgba(109, 82, 87, .08); }
+html[data-paleta="es"] .campo select,
+html[data-paleta="es"] .campo input { background: #fbf6f1; }
+html[data-paleta="es"] .fundo { background: rgba(57, 29, 34, .4); }
+html[data-paleta="es"] .aviso { box-shadow: 0 16px 30px -16px rgba(57, 29, 34, .7); }
+@media (max-width: 860px) {
+html[data-paleta="es"] .divisorias a[aria-current="page"] { box-shadow: 0 -6px 14px -10px rgba(57, 29, 34, .5); }
+html[data-paleta="es"] .barra-comanda { color: #ffffff; box-shadow: 0 16px 30px -14px rgba(57, 29, 34, .7); }
+html[data-paleta="es"] .barra-comanda .btn { background: #ffffff; border-color: #ffffff; }
+}
+html[data-paleta="es"] { --aba-6: #4d2d34; --gx-acento-tx: #ffffff; --gx-suave: rgba(109, 82, 87, .1); }
+html[data-paleta="es"] .prod .sem.peso { background: rgba(109, 82, 87, .14); }
+html[data-paleta="es"] .cupom-papel { background: #ffffff; color: #111111; }
+html[data-paleta="es"] .cupom-papel > small { color: #555555; }
+html[data-paleta="es"] .cupom-papel hr { border-top: 1px dashed #bbbbbb; }
+html[data-paleta="es"] .cupom-papel .cl small { color: #666666; }
+html[data-paleta="es"] .camera-caixa video { background: #000000; }
+html[data-paleta="es"] { --aba-7: #5e464b; }
+html[data-paleta="es"] .aviso-ass { background: #eedcc8; }
+html[data-paleta="es"] .trava { background: rgba(57, 29, 34, .82); }
+html[data-paleta="es"] .pix-falso { background: repeating-conic-gradient(var(--tinta) 0 25%, #ffffff 0 50%) 0 0 / 22px 22px; border: 10px solid #ffffff; }
+html[data-paleta="en"] { --mesa: #e5c6c8; --papel: #eaeef7; --papel-2: #dde3f1; --pauta: #e4c2c4; --tinta: #0d1b49; --tinta-2: #464c5e; --tinta-3: #6c6e75; --veltria: #52586d; --veltria-escuro: #3f4557; --celeste: #a9afbf; --ambar: #d9921c; --tijolo: #b42c34; --verde: #3d6b55; --aba-1: #9da0a7; --aba-2: #7a808f; --aba-3: #52586d; --aba-4: #1b3073; --aba-5: #0d1b49; }
+html[data-paleta="en"] .faixa-demo { color: #e0e2e8; }
+html[data-paleta="en"] .faixa-demo a { color: #ffffff; }
+html[data-paleta="en"] .faixa-demo button { border: 1px solid rgba(255, 255, 255, .35); color: #ffffff; }
+html[data-paleta="en"] .caderno { box-shadow: 0 1px 0 #b8bdc9, 0 30px 60px -40px rgba(13, 27, 73, .45); }
+html[data-paleta="en"] .caderno::before { background: repeating-linear-gradient(180deg, transparent 0 14px, rgba(13, 27, 73, .18) 14px 16px), linear-gradient(90deg, #d3d8e6, var(--papel)); }
+html[data-paleta="en"] .comando { background: #f2f4fa; }
+html[data-paleta="en"] .comando:focus-within { box-shadow: 0 0 0 4px rgba(82, 88, 109, .1); }
+html[data-paleta="en"] .sugestoes { background: #f2f4fa; box-shadow: 0 24px 40px -20px rgba(13, 27, 73, .4); }
+html[data-paleta="en"] .divisorias a { color: #ffffff; }
+html[data-paleta="en"] .divisorias a[aria-current="page"] { box-shadow: 6px 0 14px -10px rgba(13, 27, 73, .5); }
+html[data-paleta="en"] .mt { background: linear-gradient(100deg, rgba(134, 144, 168, .75), rgba(134, 144, 168, .55)) no-repeat 0 96% / 100% .62em; }
+html[data-paleta="en"] .mt.ambar { background-image: linear-gradient(100deg, rgba(220, 66, 76, .7), rgba(220, 66, 76, .5)); }
+html[data-paleta="en"] .lembretes li { background: #f2f4fa; }
+html[data-paleta="en"] .btn:hover { background: rgba(13, 27, 73, .06); }
+html[data-paleta="en"] .btn.pri { color: #ffffff; }
+html[data-paleta="en"] .busca-pdv { background: #f2f4fa; }
+html[data-paleta="en"] .prod { background: #f2f4fa; }
+html[data-paleta="en"] .prod .ini { color: #ffffff; }
+html[data-paleta="en"] .comanda { background: #f5f7fb; -webkit-mask: radial-gradient(9px at 50% 100%, transparent 98%, #000000) 0 0 / 18px 100% repeat-x; mask: radial-gradient(9px at 50% 100%, transparent 98%, #000000) 0 0 / 18px 100% repeat-x; }
+html[data-paleta="en"] .pagamentos button[aria-pressed="true"] { background: rgba(82, 88, 109, .08); }
+html[data-paleta="en"] .campo select,
+html[data-paleta="en"] .campo input { background: #f2f4fa; }
+html[data-paleta="en"] .fundo { background: rgba(13, 27, 73, .4); }
+html[data-paleta="en"] .aviso { box-shadow: 0 16px 30px -16px rgba(13, 27, 73, .7); }
+@media (max-width: 860px) {
+html[data-paleta="en"] .divisorias a[aria-current="page"] { box-shadow: 0 -6px 14px -10px rgba(13, 27, 73, .5); }
+html[data-paleta="en"] .barra-comanda { color: #ffffff; box-shadow: 0 16px 30px -14px rgba(13, 27, 73, .7); }
+html[data-paleta="en"] .barra-comanda .btn { background: #ffffff; border-color: #ffffff; }
+}
+html[data-paleta="en"] { --aba-6: #172863; --gx-acento-tx: #ffffff; --gx-suave: rgba(82, 88, 109, .1); }
+html[data-paleta="en"] .prod .sem.peso { background: rgba(82, 88, 109, .14); }
+html[data-paleta="en"] .cupom-papel { background: #ffffff; color: #111111; }
+html[data-paleta="en"] .cupom-papel > small { color: #555555; }
+html[data-paleta="en"] .cupom-papel hr { border-top: 1px dashed #bbbbbb; }
+html[data-paleta="en"] .cupom-papel .cl small { color: #666666; }
+html[data-paleta="en"] .camera-caixa video { background: #000000; }
+html[data-paleta="en"] { --aba-7: #464c5e; }
+html[data-paleta="en"] .aviso-ass { background: #cad4ec; }
+html[data-paleta="en"] .trava { background: rgba(13, 27, 73, .82); }
+html[data-paleta="en"] .pix-falso { background: repeating-conic-gradient(var(--tinta) 0 25%, #ffffff 0 50%) 0 0 / 22px 22px; border: 10px solid #ffffff; }
+html[data-paleta="it"] { --mesa: #e2dac9; --papel: #f6f4eb; --papel-2: #f0ecde; --pauta: #e1d8c5; --tinta: #2d381e; --tinta-2: #525e46; --tinta-3: #70756c; --veltria: #606d52; --veltria-escuro: #4b573f; --celeste: #bfbba9; --ambar: #d9921c; --tijolo: #ac8434; --verde: #3d6b55; --aba-1: #a7a59d; --aba-2: #8f8b7a; --aba-3: #606d52; --aba-4: #4a5638; --aba-5: #2d381e; }
+html[data-paleta="it"] .faixa-demo { color: #e8e7e0; }
+html[data-paleta="it"] .faixa-demo a { color: #ffffff; }
+html[data-paleta="it"] .faixa-demo button { border: 1px solid rgba(255, 255, 255, .35); color: #ffffff; }
+html[data-paleta="it"] .caderno { box-shadow: 0 1px 0 #c9c6b8, 0 30px 60px -40px rgba(45, 56, 30, .45); }
+html[data-paleta="it"] .caderno::before { background: repeating-linear-gradient(180deg, transparent 0 14px, rgba(45, 56, 30, .18) 14px 16px), linear-gradient(90deg, #e6e3d3, var(--papel)); }
+html[data-paleta="it"] .comando { background: #f9f8f3; }
+html[data-paleta="it"] .comando:focus-within { box-shadow: 0 0 0 4px rgba(96, 109, 82, .1); }
+html[data-paleta="it"] .sugestoes { background: #f9f8f3; box-shadow: 0 24px 40px -20px rgba(45, 56, 30, .4); }
+html[data-paleta="it"] .divisorias a { color: #ffffff; }
+html[data-paleta="it"] .divisorias a[aria-current="page"] { box-shadow: 6px 0 14px -10px rgba(45, 56, 30, .5); }
+html[data-paleta="it"] .mt { background: linear-gradient(100deg, rgba(168, 162, 134, .75), rgba(168, 162, 134, .55)) no-repeat 0 96% / 100% .62em; }
+html[data-paleta="it"] .mt.ambar { background-image: linear-gradient(100deg, rgba(211, 166, 75, .7), rgba(211, 166, 75, .5)); }
+html[data-paleta="it"] .lembretes li { background: #f9f8f3; }
+html[data-paleta="it"] .btn:hover { background: rgba(45, 56, 30, .06); }
+html[data-paleta="it"] .btn.pri { color: #ffffff; }
+html[data-paleta="it"] .busca-pdv { background: #f9f8f3; }
+html[data-paleta="it"] .prod { background: #f9f8f3; }
+html[data-paleta="it"] .prod .ini { color: #ffffff; }
+html[data-paleta="it"] .comanda { background: #fafaf6; -webkit-mask: radial-gradient(9px at 50% 100%, transparent 98%, #000000) 0 0 / 18px 100% repeat-x; mask: radial-gradient(9px at 50% 100%, transparent 98%, #000000) 0 0 / 18px 100% repeat-x; }
+html[data-paleta="it"] .pagamentos button[aria-pressed="true"] { background: rgba(96, 109, 82, .08); }
+html[data-paleta="it"] .campo select,
+html[data-paleta="it"] .campo input { background: #f9f8f3; }
+html[data-paleta="it"] .fundo { background: rgba(45, 56, 30, .4); }
+html[data-paleta="it"] .aviso { box-shadow: 0 16px 30px -16px rgba(45, 56, 30, .7); }
+@media (max-width: 860px) {
+html[data-paleta="it"] .divisorias a[aria-current="page"] { box-shadow: 0 -6px 14px -10px rgba(45, 56, 30, .5); }
+html[data-paleta="it"] .barra-comanda { color: #ffffff; box-shadow: 0 16px 30px -14px rgba(45, 56, 30, .7); }
+html[data-paleta="it"] .barra-comanda .btn { background: #ffffff; border-color: #ffffff; }
+}
+html[data-paleta="it"] { --aba-6: #3f4b2f; --gx-acento-tx: #ffffff; --gx-suave: rgba(96, 109, 82, .1); }
+html[data-paleta="it"] .prod .sem.peso { background: rgba(96, 109, 82, .14); }
+html[data-paleta="it"] .cupom-papel { background: #ffffff; color: #111111; }
+html[data-paleta="it"] .cupom-papel > small { color: #555555; }
+html[data-paleta="it"] .cupom-papel hr { border-top: 1px dashed #bbbbbb; }
+html[data-paleta="it"] .cupom-papel .cl small { color: #666666; }
+html[data-paleta="it"] .camera-caixa video { background: #000000; }
+html[data-paleta="it"] { --aba-7: #525e46; }
+html[data-paleta="it"] .aviso-ass { background: #e8e3ce; }
+html[data-paleta="it"] .trava { background: rgba(45, 56, 30, .82); }
+html[data-paleta="it"] .pix-falso { background: repeating-conic-gradient(var(--tinta) 0 25%, #ffffff 0 50%) 0 0 / 22px 22px; border: 10px solid #ffffff; }
+html[data-paleta="fr"] { --mesa: #d0cbe0; --papel: #f1eaf7; --papel-2: #e7ddf1; --pauta: #cdc8de; --tinta: #231c3a; --tinta-2: #4c465e; --tinta-3: #6e6c75; --veltria: #58526d; --veltria-escuro: #453f57; --celeste: #b4a9bf; --ambar: #d9921c; --tijolo: #553ba5; --verde: #3d6b55; --aba-1: #a29da7; --aba-2: #857a8f; --aba-3: #58526d; --aba-4: #3d345a; --aba-5: #231c3a; }
+html[data-paleta="fr"] .faixa-demo { color: #e4e0e8; }
+html[data-paleta="fr"] .faixa-demo a { color: #ffffff; }
+html[data-paleta="fr"] .faixa-demo button { border: 1px solid rgba(255, 255, 255, .35); color: #ffffff; }
+html[data-paleta="fr"] .caderno { box-shadow: 0 1px 0 #c1b8c9, 0 30px 60px -40px rgba(35, 28, 58, .45); }
+html[data-paleta="fr"] .caderno::before { background: repeating-linear-gradient(180deg, transparent 0 14px, rgba(35, 28, 58, .18) 14px 16px), linear-gradient(90deg, #ddd3e6, var(--papel)); }
+html[data-paleta="fr"] .comando { background: #f6f2fa; }
+html[data-paleta="fr"] .comando:focus-within { box-shadow: 0 0 0 4px rgba(88, 82, 109, .1); }
+html[data-paleta="fr"] .sugestoes { background: #f6f2fa; box-shadow: 0 24px 40px -20px rgba(35, 28, 58, .4); }
+html[data-paleta="fr"] .divisorias a { color: #ffffff; }
+html[data-paleta="fr"] .divisorias a[aria-current="page"] { box-shadow: 6px 0 14px -10px rgba(35, 28, 58, .5); }
+html[data-paleta="fr"] .mt { background: linear-gradient(100deg, rgba(151, 134, 168, .75), rgba(151, 134, 168, .55)) no-repeat 0 96% / 100% .62em; }
+html[data-paleta="fr"] .mt.ambar { background-image: linear-gradient(100deg, rgba(111, 81, 205, .7), rgba(111, 81, 205, .5)); }
+html[data-paleta="fr"] .lembretes li { background: #f6f2fa; }
+html[data-paleta="fr"] .btn:hover { background: rgba(35, 28, 58, .06); }
+html[data-paleta="fr"] .btn.pri { color: #ffffff; }
+html[data-paleta="fr"] .busca-pdv { background: #f6f2fa; }
+html[data-paleta="fr"] .prod { background: #f6f2fa; }
+html[data-paleta="fr"] .prod .ini { color: #ffffff; }
+html[data-paleta="fr"] .comanda { background: #f8f5fb; -webkit-mask: radial-gradient(9px at 50% 100%, transparent 98%, #000000) 0 0 / 18px 100% repeat-x; mask: radial-gradient(9px at 50% 100%, transparent 98%, #000000) 0 0 / 18px 100% repeat-x; }
+html[data-paleta="fr"] .pagamentos button[aria-pressed="true"] { background: rgba(88, 82, 109, .08); }
+html[data-paleta="fr"] .campo select,
+html[data-paleta="fr"] .campo input { background: #f6f2fa; }
+html[data-paleta="fr"] .fundo { background: rgba(35, 28, 58, .4); }
+html[data-paleta="fr"] .aviso { box-shadow: 0 16px 30px -16px rgba(35, 28, 58, .7); }
+@media (max-width: 860px) {
+html[data-paleta="fr"] .divisorias a[aria-current="page"] { box-shadow: 0 -6px 14px -10px rgba(35, 28, 58, .5); }
+html[data-paleta="fr"] .barra-comanda { color: #ffffff; box-shadow: 0 16px 30px -14px rgba(35, 28, 58, .7); }
+html[data-paleta="fr"] .barra-comanda .btn { background: #ffffff; border-color: #ffffff; }
+}
+html[data-paleta="fr"] { --aba-6: #342c4e; --gx-acento-tx: #ffffff; --gx-suave: rgba(88, 82, 109, .1); }
+html[data-paleta="fr"] .prod .sem.peso { background: rgba(88, 82, 109, .14); }
+html[data-paleta="fr"] .cupom-papel { background: #ffffff; color: #111111; }
+html[data-paleta="fr"] .cupom-papel > small { color: #555555; }
+html[data-paleta="fr"] .cupom-papel hr { border-top: 1px dashed #bbbbbb; }
+html[data-paleta="fr"] .cupom-papel .cl small { color: #666666; }
+html[data-paleta="fr"] .camera-caixa video { background: #000000; }
+html[data-paleta="fr"] { --aba-7: #4c465e; }
+html[data-paleta="fr"] .aviso-ass { background: #dbcbeb; }
+html[data-paleta="fr"] .trava { background: rgba(35, 28, 58, .82); }
+html[data-paleta="fr"] .pix-falso { background: repeating-conic-gradient(var(--tinta) 0 25%, #ffffff 0 50%) 0 0 / 22px 22px; border: 10px solid #ffffff; }
