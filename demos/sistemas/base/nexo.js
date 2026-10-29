@@ -562,6 +562,7 @@ function montar(app, cfg) {
         <div class="conteudo" id="conteudo"></div></main>
     </div>`;
   const $ = (s) => document.querySelector(s);
+  document.addEventListener('pointerdown', (e) => { app.ultimoToque = { x: e.clientX, y: e.clientY }; }, true);
   const atualizaTemaRot = () => { const e = raiz.dataset.tema === 'escuro'; const a = $('[data-acao="tema"]'); a.innerHTML = `${ic(e ? 'sun' : 'moon')}<span>${e ? 'Tema claro' : 'Tema escuro'}</span>`; };
   atualizaTemaRot();
 
@@ -647,7 +648,13 @@ function montar(app, cfg) {
   // ações globais
   Object.assign(app.acoes, {
     recomecar: async () => { if (await confirmar('Apagar tudo o que você mudou e voltar aos dados de exemplo?', { rotulo: 'Recomeçar', titulo: 'Recomeçar a demonstração' })) { app.db.recomecar(); app.estado = {}; app.empresa = app.db.cfg.empresa || cfg.empresa; $('[data-empresa]').textContent = app.empresa; avisar('Dados de exemplo restaurados'); app.render(); } },
-    tema: () => { raiz.dataset.tema = raiz.dataset.tema === 'escuro' ? 'claro' : 'escuro'; try { localStorage.setItem('nexo-tema', raiz.dataset.tema); } catch { /* sem armazenamento */ } atualizaTemaRot(); app.render(); },
+    tema: () => {
+      const troca = () => { raiz.dataset.tema = raiz.dataset.tema === 'escuro' ? 'claro' : 'escuro'; try { localStorage.setItem('nexo-tema', raiz.dataset.tema); } catch { /* sem armazenamento */ } atualizaTemaRot(); app.render(); };
+      // o tema novo abre num circulo a partir do ponto clicado (View Transitions); sem suporte ou com movimento reduzido, troca direto
+      if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return troca();
+      const { x, y } = app.ultimoToque || { x: innerWidth - 40, y: 40 }, r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+      document.startViewTransition(troca).ready.then(() => document.documentElement.animate({ clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] }, { duration: 560, easing: 'cubic-bezier(.2,.7,.2,1)', pseudoElement: '::view-transition-new(root)' })).catch(() => {});
+    },
     menu: () => $('#app').classList.toggle('menu-aberto'),
     paleta,
     atalhos: () => modal({ titulo: 'Atalhos do teclado', largura: 460, corpo: `<div class="col" style="gap:9px">${[['Ctrl K', 'Buscar ou ir para qualquer lugar'], ['/', 'Buscar na lista'], ['N', 'Criar novo na página atual'], ...paginas.filter((p) => p.atalho).map((p) => [`G ${p.atalho.toUpperCase()}`, `Ir para ${p.rot}`]), ['Esc', 'Fechar janela ou ficha'], ['Ctrl Enter', 'Salvar o formulário aberto']].map(([k, t]) => `<div class="entre"><span class="mute-2">${esc(t)}</span><span>${k.split(' ').map((x) => `<kbd>${esc(x)}</kbd>`).join(' ')}</span></div>`).join('')}</div>`, botoes: [{ rotulo: 'Fechar', classe: 'pri', valor: true }] }),

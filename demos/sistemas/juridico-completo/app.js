@@ -473,6 +473,19 @@ document.addEventListener('input', (e) => {
   if (t.dataset.esc) { db.esc[t.dataset.esc] = t.value; guarda(); qs('#esc-nome').textContent = db.esc.nome; }
   if (t.dataset.meuNome !== undefined) { pessoa(db.eu).nome = t.value; guarda(); qs('#esc-usuario').textContent = `${t.value} · ${pessoa(db.eu).cargo.toLowerCase()}`; }
 });
+// cronômetro em "ilha" no topo: aparece em qualquer tela enquanto roda; o detalhe e a meta ficam em Horas
+setInterval(() => {
+  const c = db.cronometro; let el = document.getElementById('ilha-crono');
+  if (!c) { el?.remove(); return; }
+  if (!el) {
+    el = document.createElement('div'); el.id = 'ilha-crono'; el.setAttribute('role', 'status');
+    el.innerHTML = '<span class="ponto" aria-hidden="true"></span><b data-t></b><span class="o-que" data-o></span><a href="#horas" class="ver">Horas</a><button type="button" data-a="parar-crono">Parar e lançar</button>';
+    document.body.append(el);
+  }
+  const s2 = Math.floor((Date.now() - c.ini) / 1000);
+  el.querySelector('[data-t]').textContent = `${Math.floor(s2 / 3600)}:${String(Math.floor(s2 / 60) % 60).padStart(2, '0')}:${String(s2 % 60).padStart(2, '0')}`;
+  const o = `${c.desc} · ${cliente(processo(c.proc).cli).nome}`; if (el.querySelector('[data-o]').textContent !== o) el.querySelector('[data-o]').textContent = o;
+}, 1000);
 qs('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE); db = escritorio(); location.hash = '#pauta'; abre(); aviso('Demonstração recomeçada.'); });
 abre();
 

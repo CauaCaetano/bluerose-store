@@ -1584,3 +1584,25 @@ html[data-theme="light"] body::before {
   .sis-botoes .btn-primary { grid-column: 1 / -1 !important; grid-row: 1 !important; }
   .sis-botoes .btn { min-height: 48px; }
 }
+
+/* serviços: o que vai em toda entrega, página ou site, e outros serviços */
+.entrega { margin-top: 22px; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: color-mix(in srgb, var(--surface, #141922) 70%, transparent); }
+.entrega summary { cursor: pointer; list-style: none; display: grid; gap: 4px; padding: 18px 22px; }
+.entrega summary::-webkit-details-marker { display: none; }
+.entrega summary .t1 { font-weight: 600; font-size: 17px; } .entrega summary .t1::after { content: " +"; color: var(--accent); } .entrega details[open] summary .t1::after { content: " −"; }
+.entrega summary .t2 { color: var(--ink-2); font-size: 14.5px; }
+.entrega-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px 26px; padding: 4px 22px 22px; }
+.entrega-grade strong { display: block; margin-bottom: 8px; color: var(--accent); font-size: 14px; }
+.entrega-grade ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; color: var(--ink-2); font-size: 14px; line-height: 1.45; }
+.pagina-ou-site { margin-top: 14px; padding: 18px 22px; border: 1px dashed var(--line-2); border-radius: var(--r-lg); }
+.pagina-ou-site .t1 { font-weight: 600; margin-bottom: 6px; } .pagina-ou-site .t2 { color: var(--ink-2); font-size: 14.5px; line-height: 1.55; }
+.tambem { margin-top: 34px; } .tambem h3 { font-size: 21px; margin-bottom: 14px; }
+.tambem-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.tambem-grade article { display: flex; flex-direction: column; gap: 10px; padding: 22px; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: rgba(20, 25, 34, 0.55); }
+.tambem-grade article .preco2-tag { align-self: flex-start; } .tambem-grade h4 { font-size: 19px; margin: 0; }
+.tambem-grade p { color: var(--ink-2); font-size: 14.5px; line-height: 1.55; margin: 0; }
+.tambem-preco b { color: var(--ink); font-size: 22px; } .tambem-preco span { font-size: 13.5px; }
+.tambem-grade .btn { margin-top: auto; align-self: flex-start; }
+.tambem-links { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 8px; }
+.tambem-links a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: var(--r-sm); color: var(--ink); text-decoration: none; transition: border-color .2s, background .2s; }
+.tambem-links a:hover { border-color: var(--ink-2); background: rgba(255, 255, 255, .04); } .tambem-links span { color: var(--ink-2); font-size: 13.5px; }

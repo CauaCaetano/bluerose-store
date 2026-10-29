@@ -884,3 +884,7 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 
 /* botoes no cabecalho dos cartoes: quebram linha em vez de alargar a pagina */
 .cartao-cab > .flex { flex-wrap: wrap; justify-content: flex-end; }
+
+/* troca de tema em circulo: a camada nova cobre a antiga sem o esmaecimento padrao */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { z-index: 2; }

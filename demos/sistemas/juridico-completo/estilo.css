@@ -220,3 +220,16 @@ span.cal-i { display: inline-block; width: auto; }
 
 /* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
 @media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }
+
+/* cronômetro em ilha no topo (enquanto roda) */
+#ilha-crono { position: fixed; top: 50px; left: 50%; transform: translateX(-50%); z-index: 70; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px); padding: 7px 8px 7px 14px; border-radius: 999px; background: #1d1416; color: #f6efe9; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .55); font-size: .86rem; animation: ilha-entra .35s ease-out; }
+#ilha-crono .ponto { width: 9px; height: 9px; border-radius: 50%; background: #e0524b; animation: ilha-pisca 1.4s ease-in-out infinite; flex: none; }
+#ilha-crono b { font-variant-numeric: tabular-nums; font-size: 1rem; letter-spacing: .02em; }
+#ilha-crono .o-que { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 34ch; opacity: .8; }
+#ilha-crono .ver { color: #f6efe9; opacity: .75; text-decoration: underline; text-underline-offset: 3px; }
+#ilha-crono button { border: 0; border-radius: 999px; padding: 6px 12px; background: #f6efe9; color: #1d1416; font: inherit; font-weight: 600; cursor: pointer; }
+@keyframes ilha-entra { from { opacity: 0; transform: translate(-50%, -12px); } }
+@keyframes ilha-pisca { 50% { opacity: .35; } }
+@media (max-width: 620px) { #ilha-crono { top: auto; bottom: 88px; } #ilha-crono .o-que, #ilha-crono .ver { display: none; } }
+@media (prefers-reduced-motion: reduce) { #ilha-crono, #ilha-crono .ponto { animation: none; } }
+@media print { #ilha-crono { display: none; } }
