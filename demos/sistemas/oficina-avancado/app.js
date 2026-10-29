@@ -213,7 +213,7 @@ function desenha() {
   const at = location.hash.slice(1) || 'painel', i = ind();
   q('#unidades').innerHTML = [['todas', 'Rede toda'], ...Object.entries(UNIDADES)].map(([k, n]) => `<button type="button" data-un="${k}" aria-pressed="${db.un === k}">${e(n)}</button>`).join('') + '<button type="button" data-a="nova-unidade" title="Cadastrar outra unidade">+ Unidade</button>';
   q('#instrumentos').innerHTML = MOSTRADORES.map(([k, t, f, s]) => { const [fr, txt] = f(i); return `<button type="button" class="mostrador" data-ir="${k}" ${at === k ? 'aria-current="page"' : ''}>${arco(fr, txt)}<small><b style="display:inline;font:600 .78rem Sora,sans-serif;margin:0">${t}</b><br>${e(typeof s === 'function' ? s(i) : s)}</small></button>`; }).join('')
-    + `<div class="chaves"><button type="button" class="chave" data-ir="painel" ${at === 'painel' ? 'aria-current="page"' : ''}><i></i>Cabine</button>${CHAVES.map(([k, t, n]) => `<button type="button" class="chave" data-ir="${k}" ${at === k ? 'aria-current="page"' : ''}><i></i>${t}${n() ? `<span class="n-al">${n()}</span>` : ''}</button>`).join('')}</div>`;
+    + `<div class="chaves"><button type="button" class="chave" data-ir="painel" ${at === 'painel' ? 'aria-current="page"' : ''}><i></i>Cabine</button>${CHAVES.map(([k, t, n]) => `<button type="button" class="chave" data-ir="${k}" ${at === k ? 'aria-current="page"' : ''}><i></i><span class="ct">${t}</span>${n() ? `<span class="n-al">${n()}</span>` : ''}</button>`).join('')}</div>`;
   q('#area').innerHTML = (M[at] || M.painel)(i);
   q('#rede').textContent = db.rede;
   document.title = `${NOMES[at] || 'Cabine'} · Veltria Oficina Avançado`;

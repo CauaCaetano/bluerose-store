@@ -157,3 +157,6 @@ tr:last-child td { border-bottom: 0; }
 
 /* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
 @media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }
+
+/* chave com contador: o nome encurta com reticencias e o numero fica sempre visivel */
+.chave .ct { min-width: 0; overflow: hidden; text-overflow: ellipsis; } .chave .n-al { flex: none; margin-left: auto; }

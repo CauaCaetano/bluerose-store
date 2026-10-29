@@ -881,3 +881,6 @@ table.tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-s
 :root:not([data-tema="escuro"]) .lat .marca small, :root:not([data-tema="escuro"]) .lat-pe .feito a { color: #1d3b85; }
 :root:not([data-tema="escuro"]) .marca-logo { box-shadow: 0 0 0 1px #ddd3c0, 0 4px 10px -6px rgba(16, 32, 70, 0.35); }
 :root:not([data-tema="escuro"]) .lat-pe .feito-br:hover { background: rgba(16, 32, 70, 0.06); }
+
+/* botoes no cabecalho dos cartoes: quebram linha em vez de alargar a pagina */
+.cartao-cab > .flex { flex-wrap: wrap; justify-content: flex-end; }

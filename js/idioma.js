@@ -27,7 +27,11 @@
   var esteScript = document.currentScript;
   var RAIZ = esteScript ? esteScript.src.replace(/js\/idioma\.js.*$/, '') : '/';
   // nos sistemas, WhatsApp/e-mail para clientes viram simulação na demonstração (js/envio-demo.js)
-  if (/\/demos\/sistemas\//.test(location.pathname)) { var ved = document.createElement('script'); ved.src = RAIZ + 'js/envio-demo.js?v=1'; document.head.appendChild(ved); }
+  if (/\/demos\/sistemas\//.test(location.pathname)) {
+    var ved = document.createElement('script'); ved.src = RAIZ + 'js/envio-demo.js?v=1'; document.head.appendChild(ved);
+    // botões flutuantes e barras fixas não cobrem o conteúdo (js/sistemas-folga.js)
+    var fol = document.createElement('script'); fol.src = RAIZ + 'js/sistemas-folga.js?v=3'; document.head.appendChild(fol);
+  }
   var params = new URLSearchParams(location.search);
   var COLETAR = params.get('coletar') === '1';
 
@@ -98,6 +102,7 @@
     '.br-idi.solto{position:fixed;left:12px;bottom:12px;background:rgba(20,22,30,.82);color:#fff;border-radius:999px;backdrop-filter:blur(6px)}' +
     '.br-idi.solto ul{top:auto;bottom:calc(100% + 8px);left:0;right:auto}' +
     '.br-idi.na-barra>button{padding:4px 9px;font-size:12px}' +
+    '@media (max-width:600px){.br-idi.na-barra>button{padding:4px 7px}.br-idi.na-barra>button span{display:none}}' +
     'body:has(.site-de-teste) .br-idi.solto{bottom:46px}' +
     '@media (max-width:900px){.nav-links .br-idi{flex-direction:column;align-items:flex-start}.nav-links .br-idi ul{position:static;margin-top:6px;box-shadow:none}}' +
     '@media print{.br-idi{display:none}}' +
@@ -129,9 +134,11 @@
     document.addEventListener('click', function (e) { if (!box.contains(e.target)) fechar(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fechar(); });
     var nav = document.querySelector('.nav-links');
-    var barra = document.querySelector('.barra-demo, [data-barra-demo]');
+    // nos sistemas, a barra de demonstração é a que tem o "Recomeçar": o globo fica nela, sem cobrir menu nem botões
+    var rec = document.getElementById('recomecar');
+    var barra = document.querySelector('.barra-demo, [data-barra-demo]') || (rec && rec.parentElement && getComputedStyle(rec.parentElement).display !== 'none' ? rec.parentElement : null);
     if (nav) { var cta = nav.querySelector('.btn-primary'); nav.insertBefore(box, cta || null); }
-    else if (barra) { box.classList.add('na-barra'); barra.appendChild(box); }
+    else if (barra) { box.classList.add('na-barra'); barra.appendChild(box); if (getComputedStyle(barra).display.indexOf('flex') >= 0) barra.style.flexWrap = 'wrap'; }
     else { box.classList.add('solto'); document.body.appendChild(box); }
   }
 

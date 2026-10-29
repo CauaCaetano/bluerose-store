@@ -321,3 +321,6 @@ tr.melhor td { background: var(--pos-f); }
 
 /* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
 @media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }
+
+/* filtros em segmentos: no celular quebram linha em vez de sair da tela */
+@media (max-width: 700px) { .seg { display: flex; flex-wrap: wrap; max-width: 100%; } .seg button { flex: 1 1 auto; border-bottom: 1px solid var(--borda); } }
