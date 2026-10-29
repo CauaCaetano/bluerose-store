@@ -4,23 +4,23 @@
  *  - [data-perso]: "veja com o seu nome" (nome do negócio + cor) que segue para os sites
  *  - [data-categorias]: cartões de categoria; ao clicar, abre a escolha dos sites
  *  - [data-vitrine-sites]: vitrine com categoria → site → computador/celular
- * Em páginas em inglês, usa as versões americanas (sites/en/).
+ * Os sites de exemplo são os mesmos em todos os idiomas; o idioma.js traduz cada um.
  */
 (function () {
   var dados = window.BR_SITES;
   if (!dados) return;
   var en = (document.documentElement.lang || '').indexOf('en') === 0;
   var T = en
-    ? { sites: function (n) { return n + (n > 1 ? ' websites' : ' website'); }, abrir: 'Open website', paginas: 'pages', escolha: 'Choose a website to explore', ver: 'See the websites', plano: 'This model in the Complete plan', prazo: 'ready in 10 business days', preco: '$1,190', quero: 'I want this one', comNome: 'Opens as' }
-    : { sites: function (n) { return n + (n > 1 ? ' sites' : ' site'); }, abrir: 'Abrir site', paginas: 'páginas', escolha: 'Escolha um site para navegar', ver: 'Ver os sites', plano: 'Este modelo no plano Completo', prazo: 'pronto em 7 dias úteis', preco: 'R$ 1.490', quero: 'Quero este', comNome: 'Abre como' };
+    ? { sites: function (n) { return n + (n > 1 ? ' websites' : ' website'); }, abrir: 'Open website', paginas: 'pages', pagina: 'page', escolha: 'Choose a website to explore', ver: 'See the websites', plano: 'This model in the Complete plan', prazo: 'ready in 10 business days', preco: '$1,190', quero: 'I want this one', comNome: 'Opens as' }
+    : { sites: function (n) { return n + (n > 1 ? ' sites' : ' site'); }, abrir: 'Abrir site', paginas: 'páginas', pagina: 'página', escolha: 'Escolha um site para navegar', ver: 'Ver os sites', plano: 'Este modelo no plano Completo', prazo: 'pronto em 7 dias úteis', preco: 'R$ 1.490', quero: 'Quero este', comNome: 'Abre como' };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); };
   var lang = en ? 'en' : 'pt';
   var todos = dados.sites.filter(function (s) { return (s.lang || 'pt') === lang; });
   if (!todos.length) todos = dados.sites.filter(function (s) { return (s.lang || 'pt') === 'pt'; });
   var doCat = function (id) { return todos.filter(function (s) { return s.cat === id; }); };
   var nomeCat = function (c) { return en ? (c.en || c.n) : c.n; };
-  var pasta = en ? 'sites/en/' : 'sites/';
-  var thumb = function (s, cel) { return 'img/sites/' + (en ? 'en/' : '') + s.slug + (cel ? '-mobile' : '') + '.webp'; };
+  var pasta = 'sites/'; // os sites de exemplo se traduzem sozinhos (idioma.js)
+  var thumb = function (s, cel) { return 'img/sites/' + s.slug + (cel ? '-mobile' : '') + '.webp'; };
   var thumbPt = function (s, cel) { return 'img/sites/' + s.slug + (cel ? '-mobile' : '') + '.webp'; };
   var imgTag = function (s, cel, extra) {
     return '<img src="' + thumb(s, cel) + '"' + (en ? ' data-reserva="' + thumbPt(s, cel) + '"' : '') + ' width="' + (cel ? 390 : 960) + '" height="' + (cel ? 844 : 600) + '" loading="lazy" ' + (extra || 'alt=""') + '>';
@@ -218,7 +218,7 @@
       return '<article class="site-op">' +
         '<a class="site-op-img" data-site-link="' + s.slug + '" href="' + url(s) + '">' + imgTag(s, false, 'alt="' + esc(s.nome) + '"') + imgTag(s, true, 'class="site-op-cel" alt=""') + '</a>' +
         '<div class="site-op-txt"><p class="tipo">' + esc(s.estilo) + '</p><h3>' + esc(s.nome) + ' <span>' + esc(s.sub || '') + '</span></h3><p>' + esc(s.resumo) + '</p>' +
-        '<ul class="site-op-rec">' + (s.recursos || []).map(function (r) { return '<li>' + ico('check') + esc(r) + '</li>'; }).join('') + '<li>' + ico('files') + s.paginas + ' ' + T.paginas + '</li></ul>' +
+        '<ul class="site-op-rec">' + (s.recursos || []).map(function (r) { return '<li>' + ico('check') + esc(r) + '</li>'; }).join('') + '<li>' + ico('files') + s.paginas + ' ' + (s.paginas > 1 ? T.paginas : T.pagina) + '</li></ul>' +
         '<p class="site-op-preco"><span>' + T.plano + '</span><b>' + T.preco + '</b><small>' + T.prazo + '</small></p>' +
         '<p class="site-op-perso" data-perso-aviso hidden></p>' +
         '<div class="site-op-acoes"><a class="btn btn-primary" data-site-link="' + s.slug + '" href="' + url(s) + '">' + T.abrir + ico('arrow-up-right') + '</a><a class="btn btn-ghost" data-quero-site="' + s.slug + '" href="' + querHref(s) + '">' + T.quero + '</a></div></div></article>';

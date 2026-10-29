@@ -1,0 +1,73 @@
+/* Ana Ribeiro · Cashmere (paletas do dono, post 5): Cashmere Brown, Warm Taupe, Soft Cashmere, Cream Knit. Editorial e pessoal. */
+:root {
+  --fundo: #f4f0e4; --branco: #fff; --tx: #322723; --tx-2: #8e7463; --cash: #d6c6ad; --linha: rgba(50, 39, 35, .15);
+  --acc: #322723;
+  --serif: 'Instrument Serif', Georgia, serif; --f: 'DM Sans', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--fundo); color: var(--tx); font: 400 16px/1.6 var(--f); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+h1, h2 { font-family: var(--serif); font-weight: 400; line-height: .98; letter-spacing: -.02em; margin: 0 0 .4em; text-wrap: balance; }
+h1 { font-size: clamp(3rem, 7vw, 6.4rem); } h1 i { color: var(--tx-2); }
+h2 { font-size: clamp(2.2rem, 4.4vw, 3.8rem); }
+p { margin: 0 0 1em; text-wrap: pretty; }
+:focus-visible { outline: 2px solid var(--tx); outline-offset: 3px; }
+.pular { position: absolute; left: -999px; } .pular:focus { left: 8px; top: 8px; background: #fff; padding: 8px; z-index: 99; }
+
+.topo { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px clamp(16px, 4vw, 48px); }
+.marca { font-family: var(--serif); font-size: 1.7rem; text-decoration: none; } .marca em { color: var(--tx-2); }
+.lados { display: flex; border: 1px solid var(--tx); border-radius: 999px; overflow: hidden; }
+.lados a { text-decoration: none; padding: 9px 16px; font-weight: 500; font-size: .9rem; } .lados a + a { background: var(--tx); color: var(--fundo); }
+
+.botao { display: inline-block; border: 0; cursor: pointer; text-decoration: none; text-align: center; background: var(--tx); color: var(--fundo); font: 500 1rem var(--f); padding: 16px 26px; border-radius: 999px; transition: background .2s, transform .15s; }
+.botao:hover { background: #4d3c35; } .botao:active { transform: translateY(1px); }
+
+section { padding: clamp(56px, 8vw, 110px) clamp(16px, 4vw, 48px); max-width: 1320px; margin: 0 auto; }
+.abre { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: clamp(24px, 4vw, 64px); align-items: end; padding-top: clamp(24px, 4vw, 48px); }
+.abre-txt > p { font-size: 1.12rem; color: var(--tx-2); max-width: 48ch; }
+.assina { font-size: .92rem !important; color: var(--tx) !important; border-top: 1px solid var(--linha); padding-top: 14px; }
+.abre-foto { margin: 0; } .abre-foto img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 60% 30%; border-radius: 240px 240px 0 0; display: block; }
+@media (max-width: 860px) { .abre { grid-template-columns: 1fr; } .abre-foto img { aspect-ratio: 1; max-width: 420px; } }
+
+.comprar { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(24px, 4vw, 56px); align-items: start; border-top: 1px solid var(--linha); }
+.cp-calc { position: sticky; top: 20px; }
+.fin { display: grid; gap: 20px; margin: 10px 0 20px; }
+.fin label { display: grid; gap: 6px; font-weight: 500; color: var(--tx-2); font-size: .92rem; }
+.fin output { font-family: var(--serif); font-size: 2.2rem; color: var(--tx); line-height: 1; }
+.fin input { width: 100%; accent-color: var(--tx); }
+.fin-res { background: var(--tx); color: var(--fundo); border-radius: 26px; padding: 24px; }
+.fin-res .grande { font-family: var(--serif); font-size: clamp(2.6rem, 5vw, 3.8rem); line-height: 1; margin: 4px 0 8px; }
+.fin-res p { color: var(--cash); margin-bottom: .5em; }
+.cp-tit { font-family: var(--serif); font-size: 1.7rem; margin-bottom: 14px; }
+.imoveis { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.imovel { background: var(--branco); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; }
+.imovel img { width: 100%; height: 200px; object-fit: cover; display: block; }
+.imovel div { padding: 16px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.imovel b { font-family: var(--serif); font-size: 1.7rem; font-weight: 400; line-height: 1; }
+.imovel span { color: var(--tx-2); font-size: .9rem; }
+.imovel .cabe { color: #3f7a4f; font-weight: 600; font-size: .84rem; } .imovel .nao { color: #a14a2a; }
+.imovel a { margin-top: auto; padding-top: 8px; font-weight: 500; }
+.imovel.fora { opacity: .45; }
+@media (max-width: 900px) { .comprar { grid-template-columns: 1fr; } .cp-calc { position: relative; top: 0; } }
+@media (max-width: 520px) { .imoveis { grid-template-columns: 1fr; } }
+
+.vender { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; background: var(--cash); border-radius: 36px; }
+.vender > img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 26px; display: block; }
+.vender p { color: #5a4a40; }
+.aval { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.aval label { display: grid; gap: 4px; font-size: .86rem; font-weight: 500; }
+.aval input, .aval select { font: 500 1rem var(--f); padding: 13px 14px; border-radius: 14px; border: 1px solid var(--linha); background: var(--fundo); color: var(--tx); }
+.aval .ck { display: flex; align-items: center; gap: 8px; } .aval .ck input { width: 18px; height: 18px; accent-color: var(--tx); }
+.aval-res, .aval .botao { grid-column: 1 / -1; }
+.aval-res { background: var(--fundo); border-radius: 20px; padding: 18px; }
+.aval-res b { font-family: var(--serif); font-size: 2.2rem; font-weight: 400; display: block; line-height: 1.05; }
+@media (max-width: 860px) { .vender { grid-template-columns: 1fr; } .vender > img { aspect-ratio: 16 / 10; } }
+
+.vozes ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+.vozes q { display: block; font-family: var(--serif); font-size: 1.7rem; line-height: 1.15; quotes: none; margin-bottom: 12px; }
+.vozes span { color: var(--tx-2); font-size: .9rem; }
+@media (max-width: 860px) { .vozes ul { grid-template-columns: 1fr; } }
+.flutua { position: fixed; right: 16px; bottom: 76px; z-index: 50; background: #1fae63; color: #fff; text-decoration: none; font-weight: 600; padding: 13px 18px; border-radius: 999px; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .4); }
+.rodape { text-align: center; padding: 20px 16px 96px; font-size: .8rem; color: var(--tx-2); }

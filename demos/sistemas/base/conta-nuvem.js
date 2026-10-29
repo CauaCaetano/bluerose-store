@@ -29,6 +29,7 @@
   var info = null; try { info = JSON.parse(sessionStorage.getItem('veltria-conta') || 'null'); } catch (e) { info = null; }
   if (!info || info.app !== app) { location.replace(RAIZ + 'app/' + app + '/'); throw new Error('abrindo pela porta'); }
   document.documentElement.classList.add('modo-conta');
+  window.veltriaEnvioReal = info.plano === 'ativo'; // WhatsApp e e-mail de verdade só com assinatura ativa (js/envio-demo.js)
   var CHAVE = info.chave, NS = 'conta:' + info.espaco + ':' + CHAVE, P = Storage.prototype, ler = P.getItem, gravar = P.setItem, tirar = P.removeItem;
   P.getItem = function (k) { return ler.call(this, this === localStorage && k === CHAVE ? NS : k); };
   // ---------------------------------------------------------------- os dias andam sozinhos
@@ -497,7 +498,7 @@
   // empresa vazia: contas com zero dividido por zero não mostram "NaN%" nem "Infinity" na tela
   // shortcut: corrige só o texto exibido; se aparecer em cálculo que grava dado, corrigir no app.js daquela versão
   // e o nome da empresa de exemplo (escrito direto em algumas telas e nas mensagens de WhatsApp) vira o da conta
-  var EXEMPLO = { vetnature: 'Clínica Veterinária Bem-Estar Animal', agendaessencial: 'Studio Lia Nails', agendacompleto: 'Salão Ateliê Bela Vista', agendaavancado: 'Maison Íris', crmcompleto: 'Solaris Energia Solar', crmavancado: 'Nuvra Software B2B',
+  var EXEMPLO = { vetnature: 'Clínica Veterinária Bem-Estar Animal', agendaessencial: 'Espaço Lia Santos', agendacompleto: 'Espaço Bela Vista', agendaavancado: 'Maison Íris', crmcompleto: 'Solaris Energia Solar', crmavancado: 'Nuvra Software B2B',
     farmaciaessencial: 'Drogaria Santa Clara', farmaciacompleto: 'Farmácia Vida Plena', farmaciaavancado: 'Rede FarmaJá', financeirocompleto: 'Climatiza BH Refrigeração|Climatiza BH',
     gestaoessencial: 'Mercado Bom Preço', gestaocompleto: 'Casa Aurora Utilidades|Casa Aurora', gestaoavancado: 'Empório Vila Nobre', juridicocompleto: 'Ferraz & Albuquerque Advogados',
     juridicoavancado: 'Monteiro Bastos Sociedade de Advogados', obrasessencial: 'Reforma Certa', obrascompleto: 'Construtora Alicerce', obrasavancado: 'Grupo Monólito Engenharia',

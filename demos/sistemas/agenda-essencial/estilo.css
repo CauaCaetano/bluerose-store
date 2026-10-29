@@ -114,3 +114,32 @@ h2 { font: 600 .92rem var(--sans); margin: 22px 0 8px; color: var(--noite-2); }
   html.web main > .dias, html.web main > .relogio, html.web main > .legenda-c { grid-column: 1; }
   html.web main > .relogio ~ h2, html.web main > .relogio ~ .cartao { grid-column: 2; }
 }
+
+/* assistente com o personagem (o mesmo do PlayCell e dos outros sistemas) */
+.ia-cab { display: flex; align-items: center; gap: 12px; margin: 6px 0 10px; }
+.ia-boneco { width: 86px; height: 112px; flex: none; }
+.ia-boneco canvas { width: 100%; height: 100%; image-rendering: pixelated; }
+/* serviços editáveis em Configurações */
+.serv-ed { display: grid; grid-template-columns: auto 1fr 74px 90px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,.06); }
+.serv-ed input { width: 100%; min-width: 0; font: inherit; padding: 8px; border: 1px solid rgba(0,0,0,.14); border-radius: 10px; background: #fff; }
+.serv-ed label { display: flex; align-items: center; gap: 4px; font-size: .78rem; color: #8a8d99; }
+
+/* ir para qualquer data, passos do novo horário, busca de cliente */
+.ir-data { display: flex; align-items: end; gap: 8px; margin: 4px 0 10px; }
+.ir-data label { flex: 1; display: grid; gap: 4px; font-size: .82rem; color: #6c6f7c; }
+.ir-data input, .r-data input, .busca { font: inherit; padding: 9px 12px; border: 1px solid rgba(0,0,0,.14); border-radius: 12px; background: #fff; min-width: 0; width: 100%; box-sizing: border-box; }
+.busca { margin-bottom: 12px; }
+.tit-linha { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tit-linha h2 { margin-bottom: 8px; }
+.passos { display: flex; gap: 6px; list-style: none; padding: 0; margin: -4px 0 12px; counter-reset: p; font-size: .78rem; color: #6c6f7c; flex-wrap: wrap; }
+.passos li { counter-increment: p; } .passos li::before { content: counter(p) ". "; font-weight: 700; } .passos li:not(:last-child)::after { content: " ›"; margin-left: 4px; }
+/* resumo */
+.r-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 12px; }
+.r-nav .r-tit { font-size: 1.05rem; } .r-data { flex: 1; }
+.r-grade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.r-grade .cartao { margin: 0; display: grid; gap: 2px; min-width: 0; box-sizing: border-box; }
+.r-num { font: 400 clamp(1.05rem, 5.2vw, 1.45rem) var(--serif); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.barras { display: flex; align-items: stretch; gap: 3px; height: 140px; padding: 8px 0 18px; }
+.barras span { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; }
+.barras i { display: block; background: var(--rose, #c69c9a); border-radius: 4px 4px 0 0; min-height: 2px; }
+.barras small { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: .66rem; color: #8a8d99; white-space: nowrap; }

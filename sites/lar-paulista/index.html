@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script src="../../js/idioma.js?v=17"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lar Paulista Imóveis · Comprar e alugar em Campinas com custo total na tela</title>
+<meta name="description" content="Imóveis para comprar e alugar em Campinas com o custo mensal de verdade (aluguel, condomínio e IPTU), simulação de financiamento e visita agendada na hora.">
+<meta name="theme-color" content="#142666">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'10'%20fill%3D'%23142666'%2F%3E%3Cpath%20d%3D'M9%2020l11-9%2011%209v11H9z'%20fill%3D'%23bfcdfa'%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/92878cb7af.css">
+<link rel="stylesheet" href="../assets/moldura.css?v=3">
+<link rel="stylesheet" href="estilo.css?v=1">
+<script src="../../js/leads-config.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=1" defer></script>
+<script src="site.js?v=1" defer></script>
+</head>
+<body data-slug="lar-paulista" data-marca="Lar Paulista Imóveis" data-cat="imobiliaria">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo">
+  <a class="marca" href="#">lar<b>paulista</b></a>
+  <nav class="menu" aria-label="Principal"><a href="#busca">Imóveis</a><a href="#anunciar">Anunciar meu imóvel</a><a href="#" data-wa="Olá, Lar Paulista! Quero falar com um corretor.">Falar com corretor</a></nav>
+  <span class="fav-cont" aria-live="polite">♡ <b>0</b> salvos</span>
+</header>
+<main id="conteudo">
+  <section class="busca" id="busca" aria-labelledby="bs-t">
+    <h1 id="bs-t">Ache seu lugar em Campinas.<span> Com o custo real por mês, sem surpresa.</span></h1>
+    <form class="filtros" id="filtros" role="search">
+      <div class="modo" role="radiogroup" aria-label="Comprar ou alugar"><label><input type="radio" name="modo" value="venda"><span>Comprar</span></label><label><input type="radio" name="modo" value="aluguel" checked><span>Alugar</span></label></div>
+      <label>Bairro<select name="bairro"><option value="">Todos</option><option>Cambuí</option><option>Taquaral</option><option>Barão Geraldo</option><option>Nova Campinas</option><option>Mansões Santo Antônio</option><option>Centro</option></select></label>
+      <label>Quartos<select name="q"><option value="0">Qualquer</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label>
+      <label>Até <output name="mx"></output><input type="range" name="preco" min="0" max="100" value="100"></label>
+      <label class="ck"><input type="checkbox" name="pet"> Aceita pet</label>
+      <label class="ck"><input type="checkbox" name="vaga"> Com vaga</label>
+    </form>
+    <div class="res-cab"><p class="conta" aria-live="polite"></p><label class="ordem">Ordenar<select id="ordem"><option value="preco">Menor custo</option><option value="m2">Maior área</option><option value="novo">Mais recentes</option></select></label></div>
+    <div class="cards" aria-live="polite"></div>
+  </section>
+
+  <section class="anunciar" id="anunciar" aria-labelledby="an-t">
+    <div><h2 id="an-t">Tem imóvel parado?</h2><p>Anunciamos em 6 portais, filtramos interessados com análise de crédito e garantimos o aluguel em dia mesmo se o inquilino atrasar.</p></div>
+    <ul><li><b>R$ 0</b>para anunciar e fotografar</li><li><b>18 dias</b>média para alugar</li><li><b>Aluguel garantido</b>todo dia 10 na sua conta</li></ul>
+    <a class="botao" href="#" data-wa="Olá, Lar Paulista! Quero anunciar meu imóvel.">Anunciar grátis</a>
+  </section>
+</main>
+<dialog class="ficha" id="ficha" aria-labelledby="fc-t"><div class="fc-corpo"></div></dialog>
+<footer class="rodape"><p>Lar Paulista Imóveis · CRECI-SP fictício · Rua Coronel Quirino, 1.230, Cambuí, Campinas/SP · Marca criada para demonstração · Site de exemplo feito pela Blue Rose</p></footer>
+</body>
+</html>

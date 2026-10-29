@@ -1,0 +1,6 @@
+Modelos 3D, texturas e fotos 360° (HDRI) do Poly Haven (https://polyhaven.com), licença CC0 (domínio público).
+Biblioteca Three.js (MIT), ver ../LICENSE-three.txt.
+
+MaterialsVariantsShoe (Eixo): © 2021 Shopify, licença Creative Commons Atribuição 4.0 (CC BY 4.0),
+  via Khronos glTF Sample Assets — https://github.com/KhronosGroup/glTF-Sample-Assets
+vintage_suitcase (Brisa) e BarberShopChair_01 (Atelier Serena): Poly Haven, CC0 — https://polyhaven.com

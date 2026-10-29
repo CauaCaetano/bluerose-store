@@ -1,0 +1,36 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/sorriso-prime/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --fundo: #f8f3eb; --nevoa: #f3eee8; --salvia: #d6b69c; --verde: #7e9674; --tx: #34404a; --tx-2: #5e6870; --branco: #ffffff; --linha: rgba(52, 64, 74, .14); --acc: #34404a; --vivo: #cb6439; }
+html[data-paleta="pt-PT"] .pular:focus { background: #ffffff; }
+html[data-paleta="pt-PT"] .urg { color: #ffffff; }
+html[data-paleta="pt-PT"] .buscador .botao { color: #ffffff; }
+html[data-paleta="pt-PT"] .aberta { color: #2e5a7e; }
+html[data-paleta="pt-PT"] .sim { color: #2e5a7e; }
+html[data-paleta="pt-PT"] .abas button[aria-selected="true"] { box-shadow: 0 4px 12px -6px rgba(52, 64, 74, .4); }
+html[data-paleta="es"] { --fundo: #f9f2ea; --nevoa: #f3eee8; --salvia: #d7c59b; --verde: #7e9674; --tx: #4a3438; --tx-2: #705e62; --branco: #ffffff; --linha: rgba(74, 52, 56, .14); --acc: #4a3438; --vivo: #ca3a3c; }
+html[data-paleta="es"] .pular:focus { background: #ffffff; }
+html[data-paleta="es"] .urg { color: #ffffff; }
+html[data-paleta="es"] .buscador .botao { color: #ffffff; }
+html[data-paleta="es"] .aberta { color: #852727; }
+html[data-paleta="es"] .sim { color: #852727; }
+html[data-paleta="es"] .abas button[aria-selected="true"] { box-shadow: 0 4px 12px -6px rgba(74, 52, 56, .4); }
+html[data-paleta="en"] { --fundo: #ebeff8; --nevoa: #e8ebf3; --salvia: #99acd9; --verde: #7e9674; --tx: #34394a; --tx-2: #5e6270; --branco: #ffffff; --linha: rgba(52, 57, 74, .14); --acc: #34394a; --vivo: #d1333c; }
+html[data-paleta="en"] .pular:focus { background: #ffffff; }
+html[data-paleta="en"] .urg { color: #ffffff; }
+html[data-paleta="en"] .buscador .botao { color: #ffffff; }
+html[data-paleta="en"] .aberta { color: #254587; }
+html[data-paleta="en"] .sim { color: #254587; }
+html[data-paleta="en"] .abas button[aria-selected="true"] { box-shadow: 0 4px 12px -6px rgba(52, 57, 74, .4); }
+html[data-paleta="it"] { --fundo: #f6f5ed; --nevoa: #f3f1e8; --salvia: #d0c1a2; --verde: #7e9674; --tx: #3f4a34; --tx-2: #67705e; --branco: #ffffff; --linha: rgba(63, 74, 52, .14); --acc: #3f4a34; --vivo: #c9683b; }
+html[data-paleta="it"] .pular:focus { background: #ffffff; }
+html[data-paleta="it"] .urg { color: #ffffff; }
+html[data-paleta="it"] .buscador .botao { color: #ffffff; }
+html[data-paleta="it"] .aberta { color: #5a713b; }
+html[data-paleta="it"] .sim { color: #5a713b; }
+html[data-paleta="it"] .abas button[aria-selected="true"] { box-shadow: 0 4px 12px -6px rgba(63, 74, 52, .4); }
+html[data-paleta="fr"] { --fundo: #f2ebf8; --nevoa: #eee8f3; --salvia: #a89dd5; --verde: #7e9674; --tx: #39344a; --tx-2: #625e70; --branco: #ffffff; --linha: rgba(57, 52, 74, .14); --acc: #39344a; --vivo: #6243c1; }
+html[data-paleta="fr"] .pular:focus { background: #ffffff; }
+html[data-paleta="fr"] .urg { color: #ffffff; }
+html[data-paleta="fr"] .buscador .botao { color: #ffffff; }
+html[data-paleta="fr"] .aberta { color: #413379; }
+html[data-paleta="fr"] .sim { color: #413379; }
+html[data-paleta="fr"] .abas button[aria-selected="true"] { box-shadow: 0 4px 12px -6px rgba(57, 52, 74, .4); }

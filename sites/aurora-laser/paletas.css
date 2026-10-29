@@ -1,0 +1,71 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/aurora-laser/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --fundo: #f8f3ed; --branco: #ffffff; --rosa: #ecdeca; --rosa2: #d7a28c; --acc: #ac6447; --tx: #462b20; --tx-2: #566a7a; --linha: rgba(70, 43, 32, .14); }
+html[data-paleta="pt-PT"] .pular:focus { background: #ffffff; }
+html[data-paleta="pt-PT"] .topo { background: rgba(248, 243, 237, .92); }
+html[data-paleta="pt-PT"] .botao { color: #ffffff; }
+html[data-paleta="pt-PT"] .corpo button[aria-selected="true"] { color: #ffffff; }
+html[data-paleta="pt-PT"] .sess input:checked + span { color: #ffffff; }
+html[data-paleta="pt-PT"] .conta { color: #ffffff; }
+html[data-paleta="pt-PT"] .conta p { color: #e6ccc1; }
+html[data-paleta="pt-PT"] .conta s { color: #be8f7c; }
+html[data-paleta="pt-PT"] .conta ul { color: #e6ccc1; }
+html[data-paleta="pt-PT"] .dest p,
+html[data-paleta="pt-PT"] .dest .cl-n,
+html[data-paleta="pt-PT"] .dest .cl-p { color: #ffffff !important; }
+html[data-paleta="pt-PT"] .dest .botao { background: #ffffff; }
+html[data-paleta="es"] { --fundo: #f8f3ed; --branco: #ffffff; --rosa: #eedcc8; --rosa2: #d68d8e; --acc: #ab4849; --tx: #462021; --tx-2: #7a565d; --linha: rgba(70, 32, 33, .14); }
+html[data-paleta="es"] .pular:focus { background: #ffffff; }
+html[data-paleta="es"] .topo { background: rgba(248, 243, 237, .92); }
+html[data-paleta="es"] .botao { color: #ffffff; }
+html[data-paleta="es"] .corpo button[aria-selected="true"] { color: #ffffff; }
+html[data-paleta="es"] .sess input:checked + span { color: #ffffff; }
+html[data-paleta="es"] .conta { color: #ffffff; }
+html[data-paleta="es"] .conta p { color: #e6c1c2; }
+html[data-paleta="es"] .conta s { color: #bd7d7e; }
+html[data-paleta="es"] .conta ul { color: #e6c1c2; }
+html[data-paleta="es"] .dest p,
+html[data-paleta="es"] .dest .cl-n,
+html[data-paleta="es"] .dest .cl-p { color: #ffffff !important; }
+html[data-paleta="es"] .dest .botao { background: #ffffff; }
+html[data-paleta="en"] { --fundo: #edf0f8; --branco: #ffffff; --rosa: #cad4ec; --rosa2: #db888d; --acc: #b34047; --tx: #491d20; --tx-2: #565e7a; --linha: rgba(73, 29, 32, .14); }
+html[data-paleta="en"] .pular:focus { background: #ffffff; }
+html[data-paleta="en"] .topo { background: rgba(237, 240, 248, .92); }
+html[data-paleta="en"] .botao { color: #ffffff; }
+html[data-paleta="en"] .corpo button[aria-selected="true"] { color: #ffffff; }
+html[data-paleta="en"] .sess input:checked + span { color: #ffffff; }
+html[data-paleta="en"] .conta { color: #ffffff; }
+html[data-paleta="en"] .conta p { color: #e8bfc1; }
+html[data-paleta="en"] .conta s { color: #c3777c; }
+html[data-paleta="en"] .conta ul { color: #e8bfc1; }
+html[data-paleta="en"] .dest p,
+html[data-paleta="en"] .dest .cl-n,
+html[data-paleta="en"] .dest .cl-p { color: #ffffff !important; }
+html[data-paleta="en"] .dest .botao { background: #ffffff; }
+html[data-paleta="it"] { --fundo: #f7f5ee; --branco: #ffffff; --rosa: #e8e3ce; --rosa2: #d6a48d; --acc: #aa6849; --tx: #452c21; --tx-2: #687a56; --linha: rgba(69, 44, 33, .14); }
+html[data-paleta="it"] .pular:focus { background: #ffffff; }
+html[data-paleta="it"] .topo { background: rgba(247, 245, 238, .92); }
+html[data-paleta="it"] .botao { color: #ffffff; }
+html[data-paleta="it"] .corpo button[aria-selected="true"] { color: #ffffff; }
+html[data-paleta="it"] .sess input:checked + span { color: #ffffff; }
+html[data-paleta="it"] .conta { color: #ffffff; }
+html[data-paleta="it"] .conta p { color: #e5cdc2; }
+html[data-paleta="it"] .conta s { color: #bc927e; }
+html[data-paleta="it"] .conta ul { color: #e5cdc2; }
+html[data-paleta="it"] .dest p,
+html[data-paleta="it"] .dest .cl-n,
+html[data-paleta="it"] .dest .cl-p { color: #ffffff !important; }
+html[data-paleta="it"] .dest .botao { background: #ffffff; }
+html[data-paleta="fr"] { --fundo: #f3edf8; --branco: #ffffff; --rosa: #dbcbeb; --rosa2: #a192d1; --acc: #6450a3; --tx: #2b2442; --tx-2: #5e567a; --linha: rgba(43, 36, 66, .14); }
+html[data-paleta="fr"] .pular:focus { background: #ffffff; }
+html[data-paleta="fr"] .topo { background: rgba(243, 237, 248, .92); }
+html[data-paleta="fr"] .botao { color: #ffffff; }
+html[data-paleta="fr"] .corpo button[aria-selected="true"] { color: #ffffff; }
+html[data-paleta="fr"] .sess input:checked + span { color: #ffffff; }
+html[data-paleta="fr"] .conta { color: #ffffff; }
+html[data-paleta="fr"] .conta p { color: #ccc5e2; }
+html[data-paleta="fr"] .conta s { color: #9084b6; }
+html[data-paleta="fr"] .conta ul { color: #ccc5e2; }
+html[data-paleta="fr"] .dest p,
+html[data-paleta="fr"] .dest .cl-n,
+html[data-paleta="fr"] .dest .cl-p { color: #ffffff !important; }
+html[data-paleta="fr"] .dest .botao { background: #ffffff; }

@@ -1,0 +1,86 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/lumi-odonto/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --fundo: #fdfcfa; --suave: #f6efe5; --medio: #9bbdd8; --ardosia: #4c7799; --tx: #1c2f3e; --tx-2: #4c7799; --branco: #ffffff; --linha: rgba(28, 47, 62, .12); --acc: #3987c7; --ok: #1f9d6b; }
+html[data-paleta="pt-PT"] .pular { color: #ffffff; }
+html[data-paleta="pt-PT"] .oferta { color: #ffffff; }
+html[data-paleta="pt-PT"] .topo { background: rgba(253, 252, 250, .94); }
+html[data-paleta="pt-PT"] .marca span::after { background: #ffffff; }
+html[data-paleta="pt-PT"] .botao-p { color: #ffffff; }
+html[data-paleta="pt-PT"] .botao-g { color: #ffffff; box-shadow: 0 10px 24px -12px rgba(57, 135, 199, .8); }
+html[data-paleta="pt-PT"] .estrelas { color: #dc6b3c; }
+html[data-paleta="pt-PT"] .agenda-card { box-shadow: 0 30px 60px -30px rgba(28, 47, 62, .35); }
+html[data-paleta="pt-PT"] .periodo input:checked + span { color: #ffffff; }
+html[data-paleta="pt-PT"] .erro { color: #b75a34; }
+html[data-paleta="pt-PT"] .precos { color: #ffffff; }
+html[data-paleta="pt-PT"] .passos li::before { color: #ffffff; }
+@media (max-width: 760px) {
+html[data-paleta="pt-PT"] .barra-cel { background: rgba(253, 252, 250, .96); }
+html[data-paleta="pt-PT"] .barra-cel a:last-child { color: #ffffff; }
+}
+html[data-paleta="es"] { --fundo: #fdfcfa; --suave: #f7eee4; --medio: #d79c9d; --ardosia: #984d4e; --tx: #3e1c1d; --tx-2: #984d4e; --branco: #ffffff; --linha: rgba(62, 28, 29, .12); --acc: #c53b3c; --ok: #1f9d6b; }
+html[data-paleta="es"] .pular { color: #ffffff; }
+html[data-paleta="es"] .oferta { color: #ffffff; }
+html[data-paleta="es"] .topo { background: rgba(253, 252, 250, .94); }
+html[data-paleta="es"] .marca span::after { background: #ffffff; }
+html[data-paleta="es"] .botao-p { color: #ffffff; }
+html[data-paleta="es"] .botao-g { color: #ffffff; box-shadow: 0 10px 24px -12px rgba(197, 59, 60, .8); }
+html[data-paleta="es"] .estrelas { color: #e5ae33; }
+html[data-paleta="es"] .agenda-card { box-shadow: 0 30px 60px -30px rgba(62, 28, 29, .35); }
+html[data-paleta="es"] .periodo input:checked + span { color: #ffffff; }
+html[data-paleta="es"] .erro { color: #c0922b; }
+html[data-paleta="es"] .precos { color: #ffffff; }
+html[data-paleta="es"] .passos li::before { color: #ffffff; }
+@media (max-width: 760px) {
+html[data-paleta="es"] .barra-cel { background: rgba(253, 252, 250, .96); }
+html[data-paleta="es"] .barra-cel a:last-child { color: #ffffff; }
+}
+html[data-paleta="en"] { --fundo: #fafbfd; --suave: #e5eaf6; --medio: #94addf; --ardosia: #3f61a6; --tx: #172643; --tx-2: #3f61a6; --branco: #ffffff; --linha: rgba(23, 38, 67, .12); --acc: #2b63d5; --ok: #1f9d6b; }
+html[data-paleta="en"] .pular { color: #ffffff; }
+html[data-paleta="en"] .oferta { color: #ffffff; }
+html[data-paleta="en"] .topo { background: rgba(250, 251, 253, .94); }
+html[data-paleta="en"] .marca span::after { background: #ffffff; }
+html[data-paleta="en"] .botao-p { color: #ffffff; }
+html[data-paleta="en"] .botao-g { color: #ffffff; box-shadow: 0 10px 24px -12px rgba(43, 99, 213, .8); }
+html[data-paleta="en"] .estrelas { color: #e13741; }
+html[data-paleta="en"] .agenda-card { box-shadow: 0 30px 60px -30px rgba(23, 38, 67, .35); }
+html[data-paleta="en"] .periodo input:checked + span { color: #ffffff; }
+html[data-paleta="en"] .erro { color: #bc2f37; }
+html[data-paleta="en"] .precos { color: #ffffff; }
+html[data-paleta="en"] .passos li::before { color: #ffffff; }
+@media (max-width: 760px) {
+html[data-paleta="en"] .barra-cel { background: rgba(250, 251, 253, .96); }
+html[data-paleta="en"] .barra-cel a:last-child { color: #ffffff; }
+}
+html[data-paleta="it"] { --fundo: #fdfcfa; --suave: #f4f1e7; --medio: #d7af9c; --ardosia: #97654e; --tx: #3d271d; --tx-2: #97654e; --branco: #ffffff; --linha: rgba(61, 39, 29, .12); --acc: #c4673c; --ok: #1f9d6b; }
+html[data-paleta="it"] .pular { color: #ffffff; }
+html[data-paleta="it"] .oferta { color: #ffffff; }
+html[data-paleta="it"] .topo { background: rgba(253, 252, 250, .94); }
+html[data-paleta="it"] .marca span::after { background: #ffffff; }
+html[data-paleta="it"] .botao-p { color: #ffffff; }
+html[data-paleta="it"] .botao-g { color: #ffffff; box-shadow: 0 10px 24px -12px rgba(196, 103, 60, .8); }
+html[data-paleta="it"] .estrelas { color: #d9a63f; }
+html[data-paleta="it"] .agenda-card { box-shadow: 0 30px 60px -30px rgba(61, 39, 29, .35); }
+html[data-paleta="it"] .periodo input:checked + span { color: #ffffff; }
+html[data-paleta="it"] .erro { color: #b48a37; }
+html[data-paleta="it"] .precos { color: #ffffff; }
+html[data-paleta="it"] .passos li::before { color: #ffffff; }
+@media (max-width: 760px) {
+html[data-paleta="it"] .barra-cel { background: rgba(253, 252, 250, .96); }
+html[data-paleta="it"] .barra-cel a:last-child { color: #ffffff; }
+}
+html[data-paleta="fr"] { --fundo: #fcfafd; --suave: #eee6f5; --medio: #aaa0d3; --ardosia: #605392; --tx: #241f3b; --tx-2: #605392; --branco: #ffffff; --linha: rgba(36, 31, 59, .12); --acc: #5a41bf; --ok: #1f9d6b; }
+html[data-paleta="fr"] .pular { color: #ffffff; }
+html[data-paleta="fr"] .oferta { color: #ffffff; }
+html[data-paleta="fr"] .topo { background: rgba(252, 250, 253, .94); }
+html[data-paleta="fr"] .marca span::after { background: #ffffff; }
+html[data-paleta="fr"] .botao-p { color: #ffffff; }
+html[data-paleta="fr"] .botao-g { color: #ffffff; box-shadow: 0 10px 24px -12px rgba(90, 65, 191, .8); }
+html[data-paleta="fr"] .estrelas { color: #6846d2; }
+html[data-paleta="fr"] .agenda-card { box-shadow: 0 30px 60px -30px rgba(36, 31, 59, .35); }
+html[data-paleta="fr"] .periodo input:checked + span { color: #ffffff; }
+html[data-paleta="fr"] .erro { color: #593ead; }
+html[data-paleta="fr"] .precos { color: #ffffff; }
+html[data-paleta="fr"] .passos li::before { color: #ffffff; }
+@media (max-width: 760px) {
+html[data-paleta="fr"] .barra-cel { background: rgba(252, 250, 253, .96); }
+html[data-paleta="fr"] .barra-cel a:last-child { color: #ffffff; }
+}

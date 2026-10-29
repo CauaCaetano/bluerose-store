@@ -1,0 +1,16 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/vertice/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --fundo: #080f14; --sup: #152736; --tx: #f7f2eb; --tx-2: #b2aa9f; --linha: rgba(247, 242, 235, .14); --acc: #c5704d; --ouro2: #e5b5a2; --vend: #31516b; --res: #89482e; }
+html[data-paleta="pt-PT"] .pular:focus { background: #ffffff; color: #000000; }
+html[data-paleta="pt-PT"] .predio button[aria-pressed="true"] { outline: 2px solid #ffffff; }
+html[data-paleta="es"] { --fundo: #110b0c; --sup: #2e1d21; --tx: #f8f2ea; --tx-2: #b2a99f; --linha: rgba(248, 242, 234, .14); --acc: #cfa443; --ouro2: #ead29d; --vend: #712b2b; --res: #917026; }
+html[data-paleta="es"] .pular:focus { background: #ffffff; color: #000000; }
+html[data-paleta="es"] .predio button[aria-pressed="true"] { outline: 2px solid #ffffff; }
+html[data-paleta="en"] { --fundo: #050917; --sup: #111a3a; --tx: #eaeef8; --tx-2: #9fa4b2; --linha: rgba(234, 238, 248, .14); --acc: #cb474f; --ouro2: #e89fa3; --vend: #1f357d; --res: #8e292f; }
+html[data-paleta="en"] .pular:focus { background: #ffffff; color: #000000; }
+html[data-paleta="en"] .predio button[aria-pressed="true"] { outline: 2px solid #ffffff; }
+html[data-paleta="it"] { --fundo: #0e110b; --sup: #262d1e; --tx: #f6f4ec; --tx-2: #b2af9f; --linha: rgba(246, 244, 236, .14); --acc: #c29c50; --ouro2: #e4cea3; --vend: #515f3d; --res: #876a30; }
+html[data-paleta="it"] .pular:focus { background: #ffffff; color: #000000; }
+html[data-paleta="it"] .predio button[aria-pressed="true"] { outline: 2px solid #ffffff; }
+html[data-paleta="fr"] { --fundo: #0c0a12; --sup: #201c2f; --tx: #f1ebf7; --tx-2: #a99fb2; --linha: rgba(241, 235, 247, .14); --acc: #6f57bb; --ouro2: #b5a7e0; --vend: #433a62; --res: #483582; }
+html[data-paleta="fr"] .pular:focus { background: #ffffff; color: #000000; }
+html[data-paleta="fr"] .predio button[aria-pressed="true"] { outline: 2px solid #ffffff; }

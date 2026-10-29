@@ -1,0 +1,41 @@
+/* Moldura dos sites de exemplo: pílula da Blue Rose e simulação do WhatsApp. Neutra de propósito, para não brigar com o site. */
+.br-pill { position: fixed; z-index: 90; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; padding: 5px; border-radius: 999px; background: rgba(14, 16, 20, .88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .5); font: 500 12px/1.2 system-ui, -apple-system, 'Segoe UI', sans-serif; color: #fff; max-width: calc(100vw - 24px); }
+.br-pill a, .br-pill button { color: inherit; text-decoration: none; font: inherit; }
+.br-pill-marca { display: flex; flex-direction: column; padding: 4px 12px; line-height: 1.15; }
+.br-pill-marca b { letter-spacing: .14em; font-size: 10px; }
+.br-pill-marca span { opacity: .7; }
+.br-pill-perso { padding: 0 8px; opacity: .85; white-space: nowrap; }
+.br-pill-perso button { background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 0; }
+.br-pill-cta { background: #fff; color: #111 !important; padding: 9px 14px; border-radius: 999px; font-weight: 650; white-space: nowrap; transition: transform .2s; }
+.br-pill-cta:hover { transform: translateY(-1px); }
+.br-pill a:focus-visible, .br-pill button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 999px; }
+@media (max-width: 520px) { .br-pill-marca span, .br-pill-perso { display: none; } }
+
+.br-sim { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 16px; background: rgba(8, 10, 14, .62); backdrop-filter: blur(4px); font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+.br-sim[hidden] { display: none; }
+.br-sim-caixa { position: relative; display: grid; grid-template-columns: 300px minmax(0, 340px); gap: 28px; align-items: center; background: #fff; color: #161616; border-radius: 22px; padding: 26px; max-height: calc(100dvh - 32px); overflow: auto; }
+.br-sim-x { position: absolute; top: 10px; right: 12px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: #f1f1f1; font-size: 20px; cursor: pointer; }
+.br-sim-fone { background: #e7ddd3; border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; height: 430px; box-shadow: inset 0 0 0 6px #1b1b1b; }
+.br-sim-topo { display: flex; gap: 10px; align-items: center; background: #075e54; color: #fff; padding: 16px 16px 10px; }
+.br-sim-topo small { display: block; opacity: .8; font-size: 11px; }
+.br-sim-av { width: 34px; height: 34px; border-radius: 50%; background: #fff; color: #075e54; display: grid; place-items: center; font-weight: 700; }
+.br-sim-chat { flex: 1; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.br-sim-msg { max-width: 82%; padding: 7px 10px 5px; border-radius: 10px; font-size: 13px; background: #fff; align-self: flex-start; }
+.br-sim-msg.eu { background: #d9fdd3; align-self: flex-end; }
+.br-sim-msg span { display: block; text-align: right; font-size: 10px; opacity: .55; }
+.br-sim-msg i { display: inline-block; width: 6px; height: 6px; margin: 2px; border-radius: 50%; background: #888; animation: br-pulo 1s infinite; }
+.br-sim-msg i:nth-child(2) { animation-delay: .15s; } .br-sim-msg i:nth-child(3) { animation-delay: .3s; }
+@keyframes br-pulo { 50% { transform: translateY(-3px); opacity: .5; } }
+.br-sim-aviso { font-size: 11px; text-align: center; padding: 6px; background: rgba(0, 0, 0, .06); }
+.br-sim-tag { text-transform: none; font-size: 12px; color: #075e54; font-weight: 650; margin: 0 0 6px; }
+.br-sim-txt h3 { font-size: 22px; line-height: 1.2; margin: 0 0 10px; }
+.br-sim-txt p { margin: 0 0 16px; color: #444; }
+.br-sim-cta { display: inline-block; background: #111; color: #fff; padding: 12px 18px; border-radius: 999px; text-decoration: none; font-weight: 650; }
+.br-sim-volta { display: block; margin-top: 10px; background: none; border: 0; text-decoration: underline; cursor: pointer; color: #444; padding: 0; font: inherit; }
+@media (max-width: 720px) { .br-sim-caixa { grid-template-columns: 1fr; } .br-sim-fone { height: 340px; } }
+@media (prefers-reduced-motion: reduce) { .br-sim-msg i { animation: none; } }
+
+.foto-3d { display: block; width: 100%; min-height: 360px; }
+.foto-caixa { position: relative; overflow: hidden; }
+.foto-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .4s ease; }
+.foto-img.ativa { opacity: 1; }

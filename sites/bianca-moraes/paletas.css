@@ -1,0 +1,31 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/bianca-moraes/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --fundo: #f9f5ef; --rosa: #f2e9dc; --muted: #cd9b87; --tx: #2a333a; --tx-2: #8a5945; --branco: #fefdfb; --linha: rgba(42, 51, 58, .14); --acc: #8a5945; }
+html[data-paleta="pt-PT"] .pular:focus { background: #ffffff; }
+html[data-paleta="pt-PT"] .painel { box-shadow: 0 30px 60px -40px rgba(138, 89, 69, .5); }
+html[data-paleta="pt-PT"] .pt { border: 2px solid #ffffff; box-shadow: 0 0 0 0 rgba(138, 89, 69, .55); }
+html[data-paleta="pt-PT"] .pt[aria-pressed="true"] { background: #ffffff; }
+html[data-paleta="pt-PT"] .erro { color: #9a4f30; }
+html[data-paleta="es"] { --fundo: #f9f4ef; --rosa: #f3e8db; --muted: #cc8889; --tx: #3a2a2d; --tx-2: #894647; --branco: #fefdfb; --linha: rgba(58, 42, 45, .14); --acc: #894647; }
+html[data-paleta="es"] .pular:focus { background: #ffffff; }
+html[data-paleta="es"] .painel { box-shadow: 0 30px 60px -40px rgba(137, 70, 71, .5); }
+html[data-paleta="es"] .pt { border: 2px solid #ffffff; box-shadow: 0 0 0 0 rgba(137, 70, 71, .55); }
+html[data-paleta="es"] .pt[aria-pressed="true"] { background: #ffffff; }
+html[data-paleta="es"] .erro { color: #993132; }
+html[data-paleta="en"] { --fundo: #eff2f9; --rosa: #dce2f2; --muted: #d18387; --tx: #2a2e3a; --tx-2: #8f4044; --branco: #fbfcfe; --linha: rgba(42, 46, 58, .14); --acc: #8f4044; }
+html[data-paleta="en"] .pular:focus { background: #ffffff; }
+html[data-paleta="en"] .painel { box-shadow: 0 30px 60px -40px rgba(143, 64, 68, .5); }
+html[data-paleta="en"] .pt { border: 2px solid #ffffff; box-shadow: 0 0 0 0 rgba(143, 64, 68, .55); }
+html[data-paleta="en"] .pt[aria-pressed="true"] { background: #ffffff; }
+html[data-paleta="en"] .erro { color: #9f2b32; }
+html[data-paleta="it"] { --fundo: #f8f6f0; --rosa: #f0ecde; --muted: #cc9e88; --tx: #323a2a; --tx-2: #885c47; --branco: #fdfdfc; --linha: rgba(50, 58, 42, .14); --acc: #885c47; }
+html[data-paleta="it"] .pular:focus { background: #ffffff; }
+html[data-paleta="it"] .painel { box-shadow: 0 30px 60px -40px rgba(136, 92, 71, .5); }
+html[data-paleta="it"] .pt { border: 2px solid #ffffff; box-shadow: 0 0 0 0 rgba(136, 92, 71, .55); }
+html[data-paleta="it"] .pt[aria-pressed="true"] { background: #ffffff; }
+html[data-paleta="it"] .erro { color: #995231; }
+html[data-paleta="fr"] { --fundo: #f4eff9; --rosa: #e7dcf2; --muted: #988cc8; --tx: #2e2a3a; --tx-2: #564b84; --branco: #fcfbfe; --linha: rgba(46, 42, 58, .14); --acc: #564b84; }
+html[data-paleta="fr"] .pular:focus { background: #ffffff; }
+html[data-paleta="fr"] .painel { box-shadow: 0 30px 60px -40px rgba(86, 75, 132, .5); }
+html[data-paleta="fr"] .pt { border: 2px solid #ffffff; box-shadow: 0 0 0 0 rgba(86, 75, 132, .55); }
+html[data-paleta="fr"] .pt[aria-pressed="true"] { background: #ffffff; }
+html[data-paleta="fr"] .erro { color: #493694; }

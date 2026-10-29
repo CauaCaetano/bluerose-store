@@ -1,0 +1,88 @@
+/* Ferreira Reformas · Terracota + Blue + Mustard (paletas do dono, post 2). Cara de canteiro: cantos retos, letra grossa. */
+:root {
+  --fundo: #efe6d6; --papel: #faf5ec; --tx: #1e2f38; --tx-2: #4d6470; --linha: rgba(30, 47, 56, .18);
+  --azul: #304d5d; --acc: #ab452f; --mostarda: #c38343; --areia: #d3b591;
+  --f: 'Archivo', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--fundo); color: var(--tx); font: 400 16px/1.55 var(--f); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+h1, h2 { font-weight: 800; letter-spacing: -.035em; line-height: .98; margin: 0 0 .45em; text-wrap: balance; }
+h1 { font-size: clamp(2.5rem, 5.6vw, 4.8rem); }
+h2 { font-size: clamp(1.9rem, 3.8vw, 3.2rem); }
+p { margin: 0 0 1em; text-wrap: pretty; }
+:focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; }
+.pular { position: absolute; left: -999px; } .pular:focus { left: 8px; top: 8px; background: #fff; padding: 8px; z-index: 99; }
+
+.topo { display: flex; align-items: center; gap: 20px; padding: 14px clamp(16px, 4vw, 48px); background: var(--azul); color: #fff; }
+.marca { text-decoration: none; font-size: 1.3rem; letter-spacing: -.02em; }
+.marca b { background: var(--acc); padding: 2px 8px; margin-right: 4px; letter-spacing: .02em; }
+.topo-sel { margin: 0 auto 0 0; font-size: .84rem; color: var(--areia); }
+.topo-wa { text-decoration: none; font-weight: 800; background: #1fae63; padding: 10px 14px; }
+@media (max-width: 760px) { .topo-sel { display: none; } .topo-wa { margin-left: auto; font-size: .88rem; } }
+
+.botao { display: inline-block; border: 0; cursor: pointer; text-decoration: none; text-align: center; background: var(--acc); color: #fff; font: 800 1.05rem var(--f); padding: 17px 26px; transition: filter .2s, transform .15s; }
+.botao:hover { filter: brightness(1.1); } .botao:active { transform: translateY(1px); }
+
+section { padding: clamp(56px, 8vw, 104px) clamp(16px, 4vw, 48px); max-width: 1300px; margin: 0 auto; }
+
+/* primeira tela: o quiz de orçamento ocupa metade dela */
+.abre { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); align-items: start; padding-top: clamp(32px, 5vw, 64px); }
+.abre-txt > p { font-size: 1.2rem; color: var(--tx-2); max-width: 40ch; }
+.eu { margin: 28px 0 0; display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; }
+.eu img { width: 120px; height: 120px; object-fit: cover; object-position: 50% 20%; display: block; }
+.eu figcaption { color: var(--tx-2); font-size: .94rem; } .eu b { display: block; color: var(--tx); font-size: 1.1rem; }
+.quiz { background: var(--papel); border: 2px solid var(--tx); padding: clamp(20px, 3vw, 32px); box-shadow: 10px 10px 0 var(--tx); min-height: 440px; display: flex; flex-direction: column; }
+.q-barra { height: 8px; background: var(--fundo); margin-bottom: 22px; } .q-barra i { display: block; height: 100%; width: 25%; background: var(--acc); transition: width .35s; }
+.q-passo { border: 0; padding: 0; margin: 0; min-width: 0; }
+.q-passo legend { font-size: clamp(1.4rem, 2.4vw, 1.9rem); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; margin-bottom: 18px; padding: 0; }
+.q-passo legend span { display: block; font-size: .82rem; font-weight: 700; color: var(--acc); margin-bottom: 6px; letter-spacing: 0; }
+.q-op { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.q-op label { position: relative; }
+.q-op input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.q-op span { display: block; height: 100%; padding: 16px; border: 2px solid var(--linha); background: #fff; cursor: pointer; font-weight: 700; font-size: 1.05rem; transition: border-color .15s, background .15s; }
+.q-op span b { display: block; } .q-op span:not(:has(b)) { display: flex; align-items: center; }
+.q-op input:checked + span { border-color: var(--tx); background: var(--areia); }
+.q-op input:focus-visible + span { outline: 3px solid var(--acc); }
+[data-p="2"] .q-op { grid-template-columns: 1fr; } [data-p="2"] .q-op span { font-weight: 400; color: var(--tx-2); } [data-p="2"] .q-op b { color: var(--tx); }
+.q-m2 { display: grid; gap: 12px; } .q-m2 output { font-size: 3.6rem; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+.q-m2 input { width: 100%; accent-color: var(--acc); }
+.q-dica { color: var(--tx-2); margin-top: 10px; }
+.q-res .q-faixa { font-size: clamp(2.2rem, 4.4vw, 3.3rem); font-weight: 800; letter-spacing: -.04em; line-height: 1; margin: 6px 0 12px; font-variant-numeric: tabular-nums; }
+.q-res ul { padding-left: 18px; color: var(--tx-2); margin: 0 0 16px; }
+.q-res .botao { width: 100%; }
+.q-nav { margin-top: auto; padding-top: 16px; }
+.q-volta { font: 700 .9rem var(--f); background: none; border: 0; color: var(--tx-2); cursor: pointer; text-decoration: underline; padding: 0; }
+@media (max-width: 900px) { .abre { grid-template-columns: 1fr; } .quiz { box-shadow: 6px 6px 0 var(--tx); } }
+@media (max-width: 420px) { .q-op { grid-template-columns: 1fr; } }
+
+.compromisso { background: var(--azul); color: #fff; max-width: none; }
+.compromisso h2 { max-width: 1300px; margin-left: auto; margin-right: auto; }
+.compromisso ol { list-style: none; counter-reset: c; padding: 0; margin: 30px auto 0; max-width: 1300px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 2px solid rgba(255, 255, 255, .25); }
+.compromisso li { counter-increment: c; padding: 22px 22px 0 0; color: var(--areia); }
+.compromisso li::before { content: '0' counter(c); display: block; font-size: 2.6rem; font-weight: 800; color: var(--mostarda); line-height: 1; margin-bottom: 10px; }
+.compromisso b { display: block; color: #fff; font-size: 1.25rem; margin-bottom: 4px; }
+@media (max-width: 860px) { .compromisso ol { grid-template-columns: 1fr 1fr; gap: 20px; } }
+@media (max-width: 480px) { .compromisso ol { grid-template-columns: 1fr; } }
+
+.ob-grade { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.ob-grade figure { margin: 0; position: relative; }
+.ob-grade img { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 220px; }
+.ob-grade figcaption { position: absolute; left: 0; bottom: 0; background: var(--tx); color: #fff; font-weight: 700; font-size: .86rem; padding: 8px 12px; }
+.g1 { grid-column: 1 / 4; grid-row: span 2; } .g2 { grid-column: 4 / 7; } .g3 { grid-column: 4 / 6; } .g4 { grid-column: 6 / 7; }
+@media (max-width: 760px) { .ob-grade { grid-template-columns: 1fr; } .ob-grade figure { grid-column: auto !important; grid-row: auto !important; } }
+
+.vozes ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.vozes li { background: var(--papel); border-left: 6px solid var(--mostarda); padding: 24px; }
+.vozes q { display: block; font-size: 1.25rem; font-weight: 600; line-height: 1.35; quotes: none; margin-bottom: 12px; }
+.vozes span { color: var(--tx-2); font-size: .9rem; }
+@media (max-width: 760px) { .vozes ul { grid-template-columns: 1fr; } }
+
+.fim { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; padding: 0; margin-bottom: 60px; background: var(--acc); color: #fff; }
+.fim img { width: 100%; height: 100%; min-height: 320px; object-fit: cover; display: block; }
+.fim div { padding: clamp(28px, 5vw, 56px); align-self: center; } .fim p { color: #f6dcd2; }
+.fim .botao { background: var(--tx); }
+@media (max-width: 760px) { .fim { grid-template-columns: 1fr; } }
+.rodape { text-align: center; padding: 20px 16px 96px; font-size: .8rem; color: var(--tx-2); }

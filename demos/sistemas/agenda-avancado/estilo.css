@@ -131,3 +131,14 @@ tbody tr { transition: background .15s; } tbody tr:hover td { background: #fbf4e
 
 /* celular (390 px): tabela larga rola dentro dela; campo de formulário encolhe com a coluna */
 @media (max-width: 640px) { table { display: block; overflow-x: auto; } label, input, select, textarea { min-width: 0; max-width: 100%; } }
+
+/* agenda e resumo */
+.nav-dia { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; flex-wrap: wrap; }
+.nav-dia input[type=date], .busca-a { font: inherit; padding: 7px 10px; border: 1px solid #e0d2c1; border-radius: 10px; background: #fff; }
+.nav-dia .nav-t { min-width: 160px; text-align: center; font-size: 1.1rem; }
+.busca-a { width: 100%; max-width: 420px; margin: 0 0 10px; box-sizing: border-box; }
+.trilho { display: block; height: 7px; border-radius: 9px; background: #ecdfd0; margin-top: 5px; overflow: hidden; } .trilho i { display: block; height: 100%; background: var(--uva, #57405f); border-radius: 9px; }
+.colunas-a { display: flex; align-items: stretch; gap: 3px; height: 160px; padding: 6px 0 18px; }
+.colunas-a span { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; }
+.colunas-a i { display: block; background: var(--uva, #57405f); border-radius: 3px 3px 0 0; min-height: 1px; opacity: .85; }
+.colunas-a small { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: .68rem; color: var(--tx-3, #8a7f86); white-space: nowrap; }

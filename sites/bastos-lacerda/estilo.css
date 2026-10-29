@@ -1,0 +1,77 @@
+/* Bastos Lacerda · Ivory + Gold + Deep Atlas Navy (paletas do dono, vídeo 19). Banca tradicional, atendimento moderno. */
+:root {
+  --fundo: #f1ede2; --marfim: #e0d9c6; --branco: #fbf9f3; --tx: #0a1950; --tx-2: #5c6287; --linha: rgba(10, 25, 80, .15);
+  --acc: #a18146;
+  --serif: 'Cormorant Garamond', Georgia, serif; --f: 'Montserrat', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--fundo); color: var(--tx); font: 400 15px/1.65 var(--f); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 500; line-height: 1.02; letter-spacing: -.01em; margin: 0 0 .4em; text-wrap: balance; }
+h1 { font-size: clamp(2.6rem, 5vw, 4.6rem); } h2 { font-size: clamp(2.2rem, 4vw, 3.4rem); } h3 { font-size: 1.7rem; }
+p { margin: 0 0 1em; text-wrap: pretty; }
+:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.pular { position: absolute; left: -999px; } .pular:focus { left: 8px; top: 8px; background: #fff; padding: 8px; z-index: 99; }
+
+.topo { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 26px; padding: 14px clamp(16px, 4vw, 48px); background: var(--tx); color: var(--branco); }
+.marca { font-family: var(--serif); font-size: 1.6rem; text-decoration: none; line-height: 1; } .marca i { color: var(--acc); } .marca small { display: block; font-family: var(--f); font-size: .6rem; letter-spacing: .24em; color: var(--acc); margin-top: 4px; }
+.menu { display: flex; gap: 22px; margin-left: auto; font-size: .84rem; } .menu a { text-decoration: none; color: var(--marfim); } .menu a:hover { color: #fff; }
+@media (max-width: 960px) { .menu { display: none; } .topo .botao-p { margin-left: auto; } }
+
+.botao { display: inline-block; border: 0; cursor: pointer; text-decoration: none; text-align: center; background: var(--acc); color: #fff; font: 600 .92rem var(--f); padding: 15px 24px; letter-spacing: .02em; transition: background .2s, transform .15s; }
+.botao:hover { background: #8b6e3a; } .botao:active { transform: translateY(1px); }
+.botao-p { padding: 10px 16px; font-size: .82rem; } .botao-l { background: transparent; color: var(--tx); box-shadow: inset 0 0 0 1.5px var(--tx); } .botao-l:hover { background: var(--tx); color: #fff; }
+
+section { padding: clamp(56px, 8vw, 104px) clamp(16px, 4vw, 48px); max-width: 1320px; margin: 0 auto; }
+.abre { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: clamp(24px, 5vw, 72px); align-items: center; padding-top: clamp(28px, 4vw, 56px); }
+.abre img { width: 100%; height: min(80vh, 760px); object-fit: cover; display: block; }
+.abre-txt > p { font-size: 1.05rem; color: var(--tx-2); max-width: 54ch; }
+.triagem { background: var(--branco); padding: 20px; margin-top: 22px; border-top: 3px solid var(--acc); }
+.triagem label { font-family: var(--serif); font-size: 1.4rem; display: block; margin-bottom: 8px; }
+.triagem textarea { width: 100%; font: 400 1rem var(--f); padding: 14px; border: 1px solid var(--linha); background: var(--fundo); color: var(--tx); resize: vertical; }
+.exemplos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.exemplos button { font: 500 .8rem var(--f); background: transparent; border: 1px solid var(--linha); color: var(--tx-2); padding: 7px 11px; cursor: pointer; }
+.exemplos button:hover { border-color: var(--acc); color: var(--tx); }
+@media (max-width: 860px) { .abre { grid-template-columns: 1fr; } .abre img { height: 260px; } }
+
+.resultado { padding-top: 0; }
+.rs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; background: var(--tx); color: var(--branco); }
+.rs-a { padding: clamp(22px, 3vw, 36px); } .rs-a p { color: var(--marfim); } .rs-a .area { color: var(--acc); font-size: .8rem; letter-spacing: .14em; font-weight: 600; }
+.rs-a dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; } .rs-a dt { font-size: .74rem; color: var(--marfim); } .rs-a dd { margin: 0; font-family: var(--serif); font-size: 1.3rem; line-height: 1.15; }
+.rs-b { padding: clamp(22px, 3vw, 36px); background: #111f5c; display: grid; grid-template-columns: 110px 1fr; gap: 16px; align-content: start; }
+.rs-b img { width: 110px; height: 130px; object-fit: cover; display: block; }
+.slots { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; } .slots button { font: 600 .82rem var(--f); background: transparent; border: 1px solid rgba(224, 217, 198, .4); color: var(--branco); padding: 8px 10px; cursor: pointer; }
+.slots button[aria-pressed="true"] { background: var(--acc); border-color: var(--acc); }
+.rs-b .botao { grid-column: 1 / -1; }
+@media (max-width: 860px) { .rs { grid-template-columns: 1fr; } .rs-a dl { grid-template-columns: 1fr; } }
+
+.numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; padding-top: 0; padding-bottom: 0; }
+.numeros p { margin: 0; padding: 26px 18px 26px 0; border-top: 1px solid var(--tx); color: var(--tx-2); font-size: .84rem; } .numeros b { display: block; font-family: var(--serif); font-weight: 500; font-size: 2.4rem; color: var(--tx); }
+@media (max-width: 760px) { .numeros { grid-template-columns: 1fr 1fr; } }
+
+.sc-grade { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.socio img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 20%; display: block; filter: grayscale(.35); transition: filter .3s; } .socio:hover img { filter: none; }
+.socio h3 { font-size: 1.5rem; margin: 12px 0 0; } .socio p { color: var(--tx-2); font-size: .84rem; margin: 0 0 8px; }
+.socio button { font: 600 .82rem var(--f); background: none; border: 0; border-bottom: 1px solid var(--acc); padding: 0 0 2px; color: var(--tx); cursor: pointer; }
+@media (max-width: 860px) { .sc-grade { grid-template-columns: 1fr 1fr; } }
+
+.processo { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(24px, 5vw, 64px); align-items: start; background: var(--marfim); max-width: none; }
+.processo > * { max-width: 640px; } .processo p { color: var(--tx-2); }
+.proc { display: flex; gap: 8px; flex-wrap: wrap; } .proc input { flex: 1; min-width: 220px; font: 500 1rem var(--f); padding: 14px; border: 1px solid var(--linha); background: var(--branco); color: var(--tx); }
+.linha { list-style: none; padding: 0; margin: 0; border-left: 2px solid var(--acc); }
+.linha li { position: relative; padding: 0 0 18px 22px; } .linha li::before { content: ''; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--tx); }
+.linha li:first-child::before { background: var(--acc); box-shadow: 0 0 0 4px rgba(161, 129, 70, .3); }
+.linha b { display: block; } .linha span { color: var(--tx-2); font-size: .86rem; }
+@media (max-width: 860px) { .processo { grid-template-columns: 1fr; } }
+
+.pl-sub { color: var(--tx-2); max-width: 60ch; }
+.pl-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border: 1px solid var(--linha); margin-top: 24px; }
+.pl-grade article { padding: 28px; display: flex; flex-direction: column; border-right: 1px solid var(--linha); background: var(--branco); } .pl-grade article:last-child { border-right: 0; }
+.pl-grade .dest { background: var(--tx); color: var(--branco); } .dest .sel { color: var(--acc); font-size: .74rem; letter-spacing: .16em; font-weight: 600; margin: 0 0 6px; }
+.pr { font-family: var(--serif); font-size: 2.6rem; line-height: 1; margin: 4px 0 14px; } .pr small { font-family: var(--f); font-size: .82rem; }
+.pl-grade ul { padding-left: 18px; margin: 0 0 22px; flex: 1; } .pl-grade li { margin-bottom: 6px; }
+.dest .botao-l { color: #fff; box-shadow: inset 0 0 0 1.5px #fff; }
+@media (max-width: 860px) { .pl-grade { grid-template-columns: 1fr; } .pl-grade article { border-right: 0; border-bottom: 1px solid var(--linha); } }
+.rodape { text-align: center; padding: 20px 16px 96px; font-size: .76rem; color: var(--tx-2); border-top: 1px solid var(--linha); }

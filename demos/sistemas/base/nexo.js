@@ -735,7 +735,7 @@ function montar(app, cfg) {
         ${r.itens.length ? `<div><h4 style="font-size:12.5px;color:var(--tx-3);font-weight:500;margin-bottom:6px">${esc(r.tituloItens || 'Hoje')}</h4><ul class="lista" style="margin:0 -18px">${r.itens.map((x) => `<li style="min-height:34px;padding:6px 18px">${esc(x)}</li>`).join('')}</ul></div>` : ''}
         <label class="campo">Seu WhatsApp (para mandar o resumo)<input data-zap type="tel" value="${esc(app.db.cfg.whats_dono || '')}" placeholder="(11) 99999-9999"></label></div>`,
         botoes: [{ rotulo: 'Copiar', icone: 'copy', classe: 'fant', acao: () => { navigator.clipboard?.writeText(texto).catch(() => {}); avisar('Resumo copiado'); return false; } },
-          { rotulo: 'E-mail', icone: 'envelope-simple', acao: () => { location.href = `mailto:?subject=${encodeURIComponent(`Resumo do dia · ${app.empresa}`)}&body=${encodeURIComponent(texto.replace(/\*/g, ''))}`; return false; } },
+          { rotulo: 'E-mail', icone: 'envelope-simple', acao: () => { window.open(`mailto:?subject=${encodeURIComponent(`Resumo do dia · ${app.empresa}`)}&body=${encodeURIComponent(texto.replace(/\*/g, ''))}`, '_self'); return false; } },
           { rotulo: 'Enviar no WhatsApp', icone: 'whatsapp-logo', classe: 'pri', acao: (f) => { const n = f.querySelector('[data-zap]').value; if (n) { app.db.cfg.whats_dono = n; app.db.gravar(); } const num = String(n || zap).replace(/\D/g, ''); window.open(`https://wa.me/${num ? `55${num.replace(/^55/, '')}` : ''}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener'); return false; } }] });
     },
   });

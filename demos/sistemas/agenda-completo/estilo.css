@@ -172,3 +172,13 @@ td input[data-com] { min-height: 34px; border: 1px solid var(--areia); border-ra
 @media print { body.so-dialogo > *:not(.sombra) { display: none !important; } body.so-dialogo .sombra { position: static; background: none; } body.so-dialogo .pe { display: none; }
   body.imprime-dia .barra-demo, body.imprime-dia .recepcao, body.imprime-dia .fila, body.imprime-dia .comanda, body.imprime-dia .acoes { display: none !important; } }
 .barras.metas .l { grid-template-columns: 110px 1fr auto; } .barras.metas input { width: 76px; padding: 4px 6px; }
+
+/* grade de qualquer dia, resumo com colunas */
+.dia-g { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.dia-g > span { min-width: 92px; text-align: center; }
+.dia-g input[type=date], .r-nav input[type=date] { font: inherit; font-size: .84rem; padding: 4px 8px; border: 1px solid var(--areia); border-radius: 6px; background: #fff; }
+.r-nav { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; } .r-nav b { min-width: 150px; text-align: center; font-size: 1.05rem; }
+.colunas { display: flex; align-items: stretch; gap: 3px; height: 150px; padding: 6px 0 18px; }
+.colunas span { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; }
+.colunas i { display: block; background: var(--azul, #2f4352); border-radius: 3px 3px 0 0; min-height: 1px; opacity: .85; }
+.colunas small { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: .68rem; color: var(--tx-3, #8a8f9c); white-space: nowrap; }

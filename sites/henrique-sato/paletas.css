@@ -1,0 +1,56 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/henrique-sato/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --fundo: #111a22; --sup: #1b2e3e; --sup2: #2a475f; --tx: #efe7dc; --tx-2: #92b3cd; --linha: rgba(239, 231, 220, .12); --acc: #e2a370; --ok: #6fd3a5; }
+html[data-paleta="pt-PT"] .pular:focus { background: #ffffff; color: #000000; }
+html[data-paleta="pt-PT"] .topo { background: linear-gradient(rgba(17, 26, 34, .85), transparent); }
+html[data-paleta="pt-PT"] .hero::after { background: linear-gradient(90deg, rgba(17, 26, 34, .96) 0%, rgba(17, 26, 34, .78) 42%, rgba(17, 26, 34, .1) 75%), linear-gradient(transparent 60%, var(--fundo)); }
+@media (max-width: 760px) {
+html[data-paleta="pt-PT"] .hero::after { background: linear-gradient(rgba(17, 26, 34, .4), rgba(17, 26, 34, .95) 55%); }
+}
+html[data-paleta="pt-PT"] .qt-res p { color: #315069; }
+html[data-paleta="pt-PT"] .tabela .nos { background: rgba(226, 163, 112, .12); }
+html[data-paleta="pt-PT"] .erro { color: #f0b59d; }
+html[data-paleta="pt-PT"] .flutua { background: #2c6da1; color: #ffffff; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .6); }
+html[data-paleta="es"] { --fundo: #1f1416; --sup: #421717; --sup2: #652424; --tx: #efe6dc; --tx-2: #d38c8c; --linha: rgba(239, 230, 220, .12); --acc: #e4c06e; --ok: #6fd3a5; }
+html[data-paleta="es"] .pular:focus { background: #ffffff; color: #000000; }
+html[data-paleta="es"] .topo { background: linear-gradient(rgba(31, 20, 22, .85), transparent); }
+html[data-paleta="es"] .hero::after { background: linear-gradient(90deg, rgba(31, 20, 22, .96) 0%, rgba(31, 20, 22, .78) 42%, rgba(31, 20, 22, .1) 75%), linear-gradient(transparent 60%, var(--fundo)); }
+@media (max-width: 760px) {
+html[data-paleta="es"] .hero::after { background: linear-gradient(rgba(31, 20, 22, .4), rgba(31, 20, 22, .95) 55%); }
+}
+html[data-paleta="es"] .qt-res p { color: #6f2b2b; }
+html[data-paleta="es"] .tabela .nos { background: rgba(228, 192, 110, .12); }
+html[data-paleta="es"] .erro { color: #ef9e9e; }
+html[data-paleta="es"] .flutua { background: #95384a; color: #ffffff; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .6); }
+html[data-paleta="en"] { --fundo: #111522; --sup: #162543; --sup2: #223967; --tx: #dce1ef; --tx-2: #8aa3d5; --linha: rgba(220, 225, 239, .12); --acc: #e17178; --ok: #6fd3a5; }
+html[data-paleta="en"] .pular:focus { background: #ffffff; color: #000000; }
+html[data-paleta="en"] .topo { background: linear-gradient(rgba(17, 21, 34, .85), transparent); }
+html[data-paleta="en"] .hero::after { background: linear-gradient(90deg, rgba(17, 21, 34, .96) 0%, rgba(17, 21, 34, .78) 42%, rgba(17, 21, 34, .1) 75%), linear-gradient(transparent 60%, var(--fundo)); }
+@media (max-width: 760px) {
+html[data-paleta="en"] .hero::after { background: linear-gradient(rgba(17, 21, 34, .4), rgba(17, 21, 34, .95) 55%); }
+}
+html[data-paleta="en"] .qt-res p { color: #294171; }
+html[data-paleta="en"] .tabela .nos { background: rgba(225, 113, 120, .12); }
+html[data-paleta="en"] .erro { color: #97b3f6; }
+html[data-paleta="en"] .flutua { background: #1239bb; color: #ffffff; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .6); }
+html[data-paleta="it"] { --fundo: #1a1f14; --sup: #2e3722; --sup2: #475435; --tx: #efebdc; --tx-2: #b2c09f; --linha: rgba(239, 235, 220, .12); --acc: #dbba77; --ok: #6fd3a5; }
+html[data-paleta="it"] .pular:focus { background: #ffffff; color: #000000; }
+html[data-paleta="it"] .topo { background: linear-gradient(rgba(26, 31, 20, .85), transparent); }
+html[data-paleta="it"] .hero::after { background: linear-gradient(90deg, rgba(26, 31, 20, .96) 0%, rgba(26, 31, 20, .78) 42%, rgba(26, 31, 20, .1) 75%), linear-gradient(transparent 60%, var(--fundo)); }
+@media (max-width: 760px) {
+html[data-paleta="it"] .hero::after { background: linear-gradient(rgba(26, 31, 20, .4), rgba(26, 31, 20, .95) 55%); }
+}
+html[data-paleta="it"] .qt-res p { color: #505d3d; }
+html[data-paleta="it"] .tabela .nos { background: rgba(219, 186, 119, .12); }
+html[data-paleta="it"] .erro { color: #efb89e; }
+html[data-paleta="it"] .flutua { background: #679439; color: #ffffff; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .6); }
+html[data-paleta="fr"] { --fundo: #161320; --sup: #231d3c; --sup2: #372e5b; --tx: #e6dcef; --tx-2: #a197c8; --linha: rgba(230, 220, 239, .12); --acc: #927cd6; --ok: #6fd3a5; }
+html[data-paleta="fr"] .pular:focus { background: #ffffff; color: #000000; }
+html[data-paleta="fr"] .topo { background: linear-gradient(rgba(22, 19, 32, .85), transparent); }
+html[data-paleta="fr"] .hero::after { background: linear-gradient(90deg, rgba(22, 19, 32, .96) 0%, rgba(22, 19, 32, .78) 42%, rgba(22, 19, 32, .1) 75%), linear-gradient(transparent 60%, var(--fundo)); }
+@media (max-width: 760px) {
+html[data-paleta="fr"] .hero::after { background: linear-gradient(rgba(22, 19, 32, .4), rgba(22, 19, 32, .95) 55%); }
+}
+html[data-paleta="fr"] .qt-res p { color: #3f3664; }
+html[data-paleta="fr"] .tabela .nos { background: rgba(146, 124, 214, .12); }
+html[data-paleta="fr"] .erro { color: #ac9af3; }
+html[data-paleta="fr"] .flutua { background: #4c3598; color: #ffffff; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .6); }

@@ -1,0 +1,64 @@
+/* Dra. Bianca Moraes · Soft Beauty / Serum Blush (paletas do dono, posts 6 e 8). Rosado, delicado, editorial. */
+:root {
+  --fundo: #f9eff0; --rosa: #f8d6d7; --muted: #c88c96; --tx: #3a2a2b; --tx-2: #7c5357; --branco: #fffafa; --linha: rgba(58, 42, 43, .14);
+  --acc: #7c5357;
+  --serif: 'Bodoni Moda', Didot, Georgia, serif; --f: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--fundo); color: var(--tx); font: 400 16px/1.6 var(--f); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+h1, h2 { font-family: var(--serif); font-weight: 400; line-height: 1; letter-spacing: -.02em; margin: 0 0 .4em; text-wrap: balance; }
+h1 { font-size: clamp(2.8rem, 6vw, 5.6rem); } h1 i, h2 i { color: var(--muted); } h2 { font-size: clamp(2rem, 4vw, 3.4rem); }
+p { margin: 0 0 1em; text-wrap: pretty; }
+:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+.pular { position: absolute; left: -999px; } .pular:focus { left: 8px; top: 8px; background: #fff; padding: 8px; z-index: 99; }
+
+.topo { display: flex; align-items: baseline; gap: 18px; padding: 20px clamp(16px, 4vw, 48px); }
+.marca { font-family: var(--serif); font-size: 1.5rem; text-decoration: none; } .marca i { color: var(--muted); }
+.topo-l { margin: 0; color: var(--tx-2); font-size: .86rem; }
+.topo-cta { margin-left: auto; background: var(--tx); color: var(--fundo); text-decoration: none; padding: 10px 18px; border-radius: 999px; font-size: .9rem; }
+@media (max-width: 640px) { .topo-l { display: none; } }
+
+.botao { display: inline-block; border: 0; cursor: pointer; text-decoration: none; text-align: center; background: var(--tx); color: var(--fundo); font: 500 1rem var(--f); padding: 16px 28px; border-radius: 999px; transition: background .2s, transform .15s; }
+.botao:hover { background: var(--acc); } .botao:active { transform: translateY(1px); }
+
+section { padding: clamp(56px, 8vw, 104px) clamp(16px, 4vw, 48px); max-width: 1280px; margin: 0 auto; }
+.rosto { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); gap: clamp(20px, 4vw, 56px); align-items: center; padding-top: 10px; }
+.rs-txt > p { color: var(--tx-2); font-size: 1.08rem; max-width: 46ch; }
+.painel { background: var(--branco); border-radius: 26px; padding: 24px; min-height: 230px; box-shadow: 0 30px 60px -40px rgba(124, 83, 87, .5); }
+.painel .vazio { color: var(--muted); font-family: var(--serif); font-size: 1.4rem; margin: 0; }
+.painel h3 { font-family: var(--serif); font-weight: 400; font-size: 2rem; margin: 0 0 .2em; }
+.painel dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0 16px; } .painel dl div { background: var(--fundo); border-radius: 14px; padding: 10px 12px; }
+.painel dt { font-size: .74rem; color: var(--tx-2); } .painel dd { margin: 0; font-family: var(--serif); font-size: 1.2rem; }
+.foto { position: relative; margin: 0; } .foto img { width: 100%; height: auto; display: block; border-radius: 300px 300px 26px 26px; }
+.pt { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 2px solid #fff; background: var(--acc); cursor: pointer; padding: 0; box-shadow: 0 0 0 0 rgba(124, 83, 87, .55); animation: pulso 2.4s infinite; }
+.pt span { position: absolute; left: 28px; top: 50%; transform: translateY(-50%); white-space: nowrap; background: var(--branco); color: var(--tx); font: 500 .78rem var(--f); padding: 4px 10px; border-radius: 999px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.pt:hover span, .pt:focus-visible span, .pt[aria-pressed="true"] span { opacity: 1; }
+.pt[aria-pressed="true"] { background: #fff; border-color: var(--acc); animation: none; }
+@keyframes pulso { 0% { box-shadow: 0 0 0 0 rgba(124, 83, 87, .55); } 70% { box-shadow: 0 0 0 14px rgba(124, 83, 87, 0); } 100% { box-shadow: 0 0 0 0 rgba(124, 83, 87, 0); } }
+@media (prefers-reduced-motion: reduce) { .pt { animation: none; } }
+@media (max-width: 860px) { .rosto { grid-template-columns: 1fr; } .foto { order: -1; max-width: 420px; margin: 0 auto; } .painel dl { grid-template-columns: 1fr; } }
+
+.faixa { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding-top: 0; padding-bottom: 0; }
+.faixa p { margin: 0; background: var(--rosa); border-radius: 20px; padding: 18px; color: var(--tx-2); font-size: .88rem; } .faixa b { display: block; font-family: var(--serif); font-weight: 400; font-size: 1.45rem; color: var(--tx); }
+@media (max-width: 760px) { .faixa { grid-template-columns: 1fr 1fr; } }
+
+.re-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.re-grade figure { margin: 0; } .re-grade img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 22px; display: block; }
+.re-grade figure:nth-child(2) { margin-top: 50px; }
+.re-grade figcaption { font-family: var(--serif); font-size: 1.15rem; padding-top: 10px; }
+@media (max-width: 760px) { .re-grade { grid-template-columns: 1fr; } .re-grade figure:nth-child(2) { margin-top: 0; } }
+
+.eu { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(24px, 5vw, 64px); align-items: center; }
+.eu img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 26px; display: block; } .eu p { color: var(--tx-2); }
+blockquote { margin: 20px 0 0; font-family: var(--serif); font-size: 1.6rem; line-height: 1.25; } cite { display: block; font: 400 .88rem var(--f); color: var(--tx-2); margin-top: 10px; }
+@media (max-width: 760px) { .eu { grid-template-columns: 1fr; } }
+
+.agendar { text-align: center; max-width: 760px; }
+.ag { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.ag input { font: 400 1rem var(--f); padding: 16px 18px; border-radius: 999px; border: 1px solid var(--linha); background: var(--branco); color: var(--tx); }
+.ag-z, .ag .botao, .erro { grid-column: 1 / -1; margin: 0; } .ag-z { color: var(--tx-2); } .erro { color: #a02a3a; min-height: 1.2em; }
+@media (max-width: 560px) { .ag { grid-template-columns: 1fr; } }
+.rodape { text-align: center; padding: 20px 16px 96px; font-size: .8rem; color: var(--tx-2); }
