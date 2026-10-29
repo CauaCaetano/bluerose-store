@@ -486,8 +486,8 @@
     if (bt) { bt.textContent = feitos.length >= PASSOS.length ? 'Tudo pronto ✓' : 'Primeiros passos ' + feitos.length + '/' + PASSOS.length; bt.style.setProperty('--p', Math.round(feitos.length / PASSOS.length * 100) + '%'); }
     if (novos.length && antes.length) { confete(); toast(feitos.length >= PASSOS.length ? 'Tudo configurado. A sua empresa está pronta no ' + (ver.nomeCategoria || 'sistema') + '.' : 'Passo concluído: ' + PASSOS.find(function (p) { return p[0] === novos[0]; })[1] + ' (' + feitos.length + ' de ' + PASSOS.length + ')'); }
   }
-  var TUTORIAL = new URL('../../../video/versoes/' + m[1] + '-' + m[2] + '-tutorial.mp4', BASE).href + '?v=2';
-  var VIDEO_PASSOS = new URL('../../../video/versoes/primeiros-passos.mp4', BASE).href + '?v=2';
+  var TUTORIAL = new URL('../../../video/versoes/' + m[1] + '-' + m[2] + '-tutorial.mp4', BASE).href + '?v=3';
+  var VIDEO_PASSOS = new URL('../../../video/versoes/primeiros-passos.mp4', BASE).href + '?v=3';
   function painelPassos() {
     var d = window.veltriaDados(), v = document.createElement('div'); v.className = 'vk-veu';
     v.innerHTML = '<div class="vk-caixa" role="dialog" aria-modal="true" aria-label="Primeiros passos"><h2>Primeiros passos</h2><p class="vk-mudo">Em poucos minutos a sua empresa fica pronta para o dia a dia.</p><ol class="vk-passos">' +

@@ -23,7 +23,7 @@
       dlg.querySelector('[data-v-testar]').href = b.getAttribute('data-video-demo') || b.getAttribute('href') || 'sistemas.html';
       dlg.querySelector('[data-v-planos]').href = b.getAttribute('data-video-planos') || 'sistemas.html#' + id;
       // vídeos por versão (agenda-completo-apresentacao, agenda-completo-tutorial) ficam em video/versoes/
-      var pasta = id.indexOf('-') > 0 ? 'video/versoes/' : 'video/sistemas/', v = id.indexOf('-') > 0 ? '2' : '9';
+      var pasta = id.indexOf('-') > 0 ? 'video/versoes/' : 'video/sistemas/', v = id.indexOf('-') > 0 ? '3' : '9';
       video.poster = pasta + id + '.webp?v=' + v;
       video.src = pasta + id + '.mp4?v=' + v;
       dlg.showModal();
