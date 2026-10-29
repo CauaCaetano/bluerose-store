@@ -14,7 +14,7 @@
     var b = e.target.closest('[data-s]'); if (!b) return;
     [].forEach.call(document.querySelectorAll('[data-s]'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
     var s = S[b.dataset.s];
-    $('.carta').innerHTML = '<h3 style="font-weight:400;font-size:1.7rem;margin:0 0 .4em">' + s[0] + '</h3><p>' + s[1] + '</p><dl><div><dt>prazo comum</dt><dd>' + s[2] + '</dd></div><div><dt>honorários</dt><dd>' + s[3] + '</dd></div><div><dt>o que separar</dt><dd style="font-size:.95rem">' + s[4] + '</dd></div></dl><p class="assina">Cada caso tem detalhes. Na consulta eu olho o seu e dou o prazo e o valor exatos. · Patrícia</p><a class="botao" href="#consulta" data-assunto="' + s[0] + '">Marcar consulta sobre ' + s[0].toLowerCase() + '</a>';
+    $('.carta').innerHTML = '<h3 style="font-weight:400;font-size:1.7rem;margin:0 0 .4em">' + s[0] + '</h3><p>' + s[1] + '</p><dl><div><dt>prazo comum</dt><dd>' + s[2] + '</dd></div><div><dt>honorários</dt><dd>' + s[3] + '</dd></div><div><dt>o que separar</dt><dd style="font-size:.95rem">' + s[4] + '</dd></div></dl><p class="assina">Cada caso tem detalhes. Na consulta eu olho o seu e dou o prazo e o valor exatos. · Patrícia</p><a class="botao" href="#consulta" data-assunto="' + s[0] + '"><span>Marcar consulta</span>: <span>' + s[0].toLowerCase() + '</span></a>';
   });
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-assunto]'); if (!b) return; var sel = $('#cons').assunto; [].forEach.call(sel.options, function (o) { if (b.dataset.assunto.indexOf(o.text.split(' ')[0]) > -1) sel.value = o.value; }); });
 

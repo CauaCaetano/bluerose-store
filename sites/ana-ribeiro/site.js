@@ -28,7 +28,7 @@
   var a = $('#aval');
   function av() {
     var m2 = Math.max(20, +a.m2.value || 20), v = +a.b.value * m2 * +a.q.value * (a.vaga.checked ? 1 : 0.92), bairro = a.b.options[a.b.selectedIndex].text;
-    $('.aval-res').innerHTML = 'Valor estimado de venda<b>' + mil(v * 0.94) + ' a ' + mil(v * 1.05) + '</b><span style="color:var(--tx-2);font-size:.88rem">Imóveis assim no ' + bairro + ' vendem em 41 dias, em média, com a Ana.</span>';
+    $('.aval-res').innerHTML = 'Valor estimado de venda<b>' + mil(v * 0.94) + ' a ' + mil(v * 1.05) + '</b><span style="color:var(--tx-2);font-size:.88rem"><span>Imóveis assim vendem em 41 dias, em média, com a Ana.</span> (' + bairro + ')</span>';
     $('[data-wa-aval]').setAttribute('data-wa', 'Olá, Ana! Quero a avaliação grátis do meu imóvel: ' + m2 + ' m², ' + a.q.options[a.q.selectedIndex].text + ' quarto(s), ' + bairro + '.');
   }
   a.addEventListener('input', av); a.addEventListener('change', av); a.addEventListener('submit', function (e) { e.preventDefault(); }); av();

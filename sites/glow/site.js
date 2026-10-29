@@ -39,7 +39,7 @@
     var q = sem($('#un-q').value.trim()), d = q.replace(/\D/g, '');
     var l = UN.filter(function (u) { return !q || (d.length >= 2 ? u[2].indexOf(d.slice(0, 3)) === 0 || u[2].slice(0, 2) === d.slice(0, 2) : sem(u[0]).indexOf(q) > -1); });
     if (!l.length) l = UN.slice(0, 3);
-    $('.un-lista').innerHTML = l.slice(0, 5).map(function (u) { return '<li><span><b>' + u[0] + '</b><small>' + u[1] + ' · seg a sáb, 8h às 21h</small></span><a href="#" data-wa="Olá, Glow! Quero reservar ' + (trat ? trat.toLowerCase() : 'uma avaliação') + ' na unidade ' + u[0] + '.">Reservar</a></li>'; }).join('');
+    $('.un-lista').innerHTML = l.slice(0, 5).map(function (u) { return '<li><span><b>' + u[0] + '</b><small>' + u[1] + ' · <span>seg a sáb, 8h às 21h</span></small></span><a href="#" data-wa="Olá, Glow! Quero reservar ' + (trat ? trat.toLowerCase() : 'uma avaliação') + ' na unidade ' + u[0] + '.">Reservar</a></li>'; }).join('');
   }
   $('#un-q').addEventListener('input', un);
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-t]'); if (b) { trat = b.dataset.t; un(); } });
