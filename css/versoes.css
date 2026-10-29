@@ -65,3 +65,7 @@
 .pl-tabela tr.pl-escolhida th { box-shadow: inset 4px 0 0 #1d4ed8; }
 .pl-tabela tr.pl-escolhida .vs-selo-escolha { position: static; display: table; margin: 0 0 8px; }
 @media (prefers-reduced-motion: reduce) { .vs-card.vs-escolhida { transform: none; } }
+
+.vs-pos { margin: 22px 0 0; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; justify-content: center; text-align: center; }
+.vs-pos-bt { font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.vs-pos span { color: var(--ink-3); font-size: 14.5px; }

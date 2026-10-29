@@ -486,13 +486,14 @@
     if (bt) { bt.textContent = feitos.length >= PASSOS.length ? 'Tudo pronto ✓' : 'Primeiros passos ' + feitos.length + '/' + PASSOS.length; bt.style.setProperty('--p', Math.round(feitos.length / PASSOS.length * 100) + '%'); }
     if (novos.length && antes.length) { confete(); toast(feitos.length >= PASSOS.length ? 'Tudo configurado. A sua empresa está pronta no ' + (ver.nomeCategoria || 'sistema') + '.' : 'Passo concluído: ' + PASSOS.find(function (p) { return p[0] === novos[0]; })[1] + ' (' + feitos.length + ' de ' + PASSOS.length + ')'); }
   }
-  var TUTORIAL = new URL('../../../video/versoes/' + m[1] + '-' + m[2] + '-tutorial', BASE).href + '?v=1';
+  var TUTORIAL = new URL('../../../video/versoes/' + m[1] + '-' + m[2] + '-tutorial.mp4', BASE).href + '?v=2';
+  var VIDEO_PASSOS = new URL('../../../video/versoes/primeiros-passos.mp4', BASE).href + '?v=2';
   function painelPassos() {
     var d = window.veltriaDados(), v = document.createElement('div'); v.className = 'vk-veu';
     v.innerHTML = '<div class="vk-caixa" role="dialog" aria-modal="true" aria-label="Primeiros passos"><h2>Primeiros passos</h2><p class="vk-mudo">Em poucos minutos a sua empresa fica pronta para o dia a dia.</p><ol class="vk-passos">' +
       PASSOS.map(function (p) { var ok = p[2](d); return '<li class="' + (ok ? 'ok' : '') + '"><span aria-hidden="true">' + (ok ? '✓' : '') + '</span>' + esc(p[1]) + '</li>'; }).join('') +
       '</ol><p class="vk-mudo">' + (ritmo.serie > 1 ? 'Você está há <b>' + ritmo.serie + ' dias seguidos</b> com o sistema em dia.' : 'Abra todo dia: o resumo do dia anterior aparece aqui.') + '</p>' +
-      // vídeo do tutorial fora do ar até segunda ordem do dono (23/10/2026)
+      '<p class="vk-videos"><a href="' + TUTORIAL + '" target="_blank" rel="noopener">Tutorial em vídeo deste sistema</a><a href="' + VIDEO_PASSOS + '" target="_blank" rel="noopener">Primeiros passos em vídeo</a></p>' +
       '<button type="button" class="vk-bt" data-vk-fecha>Fechar</button></div>';
     v.addEventListener('click', function (e) { if (e.target === v || e.target.closest('[data-vk-fecha]')) v.remove(); });
     document.body.appendChild(v); v.querySelector('button').focus();
@@ -539,6 +540,7 @@
     '.vk-passos li.ok{color:#6b7080;text-decoration:line-through}.vk-passos li.ok span{background:#2f8a57;border-color:#2f8a57;color:#fff}.vk-bt{min-height:42px;border-radius:10px;border:0;background:#1d2230;color:#fff;padding:0 16px;font:600 .95rem system-ui,sans-serif;cursor:pointer}' +
     '.vk-confete{position:fixed;inset:0;pointer-events:none;z-index:10000;overflow:hidden}.vk-confete i{position:absolute;top:-12px;width:8px;height:14px;border-radius:2px;animation:vk-cai 1.6s cubic-bezier(.2,.6,.4,1) forwards}' +
     '@keyframes vk-cai{to{top:105%;transform:rotate(540deg) translateX(40px)}}' +
+    '.vk-videos{display:flex;flex-wrap:wrap;gap:8px 16px;margin:4px 0 14px}.vk-videos a{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px}' +
     '[data-vk-passos]{background:linear-gradient(90deg,#2f8a57 var(--p,0%),transparent var(--p,0%))!important}' +
     '.vk-vazio{display:grid;gap:8px;margin:14px 0;padding:16px 18px;border:1px dashed currentColor;border-radius:14px;opacity:.92}.vk-vazio span{opacity:.8}.vk-vazio div{display:flex;gap:8px;flex-wrap:wrap}.vk-vazio button{border:1px solid currentColor;background:transparent;color:inherit;border-radius:10px;padding:8px 14px;cursor:pointer;font:600 14px system-ui,sans-serif}.vk-vazio button:first-child{background:#1d2230;color:#fff;border-color:#1d2230}' +
     '.vk-busca{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:62;display:flex;align-items:center;gap:8px;width:min(560px,calc(100vw - 24px));background:#fbfaf7;border-radius:14px;padding:6px 8px;box-shadow:0 16px 40px -16px rgba(0,0,0,.55);font:14px system-ui,sans-serif;color:#1d2230}' +

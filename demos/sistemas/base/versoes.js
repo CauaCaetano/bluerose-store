@@ -4,7 +4,7 @@
 (function () {
   var CAT = { obras: ['Obras', [69, 119, 249], 'obras'], juridico: ['Jurídico', [89, 149, 299], 'juridico'], oficina: ['Oficina', [69, 89, 229], 'oficina'], financeiro: ['Financeiro', [59, 109, 249], 'financeiro'], agenda: ['Agenda', [49, 79, 199], 'agenda'], crm: ['CRM', [59, 99, 229], 'crm'], farmacia: ['Farmácia', [89, 149, 299], 'farmacia'], gestao: ['Gestão', [59, 119, 199], 'gestao'] };
   var VER = [['essencial', 'Essencial'], ['completo', 'Completo'], ['avancado', 'Avançado']];
-  var CHAVE_DIFERENTE = { 'gestao-essencial': 'veltria-gestao-simples-v1' };
+  var CHAVE_DIFERENTE = { 'gestao-essencial': 'veltria-gestao-simples-v1', 'agenda-essencial': 'veltria-agenda-essencial-v3', 'agenda-completo': 'veltria-agenda-completo-v2', 'agenda-avancado': 'veltria-agenda-avancado-v2' }; // igual ao CHAVE de cada app.js (o modo conta só sobe para a nuvem o que fica nessa chave)
   // versão dos dados de exemplo da demonstração: suba o número quando o exemplo de um sistema ganhar novidades
   // (quem já tinha a demonstração aberta recebe o exemplo novo; o que testou antes fica guardado no navegador)
   var EXEMPLO = { financeiroessencial: 2, financeirocompleto: 4, financeiroavancado: 4, agendacompleto: 3, agendaavancado: 3, juridicocompleto: 3, juridicoavancado: 3, obrascompleto: 3, obrasavancado: 3, crmcompleto: 3, crmavancado: 3, farmaciacompleto: 3, farmaciaavancado: 3, oficinacompleto: 3, oficinaavancado: 3, gestaocompleto: 3, gestaoavancado: 3 };
