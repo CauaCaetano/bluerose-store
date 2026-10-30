@@ -217,7 +217,7 @@ body.menu-aberto .topo .marca { color: var(--tx); }
 .in-cab { position: relative; }
 .interiores .gigante { color: var(--noite); position: relative; z-index: 1; }
 .in-cena { position: absolute; z-index: 2; left: 50%; top: -12%; width: min(48vw, 640px); height: min(48vw, 640px); transform: translateX(-42%); pointer-events: none; }
-.in-reserva { display: none; position: absolute; z-index: 2; left: 50%; top: 30%; width: min(26vw, 340px); aspect-ratio: 2.4; transform: translateX(-30%) rotate(-12deg); border-radius: 50%; background: radial-gradient(ellipse at 40% 30%, #fff, #d9d4cf 55%, #a8a19b); box-shadow: 0 26px 0 -6px #c9c2bb, 0 50px 60px rgba(6, 26, 55, .2); }
+.in-reserva { display: none; position: absolute; z-index: 2; left: 50%; top: 4%; width: min(22vw, 300px); aspect-ratio: 3 / 4; transform: translateX(-50%); border-radius: 999px 999px 0 0; background: url(img/lustre.webp) center / cover no-repeat; box-shadow: 0 40px 60px rgba(6, 26, 55, .2); }
 .sem-3d .in-reserva { display: block; }
 .sem-3d .in-cena { display: none; }
 .in-grade { display: grid; grid-template-columns: minmax(0, .45fr) minmax(0, 1fr) minmax(0, .45fr); gap: clamp(20px, 3vw, 40px); margin-top: clamp(140px, 22vw, 330px); align-items: start; }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=17"></script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com; font-src 'self'; connect-src 'self' blob: https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vértice Residence · Lançamento em Balneário Camboriú · Escolha sua unidade</title>
@@ -13,16 +13,16 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23050817'%2F%3E%3Cpath%20d%3D'M9%2010l11%2021%2011-21'%20stroke%3D'%23c9a849'%20stroke-width%3D'3'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/93a341139e.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=3">
-<link rel="stylesheet" href="estilo.css?v=3">
+<link rel="stylesheet" href="estilo.css?v=4">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=1" defer></script>
 <script src="site.js?v=3" defer></script>
-<script type="module" src="cena.js?v=1"></script>
+<script type="module" src="cena.js?v=2"></script>
 </head>
 <body data-slug="vertice" data-marca="Vértice Residence" data-cat="imobiliaria">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
-<!-- abertura em 3D: a orla de BC desenhada em linhas douradas -->
+<!-- abertura em 3D: a torre Vértice (modelo realista) sobe na orla de BC à noite -->
 <div class="intro" aria-hidden="true">
   <canvas class="intro-cena"></canvas>
   <p class="intro-marca" translate="no">VÉRTICE<small>residence</small></p>
@@ -186,7 +186,7 @@
     <figure class="lz-larga"><img src="img/rooftop.webp" alt="Rooftop com sofás, árvore e vista do pôr do sol" width="1600" height="900" loading="lazy"></figure>
   </section>
 
-  <!-- 8 · interiores em fundo claro: título com o objeto 3D de mármore e anel dourado -->
+  <!-- 8 · interiores em fundo claro: título com a torre em 3D como maquete -->
   <section class="interiores" id="interiores" aria-labelledby="in-t">
     <div class="in-cab">
       <h2 id="in-t" class="gigante encaixe">Interiores</h2>
@@ -276,7 +276,7 @@
     <p class="rd-legal">Incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento, sujeitos a reajuste.</p>
     <div class="rd-acoes"><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero receber o relatório de andamento da obra.">Andamento da obra</a><a class="redondo redondo-cobre" href="#conteudo" aria-label="Voltar ao topo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg></a></div>
   </div>
-  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash</span></p>
+  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash</span><span>Modelo 3D: <span translate="no">Miami style condominium</span> por aitortilla01 (Sketchfab, CC BY 4.0)</span></p>
 </footer>
 </body>
 </html>

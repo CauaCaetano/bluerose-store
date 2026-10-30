@@ -1,10 +1,15 @@
-// Aguiar & Monteiro · estátua da Justiça estilizada em three.js (geometria própria), metal iridescente verde e roxo com brilho,
+// Aguiar & Monteiro · estátua da Justiça escaneada (modelo realista em GLB), metal iridescente verde e roxo com brilho,
 // fixa atrás da página: a câmera acompanha a rolagem e a estátua vira lilás e menta nas seções claras.
 import * as THREE from '../assets/three/three.module.js';
 import { EffectComposer } from '../assets/three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from '../assets/three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from '../assets/three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from '../assets/three/addons/postprocessing/OutputPass.js';
+import { GLTFLoader } from '../assets/three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from '../assets/three/addons/libs/meshopt_decoder.module.js';
+
+// posição do modelo escaneado dentro da cena (a câmera foi ajustada para a estátua antiga, com a balança à direita)
+const AJUSTE = { x: 1.3, z: 0, giro: 0 };
 
 const raiz = document.documentElement;
 const tela = document.getElementById('palco');
@@ -59,135 +64,26 @@ function iniciar() {
     iridescence: 0.4, iridescenceIOR: 1.6, iridescenceThicknessRange: [180, 620], envMapIntensity: 1,
   });
 
+  // estátua escaneada (Lady Justice, Kenny Maguire, CC BY): 317 mil triângulos comprimidos com meshopt; o material é o nosso
   const estatua = new THREE.Group();
   cena.add(estatua);
-  const peca = (g, x = 0, y = 0, z = 0, sx = 1, sy = 1, sz = 1) => { const m = new THREE.Mesh(g, mat); m.position.set(x, y, z); m.scale.set(sx, sy, sz); estatua.add(m); return m; };
-
-  // perfil do corpo: barra da túnica até o pescoço
-  const perfil = new THREE.SplineCurve([
-    [0.01, 0.06], [1.5, 0.0], [1.62, 0.12], [1.5, 0.6], [1.36, 1.5], [1.22, 2.5], [1.1, 3.4], [1.02, 4.2], [0.98, 4.8],
-    [0.86, 5.5], [0.72, 6.0], [0.78, 6.4], [0.9, 6.75], [0.84, 7.05], [0.66, 7.32], [0.36, 7.56], [0.21, 7.72], [0.2, 8.05], [0.01, 8.12],
-  ].map((p) => new THREE.Vector2(p[0], p[1]))).getPoints(150);
-  const raioEm = (y) => { let melhor = perfil[0]; for (const p of perfil) if (Math.abs(p.y - y) < Math.abs(melhor.y - y) && p.x > 0.05) melhor = p; return melhor.x; };
-  const fundura = (y) => 1 - 0.22 * THREE.MathUtils.smoothstep(y, 3.4, 5.2);
-
-  const corpo = new THREE.LatheGeometry(perfil, 160);
-  corpo.rotateY(Math.PI); // costura para trás
-  {
-    const pos = corpo.attributes.position;
-    for (let i = 0; i < pos.count; i++) {
-      let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-      const r = Math.hypot(x, z);
-      if (r > 0.06) {
-        const a = Math.atan2(x, z);
-        const amp = y < 5.7 ? 0.1 * Math.pow(1 - y / 5.7, 0.75) + 0.012 : 0.008;
-        const dobra = amp * (0.72 * Math.sin(a * 7 + y * 0.35) + 0.28 * Math.sin(a * 13 - y * 0.6) + 0.18 * Math.sin(a * 23 + y * 1.3));
-        const k = (r + dobra) / r;
-        x *= k; z *= k;
-      }
-      z *= fundura(y);
-      x *= 1 + 0.32 * THREE.MathUtils.smoothstep(y, 6.5, 7.15) * (1 - THREE.MathUtils.smoothstep(y, 7.3, 7.62)); // ombros
-      x += 0.06 * Math.sin(y * 0.55); // leve contraposto
-      pos.setXYZ(i, x, y, z);
-    }
-    corpo.computeVertexNormals();
-  }
-  peca(corpo);
-
-  const esfera = (r, ws = 40, hs = 28) => new THREE.SphereGeometry(r, ws, hs);
-  // busto, ombros, cinto
-  peca(esfera(0.24), 0.27, 6.72, 0.5, 1, 0.85, 0.7);
-  peca(esfera(0.24), -0.21, 6.72, 0.5, 1, 0.85, 0.7);
-  const cinto = new THREE.TorusGeometry(0.74, 0.05, 14, 90); cinto.rotateX(Math.PI / 2);
-  peca(cinto, 0.06 * Math.sin(6.02 * 0.55), 6.02, 0, 1, 1, fundura(6.02));
-
-  // cabeça, cabelo, coque e venda
-  peca(esfera(0.36, 48, 36), 0.05, 8.48, 0.06, 0.88, 1.12, 0.98);
-  peca(esfera(0.17, 32, 24), 0.05, 8.24, 0.17, 1, 0.9, 1);
-  peca(esfera(0.39, 48, 36), 0.05, 8.62, -0.1, 0.94, 0.98, 0.88);
-  peca(esfera(0.19), 0.05, 8.72, -0.46);
-  const venda = new THREE.TorusGeometry(0.335, 0.045, 14, 80); venda.rotateX(Math.PI / 2);
-  peca(venda, 0.05, 8.54, 0.06, 0.92, 1, 1.06);
-  peca(esfera(0.07), 0.05, 8.54, -0.3);
-
-  function tubo(pts, r0, r1, seg = 48, rad = 14) {
-    const curva = new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(p[0], p[1], p[2])));
-    const g = new THREE.TubeGeometry(curva, seg, 1, rad, false);
-    const pos = g.attributes.position, c = new THREE.Vector3(), v = new THREE.Vector3();
-    for (let i = 0; i <= seg; i++) {
-      curva.getPointAt(i / seg, c);
-      const r = r0 + (r1 - r0) * (i / seg);
-      for (let j = 0; j <= rad; j++) { const k = i * (rad + 1) + j; v.fromBufferAttribute(pos, k).sub(c).multiplyScalar(r).add(c); pos.setXYZ(k, v.x, v.y, v.z); }
-    }
-    g.computeVertexNormals();
-    return g;
-  }
-  // pontas da venda caindo nas costas
-  peca(tubo([[0.05, 8.52, -0.3], [0.12, 8.2, -0.45], [0.16, 7.8, -0.5]], 0.04, 0.025, 20, 8));
-  peca(tubo([[0.05, 8.52, -0.3], [-0.04, 8.15, -0.47], [-0.06, 7.75, -0.52]], 0.04, 0.025, 20, 8));
-
-  // faixa do manto atravessando o peito
-  const faixa = [[60, 7.25], [30, 6.85], [0, 6.35], [-30, 5.75], [-55, 5.15], [-80, 4.55], [-100, 3.9]].map(([g, y]) => {
-    const a = THREE.MathUtils.degToRad(g), r = raioEm(y) + 0.07;
-    return [r * Math.sin(a) + 0.06 * Math.sin(y * 0.55), y, r * Math.cos(a) * fundura(y)];
-  });
-  peca(tubo(faixa, 0.1, 0.07, 64, 14));
-
-  // braço erguido (balança) e braço baixo (espada)
-  peca(tubo([[0.82, 7.3, 0], [1.4, 7.95, 0.12], [1.72, 8.85, 0.15], [1.8, 9.75, 0.12]], 0.17, 0.11));
-  peca(esfera(0.18), 0.86, 7.28, 0, 1, 1, 0.9);
-  peca(esfera(0.14), 1.8, 9.86, 0.12, 1, 1.3, 1);
-  peca(tubo([[-0.82, 7.3, 0], [-1.15, 6.6, 0.15], [-1.22, 5.95, 0.5], [-1.12, 5.4, 0.82]], 0.17, 0.11));
-  peca(esfera(0.18), -0.8, 7.28, 0, 1, 1, 0.9);
-  peca(esfera(0.14), -1.12, 5.3, 0.85, 1, 1.25, 1);
-
-  // espada
-  {
-    const lamina = new THREE.Shape();
-    lamina.moveTo(-0.085, 0); lamina.lineTo(0.085, 0); lamina.lineTo(0.07, -3.55); lamina.lineTo(0, -3.95); lamina.lineTo(-0.07, -3.55); lamina.closePath();
-    const g = new THREE.ExtrudeGeometry(lamina, { depth: 0.025, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 2, steps: 1 });
-    g.translate(0, 0, -0.0125);
-    const m = peca(g, -1.12, 4.96, 0.88); m.rotation.z = 0.035; m.rotation.y = 0.5;
-    peca(new THREE.CylinderGeometry(0.045, 0.05, 0.5, 16), -1.12, 5.25, 0.86);
-    peca(esfera(0.08), -1.12, 5.55, 0.86);
-    const guarda = tubo([[-0.38, 0.06, 0], [-0.18, -0.02, 0], [0, 0, 0], [0.18, -0.02, 0], [0.38, 0.06, 0]], 0.04, 0.04, 30, 10);
-    const gm = peca(guarda, -1.12, 4.98, 0.86); gm.rotation.y = 0.5;
-  }
-
-  // pedestal
-  peca(new THREE.CylinderGeometry(1.95, 2.05, 0.36, 96), 0, -0.18, 0);
-  peca(new THREE.CylinderGeometry(2.35, 2.4, 0.3, 96), 0, -0.5, 0);
-
-  // balança
-  const balanca = new THREE.Group(); balanca.position.set(1.8, 9.78, 0.12); estatua.add(balanca);
-  const daBalanca = (g, x = 0, y = 0, z = 0, pai = balanca) => { const m = new THREE.Mesh(g, mat); m.position.set(x, y, z); pai.add(m); return m; };
-  function barra(a, b, r, pai) {
-    const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b);
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, A.distanceTo(B), 8, 1, true), mat);
-    m.position.copy(A).add(B).multiplyScalar(0.5);
-    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), B.clone().sub(A).normalize());
-    pai.add(m); return m;
-  }
-  barra([0, -0.1, 0], [0, 1.4, 0], 0.035, balanca);
-  daBalanca(esfera(0.075), 0, 1.47, 0);
-  daBalanca(new THREE.ConeGeometry(0.05, 0.22, 16), 0, 1.62, 0);
-  const anel = new THREE.TorusGeometry(0.11, 0.025, 10, 40); daBalanca(anel, 0, 1.22, 0);
-  const travessa = new THREE.Group(); travessa.position.set(0, 1.22, 0); balanca.add(travessa);
-  const MEIA = 1.25;
-  daBalanca(tubo([[-MEIA, -0.02, 0], [-0.62, 0.07, 0], [0, 0.1, 0], [0.62, 0.07, 0], [MEIA, -0.02, 0]], 0.045, 0.045, 60, 12), 0, 0, 0, travessa);
-  for (const s of [-1, 1]) {
-    const pts = [];
-    for (let k = 0; k <= 26; k++) { const a = (k / 26) * Math.PI * 2.3, rr = 0.13 * (1 - a / (Math.PI * 3)); pts.push([s * MEIA + s * rr * Math.sin(a), -0.02 - 0.13 + rr * Math.cos(a) + 0.0, 0]); }
-    pts[0] = [s * MEIA, -0.02, 0];
-    daBalanca(tubo(pts, 0.03, 0.014, 60, 8), 0, 0, 0, travessa);
-  }
-  const prato = new THREE.LatheGeometry([[0.01, -0.13], [0.22, -0.12], [0.38, -0.06], [0.47, 0.02], [0.49, 0.05]].map((p) => new THREE.Vector2(p[0], p[1])), 64);
-  const pratos = [-1, 1].map((s) => {
-    const g = new THREE.Group(); balanca.add(g);
-    for (let k = 0; k < 3; k++) { const a = k * Math.PI * 2 / 3 + 0.4; barra([0, 0, 0], [Math.cos(a) * 0.46, -1.52, Math.sin(a) * 0.46], 0.009, g); }
-    daBalanca(prato, 0, -1.56, 0, g);
-    return { g, s };
-  });
+  const ALTURA = 11.6, BASE = -0.66;
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('modelo/justica.glb?v=1', (g) => {
+    const obj = g.scene;
+    obj.traverse((o) => {
+      if (!o.isMesh) return;
+      o.geometry.deleteAttribute('color'); o.geometry.deleteAttribute('color_1');
+      if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals();
+      o.material = mat;
+    });
+    obj.updateMatrixWorld(true);
+    const caixa = new THREE.Box3().setFromObject(obj), tam = caixa.getSize(new THREE.Vector3()), meio = caixa.getCenter(new THREE.Vector3());
+    const esc = ALTURA / tam.y;
+    obj.scale.multiplyScalar(esc);
+    obj.position.set(-meio.x * esc + AJUSTE.x, -caixa.min.y * esc + BASE, -meio.z * esc + AJUSTE.z);
+    const giro = new THREE.Group(); giro.rotation.y = AJUSTE.giro; giro.add(obj); estatua.add(giro);
+    raiz.classList.add('estatua-pronta');
+  }, undefined, () => semTresD());
 
   // poeira de luz em volta
   const N = innerWidth < 820 ? 700 : 1500;
@@ -327,13 +223,6 @@ function iniciar() {
     alvoV.set(atual.alvo[0], atual.alvo[1], atual.alvo[2]); camera.lookAt(alvoV);
     estatua.rotation.y = atual.giro + (calmo ? 0 : Math.sin(t * 0.25) * 0.06);
 
-    const bal = calmo ? 0 : Math.sin(t * 0.7) * 0.045;
-    travessa.rotation.z = bal;
-    for (const p of pratos) {
-      const c = Math.cos(bal), s = Math.sin(bal), x = p.s * MEIA, y = -0.02;
-      p.g.position.set(x * c - y * s, 1.22 + x * s + y * c, 0);
-      p.g.rotation.z = calmo ? 0 : Math.sin(t * 0.9 + p.s) * 0.02;
-    }
     if (!calmo) { poeira.rotation.y = t * 0.02; poeira.position.y = Math.sin(t * 0.3) * 0.15; }
 
     composer.render();
