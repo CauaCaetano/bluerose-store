@@ -29,6 +29,27 @@
   var info = null; try { info = JSON.parse(sessionStorage.getItem('veltria-conta') || 'null'); } catch (e) { info = null; }
   if (!info || info.app !== app) { location.replace(RAIZ + 'app/' + app + '/'); throw new Error('abrindo pela porta'); }
   document.documentElement.classList.add('modo-conta');
+  // ---------------------------------------------------------------- instalar o app da conta
+  // O app instalado abre pela porta (app/<id>/): ela confere o login e traz da nuvem o que foi feito em qualquer aparelho,
+  // e daqui cada alteração sobe para a nuvem; assim o app, o computador e a web mostram a mesma coisa.
+  // Sem a troca, o manifesto da tela levaria o app instalado para a demonstração.
+  (function () {
+    var href = RAIZ + 'app/' + app + '/manifest.webmanifest';
+    var ponha = function () {
+      var l = document.querySelectorAll('link[rel="manifest"]');
+      [].slice.call(l, 1).forEach(function (x) { x.remove(); });
+      var m = l[0]; if (!m) { m = document.createElement('link'); m.rel = 'manifest'; document.head.appendChild(m); }
+      if (m.href !== href) m.href = href;
+    };
+    ponha(); document.addEventListener('DOMContentLoaded', ponha);
+    var pedido = null;
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); pedido = e; });
+    window.veltriaInstalar = function () {
+      if (matchMedia('(display-mode: standalone)').matches || navigator.standalone) return Promise.resolve('instalado');
+      if (pedido) { var p = pedido; pedido = null; p.prompt(); return p.userChoice.then(function (r) { return r.outcome === 'accepted' ? 'ok' : 'cancelou'; }); }
+      return Promise.resolve(/iphone|ipad|ipod/i.test(navigator.userAgent) ? 'iphone' : 'manual');
+    };
+  })();
   window.veltriaEnvioReal = info.plano === 'ativo'; // WhatsApp e e-mail de verdade só com assinatura ativa (js/envio-demo.js)
   var CHAVE = info.chave, NS = 'conta:' + info.espaco + ':' + CHAVE, P = Storage.prototype, ler = P.getItem, gravar = P.setItem, tirar = P.removeItem;
   P.getItem = function (k) { return ler.call(this, this === localStorage && k === CHAVE ? NS : k); };
