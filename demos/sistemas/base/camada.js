@@ -487,13 +487,14 @@
     if (novos.length && antes.length) { confete(); toast(feitos.length >= PASSOS.length ? 'Tudo configurado. A sua empresa está pronta no ' + (ver.nomeCategoria || 'sistema') + '.' : 'Passo concluído: ' + PASSOS.find(function (p) { return p[0] === novos[0]; })[1] + ' (' + feitos.length + ' de ' + PASSOS.length + ')'); }
   }
   var TUTORIAL = new URL('../../../video/versoes/' + m[1] + '-' + m[2] + '-tutorial.mp4', BASE).href + '?v=3';
+  var APRESENTA = new URL('../../../video/versoes/' + m[1] + '-' + m[2] + '-apresentacao.mp4', BASE).href + '?v=3';
   var VIDEO_PASSOS = new URL('../../../video/versoes/primeiros-passos.mp4', BASE).href + '?v=3';
   function painelPassos() {
     var d = window.veltriaDados(), v = document.createElement('div'); v.className = 'vk-veu';
     v.innerHTML = '<div class="vk-caixa" role="dialog" aria-modal="true" aria-label="Primeiros passos"><h2>Primeiros passos</h2><p class="vk-mudo">Em poucos minutos a sua empresa fica pronta para o dia a dia.</p><ol class="vk-passos">' +
       PASSOS.map(function (p) { var ok = p[2](d); return '<li class="' + (ok ? 'ok' : '') + '"><span aria-hidden="true">' + (ok ? '✓' : '') + '</span>' + esc(p[1]) + '</li>'; }).join('') +
       '</ol><p class="vk-mudo">' + (ritmo.serie > 1 ? 'Você está há <b>' + ritmo.serie + ' dias seguidos</b> com o sistema em dia.' : 'Abra todo dia: o resumo do dia anterior aparece aqui.') + '</p>' +
-      '<p class="vk-videos"><a href="' + TUTORIAL + '" target="_blank" rel="noopener">Tutorial em vídeo deste sistema</a><a href="' + VIDEO_PASSOS + '" target="_blank" rel="noopener">Primeiros passos em vídeo</a></p>' +
+      '<p class="vk-videos"><a href="' + APRESENTA + '" target="_blank" rel="noopener">O sistema em 36 segundos</a><a href="' + TUTORIAL + '" target="_blank" rel="noopener">Tutorial em vídeo deste sistema</a><a href="' + VIDEO_PASSOS + '" target="_blank" rel="noopener">Primeiros passos em vídeo</a></p>' +
       '<button type="button" class="vk-bt" data-vk-fecha>Fechar</button></div>';
     v.addEventListener('click', function (e) { if (e.target === v || e.target.closest('[data-vk-fecha]')) v.remove(); });
     document.body.appendChild(v); v.querySelector('button').focus();
