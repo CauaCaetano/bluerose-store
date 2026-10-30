@@ -163,7 +163,7 @@
     // botão solto: some e a ação dele vira o primeiro item do menu do +
     if (achou.solto) { proprio = achou.el; proprio.style.display = 'none'; return; }
     // + no menu de baixo: o nosso vira "mais opções" (três pontos) para não repetir o sinal
-    mais.innerHTML = '<span aria-hidden="true" style="font:700 1.3rem/1 system-ui;letter-spacing:1px">•••</span>'; mais.setAttribute('aria-label', 'Mais opções: importar planilha, exportar, procurar'); mais.title = 'Importar planilha, exportar ou procurar';
+    repetido = true; mais.innerHTML = '<span aria-hidden="true" style="font:700 1.3rem/1 system-ui;letter-spacing:1px">•••</span>'; mais.setAttribute('aria-label', 'Mais opções: importar planilha, exportar, procurar'); mais.title = 'Importar planilha, exportar ou procurar';
   }
   function subirMais() {
     if (window.veltriaSemMaisComum) return; // o + comum nem entrou: o + do app fica como está
@@ -177,7 +177,13 @@
       alto = Math.max(alto, innerHeight - b.top + 12);
     });
     mais.style.bottom = alto + 'px'; document.documentElement.style.setProperty('--vk-mais-base', alto + 'px');
+    celular();
   }
+  // no celular: quando o app já tem o próprio + na barra de baixo, o nosso (•••) só repetia e cobria o conteúdo: some, e as
+  // opções ficam no bloco "App, planilhas e busca" das Configurações. Onde o + comum é o único jeito de adicionar, ele fica,
+  // e o fim de cada tela ganha espaço para nada ficar escondido atrás dele.
+  var repetido = false;
+  function celular() { var cel = innerWidth <= 899; mais.classList.toggle('vk-mais-cel', cel && repetido); document.documentElement.classList.toggle('vk-fim-livre', cel && !repetido && !window.veltriaSemMaisComum); }
 
   // ---------------------------------------------------------------- tela vazia: diz o que fazer em vez de parecer quebrada
   var DICAS = { clientes: 'Cadastre os seus clientes ou traga a lista do Excel: nome e telefone já bastam.', produtos: 'Traga os produtos do Excel (nome, preço, estoque) ou cadastre um por um.',
@@ -540,6 +546,7 @@
     '.vk-passos li.ok{color:#6b7080;text-decoration:line-through}.vk-passos li.ok span{background:#2f8a57;border-color:#2f8a57;color:#fff}.vk-bt{min-height:42px;border-radius:10px;border:0;background:#1d2230;color:#fff;padding:0 16px;font:600 .95rem system-ui,sans-serif;cursor:pointer}' +
     '.vk-confete{position:fixed;inset:0;pointer-events:none;z-index:10000;overflow:hidden}.vk-confete i{position:absolute;top:-12px;width:8px;height:14px;border-radius:2px;animation:vk-cai 1.6s cubic-bezier(.2,.6,.4,1) forwards}' +
     '@keyframes vk-cai{to{top:105%;transform:rotate(540deg) translateX(40px)}}' +
+    '.vk-mais.vk-mais-cel{display:none!important}html.vk-fim-livre body::after{content:"";display:block;height:88px}.vk-instalar .vk-acoes{display:flex;flex-wrap:wrap;gap:8px}' +
     '.vk-instalar{margin:12px 0 18px;padding:14px 16px;border:1px solid rgba(127,127,127,.35);border-radius:14px;display:grid;gap:8px;max-width:640px}.vk-instalar b{font-size:1rem}.vk-instalar p{margin:0;font-size:.9rem;opacity:.85;line-height:1.45}' +
     '.vk-instalar button{justify-self:start;min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#1d2230;color:#fff;font:600 .95rem system-ui,sans-serif;cursor:pointer}.vk-instalar .vk-instalar-msg:empty{display:none}' +
     '.vk-videos{display:flex;flex-wrap:wrap;gap:8px 16px;margin:4px 0 14px}.vk-videos a{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px}' +
@@ -586,7 +593,7 @@
 // O app instalado abre a conta pela porta (conta-nuvem.js troca o manifesto e cria window.veltriaInstalar): o que a pessoa muda
 // no app aparece no computador e na web, e o contrário também. Na demonstração, o botão explica que precisa entrar na conta.
 (function () {
-  var RE = /^(⚙\s*)?(Configurações|Minhas configurações|Suas configurações|Configurações da empresa|Ajustes|Preferências|Config)$/i;
+  var RE = /^(⚙\s*)?(Configurações|Minhas configurações|Suas configurações|Configurações da empresa|Ajustes|Preferências|Config|Mais ferramentas)$/i;
   var MSG = { instalado: 'Você já está no app instalado.', ok: 'Pronto: o app está na tela de início.', iphone: 'No iPhone: toque em Compartilhar e depois em Adicionar à Tela de Início.', manual: 'No menu do navegador (⋮), toque em Instalar app ou Adicionar à tela inicial.' };
   // pelo menu do + (em qualquer tela): pede a instalação e mostra o resultado num aviso
   window.veltriaPedeInstalar = function () {
@@ -596,16 +603,19 @@
   };
   function bloco() {
     var d = document.createElement('div'); d.className = 'vk-instalar';
-    d.innerHTML = '<b>App no celular e no computador</b><p>Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><button type="button">Instalar o app</button><p class="vk-instalar-msg" role="status"></p>';
+    d.innerHTML = '<b>App, planilhas e busca</b><p>Instale na tela de início: o app abre a sua conta, e o que você mudar nele aparece no computador e na web (e o contrário também). Em Planilhas e busca: importar do Excel, exportar, procurar e imprimir.</p><div class="vk-acoes"><button type="button" data-vk-inst>Instalar o app</button><button type="button" data-vk-menu>Planilhas e busca</button></div><p class="vk-instalar-msg" role="status"></p>';
     var msg = d.querySelector('.vk-instalar-msg');
-    d.querySelector('button').addEventListener('click', function () {
+    // sistema sem o + comum (o Financeiro tem o próprio): o botão das planilhas não aparece; o + comum entra logo depois da tela
+    var bm = d.querySelector('[data-vk-menu]'); bm.hidden = !document.querySelector('.vk-mais'); if (bm.hidden) setTimeout(function () { bm.hidden = !document.querySelector('.vk-mais'); }, 1500);
+    d.querySelector('[data-vk-menu]').addEventListener('click', function (e) { e.stopPropagation(); var m = document.querySelector('.vk-mais'); if (m) m.click(); });
+    d.querySelector('[data-vk-inst]').addEventListener('click', function () {
       if (!window.veltriaInstalar) { msg.textContent = 'Na demonstração não instala. Entre na sua conta para instalar o seu app.'; return; }
       window.veltriaInstalar().then(function (r) { msg.textContent = MSG[r] || ''; });
     });
     return d;
   }
   function poe() {
-    if (document.querySelector('[data-acao="instalar"], .vk-instalar')) return; // já tem (o Agenda Essencial tem o próprio botão)
+    if (document.querySelector('[data-acao="instalar"], [data-acao="menu-comum"], .vk-instalar')) return; // já tem (o Agenda Essencial tem o próprio botão)
     var h = [].filter.call(document.querySelectorAll('h1,h2'), function (x) { return RE.test(((x.firstChild && x.firstChild.nodeType === 3 ? x.firstChild.textContent : '') || x.textContent).trim()) && x.offsetParent; })[0];
     if (!h) return;
     // título dentro de uma linha (título + botões lado a lado): o bloco vai logo abaixo da linha
