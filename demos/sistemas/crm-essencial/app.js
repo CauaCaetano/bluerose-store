@@ -110,7 +110,7 @@ const T = {
       <h2>Plano</h2><div class="chips"><button type="button" data-plano="basico" aria-pressed="${db.plano === 'basico'}">Assinatura · R$ 59/mês</button></div><p class="mini">Equipe sem limite, histórico de quem fez o quê e até 10 empresas. Anual com 20% a menos.</p>`;
   },
   config() {
-    return `<a href="#mais">← Mais</a><h1>Configurações</h1><label class="campo">Seu nome<input data-cfg="vendedor" value="${t(db.vendedor)}"></label><label class="campo">O que você vende<input data-cfg="ramo" value="${t(db.ramo)}"></label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="campo">Meta do mês (R$)<input data-cfg="meta" inputmode="decimal" value="${db.meta}"></label><label class="campo">Comissão (%)<input data-cfg="comissao" type="number" value="${db.comissao}"></label></div><p class="mini">Funciona sem internet: o que você registrar na rua sobe quando a conexão voltar.</p>`;
+    return `<a href="#mais">← Mais</a><h1>Configurações</h1><label class="campo">Seu nome<input data-cfg="vendedor" value="${t(db.vendedor)}"></label><label class="campo">O que você vende<input data-cfg="ramo" value="${t(db.ramo)}"></label><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"><label class="campo">Meta do mês (R$)<input data-cfg="meta" inputmode="decimal" value="${db.meta}"></label><label class="campo">Comissão (%)<input data-cfg="comissao" type="number" value="${db.comissao}"></label></div><p class="mini">Funciona sem internet: o que você registrar na rua sobe quando a conexão voltar.</p>`;
   },
 };
 

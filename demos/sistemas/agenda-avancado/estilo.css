@@ -142,3 +142,5 @@ tbody tr { transition: background .15s; } tbody tr:hover td { background: #fbf4e
 .colunas-a span { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; }
 .colunas-a i { display: block; background: var(--uva, #57405f); border-radius: 3px 3px 0 0; min-height: 1px; opacity: .85; }
 .colunas-a small { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: .68rem; color: var(--tx-3, #8a7f86); white-space: nowrap; }
+/* celular: tabela larga rola dentro do cartão, a tela não passa da largura */
+@media (max-width: 640px) { .peca table { display: block; overflow-x: auto; max-width: 100%; } }

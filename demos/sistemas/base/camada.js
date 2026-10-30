@@ -139,9 +139,9 @@
       var mn = document.createElement('div'); mn.className = 'vk-menu'; mn.setAttribute('role', 'menu');
       mn.innerHTML = (proprio ? '<button type="button" role="menuitem" data-vk="proprio">+ ' + esc(proprio.getAttribute('aria-label') || 'Novo') + '</button>' : '') + (daTela ? '<button type="button" role="menuitem" data-vk="novo">+ Adicionar em ' + esc(daTela[1]) + '</button><button type="button" role="menuitem" data-vk="importar">Importar planilha para ' + esc(daTela[1]) + '</button>' : '') +
         (daTela ? '' : '<button type="button" role="menuitem" data-vk="importarQualquer">Importar planilha (Excel ou CSV)</button>') + '<button type="button" role="menuitem" data-vk="procurar">Procurar nesta tela <small>Ctrl+K</small></button><button type="button" role="menuitem" data-vk="dados">Todos os dados (adicionar, editar, importar)</button>' +
-        '<button type="button" role="menuitem" data-vk="exportar">Exportar tudo para o Excel</button><button type="button" role="menuitem" data-vk="imprimir">Imprimir esta tela</button>';
+        '<button type="button" role="menuitem" data-vk="exportar">Exportar tudo para o Excel</button><button type="button" role="menuitem" data-vk="imprimir">Imprimir esta tela</button><button type="button" role="menuitem" data-vk="instalar">Instalar o app</button>';
       mn.addEventListener('click', function (e) { var b = e.target.closest('[data-vk]'); if (!b) return; mn.remove();
-        ({ proprio: function () { proprio.click(); }, novo: function () { editor({ lista: daTela[0], acao: 'novo' }); }, importar: function () { editor({ lista: daTela[0], acao: 'importar' }); }, importarQualquer: function () { editor({ acao: 'importar-qualquer' }); }, dados: function () { editor(null); }, exportar: exportar, procurar: procurar, imprimir: function () { window.print(); } })[b.dataset.vk](); });
+        ({ proprio: function () { proprio.click(); }, novo: function () { editor({ lista: daTela[0], acao: 'novo' }); }, importar: function () { editor({ lista: daTela[0], acao: 'importar' }); }, importarQualquer: function () { editor({ acao: 'importar-qualquer' }); }, dados: function () { editor(null); }, exportar: exportar, procurar: procurar, instalar: function () { window.veltriaPedeInstalar(); }, imprimir: function () { window.print(); } })[b.dataset.vk](); });
       document.body.appendChild(mn); var p = mn.querySelector('button'); if (p) p.focus();
       setTimeout(function () { document.addEventListener('click', function fora(e) { if (!e.target.closest('.vk-menu,.vk-mais')) { mn.remove(); document.removeEventListener('click', fora); } }); }, 0);
     };
@@ -540,6 +540,8 @@
     '.vk-passos li.ok{color:#6b7080;text-decoration:line-through}.vk-passos li.ok span{background:#2f8a57;border-color:#2f8a57;color:#fff}.vk-bt{min-height:42px;border-radius:10px;border:0;background:#1d2230;color:#fff;padding:0 16px;font:600 .95rem system-ui,sans-serif;cursor:pointer}' +
     '.vk-confete{position:fixed;inset:0;pointer-events:none;z-index:10000;overflow:hidden}.vk-confete i{position:absolute;top:-12px;width:8px;height:14px;border-radius:2px;animation:vk-cai 1.6s cubic-bezier(.2,.6,.4,1) forwards}' +
     '@keyframes vk-cai{to{top:105%;transform:rotate(540deg) translateX(40px)}}' +
+    '.vk-instalar{margin:12px 0 18px;padding:14px 16px;border:1px solid rgba(127,127,127,.35);border-radius:14px;display:grid;gap:8px;max-width:640px}.vk-instalar b{font-size:1rem}.vk-instalar p{margin:0;font-size:.9rem;opacity:.85;line-height:1.45}' +
+    '.vk-instalar button{justify-self:start;min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#1d2230;color:#fff;font:600 .95rem system-ui,sans-serif;cursor:pointer}.vk-instalar .vk-instalar-msg:empty{display:none}' +
     '.vk-videos{display:flex;flex-wrap:wrap;gap:8px 16px;margin:4px 0 14px}.vk-videos a{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px}' +
     '[data-vk-passos]{background:linear-gradient(90deg,#2f8a57 var(--p,0%),transparent var(--p,0%))!important}' +
     '.vk-vazio{display:grid;gap:8px;margin:14px 0;padding:16px 18px;border:1px dashed currentColor;border-radius:14px;opacity:.92}.vk-vazio span{opacity:.8}.vk-vazio div{display:flex;gap:8px;flex-wrap:wrap}.vk-vazio button{border:1px solid currentColor;background:transparent;color:inherit;border-radius:10px;padding:8px 14px;cursor:pointer;font:600 14px system-ui,sans-serif}.vk-vazio button:first-child{background:#1d2230;color:#fff;border-color:#1d2230}' +
@@ -578,4 +580,41 @@
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(montar, 50); }); else setTimeout(montar, 50);
+})();
+
+// ---------------------------------------------------------------- instalar o app, nas Configurações / Ajustes de cada sistema
+// O app instalado abre a conta pela porta (conta-nuvem.js troca o manifesto e cria window.veltriaInstalar): o que a pessoa muda
+// no app aparece no computador e na web, e o contrário também. Na demonstração, o botão explica que precisa entrar na conta.
+(function () {
+  var RE = /^(⚙\s*)?(Configurações|Minhas configurações|Suas configurações|Configurações da empresa|Ajustes|Preferências|Config)$/i;
+  var MSG = { instalado: 'Você já está no app instalado.', ok: 'Pronto: o app está na tela de início.', iphone: 'No iPhone: toque em Compartilhar e depois em Adicionar à Tela de Início.', manual: 'No menu do navegador (⋮), toque em Instalar app ou Adicionar à tela inicial.' };
+  // pelo menu do + (em qualquer tela): pede a instalação e mostra o resultado num aviso
+  window.veltriaPedeInstalar = function () {
+    var diz = function (t) { var a = document.createElement('div'); a.className = 'vk-toast'; a.setAttribute('role', 'status'); a.textContent = t; a.style.cssText = 'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:9999;background:#141820;color:#fff;padding:12px 16px;border-radius:12px;font:14px/1.4 system-ui,sans-serif;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgba(0,0,0,.25)'; document.body.appendChild(a); setTimeout(function () { a.remove(); }, 5000); };
+    if (!window.veltriaInstalar) return diz('Na demonstração não instala. Entre na sua conta para instalar o seu app.');
+    window.veltriaInstalar().then(function (r) { if (MSG[r]) diz(MSG[r]); });
+  };
+  function bloco() {
+    var d = document.createElement('div'); d.className = 'vk-instalar';
+    d.innerHTML = '<b>App no celular e no computador</b><p>Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><button type="button">Instalar o app</button><p class="vk-instalar-msg" role="status"></p>';
+    var msg = d.querySelector('.vk-instalar-msg');
+    d.querySelector('button').addEventListener('click', function () {
+      if (!window.veltriaInstalar) { msg.textContent = 'Na demonstração não instala. Entre na sua conta para instalar o seu app.'; return; }
+      window.veltriaInstalar().then(function (r) { msg.textContent = MSG[r] || ''; });
+    });
+    return d;
+  }
+  function poe() {
+    if (document.querySelector('[data-acao="instalar"], .vk-instalar')) return; // já tem (o Agenda Essencial tem o próprio botão)
+    var h = [].filter.call(document.querySelectorAll('h1,h2'), function (x) { return RE.test(((x.firstChild && x.firstChild.nodeType === 3 ? x.firstChild.textContent : '') || x.textContent).trim()) && x.offsetParent; })[0];
+    if (!h) return;
+    // título dentro de uma linha (título + botões lado a lado): o bloco vai logo abaixo da linha
+    var alvo = h, pai = h.parentElement, cs = pai && getComputedStyle(pai);
+    if (cs && /flex|grid/.test(cs.display) && cs.flexDirection !== 'column' && pai.children.length > 1) alvo = pai;
+    var sub = alvo.nextElementSibling; if (sub && sub.tagName === 'P' && sub.textContent.length < 220) alvo = sub; // a frase de baixo do título fica junto dele
+    alvo.insertAdjacentElement('afterend', bloco());
+  }
+  var t = 0;
+  function vigia() { poe(); new MutationObserver(function () { clearTimeout(t); t = setTimeout(poe, 200); }).observe(document.body, { childList: true, subtree: true }); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', vigia); else vigia();
 })();

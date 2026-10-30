@@ -182,3 +182,5 @@ td input[data-com] { min-height: 34px; border: 1px solid var(--areia); border-ra
 .colunas span { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; }
 .colunas i { display: block; background: var(--azul, #2f4352); border-radius: 3px 3px 0 0; min-height: 1px; opacity: .85; }
 .colunas small { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: .68rem; color: var(--tx-3, #8a8f9c); white-space: nowrap; }
+/* celular: tabela larga rola dentro do cartão, a tela não passa da largura */
+@media (max-width: 640px) { .caixa-b table { display: block; overflow-x: auto; max-width: 100%; } }

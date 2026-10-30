@@ -78,7 +78,7 @@ h2 { font: 600 .92rem var(--sans); margin: 22px 0 8px; color: var(--alp-2); }
 .grande { font: 400 2.2rem/1 var(--serif); margin: 4px 0; font-variant-numeric: lining-nums; }
 
 .campo { display: grid; gap: 4px; margin-bottom: 12px; font-size: .86rem; color: var(--tx-2); }
-.campo input, .campo select, .campo textarea { min-height: 48px; border: 1px solid #d6cbb6; border-radius: 14px; padding: 0 14px; background: #fff; color: var(--tx); font-size: 1rem; }
+.campo input, .campo select, .campo textarea { width: 100%; min-width: 0; box-sizing: border-box; min-height: 48px; border: 1px solid #d6cbb6; border-radius: 14px; padding: 0 14px; background: #fff; color: var(--tx); font-size: 1rem; }
 .campo textarea { padding: 10px 14px; min-height: 80px; }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
 .chips button { border: 1px solid #d6cbb6; background: #fff; border-radius: 999px; padding: 7px 12px; cursor: pointer; font-size: .86rem; }
