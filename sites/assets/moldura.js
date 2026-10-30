@@ -59,11 +59,13 @@
   }
 
   // ---------- pílula ----------
+  // site com cena 3D (cena.js) custa mais: a partir de R$ 2.490 (o catálogo usa o mesmo valor)
+  var TRES_D = !!doc.querySelector('script[src*="cena.js"]');
   var pill = doc.createElement('div');
   pill.className = 'br-pill';
   pill.innerHTML = '<a class="br-pill-marca" href="' + raiz + 'exemplos.html' + (CAT ? '?c=' + CAT : '') + '"><b>BLUE ROSE</b><span>ver outros modelos</span></a>' +
     (perso && perso.nome ? '<span class="br-pill-perso">Prévia para <b>' + esc(perso.nome) + '</b> · <button type="button">desfazer</button></span>' : '') +
-    (CAT !== 'midia-kit' ? '<a class="br-pill-preco" href="' + urlQuero() + '"><b>R$ 1.490</b><span>site como este, pronto em 7 dias úteis</span></a>' : '') +
+    (CAT !== 'midia-kit' ? '<a class="br-pill-preco" href="' + urlQuero() + '">' + (TRES_D ? '<b>a partir de R$ 2.490</b><span>site com 3D como este, pronto em 10 dias úteis</span>' : '<b>R$ 1.490</b><span>site como este, pronto em 7 dias úteis</span>') + '</a>' : '') +
     '<a class="br-pill-cta" href="' + urlQuero() + '">Quero um site assim</a>';
   body.appendChild(pill);
   pill.querySelector('.br-pill-cta').addEventListener('click', function () { contar('quero', 'pilula'); });
