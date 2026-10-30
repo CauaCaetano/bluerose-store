@@ -7,72 +7,187 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Aurora Laser · Depilação a laser em Salvador · Preço por área na tela</title>
-<meta name="description" content="Depilação a laser com o preço de cada área na tela, laser certo para pele clara ou morena e pacote de 10 sessões com até 40% de desconto. Primeira sessão de teste grátis.">
-<meta name="theme-color" content="#eeeaff">
+<meta name="description" content="Depilação a laser em Salvador com o preço de cada área na tela, laser certo para pele clara, morena ou negra e pacote de 10 sessões com até 40% de desconto. Primeira sessão de teste grátis.">
+<meta name="theme-color" content="#f5f5f5">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Ccircle%20cx%3D'20'%20cy%3D'26'%20r%3D'11'%20fill%3D'%23a64d63'%2F%3E%3Cpath%20d%3D'M20%204v9M8%209l5%206M32%209l-5%206'%20stroke%3D'%23a64d63'%20stroke-width%3D'3'%20stroke-linecap%3D'round'%2F%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="../assets/fontes/0967c36878.css">
+<link rel="stylesheet" href="../assets/fontes/514659f99a.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=3">
-<link rel="stylesheet" href="estilo.css?v=3">
+<link rel="stylesheet" href="estilo.css?v=4">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=1" defer></script>
-<script src="site.js?v=2" defer></script>
+<script src="site.js?v=3" defer></script>
 </head>
 <body data-slug="aurora-laser" data-marca="Aurora Laser" data-cat="estetica">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
 <header class="topo">
-  <a class="marca" href="#" translate="no">aurora<b>laser</b></a>
-  <nav class="menu" aria-label="Principal"><a href="#monte">Preços</a><a href="#pele">Minha pele</a><a href="#clube">Clube</a><a href="#duvidas">Dúvidas</a></nav>
-  <a class="botao" href="#monte">Sessão teste grátis</a>
+  <div class="topo-esq">
+    <button class="hamb" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-cel"><span></span><span></span></button>
+    <nav class="menu" aria-label="Principal"><a href="#precos">Preços</a><a href="#areas">Áreas</a><a href="#pele">Minha pele</a><a href="#agendar">Clube</a></nav>
+  </div>
+  <a class="marca" href="#" translate="no" aria-label="Aurora Laser, início">
+    <svg class="marca-ic" viewBox="0 0 40 40" aria-hidden="true"><path d="M3 31h34M10.5 31a9.5 9.5 0 0 1 19 0M20 7v7M8 12.5l4.5 4.5M32 12.5l-4.5 4.5M2.5 22.5h6M31.5 22.5h6"/></svg>
+    <span class="marca-tx">Aurora Laser<small>depilação a laser</small></span>
+  </a>
+  <div class="topo-dir">
+    <a class="menu-link so-pc" href="#agendar">Contato</a>
+    <a class="menu-link so-pc" href="#duvidas">Dúvidas</a>
+    <a class="sacola" href="#pacote" aria-label="Meu pacote"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 13H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span class="sacola-n">0</span></a>
+  </div>
 </header>
+<nav class="menu-cel" id="menu-cel" aria-label="Menu do celular" hidden>
+  <a href="#precos">Preços</a><a href="#areas">Áreas</a><a href="#pele">Minha pele</a><a href="#agendar">Clube e contato</a><a href="#duvidas">Dúvidas</a>
+  <a class="botao" href="#" data-wa="Olá, Aurora! Quero agendar a sessão teste grátis.">Sessão teste grátis</a>
+</nav>
+
 <main id="conteudo">
-  <section class="abre">
-    <div class="abre-txt">
-      <h1>Escolha as áreas. O preço aparece na hora.</h1>
-      <p>Sem tabela escondida e sem pacote empurrado. Laser certo para pele clara, morena ou negra, e a primeira sessão de teste não custa nada.</p>
-      <a class="botao botao-g" href="#monte">Montar meu pacote</a>
-      <ul class="sel"><li><b>−85%</b>de pelos em média após 8 sessões</li><li><b>15 min</b>por sessão de axila e virilha</li><li><b>3 lasers</b>um para cada tom de pele</li></ul>
-    </div>
-    <div class="fatias" role="img" aria-label="Sessão de depilação a laser na perna">
-      <span><img src="img/laser.webp" alt="" width="1400" height="934" fetchpriority="high"></span><span><img src="img/laser.webp" alt="" width="1400" height="934"></span><span><img src="img/laser.webp" alt="" width="1400" height="934"></span><span><img src="img/laser.webp" alt="" width="1400" height="934"></span>
+  <!-- abertura: foto cheia que respira, com a luz do laser varrendo -->
+  <section class="heroi" aria-labelledby="h-t">
+    <div class="heroi-moldura">
+      <img class="heroi-foto" src="img/abertura.webp" alt="Ponteira do laser encostada na pele durante a sessão" width="1600" height="1067" fetchpriority="high">
+      <span class="heroi-luz" aria-hidden="true"></span>
+      <div class="heroi-tx">
+        <h1 id="h-t" class="ta" data-atraso="1">Sua pele livre, o preço na hora</h1>
+        <div class="heroi-links ta" data-atraso="2"><a href="#precos">Preços</a><a href="#pele">Minha pele</a><a href="#agendar">Sessão teste</a></div>
+      </div>
     </div>
   </section>
 
-  <section class="monte" id="monte" aria-labelledby="mt-t">
-    <div class="mt-cab"><h2 id="mt-t">Monte seu pacote</h2><p>Toque nas áreas e escolha quantas sessões. A conta é feita na hora, com o desconto do pacote e do combo.</p></div>
-    <div class="mt-grade">
-      <div>
-        <div class="corpo" role="tablist" aria-label="Para quem"><button role="tab" data-g="f" aria-selected="true">Feminino</button><button role="tab" data-g="m" aria-selected="false">Masculino</button></div>
-        <div class="areas" role="group" aria-label="Áreas" aria-live="polite"></div>
-        <fieldset class="sess"><legend>Sessões</legend>
-          <label><input type="radio" name="s" value="1"><span>Avulsa</span></label><label><input type="radio" name="s" value="5"><span>5 sessões <em>−20%</em></span></label><label><input type="radio" name="s" value="10" checked><span>10 sessões <em>−40%</em></span></label></fieldset>
+  <!-- áreas em palavras grandes: passa o mouse e a foto aparece numa forma orgânica -->
+  <section class="areas-grandes" id="areas" aria-label="Áreas mais procuradas">
+    <div class="ag-lista">
+      <a class="ag-item ag-1 ta-lado ta-esq" href="#precos" data-pre="f:0,2"><span class="ag-pal">Axila e virilha</span><span class="ag-img"><img src="img/area-axila.webp" alt="" width="774" height="900" loading="lazy"></span></a>
+      <a class="ag-item ag-2 ta-lado ta-dir" href="#precos" data-pre="f:6,7"><span class="ag-pal">Pernas e braços</span><span class="ag-img"><img src="img/area-pernas.webp" alt="" width="774" height="900" loading="lazy"></span></a>
+      <a class="ag-item ag-3 ta-lado ta-esq" href="#precos" data-pre="m:0,1"><span class="ag-pal">Barba e pescoço</span><span class="ag-img"><img src="img/area-rosto.webp" alt="" width="774" height="900" loading="lazy"></span></a>
+    </div>
+    <div class="ag-cel" aria-label="Áreas mais procuradas">
+      <a class="ag-card" href="#precos" data-pre="f:0,2"><span class="ag-card-img"><img src="img/area-axila.webp" alt="Mulher de toalha mostrando a axila lisa" width="774" height="900" loading="lazy"></span><b>Axila e virilha</b><small>15 min · a partir de R$ 89</small></a>
+      <a class="ag-card" href="#precos" data-pre="f:6,7"><span class="ag-card-img"><img src="img/area-pernas.webp" alt="Laser aplicado na perna da cliente" width="774" height="900" loading="lazy"></span><b>Pernas e braços</b><small>40 min · a partir de R$ 199</small></a>
+      <a class="ag-card" href="#precos" data-pre="m:0,1"><span class="ag-card-img"><img src="img/area-rosto.webp" alt="Técnica aplicando laser no queixo do cliente" width="774" height="900" loading="lazy"></span><b>Barba e pescoço</b><small>20 min · a partir de R$ 99</small></a>
+    </div>
+  </section>
+
+  <!-- vitrine: cada área é um produto com preço; toque para pôr no pacote -->
+  <section class="vitrine" id="precos" aria-labelledby="pr-t">
+    <div class="vt-cab">
+      <div class="vt-tit">
+        <h2 id="pr-t" class="ta">Preço por área</h2>
+        <div class="corpo ta" role="tablist" aria-label="Para quem"><button type="button" role="tab" data-g="f" aria-selected="true">Feminino</button><button type="button" role="tab" data-g="m" aria-selected="false">Masculino</button></div>
+      </div>
+      <div class="vt-acoes ta">
+        <button class="seta" type="button" data-ir="-1" aria-label="Áreas anteriores"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button class="seta" type="button" data-ir="1" aria-label="Próximas áreas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        <a class="botao so-pc" href="#pacote">Ver meu pacote</a>
+      </div>
+    </div>
+    <div class="trilho ta" role="group" aria-label="Áreas e preço por sessão" tabindex="0"></div>
+
+    <div class="pacote ta" id="pacote" aria-labelledby="pc-t">
+      <div class="pc-sess">
+        <h3 id="pc-t">Quantas sessões?</h3>
+        <fieldset class="sess"><legend class="vh">Sessões</legend>
+          <label><input type="radio" name="s" value="1"><span>Avulsa</span></label>
+          <label><input type="radio" name="s" value="5"><span>5 sessões <em>−20%</em></span></label>
+          <label><input type="radio" name="s" value="10" checked><span>10 sessões <em>−40%</em></span></label>
+        </fieldset>
+        <p class="pc-dica">A partir de 3 áreas, mais 10% de desconto no combo.</p>
       </div>
       <div class="conta" aria-live="polite"></div>
     </div>
   </section>
 
-  <section class="pele" id="pele" aria-labelledby="pl-t">
-    <div class="pl-txt"><h2 id="pl-t">Qual é o tom da sua pele?</h2><p>Cada pele pede um laser e um número de sessões. Toque no tom mais parecido com o seu.</p>
-      <div class="tons" role="radiogroup" aria-label="Tom de pele"><button type="button" role="radio" aria-checked="false" data-t="0" style="background:#f6dccb" aria-label="Muito clara"></button><button type="button" role="radio" aria-checked="false" data-t="1" style="background:#e6bc9c" aria-label="Clara"></button><button type="button" role="radio" aria-checked="false" data-t="2" style="background:#c58e66" aria-label="Morena"></button><button type="button" role="radio" aria-checked="false" data-t="3" style="background:#8f5b3c" aria-label="Morena escura"></button><button type="button" role="radio" aria-checked="false" data-t="4" style="background:#5a3622" aria-label="Negra"></button></div>
-      <div class="tom-res" aria-live="polite"><p>O laser que usamos em cada tom foi aprovado pela Anvisa e é ajustado pela técnica na primeira sessão.</p></div></div>
-    <img class="pl-foto" src="img/braco.webp" alt="Aplicação de laser na pele do braço" loading="lazy">
-  </section>
-
-  <section class="clube" id="clube" aria-labelledby="cl-t">
-    <div class="cl-cab"><h2 id="cl-t">Clube Aurora</h2><p>Para manter depois do pacote, ou fazer várias áreas pagando pouco por mês.</p></div>
-    <article><p class="cl-n">Clube 3 áreas</p><p class="cl-p">R$ 149<small>/mês</small></p><p>1 sessão por mês em até 3 áreas pequenas. Cancele quando quiser.</p><a class="botao" href="#" data-wa="Olá, Aurora! Quero entrar no Clube 3 áreas.">Entrar no clube</a></article>
-    <article class="dest"><p class="cl-n">Clube corpo inteiro</p><p class="cl-p">R$ 389<small>/mês</small></p><p>Todas as áreas, 1 sessão por mês, e uma acompanhante com 20% de desconto.</p><a class="botao" href="#" data-wa="Olá, Aurora! Quero entrar no Clube corpo inteiro.">Entrar no clube</a></article>
-  </section>
-
-  <section class="duvidas" id="duvidas" aria-labelledby="dv-t">
-    <h2 id="dv-t">Dúvidas</h2>
-    <div class="dv-lista">
-      <details><summary>Dói?</summary><p>Parece um elástico batendo na pele, por menos de um segundo. O aparelho resfria a ponteira, e a maioria das clientes diz que dói menos que a cera.</p></details>
-      <details><summary>Posso tomar sol?</summary><p>Evite sol forte na área 7 dias antes e depois da sessão. No verão, fazemos as áreas cobertas pela roupa.</p></details>
-      <details><summary>Por que preciso de tantas sessões?</summary><p>O laser só pega o pelo na fase de crescimento, e cada pelo está numa fase. Com sessões a cada 30 a 45 dias, você pega todos.</p></details>
+  <!-- foto larga com título central: qual é o seu tom de pele -->
+  <section class="faixa" id="pele" aria-labelledby="pl-t">
+    <div class="faixa-moldura ta">
+      <img class="faixa-foto" src="img/tom-pele.webp" alt="Pele morena das costas e do ombro" width="1600" height="800" loading="lazy">
+      <div class="faixa-tx">
+        <h2 id="pl-t">Qual é o tom da sua pele?</h2>
+        <p class="faixa-sub">Cada pele pede um laser e um número de sessões. Toque no tom mais parecido com o seu.</p>
+        <div class="tons" role="radiogroup" aria-label="Tom de pele">
+          <button type="button" role="radio" aria-checked="false" data-t="0" style="--tom:#f6dccb"><span>Muito clara</span></button>
+          <button type="button" role="radio" aria-checked="false" data-t="1" style="--tom:#e6bc9c"><span>Clara</span></button>
+          <button type="button" role="radio" aria-checked="false" data-t="2" style="--tom:#c58e66"><span>Morena</span></button>
+          <button type="button" role="radio" aria-checked="false" data-t="3" style="--tom:#8f5b3c"><span>Morena escura</span></button>
+          <button type="button" role="radio" aria-checked="false" data-t="4" style="--tom:#5a3622"><span>Negra</span></button>
+        </div>
+        <div class="tom-res" aria-live="polite"><p>Os 3 lasers da clínica são aprovados pela Anvisa e ajustados pela técnica na primeira sessão.</p></div>
+        <div class="faixa-bts"><a class="botao botao-claro" href="#precos">Montar meu pacote</a><a class="botao botao-borda" href="#duvidas">Tirar dúvidas</a></div>
+      </div>
     </div>
   </section>
+
+  <!-- agendamento: o fundo da página muda de cor ao chegar aqui -->
+  <section class="agendar" id="agendar" data-cor="#e2d8d0" aria-labelledby="ag-t">
+    <h2 id="ag-t" class="ta">Descubra a pele lisa que já é sua</h2>
+    <p class="ag-txt ta">Cada pele responde de um jeito. Na sessão teste, que não custa nada, a técnica olha seu tom e seu pelo, testa o laser numa área pequena e monta o plano com você. Em média, os pelos caem 85% depois de 8 sessões, e axila com virilha leva só 15 minutos.</p>
+    <p class="ag-clube ta"><b translate="no">Clube Aurora</b> para manter depois do pacote: <b>R$ 149/mês</b> com 1 sessão em até 3 áreas pequenas, ou <b>R$ 389/mês</b> no corpo inteiro, com uma acompanhante a 20% de desconto. Cancele quando quiser.</p>
+    <form class="form ta" novalidate>
+      <div class="f-linha"><label class="vh" for="f-nome">Nome</label><input id="f-nome" name="nome" placeholder="Nome" autocomplete="given-name" required><label class="vh" for="f-sob">Sobrenome</label><input id="f-sob" name="sobrenome" placeholder="Sobrenome" autocomplete="family-name"></div>
+      <div class="f-linha"><label class="vh" for="f-tel">Telefone</label><input id="f-tel" name="tel" placeholder="Telefone com DDD" inputmode="tel" autocomplete="tel" required><label class="vh" for="f-mail">E-mail</label><input id="f-mail" name="email" type="email" placeholder="E-mail" autocomplete="email"></div>
+      <div class="escolha">
+        <button type="button" class="escolha-bt" aria-haspopup="listbox" aria-expanded="false" aria-controls="escolha-l"><span>Escolha o serviço</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <ul class="escolha-l" id="escolha-l" role="listbox" aria-label="Serviço" hidden>
+          <li role="option" tabindex="-1" data-v="Sessão teste grátis">Sessão teste grátis<small>15 min · sem custo</small></li>
+          <li role="option" tabindex="-1" data-v="pacote" class="op-pacote">O pacote que montei<small>escolha as áreas acima</small></li>
+          <li role="option" tabindex="-1" data-v="Clube 3 áreas (R$ 149/mês)">Clube 3 áreas<small>R$ 149/mês</small></li>
+          <li role="option" tabindex="-1" data-v="Clube corpo inteiro (R$ 389/mês)">Clube corpo inteiro<small>R$ 389/mês</small></li>
+        </ul>
+      </div>
+      <button class="botao botao-cheio" type="submit">Agendar sessão teste grátis</button>
+      <label class="aceite"><input type="checkbox" name="aceite" required><span>Li e aceito o <a href="#duvidas">regulamento</a> e a política de privacidade</span></label>
+      <p class="f-erro" aria-live="polite"></p>
+    </form>
+  </section>
 </main>
-<footer class="rodape"><p>Aurora Laser · Responsável técnica: Dra. Luana Pires, CRM-BA fictício · Av. Tancredo Neves, 1.632, Salvador · Resultados variam de pessoa para pessoa · Marca criada para demonstração · Site de exemplo feito pela Blue Rose</p></footer>
+
+<footer class="rodape">
+  <div class="insta">
+    <h2 class="insta-t ta">Instagram <a href="#" data-wa="Olá, Aurora! Vi o Instagram de vocês e quero saber mais." translate="no">@aurora.laser.ssa</a></h2>
+    <div class="insta-fila ta">
+      <a href="#" class="zoom" data-wa="Olá, Aurora! Vi o Instagram de vocês e quero saber mais."><img src="img/sessao-laser.webp" alt="Sessão de laser no braço, com óculos de proteção" width="800" height="800" loading="lazy"></a>
+      <a href="#" class="zoom" data-wa="Olá, Aurora! Vi o Instagram de vocês e quero saber mais."><img src="img/pele-lisa.webp" alt="Pernas lisas sobre o sofá branco" width="800" height="800" loading="lazy"></a>
+      <a href="#" class="zoom" data-wa="Olá, Aurora! Vi o Instagram de vocês e quero saber mais."><img src="img/braco.webp" alt="Laser passando no antebraço" width="800" height="800" loading="lazy"></a>
+      <a href="#" class="zoom" data-wa="Olá, Aurora! Vi o Instagram de vocês e quero saber mais."><img src="img/toalha.webp" alt="Cliente de toalha depois da sessão" width="800" height="800" loading="lazy"></a>
+      <a href="#" class="zoom" data-wa="Olá, Aurora! Vi o Instagram de vocês e quero saber mais."><img src="img/sala.webp" alt="Recepção clara da clínica" width="800" height="800" loading="lazy"></a>
+    </div>
+  </div>
+
+  <div class="rd-logo ta" translate="no" aria-hidden="true">
+    <svg class="rd-ic" viewBox="0 0 40 40"><path d="M3 31h34M10.5 31a9.5 9.5 0 0 1 19 0M20 7v7M8 12.5l4.5 4.5M32 12.5l-4.5 4.5M2.5 22.5h6M31.5 22.5h6"/></svg>
+    <span class="rd-nome">Aurora Laser</span>
+    <span class="rd-sub">Depilação a laser</span>
+  </div>
+
+  <div class="rd-cols">
+    <div class="rd-col">
+      <h3>Aurora Laser Salvador</h3>
+      <p>Av. Tancredo Neves, 1.632<br>Caminho das Árvores, Salvador</p>
+      <p>Segunda a sexta 8h–20h<br>Sábado 8h–14h</p>
+    </div>
+    <div class="rd-col">
+      <h3>Página</h3>
+      <ul><li><a href="#precos">Preços</a></li><li><a href="#areas">Áreas</a></li><li><a href="#pele">Minha pele</a></li><li><a href="#agendar">Clube</a></li><li><a href="#agendar">Contato</a></li></ul>
+    </div>
+    <div class="rd-col">
+      <h3>Contato</h3>
+      <p><a href="#" data-wa="Olá, Aurora! Quero tirar uma dúvida sobre a depilação a laser.">Chamar no WhatsApp</a><br>Resposta em até 15 min no horário da clínica</p>
+      <p>Responsável técnica<br>Dra. Luana Pires, CRM-BA fictício</p>
+    </div>
+    <div class="rd-col rd-duv" id="duvidas">
+      <h3>Dúvidas</h3>
+      <details><summary>Dói?</summary><p>Parece um elástico batendo na pele, por menos de um segundo. O aparelho resfria a ponteira, e a maioria das clientes diz que dói menos que a cera.</p></details>
+      <details><summary>Posso tomar sol?</summary><p>Evite sol forte na área 7 dias antes e depois da sessão. No verão, fazemos as áreas cobertas pela roupa.</p></details>
+      <details><summary>Por que tantas sessões?</summary><p>O laser só pega o pelo na fase de crescimento, e cada pelo está numa fase. Com sessões a cada 30 a 45 dias, você pega todos.</p></details>
+    </div>
+    <p class="rd-sobre">A Aurora Laser é uma clínica só de depilação a laser, no Caminho das Árvores. São 3 lasers, um para cada tom de pele, preço de cada área na tela e sessão teste grátis antes de fechar qualquer pacote. Resultados variam de pessoa para pessoa.</p>
+  </div>
+  <p class="rd-pe"><span>© 2026 Aurora Laser · Nomes e registros fictícios · Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash</span></p>
+</footer>
+
+<a class="flor" href="#" data-wa="Olá, Aurora! Quero agendar a sessão teste grátis." aria-label="Agendar sessão teste grátis">
+  <svg viewBox="0 0 120 120" aria-hidden="true"><g class="flor-p"><circle cx="60" cy="30" r="27"/><circle cx="90" cy="60" r="27"/><circle cx="60" cy="90" r="27"/><circle cx="30" cy="60" r="27"/><circle cx="81" cy="39" r="27"/><circle cx="81" cy="81" r="27"/><circle cx="39" cy="81" r="27"/><circle cx="39" cy="39" r="27"/></g></svg>
+  <span>Sessão teste<br>grátis<br>♡</span>
+</a>
 </body>
 </html>

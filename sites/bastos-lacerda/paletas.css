@@ -1,31 +1,116 @@
 /* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/bastos-lacerda/estilo.css: cores por idioma. Não editar à mão. */
-html[data-paleta="pt-PT"] { --tinta: #15181a; --grafite: #2b3135; --papel: #f3f2f0; --cinza: #6b7379; --linha: #d9d7d4; --tijolo: #b95d37; --branco: #ffffff; --marfim: #c9c4bd; }
-html[data-paleta="pt-PT"] .botao:hover { background: #9f4f2e; }
-html[data-paleta="pt-PT"] .abre::after { background: linear-gradient(90deg, rgba(21, 24, 26, .82), rgba(21, 24, 26, .35)); }
-html[data-paleta="pt-PT"] .abre-txt > p { color: #dcdad6; }
-html[data-paleta="pt-PT"] .triagem { box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .8); }
-html[data-paleta="pt-PT"] .slots button { border: 1.5px solid #474e54; }
-html[data-paleta="es"] { --tinta: #1a1516; --grafite: #352b2d; --papel: #f3f2f0; --cinza: #796b6e; --linha: #d9d7d4; --tijolo: #b83839; --branco: #ffffff; --marfim: #c9c3bd; }
-html[data-paleta="es"] .botao:hover { background: #9e2f30; }
-html[data-paleta="es"] .abre::after { background: linear-gradient(90deg, rgba(26, 21, 22, .82), rgba(26, 21, 22, .35)); }
-html[data-paleta="es"] .abre-txt > p { color: #dcd9d6; }
-html[data-paleta="es"] .triagem { box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .8); }
-html[data-paleta="es"] .slots button { border: 1.5px solid #54474a; }
-html[data-paleta="en"] { --tinta: #15161a; --grafite: #2b2d35; --papel: #f0f1f3; --cinza: #6b6e79; --linha: #d4d5d9; --tijolo: #bf3139; --branco: #ffffff; --marfim: #bdc0c9; }
-html[data-paleta="en"] .botao:hover { background: #a52830; }
-html[data-paleta="en"] .abre::after { background: linear-gradient(90deg, rgba(21, 22, 26, .82), rgba(21, 22, 26, .35)); }
-html[data-paleta="en"] .abre-txt > p { color: #d6d8dc; }
-html[data-paleta="en"] .triagem { box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .8); }
-html[data-paleta="en"] .slots button { border: 1.5px solid #474a54; }
-html[data-paleta="it"] { --tinta: #181a15; --grafite: #30352b; --papel: #f3f2f0; --cinza: #72796b; --linha: #d9d8d4; --tijolo: #b76139; --branco: #ffffff; --marfim: #c9c7bd; }
-html[data-paleta="it"] .botao:hover { background: #9e532f; }
-html[data-paleta="it"] .abre::after { background: linear-gradient(90deg, rgba(24, 26, 21, .82), rgba(24, 26, 21, .35)); }
-html[data-paleta="it"] .abre-txt > p { color: #dcdbd6; }
-html[data-paleta="it"] .triagem { box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .8); }
-html[data-paleta="it"] .slots button { border: 1.5px solid #4e5447; }
-html[data-paleta="fr"] { --tinta: #16151a; --grafite: #2d2b35; --papel: #f2f0f3; --cinza: #6e6b79; --linha: #d6d4d9; --tijolo: #553eb2; --branco: #ffffff; --marfim: #c3bdc9; }
-html[data-paleta="fr"] .botao:hover { background: #483499; }
-html[data-paleta="fr"] .abre::after { background: linear-gradient(90deg, rgba(22, 21, 26, .82), rgba(22, 21, 26, .35)); }
-html[data-paleta="fr"] .abre-txt > p { color: #d9d6dc; }
-html[data-paleta="fr"] .triagem { box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .8); }
-html[data-paleta="fr"] .slots button { border: 1.5px solid #4a4754; }
+html[data-paleta="pt-PT"] { --tinta: #111519; --preto: #000000; --cinza: #393939; --cinza2: #666a6d; --linha: #e9e5e0; --acc: #e0ad84; --ouro-esc: #854b1c; --rosa: #f4ece1; --rosa2: #ebddc8; --creme: #fbf8f4; --escuro: #1d1d1d; --marrom: #47311f; --rodape: #111519; --bege: #efe6da; --branco: #ffffff; }
+html[data-paleta="pt-PT"] .topo.rolou { background: rgba(250, 247, 243, .78); box-shadow: 0 1px 0 rgba(17, 21, 25, .07); }
+html[data-paleta="pt-PT"] .abre-cena { background:
+  radial-gradient(60% 70% at 78% 62%, #e7cdb8 0, transparent 60%),
+  radial-gradient(40% 40% at 62% 82%, #a87a4d55 0, transparent 70%),
+  linear-gradient(160deg, #f4ede4 0, #eadece 60%, #e8cfba 100%); }
+html[data-paleta="pt-PT"] .abre-painel { background: rgba(250, 247, 243, .86); }
+html[data-paleta="pt-PT"] .mini { border-bottom: 1px solid rgba(17, 21, 25, .35); }
+html[data-paleta="pt-PT"] .mini input::placeholder { color: #71777b; }
+html[data-paleta="pt-PT"] .rolar { color: rgba(17, 21, 25, .6); }
+html[data-paleta="pt-PT"] .proc input { border-bottom: 1px solid #cfc8bf; }
+html[data-paleta="pt-PT"] .lista button small,
+html[data-paleta="pt-PT"] .lista span.it small { color: rgba(255, 255, 255, .55); }
+html[data-paleta="pt-PT"] .faixa { background: linear-gradient(110deg, #c69e7e 0, #d7b69b 45%, #e8d3c2 100%); }
+html[data-paleta="pt-PT"] .faixa-cena::after { background: linear-gradient(90deg, rgba(140, 97, 62, .55), rgba(140, 97, 62, .12) 55%, transparent); }
+html[data-paleta="pt-PT"] .triagem textarea { border-bottom: 1px solid #cfc8bf; }
+html[data-paleta="pt-PT"] .rs-b small { color: rgba(255, 255, 255, .6); }
+html[data-paleta="pt-PT"] .rs-b p { color: rgba(255, 255, 255, .7); }
+html[data-paleta="pt-PT"] .slots button { border: 1px solid rgba(255, 255, 255, .25); }
+html[data-paleta="pt-PT"] .rp-l1 { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html[data-paleta="pt-PT"] .circ { border: 1px solid rgba(255, 255, 255, .8); }
+html[data-paleta="pt-PT"] .rp-l2 { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html[data-paleta="pt-PT"] .rp-l3 p:last-child { color: rgba(255, 255, 255, .5); }
+html[data-paleta="es"] { --tinta: #191113; --preto: #000000; --cinza: #393939; --cinza2: #6d6667; --linha: #e9e5e0; --acc: #e2c482; --ouro-esc: #87651a; --rosa: #f5ebe0; --rosa2: #eddbc6; --creme: #fbf8f4; --escuro: #1d1d1d; --marrom: #483b1e; --rodape: #191113; --bege: #efe5da; --branco: #ffffff; }
+html[data-paleta="es"] .topo.rolou { background: rgba(250, 247, 243, .78); box-shadow: 0 1px 0 rgba(25, 17, 19, .07); }
+html[data-paleta="es"] .abre-cena { background:
+  radial-gradient(60% 70% at 78% 62%, #e8d9b7 0, transparent 60%),
+  radial-gradient(40% 40% at 62% 82%, #a87a4d55 0, transparent 70%),
+  linear-gradient(160deg, #f4ede4 0, #eaddce 60%, #e9dab9 100%); }
+html[data-paleta="es"] .abre-painel { background: rgba(250, 247, 243, .86); }
+html[data-paleta="es"] .mini { border-bottom: 1px solid rgba(25, 17, 19, .35); }
+html[data-paleta="es"] .mini input::placeholder { color: #7b7173; }
+html[data-paleta="es"] .rolar { color: rgba(25, 17, 19, .6); }
+html[data-paleta="es"] .proc input { border-bottom: 1px solid #cfc8bf; }
+html[data-paleta="es"] .lista button small,
+html[data-paleta="es"] .lista span.it small { color: rgba(255, 255, 255, .55); }
+html[data-paleta="es"] .faixa { background: linear-gradient(110deg, #c9b17b 0, #d8c59a 45%, #e9ddc1 100%); }
+html[data-paleta="es"] .faixa-cena::after { background: linear-gradient(90deg, rgba(143, 117, 59, .55), rgba(143, 117, 59, .12) 55%, transparent); }
+html[data-paleta="es"] .triagem textarea { border-bottom: 1px solid #cfc8bf; }
+html[data-paleta="es"] .rs-b small { color: rgba(255, 255, 255, .6); }
+html[data-paleta="es"] .rs-b p { color: rgba(255, 255, 255, .7); }
+html[data-paleta="es"] .slots button { border: 1px solid rgba(255, 255, 255, .25); }
+html[data-paleta="es"] .rp-l1 { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html[data-paleta="es"] .circ { border: 1px solid rgba(255, 255, 255, .8); }
+html[data-paleta="es"] .rp-l2 { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html[data-paleta="es"] .rp-l3 p:last-child { color: rgba(255, 255, 255, .5); }
+html[data-paleta="en"] { --tinta: #111319; --preto: #000000; --cinza: #393939; --cinza2: #66686d; --linha: #e0e3e9; --acc: #df858a; --ouro-esc: #841d23; --rosa: #e1e6f4; --rosa2: #c8d2eb; --creme: #f4f6fb; --escuro: #1d1d1d; --marrom: #471f22; --rodape: #111319; --bege: #dae0ef; --branco: #ffffff; }
+html[data-paleta="en"] .topo.rolou { background: rgba(243, 245, 250, .78); box-shadow: 0 1px 0 rgba(17, 19, 25, .07); }
+html[data-paleta="en"] .abre-cena { background:
+  radial-gradient(60% 70% at 78% 62%, #e6b9bb 0, transparent 60%),
+  radial-gradient(40% 40% at 62% 82%, #a87a4d55 0, transparent 70%),
+  linear-gradient(160deg, #e4e9f4 0, #ced6ea 60%, #e7bbbd 100%); }
+html[data-paleta="en"] .abre-painel { background: rgba(243, 245, 250, .86); }
+html[data-paleta="en"] .mini { border-bottom: 1px solid rgba(17, 19, 25, .35); }
+html[data-paleta="en"] .mini input::placeholder { color: #71737b; }
+html[data-paleta="en"] .rolar { color: rgba(17, 19, 25, .6); }
+html[data-paleta="en"] .proc input { border-bottom: 1px solid #bfc4cf; }
+html[data-paleta="en"] .lista button small,
+html[data-paleta="en"] .lista span.it small { color: rgba(255, 255, 255, .55); }
+html[data-paleta="en"] .faixa { background: linear-gradient(110deg, #c67e83 0, #d69c9f 45%, #e8c2c5 100%); }
+html[data-paleta="en"] .faixa-cena::after { background: linear-gradient(90deg, rgba(139, 63, 67, .55), rgba(139, 63, 67, .12) 55%, transparent); }
+html[data-paleta="en"] .triagem textarea { border-bottom: 1px solid #bfc4cf; }
+html[data-paleta="en"] .rs-b small { color: rgba(255, 255, 255, .6); }
+html[data-paleta="en"] .rs-b p { color: rgba(255, 255, 255, .7); }
+html[data-paleta="en"] .slots button { border: 1px solid rgba(255, 255, 255, .25); }
+html[data-paleta="en"] .rp-l1 { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html[data-paleta="en"] .circ { border: 1px solid rgba(255, 255, 255, .8); }
+html[data-paleta="en"] .rp-l2 { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html[data-paleta="en"] .rp-l3 p:last-child { color: rgba(255, 255, 255, .5); }
+html[data-paleta="it"] { --tinta: #151911; --preto: #000000; --cinza: #393939; --cinza2: #6a6d66; --linha: #e9e7e0; --acc: #d9bf8b; --ouro-esc: #7e6023; --rosa: #f2efe3; --rosa2: #e7e2cc; --creme: #faf9f5; --escuro: #1d1d1d; --marrom: #433823; --rodape: #151911; --bege: #eeeadb; --branco: #ffffff; }
+html[data-paleta="it"] .topo.rolou { background: rgba(250, 248, 243, .78); box-shadow: 0 1px 0 rgba(21, 25, 17, .07); }
+html[data-paleta="it"] .abre-cena { background:
+  radial-gradient(60% 70% at 78% 62%, #e3d6bc 0, transparent 60%),
+  radial-gradient(40% 40% at 62% 82%, #a87a4d55 0, transparent 70%),
+  linear-gradient(160deg, #f3f0e5 0, #e8e4d0 60%, #e4d7be 100%); }
+html[data-paleta="it"] .abre-painel { background: rgba(250, 248, 243, .86); }
+html[data-paleta="it"] .mini { border-bottom: 1px solid rgba(21, 25, 17, .35); }
+html[data-paleta="it"] .mini input::placeholder { color: #767b71; }
+html[data-paleta="it"] .rolar { color: rgba(21, 25, 17, .6); }
+html[data-paleta="it"] .proc input { border-bottom: 1px solid #cfccbf; }
+html[data-paleta="it"] .lista button small,
+html[data-paleta="it"] .lista span.it small { color: rgba(255, 255, 255, .55); }
+html[data-paleta="it"] .faixa { background: linear-gradient(110deg, #bfac85 0, #d1c1a1 45%, #e4dac6 100%); }
+html[data-paleta="it"] .faixa-cena::after { background: linear-gradient(90deg, rgba(132, 111, 70, .55), rgba(132, 111, 70, .12) 55%, transparent); }
+html[data-paleta="it"] .triagem textarea { border-bottom: 1px solid #cfccbf; }
+html[data-paleta="it"] .rs-b small { color: rgba(255, 255, 255, .6); }
+html[data-paleta="it"] .rs-b p { color: rgba(255, 255, 255, .7); }
+html[data-paleta="it"] .slots button { border: 1px solid rgba(255, 255, 255, .25); }
+html[data-paleta="it"] .rp-l1 { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html[data-paleta="it"] .circ { border: 1px solid rgba(255, 255, 255, .8); }
+html[data-paleta="it"] .rp-l2 { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html[data-paleta="it"] .rp-l3 p:last-child { color: rgba(255, 255, 255, .5); }
+html[data-paleta="fr"] { --tinta: #131119; --preto: #000000; --cinza: #393939; --cinza2: #68666d; --linha: #e4e0e9; --acc: #a08fd5; --ouro-esc: #3b277a; --rosa: #ebe1f4; --rosa2: #dac9ea; --creme: #f8f4fb; --escuro: #1d1d1d; --marrom: #2c2640; --rodape: #131119; --bege: #e5daef; --branco: #ffffff; }
+html[data-paleta="fr"] .topo.rolou { background: rgba(246, 243, 250, .78); box-shadow: 0 1px 0 rgba(19, 17, 25, .07); }
+html[data-paleta="fr"] .abre-cena { background:
+  radial-gradient(60% 70% at 78% 62%, #c7bfe0 0, transparent 60%),
+  radial-gradient(40% 40% at 62% 82%, #a87a4d55 0, transparent 70%),
+  linear-gradient(160deg, #ece4f4 0, #dcceea 60%, #c9c1e1 100%); }
+html[data-paleta="fr"] .abre-painel { background: rgba(246, 243, 250, .86); }
+html[data-paleta="fr"] .mini { border-bottom: 1px solid rgba(19, 17, 25, .35); }
+html[data-paleta="fr"] .mini input::placeholder { color: #73717b; }
+html[data-paleta="fr"] .rolar { color: rgba(19, 17, 25, .6); }
+html[data-paleta="fr"] .proc input { border-bottom: 1px solid #c7bfcf; }
+html[data-paleta="fr"] .lista button small,
+html[data-paleta="fr"] .lista span.it small { color: rgba(255, 255, 255, .55); }
+html[data-paleta="fr"] .faixa { background: linear-gradient(110deg, #968bb9 0, #afa5cd 45%, #cec8e2 100%); }
+html[data-paleta="fr"] .faixa-cena::after { background: linear-gradient(90deg, rgba(88, 76, 126, .55), rgba(88, 76, 126, .12) 55%, transparent); }
+html[data-paleta="fr"] .triagem textarea { border-bottom: 1px solid #c7bfcf; }
+html[data-paleta="fr"] .rs-b small { color: rgba(255, 255, 255, .6); }
+html[data-paleta="fr"] .rs-b p { color: rgba(255, 255, 255, .7); }
+html[data-paleta="fr"] .slots button { border: 1px solid rgba(255, 255, 255, .25); }
+html[data-paleta="fr"] .rp-l1 { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html[data-paleta="fr"] .circ { border: 1px solid rgba(255, 255, 255, .8); }
+html[data-paleta="fr"] .rp-l2 { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html[data-paleta="fr"] .rp-l3 p:last-child { color: rgba(255, 255, 255, .5); }

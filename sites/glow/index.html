@@ -7,67 +7,168 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Glow Estética · Rede de clínicas em SP · Clube com tratamentos todo mês</title>
-<meta name="description" content="11 clínicas de estética em São Paulo. Escolha pelo objetivo, veja o preço no clube e fora dele, reserve na unidade mais perto e ganhe R$ 100 por amiga indicada.">
-<meta name="theme-color" content="#ffffff">
+<meta name="description" content="11 clínicas de estética em São Paulo, com médicas e biomédicas. Escolha o tratamento pelo objetivo, veja o preço no clube e fora dele, reserve na unidade mais perto e ganhe R$ 100 por amiga indicada.">
+<meta name="theme-color" content="#7a6047">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'12'%20fill%3D'%23140816'%2F%3E%3Ccircle%20cx%3D'20'%20cy%3D'20'%20r%3D'9'%20fill%3D'%23dab5de'%2F%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="../assets/fontes/631d692889.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'12'%20fill%3D'%237a6047'%2F%3E%3Ccircle%20cx%3D'20'%20cy%3D'20'%20r%3D'9'%20fill%3D'%23f9f6f1'%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/b5fdcb37a1.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=3">
-<link rel="stylesheet" href="estilo.css?v=3">
+<link rel="stylesheet" href="estilo.css?v=5">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=1" defer></script>
-<script src="site.js?v=2" defer></script>
+<script src="site.js?v=3" defer></script>
 </head>
 <body data-slug="glow" data-marca="Glow Estética" data-cat="estetica">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
-<p class="faixa-top">Indique uma amiga e <b>vocês duas ganham R$ 100</b>. <a href="#indique">Pegar meu link</a></p>
+<div class="carrega" aria-hidden="true"><span class="logo" translate="no"><i>G</i><i>L</i><i>O</i><i>W</i></span></div>
+
 <header class="topo">
-  <a class="marca" href="#" translate="no">glow<span aria-hidden="true"></span></a>
-  <nav class="menu" aria-label="Principal"><a href="#objetivo">Tratamentos</a><a href="#clube">Clube Glow</a><a href="#unidades">Unidades</a></nav>
-  <a class="botao" href="#unidades">Reservar</a>
+  <button class="abre-menu" type="button" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span><b>Menu</b></button>
+  <a class="marca logo" href="#inicio" translate="no" aria-label="Glow Estética, início">GLOW</a>
+  <a class="topo-cta" href="#unidades">Reservar avaliação</a>
 </header>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <p class="menu-gigante" aria-hidden="true">MENU</p>
+  <nav aria-label="Principal">
+    <a href="#tratamentos"><small>001</small>Tratamentos por objetivo</a>
+    <a href="#sob-medida"><small>002</small>Avaliação sob medida</a>
+    <a href="#clube"><small>003</small>Clube <span translate="no">Glow</span></a>
+    <a href="#unidades"><small>004</small>11 unidades em SP</a>
+    <a href="#perguntas"><small>005</small>Perguntas frequentes</a>
+    <a href="#indique"><small>006</small>Indique e ganhe R$ 100</a>
+  </nav>
+  <div class="menu-pe"><a href="#" data-wa="Olá, Glow! Quero agendar uma avaliação.">WhatsApp</a><a href="#">Instagram</a><span>Seg a sáb, 8h às 21h</span></div>
+  <button class="fecha-menu" type="button" aria-label="Fechar menu">Fechar</button>
+</div>
+
 <main id="conteudo">
-  <section class="abre" aria-labelledby="bn-t">
-    <div class="ab-txt">
-      <h1 id="bn-t">Pele bonita não é sorte. É rotina.</h1>
-      <p>Tratamentos com médicas e biomédicas em 11 clínicas de São Paulo, e um clube que deixa a sua rotina mais barata todo mês.</p>
-      <div class="ab-ctas"><a class="botao botao-g" href="#objetivo">Escolher meu tratamento</a><a class="link" href="#clube">Conhecer o clube</a></div>
-      <dl class="nums"><div><dt>4,8</dt><dd>nota média em 21 mil avaliações</dd></div><div><dt>280 mil</dt><dd>atendimentos em 2025</dd></div><div><dt>11</dt><dd>clínicas em São Paulo</dd></div></dl>
-    </div>
-    <div class="folhas">
-      <img class="f1" src="img/m1.webp" alt="Mulher com a pele iluminada" width="1400" height="1400" fetchpriority="high">
-      <img class="f2" src="img/facial.webp" alt="Limpeza de pele com máscara" width="1400" height="934">
-      <img class="f3" src="img/serum.webp" alt="Sérum sendo aplicado com conta-gotas" width="1400" height="934">
+  <section class="heroi" id="inicio" aria-labelledby="h-t">
+    <div class="h-fixo">
+      <img class="h-foto" src="img/m2.webp" alt="Rosto de mulher com a pele uniforme e iluminada" width="1400" height="2107" fetchpriority="high">
+      <h1 id="h-t">Pele bonita é rotina</h1>
+      <p class="h-rola">Role para explorar</p>
+      <blockquote class="h-frase"><p>“Sua pele cuidada em cada detalhe, todo mês, em 11 clínicas de São Paulo.”</p><span class="logo" translate="no">GLOW</span></blockquote>
     </div>
   </section>
 
-  <section class="objetivo" id="objetivo" aria-labelledby="ob-t">
-    <h2 id="ob-t">Qual é o seu objetivo?</h2>
-    <div class="objs" role="tablist" aria-label="Objetivos"></div>
-    <div class="trats" aria-live="polite"></div>
+  <section class="linhas" aria-labelledby="li-t">
+    <h2 id="li-t" class="so-leitor">Linhas de tratamento</h2>
+    <div class="li-fixo">
+      <div class="li-trilho">
+        <a class="li-card" href="#tratamentos" data-ir="0"><img src="img/ambar.webp" alt="" loading="lazy" width="1067" height="1600"><b><span translate="no">GLOW</span> MANCHAS</b><small>3 tratamentos · a partir de R$ 189</small></a>
+        <a class="li-card" href="#tratamentos" data-ir="1"><img src="img/gota.webp" alt="" loading="lazy" width="1280" height="1600"><b><span translate="no">GLOW</span> LINHAS</b><small>3 tratamentos · a partir de R$ 1.090</small></a>
+        <a class="li-card" href="#tratamentos" data-ir="2"><img src="img/creme.webp" alt="" loading="lazy" width="1504" height="1600"><b><span translate="no">GLOW</span> POROS</b><small>3 tratamentos · a partir de R$ 189</small></a>
+        <a class="li-card" href="#tratamentos" data-ir="3"><img src="img/agua.webp" alt="" loading="lazy" width="900" height="1600"><b><span translate="no">GLOW</span> VIÇO</b><small>3 tratamentos · a partir de R$ 160</small></a>
+        <a class="li-card" href="#tratamentos" data-ir="4"><img src="img/pedras.webp" alt="" loading="lazy" width="1400" height="933"><b><span translate="no">GLOW</span> CORPO</b><small>3 tratamentos · a partir de R$ 140</small></a>
+        <a class="li-card" href="#clube"><img src="img/tulipas.webp" alt="" loading="lazy" width="1600" height="1067"><b><span translate="no">GLOW</span> CLUBE</b><small>3 planos · a partir de R$ 199/mês</small></a>
+        <a class="li-card" href="#unidades"><img src="img/sala2.webp" alt="" loading="lazy" width="1400" height="931"><b><span translate="no">GLOW</span> SP</b><small>11 clínicas · seg a sáb, 8h às 21h</small></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="arte" aria-labelledby="ar-t">
+    <div class="ar-fixo">
+      <h2 id="ar-t">A arte do cuidado sem exagero</h2>
+      <dl class="ar-nums"><div><dt>4,8</dt><dd>nota média em 21 mil avaliações</dd></div><div><dt>280 mil</dt><dd>atendimentos em 2025</dd></div><div><dt>11</dt><dd>clínicas em São Paulo</dd></div></dl>
+    </div>
+    <div class="ar-fotos" aria-hidden="true">
+      <img class="a1" src="img/textura-creme.webp" alt="" loading="lazy" data-v="-.25">
+      <img class="a2" src="img/vapor2.webp" alt="" loading="lazy" data-v=".18">
+      <img class="a3" src="img/bolhas.webp" alt="" loading="lazy" data-v="-.1">
+      <img class="a4" src="img/flores-creme.webp" alt="" loading="lazy" data-v=".3">
+      <img class="a5" src="img/vapor.webp" alt="" loading="lazy" data-v="-.2">
+      <img class="a6" src="img/tubo-gotas.webp" alt="" loading="lazy" data-v=".12">
+      <img class="a7" src="img/frasco2.webp" alt="" loading="lazy" data-v="-.3">
+      <img class="a8" src="img/serum.webp" alt="" loading="lazy" data-v=".22">
+    </div>
+  </section>
+
+  <section class="detalhe" id="tratamentos" aria-labelledby="dt-t">
+    <div class="dt-palco">
+      <img class="dt-fundo" src="img/m1.webp" alt="Mulher de pele negra iluminada, olhando para a câmera" width="1400" height="2059" loading="lazy">
+      <p class="dt-faixa" aria-hidden="true"><span>Brilho em cada detalhe · Brilho em cada detalhe · Brilho em cada detalhe · Brilho em cada detalhe · </span><span>Brilho em cada detalhe · Brilho em cada detalhe · Brilho em cada detalhe · Brilho em cada detalhe · </span></p>
+      <img class="dt-frente" src="img/m1-recorte.webp" alt="" width="1400" height="2059" loading="lazy" aria-hidden="true">
+      <div class="dt-cab"><p class="sobre">Escolha pelo objetivo</p><h2 id="dt-t">Toque em um ponto e veja os tratamentos</h2></div>
+      <div class="dt-pontos" role="tablist" aria-label="Objetivos"></div>
+    </div>
+    <div class="dt-cartoes" aria-live="polite"></div>
+  </section>
+
+  <section class="sob" id="sob-medida" aria-labelledby="sb-t">
+    <div class="sb-txt">
+      <div><p class="sobre">Possibilidades sem fim com</p><h2 id="sb-t">Tratamentos sob medida</h2></div>
+      <div class="sb-pe rv">
+        <ul class="sb-nums"><li><b>40 min</b> de avaliação com médica ou biomédica</li><li><b>18</b> protocolos combináveis</li><li><b>1</b> plano por escrito, com preço total</li></ul>
+        <p>Na <span translate="no">Glow</span>, nada é no automático. A avaliação mapeia a sua pele e termina com um plano por escrito: quais sessões, em que ordem e quanto custa no total, dentro e fora do clube.</p>
+        <a class="botao" href="#tratamentos">Ver todos os tratamentos</a>
+      </div>
+    </div>
+    <figure class="sb-foto">
+      <img src="img/mapa.webp" alt="Mulher de perfil tocando o rosto, com a pele hidratada" width="1067" height="1600" loading="lazy">
+      <svg class="sb-linhas" viewBox="0 0 1067 1600" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><path d="M60 640 L640 560"/><path d="M330 220 L330 1300"/><path d="M80 980 L560 380"/><path d="M120 470 L520 1020"/><path d="M40 820 L700 820"/><circle cx="330" cy="604" r="10"/><circle cx="330" cy="820" r="10"/><circle cx="214" cy="820" r="10"/></svg>
+      <button class="sb-pausa" type="button" aria-pressed="false" aria-label="Pausar a animação das linhas"><span></span></button>
+    </figure>
+  </section>
+
+  <section class="semfim" aria-labelledby="sf-t">
+    <div class="sf-fixo">
+      <img class="sf-foto" src="img/clube.webp" alt="Massagem facial com as pontas dos dedos" width="1067" height="1600" loading="lazy">
+      <div class="sf-txt"><p class="sobre">Clube <span translate="no">Glow</span></p><h2 id="sf-t">R$ 230 em tratamentos todo mês, por R$ 199</h2><p>Créditos que valem em qualquer tratamento e em qualquer unidade. Sem fidelidade.</p></div>
+    </div>
   </section>
 
   <section class="clube" id="clube" aria-labelledby="cl-t">
-    <div class="cl-in">
-      <div class="cl-cab"><h2 id="cl-t">Clube Glow</h2><p>Créditos mensais para usar em qualquer tratamento, em qualquer unidade, e desconto em tudo o que passar disso. Sem fidelidade.</p></div>
-      <div class="planos" aria-live="polite"></div>
-      <div class="econ"><label>Quanto você gasta hoje com estética por mês? <output></output><input type="range" id="gasto" min="150" max="2000" step="50" value="450"></label><p class="econ-res" aria-live="polite"></p></div>
-    </div>
+    <div class="cl-cab rv"><h2 id="cl-t">Clube <span translate="no">Glow</span></h2><p>Créditos mensais para usar em qualquer tratamento, em qualquer unidade, e desconto em tudo o que passar disso. Sem fidelidade: cancele pelo WhatsApp quando quiser.</p></div>
+    <div class="planos" aria-live="polite"></div>
+    <div class="econ rv"><label for="gasto">Quanto você gasta hoje com estética por mês? <output for="gasto"></output></label><input type="range" id="gasto" min="150" max="2000" step="50" value="450"><p class="econ-res" aria-live="polite"></p></div>
   </section>
 
   <section class="unidades" id="unidades" aria-labelledby="un-t">
-    <div><h2 id="un-t">11 clínicas em São Paulo</h2>
-      <label class="un-busca">Seu bairro ou CEP<input id="un-q" placeholder="Ex.: Moema ou 04077"></label>
-      <ul class="un-lista" aria-live="polite"></ul></div>
-    <div class="un-foto"><img src="img/sala1.webp" alt="Sala de atendimento de uma unidade Glow" loading="lazy"><img src="img/sala2.webp" alt="Recepção de uma unidade Glow" loading="lazy"></div>
+    <img class="un-fundo" src="img/sala-maca.webp" alt="Sala de atendimento com maca e luz natural" width="1067" height="1600" loading="lazy">
+    <div class="un-card rv">
+      <h2 id="un-t">Seu momento <span translate="no">Glow</span><br>começa aqui</h2>
+      <p>11 clínicas em São Paulo e região, de segunda a sábado, das 8h às 21h. Digite seu bairro ou CEP e reserve na mais perto.</p>
+      <label class="un-busca" for="un-q">Seu bairro ou CEP</label>
+      <input id="un-q" placeholder="Ex.: Moema ou 04077" autocomplete="postal-code">
+      <ul class="un-lista" aria-live="polite"></ul>
+    </div>
   </section>
 
-  <section class="indique" id="indique" aria-labelledby="in-t">
-    <img src="img/pedras.webp" alt="" loading="lazy">
-    <div><h2 id="in-t">Indique e ganhe R$ 100</h2><p>Sua amiga ganha R$ 100 no primeiro tratamento. Quando ela for, você ganha R$ 100 de crédito. Sem limite de amigas.</p>
-      <form id="ind" class="ind"><input name="nome" placeholder="Seu primeiro nome" aria-label="Seu primeiro nome" maxlength="24"><button class="botao" type="submit">Gerar meu link</button><p class="ind-res" aria-live="polite"></p></form></div>
+  <section class="faq" id="perguntas" aria-labelledby="fq-t">
+    <div class="fq-lado rv">
+      <h2 id="fq-t">Perguntas frequentes</h2>
+      <p>Não achou a sua dúvida? Mande pelo WhatsApp. A equipe responde em até 15 minutos, de segunda a sábado.</p>
+      <a class="botao botao-largo" href="#" data-wa="Olá, Glow! Tenho uma dúvida sobre os tratamentos.">Falar com a gente</a>
+    </div>
+    <div class="fq-lista">
+      <details><summary>Quais formas de pagamento vocês aceitam?</summary><div><p>Pix, débito e cartão de crédito em até 10 vezes sem juros nos pacotes acima de R$ 600. O clube é cobrado no cartão, todo mês, na data em que você assinou.</p></div></details>
+      <details><summary>Onde ficam as unidades e qual o horário?</summary><div><p>São 11 clínicas: Moema, Pinheiros, Jardins, Vila Mariana, Tatuapé, Santana, Morumbi, Brooklin, Perdizes, Santo André e Alphaville. Todas abrem de segunda a sábado, das 8h às 21h.</p></div></details>
+      <details><summary>Como funcionam os créditos do clube?</summary><div><p>Todo mês entram créditos na sua conta: R$ 230 no <span translate="no">Glow</span> 1, R$ 460 no <span translate="no">Glow</span> 2 e R$ 950 no <span translate="no">Glow</span> Black. Você usa em qualquer tratamento e unidade. O que passar dos créditos sai com 20% de desconto (25% no Black).</p></div></details>
+      <details><summary>Tem fidelidade? Como cancelo?</summary><div><p>Não tem fidelidade nem multa. Para cancelar, mande uma mensagem no WhatsApp até o dia do vencimento. Os créditos do mês continuam valendo até o fim do ciclo.</p></div></details>
+      <details><summary>É a minha primeira vez. O que devo saber?</summary><div><p>Venha sem maquiagem e traga a lista dos remédios e cremes que você usa. A avaliação dura 40 minutos e termina com um plano por escrito, com o preço de cada sessão.</p></div></details>
+      <details><summary>Quem faz os tratamentos?</summary><div><p>Médicas dermatologistas e biomédicas esteticistas, com responsável técnica em todas as unidades. Injetáveis e lasers só com médica.</p></div></details>
+      <details id="indique"><summary>Como funciona o Indique e ganhe R$ 100?</summary><div><p>Sua amiga ganha R$ 100 no primeiro tratamento. Quando ela for, você ganha R$ 100 de crédito. Sem limite de amigas. Gere o seu código:</p>
+        <form id="ind" class="ind"><input name="nome" placeholder="Seu primeiro nome" aria-label="Seu primeiro nome" maxlength="24"><button class="botao" type="submit">Gerar meu link</button><p class="ind-res" aria-live="polite"></p></form></div></details>
+    </div>
   </section>
 </main>
-<footer class="rodape"><p>Glow Estética · Responsável técnica: Dra. Marina Costa, CRM-SP fictício · Resultados variam de pessoa para pessoa · Marca criada para demonstração · Site de exemplo feito pela Blue Rose</p></footer>
+
+<footer class="rodape">
+  <div class="rp-cols">
+    <div><p>Glow</p><a href="#inicio">Início</a><a href="#tratamentos">Tratamentos</a><a href="#clube">Clube</a><a href="#unidades">Unidades</a><a href="#perguntas">Perguntas</a></div>
+    <div><p>Contato</p><a href="#" data-wa="Olá, Glow! Quero agendar uma avaliação.">Agendar avaliação</a><a href="#" data-wa="Olá, Glow! Quero falar com uma consultora.">Falar com uma consultora</a></div>
+    <div><p>Siga</p><a href="#">Instagram</a><a href="#">TikTok</a></div>
+  </div>
+  <div class="rp-base">
+    <p class="rp-logo logo" translate="no" aria-hidden="true">GLOW</p>
+    <div class="rp-legal"><p>© 2026 <span translate="no">Glow Estética</span> · Responsável técnica: Dra. Marina Costa, CRM-SP fictício · Resultados variam de pessoa para pessoa</p><p>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</p><p>Fotos: Unsplash (licença Unsplash)</p></div>
+  </div>
+</footer>
+<aside class="fim" aria-label="Convite final">
+  <img src="img/descanso.webp" alt="Mulher relaxando de olhos fechados durante um tratamento facial" width="1584" height="864" loading="lazy">
+  <p>Explore cada detalhe da <span translate="no">Glow</span></p>
+  <a class="botao" href="#" data-wa="Olá, Glow! Quero agendar uma avaliação.">Agendar avaliação</a>
+</aside>
 </body>
 </html>

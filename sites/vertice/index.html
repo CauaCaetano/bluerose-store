@@ -7,67 +7,276 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vértice Residence · Lançamento em Balneário Camboriú · Escolha sua unidade</title>
-<meta name="description" content="Lançamento a 300 m do mar em Balneário Camboriú. Veja o espelho de vendas ao vivo, escolha andar e final, monte o pagamento durante a obra e reserve sua unidade.">
-<meta name="theme-color" content="#0a1230">
+<meta name="description" content="Lançamento a 300 m do mar em Balneário Camboriú: 72 unidades de 2 e 3 suítes. Veja o espelho de vendas ao vivo, escolha andar e final, monte o pagamento em 30 meses de obra e reserve sua unidade.">
+<meta name="theme-color" content="#061a37">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23050817'%2F%3E%3Cpath%20d%3D'M9%2010l11%2021%2011-21'%20stroke%3D'%23c9a849'%20stroke-width%3D'3'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="../assets/fontes/7a93d76d08.css">
+<link rel="stylesheet" href="../assets/fontes/93a341139e.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=3">
-<link rel="stylesheet" href="estilo.css?v=2">
+<link rel="stylesheet" href="estilo.css?v=3">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=1" defer></script>
-<script src="site.js?v=2" defer></script>
+<script src="site.js?v=3" defer></script>
+<script type="module" src="cena.js?v=1"></script>
 </head>
 <body data-slug="vertice" data-marca="Vértice Residence" data-cat="imobiliaria">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
-<p class="aviso" aria-live="polite">Tabela de lançamento até <b data-ate></b>. Depois, reajuste de 6%. <span data-conta></span></p>
+
+<!-- abertura em 3D: a orla de BC desenhada em linhas douradas -->
+<div class="intro" aria-hidden="true">
+  <canvas class="intro-cena"></canvas>
+  <p class="intro-marca" translate="no">VÉRTICE<small>residence</small></p>
+  <button type="button" class="pilula intro-pular" tabindex="-1">Pular</button>
+</div>
+
 <header class="topo">
-  <a class="marca" href="#" translate="no">VÉRTICE<small>residence</small></a>
-  <nav class="menu" aria-label="Principal"><a href="#espelho">Unidades</a><a href="#pagamento">Pagamento</a><a href="#lugar">Localização</a></nav>
-  <a class="botao" href="#espelho">Escolher unidade</a>
+  <button type="button" class="pilula pilula-clara bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i>Menu</button>
+  <a class="marca" href="#conteudo" translate="no" aria-label="Vértice Residence, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 9l12 23 12-23"/></svg><span>VÉRTICE<small>residence</small></span></a>
+  <a class="pilula pilula-cobre bt-escolher" href="#unidades">Escolher unidade</a>
 </header>
+<nav class="menu" id="menu" aria-label="Principal" hidden>
+  <a href="#era">O projeto</a><a href="#arquitetura">Arquitetura</a><a href="#vida">Localização</a><a href="#lazer">Lazer</a><a href="#interiores">Interiores</a><a href="#unidades">Unidades</a><a href="#pagamento">Pagamento</a>
+  <p class="menu-pe"><span>Central de vendas · todos os dias, 9h às 20h</span><a href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor ↗</a></p>
+</nav>
+
 <main id="conteudo">
-  <section class="hero">
-    <div class="hero-txt">
-      <h1>Seu andar alto, a 300 metros do mar, pelo preço de planta.</h1>
-      <p>72 unidades de 2 e 3 suítes em Balneário Camboriú. Entrega em dezembro de 2028, com 30 meses para pagar durante a obra.</p>
-      <div class="hero-ctas"><a class="botao botao-g" href="#espelho">Ver unidades disponíveis</a><a class="link" href="#pagamento">Simular pagamento</a></div>
+  <!-- 1 · abertura presa: o título enorme e a foto que cresce até ocupar a tela -->
+  <section class="abertura" aria-labelledby="h-t">
+    <div class="ab-presa">
+      <h1 id="h-t" class="ab-titulo"><span class="l1">Vista</span><span class="l2">de</span><span class="l3 cobre">mar</span><span class="sr"> · Seu andar alto, a 300 metros do mar, pelo preço de planta.</span></h1>
+      <div class="ab-lado">
+        <p class="ab-sub" aria-hidden="true">Seu andar alto, a 300 metros do mar, pelo preço de planta</p>
+        <p class="aviso" aria-live="polite">Tabela de lançamento até <b data-ate></b>. Depois, reajuste de 6%. <span data-conta></span></p>
+      </div>
+      <figure class="ab-foto"><img src="img/costa.webp" alt="Prédios altos ao longo da orla com o mar e as ondas" width="1600" height="900" fetchpriority="high"></figure>
+      <a class="ab-descer" href="#era" aria-label="Rolar para o projeto"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg></a>
+      <a class="ab-3d" href="#unidades"><span class="ab-3d-ic" aria-hidden="true">3D</span><span>Espelho de vendas</span><img src="img/torre-mar.webp" alt="" width="1067" height="1600"></a>
     </div>
-    <figure class="pico"><img src="img/torre.webp" alt="Quina do edifício contra o céu" width="1400" height="937" fetchpriority="high"></figure>
-    <dl class="hero-n"><div><dt>vendidas</dt><dd data-vend></dd></div><div><dt>a partir de</dt><dd>R$ 1,29 mi</dd></div><div><dt>valorização na planta*</dt><dd>+31%</dd></div><div><dt>entrega</dt><dd>dez/2028</dd></div></dl>
+  </section>
+
+  <!-- 2 · a nova linha do horizonte: título à esquerda, torre com anel de luz e o texto em cobre -->
+  <section class="era" id="era" aria-labelledby="era-t">
+    <svg class="arcos-fundo" viewBox="0 0 1440 1400" aria-hidden="true"><circle cx="300" cy="1300" r="620"/><circle cx="1140" cy="1300" r="620"/><circle cx="720" cy="1500" r="900"/></svg>
+    <h2 id="era-t" class="era-titulo revela">Uma nova<br>linha no<br>horizonte</h2>
+    <figure class="era-foto">
+      <span class="anel" aria-hidden="true"><i></i><i></i></span>
+      <img src="img/torre-mar.webp" alt="Torre residencial iluminada ao entardecer com o mar ao fundo" width="1067" height="1600" loading="lazy">
+    </figure>
+    <p class="era-texto cobre revela">72 unidades de 2 e 3 suítes a 300 metros da praia central. 18 andares, quatro apartamentos por andar, entrega em dezembro de 2028 e 30 meses para pagar durante a obra.</p>
+  </section>
+
+  <!-- 3 · arquitetura: título que ocupa a largura, céu em degradê e o topo da torre subindo -->
+  <section class="arq" id="arquitetura" aria-labelledby="arq-t">
+    <h2 id="arq-t" class="gigante encaixe">Arquitetura</h2>
+    <p class="arq-texto revela">Uma torre de 18 andares que afina como um cume. A base larga em granito preto abriga o hall de pé-direito duplo; a partir do 15º andar, os recuos abrem terraços e a quina de vidro de cada final 1 olha o mar de frente. Brises de alumínio champanhe filtram o sol da tarde.</p>
+    <figure class="arq-torre"><img src="img/torre-cume.webp" alt="Torre vista de baixo, afinando em direção ao céu" width="1067" height="1600" loading="lazy"></figure>
+  </section>
+  <section class="arco" aria-label="Fachada em arcos">
+    <div class="arco-presa">
+      <div class="arco-creme"></div>
+      <div class="arco-foto"><img src="img/arcos.webp" alt="Fachada com varandas em arco diante do mar calmo" width="1600" height="1067" loading="lazy"></div>
+    </div>
+  </section>
+
+  <!-- 4 · manifesto em fundo claro, depoimento da arquiteta e a torre alta -->
+  <section class="manifesto" aria-labelledby="mf-t">
+    <h2 id="mf-t" class="sr">O projeto em números</h2>
+    <p class="mf-frase revela">Quem compra na planta em Balneário Camboriú paga menos do que quem chega depois. Os últimos seis lançamentos da construtora valorizaram 31% entre o lançamento e a entrega das chaves.</p>
+    <dl class="mf-numeros">
+      <div><dt>vendidas</dt><dd data-vend>—</dd></div>
+      <div><dt>a partir de</dt><dd>R$ 1,29 mi</dd></div>
+      <div><dt>valorização na planta*</dt><dd>+31%</dd></div>
+      <div><dt>entrega</dt><dd>dez/2028</dd></div>
+    </dl>
     <p class="nota">*média dos últimos 6 lançamentos da construtora entre lançamento e entrega.</p>
-  </section>
-
-  <section class="espelho" id="espelho" aria-labelledby="es-t">
-    <div class="es-cab"><h2 id="es-t">Espelho de vendas ao vivo</h2>
-      <p class="leg"><span class="l-d">disponível</span><span class="l-r">reservada</span><span class="l-v">vendida</span></p></div>
-    <div class="es-grade">
-      <div class="predio" role="grid" aria-label="Unidades por andar e final"></div>
-      <aside class="unid" aria-live="polite"><img class="u-foto" src="img/fachada.webp" alt="Fachada do Vértice Residence" width="1400" height="804" loading="lazy"><p class="u-vazio">Toque numa unidade disponível do prédio ao lado para ver planta, vista e preço.</p></aside>
+    <div class="mf-grade">
+      <div class="mf-citacao">
+        <blockquote class="revela">«A ideia do Vértice é a de um cume: base larga e firme, e o topo afinando até a quina de vidro que olha o mar. De cada apartamento, o horizonte é o quadro principal.»</blockquote>
+        <p class="mf-autor">Helena Duarte<small>arquiteta autora do projeto (personagem fictícia)</small></p>
+        <a class="mf-tour" href="#" data-wa="Olá, Vértice! Quero receber o tour em vídeo do decorado.">
+          <span class="mf-tour-rot">Tour pelo decorado · 3 min</span>
+          <span class="mf-tour-img"><img src="img/vista-sala.webp" alt="Sala do decorado com janelas do piso ao teto e vista para o mar" width="1600" height="1067" loading="lazy"><i aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M7 5l8 5-8 5z"/></svg></i></span>
+        </a>
+      </div>
+      <figure class="mf-foto">
+        <span class="selo" aria-hidden="true">Arquitetura</span>
+        <img src="img/fachada-vidro.webp" alt="Fachada de vidro de um arranha-céu vista de baixo" width="1600" height="1067" loading="lazy">
+      </figure>
     </div>
   </section>
 
-  <section class="pagamento" id="pagamento" aria-labelledby="pg-t">
-    <h2 id="pg-t">Monte o pagamento durante a obra</h2>
-    <div class="pg-grade">
-      <form id="fluxo" class="fluxo">
-        <p class="pg-u" aria-live="polite"></p>
-        <label>Entrada <output></output><input type="range" name="ent" min="10" max="40" value="15"></label>
-        <label>Mensais na obra (30x) <output></output><input type="range" name="men" min="10" max="40" value="20"></label>
-        <label>Anuais (3x, todo dezembro) <output></output><input type="range" name="anu" min="0" max="30" value="15"></label>
-        <p class="pg-chave"></p>
-      </form>
-      <div class="pg-res" aria-live="polite"></div>
+  <!-- 5 · a vida perto do mar: título em degradê com a foto inclinada no meio, texto e o carrossel de números -->
+  <section class="vida" id="vida" aria-labelledby="vd-t">
+    <div class="vd-cab">
+      <h2 id="vd-t" class="vd-titulo degrade"><span class="v1">A praia</span><span class="v2">no <em>caminho</em></span><span class="v3">de todo</span><span class="v4">dia</span></h2>
+      <figure class="vd-voo">
+        <span class="anel anel-g" aria-hidden="true"><i></i><i></i></span>
+        <img src="img/manha.webp" alt="Mulher acordando diante de uma janela com vista para a baía" width="1067" height="1600" loading="lazy">
+      </figure>
+    </div>
+    <div class="vd-fotos">
+      <img class="vd-f1" src="img/varanda-mar.webp" alt="Varanda envidraçada com vista para o oceano" width="1200" height="1600" loading="lazy">
+      <img class="vd-f2" src="img/baia.webp" alt="Cidade à beira da baía com morros ao fundo" width="1201" height="1600" loading="lazy">
+      <p class="vd-texto revela">Acordar com o mar na janela, descer a pé até a praia central, voltar pela calçada da Atlântica e ainda passar no mercado da esquina. No Vértice, a rotina cabe a pé: praia, shopping, escolas, farmácia e restaurantes num raio de 600 metros.</p>
+    </div>
+    <div class="vd-slider" aria-roledescription="carrossel" aria-label="O entorno em números">
+      <p class="vd-nota">Mercado, padaria, farmácia, duas escolas e o terminal de ônibus urbano ficam a menos de 10 minutos a pé.</p>
+      <div class="vd-num" aria-live="polite">
+        <p class="vd-n"><b>300</b><span>metros</span></p>
+        <p class="vd-d">da areia da praia central</p>
+      </div>
+      <div class="vd-trilho"></div>
+      <div class="vd-ctrl"><span class="vd-cont">1 / 5</span><button type="button" class="redondo vd-ant" aria-label="Anterior"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15 10H5m4-4l-4 4 4 4"/></svg></button><button type="button" class="redondo vd-prox" aria-label="Próximo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10h10m-4-4l4 4-4 4"/></svg></button></div>
     </div>
   </section>
 
-  <section class="lugar" id="lugar" aria-labelledby="lg-t">
-    <img src="img/cidade.webp" alt="Prédios altos de Balneário Camboriú" width="1400" height="933" loading="lazy">
-    <div class="lg-txt"><h2 id="lg-t">Rua 3.100, Centro</h2>
+  <!-- 6 · localização: mapa escuro desenhado, selo redondo e os pontos de interesse -->
+  <section class="mapa" id="lugar" aria-labelledby="mp-t">
+    <span class="selo selo-topo" aria-hidden="true">Localização</span>
+    <div class="mp-tela">
+      <svg class="mp-svg" viewBox="0 0 1440 820" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa do Centro de Balneário Camboriú com o Vértice a 300 metros da praia central">
+        <defs><linearGradient id="mar" x1="0" x2="1"><stop offset="0" stop-color="#0b2a52"/><stop offset="1" stop-color="#0e3563"/></linearGradient></defs>
+        <rect width="1440" height="820" fill="#061a37"/>
+        <path d="M1080 0 C1010 160 1000 300 1040 430 C1080 560 1060 690 990 820 L1440 820 L1440 0Z" fill="url(#mar)"/>
+        <path class="mp-areia" d="M1080 0 C1010 160 1000 300 1040 430 C1080 560 1060 690 990 820" />
+        <g class="mp-ruas">
+          <path d="M1010 0 C945 160 935 300 975 430 C1015 560 995 690 925 820"/>
+          <path d="M760 0 C720 200 720 420 750 600 C770 700 760 760 740 820"/>
+          <path d="M470 0 C450 260 460 520 440 820"/>
+          <path d="M0 120 L1040 150"/><path d="M0 260 L1015 270"/><path d="M0 395 L1030 395"/><path d="M0 520 L1050 515"/><path d="M0 650 L1030 640"/><path d="M0 760 L990 770"/>
+          <path d="M120 0 L160 820"/><path d="M270 0 L300 820"/><path d="M600 0 L610 820"/><path d="M880 0 L860 820"/>
+          <path d="M0 40 C200 80 260 200 230 330 C200 470 330 600 300 820" class="mp-rio"/>
+        </g>
+        <g class="mp-rot">
+          <text x="1120" y="250">Praia Central</text>
+          <text x="905" y="120" transform="rotate(-80 905 120)">Av. Atlântica</text>
+          <text x="735" y="90" transform="rotate(-86 735 90)">Av. Brasil</text>
+          <text x="40" y="385">Rua 3.100</text>
+          <text x="70" y="250">Av. do Estado</text>
+        </g>
+      </svg>
+      <button type="button" class="mp-pino mp-voce" style="left:58%;top:47%" aria-describedby="mp-v"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3l4 13 13 4-13 4-4 13-4-13-13-4 13-4z"/></svg><span id="mp-v" class="mp-dica" translate="no">Vértice Residence</span></button>
+      <button type="button" class="mp-pino" style="left:75%;top:44%"><b aria-hidden="true">P</b><span class="mp-dica">Praia central · 300 m</span></button>
+      <button type="button" class="mp-pino" style="left:50%;top:70%"><b aria-hidden="true">S</b><span class="mp-dica">Atlântico Shopping · 4 min a pé</span></button>
+      <button type="button" class="mp-pino" style="left:44%;top:27%"><b aria-hidden="true">E</b><span class="mp-dica">Escola e creche · 450 m</span></button>
+      <button type="button" class="mp-pino" style="left:66%;top:20%"><b aria-hidden="true">M</b><span class="mp-dica">Mercado 24 h · 200 m</span></button>
+    </div>
+    <div class="mp-info">
+      <h2 id="mp-t">Rua 3.100, Centro</h2>
       <ul><li><b>300 m</b>da praia central</li><li><b>4 min</b>a pé do Atlântico Shopping</li><li><b>R$ 2.400</b>média de diária na temporada para 3 suítes</li></ul>
-      <a class="botao" href="#" data-wa="Olá, Vértice! Quero visitar o decorado.">Visitar o decorado</a></div>
+      <a class="pilula pilula-cobre pilula-g" href="#" data-wa="Olá, Vértice! Quero visitar o decorado."><span class="pil-ic" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M7 5l8 5-8 5z"/></svg></span>Visitar o decorado</a>
+    </div>
+  </section>
+
+  <!-- 7 · lazer: título em degradê, foto com rastro de luz, selo e a foto larga do rooftop -->
+  <section class="lazer" id="lazer" aria-labelledby="lz-t">
+    <h2 id="lz-t" class="lz-titulo degrade revela">Um toque de<br>sofisticação</h2>
+    <div class="lz-grade">
+      <p class="lz-mini">Cada área comum foi desenhada para quem mora, não para a foto do folheto: 1.100 m² de lazer em dois pavimentos.</p>
+      <figure class="lz-foto">
+        <span class="anel anel-lz" aria-hidden="true"><i></i><i></i></span>
+        <img src="img/terraco.webp" alt="Terraço com cadeira suspensa e jardim diante da cidade" width="1600" height="900" loading="lazy">
+        <span class="selo selo-lz" aria-hidden="true">Lazer</span>
+      </figure>
+      <p class="lz-texto revela">No 19º andar, piscina aquecida de borda infinita, deque com vista para o mar e espaço gourmet. No térreo, academia de 140 m², coworking, brinquedoteca e bicicletário. Tudo entregue equipado e decorado.</p>
+    </div>
+    <ul class="lz-lista">
+      <li><b>19º</b>rooftop com piscina aquecida</li><li><b>140 m²</b>de academia equipada</li><li><b>2</b>vagas nos finais 1 e 4</li><li><b>24 h</b>portaria e segurança</li>
+    </ul>
+    <figure class="lz-larga"><img src="img/rooftop.webp" alt="Rooftop com sofás, árvore e vista do pôr do sol" width="1600" height="900" loading="lazy"></figure>
+  </section>
+
+  <!-- 8 · interiores em fundo claro: título com o objeto 3D de mármore e anel dourado -->
+  <section class="interiores" id="interiores" aria-labelledby="in-t">
+    <div class="in-cab">
+      <h2 id="in-t" class="gigante encaixe">Interiores</h2>
+      <canvas class="in-cena" aria-hidden="true"></canvas>
+      <span class="in-reserva" aria-hidden="true"></span>
+    </div>
+    <div class="in-grade">
+      <p class="in-rot">Do hall à suíte</p>
+      <p class="in-texto revela">O hall de pé-direito duplo recebe com mármore travertino, painéis de madeira e um lustre de cristal de 4 metros. Nos apartamentos, porcelanato de 1,20 m, esquadrias do piso ao teto e a suíte master com closet e banheira voltada para o mar.</p>
+      <p class="in-mini">Entregamos com piso, forro de gesso, iluminação embutida e pontos de ar-condicionado em todos os ambientes. É só trazer os móveis.</p>
+    </div>
+    <div class="in-faixa"><div class="in-trilho">
+      <img src="img/estar.webp" alt="Sala de estar com sofás de couro e luz indireta" width="1600" height="1066" loading="lazy">
+      <img src="img/living-pe-direito.webp" alt="Living de pé-direito duplo com lustre de cristal e escada" width="1600" height="900" loading="lazy">
+      <img src="img/living.webp" alt="Living amplo com sofás em tom caramelo e teto rebaixado" width="1600" height="1066" loading="lazy">
+      <img src="img/sala.webp" alt="Sala do decorado com sofá cinza e janela para o jardim" width="1400" height="738" loading="lazy">
+    </div></div>
+    <div class="in-arco">
+      <div class="in-arco-foto"><img src="img/vista-sala.webp" alt="Living vazio com janelas do piso ao teto e o mar ao fundo" width="1600" height="1067" loading="lazy"></div>
+      <p class="in-cartao"><b>128</b><span>área privativa dos finais 1 e 4, m²</span></p>
+    </div>
+  </section>
+
+  <!-- 9 · unidades: título sobre a foto e os dois caminhos de escolha (critério e visual), com espelho, ficha e pagamento -->
+  <section class="unidades" id="unidades" aria-labelledby="un-t">
+    <div class="un-topo">
+      <img class="un-fundo" src="img/lustre.webp" alt="" width="1067" height="1600" loading="lazy">
+      <h2 id="un-t" class="gigante encaixe">Unidades</h2>
+      <div class="un-cartoes" role="tablist" aria-label="Como escolher">
+        <button type="button" role="tab" class="un-cartao" id="tab-crit" aria-controls="painel-crit" aria-selected="false"><span>Escolher por critério</span><svg class="un-ramos" viewBox="0 0 200 120" aria-hidden="true"><path d="M100 120V10M100 60C70 40 40 40 20 10M100 60c30-20 60-20 80-50M100 90C75 75 50 72 30 50M100 90c25-15 50-18 70-40"/></svg><i class="redondo" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M5 10h10m-4-4l4 4-4 4"/></svg></i></button>
+        <button type="button" role="tab" class="un-cartao" id="tab-vis" aria-controls="painel-vis" aria-selected="true"><span>Seleção visual</span><img src="img/torre-mar.webp" alt="" width="1067" height="1600" loading="lazy"><i class="redondo" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M5 10h10m-4-4l4 4-4 4"/></svg></i></button>
+      </div>
+    </div>
+
+    <div class="un-corpo" id="espelho">
+      <div class="es-cab"><h3>Espelho de vendas ao vivo</h3>
+        <p class="leg"><span class="l-d">disponível</span><span class="l-r">reservada</span><span class="l-v">vendida</span></p></div>
+      <div class="es-grade">
+        <div class="es-paineis">
+          <div class="painel" id="painel-vis" role="tabpanel" aria-labelledby="tab-vis">
+            <div class="predio" role="grid" aria-label="Unidades por andar e final"></div>
+          </div>
+          <div class="painel" id="painel-crit" role="tabpanel" aria-labelledby="tab-crit" hidden>
+            <form class="filtros" id="filtros">
+              <fieldset><legend>Suítes</legend><label><input type="radio" name="su" value="0" checked> todas</label><label><input type="radio" name="su" value="2"> 2 suítes</label><label><input type="radio" name="su" value="3"> 3 suítes</label></fieldset>
+              <fieldset><legend>Vista</legend><label><input type="radio" name="vi" value="" checked> todas</label><label><input type="radio" name="vi" value="mar"> para o mar</label><label><input type="radio" name="vi" value="cidade"> cidade</label></fieldset>
+              <label class="faixa">Andar a partir do <output></output><input type="range" name="an" min="1" max="18" value="1"></label>
+              <label class="faixa">Preço até <output></output><input type="range" name="pr" min="1300000" max="2100000" step="10000" value="2100000"></label>
+            </form>
+            <p class="fl-total" aria-live="polite"></p>
+            <div class="fl-lista" role="list"></div>
+          </div>
+        </div>
+        <aside class="unid" aria-live="polite"><img class="u-foto" src="img/torre-mar.webp" alt="Torre do Vértice Residence ao entardecer" width="1067" height="1600" loading="lazy"><p class="u-vazio">Toque numa unidade disponível do prédio ao lado para ver planta, vista e preço.</p></aside>
+      </div>
+    </div>
+
+    <div class="un-corpo pagamento" id="pagamento" aria-labelledby="pg-t">
+      <h3 id="pg-t">Monte o pagamento durante a obra</h3>
+      <div class="pg-grade">
+        <form id="fluxo" class="fluxo">
+          <p class="pg-u" aria-live="polite"></p>
+          <label>Entrada <output></output><input type="range" name="ent" min="10" max="40" value="15"></label>
+          <label>Mensais na obra (30x) <output></output><input type="range" name="men" min="10" max="40" value="20"></label>
+          <label>Anuais (3x, todo dezembro) <output></output><input type="range" name="anu" min="0" max="30" value="15"></label>
+          <p class="pg-chave"></p>
+        </form>
+        <div class="pg-res" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · fecho: frase centralizada e a foto do skyline com o botão redondo que segue o cursor -->
+  <section class="nova" aria-labelledby="nv-t">
+    <p class="nv-rot cobre">O lugar onde o mar vira endereço</p>
+    <h2 id="nv-t" class="nv-titulo revela">Um novo ponto alto em BC, um novo capítulo na sua vida.</h2>
+    <figure class="nv-foto">
+      <img src="img/skyline-mar.webp" alt="Torres residenciais diante do mar azul com um navio ao fundo" width="1600" height="1068" loading="lazy">
+      <a class="nv-ligar" href="#" data-wa="Olá, Vértice! Quero que um corretor me ligue sobre o lançamento.">Pedir uma<br>ligação</a>
+    </figure>
   </section>
 </main>
-<footer class="rodape"><p>Vértice Residence · Incorporação registrada sob R.I. fictício · Imagens ilustrativas · Marca criada para demonstração · Site de exemplo feito pela Blue Rose</p></footer>
+
+<footer class="rodape">
+  <div class="rd-grade">
+    <div><p class="rd-rot">Central de vendas Vértice</p><p class="rd-end">Rua 3.100, 450 · Centro · Balneário Camboriú/SC</p><p class="rd-rot">Todos os dias, 9h às 20h</p></div>
+    <p class="rd-legal">Incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento, sujeitos a reajuste.</p>
+    <div class="rd-acoes"><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero receber o relatório de andamento da obra.">Andamento da obra</a><a class="redondo redondo-cobre" href="#conteudo" aria-label="Voltar ao topo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg></a></div>
+  </div>
+  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash</span></p>
+</footer>
 </body>
 </html>

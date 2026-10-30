@@ -7,57 +7,213 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lar Paulista Imóveis · Comprar e alugar em Campinas com custo total na tela</title>
-<meta name="description" content="Imóveis para comprar e alugar em Campinas com o custo mensal de verdade (aluguel, condomínio e IPTU), simulação de financiamento e visita agendada na hora.">
+<meta name="description" content="18 imóveis para comprar e alugar em Campinas com o custo mensal de verdade (aluguel, condomínio, IPTU e seguro somados), mapa por bairro, comparação lado a lado, simulação de financiamento e visita agendada.">
 <meta name="theme-color" content="#ffffff">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'10'%20fill%3D'%23142666'%2F%3E%3Cpath%20d%3D'M9%2020l11-9%2011%209v11H9z'%20fill%3D'%23bfcdfa'%2F%3E%3C%2Fsvg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'8'%20fill%3D'%231b67ee'%2F%3E%3Cpath%20d%3D'M9%2020l11-9%2011%209v11H9z'%20fill%3D'%23ffffff'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/12344d647b.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=3">
-<link rel="stylesheet" href="estilo.css?v=3">
+<link rel="stylesheet" href="estilo.css?v=4">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=1" defer></script>
-<script src="site.js?v=2" defer></script>
+<script src="site.js?v=3" defer></script>
 </head>
-<body data-slug="lar-paulista" data-marca="Lar Paulista Imóveis" data-cat="imobiliaria">
+<body data-slug="lar-paulista" data-marca="Lar Paulista Imóveis" data-cat="imobiliaria" data-vista="grade">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
-<header class="topo">
-  <a class="marca" href="#" translate="no">lar<b>paulista</b></a>
-  <nav class="menu" aria-label="Principal"><a href="#lista">Imóveis</a><a href="#anunciar">Anunciar meu imóvel</a><a href="#" data-wa="Olá, Lar Paulista! Quero falar com um corretor.">Falar com corretor</a></nav>
-  <span class="fav-cont" aria-live="polite">♡ <b>0</b> salvos</span>
-</header>
-<main id="conteudo">
-  <section class="busca" id="busca" aria-labelledby="bs-t">
-    <div class="bs-esq">
-      <h1 id="bs-t">Ache seu lugar em Campinas.</h1>
-      <p class="bs-sub">Com o custo real por mês: aluguel, condomínio, IPTU e seguro somados no cartão.</p>
-      <form class="filtros" id="filtros" role="search">
-        <div class="modo" role="radiogroup" aria-label="Comprar ou alugar"><label><input type="radio" name="modo" value="venda"><span>Comprar</span></label><label><input type="radio" name="modo" value="aluguel" checked><span>Alugar</span></label></div>
-        <label class="lb">Bairro<select name="bairro"><option value="">Todos</option><option>Cambuí</option><option>Taquaral</option><option>Barão Geraldo</option><option>Nova Campinas</option><option>Mansões Santo Antônio</option><option>Centro</option></select></label>
-        <label class="lb">Quartos<select name="q"><option value="0">Qualquer</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label>
-        <label class="lb faixa">Até <output name="mx"></output><input type="range" name="preco" min="0" max="100" value="100"></label>
-        <div class="cks"><label class="ck"><input type="checkbox" name="pet"> Aceita pet</label><label class="ck"><input type="checkbox" name="vaga"> Com vaga</label></div>
-      </form>
-    </div>
-    <div class="mosaico" aria-hidden="true">
-      <figure class="m1"><img src="img/i9.webp" alt="" width="1400" height="787" fetchpriority="high"><span>Mansões Santo Antônio · R$ 3,9 mi</span></figure>
-      <figure class="m2"><img src="img/i1.webp" alt="" width="1400" height="2100"><span>Cambuí · R$ 5.685/mês</span></figure>
-      <figure class="m3"><img src="img/i6.webp" alt="" width="1400" height="933"><span>Barão Geraldo · R$ 6.265/mês</span></figure>
-    </div>
-  </section>
 
-  <section class="lista" id="lista" aria-label="Imóveis encontrados">
-    <div class="res-cab"><p class="conta" aria-live="polite"></p><label class="ordem">Ordenar<select id="ordem"><option value="preco">Menor custo</option><option value="m2">Maior área</option><option value="novo">Mais recentes</option></select></label></div>
-    <div class="cards" aria-live="polite"></div>
-  </section>
+<header class="topo">
+  <a class="marca" href="#" data-ir-topo aria-label="Lar Paulista Imóveis, início" translate="no"><span class="marca-txt">LARPAULISTA</span><span class="marca-q" aria-hidden="true">L</span></a>
+  <nav class="menu" aria-label="Principal">
+    <a href="#" data-modo="aluguel" aria-current="page">Alugar</a>
+    <a href="#" data-modo="venda">Comprar</a>
+    <a href="#anunciar">Anunciar</a>
+  </nav>
+  <form class="busca" id="busca" role="search" autocomplete="off">
+    <svg class="lupa" viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.6"/><path d="M13.2 13.2l3.6 3.6"/></svg>
+    <label class="sr" for="q">Buscar endereço, bairro ou código</label>
+    <input id="q" name="q" type="search" enterkeyhint="search">
+    <span class="dica" aria-hidden="true"><span>Buscar</span> <span class="dica-rolo"><span>endereço ou código</span></span></span>
+    <button type="submit" class="perg">Perguntar</button>
+  </form>
+  <div class="acoes">
+    <div class="grupo">
+      <button type="button" class="bt-f" data-abre="filtros"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h9M15 6h2M3 14h3M9 14h8"/><circle cx="13.5" cy="6" r="1.6"/><circle cx="7.5" cy="14" r="1.6"/></svg><span>Filtros</span><b class="n-f" hidden>0</b></button>
+      <a href="#" class="bt-f bt-salvar" data-wa="Olá, Lar Paulista! Quero ser avisado de imóveis para alugar em Campinas."><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h8l3 3v11H4V3z"/><path d="M7 3v4h5V3M7 17v-5h6v5"/></svg><span>Salvar</span></a>
+    </div>
+    <div class="grupo vistas" role="group" aria-label="Modo de exibição">
+      <button type="button" data-vista="grade" aria-pressed="true" aria-label="Lista em grade"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="3.5" width="5" height="5" rx="1"/><rect x="11.5" y="3.5" width="5" height="5" rx="1"/><rect x="3.5" y="11.5" width="5" height="5" rx="1"/><rect x="11.5" y="11.5" width="5" height="5" rx="1"/></svg></button>
+      <button type="button" data-vista="hibrido" aria-pressed="false" aria-label="Mapa e lista"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="1.5"/><path d="M10 3.5v13"/></svg></button>
+      <button type="button" data-vista="mapa" aria-pressed="false" aria-label="Só o mapa"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5l4.5-2 5 2 4.5-2v11l-4.5 2-5-2-4.5 2z"/><path d="M7.5 3.5v11M12.5 5.5v11"/></svg></button>
+    </div>
+    <div class="usuario">
+      <button type="button" class="bt-u" aria-haspopup="true" aria-expanded="false" aria-label="Minha conta"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="7" r="3.2"/><path d="M4 17c.8-3.3 3.2-5 6-5s5.2 1.7 6 5"/></svg><b class="n-sv" hidden>0</b></button>
+      <div class="menu-u" hidden>
+        <button type="button" data-so-salvos><span>Imóveis salvos</span><b class="n-sv2">0</b></button>
+        <a href="#" data-wa="Olá, Lar Paulista! Quero falar com um corretor.">Falar com um corretor</a>
+        <a href="#anunciar">Anunciar meu imóvel</a>
+        <p class="rot">Aparência</p>
+        <div class="tema" role="group" aria-label="Aparência">
+          <button type="button" data-tema="escuro" aria-pressed="false">Escuro</button>
+          <button type="button" data-tema="claro" aria-pressed="false">Claro</button>
+          <button type="button" data-tema="sistema" aria-pressed="true">Sistema</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="conteudo">
+  <div class="palco">
+    <div class="mapa-caixa" id="mapa" aria-label="Mapa de Campinas com os imóveis">
+      <div class="mapa-ctl-e">
+        <div class="seg" role="group" aria-label="Camada do mapa"><button type="button" data-camada="ruas" aria-pressed="true">Mapa</button><button type="button" data-camada="bairros" aria-pressed="false">Custo por bairro</button></div>
+        <button type="button" class="mbt" data-mapa="centro" aria-label="Recentralizar"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 1 1-1.8-4.3M16 4v3.2h-3.2"/></svg></button>
+      </div>
+      <div class="mapa-ctl-d">
+        <button type="button" class="mbt" data-mapa="mais" aria-label="Aproximar">+</button>
+        <button type="button" class="mbt" data-mapa="menos" aria-label="Afastar">−</button>
+      </div>
+      <svg class="mapa-svg" viewBox="0 0 1000 700" role="img" aria-label="Mapa ilustrativo dos bairros de Campinas"><g class="mapa-g"></g></svg>
+      <div class="legenda" hidden></div>
+      <div class="mapa-pop" hidden></div>
+      <p class="mapa-nota">Mapa ilustrativo · posições aproximadas</p>
+    </div>
+    <section class="lista" aria-labelledby="conta">
+      <ul class="cards" aria-live="polite"></ul>
+      <nav class="paginas" aria-label="Páginas"></nav>
+      <div class="conta-box">
+        <h1 id="conta"><b>0</b> imóveis para alugar em Campinas</h1>
+        <p class="pag-de"></p>
+        <p class="conta-nota">Nos imóveis para alugar, o preço grande é o custo do mês inteiro: aluguel + condomínio + IPTU + seguro incêndio (R$ 45). Sem surpresa na hora de assinar.</p>
+      </div>
+    </section>
+  </div>
 
   <section class="anunciar" id="anunciar" aria-labelledby="an-t">
-    <img src="img/i11.webp" alt="Sala de apartamento anunciado pela Lar Paulista" width="1400" height="1025" loading="lazy">
-    <div class="an-txt"><h2 id="an-t">Tem imóvel parado?</h2><p>Anunciamos em 6 portais, filtramos interessados com análise de crédito e garantimos o aluguel em dia mesmo se o inquilino atrasar.</p>
-      <ul><li><b>R$ 0</b>para anunciar e fotografar</li><li><b>18 dias</b>média para alugar</li><li><b>Dia 10</b>aluguel garantido na sua conta</li></ul>
-      <a class="botao" href="#" data-wa="Olá, Lar Paulista! Quero anunciar meu imóvel.">Anunciar grátis</a></div>
+    <img class="an-fundo" src="img/i11.webp" alt="" width="1400" height="1025" loading="lazy">
+    <div class="an-txt">
+      <p class="sobre">Para proprietários em Campinas</p>
+      <h2 id="an-t">Tem imóvel parado?</h2>
+      <p class="an-sub">Anunciamos com o custo total na tela, que é o que faz o inquilino certo chegar mais rápido.</p>
+      <ol>
+        <li>Fotografamos e anunciamos em 6 portais, sem custo.</li>
+        <li>Filtramos interessados com análise de crédito em 24 horas.</li>
+        <li>O aluguel cai na sua conta no dia 10, mesmo se o inquilino atrasar.</li>
+      </ol>
+      <ul class="an-num">
+        <li><b>R$ 0</b><span>para anunciar e fotografar</span></li>
+        <li><b>18 dias</b><span>média para alugar</span></li>
+        <li><b>Dia 10</b><span>aluguel garantido na conta</span></li>
+      </ul>
+    </div>
+    <form class="an-form" id="form-anunciar">
+      <p class="sobre">Fale com a gente</p>
+      <h3>Anunciar meu imóvel</h3>
+      <div class="seg seg-larga" role="radiogroup" aria-label="Quero"><label><input type="radio" name="neg" value="alugar" checked><span>Alugar</span></label><label><input type="radio" name="neg" value="vender"><span>Vender</span></label></div>
+      <div class="campos">
+        <label>Bairro<select name="bairro"><option>Cambuí</option><option>Taquaral</option><option>Guanabara</option><option>Barão Geraldo</option><option>Nova Campinas</option><option>Mansões Santo Antônio</option><option>Centro</option></select></label>
+        <label>Tipo<select name="tipo"><option>Apartamento</option><option>Casa</option><option>Casa em condomínio</option><option>Cobertura</option><option>Studio</option><option>Sobrado</option></select></label>
+        <label>Área (m²)<input name="area" type="number" min="15" max="2000" value="80" inputmode="numeric"></label>
+        <label>Seu nome<input name="nome" required autocomplete="name"></label>
+      </div>
+      <p class="estima" aria-live="polite"></p>
+      <button class="bt-azul" type="submit">Quero anunciar</button>
+    </form>
   </section>
 </main>
-<dialog class="ficha" id="ficha" aria-labelledby="fc-t"><div class="fc-corpo"></div></dialog>
-<footer class="rodape"><p>Lar Paulista Imóveis · CRECI-SP fictício · Rua Coronel Quirino, 1.230, Cambuí, Campinas/SP · Marca criada para demonstração · Site de exemplo feito pela Blue Rose</p></footer>
+
+<footer class="rodape">
+  <div class="rd-legal">
+    <p>Lar Paulista Imóveis · CRECI-SP fictício · Rua Coronel Quirino, 1.230, Cambuí, Campinas/SP. Os valores de aluguel, condomínio e IPTU mostrados são de referência e podem mudar sem aviso; o custo total por mês soma aluguel, condomínio, IPTU mensal e seguro incêndio de R$ 45. A simulação de financiamento usa tabela SAC, 30 anos, 20% de entrada e juros de 11,49% ao ano, e não é proposta de crédito. Fotos ilustrativas do Unsplash (licença Unsplash). Mapa ilustrativo, sem escala. Marca criada para demonstração · Site de exemplo feito pela Blue Rose.</p>
+    <span class="rd-marca" translate="no">lar<b>paulista</b></span>
+  </div>
+  <div class="rd-pe">
+    <div><p>© 2026 Lar Paulista Imóveis. Marca criada para demonstração.</p>
+      <nav aria-label="Rodapé"><a href="#" data-ir-topo>Início</a><a href="#" data-modo="aluguel">Alugar</a><a href="#" data-modo="venda">Comprar</a><a href="#anunciar">Anunciar</a><a href="#" data-wa="Olá, Lar Paulista! Quero falar com um corretor.">Contato</a></nav></div>
+    <div class="rd-dir">
+      <a class="rd-ic" href="#" aria-label="Instagram (exemplo)" data-wa="Olá, Lar Paulista! Vi o Instagram de vocês."><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r=".6"/></svg></a>
+      <a class="rd-wa" href="#" data-wa="Olá, Lar Paulista! Quero falar com um corretor."><small>Fale agora no</small>WhatsApp</a>
+    </div>
+  </div>
+</footer>
+
+<div class="barra-cmp" hidden>
+  <span class="ponto" aria-hidden="true"></span>
+  <p><b>Comparar imóveis</b><span class="cmp-n">0 de 4 selecionados</span></p>
+  <ul class="cmp-fotos"></ul>
+  <button type="button" class="cmp-limpa">Limpar</button>
+  <button type="button" class="bt-azul cmp-ir">Comparar<span class="lado">&nbsp;lado a lado</span> <span aria-hidden="true">→</span></button>
+</div>
+
+<nav class="abas-cel" aria-label="Atalhos">
+  <button type="button" data-cel="lista" aria-current="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>Buscar</button>
+  <button type="button" data-cel="mapa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5l-5.5 2.5-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>Mapa</button>
+  <a href="#anunciar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/></svg>Anunciar</a>
+  <button type="button" data-so-salvos><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>Salvos</button>
+</nav>
+
+<div class="camada filtros" id="filtros" role="dialog" aria-modal="true" aria-labelledby="ft-t" hidden>
+  <form class="painel">
+    <div class="pn-cab"><div><h2 id="ft-t">Filtros</h2><p class="ft-n">0 imóveis</p></div><button type="button" class="x" data-fecha aria-label="Fechar filtros">×</button></div>
+    <div class="pn-corpo">
+      <p class="rot">Tipo</p>
+      <div class="tipos">
+        <label><input type="checkbox" name="tipo" value="Apartamento"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3.5" width="12" height="17"/><path d="M9 7h2M13 7h2M9 10.5h2M13 10.5h2M9 14h2M13 14h2M11 20.5v-3h2v3"/></svg>Apartamento</span></label>
+        <label><input type="checkbox" name="tipo" value="Casa"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-6.5 8 6.5M6 9.5v10h12v-10M10 19.5v-5h4v5"/></svg>Casa</span></label>
+        <label><input type="checkbox" name="tipo" value="Casa em condomínio"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12l5-4 5 4M4 11v8h7v-8M11.5 12l5-4 5 4M13 11v8h7v-8"/></svg>Casa em condomínio</span></label>
+        <label><input type="checkbox" name="tipo" value="Cobertura"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20.5V9h14v11.5M3.5 9h17M8 5.5h8V9M9 13h2M13 13h2M9 16.5h2M13 16.5h2"/></svg>Cobertura</span></label>
+        <label><input type="checkbox" name="tipo" value="Studio"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M4 14h9v5M13 9h4"/></svg>Studio</span></label>
+        <label><input type="checkbox" name="tipo" value="Sobrado"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10L12 4.5 19 10M6.5 9v11.5h11V9M6.5 14.5h11M10 20.5v-3h4v3M9 11.5h2M13 11.5h2"/></svg>Sobrado</span></label>
+      </div>
+      <div class="lin3">
+        <div><p class="rot">Negócio</p><select name="modo" aria-label="Negócio"><option value="aluguel">Alugar</option><option value="venda">Comprar</option></select></div>
+        <div><p class="rot">Bairro</p><select name="bairro" aria-label="Bairro"><option value="">Todos os bairros</option></select></div>
+        <div><p class="rot">Ordem</p><select name="ordem" aria-label="Ordem"><option value="novo">Mais recentes</option><option value="barato">Menor custo</option><option value="caro">Maior custo</option><option value="area">Maior área</option><option value="m2">Menor R$/m²</option></select></div>
+      </div>
+      <div class="lin3">
+        <div><p class="rot rot-preco">Custo total por mês (R$)</p><div class="par"><input name="pmin" inputmode="numeric" placeholder="Mín." aria-label="Preço mínimo"><input name="pmax" inputmode="numeric" placeholder="Máx." aria-label="Preço máximo"></div></div>
+        <div><p class="rot">Quartos</p><div class="par"><input name="qmin" inputmode="numeric" placeholder="De" aria-label="Quartos, de"><input name="qmax" inputmode="numeric" placeholder="Até" aria-label="Quartos, até"></div></div>
+        <div><p class="rot">Banheiros</p><div class="par"><input name="bmin" inputmode="numeric" placeholder="De" aria-label="Banheiros, de"><input name="bmax" inputmode="numeric" placeholder="Até" aria-label="Banheiros, até"></div></div>
+      </div>
+      <p class="rot-sec">Medidas</p>
+      <div class="lin3">
+        <div><p class="rot">Área útil (m²)</p><div class="par"><input name="amin" inputmode="numeric" placeholder="De" aria-label="Área, de"><input name="amax" inputmode="numeric" placeholder="Até" aria-label="Área, até"></div></div>
+        <div><p class="rot">Vagas</p><div class="par"><input name="vmin" inputmode="numeric" placeholder="De" aria-label="Vagas, de"><input name="vmax" inputmode="numeric" placeholder="Até" aria-label="Vagas, até"></div></div>
+        <div><p class="rot">Ano de construção</p><div class="par"><input name="ymin" inputmode="numeric" placeholder="De" aria-label="Ano, de"><input name="ymax" inputmode="numeric" placeholder="Até" aria-label="Ano, até"></div></div>
+      </div>
+      <div class="lin3">
+        <div><p class="rot">Condomínio (R$/mês)</p><div class="par"><input name="cmin" inputmode="numeric" placeholder="Mín." aria-label="Condomínio mínimo"><input name="cmax" inputmode="numeric" placeholder="Máx." aria-label="Condomínio máximo"></div></div>
+      </div>
+      <p class="rot-sec">Características</p>
+      <div class="feats">
+        <label><input type="checkbox" name="feat" value="pet"><span>Aceita pet</span></label>
+        <label><input type="checkbox" name="feat" value="vaga"><span>Com vaga</span></label>
+        <label><input type="checkbox" name="feat" value="pisc"><span>Piscina</span></label>
+        <label><input type="checkbox" name="feat" value="mob"><span>Mobiliado</span></label>
+        <label><input type="checkbox" name="feat" value="var"><span>Varanda</span></label>
+        <label><input type="checkbox" name="feat" value="novo"><span>Novo no site</span></label>
+        <label><input type="checkbox" name="feat" value="fav"><span>Só os salvos</span></label>
+      </div>
+    </div>
+    <div class="pn-pe"><button type="button" class="ft-limpa">Limpar</button><span></span><button type="button" class="bt-borda" data-fecha>Cancelar</button><button type="submit" class="bt-azul ft-ok">Mostrar resultados</button></div>
+  </form>
+</div>
+
+<div class="camada comparar" id="comparar" role="dialog" aria-modal="true" aria-labelledby="cp-t" hidden>
+  <div class="painel painel-largo">
+    <div class="pn-cab"><div><h2 id="cp-t">Comparar imóveis</h2><p>Em verde, o melhor valor de cada linha.</p></div><button type="button" class="x" data-fecha aria-label="Fechar comparação">×</button></div>
+    <div class="pn-corpo cp-corpo"></div>
+  </div>
+</div>
+
+<div class="ficha" id="ficha" role="dialog" aria-modal="true" aria-labelledby="fc-t" hidden><div class="fc-in"></div></div>
+<div class="galeria" id="galeria" role="dialog" aria-modal="true" aria-label="Fotos do imóvel" hidden>
+  <button type="button" class="x gl-x" aria-label="Fechar fotos">×</button>
+  <button type="button" class="gl-seta gl-ant" aria-label="Foto anterior">‹</button>
+  <img alt="">
+  <button type="button" class="gl-seta gl-prox" aria-label="Próxima foto">›</button>
+  <p class="gl-n"></p>
+</div>
+<div class="aviso" role="status" aria-live="polite" hidden></div>
 </body>
 </html>

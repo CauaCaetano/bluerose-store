@@ -6,75 +6,287 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ana Ribeiro · Corretora de imóveis em Florianópolis · CRECI fictício</title>
-<meta name="description" content="Descubra quanto você consegue financiar e veja imóveis que cabem no seu bolso em Florianópolis. Quer vender? Avaliação grátis do seu imóvel em 24 horas.">
-<meta name="theme-color" content="#ffffff">
+<title>Ana Ribeiro · Corretora de imóveis em Florianópolis · Seu próximo endereço na Ilha</title>
+<meta name="description" content="Corretora em Florianópolis há 12 anos: descubra quanto você consegue financiar, veja imóveis de R$ 480 mil a R$ 2,45 milhões e saiba quanto vale o seu imóvel em 24 horas.">
+<meta name="theme-color" content="#1b2120">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Ccircle%20cx%3D'20'%20cy%3D'20'%20r%3D'19'%20fill%3D'%23322723'%2F%3E%3Ctext%20x%3D'20'%20y%3D'27'%20font-size%3D'18'%20text-anchor%3D'middle'%20fill%3D'%23d6c6ad'%20font-family%3D'Georgia'%20font-style%3D'italic'%3EAR%3C%2Ftext%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="../assets/fontes/a25ca8da41.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%231b2120'%2F%3E%3Cpath%20d%3D'M8%2030L20%209l12%2021'%20fill%3D'none'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3Cpath%20d%3D'M14%2030h12'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
+<link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=3">
-<link rel="stylesheet" href="estilo.css?v=3">
+<link rel="stylesheet" href="estilo.css?v=4">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=1" defer></script>
-<script src="site.js?v=3" defer></script>
+<script src="site.js?v=4" defer></script>
+<script type="module" src="cena.js?v=1"></script>
 </head>
 <body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
-<header class="topo">
-  <a class="marca" href="#">Ana Ribeiro<small>imóveis em Florianópolis</small></a>
-  <nav class="menu" aria-label="Seções"><a href="#imoveis">Imóveis</a><a href="#ana">Quem é a Ana</a><a href="#como">Como vendo</a></nav>
-  <a class="botao" href="#" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana</a>
+
+<header class="cab" data-tom="foto">
+  <a class="logo" href="#inicio" aria-label="Ana Ribeiro Imóveis, início">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg>
+    <span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span>
+  </a>
+  <nav class="nav" aria-label="Seções">
+    <a href="#corretora">A corretora</a><a href="#destaques">Imóveis</a><a href="#ilha">A Ilha</a><a href="#financiar">Financiar</a><a href="#vender">Vender</a><a href="#contato">Contato</a>
+  </nav>
+  <p class="creci"><b>AR</b><span>CORRETORA DE IMÓVEIS<br>CRECI-SC FICTÍCIO</span></p>
+  <button class="cab-menu" type="button" aria-expanded="false" aria-controls="menu-cel">Menu</button>
 </header>
+<div class="menu-cel" id="menu-cel" hidden>
+  <a href="#corretora">A corretora</a><a href="#destaques">Imóveis</a><a href="#ilha">A Ilha</a><a href="#financiar">Financiar</a><a href="#vender">Vender</a><a href="#contato">Contato</a>
+  <a class="bt bt-bege" href="#" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana ↗</a>
+</div>
+
 <main id="conteudo">
-  <section class="abre">
-    <img class="abre-foto" src="img/i4.webp" alt="" width="1400" height="933" fetchpriority="high">
-    <h1>Eu acho o imóvel. Você só escolhe.</h1>
-    <div class="busca">
-      <div class="abas" role="tablist" aria-label="O que você quer"><button type="button" role="tab" id="ab-c" aria-controls="comprar" aria-selected="true">Quero comprar</button><button type="button" role="tab" id="ab-v" aria-controls="vender" aria-selected="false">Quero vender</button></div>
-      <div class="painel cp-calc" id="comprar" role="tabpanel" aria-labelledby="ab-c">
-        <form id="fin" class="fin">
-          <label>Renda da família por mês <output>R$ 22.000</output><input type="range" name="renda" min="3000" max="50000" step="500" value="22000"></label>
-          <label>Entrada, com FGTS <output>R$ 150.000</output><input type="range" name="ent" min="0" max="800000" step="10000" value="150000"></label>
-          <label>Prazo <output>30 anos</output><input type="range" name="anos" min="10" max="35" value="30"></label>
-        </form>
-        <div class="fin-res" aria-live="polite"></div>
+  <!-- 1 · abertura presa: foto da Beira-Mar, título e, ao rolar, o nome da Ana em letras grandes -->
+  <section class="abertura" id="inicio" data-tom="foto" aria-labelledby="ab-t">
+    <div class="ab-palco">
+      <img class="ab-foto" src="img/abertura-beira-mar.webp" alt="Avenida Beira-Mar Norte, em Florianópolis, com os prédios à beira da baía" width="1360" height="1018" fetchpriority="high">
+      <img class="ab-foto2" src="img/ponte-por-do-sol.webp" alt="" width="1600" height="1067">
+      <div class="ab-vela" aria-hidden="true"></div>
+      <div class="ab-texto">
+        <p class="olho">FLORIANÓPOLIS · SANTA CATARINA</p>
+        <h1 id="ab-t"><span class="caps">SEU PRÓXIMO</span><em>endereço.</em></h1>
+        <div class="ab-pe">
+          <p>Eu acho o imóvel. Você só escolhe.<br>12 anos vendendo casa na Ilha.</p>
+          <a class="ab-conheca" href="#corretora">Conheça a Ana <i aria-hidden="true">↓</i></a>
+        </div>
       </div>
-      <div class="painel vender" id="vender" role="tabpanel" aria-labelledby="ab-v" hidden>
-        <form id="aval" class="aval">
-          <label>Bairro<select name="b"><option value="12800">Jurerê Internacional</option><option value="11200">Centro</option><option value="10600">Agronômica</option><option value="9800" selected>Itacorubi</option><option value="9200">Trindade</option><option value="8100">Campeche</option><option value="7300">Ingleses</option></select></label>
-          <label>Área privativa (m²)<input name="m2" type="number" min="20" max="900" value="85"></label>
-          <label>Quartos<select name="q"><option value="0.96">1</option><option value="1" selected>2</option><option value="1.04">3</option><option value="1.08">4 ou mais</option></select></label>
-          <label class="ck"><input type="checkbox" name="vaga" checked> Tem vaga de garagem</label>
-          <div class="aval-res" aria-live="polite"></div>
-          <a class="botao" href="#" data-wa-aval>Quero a avaliação completa grátis</a>
-        </form>
+      <div class="ab-marca" aria-hidden="true">
+        <p class="olho">CORRETORA DE IMÓVEIS APRESENTA</p>
+        <p class="ab-nome" translate="no">ANA RIBEIRO</p>
+        <p class="olho">340 FAMÍLIAS COM A CHAVE NA MÃO</p>
+      </div>
+      <a class="ab-explore" href="#corretora">EXPLORE</a>
+      <a class="ab-pular" href="#corretora">Pular abertura ↗</a>
+      <p class="selo-foto">Beira-Mar Norte, Florianópolis</p>
+    </div>
+  </section>
+
+  <!-- 2 · a corretora + galeria presa dos destaques -->
+  <section class="projeto" id="corretora" data-tom="claro" aria-labelledby="pj-t">
+    <div class="regua"><span>01 / A CORRETORA</span><span>FLORIANÓPOLIS · SC</span></div>
+    <div class="pj-grade">
+      <h2 id="pj-t"><span class="caps">EU ACHO O</span><em>imóvel certo.</em></h2>
+      <div class="pj-lado">
+        <p class="pj-chamada">Antes de visitar qualquer coisa,<br>a gente descobre quanto cabe no bolso.</p>
+        <p>Sou a Ana Ribeiro, corretora em Florianópolis há 12 anos. Já entreguei a chave para 340 famílias, do Itacorubi a Jurerê, e vendo imóvel em 41 dias, em média.</p>
+        <p class="pj-assina">ANA RIBEIRO IMÓVEIS · CRECI-SC FICTÍCIO</p>
       </div>
     </div>
   </section>
 
-  <section class="imoveis-sec" id="imoveis" aria-labelledby="im-t">
-    <div class="cp-lista"><h2 id="im-t">Destaques da semana</h2><p class="cp-tit" aria-live="polite"></p><div class="imoveis" aria-live="polite"></div></div>
-  </section>
-
-  <section class="ana" id="ana" aria-labelledby="an-t">
-    <figure class="selo"><img src="img/ana.webp" alt="Ana Ribeiro, corretora de imóveis" width="1400" height="933" loading="lazy"></figure>
-    <div>
-      <h2 id="an-t">Corretora em Florianópolis há 12 anos</h2>
-      <p>Antes de visitar qualquer coisa, a gente descobre juntos quanto você consegue financiar, para você não se apaixonar por um imóvel que não cabe no bolso.</p>
-      <dl class="nums"><div><dt>340</dt><dd>famílias com a chave na mão</dd></div><div><dt>41 dias</dt><dd>tempo médio de venda</dd></div><div><dt>12 anos</dt><dd>de CRECI ativo</dd></div></dl>
-      <ul class="vozes"><li><q>Vendeu nosso apartamento em 23 dias, pelo preço que ela tinha avaliado.</q><span>Família Kuster, Trindade</span></li><li><q>Mostrou só imóveis que cabiam no nosso financiamento. Visitamos 4 e fechamos o terceiro.</q><span>Bruna e Diego, Campeche</span></li><li><q>Cuidou da papelada do banco do começo ao fim. Eu só assinei.</q><span>Sr. Valdir, Centro</span></li></ul>
+  <section class="galeria g-claro" id="destaques" data-tom="claro" data-galeria aria-labelledby="ds-t">
+    <div class="g-preso">
+      <div class="regua g-regua"><h2 id="ds-t" class="olho-h">01 / DESTAQUES DA SEMANA</h2><a href="#ilha">Próximo capítulo <i aria-hidden="true">↓</i></a></div>
+      <div class="g-quadros">
+        <figure class="g-q" data-preco="480000"><img src="img/i1.webp" alt="Sala clara com poltrona laranja e plantas do apartamento de 2 quartos no Itacorubi" width="1400" height="2489"></figure>
+        <figure class="g-q" data-preco="690000"><img src="img/i2.webp" alt="Sala com sofá caramelo e tapete do apartamento de 3 quartos na Trindade" width="1400" height="1400" loading="lazy"></figure>
+        <figure class="g-q" data-preco="920000"><img src="img/i3.webp" alt="Sala do apartamento garden no Campeche, com poltrona amarela e piso de madeira" width="1400" height="1235" loading="lazy"></figure>
+        <figure class="g-q" data-preco="1150000"><img src="img/imovel-studio-centro.webp" alt="Sala de estar e jantar integradas com janelas amplas do apartamento na Agronômica" width="1600" height="1067" loading="lazy"></figure>
+        <figure class="g-q" data-preco="1380000"><img src="img/i4.webp" alt="Fachadas das casas do condomínio nos Ingleses" width="1400" height="933" loading="lazy"></figure>
+        <figure class="g-q" data-preco="2450000"><img src="img/imovel-cobertura.webp" alt="Sala com pé-direito duplo e janelas altas da cobertura em Jurerê Internacional" width="1200" height="1600" loading="lazy"></figure>
+        <button class="g-ampliar" type="button">Imagem completa <i aria-hidden="true">↗</i></button>
+      </div>
+      <div class="g-pe">
+        <div class="g-legendas" aria-live="polite">
+          <div class="g-leg"><h3>Apartamento 2 quartos</h3><p><b>01 / 06</b> Itacorubi · 78 m² · 1 vaga</p><p class="g-preco">R$ 480.000 <span class="cabe"></span></p><a href="#" data-wa="Olá, Ana! Quero visitar o apartamento 2 quartos no Itacorubi, de R$ 480.000.">Agendar visita ↗</a></div>
+          <div class="g-leg"><h3>Apartamento 3 quartos</h3><p><b>02 / 06</b> Trindade · 96 m² · 2 vagas</p><p class="g-preco">R$ 690.000 <span class="cabe"></span></p><a href="#" data-wa="Olá, Ana! Quero visitar o apartamento 3 quartos na Trindade, de R$ 690.000.">Agendar visita ↗</a></div>
+          <div class="g-leg"><h3>Apartamento garden</h3><p><b>03 / 06</b> Campeche · 102 m² · quintal</p><p class="g-preco">R$ 920.000 <span class="cabe"></span></p><a href="#" data-wa="Olá, Ana! Quero visitar o apartamento garden no Campeche, de R$ 920.000.">Agendar visita ↗</a></div>
+          <div class="g-leg"><h3>Apartamento 3 quartos com vista</h3><p><b>04 / 06</b> Agronômica · 118 m² · 2 vagas</p><p class="g-preco">R$ 1.150.000 <span class="cabe"></span></p><a href="#" data-wa="Olá, Ana! Quero visitar o apartamento 3 quartos na Agronômica, de R$ 1.150.000.">Agendar visita ↗</a></div>
+          <div class="g-leg"><h3>Casa 3 suítes</h3><p><b>05 / 06</b> Ingleses · 180 m² · condomínio</p><p class="g-preco">R$ 1.380.000 <span class="cabe"></span></p><a href="#" data-wa="Olá, Ana! Quero visitar a casa 3 suítes nos Ingleses, de R$ 1.380.000.">Agendar visita ↗</a></div>
+          <div class="g-leg"><h3>Cobertura duplex</h3><p><b>06 / 06</b> Jurerê Internacional · 210 m² · 3 vagas</p><p class="g-preco">R$ 2.450.000 <span class="cabe"></span></p><a href="#" data-wa="Olá, Ana! Quero visitar a cobertura duplex em Jurerê Internacional, de R$ 2.450.000.">Agendar visita ↗</a></div>
+        </div>
+        <div class="g-setas"><button type="button" class="g-ant" aria-label="Imóvel anterior">←</button><button type="button" class="g-prox" aria-label="Próximo imóvel">→</button></div>
+        <div class="g-barras" aria-hidden="true"></div>
+        <p class="g-dica">ROLE PARA DESCOBRIR O PRÓXIMO IMÓVEL</p>
+      </div>
     </div>
   </section>
 
-  <section class="como" id="como" aria-labelledby="cm-t">
-    <img src="img/visita.webp" alt="Corretora mostrando um apartamento a um casal" width="1400" height="788" loading="lazy">
-    <div>
-      <h2 id="cm-t">Como eu vendo o seu imóvel</h2>
-      <ol><li><b>Avaliação em 24 horas</b>com visita e comparação com 1.900 vendas reais da região</li><li><b>Fotos e vídeo profissionais</b>e anúncio nos portais no mesmo dia</li><li><b>Visitas só com comprador aprovado</b>pelo banco, sem curioso na sua sala</li><li><b>Papelada até a escritura</b>certidões, banco e cartório por minha conta</li></ol>
-      <a class="botao" href="#vender" data-aba="vender">Ver quanto vale o meu imóvel</a>
+  <!-- 3 · a Ilha em 3D: quadros dos bairros flutuando; a câmera passa de um para o outro ao rolar -->
+  <section class="ilha" id="ilha" data-tom="escuro" aria-labelledby="il-t">
+    <div class="il-preso">
+      <canvas class="il-tela" aria-hidden="true"></canvas>
+      <figure class="il-plano" aria-hidden="true"><img src="img/bairro-jurere.webp" alt="" width="1600" height="1000"></figure>
+      <p class="il-topo">ANA RIBEIRO / A ILHA</p>
+      <a class="il-desca" href="#jeito">DESÇA PARA EXPLORAR <i aria-hidden="true">↓</i></a>
+      <div class="il-intro">
+        <p class="olho">BAIRROS · PREÇO · VIDA</p>
+        <h2 id="il-t">Uma nova<br><em>perspectiva.</em></h2>
+        <p>Oito bairros da Ilha,<br>com o preço real do metro quadrado.</p>
+      </div>
+      <ol class="il-lista">
+        <li data-img="img/bairro-jurere.webp"><b>Jurerê Internacional</b><span>Casas de alto padrão a duas quadras do mar</span><i>R$ 12.800/m²</i></li>
+        <li data-img="img/bairro-centro.webp"><b>Centro</b><span>A ponte Hercílio Luz, a feira e tudo a pé</span><i>R$ 11.200/m²</i></li>
+        <li data-img="img/bairro-agronomica.webp"><b>Agronômica</b><span>Prédios de frente para a baía Norte</span><i>R$ 10.600/m²</i></li>
+        <li data-img="img/bairro-itacorubi.webp"><b>Itacorubi</b><span>Prédios novos perto da UDESC e do shopping</span><i>R$ 9.800/m²</i></li>
+        <li data-img="img/bairro-trindade.webp"><b>Trindade</b><span>Ao lado da UFSC, aluguel garantido o ano todo</span><i>R$ 9.200/m²</i></li>
+        <li data-img="img/bairro-santo-antonio.webp"><b>Santo Antônio de Lisboa</b><span>Casario açoriano, ostra e pôr do sol na baía</span><i>R$ 8.900/m²</i></li>
+        <li data-img="img/bairro-campeche.webp"><b>Campeche</b><span>Praia longa, ciclovia e casas com quintal</span><i>R$ 8.100/m²</i></li>
+        <li data-img="img/bairro-ingleses.webp"><b>Ingleses</b><span>Condomínios de casa no norte da Ilha</span><i>R$ 7.300/m²</i></li>
+      </ol>
+      <div class="il-pe">
+        <p class="il-cont"><b>01</b> / 08</p>
+        <p class="il-nome" aria-live="polite">Jurerê Internacional</p>
+        <p class="il-info">Casas de alto padrão a duas quadras do mar · <b>R$ 12.800/m²</b></p>
+        <div class="il-linha" aria-hidden="true"><span></span></div>
+        <div class="il-botoes"><button type="button" class="il-ant" aria-label="Bairro anterior">←</button><span class="il-mini" aria-hidden="true">08</span><button type="button" class="il-prox" aria-label="Próximo bairro">→</button><button type="button" class="il-ampliar">Ampliar imagem <i aria-hidden="true">↗</i></button></div>
+        <a class="il-continuar" href="#jeito">Continuar no site ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · o jeito da Ana: retrato grande preso, três capítulos trocando ao rolar -->
+  <section class="jeito" id="jeito" data-tom="escuro" aria-labelledby="jt-t">
+    <div class="jt-preso">
+      <div class="jt-moldura">
+        <img class="jt-foto on" src="img/ana.webp" alt="Ana Ribeiro, corretora, segurando um tablet no escritório" width="1400" height="933" loading="lazy">
+        <img class="jt-foto" src="img/visita.webp" alt="Ana mostrando um apartamento a um casal" width="1400" height="788" loading="lazy">
+        <img class="jt-foto" src="img/chave.webp" alt="Chave de casa ao lado de uma casinha de madeira" width="1400" height="1051" loading="lazy">
+        <div class="jt-texto">
+          <p class="olho">O JEITO DA ANA</p>
+          <h2 id="jt-t">É sobre<br><em>se sentir em casa.</em></h2>
+          <div class="jt-frases" aria-live="polite">
+            <div class="jt-frase on"><p>Antes da primeira visita, a gente descobre quanto você consegue financiar.</p><blockquote><q>Mostrou só imóveis que cabiam no nosso financiamento. Visitamos 4 e fechamos o terceiro.</q><cite>Bruna e Diego, Campeche</cite></blockquote></div>
+            <div class="jt-frase"><p>Visita só do que faz sentido, com comprador aprovado pelo banco.</p><blockquote><q>Vendeu nosso apartamento em 23 dias, pelo preço que ela tinha avaliado.</q><cite>Família Kuster, Trindade</cite></blockquote></div>
+            <div class="jt-frase"><p>Banco, certidões e cartório por minha conta, até a escritura.</p><blockquote><q>Cuidou da papelada do banco do começo ao fim. Eu só assinei.</q><cite>Sr. Valdir, Centro</cite></blockquote></div>
+          </div>
+          <p class="jt-traco">A ILHA, DE PERTO.</p>
+        </div>
+        <div class="jt-abas" role="tablist" aria-label="Capítulos">
+          <button type="button" role="tab" aria-selected="true"><i>01</i> A escuta</button><button type="button" role="tab" aria-selected="false"><i>02</i> A visita</button><button type="button" role="tab" aria-selected="false"><i>03</i> A chave</button>
+        </div>
+      </div>
+    </div>
+    <div class="jt-rodape regua"><span>CORRETAGEM PARA A VIDA ACONTECER</span><span>DEPOIMENTOS REAIS DE EXEMPLO</span></div>
+  </section>
+
+  <!-- 5 · números, como as medidas das residências -->
+  <section class="numeros" id="numeros" data-tom="claro" aria-labelledby="nm-t">
+    <div class="nm-tit"><p class="olho-h">02 / NÚMEROS</p><h2 id="nm-t">O seu lugar.<br><em>No seu tempo.</em></h2></div>
+    <dl class="nm-lista">
+      <div><dt><span data-conta="340">340</span></dt><dd>famílias<small>com a chave na mão</small></dd></div>
+      <div><dt><span data-conta="41">41</span><sup>dias</sup></dt><dd>tempo médio<small>de venda</small></dd></div>
+      <div><dt><span data-conta="12">12</span><sup>anos</sup></dt><dd>de CRECI ativo<small>em Florianópolis</small></dd></div>
+      <div><dt><span data-conta="1900">1.900</span></dt><dd>vendas reais<small>na base de comparação</small></dd></div>
+    </dl>
+  </section>
+
+  <!-- 6 · financiar: o capítulo marrom "dentro e fora" vira o simulador -->
+  <section class="financiar" id="financiar" data-tom="terra" aria-labelledby="fn-t">
+    <div class="fn-topo">
+      <p class="olho-h">COMPRAR</p>
+      <h2 id="fn-t">Quanto cabe<br>no seu <em>bolso.</em></h2>
+      <p>Financiamento pela tabela SAC, juros de 11,49% ao ano e parcela de até 30% da renda.<br>Mexa nos números e veja quais destaques já cabem.</p>
+    </div>
+    <div class="regua fn-regua"><span>02 / SIMULADOR</span><a href="#vender">Próximo capítulo <i aria-hidden="true">↓</i></a></div>
+    <div class="fn-faixa">
+      <img src="img/simulador-ilha.webp" alt="Vista aérea de uma enseada da Ilha com casas e barcos" width="1360" height="1019" loading="lazy">
+      <form class="fn-form" id="fin">
+        <label>Renda da família por mês <output>R$ 22.000</output><input type="range" name="renda" min="3000" max="50000" step="500" value="22000"></label>
+        <label>Entrada, com FGTS <output>R$ 150.000</output><input type="range" name="ent" min="0" max="800000" step="10000" value="150000"></label>
+        <label>Prazo <output>30 anos</output><input type="range" name="anos" min="10" max="35" value="30"></label>
+      </form>
+      <p class="selo-foto">Simulação ilustrativa</p>
+    </div>
+    <div class="fn-pe" aria-live="polite">
+      <div><h3 class="fn-total">Você compra até R$ 706.000</h3><p class="fn-det"></p></div>
+      <a class="bt bt-bege fn-wa" href="#" data-wa="Olá, Ana! Fiz a simulação no site.">Me mostre imóveis ↗</a>
+      <div class="fn-barras" aria-hidden="true"></div>
+      <p class="g-dica fn-cabem"></p>
+    </div>
+  </section>
+
+  <!-- 7 · vender: abertura clara + galeria presa dos 4 passos -->
+  <section class="projeto vender-topo" id="vender" data-tom="claro2" aria-labelledby="vd-t">
+    <div class="pj-grade">
+      <div><p class="olho-h">03 / VENDER</p><h2 id="vd-t">O seu imóvel<br><em>encontra comprador.</em></h2></div>
+      <p class="pj-lado">Avaliação em 24 horas, comparada com 1.900 vendas reais da região. Imóvel vendido em 41 dias, em média, sem curioso na sua sala.</p>
+    </div>
+  </section>
+  <section class="galeria g-claro2" id="como" data-tom="claro2" data-galeria aria-labelledby="cm-t">
+    <div class="g-preso">
+      <div class="regua g-regua"><h2 id="cm-t" class="olho-h">03 / COMO EU VENDO</h2><a href="#avaliar">Próximo capítulo <i aria-hidden="true">↓</i></a></div>
+      <div class="g-quadros">
+        <figure class="g-q"><img src="img/passo-avaliacao.webp" alt="Corretor segurando uma casinha de brinquedo ao lado de uma calculadora" width="1600" height="1068" loading="lazy"></figure>
+        <figure class="g-q"><img src="img/passo-fotos.webp" alt="Quarto com vista para o mar e coqueiros, fotografado com luz natural" width="1200" height="1600" loading="lazy"></figure>
+        <figure class="g-q"><img src="img/passo-visitas.webp" alt="Corretora conversando com um comprador no corredor de um apartamento vazio" width="1600" height="900" loading="lazy"></figure>
+        <figure class="g-q"><img src="img/passo-escritura.webp" alt="Aperto de mão com a entrega da chave sobre a maquete de uma casa" width="1600" height="959" loading="lazy"></figure>
+        <button class="g-ampliar" type="button">Imagem completa <i aria-hidden="true">↗</i></button>
+      </div>
+      <div class="g-pe">
+        <div class="g-legendas" aria-live="polite">
+          <div class="g-leg"><h3>Avaliação em 24 horas</h3><p><b>01 / 04</b> Visita e comparação com 1.900 vendas reais da região</p></div>
+          <div class="g-leg"><h3>Fotos e vídeo profissionais</h3><p><b>02 / 04</b> E anúncio nos portais no mesmo dia</p></div>
+          <div class="g-leg"><h3>Visitas só com comprador aprovado</h3><p><b>03 / 04</b> Crédito aprovado pelo banco, sem curioso na sua sala</p></div>
+          <div class="g-leg"><h3>Papelada até a escritura</h3><p><b>04 / 04</b> Certidões, banco e cartório por minha conta</p></div>
+        </div>
+        <div class="g-setas"><button type="button" class="g-ant" aria-label="Passo anterior">←</button><button type="button" class="g-prox" aria-label="Próximo passo">→</button></div>
+        <div class="g-barras" aria-hidden="true"></div>
+        <p class="g-dica">ROLE PARA DESCOBRIR O PRÓXIMO PASSO</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · avaliação em dois cartões + todas as imagens com filtro e slideshow -->
+  <section class="avaliar" id="avaliar" data-tom="claro" aria-labelledby="av-t">
+    <div class="av-tit"><p class="olho-h">04 / AVALIAÇÃO</p><h2 id="av-t">Quanto vale<br><em>o seu imóvel.</em></h2></div>
+    <div class="av-cartoes">
+      <form class="av-cartao" id="aval">
+        <p class="av-rot">AVALIAÇÃO / 01</p>
+        <label>Bairro<select name="b"><option value="12800">Jurerê Internacional</option><option value="11200">Centro</option><option value="10600">Agronômica</option><option value="9800" selected>Itacorubi</option><option value="9200">Trindade</option><option value="8900">Santo Antônio de Lisboa</option><option value="8100">Campeche</option><option value="7300">Ingleses</option></select></label>
+        <label>Área privativa (m²)<input name="m2" type="number" min="20" max="900" value="85" inputmode="numeric"></label>
+        <label>Quartos<select name="q"><option value="0.96">1</option><option value="1" selected>2</option><option value="1.04">3</option><option value="1.08">4 ou mais</option></select></label>
+        <label class="ck"><input type="checkbox" name="vaga" checked> Tem vaga de garagem</label>
+        <h3>Os dados do seu imóvel <i aria-hidden="true">↗</i></h3>
+      </form>
+      <div class="av-cartao av-res">
+        <p class="av-rot">ESTIMATIVA / 02</p>
+        <div class="aval-saida" aria-live="polite"></div>
+        <a class="bt bt-escuro" href="#" data-wa-aval data-wa="Olá, Ana! Quero a avaliação grátis do meu imóvel.">Quero a avaliação completa grátis ↗</a>
+        <h3>Valor estimado de venda <i aria-hidden="true">↗</i></h3>
+      </div>
+    </div>
+    <p class="av-nota">Estimativa pelo preço médio do metro quadrado vendido no bairro. A avaliação completa tem visita e sai em 24 horas.</p>
+
+    <div class="mostra" aria-label="Todas as imagens">
+      <div class="ms-filtros" role="group" aria-label="Filtrar imagens">
+        <button type="button" data-f="todas" aria-pressed="true">Todas as imagens</button><button type="button" data-f="imoveis" aria-pressed="false">Imóveis</button><button type="button" data-f="bairros" aria-pressed="false">Bairros</button><button type="button" data-f="venda" aria-pressed="false">Como eu vendo</button>
+      </div>
+      <div class="ms-barra">
+        <p><b class="ms-cont">01 / 18</b> <span class="ms-tit">Apartamento 2 quartos · Itacorubi</span></p>
+        <div class="ms-botoes"><button type="button" class="ms-play" aria-label="Pausar a troca automática">❚❚</button><button type="button" class="ms-ant" aria-label="Imagem anterior">←</button><button type="button" class="ms-prox" aria-label="Próxima imagem">→</button></div>
+      </div>
+      <figure class="ms-palco"><img class="ms-img" src="img/i1.webp" alt="" width="1400" height="2489" loading="lazy"><button type="button" class="ms-ampliar">Ver imagem completa <i aria-hidden="true">↗</i></button><figcaption class="selo-foto">Imagem ilustrativa</figcaption></figure>
     </div>
   </section>
 </main>
-<footer class="rodape"><p>Ana Ribeiro Imóveis · CRECI-SC fictício · Florianópolis/SC · Marca criada para demonstração · Site de exemplo feito pela Blue Rose</p></footer>
+
+<footer class="rodape" id="contato" data-tom="escuro">
+  <div class="rd-topo">
+    <h2>Seu próximo endereço <em>começa numa conversa.</em></h2>
+  </div>
+  <div class="rd-meio">
+    <p>Comprar, vender ou só entender quanto dá para financiar.<br>Respondo no mesmo dia, de segunda a sábado.</p>
+    <a class="bt bt-bege" href="#" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Converse com a Ana <i aria-hidden="true">↗</i></a>
+  </div>
+  <div class="rd-baixo">
+    <a class="logo logo-grande" href="#inicio" aria-label="Voltar ao início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg><span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span></a>
+    <p>Florianópolis · SC<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI-SC fictício</p>
+    <a class="rd-rever" href="#inicio">Rever a abertura <i aria-hidden="true">↗</i></a>
+  </div>
+  <p class="rd-nota">Imagens ilustrativas. Simulações de financiamento e de avaliação são estimativas e não substituem a análise do banco nem a visita. Marca criada para demonstração · Site de exemplo feito pela Blue Rose · Fotos: Unsplash (licença Unsplash).</p>
+</footer>
+
+<button class="anim" type="button" aria-pressed="false"><i aria-hidden="true">❚❚</i> Animações</button>
+
+<dialog class="caixa" aria-label="Imagem ampliada">
+  <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="">
+  <p class="caixa-leg"></p>
+  <button type="button" class="caixa-fecha" aria-label="Fechar">✕</button>
+</dialog>
 </body>
 </html>

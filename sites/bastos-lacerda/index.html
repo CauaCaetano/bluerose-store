@@ -7,64 +7,183 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bastos Lacerda Advogados · Direito empresarial em São Paulo · Resposta em 4 horas</title>
-<meta name="description" content="Escritório full-service para empresas: tributário, trabalhista, contratos, societário e LGPD. Descreva o problema, fale com o sócio da área em até 4 horas e acompanhe processos online.">
-<meta name="theme-color" content="#15171a">
+<meta name="description" content="Advocacia empresarial na Faria Lima desde 1994: 62 advogados em 9 áreas, um sócio responsável por área e primeira resposta em até 4 horas úteis. Descreva o problema e acompanhe processos online.">
+<meta name="theme-color" content="#f3ebe1">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%230a1950'%2F%3E%3Ctext%20x%3D'20'%20y%3D'27'%20font-size%3D'17'%20text-anchor%3D'middle'%20fill%3D'%23a18146'%20font-family%3D'Georgia'%3EBL%3C%2Ftext%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="../assets/fontes/381eea50c4.css">
-<link rel="stylesheet" href="../assets/fontes/355a6583f3.css">
+<link rel="stylesheet" href="../assets/fontes/5bdb0d6658.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=3">
-<link rel="stylesheet" href="estilo.css?v=3">
+<link rel="stylesheet" href="estilo.css?v=4">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=1" defer></script>
-<script src="site.js?v=2" defer></script>
+<script src="site.js?v=3" defer></script>
+<script type="module" src="cena.js?v=1"></script>
 </head>
 <body data-slug="bastos-lacerda" data-marca="Bastos Lacerda Advogados" data-cat="advocacia">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
-<header class="topo">
-  <a class="marca" href="#inicio"><span translate="no">Bastos <i>&amp;</i> Lacerda</span><small>Advogados desde 1994</small></a>
-  <nav class="menu" aria-label="Principal"><a href="#triagem">Seu problema</a><a href="#socios">Sócios</a><a href="#processo">Acompanhar processo</a><a href="#assessoria">Assessoria mensal</a></nav>
-  <a class="tel" href="tel:+551130450000">(11) 3045-0000</a>
-  <a class="botao botao-p" href="#triagem">Falar com um sócio</a>
+
+<header class="topo" id="topo">
+  <div class="topo-in">
+    <a class="marca" href="#inicio" aria-label="Bastos Lacerda Advogados, início">
+      <svg class="marca-sinal" viewBox="0 0 40 48" aria-hidden="true"><path d="M27 9c-2-4-9-4-11 0s1 7 4 9l-6 6c-4 4-3 12 4 13 4 1 8-1 11-5l6-7" /><circle cx="33" cy="18" r="2.6" /><circle cx="9" cy="40" r="2" /></svg>
+      <span class="marca-txt"><b translate="no">BASTOS LACERDA</b><small translate="no">SÃO PAULO · FARIA LIMA · 1994</small></span>
+    </a>
+    <div class="filtros" role="group" aria-label="Filtrar o site por área">
+      <button type="button" data-f="todas" aria-pressed="true">Todas</button>
+      <button type="button" data-f="trib" aria-pressed="false">Tributário</button>
+      <button type="button" data-f="trab" aria-pressed="false">Trabalhista</button>
+      <button type="button" data-f="contr" aria-pressed="false">Contratos</button>
+      <button type="button" data-f="soc" aria-pressed="false">Societário</button>
+    </div>
+    <nav class="menu" aria-label="Principal">
+      <a href="#oque">O escritório</a><a href="#areas">Áreas</a><a href="#socios">Sócios</a><a href="#processo">Processos</a><a href="#radar">Radar</a><a href="#assessoria">Assessoria</a><a href="#contato">Contato</a>
+    </nav>
+    <button class="ico" type="button" id="abrir-busca" aria-label="Descrever o problema da empresa"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
+    <a class="tel" href="tel:+551130450000">PT · (11) 3045-0000</a>
+    <button class="ico ico-menu" type="button" id="abrir-menu" aria-expanded="false" aria-controls="gaveta" aria-label="Abrir o menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  </div>
 </header>
+
+<div class="gaveta" id="gaveta" hidden>
+  <nav aria-label="Menu completo">
+    <a href="#oque">O escritório</a><a href="#areas">Áreas de atuação</a><a href="#socios">Sócios</a><a href="#processo">Acompanhar processo</a><a href="#radar">Radar jurídico</a><a href="#assessoria">Assessoria mensal</a><a href="#contato">Falar com um sócio</a>
+  </nav>
+  <div class="gaveta-pe"><p>Av. Brigadeiro Faria Lima, 3.900, 14º andar · São Paulo</p><p><a href="tel:+551130450000">(11) 3045-0000</a> · seg. a sex., 8h às 19h</p></div>
+</div>
+
 <main id="conteudo">
   <section class="abre" id="inicio" aria-labelledby="h-t">
-    <img class="abre-fundo" src="img/fachada.webp" alt="" width="1400" height="2100" fetchpriority="high">
-    <div class="abre-txt">
-      <h1 id="h-t">Seu problema jurídico na mesa de um sócio em até 4 horas.</h1>
-      <p>Direito empresarial na Faria Lima: 62 advogados, 9 áreas e um só ponto de contato. Descreva o que está acontecendo e mostramos quem cuida, o prazo típico e o primeiro horário livre do sócio.</p>
-      <ul class="selos"><li>Desde 1994</li><li>62 advogados</li><li>9 áreas</li><li>Primeira resposta em até 4 h</li></ul>
+    <div class="abre-cena" aria-hidden="true"><canvas id="cena-abre"></canvas></div>
+    <div class="abre-painel">
+      <div class="abre-txt">
+        <h1 id="h-t">Seu problema na mesa de um sócio em até 4 horas</h1>
+        <p>Advocacia empresarial na Faria Lima desde 1994</p>
+        <form class="mini" id="mini" autocomplete="off">
+          <label class="sr" for="mini-t">Descreva o problema da sua empresa</label>
+          <input id="mini-t" placeholder="Descreva o problema da sua empresa">
+          <button type="submit" aria-label="Enviar para a triagem">→</button>
+        </form>
+      </div>
     </div>
-    <form class="triagem" id="triagem" role="search">
-      <label for="prob">O que está acontecendo na sua empresa?</label>
-      <textarea id="prob" rows="4" placeholder="Ex.: recebemos uma autuação da Receita sobre PIS e Cofins de 2022"></textarea>
+    <p class="rolar" aria-hidden="true">Role</p>
+  </section>
+
+  <section class="oque" id="oque" aria-labelledby="oq-t">
+    <h2 id="oq-t" class="tit-sec borrar">O que fazemos <em>pela sua empresa</em></h2>
+
+    <article class="linha" id="assessoria">
+      <h3 class="borrar">Prevenir riscos</h3>
+      <div class="linha-txt">
+        <div class="borrar">
+          <p>Na assessoria mensal, um advogado que já conhece a sua empresa responde as dúvidas do dia a dia antes que elas virem processo. Resposta em até 4 horas úteis.</p>
+          <a class="pilula" href="#" data-wa="Olá, Bastos Lacerda Advogados! Quero uma proposta de assessoria mensal para a minha empresa.">Pedir proposta</a>
+        </div>
+        <div class="borrar">
+          <ul class="inclui"><li>Revisão de contratos com clientes e fornecedores</li><li>Prevenção trabalhista e tributária</li><li>Comitê jurídico mensal com os sócios</li><li>Alertas quando a lei muda no seu setor</li></ul>
+          <a class="pilula" href="#areas">Ver as 9 áreas</a>
+        </div>
+      </div>
+      <figure class="linha-foto"><img src="img/reuniao-contrato.webp" alt="Advogados e clientes revisando um contrato em volta da mesa" width="1600" height="900" loading="lazy"></figure>
+    </article>
+
+    <article class="linha">
+      <h3 class="borrar">Crescer com segurança</h3>
+      <div class="linha-txt">
+        <div class="borrar">
+          <p>São 62 advogados em 9 áreas, desde 1994. Contrato social, acordo de sócios, entrada de investidor e compra de empresas ficam com o mesmo sócio do início ao fim.</p>
+          <a class="pilula" href="#socios">Sócios</a>
+        </div>
+        <div class="borrar">
+          <p>Antes de começar, você recebe o prazo típico do caso, a lista do que separar e o nome de quem vai cuidar dele.</p>
+          <a class="pilula" href="#contato">Descrever meu caso</a>
+        </div>
+      </div>
+      <figure class="linha-foto"><img src="img/equipe-conversa.webp" alt="Equipe do escritório conversando com clientes numa sala de reunião" width="1600" height="900" loading="lazy"></figure>
+    </article>
+
+    <article class="linha" id="processo">
+      <h3 class="borrar">Resolver conflitos</h3>
+      <div class="linha-txt">
+        <div class="borrar">
+          <p>Quando o conflito já começou, cada movimentação, prazo e documento aparece online, sem precisar ligar. Teste com o número de exemplo.</p>
+          <form id="proc" class="proc"><label class="sr" for="num">Número do processo</label><input id="num" value="1004587-22.2025.8.26.0100" inputmode="numeric"><button class="pilula" type="submit">Consultar</button></form>
+        </div>
+        <ol class="mov" aria-live="polite"></ol>
+      </div>
+      <figure class="linha-foto"><img src="img/sala-reuniao.webp" alt="Sala de reunião com mesa de madeira e vista para a cidade" width="1600" height="1280" loading="lazy"></figure>
+    </article>
+  </section>
+
+  <section class="areas" id="areas" aria-labelledby="ar-t">
+    <div class="areas-fixa">
+      <div class="areas-tit" role="tablist" aria-label="Áreas e setores">
+        <h2 id="ar-t" class="sr">Áreas de atuação e setores atendidos</h2>
+        <button type="button" role="tab" id="tab-areas" aria-controls="lista-areas" aria-selected="true">Áreas</button>
+        <button type="button" role="tab" id="tab-setores" aria-controls="lista-setores" aria-selected="false">Setores</button>
+      </div>
+      <div class="areas-listas">
+        <ul class="lista" id="lista-areas" role="tabpanel" aria-labelledby="tab-areas"></ul>
+        <ul class="lista" id="lista-setores" role="tabpanel" aria-labelledby="tab-setores" hidden></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="faixa" aria-labelledby="fx-t">
+    <div class="faixa-cena" aria-hidden="true"><canvas id="cena-faixa"></canvas></div>
+    <h2 id="fx-t" class="faixa-txt"><span>O futuro da empresa é melhor</span> <span>quando é decidido nos seus termos.</span></h2>
+  </section>
+
+  <section class="filo" aria-labelledby="fi-t">
+    <h2 id="fi-t" class="tit-p">A filosofia <span translate="no">Bastos Lacerda</span></h2>
+    <div class="filo-grade">
+      <article class="surge"><h3>Um sócio do começo ao fim</h3><p>Cada área tem um sócio responsável. É com ele que você fala, do primeiro contato à última petição, sem repassar o caso para quem você nunca viu.</p></article>
+      <article class="surge"><h3>Resposta em até 4 horas úteis</h3><p>Todo contato recebe a primeira resposta em até 4 horas úteis, com o nome do responsável e o próximo passo. Em incidente de dados ou autuação, o plantão atende no mesmo dia.</p></article>
+      <article class="surge"><h3>Direto ao ponto, sem juridiquês</h3><p>Explicamos o risco, as alternativas e o prazo em linguagem de negócio. Cada parecer abre com um resumo de uma página para quem decide.</p></article>
+      <article class="surge"><h3>Atenção à sua empresa</h3><p>Comitê jurídico mensal com os sócios, revisão preventiva de contratos e alertas sobre mudanças na lei que afetam o seu setor, antes que virem multa ou processo.</p></article>
+    </div>
+  </section>
+
+  <section class="radar" id="radar" aria-labelledby="ra-t">
+    <div class="cab-f">
+      <h2 id="ra-t" class="tit-sec borrar">O que está no radar?</h2>
+      <div class="filtros filtros-sec" role="group" aria-label="Filtrar o radar por área"></div>
+    </div>
+    <div class="radar-grade" aria-live="polite"></div>
+  </section>
+
+  <section class="socios" id="socios" aria-labelledby="so-t">
+    <div class="cab-f">
+      <h2 id="so-t" class="tit-sec borrar">Quem cuida da sua empresa</h2>
+      <div class="filtros filtros-sec" role="group" aria-label="Filtrar os sócios por área"></div>
+    </div>
+    <div class="socios-grade" aria-live="polite"></div>
+    <p class="mais-wrap"><button type="button" class="pilula pilula-esc" id="mais">Mostrar mais</button></p>
+  </section>
+
+  <section class="contato" id="contato" aria-labelledby="ct-t">
+    <h2 id="ct-t" class="cta">Esses são os nossos termos.<br><span>Quais são os seus? <a href="#tri-t" id="vamos">Vamos conversar</a></span></h2>
+    <form class="triagem" id="triagem" autocomplete="off">
+      <label for="prob" id="tri-t">O que está acontecendo na sua empresa?</label>
+      <textarea id="prob" rows="3" placeholder="Ex.: recebemos uma autuação da Receita sobre PIS e Cofins de 2022"></textarea>
       <p class="tr-dica">Ou toque num exemplo:</p>
-      <div class="exemplos" role="group" aria-label="Exemplos"><button type="button">Um ex-funcionário entrou com ação</button><button type="button">Cliente não paga e o contrato venceu</button><button type="button">Quero tirar um sócio da empresa</button><button type="button">Vazaram dados de clientes</button></div>
+      <div class="exemplos" role="group" aria-label="Exemplos de problema">
+        <button type="button">Um ex-funcionário entrou com ação</button><button type="button">Cliente não paga e o contrato venceu</button><button type="button">Quero tirar um sócio da empresa</button><button type="button">Vazaram dados de clientes</button>
+      </div>
     </form>
-  </section>
-  <section class="resultado" id="resultado" aria-live="polite" hidden></section>
-
-  <section class="socios" id="socios" aria-labelledby="sc-t">
-    <div class="sec-cab"><h2 id="sc-t">Os sócios</h2><p>Cada área tem um sócio responsável. É com ele que você fala, do primeiro contato ao fim.</p></div>
-    <div class="sc-grade"></div>
-  </section>
-
-  <section class="processo" id="processo" aria-labelledby="pr-t">
-    <div><h2 id="pr-t">Acompanhe o seu processo</h2><p>Clientes veem cada movimentação, prazo e documento sem precisar ligar. Teste com o número de exemplo.</p>
-      <form id="proc" class="proc"><input id="num" value="1004587-22.2025.8.26.0100" aria-label="Número do processo"><button class="botao" type="submit">Consultar</button></form></div>
-    <ol class="linha" aria-live="polite"></ol>
-  </section>
-
-  <section class="assessoria" id="assessoria" aria-labelledby="as-t">
-    <img src="img/sala.webp" alt="Sala de reunião do escritório" width="1400" height="933" loading="lazy">
-    <div>
-      <h2 id="as-t">Assessoria mensal para empresas</h2>
-      <p>Um advogado que conhece a sua empresa e responde as dúvidas do dia a dia antes que virem processo.</p>
-      <ul class="inclui"><li>Revisão de contratos com clientes e fornecedores</li><li>Prevenção trabalhista e tributária</li><li>Comitê jurídico mensal com os sócios</li><li>Resposta em até 4 horas úteis</li></ul>
-      <a class="botao" href="#" data-wa="Olá, Bastos Lacerda! Quero uma proposta de assessoria mensal para a minha empresa.">Pedir proposta</a>
-    </div>
+    <div class="resultado" id="resultado" aria-live="polite" hidden></div>
   </section>
 </main>
-<footer class="rodape"><p>Bastos Lacerda Sociedade de Advogados · OAB/SP fictício · Av. Brigadeiro Faria Lima, 3.900, 14º andar, São Paulo · Marca criada para demonstração · Site de exemplo feito pela Blue Rose</p></footer>
+
+<footer class="rodape">
+  <div class="rp-l1">
+    <p class="rp-cid">São Paulo <a class="circ" href="#" data-wa="Olá, Bastos Lacerda Advogados! Vim pelo site e quero falar com o escritório." aria-label="WhatsApp do escritório">wa</a><a class="circ" href="tel:+551130450000" aria-label="Ligar para o escritório">tel</a></p>
+    <p class="rp-info"><span class="rp-pil">(11) 3045-0000</span><span>/</span><span>seg. a sex., 8h às 19h</span><span>/</span><span>Av. Brigadeiro Faria Lima, 3.900, 14º andar</span></p>
+  </div>
+  <nav class="rp-l2" aria-label="Rodapé"><a href="#oque">O escritório</a><a href="#areas">Áreas</a><a href="#socios">Sócios</a><a href="#processo">Acompanhar processo</a><a href="#radar">Radar jurídico</a><a href="#assessoria">Assessoria mensal</a><a href="#contato">Contato</a></nav>
+  <div class="rp-l3">
+    <p>© 2026 <span translate="no">Bastos Lacerda Sociedade de Advogados</span> · OAB/SP fictício</p>
+    <p>Marca criada para demonstração · Site de exemplo feito pela Blue Rose · Fotos: Unsplash · Cenas 3D feitas em código</p>
+  </div>
+</footer>
 </body>
 </html>

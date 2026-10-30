@@ -1,31 +1,101 @@
 /* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/aguiar-monteiro/estilo.css: cores por idioma. Não editar à mão. */
-html[data-paleta="pt-PT"] { --mar: #163248; --mar-2: #234a6a; --papel: #f6f3ef; --latao: #be7d49; --tinta: #14293a; --tx-2: #5a6975; --linha: #dcd7cf; --branco: #ffffff; }
-html[data-paleta="pt-PT"] .bt-claro:hover { background: #cb8f5f; }
-html[data-paleta="pt-PT"] .faixa-cima { color: #b3cadc; }
-html[data-paleta="pt-PT"] .dr-res { color: #b3cadc; }
-html[data-paleta="pt-PT"] .form-sec { color: #b3cadc; }
-html[data-paleta="pt-PT"] .erro { color: #f6d1b4; }
-html[data-paleta="es"] { --mar: #4c1212; --mar-2: #6f1e1e; --papel: #f6f3ef; --latao: #c19b46; --tinta: #3d1111; --tx-2: #755a5f; --linha: #dcd6cf; --branco: #ffffff; }
-html[data-paleta="es"] .bt-claro:hover { background: #ceab5c; }
-html[data-paleta="es"] .faixa-cima { color: #e1aeae; }
-html[data-paleta="es"] .dr-res { color: #e1aeae; }
-html[data-paleta="es"] .form-sec { color: #e1aeae; }
-html[data-paleta="es"] .erro { color: #f7e2b3; }
-html[data-paleta="en"] { --mar: #11254d; --mar-2: #1c3871; --papel: #eff1f6; --latao: #bd4a51; --tinta: #101f3e; --tx-2: #5a6075; --linha: #cfd3dc; --branco: #ffffff; }
-html[data-paleta="en"] .bt-claro:hover { background: #ca6066; }
-html[data-paleta="en"] .faixa-cima { color: #adbfe2; }
-html[data-paleta="en"] .dr-res { color: #adbfe2; }
-html[data-paleta="en"] .form-sec { color: #adbfe2; }
-html[data-paleta="en"] .erro { color: #f6b4b8; }
-html[data-paleta="it"] { --mar: #32401e; --mar-2: #4b5f2e; --papel: #f6f5ef; --latao: #b49453; --tinta: #29341a; --tx-2: #68755a; --linha: #dcdacf; --branco: #ffffff; }
-html[data-paleta="it"] .bt-claro:hover { background: #c2a468; }
-html[data-paleta="it"] .faixa-cima { color: #c9d3bc; }
-html[data-paleta="it"] .dr-res { color: #c9d3bc; }
-html[data-paleta="it"] .form-sec { color: #c9d3bc; }
-html[data-paleta="it"] .erro { color: #f3dfb7; }
-html[data-paleta="fr"] { --mar: #221945; --mar-2: #342865; --papel: #f3eff6; --latao: #6e5aad; --tinta: #1d1737; --tx-2: #605a75; --linha: #d6cfdc; --branco: #ffffff; }
-html[data-paleta="fr"] .bt-claro:hover { background: #816ebc; }
-html[data-paleta="fr"] .faixa-cima { color: #bdb7d8; }
-html[data-paleta="fr"] .dr-res { color: #bdb7d8; }
-html[data-paleta="fr"] .form-sec { color: #bdb7d8; }
-html[data-paleta="fr"] .erro { color: #c7b9f1; }
+html[data-paleta="pt-PT"] { --preto: #000000; --branco: #ffffff; --verde: #39f27a; --verde-2: #1fc95c; --roxo: #56a5e6; --azul: #2c7aba; --menta: #e7af98; --lilas: #b2d6f3; --fundo: #000000; --tx: #ffffff; --tx-2: #c8c2b9; --tx-3: rgba(255, 255, 255, .07); --linha: rgba(255, 255, 255, .22); }
+html[data-paleta="pt-PT"] body[data-tema="claro"] { --fundo: #ffffff; --tx: #0a0d10; --tx-2: #4a535a; --tx-3: rgba(11, 21, 29, .06); --linha: rgba(11, 21, 29, .2); }
+html[data-paleta="pt-PT"] .pular { color: #000000; }
+html[data-paleta="pt-PT"] .brilho-alt { background: radial-gradient(60vw 70vh at 62% 30%, rgba(68, 156, 227, .55), transparent 70%), radial-gradient(30vw 40vh at 80% 70%, rgba(57, 242, 122, .18), transparent 70%); }
+html[data-paleta="pt-PT"] body[data-tema="claro"] .marca span { color: #984421; }
+html[data-paleta="pt-PT"] .pontos a.ativo::before { box-shadow: 0 0 12px rgba(57, 242, 122, .7); }
+html[data-paleta="pt-PT"] .fale:hover i { color: #000000; }
+html[data-paleta="pt-PT"] .pilula:hover { color: #000000; box-shadow: 0 0 30px rgba(57, 242, 122, .35); }
+html[data-paleta="pt-PT"] .resc select option { color: #000000; }
+html[data-paleta="pt-PT"] .dr-lista input:checked::after { border: solid #ffffff; }
+html[data-paleta="pt-PT"] .dr-res .botao:hover { color: #000000; }
+html[data-paleta="pt-PT"] .pg-grade .lei::before { color: #ffffff; }
+html[data-paleta="pt-PT"] .foto { border: 1.5px solid rgba(255, 255, 255, .8); }
+html[data-paleta="pt-PT"] .foto::after { background: linear-gradient(140deg, rgba(57, 242, 122, .75), rgba(94, 170, 231, .55) 55%, rgba(85, 165, 230, .7)); }
+html[data-paleta="pt-PT"] .erro { color: #cb752f; }
+html[data-paleta="pt-PT"] body[data-tema="escuro"] .ar p,
+html[data-paleta="pt-PT"] body[data-tema="escuro"] .ar h3,
+html[data-paleta="pt-PT"] body[data-tema="escuro"] .pessoa p,
+html[data-paleta="pt-PT"] body[data-tema="escuro"] .ini-sub,
+html[data-paleta="pt-PT"] body[data-tema="escuro"] .carreira p { text-shadow: 0 1px 14px rgba(0, 0, 0, .85), 0 0 2px rgba(0, 0, 0, .6); }
+html[data-paleta="es"] { --preto: #000000; --branco: #ffffff; --verde: #39f27a; --verde-2: #1fc95c; --roxo: #eebd4e; --azul: #c39223; --menta: #e6999a; --lilas: #f7e1ae; --fundo: #000000; --tx: #ffffff; --tx-2: #c8c1b9; --tx-3: rgba(255, 255, 255, .07); --linha: rgba(255, 255, 255, .22); }
+html[data-paleta="es"] body[data-tema="claro"] { --fundo: #ffffff; --tx: #100a0b; --tx-2: #5a4a4d; --tx-3: rgba(24, 16, 17, .06); --linha: rgba(24, 16, 17, .2); }
+html[data-paleta="es"] .pular { color: #000000; }
+html[data-paleta="es"] .brilho-alt { background: radial-gradient(60vw 70vh at 62% 30%, rgba(236, 181, 59, .55), transparent 70%), radial-gradient(30vw 40vh at 80% 70%, rgba(57, 242, 122, .18), transparent 70%); }
+html[data-paleta="es"] body[data-tema="claro"] .marca span { color: #972223; }
+html[data-paleta="es"] .pontos a.ativo::before { box-shadow: 0 0 12px rgba(57, 242, 122, .7); }
+html[data-paleta="es"] .fale:hover i { color: #000000; }
+html[data-paleta="es"] .pilula:hover { color: #000000; box-shadow: 0 0 30px rgba(57, 242, 122, .35); }
+html[data-paleta="es"] .resc select option { color: #000000; }
+html[data-paleta="es"] .dr-lista input:checked::after { border: solid #ffffff; }
+html[data-paleta="es"] .dr-res .botao:hover { color: #000000; }
+html[data-paleta="es"] .pg-grade .lei::before { color: #ffffff; }
+html[data-paleta="es"] .foto { border: 1.5px solid rgba(255, 255, 255, .8); }
+html[data-paleta="es"] .foto::after { background: linear-gradient(140deg, rgba(57, 242, 122, .75), rgba(238, 192, 87, .55) 55%, rgba(238, 188, 77, .7)); }
+html[data-paleta="es"] .erro { color: #cf2b2b; }
+html[data-paleta="es"] body[data-tema="escuro"] .ar p,
+html[data-paleta="es"] body[data-tema="escuro"] .ar h3,
+html[data-paleta="es"] body[data-tema="escuro"] .pessoa p,
+html[data-paleta="es"] body[data-tema="escuro"] .ini-sub,
+html[data-paleta="es"] body[data-tema="escuro"] .carreira p { text-shadow: 0 1px 14px rgba(0, 0, 0, .85), 0 0 2px rgba(0, 0, 0, .6); }
+html[data-paleta="en"] { --preto: #000000; --branco: #ffffff; --verde: #39f27a; --verde-2: #1fc95c; --roxo: #4c82f0; --azul: #2057c6; --menta: #ea959a; --lilas: #adc6f8; --fundo: #000000; --tx: #ffffff; --tx-2: #b9bdc8; --tx-3: rgba(255, 255, 255, .07); --linha: rgba(255, 255, 255, .22); }
+html[data-paleta="en"] body[data-tema="claro"] { --fundo: #ffffff; --tx: #0a0b10; --tx-2: #4a4e5a; --tx-3: rgba(10, 15, 30, .06); --linha: rgba(10, 15, 30, .2); }
+html[data-paleta="en"] .pular { color: #000000; }
+html[data-paleta="en"] .brilho-alt { background: radial-gradient(60vw 70vh at 62% 30%, rgba(56, 117, 239, .55), transparent 70%), radial-gradient(30vw 40vh at 80% 70%, rgba(57, 242, 122, .18), transparent 70%); }
+html[data-paleta="en"] body[data-tema="claro"] .marca span { color: #9d1c24; }
+html[data-paleta="en"] .pontos a.ativo::before { box-shadow: 0 0 12px rgba(57, 242, 122, .7); }
+html[data-paleta="en"] .fale:hover i { color: #000000; }
+html[data-paleta="en"] .pilula:hover { color: #000000; box-shadow: 0 0 30px rgba(57, 242, 122, .35); }
+html[data-paleta="en"] .resc select option { color: #000000; }
+html[data-paleta="en"] .dr-lista input:checked::after { border: solid #ffffff; }
+html[data-paleta="en"] .dr-res .botao:hover { color: #000000; }
+html[data-paleta="en"] .pg-grade .lei::before { color: #ffffff; }
+html[data-paleta="en"] .foto { border: 1.5px solid rgba(255, 255, 255, .8); }
+html[data-paleta="en"] .foto::after { background: linear-gradient(140deg, rgba(57, 242, 122, .75), rgba(84, 136, 241, .55) 55%, rgba(75, 130, 240, .7)); }
+html[data-paleta="en"] .erro { color: #1847e2; }
+html[data-paleta="en"] body[data-tema="escuro"] .ar p,
+html[data-paleta="en"] body[data-tema="escuro"] .ar h3,
+html[data-paleta="en"] body[data-tema="escuro"] .pessoa p,
+html[data-paleta="en"] body[data-tema="escuro"] .ini-sub,
+html[data-paleta="en"] body[data-tema="escuro"] .carreira p { text-shadow: 0 1px 14px rgba(0, 0, 0, .85), 0 0 2px rgba(0, 0, 0, .6); }
+html[data-paleta="it"] { --preto: #000000; --branco: #ffffff; --verde: #39f27a; --verde-2: #1fc95c; --roxo: #e3b559; --azul: #b68930; --menta: #e6b299; --lilas: #f2ddb3; --fundo: #000000; --tx: #ffffff; --tx-2: #c8c5b9; --tx-3: rgba(255, 255, 255, .07); --linha: rgba(255, 255, 255, .22); }
+html[data-paleta="it"] body[data-tema="claro"] { --fundo: #ffffff; --tx: #0d100a; --tx-2: #525a4a; --tx-3: rgba(20, 24, 16, .06); --linha: rgba(20, 24, 16, .2); }
+html[data-paleta="it"] .pular { color: #000000; }
+html[data-paleta="it"] .brilho-alt { background: radial-gradient(60vw 70vh at 62% 30%, rgba(224, 173, 71, .55), transparent 70%), radial-gradient(30vw 40vh at 80% 70%, rgba(57, 242, 122, .18), transparent 70%); }
+html[data-paleta="it"] body[data-tema="claro"] .marca span { color: #974722; }
+html[data-paleta="it"] .pontos a.ativo::before { box-shadow: 0 0 12px rgba(57, 242, 122, .7); }
+html[data-paleta="it"] .fale:hover i { color: #000000; }
+html[data-paleta="it"] .pilula:hover { color: #000000; box-shadow: 0 0 30px rgba(57, 242, 122, .35); }
+html[data-paleta="it"] .resc select option { color: #000000; }
+html[data-paleta="it"] .dr-lista input:checked::after { border: solid #ffffff; }
+html[data-paleta="it"] .dr-res .botao:hover { color: #000000; }
+html[data-paleta="it"] .pg-grade .lei::before { color: #ffffff; }
+html[data-paleta="it"] .foto { border: 1.5px solid rgba(255, 255, 255, .8); }
+html[data-paleta="it"] .foto::after { background: linear-gradient(140deg, rgba(57, 242, 122, .75), rgba(228, 184, 97, .55) 55%, rgba(227, 181, 88, .7)); }
+html[data-paleta="it"] .erro { color: #86b149; }
+html[data-paleta="it"] body[data-tema="escuro"] .ar p,
+html[data-paleta="it"] body[data-tema="escuro"] .ar h3,
+html[data-paleta="it"] body[data-tema="escuro"] .pessoa p,
+html[data-paleta="it"] body[data-tema="escuro"] .ini-sub,
+html[data-paleta="it"] body[data-tema="escuro"] .carreira p { text-shadow: 0 1px 14px rgba(0, 0, 0, .85), 0 0 2px rgba(0, 0, 0, .6); }
+html[data-paleta="fr"] { --preto: #000000; --branco: #ffffff; --verde: #39f27a; --verde-2: #1fc95c; --roxo: #7d5ede; --azul: #5436b0; --menta: #aa9ce3; --lilas: #c4b5f0; --fundo: #000000; --tx: #ffffff; --tx-2: #c1b9c8; --tx-3: rgba(255, 255, 255, .07); --linha: rgba(255, 255, 255, .22); }
+html[data-paleta="fr"] body[data-tema="claro"] { --fundo: #ffffff; --tx: #0b0a10; --tx-2: #4e4a5a; --tx-3: rgba(17, 15, 25, .06); --linha: rgba(17, 15, 25, .2); }
+html[data-paleta="fr"] .pular { color: #000000; }
+html[data-paleta="fr"] .brilho-alt { background: radial-gradient(60vw 70vh at 62% 30%, rgba(111, 77, 218, .55), transparent 70%), radial-gradient(30vw 40vh at 80% 70%, rgba(57, 242, 122, .18), transparent 70%); }
+html[data-paleta="fr"] body[data-tema="claro"] .marca span { color: #3c2792; }
+html[data-paleta="fr"] .pontos a.ativo::before { box-shadow: 0 0 12px rgba(57, 242, 122, .7); }
+html[data-paleta="fr"] .fale:hover i { color: #000000; }
+html[data-paleta="fr"] .pilula:hover { color: #000000; box-shadow: 0 0 30px rgba(57, 242, 122, .35); }
+html[data-paleta="fr"] .resc select option { color: #000000; }
+html[data-paleta="fr"] .dr-lista input:checked::after { border: solid #ffffff; }
+html[data-paleta="fr"] .dr-res .botao:hover { color: #000000; }
+html[data-paleta="fr"] .pg-grade .lei::before { color: #ffffff; }
+html[data-paleta="fr"] .foto { border: 1.5px solid rgba(255, 255, 255, .8); }
+html[data-paleta="fr"] .foto::after { background: linear-gradient(140deg, rgba(57, 242, 122, .75), rgba(131, 102, 223, .55) 55%, rgba(125, 94, 221, .7)); }
+html[data-paleta="fr"] .erro { color: #5e43b7; }
+html[data-paleta="fr"] body[data-tema="escuro"] .ar p,
+html[data-paleta="fr"] body[data-tema="escuro"] .ar h3,
+html[data-paleta="fr"] body[data-tema="escuro"] .pessoa p,
+html[data-paleta="fr"] body[data-tema="escuro"] .ini-sub,
+html[data-paleta="fr"] body[data-tema="escuro"] .carreira p { text-shadow: 0 1px 14px rgba(0, 0, 0, .85), 0 0 2px rgba(0, 0, 0, .6); }

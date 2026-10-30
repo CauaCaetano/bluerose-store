@@ -7,90 +7,230 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Dra. Patrícia Leal · Advogada de família em Belo Horizonte · Divórcio, pensão e guarda</title>
-<meta name="description" content="Divórcio, pensão alimentícia, guarda e inventário em Belo Horizonte. Veja o prazo e o custo do seu caso, calcule a pensão e marque uma consulta online.">
-<meta name="theme-color" content="#2e1a2e">
+<meta name="description" content="Divórcio, pensão alimentícia, guarda e inventário em Belo Horizonte e online. Entenda o caminho e o prazo comum do seu caso, faça a conta informativa da pensão e marque uma conversa.">
+<meta name="theme-color" content="#f7f0dc">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Ccircle%20cx%3D'20'%20cy%3D'20'%20r%3D'19'%20fill%3D'%23470718'%2F%3E%3Ctext%20x%3D'20'%20y%3D'27'%20font-size%3D'17'%20text-anchor%3D'middle'%20fill%3D'%23f3ebd8'%20font-family%3D'Georgia'%3EPL%3C%2Ftext%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
-<link rel="stylesheet" href="../assets/fontes/e2531d64e2.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Ccircle%20cx%3D'20'%20cy%3D'20'%20r%3D'19'%20fill%3D'%2316280d'%2F%3E%3Ctext%20x%3D'20'%20y%3D'27'%20font-size%3D'17'%20text-anchor%3D'middle'%20fill%3D'%23f7f0dc'%20font-family%3D'Georgia'%3EPL%3C%2Ftext%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/0bb1030ca6.css">
+<link rel="stylesheet" href="../assets/fontes/44fd1fe295.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=3">
-<link rel="stylesheet" href="estilo.css?v=6">
+<link rel="stylesheet" href="estilo.css?v=7">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=1" defer></script>
-<script src="site.js?v=4" defer></script>
+<script src="site.js?v=5" defer></script>
 </head>
 <body data-slug="patricia-leal" data-marca="Dra. Patrícia Leal" data-cat="advocacia">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
 <header class="topo">
-  <a class="marca" href="#inicio">Patrícia Leal<small>Advocacia de família · OAB/MG fictício</small></a>
-  <nav class="menu" aria-label="Seções"><a href="#situacao">O seu caso</a><a href="#pensao">Pensão</a><a href="#eu">Quem sou</a></nav>
-  <a class="bt bt-mel" href="#consulta">Marcar consulta</a>
+  <p class="relogio"><span class="ponto" aria-hidden="true"></span><time id="hora">BH</time></p>
+  <button class="menu-bt" type="button" aria-expanded="false" aria-controls="menu">Menu</button>
 </header>
+
+<div class="menu" id="menu" hidden>
+  <div class="menu-topo"><p class="relogio"><span class="ponto ponto-v" aria-hidden="true"></span><time class="hora2">BH</time></p><button class="menu-fecha" type="button">Fechar [×]</button></div>
+  <nav class="menu-nav" aria-label="Seções">
+    <a href="#sobre">O escritório</a>
+    <a href="#situacoes">O seu caso</a>
+    <a href="#pensao">Pensão</a>
+    <a href="#quem">Quem sou</a>
+    <a href="#prazos">Prazos da lei</a>
+    <a href="#consulta">Contato</a>
+  </nav>
+  <div class="menu-pe">
+    <p>Av. do Contorno, 6.594 · Savassi<br>Belo Horizonte · MG</p>
+    <p translate="no">Patrícia Leal Advocacia<br>OAB/MG fictício<br>Advocacia de família</p>
+    <a class="circulo circulo-claro" href="#consulta" data-fecha>Falar</a>
+  </div>
+</div>
+
 <main id="conteudo">
-  <section class="abre" id="inicio" aria-labelledby="h-t">
-    <div class="abre-txt">
-      <p class="abre-de">Divórcio, pensão e guarda em Belo Horizonte e online</p>
-      <h1 id="h-t">Separar já dói. O processo não precisa doer mais.</h1>
-      <p class="abre-sub">Explico cada passo em português claro, digo o prazo e o custo no primeiro contato e cuido para que os filhos fiquem fora da briga.</p>
-      <div class="abre-bts">
-        <a class="bt bt-mel bt-grande" href="#consulta">Marcar consulta online</a>
-        <a class="bt-texto" href="#situacao">Ver o que acontece no meu caso</a>
-      </div>
-      <ul class="abre-fatos">
-        <li><b>16 anos</b> só em direito de família</li>
-        <li><b>Mediadora</b> formada pelo TJMG</li>
-        <li><b>Online</b> de qualquer cidade, com sigilo</li>
-      </ul>
-    </div>
-    <figure class="abre-foto"><img src="img/patricia-recorte.webp" alt="Dra. Patrícia Leal" width="1172" height="1802" fetchpriority="high"><figcaption>Você fala comigo, não com estagiário.</figcaption></figure>
+  <section class="abre" id="inicio" aria-label="Início">
+    <p class="abre-de">Advocacia de família<br>Belo Horizonte e online</p>
+    <p class="abre-areas">Divórcio · Pensão<br>Guarda · Inventário</p>
+    <a class="desce" href="#sobre" aria-label="Descer para o conteúdo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v13M6 12l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+    <h1 class="logo" translate="no">
+      <svg class="logo-marca" viewBox="0 0 120 140" aria-hidden="true"><path d="M8 136V60a52 52 0 0 1 104 0v76z" fill="currentColor"/><path d="M30 120V66a30 30 0 0 1 60 0v54" fill="none" stroke="var(--creme)" stroke-width="7"/><path d="M48 120V72a12 12 0 0 1 24 0v48" fill="none" stroke="var(--creme)" stroke-width="7"/></svg>
+      <span class="logo-txt" aria-label="Patrícia Leal"><span>Patrícia</span> <span>Leal</span></span>
+    </h1>
   </section>
 
-  <section class="situacao" id="situacao" aria-labelledby="st-t">
-    <div class="sit-txt">
-      <h2 id="st-t">Qual é a sua situação?</h2>
-      <p>Escolha a frase que mais parece com o seu momento. Eu respondo como responderia numa primeira conversa.</p>
-      <div class="sit-op" role="group" aria-label="Situação">
-        <button type="button" data-s="consensual" aria-pressed="false">Queremos nos divorciar, os dois concordam</button>
-        <button type="button" data-s="litigioso" aria-pressed="false">Quero me divorciar e o outro não aceita</button>
-        <button type="button" data-s="pensao" aria-pressed="false">Preciso pedir ou revisar pensão</button>
-        <button type="button" data-s="guarda" aria-pressed="false">Guarda ou visitas dos filhos</button>
-        <button type="button" data-s="inventario" aria-pressed="false">Faleceu alguém da família e há bens</button>
+  <section class="bloco" id="sobre" aria-labelledby="sb-t">
+    <h2 id="sb-t" class="titulo">Divórcio, pensão e guarda explicados em português claro. Esse é o nosso combinado.</h2>
+    <div class="linha">
+      <p class="rotulo">Sobre o escritório</p>
+      <a class="circulo" href="#quem">Ler mais</a>
+      <div class="texto">
+        <p>A <span translate="no">Patrícia Leal Advocacia</span> atende só direito de família há 16 anos, em Belo Horizonte e por vídeo em qualquer cidade. Divórcio, pensão alimentícia, guarda, convivência e inventário: cada passo é explicado antes de acontecer, e os filhos ficam fora da briga.</p>
       </div>
     </div>
-    <article class="carta" aria-live="polite"><p class="carta-vazia">A resposta aparece aqui, com o prazo comum e o que separar de documentos.</p></article>
   </section>
 
-  <section class="foto-faixa" aria-hidden="true"><img src="img/hero.webp" alt="" width="1400" height="933" loading="lazy"></section>
-
-  <section class="pensao" id="pensao" aria-labelledby="pn-t">
-    <div class="pn-txt"><h2 id="pn-t">Quanto pode ficar a pensão</h2><p>A lei não tem tabela fixa: o juiz pesa a necessidade de quem recebe e a possibilidade de quem paga. Esta conta mostra a faixa que os tribunais de Minas costumam fixar.</p>
-      <form id="pens" class="pens">
-        <label>Renda líquida de quem paga <output></output><input type="range" name="r" min="1500" max="40000" step="100" value="6000"></label>
-        <label>Filhos <output></output><input type="range" name="f" min="1" max="4" value="1"></label>
-        <label class="ck"><input type="checkbox" name="inf"> Quem paga não tem carteira assinada (autônomo ou informal)</label>
-      </form></div>
-    <div class="pn-res" aria-live="polite"></div>
+  <section class="bloco" id="situacoes" aria-labelledby="st-t">
+    <h2 id="st-t" class="titulo">O seu caso,<br>em cinco situações</h2>
+    <div class="linha">
+      <p class="rotulo">Qual é a sua situação</p>
+      <a class="circulo" href="#lista-sit">Escolher</a>
+      <div class="texto">
+        <p>Escolha a frase que mais parece com o seu momento. A resposta é a mesma que eu daria numa primeira conversa: o caminho, o prazo comum e o que separar de documentos.</p>
+      </div>
+    </div>
+    <ul class="lista" id="lista-sit">
+      <li class="item" data-foto="img/acordo.webp" data-alt="Casal assinando um acordo à mesa">
+        <button type="button" class="item-bt" aria-expanded="false" aria-controls="sit-1"><span>Queremos nos divorciar, os dois concordam</span></button>
+        <div class="item-corpo" id="sit-1" hidden>
+          <p class="rotulo">Divórcio consensual</p>
+          <div class="texto">
+            <p>Sem filho menor ou incapaz, dá para fazer no cartório, numa só assinatura, com a advogada presente. Com filhos menores, vai ao juiz, mas como acordo, que é o caminho mais curto.</p>
+            <dl class="dados"><div><dt>Prazo comum</dt><dd>15 a 45 dias</dd></div><div><dt>O que separar</dt><dd>RG, certidão de casamento, documentos dos bens</dd></div></dl>
+            <a class="circulo circulo-p" href="#consulta" data-assunto="Divórcio">Marcar</a>
+          </div>
+        </div>
+      </li>
+      <li class="item" data-foto="img/assina.webp" data-alt="Mão assinando um documento">
+        <button type="button" class="item-bt" aria-expanded="false" aria-controls="sit-2"><span>Quero me divorciar e o outro não aceita</span></button>
+        <div class="item-corpo" id="sit-2" hidden>
+          <p class="rotulo">Divórcio sem acordo</p>
+          <div class="texto">
+            <p>Ninguém é obrigado a continuar casado: o divórcio sai mesmo que o outro não queira. O que se discute é a divisão dos bens, a pensão e a guarda, e antes de cada audiência existe uma tentativa séria de acordo.</p>
+            <dl class="dados"><div><dt>Prazo comum</dt><dd>8 a 18 meses</dd></div><div><dt>O que separar</dt><dd>certidões, comprovantes de renda, lista de bens e dívidas</dd></div></dl>
+            <a class="circulo circulo-p" href="#consulta" data-assunto="Divórcio">Marcar</a>
+          </div>
+        </div>
+      </li>
+      <li class="item" data-foto="img/bebe.webp" data-alt="Mãe beijando o rosto de um bebê sorridente">
+        <button type="button" class="item-bt" aria-expanded="false" aria-controls="sit-3"><span>Preciso pedir ou revisar a pensão</span></button>
+        <div class="item-corpo" id="sit-3" hidden>
+          <p class="rotulo">Pensão alimentícia</p>
+          <div class="texto">
+            <p>A pensão provisória pode ser pedida já na primeira petição, para os filhos não esperarem o fim do processo. A revisão vale quando a renda de quem paga ou a necessidade de quem recebe mudou.</p>
+            <dl class="dados"><div><dt>Prazo comum</dt><dd>provisória em cerca de 15 dias</dd></div><div><dt>O que separar</dt><dd>certidão de nascimento, gastos da criança, o que souber da renda do outro</dd></div></dl>
+            <a class="circulo circulo-p" href="#consulta" data-assunto="Pensão">Marcar</a>
+          </div>
+        </div>
+      </li>
+      <li class="item" data-foto="img/hero.webp" data-alt="Pai abraçando o filho na praia">
+        <button type="button" class="item-bt" aria-expanded="false" aria-controls="sit-4"><span>Guarda ou visitas dos filhos</span></button>
+        <div class="item-corpo" id="sit-4" hidden>
+          <p class="rotulo">Guarda e convivência</p>
+          <div class="texto">
+            <p>A regra hoje é a guarda compartilhada, com uma casa de referência. Um plano de convivência escrito, com feriados, férias e aniversários, evita que cada fim de semana vire uma briga nova.</p>
+            <dl class="dados"><div><dt>Prazo comum</dt><dd>3 a 10 meses</dd></div><div><dt>O que separar</dt><dd>certidões, rotina da criança, mensagens que mostrem o combinado</dd></div></dl>
+            <a class="circulo circulo-p" href="#consulta" data-assunto="Guarda">Marcar</a>
+          </div>
+        </div>
+      </li>
+      <li class="item" data-foto="img/geracoes.webp" data-alt="Mão de um adulto segurando a mão de um bebê">
+        <button type="button" class="item-bt" aria-expanded="false" aria-controls="sit-5"><span>Faleceu alguém da família e há bens</span></button>
+        <div class="item-corpo" id="sit-5" hidden>
+          <p class="rotulo">Inventário</p>
+          <div class="texto">
+            <p>Com herdeiros de acordo e todos maiores, o inventário é feito no cartório em poucas semanas. Atenção ao prazo de 2 meses para abrir o inventário, para não pagar multa no imposto de transmissão (ITCD de Minas).</p>
+            <dl class="dados"><div><dt>Prazo comum</dt><dd>30 a 90 dias no cartório</dd></div><div><dt>O que separar</dt><dd>certidão de óbito, documentos dos bens e dos herdeiros</dd></div></dl>
+            <a class="circulo circulo-p" href="#consulta" data-assunto="Inventário">Marcar</a>
+          </div>
+        </div>
+      </li>
+    </ul>
   </section>
 
-  <section class="eu" id="eu" aria-labelledby="eu-t">
-    <figure><img src="img/assina.webp" alt="Assinatura de um acordo" width="1400" height="934" loading="lazy"></figure>
-    <div><h2 id="eu-t">Quem vai cuidar do seu caso</h2>
-      <p>Sou Patrícia Leal, advogada há 16 anos, só em direito de família. Como mediadora formada pelo TJMG, procuro o acordo antes de qualquer audiência longa: sai mais rápido, custa menos e protege os filhos.</p>
-      <p>Você fala comigo do começo ao fim e recebe um resumo por escrito depois de cada passo do processo.</p></div>
+  <section class="bloco" id="pensao" aria-labelledby="pn-t">
+    <h2 id="pn-t" class="titulo">Quanto pode ficar a pensão</h2>
+    <div class="linha">
+      <p class="rotulo">Calculadora informativa</p>
+      <a class="circulo" href="#pens">Calcular</a>
+      <div class="texto">
+        <p>A lei não tem tabela fixa: o juiz pesa a necessidade de quem recebe e a possibilidade de quem paga. Mova os controles e veja a faixa que os tribunais de Minas costumam fixar.</p>
+      </div>
+    </div>
+    <div class="calc">
+      <form id="pens" class="pens" aria-label="Calculadora de pensão">
+        <label class="campo"><span class="rotulo">Renda líquida de quem paga</span><output class="num" for="r-renda"></output><input id="r-renda" type="range" name="r" min="1500" max="40000" step="100" value="6000"></label>
+        <label class="campo"><span class="rotulo">Número de filhos</span><output class="num" for="r-filhos"></output><input id="r-filhos" type="range" name="f" min="1" max="4" value="1"></label>
+        <label class="ck"><input type="checkbox" name="inf"><span>Quem paga não tem carteira assinada (autônomo ou informal)</span></label>
+      </form>
+      <div class="pn-res" aria-live="polite">
+        <p class="rotulo pn-cab"></p>
+        <p class="faixa"></p>
+        <p class="pn-txt"></p>
+        <p class="pn-aviso">Conta informativa, sem promessa de valor. O valor final depende das provas de renda e de gastos de cada caso.</p>
+      </div>
+    </div>
   </section>
 
-  <section class="consulta" id="consulta" aria-labelledby="cs-t">
-    <div class="cs-txt"><h2 id="cs-t">Consulta online de 50 minutos</h2>
-    <p>Por vídeo, de onde estiver, com total sigilo. Você conta o que está acontecendo e sai sabendo os caminhos possíveis e os prazos. Respondo pessoalmente no seu WhatsApp com os horários livres.</p></div>
+  <section class="bloco" id="quem" aria-labelledby="qm-t">
+    <h2 id="qm-t" class="titulo">Quem vai cuidar<br>do seu caso</h2>
+    <div class="linha">
+      <div class="rotulo-col">
+        <p class="rotulo">Quem sou</p>
+        <figure class="retrato"><img src="img/patricia.webp" alt="Retrato da Dra. Patrícia Leal, de terno cinza" width="1400" height="2100" loading="lazy"></figure>
+      </div>
+      <a class="circulo" href="#consulta">Conversar</a>
+      <div class="texto">
+        <p>Sou <span translate="no">Patrícia Leal</span>, advogada há 16 anos, só em direito de família. Como mediadora formada pelo TJMG, procuro o acordo antes de qualquer audiência longa, porque ele costuma sair mais rápido e protege os filhos.</p>
+        <p>Você fala comigo do começo ao fim, e não com um estagiário. Depois de cada passo do processo, recebe um resumo por escrito do que aconteceu e do que vem a seguir.</p>
+      </div>
+    </div>
+    <ul class="lista lista-fixa" aria-label="Formação e forma de trabalho">
+      <li class="item" data-foto="img/patricia.webp" data-alt="Dra. Patrícia Leal"><p class="item-bt"><span>16 anos só em direito de família</span></p></li>
+      <li class="item" data-foto="img/acordo.webp" data-alt="Casal assinando um acordo"><p class="item-bt"><span>Mediadora formada pelo TJMG</span></p></li>
+      <li class="item" data-foto="img/assina.webp" data-alt="Documento sendo assinado"><p class="item-bt"><span>Resumo por escrito a cada passo</span></p></li>
+      <li class="item" data-foto="img/hero.webp" data-alt="Pai e filho abraçados"><p class="item-bt"><span>Atendimento por vídeo, com sigilo</span></p></li>
+    </ul>
+  </section>
+
+  <section class="bloco" id="prazos" aria-labelledby="pz-t">
+    <h2 id="pz-t" class="titulo">Prazos que a lei dá,<br>e que vale conhecer</h2>
+    <div class="linha">
+      <p class="rotulo">Prazos da lei</p>
+      <a class="circulo" href="#consulta">Tirar dúvida</a>
+      <div class="texto">
+        <p>Perder um prazo custa caro em família: multa no imposto, pensão que não volta, bem que fica parado. Os quatro abaixo são os que mais aparecem nas primeiras conversas.</p>
+      </div>
+    </div>
+    <ol class="prazos">
+      <li><b>2 meses</b><span>para abrir o inventário depois do falecimento (art. 611 do CPC). Passar disso pode gerar multa no ITCD de Minas Gerais.</span></li>
+      <li><b>2 anos</b><span>para cobrar cada pensão atrasada (art. 206 do Código Civil). Contra filho menor, o prazo só começa a correr aos 18 anos.</span></li>
+      <li><b>3 parcelas</b><span>é o que cobre o pedido de prisão civil de quem deve pensão: as três últimas antes da cobrança e as que vencerem depois (art. 528 do CPC).</span></li>
+      <li><b>1 assinatura</b><span>no cartório resolve o divórcio consensual quando não há filho menor ou incapaz.</span></li>
+    </ol>
+  </section>
+
+  <section class="bloco" id="consulta" aria-labelledby="cs-t">
+    <h2 id="cs-t" class="titulo">16 anos de direito de família, a serviço da sua</h2>
+    <div class="linha">
+      <p class="rotulo">Consulta online</p>
+      <a class="circulo" href="#cons">Pedir horário</a>
+      <div class="texto">
+        <p>Uma conversa de 50 minutos por vídeo, de onde você estiver, com total sigilo. Você conta o que está acontecendo e sai sabendo os caminhos possíveis e os prazos. A resposta com os horários livres chega no seu WhatsApp.</p>
+      </div>
+    </div>
     <form id="cons" class="cons" novalidate>
-      <label>Seu nome<input name="nome" autocomplete="name"></label>
-      <label>WhatsApp com DDD<input name="tel" inputmode="tel" autocomplete="tel" placeholder="(31) 99999-9999"></label>
-      <label>Assunto<select name="assunto"><option>Divórcio</option><option>Pensão</option><option>Guarda</option><option>Inventário</option><option>Outro assunto de família</option></select></label>
+      <label><span class="rotulo">Seu nome</span><input name="nome" autocomplete="name"></label>
+      <label><span class="rotulo">WhatsApp com DDD</span><input name="tel" inputmode="tel" autocomplete="tel" placeholder="(31) 99999-9999"></label>
+      <label><span class="rotulo">Assunto</span><select name="assunto"><option>Divórcio</option><option>Pensão</option><option>Guarda</option><option>Inventário</option><option>Outro assunto de família</option></select></label>
       <p class="erro" aria-live="polite"></p>
-      <button class="bt bt-mel bt-grande" type="submit">Pedir horário</button>
+      <button class="circulo circulo-g" type="submit">Enviar pedido</button>
     </form>
   </section>
 </main>
-<footer class="rodape"><p>Patrícia Leal Advocacia · OAB/MG fictício · Av. do Contorno, 6.594, Savassi, Belo Horizonte · Este site não promete resultado de processo · Marca criada para demonstração · Site de exemplo feito pela Blue Rose</p></footer>
+
+<footer class="rodape">
+  <p class="logo logo-rodape" translate="no" aria-label="Patrícia Leal">
+    <svg class="logo-marca" viewBox="0 0 120 140" aria-hidden="true"><path d="M8 136V60a52 52 0 0 1 104 0v76z" fill="currentColor"/><path d="M30 120V66a30 30 0 0 1 60 0v54" fill="none" stroke="var(--creme)" stroke-width="7"/><path d="M48 120V72a12 12 0 0 1 24 0v48" fill="none" stroke="var(--creme)" stroke-width="7"/></svg>
+    <span class="logo-txt"><span>Patrícia</span> <span>Leal</span></span>
+  </p>
+  <div class="rd-meio">
+    <nav class="rd-nav" aria-label="Rodapé"><a href="#sobre">O escritório</a><a href="#situacoes">O seu caso</a><a href="#pensao">Pensão</a><a href="#quem">Quem sou</a><a href="#consulta">Contato</a></nav>
+    <p class="rd-frase">Patrícia Leal Advocacia: 16 anos só em direito de família, em divórcio, pensão, guarda, convivência e inventário. Este site é informativo e não promete resultado de processo.</p>
+    <p class="rd-dir"><a href="#" data-wa="Olá, Dra. Patrícia! Vim pelo site e quero marcar uma conversa sobre direito de família.">WhatsApp</a><a href="#consulta">Consulta online</a><a href="#prazos">Prazos da lei</a></p>
+  </div>
+  <div class="rd-pe">
+    <p><span translate="no">Patrícia Leal Advocacia</span><br>OAB/MG fictício · Advocacia de família<br>© 2026 · Marca criada para demonstração</p>
+    <p>Av. do Contorno, 6.594, sala 1.102<br>Savassi, Belo Horizonte · MG<br>Seg. a sex., 9h às 18h</p>
+    <p class="rd-dir">Site de exemplo feito pela Blue Rose<br>Fotos: Unsplash<br><a href="#inicio">Voltar ao topo ↑</a></p>
+  </div>
+</footer>
+<div class="segue" aria-hidden="true"><img alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="175" height="220"></div>
 </body>
 </html>
