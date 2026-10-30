@@ -184,7 +184,7 @@ const T = {
   },
   mais() {
     const l = [['resumo', 'Resumo', 'do dia, do mês e do ano'], ['ia', 'Assistente', 'pergunte da sua agenda e dos clientes'], ['caixa', 'Caixa', 'quanto entrou e o que as faltas custaram'], ['espera', 'Lista de espera', `${db.espera.length} esperando encaixe`], ['assinatura', 'Minha assinatura', estAss()], ['dono', 'Painel do dono', 'ajudante e o que ela vê'], ['config', 'Configurações', 'tipo de negócio, horário, serviços, sinal, PIX']];
-    return `<h1>Mais</h1><div class="lista-mais">${l.map(([k, n, s]) => `<a href="#${k}"><span><b>${n}</b><small>${t(s)}</small></span><span aria-hidden="true">›</span></a>`).join('')}</div>`;
+    return `<h1>Mais</h1><div class="lista-mais">${l.map(([k, n, s]) => `<a href="#${k}"><span><b>${n}</b><small>${t(s)}</small></span><span aria-hidden="true">›</span></a>`).join('')}<a href="#mais" data-acao="menu-comum"><span><b>Planilhas e busca</b><small>importar do Excel, exportar, procurar, imprimir, instalar o app</small></span><span aria-hidden="true">›</span></a></div>`;
   },
   ia() {
     const conv = db.conversa.length ? db.conversa : [{ ia: 1, t: `Oi, ${db.pro.split(' ')[0]}! Eu vejo sua agenda e seus clientes. Pergunte do seu jeito. Na versão contratada são 20 perguntas grátis por dia.` }];
@@ -334,6 +334,7 @@ const ACOES = {
       f.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); const x = new FormData(e.target), nome = String(x.get('n')).trim(); if (!nome) return; if (db.clientes.some((o) => o !== c && sa(o.nome) === sa(nome))) { toast('Já existe outro cliente com esse nome.'); return; } const v = String(x.get('v') || '').trim(); Object.assign(c, { nome, tel: String(x.get('t') || ''), valor: v === '' ? null : Number(v), serv: x.get('s'), obs: String(x.get('o') || '') }); grava(); fecha(); mostra(); toast('Cliente salvo.'); });
       f.querySelector('[data-apaga]').addEventListener('click', () => { if (!confirm(futuro.length ? `Apagar ${c.nome} e desmarcar ${futuro.length} horário(s)?` : `Apagar ${c.nome}?`)) return; futuro.forEach((a) => { a.st = 'cancelado'; }); db.clientes = db.clientes.filter((o) => o !== c); grava(); fecha(); mostra(); toast('Cliente apagado.'); });
     }); },
+  'menu-comum': () => { const b = document.querySelector('.vk-mais'); if (b) b.click(); else toast('Abra de novo em alguns segundos.'); }, // menu da camada (o ••• fica escondido)
   instalar: () => {
     if (!window.veltriaInstalar) { toast('Na demonstração não instala. Entre na sua conta para instalar o seu app.'); return; }
     const msg = { instalado: 'Você já está no app instalado.', ok: 'Pronto: o app está na tela de início.', iphone: 'No iPhone: toque em Compartilhar e depois em Adicionar à Tela de Início.', manual: 'No menu do navegador (⋮), toque em Instalar app ou Adicionar à tela inicial.' };
