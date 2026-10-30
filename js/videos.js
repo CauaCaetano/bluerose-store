@@ -2,6 +2,16 @@
 (function () {
   var botoes = document.querySelectorAll('[data-video]');
   if (!botoes.length) return;
+  // tutorial aparece como imagem com o botão de play no meio
+  var est = document.createElement('style');
+  est.textContent = '.tem-play{position:relative;display:block;cursor:pointer}' +
+    '.tem-play span.play-bt{position:absolute;left:50%;top:50%;right:auto;bottom:auto;padding:0;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;background:rgba(10,14,22,.74);border:2px solid rgba(255,255,255,.9);box-shadow:0 10px 28px rgba(0,0,0,.35);transition:transform .2s,background .2s;pointer-events:none}' +
+    '.tem-play span.play-bt::after{content:"";position:absolute;left:28px;top:21px;border-style:solid;border-width:15px 0 15px 24px;border-color:transparent transparent transparent #fff}' +
+    '.tem-play:hover span.play-bt,.tem-play:focus-visible span.play-bt{transform:scale(1.08);background:rgba(10,14,22,.9)}' +
+    '.vs-tut{margin:16px 0 6px;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.18)}.vs-tut img{display:block;width:100%;height:auto}' +
+    '.tem-play span.vs-tut-txt{right:auto;position:absolute;left:10px;bottom:10px;background:rgba(10,14,22,.8);color:#fff;font-size:13px;font-weight:600;padding:5px 11px;border-radius:999px;pointer-events:none}' +
+    '.np-tut-play{max-width:560px;margin-top:22px}@media (max-width:560px){.tem-play span.play-bt{width:58px;height:58px;margin:-29px 0 0 -29px}.tem-play span.play-bt::after{left:22px;top:16px;border-width:13px 0 13px 20px}}';
+  document.head.appendChild(est);
   var dlg = document.createElement('dialog');
   dlg.className = 'video-dlg';
   dlg.setAttribute('aria-label', 'Vídeo de demonstração');
