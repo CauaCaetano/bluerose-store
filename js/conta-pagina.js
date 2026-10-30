@@ -47,11 +47,13 @@
   // tutorial em vídeo de cada sistema: por versão (Essencial, Completo, Avançado) quando existe; senão o geral do sistema
   var POR_VERSAO = ['agenda', 'crm', 'farmacia', 'financeiro', 'gestao', 'juridico', 'obras', 'oficina'], SO_VERSOES = ['ofixl', 'vetnature'];
   function tutorial(a) {
-    if (!a.app || (APPS.indexOf(a.app) < 0 && SO_VERSOES.indexOf(a.app) < 0)) return '';
-    var v = (String(a.nome || '') + ' ' + String(a.produto || '')).match(/essencial|completo|avan[cç]ado/i);
-    if (v && POR_VERSAO.indexOf(a.app) >= 0) return 'video/versoes/' + a.app + '-' + normal(v[0]) + '-tutorial';
-    if (SO_VERSOES.indexOf(a.app) >= 0) return 'video/versoes/' + a.app + '-tutorial';
-    return 'video/tutoriais/' + a.app;
+    // a.app vem como "gestao" ou já com a versão junto ("gestaoavancado", "agendaessencial")
+    var m = String(a.app || '').match(/^([a-z]+?)(essencial|completo|avancado)?$/), base = m ? m[1] : '';
+    if (!base || (APPS.indexOf(base) < 0 && SO_VERSOES.indexOf(base) < 0)) return '';
+    var v = m[2] || normal((String(a.nome || '') + ' ' + String(a.produto || '')).match(/essencial|completo|avan[cç]ado/i) || '');
+    if (v && POR_VERSAO.indexOf(base) >= 0) return 'video/versoes/' + base + '-' + v + '-tutorial';
+    if (SO_VERSOES.indexOf(base) >= 0) return 'video/versoes/' + base + '-tutorial';
+    return 'video/tutoriais/' + base;
   }
   // janela do vídeo: abre ao tocar na foto do sistema ou no link "Assista ao vídeo tutorial"
   var janela = null;
