@@ -65,7 +65,7 @@ h2 { font: 600 .92rem var(--sans); margin: 22px 0 8px; color: var(--noite-2); }
 .linha { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 
 .campo { display: grid; gap: 4px; margin-bottom: 12px; font-size: .86rem; color: var(--tx-2); }
-.campo input, .campo select { min-height: 48px; border: 1px solid var(--nude); border-radius: 14px; padding: 0 14px; background: #fff; color: var(--tx); font-size: 1rem; }
+.campo input, .campo select { width: 100%; min-width: 0; box-sizing: border-box; min-height: 48px; border: 1px solid var(--nude); border-radius: 14px; padding: 0 14px; background: #fff; color: var(--tx); font-size: 1rem; }
 .servicos { display: grid; gap: 8px; margin-bottom: 12px; }
 .servicos button { display: grid; grid-template-columns: 12px 1fr auto; gap: 10px; align-items: center; text-align: left; border: 1px solid var(--nude); background: #fff; border-radius: 14px; padding: 10px 14px; cursor: pointer; }
 .servicos button::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
@@ -120,9 +120,11 @@ h2 { font: 600 .92rem var(--sans); margin: 22px 0 8px; color: var(--noite-2); }
 .ia-boneco { width: 86px; height: 112px; flex: none; }
 .ia-boneco canvas { width: 100%; height: 100%; image-rendering: pixelated; }
 /* serviços editáveis em Configurações */
-.serv-ed { display: grid; grid-template-columns: auto 1fr 74px 90px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,.06); }
+.serv-ed { display: grid; grid-template-columns: auto repeat(2, minmax(0, 1fr)); gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,.06); }
 .serv-ed input { width: 100%; min-width: 0; font: inherit; padding: 8px; border: 1px solid rgba(0,0,0,.14); border-radius: 10px; background: #fff; }
-.serv-ed label { display: flex; align-items: center; gap: 4px; font-size: .78rem; color: #8a8d99; }
+.serv-ed > .h { grid-row: span 2; }
+.serv-ed > input { grid-column: 2 / -1; }
+.serv-ed label { min-width: 0; display: flex; align-items: center; gap: 4px; font-size: .78rem; color: #8a8d99; }
 
 /* ir para qualquer data, passos do novo horário, busca de cliente */
 .ir-data { display: flex; align-items: end; gap: 8px; margin: 4px 0 10px; }
