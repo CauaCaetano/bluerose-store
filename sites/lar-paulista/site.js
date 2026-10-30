@@ -54,7 +54,7 @@
     } else {
       conta = '<dl><dt>Aluguel</dt><dd>' + real(x[4]) + '</dd><dt>Condomínio</dt><dd>' + real(x[5]) + '</dd><dt>IPTU</dt><dd>' + real(x[6]) + '</dd><dt>Seguro incêndio</dt><dd>R$ 45</dd><dt class="soma">Total por mês</dt><dd class="soma">' + real(custo(x)) + '</dd><dt>Sem fiador</dt><dd>seguro-fiança ou caução</dd></dl>';
     }
-    $('.fc-corpo', d).innerHTML = '<img src="img/' + x[0] + '.webp" alt="' + x[1] + ' em ' + x[2] + '"><div class="fc-txt"><h3 id="fc-t" style="font-size:1.6rem;margin:0">' + x[1] + '</h3><p style="margin:0;color:var(--tx-2)">' + x[2] + ' · ' + x[7] + ' m² · ' + x[8] + ' quartos · ' + x[9] + (x[9] === 1 ? ' vaga' : ' vagas') + '</p>' + conta +
+    $('.fc-corpo', d).innerHTML = '<img src="img/' + x[0] + '.webp" alt="' + x[1] + ' em ' + x[2] + '"><div class="fc-txt"><h3 id="fc-t" style="font-size:1.6rem;margin:0">' + x[1] + '</h3><p style="margin:0;color:var(--tx-2)">' + x[2] + ' · ' + x[7] + ' m² · ' + x[8] + (x[8] > 1 ? ' quartos · ' : ' quarto · ') + x[9] + (x[9] === 1 ? ' vaga' : ' vagas') + '</p>' + conta +
       '<p style="margin:6px 0 0;font-weight:700">Visitar</p><div class="slots">' + dias.map(function (dt) { return ['10:00', '15:00', '18:30'].map(function (h) { var t = dt.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' }) + ' ' + h; return '<button type="button" data-slot="' + t + '" aria-pressed="false">' + t + '</button>'; }).join(''); }).slice(0, 2).join('') + '</div>' +
       '<a class="botao" href="#" data-wa-visita data-wa="Olá, Lar Paulista! Quero visitar: ' + x[1] + ' em ' + x[2] + ' (' + (venda ? mil(x[4]) : real(custo(x)) + '/mês') + ').">Agendar visita</a></div><button type="button" class="fc-fecha" aria-label="Fechar">×</button>';
     d.showModal();

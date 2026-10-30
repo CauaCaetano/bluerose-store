@@ -41,6 +41,10 @@ html[data-paleta="pt-PT"] .bloco.bloqueio { background: repeating-linear-gradien
 html[data-paleta="pt-PT"] .alerta-c { background: #a65c3e; color: #ffffff; }
 html[data-paleta="pt-PT"] .alerta-f { background: #f3ebdf; color: #7a3f27; }
 html[data-paleta="pt-PT"] .recibo-t { background: #faf7f3; }
+html[data-paleta="pt-PT"] .dia-g input[type=date],
+html[data-paleta="pt-PT"] .r-nav input[type=date] { background: #ffffff; }
+html[data-paleta="pt-PT"] .colunas i { background: var(--azul, #284359); }
+html[data-paleta="pt-PT"] .colunas small { color: var(--tx-3, #9c958a); }
 html[data-paleta="es"] { --azul: #79393a; --azul-2: #95494a; --azul-3: #58292a; --papel: #f3ebe2; --papel-2: #faf6f1; --argila: #cfb06b; --argila-esc: #a7863c; --areia: #e0d0ab; --salvia: #b1aba5; --tx: #3f1f1f; --tx-2: #6b565a; --tx-3: #918c87; --ok: #4c7a63; --ruim: #a8524a; --at: #b08636; }
 html[data-paleta="es"] .barra-demo button { border: 1px solid #803f40; }
 html[data-paleta="es"] .barra-demo .teste { color: #ffffff; }
@@ -83,6 +87,10 @@ html[data-paleta="es"] .bloco.bloqueio { background: repeating-linear-gradient(1
 html[data-paleta="es"] .alerta-c { background: #b08a34; color: #ffffff; }
 html[data-paleta="es"] .alerta-f { background: #f4eade; color: #816320; }
 html[data-paleta="es"] .recibo-t { background: #fbf7f2; }
+html[data-paleta="es"] .dia-g input[type=date],
+html[data-paleta="es"] .r-nav input[type=date] { background: #ffffff; }
+html[data-paleta="es"] .colunas i { background: var(--azul, #58292a); }
+html[data-paleta="es"] .colunas small { color: var(--tx-3, #9c948a); }
 html[data-paleta="en"] { --azul: #2f4b83; --azul-2: #3b5ea3; --azul-3: #213660; --papel: #e2e7f3; --papel-2: #f1f4fa; --argila: #cc6e74; --argila-esc: #a34046; --areia: #deadb0; --salvia: #a5a8b1; --tx: #192845; --tx-2: #565b6b; --tx-3: #878a91; --ok: #4c7a63; --ruim: #a8524a; --at: #b08636; }
 html[data-paleta="en"] .barra-demo button { border: 1px solid #34518b; }
 html[data-paleta="en"] .barra-demo .teste { color: #ffffff; }
@@ -125,6 +133,10 @@ html[data-paleta="en"] .bloco.bloqueio { background: repeating-linear-gradient(1
 html[data-paleta="en"] .alerta-c { background: #ac383f; color: #ffffff; }
 html[data-paleta="en"] .alerta-f { background: #dfe5f3; color: #7e2329; }
 html[data-paleta="en"] .recibo-t { background: #f3f5fa; }
+html[data-paleta="en"] .dia-g input[type=date],
+html[data-paleta="en"] .r-nav input[type=date] { background: #ffffff; }
+html[data-paleta="en"] .colunas i { background: var(--azul, #213660); }
+html[data-paleta="en"] .colunas small { color: var(--tx-3, #8a8f9c); }
 html[data-paleta="it"] { --azul: #5c6c46; --azul-2: #738559; --azul-3: #434f32; --papel: #f2efe3; --papel-2: #f9f8f2; --argila: #c58f75; --argila-esc: #9c6247; --areia: #dabeb1; --salvia: #b1afa5; --tx: #313826; --tx-2: #606b56; --tx-3: #918f87; --ok: #4c7a63; --ruim: #a8524a; --at: #b08636; }
 html[data-paleta="it"] .barra-demo button { border: 1px solid #63724d; }
 html[data-paleta="it"] .barra-demo .teste { color: #ffffff; }
@@ -167,6 +179,10 @@ html[data-paleta="it"] .bloco.bloqueio { background: repeating-linear-gradient(1
 html[data-paleta="it"] .alerta-c { background: #a5603f; color: #ffffff; }
 html[data-paleta="it"] .alerta-f { background: #f1eee1; color: #784229; }
 html[data-paleta="it"] .recibo-t { background: #faf8f3; }
+html[data-paleta="it"] .dia-g input[type=date],
+html[data-paleta="it"] .r-nav input[type=date] { background: #ffffff; }
+html[data-paleta="it"] .colunas i { background: var(--azul, #434f32); }
+html[data-paleta="it"] .colunas small { color: var(--tx-3, #9c998a); }
 html[data-paleta="fr"] { --azul: #493e74; --azul-2: #5c4f8f; --azul-3: #342c55; --papel: #ebe2f3; --papel-2: #f6f1fa; --argila: #8c7bbf; --argila-esc: #604f94; --areia: #bdb4d7; --salvia: #aba5b1; --tx: #27213d; --tx-2: #5b566b; --tx-3: #8c8791; --ok: #4c7a63; --ruim: #a8524a; --at: #b08636; }
 html[data-paleta="fr"] .barra-demo button { border: 1px solid #4f447b; }
 html[data-paleta="fr"] .barra-demo .teste { color: #ffffff; }
@@ -209,3 +225,7 @@ html[data-paleta="fr"] .bloco.bloqueio { background: repeating-linear-gradient(1
 html[data-paleta="fr"] .alerta-c { background: #5c479d; color: #ffffff; }
 html[data-paleta="fr"] .alerta-f { background: #e9dff3; color: #3f2e73; }
 html[data-paleta="fr"] .recibo-t { background: #f6f3fa; }
+html[data-paleta="fr"] .dia-g input[type=date],
+html[data-paleta="fr"] .r-nav input[type=date] { background: #ffffff; }
+html[data-paleta="fr"] .colunas i { background: var(--azul, #342c55); }
+html[data-paleta="fr"] .colunas small { color: var(--tx-3, #938a9c); }

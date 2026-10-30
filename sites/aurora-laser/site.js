@@ -16,7 +16,7 @@
   function conta() {
     var esc = A[g].filter(function (a, i) { return sel[g + i]; }), s = +$('[name=s]:checked').value, d = SES[s];
     var combo = esc.length >= 3 ? 0.1 : 0, porSessao = esc.reduce(function (t, a) { return t + a[1]; }, 0), cheio = porSessao * s, total = cheio * (1 - d) * (1 - combo);
-    if (!esc.length) { $('.conta').innerHTML = '<p style="font-size:1.3rem;color:#fff;margin:0">Toque nas áreas ao lado.</p><p>A partir de 3 áreas, mais 10% de desconto no combo.</p>'; return; }
+    if (!esc.length) { $('.conta').innerHTML = '<p style="font-size:1.3rem;color:#fff;margin:0">Toque nas áreas para ver o preço.</p><p>A partir de 3 áreas, mais 10% de desconto no combo.</p>'; return; }
     var parc = Math.min(12, s * 2);
     $('.conta').innerHTML = '<p style="margin:0">' + esc.map(function (a) { return a[0]; }).join(', ') + '</p><p class="grande">' + real(total) + '</p>' +
       (d || combo ? '<p><s>' + real(cheio) + '</s> · economia de ' + real(cheio - total) + '</p>' : '') +
@@ -28,7 +28,7 @@
   $('.sess').addEventListener('change', conta);
   sel.f0 = sel.f2 = true; areas(); conta();
 
-  var TOM = [['muito clara', 'Alexandrite 755 nm', '6 a 8', 'Resposta rápida: a maioria vê diferença já na 2ª sessão.'], ['clara', 'Alexandrite 755 nm', '6 a 8', 'Pele ideal para o laser. Evite bronzear entre as sessões.'], ['morena', 'Diodo 810 nm', '8 a 10', 'Ajustamos a energia para não manchar. Pode fazer o ano inteiro.'], ['morena escura', 'Nd:YAG 1064 nm', '8 a 12', 'O Nd:YAG passa pela pele sem aquecer a melanina dela.'], ['negra', 'Nd:YAG 1064 nm', '10 a 12', 'É o laser mais seguro para pele negra, com resfriamento contínuo. Zero risco de queimadura na técnica certa.']];
+  var TOM = [['muito clara', 'Alexandrite 755 nm', '6 a 8', 'Resposta rápida: a maioria vê diferença já na 2ª sessão.'], ['clara', 'Alexandrite 755 nm', '6 a 8', 'Pele ideal para o laser. Evite bronzear entre as sessões.'], ['morena', 'Diodo 810 nm', '8 a 10', 'Ajustamos a energia para não manchar. Pode fazer o ano inteiro.'], ['morena escura', 'Nd:YAG 1064 nm', '8 a 12', 'O Nd:YAG passa pela pele sem aquecer a melanina dela.'], ['negra', 'Nd:YAG 1064 nm', '10 a 12', 'É o laser mais seguro para pele negra, com resfriamento contínuo. A técnica ajusta a energia a cada sessão.']];
   $('.tons').addEventListener('click', function (e) {
     var b = e.target.closest('[data-t]'); if (!b) return; tom = +b.dataset.t;
     $$('[data-t]').forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); });

@@ -1,16 +1,21 @@
 /* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/vertice/estilo.css: cores por idioma. Não editar à mão. */
-html[data-paleta="pt-PT"] { --fundo: #080f14; --sup: #152736; --tx: #f7f2eb; --tx-2: #b2aa9f; --linha: rgba(247, 242, 235, .14); --acc: #c5704d; --ouro2: #e5b5a2; --vend: #31516b; --res: #89482e; }
-html[data-paleta="pt-PT"] .pular:focus { background: #ffffff; color: #000000; }
-html[data-paleta="pt-PT"] .predio button[aria-pressed="true"] { outline: 2px solid #ffffff; }
-html[data-paleta="es"] { --fundo: #110b0c; --sup: #2e1d21; --tx: #f8f2ea; --tx-2: #b2a99f; --linha: rgba(248, 242, 234, .14); --acc: #cfa443; --ouro2: #ead29d; --vend: #712b2b; --res: #917026; }
-html[data-paleta="es"] .pular:focus { background: #ffffff; color: #000000; }
-html[data-paleta="es"] .predio button[aria-pressed="true"] { outline: 2px solid #ffffff; }
-html[data-paleta="en"] { --fundo: #050917; --sup: #111a3a; --tx: #eaeef8; --tx-2: #9fa4b2; --linha: rgba(234, 238, 248, .14); --acc: #cb474f; --ouro2: #e89fa3; --vend: #1f357d; --res: #8e292f; }
-html[data-paleta="en"] .pular:focus { background: #ffffff; color: #000000; }
-html[data-paleta="en"] .predio button[aria-pressed="true"] { outline: 2px solid #ffffff; }
-html[data-paleta="it"] { --fundo: #0e110b; --sup: #262d1e; --tx: #f6f4ec; --tx-2: #b2af9f; --linha: rgba(246, 244, 236, .14); --acc: #c29c50; --ouro2: #e4cea3; --vend: #515f3d; --res: #876a30; }
-html[data-paleta="it"] .pular:focus { background: #ffffff; color: #000000; }
-html[data-paleta="it"] .predio button[aria-pressed="true"] { outline: 2px solid #ffffff; }
-html[data-paleta="fr"] { --fundo: #0c0a12; --sup: #201c2f; --tx: #f1ebf7; --tx-2: #a99fb2; --linha: rgba(241, 235, 247, .14); --acc: #6f57bb; --ouro2: #b5a7e0; --vend: #433a62; --res: #483582; }
-html[data-paleta="fr"] .pular:focus { background: #ffffff; color: #000000; }
-html[data-paleta="fr"] .predio button[aria-pressed="true"] { outline: 2px solid #ffffff; }
+html[data-paleta="pt-PT"] { --noite: #101e2a; --noite-2: #132b3e; --noite-3: #1b3951; --champ: #dea892; --ouro2: #dea892; --champ-2: #cd886c; --tx: #f1eae0; --tx-2: #98b4cb; --linha: #244560; --res: #704330; --vend: #203d54; --acc: #dea892; --fundo: #101e2a; --branco: #ffffff; }
+html[data-paleta="pt-PT"] .pular:focus { color: #000000; }
+html[data-paleta="pt-PT"] .topo { background: rgba(16, 30, 42, .9); }
+html[data-paleta="pt-PT"] .predio button.v { color: #487498; }
+html[data-paleta="es"] { --noite: #231719; --noite-2: #411010; --noite-3: #551717; --champ: #e4c98c; --ouro2: #e4c98c; --champ-2: #d5b264; --tx: #f1e9e0; --tx-2: #d29191; --linha: #651f1f; --res: #775f29; --vend: #591b1b; --acc: #e4c98c; --fundo: #231719; --branco: #ffffff; }
+html[data-paleta="es"] .pular:focus { color: #000000; }
+html[data-paleta="es"] .topo { background: rgba(35, 23, 25, .9); }
+html[data-paleta="es"] .predio button.v { color: #a13f3f; }
+html[data-paleta="en"] { --noite: #0a1330; --noite-2: #091848; --noite-3: #0e215e; --champ: #e28e93; --ouro2: #e28e93; --champ-2: #d2676d; --tx: #e0e5f1; --tx-2: #859ade; --linha: #142970; --res: #742c30; --vend: #122562; --acc: #e28e93; --fundo: #0a1330; --branco: #ffffff; }
+html[data-paleta="en"] .pular:focus { color: #000000; }
+html[data-paleta="en"] .topo { background: rgba(10, 19, 48, .9); }
+html[data-paleta="en"] .predio button.v { color: #2d4cb3; }
+html[data-paleta="it"] { --noite: #1d2317; --noite-2: #2b3819; --noite-3: #394924; --champ: #ddab93; --ouro2: #ddab93; --champ-2: #cb8c6e; --tx: #f0eee1; --tx-2: #b4bfa4; --linha: #45562f; --res: #6f4531; --vend: #3d4b29; --acc: #ddab93; --fundo: #1d2317; --branco: #ffffff; }
+html[data-paleta="it"] .pular:focus { color: #000000; }
+html[data-paleta="it"] .topo { background: rgba(29, 35, 23, .9); }
+html[data-paleta="it"] .predio button.v { color: #74865a; }
+html[data-paleta="fr"] { --noite: #191525; --noite-2: #1d163b; --noite-3: #281f4d; --champ: #a798d8; --ouro2: #a798d8; --champ-2: #8874c5; --tx: #e9e0f1; --tx-2: #a59dc6; --linha: #33285c; --res: #43366a; --vend: #2d2450; --acc: #a798d8; --fundo: #191525; --branco: #ffffff; }
+html[data-paleta="fr"] .pular:focus { color: #000000; }
+html[data-paleta="fr"] .topo { background: rgba(25, 21, 37, .9); }
+html[data-paleta="fr"] .predio button.v { color: #5c4f91; }

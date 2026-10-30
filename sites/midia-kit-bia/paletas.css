@@ -1,0 +1,101 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/midia-kit-bia/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --fundo: #f5eee5; --papel: #fbf9f6; --tx: #17222a; --tx-2: #805939; --linha: #e8d0bd; --acc: #c67331; --verde: #4f6b3a; --ouro: #d58545; }
+html[data-paleta="pt-PT"] .pular:focus { background: #ffffff; }
+html[data-paleta="pt-PT"] .botao { color: #ffffff; }
+html[data-paleta="pt-PT"] .topo { background: rgba(245, 238, 229, .92); }
+html[data-paleta="pt-PT"] .capa-foto figcaption { box-shadow: 0 10px 24px -12px rgba(23, 34, 42, .6); }
+html[data-paleta="pt-PT"] .interesses li { color: #f3eee6; }
+html[data-paleta="pt-PT"] .po-grade figcaption { background: linear-gradient(transparent, rgba(11, 21, 29, .82)); color: #faf7f3; }
+html[data-paleta="pt-PT"] .cs-grade article { color: #f5eee5; }
+html[data-paleta="pt-PT"] .cs-grade p { color: #e1c5ae; }
+html[data-paleta="pt-PT"] .proposta { color: #faf7f3; }
+html[data-paleta="pt-PT"] .proposta h2 { color: #faf7f3; }
+html[data-paleta="pt-PT"] .pr-cab p { color: #f1e8da; }
+html[data-paleta="pt-PT"] .formatos li { background: rgba(255, 255, 255, .1); }
+html[data-paleta="pt-PT"] .formatos small { color: #f1e8da; }
+html[data-paleta="pt-PT"] .qtd button { background: #faf7f3; }
+@media print {
+html[data-paleta="pt-PT"] body { background: #ffffff; }
+html[data-paleta="pt-PT"] .proposta { background: #ffffff; }
+html[data-paleta="pt-PT"] .formatos li { background: #f8f4ed; }
+}
+html[data-paleta="es"] { --fundo: #f6eee4; --papel: #fcf9f5; --tx: #28191c; --tx-2: #836b36; --linha: #e9dbbc; --acc: #c9992e; --verde: #4f6b3a; --ouro: #d8aa42; }
+html[data-paleta="es"] .pular:focus { background: #ffffff; }
+html[data-paleta="es"] .botao { color: #ffffff; }
+html[data-paleta="es"] .topo { background: rgba(246, 238, 228, .92); }
+html[data-paleta="es"] .capa-foto figcaption { box-shadow: 0 10px 24px -12px rgba(40, 25, 28, .6); }
+html[data-paleta="es"] .interesses li { color: #f3ede6; }
+html[data-paleta="es"] .po-grade figcaption { background: linear-gradient(transparent, rgba(24, 16, 17, .82)); color: #fbf7f2; }
+html[data-paleta="es"] .cs-grade article { color: #f6eee4; }
+html[data-paleta="es"] .cs-grade p { color: #e2d2ad; }
+html[data-paleta="es"] .proposta { color: #fbf7f2; }
+html[data-paleta="es"] .proposta h2 { color: #fbf7f2; }
+html[data-paleta="es"] .pr-cab p { color: #f3e7d8; }
+html[data-paleta="es"] .formatos li { background: rgba(255, 255, 255, .1); }
+html[data-paleta="es"] .formatos small { color: #f3e7d8; }
+html[data-paleta="es"] .qtd button { background: #fbf7f2; }
+@media print {
+html[data-paleta="es"] body { background: #ffffff; }
+html[data-paleta="es"] .proposta { background: #ffffff; }
+html[data-paleta="es"] .formatos li { background: #f9f3ec; }
+}
+html[data-paleta="en"] { --fundo: #e5e9f5; --papel: #f5f7fc; --tx: #171b2a; --tx-2: #80393d; --linha: #e7bec0; --acc: #c5323b; --verde: #4f6b3a; --ouro: #d4464f; }
+html[data-paleta="en"] .pular:focus { background: #ffffff; }
+html[data-paleta="en"] .botao { color: #ffffff; }
+html[data-paleta="en"] .topo { background: rgba(229, 233, 245, .92); }
+html[data-paleta="en"] .capa-foto figcaption { box-shadow: 0 10px 24px -12px rgba(23, 27, 42, .6); }
+html[data-paleta="en"] .interesses li { color: #e6eaf3; }
+html[data-paleta="en"] .po-grade figcaption { background: linear-gradient(transparent, rgba(10, 15, 30, .82)); color: #f3f5fa; }
+html[data-paleta="en"] .cs-grade article { color: #e5e9f5; }
+html[data-paleta="en"] .cs-grade p { color: #e0afb2; }
+html[data-paleta="en"] .proposta { color: #f3f5fa; }
+html[data-paleta="en"] .proposta h2 { color: #f3f5fa; }
+html[data-paleta="en"] .pr-cab p { color: #dae0f1; }
+html[data-paleta="en"] .formatos li { background: rgba(255, 255, 255, .1); }
+html[data-paleta="en"] .formatos small { color: #dae0f1; }
+html[data-paleta="en"] .qtd button { background: #f3f5fa; }
+@media print {
+html[data-paleta="en"] body { background: #ffffff; }
+html[data-paleta="en"] .proposta { background: #ffffff; }
+html[data-paleta="en"] .formatos li { background: #edf0f8; }
+}
+html[data-paleta="it"] { --fundo: #f3f1e7; --papel: #fbfaf6; --tx: #20271a; --tx-2: #796640; --linha: #e4d8c1; --acc: #bc913b; --verde: #4f6b3a; --ouro: #cba24f; }
+html[data-paleta="it"] .pular:focus { background: #ffffff; }
+html[data-paleta="it"] .botao { color: #ffffff; }
+html[data-paleta="it"] .topo { background: rgba(243, 241, 231, .92); }
+html[data-paleta="it"] .capa-foto figcaption { box-shadow: 0 10px 24px -12px rgba(32, 39, 26, .6); }
+html[data-paleta="it"] .interesses li { color: #f3f1e6; }
+html[data-paleta="it"] .po-grade figcaption { background: linear-gradient(transparent, rgba(20, 24, 16, .82)); color: #faf8f3; }
+html[data-paleta="it"] .cs-grade article { color: #f3f1e7; }
+html[data-paleta="it"] .cs-grade p { color: #dcceb3; }
+html[data-paleta="it"] .proposta { color: #faf8f3; }
+html[data-paleta="it"] .proposta h2 { color: #faf8f3; }
+html[data-paleta="it"] .pr-cab p { color: #efebdc; }
+html[data-paleta="it"] .formatos li { background: rgba(255, 255, 255, .1); }
+html[data-paleta="it"] .formatos small { color: #efebdc; }
+html[data-paleta="it"] .qtd button { background: #faf8f3; }
+@media print {
+html[data-paleta="it"] body { background: #ffffff; }
+html[data-paleta="it"] .proposta { background: #ffffff; }
+html[data-paleta="it"] .formatos li { background: #f7f5ee; }
+}
+html[data-paleta="fr"] { --fundo: #ede5f5; --papel: #f8f6fb; --tx: #1c1829; --tx-2: #514574; --linha: #cbc3e2; --acc: #5e42b5; --verde: #4f6b3a; --ouro: #7055c5; }
+html[data-paleta="fr"] .pular:focus { background: #ffffff; }
+html[data-paleta="fr"] .botao { color: #ffffff; }
+html[data-paleta="fr"] .topo { background: rgba(237, 229, 245, .92); }
+html[data-paleta="fr"] .capa-foto figcaption { box-shadow: 0 10px 24px -12px rgba(28, 24, 41, .6); }
+html[data-paleta="fr"] .interesses li { color: #ede6f3; }
+html[data-paleta="fr"] .po-grade figcaption { background: linear-gradient(transparent, rgba(17, 15, 25, .82)); color: #f7f3fa; }
+html[data-paleta="fr"] .cs-grade article { color: #ede5f5; }
+html[data-paleta="fr"] .cs-grade p { color: #bfb6d9; }
+html[data-paleta="fr"] .proposta { color: #f7f3fa; }
+html[data-paleta="fr"] .proposta h2 { color: #f7f3fa; }
+html[data-paleta="fr"] .pr-cab p { color: #e6daf1; }
+html[data-paleta="fr"] .formatos li { background: rgba(255, 255, 255, .1); }
+html[data-paleta="fr"] .formatos small { color: #e6daf1; }
+html[data-paleta="fr"] .qtd button { background: #f7f3fa; }
+@media print {
+html[data-paleta="fr"] body { background: #ffffff; }
+html[data-paleta="fr"] .proposta { background: #ffffff; }
+html[data-paleta="fr"] .formatos li { background: #f3edf8; }
+}

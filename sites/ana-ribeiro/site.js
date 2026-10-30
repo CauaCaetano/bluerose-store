@@ -32,4 +32,11 @@
     $('[data-wa-aval]').setAttribute('data-wa', 'Olá, Ana! Quero a avaliação grátis do meu imóvel: ' + m2 + ' m², ' + a.q.options[a.q.selectedIndex].text + ' quarto(s), ' + bairro + '.');
   }
   a.addEventListener('input', av); a.addEventListener('change', av); a.addEventListener('submit', function (e) { e.preventDefault(); }); av();
+
+  // abas Quero comprar / Quero vender no topo; links com data-aba abrem a aba certa
+  function aba(id) {
+    [].forEach.call(document.querySelectorAll('.abas [role=tab]'), function (b) { var on = b.getAttribute('aria-controls') === id; b.setAttribute('aria-selected', String(on)); $('#' + b.getAttribute('aria-controls')).hidden = !on; });
+  }
+  $('.abas').addEventListener('click', function (e) { var b = e.target.closest('[role=tab]'); if (b) aba(b.getAttribute('aria-controls')); });
+  document.addEventListener('click', function (e) { var l = e.target.closest('[data-aba]'); if (!l) return; e.preventDefault(); aba(l.dataset.aba); $('.busca').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
 })();

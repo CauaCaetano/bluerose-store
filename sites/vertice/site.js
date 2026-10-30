@@ -52,6 +52,6 @@
   // tabela de lançamento vale até o último dia do mês
   var fim = new Date(); fim = new Date(fim.getFullYear(), fim.getMonth() + 1, 0, 23, 59, 59);
   $('[data-ate]').textContent = fim.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
-  function cont() { var s = Math.max(0, (fim - new Date()) / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600); $('[data-conta]').textContent = 'Faltam ' + d + ' dias e ' + h + ' horas.'; }
+  function cont() { var s = Math.max(0, (fim - new Date()) / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600); $('[data-conta]').textContent = 'Faltam ' + d + (d === 1 ? ' dia e ' : ' dias e ') + h + (h === 1 ? ' hora.' : ' horas.'); }
   cont(); setInterval(cont, 60000);
 })();

@@ -13,7 +13,7 @@
     c.m2.previousElementSibling.textContent = m2 + ' m²';
     var parc = c.fin.checked ? '<p>Financiando, a Caixa libera o dinheiro por medição de etapa, o mesmo jeito que cobramos. Nós cuidamos da documentação.</p>' : '<p>Pagamento em 6 parcelas, uma por etapa concluída. Sem entrada antes da obra começar.</p>';
     $('.cl-res').innerHTML = '<p style="margin:0">Casa de ' + m2 + ' m², ' + c.querySelector('[name=pd]:checked + span b').textContent.toLowerCase() + (pv > 1 ? ', sobrado' : ', térrea') + '</p><p class="total">' + real(total) + '</p><p>' + real(total / m2) + ' por m² · pronta em cerca de ' + String(meses).replace('.', ',') + ' meses</p>' +
-      '<div class="barras">' + ET.map(function (e) { return '<div><span>' + e[0] + '</span><i style="width:' + (e[1] * 400) + '%"></i><span>' + real(obra * e[1]) + '</span></div>'; }).join('') + (proj ? '<div><span>Projetos</span><i style="width:' + Math.min(100, proj / obra * 400) + '%;background:#d97a1e"></i><span>' + real(proj) + '</span></div>' : '') + '</div>' + parc +
+      '<div class="barras">' + ET.map(function (e) { return '<div><span>' + e[0] + '</span><i style="width:' + (e[1] * 400) + '%"></i><span>' + real(obra * e[1]) + '</span></div>'; }).join('') + (proj ? '<div><span>Projetos</span><i style="width:' + Math.min(100, proj / obra * 400) + '%;background:#c9d3ff"></i><span>' + real(proj) + '</span></div>' : '') + '</div>' + parc +
       '<a class="botao" href="#" data-wa="Olá, Base Forte! Calculei no site uma casa de ' + m2 + ' m² por ' + real(total) + '. Quero marcar a reunião grátis com o engenheiro.">Quero o orçamento real</a>';
     // trilha de pagamento por etapa
     var mes = 0;

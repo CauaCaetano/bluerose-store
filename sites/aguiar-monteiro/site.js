@@ -41,7 +41,7 @@
   function dir() {
     var s = resc(), marc = [].slice.call(document.querySelectorAll('[data-d]:checked'));
     var tot = marc.reduce(function (a, x) { return a + D[x.dataset.d][1](s); }, 0);
-    $('.dr-res').innerHTML = marc.length ? '<p style="margin:0">Estimativa do que você pode cobrar</p><p class="grande">' + real(tot * 0.7) + ' a ' + real(tot * 1.2) + '</p><p>' + marc.map(function (x) { return D[x.dataset.d][0]; }).join(', ') + '. Valor depende de provas: testemunhas, mensagens, cartões de ponto.</p><a class="botao" href="#caso">Quero cobrar isso</a>' : '<p style="margin:0;font-size:1.2rem">Marque ao lado o que acontecia. Mais da metade dos trabalhadores que nos procuram tinha pelo menos um destes direitos sem receber.</p>';
+    $('.dr-res').innerHTML = marc.length ? '<p style="margin:0">Estimativa do que você pode cobrar</p><p class="grande">' + real(tot * 0.7) + ' a ' + real(tot * 1.2) + '</p><p>' + marc.map(function (x) { return D[x.dataset.d][0]; }).join(', ') + '. Valor depende de provas: testemunhas, mensagens, cartões de ponto.</p><a class="botao" href="#caso">Falar com um advogado sobre isso</a>' : '<p style="margin:0;font-size:1.2rem">Marque ao lado o que acontecia no seu trabalho para ver a estimativa.</p>';
   }
   document.querySelector('.dr-lista').addEventListener('change', dir); r.addEventListener('input', dir); dir();
 
@@ -51,7 +51,7 @@
     var n = c.nome.value.trim(), t = c.tel.value.replace(/\D/g, ''), er = $('.erro', c);
     er.textContent = n.length < 2 ? 'Escreva seu nome.' : t.length < 10 ? 'Confira o WhatsApp com DDD.' : '';
     if (er.textContent) return;
-    window.BR_WA && window.BR_WA('Olá, Aguiar & Monteiro! Sou ' + n + ', saí da empresa ' + (c.emp.value.trim() || '(não informada)') + ' e quero a análise grátis do meu caso.');
-    c.innerHTML = '<p style="grid-column:1/-1;font-size:1.3rem">Recebido, ' + n.split(' ')[0] + '. Um advogado chama você no WhatsApp em até 24 horas.</p>';
+    window.BR_WA && window.BR_WA('Olá, Aguiar & Monteiro! Sou ' + n + ', saí da empresa ' + (c.emp.value.trim() || '(não informada)') + ' e quero falar com um advogado sobre o meu caso.');
+    c.innerHTML = '<p style="font-size:1.3rem;color:#fff">Recebido, ' + n.split(' ')[0] + '. Um advogado chama você no WhatsApp em até 24 horas.</p>';
   });
 })();

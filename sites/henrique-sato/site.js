@@ -14,7 +14,7 @@
   document.querySelector('.dores-lista').addEventListener('click', function (e) {
     var b = e.target.closest('[data-dor]'); if (!b) return;
     [].forEach.call(document.querySelectorAll('[data-dor]'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-    $('.resposta').innerHTML = '<p>' + DOR[b.dataset.dor] + '</p><p style="margin-top:14px"><a class="link" href="#avaliacao">Agendar avaliação grátis</a></p>';
+    $('.resposta').innerHTML = '<p>' + DOR[b.dataset.dor] + '</p><p style="margin-top:14px"><a class="link" href="#form">Agendar avaliação grátis</a></p>';
   });
 
   // preços de partida por caso; sedação soma por sessão
@@ -22,7 +22,7 @@
   var calc = $('#calc');
   function conta() {
     var c = CASO[calc.q.value], sed = +calc.sed.value, total = c[1] + sed;
-    $('.qt-res').innerHTML = '<p><span>' + c[0] + '</span>' + (sed ? ' + <span>sedação</span>' : '') + '</p><p class="grande">' + real(total) + '</p><p>ou 24x de <b>' + real(Math.ceil(total / 24)) + '</b> · à vista no Pix ' + real(total * 0.92) + '</p><p style="font-size:.9rem">Inclui tomografia, cirurgia guiada, dente provisório em 72 h e definitivo com 10 anos de garantia.</p><a class="botao" href="#avaliacao">Confirmar na avaliação grátis</a>';
+    $('.qt-res').innerHTML = '<p><span>' + c[0] + '</span>' + (sed ? ' + <span>sedação</span>' : '') + '</p><p class="grande">' + real(total) + '</p><p>ou 24x de <b>' + real(Math.ceil(total / 24)) + '</b> · à vista no Pix ' + real(total * 0.92) + '</p><p style="font-size:.9rem">Inclui tomografia, cirurgia guiada, dente provisório em 72 h e definitivo com 10 anos de garantia.</p><a class="bt bt-amarelo" href="#form">Confirmar na avaliação grátis</a>';
     return c[0];
   }
   calc.addEventListener('change', conta); conta();

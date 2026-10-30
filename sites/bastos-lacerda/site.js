@@ -6,13 +6,13 @@
   var sem = function (s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); };
   // sócio: nome, foto, área, formação
   var SO = [['Ricardo Bastos', 'a1', 'Tributário', 'mestre pela FGV, ex-conselheiro do CARF'], ['Helena Lacerda', 'a3', 'Trabalhista empresarial', 'especialista pela PUC-SP, 22 anos de contencioso'], ['Marcelo Viana', 'a2', 'Contratos e cobrança', 'LL.M. pela Columbia, contratos internacionais'], ['Camila Duarte', 'a4', 'Societário, M&A e LGPD', 'DPO certificada, 140 operações de M&A']];
-  // área: palavras, sócio, prazo, custo, primeiro passo
+  // área: palavras, sócio, prazo, documentos, primeiro passo
   var AR = [
-    ['Tributário', ['receita', 'autuac', 'imposto', 'pis', 'cofins', 'icms', 'tribut', 'fisco', 'multa fiscal', 'iss'], 0, '30 dias para a defesa administrativa', 'a partir de 8% do valor discutido', 'Não pague nem parcele antes de analisarmos: há prazo de 30 dias para impugnar.'],
-    ['Trabalhista empresarial', ['funcionario', 'empregado', 'trabalhista', 'reclamac', 'demiti', 'sindicato', 'ex-func', 'acao trabalh', 'clt'], 1, 'audiência em 60 a 120 dias', 'R$ 4.500 a R$ 12.000 por ação', 'Separe cartões de ponto, holerites e contrato: a defesa sai em até 15 dias.'],
-    ['Contratos e cobrança', ['contrato', 'nao paga', 'cobranc', 'inadimpl', 'divida', 'fornecedor', 'cliente', 'boleto', 'venceu'], 2, 'notificação em 48 h, ação em 2 semanas', 'êxito de 10% a 20% do recuperado', 'Uma notificação extrajudicial resolve 6 em cada 10 casos sem ir à justiça.'],
-    ['Societário e M&A', ['socio', 'sociedade', 'quotas', 'acordo de socios', 'tirar um socio', 'empresa', 'venda da empresa', 'investidor'], 3, '30 a 90 dias', 'a partir de R$ 15.000', 'Antes de qualquer conversa com o sócio, revisamos o contrato social e o acordo de sócios.'],
-    ['LGPD e incidentes de dados', ['dados', 'vazar', 'vazaram', 'lgpd', 'hacker', 'privacidade', 'anpd', 'incidente'], 3, 'comunicação à ANPD em até 3 dias úteis', 'plano de resposta a partir de R$ 9.000', 'Preserve os registros e não apague nada: o prazo legal de comunicação já está correndo.']
+    ['Tributário', ['receita', 'autuac', 'imposto', 'pis', 'cofins', 'icms', 'tribut', 'fisco', 'multa fiscal', 'iss'], 0, '30 dias para a defesa administrativa', 'auto de infração, notificações e as guias do período', 'Não pague nem parcele antes de analisarmos: há prazo de 30 dias para impugnar.'],
+    ['Trabalhista empresarial', ['funcionario', 'empregado', 'trabalhista', 'reclamac', 'demiti', 'sindicato', 'ex-func', 'acao trabalh', 'clt'], 1, 'audiência em 60 a 120 dias', 'cartões de ponto, holerites e contrato de trabalho', 'Separe cartões de ponto, holerites e contrato: a defesa sai em até 15 dias.'],
+    ['Contratos e cobrança', ['contrato', 'nao paga', 'cobranc', 'inadimpl', 'divida', 'fornecedor', 'cliente', 'boleto', 'venceu'], 2, 'notificação em 48 h, ação em 2 semanas', 'contrato, notas fiscais e conversas da cobrança', 'Antes de ir à justiça, uma notificação extrajudicial formaliza a cobrança e conta prazo.'],
+    ['Societário e M&A', ['socio', 'sociedade', 'quotas', 'acordo de socios', 'tirar um socio', 'empresa', 'venda da empresa', 'investidor'], 3, '30 a 90 dias', 'contrato social, alterações e acordo de sócios', 'Antes de qualquer conversa com o sócio, revisamos o contrato social e o acordo de sócios.'],
+    ['LGPD e incidentes de dados', ['dados', 'vazar', 'vazaram', 'lgpd', 'hacker', 'privacidade', 'anpd', 'incidente'], 3, 'comunicação à ANPD em até 3 dias úteis', 'registros do sistema e a lista do que vazou', 'Preserve os registros e não apague nada: o prazo legal de comunicação já está correndo.']
   ];
   function achar(t) {
     var q = sem(t), melhor = null, pts = 0;
@@ -28,7 +28,7 @@
     for (var k = 0; dias.length < 3; k++) { var d = new Date(); d.setDate(d.getDate() + k); if (d.getDay() % 6) dias.push(d); }
     var h = dias.map(function (d, i) { return ['09:30', '14:00', '17:30'].filter(function (x, j) { var hj = d.toDateString() === new Date().toDateString(); return (!hj || +x.slice(0, 2) > new Date().getHours() + 3) && (d.getDate() + j + a[2]) % 3; }).map(function (x) { var r = (i === 0 && d.toDateString() === new Date().toDateString() ? 'hoje' : d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' })) + ' ' + x; return '<button type="button" data-slot="' + r + '" aria-pressed="false">' + r + '</button>'; }).join(''); }).join('');
     res.hidden = false; slot = '';
-    res.innerHTML = '<div class="rs"><div class="rs-a"><p class="area">' + a[0].toUpperCase() + '</p><h3>' + a[5] + '</h3><dl><div><dt>prazo típico</dt><dd>' + a[3] + '</dd></div><div><dt>honorários</dt><dd>' + a[4] + '</dd></div><div><dt>primeira resposta</dt><dd>até 4 horas</dd></div></dl></div>' +
+    res.innerHTML = '<div class="rs"><div class="rs-a"><p class="area">' + a[0].toUpperCase() + '</p><h3>' + a[5] + '</h3><dl><div><dt>prazo típico</dt><dd>' + a[3] + '</dd></div><div><dt>o que separar</dt><dd>' + a[4] + '</dd></div><div><dt>primeira resposta</dt><dd>até 4 horas</dd></div></dl></div>' +
       '<div class="rs-b"><img src="img/' + s[1] + '.webp" alt="' + s[0] + '"><div><p style="margin:0;color:var(--marfim);font-size:.8rem">sócio responsável</p><h3 style="margin:2px 0 4px">' + s[0] + '</h3><p style="margin:0;color:var(--marfim);font-size:.84rem">' + s[3] + '</p></div><div class="slots">' + h + '</div><a class="botao" href="#" data-wa-socio data-wa="Olá, Bastos Lacerda! Quero falar com ' + s[0] + ' sobre: ' + t.replace(/"/g, '') + '">Pedir conversa por vídeo</a></div></div>';
   }
   $('#prob').addEventListener('input', mostrar);

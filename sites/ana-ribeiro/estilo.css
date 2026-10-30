@@ -1,73 +1,101 @@
-/* Ana Ribeiro · Cashmere (paletas do dono, post 5): Cashmere Brown, Warm Taupe, Soft Cashmere, Cream Knit. Editorial e pessoal. */
+/* Ana Ribeiro · corretora em Florianópolis: branco, azul-petróleo do mar e coral do pôr do sol; Plus Jakarta em tudo; busca de comprar e vender no centro da foto, como nos portais grandes; a Ana num selo de carta */
 :root {
-  --fundo: #f4f0e4; --branco: #fff; --tx: #322723; --tx-2: #8e7463; --cash: #d6c6ad; --linha: rgba(50, 39, 35, .15);
-  --acc: #322723;
-  --serif: 'Instrument Serif', Georgia, serif; --f: 'DM Sans', system-ui, sans-serif;
+  --mar: #0b4f5c; --mar-2: #0d6373; --coral: #ff7a59; --coral-2: #f0623f; --areia: #f6f2ec; --fundo: #fff; --tx: #10262b; --tx-2: #5a6c70; --linha: #dfe5e4; --branco: #fff;
+  --f: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body { margin: 0; background: var(--fundo); color: var(--tx); font: 400 16px/1.6 var(--f); -webkit-font-smoothing: antialiased; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+html, body { overflow-x: clip; }
+body { margin: 0; background: var(--branco); color: var(--tx); font: 400 16.5px/1.6 var(--f); -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; height: auto; display: block; }
+h1, h2, h3 { font-weight: 800; margin: 0; letter-spacing: -.035em; line-height: 1.04; text-wrap: balance; }
+h2 { font-size: clamp(32px, 4vw, 54px); }
+p { margin: 0; }
 a { color: inherit; }
-h1, h2 { font-family: var(--serif); font-weight: 400; line-height: .98; letter-spacing: -.02em; margin: 0 0 .4em; text-wrap: balance; }
-h1 { font-size: clamp(3rem, 7vw, 6.4rem); } h1 i { color: var(--tx-2); }
-h2 { font-size: clamp(2.2rem, 4.4vw, 3.8rem); }
-p { margin: 0 0 1em; text-wrap: pretty; }
-:focus-visible { outline: 2px solid var(--tx); outline-offset: 3px; }
-.pular { position: absolute; left: -999px; } .pular:focus { left: 8px; top: 8px; background: #fff; padding: 8px; z-index: 99; }
+:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.pular { position: absolute; left: -999px; } .pular:focus { left: 16px; top: 12px; z-index: 99; background: var(--branco); padding: 8px 14px; }
 
-.topo { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px clamp(16px, 4vw, 48px); }
-.marca { font-family: var(--serif); font-size: 1.7rem; text-decoration: none; } .marca em { color: var(--tx-2); }
-.lados { display: flex; border: 1px solid var(--tx); border-radius: 999px; overflow: hidden; }
-.lados a { text-decoration: none; padding: 9px 16px; font-weight: 500; font-size: .9rem; } .lados a + a { background: var(--tx); color: var(--fundo); }
+.botao { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0 24px; border: 0; border-radius: 12px; background: var(--coral); color: var(--branco); font: 700 15.5px/1.2 var(--f); text-decoration: none; cursor: pointer; text-align: center; transition: background .2s, transform .15s; }
+.botao:hover { background: var(--coral-2); } .botao:active { transform: translateY(1px); }
 
-.botao { display: inline-block; border: 0; cursor: pointer; text-decoration: none; text-align: center; background: var(--tx); color: var(--fundo); font: 500 1rem var(--f); padding: 16px 26px; border-radius: 999px; transition: background .2s, transform .15s; }
-.botao:hover { background: #4d3c35; } .botao:active { transform: translateY(1px); }
+.topo { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 28px; padding: 12px clamp(16px, 4vw, 48px); background: rgba(255, 255, 255, .94); backdrop-filter: blur(10px); border-bottom: 1px solid var(--linha); }
+.marca { display: grid; font: 800 22px/1.1 var(--f); letter-spacing: -.03em; text-decoration: none; color: var(--mar); }
+.marca small { font-weight: 500; font-size: 12.5px; color: var(--tx-2); letter-spacing: 0; }
+.menu { display: flex; gap: 26px; margin-left: auto; font-weight: 600; font-size: 15px; } .menu a { text-decoration: none; color: var(--tx-2); } .menu a:hover { color: var(--tx); }
+.topo .botao { min-height: 42px; }
 
-section { padding: clamp(56px, 8vw, 110px) clamp(16px, 4vw, 48px); max-width: 1320px; margin: 0 auto; }
-.abre { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: clamp(24px, 4vw, 64px); align-items: end; padding-top: clamp(24px, 4vw, 48px); }
-.abre-txt > p { font-size: 1.12rem; color: var(--tx-2); max-width: 48ch; }
-.assina { font-size: .92rem !important; color: var(--tx) !important; border-top: 1px solid var(--linha); padding-top: 14px; }
-.abre-foto { margin: 0; } .abre-foto img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 60% 30%; border-radius: 240px 240px 0 0; display: block; }
-@media (max-width: 860px) { .abre { grid-template-columns: 1fr; } .abre-foto img { aspect-ratio: 1; max-width: 420px; } }
+/* abertura: foto da rua em tela cheia, título centralizado e a caixa de comprar ou vender no meio */
+.abre { position: relative; isolation: isolate; display: grid; justify-items: center; gap: 28px; padding: clamp(56px, 8vw, 104px) clamp(16px, 4vw, 48px) clamp(48px, 6vw, 80px); text-align: center; }
+.abre-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.abre::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(11, 79, 92, .78), rgba(11, 79, 92, .45) 60%, rgba(11, 79, 92, .7)); }
+.abre h1 { color: var(--branco); font-size: clamp(40px, 6vw, 86px); max-width: 13em; }
+.busca { width: min(860px, 100%); text-align: left; }
+.abas { display: flex; gap: 4px; }
+.abas button { border: 0; border-radius: 14px 14px 0 0; padding: 14px 22px; background: rgba(255, 255, 255, .22); color: var(--branco); font: 700 15.5px var(--f); cursor: pointer; }
+.abas [aria-selected=true] { background: var(--branco); color: var(--mar); }
+.painel { background: var(--branco); border-radius: 0 18px 18px 18px; padding: clamp(20px, 3vw, 30px); box-shadow: 0 40px 80px -40px rgba(4, 30, 36, .7); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(20px, 3vw, 36px); }
+.painel[hidden] { display: none; }
+.fin { display: grid; gap: 16px; }
+.fin label, .aval label { display: grid; gap: 4px; font-weight: 600; font-size: 14.5px; }
+.fin output { font-size: 22px; font-weight: 800; letter-spacing: -.02em; color: var(--mar); }
+.fin input[type=range] { width: 100%; accent-color: var(--coral); }
+.fin-res { background: var(--mar); color: #cfe3e6; border-radius: 14px; padding: 20px; display: grid; gap: 4px; align-content: start; font-size: 14.5px; }
+.fin-res .grande { font-size: clamp(34px, 3.6vw, 46px); font-weight: 800; letter-spacing: -.04em; color: var(--branco); line-height: 1.05; margin: 4px 0 6px; }
+.fin-res .botao { white-space: normal; }
+.aval { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: end; }
+.aval select, .aval input[type=number] { min-height: 48px; padding: 0 12px; border: 1.5px solid var(--linha); border-radius: 10px; font: 500 16px var(--f); color: var(--tx); background: var(--branco); width: 100%; min-width: 0; }
+.aval .ck { display: flex; align-items: center; gap: 10px; grid-column: 1 / -1; } .aval .ck input { width: 20px; height: 20px; accent-color: var(--mar); }
+.aval-res { grid-column: 1 / -1; display: grid; gap: 4px; background: var(--areia); border-radius: 14px; padding: 18px; font-size: 14.5px; }
+.aval-res b { font-size: clamp(26px, 3vw, 36px); letter-spacing: -.03em; color: var(--mar); }
+.aval .botao { grid-column: 1 / -1; justify-self: start; }
 
-.comprar { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(24px, 4vw, 56px); align-items: start; border-top: 1px solid var(--linha); }
-.cp-calc { position: sticky; top: 20px; }
-.fin { display: grid; gap: 20px; margin: 10px 0 20px; }
-.fin label { display: grid; gap: 6px; font-weight: 500; color: var(--tx-2); font-size: .92rem; }
-.fin output { font-family: var(--serif); font-size: 2.2rem; color: var(--tx); line-height: 1; }
-.fin input { width: 100%; accent-color: var(--tx); }
-.fin-res { background: var(--tx); color: var(--fundo); border-radius: 26px; padding: 24px; }
-.fin-res .grande { font-family: var(--serif); font-size: clamp(2.6rem, 5vw, 3.8rem); line-height: 1; margin: 4px 0 8px; }
-.fin-res p { color: var(--cash); margin-bottom: .5em; }
-.cp-tit { font-family: var(--serif); font-size: 1.7rem; margin-bottom: 14px; }
-.imoveis { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.imovel { background: var(--branco); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; }
-.imovel img { width: 100%; height: 200px; object-fit: cover; display: block; }
-.imovel div { padding: 16px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.imovel b { font-family: var(--serif); font-size: 1.7rem; font-weight: 400; line-height: 1; }
-.imovel span { color: var(--tx-2); font-size: .9rem; }
-.imovel .cabe { color: #3f7a4f; font-weight: 600; font-size: .84rem; } .imovel .nao { color: #a14a2a; }
-.imovel a { margin-top: auto; padding-top: 8px; font-weight: 500; }
-.imovel.fora { opacity: .45; }
-@media (max-width: 900px) { .comprar { grid-template-columns: 1fr; } .cp-calc { position: relative; top: 0; } }
-@media (max-width: 520px) { .imoveis { grid-template-columns: 1fr; } }
+/* destaques: cartões de anúncio, com selo dizendo se cabe no financiamento simulado acima */
+.imoveis-sec, .ana, .como { max-width: 1280px; margin: 0 auto; padding: clamp(64px, 9vw, 112px) clamp(16px, 4vw, 48px) 0; }
+.cp-tit { color: var(--tx-2); margin: 10px 0 28px; font-weight: 600; }
+.imoveis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.imovel { display: grid; align-content: start; gap: 12px; transition: opacity .3s; }
+.imovel img { width: 100%; aspect-ratio: 4 / 3.2; object-fit: cover; border-radius: 16px; }
+.imovel > div { display: grid; gap: 4px; }
+.imovel b { font-size: 24px; letter-spacing: -.03em; }
+.imovel span { color: var(--tx-2); font-size: 14.5px; }
+.imovel .cabe { color: var(--mar); font-weight: 700; } .imovel .nao { color: var(--coral-2); }
+.imovel a { font-weight: 700; color: var(--coral-2); margin-top: 4px; }
+.imovel.fora img { filter: grayscale(.7); opacity: .7; }
 
-.vender { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; background: var(--cash); border-radius: 36px; }
-.vender > img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 26px; display: block; }
-.vender p { color: #5a4a40; }
-.aval { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.aval label { display: grid; gap: 4px; font-size: .86rem; font-weight: 500; }
-.aval input, .aval select { font: 500 1rem var(--f); padding: 13px 14px; border-radius: 14px; border: 1px solid var(--linha); background: var(--fundo); color: var(--tx); }
-.aval .ck { display: flex; align-items: center; gap: 8px; } .aval .ck input { width: 18px; height: 18px; accent-color: var(--tx); }
-.aval-res, .aval .botao { grid-column: 1 / -1; }
-.aval-res { background: var(--fundo); border-radius: 20px; padding: 18px; }
-.aval-res b { font-family: var(--serif); font-size: 2.2rem; font-weight: 400; display: block; line-height: 1.05; }
-@media (max-width: 860px) { .vender { grid-template-columns: 1fr; } .vender > img { aspect-ratio: 16 / 10; } }
+/* quem é a Ana: foto num selo de carta com a borda picotada */
+.ana { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
+.selo { margin: 0; padding: 16px; transform: rotate(-3deg); filter: drop-shadow(0 22px 30px rgba(11, 79, 92, .22));
+  background: radial-gradient(circle, transparent 6px, var(--branco) 6.5px) -10px -10px / 20px 20px; }
+.selo img { width: 100%; aspect-ratio: 4 / 4.4; object-fit: cover; object-position: 62% 30%; }
+.ana > div > p { color: var(--tx-2); margin-top: 16px; max-width: 32em; font-size: 17.5px; }
+.nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 28px 0 0; padding: 22px 0; border-top: 1px solid var(--linha); border-bottom: 1px solid var(--linha); }
+.nums dt { font-size: clamp(26px, 2.6vw, 36px); font-weight: 800; letter-spacing: -.04em; color: var(--mar); }
+.nums dd { margin: 2px 0 0; font-size: 14px; color: var(--tx-2); }
+.vozes { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 14px; }
+.vozes li { display: grid; gap: 4px; padding-left: 18px; border-left: 3px solid var(--coral); }
+.vozes q { font-weight: 600; font-size: 16.5px; } .vozes span { color: var(--tx-2); font-size: 14px; }
 
-.vozes ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
-.vozes q { display: block; font-family: var(--serif); font-size: 1.7rem; line-height: 1.15; quotes: none; margin-bottom: 12px; }
-.vozes span { color: var(--tx-2); font-size: .9rem; }
-@media (max-width: 860px) { .vozes ul { grid-template-columns: 1fr; } }
-.flutua { position: fixed; right: 16px; bottom: 76px; z-index: 50; background: #1fae63; color: #fff; text-decoration: none; font-weight: 600; padding: 13px 18px; border-radius: 999px; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .4); }
-.rodape { text-align: center; padding: 20px 16px 96px; font-size: .8rem; color: var(--tx-2); }
+.como { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
+.como img { width: 100%; aspect-ratio: 4 / 3.4; object-fit: cover; border-radius: 24px; }
+.como ol { list-style: none; counter-reset: p; margin: 24px 0 28px; padding: 0; display: grid; gap: 16px; }
+.como li { counter-increment: p; display: grid; grid-template-columns: 40px 1fr; column-gap: 14px; color: var(--tx-2); }
+.como li::before { content: counter(p); grid-row: span 2; width: 36px; height: 36px; border-radius: 50%; background: var(--areia); color: var(--mar); font-weight: 800; display: grid; place-items: center; }
+.como li b { color: var(--tx); font-size: 17px; }
+
+.rodape { max-width: 1280px; margin: 72px auto 0; padding: 22px clamp(16px, 4vw, 48px) 110px; color: var(--tx-2); font-size: 14px; border-top: 1px solid var(--linha); }
+
+@media (max-width: 960px) {
+  .menu { display: none; } .topo .botao { margin-left: auto; }
+  .painel { grid-template-columns: 1fr; }
+  .imoveis { grid-template-columns: 1fr 1fr; }
+  .ana, .como { grid-template-columns: 1fr; }
+  .selo { max-width: 380px; }
+}
+@media (max-width: 560px) {
+  .marca { font-size: 19px; } .marca small { display: none; } .topo .botao { padding: 0 14px; font-size: 14px; }
+  .abas button { padding: 12px 16px; font-size: 14.5px; }
+  .aval { grid-template-columns: 1fr 1fr; } .aval label:first-child { grid-column: 1 / -1; }
+  .imoveis { grid-template-columns: 1fr; } .imovel { grid-template-columns: 130px 1fr; align-items: center; } .imovel img { aspect-ratio: 1; border-radius: 12px; } .imovel b { font-size: 20px; }
+  .nums { gap: 10px; } .nums dd { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }

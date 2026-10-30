@@ -60,10 +60,10 @@
     $('.horarios').innerHTML = '<h3 style="margin:0">' + u[0] + '</h3><p style="margin:0;color:var(--tx-2)">' + oque + '</p>' +
       '<div class="dias">' + dias.map(function (x, k) { return '<button type="button" data-d="' + k + '" aria-pressed="' + (k === diaSel) + '">' + (k === 0 && x.toDateString() === new Date().toDateString() ? 'Hoje' : x.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' })) + '</button>'; }).join('') + '</div>' +
       (slots.length ? '<div class="slots">' + slots.slice(0, 16).map(function (s) { return '<button type="button" data-h="' + s + '" aria-pressed="' + (s === horaSel) + '">' + s + '</button>'; }).join('') + '</div>' : '<p>Sem horário hoje. Veja amanhã.</p>') +
-      '<a class="botao" href="#" data-wa="Olá, Sorriso Prime! Quero ' + oque.toLowerCase() + ' na unidade ' + u[0] + (horaSel ? ', ' + d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' }) + ' às ' + horaSel : '') + '.">' + (horaSel ? 'Reservar ' + horaSel : 'Escolha um horário') + '</a>';
+      '<a class="bt bt-verde" href="#" data-wa="Olá, Sorriso Prime! Quero ' + oque.toLowerCase() + ' na unidade ' + u[0] + (horaSel ? ', ' + d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' }) + ' às ' + horaSel : '') + '.">' + (horaSel ? 'Reservar ' + horaSel : 'Escolha um horário') + '</a>';
   }
   document.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-u]'); if (b) { abrir(+b.dataset.u); return; }
+    var b = e.target.closest('[data-u]'); if (b) { abrir(+b.dataset.u); if (innerWidth < 960) $('.horarios').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; } // no celular os horários ficam abaixo da lista
     var d = e.target.closest('.horarios [data-d]'); if (d) { diaSel = +d.dataset.d; horaSel = ''; desenharHorarios(); return; }
     var h = e.target.closest('.horarios [data-h]'); if (h) { horaSel = h.dataset.h; desenharHorarios(); }
   });
@@ -77,8 +77,8 @@
     var q = sem($('#plano').value.trim()), r = $('.cv-res');
     if (q.length < 3) { r.innerHTML = '<p style="color:var(--tx-2)">Aceitamos ' + Object.keys(PL).length * 4 + ' planos, entre eles Odontoprev, Amil, SulAmérica, Bradesco e MetLife.</p>'; return; }
     var k = Object.keys(PL).find(function (p) { return p.indexOf(q) > -1 || q.indexOf(p.split(' ')[0]) > -1; });
-    if (!k) { r.innerHTML = '<p><b>Não achamos esse plano.</b> Atendemos particular com 20% de desconto para quem não tem convênio, em até 18x.</p><a class="botao" href="#" data-wa="Olá! Meu plano é ' + $('#plano').value.trim() + '. Vocês atendem?">Perguntar pelo WhatsApp</a>'; return; }
-    r.innerHTML = '<p><b style="text-transform:capitalize">' + k + '</b> é aceito em todas as 9 unidades.</p><ul>' + COB.map(function (c, i) { return '<li>' + c + (PL[k][i] ? '<span class="sim">coberto</span>' : '<span class="nao">particular, com 20% off</span>') + '</li>'; }).join('') + '</ul><a class="botao" href="#unidades">Agendar pelo convênio</a>';
+    if (!k) { r.innerHTML = '<p><b>Não achamos esse plano.</b> Atendemos particular com 20% de desconto para quem não tem convênio, em até 18x.</p><a class="bt bt-verde" href="#" data-wa="Olá! Meu plano é ' + $('#plano').value.trim() + '. Vocês atendem?">Perguntar pelo WhatsApp</a>'; return; }
+    r.innerHTML = '<p><b style="text-transform:capitalize">' + k + '</b> é aceito em todas as 9 unidades.</p><ul>' + COB.map(function (c, i) { return '<li>' + c + (PL[k][i] ? '<span class="sim">coberto</span>' : '<span class="nao">particular, com 20% off</span>') + '</li>'; }).join('') + '</ul><a class="bt bt-verde" href="#unidades">Agendar pelo convênio</a>';
   }
   $('#plano').addEventListener('input', cv); cv();
 
@@ -91,7 +91,7 @@
   ];
   function aba(i) {
     $$('[data-aba]').forEach(function (b) { b.setAttribute('aria-selected', String(+b.dataset.aba === i)); });
-    $('.aba-painel').innerHTML = AB[i].map(function (t) { return '<article class="item"><b>' + t[0] + '</b><p>' + t[1] + '</p><p class="pr">' + t[2] + '<small>' + t[3] + '</small></p><a class="botao" href="#" data-wa="Olá, Sorriso Prime! Quero agendar ' + t[0].toLowerCase() + '.">Agendar</a></article>'; }).join('');
+    $('.aba-painel').innerHTML = AB[i].map(function (t) { return '<article class="item"><b>' + t[0] + '</b><p>' + t[1] + '</p><p class="pr">' + t[2] + '<small>' + t[3] + '</small></p><a class="bt bt-verde" href="#" data-wa="Olá, Sorriso Prime! Quero agendar ' + t[0].toLowerCase() + '.">Agendar</a></article>'; }).join('');
   }
   $('.abas').addEventListener('click', function (e) { var b = e.target.closest('[data-aba]'); if (b) aba(+b.dataset.aba); }); aba(0);
 

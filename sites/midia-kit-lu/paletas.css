@@ -1,0 +1,56 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/midia-kit-lu/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --fundo: #efe6da; --papel: #f7f2eb; --tx: #1b262e; --tx-2: #566a7a; --linha: #ddbeb1; --mocha: #613b2c; --champ: #c9866b; }
+html[data-paleta="pt-PT"] .pular:focus { background: #ffffff; }
+html[data-paleta="pt-PT"] .botao:hover { background: #492a1d; }
+html[data-paleta="pt-PT"] .topo { background: rgba(239, 230, 218, .9); }
+html[data-paleta="pt-PT"] .capa h1 { text-shadow: 0 2px 30px rgba(239, 230, 218, .7); }
+html[data-paleta="pt-PT"] .nu-publico p { border-bottom: 1px solid rgba(247, 242, 235, .2); }
+@media print {
+html[data-paleta="pt-PT"] body { background: #ffffff; }
+html[data-paleta="pt-PT"] .pacotes { background: #ffffff; }
+html[data-paleta="pt-PT"] .nu-publico { background: #f3ebe0; }
+}
+html[data-paleta="es"] { --fundo: #efe5da; --papel: #f8f2ea; --tx: #2c1d20; --tx-2: #7a565d; --linha: #dcb2b2; --mocha: #612c2d; --champ: #c86c6d; }
+html[data-paleta="es"] .pular:focus { background: #ffffff; }
+html[data-paleta="es"] .botao:hover { background: #491d1e; }
+html[data-paleta="es"] .topo { background: rgba(239, 229, 218, .9); }
+html[data-paleta="es"] .capa h1 { text-shadow: 0 2px 30px rgba(239, 229, 218, .7); }
+html[data-paleta="es"] .nu-publico p { border-bottom: 1px solid rgba(248, 242, 234, .2); }
+@media print {
+html[data-paleta="es"] body { background: #ffffff; }
+html[data-paleta="es"] .pacotes { background: #ffffff; }
+html[data-paleta="es"] .nu-publico { background: #f3eae0; }
+}
+html[data-paleta="en"] { --fundo: #dae0ef; --papel: #eaeef8; --tx: #1b1f2e; --tx-2: #565e7a; --linha: #e0aeb1; --mocha: #65282c; --champ: #ce666c; }
+html[data-paleta="en"] .pular:focus { background: #ffffff; }
+html[data-paleta="en"] .botao:hover { background: #4c1a1d; }
+html[data-paleta="en"] .topo { background: rgba(218, 224, 239, .9); }
+html[data-paleta="en"] .capa h1 { text-shadow: 0 2px 30px rgba(218, 224, 239, .7); }
+html[data-paleta="en"] .nu-publico p { border-bottom: 1px solid rgba(234, 238, 248, .2); }
+@media print {
+html[data-paleta="en"] body { background: #ffffff; }
+html[data-paleta="en"] .pacotes { background: #ffffff; }
+html[data-paleta="en"] .nu-publico { background: #e0e5f3; }
+}
+html[data-paleta="it"] { --fundo: #eeeadb; --papel: #f6f4ec; --tx: #242c1d; --tx-2: #687a56; --linha: #dcbfb2; --mocha: #603d2d; --champ: #c8896c; }
+html[data-paleta="it"] .pular:focus { background: #ffffff; }
+html[data-paleta="it"] .botao:hover { background: #482b1e; }
+html[data-paleta="it"] .topo { background: rgba(238, 234, 219, .9); }
+html[data-paleta="it"] .capa h1 { text-shadow: 0 2px 30px rgba(238, 234, 219, .7); }
+html[data-paleta="it"] .nu-publico p { border-bottom: 1px solid rgba(246, 244, 236, .2); }
+@media print {
+html[data-paleta="it"] body { background: #ffffff; }
+html[data-paleta="it"] .pacotes { background: #ffffff; }
+html[data-paleta="it"] .nu-publico { background: #f1eee2; }
+}
+html[data-paleta="fr"] { --fundo: #e5daef; --papel: #f1ebf7; --tx: #1f1b2e; --tx-2: #5e567a; --linha: #bcb5d9; --mocha: #39305d; --champ: #8171c3; }
+html[data-paleta="fr"] .pular:focus { background: #ffffff; }
+html[data-paleta="fr"] .botao:hover { background: #282046; }
+html[data-paleta="fr"] .topo { background: rgba(229, 218, 239, .9); }
+html[data-paleta="fr"] .capa h1 { text-shadow: 0 2px 30px rgba(229, 218, 239, .7); }
+html[data-paleta="fr"] .nu-publico p { border-bottom: 1px solid rgba(241, 235, 247, .2); }
+@media print {
+html[data-paleta="fr"] body { background: #ffffff; }
+html[data-paleta="fr"] .pacotes { background: #ffffff; }
+html[data-paleta="fr"] .nu-publico { background: #eae0f3; }
+}

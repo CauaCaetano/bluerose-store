@@ -1,0 +1,111 @@
+/* Gerado por tools/gerar_paletas_sistemas.py a partir de sites/midia-kit-rafa/estilo.css: cores por idioma. Não editar à mão. */
+html[data-paleta="pt-PT"] { --fundo: #16191b; --fundo-2: #1f2326; --tx: #f0eeea; --tx-2: #a8a39c; --linha: #30363a; --acc: #e58056; --acc-tx: #16191b; --laranja: #eb9651; }
+html[data-paleta="pt-PT"] .botao:hover { box-shadow: 0 0 0 4px rgba(229, 128, 86, .25); }
+html[data-paleta="pt-PT"] .capa::after { background: linear-gradient(180deg, rgba(22, 25, 27, .1) 30%, rgba(22, 25, 27, .96) 88%); }
+html[data-paleta="pt-PT"] .lede { color: #d9d5d0; }
+html[data-paleta="pt-PT"] .pu-txt p { color: #d9d5d0; }
+html[data-paleta="pt-PT"] .tr-grade figcaption { background: linear-gradient(transparent, rgba(22, 25, 27, .92)); }
+html[data-paleta="pt-PT"] .cs-lista span { color: #d9d5d0; }
+html[data-paleta="pt-PT"] .series li { background: rgba(22, 25, 27, .08); }
+@media print {
+html[data-paleta="pt-PT"] body { background: #ffffff; color: #16191b; }
+html[data-paleta="pt-PT"] .placar-grade li,
+html[data-paleta="pt-PT"] .medidor,
+html[data-paleta="pt-PT"] .ficha { background: #f4f2ee; color: #16191b; }
+html[data-paleta="pt-PT"] .placar-grade b,
+html[data-paleta="pt-PT"] .ficha-total b,
+html[data-paleta="pt-PT"] .cs-lista em,
+html[data-paleta="pt-PT"] .handle,
+html[data-paleta="pt-PT"] .ct-linha { color: #5d250e; }
+html[data-paleta="pt-PT"] .placar-grade li:first-child b,
+html[data-paleta="pt-PT"] .pu-txt p,
+html[data-paleta="pt-PT"] .cs-lista span { color: #16191b; }
+}
+html[data-paleta="es"] { --fundo: #1b1617; --fundo-2: #261f20; --tx: #f0edea; --tx-2: #a8a29c; --linha: #3a3032; --acc: #e45758; --acc-tx: #1b1617; --laranja: #eebd4e; }
+html[data-paleta="es"] .botao:hover { box-shadow: 0 0 0 4px rgba(228, 87, 88, .25); }
+html[data-paleta="es"] .capa::after { background: linear-gradient(180deg, rgba(27, 22, 23, .1) 30%, rgba(27, 22, 23, .96) 88%); }
+html[data-paleta="es"] .lede { color: #d9d5d0; }
+html[data-paleta="es"] .pu-txt p { color: #d9d5d0; }
+html[data-paleta="es"] .tr-grade figcaption { background: linear-gradient(transparent, rgba(27, 22, 23, .92)); }
+html[data-paleta="es"] .cs-lista span { color: #d9d5d0; }
+html[data-paleta="es"] .series li { background: rgba(27, 22, 23, .08); }
+@media print {
+html[data-paleta="es"] body { background: #ffffff; color: #1b1617; }
+html[data-paleta="es"] .placar-grade li,
+html[data-paleta="es"] .medidor,
+html[data-paleta="es"] .ficha { background: #f4f1ee; color: #1b1617; }
+html[data-paleta="es"] .placar-grade b,
+html[data-paleta="es"] .ficha-total b,
+html[data-paleta="es"] .cs-lista em,
+html[data-paleta="es"] .handle,
+html[data-paleta="es"] .ct-linha { color: #5c0f0f; }
+html[data-paleta="es"] .placar-grade li:first-child b,
+html[data-paleta="es"] .pu-txt p,
+html[data-paleta="es"] .cs-lista span { color: #1b1617; }
+}
+html[data-paleta="en"] { --fundo: #16171b; --fundo-2: #1f2126; --tx: #eaecf0; --tx-2: #9c9fa8; --linha: #30323a; --acc: #ea515a; --acc-tx: #16171b; --laranja: #4c82f0; }
+html[data-paleta="en"] .botao:hover { box-shadow: 0 0 0 4px rgba(234, 81, 90, .25); }
+html[data-paleta="en"] .capa::after { background: linear-gradient(180deg, rgba(22, 23, 27, .1) 30%, rgba(22, 23, 27, .96) 88%); }
+html[data-paleta="en"] .lede { color: #d0d3d9; }
+html[data-paleta="en"] .pu-txt p { color: #d0d3d9; }
+html[data-paleta="en"] .tr-grade figcaption { background: linear-gradient(transparent, rgba(22, 23, 27, .92)); }
+html[data-paleta="en"] .cs-lista span { color: #d0d3d9; }
+html[data-paleta="en"] .series li { background: rgba(22, 23, 27, .08); }
+@media print {
+html[data-paleta="en"] body { background: #ffffff; color: #16171b; }
+html[data-paleta="en"] .placar-grade li,
+html[data-paleta="en"] .medidor,
+html[data-paleta="en"] .ficha { background: #eef0f4; color: #16171b; }
+html[data-paleta="en"] .placar-grade b,
+html[data-paleta="en"] .ficha-total b,
+html[data-paleta="en"] .cs-lista em,
+html[data-paleta="en"] .handle,
+html[data-paleta="en"] .ct-linha { color: #600b10; }
+html[data-paleta="en"] .placar-grade li:first-child b,
+html[data-paleta="en"] .pu-txt p,
+html[data-paleta="en"] .cs-lista span { color: #16171b; }
+}
+html[data-paleta="it"] { --fundo: #181b16; --fundo-2: #22261f; --tx: #f0efea; --tx-2: #a8a69c; --linha: #353a30; --acc: #e48457; --acc-tx: #181b16; --laranja: #e3b559; }
+html[data-paleta="it"] .botao:hover { box-shadow: 0 0 0 4px rgba(228, 132, 87, .25); }
+html[data-paleta="it"] .capa::after { background: linear-gradient(180deg, rgba(24, 27, 22, .1) 30%, rgba(24, 27, 22, .96) 88%); }
+html[data-paleta="it"] .lede { color: #d9d7d0; }
+html[data-paleta="it"] .pu-txt p { color: #d9d7d0; }
+html[data-paleta="it"] .tr-grade figcaption { background: linear-gradient(transparent, rgba(24, 27, 22, .92)); }
+html[data-paleta="it"] .cs-lista span { color: #d9d7d0; }
+html[data-paleta="it"] .series li { background: rgba(24, 27, 22, .08); }
+@media print {
+html[data-paleta="it"] body { background: #ffffff; color: #181b16; }
+html[data-paleta="it"] .placar-grade li,
+html[data-paleta="it"] .medidor,
+html[data-paleta="it"] .ficha { background: #f4f3ee; color: #181b16; }
+html[data-paleta="it"] .placar-grade b,
+html[data-paleta="it"] .ficha-total b,
+html[data-paleta="it"] .cs-lista em,
+html[data-paleta="it"] .handle,
+html[data-paleta="it"] .ct-linha { color: #5c280f; }
+html[data-paleta="it"] .placar-grade li:first-child b,
+html[data-paleta="it"] .pu-txt p,
+html[data-paleta="it"] .cs-lista span { color: #181b16; }
+}
+html[data-paleta="fr"] { --fundo: #17161b; --fundo-2: #211f26; --tx: #edeaf0; --tx-2: #a29ca8; --linha: #32303a; --acc: #765cdf; --acc-tx: #17161b; --laranja: #7d5ede; }
+html[data-paleta="fr"] .botao:hover { box-shadow: 0 0 0 4px rgba(118, 92, 223, .25); }
+html[data-paleta="fr"] .capa::after { background: linear-gradient(180deg, rgba(23, 22, 27, .1) 30%, rgba(23, 22, 27, .96) 88%); }
+html[data-paleta="fr"] .lede { color: #d4d0d9; }
+html[data-paleta="fr"] .pu-txt p { color: #d4d0d9; }
+html[data-paleta="fr"] .tr-grade figcaption { background: linear-gradient(transparent, rgba(23, 22, 27, .92)); }
+html[data-paleta="fr"] .cs-lista span { color: #d4d0d9; }
+html[data-paleta="fr"] .series li { background: rgba(23, 22, 27, .08); }
+@media print {
+html[data-paleta="fr"] body { background: #ffffff; color: #17161b; }
+html[data-paleta="fr"] .placar-grade li,
+html[data-paleta="fr"] .medidor,
+html[data-paleta="fr"] .ficha { background: #f1eef4; color: #17161b; }
+html[data-paleta="fr"] .placar-grade b,
+html[data-paleta="fr"] .ficha-total b,
+html[data-paleta="fr"] .cs-lista em,
+html[data-paleta="fr"] .handle,
+html[data-paleta="fr"] .ct-linha { color: #20115a; }
+html[data-paleta="fr"] .placar-grade li:first-child b,
+html[data-paleta="fr"] .pu-txt p,
+html[data-paleta="fr"] .cs-lista span { color: #17161b; }
+}
