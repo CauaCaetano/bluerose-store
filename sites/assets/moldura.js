@@ -1,6 +1,6 @@
 /*
  * Moldura dos sites de exemplo (28/10/2026). O visual de cada site é dele; aqui fica só o que é de demonstração:
- *  - pílula "Quero um site assim" e "ver outros modelos";
+ *  - pílula "Quero um site assim", "ver outros modelos" e o preço de um site como este (plano Completo, o mesmo do catálogo);
  *  - [data-wa="mensagem"]: em vez de abrir o WhatsApp, mostra como o pedido chega (nada é enviado);
  *  - prévia para o cliente: ?nome=&cor= trocam a marca e a cor de destaque (--acc) só nesta aba;
  *    as cenas 3D escutam o evento "br-cor" para trocar a cor junto;
@@ -63,6 +63,7 @@
   pill.className = 'br-pill';
   pill.innerHTML = '<a class="br-pill-marca" href="' + raiz + 'exemplos.html' + (CAT ? '?c=' + CAT : '') + '"><b>BLUE ROSE</b><span>ver outros modelos</span></a>' +
     (perso && perso.nome ? '<span class="br-pill-perso">Prévia para <b>' + esc(perso.nome) + '</b> · <button type="button">desfazer</button></span>' : '') +
+    (CAT !== 'midia-kit' ? '<a class="br-pill-preco" href="' + urlQuero() + '"><b>R$ 1.490</b><span>site como este, pronto em 7 dias úteis</span></a>' : '') +
     '<a class="br-pill-cta" href="' + urlQuero() + '">Quero um site assim</a>';
   body.appendChild(pill);
   pill.querySelector('.br-pill-cta').addEventListener('click', function () { contar('quero', 'pilula'); });

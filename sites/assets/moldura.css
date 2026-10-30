@@ -4,12 +4,15 @@
 .br-pill-marca { display: flex; flex-direction: column; padding: 4px 12px; line-height: 1.15; }
 .br-pill-marca b { letter-spacing: .14em; font-size: 10px; }
 .br-pill-marca span { opacity: .7; }
+.br-pill-preco { display: flex; flex-direction: column; padding: 2px 12px 2px 10px; line-height: 1.15; border-left: 1px solid rgba(255, 255, 255, .18); white-space: nowrap; }
+.br-pill-preco b { font-size: 13px; }
+.br-pill-preco span { opacity: .7; font-size: 10px; }
 .br-pill-perso { padding: 0 8px; opacity: .85; white-space: nowrap; }
 .br-pill-perso button { background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 0; }
 .br-pill-cta { background: #fff; color: #111 !important; padding: 9px 14px; border-radius: 999px; font-weight: 650; white-space: nowrap; transition: transform .2s; }
 .br-pill-cta:hover { transform: translateY(-1px); }
 .br-pill a:focus-visible, .br-pill button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 999px; }
-@media (max-width: 520px) { .br-pill-marca span, .br-pill-perso { display: none; } }
+@media (max-width: 520px) { .br-pill-marca span, .br-pill-perso, .br-pill-preco span { display: none; } .br-pill-preco { justify-content: center; padding: 0 8px; } }
 
 .br-sim { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 16px; background: rgba(8, 10, 14, .62); backdrop-filter: blur(4px); font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; }
 .br-sim[hidden] { display: none; }
