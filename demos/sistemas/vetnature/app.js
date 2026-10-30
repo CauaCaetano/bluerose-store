@@ -415,14 +415,24 @@ function telaRelatorios() {
 
 
 // ---------------------------------------------------------------- CONFIGURAÇÕES
+// instalar o app: abre a conta pela porta (conta-nuvem.js troca o manifesto e cria window.veltriaInstalar); o que mudar no app
+// aparece no computador e na web, e o contrário também
+const APP_INSTALAR = `<div class="painel-conta" style="margin-top:14px"><p style="margin:0"><b>App no celular e no computador</b></p><p class="nota" style="margin:6px 0 10px">Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><div class="acoes"><button type="button" class="bt bt-pri" data-instalar>Instalar o app</button></div><p class="nota" data-instalar-msg role="status" style="margin:8px 0 0"></p></div>`;
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-instalar]'); if (!b) return;
+  const msg = b.closest('.painel-conta')?.querySelector('[data-instalar-msg]'), diz = (t) => { if (msg) msg.textContent = t; };
+  if (!window.veltriaInstalar) return diz('Na demonstração não instala. Entre na sua conta para instalar o seu app.');
+  const M = { instalado: 'Você já está no app instalado.', ok: 'Pronto: o app está na tela de início.', iphone: 'No iPhone: toque em Compartilhar e depois em Adicionar à Tela de Início.', manual: 'No menu do navegador (⋮), toque em Instalar app ou Adicionar à tela inicial.' };
+  window.veltriaInstalar().then((r) => { if (M[r]) diz(M[r]); });
+});
 const CFG = [['conta', 'Minha conta'], ['clinica', 'Clínica'], ['equipe', 'Equipe'], ['servicos', 'Serviços e preços'], ['agendamento', 'Agendamento online'], ['comissoes', 'Comissões'], ['fiscal', 'Nota fiscal'], ['ia', 'Assistente de IA'], ['dados', 'Cópia de segurança']];
 function telaConfig() {
   const c = db.config;
   const corpo = {
-    conta: () => CONTA ? `<div class="painel-conta"><p style="margin:0">Você está na conta da <b>${esc(window.veltriaConta?.empresa || db.clinica)}</b>. A mesma conta abre o sistema no computador e no celular, e cada pessoa da equipe entra com o próprio e-mail.</p>
+    conta: () => (CONTA ? `<div class="painel-conta"><p style="margin:0">Você está na conta da <b>${esc(window.veltriaConta?.empresa || db.clinica)}</b>. A mesma conta abre o sistema no computador e no celular, e cada pessoa da equipe entra com o próprio e-mail.</p>
       <div class="acoes"><button type="button" class="bt bt-pri" data-vc-ir="perfil">Perfil e painel do dono</button><button type="button" class="bt" data-vc-ir="equipe">Equipe e convites</button><button type="button" class="bt" data-vc-ir="assinatura">Assinatura</button><button type="button" class="bt" data-vc-ir="config">Dados da empresa</button><button type="button" class="bt" data-vc-ir="sair">Sair</button></div>
       <p class="nota">Convide pelo e-mail da pessoa e escolha o cargo, se ela pode alterar ou só ver e quais telas aparecem para ela. Equipe sem limite de pessoas.</p></div>` : `<form class="cfg-form" data-salvar-cfg="conta"><div class="grade-campos"><label class="campo">Seu nome<input name="nome" value="${esc(c.conta.nome)}"></label><label class="campo">E-mail de acesso<input name="email" type="email" value="${esc(c.conta.email)}"></label><label class="campo">Cargo<input name="cargo" value="${esc(c.conta.cargo)}"></label><label class="campo">Plano<input value="${esc(c.conta.plano)}" disabled></label></div>
-      <p class="nota">Na versão de verdade, a conta fica no site da Blue Rose: o mesmo login abre o sistema no computador e no celular, e a equipe entra com o próprio acesso.</p><div class="acoes"><button class="bt bt-pri">Salvar</button></div></form>`,
+      <p class="nota">Na versão de verdade, a conta fica no site da Blue Rose: o mesmo login abre o sistema no computador e no celular, e a equipe entra com o próprio acesso.</p><div class="acoes"><button class="bt bt-pri">Salvar</button></div></form>`) + APP_INSTALAR,
     clinica: () => `<form class="cfg-form" data-salvar-cfg="clinica"><div class="grade-campos"><label class="campo largo">Nome da clínica<input name="clinica" value="${esc(db.clinica)}"></label><label class="campo">CNPJ<input name="cnpj" value="${esc(c.cnpj)}"></label><label class="campo">WhatsApp da clínica<input name="telefone" value="${esc(telBR(c.telefone))}"></label>
       <label class="campo largo">Endereço<input name="endereco" value="${esc(c.endereco)}"></label><label class="campo">Cidade<input name="cidade" value="${esc(c.cidade)}"></label><label class="campo">Responsável técnico (CRMV)<input name="crmv" value="${esc(c.crmv)}"></label>
       <label class="campo">Horário de atendimento<input name="horario" value="${esc(c.horario)}"></label><label class="campo">Valor da diária de internação (R$)<input name="diaria" inputmode="decimal" value="${c.diaria}"></label></div><p class="nota">O nome, o endereço e o CRMV saem nas receitas, termos, atestados e carteiras de vacinação.</p><div class="acoes"><button class="bt bt-pri">Salvar</button></div></form>`,
