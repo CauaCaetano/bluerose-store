@@ -186,7 +186,7 @@ p { margin: 0; }
   .titulo { font-size: clamp(1.75rem, 8vw, 2.6rem); line-height: 1.04; }
   .linha { grid-template-columns: 1fr; margin-top: 70px; padding-top: 22px; }
   .linha .texto { grid-column: 1; margin-top: 26px; font-size: 1.05rem; line-height: 1.38; }
-  .circulo { left: auto; right: 0; margin: -38px 0 0; width: 76px; height: 76px; padding: 8px; font-size: 9px; }
+  .circulo { left: auto; right: 0; margin: -38px 0 0; width: 76px; height: 76px; padding: 8px; font-size: 10px; }
   .rotulo-col { display: flex; align-items: flex-start; gap: 16px; }
   .retrato { margin: 20px 0 0; width: 130px; }
   .rotulo-col { flex-direction: column; gap: 0; }

@@ -42,13 +42,13 @@
   /* ---------- tratamentos por objetivo (pontos no rosto) ---------- */
   // [nome, foto, texto, preço, pontos x/y na foto]
   var OBJ = [
-    ['Manchas e melasma', 'Clareia manchas de sol, melasma e marcas de espinha, com protocolo para casa.', .7, .47, [['Laser lavieen', 'Clareia manchas de sol e melasma em 3 a 5 sessões.', 590], ['Peeling de ácidos', 'Renova a camada de cima da pele, 7 dias de descamação leve.', 320], ['Clareador home care', 'Protocolo para casa, prescrito pela médica.', 189]]],
+    ['Manchas e melasma', 'Clareia manchas de sol, melasma e marcas de espinha, com protocolo para casa.', .7, .47, [['Laser LaVieen', 'Clareia manchas de sol e melasma em 3 a 5 sessões.', 590], ['Peeling de ácidos', 'Renova a camada de cima da pele, 7 dias de descamação leve.', 320], ['Clareador home care', 'Protocolo para casa, prescrito pela médica.', 189]]],
     ['Rugas e linhas', 'Suaviza linhas de expressão e devolve firmeza, sem mudar o seu rosto.', .52, .29, [['Toxina botulínica', 'Testa, glabela e pés de galinha, com retorno em 15 dias.', 1090], ['Bioestimulador', 'Firmeza que aparece em 60 dias e dura até 2 anos.', 2290], ['Ultraformer', 'Ultrassom microfocado: efeito lifting sem cortes.', 1890]]],
     ['Acne e poros', 'Controla a oleosidade, trata espinhas ativas e suaviza cicatrizes.', .56, .66, [['Limpeza de pele profunda', 'Extração, alta frequência e máscara calmante.', 189], ['Laser de CO2 fracionado', 'Suaviza cicatrizes de acne em 3 sessões.', 990], ['Peeling de ácido salicílico', 'Controla oleosidade e espinhas ativas.', 260]]],
     ['Viço e hidratação', 'Pele com brilho de quem dormiu bem, por dentro e por fora.', .38, .5, [['Skinbooster', 'Hidratação injetável que dá brilho de dentro para fora.', 1290], ['Hydrafacial', 'Limpeza, esfoliação e sérum em 45 minutos.', 450], ['Drenagem facial', 'Desincha e relaxa: ideal antes de eventos.', 160]]],
     ['Corpo', 'Gordura localizada, flacidez e celulite, com sessões que cabem no almoço.', .8, .83, [['Criolipólise', 'Congela gordura localizada: −20% a −25% na área por sessão.', 790], ['Massagem modeladora', 'Pacote de 10 sessões, com drenagem.', 140], ['Radiofrequência corporal', 'Melhora flacidez e celulite.', 220]]]
   ];
-  var PL = [['Glow 1', 199, 230, ['R$ 230 em créditos por mês', '20% off no que passar', 'Agenda prioritária']], ['Glow 2', 389, 460, ['R$ 460 em créditos por mês', '20% off no que passar', '1 drenagem de presente por mês', 'Agenda prioritária']], ['Glow Black', 790, 950, ['R$ 950 em créditos por mês', '25% off no que passar', 'Consulta médica trimestral', 'Créditos acumulam por 3 meses']]];
+  var PL = [['Glow 1', 199, 230, ['R$ 230 em créditos por mês', '20% de desconto no que passar', 'Agenda prioritária']], ['Glow 2', 389, 460, ['R$ 460 em créditos por mês', '20% de desconto no que passar', '1 drenagem de presente por mês', 'Agenda prioritária']], ['Glow Black', 790, 950, ['R$ 950 em créditos por mês', '25% de desconto no que passar', 'Consulta médica trimestral', 'Créditos acumulam por 3 meses']]];
   var CLUBE_PONTO = [.25, .44];
   var n2 = function (i) { return (i < 9 ? '0' : '') + (i + 1); };
 

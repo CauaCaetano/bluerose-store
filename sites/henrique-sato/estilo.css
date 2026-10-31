@@ -351,7 +351,7 @@ button.bt:not(:has(i)) { padding: 0 22px; }
   .dr-dados { grid-template-columns: 1fr; }
   .mapa { height: auto; } .mapa-svg { position: static; height: 200px; } .mapa-card { position: static; width: auto; box-shadow: none; border-radius: 0; }
   .lg-linha { flex-direction: column; border-radius: 20px; } .lg-linha .bt { justify-content: center; } .ou::before, .ou::after { width: 60px; }
-  .rd-cols { grid-template-columns: 1fr 1fr; } .fn-contatos { flex-direction: column; gap: 10px; }
-  .barra-cel { display: flex; justify-content: center; position: fixed; z-index: 30; left: 12px; right: 12px; bottom: 12px; padding: 0 22px; box-shadow: 0 10px 30px rgba(0, 0, 0, .3); }
+  .rd-cols { grid-template-columns: 1fr 1fr; } .rodape { padding-bottom: 150px; } .fn-contatos { flex-direction: column; gap: 10px; }
+  .barra-cel { display: flex; justify-content: center; position: fixed; z-index: 30; left: 12px; right: 12px; bottom: calc(66px + env(safe-area-inset-bottom)); padding: 0 22px; box-shadow: 0 10px 30px rgba(0, 0, 0, .3); }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }

@@ -133,7 +133,7 @@
     var pag = c.fin.checked ? 'Financiando, a Caixa libera o dinheiro por medição de etapa, o mesmo jeito que cobramos. Nós cuidamos da documentação.' : 'Pagamento em 6 parcelas, uma por etapa concluída. Sem entrada antes da obra começar.';
     res.innerHTML = '<p class="rotulo"><span class="ponto" aria-hidden="true" style="--p:1"></span>Casa de ' + m2 + ' m², ' + padrao + (pv > 1 ? ', sobrado' : ', térrea') + '</p>' +
       '<p class="total">' + real(total) + '</p>' +
-      '<p class="r-m2">' + real(total / m2) + ' por m² · obra pronta em cerca de ' + mStr + ' meses' + (proj ? ' (mais 2 de projeto e aprovação)' : '') + '</p>' +
+      '<p class="r-m2">R$ ' + (Math.round(total / m2 / 10) * 10).toLocaleString('pt-BR') + ' por m² · obra pronta em cerca de ' + mStr + ' meses' + (proj ? ' (mais 2 de projeto e aprovação)' : '') + '</p>' +
       '<div class="barras">' + ET.map(function (e) { return '<div><span>' + e[0] + '</span><span class="bx"><i style="width:' + (e[1] * 400) + '%"></i></span><span>' + real(obra * e[1]) + '</span></div>'; }).join('') +
       (proj ? '<div><span>Projetos</span><span class="bx"><i class="proj" style="width:' + Math.min(100, proj / obra * 400).toFixed(1) + '%"></i></span><span>' + real(proj) + '</span></div>' : '') + '</div>' +
       '<p class="r-pag">' + pag + '</p>' +

@@ -323,7 +323,8 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 
   .abertura .selo-foto { display: none; }
 }
 @media (max-width: 560px) {
-  .ab-texto { bottom: 17vh; }
+  .ab-texto { bottom: 17vh; text-shadow: 0 2px 18px rgba(0, 0, 0, .45); }
+  .ab-vela { background: linear-gradient(180deg, rgba(10, 14, 13, .42), rgba(10, 14, 13, .24) 30%, rgba(10, 14, 13, .7) 100%), rgba(10, 14, 13, calc(var(--p) * .62)); }
   .ab-texto h1 { font-size: 72px; }
   .ab-pe { flex-direction: column; align-items: flex-start; gap: 18px; }
   .ab-pular { display: none; }

@@ -394,6 +394,7 @@ svg use, .ic, .lateral svg, .circ svg { fill: none; stroke: currentColor; stroke
   .caso-tit { padding: 26px 8px 22px; font-size: 13px; }
   .circ { width: 60px; height: 60px; }
   .rd-marca { font-size: 46px; }
+  .numeros { padding-bottom: 56px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

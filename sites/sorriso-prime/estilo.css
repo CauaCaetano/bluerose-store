@@ -41,8 +41,8 @@ a { color: inherit; text-decoration: none; }
 .h-palco { position: sticky; top: 0; height: 100vh; overflow: hidden; }
 .h-claro { position: absolute; inset: 0; }
 .heroi h1 { position: absolute; z-index: 3; left: 44%; top: 30%; transform: translateX(-50%); font-size: clamp(64px, 10.6vw, 153px); line-height: .8; color: var(--tinta); text-align: center; white-space: nowrap; pointer-events: none; opacity: calc(1 - var(--p, 0) * 2.4); }
-.heroi h1 span { display: block; } .heroi h1 span:first-child { padding-left: 1.1em; } .heroi h1 em { color: var(--branco); }
-.h-onde { position: absolute; left: var(--borda); bottom: 36px; font: 500 12px/1.3 var(--sans); }
+.heroi h1 span { display: block; } .heroi h1 span:first-child { padding-left: 1.1em; } .heroi h1 em { color: var(--branco); text-shadow: 0 0 1px rgba(30, 30, 36, .45), 0 2px 22px rgba(30, 30, 36, .3); }
+.h-onde { position: absolute; left: var(--borda); bottom: 76px; font: 500 12px/1.3 var(--sans); }
 .h-onde small { display: block; font-size: 12px; opacity: .6; margin-bottom: 4px; }
 .h-foto { position: absolute; margin: 0; z-index: 2; overflow: hidden;
   left: calc(61% * (1 - var(--p2, 0))); top: 0; width: calc(35.4% + 64.6% * var(--p2, 0)); height: calc(100% * (.69 + .31 * var(--p2, 0))); }
@@ -114,7 +114,7 @@ a { color: inherit; text-decoration: none; }
 .eq-fotos { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); align-items: end; margin-top: -9vw; }
 .eq-fotos figure { margin: 0; position: relative; }
 .eq-fotos img { width: 100%; height: clamp(360px, 46vw, 660px); object-fit: contain; object-position: 50% 100%; -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent); mask-image: linear-gradient(180deg, #000 70%, transparent); }
-.eq-fotos figcaption { position: absolute; left: 0; bottom: 10%; max-width: 15em; display: grid; gap: 2px; font-size: 11.5px; line-height: 1.35; }
+.eq-fotos figcaption { position: absolute; left: 0; bottom: 10%; max-width: 15em; display: grid; gap: 2px; font-size: 11.5px; line-height: 1.35; z-index: 1; text-shadow: 0 1px 3px rgba(0, 0, 0, .9), 0 0 14px rgba(0, 0, 0, .8); }
 .eq-fotos b { font-weight: 600; font-size: 12.5px; color: var(--branco); } .eq-fotos small { opacity: .6; margin-bottom: 6px; }
 .eq-pe { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 32px; align-items: end; margin-top: 40px; }
 .eq-rot { display: grid; font-size: 12px; opacity: .8; } .eq-rot b { font-weight: 500; color: var(--branco); }
@@ -169,8 +169,8 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 900px) {
   :root { --borda: 18px; }
   .menu, .ficha, .fone { display: none; } .topo .pilula { margin-left: auto; }
-  .heroi { height: 220vh; } .heroi h1 { top: 18%; font-size: clamp(54px, 15vw, 90px); white-space: normal; width: 100%; } .heroi h1 span:first-child { padding-left: 0; } .heroi h1 { left: 50%; } .heroi h1 em { color: var(--tinta); }
-  .h-foto { left: calc(var(--borda) * (1 - var(--p2, 0))); top: auto; bottom: calc(90px * (1 - var(--p2, 0))); width: calc((100% - 2 * var(--borda)) + 2 * var(--borda) * var(--p2, 0)); height: calc(46% + 54% * var(--p2, 0)); transform: none; }
+  .heroi { height: 220vh; } .heroi h1 { top: 18%; font-size: clamp(54px, 15vw, 90px); white-space: normal; width: 100%; } .heroi h1 span:first-child { padding-left: 0; } .heroi h1 { left: 50%; } .heroi h1 em { color: var(--tinta); text-shadow: none; } .h-onde { bottom: 66px; }
+  .h-foto { left: calc(var(--borda) * (1 - var(--p2, 0))); top: auto; bottom: calc(132px * (1 - var(--p2, 0))); width: calc((100% - 2 * var(--borda)) + 2 * var(--borda) * var(--p2, 0)); height: calc(46% + 54% * var(--p2, 0)); transform: none; }
   .meta { grid-template-columns: 1fr; padding: 110px var(--borda); } .mt-retrato { grid-column: 1; width: 160px; } .mt-lado, .mt-tit, .mt-texto, .meta .pilula { grid-column: 1; } .mt-lado { flex-direction: column; margin-top: 24px; } .mt-tit, .mt-texto { margin-top: 40px; }
   .sv-foto { width: 100%; height: 55%; } .sv-foto::after { background: linear-gradient(0deg, var(--escuro), transparent 60%); }
   .sv-lado { top: auto; bottom: 190px; left: var(--borda); right: var(--borda); width: auto; } .sv-lista { display: none; }

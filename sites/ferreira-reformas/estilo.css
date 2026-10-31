@@ -216,7 +216,7 @@ a { color: inherit; }
 .q-volta { background: none; border: 0; padding: 6px 0; font: 700 12px/1 var(--tit); font-stretch: 125%; text-transform: uppercase; text-decoration: underline; cursor: pointer; color: var(--tinta-2); }
 
 /* rodapé azul com a marca gigante */
-.rodape { background: var(--azul); color: var(--branco); padding: 70px var(--lado) 40px; overflow: hidden; }
+.rodape { background: var(--azul); color: var(--branco); padding: 70px var(--lado) 96px; overflow: hidden; }
 .rd-cols { display: grid; grid-template-columns: 1fr 1.2fr 1fr 1.1fr auto; gap: 30px; padding: 0 3vw; }
 .rd-cols > div { display: flex; flex-direction: column; gap: 9px; }
 .rd-cols .num { font-size: 10px; margin-bottom: 8px; opacity: .85; }

@@ -69,11 +69,12 @@
   r.addEventListener('input', resc); r.addEventListener('change', resc);
 
   // direitos extras: estimativas simples sobre 24 meses
-  var D = { he: ['horas extras', function (s) { return s / 220 * 1.5 * 25 * 24; }], ins: ['insalubridade', function () { return 1518 * 0.2 * 24; }], desvio: ['diferença por desvio de função', function (s) { return s * 0.25 * 24; }], ass: ['indenização por assédio moral', function (s) { return s * 5; }], fgts: ['FGTS não depositado', function (s) { return s * 0.08 * 12; }] };
+  var D = { he: ['horas extras', function (s) { return s / 220 * 1.5 * 25 * 24; }], ins: ['insalubridade', function () { return 1518 * 0.2 * 24; }], desvio: ['diferença por desvio de função', function (s) { return s * 0.25 * 24; }], ass: ['indenização por assédio moral', null], fgts: ['FGTS não depositado', function (s) { return s * 0.08 * 12; }] };
   function dir() {
     var s = resc(), marc = $$('[data-d]:checked');
-    var tot = marc.reduce(function (a, x) { return a + D[x.dataset.d][1](s); }, 0);
-    $('.dr-res').innerHTML = marc.length ? '<p style="margin:0">Referência pela lei, para os itens marcados</p><p class="grande">' + real(tot * 0.7) + ' a ' + real(tot * 1.2) + '</p><p>' + marc.map(function (x) { return D[x.dataset.d][0]; }).join(', ') + '. O valor real depende de provas (testemunhas, mensagens, cartões de ponto) e da decisão do juiz: não é promessa de resultado.</p><a class="botao" href="#contato">Falar com um advogado sobre isso</a>' : '<p style="margin:0;font-size:1.1rem">Marque ao lado o que acontecia no seu trabalho para ver a referência pela lei.</p>';
+    var conta = marc.filter(function (x) { return D[x.dataset.d][1]; }), tot = conta.reduce(function (a, x) { return a + D[x.dataset.d][1](s); }, 0);
+    var ass = marc.some(function (x) { return x.dataset.d === 'ass'; }) ? ' O assédio moral não tem valor tabelado na lei: quem decide se há indenização é o juiz, por isso ele fica fora da conta.' : '';
+    $('.dr-res').innerHTML = marc.length ? (conta.length ? '<p style="margin:0">Referência pela lei, para os itens marcados</p><p class="grande">' + real(tot * 0.7) + ' a ' + real(tot * 1.2) + '</p>' : '') + '<p>' + marc.map(function (x) { return D[x.dataset.d][0]; }).join(', ') + '.' + ass + ' O valor real depende de provas (testemunhas, mensagens, cartões de ponto) e da decisão do juiz: não é promessa de resultado.</p><a class="botao" href="#contato">Falar com um advogado sobre isso</a>' : '<p style="margin:0;font-size:1.1rem">Marque ao lado o que acontecia no seu trabalho para ver a referência pela lei.</p>';
   }
   $('.dr-lista').addEventListener('change', dir); r.addEventListener('input', dir); dir();
 

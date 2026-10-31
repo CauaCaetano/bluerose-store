@@ -83,6 +83,7 @@ button, input, select { font: inherit; color: inherit; }
 .ab-txt { position: absolute; left: var(--lado); right: var(--lado); bottom: 64px; display: flex; flex-direction: column; gap: 14px; pointer-events: none; }
 .ab-txt h1 { font-size: clamp(76px, 15vw, 230px); line-height: .8; text-transform: uppercase; color: var(--musgo-esc); letter-spacing: -.01em; opacity: 0; transform: translateY(30px); transition: opacity 1.4s ease 1.6s, transform 1.4s ease 1.6s; }
 .pronto .ab-txt h1 { opacity: 1; transform: none; }
+.sem-3d .ab-3d { display: none; }
 .sem-3d .ab-txt h1, .sem-3d .ab-pe { color: #fff; text-shadow: 0 2px 30px rgba(0, 0, 0, .35); }
 .ab-pe { display: flex; justify-content: space-between; align-items: end; gap: 24px; color: var(--tx); }
 .ab-pe p:first-child { max-width: 430px; font-size: 15px; }
@@ -403,6 +404,7 @@ legend { padding: 0; margin-bottom: 10px; }
   .fin { grid-template-columns: 1fr; }
   .cima { height: 240vh; }
   .cm-titulo { top: 80px; font-size: 13vw; }
+  .cm-legenda { bottom: 76px; right: var(--lado); }
   .pg-foto { height: 52vh; }
   .rd-grade { grid-template-columns: 1fr 1fr; padding-top: 80px; }
   .rd-form, .rd-aviso { grid-column: 1 / -1; }

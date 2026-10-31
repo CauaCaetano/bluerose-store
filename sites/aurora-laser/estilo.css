@@ -215,7 +215,7 @@ body.na-areia .topo { background: var(--areia); }
 .rd-duv summary::after { content: "+"; } .rd-duv details[open] summary::after { content: "−"; }
 .rd-duv details p { padding: 0 0 10px; color: var(--tx-2); }
 .rd-sobre { color: var(--tx-2); }
-.rd-pe { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 64px var(--lado) 90px; font-size: 13px; color: var(--tx-2); }
+.rd-pe { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 64px var(--lado) 200px; font-size: 13px; color: var(--tx-2); }
 
 /* ---------- flor fixa (equivale ao "voucher" flutuante) ---------- */
 .flor { position: fixed; left: var(--lado); bottom: 30px; z-index: 45; width: 150px; height: 150px; display: grid; place-items: center; text-decoration: none; color: var(--cafe); opacity: 0; visibility: hidden; transform: scale(.85); transition: opacity .3s, transform .3s, visibility .3s; }
@@ -298,6 +298,7 @@ body.na-areia .topo { background: var(--areia); }
   .rd-cols { grid-template-columns: 1fr 1fr; padding-top: 48px; }
   .rd-duv, .rd-sobre { grid-column: 1 / -1; }
   .flor { display: none; }
+  .rd-pe { padding-bottom: 90px; }
 }
 @media (max-width: 420px) {
   .tons span { display: none; }

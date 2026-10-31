@@ -84,6 +84,10 @@ html[data-paleta="pt-PT"] .caixa-fecha { color: #1f2326; }
 html[data-paleta="pt-PT"] .jt-moldura::before { background: linear-gradient(0deg, rgba(14, 16, 18, .95) 0%, rgba(14, 16, 18, .78) 45%, rgba(14, 16, 18, .1) 75%); }
 html[data-paleta="pt-PT"] .anim { border: 1px solid rgba(244, 236, 224, .3); }
 }
+@media (max-width: 560px) {
+html[data-paleta="pt-PT"] .ab-texto { text-shadow: 0 2px 18px rgba(0, 0, 0, .45); }
+html[data-paleta="pt-PT"] .ab-vela { background: linear-gradient(180deg, rgba(10, 12, 14, .42), rgba(10, 12, 14, .24) 30%, rgba(10, 12, 14, .7) 100%), rgba(10, 14, 13, calc(var(--p) * .62)); }
+}
 html[data-paleta="es"] { --creme: #f3eee9; --creme-2: #ece6df; --papel: #f9f5f1; --tinta: #292526; --tinta-2: #5e5355; --cafe: #9e803b; --noite: #211b1c; --noite-2: #110d0e; --terra: #302326; --luz: #f3ebe2; --luz-2: rgba(243, 235, 226, .66); --bege: #e0cca0; --bege-2: #d6c08e; --fio: rgba(41, 37, 38, .16); --fio-e: rgba(243, 235, 226, .18); }
 html[data-paleta="es"] .bt-bege { color: #261f20; }
 html[data-paleta="es"] .bt-escuro { background: #282022; color: #faf6f1; }
@@ -168,6 +172,10 @@ html[data-paleta="es"] .caixa-fecha { color: #261f20; }
 @media (max-width: 900px) {
 html[data-paleta="es"] .jt-moldura::before { background: linear-gradient(0deg, rgba(18, 14, 15, .95) 0%, rgba(18, 14, 15, .78) 45%, rgba(18, 14, 15, .1) 75%); }
 html[data-paleta="es"] .anim { border: 1px solid rgba(244, 235, 224, .3); }
+}
+@media (max-width: 560px) {
+html[data-paleta="es"] .ab-texto { text-shadow: 0 2px 18px rgba(0, 0, 0, .45); }
+html[data-paleta="es"] .ab-vela { background: linear-gradient(180deg, rgba(14, 10, 11, .42), rgba(14, 10, 11, .24) 30%, rgba(14, 10, 11, .7) 100%), rgba(10, 14, 13, calc(var(--p) * .62)); }
 }
 html[data-paleta="en"] { --creme: #e9ecf3; --creme-2: #dfe3ec; --papel: #f1f3f9; --tinta: #252629; --tinta-2: #53565e; --cafe: #9a3f44; --noite: #1b1c21; --noite-2: #0d0e11; --terra: #232630; --luz: #e2e7f3; --luz-2: rgba(226, 231, 243, .66); --bege: #dea2a6; --bege-2: #d49094; --fio: rgba(37, 38, 41, .16); --fio-e: rgba(226, 231, 243, .18); }
 html[data-paleta="en"] .bt-bege { color: #1f2126; }
@@ -254,6 +262,10 @@ html[data-paleta="en"] .caixa-fecha { color: #1f2126; }
 html[data-paleta="en"] .jt-moldura::before { background: linear-gradient(0deg, rgba(14, 15, 18, .95) 0%, rgba(14, 15, 18, .78) 45%, rgba(14, 15, 18, .1) 75%); }
 html[data-paleta="en"] .anim { border: 1px solid rgba(224, 230, 244, .3); }
 }
+@media (max-width: 560px) {
+html[data-paleta="en"] .ab-texto { text-shadow: 0 2px 18px rgba(0, 0, 0, .45); }
+html[data-paleta="en"] .ab-vela { background: linear-gradient(180deg, rgba(10, 11, 14, .42), rgba(10, 11, 14, .24) 30%, rgba(10, 11, 14, .7) 100%), rgba(10, 14, 13, calc(var(--p) * .62)); }
+}
 html[data-paleta="it"] { --creme: #f3f1e9; --creme-2: #eceadf; --papel: #f9f7f1; --tinta: #272925; --tinta-2: #585e53; --cafe: #927947; --noite: #1e211b; --noite-2: #0f110d; --terra: #2a3023; --luz: #f2efe3; --luz-2: rgba(242, 239, 227, .66); --bege: #d9c8a7; --bege-2: #cebb96; --fio: rgba(39, 41, 37, .16); --fio-e: rgba(242, 239, 227, .18); }
 html[data-paleta="it"] .bt-bege { color: #22261f; }
 html[data-paleta="it"] .bt-escuro { background: #242820; color: #f9f8f2; }
@@ -339,6 +351,10 @@ html[data-paleta="it"] .caixa-fecha { color: #22261f; }
 html[data-paleta="it"] .jt-moldura::before { background: linear-gradient(0deg, rgba(16, 18, 14, .95) 0%, rgba(16, 18, 14, .78) 45%, rgba(16, 18, 14, .1) 75%); }
 html[data-paleta="it"] .anim { border: 1px solid rgba(241, 239, 227, .3); }
 }
+@media (max-width: 560px) {
+html[data-paleta="it"] .ab-texto { text-shadow: 0 2px 18px rgba(0, 0, 0, .45); }
+html[data-paleta="it"] .ab-vela { background: linear-gradient(180deg, rgba(12, 14, 10, .42), rgba(12, 14, 10, .24) 30%, rgba(12, 14, 10, .7) 100%), rgba(10, 14, 13, calc(var(--p) * .62)); }
+}
 html[data-paleta="fr"] { --creme: #eee9f3; --creme-2: #e6dfec; --papel: #f5f1f9; --tinta: #262529; --tinta-2: #56535e; --cafe: #513f9a; --noite: #1c1b21; --noite-2: #0e0d11; --terra: #262330; --luz: #ebe2f3; --luz-2: rgba(235, 226, 243, .66); --bege: #aea2de; --bege-2: #9e90d4; --fio: rgba(38, 37, 41, .16); --fio-e: rgba(235, 226, 243, .18); }
 html[data-paleta="fr"] .bt-bege { color: #211f26; }
 html[data-paleta="fr"] .bt-escuro { background: #222028; color: #f6f1fa; }
@@ -423,4 +439,8 @@ html[data-paleta="fr"] .caixa-fecha { color: #211f26; }
 @media (max-width: 900px) {
 html[data-paleta="fr"] .jt-moldura::before { background: linear-gradient(0deg, rgba(15, 14, 18, .95) 0%, rgba(15, 14, 18, .78) 45%, rgba(15, 14, 18, .1) 75%); }
 html[data-paleta="fr"] .anim { border: 1px solid rgba(234, 225, 243, .3); }
+}
+@media (max-width: 560px) {
+html[data-paleta="fr"] .ab-texto { text-shadow: 0 2px 18px rgba(0, 0, 0, .45); }
+html[data-paleta="fr"] .ab-vela { background: linear-gradient(180deg, rgba(11, 10, 14, .42), rgba(11, 10, 14, .24) 30%, rgba(11, 10, 14, .7) 100%), rgba(10, 14, 13, calc(var(--p) * .62)); }
 }

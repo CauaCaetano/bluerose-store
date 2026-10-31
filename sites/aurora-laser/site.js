@@ -161,5 +161,8 @@
     if (window.BR_WA) window.BR_WA(txt.replace(/\s+/g, ' '));
   });
 
+  // o link do regulamento abre o texto no rodapé
+  document.addEventListener('click', function (e) { var a = e.target.closest('a[href="#regulamento"]'); if (a) { var d = document.getElementById('regulamento'); if (d) d.open = true; } });
+
   sel.f0 = sel.f2 = true; vitrine(); conta();
 })();

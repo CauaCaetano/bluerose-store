@@ -187,7 +187,7 @@ a { color: inherit; }
   .topo { height: 72px; } .marca span { font-size: 14px; } .marca small { font-size: 11px; } .marca svg { width: 40px; }
   .bt-linha { display: none; } .idioma-tag { margin-left: auto; }
   .abre-txt { padding-bottom: 150px; } .abre h1 span { padding-left: 0; }
-  .barra-cel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; position: fixed; left: 10px; right: 10px; bottom: 10px; z-index: 45; padding: 6px; border-radius: 16px; background: rgba(246, 242, 232, .94); backdrop-filter: blur(10px); box-shadow: 0 12px 30px -10px rgba(16, 45, 44, .45); }
+  .barra-cel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; position: fixed; left: 10px; right: 10px; bottom: calc(66px + env(safe-area-inset-bottom)); z-index: 45; padding: 6px; border-radius: 16px; background: rgba(246, 242, 232, .94); backdrop-filter: blur(10px); box-shadow: 0 12px 30px -10px rgba(16, 45, 44, .45); }
   .barra-cel a { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 46px; border-radius: 11px; text-decoration: none; font: 600 14px var(--sans); color: var(--verde); background: var(--marfim); box-shadow: 0 0 0 1px var(--linha); }
   .barra-cel .b-ag { background: var(--verde); color: #fff; box-shadow: none; }
   .barra-cel i { width: 7px; height: 7px; border-radius: 50%; background: #f2a65a; }

@@ -1,7 +1,7 @@
 // Vértice · abertura (fecha a cena 3D), topo que some ao descer, menu, títulos que ocupam a largura, efeitos de rolagem
 // (foto que cresce, torre que sobe, arco que se abre, foto que gira, faixa que anda), carrossel de números, mapa,
 // botão que segue o cursor, espelho de vendas (18 andares × 4 finais) com escolha visual ou por critério, ficha da unidade,
-// fluxo de pagamento na obra (entrada, 30 mensais, 3 anuais e saldo nas chaves) e prazo da tabela de lançamento.
+// fluxo de pagamento na obra (entrada, 24 mensais, 3 anuais e saldo nas chaves) e prazo da tabela de lançamento.
 (function () {
   'use strict';
   document.documentElement.classList.add('js');
@@ -88,7 +88,7 @@
     ['4', 'minutos', 'a pé até o Atlântico Shopping', 'palmeiras', 'Prédio entre palmeiras sob o céu azul'],
     ['2.400', 'reais', 'de diária média na temporada para 3 suítes', 'varanda-mar', 'Varanda com vista para o oceano'],
     ['600', 'metros', 'raio com escolas, mercado e farmácia', 'parque', 'Prédios diante de um parque arborizado'],
-    ['30', 'meses', 'para pagar durante a obra', 'baia', 'Cidade à beira da baía']
+    ['24', 'meses', 'para pagar durante a obra', 'baia', 'Cidade à beira da baía']
   ];
   var tr = $('.vd-trilho'), num = $('.vd-num'), atual = 0;
   tr.innerHTML = SL.map(function (s, i) { return '<img src="img/' + s[3] + '.webp" alt="' + s[4] + '" loading="lazy" draggable="false" data-i="' + i + '">'; }).join('');
@@ -177,14 +177,14 @@
     if (e + m + an > 85) { an = 85 - e - m; if (an < 0) { m += an; an = 0; } fl.anu.value = an; fl.men.value = m; }
     var ch = 100 - e - m - an;
     fl.ent.previousElementSibling.textContent = e + '% · ' + real(p * e / 100);
-    fl.men.previousElementSibling.textContent = m + '% · 30x de ' + real(p * m / 100 / 30);
+    fl.men.previousElementSibling.textContent = m + '% · 24x de ' + real(p * m / 100 / 24);
     fl.anu.previousElementSibling.textContent = an + '% · 3x de ' + real(p * an / 100 / 3);
     $('.pg-u').textContent = (sel ? 'Unidade ' + a + '0' + f : 'Exemplo: unidade 1202') + ' · ' + mi(p);
     $('.pg-chave').innerHTML = 'Saldo nas chaves: <b style="color:var(--tx)">' + ch + '% · ' + real(p * ch / 100) + '</b>, à vista ou financiado no banco.';
-    $('.pg-res').innerHTML = '<p style="color:var(--tx-2)">Durante 30 meses de obra você paga</p><p class="grande">' + real(p * m / 100 / 30) + '<small> /mês</small></p>' +
+    $('.pg-res').innerHTML = '<p style="color:var(--tx-2)">Durante 24 meses de obra você paga</p><p class="grande">' + real(p * m / 100 / 24) + '<small> /mês</small></p>' +
       '<div class="barra" aria-hidden="true"><i style="width:' + e + '%;background:#f1c7b4"></i><i style="width:' + m + '%;background:#cf8f7d"></i><i style="width:' + an + '%;background:#8a4f42"></i><i style="width:' + ch + '%;background:#2a4670"></i></div>' +
-      '<table><tr><td>Entrada (no contrato)</td><td>' + real(p * e / 100) + '</td></tr><tr><td>30 mensais</td><td>' + real(p * m / 100) + '</td></tr><tr><td>3 anuais</td><td>' + real(p * an / 100) + '</td></tr><tr><td>Chaves (dez/2028)</td><td>' + real(p * ch / 100) + '</td></tr></table>' +
-      '<p style="font-size:.8rem;color:var(--tx-2);margin-top:10px">Parcelas corrigidas pelo INCC durante a obra.</p><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero reservar a unidade ' + a + '0' + f + ' (' + mi(p) + ') com ' + e + '% de entrada e 30 mensais de ' + real(p * m / 100 / 30) + '.">Reservar a unidade ' + a + '0' + f + ' por 48 h</a>';
+      '<table><tr><td>Entrada (no contrato)</td><td>' + real(p * e / 100) + '</td></tr><tr><td>24 mensais</td><td>' + real(p * m / 100) + '</td></tr><tr><td>3 anuais</td><td>' + real(p * an / 100) + '</td></tr><tr><td>Chaves (dez/2028)</td><td>' + real(p * ch / 100) + '</td></tr></table>' +
+      '<p style="font-size:.8rem;color:var(--tx-2);margin-top:10px">Parcelas corrigidas pelo INCC durante a obra.</p><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero reservar a unidade ' + a + '0' + f + ' (' + mi(p) + ') com ' + e + '% de entrada e 24 mensais de ' + real(p * m / 100 / 24) + '.">Reservar a unidade ' + a + '0' + f + ' por 48 h</a>';
   }
   fl.addEventListener('input', fluxo); fluxo();
 
