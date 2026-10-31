@@ -1619,3 +1619,20 @@ html[data-theme="light"] body::before {
 .tambem-links { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 8px; }
 .tambem-links a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: var(--r-sm); color: var(--ink); text-decoration: none; transition: border-color .2s, background .2s; }
 .tambem-links a:hover { border-color: var(--ink-2); background: rgba(255, 255, 255, .04); } .tambem-links span { color: var(--ink-2); font-size: 13.5px; }
+
+/* Desempenho em PC fraco (31/10/2026).
+   1. Fundo fixo e desfoque atrás dos cartões obrigam a repintar a tela inteira a cada rolagem: saem para todos
+      (o fundo de gradiente é liso, o desfoque quase não aparecia).
+   2. Animações infinitas param quando estão fora da tela (luxo.js marca .fora-tela).
+   3. html.leve (luxo.js liga em máquina fraca ou quando a página roda abaixo de ~45 quadros/s): menu sólido,
+      sem granulado de tela cheia e sem animações decorativas. */
+body { background-attachment: scroll !important; }
+html[data-paleta] body { background-attachment: scroll !important; }
+.sis, .prod-c, .sis-duas > div, .np-grade, .np-faq details, .preco2, .vs-card { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.fora-tela, .fora-tela * { animation-play-state: paused !important; }
+html.leve .nav, html.leve .ini-aviso, html.leve .palco-tag, html.leve .rolo-linha span, html.leve .p-mosaico span, html.leve .mx-toast, html.leve .aviso-cookies { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html.leve .nav { background: color-mix(in srgb, var(--bg) 95%, transparent) !important; }
+html.leve body::after { display: none !important; }
+html.leve ::backdrop { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html.leve .ini-rosa img, html.leve .ini-aviso, html.leve .ini-note, html.leve .ini-selo i, html.leve .perso-tag::before, html.leve .va-ponto::after { animation: none !important; }
+html.leve .eyebrow::before { filter: none; }

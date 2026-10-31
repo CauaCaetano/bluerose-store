@@ -3,6 +3,39 @@
    - Números com data-conta contam até o valor quando aparecem.
    - A redoma do topo acompanha de leve o mouse (só no computador).
    Tudo dispara uma vez por elemento (IntersectionObserver), sem trabalho contínuo durante a rolagem. */
+// Desempenho (31/10/2026): modo leve em PC fraco e animações infinitas paradas fora da tela (regras no fim do site.css)
+(function () {
+  var html = document.documentElement;
+  function leve() { html.classList.add('leve'); }
+  // máquina fraca de saída: poucos núcleos ou pouca memória (deviceMemory só existe no Chrome/Edge)
+  if ((navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || (navigator.deviceMemory && navigator.deviceMemory <= 4)) leve();
+  // senão, mede os primeiros quadros: se a página roda abaixo de ~45 quadros/s, liga o modo leve
+  else if (window.requestAnimationFrame) {
+    var q = [], ult = 0, fim = 0;
+    var medir = function (t) {
+      if (document.hidden) return;
+      if (!fim) fim = t + 2500;
+      if (ult) q.push(t - ult);
+      ult = t;
+      if (t < fim) requestAnimationFrame(medir);
+      else if (q.length > 20) { q.sort(function (x, y) { return x - y; }); if (q[q.length >> 1] > 22) leve(); }
+    };
+    addEventListener('load', function () { setTimeout(function () { requestAnimationFrame(medir); }, 600); });
+  }
+  // animações infinitas só rodam quando estão na tela
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { e.target.classList.toggle('fora-tela', !e.isIntersecting); });
+    }, { rootMargin: '120px 0px' });
+    var ver = function () {
+      document.querySelectorAll('.rolo-linha, .ini-rosa, .ini-aviso, .ini-note, .ini-selo, .nb, .ini-bag-passos, .perso-tag').forEach(function (el) {
+        if (!el.__obsDes) { el.__obsDes = true; obs.observe(el); }
+      });
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ver); else ver();
+  }
+})();
+
 (function () {
   var calmo = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (calmo || !('IntersectionObserver' in window)) return;

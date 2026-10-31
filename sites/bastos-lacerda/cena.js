@@ -53,7 +53,7 @@ function ambiente(renderer) {
 }
 function criarRenderer(canvas) {
   const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  r.setPixelRatio(Math.min(devicePixelRatio || 1, 1.6)); r.outputColorSpace = THREE.SRGBColorSpace;
+  r.setPixelRatio(Math.min(devicePixelRatio || 1, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (1.6))); r.outputColorSpace = THREE.SRGBColorSpace;
   r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.05;
   r.shadowMap.enabled = true; r.shadowMap.type = THREE.VSMShadowMap; return r;
 }

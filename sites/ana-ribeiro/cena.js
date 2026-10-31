@@ -35,7 +35,7 @@ function inicia() {
     render = new THREE.WebGLRenderer({ canvas: tela, antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (e) { return; }
   if (!render.getContext()) return;
-  render.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  render.setPixelRatio(Math.min(window.devicePixelRatio || 1, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (1.75)));
   render.outputColorSpace = THREE.SRGBColorSpace;
   render.toneMapping = THREE.ACESFilmicToneMapping;
   render.toneMappingExposure = 1.1;

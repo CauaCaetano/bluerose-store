@@ -61,7 +61,7 @@ function iniciar() {
     r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, powerPreference: 'high-performance' });
     if (!r.getContext()) throw new Error('sem contexto');
   } catch (e) { raiz.classList.add('sem-3d'); return; }
-  r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  r.setPixelRatio(Math.min(window.devicePixelRatio || 1, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (2)));
   r.outputColorSpace = THREE.SRGBColorSpace;
   r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.1;
   r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;

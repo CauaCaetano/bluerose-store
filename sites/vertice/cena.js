@@ -81,7 +81,7 @@ function abertura() {
   const tela = intro.querySelector('.intro-cena');
   let ren;
   try { ren = new THREE.WebGLRenderer({ canvas: tela, antialias: true, powerPreference: 'high-performance' }); } catch (e) { return; }
-  ren.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  ren.setPixelRatio(Math.min(devicePixelRatio, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (1.5)));
   ren.toneMapping = THREE.ACESFilmicToneMapping; ren.toneMappingExposure = 0.95;
   ren.localClippingEnabled = true;
   const cena = new THREE.Scene();
@@ -183,7 +183,7 @@ function interiores() {
   function monta() {
     let ren;
     try { ren = new THREE.WebGLRenderer({ canvas: tela, antialias: true, alpha: true }); } catch (e) { semInteriores(); return; }
-    ren.setPixelRatio(Math.min(devicePixelRatio, 2)); ren.toneMapping = THREE.ACESFilmicToneMapping; ren.toneMappingExposure = 1.05;
+    ren.setPixelRatio(Math.min(devicePixelRatio, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (2))); ren.toneMapping = THREE.ACESFilmicToneMapping; ren.toneMappingExposure = 1.05;
     const cena = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, 1, 0.1, 80);
     // ambiente para os reflexos: degradê quente de estúdio
     const ce = document.createElement('canvas'); ce.width = 512; ce.height = 256; const x = ce.getContext('2d');

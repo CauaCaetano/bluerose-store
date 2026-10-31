@@ -68,7 +68,7 @@
     this.ultimaChave = '';
     this.rodando = false;
     var self = this;
-    this.passo = function (t) { self.quadro(t); };
+    this.passo = function () { self.quadro(performance.now()); };
     document.addEventListener('visibilitychange', function () { document.hidden ? self.parar() : self.iniciar(); });
     if (reduzMov && reduzMov.addEventListener) reduzMov.addEventListener('change', function () { self.ultimaChave = ''; self.desenharAgora(); });
   }
@@ -116,11 +116,11 @@
   CharacterAnimator.prototype.iniciar = function () {
     if (this.rodando || document.hidden) return;
     this.rodando = true;
-    this.raf = requestAnimationFrame(this.passo);
+    this.raf = setTimeout(this.passo, 0);
   };
   CharacterAnimator.prototype.parar = function () {
     this.rodando = false;
-    if (this.raf) cancelAnimationFrame(this.raf);
+    if (this.raf) clearTimeout(this.raf);
   };
   CharacterAnimator.prototype.desenharAgora = function () { this.quadro(performance.now(), true); };
 
@@ -158,9 +158,10 @@
   };
 
   CharacterAnimator.prototype.quadro = function (t, forcar) {
-    if (this.rodando && !forcar) this.raf = requestAnimationFrame(this.passo);
+    // 12 quadros/s (ritmo da pixel art): acorda só quando vai desenhar, não a cada quadro da tela
+    if (this.rodando && !forcar) this.raf = setTimeout(this.passo, 1000 / 12);
     var passoMs = 1000 / 12;                                   // ritmo de pixel art
-    if (!forcar && this.ultimoT && t - this.ultimoT < passoMs) return;
+    if (!forcar && this.ultimoT && t - this.ultimoT < passoMs - 4) return;
     this.ultimoT = t;
     var m = this.movimentos(t, this.estado);
     // troca de pose sem transparência (pixel art não mistura imagens):

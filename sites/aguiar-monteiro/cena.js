@@ -176,7 +176,7 @@ function iniciar() {
   function tamanho() {
     const w = innerWidth, h = innerHeight;
     celular = w < 820;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, celular ? 1.5 : 1.6));
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (celular ? 1.5 : 1.6)));
     renderer.setSize(w, h, false);
     composer.setPixelRatio(renderer.getPixelRatio());
     composer.setSize(w, h);
