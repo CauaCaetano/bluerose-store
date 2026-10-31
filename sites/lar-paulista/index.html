@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<script src="../../js/idioma.js?v=17"></script>
+<script src="../../js/idioma.js?v=18"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -13,20 +13,22 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'8'%20fill%3D'%231b67ee'%2F%3E%3Cpath%20d%3D'M9%2020l11-9%2011%209v11H9z'%20fill%3D'%23ffffff'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/12344d647b.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=4">
+<link rel="stylesheet" href="estilo.css?v=5">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=3" defer></script>
-<script src="site.js?v=3" defer></script>
+<script src="site.js?v=4" defer></script>
 </head>
 <body data-slug="lar-paulista" data-marca="Lar Paulista Imóveis" data-cat="imobiliaria" data-vista="grade">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="topo">
-  <a class="marca" href="#" data-ir-topo aria-label="Lar Paulista Imóveis, início" translate="no"><span class="marca-txt">LARPAULISTA</span><span class="marca-q" aria-hidden="true">L</span></a>
+  <a class="marca" href="index.html" data-ir-topo aria-label="Lar Paulista Imóveis, início" translate="no"><span class="marca-txt">LARPAULISTA</span><span class="marca-q" aria-hidden="true">L</span></a>
   <nav class="menu" aria-label="Principal">
-    <a href="#" data-modo="aluguel" aria-current="page">Alugar</a>
-    <a href="#" data-modo="venda">Comprar</a>
-    <a href="#anunciar">Anunciar</a>
+    <a href="imoveis.html?modo=aluguel" data-modo="aluguel" aria-current="page">Alugar</a>
+    <a href="imoveis.html?modo=venda" data-modo="venda">Comprar</a>
+    <a href="anunciar.html">Anunciar</a>
+    <a href="sobre.html">Sobre</a>
+    <a href="contato.html">Contato</a>
   </nav>
   <form class="busca" id="busca" role="search" autocomplete="off">
     <svg class="lupa" viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.6"/><path d="M13.2 13.2l3.6 3.6"/></svg>
@@ -50,7 +52,7 @@
       <div class="menu-u" hidden>
         <button type="button" data-so-salvos><span>Imóveis salvos</span><b class="n-sv2">0</b></button>
         <a href="#" data-wa="Olá, Lar Paulista! Quero falar com um corretor.">Falar com um corretor</a>
-        <a href="#anunciar">Anunciar meu imóvel</a>
+        <a href="anunciar.html">Anunciar meu imóvel</a>
         <p class="rot">Aparência</p>
         <div class="tema" role="group" aria-label="Aparência">
           <button type="button" data-tema="escuro" aria-pressed="false">Escuro</button>
@@ -59,8 +61,22 @@
         </div>
       </div>
     </div>
+    <button type="button" class="bt-menu" aria-expanded="false" aria-controls="gaveta" aria-label="Abrir o menu"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14"/></svg></button>
   </div>
 </header>
+<div class="gaveta" id="gaveta" hidden>
+  <nav aria-label="Menu do site">
+    <a href="index.html" aria-current="page">Início</a>
+    <a href="imoveis.html">Todos os imóveis</a>
+    <a href="imoveis.html?modo=aluguel">Alugar</a>
+    <a href="imoveis.html?modo=venda">Comprar</a>
+    <a href="anunciar.html">Anunciar meu imóvel</a>
+    <a href="sobre.html">Sobre a Lar Paulista</a>
+    <a href="contato.html">Contato</a>
+    <a href="privacidade.html">Privacidade</a>
+    <p class="gv-pe">Rua Coronel Quirino, 1.230, Cambuí, Campinas/SP<br>Seg. a sex., 8h às 20h · sáb., 9h às 14h</p>
+  </nav>
+</div>
 
 <main id="conteudo">
   <div class="palco">
@@ -83,6 +99,7 @@
       <nav class="paginas" aria-label="Páginas"></nav>
       <div class="conta-box">
         <h1 id="conta"><b>0</b> imóveis para alugar em Campinas</h1>
+        <p class="pag-lista" style="margin-top:6px;font-size:14px"><a href="imoveis.html" style="color:var(--azul);font-weight:500">Ver a lista completa com filtros por tipo, bairro e preço</a></p>
         <p class="pag-de"></p>
         <p class="conta-nota">Nos imóveis para alugar, o preço grande é o custo do mês inteiro: aluguel + condomínio + IPTU + seguro incêndio (R$ 45). Sem surpresa na hora de assinar.</p>
       </div>
@@ -105,6 +122,7 @@
         <li><b>18 dias</b><span>média para alugar</span></li>
         <li><b>Dia 10</b><span>aluguel garantido na conta</span></li>
       </ul>
+      <p style="margin-top:26px"><a class="bt-azul" href="anunciar.html">Como funciona, taxas e perguntas</a></p>
     </div>
     <form class="an-form" id="form-anunciar">
       <p class="sobre">Fale com a gente</p>
@@ -129,7 +147,7 @@
   </div>
   <div class="rd-pe">
     <div><p>© 2026 Lar Paulista Imóveis. Marca criada para demonstração.</p>
-      <nav aria-label="Rodapé"><a href="#" data-ir-topo>Início</a><a href="#" data-modo="aluguel">Alugar</a><a href="#" data-modo="venda">Comprar</a><a href="#anunciar">Anunciar</a><a href="#" data-wa="Olá, Lar Paulista! Quero falar com um corretor.">Contato</a></nav></div>
+      <nav aria-label="Rodapé"><a href="index.html" data-ir-topo>Início</a><a href="imoveis.html">Imóveis</a><a href="anunciar.html">Anunciar</a><a href="sobre.html">Sobre</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav></div>
     <div class="rd-dir">
       <a class="rd-ic" href="#" aria-label="Instagram (exemplo)" data-wa="Olá, Lar Paulista! Vi o Instagram de vocês."><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r=".6"/></svg></a>
       <a class="rd-wa" href="#" data-wa="Olá, Lar Paulista! Quero falar com um corretor."><small>Fale agora no</small>WhatsApp</a>
@@ -148,7 +166,7 @@
 <nav class="abas-cel" aria-label="Atalhos">
   <button type="button" data-cel="lista" aria-current="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>Buscar</button>
   <button type="button" data-cel="mapa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5l-5.5 2.5-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>Mapa</button>
-  <a href="#anunciar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/></svg>Anunciar</a>
+  <a href="anunciar.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/></svg>Anunciar</a>
   <button type="button" data-so-salvos><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>Salvos</button>
 </nav>
 

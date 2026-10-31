@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script src="../../js/idioma.js?v=18"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com; font-src 'self'; connect-src 'self' blob: https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unidade · Vértice Residence</title>
+<meta name="description" content="Planta, área, andar, vista, preço e simulação de pagamento de uma unidade do Vértice Residence em Balneário Camboriú.">
+<meta name="theme-color" content="#061a37">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23050817'%2F%3E%3Cpath%20d%3D'M9%2010l11%2021%2011-21'%20stroke%3D'%23c9a849'%20stroke-width%3D'3'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/93a341139e.css">
+<link rel="stylesheet" href="../assets/moldura.css?v=4">
+<link rel="stylesheet" href="estilo.css?v=5">
+<script src="../../js/leads-config.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=3" defer></script>
+<script src="site.js?v=5" defer></script>
+</head>
+<body data-slug="vertice" data-marca="Vértice Residence" data-cat="imobiliaria">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="topo">
+  <button type="button" class="pilula pilula-clara bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i>Menu</button>
+  <a class="marca" href="index.html" translate="no" aria-label="Vértice Residence, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 9l12 23 12-23"/></svg><span>VÉRTICE<small>residence</small></span></a>
+  <a class="pilula pilula-cobre bt-escolher" href="apartamentos.html">Escolher unidade</a>
+</header>
+<nav class="menu" id="menu" aria-label="Principal" hidden>
+  <a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="apartamentos.html" aria-current="page">Apartamentos</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="obra.html">Obra</a><a href="como-comprar.html">Como comprar</a><a href="contato.html">Contato</a>
+  <p class="menu-pe"><span>Central de vendas · todos os dias, 9h às 20h</span><a href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor ↗</a></p>
+</nav>
+
+<main id="conteudo">
+  <section class="pg-topo" aria-labelledby="pg-t">
+    <p class="rot"><a href="apartamentos.html" style="text-decoration:none">← Todas as unidades</a></p>
+    <h1 id="pg-t" class="gigante encaixe">Unidade <span data-u>1202</span></h1>
+  </section>
+  <section class="pg-sec ap-det" style="padding-top:0" aria-label="Planta e ficha da unidade">
+    <div class="ad-grade">
+      <div>
+        <div class="ad-planta"></div>
+        <p>Planta ilustrativa com áreas aproximadas dos cômodos. A barra em cobre indica o lado da vista. Medidas finais no memorial descritivo.</p>
+      </div>
+      <aside class="ad-info" aria-live="polite">
+        <span class="ad-status"></span>
+        <p class="ad-preco"></p>
+        <dl class="ad-ficha"></dl>
+        <div class="ad-acao"></div>
+        <img class="ad-foto" src="img/vista-sala.webp" alt="Vista do living do decorado com janelas do piso ao teto" width="1600" height="1067" loading="lazy">
+      </aside>
+    </div>
+  </section>
+  <section class="pg-sec pagamento" id="pagamento" aria-labelledby="pg2-t" style="padding-top:0">
+    <h2 id="pg2-t" style="font-size:clamp(34px,4vw,60px);margin-bottom:28px">Pagamento durante a obra</h2>
+    <p class="ad-sem-fluxo" hidden>Esta unidade não está disponível agora. Entre na lista de espera ou escolha o mesmo final em outro andar logo abaixo.</p>
+      <div class="pg-grade">
+        <form id="fluxo" class="fluxo">
+          <p class="pg-u" aria-live="polite"></p>
+          <label>Entrada <output></output><input type="range" name="ent" min="10" max="40" value="15"></label>
+          <label>Mensais na obra (24x) <output></output><input type="range" name="men" min="10" max="40" value="20"></label>
+          <label>Anuais (3x, todo dezembro) <output></output><input type="range" name="anu" min="0" max="30" value="15"></label>
+          <p class="pg-chave"></p>
+        </form>
+        <div class="pg-res" aria-live="polite"></div>
+      </div>
+  </section>
+  <section class="pg-sec sec-clara" aria-labelledby="vz-t">
+    <p class="rot">Mesmo final, outros andares</p>
+    <h2 id="vz-t" style="font-size:clamp(30px,4vw,60px)">Disponíveis na coluna</h2>
+    <ul class="ad-viz"></ul>
+    <p class="mais-link esq"><a class="pilula pilula-linha" href="apartamentos.html">Ver todas as unidades</a><a class="pilula pilula-linha" href="como-comprar.html">Como comprar</a></p>
+  </section>
+  <nav class="migalhas" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span><a href="apartamentos.html">Apartamentos</a><span aria-hidden="true">/</span><span>Unidade <b data-u style="font-weight:inherit">1202</b></span></nav>
+</main>
+
+<footer class="rodape">
+  <div class="rd-grade">
+    <div><p class="rd-rot">Central de vendas Vértice</p><p class="rd-end">Rua 3.100, 450 · Centro · Balneário Camboriú/SC</p><p class="rd-rot">Todos os dias, 9h às 20h</p></div>
+    <p class="rd-legal">Incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento, sujeitos a reajuste.</p>
+    <div class="rd-acoes"><a class="pilula pilula-cobre" href="obra.html">Andamento da obra</a><a class="redondo redondo-cobre" href="#conteudo" aria-label="Voltar ao topo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg></a></div>
+  </div>
+  <nav class="rd-nav" aria-label="Páginas"><a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="apartamentos.html" aria-current="page">Apartamentos</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="obra.html">Obra</a><a href="como-comprar.html">Como comprar</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
+  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash (licença Unsplash)</span></p>
+</footer>
+</body>
+</html>

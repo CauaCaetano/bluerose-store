@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script src="../../js/idioma.js?v=18"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de financiamento imobiliário · Ana Ribeiro Imóveis</title>
+<meta name="description" content="Descubra quanto você consegue financiar em Florianópolis: renda, entrada com FGTS, prazo, juros e SAC ou Price, com os imóveis que cabem no seu bolso.">
+<meta name="theme-color" content="#1b2120">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%231b2120'%2F%3E%3Cpath%20d%3D'M8%2030L20%209l12%2021'%20fill%3D'none'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3Cpath%20d%3D'M14%2030h12'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
+<link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
+<link rel="stylesheet" href="../assets/moldura.css?v=4">
+<link rel="stylesheet" href="estilo.css?v=6">
+<script src="../../js/leads-config.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=3" defer></script>
+<script src="site.js?v=5" defer></script>
+</head>
+<body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="cab" data-tom="claro">
+  <a class="logo" href="index.html" aria-label="Ana Ribeiro Imóveis, início">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg>
+    <span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span>
+  </a>
+  <nav class="nav" aria-label="Páginas">
+    <a href="imoveis.html">Imóveis</a><a href="sobre.html">A corretora</a><a href="simulador.html" aria-current="page">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="contato.html">Contato</a>
+  </nav>
+  <p class="creci"><b>AR</b><span>CORRETORA DE IMÓVEIS<br>CRECI-SC FICTÍCIO</span></p>
+  <button class="cab-menu" type="button" aria-expanded="false" aria-controls="menu-cel">Menu</button>
+</header>
+<div class="menu-cel" id="menu-cel" hidden>
+  <a href="index.html">Início</a><a href="imoveis.html">Imóveis</a><a href="sobre.html">A corretora</a><a href="simulador.html" aria-current="page">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="contato.html">Contato</a>
+  <a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana ↗</a>
+</div>
+
+<main id="conteudo">
+  <section class="pg-topo" data-tom="claro" aria-labelledby="pg-t">
+    <nav class="trilha" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span aria-current="page">Simulador</span></nav>
+    <h1 class="pg-titulo" id="pg-t">QUANTO <em>cabe no bolso.</em></h1>
+    <div class="pg-intro">
+      <div class="rot-col"><p class="rot">[SIMULADOR DE FINANCIAMENTO]</p></div>
+      <div class="txt"><p class="grande">Antes da primeira visita, a gente descobre quanto você consegue financiar.</p><p>Mexa na renda, na entrada, no prazo e nos juros. O simulador usa as regras dos bancos: primeira parcela de até 30% da renda da família e financiamento de até 80% do valor do imóvel. Compare a tabela SAC, em que a parcela cai todo mês, com a Price, em que ela é fixa.</p></div>
+    </div>
+  </section>
+
+  <section class="ferr" data-tom="claro" aria-label="Simulador">
+    <form class="ferr-form" id="sim">
+      <p class="rot">Seus números</p>
+      <label><span class="linha">Renda bruta da família por mês <output>R$ 22.000</output></span><input type="range" name="renda" min="3000" max="60000" step="500" value="22000"></label>
+      <label><span class="linha">Entrada, com FGTS <output>R$ 150.000</output></span><input type="range" name="ent" min="20000" max="1000000" step="10000" value="150000"></label>
+      <label><span class="linha">Prazo <output>30 anos</output></span><input type="range" name="anos" min="10" max="35" value="30"></label>
+      <label><span class="linha">Juros ao ano <output>11,49% a.a.</output></span><input type="range" name="taxa" min="8" max="14" step=".01" value="11.49"></label>
+      <label>Sistema de amortização<select class="campo" name="sist"><option value="sac">SAC: parcela que cai todo mês</option><option value="price">Price: parcela fixa</option></select></label>
+    </form>
+    <div class="ferr-res" aria-live="polite">
+      <p class="rot">Você compra até</p>
+      <p class="grande sim-total">R$ 0</p>
+      <p class="det sim-det"></p>
+      <table><thead><tr><th>Resumo</th><th>Valor</th></tr></thead><tbody class="sim-tab"></tbody></table>
+      <p class="rot sim-cabem"></p>
+      <div class="cabem"><a href="imovel-itacorubi.html" data-preco="480000"><span>Apartamento 2 quartos · Itacorubi · R$ 480.000</span><span></span></a><a href="imovel-trindade.html" data-preco="690000"><span>Apartamento 3 quartos · Trindade · R$ 690.000</span><span></span></a><a href="imovel-campeche.html" data-preco="920000"><span>Apartamento garden · Campeche · R$ 920.000</span><span></span></a><a href="imovel-agronomica.html" data-preco="1150000"><span>Apartamento 3 quartos com vista · Agronômica · R$ 1.150.000</span><span></span></a><a href="imovel-ingleses.html" data-preco="1380000"><span>Casa 3 suítes · Ingleses · R$ 1.380.000</span><span></span></a><a href="imovel-jurere.html" data-preco="2450000"><span>Cobertura duplex · Jurerê Internacional · R$ 2.450.000</span><span></span></a></div>
+      <a class="bt bt-bege sim-wa" href="contato.html" data-wa="Olá, Ana! Fiz a simulação completa no site.">Me mostre imóveis nessa faixa ↗</a>
+    </div>
+  </section>
+  <div class="nota-pe" data-tom="claro"><p>Simulação ilustrativa, sem seguro habitacional nem taxas do banco, que somam cerca de R$ 150 a R$ 400 por mês. A aprovação depende da análise de crédito. Com a renda certa em mãos, eu faço a simulação nos três bancos e mostro qual sai mais barato.</p></div>
+
+  <section class="cap cap-alt" data-tom="claro2" aria-labelledby="c1">
+    <div>
+      <p class="cap-num">[01]</p>
+      <h2 id="c1">Do simulador <em>à chave.</em></h2>
+      <ol class="lista-num"><li><b>01</b>Simulação nos bancos com a sua renda e o seu FGTS</li><li><b>02</b>Carta de crédito aprovada antes de visitar</li><li><b>03</b>Proposta e avaliação do imóvel pelo engenheiro do banco</li><li><b>04</b>Contrato assinado no banco e registro no cartório</li></ol>
+    </div>
+    <figure><img src="img/simulador-ilha.webp" alt="Vista aérea de uma enseada da Ilha com casas e barcos" width="1360" height="1019" loading="lazy"></figure>
+  </section>
+</main>
+
+<footer class="rodape" data-tom="escuro">
+  <div class="rd-topo">
+    <h2>Seu próximo endereço <em>começa numa conversa.</em></h2>
+  </div>
+  <div class="rd-meio">
+    <p>Comprar, vender ou só entender quanto dá para financiar.<br>Respondo no mesmo dia, de segunda a sábado.</p>
+    <a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Converse com a Ana <i aria-hidden="true">↗</i></a>
+  </div>
+  <div class="rd-baixo">
+    <a class="logo logo-grande" href="index.html" aria-label="Voltar ao início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg><span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span></a>
+    <p>Florianópolis · SC<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI-SC fictício</p>
+    <a class="rd-rever" href="index.html">Voltar ao início <i aria-hidden="true">↗</i></a>
+  </div>
+  <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>
+  <p class="rd-nota">Fotos: Unsplash (licença Unsplash). Simulações são estimativas e não substituem a análise do banco. Marca criada para demonstração · Site de exemplo feito pela Blue Rose.</p>
+</footer>
+
+</body>
+</html>

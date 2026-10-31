@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<script src="../../js/idioma.js?v=17"></script>
+<script src="../../js/idioma.js?v=18"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -13,10 +13,10 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%2311153b'%2F%3E%3Ctext%20x%3D'20'%20y%3D'27'%20font-size%3D'16'%20font-weight%3D'800'%20text-anchor%3D'middle'%20fill%3D'%23fff'%20font-family%3D'Arial'%3EA%26amp%3BM%3C%2Ftext%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/3396be9ae4.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=6">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=3" defer></script>
-<script src="site.js?v=4" defer></script>
+<script src="site.js?v=5" defer></script>
 <script type="module" src="cena.js?v=3"></script>
 </head>
 <body data-slug="aguiar-monteiro" data-marca="Aguiar &amp; Monteiro" data-cat="advocacia" data-tema="escuro">
@@ -27,27 +27,23 @@
 <div class="veu" aria-hidden="true"></div>
 
 <header class="topo">
-  <a class="marca" href="#inicio" aria-label="Aguiar &amp; Monteiro, início">
+  <a class="marca" href="index.html" aria-label="Aguiar &amp; Monteiro, início">
     <svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3dff7a"/><stop offset=".55" stop-color="#4f6bff"/><stop offset="1" stop-color="#9b4dff"/></linearGradient></defs><path d="M20 4a16 16 0 1 0 16 16" fill="none" stroke="url(#mg)" stroke-width="3" stroke-linecap="round"/><path d="M20 10a10 10 0 1 0 10 10" fill="none" stroke="url(#mg)" stroke-width="3" stroke-linecap="round"/><path d="M20 16a4 4 0 1 0 4 4" fill="none" stroke="url(#mg)" stroke-width="3" stroke-linecap="round"/></svg>
     <span translate="no"><b>AGUIAR</b><i>&amp;</i>MONTEIRO</span>
   </a>
   <button class="menu-bt" type="button" aria-expanded="false" aria-controls="pontos">Menu</button>
 </header>
 
-<nav class="pontos" id="pontos" aria-label="Seções">
-  <a href="#inicio">Início</a>
-  <a href="#areas">Áreas de atuação</a>
-  <a href="#visao">Nossa visão</a>
-  <a href="#calc">Calculadora</a>
-  <a href="#perguntas">Perguntas reais</a>
-  <a href="#trabalho">Como trabalhamos</a>
-  <a href="#equipe">Equipe</a>
-  <a href="#carreira">Carreira</a>
-  <a href="#contato">Contato</a>
-  <a href="#sobre">Sobre nós</a>
+<nav class="pontos" id="pontos" aria-label="Páginas">
+  <a href="index.html" aria-current="page">Início</a>
+  <a href="escritorio.html">Escritório</a>
+  <a href="areas.html">Áreas de atuação</a>
+  <a href="equipe.html">Equipe</a>
+  <a href="publicacoes.html">Publicações</a>
+  <a href="contato.html">Contato</a>
 </nav>
 
-<a class="fale" href="#" data-wa="Olá, Aguiar &amp; Monteiro! Fui demitido e quero entender os meus direitos."><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></i><span>Fale conosco</span></a>
+<a class="fale" href="contato.html" data-wa="Olá, Aguiar &amp; Monteiro! Fui demitido e quero entender os meus direitos."><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></i><span>Fale conosco</span></a>
 
 <main id="conteudo">
 
@@ -69,16 +65,16 @@
   <section class="sec areas" id="areas" data-tema="escuro" aria-labelledby="ar-t">
     <h2 id="ar-t" class="tit-dir">Áreas de atuação</h2>
     <div class="ar-grade">
-      <article class="ar" style="--c:1;--r:1"><span class="num" aria-hidden="true">01</span><h3>Rescisão e verbas</h3><p>Saldo de salário, aviso prévio de 30 a 90 dias, 13º, férias com 1/3 e multa de 40% do FGTS. A empresa tem 10 dias para pagar tudo (art. 477 da CLT).</p></article>
-      <article class="ar" style="--c:3;--r:2"><span class="num" aria-hidden="true">02</span><h3>Horas extras</h3><p>Adicional de no mínimo 50%, e de 100% em domingos e feriados. Cartão de ponto sempre igual e mensagens fora do horário servem de prova.</p></article>
-      <article class="ar" style="--c:2;--r:3"><span class="num" aria-hidden="true">03</span><h3>Insalubridade e periculosidade</h3><p>Insalubridade de 10%, 20% ou 40% do salário mínimo. Periculosidade de 30% do salário para eletricidade, inflamáveis e motociclistas.</p></article>
-      <article class="ar" style="--c:3;--r:4"><span class="num" aria-hidden="true">04</span><h3>Assédio moral</h3><p>Humilhação em público, metas abusivas, isolamento. Organizamos prints, áudios e testemunhas para o pedido de indenização por dano moral.</p></article>
-      <article class="ar" style="--c:2;--r:5"><span class="num" aria-hidden="true">05</span><h3>Acidente e doença do trabalho</h3><p>LER, coluna, acidente no trajeto. Quem volta do auxílio por acidente tem 12 meses de estabilidade no emprego (Lei 8.213, art. 118).</p></article>
-      <article class="ar" style="--c:3;--r:6"><span class="num" aria-hidden="true">06</span><h3>FGTS não depositado</h3><p>São 8% do salário todo mês. Confira o extrato no app FGTS: depósito faltando pode ser cobrado e até justificar a rescisão indireta.</p></article>
-      <article class="ar" style="--c:2;--r:7"><span class="num" aria-hidden="true">07</span><h3>Carteira não assinada</h3><p>Reconhecimento do vínculo com registro, FGTS, INSS e férias do período. Vale também para quem virou PJ com rotina de empregado.</p></article>
-      <article class="ar" style="--c:3;--r:8"><span class="num" aria-hidden="true">08</span><h3>Desvio e acúmulo de função</h3><p>Fazia o trabalho de outro cargo ganhando menos? A diferença de salário pode ser cobrada dos últimos 5 anos de contrato.</p></article>
-      <article class="ar" style="--c:2;--r:9"><span class="num" aria-hidden="true">09</span><h3>Bancários</h3><p>Jornada de 6 horas (art. 224 da CLT), cargo de confiança que não tinha confiança nenhuma, metas, PLR e intervalo de 15 minutos.</p></article>
-      <article class="ar" style="--c:3;--r:10"><span class="num" aria-hidden="true">10</span><h3>Gestantes e estabilidade</h3><p>Estabilidade da confirmação da gravidez até 5 meses depois do parto, mesmo no contrato de experiência ou no aviso prévio.</p></article>
+      <article class="ar" style="--c:1;--r:1"><span class="num" aria-hidden="true">01</span><h3><a href="area-rescisao.html">Rescisão e verbas</a></h3><p>Saldo de salário, aviso prévio de 30 a 90 dias, 13º, férias com 1/3 e multa de 40% do FGTS. A empresa tem 10 dias para pagar tudo (art. 477 da CLT).</p><a class="mais" href="area-rescisao.html">Ver a área →</a></article>
+      <article class="ar" style="--c:3;--r:2"><span class="num" aria-hidden="true">02</span><h3><a href="area-horas-extras.html">Horas extras</a></h3><p>Adicional de no mínimo 50%, e de 100% em domingos e feriados. Cartão de ponto sempre igual e mensagens fora do horário servem de prova.</p><a class="mais" href="area-horas-extras.html">Ver a área →</a></article>
+      <article class="ar" style="--c:2;--r:3"><span class="num" aria-hidden="true">03</span><h3><a href="area-insalubridade.html">Insalubridade e periculosidade</a></h3><p>Insalubridade de 10%, 20% ou 40% do salário mínimo. Periculosidade de 30% do salário para eletricidade, inflamáveis e motociclistas.</p><a class="mais" href="area-insalubridade.html">Ver a área →</a></article>
+      <article class="ar" style="--c:3;--r:4"><span class="num" aria-hidden="true">04</span><h3><a href="area-assedio-moral.html">Assédio moral</a></h3><p>Humilhação em público, metas abusivas, isolamento. Organizamos prints, áudios e testemunhas para o pedido de indenização por dano moral.</p><a class="mais" href="area-assedio-moral.html">Ver a área →</a></article>
+      <article class="ar" style="--c:2;--r:5"><span class="num" aria-hidden="true">05</span><h3><a href="area-acidente.html">Acidente e doença do trabalho</a></h3><p>LER, coluna, acidente no trajeto. Quem volta do auxílio por acidente tem 12 meses de estabilidade no emprego (Lei 8.213, art. 118).</p><a class="mais" href="area-acidente.html">Ver a área →</a></article>
+      <article class="ar" style="--c:3;--r:6"><span class="num" aria-hidden="true">06</span><h3><a href="area-fgts.html">FGTS não depositado</a></h3><p>São 8% do salário todo mês. Confira o extrato no app FGTS: depósito faltando pode ser cobrado e até justificar a rescisão indireta.</p><a class="mais" href="area-fgts.html">Ver a área →</a></article>
+      <article class="ar" style="--c:2;--r:7"><span class="num" aria-hidden="true">07</span><h3><a href="area-carteira.html">Carteira não assinada</a></h3><p>Reconhecimento do vínculo com registro, FGTS, INSS e férias do período. Vale também para quem virou PJ com rotina de empregado.</p><a class="mais" href="area-carteira.html">Ver a área →</a></article>
+      <article class="ar" style="--c:3;--r:8"><span class="num" aria-hidden="true">08</span><h3><a href="area-desvio-funcao.html">Desvio e acúmulo de função</a></h3><p>Fazia o trabalho de outro cargo ganhando menos? A diferença de salário pode ser cobrada dos últimos 5 anos de contrato.</p><a class="mais" href="area-desvio-funcao.html">Ver a área →</a></article>
+      <article class="ar" style="--c:2;--r:9"><span class="num" aria-hidden="true">09</span><h3><a href="area-bancarios.html">Bancários</a></h3><p>Jornada de 6 horas (art. 224 da CLT), cargo de confiança que não tinha confiança nenhuma, metas, PLR e intervalo de 15 minutos.</p><a class="mais" href="area-bancarios.html">Ver a área →</a></article>
+      <article class="ar" style="--c:3;--r:10"><span class="num" aria-hidden="true">10</span><h3><a href="area-gestantes.html">Gestantes e estabilidade</a></h3><p>Estabilidade da confirmação da gravidez até 5 meses depois do parto, mesmo no contrato de experiência ou no aviso prévio.</p><a class="mais" href="area-gestantes.html">Ver a área →</a></article>
     </div>
   </section>
 
@@ -89,6 +85,7 @@
       <p>Acreditamos que o trabalhador merece o mesmo cuidado que uma empresa grande compra com dinheiro: advogado que atende, explica e responde. Por isso, desde 2004, defendemos só quem trabalha, nunca empresas.</p>
       <p>Somos 5 pessoas num escritório pequeno no Centro de São Paulo, a 3 minutos do metrô São Bento. Atendemos presencialmente e pelo WhatsApp, em português claro, sem juridiquês.</p>
       <p>Depois de cada audiência, você recebe um resumo por escrito do que aconteceu e do próximo passo. Ninguém fica sem notícia do próprio processo.</p>
+      <p><a class="mais" href="escritorio.html">Conheça a história do escritório →</a></p>
       <div class="vi-pe"><p>Nosso compromisso é que você entenda cada decisão do seu caso.</p><p class="assina"><b>Dr. Paulo Aguiar e Dra. Renata Monteiro</b>Sócios fundadores</p></div>
     </div>
   </section>
@@ -131,7 +128,7 @@
       <article><h3>Auxiliar de produção, 7 anos de fábrica</h3><p class="lei">NR-15 e art. 192 da CLT</p><p class="perg">“Trabalhei a vida toda do lado de máquina barulhenta e nunca recebi adicional. Ainda dá tempo?”</p><p class="resp"><b>O que a lei diz:</b> a insalubridade é de 10%, 20% ou 40% do salário mínimo, conforme a perícia. Dá para cobrar os últimos 5 anos, se a ação entrar em até 2 anos da saída.</p></article>
       <article><h3>Vendedora, grávida no aviso prévio</h3><p class="lei">ADCT, art. 10, II, b</p><p class="perg">“Descobri a gravidez durante o aviso prévio. A demissão vale?”</p><p class="resp"><b>O que a lei diz:</b> a gestante tem estabilidade da confirmação da gravidez até 5 meses depois do parto, inclusive se a gravidez começou no aviso prévio.</p></article>
     </div>
-    <p class="pg-nota">Perguntas comuns, reescritas sem nomes. Informação geral: cada caso depende de documentos e provas.</p>
+    <p class="pg-nota">Perguntas comuns, reescritas sem nomes. Informação geral: cada caso depende de documentos e provas. <a class="mais" href="publicacoes.html">Leia as publicações →</a></p>
   </section>
 
   <section class="sec trabalho" id="trabalho" data-tema="claro" aria-labelledby="tb-t">
@@ -153,7 +150,7 @@
       <article class="pessoa" style="--c:3;--r:4"><span class="num" aria-hidden="true">04</span><div class="foto"><img src="img/felipe-andrade.webp" alt="Retrato do Dr. Felipe Andrade, de terno, numa biblioteca" width="640" height="640" loading="lazy"></div><h3 translate="no">Felipe Andrade</h3><p class="cargo">Advogado associado</p><p>Vínculo de emprego, PJ disfarçado e trabalho por aplicativo.</p></article>
       <article class="pessoa" style="--c:2;--r:5"><span class="num" aria-hidden="true">05</span><div class="foto"><img src="img/marcos-teixeira.webp" alt="Retrato de Marcos Teixeira, de óculos e paletó escuro" width="640" height="640" loading="lazy"></div><h3 translate="no">Marcos Teixeira</h3><p class="cargo">Calculista trabalhista</p><p>Contador. Confere holerites, cartões de ponto e extratos do FGTS, mês a mês.</p></article>
     </div>
-    <p class="nota-oab">Nomes e registros na OAB fictícios: este é um site de exemplo.</p>
+    <p class="nota-oab">Nomes e registros na OAB fictícios: este é um site de exemplo. <a class="mais" href="equipe.html">Ver a equipe completa →</a></p>
   </section>
 
   <section class="sec carreira" id="carreira" data-tema="escuro" aria-labelledby="ca-t">
@@ -166,7 +163,7 @@
       <p>Se respondeu sim às três, queremos conhecer você. Temos 2 vagas de estágio por ano (a partir do 7º semestre) e abrimos vaga de advogado associado quando a equipe cresce.</p>
       <p>Aqui ninguém trabalha para empresa: todo caso é de trabalhador, e cada pessoa da equipe atende cliente desde o primeiro mês.</p>
     </div>
-    <a class="ca-mail" href="#" data-wa="Olá, Aguiar &amp; Monteiro! Quero enviar meu currículo para a vaga de estágio ou de advogado.">Mande seu currículo pelo WhatsApp: respondemos em até 5 dias úteis.</a>
+    <a class="ca-mail" href="contato.html" data-wa="Olá, Aguiar &amp; Monteiro! Quero enviar meu currículo para a vaga de estágio ou de advogado.">Mande seu currículo pelo WhatsApp: respondemos em até 5 dias úteis.</a>
   </section>
 
   <section class="sec contato" id="contato" data-tema="claro" aria-labelledby="ct-t">
@@ -178,7 +175,7 @@
         <label>Empresa onde trabalhou<input name="emp"></label>
       </div>
       <label class="ck"><input type="checkbox" name="sigilo" checked><span>Quero sigilo total: a empresa não fica sabendo do contato.</span></label>
-      <label class="ck"><input type="checkbox" name="priv"><span>Li e concordo com a política de privacidade deste site.</span></label>
+      <label class="ck"><input type="checkbox" name="priv"><span>Li e concordo com a <a class="mais" href="privacidade.html">política de privacidade</a> deste site.</span></label>
       <p class="erro" aria-live="polite"></p>
       <button class="pilula" type="submit">Enviar</button>
       <p class="seg">Um advogado do escritório chama você no WhatsApp em até 24 horas úteis.</p>
@@ -189,8 +186,8 @@
     <h2 id="sb-t" class="tit-dir">Sobre nós</h2>
     <p class="sb-desc"><span translate="no">Aguiar &amp; Monteiro</span> é um escritório de advocacia trabalhista que, desde 2004, atende só trabalhadores em São Paulo.</p>
     <div class="sb-grade">
-      <div style="--c:2;--r:1"><span class="num" aria-hidden="true">01</span><h3>Endereço</h3><p>Rua Boa Vista, 280, 6º andar<br>Centro, São Paulo · SP</p><p>Segunda a sexta, das 9h às 18h</p><p><a href="#" data-wa="Olá, Aguiar &amp; Monteiro! Quero marcar um horário no escritório.">WhatsApp do escritório</a></p></div>
-      <div style="--c:3;--r:2"><span class="num" aria-hidden="true">02</span><h3>Links</h3><p><a href="#calc">Calculadora de rescisão</a></p><p><a href="#areas">Áreas de atuação</a></p><p><a href="#contato">Política de privacidade</a></p></div>
+      <div style="--c:2;--r:1"><span class="num" aria-hidden="true">01</span><h3>Endereço</h3><p>Rua Boa Vista, 280, 6º andar<br>Centro, São Paulo · SP</p><p>Segunda a sexta, das 9h às 18h</p><p><a href="contato.html" data-wa="Olá, Aguiar &amp; Monteiro! Quero marcar um horário no escritório.">WhatsApp do escritório</a></p></div>
+      <div style="--c:3;--r:2"><span class="num" aria-hidden="true">02</span><h3>Links</h3><p><a href="#calc">Calculadora de rescisão</a></p><p><a href="areas.html">Áreas de atuação</a></p><p><a href="publicacoes.html">Publicações</a></p><p><a href="privacidade.html">Política de privacidade</a></p></div>
       <div style="--c:1;--r:3"><span class="num" aria-hidden="true">03</span><h3>Siga</h3><p>Instagram</p><p>LinkedIn</p><p>YouTube</p></div>
       <p class="sb-lema" style="--c:2;--r:3">Ao lado de quem trabalha desde 2004.</p>
     </div>

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<script src="../../js/idioma.js?v=17"></script>
+<script src="../../js/idioma.js?v=18"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,10 +14,10 @@
 <link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
 <link rel="stylesheet" href="../assets/fontes/9cd47a11d1.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=6">
+<link rel="stylesheet" href="estilo.css?v=8">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=3" defer></script>
-<script src="site.js?v=3" defer></script>
+<script src="site.js?v=4" defer></script>
 <script type="module" src="cena.js?v=2"></script>
 </head>
 <body data-slug="monolito" data-marca="Monolito Engenharia" data-cat="construcao">
@@ -39,7 +39,7 @@
   <a class="pl-agenda" href="#contato">Agendar<span aria-hidden="true">⟶</span></a>
   <nav class="menu-painel" id="menu-painel" aria-label="Principal" hidden>
     <p class="mp-marca" translate="no">Monolito<br>Engenharia</p>
-    <a href="#inicio">Início</a><a href="#inicio" data-explorar>Explorar em 3D</a><a href="#plantas">Plantas</a><a href="#monte">Monte sua casa</a><a href="#painel">Painel da obra</a><a href="#regiao">Região</a><a href="#pagamento">Pagamento</a><a href="#contato">Contato</a>
+    <a href="index.html" aria-current="page">Início</a><a href="tour-3d.html">Tour 3D</a><a href="residencias.html">Residências</a><a href="incorporadora.html">Incorporadora</a><a href="lojas.html">Espaços comerciais</a><a href="contato.html">Contato</a>
     <p class="mp-pe"><span>Ribeirão Preto</span><span>CREA/CAU-SP</span></p>
   </nav>
 </header>
@@ -66,7 +66,7 @@
         <div class="ps-txt">
           <p class="olho" translate="no">Monolito Engenharia</p>
           <h2 data-palavras>A casa do projeto, entregue pelo preço do projeto. Arquitetura, engenharia e obra no mesmo contrato, com o custo travado antes da primeira estaca.</h2>
-          <a class="bt-linha" href="#inicio" data-explorar>Explorar em 3D <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8l8-4 8 4-8 4zM4 8v8l8 4 8-4V8M12 12v8"/></svg></a>
+          <a class="bt-linha" href="tour-3d.html">Explorar em 3D <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8l8-4 8 4-8 4zM4 8v8l8 4 8-4V8M12 12v8"/></svg></a>
         </div>
         <figure class="fm fm-grande" style="clip-path:url(#forma-a)"><img src="img/hero.webp" alt="Casa Lago com piscina e fachada branca" width="1400" height="929" loading="lazy"></figure>
         <figure class="fm fm-peq" style="clip-path:url(#forma-b)"><img src="img/sala-vista.webp" alt="Sala de estar com janela do piso ao teto voltada para o jardim" width="1130" height="1600" loading="lazy"></figure>
@@ -97,7 +97,7 @@
   <section class="local" id="regiao" aria-labelledby="lc-t" data-prog>
     <img class="lc-fundo" src="img/casa-palmeiras.webp" alt="Casa de concreto branco e madeira entre palmeiras" width="1600" height="1067" loading="lazy">
     <figure class="lc-cartao"><img src="img/monolito-concreto.webp" alt="Volumes de concreto aparente contra o céu" width="1263" height="1600" loading="lazy"></figure>
-    <p class="lc-txt">Escritório na Av. Pres. Vargas, 2.001. Construímos em Ribeirão Preto e num raio de 60 km: condomínios fechados, loteamentos novos e terrenos de rua, com aprovação na prefeitura e no condomínio por nossa conta.</p>
+    <p class="lc-txt">Escritório na Av. Pres. Vargas, 2.001. Construímos em Ribeirão Preto e num raio de 60 km: condomínios fechados, loteamentos novos e terrenos de rua, com aprovação na prefeitura e no condomínio por nossa conta. <a href="lojas.html" style="color:var(--lima)">Também temos lojas e salas no Edifício Vargas 2001.</a></p>
     <h2 class="lc-titulo" id="lc-t" data-letras>Ribeirão Preto</h2>
   </section>
 
@@ -123,7 +123,7 @@
       <div class="pl-esq">
         <div class="filtros" role="group" aria-label="Filtrar por suítes"><button type="button" data-q="0" aria-pressed="true">Todas</button><button type="button" data-q="3" aria-pressed="false">3 suítes</button><button type="button" data-q="4" aria-pressed="false">4 suítes</button><button type="button" data-q="5" aria-pressed="false">5 ou mais</button></div>
         <ul class="pl-nomes" role="list"></ul>
-        <a class="pl-todas" href="#monte">Ver todas no configurador</a>
+        <a class="pl-todas" href="residencias.html">Ver as seis residências com ficha</a>
         <div class="pl-rodape"><p class="pl-conta"><b>6</b><span>plantas<br>prontas</span></p><a class="bt-borda" href="#" data-wa="Olá, Monolito! Quero receber as 6 plantas prontas com preços.">Pedir as plantas <span aria-hidden="true">⟶</span></a></div>
       </div>
       <div class="pl-dir" aria-live="polite">
@@ -170,7 +170,7 @@
     <div class="jt-corpo">
       <p class="jt-frase" data-palavras>Na Monolito, cada casa é fechada com um preço só, para o projeto, a aprovação e a obra. Se o orçamento estourar, a diferença é nossa: está escrito no contrato.</p>
       <ul class="jt-nums"><li><b>0%</b>teto de variação no contrato</li><li><b>1</b>contrato para projeto e obra</li><li><b>48 h</b>para responder a qualquer decisão pendente</li></ul>
-      <a class="bt-borda claro" href="#painel">Ver o painel do cliente <span aria-hidden="true">⟶</span></a>
+      <p style="display:flex;flex-wrap:wrap;gap:12px"><a class="bt-borda claro" href="#painel">Ver o painel do cliente <span aria-hidden="true">⟶</span></a><a class="bt-borda claro" href="incorporadora.html">Conheça a incorporadora <span aria-hidden="true">⟶</span></a></p>
     </div>
   </section>
 
@@ -239,7 +239,7 @@
         <p class="erro" aria-live="polite"></p>
       </form>
     </div>
-    <nav class="rd-nav" aria-label="Rodapé"><a href="#inicio">Início</a><a href="#plantas">Plantas</a><a href="#monte">Monte sua casa</a><a href="#painel">Painel da obra</a><a href="#regiao">Região</a><a href="#pagamento">Pagamento</a><a href="#contato">Contato</a></nav>
+    <nav class="rd-nav" aria-label="Rodapé"><a href="index.html" aria-current="page">Início</a><a href="tour-3d.html">Tour 3D</a><a href="residencias.html">Residências</a><a href="incorporadora.html">Incorporadora</a><a href="lojas.html">Espaços comerciais</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
     <div class="rd-redes"><a href="#" data-wa="Olá, Monolito! Vim pelo site.">WhatsApp</a><a href="#" data-wa="Olá, Monolito! Vi o Instagram de vocês.">Instagram</a><a href="#" data-wa="Olá, Monolito! Vi o LinkedIn de vocês.">LinkedIn</a></div>
     <div class="rd-aviso"><p>Preços de referência de outubro de 2026, para terreno plano e projeto aprovado sem alterações estruturais. Fotos ilustrativas de casas de alto padrão.</p><p>Monolito Engenharia e Arquitetura · CREA/CAU-SP fictícios<br>Av. Pres. Vargas, 2.001, Ribeirão Preto/SP<br>Seg a sex, 8h às 18h · Sáb, 9h às 13h</p></div>
   </div>

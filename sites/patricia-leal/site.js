@@ -81,14 +81,14 @@
   } else alvos.forEach(function (a) { a.classList.add('visto'); });
 
   // ---------- foto que segue o cursor sobre as listas ----------
-  var segue = $('.segue'), simg = $('img', segue), mx = 0, my = 0, sx = 0, sy = 0, ativo = null, rodando = false;
+  var segue = $('.segue'), simg = segue ? $('img', segue) : null, mx = 0, my = 0, sx = 0, sy = 0, ativo = null, rodando = false;
   function passo() {
     sx += (mx - sx) * (calmo ? 1 : 0.16); sy += (my - sy) * (calmo ? 1 : 0.16);
     segue.style.transform = 'translate3d(' + (sx - segue.offsetWidth * 0.5) + 'px,' + (sy - segue.offsetHeight * 0.55) + 'px,0)';
     if (ativo || Math.abs(mx - sx) > 0.5) requestAnimationFrame(passo); else rodando = false;
   }
-  if (!toque) {
-    $$('.lista .item').forEach(function (it) {
+  if (!toque && segue) {
+    $$('.lista .item[data-foto]').forEach(function (it) {
       var src = it.dataset.foto; if (src) { var pre = new Image(); pre.src = src; }
       it.addEventListener('mouseenter', function (e) {
         if (!ativo) { sx = mx = e.clientX; sy = my = e.clientY; }
@@ -105,21 +105,21 @@
     });
   }
 
-  // ---------- situações: uma resposta aberta por vez ----------
-  $$('#lista-sit .item-bt').forEach(function (b) {
-    var corpo = doc.getElementById(b.getAttribute('aria-controls')), it = b.closest('.item');
-    var f = doc.createElement('img'); f.className = 'foto-cel'; f.alt = it.dataset.alt || ''; f.loading = 'lazy'; f.dataset.src = it.dataset.foto;
-    corpo.insertBefore(f, $('.texto', corpo));
+  // ---------- listas que abrem (situações, perguntas): uma resposta aberta por vez ----------
+  $$('.lista-ab button.item-bt').forEach(function (b) {
+    var corpo = doc.getElementById(b.getAttribute('aria-controls')), it = b.closest('.item'), lista = b.closest('.lista-ab');
+    var f = null;
+    if (it.dataset.foto) { f = doc.createElement('img'); f.className = 'foto-cel'; f.alt = it.dataset.alt || ''; f.loading = 'lazy'; f.dataset.src = it.dataset.foto; corpo.insertBefore(f, $('.texto', corpo)); }
     b.addEventListener('click', function () {
       var abrir = b.getAttribute('aria-expanded') !== 'true';
-      $$('#lista-sit .item-bt').forEach(function (o) {
+      $$('button.item-bt', lista).forEach(function (o) {
         if (o !== b && o.getAttribute('aria-expanded') === 'true') { o.setAttribute('aria-expanded', 'false'); doc.getElementById(o.getAttribute('aria-controls')).hidden = true; }
       });
       b.setAttribute('aria-expanded', String(abrir)); corpo.hidden = !abrir;
       if (abrir) {
-        if (!f.src) f.src = f.dataset.src;
+        if (f && !f.src) f.src = f.dataset.src;
         corpo.classList.remove('abrindo'); void corpo.offsetWidth; corpo.classList.add('abrindo');
-        segue.classList.remove('on');
+        if (segue) segue.classList.remove('on');
         var r = b.getBoundingClientRect(); if (r.top < 0 || r.top > innerHeight * 0.6) b.scrollIntoView({ behavior: calmo ? 'auto' : 'smooth', block: 'start' });
       }
     });
@@ -127,15 +127,18 @@
 
   // botões "Marcar" escolhem o assunto no formulário
   var cons = $('#cons');
+  function poeAssunto(txt) { if (!cons || !cons.assunto) return; [].forEach.call(cons.assunto.options, function (o) { if (o.text === txt) cons.assunto.value = o.value; }); }
   doc.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-assunto]'); if (!b || !cons.assunto) return;
-    [].forEach.call(cons.assunto.options, function (o) { if (o.text === b.dataset.assunto) cons.assunto.value = o.value; });
+    var b = e.target.closest('[data-assunto]'); if (b) poeAssunto(b.dataset.assunto);
   });
+  // contato.html?assunto=Pensão já chega com o assunto escolhido
+  try { var qa = new URLSearchParams(location.search).get('assunto'); if (qa) poeAssunto(qa); } catch (e) {}
 
   // ---------- calculadora informativa de pensão ----------
   // faixa comum nos tribunais: 1 filho 15–20%, 2 filhos 20–25%, 3 filhos 25–30%, 4 filhos 28–33% da renda líquida
   var real = function (v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
   var p = $('#pens'), res = $('.pn-res');
+  if (p && res) (function () {
   function pc() {
     var r = +p.r.value, f = +p.f.value, base = [0, 15, 20, 25, 28][f], topo = base + 5, fl = f + (f > 1 ? ' filhos' : ' filho');
     p.r.previousElementSibling.textContent = real(r); p.f.previousElementSibling.textContent = fl;
@@ -146,9 +149,10 @@
     $('.pn-txt', res).innerHTML = t;
   }
   p.addEventListener('input', pc); p.addEventListener('submit', function (e) { e.preventDefault(); }); pc();
+  })();
 
   // ---------- pedido de consulta ----------
-  cons.addEventListener('submit', function (e) {
+  if (cons) cons.addEventListener('submit', function (e) {
     e.preventDefault();
     var n = cons.nome.value.trim(), t = cons.tel.value.replace(/\D/g, ''), er = $('.erro', cons);
     er.textContent = n.length < 2 ? 'Escreva seu nome.' : t.length < 10 ? 'Confira o WhatsApp com DDD.' : '';

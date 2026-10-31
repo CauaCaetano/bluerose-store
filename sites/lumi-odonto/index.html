@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<script src="../../js/idioma.js?v=17"></script>
+<script src="../../js/idioma.js?v=18"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,18 +14,19 @@
 <link rel="stylesheet" href="../assets/fontes/7a93d76d08.css">
 <link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=8">
+<link rel="stylesheet" href="estilo.css?v=9">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=3" defer></script>
-<script src="site.js?v=4" defer></script>
+<script src="site.js?v=5" defer></script>
 </head>
 <body data-slug="lumi-odonto" data-marca="Lumi Odontologia" data-cat="odontologia">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 <header class="topo">
   <a class="marca" href="#inicio" aria-label="Lumi Odontologia, início"><svg viewBox="0 0 64 22" aria-hidden="true"><path d="M2 15c9-11 20-12 28-6 8-6 19-5 28 6M10 20h44"/></svg><span>LUMI ODONTOLOGIA<small>Dra. Beatriz Lemos</small></span></a>
-  <nav class="menu" aria-label="Principal"><a href="#inicio" class="ativo">Início</a><a href="#urgencia"><i class="ponto" aria-hidden="true"></i>Urgência</a><a href="#tratamentos">Tratamentos</a><a href="#clinica">A clínica</a><a href="#dra">Dra. Beatriz</a><a href="#contato">Contato</a></nav>
+  <nav class="menu" id="menu" aria-label="Principal"><a href="index.html" aria-current="page">Início</a><a href="contato.html#urgencia"><i class="ponto" aria-hidden="true"></i>Urgência</a><a href="tratamentos.html">Tratamentos</a><a href="sobre.html">A clínica</a><a href="equipe.html">Equipe</a><a href="convenios-e-pagamento.html">Convênios</a><a href="contato.html">Contato</a></nav>
   <a class="bt-linha" href="#" data-wa="Olá, Lumi! Quero agendar uma avaliação."><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"/></svg>Agendar consulta</a>
   <span class="idioma-tag" aria-hidden="true">PT</span>
+  <button type="button" class="menu-bt" aria-controls="menu" aria-expanded="false" aria-label="Abrir menu"><span></span></button>
 </header>
 <main id="conteudo">
   <section class="abre" id="inicio" aria-labelledby="h-t">
@@ -50,16 +51,16 @@
     <div class="intro-txt">
       <p class="rotulo">A clínica</p>
       <h2 id="cl-t">Cuidado odontológico de confiança no coração do Cambuí</h2>
-      <p>A clínica atende na Av. Norte-Sul, no Cambuí, desde 2009. Hoje ela é dirigida pela Dra. Beatriz Lemos, especialista em implantodontia e reabilitação oral, que acompanha você pessoalmente desde a primeira consulta.</p>
+      <p>A clínica atende na Av. Norte-Sul, no Cambuí, desde 2009. Hoje ela é dirigida pela Dra. Beatriz Lemos, especialista em implantodontia e reabilitação oral, que acompanha você pessoalmente desde a primeira consulta. <a class="link-verde" href="sobre.html">Conheça a clínica →</a></p>
       <p>O foco é manter os seus dentes naturais sempre que possível e explicar cada opção com clareza antes de começar. Para urgências, há um telefone que atende 365 dias por ano.</p>
-      <dl class="numeros"><div><dt>2009</dt><dd>Clínica na Av. Norte-Sul</dd></div><div><dt>4,9</dt><dd>Nota dos pacientes no <a href="#depoimentos">Google ↗</a></dd></div><div><dt>365</dt><dd>dias por ano, urgências no <a href="tel:+5519991400187">(19) 99140-0187</a></dd></div></dl>
+      <dl class="numeros"><div><dt>2009</dt><dd>Clínica na Av. Norte-Sul</dd></div><div><dt>3</dt><dd>dentistas, cada um na sua <a href="equipe.html">especialidade</a></dd></div><div><dt>365</dt><dd>dias por ano, urgências no <a href="tel:+5519991400187">(19) 99140-0187</a></dd></div></dl>
     </div>
   </section>
 
   <section class="porta" aria-labelledby="pt-t">
     <div class="pt-txt"><p class="rotulo">Registro e alvará</p><h2 id="pt-t">Uma clínica com nome na porta</h2>
       <p>Na entrada da Av. Norte-Sul há uma placa com o nome da Dra. Beatriz Lemos, dentista registrada no Conselho Regional de Odontologia de São Paulo.</p>
-      <p>A clínica tem alvará da Vigilância Sanitária de Campinas. Quem atende você é quem tem o nome na porta.</p></div>
+      <p>A clínica tem alvará da Vigilância Sanitária de Campinas. Quem atende você é quem tem o nome na porta.</p><p><a class="link-verde" href="equipe.html">Conheça a equipe →</a></p></div>
     <figure class="pt-foto"><img src="img/cambui-rua.webp" alt="Rua do Cambuí, em Campinas, onde fica a clínica" width="1800" height="1350" loading="lazy"></figure>
   </section>
 
@@ -74,30 +75,20 @@
 
   <section class="trat" id="tratamentos" aria-labelledby="tr-t">
     <div class="tr-in">
-      <div class="tr-cab"><div><p class="rotulo-claro">Tratamentos</p><h2 id="tr-t">Tudo o que o seu sorriso precisa</h2></div><a class="link-ouro" href="#" data-wa="Olá, Lumi! Quero saber sobre os tratamentos.">Ver todos os tratamentos →</a></div>
+      <div class="tr-cab"><div><p class="rotulo-claro">Tratamentos</p><h2 id="tr-t">Tudo o que o seu sorriso precisa</h2></div><a class="link-ouro" href="tratamentos.html">Ver todos os tratamentos →</a></div>
       <div class="bento"></div>
       <p class="bairros"><b>Atendemos pacientes de</b><span>Cambuí</span><span>Taquaral</span><span>Guanabara</span><span>Nova Campinas</span><span>Castelo</span><span>Barão Geraldo</span><span>Sousas</span><span>Valinhos</span><span>Vinhedo</span></p>
     </div>
   </section>
 
-  <section class="depo" id="depoimentos" aria-labelledby="dp-t">
-    <p class="rotulo">Depoimentos</p><h2 id="dp-t">O que os pacientes dizem</h2>
-    <p class="dp-sub">A confiança dos pacientes faz parte do nosso jeito de entender a odontologia.<br>Avaliações originais no Google</p>
-    <p class="g-pilula"><b>G</b> 4,9 · Google</p>
-    <div class="dp-trilho" tabindex="0" aria-label="Depoimentos"></div>
-    <div class="dp-nav"><button type="button" class="dp-ant" aria-label="Anteriores">←</button><button type="button" class="dp-prox" aria-label="Próximos">→</button><span class="dp-cont" aria-live="polite"></span></div>
-    <a class="link-verde" href="#" data-wa="Olá, Lumi! Vi as avaliações no site.">Ver avaliações no Google ↗</a>
-  </section>
-
   <section class="contato" id="contato" aria-labelledby="ct-t">
-    <div class="ct-txt"><p class="rotulo">Onde estamos</p><h2 id="ct-t">Dentista no Cambuí</h2><p>Av. Norte-Sul, 1.420, sala 6 · 13025-320 Cambuí · Campinas</p>
+    <div class="ct-txt"><p class="rotulo">Onde estamos</p><h2 id="ct-t">Dentista no Cambuí</h2><p>Av. Norte-Sul, 1.420, sala 6 · 13025-320 Cambuí · Campinas</p><p><a class="link-verde" href="contato.html">Horários e como chegar →</a></p>
       <div class="mapa"><svg viewBox="0 0 400 240" aria-hidden="true"><rect width="400" height="240" fill="#e8ede4"/><path d="M0 170 C90 140 150 190 230 150 S350 110 400 130" stroke="#fffdf8" stroke-width="16" fill="none"/><path d="M200 0 L178 240" stroke="#fffdf8" stroke-width="12"/><path d="M0 70 L400 92" stroke="#fffdf8" stroke-width="8"/><path d="M310 0 C300 80 340 160 318 240" stroke="#fffdf8" stroke-width="6" fill="none"/><text x="214" y="132" font-size="13" fill="#183c3c" font-family="sans-serif" font-weight="600">Lumi</text><circle cx="196" cy="140" r="8" fill="#15332d"/></svg>
         <div class="mapa-aviso"><a class="bt-verde" href="https://www.google.com/maps/search/?api=1&amp;query=Av.+Norte-Sul+1420+Campinas" target="_blank" rel="noopener">Mostrar mapa</a><p>O mapa abre no Google Maps, que usa os próprios cookies.</p></div></div></div>
     <figure class="fachada"><img src="img/clinica.webp" alt="Consultório da Lumi Odontologia" width="1400" height="936" loading="lazy"></figure>
   </section>
 </main>
 <nav class="barra-cel" aria-label="Atalhos"><a href="#" data-wa="Olá, Lumi! Quero agendar uma consulta." class="b-ag">Agendar</a><a href="tel:+5519991400187" class="b-urg"><i></i>Urgência</a><a href="#" data-wa="Olá, Lumi!" class="b-wa">WhatsApp</a></nav>
-<dialog class="gaveta" id="gaveta" aria-labelledby="gv-t"><div class="gv-corpo"></div></dialog>
 <footer class="rodape">
   <svg class="noite" viewBox="0 0 1440 170" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
     <g class="estrelas"><circle cx="120" cy="30" r="1.2"/><circle cx="260" cy="64" r="1"/><circle cx="410" cy="22" r="1.3"/><circle cx="560" cy="58" r="1"/><circle cx="720" cy="18" r="1.2"/><circle cx="880" cy="50" r="1"/><circle cx="1010" cy="26" r="1.3"/><circle cx="1180" cy="60" r="1"/><circle cx="1320" cy="34" r="1.2"/></g>
@@ -108,12 +99,13 @@
   </svg>
   <div class="rp-in">
     <p class="rp-marca">Lumi Odontologia · Dra. Beatriz Lemos</p>
-    <p>Av. Norte-Sul, 1.420, sala 6 · 13025-320 Campinas</p><p><a href="#contato">Como chegar →</a></p>
+    <p>Av. Norte-Sul, 1.420, sala 6 · 13025-320 Campinas</p><p><a href="contato.html">Como chegar →</a></p>
     <p>Consultas: <a href="tel:+551932540187">(19) 3254-0187</a></p><p>Urgências: <a href="tel:+5519991400187">(19) 99140-0187</a></p>
     <p class="rp-rot">Tratamentos</p>
-    <p class="rp-links"><a href="#tratamentos">Implante</a><a href="#tratamentos">Aparelho e alinhador</a><a href="#tratamentos">Canal</a><a href="#tratamentos">Clareamento</a><a href="#tratamentos">Limpeza</a><a href="#urgencia">Urgências</a></p>
+    <p class="rp-links"><a href="tratamento-implante.html">Implante</a><a href="tratamento-aparelho.html">Aparelho e alinhador</a><a href="tratamento-canal.html">Canal</a><a href="tratamento-clareamento.html">Clareamento e lentes</a><a href="tratamento-limpeza.html">Limpeza</a><a href="tratamento-criancas.html">Crianças</a><a href="contato.html#urgencia">Urgências</a></p>
+    <p class="rp-links rp-sec"><a href="sobre.html">A clínica</a><a href="equipe.html">Equipe</a><a href="convenios-e-pagamento.html">Convênios e pagamento</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></p>
     <p class="rp-pe">Responsável técnica: Dra. Beatriz Lemos, CRO-SP fictício · Nomes e registros fictícios · Marca criada para demonstração · Site de exemplo feito pela Blue Rose · © 2026 Lumi Odontologia</p>
-    <p class="rp-pe">Fotos de Campinas: “Campinas na lua cheia”, de Giuliano Maiolini (CC BY 2.0), e “Cambuí, Campinas 01”, de Dornicke (CC BY-SA 4.0), via Wikimedia Commons.</p>
+    <p class="rp-pe">Fotos de Campinas: “Campinas na lua cheia”, de Giuliano Maiolini (CC BY 2.0), e “Cambuí, Campinas 01”, de Dornicke (CC BY-SA 4.0), via Wikimedia Commons. Demais fotos: Unsplash (licença Unsplash).</p>
   </div>
 </footer>
 </body>

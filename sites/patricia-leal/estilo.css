@@ -223,3 +223,73 @@ p { margin: 0; }
   .js .linha .texto, .js .linha > .rotulo, .js .linha .rotulo-col, .js .abre-de, .js .abre-areas, .js .desce { opacity: 1 !important; transform: none !important; }
 }
 .circulo-claro { position: static; margin: 0; width: 64px; height: 64px; padding: 6px; background: var(--creme); color: var(--verde); }
+
+/* ---------- páginas internas (sobre, áreas, equipe, contato, privacidade) ---------- */
+.topo-marca { position: absolute; left: var(--g); top: 12px; display: flex; align-items: flex-end; gap: 6px; font: 400 23px/1 var(--serif); letter-spacing: -.02em; color: var(--verde); text-decoration: none; }
+.topo-marca svg { height: 21px; width: auto; flex: none; }
+.topo-marca:hover span { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.menu-nav a[aria-current] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .12em; }
+.menu-nav a[aria-current]::after { content: " \25CF"; font-size: .32em; vertical-align: middle; }
+.cab { padding: 120px var(--g) 0; }
+.trilha { list-style: none; margin: 0 0 clamp(30px, 4vw, 54px); padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 0; font: 500 10px/1.4 var(--sans); text-transform: uppercase; letter-spacing: .02em; }
+.trilha li + li::before { content: "/"; margin: 0 10px; opacity: .5; }
+.trilha a { text-decoration: none; }
+.trilha a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.cab .titulo { font-size: clamp(2.1rem, 6.6vw, 6.2rem); }
+.cab-sub { max-width: 820px; margin: clamp(26px, 3vw, 44px) auto 0; text-align: center; font-size: clamp(1.05rem, 1.7vw, 1.5rem); line-height: 1.35; }
+.cab-foto { margin: clamp(60px, 9vw, 130px) 0 0; aspect-ratio: 16 / 7; overflow: hidden; background: var(--creme-2); }
+.cab-foto img { width: 100%; height: 100%; object-fit: cover; }
+.js .cab-foto img { transform: scale(1.06); transition: transform 1.8s var(--ease); }
+.pronto .cab-foto img { transform: none; }
+.lk { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .18em; }
+.lk:hover { text-decoration-thickness: 2px; }
+.texto .lk-linha { margin-top: 1.2em; font: 500 10px/1.4 var(--sans); text-transform: uppercase; letter-spacing: .02em; display: flex; flex-wrap: wrap; gap: 8px 26px; }
+.subs { list-style: none; margin: 1.1em 0 0; padding: 0; font-size: .62em; line-height: 1.35; border-bottom: 1px solid var(--linha); }
+.subs li { border-top: 1px solid var(--linha); padding: 12px 0; }
+a.item-bt { text-decoration: none; }
+.item-bt small { display: block; margin-top: 10px; font: 500 10px/1.4 var(--sans); letter-spacing: .02em; }
+/* grupos de serviços dentro de uma área */
+.grupos { list-style: none; margin: clamp(90px, 13vw, 190px) 0 0; padding: 0; border-bottom: 1px solid var(--linha); }
+.grupos > li { display: grid; grid-template-columns: 34.7% 1fr; border-top: 1px solid var(--linha); padding: clamp(24px, 3.2vw, 48px) 0; }
+.grupos h3 { margin: 0; padding-right: 24px; font: 400 clamp(1.4rem, 3vw, 2.7rem)/1.02 var(--sans); text-transform: uppercase; letter-spacing: -.01em; }
+.grupos ul { list-style: none; margin: 0; padding: 0; max-width: 910px; }
+.grupos ul li { font-size: clamp(1rem, 1.6vw, 1.45rem); line-height: 1.32; padding: 0 0 .7em 1.1em; position: relative; }
+.grupos ul li::before { content: ""; position: absolute; left: 0; top: .5em; width: 7px; height: 7px; border-radius: 50%; background: var(--verde); }
+.grupos ul li:last-child { padding-bottom: 0; }
+/* ficha da advogada */
+.ficha { display: grid; grid-template-columns: 34.7% 1fr 1fr; gap: 34px 40px; margin-top: clamp(70px, 10vw, 140px); padding-top: 34px; border-top: 1px solid var(--linha); }
+.ficha > div:nth-child(odd) { grid-column: 2; }
+.ficha > div:nth-child(even) { grid-column: 3; }
+.cab + .bloco { padding-top: clamp(70px, 9vw, 140px); }
+.ficha h3 { margin: 0 0 12px; font: 500 10px/1.4 var(--sans); text-transform: uppercase; letter-spacing: .02em; }
+.ficha ul { list-style: none; margin: 0; padding: 0; font-size: clamp(1rem, 1.5vw, 1.35rem); line-height: 1.35; }
+.ficha li + li { margin-top: .45em; }
+.retrato-g { width: min(78%, 360px); }
+/* texto longo (privacidade) */
+.doc { margin-top: clamp(80px, 12vw, 170px); border-bottom: 1px solid var(--linha); }
+.doc section { display: grid; grid-template-columns: 34.7% 1fr; border-top: 1px solid var(--linha); padding: clamp(26px, 3.4vw, 50px) 0; }
+.doc h2 { margin: 0; padding-right: 24px; font: 500 10px/1.4 var(--sans); text-transform: uppercase; letter-spacing: .02em; }
+.doc .corpo { max-width: 860px; font-size: clamp(1rem, 1.45vw, 1.3rem); line-height: 1.45; }
+.doc .corpo p + p, .doc .corpo ul { margin-top: .8em; }
+.doc .corpo ul { padding-left: 1.1em; }
+.doc .corpo li + li { margin-top: .35em; }
+.versao { margin-top: 18px; text-align: center; font: 500 10px/1.4 var(--sans); text-transform: uppercase; letter-spacing: .02em; color: var(--tx-2); }
+@media (max-width: 760px) {
+  .topo-marca { font-size: 19px; top: 13px; }
+  .topo-marca svg { height: 17px; }
+  .cab { padding-top: 96px; }
+  .cab .titulo { font-size: clamp(1.9rem, 9vw, 2.8rem); }
+  .cab-foto { aspect-ratio: 4 / 3; margin-top: 50px; }
+  .subs { font-size: .95rem; }
+  .grupos { margin-top: 64px; }
+  .grupos > li { grid-template-columns: 1fr; gap: 16px; padding: 24px 0; }
+  .grupos h3 { font-size: 1.5rem; }
+  .grupos ul li { font-size: 1.02rem; }
+  .ficha { grid-template-columns: 1fr; gap: 26px; margin-top: 60px; }
+  .ficha > div:nth-child(n) { grid-column: 1; }
+  .ficha ul { font-size: 1.02rem; }
+  .retrato-g { width: 62%; }
+  .doc { margin-top: 64px; }
+  .doc section { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
+  .doc .corpo { font-size: 1rem; }
+}

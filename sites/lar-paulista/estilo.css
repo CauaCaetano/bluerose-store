@@ -526,3 +526,134 @@ textarea { height: 84px; padding: 10px 12px; resize: vertical; font: inherit; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 .cmp-ir { gap: 0; } .cmp-ir > span:last-child { margin-left: 8px; }
+
+/* ==========================================================================
+   Páginas do site (31/10): imóveis, página de cada imóvel, sobre, anunciar, contato e privacidade.
+   Mesmo topo, mesmas cores e componentes do portal; o menu do celular abre numa gaveta.
+   ========================================================================== */
+@media (max-width: 1440px) {
+  .busca { position: relative; left: auto; transform: none; flex: 1; min-width: 0; width: auto; max-width: 450px; margin: 0 auto; }
+}
+.menu a[aria-current="page"] { color: var(--azul); background: var(--azul-cl); }
+.bt-menu { display: none; width: 38px; height: 38px; place-items: center; border: 1px solid var(--linha); border-radius: 2px; background: var(--fundo); color: var(--tx-2); }
+.bt-menu svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.gaveta { position: fixed; inset: 56px 0 0; z-index: 55; background: rgba(20, 22, 30, .45); animation: aparece .2s; }
+.gaveta nav { margin-left: auto; width: min(340px, 100%); height: 100%; overflow: auto; background: var(--fundo); border-left: 1px solid var(--linha); padding: 14px 10px 90px; display: grid; align-content: start; gap: 2px; animation: gav-entra .3s cubic-bezier(.2, .7, .2, 1); }
+@keyframes gav-entra { from { transform: translateX(24px); opacity: .4; } }
+.gaveta nav a { display: flex; justify-content: space-between; align-items: center; padding: 13px 14px; border-radius: 2px; font-size: 16px; font-weight: 500; color: var(--tx-forte); text-decoration: none; }
+.gaveta nav a::after { content: '›'; color: var(--tx-4); font-size: 20px; }
+.gaveta nav a:hover { background: var(--cinza); }
+.gaveta nav a[aria-current="page"] { color: var(--azul); background: var(--azul-cl); }
+.gaveta .gv-rot { margin: 16px 14px 6px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--tx-3); }
+.gaveta .gv-pe { margin: 18px 14px 0; font-size: 13px; line-height: 1.6; color: var(--tx-3); }
+.c-rua a { text-decoration: none; }
+.c-rua a:hover { color: var(--azul); text-decoration: underline; }
+.abas-cel a[aria-current="page"] { color: var(--azul); }
+
+/* estrutura comum das páginas */
+.pg { max-width: 1360px; margin: 0 auto; padding: 26px 48px 72px; }
+.pg-cab { padding: 18px 0 26px; border-bottom: 1px solid var(--linha); }
+.pg-cab .migalha a { color: var(--azul); text-decoration: none; font-weight: 500; }
+.pg-cab h1 { margin-top: 12px; font-size: clamp(28px, 3.3vw, 44px); line-height: 1.1; font-weight: 600; letter-spacing: -.025em; color: var(--tx-forte); max-width: 18em; }
+.pg-cab .lead { margin-top: 10px; font-size: 17px; line-height: 1.6; color: var(--tx-2); max-width: 46em; }
+.pg-sec { padding-top: 56px; }
+.pg-sec > h2, .pg-sec .h2 { font-size: clamp(20px, 2vw, 26px); font-weight: 600; letter-spacing: -.02em; color: var(--tx-forte); }
+.pg-sec > .sub { margin-top: 6px; color: var(--tx-3); font-size: 15px; max-width: 46em; }
+.duas-col { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; margin-top: 22px; }
+.duas-col img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 2px; }
+.prosa { display: grid; gap: 14px; color: var(--tx); line-height: 1.75; }
+.prosa b { color: var(--tx-forte); }
+.num4 { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--linha); }
+.num4 li { padding: 20px 22px; }
+.num4 li + li { border-left: 1px solid var(--linha); }
+.num4 b { display: block; font-size: clamp(24px, 2.4vw, 32px); font-weight: 600; letter-spacing: -.02em; color: var(--tx-forte); }
+.num4 span { font-size: 13px; color: var(--tx-3); }
+.cartoes3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; margin-top: 22px; }
+.cartao-s { border: 1px solid var(--linha); border-radius: 2px; padding: 22px 24px; box-shadow: var(--sombra); background: var(--fundo); display: grid; gap: 8px; align-content: start; }
+.cartao-s h3 { font-size: 17px; font-weight: 600; color: var(--tx-forte); }
+.cartao-s p { font-size: 14px; line-height: 1.6; color: var(--tx-2); }
+.cartao-s .c-tipo { margin-bottom: 2px; }
+.cartao-s .bt-azul, .cartao-s .bt-borda { justify-self: start; margin-top: 6px; }
+.av { width: 48px; height: 48px; border-radius: 50%; background: var(--azul-cl); color: var(--azul-tx); display: grid; place-items: center; font-weight: 600; }
+.passos4 { list-style: none; counter-reset: p; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; }
+.passos4 li { counter-increment: p; border-top: 2px solid var(--azul); padding-top: 14px; font-size: 14px; line-height: 1.6; color: var(--tx-2); }
+.passos4 li::before { content: counter(p); display: grid; place-items: center; width: 26px; height: 26px; margin-bottom: 10px; border-radius: 50%; background: var(--azul-cl); color: var(--azul-tx); font-size: 13px; font-weight: 600; }
+.passos4 b { display: block; color: var(--tx-forte); font-weight: 600; margin-bottom: 2px; }
+.perguntas { margin-top: 18px; border-top: 1px solid var(--linha); max-width: 900px; }
+.perguntas details { border-bottom: 1px solid var(--linha); }
+.perguntas summary { cursor: pointer; padding: 16px 0; font-weight: 500; color: var(--tx-forte); list-style: none; display: flex; justify-content: space-between; gap: 14px; }
+.perguntas summary::-webkit-details-marker { display: none; }
+.perguntas summary::after { content: '+'; color: var(--azul); font-size: 20px; line-height: 1; }
+.perguntas details[open] summary::after { content: '−'; }
+.perguntas details p { padding: 0 0 16px; color: var(--tx-2); line-height: 1.7; max-width: 52em; }
+.faixa-cta { margin-top: 64px; padding: 34px 36px; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; background: var(--azul-cl); border-radius: 2px; }
+.faixa-cta h2 { font-size: clamp(20px, 2vw, 26px); font-weight: 600; letter-spacing: -.02em; color: var(--tx-forte); }
+.faixa-cta p { color: var(--tx-2); margin-top: 4px; }
+.faixa-cta .bts { display: flex; gap: 10px; flex-wrap: wrap; }
+.pg .anunciar { margin: 22px 0 0; }
+
+/* imoveis.html */
+.filtro-lista { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) auto; gap: 12px; align-items: end; margin-top: 22px; padding: 16px; background: var(--fundo-2); border: 1px solid var(--linha); border-radius: 2px; }
+.filtro-lista label { display: grid; gap: 6px; }
+.filtro-lista .rot { margin: 0; }
+.filtro-lista select:disabled { opacity: .55; }
+.chips-ativos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chips-ativos button { border: 1px solid var(--azul-bd); background: var(--azul-cl); color: var(--azul-tx); border-radius: 2px; padding: 6px 12px; font-size: 13px; font-weight: 500; }
+.lista-pg { margin-top: 22px; }
+.conta-linha { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+.conta-linha p { font-size: 14px; color: var(--tx-3); }
+.conta-linha b { color: var(--tx-forte); font-weight: 600; }
+.paginas button:disabled { color: var(--tx-4); }
+
+/* página do imóvel: a ficha ocupa a página, as abas grudam logo abaixo do topo */
+.fc-pagina .fc-abas { top: 56px; }
+.fc-pagina .fc-sec { scroll-margin-top: 120px; }
+.fc-pagina .caixa-preco { top: 120px; }
+.fc-pagina .migalha a { color: var(--azul); text-decoration: none; font-weight: 500; }
+.fc-pagina .migalha a:hover { text-decoration: underline; }
+.fc-pagina .link.mini { text-decoration: none; color: var(--tx); }
+.fc-pagina .link.mini:hover span { color: var(--azul); }
+.fc-carregando { padding: 40px 0; color: var(--tx-2); line-height: 1.7; }
+
+/* contato */
+.contato-grade { display: grid; grid-template-columns: minmax(0, 1fr) 470px; gap: 40px; align-items: start; margin-top: 26px; }
+.info-lista { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--linha); }
+.info-lista li { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--linha); font-size: 15px; }
+.info-lista span:first-child { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--tx-3); padding-top: 2px; }
+.info-lista a { color: var(--azul); font-weight: 500; text-decoration: none; }
+.form-pg { border: 1px solid var(--linha); box-shadow: var(--sombra); }
+.form-pg label { display: grid; gap: 5px; font-size: 13px; font-weight: 500; color: var(--tx-2); }
+.form-pg .campos { margin-top: 0; }
+.form-pg .f-msg { margin-top: 12px; }
+
+/* privacidade */
+.texto-pg { max-width: 780px; display: grid; gap: 14px; line-height: 1.75; color: var(--tx); margin-top: 26px; }
+.texto-pg h2 { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--linha); font-size: 20px; font-weight: 600; color: var(--tx-forte); }
+.texto-pg ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.texto-pg a { color: var(--azul); }
+.resumo-pg { padding: 18px 20px; background: var(--azul-cl); border-radius: 2px; color: var(--tx-forte); }
+
+@media (max-width: 1240px) {
+  .pg { padding: 22px 24px 64px; }
+  .filtro-lista { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .contato-grade { grid-template-columns: minmax(0, 1fr) 400px; }
+}
+@media (max-width: 1000px) {
+  .bt-menu { display: grid; }
+  .duas-col, .contato-grade { grid-template-columns: minmax(0, 1fr); }
+  .cartoes3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .passos4, .num4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .num4 li:nth-child(3) { border-left: 0; }
+  .num4 li:nth-child(n+3) { border-top: 1px solid var(--linha); }
+}
+@media (max-width: 760px) {
+  .pg { padding: 14px 12px 48px; }
+  .bt-menu { width: 36px; height: 36px; }
+  .filtro-lista { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: 12px; }
+  .filtro-lista .bt-borda { grid-column: 1 / -1; }
+  .cartoes3, .passos4 { grid-template-columns: minmax(0, 1fr); }
+  .info-lista li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .faixa-cta { padding: 24px 20px; }
+  .gaveta { bottom: 64px; }
+  .fc-pagina .caixa-preco { top: auto; }
+}

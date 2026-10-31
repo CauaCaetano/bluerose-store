@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<script src="../../js/idioma.js?v=17"></script>
+<script src="../../js/idioma.js?v=18"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,20 +14,21 @@
 <link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
 <link rel="stylesheet" href="../assets/fontes/355a6583f3.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=7">
+<link rel="stylesheet" href="estilo.css?v=8">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=3" defer></script>
-<script src="site.js?v=3" defer></script>
+<script src="site.js?v=4" defer></script>
 </head>
 <body data-slug="sorriso-prime" data-marca="Sorriso Prime Odontologia" data-cat="odontologia">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 <div class="abertura" aria-hidden="true"><svg viewBox="0 0 60 30"><path d="M4 8l6 8 6-8M44 8l6 8 6-8M10 22c10 8 30 8 40 0"/></svg></div>
 <header class="topo">
   <a class="marca" href="#inicio"><svg viewBox="0 0 60 30" aria-hidden="true"><path d="M4 8l6 8 6-8M44 8l6 8 6-8M10 22c10 8 30 8 40 0"/></svg><span>Sorriso Prime<br>Odontologia</span></a>
-  <nav class="menu" aria-label="Principal"><a href="#servicos">Serviços <i aria-hidden="true">⌄</i></a><a href="#tecnologia">Tecnologia</a><a href="#equipe">Equipe</a><a href="#unidades">Unidades</a></nav>
+  <nav class="menu" id="menu" aria-label="Principal"><a href="tratamentos.html">Serviços</a><a href="sobre.html">A rede</a><a href="equipe.html">Equipe</a><a href="convenios-e-pagamento.html">Convênios</a><a href="contato.html">Unidades</a></nav>
   <a class="ficha" href="#" data-wa="Olá, Sorriso Prime! Quero preencher a ficha de paciente.">Ficha do paciente <i aria-hidden="true">↗</i></a>
   <a class="fone" href="tel:+553133345500">(31) 3334-5500</a>
   <a class="pilula" href="#agendar">Agendar avaliação <i aria-hidden="true">+</i></a>
+  <button type="button" class="menu-bt" aria-controls="menu" aria-expanded="false" aria-label="Abrir menu"><span></span></button>
 </header>
 <main id="conteudo">
   <section class="heroi" id="inicio" aria-labelledby="h-t">
@@ -47,14 +48,14 @@
     <div class="mt-lado"><p>São mais de 210 dentistas e 15 anos de rede em Belo Horizonte, com formação contínua e um cuidado que não depende da unidade.</p><div class="avatares"><img src="img/dr-rafael.webp" alt="" loading="lazy"><img src="img/dra-julia.webp" alt="" loading="lazy"><img src="img/dr-carlos.webp" alt="" loading="lazy"><span>+210</span></div></div>
     <h2 id="mt-t" class="mt-tit">Nosso objetivo é</h2>
     <p class="mt-texto">levar a odontologia de qualidade para perto de casa, com horário que cabe na rotina, preço combinado antes de começar e um atendimento que faz cada paciente se sentir em boas mãos.</p>
-    <a class="pilula pilula-escura" href="#equipe">Sobre nós <i aria-hidden="true">+</i></a>
+    <a class="pilula pilula-escura" href="sobre.html">Sobre nós <i aria-hidden="true">+</i></a>
   </section>
 
   <section class="servicos" id="servicos" aria-label="Serviços">
     <div class="sv-palco">
       <figure class="sv-foto"><img src="" alt="" width="1600" height="2400"></figure>
       <h2 class="sv-tit" aria-live="polite"></h2>
-      <div class="sv-lado"><p class="sv-rot">Nossas soluções</p><p class="sv-desc"></p><div class="sv-lista"><img src="" alt="" width="200" height="260"><ul></ul></div></div>
+      <div class="sv-lado"><p class="sv-rot">Nossas soluções</p><p class="sv-desc"></p><div class="sv-lista"><img src="" alt="" width="200" height="260"><ul></ul></div><a class="sv-ver" href="tratamento-prevencao.html">Conhecer prevenção →</a></div>
       <nav class="sv-indice" aria-label="Serviços"><p>Serviços:</p></nav>
       <a class="pilula sv-mais" href="#agendar">Agendar <i aria-hidden="true">+</i></a>
     </div>
@@ -63,11 +64,11 @@
   <section class="faixa-tec" aria-label="Tecnologia">
     <img src="img/tela.webp" alt="Dentista mostrando o exame na tela para a paciente" width="1400" height="1050" loading="lazy">
     <h2>Tecnologia de verdade</h2>
-    <p class="ft-pe"><span>Mais rápido</span><span><small>Odontologia moderna:</small>Mais simples</span><span>Sem dor</span></p>
+    <p class="ft-pe"><span>Mais rápido</span><span><small>Odontologia moderna:</small>Mais simples</span><span>Mais conforto</span></p>
   </section>
 
   <section class="tecnologia" id="tecnologia" aria-labelledby="tc-t">
-    <h2 id="tc-t" class="tc-tit"><span>Odontologia</span> <em>para</em> <span>resultados de verdade</span></h2>
+    <h2 id="tc-t" class="tc-tit"><span>Odontologia</span> <em>para</em> <span>cuidar de verdade</span></h2>
     <div class="tc-grade">
       <div class="tc-num"><span class="tc-n">01</span><small>/ 06</small></div>
       <figure class="tc-foto"><img src="img/tec-scanner.webp" alt="" width="600" height="459" loading="lazy"></figure>
@@ -82,18 +83,13 @@
       <figure><img src="img/dr-rafael-recorte.webp" alt="Dr. Rafael Moura"><figcaption><b>Dr. Rafael Moura</b><small>Ortodontia</small><span>Aparelho fixo, estético e alinhadores. Atende Savassi e Buritis.</span></figcaption></figure>
       <figure><img src="img/dra-julia-recorte.webp" alt="Dra. Júlia Prado"><figcaption><b>Dra. Júlia Prado</b><small>Estética</small><span>Clareamento, lentes e gengivoplastia, com planejamento digital do sorriso.</span></figcaption></figure>
     </div>
-    <div class="eq-pe"><p class="eq-rot"><b>Profissionais preparados</b>cuidado de especialista com tecnologia atual</p><p class="eq-digita" aria-live="polite"></p><a class="pilula" href="#agendar">Conhecer a equipe <i aria-hidden="true">+</i></a></div>
+    <div class="eq-pe"><p class="eq-rot"><b>Profissionais preparados</b>cuidado de especialista com tecnologia atual</p><p class="eq-digita" aria-live="polite"></p><a class="pilula" href="equipe.html">Conhecer a equipe <i aria-hidden="true">+</i></a></div>
   </section>
 
   <section class="porque" aria-labelledby="pq-t">
     <svg class="pq-arcos" viewBox="0 0 1440 900" aria-hidden="true"><circle cx="420" cy="980" r="620"/><circle cx="1020" cy="980" r="620"/></svg>
-    <h2 id="pq-t"><span>Estamos <em>aqui</em></span> <a class="pq-bola" href="#agendar">Por que<br>a gente?</a> <span>para <em>cuidar</em></span> <span class="pq-l3">do seu sorriso</span></h2>
-    <div class="pq-bolas"><p><b>9</b>unidades em BH e região</p><p><b>9.312</b>avaliações nota 4,8</p><p><b>22h</b>abertas até tarde e aos domingos</p></div>
-  </section>
-
-  <section class="depo" aria-labelledby="dp-t">
-    <div class="dp-esq"><h2 id="dp-t">Depoimentos</h2><ul class="dp-cats"></ul></div>
-    <blockquote class="dp-frase" aria-live="polite"><p></p><cite></cite></blockquote>
+    <h2 id="pq-t"><span>Estamos <em>aqui</em></span> <a class="pq-bola" href="sobre.html">Por que<br>a gente?</a> <span>para <em>cuidar</em></span> <span class="pq-l3">do seu sorriso</span></h2>
+    <div class="pq-bolas"><p><b>9</b>unidades em BH e região</p><p><b>36</b>convênios aceitos</p><p><b>22h</b>abertas até tarde e aos domingos</p></div>
   </section>
 
   <section class="final" id="agendar" aria-labelledby="fn-t">
@@ -114,8 +110,8 @@
         </div>
       </div>
       <div class="fn-cols" id="unidades">
-        <div><p class="fn-c">Serviços</p><a href="#servicos">Prevenção</a><a href="#servicos">Estética</a><a href="#servicos">Aparelho</a><a href="#servicos">Implante</a></div>
-        <div><p class="fn-c">A rede</p><a href="#inicio">Início</a><a href="#equipe">Equipe</a><a href="#tecnologia">Tecnologia</a><a href="#agendar">Contato</a></div>
+        <div><p class="fn-c">Serviços</p><a href="tratamento-prevencao.html">Prevenção</a><a href="tratamento-estetica.html">Estética</a><a href="tratamento-aparelho.html">Aparelho</a><a href="tratamento-implante.html">Implante</a></div>
+        <div><p class="fn-c">A rede</p><a href="index.html">Início</a><a href="sobre.html">Sobre nós</a><a href="equipe.html">Equipe</a><a href="convenios-e-pagamento.html">Convênios e pagamento</a><a href="contato.html">Unidades e contato</a><a href="privacidade.html">Privacidade</a></div>
         <div class="fn-unid"></div>
       </div>
       <p class="fn-pe"><span>© 2026 Sorriso Prime Odontologia · Responsável técnica: Dra. Helena Viana, CRO-MG fictício · Nomes e registros fictícios · Marca criada para demonstração</span><span>Site de exemplo feito pela Blue Rose · Fotos: Unsplash e Wikimedia Commons (créditos abaixo)</span></p>

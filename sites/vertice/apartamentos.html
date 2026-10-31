@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script src="../../js/idioma.js?v=18"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com; font-src 'self'; connect-src 'self' blob: https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apartamentos · escolha andar, final e preço · Vértice Residence</title>
+<meta name="description" content="Todas as 72 unidades do Vértice Residence com planta, área, andar, vista, preço e situação (disponível, reservada ou vendida). Filtre por suítes, vista, andar e preço.">
+<meta name="theme-color" content="#061a37">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23050817'%2F%3E%3Cpath%20d%3D'M9%2010l11%2021%2011-21'%20stroke%3D'%23c9a849'%20stroke-width%3D'3'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/93a341139e.css">
+<link rel="stylesheet" href="../assets/moldura.css?v=4">
+<link rel="stylesheet" href="estilo.css?v=5">
+<script src="../../js/leads-config.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=3" defer></script>
+<script src="site.js?v=5" defer></script>
+</head>
+<body data-slug="vertice" data-marca="Vértice Residence" data-cat="imobiliaria">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="topo">
+  <button type="button" class="pilula pilula-clara bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i>Menu</button>
+  <a class="marca" href="index.html" translate="no" aria-label="Vértice Residence, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 9l12 23 12-23"/></svg><span>VÉRTICE<small>residence</small></span></a>
+  <a class="pilula pilula-cobre bt-escolher" href="apartamentos.html">Escolher unidade</a>
+</header>
+<nav class="menu" id="menu" aria-label="Principal" hidden>
+  <a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="apartamentos.html" aria-current="page">Apartamentos</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="obra.html">Obra</a><a href="como-comprar.html">Como comprar</a><a href="contato.html">Contato</a>
+  <p class="menu-pe"><span>Central de vendas · todos os dias, 9h às 20h</span><a href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor ↗</a></p>
+</nav>
+
+<main id="conteudo">
+  <section class="pg-topo" aria-labelledby="pg-t">
+    <svg class="arcos-fundo" viewBox="0 0 1440 900" aria-hidden="true"><circle cx="300" cy="1000" r="620"/><circle cx="1140" cy="1000" r="620"/></svg>
+    <p class="rot">Apartamentos</p>
+    <h1 id="pg-t" class="gigante encaixe">Unidades</h1>
+    <div class="pg-topo-grade">
+      <p class="lead revela">Escolha o andar, o final e a vista. O preço já aparece no cartão.</p>
+      <div><p>São 72 apartamentos em 18 andares. Os preços sobem 1,2% a cada andar e valem para a tabela de lançamento. Uma unidade reservada fica presa por 48 horas; se o comprador não assinar, ela volta para a lista.</p><p class="mut" style="font-size:13px">Vendidas até agora: <b data-vend style="color:var(--champ)">—</b></p></div>
+    </div>
+  </section>
+  <section class="ap-sec" aria-label="Lista de unidades">
+    <div class="ap-grade">
+      <form class="ap-filtros" id="ap-filtros" aria-label="Filtros">
+        <fieldset><legend>Situação</legend><label><input type="radio" name="st" value="d" checked> disponíveis</label><label><input type="radio" name="st" value="dr"> + reservadas</label><label><input type="radio" name="st" value=""> todas</label></fieldset>
+        <fieldset><legend>Suítes</legend><label><input type="radio" name="su" value="0" checked> todas</label><label><input type="radio" name="su" value="2"> 2 suítes</label><label><input type="radio" name="su" value="3"> 3 suítes</label></fieldset>
+        <fieldset><legend>Vista</legend><label><input type="radio" name="vi" value="" checked> todas</label><label><input type="radio" name="vi" value="mar"> mar</label><label><input type="radio" name="vi" value="cidade"> cidade</label></fieldset>
+        <label class="faixa">Andar <output></output><input type="range" name="an" min="1" max="18" value="1"></label>
+        <label class="faixa">Preço <output></output><input type="range" name="pr" min="1300000" max="2100000" step="10000" value="2100000"></label>
+        <label class="faixa">Ordenar<select name="ord"><option value="preco">menor preço</option><option value="m2">menor preço por m²</option><option value="andar">andar mais alto</option></select></label>
+        <button type="reset" class="pilula">Limpar filtros</button>
+      </form>
+      <div>
+        <p class="ap-total" aria-live="polite"></p>
+        <ul class="ap-lista"></ul>
+        <button type="button" class="pilula pilula-clara ap-mais">Mostrar mais</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="pg-sec sec-clara" aria-labelledby="tp-t">
+    <p class="rot">As duas plantas</p>
+    <h2 id="tp-t">Finais 1 a 4</h2>
+    <ul class="itens">
+      <li><b>Final 1 · 128 m²</b><span>3 suítes, living de 38 m² e varanda gourmet na quina de vidro com vista frontal para o mar. 2 vagas e depósito.</span></li>
+      <li><b>Finais 2 e 3 · 92 m²</b><span>2 suítes e varanda gourmet de 10 m². O final 2 tem vista lateral do mar; o final 3, da cidade e dos morros. 1 vaga e depósito.</span></li>
+      <li><b>Final 4 · 128 m²</b><span>A mesma planta do final 1, espelhada, com vista lateral para o mar e a suíte master voltada para o nascente. 2 vagas e depósito.</span></li>
+    </ul>
+  </section>
+  <section class="pg-sec sec-clara chamada" aria-label="Fale com a central de vendas">
+    <p class="rot">Central de vendas · 9h às 20h</p>
+    <h2>Não achou o andar que queria? Entre na lista de espera e avisamos quando uma reserva cair.</h2>
+    <div class="acoes"><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero entrar na lista de espera de uma unidade.">Entrar na lista de espera</a></div>
+  </section>
+  <nav class="migalhas" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span>Apartamentos</span></nav>
+</main>
+
+<footer class="rodape">
+  <div class="rd-grade">
+    <div><p class="rd-rot">Central de vendas Vértice</p><p class="rd-end">Rua 3.100, 450 · Centro · Balneário Camboriú/SC</p><p class="rd-rot">Todos os dias, 9h às 20h</p></div>
+    <p class="rd-legal">Incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento, sujeitos a reajuste.</p>
+    <div class="rd-acoes"><a class="pilula pilula-cobre" href="obra.html">Andamento da obra</a><a class="redondo redondo-cobre" href="#conteudo" aria-label="Voltar ao topo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg></a></div>
+  </div>
+  <nav class="rd-nav" aria-label="Páginas"><a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="apartamentos.html" aria-current="page">Apartamentos</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="obra.html">Obra</a><a href="como-comprar.html">Como comprar</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
+  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash (licença Unsplash)</span></p>
+</footer>
+</body>
+</html>

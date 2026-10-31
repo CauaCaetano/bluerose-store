@@ -1,5 +1,6 @@
 // Aurora Laser · topo que encolhe, textos que entram, palavras grandes que levam às áreas, vitrine de áreas com preço (arrastar e setas),
 // pacote com desconto por sessões e combo, tom de pele → laser e sessões, fundo que vira areia no agendamento, flor fixa e formulário pelo WhatsApp.
+// Páginas internas: filtro dos tratamentos (tipo de área e para quem, também pela URL) e fotos do tratamento trocadas pelas miniaturas.
 (function () {
   'use strict';
   document.documentElement.classList.add('js');
@@ -15,7 +16,7 @@
   };
   var SELO = { f0: 'Mais pedida', f2: 'Mais pedida', f6: 'Combo verão', m0: 'Mais pedida', m4: 'Costas lisas' };
   var SES = { 1: 0, 5: 0.2, 10: 0.4 };
-  var TOM = [['muito clara', 'Alexandrite 755 nm', '6 a 8', 'Resposta rápida: a maioria vê diferença já na 2ª sessão.'], ['clara', 'Alexandrite 755 nm', '6 a 8', 'Pele ideal para o laser. Evite bronzear entre as sessões.'], ['morena', 'Diodo 810 nm', '8 a 10', 'Ajustamos a energia para não manchar. Pode fazer o ano inteiro.'], ['morena escura', 'Nd:YAG 1064 nm', '8 a 12', 'O Nd:YAG passa pela pele sem aquecer a melanina dela.'], ['negra', 'Nd:YAG 1064 nm', '10 a 12', 'É o laser mais seguro para pele negra, com resfriamento contínuo. A técnica ajusta a energia a cada sessão.']];
+  var TOM = [['muito clara', 'Alexandrite 755 nm', '6 a 8', 'Pelo escuro em pele muito clara costuma responder bem ao laser. Evite bronzear entre as sessões.'], ['clara', 'Alexandrite 755 nm', '6 a 8', 'Pele ideal para o laser. Evite bronzear entre as sessões.'], ['morena', 'Diodo 810 nm', '8 a 10', 'Ajustamos a energia para não manchar. Pode fazer o ano inteiro.'], ['morena escura', 'Nd:YAG 1064 nm', '8 a 12', 'O Nd:YAG passa pela pele sem aquecer a melanina dela.'], ['negra', 'Nd:YAG 1064 nm', '10 a 12', 'É o laser mais seguro para pele negra, com resfriamento contínuo. A técnica ajusta a energia a cada sessão.']];
   var g = 'f', sel = {}, tom = null, servico = '';
 
   // ---------- topo ----------
@@ -23,7 +24,7 @@
   function rolagem() {
     var y = scrollY;
     topo.classList.toggle('rolou', y > 40);
-    flor.classList.toggle('ativa', y > heroi.offsetHeight * 0.7);
+    flor.classList.toggle('ativa', y > (heroi ? heroi.offsetHeight : 520) * 0.7);
   }
   addEventListener('scroll', rolagem, { passive: true }); rolagem();
 
@@ -49,12 +50,14 @@
 
   // ---------- fundo areia no agendamento ----------
   var agendar = $('#agendar');
-  if ('IntersectionObserver' in window) {
+  if ('IntersectionObserver' in window && agendar) {
     new IntersectionObserver(function (es) { es.forEach(function (e) { document.body.classList.toggle('na-areia', e.isIntersecting); }); }, { rootMargin: '-35% 0px -35% 0px' }).observe(agendar);
   }
 
-  // ---------- vitrine ----------
+  // ---------- vitrine (só na home) ----------
   var trilho = $('.trilho');
+  var pacoteTxt = '';
+  if (trilho) (function () {
   function vitrine() {
     trilho.innerHTML = A[g].map(function (a, i) {
       var k = g + i, on = !!sel[k];
@@ -86,7 +89,7 @@
   addEventListener('pointerup', function () { if (!segurando) return; segurando = false; trilho.classList.remove('arrastando'); setTimeout(function () { arrastou = false; }, 0); });
 
   // ---------- conta do pacote ----------
-  var nSacola = $('.sacola-n'), ultimoN = 0, pacoteTxt = '';
+  var nSacola = $('.sacola-n'), ultimoN = 0;
   function conta() {
     var esc = A[g].filter(function (a, i) { return sel[g + i]; }), s = +$('[name=s]:checked').value, d = SES[s];
     nSacola.textContent = esc.length;
@@ -106,9 +109,10 @@
     $('.conta').innerHTML = '<p class="c-areas">' + nomes.join(' · ') + '</p><p class="grande">' + real(total) + '</p>' +
       (d || combo ? '<p><s>' + real(cheio) + '</s> · economia de ' + real(cheio - total) + '</p>' : '') +
       '<ul><li>' + s + (s > 1 ? ' sessões' : ' sessão') + ', a cada 30 a 45 dias, ' + min + ' min cada</li><li>' + real(total / s) + ' por sessão' + (combo ? ', com 10% do combo' : '') + '</li><li>em até ' + parc + 'x de ' + real(total / parc) + ' sem juros</li></ul>' +
-      '<a class="botao" href="#" data-wa="Olá, Aurora! Quero o pacote de ' + pacoteTxt + (tom !== null ? ' (pele ' + TOM[tom][0] + ')' : '') + '. Posso agendar a sessão teste grátis?">Agendar sessão teste grátis</a>';
+      '<a class="botao" href="#" data-wa="Olá, Aurora! Quero o pacote de ' + pacoteTxt + (tom !== null ? ' (pele ' + TOM[tom][0] + ')' : '') + '. Posso agendar a sessão de avaliação?">Agendar sessão de avaliação</a>';
   }
   $('.sess').addEventListener('change', conta);
+  window.AURORA_CONTA = conta;
 
   // palavras grandes e cartões do celular: já escolhem as áreas
   $$('[data-pre]').forEach(function (a) {
@@ -121,17 +125,22 @@
     });
   });
 
+  sel.f0 = sel.f2 = true; vitrine(); conta();
+  })();
+
   // ---------- tom de pele ----------
-  $('.tons').addEventListener('click', function (e) {
+  var tonsEl = $('.tons');
+  if (tonsEl) tonsEl.addEventListener('click', function (e) {
     var b = e.target.closest('[data-t]'); if (!b) return; tom = +b.dataset.t;
     $$('[data-t]').forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); });
     var t = TOM[tom];
     $('.tom-res').innerHTML = '<p>Pele <b>' + t[0] + '</b> · laser <b>' + t[1] + '</b> · <b>' + t[2] + '</b> sessões</p><p>' + t[3] + '</p>';
-    conta();
+    if (window.AURORA_CONTA) window.AURORA_CONTA();
   });
 
   // ---------- lista de serviço do formulário ----------
   var eb = $('.escolha-bt'), el = $('.escolha-l');
+  if (eb && el) (function () {
   function lista(abrir) { eb.setAttribute('aria-expanded', String(abrir)); el.hidden = !abrir; if (abrir) $('li', el).focus(); }
   eb.addEventListener('click', function () { lista(el.hidden); });
   function escolhe(li) {
@@ -156,13 +165,46 @@
     f.nome.classList.toggle('erro', !nome); f.tel.classList.toggle('erro', tel.replace(/\D/g, '').length < 10);
     if (!nome) erro = 'Escreva seu nome.'; else if (tel.replace(/\D/g, '').length < 10) erro = 'Escreva o telefone com DDD.'; else if (!f.aceite.checked) erro = 'Marque o aceite do regulamento.';
     $('.f-erro').textContent = erro; if (erro) return;
-    var txt = 'Olá, Aurora! Sou ' + nome + ' ' + f.sobrenome.value.trim() + ', telefone ' + tel + (f.email.value.trim() ? ', e-mail ' + f.email.value.trim() : '') +
-      '. Quero agendar a sessão teste grátis' + (servico && servico !== 'Sessão teste grátis' ? ' e saber do ' + servico : '') + (tom !== null ? '. Minha pele é ' + TOM[tom][0] : '') + '.';
+    var txt = 'Olá, Aurora! Sou ' + (nome + ' ' + f.sobrenome.value.trim()).trim() + ', telefone ' + tel + (f.email.value.trim() ? ', e-mail ' + f.email.value.trim() : '') +
+      '. Quero agendar a sessão de avaliação' + (servico && servico !== 'Sessão de avaliação' ? ' e saber sobre ' + (servico.indexOf('Clube') === 0 ? 'o ' : '') + servico.charAt(0).toLowerCase() + servico.slice(1) : '') + (tom !== null ? '. Minha pele é ' + TOM[tom][0] : '') + '.';
     if (window.BR_WA) window.BR_WA(txt.replace(/\s+/g, ' '));
   });
+
+  })();
 
   // o link do regulamento abre o texto no rodapé
   document.addEventListener('click', function (e) { var a = e.target.closest('a[href="#regulamento"]'); if (a) { var d = document.getElementById('regulamento'); if (d) d.open = true; } });
 
-  sel.f0 = sel.f2 = true; vitrine(); conta();
+  // ---------- tratamentos: filtro por tipo de área e para quem ----------
+  var ff = $('[data-filtro]');
+  if (ff) (function () {
+    var itens = $$('.zb-grade .zb-item'), vazio = $('.zb-vazio'), num = $('[data-n]', ff), q = new URLSearchParams(location.search);
+    ['tipo', 'para'].forEach(function (k) { if (q.get(k)) ff[k].value = q.get(k); });
+    function filtra(url) {
+      var tp = ff.tipo.value, pa = ff.para.value, n = 0;
+      itens.forEach(function (li) {
+        var ok = (!tp || li.dataset.regiao === tp) && (!pa || li.dataset.para.split(' ').indexOf(pa) > -1);
+        li.hidden = !ok; if (ok) { n++; li.classList.add('visto'); }
+      });
+      num.textContent = n; num.parentNode.lastChild.textContent = n === 1 ? ' tratamento' : ' tratamentos';
+      vazio.hidden = n > 0;
+      if (url && history.replaceState) { var u = new URLSearchParams(); if (tp) u.set('tipo', tp); if (pa) u.set('para', pa); history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : '')); }
+    }
+    ff.addEventListener('change', function () { filtra(true); });
+    ff.addEventListener('submit', function (e) { e.preventDefault(); });
+    ff.addEventListener('reset', function () { setTimeout(function () { filtra(true); }, 0); });
+    $$('[data-limpa]').forEach(function (b) { b.addEventListener('click', function () { ff.reset(); }); });
+    filtra(false);
+  })();
+
+  // ---------- página do tratamento: miniaturas trocam a foto grande ----------
+  var grande = $('.tr-grande img');
+  if (grande) $$('.tr-mini').forEach(function (b) {
+    b.addEventListener('click', function () {
+      $$('.tr-mini').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      grande.classList.remove('troca'); void grande.offsetWidth;
+      grande.src = b.dataset.src; grande.alt = b.dataset.alt; grande.width = +b.dataset.w; grande.height = +b.dataset.h;
+      grande.classList.add('troca');
+    });
+  });
 })();

@@ -31,12 +31,13 @@
     $$('.ar').forEach(function (el) { io.observe(el); });
     if (!calmo) {
       var rv = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('vis'); rv.unobserve(e.target); } }); }, { rootMargin: '0px 0px -12% 0px' });
-      $$('.tb-grade > *, .eq-grade > *, .pg-grade > *, .sb-grade > *, .vi-bloco, .ca-bloco').forEach(function (el, i) { el.classList.add('revela'); el.style.transitionDelay = (i % 4) * 0.08 + 's'; rv.observe(el); });
+      $$('.tb-grade > *, .eq-grade > *, .pg-grade > *, .sb-grade > *, .vi-bloco, .ca-bloco, .eq-lista > article, .pub-lista li, .artigo, .faq details').forEach(function (el, i) { el.classList.add('revela'); el.style.transitionDelay = (i % 4) * 0.08 + 's'; rv.observe(el); });
     }
   } else { $$('.ar').forEach(function (el) { el.classList.add('ativo'); }); }
 
   // prazo prescricional: 2 anos depois da saída
   var sd = $('#saida'), hoje = new Date();
+  if (sd) (function () {
   sd.max = hoje.toISOString().slice(0, 7);
   var ini = new Date(hoje); ini.setMonth(ini.getMonth() - 3); sd.value = ini.toISOString().slice(0, 7);
   function prazo() {
@@ -45,9 +46,11 @@
     $('.prazo-res').innerHTML = meses > 0 ? 'Seu prazo vai até <b>' + lim.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }) + '</b>: restam ' + meses + ' meses.' : '<b>O prazo de 2 anos já passou.</b> Fale com a gente: alguns direitos, como o FGTS, têm regras próprias.';
   }
   sd.addEventListener('input', prazo); prazo();
+  })();
 
   // rescisão pela CLT
   var r = $('#resc');
+  if (r) (function () {
   function resc() {
     var s = Math.max(0, +r.sal.value), m = Math.max(1, +r.meses.value), mot = r.mot.value, anos = Math.floor(m / 12);
     var mesesAno = m % 12 || 12, linhas = [];
@@ -77,10 +80,11 @@
     $('.dr-res').innerHTML = marc.length ? (conta.length ? '<p style="margin:0">Referência pela lei, para os itens marcados</p><p class="grande">' + real(tot * 0.7) + ' a ' + real(tot * 1.2) + '</p>' : '') + '<p>' + marc.map(function (x) { return D[x.dataset.d][0]; }).join(', ') + '.' + ass + ' O valor real depende de provas (testemunhas, mensagens, cartões de ponto) e da decisão do juiz: não é promessa de resultado.</p><a class="botao" href="#contato">Falar com um advogado sobre isso</a>' : '<p style="margin:0;font-size:1.1rem">Marque ao lado o que acontecia no seu trabalho para ver a referência pela lei.</p>';
   }
   $('.dr-lista').addEventListener('change', dir); r.addEventListener('input', dir); dir();
+  })();
 
   // envio do caso pelo WhatsApp
   var c = $('#caso-f');
-  c.addEventListener('submit', function (e) {
+  if (c) c.addEventListener('submit', function (e) {
     e.preventDefault();
     var n = c.nome.value.trim(), t = c.tel.value.replace(/\D/g, ''), er = $('.erro', c);
     er.textContent = n.length < 2 ? 'Escreva seu nome.' : t.length < 10 ? 'Confira o WhatsApp com DDD.' : !c.priv.checked ? 'Marque que concorda com a política de privacidade.' : '';

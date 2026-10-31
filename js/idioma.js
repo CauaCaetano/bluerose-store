@@ -36,9 +36,11 @@
   var COLETAR = params.get('coletar') === '1';
 
   function achar(id) { for (var i = 0; i < IDIOMAS.length; i++) if (IDIOMAS[i].id === id) return IDIOMAS[i]; return null; }
-  var pedido = params.get('lang');
+  // pacote suspenso no site oficial (31/10, decisão do dono): só o site de teste e o local mostram outros idiomas
+  var SUSPENSO = !/(^|\.)github\.io$|^(127\.0\.0\.1|localhost)$/.test(location.hostname);
+  var pedido = SUSPENSO ? null : params.get('lang');
   var salvo = null;
-  try { salvo = localStorage.getItem('br-idioma'); } catch (e) {}
+  try { if (SUSPENSO) localStorage.removeItem('br-idioma'); else salvo = localStorage.getItem('br-idioma'); } catch (e) {}
   if (pedido && achar(pedido)) { salvo = pedido; try { localStorage.setItem('br-idioma', pedido); } catch (e) {} }
   var atual = achar(salvo) || achar(ORIGEM);
   var avisarPronto;
@@ -142,7 +144,7 @@
     else { box.classList.add('solto'); document.body.appendChild(box); }
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montarSeletor); else montarSeletor();
+  if (SUSPENSO) {} else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montarSeletor); else montarSeletor();
 
   if (atual.id === ORIGEM && !COLETAR) { avisarPronto(); return; }
 

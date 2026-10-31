@@ -1,5 +1,7 @@
 // Monolito · carregamento, menu, revelações por rolagem, apresentação presa em 3 passos, mapa em perspectiva,
 // catálogo de plantas com slider, configurador com preço, painel do cliente e vista de cima em rolagem lateral.
+// Páginas internas: catálogo de residências com filtro e ficha e espaços comerciais com filtro.
+// Cada bloco só roda se a página tiver os elementos dele.
 (function () {
   'use strict';
   var $ = function (s, el) { return (el || document).querySelector(s); };
@@ -75,7 +77,7 @@
       if (el.offsetHeight > vh * 1.4) p = Math.min(1, Math.max(0, -r.top / (r.height - vh)));
       else p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
       el.style.setProperty('--p', p.toFixed(4));
-      if (el === intro && largo()) {
+      if (el === intro && passos.length && largo()) {
         var idx = Math.min(2, Math.floor(p * 3 * 0.999)), sp = p * 3 - idx;
         if (idx !== passoAtual) {
           passos[passoAtual].classList.remove('ativo'); passos[idx].classList.add('ativo'); passoAtual = idx;
@@ -100,7 +102,7 @@
     ['Jardim Olhos d’Água', 9, 6, 170, 420], ['Bonfim Paulista', 10, 15, 470, 540], ['Nova Aliança Sul', 8, 5, 300, 300]
   ];
   var mapa = $('.ar-plano svg');
-  (function () {
+  if (mapa) (function () {
     var s = '<g stroke="#cbc3ad" stroke-width="2" fill="none">';
     var ruas = [[0, 90, 800, 60], [0, 230, 800, 260], [0, 380, 800, 350], [0, 520, 800, 560], [120, 0, 90, 600], [270, 0, 330, 600], [520, 0, 480, 600], [690, 0, 720, 600], [0, 600, 420, 0], [380, 600, 800, 160]];
     ruas.forEach(function (r) { s += '<line x1="' + r[0] + '" y1="' + r[1] + '" x2="' + r[2] + '" y2="' + r[3] + '"/>'; });
@@ -116,6 +118,7 @@
     mapa.innerHTML = s;
   })();
   var lista = $('.ar-itens');
+  if (lista) {
   lista.innerHTML = LUG.map(function (l, k) { return '<li><button type="button" data-k="' + k + '" aria-pressed="' + (k === 0) + '">' + l[0] + '<small>' + l[1] + ' casas · ' + l[2] + ' km</small></button></li>'; }).join('');
   function lugar(k) {
     $$('button', lista).forEach(function (b) { b.setAttribute('aria-pressed', String(+b.dataset.k === k)); });
@@ -124,6 +127,7 @@
   lista.addEventListener('click', function (e) { var b = e.target.closest('[data-k]'); if (b) lugar(+b.dataset.k); });
   lista.addEventListener('mouseover', function (e) { var b = e.target.closest('[data-k]'); if (b) lugar(+b.dataset.k); });
   lugar(0);
+  }
 
   // ---------- plantas ----------
   // nome, área, suítes, terreno mínimo, preço base (essencial), meses, foto, cômodos [x,y,l,a,nome]
@@ -142,6 +146,7 @@
   };
   var filtro = 0, plAtual = 0, slide = 0, plTimer;
   var nomes = $('.pl-nomes'), slides = $('.pl-slides'), ficha = $('.pl-ficha');
+  if (nomes) {
   function listar() {
     var vis = PL.map(function (p, i) { return i; }).filter(function (i) { var q = PL[i][2]; return !filtro || (filtro === 5 ? q >= 5 : q === filtro); });
     if (vis.indexOf(plAtual) < 0) plAtual = vis[0];
@@ -164,9 +169,11 @@
   nomes.addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (b) mostrar(+b.dataset.i); });
   $('.filtros').addEventListener('click', function (e) { var b = e.target.closest('[data-q]'); if (!b) return; filtro = +b.dataset.q; $$('[data-q]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); }); listar(); });
   listar();
+  }
 
   // ---------- configurador ----------
   var m = $('#monta');
+  if (m) {
   m.pl.innerHTML = PL.map(function (p, i) { return '<option value="' + i + '">' + p[0] + ' · ' + p[1] + ' m² · ' + p[2] + ' suítes</option>'; }).join('');
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-pl]'); if (b) { m.pl.value = b.dataset.pl; calc(); } });
   function calc() {
@@ -177,6 +184,7 @@
       '<a class="bt-borda claro" href="#" data-wa="Olá, Monolito! Configurei a ' + p[0] + ' (' + nivel + (adds.length ? ', com ' + adds.map(function (x) { return x.dataset.n.toLowerCase(); }).join(', ') : '') + ') por ' + mil(total) + '. Quero agendar a reunião.">Agendar reunião com este projeto <span aria-hidden="true">⟶</span></a>';
   }
   m.addEventListener('change', calc); calc();
+  }
 
   // ---------- painel do cliente (exemplo) ----------
   var ETAPAS = [['Fundação', 0, 8, 100], ['Estrutura', 6, 10, 100], ['Alvenaria', 12, 8, 100], ['Cobertura', 18, 6, 85], ['Instalações', 16, 14, 60], ['Revestimentos', 24, 12, 20], ['Esquadrias', 30, 6, 0], ['Acabamento', 34, 10, 0]];
@@ -197,9 +205,11 @@
     $('.tela-corpo').innerHTML = ABAS[k]();
     $('.pn-desc .olho').textContent = DESC[k][0]; $('.pn-d').textContent = DESC[k][1];
   }
+  if ($('.pn-abas')) {
   $('.pn-abas').addEventListener('click', function (e) { var b = e.target.closest('[data-t]'); if (b) aba(b.dataset.t); });
   $('.tela-corpo').addEventListener('click', function (e) { var b = e.target.closest('[data-ok]'); if (b) { b.parentNode.classList.remove('pend'); b.outerHTML = '<span>✓ aprovado agora</span>'; } });
   aba('crono');
+  }
 
   // ---------- vista de cima (ilustração aérea) ----------
   (function () {
@@ -240,9 +250,51 @@
     svg.innerHTML = s;
   })();
 
+  // ---------- residências (residencias.html): filtro por suítes, área e terreno; ficha numa janela ----------
+  var rs = $('.rs-lista'), rf = $('#rs-filtros');
+  if (rs && rf) {
+    var rsLista = function () {
+      var q = +rf.su.value, ar = +rf.ar.value, tr = rf.tr.value;
+      rf.ar.previousElementSibling.textContent = 'até ' + ar + ' m²';
+      var vis = PL.map(function (p, i) { return i; }).filter(function (i) {
+        var p = PL[i], lado = +p[3].split('×')[0];
+        return (!q || (q === 5 ? p[2] >= 5 : p[2] === q)) && p[1] <= ar && (!tr || (tr === 'p' ? lado <= 15 : tr === 'm' ? lado > 15 && lado <= 20 : lado > 20));
+      });
+      $('.rs-total').textContent = vis.length + (vis.length === 1 ? ' residência' : ' residências');
+      rs.innerHTML = vis.length ? vis.map(function (i) {
+        var p = PL[i];
+        return '<li class="rs-card"><button type="button" data-rs="' + i + '"><span class="rs-des">' + desenho(p) + '</span><b>' + p[0] + '</b><span class="rs-dados">' + p[1] + ' m²<br>' + p[2] + ' suítes<br>terreno a partir de ' + p[3] + ' m</span><span class="rs-pe"><em>a partir de ' + mil(p[4]) + '</em><span>Ver ficha ⟶</span></span></button></li>';
+      }).join('') : '<li class="rs-vazio">Nenhuma planta com esses filtros. A gente adapta uma planta ao seu terreno: fale com o arquiteto.</li>';
+    };
+    rf.addEventListener('input', rsLista); rf.addEventListener('reset', function () { setTimeout(rsLista, 0); }); rsLista();
+    var rd = $('.rs-dlg');
+    rs.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-rs]'); if (!b) return; var p = PL[+b.dataset.rs];
+      $('.rs-dlg-corpo', rd).innerHTML = '<img src="img/' + p[6] + '.webp" alt="Casa de alto padrão no estilo da ' + p[0] + '"><div class="rs-dlg-txt"><p class="olho ouro">Residência</p><h2>' + p[0] + '</h2>' +
+        '<dl><dt>Área construída</dt><dd>' + p[1] + ' m²</dd><dt>Suítes</dt><dd>' + p[2] + '</dd><dt>Terreno mínimo</dt><dd>' + p[3] + ' m</dd><dt>Obra</dt><dd>' + p[5] + ' meses</dd><dt>A partir de</dt><dd>' + mil(p[4]) + '</dd><dt>Por m²</dt><dd>' + mil(p[4] / p[1]) + '</dd></dl>' +
+        '<div class="rs-dlg-planta">' + desenho(p) + '</div>' +
+        '<p class="rs-dlg-acoes"><a class="bt-borda" href="#" data-wa="Olá, Monolito! Quero a ficha completa da ' + p[0] + ' (' + p[1] + ' m²).">Pedir a ficha completa <span aria-hidden="true">⟶</span></a><a class="bt-borda" href="index.html#monte">Configurar no site <span aria-hidden="true">⟶</span></a></p></div>';
+      rd.showModal();
+    });
+    $('.rs-x', rd).addEventListener('click', function () { rd.close(); });
+    rd.addEventListener('click', function (e) { if (e.target === rd) rd.close(); });
+  }
+
+  // ---------- espaços comerciais (lojas.html): filtro por tipo e situação ----------
+  var lj = $('.lj-tab');
+  if (lj) {
+    var ljF = $('#lj-filtros');
+    var ljFiltra = function () {
+      var tp = ljF.tp.value, st = ljF.st.value, n = 0;
+      $$('tbody tr', lj).forEach(function (tr) { var ok = (!tp || tr.dataset.tp === tp) && (!st || tr.dataset.st === st); tr.hidden = !ok; if (ok) n++; });
+      $('.lj-total').textContent = n + (n === 1 ? ' espaço' : ' espaços');
+    };
+    ljF.addEventListener('change', ljFiltra); ljFiltra();
+  }
+
   // ---------- contato ----------
   var ct = $('#ct');
-  ct.addEventListener('submit', function (e) {
+  if (ct) ct.addEventListener('submit', function (e) {
     e.preventDefault();
     var n = ct.nome.value.trim(), t = ct.tel.value.replace(/\D/g, ''), er = $('.erro', ct);
     er.textContent = n.length < 2 ? 'Escreva seu nome.' : t.length < 10 ? 'Confira o WhatsApp com DDD.' : !ct.ok.checked ? 'Marque a autorização de contato.' : '';

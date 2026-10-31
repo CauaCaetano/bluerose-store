@@ -47,6 +47,24 @@
   var plural = function (n, s, p) { return n + ' ' + (n === 1 ? s : (p || s + 's')); };
   var BAIRROS = ['Cambuí', 'Taquaral', 'Guanabara', 'Centro', 'Barão Geraldo', 'Nova Campinas', 'Mansões Santo Antônio'];
 
+  var SOBRE = {
+    'Cambuí': 'O Cambuí tem a vida a pé de Campinas: Centro de Convivência, padarias, bares e a Av. Júlio de Mesquita a poucas quadras.',
+    'Taquaral': 'No Taquaral, a Lagoa e o Parque Portugal ficam perto, com pista de caminhada de 3 km e feira de artesanato aos domingos.',
+    'Centro': 'No Centro, o Mercado Municipal, a Rua 13 de Maio e os corredores de ônibus estão a uma caminhada.',
+    'Barão Geraldo': 'Barão Geraldo é o bairro da Unicamp: mais verde e mais calmo, com comércio próprio e ciclovia.',
+    'Nova Campinas': 'A Nova Campinas é residencial e arborizada, colada no Cambuí e a poucos minutos do Shopping Iguatemi.',
+    'Mansões Santo Antônio': 'Mansões Santo Antônio tem ruas largas, condomínios de casas e acesso rápido à Rod. D. Pedro I.',
+    'Guanabara': 'O Guanabara fica entre o Centro e o Taquaral, com a Av. Brasil, mercados e escolas tradicionais por perto.'
+  };
+  var PERTO = {
+    'Cambuí': [['Centro de Convivência', '#2f8a46'], ['Escola Estadual Carlos Gomes', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital Vera Cruz', '#d0393f']],
+    'Taquaral': [['Lagoa do Taquaral', '#2f8a46'], ['Escola municipal', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Pronto-socorro', '#d0393f']],
+    'Centro': [['Bosque dos Jequitibás', '#2f8a46'], ['Escola técnica', '#e0912f'], ['Mercado Municipal', '#7a54d1'], ['Terminal Central', '#1b67ee'], ['Santa Casa', '#d0393f']],
+    'Barão Geraldo': [['Unicamp', '#2f8a46'], ['Escola estadual', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital de Clínicas', '#d0393f']],
+    'Nova Campinas': [['Praça arborizada', '#2f8a46'], ['Colégio particular', '#e0912f'], ['Shopping Iguatemi', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital', '#d0393f']],
+    'Mansões Santo Antônio': [['Parque Ecológico', '#2f8a46'], ['Colégio bilíngue', '#e0912f'], ['Supermercado', '#7a54d1'], ['Acesso à D. Pedro I', '#1b67ee'], ['Hospital', '#d0393f']],
+    'Guanabara': [['Praça do bairro', '#2f8a46'], ['Escola estadual', '#e0912f'], ['Supermercado', '#7a54d1'], ['Corredor da Av. Brasil', '#1b67ee'], ['Hospital', '#d0393f']]
+  };
   // ---------- estado ----------
   var VAZIO = { modo: 'aluguel', bairro: '', tipos: [], pmin: '', pmax: '', qmin: '', qmax: '', bmin: '', bmax: '', amin: '', amax: '', vmin: '', vmax: '', ymin: '', ymax: '', cmin: '', cmax: '', feats: [], ordem: 'novo', texto: '' };
   var S = JSON.parse(JSON.stringify(VAZIO)), pagina = 1;
@@ -59,7 +77,7 @@
     var ok = function (val, a, b) { var lo = num(a), hi = num(b); return (lo === null || val >= lo) && (hi === null || val <= hi); };
     var tx = semAcento(st.texto || '');
     return IM.filter(function (x) {
-      if (x.m !== st.modo) return false;
+      if (st.modo && x.m !== st.modo) return false;
       if (st.bairro && x.b !== st.bairro) return false;
       if (st.tipos.length && st.tipos.indexOf(x.tipo) < 0) return false;
       if (!ok(custo(x), st.pmin, st.pmax) || !ok(x.q, st.qmin, st.qmax) || !ok(x.bh, st.bmin, st.bmax) || !ok(x.a, st.amin, st.amax) || !ok(x.vg, st.vmin, st.vmax) || !ok(x.ano, st.ymin, st.ymax) || !ok(x.c, st.cmin, st.cmax)) return false;
@@ -82,6 +100,24 @@
     return n;
   }
 
+  // ---------- anunciar ----------
+  var FA = $('#form-anunciar');
+  if (FA) (function () {
+  function estimar() {
+    var vende = FA.neg.value === 'vender', m = vende ? 'venda' : 'aluguel', b = FA.bairro.value, area = Math.max(15, num(FA.area.value) || 80);
+    var base = IM.filter(function (x) { return x.m === m && x.b === b; }), ond = 'no ' + b;
+    if (!base.length) { base = IM.filter(function (x) { return x.m === m; }); ond = 'em Campinas'; }
+    var med = base.reduce(function (s, x) { return s + x.v / x.a; }, 0) / base.length, v = med * area;
+    FA.querySelector('.estima').innerHTML = 'Imóveis parecidos ' + ond + ' saem por <b>' + (vende ? mil(v * 0.9) + ' a ' + mil(v * 1.1) : real(Math.round(v * 0.9 / 50) * 50) + ' a ' + real(Math.round(v * 1.1 / 50) * 50) + '/mês') + '</b>, pela média de ' + real(med) + '/m² nos nossos anúncios.';
+  }
+  FA.addEventListener('input', estimar); FA.addEventListener('change', estimar); estimar();
+  FA.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var txt = 'Olá, Lar Paulista! Sou ' + FA.nome.value.trim() + ' e quero anunciar para ' + (FA.neg.value === 'vender' ? 'vender' : 'alugar') + ': ' + FA.tipo.value + ' no ' + FA.bairro.value + ', ' + (num(FA.area.value) || 80) + ' m².';
+    if (window.BR_WA) window.BR_WA(txt);
+  });
+  })();
+
   // ---------- ícones ----------
   var IC = {
     cama: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 15.5V5.5M2.5 12h15v3.5M17.5 12v-2a2 2 0 0 0-2-2H9v4"/><circle cx="5.6" cy="9.4" r="1.4"/></svg>',
@@ -92,6 +128,181 @@
     cmp: '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="4" width="6" height="12" rx="1"/><rect x="11" y="4" width="6" height="12" rx="1"/></svg>',
     share: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 7l4-4 4 4M4 11v5h12v-5"/></svg>'
   };
+
+  // ---------- páginas do site (31/10): cada imóvel tem a sua página, e há lista, sobre, anunciar, contato e privacidade ----------
+  var paginaDe = function (x) { return 'imovel-' + semAcento(x.t + ' ' + x.b).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.html'; };
+  var SEM_CMP = !$('.palco');
+  // menu do celular (gaveta), igual em todas as páginas
+  var gav = $('#gaveta'), btMenu = $('.bt-menu');
+  if (gav && btMenu) {
+    var gaveta = function (abre) { gav.hidden = !abre; btMenu.setAttribute('aria-expanded', String(abre)); btMenu.setAttribute('aria-label', abre ? 'Fechar o menu' : 'Abrir o menu'); if (abre) { var l = $('a', gav); if (l) l.focus({ preventScroll: true }); } };
+    btMenu.addEventListener('click', function () { gaveta(gav.hidden); });
+    gav.addEventListener('click', function (e) { if (e.target === gav || e.target.closest('a')) gaveta(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !gav.hidden) { gaveta(false); btMenu.focus(); } });
+  }
+  if (SEM_CMP) { internas(); return; }
+
+  function internas() {
+    try { tema(localStorage.getItem('lp-tema') || 'sistema'); } catch (e) { tema('sistema'); }
+    var menuU = $('.menu-u'), btU = $('.bt-u');
+    var menuUsuario = function (abre) { if (!menuU) return; menuU.hidden = !abre; btU.setAttribute('aria-expanded', String(abre)); };
+    var salvos = function () { var n = favs.length; $$('.n-sv').forEach(function (b) { b.hidden = !n; b.textContent = n; }); $$('.n-sv2').forEach(function (b) { b.textContent = n; }); };
+    salvos();
+    // busca do topo: código abre a página do imóvel, o resto vai para a lista
+    var fb = $('#busca'), q = $('#q');
+    if (fb) {
+      q.addEventListener('input', function () { fb.classList.toggle('cheia', !!q.value); });
+      fb.addEventListener('submit', function (e) {
+        e.preventDefault(); var t = q.value.trim(); if (!t) { q.focus(); return; }
+        var cod = semAcento(t).match(/lp-?\s?(\d{4})/);
+        location.href = cod && porId['LP-' + cod[1]] ? paginaDe(porId['LP-' + cod[1]]) : 'imoveis.html?q=' + encodeURIComponent(t);
+      });
+    }
+    var lista = listaPagina(), ficha = imovelPagina();
+    document.addEventListener('click', function (e) {
+      var t = e.target, a;
+      if (menuU && !t.closest('.usuario') && !menuU.hidden) menuUsuario(false);
+      if ((a = t.closest('.bt-u'))) { menuUsuario(menuU.hidden); return; }
+      if ((a = t.closest('[data-tema]'))) { tema(a.dataset.tema, true); return; }
+      if ((a = t.closest('[data-so-salvos]'))) { location.href = 'imoveis.html?salvos=1'; return; }
+      if ((a = t.closest('[data-fav]'))) {
+        var id = a.dataset.fav, k = favs.indexOf(id); if (k > -1) favs.splice(k, 1); else favs.push(id); guardaFav();
+        $$('[data-fav="' + id + '"]').forEach(function (b) { b.setAttribute('aria-pressed', String(k < 0)); });
+        salvos(); if (k < 0) aviso('Salvo. Veja os seus imóveis em <b>Minha conta → Imóveis salvos</b>.');
+        if (lista) lista.render(); return;
+      }
+      if ((a = t.closest('[data-foto]'))) {
+        var tr = $('.trilho', a.closest('.foto')), n = tr.children.length, i = (+tr.dataset.i + +a.dataset.foto + n) % n;
+        tr.dataset.i = i; tr.style.transform = 'translateX(' + (-i * 100) + '%)';
+        $$('.pontos i', a.closest('.foto')).forEach(function (p, j) { p.classList.toggle('on', j === i); }); return;
+      }
+      if ((a = t.closest('[data-ver]'))) { abrirFicha(a.dataset.ver); return; }
+      if ((a = t.closest('[data-slot]'))) { $$('[data-slot]', a.closest('.slots')).forEach(function (b) { b.setAttribute('aria-pressed', String(b === a)); }); return; }
+      if (ficha) ficha.clique(e, t);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      var gl = $('#galeria'); if (gl && !gl.hidden) { gl.hidden = true; return; }
+      if (menuU && !menuU.hidden) { menuUsuario(false); btU.focus(); }
+    });
+    // deslizar as fotos do cartão no celular
+    var cards = $('.cards'), toque = null;
+    if (cards) {
+      cards.addEventListener('touchstart', function (e) { var f = e.target.closest('.foto'); if (f) toque = { f: f, x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
+      cards.addEventListener('touchend', function (e) {
+        if (!toque) return; var dx = e.changedTouches[0].clientX - toque.x, dy = e.changedTouches[0].clientY - toque.y;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { var b = $('[data-foto="' + (dx < 0 ? 1 : -1) + '"]', toque.f); if (b) b.click(); }
+        toque = null;
+      }, { passive: true });
+    }
+    // formulário da página de contato: monta a mensagem para o WhatsApp
+    var FC2 = $('#form-contato');
+    if (FC2) FC2.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var txt = 'Olá, Lar Paulista! Sou ' + (FC2.nome.value.trim() || 'cliente') + (FC2.fone.value.trim() ? ' (' + FC2.fone.value.trim() + ')' : '') + '. Assunto: ' + FC2.assunto.value + (FC2.bairro.value ? ', no ' + FC2.bairro.value : '') + '. ' + FC2.msg.value.trim();
+      if (window.BR_WA) window.BR_WA(txt);
+    });
+  }
+
+  // ---------- imoveis.html: lista com filtro de negócio, tipo, bairro e preço, paginada e com o endereço na URL ----------
+  function listaPagina() {
+    var LF = $('#filtro-lista'); if (!LF) return null;
+    var P = new URLSearchParams(location.search), POR_P = 6, pag = Math.max(1, parseInt(P.get('pag'), 10) || 1);
+    var TIPOS = ['Apartamento', 'Casa', 'Casa em condomínio', 'Cobertura', 'Studio', 'Sobrado'];
+    var PRECOS = { aluguel: [[2000, 'Até R$ 2.000/mês'], [3000, 'Até R$ 3.000/mês'], [5000, 'Até R$ 5.000/mês'], [10000, 'Até R$ 10.000/mês']], venda: [[600000, 'Até R$ 600 mil'], [1000000, 'Até R$ 1 milhão'], [2000000, 'Até R$ 2 milhões'], [4000000, 'Até R$ 4 milhões']] };
+    TIPOS.forEach(function (t) { LF.tipo.add(new Option(t, t)); });
+    BAIRROS.forEach(function (b) { LF.bairro.add(new Option(b, b)); });
+    var texto = P.get('q') || '', soSalvos = P.get('salvos') === '1';
+    function precos() {
+      var m = LF.modo.value, atual = LF.pmax.value;
+      LF.pmax.innerHTML = ''; LF.pmax.add(new Option(m ? 'Qualquer preço' : 'Escolha o negócio', ''));
+      (PRECOS[m] || []).forEach(function (p) { LF.pmax.add(new Option(p[1], p[0])); });
+      LF.pmax.disabled = !m; LF.pmax.value = (PRECOS[m] || []).some(function (p) { return String(p[0]) === atual; }) ? atual : '';
+    }
+    LF.modo.value = P.get('modo') === 'aluguel' || P.get('modo') === 'venda' ? P.get('modo') : '';
+    precos();
+    LF.tipo.value = TIPOS.indexOf(P.get('tipo')) > -1 ? P.get('tipo') : '';
+    LF.bairro.value = BAIRROS.indexOf(P.get('bairro')) > -1 ? P.get('bairro') : '';
+    LF.pmax.value = P.get('pmax') || ''; if (!LF.pmax.value) LF.pmax.value = '';
+    LF.ordem.value = ['novo', 'barato', 'caro', 'area'].indexOf(P.get('ordem')) > -1 ? P.get('ordem') : 'novo';
+    function estado() {
+      var st = JSON.parse(JSON.stringify(VAZIO));
+      st.modo = LF.modo.value; st.bairro = LF.bairro.value; st.tipos = LF.tipo.value ? [LF.tipo.value] : []; st.pmax = LF.pmax.value; st.ordem = LF.ordem.value; st.texto = texto;
+      if (soSalvos) st.feats = ['fav'];
+      return st;
+    }
+    function url() {
+      var u = new URLSearchParams();
+      if (LF.modo.value) u.set('modo', LF.modo.value); if (LF.tipo.value) u.set('tipo', LF.tipo.value); if (LF.bairro.value) u.set('bairro', LF.bairro.value);
+      if (LF.pmax.value) u.set('pmax', LF.pmax.value); if (LF.ordem.value !== 'novo') u.set('ordem', LF.ordem.value); if (texto) u.set('q', texto); if (soSalvos) u.set('salvos', '1'); if (pag > 1) u.set('pag', pag);
+      try { history.replaceState(null, '', location.pathname + (String(u) ? '?' + u : '')); } catch (e) {}
+    }
+    function render() {
+      var l = filtrar(estado()), pags = Math.max(1, Math.ceil(l.length / POR_P)); pag = Math.min(pag, pags);
+      var neg = LF.modo.value === 'aluguel' ? ' para alugar' : LF.modo.value === 'venda' ? ' à venda' : '';
+      $('#conta-lista').innerHTML = '<b>' + l.length + '</b> ' + (l.length === 1 ? 'imóvel' : 'imóveis') + neg + (LF.bairro.value ? ' no ' + LF.bairro.value : '') + ' em Campinas';
+      $('.cards').innerHTML = l.length ? l.slice((pag - 1) * POR_P, pag * POR_P).map(cardHTML).join('') :
+        '<li class="vazio"><b>Nenhum imóvel com esses filtros agora.</b>Tire um filtro ou peça para avisarmos quando entrar um assim.<div class="linha-bts"><button type="button" class="bt-borda" data-limpar-lista>Limpar filtros</button><a class="bt-azul" href="#" data-wa="Olá, Lar Paulista! Quero ser avisado quando entrar um imóvel assim em Campinas.">Avisar quando entrar</a></div></li>';
+      var h = '';
+      if (pags > 1) { h += '<button type="button" data-pg="' + (pag - 1) + '"' + (pag <= 1 ? ' disabled' : '') + '>Anterior</button>'; for (var i = 1; i <= pags; i++) h += '<button type="button" data-pg="' + i + '"' + (i === pag ? ' aria-current="page"' : '') + '>' + i + '</button>'; h += '<button type="button" data-pg="' + (pag + 1) + '"' + (pag >= pags ? ' disabled' : '') + '>Próxima</button>'; }
+      $('.paginas').innerHTML = h; $('.pag-de').textContent = 'Página ' + pag + ' de ' + pags;
+      var ch = []; if (texto) ch.push('<button type="button" data-tira="q">Busca: “' + esc(texto) + '” ×</button>'); if (soSalvos) ch.push('<button type="button" data-tira="salvos">Só os salvos ×</button>');
+      $('.chips-ativos').innerHTML = ch.join(''); $('.chips-ativos').hidden = !ch.length;
+      $$('.menu a[data-modo]').forEach(function (m) { if (m.dataset.modo === LF.modo.value) m.setAttribute('aria-current', 'page'); else m.removeAttribute('aria-current'); });
+      url();
+    }
+    LF.addEventListener('change', function (e) { if (e.target === LF.modo) precos(); pag = 1; render(); });
+    LF.addEventListener('submit', function (e) { e.preventDefault(); });
+    LF.addEventListener('reset', function () { setTimeout(function () { texto = ''; soSalvos = false; precos(); pag = 1; render(); }); });
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('[data-pg]'); if (a && !a.disabled) { pag = +a.dataset.pg; render(); scrollTo({ top: $('.lista-pg').offsetTop - 70, behavior: reduz ? 'auto' : 'smooth' }); return; }
+      if ((a = e.target.closest('[data-tira]'))) { if (a.dataset.tira === 'q') texto = ''; else soSalvos = false; pag = 1; render(); return; }
+      if (e.target.closest('[data-limpar-lista]')) { LF.reset(); }
+    });
+    render();
+    return { render: render };
+  }
+
+  // ---------- imovel-<nome>.html: a ficha completa como página ----------
+  function imovelPagina() {
+    var m = $('[data-imovel]'); if (!m) return null;
+    var x = porId[m.getAttribute('data-imovel')], box = $('.fc-in', m);
+    box.innerHTML = fichaHTML(x, true);
+    if (x.m !== 'aluguel') simula(x);
+    var abas = $$('.fc-abas a', box);
+    var ob = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) abas.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); }); }); }, { rootMargin: '-20% 0px -70% 0px' });
+    $$('.fc-sec', box).forEach(function (s) { ob.observe(s); });
+    box.addEventListener('change', function (e) {
+      if (e.target.name !== 'ass') return;
+      var vis = e.target.value === 'visita', fm = e.target.form;
+      $('.f-vis', fm).hidden = !vis; $('.f-msg', fm).hidden = vis; $('button[type=submit]', fm).textContent = vis ? 'Pedir visita' : 'Enviar pergunta';
+    });
+    box.addEventListener('submit', function (e) {
+      e.preventDefault(); var fm = e.target, vis = fm.ass.value === 'visita', sl = $('[data-slot][aria-pressed="true"]', fm);
+      if (vis && !sl) { aviso('Escolha um <b>horário</b> para a visita.'); return; }
+      var txt = 'Olá, Lar Paulista! Sou ' + (fm.nome.value.trim() || 'cliente') + (fm.fone.value.trim() ? ' (' + fm.fone.value.trim() + ')' : '') + '. ' +
+        (vis ? 'Quero visitar ' : 'Tenho uma pergunta sobre ') + x.t + ' na ' + x.rua + ', ' + x.b + ' (cód. ' + x.id + ', ' + (x.m === 'aluguel' ? real(custo(x)) + '/mês tudo incluso' : mil(x.v)) + ')' +
+        (vis ? '. Horário: ' + sl.dataset.slot + '.' : (fm.msg.value.trim() ? ': ' + fm.msg.value.trim() : '.'));
+      if (window.BR_WA) window.BR_WA(txt);
+    });
+    var GL = $('#galeria'), gi = 0;
+    function galeria(k) { gi = (k + x.f.length) % x.f.length; $('img', GL).src = foto(x.f[gi]); $('img', GL).alt = 'Foto ' + (gi + 1) + ' de ' + x.t; $('.gl-n', GL).textContent = (gi + 1) + ' de ' + x.f.length; if (GL.hidden) { GL.hidden = false; $('.gl-x', GL).focus(); } }
+    $('.gl-ant', GL).addEventListener('click', function () { galeria(gi - 1); });
+    $('.gl-prox', GL).addEventListener('click', function () { galeria(gi + 1); });
+    $('.gl-x', GL).addEventListener('click', function () { GL.hidden = true; });
+    GL.addEventListener('click', function (e) { if (e.target === GL) GL.hidden = true; });
+    return {
+      clique: function (e, t) {
+        var a;
+        if ((a = t.closest('[data-galeria]'))) { galeria(+a.dataset.galeria % x.f.length); return; }
+        if ((a = t.closest('[data-ir-contato]'))) {
+          var c = $('#fc-contato'); c.scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'start' });
+          var r = $('input[name=ass][value="' + a.dataset.irContato + '"]', c); r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); return;
+        }
+        if ((a = t.closest('[data-copiar]'))) { try { navigator.clipboard.writeText(location.href).then(function () { aviso('Link do imóvel <b>copiado</b>.'); }, function () { aviso('Copie o link na barra do navegador.'); }); } catch (er) { aviso('Copie o link na barra do navegador.'); } }
+      }
+    };
+  }
 
   // ---------- cartões ----------
   function precoHTML(x) {
@@ -106,12 +317,12 @@
     var fav = favs.indexOf(x.id) > -1, nc = cmp.indexOf(x.id) > -1, nf = x.f.length;
     return '<li class="card" data-id="' + x.id + '"><div class="foto"><div class="trilho" data-i="0">' +
       x.f.map(function (n, k) { return '<img src="' + foto(n) + '" alt="' + (k ? 'Foto ' + (k + 1) + ' de ' : '') + esc(x.t) + ' no ' + esc(x.b) + '"' + (k ? ' loading="lazy"' : '') + ' width="460" height="320">'; }).join('') +
-      '</div><button type="button" class="abrir" data-ver="' + x.id + '" aria-label="Ver ' + esc(x.t) + ' no ' + esc(x.b) + '"></button>' +
-      '<button type="button" class="ck" data-cmp="' + x.id + '" aria-pressed="' + nc + '" aria-label="Comparar este imóvel"><i></i></button>' +
+      '</div><a class="abrir" href="' + paginaDe(x) + '" aria-label="Ver ' + esc(x.t) + ' no ' + esc(x.b) + '"></a>' +
+      (SEM_CMP ? '' : '<button type="button" class="ck" data-cmp="' + x.id + '" aria-pressed="' + nc + '" aria-label="Comparar este imóvel"><i></i></button>') +
       '<button type="button" class="cor" data-fav="' + x.id + '" aria-pressed="' + fav + '" aria-label="Salvar imóvel">' + IC.cor + '</button>' +
       (nf > 1 ? '<button type="button" class="seta seta-a" data-foto="-1" aria-label="Foto anterior">‹</button><button type="button" class="seta seta-p" data-foto="1" aria-label="Próxima foto">›</button><div class="pontos" aria-hidden="true">' + x.f.map(function (n, k) { return '<i' + (k ? '' : ' class="on"') + '></i>'; }).join('') + '</div>' : '') +
       '</div><div class="c-corpo"><p class="c-tipo">' + x.tipo + ' · ' + x.ano + '</p><p class="c-preco">' + precoHTML(x) + '</p>' +
-      '<p class="c-rua"><button type="button" data-ver="' + x.id + '">' + esc(x.rua) + '</button></p><p class="c-bairro">' + x.b + ', Campinas/SP</p><p class="c-soma">' + somaHTML(x) + '</p></div>' +
+      '<p class="c-rua"><a href="' + paginaDe(x) + '">' + esc(x.rua) + '</a></p><p class="c-bairro">' + x.b + ', Campinas/SP</p><p class="c-soma">' + somaHTML(x) + '</p></div>' +
       '<div class="c-icones"><span>' + IC.cama + plural(x.q, 'quarto') + '</span><span>' + IC.banho + plural(x.bh, 'banh.', 'banh.') + '</span><span>' + IC.area + x.a + ' m²</span><span>' + IC.carro + plural(x.vg, 'vaga') + '</span></div>' +
       '<div class="c-pe"><p>Cód. ' + x.id + '<br>' + (x.cor.indexOf('Marcos') === 0 ? 'Corretor ' : 'Corretora ') + x.cor + '</p><p>' + (x.d <= 3 ? '<span class="verde">Novo no site</span>' : 'Há ' + x.d + ' dias no site') + '<br>Anunciado em ' + dataDe(x.d) + '</p></div></li>';
   }
@@ -433,24 +644,6 @@
 
   // ---------- ficha do imóvel ----------
   var FC = $('#ficha'), fichaAtual = null, empurrou = false;
-  var SOBRE = {
-    'Cambuí': 'O Cambuí tem a vida a pé de Campinas: Centro de Convivência, padarias, bares e a Av. Júlio de Mesquita a poucas quadras.',
-    'Taquaral': 'No Taquaral, a Lagoa e o Parque Portugal ficam perto, com pista de caminhada de 3 km e feira de artesanato aos domingos.',
-    'Centro': 'No Centro, o Mercado Municipal, a Rua 13 de Maio e os corredores de ônibus estão a uma caminhada.',
-    'Barão Geraldo': 'Barão Geraldo é o bairro da Unicamp: mais verde e mais calmo, com comércio próprio e ciclovia.',
-    'Nova Campinas': 'A Nova Campinas é residencial e arborizada, colada no Cambuí e a poucos minutos do Shopping Iguatemi.',
-    'Mansões Santo Antônio': 'Mansões Santo Antônio tem ruas largas, condomínios de casas e acesso rápido à Rod. D. Pedro I.',
-    'Guanabara': 'O Guanabara fica entre o Centro e o Taquaral, com a Av. Brasil, mercados e escolas tradicionais por perto.'
-  };
-  var PERTO = {
-    'Cambuí': [['Centro de Convivência', '#2f8a46'], ['Escola Estadual Carlos Gomes', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital Vera Cruz', '#d0393f']],
-    'Taquaral': [['Lagoa do Taquaral', '#2f8a46'], ['Escola municipal', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Pronto-socorro', '#d0393f']],
-    'Centro': [['Bosque dos Jequitibás', '#2f8a46'], ['Escola técnica', '#e0912f'], ['Mercado Municipal', '#7a54d1'], ['Terminal Central', '#1b67ee'], ['Santa Casa', '#d0393f']],
-    'Barão Geraldo': [['Unicamp', '#2f8a46'], ['Escola estadual', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital de Clínicas', '#d0393f']],
-    'Nova Campinas': [['Praça arborizada', '#2f8a46'], ['Colégio particular', '#e0912f'], ['Shopping Iguatemi', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital', '#d0393f']],
-    'Mansões Santo Antônio': [['Parque Ecológico', '#2f8a46'], ['Colégio bilíngue', '#e0912f'], ['Supermercado', '#7a54d1'], ['Acesso à D. Pedro I', '#1b67ee'], ['Hospital', '#d0393f']],
-    'Guanabara': [['Praça do bairro', '#2f8a46'], ['Escola estadual', '#e0912f'], ['Supermercado', '#7a54d1'], ['Corredor da Av. Brasil', '#1b67ee'], ['Hospital', '#d0393f']]
-  };
   function descricao(x) {
     var t = x.t + ' de ' + x.a + ' m² no ' + x.b + ', com ' + plural(x.q, 'quarto') + ', ' + plural(x.bh, 'banheiro') + ' e ' + (x.vg ? plural(x.vg, 'vaga') : 'sem vaga') + '. ';
     var extra = [];
@@ -476,15 +669,14 @@
     PERTO[x.b].forEach(function (p) { h += '<circle cx="' + (40 + r() * 320).toFixed(0) + '" cy="' + (30 + r() * 200).toFixed(0) + '" r="6" fill="' + p[1] + '" stroke="#fff" stroke-width="2"/>'; });
     return h + '<circle cx="200" cy="130" r="22" fill="var(--azul)" opacity=".18"/><circle cx="200" cy="130" r="9" fill="var(--azul)" stroke="#fff" stroke-width="3"/></svg>';
   }
-  function abrirFicha(id, semHist) {
-    var x = porId[id]; if (!x) return;
-    fichaAtual = id;
+  function fichaHTML(x, naPagina) {
+    var id = x.id;
     var aluga = x.m === 'aluguel', tot = custo(x), fav = favs.indexOf(id) > -1, r = rnd(x.a * 13 + 7);
     var fotos5 = x.f.slice(); while (fotos5.length < 5) fotos5.push(x.f[fotos5.length % x.f.length]);
     var partes = aluga ? [['Aluguel', x.v, '#1b67ee'], ['Condomínio', x.c, '#7aa6f5'], ['IPTU', x.ip, '#e0912f'], ['Seguro incêndio', SEGURO, '#9a9aa4']] : null;
     var comps = IM.filter(function (y) { return y.m === x.m && y.id !== x.id; }).sort(function (a, b) { return Math.abs(custo(a) - tot) - Math.abs(custo(b) - tot); }).slice(0, 6);
     var difTag = function (v, base, fmt) { var d = v - base; if (!d) return ''; return '<span class="dif ' + (d < 0 ? 'baixo' : 'alto') + '">' + (d > 0 ? '+' : '−') + fmt(Math.abs(d)) + '</span>'; };
-    var h = '<nav class="migalha" aria-label="Caminho"><button type="button" data-fecha-ficha>← Voltar aos resultados</button><i>/</i><span>SP</span><i>›</i><span>Campinas</span><i>›</i><span>' + x.b + '</span><i>›</i><span>' + esc(x.rua) + '</span></nav>' +
+    var h = '<nav class="migalha" aria-label="Caminho"><a href="index.html">Início</a><i>›</i><a href="imoveis.html?modo=' + x.m + '">' + (aluga ? 'Alugar' : 'Comprar') + '</a><i>›</i><a href="imoveis.html?modo=' + x.m + '&amp;bairro=' + encodeURIComponent(x.b) + '">' + x.b + '</a><i>›</i><span aria-current="page">' + esc(x.rua) + '</span></nav>' +
       '<div class="mosaico">' + fotos5.slice(0, 5).map(function (n, k) { return '<button type="button" data-galeria="' + k + '" aria-label="Abrir foto ' + (k + 1) + '"><img src="' + foto(n) + '" alt="' + (k ? 'Foto ' + (k + 1) + ' de ' : '') + esc(x.t) + '"' + (k ? ' loading="lazy"' : '') + '>' + (k === 4 ? '<span class="ver-todas">Ver as ' + x.f.length + ' fotos</span>' : '') + '</button>'; }).join('') + '</div>' +
       '<nav class="fc-abas" aria-label="Seções do imóvel"><a href="#fc-geral" class="on">Visão geral</a><a href="#fc-custo">Custo</a><a href="#fc-detalhes">Detalhes</a><a href="#fc-bairro">Bairro</a><a href="#fc-comp">Comparáveis</a><a href="#fc-contato">Contato</a></nav>' +
       '<div class="fc-grade"><div>' +
@@ -503,11 +695,11 @@
       '<h3>Características</h3>' + [['Aceita pet', x.pet ? 'Sim' : 'Não'], ['Mobiliado', x.mob ? 'Sim' : 'Não'], ['Piscina', x.pisc ? 'Sim' : 'Não'], ['Varanda', x.vr ? 'Sim' : 'Não']].map(function (p) { return '<div><dt>' + p[0] + '</dt><dd>' + p[1] + '</dd></div>'; }).join('') + '</dl></section>' +
       '<section class="fc-sec" id="fc-bairro"><h2>' + x.b + ' <small>' + SOBRE[x.b] + '</small></h2><div class="perto"><ul>' + PERTO[x.b].map(function (p) { var m = Math.round(150 + r() * 1300); return '<li><span style="--c:' + p[1] + '">' + p[0] + '</span><span>' + (m < 1000 ? m + ' m' : (m / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' km') + ' · ' + Math.max(2, Math.round(m / 80)) + ' min a pé</span></li>'; }).join('') + '</ul>' + mapaPerto(x) + '</div></section>' +
       '<section class="fc-sec" id="fc-comp"><h2>Comparáveis ' + (aluga ? 'para alugar' : 'à venda') + ' <small>' + comps.length + ' anúncios com custo parecido</small></h2><div class="tab-rola"><table class="tabela"><thead><tr><th>Imóvel</th><th>' + (aluga ? 'Custo/mês' : 'Preço') + '</th><th>Área</th><th>R$/m²</th><th>Quartos</th><th>No site</th></tr></thead><tbody>' +
-      comps.map(function (y) { var pm = (aluga ? custo(y) : y.v) / y.a, pmx = (aluga ? tot : x.v) / x.a; return '<tr><td><button type="button" class="link mini" data-ver="' + y.id + '"><img src="' + foto(y.f[0]) + '" alt=""><span>' + esc(y.t) + '<small>' + y.b + '</small></span></button></td><td>' + (aluga ? real(custo(y)) : mil(y.v)) + difTag(custo(y), tot, aluga ? real : mil) + '</td><td>' + y.a + ' m²' + difTag(y.a, x.a, function (v) { return v; }) + '</td><td>' + real(pm) + difTag(Math.round(pm), Math.round(pmx), real) + '</td><td>' + y.q + '</td><td>' + plural(y.d, 'dia') + '</td></tr>'; }).join('') + '</tbody></table></div></section>' +
+      comps.map(function (y) { var pm = (aluga ? custo(y) : y.v) / y.a, pmx = (aluga ? tot : x.v) / x.a; return '<tr><td><a class="link mini" href="' + paginaDe(y) + '"><img src="' + foto(y.f[0]) + '" alt=""><span>' + esc(y.t) + '<small>' + y.b + '</small></span></a></td><td>' + (aluga ? real(custo(y)) : mil(y.v)) + difTag(custo(y), tot, aluga ? real : mil) + '</td><td>' + y.a + ' m²' + difTag(y.a, x.a, function (v) { return v; }) + '</td><td>' + real(pm) + difTag(Math.round(pm), Math.round(pmx), real) + '</td><td>' + y.q + '</td><td>' + plural(y.d, 'dia') + '</td></tr>'; }).join('') + '</tbody></table></div></section>' +
       '</div><aside class="caixa-preco" aria-label="Preço e ações"><div class="cx-l1"><b>' + (aluga ? real(tot) + '<small>/mês</small>' : mil(x.v) + '<small>(' + real(x.v / x.a) + '/m²)</small>') + '</b>' + (x.d <= 3 ? '<span class="verde">Novo no site</span>' : '<span>Há ' + x.d + ' dias</span>') + '</div>' +
       '<div class="cx-l2"><span>' + (aluga ? 'Tudo incluso · aluguel ' + real(x.v) : 'Parcela estimada') + '</span><a href="#fc-custo">' + (aluga ? 'ver a conta' : real(parcela(x)) + '/mês') + '</a></div>' +
       '<button type="button" class="bt-azul" data-ir-contato="visita">Agendar visita</button><button type="button" class="cx-perg" data-ir-contato="pergunta">Fazer uma pergunta</button>' +
-      '<div class="cx-ic"><button type="button" data-fav="' + id + '" aria-pressed="' + fav + '" aria-label="Salvar imóvel">' + IC.cor + '</button><button type="button" data-cmp="' + id + '" aria-pressed="' + (cmp.indexOf(id) > -1) + '" aria-label="Comparar">' + IC.cmp + '</button><button type="button" data-copiar aria-label="Copiar link">' + IC.share + '</button></div>' +
+      '<div class="cx-ic"><button type="button" data-fav="' + id + '" aria-pressed="' + fav + '" aria-label="Salvar imóvel">' + IC.cor + '</button>' + (naPagina ? '' : '<button type="button" data-cmp="' + id + '" aria-pressed="' + (cmp.indexOf(id) > -1) + '" aria-label="Comparar">' + IC.cmp + '</button>') + '<button type="button" data-copiar aria-label="Copiar link">' + IC.share + '</button></div>' +
       '<div class="cx-cor"><i aria-hidden="true">' + x.cor.split(' ').map(function (p) { return p[0]; }).slice(0, 2).join('') + '</i><p><b>' + x.cor + '</b>' + (x.cor.indexOf('Marcos') === 0 ? 'Corretor' : 'Corretora') + ' do ' + x.b + ' · responde em até 15 min</p></div></aside></div>' +
       '<section class="fc-contato fc-sec" id="fc-contato"><img src="' + foto(x.f[0]) + '" alt="" loading="lazy"><div><p class="sobre">' + esc(x.rua) + '</p><h2>Pergunte sobre este imóvel</h2><p class="lead">Fale com ' + x.cor + ', da Lar Paulista no ' + x.b + '.</p><ol><li>Pergunte o que quiser sobre o imóvel.</li><li>Respondemos no WhatsApp em até 15 minutos, das 8h às 20h.</li><li>Perguntar ou visitar não obriga a nada.</li></ol>' +
       '<ul class="an-num"><li><b>1.240</b><span>contratos desde 2011</span></li><li><b>18 dias</b><span>média para alugar</span></li><li><b>15 min</b><span>para responder</span></li></ul></div>' +
@@ -515,18 +707,14 @@
       '<div class="duas"><label>Nome<input name="nome" required autocomplete="name"></label><label>Telefone<input name="fone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(19) 9 ____-____"></label></div>' +
       '<label class="f-msg">Mensagem<textarea name="msg" placeholder="Ex.: o condomínio tem academia? Posso levar meu cachorro?"></textarea></label><div class="f-vis" hidden><p class="rot" style="margin:0">Escolha um horário</p><div class="slots">' + slots() + '</div></div>' +
       '<button type="submit" class="bt-azul">Enviar pergunta</button></form></section>';
-    $('.fc-in', FC).innerHTML = h;
-    FC.hidden = false; FC.scrollTop = 0; document.body.style.overflow = 'hidden';
-    fecharPop();
-    if (!semHist) { try { history.pushState({ lp: id }, '', '#imovel-' + id); empurrou = true; } catch (e) {} }
-    if (!aluga) simula(x);
-    abasObs();
-    $('[data-fecha-ficha]', FC).focus({ preventScroll: true });
+    return h;
   }
+  // a ficha completa agora é a página própria do imóvel (imovel-<nome>.html)
+  function abrirFicha(id) { var x = porId[id]; if (x) location.href = paginaDe(x); }
   function simula(x) {
     var rg = $('#fc-ent'), f = function () {
       var e = rg.value / 100, fin = x.v * (1 - e), p = fin / 360 + fin * JURO;
-      $('.ent-v', FC).textContent = rg.value + '% · ' + mil(x.v * e); $('.r-fin', FC).textContent = mil(fin); $('.r-par', FC).textContent = real(p); $('.r-renda', FC).textContent = real(p / 0.3); $('.r-tot', FC).textContent = real(p + x.c + x.ip);
+      $('.ent-v').textContent = rg.value + '% · ' + mil(x.v * e); $('.r-fin').textContent = mil(fin); $('.r-par').textContent = real(p); $('.r-renda').textContent = real(p / 0.3); $('.r-tot').textContent = real(p + x.c + x.ip);
     };
     rg.addEventListener('input', f); f();
   }
@@ -577,22 +765,6 @@
   $('.gl-prox', GL).addEventListener('click', function () { galeria(gi + 1); });
   $('.gl-x', GL).addEventListener('click', function () { GL.hidden = true; });
   GL.addEventListener('click', function (e) { if (e.target === GL) GL.hidden = true; });
-
-  // ---------- anunciar ----------
-  var FA = $('#form-anunciar');
-  function estimar() {
-    var vende = FA.neg.value === 'vender', m = vende ? 'venda' : 'aluguel', b = FA.bairro.value, area = Math.max(15, num(FA.area.value) || 80);
-    var base = IM.filter(function (x) { return x.m === m && x.b === b; }), ond = 'no ' + b;
-    if (!base.length) { base = IM.filter(function (x) { return x.m === m; }); ond = 'em Campinas'; }
-    var med = base.reduce(function (s, x) { return s + x.v / x.a; }, 0) / base.length, v = med * area;
-    FA.querySelector('.estima').innerHTML = 'Imóveis parecidos ' + ond + ' saem por <b>' + (vende ? mil(v * 0.9) + ' a ' + mil(v * 1.1) : real(Math.round(v * 0.9 / 50) * 50) + ' a ' + real(Math.round(v * 1.1 / 50) * 50) + '/mês') + '</b>, pela média de ' + real(med) + '/m² nos nossos anúncios.';
-  }
-  FA.addEventListener('input', estimar); FA.addEventListener('change', estimar); estimar();
-  FA.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var txt = 'Olá, Lar Paulista! Sou ' + FA.nome.value.trim() + ' e quero anunciar para ' + (FA.neg.value === 'vender' ? 'vender' : 'alugar') + ': ' + FA.tipo.value + ' no ' + FA.bairro.value + ', ' + (num(FA.area.value) || 80) + ' m².';
-    if (window.BR_WA) window.BR_WA(txt);
-  });
 
   // ---------- tema ----------
   function tema(t, guardar) {
@@ -685,5 +857,5 @@
 
   montarMapa();
   render();
-  var h0 = location.hash.match(/^#imovel-(LP-\d{4})$/); if (h0) abrirFicha(h0[1], true);
+  var h0 = location.hash.match(/^#imovel-(LP-\d{4})$/); if (h0) abrirFicha(h0[1]);
 })();
