@@ -156,3 +156,8 @@ h2 { font: 600 .92rem var(--sans); margin: 22px 0 8px; color: var(--noite-2); }
 .bt-ia { width: 40px; height: 40px; }
 /* o botão ••• da camada cobria o fim das telas: as mesmas opções (importar, exportar, procurar, instalar) ficam no Mais */
 .vk-mais { display: none !important; }
+/* horário fixo (03/11/2026) */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.rep-mais { margin: -4px 0 6px; }
+.rep-mais .linha { margin-top: 0; flex-wrap: nowrap; }
+.rep-dias button { min-width: 44px; min-height: 36px; }

@@ -66,10 +66,10 @@ const fim = (a) => a.ini + serv(a.serv).min / 60;
 const preco = (a) => (a.valor != null && a.valor !== '' ? Number(a.valor) : serv(a.serv).preco); // valor combinado vale mais que o da tabela
 const ST = { marcado: ['marcado', ''], confirmado: ['confirmou', 'ok'], feito: ['atendido', 'ok'], faltou: ['faltou', 'ru'] };
 const estAss = () => { const a = db.assinatura; return a.status === 'vencida' ? 'vencida: pague para continuar' : a.renova ? `ativa · próxima em ${a.proxima} dias` : `cancelada · usa por mais ${a.proxima} dias`; };
-const RASC = () => ({ serv: db.servicos[0]?.id || 's1', cli: '', tel: '', dia: 0, ini: null, sinal: false, valor: '', remarca: null, rep: 0, repSem: 13 });
+const RASC = () => ({ serv: db.servicos[0]?.id || 's1', cli: '', tel: '', dia: 0, ini: null, sinal: false, valor: '', remarca: null, rep: 0, repDias: null, repN: 3, repU: 'mes' });
 let dia = 0, rasc = RASC(), res = { modo: 'dia', d: 0, m: 0, a: 0 };
 // guarda o que já foi digitado no Novo horário antes de redesenhar a tela
-const guarda = () => { const g = (id) => document.getElementById(id); if (g('cli-n')) rasc.cli = g('cli-n').value; if (g('tel-n')) rasc.tel = g('tel-n').value; if (g('valor-n')) rasc.valor = g('valor-n').value; if (g('sinal')) rasc.sinal = g('sinal').checked; if (g('rep-n')) rasc.rep = Number(g('rep-n').value); if (g('rep-q')) rasc.repSem = Number(g('rep-q').value); };
+const guarda = () => { const g = (id) => document.getElementById(id); if (g('cli-n')) rasc.cli = g('cli-n').value; if (g('tel-n')) rasc.tel = g('tel-n').value; if (g('valor-n')) rasc.valor = g('valor-n').value; if (g('sinal')) rasc.sinal = g('sinal').checked; const rb = g('rep-box'); if (rb && g('marcar-bt')) { const r = lerRep(rb, rasc.dia); rasc.rep = r.freq; rasc.repDias = r.dias; rasc.repN = r.n; rasc.repU = r.u; } };
 
 function toast(m) { const a = document.createElement('div'); a.className = 'toast'; a.textContent = m; $('#toasts').append(a); setTimeout(() => a.remove(), 3200); }
 function folha(html, liga) {
@@ -124,8 +124,7 @@ const T = {
       <label class="campo">Ou digite o horário (qualquer minuto)<input id="hr-livre" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="Ex.: 9:10 ou 14:45" value="${digitado ? hh(rasc.ini) : ''}"></label>
       <p class="mini" id="aviso-hr" style="margin:-6px 0 10px">${aviso()}</p>
       <label class="campo">Valor deste atendimento (opcional)<input id="valor-n" type="number" inputmode="decimal" min="0" step="0.01" value="${t(rasc.valor)}" placeholder="${k?.valor != null ? `${din(k.valor)} (combinado com ${t(k.nome.split(' ')[0])})` : `${din(s.preco)} (preço do serviço)`}"></label>
-      ${rasc.remarca ? '' : `<label class="campo">Repetir este horário<select id="rep-n">${[[0, 'Não repete'], [7, 'Toda semana'], [14, 'A cada 2 semanas']].map(([v, n]) => `<option value="${v}" ${v === rasc.rep ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
-      <label class="campo" id="rep-q-l" ${rasc.rep ? '' : 'hidden'}>Por quanto tempo<select id="rep-q">${[[4, '1 mês'], [13, '3 meses'], [26, '6 meses'], [52, '1 ano']].map(([v, n]) => `<option value="${v}" ${v === rasc.repSem ? 'selected' : ''}>${n}</option>`).join('')}</select></label>`}
+      ${rasc.remarca ? '' : repControles(rasc.dia, { freq: rasc.rep, dias: rasc.repDias, n: rasc.repN, u: rasc.repU }, true)}
       <label class="troca"><span>Pedir sinal de ${din(val * db.sinalPct / 100)} no PIX<br><small class="mini">${pede ? 'Recomendado: serviço acima de ' + din(db.sinalAcima) : 'Opcional'}</small></span><input type="checkbox" id="sinal" ${rasc.sinal || pede ? 'checked' : ''}></label>
       <button type="button" class="bt cheio largo" id="marcar-bt" data-acao="marcar" ${rasc.ini === null ? 'disabled' : ''}>${rotuloMarcar()}</button>`;
   },
@@ -294,17 +293,43 @@ function trava(r) {
   v.innerHTML = `<div class="folha" role="alertdialog" aria-modal="true" aria-labelledby="tr-t"><h2 id="tr-t">Sua assinatura venceu</h2><p class="sub">O pagamento não foi aprovado. Sua agenda, os clientes e os sinais estão guardados: renove para continuar.</p><div style="display:grid;gap:8px"><button type="button" class="bt cheio largo" data-acao="pagar">Pagar aqui no app</button><a class="bt largo" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Renovar no site</a><a class="bt largo" href="#assinatura" style="border-style:dashed">Ver minha assinatura</a></div></div>`;
   document.body.append(v);
 }
-// horário fixo: copia o atendimento para as próximas semanas (mesmo dia da semana e hora); todos levam a mesma "serie"
-function repetir(a, passo, semanas) {
+// horário fixo: copia o atendimento para os dias da semana escolhidos (1 ou mais vezes por semana), toda semana ou a cada 2,
+// por quanto tempo a pessoa quiser; todos levam a mesma "serie" (para desmarcar este e os próximos)
+const SEMANA = [[1, 'seg'], [2, 'ter'], [3, 'qua'], [4, 'qui'], [5, 'sex'], [6, 'sáb'], [0, 'dom']];
+const diaSem = (o) => data(o).getDay();
+function repControles(d0, r, comNao) {
+  const dias = r.dias && r.dias.length ? r.dias : [diaSem(d0)];
+  return `<div class="rep-box" id="rep-box">
+      <label class="campo">Repetir este horário<select id="rep-n">${[...(comNao ? [[0, 'Não repete']] : []), [7, 'Toda semana'], [14, 'A cada 2 semanas']].map(([v, n]) => `<option value="${v}" ${v === r.freq ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+      <div class="rep-mais" ${r.freq ? '' : 'hidden'}>
+        <p class="campo" style="margin:0 0 6px">Em quais dias da semana <small class="mini">(toque para marcar mais de um)</small></p>
+        <div class="chips rep-dias">${SEMANA.map(([v, n]) => `<button type="button" data-rdia="${v}" aria-pressed="${dias.includes(v)}">${n}</button>`).join('')}</div>
+        <div class="linha" style="gap:8px;align-items:end"><label class="campo" style="flex:1">Por quanto tempo<input id="rep-qn" type="number" inputmode="numeric" min="1" max="104" value="${r.n || 3}"></label>
+        <label class="campo" style="flex:1"><span class="sr">Unidade</span><select id="rep-qu"><option value="sem" ${r.u === 'sem' ? 'selected' : ''}>semanas</option><option value="mes" ${r.u !== 'sem' ? 'selected' : ''}>meses</option></select></label></div>
+      </div></div>`;
+}
+// lê os controles; sem nenhum dia marcado, vale o dia do próprio horário
+function lerRep(raiz, d0) {
+  const q = (sel) => raiz.querySelector(sel);
+  if (!q('#rep-n')) return null;
+  const dias = [...raiz.querySelectorAll('[data-rdia][aria-pressed="true"]')].map((b) => Number(b.dataset.rdia));
+  const n = Math.min(104, Math.max(1, Math.round(Number(q('#rep-qn')?.value) || 3)));
+  return { freq: Number(q('#rep-n').value), dias: dias.length ? dias : [diaSem(d0)], n, u: q('#rep-qu')?.value === 'sem' ? 'sem' : 'mes' };
+}
+function repetir(a, r) {
   a.serie = a.serie || uid();
-  const s = serv(a.serv), ate = a.dia + semanas * 7 - 1; let n = 0, choques = 0, ult = a.dia;
-  for (let d = a.dia + passo; d <= ate; d += passo) {
+  const s = serv(a.serv), total = r.u === 'sem' ? r.n * 7 : Math.round(r.n * 30.44), ate = a.dia + total - 1;
+  const seg0 = a.dia - ((diaSem(a.dia) + 6) % 7), cada = r.freq / 7; // semana do 1º horário começa na segunda
+  let n = 0, choques = 0, ult = a.dia;
+  for (let d = a.dia + 1; d <= ate; d++) {
+    if (!r.dias.includes(diaSem(d)) || Math.floor((d - seg0) / 7) % cada) continue;
     if (db.ags.some((x) => x.serie === a.serie && x.dia === d && x.st !== 'cancelado')) continue;
     if (ocupado(d, a.ini, s.min)) choques++;
     db.ags.push({ id: uid(), dia: d, ini: a.ini, cli: a.cli, serv: a.serv, st: 'marcado', pago: 0, valor: a.valor ?? null, sinal: null, serie: a.serie }); n++; ult = d;
   }
   return { n, choques, ate: ult };
 }
+const textoRep = (r) => `${r.freq === 14 ? 'a cada 2 semanas' : 'toda semana'} (${SEMANA.filter(([v]) => r.dias.includes(v)).map(([, n]) => n).join(', ')})`;
 function abreHorario(id) {
   const a = db.ags.find((x) => x.id === id), c = cli(a.cli), s = serv(a.serv);
   const v = preco(a);
@@ -319,8 +344,8 @@ function abreHorario(id) {
     f.querySelector('[data-faltou]')?.addEventListener('click', ok(() => { a.st = 'faltou'; c.faltas = (c.faltas || 0) + 1; }, c.faltas >= 1 ? `${c.nome.split(' ')[0]} já faltou antes: peça sinal na próxima.` : 'Falta registrada.'));
     f.querySelector('[data-desmarcar-serie]')?.addEventListener('click', ok(() => { db.ags.forEach((x) => { if (x.serie === a.serie && x.dia >= a.dia && (x.st === 'marcado' || x.st === 'confirmado')) x.st = 'cancelado'; }); }, 'Horário fixo desmarcado deste dia em diante.'));
     f.querySelector('[data-repetir]')?.addEventListener('click', () => {
-      f.innerHTML = `<h2>Repetir ${t(c.nome.split(' ')[0])} às ${hh(a.ini)}</h2><p class="sub">${((w) => (/sábado|domingo/.test(w) ? 'Todo ' : 'Toda ') + w)(data(a.dia).toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', ''))}, no mesmo horário.</p><div style="display:grid;gap:8px">${[[7, 4, 'Toda semana por 1 mês'], [7, 13, 'Toda semana por 3 meses'], [7, 26, 'Toda semana por 6 meses'], [7, 52, 'Toda semana por 1 ano'], [14, 13, 'A cada 2 semanas por 3 meses']].map(([p, w, n]) => `<button type="button" class="bt largo" data-p="${p}" data-w="${w}">${n}</button>`).join('')}<button type="button" class="bt largo" data-volta style="border-style:dashed">Cancelar</button></div>`;
-      f.querySelectorAll('[data-p]').forEach((b) => b.addEventListener('click', () => { const r = repetir(a, Number(b.dataset.p), Number(b.dataset.w)); grava(); fecha(); mostra(); toast(`${r.n} horários marcados até ${data(r.ate).toLocaleDateString('pt-BR')}${r.choques ? ` (${r.choques} encostam em outro horário)` : ''}.`); }));
+      f.innerHTML = `<h2>Repetir ${t(c.nome.split(' ')[0])} às ${hh(a.ini)}</h2><p class="sub">Escolha os dias da semana e por quanto tempo. O primeiro é ${nomeDia(a.dia).split(',')[0]}.</p>${repControles(a.dia, { freq: 7, dias: [diaSem(a.dia)], n: 3, u: 'mes' }, false)}<div style="display:grid;gap:8px;margin-top:10px"><button type="button" class="bt cheio largo" data-rep-ok>Repetir</button><button type="button" class="bt largo" data-volta style="border-style:dashed">Cancelar</button></div>`;
+      f.querySelector('[data-rep-ok]').addEventListener('click', () => { const rr = lerRep(f, a.dia), r = repetir(a, rr); grava(); fecha(); mostra(); toast(`${r.n} horários marcados ${textoRep(rr)} até ${data(r.ate).toLocaleDateString('pt-BR')}${r.choques ? ` (${r.choques} encostam em outro horário)` : ''}.`); });
       f.querySelector('[data-volta]').addEventListener('click', fecha);
     });
     f.querySelector('[data-desmarcar]')?.addEventListener('click', ok(() => { a.st = 'cancelado'; }, db.espera.length ? `Horário livre. ${db.espera.length} cliente(s) na lista de espera: ofereça em Mais > Lista de espera.` : 'Horário desmarcado.'));
@@ -338,8 +363,8 @@ const ACOES = {
     if (velho) db.ags = db.ags.filter((a) => a !== velho);
     const novo = { id: uid(), dia: rasc.dia, ini: rasc.ini, cli: c.id, serv: rasc.serv, st: 'marcado', pago: 0, valor, sinal };
     db.ags.push(novo);
-    const rep = !velho && rasc.rep ? repetir(novo, rasc.rep, rasc.repSem) : null;
-    const msg = rep ? `Marcado ${rasc.rep === 7 ? 'toda semana' : 'a cada 2 semanas'}: ${rep.n + 1} horários até ${data(rep.ate).toLocaleDateString('pt-BR')}${rep.choques ? ` (${rep.choques} encostam em outro horário; confira no dia)` : ''}.`
+    const rr = !velho && rasc.rep ? lerRep($('#rep-box'), rasc.dia) : null, rep = rr ? repetir(novo, rr) : null;
+    const msg = rep ? `Marcado ${textoRep(rr)}: ${rep.n + 1} horários até ${data(rep.ate).toLocaleDateString('pt-BR')}${rep.choques ? ` (${rep.choques} encostam em outro horário; confira no dia)` : ''}.`
       : `${velho ? 'Remarcado' : 'Marcado'}: ${s.nome.toLowerCase()} ${nomeDia(rasc.dia).split(',')[0]} às ${hh(rasc.ini)}${sinal && !velho ? `. Sinal de ${din(sinal.valor)} pedido no PIX` : ''}.`;
     dia = rasc.dia; rasc = { ...RASC(), serv: rasc.serv, dia: rasc.dia }; grava(); location.hash = '#dia'; toast(msg);
   },
@@ -375,6 +400,7 @@ const ACOES = {
 };
 
 document.addEventListener('click', (e) => {
+  const rdia = e.target.closest('[data-rdia]'); if (rdia) { rdia.setAttribute('aria-pressed', String(rdia.getAttribute('aria-pressed') !== 'true')); if ($('#marcar-bt')) guarda(); return; }
   const el = e.target;
   const ir = el.closest('[data-ir]'); if (ir) { location.hash = `#${ir.dataset.ir}`; return; }
   const ag = el.closest('[data-ag]'); if (ag && !el.closest('.folha')) { abreHorario(ag.dataset.ag); return; }
@@ -415,7 +441,8 @@ document.addEventListener('change', (e) => {
   if (el.id === 'ir-dia') { const o = deIso(el.value); if (o !== null) { dia = o; mostra(); } }
   if (el.id === 'nd-data') { const o = deIso(el.value); if (o !== null) { guarda(); rasc.dia = o; rasc.ini = null; mostra(); } }
   if (el.id === 'r-dia') { const o = deIso(el.value); if (o !== null) { res.d = o; mostra(); } }
-  if (el.id === 'rep-n' || el.id === 'rep-q') { guarda(); const q = $('#rep-q-l'); if (q) q.hidden = !rasc.rep; }
+  if (el.id === 'rep-n') { const m = el.closest('.rep-box')?.querySelector('.rep-mais'); if (m) m.hidden = !Number(el.value); if ($('#marcar-bt')) guarda(); }
+  if (el.id === 'rep-qn' || el.id === 'rep-qu') { if ($('#marcar-bt')) guarda(); }
   if (el.id === 'hr-livre' && el.value.trim() && lerHora(el.value) === null) toast('Horário inválido. Escreva assim: 9:10 ou 14:45.');
   if (el.id === 'valor-n' || el.id === 'cli-n') { guarda(); const s = serv(rasc.serv), k = db.clientes.find((x) => sa(x.nome) === sa(rasc.cli)); if (el.id === 'cli-n' && k && !$('#tel-n').value) $('#tel-n').value = k.tel || ''; const v = rasc.valor !== '' ? Number(rasc.valor) : k?.valor ?? s.preco, sp = $('#sinal')?.previousElementSibling; if (sp) sp.firstChild.textContent = `Pedir sinal de ${din(v * db.sinalPct / 100)} no PIX`; }
   if (el.dataset.ve) { const [i, k] = el.dataset.ve.split('.'); db.ajudantes[i].ve[k] = el.checked; grava(); }
