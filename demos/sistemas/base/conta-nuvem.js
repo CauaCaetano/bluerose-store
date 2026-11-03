@@ -50,7 +50,9 @@
       return Promise.resolve(/iphone|ipad|ipod/i.test(navigator.userAgent) ? 'iphone' : 'manual');
     };
   })();
-  window.veltriaEnvioReal = info.plano === 'ativo'; // WhatsApp e e-mail de verdade só com assinatura ativa (js/envio-demo.js)
+  // WhatsApp e e-mail de verdade com assinatura ativa ou no teste da conta (a porta só abre o teste com cartão cadastrado: é cliente real);
+  // a demonstração aberta continua simulada (js/envio-demo.js)
+  window.veltriaEnvioReal = info.plano === 'ativo' || (info.plano === 'teste' && (!info.ate || String(info.ate) >= new Date().toISOString().slice(0, 10)));
   var CHAVE = info.chave, NS = 'conta:' + info.espaco + ':' + CHAVE, P = Storage.prototype, ler = P.getItem, gravar = P.setItem, tirar = P.removeItem;
   P.getItem = function (k) { return ler.call(this, this === localStorage && k === CHAVE ? NS : k); };
   // ---------------------------------------------------------------- os dias andam sozinhos
