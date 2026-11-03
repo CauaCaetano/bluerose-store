@@ -161,3 +161,8 @@ h2 { font: 600 .92rem var(--sans); margin: 22px 0 8px; color: var(--noite-2); }
 .rep-mais { margin: -4px 0 6px; }
 .rep-mais .linha { margin-top: 0; flex-wrap: nowrap; }
 .rep-dias button { min-width: 44px; min-height: 36px; }
+/* mensagens editáveis (03/11/2026) */
+.msg-ed { padding: 14px; margin-bottom: 10px; }
+.msg-ed textarea { width: 100%; min-height: 96px; border: 1px solid var(--nude); border-radius: 12px; padding: 10px 12px; font: inherit; resize: vertical; background: #fff; }
+.msg-var { border: 1px dashed var(--nude); background: transparent; border-radius: 6px; padding: 1px 6px; font: inherit; font-size: .8rem; cursor: pointer; }
+.msg-previa { background: #fff; border-radius: 10px; padding: 8px 10px; margin: 0; }

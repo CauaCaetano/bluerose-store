@@ -20,6 +20,52 @@ const MES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho'
 const nomeDia = (o) => (o === 0 ? 'hoje' : o === 1 ? 'amanhã' : o === -1 ? 'ontem' : data(o).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' }));
 // link de agendamento da bio: o da empresa no modo conta (conta-nuvem.js expõe veltriaConta), o de exemplo na demonstração
 const LINK = `https://bluerose-store.com/agendar/?e=${window.veltriaConta ? window.veltriaConta.espaco : 'demo'}`;
+// Mensagens do WhatsApp (03/11/2026): cada uma tem sugestões prontas e o texto pode ser editado em Configurações.
+// As {palavras} viram os dados de cada cliente; db.msgs guarda só o que a pessoa mudou (vazio = volta à 1ª sugestão).
+const MSGS = {
+  marcado: { titulo: 'Ao marcar um horário', quando: 'O app abre o WhatsApp do cliente logo depois que você marca (se o cliente tiver WhatsApp anotado).', vars: ['nome', 'servico', 'dia', 'hora', 'negocio'], sug: [
+    'Oi, {nome}! Seu horário de {servico} ficou marcado para {dia} às {hora}. Qualquer coisa, é só chamar por aqui. {negocio}',
+    'Oi, {nome}! 😊 Te espero {dia} às {hora} para {servico}. Se precisar remarcar, me avisa por aqui. {negocio}',
+    'Olá, {nome}. Seu atendimento de {servico} está agendado para {dia}, às {hora}. {negocio}'] },
+  confirmar: { titulo: 'Lembrete para confirmar presença', quando: 'Botão "Confirmar no WhatsApp" de cada horário.', vars: ['nome', 'servico', 'dia', 'hora', 'sinal', 'negocio'], sug: [
+    'Oi, {nome}! Confirmando {servico} {dia} às {hora}. Responde SIM para confirmar. {sinal}',
+    'Oi, {nome}! Passando para lembrar do seu horário {dia} às {hora} ({servico}). Posso confirmar? {sinal}',
+    'Olá, {nome}. Lembrete: {servico} em {dia}, às {hora}. Por favor, confirme sua presença. {sinal}'] },
+  aceito: { titulo: 'Pedido pelo link: aceito', quando: 'Quando você aceita um pedido que chegou pelo link de agendamento.', vars: ['nome', 'servico', 'dia', 'hora', 'negocio'], sug: [
+    'Oi, {nome}! Seu horário de {servico} está confirmado para {dia} às {hora}. Qualquer coisa, é só chamar por aqui. {negocio}',
+    'Oi, {nome}! Recebi seu pedido e está confirmado: {servico}, {dia} às {hora}. Até lá! {negocio}'] },
+  recusado: { titulo: 'Pedido pelo link: sem vaga', quando: 'Quando o horário pedido não dá e você oferece outros.', vars: ['nome', 'horarios', 'negocio'], sug: [
+    'Oi, {nome}! Esse horário não vai dar. Tenho {horarios}. Algum serve?',
+    'Oi, {nome}! Infelizmente esse horário já está ocupado. Consigo {horarios}. Qual fica melhor para você?'] },
+  espera: { titulo: 'Lista de espera: abriu um horário', quando: 'Quando você oferece um horário livre para quem está na lista de espera.', vars: ['nome', 'servico', 'negocio'], sug: [
+    'Oi, {nome}! Abriu um horário para {servico}. Quer? Responde aqui que eu reservo.',
+    'Oi, {nome}! Boa notícia: vagou um horário para {servico}. Se quiser, me responde que eu já deixo reservado para você.'] },
+  retorno: { titulo: 'Chamar de volta quem sumiu', quando: 'Na lista de clientes que já passaram do tempo de voltar.', vars: ['nome', 'profissional', 'dias', 'servico', 'link', 'negocio'], sug: [
+    'Oi, {nome}! Aqui é {profissional}. Já faz {dias} dias do seu último atendimento ({servico}). Vamos marcar o próximo? Escolha o horário aqui: {link}',
+    'Oi, {nome}! Sentimos sua falta 💛 Já faz {dias} dias do seu último {servico}. Quer marcar? É só escolher o horário aqui: {link}'] },
+};
+const VAR_NOME = { nome: 'nome do cliente', servico: 'serviço', dia: 'dia', hora: 'hora', negocio: 'nome do seu negócio', sinal: 'sinal no PIX (só aparece se houver)', horarios: 'horários livres', profissional: 'seu nome', dias: 'dias sem vir', link: 'seu link de agendamento' };
+const textoMsg = (k) => (db.msgs && db.msgs[k]) || MSGS[k].sug[0];
+const msg = (k, v) => textoMsg(k).replace(/\{(\w+)\}/g, (m, x) => String((x === 'negocio' ? db.studio : v[x]) ?? '')).replace(/[ \t]{2,}/g, ' ').trim();
+const EXEMPLO_MSG = () => ({ nome: 'Marina', servico: (db.servicos[0]?.nome || 'atendimento').toLowerCase(), dia: nomeDia(2), hora: '14:30', sinal: `Sinal de ${din(30)} no PIX ${db.pix}.`, horarios: '9:00, 10:30, 15:00', profissional: db.pro.split(' ')[0], dias: 45, link: LINK });
+// guarda o texto (vazio ou igual à 1ª sugestão = volta ao padrão) e atualiza a prévia
+function salvaMsg(k, v) {
+  db.msgs = db.msgs || {}; const x = String(v || '').trim();
+  if (!x || x === MSGS[k].sug[0]) delete db.msgs[k]; else db.msgs[k] = x;
+  grava(); const pv = document.querySelector(`[data-mprev="${k}"]`); if (pv) pv.innerHTML = `<b>Como chega:</b> ${t(msg(k, EXEMPLO_MSG()))}`;
+  document.querySelectorAll(`[data-msug="${k}"]`).forEach((b) => b.setAttribute('aria-pressed', String(textoMsg(k) === MSGS[k].sug[Number(b.dataset.i)])));
+}
+document.addEventListener('input', (e) => { const k = e.target.dataset?.msg; if (k) { const pv = document.querySelector(`[data-mprev="${k}"]`); if (pv) pv.innerHTML = `<b>Como chega:</b> ${t(e.target.value.replace(/\{(\w+)\}/g, (m, x) => String((x === 'negocio' ? db.studio : EXEMPLO_MSG()[x]) ?? '')))}`; } });
+function secMsgs() {
+  const ex = EXEMPLO_MSG();
+  return `<h2 id="mensagens">Mensagens do WhatsApp</h2><p class="mini" style="margin-top:-6px">Escolha uma sugestão ou escreva do seu jeito. As palavras entre chaves, como {nome}, viram os dados de cada cliente.</p>
+  ${Object.entries(MSGS).map(([k, m]) => `<div class="cartao msg-ed"><b>${m.titulo}</b><p class="mini" style="margin:2px 0 8px">${m.quando}</p>
+    ${k === 'marcado' ? `<label class="troca" style="margin-bottom:8px"><span>Abrir o WhatsApp ao marcar</span><input type="checkbox" id="msg-auto" ${db.msgAuto === false ? '' : 'checked'}></label>` : ''}
+    <div class="chips" style="margin-bottom:6px">${m.sug.map((x, i) => `<button type="button" data-msug="${k}" data-i="${i}" aria-pressed="${textoMsg(k) === x}">Sugestão ${i + 1}</button>`).join('')}</div>
+    <label class="campo" style="margin-bottom:6px"><span class="sr">Texto da mensagem</span><textarea data-msg="${k}" rows="4">${t(textoMsg(k))}</textarea></label>
+    <p class="mini" style="margin:0 0 6px">Pode usar: ${m.vars.map((v) => `<button type="button" class="msg-var" data-mvar="${k}" data-v="${v}" title="${VAR_NOME[v]}">{${v}}</button>`).join(' ')}</p>
+    <p class="mini msg-previa" data-mprev="${k}"><b>Como chega:</b> ${t(msg(k, ex))}</p></div>`).join('')}`;
+}
 const zap = (tel, m) => `https://wa.me/55${String(tel).replace(/\D/g, '')}?text=${encodeURIComponent(m)}`;
 const $ = (s) => document.querySelector(s);
 
@@ -133,7 +179,7 @@ const T = {
     const chamar = l.filter((c) => c.ultima && c.atraso >= 0 && !c.marcada);
     return `<h1>Clientes</h1><p class="sub">${db.clientes.length} clientes. ${chamar.length ? `${chamar.length} já passaram do tempo de voltar e não têm horário marcado (aparecem primeiro).` : 'Todos em dia.'}</p><input type="search" id="busca-cli" class="busca" placeholder="Procurar cliente pelo nome" aria-label="Procurar cliente"><button type="button" class="bt cheio largo" data-acao="add-cliente" style="margin-bottom:12px">+ Adicionar cliente</button>
       ${l.map((c) => `<div class="cartao" data-nome-cli="${t(sa(c.nome))}"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>${t(c.nome)}</b><small class="mini" style="display:block">${c.ultima ? `${t(c.s.nome)} há ${-c.ultima} dias · volta a cada ${c.s.retorno} dias` : 'cliente novo'}${c.valor != null ? ` · paga ${din(c.valor)}` : ''}${c.faltas ? ` · ${c.faltas} falta(s)` : ''}</small></div>${c.marcada ? '<span class="selo ok">tem horário</span>' : !c.ultima ? '<span class="selo">novo</span>' : c.atraso >= 0 ? '<span class="selo rs">hora de chamar</span>' : `<span class="selo">em ${-c.atraso} dias</span>`}</div>
-        <div class="linha">${c.ultima && !c.marcada && c.atraso >= 0 && c.tel ? `<a class="bt pq rose" target="_blank" rel="noopener" href="${zap(c.tel, `Oi, ${c.nome.split(' ')[0]}! Aqui é ${db.pro.split(' ')[0]}. Já faz ${-c.ultima} dias do seu último atendimento (${c.s.nome.toLowerCase()}). Vamos marcar o próximo? Escolha o horário aqui: ${LINK}`)}">Chamar no WhatsApp</a>` : ''}<button type="button" class="bt pq" data-marca-cli="${c.id}">Marcar horário</button><button type="button" class="bt pq" data-edita-cli="${c.id}">Editar</button></div></div>`).join('')}`;
+        <div class="linha">${c.ultima && !c.marcada && c.atraso >= 0 && c.tel ? `<a class="bt pq rose" target="_blank" rel="noopener" href="${zap(c.tel, msg('retorno', { nome: c.nome.split(' ')[0], profissional: db.pro.split(' ')[0], dias: -c.ultima, servico: c.s.nome.toLowerCase(), link: LINK }))}">Chamar no WhatsApp</a>` : ''}<button type="button" class="bt pq" data-marca-cli="${c.id}">Marcar horário</button><button type="button" class="bt pq" data-edita-cli="${c.id}">Editar</button></div></div>`).join('')}`;
   },
   link() {
     return `<h1>Seu link de agendamento</h1><p class="sub">Coloque na bio do Instagram ou no Google. O cliente escolhe serviço e horário; você só aprova.</p>
@@ -142,7 +188,7 @@ const T = {
       <h2>O que o cliente vê</h2><div class="vitrine"><header><b>${t(db.studio)}</b><small>${t(db.pro)} · ${t(db.ramo)}</small></header><div class="corpo">${db.servicos.slice(0, 4).map((s) => `<div class="hora" style="cursor:default"><span class="h" style="font-size:.9rem">${s.min}′</span><span><b>${t(s.nome)}</b><small>${livres(1, s.min).slice(0, 3).map(hh).join(' · ')} amanhã</small></span><span>${din(s.preco)}</span></div>`).join('')}<p class="mini">Serviço acima de ${din(db.sinalAcima)} pede sinal de ${db.sinalPct}% no PIX para garantir o horário.</p></div></div>`;
   },
   espera() {
-    return `<a href="#dia">← Dia</a><h1>Lista de espera</h1><p class="sub">Quem quer um encaixe. Quando alguém desmarca, ofereça o horário por aqui.</p>${db.espera.map((e) => `<div class="cartao"><b>${t(e.nome)}</b><small class="mini" style="display:block">${t(e.quer)} · ${t(e.quando)}</small><div class="linha"><a class="bt pq rose" target="_blank" rel="noopener" href="${zap(e.tel, `Oi, ${e.nome.split(' ')[0]}! Abriu um horário para ${e.quer.toLowerCase()}. Quer? Responde aqui que eu reservo.`)}">Oferecer horário</a><button type="button" class="bt pq" data-acao="tira-espera" data-e="${e.id}">Já marcou</button></div></div>`).join('') || '<p class="livre">Ninguém esperando.</p>'}<button type="button" class="bt largo" data-acao="add-espera">+ Pôr na lista</button>`;
+    return `<a href="#dia">← Dia</a><h1>Lista de espera</h1><p class="sub">Quem quer um encaixe. Quando alguém desmarca, ofereça o horário por aqui.</p>${db.espera.map((e) => `<div class="cartao"><b>${t(e.nome)}</b><small class="mini" style="display:block">${t(e.quer)} · ${t(e.quando)}</small><div class="linha"><a class="bt pq rose" target="_blank" rel="noopener" href="${zap(e.tel, msg('espera', { nome: e.nome.split(' ')[0], servico: e.quer.toLowerCase() }))}">Oferecer horário</a><button type="button" class="bt pq" data-acao="tira-espera" data-e="${e.id}">Já marcou</button></div></div>`).join('') || '<p class="livre">Ninguém esperando.</p>'}<button type="button" class="bt largo" data-acao="add-espera">+ Pôr na lista</button>`;
   },
   caixa() {
     const sem = db.ags.filter((a) => a.dia <= 0 && a.dia > -7), rec = sem.reduce((s, a) => s + a.pago + (a.sinal?.pago ? a.sinal.valor : 0), 0), faltas = sem.filter((a) => a.st === 'faltou'), perdido = faltas.reduce((s, a) => s + preco(a), 0), prev = db.ags.filter((a) => a.dia >= 0 && a.st !== 'feito' && a.st !== 'faltou').reduce((s, a) => s + preco(a), 0);
@@ -211,7 +257,7 @@ const T = {
   config() {
     return `<a href="#mais">← Mais</a><h1>Configurações</h1><h2>Tipo de negócio</h2><p class="mini" style="margin-top:-6px">Troca os serviços de exemplo. Você ajusta nomes, tempos e preços logo abaixo.</p><div class="chips">${Object.entries(MODELOS).map(([k, m]) => `<button type="button" data-tipo="${k}" aria-pressed="${(db.tipo || 'geral') === k}">${m.nome}</button>`).join('')}</div>${[['studio', 'Nome do espaço'], ['pro', 'Seu nome'], ['ramo', 'O que você faz'], ['pix', 'Chave PIX do sinal']].map(([k, n]) => `<label class="campo">${n}<input data-cfg="${k}" value="${t(db[k])}"></label>`).join('')}
       <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end"><label class="campo">Começo às<input data-cfg="abre" type="number" value="${db.abre}"></label><label class="campo">Término às<input data-cfg="fecha" type="number" value="${db.fecha}"></label><label class="campo">Sinal (%)<input data-cfg="sinalPct" type="number" value="${db.sinalPct}"></label><label class="campo">Pedir sinal acima de (R$)<input data-cfg="sinalAcima" type="number" value="${db.sinalAcima}"></label><label class="campo" style="grid-column:1/-1">Horários sugeridos de quanto em quanto<select data-cfg="passo">${[10, 15, 20, 30, 60].map((m) => `<option value="${m}" ${(db.passo || 30) === m ? 'selected' : ''}>${m} minutos</option>`).join('')}</select></label></div>
-      <h2>Serviços</h2><div class="cartao">${db.servicos.map((s, i) => `<div class="serv-ed"><span class="h" style="color:${s.cor}">●</span><input data-sv="${i}.nome" value="${t(s.nome)}" aria-label="Nome do serviço"><label>min<input data-sv="${i}.min" type="number" min="5" step="5" value="${s.min}"></label><label>R$<input data-sv="${i}.preco" type="number" min="0" step="0.01" value="${s.preco}"></label></div>`).join('')}</div><button type="button" class="bt largo" data-acao="add-serv">+ Adicionar serviço</button><h2>App no celular</h2><p class="mini" style="margin-top:-6px">Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><button type="button" class="bt largo" data-acao="instalar">Instalar o app</button><p class="mini" style="margin-bottom:120px">Funciona sem internet: o que você marcar sobe quando a conexão voltar.</p>`;
+      <h2>Serviços</h2><div class="cartao">${db.servicos.map((s, i) => `<div class="serv-ed"><span class="h" style="color:${s.cor}">●</span><input data-sv="${i}.nome" value="${t(s.nome)}" aria-label="Nome do serviço"><label>min<input data-sv="${i}.min" type="number" min="5" step="5" value="${s.min}"></label><label>R$<input data-sv="${i}.preco" type="number" min="0" step="0.01" value="${s.preco}"></label></div>`).join('')}</div><button type="button" class="bt largo" data-acao="add-serv">+ Adicionar serviço</button>${secMsgs()}<h2>App no celular</h2><p class="mini" style="margin-top:-6px">Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><button type="button" class="bt largo" data-acao="instalar">Instalar o app</button><p class="mini" style="margin-bottom:120px">Funciona sem internet: o que você marcar sobe quando a conexão voltar.</p>`;
   },
 };
 
@@ -334,7 +380,7 @@ function abreHorario(id) {
   const a = db.ags.find((x) => x.id === id), c = cli(a.cli), s = serv(a.serv);
   const v = preco(a);
   folha(`<h2>${hh(a.ini)} · ${t(c.nome)}</h2><p class="sub">${t(s.nome)} · ${s.min} min · ${din(v)}${a.valor != null ? ' (combinado)' : ''} · ${nomeDia(a.dia)}</p>${a.sinal ? `<p class="cartao" style="padding:8px 12px">Sinal de ${din(a.sinal.valor)}: <b>${a.sinal.pago ? 'pago' : 'esperando o PIX'}</b>${a.sinal.pago ? '' : ' <button type="button" class="bt pq" data-sinal-ok>Caiu</button>'}</p>` : ''}
-    <div style="display:grid;gap:8px">${a.st === 'feito' || a.st === 'faltou' ? '' : `${c.tel ? '' : '<p class="mini" style="margin:0">Sem WhatsApp anotado: edite o cliente em Clientes para confirmar por aqui.</p>'}<a class="bt rose largo" ${c.tel ? '' : 'hidden'} target="_blank" rel="noopener" href="${zap(c.tel, `Oi, ${c.nome.split(' ')[0]}! Confirmando ${s.nome.toLowerCase()} ${nomeDia(a.dia)} às ${hh(a.ini)}. Responde SIM para confirmar.${a.sinal && !a.sinal.pago ? ` Sinal de ${din(a.sinal.valor)} no PIX ${db.pix}.` : ''}`)}" data-confirmou>Confirmar no WhatsApp</a>
+    <div style="display:grid;gap:8px">${a.st === 'feito' || a.st === 'faltou' ? '' : `${c.tel ? '' : '<p class="mini" style="margin:0">Sem WhatsApp anotado: edite o cliente em Clientes para confirmar por aqui.</p>'}<a class="bt rose largo" ${c.tel ? '' : 'hidden'} target="_blank" rel="noopener" href="${zap(c.tel, msg('confirmar', { nome: c.nome.split(' ')[0], servico: s.nome.toLowerCase(), dia: nomeDia(a.dia), hora: hh(a.ini), sinal: a.sinal && !a.sinal.pago ? `Sinal de ${din(a.sinal.valor)} no PIX ${db.pix}.` : '' }))}" data-confirmou>Confirmar no WhatsApp</a>
     <button type="button" class="bt cheio largo" data-receber>Atendido: receber ${din(v - (a.sinal?.pago ? a.sinal.valor : 0))}</button><div class="linha" style="margin:0"><button type="button" class="bt pq" data-remarcar>Remarcar</button><button type="button" class="bt pq" data-faltou>Faltou</button><button type="button" class="bt pq" data-desmarcar>Desmarcar</button></div>${a.serie ? '<button type="button" class="bt largo" data-desmarcar-serie>Desmarcar este e os próximos</button>' : ''}`}${a.serie ? '' : '<button type="button" class="bt largo" data-repetir>Repetir toda semana</button>'}<button type="button" class="bt largo" data-fecha style="border-style:dashed">Fechar</button></div>`, (f, fecha) => {
     const ok = (fn, msg) => () => { fn(); grava(); fecha(); mostra(); if (msg) toast(msg); };
     f.querySelector('[data-sinal-ok]')?.addEventListener('click', ok(() => { a.sinal.pago = true; }, 'Sinal recebido. Horário garantido.'));
@@ -364,9 +410,10 @@ const ACOES = {
     const novo = { id: uid(), dia: rasc.dia, ini: rasc.ini, cli: c.id, serv: rasc.serv, st: 'marcado', pago: 0, valor, sinal };
     db.ags.push(novo);
     const rr = !velho && rasc.rep ? lerRep($('#rep-box'), rasc.dia) : null, rep = rr ? repetir(novo, rr) : null;
-    const msg = rep ? `Marcado ${textoRep(rr)}: ${rep.n + 1} horários até ${data(rep.ate).toLocaleDateString('pt-BR')}${rep.choques ? ` (${rep.choques} encostam em outro horário; confira no dia)` : ''}.`
+    const txtMarcado = rep ? `Marcado ${textoRep(rr)}: ${rep.n + 1} horários até ${data(rep.ate).toLocaleDateString('pt-BR')}${rep.choques ? ` (${rep.choques} encostam em outro horário; confira no dia)` : ''}.`
       : `${velho ? 'Remarcado' : 'Marcado'}: ${s.nome.toLowerCase()} ${nomeDia(rasc.dia).split(',')[0]} às ${hh(rasc.ini)}${sinal && !velho ? `. Sinal de ${din(sinal.valor)} pedido no PIX` : ''}.`;
-    dia = rasc.dia; rasc = { ...RASC(), serv: rasc.serv, dia: rasc.dia }; grava(); location.hash = '#dia'; toast(msg);
+    dia = rasc.dia; rasc = { ...RASC(), serv: rasc.serv, dia: rasc.dia }; grava(); location.hash = '#dia'; toast(txtMarcado);
+    if (!velho && db.msgAuto !== false && c.tel) window.open(zap(c.tel, msg('marcado', { nome: c.nome.split(' ')[0], servico: s.nome.toLowerCase(), dia: nomeDia(novo.dia), hora: hh(novo.ini) })), '_blank', 'noopener');
   },
   'sem-remarcar': () => { rasc = RASC(); location.hash = '#dia'; },
   'add-cliente': () => folha(`<h2>Adicionar cliente</h2><form><label class="campo">Nome<input name="n" required autocomplete="off"></label><label class="campo">WhatsApp<input name="t" inputmode="tel"></label><label class="campo">Quanto vai pagar (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Deixe vazio para usar o preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}">${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Anotação (opcional)<input name="o" placeholder="Ex.: prefere de manhã"></label><button class="bt cheio largo">Salvar cliente</button></form>`, (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => {
@@ -389,8 +436,8 @@ const ACOES = {
   },
   'add-serv': () => { const i = db.servicos.length; db.servicos.push({ id: 's' + Date.now().toString(36), nome: 'Novo serviço', min: 60, preco: 0, cor: COR[i % COR.length], retorno: 30 }); grava(); mostra(); setTimeout(() => document.querySelector(`[data-sv="${i}.nome"]`)?.select(), 30); },
   copiar: () => { navigator.clipboard?.writeText(LINK).catch(() => {}); toast('Link copiado. Cole na bio do Instagram.'); },
-  aceitar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); let c = db.clientes.find((x) => x.nome === p.nome); if (!c) { c = { id: uid(), nome: p.nome, tel: p.tel, ultima: 0, serv: p.serv, faltas: 0 }; db.clientes.push(c); } db.ags.push({ id: uid(), dia: p.dia, ini: p.ini, cli: c.id, serv: p.serv, st: 'confirmado', pago: 0, valor: c.valor ?? null, sinal: serv(p.serv).preco >= db.sinalAcima ? { valor: Math.round(serv(p.serv).preco * db.sinalPct / 100), pago: true } : null }); db.pedidos = db.pedidos.filter((x) => x !== p); grava(); mostra(); toast(`Horário de ${p.nome.split(' ')[0]} confirmado. Abrindo o WhatsApp para avisar.`); window.open(zap(p.tel, `Oi, ${p.nome.split(' ')[0]}! Seu horário de ${serv(p.serv).nome} está confirmado para ${nomeDia(p.dia)} às ${hh(p.ini)}. Qualquer coisa, é só chamar por aqui. ${db.studio}`), '_blank', 'noopener'); },
-  recusar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); window.open(zap(p.tel, `Oi, ${p.nome.split(' ')[0]}! Esse horário não vai dar. Tenho ${livres(p.dia, serv(p.serv).min).slice(0, 3).map(hh).join(', ')}. Algum serve?`), '_blank', 'noopener'); },
+  aceitar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); let c = db.clientes.find((x) => x.nome === p.nome); if (!c) { c = { id: uid(), nome: p.nome, tel: p.tel, ultima: 0, serv: p.serv, faltas: 0 }; db.clientes.push(c); } db.ags.push({ id: uid(), dia: p.dia, ini: p.ini, cli: c.id, serv: p.serv, st: 'confirmado', pago: 0, valor: c.valor ?? null, sinal: serv(p.serv).preco >= db.sinalAcima ? { valor: Math.round(serv(p.serv).preco * db.sinalPct / 100), pago: true } : null }); db.pedidos = db.pedidos.filter((x) => x !== p); grava(); mostra(); toast(`Horário de ${p.nome.split(' ')[0]} confirmado. Abrindo o WhatsApp para avisar.`); window.open(zap(p.tel, msg('aceito', { nome: p.nome.split(' ')[0], servico: serv(p.serv).nome.toLowerCase(), dia: nomeDia(p.dia), hora: hh(p.ini) })), '_blank', 'noopener'); },
+  recusar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); window.open(zap(p.tel, msg('recusado', { nome: p.nome.split(' ')[0], horarios: livres(p.dia, serv(p.serv).min).slice(0, 3).map(hh).join(', ') })), '_blank', 'noopener'); },
   'tira-espera': (d) => { db.espera = db.espera.filter((e) => e.id !== d.e); grava(); mostra(); },
   'add-espera': () => folha('<h2>Lista de espera</h2><form><label class="campo">Nome<input name="n" required></label><label class="campo">WhatsApp<input name="t" inputmode="tel"></label><label class="campo">Quer<input name="q" placeholder="Mão e pé"></label><label class="campo">Quando pode<input name="w" placeholder="qualquer tarde"></label><button class="bt cheio largo">Pôr na lista</button></form>', (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); const x = new FormData(e.target); db.espera.push({ id: uid(), nome: x.get('n'), tel: x.get('t'), quer: x.get('q') || 'qualquer serviço', quando: x.get('w') || 'qualquer horário' }); grava(); fecha(); mostra(); })),
   ajudante: () => folha('<h2>Convidar ajudante</h2><form><label class="campo">Nome<input name="n" required></label><button class="bt cheio largo">Mandar convite</button></form>', (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); db.ajudantes.push({ nome: new FormData(e.target).get('n'), ve: { agenda: true, valores: false, clientes: true } }); grava(); fecha(); mostra(); toast('Convite enviado.'); })),
@@ -400,6 +447,8 @@ const ACOES = {
 };
 
 document.addEventListener('click', (e) => {
+  const ms = e.target.closest('[data-msug]'); if (ms) { const k = ms.dataset.msug, x = MSGS[k].sug[Number(ms.dataset.i)]; salvaMsg(k, x); const ta = document.querySelector(`[data-msg="${k}"]`); if (ta) ta.value = x; ms.parentNode.querySelectorAll('[data-msug]').forEach((b) => b.setAttribute('aria-pressed', String(b === ms))); toast('Mensagem trocada.'); return; }
+  const mv = e.target.closest('[data-mvar]'); if (mv) { const ta = document.querySelector(`[data-msg="${mv.dataset.mvar}"]`); if (ta) { const i = ta.selectionStart ?? ta.value.length, j = ta.selectionEnd ?? i, w = `{${mv.dataset.v}}`; ta.value = ta.value.slice(0, i) + w + ta.value.slice(j); ta.focus(); ta.setSelectionRange(i + w.length, i + w.length); salvaMsg(mv.dataset.mvar, ta.value); } return; }
   const rdia = e.target.closest('[data-rdia]'); if (rdia) { rdia.setAttribute('aria-pressed', String(rdia.getAttribute('aria-pressed') !== 'true')); if ($('#marcar-bt')) guarda(); return; }
   const el = e.target;
   const ir = el.closest('[data-ir]'); if (ir) { location.hash = `#${ir.dataset.ir}`; return; }
@@ -436,6 +485,8 @@ document.addEventListener('input', (e) => {
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.id === 'hr-livre') { e.preventDefault(); if (rasc.ini !== null) ACOES.marcar(); } });
 document.addEventListener('change', (e) => {
   const el = e.target;
+  if (el.dataset.msg) { salvaMsg(el.dataset.msg, el.value); toast('Mensagem salva.'); }
+  if (el.id === 'msg-auto') { db.msgAuto = el.checked; grava(); toast(el.checked ? 'Ao marcar, o app abre o WhatsApp com a mensagem.' : 'Ao marcar, o app não abre mais o WhatsApp.'); }
   if (el.dataset.cfg) { db[el.dataset.cfg] = ['abre', 'fecha', 'sinalPct', 'sinalAcima', 'passo'].includes(el.dataset.cfg) ? Number(el.value) : el.value; grava(); mostra(); toast('Salvo.'); }
   if (el.dataset.sv) { const [i, k] = el.dataset.sv.split('.'), v = k === 'nome' ? el.value.trim() || db.servicos[i].nome : Math.max(0, Number(el.value) || 0); db.servicos[i][k] = k === 'min' ? Math.max(5, v) : v; grava(); toast('Serviço salvo.'); }
   if (el.id === 'ir-dia') { const o = deIso(el.value); if (o !== null) { dia = o; mostra(); } }
