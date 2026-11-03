@@ -153,3 +153,21 @@ tbody tr { transition: background .15s; } tbody tr:hover td { background: #fbf4e
 .rep-dias input:checked + span { background: var(--tx); color: #fff; border-color: var(--tx); }
 .rep-dias input:focus-visible + span { outline: 2px solid var(--tx); outline-offset: 2px; }
 .rep-q { display: flex; gap: 8px; } .rep-q input { width: 96px; flex: none; } .rep-q select { flex: 1; min-width: 0; }
+/* mensagens do WhatsApp em Ajustes (03/11/2026): cada peça mostra a mensagem como um balão de conversa */
+.msg-abre { margin-top: 34px; scroll-margin-top: 30px; } .msg-abre h2 { margin: 0; font: 400 2rem/1.1 var(--serif); } .msg-abre h2 i { color: var(--malva-esc); }
+.msg-a { display: flex; flex-direction: column; }
+.msg-a h2 { margin-bottom: 2px; }
+.msg-quando { margin: 0 0 12px; }
+.msg-sugs { margin-bottom: 12px; }
+.msg-sugs .bt[aria-pressed="true"] { background: var(--ber); border-color: var(--ber); color: var(--seda); }
+.msg-a textarea { width: 100%; min-height: 96px; border: 1px solid var(--areia); border-radius: 14px; padding: 10px 14px; background: #fff; color: var(--tx); font: inherit; font-size: .92rem; line-height: 1.5; resize: vertical; }
+.msg-a textarea:focus { border-color: var(--malva); }
+.msg-vars { margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.msg-var { border: 1px solid #e3d4e4; background: #f4ecf4; color: var(--malva-esc); border-radius: 999px; padding: 2px 10px; font: 600 .75rem 'Hanken Grotesk', sans-serif; cursor: pointer; transition: background .2s, color .2s; }
+.msg-var:hover { background: var(--malva); border-color: var(--malva); color: #fff; }
+.msg-previa { margin: auto 0 0; align-self: flex-start; max-width: 100%; background: #fff; border: 1px solid #e3d4c3; border-radius: 18px 18px 18px 4px; padding: 10px 14px; font-size: .9rem; color: var(--tx); box-shadow: 0 8px 18px -14px rgba(57, 40, 63, .45); }
+.msg-previa b { display: block; font: italic 400 .95rem var(--serif); color: var(--malva-esc); margin-bottom: 2px; }
+.msg-liga { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: .88rem; color: var(--tx-2); cursor: pointer; }
+.msg-liga input { appearance: none; -webkit-appearance: none; width: 42px; height: 24px; border-radius: 999px; background: var(--areia); position: relative; cursor: pointer; flex: none; margin: 0; transition: background .2s; }
+.msg-liga input::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.msg-liga input:checked { background: var(--ber); } .msg-liga input:checked::after { transform: translateX(18px); }

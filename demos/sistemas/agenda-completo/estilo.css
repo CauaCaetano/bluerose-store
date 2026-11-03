@@ -193,3 +193,17 @@ td input[data-com] { min-height: 34px; border: 1px solid var(--areia); border-ra
 .rep-dias input:checked + span { background: var(--tx); color: #fff; border-color: var(--tx); }
 .rep-dias input:focus-visible + span { outline: 2px solid var(--tx); outline-offset: 2px; }
 .rep-q { display: flex; gap: 8px; } .rep-q input { width: 96px; flex: none; } .rep-q select { flex: 1; min-width: 0; }
+/* mensagens do WhatsApp em Ajustes (03/11/2026): cada uma vira uma ficha de balcão editável */
+.msg-topo { margin: 26px 0 12px; scroll-margin-top: 150px; } .msg-topo h2 { margin: 0; font-size: 1.25rem; letter-spacing: -.01em; }
+.msg-ed { display: flex; flex-direction: column; border-top: 3px solid var(--azul-2); }
+.msg-ed h2 { margin-bottom: 2px; }
+.msg-quando { margin: 0 0 10px; }
+.msg-sugs { margin-bottom: 10px; }
+.msg-sugs .bt[aria-pressed="true"] { background: var(--azul); border-color: var(--azul); color: var(--papel); }
+.msg-ed textarea { width: 100%; min-height: 92px; border: 1px solid var(--areia); border-radius: 8px; padding: 8px 10px; background: #fff; color: var(--tx); font: inherit; font-size: .9rem; line-height: 1.45; resize: vertical; }
+.msg-ed textarea:focus { border-color: var(--azul-2); }
+.msg-vars { margin: 0 0 10px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; font-size: .78rem; color: var(--tx-3); }
+.msg-var { border: 1px dashed var(--azul-2); background: #eef2f4; color: var(--azul-3); border-radius: 5px; padding: 1px 7px; font: 500 .74rem var(--mono); cursor: pointer; }
+.msg-var:hover { background: var(--azul); color: var(--papel); border-style: solid; }
+.msg-previa { margin: auto 0 0; background: var(--papel); border: 1px solid var(--areia); border-left: 4px solid var(--argila); border-radius: 0 8px 8px 0; padding: 9px 12px; font-size: .86rem; color: var(--tx); white-space: pre-line; }
+.msg-previa b { display: block; font: 600 .68rem var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--argila-esc); margin-bottom: 2px; }
