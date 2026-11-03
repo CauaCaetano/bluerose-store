@@ -144,3 +144,12 @@ tbody tr { transition: background .15s; } tbody tr:hover td { background: #fbf4e
 .colunas-a small { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: .68rem; color: var(--tx-3, #8a7f86); white-space: nowrap; }
 /* celular: tabela larga rola dentro do cartão, a tela não passa da largura */
 @media (max-width: 640px) { .peca table { display: block; overflow-x: auto; max-width: 100%; } }
+/* horário fixo (03/11/2026): dias da semana para repetir */
+.rep-dias { border: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.rep-dias legend { width: 100%; margin-bottom: 4px; }
+.rep-dias label { position: relative; }
+.rep-dias input { position: absolute; opacity: 0; inset: 0; min-height: 0; cursor: pointer; }
+.rep-dias span { display: inline-grid; place-items: center; min-width: 44px; min-height: 36px; padding: 0 10px; border: 1px solid var(--areia); border-radius: 999px; background: #fff; color: var(--tx); }
+.rep-dias input:checked + span { background: var(--tx); color: #fff; border-color: var(--tx); }
+.rep-dias input:focus-visible + span { outline: 2px solid var(--tx); outline-offset: 2px; }
+.rep-q { display: flex; gap: 8px; } .rep-q input { width: 96px; flex: none; } .rep-q select { flex: 1; min-width: 0; }
