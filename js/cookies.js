@@ -27,14 +27,14 @@
     nec: ['Necessary', 'Always on. Your cookie choice, language, login and the referral link you used.'],
     est: ['Statistics', 'Pages visited and clicks, with a random browser ID. No IP, no third parties. Kept for up to 13 months.'],
     mkt: ['Marketing', 'Where you came from (Instagram, Google, campaign), kept for 90 days to measure our campaigns.'],
-    pref: 'Cookie preferences', ok: 'Preferences saved', curto: ['We use cookies', ' to improve your visit'], saiba: 'Learn more', aceitar1: 'Accept',
+    pref: 'Cookie preferences', ok: 'Preferences saved', curto: ['We use cookies', ' to measure visits'], saiba: 'Learn more', aceitar1: 'Accept', recusar: 'Decline',
   } : {
     titulo: 'Cookies e privacidade', texto: 'Usamos cookies necessários para o site funcionar. Com a sua permissão, também medimos as visitas (no nosso próprio banco, sem terceiros) e quais divulgações trazem visitantes.',
     aceitar: 'Aceitar todos', so: 'Só necessários', pers: 'Personalizar', salvar: 'Salvar escolhas', fechar: 'Fechar', mais: 'Política de privacidade',
     nec: ['Necessários', 'Sempre ligados. Sua escolha de cookies, o idioma, o login e o link de indicação que você usou.'],
     est: ['Estatística', 'Páginas visitadas e cliques, com um identificador aleatório do navegador. Sem IP e sem terceiros. Guardado por até 13 meses.'],
     mkt: ['Marketing', 'De onde você veio (Instagram, Google, campanha), guardado por 90 dias para medir as nossas divulgações.'],
-    pref: 'Preferências de cookies', ok: 'Preferências salvas', curto: ['Usamos cookies', ' para melhorar a sua visita'], saiba: 'Saiba mais', aceitar1: 'Aceitar',
+    pref: 'Preferências de cookies', ok: 'Preferências salvas', curto: ['Usamos cookies', ' para medir as visitas'], saiba: 'Saiba mais', aceitar1: 'Aceitar', recusar: 'Recusar',
   };
 
   // ---------------------------------------------------------------- cookies
@@ -143,10 +143,11 @@
     // aviso de uma linha só, com um botão: sem o aceite, nada além do necessário é gravado (a escolha pode ser mudada no rodapé)
     aviso = el('div', { class: 'aviso-cookies ck-linha', role: 'region', 'aria-label': T.titulo },
       '<p>' + T.curto[0] + '<span class="ck-mais">' + T.curto[1] + '</span>. <a href="' + raiz + (EN ? 'privacy-en.html' : 'privacidade.html') + '#cookies">' + T.saiba + '</a></p>' +
-      '<button type="button" class="btn btn-primary" data-ck-acao="todos">' + T.aceitar1 + '</button>');
+      '<button type="button" class="btn btn-primary" data-ck-acao="so">' + T.recusar + '</button><button type="button" class="btn btn-primary" data-ck-acao="todos">' + T.aceitar1 + '</button>');
     aviso.addEventListener('click', function (e) {
       var b = e.target.closest('[data-ck-acao]'); if (!b) return;
-      salvar(true, true); fecharAviso();
+      var sim = b.getAttribute('data-ck-acao') === 'todos';
+      salvar(sim, sim); fecharAviso();
     });
     document.body.appendChild(aviso);
   }

@@ -505,16 +505,62 @@
     })(d || {}, '', 0);
     return linhas.join('\n');
   }
+  // nomes não saem do aparelho: viram códigos ([P1], [P2]...) antes de ir para a IA e voltam na resposta; documentos e contatos são apagados
+  var CAMPO_NOME = /^(nome|cliente|clientenome|cli|paciente|pessoa|aluno|responsavel|contato|tecnico|profissional|prof|advogado|autor|reu|parte|partes|fornecedor|comprador|tutor|funcionario|colaborador|vendedor|empreiteiro|titular|corretor|inquilino|proprietario|empresa|razao|favorecido|pagador|beneficiario)$/i;
+  function tiraDocs(s) {
+    return String(s)
+      .replace(/\b\d{7}-?\d{2}\.?\d{4}\.?\d\.?\d{2}\.?\d{4}\b/g, '[processo]')
+      .replace(/\b\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}\b/g, '[documento]')
+      .replace(/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g, '[documento]')
+      .replace(/\b(?:\d[ -]?){13,19}\b/g, '[número]')
+      .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, '[e-mail]')
+      .replace(/(?:\+?55[\s-]?)?\(?\b\d{2}\)?[\s-]?9?\d{4}[\s-]?\d{4}\b/g, '[telefone]')
+      .replace(/\b\d{5}-\d{3}\b/g, '[cep]');
+  }
+  function anonimizador(d, extras) {
+    var nomes = {}, n = 0, primeiros = {};
+    var poe = function (v) {
+      v = String(v).trim();
+      if (v.length < 3 || v.length > 80 || /^[\d\s.,/:-]+$/.test(v) || nomes[v] || n >= 2000) return;
+      nomes[v] = '[P' + (++n) + ']';
+      var p = v.split(/\s+/)[0];
+      if (p !== v && p.length >= 3 && /^\p{Lu}/u.test(p)) primeiros[p] = primeiros[p] ? 0 : v;
+    };
+    (function anda(o, prof) {
+      if (!o || typeof o !== 'object' || prof > 5) return;
+      Object.keys(o).forEach(function (k) {
+        var v = o[k];
+        if (typeof v === 'string') { if (CAMPO_NOME.test(k)) poe(v); }
+        else anda(v, prof + 1);
+      });
+    })(d, 0);
+    (extras || []).forEach(function (v) { if (v) poe(v); });
+    // o primeiro nome sozinho só vale quando é de uma pessoa só; senão ficaria ambíguo
+    Object.keys(primeiros).forEach(function (p) { if (primeiros[p] && !nomes[p]) nomes[p] = nomes[primeiros[p]]; });
+    var lista = Object.keys(nomes).sort(function (a, b) { return b.length - a.length; });
+    var esc2 = function (s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
+    var volta = {}; lista.forEach(function (v) { if (!volta[nomes[v]] || v.length > volta[nomes[v]].length) volta[nomes[v]] = v; });
+    return {
+      tira: function (s) {
+        var r = tiraDocs(s);
+        lista.forEach(function (v) { r = r.replace(new RegExp('(^|[^\\p{L}\\p{N}])' + esc2(v) + '(?![\\p{L}\\p{N}])', 'gu'), function (m, a1) { return a1 + nomes[v]; }); });
+        return r;
+      },
+      volta: function (s) { return String(s).replace(/\[P\d+\]/g, function (c) { return volta[c] || 'esse cadastro'; }); },
+    };
+  }
+  window.__veltriaAnon = anonimizador; // usado pelo teste automático
   window.veltriaIA = function (pergunta) {
     if (window.veltriaMarca) window.veltriaMarca('ia');
     var d = window.veltriaDados ? window.veltriaDados() : JSON.parse(texto(NS) || '{}'), ver = (window.VELTRIA_VERSOES || {})[app] || {};
     var contagens = {}; Object.keys(d || {}).forEach(function (k) { if (Array.isArray(d[k]) && !FORA.test(k)) contagens[k] = d[k].length; });
+    var anon = anonimizador(d, [info.empresa]);
     return cliente().then(function (sb) {
-      return sb.functions.invoke('nexo-ia', { body: { pergunta: (window.__brIdioma && window.__brIdioma.comIdioma ? window.__brIdioma.comIdioma : String)(String(pergunta).slice(0, 600)), espaco: info.espaco, sistema: ver.nome || 'Veltria', hoje: new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10), contexto: { contagens: contagens }, resumo: resumo(d) } });
+      return sb.functions.invoke('nexo-ia', { body: { pergunta: anon.tira((window.__brIdioma && window.__brIdioma.comIdioma ? window.__brIdioma.comIdioma : String)(String(pergunta).slice(0, 600))), espaco: info.espaco, sistema: ver.nome || 'Veltria', hoje: new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10), contexto: { contagens: contagens }, resumo: 'Códigos como [P1] são nomes de pessoas e empresas: escreva sempre o código exatamente assim.\n' + anon.tira(resumo(d)) } });
     }).then(function (r) {
       if (r.error) return r.error.context.json().catch(function () { return {}; }).then(function (j) { return j.erro || 'O assistente não respondeu agora. Tente de novo em instantes.'; });
       var x = r.data || {};
-      return (x.resposta || 'Não consegui responder agora.') + (typeof x.restantes === 'number' && !x.propria ? '\n\n(' + x.restantes + ' perguntas grátis restantes hoje)' : '');
+      return anon.volta(x.resposta || 'Não consegui responder agora.') + (typeof x.restantes === 'number' && !x.propria ? '\n\n(' + x.restantes + ' perguntas grátis restantes hoje)' : '');
     }).catch(function () { return 'Sem conexão com o assistente agora. Tente de novo em instantes.'; });
   };
 
