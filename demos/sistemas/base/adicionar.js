@@ -85,7 +85,14 @@ function lerSemIA(app, colecao, texto) {
 }
 
 // ------------------------------------------------------------ IA (nuvem)
-async function lerComIA(app, colecao, { texto = '', imagem = '', mime = '' }) {
+// sistemas com dados de saúde ou sigilo: foto, PDF e texto só vão para a IA pela conta própria da pessoa, nunca pelo plano gratuito
+export const SENSIVEL_IA = /^(agenda|juridico|farmacia|clinica)/;
+export const pastaDoSistema = (l = location) => (l.pathname.match(/sistemas\/([a-z-]+)\//) || [])[1] || new URLSearchParams(l.search).get('conta') || '';
+export async function lerComIA(app, colecao, { texto = '', imagem = '', mime = '' }, pasta = pastaDoSistema()) {
+  if (SENSIVEL_IA.test(pasta)) {
+    const st = await app.sessao.funcao('nexo-ia', { acao: 'status' });
+    if (!st?.propria) throw new Error('Neste sistema, a leitura com IA só funciona com a sua própria conta do Gemini ou do ChatGPT, para os dados dos seus clientes não irem ao plano gratuito. Conecte a sua conta no Assistente IA');
+  }
   const col = app.colecoes[colecao];
   const r = await app.sessao.funcao('nexo-ia', { acao: 'extrair', destino: `${col.singular} (${col.plural || col.singular})`, campos: esquema(app, colecao), texto: texto.slice(0, 8000), imagem, mime, hoje: hoje() });
   if (r?.erro) throw new Error(r.erro);
@@ -130,7 +137,7 @@ export function prepararAdicionar(app, cfg) {
     if (r === 'um') { for (const x of lidos) { if (!(await criar(colecao, x.valores))) break; } }
     else if (r === 'todos') { const gravar = app.db.gravar; app.db.gravar = () => {}; let n = 0; try { lidos.forEach((x) => { if (criarDireto(colecao, x.valores)) n++; }); } finally { app.db.gravar = gravar; } app.db.gravar(); avisar(`${n} ${n === 1 ? col.singular : col.plural || col.singular} ${n === 1 ? 'criado' : 'criados'}${n < lidos.length ? ` (${lidos.length - n} ficaram de fora por faltar dado obrigatório)` : ''}`); app.render(); }
   }
-  const avisoIA = () => (app.nuvem ? `<div class="dica" style="margin-top:10px">${ic('info')}<span>O conteúdo vai para a IA (Google Gemini, ou a sua conta do Gemini ou do ChatGPT, se você conectou no assistente) só para ser lido. Você confere tudo antes de salvar.</span></div>` : `<div class="dica" style="margin-top:10px">${ic('info')}<span>Na demonstração o texto é lido por regras simples (valor, data, telefone, e-mail, CPF/CNPJ). Na versão contratada quem lê é a IA, que entende mensagens soltas, listas e fotos.</span></div>`);
+  const avisoIA = () => (app.nuvem ? `<div class="dica" style="margin-top:10px">${ic('info')}<span>${SENSIVEL_IA.test(pastaDoSistema()) ? 'O conteúdo só vai para a IA se você tiver conectado a sua própria conta do Gemini ou do ChatGPT no Assistente IA; sem ela, o texto colado é lido por regras simples aqui no aparelho.' : 'O conteúdo vai para a IA (Google Gemini, ou a sua conta do Gemini ou do ChatGPT, se você conectou no assistente) só para ser lido.'} Você confere tudo antes de salvar.</span></div>` : `<div class="dica" style="margin-top:10px">${ic('info')}<span>Na demonstração o texto é lido por regras simples (valor, data, telefone, e-mail, CPF/CNPJ). Na versão contratada quem lê é a IA, que entende mensagens soltas, listas e fotos.</span></div>`);
   const seletor = (alvo) => `<label class="campo largo">Vai para<select data-ad-col>${editaveis(app).map(([k, c]) => `<option value="${k}" ${k === alvo ? 'selected' : ''}>${esc(String(c.plural || c.singular).replace(/^./, (x) => x.toUpperCase()))}</option>`).join('')}</select></label>`;
 
   Object.assign(app.acoes, {

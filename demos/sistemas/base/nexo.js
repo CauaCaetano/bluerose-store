@@ -15,7 +15,7 @@ import { prepararExtras } from './extras.js';
 import { cargosDe, resumoAcesso, editarPermissoes } from './equipe.js';
 import { paginaImportar } from './planilha.js';
 import { prepararSuporte } from './suporte.js';
-import { prepararAdicionar } from './adicionar.js';
+import { prepararAdicionar } from './adicionar.js?v=2';
 import { baixarXlsx } from './xlsx.js';
 // Assistente IA: liberado em 17/10 (sem a chave do Gemini, a função nexo-ia responde que está sendo ativado)
 const IA_LIBERADA = true;
