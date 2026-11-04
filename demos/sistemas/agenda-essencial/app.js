@@ -112,10 +112,10 @@ const fim = (a) => a.ini + serv(a.serv).min / 60;
 const preco = (a) => (a.valor != null && a.valor !== '' ? Number(a.valor) : serv(a.serv).preco); // valor combinado vale mais que o da tabela
 const ST = { marcado: ['marcado', ''], confirmado: ['confirmou', 'ok'], feito: ['atendido', 'ok'], faltou: ['faltou', 'ru'] };
 const estAss = () => { const a = db.assinatura; return a.status === 'vencida' ? 'vencida: pague para continuar' : a.renova ? `ativa · próxima em ${a.proxima} dias` : `cancelada · usa por mais ${a.proxima} dias`; };
-const RASC = () => ({ serv: db.servicos[0]?.id || 's1', cli: '', tel: '', dia: 0, ini: null, sinal: false, valor: '', remarca: null, rep: 0, repDias: null, repN: 3, repU: 'mes' });
+const RASC = () => ({ serv: db.servicos[0]?.id || 's1', cli: '', tel: '', dia: 0, ini: null, sinal: false, valor: '', remarca: null, rep: 0, repDias: null, repManual: false, repN: 3, repU: 'mes' });
 let dia = 0, rasc = RASC(), res = { modo: 'dia', d: 0, m: 0, a: 0 };
 // guarda o que já foi digitado no Novo horário antes de redesenhar a tela
-const guarda = () => { const g = (id) => document.getElementById(id); if (g('cli-n')) rasc.cli = g('cli-n').value; if (g('tel-n')) rasc.tel = g('tel-n').value; if (g('valor-n')) rasc.valor = g('valor-n').value; if (g('sinal')) rasc.sinal = g('sinal').checked; const rb = g('rep-box'); if (rb && g('marcar-bt')) { const r = lerRep(rb, rasc.dia); rasc.rep = r.freq; rasc.repDias = r.dias; rasc.repN = r.n; rasc.repU = r.u; } };
+const guarda = () => { const g = (id) => document.getElementById(id); if (g('cli-n')) rasc.cli = g('cli-n').value; if (g('tel-n')) rasc.tel = g('tel-n').value; if (g('valor-n')) rasc.valor = g('valor-n').value; if (g('sinal')) rasc.sinal = g('sinal').checked; const rb = g('rep-box'); if (rb && g('marcar-bt')) { const r = lerRep(rb, rasc.dia); rasc.rep = r.freq; rasc.repDias = rasc.repManual ? r.dias : null; /* sem escolha manual, o dia da semana acompanha o dia marcado */ rasc.repN = r.n; rasc.repU = r.u; } };
 
 function toast(m) { const a = document.createElement('div'); a.className = 'toast'; a.textContent = m; $('#toasts').append(a); setTimeout(() => a.remove(), 3200); }
 function folha(html, liga) {
@@ -407,7 +407,8 @@ const ACOES = {
     const vd = $('#valor-n').value, valor = vd !== '' ? Number(vd) : c.valor ?? null, velho = rasc.remarca && db.ags.find((a) => a.id === rasc.remarca);
     const s = serv(rasc.serv), sinal = velho?.sinal || ($('#sinal').checked ? { valor: Math.round((valor ?? s.preco) * db.sinalPct / 100), pago: false } : null);
     if (velho) db.ags = db.ags.filter((a) => a !== velho);
-    const novo = { id: uid(), dia: rasc.dia, ini: rasc.ini, cli: c.id, serv: rasc.serv, st: 'marcado', pago: 0, valor, sinal };
+    // remarcar um horário fixo mantém ele na série (o "desmarcar este e os próximos" continua valendo)
+    const novo = { id: uid(), dia: rasc.dia, ini: rasc.ini, cli: c.id, serv: rasc.serv, st: 'marcado', pago: 0, valor, sinal, ...(velho?.serie ? { serie: velho.serie } : {}) };
     db.ags.push(novo);
     const rr = !velho && rasc.rep ? lerRep($('#rep-box'), rasc.dia) : null, rep = rr ? repetir(novo, rr) : null;
     const txtMarcado = rep ? `Marcado ${textoRep(rr)}: ${rep.n + 1} horários até ${data(rep.ate).toLocaleDateString('pt-BR')}${rep.choques ? ` (${rep.choques} encostam em outro horário; confira no dia)` : ''}.`
@@ -449,7 +450,7 @@ const ACOES = {
 document.addEventListener('click', (e) => {
   const ms = e.target.closest('[data-msug]'); if (ms) { const k = ms.dataset.msug, x = MSGS[k].sug[Number(ms.dataset.i)]; salvaMsg(k, x); const ta = document.querySelector(`[data-msg="${k}"]`); if (ta) ta.value = x; ms.parentNode.querySelectorAll('[data-msug]').forEach((b) => b.setAttribute('aria-pressed', String(b === ms))); toast('Mensagem trocada.'); return; }
   const mv = e.target.closest('[data-mvar]'); if (mv) { const ta = document.querySelector(`[data-msg="${mv.dataset.mvar}"]`); if (ta) { const i = ta.selectionStart ?? ta.value.length, j = ta.selectionEnd ?? i, w = `{${mv.dataset.v}}`; ta.value = ta.value.slice(0, i) + w + ta.value.slice(j); ta.focus(); ta.setSelectionRange(i + w.length, i + w.length); salvaMsg(mv.dataset.mvar, ta.value); } return; }
-  const rdia = e.target.closest('[data-rdia]'); if (rdia) { rdia.setAttribute('aria-pressed', String(rdia.getAttribute('aria-pressed') !== 'true')); if ($('#marcar-bt')) guarda(); return; }
+  const rdia = e.target.closest('[data-rdia]'); if (rdia) { rdia.setAttribute('aria-pressed', String(rdia.getAttribute('aria-pressed') !== 'true')); if ($('#marcar-bt')) { rasc.repManual = true; guarda(); } return; }
   const el = e.target;
   const ir = el.closest('[data-ir]'); if (ir) { location.hash = `#${ir.dataset.ir}`; return; }
   const ag = el.closest('[data-ag]'); if (ag && !el.closest('.folha')) { abreHorario(ag.dataset.ag); return; }

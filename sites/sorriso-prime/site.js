@@ -69,7 +69,7 @@
     var y = 36, escuro = false;
     $$('.servicos, .faixa-tec, .equipe, .porque, .depo, .final, .pg-heroi, .solucoes, .coord, .escura').forEach(function (s) { var b = s.getBoundingClientRect(); if (b.top <= y && b.bottom > y) escuro = true; });
     if (heroi) { var pp = progresso(heroi); if (pp > .45 && pp < 1) escuro = true; }
-    topo.classList.toggle('escuro', escuro);
+    topo.classList.toggle('escuro', escuro); topo.classList.toggle('rolou', scrollY > 40);
   }
   addEventListener('scroll', function () { requestAnimationFrame(rola); }, { passive: true }); addEventListener('resize', rola); rola();
 
@@ -104,7 +104,7 @@
   }
 
   // unidades: escolha no formulário e lista no rodapé
-  var UN = [['Savassi', 'Rua Pernambuco, 1.120', '(31) 3334-5500', 'Seg a sáb 7h às 22h · Dom 8h às 14h'], ['Buritis', 'Av. Prof. Mário Werneck, 1.540', '(31) 3378-2100', 'Seg a sáb 8h às 21h · Dom 8h às 14h'], ['Contagem · Eldorado', 'Av. João César de Oliveira, 1.870', '(31) 3352-0900', 'Seg a sáb 8h às 22h · Dom 8h às 14h']];
+  var UN = [['Bairro Exemplo 1', 'Rua de Exemplo, 100', '(31) 3334-5500', 'Seg a sáb 7h às 22h · Dom 8h às 14h'], ['Bairro Exemplo 2', 'Rua de Exemplo, 200', '(31) 3378-2100', 'Seg a sáb 8h às 21h · Dom 8h às 14h'], ['Bairro Exemplo 3', 'Rua de Exemplo, 300', '(31) 3352-0900', 'Seg a sáb 8h às 22h · Dom 8h às 14h']];
   var un = $('.fn-un');
   if (un) un.insertAdjacentHTML('beforeend', UN.map(function (u, i) { return '<label><input type="radio" name="un" value="' + u[0] + '"' + (i ? '' : ' checked') + '>' + u[0] + '</label>'; }).join('') + '<label><input type="radio" name="un" value="outra unidade">Outras 6 unidades</label>');
   var fu = $('.fn-unid');

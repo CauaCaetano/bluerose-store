@@ -61,7 +61,7 @@ body.na-areia .topo { background: var(--areia); }
 .heroi-moldura { position: relative; height: calc(100vh - 160px); height: calc(100svh - 160px); min-height: 500px; overflow: hidden; display: grid; place-items: center; background: #1d130c; }
 .heroi-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); animation: respira 22s ease-in-out infinite alternate; }
 @keyframes respira { from { transform: scale(1.12) translate(0, 0); } to { transform: scale(1.02) translate(-1.5%, 1%); } }
-.heroi-moldura::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(29, 19, 12, .35), rgba(29, 19, 12, .5)); }
+.heroi-moldura::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(29, 19, 12, .44), rgba(29, 19, 12, .56)); }
 .heroi-luz { position: absolute; z-index: 1; top: -20%; bottom: -20%; width: 22%; left: -30%; background: linear-gradient(90deg, transparent, rgba(255, 196, 160, .16) 45%, rgba(255, 226, 205, .28) 50%, rgba(255, 196, 160, .16) 55%, transparent); transform: skewX(-14deg); mix-blend-mode: screen; animation: varre 9s cubic-bezier(.6, 0, .4, 1) 1.6s infinite; }
 @keyframes varre { 0% { left: -30%; } 55%, 100% { left: 115%; } }
 .heroi-tx { position: relative; z-index: 2; text-align: center; padding: 0 var(--lado); color: var(--creme); }
@@ -310,4 +310,34 @@ body.na-areia .topo { background: var(--areia); }
   html { scroll-behavior: auto; }
   .heroi-luz { display: none; }
   .js .ta, .js .ta-lado { opacity: 1; transform: none; }
+}
+
+/* no celular os três links ficam numa linha só, sem quebrar "Sessão de avaliação" */
+@media (max-width: 600px) {
+  .heroi-links { padding-top: 28px; justify-content: space-between; gap: 6px; }
+  .heroi-links a { margin-right: 0; font-size: 14px; line-height: 22px; white-space: nowrap; }
+  .heroi-links a::after { display: none; }
+}
+
+/* ---------- correção visual: nenhum preço cortado na vitrine, botão sem cobrir texto, valores inteiros ---------- */
+.nq { white-space: nowrap; }
+.heroi h1, .heroi-links a { text-shadow: 0 1px 18px rgba(29, 19, 12, .45); }
+.area-preco, .area-preco small, .conta .grande { white-space: nowrap; }
+h1, h2, h3, .ag-pal, .conta-vazia { text-wrap: balance; }
+.ag-txt, .ag-clube, .faixa-sub, .tom-res { text-wrap: pretty; }
+@media (min-width: 901px) {
+  /* a vitrine mostra sempre cartões inteiros; as setas e o arrastar levam aos próximos */
+  .trilho { gap: 46px; }
+  .area { flex-basis: calc((100% - 138px) / 4); min-width: 0; }
+  .area-topo { padding-bottom: 74px; }
+  .area-preco { font-size: clamp(54px, 5.6vw, 74px); }
+}
+@media (min-width: 901px) and (max-width: 1180px) { .area { flex-basis: calc((100% - 92px) / 3); } }
+@media (min-width: 1700px) { .area { flex-basis: calc((100% - 184px) / 5); } }
+@media (max-width: 900px) {
+  /* no celular um cartão por vez (com setas); nas áreas, só a borda da foto seguinte aparece, sem letra cortada */
+  .area { flex-basis: 100%; }
+  .ag-card { flex-basis: calc(100% - 12px); }
+  .ag-card b, .ag-card small { padding-left: 14px; }
+  .ag-card small { display: block; }
 }

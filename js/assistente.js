@@ -19,8 +19,8 @@
 
   var CFG = {
     sprite: 'img/assistente.png?v=1',
-    dados: 'js/assistente-dados.json?v=10',
-    ia: 'https://yihnfzwtkqdfnwziutqa.supabase.co/functions/v1/site-assistente',   // perguntas livres (Gemini, com limite)
+    dados: 'js/assistente-dados.json?v=14',
+    ia: (/(^|\.)bluerose-store\.com$/.test(location.hostname) ? 'https://yihnfzwtkqdfnwziutqa.supabase.co' : 'https://banco-desligado-no-teste.invalid') + '/functions/v1/site-assistente',   // perguntas livres (Gemini, com limite)
     W: 111, H: 168, MARGEM: 3,           // tamanho de cada pose na folha; margem para o pulinho
   };
   var reduzMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');

@@ -302,7 +302,7 @@ fieldset { border: 0; border-top: 1px solid var(--linha); margin: 0; padding: 18
 .rd-pe { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-top: 54px; padding-top: 18px; border-top: 1px solid var(--linha); background-clip: content-box; font-size: 12px; color: var(--tx-3); }
 
 /* ---------- linhas que sobem ---------- */
-.js .linhas .l { display: block; overflow: hidden; text-indent: 0; padding-bottom: .08em; margin-bottom: -.08em; }
+.js .linhas .l { display: block; overflow: hidden; text-indent: 0; padding: .16em 0 .24em; margin: -.16em 0 -.24em; }
 .js .linhas .l:first-child { text-indent: inherit; }
 .js .linhas .l > span { display: block; transform: translateY(110%); transition: transform 1s var(--curva); }
 .js .linhas.vis .l > span { transform: none; }
@@ -631,3 +631,11 @@ fieldset { border: 0; border-top: 1px solid var(--linha); margin: 0; padding: 18
   .faq-l summary { grid-template-columns: 2.2em minmax(0, 1fr) auto; }
   .faq-l .faq-r { padding-left: 0; }
 }
+
+/* leitura: títulos equilibrados, parágrafos sem palavra sozinha, palavra nunca partida */
+h1, h2, h3, h4, blockquote { text-wrap: balance; }
+p, li, dd, figcaption { text-wrap: pretty; }
+h1, h2, h3, h4, p, li, dd, dt, a, button, span, b, strong, em { word-break: normal; overflow-wrap: normal; hyphens: manual; }
+
+/* abertura: título legível sobre a fachada iluminada */
+.heroi-titulo h1, .heroi-titulo .rotulo, .heroi-pe { text-shadow: 0 2px 22px rgba(8, 10, 8, .6); }

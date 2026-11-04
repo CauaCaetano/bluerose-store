@@ -100,6 +100,7 @@
   pagar.addEventListener('click', function (e) {
     e.preventDefault();
     if (pagar.getAttribute('aria-disabled') === 'true') { aceite.focus(); return; }
+    if (!/(^|\.)bluerose-store\.com$/.test(location.hostname)) { erroCt.textContent = 'Ambiente de teste: o pagamento fica desligado e nada é cobrado. No site oficial este botão abre o Mercado Pago.'; return; }
     if (fora()) {
       try {
         var s0 = window.BR_CONTA && window.BR_CONTA.sessao();

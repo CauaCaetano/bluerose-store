@@ -10,7 +10,7 @@
 
   // cabeçalho: degradê sobre a foto, sólido depois dela
   var topo = $('.topo'), abre = $('.abre');
-  function cabecalho() { topo.classList.toggle('cheio', !abre || scrollY > abre.offsetHeight - 100); }
+  function cabecalho() { topo.classList.toggle('cheio', !abre || scrollY > 30); }
   addEventListener('scroll', cabecalho, { passive: true }); cabecalho();
 
   // menu do celular

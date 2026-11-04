@@ -104,3 +104,9 @@ section { padding: clamp(48px, 7vw, 96px) clamp(16px, 5vw, 64px); max-width: 128
   body { background: #fff; } section { padding: 18px 0; break-inside: avoid; } .proposta { background: #fff; color: var(--tx); border: 2px solid var(--acc); } .proposta h2 { color: var(--acc); }
   .formatos li { background: #fbf4ea; } .pr-total { position: static; } .capa-foto img { max-height: 420px; }
 }
+
+/* correção visual: âncoras abaixo da barra, valores inteiros, títulos equilibrados */
+html { scroll-padding-top: 76px; }
+.po-grade figcaption b { text-wrap: balance; }
+.num-capa b, .rede dd, .rede h3 small, .barras b, .barras span, .cs-num, .formatos .pr, .pr-linhas span, .pr-valor b, .rosca b { white-space: nowrap; }
+.barras li { grid-template-columns: 112px 1fr 44px; }

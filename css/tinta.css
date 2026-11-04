@@ -1,0 +1,67 @@
+/* Blue Rose · camada final "pintura, não metal" (03/11/2026, auditoria visual P0-2).
+   Carregada por último em todas as páginas do site. Tira o degradê metálico do texto de ênfase, dos números e dos
+   botões, e o halo de luz atrás do notebook. Cores chapadas da paleta: ultramar fosco da rosa, marinho e creme.
+   Quando luxo/creme/areia forem unidos num arquivo de tokens, estas regras entram lá e este arquivo sai. */
+:root { --tinta-rosa: #2f4c8a; --tinta-marinho: #101b36; --tinta-marinho-2: #22345a; --tinta-creme: #f4ebdd; --tinta-azul-claro: #6cc4ff; --tinta-creme-2: #fffaf0; }
+
+/* ênfase em itálico e números grandes: ultramar chapado no creme */
+.serif, h1 em, h2 em, .sec-title em,
+.serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span,
+.lx-numeros b, .fatos b, .hero h1 em {
+  background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important;
+  color: var(--tinta-rosa) !important; -webkit-text-fill-color: currentColor !important;
+}
+/* nas faixas azul-marinho (menu, topos e rodapé): creme chapado */
+.nav .serif,
+:is(.lx-hero, .p-hero, .np-hero, main > .hero, .hero, .cf-hero, .rodape-site)
+  :is(.serif, h1 em, h2 em, .sec-title em, .serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span, .lx-numeros b, .fatos b) {
+  color: var(--tinta-azul-claro) !important;
+}
+
+/* botão principal: marinho chapado, sem degradê, sem sombra colorida, sem brilho interno */
+.btn-primary {
+  background: var(--tinta-marinho) !important; border-color: var(--tinta-marinho) !important; box-shadow: none !important;
+  color: var(--tinta-creme) !important; -webkit-text-fill-color: currentColor !important;
+}
+.btn-primary:hover { background: var(--tinta-marinho-2) !important; box-shadow: none !important; transform: none !important; }
+/* sobre o marinho ele inverte: creme chapado com letra marinho */
+:is(.nav, .lx-hero, .p-hero, .np-hero, main > .hero, .hero, .cf-hero, .rodape-site) .btn-primary {
+  background: var(--tinta-creme) !important; border-color: var(--tinta-creme) !important; color: var(--tinta-marinho) !important;
+}
+:is(.nav, .lx-hero, .p-hero, .np-hero, main > .hero, .hero, .cf-hero, .rodape-site) .btn-primary:hover { background: var(--tinta-creme-2) !important; }
+.btn-primary:focus-visible { outline: 2px solid var(--tinta-rosa); outline-offset: 2px; }
+
+/* sem halo de luz atrás do notebook do topo */
+.nb::before { display: none !important; }
+
+/* um azul só (04/11/2026): marinho nas faixas, ultramar sobre claro e azul-claro sobre marinho */
+:root { --accent: #2f4c8a; --accent-solid: #2f4c8a; --accent-soft: rgba(47, 76, 138, .1); }
+::selection { background: #2f4c8a; color: #fff; }
+.aviso-cookies { background: #101b36 !important; color: #f4ebdd !important; }
+.aviso-cookies a { color: #6cc4ff !important; }
+.aviso-cookies p, .aviso-cookies span { color: #f4ebdd !important; }
+.aviso-cookies .btn, .aviso-cookies button { background: #f4ebdd !important; color: #101b36 !important; }
+.conta-fundo { background: none !important; }
+.conta-avatar { background: #101b36 !important; }
+.palco-dash { background: #101b36 !important; }
+
+/* cartão largo em duas colunas: site personalizado (serviços) e sistema sob medida (sistemas) */
+.preco2.preco2-erp { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 48px; align-items: start; height: auto; }
+.preco2-erp > * { grid-column: 1; }
+.preco2-erp > .preco2-tag { justify-self: start; }
+.preco2-erp > ul { grid-column: 2; grid-row: 1 / span 5; margin-top: 0; }
+.preco2-erp > .preco2-acao { grid-column: 2; margin-top: 16px; }
+.preco2-valor.preco2-sob { font-size: 30px; }
+.orc-site { margin-top: 24px; scroll-margin-top: 96px; }
+@media (max-width: 760px) {
+  .preco2.preco2-erp { grid-template-columns: minmax(0, 1fr); }
+  .preco2-erp > ul, .preco2-erp > .preco2-acao { grid-column: 1; grid-row: auto; }
+}
+
+/* rosas inteiras (04/11/2026): a arte tem o desenho forte à esquerda e some aos poucos. A caixa ocupa a arte toda, em vez
+   de cortá-la na margem, e repete só um número inteiro de vezes, para não terminar com rosa cortada no fim da seção. */
+main > section:not(.ini-hero):not(.lx-hero)::after {
+  width: min(474px, max(0px, calc(100vw - 1200px)));
+  background-size: 100% auto; background-repeat: no-repeat round; background-position: left top;
+}
+main > section:nth-of-type(odd):not(.ini-hero):not(.lx-hero)::after { background-position: right top; }

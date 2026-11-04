@@ -376,3 +376,11 @@
 }
 .aj-bts { display: flex; flex-wrap: wrap; gap: 12px; }
 .menu-cel a.pilula { font: 600 13px/1 var(--f); letter-spacing: .1em; padding: 0 28px; border-bottom: 1px solid var(--acc); }
+
+/* ---------- correção visual (04/11/2026): nada cortado, coberto ou quebrado ---------- */
+p, li, dd, figcaption { text-wrap: pretty; }
+.pg-sub { text-wrap: balance; }
+.pg-ficha { display: flex; flex-wrap: wrap; }
+.pg-ficha div { flex: 1 1 auto; }
+.pg-ficha dd { white-space: nowrap; }
+@media (min-width: 961px) and (max-width: 1500px) { .pg-heroi { grid-template-columns: 41% 1fr; } }

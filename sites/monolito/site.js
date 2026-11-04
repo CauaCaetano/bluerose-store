@@ -98,8 +98,8 @@
 
   // ---------- onde já construímos: lista e mapa em perspectiva ----------
   var LUG = [
-    ['Alphaville Ribeirão', 14, 9, 600, 150], ['Vila do Golfe', 12, 7, 220, 140], ['Quinta da Alvorada', 11, 12, 640, 430],
-    ['Jardim Olhos d’Água', 9, 6, 170, 420], ['Bonfim Paulista', 10, 15, 470, 540], ['Nova Aliança Sul', 8, 5, 300, 300]
+    ['Bairro Exemplo 1', 14, 9, 600, 150], ['Bairro Exemplo 2', 12, 7, 220, 140], ['Bairro Exemplo 3', 11, 12, 640, 430],
+    ['Bairro Exemplo 4', 9, 6, 170, 420], ['Bairro Exemplo 5', 10, 15, 470, 540], ['Bairro Exemplo 6', 8, 5, 300, 300]
   ];
   var mapa = $('.ar-plano svg');
   if (mapa) (function () {

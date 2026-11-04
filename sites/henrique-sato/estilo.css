@@ -437,3 +437,17 @@ button.bt:not(:has(i)) { padding: 0 22px; }
   .dr-link { display: block; margin: 14px 0 0; }
 }
 @media (max-width: 560px) { .pq-cards, .chegar-hs { grid-template-columns: 1fr; } }
+
+/* ---------- correção visual (04/11/2026): nada cortado, coberto ou quebrado ---------- */
+p, li, dd, figcaption, small { text-wrap: pretty; }
+.st-card b, .sv-grade b, .cm-passos b { text-wrap: balance; }
+.sm-linha output, .contador b, .av-nota b, .processo-pe b, .pp-lista span { white-space: nowrap; }
+.heroi-pag h1 em { display: block; text-wrap: balance; }
+.topo.pilula { background: rgba(60, 54, 48, .94); }
+@media (max-width: 900px) {
+  /* abertura: o telefone não fica atrás do painel creme que sobe por cima */
+  .heroi-txt { padding-bottom: 96px; }
+  .heroi.heroi-pag .heroi-txt { padding-bottom: 96px; }
+  /* título legível sobre a foto da consulta */
+  .co-foto::after { background: linear-gradient(0deg, rgba(20, 16, 12, .88), rgba(20, 16, 12, .15) 75%); }
+}

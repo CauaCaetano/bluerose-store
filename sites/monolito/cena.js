@@ -1,9 +1,11 @@
 // Monolito · maquete 3D da abertura com uma casa real (GLB com texturas): ela nasce como desenho a traço
 // (arestas do próprio modelo, de baixo para cima), ganha volume e textura e gira devagar; arraste para girar.
 // Modelo: "Modern Coastal Hillside Villa" por Visthétique (Sketchfab, CC BY 4.0), sem árvores, carro e móveis.
-import * as THREE from '../assets/three/three.module.js';
-import { GLTFLoader } from '../assets/three/addons/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from '../assets/three/addons/libs/meshopt_decoder.module.js';
+// Leve: three.js r160 minificado, baixado só quando o 3D vai começar (no celular, depois do texto do topo); no celular
+// pixel ratio 1, sombra 1024 e a casa com texturas 512 (mesma geometria); o laço só roda com a abertura na tela e a aba
+// visível e, depois de construída, gira a ~30 quadros/s quando ninguém mexe (giro lento, fica igual).
+import { celular, pixelRatio, modelo, depoisDoConteudo } from '../assets/three/leve.js';
+let THREE, GLTFLoader, MeshoptDecoder;
 
 // enquadramento do modelo: largura da casa na cena, giro inicial (fachada da piscina para a câmera) e altura do olhar
 const AJUSTE = { largura: 24, giro: -2.75, alvoY: 7.4 };
@@ -61,7 +63,7 @@ function iniciar() {
     r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, powerPreference: 'high-performance' });
     if (!r.getContext()) throw new Error('sem contexto');
   } catch (e) { raiz.classList.add('sem-3d'); return; }
-  r.setPixelRatio(Math.min(window.devicePixelRatio || 1, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (2)));
+  r.setPixelRatio(pixelRatio(2));
   r.outputColorSpace = THREE.SRGBColorSpace;
   r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.1;
   r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -91,7 +93,7 @@ function iniciar() {
   cena.add(new THREE.HemisphereLight(0xfffaf0, 0xb7ab8c, 0.35));
   const sol = new THREE.DirectionalLight(0xffeccd, 3.6);
   sol.position.set(-22, 30, 16); sol.castShadow = true;
-  sol.shadow.mapSize.set(2048, 2048);
+  sol.shadow.mapSize.set(celular ? 1024 : 2048, celular ? 1024 : 2048);
   Object.assign(sol.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 110 });
   sol.shadow.bias = -0.0005; sol.shadow.normalBias = 0.03; sol.shadow.radius = 4;
   cena.add(sol); cena.add(sol.target);
@@ -109,7 +111,7 @@ function iniciar() {
   const mGuia = new THREE.LineDashedMaterial({ color: 0x8a8370, dashSize: 0.6, gapSize: 0.4, transparent: true, opacity: 0, fog: false });
   const lGuia = new THREE.LineSegments(gGuia, mGuia); lGuia.computeLineDistances(); cena.add(lGuia);
 
-  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).register(semBlob).load('modelo/casa.glb?v=1', g => {
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).register(semBlob).load(modelo('modelo/casa.glb?v=1', 'modelo/casa-cel.glb?v=1'), g => {
     const obj = g.scene;
     obj.updateMatrixWorld(true);
     // normaliza pela casa (caixilhos + vidro), não pelo terreno: centro no meio da casa, base do terreno no chão
@@ -160,7 +162,19 @@ function iniciar() {
     const linhas = new THREE.LineSegments(gTraco, mTraco); linhas.renderOrder = 2; casa.add(linhas);
     totalV = segs.length * 2; gTraco.setDrawRange(0, 0);
 
-    carregado = true; t0 = null; pedir();
+    // compila os shaders em paralelo (KHR_parallel_shader_compile) antes de mostrar, nos dois estados dos materiais
+    // (transparente na construção e o original depois), para não travar a página com a compilação no meio do desenho
+    casa.visible = false;
+    (async () => {
+      try {
+        await r.compileAsync(cena, cam);
+        mats.forEach(m => { m.transparent = m.userData.tr0; m.needsUpdate = true; });
+        await r.compileAsync(cena, cam);
+      } catch (e) { /* sem compilação paralela: compila no primeiro quadro, como antes */ }
+      mats.forEach(m => { m.transparent = true; m.needsUpdate = true; });
+      casa.visible = true;
+      carregado = true; t0 = null; pedir();
+    })();
   }, undefined, () => { raiz.classList.remove('com-3d'); raiz.classList.add('sem-3d'); });
 
   // tamanho
@@ -174,23 +188,30 @@ function iniciar() {
 
   // interação
   let giro = 0, giroAlvo = 0, arrasto = null, mx = 0, my = 0;
-  cv.addEventListener('pointerdown', e => { arrasto = { x: e.clientX, g: giroAlvo }; cv.setPointerCapture(e.pointerId); pedir(); });
-  cv.addEventListener('pointermove', e => { if (arrasto) { giroAlvo = arrasto.g + (e.clientX - arrasto.x) * 0.006; pedir(); } });
+  cv.addEventListener('pointerdown', e => { arrasto = { x: e.clientX, g: giroAlvo }; cv.setPointerCapture(e.pointerId); acorda(); });
+  cv.addEventListener('pointermove', e => { if (arrasto) { giroAlvo = arrasto.g + (e.clientX - arrasto.x) * 0.006; acorda(); } });
   const solta = () => { arrasto = null; };
   cv.addEventListener('pointerup', solta); cv.addEventListener('pointercancel', solta);
-  window.addEventListener('pointermove', e => { mx = e.clientX / window.innerWidth - 0.5; my = e.clientY / window.innerHeight - 0.5; }, { passive: true });
-  window.addEventListener('monolito:explorar', () => { giroAlvo += Math.PI * 0.75; pedir(); });
+  window.addEventListener('pointermove', e => { mx = e.clientX / window.innerWidth - 0.5; my = e.clientY / window.innerHeight - 0.5; acorda(); }, { passive: true });
+  window.addEventListener('monolito:explorar', () => { giroAlvo += Math.PI * 0.75; acorda(); });
+  window.addEventListener('scroll', () => acorda(), { passive: true });
 
   // tempo da construção
-  let t0 = null, visivel = true, ultimo = 0, ativo = false, rodando = false, solidos = false;
-  function pedir() { if (ativo && visivel && !rodando) { rodando = true; requestAnimationFrame(quadro); } }
+  let t0 = null, visivel = true, ultimo = 0, ativo = false, rodando = false, solidos = false, espera = 0, mexeu = 0;
+  // desenha no próximo quadro (só com a abertura na tela e a aba visível)
+  function pedir() {
+    if (espera) { clearTimeout(espera); espera = 0; }
+    if (ativo && visivel && !document.hidden && !rodando) { rodando = true; requestAnimationFrame(quadro); }
+  }
+  function acorda() { mexeu = performance.now(); pedir(); }
+  document.addEventListener('visibilitychange', pedir);
   const ease = k => 1 - Math.pow(1 - Math.min(1, Math.max(0, k)), 3);
   const sec = document.querySelector('.abertura');
   if ('IntersectionObserver' in window) new IntersectionObserver(es => { visivel = es[0].isIntersecting; pedir(); }, { rootMargin: '100px' }).observe(sec);
 
   function quadro(t) {
     rodando = false;
-    if (!visivel) return;
+    if (!visivel || document.hidden) return;
     const dt = Math.min(0.05, (t - ultimo) / 1000 || 0.016); ultimo = t;
     let s = 0;
     if (carregado) {
@@ -221,14 +242,21 @@ function iniciar() {
     alvo.y = AJUSTE.alvoY - (cel ? 4.5 : 0) + p * 1.5;
     cam.lookAt(alvo);
     r.render(cena, cam);
-    if (!reduz || !solidos || arrasto || Math.abs(giroAlvo - giro) > 0.001) pedir();
+    if (reduz) { if (!solidos || arrasto || Math.abs(giroAlvo - giro) > 0.001) pedir(); return; }
+    // construída e ninguém mexendo: só o giro lento continua, a ~30 quadros/s
+    const ocioso = solidos && !arrasto && Math.abs(giroAlvo - giro) < 0.02 && t - mexeu > 600;
+    if (ocioso) espera = setTimeout(() => { espera = 0; pedir(); }, 33); else pedir();
   }
 
   medir();
   const comecar = () => { if (ativo) return; ativo = true; raiz.classList.add('com-3d'); pedir(); };
   if (raiz.classList.contains('pronto') || reduz) comecar();
   else { window.addEventListener('monolito:pronto', comecar, { once: true }); setTimeout(comecar, 3600); }
-  if (reduz) { window.addEventListener('scroll', pedir, { passive: true }); }
 }
 
-try { iniciar(); } catch (e) { document.documentElement.classList.add('sem-3d'); }
+try {
+  await depoisDoConteudo();
+  const [a, b] = await Promise.all([import('../assets/three/three.module.min.js'), import('../assets/three/gltf.min.js')]);
+  THREE = a; ({ GLTFLoader, MeshoptDecoder } = b);
+  iniciar();
+} catch (e) { document.documentElement.classList.add('sem-3d'); }

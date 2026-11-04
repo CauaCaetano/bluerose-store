@@ -1,10 +1,12 @@
-// Ana Ribeiro · "Uma nova perspectiva": a Ilha do Campeche real (fotogrametria com textura de verdade) sobre o mar escuro.
+// Ana Ribeiro · "Uma nova perspectiva": a Ilha do Bairro Exemplo G real (fotogrametria com textura de verdade) sobre o mar escuro.
 // A rolagem leva a câmera numa volta em torno da ilha, descendo perto dela no meio do caminho; os quadros dos bairros
 // sobem do mar, param ao lado da ilha quando é a vez deles e saem girando como uma porta (contador e legendas em site.js).
 // Sem WebGL, ou com erro, fica o quadro simples em CSS (.il-plano).
-import * as THREE from '../assets/three/three.module.js';
-import { GLTFLoader } from '../assets/three/addons/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from '../assets/three/addons/libs/meshopt_decoder.module.js';
+// Leve: three.js r160 minificado, baixado só quando o 3D vai começar (no celular, depois do texto do topo); no celular
+// pixel ratio 1 e a ilha com textura 1024; o laço só roda com a seção na tela e a aba visível, ~30 quadros/s quando a
+// rolagem assenta (os quadros flutuam devagar) e, com reduced-motion ou animação pausada, só quando a rolagem muda.
+import { pixelRatio, modelo, depoisDoConteudo, laco } from '../assets/three/leve.js';
+let THREE, GLTFLoader, MeshoptDecoder;
 
 const ilha = document.getElementById('ilha');
 const tela = ilha && ilha.querySelector('.il-tela');
@@ -35,7 +37,7 @@ function inicia() {
     render = new THREE.WebGLRenderer({ canvas: tela, antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (e) { return; }
   if (!render.getContext()) return;
-  render.setPixelRatio(Math.min(window.devicePixelRatio || 1, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (1.75)));
+  render.setPixelRatio(pixelRatio(1.75));
   render.outputColorSpace = THREE.SRGBColorSpace;
   render.toneMapping = THREE.ACESFilmicToneMapping;
   render.toneMappingExposure = 1.1;
@@ -57,7 +59,7 @@ function inicia() {
   // ilha real: só a superfície (o bloco com a textura do fundo do mar fica escondido); a água da foto escurece e se
   // desfaz nas bordas, para a ilha nascer do mar escuro em vez de parecer um recorte retangular
   const raizIlha = new THREE.Group(); cena.add(raizIlha);
-  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).register((p) => new WebpDaMemoria(p)).load('modelo/ilha.glb?v=1', (g) => {
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).register((p) => new WebpDaMemoria(p)).load(modelo('modelo/ilha.glb?v=1', 'modelo/ilha-cel.glb?v=1'), (g) => {
     const obj = g.scene;
     let terreno = null, maior = 0;
     obj.traverse((o) => { if (o.isMesh && o.geometry.attributes.position.count > maior) { maior = o.geometry.attributes.position.count; terreno = o; } });
@@ -87,7 +89,7 @@ function inicia() {
     // lado comprido na diagonal: a ilha aparece inteira de três quartos logo no começo
     raizIlha.rotation.y = tam.x > tam.z ? -.55 : Math.PI / 2 - .55;
     raizIlha.add(obj);
-    if (!ativo) render.render(cena, cam);
+    if (desenho) desenho.pedir();
   });
 
   const carrega = new THREE.TextureLoader();
@@ -106,7 +108,7 @@ function inicia() {
   }
   const quadros = bairros.map((li) => {
     const q = quadro(null);
-    const tex = carrega.load(li.dataset.img, () => { q.userData.foto.opacity = 1; });
+    const tex = carrega.load(li.dataset.img, () => { q.userData.foto.opacity = 1; if (desenho) desenho.pedir(); });
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = Math.min(8, render.capabilities.getMaxAnisotropy());
     q.userData.foto.map = tex;
@@ -157,7 +159,7 @@ function inicia() {
   }
 
   // câmera: segue o caminho com atraso suave; o mouse dá um leve paralaxe
-  let alvoT = 0, t = 0, mx = 0, my = 0, ativo = false, tempo = 0, ultimo = performance.now();
+  let alvoT = 0, t = 0, mx = 0, my = 0, perdido = false, desenho = null, tempo = 0, ultimo = performance.now();
   const posCam = new THREE.Vector3(), mira = new THREE.Vector3(), lado = new THREE.Vector3(), eix = new THREE.Vector3(0, 1, 0);
   const giroQ = new THREE.Quaternion(), sobe = (a, b, x) => { const k = Math.max(0, Math.min(1, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
 
@@ -170,6 +172,7 @@ function inicia() {
   function progresso() { const r = ilha.getBoundingClientRect(), curso = ilha.offsetHeight - innerHeight; return curso > 0 ? Math.max(0, Math.min(1, -r.top / curso)) : 0; }
 
   function quadroFrame(agora) {
+    if (perdido) return false;
     const dt = Math.min(.05, (agora - ultimo) / 1000); ultimo = agora;
     const parado = document.body.classList.contains('parado') || calmo.matches;
     if (!parado) tempo += dt;
@@ -199,18 +202,29 @@ function inicia() {
     if (!parado) poeira.rotation.y = tempo * .012;
 
     render.render(cena, cam);
-    if (ativo) requestAnimationFrame(quadroFrame);
+    // assentou na rolagem: parado (reduced-motion ou botão de pausa) espera a próxima mudança; senão ~30 quadros/s
+    const assentou = Math.abs(alvoT - t) < .0005;
+    if (parado) return !assentou;
+    return assentou ? 'ocioso' : true;
   }
-  function liga(sim) { if (sim === ativo) return; ativo = sim; if (sim) { ultimo = performance.now(); requestAnimationFrame(quadroFrame); } }
-
-  addEventListener('resize', tamanho);
-  addEventListener('pointermove', (e) => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; }, { passive: true });
-  tela.addEventListener('webglcontextlost', (e) => { e.preventDefault(); liga(false); document.body.classList.remove('tem-3d'); });
-  new IntersectionObserver((es) => liga(es[0].isIntersecting), { rootMargin: '200px 0px' }).observe(ilha);
+  const acorda = () => { if (desenho) desenho.pedir(); };
+  addEventListener('resize', () => { tamanho(); acorda(); });
+  addEventListener('scroll', acorda, { passive: true });
+  addEventListener('pointermove', (e) => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; acorda(); }, { passive: true });
+  new MutationObserver(acorda).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  tela.addEventListener('webglcontextlost', (e) => { e.preventDefault(); perdido = true; document.body.classList.remove('tem-3d'); });
   tamanho();
   t = alvoT = progresso() * (n - 1);
   document.body.classList.add('tem-3d');
   render.render(cena, cam);
+  desenho = laco(ilha, quadroFrame, { margem: '200px 0px', naTela: false });
 }
 
-if (tela) { try { inicia(); } catch (e) { document.body.classList.remove('tem-3d'); } }
+if (tela) {
+  try {
+    await depoisDoConteudo();
+    const [a, b] = await Promise.all([import('../assets/three/three.module.min.js'), import('../assets/three/gltf.min.js')]);
+    THREE = a; ({ GLTFLoader, MeshoptDecoder } = b);
+    inicia();
+  } catch (e) { document.body.classList.remove('tem-3d'); }
+}

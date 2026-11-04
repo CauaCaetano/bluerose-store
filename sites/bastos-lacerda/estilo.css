@@ -12,7 +12,8 @@ html { scroll-padding-top: 76px; }
 html, body { overflow-x: clip; }
 body { margin: 0; background: var(--branco); color: var(--tinta); font: 400 15.75px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
 img { max-width: 100%; height: auto; display: block; }
-h1, h2, h3 { margin: 0; font-family: var(--tit); font-weight: 200; letter-spacing: -.01em; }
+h1, h2, h3 { margin: 0; font-family: var(--tit); font-weight: 200; letter-spacing: -.01em; text-wrap: balance; }
+p { text-wrap: pretty; }
 p, ul, ol, figure { margin: 0; }
 a { color: inherit; }
 button { font: inherit; color: inherit; }
@@ -33,15 +34,15 @@ button { font: inherit; color: inherit; }
 .marca-sinal { width: 30px; height: 36px; fill: none; stroke: var(--tinta); stroke-width: 2.6; stroke-linecap: round; flex: none; }
 .marca-sinal circle { fill: var(--tinta); stroke: none; }
 .marca-txt { display: grid; }
-.marca-txt b { font: 300 21px/1 var(--tit); letter-spacing: .32em; }
+.marca-txt b { font: 300 21px/1 var(--tit); letter-spacing: .32em; white-space: nowrap; }
 .marca-txt small { font: 500 7.5px/1 var(--sans); letter-spacing: .3em; margin-top: 5px; color: var(--cinza2); }
-.filtros { grid-area: filtros; display: flex; gap: 4px 18px; flex-wrap: wrap; margin-top: 26px; }
+.filtros { grid-area: filtros; display: flex; gap: 4px 18px; flex-wrap: nowrap; margin-top: 26px; white-space: nowrap; }
 .filtros button { position: relative; padding: 6px 0; border: 0; background: none; font: 500 12.5px/1 var(--sans); color: var(--cinza2); cursor: pointer; }
 .filtros button::before { content: ''; position: absolute; left: 0; top: -6px; width: 18px; height: 2px; background: var(--acc); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
 .filtros button[aria-pressed="true"] { color: var(--tinta); }
 .filtros button[aria-pressed="true"]::before, .filtros button:hover::before { transform: scaleX(1); }
 .menu { grid-area: menu; display: flex; justify-content: flex-end; gap: 18px; font: 500 13px/1 var(--sans); }
-.menu a { text-decoration: none; padding: 6px 0; background: linear-gradient(var(--acc), var(--acc)) left bottom / 0 1.5px no-repeat; transition: background-size .3s; }
+.menu a { white-space: nowrap; text-decoration: none; padding: 6px 0; background: linear-gradient(var(--acc), var(--acc)) left bottom / 0 1.5px no-repeat; transition: background-size .3s; }
 .menu a:hover, .menu a.ativo { background-size: 100% 1.5px; }
 .ico { grid-area: busca; display: grid; place-items: center; width: 34px; height: 34px; border: 0; background: none; cursor: pointer; padding: 0; }
 .ico svg { width: 19px; height: 19px; fill: none; stroke: var(--tinta); stroke-width: 1.6; stroke-linecap: round; }
@@ -142,9 +143,9 @@ body.gav-aberta .topo { background: transparent; box-shadow: none; backdrop-filt
 .faixa { position: relative; height: clamp(320px, 33vw, 480px); margin-top: 110px; display: flex; align-items: center; padding: 0 var(--mx); overflow: hidden; isolation: isolate; background: linear-gradient(110deg, #b4a690 0, #cbbda7 45%, #e2d8c8 100%); }
 .faixa-cena { position: absolute; inset: 0; z-index: -1; }
 .faixa-cena canvas { width: 100%; height: 100%; display: block; }
-.faixa-cena::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(120, 104, 82, .55), rgba(120, 104, 82, .12) 55%, transparent); pointer-events: none; }
+.faixa-cena::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(70, 58, 42, .78), rgba(70, 58, 42, .5) 45%, transparent 75%); pointer-events: none; }
 .faixa-txt { font-size: clamp(28px, 3.2vw, 45.5px); line-height: 1.25; color: var(--branco); max-width: 16em; }
-.faixa-txt span { display: block; opacity: var(--o, .35); transition: opacity .2s linear; }
+.faixa-txt span { display: block; opacity: calc(.62 + var(--o, .35) * .38); transition: opacity .2s linear; }
 
 /* ---------- filosofia em 2 x 2 com linhas finas ---------- */
 .filo { padding: 110px var(--mx) 40px; }
@@ -322,7 +323,7 @@ body.gav-aberta .topo { background: transparent; box-shadow: none; backdrop-filt
 /* números e marcos */
 .numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 clamp(16px, 3vw, 40px); }
 .numeros div { border-top: 1px solid var(--acc); padding-top: 18px; }
-.numeros b { display: block; font: 200 clamp(38px, 4vw, 58px)/1 var(--tit); color: var(--preto); }
+.numeros b { display: block; font: 200 clamp(38px, 4vw, 58px)/1 var(--tit); color: var(--preto); white-space: nowrap; }
 .numeros span { display: block; margin-top: 10px; font-size: 12.5px; line-height: 1.6; color: var(--cinza); }
 .marcos { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px clamp(16px, 3vw, 40px); }
 .marcos li { border-top: 1px solid var(--linha); padding-top: 18px; position: relative; }
@@ -444,4 +445,18 @@ body.gav-aberta .topo { background: transparent; box-shadow: none; backdrop-filt
   .resp img { min-height: 0; aspect-ratio: 4 / 3; }
   .radar-grade[data-completo] .nota { padding-right: 0; }
   .chamada { padding: 70px var(--mx) 80px; }
+}
+
+/* topo ao rolar: tudo numa linha só, sem quebrar item do menu */
+@media (min-width: 1181px) and (max-width: 1340px) { .tel { display: none; } }
+@media (min-width: 1181px) and (max-width: 1500px) {
+  .topo.rolou .tel { display: none; }
+  .topo.rolou .filtros { gap: 4px 14px; }
+  .topo.rolou .menu { gap: 14px; }
+}
+@media (max-width: 700px) {
+  .filtros { overflow-x: auto; scrollbar-width: none; }
+  .filtros::-webkit-scrollbar { display: none; }
+  .faixa-cena::after { background: linear-gradient(180deg, rgba(70, 58, 42, .8), rgba(70, 58, 42, .55) 55%, transparent 85%); }
+  .faixa-txt span { opacity: 1; }
 }

@@ -9,7 +9,7 @@
 if (window.top !== window.self) { try { if (window.top.location.origin !== location.origin) throw 0; } catch (e) { window.top.location.href = location.href; } }
 (function () {
   var CHAVE = 'nexo-sessao';
-  var FUNC = 'https://yihnfzwtkqdfnwziutqa.supabase.co/functions/v1/nexo-pagamentos';
+  var FUNC = (/(^|\.)bluerose-store\.com$/.test(location.hostname) ? 'https://yihnfzwtkqdfnwziutqa.supabase.co' : 'https://banco-desligado-no-teste.invalid') + '/functions/v1/nexo-pagamentos'; // teste nunca chama o pagamento real
   var raiz = (document.querySelector('script[src*="js/conta.js"]').getAttribute('src').split('js/conta.js')[0]) || '';
   var cliente = null;
 

@@ -1,12 +1,9 @@
 // Aguiar & Monteiro · estátua da Justiça escaneada (modelo realista em GLB), metal iridescente verde e roxo com brilho,
 // fixa atrás da página: a câmera acompanha a rolagem e a estátua vira lilás e menta nas seções claras.
-import * as THREE from '../assets/three/three.module.js';
-import { EffectComposer } from '../assets/three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from '../assets/three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from '../assets/three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from '../assets/three/addons/postprocessing/OutputPass.js';
-import { GLTFLoader } from '../assets/three/addons/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from '../assets/three/addons/libs/meshopt_decoder.module.js';
+// Leve: three.js r160 minificado, baixado só quando o 3D vai começar (no celular, depois do texto do topo); a cena é o
+// fundo fixo da página (sempre na tela): o laço para com a aba escondida e cai para ~30 quadros/s quando nada muda;
+// com reduced-motion desenha só quando algo muda.
+import { calmo, pixelRatio, modelo, depoisDoConteudo, laco } from '../assets/three/leve.js';
 
 // posição do modelo escaneado dentro da cena (a câmera foi ajustada para a estátua antiga, com a balança à direita)
 const AJUSTE = { x: 1.3, z: 0, giro: 0 };
@@ -14,11 +11,16 @@ const AJUSTE = { x: 1.3, z: 0, giro: 0 };
 const raiz = document.documentElement;
 const tela = document.getElementById('palco');
 const veu = document.querySelector('.veu');
-const calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function semTresD() { raiz.classList.add('sem-3d'); }
 
-try { iniciar(); } catch (e) { semTresD(); }
+let THREE, GLTFLoader, MeshoptDecoder, EffectComposer, RenderPass, UnrealBloomPass, OutputPass;
+try {
+  await depoisDoConteudo();
+  const [a, b, c] = await Promise.all([import('../assets/three/three.module.min.js'), import('../assets/three/gltf.min.js'), import('../assets/three/pos.min.js')]);
+  THREE = a; ({ GLTFLoader, MeshoptDecoder } = b); ({ EffectComposer, RenderPass, UnrealBloomPass, OutputPass } = c);
+  iniciar();
+} catch (e) { semTresD(); }
 
 function iniciar() {
   const renderer = new THREE.WebGLRenderer({ canvas: tela, antialias: true, powerPreference: 'high-performance' });
@@ -68,7 +70,8 @@ function iniciar() {
   const estatua = new THREE.Group();
   cena.add(estatua);
   const ALTURA = 11.6, BASE = -0.66;
-  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('modelo/justica.glb?v=1', (g) => {
+  // celular: o mesmo modelo com metade dos triângulos (158 mil); computador: o modelo inteiro sem as cores de vértice (o código já as apagava)
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(modelo('modelo/justica.glb?v=2', 'modelo/justica-cel.glb?v=1'), (g) => {
     const obj = g.scene;
     obj.traverse((o) => {
       if (!o.isMesh) return;
@@ -82,7 +85,13 @@ function iniciar() {
     obj.scale.multiplyScalar(esc);
     obj.position.set(-meio.x * esc + AJUSTE.x, -caixa.min.y * esc + BASE, -meio.z * esc + AJUSTE.z);
     const giro = new THREE.Group(); giro.rotation.y = AJUSTE.giro; giro.add(obj); estatua.add(giro);
-    raiz.classList.add('estatua-pronta');
+    // compila o material da estátua em paralelo antes de mostrar (não trava a página no primeiro quadro)
+    giro.visible = false;
+    renderer.compileAsync(cena, camera).catch(() => {}).then(() => {
+      giro.visible = true;
+      raiz.classList.add('estatua-pronta');
+      acorda();
+    });
   }, undefined, () => semTresD());
 
   // poeira de luz em volta
@@ -176,7 +185,7 @@ function iniciar() {
   function tamanho() {
     const w = innerWidth, h = innerHeight;
     celular = w < 820;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (celular ? 1.5 : 1.6)));
+    renderer.setPixelRatio(pixelRatio(1.6));
     renderer.setSize(w, h, false);
     composer.setPixelRatio(renderer.getPixelRatio());
     composer.setSize(w, h);
@@ -184,15 +193,21 @@ function iniciar() {
     camera.aspect = w / h; camera.fov = celular ? 42 : 35; camera.updateProjectionMatrix();
     montaAncoras();
   }
-  addEventListener('resize', tamanho);
-  addEventListener('load', montaAncoras);
-  new ResizeObserver(montaAncoras).observe(document.body);
+  // acorda o laço de desenho (rolagem, mouse, tamanho, modelo pronto)
+  let desenho = null, mexeu = performance.now();
+  function acorda() { mexeu = performance.now(); if (desenho) desenho.pedir(); }
+  addEventListener('resize', () => { tamanho(); acorda(); });
+  addEventListener('load', () => { montaAncoras(); acorda(); });
+  new ResizeObserver(() => { montaAncoras(); acorda(); }).observe(document.body);
+  addEventListener('scroll', acorda, { passive: true });
   tamanho();
 
   // estado suavizado
   let atual = alvoDaRolagem(), luz = document.body.dataset.tema === 'claro' ? 1 : 0, claroAplicado = null;
   const ponteiro = { x: 0, y: 0, sx: 0, sy: 0 };
-  if (!calmo) addEventListener('pointermove', (e) => { ponteiro.x = e.clientX / innerWidth - 0.5; ponteiro.y = e.clientY / innerHeight - 0.5; }, { passive: true });
+  if (!calmo) addEventListener('pointermove', (e) => { ponteiro.x = e.clientX / innerWidth - 0.5; ponteiro.y = e.clientY / innerHeight - 0.5; acorda(); }, { passive: true });
+  const perto = (a, b) => Math.abs(a.cam[0] - b.cam[0]) + Math.abs(a.cam[1] - b.cam[1]) + Math.abs(a.cam[2] - b.cam[2])
+    + Math.abs(a.alvo[0] - b.alvo[0]) + Math.abs(a.alvo[1] - b.alvo[1]) + Math.abs(a.giro - b.giro) + Math.abs(a.brilho - b.brilho) + Math.abs(a.veu - b.veu) < 0.003;
   const preto = new THREE.Color(0x000000), branco = new THREE.Color(0xffffff), fundo = new THREE.Color();
   const alvoV = new THREE.Vector3();
   let antes = performance.now(), t = 0;
@@ -215,6 +230,7 @@ function iniciar() {
     pm.opacity = claro ? 0.35 : 0.75;
     fundo.copy(preto).lerp(branco, luz); renderer.setClearColor(fundo, 1);
     bloom.strength = 0.6 * (1 - luz);
+    bloom.enabled = bloom.strength > 0.001; // seções claras: brilho zero, pula o passe (a imagem é a mesma)
     brilhoMat.uniforms.op.value = atual.brilho * (1 - luz);
     if (veu) veu.style.opacity = atual.veu.toFixed(3);
 
@@ -226,8 +242,12 @@ function iniciar() {
     if (!calmo) { poeira.rotation.y = t * 0.02; poeira.position.y = Math.sin(t * 0.3) * 0.15; }
 
     composer.render();
-    requestAnimationFrame(quadro);
+    // assentou (rolagem, tema e mouse parados): com reduced-motion para até a próxima mudança; sem ele a estátua
+    // continua balançando devagar e a poeira girando, a ~30 quadros/s (movimento lento, fica igual)
+    const assentou = perto(atual, alvo) && Math.abs(luzAlvo - luz) < 0.002 && Math.abs(ponteiro.x - ponteiro.sx) + Math.abs(ponteiro.y - ponteiro.sy) < 0.002;
+    if (calmo) return !assentou;
+    return assentou && agora - mexeu > 600 ? 'ocioso' : true;
   }
-  requestAnimationFrame(quadro);
+  desenho = laco(tela, quadro);
   raiz.classList.add('com-3d');
 }

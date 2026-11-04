@@ -339,3 +339,18 @@ a.card { text-decoration: none; }
 }
 .pg-full { max-width: none; }
 .trat.trat-pg::after { background: var(--creme); }
+
+/* ---------- correção visual (04/11/2026): nada cortado, coberto ou quebrado ---------- */
+p, li, dd, figcaption { text-wrap: pretty; }
+.menu a, .bt-linha, .marca span, .idioma-tag { white-space: nowrap; }
+.numeros dt, .gv-preco, .gv-parc, .resumo .preco, .resumo dd, .tempo b, .grade-itens .num, .h-dias li, .h-dias li b, .tabela td:last-child { white-space: nowrap; }
+/* título sobre a foto da abertura: mais contraste embaixo */
+.abre::after { background: linear-gradient(180deg, rgba(9, 31, 39, .1) 25%, rgba(9, 31, 39, .72) 100%); }
+.abre h1 { text-shadow: 0 2px 24px rgba(9, 31, 39, .45); }
+/* menu inteiro numa linha só em 1280 e 1366 */
+@media (min-width: 1001px) and (max-width: 1420px) {
+  .topo { gap: 18px; }
+  .menu { gap: 18px; font-size: 12px; letter-spacing: .03em; }
+  .bt-linha { padding: 0 14px; font-size: 13px; }
+}
+@media (min-width: 1001px) and (max-width: 1180px) { .bt-linha { display: none; } .idioma-tag { margin-left: 0; } }

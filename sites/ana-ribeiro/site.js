@@ -173,7 +173,7 @@
     // ---------- todas as imagens: filtro, setas e troca automática ----------
     var itens = [];
     $$('#destaques .g-q').forEach(function (q, k) { var im = $('img', q), leg = $$('#destaques .g-leg')[k]; itens.push({ src: im.getAttribute('src'), alt: im.alt, tit: $('h3', leg).textContent + ' · ' + $('p', leg).textContent.replace(/^\d+ \/ \d+\s*/, '').split(' · ')[0], c: 'imoveis' }); });
-    bairros.forEach(function (li) { itens.push({ src: li.dataset.img, alt: 'Vista do bairro ' + $('b', li).textContent + ', em Florianópolis', tit: $('b', li).textContent + ' · ' + $('i', li).textContent, c: 'bairros' }); });
+    bairros.forEach(function (li) { itens.push({ src: li.dataset.img, alt: 'Vista do bairro ' + $('b', li).textContent + ', em Cidade Exemplo', tit: $('b', li).textContent + ' · ' + $('i', li).textContent, c: 'bairros' }); });
     $$('#como .g-q').forEach(function (q, k) { var im = $('img', q); itens.push({ src: im.getAttribute('src'), alt: im.alt, tit: $('h3', $$('#como .g-leg')[k]).textContent, c: 'venda' }); });
     var lista = itens, mI = 0, tocando = !calmo.matches, relogio = null, visivel = false;
     var mImg = $('.ms-img'), bPlay = $('.ms-play');

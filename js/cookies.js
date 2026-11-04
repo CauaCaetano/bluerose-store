@@ -18,7 +18,7 @@
   window.__brCookies = true;
 
   var VERSAO = '2026-10-14';
-  var BANCO = { url: 'https://yihnfzwtkqdfnwziutqa.supabase.co', chave: (window.BR_LEADS && window.BR_LEADS.chave) || 'sb_publishable_nrMgwLCtiojWE-yWMeZK7g_iinpfY_5' };
+  var BANCO = { url: (window.BR_LEADS && window.BR_LEADS.url) || (/(^|\.)bluerose-store\.com$/.test(location.hostname) ? 'https://yihnfzwtkqdfnwziutqa.supabase.co' : 'https://banco-desligado-no-teste.invalid'), chave: (window.BR_LEADS && window.BR_LEADS.chave) || 'sb_publishable_nrMgwLCtiojWE-yWMeZK7g_iinpfY_5' };
   var EN = (document.documentElement.lang || '').indexOf('en') === 0;
   var raiz = /\/sites\/[^/]+\//.test(location.pathname) ? '../../' : '';
   var T = EN ? {

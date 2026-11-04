@@ -37,11 +37,12 @@
   // ── títulos gigantes ocupam a largura toda
   function encaixa() {
     $$('.encaixe').forEach(function (el) {
-      el.style.fontSize = '100px'; el.style.display = 'inline-block'; var tw = el.offsetWidth; el.style.display = '';
-      var disp = el.clientWidth; if (tw > 0 && disp > 0) el.style.fontSize = (100 * disp / tw * .995) + 'px';
+      el.style.fontSize = '100px'; var rg = document.createRange(); rg.selectNodeContents(el); var tw = rg.getBoundingClientRect().width;
+      var disp = el.clientWidth; if (tw > 0 && disp > 0) el.style.fontSize = (100 * disp / tw * .98) + 'px';
     });
   }
-  encaixa(); if (document.fonts) document.fonts.ready.then(encaixa);
+  encaixa(); if (document.fonts) { document.fonts.ready.then(encaixa); document.fonts.load('300 100px Jost').then(encaixa, function () {}); }
+  addEventListener('load', encaixa);
   var rz; addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(encaixa, 120); });
 
   // ── revelar ao entrar
@@ -84,7 +85,7 @@
   if (tr) {
     var SL = [
       ['300', 'metros', 'da areia da praia central', 'praia-predio', 'Prédio de frente para a praia'],
-      ['4', 'minutos', 'a pé até o Atlântico Shopping', 'palmeiras', 'Prédio entre palmeiras sob o céu azul'],
+      ['4', 'minutos', 'a pé até o Shopping de Exemplo', 'palmeiras', 'Prédio entre palmeiras sob o céu azul'],
       ['2.400', 'reais', 'de diária média na temporada para 3 suítes', 'varanda-mar', 'Varanda com vista para o oceano'],
       ['600', 'metros', 'raio com escolas, mercado e farmácia', 'parque', 'Prédios diante de um parque arborizado'],
       ['24', 'meses', 'para pagar durante a obra', 'baia', 'Cidade à beira da baía']

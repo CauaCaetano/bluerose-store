@@ -4,13 +4,10 @@
 // 2) interiores: a mesma torre como maquete de estande sobre o creme, girando devagar conforme a rolagem.
 // Modelo 3D: "Miami style condominium" por aitortilla01 (Sketchfab, CC BY 4.0) — crédito no rodapé.
 // Sem WebGL: a abertura vira só o degradê com a marca e os interiores mostram uma foto.
-import * as THREE from '../assets/three/three.module.js';
-import { EffectComposer } from '../assets/three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from '../assets/three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from '../assets/three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from '../assets/three/addons/postprocessing/OutputPass.js';
-import { GLTFLoader } from '../assets/three/addons/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from '../assets/three/addons/libs/meshopt_decoder.module.js';
+// Leve: three.js r160 minificado, baixado só quando o 3D vai começar (no celular, depois do texto do topo; se a abertura
+// já tiver acabado, ela não é montada); pixel ratio 1 no celular; a torre é baixada uma vez só para as duas cenas.
+import { pixelRatio, depoisDoConteudo, laco } from '../assets/three/leve.js';
+let THREE, EffectComposer, RenderPass, UnrealBloomPass, OutputPass, GLTFLoader, MeshoptDecoder;
 
 const MODELO = 'modelo/torre.glb?v=1';
 const calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -23,9 +20,11 @@ let semente = 7;
 const rnd = () => { semente = (semente * 16807) % 2147483647; return (semente - 1) / 2147483646; };
 
 // carrega a torre e devolve o objeto normalizado: base no chão (y = 0), centrada em x/z, com a altura pedida
+let pedidoTorre = null;
 function carregaTorre(altura, pronto, falha) {
-  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(MODELO, (g) => {
-    const obj = g.scene;
+  if (!pedidoTorre) pedidoTorre = new Promise((ok, erro) => new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(MODELO, ok, undefined, erro));
+  pedidoTorre.then((g) => {
+    const obj = g.scene.clone(true);
     obj.updateMatrixWorld(true);
     const caixa = new THREE.Box3().setFromObject(obj), tam = caixa.getSize(new THREE.Vector3()), meio = caixa.getCenter(new THREE.Vector3());
     const esc = altura / tam.y;
@@ -35,7 +34,7 @@ function carregaTorre(altura, pronto, falha) {
     let malha = null, mapa = null;
     obj.traverse((o) => { if (o.isMesh) { malha = malha || o; mapa = mapa || o.material.map; } });
     pronto(raiz, malha, mapa, tam.x * esc, tam.z * esc);
-  }, undefined, falha);
+  }, falha);
 }
 
 // janelas acesas: a partir da textura do modelo, as janelas de vidro (tons verde-azulados da fachada) viram uma máscara;
@@ -81,7 +80,7 @@ function abertura() {
   const tela = intro.querySelector('.intro-cena');
   let ren;
   try { ren = new THREE.WebGLRenderer({ canvas: tela, antialias: true, powerPreference: 'high-performance' }); } catch (e) { return; }
-  ren.setPixelRatio(Math.min(devicePixelRatio, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (1.5)));
+  ren.setPixelRatio(pixelRatio(1.5));
   ren.toneMapping = THREE.ACESFilmicToneMapping; ren.toneMappingExposure = 0.95;
   ren.localClippingEnabled = true;
   const cena = new THREE.Scene();
@@ -183,7 +182,7 @@ function interiores() {
   function monta() {
     let ren;
     try { ren = new THREE.WebGLRenderer({ canvas: tela, antialias: true, alpha: true }); } catch (e) { semInteriores(); return; }
-    ren.setPixelRatio(Math.min(devicePixelRatio, ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) ? 1 : (2))); ren.toneMapping = THREE.ACESFilmicToneMapping; ren.toneMappingExposure = 1.05;
+    ren.setPixelRatio(pixelRatio(2)); ren.toneMapping = THREE.ACESFilmicToneMapping; ren.toneMappingExposure = 1.05;
     const cena = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, 1, 0.1, 80);
     // ambiente para os reflexos: degradê quente de estúdio
     const ce = document.createElement('canvas'); ce.width = 512; ce.height = 256; const x = ce.getContext('2d');
@@ -203,27 +202,38 @@ function interiores() {
     sombra.rotation.x = -Math.PI / 2; sombra.position.y = -ALT / 2 + 0.01; cena.add(sombra);
     cam.position.set(0, 0.9, 9.6); cam.lookAt(0, 0.05, 0);
 
-    let pronta = false;
+    let pronta = false, desenho = null;
     carregaTorre(ALT, (raiz, malha, mapa) => {
       malha.material = new THREE.MeshStandardMaterial({ map: mapa, color: 0xfff6ee, roughness: 0.5, metalness: 0.05, envMapIntensity: 0.9, side: THREE.DoubleSide });
       raiz.position.y = -ALT / 2; grupo.add(raiz); pronta = true;
-      if (!rodando) { rodando = true; requestAnimationFrame(quadro); }
+      desenho.pedir();
     }, semInteriores);
 
-    function tamanho() { const r = tela.getBoundingClientRect(); ren.setSize(r.width, r.height, false); cam.aspect = r.width / Math.max(1, r.height); cam.updateProjectionMatrix(); }
+    function tamanho() { const r = tela.getBoundingClientRect(); ren.setSize(r.width, r.height, false); cam.aspect = r.width / Math.max(1, r.height); cam.updateProjectionMatrix(); if (desenho) desenho.pedir(); }
     tamanho(); addEventListener('resize', tamanho);
-    const sec = document.querySelector('.interiores'); let visivel = true, rodando = false;
-    new IntersectionObserver((es) => { visivel = es[0].isIntersecting; if (visivel && pronta && !calmo && !rodando) { rodando = true; requestAnimationFrame(quadro); } }).observe(sec);
+    // laço só com a seção na tela e a aba visível; com reduced-motion um quadro parado; sem rolagem recente, a
+    // maquete continua girando devagar a ~30 quadros/s
+    const sec = document.querySelector('.interiores');
+    let rolou = 0;
+    addEventListener('scroll', () => { rolou = performance.now(); if (!calmo && desenho) desenho.pedir(); }, { passive: true });
     const t0 = performance.now();
     function quadro(agora) {
+      if (!pronta) return false;
       const t = calmo ? 1.2 : (agora - t0) / 1000;
       const r = sec.getBoundingClientRect(), k = Math.min(1, Math.max(0, 1 - r.top / innerHeight));
       grupo.rotation.y = -0.6 + t * 0.18 + k * 1.1; grupo.position.y = Math.sin(t * 0.9) * 0.03;
       ren.render(cena, cam);
-      if (visivel && !calmo) requestAnimationFrame(quadro); else rodando = false;
+      if (calmo) return false;
+      return agora - rolou > 600 ? 'ocioso' : true;
     }
+    desenho = laco(sec, quadro, { naTela: false });
   }
 }
 
-abertura();
-interiores();
+try {
+  await depoisDoConteudo();
+  const [a, b, c] = await Promise.all([import('../assets/three/three.module.min.js'), import('../assets/three/gltf.min.js'), import('../assets/three/pos.min.js')]);
+  THREE = a; ({ GLTFLoader, MeshoptDecoder } = b); ({ EffectComposer, RenderPass, UnrealBloomPass, OutputPass } = c);
+  abertura();
+  interiores();
+} catch (e) { semInteriores(); }

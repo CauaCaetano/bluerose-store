@@ -11,7 +11,7 @@
 
   // menu: some na abertura e volta como pílula flutuante
   var topo = $('.topo'), heroi = $('.heroi');
-  function menu() { topo.classList.toggle('pilula', !heroi || scrollY > heroi.offsetHeight - 120); }
+  function menu() { topo.classList.toggle('pilula', !heroi || scrollY > 60); }
   addEventListener('scroll', menu, { passive: true }); menu();
 
   // menu do celular

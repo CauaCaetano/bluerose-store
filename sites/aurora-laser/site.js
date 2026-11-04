@@ -6,7 +6,7 @@
   document.documentElement.classList.add('js');
   var $ = function (s, el) { return (el || document).querySelector(s); };
   var $$ = function (s, el) { return [].slice.call((el || document).querySelectorAll(s)); };
-  var real = function (v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
+  var real = function (v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
   var calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---------- dados (preço por sessão e minutos) ----------
@@ -21,12 +21,32 @@
 
   // ---------- topo ----------
   var topo = $('.topo'), flor = $('.flor'), heroi = $('.heroi');
+  // a flor fixa só aparece quando não há texto, foto ou botão embaixo dela
+  function temConteudo(e) {
+    if (/^(IMG|VIDEO|BUTTON|INPUT|SELECT|TEXTAREA|A|SVG)$/i.test(e.tagName)) return true;
+    for (var n = e.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && n.nodeValue.trim()) return true;
+    return false;
+  }
+  function florLivre() {
+    if (getComputedStyle(flor).display === 'none') return false;
+    var cs = getComputedStyle(flor), L = parseFloat(cs.left), T = innerHeight - parseFloat(cs.bottom) - flor.offsetHeight, W = flor.offsetWidth, H = flor.offsetHeight;
+    for (var i = 0; i <= 2; i++) for (var k = 0; k <= 6; k++) {
+      var pts = document.elementsFromPoint(L + W * (.1 + .4 * i), T + H * k / 6);
+      for (var p = 0; p < pts.length; p++) {
+        var e = pts[p];
+        if (e === flor || flor.contains(e) || e === document.body || e === document.documentElement) continue;
+        if (e.closest('[class^="br-"],[class*=" br-"],#br-moldura')) continue;
+        if (temConteudo(e)) return false;
+      }
+    }
+    return true;
+  }
   function rolagem() {
     var y = scrollY;
     topo.classList.toggle('rolou', y > 40);
-    flor.classList.toggle('ativa', y > (heroi ? heroi.offsetHeight : 520) * 0.7);
+    flor.classList.toggle('ativa', y > (heroi ? heroi.offsetHeight : 520) * 0.7 && florLivre());
   }
-  addEventListener('scroll', rolagem, { passive: true }); rolagem();
+  var quadro = 0; addEventListener('scroll', function () { if (!quadro) quadro = requestAnimationFrame(function () { quadro = 0; rolagem(); }); }, { passive: true }); rolagem();
 
   var hamb = $('.hamb'), mc = $('.menu-cel');
   function menu(abrir) { hamb.setAttribute('aria-expanded', String(abrir)); mc.hidden = !abrir; document.body.style.overflow = abrir ? 'hidden' : ''; }
@@ -81,7 +101,7 @@
     vitrine(); trilho.scrollLeft = 0; conta();
   }
   $('.corpo').addEventListener('click', function (e) { var b = e.target.closest('[data-g]'); if (b) genero(b.dataset.g); });
-  $$('[data-ir]').forEach(function (b) { b.addEventListener('click', function () { trilho.scrollBy({ left: +b.dataset.ir * 347 * (innerWidth < 900 ? 1 : 2), behavior: calmo ? 'auto' : 'smooth' }); }); });
+  $$('[data-ir]').forEach(function (b) { b.addEventListener('click', function () { var c0 = trilho.firstElementChild, passo = c0 ? c0.offsetWidth + (parseFloat(getComputedStyle(trilho).columnGap) || 40) : 347; trilho.scrollBy({ left: +b.dataset.ir * passo * (innerWidth < 900 ? 1 : 2), behavior: calmo ? 'auto' : 'smooth' }); }); });
   // arrastar com o mouse
   var x0 = 0, s0 = 0, segurando = false, arrastou = false;
   trilho.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') return; segurando = true; arrastou = false; x0 = e.clientX; s0 = trilho.scrollLeft; });

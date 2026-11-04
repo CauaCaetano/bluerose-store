@@ -9,4 +9,6 @@
  * ficar visível: a tabela só aceita INSERIR pedidos, nunca ler ou alterar.
  * Nunca coloque a service_role aqui.
  */
-window.BR_LEADS = { url: 'https://yihnfzwtkqdfnwziutqa.supabase.co', chave: 'sb_publishable_nrMgwLCtiojWE-yWMeZK7g_iinpfY_5' };
+// Isolamento (03/11/2026): só o site oficial grava no banco real; teste e cópia local usam um endereço desligado.
+window.BR_OFICIAL = /(^|\.)bluerose-store\.com$/.test(location.hostname);
+window.BR_LEADS = { url: window.BR_OFICIAL ? 'https://yihnfzwtkqdfnwziutqa.supabase.co' : 'https://banco-desligado-no-teste.invalid', chave: 'sb_publishable_nrMgwLCtiojWE-yWMeZK7g_iinpfY_5' };

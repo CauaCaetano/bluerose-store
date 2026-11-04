@@ -14,10 +14,10 @@
 <link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
 <link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=6">
+<link rel="stylesheet" href="estilo.css?v=7">
 <script src="../../js/leads-config.js?v=6" defer></script>
-<script src="../assets/moldura.js?v=3" defer></script>
-<script src="site.js?v=5" defer></script>
+<script src="../assets/moldura.js?v=4" defer></script>
+<script src="site.js?v=6" defer></script>
 </head>
 <body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -30,7 +30,7 @@
   <nav class="nav" aria-label="Páginas">
     <a href="imoveis.html">Imóveis</a><a href="sobre.html">A corretora</a><a href="simulador.html" aria-current="page">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="contato.html">Contato</a>
   </nav>
-  <p class="creci"><b>AR</b><span>CORRETORA DE IMÓVEIS<br>CRECI-SC FICTÍCIO</span></p>
+  <p class="creci"><b>AR</b><span>CORRETORA DE IMÓVEIS<br>CRECI FICTÍCIO</span></p>
   <button class="cab-menu" type="button" aria-expanded="false" aria-controls="menu-cel">Menu</button>
 </header>
 <div class="menu-cel" id="menu-cel" hidden>
@@ -51,23 +51,23 @@
   <section class="ferr" data-tom="claro" aria-label="Simulador">
     <form class="ferr-form" id="sim">
       <p class="rot">Seus números</p>
-      <label><span class="linha">Renda bruta da família por mês <output>R$ 22.000</output></span><input type="range" name="renda" min="3000" max="60000" step="500" value="22000"></label>
-      <label><span class="linha">Entrada, com FGTS <output>R$ 150.000</output></span><input type="range" name="ent" min="20000" max="1000000" step="10000" value="150000"></label>
-      <label><span class="linha">Prazo <output>30 anos</output></span><input type="range" name="anos" min="10" max="35" value="30"></label>
+      <label><span class="linha">Renda bruta da família por mês <output>R$ 22.000</output></span><input type="range" name="renda" min="3000" max="60000" step="500" value="22000"></label>
+      <label><span class="linha">Entrada, com FGTS <output>R$ 150.000</output></span><input type="range" name="ent" min="20000" max="1000000" step="10000" value="150000"></label>
+      <label><span class="linha">Prazo <output>30 anos</output></span><input type="range" name="anos" min="10" max="35" value="30"></label>
       <label><span class="linha">Juros ao ano <output>11,49% a.a.</output></span><input type="range" name="taxa" min="8" max="14" step=".01" value="11.49"></label>
       <label>Sistema de amortização<select class="campo" name="sist"><option value="sac">SAC: parcela que cai todo mês</option><option value="price">Price: parcela fixa</option></select></label>
     </form>
     <div class="ferr-res" aria-live="polite">
       <p class="rot">Você compra até</p>
-      <p class="grande sim-total">R$ 0</p>
+      <p class="grande sim-total">R$ 0</p>
       <p class="det sim-det"></p>
       <table><thead><tr><th>Resumo</th><th>Valor</th></tr></thead><tbody class="sim-tab"></tbody></table>
       <p class="rot sim-cabem"></p>
-      <div class="cabem"><a href="imovel-itacorubi.html" data-preco="480000"><span>Apartamento 2 quartos · Itacorubi · R$ 480.000</span><span></span></a><a href="imovel-trindade.html" data-preco="690000"><span>Apartamento 3 quartos · Trindade · R$ 690.000</span><span></span></a><a href="imovel-campeche.html" data-preco="920000"><span>Apartamento garden · Campeche · R$ 920.000</span><span></span></a><a href="imovel-agronomica.html" data-preco="1150000"><span>Apartamento 3 quartos com vista · Agronômica · R$ 1.150.000</span><span></span></a><a href="imovel-ingleses.html" data-preco="1380000"><span>Casa 3 suítes · Ingleses · R$ 1.380.000</span><span></span></a><a href="imovel-jurere.html" data-preco="2450000"><span>Cobertura duplex · Jurerê Internacional · R$ 2.450.000</span><span></span></a></div>
+      <div class="cabem"><a href="imovel-itacorubi.html" data-preco="480000"><span>Apartamento 2 quartos · Bairro Exemplo D · R$ 480.000</span><span></span></a><a href="imovel-trindade.html" data-preco="690000"><span>Apartamento 3 quartos · Bairro Exemplo E · R$ 690.000</span><span></span></a><a href="imovel-campeche.html" data-preco="920000"><span>Apartamento garden · Bairro Exemplo G · R$ 920.000</span><span></span></a><a href="imovel-agronomica.html" data-preco="1150000"><span>Apartamento 3 quartos com vista · Bairro Exemplo C · R$ 1.150.000</span><span></span></a><a href="imovel-ingleses.html" data-preco="1380000"><span>Casa 3 suítes · Bairro Exemplo H · R$ 1.380.000</span><span></span></a><a href="imovel-jurere.html" data-preco="2450000"><span>Cobertura duplex · Bairro Exemplo A · R$ 2.450.000</span><span></span></a></div>
       <a class="bt bt-bege sim-wa" href="contato.html" data-wa="Olá, Ana! Fiz a simulação completa no site.">Me mostre imóveis nessa faixa ↗</a>
     </div>
   </section>
-  <div class="nota-pe" data-tom="claro"><p>Simulação ilustrativa, sem seguro habitacional nem taxas do banco, que somam cerca de R$ 150 a R$ 400 por mês. A aprovação depende da análise de crédito. Com a renda certa em mãos, eu faço a simulação nos três bancos e mostro qual sai mais barato.</p></div>
+  <div class="nota-pe" data-tom="claro"><p>Simulação ilustrativa, sem seguro habitacional nem taxas do banco, que somam cerca de R$ 150 a R$ 400 por mês. A aprovação depende da análise de crédito. Com a renda certa em mãos, eu faço a simulação nos três bancos e mostro qual sai mais barato.</p></div>
 
   <section class="cap cap-alt" data-tom="claro2" aria-labelledby="c1">
     <div>
@@ -89,7 +89,7 @@
   </div>
   <div class="rd-baixo">
     <a class="logo logo-grande" href="index.html" aria-label="Voltar ao início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg><span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span></a>
-    <p>Florianópolis · SC<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI-SC fictício</p>
+    <p>Cidade Exemplo<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI fictício</p>
     <a class="rd-rever" href="index.html">Voltar ao início <i aria-hidden="true">↗</i></a>
   </div>
   <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>

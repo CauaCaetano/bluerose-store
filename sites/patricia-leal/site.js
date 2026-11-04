@@ -1,4 +1,4 @@
-// Patrícia Leal · relógio de BH, menu lateral, logotipo que ocupa a largura, revelações na rolagem,
+// Patrícia Leal · relógio, menu lateral, logotipo que ocupa a largura, revelações na rolagem,
 // lista de situações (foto que segue o cursor + resposta aberta), calculadora informativa de pensão e pedido de consulta.
 (function () {
   'use strict';
@@ -9,7 +9,7 @@
   var toque = matchMedia('(hover: none)').matches;
   raiz.classList.add('js');
 
-  // ---------- relógio de Belo Horizonte ----------
+  // ---------- relógio ----------
   var MES = ['JAN.', 'FEV.', 'MAR.', 'ABR.', 'MAIO', 'JUN.', 'JUL.', 'AGO.', 'SET.', 'OUT.', 'NOV.', 'DEZ.'];
   function hora() {
     var d = new Date(), t;
@@ -18,7 +18,7 @@
         .formatToParts(d).forEach(function (x) { p[x.type] = x.value; });
       t = p.hour + 'H' + p.minute + ' ' + p.day + ' ' + MES[+p.month - 1];
     } catch (e) { t = d.getHours() + 'H' + String(d.getMinutes()).padStart(2, '0'); }
-    $$('#hora, .hora2').forEach(function (el) { el.textContent = t + ' · BH'; });
+    $$('#hora, .hora2').forEach(function (el) { el.textContent = t + ' · Cidade Exemplo'; });
   }
   hora(); setInterval(hora, 15000);
 
@@ -136,7 +136,7 @@
 
   // ---------- calculadora informativa de pensão ----------
   // faixa comum nos tribunais: 1 filho 15–20%, 2 filhos 20–25%, 3 filhos 25–30%, 4 filhos 28–33% da renda líquida
-  var real = function (v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
+  var real = function (v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
   var p = $('#pens'), res = $('.pn-res');
   if (p && res) (function () {
   function pc() {

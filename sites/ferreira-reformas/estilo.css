@@ -588,3 +588,17 @@ h1, h2, h3 { overflow-wrap: break-word; }
 .time-lista li:nth-child(3n) i { background: var(--creme); }
 .contato-grade .pg-tit { font-size: clamp(30px, 3.4vw, 50px); }
 .atalho .q-op { grid-template-columns: 1fr 1fr; }
+
+/* leitura: títulos equilibrados, parágrafos sem palavra sozinha, palavra nunca partida */
+h1, h2, h3, h4, blockquote { text-wrap: balance; }
+p, li, dd, figcaption { text-wrap: pretty; }
+h1, h2, h3, h4, p, li, dd, dt, a, button, span, b, strong, em { word-break: normal; overflow-wrap: normal; hyphens: manual; }
+
+/* fim: título vazado legível sobre a foto clara */
+.fim::before { background: linear-gradient(180deg, var(--creme) 0%, rgba(255, 245, 232, 0) 14%, rgba(20, 18, 16, .72) 26%, rgba(20, 18, 16, .84) 100%); }
+.vazado { color: rgba(255, 245, 232, .16); }
+.abre-foto::after { background: linear-gradient(180deg, rgba(20, 18, 16, .55) 0%, rgba(20, 18, 16, .38) 40%, rgba(20, 18, 16, .58) 100%); }
+.abre-tit, .abre-sub { text-shadow: 0 2px 20px rgba(15, 13, 11, .55); }
+.dados dd { white-space: nowrap; }
+/* miniatura com parallax fica dentro do próprio serviço e nunca cobre o título do seguinte */
+.es-item { overflow: clip; }

@@ -405,3 +405,16 @@ svg use, .ic, .lateral svg, .circ svg { fill: none; stroke: currentColor; stroke
   .v-flor { transform: translate(var(--x), var(--y)); }
   .vaso .v-folhas path { opacity: 1; }
 }
+
+/* ---------- correção visual (04/11/2026): nada cortado, coberto ou quebrado ---------- */
+h1, h2, h3 { text-wrap: balance; }
+p, li, dd, figcaption { text-wrap: pretty; }
+.sv dd, .aj-info dd, .nu-num, .cp-valor { white-space: nowrap; }
+/* ficha do tratamento na seção "como podemos ajudar": cada valor numa linha, as caixas se acomodam */
+.aj-info dl { display: flex; flex-wrap: wrap; }
+.aj-info dl div { flex: 1 1 auto; }
+/* carrossel: os casos laterais mostram só a foto; texto cortado na beira não aparece */
+.caso .caso-tit, .caso figcaption, .caso .marca-agua, .caso .selo { transition: opacity .4s; }
+.caso:not(.ativo) .caso-tit, .caso:not(.ativo) figcaption, .caso:not(.ativo) .marca-agua, .caso:not(.ativo) .selo { opacity: 0; }
+/* abertura: o menu não invade a foto em 1280 e 1366 */
+@media (min-width: 961px) and (max-width: 1500px) { .heroi { grid-template-columns: 41% 1fr; } }

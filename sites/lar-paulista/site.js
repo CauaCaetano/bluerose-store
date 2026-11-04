@@ -4,8 +4,8 @@
   'use strict';
   var $ = function (s, el) { return (el || document).querySelector(s); };
   var $$ = function (s, el) { return [].slice.call((el || document).querySelectorAll(s)); };
-  var real = function (v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
-  var mil = function (v) { return 'R$ ' + (Math.round(v / 1000) * 1000).toLocaleString('pt-BR'); };
+  var real = function (v) { return 'R$\u00a0' + Math.round(v).toLocaleString('pt-BR'); };
+  var mil = function (v) { return 'R$\u00a0' + (Math.round(v / 1000) * 1000).toLocaleString('pt-BR'); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); };
   var semAcento = function (s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); };
   var reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -15,24 +15,24 @@
   // cod, fotos, título, tipo, bairro, rua, modo, valor (venda) ou aluguel, condomínio, IPTU/mês, m², quartos, banheiros, vagas, pet, dias no ar, ano, piscina, mobiliado, varanda, corretor
   var COR = ['Ana Lúcia Prado', 'Marcos Teixeira', 'Juliana Okada'];
   var BR = [
-    ['LP-1031', 'i0 sala-lareira cozinha-janela quarto-casal sala-jardim', 'Casa com piscina', 'Casa', 'Nova Campinas', 'Rua Sampaio Ferraz, 418', 'venda', 2450000, 0, 690, 310, 4, 5, 3, 1, 4, 2019, 1, 0, 1, 0],
-    ['LP-1042', 'sala-clara i1 cozinha-branca quarto-casal sala-varanda', 'Apartamento 3 quartos', 'Apartamento', 'Cambuí', 'Rua Maria Monteiro, 812', 'aluguel', 4200, 1180, 260, 118, 3, 2, 2, 1, 2, 2014, 0, 0, 1, 0],
-    ['LP-1047', 'sala-poltrona-amarela i2 cozinha-americana home-office quarto-casal', 'Studio mobiliado', 'Studio', 'Centro', 'Rua Barão de Jaguara, 1.090', 'aluguel', 1950, 520, 85, 38, 1, 1, 0, 0, 1, 2021, 0, 1, 0, 1],
-    ['LP-1018', 'i3 sala-plantas cozinha-branca quarto-casal sala-jantar', 'Apartamento 2 quartos', 'Apartamento', 'Taquaral', 'Av. Dr. Heitor Penteado, 1.540', 'aluguel', 2600, 690, 140, 72, 2, 2, 1, 1, 6, 2009, 0, 0, 1, 2],
-    ['LP-1009', 'sala-jantar i4 cozinha-americana quarto-casal sala-sofa-azul', 'Apartamento 2 quartos', 'Apartamento', 'Barão Geraldo', 'Av. Albino J. B. de Oliveira, 2.210', 'venda', 520000, 480, 150, 68, 2, 1, 1, 1, 9, 2016, 0, 0, 0, 2],
-    ['LP-1003', 'i5 sala-pe-direito cozinha-janela quarto-casal sala-varanda', 'Cobertura duplex', 'Cobertura', 'Cambuí', 'Rua Coronel Quirino, 1.480', 'venda', 1680000, 1650, 520, 196, 3, 4, 3, 1, 12, 2015, 1, 0, 1, 1],
-    ['LP-1036', 'i6 sala-madeira cozinha-branca varanda-entrada quarto-casal', 'Casa térrea', 'Casa', 'Barão Geraldo', 'Rua Eduardo Modesto, 377', 'aluguel', 5800, 0, 420, 210, 3, 3, 4, 1, 3, 2006, 0, 0, 0, 2],
-    ['LP-1027', 'i7 sala-lareira cozinha-janela quarto-casal sala-jardim', 'Casa em condomínio', 'Casa em condomínio', 'Mansões Santo Antônio', 'Rua Hermantino Coelho, 901', 'venda', 1890000, 980, 610, 280, 4, 4, 4, 1, 5, 2017, 1, 0, 1, 0],
-    ['LP-1015', 'i8 sala-pe-direito cozinha-americana quarto-casal home-office', 'Sobrado moderno', 'Sobrado', 'Nova Campinas', 'Rua Jasmim, 230', 'aluguel', 8900, 0, 780, 260, 4, 4, 3, 1, 8, 2020, 0, 0, 1, 1],
-    ['LP-1001', 'i9 sala-lareira sala-pe-direito cozinha-janela sala-jardim', 'Casa de alto padrão', 'Casa em condomínio', 'Mansões Santo Antônio', 'Rua Hermantino Coelho, 1.450', 'venda', 3900000, 1300, 1100, 520, 5, 7, 6, 1, 15, 2018, 1, 0, 1, 1],
-    ['LP-1012', 'i10 sala-sofa-azul cozinha-americana quarto-casal', 'Apartamento 1 quarto', 'Apartamento', 'Centro', 'Av. Francisco Glicério, 1.310', 'aluguel', 1600, 430, 70, 45, 1, 1, 1, 0, 11, 1998, 0, 0, 0, 2],
-    ['LP-1021', 'i11 sala-plantas cozinha-branca quarto-casal sala-clara', 'Apartamento 3 quartos', 'Apartamento', 'Taquaral', 'Rua Uruguai, 640', 'venda', 780000, 820, 230, 104, 3, 2, 2, 0, 7, 2012, 0, 0, 1, 0],
-    ['LP-1049', 'sala-varanda sala-clara cozinha-janela quarto-casal', 'Apartamento com varanda', 'Apartamento', 'Guanabara', 'Av. Brasil, 1.870', 'aluguel', 2900, 610, 120, 64, 2, 2, 1, 1, 2, 2019, 0, 0, 1, 1],
-    ['LP-1033', 'casa-sobrado-azul sala-madeira cozinha-branca varanda-entrada', 'Sobrado 3 quartos', 'Sobrado', 'Taquaral', 'Rua Uruguai, 95', 'aluguel', 4900, 0, 310, 170, 3, 3, 2, 1, 5, 2004, 0, 0, 1, 0],
-    ['LP-1050', 'home-office sala-poltrona-amarela cozinha-americana quarto-casal', 'Studio com escritório', 'Studio', 'Cambuí', 'Rua Guilherme da Silva, 255', 'aluguel', 2350, 640, 95, 42, 1, 1, 1, 0, 1, 2022, 0, 1, 0, 2],
-    ['LP-1029', 'casa-tijolo sala-madeira cozinha-janela varanda-entrada', 'Casa térrea com quintal', 'Casa', 'Barão Geraldo', 'Rua Eduardo Modesto, 1.020', 'venda', 1150000, 0, 380, 230, 3, 3, 3, 1, 6, 2008, 0, 0, 0, 2],
-    ['LP-1044', 'sala-pe-direito sala-jardim cozinha-branca quarto-casal', 'Apartamento garden', 'Apartamento', 'Guanabara', 'Rua Padre Vieira, 410', 'venda', 690000, 720, 190, 96, 3, 2, 2, 1, 3, 2017, 0, 0, 1, 1],
-    ['LP-1024', 'casa-telhado sala-clara cozinha-janela quarto-casal', 'Casa em condomínio', 'Casa em condomínio', 'Taquaral', 'Rua Uruguai, 1.880', 'venda', 1320000, 650, 420, 205, 3, 3, 2, 1, 10, 2013, 1, 0, 0, 0]
+    ['LP-1031', 'i0 sala-lareira cozinha-janela quarto-casal sala-jardim', 'Casa com piscina', 'Casa', 'Bairro Exemplo F', 'Rua de Exemplo, 900', 'venda', 2450000, 0, 690, 310, 4, 5, 3, 1, 4, 2019, 1, 0, 1, 0],
+    ['LP-1042', 'sala-clara i1 cozinha-branca quarto-casal sala-varanda', 'Apartamento 3 quartos', 'Apartamento', 'Bairro Exemplo A', 'Rua de Exemplo, 500', 'aluguel', 4200, 1180, 260, 118, 3, 2, 2, 1, 2, 2014, 0, 0, 1, 0],
+    ['LP-1047', 'sala-poltrona-amarela i2 cozinha-americana home-office quarto-casal', 'Studio mobiliado', 'Studio', 'Bairro Exemplo D', 'Rua de Exemplo, 1900', 'aluguel', 1950, 520, 85, 38, 1, 1, 0, 0, 1, 2021, 0, 1, 0, 1],
+    ['LP-1018', 'i3 sala-plantas cozinha-branca quarto-casal sala-jantar', 'Apartamento 2 quartos', 'Apartamento', 'Bairro Exemplo B', 'Rua de Exemplo, 400', 'aluguel', 2600, 690, 140, 72, 2, 2, 1, 1, 6, 2009, 0, 0, 1, 2],
+    ['LP-1009', 'sala-jantar i4 cozinha-americana quarto-casal sala-sofa-azul', 'Apartamento 2 quartos', 'Apartamento', 'Bairro Exemplo E', 'Rua de Exemplo, 300', 'venda', 520000, 480, 150, 68, 2, 1, 1, 1, 9, 2016, 0, 0, 0, 2],
+    ['LP-1003', 'i5 sala-pe-direito cozinha-janela quarto-casal sala-varanda', 'Cobertura duplex', 'Cobertura', 'Bairro Exemplo A', 'Rua de Exemplo, 1500', 'venda', 1680000, 1650, 520, 196, 3, 4, 3, 1, 12, 2015, 1, 0, 1, 1],
+    ['LP-1036', 'i6 sala-madeira cozinha-branca varanda-entrada quarto-casal', 'Casa térrea', 'Casa', 'Bairro Exemplo E', 'Rua de Exemplo, 1300', 'aluguel', 5800, 0, 420, 210, 3, 3, 4, 1, 3, 2006, 0, 0, 0, 2],
+    ['LP-1027', 'i7 sala-lareira cozinha-janela quarto-casal sala-jardim', 'Casa em condomínio', 'Casa em condomínio', 'Bairro Exemplo G', 'Rua de Exemplo, 1100', 'venda', 1890000, 980, 610, 280, 4, 4, 4, 1, 5, 2017, 1, 0, 1, 0],
+    ['LP-1015', 'i8 sala-pe-direito cozinha-americana quarto-casal home-office', 'Sobrado moderno', 'Sobrado', 'Bairro Exemplo F', 'Rua de Exemplo, 1700', 'aluguel', 8900, 0, 780, 260, 4, 4, 3, 1, 8, 2020, 0, 0, 1, 1],
+    ['LP-1001', 'i9 sala-lareira sala-pe-direito cozinha-janela sala-jardim', 'Casa de alto padrão', 'Casa em condomínio', 'Bairro Exemplo G', 'Rua de Exemplo, 1000', 'venda', 3900000, 1300, 1100, 520, 5, 7, 6, 1, 15, 2018, 1, 0, 1, 1],
+    ['LP-1012', 'i10 sala-sofa-azul cozinha-americana quarto-casal', 'Apartamento 1 quarto', 'Apartamento', 'Bairro Exemplo D', 'Rua de Exemplo, 200', 'aluguel', 1600, 430, 70, 45, 1, 1, 1, 0, 11, 1998, 0, 0, 0, 2],
+    ['LP-1021', 'i11 sala-plantas cozinha-branca quarto-casal sala-clara', 'Apartamento 3 quartos', 'Apartamento', 'Bairro Exemplo B', 'Rua de Exemplo, 600', 'venda', 780000, 820, 230, 104, 3, 2, 2, 0, 7, 2012, 0, 0, 1, 0],
+    ['LP-1049', 'sala-varanda sala-clara cozinha-janela quarto-casal', 'Apartamento com varanda', 'Apartamento', 'Bairro Exemplo C', 'Rua de Exemplo, 700', 'aluguel', 2900, 610, 120, 64, 2, 2, 1, 1, 2, 2019, 0, 0, 1, 1],
+    ['LP-1033', 'casa-sobrado-azul sala-madeira cozinha-branca varanda-entrada', 'Sobrado 3 quartos', 'Sobrado', 'Bairro Exemplo B', 'Rua de Exemplo, 1600', 'aluguel', 4900, 0, 310, 170, 3, 3, 2, 1, 5, 2004, 0, 0, 1, 0],
+    ['LP-1050', 'home-office sala-poltrona-amarela cozinha-americana quarto-casal', 'Studio com escritório', 'Studio', 'Bairro Exemplo A', 'Rua de Exemplo, 1800', 'aluguel', 2350, 640, 95, 42, 1, 1, 1, 0, 1, 2022, 0, 1, 0, 2],
+    ['LP-1029', 'casa-tijolo sala-madeira cozinha-janela varanda-entrada', 'Casa térrea com quintal', 'Casa', 'Bairro Exemplo E', 'Rua de Exemplo, 1400', 'venda', 1150000, 0, 380, 230, 3, 3, 3, 1, 6, 2008, 0, 0, 0, 2],
+    ['LP-1044', 'sala-pe-direito sala-jardim cozinha-branca quarto-casal', 'Apartamento garden', 'Apartamento', 'Bairro Exemplo C', 'Rua de Exemplo, 800', 'venda', 690000, 720, 190, 96, 3, 2, 2, 1, 3, 2017, 0, 0, 1, 1],
+    ['LP-1024', 'casa-telhado sala-clara cozinha-janela quarto-casal', 'Casa em condomínio', 'Casa em condomínio', 'Bairro Exemplo B', 'Rua de Exemplo, 1200', 'venda', 1320000, 650, 420, 205, 3, 3, 2, 1, 10, 2013, 1, 0, 0, 0]
   ];
   var IM = BR.map(function (r) {
     return { id: r[0], f: r[1].split(' '), t: r[2], tipo: r[3], b: r[4], rua: r[5], m: r[6], v: r[7], c: r[8], ip: r[9], a: r[10], q: r[11], bh: r[12], vg: r[13], pet: r[14], d: r[15], ano: r[16], pisc: r[17], mob: r[18], vr: r[19], cor: COR[r[20]] };
@@ -45,25 +45,25 @@
   var hoje = new Date();
   var dataDe = function (d) { var t = new Date(hoje); t.setDate(t.getDate() - d); return t.toLocaleDateString('pt-BR'); };
   var plural = function (n, s, p) { return n + ' ' + (n === 1 ? s : (p || s + 's')); };
-  var BAIRROS = ['Cambuí', 'Taquaral', 'Guanabara', 'Centro', 'Barão Geraldo', 'Nova Campinas', 'Mansões Santo Antônio'];
+  var BAIRROS = ['Bairro Exemplo A', 'Bairro Exemplo B', 'Bairro Exemplo C', 'Bairro Exemplo D', 'Bairro Exemplo E', 'Bairro Exemplo F', 'Bairro Exemplo G'];
 
   var SOBRE = {
-    'Cambuí': 'O Cambuí tem a vida a pé de Campinas: Centro de Convivência, padarias, bares e a Av. Júlio de Mesquita a poucas quadras.',
-    'Taquaral': 'No Taquaral, a Lagoa e o Parque Portugal ficam perto, com pista de caminhada de 3 km e feira de artesanato aos domingos.',
-    'Centro': 'No Centro, o Mercado Municipal, a Rua 13 de Maio e os corredores de ônibus estão a uma caminhada.',
-    'Barão Geraldo': 'Barão Geraldo é o bairro da Unicamp: mais verde e mais calmo, com comércio próprio e ciclovia.',
-    'Nova Campinas': 'A Nova Campinas é residencial e arborizada, colada no Cambuí e a poucos minutos do Shopping Iguatemi.',
-    'Mansões Santo Antônio': 'Mansões Santo Antônio tem ruas largas, condomínios de casas e acesso rápido à Rod. D. Pedro I.',
-    'Guanabara': 'O Guanabara fica entre o Centro e o Taquaral, com a Av. Brasil, mercados e escolas tradicionais por perto.'
+    'Bairro Exemplo A': 'O Bairro Exemplo A tem a vida a pé: praça, padarias, bares e a Av. de Exemplo a poucas quadras.',
+    'Bairro Exemplo B': 'No Bairro Exemplo B, a lagoa e o parque ficam perto, com pista de caminhada de 3 km e feira de artesanato aos domingos.',
+    'Bairro Exemplo D': 'No Bairro Exemplo D, o mercado municipal, a Rua de Exemplo e os corredores de ônibus estão a uma caminhada.',
+    'Bairro Exemplo E': 'O Bairro Exemplo E fica ao lado da universidade: mais verde e mais calmo, com comércio próprio e ciclovia.',
+    'Bairro Exemplo F': 'O Bairro Exemplo F é residencial e arborizado, colado no Bairro Exemplo A e a poucos minutos do shopping.',
+    'Bairro Exemplo G': 'O Bairro Exemplo G tem ruas largas, condomínios de casas e acesso rápido à Rodovia de Exemplo.',
+    'Bairro Exemplo C': 'O Bairro Exemplo C fica entre o Bairro Exemplo D e o Bairro Exemplo B, com a Rua de Exemplo, mercados e escolas tradicionais por perto.'
   };
   var PERTO = {
-    'Cambuí': [['Centro de Convivência', '#2f8a46'], ['Escola Estadual Carlos Gomes', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital Vera Cruz', '#d0393f']],
-    'Taquaral': [['Lagoa do Taquaral', '#2f8a46'], ['Escola municipal', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Pronto-socorro', '#d0393f']],
-    'Centro': [['Bosque dos Jequitibás', '#2f8a46'], ['Escola técnica', '#e0912f'], ['Mercado Municipal', '#7a54d1'], ['Terminal Central', '#1b67ee'], ['Santa Casa', '#d0393f']],
-    'Barão Geraldo': [['Unicamp', '#2f8a46'], ['Escola estadual', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital de Clínicas', '#d0393f']],
-    'Nova Campinas': [['Praça arborizada', '#2f8a46'], ['Colégio particular', '#e0912f'], ['Shopping Iguatemi', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital', '#d0393f']],
-    'Mansões Santo Antônio': [['Parque Ecológico', '#2f8a46'], ['Colégio bilíngue', '#e0912f'], ['Supermercado', '#7a54d1'], ['Acesso à D. Pedro I', '#1b67ee'], ['Hospital', '#d0393f']],
-    'Guanabara': [['Praça do bairro', '#2f8a46'], ['Escola estadual', '#e0912f'], ['Supermercado', '#7a54d1'], ['Corredor da Av. Brasil', '#1b67ee'], ['Hospital', '#d0393f']]
+    'Bairro Exemplo A': [['Praça de Exemplo', '#2f8a46'], ['Escola de Exemplo', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital de Exemplo', '#d0393f']],
+    'Bairro Exemplo B': [['Lagoa de Exemplo', '#2f8a46'], ['Escola municipal', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Pronto-socorro', '#d0393f']],
+    'Bairro Exemplo D': [['Bosque de Exemplo', '#2f8a46'], ['Escola técnica', '#e0912f'], ['Mercado de Exemplo', '#7a54d1'], ['Terminal de Exemplo', '#1b67ee'], ['Hospital de Exemplo', '#d0393f']],
+    'Bairro Exemplo E': [['Universidade de Exemplo', '#2f8a46'], ['Escola estadual', '#e0912f'], ['Supermercado', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital de Exemplo', '#d0393f']],
+    'Bairro Exemplo F': [['Praça arborizada', '#2f8a46'], ['Colégio particular', '#e0912f'], ['Shopping de Exemplo', '#7a54d1'], ['Ponto de ônibus', '#1b67ee'], ['Hospital', '#d0393f']],
+    'Bairro Exemplo G': [['Parque de Exemplo', '#2f8a46'], ['Colégio bilíngue', '#e0912f'], ['Supermercado', '#7a54d1'], ['Acesso à Rodovia de Exemplo', '#1b67ee'], ['Hospital', '#d0393f']],
+    'Bairro Exemplo C': [['Praça do bairro', '#2f8a46'], ['Escola estadual', '#e0912f'], ['Supermercado', '#7a54d1'], ['Corredor da Rua de Exemplo', '#1b67ee'], ['Hospital', '#d0393f']]
   };
   // ---------- estado ----------
   var VAZIO = { modo: 'aluguel', bairro: '', tipos: [], pmin: '', pmax: '', qmin: '', qmax: '', bmin: '', bmax: '', amin: '', amax: '', vmin: '', vmax: '', ymin: '', ymax: '', cmin: '', cmax: '', feats: [], ordem: 'novo', texto: '' };
@@ -106,7 +106,7 @@
   function estimar() {
     var vende = FA.neg.value === 'vender', m = vende ? 'venda' : 'aluguel', b = FA.bairro.value, area = Math.max(15, num(FA.area.value) || 80);
     var base = IM.filter(function (x) { return x.m === m && x.b === b; }), ond = 'no ' + b;
-    if (!base.length) { base = IM.filter(function (x) { return x.m === m; }); ond = 'em Campinas'; }
+    if (!base.length) { base = IM.filter(function (x) { return x.m === m; }); ond = 'em Cidade Exemplo'; }
     var med = base.reduce(function (s, x) { return s + x.v / x.a; }, 0) / base.length, v = med * area;
     FA.querySelector('.estima').innerHTML = 'Imóveis parecidos ' + ond + ' saem por <b>' + (vende ? mil(v * 0.9) + ' a ' + mil(v * 1.1) : real(Math.round(v * 0.9 / 50) * 50) + ' a ' + real(Math.round(v * 1.1 / 50) * 50) + '/mês') + '</b>, pela média de ' + real(med) + '/m² nos nossos anúncios.';
   }
@@ -130,7 +130,8 @@
   };
 
   // ---------- páginas do site (31/10): cada imóvel tem a sua página, e há lista, sobre, anunciar, contato e privacidade ----------
-  var paginaDe = function (x) { return 'imovel-' + semAcento(x.t + ' ' + x.b).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.html'; };
+  var ARQ_B = { 'Bairro Exemplo A': 'cambui', 'Bairro Exemplo B': 'taquaral', 'Bairro Exemplo C': 'guanabara', 'Bairro Exemplo D': 'centro', 'Bairro Exemplo E': 'barao geraldo', 'Bairro Exemplo F': 'nova campinas', 'Bairro Exemplo G': 'mansoes santo antonio' };
+  var paginaDe = function (x) { return 'imovel-' + semAcento(x.t + ' ' + ARQ_B[x.b]).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.html'; };
   var SEM_CMP = !$('.palco');
   // menu do celular (gaveta), igual em todas as páginas
   var gav = $('#gaveta'), btMenu = $('.bt-menu');
@@ -240,7 +241,7 @@
     function render() {
       var l = filtrar(estado()), pags = Math.max(1, Math.ceil(l.length / POR_P)); pag = Math.min(pag, pags);
       var neg = LF.modo.value === 'aluguel' ? ' para alugar' : LF.modo.value === 'venda' ? ' à venda' : '';
-      $('#conta-lista').innerHTML = '<b>' + l.length + '</b> ' + (l.length === 1 ? 'imóvel' : 'imóveis') + neg + (LF.bairro.value ? ' no ' + LF.bairro.value : '') + ' em Campinas';
+      $('#conta-lista').innerHTML = '<b>' + l.length + '</b> ' + (l.length === 1 ? 'imóvel' : 'imóveis') + neg + (LF.bairro.value ? ' no ' + LF.bairro.value : '') + ' em Cidade Exemplo';
       $('.cards').innerHTML = l.length ? l.slice((pag - 1) * POR_P, pag * POR_P).map(cardHTML).join('') :
         '<li class="vazio"><b>Nenhum imóvel com esses filtros agora.</b>Tire um filtro ou peça para avisarmos quando entrar um assim.<div class="linha-bts"><button type="button" class="bt-borda" data-limpar-lista>Limpar filtros</button><a class="bt-azul" href="#" data-wa="Olá, Lar Paulista! Quero ser avisado quando entrar um imóvel assim em Campinas.">Avisar quando entrar</a></div></li>';
       var h = '';
@@ -310,7 +311,7 @@
   }
   function somaHTML(x) {
     return x.m === 'aluguel'
-      ? 'aluguel <b>' + real(x.v) + '</b> + cond. <b>' + real(x.c) + '</b> + IPTU <b>' + real(x.ip) + '</b> + seguro <b>R$ ' + SEGURO + '</b>'
+      ? 'aluguel <b>' + real(x.v) + '</b> + cond. <b>' + real(x.c) + '</b> + IPTU <b>' + real(x.ip) + '</b> + seguro <b>R$\u00a0' + SEGURO + '</b>'
       : '1ª parcela <b>~' + real(parcela(x)) + '</b>/mês com 20% de entrada · cond. <b>' + real(x.c) + '</b> · IPTU <b>' + real(x.ip) + '</b>/mês';
   }
   function cardHTML(x) {
@@ -322,7 +323,7 @@
       '<button type="button" class="cor" data-fav="' + x.id + '" aria-pressed="' + fav + '" aria-label="Salvar imóvel">' + IC.cor + '</button>' +
       (nf > 1 ? '<button type="button" class="seta seta-a" data-foto="-1" aria-label="Foto anterior">‹</button><button type="button" class="seta seta-p" data-foto="1" aria-label="Próxima foto">›</button><div class="pontos" aria-hidden="true">' + x.f.map(function (n, k) { return '<i' + (k ? '' : ' class="on"') + '></i>'; }).join('') + '</div>' : '') +
       '</div><div class="c-corpo"><p class="c-tipo">' + x.tipo + ' · ' + x.ano + '</p><p class="c-preco">' + precoHTML(x) + '</p>' +
-      '<p class="c-rua"><a href="' + paginaDe(x) + '">' + esc(x.rua) + '</a></p><p class="c-bairro">' + x.b + ', Campinas/SP</p><p class="c-soma">' + somaHTML(x) + '</p></div>' +
+      '<p class="c-rua"><a href="' + paginaDe(x) + '">' + esc(x.rua) + '</a></p><p class="c-bairro">' + x.b + ', Cidade Exemplo</p><p class="c-soma">' + somaHTML(x) + '</p></div>' +
       '<div class="c-icones"><span>' + IC.cama + plural(x.q, 'quarto') + '</span><span>' + IC.banho + plural(x.bh, 'banh.', 'banh.') + '</span><span>' + IC.area + x.a + ' m²</span><span>' + IC.carro + plural(x.vg, 'vaga') + '</span></div>' +
       '<div class="c-pe"><p>Cód. ' + x.id + '<br>' + (x.cor.indexOf('Marcos') === 0 ? 'Corretor ' : 'Corretora ') + x.cor + '</p><p>' + (x.d <= 3 ? '<span class="verde">Novo no site</span>' : 'Há ' + x.d + ' dias no site') + '<br>Anunciado em ' + dataDe(x.d) + '</p></div></li>';
   }
@@ -345,7 +346,7 @@
       for (var i = 1; i <= pags; i++) h += '<button type="button" data-pag="' + i + '"' + (i === pagina ? ' aria-current="page"' : '') + '>' + i + '</button>';
       pg.innerHTML = h + '<button type="button" data-pag="' + (pagina + 1) + '"' + (pagina >= pags ? ' disabled' : '') + '>Próxima</button>';
     }
-    $('#conta').innerHTML = '<b>' + lista.length + '</b> ' + (lista.length === 1 ? 'imóvel ' : 'imóveis ') + modoTx + ' em Campinas';
+    $('#conta').innerHTML = '<b>' + lista.length + '</b> ' + (lista.length === 1 ? 'imóvel ' : 'imóveis ') + modoTx + ' em Cidade Exemplo';
     $('.pag-de').textContent = vista === 'hibrido' ? 'Todos na lista ao lado do mapa' : 'Página ' + pagina + ' de ' + pags;
     $$('.menu a[data-modo]').forEach(function (a) { if (a.dataset.modo === S.modo) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     var nf = nFiltros(S), bf = $('.n-f'); bf.hidden = !nf; bf.textContent = nf;
@@ -359,7 +360,7 @@
     if (num(S.qmin) !== null) p.push(num(S.qmin) + '+ quartos');
     if (num(S.pmax) !== null) p.push('até ' + real(num(S.pmax)) + (S.modo === 'aluguel' ? '/mês' : ''));
     if (S.feats.indexOf('pet') > -1) p.push('que aceite pet');
-    return 'Olá, Lar Paulista! Quero ser avisado quando entrar imóvel assim: ' + p.join(', ') + ', em Campinas.';
+    return 'Olá, Lar Paulista! Quero ser avisado quando entrar imóvel assim: ' + p.join(', ') + ', em Cidade Exemplo.';
   }
   function contarSalvos() {
     var n = favs.length, b = $('.n-sv'); b.hidden = !n; b.textContent = n; $('.n-sv2').textContent = n;
@@ -371,8 +372,8 @@
 
   // ---------- busca com dica que roda ----------
   var DICAS = {
-    aluguel: ['endereço ou código', 'aluguel no Cambuí', '2 quartos até 4 mil', 'casa que aceita pet', 'studio mobiliado', 'imóveis mais baratos'],
-    venda: ['endereço ou código', 'casa com piscina', 'apartamento no Taquaral', 'até 800 mil', '3 quartos em Barão Geraldo', 'imóveis maiores']
+    aluguel: ['endereço ou código', 'aluguel por bairro', '2 quartos até 4 mil', 'casa que aceita pet', 'studio mobiliado', 'imóveis mais baratos'],
+    venda: ['endereço ou código', 'casa com piscina', 'apartamento', 'até 800 mil', '3 quartos', 'imóveis maiores']
   };
   var dk = 0, dicaT = null;
   function rodaDica(reinicia) {
@@ -437,7 +438,7 @@
 
   // ---------- mapa ilustrativo de Campinas ----------
   var NS = 'http://www.w3.org/2000/svg';
-  var CENTRO = { 'Cambuí': [505, 415], 'Centro': [415, 445], 'Guanabara': [440, 345], 'Taquaral': [595, 318], 'Nova Campinas': [578, 478], 'Mansões Santo Antônio': [705, 232], 'Barão Geraldo': [560, 112] };
+  var CENTRO = { 'Bairro Exemplo A': [505, 415], 'Bairro Exemplo D': [415, 445], 'Bairro Exemplo C': [440, 345], 'Bairro Exemplo B': [595, 318], 'Bairro Exemplo F': [578, 478], 'Bairro Exemplo G': [705, 232], 'Bairro Exemplo E': [560, 112] };
   var OFF = [[0, 0], [52, -34], [-50, 30], [44, 40], [-46, -36]];
   var svg = $('.mapa-svg'), G = $('.mapa-g'), CX = $('#mapa');
   var cam = { k: 1.5, tx: 0, ty: 0 }, camada = 'ruas', pinSel = null;
@@ -455,14 +456,14 @@
     // bairros (para o mapa de custo): desenhados depois das ruas, por cima
     var gb = el('g', { class: 'bairros' });
     Object.keys(CENTRO).forEach(function (b, bi) {
-      var c = CENTRO[b], r = rnd(bi * 97 + 13), pts = [], R = b === 'Barão Geraldo' || b === 'Mansões Santo Antônio' ? 92 : b === 'Centro' || b === 'Cambuí' ? 58 : 70;
+      var c = CENTRO[b], r = rnd(bi * 97 + 13), pts = [], R = b === 'Bairro Exemplo E' || b === 'Bairro Exemplo G' ? 92 : b === 'Bairro Exemplo D' || b === 'Bairro Exemplo A' ? 58 : 70;
       for (var i = 0; i < 14; i++) { var th = i / 14 * Math.PI * 2, rr = R * (0.82 + r() * 0.3); pts.push((c[0] + Math.cos(th) * rr).toFixed(1) + ',' + (c[1] + Math.sin(th) * rr * 0.85).toFixed(1)); }
       el('polygon', { points: pts.join(' '), class: 'm-bairro', 'data-b': b }, gb);
     });
     // ruas de bairro
     var gr = el('g', {}, fundo), linhas = [];
     Object.keys(CENTRO).forEach(function (b, bi) {
-      var c = CENTRO[b], ang = (bi * 23 + 8) * Math.PI / 180, R = b === 'Barão Geraldo' || b === 'Mansões Santo Antônio' ? 95 : 72;
+      var c = CENTRO[b], ang = (bi * 23 + 8) * Math.PI / 180, R = b === 'Bairro Exemplo E' || b === 'Bairro Exemplo G' ? 95 : 72;
       [ang, ang + Math.PI / 2].forEach(function (a) {
         var dx = Math.cos(a), dy = Math.sin(a), px = -dy, py = dx;
         for (var o = -R + 8; o < R; o += 15) { var h = Math.sqrt(R * R - o * o); linhas.push('M' + (c[0] + px * o - dx * h).toFixed(1) + ' ' + (c[1] + py * o - dy * h).toFixed(1) + 'L' + (c[0] + px * o + dx * h).toFixed(1) + ' ' + (c[1] + py * o + dy * h).toFixed(1)); }
@@ -479,8 +480,8 @@
     el('g', { class: 'm-sobre' }, svg);
     camadaBairros();
   }
-  var ROTULOS = [['Lagoa do Taquaral', 598, 334, 'p'], ['Unicamp', 560, 66, 'p'], ['Bosque dos Jequitibás', 410, 568, 'p'], ['Shopping Iguatemi', 690, 520, 'p'], ['Parque Ecológico', 875, 168, 'p']];
-  var PLACAS = [['SP-330', 296, 250], ['SP-065', 760, 160], ['SP-330', 190, 545]];
+  var ROTULOS = [['Lagoa de Exemplo', 598, 272, 'p'], ['Universidade de Exemplo', 560, 66, 'p'], ['Bosque de Exemplo', 410, 568, 'p'], ['Shopping de Exemplo', 690, 520, 'p'], ['Parque de Exemplo', 875, 168, 'p']];
+  var PLACAS = [['UF-000', 296, 250], ['UF-000', 760, 160], ['UF-000', 190, 545]];
   function tela(x, y) { return [cam.tx + cam.k * x, cam.ty + cam.k * y]; }
   function aplicaCam() { G.setAttribute('transform', 'translate(' + cam.tx.toFixed(1) + ' ' + cam.ty.toFixed(1) + ') scale(' + cam.k.toFixed(3) + ')'); pinos(); }
   function visivel() {
@@ -489,7 +490,7 @@
   }
   function mapaEnquadra(px, py, k) {
     var v = visivel(); if (!v) return;
-    var kk = k || Math.max(0.7, Math.min(v.w / 380, v.h / 470, 2.4));
+    var kk = k || Math.max(0.7, Math.min(v.w / 450, v.h / 470, 2.4));
     var cx = px == null ? 565 : px, cy = py == null ? 345 : py;
     cam.k = kk; cam.tx = 500 - kk * cx; cam.ty = 350 - kk * cy; aplicaCam();
   }
@@ -505,7 +506,7 @@
     sob.innerHTML = '';
     ROTULOS.forEach(function (r) { var p = tela(r[1], r[2]); el('text', { x: p[0], y: p[1], 'text-anchor': 'middle', class: 'm-rot m-rot-p' }, sob).textContent = r[0]; });
     PLACAS.forEach(function (r) { var p = tela(r[1], r[2]), g = el('g', { transform: 'translate(' + p[0] + ' ' + p[1] + ')' }, sob); el('rect', { x: -20, y: -8, width: 40, height: 16, rx: 3, class: 'm-placa' }, g); el('text', { x: 0, y: 4, 'text-anchor': 'middle', class: 'm-esc' }, g).textContent = r[0]; });
-    Object.keys(CENTRO).forEach(function (b) { var p = tela(CENTRO[b][0], CENTRO[b][1] + 46); el('text', { x: p[0], y: p[1], 'text-anchor': 'middle', class: 'm-rot' }, sob).textContent = b; });
+    Object.keys(CENTRO).forEach(function (b) { var p = tela(CENTRO[b][0], CENTRO[b][1] + 46); el('text', { x: p[0] - (b === 'Bairro Exemplo A' ? 16 * cam.k : 0), y: p[1], 'text-anchor': 'middle', class: 'm-rot' }, sob).textContent = b; });
     var grupos = {};
     lista.forEach(function (x) { (grupos[x.b] = grupos[x.b] || []).push(x); });
     Object.keys(grupos).forEach(function (b) {
@@ -680,7 +681,7 @@
       '<div class="mosaico">' + fotos5.slice(0, 5).map(function (n, k) { return '<button type="button" data-galeria="' + k + '" aria-label="Abrir foto ' + (k + 1) + '"><img src="' + foto(n) + '" alt="' + (k ? 'Foto ' + (k + 1) + ' de ' : '') + esc(x.t) + '"' + (k ? ' loading="lazy"' : '') + '>' + (k === 4 ? '<span class="ver-todas">Ver as ' + x.f.length + ' fotos</span>' : '') + '</button>'; }).join('') + '</div>' +
       '<nav class="fc-abas" aria-label="Seções do imóvel"><a href="#fc-geral" class="on">Visão geral</a><a href="#fc-custo">Custo</a><a href="#fc-detalhes">Detalhes</a><a href="#fc-bairro">Bairro</a><a href="#fc-comp">Comparáveis</a><a href="#fc-contato">Contato</a></nav>' +
       '<div class="fc-grade"><div>' +
-      '<section class="fc-sec" id="fc-geral"><h1 id="fc-t">' + esc(x.rua) + '</h1><p class="fc-end">' + x.b + ', Campinas/SP · ' + esc(x.t) + '</p>' +
+      '<section class="fc-sec" id="fc-geral"><h1 id="fc-t">' + esc(x.rua) + '</h1><p class="fc-end">' + x.b + ', Cidade Exemplo · ' + esc(x.t) + '</p>' +
       '<div class="stats"><div><b>' + x.q + '</b><span>' + (x.q === 1 ? 'quarto' : 'quartos') + '</span></div><div><b>' + x.bh + '</b><span>' + (x.bh === 1 ? 'banheiro' : 'banheiros') + '</span></div><div><b>' + x.a + '</b><span>m² úteis</span></div><div><b>' + x.ano + '</b><span>construído</span></div></div>' +
       '<div class="chips"><span>' + x.tipo + '</span><span>' + plural(x.vg, 'vaga') + '</span>' + (x.pet ? '<span>Aceita pet</span>' : '') + (x.pisc ? '<span>Piscina</span>' : '') + (x.vr ? '<span>Varanda</span>' : '') + (x.mob ? '<span>Mobiliado</span>' : '') + '<span>Cód. ' + x.id + '</span></div>' +
       '<p class="fc-desc">' + descricao(x) + '</p></section>' +
@@ -691,11 +692,11 @@
           '<div class="soma-tab" style="margin-top:14px"><div><span>Condomínio</span><span>' + real(x.c) + '</span></div><div><span>IPTU por mês</span><span>' + real(x.ip) + '</span></div><div class="tot"><span>1ª parcela + taxas</span><span class="r-tot"></span></div><div><span>ITBI e cartório (estimativa de 4%)</span><span>' + mil(x.v * 0.04) + '</span></div></div>') + '</section>' +
       '<section class="fc-sec" id="fc-detalhes"><h2>Detalhes de ' + esc(x.rua) + '</h2><dl class="dados"><h3>Anúncio</h3>' +
       [['Negócio', aluga ? 'Aluguel' : 'Venda'], ['Código', x.id], ['Preço', aluga ? real(x.v) + '/mês' : mil(x.v)], ['Anunciado em', dataDe(x.d)], ['Atualizado em', hoje.toLocaleDateString('pt-BR')], [x.cor.indexOf('Marcos') === 0 ? 'Corretor' : 'Corretora', x.cor]].map(function (p) { return '<div><dt>' + p[0] + '</dt><dd>' + p[1] + '</dd></div>'; }).join('') +
-      '<h3>Imóvel</h3>' + [['Tipo', x.tipo], ['Ano de construção', x.ano], ['Área útil', x.a + ' m²'], ['Quartos', x.q], ['Banheiros', x.bh], ['Vagas', x.vg], ['Condomínio', x.c ? real(x.c) + '/mês' : 'Não tem'], ['IPTU', real(x.ip) + '/mês (' + real(x.ip * 12) + '/ano)']].map(function (p) { return '<div><dt>' + p[0] + '</dt><dd>' + p[1] + '</dd></div>'; }).join('') +
+      '<h3>Imóvel</h3>' + [['Tipo', x.tipo], ['Ano de construção', x.ano], ['Área útil', x.a + '\u00a0m²'], ['Quartos', x.q], ['Banheiros', x.bh], ['Vagas', x.vg], ['Condomínio', x.c ? real(x.c) + '/mês' : 'Não tem'], ['IPTU', real(x.ip) + '/mês (' + real(x.ip * 12) + '/ano)']].map(function (p) { return '<div><dt>' + p[0] + '</dt><dd>' + p[1] + '</dd></div>'; }).join('') +
       '<h3>Características</h3>' + [['Aceita pet', x.pet ? 'Sim' : 'Não'], ['Mobiliado', x.mob ? 'Sim' : 'Não'], ['Piscina', x.pisc ? 'Sim' : 'Não'], ['Varanda', x.vr ? 'Sim' : 'Não']].map(function (p) { return '<div><dt>' + p[0] + '</dt><dd>' + p[1] + '</dd></div>'; }).join('') + '</dl></section>' +
       '<section class="fc-sec" id="fc-bairro"><h2>' + x.b + ' <small>' + SOBRE[x.b] + '</small></h2><div class="perto"><ul>' + PERTO[x.b].map(function (p) { var m = Math.round(150 + r() * 1300); return '<li><span style="--c:' + p[1] + '">' + p[0] + '</span><span>' + (m < 1000 ? m + ' m' : (m / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' km') + ' · ' + Math.max(2, Math.round(m / 80)) + ' min a pé</span></li>'; }).join('') + '</ul>' + mapaPerto(x) + '</div></section>' +
-      '<section class="fc-sec" id="fc-comp"><h2>Comparáveis ' + (aluga ? 'para alugar' : 'à venda') + ' <small>' + comps.length + ' anúncios com custo parecido</small></h2><div class="tab-rola"><table class="tabela"><thead><tr><th>Imóvel</th><th>' + (aluga ? 'Custo/mês' : 'Preço') + '</th><th>Área</th><th>R$/m²</th><th>Quartos</th><th>No site</th></tr></thead><tbody>' +
-      comps.map(function (y) { var pm = (aluga ? custo(y) : y.v) / y.a, pmx = (aluga ? tot : x.v) / x.a; return '<tr><td><a class="link mini" href="' + paginaDe(y) + '"><img src="' + foto(y.f[0]) + '" alt=""><span>' + esc(y.t) + '<small>' + y.b + '</small></span></a></td><td>' + (aluga ? real(custo(y)) : mil(y.v)) + difTag(custo(y), tot, aluga ? real : mil) + '</td><td>' + y.a + ' m²' + difTag(y.a, x.a, function (v) { return v; }) + '</td><td>' + real(pm) + difTag(Math.round(pm), Math.round(pmx), real) + '</td><td>' + y.q + '</td><td>' + plural(y.d, 'dia') + '</td></tr>'; }).join('') + '</tbody></table></div></section>' +
+      '<section class="fc-sec" id="fc-comp"><h2>Comparáveis ' + (aluga ? 'para alugar' : 'à venda') + ' <small>' + comps.length + ' anúncios com custo parecido</small></h2><div class="tab-rola"><table class="tabela tb-comp"><thead><tr><th>Imóvel</th><th>' + (aluga ? 'Custo/mês' : 'Preço') + '</th><th>Área</th><th>R$/m²</th><th>Quartos</th><th>No site</th></tr></thead><tbody>' +
+      comps.map(function (y) { var pm = (aluga ? custo(y) : y.v) / y.a, pmx = (aluga ? tot : x.v) / x.a; return '<tr><td><a class="link mini" href="' + paginaDe(y) + '"><img src="' + foto(y.f[0]) + '" alt=""><span>' + esc(y.t) + '<small>' + y.b + '</small></span></a></td><td>' + (aluga ? real(custo(y)) : mil(y.v)) + difTag(custo(y), tot, aluga ? real : mil) + '</td><td data-l="Área">' + y.a + '\u00a0m²' + difTag(y.a, x.a, function (v) { return v; }) + '</td><td data-l="R$/m²">' + real(pm) + difTag(Math.round(pm), Math.round(pmx), real) + '</td><td data-l="Quartos">' + y.q + '</td><td data-l="No site">' + plural(y.d, 'dia') + '</td></tr>'; }).join('') + '</tbody></table></div></section>' +
       '</div><aside class="caixa-preco" aria-label="Preço e ações"><div class="cx-l1"><b>' + (aluga ? real(tot) + '<small>/mês</small>' : mil(x.v) + '<small>(' + real(x.v / x.a) + '/m²)</small>') + '</b>' + (x.d <= 3 ? '<span class="verde">Novo no site</span>' : '<span>Há ' + x.d + ' dias</span>') + '</div>' +
       '<div class="cx-l2"><span>' + (aluga ? 'Tudo incluso · aluguel ' + real(x.v) : 'Parcela estimada') + '</span><a href="#fc-custo">' + (aluga ? 'ver a conta' : real(parcela(x)) + '/mês') + '</a></div>' +
       '<button type="button" class="bt-azul" data-ir-contato="visita">Agendar visita</button><button type="button" class="cx-perg" data-ir-contato="pergunta">Fazer uma pergunta</button>' +

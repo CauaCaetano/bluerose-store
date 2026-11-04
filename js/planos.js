@@ -18,3 +18,5 @@ window.BR_PAGAMENTO = {
   "a-sis-imobiliaria": "https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=d0d3e68450864204b7848442890cd32e",
   "a-sis-oficina": "https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=df39d161dcfb4ff38b9495ccea84b8cd"
 };
+// Isolamento (03/11/2026): fora do site oficial os links de pagamento ficam desligados (nada é cobrado no teste).
+if (!/(^|\.)bluerose-store\.com$/.test(location.hostname)) Object.keys(window.BR_PAGAMENTO).forEach(function (k) { window.BR_PAGAMENTO[k] = '#pagamento-desligado-no-teste'; });

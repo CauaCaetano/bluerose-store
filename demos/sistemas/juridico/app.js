@@ -38,7 +38,7 @@ const uteisAte = (d) => { if (d < hoje()) return -1; let n = 0, x = hoje(); whil
 
 // ---------------------------------------------------------------- DJEN: captura das intimações (API pública do CNJ, sem chave)
 // a consulta passa por uma função do Supabase (o DJEN não aceita chamadas direto do navegador)
-const DJEN = 'https://yihnfzwtkqdfnwziutqa.supabase.co/functions/v1/nexo-djen';
+const DJEN = (/(^|\.)bluerose-store\.com$/.test(location.hostname) ? 'https://yihnfzwtkqdfnwziutqa.supabase.co' : 'https://banco-desligado-no-teste.invalid') + '/functions/v1/nexo-djen'; // teste não chama o servidor real
 const soDigitos = (s) => String(s || '').replace(/\D/g, '');
 const limparTexto = (html) => { const d = new DOMParser().parseFromString(String(html || '').replace(/<br\s*\/?>/gi, '\n'), 'text/html'); return (d.body.textContent || '').replace(/\n{3,}/g, '\n\n').trim(); };
 async function capturarDJEN(a, { silencioso = false } = {}) {

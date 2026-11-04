@@ -29,7 +29,7 @@ section { padding: clamp(56px, 8vw, 120px) clamp(16px, 5vw, 72px); max-width: 12
 
 .capa { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: clamp(20px, 4vw, 56px); align-items: end; padding-top: clamp(24px, 4vw, 48px); }
 .capa figure { margin: 0; } .capa img { width: 100%; aspect-ratio: 4 / 3.2; object-fit: cover; }
-.capa-txt { padding-bottom: 8px; } .capa h1 { margin-left: -.5em; position: relative; text-shadow: 0 2px 30px rgba(239, 230, 218, .7); }
+.capa-txt { padding-bottom: 8px; } .capa h1 { position: relative; text-shadow: 0 2px 30px rgba(239, 230, 218, .7); }
 .handle { color: var(--tx-2); font-size: .9rem; } .lede { font-size: 1.08rem; color: var(--tx); }
 @media (max-width: 860px) { .capa { grid-template-columns: 1fr; } .capa h1 { margin-left: 0; } }
 
@@ -91,3 +91,10 @@ section { padding: clamp(56px, 8vw, 120px) clamp(16px, 5vw, 72px); max-width: 12
   body { background: #fff; } section { padding: 18px 0; break-inside: avoid; } .pacotes { background: #fff; }
   .capa img { max-height: 380px; } .nu-publico { background: #f3ebe0; color: var(--tx); } .nu-publico b { color: var(--mocha); }
 }
+
+/* correção visual: âncoras abaixo da barra, valores inteiros e fios finos da Bodoni reforçados (o 4 parecia 1) */
+html { scroll-padding-top: 76px; }
+h1, h2, h3, .lb-grade figcaption b { text-wrap: balance; }
+.nu-lista dd, .cs-num, .pacote .pr, .pc-mais li > span:nth-child(2), .pc-linhas span, .pc-total > p b { white-space: nowrap; }
+.nu-lista dd, .cs-num, .pacote .pr, .pc-total > p b, .nu-publico b { -webkit-text-stroke: .4px currentColor; }
+@media print { .nu-lista dd, .cs-num, .pacote .pr, .pc-total > p b, .nu-publico b { -webkit-text-stroke: 0; } }
