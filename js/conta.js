@@ -150,6 +150,55 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       .then(function (j) { location.href = j.link; return j; });
   }
 
+  // ------------------------------------------------ Pix do Mercado Pago: QR Code na tela e liberação assim que o pagamento entra
+  function pixDisponivel() { return /^pt-br/i.test(document.documentElement.lang || 'pt-BR'); } // fora do Brasil o pagamento é pelo PayPal
+  var pixEspera = null;
+  function pararPix() { if (pixEspera) { clearTimeout(pixEspera); pixEspera = null; } }
+  function pix(produto, nome, troca) {
+    pararPix();
+    return exigirLogin('Para pagar por Pix, entre ou crie a sua conta.').then(function () {
+      var d = janela('<span class="eyebrow">Pagamento por Pix</span><h3 id="conta-t">' + esc(nome) + '</h3><p class="conta-sub" role="status">Gerando o QR Code…</p>');
+      return chamar({ acao: 'pix', produto: produto }).then(function (j) { mostrarPix(d, j, nome, troca); }).catch(function (x) {
+        d.querySelector('.conta-sub').textContent = x.message || 'Não foi possível gerar o Pix agora. Tente de novo em alguns minutos.';
+      });
+    });
+  }
+  function mostrarPix(d, j, nome, troca) {
+    var b64 = /^[A-Za-z0-9+/=]+$/.test(j.qr_base64 || '') ? j.qr_base64 : '';
+    var hora = new Date(j.expira), val = isNaN(hora) ? '' : hora.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    janela('<span class="eyebrow">Pagamento por Pix</span><h3 id="conta-t">' + esc(nome) + '</h3>' +
+      '<p class="conta-pix-valor">' + reais(j.valor) + '</p>' +
+      (b64 ? '<img class="conta-pix-qr" width="220" height="220" alt="QR Code do Pix de ' + esc(reais(j.valor)) + '" src="data:image/png;base64,' + b64 + '">' : '') +
+      '<p class="conta-pix-ajuda">Abra o app do seu banco, escolha Pix e leia o QR Code. No celular, copie o código abaixo e use o Pix copia e cola.</p>' +
+      '<label class="conta-pix-cod">Pix copia e cola<textarea readonly rows="3" data-pix-cod>' + esc(j.qr_code) + '</textarea></label>' +
+      '<button type="button" class="btn btn-primary conta-pix-copiar" data-pix-copiar>Copiar o código</button>' +
+      '<p class="conta-pix-estado" role="status" data-pix-estado>Aguardando o pagamento…' + (val ? ' Este código vale até ' + esc(val) + '.' : '') + '</p>' +
+      (troca ? '<p class="conta-pix-ajuda">Quando o Pix for confirmado, a cobrança no cartão deste sistema é cancelada e o novo período começa nesse dia.</p>' : '') +
+      '<p class="conta-pix-ajuda">Sem cobrança automática: o acesso vale pelo período pago e você renova com um novo Pix em <a href="' + raiz + 'conta.html">Minha conta</a>.</p>');
+    var campo = d.querySelector('[data-pix-cod]'), estado = d.querySelector('[data-pix-estado]'), bc = d.querySelector('[data-pix-copiar]');
+    bc.onclick = function () {
+      campo.select();
+      var feito = function () { bc.textContent = 'Código copiado'; setTimeout(function () { bc.textContent = 'Copiar o código'; }, 2500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(j.qr_code).then(feito, function () { document.execCommand('copy'); feito(); });
+      else { document.execCommand('copy'); feito(); }
+    };
+    var tentativas = 0;
+    (function conferir() {
+      pixEspera = setTimeout(function () {
+        if (!d.open || tentativas++ > 360) return;
+        chamar({ acao: 'pix_conferir', id: j.id }).then(function (r) {
+          if (!d.open) return;
+          if (r.status !== 'ativa' || String(r.pago_ate || '') === String(j.pago_ate || '')) return conferir();
+          acessoCache = null;
+          estado.className = 'conta-pix-estado ok';
+          estado.innerHTML = 'Pagamento confirmado. Obrigado! <a href="' + raiz + 'app/' + encodeURIComponent(r.app) + '/">Abrir o sistema</a>';
+          d.dispatchEvent(new CustomEvent('pix-confirmado'));
+        }).catch(conferir);
+      }, 5000);
+    })();
+    d.addEventListener('close', pararPix, { once: true });
+  }
+
   // ------------------------------------------------ teste grátis de 7 dias, com o cartão cadastrado no Mercado Pago
   // sistemas que a pessoa já pode abrir (teste valendo, assinatura, compra ou cortesia): lido uma vez por página
   var acessoCache = null;
@@ -180,9 +229,9 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
         '<ul class="conta-lista">' + oferta + '<li>Assinatura de <b>' + reais(n > 0 ? metade : mensal) + '/mês</b> no cartão, pelo Mercado Pago. Sem fidelidade.</li><li>O sistema fica liberado assim que o pagamento é confirmado.</li><li>Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>.</li></ul>' :
         '<ul class="conta-lista"><li>Use com os dados da sua empresa por <b>7 dias sem pagar nada</b>.</li><li>Para começar, <b>cadastre o cartão no Mercado Pago</b>. Nada é cobrado nos 7 dias.</li><li>Se não cancelar, a assinatura de ' + reais(mensal) + '/mês começa no 8º dia, com tudo o que você cadastrou. Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>.</li>' + oferta + '</ul>') +
         '<form class="conta-form" novalidate>' + (true ? '<label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="' + esc(s.user.email) + '" required><small>' + (direto ? 'A assinatura fica na conta do Mercado Pago com este e-mail.' : 'O cartão do teste fica na conta do Mercado Pago com este e-mail.') + '</small></label>' : '') +
-        '<label class="conta-aceite"><input type="checkbox" name="ok" required> <span>Tenho 18 anos ou mais. Li e aceito os <a href="' + raiz + 'termos.html" target="_blank" rel="noopener">Termos de Serviço</a>' + (direto ? ' e a cobrança mensal' : ' e a cobrança mensal depois dos 7 dias, se eu não cancelar') + '.</span></label>' +
+        '<label class="conta-aceite"><input type="checkbox" name="ok" required> <span>Tenho 18 anos ou mais. Li e aceito os <a href="' + raiz + 'termos.html" target="_blank" rel="noopener">Termos de Serviço</a>' + (direto ? ' e, no cartão, a cobrança mensal' : ' e a cobrança mensal depois dos 7 dias, se eu não cancelar') + '.</span></label>' +
         '<p class="conta-erro" role="alert"></p><button class="btn btn-primary" type="submit">' + (direto ? 'Assinar agora' : 'Começar o teste grátis') + '</button>' +
-        (direto ? '' : '<button type="button" class="conta-link conta-direto" data-direto>Prefiro assinar agora</button>') + '</form>');
+        (direto ? (pixDisponivel() ? '<button type="button" class="btn btn-ghost" data-pix>Pagar com Pix</button><small class="conta-pix-nota">No Pix não há cobrança automática: o acesso vale pelo período pago e você renova com um novo Pix.</small>' : '') : '<button type="button" class="conta-link conta-direto" data-direto>' + (pixDisponivel() ? 'Prefiro assinar agora, no cartão ou no Pix' : 'Prefiro assinar agora') + '</button>') + '</form>');
       var f = d.querySelector('form'), erro = d.querySelector('.conta-erro'), bt = f.querySelector('button');
       f.onsubmit = function (e) {
         e.preventDefault(); if (!f.reportValidity()) return;
@@ -196,6 +245,12 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
             erro.querySelector('[data-assinar]').onclick = function (ev) { ev.preventDefault(); d.close ? d.close() : null; teste(app, nome, mensal, true); };
           } else erro.textContent = x.message;
         });
+      };
+      var bp = f.querySelector('[data-pix]');
+      if (bp) bp.onclick = function () {
+        erro.textContent = '';
+        if (!f.ok.checked) { erro.textContent = 'Marque a caixa de aceite dos Termos para continuar.'; f.ok.focus(); return; }
+        pix('a-sis-' + app, nome, false);
       };
       var bd = f.querySelector('[data-direto]');
       if (bd) bd.onclick = function () { if (d.close) d.close(); teste(app, nome, mensal, true); };
@@ -233,6 +288,6 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ajustarBotoes); else ajustarBotoes();
 
-  window.BR_CONTA = { sb: sb, exigirLogin: exigirLogin, pagar: pagar, teste: teste, chamar: chamar, sessao: sessaoGuardada, janela: janela, esc: esc, reais: reais };
+  window.BR_CONTA = { sb: sb, exigirLogin: exigirLogin, pagar: pagar, teste: teste, pix: pix, pixDisponivel: pixDisponivel, chamar: chamar, sessao: sessaoGuardada, janela: janela, esc: esc, reais: reais };
   marcarMenu();
 })();

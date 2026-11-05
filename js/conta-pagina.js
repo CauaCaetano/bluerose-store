@@ -34,6 +34,8 @@
   function dias(ate) { return Math.round((new Date(String(ate).slice(0, 10) + 'T12:00:00') - new Date(hojeISO + 'T12:00:00')) / 864e5); }
   function etiqueta(a) {
     var m = { pendente: ['Aguardando o Mercado Pago', 'al'], teste: ['Em teste', 'ok'], ativa: ['Ativa', 'ok'], paga: ['Paga', 'ok'], cancelada: ['Cancelada', ''], recusada: ['Não liberada', 'er'], expirada: ['Não concluída', ''] }[a.status] || [a.status, ''];
+    if (a.forma === 'pix' && a.status === 'ativa' && a.pago_ate < hojeISO) m = ['Pix vencido', 'al'];
+    if (a.forma === 'pix' && a.status === 'pendente') m = ['Aguardando o Pix', 'al'];
     return '<span class="conta-et ' + m[1] + '">' + esc(m[0]) + '</span>';
   }
   function barraTeste(a) {
@@ -80,6 +82,8 @@
     if (a.tipo === 'teste' && a.status === 'teste') linhas.push('Primeira cobrança de ' + reais(a.valor) + ' em ' + data(a.proxima_cobranca || a.teste_ate) + ', se você não cancelar antes.');
     if (a.brinde) { /* brinde do Completo ou do Avançado: o motivo já explica */ }
     else if (a.tipo !== 'compra' && a.status === 'ativa' && !Number(a.valor)) linhas.push('Cortesia da Blue Rose: sem cobrança.');
+    else if (a.forma === 'pix' && a.status === 'ativa') linhas.push(reais(a.valor) + (anual(a) ? ' por ano' : ' por mês') + ' no Pix · ' + (a.pago_ate >= hojeISO ? 'pago até ' + data(a.pago_ate) + '. Sem cobrança automática: renove com um novo Pix.' : 'venceu em ' + data(a.pago_ate) + '. Pague um novo Pix para continuar usando.'));
+    else if (a.forma === 'pix' && a.status === 'pendente') linhas.push('Pix de ' + reais(a.valor) + ' aguardando pagamento. O sistema libera assim que ele entrar.');
     else if (a.tipo !== 'compra' && a.status === 'ativa') linhas.push(reais(a.valor) + (anual(a) ? ' por ano (plano anual, 20% de desconto)' : ' por mês') + ' · próxima cobrança em ' + data(a.proxima_cobranca));
     if (a.status === 'cancelada' && !a.brinde) { var ate = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop(); linhas.push(ate ? 'Sem novas cobranças. O acesso continua até ' + data(ate) + '.' : 'Sem novas cobranças.'); }
     if (a.tipo === 'compra') linhas.push(a.status === 'paga' ? 'Entrada de ' + reais(a.valor) + ' paga. Em até 1 dia útil entramos em contato para a implantação.' : 'Entrada de ' + reais(a.valor) + '.');
@@ -90,19 +94,26 @@
     var cancelar = !a.brinde && a.tipo !== 'compra' && ['teste', 'ativa'].indexOf(a.status) >= 0 ? '<button type="button" class="conta-link" data-cancelar="' + esc(a.id) + '">' + (a.status === 'teste' ? 'Cancelar o teste' : 'Cancelar a assinatura') + '</button>' : '';
     var assinar = a.app && a.tipo !== 'compra' && !(a.brinde && a.status === 'cancelada' && fim && fim >= hojeISO) && (a.status === 'recusada' || (a.status === 'cancelada' && (!fim || fim < hojeISO))) ? '<button type="button" class="btn btn-primary" data-assinar="a-sis-' + esc(a.app) + '">Assinar por ' + reais(a.valor) + '/mês</button>' : '';
     var foto = '', nomeSis = String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, ''), vid = tutorial(a);
+    /* Pix: renovar perto do vencimento, retomar um pendente, voltar depois de encerrada, ou trocar o cartão pelo Pix */
+    var pixAbre = C.pixDisponivel() && a.app && a.tipo !== 'compra' && !a.brinde && Number(a.valor) > 0;
+    var pixRenova = pixAbre && a.forma === 'pix' && (a.status === 'pendente' || (a.status === 'ativa' && dias(a.pago_ate) <= 7));
+    var pixVolta = pixAbre && !!assinar;
+    var pixTroca = pixAbre && a.forma !== 'pix' && (a.status === 'ativa' || a.status === 'teste');
+    var pixBt = pixRenova || pixVolta ? '<button type="button" class="btn ' + (pixVolta ? 'btn-ghost' : 'btn-primary') + '" data-pix="' + esc(pixVolta ? 'a-sis-' + a.app : a.produto) + '" data-pix-nome="' + esc(nomeSis) + '">Pagar com Pix</button>'
+      : pixTroca ? '<button type="button" class="conta-link" data-pix="' + esc(a.produto) + '" data-pix-nome="' + esc(nomeSis) + '" data-pix-troca>Prefere pagar por Pix?</button>' : '';
     var mini = vid ? '<button type="button" class="conta-mini" data-tutorial="' + vid + '" data-titulo="' + esc(nomeSis) + '" aria-label="Ver o tutorial do ' + esc(nomeSis) + '"><img src="' + vid + '.webp" alt="" width="640" height="400" loading="lazy"><span class="conta-mini-play" aria-hidden="true"></span></button>' : '';
     var apagado = ['cancelada', 'expirada', 'recusada'].indexOf(a.status) >= 0 ? ' conta-item-off' : '';
     /* token de dono: pedido uma vez, quando a empresa é criada no sistema */
     var tk = pode && TOKENS[a.app] && !tokenMostrado[a.app] ? TOKENS[a.app] : null; if (tk) tokenMostrado[a.app] = true;
     var token = tk ? '<div class="conta-token"><small>Token de dono</small><code>' + esc(tk.token) + '</code><span>' + (tk.ativado ? 'Já ativado em ' + data(tk.ativado) + '. Não precisa usar de novo.' : 'Use uma vez, ao criar a sua empresa no sistema. Não compartilhe: a equipe entra pelos convites.') + '</span></div>' : '';
     return '<article data-busca="' + esc(normal((a.nome || '') + ' ' + (CAT[a.app] ? CAT[a.app][0] : ''))) + '" class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div class="conta-item-titulo">' + mini + '<div><small>' + esc(a.brinde ? 'Brinde' : NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(nomeSis) + '</h3></div></div>' + etiqueta(a) + '</div>' +
-      barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + (pode ? '<p class="conta-ajuda"><a href="' + (PAGINA[a.app] || 'veltria-' + esc(a.app) + '.html') + '#tutorial"' + (vid ? ' data-tutorial="' + vid + '" data-titulo="' + esc(nomeSis) + '"' : '') + '>Assista ao vídeo tutorial</a>: mostra cada passo, da criação da empresa à importação das suas planilhas. ' + 'Prefere como programa? <a href="app/' + esc(a.app) + '/?instalar=1">Instale no computador ou no celular</a>: ganha ícone e abre em janela própria. ' + 'Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda.</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + cancelar + '</div></div></article>';
+      barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + (pode ? '<p class="conta-ajuda"><a href="' + (PAGINA[a.app] || 'veltria-' + esc(a.app) + '.html') + '#tutorial"' + (vid ? ' data-tutorial="' + vid + '" data-titulo="' + esc(nomeSis) + '"' : '') + '>Assista ao vídeo tutorial</a>: mostra cada passo, da criação da empresa à importação das suas planilhas. ' + 'Prefere como programa? <a href="app/' + esc(a.app) + '/?instalar=1">Instale no computador ou no celular</a>: ganha ícone e abre em janela própria. ' + 'Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda.</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + pixBt + cancelar + '</div></div></article>';
   }
   function mostrarResumo(l) {
     if (!resumo) return;
     var ativos = l.filter(function (a) { return ['teste', 'ativa', 'paga'].indexOf(a.status) >= 0; });
     var cobrancas = l.filter(function (a) { return a.tipo !== 'compra' && (a.status === 'ativa' || a.status === 'teste'); })
-      .map(function (a) { return { quando: a.proxima_cobranca || a.teste_ate, valor: a.valor }; }).filter(function (x) { return x.quando; })
+      .map(function (a) { return { quando: a.forma === 'pix' ? '' : a.proxima_cobranca || a.teste_ate, valor: a.valor }; }).filter(function (x) { return x.quando; })
       .sort(function (x, y) { return String(x.quando).localeCompare(String(y.quando)); });
     var mensal = l.filter(function (a) { return a.tipo !== 'compra' && a.status === 'ativa'; }).reduce(function (s, a) { return s + Number(a.valor || 0) / (anual(a) ? 12 : 1); }, 0);
     if (!l.length) { resumo.hidden = true; return; }
@@ -199,7 +210,14 @@
   raiz.addEventListener('input', function (e) { if (e.target.id !== 'conta-q') return; termo = e.target.value; filtrar(); });
   raiz.addEventListener('click', function (e) {
     if (e.target.closest('[data-recarregar]')) { carregar(); return; }
-    var c = e.target.closest('[data-cancelar]'), a = e.target.closest('[data-assinar]');
+    var c = e.target.closest('[data-cancelar]'), a = e.target.closest('[data-assinar]'), px = e.target.closest('[data-pix]');
+    if (px) {
+      C.pix(px.getAttribute('data-pix'), px.getAttribute('data-pix-nome'), px.hasAttribute('data-pix-troca')).then(function () {
+        var dl = document.querySelector('dialog.conta-dlg');
+        if (dl) { dl.addEventListener('pix-confirmado', carregar, { once: true }); dl.addEventListener('close', carregar, { once: true }); }
+      });
+      return;
+    }
     if (c) {
       if (!confirm('Cancelar? Não haverá novas cobranças. O acesso continua até o fim do período que já está valendo.')) return;
       c.disabled = true; c.textContent = 'Cancelando…';
