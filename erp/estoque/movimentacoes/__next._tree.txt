@@ -1,8 +1,8 @@
-:HL["/erp/_next/static/chunks/23d6esr83jwmb.css","style"]
+:HL["/erp/_next/static/chunks/0cs1f4oydzot5.css","style"]
 :HL["/erp/_next/static/media/4cf231d25563e07b-s.p.2874ccu1_u7jf.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/erp/_next/static/media/d236bb4c0caf68e4-s.p.14og3_uq6yls0.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 4:[["children",{"s":"__PAGE__","h":160}]]
 3:[["children",{"s":{"n":"sub","t":"oc","k":"movimentacoes","s":[]},"h":65632,"c":"$Q4"}]]
 2:[["children",{"s":{"n":"modulo","t":"d","k":"estoque","s":["api","entrar"]},"h":196704,"c":"$Q3"}]]
 1:[["children",{"s":"(sistema)","h":131168,"c":"$Q2"}]]
-0:{"b":"ycizzjdDIPUs-FQgXb0xw","t":{"t":{"s":"","h":131152,"c":"$Q1"}}}
+0:{"b":"DYTJsVoiVMFJXrqoB7GRx","t":{"t":{"s":"","h":131152,"c":"$Q1"}}}
