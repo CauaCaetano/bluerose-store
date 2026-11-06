@@ -288,6 +288,15 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ajustarBotoes); else ajustarBotoes();
 
+  // programa de afiliados: conta a visita do link, uma vez por sessão (só um número, sem guardar quem clicou)
+  try {
+    var pIndica = new URLSearchParams(location.search), codIndica = pIndica.get('indica') || pIndica.get('ref');
+    if (codIndica && /^[A-Za-z0-9]{8}$/.test(codIndica) && !sessionStorage.getItem('br-visita-' + codIndica)) {
+      sessionStorage.setItem('br-visita-' + codIndica, '1');
+      sb().then(function (c) { return c.rpc('nexo_afiliado_clique', { p_codigo: codIndica }); }).catch(function () {});
+    }
+  } catch (e) { /* segue sem contar */ }
+
   window.BR_CONTA = { sb: sb, exigirLogin: exigirLogin, pagar: pagar, teste: teste, pix: pix, pixDisponivel: pixDisponivel, chamar: chamar, sessao: sessaoGuardada, janela: janela, esc: esc, reais: reais };
   marcarMenu();
 })();
