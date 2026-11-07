@@ -381,3 +381,11 @@ table.tabela { width: 100%; border-collapse: collapse; font-size: 14px; }
 .cd-tab td { padding: 5px 4px; }
 
 .barras-svg { display: block; width: 100%; height: 40px; }
+
+.guia-item { border-top: 1px solid var(--linha-2); }
+.guia-item summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 4px; font-weight: 600; cursor: pointer; }
+.guia-item summary::-webkit-details-marker { display: none; }
+.guia-item summary::after { content: ""; flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--ac-claro) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E3B50' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") center / 14px no-repeat; transition: transform .25s ease; }
+.guia-item[open] summary::after { transform: rotate(180deg); }
+.guia-item p { margin: 0; padding: 0 4px 16px; color: var(--mudo); line-height: 1.6; }
+.cartao-cab h2 .tag { margin-right: 4px; }

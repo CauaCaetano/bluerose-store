@@ -496,6 +496,39 @@ function marca() {
 
 // ------------------------------------------------------------------ telas
 let estado = { fiadoFiltro: 'todos', estoqueAba: 'pecas', busca: '', relPer: 'mes', relDe: '', relAte: '', vendAba: 'vender', cliBusca: '', sacola: [], vCli: '', desc: 0, pag: [{ f: 'pix', v: 0 }], parc: { n: 1, int: 'mes', prim: somaMes(hoje(), 1) }, excecao: null };
+const GUIA = [
+  ['Primeiros passos (10 minutos)', [
+    ['Ponha a cara da sua loja', 'Em Configurações, “A marca da sua loja”: logo, nome, frase, WhatsApp, chave Pix e a cor do sistema. Tudo aparece no topo, nos recibos e nas cobranças.'],
+    ['Defina as regras do fiado', 'Em Configurações, “Regras do fiado”: o limite da cliente nova, quando avisar que está perto do limite e com quantos dias de atraso o fiado bloqueia sozinho. Juros e multa ficam desligados, a não ser que você ligue.'],
+    ['Passe o seu caderno', 'Em Fiado, “Adicionar” e “Passar o caderno inteiro”: uma linha por cliente, com nome, WhatsApp, quanto deve e quando vence. Se tiver planilha, use “Clientes de uma planilha”.'],
+    ['Cadastre as peças', 'Em Estoque, “Adicionar” e “Peça”: nome, categoria, custo, preço, foto, tamanhos (atalhos de PP a G5 e de 34 a 56), cores e quantas tem de cada. Também dá para importar de planilha.'],
+    ['Chame a equipe', 'No Painel do dono, “Adicionar” e “Pessoa da equipe”. Marque o que cada vendedora pode fazer (ver custo, dar desconto, mexer no caixa) e a comissão dela.'],
+  ]],
+  ['O dia a dia', [
+    ['Abra o caixa', 'Em Caixa do dia, digite o troco que está na gaveta. Se esquecer, ele abre sozinho na primeira venda.'],
+    ['Venda', 'Em Vender, toque na peça (ou passe o leitor de código de barras), escolha cor e tamanho, ponha a cliente e o pagamento. Dá para dividir: parte no Pix, parte no fiado. O estoque baixa na hora.'],
+    ['Venda no fiado', 'Escolha “Fiado”, as parcelas e o 1º vencimento. Se a cliente estiver atrasada ou sem limite, o Peplo avisa; só a senha da dona libera a exceção.'],
+    ['Receba e cobre', 'Em Fiado, “Receber” baixa o pagamento (pode ser só uma parte) e gera o recibo para mandar no WhatsApp. “Cobrar” abre o WhatsApp da cliente com a mensagem pronta.'],
+    ['Troque ou devolva', 'Em Vendas e trocas, abra a venda e toque em “Troca ou devolução”: a peça volta ao estoque (ou vai como avaria) e o valor vira crédito, abate do fiado ou volta em dinheiro.'],
+    ['Feche o caixa', 'No fim do dia, “Fechar caixa”: conte o dinheiro da gaveta e o Peplo mostra se bateu ou a diferença.'],
+  ]],
+  ['Estoque e compras', [
+    ['Mercadoria chegou', 'Em Compras, “Adicionar” e “Chegada de mercadoria”: escolha a peça e digite quantas chegaram de cada cor e tamanho.'],
+    ['Pedido de atacado', 'Na viagem de compra, faça o “Pedido de compra”. Quando chegar, toque em “Registrar chegada” (pode chegar em partes). O Peplo mostra a margem do lote.'],
+    ['Etiquetas', 'Em Estoque, toque em “Etiquetas” na peça: saem com o preço e o código de barras de cada cor e tamanho.'],
+    ['Liquidação', 'Em Estoque, aba Liquidação: escolha a categoria, o desconto e as datas. No período, o Vender já usa o preço com desconto. Use a aba Parados para escolher o que liquidar.'],
+  ]],
+  ['Números e controle', [
+    ['Relatórios ao vivo', 'Em Relatórios: diário, semanal e mensal. Vendas, lucro bruto, dinheiro que entrou, fiado, inadimplência e o que mais vende.'],
+    ['Painel do dono', 'Meta do mês com a projeção, vendas e comissão de cada vendedora, quem pode o quê e tudo o que aconteceu na loja.'],
+    ['Cartão', 'Em Configurações, ponha as taxas da sua maquininha. No Caixa do dia, “Conferir com o extrato” mostra o que bateu.'],
+    ['Cópia de segurança', 'Com a assinatura, tudo fica na nuvem e aparece no celular e no computador. Em Configurações você também baixa uma cópia em arquivo quando quiser.'],
+  ]],
+  ['Nota fiscal (opcional)', [
+    ['Precisa?', 'MEI não precisa dar nota para consumidor pessoa física. Loja do Simples Nacional em SP precisa emitir NFC-e. Converse com o seu contador.'],
+    ['Como ligar', 'Em Configurações, “Nota fiscal”: marque que vai usar e preencha os dados da loja. Os custos são da loja: certificado digital A1 e o código CSC da SEFAZ (grátis).'],
+  ]],
+];
 const saudacao = () => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; };
 
 const TELAS = {
@@ -772,7 +805,7 @@ const TELAS = {
   config() {
     if (!dona()) return `<div class="cab"><div><h1>Configurações</h1><p>Só a dona mexe nas configurações da loja.</p></div></div>`;
     const L = db.loja, j = db.cfg.juros, ini = String(L.nome || 'L').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
-    return `<div class="cab"><div><h1>Configurações</h1><p>A cara da sua loja, as regras do fiado e a cópia de segurança.</p></div></div>
+    return `<div class="cab"><div><h1>Configurações</h1><p>A cara da sua loja, as regras do fiado e a cópia de segurança.</p></div><div class="acoes"><a class="bt cheio" href="#guia">${ico('recibo')}Guia de como usar</a><button type="button" class="bt" data-acao="instalar">Instalar o app</button></div></div>
       <div class="grade g2">
         <section class="cartao"><div class="cartao-cab"><h2>A marca da sua loja</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">Sua logo e o nome aparecem no topo, nos recibos e nas mensagens. Quem você convidar vê igual.</p>
           <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px"><span class="loja-logo" style="width:72px;height:72px;font-size:24px">${L.logo ? `<img src="${t(L.logo)}" alt="">` : t(ini)}</span><div style="display:flex;gap:8px;flex-wrap:wrap"><label class="bt pq cheio" for="logo-in">${L.logo ? 'Trocar logo' : 'Pôr a logo'}</label><input type="file" id="logo-in" accept="image/*" class="sr">${L.logo ? '<button type="button" class="bt pq" data-acao="tira-logo">Tirar</button>' : ''}</div></div>
@@ -810,8 +843,13 @@ const TELAS = {
       </div>`;
   },
 
+  guia() {
+    return `<div class="cab"><div><h1>Guia de como usar</h1><p>Do primeiro dia ao fechamento do mês, em passos curtos. Toque em cada assunto.</p></div><div class="acoes"><button type="button" class="bt" data-acao="instalar">Instalar o app</button><button type="button" class="bt zap" data-acao="ajuda">${ico('zap')}Falar com uma pessoa</button></div></div>
+      <div class="grade cascata">${GUIA.map(([g, itens], gi) => `<section class="cartao"><div class="cartao-cab"><h2><span class="tag ac" style="font-family:var(--sans)">${gi + 1}</span>${t(g)}</h2></div>${itens.map(([titulo, txt]) => `<details class="guia-item"><summary>${t(titulo)}</summary><p>${t(txt)}</p></details>`).join('')}</section>`).join('')}</div>`;
+  },
+
   mais() {
-    const G = [['A loja', [['#relatorios', 'lucro', 'Relatórios']]], ['Vendas', [['#vendas', 'recibo', 'Vendas e trocas'], ['#clientes', 'gente', 'Clientes']]], ['Mercadoria', [['#compras', 'bolsa', 'Compras e fornecedores']]], ['Dinheiro', [['#caixa', 'moedas', 'Caixa do dia']]], ['Sistema', [['#perfil', 'gente', 'Meu perfil'], ['#dono', 'ok', 'Painel do dono'], ['#config', 'cabide', 'Configurações']]]];
+    const G = [['A loja', [['#relatorios', 'lucro', 'Relatórios']]], ['Vendas', [['#vendas', 'recibo', 'Vendas e trocas'], ['#clientes', 'gente', 'Clientes']]], ['Mercadoria', [['#compras', 'bolsa', 'Compras e fornecedores']]], ['Dinheiro', [['#caixa', 'moedas', 'Caixa do dia']]], ['Sistema', [['#perfil', 'gente', 'Meu perfil'], ['#dono', 'ok', 'Painel do dono'], ['#config', 'cabide', 'Configurações'], ['#guia', 'recibo', 'Guia de como usar']]]];
     return `<div class="cab"><div><h1>Mais</h1><p>Tudo da loja, por assunto.</p></div></div>${G.map(([g, it]) => `<p class="campo" style="margin:16px 0 8px;letter-spacing:.06em;text-transform:uppercase;font-size:12px">${g}</p><div class="mais-lista cascata">${it.map(([h, i, n]) => `<a href="${h}">${ico(i)}${n}</a>`).join('')}</div>`).join('')}
       <button type="button" class="bt largo" style="margin-top:18px" data-acao="instalar">Instalar o app no celular</button><button type="button" class="bt largo zap" style="margin-top:10px" data-acao="ajuda">${ico('zap')}Falar com uma pessoa da equipe</button>`;
   },
@@ -865,7 +903,7 @@ function rota() {
   const mn = $('#menu a[data-aba="notas"]'); if (mn) mn.hidden = !db.fiscal.usar;
   $$('[data-aba]').forEach((a) => a.toggleAttribute('aria-current', false));
   $$(`[data-aba="${aba}"]`).forEach((a) => a.setAttribute('aria-current', 'page'));
-  if (['vendas', 'clientes', 'compras', 'caixa', 'relatorios', 'config', 'perfil', 'dono'].includes(nome)) $$('.barra [data-aba="mais"]').forEach((a) => a.setAttribute('aria-current', 'page'));
+  if (['vendas', 'clientes', 'compras', 'caixa', 'relatorios', 'config', 'perfil', 'dono', 'guia', 'notas'].includes(nome)) $$('.barra [data-aba="mais"]').forEach((a) => a.setAttribute('aria-current', 'page'));
   marca(); contar(tela); requestAnimationFrame(() => ajustaAbas(tela));
   if (!rota.mesma) scrollTo({ top: 0 }); rota.mesma = false;
 }
@@ -1202,9 +1240,22 @@ function importar(tipo) {
     };
   });
 }
+// instalar de verdade: o navegador oferece (Chrome, Edge, Android); no iPhone e no Safari, mostra o passo a passo
+let pedidoInstalar = null;
+addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); pedidoInstalar = e; });
+addEventListener('appinstalled', () => { pedidoInstalar = null; toast('Peplo instalado. Abra pelo ícone na tela.'); });
+const instalado = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 function instalar() {
-  abrir(`<div class="instala"><img src="icone-512.png" alt=""><h2 style="padding:0">Instalar o Peplo</h2><p class="mudo" style="margin:0">Fica na tela do celular e do computador como um aplicativo, abre sem o navegador e funciona mesmo com a internet fraca.</p><div class="progresso"><i></i></div><p class="mudo" data-est style="margin:0;font-size:13.5px">Pronto para instalar.</p><div class="acoes" style="justify-content:center"><button type="button" class="bt cheio" data-ok>Instalar</button></div></div>`, (j) => {
-    $('[data-ok]', j).onclick = (e) => { e.currentTarget.disabled = true; $('[data-est]', j).textContent = 'Instalando…'; $('.progresso i', j).style.width = '100%'; setTimeout(() => { $('[data-est]', j).innerHTML = '<b style="color:var(--ok)">Instalado.</b> O Peplo está na sua tela inicial.'; toast('Peplo instalado.'); }, 2300); };
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent), android = /android/i.test(navigator.userAgent);
+  const passos = ios ? ['Toque no botão de compartilhar (o quadrado com a seta para cima), embaixo no Safari.', 'Role e toque em “Adicionar à Tela de Início”.', 'Toque em “Adicionar”. O ícone do Peplo aparece na tela do iPhone.']
+    : android ? ['Toque nos três pontinhos do Chrome, no canto de cima.', 'Toque em “Instalar app” ou “Adicionar à tela inicial”.', 'Confirme. O ícone do Peplo aparece junto com os seus apps.']
+    : ['No Chrome ou no Edge, clique no ícone de instalar na barra de endereço (um computador com uma seta) ou no menu ⋮, em “Instalar Peplo”.', 'Confirme em “Instalar”.', 'O Peplo abre numa janela própria e ganha atalho na área de trabalho e no menu Iniciar.'];
+  abrir(`<div class="instala"><img src="icone-512.png" alt=""><h2 style="padding:0">${instalado() ? 'O Peplo já está instalado' : 'Instalar o Peplo'}</h2>
+    <p class="mudo" style="margin:0">Fica na tela do celular e do computador como um aplicativo, abre sem a barra do navegador e continua vendendo mesmo com a internet fraca (sobe para a nuvem quando a conexão volta).</p>
+    ${instalado() ? '' : pedidoInstalar ? '<div class="acoes" style="justify-content:center"><button type="button" class="bt cheio" data-ok>Instalar agora</button></div>' : `<ol style="text-align:left;margin:6px 0 0;padding-left:20px;display:grid;gap:8px">${passos.map((x) => `<li>${t(x)}</li>`).join('')}</ol>`}
+    ${window.veltriaConta ? '' : '<p class="mudo" style="font-size:12.5px;margin:6px 0 0">Esta é a demonstração. Depois de assinar, instale pela sua conta: o app abre direto na sua loja.</p>'}</div>`, (j) => {
+    const b = $('[data-ok]', j);
+    if (b) b.onclick = async () => { const p = pedidoInstalar; if (!p) return; p.prompt(); const r = await p.userChoice.catch(() => ({})); pedidoInstalar = null; fechar(); if (r.outcome === 'accepted') toast('Instalando o Peplo…'); };
   });
 }
 window.veltriaNovoCadastro = (tipo, nome) => { if (/cli/.test(tipo)) formCliente({ nome, tel: '', cpf: '', nasc: '', end: '', limite: db.cfg.limitePadrao, obs: '' }); };
@@ -1443,6 +1494,7 @@ addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLow
 setInterval(() => { const n = (location.hash.slice(1) || 'inicio').split('/')[0]; if (['inicio', 'relatorios', 'caixa', 'dono', 'fiado'].includes(n) && $('#camada').hidden && !document.activeElement.matches('input,textarea,select') && !document.querySelector('details.add[open]')) mostra(); }, 20000);
 // abre na tela que a pessoa escolheu no perfil
 if (!location.hash && eu().abrirEm && eu().abrirEm !== 'inicio') location.hash = `#${eu().abrirEm}`;
+if (new URLSearchParams(location.search).has('instalar')) setTimeout(instalar, 900);
 $('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE); location.replace(location.pathname); });
 if ('serviceWorker' in navigator && window === window.top) navigator.serviceWorker.register('sw.js').catch(() => {});
 rota();

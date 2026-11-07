@@ -65,3 +65,36 @@ main > section:not(.ini-hero):not(.lx-hero)::after {
   background-size: 100% auto; background-repeat: no-repeat round; background-position: left top;
 }
 main > section:nth-of-type(odd):not(.ini-hero):not(.lx-hero)::after { background-position: right top; }
+
+/* 07/11/2026 · caminho (Início / Sistemas) e links de navegação com cara de botão, e perguntas frequentes com respiro */
+.np-trilha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0; padding-top: 18px; padding-bottom: 6px; }
+.np-trilha > * { font-size: 14px; }
+.np-trilha a { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 0 16px; border-radius: 999px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: color-mix(in srgb, currentColor 9%, transparent); color: inherit; font-weight: 600; text-decoration: none; box-shadow: 0 1px 2px rgba(20, 24, 32, .06); transition: transform .2s ease, background .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.np-trilha a::before { content: ""; width: 7px; height: 7px; border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin-right: 2px; opacity: .7; }
+.np-trilha a:hover { background: color-mix(in srgb, currentColor 18%, transparent); transform: translateY(-1px); box-shadow: 0 6px 16px -8px rgba(20, 24, 32, .35); border-color: color-mix(in srgb, currentColor 40%, transparent); }
+.np-trilha a:active { transform: translateY(0) scale(.97); }
+.np-trilha a:focus-visible { outline: 3px solid color-mix(in srgb, var(--sis, #6b5bd2) 55%, transparent); outline-offset: 2px; }
+.np-trilha > span { display: inline-flex; align-items: center; min-height: 38px; padding: 0 6px; font-weight: 600; opacity: .75; }
+
+.sis-mais, .vs-demo, .vs-pos-bt, .np-comparar p > a { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 18px; border-radius: 999px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: color-mix(in srgb, currentColor 8%, transparent); font-weight: 600; text-decoration: none !important; transition: transform .2s ease, background .2s ease, box-shadow .2s ease; }
+.sis-mais:hover, .vs-demo:hover, .vs-pos-bt:hover, .np-comparar p > a:hover { background: color-mix(in srgb, currentColor 16%, transparent); transform: translateY(-1px); box-shadow: 0 8px 18px -10px rgba(20, 24, 32, .35); }
+.sis-mais:active, .vs-demo:active, .vs-pos-bt:active, .np-comparar p > a:active { transform: scale(.97); }
+.np-comparar p > a { margin-top: 10px; }
+
+.np-faq details { padding: 0 !important; margin-bottom: 10px; border-radius: 14px; overflow: hidden; transition: box-shadow .2s ease, background .2s ease; }
+.np-faq details:hover { box-shadow: 0 8px 22px -14px rgba(20, 24, 32, .35); }
+.np-faq summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; min-height: 58px; font-size: 16.5px; line-height: 1.35; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.np-faq summary::-webkit-details-marker { display: none; }
+.np-faq summary::marker { content: ""; }
+.np-faq summary::after { content: ""; flex: none; width: 30px; height: 30px; border-radius: 50%; background: color-mix(in srgb, var(--sis, #6b5bd2) 14%, #fff) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") center / 16px no-repeat; transition: transform .25s ease, background-color .2s ease; }
+.np-faq details[open] summary::after { transform: rotate(180deg); }
+.np-faq summary:hover::after { background-color: color-mix(in srgb, var(--sis, #6b5bd2) 24%, #fff); }
+.np-faq summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--sis, #6b5bd2) 50%, transparent); outline-offset: -3px; border-radius: 14px; }
+.np-faq details p { margin: 0 !important; padding: 0 22px 20px; max-width: 75ch; }
+.np-faq details[open] summary { padding-bottom: 12px; }
+@media (max-width: 720px) {
+  .np-trilha a, .np-trilha > span { min-height: 42px; }
+  .np-faq summary { padding: 16px 16px; font-size: 16px; }
+  .np-faq details p { padding: 0 16px 18px; }
+  .sis-mais, .vs-demo, .vs-pos-bt, .np-comparar p > a { min-height: 46px; justify-content: center; }
+}
