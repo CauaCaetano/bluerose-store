@@ -177,6 +177,12 @@ db.notas = db.notas || [];
 db.fiscal = db.fiscal || { usar: false, ambiente: '2', regime: '1', razao: '', cnpj: '', ie: '', rua: '', numero: '', bairro: '', cidade: '', codMun: '', uf: 'SP', cep: '', cscId: '', serie: 1, proximo: 1 };
 const NOTA_LIGADA = false; // 07/11/2026: dono decidiu deixar o Peplo sem nota fiscal por enquanto
 if (!NOTA_LIGADA) db.fiscal.usar = false;
+// várias lojas (07/11/2026): cada loja tem o próprio estoque e o próprio caixa; a loja 1 usa p.q e db.caixa (dados antigos continuam valendo)
+db.lojas = db.lojas || [{ id: 'l1', nome: 'Loja principal' }];
+const lojaAtual = () => { let l = ''; try { l = localStorage.getItem('peplo-loja') || ''; } catch (e) { /* sem armazenamento */ } return db.lojas.some((x) => x.id === l) ? l : 'l1'; };
+const nomeLoja = (id) => (db.lojas.find((x) => x.id === id) || {}).nome || 'Loja';
+const variasLojas = () => db.lojas.length > 1;
+const CX = () => (lojaAtual() === 'l1' ? db.caixa : ((db.caixas ||= {})[lojaAtual()] ||= { aberto: null, historico: [] }));
 db.pedidos = db.pedidos || []; db.promos = db.promos || []; db.cfg.comissaoPct = db.cfg.comissaoPct ?? 3;
 db.cfg.taxas = db.cfg.taxas || { debito: 1.39, credito: 3.15, parcelado: 4.69, prazoDebito: 1, prazoCredito: 30 };
 db.usuarios.forEach((u) => { if (u.comissao === undefined) u.comissao = u.perfil === 'dona' ? 0 : db.cfg.comissaoPct; });
@@ -240,8 +246,10 @@ function msg(k, c, extra = {}) {
 const modeloCobranca = (c) => (vencido(c.id) > 0 ? 'atraso' : abertas(c.id).some((p) => p.venc === hoje()) ? 'hoje' : 'lembrete');
 
 // ------------------------------------------------------------------ regras: estoque
-const qtd = (p, cor, tam) => p.q[`${cor}|${tam}`] || 0;
-const totalPecas = (p) => Object.values(p.q).reduce((s, x) => s + Math.max(0, x), 0);
+const Q = (p, l = lojaAtual()) => (l === 'l1' ? (p.q ||= {}) : ((p.qs ||= {})[l] ||= {}));
+const qtd = (p, cor, tam, l) => Q(p, l)[`${cor}|${tam}`] || 0;
+const totalPecas = (p, l) => Object.values(Q(p, l)).reduce((s, x) => s + Math.max(0, x), 0);
+const totalRede = (p) => db.lojas.reduce((s, l) => s + totalPecas(p, l.id), 0);
 const ativos = () => db.produtos.filter((p) => !p.arquivado);
 function ultimaVenda(pid) { let u = null; for (const m of db.movs) if (m.p === pid && m.tipo === 'venda' && (!u || m.data > u)) u = m.data; return u; }
 function situacaoParada(p) {
@@ -251,13 +259,13 @@ function situacaoParada(p) {
 const parados = () => ativos().filter((p) => totalPecas(p) > 0).map((p) => ({ p, ...situacaoParada(p) })).filter((x) => x.dias > db.cfg.parados[1]).sort((a, b) => b.dias - a.dias);
 const baixos = () => ativos().flatMap((p) => p.cores.flatMap((c) => p.tam.map((tm) => ({ p, cor: c.n, tam: tm, q: qtd(p, c.n, tm) })))).filter((x) => x.q <= x.p.min);
 const produtosBaixos = () => [...new Set(baixos().map((x) => x.p))];
-function grade(p, { editar = false, minimo = true } = {}) {
+function grade(p, { editar = false, minimo = true, loja } = {}) {
   return `<div class="tabela-wrap"><table class="gradeq"><thead><tr><th></th>${p.tam.map((tm) => `<th>${t(tm)}</th>`).join('')}</tr></thead><tbody>${p.cores.map((c) => `<tr><th class="cor"><span class="bolinha" style="background:${t(c.h)}"></span>${t(c.n)}</th>${p.tam.map((tm) => {
-    const q = qtd(p, c.n, tm);
+    const q = qtd(p, c.n, tm, loja);
     return editar ? `<td><input type="number" inputmode="numeric" min="0" data-g="${t(c.n)}|${t(tm)}" value="${q}" aria-label="${t(c.n)} ${t(tm)}"></td>` : `<td class="${q <= 0 ? 'zero' : minimo && q <= p.min ? 'baixo' : ''}">${q}</td>`;
   }).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
-function mover(p, cor, tam, q, tipo, ref, motivo = '') { const k = `${cor}|${tam}`; p.q[k] = (p.q[k] || 0) + q; db.movs.push({ id: uid('m'), data: agora(), p: p.id, cor, tam, q, tipo, ref, motivo }); }
+function mover(p, cor, tam, q, tipo, ref, motivo = '', l = lojaAtual()) { const k = `${cor}|${tam}`, g = Q(p, l); g[k] = (g[k] || 0) + q; db.movs.push({ id: uid('m'), data: agora(), p: p.id, cor, tam, q, tipo, ref, motivo, loja: l }); }
 
 // ------------------------------------------------------------------ código de barras (Code 128-B) e etiquetas
 const codVar = (p, cor, tam) => `${String(p.cod || p.id).replace(/[^A-Za-z0-9-]/g, '')}-${p.cores.findIndex((c) => c.n === cor) + 1}${String(tam).replace(/\s/g, '')}`.toUpperCase();
@@ -359,8 +367,8 @@ function conferirExtrato() {
 
 // ------------------------------------------------------------------ regras: caixa
 function caixaAtual(auto = true) {
-  if (!db.caixa.aberto && auto) { db.caixa.aberto = { id: uid('cx'), abertura: agora(), inicial: 0, movs: [] }; toast('Caixa aberto automaticamente com R$ 0,00. Ajuste o troco inicial em Caixa.'); }
-  return db.caixa.aberto;
+  if (!CX().aberto && auto) { CX().aberto = { id: uid('cx'), abertura: agora(), inicial: 0, movs: [] }; toast('Caixa aberto automaticamente com R$ 0,00. Ajuste o troco inicial em Caixa.'); }
+  return CX().aberto;
 }
 function resumoCaixa(cx) {
   const vs = db.vendas.filter((v) => v.caixa === cx.id && !v.cancelada), pgs = db.pagamentos.filter((p) => p.caixa === cx.id);
@@ -393,7 +401,7 @@ function numeros(ini, fim) {
   const recebidoVenda = vs.reduce((s, v) => s + v.pag.filter((x) => x.f !== 'fiado' && x.f !== 'loja').reduce((a, x) => a + x.v, 0), 0);
   const recebidoFiado = pgs.reduce((s, p) => s + p.v, 0);
   const fiadoVendido = vs.reduce((s, v) => s + v.pag.filter((x) => x.f === 'fiado').reduce((a, x) => a + x.v, 0), 0);
-  const despesas = [db.caixa.aberto, ...db.caixa.historico].filter(Boolean).flatMap((c) => c.movs || []).filter((m) => m.t === 'despesa' && dentro(m.data)).reduce((s, m) => s + m.v, 0);
+  const despesas = [CX().aberto, ...CX().historico].filter(Boolean).flatMap((c) => c.movs || []).filter((m) => m.t === 'despesa' && dentro(m.data)).reduce((s, m) => s + m.v, 0);
   return { vs, pgs, bruto, desc, devol, liquido, cmv, lucro: liquido - cmv, recebidoVenda, recebidoFiado, recebido: recebidoVenda + recebidoFiado, fiadoVendido, despesas, ticket: vs.length ? Math.round(liquido / vs.length) : 0 };
 }
 const totalAberto = () => db.clientes.reduce((s, c) => s + aberto(c.id), 0);
@@ -407,7 +415,7 @@ function avisos() {
   if (hj.length) l.push({ ic: 'atn', txt: `${hj.length} ${hj.length === 1 ? 'parcela vence' : 'parcelas vencem'} hoje (${din(hj.reduce((s, p) => s + p.saldo, 0))})`, ir: '#fiado/hoje' });
   const bx = produtosBaixos(); if (bx.length) l.push({ ic: 'atn', txt: `${bx.length} ${bx.length === 1 ? 'peça está' : 'peças estão'} com estoque baixo em algum tamanho ou cor`, ir: '#estoque/baixo' });
   const pr = parados(); if (pr.length) l.push({ ic: 'ac', txt: `${pr.length} ${pr.length === 1 ? 'peça parada' : 'peças paradas'} há mais de ${db.cfg.parados[1]} dias (${din(pr.reduce((s, x) => s + totalPecas(x.p) * x.p.custo, 0))} de custo)`, ir: '#estoque/parados' });
-  if (!db.caixa.aberto) l.push({ ic: 'ac', txt: 'O caixa de hoje ainda não foi aberto', ir: '#caixa' });
+  if (!CX().aberto) l.push({ ic: 'ac', txt: 'O caixa de hoje ainda não foi aberto', ir: '#caixa' });
   return l;
 }
 
@@ -487,7 +495,7 @@ const acharCli = (nome) => db.clientes.find((c) => sa(c.nome) === sa(nome));
 function marca() {
   const L = db.loja, ini = String(L.nome || 'Loja').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
   $('#loja-logo').innerHTML = L.logo ? `<img src="${t(L.logo)}" alt="">` : t(ini);
-  $('#loja-nome').textContent = L.nome || 'Sua loja'; $('#loja-slogan').textContent = L.slogan || '';
+  $('#loja-nome').textContent = L.nome || 'Sua loja'; $('#loja-slogan').textContent = variasLojas() ? nomeLoja(lojaAtual()) : (L.slogan || '');
   document.documentElement.dataset.tema = db.tema || 'ameixa';
   const u = eu(), te = $('#topo-eu'); if (te) { te.innerHTML = u.foto ? `<img src="${t(u.foto)}" alt="">` : t(iniciais(u.nome)); te.title = `${u.nome} · meu perfil`; }
   const at = atrasadas().length, bx = produtosBaixos().length, av = avisos().length;
@@ -523,6 +531,7 @@ const GUIA = [
   ['Números e controle', [
     ['Relatórios ao vivo', 'Em Relatórios: diário, semanal e mensal. Vendas, lucro bruto, dinheiro que entrou, fiado, inadimplência e o que mais vende.'],
     ['Painel do dono', 'Meta do mês com a projeção, vendas e comissão de cada vendedora, quem pode o quê e tudo o que aconteceu na loja.'],
+    ['Duas lojas ou mais', 'Em Configurações, “Lojas”: cadastre a filial e escolha em cada aparelho por qual loja ele vende. Em Estoque, “Todas as lojas” mostra as lojas lado a lado, as vendas do mês de cada uma e transfere peças.'],
     ['Cartão', 'Em Configurações, ponha as taxas da sua maquininha. No Caixa do dia, “Conferir com o extrato” mostra o que bateu.'],
     ['Cópia de segurança', 'Com a assinatura, tudo fica na nuvem e aparece no celular e no computador. Em Configurações você também baixa uma cópia em arquivo quando quiser.'],
   ]],
@@ -683,12 +692,12 @@ const TELAS = {
 
   estoque(sub) {
     const a = sub || estado.estoqueAba;
-    const tabs = [['pecas', 'Peças'], ['baixo', `Estoque baixo (${produtosBaixos().length})`], ['parados', `Parados (${parados().length})`], ['promos', 'Liquidação'], ['movs', 'Movimentações']];
+    const tabs = [['pecas', 'Peças'], ['baixo', `Estoque baixo (${produtosBaixos().length})`], ['parados', `Parados (${parados().length})`], ['promos', 'Liquidação'], ['movs', 'Movimentações'], ...(variasLojas() ? [['lojas', 'Todas as lojas']] : [])];
     let corpo = '';
     if (a === 'pecas') {
       const b = sa(estado.busca), l = ativos().filter((p) => !b || sa(`${p.nome} ${p.cod} ${p.cat}`).includes(b));
       corpo = `<label class="busca" style="display:block;margin-bottom:14px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Buscar peça</span><input id="est-busca" placeholder="Buscar peça" value="${t(estado.busca)}" autocomplete="off"></label>
-        <div class="produtos cascata">${l.map((p) => `<article class="cartao prod" data-peca="${p.id}" tabindex="0"><div class="prod-topo">${iconePeca(p)}<div><b>${t(p.nome)}</b><small>${t(p.cod)} · ${t(p.cat)}</small></div></div>${grade(p)}<div class="prod-rodape"><span>${totalPecas(p)} peças${pode('custo') ? ` · custo ${din(p.custo)}` : ''}</span><span style="display:flex;gap:8px;align-items:center"><button type="button" class="bt pq" data-etiquetas="${p.id}">Etiquetas</button><b>${din(precoAtual(p))}</b></span></div></article>`).join('') || '<p class="vazio"><b>Nenhuma peça</b>Cadastre a primeira com “Nova peça”.</p>'}</div>`;
+        <div class="produtos cascata">${l.map((p) => `<article class="cartao prod" data-peca="${p.id}" tabindex="0"><div class="prod-topo">${iconePeca(p)}<div><b>${t(p.nome)}</b><small>${t(p.cod)} · ${t(p.cat)}</small></div></div>${grade(p)}${variasLojas() ? `<p class="mudo" style="font-size:12.5px;margin:6px 0 0">${db.lojas.map((l) => `${t(l.nome)}: <b>${totalPecas(p, l.id)}</b>`).join(' · ')} <button type="button" class="link" data-transf="${p.id}">Transferir</button></p>` : ''}<div class="prod-rodape"><span>${totalPecas(p)} peças${pode('custo') ? ` · custo ${din(p.custo)}` : ''}</span><span style="display:flex;gap:8px;align-items:center"><button type="button" class="bt pq" data-etiquetas="${p.id}">Etiquetas</button><b>${din(precoAtual(p))}</b></span></div></article>`).join('') || '<p class="vazio"><b>Nenhuma peça</b>Cadastre a primeira com “Nova peça”.</p>'}</div>`;
     }
     if (a === 'baixo') {
       const ps = produtosBaixos();
@@ -706,10 +715,18 @@ const TELAS = {
       corpo = `<section class="cartao"><div class="cartao-cab"><h2>Liquidações e promoções</h2><button type="button" class="bt pq cheio" data-acao="nova-promo">${ico('mais')}Nova</button></div>${db.promos.length ? `<ul class="lista">${db.promos.slice().reverse().map((x) => `<li><span class="cresce"><b>${t(x.nome)} · ${x.pct}% em ${t(x.cat === 'Todas' ? 'toda a loja' : x.cat)}</b><small>${dataBR(x.de)} a ${dataBR(x.ate)}</small></span><span class="tag ${x.de <= h && x.ate >= h ? 'ok' : x.de > h ? 'ac' : ''}">${x.de <= h && x.ate >= h ? 'Valendo agora' : x.de > h ? 'Programada' : 'Encerrada'}</span><button type="button" class="bt pq perigo" data-tira-promo="${x.id}">Tirar</button></li>`).join('')}</ul>` : '<p class="vazio"><b>Nenhuma promoção</b>Crie a liquidação com a categoria, o desconto e as datas.</p>'}
         <p class="mudo" style="font-size:13px;margin:10px 0 0">Dica: use “Parados” para escolher o que entra na liquidação.</p></section>`;
     }
+    if (a === 'lojas' && variasLojas()) {
+      const ini = `${hoje().slice(0, 7)}-01`, vm = db.vendas.filter((v) => !v.cancelada && v.data.slice(0, 10) >= ini);
+      const b = sa(estado.busca), l = ativos().filter((p) => !b || sa(`${p.nome} ${p.cod} ${p.cat}`).includes(b));
+      corpo = `<div class="grade g${Math.min(4, db.lojas.length)} kpis cascata" style="margin-bottom:16px">${db.lojas.map((lj) => { const vs = vm.filter((v) => (v.loja || 'l1') === lj.id); return `<div class="kpi"><span><small>${t(lj.nome)}${lj.id === lojaAtual() ? ' · este aparelho' : ''}</small><b>${din(vs.reduce((s, v) => s + v.total, 0))}</b><em>${vs.length} vendas no mês · ${ativos().reduce((s, p) => s + totalPecas(p, lj.id), 0)} peças</em></span></div>`; }).join('')}</div>
+        <label class="busca" style="display:block;margin-bottom:14px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Buscar peça</span><input id="est-busca" placeholder="Buscar peça" value="${t(estado.busca)}" autocomplete="off"></label>
+        <section class="cartao"><div class="tabela-wrap"><table class="tabela cartoes"><thead><tr><th>Peça</th>${db.lojas.map((lj) => `<th class="n">${t(lj.nome)}</th>`).join('')}<th class="n">Total</th><th></th></tr></thead><tbody>${l.map((p) => `<tr><td><b>${t(p.nome)}</b><br><small class="mudo">${t(p.cod)}</small></td>${db.lojas.map((lj) => { const q = totalPecas(p, lj.id); return `<td class="n" data-r="${t(lj.nome)}"><span class="${q ? '' : 'tag mal'}">${q}</span></td>`; }).join('')}<td class="n" data-r="Total"><b>${totalRede(p)}</b></td><td><button type="button" class="bt pq" data-transf="${p.id}">Ver e transferir</button></td></tr>`).join('') || `<tr><td colspan="${db.lojas.length + 3}"><p class="vazio"><b>Nenhuma peça</b>Cadastre a primeira em “Peças”.</p></td></tr>`}</tbody></table></div>
+        <p class="mudo" style="font-size:13px;margin:10px 0 0">Cada loja vende do próprio estoque. A transferência tira de uma e põe na outra, e fica nas Movimentações.</p></section>`;
+    }
     if (a === 'movs') {
-      const TIPO = { venda: ['', 'Venda'], entrada: ['ok', 'Entrada'], ajuste: ['atn', 'Ajuste'], devolucao: ['ac', 'Devolução'], avaria: ['mal', 'Avaria'], troca: ['ac', 'Troca'] };
+      const TIPO = { venda: ['', 'Venda'], entrada: ['ok', 'Entrada'], ajuste: ['atn', 'Ajuste'], devolucao: ['ac', 'Devolução'], avaria: ['mal', 'Avaria'], troca: ['ac', 'Troca'], transf: ['ac', 'Transferência'] };
       const l = db.movs.slice().sort((x, y) => y.data.localeCompare(x.data)).slice(0, 120);
-      corpo = `<section class="cartao"><div class="tabela-wrap"><table class="tabela cartoes"><thead><tr><th>Data</th><th>Peça</th><th>Cor · tamanho</th><th>Tipo</th><th class="n">Qtd.</th><th>Motivo</th></tr></thead><tbody>${l.map((m) => { const p = prod(m.p) || { nome: '?' }, tp = TIPO[m.tipo] || ['', m.tipo]; return `<tr><td data-r="Data">${dataBR(m.data)} ${horaBR(m.data)}</td><td><b>${t(p.nome)}</b></td><td data-r="Variação">${t(m.cor)} · ${t(m.tam)}</td><td><span class="tag ${tp[0]}">${tp[1]}</span></td><td class="n" data-r="Quantidade">${m.q > 0 ? '+' : ''}${m.q}</td><td data-r="Motivo">${t(m.motivo || m.ref || '')}</td></tr>`; }).join('')}</tbody></table></div></section>`;
+      corpo = `<section class="cartao"><div class="tabela-wrap"><table class="tabela cartoes"><thead><tr><th>Data</th><th>Peça</th><th>Cor · tamanho</th><th>Tipo</th><th class="n">Qtd.</th><th>Motivo</th></tr></thead><tbody>${l.map((m) => { const p = prod(m.p) || { nome: '?' }, tp = TIPO[m.tipo] || ['', m.tipo]; return `<tr><td data-r="Data">${dataBR(m.data)} ${horaBR(m.data)}</td><td><b>${t(p.nome)}</b></td><td data-r="Variação">${t(m.cor)} · ${t(m.tam)}</td><td><span class="tag ${tp[0]}">${tp[1]}</span></td><td class="n" data-r="Quantidade">${m.q > 0 ? '+' : ''}${m.q}</td><td data-r="Motivo">${variasLojas() ? `<b>${t(nomeLoja(m.loja || 'l1'))}</b> · ` : ''}${t(m.motivo || m.ref || '')}</td></tr>`; }).join('')}</tbody></table></div></section>`;
     }
     return `<div class="cab"><div><h1>Estoque</h1><p>${ativos().reduce((s, p) => s + totalPecas(p), 0)} peças · ${din(ativos().reduce((s, p) => s + totalPecas(p) * p.custo, 0))} pelo custo · cada cor e tamanho contado separado.</p></div><div class="acoes"><button type="button" class="bt" data-acao="exportar-estoque">Planilha</button>${addBt('peca', 'compra', 'pedido', 'promo', 'impPeca')}</div></div>
       ${abas(tabs, a, 'data-ea')}${corpo}`;
@@ -744,8 +761,8 @@ const TELAS = {
   },
 
   caixa() {
-    const cx = db.caixa.aberto;
-    const hist = `<section class="cartao" style="margin-top:16px"><div class="cartao-cab"><h2>Fechamentos anteriores</h2></div><ul class="lista">${db.caixa.historico.slice().reverse().slice(0, 12).map((h) => `<li><span class="cresce"><b>${dataBR(h.abertura)}</b><small>aberto ${horaBR(h.abertura)} · fechado ${horaBR(h.fechamento)}${h.obs ? ` · ${t(h.obs)}` : ''}</small></span><span class="tag ${h.dif ? 'mal' : 'ok'}">${h.dif ? `diferença ${din(h.dif)}` : 'bateu'}</span></li>`).join('') || '<p class="mudo">Nenhum fechamento ainda.</p>'}</ul></section>`;
+    const cx = CX().aberto;
+    const hist = `<section class="cartao" style="margin-top:16px"><div class="cartao-cab"><h2>Fechamentos anteriores</h2></div><ul class="lista">${CX().historico.slice().reverse().slice(0, 12).map((h) => `<li><span class="cresce"><b>${dataBR(h.abertura)}</b><small>aberto ${horaBR(h.abertura)} · fechado ${horaBR(h.fechamento)}${h.obs ? ` · ${t(h.obs)}` : ''}</small></span><span class="tag ${h.dif ? 'mal' : 'ok'}">${h.dif ? `diferença ${din(h.dif)}` : 'bateu'}</span></li>`).join('') || '<p class="mudo">Nenhum fechamento ainda.</p>'}</ul></section>`;
     if (!cx) return `<div class="cab"><div><h1>Caixa</h1><p>Abra o caixa com o troco que está na gaveta.</p></div></div>
       <section class="cartao" style="max-width:520px"><label class="campo">Troco inicial (R$)<input id="cx-ini" inputmode="decimal" placeholder="200,00"></label><button type="button" class="bt cheio largo" style="margin-top:12px" data-acao="abrir-caixa">Abrir caixa</button></section>${hist}`;
     const r = resumoCaixa(cx), linha = (n, v, cls = '') => `<li><span class="cresce">${n}</span><b class="num ${cls}">${din(v)}</b></li>`;
@@ -831,6 +848,9 @@ const TELAS = {
           <label class="campo">Série<input data-fiscal="serie" type="number" min="1" value="${db.fiscal.serie}"></label><label class="campo">Próximo número<input data-fiscal="proximo" type="number" min="1" value="${db.fiscal.proximo}"></label></div>
           ${emiteAqui() ? '' : '<div class="caixa-aviso ac" style="margin-top:12px">A emissão de NFC-e pelo Peplo está em fase de liberação. Você já pode deixar os dados prontos: avisaremos pelo e-mail e aqui no sistema quando estiver liberada para a sua loja. Na demonstração você vê como a nota fica.</div>'}<p class="mudo" style="font-size:13px;margin:12px 0 0"><b>Certificado digital e código CSC:</b> por segurança, eles não ficam neste aparelho. Na conta, você envia o arquivo do certificado (.pfx), a senha e o CSC numa tela própria, e eles ficam guardados cifrados no servidor, que é quem fala com a SEFAZ. ${fiscalPronto() ? '<span class="tag ok">Dados da loja completos</span>' : '<span class="tag atn">Faltam dados da loja</span>'}</p>` : ''}
       </section>` : ''}
+      <section class="cartao" style="margin-top:16px"><div class="cartao-cab"><h2>Lojas</h2>${dona() ? `<button type="button" class="bt pq" data-acao="nova-loja">${ico('mais')}Nova loja</button>` : ''}</div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">Tem filial? Cadastre aqui, na mesma assinatura. Cada loja tem o próprio estoque e o próprio caixa; clientes, fiado e relatórios ficam juntos.</p>
+        <div class="campos">${db.lojas.map((l) => `<label class="campo">Nome da loja<input data-filial-nome="${l.id}" value="${t(l.nome)}" ${dona() ? '' : 'disabled'}></label>`).join('')}
+        <label class="campo">Este aparelho vende pela<select data-filial-atual>${db.lojas.map((l) => `<option value="${l.id}" ${l.id === lojaAtual() ? 'selected' : ''}>${t(l.nome)}</option>`).join('')}</select><small>Escolha em cada celular ou computador.</small></label></div></section>
       <section class="cartao" style="margin-top:16px"><div class="cartao-cab"><h2>Mensagens de cobrança no WhatsApp</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">As palavras entre chaves viram os dados de cada cliente: {nome}, {valor}, {venc}, {saldo}, {dias}, {loja}, {pix}, {acordo}. Deixe em branco para voltar ao texto sugerido.</p>
         <div class="grade g2">${Object.entries(MSGS).map(([k, m]) => `<label class="campo">${m.titulo}<textarea data-msg="${k}" rows="4">${t((db.cfg.msgs || {})[k] || m.sug)}</textarea></label>`).join('')}</div></section>
       <div class="grade g2" style="margin-top:16px">
@@ -875,7 +895,7 @@ const TELAS = {
     const h = hoje(), ini = `${h.slice(0, 8)}01`, n = numeros(ini, h), diaMes = Number(h.slice(8)), ultimo = new Date(Number(h.slice(0, 4)), Number(h.slice(5, 7)), 0).getDate();
     const proj = Math.round(n.liquido / diaMes * ultimo), pct = db.meta ? Math.min(100, Math.round(n.liquido / db.meta * 100)) : 0;
     const porVend = db.usuarios.map((u) => { const vs = n.vs.filter((v) => v.vend === u.id), tot = vs.reduce((s, v) => s + v.total, 0); return { u, vs, tot, desc: vs.reduce((s, v) => s + v.desc, 0), fiado: vs.reduce((s, v) => s + v.pag.filter((x) => x.f === 'fiado').reduce((a, x) => a + x.v, 0), 0) }; });
-    const ativ = [...db.atividades, ...db.excecoes.map((e) => ({ data: e.data, quem: '', txt: `Fiado liberado fora da regra para ${(cli(e.cli) || {}).nome || 'cliente'}: ${din(e.valor)} (${e.motivo})`, tipo: 'excecao' })), ...db.movs.filter((m) => m.tipo === 'ajuste' || m.tipo === 'avaria').map((m) => ({ data: m.data, quem: '', txt: `${m.tipo === 'ajuste' ? 'Ajuste de estoque' : 'Avaria'}: ${(prod(m.p) || {}).nome} ${m.cor} ${m.tam} (${m.q > 0 ? '+' : ''}${m.q}) ${m.motivo || ''}`, tipo: 'estoque' })), ...db.caixa.historico.filter((c) => c.dif).map((c) => ({ data: c.fechamento, quem: '', txt: `Caixa fechou com diferença de ${din(c.dif)}${c.obs ? ` (${c.obs})` : ''}`, tipo: 'caixa' }))].sort((a, b) => String(b.data).localeCompare(String(a.data))).slice(0, 25);
+    const ativ = [...db.atividades, ...db.excecoes.map((e) => ({ data: e.data, quem: '', txt: `Fiado liberado fora da regra para ${(cli(e.cli) || {}).nome || 'cliente'}: ${din(e.valor)} (${e.motivo})`, tipo: 'excecao' })), ...db.movs.filter((m) => m.tipo === 'ajuste' || m.tipo === 'avaria').map((m) => ({ data: m.data, quem: '', txt: `${m.tipo === 'ajuste' ? 'Ajuste de estoque' : 'Avaria'}: ${(prod(m.p) || {}).nome} ${m.cor} ${m.tam} (${m.q > 0 ? '+' : ''}${m.q}) ${m.motivo || ''}`, tipo: 'estoque' })), ...CX().historico.filter((c) => c.dif).map((c) => ({ data: c.fechamento, quem: '', txt: `Caixa fechou com diferença de ${din(c.dif)}${c.obs ? ` (${c.obs})` : ''}`, tipo: 'caixa' }))].sort((a, b) => String(b.data).localeCompare(String(a.data))).slice(0, 25);
     return `<div class="cab"><div><h1>Painel do dono</h1><p>Meta, equipe, quem pode o quê e tudo o que aconteceu na loja.</p></div><div class="acoes">${addBt('usuario')}</div></div>
       <div class="grade g-21" style="margin-bottom:16px">
         <section class="cartao"><div class="cartao-cab"><h2>${ico('lucro')}Meta do mês</h2><span class="vivo" style="margin-left:auto"><i></i>ao vivo</span></div>
@@ -972,7 +992,7 @@ function finalizarVenda() {
   const cx = caixaAtual();
   // troco sai do dinheiro
   const pagFinal = pags.map((x) => ({ ...x })); if (troco > 0) { const d = pagFinal.find((x) => x.f === 'dinheiro'); d.v -= troco; }
-  const v = { id: uid('v'), n: ++db.n, data: agora(), vend: db.usuario, cli: c ? c.id : null, itens: sac.map((x) => ({ p: x.p, nome: x.nome, cor: x.cor, tam: x.tam, qtd: x.qtd, preco: x.preco, custo: x.custo })), sub, desc: estado.desc, total, pag: pagFinal.filter((x) => x.v > 0), devol: [], caixa: cx.id, troco, excecao: fiado && estado.excecao ? estado.excecao : null };
+  const v = { id: uid('v'), n: ++db.n, data: agora(), loja: lojaAtual(), vend: db.usuario, cli: c ? c.id : null, itens: sac.map((x) => ({ p: x.p, nome: x.nome, cor: x.cor, tam: x.tam, qtd: x.qtd, preco: x.preco, custo: x.custo })), sub, desc: estado.desc, total, pag: pagFinal.filter((x) => x.v > 0), devol: [], caixa: cx.id, troco, excecao: fiado && estado.excecao ? estado.excecao : null };
   v.itens.forEach((x) => mover(prod(x.p), x.cor, x.tam, -x.qtd, 'venda', v.id));
   if (loja) c.credito -= loja;
   if (fiado) {
@@ -1262,6 +1282,7 @@ window.veltriaNovoCadastro = (tipo, nome) => { if (/cli/.test(tipo)) formCliente
 const CORES_SUG = [['Preto', '#1f1d1b'], ['Branco', '#f4f1ea'], ['Off-white', '#ede4d3'], ['Nude', '#d9b99b'], ['Caramelo', '#a0683a'], ['Vinho', '#6b2338'], ['Rosa', '#e3a3b5'], ['Azul jeans', '#4a6a8f'], ['Marinho', '#22304a'], ['Verde oliva', '#6e7444'], ['Estampado', '#b5677f'], ['Cinza', '#9a958e']];
 function formPeca(p) {
   const nova = !p; p = p ? JSON.parse(JSON.stringify(p)) : { nome: '', cat: 'Blusas', cod: '', marca: '', forn: '', custo: 0, preco: 0, min: db.cfg.minimo, tam: ['P', 'M', 'G', 'GG'], cores: [{ n: 'Preto', h: '#1f1d1b' }], q: {} };
+  if (!nova) p.q = { ...Q(prod(p.id)) };
   const desenhaGrade = (j) => { $('[data-grade]', j).innerHTML = grade(p, { editar: true }); };
   abrir(`<h2>${nova ? 'Nova peça' : 'Editar peça'}</h2><p class="mudo">${nova ? 'A quantidade de cada cor e tamanho entra como estoque inicial.' : 'Mudar a quantidade registra um ajuste com o motivo.'}</p>
     <div class="campos"><label class="campo inteiro">Nome<input id="fp-nome" value="${t(p.nome)}" placeholder="Ex.: Vestido Midi Floral"></label>
@@ -1273,7 +1294,7 @@ function formPeca(p) {
     <p class="campo" style="margin:14px 0 8px">Cores</p><div class="chips" data-cores>${p.cores.map((c, i) => `<button type="button" data-tira-cor="${i}" title="Tirar"><span class="bolinha" style="background:${t(c.h)}"></span>${t(c.n)} ×</button>`).join('')}</div>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input id="fp-cor" list="dl-cores" placeholder="Nova cor" style="min-height:40px;border-radius:10px;border:1px solid var(--linha);padding:6px 10px;flex:1;min-width:140px"><datalist id="dl-cores">${CORES_SUG.map(([n]) => `<option value="${n}">`).join('')}</datalist><input type="color" id="fp-corh" value="#8a5367" style="width:46px;height:40px;border:1px solid var(--linha);border-radius:10px;padding:2px"><button type="button" class="bt pq" data-acao-cor>Pôr cor</button></div>
     ${NOTA_LIGADA ? `<details style="margin-top:14px"><summary class="link">Dados fiscais da peça (para a nota)</summary><div class="campos" style="margin-top:10px"><label class="campo">NCM<input id="fp-ncm" list="dl-ncm" value="${t(p.ncm || NCM_SUG[p.cat] || '')}" placeholder="0000.00.00"><datalist id="dl-ncm">${Object.entries(NCM_SUG).map(([c, n]) => `<option value="${n}">${c}</option>`).join('')}</datalist><small>Confirme com o seu contador.</small></label><label class="campo">CFOP<input id="fp-cfop" value="${t(p.cfop || '5102')}"></label><label class="campo">CSOSN / CST<input id="fp-csosn" value="${t(p.csosn || '102')}"></label><label class="campo">Origem<select id="fp-orig"><option value="0" ${(p.orig || '0') === '0' ? 'selected' : ''}>0 · Nacional</option><option value="1" ${p.orig === '1' ? 'selected' : ''}>1 · Importada direto</option><option value="2" ${p.orig === '2' ? 'selected' : ''}>2 · Importada no mercado interno</option></select></label></div></details>` : ''}
-    <p class="campo" style="margin:16px 0 8px">Quantidade em estoque</p><div data-grade></div>
+    <p class="campo" style="margin:16px 0 8px">Quantidade em estoque${variasLojas() ? ` na ${t(nomeLoja(lojaAtual()))}` : ''}</p><div data-grade></div>
     ${nova ? '' : '<label class="campo" style="margin-top:10px">Motivo do ajuste (se mudar a quantidade)<input id="fp-mot" list="dl-aj" placeholder="Ex.: contagem do estoque"><datalist id="dl-aj"><option value="Contagem do estoque"><option value="Peça com defeito"><option value="Perda ou furto"><option value="Brinde"></datalist></label>'}
     <div class="acoes">${nova ? '' : `<button type="button" class="bt perigo" data-arquivar>${p.arquivado ? 'Voltar para a venda' : 'Arquivar'}</button>`}<button type="button" class="bt cheio" data-ok>Salvar</button></div>`, (j) => {
     const lerGrade = () => $$('[data-g]', j).forEach((i) => { p.q[i.dataset.g] = Math.max(0, Math.round(Number(i.value) || 0)); });
@@ -1295,7 +1316,7 @@ function formPeca(p) {
       if (nome.length < 2) { toast('Escreva o nome da peça.', true); return; }
       if (!preco) { toast('Digite o preço de venda.', true); return; }
       if (!tam.length) { toast('Ponha ao menos um tamanho.', true); return; }
-      Object.assign(p, { ncm: $('#fp-ncm', j).value.trim(), cfop: $('#fp-cfop', j).value.trim() || '5102', csosn: $('#fp-csosn', j).value.trim() || '102', orig: $('#fp-orig', j).value });
+      if (NOTA_LIGADA) Object.assign(p, { ncm: $('#fp-ncm', j).value.trim(), cfop: $('#fp-cfop', j).value.trim() || '5102', csosn: $('#fp-csosn', j).value.trim() || '102', orig: $('#fp-orig', j).value });
       Object.assign(p, { nome, cat: $('#fp-cat', j).value.trim() || 'Outras', cod: $('#fp-cod', j).value.trim(), custo: lerDin($('#fp-custo', j).value), preco, min: Math.max(0, Number($('#fp-min', j).value) || 0), forn: $('#fp-forn', j).value.trim(), tam });
       if (p.forn && !db.fornecedores.some((f) => sa(f.nome) === sa(p.forn))) db.fornecedores.push({ id: uid('f'), nome: p.forn, tel: '' });
       if (nova) {
@@ -1303,10 +1324,35 @@ function formPeca(p) {
         db.produtos.push(np); Object.entries(p.q).forEach(([k, q]) => { const [cor, tm] = k.split('|'); if (q > 0 && np.tam.includes(tm) && np.cores.some((c) => c.n === cor)) mover(np, cor, tm, q, 'entrada', 'Estoque inicial', 'Cadastro da peça'); });
       } else {
         const orig = prod(p.id), mot = $('#fp-mot', j).value.trim() || 'Ajuste manual';
-        p.cores.forEach((c) => p.tam.forEach((tm) => { const k = `${c.n}|${tm}`, nv = p.q[k] || 0, at = orig.q[k] || 0; if (nv !== at) { orig.q[k] = at; mover(orig, c.n, tm, nv - at, 'ajuste', 'Ajuste', mot); } }));
-        const q = orig.q; Object.assign(orig, { ...p, q });
+        p.cores.forEach((c) => p.tam.forEach((tm) => { const k = `${c.n}|${tm}`, nv = p.q[k] || 0, at = qtd(orig, c.n, tm); if (nv !== at) { mover(orig, c.n, tm, nv - at, 'ajuste', 'Ajuste', mot); } }));
+        const q = orig.q, qs = orig.qs; Object.assign(orig, { ...p, q, qs });
       }
       grava(); fechar(); mostra(); toast(nova ? 'Peça cadastrada.' : 'Peça salva.');
+    };
+  }, true);
+}
+function formTransf(p) {
+  if (!variasLojas()) return toast('Cadastre a segunda loja em Configurações.', true);
+  const outra = db.lojas.find((l) => l.id !== lojaAtual()) || db.lojas[1];
+  abrir(`<h2>${t(p.nome)} nas lojas</h2><p class="mudo">O estoque de cada loja, cor e tamanho. Para mandar peças de uma loja para a outra, preencha embaixo.</p>
+    ${db.lojas.map((l) => `<h3 style="margin:14px 0 6px;font-size:15px">${t(l.nome)} · ${totalPecas(p, l.id)} peças</h3>${grade(p, { loja: l.id })}`).join('')}
+    <div class="campos" style="margin-top:16px"><label class="campo">Sai da loja<select id="tr-de">${db.lojas.map((l) => `<option value="${l.id}" ${l.id === lojaAtual() ? 'selected' : ''}>${t(l.nome)}</option>`).join('')}</select></label>
+    <label class="campo">Vai para<select id="tr-para">${db.lojas.map((l) => `<option value="${l.id}" ${l.id === outra.id ? 'selected' : ''}>${t(l.nome)}</option>`).join('')}</select></label>
+    <label class="campo">Cor<select id="tr-cor">${p.cores.map((c) => `<option>${t(c.n)}</option>`).join('')}</select></label>
+    <label class="campo">Tamanho<select id="tr-tam">${p.tam.map((tm) => `<option>${t(tm)}</option>`).join('')}</select></label>
+    <label class="campo">Quantidade<input id="tr-q" type="number" min="1" value="1" inputmode="numeric"><small data-tem></small></label></div>
+    <div class="acoes"><button type="button" class="bt cheio" data-ok>Transferir</button></div>`, (j) => {
+    const tem = () => { $('[data-tem]', j).textContent = `Tem ${qtd(p, $('#tr-cor', j).value, $('#tr-tam', j).value, $('#tr-de', j).value)} na loja de saída.`; };
+    tem(); j.addEventListener('change', tem);
+    $('[data-ok]', j).onclick = () => {
+      const de = $('#tr-de', j).value, para = $('#tr-para', j).value, cor = $('#tr-cor', j).value, tam = $('#tr-tam', j).value, q = Math.round(Number($('#tr-q', j).value) || 0);
+      if (de === para) return toast('Escolha lojas diferentes.', true);
+      if (q < 1) return toast('Digite a quantidade.', true);
+      if (q > qtd(p, cor, tam, de)) return toast(`A ${nomeLoja(de)} só tem ${qtd(p, cor, tam, de)} de ${cor} ${tam}.`, true);
+      const ref = uid('tr');
+      mover(p, cor, tam, -q, 'transf', ref, `Para ${nomeLoja(para)}`, de); mover(p, cor, tam, q, 'transf', ref, `Vindo da ${nomeLoja(de)}`, para);
+      registra(`Transferência: ${q} ${p.nome} ${cor} ${tam}, da ${nomeLoja(de)} para a ${nomeLoja(para)}`, 'estoque');
+      grava(); fechar(); mostra(); marca(); toast(`${q} ${q === 1 ? 'peça transferida' : 'peças transferidas'} para a ${nomeLoja(para)}.`); formTransf(p);
     };
   }, true);
 }
@@ -1358,11 +1404,11 @@ function fecharCaixa() {
   fecharCaixaOk();
 }
 function fecharCaixaOk() {
-  const cx = db.caixa.aberto, r = resumoCaixa(cx);
+  const cx = CX().aberto, r = resumoCaixa(cx);
   abrir(`<h2>Fechar o caixa</h2><p class="mudo">Conte o dinheiro da gaveta. O sistema esperava <b>${din(r.esperado)}</b>.</p><label class="campo">Dinheiro contado (R$)<input id="fx-c" inputmode="decimal"></label><p data-dif class="mudo" style="margin:8px 0 0"></p><label class="campo" style="margin-top:10px">Observação<input id="fx-o" placeholder="Ex.: faltou troco"></label>
     <div class="acoes"><button type="button" class="bt cheio" data-ok>Fechar caixa</button></div>`, (j) => {
     $('#fx-c', j).addEventListener('input', (e) => { const d = lerDin(e.target.value) - r.esperado; $('[data-dif]', j).innerHTML = e.target.value ? (d === 0 ? '<span style="color:var(--ok)">Bateu certinho.</span>' : `<span style="color:var(--mal)">${d > 0 ? 'Sobrou' : 'Faltou'} ${din(Math.abs(d))}.</span>`) : ''; });
-    $('[data-ok]', j).onclick = () => { if (!$('#fx-c', j).value.trim()) { toast('Digite o dinheiro contado.', true); return; } const c = lerDin($('#fx-c', j).value); db.caixa.historico.push({ ...cx, fechamento: agora(), contado: c, esperado: r.esperado, dif: c - r.esperado, obs: $('#fx-o', j).value.trim(), resumo: r, por: eu().nome }); db.caixa.aberto = null; registra(`Caixa fechado: contado ${din(c)}, esperado ${din(r.esperado)}`, 'caixa'); grava(); fechar(); mostra(); toast(c === r.esperado ? 'Caixa fechado. Bateu certinho.' : `Caixa fechado com diferença de ${din(c - r.esperado)}.`); };
+    $('[data-ok]', j).onclick = () => { if (!$('#fx-c', j).value.trim()) { toast('Digite o dinheiro contado.', true); return; } const c = lerDin($('#fx-c', j).value); CX().historico.push({ ...cx, fechamento: agora(), contado: c, esperado: r.esperado, dif: c - r.esperado, obs: $('#fx-o', j).value.trim(), resumo: r, por: eu().nome }); CX().aberto = null; registra(`Caixa fechado: contado ${din(c)}, esperado ${din(r.esperado)}`, 'caixa'); grava(); fechar(); mostra(); toast(c === r.esperado ? 'Caixa fechado. Bateu certinho.' : `Caixa fechado com diferença de ${din(c - r.esperado)}.`); };
   });
 }
 
@@ -1393,6 +1439,7 @@ document.addEventListener('click', (e) => {
   if (d.ff) { estado.fiadoFiltro = d.ff; location.hash = '#fiado'; return mostra(); }
   if (d.ea) { estado.estoqueAba = d.ea; if (location.hash !== '#estoque') location.hash = '#estoque'; return mostra(); }
   if (d.per) { estado.relPer = d.per; return mostra(); }
+  if (d.transf) return formTransf(prod(d.transf));
   if (d.peca && !e.target.closest('button')) return formPeca(prod(d.peca));
   if (d.repor) return formCompra(d.repor);
   if (d.mov) return movCaixa(d.mov);
@@ -1417,12 +1464,13 @@ document.addEventListener('click', (e) => {
     'ir-vender': () => { location.hash = '#vender'; }, 'xml-notas': () => baixar(`notas-${hoje()}.csv`, csv([['Número', 'Série', 'Data', 'Chave', 'CPF', 'Valor', 'Situação'], ...db.notas.map((n) => [n.numero, n.serie, `${dataBR(n.data)} ${horaBR(n.data)}`, n.chave, n.cpf, campoDin(n.valor), n.status])])), 'novo-pedido': formPedido, 'nova-promo': formPromo, 'conferir-extrato': conferirExtrato, 'fiado-caderno': fiadoCaderno, 'passar-caderno': passarCaderno, ajuda: () => window.open(`https://wa.me/5516991500746?text=${encodeURIComponent(`Olá! Uso o Peplo na ${db.loja.nome} e preciso de ajuda.`)}`, '_blank', 'noopener'), 'receber-escolher': receberEscolher,
     'mov-despesa': () => movCaixa('despesa'), 'mov-retirada': () => movCaixa('retirada'), 'mov-reforco': () => movCaixa('reforco'),
     'importar-clientes': () => importar('clientes'), 'importar-pecas': () => importar('pecas'), instalar,
+    'nova-loja': () => { if (!dona()) return toast('Só a dona cadastra lojas.', true); db.lojas.push({ id: uid('l'), nome: `Loja ${db.lojas.length + 1}` }); registra('Loja nova cadastrada', 'geral'); grava(); mostra(); toast('Loja criada. Dê o nome dela e transfira as peças em Estoque.'); },
     'tira-foto-eu': () => { eu().foto = ''; grava(); mostra(); },
     'salvar-pin': async () => { const p = ($('#pin-novo') || {}).value || ''; if (!/^\d{4}$/.test(p)) { toast('A senha tem 4 números.', true); return; } eu().pin = await resumoPin(p); grava(); mostra(); toast('Senha salva.'); },
     'novo-usuario': () => abrir(`<h2>Pessoa da equipe</h2><p class="mudo">Na conta de verdade ela recebe o convite e entra com o próprio login.</p><div class="campos"><label class="campo inteiro">Nome<input id="nu-n"></label><label class="campo">WhatsApp<input id="nu-t" inputmode="tel"></label><label class="campo">Desconto sem pedir (%)<input id="nu-d" type="number" min="0" max="100" value="5"></label></div><div class="acoes"><button type="button" class="bt cheio" data-ok>Pôr na equipe</button></div>`, (j) => { $('[data-ok]', j).onclick = () => { const n = $('#nu-n', j).value.trim(); if (n.length < 2) { toast('Escreva o nome.', true); return; } db.usuarios.push({ id: uid('u'), nome: n, perfil: 'vendedora', tel: telLimpo($('#nu-t', j).value), email: '', foto: '', nasc: '', descMax: Number($('#nu-d', j).value) || 0, perms: {}, pin: '' }); registra(`${n} entrou na equipe`, 'equipe'); grava(); fechar(); mostra(); toast(`${n} está na equipe.`); }; }),
     'nova-cli': () => formCliente(), 'nova-peca': () => formPeca(), 'nova-compra': () => formCompra(),
     'novo-forn': () => abrir(`<h2>Novo fornecedor</h2><div class="campos" style="margin-top:12px"><label class="campo">Nome<input id="nf-n"></label><label class="campo">WhatsApp<input id="nf-t" inputmode="tel"></label></div><div class="acoes"><button type="button" class="bt cheio" data-ok>Salvar</button></div>`, (j) => { $('[data-ok]', j).onclick = () => { const n = $('#nf-n', j).value.trim(); if (!n) { toast('Escreva o nome.', true); return; } db.fornecedores.push({ id: uid('f'), nome: n, tel: telLimpo($('#nf-t', j).value) }); grava(); fechar(); mostra(); }; }),
-    'abrir-caixa': () => { db.caixa.aberto = { id: uid('cx'), abertura: agora(), inicial: lerDin($('#cx-ini').value), movs: [] }; grava(); mostra(); toast('Caixa aberto.'); },
+    'abrir-caixa': () => { CX().aberto = { id: uid('cx'), abertura: agora(), inicial: lerDin($('#cx-ini').value), movs: [] }; grava(); mostra(); toast('Caixa aberto.'); },
     'fechar-caixa': fecharCaixa,
     'tira-logo': () => { db.loja.logo = ''; grava(); mostra(); },
     backup: () => { baixar(`peplo-copia-${hoje()}.json`, JSON.stringify(db), 'application/json'); toast('Cópia baixada. Guarde o arquivo.'); },
@@ -1463,6 +1511,8 @@ document.addEventListener('change', (e) => {
   if (el.id === 'rel-de') { estado.relDe = el.value; mostra(); }
   if (el.id === 'rel-ate') { estado.relAte = el.value; mostra(); }
   if (d.loja) { db.loja[d.loja] = d.loja === 'tel' ? telLimpo(el.value) : el.value.trim(); grava(); marca(); toast('Salvo.'); }
+  if (d.filialNome) { const l = db.lojas.find((x) => x.id === d.filialNome), n = el.value.trim(); if (l && n) { l.nome = n; grava(); marca(); toast('Nome da loja salvo.'); } }
+  if (el.matches('[data-filial-atual]')) { try { localStorage.setItem('peplo-loja', el.value); } catch (e) { /* sem armazenamento */ } marca(); mostra(); toast(`Este aparelho agora vende pela ${nomeLoja(el.value)}.`); }
   if (d.cfg) { db.cfg[d.cfg] = Math.max(1, Number(el.value) || 1); grava(); toast('Regra salva.'); }
   if (d.cfgd) { db.cfg[d.cfgd] = lerDin(el.value); grava(); toast('Regra salva.'); }
   if (d.cfgb) { db.cfg[d.cfgb] = el.checked; grava(); marca(); toast('Regra salva.'); }
