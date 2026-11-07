@@ -69,3 +69,6 @@
 .vs-pos { margin: 22px 0 0; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; justify-content: center; text-align: center; }
 .vs-pos-bt { font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .vs-pos span { color: var(--ink-3); font-size: 14.5px; }
+
+/* 07/11/2026: so o Essencial a venda: o cartao unico fica centralizado */
+.vs-grade:has(> .vs-card:only-child) { grid-template-columns: minmax(0, 520px); justify-content: center; }

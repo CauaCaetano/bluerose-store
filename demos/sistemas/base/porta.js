@@ -122,11 +122,25 @@ function telaManutencao(podeEntrar) {
   });
 }
 
+// ---------------------------------------------------------------- fora da venda (Completo e Avançado, desde 07/11/2026)
+// Só o Essencial é vendido. Quem já tem empresa liberada (cortesia, revisão, assinatura antiga) continua entrando.
+const FORA = !MANUTENCAO && (V.versao === 'completo' || V.versao === 'avancado');
+function telaFora(podeEntrar) {
+  return new Promise((ok) => {
+    const f = tela(`<h1>${esc(V.nome)} saiu da venda</h1><p class="p-sub">Agora a ${esc(V.nomeCategoria)} é vendida só na versão Essencial, o app de celular, com 7 dias grátis. Quem já tem acesso a esta versão continua entrando normalmente.</p>
+      <a class="p-bt" style="display:grid;place-items:center;text-decoration:none" href="${RAIZ}app/${V.categoria}essencial/">Conhecer o ${esc(V.nomeCategoria)} Essencial</a>
+      ${podeEntrar ? '<p class="p-ou">Já tem acesso a esta versão?</p><button type="button" class="p-bt p-bt-2" data-entrar>Entrar</button>' : ''}
+      <p class="p-links"><a href="${RAIZ}${V.pagina}">Voltar ao site</a></p>`);
+    const b = f.querySelector('[data-entrar]'); if (b) b.onclick = () => ok();
+  });
+}
+
 // ---------------------------------------------------------------- caminho
 async function entrar() {
   carregando('Abrindo…');
   let { data: { session } } = await sb.auth.getSession();
   if (!session && MANUTENCAO) await telaManutencao(true);
+  if (!session && FORA) await telaFora(true);
   if (!session) session = await telaConta(new URLSearchParams(location.search).has('criar') ? 'criar' : 'entrar');
   carregando('Conferindo o seu acesso…');
   await sb.rpc('nexo_aceitar_convites').then(() => {}, () => {});
@@ -139,6 +153,8 @@ async function entrar() {
     // sem empresa liberada: confere teste e assinatura do próprio login
     const r = await pagamentos({ acao: 'status' }).catch(() => ({ assinaturas: [], tokens: {} }));
     const daqui = (r.assinaturas || []).filter((a) => a.app === V.id), h = hoje();
+    // fora da venda: só segue quem já tem acesso liberado a esta versão (cortesia ou assinatura antiga)
+    if (FORA && !daqui.some((a) => valeAssinatura(a, h))) { await telaFora(false); return; }
     if (!daqui.some((a) => valeAssinatura(a, h))) {
       if (espacos.length && !meus.length) { tela(`<h1>O acesso da empresa venceu</h1><p class="p-sub">A assinatura de ${esc(espacos[0].nome)} não está em dia. Peça ao dono da empresa para renovar em Minha conta.</p><p class="p-links"><a href="#" data-sair>Sair</a></p>`); $('[data-sair]').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.reload(); }; return; }
       const pend = daqui.find((a) => a.status === 'pendente');
