@@ -17,16 +17,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=11">
+<link rel="stylesheet" href="estilo.css?v=12">
+<script>try{var d=JSON.parse(localStorage.getItem("veltria-agenda-essencial-v3")||"null");if(d&&d.tema)document.documentElement.dataset.tema=d.tema}catch(e){}</script>
 <script src="../base/versoes.js?v=42"></script>
 <script src="../base/conta-nuvem.js?v=52"></script>
-<style>.v-logo{height:42px;width:auto;flex:none;display:block;object-fit:contain}.v-logo.v-claro{background:#161a22;padding:5px 9px;border-radius:10px;box-sizing:content-box}.v-logo[src*="veltria-agenda"]{background:#f7f2e8;padding:4px 8px;border-radius:10px;box-sizing:content-box}</style>
 <script src="../base/ver-web.js?v=2"></script>
 </head>
 <body>
 <div class="demo-topo"><a href="../../../veltria-agenda.html">Voltar ao site</a><button type="button" id="recomecar">Recomeçar</button><a href="index.html?celular=1">Ver no celular</a></div>
 <header class="topo">
-  <img class="v-logo" src="../../../img/logos/veltria-agenda-simbolo.png?v=7" alt="Veltria Agenda" width="256" height="180"><div class="quem"><span class="ini" id="iniciais" aria-hidden="true">LS</span><div><b id="nome-studio">Studio Lia Nails</b><small id="nome-pro">Lia Santos · manicure e nail designer</small></div></div>
+  <a class="quem" href="#config" aria-label="Sua marca no app (trocar foto, nome e cor)"><span class="ini" id="iniciais" aria-hidden="true">LS</span><div><b id="nome-studio">Studio Lia Nails</b><small id="nome-pro">Lia Santos · manicure e nail designer</small></div></a>
   <button type="button" class="bt-ia" data-ir="ia" aria-label="Assistente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M18 15c.3 1.7 1 2.4 2.7 2.7-1.7.3-2.4 1-2.7 2.7-.3-1.7-1-2.4-2.7-2.7 1.7-.3 2.4-1 2.7-2.7z"/></svg></button>
 </header>
 <main id="tela" tabindex="-1"></main>
@@ -38,7 +38,7 @@
   <a href="#mais" data-aba="mais">Mais</a>
 </nav>
 <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
-<script type="module" src="app.js?v=17"></script>
+<script type="module" src="app.js?v=19"></script>
 <script src="../base/camada.js?v=22" defer></script>
 </body>
 </html>

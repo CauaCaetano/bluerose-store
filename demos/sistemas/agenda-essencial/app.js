@@ -66,6 +66,39 @@ function secMsgs() {
     <p class="mini" style="margin:0 0 6px">Pode usar: ${m.vars.map((v) => `<button type="button" class="msg-var" data-mvar="${k}" data-v="${v}" title="${VAR_NOME[v]}">{${v}}</button>`).join(' ')}</p>
     <p class="mini msg-previa" data-mprev="${k}"><b>Como chega:</b> ${t(msg(k, ex))}</p></div>`).join('')}`;
 }
+const TEMAS = [['rose', 'Rosé', '#242d46', '#c69c9a'], ['salvia', 'Sálvia', '#2c4639', '#a9bf9c'], ['terracota', 'Terracota', '#3a2a24', '#c98a68'], ['oceano', 'Oceano', '#173b45', '#86b8bd'], ['ameixa', 'Ameixa', '#3a2433', '#d29ab3'], ['grafite', 'Grafite e ouro', '#27292e', '#cdaa6b']];
+const temaAtual = () => TEMAS.find((x) => x[0] === db.tema) || TEMAS[0];
+function aplicaTema() { const m = temaAtual(); document.documentElement.dataset.tema = m[0]; const mt = document.querySelector('meta[name="theme-color"]'); if (mt) mt.content = m[2]; }
+const primeiroNome = () => String(db.pro || '').trim().split(' ')[0];
+const saudacao = () => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; };
+// foto ou logo da pessoa: quadrado de 192 px em JPEG, pequeno para caber na nuvem junto com a agenda
+function lerFoto(arq) {
+  return new Promise((ok, erro) => {
+    if (!arq || !/^image\//.test(arq.type)) { erro(new Error('Escolha uma imagem.')); return; }
+    const r = new FileReader(); r.onerror = () => erro(new Error('Não deu para abrir a imagem.'));
+    r.onload = () => { const im = new Image(); im.onerror = () => erro(new Error('Não deu para abrir a imagem.')); im.onload = () => {
+      const L = 192, c = document.createElement('canvas'); c.width = c.height = L; const x = c.getContext('2d'), m = Math.min(im.width, im.height);
+      x.fillStyle = '#fff'; x.fillRect(0, 0, L, L); x.drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, L, L); ok(c.toDataURL('image/jpeg', 0.82)); }; im.src = r.result; };
+    r.readAsDataURL(arq);
+  });
+}
+// novidades da atualização: aparece uma vez em cada aparelho; a marca fica fora dos dados da agenda
+const NOVIDADES = 'agenda-essencial-novidades', VISTA = '2026-11-07';
+function novidades() {
+  if (window !== window.top || document.querySelector('.trava, .veu')) return;
+  try { if (localStorage.getItem(NOVIDADES) === VISTA) return; } catch { return; }
+  const visto = () => { try { localStorage.setItem(NOVIDADES, VISTA); } catch { /* sem espaço: mostra de novo na próxima */ } };
+  if (!db.clientes.length && !db.ags.length) { visto(); return; } // conta nova: não há o que contar de novidade
+  folha(`<h2>Seu app ganhou a sua cara</h2><p class="sub">Novidades desta atualização. Sua agenda, seus clientes e os valores continuam do mesmo jeito.</p>
+    <ul class="novidades"><li><b>Sua foto ou logo no topo</b><span>No lugar da logo da Veltria, que atrapalhava no celular. Toque no seu nome lá em cima para trocar.</span></li>
+    <li><b>Escolha a cor do app</b><span>Seis cores para combinar com o seu negócio, em Mais › Configurações › Sua marca no app.</span></li>
+    <li><b>Bom dia com o resumo de hoje</b><span>Quantos horários, quanto vai entrar, quantos faltam e se chegou pedido novo pelo link.</span></li></ul>
+    <div style="display:grid;gap:8px"><a class="bt cheio largo" href="#config" data-fecha>Personalizar agora</a><button type="button" class="bt largo" data-fecha>Ver depois</button></div>`, (f) => {
+    const veu = f.parentElement;
+    veu.addEventListener('click', (e) => { if (e.target === veu || e.target.closest('[data-fecha]')) visto(); });
+    veu.addEventListener('keydown', (e) => { if (e.key === 'Escape') visto(); });
+  });
+}
 const zap = (tel, m) => `https://wa.me/55${String(tel).replace(/\D/g, '')}?text=${encodeURIComponent(m)}`;
 const $ = (s) => document.querySelector(s);
 
@@ -139,7 +172,7 @@ function relogio(d) {
   const l = doDia(d), agora = new Date(), hA = agora.getHours() + agora.getMinutes() / 60, prox = l.find((a) => d > 0 || (d === 0 && a.ini >= hA - 0.25 && a.st !== 'feito')) || null, prev = l.reduce((s, a) => s + preco(a), 0);
   const marcas = Array.from({ length: 12 }, (_, i) => { const h = db.abre + i, [x, y] = pt(146, ang(h)), [a1, b1] = pt(100, ang(h)), [a2, b2] = pt(106, ang(h)); return `<line x1="${a1}" y1="${b1}" x2="${a2}" y2="${b2}" stroke="#d6c5b8" stroke-width="2"/><text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Outfit" font-size="12" fill="#8a8d99">${h}h</text>`; }).join('');
   const arcos = l.map((a) => `<path class="arco" data-ag="${a.id}" d="${fatia(a.ini, fim(a), 108, 136)}" fill="${serv(a.serv).cor}" opacity="${a.st === 'faltou' ? 0.3 : a.st === 'feito' ? 0.55 : 1}" stroke="#f5eee7" stroke-width="2"><title>${hh(a.ini)} ${t(cli(a.cli).nome)} · ${t(serv(a.serv).nome)}</title></path>`).join('');
-  const ponteiro = d === 0 && hA >= db.abre && hA <= db.fecha ? (() => { const [x, y] = pt(140, ang(hA)), [x0, y0] = pt(98, ang(hA)); return `<line x1="${x0}" y1="${y0}" x2="${x}" y2="${y}" stroke="#242d46" stroke-width="3" stroke-linecap="round"/><circle cx="${x0}" cy="${y0}" r="4" fill="#242d46"/>`; })() : '';
+  const ponteiro = d === 0 && hA >= db.abre && hA <= db.fecha ? (() => { const [x, y] = pt(140, ang(hA)), [x0, y0] = pt(98, ang(hA)); return `<line x1="${x0}" y1="${y0}" x2="${x}" y2="${y}" style="stroke:var(--noite)" stroke-width="3" stroke-linecap="round"/><circle cx="${x0}" cy="${y0}" r="4" style="fill:var(--noite)"/>`; })() : '';
   return `<div class="relogio"><svg viewBox="0 0 320 320" role="img" aria-label="Relógio do dia com ${l.length} atendimentos"><circle cx="160" cy="160" r="152" fill="#fbf7f3" stroke="#e6dbd1"/><circle cx="160" cy="160" r="122" fill="none" stroke="#ece2d8" stroke-width="28"/>${marcas}${arcos}${ponteiro}</svg>
     <div class="centro">${prox ? `<small>próxima</small><b>${hh(prox.ini)}</b><span>${t(cli(prox.cli).nome.split(' ')[0])} · ${t(serv(prox.serv).nome)}</span>` : l.length ? '<small>dia encerrado</small><b>✓</b>' : '<small>dia livre</small><b>—</b>'}<span style="margin-top:4px">${l.length} horário(s) · ${din(prev)}</span></div></div>`;
 }
@@ -147,8 +180,9 @@ function relogio(d) {
 // ------------------------------------------------------------------ telas
 const T = {
   dia() {
-    const l = doDia(dia), usados = [...new Set(l.map((a) => a.serv))];
-    return `<div class="dias" role="group" aria-label="Escolher o dia">${Array.from({ length: 8 }, (_, i) => i - 1).map((o) => `<button type="button" data-dia="${o}" aria-pressed="${o === dia}"><small>${data(o).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')}</small><b>${data(o).getDate()}</b>${doDia(o).length ? '<i></i>' : ''}</button>`).join('')}</div>
+    const l = doDia(dia), usados = [...new Set(l.map((a) => a.serv))], hj = doDia(0), falta = hj.filter((a) => a.st === 'marcado' || a.st === 'confirmado');
+    const ola = `<section class="ola" aria-label="Resumo de hoje"><p class="ola-t">${saudacao()}${primeiroNome() ? `, ${t(primeiroNome())}` : ''}</p><p class="ola-s">${hj.length ? `Hoje: ${hj.length} ${hj.length === 1 ? 'horário' : 'horários'} · ${din(hj.reduce((s, a) => s + preco(a), 0))}${falta.length ? ` · faltam ${falta.length}` : ' · tudo atendido'}` : 'Hoje a agenda está livre.'}${db.pedidos.length ? ` · <a href="#link">${db.pedidos.length} ${db.pedidos.length === 1 ? 'pedido novo' : 'pedidos novos'}</a>` : ''}</p></section>`;
+    return `${ola}<div class="dias" role="group" aria-label="Escolher o dia">${Array.from({ length: 8 }, (_, i) => i - 1).map((o) => `<button type="button" data-dia="${o}" aria-pressed="${o === dia}"><small>${data(o).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')}</small><b>${data(o).getDate()}</b>${doDia(o).length ? '<i></i>' : ''}</button>`).join('')}</div>
       <div class="ir-data"><label>Ir para outra data<input type="date" id="ir-dia" value="${iso(dia)}"></label>${dia !== 0 ? '<button type="button" class="bt pq" data-dia="0">Hoje</button>' : ''}</div>
       ${relogio(dia)}<div class="legenda-c">${usados.map((s) => `<span style="--c:${serv(s).cor}">${t(serv(s).nome)}</span>`).join('')}</div>
       <div class="tit-linha"><h2>${nomeDia(dia)[0].toUpperCase() + nomeDia(dia).slice(1)}${Math.abs(dia) > 1 ? ` · ${data(dia).toLocaleDateString('pt-BR')}` : ''}</h2><a class="bt pq" href="#resumo" data-res-dia="${dia}">Resumo do dia</a></div><div class="cartao">${l.map((a) => { const c = cli(a.cli), s = serv(a.serv); return `<div class="hora" data-ag="${a.id}" role="button" tabindex="0" style="position:relative"><span class="h">${hh(a.ini)}</span><span><b>${t(c.nome)}</b><small>${t(s.nome)} · ${s.min} min · ${din(preco(a))}${a.sinal ? ` · sinal ${din(a.sinal.valor)} ${a.sinal.pago ? 'pago' : 'pendente'}` : ''}</small></span><span class="selo ${ST[a.st][1]}">${ST[a.st][0]}</span></div>`; }).join('') || `<p class="livre">Nenhum horário neste dia. ${dia >= 0 ? `<button type="button" class="bt pq" data-novo-dia="${dia}">Marcar neste dia</button>` : ''}</p>`}</div>
@@ -230,8 +264,8 @@ const T = {
       <h2>Como pagaram</h2><div class="chips">${l.formas.map(([f, v]) => `<span class="selo">${f}: ${din(v)}</span>`).join('')}</div>` : ''}${extra}`;
   },
   mais() {
-    const l = [['resumo', 'Resumo', 'do dia, do mês e do ano'], ['ia', 'Assistente', 'pergunte da sua agenda e dos clientes'], ['caixa', 'Caixa', 'quanto entrou e o que as faltas custaram'], ['espera', 'Lista de espera', `${db.espera.length} esperando encaixe`], ['assinatura', 'Minha assinatura', estAss()], ['dono', 'Painel do dono', 'ajudante e o que ela vê'], ['config', 'Configurações', 'tipo de negócio, horário, serviços, sinal, PIX']];
-    return `<h1>Mais</h1><div class="lista-mais">${l.map(([k, n, s]) => `<a href="#${k}"><span><b>${n}</b><small>${t(s)}</small></span><span aria-hidden="true">›</span></a>`).join('')}<a href="#mais" data-acao="menu-comum"><span><b>Planilhas e busca</b><small>importar do Excel, exportar, procurar, imprimir, instalar o app</small></span><span aria-hidden="true">›</span></a></div>`;
+    const l = [['resumo', 'Resumo', 'do dia, do mês e do ano'], ['ia', 'Assistente', 'pergunte da sua agenda e dos clientes'], ['caixa', 'Caixa', 'quanto entrou e o que as faltas custaram'], ['espera', 'Lista de espera', `${db.espera.length} esperando encaixe`], ['assinatura', 'Minha assinatura', estAss()], ['dono', 'Painel do dono', 'ajudante e o que ela vê'], ['config', 'Configurações', 'sua foto e cor, tipo de negócio, horário, serviços, sinal, PIX']];
+    return `<h1>Mais</h1><div class="lista-mais">${l.map(([k, n, s]) => `<a href="#${k}"><span><b>${n}</b><small>${t(s)}</small></span><span aria-hidden="true">›</span></a>`).join('')}<a href="#mais" data-acao="menu-comum"><span><b>Planilhas e busca</b><small>importar do Excel, exportar, procurar, imprimir, instalar o app</small></span><span aria-hidden="true">›</span></a></div><p class="creditos">Agenda feita com Veltria · Blue Rose</p>`;
   },
   ia() {
     const conv = db.conversa.length ? db.conversa : [{ ia: 1, t: `Oi, ${db.pro.split(' ')[0]}! Eu vejo sua agenda e seus clientes. Pergunte do seu jeito. Na versão contratada são 20 perguntas grátis por dia.` }];
@@ -255,7 +289,11 @@ const T = {
       <h2>Plano</h2><div class="chips"><button type="button" data-plano="basico" aria-pressed="${db.plano === 'basico'}">Assinatura · R$ 49/mês</button></div><p class="mini">Equipe sem limite, histórico de quem fez o quê e até 10 empresas. Anual com 20% a menos.</p>`;
   },
   config() {
-    return `<a href="#mais">← Mais</a><h1>Configurações</h1><h2>Tipo de negócio</h2><p class="mini" style="margin-top:-6px">Troca os serviços de exemplo. Você ajusta nomes, tempos e preços logo abaixo.</p><div class="chips">${Object.entries(MODELOS).map(([k, m]) => `<button type="button" data-tipo="${k}" aria-pressed="${(db.tipo || 'geral') === k}">${m.nome}</button>`).join('')}</div>${[['studio', 'Nome do espaço'], ['pro', 'Seu nome'], ['ramo', 'O que você faz'], ['pix', 'Chave PIX do sinal']].map(([k, n]) => `<label class="campo">${n}<input data-cfg="${k}" value="${t(db[k])}"></label>`).join('')}
+    const foto = db.foto ? `<img src="${t(db.foto)}" alt="">` : t(db.pro.split(' ').map((p) => p[0]).slice(0, 2).join(''));
+    return `<a href="#mais">← Mais</a><h1>Configurações</h1><h2>Sua marca no app</h2><p class="mini" style="margin-top:-6px">O app fica com a sua cara: sua foto ou logo no topo e a cor que você escolher. Quem você convidar vê igual.</p>
+      <div class="cartao marca"><span class="ini grande" aria-hidden="true">${foto}</span><div class="marca-bts"><label class="bt pq cheio" for="foto-in">${db.foto ? 'Trocar foto ou logo' : 'Pôr foto ou logo'}</label><input type="file" id="foto-in" accept="image/*" class="sr">${db.foto ? '<button type="button" class="bt pq" data-acao="tira-foto">Tirar a foto</button>' : ''}</div></div>
+      <p class="campo" style="margin:0 0 6px">Cor do app</p><div class="temas" role="group" aria-label="Cor do app">${TEMAS.map(([k, n, a, b]) => `<button type="button" data-cor-tema="${k}" aria-pressed="${temaAtual()[0] === k}" style="--a:${a};--b:${b}"><i aria-hidden="true"></i>${n}</button>`).join('')}</div>
+      <h2>Tipo de negócio</h2><p class="mini" style="margin-top:-6px">Troca os serviços de exemplo. Você ajusta nomes, tempos e preços logo abaixo.</p><div class="chips">${Object.entries(MODELOS).map(([k, m]) => `<button type="button" data-tipo="${k}" aria-pressed="${(db.tipo || 'geral') === k}">${m.nome}</button>`).join('')}</div>${[['studio', 'Nome do espaço'], ['pro', 'Seu nome'], ['ramo', 'O que você faz'], ['pix', 'Chave PIX do sinal']].map(([k, n]) => `<label class="campo">${n}<input data-cfg="${k}" value="${t(db[k])}"></label>`).join('')}
       <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end"><label class="campo">Começo às<input data-cfg="abre" type="number" value="${db.abre}"></label><label class="campo">Término às<input data-cfg="fecha" type="number" value="${db.fecha}"></label><label class="campo">Sinal (%)<input data-cfg="sinalPct" type="number" value="${db.sinalPct}"></label><label class="campo">Pedir sinal acima de (R$)<input data-cfg="sinalAcima" type="number" value="${db.sinalAcima}"></label><label class="campo" style="grid-column:1/-1">Horários sugeridos de quanto em quanto<select data-cfg="passo">${[10, 15, 20, 30, 60].map((m) => `<option value="${m}" ${(db.passo || 30) === m ? 'selected' : ''}>${m} minutos</option>`).join('')}</select></label></div>
       <h2>Serviços</h2><div class="cartao">${db.servicos.map((s, i) => `<div class="serv-ed"><span class="h" style="color:${s.cor}">●</span><input data-sv="${i}.nome" value="${t(s.nome)}" aria-label="Nome do serviço"><label>min<input data-sv="${i}.min" type="number" min="5" step="5" value="${s.min}"></label><label>R$<input data-sv="${i}.preco" type="number" min="0" step="0.01" value="${s.preco}"></label></div>`).join('')}</div><button type="button" class="bt largo" data-acao="add-serv">+ Adicionar serviço</button>${secMsgs()}<h2>App no celular</h2><p class="mini" style="margin-top:-6px">Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><button type="button" class="bt largo" data-acao="instalar">Instalar o app</button><p class="mini" style="margin-bottom:120px">Funciona sem internet: o que você marcar sobe quando a conexão voltar.</p>`;
   },
@@ -325,11 +363,11 @@ function mostra() {
   tela.innerHTML = (T[r] || T.dia)();
   const aba = { espera: 'dia', resumo: 'mais', ia: 'mais', caixa: 'mais', assinatura: 'mais', dono: 'mais', config: 'mais' }[r] ?? r;
   document.querySelectorAll('.pilula a').forEach((l) => { if (l.dataset.aba === aba) l.setAttribute('aria-current', 'page'); else l.removeAttribute('aria-current'); });
-  $('#nome-studio').textContent = db.studio; $('#nome-pro').textContent = `${db.pro} · ${db.ramo}`; $('#iniciais').textContent = db.pro.split(' ').map((p) => p[0]).slice(0, 2).join('');
+  aplicaTema(); $('#nome-studio').textContent = db.studio; $('#nome-pro').textContent = `${db.pro} · ${db.ramo}`; const ini = $('#iniciais'); if (db.foto) { ini.innerHTML = `<img src="${t(db.foto)}" alt="">`; ini.classList.add('com-foto'); } else { ini.textContent = db.pro.split(' ').map((p) => p[0]).slice(0, 2).join(''); ini.classList.remove('com-foto'); }
   if (!db.assinatura.renova && db.assinatura.status !== 'vencida' && r !== 'assinatura') tela.insertAdjacentHTML('afterbegin', `<p class="cartao" style="margin-top:12px;padding:8px 12px;background:#f1dfdd">Assinatura cancelada: você usa por mais ${db.assinatura.proxima} dias. <a href="#assinatura">Reativar</a></p>`);
   trava(r);
   if (r === 'ia') { const el = $('#ia-boneco'); if (el) import('../base/assistente-ia.js?v=2').then((m) => { const b = m.personagemIA(el, db.conversa.length ? 'parado' : 'ola'); if (!db.conversa.length) b.estado('ola', 2600); else if (/Pensando/.test(db.conversa[db.conversa.length - 1].t)) b.estado('pensando'); else b.estado('explicando', 4000); }).catch(() => el.remove()); }
-  document.title = `${{ dia: 'Dia', resumo: 'Resumo', novo: rasc.remarca ? 'Remarcar' : 'Novo horário', clientes: 'Clientes', link: 'Link', espera: 'Lista de espera', caixa: 'Caixa', mais: 'Mais', ia: 'Assistente', assinatura: 'Minha assinatura', dono: 'Painel do dono', config: 'Configurações' }[r] || 'Dia'} · Veltria Agenda Essencial`;
+  document.title = `${{ dia: 'Dia', resumo: 'Resumo', novo: rasc.remarca ? 'Remarcar' : 'Novo horário', clientes: 'Clientes', link: 'Link', espera: 'Lista de espera', caixa: 'Caixa', mais: 'Mais', ia: 'Assistente', assinatura: 'Minha assinatura', dono: 'Painel do dono', config: 'Configurações' }[r] || 'Dia'} · ${db.studio || 'Agenda'}`;
 }
 addEventListener('hashchange', () => { mostra(); $('#tela').focus({ preventScroll: true }); scrollTo(0, 0); });
 function trava(r) {
@@ -435,6 +473,7 @@ const ACOES = {
     const msg = { instalado: 'Você já está no app instalado.', ok: 'Pronto: o app está na tela de início.', iphone: 'No iPhone: toque em Compartilhar e depois em Adicionar à Tela de Início.', manual: 'No menu do navegador (⋮), toque em Instalar app ou Adicionar à tela inicial.' };
     window.veltriaInstalar().then((r) => { if (msg[r]) toast(msg[r]); });
   },
+  'tira-foto': () => { delete db.foto; grava(); mostra(); toast('Foto tirada. O topo mostra as suas iniciais.'); },
   'add-serv': () => { const i = db.servicos.length; db.servicos.push({ id: 's' + Date.now().toString(36), nome: 'Novo serviço', min: 60, preco: 0, cor: COR[i % COR.length], retorno: 30 }); grava(); mostra(); setTimeout(() => document.querySelector(`[data-sv="${i}.nome"]`)?.select(), 30); },
   copiar: () => { navigator.clipboard?.writeText(LINK).catch(() => {}); toast('Link copiado. Cole na bio do Instagram.'); },
   aceitar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); let c = db.clientes.find((x) => x.nome === p.nome); if (!c) { c = { id: uid(), nome: p.nome, tel: p.tel, ultima: 0, serv: p.serv, faltas: 0 }; db.clientes.push(c); } db.ags.push({ id: uid(), dia: p.dia, ini: p.ini, cli: c.id, serv: p.serv, st: 'confirmado', pago: 0, valor: c.valor ?? null, sinal: serv(p.serv).preco >= db.sinalAcima ? { valor: Math.round(serv(p.serv).preco * db.sinalPct / 100), pago: true } : null }); db.pedidos = db.pedidos.filter((x) => x !== p); grava(); mostra(); toast(`Horário de ${p.nome.split(' ')[0]} confirmado. Abrindo o WhatsApp para avisar.`); window.open(zap(p.tel, msg('aceito', { nome: p.nome.split(' ')[0], servico: serv(p.serv).nome.toLowerCase(), dia: nomeDia(p.dia), hora: hh(p.ini) })), '_blank', 'noopener'); },
@@ -466,6 +505,7 @@ document.addEventListener('click', (e) => {
   const hr = el.closest('[data-hr]'); if (hr) { guarda(); rasc.ini = Number(hr.dataset.hr); mostra(); return; }
   const sg = el.closest('[data-sug]'); if (sg) { $('#q-ia').value = sg.dataset.sug; $('#f-ia').requestSubmit(); return; }
   const tp = el.closest('[data-tipo]'); if (tp) { const m = MODELOS[tp.dataset.tipo]; db.tipo = tp.dataset.tipo; db.servicos = m.servicos.map((x) => ({ ...x })); if (db.ramo === 'atendimento com hora marcada' || Object.values(MODELOS).some((x) => x.nome.toLowerCase() === db.ramo)) db.ramo = m.nome.toLowerCase(); grava(); mostra(); toast(`Serviços de ${m.nome.toLowerCase()} carregados. Ajuste os preços abaixo.`); return; }
+  const tm = el.closest('[data-cor-tema]'); if (tm) { db.tema = tm.dataset.corTema; grava(); mostra(); toast(`Cor ${temaAtual()[1].toLowerCase()} aplicada.`); return; }
   const pl = el.closest('[data-plano]'); if (pl) { db.plano = pl.dataset.plano; db.assinatura.valor = db.plano === 'pro' ? 109 : 49; grava(); mostra(); return; }
   const ac = el.closest('[data-acao]'); if (ac && ACOES[ac.dataset.acao]) ACOES[ac.dataset.acao](ac.dataset);
 });
@@ -497,6 +537,7 @@ document.addEventListener('change', (e) => {
   if (el.id === 'rep-qn' || el.id === 'rep-qu') { if ($('#marcar-bt')) guarda(); }
   if (el.id === 'hr-livre' && el.value.trim() && lerHora(el.value) === null) toast('Horário inválido. Escreva assim: 9:10 ou 14:45.');
   if (el.id === 'valor-n' || el.id === 'cli-n') { guarda(); const s = serv(rasc.serv), k = db.clientes.find((x) => sa(x.nome) === sa(rasc.cli)); if (el.id === 'cli-n' && k && !$('#tel-n').value) $('#tel-n').value = k.tel || ''; const v = rasc.valor !== '' ? Number(rasc.valor) : k?.valor ?? s.preco, sp = $('#sinal')?.previousElementSibling; if (sp) sp.firstChild.textContent = `Pedir sinal de ${din(v * db.sinalPct / 100)} no PIX`; }
+  if (el.id === 'foto-in' && el.files?.[0]) { lerFoto(el.files[0]).then((u) => { db.foto = u; grava(); mostra(); toast('Foto no topo do app.'); }).catch((x) => toast(x.message)); }
   if (el.dataset.ve) { const [i, k] = el.dataset.ve.split('.'); db.ajudantes[i].ve[k] = el.checked; grava(); }
 });
 addEventListener('message', (e) => {
@@ -510,3 +551,4 @@ $('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE)
 if (window !== window.top) document.documentElement.classList.add('no-celular');
 if ('serviceWorker' in navigator && window === window.top) navigator.serviceWorker.register('sw.js').catch(() => {});
 mostra();
+setTimeout(novidades, 1500); // depois da nuvem: se a conta recarregar a tela, o aviso ainda aparece

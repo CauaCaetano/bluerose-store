@@ -1,6 +1,6 @@
 // Veltria Agenda Essencial · abre sem internet: marca agora, sobe quando a conexão voltar.
-const CACHE = 'agenda-essencial-v19';
-const ARQUIVOS = ['app.html', 'app.js?v=17', 'estilo.css?v=11', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png'];
+const CACHE = 'agenda-essencial-v21';
+const ARQUIVOS = ['app.html', 'app.js?v=19', 'estilo.css?v=12', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((l) => Promise.all(l.filter((k) => k !== CACHE && k.startsWith(CACHE.replace(/v\d+$/, ''))).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {

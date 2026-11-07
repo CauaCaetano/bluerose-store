@@ -166,3 +166,35 @@ h2 { font: 600 .92rem var(--sans); margin: 22px 0 8px; color: var(--noite-2); }
 .msg-ed textarea { width: 100%; min-height: 96px; border: 1px solid var(--nude); border-radius: 12px; padding: 10px 12px; font: inherit; resize: vertical; background: #fff; }
 .msg-var { border: 1px dashed var(--nude); background: transparent; border-radius: 6px; padding: 1px 6px; font: inherit; font-size: .8rem; cursor: pointer; }
 .msg-previa { background: #fff; border-radius: 10px; padding: 8px 10px; margin: 0; }
+
+/* redesenho 07/11/2026: o app com a cara de quem usa (foto ou logo, cor própria), sem a logo da Veltria no topo */
+html[data-tema="salvia"] { --noite: #2c4639; --noite-2: #3c5a4b; --noite-3: #1f3229; --rose: #a9bf9c; --rose-esc: #627d55; --azul: #a9b8ae; }
+html[data-tema="terracota"] { --noite: #3a2a24; --noite-2: #4d3830; --noite-3: #2a1e19; --rose: #c98a68; --rose-esc: #94573a; --azul: #b9a597; }
+html[data-tema="oceano"] { --noite: #173b45; --noite-2: #23505c; --noite-3: #0f2a32; --rose: #86b8bd; --rose-esc: #4b7f85; --azul: #9db4b8; }
+html[data-tema="ameixa"] { --noite: #3a2433; --noite-2: #4e3245; --noite-3: #2a1925; --rose: #d29ab3; --rose-esc: #9a5d79; --azul: #b5a2ae; }
+html[data-tema="grafite"] { --noite: #27292e; --noite-2: #393c43; --noite-3: #1b1c20; --rose: #cdaa6b; --rose-esc: #93733a; --azul: #a9abb1; }
+.topo { padding: 8px 14px calc(8px); min-height: 58px; }
+.quem { text-decoration: none; color: inherit; border-radius: 14px; }
+.ini { border-radius: 12px; overflow: hidden; background: var(--rose); color: var(--noite-3); }
+.ini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ini.com-foto { background: #fff; }
+.quem small { color: var(--azul); }
+/* saudação do dia */
+.ola { margin: 14px 0 2px; }
+.ola-t { margin: 0; font: 400 1.55rem/1.15 var(--serif); }
+.ola-s { margin: 4px 0 0; color: var(--tx-2); font-size: .9rem; }
+.ola-s a { color: var(--rose-esc); font-weight: 600; }
+.dias { padding-top: 10px; }
+/* Configurações: sua marca no app */
+.marca { display: flex; align-items: center; gap: 14px; }
+.ini.grande { width: 72px; height: 72px; font-size: 1.5rem; border-radius: 18px; }
+.marca-bts { display: flex; flex-wrap: wrap; gap: 8px; }
+.marca-bts label { cursor: pointer; }
+.temas { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-bottom: 8px; }
+.temas button { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 12px; border: 1px solid var(--nude); border-radius: 14px; background: #fff; cursor: pointer; text-align: left; font-size: .9rem; }
+.temas button i { width: 26px; height: 26px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--a) 0 50%, var(--b) 50% 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+.temas button[aria-pressed="true"] { border-color: var(--noite); box-shadow: 0 0 0 1px var(--noite); font-weight: 600; }
+.creditos { margin: 18px 0 0; text-align: center; color: var(--tx-3); font-size: .74rem; }
+.novidades { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 12px; }
+.novidades li { display: grid; gap: 2px; padding-left: 16px; border-left: 3px solid var(--rose); }
+.novidades li span { color: var(--tx-2); font-size: .9rem; }
