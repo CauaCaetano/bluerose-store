@@ -1,0 +1,15 @@
+{
+  "name": "Peplo · gestão da loja de moda",
+  "short_name": "Peplo",
+  "description": "Fiado com limite e cobrança no WhatsApp, estoque por tamanho e cor, caixa e relatórios da loja de roupas.",
+  "lang": "pt-BR",
+  "start_url": "app.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F7F4EE",
+  "theme_color": "#F7F4EE",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

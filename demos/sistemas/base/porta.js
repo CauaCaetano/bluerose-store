@@ -63,9 +63,11 @@ function telaConta(modo = 'entrar', aviso = '') {
 // ---------------------------------------------------------------- teste grátis ou assinatura
 function telaPlano({ email, venceu, semTeste, motivo }) {
   return new Promise(() => {
-    const opcoes = [['', 'Assinatura mensal', V.mensal, 'equipe sem limite, histórico e até 10 empresas'], ['-anual', 'Assinatura anual', anual(V.mensal), '12 meses com 20% a menos']];
+    const opcoes = [['', 'Assinatura mensal', V.mensal, 'equipe sem limite, histórico e até 10 empresas'], ...(V.semAnual ? [] : [['-anual', 'Assinatura anual', anual(V.mensal), '12 meses com 20% a menos']])];
+    // sistemas sem teste grátis (V.semTeste, ex.: Peplo): paga na hora no cartão aqui ou no Pix pela página do sistema
+    if (V.semTeste) semTeste = true;
     const f = tela(`<h1>${venceu ? 'O acesso venceu' : `Comece a usar o ${esc(V.nome)}`}</h1>
-      <p class="p-sub">${venceu ? 'Seus dados estão guardados. Assine para voltar a usar de onde parou.' : 'Teste 7 dias grátis com os dados da sua empresa. Cadastre o cartão no Mercado Pago: nada é cobrado nos 7 dias e, se não cancelar, a assinatura do plano escolhido começa no 8º dia.'}</p>
+      <p class="p-sub">${venceu ? 'Seus dados estão guardados. Assine para voltar a usar de onde parou.' : V.semTeste ? `Assine e o ${esc(V.nome)} fica liberado assim que o pagamento for aprovado. Sem fidelidade: cancele quando quiser em Minha conta. Prefere Pix? <a href="${RAIZ}${V.pagina}#precos">Pague com Pix pela página do ${esc(V.nome)}</a>.` : 'Teste 7 dias grátis com os dados da sua empresa. Cadastre o cartão no Mercado Pago: nada é cobrado nos 7 dias e, se não cancelar, a assinatura do plano escolhido começa no 8º dia.'}</p>
       ${motivo ? `<p class="p-aviso">${esc(motivo)}</p>` : ''}
       ${venceu || semTeste ? '' : `<button class="p-bt" data-teste>Começar os 7 dias grátis</button><p class="p-ou">ou assine agora</p>`}
       <form novalidate><fieldset class="p-planos"><legend>Plano</legend>${opcoes.map(([suf, nome, valor, det], i) => `<label><input type="radio" name="plano" value="${suf}" ${i ? '' : 'checked'}><span><b>${nome}</b><em>${reais(valor)}${suf.includes('anual') ? '/ano' : '/mês'}</em><small>${det}</small></span></label>`).join('')}</fieldset>

@@ -22,5 +22,8 @@
   // linha Vexorin: sistemas fora das 3 versões, com o mesmo login, teste, assinatura, equipe e nuvem
   out.vetnature = { id: 'vetnature', categoria: 'vetnature', versao: '', nome: 'VetNature', nomeCategoria: 'VetNature', nomeVersao: '', pasta: 'vetnature', entrada: 'index.html',
     chave: 'vetnature-demo-v2', mensal: 129, exemplo: 1, pagina: 'index.html#produtos', logo: 'img/logos/vetnature-192.png' };
+  // Peplo: sistema da loja de roupas (marca própria, fora da linha Veltria), mesma conta, nuvem e equipe; sem teste grátis (paga na hora, Pix ou cartão)
+  out.peplo = { id: 'peplo', categoria: 'peplo', versao: '', nome: 'Peplo', nomeCategoria: 'Peplo', nomeVersao: '', pasta: 'peplo', entrada: 'app.html',
+    chave: 'peplo-v1', mensal: 59, exemplo: 1, pagina: 'peplo.html', logo: 'img/logos/peplo-simbolo.png', semTeste: true, semAnual: true };
   window.VELTRIA_VERSOES = out;
 })();
