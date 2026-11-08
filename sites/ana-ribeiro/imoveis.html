@@ -3,21 +3,26 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=18"></script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Imóveis à venda em Florianópolis · Ana Ribeiro Imóveis</title>
-<meta name="description" content="Apartamentos, casa e cobertura à venda em Florianópolis, de R$ 480 mil a R$ 2,45 milhões, com filtro por tipo, bairro, preço e quartos.">
+<title>Imóveis à venda em Florianópolis · Jurerê, Cacupé, Lagoa e Beira-Mar · Ana Ribeiro Imóveis</title>
+<meta name="description" content="9 imóveis selecionados em Florianópolis, de R$ 980 mil a R$ 7,8 milhões: casas frente-mar, coberturas e apartamentos com vídeo, planta e tour 360°.">
+<meta property="og:title" content="Imóveis à venda em Florianópolis · Jurerê, Cacupé, Lagoa e Beira-Mar · Ana Ribeiro Imóveis">
+<meta property="og:description" content="9 imóveis selecionados em Florianópolis, de R$ 980 mil a R$ 7,8 milhões: casas frente-mar, coberturas e apartamentos com vídeo, planta e tour 360°.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
 <meta name="theme-color" content="#1b2120">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%231b2120'%2F%3E%3Cpath%20d%3D'M8%2030L20%209l12%2021'%20fill%3D'none'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3Cpath%20d%3D'M14%2030h12'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
 <link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
-<link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=7">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=9">
 <script src="../../js/leads-config.js?v=6" defer></script>
-<script src="../assets/moldura.js?v=4" defer></script>
-<script src="site.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="dados.js?v=1" defer></script>
+<script src="site.js?v=8" defer></script>
 </head>
 <body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -28,85 +33,107 @@
     <span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span>
   </a>
   <nav class="nav" aria-label="Páginas">
-    <a href="imoveis.html" aria-current="page">Imóveis</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="contato.html">Contato</a>
+    <a href="imoveis.html" aria-current="page">Imóveis</a><a href="bairros.html">Bairros</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a>
   </nav>
-  <p class="creci"><b>AR</b><span>CORRETORA DE IMÓVEIS<br>CRECI FICTÍCIO</span></p>
+  <a class="cab-agendar" href="agendar.html">Agendar<span class="so-pc"> visita</span></a>
   <button class="cab-menu" type="button" aria-expanded="false" aria-controls="menu-cel">Menu</button>
 </header>
 <div class="menu-cel" id="menu-cel" hidden>
-  <a href="index.html">Início</a><a href="imoveis.html" aria-current="page">Imóveis</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="contato.html">Contato</a>
-  <a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana ↗</a>
+  <a href="index.html">Início</a><a href="imoveis.html" aria-current="page">Imóveis</a><a href="bairros.html">Bairros</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a>
+  <a class="bt bt-bege" href="agendar.html">Agendar uma visita ↗</a>
+  <a class="menu-wa" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana no WhatsApp ↗</a>
 </div>
-
 <main id="conteudo">
   <section class="pg-topo" data-tom="claro" aria-labelledby="pg-t">
     <nav class="trilha" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span aria-current="page">Imóveis</span></nav>
     <h1 class="pg-titulo" id="pg-t">IMÓVEIS <em>à venda.</em></h1>
     <div class="pg-intro">
-      <div class="rot-col"><p class="rot">[SELEÇÃO DA SEMANA · FLORIANÓPOLIS]</p></div>
-      <div class="txt"><p class="grande">Seis imóveis que eu visitei, fotografei e conferi a documentação.</p><p>De R$ 480 mil a R$ 2,45 milhões, do primeiro apartamento perto da Universidade de Exemplo à cobertura no Bairro Exemplo A. Filtre pelo que importa para você e abra cada um para ver fotos, ficha técnica, o que tem perto e quanto fica a parcela.</p><p>Não achou? Tenho acesso a outros imóveis que não estão anunciados. Me diga o que procura e eu busco.</p></div>
+      <div class="rot-col"><p class="rot">[SELEÇÃO DA SEMANA · FLORIANÓPOLIS]</p><a class="bt bt-escuro" href="agendar.html">Agendar visita ↗</a></div>
+      <div class="txt"><p class="grande">9 imóveis que eu visitei, fotografei e conferi a documentação.</p><p>De R$ 980 mil a R$ 7,8 milhões, da casa frente-mar em Cacupé ao apartamento perto da universidade. Todos têm vídeo e planta; os marcados com tour 360° você visita pelo celular.</p><p>Não achou? Tenho imóveis que não estão anunciados, apresentados só sob consulta. <a href="contato.html" data-wa="Olá, Ana! Procuro um imóvel que não está no site. Pode me mostrar os que não estão anunciados?">Me diga o que procura ↗</a></p></div>
     </div>
   </section>
 
   <section class="lista" data-tom="claro" aria-label="Lista de imóveis">
     <form class="filtro" id="filtro">
       <label>Tipo<select name="tipo"><option value="">Todos</option><option value="apartamento">Apartamento</option><option value="casa">Casa</option><option value="cobertura">Cobertura</option></select></label>
-      <label>Bairro<select name="bairro"><option value="">Todos os bairros</option><option>Bairro Exemplo D</option><option>Bairro Exemplo E</option><option>Bairro Exemplo G</option><option>Bairro Exemplo C</option><option>Bairro Exemplo H</option><option>Bairro Exemplo A</option></select></label>
-      <label>Até<select name="preco"><option value="0">Qualquer preço</option><option value="600000">R$ 600 mil</option><option value="1000000">R$ 1 milhão</option><option value="1500000">R$ 1,5 milhão</option><option value="2500000">R$ 2,5 milhões</option></select></label>
-      <label>Quartos<select name="quartos"><option value="0">Qualquer</option><option value="2">2 ou mais</option><option value="3">3 ou mais</option></select></label>
-      <label>Ordenar<select name="ordem"><option value="menor">Menor preço</option><option value="maior">Maior preço</option><option value="area">Maior área</option></select></label>
+      <label>Bairro<select name="bairro"><option value="">Todos os bairros</option><option>Beira-Mar Norte</option><option>Cacupé</option><option>Campeche</option><option>Ingleses</option><option>Itacorubi</option><option>Jurerê Internacional</option><option>Lagoa da Conceição</option><option>Santo Antônio de Lisboa</option><option>Trindade</option></select></label>
+      <label>Até<select name="preco"><option value="0">Qualquer preço</option><option value="1000000">R$ 1 milhão</option><option value="1500000">R$ 1,5 milhão</option><option value="2500000">R$ 2,5 milhões</option><option value="4000000">R$ 4 milhões</option><option value="6000000">R$ 6 milhões</option></select></label>
+      <label>Quartos<select name="quartos"><option value="0">Qualquer</option><option value="2">2 ou mais</option><option value="3">3 ou mais</option><option value="4">4 ou mais</option></select></label>
+      <label>Ordenar<select name="ordem"><option value="maior">Maior preço</option><option value="menor">Menor preço</option><option value="area">Maior área</option></select></label>
       <button type="button" class="filtro-limpa">Limpar filtros</button>
     </form>
-    <p class="lista-cont"><span><b>6 imóveis</b> encontrados</span><span>Atualizado toda segunda-feira</span></p>
+    <p class="lista-cont"><span><b>9 imóveis</b> encontrados</span><span>Atualizado toda segunda-feira</span></p>
     <div class="cards">
-      <a class="card" href="imovel-itacorubi.html" data-tipo="apartamento" data-bairro="Bairro Exemplo D" data-preco="480000" data-quartos="2" data-area="52">
-        <span class="card-img"><img src="img/i1.webp" alt="Sala clara com poltrona laranja e plantas do apartamento de 2 quartos no Bairro Exemplo D" width="1400" height="2489"><span class="card-tag">Apartamento</span></span>
-        <span class="card-num">01 / 06 · ITACORUBI</span>
-        <h3>Apartamento 2 quartos</h3>
-        <span class="card-meta">52 m² · 2 quartos · 1 vaga · condomínio R$ 520</span>
-        <span class="card-pe"><span class="card-preco">R$ 480.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
+      <a class="card" href="imovel-cacupe.html" data-tipo="casa" data-bairro="Cacupé" data-preco="7800000" data-quartos="4" data-area="420" data-midia="tour video">
+        <span class="card-img"><img src="img/cacupe-fachada.webp" alt="Casa branca de dois andares com jardim e a baía ao fundo" width="1600" height="1067"><span class="card-tag">Casa frente-mar</span><span class='card-360'>Tour 360°</span></span>
+        <span class="card-num">AR-0907 · CACUPÉ</span>
+        <h3>Casa frente-mar com píer</h3>
+        <span class="card-meta">420 m² · 4 quartos · 4 suítes · 4 vagas</span>
+        <span class="card-pe"><span class="card-preco">R$ 7.800.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
       </a>
-      <a class="card" href="imovel-trindade.html" data-tipo="apartamento" data-bairro="Bairro Exemplo E" data-preco="690000" data-quartos="3" data-area="76">
-        <span class="card-img"><img src="img/i2.webp" alt="Sala com sofá caramelo e tapete do apartamento de 3 quartos no Bairro Exemplo E" width="1400" height="1400"><span class="card-tag">Apartamento</span></span>
-        <span class="card-num">02 / 06 · TRINDADE</span>
-        <h3>Apartamento 3 quartos</h3>
-        <span class="card-meta">76 m² · 3 quartos · 2 vagas · condomínio R$ 680</span>
-        <span class="card-pe"><span class="card-preco">R$ 690.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
+      <a class="card" href="imovel-jurere.html" data-tipo="cobertura" data-bairro="Jurerê Internacional" data-preco="5200000" data-quartos="3" data-area="286" data-midia="tour video">
+        <span class="card-img"><img src="img/jurere-piscina.webp" alt="Piscina no terraço da cobertura com guarda-corpo de vidro" width="1600" height="1036"><span class="card-tag">Cobertura duplex</span><span class='card-360'>Tour 360°</span></span>
+        <span class="card-num">AR-1104 · JURERÊ INTERNACIONAL</span>
+        <h3>Cobertura duplex com piscina</h3>
+        <span class="card-meta">286 m² · 3 quartos · 3 suítes · 3 vagas</span>
+        <span class="card-pe"><span class="card-preco">R$ 5.200.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
       </a>
-      <a class="card" href="imovel-campeche.html" data-tipo="apartamento" data-bairro="Bairro Exemplo G" data-preco="920000" data-quartos="3" data-area="102">
-        <span class="card-img"><img src="img/i3.webp" alt="Sala do apartamento garden no Bairro Exemplo G, com poltrona amarela e piso de madeira" width="1400" height="1235"><span class="card-tag">Apartamento garden</span></span>
-        <span class="card-num">03 / 06 · CAMPECHE</span>
-        <h3>Apartamento garden</h3>
-        <span class="card-meta">102 m² · 3 quartos · 2 vagas · condomínio R$ 740</span>
-        <span class="card-pe"><span class="card-preco">R$ 920.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
+      <a class="card" href="imovel-lagoa.html" data-tipo="casa" data-bairro="Lagoa da Conceição" data-preco="3450000" data-quartos="3" data-area="260" data-midia="tour video">
+        <span class="card-img"><img src="img/lagoa-fachada.webp" alt="Casa moderna de madeira e vidro com gramado na frente" width="1200" height="801"><span class="card-tag">Casa</span><span class='card-360'>Tour 360°</span></span>
+        <span class="card-num">AR-0821 · LAGOA DA CONCEIÇÃO</span>
+        <h3>Casa com vista para a Lagoa</h3>
+        <span class="card-meta">260 m² · 3 quartos · 3 suítes · 3 vagas</span>
+        <span class="card-pe"><span class="card-preco">R$ 3.450.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
       </a>
-      <a class="card" href="imovel-agronomica.html" data-tipo="apartamento" data-bairro="Bairro Exemplo C" data-preco="1150000" data-quartos="3" data-area="118">
-        <span class="card-img"><img src="img/imovel-studio-centro.webp" alt="Sala de estar e jantar integradas com janelas amplas do apartamento no Bairro Exemplo C" width="1600" height="1067" loading="lazy"><span class="card-tag">Apartamento</span></span>
-        <span class="card-num">04 / 06 · AGRONÔMICA</span>
-        <h3>Apartamento 3 quartos com vista</h3>
-        <span class="card-meta">118 m² · 3 quartos · 2 vagas · condomínio R$ 1.150</span>
-        <span class="card-pe"><span class="card-preco">R$ 1.150.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
+      <a class="card" href="imovel-agronomica.html" data-tipo="apartamento" data-bairro="Beira-Mar Norte" data-preco="2980000" data-quartos="3" data-area="168" data-midia="tour video">
+        <span class="card-img"><img src="img/imovel-studio-centro.webp" alt="Sala de estar e jantar integradas com janelas amplas" width="1600" height="1067" loading="lazy" decoding="async"><span class="card-tag">Apartamento</span><span class='card-360'>Tour 360°</span></span>
+        <span class="card-num">AR-1012 · BEIRA-MAR NORTE</span>
+        <h3>Apartamento 3 suítes de frente para a baía</h3>
+        <span class="card-meta">168 m² · 3 quartos · 3 suítes · 3 vagas</span>
+        <span class="card-pe"><span class="card-preco">R$ 2.980.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
       </a>
-      <a class="card" href="imovel-ingleses.html" data-tipo="casa" data-bairro="Bairro Exemplo H" data-preco="1380000" data-quartos="3" data-area="180">
-        <span class="card-img"><img src="img/casa-ingleses.webp" alt="Fachada do sobrado branco com madeira, pedra e gramado no condomínio no Bairro Exemplo H" width="1600" height="900" loading="lazy"><span class="card-tag">Casa em condomínio</span></span>
-        <span class="card-num">05 / 06 · INGLESES</span>
-        <h3>Casa 3 suítes</h3>
-        <span class="card-meta">180 m² · 3 quartos · 2 vagas · condomínio R$ 890</span>
-        <span class="card-pe"><span class="card-preco">R$ 1.380.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
+      <a class="card" href="imovel-santo-antonio.html" data-tipo="casa" data-bairro="Santo Antônio de Lisboa" data-preco="2150000" data-quartos="3" data-area="190" data-midia="video">
+        <span class="card-img"><img src="img/santo-varanda.webp" alt="Varanda de madeira com mesa e o pôr do sol no mar" width="1600" height="1067" loading="lazy" decoding="async"><span class="card-tag">Casa açoriana</span></span>
+        <span class="card-num">AR-0733 · SANTO ANTÔNIO DE LISBOA</span>
+        <h3>Casa açoriana restaurada</h3>
+        <span class="card-meta">190 m² · 3 quartos · 1 suíte · 2 vagas</span>
+        <span class="card-pe"><span class="card-preco">R$ 2.150.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
       </a>
-      <a class="card" href="imovel-jurere.html" data-tipo="cobertura" data-bairro="Bairro Exemplo A" data-preco="2450000" data-quartos="3" data-area="210">
-        <span class="card-img"><img src="img/imovel-cobertura.webp" alt="Sala com pé-direito duplo e janelas altas da cobertura no Bairro Exemplo A" width="1200" height="1600" loading="lazy"><span class="card-tag">Cobertura duplex</span></span>
-        <span class="card-num">06 / 06 · JURERÊ INTERNACIONAL</span>
-        <h3>Cobertura duplex</h3>
-        <span class="card-meta">210 m² · 3 quartos · 3 vagas · condomínio R$ 2.400</span>
-        <span class="card-pe"><span class="card-preco">R$ 2.450.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
+      <a class="card" href="imovel-ingleses.html" data-tipo="casa" data-bairro="Ingleses" data-preco="1690000" data-quartos="3" data-area="210" data-midia="video">
+        <span class="card-img"><img src="img/casa-ingleses.webp" alt="Sobrado branco com madeira, pedra e gramado" width="1600" height="900" loading="lazy" decoding="async"><span class="card-tag">Casa em condomínio</span></span>
+        <span class="card-num">AR-0615 · INGLESES</span>
+        <h3>Casa 3 suítes em condomínio</h3>
+        <span class="card-meta">210 m² · 3 quartos · 3 suítes · 2 vagas</span>
+        <span class="card-pe"><span class="card-preco">R$ 1.690.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
+      </a>
+      <a class="card" href="imovel-campeche.html" data-tipo="apartamento" data-bairro="Campeche" data-preco="1480000" data-quartos="3" data-area="128" data-midia="video">
+        <span class="card-img"><img src="img/campeche-jardim.webp" alt="Varanda com poltronas de vime e jardim tropical" width="1600" height="1067" loading="lazy" decoding="async"><span class="card-tag">Apartamento garden</span></span>
+        <span class="card-num">AR-0548 · CAMPECHE</span>
+        <h3>Apartamento garden perto do mar</h3>
+        <span class="card-meta">128 m² · 3 quartos · 1 suíte · 2 vagas</span>
+        <span class="card-pe"><span class="card-preco">R$ 1.480.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
+      </a>
+      <a class="card" href="imovel-trindade.html" data-tipo="apartamento" data-bairro="Trindade" data-preco="1190000" data-quartos="3" data-area="112" data-midia="tour video">
+        <span class="card-img"><img src="img/trindade-sala.webp" alt="Sala ampla com janelas de vidro e sofá azul" width="1600" height="1067" loading="lazy" decoding="async"><span class="card-tag">Apartamento</span><span class='card-360'>Tour 360°</span></span>
+        <span class="card-num">AR-0402 · TRINDADE</span>
+        <h3>Apartamento 3 quartos com varanda</h3>
+        <span class="card-meta">112 m² · 3 quartos · 1 suíte · 2 vagas</span>
+        <span class="card-pe"><span class="card-preco">R$ 1.190.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
+      </a>
+      <a class="card" href="imovel-itacorubi.html" data-tipo="apartamento" data-bairro="Itacorubi" data-preco="980000" data-quartos="2" data-area="84" data-midia="tour video">
+        <span class="card-img"><img src="img/int-itacorubi.webp" alt="Mesa redonda de jantar e cozinha integrada com luz embutida" width="1400" height="932" loading="lazy" decoding="async"><span class="card-tag">Apartamento</span><span class='card-360'>Tour 360°</span></span>
+        <span class="card-num">AR-0319 · ITACORUBI</span>
+        <h3>Apartamento 2 suítes</h3>
+        <span class="card-meta">84 m² · 2 quartos · 2 suítes · 2 vagas</span>
+        <span class="card-pe"><span class="card-preco">R$ 980.000</span><span class="card-ver">Ver o imóvel ↗</span></span>
       </a>
     </div>
-    <div class="vazio" hidden>
-      <p>Nenhum imóvel da seleção com esses filtros.</p>
-      <span>Tenho outros fora do site. Me conte o que procura.</span>
-      <div class="g-links"><button type="button" class="filtro-limpa" data-limpa>Ver todos</button><a class="bt bt-escuro" href="contato.html" data-wa="Olá, Ana! Não achei no site o imóvel que procuro. Pode me ajudar a buscar?">Pedir para a Ana buscar ↗</a></div>
-    </div>
+    <div class="vazio" hidden><p>Nenhum imóvel com esses filtros.</p><button type="button" class="bt bt-escuro" data-limpa>Limpar filtros</button><a href="contato.html" data-wa="Olá, Ana! Não achei no site o imóvel que procuro. Pode me ajudar?">Pedir para a Ana procurar ↗</a></div>
+  </section>
+
+  <section class="faixa-cta" data-tom="escuro" aria-labelledby="fc-t">
+    <h2 id="fc-t">Prefere ver os bairros <em>antes dos imóveis?</em></h2>
+    <a class="bt bt-bege" href="bairros.html">Abrir o mapa dos bairros ↗</a>
   </section>
 </main>
 
@@ -115,17 +142,14 @@
     <h2>Seu próximo endereço <em>começa numa conversa.</em></h2>
   </div>
   <div class="rd-meio">
-    <p>Comprar, vender ou só entender quanto dá para financiar.<br>Respondo no mesmo dia, de segunda a sábado.</p>
-    <a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Converse com a Ana <i aria-hidden="true">↗</i></a>
+    <p>Comprar, vender ou só entender o mercado da Ilha.<br>Respondo no mesmo dia, de segunda a sábado.</p>
+    <div class="rd-bts"><a class="bt bt-bege" href="agendar.html">Agendar uma visita <i aria-hidden="true">↗</i></a><a class="bt bt-linha" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">WhatsApp da Ana <i aria-hidden="true">↗</i></a></div>
   </div>
   <div class="rd-baixo">
     <a class="logo logo-grande" href="index.html" aria-label="Voltar ao início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg><span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span></a>
-    <p>Cidade Exemplo<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI fictício</p>
-    <a class="rd-rever" href="index.html">Voltar ao início <i aria-hidden="true">↗</i></a>
+    <p>Rua de Exemplo, 100, sala 504 · Agronômica · Florianópolis, SC<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI de exemplo 00000-F · CNPJ de exemplo 00.000.000/0001-00</p>
+    <a class="rd-rever" href="#conteudo">Voltar ao topo <i aria-hidden="true">↑</i></a>
   </div>
-  <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>
-  <p class="rd-nota">Fotos: Unsplash (licença Unsplash). Imagens ilustrativas. Marca criada para demonstração · Site de exemplo feito pela Blue Rose.</p>
+  <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="bairros.html">Mapa dos bairros</a><a href="agendar.html">Agendar visita</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>
+  <p class="rd-nota">Marca criada para demonstração · site de exemplo feito pela Blue Rose. Imóveis, preços, vendas e depoimentos são exemplos; simulações e avaliações são estimativas e não substituem a análise do banco nem a visita. Fotos dos imóveis: Pexels (licença Pexels) e Unsplash (licença Unsplash). Lagoa da Conceição: Rodrigo Soldon (Wikimedia Commons, CC BY 2.0). Pôr do sol em Cacupé: Adtormena (Wikimedia Commons, CC BY-SA 4.0). Tours 360°: Poly Haven (CC0). Vídeos montados com as fotos de cada imóvel.</p>
 </footer>
-
-</body>
-</html>

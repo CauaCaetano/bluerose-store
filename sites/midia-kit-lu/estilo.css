@@ -98,3 +98,19 @@ h1, h2, h3, .lb-grade figcaption b { text-wrap: balance; }
 .nu-lista dd, .cs-num, .pacote .pr, .pc-mais li > span:nth-child(2), .pc-linhas span, .pc-total > p b { white-space: nowrap; }
 .nu-lista dd, .cs-num, .pacote .pr, .pc-total > p b, .nu-publico b { -webkit-text-stroke: .4px currentColor; }
 @media print { .nu-lista dd, .cs-num, .pacote .pr, .pc-total > p b, .nu-publico b { -webkit-text-stroke: 0; } }
+
+/* rodada 1 (08/11): no celular, margem lateral de 22 px em tudo (texto dos pacotes não encosta na borda) */
+@media (max-width: 640px) {
+  section { padding-left: 22px; padding-right: 22px; }
+  .topo { padding-left: 22px; padding-right: 22px; }
+  .pacote { padding: 22px 20px; }
+  .pacote ul { padding-left: 20px; }
+  .pc-mais li { gap: 10px; }
+  .rodape { padding-left: 22px; padding-right: 22px; }
+}
+/* regra dos kits: texto secundário com 14 px ou mais */
+.pc-mais small, .nota, .lb-frase cite, .rodape { font-size: .875rem; }
+
+/* resultados de venda marcados como exemplo */
+.ex-tag { display: inline-block; margin: 0 0 10px; padding: 3px 10px; border: 1px solid var(--mocha); color: var(--mocha); font: 500 .875rem/1.4 var(--f); letter-spacing: .03em; }
+.ex-nota { margin: 22px 0 0; padding: 12px 16px; border-left: 3px solid var(--mocha); background: var(--papel); font-size: .9375rem; color: var(--tx-2); }

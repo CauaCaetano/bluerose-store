@@ -70,7 +70,7 @@
   var ondas = $$('.ondas').map(function (o) { o.innerHTML = relevo(+o.dataset.ondas || 16); return { el: o, ps: $$('path', o) }; });
 
   // ---------- rolagem: paralaxe, sombra, relevo e círculo dos rótulos ----------
-  var imgsPar = $$('.casa-img img, .depo-fundo img').filter(function (i) { return !i.closest('.final-img'); });
+  var imgsPar = $$('.casa-img img, .depo-fundo img').filter(function (i) { return !i.closest('.final-img, .gal-bt'); });
   var sombras = $$('.sombra[data-escurece]');
   var pontos = $$('section .ponto').map(function (p) { return { el: p, sec: p.closest('section') }; });
   var heroi = $('.heroi'), pedido = false;
@@ -237,6 +237,50 @@
     r.innerHTML = '<p style="font-weight:600;font-size:1.35rem;line-height:1.3">Reunião pedida, ' + n.split(' ')[0] + '. O engenheiro chama você no WhatsApp hoje.</p>';
   });
 
+  // ---------- entrada: tenho o terreno / quero escolher o terreno ----------
+  var tf = $('#terreno-form');
+  if (tf) (function () {
+    var perg = $('.tr-perg', tf), msgEl = $('.tr-msg', tf), contaEl = $('.tr-conta', tf), erT = $('.erro', tf);
+    var M2Q = { '2': 90, '3': 130, '4': 190, '5 ou mais': 250 }, PRECO = { popular: 2150, 'médio': 2780, alto: 3690 };
+    var val = function (n) { var x = tf.querySelector('[name="' + n + '"]:checked'); return x ? x.value : ''; };
+    var limpa = function (s) { return s.replace(/[<>&"]/g, '').trim(); };
+    function texto(nome) {
+      var caso = val('caso'), q = val('quartos'), pd = val('padrao'), lote = tf.lote.value, quem = nome ? 'Sou ' + nome + '. ' : '';
+      if (caso === 'tenho') {
+        var loc = limpa(tf.local.value);
+        return 'Olá, Base Forte! ' + quem + 'Já tenho o terreno, ' + val('onde') + (loc ? ' (' + loc + ')' : '') + ', com ' + lote + ' m². Quero construir uma casa de ' + q + ' quartos no padrão ' + pd + '. Quanto custa e em quanto tempo fica pronta?';
+      }
+      return 'Olá, Base Forte! ' + quem + 'Ainda não tenho terreno. Quero ajuda para escolher um lote ' + val('tipoLote') + ' em ' + val('cidade') + ', de uns ' + lote + ' m², para uma casa de ' + q + ' quartos no padrão ' + pd + '.';
+    }
+    function atualiza() {
+      var caso = val('caso'); if (!caso) return;
+      perg.hidden = false;
+      $$('.tr-q[data-caso]', tf).forEach(function (f) { f.hidden = f.dataset.caso !== caso; });
+      var leg = $('.tr-m2 .c-leg', tf); leg.textContent = leg.getAttribute('data-txt-' + caso);
+      $('.tr-m2 output', tf).textContent = tf.lote.value + ' m²';
+      tf.lote.style.setProperty('--v', ((tf.lote.value - 200) / 800 * 100).toFixed(1) + '%');
+      msgEl.textContent = '“' + texto(limpa(tf.nome.value)) + '”';
+      var m2 = M2Q[val('quartos')], obra = m2 * PRECO[val('padrao')];
+      contaEl.innerHTML = 'Casa de ' + val('quartos') + ' quartos costuma ter perto de <b>' + m2 + ' m²</b>: no padrão ' + val('padrao') + ', cerca de <b>' + real(obra) + '</b> de obra. ' +
+        (caso === 'escolher' ? 'Um lote de ' + tf.lote.value + ' m² ' + (tf.lote.value >= m2 * 2.2 ? 'comporta essa casa térrea com quintal.' : 'pede sobrado para sobrar quintal.') : '') +
+        ' <a class="ver-casa" href="#calculo" data-m2="' + m2 + '">Abrir na calculadora</a>';
+    }
+    tf.addEventListener('input', atualiza); tf.addEventListener('change', atualiza);
+    contaEl.addEventListener('click', function (e) {
+      var a = e.target.closest('[data-m2]'); if (!a || !c) return;
+      c.m2.value = a.dataset.m2; var r0 = c.querySelector('[name=pd][value="' + PRECO[val('padrao')] + '"]'); if (r0) r0.checked = true;
+      c.dispatchEvent(new Event('input'));
+    });
+    tf.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var n = limpa(tf.nome.value), t = tf.tel.value.replace(/\D/g, '');
+      erT.textContent = !val('caso') ? 'Escolha se já tem o terreno.' : n.length < 2 ? 'Escreva seu nome.' : t.length < 10 ? 'Confira o WhatsApp com DDD.' : '';
+      if (erT.textContent) return;
+      if (window.BR_WA) window.BR_WA(texto(n) + ' Meu WhatsApp: ' + tf.tel.value.trim() + '.');
+      erT.textContent = ''; $('.bt-tx', tf).textContent = 'Mensagem pronta, enviar de novo';
+    });
+  })();
+
   // =====================================================================================
   // PÁGINAS INTERNAS
   // =====================================================================================
@@ -254,6 +298,49 @@
       });
     });
   }
+
+  // projetos.html: galeria de fachadas com filtro e tela cheia (setas, teclado e arrastar no celular)
+  var gal = $('.gal-grade'), lb = $('#lb');
+  if (gal && lb) (function () {
+    var itens = $$('.gal-item', gal), gbts = $$('.gal-filtro button'), gcont = $('.gal-cont');
+    var img = $('.lb-palco img', lb), cont = $('.lb-cont', lb), tit = $('.lb-leg b', lb), txt = $('.lb-leg span', lb), wa = $('.lb-wa', lb);
+    var vis = itens, at = 0, volta = null;
+    gbts.forEach(function (b) {
+      b.addEventListener('click', function () {
+        gbts.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        vis = itens.filter(function (it) { var ok = b.dataset.g === 'todas' || it.dataset.cat === b.dataset.g; it.hidden = !ok; return ok; });
+        gcont.textContent = vis.length + (vis.length === 1 ? ' foto' : ' fotos');
+        revela(innerHeight); pede();
+      });
+    });
+    function mostra(n) {
+      at = (n + vis.length) % vis.length;
+      var it = vis[at], bt = $('.gal-bt', it), mini = $('img', it);
+      img.classList.remove('ok'); img.src = mini.src;
+      img.width = +bt.dataset.w; img.height = +bt.dataset.h; img.alt = mini.alt;
+      var alta = new Image(); alta.onload = function () { if (vis[at] === it) { img.src = alta.src; img.classList.add('ok'); } }; alta.src = bt.dataset.alta;
+      var nome = $('figcaption b', it).textContent;
+      cont.textContent = String(at + 1).padStart(2, '0') + ' | ' + String(vis.length).padStart(2, '0') + ' · referência, foto Pexels';
+      tit.textContent = nome; txt.textContent = $('figcaption', it).lastChild.textContent;
+      wa.setAttribute('data-wa', 'Olá, Base Forte! Vi na galeria do site a fachada “' + nome + '” e quero uma casa nesse estilo. Podemos conversar?');
+    }
+    function abre(n) { volta = document.activeElement; lb.hidden = false; document.body.style.overflow = 'hidden'; mostra(n); $('.lb-fechar', lb).focus(); }
+    function fecha() { lb.hidden = true; document.body.style.overflow = ''; if (volta) volta.focus(); }
+    gal.addEventListener('click', function (e) { var b = e.target.closest('.gal-bt'); if (b) abre(vis.indexOf(b.closest('.gal-item'))); });
+    $('.lb-ant', lb).addEventListener('click', function () { mostra(at - 1); });
+    $('.lb-prox', lb).addEventListener('click', function () { mostra(at + 1); });
+    $('.lb-fechar', lb).addEventListener('click', fecha);
+    var arrastou = false;
+    lb.addEventListener('click', function (e) { if (arrastou) { arrastou = false; return; } if (e.target === lb || e.target.classList.contains('lb-palco')) fecha(); });
+    document.addEventListener('keydown', function (e) {
+      if (lb.hidden) return;
+      if (e.key === 'Escape') fecha(); else if (e.key === 'ArrowRight') mostra(at + 1); else if (e.key === 'ArrowLeft') mostra(at - 1);
+      else if (e.key === 'Tab') { var f = $$('a, button', lb), i = f.indexOf(document.activeElement); if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); } }
+    });
+    var gx = null;
+    $('.lb-palco', lb).addEventListener('pointerdown', function (e) { gx = e.clientX; });
+    lb.addEventListener('pointerup', function (e) { if (gx === null) return; var dx = e.clientX - gx; gx = null; arrastou = Math.abs(dx) > 10; if (Math.abs(dx) > 50) mostra(at + (dx < 0 ? 1 : -1)); });
+  })();
 
   // contato.html e trabalhe-conosco.html: formulários que viram mensagem no WhatsApp
   $$('form[data-pedido]').forEach(function (f) {

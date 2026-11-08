@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script src="../../js/idioma.js?v=18"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Administração de aluguel para proprietários em Ribeirão Preto · Prisma</title>
+<meta name="description" content="Entregue seu imóvel para a Prisma administrar: anúncio, análise do inquilino, contrato, cobrança, repasse em até 2 dias úteis, manutenção com sua aprovação e prestação de contas no portal. Taxas claras e cadastro online.">
+<meta name="theme-color" content="#1d2326">
+<meta name="robots" content="noindex, follow">
+<meta property="og:title" content="Administração de aluguel para proprietários em Ribeirão Preto · Prisma">
+<meta property="og:description" content="Entregue seu imóvel para a Prisma administrar: anúncio, análise do inquilino, contrato, cobrança, repasse em até 2 dias úteis, manutenção com sua aprovação e prestação de contas no portal. Taxas claras e cadastro online.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'6'%20fill%3D'%231d2326'%2F%3E%3Cpath%20d%3D'M20%208%2033%2031H7Z'%20fill%3D'none'%20stroke%3D'%23ffffff'%20stroke-width%3D'2.4'%2F%3E%3Cpath%20d%3D'M25%2020%2036%2015M26%2023%2036%2026'%20stroke%3D'%2389b3bd'%20stroke-width%3D'2.2'%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/5256e582e1.css">
+<link rel="stylesheet" href="../assets/fontes/b38ec324dd.css">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=2">
+<script src="../../js/leads-config.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="dados.js?v=1" defer></script>
+<script src="site.js?v=1" defer></script>
+</head>
+<body data-slug="prisma-adm" data-marca="Prisma Administração Imobiliária" data-cat="imobiliaria" data-pagina="proprietarios.html">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div class="utilidade">
+  <div class="envolve">
+    <p style="margin:0">Ribeirão Preto/SP · seg. a sex., 8h às 18h · (16) 3000-0000 <span style="opacity:.7">(exemplo)</span></p>
+    <nav aria-label="Atalhos">
+      <a href="inquilino.html#boleto">2ª via de boleto</a>
+      <a href="inquilino.html#manutencao">Solicitar manutenção</a>
+      <a href="painel.html">Painel da equipe (demo)</a>
+    </nav>
+  </div>
+</div>
+<header class="topo">
+  <div class="envolve">
+    <a class="marca" href="index.html" aria-label="Prisma Administração Imobiliária, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 35 32H5Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M1 22.5 14.5 20.5" stroke="#636a3c" stroke-width="2"/><path d="M24.5 19 39 12.5M25.3 21.2 39 19.6M26 23.4 39 27" stroke="#0f4c5c" stroke-width="2"/></svg><span class="marca-txt"><b>Prisma</b><span>Administração Imobiliária</span></span></a>
+    <nav class="menu" aria-label="Principal"><a href="proprietarios.html" aria-current="page">Proprietários</a><a href="imoveis.html">Imóveis para alugar</a><a href="locacao.html">Alugar online</a><a href="calculadora.html">Calculadora</a><a href="sobre.html">Sobre</a><a href="contato.html">Contato</a></nav>
+    <div class="entrar">
+      <a class="bt bt-pri bt-peq" href="proprietario.html">Área do proprietário</a>
+      <a class="bt bt-cla bt-peq" href="inquilino.html">Área do inquilino</a>
+    </div>
+    <button type="button" class="bt-menu" aria-expanded="false" aria-controls="gaveta"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.8"/></svg><span>Menu</span></button>
+  </div>
+</header>
+<div class="gaveta" id="gaveta" hidden>
+  <nav class="gaveta-in" aria-label="Menu do celular">
+    <button type="button" class="fechar" data-fecha-menu aria-label="Fechar menu">×</button>
+    <p class="rot-g">Entrar</p>
+    <a class="bt bt-pri" href="proprietario.html">Área do proprietário</a>
+    <a class="bt bt-cla" href="inquilino.html">Área do inquilino</a>
+    <p class="rot-g">Navegação</p>
+    <a class="item" href="index.html">Início</a><a class="item" href="proprietarios.html" aria-current="page">Proprietários</a><a class="item" href="imoveis.html">Imóveis para alugar</a><a class="item" href="locacao.html">Alugar online</a><a class="item" href="calculadora.html">Calculadora</a><a class="item" href="sobre.html">Sobre</a><a class="item" href="contato.html">Contato</a>
+    <p class="rot-g">Atalhos</p>
+    <a class="item" href="inquilino.html#boleto">2ª via de boleto</a>
+    <a class="item" href="inquilino.html#manutencao">Solicitar manutenção</a>
+    <a class="item" href="painel.html">Painel da equipe (demo)</a>
+    <a class="item" href="privacidade.html">Privacidade</a>
+  </nav>
+</div>
+<main id="conteudo">
+<section class="cab-pagina">
+  <div class="envolve duas meio">
+    <div>
+      <p class="trilha"><a href="index.html">Início</a> / Para proprietários</p>
+      <h1>Você recebe. A Prisma cuida do resto.</h1>
+      <p class="lead">Anunciamos, escolhemos o inquilino com análise de crédito e garantia, cobramos todo mês, repassamos em até 2 dias úteis e prestamos contas no portal, com nota de cada despesa.</p>
+      <div class="cta-linha" style="margin-top:8px"><a class="bt bt-pri" href="#cadastro">Cadastrar meu imóvel</a><a class="bt bt-lin" href="calculadora.html">Quanto meu imóvel rende</a></div>
+    </div>
+    <figure class="foto-moldura"><img src="img/chaves-entrega.webp" width="1400" height="934" alt="Mão segurando chaves de casa dentro de um apartamento" fetchpriority="high" style="aspect-ratio:3/2"></figure>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="envolve">
+    <div class="cab-secao">
+      <div><p class="sobre-t"><b>01</b> O que está incluído</p><h2>Da placa de aluga-se ao informe do Imposto de Renda.</h2></div>
+      <p>Tudo que dá trabalho num aluguel fica com a administradora, e tudo que envolve dinheiro fica registrado no portal do proprietário.</p>
+    </div>
+    <div class="grade-2">
+      <ul class="lista-check">
+        <li>Avaliação do aluguel e fotos para o anúncio</li>
+        <li>Anúncio no site e nos portais imobiliários</li>
+        <li>Visitas acompanhadas e proposta pelo portal</li>
+        <li>Análise cadastral e de crédito do interessado</li>
+        <li>Garantia: seguro fiança, título, CredPago ou caução</li>
+        <li>Contrato com assinatura eletrônica</li>
+      </ul>
+      <ul class="lista-check">
+        <li>Vistoria de entrada e de saída com fotos datadas</li>
+        <li>Cobrança mensal, boleto, Pix e régua de lembretes</li>
+        <li>Repasse em até 2 dias úteis em conta separada</li>
+        <li>Reajuste anual e renovação do contrato</li>
+        <li>Manutenção com orçamento e sua aprovação</li>
+        <li>Extrato, informe de rendimentos e documentos no portal</li>
+      </ul>
+    </div>
+    <div class="cta-linha"><a class="bt bt-pri" href="#cadastro">Quero esse serviço</a><a class="bt bt-lin" href="proprietario.html">Ver o portal do proprietário</a></div>
+  </div>
+</section>
+
+<section class="secao branca" id="taxas">
+  <div class="envolve">
+    <div class="cab-secao">
+      <div><p class="sobre-t"><b>02</b> Taxas</p><h2>Dois planos, sem letra miúda.</h2></div>
+      <p>Valores de exemplo para esta demonstração. A taxa só é cobrada sobre o aluguel efetivamente recebido.</p>
+    </div>
+    <table class="garantias">
+      <thead><tr><th scope="col">Plano</th><th scope="col">Taxa mensal</th><th scope="col">Primeira locação</th><th scope="col">Se o inquilino não pagar</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Administração</th><td data-rot="Taxa mensal">8% do aluguel recebido</td><td data-rot="Primeira locação">1 aluguel (anúncio, visitas, análise, contrato e vistoria)</td><td data-rot="Se o inquilino não pagar">Cobrança e acionamento da garantia; você recebe quando a garantia paga</td></tr>
+        <tr><th scope="row">Aluguel garantido</th><td data-rot="Taxa mensal">10% do aluguel</td><td data-rot="Primeira locação">1 aluguel</td><td data-rot="Se o inquilino não pagar">Repasse no dia combinado mesmo com atraso, por até 6 meses</td></tr>
+      </tbody>
+    </table>
+    <p class="nota">Imóvel vago não paga taxa. Sem multa para trocar de administradora após 12 meses.</p>
+    <div class="cta-linha"><a class="bt bt-pri" href="#cadastro">Pedir proposta por escrito</a></div>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="envolve">
+    <div class="cab-secao">
+      <div><p class="sobre-t"><b>03</b> Sozinho ou com administradora</p><h2>O que muda na prática.</h2></div>
+      <p>Quem aluga sozinho economiza a taxa, mas assume cobrança, conserto, contrato e risco de atraso sem garantia.</p>
+    </div>
+    <div class="tabela-rola">
+      <table class="demonstrativo resp">
+        <thead><tr><th scope="col">Situação</th><th scope="col" style="text-align:left">Alugando sozinho</th><th scope="col" style="text-align:left">Com a Prisma</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Inquilino atrasou</th><td style="text-align:left" data-rot="Sozinho">Você cobra e negocia</td><td style="text-align:left" data-rot="Com a Prisma">Cobrança no dia seguinte e garantia acionada</td></tr>
+          <tr><th scope="row">Vazamento num domingo</th><td style="text-align:left" data-rot="Sozinho">O inquilino liga para você</td><td style="text-align:left" data-rot="Com a Prisma">Chamado com protocolo e técnico credenciado</td></tr>
+          <tr><th scope="row">Imposto de Renda</th><td style="text-align:left" data-rot="Sozinho">Junta recibos do ano</td><td style="text-align:left" data-rot="Com a Prisma">Informe pronto no portal em fevereiro</td></tr>
+          <tr><th scope="row">Fim do contrato</th><td style="text-align:left" data-rot="Sozinho">Vistoria sem comparação</td><td style="text-align:left" data-rot="Com a Prisma">Laudo de saída comparado às fotos de entrada</td></tr>
+          <tr><th scope="row">Reajuste</th><td style="text-align:left" data-rot="Sozinho">Calcular índice e avisar</td><td style="text-align:left" data-rot="Com a Prisma">Automático no sistema, com aviso às duas partes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cta-linha"><a class="bt bt-pri" href="#cadastro">Cadastrar meu imóvel</a><a class="bt bt-lin" href="calculadora.html">Calcular quanto rende</a></div>
+  </div>
+</section>
+
+<section class="secao branca" id="cadastro">
+  <div class="envolve duas">
+    <div>
+      <p class="sobre-t"><b>04</b> Cadastro do imóvel</p>
+      <h2>Conte sobre o imóvel e receba a avaliação.</h2>
+      <p>Um gestor responde em até 1 dia útil com a faixa de aluguel, o prazo esperado para alugar e a proposta de administração por escrito.</p>
+      <figure class="foto-moldura" style="margin-top:24px"><img src="img/contrato-anotacoes.webp" width="1400" height="934" alt="Mão escrevendo anotações ao lado de um contrato" loading="lazy" style="aspect-ratio:3/2"></figure>
+      <ol class="linha-anos" style="margin-top:28px">
+        <li><b>Hoje</b>Você envia o cadastro</li>
+        <li><b>Em 1 dia útil</b>Avaliação e proposta</li>
+        <li><b>Em até 5 dias</b>Fotos, vistoria e anúncio no ar</li>
+        <li><b>Média de 24 dias</b>Imóvel alugado (exemplo)</li>
+      </ol>
+    </div>
+    <div>
+      <form class="form cartao" id="form-cap" novalidate data-form-wa="Quero cadastrar meu imóvel para a Prisma administrar." data-ok="Cadastro recebido. Um gestor responde em até 1 dia útil com a avaliação e a proposta. Demonstração: o pedido abre como mensagem de WhatsApp simulada e nada é gravado.">
+        <h3 style="margin:0">Dados do proprietário</h3>
+        <div class="campo"><label for="p-nome">Nome completo</label><input id="p-nome" type="text" autocomplete="off" required minlength="3" data-rot="Nome"></div>
+        <div class="linha">
+          <div class="campo"><label for="p-fone">WhatsApp</label><input id="p-fone" type="tel" data-tipo="fone" required data-rot="WhatsApp" placeholder="(16) 99999-0000"></div>
+          <div class="campo"><label for="p-email">E-mail</label><input id="p-email" type="email" autocomplete="off" required data-rot="E-mail"></div>
+        </div>
+        <h3 style="margin:8px 0 0">Imóvel</h3>
+        <div class="linha">
+          <div class="campo"><label for="p-tipo">Tipo</label><select id="p-tipo" required data-rot="Tipo"><option value="">Escolha</option><option>Apartamento</option><option>Casa</option><option>Casa em condomínio</option><option>Studio ou kitnet</option><option>Sala comercial</option><option>Galpão ou ponto comercial</option></select></div>
+          <div class="campo"><label for="p-bairro">Bairro</label><input id="p-bairro" type="text" required data-rot="Bairro" list="lista-bairros" placeholder="Ex.: Jardim Botânico"><datalist id="lista-bairros"><option>Jardim Botânico</option><option>Jardim Irajá</option><option>Nova Aliança</option><option>Vila do Golf</option><option>Alto da Boa Vista</option><option>Ribeirânia</option><option>Centro</option><option>Jardim Sumaré</option><option>Vila Amélia</option><option>Bonfim Paulista</option></datalist></div>
+        </div>
+        <div class="campo"><label for="p-end">Endereço (rua e número)</label><input id="p-end" type="text" data-rot="Endereço" placeholder="Opcional nesta etapa"></div>
+        <div class="linha3">
+          <div class="campo"><label for="p-area">Área (m²)</label><input id="p-area" type="number" inputmode="numeric" min="10" max="5000" required data-rot="Área (m²)"></div>
+          <div class="campo"><label for="p-quartos">Quartos</label><select id="p-quartos" data-rot="Quartos"><option>0</option><option>1</option><option selected>2</option><option>3</option><option>4 ou mais</option></select></div>
+          <div class="campo"><label for="p-vagas">Vagas</label><select id="p-vagas" data-rot="Vagas"><option>0</option><option selected>1</option><option>2</option><option>3 ou mais</option></select></div>
+        </div>
+        <div class="linha3">
+          <div class="campo"><label for="p-aluguel">Aluguel pretendido (R$)</label><input id="p-aluguel" type="text" inputmode="numeric" data-tipo="dinheiro" data-rot="Aluguel pretendido (R$)" placeholder="Opcional"></div>
+          <div class="campo"><label for="p-cond">Condomínio (R$)</label><input id="p-cond" type="text" inputmode="numeric" data-tipo="dinheiro" data-rot="Condomínio (R$)" placeholder="0"></div>
+          <div class="campo"><label for="p-iptu">IPTU por mês (R$)</label><input id="p-iptu" type="text" inputmode="numeric" data-tipo="dinheiro" data-rot="IPTU (R$/mês)" placeholder="0"></div>
+        </div>
+        <div class="linha">
+          <div class="campo"><label for="p-sit">Situação hoje</label><select id="p-sit" required data-rot="Situação"><option value="">Escolha</option><option>Vago e pronto para alugar</option><option>Vago, precisa de reparos</option><option>Alugado, quero trocar de administradora</option><option>Alugado por mim, quero passar a administração</option><option>Em obra ou na planta</option></select></div>
+          <div class="campo"><label for="p-plano">Plano de interesse</label><select id="p-plano" data-rot="Plano"><option>Administração (8%)</option><option>Aluguel garantido (10%)</option><option>Ainda não sei</option></select></div>
+        </div>
+        <fieldset class="campo"><legend>Características</legend>
+          <div class="opcoes"><label><input type="checkbox" data-rot="Aceita pet"> Aceita pet</label><label><input type="checkbox" data-rot="Mobiliado"> Mobiliado</label><label><input type="checkbox" data-rot="Tem lazer no condomínio"> Lazer no condomínio</label></div></fieldset>
+        <div class="campo"><label for="p-hora">Melhor horário para a visita do gestor</label><select id="p-hora" data-rot="Melhor horário"><option>Manhã</option><option>Tarde</option><option>Fim de tarde</option><option>Sábado de manhã</option></select></div>
+        <label class="aceite"><input type="checkbox" required> Concordo que a Prisma use estes dados só para avaliar o imóvel e falar comigo, conforme a <a href="privacidade.html">política de privacidade</a>.</label>
+        <button type="submit" class="bt bt-pri">Enviar cadastro do imóvel</button>
+        <div class="confirma" id="cap-ok" tabindex="-1" hidden></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="envolve duas">
+    <div>
+      <p class="sobre-t"><b>05</b> Dúvidas de quem vai entregar o imóvel</p>
+      <h2>Antes de assinar com a administradora.</h2>
+      <a class="bt bt-pri" href="#" data-wa="Olá, Prisma! Quero tirar dúvidas sobre a administração do meu imóvel.">Falar com um gestor</a>
+    </div>
+    <div class="perguntas">
+      <details><summary>Já tenho inquilino. Vocês assumem o contrato?</summary><p>Sim. Fazemos uma vistoria, cadastramos o contrato no sistema e passamos a cobrar e repassar a partir do mês seguinte. O inquilino recebe o acesso ao portal.</p></details>
+      <details><summary>Posso escolher o inquilino?</summary><p>Você recebe a proposta no portal, com a análise de crédito e a garantia escolhida, e aprova ou faz contraproposta.</p></details>
+      <details><summary>Em que conta o dinheiro fica até o repasse?</summary><p>Numa conta só de repasses, separada da conta da administradora, e o extrato mostra a data e o comprovante de cada transferência.</p></details>
+      <details><summary>Quem paga o IPTU e o condomínio?</summary><p>Normalmente o inquilino, junto com o aluguel no boleto. Despesas extraordinárias de condomínio e o IPTU de imóvel vago ficam com o proprietário e aparecem no extrato.</p></details>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="rodape">
+  <div class="envolve">
+    <div class="rodape-grade">
+      <div>
+        <a class="marca" href="index.html" aria-label="Prisma Administração Imobiliária, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 35 32H5Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M1 22.5 14.5 20.5" stroke="#636a3c" stroke-width="2"/><path d="M24.5 19 39 12.5M25.3 21.2 39 19.6M26 23.4 39 27" stroke="#0f4c5c" stroke-width="2"/></svg><span class="marca-txt"><b>Prisma</b><span>Administração Imobiliária</span></span></a>
+        <p>Administração de aluguéis em Ribeirão Preto e região: cobrança, repasse, manutenção, contratos e prestação de contas.</p>
+        <p>Rua de Exemplo, 1.000, sala 12 · Jardim Irajá · Ribeirão Preto/SP<br>CRECI-J 00.000 (exemplo) · CNPJ 00.000.000/0001-00 (exemplo)</p>
+        <p><a href="#" data-wa="Olá, Prisma! Quero falar com a equipe de administração.">WhatsApp (16) 99000-0000 (exemplo)</a></p>
+      </div>
+      <div>
+        <h3>Proprietário</h3>
+        <ul><li><a href="proprietario.html">Área do proprietário</a></li><li><a href="proprietarios.html">Anunciar meu imóvel</a></li><li><a href="calculadora.html">Quanto meu imóvel rende</a></li><li><a href="proprietarios.html#taxas">Taxas e serviços</a></li></ul>
+      </div>
+      <div>
+        <h3>Inquilino</h3>
+        <ul><li><a href="inquilino.html">Área do inquilino</a></li><li><a href="inquilino.html#boleto">2ª via de boleto</a></li><li><a href="inquilino.html#manutencao">Solicitar manutenção</a></li><li><a href="imoveis.html">Imóveis para alugar</a></li><li><a href="locacao.html">Alugar online</a></li></ul>
+      </div>
+      <div>
+        <h3>Administradora</h3>
+        <ul><li><a href="sobre.html">Sobre a Prisma</a></li><li><a href="contato.html">Contato</a></li><li><a href="painel.html">Painel da equipe (demo)</a></li><li><a href="privacidade.html">Privacidade e dados</a></li></ul>
+      </div>
+    </div>
+    <div class="rodape-legal">
+      <span>© <span data-ano>2026</span> Prisma Administração Imobiliária · site de exemplo feito pela Blue Rose Express.</span>
+      <span>Nomes, números, CRECI, CNPJ e endereços são fictícios. Portais e painéis são demonstrações com dados de exemplo.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

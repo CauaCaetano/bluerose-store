@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=18"></script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Avaliar meu imóvel em Florianópolis · Ana Ribeiro Imóveis</title>
@@ -13,13 +13,14 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%231b2120'%2F%3E%3Cpath%20d%3D'M8%2030L20%209l12%2021'%20fill%3D'none'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3Cpath%20d%3D'M14%2030h12'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
 <link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
-<link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=7">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=9">
 <script src="../../js/leads-config.js?v=6" defer></script>
-<script src="../assets/moldura.js?v=4" defer></script>
-<script src="site.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="dados.js?v=1" defer></script>
+<script src="site.js?v=8" defer></script>
 </head>
-<body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
+ <body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="cab" data-tom="claro">
@@ -28,15 +29,17 @@
     <span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span>
   </a>
   <nav class="nav" aria-label="Páginas">
-    <a href="imoveis.html">Imóveis</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html" aria-current="page">Avaliar</a><a href="contato.html">Contato</a>
+    <a href="imoveis.html">Imóveis</a><a href="bairros.html">Bairros</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html" aria-current="page">Avaliar</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a>
   </nav>
-  <p class="creci"><b>AR</b><span>CORRETORA DE IMÓVEIS<br>CRECI FICTÍCIO</span></p>
+  <a class="cab-agendar" href="agendar.html">Agendar<span class="so-pc"> visita</span></a>
   <button class="cab-menu" type="button" aria-expanded="false" aria-controls="menu-cel">Menu</button>
 </header>
 <div class="menu-cel" id="menu-cel" hidden>
-  <a href="index.html">Início</a><a href="imoveis.html">Imóveis</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html" aria-current="page">Avaliar</a><a href="contato.html">Contato</a>
-  <a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana ↗</a>
+  <a href="index.html">Início</a><a href="imoveis.html">Imóveis</a><a href="bairros.html">Bairros</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html" aria-current="page">Avaliar</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a>
+  <a class="bt bt-bege" href="agendar.html">Agendar uma visita ↗</a>
+  <a class="menu-wa" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana no WhatsApp ↗</a>
 </div>
+
 
 <main id="conteudo">
   <section class="pg-topo" data-tom="claro" aria-labelledby="pg-t">
@@ -44,7 +47,7 @@
     <h1 class="pg-titulo" id="pg-t">QUANTO VALE <em>o seu imóvel.</em></h1>
     <div class="pg-intro">
       <div class="rot-col"><p class="rot">[AVALIAÇÃO EM 24 HORAS]</p></div>
-      <div class="txt"><p class="grande">Preço certo é o que vende em 41 dias, e não em um ano.</p><p>Preencha os dados abaixo para ter uma estimativa na hora, calculada com o preço médio do metro quadrado vendido no bairro. Depois eu visito o imóvel, comparo com 1.900 vendas reais da região e mando a avaliação completa em até 24 horas, sem custo.</p></div>
+      <div class="txt"><p class="grande">Preço certo é o que vende em 41 dias, e não em um ano.</p><p>Preencha os dados abaixo para ter uma estimativa na hora, calculada com o preço médio do metro quadrado vendido no bairro. Depois eu visito o imóvel, comparo com as vendas reais da região e mando a avaliação completa em até 24 horas, sem custo.</p></div>
     </div>
   </section>
 
@@ -52,11 +55,11 @@
     <form class="ferr-form" id="aval2">
       <p class="rot">Os dados do seu imóvel</p>
       <div class="dupla">
-        <label>Bairro<select class="campo" name="b"><option value="12800">Bairro Exemplo A</option><option value="11200">Bairro Exemplo B</option><option value="10600">Bairro Exemplo C</option><option value="9800" selected>Bairro Exemplo D</option><option value="9200">Bairro Exemplo E</option><option value="8900">Bairro Exemplo F</option><option value="8100">Bairro Exemplo G</option><option value="7300">Bairro Exemplo H</option></select></label>
+        <label>Bairro<select class="campo" name="b"><option value="22400">Jurerê Internacional</option><option value="18600">Cacupé</option><option value="17900" selected>Beira-Mar Norte</option><option value="13800">Lagoa da Conceição</option><option value="12600">Santo Antônio de Lisboa</option><option value="12100">Centro</option><option value="11800">Itacorubi</option><option value="11300">Campeche</option><option value="11000">Trindade</option><option value="9600">Ingleses</option></select></label>
         <label>Tipo<select class="campo" name="tipo"><option value="1">Apartamento</option><option value="1.06">Casa</option><option value="1.12">Cobertura</option></select></label>
       </div>
       <div class="dupla">
-        <label>Área privativa (m²)<input class="campo" name="m2" type="number" min="20" max="900" value="85" inputmode="numeric"></label>
+        <label>Área privativa (m²)<input class="campo" name="m2" type="number" min="20" max="2000" value="160" inputmode="numeric"></label>
         <label>Quartos<select class="campo" name="q"><option value="0.96">1</option><option value="1" selected>2</option><option value="1.04">3</option><option value="1.08">4 ou mais</option></select></label>
       </div>
       <div class="dupla">
@@ -101,17 +104,18 @@
     <h2>Seu próximo endereço <em>começa numa conversa.</em></h2>
   </div>
   <div class="rd-meio">
-    <p>Comprar, vender ou só entender quanto dá para financiar.<br>Respondo no mesmo dia, de segunda a sábado.</p>
-    <a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Converse com a Ana <i aria-hidden="true">↗</i></a>
+    <p>Comprar, vender ou só entender o mercado da Ilha.<br>Respondo no mesmo dia, de segunda a sábado.</p>
+    <div class="rd-bts"><a class="bt bt-bege" href="agendar.html">Agendar uma visita <i aria-hidden="true">↗</i></a><a class="bt bt-linha" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">WhatsApp da Ana <i aria-hidden="true">↗</i></a></div>
   </div>
   <div class="rd-baixo">
     <a class="logo logo-grande" href="index.html" aria-label="Voltar ao início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg><span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span></a>
-    <p>Cidade Exemplo<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI fictício</p>
-    <a class="rd-rever" href="index.html">Voltar ao início <i aria-hidden="true">↗</i></a>
+    <p>Rua de Exemplo, 100, sala 504 · Agronômica · Florianópolis, SC<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI de exemplo 00000-F · CNPJ de exemplo 00.000.000/0001-00</p>
+    <a class="rd-rever" href="#conteudo">Voltar ao topo <i aria-hidden="true">↑</i></a>
   </div>
-  <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>
-  <p class="rd-nota">Fotos: Unsplash (licença Unsplash). A estimativa é ilustrativa e não substitui a avaliação com visita. Marca criada para demonstração · Site de exemplo feito pela Blue Rose.</p>
+  <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="bairros.html">Mapa dos bairros</a><a href="agendar.html">Agendar visita</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>
+  <p class="rd-nota">Marca criada para demonstração · site de exemplo feito pela Blue Rose. Imóveis, preços, vendas e depoimentos são exemplos; simulações e avaliações são estimativas e não substituem a análise do banco nem a visita. Fotos dos imóveis: Pexels (licença Pexels) e Unsplash (licença Unsplash). Lagoa da Conceição: Rodrigo Soldon (Wikimedia Commons, CC BY 2.0). Pôr do sol em Cacupé: Adtormena (Wikimedia Commons, CC BY-SA 4.0). Tours 360°: Poly Haven (CC0). Vídeos montados com as fotos de cada imóvel.</p>
 </footer>
+
 
 </body>
 </html>

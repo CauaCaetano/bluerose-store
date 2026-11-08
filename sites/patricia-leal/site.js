@@ -1,5 +1,5 @@
 // Patrícia Leal · relógio, menu lateral, logotipo que ocupa a largura, revelações na rolagem,
-// lista de situações (foto que segue o cursor + resposta aberta), calculadora informativa de pensão e pedido de consulta.
+// lista de situações (foto que segue o cursor + resposta aberta), pedido de horário (formulário curto que monta a mensagem do WhatsApp).
 (function () {
   'use strict';
   var doc = document, raiz = doc.documentElement;
@@ -18,7 +18,7 @@
         .formatToParts(d).forEach(function (x) { p[x.type] = x.value; });
       t = p.hour + 'H' + p.minute + ' ' + p.day + ' ' + MES[+p.month - 1];
     } catch (e) { t = d.getHours() + 'H' + String(d.getMinutes()).padStart(2, '0'); }
-    $$('#hora, .hora2').forEach(function (el) { el.textContent = t + ' · Cidade Exemplo'; });
+    $$('#hora, .hora2').forEach(function (el) { el.textContent = t + ' · Curitiba'; });
   }
   hora(); setInterval(hora, 15000);
 
@@ -134,33 +134,63 @@
   // contato.html?assunto=Pensão já chega com o assunto escolhido
   try { var qa = new URLSearchParams(location.search).get('assunto'); if (qa) poeAssunto(qa); } catch (e) {}
 
-  // ---------- calculadora informativa de pensão ----------
-  // faixa comum nos tribunais: 1 filho 15–20%, 2 filhos 20–25%, 3 filhos 25–30%, 4 filhos 28–33% da renda líquida
-  var real = function (v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
-  var p = $('#pens'), res = $('.pn-res');
-  if (p && res) (function () {
-  function pc() {
-    var r = +p.r.value, f = +p.f.value, base = [0, 15, 20, 25, 28][f], topo = base + 5, fl = f + (f > 1 ? ' filhos' : ' filho');
-    p.r.previousElementSibling.textContent = real(r); p.f.previousElementSibling.textContent = fl;
-    $('.pn-cab', res).textContent = 'Faixa comum para ' + fl + ', por mês';
-    $('.faixa', res).textContent = real(r * base / 100) + ' a ' + real(r * topo / 100);
-    var t = '<p>' + base + '% a ' + topo + '% da renda líquida, descontados em folha quando há emprego formal.</p>';
-    if (p.inf.checked) t += '<p>Sem carteira assinada, o juiz costuma fixar em salários mínimos: entre <b>' + (f * 0.3 + 0.2).toFixed(1).replace('.', ',') + ' e ' + (f * 0.4 + 0.3).toFixed(1).replace('.', ',') + ' salários</b>, conforme o padrão de vida que se consegue provar.</p>';
-    $('.pn-txt', res).innerHTML = t;
+  // ---------- pedido de horário: nome, assunto e melhor período montam a mensagem do WhatsApp ----------
+  var ASSUNTOS = ['Divórcio', 'Pensão', 'Guarda', 'Inventário', 'Outro assunto de família'];
+  function msgHorario(nome, assunto, periodo) {
+    return 'Olá, Dra. Patrícia! Sou ' + nome + ' e quero pedir um horário para conversar sobre ' + assunto.toLowerCase() + '. Melhor período para mim: ' + periodo + '.';
   }
-  p.addEventListener('input', pc); p.addEventListener('submit', function (e) { e.preventDefault(); }); pc();
-  })();
-
-  // ---------- pedido de consulta ----------
+  function enviaHorario(f) {
+    var n = f.nome.value.trim(), er = $('.erro', f);
+    er.textContent = n.length < 2 ? 'Escreva seu nome.' : '';
+    if (er.textContent) { f.nome.focus(); return false; }
+    if (window.BR_WA) window.BR_WA(msgHorario(n, f.assunto.value, f.periodo.value));
+    return n;
+  }
   if (cons) cons.addEventListener('submit', function (e) {
     e.preventDefault();
-    var n = cons.nome.value.trim(), t = cons.tel.value.replace(/\D/g, ''), er = $('.erro', cons);
-    er.textContent = n.length < 2 ? 'Escreva seu nome.' : t.length < 10 ? 'Confira o WhatsApp com DDD.' : '';
-    if (er.textContent) { (n.length < 2 ? cons.nome : cons.tel).focus(); return; }
-    var assunto = cons.assunto.value.toLowerCase();
-    if (window.BR_WA) window.BR_WA('Olá, Dra. Patrícia! Sou ' + n + ' e quero marcar a consulta online sobre ' + assunto + '.');
+    var n = enviaHorario(cons); if (!n) return;
     var ok = doc.createElement('p'); ok.className = 'cons-ok'; ok.setAttribute('role', 'status');
-    ok.textContent = 'Obrigada, ' + n.split(' ')[0] + '. A resposta com os horários livres para falar sobre ' + assunto + ' chega hoje no seu WhatsApp.';
+    ok.textContent = 'Pronto, ' + n.split(' ')[0] + '. A mensagem com o seu pedido abriu no WhatsApp: é só enviar por lá. Os horários livres são combinados na resposta.';
     cons.innerHTML = ''; cons.appendChild(ok);
   });
+
+  // os botões "Pedir horário" abrem o formulário curto numa janela, sem sair da página
+  var dlg = null;
+  function montaDialogo() {
+    dlg = doc.createElement('dialog');
+    dlg.className = 'horario'; dlg.setAttribute('aria-labelledby', 'hr-t');
+    dlg.innerHTML = '<form class="hr-form" novalidate>' +
+      '<div class="hr-topo"><p class="rotulo">Consulta de 50 minutos · por vídeo ou no escritório</p><button type="button" class="menu-fecha hr-fecha">Fechar [×]</button></div>' +
+      '<h2 id="hr-t" class="hr-tit">Pedir horário</h2>' +
+      '<label><span class="rotulo">Seu nome</span><input name="nome" autocomplete="name"></label>' +
+      '<label><span class="rotulo">Assunto</span><select name="assunto">' + ASSUNTOS.map(function (a) { return '<option>' + a + '</option>'; }).join('') + '</select></label>' +
+      '<fieldset><legend class="rotulo">Melhor período</legend><div class="hr-per">' +
+      [['de manhã, das 9h às 12h', 'Manhã'], ['à tarde, das 13h às 17h', 'Tarde'], ['no fim do dia, das 17h às 18h', 'Fim do dia'], ['qualquer período', 'Tanto faz']].map(function (p, i) {
+        return '<label><input type="radio" name="periodo" value="' + p[0] + '"' + (i === 0 ? ' checked' : '') + '><span>' + p[1] + '</span></label>';
+      }).join('') + '</div></fieldset>' +
+      '<p class="erro" aria-live="polite"></p>' +
+      '<div class="hr-pe"><p class="hr-nota">A mensagem abre pronta no WhatsApp para você enviar. Não precisa contar o caso por aqui.</p><button class="circulo hr-bt" type="submit">Montar mensagem</button></div>' +
+      '</form>';
+    doc.body.appendChild(dlg);
+    var f = $('form', dlg);
+    $('.hr-fecha', dlg).addEventListener('click', function () { dlg.close(); });
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+    f.addEventListener('submit', function (e) { e.preventDefault(); if (enviaHorario(f)) dlg.close(); });
+  }
+  function abreHorario(assunto) {
+    if (!dlg) montaDialogo();
+    var f = $('form', dlg);
+    if (assunto) [].forEach.call(f.assunto.options, function (o) { if (o.text === assunto) f.assunto.value = o.value; });
+    $('.erro', f).textContent = '';
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    setTimeout(function () { f.nome.focus(); }, 30);
+  }
+  doc.addEventListener('click', function (e) {
+    var a = e.target.closest('a'); if (!a || !/^Pedir horário/.test(a.textContent.trim())) return;
+    e.preventDefault();
+    var as = a.dataset.assunto || null;
+    if (!as) { try { as = new URL(a.href, location.href).searchParams.get('assunto'); } catch (er) {} }
+    if (!as) { var pg = (location.pathname.match(/area-(\w+)/) || [])[1]; as = { divorcio: 'Divórcio', pensao: 'Pensão', guarda: 'Guarda', inventario: 'Inventário' }[pg] || null; }
+    abreHorario(as);
+  }, true);
 })();

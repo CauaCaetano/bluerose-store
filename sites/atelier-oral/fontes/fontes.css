@@ -1,0 +1,22 @@
+/* Atelier Oral · fontes locais (Google Fonts, licença OFL), baixadas para respeitar a CSP do site */
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url(newsreader.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Newsreader';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(newsreader-italic.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url(figtree.woff2) format('woff2');
+}

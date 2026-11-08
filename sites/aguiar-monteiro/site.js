@@ -1,10 +1,9 @@
-// Aguiar & Monteiro · tema por seção, menu de pontos, revelações, prazo de 2 anos, rescisão pela CLT (estimativa), direitos extras e envio do caso.
+// Aguiar & Monteiro · tema por seção, menu de pontos, revelações, prazo de 2 anos, pedido de análise da rescisão (lista, sem valores) e envio do caso.
 (function () {
   'use strict';
   document.documentElement.classList.add('js');
   var $ = function (s, el) { return (el || document).querySelector(s); };
   var $$ = function (s, el) { return [].slice.call((el || document).querySelectorAll(s)); };
-  var real = function (v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
   var calmo = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // tema e ponto ativo conforme a seção no meio da tela
@@ -15,7 +14,7 @@
     if (achou === atual) return;
     atual = achou;
     document.body.dataset.tema = achou.dataset.tema;
-    if (meta) meta.content = achou.dataset.tema === 'claro' ? '#ffffff' : '#000000';
+    if (meta) meta.content = achou.dataset.tema === 'azul' ? '#1F3A5F' : achou.dataset.tema === 'escuro' ? '#E8E1D6' : '#F7F5F0';
     links.forEach(function (a) { a.classList.toggle('ativo', a.getAttribute('href') === '#' + achou.id); });
   }
   addEventListener('scroll', olha, { passive: true }); addEventListener('resize', olha); olha();
@@ -35,52 +34,56 @@
     }
   } else { $$('.ar').forEach(function (el) { el.classList.add('ativo'); }); }
 
-  // prazo prescricional: 2 anos depois da saída
-  var sd = $('#saida'), hoje = new Date();
-  if (sd) (function () {
-  sd.max = hoje.toISOString().slice(0, 7);
-  var ini = new Date(hoje); ini.setMonth(ini.getMonth() - 3); sd.value = ini.toISOString().slice(0, 7);
+  // prazo da lei: 2 anos depois da saída (só informa a data; não calcula valor)
+  var sd = $('#saida'), hoje = new Date(), r = $('#resc');
+  function aindaTrabalha() { return r && r.mot.value.indexOf('ainda') === 0; }
   function prazo() {
-    if (!sd.value) return;
+    var out = $('.prazo-res'); if (!sd || !out) return;
+    if (aindaTrabalha()) { out.textContent = 'Como você ainda trabalha lá, esse prazo só começa a contar quando sair.'; sd.disabled = true; return; }
+    sd.disabled = false;
+    if (!sd.value) { out.textContent = ''; return; }
     var p = sd.value.split('-'), lim = new Date(+p[0] + 2, +p[1] - 1, 1), meses = (lim.getFullYear() - hoje.getFullYear()) * 12 + lim.getMonth() - hoje.getMonth();
-    $('.prazo-res').innerHTML = meses > 0 ? 'Seu prazo vai até <b>' + lim.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }) + '</b>: restam ' + meses + ' meses.' : '<b>O prazo de 2 anos já passou.</b> Fale com a gente: alguns direitos, como o FGTS, têm regras próprias.';
+    out.innerHTML = meses > 0 ? 'Saindo nesse mês, o prazo vai até <b>' + lim.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }) + '</b>.' : '<b>Os 2 anos já passaram.</b> Fale com a gente mesmo assim: alguns direitos têm regras próprias.';
   }
-  sd.addEventListener('input', prazo); prazo();
-  })();
+  if (sd) { sd.max = hoje.toISOString().slice(0, 7); var ini = new Date(hoje); ini.setMonth(ini.getMonth() - 3); sd.value = ini.toISOString().slice(0, 7); }
 
-  // rescisão pela CLT
-  var r = $('#resc');
+  // solicitar análise da rescisão: o problema em palavras do dia a dia, perguntas simples e papéis; monta a mensagem do WhatsApp
   if (r) (function () {
-  function resc() {
-    var s = Math.max(0, +r.sal.value), m = Math.max(1, +r.meses.value), mot = r.mot.value, anos = Math.floor(m / 12);
-    var mesesAno = m % 12 || 12, linhas = [];
-    linhas.push(['Saldo de salário (15 dias)', s / 2]);
-    if (mot !== 'justa') linhas.push(['13º proporcional (' + mesesAno + '/12)', s * mesesAno / 12]);
-    if (mot !== 'justa') linhas.push(['Férias proporcionais + 1/3', s * mesesAno / 12 * 4 / 3]);
-    if (r.ferias.checked) linhas.push(['Férias vencidas + 1/3', s * 4 / 3]);
-    var avisoDias = Math.min(90, 30 + 3 * anos);
-    if (mot === 'sem' && !r.aviso.checked) linhas.push(['Aviso prévio indenizado (' + avisoDias + ' dias)', s * avisoDias / 30]);
-    if (mot === 'acordo' && !r.aviso.checked) linhas.push(['Metade do aviso prévio', s * avisoDias / 60]);
-    var fgts = s * 0.08 * m;
-    if (mot === 'sem') linhas.push(['Multa de 40% do FGTS', fgts * 0.4]);
-    if (mot === 'acordo') linhas.push(['Multa de 20% do FGTS', fgts * 0.2]);
-    var tot = linhas.reduce(function (a, l) { return a + l[1]; }, 0);
-    var saque = mot === 'sem' ? 'Você saca todo o FGTS (cerca de ' + real(fgts) + ') e pode pedir seguro-desemprego.' : mot === 'acordo' ? 'No acordo você saca 80% do FGTS e não recebe seguro-desemprego.' : 'Nesse tipo de saída o FGTS fica retido.';
-    $('.cl-res').innerHTML = '<table>' + linhas.map(function (l) { return '<tr><td>' + l[0] + '</td><td>' + real(l[1]) + '</td></tr>'; }).join('') + '<tr class="tot"><td>Pela CLT, a rescisão seria</td><td>' + real(tot) + '</td></tr></table><p>' + saque + ' Se recebeu menos que isso, ou com atraso de mais de 10 dias, a lei prevê multa de 1 salário a seu favor (art. 477, § 8º).</p>';
-    return s;
-  }
-  r.addEventListener('input', resc); r.addEventListener('change', resc);
-
-  // direitos extras: estimativas simples sobre 24 meses
-  var D = { he: ['horas extras', function (s) { return s / 220 * 1.5 * 25 * 24; }], ins: ['insalubridade', function () { return 1518 * 0.2 * 24; }], desvio: ['diferença por desvio de função', function (s) { return s * 0.25 * 24; }], ass: ['indenização por assédio moral', null], fgts: ['FGTS não depositado', function (s) { return s * 0.08 * 12; }] };
-  function dir() {
-    var s = resc(), marc = $$('[data-d]:checked');
-    var conta = marc.filter(function (x) { return D[x.dataset.d][1]; }), tot = conta.reduce(function (a, x) { return a + D[x.dataset.d][1](s); }, 0);
-    var ass = marc.some(function (x) { return x.dataset.d === 'ass'; }) ? ' O assédio moral não tem valor tabelado na lei: quem decide se há indenização é o juiz, por isso ele fica fora da conta.' : '';
-    $('.dr-res').innerHTML = marc.length ? (conta.length ? '<p style="margin:0">Referência pela lei, para os itens marcados</p><p class="grande">' + real(tot * 0.7) + ' a ' + real(tot * 1.2) + '</p>' : '') + '<p>' + marc.map(function (x) { return D[x.dataset.d][0]; }).join(', ') + '.' + ass + ' O valor real depende de provas (testemunhas, mensagens, cartões de ponto) e da decisão do juiz: não é promessa de resultado.</p><a class="botao" href="#contato">Falar com um advogado sobre isso</a>' : '<p style="margin:0;font-size:1.1rem">Marque ao lado o que acontecia no seu trabalho para ver a referência pela lei.</p>';
-  }
-  $('.dr-lista').addEventListener('change', dir); r.addEventListener('input', dir); dir();
-  })();
+    // papéis que mais ajudam em cada problema (mesma ordem dos botões)
+    var DOCS = ['o papel da rescisão (TRCT)', 'meus holerites (contracheques)', 'minha carteira de trabalho', 'o extrato do fundo de garantia (FGTS)', 'o comprovante do dinheiro da rescisão', 'atestados, laudos ou exames', 'o papel de comunicação do acidente (CAT)', 'prints, áudios ou nomes de quem viu'];
+    var AJUDA = [[0, 1, 3, 4], [1, 7], [0, 5], [6, 5], [7, 2], [7], [5, 0], [1]];
+    function marcados(nome) { return $$('input[name="' + nome + '"]:checked', r).map(function (x) { return x.value; }); }
+    function junta(l) { return l.length < 2 ? l.join('') : l.slice(0, -1).join(', ') + ' e ' + l[l.length - 1]; }
+    function mensagem() {
+      var probs = marcados('prob'), docs = marcados('doc'), idx = $$('input[name="prob"]', r).map(function (x, i) { return x.checked ? i : -1; }).filter(function (i) { return i >= 0; });
+      var m = 'Olá, Aguiar & Monteiro! Quero pedir a análise do meu caso.';
+      m += probs.length ? ' O que aconteceu: ' + junta(probs) + '.' : '';
+      var saiu = '';
+      if (!aindaTrabalha() && sd && sd.value) { var p = sd.value.split('-'); saiu = ', em ' + new Date(+p[0], +p[1] - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }); }
+      m += ' Situação: ' + r.mot.value + saiu + '. Tempo de trabalho lá: ' + r.tempo.value + '.';
+      if (!aindaTrabalha()) m += ' Recebi o dinheiro da saída? ' + r.pago.value + '.';
+      m += docs.length ? ' Papéis que tenho: ' + junta(docs) + '.' : ' Ainda não separei os papéis.';
+      m += ' Posso mandar as fotos por aqui?';
+      var quer = []; (idx.length ? idx : [0]).forEach(function (i) { AJUDA[i].forEach(function (d) { if (quer.indexOf(d) < 0) quer.push(d); }); });
+      var falta = quer.map(function (d) { return DOCS[d]; }).filter(function (d) { return docs.indexOf(d) < 0; });
+      return { texto: m, falta: falta };
+    }
+    function mostra() {
+      var x = mensagem();
+      $('.an-msg', r).textContent = '“' + x.texto + '”';
+      $('.an-falta', r).textContent = x.falta.length ? 'Se tiver, separe também: ' + junta(x.falta) + '. Não precisa ter tudo para pedir a análise.' : 'Com esses papéis o advogado já consegue começar a olhar o seu caso.';
+      prazo();
+    }
+    r.addEventListener('change', mostra); r.addEventListener('input', mostra); mostra();
+    r.addEventListener('submit', function (e) { e.preventDefault(); window.BR_WA && window.BR_WA(mensagem().texto); });
+    // os botões do topo já marcam o problema escolhido
+    $$('a.prob[data-prob]').forEach(function (a) {
+      a.addEventListener('click', function () {
+        var ck = $$('input[name="prob"]', r)[+a.dataset.prob];
+        if (ck && !ck.checked) { ck.checked = true; mostra(); }
+      });
+    });
+  })(); else prazo();
 
   // envio do caso pelo WhatsApp
   var c = $('#caso-f');
@@ -90,6 +93,6 @@
     er.textContent = n.length < 2 ? 'Escreva seu nome.' : t.length < 10 ? 'Confira o WhatsApp com DDD.' : !c.priv.checked ? 'Marque que concorda com a política de privacidade.' : '';
     if (er.textContent) return;
     window.BR_WA && window.BR_WA('Olá, Aguiar & Monteiro! Sou ' + n + ', saí da empresa ' + (c.emp.value.trim() || '(não informada)') + ' e quero falar com um advogado sobre o meu caso.' + (c.sigilo.checked ? ' Peço sigilo total.' : ''));
-    c.innerHTML = '<p class="enviado">Recebido, ' + n.split(' ')[0].replace(/[<>&"]/g, '') + '. Um advogado chama você no WhatsApp em até 24 horas úteis.</p>';
+    c.innerHTML = '<p class="enviado">Pronto, ' + n.split(' ')[0].replace(/[<>&"]/g, '') + '. A mensagem abriu no WhatsApp: é só enviar por lá. O escritório retorna o contato pelo canal que você escolher.</p>';
   });
 })();

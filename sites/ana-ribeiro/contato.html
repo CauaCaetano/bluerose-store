@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=18"></script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Contato · Ana Ribeiro, corretora de imóveis em Florianópolis</title>
@@ -13,13 +13,14 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%231b2120'%2F%3E%3Cpath%20d%3D'M8%2030L20%209l12%2021'%20fill%3D'none'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3Cpath%20d%3D'M14%2030h12'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
 <link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
-<link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=7">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=9">
 <script src="../../js/leads-config.js?v=6" defer></script>
-<script src="../assets/moldura.js?v=4" defer></script>
-<script src="site.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="dados.js?v=1" defer></script>
+<script src="site.js?v=8" defer></script>
 </head>
-<body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
+ <body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="cab" data-tom="claro">
@@ -28,37 +29,39 @@
     <span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span>
   </a>
   <nav class="nav" aria-label="Páginas">
-    <a href="imoveis.html">Imóveis</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="contato.html" aria-current="page">Contato</a>
+    <a href="imoveis.html">Imóveis</a><a href="bairros.html">Bairros</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="artigos.html">Artigos</a><a href="contato.html" aria-current="page">Contato</a>
   </nav>
-  <p class="creci"><b>AR</b><span>CORRETORA DE IMÓVEIS<br>CRECI FICTÍCIO</span></p>
+  <a class="cab-agendar" href="agendar.html">Agendar<span class="so-pc"> visita</span></a>
   <button class="cab-menu" type="button" aria-expanded="false" aria-controls="menu-cel">Menu</button>
 </header>
 <div class="menu-cel" id="menu-cel" hidden>
-  <a href="index.html">Início</a><a href="imoveis.html">Imóveis</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="contato.html" aria-current="page">Contato</a>
-  <a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana ↗</a>
+  <a href="index.html">Início</a><a href="imoveis.html">Imóveis</a><a href="bairros.html">Bairros</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="artigos.html">Artigos</a><a href="contato.html" aria-current="page">Contato</a>
+  <a class="bt bt-bege" href="agendar.html">Agendar uma visita ↗</a>
+  <a class="menu-wa" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana no WhatsApp ↗</a>
 </div>
+
 
 <main id="conteudo">
   <section class="pg-topo" data-tom="claro" aria-labelledby="pg-t">
     <nav class="trilha" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span aria-current="page">Contato</span></nav>
     <h1 class="pg-titulo" id="pg-t">CONTATO</h1>
     <div class="pg-intro">
-      <div class="rot-col"><p class="rot">[RESPONDO NO MESMO DIA, DE SEGUNDA A SÁBADO]</p></div>
-      <div class="txt"><p class="grande">Comprar, vender ou só entender quanto dá para financiar.</p><p>Mande uma mensagem pelo formulário ou chame direto no WhatsApp. Se preferir, marque um café no escritório do Bairro Exemplo C.</p></div>
+      <div class="rot-col"><p class="rot">[RESPONDO NO MESMO DIA, DE SEGUNDA A SÁBADO]</p><a class="bt bt-escuro" href="agendar.html">Agendar uma visita ↗</a></div>
+      <div class="txt"><p class="grande">Comprar, vender ou só entender quanto dá para financiar.</p><p>Mande uma mensagem pelo formulário ou chame direto no WhatsApp. Se preferir, marque um café no escritório do Agronômica.</p></div>
     </div>
   </section>
 
   <section class="ct" data-tom="claro" aria-label="Contato">
     <div class="ct-lado">
-      <div><h2>Escritório</h2><p>Rua de Exemplo, 100, sala 504<br>Bairro Exemplo C · Cidade Exemplo<br>00000-000</p></div>
+      <div><h2>Escritório</h2><p>Rua de Exemplo, 100, sala 504<br>Agronômica · Florianópolis<br>00000-000</p></div>
       <div><h2>Atendimento</h2><p>Segunda a sexta, das 9h às 19h<br>Sábado, das 9h às 13h<br>Visitas também no fim de semana</p></div>
       <div><h2>WhatsApp</h2><p><a href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">(48) 99172-0418</a></p></div>
-      <div><h2>Registro</h2><p>Ana Ribeiro · Corretora de imóveis<br>CRECI fictício</p></div>
+      <div><h2>Registro</h2><p>Ana Ribeiro · Corretora de imóveis<br>CRECI de exemplo 00000-F</p></div>
     </div>
     <form class="ct-form" id="ct-form" novalidate>
       <label class="meia"><span>Nome*</span><input name="nome" autocomplete="name" required></label>
       <label class="meia"><span>WhatsApp com DDD*</span><input name="tel" inputmode="tel" autocomplete="tel" required></label>
-      <label><span>Assunto*</span><select name="assunto"><option>Quero comprar um imóvel</option><option>Quero vender meu imóvel</option><option>Quero simular o financiamento</option><option>Quero avaliar meu imóvel</option><option>Outro assunto</option></select></label>
+      <label><span>Assunto*</span><select name="assunto"><option>Quero comprar um imóvel</option><option>Quero agendar uma visita</option><option>Quero vender meu imóvel</option><option>Quero simular o financiamento</option><option>Quero avaliar meu imóvel</option><option>Outro assunto</option></select></label>
       <label><span>Mensagem</span><textarea name="msg" rows="5"></textarea></label>
       <label class="aceite"><input type="checkbox" name="aceite"><i class="ac-tx">Li e aceito a <a href="privacidade.html">política de privacidade</a>. Meus dados só servem para a Ana responder este pedido.</i></label>
       <p class="aviso" aria-live="polite"></p>
@@ -82,17 +85,18 @@
     <h2>Seu próximo endereço <em>começa numa conversa.</em></h2>
   </div>
   <div class="rd-meio">
-    <p>Comprar, vender ou só entender quanto dá para financiar.<br>Respondo no mesmo dia, de segunda a sábado.</p>
-    <a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Converse com a Ana <i aria-hidden="true">↗</i></a>
+    <p>Comprar, vender ou só entender o mercado da Ilha.<br>Respondo no mesmo dia, de segunda a sábado.</p>
+    <div class="rd-bts"><a class="bt bt-bege" href="agendar.html">Agendar uma visita <i aria-hidden="true">↗</i></a><a class="bt bt-linha" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">WhatsApp da Ana <i aria-hidden="true">↗</i></a></div>
   </div>
   <div class="rd-baixo">
     <a class="logo logo-grande" href="index.html" aria-label="Voltar ao início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg><span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span></a>
-    <p>Cidade Exemplo<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI fictício</p>
-    <a class="rd-rever" href="index.html">Voltar ao início <i aria-hidden="true">↗</i></a>
+    <p>Rua de Exemplo, 100, sala 504 · Agronômica · Florianópolis, SC<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI de exemplo 00000-F · CNPJ de exemplo 00.000.000/0001-00</p>
+    <a class="rd-rever" href="#conteudo">Voltar ao topo <i aria-hidden="true">↑</i></a>
   </div>
-  <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>
-  <p class="rd-nota">Página sem fotos. Marca criada para demonstração · Site de exemplo feito pela Blue Rose.</p>
+  <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="bairros.html">Mapa dos bairros</a><a href="agendar.html">Agendar visita</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>
+  <p class="rd-nota">Marca criada para demonstração · site de exemplo feito pela Blue Rose. Imóveis, preços, vendas e depoimentos são exemplos; simulações e avaliações são estimativas e não substituem a análise do banco nem a visita. Fotos dos imóveis: Pexels (licença Pexels) e Unsplash (licença Unsplash). Lagoa da Conceição: Rodrigo Soldon (Wikimedia Commons, CC BY 2.0). Pôr do sol em Cacupé: Adtormena (Wikimedia Commons, CC BY-SA 4.0). Tours 360°: Poly Haven (CC0). Vídeos montados com as fotos de cada imóvel.</p>
 </footer>
+
 
 </body>
 </html>

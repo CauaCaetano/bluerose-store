@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 443" width="488" height="443" font-family="Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" fill="#f9f7f1"/>
+<text x="40" y="34" font-size="15" fill="#272925" letter-spacing="2">SUPERIOR</text>
+<text x="448" y="34" font-size="12" fill="#5e5b53" text-anchor="end">Planta ilustrativa · medidas aproximadas</text>
+<rect x="40.0" y="56.0" width="170.0" height="149.6" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="125.0" y="130.8" font-size="15" fill="#272925" text-anchor="middle">Suíte master</text>
+<text x="125.0" y="151.1" font-size="12" fill="#5e5b53" text-anchor="middle">22,0 m²</text>
+<rect x="210.0" y="56.0" width="68.0" height="149.6" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="244.0" y="130.8" font-size="12" fill="#272925" text-anchor="middle">Closet</text>
+<text x="244.0" y="147.6" font-size="12" fill="#5e5b53" text-anchor="middle">8,8 m²</text>
+<rect x="278.0" y="56.0" width="81.6" height="149.6" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="318.8" y="130.8" font-size="12" fill="#272925" text-anchor="middle">Banho</text>
+<text x="318.8" y="147.6" font-size="12" fill="#5e5b53" text-anchor="middle">10,6 m²</text>
+<rect x="359.6" y="56.0" width="88.4" height="149.6" fill="#ece6da" stroke="#272925" stroke-width="3"/>
+<text x="403.8" y="130.8" font-size="12" fill="#272925" text-anchor="middle">Varanda</text>
+<text x="403.8" y="147.6" font-size="12" fill="#5e5b53" text-anchor="middle">11,4 m²</text>
+<rect x="40.0" y="205.6" width="408.0" height="44.2" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="244.0" y="227.7" font-size="15" fill="#272925" text-anchor="middle">Circulação</text>
+<rect x="40.0" y="249.8" width="122.4" height="129.2" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="101.2" y="314.4" font-size="15" fill="#272925" text-anchor="middle">Suíte 2</text>
+<text x="101.2" y="334.6" font-size="12" fill="#5e5b53" text-anchor="middle">13,7 m²</text>
+<rect x="162.4" y="249.8" width="74.8" height="129.2" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="199.8" y="314.4" font-size="12" fill="#272925" text-anchor="middle">Banho</text>
+<text x="199.8" y="331.2" font-size="12" fill="#5e5b53" text-anchor="middle">8,4 m²</text>
+<rect x="237.2" y="249.8" width="122.4" height="129.2" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="298.4" y="314.4" font-size="15" fill="#272925" text-anchor="middle">Suíte 3</text>
+<text x="298.4" y="334.6" font-size="12" fill="#5e5b53" text-anchor="middle">13,7 m²</text>
+<rect x="359.6" y="249.8" width="88.4" height="129.2" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="403.8" y="314.4" font-size="12" fill="#272925" text-anchor="middle">Banho</text>
+<text x="403.8" y="331.2" font-size="12" fill="#5e5b53" text-anchor="middle">9,9 m²</text>
+<g transform="translate(40 409)"><rect width="170" height="6" fill="#272925"/><rect width="85.0" height="6" fill="#d7c5a9"/><text y="22" font-size="11" fill="#5e5b53">0</text><text x="170" y="22" font-size="11" fill="#5e5b53" text-anchor="end">5 m</text></g>
+<g transform="translate(432 393)"><path d="M0 18 8 -6 16 18 8 12z" fill="#272925"/><text x="8" y="34" font-size="11" fill="#5e5b53" text-anchor="middle">N</text></g>
+</svg>

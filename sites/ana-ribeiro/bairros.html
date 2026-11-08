@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script src="../../js/idioma.js?v=18"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bairros de Florianópolis no mapa · Jurerê, Cacupé, Lagoa, Campeche · Ana Ribeiro Imóveis</title>
+<meta name="description" content="Mapa interativo dos bairros de alto padrão de Florianópolis: Jurerê Internacional, Beira-Mar Norte, Cacupé, Lagoa da Conceição, Campeche e Santo Antônio de Lisboa, com perfil, estilo de vida e imóveis.">
+<meta property="og:title" content="Bairros de Florianópolis no mapa · Jurerê, Cacupé, Lagoa, Campeche · Ana Ribeiro Imóveis">
+<meta property="og:description" content="Mapa interativo dos bairros de alto padrão de Florianópolis: Jurerê Internacional, Beira-Mar Norte, Cacupé, Lagoa da Conceição, Campeche e Santo Antônio de Lisboa, com perfil, estilo de vida e imóveis.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta name="theme-color" content="#1b2120">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%231b2120'%2F%3E%3Cpath%20d%3D'M8%2030L20%209l12%2021'%20fill%3D'none'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3Cpath%20d%3D'M14%2030h12'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
+<link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=9">
+<script src="../../js/leads-config.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="dados.js?v=1" defer></script>
+<script src="site.js?v=8" defer></script>
+</head>
+<body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="cab" data-tom="claro">
+  <a class="logo" href="index.html" aria-label="Ana Ribeiro Imóveis, início">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg>
+    <span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span>
+  </a>
+  <nav class="nav" aria-label="Páginas">
+    <a href="imoveis.html">Imóveis</a><a href="bairros.html" aria-current="page">Bairros</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a>
+  </nav>
+  <a class="cab-agendar" href="agendar.html">Agendar<span class="so-pc"> visita</span></a>
+  <button class="cab-menu" type="button" aria-expanded="false" aria-controls="menu-cel">Menu</button>
+</header>
+<div class="menu-cel" id="menu-cel" hidden>
+  <a href="index.html">Início</a><a href="imoveis.html">Imóveis</a><a href="bairros.html" aria-current="page">Bairros</a><a href="sobre.html">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a>
+  <a class="bt bt-bege" href="agendar.html">Agendar uma visita ↗</a>
+  <a class="menu-wa" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana no WhatsApp ↗</a>
+</div>
+<main id="conteudo">
+  <section class="pg-topo" data-tom="claro" aria-labelledby="pg-t">
+    <nav class="trilha" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span aria-current="page">Bairros</span></nav>
+    <h1 class="pg-titulo" id="pg-t">BAIRROS <em>da Ilha.</em></h1>
+    <div class="pg-intro">
+      <div class="rot-col"><p class="rot">[MAPA INTERATIVO · SEIS BAIRROS]</p></div>
+      <div class="txt"><p class="grande">Antes de escolher a casa, escolha o jeito de viver.</p><p>Toque num bairro do mapa para ver como é a vida lá, para quem ele combina, quanto custa o metro quadrado e os imóveis que eu tenho no bairro.</p></div>
+    </div>
+  </section>
+  <section class="mapa-sec" data-tom="claro2" aria-label="Mapa dos bairros">
+    <div class="mapa" data-mapa id="mapa">
+      <div class="mp-carta">
+        <svg class="mp-svg" viewBox="-44 -4 310 510" role="img" aria-labelledby="mp-svg-t"><title id="mp-svg-t">Mapa da Ilha de Santa Catarina com os bairros onde a Ana trabalha</title><path class="mp-cont" d="M-47.2 255.0 Q-47.2 0.0 -2.0 0.0 Q43.2 0.0 44.1 50.0 Q45.0 100.0 49.4 140.0 Q53.8 180.0 56.9 210.0 Q60.0 240.0 55.2 265.0 Q50.3 290.0 45.9 330.0 Q41.4 370.0 42.3 440.0 Q43.2 510.0 -2.0 510.0 Q-47.2 510.0 -47.2 255.0Z"/><path class="mp-ilha" d="M197.4 37.5 Q202.7 33.0 214.2 40.5 Q225.7 48.0 231.9 61.5 Q238.1 75.0 235.9 85.0 Q233.7 95.0 238.1 106.5 Q242.6 118.0 235.9 134.0 Q229.3 150.0 221.7 167.5 Q214.2 185.0 208.5 201.5 Q202.7 218.0 196.5 233.0 Q190.3 248.0 186.7 261.5 Q183.2 275.0 176.6 290.0 Q169.9 305.0 164.2 321.5 Q158.4 338.0 152.2 356.5 Q146.0 375.0 138.9 391.5 Q131.8 408.0 128.3 424.0 Q124.7 440.0 114.1 451.0 Q103.5 462.0 91.9 474.0 Q80.4 486.0 76.0 475.5 Q71.6 465.0 75.6 445.0 Q79.5 425.0 76.0 405.0 Q72.5 385.0 74.7 362.5 Q76.9 340.0 82.2 327.5 Q87.5 315.0 88.8 300.0 Q90.2 285.0 85.3 273.5 Q80.4 262.0 75.1 254.0 Q69.8 246.0 75.1 240.5 Q80.4 235.0 85.3 231.5 Q90.2 228.0 97.7 219.0 Q105.2 210.0 100.8 200.0 Q96.4 190.0 97.7 181.0 Q99.0 172.0 103.9 163.5 Q108.8 155.0 103.9 146.5 Q99.0 138.0 97.7 125.0 Q96.4 112.0 91.9 97.0 Q87.5 82.0 99.0 85.0 Q110.5 88.0 122.5 84.0 Q134.5 80.0 145.5 77.5 Q156.6 75.0 167.7 66.5 Q178.8 58.0 185.4 50.0 Q192.1 42.0 197.4 37.5Z"/><path class="mp-lagoa" d="M165.5 198.0 Q167.3 190.0 171.7 197.5 Q176.1 205.0 177.4 215.0 Q178.8 225.0 175.7 235.0 Q172.6 245.0 168.1 253.5 Q163.7 262.0 159.3 268.5 Q154.8 275.0 151.3 272.5 Q147.8 270.0 152.2 260.0 Q156.6 250.0 159.7 239.0 Q162.8 228.0 163.3 217.0 Q163.7 206.0 165.5 198.0Z"/><line class="mp-ponte" x1="60.9" y1="244.0" x2="70.7" y2="246.0"/><text class="mp-rot mp-rot-v" x="-11.7" y="350.0" transform="rotate(-90 -11.7 350.0)">Continente</text><text class="mp-rot" x="63.6" y="120.0">Baía Norte</text><text class="mp-rot mp-rot-v" x="214.2" y="350.0" transform="rotate(-90 214.2 350.0)">Oceano Atlântico</text><a class="mp-sec" href="imovel-ingleses.html"><circle cx="223.1" cy="87.0" r="3.2"/><text x="217.1" y="90.5" text-anchor="end">Ingleses</text></a><a class="mp-sec" href="imovel-itacorubi.html"><circle cx="125.6" cy="235.0" r="3.2"/><text x="131.6" y="238.5" text-anchor="start">Itacorubi</text></a><a class="mp-sec" href="imovel-trindade.html"><circle cx="110.5" cy="248.0" r="3.2"/><text x="116.5" y="251.5" text-anchor="start">Trindade</text></a><g class="mp-pino" data-b="jurere"><circle class="mp-halo" cx="136.2" cy="87.0" r="11"/><circle class="mp-ponto" cx="136.2" cy="87.0" r="5.5"/><text x="136.2" y="75.0" text-anchor="middle">Jurerê Internacional</text></g><g class="mp-pino" data-b="cacupe"><circle class="mp-halo" cx="100.8" cy="181.0" r="11"/><circle class="mp-ponto" cx="100.8" cy="181.0" r="5.5"/><text x="91.8" y="187.0" text-anchor="end">Cacupé</text></g><g class="mp-pino" data-b="santo-antonio"><circle class="mp-halo" cx="110.5" cy="157.0" r="11"/><circle class="mp-ponto" cx="110.5" cy="157.0" r="5.5"/><text x="101.5" y="157.0" text-anchor="end">Santo Antônio de Lisboa</text></g><g class="mp-pino" data-b="beira-mar"><circle class="mp-halo" cx="89.3" cy="234.0" r="11"/><circle class="mp-ponto" cx="89.3" cy="234.0" r="5.5"/><text x="80.3" y="246.0" text-anchor="end">Beira-Mar Norte</text></g><g class="mp-pino" data-b="lagoa"><circle class="mp-halo" cx="160.2" cy="247.0" r="11"/><circle class="mp-ponto" cx="160.2" cy="247.0" r="5.5"/><text x="160.2" y="267.0" text-anchor="middle">Lagoa da Conceição</text></g><g class="mp-pino" data-b="campeche"><circle class="mp-halo" cx="149.5" cy="326.0" r="11"/><circle class="mp-ponto" cx="149.5" cy="326.0" r="5.5"/><text x="158.5" y="330.0" text-anchor="start">Campeche</text></g></svg>
+        <p class="mp-legenda"><span class="mp-l1"></span> bairros do mapa <span class="mp-l2"></span> outros bairros com imóveis</p>
+      </div>
+      <div class="mp-lado">
+        <div class="mp-botoes" role="group" aria-label="Escolha um bairro"><button type="button" data-b="jurere" aria-pressed="false">Jurerê Internacional</button><button type="button" data-b="cacupe" aria-pressed="false">Cacupé</button><button type="button" data-b="santo-antonio" aria-pressed="false">Santo Antônio de Lisboa</button><button type="button" data-b="beira-mar" aria-pressed="false">Beira-Mar Norte</button><button type="button" data-b="lagoa" aria-pressed="false">Lagoa da Conceição</button><button type="button" data-b="campeche" aria-pressed="false">Campeche</button></div>
+        <article class="mp-painel" aria-live="polite"></article>
+      </div>
+    </div>
+    <p class="mp-nota">Mapa ilustrativo da Ilha de Santa Catarina. Valores do metro quadrado de exemplo, para demonstração.</p>
+  </section>
+  <section class="bxs" data-tom="claro" aria-label="Os seis bairros em detalhe">
+    <article class="bx" id="b-jurere">
+      <figure><img src="img/bairro-jurere.webp" alt="Vista de Jurerê Internacional" width="1600" height="1000" loading="lazy" decoding="async"></figure>
+      <div>
+        <p class="olho-h">NORTE DA ILHA · R$ 22.400/m² (EXEMPLO)</p>
+        <h2>Jurerê Internacional</h2>
+        <p class="bx-res">Ruas largas, casas de alto padrão e o mar mais calmo do norte da Ilha.</p>
+        <dl class="bx-dl"><div><dt>Para quem</dt><dd>Família que quer casa grande perto da praia, segunda residência e quem recebe muito.</dd></div><div><dt>Como é viver lá</dt><dd>Praia de águas calmas, restaurantes e beach clubs na orla, ciclovia e escolas bilíngues por perto. No verão o bairro enche; no resto do ano é sossegado.</dd></div><div><dt>Distâncias</dt><dd>25 min do Centro · 36 min do aeroporto</dd></div><div><dt>Faixa de preço</dt><dd>Casas de R$ 4 milhões a R$ 25 milhões</dd></div></dl>
+        <p class="bx-links"><a href="imovel-jurere.html">Cobertura duplex com piscina · R$ 5,2 milhões ↗</a><span>Vendido: casa em condomínio, R$ 6,2 milhões</span> <span>Vendido: terreno frente-mar, R$ 7,5 milhões</span></p>
+        <a class="bt bt-contorno" href="contato.html" data-wa="Olá, Ana! Quero ver imóveis em Jurerê Internacional. Pode me mostrar o que tem, inclusive os que não estão anunciados?">Quero imóveis em Jurerê Internacional ↗</a>
+      </div>
+    </article>
+    <article class="bx" id="b-cacupe">
+      <figure><img src="img/bairro-cacupe.webp" alt="Vista de Cacupé" width="1600" height="1067" loading="lazy" decoding="async"></figure>
+      <div>
+        <p class="olho-h">BAÍA NORTE · R$ 18.600/m² (EXEMPLO)</p>
+        <h2>Cacupé</h2>
+        <p class="bx-res">Casas na beira da baía, pôr do sol de frente e muito silêncio.</p>
+        <dl class="bx-dl"><div><dt>Para quem</dt><dd>Quem quer privacidade, barco na porta e não faz questão de praia de mar aberto.</dd></div><div><dt>Como é viver lá</dt><dd>Águas calmas para remo e lancha, ruas sem saída, poucos vizinhos. Restaurantes e ostras em Santo Antônio, a 5 minutos.</dd></div><div><dt>Distâncias</dt><dd>20 min do Centro · 25 min do aeroporto</dd></div><div><dt>Faixa de preço</dt><dd>Casas de R$ 3 milhões a R$ 15 milhões</dd></div></dl>
+        <p class="bx-links"><a href="imovel-cacupe.html">Casa frente-mar com píer · R$ 7,8 milhões ↗</a><span>Vendido: casa frente-mar, R$ 9,4 milhões</span></p>
+        <a class="bt bt-contorno" href="contato.html" data-wa="Olá, Ana! Quero ver imóveis em Cacupé. Pode me mostrar o que tem, inclusive os que não estão anunciados?">Quero imóveis em Cacupé ↗</a>
+      </div>
+    </article>
+    <article class="bx" id="b-santo-antonio">
+      <figure><img src="img/bairro-santo-antonio.webp" alt="Vista de Santo Antônio de Lisboa" width="1360" height="850" loading="lazy" decoding="async"></figure>
+      <div>
+        <p class="olho-h">BAÍA NORTE · R$ 12.600/m² (EXEMPLO)</p>
+        <h2>Santo Antônio de Lisboa</h2>
+        <p class="bx-res">Vila açoriana com calçadão, ostras e casario do século XIX.</p>
+        <dl class="bx-dl"><div><dt>Para quem</dt><dd>Quem gosta de bairro com história, vida a pé e restaurante bom na esquina.</dd></div><div><dt>Como é viver lá</dt><dd>Calçadão à beira da baía, feira de artesanato, igreja de 1750 e os melhores restaurantes de frutos do mar da Ilha.</dd></div><div><dt>Distâncias</dt><dd>25 min do Centro · 30 min do aeroporto</dd></div><div><dt>Faixa de preço</dt><dd>Casas de R$ 1,5 milhão a R$ 6 milhões</dd></div></dl>
+        <p class="bx-links"><a href="imovel-santo-antonio.html">Casa açoriana restaurada · R$ 2,15 milhões ↗</a><span>Vendido: casa açoriana, R$ 2,4 milhões</span></p>
+        <a class="bt bt-contorno" href="contato.html" data-wa="Olá, Ana! Quero ver imóveis em Santo Antônio de Lisboa. Pode me mostrar o que tem, inclusive os que não estão anunciados?">Quero imóveis em Santo Antônio de Lisboa ↗</a>
+      </div>
+    </article>
+    <article class="bx" id="b-beira-mar">
+      <figure><img src="img/bairro-agronomica.webp" alt="Vista de Beira-Mar Norte" width="1600" height="1000" loading="lazy" decoding="async"></figure>
+      <div>
+        <p class="olho-h">CENTRO E AGRONÔMICA · R$ 17.900/m² (EXEMPLO)</p>
+        <h2>Beira-Mar Norte</h2>
+        <p class="bx-res">Apartamentos de frente para a baía, com tudo a pé e a pista de caminhada na porta.</p>
+        <dl class="bx-dl"><div><dt>Para quem</dt><dd>Quem quer cidade: serviços, hospitais e restaurantes perto, sem depender de carro.</dd></div><div><dt>Como é viver lá</dt><dd>Pista de 4 km na beira da baía, shoppings, os melhores hospitais e escolas da cidade a poucos minutos.</dd></div><div><dt>Distâncias</dt><dd>5 min do Centro · 15 min do aeroporto</dd></div><div><dt>Faixa de preço</dt><dd>Apartamentos de R$ 1,5 milhão a R$ 9 milhões</dd></div></dl>
+        <p class="bx-links"><a href="imovel-agronomica.html">Apartamento 3 suítes de frente para a baía · R$ 2,98 milhões ↗</a><span>Vendido: cobertura duplex, R$ 4,8 milhões</span> <span>Vendido: apartamento 4 suítes, R$ 3,9 milhões</span></p>
+        <a class="bt bt-contorno" href="contato.html" data-wa="Olá, Ana! Quero ver imóveis em Beira-Mar Norte. Pode me mostrar o que tem, inclusive os que não estão anunciados?">Quero imóveis em Beira-Mar Norte ↗</a>
+      </div>
+    </article>
+    <article class="bx" id="b-lagoa">
+      <figure><img src="img/bairro-lagoa.webp" alt="Vista de Lagoa da Conceição" width="1600" height="1200" loading="lazy" decoding="async"></figure>
+      <div>
+        <p class="olho-h">LESTE DA ILHA · R$ 13.800/m² (EXEMPLO)</p>
+        <h2>Lagoa da Conceição</h2>
+        <p class="bx-res">Morros, mata e água para todo lado, com as praias do leste a 10 minutos.</p>
+        <dl class="bx-dl"><div><dt>Para quem</dt><dd>Quem trabalha de casa, pratica esporte ao ar livre e quer natureza sem sair da cidade.</dd></div><div><dt>Como é viver lá</dt><dd>Vela, stand-up e kitesurf na Lagoa, trilhas, dunas da Joaquina, praia Mole e vida noturna no centrinho.</dd></div><div><dt>Distâncias</dt><dd>15 min do Centro · 18 min do aeroporto</dd></div><div><dt>Faixa de preço</dt><dd>Casas de R$ 1,8 milhão a R$ 8 milhões</dd></div></dl>
+        <p class="bx-links"><a href="imovel-lagoa.html">Casa com vista para a Lagoa · R$ 3,45 milhões ↗</a><span>Vendido: casa com vista para a lagoa, R$ 3,1 milhões</span></p>
+        <a class="bt bt-contorno" href="contato.html" data-wa="Olá, Ana! Quero ver imóveis em Lagoa da Conceição. Pode me mostrar o que tem, inclusive os que não estão anunciados?">Quero imóveis em Lagoa da Conceição ↗</a>
+      </div>
+    </article>
+    <article class="bx" id="b-campeche">
+      <figure><img src="img/bairro-campeche.webp" alt="Vista de Campeche" width="1360" height="850" loading="lazy" decoding="async"></figure>
+      <div>
+        <p class="olho-h">SUL DA ILHA · R$ 11.300/m² (EXEMPLO)</p>
+        <h2>Campeche</h2>
+        <p class="bx-res">Praia longa, ciclovia e casas com quintal perto do aeroporto.</p>
+        <dl class="bx-dl"><div><dt>Para quem</dt><dd>Família com criança, quem surfa e quem viaja muito a trabalho.</dd></div><div><dt>Como é viver lá</dt><dd>Praia de mar aberto com a ilha do Campeche em frente, ciclovia, escolas e comércio de bairro. O aeroporto fica a 10 minutos.</dd></div><div><dt>Distâncias</dt><dd>20 min do Centro · 10 min do aeroporto</dd></div><div><dt>Faixa de preço</dt><dd>Imóveis de R$ 900 mil a R$ 5 milhões</dd></div></dl>
+        <p class="bx-links"><a href="imovel-campeche.html">Apartamento garden perto do mar · R$ 1,48 milhão ↗</a><span>Vendido: casa de praia, R$ 2,2 milhões</span></p>
+        <a class="bt bt-contorno" href="contato.html" data-wa="Olá, Ana! Quero ver imóveis em Campeche. Pode me mostrar o que tem, inclusive os que não estão anunciados?">Quero imóveis em Campeche ↗</a>
+      </div>
+    </article>
+  </section>
+</main>
+
+<footer class="rodape" data-tom="escuro">
+  <div class="rd-topo">
+    <h2>Seu próximo endereço <em>começa numa conversa.</em></h2>
+  </div>
+  <div class="rd-meio">
+    <p>Comprar, vender ou só entender o mercado da Ilha.<br>Respondo no mesmo dia, de segunda a sábado.</p>
+    <div class="rd-bts"><a class="bt bt-bege" href="agendar.html">Agendar uma visita <i aria-hidden="true">↗</i></a><a class="bt bt-linha" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">WhatsApp da Ana <i aria-hidden="true">↗</i></a></div>
+  </div>
+  <div class="rd-baixo">
+    <a class="logo logo-grande" href="index.html" aria-label="Voltar ao início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg><span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span></a>
+    <p>Rua de Exemplo, 100, sala 504 · Agronômica · Florianópolis, SC<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI de exemplo 00000-F · CNPJ de exemplo 00.000.000/0001-00</p>
+    <a class="rd-rever" href="#conteudo">Voltar ao topo <i aria-hidden="true">↑</i></a>
+  </div>
+  <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="bairros.html">Mapa dos bairros</a><a href="agendar.html">Agendar visita</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>
+  <p class="rd-nota">Marca criada para demonstração · site de exemplo feito pela Blue Rose. Imóveis, preços, vendas e depoimentos são exemplos; simulações e avaliações são estimativas e não substituem a análise do banco nem a visita. Fotos dos imóveis: Pexels (licença Pexels) e Unsplash (licença Unsplash). Lagoa da Conceição: Rodrigo Soldon (Wikimedia Commons, CC BY 2.0). Pôr do sol em Cacupé: Adtormena (Wikimedia Commons, CC BY-SA 4.0). Tours 360°: Poly Haven (CC0). Vídeos montados com as fotos de cada imóvel.</p>
+</footer>

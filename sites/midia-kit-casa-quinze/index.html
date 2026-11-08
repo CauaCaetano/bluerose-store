@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script src="../../js/idioma.js?v=18"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Casa Quinze · Mídia kit da agência · 15 talentos</title>
+<meta name="description" content="Mídia kit de demonstração da Casa Quinze, agência boutique com 15 criadores de moda, beleza, fitness, gastronomia, lifestyle e educação: casting com filtros, perfil de cada talento e seleção para pedir proposta.">
+<meta name="theme-color" content="#f2efe8">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23191a19'%2F%3E%3Ctext%20x%3D'20'%20y%3D'27'%20font-size%3D'18'%20text-anchor%3D'middle'%20fill%3D'%23f2efe8'%20font-family%3D'Georgia'%3E15%3C%2Ftext%3E%3C%2Fsvg%3E">
+<link rel="preload" href="fontes/playfair.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fontes/dm-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=1">
+<script src="../../js/leads-config.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="talentos.js?v=1" defer></script>
+<script src="site.js?v=1" defer></script>
+</head>
+<body data-slug="midia-kit-casa-quinze" data-marca="Casa Quinze" data-cat="midia-kit">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo">
+  <a class="marca-topo" href="#inicio" aria-label="Casa Quinze, voltar ao início"><span class="mt-15">15</span><span>Casa Quinze</span></a>
+  <nav aria-label="Seções">
+    <a href="#casting">Casting</a><a href="#solucoes">Soluções</a><a href="#processo">Processo</a><a href="#campanhas">Campanhas</a><a href="#contato">Contato</a>
+  </nav>
+  <a class="topo-sel" href="#selecao"><span>Minha seleção</span> <b data-sel-conta>0/5</b></a>
+</header>
+
+<main id="conteudo">
+  <section class="capa" id="inicio" aria-labelledby="c-t">
+    <div class="capa-txt">
+      <p class="sobre">Agência boutique de criadores · mídia kit 2026 · <span class="selo">Demonstração</span></p>
+      <h1 id="c-t">15 talentos. <em>Diferentes comunidades.</em> Uma campanha com direção.</h1>
+      <p class="lede">Moda, beleza, fitness, gastronomia, lifestyle e educação na mesma casa. Você escolhe os perfis no casting, a gente cuida do roteiro, da produção, das aprovações e do relatório.</p>
+      <div class="acoes">
+        <a class="botao" href="#casting">Ver o casting</a>
+        <a class="botao botao-linha" href="#" data-wa="Olá, Casa Quinze! Vi o mídia kit da agência e quero conversar sobre uma campanha.">Falar com a agência</a>
+      </div>
+    </div>
+    <div class="folha" aria-label="Os 15 talentos da casa">
+      <ol class="folha-grade" data-folha></ol>
+      <p class="folha-nota">Toque num número para abrir a ficha do talento. Fotos ilustrativas de banco livre, que representam o nicho de cada perfil.</p>
+    </div>
+  </section>
+
+  <section class="panorama" id="panorama" aria-labelledby="pa-t">
+    <div class="sec-topo">
+      <p class="rotulo">A casa em números</p>
+      <h2 id="pa-t">O tamanho do elenco, sem somar o que não se soma</h2>
+      <p class="sec-sub">Os números abaixo são calculados a partir das fichas dos 15 talentos. Seguidores somados mostram a <b>exposição potencial</b>: uma pessoa pode seguir mais de um talento, então isso não é audiência única.</p>
+    </div>
+    <div class="pa-grade">
+      <dl class="pa-numeros" data-painel></dl>
+      <figure class="pa-grafico">
+        <figcaption><b>Seguidores por nicho</b><span>soma dos perfis de cada nicho · calculado na página</span></figcaption>
+        <ul class="barras" data-barras></ul>
+      </figure>
+    </div>
+    <p class="nota">Faixas ilustrativas de demonstração. No kit real, substituir pelos dados do Instagram Insights de cada talento (últimos 90 dias).</p>
+  </section>
+
+  <section class="casting" id="casting" aria-labelledby="ca-t">
+    <div class="sec-topo">
+      <p class="rotulo">Casting</p>
+      <h2 id="ca-t">Escolha quem fala com o seu cliente</h2>
+      <p class="sec-sub">Filtre por nicho, procure pelo nome e ordene. Abra a ficha para ver audiência e formatos. Selecione até 5 talentos para pedir uma proposta.</p>
+    </div>
+    <div class="ferramentas">
+      <div class="chips" role="group" aria-label="Filtrar por nicho" data-chips></div>
+      <div class="ferr-linha">
+        <label class="campo campo-busca"><span>Buscar pelo nome</span><input type="search" data-busca placeholder="Ex.: Marina" autocomplete="off"></label>
+        <label class="campo"><span>Ordenar</span>
+          <select data-ordem>
+            <option value="casa">Ordem da casa (Nº 01 a 15)</option>
+            <option value="maior">Mais seguidores primeiro</option>
+            <option value="menor">Menos seguidores primeiro</option>
+            <option value="eng">Maior faixa de engajamento</option>
+            <option value="nome">Nome, de A a Z</option>
+          </select>
+        </label>
+      </div>
+      <p class="contagem" aria-live="polite" data-contagem></p>
+    </div>
+    <ul class="elenco" data-elenco></ul>
+    <div class="vazio" data-vazio hidden>
+      <p><b>Nenhum talento com esse nome neste nicho.</b> Tente outro nome ou veja o elenco completo.</p>
+      <button type="button" class="botao" data-limpar>Mostrar os 15 talentos</button>
+    </div>
+    <p class="aviso-sel" role="status" aria-live="polite" data-aviso></p>
+  </section>
+
+  <section class="selecao" id="selecao" aria-labelledby="se-t">
+    <div class="se-cab">
+      <p class="rotulo">Minha seleção</p>
+      <h2 id="se-t">Monte o time da campanha</h2>
+      <p class="sec-sub">Até 5 talentos. A soma de seguidores é exposição potencial, não audiência única.</p>
+    </div>
+    <ol class="vagas" data-vagas></ol>
+    <div class="se-resumo" data-resumo aria-live="polite"></div>
+    <div class="se-acoes">
+      <button type="button" class="botao" data-pedir-sel>Solicitar proposta com esta seleção</button>
+      <a class="botao botao-linha" href="#contato">Detalhar no formulário</a>
+      <button type="button" class="link" data-zerar>Limpar seleção</button>
+    </div>
+    <p class="aviso-sel" role="status" aria-live="polite" data-aviso-sel></p>
+  </section>
+
+  <section class="solucoes" id="solucoes" aria-labelledby="so-t">
+    <div class="sec-topo">
+      <p class="rotulo">Soluções</p>
+      <h2 id="so-t">Quatro jeitos de trabalhar com a casa</h2>
+    </div>
+    <ol class="so-lista">
+      <li>
+        <p class="so-n">I</p>
+        <h3>Campanha multicriadores</h3>
+        <p>De 3 a 5 talentos de nichos diferentes falando do mesmo produto, cada um do seu jeito. Um roteiro-mãe, um calendário e um relatório só.</p>
+        <p class="so-ideal">Bom para: lançamento, data sazonal, marca que quer chegar a públicos novos.</p>
+        <a class="botao botao-linha" href="#" data-wa="Olá, Casa Quinze! Quero entender a campanha multicriadores.">Pedir proposta</a>
+      </li>
+      <li>
+        <p class="so-n">II</p>
+        <h3>Campanha por nicho</h3>
+        <p>Dois ou três perfis do mesmo assunto para a mensagem chegar com profundidade. Ex.: três talentos de beleza testando a mesma base por 7 dias.</p>
+        <p class="so-ideal">Bom para: produto técnico, que precisa ser explicado e testado.</p>
+        <a class="botao botao-linha" href="#" data-wa="Olá, Casa Quinze! Quero uma campanha com talentos de um nicho só.">Pedir proposta</a>
+      </li>
+      <li>
+        <p class="so-n">III</p>
+        <h3>Programa de embaixadores</h3>
+        <p>Contrato de 3 a 12 meses com um ou mais talentos, com presença todo mês. A comunidade passa a associar a marca ao criador.</p>
+        <p class="so-ideal">Bom para: marca que quer constância e menos negociação a cada mês.</p>
+        <a class="botao botao-linha" href="#" data-wa="Olá, Casa Quinze! Quero conversar sobre um programa de embaixadores.">Pedir proposta</a>
+      </li>
+      <li>
+        <p class="so-n">IV</p>
+        <h3>Produção de conteúdo e UGC</h3>
+        <p>Vídeos e fotos gravados pelos talentos para a marca usar no próprio perfil, no site e em anúncios, com direito de uso combinado em contrato.</p>
+        <p class="so-ideal">Bom para: anúncios, e-commerce e redes da marca.</p>
+        <a class="botao botao-linha" href="#" data-wa="Olá, Casa Quinze! Quero orçar produção de conteúdo e UGC.">Pedir proposta</a>
+      </li>
+    </ol>
+  </section>
+
+  <section class="processo" id="processo" aria-labelledby="pr-t">
+    <div class="sec-topo">
+      <p class="rotulo">Processo</p>
+      <h2 id="pr-t">Do briefing ao relatório, em 4 etapas</h2>
+    </div>
+    <ol class="pr-lista">
+      <li><span class="pr-n">01</span><h3>Briefing</h3><p>Uma conversa de 30 minutos sobre produto, objetivo, público, prazo e verba. Saímos com um resumo por escrito.</p><p class="pr-prazo">1 a 2 dias úteis</p></li>
+      <li><span class="pr-n">02</span><h3>Casting e proposta</h3><p>Sugerimos talentos, formatos e calendário, com valores por entrega. Você aprova, troca ou corta.</p><p class="pr-prazo">2 a 4 dias úteis</p></li>
+      <li><span class="pr-n">03</span><h3>Produção e aprovação</h3><p>Roteiro aprovado antes de gravar e conteúdo aprovado antes de publicar. Até 2 rodadas de ajuste por peça.</p><p class="pr-prazo">7 a 15 dias úteis</p></li>
+      <li><span class="pr-n">04</span><h3>Publicação e relatório</h3><p>Publicação nas datas combinadas e relatório com prints do Insights de cada talento, alcance, cliques e o que aprendemos.</p><p class="pr-prazo">relatório em até 10 dias após a última publicação</p></li>
+    </ol>
+    <div class="pr-cta"><a class="botao" href="#" data-wa="Olá, Casa Quinze! Quero começar pelo briefing de uma campanha.">Marcar o briefing</a></div>
+  </section>
+
+  <section class="campanhas" id="campanhas" aria-labelledby="cp-t">
+    <div class="sec-topo">
+      <p class="rotulo">Campanhas · <span class="selo">Portfólio conceitual</span></p>
+      <h2 id="cp-t">Três ideias de campanha com o elenco da casa</h2>
+      <p class="sec-sub">Marcas fictícias e campanhas de exemplo, para mostrar como os talentos se combinam. Não há resultado inventado: o relatório real entra aqui depois de cada campanha.</p>
+    </div>
+    <div class="cp-lista" data-campanhas></div>
+  </section>
+
+  <section class="contato" id="contato" aria-labelledby="ct-t">
+    <div class="ct-texto">
+      <p class="rotulo">Contato</p>
+      <h2 id="ct-t">Conte o que a sua marca precisa</h2>
+      <p>Respondemos em até 1 dia útil com uma primeira sugestão de casting. Para datas fortes (Dia das Mães, Black Friday, Natal), chame com 45 dias de antecedência.</p>
+      <p class="ct-linha">contato@casaquinze.exemplo · (11) 90000-0015 (exemplo)</p>
+      <div class="ct-sel">
+        <p><b>Talentos que vão no pedido</b></p>
+        <ul class="ct-chips" data-ct-sel></ul>
+      </div>
+    </div>
+    <form class="form" data-form novalidate>
+      <div class="form-linha">
+        <label class="campo"><span>Seu nome *</span><input name="nome" autocomplete="name" required></label>
+        <label class="campo"><span>Marca ou empresa *</span><input name="marca" autocomplete="organization" required></label>
+      </div>
+      <div class="form-linha">
+        <label class="campo"><span>WhatsApp com DDD *</span><input name="whats" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" required></label>
+        <label class="campo"><span>E-mail</span><input name="email" type="email" autocomplete="email" placeholder="voce@empresa.com.br"></label>
+      </div>
+      <div class="form-linha">
+        <label class="campo"><span>Objetivo *</span>
+          <select name="objetivo" required>
+            <option value="">Escolha</option>
+            <option>Lançamento de produto</option><option>Data sazonal</option><option>Fazer a marca ser conhecida</option><option>Conteúdo para anúncios (UGC)</option><option>Programa de embaixadores</option>
+          </select>
+        </label>
+        <label class="campo"><span>Quando</span>
+          <select name="periodo">
+            <option>Nos próximos 30 dias</option><option>Em 1 a 3 meses</option><option>Daqui a mais de 3 meses</option><option>Ainda não sei</option>
+          </select>
+        </label>
+      </div>
+      <label class="campo"><span>Verba aproximada</span>
+        <select name="verba">
+          <option>Ainda não definida</option><option>Até R$ 10 mil</option><option>De R$ 10 mil a R$ 30 mil</option><option>De R$ 30 mil a R$ 80 mil</option><option>Acima de R$ 80 mil</option>
+        </select>
+      </label>
+      <label class="campo"><span>Conte um pouco do produto (opcional)</span><textarea name="msg" rows="3" maxlength="600"></textarea></label>
+      <p class="form-erro" role="alert" data-erro></p>
+      <button class="botao" type="submit">Enviar pedido pelo WhatsApp</button>
+      <p class="form-ok" role="status" data-ok></p>
+    </form>
+  </section>
+</main>
+
+<div class="perfil" data-perfil role="dialog" aria-modal="true" aria-labelledby="pf-nome" hidden></div>
+
+<footer class="rodape">
+  <p>Mídia kit de demonstração da Blue Rose. Números, marcas e depoimentos são ilustrativos.</p>
+  <p>Casa Quinze e os 15 talentos são fictícios. Fotos de banco livre (Pexels e Rawpixel, domínio público), que representam o nicho de cada perfil e não mostram os criadores.</p>
+</footer>
+</body>
+</html>

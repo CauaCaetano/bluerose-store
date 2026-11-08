@@ -6,248 +6,151 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Monolito Engenharia · Casas de alto padrão com projeto e obra em um contrato</title>
-<meta name="description" content="Casas de alto padrão em Ribeirão Preto com arquitetura, engenharia e obra no mesmo contrato e preço travado antes da primeira estaca. Escolha a planta, monte a casa com preço na tela e acompanhe a obra pelo painel do cliente.">
-<meta name="theme-color" content="#3b5229">
+<title>Monólito · Arquitetura, interiores e execução em Belo Horizonte</title>
+<meta name="description" content="Escritório de arquitetura e interiores que projeta e executa: casas, apartamentos e espaços comerciais em Belo Horizonte e região, do estudo preliminar à entrega da obra.">
+<meta name="theme-color" content="#F3F1EB">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%231f2933'%2F%3E%3Crect%20x%3D'14'%20y%3D'8'%20width%3D'12'%20height%3D'24'%20fill%3D'%23a78b64'%2F%3E%3C%2Fsvg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23F3F1EB'%2F%3E%3Crect%20x%3D'15'%20y%3D'5'%20width%3D'10'%20height%3D'30'%20fill%3D'%23252722'%2F%3E%3Crect%20x%3D'5'%20y%3D'17'%20width%3D'7'%20height%3D'18'%20fill%3D'%23A18E75'%2F%3E%3Crect%20x%3D'28'%20y%3D'12'%20width%3D'7'%20height%3D'23'%20fill%3D'%2377776E'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
 <link rel="stylesheet" href="../assets/fontes/9cd47a11d1.css">
-<link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=10">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="arq.css?v=1">
 <script src="../../js/leads-config.js?v=6" defer></script>
-<script src="../assets/moldura.js?v=4" defer></script>
-<script src="site.js?v=5" defer></script>
-<script type="module" src="cena.js?v=4"></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="dados.js?v=1" defer></script>
+<script src="arq.js?v=1" defer></script>
 </head>
-<body data-slug="monolito" data-marca="Monolito Engenharia" data-cat="construcao">
+<body data-slug="monolito" data-marca="Monólito" data-cat="construcao">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
-
-<div class="carrega" aria-hidden="true"><svg class="logo" viewBox="0 0 40 40"><rect x="15" y="5" width="10" height="30"/><rect x="5" y="17" width="7" height="18"/><rect x="28" y="12" width="7" height="23"/></svg><span class="carrega-linha"><i></i></span><b class="carrega-num">0%</b></div>
-
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <clipPath id="forma-a" clipPathUnits="objectBoundingBox"><path d="M.16 .02 L.86 0 C.95 0 1 .05 1 .13 L.97 .9 C.96 .97 .92 1 .85 1 L.1 .93 C.03 .92 0 .88 .01 .8 L.06 .1 C.07 .05 .1 .02 .16 .02Z"/></clipPath>
-    <clipPath id="forma-b" clipPathUnits="objectBoundingBox"><path d="M.05 .04 L.62 .0 C.7 0 .74 .03 .78 .1 L.99 .82 C1.01 .92 .95 1 .86 1 L.1 .99 C.04 .99 0 .95 0 .88 L0 .12 C0 .07 .01 .05 .05 .04Z"/></clipPath>
-    <clipPath id="forma-c" clipPathUnits="objectBoundingBox"><path d="M.3 .03 L.9 0 C.97 0 1 .04 1 .11 L.98 .92 C.98 .97 .94 1 .88 1 L.12 .86 C.04 .85 0 .79 .03 .72 L.22 .09 C.24 .05 .26 .03 .3 .03Z"/></clipPath>
-  </defs>
-</svg>
-
-<header class="pilula" id="topo">
-  <button class="pl-menu" type="button" aria-expanded="false" aria-controls="menu-painel"><i aria-hidden="true"></i>Menu</button>
-  <a class="pl-logo" href="#inicio" aria-label="Monolito Engenharia, início"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="15" y="5" width="10" height="30"/><rect x="5" y="17" width="7" height="18"/><rect x="28" y="12" width="7" height="23"/></svg></a>
-  <a class="pl-agenda" href="#contato">Agendar<span aria-hidden="true">⟶</span></a>
-  <nav class="menu-painel" id="menu-painel" aria-label="Principal" hidden>
-    <p class="mp-marca" translate="no">Monolito<br>Engenharia</p>
-    <a href="index.html" aria-current="page">Início</a><a href="tour-3d.html">Tour 3D</a><a href="residencias.html">Residências</a><a href="incorporadora.html">Incorporadora</a><a href="lojas.html">Espaços comerciais</a><a href="contato.html">Contato</a>
-    <p class="mp-pe"><span>Cidade Exemplo</span><span>CREA/CAU</span></p>
-  </nav>
+<header class="topo">
+  <div class="topo-in">
+    <a class="marca" href="index.html" aria-label="Monólito Arquitetura, início"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="15" y="5" width="10" height="30" fill="#252722"/><rect x="5" y="17" width="7" height="18" fill="#A18E75"/><rect x="28" y="12" width="7" height="23" fill="#77776E"/></svg><span class="marca-tx"><b translate="no">Monólito</b><span>Arquitetura · Interiores · Execução</span></span></a>
+    <nav class="menu" id="menu" aria-label="Principal"><a href="index.html" aria-current="page">Início</a><a href="projetos.html">Projetos</a><a href="arquitetura.html">Arquitetura</a><a href="interiores.html">Interiores</a><a href="processo.html">Processo</a><a href="sobre.html">Sobre</a><a href="tour-3d.html">Tour 3D</a><a href="contato.html">Contato</a></nav>
+    <a class="bt-topo" href="contato.html">Inicie seu projeto</a>
+    <button class="bt-menu" type="button" aria-expanded="false" aria-controls="menu">Menu</button>
+  </div>
 </header>
-
 <main id="conteudo">
-  <!-- 1. Abertura: maquete 3D desenhada a traço e depois construída -->
-  <section class="abertura" id="inicio" aria-labelledby="ab-t" data-prog>
-    <div class="ab-fixo">
-      <img class="ab-reserva" src="img/hero.webp" alt="Casa Lago, 340 m², com piscina, entregue pela Monolito em Bairro Exemplo 1" width="1400" height="929" fetchpriority="high">
-      <div class="ab-3d"><canvas aria-label="Maquete 3D de uma casa Monolito: arraste para girar" role="img"></canvas></div>
-      <p class="ab-cota ab-cota-1" aria-hidden="true">14,60</p><p class="ab-cota ab-cota-2" aria-hidden="true">7,20</p>
-      <div class="ab-txt">
-        <h1 id="ab-t"><span translate="no">Monolito</span><span class="sr"> Engenharia: casas de alto padrão com projeto e obra em um contrato</span></h1>
-        <div class="ab-pe"><p>Casas de alto padrão em Ribeirão Preto. Arquitetura, engenharia e obra no mesmo contrato, com o custo travado antes da primeira estaca.</p><p class="ab-dica"><span class="so-pc">Arraste a maquete para girar · </span>role para entrar</p></div>
+
+<section class="cx ab" aria-labelledby="ab-t">
+  <div class="ab-tx">
+    <p class="mono"><span>Arquitetura <i>+</i> Interiores <i>+</i> Execução</span><span>Belo Horizonte e região</span></p>
+    <h1 id="ab-t">Espaços que começam na <em>intenção</em>.</h1>
+    <p class="lead">Arquitetura, interiores e execução conduzidos por uma mesma visão.</p>
+    <div class="acoes"><a class="bt" href="contato.html">Inicie seu projeto</a><a class="lk" href="projetos.html">Ver projetos</a></div>
+  </div>
+  <figure class="ab-foto" style="margin:0"><img src="img/serra-fachada.webp" alt="Casa térrea com laje longa aberta para o gramado" width="960" height="1200" fetchpriority="high">
+    <figcaption class="legenda ab-pos"><span><b>Casa Serra</b> · Jaboticatubas (MG) · 2023</span><span class="selo">Projeto ilustrativo · dados fictícios</span></figcaption></figure>
+</section>
+<div class="cx"><div class="ab-faixa"><ul>
+  <li><span class="num">01</span><b>Arquitetura</b><span class="tx-cinza">casas e espaços comerciais</span></li>
+  <li><span class="num">02</span><b>Interiores</b><span class="tx-cinza">marcenaria, luz e materiais</span></li>
+  <li><span class="num">03</span><b>Execução</b><span class="tx-cinza">obra conduzida pela equipe do projeto</span></li>
+</ul></div></div>
+
+<section class="sec" aria-labelledby="mf-t">
+  <div class="cx manif">
+    <p class="num" id="mf-t">Manifesto</p>
+    <div>
+      <blockquote class="rv">Projetamos espaços com <em>intenção</em>. Executamos cada detalhe com <em>precisão</em>.</blockquote>
+      <div class="manif-col">
+        <div class="rv"><span class="num">I</span><h3>Antes da forma, o uso</h3><p>Começamos pela rotina de quem vai morar ou trabalhar ali: onde bate o sol, quem cozinha, onde ficam os livros. A forma vem depois.</p></div>
+        <div class="rv"><span class="num">II</span><h3>Poucos materiais, bem resolvidos</h3><p>Preferimos três materiais escolhidos com cuidado a dez que brigam entre si. Cada encontro de piso, parede e marcenaria é desenhado.</p></div>
+        <div class="rv"><span class="num">III</span><h3>Quem desenha, acompanha</h3><p>A arquiteta que fez o projeto está na obra toda semana. O que foi decidido no papel chega igual ao espaço construído.</p></div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- 2. Apresentação presa em 3 passos -->
-  <section class="intro" id="apresentacao" aria-label="Apresentação da Monolito" data-prog>
-    <div class="in-fixo">
-      <div class="sombras" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-      <article class="passo passo-1 ativo">
-        <div class="ps-txt">
-          <p class="olho" translate="no">Monolito Engenharia</p>
-          <h2 data-palavras>A casa do projeto, entregue pelo preço do projeto. Arquitetura, engenharia e obra no mesmo contrato, com o custo travado antes da primeira estaca.</h2>
-          <a class="bt-linha" href="tour-3d.html">Explorar em 3D <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8l8-4 8 4-8 4zM4 8v8l8 4 8-4V8M12 12v8"/></svg></a>
-        </div>
-        <figure class="fm fm-grande" style="clip-path:url(#forma-a)"><img src="img/hero.webp" alt="Casa Lago com piscina e fachada branca" width="1400" height="929" loading="lazy"></figure>
-        <figure class="fm fm-peq" style="clip-path:url(#forma-b)"><img src="img/sala-vista.webp" alt="Sala de estar com janela do piso ao teto voltada para o jardim" width="1130" height="1600" loading="lazy"></figure>
-      </article>
-      <article class="passo passo-2">
-        <figure class="fm fm-grande" style="clip-path:url(#forma-b)"><img src="img/sala-lareira.webp" alt="Sala com pé-direito duplo, lareira e janelas altas" width="1067" height="1600" loading="lazy"></figure>
-        <figure class="fm fm-peq" style="clip-path:url(#forma-c)"><img src="img/cozinha.webp" alt="Cozinha com bancada de quartzo e banquetas de madeira" width="1400" height="2100" loading="lazy"></figure>
-        <div class="ps-txt">
-          <h2 data-palavras>Se o orçamento estourar, a diferença é nossa. Em 64 casas entregues, a média entre orçado e gasto ficou em −0,6%.</h2>
-          <a class="bt-linha" href="#painel">Como acompanho a obra <span aria-hidden="true">⟶</span></a>
-        </div>
-      </article>
-      <article class="passo passo-3">
-        <h2 class="gigante" data-palavras>Uma casa, um contrato, um preço</h2>
-        <div class="ps-lado">
-          <p>Arquiteto e engenheiro trabalham juntos desde o estudo de massa. O preço sai do projeto executivo, não de uma estimativa, e o teto de variação no contrato é de 0%.</p>
-          <a class="link-lima" href="#monte">Configurar minha casa</a>
-        </div>
-        <ul class="nums">
-          <li><b data-conta="64">64</b>casas entregues</li><li><b>−0,6%</b>média entre orçado e gasto</li><li><b data-conta="97" data-suf="%">97%</b>entregues no prazo do contrato</li><li><b>5 anos</b>de garantia estrutural, mais 1 de manutenção</li>
-        </ul>
-      </article>
-      <div class="in-prog" aria-hidden="true"><span><i></i></span><b>01</b></div>
+<section class="sec pedra" aria-labelledby="ps-t">
+  <div class="cx">
+    <div class="cab"><p class="num">02 · Projetos selecionados</p><div><h2 id="ps-t">Projetos selecionados</h2><p class="lead">Casas, apartamentos e espaços comerciais. Cada um com conceito, materiais, ficha técnica e galeria.</p></div></div>
+    <div class="selec"><a class="pj rv s1" href="projeto-casa-lago.html"><figure><img src="img/hero.webp" alt="Fachada da Casa Lago com piscina e volumes brancos" width="1400" height="929" loading="lazy"></figure><div class="pj-tx"><h3>Casa Lago</h3><span class="mono">Nova Lima (MG) · 2025<br>Residencial · Interiores</span></div></a><a class="pj rv s2" href="projeto-apartamento-savassi.html"><figure><img src="img/savassi-estar.webp" alt="Estar com sofás claros, lareira e painel de madeira iluminado" width="1600" height="1298" loading="lazy"></figure><div class="pj-tx"><h3>Apartamento Savassi</h3><span class="mono">Savassi · 2025<br>Interiores</span></div></a><a class="pj rv s3" href="projeto-cozinha-belvedere.html"><figure><img src="img/belvedere-cozinha.webp" alt="Cozinha em madeira e laca grafite com bancada clara" width="1600" height="1067" loading="lazy"></figure><div class="pj-tx"><h3>Cozinha Belvedere</h3><span class="mono">Belvedere · 2025<br>Interiores</span></div></a><a class="pj rv s4" href="projeto-casa-patio.html"><figure><img src="img/casa-piscina-2.webp" alt="Casa Pátio com piscina de raias e laje de madeira" width="1600" height="1067" loading="lazy"></figure><div class="pj-tx"><h3>Casa Pátio</h3><span class="mono">Lagoa Santa (MG) · 2024<br>Residencial · Interiores</span></div></a><a class="pj rv s5" href="projeto-cafe-santa-tereza.html"><figure><img src="img/cafe-1.webp" alt="Salão do café com forro de madeira e mesas longas" width="1600" height="1067" loading="lazy"></figure><div class="pj-tx"><h3>Café Santa Tereza</h3><span class="mono">Santa Tereza · 2023<br>Comercial</span></div></a><a class="pj rv s6" href="projeto-reforma-sion.html"><figure><img src="img/sion-depois.webp" alt="Estar reformado com painel de madeira e poltronas claras" width="1600" height="1298" loading="lazy"></figure><div class="pj-tx"><h3>Reforma Sion</h3><span class="mono">Sion · 2024<br>Antes e depois · Interiores</span></div></a></div>
+    <p class="aviso-dados"><span class="selo">Projetos ilustrativos · dados fictícios</span><span>Fotos de banco livre usadas para mostrar o tipo de trabalho; nomes, endereços e números são exemplos.</span><a class="bt claro" href="projetos.html" style="margin-left:auto">Ver todos os projetos</a></p>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="fr-t">
+  <div class="cx">
+    <div class="cab"><p class="num">03 · Arquitetura e interiores</p><div><h2 id="fr-t">Do volume ao puxador</h2><p class="lead">A mesma equipe pensa a casa por fora e por dentro. Assim a janela já nasce no lugar certo para o sofá, e a marcenaria já sabe onde passa a tubulação.</p></div></div>
+    <div class="frentes">
+      <article class="frente rv"><figure><img src="img/arq-concreto-1.webp" alt="Fachada de concreto aparente com faixa de janelas contra o céu" width="1600" height="1067" loading="lazy"></figure><span class="num">Arquitetura</span><h3>Casas e espaços pensados para o terreno</h3><p>Implantação, luz natural, ventilação e aprovação na prefeitura e no condomínio. Coordenamos os projetos de estrutura, elétrica e hidráulica para nada ser resolvido no improviso.</p>
+        <ul class="lista-l"><li><span class="num">01</span>Residências unifamiliares e casas de campo</li><li><span class="num">02</span>Espaços comerciais: cafés, lojas e escritórios</li><li><span class="num">03</span>Reformas e retrofit</li></ul><a class="lk" href="arquitetura.html">Conheça a arquitetura</a></article>
+      <article class="frente rv"><figure><img src="img/int-marcenaria.webp" alt="Bancada de madeira maciça em cozinha clara com prateleiras" width="1600" height="1067" loading="lazy"></figure><span class="num">Interiores</span><h3>Materiais, marcenaria, luz e mobiliário</h3><p>Desenhamos cada armário, escolhemos a pedra com você na marmoraria e definimos a luz em camadas. Tudo detalhado antes de ir para a produção.</p>
+        <ul class="lista-l"><li><span class="num">01</span>Marcenaria detalhada peça por peça</li><li><span class="num">02</span>Projeto de iluminação e paginação de pisos</li><li><span class="num">03</span>Curadoria de mobiliário e revestimentos</li></ul><a class="lk" href="interiores.html">Conheça os interiores</a></article>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- 3. Região: foto inteira com título gigante -->
-  <section class="local" id="regiao" aria-labelledby="lc-t" data-prog>
-    <img class="lc-fundo" src="img/casa-palmeiras.webp" alt="Casa de concreto branco e madeira entre palmeiras" width="1600" height="1067" loading="lazy">
-    <figure class="lc-cartao"><img src="img/monolito-concreto.webp" alt="Volumes de concreto aparente contra o céu" width="1263" height="1600" loading="lazy"></figure>
-    <p class="lc-txt">Escritório na Rua de Exemplo, 200. Construímos em Cidade Exemplo e num raio de 60 km: condomínios fechados, loteamentos novos e terrenos de rua, com aprovação na prefeitura e no condomínio por nossa conta. <a href="lojas.html" style="color:var(--lima)">Também temos lojas e salas no Edifício de Exemplo.</a></p>
-    <h2 class="lc-titulo" id="lc-t" data-letras>Cidade Exemplo</h2>
-  </section>
-
-  <!-- 4. Onde já construímos: lista e mapa em perspectiva -->
-  <section class="arredores" aria-labelledby="ar-t">
-    <div class="ar-lista">
-      <p class="olho escuro" id="ar-t">Onde já construímos</p>
-      <ol class="ar-itens"></ol>
-      <p class="ar-nota">Distâncias de carro a partir do escritório. Clique num nome para ver no mapa.</p>
-    </div>
-    <div class="ar-mapa" aria-hidden="true"><div class="ar-plano"><svg viewBox="0 0 800 600"></svg></div></div>
-  </section>
-
-  <!-- 5. Plantas -->
-  <section class="plantas" id="plantas" aria-labelledby="pl-t">
-    <div class="pl-topo" data-prog>
-      <img class="pl-fundo" src="img/concreto-curvo.webp" alt="" width="1600" height="1586" loading="lazy">
-      <figure class="pl-cartao"><img src="img/casa-branca.webp" alt="Casa branca de dois pavimentos com piscina e varanda" width="1600" height="1061" loading="lazy"></figure>
-      <h2 class="pl-titulo" id="pl-t" data-letras>Plantas</h2>
-      <p class="pl-txt" data-palavras>Seis plantas prontas, de 240 a 500 m², desenhadas para os terrenos da região. Você adapta a planta e o preço continua na tela, sem orçamento de surpresa.</p>
-    </div>
-    <div class="pl-corpo">
-      <div class="pl-esq">
-        <div class="filtros" role="group" aria-label="Filtrar por suítes"><button type="button" data-q="0" aria-pressed="true">Todas</button><button type="button" data-q="3" aria-pressed="false">3 suítes</button><button type="button" data-q="4" aria-pressed="false">4 suítes</button><button type="button" data-q="5" aria-pressed="false">5 ou mais</button></div>
-        <ul class="pl-nomes" role="list"></ul>
-        <a class="pl-todas" href="residencias.html">Ver as seis residências com ficha</a>
-        <div class="pl-rodape"><p class="pl-conta"><b>6</b><span>plantas<br>prontas</span></p><a class="bt-borda" href="#" data-wa="Olá, Monolito! Quero receber as 6 plantas prontas com preços.">Pedir as plantas <span aria-hidden="true">⟶</span></a></div>
+<section class="sec pedra" aria-labelledby="ce-t">
+  <div class="cx conc">
+    <div class="conc-fotos rv"><img class="a" src="img/proc-croqui.webp" alt="Mãos desenhando a planta de uma casa à mão" width="1600" height="1067" loading="lazy"><img class="b" src="img/proc-obra.webp" alt="Ambiente em obra com materiais e ferramentas no chão" width="1600" height="1067" loading="lazy"></div>
+    <div>
+      <p class="num">04 · Do conceito à execução</p>
+      <h2 style="font-size:clamp(40px,5.4vw,84px);margin:12px 0 22px" id="ce-t">Um contrato, uma equipe, uma visão</h2>
+      <p class="lead tx-cinza">Quando projeto e obra ficam com empresas diferentes, as decisões se perdem no caminho. Aqui, quem desenha também conduz a obra.</p>
+      <div class="dupla">
+        <div><span class="num">Projeto</span><h4>Executivo completo antes da obra</h4><p>Plantas, cortes, detalhes de marcenaria, iluminação e paginação prontos antes da primeira compra.</p></div>
+        <div><span class="num">Orçamento</span><h4>Custo aberto, item a item</h4><p>Você vê cada fornecedor e cada cotação. Nada de valor fechado sem explicação.</p></div>
+        <div><span class="num">Obra</span><h4>Visita técnica toda semana</h4><p>Arquiteta e engenheiro na obra, com relatório de fotos e decisões pendentes enviado no mesmo dia.</p></div>
+        <div><span class="num">Entrega</span><h4>Manual do espaço</h4><p>Projeto como construído, garantias dos fornecedores e orientações de manutenção.</p></div>
       </div>
-      <div class="pl-dir" aria-live="polite">
-        <div class="pl-slides"></div>
-        <button class="seta seta-e" type="button" aria-label="Imagem anterior">←</button><button class="seta seta-d" type="button" aria-label="Próxima imagem">→</button>
-        <div class="pl-ficha"></div>
-      </div>
+      <div class="compara rv" data-compara aria-label="Comparação antes e depois da Reforma Sion"><img src="img/sion-antes.webp" alt="Sala antes da reforma, com paredes descascadas" width="1600" height="1067" loading="lazy"><img class="depois" src="img/sion-depois.webp" alt="Mesma sala depois da reforma" width="1600" height="1298" loading="lazy"><span class="barra"></span><span class="rot e">Antes</span><span class="rot d">Depois</span><input type="range" min="0" max="100" value="50" aria-label="Arraste para comparar antes e depois"></div>
+      <p class="legenda"><b>Reforma Sion</b> · arraste para comparar · <a href="projeto-reforma-sion.html">ver o projeto</a> · exemplo ilustrativo</p>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- 6. Monte sua casa -->
-  <section class="monte" id="monte" aria-labelledby="mt-t">
-    <div class="mt-topo" data-prog>
-      <img class="mt-fundo" src="img/concreto-escuro.webp" alt="" width="1600" height="1067" loading="lazy">
-      <h2 class="mt-titulo" id="mt-t" data-letras>Monte sua casa</h2>
-      <p class="mt-txt" data-palavras>Escolha a planta, o nível de acabamento e os opcionais. O valor que aparece aqui é o que vai para o contrato, com teto de variação de 0%.</p>
-      <figure class="mt-cartao"><img src="img/projeto.webp" alt="Plantas e material de desenho sobre a mesa" width="1400" height="942" loading="lazy"></figure>
-    </div>
-    <div class="mt-corpo">
-      <figure class="mt-foto"><img src="img/casa-piscina-2.webp" alt="Casa branca com forro de madeira e piscina com raias" width="1600" height="1067" loading="lazy"></figure>
-      <form id="monta" class="monta">
-        <label class="sel">Planta<select name="pl"></select></label>
-        <fieldset class="acab"><legend class="olho">Acabamento</legend>
-          <label><input type="radio" name="ac" value="0" checked><span><b>Essencial</b><small>porcelanato 90×90, metais Deca</small></span></label>
-          <label><input type="radio" name="ac" value="0.14"><span><b>Signature</b><small>porcelanato 120×120, marcenaria planejada</small></span></label>
-          <label><input type="radio" name="ac" value="0.3"><span><b>Atelier</b><small>pedras naturais, esquadria minimalista</small></span></label>
-        </fieldset>
-        <fieldset class="adds"><legend class="olho">Opcionais</legend>
-          <label><input type="checkbox" name="o" value="148000" data-n="Piscina 8×4 aquecida"><span>Piscina 8×4 aquecida<em>+ R$ 148 mil</em></span></label>
-          <label><input type="checkbox" name="o" value="46000" data-n="Energia solar 12 kWp"><span>Energia solar 12 kWp<em>+ R$ 46 mil</em></span></label>
-          <label><input type="checkbox" name="o" value="62000" data-n="Automação completa"><span>Automação completa<em>+ R$ 62 mil</em></span></label>
-          <label><input type="checkbox" name="o" value="38000" data-n="Elevador"><span>Elevador residencial<em>+ R$ 38 mil</em></span></label>
-          <label><input type="checkbox" name="o" value="27000" data-n="Paisagismo"><span>Paisagismo com irrigação<em>+ R$ 27 mil</em></span></label>
-        </fieldset>
-        <div class="ficha" aria-live="polite"></div>
-      </form>
-    </div>
-  </section>
+<section class="sec" aria-labelledby="pr-t">
+  <div class="cx">
+    <div class="cab"><p class="num">05 · Processo</p><div><h2 id="pr-t">Cinco etapas, sem pular nenhuma</h2><p class="lead">Cada etapa termina com uma entrega aprovada por você. Só então a próxima começa.</p></div></div>
+    <ol class="passos">
+      <li class="rv"><span class="num">01</span><h3>Estudo preliminar</h3><p>Programa de necessidades, visita ao terreno ou imóvel e primeiras ideias de implantação.</p></li>
+      <li class="rv"><span class="num">02</span><h3>Anteprojeto</h3><p>Plantas, volumetria em 3D e materiais principais, com estimativa de custo da obra.</p></li>
+      <li class="rv"><span class="num">03</span><h3>Projeto executivo</h3><p>Todos os desenhos para construir e aprovar, compatibilizados com estrutura e instalações.</p></li>
+      <li class="rv"><span class="num">04</span><h3>Detalhamento</h3><p>Marcenaria, iluminação e paginação de pisos e revestimentos, peça por peça.</p></li>
+      <li class="rv"><span class="num">05</span><h3>Execução</h3><p>Obra conduzida pela equipe do projeto, com cronograma, compras e visitas semanais.</p></li>
+    </ol>
+    <p class="acoes" style="margin-top:36px"><a class="bt claro" href="processo.html">Ver o processo em detalhes</a></p>
+  </div>
+</section>
 
-  <!-- 7. O jeito Monolito -->
-  <section class="jeito" aria-labelledby="jt-t" data-prog>
-    <p class="olho" translate="no">O jeito Monolito</p>
-    <h2 class="jt-titulo" id="jt-t" aria-label="Sem surpresa" data-espalha>Sem surpresa</h2>
-    <div class="jt-corpo">
-      <p class="jt-frase" data-palavras>Na Monolito, cada casa é fechada com um preço só, para o projeto, a aprovação e a obra. Se o orçamento estourar, a diferença é nossa: está escrito no contrato.</p>
-      <ul class="jt-nums"><li><b>0%</b>teto de variação no contrato</li><li><b>1</b>contrato para projeto e obra</li><li><b>48 h</b>para responder a qualquer decisão pendente</li></ul>
-      <p style="display:flex;flex-wrap:wrap;gap:12px"><a class="bt-borda claro" href="#painel">Ver o painel do cliente <span aria-hidden="true">⟶</span></a><a class="bt-borda claro" href="incorporadora.html">Conheça a incorporadora <span aria-hidden="true">⟶</span></a></p>
-    </div>
-  </section>
+<section class="sec pedra" aria-labelledby="t3-t">
+  <div class="cx faixa3d">
+    <figure style="margin:0" class="rv"><img src="img/monolito-concreto.webp" alt="Volumes de concreto aparente contra o céu claro" width="1263" height="1600" loading="lazy"></figure>
+    <div><p class="num">06 · Explore a arquitetura</p><h2 id="t3-t">Gire a maquete de uma casa</h2><p>No anteprojeto você recebe a volumetria em 3D para girar no computador ou no celular. Veja como apresentamos uma casa de referência, do traço ao volume.</p><div class="acoes"><a class="bt claro" href="tour-3d.html">Abrir o tour 3D</a><a class="lk" href="interiores.html#explorador">Testar acabamentos</a></div></div>
+  </div>
+</section>
 
-  <!-- 8. Painel da obra -->
-  <section class="painel" id="painel" aria-labelledby="pn-t">
-    <div class="pn-topo" data-prog>
-      <img class="pn-fundo" src="img/gruas.webp" alt="Gruas e estrutura de uma obra em andamento" width="1400" height="933" loading="lazy">
-      <figure class="pn-cartao"><img src="img/marceneiro.webp" alt="Marceneiro cortando madeira na obra" width="1400" height="933" loading="lazy"></figure>
-      <p class="pn-txt">É isto que você vê, de qualquer lugar, durante a obra: cronograma semana a semana, cada real gasto contra o orçado, fotos do dia e as decisões que esperam por você.</p>
-      <h2 class="pn-titulo" id="pn-t" data-letras>Painel da obra</h2>
+<section class="sec" aria-labelledby="sb-t">
+  <div class="cx">
+    <div class="sobre-h">
+      <div><p class="num">07 · Sobre</p><h2 id="sb-t" style="font-size:clamp(40px,5.4vw,84px);margin:12px 0 20px">Um escritório pequeno de propósito</h2><p class="lead tx-cinza">Pegamos poucos projetos por vez para que a mesma arquiteta acompanhe o seu do primeiro croqui à última tomada instalada.</p><p class="acoes" style="margin-top:28px"><a class="lk" href="sobre.html">Conheça a equipe e a metodologia</a></p></div>
+      <figure style="margin:0" class="rv"><img src="img/sobre-mesa.webp" alt="Arquiteto desenhando plantas sobre a mesa com régua e lapiseira" width="1600" height="1067" loading="lazy"><figcaption class="legenda">Foto ilustrativa de banco de imagens</figcaption></figure>
     </div>
-    <div class="pn-corpo">
-      <div class="pn-esq">
-        <div class="pn-abas" role="tablist" aria-label="Abas do painel"><button role="tab" type="button" data-t="crono" aria-selected="true">Cronograma</button><button role="tab" type="button" data-t="fin" aria-selected="false">Financeiro</button><button role="tab" type="button" data-t="fotos" aria-selected="false">Diário de obra</button><button role="tab" type="button" data-t="dec" aria-selected="false">Decisões</button></div>
-        <div class="pn-desc"><p class="olho ouro"></p><p class="pn-d"></p></div>
-      </div>
-      <div class="pn-dir">
-        <img class="pn-dir-fundo" src="img/banho.webp" alt="" width="1400" height="933" loading="lazy">
-        <div class="tela" role="tabpanel">
-          <div class="tela-topo"><b>Casa Vale 280 m², Família Andrade</b><span>atualizado hoje, 17:40</span></div>
-          <div class="tela-corpo" aria-live="polite"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 9. Vista de cima: rolagem lateral -->
-  <section class="cima" aria-labelledby="cm-t" data-prog>
-    <div class="cm-fixo">
-      <div class="cm-trilho"><svg class="cm-mapa" viewBox="0 0 3000 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Vista aérea ilustrada de três casas Monolito na mesma rua"></svg></div>
-      <div class="nuvens" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <h2 class="cm-titulo" id="cm-t">Vista de cima</h2>
-      <p class="cm-legenda">Rua de Exemplo, Bairro Exemplo 1: três casas Monolito lado a lado, entregues entre 2024 e 2026.</p>
-    </div>
-  </section>
-
-  <!-- 10. Pagamento por etapa -->
-  <section class="pagamento" id="pagamento" aria-labelledby="pg-t">
-    <figure class="pg-foto"><img src="img/casa-rodape.webp" alt="Casa com fachada de tijolo e concreto, piscina e gramado" width="1600" height="1200" loading="lazy"></figure>
-    <div class="pg-txt">
-      <h2 id="pg-t">Pagamento por etapa da obra</h2>
-      <ul class="pg-lista">
-        <li><b>20%</b><span>Assinatura do contrato e projeto executivo</span></li>
-        <li><b>15%</b><span>Fundação concluída</span></li>
-        <li><b>25%</b><span>Estrutura e cobertura concluídas</span></li>
-        <li><b>30%</b><span>Casa 80% pronta, com acabamentos</span></li>
-        <li><b>10%</b><span>Entrega das chaves e vistoria</span></li>
-      </ul>
-      <p class="pg-nota">Cada parcela só vence quando a etapa aparece concluída no painel, com fotos e laudo do engenheiro. Você nunca paga adiantado pelo que não foi feito.</p>
-      <a class="bt-creme" href="#" data-wa="Olá, Monolito! Quero receber o modelo de contrato com pagamento por etapa.">Modelo de contrato <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6"/></svg></a>
-    </div>
-  </section>
+  </div>
+</section>
+<section class="cta" aria-labelledby="cta-t">
+  <div class="cx cta-in">
+    <h2 id="cta-t">Inicie seu <em>projeto</em>.</h2>
+    <div><p class="mono">Primeira conversa sem custo</p><p style="margin-top:14px">Conte o que você quer construir ou reformar. Respondemos em até dois dias úteis com os próximos passos e uma primeira conversa com a arquiteta responsável.</p><div class="acoes"><a class="bt inv" href="contato.html">Solicitar conversa</a><a class="lk" style="color:#F3F1EB" href="#" data-wa="Olá, Monólito! Quero começar um projeto com vocês.">Ou chame no WhatsApp</a></div></div>
+  </div>
+</section>
 </main>
-
-<footer class="rodape" id="contato">
-  <div class="rd-grade">
-    <div class="rd-form">
-      <h2>Reunião no escritório ou no seu terreno</h2>
-      <p>O arquiteto e o engenheiro vão juntos. Você sai com o estudo de massa e a faixa de custo.</p>
-      <form id="ct" class="ct" novalidate>
-        <label>Nome*<input name="nome" autocomplete="name"></label>
-        <label>WhatsApp com DDD*<input name="tel" inputmode="tel" autocomplete="tel"></label>
-        <label class="lg">Terreno<select name="ter"><option>Já tenho terreno</option><option>Estou escolhendo terreno</option><option>Quero ajuda para achar terreno</option></select></label>
-        <label class="ok lg"><input type="checkbox" name="ok"><span>Aceito ser contatado pela equipe da Monolito sobre este pedido.</span></label>
-        <button type="submit">Agendar reunião</button>
-        <p class="erro" aria-live="polite"></p>
-      </form>
+<footer class="rodape">
+  <div class="cx">
+    <div class="rd-grade">
+      <div class="rd-marca"><b translate="no">Monólito</b><p>Arquitetura, interiores e execução conduzidos pela mesma equipe, do primeiro croqui à entrega das chaves.</p><p class="acoes" style="margin-top:22px"><a class="bt" href="contato.html">Inicie seu projeto</a></p></div>
+      <nav class="rd-col" aria-label="Rodapé"><h2>Páginas</h2><a href="index.html">Início</a><a href="projetos.html">Projetos</a><a href="arquitetura.html">Arquitetura</a><a href="interiores.html">Interiores</a><a href="processo.html">Processo</a><a href="sobre.html">Sobre</a><a href="tour-3d.html">Tour 3D</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
+      <div class="rd-col"><h2>Projetos</h2><a href="projeto-casa-lago.html">Casa Lago</a><a href="projeto-casa-patio.html">Casa Pátio</a><a href="projeto-casa-mirante.html">Casa Mirante</a><a href="projeto-casa-serra.html">Casa Serra</a><a href="projeto-casa-vale.html">Casa Vale</a><a href="projeto-apartamento-savassi.html">Apartamento Savassi</a><a href="projetos.html">Todos os projetos</a></div>
+      <div class="rd-col"><h2>Escritório</h2><p>Rua de Exemplo, 200, sala 4<br>Belo Horizonte (MG)</p><p>Seg a sex, 9h às 18h<br>Visitas ao escritório com hora marcada</p><p>(31) 0000-0000 (exemplo)<br>contato@monolito.exemplo</p><p>CAU da empresa: preencher com registro real<br>CREA do responsável pela execução: preencher com registro real</p><p><a href="#" data-wa="Olá, Monólito! Vim pelo site e quero conversar sobre um projeto.">Conversar pelo WhatsApp</a></p></div>
     </div>
-    <nav class="rd-nav" aria-label="Rodapé"><a href="index.html" aria-current="page">Início</a><a href="tour-3d.html">Tour 3D</a><a href="residencias.html">Residências</a><a href="incorporadora.html">Incorporadora</a><a href="lojas.html">Espaços comerciais</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
-    <div class="rd-redes"><a href="#" data-wa="Olá, Monolito! Vim pelo site.">WhatsApp</a><a href="#" data-wa="Olá, Monolito! Vi o Instagram de vocês.">Instagram</a><a href="#" data-wa="Olá, Monolito! Vi o LinkedIn de vocês.">LinkedIn</a></div>
-    <div class="rd-aviso"><p>Preços de referência de outubro de 2026, para terreno plano e projeto aprovado sem alterações estruturais. Fotos ilustrativas de casas de alto padrão.</p><p>Monolito Engenharia e Arquitetura · CREA/CAU fictícios<br>Rua de Exemplo, 100, Cidade Exemplo<br>Seg a sex, 8h às 18h · Sáb, 9h às 13h</p></div>
+    <div class="rd-pe">
+      <p><strong>Site de demonstração da Blue Rose. Profissionais, registros, obras, números e contatos são ilustrativos.</strong></p>
+      <p>Fotos de banco de imagens livres (Pexels e Unsplash), usadas para ilustrar o tipo de trabalho; não são obras da Monólito. Maquete 3D: <span translate="no">Modern Coastal Hillside Villa</span>, por Visthétique (Sketchfab, CC BY 4.0).</p>
+      <p>© 2026 <span translate="no">Monólito</span> · marca fictícia criada para demonstração · <a href="privacidade.html">Privacidade</a></p>
+    </div>
   </div>
-  <div class="rd-foto">
-    <img src="img/hero.webp" alt="" width="1400" height="929" loading="lazy">
-    <p class="rd-marca" aria-hidden="true" translate="no">Monolito</p>
-  </div>
-  <p class="rd-pe"><span>© 2026 <span translate="no">Monolito</span> Engenharia · Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash (licença Unsplash) · Modelo 3D: <span translate="no">Modern Coastal Hillside Villa</span> por Visthétique (Sketchfab, CC BY 4.0)</span></p>
 </footer>
 </body>
 </html>

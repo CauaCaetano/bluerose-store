@@ -205,7 +205,7 @@
     var t = T[q.tipo.value], m = +q.m2.value, ac = +q.ac.value, base = t[1] * m * ac;
     var dias = Math.round(t[2] + t[3] * m), nivel = $('[name=ac]:checked + span b', q).textContent.toLowerCase();
     $('.q-res', q).innerHTML = '<p style="margin:0;font-weight:700">Reforma de ' + t[0] + ', ' + m + ' m², ' + nivel + '</p><p class="q-faixa">' + real(base * 0.9) + ' <small style="font-size:.5em">a ' + real(base * 1.12) + '</small></p>' +
-      '<ul><li>Prazo de ' + dias + ' a ' + (dias + 3) + ' dias úteis, com multa por atraso</li><li>Material e mão de obra inclusos</li><li>Em até 12x no cartão, ou 6% de desconto à vista</li></ul>' +
+      '<ul><li>Prazo de ' + dias + ' a ' + (dias + 3) + ' dias úteis, com multa por atraso</li><li>Material e mão de obra inclusos</li><li>Em até 12x no cartão, ou 6% de desconto à vista</li><li>Garantia de 5 anos por escrito, ART/RRT e seguro de RC em condomínio (exemplo a confirmar)</li></ul>' +
       '<a class="botao" href="#" data-wa="Olá, Ferreira! Fiz o orçamento no site: reforma de ' + t[0] + ', ' + m + ' m², acabamento ' + nivel + ', ' + q.qd.value + '. Estimativa ' + real(base * 0.9) + ' a ' + real(base * 1.12) + '. Posso mandar fotos?">Mandar fotos e fechar o valor</a>';
   }
   // ?tipo=banheiro (vindo da home ou da página do serviço) já começa no passo 2

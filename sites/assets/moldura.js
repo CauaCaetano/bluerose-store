@@ -60,7 +60,8 @@
 
   // ---------- pílula ----------
   // site com cena 3D (cena.js) custa mais: a partir de R$ 2.490 (o catálogo usa o mesmo valor)
-  var TRES_D = !!doc.querySelector('script[src*="cena.js"]');
+  // site com 3D em qualquer página (a cena só carrega na home; mesma lista do js/catalogo-sites.js)
+  var TRES_D = !!doc.querySelector('script[src*="cena.js"]') || ['bastos-lacerda', 'monolito', 'vertice', 'ana-ribeiro'].indexOf(SLUG) >= 0;
   var pill = doc.createElement('div');
   pill.className = 'br-pill';
   pill.innerHTML = '<a class="br-pill-marca" href="' + raiz + 'exemplos.html' + (CAT ? '?c=' + CAT : '') + '"><b>BLUE ROSE</b><span>ver outros modelos</span></a>' +
@@ -68,6 +69,20 @@
     (CAT !== 'midia-kit' ? '<a class="br-pill-preco" href="' + urlQuero() + '">' + (TRES_D ? '<b>a partir de R$ 2.490</b><span>site com 3D como este, pronto em 5 dias úteis</span>' : '<b>R$ 1.490</b><span>site como este, pronto em 5 dias úteis</span>') + '</a>' : '') +
     '<a class="br-pill-cta" href="' + urlQuero() + '">Quero um site assim</a>';
   body.appendChild(pill);
+  // celular (08/11/2026): a pílula some enquanto a pessoa rola para baixo e volta ao subir ou no fim da página,
+  // para não ficar por cima dos botões do próprio site
+  (function () {
+    var ultimo = scrollY, pend = false;
+    addEventListener('scroll', function () {
+      if (pend) return; pend = true;
+      requestAnimationFrame(function () {
+        pend = false;
+        var y = scrollY, fim = y + innerHeight >= doc.documentElement.scrollHeight - 80, celular = innerWidth <= 720;
+        pill.classList.toggle('br-pill-esconde', celular && y > ultimo + 4 && y > 160 && !fim);
+        if (Math.abs(y - ultimo) > 4) ultimo = y;
+      });
+    }, { passive: true });
+  })();
   pill.querySelector('.br-pill-cta').addEventListener('click', function () { contar('quero', 'pilula'); });
   var desf = pill.querySelector('.br-pill-perso button');
   if (desf) desf.addEventListener('click', function () { try { sessionStorage.removeItem('br-perso'); } catch (e) {} location.href = location.pathname; });
@@ -80,7 +95,9 @@
     var total = (msg.match(/(?:Total|Estimativa|Mensalidade estimada)[^:\n]*:\s*([^\n]+)/i) || [])[1];
     if (dia) return 'Oi' + (nome ? ', ' + nome : '') + '! ' + (serv ? 'Seu horário de ' + serv.toLowerCase() : 'Seu horário') + ' ficou pré-reservado para ' + dia + '. Responda 1 para confirmar ou 2 para trocar.';
     if (total) return 'Recebemos sua simulação (' + total.trim() + '). Temos horários amanhã às 10h e às 15h. Qual fica melhor?';
-    return 'Olá! Aqui é a assistente virtual da ' + MARCA + '. Como posso ajudar?\n1. Agendar horário\n2. Valores\n3. Falar com a equipe';
+    // dentista e advocacia não falam de preço na primeira resposta (publicidade do CFO e da OAB): opção neutra no lugar de Valores
+    var op2 = CAT === 'odontologia' || CAT === 'advocacia' ? 'Tirar uma dúvida' : 'Valores';
+    return 'Olá! Aqui é a assistente virtual da ' + MARCA + '. Como posso ajudar?\n1. Agendar horário\n2. ' + op2 + '\n3. Falar com a equipe';
   }
   function hora() { var d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
   function montar() {

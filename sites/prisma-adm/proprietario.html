@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script src="../../js/idioma.js?v=18"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Área do proprietário · Prisma Administração Imobiliária</title>
+<meta name="description" content="Portal do proprietário (demonstração): painel dos imóveis, extrato por competência com taxa, despesas e impostos, gráfico, impressão, informe de rendimentos, documentos e solicitações.">
+<meta name="theme-color" content="#1d2326">
+<meta name="robots" content="noindex, follow">
+<meta property="og:title" content="Área do proprietário · Prisma Administração Imobiliária">
+<meta property="og:description" content="Portal do proprietário (demonstração): painel dos imóveis, extrato por competência com taxa, despesas e impostos, gráfico, impressão, informe de rendimentos, documentos e solicitações.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'6'%20fill%3D'%231d2326'%2F%3E%3Cpath%20d%3D'M20%208%2033%2031H7Z'%20fill%3D'none'%20stroke%3D'%23ffffff'%20stroke-width%3D'2.4'%2F%3E%3Cpath%20d%3D'M25%2020%2036%2015M26%2023%2036%2026'%20stroke%3D'%2389b3bd'%20stroke-width%3D'2.2'%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/5256e582e1.css">
+<link rel="stylesheet" href="../assets/fontes/b38ec324dd.css">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=2">
+<script src="../../js/leads-config.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="dados.js?v=1" defer></script>
+<script src="site.js?v=1" defer></script>
+<script src="componentes.js?v=1" defer></script>
+<script src="proprietario.js?v=1" defer></script>
+</head>
+<body data-slug="prisma-adm" data-marca="Prisma Administração Imobiliária" data-cat="imobiliaria" data-pagina="proprietario.html">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div class="utilidade">
+  <div class="envolve">
+    <p style="margin:0">Ribeirão Preto/SP · seg. a sex., 8h às 18h · (16) 3000-0000 <span style="opacity:.7">(exemplo)</span></p>
+    <nav aria-label="Atalhos">
+      <a href="inquilino.html#boleto">2ª via de boleto</a>
+      <a href="inquilino.html#manutencao">Solicitar manutenção</a>
+      <a href="painel.html">Painel da equipe (demo)</a>
+    </nav>
+  </div>
+</div>
+<header class="topo">
+  <div class="envolve">
+    <a class="marca" href="index.html" aria-label="Prisma Administração Imobiliária, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 35 32H5Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M1 22.5 14.5 20.5" stroke="#636a3c" stroke-width="2"/><path d="M24.5 19 39 12.5M25.3 21.2 39 19.6M26 23.4 39 27" stroke="#0f4c5c" stroke-width="2"/></svg><span class="marca-txt"><b>Prisma</b><span>Administração Imobiliária</span></span></a>
+    <nav class="menu" aria-label="Principal"><a href="proprietarios.html">Proprietários</a><a href="imoveis.html">Imóveis para alugar</a><a href="locacao.html">Alugar online</a><a href="calculadora.html">Calculadora</a><a href="sobre.html">Sobre</a><a href="contato.html">Contato</a></nav>
+    <div class="entrar">
+      <a class="bt bt-pri bt-peq" href="proprietario.html" aria-current="page">Área do proprietário</a>
+      <a class="bt bt-cla bt-peq" href="inquilino.html">Área do inquilino</a>
+    </div>
+    <button type="button" class="bt-menu" aria-expanded="false" aria-controls="gaveta"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.8"/></svg><span>Menu</span></button>
+  </div>
+</header>
+<div class="gaveta" id="gaveta" hidden>
+  <nav class="gaveta-in" aria-label="Menu do celular">
+    <button type="button" class="fechar" data-fecha-menu aria-label="Fechar menu">×</button>
+    <p class="rot-g">Entrar</p>
+    <a class="bt bt-pri" href="proprietario.html">Área do proprietário</a>
+    <a class="bt bt-cla" href="inquilino.html">Área do inquilino</a>
+    <p class="rot-g">Navegação</p>
+    <a class="item" href="index.html">Início</a><a class="item" href="proprietarios.html">Proprietários</a><a class="item" href="imoveis.html">Imóveis para alugar</a><a class="item" href="locacao.html">Alugar online</a><a class="item" href="calculadora.html">Calculadora</a><a class="item" href="sobre.html">Sobre</a><a class="item" href="contato.html">Contato</a>
+    <p class="rot-g">Atalhos</p>
+    <a class="item" href="inquilino.html#boleto">2ª via de boleto</a>
+    <a class="item" href="inquilino.html#manutencao">Solicitar manutenção</a>
+    <a class="item" href="painel.html">Painel da equipe (demo)</a>
+    <a class="item" href="privacidade.html">Privacidade</a>
+  </nav>
+</div>
+<main id="conteudo">
+<section class="secao" id="acesso" aria-labelledby="acesso-t">
+  <div class="envolve">
+    <p class="trilha"><a href="index.html">Início</a> / Área do proprietário</p>
+    <div class="acesso">
+      <div class="acesso-form">
+        <p class="sobre-t">Área do proprietário</p>
+        <h1 id="acesso-t" style="font-size:clamp(30px,3.4vw,42px)">Entre para ver seus imóveis e repasses.</h1>
+        <form class="form" id="form-acesso" novalidate>
+          <div class="campo">
+            <label for="ac-email">E-mail cadastrado</label>
+            <input id="ac-email" name="email" type="email" autocomplete="off" required value="proprietario@exemplo.com.br">
+          </div>
+          <div class="demo"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 9v5M10 6v.5" stroke="currentColor" stroke-width="1.8"/></svg><p><b>Demonstração sem senha.</b> O e-mail já vem preenchido com o proprietário de exemplo. No site real, o acesso usa o login do sistema da administradora (senha ou código enviado por e-mail) e cada proprietário vê só os próprios imóveis.</p></div>
+          <button type="submit" class="bt bt-pri">Entrar na demonstração</button>
+          <p style="margin:0;font-size:15px">É inquilino? <a href="inquilino.html">Vá para a área do inquilino</a>.</p>
+        </form>
+      </div>
+      <div class="acesso-lado">
+        <h2>O que o proprietário encontra</h2>
+        <ul class="lista-check">
+          <li>Painel com imóveis, recebidos, próximos repasses e pendências</li>
+          <li>Extrato por competência: bruto, taxa, despesas, impostos e líquido</li>
+          <li>Gráfico dos últimos 12 meses e impressão em PDF</li>
+          <li>Informe de rendimentos para o Imposto de Renda</li>
+          <li>Contratos, vistorias, apólices e notas fiscais</li>
+          <li>Solicitações com número de protocolo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="portal" id="portal" hidden>
+  <div class="portal-topo">
+    <div class="envolve">
+      <div><h1>Olá, Carlos Menezes</h1><p>Proprietário de exemplo · 3 imóveis administrados · gestor: equipe Prisma</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="bt bt-lin bt-peq" href="#" data-wa="Olá, Prisma! Sou o proprietário Carlos Menezes (exemplo) e quero falar com meu gestor de contratos.">Falar com meu gestor</a><button type="button" class="bt bt-lin bt-peq" id="sair">Sair</button></div>
+    </div>
+  </div>
+  <div class="abas" role="tablist" aria-label="Seções da área do proprietário">
+    <div class="envolve">
+      <button type="button" role="tab" id="t-geral" aria-controls="aba-geral" aria-selected="true">Visão geral</button>
+      <button type="button" role="tab" id="t-extrato" aria-controls="aba-extrato" aria-selected="false" tabindex="-1">Extrato</button>
+      <button type="button" role="tab" id="t-informe" aria-controls="aba-informe" aria-selected="false" tabindex="-1">Informe de rendimentos</button>
+      <button type="button" role="tab" id="t-docs" aria-controls="aba-docs" aria-selected="false" tabindex="-1">Documentos</button>
+      <button type="button" role="tab" id="t-solic" aria-controls="aba-solic" aria-selected="false" tabindex="-1">Solicitações</button>
+    </div>
+  </div>
+  <div class="envolve">
+    <div class="demo demo-tela" style="margin-top:20px"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 9v5M10 6v.5" stroke="currentColor" stroke-width="1.8"/></svg><p><b>Demonstração com dados fictícios.</b> No site real, este portal liga no sistema da administradora (Superlógica, Jetimob, Vista… por API) e mostra os dados de verdade de cada proprietário, sem nada digitado à mão.</p></div>
+
+    <section class="painel-aba" id="aba-geral" role="tabpanel" aria-labelledby="t-geral">
+      <div class="kpis" id="kpis-prop"></div>
+      <div class="grade-31">
+        <div>
+          <div class="bloco">
+            <div class="bloco-cab"><div><h2>Pendências para você</h2><p>Decisões que dependem do proprietário</p></div></div>
+            <ul class="pendencias" id="pendencias"></ul>
+          </div>
+          <div class="bloco">
+            <div class="bloco-cab"><div><h2>Bruto e líquido por mês</h2><p>Últimos 12 meses fechados</p></div><button type="button" class="bt bt-cla bt-peq" data-ir-aba="extrato">Ver extrato</button></div>
+            <div id="graf-geral"></div>
+          </div>
+        </div>
+        <div>
+          <div class="bloco">
+            <h2>Meus imóveis</h2>
+            <ul class="lista-imoveis" id="meus-imoveis"></ul>
+          </div>
+          <div class="bloco">
+            <h2>Próximos repasses</h2>
+            <ul class="lista-imoveis" id="proximos"></ul>
+            <p class="nota">Conta de repasse: Banco Exemplo · ag. 0000 · c/c ****-7 (exemplo). Para trocar, abra uma solicitação.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="painel-aba" id="aba-extrato" role="tabpanel" aria-labelledby="t-extrato" hidden>
+      <div class="so-impressao" style="margin-bottom:16px"><b style="font-family:var(--serif);font-size:22px">Prisma Administração Imobiliária</b><br>Extrato do proprietário · Carlos Menezes (exemplo) · emitido em <span class="hoje"></span> · documento de demonstração</div>
+      <div class="bloco">
+        <div class="bloco-cab">
+          <div><h2 id="ext-titulo">Extrato</h2><p>Valores por imóvel na competência escolhida</p></div>
+          <div class="filtros-linha nao-imprime">
+            <div class="campo"><label for="ext-comp">Competência</label><select id="ext-comp"></select></div>
+            <div class="campo"><label for="ext-imovel">Imóvel</label><select id="ext-imovel"><option value="">Todos os imóveis</option></select></div>
+          </div>
+        </div>
+        <div class="tabela-rola" id="ext-tabela"></div>
+        <div class="cta-linha nao-imprime">
+          <button type="button" class="bt bt-pri" data-imprimir="extrato">Imprimir ou salvar em PDF</button>
+          <button type="button" class="bt bt-cla" id="ext-csv">Baixar planilha (CSV)</button>
+          <button type="button" class="bt bt-link" id="ext-comprov">Ver comprovante do repasse</button>
+        </div>
+      </div>
+      <div class="bloco">
+        <div class="bloco-cab"><div><h2>Evolução até a competência</h2><p>12 meses até o mês escolhido</p></div></div>
+        <div id="graf-extrato"></div>
+      </div>
+      <p class="nota">IRRF: retido só quando o inquilino é pessoa jurídica. Valores e tabela de exemplo; no site real, o cálculo vem do sistema e segue a tabela vigente.</p>
+    </section>
+
+    <section class="painel-aba" id="aba-informe" role="tabpanel" aria-labelledby="t-informe" hidden>
+      <div class="so-impressao" style="margin-bottom:16px"><b style="font-family:var(--serif);font-size:22px">Prisma Administração Imobiliária</b><br>CNPJ 00.000.000/0001-00 (exemplo) · documento de demonstração</div>
+      <div class="bloco">
+        <div class="bloco-cab">
+          <div><h2 id="inf-titulo">Informe de rendimentos</h2><p>Para declarar aluguéis recebidos no Imposto de Renda</p></div>
+          <div class="filtros-linha nao-imprime"><div class="campo"><label for="inf-ano">Ano-calendário</label><select id="inf-ano"><option value="2025">2025 (fechado)</option><option value="2026">2026 (parcial, até novembro)</option></select></div></div>
+        </div>
+        <p><b>Beneficiário:</b> Carlos Menezes (exemplo) · CPF ***.482.***-** &nbsp; <b>Fonte:</b> Prisma Administração Imobiliária</p>
+        <div class="tabela-rola" id="inf-tabela"></div>
+        <ul class="lista-check" style="margin-top:16px">
+          <li>Aluguel de inquilino pessoa física: declarar no carnê-leão mês a mês.</li>
+          <li>Taxa de administração paga pode ser abatida do rendimento.</li>
+          <li>IRRF retido por inquilino pessoa jurídica aparece como imposto já pago.</li>
+        </ul>
+        <div class="cta-linha nao-imprime"><button type="button" class="bt bt-pri" data-imprimir="informe">Imprimir informe</button><a class="bt bt-cla" href="#" data-wa="Olá, Prisma! Sou o proprietário Carlos Menezes (exemplo) e tenho uma dúvida sobre o informe de rendimentos.">Dúvida sobre o informe</a></div>
+      </div>
+      <p class="nota">Orientação geral, não é consultoria tributária. Confirme com seu contador.</p>
+    </section>
+
+    <section class="painel-aba" id="aba-docs" role="tabpanel" aria-labelledby="t-docs" hidden>
+      <div class="bloco">
+        <div class="bloco-cab"><div><h2>Documentos</h2><p>Contratos, vistorias, apólices e notas de manutenção</p></div>
+          <div class="campo"><label for="doc-filtro">Imóvel</label><select id="doc-filtro"><option value="">Todos</option></select></div></div>
+        <ul class="docs" id="docs"></ul>
+      </div>
+    </section>
+
+    <section class="painel-aba" id="aba-solic" role="tabpanel" aria-labelledby="t-solic" hidden>
+      <div class="grade-2">
+        <div class="bloco">
+          <h2>Nova solicitação</h2>
+          <form class="form" id="form-solic" novalidate style="margin-top:14px">
+            <div class="campo"><label for="so-tipo">Assunto</label>
+              <select id="so-tipo" name="tipo" required><option value="">Escolha</option><option>Autorizar um reparo</option><option>Pedir reavaliação do aluguel</option><option>Trocar a conta de repasse</option><option>Renovar ou encerrar contrato</option><option>Pedir vistoria</option><option>Outro assunto</option></select></div>
+            <div class="campo"><label for="so-imovel">Imóvel</label><select id="so-imovel" name="imovel" required></select></div>
+            <div class="campo"><label for="so-desc">Descreva o pedido</label><textarea id="so-desc" name="desc" required minlength="15" placeholder="Ex.: quero reavaliar o aluguel do imóvel na renovação de fevereiro."></textarea></div>
+            <fieldset class="campo"><legend>Como prefere o retorno?</legend>
+              <div class="opcoes"><label><input type="radio" name="retorno" value="WhatsApp" checked> WhatsApp</label><label><input type="radio" name="retorno" value="E-mail"> E-mail</label><label><input type="radio" name="retorno" value="Ligação"> Ligação</label></div></fieldset>
+            <button type="submit" class="bt bt-pri">Enviar solicitação</button>
+          </form>
+        </div>
+        <div class="bloco">
+          <h2>Acompanhamento</h2>
+          <div id="lista-solic" style="margin-top:14px"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+</main>
+<footer class="rodape">
+  <div class="envolve">
+    <div class="rodape-grade">
+      <div>
+        <a class="marca" href="index.html" aria-label="Prisma Administração Imobiliária, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 35 32H5Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M1 22.5 14.5 20.5" stroke="#636a3c" stroke-width="2"/><path d="M24.5 19 39 12.5M25.3 21.2 39 19.6M26 23.4 39 27" stroke="#0f4c5c" stroke-width="2"/></svg><span class="marca-txt"><b>Prisma</b><span>Administração Imobiliária</span></span></a>
+        <p>Administração de aluguéis em Ribeirão Preto e região: cobrança, repasse, manutenção, contratos e prestação de contas.</p>
+        <p>Rua de Exemplo, 1.000, sala 12 · Jardim Irajá · Ribeirão Preto/SP<br>CRECI-J 00.000 (exemplo) · CNPJ 00.000.000/0001-00 (exemplo)</p>
+        <p><a href="#" data-wa="Olá, Prisma! Quero falar com a equipe de administração.">WhatsApp (16) 99000-0000 (exemplo)</a></p>
+      </div>
+      <div>
+        <h3>Proprietário</h3>
+        <ul><li><a href="proprietario.html">Área do proprietário</a></li><li><a href="proprietarios.html">Anunciar meu imóvel</a></li><li><a href="calculadora.html">Quanto meu imóvel rende</a></li><li><a href="proprietarios.html#taxas">Taxas e serviços</a></li></ul>
+      </div>
+      <div>
+        <h3>Inquilino</h3>
+        <ul><li><a href="inquilino.html">Área do inquilino</a></li><li><a href="inquilino.html#boleto">2ª via de boleto</a></li><li><a href="inquilino.html#manutencao">Solicitar manutenção</a></li><li><a href="imoveis.html">Imóveis para alugar</a></li><li><a href="locacao.html">Alugar online</a></li></ul>
+      </div>
+      <div>
+        <h3>Administradora</h3>
+        <ul><li><a href="sobre.html">Sobre a Prisma</a></li><li><a href="contato.html">Contato</a></li><li><a href="painel.html">Painel da equipe (demo)</a></li><li><a href="privacidade.html">Privacidade e dados</a></li></ul>
+      </div>
+    </div>
+    <div class="rodape-legal">
+      <span>© <span data-ano>2026</span> Prisma Administração Imobiliária · site de exemplo feito pela Blue Rose Express.</span>
+      <span>Nomes, números, CRECI, CNPJ e endereços são fictícios. Portais e painéis são demonstrações com dados de exemplo.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

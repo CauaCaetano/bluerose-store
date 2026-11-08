@@ -1,0 +1,4 @@
+/* Glow · fontes locais (Cormorant Garamond e Manrope, SIL Open Font License). Só o subconjunto latino, que cobre o português. */
+@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 500 700; font-display: swap; src: url(cormorant-garamond.woff2) format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 500; font-display: swap; src: url(cormorant-garamond-italico.woff2) format('woff2'); }
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(manrope.woff2) format('woff2'); }

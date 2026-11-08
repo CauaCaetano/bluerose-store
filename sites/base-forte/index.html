@@ -12,11 +12,11 @@
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'6'%20fill%3D'%23faf7f2'%2F%3E%3Cpath%20d%3D'M5%2031V15l9-7%209%207v16z'%20fill%3D'%2322344c'%2F%3E%3Cpath%20d%3D'M19%2031l8-12%208%2012z'%20fill%3D'%23719066'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/84f89701c2.css">
-<link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=8">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=9">
 <script src="../../js/leads-config.js?v=6" defer></script>
-<script src="../assets/moldura.js?v=4" defer></script>
-<script src="site.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="site.js?v=7" defer></script>
 </head>
 <body data-slug="base-forte" data-marca="Base Forte Construtora" data-cat="construcao">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -53,6 +53,58 @@
       <p class="heroi-txt">Você só paga cada etapa depois que ela está pronta e fotografada. Preço por m² fechado em contrato, do alicerce à chave, para casas de 45 a 400 m².</p>
       <button class="bt bt-branco abre-filme" type="button"><span class="bt-tx">Ver a obra em 60 s</span><svg class="ic-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4l10 6-10 6z"/></svg></button>
     </div>
+  </section>
+
+  <!-- entrada: tenho o terreno / quero escolher o terreno (as perguntas mudam e montam a mensagem) -->
+  <section class="terreno" id="terreno" aria-labelledby="tr-t">
+    <div class="caixa grade tr-cima">
+      <p class="rotulo"><span class="ponto" aria-hidden="true"></span>Por onde começar</p>
+      <h2 id="tr-t" class="tr-tit">Você já tem o terreno?</h2>
+      <p class="tr-lead">Escolha o seu caso. As perguntas mudam conforme a resposta e, no fim, a mensagem para o engenheiro sai pronta.</p>
+    </div>
+    <form id="terreno-form" class="caixa grade tr-form" novalidate>
+      <fieldset class="tr-caso"><legend class="vh">Sua situação</legend>
+        <label><input type="radio" name="caso" value="tenho"><span><small>01</small><b>Tenho o terreno</b>Quero saber quanto custa construir nele e em quanto tempo.</span></label>
+        <label><input type="radio" name="caso" value="escolher"><span><small>02</small><b>Quero escolher o terreno</b>Ajuda para achar o lote certo antes de comprar, já pensando na casa.</span></label>
+      </fieldset>
+      <div class="tr-perg" hidden>
+        <div class="tr-campos">
+          <fieldset class="tr-q" data-caso="tenho"><legend class="c-leg">Onde fica o terreno</legend><div class="op">
+            <label><input type="radio" name="onde" value="em condomínio fechado" checked><span><b>Condomínio</b>fechado</span></label>
+            <label><input type="radio" name="onde" value="em bairro aberto"><span><b>Bairro</b>aberto</span></label></div>
+            <input class="tr-txt" name="local" placeholder="Nome do condomínio ou bairro (opcional)" aria-label="Nome do condomínio ou bairro" maxlength="60">
+          </fieldset>
+          <fieldset class="tr-q" data-caso="escolher" hidden><legend class="c-leg">Onde você quer morar</legend><div class="op op4">
+            <label><input type="radio" name="cidade" value="Londrina" checked><span><b>Londrina</b></span></label>
+            <label><input type="radio" name="cidade" value="Cambé"><span><b>Cambé</b></span></label>
+            <label><input type="radio" name="cidade" value="Ibiporã"><span><b>Ibiporã</b></span></label>
+            <label><input type="radio" name="cidade" value="cidade ainda indefinida"><span><b>Não sei</b></span></label></div>
+            <div class="op tr-op-sub">
+              <label><input type="radio" name="tipoLote" value="em condomínio fechado" checked><span><b>Condomínio</b>com portaria</span></label>
+              <label><input type="radio" name="tipoLote" value="em bairro aberto"><span><b>Bairro aberto</b>lote de rua</span></label></div>
+          </fieldset>
+          <label class="tr-q tr-m2"><span class="c-leg" data-txt-tenho="Tamanho do terreno" data-txt-escolher="Tamanho de terreno que procura">Tamanho do terreno</span><output>360 m²</output><input type="range" name="lote" min="200" max="1000" step="10" value="360" aria-label="Tamanho do terreno em metros quadrados"></label>
+          <fieldset class="tr-q"><legend class="c-leg">Quartos</legend><div class="op op4">
+            <label><input type="radio" name="quartos" value="2"><span><b>2</b></span></label>
+            <label><input type="radio" name="quartos" value="3" checked><span><b>3</b></span></label>
+            <label><input type="radio" name="quartos" value="4"><span><b>4</b></span></label>
+            <label><input type="radio" name="quartos" value="5 ou mais"><span><b>5+</b></span></label></div></fieldset>
+          <fieldset class="tr-q"><legend class="c-leg">Padrão de acabamento</legend><div class="op op3">
+            <label><input type="radio" name="padrao" value="popular"><span><b>Popular</b>R$ 2.150/m²</span></label>
+            <label><input type="radio" name="padrao" value="médio" checked><span><b>Médio</b>R$ 2.780/m²</span></label>
+            <label><input type="radio" name="padrao" value="alto"><span><b>Alto</b>R$ 3.690/m²</span></label></div></fieldset>
+        </div>
+        <div class="tr-res" aria-live="polite">
+          <p class="rotulo"><span class="ponto" aria-hidden="true" style="--p:1"></span>Sua mensagem para o engenheiro</p>
+          <p class="tr-msg"></p>
+          <p class="tr-conta"></p>
+          <input class="tr-txt" name="nome" placeholder="Seu nome" autocomplete="name" aria-label="Seu nome">
+          <input class="tr-txt" name="tel" placeholder="WhatsApp com DDD" inputmode="tel" autocomplete="tel" aria-label="WhatsApp com DDD">
+          <button class="bt bt-grad" type="submit"><span class="bt-tx">Enviar pelo WhatsApp</span><span class="bt-seta" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3 10h13M11 5l5 5-5 5"/></svg><svg viewBox="0 0 20 20"><path d="M3 10h13M11 5l5 5-5 5"/></svg></span></button>
+          <p class="erro" aria-live="polite"></p>
+        </div>
+      </div>
+    </form>
   </section>
 
   <!-- 1.0 sobre -->

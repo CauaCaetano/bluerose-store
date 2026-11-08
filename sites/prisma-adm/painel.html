@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script src="../../js/idioma.js?v=18"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Painel da equipe (demonstração) · Prisma Administração Imobiliária</title>
+<meta name="description" content="Painel administrativo demonstrativo: contratos ativos, vencendo, repasses pendentes, chamados, interessados, ocupação e inadimplência, com sincronização do sistema da administradora.">
+<meta name="theme-color" content="#1d2326">
+<meta name="robots" content="noindex, follow">
+<meta property="og:title" content="Painel da equipe (demonstração) · Prisma Administração Imobiliária">
+<meta property="og:description" content="Painel administrativo demonstrativo: contratos ativos, vencendo, repasses pendentes, chamados, interessados, ocupação e inadimplência, com sincronização do sistema da administradora.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'6'%20fill%3D'%231d2326'%2F%3E%3Cpath%20d%3D'M20%208%2033%2031H7Z'%20fill%3D'none'%20stroke%3D'%23ffffff'%20stroke-width%3D'2.4'%2F%3E%3Cpath%20d%3D'M25%2020%2036%2015M26%2023%2036%2026'%20stroke%3D'%2389b3bd'%20stroke-width%3D'2.2'%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="../assets/fontes/5256e582e1.css">
+<link rel="stylesheet" href="../assets/fontes/b38ec324dd.css">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=2">
+<script src="../../js/leads-config.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="dados.js?v=1" defer></script>
+<script src="site.js?v=1" defer></script>
+<script src="painel.js?v=1" defer></script>
+</head>
+<body data-slug="prisma-adm" data-marca="Prisma Administração Imobiliária" data-cat="imobiliaria" data-pagina="painel.html">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div class="utilidade">
+  <div class="envolve">
+    <p style="margin:0">Ribeirão Preto/SP · seg. a sex., 8h às 18h · (16) 3000-0000 <span style="opacity:.7">(exemplo)</span></p>
+    <nav aria-label="Atalhos">
+      <a href="inquilino.html#boleto">2ª via de boleto</a>
+      <a href="inquilino.html#manutencao">Solicitar manutenção</a>
+      <a href="painel.html" aria-current="page">Painel da equipe (demo)</a>
+    </nav>
+  </div>
+</div>
+<header class="topo">
+  <div class="envolve">
+    <a class="marca" href="index.html" aria-label="Prisma Administração Imobiliária, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 35 32H5Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M1 22.5 14.5 20.5" stroke="#636a3c" stroke-width="2"/><path d="M24.5 19 39 12.5M25.3 21.2 39 19.6M26 23.4 39 27" stroke="#0f4c5c" stroke-width="2"/></svg><span class="marca-txt"><b>Prisma</b><span>Administração Imobiliária</span></span></a>
+    <nav class="menu" aria-label="Principal"><a href="proprietarios.html">Proprietários</a><a href="imoveis.html">Imóveis para alugar</a><a href="locacao.html">Alugar online</a><a href="calculadora.html">Calculadora</a><a href="sobre.html">Sobre</a><a href="contato.html">Contato</a></nav>
+    <div class="entrar">
+      <a class="bt bt-pri bt-peq" href="proprietario.html">Área do proprietário</a>
+      <a class="bt bt-cla bt-peq" href="inquilino.html">Área do inquilino</a>
+    </div>
+    <button type="button" class="bt-menu" aria-expanded="false" aria-controls="gaveta"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.8"/></svg><span>Menu</span></button>
+  </div>
+</header>
+<div class="gaveta" id="gaveta" hidden>
+  <nav class="gaveta-in" aria-label="Menu do celular">
+    <button type="button" class="fechar" data-fecha-menu aria-label="Fechar menu">×</button>
+    <p class="rot-g">Entrar</p>
+    <a class="bt bt-pri" href="proprietario.html">Área do proprietário</a>
+    <a class="bt bt-cla" href="inquilino.html">Área do inquilino</a>
+    <p class="rot-g">Navegação</p>
+    <a class="item" href="index.html">Início</a><a class="item" href="proprietarios.html">Proprietários</a><a class="item" href="imoveis.html">Imóveis para alugar</a><a class="item" href="locacao.html">Alugar online</a><a class="item" href="calculadora.html">Calculadora</a><a class="item" href="sobre.html">Sobre</a><a class="item" href="contato.html">Contato</a>
+    <p class="rot-g">Atalhos</p>
+    <a class="item" href="inquilino.html#boleto">2ª via de boleto</a>
+    <a class="item" href="inquilino.html#manutencao">Solicitar manutenção</a>
+    <a class="item" href="painel.html" aria-current="page">Painel da equipe (demo)</a>
+    <a class="item" href="privacidade.html">Privacidade</a>
+  </nav>
+</div>
+<main id="conteudo">
+<div class="portal">
+  <div class="portal-topo">
+    <div class="envolve">
+      <div><h1>Painel da equipe</h1><p>Visão da gestão de contratos · dados de 8 de novembro de 2026 (exemplo)</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="bt bt-lin bt-peq" data-imprimir="tudo">Imprimir resumo</button></div>
+    </div>
+  </div>
+  <div class="envolve" style="padding:24px 0 64px">
+    <div class="demo demo-tela" style="margin-bottom:20px"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 9v5M10 6v.5" stroke="currentColor" stroke-width="1.8"/></svg><p><b>Demonstração com dados fictícios.</b> No site real, esta área é restrita à equipe (login do sistema) e os números vêm do sistema da administradora (Superlógica, Jetimob, Vista… por API), sem planilha no meio.</p></div>
+
+    <div class="sinc" id="sinc"><span class="ponto" aria-hidden="true"></span><p><b>Sistema conectado: Superlógica (exemplo)</b> · última sincronização <span id="sinc-hora">há 4 minutos</span> · <span id="sinc-n">812</span> contratos · 0 erros</p><button type="button" class="bt bt-cla bt-peq" id="sincronizar">Sincronizar agora</button></div>
+
+    <div class="kpis seis" id="kpis"></div>
+
+    <div class="grade-2">
+      <div class="bloco">
+        <div class="bloco-cab"><div><h2>Inadimplência acima de 30 dias</h2><p>Percentual dos contratos, últimos 12 meses</p></div></div>
+        <div id="graf-inad"></div>
+      </div>
+      <div class="bloco">
+        <div class="bloco-cab"><div><h2>Ocupação da carteira</h2><p>Imóveis alugados sobre administrados</p></div></div>
+        <div id="graf-ocup"></div>
+      </div>
+    </div>
+
+    <div class="grade-31">
+      <div>
+        <div class="bloco">
+          <div class="bloco-cab"><div><h2>Repasses de hoje e amanhã</h2><p>Inquilino pagou, falta transferir ao proprietário</p></div><button type="button" class="bt bt-pri bt-peq" id="aprovar-lote">Aprovar selecionados</button></div>
+          <div class="tabela-rola"><table class="tabela tabela-cartoes" id="t-repasses"></table></div>
+        </div>
+        <div class="bloco">
+          <div class="bloco-cab"><div><h2>Chamados de manutenção</h2><p>Abertos pelos inquilinos no portal</p></div>
+            <div class="campo"><label for="f-cham" class="sr">Filtrar chamados</label><select id="f-cham"><option value="">Todos os status</option><option>Aberto</option><option>Técnico agendado</option><option>Orçamento com proprietário</option><option>Concluído</option></select></div></div>
+          <div class="tabela-rola"><table class="tabela tabela-cartoes" id="t-chamados"></table></div>
+        </div>
+        <div class="bloco">
+          <div class="bloco-cab"><div><h2>Contratos vencendo em 60 dias</h2><p>Renovação, reajuste ou saída</p></div></div>
+          <div class="tabela-rola"><table class="tabela tabela-cartoes" id="t-vencendo"></table></div>
+        </div>
+      </div>
+      <div>
+        <div class="bloco">
+          <h2>Esteira de locação</h2>
+          <p style="font-size:15px;color:var(--suave);margin:4px 0 12px">Interessados por etapa (locação online)</p>
+          <ul class="funil" id="funil"></ul>
+          <ul class="lista-imoveis" id="interessados" style="margin-top:12px"></ul>
+        </div>
+        <div class="bloco">
+          <h2>Inadimplentes</h2>
+          <ul class="lista-imoveis" id="inadimplentes"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+<footer class="rodape">
+  <div class="envolve">
+    <div class="rodape-grade">
+      <div>
+        <a class="marca" href="index.html" aria-label="Prisma Administração Imobiliária, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 35 32H5Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M1 22.5 14.5 20.5" stroke="#636a3c" stroke-width="2"/><path d="M24.5 19 39 12.5M25.3 21.2 39 19.6M26 23.4 39 27" stroke="#0f4c5c" stroke-width="2"/></svg><span class="marca-txt"><b>Prisma</b><span>Administração Imobiliária</span></span></a>
+        <p>Administração de aluguéis em Ribeirão Preto e região: cobrança, repasse, manutenção, contratos e prestação de contas.</p>
+        <p>Rua de Exemplo, 1.000, sala 12 · Jardim Irajá · Ribeirão Preto/SP<br>CRECI-J 00.000 (exemplo) · CNPJ 00.000.000/0001-00 (exemplo)</p>
+        <p><a href="#" data-wa="Olá, Prisma! Quero falar com a equipe de administração.">WhatsApp (16) 99000-0000 (exemplo)</a></p>
+      </div>
+      <div>
+        <h3>Proprietário</h3>
+        <ul><li><a href="proprietario.html">Área do proprietário</a></li><li><a href="proprietarios.html">Anunciar meu imóvel</a></li><li><a href="calculadora.html">Quanto meu imóvel rende</a></li><li><a href="proprietarios.html#taxas">Taxas e serviços</a></li></ul>
+      </div>
+      <div>
+        <h3>Inquilino</h3>
+        <ul><li><a href="inquilino.html">Área do inquilino</a></li><li><a href="inquilino.html#boleto">2ª via de boleto</a></li><li><a href="inquilino.html#manutencao">Solicitar manutenção</a></li><li><a href="imoveis.html">Imóveis para alugar</a></li><li><a href="locacao.html">Alugar online</a></li></ul>
+      </div>
+      <div>
+        <h3>Administradora</h3>
+        <ul><li><a href="sobre.html">Sobre a Prisma</a></li><li><a href="contato.html">Contato</a></li><li><a href="painel.html">Painel da equipe (demo)</a></li><li><a href="privacidade.html">Privacidade e dados</a></li></ul>
+      </div>
+    </div>
+    <div class="rodape-legal">
+      <span>© <span data-ano>2026</span> Prisma Administração Imobiliária · site de exemplo feito pela Blue Rose Express.</span>
+      <span>Nomes, números, CRECI, CNPJ e endereços são fictícios. Portais e painéis são demonstrações com dados de exemplo.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

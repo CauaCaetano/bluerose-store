@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 494" width="488" height="494" font-family="Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" fill="#f9f7f1"/>
+<text x="40" y="34" font-size="15" fill="#272925" letter-spacing="2">TÉRREO</text>
+<text x="448" y="34" font-size="12" fill="#5e5b53" text-anchor="end">Planta ilustrativa · medidas aproximadas</text>
+<rect x="40.0" y="56.0" width="217.6" height="156.4" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="148.8" y="134.2" font-size="15" fill="#272925" text-anchor="middle">Sala com lareira</text>
+<text x="148.8" y="154.4" font-size="12" fill="#5e5b53" text-anchor="middle">29,4 m²</text>
+<rect x="257.6" y="56.0" width="190.4" height="156.4" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="352.8" y="125.2" font-size="15" fill="#272925" text-anchor="middle">Cozinha com fogão a</text>
+<text x="352.8" y="142.4" font-size="15" fill="#272925" text-anchor="middle">lenha</text>
+<text x="352.8" y="162.7" font-size="12" fill="#5e5b53" text-anchor="middle">25,8 m²</text>
+<rect x="40.0" y="212.4" width="122.4" height="115.6" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="101.2" y="270.2" font-size="15" fill="#272925" text-anchor="middle">Quarto 2</text>
+<text x="101.2" y="290.4" font-size="12" fill="#5e5b53" text-anchor="middle">12,2 m²</text>
+<rect x="162.4" y="212.4" width="115.6" height="115.6" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="220.2" y="270.2" font-size="12" fill="#272925" text-anchor="middle">Quarto 3</text>
+<text x="220.2" y="287.0" font-size="12" fill="#5e5b53" text-anchor="middle">11,6 m²</text>
+<rect x="278.0" y="212.4" width="74.8" height="115.6" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="315.4" y="270.2" font-size="12" fill="#272925" text-anchor="middle">Banho</text>
+<text x="315.4" y="287.0" font-size="12" fill="#5e5b53" text-anchor="middle">7,5 m²</text>
+<rect x="352.8" y="212.4" width="95.2" height="115.6" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="400.4" y="270.2" font-size="12" fill="#272925" text-anchor="middle">Serviço</text>
+<text x="400.4" y="287.0" font-size="12" fill="#5e5b53" text-anchor="middle">9,5 m²</text>
+<rect x="40.0" y="328.0" width="408.0" height="102.0" fill="#ece6da" stroke="#272925" stroke-width="3"/>
+<text x="244.0" y="379.0" font-size="15" fill="#272925" text-anchor="middle">Varanda para a baía</text>
+<text x="244.0" y="399.2" font-size="12" fill="#5e5b53" text-anchor="middle">36,0 m²</text>
+<g transform="translate(40 460)"><rect width="170" height="6" fill="#272925"/><rect width="85.0" height="6" fill="#d7c5a9"/><text y="22" font-size="11" fill="#5e5b53">0</text><text x="170" y="22" font-size="11" fill="#5e5b53" text-anchor="end">5 m</text></g>
+<g transform="translate(432 444)"><path d="M0 18 8 -6 16 18 8 12z" fill="#272925"/><text x="8" y="34" font-size="11" fill="#5e5b53" text-anchor="middle">N</text></g>
+</svg>

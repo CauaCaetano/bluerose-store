@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 698" width="760" height="698" font-family="Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" fill="#f9f7f1"/>
+<text x="40" y="34" font-size="15" fill="#272925" letter-spacing="2">TÉRREO</text>
+<text x="720" y="34" font-size="12" fill="#5e5b53" text-anchor="end">Planta ilustrativa · medidas aproximadas</text>
+<rect x="40.0" y="56.0" width="340.0" height="204.0" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="210.0" y="158.0" font-size="15" fill="#272925" text-anchor="middle">Estar e jantar</text>
+<text x="210.0" y="178.2" font-size="12" fill="#5e5b53" text-anchor="middle">60,0 m²</text>
+<rect x="380.0" y="56.0" width="204.0" height="204.0" fill="#ece6da" stroke="#272925" stroke-width="3"/>
+<text x="482.0" y="158.0" font-size="15" fill="#272925" text-anchor="middle">Cozinha gourmet</text>
+<text x="482.0" y="178.2" font-size="12" fill="#5e5b53" text-anchor="middle">36,0 m²</text>
+<rect x="584.0" y="56.0" width="136.0" height="204.0" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="652.0" y="158.0" font-size="15" fill="#272925" text-anchor="middle">Despensa</text>
+<text x="652.0" y="178.2" font-size="12" fill="#5e5b53" text-anchor="middle">24,0 m²</text>
+<rect x="40.0" y="260.0" width="170.0" height="122.4" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="125.0" y="321.2" font-size="15" fill="#272925" text-anchor="middle">Suíte de hóspedes</text>
+<text x="125.0" y="341.4" font-size="12" fill="#5e5b53" text-anchor="middle">18,0 m²</text>
+<rect x="210.0" y="260.0" width="81.6" height="122.4" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="250.8" y="321.2" font-size="12" fill="#272925" text-anchor="middle">Banho</text>
+<text x="250.8" y="338.0" font-size="12" fill="#5e5b53" text-anchor="middle">8,6 m²</text>
+<rect x="291.6" y="260.0" width="74.8" height="122.4" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="329.0" y="321.2" font-size="12" fill="#272925" text-anchor="middle">Lavabo</text>
+<text x="329.0" y="338.0" font-size="12" fill="#5e5b53" text-anchor="middle">7,9 m²</text>
+<rect x="366.4" y="260.0" width="115.6" height="122.4" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="424.2" y="321.2" font-size="12" fill="#272925" text-anchor="middle">Serviço</text>
+<text x="424.2" y="338.0" font-size="12" fill="#5e5b53" text-anchor="middle">12,2 m²</text>
+<rect x="482.0" y="260.0" width="238.0" height="122.4" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="601.0" y="321.2" font-size="15" fill="#272925" text-anchor="middle">Garagem 4 carros</text>
+<text x="601.0" y="341.4" font-size="12" fill="#5e5b53" text-anchor="middle">25,2 m²</text>
+<rect x="40.0" y="382.4" width="340.0" height="170.0" fill="#d6e4e6" stroke="#272925" stroke-width="3"/>
+<text x="210.0" y="467.4" font-size="15" fill="#272925" text-anchor="middle">Piscina de borda infinita</text>
+<text x="210.0" y="487.6" font-size="12" fill="#5e5b53" text-anchor="middle">50,0 m²</text>
+<rect x="380.0" y="382.4" width="340.0" height="170.0" fill="#ece6da" stroke="#272925" stroke-width="3"/>
+<text x="550.0" y="467.4" font-size="15" fill="#272925" text-anchor="middle">Deck e varanda</text>
+<text x="550.0" y="487.6" font-size="12" fill="#5e5b53" text-anchor="middle">50,0 m²</text>
+<rect x="40.0" y="552.4" width="680.0" height="81.6" fill="#ece6da" stroke="#272925" stroke-width="3"/>
+<text x="380.0" y="593.2" font-size="15" fill="#272925" text-anchor="middle">Jardim até o píer</text>
+<text x="380.0" y="613.4" font-size="12" fill="#5e5b53" text-anchor="middle">48,0 m²</text>
+<g transform="translate(40 664)"><rect width="170" height="6" fill="#272925"/><rect width="85.0" height="6" fill="#d7c5a9"/><text y="22" font-size="11" fill="#5e5b53">0</text><text x="170" y="22" font-size="11" fill="#5e5b53" text-anchor="end">5 m</text></g>
+<g transform="translate(704 648)"><path d="M0 18 8 -6 16 18 8 12z" fill="#272925"/><text x="8" y="34" font-size="11" fill="#5e5b53" text-anchor="middle">N</text></g>
+</svg>

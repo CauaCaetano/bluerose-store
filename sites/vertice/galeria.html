@@ -12,11 +12,13 @@
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23050817'%2F%3E%3Cpath%20d%3D'M9%2010l11%2021%2011-21'%20stroke%3D'%23c9a849'%20stroke-width%3D'3'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/93a341139e.css">
-<link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=6">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=7">
+<link rel="stylesheet" href="vendas.css?v=2">
 <script src="../../js/leads-config.js?v=6" defer></script>
-<script src="../assets/moldura.js?v=4" defer></script>
-<script src="site.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="site.js?v=7" defer></script>
+<script src="vendas.js?v=1" defer></script>
 </head>
 <body data-slug="vertice" data-marca="Vértice Residence" data-cat="imobiliaria">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -24,10 +26,13 @@
 <header class="topo">
   <button type="button" class="pilula pilula-clara bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i>Menu</button>
   <a class="marca" href="index.html" translate="no" aria-label="Vértice Residence, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 9l12 23 12-23"/></svg><span>VÉRTICE<small>residence</small></span></a>
-  <a class="pilula pilula-cobre bt-escolher" href="apartamentos.html">Escolher unidade</a>
+  <div class="topo-acoes"><a class="pilula pilula-linha bt-tabela" href="apresentacao.html">Tabela de preços</a><a class="pilula pilula-cobre bt-escolher" href="espelho.html">Espelho de vendas</a></div>
 </header>
 <nav class="menu" id="menu" aria-label="Principal" hidden>
-  <a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="apartamentos.html">Apartamentos</a><a href="galeria.html" aria-current="page">Galeria</a><a href="localizacao.html">Localização</a><a href="obra.html">Obra</a><a href="como-comprar.html">Como comprar</a><a href="contato.html">Contato</a>
+  <div class="menu-grupos">
+    <div><p class="menu-rot">Escolher e comprar</p><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="como-comprar.html#simulador">Simulador</a><a href="apresentacao.html">Tabela de preços</a><a href="como-comprar.html">Como comprar</a></div>
+    <div><p class="menu-rot">Conhecer o Vértice</p><a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="obra.html">Andamento da obra</a><a href="incorporadora.html">A incorporadora</a><a href="galeria.html" aria-current="page">Galeria</a><a href="localizacao.html">Localização</a><a href="contato.html">Contato</a></div>
+  </div>
   <p class="menu-pe"><span>Central de vendas · todos os dias, 9h às 20h</span><a href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor ↗</a></p>
 </nav>
 
@@ -38,7 +43,7 @@
     <h1 id="pg-t" class="gigante encaixe">Galeria</h1>
     <div class="pg-topo-grade">
       <p class="lead revela">Fachada, lazer, interiores e a vista que dá nome ao projeto.</p>
-      <div><p>18 imagens ilustrativas de referência. Toque numa foto para ampliar e use as setas do teclado para passar. O decorado pode ser visitado todos os dias, das 9h às 20h.</p></div>
+      <div><p>18 imagens ilustrativas de referência. Toque numa foto para ampliar. Na foto ampliada, faça pinça ou dois cliques para dar zoom e arraste para ver os detalhes. O decorado pode ser visitado todos os dias, das 9h às 20h.</p></div>
     </div>
   </section>
   <section class="pg-sec" style="padding-top:0" aria-label="Fotos">
@@ -80,12 +85,12 @@
 
 <footer class="rodape">
   <div class="rd-grade">
-    <div><p class="rd-rot">Central de vendas Vértice</p><p class="rd-end">Rua de Exemplo, 100 · Bairro Exemplo · Cidade Exemplo</p><p class="rd-rot">Todos os dias, 9h às 20h</p></div>
-    <p class="rd-legal">Incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento, sujeitos a reajuste.</p>
+    <div><p class="rd-rot">Central de vendas Vértice</p><p class="rd-end">Rua de Exemplo, 100 · Bairro Exemplo · Cidade Exemplo</p><p class="rd-rot">Todos os dias, 9h às 20h · (00) 0000-0000 (exemplo)</p></div>
+    <p class="rd-legal">Vértice Incorporações Ltda. (fictícia) · CNPJ 00.000.000/0001-00 (exemplo) · incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento de exemplo, sujeitos a reajuste.</p>
     <div class="rd-acoes"><a class="pilula pilula-cobre" href="obra.html">Andamento da obra</a><a class="redondo redondo-cobre" href="#conteudo" aria-label="Voltar ao topo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg></a></div>
   </div>
-  <nav class="rd-nav" aria-label="Páginas"><a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="apartamentos.html">Apartamentos</a><a href="galeria.html" aria-current="page">Galeria</a><a href="localizacao.html">Localização</a><a href="obra.html">Obra</a><a href="como-comprar.html">Como comprar</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
-  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash (licença Unsplash)</span></p>
+  <nav class="rd-nav" aria-label="Páginas"><a href="index.html">Início</a><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="apresentacao.html">Tabela de preços</a><a href="como-comprar.html">Como comprar</a><a href="obra.html">Obra</a><a href="incorporadora.html">Incorporadora</a><a href="empreendimento.html">O empreendimento</a><a href="galeria.html" aria-current="page">Galeria</a><a href="localizacao.html">Localização</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
+  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash e Pexels (licenças livres)</span></p>
 </footer>
 </body>
 </html>

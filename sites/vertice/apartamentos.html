@@ -6,17 +6,19 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com; font-src 'self'; connect-src 'self' blob: https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Apartamentos · escolha andar, final e preço · Vértice Residence</title>
-<meta name="description" content="Todas as 72 unidades do Vértice Residence com planta, área, andar, vista, preço e situação (disponível, reservada ou vendida). Filtre por suítes, vista, andar e preço.">
+<title>Plantas · A, B e C com zoom e ficha técnica · Vértice Residence</title>
+<meta name="description" content="As três plantas do Vértice Residence, de 92 a 146 m², com zoom, arrastar e tela cheia, área de cada cômodo, vagas, vista e unidades disponíveis.">
 <meta name="theme-color" content="#061a37">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23050817'%2F%3E%3Cpath%20d%3D'M9%2010l11%2021%2011-21'%20stroke%3D'%23c9a849'%20stroke-width%3D'3'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/93a341139e.css">
-<link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=6">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=7">
+<link rel="stylesheet" href="vendas.css?v=2">
 <script src="../../js/leads-config.js?v=6" defer></script>
-<script src="../assets/moldura.js?v=4" defer></script>
-<script src="site.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="site.js?v=7" defer></script>
+<script src="vendas.js?v=1" defer></script>
 </head>
 <body data-slug="vertice" data-marca="Vértice Residence" data-cat="imobiliaria">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -24,67 +26,87 @@
 <header class="topo">
   <button type="button" class="pilula pilula-clara bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i>Menu</button>
   <a class="marca" href="index.html" translate="no" aria-label="Vértice Residence, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 9l12 23 12-23"/></svg><span>VÉRTICE<small>residence</small></span></a>
-  <a class="pilula pilula-cobre bt-escolher" href="apartamentos.html">Escolher unidade</a>
+  <div class="topo-acoes"><a class="pilula pilula-linha bt-tabela" href="apresentacao.html">Tabela de preços</a><a class="pilula pilula-cobre bt-escolher" href="espelho.html">Espelho de vendas</a></div>
 </header>
 <nav class="menu" id="menu" aria-label="Principal" hidden>
-  <a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="apartamentos.html" aria-current="page">Apartamentos</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="obra.html">Obra</a><a href="como-comprar.html">Como comprar</a><a href="contato.html">Contato</a>
+  <div class="menu-grupos">
+    <div><p class="menu-rot">Escolher e comprar</p><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html" aria-current="page">Plantas</a><a href="como-comprar.html#simulador">Simulador</a><a href="apresentacao.html">Tabela de preços</a><a href="como-comprar.html">Como comprar</a></div>
+    <div><p class="menu-rot">Conhecer o Vértice</p><a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="obra.html">Andamento da obra</a><a href="incorporadora.html">A incorporadora</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="contato.html">Contato</a></div>
+  </div>
   <p class="menu-pe"><span>Central de vendas · todos os dias, 9h às 20h</span><a href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor ↗</a></p>
 </nav>
 
 <main id="conteudo">
-  <section class="pg-topo" aria-labelledby="pg-t">
+  <section class="pg-topo pg-topo-curto" aria-labelledby="pg-t">
     <svg class="arcos-fundo" viewBox="0 0 1440 900" aria-hidden="true"><circle cx="300" cy="1000" r="620"/><circle cx="1140" cy="1000" r="620"/></svg>
     <p class="rot">Apartamentos</p>
-    <h1 id="pg-t" class="gigante encaixe">Unidades</h1>
+    <h1 id="pg-t" class="gigante encaixe">Plantas</h1>
     <div class="pg-topo-grade">
-      <p class="lead revela">Escolha o andar, o final e a vista. O preço já aparece no cartão.</p>
-      <div><p>São 72 apartamentos em 18 andares. Os preços sobem 1,2% a cada andar e valem para a tabela de lançamento. Uma unidade reservada fica presa por 48 horas; se o comprador não assinar, ela volta para a lista.</p><p class="mut" style="font-size:13px">Vendidas até agora: <b data-vend style="color:var(--champ)">—</b></p></div>
+      <p class="lead revela">Três plantas, de 92 a 146 m², todas com varanda gourmet.</p>
+      <div><p>Amplie a planta com pinça no celular ou com os botões, arraste para ver cada cômodo e abra em tela cheia. As áreas de cada ambiente estão escritas na planta e na ficha ao lado.</p></div>
     </div>
   </section>
-  <section class="ap-sec" aria-label="Lista de unidades">
-    <div class="ap-grade">
-      <form class="ap-filtros" id="ap-filtros" aria-label="Filtros">
-        <fieldset><legend>Situação</legend><label><input type="radio" name="st" value="d" checked> disponíveis</label><label><input type="radio" name="st" value="dr"> + reservadas</label><label><input type="radio" name="st" value=""> todas</label></fieldset>
-        <fieldset><legend>Suítes</legend><label><input type="radio" name="su" value="0" checked> todas</label><label><input type="radio" name="su" value="2"> 2 suítes</label><label><input type="radio" name="su" value="3"> 3 suítes</label></fieldset>
-        <fieldset><legend>Vista</legend><label><input type="radio" name="vi" value="" checked> todas</label><label><input type="radio" name="vi" value="mar"> mar</label><label><input type="radio" name="vi" value="cidade"> cidade</label></fieldset>
-        <label class="faixa">Andar <output></output><input type="range" name="an" min="1" max="18" value="1"></label>
-        <label class="faixa">Preço <output></output><input type="range" name="pr" min="1300000" max="2100000" step="10000" value="2100000"></label>
-        <label class="faixa">Ordenar<select name="ord"><option value="preco">menor preço</option><option value="m2">menor preço por m²</option><option value="andar">andar mais alto</option></select></label>
-        <button type="reset" class="pilula">Limpar filtros</button>
+  <section class="pg-sec pf-sec" data-plantas aria-label="Plantas com zoom">
+    <div class="pf-abas" role="tablist" aria-label="Escolha a planta">
+      <button type="button" role="tab" data-tab-planta="A" aria-selected="true"><b>Planta A</b><span>128 m² · 3 suítes · frente mar</span></button>
+      <button type="button" role="tab" data-tab-planta="B" aria-selected="false"><b>Planta B</b><span>92 m² · 2 suítes</span></button>
+      <button type="button" role="tab" data-tab-planta="C" aria-selected="false"><b>Planta C</b><span>128 m² · 3 suítes · mar lateral</span></button>
+    </div>
+    <div class="pf-grade">
+      <div class="pf-zoom"></div>
+      <aside class="pf-ficha-cx">
+        <h2 class="pf-t">Planta A · 128 m²</h2>
+        <p class="pf-r"></p>
+        <dl class="pf-ficha"></dl>
+        <p class="pf-sub">Área de cada cômodo</p>
+        <ul class="pf-comodos"></ul>
+        <div class="pf-acoes"><a class="pilula pilula-verde pf-espelho" href="espelho.html">Ver unidades desta planta</a><a class="pilula pilula-linha pf-wa" href="#" data-wa="Olá, Vértice Residence! Quero receber as plantas em PDF.">Pedir a planta em PDF</a></div>
+      </aside>
+    </div>
+    <p class="demo">Plantas ilustrativas com áreas aproximadas. Medidas finais no memorial descritivo. No site real, entram as plantas humanizadas e os arquivos do projeto da incorporadora.</p>
+  </section>
+  <section class="pg-sec sec-clara" aria-labelledby="cp-t">
+    <p class="rot">Lado a lado</p>
+    <h2 id="cp-t">Comparar plantas</h2>
+    <div class="tab-rolar"><table class="comparar">
+      <thead><tr><th></th><th>Planta A</th><th>Planta B</th><th>Planta C</th></tr></thead>
+      <tbody>
+        <tr><th>Área privativa</th><td>128 m² (146 m² do 15º ao 18º)</td><td>92 m²</td><td>128 m² (146 m² do 15º ao 18º)</td></tr>
+        <tr><th>Suítes</th><td>3, master com closet</td><td>2</td><td>3, master com closet</td></tr>
+        <tr><th>Vagas</th><td>2 + depósito</td><td>1 + depósito</td><td>2 + depósito</td></tr>
+        <tr><th>Finais</th><td>1</td><td>2 e 3</td><td>4</td></tr>
+        <tr><th>Vista</th><td>mar de frente</td><td>mar lateral (2) ou cidade (3)</td><td>mar lateral</td></tr>
+        <tr><th>Living</th><td>41 m²</td><td>27 m²</td><td>41 m²</td></tr>
+        <tr><th>Condomínio estimado</th><td>R$ 1.790</td><td>R$ 1.290</td><td>R$ 1.790</td></tr>
+        <tr><th>Preço a partir de</th><td>ver espelho</td><td>ver espelho</td><td>ver espelho</td></tr>
+      </tbody>
+    </table></div>
+    <p class="mais-link esq"><a class="pilula pilula-cobre" href="espelho.html">Abrir o espelho de vendas</a><a class="pilula pilula-linha" href="galeria.html">Ver as perspectivas</a></p>
+  </section>
+  <section class="pg-sec captar captar-int" id="tabela" aria-labelledby="cap-t">
+    <div class="cp-txt"><p class="rot">Plantas em PDF e tabela</p><h2 id="cap-t">Leve as plantas e a tabela para casa</h2><p>Receba a apresentação completa com as três plantas, a área de cada cômodo, a tabela de preços das 72 unidades e as condições de pagamento.</p></div>
+    <form class="cap" data-captacao novalidate aria-label="Receber a apresentação e a tabela de preços">
+        <label>Nome*<input name="nome" autocomplete="name" required></label>
+        <label>E-mail*<input name="email" type="email" autocomplete="email" required></label>
+        <label>WhatsApp com DDD*<input name="tel" inputmode="tel" autocomplete="tel" required placeholder="(00) 00000-0000"></label>
+        <label>Tipo de unidade<select name="tipo"><option>2 suítes · 92 m²</option><option selected>3 suítes · 128 m²</option><option>3 suítes com terraço · 146 m²</option><option>Ainda não sei</option></select></label>
+        <label class="lg">Quanto pretende investir<select name="faixa"><option>até R$ 1,4 milhão</option><option selected>de R$ 1,4 a 1,7 milhão</option><option>de R$ 1,7 a 2 milhões</option><option>acima de R$ 2 milhões</option></select></label>
+        <label class="ok lg"><input type="checkbox" name="ok"><span>Aceito receber a apresentação e o contato da central de vendas sobre este lançamento. Veja a <a href="privacidade.html">política de privacidade</a>.</span></label>
+        <button type="submit" class="pilula pilula-cobre pilula-alta lg">Receber apresentação e tabela</button>
+        <p class="erro lg" aria-live="polite"></p>
       </form>
-      <div>
-        <p class="ap-total" aria-live="polite"></p>
-        <ul class="ap-lista"></ul>
-        <button type="button" class="pilula pilula-clara ap-mais">Mostrar mais</button>
-      </div>
-    </div>
   </section>
-
-  <section class="pg-sec sec-clara" aria-labelledby="tp-t">
-    <p class="rot">As duas plantas</p>
-    <h2 id="tp-t">Finais 1 a 4</h2>
-    <ul class="itens">
-      <li><b>Final 1 · 128 m²</b><span>3 suítes, living de 38 m² e varanda gourmet na quina de vidro com vista frontal para o mar. 2 vagas e depósito.</span></li>
-      <li><b>Finais 2 e 3 · 92 m²</b><span>2 suítes e varanda gourmet de 10 m². O final 2 tem vista lateral do mar; o final 3, da cidade e dos morros. 1 vaga e depósito.</span></li>
-      <li><b>Final 4 · 128 m²</b><span>A mesma planta do final 1, espelhada, com vista lateral para o mar e a suíte master voltada para o nascente. 2 vagas e depósito.</span></li>
-    </ul>
-  </section>
-  <section class="pg-sec sec-clara chamada" aria-label="Fale com a central de vendas">
-    <p class="rot">Central de vendas · 9h às 20h</p>
-    <h2>Não achou o andar que queria? Entre na lista de espera e avisamos quando uma reserva cair.</h2>
-    <div class="acoes"><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero entrar na lista de espera de uma unidade.">Entrar na lista de espera</a></div>
-  </section>
-  <nav class="migalhas" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span>Apartamentos</span></nav>
+  <nav class="migalhas" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span>Plantas</span></nav>
 </main>
 
 <footer class="rodape">
   <div class="rd-grade">
-    <div><p class="rd-rot">Central de vendas Vértice</p><p class="rd-end">Rua de Exemplo, 100 · Bairro Exemplo · Cidade Exemplo</p><p class="rd-rot">Todos os dias, 9h às 20h</p></div>
-    <p class="rd-legal">Incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento, sujeitos a reajuste.</p>
+    <div><p class="rd-rot">Central de vendas Vértice</p><p class="rd-end">Rua de Exemplo, 100 · Bairro Exemplo · Cidade Exemplo</p><p class="rd-rot">Todos os dias, 9h às 20h · (00) 0000-0000 (exemplo)</p></div>
+    <p class="rd-legal">Vértice Incorporações Ltda. (fictícia) · CNPJ 00.000.000/0001-00 (exemplo) · incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento de exemplo, sujeitos a reajuste.</p>
     <div class="rd-acoes"><a class="pilula pilula-cobre" href="obra.html">Andamento da obra</a><a class="redondo redondo-cobre" href="#conteudo" aria-label="Voltar ao topo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg></a></div>
   </div>
-  <nav class="rd-nav" aria-label="Páginas"><a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="apartamentos.html" aria-current="page">Apartamentos</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="obra.html">Obra</a><a href="como-comprar.html">Como comprar</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
-  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash (licença Unsplash)</span></p>
+  <nav class="rd-nav" aria-label="Páginas"><a href="index.html">Início</a><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html" aria-current="page">Plantas</a><a href="apresentacao.html">Tabela de preços</a><a href="como-comprar.html">Como comprar</a><a href="obra.html">Obra</a><a href="incorporadora.html">Incorporadora</a><a href="empreendimento.html">O empreendimento</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
+  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash e Pexels (licenças livres)</span></p>
 </footer>
 </body>
 </html>

@@ -1,9 +1,8 @@
 // Vértice · abertura (fecha a cena 3D), topo que some ao descer, menu, títulos que ocupam a largura, efeitos de rolagem
 // (foto que cresce, torre que sobe, arco que se abre, foto que gira, faixa que anda), carrossel de números, mapa,
-// botão que segue o cursor, espelho de vendas (18 andares × 4 finais) com escolha visual ou por critério, ficha da unidade,
-// fluxo de pagamento na obra (entrada, 24 mensais, 3 anuais e saldo nas chaves) e prazo da tabela de lançamento.
-// Páginas internas: lista de apartamentos com filtro, página da unidade (?u=1202), galeria com ampliação,
-// simulador de financiamento e formulário de contato. Cada bloco só roda se a página tiver os elementos dele.
+// botão que segue o cursor e prazo da tabela de lançamento. Páginas internas: galeria com ampliação, simulador de
+// financiamento do saldo e formulário de contato. As ferramentas de venda (espelho, plantas, simulador da obra,
+// captação) estão em vendas.js. Cada bloco só roda se a página tiver os elementos dele.
 (function () {
   'use strict';
   document.documentElement.classList.add('js');
@@ -124,148 +123,7 @@
     nf.addEventListener('pointerleave', function () { lig.style.setProperty('--cx', '0px'); lig.style.setProperty('--cy', '0px'); });
   }
 
-  // ── dados das unidades: finais com tipo, m², suítes, vista e preço base no 1º andar (os mesmos em todas as páginas)
-  var FIN = { 1: ['3 suítes', 128, 3, 'mar frontal', 1690000], 2: ['2 suítes', 92, 2, 'mar lateral', 1290000], 3: ['2 suítes', 92, 2, 'cidade', 1260000], 4: ['3 suítes', 128, 3, 'mar lateral', 1640000] };
-  var ANDARES = 18, sel = null, ST = { d: 'disponível', r: 'reservada', v: 'vendida' };
-  var sit = function (a, f) { var h = (a * 37 + f * 11) % 10; return a < 6 ? (h < 7 ? 'v' : h < 8 ? 'r' : 'd') : (h < 4 ? 'v' : h < 5 ? 'r' : 'd'); };
-  var preco = function (a, f) { return FIN[f][4] * (1 + (a - 1) * 0.012); };
-  var cod = function (a, f) { return a + '0' + f; };
-  var vendidas = 0; for (var a0 = 1; a0 <= ANDARES; a0++) for (var f0 = 1; f0 <= 4; f0++) if (sit(a0, f0) === 'v') vendidas++;
-  $$('[data-vend]').forEach(function (el) { el.textContent = vendidas + ' de 72'; });
-
-  // planta simplificada de cada final (desenho em traço, cômodos com nome e m²)
-  var PLANTA = {
-    3: [[0, 0, 46, 40, 'living', 30], [46, 0, 26, 40, 'varanda', 10], [72, 0, 28, 22, 'cozinha', 9], [72, 22, 28, 18, 'serviço', 4], [0, 40, 40, 60, 'suíte master', 18], [40, 40, 24, 26, 'banho', 4], [40, 66, 24, 34, 'lavabo e hall', 3], [64, 40, 36, 60, 'suíte 2', 13]],
-    4: [[0, 0, 44, 36, 'living', 38], [44, 0, 30, 36, 'varanda gourmet', 14], [74, 0, 26, 22, 'cozinha', 11], [74, 22, 26, 14, 'serviço', 4], [0, 36, 38, 64, 'suíte master', 24], [38, 36, 24, 30, 'suíte 2', 12], [38, 66, 24, 34, 'lavabo e hall', 4], [62, 36, 38, 64, 'suíte 3', 13]]
-  };
-  function planta(f, rotulo) {
-    var p = PLANTA[FIN[f][2] + 1], esp = f === 2 || f === 4; // finais 2 e 4 são espelhados
-    return '<svg class="planta" viewBox="-4 -4 108 108" role="img" aria-label="' + (rotulo || 'Planta do final ' + f) + '">' + p.map(function (c) {
-      var x = esp ? 100 - c[0] - c[2] : c[0];
-      return '<rect x="' + x + '" y="' + c[1] + '" width="' + c[2] + '" height="' + c[3] + '"/><text x="' + (x + c[2] / 2) + '" y="' + (c[1] + c[3] / 2) + '">' + c[4] + '</text><text class="m2" x="' + (x + c[2] / 2) + '" y="' + (c[1] + c[3] / 2 + 5) + '">' + c[5] + ' m²</text>';
-    }).join('') + '<path class="vista" d="' + (FIN[f][3] === 'cidade' ? 'M30 106h40' : 'M30 -2h40') + '"/></svg>';
-  }
-
-  // ── espelho de vendas (index)
-  var predio = $('.predio');
-  if (predio) {
-    var html = '<span></span>' + [1, 2, 3, 4].map(function (f) { return '<span class="fin">final ' + f + '</span>'; }).join('');
-    for (var a = ANDARES; a >= 1; a--) {
-      html += '<span class="and">' + a + 'º</span>';
-      for (var f = 1; f <= 4; f++) {
-        var s = sit(a, f);
-        html += '<button type="button" class="' + s + '" data-a="' + a + '" data-f="' + f + '" aria-pressed="false" aria-label="Unidade ' + cod(a, f) + ', ' + ST[s] + '"' + (s !== 'd' ? ' aria-disabled="true"' : '') + '>' + cod(a, f) + '</button>';
-      }
-    }
-    predio.innerHTML = html;
-    predio.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b || b.getAttribute('aria-disabled')) return; ficha(+b.dataset.a, +b.dataset.f); });
-  }
-  function ficha(a, f) {
-    sel = [a, f]; var t = FIN[f], p = preco(a, f);
-    $$('.predio button, .fl-lista button').forEach(function (b) { b.setAttribute('aria-pressed', String(+b.dataset.a === a && +b.dataset.f === f)); });
-    $('.unid').innerHTML = '<img src="img/' + (t[2] === 3 ? 'sala' : 'planta') + '.webp" alt="' + (t[2] === 3 ? 'Living do decorado' : 'Planta da unidade') + '"><h4>Unidade ' + cod(a, f) + '</h4><p class="preco">' + mi(p) + '</p>' +
-      '<dl><dt>Tipo</dt><dd>' + t[0] + '</dd><dt>Área privativa</dt><dd>' + t[1] + ' m²</dd><dt>Vista</dt><dd>' + t[3] + '</dd><dt>Andar</dt><dd>' + a + 'º de 18</dd><dt>Vagas</dt><dd>' + (t[2] === 3 ? 2 : 1) + '</dd><dt>Preço por m²</dt><dd>' + real(p / t[1]) + '</dd></dl>' +
-      '<a class="pilula pilula-cobre" href="#pagamento">Montar pagamento desta unidade</a><a class="u-link" href="apartamento.html?u=' + cod(a, f) + '">Ver planta e ficha completa ↗</a>';
-    fluxo();
-  }
-
-  // abas: seleção visual ou por critério
-  $$('.un-cartao').forEach(function (c) {
-    c.addEventListener('click', function () {
-      $$('.un-cartao').forEach(function (o) { o.setAttribute('aria-selected', String(o === c)); $('#' + o.getAttribute('aria-controls')).hidden = o !== c; });
-      $('#espelho').scrollIntoView({ behavior: calmo ? 'auto' : 'smooth', block: 'start' });
-    });
-  });
-  // escolha por critério
-  var fi = $('#filtros');
-  if (fi) {
-    var filtra = function () {
-      var su = +fi.su.value, vi = fi.vi.value, an = +fi.an.value, pr = +fi.pr.value, l = [];
-      fi.an.previousElementSibling.textContent = an + 'º andar'; fi.pr.previousElementSibling.textContent = mi(pr);
-      for (var a = ANDARES; a >= an; a--) for (var f = 1; f <= 4; f++) {
-        var t = FIN[f], p = preco(a, f);
-        if (sit(a, f) !== 'd' || (su && t[2] !== su) || (vi && (vi === 'mar') !== /mar/.test(t[3])) || p > pr) continue;
-        l.push('<button type="button" role="listitem" data-a="' + a + '" data-f="' + f + '" aria-pressed="' + String(!!sel && sel[0] === a && sel[1] === f) + '"><b>' + cod(a, f) + '</b><span>' + t[0] + ' · ' + t[1] + ' m² · ' + t[3] + '</span><em>' + mi(p) + '</em></button>');
-      }
-      $('.fl-total').textContent = l.length ? l.length + (l.length === 1 ? ' unidade disponível' : ' unidades disponíveis') + ' com esses critérios' : 'Nenhuma unidade com esses critérios. Tente subir o preço ou baixar o andar.';
-      $('.fl-lista').innerHTML = l.join('');
-    };
-    fi.addEventListener('input', filtra); fi.addEventListener('change', filtra); filtra();
-    $('.fl-lista').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) ficha(+b.dataset.a, +b.dataset.f); });
-  }
-
-  // ── fluxo de pagamento (index, página da unidade e como comprar)
-  var fl = $('#fluxo');
-  function fluxo() {
-    if (!fl) return;
-    var a = sel ? sel[0] : 12, f = sel ? sel[1] : 2, p = preco(a, f), e = +fl.ent.value, m = +fl.men.value, an = +fl.anu.value;
-    if (e + m + an > 85) { an = 85 - e - m; if (an < 0) { m += an; an = 0; } fl.anu.value = an; fl.men.value = m; }
-    var ch = 100 - e - m - an;
-    fl.ent.previousElementSibling.textContent = e + '% · ' + real(p * e / 100);
-    fl.men.previousElementSibling.textContent = m + '% · 24x de ' + real(p * m / 100 / 24);
-    fl.anu.previousElementSibling.textContent = an + '% · 3x de ' + real(p * an / 100 / 3);
-    $('.pg-u').textContent = (sel ? 'Unidade ' + cod(a, f) : 'Exemplo: unidade 1202') + ' · ' + mi(p);
-    $('.pg-chave').innerHTML = 'Saldo nas chaves: <b style="color:var(--tx)">' + ch + '% · ' + real(p * ch / 100) + '</b>, à vista ou financiado no banco.';
-    $('.pg-res').innerHTML = '<p style="color:var(--tx-2)">Durante 24 meses de obra você paga</p><p class="grande">' + real(p * m / 100 / 24) + '<small> /mês</small></p>' +
-      '<div class="barra" aria-hidden="true"><i style="width:' + e + '%;background:#f1c7b4"></i><i style="width:' + m + '%;background:#cf8f7d"></i><i style="width:' + an + '%;background:#8a4f42"></i><i style="width:' + ch + '%;background:#2a4670"></i></div>' +
-      '<table><tr><td>Entrada (no contrato)</td><td>' + real(p * e / 100) + '</td></tr><tr><td>24 mensais</td><td>' + real(p * m / 100) + '</td></tr><tr><td>3 anuais</td><td>' + real(p * an / 100) + '</td></tr><tr><td>Chaves (dez/2028)</td><td>' + real(p * ch / 100) + '</td></tr></table>' +
-      '<p style="font-size:.8rem;color:var(--tx-2);margin-top:10px">Parcelas corrigidas pelo INCC durante a obra.</p><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero reservar a unidade ' + cod(a, f) + ' (' + mi(p) + ') com ' + e + '% de entrada e 24 mensais de ' + real(p * m / 100 / 24) + '.">Reservar a unidade ' + cod(a, f) + ' por 48 h</a>';
-  }
-  if (fl) fl.addEventListener('input', fluxo);
-
-  // ── lista de apartamentos (apartamentos.html): cartões com planta, filtros e "mostrar mais"
-  var apL = $('.ap-lista'), apF = $('#ap-filtros');
-  if (apL && apF) {
-    var mostra = 12;
-    var lista = function () {
-      var su = +apF.su.value, vi = apF.vi.value, st = apF.st.value, an = +apF.an.value, pr = +apF.pr.value, ord = apF.ord.value, l = [];
-      apF.an.previousElementSibling.textContent = 'a partir do ' + an + 'º';
-      apF.pr.previousElementSibling.textContent = 'até ' + mi(pr);
-      for (var a = ANDARES; a >= an; a--) for (var f = 1; f <= 4; f++) {
-        var t = FIN[f], p = preco(a, f), s = sit(a, f);
-        if ((st === 'd' && s !== 'd') || (st === 'dr' && s === 'v') || (su && t[2] !== su) || (vi && (vi === 'mar') !== /mar/.test(t[3])) || p > pr) continue;
-        l.push([a, f, p, s]);
-      }
-      l.sort(ord === 'm2' ? function (x, y) { return preco(x[0], x[1]) / FIN[x[1]][1] - preco(y[0], y[1]) / FIN[y[1]][1]; } : ord === 'andar' ? function (x, y) { return y[0] - x[0]; } : function (x, y) { return x[2] - y[2]; });
-      $('.ap-total').textContent = l.length + (l.length === 1 ? ' unidade encontrada' : ' unidades encontradas');
-      apL.innerHTML = l.length ? l.slice(0, mostra).map(function (u) {
-        var a = u[0], f = u[1], t = FIN[f];
-        return '<li class="ap-card st-' + u[3] + '"><a href="apartamento.html?u=' + cod(a, f) + '"><span class="ap-cab"><b>' + cod(a, f) + '</b><em>' + ST[u[3]] + '</em></span>' +
-          '<span class="ap-dados">' + t[1] + ' m²<br>' + t[0] + '<br>andar ' + a + ' · vista ' + t[3] + '</span>' + planta(f, 'Planta da unidade ' + cod(a, f)) +
-          '<span class="ap-pe"><span>' + (u[3] === 'v' ? 'vendida' : mi(u[2])) + '</span><i class="redondo" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M5 10h10m-4-4l4 4-4 4"/></svg></i></span></a></li>';
-      }).join('') : '<li class="ap-vazio">Nenhuma unidade com esses filtros. Tente subir o preço ou incluir as reservadas.</li>';
-      $('.ap-mais').hidden = l.length <= mostra;
-    };
-    apF.addEventListener('input', function () { mostra = 12; lista(); });
-    apF.addEventListener('reset', function () { setTimeout(function () { mostra = 12; lista(); }, 0); });
-    $('.ap-mais').addEventListener('click', function () { mostra += 12; lista(); });
-    lista();
-  }
-
-  // ── página da unidade (apartamento.html?u=1202)
-  var det = $('.ap-det');
-  if (det) {
-    var m = /^(\d{1,2})0([1-4])$/.exec(new URLSearchParams(location.search).get('u') || ''), ua = m ? +m[1] : 12, uf = m ? +m[2] : 2;
-    if (ua < 1 || ua > ANDARES) { ua = 12; uf = 2; }
-    var t = FIN[uf], p = preco(ua, uf), s = sit(ua, uf), c = cod(ua, uf);
-    sel = [ua, uf];
-    document.title = 'Unidade ' + c + ' · ' + t[0] + ', ' + t[1] + ' m² · Vértice Residence';
-    $$('[data-u]').forEach(function (el) { el.textContent = c; });
-    $('.ad-planta').innerHTML = planta(uf, 'Planta da unidade ' + c + ' com os cômodos e as áreas');
-    $('.ad-status').textContent = ST[s]; $('.ad-status').className = 'ad-status st-' + s;
-    $('.ad-preco').textContent = s === 'v' ? 'Unidade vendida' : mi(p);
-    $('.ad-ficha').innerHTML = '<dt>Tipo</dt><dd>' + t[0] + '</dd><dt>Área privativa</dt><dd>' + t[1] + ' m²</dd><dt>Andar</dt><dd>' + ua + 'º de 18</dd><dt>Final</dt><dd>' + uf + '</dd><dt>Vista</dt><dd>' + t[3] + '</dd><dt>Vagas</dt><dd>' + (t[2] === 3 ? 2 : 1) + ' + depósito</dd><dt>Preço por m²</dt><dd>' + real(p / t[1]) + '</dd><dt>Entrega</dt><dd>dez/2028</dd>';
-    $('.ad-foto').src = 'img/' + (t[3] === 'cidade' ? 'baia' : t[2] === 3 ? 'vista-sala' : 'varanda-mar') + '.webp';
-    $('.ad-acao').innerHTML = s === 'd' ? '<a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero reservar a unidade ' + c + ' (' + mi(p) + ') por 48 h.">Reservar por 48 h</a>' :
-      '<a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! A unidade ' + c + ' está ' + ST[s] + '. Quero entrar na lista de espera dela.">Entrar na lista de espera</a>';
-    // vizinhas: o mesmo final em outros andares, disponíveis
-    var viz = []; for (var a2 = ANDARES; a2 >= 1 && viz.length < 4; a2--) if (a2 !== ua && sit(a2, uf) === 'd') viz.push(a2);
-    $('.ad-viz').innerHTML = viz.map(function (a3) { return '<li><a href="apartamento.html?u=' + cod(a3, uf) + '"><b>' + cod(a3, uf) + '</b><span>' + a3 + 'º andar</span><em>' + mi(preco(a3, uf)) + '</em></a></li>'; }).join('');
-    $('.ad-sem-fluxo').hidden = s === 'd';
-    if (fl) fl.hidden = s !== 'd';
-    if (s !== 'd') { var pr0 = $('.pg-res'); if (pr0) pr0.hidden = true; }
-  }
-  fluxo();
+  // espelho de vendas, plantas, simulador, captação e página da unidade ficam em vendas.js
 
   // ── galeria: filtro por tema e ampliação
   var gal = $('.gal-grade');

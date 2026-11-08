@@ -42,3 +42,8 @@
 .foto-caixa { position: relative; overflow: hidden; }
 .foto-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .4s ease; }
 .foto-img.ativa { opacity: 1; }
+
+/* celular: some ao rolar para baixo (moldura.js) */
+.br-pill { transition: transform .3s ease, opacity .3s ease; }
+.br-pill.br-pill-esconde { transform: translate(-50%, 160%); opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .br-pill { transition: none; } }

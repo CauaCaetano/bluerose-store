@@ -27,7 +27,7 @@ Desde 07/11/2026 cada sistema é vendido numa versão só, o Essencial: app de c
 - [Blue Rose Ofixl](https://bluerose-store.com/ofixl.html): app Android para serviços técnicos em campo (ar-condicionado, refrigeração, elétrica e hidráulica). Em breve no Google Play. R$ 49,90 / R$ 109,90
 - [Comparar todos os sistemas](https://bluerose-store.com/sistemas.html)
 - Sistema ou ERP sob medida: preço fechado para criar, a partir de R$ 1.600 (metade para começar e metade na entrega), ou por assinatura a partir de R$ 299/mês.
-- [Sites e automação de WhatsApp](https://bluerose-store.com/servicos.html): sites a partir de R$ 690 (prontos em 2 dias úteis), entregues prontos para aparecer no Google e no Bing (Search Console, sitemap, títulos com o serviço e a cidade, dados de empresa local, pedido de avaliação no Google), com checklist de LGPD e segurança. Automação de WhatsApp a partir de R$ 890, pronta em 3 dias úteis. Também: mídia kit em site para criadores (R$ 490 ou R$ 39/mês), com 3 exemplos em /sites/midia-kit-bia/, /sites/midia-kit-rafa/ e /sites/midia-kit-lu/.
+- [Sites e automação de WhatsApp](https://bluerose-store.com/servicos.html): sites a partir de R$ 690 (prontos em 2 dias úteis), entregues prontos para aparecer no Google e no Bing (Search Console, sitemap, títulos com o serviço e a cidade, dados de empresa local, pedido de avaliação no Google), com checklist de LGPD e segurança. Automação de WhatsApp a partir de R$ 890, pronta em 3 dias úteis. Também: mídia kit em site para criadores (R$ 490 ou R$ 39/mês), com 5 exemplos em /sites/midia-kit-bia/, /sites/midia-kit-rafa/, /sites/midia-kit-lu/, /sites/midia-kit-maera/ e /sites/midia-kit-casa-quinze/ (kit de agência com 15 criadores).
 
 ## Comparações com concorrentes
 
@@ -39,7 +39,7 @@ Desde 07/11/2026 cada sistema é vendido numa versão só, o Essencial: app de c
 ## Sites e automações
 
 - [Página inicial](https://bluerose-store.com/): serviços, preços e contato
-- [Sites de exemplo](https://bluerose-store.com/exemplos.html): 15 sites no ar, 3 por ramo (dentista, construção e reforma, advocacia, estética, imobiliária), cada um com uma ferramenta que traz cliente (calculadora de orçamento, agenda, simulador de financiamento, preço por área)
+- [Sites de exemplo](https://bluerose-store.com/exemplos.html): 29 sites no ar em 6 ramos: dentista (implantes, clínica familiar, rede de clínicas, ortodontia e estética, odontopediatria), construção e reforma (reformas, construtora de casas, arquitetura e interiores, construtora industrial), advocacia (família, trabalhista, empresarial full service, previdenciário, criminal), estética (harmonização, depilação a laser, rede facial, estética corporal, salão e spa), imobiliária (corretora, imobiliária de bairro, lançamento, administradora de aluguéis e imobiliária rural) e mídia kit (4 criadoras e criadores e 1 agência com 15 talentos), cada um com uma ferramenta que traz cliente (calculadora de orçamento, agenda, simulador de financiamento, preço por área)
 - [Automação de WhatsApp](https://bluerose-store.com/automacao-express.html)
 - [Projetos](https://bluerose-store.com/projetos.html)
 

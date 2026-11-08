@@ -41,13 +41,13 @@
     var Q1 = [['um', 'Falta um dente'], ['varios', 'Faltam vários ou quase todos os dentes'], ['dentadura', 'A dentadura ou a ponte móvel incomoda'], ['osso', 'Disseram que não tenho osso para implante'], ['quebrado', 'Tenho um dente quebrado, mole ou doendo'], ['falhou', 'Um implante feito em outro lugar deu problema'], ['estetica', 'Quero um sorriso mais bonito'], ['revisao', 'Só quero uma revisão, ou não sei']];
     var Q2 = [['ja', 'Quero resolver o quanto antes'], ['mes', 'Nos próximos meses'], ['pesquisa', 'Ainda estou pesquisando']];
     var RES = {
-      um: ['Implante unitário', 'Um implante com coroa de porcelana, colocado com guia. Em muitos casos o dente provisório sai no mesmo dia.', 'a partir de R$ 2.290 · até 24x de R$ 96', 'tratamento-implante.html'],
-      varios: ['Protocolo fixo', 'Uma arcada inteira presa em 4 a 6 implantes, com dentes fixos provisórios em até 72 horas quando o osso permite.', 'a partir de R$ 14.900 por arcada · até 24x de R$ 621', 'tratamento-protocolo.html'],
-      dentadura: ['Dentadura fixa sobre implante', 'A dentadura fica presa em implantes e você não tira para comer nem para dormir.', 'a partir de R$ 14.900 por arcada · até 24x', 'tratamento-protocolo.html'],
+      um: ['Implante unitário', 'Um implante com coroa de porcelana, colocado com guia. Em muitos casos o dente provisório sai no mesmo dia.', 'valor informado na avaliação · até 24x', 'tratamento-implante.html'],
+      varios: ['Protocolo fixo', 'Uma arcada inteira presa em 4 a 6 implantes, com dentes fixos provisórios em até 72 horas quando o osso permite.', 'valor informado na avaliação · até 24x', 'tratamento-protocolo.html'],
+      dentadura: ['Dentadura fixa sobre implante', 'A dentadura fica presa em implantes e você não tira para comer nem para dormir.', 'valor informado na avaliação · até 24x', 'tratamento-protocolo.html'],
       osso: ['Enxerto ou implante zigomático', 'Em muitos casos dá para refazer o osso ou usar o implante que se apoia no osso da face. A tomografia mostra o que é possível.', 'o valor depende da tomografia, feita na avaliação', 'tratamento-enxerto.html'],
       quebrado: ['Avaliação de urgência', 'Vemos o dente no mesmo dia. Se não der para salvar, a extração e o implante podem ser planejados juntos.', 'consulta com tomografia', 'tratamento-urgencia.html'],
       falhou: ['Resgate de implante', 'Avaliamos o implante antigo e, se for preciso, ele é retirado com cuidado e refeito com material de marca.', 'o valor sai por escrito na avaliação', 'tratamento-implante.html'],
-      estetica: ['Coroas e facetas', 'Porcelana ou zircônia, com o sorriso planejado na tela antes de começar.', 'a partir de R$ 1.290 por dente · até 24x', 'tratamento-coroas.html'],
+      estetica: ['Coroas e facetas', 'Porcelana ou zircônia, com o sorriso planejado na tela antes de começar.', 'valor informado na avaliação · até 24x', 'tratamento-coroas.html'],
       revisao: ['Avaliação completa', 'Exame, tomografia e uma conversa honesta sobre o que precisa e o que pode esperar.', 'sem compromisso', 'tratamento-manutencao.html']
     };
     var esc1 = null;

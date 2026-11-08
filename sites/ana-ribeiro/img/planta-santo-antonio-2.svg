@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 386 351" width="386" height="351" font-family="Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" fill="#f9f7f1"/>
+<text x="40" y="34" font-size="15" fill="#272925" letter-spacing="2">SÓTÃO</text>
+<text x="346" y="34" font-size="12" fill="#5e5b53" text-anchor="end">Planta ilustrativa · medidas aproximadas</text>
+<rect x="40.0" y="56.0" width="183.6" height="149.6" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="131.8" y="130.8" font-size="15" fill="#272925" text-anchor="middle">Suíte</text>
+<text x="131.8" y="151.1" font-size="12" fill="#5e5b53" text-anchor="middle">23,8 m²</text>
+<rect x="223.6" y="56.0" width="122.4" height="149.6" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="284.8" y="130.8" font-size="15" fill="#272925" text-anchor="middle">Banho</text>
+<text x="284.8" y="151.1" font-size="12" fill="#5e5b53" text-anchor="middle">15,8 m²</text>
+<rect x="40.0" y="205.6" width="306.0" height="81.6" fill="#ffffff" stroke="#272925" stroke-width="3"/>
+<text x="193.0" y="246.4" font-size="15" fill="#272925" text-anchor="middle">Estar íntimo</text>
+<text x="193.0" y="266.7" font-size="12" fill="#5e5b53" text-anchor="middle">21,6 m²</text>
+<g transform="translate(40 317)"><rect width="170" height="6" fill="#272925"/><rect width="85.0" height="6" fill="#d7c5a9"/><text y="22" font-size="11" fill="#5e5b53">0</text><text x="170" y="22" font-size="11" fill="#5e5b53" text-anchor="end">5 m</text></g>
+<g transform="translate(330 301)"><path d="M0 18 8 -6 16 18 8 12z" fill="#272925"/><text x="8" y="34" font-size="11" fill="#5e5b53" text-anchor="middle">N</text></g>
+</svg>

@@ -3,23 +3,24 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=18"></script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>A corretora · Ana Ribeiro, 12 anos vendendo imóveis em Florianópolis</title>
+<title>A corretora · Ana Ribeiro, imóveis de alto padrão em Florianópolis</title>
 <meta name="description" content="Conheça a Ana Ribeiro, corretora em Florianópolis há 12 anos: 340 famílias atendidas, venda em 41 dias em média e papelada até a escritura.">
 <meta name="theme-color" content="#1b2120">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%231b2120'%2F%3E%3Cpath%20d%3D'M8%2030L20%209l12%2021'%20fill%3D'none'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3Cpath%20d%3D'M14%2030h12'%20stroke%3D'%23d7c5a9'%20stroke-width%3D'2'%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="../assets/fontes/c643e2bf05.css">
 <link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
-<link rel="stylesheet" href="../assets/moldura.css?v=4">
-<link rel="stylesheet" href="estilo.css?v=7">
+<link rel="stylesheet" href="../assets/moldura.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=9">
 <script src="../../js/leads-config.js?v=6" defer></script>
-<script src="../assets/moldura.js?v=4" defer></script>
-<script src="site.js?v=6" defer></script>
+<script src="../assets/moldura.js?v=6" defer></script>
+<script src="dados.js?v=1" defer></script>
+<script src="site.js?v=8" defer></script>
 </head>
-<body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
+ <body data-slug="ana-ribeiro" data-marca="Ana Ribeiro Imóveis" data-cat="imobiliaria">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="cab" data-tom="claro">
@@ -28,23 +29,25 @@
     <span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span>
   </a>
   <nav class="nav" aria-label="Páginas">
-    <a href="imoveis.html">Imóveis</a><a href="sobre.html" aria-current="page">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="contato.html">Contato</a>
+    <a href="imoveis.html">Imóveis</a><a href="bairros.html">Bairros</a><a href="sobre.html" aria-current="page">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a>
   </nav>
-  <p class="creci"><b>AR</b><span>CORRETORA DE IMÓVEIS<br>CRECI FICTÍCIO</span></p>
+  <a class="cab-agendar" href="agendar.html">Agendar<span class="so-pc"> visita</span></a>
   <button class="cab-menu" type="button" aria-expanded="false" aria-controls="menu-cel">Menu</button>
 </header>
 <div class="menu-cel" id="menu-cel" hidden>
-  <a href="index.html">Início</a><a href="imoveis.html">Imóveis</a><a href="sobre.html" aria-current="page">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="contato.html">Contato</a>
-  <a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana ↗</a>
+  <a href="index.html">Início</a><a href="imoveis.html">Imóveis</a><a href="bairros.html">Bairros</a><a href="sobre.html" aria-current="page">A corretora</a><a href="simulador.html">Financiar</a><a href="avaliacao.html">Avaliar</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a>
+  <a class="bt bt-bege" href="agendar.html">Agendar uma visita ↗</a>
+  <a class="menu-wa" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Falar com a Ana no WhatsApp ↗</a>
 </div>
+
 
 <main id="conteudo">
   <section class="pg-topo" data-tom="claro" aria-labelledby="pg-t">
     <nav class="trilha" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span aria-current="page">A corretora</span></nav>
     <h1 class="pg-titulo" id="pg-t">A <em>corretora.</em></h1>
     <div class="pg-intro">
-      <div class="rot-col"><p class="rot">[ANA RIBEIRO · CORRETORA EM CIDADE EXEMPLO]</p><a class="bt bt-escuro" href="contato.html" data-wa="Olá, Ana! Li sobre o seu trabalho no site e quero conversar.">Falar com a Ana ↗</a></div>
-      <div class="txt"><p class="grande">Eu acho o imóvel certo antes de você perder um fim de semana visitando o errado.</p><p>Sou a Ana Ribeiro, corretora em Florianópolis há 12 anos. Comecei atendendo estudante que procurava aluguel no Bairro Exemplo E e hoje ajudo famílias a comprar e vender do Itacorubi a Jurerê. Já são 340 famílias com a chave na mão.</p><p>Trabalho sozinha, com uma rede de fotógrafo, despachante e advogado imobiliário de confiança. Quem me chama fala comigo do primeiro contato até a escritura.</p></div>
+      <div class="rot-col"><p class="rot">[ANA RIBEIRO · CORRETORA EM FLORIANÓPOLIS]</p><a class="bt bt-escuro" href="contato.html" data-wa="Olá, Ana! Li sobre o seu trabalho no site e quero conversar.">Falar com a Ana ↗</a></div>
+      <div class="txt"><p class="grande">Eu acho o imóvel certo antes de você perder um fim de semana visitando o errado.</p><p>Sou a Ana Ribeiro, corretora em Florianópolis há 12 anos. Comecei na Trindade e hoje cuido da compra e da venda de casas e apartamentos de alto padrão, de Jurerê Internacional à Lagoa, para famílias da Ilha e de fora dela. Já são 340 famílias com a chave na mão.</p><p>Trabalho sozinha, com uma rede de fotógrafo, despachante e advogado imobiliário de confiança. Quem me chama fala comigo do primeiro contato até a escritura.</p></div>
     </div>
   </section>
 
@@ -52,7 +55,7 @@
     <div><dt>340</dt><dd>famílias com a chave na mão</dd></div>
     <div><dt>41 dias</dt><dd>tempo médio de venda</dd></div>
     <div><dt>12 anos</dt><dd>de CRECI ativo em Florianópolis</dd></div>
-    <div><dt>1.900</dt><dd>vendas reais na base de comparação</dd></div>
+    <div><dt>R$ 410 mi</dt><dd>em imóveis vendidos desde 2014 (exemplo)</dd></div>
   </dl>
 
   <section class="cap" data-tom="claro" aria-labelledby="c1">
@@ -82,13 +85,26 @@
     <figure><img src="img/chave.webp" alt="Chave de casa ao lado de uma casinha de madeira" width="1400" height="1051" loading="lazy"></figure>
   </section>
 
+  <section class="processo" data-tom="claro2" aria-labelledby="pc-t">
+    <div class="pc-topo"><p class="olho-h">COMPRA ACOMPANHADA</p><h2 id="pc-t">Do primeiro café <em>à chave.</em></h2><p>Seis etapas, todas comigo. Você sabe o próximo passo antes de ele chegar.</p></div>
+    <ol class="pc"><li><b>01</b><h3>Conversa</h3><p>Uma hora para entender quem vai morar, como é a rotina e quanto quer investir. Pode ser por vídeo.</p></li><li><b>02</b><h3>Recursos</h3><p>Simulação do financiamento ou comprovação dos recursos, para negociar com força de compra à vista.</p></li><li><b>03</b><h3>Curadoria</h3><p>Eu visito antes. Você recebe só os imóveis que passaram, com vídeo sem cortes e a matrícula.</p></li><li><b>04</b><h3>Visitas</h3><p>Presenciais ou por chamada de vídeo, no horário que você escolher, inclusive no fim de semana.</p></li><li><b>05</b><h3>Proposta e checagem</h3><p>Negociação por escrito e checagem com advogado: matrícula, certidões, débitos, marinha e laudêmio.</p></li><li><b>06</b><h3>Escritura e chaves</h3><p>ITBI, cartório e registro acompanhados por mim. Eu entrego a chave na sua mão.</p></li></ol>
+    <a class="bt bt-escuro pc-bt" href="agendar.html">Agendar a primeira conversa ↗</a>
+  </section>
+
+  <section class="vendidos" id="vendidos" data-tom="escuro" aria-labelledby="vd2-t">
+    <div class="vd-topo"><p class="olho-h">VENDAS REALIZADAS</p><h2 id="vd2-t">Imóveis que já <em>mudaram de dono.</em></h2><p>Algumas vendas dos últimos anos. Valores e prazos de exemplo, para demonstração.</p></div>
+    <div class="vd-tab"><table><caption>Vendas realizadas (exemplos)</caption><thead><tr><th scope="col">Imóvel</th><th scope="col">Bairro</th><th scope="col">Valor</th><th scope="col">Vendido em</th><th scope="col">Ano</th></tr></thead><tbody><tr><td>Casa frente-mar</td><td>Cacupé</td><td>R$ 9,4 milhões</td><td>52 dias</td><td>2026</td></tr><tr><td>Casa em condomínio</td><td>Jurerê Internacional</td><td>R$ 6,2 milhões</td><td>34 dias</td><td>2026</td></tr><tr><td>Cobertura duplex</td><td>Beira-Mar Norte</td><td>R$ 4,8 milhões</td><td>41 dias</td><td>2025</td></tr><tr><td>Casa com vista para a Lagoa</td><td>Lagoa da Conceição</td><td>R$ 3,1 milhões</td><td>29 dias</td><td>2025</td></tr><tr><td>Casa açoriana</td><td>Santo Antônio de Lisboa</td><td>R$ 2,4 milhões</td><td>63 dias</td><td>2025</td></tr><tr><td>Apartamento 4 suítes</td><td>Beira-Mar Norte</td><td>R$ 3,9 milhões</td><td>38 dias</td><td>2025</td></tr><tr><td>Casa de praia</td><td>Campeche</td><td>R$ 2,2 milhões</td><td>27 dias</td><td>2024</td></tr><tr><td>Terreno frente-mar</td><td>Jurerê Internacional</td><td>R$ 7,5 milhões</td><td>88 dias</td><td>2024</td></tr></tbody></table></div>
+    <div class="dps"><figure class="dp"><blockquote><p>A Ana visitou doze casas antes de nos mostrar três. Compramos a segunda, em Cacupé, e ela cuidou de tudo enquanto a gente ainda morava em São Paulo.</p></blockquote><figcaption><b>Helena e Rodrigo</b>compraram em Cacupé</figcaption></figure><figure class="dp"><blockquote><p>Vendeu a cobertura pelo valor que ela avaliou, sem desconto, para um comprador que já tinha o dinheiro aprovado.</p></blockquote><figcaption><b>Família Andrade</b>venderam na Beira-Mar Norte</figcaption></figure><figure class="dp"><blockquote><p>Morando em Lisboa, fiz as visitas por vídeo. Ela mostrava cada canto, abria armário, testava a água do chuveiro. Só vim para a escritura.</p></blockquote><figcaption><b>Marcelo T.</b>comprou na Lagoa da Conceição</figcaption></figure><figure class="dp"><blockquote><p>Descobriu uma pendência na matrícula que o outro corretor não tinha visto. Resolveu com o advogado antes da proposta.</p></blockquote><figcaption><b>Dra. Patrícia M.</b>comprou em Jurerê Internacional</figcaption></figure><figure class="dp"><blockquote><p>Discreta do começo ao fim. Nada de placa, nada de anúncio: ela apresentou a casa só para três compradores certos.</p></blockquote><figcaption><b>Sr. e Sra. Bauer</b>venderam em Jurerê Internacional</figcaption></figure><figure class="dp"><blockquote><p>Mostrou só imóveis que cabiam no nosso financiamento. Visitamos quatro e fechamos o terceiro.</p></blockquote><figcaption><b>Bruna e Diego</b>compraram no Campeche</figcaption></figure></div>
+    <p class="vd-pe"><span>DEPOIMENTOS DE EXEMPLO</span><a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Quero vender meu imóvel com discrição. Podemos conversar?">Quero vender com a Ana ↗</a></p>
+  </section>
+
   <section class="faq" data-tom="claro" aria-labelledby="fq">
     <h2 id="fq">O que perguntam <em>na primeira conversa.</em></h2>
     <div>
       <details><summary>Quanto custa ter a Ana como corretora?</summary><p>Quem paga a comissão de corretagem é o vendedor, no ato da escritura, e ela vem combinada por escrito na autorização de venda. Para quem compra, o meu trabalho não tem custo.</p></details>
       <details><summary>Você trabalha só com os imóveis do site?</summary><p>Não. O site mostra a seleção da semana. Tenho parceria com outros corretores da Ilha e acesso a imóveis que ainda não foram anunciados.</p></details>
       <details><summary>Atende quem mora fora de Florianópolis?</summary><p>Sim, e muito. Faço visita por vídeo chamada, mando o vídeo do imóvel sem cortes e cuido da documentação a distância. Você vem para a visita final e para a escritura.</p></details>
-      <details><summary>Em quais bairros você trabalha?</summary><p>Na Ilha toda, com mais imóveis no Bairro Exemplo D, Bairro Exemplo E, Bairro Exemplo C, Bairro Exemplo B, Bairro Exemplo G, Bairro Exemplo H, Bairro Exemplo F e Bairro Exemplo A.</p></details>
+      <details><summary>Em quais bairros você trabalha?</summary><p>Na Ilha toda, com mais imóveis em Jurerê Internacional, Cacupé, Santo Antônio de Lisboa, Beira-Mar Norte, Lagoa da Conceição e Campeche. Veja o <a href="bairros.html">mapa dos bairros</a>.</p></details><details><summary>Você vende sem anunciar?</summary><p>Sim. Para quem prefere discrição, apresento o imóvel só a compradores com recursos comprovados, sem placa e sem portal. Boa parte das vendas acima de R$ 5 milhões é assim.</p></details>
     </div>
   </section>
 </main>
@@ -98,17 +114,18 @@
     <h2>Seu próximo endereço <em>começa numa conversa.</em></h2>
   </div>
   <div class="rd-meio">
-    <p>Comprar, vender ou só entender quanto dá para financiar.<br>Respondo no mesmo dia, de segunda a sábado.</p>
-    <a class="bt bt-bege" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">Converse com a Ana <i aria-hidden="true">↗</i></a>
+    <p>Comprar, vender ou só entender o mercado da Ilha.<br>Respondo no mesmo dia, de segunda a sábado.</p>
+    <div class="rd-bts"><a class="bt bt-bege" href="agendar.html">Agendar uma visita <i aria-hidden="true">↗</i></a><a class="bt bt-linha" href="contato.html" data-wa="Olá, Ana! Vim pelo site e queria conversar sobre imóveis.">WhatsApp da Ana <i aria-hidden="true">↗</i></a></div>
   </div>
   <div class="rd-baixo">
     <a class="logo logo-grande" href="index.html" aria-label="Voltar ao início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 33 20 7l14 26"/><path d="M13 33h14"/><circle cx="20" cy="24" r="1.6"/></svg><span><b translate="no">ANA RIBEIRO</b><small>IMÓVEIS</small></span></a>
-    <p>Cidade Exemplo<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI fictício</p>
-    <a class="rd-rever" href="index.html">Voltar ao início <i aria-hidden="true">↗</i></a>
+    <p>Rua de Exemplo, 100, sala 504 · Agronômica · Florianópolis, SC<br><span translate="no">Ana Ribeiro Imóveis</span> · CRECI de exemplo 00000-F · CNPJ de exemplo 00.000.000/0001-00</p>
+    <a class="rd-rever" href="#conteudo">Voltar ao topo <i aria-hidden="true">↑</i></a>
   </div>
-  <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>
-  <p class="rd-nota">Fotos: Unsplash (licença Unsplash). Marca criada para demonstração · Site de exemplo feito pela Blue Rose.</p>
+  <nav class="rd-links" aria-label="Mapa do site"><a href="index.html">Início</a><a href="imoveis.html">Imóveis à venda</a><a href="bairros.html">Mapa dos bairros</a><a href="agendar.html">Agendar visita</a><a href="sobre.html">A corretora</a><a href="simulador.html">Simulador de financiamento</a><a href="avaliacao.html">Avaliar meu imóvel</a><a href="artigos.html">Artigos</a><a href="contato.html">Contato</a><a href="privacidade.html">Política de privacidade</a></nav>
+  <p class="rd-nota">Marca criada para demonstração · site de exemplo feito pela Blue Rose. Imóveis, preços, vendas e depoimentos são exemplos; simulações e avaliações são estimativas e não substituem a análise do banco nem a visita. Fotos dos imóveis: Pexels (licença Pexels) e Unsplash (licença Unsplash). Lagoa da Conceição: Rodrigo Soldon (Wikimedia Commons, CC BY 2.0). Pôr do sol em Cacupé: Adtormena (Wikimedia Commons, CC BY-SA 4.0). Tours 360°: Poly Haven (CC0). Vídeos montados com as fotos de cada imóvel.</p>
 </footer>
+
 
 </body>
 </html>

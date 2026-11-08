@@ -1,4 +1,4 @@
-/* Patrícia Leal · advocacia de família em BH. Layout editorial: creme, verde-escuro, grotesca em caixa alta e logotipo serifado gigante. */
+/* Patrícia Leal · advocacia de família em Curitiba. Layout editorial: creme, verde-escuro, grotesca em caixa alta e logotipo serifado gigante. */
 :root {
   --creme: #f7f0dc;
   --creme-2: #efe6cc;
@@ -22,7 +22,7 @@ p { margin: 0; }
 .pular { position: absolute; left: -999px; top: 8px; z-index: 100; background: var(--verde); color: var(--creme); padding: 10px 14px; }
 .pular:focus { left: 8px; }
 
-/* ---------- topo fixo: relógio de BH e menu ---------- */
+/* ---------- topo fixo: relógio de Curitiba e menu ---------- */
 .topo { position: fixed; z-index: 40; inset: 0 0 auto 0; display: flex; justify-content: flex-end; align-items: center; padding: 18px var(--g); pointer-events: none; mix-blend-mode: normal; }
 .topo > * { pointer-events: auto; }
 .relogio { position: absolute; left: 63.4%; display: flex; align-items: center; gap: 7px; font: 500 10px/1 var(--sans); letter-spacing: .02em; text-transform: uppercase; }
@@ -119,26 +119,40 @@ p { margin: 0; }
 .segue.on { clip-path: inset(0 0 0 0); }
 .segue img { width: 100%; height: 100%; object-fit: cover; }
 
-/* ---------- calculadora de pensão ---------- */
-.calc { display: grid; grid-template-columns: 34.7% 1fr; margin-top: clamp(60px, 8vw, 120px); border-top: 1px solid var(--linha); }
-.pens { grid-column: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; padding-top: 40px; max-width: 910px; }
-.campo { display: flex; flex-direction: column; gap: 10px; }
-.num { font: 400 clamp(1.6rem, 3.3vw, 3rem)/1.1 var(--sans); }
-.pens input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 26px; background: transparent; cursor: pointer; margin: 4px 0 0; }
-.pens input[type=range]::-webkit-slider-runnable-track { height: 1px; background: var(--verde); }
-.pens input[type=range]::-moz-range-track { height: 1px; background: var(--verde); }
-.pens input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--acc); margin-top: -11px; border: 0; transition: transform .2s; }
-.pens input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--acc); border: 0; }
-.pens input[type=range]:active::-webkit-slider-thumb { transform: scale(1.3); }
-.ck { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; margin-top: 28px; font-size: 1rem; cursor: pointer; }
-.ck input { width: 20px; height: 20px; accent-color: var(--verde); flex: none; }
-.pn-res { grid-column: 1 / -1; text-align: center; margin-top: clamp(60px, 8vw, 110px); }
-.pn-cab { margin-bottom: 18px; }
-.faixa { font: 400 clamp(2rem, 7.5vw, 6.8rem)/1 var(--sans); text-transform: uppercase; letter-spacing: -.012em; font-variant-numeric: tabular-nums; }
-.pn-txt { max-width: 760px; margin: 26px auto 0; font-size: clamp(1rem, 1.5vw, 1.35rem); line-height: 1.35; }
-.pn-txt b { font-weight: 500; }
-.pn-txt p + p { margin-top: .6em; }
-.pn-aviso { margin: 22px auto 0; max-width: 560px; font: 500 10px/1.5 var(--sans); text-transform: uppercase; color: var(--tx-2); }
+/* ---------- como o juiz analisa a pensão (explicativo, sem valor) ---------- */
+.criterios { list-style: none; margin: clamp(90px, 13vw, 190px) 0 0; padding: 0; border-bottom: 1px solid var(--linha); }
+.criterios li { display: grid; grid-template-columns: 34.7% 1fr; grid-template-rows: auto 1fr; column-gap: 0; border-top: 1px solid var(--linha); padding: clamp(26px, 3.4vw, 50px) 0; }
+.criterios .cr-num { grid-column: 1; grid-row: 1; margin-bottom: 14px; }
+.criterios b { grid-column: 1; grid-row: 2; align-self: start; font: 400 clamp(1.5rem, 3vw, 2.7rem)/1 var(--sans); text-transform: uppercase; letter-spacing: -.01em; padding-right: 24px; overflow-wrap: anywhere; }
+.cr-txt { grid-column: 2; grid-row: 1 / 3; max-width: 910px; font-size: clamp(1rem, 1.9vw, 1.75rem); line-height: 1.3; }
+.cr-txt .dados dd { font-size: .78em; }
+.cr-fim { margin-top: clamp(70px, 10vw, 140px); }
+.cr-fim .texto .lk { white-space: nowrap; }
+
+/* ---------- janela "Pedir horário" ---------- */
+.horario { width: min(620px, calc(100vw - 30px)); max-height: calc(100dvh - 30px); margin: auto; padding: 0; border: 1px solid var(--verde); border-radius: 0; background: var(--creme); color: var(--tinta); overflow: auto; }
+.horario::backdrop { background: rgba(22, 40, 13, .55); }
+.horario[open] { animation: abre-item .5s var(--ease); }
+.hr-form { display: grid; gap: 26px; padding: 22px 26px 30px; }
+.hr-topo { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; border-bottom: 1px solid var(--linha); padding-bottom: 14px; }
+.hr-fecha { flex: none; min-height: 44px; padding: 0 2px; }
+.hr-tit { margin: 0; font: 400 clamp(2rem, 5vw, 3.2rem)/1 var(--sans); text-transform: uppercase; letter-spacing: -.012em; }
+.hr-form > label { display: flex; flex-direction: column; gap: 8px; }
+.hr-form input:not([type=radio]), .hr-form select { width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--verde); border-radius: 0; padding: 8px 0 10px; color: var(--tinta); font: 400 1.25rem/1.2 var(--sans); }
+.hr-form select { -webkit-appearance: none; appearance: none; cursor: pointer; background: linear-gradient(45deg, transparent 50%, var(--verde) 50%) right 14px center / 8px 8px no-repeat, linear-gradient(-45deg, transparent 50%, var(--verde) 50%) right 8px center / 8px 8px no-repeat; }
+.hr-form input:focus-visible, .hr-form select:focus-visible { outline: none; border-bottom-width: 2px; }
+.hr-form fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.hr-form legend { padding: 0; margin-bottom: 12px; }
+.hr-per { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.hr-per label { position: relative; cursor: pointer; }
+.hr-per input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.hr-per span { display: grid; place-items: center; min-height: 48px; padding: 6px 8px; border: 1px solid var(--verde); border-radius: 99px; font: 500 11px/1.2 var(--sans); text-transform: uppercase; text-align: center; letter-spacing: .02em; transition: background .3s, color .3s; }
+.hr-per input:checked + span { background: var(--verde); color: var(--creme); }
+.hr-per input:focus-visible + span { outline: 2px solid var(--verde); outline-offset: 3px; }
+.hr-form .erro { grid-column: auto; min-height: 1.2em; margin: -10px 0 0; }
+.hr-pe { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.hr-nota { font-size: .95rem; line-height: 1.4; color: var(--tx-2); max-width: 30ch; }
+.hr-bt, .js .linha .hr-bt { position: static; flex: none; margin: 0; width: 112px; height: 112px; transform: none; }
 
 /* ---------- prazos da lei ---------- */
 .prazos { list-style: none; margin: clamp(90px, 13vw, 190px) 0 0; padding: 0; border-bottom: 1px solid var(--linha); }
@@ -199,10 +213,19 @@ p { margin: 0; }
   .dados dd { font-size: .95rem; }
   .circulo-p { margin-top: 22px; width: 84px; height: 84px; }
   .segue { display: none; }
-  .calc { grid-template-columns: 1fr; margin-top: 50px; }
-  .pens { grid-column: 1; grid-template-columns: 1fr; gap: 28px; padding-top: 28px; }
-  .ck { margin-top: 0; font-size: .95rem; }
-  .faixa { font-size: 2.05rem; }
+  .criterios { margin-top: 64px; }
+  .criterios li { grid-template-columns: 1fr; grid-template-rows: none; padding: 26px 0 30px; }
+  .criterios .cr-num, .criterios b, .cr-txt { grid-column: 1; grid-row: auto; }
+  .criterios .cr-num { margin-bottom: 8px; }
+  .criterios b { font-size: 1.85rem; padding: 0; margin-bottom: 14px; }
+  .cr-txt { font-size: 1.05rem; line-height: 1.4; }
+  .cr-txt .dados dd { font-size: .95rem; }
+  .cr-fim { margin-top: 70px; }
+  .horario { width: 100vw; max-width: 100vw; max-height: 92dvh; margin: auto 0 0; border-width: 1px 0 0; }
+  .hr-form { padding: 16px 18px 26px; gap: 22px; }
+  .hr-per { grid-template-columns: 1fr 1fr; }
+  .hr-pe { align-items: flex-end; }
+  .hr-bt, .js .linha .hr-bt { width: 96px; height: 96px; }
   .prazos { margin-top: 64px; }
   .prazos li { grid-template-columns: 1fr; gap: 8px; padding: 22px 0; }
   .prazos b { font-size: 2rem; }
@@ -297,8 +320,7 @@ a.item-bt { text-decoration: none; }
 /* ---------- correção visual: barra com fundo (o relógio e o menu não se misturam ao texto que passa), valores inteiros ---------- */
 .topo { background: var(--creme); min-height: 44px; }
 html { scroll-padding-top: 60px; }
-.texto p, .texto, .cab-sub, .item-corpo p, .prazos span, .dados dd, .grupos ul li, .doc .corpo p, .doc .corpo li, .pn-txt p { text-wrap: pretty; }
+.texto p, .texto, .cab-sub, .item-corpo p, .prazos span, .dados dd, .grupos ul li, .doc .corpo p, .doc .corpo li, .cr-txt p { text-wrap: pretty; }
 .item-bt span { display: inline-block; text-wrap: balance; }
 .grupos h3, .prazos b { text-wrap: balance; }
-.faixa, .num, .prazos b { white-space: nowrap; }
-@media (max-width: 760px) { .faixa { font-size: clamp(1.45rem, 7.6vw, 2.05rem); } }
+.num, .prazos b { white-space: nowrap; }
