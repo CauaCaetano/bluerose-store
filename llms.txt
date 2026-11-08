@@ -39,7 +39,7 @@ Desde 07/11/2026 cada sistema é vendido numa versão só, o Essencial: app de c
 ## Sites e automações
 
 - [Página inicial](https://bluerose-store.com/): serviços, preços e contato
-- [Sites de exemplo](https://bluerose-store.com/exemplos.html): 24 sites no ar em 5 ramos: dentista (implantes, clínica familiar, rede de clínicas, ortodontia e estética, odontopediatria), construção e reforma (reformas, construtora de casas, arquitetura e interiores, construtora industrial), advocacia (família, trabalhista, empresarial full service, previdenciário, criminal), estética (harmonização, depilação a laser, rede facial, estética corporal, salão e spa), imobiliária (corretora, imobiliária de bairro, lançamento, administradora de aluguéis e imobiliária rural), cada um com uma ferramenta que traz cliente (calculadora de orçamento, agenda, simulador de financiamento, preço por área)
+- [Sites de exemplo](https://bluerose-store.com/exemplos.html): 23 sites no ar em 5 ramos: dentista (implantes, clínica familiar, rede de clínicas, ortodontia e estética, odontopediatria), construção e reforma (reformas, construtora de casas, arquitetura e interiores, construtora industrial), advocacia (família, trabalhista, empresarial full service, previdenciário, criminal), estética (harmonização, rede facial, estética corporal, salão e spa), imobiliária (corretora, imobiliária de bairro, lançamento, administradora de aluguéis e imobiliária rural), cada um com uma ferramenta que traz cliente (calculadora de orçamento, agenda, simulador de financiamento, preço por área)
 - [Automação de WhatsApp](https://bluerose-store.com/automacao-express.html)
 - [Projetos](https://bluerose-store.com/projetos.html)
 
