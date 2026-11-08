@@ -316,19 +316,84 @@ const listaCli = () => `<datalist id="dl-cli">${db.clientes.map((c) => `<option 
 const acharProd = (txt) => { const s = String(txt || '').trim(); if (!s) return null; return ativos().find((p) => p.cod === s) || ativos().find((p) => sa(p.nome) === sa(s)) || null; };
 const buscaProd = (txt) => { const s = sa(txt); if (!s) return []; const por = ativos().find((p) => p.cod === String(txt).trim()); if (por) return [por]; return ativos().filter((p) => sa(p.nome).includes(s) || sa(p.cat).includes(s)).slice(0, 12); };
 
-// ------------------------------------------------------------------ câmera (leitor de código de barras do celular)
-let fluxo = null, laco = 0;
-function paraCamera() { cancelAnimationFrame(laco); if (fluxo) { fluxo.getTracks().forEach((x) => x.stop()); fluxo = null; } }
+// ------------------------------------------------------------------ leitor de código de barras (igual ao do PlayCell)
+// Câmera: 1080p, foco contínuo; cada tentativa usa um quadro tratado de um jeito: normal, invertido (código branco em
+// fundo preto) e com mais contraste. Leitor do próprio navegador quando existe (Android e Mac); senão ZXing (Windows e iPhone).
+const FORMATOS_CAM = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf', 'qr_code', 'data_matrix'];
+const FILTROS_CAM = ['none', 'grayscale(1) invert(1) contrast(1.5)', 'grayscale(1) contrast(1.8)'];
+let fluxo = null, laco = 0, camParada = true;
+function paraCamera() { camParada = true; clearTimeout(laco); if (fluxo) { fluxo.getTracks().forEach((x) => x.stop()); fluxo = null; } }
+let zxingPronto = null;
+const carregaZXing = () => (zxingPronto ||= new Promise((ok, erro) => { if (window.ZXing) { ok(window.ZXing); return; } const sc = document.createElement('script'); sc.src = 'zxing.min.js'; sc.onload = () => ok(window.ZXing); sc.onerror = erro; document.head.append(sc); }));
 async function lerCamera(aoLer) {
-  if (!('BarcodeDetector' in window) || !navigator.mediaDevices) { toast('Este navegador não lê código pela câmera. Use o leitor USB ou digite os números do código.', true); return; }
-  const j = abrir(`${cab('Aponte para o código de barras', 'Segure firme, a uns 15 cm. Lê sozinho.')}<div class="cam"><video playsinline muted></video><span class="mira"></span></div><footer class="j-pe"><button type="button" class="bt" data-fechar>Fechar</button></footer>`);
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('Este navegador não abre a câmera. Use o leitor USB ou digite os números do código.', true); return; }
+  const j = abrir(`${cab('Aponte para o código de barras', 'Segure firme, a uns 15 cm. Lê sozinho, até código branco em fundo preto.')}<div class="cam"><video playsinline muted></video><span class="mira"></span></div><p class="mudo" id="cam-msg">Abrindo a câmera…</p><footer class="j-pe"><button type="button" class="bt" data-fechar>Cancelar</button></footer>`);
+  const msg = (x) => { const m = $('#cam-msg', j); if (m) m.textContent = x; };
+  camParada = false;
+  const achou = (bruto) => { const c = String(bruto || '').trim(); if (!c || camParada) return false; camParada = true; if (navigator.vibrate) navigator.vibrate(80); fechar(); aoLer(c); return true; };
   try {
-    const det = new window.BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'] });
-    fluxo = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    // câmera de trás no celular; no computador, a webcam
+    fluxo = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+    if (camParada) { paraCamera(); return; }
+    const trilha = fluxo.getVideoTracks()[0];   // foco contínuo, quando a câmera deixa (código pequeno)
+    if (trilha && trilha.applyConstraints) trilha.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
     const v = $('video', j); v.srcObject = fluxo; await v.play();
-    const passo = async () => { if (!fluxo) return; try { const r = await det.detect(v); if (r[0]) { const c = r[0].rawValue; if (navigator.vibrate) navigator.vibrate(60); fechar(); aoLer(c); return; } } catch (e) { /* quadro ainda carregando */ } laco = requestAnimationFrame(passo); };
-    passo();
-  } catch (e) { fechar(); toast('Não consegui abrir a câmera. Libere a câmera para este site e tente de novo.', true); }
+    msg('Aponte para o código de barras do produto.');
+    const tela = document.createElement('canvas'), ctx = tela.getContext('2d', { willReadFrequently: true });
+    let vez = 0;
+    const quadro = () => { if (!v.videoWidth) return null; tela.width = v.videoWidth; tela.height = v.videoHeight; ctx.filter = FILTROS_CAM[vez++ % FILTROS_CAM.length]; ctx.drawImage(v, 0, 0); ctx.filter = 'none'; return tela; };
+    const BD = window.BarcodeDetector, suportados = BD && BD.getSupportedFormats ? await BD.getSupportedFormats().catch(() => []) : [];
+    let ler1;
+    if (BD && suportados.includes('code_128')) {   // leitor do próprio navegador: mais rápido
+      const det = new BD({ formats: FORMATOS_CAM.filter((f) => suportados.includes(f)) });
+      ler1 = async (c) => (await det.detect(c)).map((x) => x.rawValue);
+    } else {                                        // Windows e iPhone: ZXing, carregado só agora
+      msg('Preparando o leitor…');
+      const Z = await carregaZXing();
+      const dicas = new Map([[Z.DecodeHintType.TRY_HARDER, true], [Z.DecodeHintType.POSSIBLE_FORMATS, [Z.BarcodeFormat.EAN_13, Z.BarcodeFormat.EAN_8, Z.BarcodeFormat.UPC_A, Z.BarcodeFormat.UPC_E, Z.BarcodeFormat.CODE_128, Z.BarcodeFormat.CODE_39, Z.BarcodeFormat.ITF, Z.BarcodeFormat.QR_CODE, Z.BarcodeFormat.DATA_MATRIX]]]);
+      const zx = new Z.MultiFormatReader(); zx.setHints(dicas);
+      ler1 = async (c) => { try { return [zx.decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(c))), dicas).getText()]; } catch (e) { return []; } finally { zx.reset(); } };
+      msg('Aponte para o código de barras do produto.');
+    }
+    const ler = async () => {
+      if (camParada) return;
+      const c = quadro();
+      if (c) try { for (const tx of await ler1(c)) if (achou(tx)) return; } catch (e) { /* quadro ainda sem imagem */ }
+      laco = setTimeout(ler, 120);
+    };
+    ler();
+  } catch (e) {
+    const nome = e && e.name;
+    msg(nome === 'NotAllowedError' ? 'A câmera foi bloqueada. Libere a câmera para este site nas permissões do navegador.' : nome === 'NotFoundError' ? 'Nenhuma câmera encontrada neste aparelho. Use o leitor USB ou digite o código.' : 'Não consegui abrir a câmera. Digite o código ou use o leitor USB.');
+  }
+}
+
+// Leitor USB ou Bluetooth (pistola): ele "digita" como um teclado, só que muito rápido (poucos milissegundos por tecla)
+// e termina com Enter. Fora dos campos de texto, reconhece esse ritmo em qualquer tela e entrega o código lido;
+// dentro de um campo, a leitura vai para o campo normalmente.
+(function leitorUSB() {
+  let buf = '', ultima = 0, fim = 0;
+  const campo = (el) => el instanceof HTMLElement && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
+  const entregar = () => { const c = buf; buf = ''; if (c.length >= 8 && $('#camada').hidden) codigoLido(c); };
+  addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.altKey || e.metaKey || campo(e.target)) { buf = ''; return; }
+    const t0 = performance.now();
+    clearTimeout(fim);
+    if (e.key === 'Enter' || e.key === 'Tab') { if (buf.length >= 8) { e.preventDefault(); entregar(); } buf = ''; return; }
+    if (e.key.length !== 1) return;
+    if (t0 - ultima > 60) buf = '';           // pessoa digitando (ou começo de uma leitura nova)
+    buf += e.key; ultima = t0;
+    fim = setTimeout(() => { if (buf.length >= 12) entregar(); else buf = ''; }, 150); // leitor configurado sem Enter
+  });
+})();
+// para onde vai o código lido pela pistola, conforme a tela aberta
+function codigoLido(c) {
+  if (telaAtual === 'vender') { lerNoBalcao(c); return; }
+  if (telaAtual === 'inventario' && estado.invent) { contaInv(c); return; }
+  const p = ativos().find((x) => x.cod === c), bal = typeof lerBalanca === 'function' && lerBalanca(c);
+  if (p) { formProduto(p); return; }
+  if (bal) { formProduto(bal.p); return; }
+  confirmar('Código não cadastrado', `O código ${t(c)} ainda não está no estoque. Quer cadastrar o produto agora?`, 'Cadastrar', () => formProduto({ cod: c }));
 }
 
 // ------------------------------------------------------------------ marca e menu
