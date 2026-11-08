@@ -575,3 +575,12 @@ html.pa-aberto { overflow: hidden; }
 /* topo do celular sem salto: altura fixa, sem encolher ao rolar */
 @media (max-width: 1180px) { .topo.solido .topo-in { padding-top: 22px; padding-bottom: 22px; } .topo.solido .marca-txt small { display: block; } }
 @media (max-width: 600px) { .abre-txt .acoes { margin-top: 36px; } .area-c, .area-c:not(:nth-child(3n + 1)) { padding: 24px 20px 26px; } .area-c h3 { line-height: 1.22; } .area-c p { line-height: 1.6; } .grade-areas { row-gap: 18px; } .setor-c h3 { line-height: 1.22; } }
+/* ---------- rodada 8 (acabamento): número, título, texto e botão em linhas comuns da fileira; o texto encosta embaixo da sua linha, então o espaço até o botão (preso à base) é igual em qualquer largura ---------- */
+@media (min-width: 901px) {
+  .grade-areas { grid-auto-rows: auto; }
+  .area-c, .area-c:not(:nth-child(3n + 1)) { display: grid; grid-template-rows: subgrid; grid-row: span 4; row-gap: 0; align-content: stretch; }
+  .area-c small { margin-bottom: 12px; }
+  .area-c h3 { margin-bottom: 12px; align-self: start; }
+  .area-c p { margin: 0; align-self: end; }
+  .area-c .lnk { margin-top: 20px; align-self: end; justify-self: start; }
+}

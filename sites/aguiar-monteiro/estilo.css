@@ -806,3 +806,9 @@ body[data-tema="azul"] .topo { background: var(--azul-op); }
 /* legenda das fotos com peso e contraste */
 .ge-grade span { font: 800 16px/1.25 var(--tit); letter-spacing: .005em; background: linear-gradient(rgba(15, 28, 46, 0), rgba(15, 28, 46, .9) 50%); text-shadow: 0 1px 2px rgba(0, 0, 0, .35); }
 @media (max-width: 820px) { .prob { padding-left: 14px; padding-right: 12px; } .ge-grade span { font-size: 15.5px; } }
+/* ---------- rodada 8 (acabamento) ---------- */
+/* subtítulos em cinza mais escuro (contraste confortável sobre o marfim e a areia) */
+.ge-sub, .int-lead, .int-sub, .cl-sub, .an-dica, .dr-sub, .inicio .aneis li { color: #3E4851; }
+/* celular: botões de situação com mais respiro lateral */
+@media (max-width: 820px) { .prob { padding: 14px 18px; } .prob-grade, .analise .prob-grade { gap: 10px; } }
+@media (max-width: 380px) { .prob { padding: 12px 15px; } }

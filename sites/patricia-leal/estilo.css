@@ -586,3 +586,6 @@ html.pn-aberto { overflow: hidden; }
   .item-corpo .texto { font-size: 1.08rem; line-height: 1.55; }
   .base-legal, .texto p.base-legal { font-size: 10.5px; }
 }
+/* ---------- rodada 8 (acabamento): mais espaço entre o texto e o botão da linha ---------- */
+.linha { row-gap: 46px; }
+@media (max-width: 760px) { .linha { row-gap: 24px; } .linha > .circulo { margin-top: 12px; } }
