@@ -341,3 +341,6 @@ h1, h2, h3, .ag-pal, .conta-vazia { text-wrap: balance; }
   .ag-card b, .ag-card small { padding-left: 14px; }
   .ag-card small { display: block; }
 }
+
+/* sem faixa de luz passando no topo (pedido do dono) */
+.heroi-luz { display: none !important; }

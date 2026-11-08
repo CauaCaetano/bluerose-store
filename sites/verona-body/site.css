@@ -500,3 +500,7 @@ video[data-vid] { display: block; max-width: 100%; background: #E6E7E5; }
 .vid-bt::before { content: ''; width: 12px; height: 14px; border-left: 4px solid currentColor; border-right: 4px solid currentColor; box-sizing: border-box; }
 .vid-bt.parado::before { width: 0; height: 0; border-style: solid; border-width: 8px 0 8px 13px; border-color: transparent transparent transparent currentColor; margin-left: 4px; }
 .vid-bt:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* sem faixa de luz passando nas fotos (pedido do dono) */
+.varre { display: none !important; }
+.js .foto[data-rev].visto::after, .foto[data-rev]::after { animation: none !important; opacity: 0 !important; }
