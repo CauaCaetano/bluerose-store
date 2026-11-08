@@ -25,5 +25,8 @@
   // Peplo: sistema da loja de roupas (marca própria, fora da linha Veltria), mesma conta, nuvem e equipe; sem teste grátis (paga na hora, Pix ou cartão)
   out.peplo = { id: 'peplo', categoria: 'peplo', versao: '', nome: 'Peplo', nomeCategoria: 'Peplo', nomeVersao: '', pasta: 'peplo', entrada: 'app.html',
     chave: 'peplo-v1', mensal: 59, exemplo: 1, pagina: 'peplo.html', logo: 'img/logos/peplo-simbolo.png', semTeste: true, semAnual: true };
+  // Annona: estoque e vendas do mercadinho e do bar (marca própria, fora da Veltria); sem teste grátis, Pix ou cartão
+  out.annona = { id: 'annona', categoria: 'annona', versao: '', nome: 'Annona', nomeCategoria: 'Annona', nomeVersao: '', pasta: 'annona', entrada: 'app.html',
+    chave: 'annona-v1', mensal: 59, exemplo: 1, pagina: 'annona.html', logo: 'img/logos/annona-simbolo.png', semTeste: true, semAnual: true };
   window.VELTRIA_VERSOES = out;
 })();
