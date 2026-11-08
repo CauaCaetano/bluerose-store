@@ -84,7 +84,64 @@
       '<p class="card-end">' + esc(im.rua) + ' · ' + esc(im.cidade) + '</p><div class="card-preco">' + brl(im.preco) + (im.fin === 'aluguel' ? '<small>/mês</small>' : '') + '</div>' +
       '<div class="card-custos">Condomínio ' + (im.cond ? brl(im.cond) : 'não tem') + ' · IPTU ' + brl(im.iptu) + '</div>' +
       '<ul class="card-dados"><li><b>' + IC.area + im.area + '</b>m²</li>' + q + '<li><b>' + IC.banho + im.banheiros + '</b>banh.</li><li><b>' + IC.vaga + im.vagas + '</b>vaga' + (im.vagas !== 1 ? 's' : '') + '</li></ul>' +
-      '<div class="card-pe"><span class="cor-mini"><span class="mono" aria-hidden="true">' + c.iniciais + '</span>' + esc(c.nome.split(' ')[0]) + '</span><span>' + (im.dias === 0 ? 'Publicado hoje' : 'Há ' + im.dias + ' dia' + (im.dias > 1 ? 's' : '')) + '</span></div></div></li>';
+      '<div class="card-pe"><span class="cor-mini"><span class="mono" aria-hidden="true">' + c.iniciais + '</span>' + esc(c.nome.split(' ')[0]) + '</span><span>' + (im.dias === 0 ? 'Publicado hoje' : 'Há ' + im.dias + ' dia' + (im.dias > 1 ? 's' : '')) + '</span></div>' + acoesCard(im) + '</div></li>';
+  }
+  // WhatsApp do corretor responsável + seta em círculo, em todo card (gerado aqui ou já escrito na página)
+  IC.wa = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.4 9.4 0 0 0-8.1 14.2L2.6 21.5l4.9-1.3A9.4 9.4 0 1 0 12 2.5zm0 17.1a7.7 7.7 0 0 1-3.9-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A7.7 7.7 0 1 1 12 19.6zm4.3-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.3 6.3 0 0 1-3.1-2.7c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.7-1.7c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 4.9 4.9 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.7 3 .6.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.2l-.4-.2z"/></svg>';
+  IC.seta = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10h10M11 6l4 4-4 4"/></svg>';
+  function precoTxt(im) { return brl(im.preco) + (im.fin === 'aluguel' ? '/mês' : ''); }
+  function acoesCard(im) {
+    var c = LP.obterCorretor(im.corretor), pn = c.nome.split(' ')[0];
+    var msg = 'Olá, ' + pn + '! Tenho interesse no imóvel ' + im.cod + ', em ' + im.bairro + ' (' + im.titulo + ', ' + precoTxt(im) + '). Vi no site da Lar Paulista.';
+    return '<div class="card-acoes"><a class="card-wa" href="#" data-sem-lead data-wa-card="' + im.cod + '" data-wa="' + esc(msg) + '" aria-label="Falar com ' + esc(c.nome) + ' no WhatsApp sobre o imóvel ' + im.cod + '">' + IC.wa + '<span>Falar com ' + esc(pn) + '</span></a>' +
+      '<span class="card-ir" aria-hidden="true">' + IC.seta + '</span></div>';
+  }
+  function enfeitaCards(raiz) {
+    $$('.card[data-cod]', raiz).forEach(function (el) {
+      if ($('.card-acoes', el)) return;
+      var im = LP.obterImovelPorCodigo(el.dataset.cod), corpo = $('.card-corpo', el);
+      if (im && corpo) corpo.insertAdjacentHTML('beforeend', acoesCard(im));
+    });
+  }
+  enfeitaCards(doc);
+  doc.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-wa-card]'); if (!a) return;
+    var im = LP.obterImovelPorCodigo(a.dataset.waCard); if (!im) return;
+    var l = LP.registrarLead({ imovel: im.cod, origem: 'Site · WhatsApp do card', corretorEscolhido: im.corretor, mensagem: a.getAttribute('data-wa') });
+    toast('Contato enviado para ' + LP.obterCorretor(l.corretor).nome + ', corretor(a) do imóvel ' + im.cod + '.');
+  });
+
+  // ---------- movimento: FLIP nas listas e revelação de títulos ----------
+  var calmo = function () { return matchMedia('(prefers-reduced-motion: reduce)').matches; };
+  var CURVA = 'cubic-bezier(.2,.7,.2,1)';
+  function flip(cont, mudar) {
+    if (!cont || calmo() || !Element.prototype.animate) { mudar(); return; }
+    var antes = {};
+    $$('[data-cod]', cont).forEach(function (el) { if (el.offsetParent) antes[el.dataset.cod] = el.getBoundingClientRect(); });
+    mudar();
+    var novos = 0, vh = innerHeight;
+    $$('[data-cod]', cont).forEach(function (el) {
+      if (!el.offsetParent) return;
+      var r = el.getBoundingClientRect(), a = antes[el.dataset.cod];
+      if (r.bottom < -200 || r.top > vh + 200) return;
+      if (a) {
+        var dx = a.left - r.left, dy = a.top - r.top;
+        if (Math.abs(dx) + Math.abs(dy) < 1) return;
+        el.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 450, easing: CURVA });
+      } else {
+        el.animate([{ opacity: 0, transform: 'translateY(16px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 350, delay: Math.min(novos++, 8) * 40, easing: CURVA, fill: 'backwards' });
+      }
+    });
+  }
+  if ('IntersectionObserver' in window && !calmo()) {
+    var tits = $$('main .sec h2:not(.sr), main .cta-faixa p');
+    if (tits.length) {
+      doc.documentElement.classList.add('rev-on');
+      var ioT = new IntersectionObserver(function (ents) {
+        ents.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('rev-vis'); ioT.unobserve(en.target); } });
+      }, { rootMargin: '0px 0px -6% 0px' });
+      tits.forEach(function (t) { t.classList.add('rev'); ioT.observe(t); });
+    }
   }
 
   // ---------- validação dos formulários ----------
@@ -238,7 +295,7 @@
       if (f.pet) p.push('que aceite pet');
       return p.filter(Boolean).join(' ');
     }
-    var ultimo = '';
+    var ultimo = '', jaDesenhou = false;
     function render(rolar, forcar) {
       var f = lerForm();
       var chave = JSON.stringify([f, st, vista, st.favoritos ? favs() : 0]);
@@ -259,12 +316,16 @@
       ch.__acoes = cs.map(function (c) { return c[1]; });
       var nf = cs.length, bn = $('[data-n-filtros]'); bn.textContent = nf ? '(' + nf + ')' : '';
       $$('[data-ver-res]').forEach(function (b) { b.textContent = r.total ? 'Ver ' + r.total + ' imóve' + (r.total > 1 ? 'is' : 'l') : 'Nenhum imóvel'; });
-      // lista
+      // lista (com FLIP: os cards que continuam deslizam para o novo lugar, os novos entram)
+      var semFlip = !jaDesenhou || rolar; jaDesenhou = true;
+      var desenha = function () {
       area.classList.toggle('vista-lista', vista === 'lista');
       $$('[data-vista]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.vista === vista ? 'true' : 'false'); });
       if (!r.total) {
         lista.innerHTML = '<li class="vazio-res"><b style="font:700 20px var(--lp-serif);color:var(--lp-verde-esc)">' + (st.favoritos && !favs().length ? 'Você ainda não salvou nenhum imóvel.' : 'Nenhum imóvel com esses filtros agora.') + '</b><p style="margin:6px 0 0">' + (st.favoritos && !favs().length ? 'Toque no coração dos anúncios para guardar aqui.' : 'Tire um filtro ou peça para um corretor avisar quando entrar um assim.') + '</p><div class="linha-bts"><button type="button" class="bt bt-borda" data-limpar>Limpar filtros</button><a class="bt bt-wa" href="#" data-wa="' + esc('Olá, Lar Paulista! Procuro ' + resumo(f) + ' e quero ser avisado quando entrar.') + '">Avisar quando entrar</a></div></li>';
       } else lista.innerHTML = r.itens.map(card).join('');
+      };
+      if (semFlip) desenha(); else flip(lista, desenha);
       // paginação
       var pg = $('[data-paginacao]'), h = '';
       if (r.paginas > 1) {
@@ -416,13 +477,136 @@
   // PÁGINA DE BAIRRO
   // =====================================================================
   if (PAG === 'bairro') (function () {
+    var listaB = $('[data-lista-bairro]');
     $$('[data-filtra-bairro]').forEach(function (b) {
       b.addEventListener('click', function () {
         $$('[data-filtra-bairro]').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
         var fin = b.dataset.filtraBairro;
-        $$('[data-lista-bairro] .card').forEach(function (c) { var im = LP.obterImovelPorCodigo(c.dataset.cod); c.hidden = !!fin && im.fin !== fin; });
+        flip(listaB, function () {
+          $$('[data-lista-bairro] .card').forEach(function (c) { var im = LP.obterImovelPorCodigo(c.dataset.cod); c.hidden = !!fin && im.fin !== fin; });
+          if (listaB.scrollLeft) listaB.scrollLeft = 0;
+        });
       });
     });
+
+    // ---------- guia do bairro: mapa ilustrativo com pontos por categoria ----------
+    var G = window.LP_GUIA, nome = $('main').dataset.bairro, fig = $('[data-guia-mapa]');
+    if (!G || !fig) return;
+    var svg = $('svg', fig), camada = $('[data-guia-pinos]'), lista = $('[data-guia-lista]'), filtros = $('[data-guia-filtros]'), nTxt = $('[data-guia-n]');
+    var ICG = {
+      escola: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 8l8-4 8 4-8 4zM5.5 9.8v4c1.2 1.3 2.7 2 4.5 2s3.3-.7 4.5-2v-4M18 8v5"/></svg>',
+      cafe: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 8h10v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM14 9h1.5a2 2 0 0 1 0 4H14M7 3.5v2M10 3.5v2"/></svg>',
+      parque: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 17.5v-5M10 2.5l5 7H5zM10 6.5l5.5 7h-11z"/></svg>',
+      imovel: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 9.5 10 4l6.5 5.5M5.5 8v8.5h9V8M8.5 16.5v-4h3v4"/></svg>'
+    };
+    var limita = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+    function centroVerde() {
+      var p = $('path[fill="#cfdcc4"]', svg), rs = svg.getBoundingClientRect();
+      if (!p || !rs.width) return { x: 50, y: 50 };
+      var rp = p.getBoundingClientRect();
+      return { x: limita((rp.left + rp.width / 2 - rs.left) / rs.width * 100, 12, 88), y: limita((rp.top + rp.height / 2 - rs.top) / rs.height * 100, 22, 84) };
+    }
+    var cv = centroVerde();
+    var itens = (G.bairros[nome] || []).map(function (p, i) {
+      return { id: 'g' + i, cat: p.cat, nome: p.nome, det: p.det, min: p.min, x: p.verde ? cv.x : p.x, y: p.verde ? cv.y : p.y };
+    });
+    // imóveis do bairro: posição estável (pelo código) sem encostar nos outros pontos
+    var hash = function (s) { var h = 7; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100003; return h; };
+    var cands = []; for (var cx = 12; cx <= 86; cx += 6) for (var cy = 20; cy <= 86; cy += 11) cands.push({ x: cx, y: cy });
+    LP.carregarImoveis().filter(function (im) { return im.bairro === nome; }).forEach(function (im) {
+      var h = hash(im.cod), melhor = null, folga = -1;
+      for (var k = 0; k < cands.length; k++) {
+        var c = cands[(h + k * 17) % cands.length], d = 999;
+        itens.forEach(function (o) { d = Math.min(d, Math.max(Math.abs(o.x - c.x) / (o.cat === 'imovel' ? 19 : 12), Math.abs(o.y - c.y) / 10)); });
+        if (d >= 1) { melhor = c; break; }
+        if (d > folga) { folga = d; melhor = c; }
+      }
+      itens.push({ id: im.cod, cat: 'imovel', nome: im.titulo, det: precoTxt(im) + ' · ' + im.area + ' m²', x: melhor.x, y: melhor.y, im: im });
+    });
+    var curtoPreco = function (im) {
+      if (im.fin === 'aluguel') return 'R$ ' + (im.preco / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mil/mês';
+      return abrev(im.preco);
+    };
+    var cats = Object.keys(G.CATS).filter(function (k) { return itens.some(function (i) { return i.cat === k; }); });
+    var cat = '', sel = null;
+    filtros.innerHTML = '<button type="button" class="gf" data-gcat="" aria-pressed="true">Tudo <small>' + itens.length + '</small></button>' + cats.map(function (k) {
+      return '<button type="button" class="gf gf-' + k + '" data-gcat="' + k + '" aria-pressed="false">' + G.CATS[k].nome + ' <small>' + itens.filter(function (i) { return i.cat === k; }).length + '</small></button>';
+    }).join('');
+    camada.innerHTML = itens.map(function (it, i) {
+      var lado = it.x > 74 ? ' rot-dir' : it.x < 26 ? ' rot-esq' : '';
+      var rot = it.cat === 'imovel' ? it.im.cod + ' · ' + it.nome : it.nome;
+      return '<button type="button" class="pino pino-' + it.cat + lado + '" style="left:' + it.x + '%;top:' + it.y + '%;--i:' + i + '" data-pino="' + it.id + '" aria-pressed="false" aria-label="' + esc(G.CATS[it.cat].curto + ': ' + rot + (it.min ? ', ' + it.min + ' min a pé' : '')) + '">' +
+        ICG[it.cat] + (it.cat === 'imovel' ? '<span class="pino-preco">' + curtoPreco(it.im) + '</span>' : '') + '<span class="pino-rot" aria-hidden="true">' + esc(rot) + '</span></button>';
+    }).join('');
+    function item(it) {
+      if (it.cat === 'imovel') {
+        var f = it.im.fotos[0];
+        return '<li class="gi gi-imovel" data-cod="' + it.id + '"><img src="' + f.mini + '" width="72" height="54" alt="" loading="lazy" decoding="async"><span class="gi-txt"><small>' + (it.im.fin === 'venda' ? 'À venda' : 'Para alugar') + ' · Cód. ' + it.id + '</small><a href="' + it.im.url + '">' + esc(it.nome) + '</a><b>' + esc(it.det) + '</b></span><span class="card-ir" aria-hidden="true">' + IC.seta + '</span></li>';
+      }
+      return '<li class="gi gi-' + it.cat + '" data-cod="' + it.id + '"><span class="gi-ic" aria-hidden="true">' + ICG[it.cat] + '</span><span class="gi-txt"><small>' + G.CATS[it.cat].curto + '</small><button type="button" data-gi="' + it.id + '">' + esc(it.nome) + '</button><span>' + esc(it.det) + '</span></span><span class="gi-min">' + it.min + ' min<br>a pé</span></li>';
+    }
+    function contagem() {
+      var v = itens.filter(function (i) { return !cat || i.cat === cat; }), ni = v.filter(function (i) { return i.cat === 'imovel'; }).length, np = v.length - ni;
+      var p = []; if (np) p.push(np + ' ponto' + (np > 1 ? 's' : '') + ' de interesse'); if (ni) p.push(ni + ' imóve' + (ni > 1 ? 'is' : 'l') + ' da carteira');
+      nTxt.textContent = p.join(' e ') + ' (exemplo)';
+    }
+    function pintaLista(animar) {
+      var faz = function () { lista.scrollTop = 0; lista.scrollLeft = 0; lista.innerHTML = itens.filter(function (i) { return !cat || i.cat === cat; }).map(item).join(''); marca(); };
+      if (animar) flip(lista, faz); else faz();
+      contagem();
+    }
+    function marca() {
+      $$('[data-pino]', camada).forEach(function (p) { p.setAttribute('aria-pressed', p.dataset.pino === sel ? 'true' : 'false'); });
+      $$('.gi', lista).forEach(function (l) { l.classList.toggle('ativo', l.dataset.cod === sel); });
+    }
+    function rolaAte(li) {
+      if (!li) return;
+      var horiz = lista.scrollWidth > lista.clientWidth + 2;
+      var opc = { behavior: calmo() ? 'auto' : 'smooth' };
+      if (horiz) opc.left = li.offsetLeft - 16; else opc.top = li.offsetTop - 6;
+      lista.scrollTo(opc);
+    }
+    function escolhe(id, deLista) {
+      sel = sel === id && !deLista ? null : id; marca();
+      if (sel && !deLista) rolaAte($('.gi[data-cod="' + sel + '"]', lista));
+    }
+    filtros.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-gcat]'); if (!b) return;
+      cat = b.dataset.gcat; sel = null;
+      $$('[data-gcat]', filtros).forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      $$('[data-pino]', camada).forEach(function (p) {
+        var it = itens.filter(function (i) { return i.id === p.dataset.pino; })[0], fora = !!cat && it.cat !== cat;
+        p.classList.toggle('fora', fora); p.tabIndex = fora ? -1 : 0; p.setAttribute('aria-hidden', fora ? 'true' : 'false');
+      });
+      pintaLista(true);
+    });
+    camada.addEventListener('click', function (e) { var p = e.target.closest('[data-pino]'); if (p) escolhe(p.dataset.pino); });
+    lista.addEventListener('click', function (e) { var b = e.target.closest('[data-gi]'); if (b) escolhe(b.dataset.gi, true); });
+    var apaga = function () { $$('.realce', camada).forEach(function (p) { p.classList.remove('realce'); }); };
+    var realca = function (id) { apaga(); var p = $('[data-pino="' + id + '"]', camada); if (p) p.classList.add('realce'); };
+    lista.addEventListener('mouseover', function (e) { var l = e.target.closest('.gi'); if (l) realca(l.dataset.cod); });
+    lista.addEventListener('mouseleave', apaga);
+    lista.addEventListener('focusin', function (e) { var l = e.target.closest('.gi'); if (l) realca(l.dataset.cod); });
+    // celular: o card que está à frente no carrossel acende o ponto no mapa
+    var tm;
+    lista.addEventListener('scroll', function () {
+      if (lista.scrollWidth <= lista.clientWidth + 2) return;
+      clearTimeout(tm); tm = setTimeout(function () {
+        var ini = lista.getBoundingClientRect().left + 40, achou = null;
+        $$('.gi', lista).forEach(function (l) { if (!achou && l.getBoundingClientRect().right > ini) achou = l; });
+        if (achou) realca(achou.dataset.cod);
+      }, 90);
+    }, { passive: true });
+    // no computador a lista acompanha a altura do mapa
+    var ajusta = function () { lista.style.maxHeight = innerWidth >= 900 ? Math.max(260, fig.offsetHeight - nTxt.offsetHeight - 12) + 'px' : ''; };
+    addEventListener('resize', ajusta);
+    pintaLista(false); ajusta();
+    // os pontos entram no mapa uma vez, quando ele aparece na tela
+    var solta = function () { fig.classList.add('pinos-vis'); setTimeout(function () { fig.classList.add('pinos-pronto'); }, 1300); };
+    if ('IntersectionObserver' in window && !calmo()) {
+      var io = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { solta(); io.disconnect(); } }, { threshold: 0.3 });
+      io.observe(fig);
+    } else fig.classList.add('pinos-vis', 'pinos-pronto');
   })();
 
   // =====================================================================

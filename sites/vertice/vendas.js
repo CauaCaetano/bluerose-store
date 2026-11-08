@@ -63,7 +63,6 @@
     el.innerHTML = '<i class="bv-v" style="width:' + (conta.v / 72 * 100) + '%"></i><i class="bv-r" style="width:' + (conta.r / 72 * 100) + '%"></i><i class="bv-d" style="width:' + (conta.d / 72 * 100) + '%"></i>';
   });
 
-  // ───────────────────────── 2 · plantas desenhadas (vetor) ─────────────────────────
   // cômodos em metros: [x, y, largura, profundidade, nome, tipo]; y = 0 é a fachada da vista
   var GEO = {
     A: { w: 14, h: 11.6, c: [
@@ -85,20 +84,37 @@
   };
   GEO.C = GEO.A;
   var S = 50, M = 46; // escala (px por metro) e margem
+
+  // ───────────────────────── 2 · plantas desenhadas (vetor) ─────────────────────────
+  // op: esp (espelhada), terraco, vista, rotulo, mat (piso: carvalho|pedra|marmore|escura), sol (manha|tarde|''), pinos (true), id
+  var MAT = {
+    carvalho: { nome: 'Carvalho natural', img: 'img/r3-mat-carvalho.webp', onde: 'piso de madeira no living, na circulação e nas suítes' },
+    pedra: { nome: 'Pedra clara', img: 'img/r3-mat-pedra.webp', onde: 'travertino claro em toda a área social e nas suítes' },
+    marmore: { nome: 'Mármore branco', img: 'img/r3-mat-marmore.webp', onde: 'mármore de veio fino no living, no hall e nas suítes' },
+    escura: { nome: 'Madeira escura', img: 'img/r3-mat-escura.webp', onde: 'madeira escura no living, na circulação e nas suítes' }
+  };
+  var PINOS = {
+    ext: ['Varanda gourmet', 'img/r3-int-varanda.webp', 'Varanda com guarda-corpo de vidro diante do mar'],
+    living: ['Living e jantar', 'img/r3-int-living-mar.webp', 'Living com piso de madeira e janelas para o mar'],
+    cama2: ['Suíte master', 'img/r3-int-suite.webp', 'Suíte clara com porta-janela para a varanda'],
+    cozinha: ['Cozinha', 'img/r3-int-cozinha.webp', 'Cozinha com armários claros e mesa de apoio'],
+    banho: ['Banho master', 'img/r3-int-banho.webp', 'Banheiro com banheira e janela de canto']
+  };
+  var nPlanta = 0;
   function plantaSVG(pl, op) {
     op = op || {};
-    var g = GEO[pl], esp = !!op.esp, ter = !!op.terraco, topo = ter ? 2.6 : 0, W = g.w * S, H = (g.h + topo) * S;
+    var g = GEO[pl], esp = !!op.esp, ter = !!op.terraco, topo = ter ? 2.6 : 0, W = g.w * S, H = (g.h + topo) * S, id = op.id || ('p' + (++nPlanta));
     var X = function (x, w) { return M + (esp ? g.w - x - w : x) * S; }, Y = function (y) { return M + (y + topo) * S; };
-    var out = [], mov = [];
+    var out = [], mov = [], pisos = [], pins = [], visto = {}, np = 0;
     var r = function (x, y, w, h, cls, rx) { return '<rect class="' + cls + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '"' + (rx ? ' rx="' + rx + '"' : '') + '/>'; };
     if (ter) {
       out.push(r(X(0, g.w * .62), M, g.w * .62 * S, topo * S, 'pl-ext'));
       out.push('<text class="pl-txt" x="' + (X(0, g.w * .62) + g.w * .31 * S) + '" y="' + (M + topo * S / 2) + '">terraço descoberto</text><text class="pl-m2" x="' + (X(0, g.w * .62) + g.w * .31 * S) + '" y="' + (M + topo * S / 2 + 20) + '">18 m²</text>');
     }
-    g.c.forEach(function (c) {
+    g.c.forEach(function (c, ci) {
       var x = X(c[0], c[2]), y = Y(c[1]), w = c[2] * S, h = c[3] * S, t = c[5], cx = x + w / 2, cy = y + h / 2;
       out.push(r(x, y, w, h, t === 'ext' ? 'pl-ext' : 'pl-comodo'));
-      // mobiliário simples, só para dar escala
+      if (/^(living|cama|cama2|circ|closet)$/.test(t)) pisos.push('<rect class="pl-piso" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" fill="url(#' + id + '-mat)"/>');
       if (t === 'cama' || t === 'cama2') { var bw = (t === 'cama2' ? 1.9 : 1.5) * S, bh = 2 * S, bx = cx - bw / 2, by = y + h - bh - 12; mov.push(r(bx, by, bw, bh, 'pl-movel', 4), r(bx + 8, by + bh - 34, bw / 2 - 12, 24, 'pl-movel', 6), r(bx + bw / 2 + 4, by + bh - 34, bw / 2 - 12, 24, 'pl-movel', 6)); }
       if (t === 'living') { mov.push(r(x + 18, y + h - 70, w * .45, 52, 'pl-movel', 8), r(x + 18, y + h - 70 - 80, 52, 80, 'pl-movel', 8), r(x + w * .62, y + 40, 150, 80, 'pl-movel', 6));
         for (var i = 0; i < 3; i++) mov.push('<circle class="pl-movel" cx="' + (x + w * .62 + 25 + i * 50) + '" cy="' + (y + 28) + '" r="11"/><circle class="pl-movel" cx="' + (x + w * .62 + 25 + i * 50) + '" cy="' + (y + 132) + '" r="11"/>'); }
@@ -109,15 +125,24 @@
       if (t === 'closet') mov.push(r(x + 6, y + 6, w - 12, 18, 'pl-movel'));
       if (t === 'servico') mov.push(r(x + 6, y + 6, 30, 30, 'pl-movel'), r(x + 40, y + 6, 30, 30, 'pl-movel'));
       if (t !== 'circ') out.push('<text class="pl-txt" x="' + cx.toFixed(1) + '" y="' + (cy - (h > 90 ? 4 : 2)).toFixed(1) + '">' + c[4] + '</text><text class="pl-m2" x="' + cx.toFixed(1) + '" y="' + (cy + 16).toFixed(1) + '">' + (c[2] * c[3]).toFixed(1).replace('.', ',') + ' m²</text>');
+      if (op.pinos && PINOS[t] && !visto[t]) {
+        visto[t] = 1; np++;
+        var px = x + Math.min(34, w * .2), py = y + Math.min(32, h * .3);
+        pins.push('<g class="pl-pino" tabindex="0" role="button" data-c="' + ci + '" data-t="' + t + '" aria-label="' + esc(PINOS[t][0]) + ', ' + (c[2] * c[3]).toFixed(1).replace('.', ',') + ' metros quadrados: ver foto de referência">' +
+          '<circle class="pl-pino-h" cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="27"/><circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="16"/><text x="' + px.toFixed(1) + '" y="' + py.toFixed(1) + '">' + np + '</text></g>');
+      }
     });
     var vista = op.vista || (pl === 'B' ? 'mar lateral' : 'mar');
-    var mar = /mar/.test(vista);
-    return '<svg class="planta-svg" viewBox="0 0 ' + (W + 2 * M) + ' ' + (H + 2 * M + 30) + '" role="img" aria-label="' + esc(op.rotulo || PLANTAS[pl].nome + ', ' + PLANTAS[pl].area + ' m²') + '">' +
-      '<g class="pl-mob">' + mov.join('') + '</g>' + out.join('') +
+    var mar = /mar/.test(vista), m = MAT[op.mat] || MAT.carvalho, tarde = op.sol === 'tarde';
+    var defs = '<defs><pattern id="' + id + '-mat" patternUnits="userSpaceOnUse" width="320" height="320"><image class="pl-mat-img" href="' + m.img + '" width="320" height="320" preserveAspectRatio="xMidYMid slice"/></pattern>' +
+      '<linearGradient id="' + id + '-sol" class="pl-sol-g" x1="0" y1="' + (tarde ? 1 : 0) + '" x2="0" y2="' + (tarde ? 0 : 1) + '"><stop offset="0" stop-color="#E2B66C" stop-opacity=".62"/><stop offset=".55" stop-color="#E2B66C" stop-opacity=".14"/><stop offset="1" stop-color="#E2B66C" stop-opacity="0"/></linearGradient></defs>';
+    return '<svg class="planta-svg' + (op.mat ? ' com-piso' : '') + '" viewBox="0 0 ' + (W + 2 * M) + ' ' + (H + 2 * M + 30) + '" role="img" aria-label="' + esc(op.rotulo || PLANTAS[pl].nome + ', ' + PLANTAS[pl].area + ' m²') + '" data-id="' + id + '">' + defs +
+      out.join('') + '<g class="pl-pisos">' + pisos.join('') + '</g><g class="pl-mob">' + mov.join('') + '</g>' +
+      '<rect class="pl-sol" x="' + M + '" y="' + Y(0) + '" width="' + W + '" height="' + (g.h * S) + '" fill="url(#' + id + '-sol)" style="opacity:' + (op.sol ? 1 : 0) + '"/>' +
       '<rect class="pl-borda" x="' + M + '" y="' + Y(0) + '" width="' + W + '" height="' + (g.h * S) + '"/>' +
       '<path class="pl-vista' + (mar ? '' : ' cidade') + '" d="M' + (M + 10) + ' ' + (M - 18) + 'H' + (M + W - 10) + '"/><text class="pl-cota" x="' + (M + W / 2) + '" y="' + (M - 26) + '">vista: ' + esc(vista) + ' · ' + g.w.toFixed(2).replace('.', ',') + ' m</text>' +
       '<text class="pl-cota" x="' + (M + W / 2) + '" y="' + (H + 2 * M + 14) + '">hall dos elevadores e entrada social</text>' +
-      '<g transform="translate(' + (M + W - 10) + ' ' + (H + 2 * M + 4) + ')"><path class="pl-norte" d="M0 -26 L8 0 L0 -6 L-8 0Z"/><text class="pl-cota" x="0" y="16">N</text></g></svg>';
+      '<g transform="translate(' + (M + W - 10) + ' ' + (H + 2 * M + 4) + ')"><path class="pl-norte" d="M0 -26 L8 0 L0 -6 L-8 0Z"/><text class="pl-cota" x="0" y="16">N</text></g>' + pins.join('') + '</svg>';
   }
 
   // ───────────────────────── 3 · zoom com arrastar e pinça ─────────────────────────
@@ -200,8 +225,163 @@
     var gz = Zoom(gpalco, galvo); gimg.addEventListener('load', gz.zera); gdlg.addEventListener('close', gz.zera);
   }
 
-  // ───────────────────────── 4 · espelho de vendas ─────────────────────────
-  var VAZIO = '<p class="pn-vazio">Toque numa unidade do prédio para ver andar, planta, área, vagas, preço e situação.</p><p class="pn-dica">Verde está à venda. Amarelo está reservada por 48 horas. Cinza já foi vendida.</p>';
+  // ───────────────────────── 4 · espelho de vendas = corte da fachada ─────────────────────────
+  // a fachada é desenhada em linhas finas; cada pavimento é um <g> clicável com as 4 unidades (finais 1 a 4).
+  // passar o mouse ilumina o andar em bronze (180 ms) e liga uma linha ao cartão do andar; clicar fixa (250 ms);
+  // escolher a unidade abre a gaveta com planta, ficha e as ações (interesse, simulação, fila ou aviso).
+  var SETA = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>';
+  var ST_CURTO = { d: 'disponível', r: 'reservada', v: 'vendida' };
+  function fachadaSVG() {
+    var VW = 440, BX0 = 92, BX1 = 392, FH = 26, Y0 = 70, pad = 10, o = [];
+    var yA = function (a) { return Y0 + (18 - a) * FH; };
+    var yBase = yA(1) + FH, yChao = yBase + 58;
+    // céu, coroamento e pérgola do rooftop
+    o.push('<line class="f-fina" x1="' + (BX0 + 26) + '" y1="22" x2="' + (BX1 - 26) + '" y2="22"/>');
+    for (var k = 0; k <= 12; k++) { var xp = BX0 + 26 + k * (BX1 - BX0 - 52) / 12; o.push('<line class="f-fina" x1="' + xp.toFixed(1) + '" y1="22" x2="' + xp.toFixed(1) + '" y2="34"/>'); }
+    o.push('<path class="f-linha" d="M' + (BX0 + 14) + ' ' + Y0 + 'V34H' + (BX1 - 14) + 'V' + Y0 + '"/>');
+    o.push('<line class="f-fina" x1="' + (BX0 + 14) + '" y1="50" x2="' + (BX1 - 14) + '" y2="50"/>');
+    o.push('<text x="' + ((BX0 + BX1) / 2) + '" y="14" text-anchor="middle">rooftop · piscina e espaço gourmet</text>');
+    // corpo da torre: do 15º ao 18º recua (terraços), abaixo a fachada cheia
+    o.push('<path class="f-linha" d="M' + (BX0 + 14) + ' ' + Y0 + 'V' + yA(14) + 'H' + BX0 + 'V' + yBase + 'M' + (BX1 - 14) + ' ' + Y0 + 'V' + yA(14) + 'H' + BX1 + 'V' + yBase + '"/>');
+    // térreo de pé-direito duplo com vidro e marquise
+    o.push('<path class="f-linha" d="M' + BX0 + ' ' + yBase + 'V' + yChao + 'M' + BX1 + ' ' + yBase + 'V' + yChao + '"/>');
+    o.push('<line class="f-linha" x1="' + (BX0 - 18) + '" y1="' + (yBase + 8) + '" x2="' + (BX1 + 18) + '" y2="' + (yBase + 8) + '"/>');
+    for (k = 0; k <= 10; k++) { var xv = BX0 + 16 + k * (BX1 - BX0 - 32) / 10; o.push('<line class="f-fina" x1="' + xv.toFixed(1) + '" y1="' + (yBase + 14) + '" x2="' + xv.toFixed(1) + '" y2="' + yChao + '"/>'); }
+    o.push('<line class="f-chao" x1="0" y1="' + yChao + '" x2="' + VW + '" y2="' + yChao + '"/>');
+    o.push('<text x="' + ((BX0 + BX1) / 2) + '" y="' + (yChao + 18) + '" text-anchor="middle">térreo · hall de pé-direito duplo</text>');
+    // pavimentos
+    for (var a = 18; a >= 1; a--) {
+      var y = yA(a), rec = a >= 15 ? 14 : 0, x0 = BX0 + rec, x1 = BX1 - rec, bw = (x1 - x0 - 2 * pad) / 4, g = [];
+      g.push('<rect class="f-hit" x="0" y="' + y + '" width="' + VW + '" height="' + FH + '"/>');
+      g.push('<rect class="f-faixa" x="' + (x0 - 6) + '" y="' + y + '" width="' + (x1 - x0 + 12) + '" height="' + FH + '"/>');
+      g.push('<line class="f-fina" x1="' + x0 + '" y1="' + y + '" x2="' + x1 + '" y2="' + y + '"/>');
+      g.push('<text class="f-num" x="' + (BX0 - 26) + '" y="' + (y + FH / 2 + 4) + '" text-anchor="end">' + (a < 10 ? '0' + a : a) + '</text>');
+      for (var f = 1; f <= 4; f++) {
+        var u = porCod(a * 100 + f), ux = x0 + pad + (f - 1) * bw;
+        g.push('<rect class="f-un st-' + u.st + '" data-cod="' + u.cod + '" x="' + (ux + 3).toFixed(1) + '" y="' + (y + 6) + '" width="' + (bw - 6).toFixed(1) + '" height="' + (FH - 11) + '"/>');
+        if (f > 1) g.push('<line class="f-fina" x1="' + ux.toFixed(1) + '" y1="' + (y + 3) + '" x2="' + ux.toFixed(1) + '" y2="' + (y + FH - 3) + '"/>');
+      }
+      if (rec) g.push('<path class="f-fina" d="M' + BX0 + ' ' + (y + FH) + 'v-9h' + rec + 'M' + BX1 + ' ' + (y + FH) + 'v-9h-' + rec + '"/>');
+      o.push('<g class="f-andar" data-andar="' + a + '" tabindex="0" role="button" aria-label="' + a + 'º andar: ver as 4 unidades" data-y="' + (y + FH / 2) + '">' + g.join('') + '</g>');
+    }
+    // finais em cima, para ler as colunas
+    var fx0 = BX0 + pad, fbw = (BX1 - BX0 - 2 * pad) / 4;
+    for (f = 1; f <= 4; f++) o.push('<text x="' + (fx0 + (f - .5) * fbw).toFixed(1) + '" y="' + (Y0 - 6) + '" text-anchor="middle">final ' + f + '</text>');
+    return { X0: 44, VWv: VW - 68, svg: '<svg class="fachada" viewBox="44 0 ' + (VW - 68) + ' ' + (yChao + 26) + '" role="group" aria-label="Corte da fachada do Vértice: 18 andares com 4 unidades cada. Escolha um andar.">' + o.join('') + '</svg>', VW: VW, BX1: BX1, H: yChao + 26 };
+  }
+
+  $$('[data-espelho]').forEach(function (raiz) {
+    var completo = raiz.getAttribute('data-espelho') === 'completo';
+    var fx = fachadaSVG(), fixo = null, mostrado = null;
+    var chips = function (nome, ops) { return '<fieldset><legend>' + ops[0] + '</legend>' + ops.slice(1).map(function (o, i) { return '<label class="chip"><input type="radio" name="' + nome + '" value="' + o[0] + '"' + (i === 0 ? ' checked' : '') + '><span>' + o[1] + '</span></label>'; }).join('') + '</fieldset>'; };
+    raiz.classList.add('esp');
+    raiz.innerHTML =
+      '<form class="esp-filtros" aria-label="Filtrar unidades">' +
+      chips('su', ['Suítes', ['', 'Todas'], ['2', '2 suítes'], ['3', '3 suítes']]) +
+      chips('st', ['Situação', ['', 'Todas'], ['d', 'Disponíveis'], ['r', 'Reservadas'], ['v', 'Vendidas']]) +
+      (completo ? '<div class="esp-modo" role="group" aria-label="Forma de ver"><button type="button" data-m="fachada" aria-pressed="true">Fachada</button><button type="button" data-m="lista" aria-pressed="false">Lista</button></div>' : '') +
+      '<p class="esp-cont" aria-live="polite"><span class="leg-ponto st-d"><b>' + conta.d + '</b>disponíveis</span><span class="leg-ponto st-r"><b>' + conta.r + '</b>reservadas</span><span class="leg-ponto st-v"><b>' + conta.v + '</b>vendidas</span></p></form>' +
+      '<div class="esp-palco">' +
+      '<div class="fachada-cx">' + fx.svg + '</div>' +
+      '<div class="esp-lado"><div class="andar-cartao" aria-live="polite"></div></div>' +
+      '<span class="f-dica" aria-hidden="true"></span></div>' +
+      (completo ? '<div class="esp-lista" hidden><p class="mut" style="font-size:14px">Ordenar <select name="ord" class="campo" style="width:auto;min-height:40px;display:inline-block"><option value="andar">andar mais alto</option><option value="preco">menor preço</option><option value="area">maior área</option><option value="m2">menor preço por m²</option></select></p><table><thead><tr><th>Unidade</th><th>Andar</th><th>Planta</th><th>Área</th><th>Suítes</th><th>Preço</th><th>Situação</th></tr></thead><tbody></tbody></table></div>' : '') +
+      '<p class="demo">' + DEMO + ' Quando uma unidade é reservada ou vendida, a cor muda sozinha para todos os corretores e para o site. Atualizado hoje às <span data-hora></span>.</p>';
+    var dlg = document.querySelector('.un-dlg');
+    if (!dlg) {
+      dlg = document.createElement('dialog'); dlg.className = 'un-dlg'; dlg.setAttribute('aria-label', 'Unidade escolhida');
+      dlg.innerHTML = '<button type="button" class="redondo un-dlg-x" aria-label="Fechar">×</button><div class="un-dlg-corpo"></div>';
+      document.body.appendChild(dlg);
+      $('.un-dlg-x', dlg).addEventListener('click', function () { dlg.close(); });
+      dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+      dlg.addEventListener('close', function () { document.body.classList.remove('sem-rolar'); });
+    }
+    var fo = $('.esp-filtros', raiz), palco = $('.esp-palco', raiz), svg = $('.fachada', raiz), cartao = $('.andar-cartao', raiz), dica = $('.f-dica', raiz), lado = $('.esp-lado', raiz);
+    var hora = new Date(); $('[data-hora]', raiz).textContent = String(hora.getHours()).padStart(2, '0') + ':' + String(hora.getMinutes()).padStart(2, '0');
+    var pp = params.get('planta'); if (pp && /^[ABC]$/.test(pp)) fo.su.value = String(PLANTAS[pp].suites);
+    var passa = function (u) { return (!fo.su.value || u.suites === +fo.su.value) && (!fo.st.value || u.st === fo.st.value); };
+    var desenhaCartao = function (a) {
+      mostrado = a;
+      var uns = [1, 2, 3, 4].map(function (f) { return porCod(a * 100 + f); }), nd = uns.filter(function (u) { return u.st === 'd'; }).length;
+      cartao.innerHTML = '<div class="ac-topo"><h3>' + a + 'º <em>andar</em></h3><span>' + nd + (nd === 1 ? ' disponível' : ' disponíveis') + ' de 4</span></div>' +
+        '<ul class="ac-uns">' + uns.map(function (u) {
+          return '<li><button type="button" class="st-' + u.st + (passa(u) ? '' : ' fora') + '" data-u="' + u.cod + '" data-cursor="Ver unidade"><i aria-hidden="true"></i><b>' + u.cod + '</b><span>Planta ' + u.planta + (u.terraco ? ' + terraço' : '') + ' · ' + u.area + ' m² · ' + u.suites + ' suítes<br>vista ' + u.vista + '</span><em>' + (u.st === 'v' ? 'vendida' : u.st === 'r' ? 'reservada' : mi(u.preco).replace('R$ ', 'R$ ')) + '</em><span class="seta-so" aria-hidden="true">' + SETA + '</span></button></li>';
+        }).join('') + '</ul>' +
+        '<div class="ac-pe"><span>' + (fixo === a ? 'Andar fixado · escolha a unidade' : 'Clique para fixar o andar') + '</span><span class="ac-nav"><button type="button" class="redondo" data-nav="1" aria-label="Andar de cima"' + (a === 18 ? ' disabled' : '') + '>↑</button><button type="button" class="redondo" data-nav="-1" aria-label="Andar de baixo"' + (a === 1 ? ' disabled' : '') + '>↓</button></span></div>';
+      posiciona(a);
+    };
+    var posiciona = function (a) {
+      var g = svg.querySelector('[data-andar="' + a + '"]'); if (!g) return;
+      var rs = svg.getBoundingClientRect(), rp = palco.getBoundingClientRect(), k = rs.width / fx.VWv, yF = rs.top - rp.top + (+g.getAttribute('data-y')) * k;
+      if (getComputedStyle(lado).position !== 'sticky') {
+        var hC = cartao.offsetHeight, max = Math.max(0, rs.height - hC);
+        var t = lim(yF - (rs.top - rp.top) - 46, 0, max);
+        lado.style.transform = 'translateY(' + t.toFixed(0) + 'px)';
+        var rl = lado.getBoundingClientRect(), x0 = rs.left - rp.left + (fx.BX1 - fx.X0) * k + 10, x1 = rl.left - rp.left - (rs.top - rp.top) * 0;
+        dica.style.left = x0 + 'px'; dica.style.width = Math.max(0, rl.left - rp.left - x0) + 'px'; dica.style.top = yF + 'px';
+      }
+      palco.classList.add('ativo');
+    };
+    var marca = function () { $$('.f-andar', svg).forEach(function (g) { g.classList.toggle('on', +g.dataset.andar === (mostrado || fixo)); }); };
+    var mostra = function (a) { if (a === mostrado) return; desenhaCartao(a); marca(); };
+    var fixa = function (a) { fixo = a; desenhaCartao(a); marca(); };
+    var filtra = function () {
+      $$('.f-un', svg).forEach(function (r) { r.classList.toggle('fora', !passa(porCod(r.dataset.cod))); });
+      if (mostrado) desenhaCartao(mostrado);
+      if (completo) lista();
+    };
+    // andar inicial: o mais alto com unidade disponível
+    var ini = 18; while (ini > 1 && ![1, 2, 3, 4].some(function (f) { return porCod(ini * 100 + f).st === 'd'; })) ini--;
+    svg.addEventListener('pointerover', function (e) { var g = e.target.closest('.f-andar'); if (g && e.pointerType === 'mouse') mostra(+g.dataset.andar); });
+    svg.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse' && fixo) mostra(fixo); });
+    svg.addEventListener('click', function (e) { var g = e.target.closest('.f-andar'); if (g) fixa(+g.dataset.andar); });
+    svg.addEventListener('keydown', function (e) {
+      var g = e.target.closest('.f-andar'); if (!g) return; var a = +g.dataset.andar;
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fixa(a); }
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); var n = lim(a + (e.key === 'ArrowUp' ? 1 : -1), 1, 18); fixa(n); svg.querySelector('[data-andar="' + n + '"]').focus(); }
+    });
+    svg.addEventListener('focusin', function (e) { var g = e.target.closest('.f-andar'); if (g) mostra(+g.dataset.andar); });
+    var abre = function (cod) {
+      var u = porCod(cod); if (!u) return;
+      $('.un-dlg-corpo', dlg).innerHTML = painel(u);
+      if (!dlg.open) dlg.showModal(); $('.un-dlg-corpo', dlg).scrollTop = 0;
+      raiz.dispatchEvent(new CustomEvent('vt-unidade', { bubbles: true, detail: u.cod }));
+    };
+    raiz.addEventListener('click', function (e) { var n = e.target.closest('[data-nav]'); if (n) { fixa(lim((mostrado || fixo) + +n.dataset.nav, 1, 18)); var bn = $('[data-nav="' + n.dataset.nav + '"]', cartao); if (bn && !bn.disabled) bn.focus(); return; } var b = e.target.closest('[data-u]'); if (b) abre(b.dataset.u); });
+    if (!dlg.dataset.ligado) {
+      dlg.dataset.ligado = '1';
+      dlg.addEventListener('click', function (e) {
+        var b = e.target.closest('.pn-par [data-u]'); if (b) { $('.un-dlg-corpo', dlg).innerHTML = painel(porCod(b.dataset.u)); return; }
+        var s = e.target.closest('[data-sim-u]');
+        if (s && s.getAttribute('href') === '#simulador') { e.preventDefault(); dlg.close(); VT.simular(s.dataset.simU); }
+      });
+    }
+    fo.addEventListener('change', filtra);
+    // lista (só no espelho completo)
+    var tb = completo && $('tbody', raiz), ord = completo && $('[name=ord]', raiz);
+    function lista() {
+      var l = UN.filter(passa), o = ord.value;
+      l.sort(o === 'preco' ? function (x, y) { return x.preco - y.preco; } : o === 'area' ? function (x, y) { return y.area - x.area || x.preco - y.preco; } : o === 'm2' ? function (x, y) { return x.m2 - y.m2; } : function (x, y) { return y.andar - x.andar || x.final - y.final; });
+      tb.innerHTML = l.map(function (u) {
+        return '<tr data-u="' + u.cod + '" tabindex="0"><td><b>' + u.cod + '</b></td><td>' + u.andar + 'º</td><td>' + u.planta + (u.terraco ? ' + terraço' : '') + '</td><td>' + u.area + ' m²</td><td>' + u.suites + '</td><td>' + (u.st === 'v' ? '—' : mi(u.preco)) + '</td><td><span class="pn-st st-' + u.st + '">' + ST_CURTO[u.st] + '</span></td></tr>';
+      }).join('') || '<tr><td colspan="7">Nenhuma unidade com esses filtros.</td></tr>';
+    }
+    if (completo) {
+      ord.addEventListener('change', lista);
+      tb.addEventListener('keydown', function (e) { var t = e.target.closest('tr[data-u]'); if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); abre(t.dataset.u); } });
+      $$('.esp-modo button', raiz).forEach(function (b) {
+        b.addEventListener('click', function () {
+          $$('.esp-modo button', raiz).forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+          palco.hidden = b.dataset.m !== 'fachada'; $('.esp-lista', raiz).hidden = b.dataset.m !== 'lista';
+        });
+      });
+    }
+    filtra(); fixa(ini);
+    addEventListener('resize', function () { if (mostrado) posiciona(mostrado); });
+    if (document.fonts) document.fonts.ready.then(function () { if (mostrado) posiciona(mostrado); });
+    var pu = params.get('u'); if (pu && porCod(pu) && raiz.hasAttribute('data-abrir-url')) { fixa(porCod(pu).andar); setTimeout(function () { abre(pu); }, 300); }
+  });
+
   function painel(u) {
     var P = PLANTAS[u.planta], par = u.st !== 'd' ? parecidas(u, 3) : [];
     var acao = u.st === 'd'
@@ -220,95 +400,6 @@
       '<a class="u-link pn-ficha-link" href="apartamento.html?u=' + u.cod + '">Ficha completa e planta com zoom ↗</a>' +
       (par.length ? '<div class="pn-par"><p>Parecidas e disponíveis</p>' + par.map(function (o) { return '<button type="button" data-u="' + o.cod + '"><b>' + o.cod + '</b><span>' + o.andar + 'º · ' + o.area + ' m²</span><em>' + mi(o.preco) + '</em></button>'; }).join('') + '</div>' : '');
   }
-
-  $$('[data-espelho]').forEach(function (raiz, ix) {
-    raiz.classList.add('es'); var sel = null;
-    var chips = function (nome, ops) { return ops.map(function (o, i) { return '<label><input type="radio" name="' + nome + '" value="' + o[0] + '"' + (i === 0 ? ' checked' : '') + '><span>' + o[1] + '</span></label>'; }).join(''); };
-    var andares = ''; for (var a = 1; a <= 18; a++) andares += '<option value="' + a + '">' + a + 'º</option>';
-    raiz.innerHTML =
-      '<div class="es-topo"><ul class="es-cont" aria-label="Situação das 72 unidades"><li class="st-d"><b>' + conta.d + '</b> disponíveis</li><li class="st-r"><b>' + conta.r + '</b> reservadas</li><li class="st-v"><b>' + conta.v + '</b> vendidas</li><li class="es-pct"><b>' + vendido + '%</b> vendido</li></ul>' +
-      '<p class="es-at">Atualizado hoje às <span data-hora></span> · demonstração</p></div>' +
-      '<details class="es-dobra"' + (largo.matches ? ' open' : '') + '><summary><span>Filtrar unidades</span><em class="es-ativos"></em></summary>' +
-      '<form class="es-filtros" aria-label="Filtros do espelho">' +
-      '<fieldset><legend>Situação</legend><div class="chips">' + chips('st', [['', 'Todas'], ['d', 'Disponíveis'], ['r', 'Reservadas'], ['v', 'Vendidas']]) + '</div></fieldset>' +
-      '<fieldset><legend>Planta</legend><div class="chips">' + chips('pl', [['', 'Todas'], ['A', 'A · 128 m²'], ['B', 'B · 92 m²'], ['C', 'C · 128 m²']]) + '</div></fieldset>' +
-      '<fieldset class="es-and"><legend>Andar</legend><label>do <select name="de">' + andares + '</select></label><label>ao <select name="ate">' + andares.replace('value="18"', 'value="18" selected') + '</select></label></fieldset>' +
-      '<label class="es-campo">Área mínima<select name="ar"><option value="0">qualquer área</option><option value="92">a partir de 92 m²</option><option value="128">a partir de 128 m²</option><option value="146">146 m² com terraço</option></select></label>' +
-      '<label class="es-campo es-preco">Preço até <output></output><input type="range" name="pr" min="1300000" max="2500000" step="10000" value="2500000"></label>' +
-      '<fieldset><legend>Vista</legend><div class="chips">' + chips('vi', [['', 'Todas'], ['mar', 'Mar'], ['cidade', 'Cidade']]) + '</div></fieldset>' +
-      '<button type="reset" class="pilula pilula-linha es-limpa">Limpar filtros</button></form></details>' +
-      '<div class="es-barra"><p class="es-total" aria-live="polite"></p><div class="es-modo" role="group" aria-label="Forma de ver"><button type="button" data-m="predio" aria-pressed="true">Prédio</button><button type="button" data-m="lista" aria-pressed="false">Lista</button></div>' +
-      '<p class="es-leg" aria-hidden="true"><span class="st-d">disponível</span><span class="st-r">reservada</span><span class="st-v">vendida</span></p></div>' +
-      '<div class="es-grade"><div class="es-area"><div class="es-predio" role="grid" aria-label="Espelho de vendas: 18 andares, 4 unidades por andar"></div>' +
-      '<div class="es-lista" hidden><label class="es-ord">Ordenar <select name="ord"><option value="andar">andar mais alto</option><option value="preco">menor preço</option><option value="area">maior área</option><option value="m2">menor preço por m²</option></select></label><table><thead><tr><th>Unidade</th><th>Andar</th><th>Planta</th><th>Área</th><th>Suítes</th><th>Vagas</th><th>Preço</th><th>Situação</th></tr></thead><tbody></tbody></table></div></div>' +
-      '<aside class="es-painel" aria-live="polite" aria-label="Unidade escolhida">' + VAZIO + '</aside></div>' +
-      '<p class="demo">' + DEMO + ' Quando uma unidade é reservada ou vendida, a cor muda sozinha para todos os corretores e para o site.</p>' +
-      '<dialog class="es-dlg" aria-label="Unidade escolhida"><button type="button" class="redondo es-dlg-x" aria-label="Fechar">×</button><div class="es-dlg-corpo"></div></dialog>';
-    var fo = $('.es-filtros', raiz), predio = $('.es-predio', raiz), aside = $('.es-painel', raiz), dlg = $('.es-dlg', raiz), tb = $('tbody', raiz), ord = $('[name=ord]', raiz);
-    var hora = new Date(); $('[data-hora]', raiz).textContent = String(hora.getHours()).padStart(2, '0') + ':' + String(hora.getMinutes()).padStart(2, '0');
-    if (params.get('planta') && /^[ABC]$/.test(params.get('planta'))) fo.pl.value = params.get('planta');
-    var passa = function (u) {
-      var de = +fo.de.value, ate = +fo.ate.value; if (de > ate) { var t = de; de = ate; ate = t; }
-      return (!fo.st.value || u.st === fo.st.value) && (!fo.pl.value || u.planta === fo.pl.value) && u.andar >= de && u.andar <= ate &&
-        u.area >= +fo.ar.value && u.preco <= +fo.pr.value && (!fo.vi.value || (fo.vi.value === 'mar') === /mar/.test(u.vista));
-    };
-    var cel = function (u) {
-      return '<button type="button" role="gridcell" class="un st-' + u.st + '" data-u="' + u.cod + '" aria-pressed="false" aria-label="Unidade ' + u.cod + ', ' + u.andar + 'º andar, ' + PLANTAS[u.planta].nome + ', ' + u.area + ' metros, ' + ST[u.st] + (u.st !== 'v' ? ', ' + mi(u.preco) : '') + '">' +
-        '<b>' + u.cod + '</b><small>' + (u.st === 'v' ? 'vendida' : mi(u.preco).replace('R$ ', '')) + '</small></button>';
-    };
-    var html = '<div class="es-teto" aria-hidden="true">Rooftop · piscina e espaço gourmet no 19º andar</div><span class="es-h es-h-and" aria-hidden="true">andar</span>' +
-      [1, 2, 3, 4].map(function (f) { return '<span class="es-h" role="columnheader">Final ' + f + '<small>' + FINAL[f].planta + ' · ' + FINAL[f].vista.replace(' e morros', '') + '</small></span>'; }).join('');
-    for (var an = 18; an >= 1; an--) {
-      html += '<span class="es-and" role="rowheader" aria-label="' + an + 'º andar">' + an + '</span>';
-      for (var fi = 1; fi <= 4; fi++) html += cel(porCod(an * 100 + fi));
-    }
-    html += '<div class="es-base" aria-hidden="true">Térreo · hall de pé-direito duplo, academia e coworking</div>';
-    predio.innerHTML = html;
-    var lista = function (l) {
-      var o = ord.value;
-      l = l.slice().sort(o === 'preco' ? function (x, y) { return x.preco - y.preco; } : o === 'area' ? function (x, y) { return y.area - x.area || x.preco - y.preco; } : o === 'm2' ? function (x, y) { return x.m2 - y.m2; } : function (x, y) { return y.andar - x.andar || x.final - y.final; });
-      tb.innerHTML = l.map(function (u) {
-        return '<tr class="st-' + u.st + '" data-u="' + u.cod + '" tabindex="0"><td data-r="Unidade"><b>' + u.cod + '</b></td><td data-r="Andar">' + u.andar + 'º</td><td data-r="Planta">' + u.planta + (u.terraco ? ' + terraço' : '') + '</td><td data-r="Área">' + u.area + ' m²</td><td data-r="Suítes">' + u.suites + '</td><td data-r="Vagas">' + u.vagas + '</td><td data-r="Preço">' + (u.st === 'v' ? '—' : mi(u.preco)) + '</td><td data-r="Situação"><span class="pn-st st-' + u.st + '">' + ST[u.st] + '</span></td></tr>';
-      }).join('') || '<tr><td colspan="8">Nenhuma unidade com esses filtros.</td></tr>';
-    };
-    var filtra = function () {
-      var out = $('output', fo); out.textContent = +fo.pr.value >= 2500000 ? 'qualquer valor' : mi(+fo.pr.value);
-      var ok = UN.filter(passa), nd = ok.filter(function (u) { return u.st === 'd'; }).length;
-      $$('.un', predio).forEach(function (b) { b.classList.toggle('fora', !passa(porCod(b.dataset.u))); });
-      var ativos = 0; ['st', 'pl', 'vi'].forEach(function (n) { if (fo[n].value) ativos++; }); if (+fo.de.value !== 1 || +fo.ate.value !== 18) ativos++; if (+fo.ar.value) ativos++; if (+fo.pr.value < 2500000) ativos++;
-      $('.es-ativos', raiz).textContent = ativos ? ativos + (ativos === 1 ? ' filtro ativo' : ' filtros ativos') : '';
-      $('.es-total', raiz).textContent = ok.length === 72 ? 'Mostrando as 72 unidades · ' + nd + ' disponíveis' : ok.length ? ok.length + (ok.length === 1 ? ' unidade' : ' unidades') + ' com esses filtros · ' + nd + (nd === 1 ? ' disponível' : ' disponíveis') : 'Nenhuma unidade com esses filtros. Tente subir o preço ou abrir os andares.';
-      lista(ok);
-    };
-    fo.addEventListener('input', filtra); fo.addEventListener('change', filtra);
-    fo.addEventListener('reset', function () { setTimeout(filtra, 0); });
-    ord.addEventListener('change', filtra);
-    $$('.es-modo button', raiz).forEach(function (b) {
-      b.addEventListener('click', function () {
-        $$('.es-modo button', raiz).forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
-        predio.hidden = b.dataset.m !== 'predio'; $('.es-lista', raiz).hidden = b.dataset.m !== 'lista';
-      });
-    });
-    var mostra = function (cod, rolar) {
-      var u = porCod(cod); if (!u) return; sel = u;
-      $$('[data-u]', predio).forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.u === u.cod)); });
-      $$('tr[data-u]', tb).forEach(function (t) { t.classList.toggle('on', t.dataset.u === u.cod); });
-      if (largo.matches) { aside.innerHTML = painel(u); if (rolar) { var r = aside.getBoundingClientRect(); if (r.top < 0 || r.top > innerHeight - 120) aside.scrollIntoView({ block: 'nearest', behavior: calmo ? 'auto' : 'smooth' }); } }
-      else { $('.es-dlg-corpo', dlg).innerHTML = painel(u); if (!dlg.open) dlg.showModal(); $('.es-dlg-corpo', dlg).scrollTop = 0; }
-      raiz.dispatchEvent(new CustomEvent('vt-unidade', { bubbles: true, detail: u.cod }));
-    };
-    raiz.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-u]');
-      if (b && !b.closest('.pn-acoes')) { mostra(b.dataset.u, true); return; }
-      var s = e.target.closest('[data-sim-u]');
-      if (s && s.getAttribute('href') === '#simulador') { e.preventDefault(); if (dlg.open) dlg.close(); VT.simular(s.dataset.simU); }
-    });
-    tb.addEventListener('keydown', function (e) { var t = e.target.closest('tr[data-u]'); if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); mostra(t.dataset.u, true); } });
-    $('.es-dlg-x', dlg).addEventListener('click', function () { dlg.close(); });
-    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
-    filtra();
-    var pu = params.get('u'); if (pu && porCod(pu) && raiz.hasAttribute('data-abrir-url')) setTimeout(function () { mostra(pu, false); }, 300);
-  });
 
   // ───────────────────────── 5 · simulador de pagamento na planta ─────────────────────────
   var VT = window.VT = { UN: UN, porCod: porCod, PLANTAS: PLANTAS, plantaSVG: plantaSVG, conta: conta, simular: function () {} };
@@ -354,8 +445,8 @@
       var barra = function (rot, v) { return '<li><span>' + rot + '</span><i style="--w:' + (v / maxA * 100).toFixed(1) + '%"></i><b>' + brl(v) + '</b></li>'; };
       res.innerHTML = '<p class="sim-rot">Durante a obra, a parcela mensal começa em</p><p class="grande">' + brl(vm) + '<small> /mês</small></p>' +
         '<p class="sim-sub">Com o INCC de ' + String(fo.incc.value).replace('.', ',') + '% ao ano como hipótese, a 24ª parcela fica perto de <b>' + brl(vm * fat(24)) + '</b>.</p>' +
-        '<div class="barra" aria-hidden="true"><i style="width:' + e + '%;background:#f1c7b4"></i><i style="width:' + m + '%;background:#cf8f7d"></i><i style="width:' + it + '%;background:#8a4f42"></i><i style="width:' + ch + '%;background:#2a4670"></i></div>' +
-        '<p class="sim-leg" aria-hidden="true"><span style="--c:#f1c7b4">entrada ' + e + '%</span><span style="--c:#cf8f7d">mensais ' + m + '%</span><span style="--c:#8a4f42">intermediárias ' + it + '%</span><span style="--c:#2a4670">chaves ' + ch + '%</span></p>' +
+        '<div class="barra" aria-hidden="true"><i style="width:' + e + '%;background:#D8C6A3"></i><i style="width:' + m + '%;background:#A88D63"></i><i style="width:' + it + '%;background:#535A4C"></i><i style="width:' + ch + '%;background:#292A27"></i></div>' +
+        '<p class="sim-leg" aria-hidden="true"><span style="--c:#D8C6A3">entrada ' + e + '%</span><span style="--c:#A88D63">mensais ' + m + '%</span><span style="--c:#535A4C">intermediárias ' + it + '%</span><span style="--c:#292A27">chaves ' + ch + '%</span></p>' +
         '<p class="sim-rot">Quanto você desembolsa por ano (com a correção hipotética)</p><ul class="sim-anos">' + barra('2026', ano[2026]) + barra('2027', ano[2027]) + barra('2028', ano[2028]) + barra('Chaves', chC) + '</ul>' +
         '<table><tr><td>Entrada (nov/2026)</td><td>' + brl(p * e / 100) + '</td></tr><tr><td>24 mensais, somadas e corrigidas</td><td>' + brl(somaM) + '</td></tr><tr><td>2 intermediárias corrigidas</td><td>' + brl(somaI) + '</td></tr><tr><td>Saldo nas chaves corrigido</td><td>' + brl(chC) + '</td></tr><tr><td>Correção estimada no período</td><td>' + brl(total - p) + '</td></tr><tr class="tot"><td>Total estimado</td><td>' + brl(total) + '</td></tr></table>' +
         '<p class="aviso-sim"><b>Simulação ilustrativa, não é proposta nem reserva.</b> Preço da tabela de lançamento de exemplo; o INCC real pode ser maior ou menor. Condições finais só no contrato, depois da análise de cadastro.</p>' +
@@ -474,28 +565,92 @@
     }).join('');
   });
 
-  // ───────────────────────── 9 · página das plantas (apartamentos.html) ─────────────────────────
-  var pv = $('[data-plantas]');
-  if (pv) {
-    var zv = null, abas = $$('[data-tab-planta]');
-    var ficha = function (pl) {
+  // ───────────────────────── 9 · plantas + personalização (home e apartamentos.html) ─────────────────────────
+  // planta técnica (60%) com zoom e pinos por cômodo + painel (40%): tipologia, acabamento do piso (troca a amostra e o piso
+  // desenhado em 300 ms), insolação por orientação (demonstração) e lista de cômodos ligada aos pinos.
+  var SOL = {
+    '': 'Sem sobreposição de luz.',
+    manha: 'Manhã: o sol do nascente entra pela fachada do mar, na varanda, no living e na suíte master. Demonstração aproximada.',
+    tarde: 'Tarde: o sol do poente bate na fachada dos fundos, na cozinha e nas suítes 2 e 3, filtrado pelos brises. Demonstração aproximada.'
+  };
+  $$('[data-plantas]').forEach(function (pv, ix) {
+    var est = { pl: 'A', mat: 'carvalho', sol: '' }, zv = null;
+    var h = /planta-([abc])/.exec(location.hash); if (h) est.pl = h[1].toUpperCase();
+    pv.classList.add('pv');
+    pv.innerHTML =
+      '<div class="pv-esq"><div class="pv-tipos" role="tablist" aria-label="Escolha a tipologia">' + ['A', 'B', 'C'].map(function (p) {
+        var P = PLANTAS[p]; return '<button type="button" role="tab" data-pl="' + p + '" aria-selected="false"><b>Planta ' + p + '</b><span>' + P.area + ' m² · ' + P.suites + ' suítes · ' + (p === 'A' ? 'mar de frente' : p === 'B' ? 'finais 2 e 3' : 'mar lateral') + '</span></button>';
+      }).join('') + '</div><div class="pv-planta-cx"><div class="pv-zoom"></div></div></div>' +
+      '<div class="pv-painel">' +
+      '<div><h3 class="pv-t"></h3><p class="pv-r mut" style="margin:10px 0 0"></p></div>' +
+      '<dl class="pv-ficha"></dl>' +
+      '<div class="pv-bloco"><p class="rot">Acabamento do piso</p><div class="pv-mats" role="group" aria-label="Acabamento">' + Object.keys(MAT).map(function (k) {
+        return '<button type="button" data-mat="' + k + '" aria-pressed="false"><img src="' + MAT[k].img + '" alt="" width="120" height="120" loading="lazy">' + MAT[k].nome + '</button>';
+      }).join('') + '</div></div>' +
+      '<figure class="pv-amostra"><img class="pv-a1" src="' + MAT.carvalho.img + '" alt="" width="900" height="600" loading="lazy"><img class="pv-a2" src="' + MAT.carvalho.img + '" alt="" width="900" height="600" loading="lazy" style="opacity:0"><figcaption></figcaption></figure>' +
+      '<div class="pv-bloco"><p class="rot">Insolação · demonstração</p><div class="pv-sol" role="group" aria-label="Luz do sol"><button type="button" data-sol="" aria-pressed="true">Sem luz</button><button type="button" data-sol="manha" aria-pressed="false">Manhã</button><button type="button" data-sol="tarde" aria-pressed="false">Tarde</button></div><p class="pv-sol-txt">' + SOL[''] + '</p></div>' +
+      '<details class="pv-bloco pv-lista"><summary>Área de cada cômodo</summary><ul class="cap-lista pv-comodos" style="margin-top:14px"></ul></details>' +
+      '<div class="acoes" style="margin-top:0"><a class="bt pv-espelho" href="espelho.html" data-cursor="Explorar">Ver unidades desta planta<span class="seta">' + SETA + '</span></a><a class="bt pv-wa" href="#" data-wa="">Planta em PDF</a></div>' +
+      '</div>';
+    var cx = $('.pv-planta-cx', pv), pop = null;
+    var fechaPop = function () { if (pop) { pop.remove(); pop = null; } $$('.pl-pino', cx).forEach(function (p) { p.classList.remove('on'); }); };
+    var abrePino = function (pino) {
+      fechaPop(); var t = pino.dataset.t, c = GEO[est.pl].c[+pino.dataset.c], info = PINOS[t];
+      pino.classList.add('on');
+      pop = document.createElement('div'); pop.className = 'pv-comodo'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', info[0]);
+      pop.innerHTML = '<img src="' + info[1] + '" alt="' + esc(info[2]) + '" width="520" height="390"><div><b>' + info[0] + '</b><span>' + (c[2] * c[3]).toFixed(1).replace('.', ',') + ' m² · ' + c[2].toFixed(1).replace('.', ',') + ' × ' + c[3].toFixed(1).replace('.', ',') + ' m</span><small>Foto real de referência · banco de imagens, não é o decorado</small></div><button type="button" class="redondo" aria-label="Fechar">×</button>';
+      cx.appendChild(pop);
+      var rp = pino.getBoundingClientRect(), rc = cx.getBoundingClientRect(), w = pop.offsetWidth, hh = pop.offsetHeight;
+      var x = lim(rp.left - rc.left + rp.width + 10, 0, rc.width - w), y = rp.top - rc.top - 10; if (y + hh > rc.height) y = Math.max(0, rc.height - hh);
+      if (rp.left - rc.left + rp.width + 10 + w > rc.width && rp.left - rc.left - w - 10 > 0) x = rp.left - rc.left - w - 10;
+      pop.style.left = x + 'px'; pop.style.top = y + 'px';
+      $('button', pop).addEventListener('click', function () { var p = pino; fechaPop(); p.focus(); });
+      $('button', pop).focus({ preventScroll: true });
+    };
+    var aplicaMat = function (anim) {
+      var m = MAT[est.mat], svg = $('.planta-svg', cx);
+      if (svg) { var im = $('.pl-mat-img', svg); im.setAttribute('href', m.img); svg.classList.add('com-piso'); }
+      var a1 = $('.pv-a1', pv), a2 = $('.pv-a2', pv), vis = a1.style.opacity === '0' ? a2 : a1, nov = vis === a1 ? a2 : a1;
+      if (vis.getAttribute('src') !== m.img) { nov.src = m.img; nov.style.opacity = '1'; vis.style.opacity = '0'; }
+      $('.pv-amostra figcaption', pv).textContent = m.nome + ' · ' + m.onde + ' · foto da textura';
+      $$('[data-mat]', pv).forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.mat === est.mat)); });
+    };
+    var aplicaSol = function () {
+      var svg = $('.planta-svg', cx); if (svg) {
+        var gr = $('.pl-sol-g', svg), t = est.sol === 'tarde';
+        gr.setAttribute('y1', t ? 1 : 0); gr.setAttribute('y2', t ? 0 : 1); $('.pl-sol', svg).style.opacity = est.sol ? 1 : 0;
+      }
+      $$('[data-sol]', pv).forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.sol === est.sol)); });
+      $('.pv-sol-txt', pv).textContent = SOL[est.sol];
+    };
+    var tipo = function (pl) {
+      est.pl = pl; fechaPop();
       var P = PLANTAS[pl], us = UN.filter(function (u) { return u.planta === pl; }), ds = us.filter(function (u) { return u.st === 'd'; });
       var menor = ds.length ? Math.min.apply(null, ds.map(function (u) { return u.preco; })) : 0;
-      $('.pf-t', pv).textContent = P.nome + ' · ' + P.area + ' m²';
-      $('.pf-r', pv).textContent = P.resumo + '.';
-      $('.pf-ficha', pv).innerHTML = '<dt>Área privativa</dt><dd>' + P.area + ' m²' + (P.suites === 3 ? ' (146 m² do 15º ao 18º, com terraço)' : '') + '</dd>' +
-        '<dt>Suítes</dt><dd>' + P.suites + '</dd><dt>Vagas</dt><dd>' + P.vagas + ' + depósito privativo</dd><dt>Finais</dt><dd>' + P.finais + '</dd><dt>Pé-direito</dt><dd>2,70 m (living 2,90 m)</dd><dt>Varanda</dt><dd>gourmet com churrasqueira elétrica e ponto de pia</dd>' +
-        '<dt>Ar-condicionado</dt><dd>infraestrutura em todos os ambientes</dd><dt>Disponíveis</dt><dd>' + ds.length + ' de ' + us.length + (ds.length ? ' · a partir de ' + mi(menor) : '') + '</dd>';
-      $('.pf-comodos', pv).innerHTML = GEO[pl].c.filter(function (c) { return c[5] !== 'circ'; }).map(function (c) { return '<li><span>' + c[4] + '</span><b>' + (c[2] * c[3]).toFixed(1).replace('.', ',') + ' m²</b></li>'; }).join('');
-      $('.pf-espelho', pv).href = 'espelho.html?planta=' + pl;
-      $('.pf-wa', pv).setAttribute('data-wa', 'Olá, Vértice Residence! Gostei da ' + P.nome + ' (' + P.area + ' m², ' + P.suites + ' suítes). Quero saber das unidades disponíveis e receber a planta em PDF.');
-      zv = visualizador($('.pf-zoom', pv), plantaSVG(pl, { esp: pl === 'C', vista: pl === 'A' ? 'mar frontal' : pl === 'C' ? 'mar lateral' : 'mar lateral (final 2) ou cidade (final 3)' }));
-      abas.forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tabPlanta === pl)); });
+      $('.pv-t', pv).innerHTML = 'Planta ' + pl + ' · <em>' + P.area + ' m²</em>';
+      $('.pv-r', pv).textContent = P.resumo.charAt(0).toUpperCase() + P.resumo.slice(1) + '.';
+      $('.pv-ficha', pv).innerHTML = '<div><dt>Suítes</dt><dd>' + P.suites + '</dd></div><div><dt>Vagas</dt><dd>' + P.vagas + ' + dep.</dd></div><div><dt>Disponíveis</dt><dd>' + ds.length + ' de ' + us.length + '</dd></div>' +
+        '<div><dt>Finais</dt><dd>' + P.finais.replace('finais ', '').replace('final ', '') + '</dd></div><div><dt>Pé-direito</dt><dd>2,70 m</dd></div><div><dt>A partir de</dt><dd>' + (menor ? mi(menor).replace('R$ ', '') : '—') + '</dd></div>';
+      $('.pv-comodos', pv).innerHTML = GEO[pl].c.filter(function (c) { return c[5] !== 'circ'; }).map(function (c) { return '<li style="display:flex;justify-content:space-between;gap:10px"><span>' + c[4] + '</span><b style="font-weight:500;color:var(--graf)">' + (c[2] * c[3]).toFixed(1).replace('.', ',') + ' m²</b></li>'; }).join('');
+      $('.pv-espelho', pv).href = 'espelho.html?planta=' + pl;
+      $('.pv-wa', pv).setAttribute('data-wa', 'Olá, Vértice Residence! Gostei da ' + P.nome + ' (' + P.area + ' m², ' + P.suites + ' suítes) com acabamento ' + MAT[est.mat].nome.toLowerCase() + '. Quero receber a planta em PDF e saber das unidades disponíveis.');
+      zv = visualizador($('.pv-zoom', pv), plantaSVG(pl, { id: 'pv' + ix + pl, esp: pl === 'C', vista: pl === 'A' ? 'mar frontal' : pl === 'C' ? 'mar lateral' : 'mar lateral (final 2) ou cidade (final 3)', mat: est.mat, sol: est.sol, pinos: true }),
+        'Toque nos números para ver cada cômodo. No celular, faça pinça para ampliar e arraste para mover; no computador, use os botões ou dois cliques.');
+      $$('[data-pl]', pv).forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.pl === pl)); });
+      aplicaSol();
     };
-    abas.forEach(function (b) { b.addEventListener('click', function () { ficha(b.dataset.tabPlanta); history.replaceState(null, '', '#planta-' + b.dataset.tabPlanta.toLowerCase()); }); });
-    var h = /planta-([abc])/.exec(location.hash);
-    ficha(h ? h[1].toUpperCase() : 'A');
-  }
+    pv.addEventListener('click', function (e) {
+      var b;
+      if ((b = e.target.closest('[data-pl]'))) { tipo(b.dataset.pl); if (pv.hasAttribute('data-hash')) history.replaceState(null, '', '#planta-' + b.dataset.pl.toLowerCase()); }
+      else if ((b = e.target.closest('[data-mat]'))) { est.mat = b.dataset.mat; aplicaMat(true); $('.pv-wa', pv).setAttribute('data-wa', 'Olá, Vértice Residence! Gostei da ' + PLANTAS[est.pl].nome + ' com acabamento ' + MAT[est.mat].nome.toLowerCase() + '. Quero receber a planta em PDF e saber das unidades disponíveis.'); }
+      else if ((b = e.target.closest('[data-sol]'))) { est.sol = b.dataset.sol; aplicaSol(); }
+      else if ((b = e.target.closest('.pl-pino'))) abrePino(b);
+    });
+    pv.addEventListener('keydown', function (e) { var p = e.target.closest('.pl-pino'); if (p && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); abrePino(p); } if (e.key === 'Escape' && pop) fechaPop(); });
+    // os pinos não iniciam o arrastar do zoom
+    cx.addEventListener('pointerdown', function (e) { if (e.target.closest('.pl-pino')) e.stopPropagation(); }, true);
+    tipo(est.pl); aplicaMat(false);
+  });
 
   // ───────────────────────── 10 · página da unidade (apartamento.html?u=1204) ─────────────────────────
   var ud = $('[data-unidade]');
@@ -510,4 +665,14 @@
     var aviso = $('.ad-sem-fluxo'); if (aviso) aviso.hidden = u.st === 'd';
     $('.ad-info', ud).addEventListener('click', function (e) { var b = e.target.closest('[data-u]'); if (b) location.href = 'apartamento.html?u=' + b.dataset.u; });
   }
+
+  // ───────────────────────── 11 · unidade em destaque (cartão do hero) ─────────────────────────
+  $$('[data-destaque]').forEach(function (el) {
+    var u = porCod(el.dataset.destaque); if (!u || u.st !== 'd') u = disp.slice().sort(function (x, y) { return y.andar - x.andar || y.area - x.area; })[0];
+    el.href = 'apartamento.html?u=' + u.cod;
+    var q = function (s) { return el.querySelector(s); };
+    q('.hc-t').textContent = 'Pavimento ' + u.andar + ' · Final 0' + u.final;
+    q('.hc-d').textContent = u.suites + ' suítes · ' + u.area + ' m²' + (u.terraco ? ' com terraço' : '') + ' · vista ' + u.vista;
+    q('.hc-p b').textContent = 'a partir de ' + mi(u.preco);
+  });
 })();

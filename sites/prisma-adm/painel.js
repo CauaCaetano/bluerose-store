@@ -2,27 +2,7 @@
 (function () {
   'use strict';
   var P = window.PRISMA, U = window.PR, $ = U.$, $$ = U.$$, esc = U.esc, brl = U.brl;
-  var D = P.painel(), MES = ['dez', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov'];
-
-  $('#kpis').innerHTML = [
-    ['Contratos ativos', D.contratos, 'residenciais e comerciais'], ['Vencendo em 60 dias', D.vencendo60, '6 listados abaixo'],
-    ['Repasses pendentes', D.repassesPend, 'R$ 118,4 mil a transferir'], ['Chamados abertos', D.nChamados, '4 com urgência alta'],
-    ['Interessados na esteira', D.nInteressados, '9 em análise cadastral'], ['Ocupação', D.ocupacao.toLocaleString('pt-BR') + '%', '50 imóveis vagos'],
-    ['Inadimplência > 30 dias', D.inad.toLocaleString('pt-BR') + '%', '23 contratos'], ['Repasse médio', '1,6 dia útil', 'meta: até 2 dias úteis']
-  ].map(function (k) { return '<div><span>' + k[0] + '</span><strong>' + k[1] + '</strong><small>' + k[2] + '</small></div>'; }).join('');
-
-  function linha(serie, min, max, suf, cor, largura) {
-    var W = Math.max(300, Math.min(640, Math.round(largura || 560))), H = W < 420 ? 190 : 200, m = { t: 14, r: 12, b: 28, l: 44 }, iw = W - m.l - m.r, ih = H - m.t - m.b;
-    var x = function (i) { return m.l + iw * i / (serie.length - 1); }, y = function (v) { return m.t + ih - ih * (v - min) / (max - min); };
-    var s = '<svg class="grafico" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Gráfico de linha, de ' + serie[0].toLocaleString('pt-BR') + suf + ' a ' + serie[serie.length - 1].toLocaleString('pt-BR') + suf + '">';
-    for (var k = 0; k <= 4; k++) { var v = min + (max - min) * k / 4; s += '<line class="ref" x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + y(v) + '" y2="' + y(v) + '"/><text x="' + (m.l - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + v.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + suf + '</text>'; }
-    var pts = serie.map(function (v, i) { return x(i) + ',' + y(v); }).join(' ');
-    s += '<polygon points="' + m.l + ',' + (m.t + ih) + ' ' + pts + ' ' + x(serie.length - 1) + ',' + (m.t + ih) + '" fill="' + cor + '" opacity=".08"/><polyline points="' + pts + '" fill="none" stroke="' + cor + '" stroke-width="2.5"/>';
-    serie.forEach(function (v, i) { s += '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="3.5" fill="#fff" stroke="' + cor + '" stroke-width="2"><title>' + MES[i] + ': ' + v.toLocaleString('pt-BR') + suf + '</title></circle>' + (W < 420 && i % 2 ? '' : '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle">' + MES[i] + '</text>'); });
-    return s + '</svg>';
-  }
-  $('#graf-inad').innerHTML = linha(D.inadSerie, 2, 4.5, '%', '#9a3a2c', $('#graf-inad').clientWidth);
-  $('#graf-ocup').innerHTML = linha(D.ocupSerie, 90, 95, '%', '#0f4c5c', $('#graf-ocup').clientWidth);
+  var D = P.painel();
 
   // repasses
   var tr = $('#t-repasses');
@@ -66,8 +46,6 @@
     }).join('') + '</tbody>';
 
   // funil e interessados
-  var etapas = [['Cadastro', 21], ['Documentos', 14], ['Análise', 9], ['Garantia', 6], ['Assinatura', 5], ['Chaves', 3]];
-  $('#funil').innerHTML = etapas.map(function (e) { return '<li><span>' + e[0] + '</span><i style="width:' + Math.round(e[1] / 21 * 100) + '%"></i><b>' + e[1] + '</b></li>'; }).join('');
   $('#interessados').innerHTML = D.interessados.map(function (i) { return '<li><div><b>' + esc(i[0]) + ' · ' + i[1] + '</b><small>origem: ' + i[3] + '</small></div><span class="selo selo-neutro">' + i[2] + '</span></li>'; }).join('');
   $('#inadimplentes').innerHTML = D.inadimplentes.map(function (i) {
     var msg = 'Olá! Aqui é a Prisma Administração. Consta em aberto o aluguel do contrato ' + i[0] + ', no valor de ' + brl(i[2]) + ', vencido há ' + i[3] + ' dias. Podemos ajudar com a 2ª via ou um acordo?';

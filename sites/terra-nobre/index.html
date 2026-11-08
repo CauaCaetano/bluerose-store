@@ -17,11 +17,11 @@
 <link rel="stylesheet" href="../assets/fontes/c1a0712f00.css">
 <link rel="stylesheet" href="../assets/fontes/b38ec324dd.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=5">
-<link rel="stylesheet" href="estilo.css?v=2">
+<link rel="stylesheet" href="estilo.css?v=3">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=7" defer></script>
 <script src="dados.js?v=1" defer></script>
-<script src="site.js?v=1" defer></script>
+<script src="site.js?v=2" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "RealEstateAgent", "name": "Terra Nobre Negócios Rurais", "description": "Consultoria em compra, venda e arrendamento de propriedades rurais no nordeste paulista (empresa de exemplo).", "areaServed": ["Franca", "Ribeirão Preto", "Orlândia"], "address": {"@type": "PostalAddress", "streetAddress": "Rua de Exemplo, 100", "addressLocality": "Ribeirão Preto", "addressRegion": "SP", "addressCountry": "BR"}, "telephone": "+55 16 3000-0000"}</script>
 
 <meta property="og:image" content="https://bluerose-store.com/img/og/sites/terra-nobre.jpg?v=1">
@@ -41,22 +41,25 @@
 </div></header>
 <main id="conteudo">
 
-<section class="hero" aria-labelledby="h-hero">
-  <div class="hero-foto"><img src="img/capa.webp" width="1600" height="900" alt="Vista aérea de lavouras e matas no interior" fetchpriority="high"></div>
-  <div class="hero-curvas" aria-hidden="true"></div>
-  <p class="hero-legenda">Lavouras e reservas vistas de drone</p>
-  <div class="w hero-in">
-    <p class="kicker">Consultoria em patrimônio rural</p>
-    <h1 id="h-hero">Terra boa se negocia <em>com discrição.</em></h1>
-    <p class="lead">Fazendas, sítios e áreas para arrendamento na região de Franca, Ribeirão Preto e Orlândia. Cada propriedade tem ficha técnica com uso do solo, água, topografia e documentos conferidos. A localização exata só é passada com autorização do proprietário.</p>
-    <div class="bts"><a class="bt bt-b" href="propriedades.html">Ver as propriedades <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="bt bt-l" href="proprietarios.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Quero vender com sigilo</a></div>
-    <form class="busca-rapida" action="busca.html" method="get" aria-label="Busca rápida">
+<section class="hero hero-voo" aria-labelledby="h-hero" data-voo-hero>
+  <div class="voo-palco">
+    <div class="hero-foto"><img src="img/drone-poster.webp" srcset="img/drone-poster-m.webp 800w, img/drone-poster.webp 1600w" sizes="100vw" width="1600" height="900" alt="Vista aérea de eucaliptos, terra roxa preparada e sede de fazenda no interior paulista" fetchpriority="high"><video class="voo-video" muted playsinline preload="none" tabindex="-1" aria-hidden="true" disablepictureinpicture data-src-pc="img/drone-scrub.mp4" data-src-cel="img/drone-cel.mp4"></video></div>
+    <div class="voo-hud" data-voo-hud aria-hidden="true"><div class="hud-rot"><span>Sobrevoo real</span><span data-voo-tempo>0:00 de 0:18</span></div><div class="hud-trilho"><i data-voo-linha></i></div><p class="hud-cap" data-voo-cap>Eucaliptos e reserva na entrada</p><p class="hud-dica">Role a página para sobrevoar</p></div>
+    <button type="button" class="voo-tocar" data-voo-tocar aria-pressed="false" hidden><b><svg class="ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="ic-pausa" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></b><span>Ver o sobrevoo</span></button>
+    <div class="w hero-in">
+      <p class="kicker">Consultoria em patrimônio rural</p>
+      <h1 id="h-hero"><span class="rev">Terra boa se negocia</span> <span class="rev"><em>com discrição.</em></span></h1>
+      <p class="lead">Fazendas, sítios e áreas para arrendamento na região de Franca, Ribeirão Preto e Orlândia. Cada propriedade tem ficha técnica com uso do solo, água, topografia e documentos conferidos. A localização exata só é passada com autorização do proprietário.</p>
+      <div class="bts"><a class="bt bt-b" href="propriedades.html">Ver as propriedades <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="bt bt-l" href="proprietarios.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Quero vender com sigilo</a></div>
+      <form class="busca-rapida" action="busca.html" method="get" aria-label="Busca rápida">
       <div class="campo"><label for="br-neg">Negócio</label><select id="br-neg" name="neg"><option value="">Todos</option><option value="venda">Venda</option><option value="arrendamento">Arrendamento</option><option value="parceria">Parceria</option></select></div>
       <div class="campo"><label for="br-apt">Aptidão</label><select id="br-apt" name="apt"><option value="">Todas</option><option value="cafe">Café</option><option value="cana">Cana</option><option value="graos">Grãos</option><option value="pecuaria">Pecuária</option><option value="equinos">Equinos</option><option value="lazer">Lazer e moradia</option></select></div>
       <div class="campo"><label for="br-reg">Região</label><select id="br-reg" name="regiao"><option value="">Todas</option><option value="franca">Franca</option><option value="ribeirao">Ribeirão Preto</option><option value="orlandia">Orlândia</option></select></div>
       <div class="campo"><label for="br-area">Área mínima</label><select id="br-area" name="amin"><option value="">Qualquer</option><option value="24.2">10 alq. (24 ha)</option><option value="121">50 alq. (121 ha)</option><option value="242">100 alq. (242 ha)</option><option value="484">200 alq. (484 ha)</option><option value="968">400 alq. (968 ha)</option></select></div>
-      <button class="bt bt-p" type="submit">Buscar <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <button class="bt bt-s" type="submit">Buscar <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </form>
+      <p class="hero-legenda">Vídeo real de drone em terra roxa · imagem ilustrativa, não é uma propriedade da carteira</p>
+    </div>
   </div>
 </section>
 
@@ -71,7 +74,7 @@
   <div class="w">
     <div class="cab"><div><p class="kicker">Carteira</p><h2 id="h-dest">Propriedades em destaque</h2><p>Fotos aéreas reais, área total e produtiva, exploração atual e água logo no card. Região aproximada; o município fica sob sigilo.</p></div>
       <div class="bts"><a class="bt bt-s" href="busca.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Busca técnica</a><a class="bt bt-p" href="propriedades.html">Todas as 10 propriedades <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div>
-    <div class="grade-p"><article class="card-p">
+    <div class="grade-p editorial"><article class="card-p">
   <div class="card-foto"><img src="img/tn101-1-m.webp" width="800" height="450" alt="Talhões de café vistos de cima" loading="lazy"><div class="selo"><span class="neg neg-venda">Venda</span><span>TN-101</span></div></div>
   <div class="card-corpo">
     <h3><a href="propriedade-fazenda-cafe-alta-mogiana.html">Fazenda de café na Alta Mogiana</a></h3>
@@ -128,6 +131,14 @@
     
   </div>
 </article></div>
+  </div>
+</section>
+
+<section class="sec sec-camadas" aria-labelledby="h-cam">
+  <div class="w">
+    <div class="camadas-cab"><div><p class="kicker">Mapa técnico em camadas</p><h2 id="h-cam">Leia o terreno <em>antes</em> da visita</h2><p class="lead" style="margin:0">Ligue e desligue solo, curvas de nível e água. Passe o cursor para ler altitude e solo de cada ponto; os ícones mostram sede, nascentes, represas e pivôs.</p><p class="tit-prop" data-cm-titulo></p></div>
+      <a class="bt bt-p" href="propriedade-fazenda-cafe-alta-mogiana.html" data-cm-link><span>Abrir a página da TN-101</span> <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <div data-camadas></div>
   </div>
 </section>
 
@@ -261,7 +272,7 @@
     </div>
     <div class="rd-legal">
       <p>Terra Nobre Negócios Rurais · CRECI-J 00000 e CNPJ 00.000.000/0001-00 (dados de exemplo). Propriedades, áreas, produtividades, valores e documentos mostrados são de exemplo, para demonstração. Áreas em hectares (ha) e alqueires paulistas (1 alq. = 2,42 ha). Mapas esquemáticos, sem escala precisa, e sem localização real.</p>
-      <p>Fotos desta página: Giovani Nunes, André Ulysses De Salis, Maurylio Silva, Clodoaldo Franco, MELQUIZEDEQUE ALMEIDA, Junior Cazangi, Devin Bourg, LEONARDO DOURADO, K, Hudson Guerrero Michelan, Nilton Rodrigues, jonathan emili (Pexels). Fotos: Pexels (licença Pexels), créditos completos na página <a href="sobre.html#creditos">Sobre</a>.</p>
+      <p>Fotos desta página: Giovani Nunes, André Ulysses De Salis, Maurylio Silva, Clodoaldo Franco, MELQUIZEDEQUE ALMEIDA, Junior Cazangi, Devin Bourg, LEONARDO DOURADO, K, Hudson Guerrero Michelan, Nilton Rodrigues, jonathan emili (Pexels). Vídeo do sobrevoo: Matheus Bertelli (Pexels). Fotos: Pexels (licença Pexels), créditos completos na página <a href="sobre.html#creditos">Sobre</a>.</p>
       <p>© 2026 Terra Nobre Negócios Rurais. Marca criada para demonstração · Site de exemplo feito pela Blue Rose.</p>
     </div>
   </div>

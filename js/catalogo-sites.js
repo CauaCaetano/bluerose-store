@@ -13,7 +13,7 @@
   var T = en
     ? { sites: function (n) { return n + (n > 1 ? ' websites' : ' website'); }, abrir: 'Open website', paginas: 'pages', pagina: 'page', escolha: 'Choose a website to explore', ver: 'See the websites', plano: 'This model in the Complete plan', prazo: 'ready in 10 business days', preco: function (v) { return '$' + Math.max(0, Math.round(v * 0.8 / 100) * 100 - 10).toLocaleString('en-US'); }, plano3d: 'This model, with 3D', prazo3d: 'ready in 14 business days', preco3d: function (v) { return '$' + Math.max(0, Math.round(v * 0.8 / 100) * 100 - 10).toLocaleString('en-US'); }, quero: 'I want this one', comNome: 'Opens as' }
     : { sites: function (n) { return n + (n > 1 ? ' sites' : ' site'); }, abrir: 'Abrir site', paginas: 'páginas', pagina: 'página', escolha: 'Escolha um site para navegar', ver: 'Ver os sites', plano: 'Este modelo no plano Completo', prazo: 'pronto em 5 dias úteis', preco: function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); }, plano3d: 'Este modelo, com 3D', prazo3d: 'pronto em 5 dias úteis', preco3d: function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); }, quero: 'Quero este', comNome: 'Abre como' };
-  var TRES_D = ['bastos-lacerda', 'monolito', 'vertice', 'ana-ribeiro']; // sites com cena 3D: preço próprio
+  var TRES_D = ['bastos-lacerda', 'monolito', 'ana-ribeiro']; // sites com cena 3D: preço próprio
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); };
   var lang = en ? 'en' : 'pt';
   var todos = dados.sites.filter(function (s) { return (s.lang || 'pt') === lang; });

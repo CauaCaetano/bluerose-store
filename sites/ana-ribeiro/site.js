@@ -416,49 +416,96 @@
   })();
   window.ANA_TELA = tela;
 
-  // ---------- galeria cinematográfica da página do imóvel ----------
+  // ---------- galeria do imóvel: rolagem horizontal com encaixe (scroll-snap) e revelação de cada foto ----------
+  // Sem troca automática: a pessoa arrasta, desliza, usa as setas, o teclado ou as miniaturas. Toque/clique abre a tela cheia.
   $$('[data-cine]').forEach(function (sec) {
-    var palco = $('.cn-palco', sec), slides = $$('.cn-slide', sec), minis = $$('.cn-mini', sec), n = slides.length, i = 0, relogio = null, pausa = false, visivel = false;
+    var palco = $('.cn-palco', sec), trilho = $('.cn-trilho', sec), slides = $$('.cn-slide', sec), minis = $$('.cn-mini', sec), n = slides.length, i = -1;
+    if (!trilho || !n) return;
     var lista = slides.map(function (s) { var im = $('img', s); return { src: im.getAttribute('src'), alt: im.alt, leg: s.dataset.leg }; });
     var barra = $('.cn-progresso span', sec);
-    function mostra(k, auto) {
-      i = (k + n) % n;
-      slides.forEach(function (s, j) { s.classList.toggle('on', j === i); if (j === i) { var im = $('img', s); if (im.loading === 'lazy') im.loading = 'eager'; } });
+    var inicioDe = function (s) { return s.offsetLeft - (parseFloat(getComputedStyle(trilho).scrollPaddingLeft) || 0); };
+    function vaiPara(k) {
+      k = (k + n) % n;
+      trilho.scrollTo({ left: Math.max(0, Math.min(inicioDe(slides[k]), trilho.scrollWidth - trilho.clientWidth)), behavior: calmo.matches ? 'auto' : 'smooth' });
+      marca(k);
+    }
+    function marca(k) {
+      if (k === i) return;
+      i = k;
+      slides.forEach(function (s, j) { s.classList.toggle('on', j === i); });
       minis.forEach(function (m, j) { m.classList.toggle('on', j === i); if (j === i) m.setAttribute('aria-current', 'true'); else m.removeAttribute('aria-current'); });
       $('.cn-cont', sec).textContent = dois(i + 1) + ' / ' + dois(n);
       $('.cn-txt', sec).textContent = slides[i].dataset.leg;
       var m = minis[i], fila = m && m.parentNode;
       if (fila && fila.scrollWidth > fila.clientWidth) fila.scrollTo({ left: m.offsetLeft - fila.clientWidth / 2 + m.offsetWidth / 2, behavior: calmo.matches ? 'auto' : 'smooth' });
-      var prox = slides[(i + 1) % n] && $('img', slides[(i + 1) % n]); if (prox && prox.loading === 'lazy') prox.loading = 'eager';
-      if (!auto) reinicia();
+      [i, i + 1].forEach(function (j) { var im = slides[j] && $('img', slides[j]); if (im && im.loading === 'lazy') im.loading = 'eager'; });
     }
-    function reinicia() {
-      clearInterval(relogio);
-      if (barra) { barra.style.animation = 'none'; void barra.offsetWidth; barra.style.animation = ''; }
-      var ok = !pausa && visivel && !calmo.matches && !document.body.classList.contains('parado');
-      sec.classList.toggle('tocando', ok);
-      if (ok) relogio = setInterval(function () { mostra(i + 1, true); if (barra) { barra.style.animation = 'none'; void barra.offsetWidth; barra.style.animation = ''; } }, 6000);
+    function rolou() {
+      var max = trilho.scrollWidth - trilho.clientWidth, x = trilho.scrollLeft, k = 0, menor = Infinity;
+      if (max > 0 && x >= max - 4) k = n - 1;
+      else slides.forEach(function (s, j) { var d = Math.abs(inicioDe(s) - x); if (d < menor) { menor = d; k = j; } });
+      marca(k);
+      if (barra) barra.style.transform = 'scaleX(' + (max > 0 ? limita(x / max, 0, 1) : 1) + ')';
     }
-    $('.cn-ant', sec).addEventListener('click', function () { mostra(i - 1); });
-    $('.cn-prox', sec).addEventListener('click', function () { mostra(i + 1); });
-    $('.cn-cheia', sec).addEventListener('click', function () { pausa = true; reinicia(); tela.abre(lista, i); });
-    minis.forEach(function (m, j) { m.addEventListener('click', function () { mostra(j); }); });
-    palco.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft') { e.preventDefault(); mostra(i - 1); } else if (e.key === 'ArrowRight') { e.preventDefault(); mostra(i + 1); } else if (e.key === 'Enter') tela.abre(lista, i); });
-    palco.addEventListener('mouseenter', function () { pausa = true; reinicia(); });
-    palco.addEventListener('mouseleave', function () { pausa = false; reinicia(); });
-    // deslizar no celular; toque simples abre em tela cheia
-    var ini = null;
-    palco.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; ini = { x: e.clientX, y: e.clientY, t: Date.now() }; });
-    palco.addEventListener('pointerup', function (e) {
-      if (!ini) return;
-      var dx = e.clientX - ini.x, dy = e.clientY - ini.y; ini = null;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { pausa = true; mostra(i + (dx < 0 ? 1 : -1)); }
-      else if (Math.abs(dx) < 8 && Math.abs(dy) < 8) { pausa = true; reinicia(); tela.abre(lista, i); }
+    var pedido = false;
+    trilho.addEventListener('scroll', function () { if (!pedido) { pedido = true; requestAnimationFrame(function () { pedido = false; rolou(); }); } }, { passive: true });
+    $('.cn-ant', sec).addEventListener('click', function () { vaiPara(i - 1); });
+    $('.cn-prox', sec).addEventListener('click', function () { vaiPara(i + 1); });
+    $('.cn-cheia', sec).addEventListener('click', function () { tela.abre(lista, i); });
+    minis.forEach(function (m, j) { m.addEventListener('click', function () { vaiPara(j); }); });
+    palco.addEventListener('keydown', function (e) {
+      if (e.target.closest('button')) return;
+      if (e.key === 'ArrowLeft') { e.preventDefault(); vaiPara(i - 1); } else if (e.key === 'ArrowRight') { e.preventDefault(); vaiPara(i + 1); } else if (e.key === 'Enter') tela.abre(lista, i);
     });
-    palco.addEventListener('pointercancel', function () { ini = null; });
-    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { visivel = es[0].isIntersecting; reinicia(); }, { threshold: .4 }).observe(palco);
-    new MutationObserver(reinicia).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    mostra(0, true);
+    // mouse: arrastar rola a fila; clique sem arrastar abre a foto em tela cheia. No toque, a rolagem é a nativa do navegador.
+    var arr = null;
+    trilho.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      arr = { x: e.clientX, y: e.clientY, sl: trilho.scrollLeft, k: i, movel: e.pointerType === 'mouse', andou: false, id: e.pointerId };
+    });
+    trilho.addEventListener('pointermove', function (e) {
+      if (!arr || !arr.movel || e.pointerId !== arr.id) return;
+      var dx = e.clientX - arr.x;
+      if (!arr.andou && Math.abs(dx) > 6) { arr.andou = true; trilho.classList.add('arrastando'); try { trilho.setPointerCapture(e.pointerId); } catch (er) {} }
+      if (arr.andou) trilho.scrollLeft = arr.sl - dx;
+    });
+    function solta(e) {
+      if (!arr) return;
+      var a = arr; arr = null;
+      var dx = e.clientX - a.x, dy = e.clientY - a.y;
+      if (a.andou) {
+        trilho.classList.remove('arrastando');
+        // ao soltar, encaixa na próxima foto na direção do gesto (ou volta para a mesma, se o gesto foi curto)
+        vaiPara(Math.abs(dx) > 50 ? limita(a.k + (dx < 0 ? 1 : -1), 0, n - 1) : a.k);
+      } else if (e.type === 'pointerup' && Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+        var s = e.target.closest('.cn-slide'); if (s) { var k = slides.indexOf(s); marca(k); tela.abre(lista, k); }
+      }
+    }
+    trilho.addEventListener('pointerup', solta); trilho.addEventListener('pointercancel', solta);
+    trilho.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    // revelação: cada foto se abre (máscara de baixo para cima) quando entra na fila visível, uma vez só
+    // (conferido pela posição: o IntersectionObserver do Chrome conta o clip-path e não dispara numa foto toda mascarada)
+    if (!calmo.matches) {
+      sec.classList.add('revela');
+      var faltam = slides.slice();
+      var revela = function () {
+        if (!faltam.length) return;
+        var vh = window.innerHeight, vw = window.innerWidth, lote = 0;
+        faltam = faltam.filter(function (s) {
+          var r = s.getBoundingClientRect();
+          if (r.top < vh * .9 && r.bottom > vh * .1 && r.left < vw - 20 && r.right > 20) {
+            s.style.setProperty('--atraso', (lote++ * .12) + 's'); s.classList.add('visto'); return false;
+          }
+          return true;
+        });
+      };
+      var pedeR = false;
+      var agendaR = function () { if (!pedeR) { pedeR = true; requestAnimationFrame(function () { pedeR = false; revela(); }); } };
+      window.addEventListener('scroll', agendaR, { passive: true }); trilho.addEventListener('scroll', agendaR, { passive: true }); window.addEventListener('resize', agendaR);
+      requestAnimationFrame(revela);
+    }
+    window.addEventListener('resize', rolou);
+    rolou();
   });
 
   // ---------- abas: vídeo, tour 360° e planta ----------

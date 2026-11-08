@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=18"></script>
+<script src="r3-cedo.js?v=1"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -19,10 +20,12 @@
 <link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=5">
 <link rel="stylesheet" href="estilo.css?v=9">
+<link rel="stylesheet" href="r3.css?v=2">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=7" defer></script>
 <script src="dados.js?v=1" defer></script>
-<script src="site.js?v=8" defer></script>
+<script src="site.js?v=9" defer></script>
+<script src="r3.js?v=1" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "RealEstateListing", "name": "Cobertura duplex com piscina em Jurerê Internacional", "description": "Pé-direito duplo, terraço com piscina e o mar a duas quadras, no prédio de oito unidades.", "image": ["img/jurere-piscina.webp", "img/imovel-cobertura.webp", "img/int-jurere.webp"], "identifier": "AR-1104", "offers": {"@type": "Offer", "price": 5200000, "priceCurrency": "BRL", "availability": "https://schema.org/InStock"}, "about": {"@type": "Apartment", "floorSize": {"@type": "QuantitativeValue", "value": 286, "unitCode": "MTK"}, "numberOfRooms": 3, "numberOfBathroomsTotal": 5, "address": {"@type": "PostalAddress", "addressLocality": "Florianópolis", "addressRegion": "SC", "addressCountry": "BR", "streetAddress": "Jurerê Internacional"}}}</script>
 
 <meta property="og:image" content="https://bluerose-store.com/img/og/sites/ana-ribeiro.jpg?v=1">
@@ -63,7 +66,7 @@
 
   <section class="cine" data-tom="escuro" data-cine aria-label="Fotos do imóvel">
     <div class="cn-palco" tabindex="0" aria-roledescription="carrossel" aria-label="Fotos do imóvel, 8 imagens. Use as setas do teclado ou deslize para trocar.">
-      <figure class="cn-slide on" data-leg="Piscina do terraço"><img src="img/jurere-piscina.webp" alt="Piscina no terraço da cobertura com guarda-corpo de vidro" width="1600" height="1036" fetchpriority="high"></figure><figure class="cn-slide" data-leg="Sala com pé-direito duplo"><img src="img/imovel-cobertura.webp" alt="Sala com pé-direito duplo, mezanino e janelas altas da cobertura" width="1200" height="1600" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Vista do terraço"><img src="img/int-jurere.webp" alt="Porta de vidro aberta para a varanda com o mar ao fundo" width="1200" height="1600" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Cozinha com bancada de mármore"><img src="img/jurere-cozinha.webp" alt="Cozinha clara com bancada de mármore e cadeiras estofadas" width="1600" height="1068" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Suíte principal"><img src="img/jurere-suite.webp" alt="Suíte ampla com cama de casal, tapete e luz natural" width="1600" height="1067" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Banho da suíte"><img src="img/jurere-banho.webp" alt="Banheiro escuro com duas cubas, banheira e janela de canto" width="1600" height="1070" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Lounge do terraço"><img src="img/jurere-gourmet.webp" alt="Terraço com sofás, ombrelones e vista aberta" width="1600" height="1068" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Jurerê Internacional"><img src="img/bairro-jurere.webp" alt="Casa moderna com piscina em Jurerê Internacional" width="1600" height="1000" loading="lazy" decoding="async"></figure>
+      <div class="cn-trilho"><figure class="cn-slide on" data-leg="Piscina do terraço"><img src="img/jurere-piscina.webp" alt="Piscina no terraço da cobertura com guarda-corpo de vidro" width="1600" height="1036" fetchpriority="high"></figure><figure class="cn-slide" data-leg="Sala com pé-direito duplo"><img src="img/imovel-cobertura.webp" alt="Sala com pé-direito duplo, mezanino e janelas altas da cobertura" width="1200" height="1600" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Vista do terraço"><img src="img/int-jurere.webp" alt="Porta de vidro aberta para a varanda com o mar ao fundo" width="1200" height="1600" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Cozinha com bancada de mármore"><img src="img/jurere-cozinha.webp" alt="Cozinha clara com bancada de mármore e cadeiras estofadas" width="1600" height="1068" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Suíte principal"><img src="img/jurere-suite.webp" alt="Suíte ampla com cama de casal, tapete e luz natural" width="1600" height="1067" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Banho da suíte"><img src="img/jurere-banho.webp" alt="Banheiro escuro com duas cubas, banheira e janela de canto" width="1600" height="1070" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Lounge do terraço"><img src="img/jurere-gourmet.webp" alt="Terraço com sofás, ombrelones e vista aberta" width="1600" height="1068" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Jurerê Internacional"><img src="img/bairro-jurere.webp" alt="Casa moderna com piscina em Jurerê Internacional" width="1600" height="1000" loading="lazy" decoding="async"></figure></div>
       <div class="cn-sombra" aria-hidden="true"></div>
       <p class="cn-leg" aria-live="polite"><b class="cn-cont">01 / 08</b> <span class="cn-txt">Piscina do terraço</span></p>
       <div class="cn-bts">

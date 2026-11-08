@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=18"></script>
+<script src="r3-cedo.js?v=1"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -19,10 +20,12 @@
 <link rel="stylesheet" href="../assets/fontes/eb39e0b781.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=5">
 <link rel="stylesheet" href="estilo.css?v=9">
+<link rel="stylesheet" href="r3.css?v=2">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=7" defer></script>
 <script src="dados.js?v=1" defer></script>
-<script src="site.js?v=8" defer></script>
+<script src="site.js?v=9" defer></script>
+<script src="r3.js?v=1" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "RealEstateListing", "name": "Casa açoriana restaurada em Santo Antônio de Lisboa", "description": "Casarão de 1890 restaurado a duas quadras do calçadão, com varanda para o pôr do sol.", "image": ["img/santo-varanda.webp", "img/santo-fachada.webp", "img/santo-sala.webp"], "identifier": "AR-0733", "offers": {"@type": "Offer", "price": 2150000, "priceCurrency": "BRL", "availability": "https://schema.org/InStock"}, "about": {"@type": "House", "floorSize": {"@type": "QuantitativeValue", "value": 190, "unitCode": "MTK"}, "numberOfRooms": 3, "numberOfBathroomsTotal": 3, "address": {"@type": "PostalAddress", "addressLocality": "Florianópolis", "addressRegion": "SC", "addressCountry": "BR", "streetAddress": "Santo Antônio de Lisboa"}}}</script>
 
 <meta property="og:image" content="https://bluerose-store.com/img/og/sites/ana-ribeiro.jpg?v=1">
@@ -63,7 +66,7 @@
 
   <section class="cine" data-tom="escuro" data-cine aria-label="Fotos do imóvel">
     <div class="cn-palco" tabindex="0" aria-roledescription="carrossel" aria-label="Fotos do imóvel, 7 imagens. Use as setas do teclado ou deslize para trocar.">
-      <figure class="cn-slide on" data-leg="Varanda para o pôr do sol"><img src="img/santo-varanda.webp" alt="Varanda de madeira com mesa e o pôr do sol no mar" width="1600" height="1067" fetchpriority="high"></figure><figure class="cn-slide" data-leg="Janela da fachada"><img src="img/santo-fachada.webp" alt="Fachada branca com janela de madeira e folhagem tropical" width="1600" height="1600" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Sala com vigas aparentes"><img src="img/santo-sala.webp" alt="Sala com vigas de madeira, lareira e móveis rústicos" width="1600" height="1068" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Cozinha"><img src="img/santo-cozinha.webp" alt="Cozinha clara com armários brancos e janela" width="1600" height="1067" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Suíte do sótão"><img src="img/santo-suite.webp" alt="Quarto com cama branca e janela no sótão" width="1600" height="1068" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Banheiro com banheira"><img src="img/santo-banho.webp" alt="Banheiro com banheira antiga de pés e janela com venezianas" width="1600" height="1067" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Santo Antônio de Lisboa"><img src="img/bairro-santo-antonio.webp" alt="Casario e barcos de pesca em Santo Antônio de Lisboa" width="1360" height="850" loading="lazy" decoding="async"></figure>
+      <div class="cn-trilho"><figure class="cn-slide on" data-leg="Varanda para o pôr do sol"><img src="img/santo-varanda.webp" alt="Varanda de madeira com mesa e o pôr do sol no mar" width="1600" height="1067" fetchpriority="high"></figure><figure class="cn-slide" data-leg="Janela da fachada"><img src="img/santo-fachada.webp" alt="Fachada branca com janela de madeira e folhagem tropical" width="1600" height="1600" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Sala com vigas aparentes"><img src="img/santo-sala.webp" alt="Sala com vigas de madeira, lareira e móveis rústicos" width="1600" height="1068" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Cozinha"><img src="img/santo-cozinha.webp" alt="Cozinha clara com armários brancos e janela" width="1600" height="1067" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Suíte do sótão"><img src="img/santo-suite.webp" alt="Quarto com cama branca e janela no sótão" width="1600" height="1068" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Banheiro com banheira"><img src="img/santo-banho.webp" alt="Banheiro com banheira antiga de pés e janela com venezianas" width="1600" height="1067" loading="lazy" decoding="async"></figure><figure class="cn-slide" data-leg="Santo Antônio de Lisboa"><img src="img/bairro-santo-antonio.webp" alt="Casario e barcos de pesca em Santo Antônio de Lisboa" width="1360" height="850" loading="lazy" decoding="async"></figure></div>
       <div class="cn-sombra" aria-hidden="true"></div>
       <p class="cn-leg" aria-live="polite"><b class="cn-cont">01 / 07</b> <span class="cn-txt">Varanda para o pôr do sol</span></p>
       <div class="cn-bts">

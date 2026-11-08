@@ -18,11 +18,13 @@
 <link rel="stylesheet" href="../assets/fontes/b38ec324dd.css">
 <link rel="stylesheet" href="../assets/moldura.css?v=5">
 <link rel="stylesheet" href="estilo.css?v=2">
+<link rel="stylesheet" href="bento.css?v=1">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=7" defer></script>
 <script src="dados.js?v=1" defer></script>
 <script src="site.js?v=1" defer></script>
-<script src="painel.js?v=1" defer></script>
+<script src="painel.js?v=2" defer></script>
+<script src="bento.js?v=1" defer></script>
 
 <meta property="og:image" content="https://bluerose-store.com/img/og/sites/prisma-adm.jpg?v=1">
 <meta property="og:image:width" content="1200">
@@ -81,18 +83,10 @@
 
     <div class="sinc" id="sinc"><span class="ponto" aria-hidden="true"></span><p><b>Sistema conectado: Superlógica (exemplo)</b> · última sincronização <span id="sinc-hora">há 4 minutos</span> · <span id="sinc-n">812</span> contratos · 0 erros</p><button type="button" class="bt bt-cla bt-peq" id="sincronizar">Sincronizar agora</button></div>
 
-    <div class="kpis seis" id="kpis"></div>
-
-    <div class="grade-2">
-      <div class="bloco">
-        <div class="bloco-cab"><div><h2>Inadimplência acima de 30 dias</h2><p>Percentual dos contratos, últimos 12 meses</p></div></div>
-        <div id="graf-inad"></div>
-      </div>
-      <div class="bloco">
-        <div class="bloco-cab"><div><h2>Ocupação da carteira</h2><p>Imóveis alugados sobre administrados</p></div></div>
-        <div id="graf-ocup"></div>
-      </div>
-    </div>
+    <section class="bloco-bento" aria-labelledby="t-indicadores">
+      <h2 id="t-indicadores" class="sr">Indicadores da carteira</h2>
+      <div data-bento="equipe"></div>
+    </section>
 
     <div class="grade-31">
       <div>
@@ -112,10 +106,9 @@
       </div>
       <div>
         <div class="bloco">
-          <h2>Esteira de locação</h2>
-          <p style="font-size:15px;color:var(--suave);margin:4px 0 12px">Interessados por etapa (locação online)</p>
-          <ul class="funil" id="funil"></ul>
-          <ul class="lista-imoveis" id="interessados" style="margin-top:12px"></ul>
+          <h2>Interessados recentes</h2>
+          <p style="font-size:15px;color:var(--suave);margin:4px 0 12px">Locação online, etapa atual de cada um</p>
+          <ul class="lista-imoveis" id="interessados"></ul>
         </div>
         <div class="bloco">
           <h2>Inadimplentes</h2>

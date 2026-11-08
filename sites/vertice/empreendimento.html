@@ -3,22 +3,23 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=18"></script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com; font-src 'self'; connect-src 'self' blob: https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>O empreendimento · Vértice Residence, Balneário Camboriú</title>
 <meta name="description" content="Conheça o Vértice Residence: torre de 18 andares a 300 m do mar em Balneário Camboriú, 72 unidades de 2 e 3 suítes, 1.100 m² de lazer, garagem com 2 vagas e depósito, entrega em dezembro de 2028.">
-<meta name="theme-color" content="#061a37">
+<meta name="theme-color" content="#F4F1E9">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23050817'%2F%3E%3Cpath%20d%3D'M9%2010l11%2021%2011-21'%20stroke%3D'%23c9a849'%20stroke-width%3D'3'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="../assets/fontes/93a341139e.css">
+<meta name="view-transition" content="same-origin">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23F4F1E9'%2F%3E%3Crect%20x%3D'6.5'%20y%3D'6.5'%20width%3D'27'%20height%3D'27'%20fill%3D'none'%20stroke%3D'%23292A27'%2F%3E%3Cpath%20d%3D'M13%2013l7%2014%207-14'%20stroke%3D'%23A88D63'%20stroke-width%3D'1.6'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
+<link rel="preload" href="fontes/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fontes/fontes.css?v=10">
 <link rel="stylesheet" href="../assets/moldura.css?v=5">
-<link rel="stylesheet" href="estilo.css?v=7">
-<link rel="stylesheet" href="vendas.css?v=2">
+<link rel="stylesheet" href="vertice.css?v=10">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=7" defer></script>
-<script src="site.js?v=7" defer></script>
-<script src="vendas.js?v=1" defer></script>
+<script src="vendas.js?v=10" defer></script>
+<script src="site.js?v=10" defer></script>
 
 <meta property="og:title" content="O empreendimento · Vértice Residence, Balneário Camboriú">
 <meta property="og:description" content="Conheça o Vértice Residence: torre de 18 andares a 300 m do mar em Balneário Camboriú, 72 unidades de 2 e 3 suítes, 1.100 m² de lazer, garagem com 2 vagas e depósito, entrega em dezembro de 2028.">
@@ -33,100 +34,83 @@
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="topo">
-  <button type="button" class="pilula pilula-clara bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i>Menu</button>
-  <a class="marca" href="index.html" translate="no" aria-label="Vértice Residence, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 9l12 23 12-23"/></svg><span>VÉRTICE<small>residence</small></span></a>
-  <div class="topo-acoes"><a class="pilula pilula-linha bt-tabela" href="apresentacao.html">Tabela de preços</a><a class="pilula pilula-cobre bt-escolher" href="espelho.html">Espelho de vendas</a></div>
+  <a class="marca" href="index.html" translate="no" aria-label="Vértice Residence, início"><span class="marca-v"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3.5l5 9 5-9"/></svg></span><span class="marca-n">VÉRTICE<small>Balneário Camboriú</small></span></a>
+  <nav class="topo-nav" aria-label="Atalhos"><a href="espelho.html">Espelho</a><a href="apartamentos.html">Plantas</a><a href="obra.html">Obra</a><a href="localizacao.html">Localização</a><a href="incorporadora.html">Incorporadora</a></nav>
+  <div class="topo-acoes">
+    <a class="bt bt-tab" href="apresentacao.html">Tabela de preços</a>
+    <a class="bt bt-agenda" href="contato.html#agendar"><span>Agendar<span class="txt-longo"> visita</span></span><span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+    <button type="button" class="bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i><span class="bt-menu-t">Menu</span></button>
+  </div>
 </header>
 <nav class="menu" id="menu" aria-label="Principal" hidden>
-  <div class="menu-grupos">
-    <div><p class="menu-rot">Escolher e comprar</p><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="como-comprar.html#simulador">Simulador</a><a href="apresentacao.html">Tabela de preços</a><a href="como-comprar.html">Como comprar</a></div>
-    <div><p class="menu-rot">Conhecer o Vértice</p><a href="index.html">Início</a><a href="empreendimento.html" aria-current="page">O empreendimento</a><a href="obra.html">Andamento da obra</a><a href="incorporadora.html">A incorporadora</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="contato.html">Contato</a></div>
+  <ol class="menu-lista"><li><a href="index.html">Início</a></li><li><a href="empreendimento.html" aria-current="page">O empreendimento</a></li><li><a href="localizacao.html">Localização</a></li><li><a href="espelho.html">Espelho de vendas</a></li><li><a href="apartamentos.html">Plantas</a></li><li><a href="galeria.html">Interiores e galeria</a></li><li><a href="obra.html">Andamento da obra</a></li><li><a href="como-comprar.html">Como comprar</a></li><li><a href="incorporadora.html">A incorporadora</a></li><li><a href="contato.html">Contato</a></li></ol>
+  <div class="menu-lado">
+    <p class="rot">Central de vendas e decorado</p>
+    <p>Rua de Exemplo, 100 · Bairro Exemplo<br>Balneário Camboriú · todos os dias, 9h às 20h</p>
+    <a class="bt" href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+    <p class="rot">Materiais</p>
+    <a href="apresentacao.html">Tabela de preços e apresentação</a><a href="como-comprar.html#simulador">Simulador de pagamento</a><a href="privacidade.html">Política de privacidade</a>
   </div>
-  <p class="menu-pe"><span>Central de vendas · todos os dias, 9h às 20h</span><a href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor ↗</a></p>
 </nav>
 
 <main id="conteudo">
-  <section class="pg-topo" aria-labelledby="pg-t">
-    <svg class="arcos-fundo" viewBox="0 0 1440 900" aria-hidden="true"><circle cx="300" cy="1000" r="620"/><circle cx="1140" cy="1000" r="620"/></svg>
+<section class="pg-hero" aria-labelledby="pg-t">
     <p class="rot">O empreendimento</p>
-    <h1 id="pg-t" class="gigante encaixe">O projeto</h1>
-    <div class="pg-topo-grade">
-      <p class="lead revela">Uma torre que afina como um cume, a 300 metros da praia central.</p>
-      <div><p>O Vértice Residence tem 18 andares, quatro apartamentos por andar e 72 unidades de 2 e 3 suítes. O projeto é da arquiteta Helena Duarte (personagem fictícia) e a obra começou em junho de 2026, com entrega das chaves em dezembro de 2028.</p><a class="pilula pilula-cobre" href="espelho.html">Ver as unidades no espelho</a></div>
+    <div class="pg-hero-grade">
+      <h1 id="pg-t" class="revela-t"><span class="mascara"><span>Forma que</span></span><span class="mascara"><span><em>permanece</em>.</span></span></h1>
+      <div class="pg-hero-lado"><p>18 andares, quatro apartamentos por andar e 72 unidades de 2 e 3 suítes. Projeto da arquiteta Helena Duarte (personagem fictícia), obra iniciada em junho de 2026 e entrega das chaves em dezembro de 2028.</p><div class="acoes"><a class="bt" href="espelho.html" data-cursor="Explorar">Ver as unidades na fachada<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a></div></div>
     </div>
   </section>
-  <figure class="pg-larga"><img src="img/torre-mar.webp" alt="Torre residencial iluminada ao entardecer com o mar ao fundo" width="1067" height="1600" style="object-position:50% 30%"></figure>
-
-  <section class="pg-sec sec-clara" aria-labelledby="n-t">
-    <h2 id="n-t" class="sr">O Vértice em números</h2>
-    <p class="lead revela" style="max-width:1060px">Cada final foi desenhado a partir da vista: os finais 1 e 4 têm 128 m² e três suítes voltadas para o mar; os finais 2 e 3 têm 92 m² e duas suítes, com varanda gourmet em todos.</p>
-    <dl class="numeros" style="margin-top:clamp(40px,6vw,80px)">
-      <div><dt>unidades</dt><dd>72</dd></div>
-      <div><dt>andares</dt><dd>18</dd></div>
-      <div><dt>área privativa, m²</dt><dd>92–128</dd></div>
-      <div><dt>lazer, m²</dt><dd>1.100</dd></div>
-    </dl>
+  <figure class="pg-larga"><img src="img/r3-hero-torre.webp" alt="Quina de uma torre residencial com o mar no horizonte" width="2000" height="1333" loading="lazy" style="object-position:70% 50%"><figcaption class="ilus">Imagem ilustrativa · foto de banco</figcaption></figure>
+  <section class="numeros-faixa" aria-label="O Vértice em números">
+    <dl class="nf"><div><dd>72</dd><dt>unidades</dt></div><div><dd>18</dd><dt>andares</dt></div><div><dd class="nf-p">92–146<small>m²</small></dd><dt>área privativa</dt></div><div><dd>1.100<small>m²</small></dd><dt>de lazer</dt></div></dl>
   </section>
-
-  <section class="pg-sec" aria-labelledby="ar-t">
+  <section class="sec" aria-labelledby="ar-t">
     <div class="duas">
-      <figure><img src="img/torre-cume.webp" alt="Torre vista de baixo, afinando em direção ao céu" width="1067" height="1600" loading="lazy"></figure>
-      <div class="txt">
+      <figure><img src="img/r3-torre-entardecer.webp" alt="Torre esguia contra o céu do entardecer" width="1100" height="1650" loading="lazy"></figure>
+      <div>
         <p class="rot">Arquitetura</p>
-        <h2 id="ar-t" style="font-size:clamp(36px,5vw,76px)">Base larga, topo de vidro</h2>
-        <p>A base em granito preto abriga o hall de pé-direito duplo, com 7 metros de altura. A partir do 15º andar, os recuos abrem terraços e a quina de vidro do final 1 olha o mar de frente.</p>
+        <h2 id="ar-t">Base firme, topo de <em>vidro</em>.</h2>
+        <p>A base em pedra escura abriga o hall de pé-direito duplo, com 7 metros de altura. A partir do 15º andar, os recuos abrem terraços e a quina de vidro do final 1 olha o mar de frente.</p>
         <p class="mut">Os brises de alumínio champanhe filtram o sol da tarde na fachada oeste, e as esquadrias do piso ao teto têm vidro laminado com controle solar em todos os ambientes de estar.</p>
       </div>
     </div>
   </section>
-
-  <section class="pg-sec sec-deg" aria-labelledby="tc-t">
-    <p class="rot">Tecnologia e conforto</p>
-    <h2 id="tc-t">Feito para morar</h2>
+  <section class="sec sec-pedra" aria-labelledby="tc-t">
+    <div class="sec-cab"><div><p class="rot">Tecnologia e conforto</p><h2 id="tc-t">Feito para <em>morar</em>.</h2></div></div>
     <ul class="itens">
-      <li><b>Ar-condicionado sem aparelho na fachada</b><span>Infraestrutura para split com condensadoras em área técnica no andar. A fachada fica limpa e o barulho fica longe dos quartos.</span></li>
+      <li><b>Ar-condicionado sem aparelho na fachada</b><span>Infraestrutura para split com condensadoras em área técnica no andar. A fachada fica limpa e o barulho longe dos quartos.</span></li>
       <li><b>Três elevadores</b><span>Dois sociais e um de serviço, com velocidade de 2,5 m/s. Do térreo ao 18º andar em menos de 30 segundos.</span></li>
-      <li><b>Água quente a gás</b><span>Aquecedor de passagem por apartamento e medição individual de água e gás, para cada um pagar o que usa.</span></li>
-      <li><b>Fechadura digital</b><span>Porta de entrada com fechadura por senha e biometria, e controle de acesso por reconhecimento facial no hall.</span></li>
-      <li><b>Isolamento acústico</b><span>Contrapiso com manta acústica entre os andares e esquadrias de vidro duplo nas suítes voltadas para a avenida.</span></li>
-      <li><b>Energia solar nas áreas comuns</b><span>Placas no topo da torre abastecem a iluminação do lazer e da garagem e reduzem o valor do condomínio.</span></li>
+      <li><b>Água quente a gás</b><span>Aquecedor de passagem por apartamento e medição individual de água e gás.</span></li>
+      <li><b>Fechadura digital</b><span>Porta de entrada com senha e biometria, e controle de acesso por reconhecimento facial no hall.</span></li>
+      <li><b>Isolamento acústico</b><span>Contrapiso com manta acústica entre os andares e vidro duplo nas suítes voltadas para a avenida.</span></li>
+      <li><b>Energia solar nas áreas comuns</b><span>Placas no topo da torre abastecem a iluminação do lazer e da garagem e reduzem o condomínio.</span></li>
     </ul>
   </section>
-
-  <section class="pg-sec sec-clara" aria-labelledby="gv-t">
-    <div class="duas inv">
-      <figure><img src="img/fachada-vidro.webp" alt="Fachada de vidro de um arranha-céu vista de baixo" width="1600" height="1067" loading="lazy" style="aspect-ratio:4/3"></figure>
-      <div class="txt">
-        <p class="rot">Garagem e depósitos</p>
-        <h2 id="gv-t" style="font-size:clamp(36px,5vw,76px)">Vagas para todos, depósito para cada um</h2>
-        <p>Três subsolos com 112 vagas cobertas: duas por apartamento nos finais 1 e 4 e uma nos finais 2 e 3, além de 4 vagas para visitantes. Cada unidade tem um depósito privativo de 3 a 5 m² no subsolo.</p>
-        <dl class="numeros" style="width:100%;grid-template-columns:repeat(3,minmax(0,1fr))">
-          <div><dt>vagas</dt><dd>112</dd></div>
-          <div><dt>depósitos</dt><dd>72</dd></div>
-          <div><dt>recarga elétrica</dt><dd>12</dd></div>
-        </dl>
-        <p class="mut">Vagas extras e depósitos maiores podem ser comprados à parte enquanto houver estoque. Pergunte na central de vendas.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="pg-sec" aria-labelledby="lz-t2">
-    <p class="rot">Lazer · 1.100 m² em dois pavimentos</p>
-    <h2 id="lz-t2">Do rooftop ao térreo</h2>
+  <section class="sec" aria-labelledby="lz-t2">
+    <div class="sec-cab"><div><p class="rot">Lazer · 1.100 m² em dois pavimentos</p><h2 id="lz-t2">Do rooftop ao <em>térreo</em>.</h2></div><p class="sec-cab-txt">Piscina aquecida com borda infinita no 19º andar e, no térreo, academia, coworking e brinquedoteca.</p></div>
     <ul class="itens">
       <li><b>Piscina aquecida no 19º</b><span>Borda infinita voltada para o mar, deque molhado e solário com espreguiçadeiras.</span></li>
       <li><b>Espaço gourmet com vista</b><span>Cozinha equipada, adega climatizada e mesa para 16 pessoas no rooftop.</span></li>
-      <li><b>Academia de 140 m²</b><span>Aparelhos de musculação e cardio, sala de pilates e vestiários com sauna seca.</span></li>
+      <li><b>Academia de 140 m²</b><span>Musculação e cardio, sala de pilates e vestiários com sauna seca.</span></li>
       <li><b>Coworking</b><span>Oito estações, duas salas de reunião fechadas e internet dedicada para os moradores.</span></li>
       <li><b>Brinquedoteca e playground</b><span>Brinquedoteca no térreo, com janela para o jardim, e playground coberto.</span></li>
       <li><b>Bicicletário e pet place</b><span>Vagas para 80 bicicletas, oficina de reparo e área de banho para os pets.</span></li>
     </ul>
-    <p class="mais-link esq"><a class="pilula pilula-linha" href="galeria.html">Ver a galeria do lazer</a></p>
   </section>
-
-  <section class="pg-sec sec-clara" aria-labelledby="ft-t">
-    <p class="rot">Ficha técnica</p>
-    <h2 id="ft-t">Quem faz o Vértice</h2>
+  <section class="sec sec-pedra" aria-labelledby="gv-t">
+    <div class="duas inv">
+      <figure><img src="img/r3-int-living-mar.webp" alt="Living com piso de madeira e janelas para o mar" width="1600" height="1205" loading="lazy"></figure>
+      <div>
+        <p class="rot">Garagem e depósitos</p>
+        <h2 id="gv-t">Vaga e depósito para <em>cada um</em>.</h2>
+        <p>Três subsolos com 112 vagas cobertas: duas por apartamento nos finais 1 e 4 e uma nos finais 2 e 3, além de 4 vagas para visitantes. Cada unidade tem depósito privativo de 3 a 5 m².</p>
+        <dl class="numeros" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:26px"><div><dt>vagas</dt><dd>112</dd></div><div><dt>depósitos</dt><dd>72</dd></div><div><dt>recarga elétrica</dt><dd>12</dd></div></dl>
+      </div>
+    </div>
+  </section>
+  <section class="sec" aria-labelledby="ft-t">
+    <div class="sec-cab"><div><p class="rot">Ficha técnica</p><h2 id="ft-t">Quem faz o <em>Vértice</em>.</h2></div></div>
     <dl class="ficha-tec">
       <div><dt>Incorporação e construção</dt><dd>Vértice Incorporações (fictícia)</dd></div>
       <div><dt>Arquitetura</dt><dd>Helena Duarte Arquitetos (fictícia)</dd></div>
@@ -137,25 +121,27 @@
       <div><dt>Unidades por andar</dt><dd>4</dd></div>
       <div><dt>Início da obra</dt><dd>junho de 2026</dd></div>
       <div><dt>Entrega prevista</dt><dd>dezembro de 2028</dd></div>
-      <div><dt>Registro de incorporação</dt><dd>R.I. fictício, 2º Ofício de Cidade Exemplo</dd></div>
+      <div><dt>Registro de incorporação</dt><dd>R.I. fictício</dd></div>
     </dl>
   </section>
-  <section class="pg-sec sec-clara chamada" aria-label="Fale com a central de vendas">
+  <section class="sec sec-branca chamada" aria-labelledby="ch-t">
     <p class="rot">Central de vendas · 9h às 20h</p>
-    <h2>Visite o decorado e veja a vista do 12º andar com os próprios olhos.</h2>
-    <div class="acoes"><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero agendar uma visita ao decorado.">Agendar visita ao decorado</a><a class="pilula pilula-linha" href="como-comprar.html">Como comprar</a></div>
+    <h2 id="ch-t">A vista do 12º, <em>ao vivo</em>.</h2>
+    <div class="acoes"><a class="bt bt-dest bt-g" href="contato.html#agendar">Agendar visita ao decorado<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a></div>
   </section>
   <nav class="migalhas" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span>O empreendimento</span></nav>
 </main>
 
 <footer class="rodape">
-  <div class="rd-grade">
-    <div><p class="rd-rot">Central de vendas Vértice</p><p class="rd-end">Rua de Exemplo, 100 · Bairro Exemplo · Cidade Exemplo</p><p class="rd-rot">Todos os dias, 9h às 20h · (00) 0000-0000 (exemplo)</p></div>
-    <p class="rd-legal">Vértice Incorporações Ltda. (fictícia) · CNPJ 00.000.000/0001-00 (exemplo) · incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento de exemplo, sujeitos a reajuste.</p>
-    <div class="rd-acoes"><a class="pilula pilula-cobre" href="obra.html">Andamento da obra</a><a class="redondo redondo-cobre" href="#conteudo" aria-label="Voltar ao topo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg></a></div>
+  <div class="rd">
+    <div class="rd-topo">
+      <p class="rd-frase">Um endereço <em>singular</em>, a 300 metros do mar.</p>
+      <div><h3>Central de vendas</h3><p class="mut" style="font-size:15px">Rua de Exemplo, 100 · Bairro Exemplo · Balneário Camboriú (endereço de exemplo)<br>Todos os dias, 9h às 20h · (00) 0000-0000 (exemplo)</p><a class="bt" href="#" data-wa="Olá, Vértice! Quero falar com um corretor.">WhatsApp do plantão<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a></div>
+      <div><h3>Páginas</h3><nav aria-label="Páginas" style="grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px"><a href="index.html">Início</a><a href="empreendimento.html" aria-current="page">O empreendimento</a><a href="localizacao.html">Localização</a><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="galeria.html">Galeria</a><a href="obra.html">Obra</a><a href="como-comprar.html">Como comprar</a><a href="apresentacao.html">Tabela de preços</a><a href="incorporadora.html">Incorporadora</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav></div>
+    </div>
+    <p class="rd-legal">Vértice Incorporações Ltda. (fictícia) · CNPJ 00.000.000/0001-00 (exemplo) · incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas de banco (Pexels e Wikimedia Commons), não são o empreendimento; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços, situação das unidades e números da obra são dados de exemplo.</p>
+    <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · site de exemplo feito pela Blue Rose</span><span>Fotos: Pexels (licença Pexels) e Wikimedia Commons (CC BY 4.0, autor HVL)</span></p>
   </div>
-  <nav class="rd-nav" aria-label="Páginas"><a href="index.html">Início</a><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="apresentacao.html">Tabela de preços</a><a href="como-comprar.html">Como comprar</a><a href="obra.html">Obra</a><a href="incorporadora.html">Incorporadora</a><a href="empreendimento.html" aria-current="page">O empreendimento</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
-  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash e Pexels (licenças livres)</span></p>
 </footer>
 </body>
 </html>

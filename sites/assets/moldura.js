@@ -62,7 +62,7 @@
   // preço de cada site (o mesmo de sites/catalogo.js); sem preço na lista: 3D R$ 2.490, comum R$ 1.490
   var PRECOS = {"patricia-leal":1290,"bianca-moraes":1290,"henrique-sato":1490,"ferreira-reformas":1490,"alvorada-previdenciario":1490,"lumi-odonto":1690,"ninho-odontopediatria":1690,"aguiar-monteiro":1690,"aurora-laser":1690,"base-forte":1890,"verona-body":1890,"atelier-oral":1990,"basalto-criminal":1990,"sorriso-prime":2290,"maison-elora":2290,"prisma-adm":2290,"terra-nobre":2290,"glow":2490,"vetrax-engenharia":2490,"ana-ribeiro":2490,"vertice":2990,"monolito":2990,"lar-paulista":3290,"bastos-lacerda":3490};
   // site com 3D em qualquer página (a cena só carrega na home; mesma lista do js/catalogo-sites.js)
-  var TRES_D = !!doc.querySelector('script[src*="cena.js"]') || ['bastos-lacerda', 'monolito', 'vertice', 'ana-ribeiro'].indexOf(SLUG) >= 0;
+  var TRES_D = !!doc.querySelector('script[src*="cena.js"]') || ['bastos-lacerda', 'monolito', 'ana-ribeiro'].indexOf(SLUG) >= 0;
   var pill = doc.createElement('div');
   pill.className = 'br-pill';
   pill.innerHTML = '<a class="br-pill-marca" href="' + raiz + 'exemplos.html' + (CAT ? '?c=' + CAT : '') + '"><b>BLUE ROSE</b><span>ver outros modelos</span></a>' +

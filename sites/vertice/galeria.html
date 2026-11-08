@@ -3,25 +3,26 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=18"></script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com; font-src 'self'; connect-src 'self' blob: https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Galeria · fachada, lazer, interiores e vista · Vértice Residence</title>
-<meta name="description" content="Imagens ilustrativas da fachada, do lazer, dos interiores e da vista do Vértice Residence em Balneário Camboriú.">
-<meta name="theme-color" content="#061a37">
+<title>Galeria · arquitetura, interiores, cidade e obra · Vértice Residence</title>
+<meta name="description" content="Fotos reais de referência da arquitetura, dos interiores, de Balneário Camboriú e da obra, para conhecer o padrão do Vértice Residence.">
+<meta name="theme-color" content="#F4F1E9">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23050817'%2F%3E%3Cpath%20d%3D'M9%2010l11%2021%2011-21'%20stroke%3D'%23c9a849'%20stroke-width%3D'3'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="../assets/fontes/93a341139e.css">
+<meta name="view-transition" content="same-origin">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23F4F1E9'%2F%3E%3Crect%20x%3D'6.5'%20y%3D'6.5'%20width%3D'27'%20height%3D'27'%20fill%3D'none'%20stroke%3D'%23292A27'%2F%3E%3Cpath%20d%3D'M13%2013l7%2014%207-14'%20stroke%3D'%23A88D63'%20stroke-width%3D'1.6'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
+<link rel="preload" href="fontes/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fontes/fontes.css?v=10">
 <link rel="stylesheet" href="../assets/moldura.css?v=5">
-<link rel="stylesheet" href="estilo.css?v=7">
-<link rel="stylesheet" href="vendas.css?v=2">
+<link rel="stylesheet" href="vertice.css?v=10">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=7" defer></script>
-<script src="site.js?v=7" defer></script>
-<script src="vendas.js?v=1" defer></script>
+<script src="vendas.js?v=10" defer></script>
+<script src="site.js?v=10" defer></script>
 
-<meta property="og:title" content="Galeria · fachada, lazer, interiores e vista · Vértice Residence">
-<meta property="og:description" content="Imagens ilustrativas da fachada, do lazer, dos interiores e da vista do Vértice Residence em Balneário Camboriú.">
+<meta property="og:title" content="Galeria · arquitetura, interiores, cidade e obra · Vértice Residence">
+<meta property="og:description" content="Fotos reais de referência da arquitetura, dos interiores, de Balneário Camboriú e da obra, para conhecer o padrão do Vértice Residence.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://bluerose-store.com/img/og/sites/vertice.jpg?v=1">
 <meta property="og:image:width" content="1200">
@@ -33,73 +34,74 @@
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="topo">
-  <button type="button" class="pilula pilula-clara bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i>Menu</button>
-  <a class="marca" href="index.html" translate="no" aria-label="Vértice Residence, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 9l12 23 12-23"/></svg><span>VÉRTICE<small>residence</small></span></a>
-  <div class="topo-acoes"><a class="pilula pilula-linha bt-tabela" href="apresentacao.html">Tabela de preços</a><a class="pilula pilula-cobre bt-escolher" href="espelho.html">Espelho de vendas</a></div>
+  <a class="marca" href="index.html" translate="no" aria-label="Vértice Residence, início"><span class="marca-v"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3.5l5 9 5-9"/></svg></span><span class="marca-n">VÉRTICE<small>Balneário Camboriú</small></span></a>
+  <nav class="topo-nav" aria-label="Atalhos"><a href="espelho.html">Espelho</a><a href="apartamentos.html">Plantas</a><a href="obra.html">Obra</a><a href="localizacao.html">Localização</a><a href="incorporadora.html">Incorporadora</a></nav>
+  <div class="topo-acoes">
+    <a class="bt bt-tab" href="apresentacao.html">Tabela de preços</a>
+    <a class="bt bt-agenda" href="contato.html#agendar"><span>Agendar<span class="txt-longo"> visita</span></span><span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+    <button type="button" class="bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i><span class="bt-menu-t">Menu</span></button>
+  </div>
 </header>
 <nav class="menu" id="menu" aria-label="Principal" hidden>
-  <div class="menu-grupos">
-    <div><p class="menu-rot">Escolher e comprar</p><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="como-comprar.html#simulador">Simulador</a><a href="apresentacao.html">Tabela de preços</a><a href="como-comprar.html">Como comprar</a></div>
-    <div><p class="menu-rot">Conhecer o Vértice</p><a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="obra.html">Andamento da obra</a><a href="incorporadora.html">A incorporadora</a><a href="galeria.html" aria-current="page">Galeria</a><a href="localizacao.html">Localização</a><a href="contato.html">Contato</a></div>
+  <ol class="menu-lista"><li><a href="index.html">Início</a></li><li><a href="empreendimento.html">O empreendimento</a></li><li><a href="localizacao.html">Localização</a></li><li><a href="espelho.html">Espelho de vendas</a></li><li><a href="apartamentos.html">Plantas</a></li><li><a href="galeria.html" aria-current="page">Interiores e galeria</a></li><li><a href="obra.html">Andamento da obra</a></li><li><a href="como-comprar.html">Como comprar</a></li><li><a href="incorporadora.html">A incorporadora</a></li><li><a href="contato.html">Contato</a></li></ol>
+  <div class="menu-lado">
+    <p class="rot">Central de vendas e decorado</p>
+    <p>Rua de Exemplo, 100 · Bairro Exemplo<br>Balneário Camboriú · todos os dias, 9h às 20h</p>
+    <a class="bt" href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+    <p class="rot">Materiais</p>
+    <a href="apresentacao.html">Tabela de preços e apresentação</a><a href="como-comprar.html#simulador">Simulador de pagamento</a><a href="privacidade.html">Política de privacidade</a>
   </div>
-  <p class="menu-pe"><span>Central de vendas · todos os dias, 9h às 20h</span><a href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor ↗</a></p>
 </nav>
 
 <main id="conteudo">
-  <section class="pg-topo" aria-labelledby="pg-t">
-    <svg class="arcos-fundo" viewBox="0 0 1440 900" aria-hidden="true"><circle cx="300" cy="1000" r="620"/><circle cx="1140" cy="1000" r="620"/></svg>
-    <p class="rot">Galeria</p>
-    <h1 id="pg-t" class="gigante encaixe">Galeria</h1>
-    <div class="pg-topo-grade">
-      <p class="lead revela">Fachada, lazer, interiores e a vista que dá nome ao projeto.</p>
-      <div><p>18 imagens ilustrativas de referência. Toque numa foto para ampliar. Na foto ampliada, faça pinça ou dois cliques para dar zoom e arraste para ver os detalhes. O decorado pode ser visitado todos os dias, das 9h às 20h.</p></div>
+<section class="pg-hero" aria-labelledby="pg-t">
+    <p class="rot">Galeria · fotos reais de referência</p>
+    <div class="pg-hero-grade">
+      <h1 id="pg-t" class="revela-t"><span class="mascara"><span>Detalhes que</span></span><span class="mascara"><span><em>transformam</em>.</span></span></h1>
+      <div class="pg-hero-lado"><p>Fotos reais de banco de imagens que mostram o padrão de arquitetura e acabamento: não são o empreendimento nem o decorado. Toque numa foto para ampliar; na ampliada, faça pinça ou dois cliques para dar zoom.</p></div>
     </div>
   </section>
-  <section class="pg-sec" style="padding-top:0" aria-label="Fotos">
-    <div class="gal-filtro" role="group" aria-label="Filtrar fotos"><button type="button" data-g="todas" aria-pressed="true">Todas</button><button type="button" data-g="fachada" aria-pressed="false">Fachada</button><button type="button" data-g="lazer" aria-pressed="false">Lazer</button><button type="button" data-g="interiores" aria-pressed="false">Interiores</button><button type="button" data-g="vista" aria-pressed="false">Vista</button></div>
+  <section class="sec" style="padding-top:0" aria-label="Fotos">
+    <div class="gal-filtro" role="group" aria-label="Filtrar fotos"><button type="button" data-g="todas" aria-pressed="true">Todas</button><button type="button" data-g="arquitetura" aria-pressed="false">Arquitetura</button><button type="button" data-g="interiores" aria-pressed="false">Interiores</button><button type="button" data-g="cidade" aria-pressed="false">Cidade</button><button type="button" data-g="obra" aria-pressed="false">Obra</button></div>
     <div class="gal-grade">
-      <figure data-g="fachada"><button type="button" aria-label="Ampliar: Torre iluminada ao entardecer com o mar ao fundo"><img src="img/torre-mar.webp" alt="Torre iluminada ao entardecer com o mar ao fundo" width="1067" height="1600" loading="lazy"></button><figcaption>Torre iluminada ao entardecer com o mar ao fundo</figcaption></figure>
-      <figure data-g="fachada"><button type="button" aria-label="Ampliar: Fachada com varandas em arco diante do mar"><img src="img/arcos.webp" alt="Fachada com varandas em arco diante do mar" width="1600" height="1067" loading="lazy"></button><figcaption>Fachada com varandas em arco diante do mar</figcaption></figure>
-      <figure data-g="fachada"><button type="button" aria-label="Ampliar: Torre vista de baixo, afinando em direção ao céu"><img src="img/torre-cume.webp" alt="Torre vista de baixo, afinando em direção ao céu" width="1067" height="1600" loading="lazy"></button><figcaption>Torre vista de baixo, afinando em direção ao céu</figcaption></figure>
-      <figure data-g="fachada"><button type="button" aria-label="Ampliar: Fachada de vidro vista de baixo"><img src="img/fachada-vidro.webp" alt="Fachada de vidro vista de baixo" width="1600" height="1067" loading="lazy"></button><figcaption>Fachada de vidro vista de baixo</figcaption></figure>
-      <figure data-g="lazer"><button type="button" aria-label="Ampliar: Rooftop com sofás, árvore e o pôr do sol"><img src="img/rooftop.webp" alt="Rooftop com sofás, árvore e o pôr do sol" width="1600" height="900" loading="lazy"></button><figcaption>Rooftop com sofás, árvore e o pôr do sol</figcaption></figure>
-      <figure data-g="lazer"><button type="button" aria-label="Ampliar: Terraço com cadeira suspensa e jardim"><img src="img/terraco.webp" alt="Terraço com cadeira suspensa e jardim" width="1600" height="900" loading="lazy"></button><figcaption>Terraço com cadeira suspensa e jardim</figcaption></figure>
-      <figure data-g="lazer"><button type="button" aria-label="Ampliar: Academia com aparelhos e vista para a cidade"><img src="img/academia.webp" alt="Academia com aparelhos e vista para a cidade" width="1600" height="1067" loading="lazy"></button><figcaption>Academia com aparelhos e vista para a cidade</figcaption></figure>
-      <figure data-g="interiores"><button type="button" aria-label="Ampliar: Hall de pé-direito duplo com lustre de cristal"><img src="img/living-pe-direito.webp" alt="Hall de pé-direito duplo com lustre de cristal" width="1600" height="900" loading="lazy"></button><figcaption>Hall de pé-direito duplo com lustre de cristal</figcaption></figure>
-      <figure data-g="interiores"><button type="button" aria-label="Ampliar: Sala de estar com sofás de couro e luz indireta"><img src="img/estar.webp" alt="Sala de estar com sofás de couro e luz indireta" width="1600" height="1066" loading="lazy"></button><figcaption>Sala de estar com sofás de couro e luz indireta</figcaption></figure>
-      <figure data-g="interiores"><button type="button" aria-label="Ampliar: Living amplo com sofás em tom caramelo"><img src="img/living.webp" alt="Living amplo com sofás em tom caramelo" width="1600" height="1066" loading="lazy"></button><figcaption>Living amplo com sofás em tom caramelo</figcaption></figure>
-      <figure data-g="interiores"><button type="button" aria-label="Ampliar: Living com janelas do piso ao teto e o mar ao fundo"><img src="img/vista-sala.webp" alt="Living com janelas do piso ao teto e o mar ao fundo" width="1600" height="1067" loading="lazy"></button><figcaption>Living com janelas do piso ao teto e o mar ao fundo</figcaption></figure>
-      <figure data-g="interiores"><button type="button" aria-label="Ampliar: Lustre de cristal do hall de entrada"><img src="img/lustre.webp" alt="Lustre de cristal do hall de entrada" width="1067" height="1600" loading="lazy"></button><figcaption>Lustre de cristal do hall de entrada</figcaption></figure>
-      <figure data-g="interiores"><button type="button" aria-label="Ampliar: Sala do decorado com sofá cinza"><img src="img/sala.webp" alt="Sala do decorado com sofá cinza" width="1400" height="738" loading="lazy"></button><figcaption>Sala do decorado com sofá cinza</figcaption></figure>
-      <figure data-g="vista"><button type="button" aria-label="Ampliar: Varanda envidraçada com vista para o oceano"><img src="img/varanda-mar.webp" alt="Varanda envidraçada com vista para o oceano" width="1200" height="1600" loading="lazy"></button><figcaption>Varanda envidraçada com vista para o oceano</figcaption></figure>
-      <figure data-g="vista"><button type="button" aria-label="Ampliar: Prédios ao longo da orla com o mar e as ondas"><img src="img/costa.webp" alt="Prédios ao longo da orla com o mar e as ondas" width="1600" height="900" loading="lazy"></button><figcaption>Prédios ao longo da orla com o mar e as ondas</figcaption></figure>
-      <figure data-g="vista"><button type="button" aria-label="Ampliar: Torres diante do mar azul com um navio ao fundo"><img src="img/skyline-mar.webp" alt="Torres diante do mar azul com um navio ao fundo" width="1600" height="1068" loading="lazy"></button><figcaption>Torres diante do mar azul com um navio ao fundo</figcaption></figure>
-      <figure data-g="vista"><button type="button" aria-label="Ampliar: Cidade à beira da baía com morros ao fundo"><img src="img/baia.webp" alt="Cidade à beira da baía com morros ao fundo" width="1201" height="1600" loading="lazy"></button><figcaption>Cidade à beira da baía com morros ao fundo</figcaption></figure>
-      <figure data-g="vista"><button type="button" aria-label="Ampliar: Manhã diante de uma janela com vista para a baía"><img src="img/manha.webp" alt="Manhã diante de uma janela com vista para a baía" width="1067" height="1600" loading="lazy"></button><figcaption>Manhã diante de uma janela com vista para a baía</figcaption></figure>
+      <figure data-g="arquitetura"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: torre esguia contra o céu do entardecer"><img src="img/r3-torre-entardecer.webp" alt="Torre esguia contra o céu do entardecer" width="1100" height="1650" loading="lazy"></button><figcaption>Torre esguia ao entardecer · referência</figcaption></figure>
+      <figure data-g="interiores"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: living diante do mar ao entardecer"><img src="img/r3-int-living-por-do-sol.webp" alt="Living com sofá claro diante do mar ao entardecer" width="1800" height="1200" loading="lazy"></button><figcaption>Living diante do mar · referência</figcaption></figure>
+      <figure data-g="arquitetura"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: quina de torre com o mar no horizonte"><img src="img/r3-hero-torre.webp" alt="Quina de torre residencial com o mar no horizonte" width="2000" height="1333" loading="lazy"></button><figcaption>Quina de vidro e o horizonte · referência</figcaption></figure>
+      <figure data-g="interiores"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: suíte clara com porta-janela"><img src="img/r3-int-suite.webp" alt="Suíte clara com porta-janela" width="1400" height="934" loading="lazy"></button><figcaption>Suíte master · referência</figcaption></figure>
+      <figure data-g="cidade"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: Praia Central de Balneário Camboriú"><img src="img/r3-cidade-bc.webp" alt="Praia Central de Balneário Camboriú com os prédios altos da orla" width="1600" height="1200" loading="lazy"></button><figcaption>Praia Central, Balneário Camboriú · HVL, Wikimedia Commons (CC BY 4.0)</figcaption></figure>
+      <figure data-g="interiores"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: banheiro com banheira"><img src="img/r3-int-banho.webp" alt="Banheiro com banheira e janela de canto" width="1400" height="934" loading="lazy"></button><figcaption>Banho master · referência</figcaption></figure>
+      <figure data-g="interiores"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: varanda alta diante do mar"><img src="img/r3-int-varanda.webp" alt="Varanda de vidro no alto, com o mar abaixo" width="800" height="1200" loading="lazy"></button><figcaption>Varanda · referência</figcaption></figure>
+      <figure data-g="interiores"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: living com mesa de jantar"><img src="img/r3-int-living-mar.webp" alt="Living com mesa de jantar redonda e janelas para o mar" width="1600" height="1205" loading="lazy"></button><figcaption>Living e jantar · referência</figcaption></figure>
+      <figure data-g="interiores"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: cozinha clara"><img src="img/r3-int-cozinha.webp" alt="Cozinha com armários claros e mesa" width="1400" height="934" loading="lazy"></button><figcaption>Cozinha · referência</figcaption></figure>
+      <figure data-g="obra"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: estrutura de concreto ao fim da tarde"><img src="img/r3-obra-estrutura.webp" alt="Estrutura de concreto de prédio em construção" width="1600" height="1067" loading="lazy"></button><figcaption>Estrutura · referência de obra</figcaption></figure>
+      <figure data-g="obra"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: armação da fundação"><img src="img/r3-obra-fundacao.webp" alt="Operários sobre a armação de aço da fundação" width="1300" height="1040" loading="lazy"></button><figcaption>Fundação · referência de obra</figcaption></figure>
+      <figure data-g="obra"><button type="button" data-cursor="Ampliar" aria-label="Ampliar: fachada em obra"><img src="img/r3-obra-fachada.webp" alt="Fachada de prédio alto em obra" width="1600" height="1038" loading="lazy"></button><figcaption>Fachada · referência de obra</figcaption></figure>
     </div>
     <dialog class="gal-dlg" aria-label="Foto ampliada">
-      <figure><img src="img/torre-mar.webp" alt=""><figcaption></figcaption></figure>
+      <figure><img src="img/r3-torre-entardecer.webp" alt=""><figcaption></figcaption></figure>
       <button type="button" class="redondo gal-x" aria-label="Fechar"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
       <button type="button" class="redondo gal-ant" aria-label="Foto anterior"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15 10H5m4-4l-4 4 4 4"/></svg></button>
       <button type="button" class="redondo gal-prox" aria-label="Próxima foto"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10h10m-4-4l4 4-4 4"/></svg></button>
     </dialog>
   </section>
-  <section class="pg-sec sec-clara chamada" aria-label="Fale com a central de vendas">
+  <section class="sec sec-pedra chamada" aria-labelledby="ch-t">
     <p class="rot">Central de vendas · 9h às 20h</p>
-    <h2>As fotos mostram o padrão. O decorado mostra o seu apartamento.</h2>
-    <div class="acoes"><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero receber o tour em vídeo do decorado.">Receber o tour em vídeo</a><a class="pilula pilula-linha" href="contato.html">Agendar visita</a></div>
+    <h2 id="ch-t">O decorado mostra o <em>seu</em>.</h2>
+    <div class="acoes"><a class="bt bt-dest bt-g" href="contato.html#agendar">Agendar visita ao decorado<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a></div>
   </section>
   <nav class="migalhas" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span>Galeria</span></nav>
 </main>
 
 <footer class="rodape">
-  <div class="rd-grade">
-    <div><p class="rd-rot">Central de vendas Vértice</p><p class="rd-end">Rua de Exemplo, 100 · Bairro Exemplo · Cidade Exemplo</p><p class="rd-rot">Todos os dias, 9h às 20h · (00) 0000-0000 (exemplo)</p></div>
-    <p class="rd-legal">Vértice Incorporações Ltda. (fictícia) · CNPJ 00.000.000/0001-00 (exemplo) · incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento de exemplo, sujeitos a reajuste.</p>
-    <div class="rd-acoes"><a class="pilula pilula-cobre" href="obra.html">Andamento da obra</a><a class="redondo redondo-cobre" href="#conteudo" aria-label="Voltar ao topo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg></a></div>
+  <div class="rd">
+    <div class="rd-topo">
+      <p class="rd-frase">Um endereço <em>singular</em>, a 300 metros do mar.</p>
+      <div><h3>Central de vendas</h3><p class="mut" style="font-size:15px">Rua de Exemplo, 100 · Bairro Exemplo · Balneário Camboriú (endereço de exemplo)<br>Todos os dias, 9h às 20h · (00) 0000-0000 (exemplo)</p><a class="bt" href="#" data-wa="Olá, Vértice! Quero falar com um corretor.">WhatsApp do plantão<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a></div>
+      <div><h3>Páginas</h3><nav aria-label="Páginas" style="grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px"><a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="localizacao.html">Localização</a><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="galeria.html" aria-current="page">Galeria</a><a href="obra.html">Obra</a><a href="como-comprar.html">Como comprar</a><a href="apresentacao.html">Tabela de preços</a><a href="incorporadora.html">Incorporadora</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav></div>
+    </div>
+    <p class="rd-legal">Vértice Incorporações Ltda. (fictícia) · CNPJ 00.000.000/0001-00 (exemplo) · incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas de banco (Pexels e Wikimedia Commons), não são o empreendimento; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços, situação das unidades e números da obra são dados de exemplo.</p>
+    <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · site de exemplo feito pela Blue Rose</span><span>Fotos: Pexels (licença Pexels) e Wikimedia Commons (CC BY 4.0, autor HVL)</span></p>
   </div>
-  <nav class="rd-nav" aria-label="Páginas"><a href="index.html">Início</a><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="apresentacao.html">Tabela de preços</a><a href="como-comprar.html">Como comprar</a><a href="obra.html">Obra</a><a href="incorporadora.html">Incorporadora</a><a href="empreendimento.html">O empreendimento</a><a href="galeria.html" aria-current="page">Galeria</a><a href="localizacao.html">Localização</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
-  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash e Pexels (licenças livres)</span></p>
 </footer>
 </body>
 </html>

@@ -3,25 +3,26 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=18"></script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com; font-src 'self'; connect-src 'self' blob: https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Andamento da obra · Vértice Residence</title>
-<meta name="description" content="Acompanhe a obra do Vértice Residence: percentual geral, cada etapa com o quanto já foi feito e o relatório de cada mês com fotos. Entrega prevista para dezembro de 2028.">
-<meta name="theme-color" content="#061a37">
+<meta name="description" content="Acompanhe a obra do Vértice Residence: do terreno à entrega, o percentual de cada etapa, o relatório de cada mês e as garantias. Entrega prevista para dezembro de 2028.">
+<meta name="theme-color" content="#F4F1E9">
 <meta name="robots" content="noindex, follow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23050817'%2F%3E%3Cpath%20d%3D'M9%2010l11%2021%2011-21'%20stroke%3D'%23c9a849'%20stroke-width%3D'3'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
-<link rel="stylesheet" href="../assets/fontes/93a341139e.css">
+<meta name="view-transition" content="same-origin">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20fill%3D'%23F4F1E9'%2F%3E%3Crect%20x%3D'6.5'%20y%3D'6.5'%20width%3D'27'%20height%3D'27'%20fill%3D'none'%20stroke%3D'%23292A27'%2F%3E%3Cpath%20d%3D'M13%2013l7%2014%207-14'%20stroke%3D'%23A88D63'%20stroke-width%3D'1.6'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E">
+<link rel="preload" href="fontes/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fontes/fontes.css?v=10">
 <link rel="stylesheet" href="../assets/moldura.css?v=5">
-<link rel="stylesheet" href="estilo.css?v=7">
-<link rel="stylesheet" href="vendas.css?v=2">
+<link rel="stylesheet" href="vertice.css?v=10">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=7" defer></script>
-<script src="site.js?v=7" defer></script>
-<script src="vendas.js?v=1" defer></script>
+<script src="vendas.js?v=10" defer></script>
+<script src="site.js?v=10" defer></script>
 
 <meta property="og:title" content="Andamento da obra · Vértice Residence">
-<meta property="og:description" content="Acompanhe a obra do Vértice Residence: percentual geral, cada etapa com o quanto já foi feito e o relatório de cada mês com fotos. Entrega prevista para dezembro de 2028.">
+<meta property="og:description" content="Acompanhe a obra do Vértice Residence: do terreno à entrega, o percentual de cada etapa, o relatório de cada mês e as garantias. Entrega prevista para dezembro de 2028.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://bluerose-store.com/img/og/sites/vertice.jpg?v=1">
 <meta property="og:image:width" content="1200">
@@ -33,53 +34,73 @@
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="topo">
-  <button type="button" class="pilula pilula-clara bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i>Menu</button>
-  <a class="marca" href="index.html" translate="no" aria-label="Vértice Residence, início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 9l12 23 12-23"/></svg><span>VÉRTICE<small>residence</small></span></a>
-  <div class="topo-acoes"><a class="pilula pilula-linha bt-tabela" href="apresentacao.html">Tabela de preços</a><a class="pilula pilula-cobre bt-escolher" href="espelho.html">Espelho de vendas</a></div>
+  <a class="marca" href="index.html" translate="no" aria-label="Vértice Residence, início"><span class="marca-v"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3.5l5 9 5-9"/></svg></span><span class="marca-n">VÉRTICE<small>Balneário Camboriú</small></span></a>
+  <nav class="topo-nav" aria-label="Atalhos"><a href="espelho.html">Espelho</a><a href="apartamentos.html">Plantas</a><a href="obra.html" aria-current="page">Obra</a><a href="localizacao.html">Localização</a><a href="incorporadora.html">Incorporadora</a></nav>
+  <div class="topo-acoes">
+    <a class="bt bt-tab" href="apresentacao.html">Tabela de preços</a>
+    <a class="bt bt-agenda" href="contato.html#agendar"><span>Agendar<span class="txt-longo"> visita</span></span><span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+    <button type="button" class="bt-menu" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"></i><span class="bt-menu-t">Menu</span></button>
+  </div>
 </header>
 <nav class="menu" id="menu" aria-label="Principal" hidden>
-  <div class="menu-grupos">
-    <div><p class="menu-rot">Escolher e comprar</p><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="como-comprar.html#simulador">Simulador</a><a href="apresentacao.html">Tabela de preços</a><a href="como-comprar.html">Como comprar</a></div>
-    <div><p class="menu-rot">Conhecer o Vértice</p><a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="obra.html" aria-current="page">Andamento da obra</a><a href="incorporadora.html">A incorporadora</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="contato.html">Contato</a></div>
+  <ol class="menu-lista"><li><a href="index.html">Início</a></li><li><a href="empreendimento.html">O empreendimento</a></li><li><a href="localizacao.html">Localização</a></li><li><a href="espelho.html">Espelho de vendas</a></li><li><a href="apartamentos.html">Plantas</a></li><li><a href="galeria.html">Interiores e galeria</a></li><li><a href="obra.html" aria-current="page">Andamento da obra</a></li><li><a href="como-comprar.html">Como comprar</a></li><li><a href="incorporadora.html">A incorporadora</a></li><li><a href="contato.html">Contato</a></li></ol>
+  <div class="menu-lado">
+    <p class="rot">Central de vendas e decorado</p>
+    <p>Rua de Exemplo, 100 · Bairro Exemplo<br>Balneário Camboriú · todos os dias, 9h às 20h</p>
+    <a class="bt" href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+    <p class="rot">Materiais</p>
+    <a href="apresentacao.html">Tabela de preços e apresentação</a><a href="como-comprar.html#simulador">Simulador de pagamento</a><a href="privacidade.html">Política de privacidade</a>
   </div>
-  <p class="menu-pe"><span>Central de vendas · todos os dias, 9h às 20h</span><a href="#" data-wa="Olá, Vértice! Quero falar com um corretor sobre o lançamento.">Falar com um corretor ↗</a></p>
 </nav>
 
 <main id="conteudo">
-  <section class="pg-topo" aria-labelledby="pg-t">
-    <svg class="arcos-fundo" viewBox="0 0 1440 900" aria-hidden="true"><circle cx="300" cy="1000" r="620"/><circle cx="1140" cy="1000" r="620"/></svg>
-    <p class="rot">Andamento da obra</p>
-    <h1 id="pg-t" class="gigante encaixe">A obra</h1>
-    <div class="pg-topo-grade">
-      <p class="lead revela">Cada etapa, o quanto já foi feito e o que vem a seguir.</p>
-      <div><p>O engenheiro responsável atualiza esta página no último dia útil de cada mês. Quem já comprou recebe também o relatório completo, com fotos de cada andar e a medição do mês.</p><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero receber o relatório mensal da obra.">Receber o relatório</a></div>
+<section class="pg-hero" aria-labelledby="pg-t">
+    <p class="rot">Andamento da obra · dados de exemplo</p>
+    <div class="pg-hero-grade">
+      <h1 id="pg-t" class="revela-t"><span class="mascara"><span>Da origem ao</span></span><span class="mascara"><span><em>horizonte</em>.</span></span></h1>
+      <div class="pg-hero-lado"><p>O engenheiro responsável atualiza esta página no último dia útil de cada mês. Quem já comprou recebe o relatório completo, com fotos de cada andar e a medição do mês.</p><div class="acoes"><a class="bt" href="#" data-wa="Olá, Vértice! Quero receber o relatório mensal da obra.">Receber o relatório<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a></div></div>
     </div>
   </section>
-  <section class="pg-sec" style="padding-top:clamp(20px,3vw,40px)" aria-labelledby="ob-t">
-    <div class="ob-geral revela">
-      <p class="ob-pct">14<small>%</small></p>
-      <div>
-        <h2 id="ob-t" class="lead">Obra geral concluída</h2>
-        <span class="ob-barra" aria-hidden="true"><i style="--v:14%"></i></span>
-        <p class="mut" style="font-size:14px">Atualizado em 31 de outubro de 2026 · obra iniciada em junho de 2026 · entrega prevista em dezembro de 2028 · no prazo</p>
+
+  <section class="obra-pista" aria-labelledby="ob-t">
+    <div class="obra-palco">
+      <div class="obra-cab"><div><p class="rot">Cinco etapas · role para avançar</p><h2 id="ob-t">A obra em <em>cinco</em> tempos.</h2></div></div>
+      <div class="obra-trilho">
+        <figure class="obra-foto"><img src="img/r3-obra-terreno.webp" alt="Escavadeiras abrindo o terreno de uma obra com parede de contenção" width="1200" height="800" loading="lazy"><figcaption><small class="ilus">Terreno · jun/2026 · concluído</small><h3 class="t-m">Terreno</h3><p>Contenção e escavação dos três subsolos.</p></figcaption></figure>
+        <figure class="obra-foto"><img src="img/r3-obra-fundacao.webp" alt="Operários sobre a armação de aço da fundação de um prédio" width="1300" height="1040" loading="lazy"><figcaption><small class="ilus">Fundação · ago/2026 · concluída</small><h3 class="t-m">Fundação</h3><p>146 estacas hélice contínua, no prazo.</p></figcaption></figure>
+        <figure class="obra-foto"><img src="img/r3-obra-estrutura.webp" alt="Estrutura de concreto de um prédio em construção sob a luz do fim de tarde" width="1600" height="1067" loading="lazy"><figcaption><small class="ilus">Estrutura · 2027 · em andamento</small><h3 class="t-m">Estrutura</h3><p>Um andar a cada 15 dias, do térreo ao rooftop.</p></figcaption></figure>
+        <figure class="obra-foto"><img src="img/r3-obra-fachada.webp" alt="Fachada de um prédio alto em obra, com varandas e operários" width="1600" height="1038" loading="lazy"><figcaption><small class="ilus">Fachada · 2027 a 2028 · prevista</small><h3 class="t-m">Fachada</h3><p>Pedra, brises e vidro de controle solar.</p></figcaption></figure>
+        <figure class="obra-foto"><img src="img/r3-torre-entardecer.webp" alt="Torre residencial pronta contra o céu do entardecer" width="1100" height="1650" loading="lazy" style="object-position:50% 30%"><figcaption><small class="ilus">Entrega · dez/2028 · no prazo</small><h3 class="t-m">Entrega</h3><p>Vistoria com o engenheiro e as chaves.</p></figcaption></figure>
       </div>
+      <div class="obra-txt" aria-live="polite">
+        <div class="obra-etapa"><small>01 · jun a jul/2026 · 100%</small><h3>Terreno</h3><p>Cortina de estacas no perímetro e escavação dos três subsolos, com rebaixamento do lençol freático.</p></div>
+        <div class="obra-etapa"><small>02 · ago/2026 · 100%</small><h3>Fundação</h3><p>146 estacas hélice contínua e os blocos de fundação concretados dentro do prazo.</p></div>
+        <div class="obra-etapa"><small>03 · mar/2027 a mar/2028 · 4%</small><h3>Estrutura</h3><p>Subsolos em 55%. Depois, um andar a cada 15 dias, do térreo ao rooftop.</p></div>
+        <div class="obra-etapa"><small>04 · 2027 a 2028 · 0%</small><h3>Fachada</h3><p>Base em pedra, brises de alumínio champanhe e esquadrias do piso ao teto.</p></div>
+        <div class="obra-etapa"><small>05 · dez/2028 · no prazo</small><h3>Entrega</h3><p>Vistoria de cada apartamento com o engenheiro responsável e entrega das chaves.</p></div>
+      </div>
+      <p class="obra-pct"><b>14%</b><span>da obra concluída · atualizado em 31/10/2026</span></p>
+      <p class="obra-ilus ilus">Fotos ilustrativas de banco · não são a obra do Vértice</p>
+      <div class="obra-barra"><div class="obra-barra-trilho"><i></i></div><ol class="obra-marcas"><li>Terreno</li><li>Fundação</li><li>Estrutura</li><li>Fachada</li><li>Entrega</li></ol></div>
     </div>
-    <ol class="ob-etapas revela" style="margin-top:clamp(50px,7vw,90px)">
-      <li><span><b>Projeto e aprovações</b><small>alvará e registro de incorporação</small></span><span class="ob-barra" aria-hidden="true"><i style="--v:100%"></i></span><em>100%</em></li>
-      <li><span><b>Terraplanagem e contenção</b><small>jun a jul/2026</small></span><span class="ob-barra" aria-hidden="true"><i style="--v:100%"></i></span><em>100%</em></li>
-      <li><span><b>Fundações</b><small>estacas hélice contínua</small></span><span class="ob-barra" aria-hidden="true"><i style="--v:100%"></i></span><em>100%</em></li>
-      <li><span><b>Subsolos</b><small>3 pavimentos de garagem</small></span><span class="ob-barra" aria-hidden="true"><i style="--v:55%"></i></span><em>55%</em></li>
-      <li><span><b>Estrutura da torre</b><small>18 andares + rooftop</small></span><span class="ob-barra" aria-hidden="true"><i style="--v:4%"></i></span><em>4%</em></li>
-      <li><span><b>Alvenaria e fachada</b><small>início previsto em mar/2027</small></span><span class="ob-barra" aria-hidden="true"><i style="--v:0%"></i></span><em>0%</em></li>
-      <li><span><b>Instalações</b><small>elétrica, hidráulica e gás</small></span><span class="ob-barra" aria-hidden="true"><i style="--v:0%"></i></span><em>0%</em></li>
-      <li><span><b>Acabamentos e lazer</b><small>início previsto em jan/2028</small></span><span class="ob-barra" aria-hidden="true"><i style="--v:0%"></i></span><em>0%</em></li>
+  </section>
+
+  <section class="sec" aria-labelledby="et-t">
+    <div class="sec-cab"><div><p class="rot">Etapa por etapa</p><h2 id="et-t">O que já foi <em>feito</em>.</h2></div><p class="sec-cab-txt">14% da obra geral concluída. Obra iniciada em junho de 2026, entrega prevista em dezembro de 2028, no prazo.</p></div>
+    <ol class="etapas">
+      <li><span><b>Projeto e aprovações</b><small>alvará e registro de incorporação</small></span><span class="barra-e" aria-hidden="true"><i style="--v:100%"></i></span><em>100%</em></li>
+      <li><span><b>Terraplanagem e contenção</b><small>jun a jul/2026</small></span><span class="barra-e" aria-hidden="true"><i style="--v:100%"></i></span><em>100%</em></li>
+      <li><span><b>Fundações</b><small>estacas hélice contínua</small></span><span class="barra-e" aria-hidden="true"><i style="--v:100%"></i></span><em>100%</em></li>
+      <li><span><b>Subsolos</b><small>3 pavimentos de garagem</small></span><span class="barra-e" aria-hidden="true"><i style="--v:55%"></i></span><em>55%</em></li>
+      <li><span><b>Estrutura da torre</b><small>18 andares + rooftop</small></span><span class="barra-e" aria-hidden="true"><i style="--v:4%"></i></span><em>4%</em></li>
+      <li><span><b>Alvenaria e fachada</b><small>início previsto em mar/2027</small></span><span class="barra-e" aria-hidden="true"><i style="--v:0%"></i></span><em>0%</em></li>
+      <li><span><b>Instalações</b><small>elétrica, hidráulica e gás</small></span><span class="barra-e" aria-hidden="true"><i style="--v:0%"></i></span><em>0%</em></li>
+      <li><span><b>Acabamentos e lazer</b><small>início previsto em jan/2028</small></span><span class="barra-e" aria-hidden="true"><i style="--v:0%"></i></span><em>0%</em></li>
     </ol>
   </section>
 
-
-  <section class="pg-sec sec-clara" aria-labelledby="lt-t">
-    <p class="rot">Linha do tempo</p>
-    <h2 id="lt-t">Do alvará às chaves</h2>
+  <section class="sec sec-pedra" aria-labelledby="lt-t">
+    <div class="sec-cab"><div><p class="rot">Linha do tempo</p><h2 id="lt-t">Do alvará às <em>chaves</em>.</h2></div></div>
     <ol class="tempo">
       <li class="feito"><time>mai/2026</time><b>Lançamento e alvará</b><span>Incorporação registrada, alvará emitido e central de vendas aberta.</span><em>100%</em></li>
       <li class="feito"><time>jun/2026</time><b>Início da obra</b><span>Canteiro montado e pedra fundamental em 12 de junho.</span><em>100%</em></li>
@@ -92,66 +113,62 @@
     </ol>
   </section>
 
-  <section class="pg-sec" aria-labelledby="pr-t">
-    <p class="rot">Previsto e realizado</p>
-    <h2 id="pr-t" class="h2">A obra está no prazo</h2>
-    <div class="pr-grade">
-      <ul class="saude">
-        <li><span>Obra prevista no cronograma até out/2026</span><b>13%</b><i style="--v:13%"></i></li>
-        <li><span>Obra realizada até out/2026</span><b>14%</b><i style="--v:14%"></i></li>
-        <li><span>Custo da obra já garantido (vendas e financiamento)</span><b>78%</b><i style="--v:78%"></i></li>
-        <li><span>Unidades vendidas</span><b data-n="vendido">47%</b><i style="--v:47%"></i></li>
-      </ul>
-      <div class="pr-resp">
+  <section class="sec" aria-labelledby="pr-t">
+    <div class="duas">
+      <div>
+        <p class="rot">Previsto e realizado</p>
+        <h2 id="pr-t">A obra está no <em>prazo</em>.</h2>
+        <ul class="saude">
+          <li><span>Obra prevista no cronograma até out/2026</span><b>13%</b><i style="--v:13%"></i></li>
+          <li><span>Obra realizada até out/2026</span><b>14%</b><i style="--v:14%"></i></li>
+          <li><span>Custo da obra já garantido (vendas e financiamento)</span><b>78%</b><i style="--v:78%"></i></li>
+          <li><span>Unidades vendidas</span><b data-n="vendido">47%</b><i style="--v:47%"></i></li>
+        </ul>
+        <p class="demo">Dados de exemplo. No site real, a construtora atualiza percentuais e fotos pelo painel, sem depender de programador.</p>
+      </div>
+      <div class="cap-ok">
         <p class="rot">Responsável técnico</p>
-        <p class="pr-nome">Eng. Rafael Moretti</p>
-        <p class="mut">Engenheiro civil · CREA-SC 000000-0 (exemplo). Assina o relatório mensal e acompanha as visitas guiadas.</p>
-        <a class="pilula pilula-linha" href="incorporadora.html">Todos os responsáveis técnicos</a>
+        <p class="cap-ok-t">Eng. Rafael Moretti</p>
+        <p class="mut">Engenheiro civil · CREA-SC 000000-0 (exemplo). Assina o relatório mensal e acompanha as visitas guiadas ao canteiro.</p>
+        <a class="bt" href="incorporadora.html">Todos os responsáveis<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
       </div>
     </div>
-    <p class="demo">Dados de exemplo. No site real, a construtora atualiza os percentuais e as fotos pelo painel, sem depender de programador.</p>
   </section>
 
-  <section class="pg-sec sec-clara" aria-labelledby="ms-t">
-    <p class="rot">Relatório do mês</p>
-    <h2 id="ms-t">Mês a mês</h2>
-    <ul class="ob-meses">
-      <li><img src="img/obra-grua.webp" alt="Grua de torre vista de baixo contra o céu" width="1600" height="1000" loading="lazy"><div><small>outubro 2026</small><b>Primeiro subsolo concretado</b><p>Laje do 1º subsolo concluída e armação das paredes do 2º. A grua já está montada.</p></div></li>
-      <li><img src="img/obra-estrutura.webp" alt="Estrutura de concreto de um edifício em construção" width="1600" height="1000" loading="lazy"><div><small>setembro 2026</small><b>Subsolos em execução</b><p>Paredes de contenção do 3º subsolo prontas e impermeabilização em andamento.</p></div></li>
-      <li><img src="img/obra-equipe.webp" alt="Equipe de obra caminhando sobre a laje" width="1600" height="1000" loading="lazy"><div><small>agosto 2026</small><b>Fundações concluídas</b><p>As 146 estacas foram executadas e os blocos de fundação concretados dentro do prazo.</p></div></li>
-      <li><img src="img/obra-vistoria.webp" alt="Engenheiros apontando para a obra em andamento" width="1600" height="1000" loading="lazy"><div><small>julho 2026</small><b>Contenção e escavação</b><p>Cortina de estacas no perímetro e escavação dos três subsolos com rebaixamento do lençol.</p></div></li>
-      <li><img src="img/obra-plantas.webp" alt="Homem conferindo plantas na obra" width="1600" height="1000" loading="lazy"><div><small>junho 2026</small><b>Início da obra</b><p>Canteiro montado, tapume e ligação provisória de energia e água. Pedra fundamental em 12/06.</p></div></li>
-      <li><img src="img/planta.webp" alt="Planta de apartamento sobre a mesa" width="1600" height="1000" loading="lazy"><div><small>maio 2026</small><b>Alvará e lançamento</b><p>Alvará de construção emitido, incorporação registrada e abertura da central de vendas com o decorado.</p></div></li>
+  <section class="sec sec-branca" aria-labelledby="ms-t">
+    <div class="sec-cab"><div><p class="rot">Relatório do mês · fotos ilustrativas</p><h2 id="ms-t">Mês a <em>mês</em>.</h2></div></div>
+    <ul class="meses">
+      <li><img src="img/obra-grua.webp" alt="Grua de torre vista de baixo contra o céu" width="1280" height="1600" loading="lazy"><div><small>outubro 2026</small><b>Primeiro subsolo concretado</b><p>Laje do 1º subsolo concluída e armação das paredes do 2º. A grua já está montada.</p></div></li>
+      <li><img src="img/obra-estrutura.webp" alt="Estrutura de concreto de um edifício em construção" width="1319" height="1600" loading="lazy"><div><small>setembro 2026</small><b>Subsolos em execução</b><p>Paredes de contenção do 3º subsolo prontas e impermeabilização em andamento.</p></div></li>
+      <li><img src="img/obra-equipe.webp" alt="Equipe de obra caminhando sobre a laje" width="1600" height="1067" loading="lazy"><div><small>agosto 2026</small><b>Fundações concluídas</b><p>As 146 estacas foram executadas e os blocos de fundação concretados dentro do prazo.</p></div></li>
     </ul>
   </section>
 
-  <section class="pg-sec" aria-labelledby="gr-t">
+  <section class="sec" aria-labelledby="gr-t">
     <div class="duas">
-      <figure><img src="img/obra-estrutura.webp" alt="Estrutura de concreto de um edifício em construção" width="1319" height="1600" loading="lazy"></figure>
-      <div class="txt">
+      <figure><img src="img/r3-obra-fundacao.webp" alt="Operários sobre a armação de aço da fundação" width="1300" height="1040" loading="lazy"></figure>
+      <div>
         <p class="rot">Garantias</p>
-        <h2 id="gr-t" style="font-size:clamp(36px,5vw,76px)">Seu dinheiro na obra certa</h2>
-        <p>O Vértice tem patrimônio de afetação: o dinheiro de quem compra fica separado das contas da incorporadora e só pode ser usado nesta obra. Uma comissão de representantes dos compradores acompanha as contas a cada trimestre.</p>
+        <h2 id="gr-t">Dinheiro na obra <em>certa</em>.</h2>
+        <p>O Vértice tem patrimônio de afetação: o dinheiro de quem compra fica separado das contas da incorporadora e só pode ser usado nesta obra. Uma comissão de compradores acompanha as contas a cada trimestre.</p>
         <p class="mut">Se a entrega atrasar mais de 180 dias além da data do contrato, o comprador recebe multa mensal prevista em contrato, conforme a Lei 13.786/2018.</p>
+        <div class="acoes"><a class="bt bt-dest" href="#" data-wa="Olá, Vértice! Quero agendar uma visita guiada à obra.">Agendar visita à obra<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a></div>
       </div>
     </div>
-  </section>
-  <section class="pg-sec sec-clara chamada" aria-label="Fale com a central de vendas">
-    <p class="rot">Central de vendas · 9h às 20h</p>
-    <h2>Quer ver a obra de perto? Fazemos visitas guiadas com capacete no primeiro sábado do mês.</h2>
-    <div class="acoes"><a class="pilula pilula-cobre" href="#" data-wa="Olá, Vértice! Quero agendar uma visita guiada à obra.">Agendar visita à obra</a></div>
   </section>
   <nav class="migalhas" aria-label="Você está em"><a href="index.html">Início</a><span aria-hidden="true">/</span><span>Obra</span></nav>
 </main>
 
 <footer class="rodape">
-  <div class="rd-grade">
-    <div><p class="rd-rot">Central de vendas Vértice</p><p class="rd-end">Rua de Exemplo, 100 · Bairro Exemplo · Cidade Exemplo</p><p class="rd-rot">Todos os dias, 9h às 20h · (00) 0000-0000 (exemplo)</p></div>
-    <p class="rd-legal">Vértice Incorporações Ltda. (fictícia) · CNPJ 00.000.000/0001-00 (exemplo) · incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços da tabela de lançamento de exemplo, sujeitos a reajuste.</p>
-    <div class="rd-acoes"><a class="pilula pilula-cobre" href="obra.html">Andamento da obra</a><a class="redondo redondo-cobre" href="#conteudo" aria-label="Voltar ao topo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg></a></div>
+  <div class="rd">
+    <div class="rd-topo">
+      <p class="rd-frase">Um endereço <em>singular</em>, a 300 metros do mar.</p>
+      <div><h3>Central de vendas</h3><p class="mut" style="font-size:15px">Rua de Exemplo, 100 · Bairro Exemplo · Balneário Camboriú (endereço de exemplo)<br>Todos os dias, 9h às 20h · (00) 0000-0000 (exemplo)</p><a class="bt" href="#" data-wa="Olá, Vértice! Quero falar com um corretor.">WhatsApp do plantão<span class="seta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a></div>
+      <div><h3>Páginas</h3><nav aria-label="Páginas" style="grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px"><a href="index.html">Início</a><a href="empreendimento.html">O empreendimento</a><a href="localizacao.html">Localização</a><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="galeria.html">Galeria</a><a href="obra.html" aria-current="page">Obra</a><a href="como-comprar.html">Como comprar</a><a href="apresentacao.html">Tabela de preços</a><a href="incorporadora.html">Incorporadora</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav></div>
+    </div>
+    <p class="rd-legal">Vértice Incorporações Ltda. (fictícia) · CNPJ 00.000.000/0001-00 (exemplo) · incorporação registrada sob R.I. fictício. As informações deste site têm caráter informativo e não constituem oferta. Imagens ilustrativas de banco (Pexels e Wikimedia Commons), não são o empreendimento; acabamentos, mobiliário e paisagismo podem mudar no projeto executivo. Preços, situação das unidades e números da obra são dados de exemplo.</p>
+    <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · site de exemplo feito pela Blue Rose</span><span>Fotos: Pexels (licença Pexels) e Wikimedia Commons (CC BY 4.0, autor HVL)</span></p>
   </div>
-  <nav class="rd-nav" aria-label="Páginas"><a href="index.html">Início</a><a href="espelho.html">Espelho de vendas</a><a href="apartamentos.html">Plantas</a><a href="apresentacao.html">Tabela de preços</a><a href="como-comprar.html">Como comprar</a><a href="obra.html" aria-current="page">Obra</a><a href="incorporadora.html">Incorporadora</a><a href="empreendimento.html">O empreendimento</a><a href="galeria.html">Galeria</a><a href="localizacao.html">Localização</a><a href="contato.html">Contato</a><a href="privacidade.html">Privacidade</a></nav>
-  <p class="rd-pe"><span translate="no">© 2026 Vértice Residence</span><span>Marca criada para demonstração · Site de exemplo feito pela Blue Rose</span><span>Fotos: Unsplash e Pexels (licenças livres)</span></p>
 </footer>
 </body>
 </html>
