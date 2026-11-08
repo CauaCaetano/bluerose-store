@@ -253,7 +253,7 @@
       return '<button type="button" class="cat-card" style="--i:' + i + '" data-cat="' + c.id + '">' +
         '<span class="cat-pilha">' + lista.slice(0, 3).map(function (s, k) { return imgTag(s, false, 'alt="" style="--k:' + k + '"'); }).join('') + '</span>' +
         '<span class="cat-txt"><span class="tipo">' + T.sites(lista.length) + '</span><strong>' + esc(nomeCat(c)) + '</strong><span class="cat-nomes">' + lista.map(function (s) { return esc(s.nome); }).join(' · ') + '</span><span class="link">' + T.ver + ico('arrow-right') + '</span></span></button>';
-    }).join('');
+    }).join('') + (dados.categorias.length % 3 === 2 ? '<a class="cat-card cat-cta" href="index.html#contato"><span class="cat-txt"><span class="tipo">Site sob medida</span><strong>Não achou o seu ramo?</strong><span class="cat-nomes">Fazemos o site do seu negócio do zero, no mesmo padrão destes exemplos.</span><span class="link">Falar com a Blue Rose</span></span></a>' : '');
     grade.querySelectorAll('[data-cat]').forEach(function (b) { b.addEventListener('click', function () { abrirCategoria(b.getAttribute('data-cat'), b); }); });
     var pedida = params.get('c');
     if (pedida) abrirCategoria(pedida);
