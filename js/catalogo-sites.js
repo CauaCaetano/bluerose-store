@@ -11,8 +11,8 @@
   if (!dados) return;
   var en = (document.documentElement.lang || '').indexOf('en') === 0;
   var T = en
-    ? { sites: function (n) { return n + (n > 1 ? ' websites' : ' website'); }, abrir: 'Open website', paginas: 'pages', pagina: 'page', escolha: 'Choose a website to explore', ver: 'See the websites', plano: 'This model in the Complete plan', prazo: 'ready in 10 business days', preco: '$1,190', plano3d: 'This model, with 3D', prazo3d: 'ready in 14 business days', preco3d: 'from $1,990', quero: 'I want this one', comNome: 'Opens as' }
-    : { sites: function (n) { return n + (n > 1 ? ' sites' : ' site'); }, abrir: 'Abrir site', paginas: 'páginas', pagina: 'página', escolha: 'Escolha um site para navegar', ver: 'Ver os sites', plano: 'Este modelo no plano Completo', prazo: 'pronto em 5 dias úteis', preco: 'R$ 1.490', plano3d: 'Este modelo, com 3D', prazo3d: 'pronto em 5 dias úteis', preco3d: 'a partir de R$ 2.490', quero: 'Quero este', comNome: 'Abre como' };
+    ? { sites: function (n) { return n + (n > 1 ? ' websites' : ' website'); }, abrir: 'Open website', paginas: 'pages', pagina: 'page', escolha: 'Choose a website to explore', ver: 'See the websites', plano: 'This model in the Complete plan', prazo: 'ready in 10 business days', preco: function (v) { return '$' + Math.max(0, Math.round(v * 0.8 / 100) * 100 - 10).toLocaleString('en-US'); }, plano3d: 'This model, with 3D', prazo3d: 'ready in 14 business days', preco3d: function (v) { return '$' + Math.max(0, Math.round(v * 0.8 / 100) * 100 - 10).toLocaleString('en-US'); }, quero: 'I want this one', comNome: 'Opens as' }
+    : { sites: function (n) { return n + (n > 1 ? ' sites' : ' site'); }, abrir: 'Abrir site', paginas: 'páginas', pagina: 'página', escolha: 'Escolha um site para navegar', ver: 'Ver os sites', plano: 'Este modelo no plano Completo', prazo: 'pronto em 5 dias úteis', preco: function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); }, plano3d: 'Este modelo, com 3D', prazo3d: 'pronto em 5 dias úteis', preco3d: function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); }, quero: 'Quero este', comNome: 'Abre como' };
   var TRES_D = ['bastos-lacerda', 'monolito', 'vertice', 'ana-ribeiro']; // sites com cena 3D: preço próprio
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); };
   var lang = en ? 'en' : 'pt';
@@ -222,8 +222,8 @@
         '<div class="site-op-txt"><p class="tipo">' + esc(s.estilo) + '</p><h3>' + esc(s.nome) + ' <span>' + esc(s.sub || '') + '</span></h3><p>' + esc(s.resumo) + '</p>' +
         '<ul class="site-op-rec">' + (s.recursos || []).map(function (r) { return '<li>' + ico('check') + esc(r) + '</li>'; }).join('') + '<li>' + ico('files') + s.paginas + ' ' + (s.paginas > 1 ? T.paginas : T.pagina) + '</li></ul>' +
         (s.cat === 'midia-kit' ? '' /* mídia kit não é vendido pelo preço de site (a moldura também esconde) */
-          : TRES_D.indexOf(s.slug) >= 0 ? '<p class="site-op-preco"><span>' + T.plano3d + '</span><b>' + T.preco3d + '</b><small>' + T.prazo3d + '</small></p>'
-          : '<p class="site-op-preco"><span>' + T.plano + '</span><b>' + T.preco + '</b><small>' + T.prazo + '</small></p>') +
+          : TRES_D.indexOf(s.slug) >= 0 ? '<p class="site-op-preco"><span>' + T.plano3d + '</span><b>' + T.preco3d(s.preco || 2490) + '</b><small>' + T.prazo3d + '</small></p>'
+          : '<p class="site-op-preco"><span>' + T.plano + '</span><b>' + T.preco(s.preco || 1490) + '</b><small>' + T.prazo + '</small></p>') +
         '<p class="site-op-perso" data-perso-aviso hidden></p>' +
         '<div class="site-op-acoes"><a class="btn btn-primary" data-site-link="' + s.slug + '" href="' + url(s) + '">' + T.abrir + ico('arrow-up-right') + '</a><a class="btn btn-ghost" data-quero-site="' + s.slug + '" href="' + querHref(s) + '">' + T.quero + '</a></div></div></article>';
     }).join('');
