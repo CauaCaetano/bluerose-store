@@ -41,7 +41,7 @@ function ean13(base12) { const d = String(base12).padStart(12, '0').slice(0, 12)
 const eanValido = (c) => /^\d{13}$/.test(c) && ean13(c.slice(0, 12)) === c;
 
 // fotos de produto (Pexels, licença livre) só na demonstração; na conta, a loja põe a foto que quiser
-const FOTOS = {"Cerveja lata 350": "cerveja-lata", "Cerveja long neck": "cerveja-longneck", "Cerveja garrafa 600": "cerveja-600", "Cerveja puro malte": "cerveja-473", "Refrigerante lata": "refri-lata", "Água mineral": "agua", "Energético": "energetico", "Cachaça": "cachaca", "Conhaque": "conhaque", "Arroz": "arroz", "Feijão": "feijao", "Açúcar": "acucar", "Óleo": "oleo", "Café": "cafe", "Macarrão": "macarrao", "Leite": "leite", "Iogurte": "iogurte", "Queijo": "queijo", "Presunto": "presunto", "Pão francês": "pao-frances", "Pão de forma": "pao-forma", "Bolo": "bolo", "Tomate": "tomate", "Banana": "banana", "Batata palha": "batata-palha", "Batata": "batata", "Detergente": "detergente", "Sabão": "sabao", "Papel": "papel", "Sabonete": "sabonete", "Carvão": "carvao", "Gelo": "gelo", "Linguiça": "linguica", "Picanha": "picanha", "Amendoim": "amendoim", "Chocolate": "chocolate", "Uísque": "uisque", "Vodca": "vodca", "Manteiga": "manteiga"};
+const FOTOS = {"Cerveja lata 350": "cerveja-lata", "Cerveja long neck": "cerveja-longneck", "Cerveja garrafa 600": "cerveja-600", "Cerveja puro malte": "cerveja-473", "Refrigerante lata": "refri-lata", "Água mineral": "agua", "Energético": "energetico", "Cachaça": "cachaca", "Conhaque": "conhaque", "Arroz": "arroz", "Feijão": "feijao", "Açúcar": "acucar", "Óleo": "oleo", "Café": "cafe", "Macarrão": "macarrao", "Leite": "leite", "Iogurte": "iogurte", "Queijo": "queijo", "Presunto": "presunto", "Pão francês": "pao-frances", "Pão de forma": "pao-forma", "Bolo": "bolo", "Tomate": "tomate", "Banana": "banana", "Batata palha": "batata-palha", "Batata": "batata", "Detergente": "detergente", "Sabão": "sabao", "Papel": "papel", "Sabonete": "sabonete", "Carvão": "carvao", "Gelo": "gelo", "Linguiça": "linguica", "Picanha": "picanha", "Amendoim": "amendoim", "Chocolate": "chocolate", "Batata frita": "porcao-batata", "Calabresa": "porcao-calabresa", "Isca": "porcao-isca", "Pastel": "porcao-pastel", "Uísque": "uisque", "Vodca": "vodca", "Manteiga": "manteiga"};
 // ------------------------------------------------------------------ demonstração: o Mercadinho São José (mercearia com bar)
 function rnd(sem) { let a = sem >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let x = Math.imul(a ^ (a >>> 15), 1 | a); x ^= x + Math.imul(x ^ (x >>> 7), 61 | x); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }
 function inicial() {
@@ -95,12 +95,18 @@ function inicial() {
     ['Amendoim japonês 150 g', 'Petiscos', 'un', 349, 699, 15, 8, 'f2', 0],
     ['Batata palha 120 g', 'Petiscos', 'un', 399, 749, 11, 6, 'f2', 0],
     ['Chocolate 90 g', 'Bomboniere', 'un', 499, 849, 20, 10, 'f2', 0],
+    ['Batata frita (porção)', 'Porções', 'un', 890, 3290, 0, 0, '', 0],
+    ['Calabresa acebolada (porção)', 'Porções', 'un', 1250, 3690, 0, 0, '', 0],
+    ['Isca de frango (porção)', 'Porções', 'un', 1490, 4290, 0, 0, '', 0],
+    ['Pastel (6 unidades)', 'Porções', 'un', 690, 2490, 0, 0, '', 0],
   ];
   const produtos = L.map((x, i) => {
     const mult = x[5] <= x[6] ? 1 : 3; // o que está no mínimo continua no mínimo (lista de compras); o resto tem estoque de verdade
     const p = { id: `p${i + 1}`, nome: x[0], cat: x[1], un: x[2], custo: x[3], preco: x[4], q: r3(x[5] * mult), min: x[6], forn: x[7], cod: ean13(`7891${String(20261 + i * 37).padStart(5, '0')}${String(i).padStart(3, '0')}`), lotes: [], criado: somaDias(h, -90) };
     if (x[9]) p.dose = { ...x[9] };
-    const fo = Object.entries(FOTOS).find(([n]) => x[0].startsWith(n)); if (fo) p.foto = `fotos/${fo[1]}.webp`;
+    const fo = Object.entries(FOTOS).filter(([n]) => x[0].startsWith(n)).sort((a, b) => b[0].length - a[0].length)[0]; if (fo) p.foto = `fotos/${fo[1]}.webp`;
+    if (x[1] === 'Porções') { p.semEstoque = true; p.cozinha = true; p.cod = ''; p.adics = x[0].startsWith('Batata') ? [{ n: 'Cheddar e bacon', v: 900 }, { n: 'Trocar por mandioca', v: 0 }] : x[0].startsWith('Pastel') ? [{ n: 'Metade carne, metade queijo', v: 0 }] : [{ n: 'Molho extra', v: 300 }]; }
+    if (x[0].startsWith('Cerveja garrafa')) p.hh = { preco: 990, dias: [4, 5], de: '18:00', ate: '20:00' };
     if (x[8]) { // dois lotes: o mais antigo vence antes
       const q1 = r3(p.q * 0.4), q2 = r3(p.q - q1);
       p.lotes = [{ id: uid('l'), lote: `L${String(240 + i * 7)}`, val: somaDias(h, Math.max(1, Math.round(x[8] * 0.7))), q: q1, ent: somaDias(h, -6) }, { id: uid('l'), lote: `L${String(251 + i * 7)}`, val: somaDias(h, x[8] + 4), q: q2, ent: somaDias(h, -1) }];
@@ -142,8 +148,8 @@ function inicial() {
   const pid = (n) => produtos.find((p) => p.nome.startsWith(n));
   const item = (n, q, dose = false) => { const p = pid(n); return dose ? { p: p.id, nome: `Dose de ${p.nome.replace(/ \d.*$/, '')}`, q, preco: p.dose.preco, custo: Math.round(p.custo * p.dose.doseMl / p.dose.ml), dose: true, h: agora() } : { p: p.id, nome: p.nome, q, preco: p.preco, custo: p.custo, h: agora() }; };
   const mesas = [
-    { id: 'm3', nome: 'Mesa 3', pessoas: 4, aberta: `${h}T17:42:00`, itens: [item('Cerveja garrafa', 6), item('Amendoim', 2), item('Cachaça', 3, true), item('Batata palha', 1)] },
-    { id: 'm5', nome: 'Mesa 5', pessoas: 2, aberta: `${h}T18:20:00`, itens: [item('Cerveja long neck', 5), item('Refrigerante lata', 1), item('Amendoim', 1)] },
+    { id: 'm3', nome: 'Mesa 3', pessoas: 4, aberta: `${h}T17:42:00`, itens: [item('Cerveja garrafa', 6), item('Amendoim', 2), item('Cachaça', 3, true), item('Batata palha', 1), { ...item('Calabresa acebolada', 1), id: 'i-demo2', cz: 'prep', obs: 'Sem pimenta' }] },
+    { id: 'm5', nome: 'Mesa 5', pessoas: 2, aberta: `${h}T18:20:00`, itens: [item('Cerveja long neck', 5), item('Refrigerante lata', 1), item('Amendoim', 1), { ...item('Batata frita', 1), id: 'i-demo1', cz: 'novo', obs: 'Bem sequinha', adics: [{ n: 'Cheddar e bacon', v: 900 }], base: 3290, preco: 4190 }] },
     { id: 'mb', nome: 'Balcão', pessoas: 1, aberta: `${h}T18:55:00`, itens: [item('Conhaque', 2, true), item('Cerveja lata', 2)] },
   ];
   const entradas = [
@@ -185,23 +191,26 @@ const prod = (id) => db.produtos.find((p) => p.id === id);
 const cli = (id) => db.clientes.find((c) => c.id === id);
 const forn = (id) => db.fornecedores.find((f) => f.id === id);
 const ativos = () => db.produtos.filter((p) => !p.arq);
+const comEstoque = () => ativos().filter((p) => !p.semEstoque);
 const cats = () => [...new Set(ativos().map((p) => p.cat).filter(Boolean))].sort();
 const margem = (preco, custo) => (preco > 0 ? Math.round(((preco - custo) / preco) * 1000) / 10 : 0);
 const qtdTxt = (p, q = p.q) => {
+  if (p.semEstoque) return 'feito na hora';
   if (p.dose) { const g = Math.floor(q + 1e-9), ml = Math.round((q - g) * p.dose.ml); return ml > 0 ? `${g} fechada${g === 1 ? '' : 's'} + ${ml} ml aberta` : `${g} garrafa${g === 1 ? '' : 's'}`; }
   return p.un === 'kg' ? `${numBR(q)} kg` : `${numBR(q, 0)} ${UN[p.un] || 'un'}`;
 };
 // miniatura do produto: a foto, ou a inicial sobre a cor da categoria
 const COR_CAT = ['#F5E8EE', '#FBF1DC', '#E2F3EE', '#F1EAF5', '#F7ECE6'];
 const foto = (p, cls = '') => (!p ? `<span class="foto ${cls}"></span>` : p.foto ? `<span class="foto ${cls}"><img src="${t(p.foto)}" alt="" loading="lazy" width="120" height="120"></span>` : `<span class="foto letra ${cls}" style="background:${COR_CAT[[...String(p.cat)].reduce((s, c) => s + c.charCodeAt(0), 0) % COR_CAT.length]}">${t(String(p.nome).slice(0, 1))}</span>`);
-const situ = (p) => (p.q <= 0 ? 'zerado' : p.q <= p.min ? 'baixo' : 'ok');
-const baixos = () => ativos().filter((p) => p.q <= p.min).sort((a, b) => a.q / (a.min || 1) - b.q / (b.min || 1));
+const situ = (p) => (p.semEstoque ? 'ok' : p.q <= 0 ? 'zerado' : p.q <= p.min ? 'baixo' : 'ok');
+const baixos = () => comEstoque().filter((p) => p.q <= p.min).sort((a, b) => a.q / (a.min || 1) - b.q / (b.min || 1));
 const lotesAtivos = () => ativos().flatMap((p) => (p.lotes || []).filter((l) => l.q > 0.0005 && l.val).map((l) => ({ ...l, p }))).sort((a, b) => a.val.localeCompare(b.val));
 const vencendo = (n = 7) => lotesAtivos().filter((l) => dias(hoje(), l.val) <= n);
-const valorEstoque = () => ativos().reduce((s, p) => s + Math.max(0, p.q) * p.custo, 0);
+const valorEstoque = () => comEstoque().reduce((s, p) => s + Math.max(0, p.q) * p.custo, 0);
 
 // baixa do estoque: tira dos lotes que vencem primeiro
 function baixar(p, q) {
+  if (p.semEstoque) return; // porção feita na hora
   p.q = r3(p.q - q);
   let falta = q;
   for (const l of [...(p.lotes || [])].sort((a, b) => String(a.val || '9').localeCompare(String(b.val || '9')))) { if (falta <= 0) break; const tira = Math.min(l.q, falta); l.q = r3(l.q - tira); falta = r3(falta - tira); }
@@ -299,7 +308,7 @@ function marca() {
   $('#saudacao').textContent = `${s}, ${db.loja.nome}`;
   const nv = vencendo(7).length, nf = devedores().filter((c) => contaFiado(c.id).atraso > 0).length, nc = baixos().length, nm = db.mesas.length;
   const n = (id, v) => { const e = $(id); e.hidden = !v; e.textContent = v; };
-  n('#n-val', nv); n('#n-fiado', nf); n('#n-compras', nc); n('#n-mesas', nm);
+  n('#n-cozinha', naCozinha().filter((y) => y.x.cz !== 'pronto').length); n('#n-val', nv); n('#n-fiado', nf); n('#n-compras', nc); n('#n-mesas', nm);
   document.title = `${db.loja.nome} · Annona`;
   $('#lat-loja-ini').textContent = iniciais(db.loja.nome); $('#lat-loja-nome').textContent = db.loja.nome;
   const lc = $('#lat-caixa'); lc.textContent = db.caixa.aberto ? `Caixa aberto desde ${horaBR(db.caixa.ab)}` : 'Caixa fechado'; lc.classList.toggle('fechado', !db.caixa.aberto);
@@ -412,12 +421,20 @@ function caixaTxt() {
 }
 
 // ------------------------------------------------------------------ vender (balcão)
+// happy hour: preço por dia da semana e horário (ex.: cerveja de quinta e sexta, das 18h às 20h)
+const hhAgora = (p) => { const h = p.hh; if (!h || !h.preco) return false; const d = new Date(), hm = d.toTimeString().slice(0, 5); return (h.dias || []).includes(d.getDay()) && hm >= h.de && hm < h.ate; };
+const precoAgora = (p) => (hhAgora(p) ? p.hh.preco : p.preco);
+const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const hhTxt = (p) => (p.hh && p.hh.preco ? `Happy hour ${din(p.hh.preco)} · ${(p.hh.dias || []).map((x) => DIAS[x]).join(', ')} das ${p.hh.de} às ${p.hh.ate}` : '');
 const totalVenda = () => Math.max(0, estado.venda.itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0) - estado.venda.desc);
-function addItem(lista, p, { q = 1, dose = false } = {}) {
+function addItem(lista, p, { q = 1, dose = false, cozinha = false } = {}) {
   if (dose && !p.dose) dose = false;
-  const ja = lista.find((x) => x.p === p.id && !!x.dose === dose && p.un !== 'kg');
+  const pr = dose ? p.dose.preco : precoAgora(p), vaiCozinha = cozinha && p.cozinha;
+  // pedido da cozinha é sempre uma linha nova (cada pedido tem a sua hora e as suas observações)
+  const ja = !vaiCozinha && lista.find((x) => x.p === p.id && !!x.dose === dose && p.un !== 'kg' && !x.obs && !(x.adics || []).length && x.preco === pr);
   if (ja) { ja.q = r3(ja.q + q); return ja; }
-  const it = dose ? { p: p.id, nome: `Dose de ${p.nome.replace(/ \d.*$/, '')}`, q, preco: p.dose.preco, custo: Math.round(p.custo * p.dose.doseMl / p.dose.ml), dose: true, h: agora() } : { p: p.id, nome: p.nome, q, preco: p.preco, custo: p.custo, h: agora() };
+  const it = dose ? { p: p.id, nome: `Dose de ${p.nome.replace(/ \d.*$/, '')}`, q, preco: pr, custo: Math.round(p.custo * p.dose.doseMl / p.dose.ml), dose: true, h: agora() } : { p: p.id, nome: p.nome, q, preco: pr, base: pr, custo: p.custo, h: agora(), ...(hhAgora(p) ? { hh: true } : {}) };
+  if (vaiCozinha) Object.assign(it, { id: uid('i'), cz: 'novo' });
   lista.push(it); return it;
 }
 // escolhe garrafa ou dose, ou pede o peso; depois chama ok(q, dose)
@@ -427,9 +444,15 @@ function quanto(p, ok) {
     return;
   }
   if (p.un === 'kg') {
-    abrir(`${cab(`Peso de ${t(p.nome)}`, `${din(p.preco)} o kg`)}<form class="form" id="f-peso"><label>Peso (kg)<input name="kg" inputmode="decimal" required placeholder="0,350" autocomplete="off"></label><p class="mudo" id="pz">Total: R$ 0,00</p><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Pôr na venda</button></footer></form>`, (j) => {
-      const f = $('form', j); f.kg.addEventListener('input', () => { $('#pz', j).textContent = `Total: ${din(Math.round(lerNum(f.kg.value) * p.preco))}`; });
-      f.addEventListener('submit', (e) => { e.preventDefault(); const q = r3(lerNum(f.kg.value)); if (q <= 0) { toast('Digite o peso, por exemplo 0,350.', true); return; } fechar(); ok(q, false); });
+    const pr = precoAgora(p);
+    abrir(`${cab(`Peso de ${t(p.nome)}`, `${din(pr)} o kg`)}<form class="form" id="f-peso"><label>Peso que está na balança (kg)<input name="kg" class="peso-in" inputmode="decimal" required placeholder="0,350" autocomplete="off"></label>
+      <div class="pesos">${[0.1, 0.2, 0.25, 0.5, 0.75, 1].map((x) => `<button type="button" class="peso-bt" data-kg="${x}">${x < 1 ? `${x * 1000} g` : '1 kg'}</button>`).join('')}</div>
+      <p class="peso-tot" id="pz">R$ 0,00</p><p class="aviso-peso" id="pa" hidden></p><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio verde grande">Pôr na venda</button></footer></form>`, (j) => {
+      const f = $('form', j), mostraT = () => { const q = lerNum(f.kg.value); $('#pz', j).textContent = din(Math.round(q * pr)); const a = $('#pa', j); a.hidden = !(q > 5 || (q > 0 && q < 0.02)); a.textContent = q > 5 ? `${numBR(q)} kg? Confira: talvez seja ${numBR(q / 10)} ou ${numBR(q / 100)} kg.` : 'Peso muito baixo. Confira a vírgula: 0,350 = 350 gramas.'; };
+      f.kg.addEventListener('input', mostraT);
+      $$('[data-kg]', j).forEach((b) => b.addEventListener('click', () => { f.kg.value = numBR(Number(b.dataset.kg)); mostraT(); f.kg.focus(); }));
+      let confirmou = false;
+      f.addEventListener('submit', (e) => { e.preventDefault(); const q = r3(lerNum(f.kg.value)); if (q <= 0) { toast('Digite o peso, por exemplo 0,350.', true); return; } if ((q > 5 || q < 0.02) && !confirmou) { confirmou = true; toast('Peso fora do comum. Confira e toque de novo em Pôr na venda.', true); return; } fechar(); ok(q, false); });
     });
     return;
   }
@@ -443,7 +466,7 @@ TELAS.vender = () => {
       <form class="leitor" id="f-leitor" autocomplete="off"><span>${ico('busca')}</span><input id="leitor" placeholder="Passe o código no leitor ou digite o nome" aria-label="Código de barras ou nome do produto" autofocus><button type="button" class="icone-bt" data-acao="camera-venda" aria-label="Ler código pela câmera">${ico('cam')}</button></form>
       <div class="sugestoes" id="sugestoes"></div>
       <h3 class="mini-tit">Mais vendidos</h3>
-      <div class="rapidos">${rapidos.map((p) => `<button type="button" class="rapido" data-por="${p.id}">${foto(p)}<b>${t(p.nome)}</b><span>${din(p.preco)}${p.un === 'kg' ? '/kg' : ''}</span>${p.dose ? `<i>dose ${din(p.dose.preco)}</i>` : ''}</button>`).join('')}</div>
+      <div class="rapidos">${rapidos.map((p) => `<button type="button" class="rapido" data-por="${p.id}">${foto(p)}<b>${t(p.nome)}</b><span>${din(precoAgora(p))}${p.un === 'kg' ? '/kg' : ''}</span>${hhAgora(p) ? '<i class="hh-on">happy hour agora</i>' : ''}${p.dose ? `<i>dose ${din(p.dose.preco)}</i>` : ''}</button>`).join('')}</div>
     </div>
     <aside class="pdv-dir bloco">
       <header><h3>${ico('sacola')}Venda no balcão</h3>${v.itens.length ? '<button type="button" class="link" data-acao="limpar-venda">Limpar</button>' : ''}</header>
@@ -455,7 +478,9 @@ TELAS.vender = () => {
 };
 function itemLinha(x, i, onde) {
   const p = prod(x.p), kg = p && p.un === 'kg' && !x.dose;
-  return `<li>${foto(p, 'mini')}<div><b>${t(x.nome)}</b><small>${kg ? `${numBR(x.q)} kg × ${din(x.preco)}` : `${din(x.preco)} cada`}</small></div>
+  const CZ = { novo: ['Na fila da cozinha', 'ambar'], prep: ['Preparando', 'ambar'], pronto: ['Pronto: levar à mesa', 'verde'], entregue: ['Entregue', 'cinza'] };
+  const extra = [x.hh ? '<span class="tag ouro-tag">happy hour</span>' : '', x.cz ? `<span class="tag ${CZ[x.cz][1]}">${CZ[x.cz][0]}</span>` : '', (x.adics || []).length ? `<small class="adic">+ ${t(x.adics.map((a) => a.n).join(', '))}</small>` : '', x.obs ? `<small class="obs">“${t(x.obs)}”</small>` : ''].join('');
+  return `<li>${foto(p, 'mini')}<div><b>${t(x.nome)}</b><small>${kg ? `${numBR(x.q)} kg × ${din(x.preco)}` : `${din(x.preco)} cada`}</small>${extra}${onde !== 'venda' && p && !x.dose && (p.cozinha || (p.adics || []).length) ? `<button type="button" class="link mini-link" data-obs="${onde}:${i}">${x.obs || (x.adics || []).length ? 'Mudar observação' : '+ Observação ou adicional'}</button>` : ''}${x.cz === 'pronto' ? `<button type="button" class="link mini-link" data-entregue="${onde}:${i}">Marcar como entregue</button>` : ''}</div>
     <div class="qtd">${kg ? '' : `<button type="button" class="icone-bt" data-menos="${onde}:${i}" aria-label="Tirar um">${ico('menos')}</button><span>${numBR(x.q, 0)}</span><button type="button" class="icone-bt" data-mais="${onde}:${i}" aria-label="Mais um">${ico('mais')}</button>`}</div>
     <b class="vl">${din(Math.round(x.q * x.preco))}</b><button type="button" class="icone-bt" data-tira="${onde}:${i}" aria-label="Tirar ${t(x.nome)}">${ico('lixo')}</button></li>`;
 }
@@ -466,7 +491,7 @@ function maisVendidos(n) {
 }
 function poeNaVenda(p) {
   quanto(p, (q, dose) => {
-    if (!dose && p.q - q < 0 && p.un !== 'kg') toast(`Atenção: o estoque de ${p.nome} vai ficar negativo. Confira depois.`, true);
+    if (!dose && !p.semEstoque && p.q - q < 0 && p.un !== 'kg') toast(`Atenção: o estoque de ${p.nome} vai ficar negativo. Confira depois.`, true);
     addItem(estado.venda.itens, p, { q, dose }); mostra(); setTimeout(() => { const l = $('#leitor'); if (l) l.focus(); }, 30);
   });
 }
@@ -537,17 +562,33 @@ function pagar({ itens, desc = 0, servico = 0, titulo, origem, mesa = null, depo
   });
   abrirPg();
 }
+// imprime direto por um quadro escondido (sem abrir janela). No Chrome aberto com --kiosk-printing, sai sem perguntar nada.
+function imprimir(txt) {
+  let f = $('#quadro-imp'); if (!f) { f = document.createElement('iframe'); f.id = 'quadro-imp'; f.title = 'impressão'; f.style.cssText = 'position:fixed;width:0;height:0;border:0;right:0;bottom:0'; document.body.append(f); }
+  const d = f.contentDocument; d.open(); d.write(`<!doctype html><meta charset="utf-8"><style>@page{size:80mm auto;margin:3mm}body{margin:0;font:12.5px/1.35 monospace;white-space:pre-wrap;width:74mm}</style>${t(txt)}`); d.close();
+  setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('Não consegui imprimir. Confira a impressora.', true); } }, 60);
+}
 function comprovante(v) {
   const c = v.pag.find((x) => x.cli), cl = c && cli(c.cli);
-  const linhas = v.itens.map((x) => `${numBR(x.q, 3)} ${x.nome} ${din(Math.round(x.q * x.preco))}`);
+  const linhas = v.itens.map((x) => `${numBR(x.q, 3)} ${x.nome}${(x.adics || []).length ? ` (+ ${x.adics.map((a) => a.n).join(', ')})` : ''} ${din(Math.round(x.q * x.preco))}`);
   const txt = `${db.loja.nome}\nVenda nº ${v.n} · ${dataBR(v.data)} ${horaBR(v.data)}\n\n${linhas.join('\n')}\n${v.servico ? `Serviço ${din(v.servico)}\n` : ''}${v.desc ? `Desconto −${din(v.desc)}\n` : ''}Total ${din(v.total)}\n${v.pag.map((x) => `${FORMAS[x.f]} ${din(x.v)}`).join('\n')}\n\nComprovante sem valor fiscal. Obrigado pela preferência!`;
   abrir(`${cab('Venda concluída', `Nº ${v.n} · ${din(v.total)}`)}<pre class="cupom">${t(txt)}</pre><footer class="j-pe"><button type="button" class="bt" data-imp>${ico('imp')}Imprimir</button>${cl && cl.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(cl.tel, txt)}">${ico('zap')}Mandar no WhatsApp</a>` : ''}<button type="button" class="bt cheio" data-fechar>Nova venda</button></footer>`, (j) => {
-    $('[data-imp]', j).addEventListener('click', () => { const w = window.open('', '_blank', 'width=360,height=600'); if (!w) { toast('Libere as janelas deste site para imprimir.', true); return; } w.document.write(`<pre style="font:13px monospace;white-space:pre-wrap">${t(txt)}</pre>`); w.document.close(); w.print(); });
+    $('[data-imp]', j).addEventListener('click', () => imprimir(txt));
+    if (db.loja.impAuto) imprimir(txt);
+    setTimeout(() => $('[data-imp]', j).focus(), 40); // Enter imprime
   });
 }
 
 // ------------------------------------------------------------------ mesas e comandas do bar
 const totalMesa = (m) => m.itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0);
+// cozinha: os pedidos das mesas chegam aqui (no aparelho da cozinha, chegam pela nuvem em até 30 segundos)
+const naCozinha = () => db.mesas.flatMap((m) => m.itens.filter((x) => x.cz && x.cz !== 'entregue').map((x) => ({ m, x })));
+const minutos = (iso) => Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+TELAS.cozinha = () => {
+  const l = naCozinha(), col = (st, tit) => { const it = l.filter((y) => y.x.cz === st).sort((a, b) => a.x.h.localeCompare(b.x.h)); return `<section class="kds-col"><h3>${tit} <span class="selo">${it.length}</span></h3>${it.map(({ m, x }) => `<article class="kds ${st}${minutos(x.h) >= 20 && st !== 'pronto' ? ' atrasado' : ''}"><header><b>${t(m.nome)}</b><span>${minutos(x.h)} min</span></header><p class="kds-item">${numBR(x.q, 0)}× ${t(x.nome)}</p>${(x.adics || []).length ? `<p class="adic">+ ${t(x.adics.map((a) => a.n).join(', '))}</p>` : ''}${x.obs ? `<p class="obs">“${t(x.obs)}”</p>` : ''}<footer>${st === 'novo' ? `<button type="button" class="bt mini" data-cz="${m.id}:${x.id}:prep">Começar</button>` : ''}${st !== 'pronto' ? `<button type="button" class="bt mini verde" data-cz="${m.id}:${x.id}:pronto">Pronto</button>` : `<button type="button" class="bt mini" data-cz="${m.id}:${x.id}:entregue">Entregue</button>`}<button type="button" class="icone-bt" data-czimp="${m.id}:${x.id}" aria-label="Imprimir este pedido">${ico('imp')}</button></footer></article>`).join('') || '<p class="vazio">Nada aqui.</p>'}</section>`; };
+  return `<section class="cab-tela"><div><h2>Cozinha</h2><p>Os pedidos das mesas chegam aqui na hora. Deixe esta tela aberta num celular ou tablet na cozinha; o garçom vê na mesa quando fica pronto.</p></div></section>
+  <div class="kds-grade">${col('novo', 'Na fila')}${col('prep', 'Preparando')}${col('pronto', 'Pronto para levar')}</div>`;
+};
 TELAS.mesas = (id) => {
   const m = id && db.mesas.find((x) => x.id === id);
   if (m) return telaMesa(m);
@@ -561,19 +602,53 @@ function fechadasHoje() {
 }
 function telaMesa(m) {
   const tot = totalMesa(m), serv = Math.round(tot * (db.loja.servico || 0) / 100);
-  return `<section class="cab-tela"><div><a class="voltar" href="#mesas">← Todas as mesas</a><h2>${t(m.nome)}</h2><p>${m.pessoas} pessoa${m.pessoas === 1 ? '' : 's'} · aberta às ${horaBR(m.aberta)}</p></div><div class="acoes"><button type="button" class="bt" data-acao="pessoas" data-id="${m.id}">Pessoas</button><button type="button" class="bt" data-acao="parcial" data-id="${m.id}">${ico('imp')}Conta parcial</button></div></section>
+  return `<section class="cab-tela"><div><a class="voltar" href="#mesas">← Todas as mesas</a><h2>${t(m.nome)}</h2><p>${m.pessoas} pessoa${m.pessoas === 1 ? '' : 's'} · aberta às ${horaBR(m.aberta)}</p></div><div class="acoes"><button type="button" class="bt" data-acao="pessoas" data-id="${m.id}">Pessoas</button><button type="button" class="bt" data-acao="parcial" data-id="${m.id}">${ico('imp')}Conta parcial</button><button type="button" class="bt" data-acao="separar" data-id="${m.id}" ${m.itens.length ? '' : 'disabled'}>Separar a conta</button></div></section>
   <section class="pdv">
     <div class="pdv-esq">
       <form class="leitor" id="f-mesa" data-id="${m.id}" autocomplete="off"><span>${ico('busca')}</span><input id="leitor-mesa" placeholder="O que a mesa pediu? Nome ou código" aria-label="Produto pedido pela mesa"><button type="button" class="icone-bt" data-acao="camera-mesa" data-id="${m.id}" aria-label="Ler código pela câmera">${ico('cam')}</button></form>
       <div class="sugestoes" id="sugestoes"></div>
       <h3 class="mini-tit">Do bar</h3>
-      <div class="rapidos">${ativos().filter((p) => p.dose || /Cerveja|Bebidas|Petiscos/.test(p.cat)).slice(0, 12).map((p) => `<button type="button" class="rapido" data-mesa-por="${p.id}" data-id="${m.id}">${foto(p)}<b>${t(p.nome)}</b><span>${din(p.preco)}</span>${p.dose ? `<i>dose ${din(p.dose.preco)}</i>` : ''}</button>`).join('')}</div>
+      <div class="rapidos">${ativos().filter((p) => p.cozinha || p.dose || /Cerveja|Bebidas|Petiscos/.test(p.cat)).sort((a, b) => (b.cozinha ? 1 : 0) - (a.cozinha ? 1 : 0)).slice(0, 16).map((p) => `<button type="button" class="rapido" data-mesa-por="${p.id}" data-id="${m.id}">${foto(p)}<b>${t(p.nome)}</b><span>${din(precoAgora(p))}</span>${hhAgora(p) ? '<i class="hh-on">happy hour agora</i>' : ''}${p.dose ? `<i>dose ${din(p.dose.preco)}</i>` : ''}</button>`).join('')}</div>
     </div>
     <aside class="pdv-dir bloco"><header><h3>${ico('mesa')}Comanda</h3></header>
       ${m.itens.length ? `<ul class="itens">${m.itens.map((x, i) => itemLinha(x, i, `mesa-${m.id}`)).join('')}</ul>` : '<p class="vazio">A comanda está vazia.</p>'}
       <dl class="soma"><div><dt>Consumo</dt><dd>${din(tot)}</dd></div>${serv ? `<div><dt>Serviço (${db.loja.servico}%, opcional)</dt><dd>${din(serv)}</dd></div>` : ''}<div class="total"><dt>Total</dt><dd>${din(tot + serv)}</dd></div>${m.pessoas > 1 ? `<div><dt>Por pessoa (${m.pessoas})</dt><dd>${din(Math.ceil((tot + serv) / m.pessoas))}</dd></div>` : ''}</dl>
       <div class="pdv-acoes">${m.itens.length ? '' : `<button type="button" class="bt" data-acao="cancelar-mesa" data-id="${m.id}">Cancelar mesa</button>`}<button type="button" class="bt cheio verde grande" data-acao="fechar-mesa" data-id="${m.id}" ${m.itens.length ? '' : 'disabled'}>Fechar a conta</button></div>
     </aside></section>`;
+}
+// cada pessoa marca o que consumiu e paga só aquilo; o resto continua na mesa
+function separarConta(m) {
+  const un = []; m.itens.forEach((x, i) => { const p = prod(x.p), kg = p && p.un === 'kg' && !x.dose; const n = kg ? 1 : Math.round(x.q); for (let k = 0; k < n; k++) un.push({ i, q: kg ? x.q : 1, x }); });
+  abrir(`${cab(`Separar a conta da ${t(m.nome)}`, 'Marque o que esta pessoa consumiu')}<div class="form"><ul class="separa">${un.map((u, k) => `<li><label class="check"><input type="checkbox" data-u="${k}"> <span>${t(u.x.nome)}${u.x.obs ? ` <small>“${t(u.x.obs)}”</small>` : ''}</span><b>${din(Math.round(u.q * u.x.preco))}</b></label></li>`).join('')}</ul>
+    <label class="check"><input type="checkbox" id="s-serv" ${db.loja.servico ? 'checked' : 'disabled'}> Cobrar serviço de ${db.loja.servico || 0}% desta parte</label>
+    <p class="sep-tot" id="s-tot">Marcados: R$ 0,00</p><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio verde" id="s-ok" disabled>Receber os marcados</button></footer></div>`, (j) => {
+    const sel = () => $$('[data-u]:checked', j).map((c) => un[Number(c.dataset.u)]);
+    const att = () => { const s2 = sel(), tot = s2.reduce((a, u) => a + Math.round(u.q * u.x.preco), 0); $('#s-tot', j).innerHTML = `Marcados: <b>${din(tot)}</b> de ${din(totalMesa(m))}`; $('#s-ok', j).disabled = !s2.length; };
+    j.addEventListener('change', att); att();
+    $('#s-ok', j).addEventListener('click', () => {
+      const s2 = sel(), por = {}; s2.forEach((u) => { (por[u.i] ||= { ...u.x, q: 0 }).q = r3(por[u.i].q + u.q); });
+      const itens = Object.values(por), tot = itens.reduce((a, x) => a + Math.round(x.q * x.preco), 0), serv = $('#s-serv', j).checked ? Math.round(tot * (db.loja.servico || 0) / 100) : 0;
+      fechar();
+      pagar({ itens, servico: serv, titulo: `Parte da conta da ${m.nome}`, origem: 'mesa', mesa: `${m.nome} (parte)`, depois: () => {
+        Object.keys(por).map(Number).sort((a, b) => b - a).forEach((i) => { m.itens[i].q = r3(m.itens[i].q - por[i].q); if (m.itens[i].q <= 0.0005) m.itens.splice(i, 1); });
+        if (!m.itens.length) { db.mesas = db.mesas.filter((x) => x.id !== m.id); location.hash = '#mesas'; toast(`${m.nome} paga por completo.`); }
+        grava(); mostra();
+      } });
+    });
+  }, true);
+}
+// observação e adicionais de um item (vão para a cozinha e para a conta)
+function obsItem(lista, i) {
+  const x = lista[i], p = prod(x.p), ad = (p && p.adics) || [], tem = new Set((x.adics || []).map((a) => a.n));
+  abrir(`${cab(t(x.nome), 'Observação e adicionais')}<form class="form"><label>Observação para a cozinha<input name="obs" value="${t(x.obs || '')}" placeholder="Sem cebola, bem passada, sem gelo…" maxlength="120"></label>
+    ${ad.length ? `<p class="mini-tit">Adicionais</p>${ad.map((a, k) => `<label class="check"><input type="checkbox" name="a${k}" ${tem.has(a.n) ? 'checked' : ''}> ${t(a.n)}${a.v ? ` <b>+ ${din(a.v)}</b>` : ''}</label>`).join('')}` : '<p class="dica">Este produto não tem adicionais. Cadastre em Estoque, no produto.</p>'}
+    <footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Salvar</button></footer></form>`, (j) => {
+    $('form', j).addEventListener('submit', (e) => {
+      e.preventDefault(); const f = e.target, base = x.base ?? x.preco;
+      x.obs = f.obs.value.trim(); x.adics = ad.filter((a, k) => f[`a${k}`] && f[`a${k}`].checked); x.base = base; x.preco = base + x.adics.reduce((s2, a) => s2 + a.v, 0);
+      grava(); fechar(); mostra();
+    });
+  });
 }
 function novaMesa() {
   const prox = (() => { for (let i = 1; i < 100; i++) if (!db.mesas.some((m) => m.nome === `Mesa ${i}`)) return `Mesa ${i}`; return 'Mesa'; })();
@@ -604,7 +679,7 @@ TELAS.estoque = () => {
   <form class="leitor" id="f-busca-est" autocomplete="off"><span>${ico('busca')}</span><input id="busca-est" value="${t(estado.filtro)}" placeholder="Buscar pelo nome ou passar o código" aria-label="Buscar produto"><button type="button" class="icone-bt" data-acao="camera-estoque" aria-label="Ler código pela câmera">${ico('cam')}</button></form>
   <div class="chips"><button type="button" class="chip${!c ? ' on' : ''}" data-cat="">Todos</button><button type="button" class="chip alerta${c === '_baixo' ? ' on' : ''}" data-cat="_baixo">Abaixo do mínimo (${nBaixo})</button>${cats().map((x) => `<button type="button" class="chip${c === x ? ' on' : ''}" data-cat="${t(x)}">${t(x)}</button>`).join('')}</div>
   <section class="bloco sem-pad"><table class="tab grande"><thead><tr><th>Produto</th><th>Estoque</th><th class="so-pc">Mínimo</th><th class="so-pc">Custo</th><th>Preço</th><th class="so-pc">Margem</th><th class="so-pc">Validade mais próxima</th></tr></thead><tbody>
-  ${l.map((p) => { const s = situ(p), lv = (p.lotes || []).filter((x) => x.val).sort((a, b) => a.val.localeCompare(b.val))[0]; return `<tr class="clica" data-prod="${p.id}"><td><span class="com-foto">${foto(p, 'mini')}<span><b>${t(p.nome)}</b><small class="cod">${t(p.cat)} · ${t(p.cod)}${p.dose ? ` · dose ${p.dose.doseMl} ml` : ''}</small></span></span></td><td><span class="tag ${s === 'ok' ? 'verde' : s === 'baixo' ? 'ambar' : 'verm'}">${qtdTxt(p)}</span></td><td class="so-pc">${qtdTxt(p, p.min)}</td><td class="so-pc">${din(p.custo)}</td><td>${din(p.preco)}${p.un === 'kg' ? '/kg' : ''}${p.dose ? `<small class="cod">dose ${din(p.dose.preco)}</small>` : ''}</td><td class="so-pc">${margem(p.preco, p.custo).toLocaleString('pt-BR')}%</td><td class="so-pc">${lv ? `<span class="tag ${dias(hoje(), lv.val) <= 7 ? 'ambar' : 'cinza'}">${dataBR(lv.val)}</span>` : '<span class="mudo">—</span>'}</td></tr>`; }).join('') || '<tr><td colspan="7" class="vazio">Nenhum produto encontrado.</td></tr>'}
+  ${l.map((p) => { const s = situ(p), lv = (p.lotes || []).filter((x) => x.val).sort((a, b) => a.val.localeCompare(b.val))[0]; return `<tr class="clica" data-prod="${p.id}"><td><span class="com-foto">${foto(p, 'mini')}<span><b>${t(p.nome)}</b><small class="cod">${t(p.cat)} · ${t(p.cod)}${p.dose ? ` · dose ${p.dose.doseMl} ml` : ''}</small></span></span></td><td><span class="tag ${s === 'ok' ? 'verde' : s === 'baixo' ? 'ambar' : 'verm'}">${qtdTxt(p)}</span></td><td class="so-pc">${qtdTxt(p, p.min)}</td><td class="so-pc">${din(p.custo)}</td><td>${din(p.preco)}${p.un === 'kg' ? '/kg' : ''}${p.dose ? `<small class="cod">dose ${din(p.dose.preco)}</small>` : ''}${p.hh ? `<small class="cod hh-txt">${t(hhTxt(p))}</small>` : ''}</td><td class="so-pc">${margem(p.preco, p.custo).toLocaleString('pt-BR')}%</td><td class="so-pc">${lv ? `<span class="tag ${dias(hoje(), lv.val) <= 7 ? 'ambar' : 'cinza'}">${dataBR(lv.val)}</span>` : '<span class="mudo">—</span>'}</td></tr>`; }).join('') || '<tr><td colspan="7" class="vazio">Nenhum produto encontrado.</td></tr>'}
   </tbody></table></section>`;
 };
 function formProduto(base = {}) {
@@ -621,6 +696,12 @@ function formProduto(base = {}) {
     <p class="toda margem" id="mg"></p>
     ${ed ? '' : '<label>Estoque agora<input name="q" inputmode="decimal" value="0"></label>'}
     <label>Estoque mínimo<input name="min" inputmode="decimal" value="${numBR(p.min)}"></label>
+    <fieldset class="toda extras"><legend>Bar e cozinha</legend>
+      <label class="check"><input type="checkbox" name="semEstoque" ${p.semEstoque ? 'checked' : ''}> Feito na hora (porção, lanche): não controla estoque</label>
+      <label class="check"><input type="checkbox" name="cozinha" ${p.cozinha ? 'checked' : ''}> Pedido vai para a tela da Cozinha</label>
+      <label>Adicionais, um por linha (nome = preço)<textarea name="adics" rows="3" placeholder="Cheddar e bacon = 9,00&#10;Trocar por mandioca = 0">${t((p.adics || []).map((a) => `${a.n} = ${campoDin(a.v) || '0'}`).join('\n'))}</textarea></label>
+      <div class="hh"><label>Happy hour: preço (R$)<input name="hhp" inputmode="decimal" value="${p.hh ? campoDin(p.hh.preco) : ''}" placeholder="vazio = sem happy hour"></label><label>Das<input name="hhde" type="time" value="${p.hh ? p.hh.de : '18:00'}"></label><label>Às<input name="hhate" type="time" value="${p.hh ? p.hh.ate : '20:00'}"></label>
+      <div class="dias-hh">${DIAS.map((d, k) => `<label class="check"><input type="checkbox" name="hhd${k}" ${p.hh && p.hh.dias.includes(k) ? 'checked' : ''}> ${d}</label>`).join('')}</div></div></fieldset>
     <fieldset class="toda dose" ${p.un === 'gf' ? '' : 'hidden'}><legend>Dose (bebida vendida aberta)</legend><label>Garrafa tem (ml)<input name="ml" inputmode="numeric" value="${p.dose ? p.dose.ml : 1000}"></label><label>Cada dose (ml)<input name="dml" inputmode="numeric" value="${p.dose ? p.dose.doseMl : 50}"></label><label>Preço da dose (R$)<input name="dpreco" inputmode="decimal" value="${p.dose ? campoDin(p.dose.preco) : ''}"></label><p class="dica toda" id="dose-info"></p></fieldset>
     <footer class="j-pe toda">${ed ? `<button type="button" class="bt perigo" data-arq>Tirar de linha</button><button type="button" class="bt" data-ajuste>Corrigir estoque</button>` : ''}<button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Salvar</button></footer>
   </form><datalist id="dl-cat">${cats().map((c) => `<option value="${t(c)}">`).join('')}</datalist>`, (j) => {
@@ -641,6 +722,7 @@ function formProduto(base = {}) {
       if (ed && d.preco !== p.preco && !pode('entradas')) { liberar('entradas', `mudar o preço de ${p.nome}`, () => { Object.assign(p, d); if (!d.dose) delete p.dose; grava(); mostra(); toast('Produto salvo.'); }); return; }
       if (ed) Object.assign(p, d); else { const n = { id: uid('p'), ...d, cod: d.cod || ean13(`2${String(Date.now()).slice(-11)}`), lotes: [], criado: hoje() }; db.produtos.push(n); }
       if (!d.dose) delete p.dose;
+      if (!d.hh) delete p.hh;
       grava(); fechar(); mostra(); toast(ed ? 'Produto salvo.' : 'Produto cadastrado. Para ele ter estoque com validade, dê entrada pela nota.');
     });
   });
@@ -649,6 +731,12 @@ function lerForm(o) {
   const d = { nome: String(o.nome || '').trim(), cod: String(o.cod || '').trim(), cat: String(o.cat || '').trim() || 'Outros', un: o.un || 'un', forn: o.forn || '', custo: lerDin(o.custo), preco: lerDin(o.preco), min: lerNum(o.min) };
   if (o.q !== undefined) d.q = r3(lerNum(o.q));
   if (d.un === 'gf') d.dose = { ml: Math.max(1, Math.round(lerNum(o.ml) || 1000)), doseMl: Math.max(1, Math.round(lerNum(o.dml) || 50)), preco: lerDin(o.dpreco) };
+  if ('adics' in o) {
+    d.semEstoque = !!o.semEstoque; d.cozinha = !!o.cozinha;
+    d.adics = String(o.adics || '').split('\n').map((l) => l.split('=')).filter((x) => x[0].trim()).map((x) => ({ n: x[0].trim(), v: lerDin(x[1] || '0') }));
+    const hp = lerDin(o.hhp), dd = DIAS.map((x, k) => (o[`hhd${k}`] ? k : -1)).filter((k) => k >= 0);
+    d.hh = hp > 0 && dd.length ? { preco: hp, dias: dd, de: o.hhde || '18:00', ate: o.hhate || '20:00' } : null;
+  }
   return d;
 }
 function ajusteEstoque(p) {
@@ -734,7 +822,7 @@ TELAS.fiado = (id) => {
   if (c) return telaCliente(c);
   const l = db.clientes.map((x) => ({ c: x, s: situCli(x) })).sort((a, b) => b.s.k.atraso - a.s.k.atraso || b.s.k.saldo - a.s.k.saldo);
   const atras = l.filter((x) => x.s.k.atraso > 0);
-  return `<section class="cab-tela"><div><h2>Fiado</h2><p>${din(totalFiado())} a receber de ${devedores().length} cliente${devedores().length === 1 ? '' : 's'}. Prazo de ${db.loja.prazo} dias; com mais de 15 dias de atraso o fiado trava sozinho.</p></div><div class="acoes"><button type="button" class="bt cheio" data-acao="novo-cliente">${ico('mais')}Novo cliente</button></div></section>
+  return `<section class="cab-tela"><div><h2>Fiado</h2><p>${din(totalFiado())} a receber de ${devedores().length} cliente${devedores().length === 1 ? '' : 's'}. Prazo de ${db.loja.prazo} dias; com mais de 15 dias de atraso o fiado trava sozinho.</p></div><div class="acoes"><button type="button" class="bt" data-acao="caderno-todo">Passar o caderno inteiro</button><button type="button" class="bt cheio" data-acao="novo-cliente">${ico('mais')}Novo cliente</button></div></section>
   ${atras.length ? `<p class="faixa-alerta">${ico('alerta')} ${atras.length} cliente${atras.length === 1 ? '' : 's'} em atraso, somando ${din(atras.reduce((s, x) => s + x.s.k.saldo, 0))}.</p>` : ''}
   <section class="clientes">${l.map(({ c: x, s }) => `<a class="cli" href="#fiado/${x.id}"><span class="av">${t(x.nome.slice(0, 1))}</span><span class="cli-n"><b>${t(x.nome)}</b><small class="st ${s.s}">${s.txt}</small></span><span class="cli-v"><b>${din(s.k.saldo)}</b><small>limite ${din(x.limite)}</small><span class="medidor"><i style="width:${Math.min(100, Math.round((s.k.saldo / (x.limite || 1)) * 100))}%"></i></span></span></a>`).join('') || '<p class="vazio grande">Nenhum cliente no fiado.</p>'}</section>`;
 };
@@ -745,6 +833,27 @@ function telaCliente(c) {
   ${s.s === 'bloq' ? `<p class="faixa-alerta">${ico('alerta')} Fiado travado: ${s.txt}. <button type="button" class="link" data-acao="liberar" data-id="${c.id}">${c.bloq ? 'Desbloquear' : 'Liberar mesmo assim'}</button></p>` : `<p class="dica larga"><button type="button" class="link" data-acao="bloquear" data-id="${c.id}">Bloquear o fiado deste cliente</button></p>`}
   <section class="bloco sem-pad"><table class="tab grande"><thead><tr><th>Data</th><th>O que foi</th><th>Valor</th></tr></thead><tbody>${ls.map((f) => { const v = f.venda && db.vendas.find((x) => x.id === f.venda); return `<tr><td>${dataBR(f.data)} <small class="cod">${horaBR(f.data)}</small></td><td>${f.tipo === 'pag' ? `Pagou${f.obs ? ` (${t(f.obs)})` : ''}` : `Comprou${v ? `: ${t(v.itens.map((x) => x.nome).slice(0, 3).join(', '))}${v.itens.length > 3 ? '…' : ''}` : f.obs ? ` (${t(f.obs)})` : ''}`}</td><td class="${f.tipo === 'pag' ? 'ok-txt' : ''}">${f.tipo === 'pag' ? '− ' : ''}${din(f.v)}</td></tr>`; }).join('') || '<tr><td colspan="3" class="vazio">Sem lançamentos.</td></tr>'}</tbody></table></section>
   <p class="dica larga"><button type="button" class="link" data-acao="caderno" data-id="${c.id}">Passar do caderno: lançar uma dívida antiga</button></p>`;
+}
+// o caderno inteiro de uma vez: uma linha por cliente (nome, WhatsApp, limite, quanto deve e desde quando); Enter cria a próxima linha
+function cadernoTodo() {
+  const linha = () => `<div class="cad-linha"><input name="n" placeholder="Nome" aria-label="Nome"><input name="t" placeholder="WhatsApp" inputmode="tel" aria-label="WhatsApp"><input name="l" placeholder="Limite" inputmode="decimal" value="${campoDin(db.loja.limite)}" aria-label="Limite"><input name="v" placeholder="Deve R$" inputmode="decimal" aria-label="Quanto deve"><input name="d" type="date" value="${hoje()}" aria-label="Desde quando"></div>`;
+  abrir(`${cab('Passar o caderno inteiro', 'Uma linha por cliente. Enter cria a próxima linha.')}<form class="form"><div class="cad-cab"><span>Nome</span><span>WhatsApp</span><span>Limite</span><span>Deve</span><span>Desde</span></div><div id="cad">${linha()}${linha()}${linha()}</div><button type="button" class="bt" data-mais-cad>${ico('mais')}Mais uma linha</button><p class="dica">Quem já está no fiado com o mesmo nome recebe só a dívida, sem duplicar o cadastro.</p><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Lançar tudo</button></footer></form>`, (j) => {
+    const box = $('#cad', j), mais = () => { box.insertAdjacentHTML('beforeend', linha()); $('.cad-linha:last-child [name=n]', box).focus(); };
+    $('[data-mais-cad]', j).addEventListener('click', mais);
+    box.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('input')) { e.preventDefault(); const l = e.target.closest('.cad-linha'); if (l === box.lastElementChild) mais(); else $('[name=n]', l.nextElementSibling).focus(); } });
+    $('form', j).addEventListener('submit', (e) => {
+      e.preventDefault(); let n = 0, tot = 0;
+      $$('.cad-linha', box).forEach((l) => {
+        const nome = $('[name=n]', l).value.trim(); if (!nome) return;
+        let c = db.clientes.find((x) => sa(x.nome) === sa(nome));
+        if (!c) { c = { id: uid('c'), nome, tel: $('[name=t]', l).value.trim(), limite: lerDin($('[name=l]', l).value) || db.loja.limite, bloq: false, desde: hoje() }; db.clientes.push(c); }
+        const v = lerDin($('[name=v]', l).value); if (v > 0) { db.fiado.push({ id: uid('f'), cli: c.id, data: `${$('[name=d]', l).value || hoje()}T12:00:00`, tipo: 'compra', v, obs: 'Do caderno' }); tot += v; }
+        n++;
+      });
+      if (!n) { toast('Escreva pelo menos um nome.', true); return; }
+      registra(`Caderno passado para o sistema: ${n} cliente${n === 1 ? '' : 's'}, ${din(tot)} em fiado`, 'fiado'); grava(); fechar(); mostra(); toast(`${n} cliente${n === 1 ? '' : 's'} lançado${n === 1 ? '' : 's'}, ${din(tot)} em fiado.`);
+    });
+  }, true);
 }
 function formCliente(base = {}) {
   const c = base.id ? base : { nome: base.nome || '', tel: '', limite: db.loja.limite };
@@ -878,6 +987,8 @@ TELAS.config = () => `<section class="cab-tela"><div><h2>Configurações</h2><p>
     <label class="toda">Chave Pix (aparece no QR da venda e na cobrança do fiado)<input name="pix" value="${t(db.loja.pix)}" placeholder="CPF, CNPJ, celular, e-mail ou chave aleatória"></label>
     <label>Prazo do fiado (dias)<input name="prazo" type="number" min="1" max="120" value="${db.loja.prazo}"></label><label>Limite padrão de cliente novo (R$)<input name="limite" value="${campoDin(db.loja.limite)}" inputmode="decimal"></label>
     <label>Serviço do bar (%) — 0 para não cobrar<input name="servico" type="number" min="0" max="20" value="${db.loja.servico}"></label>
+    <label class="check toda"><input type="checkbox" name="impAuto" ${db.loja.impAuto ? 'checked' : ''}> Imprimir o comprovante sozinho ao concluir a venda (impressora térmica de 80 mm)</label>
+    <p class="dica toda">Para sair direto, sem a janela de impressão: no computador do caixa, abra o Chrome pelo atalho com <b>--kiosk-printing</b> no fim (botão direito no atalho → Propriedades → Destino). A impressora térmica precisa ser a padrão do Windows.</p>
     <footer class="j-pe toda"><button class="bt cheio">Salvar</button></footer></form></section>
   <section class="bloco"><header><h3>Cópia dos dados</h3></header><p class="dica">Guarde uma cópia de tudo num arquivo. Na conta, os dados já ficam na nuvem; a cópia é uma garantia a mais.</p><div class="acoes"><button type="button" class="bt" data-acao="copia">Baixar cópia</button><label class="bt">Restaurar cópia<input type="file" accept=".json,application/json" id="restaura" hidden></label></div></section>
   <section class="bloco"><header><h3>Nota fiscal</h3></header><p class="dica">O Annona não emite nota fiscal. A venda gera um comprovante sem valor fiscal para imprimir ou mandar no WhatsApp. Quem precisa de NFC-e continua usando o emissor que já tem e usa o Annona para estoque, validade, fiado, mesas, compras e lucro.</p></section>`;
@@ -886,14 +997,17 @@ const GUIA = [
   ['Dê entrada pela nota', 'Em Entradas, toque em Ler o XML da nota. O Annona traz produto, quantidade, custo, lote e validade. Se a nota vier em caixa (CX C/12), ele pergunta quantas unidades vêm.'],
   ['Venda no balcão', 'Em Vender, passe o código ou digite o nome. Produto de balança pede o peso. Escolha dinheiro (mostra o troco), Pix (mostra o QR), cartão ou fiado.'],
   ['Mesas do bar', 'Em Mesas, abra a mesa e vá lançando o que pedem. Garrafa com dose: escolha Dose e o estoque baixa só os ml servidos. Ao fechar, divide por pessoa e cobra o serviço se quiser.'],
-  ['Fiado com limite', 'Cada cliente tem limite. Passou do prazo, aparece o atraso; com mais de 15 dias o fiado trava sozinho. Cobre pelo WhatsApp com a mensagem pronta.'],
+  ['Cozinha e porções', 'Porção e lanche são “feitos na hora” e vão para a tela Cozinha assim que o garçom lança na mesa, com a observação (sem cebola) e os adicionais (cheddar + R$ 9). A cozinha marca Preparando e Pronto; o garçom vê na mesa.'],
+  ['Separar a conta', 'Na mesa, toque em Separar a conta: cada pessoa marca o que consumiu e paga só aquilo. O resto continua na mesa. Também dá para dividir igual por pessoa.'],
+  ['Happy hour', 'No produto, ponha o preço de happy hour, os dias e o horário. Nesse horário a venda já sai com o preço certo, sem ninguém lembrar.'],
+  ['Fiado com limite', 'Passe o caderno inteiro de uma vez (Fiado → Passar o caderno inteiro). Cada cliente tem limite. Passou do prazo, aparece o atraso; com mais de 15 dias o fiado trava sozinho. Cobre pelo WhatsApp com a mensagem pronta.'],
   ['Validades', 'A tela Validades mostra o que já venceu, o que vence em 7 dias e em 30 dias, com o dinheiro parado em cada lote.'],
   ['Compras', 'O que está no mínimo entra sozinho na lista de compras, separada por fornecedor, pronta para mandar no WhatsApp.'],
   ['Perdas e inventário', 'Quebrou, venceu ou sumiu: registre em Perdas. Uma vez por mês, conte a prateleira em Inventário e o estoque se corrige.'],
   ['Caixa do dia', 'Abra com o troco, registre sangrias e feche contando a gaveta. O Annona diz quanto deveria ter.'],
   ['Relatórios', 'Veja quanto vendeu, quanto lucrou de verdade (já tirando as perdas) e quais produtos dão mais lucro.'],
 ];
-TELAS.guia = () => `<section class="cab-tela"><div><h2>Como usar o Annona</h2><p>Dez passos, do cadastro ao lucro.</p></div></section><ol class="guia">${GUIA.map(([a, b]) => `<li><b>${a}</b><p>${b}</p></li>`).join('')}</ol>`;
+TELAS.guia = () => `<section class="cab-tela"><div><h2>Como usar o Annona</h2><p>Treze passos, do cadastro ao lucro.</p></div></section><ol class="guia">${GUIA.map(([a, b]) => `<li><b>${a}</b><p>${b}</p></li>`).join('')}</ol>`;
 TELAS.mais = () => `<section class="cab-tela"><div><h2>Mais</h2></div></section><nav class="mais-grade">${$$('#menu a').map((a) => `<a href="${a.getAttribute('href')}">${a.querySelector('svg').outerHTML}<span>${a.querySelector('span').textContent}</span></a>`).join('')}</nav>`;
 
 // ------------------------------------------------------------------ rotas
@@ -926,6 +1040,7 @@ function anima(tela) {
 }
 const mostra = () => { const y = window.scrollY; rota(); window.scrollTo(0, y); };
 addEventListener('hashchange', rota);
+setInterval(() => { if (telaAtual === 'cozinha' && $('#camada').hidden) { try { const d = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (d && Array.isArray(d.mesas)) db.mesas = d.mesas; } catch (e) { /* fica como está */ } mostra(); } }, 15000);
 
 // sugestões ao digitar no leitor (balcão e mesa)
 function sugere(inp, ao) {
@@ -934,7 +1049,7 @@ function sugere(inp, ao) {
   box.innerHTML = l.map((p) => `<button type="button" class="sug" data-sug="${p.id}">${foto(p, 'mini')}<b>${t(p.nome)}</b><span>${qtdTxt(p)}</span><b>${din(p.preco)}${p.un === 'kg' ? '/kg' : ''}</b></button>`).join('');
   $$('[data-sug]', box).forEach((b) => b.addEventListener('click', () => { inp.value = ''; box.innerHTML = ''; ao(prod(b.dataset.sug)); }));
 }
-function poeNaMesa(m, p) { quanto(p, (q, dose) => { addItem(m.itens, p, { q, dose }); grava(); mostra(); setTimeout(() => { const l = $('#leitor-mesa'); if (l) l.focus(); }, 30); toast(`${dose ? 'Dose' : p.nome} na ${m.nome}.`); }); }
+function poeNaMesa(m, p) { quanto(p, (q, dose) => { addItem(m.itens, p, { q, dose, cozinha: true }); grava(); mostra(); setTimeout(() => { const l = $('#leitor-mesa'); if (l) l.focus(); }, 30); toast(p.cozinha ? `${p.nome}: pedido enviado para a cozinha.` : `${dose ? 'Dose' : p.nome} na ${m.nome}.`); }); }
 function lerNaMesa(m, s) { s = String(s || '').trim(); if (!s) return; const p = ativos().find((x) => x.cod === s); if (p) { poeNaMesa(m, p); return; } const l = buscaProd(s); if (l.length === 1) poeNaMesa(m, l[0]); else toast(l.length ? 'Escolha um dos produtos da lista.' : 'Produto não encontrado.', !l.length); }
 function contaInv(cod) { const p = ativos().find((x) => x.cod === String(cod).trim()); const it = p && estado.invent.itens.find((x) => x.p === p.id); if (!it) { toast('Esse código não está nesta contagem.', true); return; } it.c = r3((it.c || 0) + 1); mostra(); toast(`${p.nome}: ${numBR(it.c)}`); }
 
@@ -942,14 +1057,14 @@ function liga() {
   const fl = $('#f-leitor'); if (fl) { const i = $('#leitor'); fl.addEventListener('submit', (e) => { e.preventDefault(); const v = i.value; i.value = ''; $('#sugestoes').innerHTML = ''; lerNoBalcao(v); }); i.addEventListener('input', () => sugere(i, poeNaVenda)); }
   const fm = $('#f-mesa'); if (fm) { const m = db.mesas.find((x) => x.id === fm.dataset.id), i = $('#leitor-mesa'); fm.addEventListener('submit', (e) => { e.preventDefault(); const v = i.value; i.value = ''; $('#sugestoes').innerHTML = ''; lerNaMesa(m, v); }); i.addEventListener('input', () => sugere(i, (p) => poeNaMesa(m, p))); }
   const fb = $('#f-busca-est'); if (fb) { const i = $('#busca-est'); fb.addEventListener('submit', (e) => { e.preventDefault(); const p = ativos().find((x) => x.cod === i.value.trim()); if (p) formProduto(p); else if (/^\d{8,14}$/.test(i.value.trim())) formProduto({ cod: i.value.trim() }); }); i.addEventListener('input', () => { estado.filtro = i.value; const pos = i.selectionStart; mostra(); const n = $('#busca-est'); n.focus(); n.setSelectionRange(pos, pos); }); }
-  const fi = $('#f-inv'); if (fi) fi.addEventListener('submit', (e) => { e.preventDefault(); const c = e.target.cat.value; estado.invent = { cat: c, itens: ativos().filter((p) => !c || p.cat === c).map((p) => ({ p: p.id, c: null })) }; mostra(); });
+  const fi = $('#f-inv'); if (fi) fi.addEventListener('submit', (e) => { e.preventDefault(); const c = e.target.cat.value; estado.invent = { cat: c, itens: comEstoque().filter((p) => !c || p.cat === c).map((p) => ({ p: p.id, c: null })) }; mostra(); });
   const fic = $('#f-inv-cod'); if (fic) fic.addEventListener('submit', (e) => { e.preventDefault(); const i = $('#inv-cod'); const v = i.value; i.value = ''; contaInv(v); });
   $$('[data-perm]').forEach((c) => c.addEventListener('change', () => { const [ui, k] = c.dataset.perm.split('.'), u = db.usuarios.find((x) => x.id === ui); (u.perms ||= {})[k] = c.checked; registra(`${u.nome}: ${c.checked ? 'pode' : 'não pode mais'} ${PERMS.find((x) => x[0] === k)[1].toLowerCase()}`, 'equipe'); grava(); toast('Permissão salva.'); }));
   const fp = $('#f-perfil'); if (fp) fp.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target, u = eu(); if (f.pin.value && !/^\d{4}$/.test(f.pin.value)) { toast('A senha tem 4 números.', true); return; } Object.assign(u, { nome: f.nome.value.trim(), tel: f.tel.value.trim(), email: f.email.value.trim(), abrir: f.abrir.value }); if (f.pin.value) u.pin = f.pin.value; grava(); mostra(); toast('Perfil salvo.'); });
   const fmt = $('#f-meta'); if (fmt) fmt.m.addEventListener('change', () => { db.meta = lerDin(fmt.m.value); grava(); mostra(); toast('Meta salva.'); });
   $$('[data-conta]').forEach((inp) => inp.addEventListener('change', () => { const it = estado.invent.itens.find((x) => x.p === inp.dataset.conta); it.c = inp.value.trim() === '' ? null : r3(lerNum(inp.value)); inp.closest('tr').classList.toggle('feito', it.c !== null); }));
   const fa = $('#f-abre'); if (fa) fa.addEventListener('submit', (e) => { e.preventDefault(); if (!pode('caixa')) { liberar('caixa', 'abrir o caixa', () => fa.requestSubmit()); return; } db.caixa = { aberto: true, ab: agora(), troco: lerDin(e.target.troco.value), movs: [] }; registra(`Caixa aberto com ${din(db.caixa.troco)} de troco`, 'caixa'); grava(); mostra(); toast('Caixa aberto. Boas vendas!'); });
-  const flj = $('#f-loja'); if (flj) flj.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; Object.assign(db.loja, { nome: f.nome.value.trim(), slogan: f.slogan.value.trim(), tel: f.tel.value.trim(), cidade: f.cidade.value.trim(), pix: f.pix.value.trim(), prazo: Math.max(1, Number(f.prazo.value) || 30), limite: lerDin(f.limite.value), servico: Math.max(0, Math.min(20, Number(f.servico.value) || 0)) }); grava(); mostra(); toast('Configurações salvas.'); });
+  const flj = $('#f-loja'); if (flj) flj.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; Object.assign(db.loja, { nome: f.nome.value.trim(), slogan: f.slogan.value.trim(), tel: f.tel.value.trim(), cidade: f.cidade.value.trim(), pix: f.pix.value.trim(), prazo: Math.max(1, Number(f.prazo.value) || 30), limite: lerDin(f.limite.value), servico: Math.max(0, Math.min(20, Number(f.servico.value) || 0)), impAuto: f.impAuto.checked }); grava(); mostra(); toast('Configurações salvas.'); });
   const xml = $('#xml'); if (xml) xml.addEventListener('click', (e) => { if (!pode('entradas')) { e.preventDefault(); liberar('entradas', 'dar entrada pela nota', () => xml.click()); } });
   if (xml) xml.addEventListener('change', () => { const a = xml.files[0]; if (!a) return; a.text().then((txt) => { try { formEntrada(lerXML(txt)); } catch (e) { toast('Esse arquivo não parece o XML de uma nota fiscal (NF-e).', true); } }); xml.value = ''; });
   const rs = $('#restaura'); if (rs) rs.addEventListener('change', () => { const a = rs.files[0]; if (!a) return; a.text().then((txt) => { try { const d = JSON.parse(txt); if (!Array.isArray(d.produtos)) throw new Error('x'); confirmar('Restaurar a cópia', 'Os dados de agora serão trocados pelos da cópia.', 'Restaurar', () => { db = d; grava(); mostra(); toast('Cópia restaurada.'); }, true); } catch (e) { toast('Esse arquivo não é uma cópia do Annona.', true); } }); rs.value = ''; });
@@ -980,6 +1095,9 @@ document.addEventListener('click', (e) => {
     db.pedidos.push({ id: uid('o'), data: agora(), forn: f.id, itens: linhas.map(([p, q]) => ({ p: p.id, q })) }); grava(); window.open(zap(f.tel, txt), '_blank', 'noopener'); return;
   }
   if (ds.edforn) { formForn(forn(ds.edforn)); return; }
+  if (ds.obs || ds.entregue) { const [onde, i] = (ds.obs || ds.entregue).split(':'), lista = db.mesas.find((m) => `mesa-${m.id}` === onde).itens; if (ds.obs) obsItem(lista, Number(i)); else { lista[Number(i)].cz = 'entregue'; grava(); mostra(); } return; }
+  if (ds.cz) { const [mid, iid, st] = ds.cz.split(':'), m = db.mesas.find((x) => x.id === mid), x = m && m.itens.find((y) => y.id === iid); if (x) { x.cz = st; if (st === 'pronto') x.pronto = agora(); grava(); mostra(); if (st === 'pronto') toast(`${x.nome} da ${m.nome} pronto.`); } return; }
+  if (ds.czimp) { const [mid, iid] = ds.czimp.split(':'), m = db.mesas.find((x) => x.id === mid), x = m && m.itens.find((y) => y.id === iid); if (x) imprimir(`COZINHA · ${m.nome}\n${horaBR(x.h)}\n\n${numBR(x.q, 0)}x ${x.nome}${(x.adics || []).length ? `\n+ ${x.adics.map((a) => a.n).join(', ')}` : ''}${x.obs ? `\nOBS: ${x.obs}` : ''}`); return; }
   if (ds.como) { db.usuario = ds.como; grava(); location.hash = `#${eu().abrir || 'painel'}`; mostra(); toast(`Agora você vê o sistema como ${eu().nome}.`); return; }
   if (ds.tiraU) { const u = db.usuarios.find((x) => x.id === ds.tiraU); confirmar('Tirar da equipe', `${t(u.nome)} perde o acesso. As vendas dela continuam nos relatórios.`, 'Tirar', () => { db.usuarios = db.usuarios.filter((x) => x.id !== u.id); registra(`${u.nome} saiu da equipe`, 'equipe'); grava(); mostra(); }, true); return; }
   const id = ds.id, A = {
@@ -988,7 +1106,7 @@ document.addEventListener('click', (e) => {
     'limpar-venda': () => { estado.venda = { itens: [], cli: '', desc: 0 }; mostra(); },
     desconto: () => liberar('desconto', 'desconto na venda', () => abrir(`${cab('Desconto na venda')}<form class="form"><label>Desconto (R$)<input name="d" inputmode="decimal" value="${campoDin(estado.venda.desc)}"></label><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Aplicar</button></footer></form>`, (j) => $('form', j).addEventListener('submit', (ev) => { ev.preventDefault(); const sub = estado.venda.itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0); estado.venda.desc = Math.min(sub, lerDin(ev.target.d.value)); fechar(); mostra(); }))),
     'pagar-venda': () => pagar({ itens: estado.venda.itens, desc: estado.venda.desc, titulo: 'Receber', origem: 'balcao', depois: () => { estado.venda = { itens: [], cli: '', desc: 0 }; mostra(); } }),
-    'nova-mesa': novaMesa, 'fechar-mesa': () => fecharMesa(db.mesas.find((m) => m.id === id)), parcial: () => fecharMesa(db.mesas.find((m) => m.id === id), true),
+    'nova-mesa': novaMesa, separar: () => separarConta(db.mesas.find((m) => m.id === id)), 'caderno-todo': cadernoTodo, 'fechar-mesa': () => fecharMesa(db.mesas.find((m) => m.id === id)), parcial: () => fecharMesa(db.mesas.find((m) => m.id === id), true),
     'cancelar-mesa': () => { registra(`Mesa cancelada: ${(db.mesas.find((m) => m.id === id) || {}).nome}`, 'mesa'); db.mesas = db.mesas.filter((m) => m.id !== id); grava(); location.hash = '#mesas'; },
     pessoas: () => { const m = db.mesas.find((x) => x.id === id); abrir(`${cab('Pessoas na mesa')}<form class="form"><label>Quantas pessoas<input name="p" type="number" min="1" max="40" value="${m.pessoas}"></label><footer class="j-pe"><button class="bt cheio">Salvar</button></footer></form>`, (j) => $('form', j).addEventListener('submit', (ev) => { ev.preventDefault(); m.pessoas = Math.max(1, Number(ev.target.p.value) || 1); grava(); fechar(); mostra(); })); },
     'novo-produto': () => formProduto(), 'nova-entrada': () => liberar('entradas', 'dar entrada de mercadoria', () => formEntrada()), 'nova-perda': () => liberar('estoque', 'registrar perda', () => formPerda()), 'nova-pessoa': novaPessoa,

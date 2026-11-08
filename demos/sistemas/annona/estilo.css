@@ -443,3 +443,44 @@ body { font-size: 16.5px; }
 /* demonstração: a faixa de cima fica presa e a barra lateral desconta a altura dela */
 body:not(.na-conta) .demo-topo { position: sticky; top: 0; z-index: 45; min-height: 42px; }
 @media (min-width: 861px) { body:not(.na-conta) .lateral { top: 58px; height: calc(100dvh - 74px); } }
+
+/* ===== 08/11: cozinha, separar conta, observações, happy hour, caderno e peso ===== */
+.mini-link { display: block; font-size: 13.5px; margin-top: 4px; }
+.itens .tag { margin: 4px 6px 0 0; font-size: 12px; padding: 2px 8px; }
+.tag.ouro-tag { background: var(--ouro-claro); color: var(--ouro-2); }
+.adic, .obs { display: block; font-size: 13.5px; margin: 3px 0 0; }
+.adic { color: var(--verde-2); } .obs { color: var(--azul); font-style: italic; }
+.hh-on { color: var(--verde-2) !important; font-weight: 700; } .hh-txt { color: var(--verde-2); }
+.kds-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.kds-col h3 { font: 700 19px var(--tit); display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+.kds { background: var(--branco); border-radius: 18px; box-shadow: var(--sombra); padding: 16px 18px; margin-bottom: 12px; border-left: 6px solid var(--ouro); }
+.kds.prep { border-left-color: var(--azul); } .kds.pronto { border-left-color: var(--verde); } .kds.atrasado { box-shadow: 0 0 0 2px var(--verm), var(--sombra); }
+.kds header { display: flex; justify-content: space-between; align-items: center; } .kds header b { font: 800 19px var(--tit); } .kds header span { color: var(--ardosia); font-size: 15px; }
+.kds-item { font-size: 20px; font-weight: 700; margin: 8px 0 2px; }
+.kds .obs, .kds .adic { font-size: 16px; }
+.kds footer { display: flex; gap: 8px; margin-top: 12px; align-items: center; } .kds footer .icone-bt { margin-left: auto; }
+.separa { list-style: none; margin: 0; padding: 0; max-height: 46vh; overflow: auto; }
+.separa li { border-bottom: 1px solid var(--linha); } .separa label { display: flex; align-items: center; gap: 12px; padding: 10px 4px; cursor: pointer; font-weight: 500; }
+.separa label span { flex: 1; } .separa input { width: 22px; height: 22px; accent-color: var(--verde); }
+.sep-tot { font-size: 19px; margin: 6px 0 0; }
+.pesos { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.peso-bt { min-height: 56px; border-radius: 12px; border: 1px solid var(--linha); background: #fff; font: 700 16px var(--tit); cursor: pointer; }
+.peso-bt:hover { border-color: var(--ouro); background: var(--ouro-claro); }
+.form input.peso-in { font: 800 34px var(--tit) !important; min-height: 68px !important; text-align: center; letter-spacing: .02em; }
+.peso-tot { font: 800 30px var(--tit); color: var(--verde-2); text-align: center; margin: 4px 0 0; }
+.aviso-peso { background: var(--ambar-claro); color: #6E4A0E; padding: 10px 14px; border-radius: 10px; margin: 0; font-weight: 600; }
+.cad-cab, .cad-linha { display: grid; grid-template-columns: 2fr 1.3fr 1fr 1fr 1.2fr; gap: 8px; }
+.cad-cab span { font-size: 13px; font-weight: 600; color: var(--ardosia); }
+#cad { display: grid; gap: 8px; } .cad-linha input { min-height: 46px; border: 1px solid #E5D5DC; border-radius: 10px; padding: 0 10px; width: 100%; font-size: 15.5px; }
+fieldset.extras { border: 1px solid var(--linha); border-radius: 14px; padding: 12px 14px; margin: 0; display: grid; gap: 10px; }
+fieldset.extras legend { font-weight: 700; padding: 0 6px; color: var(--azul); }
+fieldset.extras textarea { border: 1px solid #E5D5DC; border-radius: 10px; padding: 10px 12px; font: inherit; resize: vertical; }
+.hh { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; } .dias-hh { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+@media (max-width: 860px) { .kds-grade { grid-template-columns: 1fr; } .pesos { grid-template-columns: repeat(3, 1fr); } .cad-cab { display: none; } .cad-linha { grid-template-columns: 1fr 1fr; padding-bottom: 10px; border-bottom: 1px solid var(--linha); } .cad-linha input[name=n] { grid-column: 1 / -1; } .hh { grid-template-columns: 1fr 1fr; } }
+/* comanda: nome e detalhes numa linha inteira, quantidade, valor e lixeira embaixo */
+.itens li { flex-wrap: wrap; row-gap: 6px; }
+.itens li > div:nth-child(2) { flex: 1 1 calc(100% - 60px); }
+.itens li > .qtd { margin-left: 50px; }
+.itens li > .vl { margin-left: auto; }
+.mini-link { white-space: nowrap; display: inline-block; margin-right: 12px; }
+.itens small + .mini-link, .itens .tag + .mini-link { margin-left: 0; } .itens li > div:nth-child(2) > small:first-of-type { display: block; }
