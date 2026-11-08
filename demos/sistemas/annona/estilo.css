@@ -484,3 +484,19 @@ fieldset.extras textarea { border: 1px solid #E5D5DC; border-radius: 10px; paddi
 .itens li > .vl { margin-left: auto; }
 .mini-link { white-space: nowrap; display: inline-block; margin-right: 12px; }
 .itens small + .mini-link, .itens .tag + .mini-link { margin-left: 0; } .itens li > div:nth-child(2) > small:first-of-type { display: block; }
+
+/* ===== 08/11: só estoque e vendas ===== */
+.tab tr.cancelada td { color: var(--ardosia); } .tab tr.cancelada s { color: var(--ardosia); }
+.hist { max-height: 60vh; overflow: auto; }
+.giro { margin: 0; color: var(--azul); font-weight: 600; font-size: 15px; background: var(--azul-claro); padding: 10px 14px; border-radius: 12px; }
+
+/* instalar o app */
+.lat-instalar { margin: 12px 4px 0; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; border-radius: 14px; border: 1px dashed rgba(247, 213, 140, .55); background: rgba(247, 213, 140, .1); color: #F7D58C; font: 600 15px var(--corpo); cursor: pointer; flex: none; position: relative; z-index: 1; }
+.lat-instalar:hover { background: rgba(247, 213, 140, .18); }
+.inst { counter-reset: i; list-style: none; padding: 0; margin: 4px 0 14px; display: grid; gap: 10px; }
+.inst li { counter-increment: i; display: grid; gap: 2px; padding: 12px 14px 12px 54px; position: relative; background: var(--fundo); border-radius: 14px; }
+.inst li::before { content: counter(i); position: absolute; left: 14px; top: 12px; width: 28px; height: 28px; border-radius: 50%; background: var(--ouro); color: #3A1A24; display: grid; place-items: center; font: 800 14px var(--tit); }
+.inst span { color: var(--ardosia); font-size: 15px; }
+.inst-ja { width: 100%; margin-bottom: 4px; }
+/* celular: a barra lateral some (o menu fica na barra de baixo e em Mais) */
+@media (max-width: 860px) { .lateral { display: none !important; } }
