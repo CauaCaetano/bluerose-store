@@ -20,7 +20,7 @@
     try {
       fetch(cfg.url.replace(/\/$/, '') + '/rest/v1/visitas', { method: 'POST', keepalive: true,
         headers: { apikey: cfg.chave, Authorization: 'Bearer ' + cfg.chave, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-        body: JSON.stringify({ tipo: tipo, site: SLUG, pagina: location.pathname.split('/').pop() || 'index.html', idioma: 'pt', detalhe: extra || null }) }).catch(function () {});
+        body: JSON.stringify({ tipo: tipo, site: SLUG, pagina: (location.pathname.split('/').pop() || 'index.html').replace(/\.html$/, '').slice(0, 40) + '.html', idioma: 'pt', detalhe: extra || null }) }).catch(function () {});
     } catch (e) {}
   }
   addEventListener('load', function () { setTimeout(function () { contar('visita'); }, 400); });

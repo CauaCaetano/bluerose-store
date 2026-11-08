@@ -47,7 +47,7 @@ window.BL_ARTIGOS = [
 "autor": "helena-lacerda",
 "data": "2026-10-21",
 "min": 3,
-"img": "escritorio-claro",
+"img": "nr1-pressao",
 "resumo": "A nova redação da NR-1 pede que fatores como sobrecarga, metas e assédio apareçam no inventário de riscos. Entenda o que muda na rotina do RH e da segurança do trabalho.",
 "corpo": [
 "A Norma Regulamentadora 1 trata das disposições gerais de segurança e saúde no trabalho e do Gerenciamento de Riscos Ocupacionais (GRO). A Portaria MTE 1.419/2024 passou a mencionar de forma expressa os fatores de risco psicossociais relacionados ao trabalho, com vigência a partir de maio de 2026.",

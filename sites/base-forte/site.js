@@ -157,11 +157,11 @@
   // ---------- filme da obra: 8 fotos, 7 segundos cada ----------
   var CENAS = [
     ['planta', 'Planta de casa sobre a mesa do engenheiro', 'Meses 1 e 2 · Projeto', 'Planta, projeto estrutural e alvará na prefeitura. Você aprova cada prancha antes de começar.'],
-    ['obra', 'Canteiro com as fundações sendo executadas', 'Etapa 1 · Fundação · 12%', 'Sapatas, baldrame e impermeabilização. A primeira parcela só vence depois das fotos.'],
+    ['obra-fundacao', 'Canteiro com as fundações sendo executadas', 'Etapa 1 · Fundação · 12%', 'Sapatas, baldrame e impermeabilização. A primeira parcela só vence depois das fotos.'],
     ['ferragem', 'Armação de ferro da laje', 'Etapa 2 · Estrutura · 18%', 'Pilares, vigas e lajes. O engenheiro confere a ferragem antes de cada concretagem.'],
     ['obra-blocos', 'Paredes de blocos e andaime', 'Etapa 3 · Alvenaria e telhado · 17%', 'Paredes, cobertura e calhas. A casa fecha e já dá para andar pelos cômodos.'],
-    ['equipe', 'Equipe de engenharia vistoriando a laje', 'Etapa 4 · Instalações · 15%', 'Elétrica, água e esgoto, testados com pressão antes de fechar as paredes.'],
-    ['banho', 'Banheiro revestido e pronto', 'Etapa 5 · Revestimentos · 23%', 'Reboco, piso, azulejo e forro. A etapa mais cara, sempre com nota fiscal do material.'],
+    ['equipe-laje', 'Engenheiro vistoriando a laje', 'Etapa 4 · Instalações · 15%', 'Elétrica, água e esgoto, testados com pressão antes de fechar as paredes.'],
+    ['banho-suite', 'Banheiro revestido e pronto', 'Etapa 5 · Revestimentos · 23%', 'Reboco, piso, azulejo e forro. A etapa mais cara, sempre com nota fiscal do material.'],
     ['cozinha', 'Cozinha com bancada e armários instalados', 'Etapa 6 · Acabamento e chave · 15%', 'Pintura, louças, metais e limpeza fina. Vistoria final junto com você.'],
     ['casa-piscina', 'Sobrado pronto com piscina', 'Chave na mão', '186 casas entregues assim em Londrina. Nenhuma obra parada no meio.']
   ];

@@ -53,8 +53,8 @@ window.MONO_PJ = {
 1067
 ],
 [
-"casa-gramado",
-"Pátio gramado com a casa em volta e grandes portas de madeira",
+"patio-interno",
+"Pátio interno ajardinado com a casa em volta e portas de vidro",
 1600,
 900
 ],
@@ -126,7 +126,7 @@ window.MONO_PJ = {
 ],
 [
 "serra-luz",
-"Escada de madeira com luz natural sobre a parede de concreto",
+"Escada de concreto com corrimão de madeira e luz natural",
 1600,
 1067
 ]
@@ -207,7 +207,7 @@ window.MONO_PJ = {
 ],
 [
 "lourdes-quarto",
-"Suíte com cabeceira de madeira clara e luminárias pendentes",
+"Suíte com painel de madeira clara, macramê e luminárias pendentes",
 1600,
 900
 ],
@@ -308,8 +308,8 @@ window.MONO_PJ = {
 "url": "projeto-loja-savassi.html",
 "fotos": [
 [
-"loja-1",
-"Loja clara com araras suspensas e manequins",
+"loja-araras",
+"Loja clara com araras nas paredes, manequins e poltrona ao centro",
 1600,
 1067
 ],
