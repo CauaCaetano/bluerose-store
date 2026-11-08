@@ -1,5 +1,5 @@
 // Patrícia Leal · relógio, menu lateral, logotipo que ocupa a largura, revelações na rolagem,
-// lista de situações (foto que segue o cursor + resposta aberta), pedido de horário (formulário curto que monta a mensagem do WhatsApp).
+// lista de situações (resposta aberta com foto), pedido de horário (formulário curto que monta a mensagem do WhatsApp).
 (function () {
   'use strict';
   var doc = document, raiz = doc.documentElement;
@@ -54,25 +54,8 @@
   addEventListener('resize', ajustaLogo);
   requestAnimationFrame(function () { setTimeout(function () { raiz.classList.add('pronto'); }, 120); });
 
-  // ---------- títulos: palavras sobem por trás de uma máscara ----------
-  $$('.titulo').forEach(function (h) {
-    var i = 0;
-    (function quebra(no) {
-      [].slice.call(no.childNodes).forEach(function (n) {
-        if (n.nodeType === 3) {
-          var frag = doc.createDocumentFragment();
-          n.textContent.split(/(\s+)/).forEach(function (pal) {
-            if (!pal) return;
-            if (/^\s+$/.test(pal)) { frag.appendChild(doc.createTextNode(' ')); return; }
-            var a = doc.createElement('span'), b = doc.createElement('span');
-            a.className = 'pl'; b.textContent = pal; b.style.setProperty('--i', i++); a.appendChild(b); frag.appendChild(a);
-          });
-          no.replaceChild(frag, n);
-        } else if (n.nodeType === 1 && n.tagName !== 'BR') quebra(n);
-      });
-    })(h);
-  });
-  var alvos = $$('.titulo, .linha');
+  // títulos sem animação de entrada (regra do dono): só as linhas e os textos aparecem na rolagem
+  var alvos = $$('.linha');
   if ('IntersectionObserver' in window && !calmo) {
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visto'); io.unobserve(e.target); } });
@@ -80,30 +63,8 @@
     alvos.forEach(function (a) { io.observe(a); });
   } else alvos.forEach(function (a) { a.classList.add('visto'); });
 
-  // ---------- foto que segue o cursor sobre as listas ----------
-  var segue = $('.segue'), simg = segue ? $('img', segue) : null, mx = 0, my = 0, sx = 0, sy = 0, ativo = null, rodando = false;
-  function passo() {
-    sx += (mx - sx) * (calmo ? 1 : 0.16); sy += (my - sy) * (calmo ? 1 : 0.16);
-    segue.style.transform = 'translate3d(' + (sx - segue.offsetWidth * 0.5) + 'px,' + (sy - segue.offsetHeight * 0.55) + 'px,0)';
-    if (ativo || Math.abs(mx - sx) > 0.5) requestAnimationFrame(passo); else rodando = false;
-  }
-  if (!toque && segue) {
-    $$('.lista .item[data-foto]').forEach(function (it) {
-      var src = it.dataset.foto; if (src) { var pre = new Image(); pre.src = src; }
-      it.addEventListener('mouseenter', function (e) {
-        if (!ativo) { sx = mx = e.clientX; sy = my = e.clientY; }
-        ativo = it; simg.src = it.dataset.foto; segue.classList.add('on');
-        if (!rodando) { rodando = true; requestAnimationFrame(passo); }
-      });
-      it.addEventListener('mouseleave', function () { if (ativo === it) { ativo = null; segue.classList.remove('on'); } });
-      it.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; if (!rodando) { rodando = true; requestAnimationFrame(passo); } });
-    });
-    // a foto some quando a resposta aberta está sob o cursor, para não cobrir o texto
-    $$('.item-corpo').forEach(function (c) {
-      c.addEventListener('mouseenter', function () { segue.classList.remove('on'); });
-      c.addEventListener('mouseleave', function () { if (ativo) segue.classList.add('on'); });
-    });
-  }
+  // (08/11) sem foto que segue o cursor: a foto de cada situação aparece dentro da resposta aberta
+  var segue = null;
 
   // ---------- listas que abrem (situações, perguntas): uma resposta aberta por vez ----------
   $$('.lista-ab button.item-bt').forEach(function (b) {
@@ -154,43 +115,109 @@
     cons.innerHTML = ''; cons.appendChild(ok);
   });
 
-  // os botões "Pedir horário" abrem o formulário curto numa janela, sem sair da página
-  var dlg = null;
-  function montaDialogo() {
-    dlg = doc.createElement('dialog');
-    dlg.className = 'horario'; dlg.setAttribute('aria-labelledby', 'hr-t');
-    dlg.innerHTML = '<form class="hr-form" novalidate>' +
-      '<div class="hr-topo"><p class="rotulo">Consulta de 50 minutos · por vídeo ou no escritório</p><button type="button" class="menu-fecha hr-fecha">Fechar [×]</button></div>' +
-      '<h2 id="hr-t" class="hr-tit">Pedir horário</h2>' +
-      '<label><span class="rotulo">Seu nome</span><input name="nome" autocomplete="name"></label>' +
-      '<label><span class="rotulo">Assunto</span><select name="assunto">' + ASSUNTOS.map(function (a) { return '<option>' + a + '</option>'; }).join('') + '</select></label>' +
-      '<fieldset><legend class="rotulo">Melhor período</legend><div class="hr-per">' +
-      [['de manhã, das 9h às 12h', 'Manhã'], ['à tarde, das 13h às 17h', 'Tarde'], ['no fim do dia, das 17h às 18h', 'Fim do dia'], ['qualquer período', 'Tanto faz']].map(function (p, i) {
-        return '<label><input type="radio" name="periodo" value="' + p[0] + '"' + (i === 0 ? ' checked' : '') + '><span>' + p[1] + '</span></label>';
-      }).join('') + '</div></fieldset>' +
-      '<p class="erro" aria-live="polite"></p>' +
-      '<div class="hr-pe"><p class="hr-nota">A mensagem abre pronta no WhatsApp para você enviar. Não precisa contar o caso por aqui.</p><button class="circulo hr-bt" type="submit">Montar mensagem</button></div>' +
-      '</form>';
-    doc.body.appendChild(dlg);
-    var f = $('form', dlg);
-    $('.hr-fecha', dlg).addEventListener('click', function () { dlg.close(); });
-    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
-    f.addEventListener('submit', function (e) { e.preventDefault(); if (enviaHorario(f)) dlg.close(); });
+  // ---------- agendar conversa: painel lateral verde em três passos (assunto, quando, contato) e confirmação ----------
+  // Demonstração: nada é enviado. Num site real, o pedido chega no WhatsApp e no e-mail do escritório.
+  var pn = null, pveu = null, pp = 1, pvolta = null;
+  var PSEM = ['dom.', 'seg.', 'ter.', 'qua.', 'qui.', 'sex.', 'sáb.'], PMES = ['jan.', 'fev.', 'mar.', 'abr.', 'maio', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.'];
+  var pesc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  function pdias(n) { var r = [], d = new Date(); d.setHours(12); while (r.length < n) { d.setDate(d.getDate() + 1); if (d.getDay() % 6) r.push(new Date(d)); } return r; }
+  function pmonta() {
+    pveu = doc.createElement('div'); pveu.className = 'pn-veu'; pveu.hidden = true;
+    pn = doc.createElement('aside'); pn.className = 'pn'; pn.hidden = true;
+    pn.setAttribute('role', 'dialog'); pn.setAttribute('aria-modal', 'true'); pn.setAttribute('aria-labelledby', 'pn-t');
+    pn.innerHTML =
+      '<div class="pn-topo"><p class="rotulo pn-n" aria-live="polite">1 / 3</p><button type="button" class="menu-fecha pn-x">Fechar [×]</button></div>' +
+      '<h2 id="pn-t" class="pn-tit">Agendar conversa</h2>' +
+      '<form class="pn-f" novalidate>' +
+      '<fieldset class="pn-et" data-p="1"><legend class="rotulo">Assunto</legend><div class="pn-lista">' +
+      ASSUNTOS.map(function (a, i) { return '<label><input type="radio" name="assunto" value="' + a + '"' + (i ? '' : ' checked') + '><span>' + a + '</span></label>'; }).join('') + '</div></fieldset>' +
+      '<fieldset class="pn-et" data-p="2" hidden><legend class="rotulo">Quando</legend><div class="pn-dias">' +
+      pdias(5).map(function (d, i) { var v = PSEM[d.getDay()] + ' ' + d.getDate() + ' ' + PMES[d.getMonth()]; return '<label><input type="radio" name="dia" value="' + v + '"' + (i ? '' : ' checked') + '><span><small>' + PSEM[d.getDay()] + '</small>' + d.getDate() + '</span></label>'; }).join('') + '</div>' +
+      '<p class="rotulo pn-sub">Período</p><div class="pn-pilulas">' + [['de manhã', 'Manhã'], ['à tarde', 'Tarde'], ['no fim do dia', 'Fim do dia']].map(function (x, i) { return '<label><input type="radio" name="periodo" value="' + x[0] + '"' + (i ? '' : ' checked') + '><span>' + x[1] + '</span></label>'; }).join('') + '</div>' +
+      '<p class="rotulo pn-sub">Formato</p><div class="pn-pilulas">' + [['por vídeo', 'Por vídeo'], ['no escritório, em Curitiba', 'No escritório']].map(function (x, i) { return '<label><input type="radio" name="formato" value="' + x[0] + '"' + (i ? '' : ' checked') + '><span>' + x[1] + '</span></label>'; }).join('') + '</div></fieldset>' +
+      '<fieldset class="pn-et" data-p="3" hidden><legend class="rotulo">Contato</legend>' +
+      '<label class="pn-c"><span class="rotulo">Seu nome</span><input name="nome" autocomplete="name"></label>' +
+      '<label class="pn-c"><span class="rotulo">WhatsApp com DDD</span><input name="tel" inputmode="tel" autocomplete="tel"></label>' +
+      '<label class="pn-ck"><input type="checkbox" name="priv"><span>Li a <a href="privacidade.html">política de privacidade</a> e concordo com o uso destes dados para o retorno.</span></label>' +
+      '<p class="pn-nota">Não precisa contar o caso por aqui: isso fica para a conversa, com sigilo.</p></fieldset>' +
+      '<p class="erro pn-erro" aria-live="polite"></p>' +
+      '<div class="pn-pe"><button type="button" class="menu-fecha pn-volta" hidden>← Voltar</button><button type="submit" class="pn-segue">Continuar</button></div>' +
+      '</form><div class="pn-ok" hidden tabindex="-1"></div>';
+    doc.body.appendChild(pveu); doc.body.appendChild(pn);
+    var f = $('.pn-f', pn);
+    $('.pn-x', pn).addEventListener('click', pfecha); pveu.addEventListener('click', pfecha);
+    $('.pn-volta', pn).addEventListener('click', function () { pvai(pp - 1); });
+    f.addEventListener('submit', function (e) {
+      e.preventDefault(); var er = $('.pn-erro', pn); er.textContent = '';
+      if (pp < 3) { pvai(pp + 1); return; }
+      if (f.nome.value.trim().length < 2) { er.textContent = 'Escreva o seu nome.'; f.nome.focus(); return; }
+      if (f.tel.value.replace(/\D/g, '').length < 10) { er.textContent = 'Confira o WhatsApp com DDD.'; f.tel.focus(); return; }
+      if (!f.priv.checked) { er.textContent = 'Marque a concordância com a política de privacidade.'; return; }
+      var ok = $('.pn-ok', pn);
+      ok.innerHTML = '<p class="rotulo">Pedido registrado</p><h3 class="pn-tit">Até breve, ' + pesc(f.nome.value.trim().split(' ')[0]) + '.</h3>' +
+        '<dl class="pn-res"><div><dt class="rotulo">Assunto</dt><dd>' + pesc(f.assunto.value) + '</dd></div><div><dt class="rotulo">Quando</dt><dd>' + pesc(f.dia.value) + ', ' + pesc(f.periodo.value) + '</dd></div><div><dt class="rotulo">Formato</dt><dd>' + pesc(f.formato.value) + '</dd></div><div><dt class="rotulo">Retorno</dt><dd>WhatsApp ' + pesc(f.tel.value) + '</dd></div></dl>' +
+        '<p class="pn-nota">O horário exato é confirmado pelo WhatsApp. A conversa dura cerca de 50 minutos.</p>' +
+        '<p class="pn-demo">Demonstração: nada foi enviado. Num site real, o pedido chega no WhatsApp e no e-mail do escritório.</p>' +
+        '<button type="button" class="pn-segue pn-fim">Fechar</button>';
+      f.hidden = true; $('.pn-n', pn).textContent = 'Pronto'; ok.hidden = false; pn.scrollTop = 0; ok.focus();
+      $('.pn-fim', ok).addEventListener('click', pfecha);
+    });
+    doc.addEventListener('keydown', function (e) {
+      if (pn.hidden) return;
+      if (e.key === 'Escape') pfecha();
+      if (e.key === 'Tab') {
+        var fo = [].filter.call(pn.querySelectorAll('button, input, a[href], [tabindex="-1"]'), function (x) { return x.offsetParent !== null; });
+        if (e.shiftKey && doc.activeElement === fo[0]) { e.preventDefault(); fo[fo.length - 1].focus(); }
+        else if (!e.shiftKey && doc.activeElement === fo[fo.length - 1]) { e.preventDefault(); fo[0].focus(); }
+      }
+    });
   }
-  function abreHorario(assunto) {
-    if (!dlg) montaDialogo();
-    var f = $('form', dlg);
-    if (assunto) [].forEach.call(f.assunto.options, function (o) { if (o.text === assunto) f.assunto.value = o.value; });
-    $('.erro', f).textContent = '';
-    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
-    setTimeout(function () { f.nome.focus(); }, 30);
+  function pvai(n) {
+    pp = n;
+    $$('.pn-et', pn).forEach(function (x) { x.hidden = +x.dataset.p !== n; });
+    $('.pn-n', pn).textContent = n + ' / 3';
+    $('.pn-volta', pn).hidden = n === 1;
+    $('.pn-segue', pn).textContent = n === 3 ? 'Confirmar' : 'Continuar';
+    var i = $('.pn-et[data-p="' + n + '"] input', pn); if (i) i.focus({ preventScroll: true });
   }
+  function pabre(assunto) {
+    if (!pn) pmonta();
+    var f = $('.pn-f', pn), ok = $('.pn-ok', pn);
+    if (!ok.hidden) { ok.hidden = true; f.hidden = false; f.reset(); }
+    if (assunto) [].forEach.call(f.assunto, function (r) { if (r.value === assunto) r.checked = true; });
+    $('.pn-erro', pn).textContent = '';
+    pvolta = doc.activeElement; pveu.hidden = false; pn.hidden = false; raiz.classList.add('pn-aberto');
+    requestAnimationFrame(function () { pveu.classList.add('on'); pn.classList.add('on'); });
+    pvai(1);
+  }
+  function pfecha() {
+    pn.classList.remove('on'); pveu.classList.remove('on'); raiz.classList.remove('pn-aberto');
+    setTimeout(function () { pn.hidden = true; pveu.hidden = true; }, calmo ? 0 : 600);
+    if (pvolta && pvolta.focus) pvolta.focus({ preventScroll: true });
+  }
+  // o mesmo CTA em todo o site: "Agendar", "Pedir horário", "Marcar" e os links para #consulta abrem o painel
   doc.addEventListener('click', function (e) {
-    var a = e.target.closest('a'); if (!a || !/^Pedir horário/.test(a.textContent.trim())) return;
-    e.preventDefault();
+    var a = e.target.closest('a, button'); if (!a || a.closest('.pn') || a.type === 'submit') return;
+    var t = a.textContent.trim(), h = a.getAttribute('href') || '';
+    if (!(a.hasAttribute('data-agendar') || /^(Pedir horário|Marcar|Agendar)/.test(t) || /#consulta$/.test(h))) return;
+    e.preventDefault(); e.stopPropagation();
     var as = a.dataset.assunto || null;
     if (!as) { try { as = new URL(a.href, location.href).searchParams.get('assunto'); } catch (er) {} }
     if (!as) { var pg = (location.pathname.match(/area-(\w+)/) || [])[1]; as = { divorcio: 'Divórcio', pensao: 'Pensão', guarda: 'Guarda', inventario: 'Inventário' }[pg] || null; }
-    abreHorario(as);
+    pabre(as);
   }, true);
+
+  // ---------- como anda o caso: a foto acompanha o passo que está no meio da tela ----------
+  var plp = $$('.pl-passo'), plf = $$('.pl-fotos img');
+  if (plp.length && 'IntersectionObserver' in window) {
+    var plio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var i = +e.target.dataset.i;
+        plp.forEach(function (x, k) { x.classList.toggle('on', k === i); });
+        plf.forEach(function (x, k) { x.classList.toggle('on', k === i); });
+      });
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    plp.forEach(function (x) { plio.observe(x); });
+  }
 })();

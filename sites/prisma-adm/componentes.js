@@ -8,10 +8,9 @@
     var carac = [];
     if (im.quartos) carac.push(im.quartos + (im.quartos > 1 ? ' quartos' : ' quarto'));
     if (im.suites) carac.push(im.suites + (im.suites > 1 ? ' suítes' : ' suíte'));
-    carac.push(im.area + ' m²');
+    carac.push(im.area + ' m²');
     carac.push(im.vagas ? im.vagas + (im.vagas > 1 ? ' vagas' : ' vaga') : 'sem vaga');
     var selos = (im.pet ? '<span class="selo selo-pet">Aceita pet</span> ' : '') + (im.mobiliado ? '<span class="selo selo-neutro">Mobiliado</span> ' : '') + (im.novo ? '<span class="selo selo-ok">Novo</span>' : '');
-    var msg = 'Olá, Prisma! Quero visitar o imóvel ' + im.cod + ' (' + im.titulo + '), no ' + im.bairro + ', com aluguel de ' + brl0(im.aluguel) + '.';
     return '<article class="imovel">' +
       '<a class="imovel-foto" href="imovel.html?c=' + im.cod + '" tabindex="-1" aria-hidden="true"><img src="img/' + f[0] + '.webp" width="' + f[1] + '" height="' + f[2] + '" alt="' + esc(f[3]) + '"' + (lazy ? ' loading="lazy"' : '') + '><span class="imovel-cod">' + im.cod + '</span></a>' +
       '<div class="imovel-corpo">' +
@@ -22,10 +21,10 @@
         (selos ? '<div>' + selos + '</div>' : '') +
         '<div class="imovel-custos">' +
           '<div><span>Aluguel</span><span class="alug num">' + brl0(im.aluguel) + '</span></div>' +
-          '<div><span>Condomínio + IPTU + seguro</span><span class="num">' + brl0(im.cond + im.iptu + im.seguro) + '</span></div>' +
+          '<div><span>Cond. + IPTU + seguro</span><span class="num">' + brl0(im.cond + im.iptu + im.seguro) + '</span></div>' +
           '<div class="tot"><span>Total por mês</span><span class="num">' + brl0(im.total) + '</span></div>' +
         '</div>' +
-        '<div class="imovel-acoes"><a class="bt bt-pri" href="locacao.html?c=' + im.cod + '">Quero alugar</a><a class="bt bt-cla" href="#" data-wa="' + esc(msg) + '">Agendar visita</a></div>' +
+        '<div class="imovel-acoes"><button type="button" class="bt bt-lin" data-painel="alugar" data-imovel="' + im.cod + '">Agendar visita</button><a class="bt bt-cla" href="locacao.html?c=' + im.cod + '">Quero alugar</a></div>' +
       '</div></article>';
   }
 
@@ -40,7 +39,7 @@
     var h = '<table class="demonstrativo resp"><caption class="sr">Extrato de ' + esc(c.rotulo) + '</caption><thead><tr><th scope="col">Imóvel</th><th scope="col">Aluguel bruto</th><th scope="col">Taxa adm.</th><th scope="col">Despesas</th>' + (completo ? '<th scope="col">IRRF</th>' : '') + '<th scope="col">Líquido</th>' + (completo ? '<th scope="col">Repasse</th>' : '') + '</tr></thead><tbody>';
     lin.forEach(function (l) {
       h += '<tr><th scope="row">' + l.cod + '<small>' + esc(l.nome) + ' · ' + esc(l.bairro) + '</small>' + (l.despesaDesc && completo ? '<small>Despesa: ' + esc(l.despesaDesc) + '</small>' : '') + '</th>' +
-        '<td class="num" data-rot="Aluguel bruto">' + brl(l.bruto) + '</td><td class="num menos" data-rot="Taxa de administração">' + (l.taxa ? '− ' + brl(l.taxa) : brl(0)) + '</td><td class="num' + (l.despesa ? ' menos' : '') + '" data-rot="Despesas">' + (l.despesa ? '− ' + brl(l.despesa) : brl(0)) + '</td>' +
+        '<td class="num" data-rot="Aluguel bruto">' + brl(l.bruto) + '</td><td class="num' + (l.taxa ? ' menos' : '') + '" data-rot="Taxa de administração">' + (l.taxa ? '− ' + brl(l.taxa) : brl(0)) + '</td><td class="num' + (l.despesa ? ' menos' : '') + '" data-rot="Despesas">' + (l.despesa ? '− ' + brl(l.despesa) : brl(0)) + '</td>' +
         (completo ? '<td class="num' + (l.imposto ? ' menos' : '') + '" data-rot="IRRF">' + (l.imposto ? '− ' + brl(l.imposto) : brl(0)) + '</td>' : '') +
         '<td class="num" data-rot="Líquido"><b>' + brl(l.liquido) + '</b></td>' + (completo ? '<td data-rot="Repasse">' + SIT[l.situacao](l) + '</td>' : '') + '</tr>';
     });
@@ -50,8 +49,8 @@
   }
 
   // gráfico de barras: bruto (claro) e líquido (escuro) por competência
-  function grafico(cs, largura) {
-    var W = Math.max(300, Math.min(760, Math.round(largura || 640))), H = W < 420 ? 220 : 240, m = { t: 14, r: 8, b: 30, l: 52 }, iw = W - m.l - m.r, ih = H - m.t - m.b;
+  function grafico(cs, largura, alto) {
+    var W = Math.max(300, Math.min(760, Math.round(largura || 640))), H = alto || (W < 420 ? 220 : 240), m = { t: 14, r: 8, b: 30, l: 52 }, iw = W - m.l - m.r, ih = H - m.t - m.b;
     var max = Math.max.apply(null, cs.map(function (c) { return c.bruto; })) || 1;
     var passo = Math.pow(10, Math.floor(Math.log10(max))) / 2, topo = Math.ceil(max / passo) * passo;
     var bw = iw / cs.length, s = '<svg class="grafico" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Gráfico de aluguel bruto e líquido por mês">';

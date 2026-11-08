@@ -1,6 +1,5 @@
 // Vértice · rodada 3 · comportamento comum das páginas: transição suave entre páginas (350 ms, sem tela branca), topo que
-// fica sólido ao rolar, menu em tela cheia, entrada do hero (uma vez), revelação de títulos por máscara, cursor contextual só
-// no desktop, mapa da cidade com pontos, palco da obra controlado pela rolagem (desktop), visualizador das fotos dos interiores,
+// fica sólido ao rolar, menu em tela cheia, entrada da foto do hero (uma vez), mapa da cidade com pontos, palco da obra controlado pela rolagem (desktop), visualizador das fotos dos interiores,
 // galeria, simulador de financiamento do saldo, formulários de contato que montam a conversa no WhatsApp e o prazo da tabela.
 // As ferramentas de venda (fachada/espelho, plantas, simulador da obra, captação) ficam em vendas.js.
 (function () {
@@ -9,8 +8,7 @@
   var $ = function (s, el) { return (el || document).querySelector(s); };
   var $$ = function (s, el) { return [].slice.call((el || document).querySelectorAll(s)); };
   var calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var fino = matchMedia('(pointer: fine)').matches;
-  var real = function (v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
+    var real = function (v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
   var mi = function (v) { return 'R$ ' + (v / 1e6).toFixed(2).replace('.', ',') + ' mi'; };
   var lim = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
 
@@ -49,23 +47,11 @@
   }
 
   // ── revelar ao entrar na tela (uma vez)
-  var alvos = $$('.revela, .revela-t, .nf');
+  var alvos = $$('.revela, .nf');
   if ('IntersectionObserver' in window && !calmo) {
     var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visto'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -12% 0px' });
     alvos.forEach(function (el) { io.observe(el); });
   } else alvos.forEach(function (el) { el.classList.add('visto'); });
-
-  // ── cursor contextual: "Ver unidade", "Explorar", "Ampliar" (só com mouse e sem movimento reduzido)
-  if (fino && !calmo && innerWidth > 900) {
-    var cur = document.createElement('div'); cur.className = 'cursor'; cur.setAttribute('aria-hidden', 'true'); document.body.appendChild(cur);
-    var alvoC = null;
-    addEventListener('pointermove', function (e) {
-      cur.style.setProperty('--x', e.clientX + 'px'); cur.style.setProperty('--y', e.clientY + 'px');
-      var a = e.target.closest && e.target.closest('[data-cursor]');
-      if (a !== alvoC) { alvoC = a; cur.classList.toggle('on', !!a); if (a) cur.textContent = a.getAttribute('data-cursor'); }
-    }, { passive: true });
-    document.addEventListener('pointerleave', function () { cur.classList.remove('on'); alvoC = null; });
-  }
 
   // ── mapa da cidade: pontos selecionáveis ligados à lista
   $$('[data-mapa]').forEach(function (mp) {

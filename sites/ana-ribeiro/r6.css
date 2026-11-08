@@ -1,0 +1,80 @@
+/* Ana Ribeiro · rodada 6: correções da banca rigorosa (telas em tamanho real) e caça a defeitos em 1440 e 390. */
+
+/* ---------- título do imóvel: kerning e espaço entre as palavras do itálico ---------- */
+.pg-titulo { font-kerning: normal; font-feature-settings: "kern" 1, "liga" 1; text-rendering: optimizeLegibility; }
+.pg-titulo em { letter-spacing: -.012em; word-spacing: .08em; padding-left: .04em; }
+
+/* ---------- contraste: trilha e especificações mais escuras (AA com folga no bege) ---------- */
+.trilha { color: #45433d; }
+.trilha span[aria-hidden] { opacity: .7; }
+.im-chips li { color: #22241f; border-color: rgba(39, 41, 37, .28); font-weight: 500; }
+.im-sub, .md-nota, .im-doc, .ficha dt, .perto li span { color: #4d4b44; }
+
+/* ---------- player de vídeo próprio (sem os controles do navegador) ---------- */
+.vp { position: relative; background: #0b0d0c; overflow: hidden; }
+.vp .md-video { cursor: pointer; }
+.vp-grande { position: absolute; left: 50%; top: 50%; width: 84px; height: 84px; margin: -42px 0 0 -42px; display: grid; place-items: center; border: 1px solid rgba(243, 236, 226, .6); border-radius: 50%; background: rgba(20, 25, 24, .55); color: #f6efe4; cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: transform .2s, background .2s, opacity .25s; }
+.vp-grande svg { width: 26px; height: 26px; margin-left: 4px; }
+.vp-grande:hover { background: rgba(20, 25, 24, .75); transform: scale(1.04); }
+.vp.tocando .vp-grande { opacity: 0; pointer-events: none; }
+.vp-barra { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; align-items: center; gap: 14px; padding: 28px 18px 14px; background: linear-gradient(0deg, rgba(8, 10, 9, .78), rgba(8, 10, 9, 0)); color: #f3ece2; transition: opacity .3s; }
+.vp.tocando:not(:hover):not(:focus-within) .vp-barra { opacity: 0; }
+.vp-bt { width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(243, 236, 226, .35); border-radius: 50%; background: rgba(20, 25, 24, .35); color: inherit; cursor: pointer; transition: background .2s; }
+.vp-bt:hover { background: rgba(243, 236, 226, .16); }
+.vp-bt svg { width: 16px; height: 16px; }
+.vp-bt:focus-visible, .vp-grande:focus-visible, .vp-prog:focus-visible { outline: 2px solid var(--bege); outline-offset: 3px; }
+.vp-prog { position: relative; height: 24px; cursor: pointer; touch-action: none; }
+.vp-prog::before { content: ''; position: absolute; left: 0; right: 0; top: 11px; height: 2px; background: rgba(243, 236, 226, .3); }
+.vp-prog span { position: absolute; left: 0; top: 11px; height: 2px; width: 100%; background: var(--bege); transform-origin: 0 50%; transform: scaleX(0); }
+.vp-prog i { position: absolute; top: 6px; left: 0; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--bege); }
+.vp-tempo { font: 500 13px/1 var(--sans); letter-spacing: .04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.md-nota { margin-top: 14px; padding-left: 0; }
+@media (max-width: 560px) {
+  .vp-grande { width: 64px; height: 64px; margin: -32px 0 0 -32px; }
+  .vp-barra { gap: 8px; padding: 22px 10px 8px; }
+  .vp-tempo { font-size: 12px; }
+  .vp-cheia { display: none !important; }
+  .vp-barra { grid-template-columns: auto minmax(0, 1fr) auto auto; }
+}
+
+/* ---------- "O que tem perto", ficha e simulação: mesma grade de linhas ---------- */
+.ficha div, .perto li { min-height: 52px; align-items: center; padding: 12px 0; }
+.perto li:nth-child(-n+2) { border-top: 1px solid var(--fio); }
+.perto { margin-top: 18px; }
+.parcela { gap: 10px; padding: 26px 28px 28px; }
+.parcela .rot { margin: 0; }
+.parcela b { margin: 0; }
+.parcela span { margin: 0 0 6px; }
+/* botões de chamada da coluna e do mapa: uma classe só, 48 px */
+.im-bairro-link { margin-top: 24px; }
+.im-bairro-link a, .parcela > a, .ver-mais, .om-pedir, .om-sair, .vx-alterar, .il-continuar { min-height: 48px; padding: 0 20px; font-size: 15px; }
+@media (max-width: 900px) { .perto li:nth-child(2) { border-top: 0; } }
+
+/* ---------- anterior / próximo: nome em até 2 linhas, bairro embaixo, os dois lados iguais ---------- */
+.outros a { align-content: start; gap: 8px; }
+.outros b { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font: 500 22px/1.3 var(--sans); letter-spacing: -.01em; }
+.outros-bairro { font-size: 14px; letter-spacing: .04em; color: #4d4b44; }
+@media (max-width: 900px) { .outros b { font-size: 19px; } }
+
+/* ---------- rodapé: links com mais respiro ---------- */
+.rd-links { gap: 6px 34px; }
+.rd-links a { display: inline-flex; align-items: center; min-height: 44px; padding: 0; }
+
+/* ---------- celular: barra de WhatsApp do imóvel some ao descer e volta ao subir; rodapé não fica atrás dela ---------- */
+@media (max-width: 720px) {
+  body.com-wa-fixo { padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+  .wa-fixo { bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .wa-fixo.ver.desce { transform: translateY(160%); opacity: 0; pointer-events: none; }
+}
+@media (prefers-reduced-motion: reduce) { .vp-grande, .vp-barra { transition: none; } }
+
+/* ---------- caça a defeitos (tamanho real) ---------- */
+/* sem palavra sozinha na última linha dos textos curtos */
+.im-sub, .im-frase, .im-texto p, .md-nota, .im-doc, .parcela span, .ag-tit > p, .pg-intro .txt p, .rd-nota { text-wrap: pretty; }
+/* agendar (fechado): o cartão fica no meio da altura do texto, sem um vão escuro embaixo dele */
+.ag-sec:has(.vx:not(.aberto)) { align-items: center; }
+/* celular: a barra de WhatsApp do imóvel não passa por baixo do botão de idioma quando a pílula da Blue Rose aparece */
+@media (max-width: 720px) { body:has(.br-idi.solto):has(.br-pill:not(.br-pill-esconde)) .wa-fixo { left: 80px; } }
+/* agendar: o código do imóvel não quebra no meio do rótulo (no celular vai para a linha de baixo) */
+.vx-cod::before { content: ' · '; }
+@media (max-width: 900px) { .vx-cod { display: block; margin-top: 2px; } .vx-cod::before { content: none; } }

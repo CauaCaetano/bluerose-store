@@ -12,6 +12,14 @@
 
   // ---------- revelação ao rolar ----------
   raiz.classList.add('js');
+  // títulos (h1 a h4 e frases de destaque) ficam parados: bloco com título não sobe inteiro, só as partes sem título
+  $$('.rv').forEach(function (el) {
+    var T = 'h1, h2, h3, h4, blockquote';
+    if (!el.matches(T) && !el.querySelector(T)) return;
+    el.classList.remove('rv');
+    if (el.matches(T)) return;
+    [].forEach.call(el.children, function (f) { if (!f.matches(T) && !f.querySelector(T)) f.classList.add('rv'); });
+  });
   var rvs = $$('.rv');
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visto'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
@@ -294,4 +302,105 @@
     $('#orc-wa').addEventListener('click', function () { whats(texto); });
     $('#orc-editar').addEventListener('click', function () { resumo.hidden = true; form.elements.nome.focus(); });
   }
+})();
+
+// ---------- iniciar projeto em painel lateral: escopo → imóvel → momento → contato, termina no resumo (demonstração, nada é enviado) ----------
+(function () {
+  var PASSOS = [
+    { chave: 'obra', titulo: 'O que vamos desenhar?', ops: [['Arquitetura', 'a casa ou o espaço inteiro'], ['Interiores', 'marcenaria, luz e materiais'], ['Projeto e obra', 'do croqui à entrega das chaves']] },
+    { chave: 'terreno', titulo: 'Para qual imóvel?', ops: [['Casa', 'terreno ou casa existente'], ['Apartamento', 'reforma ou imóvel na planta'], ['Comercial', 'café, loja ou escritório']] },
+    { chave: 'area', titulo: 'Em que momento?', ops: [['Começando agora', 'ainda sem projeto'], ['Já tenho um projeto', 'quero rever ou detalhar'], ['Obra em andamento', 'preciso de acompanhamento']] },
+    { chave: 'dados', titulo: 'Como falamos com você?' }
+  ];
+  var ROT = { obra: 'Escopo', terreno: 'Imóvel', area: 'Momento', nome: 'Nome', tel: 'WhatsApp' };
+  var calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var p = document.createElement('div');
+  p.className = 'orc orc-mo'; p.hidden = true;
+  p.innerHTML = '<div class="orc-fundo" data-fecha></div>' +
+    '<aside class="orc-painel" role="dialog" aria-modal="true" aria-labelledby="orc-t">' +
+    '<div class="orc-cab"><p class="orc-passo"></p><button type="button" class="orc-x" data-fecha aria-label="Fechar"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4l12 12M16 4L4 16"/></svg></button></div>' +
+    '<div class="orc-barra"><i></i></div>' +
+    '<form class="orc-corpo" novalidate></form></aside>';
+  document.body.appendChild(p);
+  var corpo = p.querySelector('.orc-corpo'), passoTx = p.querySelector('.orc-passo'), barra = p.querySelector('.orc-barra i');
+  var at = 0, resp = {}, volta = null;
+  function desenha() {
+    var s = PASSOS[at], h = '';
+    passoTx.textContent = at < PASSOS.length ? ['I', 'II', 'III', 'IV'][at] + ' · ' + PASSOS.length + ' passos' : 'Recebido';
+    barra.style.width = ((Math.min(at, PASSOS.length) + 1) / (PASSOS.length + 1) * 100) + '%';
+    if (!s) {
+      h = '<h2 id="orc-t" class="orc-tit" tabindex="-1">Conversa <em>solicitada</em>.</h2><p class="orc-tx">A arquiteta responsável responde em até dois dias úteis para marcar a primeira conversa, sem custo.</p><dl class="orc-res">';
+      ['obra', 'terreno', 'area', 'nome', 'tel'].forEach(function (k) { h += '<div><dt>' + ROT[k] + '</dt><dd></dd></div>'; });
+      h += '</dl><p class="orc-aviso">Demonstração: nada foi enviado. No site do escritório, o pedido chega para a arquiteta responsável.</p><div class="orc-bts"><button type="button" class="bt" data-fecha>Fechar</button></div>';
+      corpo.innerHTML = h;
+      var dds = corpo.querySelectorAll('dd');
+      ['obra', 'terreno', 'area', 'nome', 'tel'].forEach(function (k, i) { dds[i].textContent = resp[k] || '—'; });
+    } else if (s.ops) {
+      h = '<h2 id="orc-t" class="orc-tit" tabindex="-1">' + s.titulo + '</h2><fieldset class="orc-ops"><legend class="vh">' + s.titulo + '</legend>';
+      s.ops.forEach(function (o, i) { h += '<label><input type="radio" name="' + s.chave + '" value="' + o[0] + '"' + (resp[s.chave] === o[0] ? ' checked' : '') + '><span><b>' + o[0] + '</b><small>' + o[1] + '</small></span></label>'; });
+      h += '</fieldset><p class="orc-erro" aria-live="polite"></p>';
+    } else {
+      h = '<h2 id="orc-t" class="orc-tit" tabindex="-1">' + s.titulo + '</h2><div class="orc-campos"><label><span>Seu nome</span><input name="nome" autocomplete="name" maxlength="60"></label><label><span>WhatsApp com DDD</span><input name="tel" inputmode="tel" autocomplete="tel" maxlength="20"></label></div><p class="orc-erro" aria-live="polite"></p>';
+    }
+    if (s) h += '<div class="orc-bts">' + (at > 0 ? '<button type="button" class="orc-volta">Voltar</button>' : '') + '<button type="submit" class="bt">' + (at === PASSOS.length - 1 ? 'Solicitar conversa' : 'Continuar') + '</button></div>';
+    if (s) corpo.innerHTML = h;
+    if (s && !s.ops) { corpo.nome.value = resp.nome || ''; corpo.tel.value = resp.tel || ''; }
+    var t = corpo.querySelector('.orc-tit'); if (t) t.focus({ preventScroll: true });
+  }
+  corpo.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var s = PASSOS[at], erro = corpo.querySelector('.orc-erro');
+    if (s.ops) {
+      var m = corpo.querySelector('input:checked'); if (!m) { erro.textContent = 'Escolha uma opção para continuar.'; return; }
+      resp[s.chave] = m.value;
+    } else {
+      var n = corpo.nome.value.trim(), tl = corpo.tel.value.replace(/\D/g, '');
+      if (n.length < 2) { erro.textContent = 'Escreva o seu nome.'; corpo.nome.focus(); return; }
+      if (tl.length < 10) { erro.textContent = 'Confira o WhatsApp: DDD e número.'; corpo.tel.focus(); return; }
+      resp.nome = n; resp.tel = corpo.tel.value.trim();
+    }
+    at++; desenha();
+  });
+  corpo.addEventListener('change', function (e) { if (e.target.type === 'radio') { var er = corpo.querySelector('.orc-erro'); if (er) er.textContent = ''; } });
+  corpo.addEventListener('click', function (e) { if (e.target.closest('.orc-volta')) { at--; desenha(); } });
+  p.addEventListener('click', function (e) { if (e.target.closest('[data-fecha]')) fecha(); });
+  document.addEventListener('keydown', function (e) {
+    if (p.hidden) return;
+    if (e.key === 'Escape') fecha();
+    if (e.key === 'Tab') {
+      var f = [].filter.call(p.querySelectorAll('button, input, [tabindex="-1"]'), function (x) { return x.offsetParent !== null && x.tabIndex >= 0; });
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+  });
+  function abre(origem) {
+    volta = origem || document.activeElement; at = 0; resp = {};
+    p.hidden = false; document.documentElement.classList.add('orc-aberto');
+    desenha(); requestAnimationFrame(function () { p.classList.add('vis'); });
+  }
+  function fecha() {
+    p.classList.remove('vis'); document.documentElement.classList.remove('orc-aberto');
+    setTimeout(function () { p.hidden = true; if (volta && volta.focus) volta.focus(); }, calmo ? 0 : 420);
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-orc], .bt-topo'); if (!a) return;
+    e.preventDefault(); abre(a);
+  });
+})();
+
+// ---------- percurso do projeto: a rolagem troca a foto conforme a etapa ----------
+(function () {
+  var h = document.querySelector('.perc'); if (!h) return;
+  var fotos = h.querySelectorAll('.hist-fotos img'), passos = h.querySelectorAll('.hist-passo');
+  if (!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var i = +e.target.dataset.i;
+      passos.forEach(function (x, k) { x.classList.toggle('at', k === i); });
+      fotos.forEach(function (x, k) { x.classList.toggle('at', k === i); });
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  passos.forEach(function (x) { io.observe(x); });
 })();

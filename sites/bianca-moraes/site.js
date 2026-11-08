@@ -71,8 +71,38 @@
     });
   });
 
+  // ---------- do espelho ao resultado: a rolagem conta o processo e troca a foto presa ao lado ----------
+  var proc = $('.processo');
+  if (proc && 'IntersectionObserver' in window) {
+    var pFotos = $$('.pr-fotos img', proc), pPassos = $$('.pr-passo', proc);
+    var ioP = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var i = +e.target.dataset.i;
+        pFotos.forEach(function (f, k) { f.classList.toggle('on', k === i); });
+        pPassos.forEach(function (x, k) { x.classList.toggle('on', k === i); });
+      });
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    pPassos.forEach(function (x) { ioP.observe(x); });
+  }
+
+  // ---------- tabelas: o nome da coluna vai em cada célula (no celular a linha vira cartão) ----------
+  $$('.tabela').forEach(function (t) {
+    var cab = [].map.call(t.querySelectorAll('thead th'), function (th) { return th.textContent.trim(); });
+    [].forEach.call(t.querySelectorAll('tbody tr'), function (tr) {
+      [].forEach.call(tr.children, function (c, i) { if (c.tagName === 'TD' && cab[i]) c.setAttribute('data-rotulo', cab[i]); });
+    });
+  });
+
   // ---------- aparecer ao rolar ----------
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('ver'); io.unobserve(e.target); } }); }, { threshold: .18 });
+  // títulos (h1/h2) ficam parados: bloco com título não sobe inteiro, só as partes sem título
+  $$('.anima').forEach(function (el) {
+    if (el.matches('h1, h2')) { el.classList.remove('anima'); return; }
+    if (!el.querySelector('h1, h2')) return;
+    el.classList.remove('anima');
+    [].forEach.call(el.children, function (f) { if (!f.matches('h1, h2') && !f.querySelector('h1, h2')) f.classList.add('anima'); });
+  });
   $$('.anima, .ajuda, .numeros').forEach(function (el) { io.observe(el); });
 
   // ---------- carrossel de casos ----------
@@ -228,22 +258,56 @@
   });
 
   // ---------- janela de agendamento ----------
-  var dlg = $('#agenda'), f = $('#ag'), sel = $('#ag-int');
-  function abreAgenda(int) {
-    if (int) { [].some.call(sel.options, function (o) { if (o.text === int) { sel.value = o.text; return true; } }); }
-    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
-    setTimeout(function () { $('#ag-nome').focus(); }, 60);
+  // painel lateral em passos: interesse → período → dados → confirmação com resumo (envio simulado na demonstração)
+  var dlg = $('#agenda');
+  var INTS = [].map.call($$('#ag-int option'), function (o) { return o.text; });
+  var PERS = ['Manhã, de 9h às 12h', 'Tarde, de 13h às 19h', 'Sábado, de 8h às 13h'];
+  var ag = { int: '', per: '', nome: '', tel: '', passo: 0 };
+  var escH = function (t) { return String(t).replace(/[<>&"]/g, function (m) { return { '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[m]; }); };
+  var corpoAg = $('.ag-corpo', dlg);
+  dlg.classList.add('ag-painel');
+  function msgAg() { return 'Olá, Dra. Bianca Moraes! Sou ' + ag.nome + ' e quero agendar a avaliação sem custo.\n• Interesse: ' + ag.int + '\n• Melhor período: ' + ag.per + '\n• WhatsApp: ' + ag.tel; }
+  function chips(lista, atual, nome) {
+    return '<div class="ag-chips" role="radiogroup">' + lista.map(function (t) { return '<button type="button" role="radio" class="ag-chip" data-' + nome + '="' + escH(t) + '" aria-checked="' + (t === atual) + '">' + escH(t) + '</button>'; }).join('') + '</div>';
   }
+  function telaAg() {
+    var p = ag.passo, h = '<ol class="ag-prog" aria-label="Etapas">' + ['Interesse', 'Período', 'Seus dados', 'Confirmar'].map(function (n, i) { return '<li class="' + (i < p ? 'feito' : i === p ? 'agora' : '') + '"' + (i === p ? ' aria-current="step"' : '') + '><span>' + n + '</span></li>'; }).join('') + '</ol>';
+    if (p === 0) h += '<p class="ag-olho">Passo 1 de 4</p><h2 id="ag-t" tabindex="-1">O que avaliar?</h2><p class="ag-sub">Se não souber, a Dra. Bianca indica na avaliação.</p>' + chips(INTS, ag.int, 'int');
+    if (p === 1) h += '<p class="ag-olho">Passo 2 de 4</p><h2 id="ag-t" tabindex="-1">Melhor período</h2><p class="ag-sub">A recepção oferece o primeiro horário livre nesse período.</p>' + chips(PERS, ag.per, 'per');
+    if (p === 2) h += '<p class="ag-olho">Passo 3 de 4</p><h2 id="ag-t" tabindex="-1">Seus dados</h2><p class="ag-sub">Só para a recepção confirmar com você.</p><form class="ag ag-dados" novalidate><label for="ag-nome">Seu nome</label><input id="ag-nome" name="nome" autocomplete="name" value="' + escH(ag.nome) + '"><label for="ag-tel">WhatsApp com DDD</label><input id="ag-tel" name="tel" inputmode="tel" autocomplete="tel" placeholder="(81) 99999-9999" value="' + escH(ag.tel) + '"><p class="erro" aria-live="polite"></p><div class="ag-pe"><button type="button" class="pilula" data-ag-volta>Voltar</button><button type="submit" class="pilula pilula-cheia">Ver resumo</button></div></form>';
+    if (p === 3) h += '<p class="ag-olho">Passo 4 de 4</p><h2 id="ag-t" tabindex="-1">Confira</h2><dl class="ag-resumo"><div><dt>Interesse</dt><dd>' + escH(ag.int) + '</dd></div><div><dt>Período</dt><dd>' + escH(ag.per) + '</dd></div><div><dt>Nome</dt><dd>' + escH(ag.nome) + '</dd></div><div><dt>WhatsApp</dt><dd>' + escH(ag.tel) + '</dd></div><div><dt>Avaliação</dt><dd>40 minutos, sem custo</dd></div></dl><div class="ag-pe"><button type="button" class="pilula" data-ag-volta>Voltar</button><button type="button" class="pilula pilula-cheia" data-ag-ok>Confirmar pedido</button></div>';
+    if (p === 4) h += '<p class="ag-olho">Pedido feito</p><h2 id="ag-t" tabindex="-1">Tudo certo, ' + escH(ag.nome.split(' ')[0]) + '</h2><p class="ag-sub">A recepção confirma o dia e o horário no seu WhatsApp ainda hoje.</p><dl class="ag-resumo"><div><dt>Interesse</dt><dd>' + escH(ag.int) + '</dd></div><div><dt>Período</dt><dd>' + escH(ag.per) + '</dd></div></dl><p class="ag-demo">Demonstração: nada foi enviado. Veja como o pedido chega no WhatsApp da clínica.</p><div class="ag-pe"><button type="button" class="pilula" data-ag-fecha>Fechar</button><button type="button" class="pilula pilula-cheia" data-ag-wa>Ver no WhatsApp</button></div>';
+    if (p < 2) h += '<div class="ag-pe">' + (p ? '<button type="button" class="pilula" data-ag-volta>Voltar</button>' : '<span></span>') + '<button type="button" class="pilula pilula-cheia" data-ag-segue' + ((p === 0 ? ag.int : ag.per) ? '' : ' disabled') + '>Continuar</button></div>';
+    corpoAg.innerHTML = h;
+    var t = $('#ag-t', corpoAg); if (t && telaAg.foco) t.focus({ preventScroll: true });
+    telaAg.foco = true; corpoAg.scrollTop = 0;
+  }
+  function abreAgenda(int) {
+    ag = { int: INTS.indexOf(int) > -1 ? int : '', per: '', nome: ag.nome, tel: ag.tel, passo: 0 };
+    telaAg.foco = false; telaAg();
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    setTimeout(function () { var c = $('.ag-chip[aria-checked="true"]', dlg) || $('.ag-chip', dlg); if (c) c.focus(); }, 80);
+  }
+  function fechaAgenda() { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
   d.addEventListener('click', function (e) { var b = e.target.closest('[data-abrir-agenda]'); if (!b) return; e.preventDefault(); fechaDd(null); abreAgenda(b.dataset.int || (Z[atual] && b.closest('.aj-info') ? Z[atual].p : '')); });
-  $('.ag-fechar').addEventListener('click', function () { dlg.close ? dlg.close() : dlg.removeAttribute('open'); });
-  dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
-  f.addEventListener('submit', function (e) {
+  $('.ag-fechar').addEventListener('click', fechaAgenda);
+  dlg.addEventListener('click', function (e) {
+    if (e.target === dlg) { fechaAgenda(); return; }
+    var c = e.target.closest('.ag-chip');
+    if (c) { if (c.dataset.int) ag.int = c.dataset.int; if (c.dataset.per) ag.per = c.dataset.per; ag.passo++; telaAg(); return; }
+    if (e.target.closest('[data-ag-segue]')) { ag.passo++; telaAg(); return; }
+    if (e.target.closest('[data-ag-volta]')) { ag.passo = Math.max(0, ag.passo - 1); telaAg(); return; }
+    if (e.target.closest('[data-ag-ok]')) { ag.passo = 4; telaAg(); return; }
+    if (e.target.closest('[data-ag-fecha]')) { fechaAgenda(); return; }
+    if (e.target.closest('[data-ag-wa]')) { fechaAgenda(); if (window.BR_WA) window.BR_WA(msgAg()); }
+  });
+  dlg.addEventListener('submit', function (e) {
+    var fd = e.target.closest('.ag-dados'); if (!fd) return;
     e.preventDefault();
-    var n = f.nome.value.trim(), t = f.tel.value.replace(/\D/g, ''), er = $('.erro', f);
-    er.textContent = n.length < 2 ? 'Escreva seu nome.' : t.length < 10 ? 'Confira o WhatsApp com DDD.' : '';
-    if (er.textContent) return;
-    if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); // a janela fica na camada do topo; fecha para a prévia do WhatsApp aparecer
-    if (window.BR_WA) window.BR_WA('Olá, Dra. Bianca Moraes! Sou ' + n + ' e quero agendar a avaliação sem custo. Interesse: ' + sel.value.toLowerCase() + '. WhatsApp: ' + t + '.');
-    f.innerHTML = '<p class="ag-ok">Obrigada, ' + n.split(' ')[0].replace(/[<>&"]/g, '') + '. A Dra. Bianca te chama no WhatsApp ainda hoje.</p>';
+    var n = fd.nome.value.trim(), t = fd.tel.value.replace(/\D/g, ''), er = $('.erro', fd);
+    fd.nome.classList.toggle('ruim', n.length < 2); fd.tel.classList.toggle('ruim', t.length < 10 || t.length > 11);
+    er.textContent = n.length < 2 ? 'Escreva seu nome.' : (t.length < 10 || t.length > 11) ? 'Confira o WhatsApp com DDD.' : '';
+    if (er.textContent) { (n.length < 2 ? fd.nome : fd.tel).focus(); return; }
+    ag.nome = n; ag.tel = fd.tel.value.trim(); ag.passo = 3; telaAg();
   });
 })();

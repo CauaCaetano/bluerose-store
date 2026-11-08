@@ -43,10 +43,31 @@
   var topo = $('.topo');
   var rolou = function () { if (topo) topo.classList.toggle('rolou', scrollY > 10); };
   addEventListener('scroll', rolou, { passive: true }); rolou();
+  // títulos (h1/h2) ficam parados: bloco com título não sobe inteiro, só as partes sem título
+  $$('.rv').forEach(function (el) {
+    if (el.matches('h1, h2')) { el.classList.remove('rv'); return; }
+    if (!el.querySelector('h1, h2')) return;
+    el.classList.remove('rv');
+    [].forEach.call(el.children, function (f) { if (!f.matches('h1, h2') && !f.querySelector('h1, h2')) f.classList.add('rv'); });
+  });
   if (!calmo && 'IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -6% 0px' });
     $$('.rv').forEach(function (el) { io.observe(el); });
   } else $$('.rv').forEach(function (el) { el.classList.add('vis'); });
+
+  /* ---------- da avaliação ao resultado: a rolagem conta o processo e troca a foto em arco ---------- */
+  var proc = $('.processo');
+  if (proc) {
+    var pFotos = $$('.pr-fotos img', proc), pPassos = $$('.pr-passo', proc);
+    var ativaP = function (i) {
+      pFotos.forEach(function (f, k) { f.classList.toggle('on', k === i); });
+      pPassos.forEach(function (x, k) { x.classList.toggle('on', k === i); });
+    };
+    if ('IntersectionObserver' in window) {
+      var ioP = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) ativaP(+e.target.dataset.i); }); }, { rootMargin: '-45% 0px -45% 0px' });
+      pPassos.forEach(function (x) { ioP.observe(x); });
+    }
+  }
 
   /* ---------- WhatsApp flutuante (um só, acima da faixa da Blue Rose no celular) ---------- */
   if (!$('.wa-flutua')) {
@@ -265,9 +286,14 @@
   function cartaoUn(u, km, perto) {
     return '<li class="un' + (perto ? ' perto' : '') + '" id="un-' + u.id + '">' + (perto ? '<span class="un-tag">Mais perto de você</span>' : '') +
       '<h3>' + esc(u.nome) + (km != null ? '<span class="un-dist">' + (km < 1 ? 'menos de 1 km' : '≈ ' + km.toFixed(km < 10 ? 1 : 0).replace('.', ',') + ' km') + '</span>' : '') + '</h3>' +
-      '<dl><dt>Endereço</dt><dd>' + esc(u.endereco) + '</dd><dt>Horário</dt><dd>' + esc(u.horario) + '</dd><dt>Telefone</dt><dd>' + esc(u.tel) + '</dd><dt>WhatsApp</dt><dd>' + esc(u.wa) + '</dd><dt>Como chegar</dt><dd>' + esc(u.chegar) + ' · ' + esc(u.carro) + '</dd></dl>' +
-      '<div class="un-serv">' + u.servicos.map(function (s) { return '<span>' + s + '</span>'; }).join('') + '</div>' +
-      '<div class="un-acoes"><a class="botao peq" href="#agendar" data-agendar data-unidade="' + u.id + '">Agendar nesta unidade</a><a class="botao wa peq" href="#" data-wa="Olá, ' + esc(u.nome) + '! Vim pelo site e quero falar com a unidade.">WhatsApp da unidade</a></div></li>';
+      '<p class="un-serv">' + u.servicos.map(esc).join(' · ') + '</p>' +
+      '<ul class="un-info">' +
+        '<li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg><span><span class="so-leitor">Endereço: </span>' + esc(u.endereco) + '</span></li>' +
+        '<li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span><span class="so-leitor">Horário: </span>' + esc(u.horario) + '</span></li>' +
+        '<li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h2.6l1.5 4-2 1.3a10.5 10.5 0 0 0 6.5 6.5l1.3-2 4 1.5v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z"/></svg><span><span class="so-leitor">Telefone: </span>' + esc(u.tel) + '<span class="un-sep">WhatsApp ' + esc(u.wa) + '</span></span></li>' +
+        '<li class="un-chegar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3.5" width="12" height="13" rx="3"/><path d="M6 11h12M9 20l-1.5 1.5M15 20l1.5 1.5M9.5 14h.01M14.5 14h.01"/></svg><span><span class="so-leitor">Como chegar: </span>' + esc(u.chegar) + ' · ' + esc(u.carro) + '</span></li>' +
+      '</ul>' +
+      '<div class="un-acoes"><a class="botao peq" href="#agendar" data-agendar data-unidade="' + u.id + '">Agendar nesta unidade</a><a class="botao wa peq" href="#" data-wa="Olá, ' + esc(u.nome) + '! Vim pelo site e quero falar com a unidade." aria-label="WhatsApp da ' + esc(u.nome) + '"><span class="un-wa-tx">WhatsApp da unidade</span></a></div></li>';
   }
   $$('[data-busca-un]').forEach(function (bx) {
     var form = $('form', bx), campo = $('input', form), msg = $('.busca-msg', bx), lista = $(bx.dataset.buscaUn), limite = +(bx.dataset.limite || 99), geo = $('.geo', bx), mapa = $('.mapa svg');

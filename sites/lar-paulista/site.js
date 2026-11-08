@@ -80,7 +80,7 @@
       '<span class="placa' + (im.fin === 'venda' ? '' : ' placa-aluga') + '">' + (im.fin === 'venda' ? 'Vende' : 'Aluga') + '</span><span class="card-selos">' + selos + '</span>' +
       '<span class="card-cod">Cód. ' + im.cod + '</span><span class="card-nfotos">' + im.fotos.length + ' fotos</span>' +
       '<button type="button" class="fav" data-fav="' + im.cod + '" aria-pressed="' + fv + '" aria-label="Favoritar ' + im.cod + '">' + IC.coracao + '</button></div>' +
-      '<div class="card-corpo"><span class="card-tipo">' + esc(im.subtipo) + ' · ' + esc(im.bairro) + '</span><h3 class="card-tit"><a href="' + im.url + '">' + esc(im.titulo) + '</a></h3>' +
+      '<div class="card-corpo"><span class="card-tipo">' + esc(im.subtipo) + '&nbsp;· ' + esc(im.bairro) + '</span><h3 class="card-tit"><a href="' + im.url + '">' + esc(im.titulo) + '</a></h3>' +
       '<p class="card-end">' + esc(im.rua) + ' · ' + esc(im.cidade) + '</p><div class="card-preco">' + brl(im.preco) + (im.fin === 'aluguel' ? '<small>/mês</small>' : '') + '</div>' +
       '<div class="card-custos">Condomínio ' + (im.cond ? brl(im.cond) : 'não tem') + ' · IPTU ' + brl(im.iptu) + '</div>' +
       '<ul class="card-dados"><li><b>' + IC.area + im.area + '</b>m²</li>' + q + '<li><b>' + IC.banho + im.banheiros + '</b>banh.</li><li><b>' + IC.vaga + im.vagas + '</b>vaga' + (im.vagas !== 1 ? 's' : '') + '</li></ul>' +
@@ -88,6 +88,7 @@
   }
   // WhatsApp do corretor responsável + seta em círculo, em todo card (gerado aqui ou já escrito na página)
   IC.wa = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.4 9.4 0 0 0-8.1 14.2L2.6 21.5l4.9-1.3A9.4 9.4 0 1 0 12 2.5zm0 17.1a7.7 7.7 0 0 1-3.9-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A7.7 7.7 0 1 1 12 19.6zm4.3-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.3 6.3 0 0 1-3.1-2.7c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.7-1.7c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 4.9 4.9 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.7 3 .6.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.2l-.4-.2z"/></svg>';
+  IC.pe = '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="11" cy="3.6" r="1.6"/><path d="M8.5 18l2-5.5 2.5 2.5v3M10.5 12.5l.8-4.5-3 1.4L7 12M11.3 8l2 2.5 2.2.8"/></svg>';
   IC.seta = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10h10M11 6l4 4-4 4"/></svg>';
   function precoTxt(im) { return brl(im.preco) + (im.fin === 'aluguel' ? '/mês' : ''); }
   function acoesCard(im) {
@@ -104,6 +105,29 @@
     });
   }
   enfeitaCards(doc);
+  // cards da mesma linha: tipo, título, custos e tempo a pé com a mesma altura (só quando há mais de uma coluna)
+  var PARTES = ['.card-tipo', '.card-tit', '.card-custos', '.card-perto'];
+  function iguala() {
+    $$('.grade-im').forEach(function (g) {
+      var cards = $$('.card', g).filter(function (c) { return c.offsetParent; });
+      cards.forEach(function (c) { PARTES.forEach(function (s) { var e = $(s, c); if (e) e.style.minHeight = ''; }); });
+      var colunas = getComputedStyle(g).gridTemplateColumns.split(' ').length;
+      if (colunas < 2 || g.closest('.vista-lista') || getComputedStyle(g).gridAutoFlow.indexOf('column') === 0) return;
+      var linhas = {};
+      cards.forEach(function (c) { var t = Math.round(c.offsetTop); (linhas[t] = linhas[t] || []).push(c); });
+      Object.keys(linhas).forEach(function (k) {
+        PARTES.forEach(function (s) {
+          var els = linhas[k].map(function (c) { return $(s, c); }).filter(Boolean);
+          var m = Math.max.apply(null, els.map(function (e) { return e.getBoundingClientRect().height; }).concat([0]));
+          els.forEach(function (e) { e.style.minHeight = m + 'px'; });
+        });
+      });
+    });
+  }
+  window.__lpIguala = iguala;
+  var tIg; addEventListener('resize', function () { clearTimeout(tIg); tIg = setTimeout(iguala, 120); });
+  addEventListener('load', iguala);
+  if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(iguala);
   doc.addEventListener('click', function (e) {
     var a = e.target.closest('[data-wa-card]'); if (!a) return;
     var im = LP.obterImovelPorCodigo(a.dataset.waCard); if (!im) return;
@@ -111,7 +135,7 @@
     toast('Contato enviado para ' + LP.obterCorretor(l.corretor).nome + ', corretor(a) do imóvel ' + im.cod + '.');
   });
 
-  // ---------- movimento: FLIP nas listas e revelação de títulos ----------
+  // ---------- movimento: FLIP nas listas (títulos ficam sempre visíveis, sem efeito de entrada) ----------
   var calmo = function () { return matchMedia('(prefers-reduced-motion: reduce)').matches; };
   var CURVA = 'cubic-bezier(.2,.7,.2,1)';
   function flip(cont, mudar) {
@@ -133,15 +157,33 @@
       }
     });
   }
-  if ('IntersectionObserver' in window && !calmo()) {
-    var tits = $$('main .sec h2:not(.sr), main .cta-faixa p');
-    if (tits.length) {
-      doc.documentElement.classList.add('rev-on');
-      var ioT = new IntersectionObserver(function (ents) {
-        ents.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('rev-vis'); ioT.unobserve(en.target); } });
-      }, { rootMargin: '0px 0px -6% 0px' });
-      tits.forEach(function (t) { t.classList.add('rev'); ioT.observe(t); });
-    }
+  // véu entre páginas: cobre a saída (350 ms) e o CSS descobre a entrada, sem tela branca
+  doc.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target || a.hasAttribute('download') || a.hasAttribute('data-wa')) return;
+    var h = a.getAttribute('href'); if (!h || h.charAt(0) === '#' || /^(mailto|tel|javascript):/i.test(h)) return;
+    var u = new URL(a.href, location.href);
+    if (u.origin !== location.origin || !/\.html$|\/$/.test(u.pathname) || (u.pathname === location.pathname && u.search === location.search)) return;
+    if (calmo()) return;
+    e.preventDefault();
+    doc.documentElement.classList.add('veu-saindo');
+    setTimeout(function () { location.href = a.href; }, 360);
+  });
+  addEventListener('pageshow', function () { doc.documentElement.classList.remove('veu-saindo'); });
+  // profundidade nos cards (tilt leve, máx. 6°, só com mouse no computador)
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    var tiltEl = null;
+    doc.addEventListener('pointermove', function (e) {
+      if (calmo() || innerWidth < 900) return;
+      var el = e.target.closest && e.target.closest('.card, .bairro-card');
+      if (el !== tiltEl && tiltEl) { tiltEl.classList.remove('tilt'); tiltEl.style.removeProperty('--rx'); tiltEl.style.removeProperty('--ry'); }
+      tiltEl = el; if (!el) return;
+      var r = el.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
+      el.classList.add('tilt');
+      el.style.setProperty('--ry', (px * 12).toFixed(2) + 'deg');
+      el.style.setProperty('--rx', (-py * 12).toFixed(2) + 'deg');
+    }, { passive: true });
+    doc.addEventListener('pointerleave', function () { if (tiltEl) tiltEl.classList.remove('tilt'); tiltEl = null; });
   }
 
   // ---------- validação dos formulários ----------
@@ -232,7 +274,7 @@
       b.addEventListener('click', function () {
         $$('[data-dest]').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
         var fin = b.dataset.dest, r = LP.buscarImoveis({ finalidade: fin, ordem: 'relevancia', porPagina: 8 });
-        lista.innerHTML = r.itens.map(card).join('');
+        lista.innerHTML = r.itens.map(card).join(''); iguala();
         ver.href = 'imoveis.html?finalidade=' + fin; ver.textContent = 'Ver todos os imóveis ' + (fin === 'venda' ? 'à venda' : 'para alugar');
         pintaFavs();
       });
@@ -248,14 +290,18 @@
     var LISTAS = ['tipo', 'bairro'], BOOL = ['pet', 'mobiliado', 'varanda', 'piscina', 'elevador', 'novo', 'condominioFechado'];
     var NUMS = ['precoMin', 'precoMax', 'condMin', 'condMax', 'iptuMin', 'iptuMax', 'areaMin', 'areaMax'];
     var RADIOS = ['finalidade', 'quartos', 'suites', 'banheiros', 'vagas'];
-    var q = new URLSearchParams(location.search);
-    var st = { ordem: q.get('ordem') || 'relevancia', pagina: parseInt(q.get('pagina'), 10) || 1, favoritos: q.get('favoritos') === '1', q: q.get('q') || '' };
-    // URL -> formulário
-    LISTAS.forEach(function (k) { var v = (q.get(k) || '').split(',').filter(Boolean); $$('input[name="' + k + '"]', form).forEach(function (i) { i.checked = v.some(function (x) { return semAcento(x) === semAcento(i.value); }); }); });
-    BOOL.forEach(function (k) { form[k].checked = q.get(k) === '1'; });
-    NUMS.concat(['codigo', 'cidade', 'corretor']).forEach(function (k) { if (q.get(k)) form[k].value = q.get(k); });
-    RADIOS.forEach(function (k) { var v = q.get(k) || ''; $$('input[name="' + k + '"]', form).forEach(function (i) { i.checked = i.value === v; }); });
-    $('#ordem').value = st.ordem;
+    var st = {};
+    // URL -> formulário (na carga, nos links internos da busca e no voltar/avançar do navegador)
+    function aplicaURL(busca) {
+      var q = new URLSearchParams(busca);
+      st.ordem = q.get('ordem') || 'relevancia'; st.pagina = parseInt(q.get('pagina'), 10) || 1; st.favoritos = q.get('favoritos') === '1'; st.q = q.get('q') || '';
+      LISTAS.forEach(function (k) { var v = (q.get(k) || '').split(',').filter(Boolean); $$('input[name="' + k + '"]', form).forEach(function (i) { i.checked = v.some(function (x) { return semAcento(x) === semAcento(i.value); }); }); });
+      BOOL.forEach(function (k) { form[k].checked = q.get(k) === '1'; });
+      NUMS.concat(['codigo', 'cidade', 'corretor']).forEach(function (k) { form[k].value = q.get(k) || ''; });
+      RADIOS.forEach(function (k) { var v = q.get(k) || ''; $$('input[name="' + k + '"]', form).forEach(function (i) { i.checked = i.value === v; }); });
+      $('#ordem').value = st.ordem;
+    }
+    aplicaURL(location.search);
     var vista = ler('lp-vista', 'grade');
 
     function lerForm() {
@@ -324,6 +370,7 @@
       if (!r.total) {
         lista.innerHTML = '<li class="vazio-res"><b style="font:700 20px var(--lp-serif);color:var(--lp-verde-esc)">' + (st.favoritos && !favs().length ? 'Você ainda não salvou nenhum imóvel.' : 'Nenhum imóvel com esses filtros agora.') + '</b><p style="margin:6px 0 0">' + (st.favoritos && !favs().length ? 'Toque no coração dos anúncios para guardar aqui.' : 'Tire um filtro ou peça para um corretor avisar quando entrar um assim.') + '</p><div class="linha-bts"><button type="button" class="bt bt-borda" data-limpar>Limpar filtros</button><a class="bt bt-wa" href="#" data-wa="' + esc('Olá, Lar Paulista! Procuro ' + resumo(f) + ' e quero ser avisado quando entrar.') + '">Avisar quando entrar</a></div></li>';
       } else lista.innerHTML = r.itens.map(card).join('');
+      iguala();
       };
       if (semFlip) desenha(); else flip(lista, desenha);
       // paginação
@@ -350,6 +397,17 @@
       if (rolar) $('[data-resultados]').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
     }
     window.__lpBuscaFav = function () { if (st.favoritos) render(false, true); };
+    // links para a própria busca (menu Comprar/Alugar, favoritos, buscas por tipo) filtram sem recarregar a página
+    doc.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href^="imoveis.html"]');
+      if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || a.target) return;
+      e.preventDefault(); e.stopPropagation();
+      var u = new URL(a.href, location.href);
+      aplicaURL(u.search); fechaGaveta();
+      history.pushState(null, '', 'imoveis.html' + u.search);
+      render(true, true);
+    }, true);
+    addEventListener('popstate', function () { aplicaURL(location.search); render(false, true); });
     var tm;
     form.addEventListener('input', function (e) { if (e.target.matches('[data-filtra-bairros]')) return; clearTimeout(tm); st.pagina = 1; tm = setTimeout(render, e.target.classList.contains('inp') && e.target.tagName === 'INPUT' ? 350 : 0); });
     form.addEventListener('change', function (e) { if (e.target.matches('[data-filtra-bairros]')) return; st.pagina = 1; clearTimeout(tm); render(); });
@@ -485,6 +543,7 @@
         flip(listaB, function () {
           $$('[data-lista-bairro] .card').forEach(function (c) { var im = LP.obterImovelPorCodigo(c.dataset.cod); c.hidden = !!fin && im.fin !== fin; });
           if (listaB.scrollLeft) listaB.scrollLeft = 0;
+          iguala();
         });
       });
     });
@@ -493,6 +552,12 @@
     var G = window.LP_GUIA, nome = $('main').dataset.bairro, fig = $('[data-guia-mapa]');
     if (!G || !fig) return;
     var svg = $('svg', fig), camada = $('[data-guia-pinos]'), lista = $('[data-guia-lista]'), filtros = $('[data-guia-filtros]'), nTxt = $('[data-guia-n]');
+    var palco = doc.createElement('div'); palco.className = 'guia-palco'; fig.insertBefore(palco, svg); palco.appendChild(svg); palco.appendChild(camada);
+    var txs = $$('text', svg), rt = txs[txs.length - 1];
+    if (rt && rt.previousElementSibling && rt.previousElementSibling.tagName.toLowerCase() === 'rect') {
+      var rot = doc.createElement('span'); rot.className = 'guia-rotulo'; rot.setAttribute('aria-hidden', 'true'); rot.textContent = rt.textContent;
+      rt.previousElementSibling.remove(); rt.remove(); fig.insertBefore(rot, palco.nextSibling);
+    }
     var ICG = {
       escola: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 8l8-4 8 4-8 4zM5.5 9.8v4c1.2 1.3 2.7 2 4.5 2s3.3-.7 4.5-2v-4M18 8v5"/></svg>',
       cafe: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 8h10v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM14 9h1.5a2 2 0 0 1 0 4H14M7 3.5v2M10 3.5v2"/></svg>',
@@ -523,6 +588,28 @@
       }
       itens.push({ id: im.cod, cat: 'imovel', nome: im.titulo, det: precoTxt(im) + ' · ' + im.area + ' m²', x: melhor.x, y: melhor.y, im: im });
     });
+    function perto(it) {
+      var pref = ['escola', 'parque', 'cafe'];
+      for (var k = 0; k < pref.length; k++) {
+        var c = itens.filter(function (o) { return o.cat === pref[k]; });
+        if (!c.length) continue;
+        var m = null, dm = 1e9;
+        c.forEach(function (o) { var d = Math.sqrt(Math.pow(o.x - it.x, 2) + Math.pow((o.y - it.y) * .53, 2)); if (d < dm) { dm = d; m = o; } });
+        return { min: Math.max(2, Math.round(dm * .3)), ponto: m };
+      }
+      return null;
+    }
+    var PREP = { escola: 'da escola', parque: 'do parque', cafe: 'do comércio' };
+    itens.forEach(function (it) { if (it.cat === 'imovel') it.perto = perto(it); });
+    function pertoHTML(it, cls) {
+      var p = it.perto; if (!p) return '';
+      return '<p class="' + cls + '">' + IC.pe + '<span><b>A ' + p.min + ' min a pé ' + PREP[p.ponto.cat] + '</b> <small>exemplo</small><br>' + esc(p.ponto.nome) + '</span></p>';
+    }
+    // o mesmo dado aparece no card do imóvel, na lista do bairro
+    $$('[data-lista-bairro] .card').forEach(function (c) {
+      var it = itens.filter(function (i) { return i.id === c.dataset.cod; })[0], ac = $('.card-acoes', c);
+      if (it && it.perto && ac && !$('.card-perto', c)) ac.insertAdjacentHTML('beforebegin', pertoHTML(it, 'card-perto'));
+    });
     var curtoPreco = function (im) {
       if (im.fin === 'aluguel') return 'R$ ' + (im.preco / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mil/mês';
       return abrev(im.preco);
@@ -538,10 +625,38 @@
       return '<button type="button" class="pino pino-' + it.cat + lado + '" style="left:' + it.x + '%;top:' + it.y + '%;--i:' + i + '" data-pino="' + it.id + '" aria-pressed="false" aria-label="' + esc(G.CATS[it.cat].curto + ': ' + rot + (it.min ? ', ' + it.min + ' min a pé' : '')) + '">' +
         ICG[it.cat] + (it.cat === 'imovel' ? '<span class="pino-preco">' + curtoPreco(it.im) + '</span>' : '') + '<span class="pino-rot" aria-hidden="true">' + esc(rot) + '</span></button>';
     }).join('');
+    function afasta() {
+      var W = camada.offsetWidth, H = camada.offsetHeight; if (!W || !H) return;
+      var ps = $$('[data-pino]', camada).map(function (el) {
+        var it = itens.filter(function (i) { return i.id === el.dataset.pino; })[0];
+        return { el: el, it: it, w: el.offsetWidth + 8, h: el.offsetHeight + 8, x: it.x0 / 100 * W, y: it.y0 / 100 * H };
+      });
+      for (var volta = 0; volta < 60; volta++) {
+        var mexeu = false;
+        for (var a = 0; a < ps.length; a++) for (var b = a + 1; b < ps.length; b++) {
+          var A = ps[a], B = ps[b], dx = B.x - A.x, dy = B.y - A.y;
+          var ox = (A.w + B.w) / 2 - Math.abs(dx), oy = (A.h + B.h) / 2 - Math.abs(dy);
+          if (ox > 0 && oy > 0) {
+            mexeu = true;
+            if (ox < oy) { var mx = (ox / 2 + .5) * (dx >= 0 ? 1 : -1); A.x -= mx; B.x += mx; }
+            else { var my = (oy / 2 + .5) * (dy >= 0 ? 1 : -1); A.y -= my; B.y += my; }
+          }
+        }
+        ps.forEach(function (q) { q.x = limita(q.x, q.w / 2 + 2, W - q.w / 2 - 2); q.y = limita(q.y, q.h / 2 + 2, H - q.h / 2 - 2); });
+        if (!mexeu) break;
+      }
+      ps.forEach(function (q) {
+        q.it.x = q.x / W * 100; q.it.y = q.y / H * 100;
+        q.el.style.left = q.it.x.toFixed(2) + '%'; q.el.style.top = q.it.y.toFixed(2) + '%';
+        q.el.classList.toggle('rot-dir', q.it.x > 74); q.el.classList.toggle('rot-esq', q.it.x < 26);
+      });
+    }
+    itens.forEach(function (it) { it.x0 = it.x; it.y0 = it.y; });
+    afasta();
     function item(it) {
       if (it.cat === 'imovel') {
         var f = it.im.fotos[0];
-        return '<li class="gi gi-imovel" data-cod="' + it.id + '"><img src="' + f.mini + '" width="72" height="54" alt="" loading="lazy" decoding="async"><span class="gi-txt"><small>' + (it.im.fin === 'venda' ? 'À venda' : 'Para alugar') + ' · Cód. ' + it.id + '</small><a href="' + it.im.url + '">' + esc(it.nome) + '</a><b>' + esc(it.det) + '</b></span><span class="card-ir" aria-hidden="true">' + IC.seta + '</span></li>';
+        return '<li class="gi gi-imovel" data-cod="' + it.id + '"><img src="' + f.mini + '" width="56" height="56" alt="" loading="lazy" decoding="async"><span class="gi-txt"><small>' + (it.im.fin === 'venda' ? 'À venda' : 'Para alugar') + ' · Cód. ' + it.id + '</small><a href="' + it.im.url + '">' + esc(it.nome) + '</a><b>' + esc(it.det) + '</b>' + (it.perto ? '<span class="gi-perto">A ' + it.perto.min + ' min a pé ' + PREP[it.perto.ponto.cat] + ' · exemplo</span>' : '') + '</span><span class="card-ir" aria-hidden="true">' + IC.seta + '</span></li>';
       }
       return '<li class="gi gi-' + it.cat + '" data-cod="' + it.id + '"><span class="gi-ic" aria-hidden="true">' + ICG[it.cat] + '</span><span class="gi-txt"><small>' + G.CATS[it.cat].curto + '</small><button type="button" data-gi="' + it.id + '">' + esc(it.nome) + '</button><span>' + esc(it.det) + '</span></span><span class="gi-min">' + it.min + ' min<br>a pé</span></li>';
     }
@@ -550,11 +665,11 @@
       var p = []; if (np) p.push(np + ' ponto' + (np > 1 ? 's' : '') + ' de interesse'); if (ni) p.push(ni + ' imóve' + (ni > 1 ? 'is' : 'l') + ' da carteira');
       nTxt.textContent = p.join(' e ') + ' (exemplo)';
     }
-    function pintaLista(animar) {
+    var pintaLista = function (animar) {
       var faz = function () { lista.scrollTop = 0; lista.scrollLeft = 0; lista.innerHTML = itens.filter(function (i) { return !cat || i.cat === cat; }).map(item).join(''); marca(); };
       if (animar) flip(lista, faz); else faz();
       contagem();
-    }
+    };
     function marca() {
       $$('[data-pino]', camada).forEach(function (p) { p.setAttribute('aria-pressed', p.dataset.pino === sel ? 'true' : 'false'); });
       $$('.gi', lista).forEach(function (l) { l.classList.toggle('ativo', l.dataset.cod === sel); });
@@ -566,13 +681,28 @@
       if (horiz) opc.left = li.offsetLeft - 16; else opc.top = li.offsetTop - 6;
       lista.scrollTo(opc);
     }
+    var Z = 1.3;
+    function centra(id) {
+      var it = id ? itens.filter(function (i) { return i.id === id; })[0] : null, pinos = $$('[data-pino]', camada);
+      if (!it || innerWidth < 900 || calmo()) { palco.style.transform = ''; fig.style.setProperty('--z', 1); pinos.forEach(function (p) { p.classList.remove('borda'); }); return; }
+      var W = palco.offsetWidth, H = palco.offsetHeight;
+      var tx = limita(W / 2 - it.x / 100 * W * Z, W - W * Z, 0), ty = limita(H / 2 - it.y / 100 * H * Z, H - H * Z, 0);
+      palco.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + Z + ')';
+      fig.style.setProperty('--z', Z);
+      // com zoom, o pino que ficaria cortado na borda do mapa some até voltar ao enquadramento
+      pinos.forEach(function (p) {
+        var o = itens.filter(function (i) { return i.id === p.dataset.pino; })[0];
+        var px = tx + o.x / 100 * W * Z, py = ty + o.y / 100 * H * Z, mw = p.offsetWidth / 2 + 6, mh = p.offsetHeight / 2 + 6;
+        p.classList.toggle('borda', px < mw || px > W - mw || py < mh || py > H - mh);
+      });
+    }
     function escolhe(id, deLista) {
-      sel = sel === id && !deLista ? null : id; marca();
+      sel = sel === id && !deLista ? null : id; marca(); centra(sel);
       if (sel && !deLista) rolaAte($('.gi[data-cod="' + sel + '"]', lista));
     }
     filtros.addEventListener('click', function (e) {
       var b = e.target.closest('[data-gcat]'); if (!b) return;
-      cat = b.dataset.gcat; sel = null;
+      cat = b.dataset.gcat; sel = null; centra(null);
       $$('[data-gcat]', filtros).forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
       $$('[data-pino]', camada).forEach(function (p) {
         var it = itens.filter(function (i) { return i.id === p.dataset.pino; })[0], fora = !!cat && it.cat !== cat;
@@ -598,9 +728,21 @@
       }, 90);
     }, { passive: true });
     // no computador a lista acompanha a altura do mapa
-    var ajusta = function () { lista.style.maxHeight = innerWidth >= 900 ? Math.max(260, fig.offsetHeight - nTxt.offsetHeight - 12) + 'px' : ''; };
-    addEventListener('resize', ajusta);
-    pintaLista(false); ajusta();
+    var ioL = null, atual = null;
+    function sincroniza() {
+      if (ioL) ioL.disconnect();
+      if (!('IntersectionObserver' in window) || innerWidth < 900) return;
+      ioL = new IntersectionObserver(function (ens) {
+        ens.forEach(function (en) { if (en.isIntersecting) atual = en.target.dataset.cod; });
+        if (atual && atual !== sel) { sel = atual; marca(); realca(atual); centra(atual); }
+      }, { rootMargin: '-46% 0px -46% 0px' });
+      $$('.gi', lista).forEach(function (l) { ioL.observe(l); });
+    }
+    var tr;
+    addEventListener('resize', function () { clearTimeout(tr); tr = setTimeout(function () { afasta(); sincroniza(); centra(sel); }, 150); });
+    var pintaOrig = pintaLista;
+    pintaLista = function (animar) { pintaOrig(animar); sincroniza(); };
+    pintaLista(false);
     // os pontos entram no mapa uma vez, quando ele aparece na tela
     var solta = function () { fig.classList.add('pinos-vis'); setTimeout(function () { fig.classList.add('pinos-pronto'); }, 1300); };
     if ('IntersectionObserver' in window && !calmo()) {

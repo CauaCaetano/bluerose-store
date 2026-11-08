@@ -192,3 +192,100 @@
     agora.textContent = aberto ? 'Agora a clínica está aberta (horário de Recife). Resposta pelo WhatsApp em instantes.' : 'Agora a clínica está fechada. Deixe sua mensagem no WhatsApp: respondemos no próximo horário de atendimento.';
   }
 })();
+
+// ---------- agendamento em painel lateral (08/11/2026): em passos, sem sair da página, envio simulado ----------
+(function () {
+  'use strict';
+  var PASSOS = [
+    { chave: 'idade', titulo: 'Qual a idade da criança?', ops: ['Até 6 meses', '7 a 12 meses', '1 a 2 anos', '3 a 5 anos', '6 a 9 anos', '10 a 12 anos'] },
+    { chave: 'motivo', titulo: 'Qual o motivo da visita?', ops: ['Primeira consulta', 'Revisão e limpeza', 'Dor ou dente machucado', 'Chupeta, dedo ou mamadeira', 'Outro motivo'] },
+    { chave: 'periodo', titulo: 'Melhor período?', ops: ['Manhã', 'Tarde', 'Sábado de manhã'] }
+  ];
+  var IDADES = { 'ate-6m': 'Até 6 meses', '7-12m': '7 a 12 meses', '1-2': '1 a 2 anos', '3-5': '3 a 5 anos', '6-9': '6 a 9 anos', '10-12': '10 a 12 anos' };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var painel, fundo, corpo, barra, voltar, ultimoFoco, passo = 0, resp = {};
+  function monta() {
+    fundo = document.createElement('div'); fundo.className = 'ag-fundo'; fundo.hidden = true;
+    painel = document.createElement('aside'); painel.className = 'ag-painel'; painel.hidden = true;
+    painel.setAttribute('role', 'dialog'); painel.setAttribute('aria-modal', 'true'); painel.setAttribute('aria-labelledby', 'ag-tit');
+    painel.innerHTML = '<div class="ag-cab"><button type="button" class="ag-voltar" aria-label="Voltar">←</button><p class="ag-marca">Agendar no <b>ninho</b></p><button type="button" class="ag-x" aria-label="Fechar">×</button></div>' +
+      '<div class="ag-barra" aria-hidden="true"><span></span></div><div class="ag-corpo" aria-live="polite"></div>';
+    document.body.appendChild(fundo); document.body.appendChild(painel);
+    corpo = painel.querySelector('.ag-corpo'); barra = painel.querySelector('.ag-barra span'); voltar = painel.querySelector('.ag-voltar');
+    fundo.addEventListener('click', fecha);
+    painel.querySelector('.ag-x').addEventListener('click', fecha);
+    voltar.addEventListener('click', function () { if (passo > 0) { passo--; mostra(); } });
+    painel.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') fecha();
+      if (e.key === 'Tab') { var f = painel.querySelectorAll('button:not([hidden]), input, a[href]'); f = [].filter.call(f, function (x) { return x.offsetParent; }); if (!f.length) return; var a = f[0], z = f[f.length - 1]; if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); } else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); } }
+    });
+  }
+  function mostra() {
+    var total = PASSOS.length + 1;
+    barra.style.width = Math.min(100, (passo + 1) / (total + 1) * 100) + '%';
+    voltar.style.visibility = passo > 0 && passo <= PASSOS.length ? 'visible' : 'hidden';
+    if (passo < PASSOS.length) {
+      var p = PASSOS[passo];
+      corpo.innerHTML = '<p class="ag-passo">Passo ' + (passo + 1) + ' de ' + total + '</p><h2 id="ag-tit">' + p.titulo + '</h2><div class="ag-ops">' +
+        p.ops.map(function (o) { return '<button type="button" class="ag-op' + (resp[p.chave] === o ? ' on' : '') + '">' + esc(o) + '</button>'; }).join('') + '</div>';
+      [].forEach.call(corpo.querySelectorAll('.ag-op'), function (b) { b.addEventListener('click', function () { resp[p.chave] = b.textContent; passo++; mostra(); }); });
+      var foco = corpo.querySelector('.ag-op.on') || corpo.querySelector('.ag-op'); if (foco) foco.focus();
+    } else if (passo === PASSOS.length) {
+      corpo.innerHTML = '<p class="ag-passo">Passo ' + total + ' de ' + total + '</p><h2 id="ag-tit">Seus dados</h2>' +
+        '<form class="ag-form" novalidate><label>Seu nome (responsável)<input name="nome" autocomplete="name" value="' + esc(resp.nome || '') + '"></label>' +
+        '<label>Telefone com DDD<input name="tel" inputmode="tel" autocomplete="tel" value="' + esc(resp.tel || '') + '"></label>' +
+        '<fieldset><legend>Como prefere o contato?</legend><div class="ag-ops ag-ops-linha"><button type="button" class="ag-op' + (resp.contato !== 'Ligação' ? ' on' : '') + '" data-c="WhatsApp">WhatsApp</button><button type="button" class="ag-op' + (resp.contato === 'Ligação' ? ' on' : '') + '" data-c="Ligação">Ligação</button></div></fieldset>' +
+        '<p class="ag-erro" aria-live="polite"></p><button class="bt ag-enviar" type="submit">Pedir horário</button>' +
+        '<p class="ag-nota">Demonstração: nada é enviado. No site real, a equipe responde pelo WhatsApp e confirma o horário.</p></form>';
+      var form = corpo.querySelector('form'); resp.contato = resp.contato || 'WhatsApp';
+      [].forEach.call(form.querySelectorAll('[data-c]'), function (b) { b.addEventListener('click', function () { resp.contato = b.dataset.c; [].forEach.call(form.querySelectorAll('[data-c]'), function (x) { x.classList.toggle('on', x === b); }); }); });
+      form.addEventListener('submit', function (e) {
+        e.preventDefault(); var nome = form.nome.value.trim(), tel = form.tel.value.replace(/\D/g, '');
+        var er = nome.length < 2 ? 'Escreva o seu nome.' : tel.length < 10 ? 'Confira o telefone com DDD.' : '';
+        form.querySelector('.ag-erro').textContent = er; if (er) { (nome.length < 2 ? form.nome : form.tel).focus(); return; }
+        resp.nome = nome; resp.tel = form.tel.value.trim(); passo++; mostra();
+      });
+      form.nome.focus();
+    } else {
+      barra.style.width = '100%';
+      corpo.innerHTML = '<div class="ag-ok"><span class="ag-selo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><h2 id="ag-tit">Pedido recebido!</h2><p>Obrigado, ' + esc(resp.nome.split(' ')[0]) + '. Veja o resumo:</p>' +
+        '<dl><div><dt>Idade</dt><dd>' + esc(resp.idade) + '</dd></div><div><dt>Motivo</dt><dd>' + esc(resp.motivo) + '</dd></div><div><dt>Período</dt><dd>' + esc(resp.periodo) + '</dd></div><div><dt>Contato</dt><dd>' + esc(resp.contato) + ' · <span class="ag-tel">' + esc(resp.tel) + '</span></dd></div></dl>' +
+        '<p class="ag-nota">Demonstração: nada foi enviado. No site real, a equipe confirma o horário por ' + esc(resp.contato) + '.</p><button type="button" class="bt bt-claro ag-fim">Fechar</button></div>';
+      corpo.querySelector('.ag-fim').addEventListener('click', fecha); corpo.querySelector('.ag-fim').focus();
+    }
+  }
+  function abre(e, a) {
+    if (e) e.preventDefault();
+    var m = a && /idade=([\w-]+)/.exec(a.getAttribute('href') || '');
+    if (!painel) monta();
+    ultimoFoco = document.activeElement;
+    if (passo > PASSOS.length) { passo = 0; resp = {}; }
+    if (m && IDADES[m[1]]) { resp.idade = IDADES[m[1]]; passo = 1; }
+    fundo.hidden = false; painel.hidden = false; document.documentElement.classList.add('ag-aberto');
+    requestAnimationFrame(function () { fundo.classList.add('on'); painel.classList.add('on'); });
+    mostra();
+  }
+  function fecha() {
+    if (!painel || painel.hidden) return;
+    fundo.classList.remove('on'); painel.classList.remove('on'); document.documentElement.classList.remove('ag-aberto');
+    setTimeout(function () { painel.hidden = true; fundo.hidden = true; }, 320);
+    if (ultimoFoco && ultimoFoco.focus) ultimoFoco.focus();
+  }
+  document.addEventListener('click', function (e) {
+    if (document.getElementById('form-agendar')) return;
+    var a = e.target.closest('a[href="agendar.html"], a[href^="agendar.html?"], [data-agendar]');
+    if (a) abre(e, a);
+  });
+})();
+
+// ---------- "como funciona" contado na rolagem: a foto acompanha o passo lido ----------
+(function () {
+  var hist = document.querySelector('.ph-historia'); if (!hist || !('IntersectionObserver' in window)) return;
+  var fotos = hist.querySelectorAll('.ph-palco img'), etapas = hist.querySelectorAll('.ph-passos li');
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (!e.isIntersecting) return; var k = e.target.getAttribute('data-p');
+      [].forEach.call(etapas, function (li) { li.classList.toggle('on', li === e.target); });
+      [].forEach.call(fotos, function (im) { im.classList.toggle('on', im.getAttribute('data-p') === k); }); });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  [].forEach.call(etapas, function (li) { io.observe(li); });
+})();

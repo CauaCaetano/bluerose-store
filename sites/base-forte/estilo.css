@@ -301,19 +301,10 @@ fieldset { border: 0; border-top: 1px solid var(--linha); margin: 0; padding: 18
 .rd-cols a:hover { color: var(--musgo-2); }
 .rd-pe { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-top: 54px; padding-top: 18px; border-top: 1px solid var(--linha); background-clip: content-box; font-size: 12px; color: var(--tx-3); }
 
-/* ---------- linhas que sobem ---------- */
-.js .linhas .l { display: block; overflow: hidden; text-indent: 0; padding: .16em 0 .24em; margin: -.16em 0 -.24em; }
-.js .linhas .l:first-child { text-indent: inherit; }
-.js .linhas .l > span { display: block; transform: translateY(110%); transition: transform 1s var(--curva); }
-.js .linhas.vis .l > span { transform: none; }
+/* ---------- blocos que sobem (títulos ficam parados) ---------- */
 .js .sobe { opacity: 0; transform: translateY(26px); transition: opacity .9s var(--curva), transform .9s var(--curva); }
 .js .sobe.vis { opacity: 1; transform: none; }
 
-/* ---------- cursor próprio ---------- */
-.cursor { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; width: 0; height: 0; }
-.cursor span { position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%; background: var(--tinta); color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: -.01em; text-align: center; line-height: 1.1; padding: 0 10px; transform: scale(0); transition: transform .45s var(--curva); }
-.cursor.ativo span { transform: scale(1); }
-@media (hover: none), (pointer: coarse) { .cursor { display: none; } }
 
 /* ---------- filme da obra ---------- */
 .filme { position: fixed; inset: 0; z-index: 150; background: #0d0f0e; color: #fff; }
@@ -449,7 +440,7 @@ fieldset { border: 0; border-top: 1px solid var(--linha); margin: 0; padding: 18
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
-  .js .linhas .l > span, .js .sobe { transform: none !important; opacity: 1 !important; }
+  .js .sobe { transform: none !important; opacity: 1 !important; }
 }
 
 /* ==========================================================================
@@ -735,3 +726,196 @@ h1, h2, h3, h4, p, li, dd, dt, a, button, span, b, strong, em { word-break: norm
   .op4 span { padding: 10px 6px; text-align: center; }
 }
 @media (max-width: 560px) { .gal-grade { columns: 1; } }
+
+
+/* ==========================================================================
+   rodada 3 (banca rigorosa): proteção do título, números em coluna própria,
+   galeria com uma proporção só, selos com respiro, chamadas como botão
+   ========================================================================== */
+/* abertura: véu escuro atrás do título, onde quer que ele esteja sobre a foto */
+.heroi-titulo { isolation: isolate; }
+.heroi-titulo::before { content: ''; position: absolute; left: 50%; top: 50%; z-index: -1; width: min(1100px, 120%); height: 190%; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(8, 10, 8, .62), rgba(8, 10, 8, .38) 55%, rgba(8, 10, 8, 0)); pointer-events: none; }
+.heroi-pe::before { content: ''; position: absolute; inset: -60px 0 -108px; z-index: -1; background: linear-gradient(180deg, rgba(8, 10, 8, 0), rgba(8, 10, 8, .55) 45%, rgba(8, 10, 8, .7)); pointer-events: none; }
+
+/* números de seção: topo do número alinhado ao topo do título/rótulo */
+.numero { align-self: start; line-height: .8; padding-top: .06em; }
+.ac-cima { align-items: start; }
+.ac-cima .bt { align-self: end; }
+
+/* casas entregues: todas as fotos em 4:3, mesmo tamanho, selos com respiro */
+.casas-grade { grid-auto-flow: row dense; row-gap: 56px; }
+.casas-grade > .casa { grid-column: auto; }
+.casas-grade > .casas-intro { grid-column: 4; grid-row: 1; align-self: start; }
+.casas .casa-img, .c-grande .casa-img, .c-peq .casa-img { aspect-ratio: 4 / 3; }
+.casa-tags { flex-wrap: wrap; gap: 6px; margin: 16px 0 12px; }
+.casa-tags span { padding: 3px 8px 4px; line-height: 1.3; }
+.casa-tags .dir { margin-left: 0; }
+.casa-nome { padding-right: 0; text-wrap: balance; }
+.casas-grade .casa-nome { font-size: clamp(20px, 1.6vw, 30px); }
+.pj-card .casa-img, .pj-card.g .casa-img { aspect-ratio: 4 / 3; }
+
+/* chamadas que eram links sublinhados viram botão */
+.ver-casa { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; margin-top: 18px; padding: 0 18px; border: 1px solid var(--tinta); border-radius: 2px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.2; text-align: center; transition: background .3s, color .3s; }
+.ver-casa::after { content: ''; width: 7px; height: 7px; border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor; transform: rotate(45deg); flex: none; }
+.ver-casa:hover { background: var(--tinta); color: #fff; }
+.sobre-txt .ver-casa { display: flex; width: max-content; max-width: 100%; }
+
+/* leitura sem viúvas */
+.frase, .faixa-tit, .final h2, .tr-tit { text-wrap: pretty; }
+
+@media (max-width: 900px) {
+  .heroi-titulo::before { width: 150%; height: 175%; background: radial-gradient(closest-side, rgba(8, 10, 8, .7), rgba(8, 10, 8, .45) 60%, rgba(8, 10, 8, 0)); }
+  .heroi { height: max(132svh, 800px); }
+  .heroi-pe { bottom: 48px; }
+
+  /* número em coluna própria, alinhado ao topo do que vem ao lado */
+  .grade.sobre-cima, .grade.etapas-cima, .grade.calc-cima, .grade.ac-cima, .grade.bloco-cab { grid-template-columns: 52px minmax(0, 1fr); column-gap: 14px; align-items: start; }
+  .grade.sobre-cima > *, .grade.etapas-cima > *, .grade.calc-cima > *, .grade.ac-cima > *, .grade.bloco-cab > * { grid-column: 2 !important; }
+  .grade.sobre-cima > .numero, .grade.etapas-cima > .numero, .grade.calc-cima > .numero, .grade.ac-cima > .numero, .grade.bloco-cab > .numero { grid-column: 1 !important; grid-row: 1 !important; }
+  .numero, .casas-intro .numero, .final-cab .numero { font-size: 34px; white-space: nowrap; }
+  .casas-intro { grid-template-columns: 52px minmax(0, 1fr); column-gap: 14px; }
+  .final-cab { grid-template-columns: 52px minmax(0, 1fr); column-gap: 14px; }
+  .sobre-cima .rotulo { margin-top: 0; }
+
+  /* galeria: a primeira casa larga, as outras em pares, tudo 4:3 */
+  .casas-grade > .casas-intro { grid-column: 1 / -1 !important; grid-row: auto !important; }
+  .casas-grade > .casa { grid-column: auto !important; }
+  .casas-grade > .casa.c-grande:first-child { grid-column: 1 / -1 !important; }
+  .casas-grade .casa-nome { font-size: 19px; }
+  .casas-grade > .casa.c-grande:first-child .casa-nome { font-size: 24px; }
+  .casa-tags { gap: 5px; margin: 14px 0 10px; }
+  .casa-tags span { padding: 3px 7px 4px; }
+  .sobre-n dt { font-size: 24px; white-space: nowrap; }
+}
+
+/* ==========================================================================
+   lições dos vídeos: um só CTA no topo, painel de orçamento em passos,
+   rolagem que conta projeto → obra → entrega, CTA final em tela cheia
+   ========================================================================== */
+.topo-acoes { gap: 10px; }
+
+/* painel lateral de orçamento */
+html.orc-aberto { overflow: hidden; }
+.orc { position: fixed; inset: 0; z-index: 2147483100; }
+.orc[hidden] { display: none; }
+.orc-fundo { position: absolute; inset: 0; background: rgba(13, 15, 14, .5); opacity: 0; transition: opacity .42s cubic-bezier(.22, .61, .36, 1); }
+.orc-painel { position: absolute; top: 0; right: 0; bottom: 0; width: min(520px, 100%); display: flex; flex-direction: column; background: var(--papel); color: var(--tinta); box-shadow: -30px 0 60px -40px rgba(0, 0, 0, .5); transform: translateX(104%); transition: transform .42s cubic-bezier(.22, .61, .36, 1); }
+.orc.vis .orc-fundo { opacity: 1; }
+.orc.vis .orc-painel { transform: none; }
+.orc-cab { display: flex; justify-content: space-between; align-items: center; padding: 22px 28px 14px; }
+.orc-passo { font-size: var(--f-rot); font-weight: 700; text-transform: uppercase; letter-spacing: -.01em; color: var(--tx-2); }
+.orc-x { width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid var(--tag); border-radius: 2px; }
+.orc-x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.orc-barra { height: 2px; margin: 0 28px; background: var(--linha); }
+.orc-barra i { display: block; height: 100%; width: 20%; background: var(--grad); transition: width .42s cubic-bezier(.22, .61, .36, 1); }
+.orc-corpo { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding: 30px 28px 28px; }
+.orc-tit { font-size: clamp(30px, 2.4vw, 40px); font-weight: 400; line-height: 1.1; letter-spacing: -.03em; outline: none; }
+.orc-tx { font-weight: 500; color: var(--tx-2); line-height: 1.55; }
+.orc-ops { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }
+.orc-ops label { position: relative; cursor: pointer; }
+.orc-ops input { position: absolute; opacity: 0; inset: 0; }
+.orc-ops span { display: grid; gap: 2px; padding: 16px 18px; border: 1px solid var(--tag); border-radius: 3px; background: #fff; transition: border-color .3s, background .3s, color .3s; }
+.orc-ops b { font-size: 19px; font-weight: 500; letter-spacing: -.02em; }
+.orc-ops small { font-size: 13px; color: var(--tx-2); font-weight: 500; }
+.orc-ops label:hover span { border-color: var(--tinta); }
+.orc-ops input:checked + span { background: var(--grad); border-color: transparent; color: #fff; }
+.orc-ops input:checked + span small { color: rgba(255, 255, 255, .8); }
+.orc-ops input:focus-visible + span { outline: 2px solid var(--musgo); outline-offset: 2px; }
+.orc-campos { display: grid; gap: 16px; }
+.orc-campos label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: -.01em; }
+.orc-campos input { height: 52px; padding: 0 14px; border: 1px solid var(--tag); border-radius: 2px; background: #fff; font: 500 16px/1.4 'Barlow', system-ui, sans-serif; color: var(--tinta); text-transform: none; }
+.orc-campos input:focus { outline: none; border-color: var(--tinta); }
+.orc-erro { min-height: 1.4em; color: #a2492a; font-weight: 500; }
+.orc-bts { margin-top: auto; display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding-top: 12px; }
+.orc-bts .bt { min-width: 180px; }
+.orc-volta { margin-right: auto; min-height: 44px; padding: 0 16px; border: 1px solid var(--tag); border-radius: 2px; font-size: var(--f-rot); font-weight: 700; text-transform: uppercase; }
+.orc-volta:hover { border-color: var(--tinta); }
+.orc-res { display: grid; gap: 0; border-top: 1px solid var(--linha); }
+.orc-res div { display: grid; grid-template-columns: 7em 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--linha); }
+.orc-res dt { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--tx-3); }
+.orc-res dd { font-weight: 500; }
+.orc-aviso { font-size: 13px; color: var(--tx-3); line-height: 1.5; }
+
+/* do papel à chave: foto presa ao lado, etapas passando pela rolagem */
+.hist { padding: 108px 0 72px; }
+.hist-cab { align-items: end; row-gap: 14px; }
+.hist-cab .rotulo { grid-column: 1; align-self: start; margin-top: .9em; }
+.hist-tit { grid-column: 2 / 5; font-size: var(--f-h2); font-weight: 400; line-height: 1.1; letter-spacing: -.03em; }
+.hist-grade { margin-top: 48px; align-items: start; }
+.hist-fotos { grid-column: 1 / 3; position: sticky; top: 110px; height: calc(100vh - 150px); max-height: 720px; border-radius: 3px; overflow: hidden; background: var(--papel-2); }
+.hist-fotos img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .7s cubic-bezier(.22, .61, .36, 1); }
+.hist-fotos img.at { opacity: 1; }
+.hist-passos { grid-column: 3 / 5; list-style: none; margin: 0; padding: 0; }
+.hist-passo { min-height: 72vh; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 0 0 0 var(--g); border-left: 1px solid var(--linha); color: var(--tx-3); transition: color .5s, border-color .5s; }
+.hist-passo.at { color: var(--tinta); border-color: var(--tinta); }
+.hist-n { font-size: var(--f-rot); font-weight: 700; text-transform: uppercase; letter-spacing: -.01em; }
+.hist-passo h3 { font-size: var(--f-h1); font-weight: 400; line-height: 1; letter-spacing: -.04em; }
+.hist-passo p { font-weight: 500; max-width: 420px; line-height: 1.6; }
+.hist-passo.at p { color: var(--tx-2); }
+.hist-cel { display: none; }
+.hist-aviso { margin-top: 18px; font-size: 12px; color: var(--tx-3); }
+
+/* CTA final em tela cheia */
+.final { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; }
+.final > .caixa { width: 100%; }
+
+@media (max-width: 900px) {
+  .bt-contato { display: inline-flex; height: 40px; padding: 0 12px; gap: 0; font-size: 12px; }
+  .bt-contato svg { display: none; }
+  .orc-cab { padding: 16px 18px 12px; }
+  .orc-barra { margin: 0 18px; }
+  .orc-corpo { padding: 24px 18px 22px; }
+  .orc-bts .bt { min-width: 0; flex: 1; }
+  .hist { padding: 72px 0 40px; }
+  .hist-cab .rotulo { margin-top: 0; }
+  .hist-grade { margin-top: 26px; }
+  .hist-fotos { display: none; }
+  .hist-passo { min-height: 0; padding: 0 0 40px; border-left: 0; color: var(--tinta); }
+  .hist-passo p { color: var(--tx-2); }
+  .hist-cel { display: block; margin: 0 0 8px; border-radius: 3px; overflow: hidden; }
+  .hist-cel img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .hist-passo h3 { font-size: 34px; }
+  .final { min-height: 100svh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orc-painel, .orc-fundo, .orc-barra i, .hist-fotos img { transition: none; }
+}
+.ver-casa { justify-self: start; width: max-content; max-width: 100%; }
+
+/* ==========================================================================
+   rodada 4: título da abertura no meio da foto, etapas em 2 colunas simétricas
+   com número na linha do título, foto do "quem somos" no tamanho da coluna
+   ========================================================================== */
+@media (min-width: 901px) {
+  .heroi-titulo { margin-top: calc(54vh - 60px); }
+}
+.etapas-baixo .rotulo { grid-column: 1; }
+.etapas-lista { grid-column: 2 / 5; column-gap: calc(var(--g) * 2.5); }
+.etapas-lista li { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; align-items: baseline; padding: 18px 0 22px; }
+.et-nome { grid-column: 1; grid-row: 1; }
+.et-num { position: static; grid-column: 2; grid-row: 1; font-size: 12px; letter-spacing: .04em; }
+.et-det { grid-column: 1 / -1; margin-top: 8px; line-height: 1.55; }
+.sobre-mini { width: 100%; max-width: 320px; aspect-ratio: 4 / 3; }
+@media (max-width: 900px) {
+  :root { --m: 20px; }
+  .tr-caso { grid-auto-rows: 1fr; }
+  .tr-caso span { padding: 20px 22px 22px; }
+  .casas-grade { column-gap: 16px; }
+  .etapas-lista li { padding: 16px 0 20px; }
+  .sobre-mini { max-width: none; }
+}
+/* frase curta do "quem somos": rótulo em cima, frase inteira na mesma margem */
+@media (min-width: 901px) {
+  .sobre-cima { row-gap: 18px; }
+  .sobre-cima .numero { grid-row: 1 / span 2; }
+  .sobre-cima .rotulo { grid-column: 2 / 5; grid-row: 1; margin-top: .3em; }
+  .frase { grid-column: 2 / 5; grid-row: 2; text-indent: 0; max-width: 22em; }
+}
+
+/* rodada 5 (acabamento): as duas caixas do "você já tem o terreno?" com o mesmo respiro interno; cards de casas com mais margem no celular */
+.tr-caso span { padding: 28px; align-content: start; }
+@media (max-width: 900px) {
+  .tr-caso span { padding: 22px; }
+  .casas .caixa { padding-left: 24px; padding-right: 24px; }
+  .casas-grade { column-gap: 18px; }
+}

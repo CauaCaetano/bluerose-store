@@ -47,3 +47,6 @@
 .br-pill { transition: transform .3s ease, opacity .3s ease; }
 .br-pill.br-pill-esconde { transform: translate(-50%, 160%); opacity: 0; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .br-pill { transition: none; } }
+
+/* no celular o botão de idioma sobe para não encostar na pílula */
+@media (max-width: 720px) { .br-idi.solto { bottom: 76px !important; } }

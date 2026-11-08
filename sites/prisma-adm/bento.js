@@ -84,7 +84,7 @@
     var y = function (v) { return m.t + ih - ih * Math.max(0, v) / max; }, passo = iw / n, bw = Math.min(46, passo * 0.56);
     var cx = function (i) { return m.l + passo * i + passo / 2; };
     var s = '<svg class="bg-svg" viewBox="0 0 ' + W + ' ' + H + '" tabindex="0" role="img" aria-label="Recebido e repassado por ' + (st.per === 'ano' ? 'mês' : 'semana') + '. Use as setas para percorrer.">';
-    for (var k = 0; k <= 4; k++) { var v = max * k / 4; s += '<line class="ref" x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + y(v) + '" y2="' + y(v) + '"/><text x="' + (m.l - 8) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + (v ? fmt(v, v < 100 ? 1 : 0) + ' mil' : '0') + '</text>'; }
+    for (var k = 0; k <= 4; k++) { var v = max * k / 4; s += '<line class="ref" x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + y(v) + '" y2="' + y(v) + '"/><text x="' + (m.l - 8) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + (v ? (v >= 1000 ? fmt(v / 1000, 1) + ' mi' : fmt(v, v < 100 ? 1 : 0) + ' mil') : '0') + '</text>'; }
     d.barras.forEach(function (v, i) {
       s += '<rect class="b-rec' + (i === ativo ? ' ativo' : '') + '" x="' + (cx(i) - bw / 2) + '" y="' + y(v) + '" width="' + bw + '" height="' + (m.t + ih - y(v)) + '" rx="1.5"/>';
       s += '<text class="rx' + (i === ativo ? ' t-ativo' : '') + '" x="' + cx(i) + '" y="' + (H - 12) + '" text-anchor="middle">' + d.pts[i].r + '</text>';
@@ -102,8 +102,8 @@
     return s + '</svg>';
   }
 
-  function grafInad(d, st) {
-    var W = 360, H = 120, m = { t: 10, r: 8, b: 22, l: 8 }, iw = W - m.l - m.r, ih = H - m.t - m.b, min = 2, max = 4.6;
+  function grafInad(d, st, estreito) {
+    var W = estreito ? 320 : 360, H = estreito ? 176 : 132, m = { t: 12, r: 10, b: 34, l: 10 }, iw = W - m.l - m.r, ih = H - m.t - m.b, min = 2, max = 4.6;
     var x = function (i) { return m.l + iw * i / 11; }, y = function (v) { return m.t + ih - ih * (v - min) / (max - min); };
     var j = JANELA[st.per], s = '<svg class="bg-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Inadimplência acima de 30 dias, 12 meses">';
     s += '<rect class="faixa" x="' + (x(j[0]) - (j.length === 12 ? 0 : 12)) + '" y="' + m.t + '" width="' + Math.max(24, x(j[j.length - 1]) - x(j[0]) + (j.length === 12 ? 0 : 24)) + '" height="' + ih + '"/>';
@@ -112,9 +112,9 @@
     s += '<polygon class="a-inad" points="' + x(0) + ',' + (m.t + ih) + ' ' + pts + ' ' + x(11) + ',' + (m.t + ih) + '"/><polyline class="l-inad" points="' + pts + '"/>';
     d.inadS.forEach(function (v, i) {
       var dentro = j.indexOf(i) > -1;
-      s += '<circle class="p-inad' + (dentro ? ' dentro' : '') + '" cx="' + x(i) + '" cy="' + y(v) + '" r="' + (dentro ? 4 : 2.6) + '"/>';
+      if (estreito ? (i % 3 === 2 || i === 11) : true) s += '<circle class="p-inad' + (dentro ? ' dentro' : '') + '" cx="' + x(i) + '" cy="' + y(v) + '" r="' + (estreito ? (dentro ? 3.4 : 2.4) : (dentro ? 4 : 2.6)) + '"/>';
       s += '<rect class="alvo" data-tip="<b>' + MES_L[i] + '</b>Inadimplência: ' + fmt(v, 1) + '%" x="' + (x(i) - iw / 24) + '" y="' + m.t + '" width="' + iw / 12 + '" height="' + ih + '"/>';
-      if (i % 2 === 1 || i === 11) s += '<text x="' + x(i) + '" y="' + (H - 6) + '" text-anchor="middle">' + MES[i] + '</text>';
+      if (estreito ? i % 3 === 2 : (i % 2 === 1 || i === 11)) s += '<text x="' + x(i) + '" y="' + (H - 10) + '" text-anchor="' + (i === 11 ? 'end' : 'middle') + '">' + MES[i] + '</text>';
     });
     return s + '</svg>';
   }
@@ -154,19 +154,20 @@
           '<button type="button" role="switch" aria-checked="false" data-chave="reaj"><i aria-hidden="true"></i>Projetar reajuste (IPCA 4,4%)</button>' +
           '<button type="button" role="switch" aria-checked="false" data-chave="meta"><i aria-hidden="true"></i>Mostrar metas</button>' +
         '</div>' +
+        '<button type="button" class="bt bt-lin bt-peq bt-rel" data-relatorio><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2h7l4 4v12H5Z M12 2v4h4 M8 11h6M8 14h6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Gerar relatório</button>' +
         '<p class="bento-per" aria-live="polite"></p>' +
       '</div>' +
       '<div class="bento">' +
         '<article class="cel c-rec"><h3>Aluguel recebido</h3><strong class="kpi" data-k="recebido">R$ 0</strong><p class="delta"></p><p class="extra" data-x="reaj"></p></article>' +
-        '<article class="cel c-graf"><div class="cel-cab"><h3>Recebido e repassado</h3><ul class="leg"><li><i class="lg-rec"></i>Recebido dos inquilinos</li><li><i class="lg-rep"></i>Repassado aos proprietários</li><li class="lg-p"><i class="lg-proj"></i>Com reajuste</li></ul></div><div class="rola-x"><div class="g-principal"></div></div></article>' +
+        '<article class="cel c-graf"><div class="cel-cab"><h3>Recebido e repassado</h3><ul class="leg"><li><i class="lg-rec"></i>Recebido dos inquilinos</li><li><i class="lg-rep"></i>Repassado aos proprietários</li><li class="lg-p"><i class="lg-proj"></i>Com reajuste</li></ul></div><div class="rola-x"><div class="g-principal"></div></div><p class="dica-rola" aria-hidden="true">Deslize o gráfico para ver todos os períodos →</p></article>' +
         '<article class="cel c-rep"><h3>Repassado</h3><strong class="kpi kpi-m" data-k="repassado">R$ 0</strong><p class="mini">líquido, após taxa de 8% e despesas</p></article>' +
         '<article class="cel c-prazo"><h3>Prazo do repasse</h3><strong class="kpi kpi-m"><span data-k="prazo">0</span> <small>dias úteis</small></strong><p class="mini" data-x="prazo"></p></article>' +
         '<article class="cel c-inad"><div class="cel-cab"><h3>Inadimplência &gt; 30 dias</h3><strong class="kpi kpi-p" data-k="inad">0%</strong></div><div class="g-inad"></div><p class="mini" data-x="inad"></p></article>' +
-        '<article class="cel c-ocup"><h3>Ocupação</h3><div class="anel-caixa"><div class="g-anel"></div><strong class="kpi kpi-p anel-n" data-k="ocup">0%</strong></div><p class="mini" data-x="ocup"></p></article>' +
+        '<article class="cel c-ocup"><div class="cel-cab"><h3>Ocupação</h3></div><div class="anel-caixa"><div class="g-anel"></div><strong class="kpi kpi-p anel-n" data-k="ocup">0%</strong></div><p class="mini" data-x="ocup"></p></article>' +
         '<article class="cel c-cham"><div class="cel-cab"><h3>Chamados por tipo</h3><span class="mini" data-x="cham"></span></div><ul class="barras-h g-cham"></ul></article>' +
         '<article class="cel c-funil"><div class="cel-cab"><h3>Esteira de locação online</h3><span class="mini" data-x="funil"></span></div><ul class="barras-h g-funil"></ul></article>' +
         '<article class="cel c-cart"><h3>Carteira administrada</h3><strong class="kpi kpi-m" data-k="contratos">0</strong><p class="mini">contratos ativos</p><div class="pilha" aria-hidden="true"><i class="p-res"></i><i class="p-com"></i></div><p class="mini" data-x="cart"></p>' +
-          (equipe ? '' : '<a class="bt bt-lin bt-peq seta" href="painel.html">Abrir o painel da equipe <span aria-hidden="true">→</span></a>') + '</article>' +
+          (equipe ? '<dl class="mini-dl"><div><dt>Novos contratos no período</dt><dd data-x="novos"></dd></div><div><dt>Imóveis vagos hoje</dt><dd data-x="vagos"></dd></div></dl>' : '<a class="bt bt-lin bt-peq seta" href="painel.html">Abrir o painel da equipe <span aria-hidden="true">→</span></a>') + '</article>' +
       '</div>' +
       '<div class="bento-tip" role="tooltip" hidden></div>' +
       '<p class="nota">Demonstração com dados fictícios. No site real, estes números vêm do sistema da administradora (Superlógica, Jetimob, Vista… por API), atualizados sozinhos.</p>';
@@ -188,12 +189,13 @@
       $('[data-x="cart"]').textContent = N_RES + ' residenciais' + (st.com ? ' · ' + N_COM + ' comerciais' : ' · comerciais fora do filtro');
       $('.c-cart .p-com').style.flexGrow = st.com ? N_COM : 0.0001;
       $('.c-cart .p-res').style.flexGrow = N_RES;
+      if ($('[data-x="novos"]')) { $('[data-x="novos"]').textContent = d.funil[5] + ' (exemplo)'; $('[data-x="vagos"]').textContent = d.vagos; }
       el.classList.toggle('com-proj', st.reaj);
     }
 
     function desenhar(v) {
       $('.g-principal').innerHTML = grafPrincipal(v, st, ativo);
-      $('.g-inad').innerHTML = grafInad(v, st);
+      $('.g-inad').innerHTML = grafInad(v, st, el.clientWidth < 560);
       $('.g-anel').innerHTML = anel(v, st);
       $('.g-cham').innerHTML = barrasH(v.cham, CAT, 'bh-pet', 'chamados');
       $('.g-funil').innerHTML = barrasH(v.funil, ETAPAS, 'bh-oli', 'interessados');
@@ -233,9 +235,52 @@
       contar(d); animarPara(d);
     }
 
+    // relatório de prestação de contas (prévia na tela + impressão/PDF com CSS próprio)
+    var MARCA = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5 35 32H5Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M1 22.5 14.5 20.5" stroke="#636a3c" stroke-width="2"/><path d="M24.5 19 39 12.5M25.3 21.2 39 19.6M26 23.4 39 27" stroke="#0f4c5c" stroke-width="2"/></svg>';
+    function relatorio(origem) {
+      var d = calcular(st), R = function (v) { return 'R$ ' + fmt(v, 2); };
+      var nomes = { mes: 'Outubro de 2026', tri: 'Agosto a outubro de 2026', ano: 'Novembro de 2025 a outubro de 2026' };
+      var unid = st.per === 'ano' ? 'Mês' : 'Semana';
+      var linhas = d.pts.map(function (p, i) {
+        var v = d.barras[i] * 1000;
+        return '<tr><th scope="row">' + p.l.charAt(0).toUpperCase() + p.l.slice(1) + '</th><td>' + R(v) + '</td><td>− ' + R(v * TAXA) + '</td><td>− ' + R(v * DESP) + '</td><td><b>' + R(v * (1 - TAXA - DESP)) + '</b></td></tr>';
+      }).join('');
+      var tot = d.recebido;
+      var kp = [['Aluguel recebido', mi(d.recebido)], ['Repassado aos proprietários', mi(d.repassado)], ['Taxa de administração', mi(d.taxa)], ['Prazo médio do repasse', fmt(d.prazo, 1) + ' dia útil'], ['Inadimplência > 30 dias', fmt(d.inad, 1) + '%'], ['Ocupação média', fmt(d.ocup, 1) + '%']];
+      var h = '<div class="rel-barra" data-so-tela><p><b>Prévia do relatório</b> · ' + nomes[st.per] + '</p><div><button type="button" class="bt bt-pri bt-peq" data-rel-imprimir>Imprimir ou salvar em PDF</button><button type="button" class="bt bt-cla bt-peq" data-rel-fechar>Fechar</button></div></div>' +
+        '<article class="rel-folha">' +
+          '<header class="rel-cab"><div class="rel-marca">' + MARCA + '<span><b>Prisma</b>Administração Imobiliária</span></div><div class="rel-meta"><p>Relatório nº PR-REL-' + (st.per === 'mes' ? '2610' : st.per === 'tri' ? '26T3' : '2612M') + ' (exemplo)</p><p>Emitido em 08/11/2026</p></div></header>' +
+          '<h1 id="rel-t">Prestação de contas da carteira</h1>' +
+          '<p class="rel-sub">' + nomes[st.per] + ' · ' + (st.com ? d.contratos + ' contratos residenciais e comerciais' : d.contratos + ' contratos residenciais') + (st.reaj ? ' · inclui projeção de reajuste de 4,4% (IPCA estimado)' : '') + '</p>' +
+          '<div class="rel-kpis">' + kp.map(function (k) { return '<div><span>' + k[0] + '</span><strong>' + k[1] + '</strong></div>'; }).join('') + '</div>' +
+          '<section class="rel-sec"><h2>Recebido e repassado por ' + unid.toLowerCase() + '</h2><div class="rel-graf">' + grafPrincipal(d, st, null).replace(' tabindex="0"', '') + '</div>' +
+            '<p class="rel-leg"><i class="lg-rec"></i>Recebido dos inquilinos <i class="lg-rep"></i>Repassado aos proprietários' + (st.reaj ? ' <i class="lg-proj"></i>Com reajuste' : '') + '</p></section>' +
+          '<section class="rel-sec"><h2>Demonstrativo</h2><table class="rel-tab"><thead><tr><th scope="col">' + unid + '</th><th scope="col">Aluguel recebido</th><th scope="col">Taxa (8%)</th><th scope="col">Despesas</th><th scope="col">Líquido repassado</th></tr></thead><tbody>' + linhas + '</tbody>' +
+            '<tfoot><tr><th scope="row">Total do período</th><td>' + R(tot) + '</td><td>− ' + R(tot * TAXA) + '</td><td>− ' + R(tot * DESP) + '</td><td><b class="duplo">' + R(tot * (1 - TAXA - DESP)) + '</b></td></tr></tfoot></table></section>' +
+          '<div class="rel-duas"><section class="rel-sec"><h2>Inadimplência acima de 30 dias</h2>' + grafInad(d, st) + '<p class="rel-nota">Média do período: ' + fmt(d.inad, 1) + '%' + (st.meta ? ' · meta 2,5%' : '') + '. Atrasos cobertos pela garantia de cada contrato.</p></section>' +
+            '<section class="rel-sec"><h2>Chamados de manutenção</h2><table class="rel-tab rel-tab-p"><tbody>' + d.cham.map(function (c, i) { return '<tr><th scope="row">' + CAT[i] + '</th><td>' + c + '</td></tr>'; }).join('') + '</tbody><tfoot><tr><th scope="row">Total</th><td><b>' + soma(d.cham) + '</b></td></tr></tfoot></table></section></div>' +
+          '<footer class="rel-pe"><div><span class="rel-ass"></span><p>Gestor de contratos responsável (exemplo)</p></div><p>Documento de demonstração com dados fictícios. No site real, o relatório sai do sistema da administradora (Superlógica, Jetimob, Vista… por API) com os comprovantes de cada lançamento.</p></footer>' +
+        '</article>';
+      var box = document.createElement('div');
+      box.className = 'relatorio'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'rel-t');
+      box.innerHTML = h; document.body.appendChild(box); document.body.classList.add('com-relatorio');
+      var fechar = function () { box.remove(); document.body.classList.remove('com-relatorio'); removeEventListener('keydown', tecla); if (origem) origem.focus(); };
+      var tecla = function (e) {
+        if (e.key === 'Escape') fechar();
+        if (e.key === 'Tab') { var fs = box.querySelectorAll('button'), pri = fs[0], ult = fs[fs.length - 1]; if (e.shiftKey && document.activeElement === pri) { e.preventDefault(); ult.focus(); } else if (!e.shiftKey && document.activeElement === ult) { e.preventDefault(); pri.focus(); } }
+      };
+      addEventListener('keydown', tecla);
+      box.addEventListener('click', function (e) {
+        if (e.target.closest('[data-rel-fechar]') || e.target === box) fechar();
+        if (e.target.closest('[data-rel-imprimir]')) window.print();
+      });
+      box.querySelector('[data-rel-imprimir]').focus();
+    }
+
     // controles
     el.addEventListener('click', function (e) {
       var p = e.target.closest('[data-per]'), c = e.target.closest('[data-chave]');
+      var rb = e.target.closest('[data-relatorio]'); if (rb) { esconder(); relatorio(rb); return; }
       if (p) { st.per = p.dataset.per; $$('[data-per]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === p)); }); ativo = null; esconder(); atualizar(); }
       if (c) { var k = c.dataset.chave; st[k] = !st[k]; c.setAttribute('aria-checked', String(st[k])); esconder(); atualizar(); }
     });

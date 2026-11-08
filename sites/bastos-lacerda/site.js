@@ -256,3 +256,122 @@
     });
   }
 })();
+
+// ---------- agendar conversa: painel lateral em três etapas (área, agenda, contato) e confirmação com resumo ----------
+// Demonstração: nada é enviado. Num site real, o pedido chega ao e-mail e ao WhatsApp do escritório.
+(function () {
+  'use strict';
+  var doc = document, calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var AREAS = ['Tributário', 'Trabalhista empresarial', 'Contratos empresariais', 'Societário e M&A', 'Proteção de dados e LGPD', 'Contencioso cível e arbitragem', 'Propriedade intelectual', 'Imobiliário empresarial', 'Compliance e investigações', 'Ainda não sei'];
+  var POR_PAGINA = { tributario: 0, trabalhista: 1, contratos: 2, societario: 3, lgpd: 4, contencioso: 5, 'propriedade-intelectual': 6, imobiliario: 7, compliance: 8 };
+  var ETAPAS = ['Área', 'Agenda', 'Contato'];
+  var SEM = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+  var MES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var p, veu, etapa = 1, volta = null;
+  function uteis(n) { var r = [], d = new Date(); d.setHours(12); while (r.length < n) { d.setDate(d.getDate() + 1); if (d.getDay() % 6) r.push(new Date(d)); } return r; }
+
+  function monta() {
+    veu = doc.createElement('div'); veu.className = 'pa-veu'; veu.hidden = true;
+    p = doc.createElement('aside'); p.className = 'pa'; p.hidden = true;
+    p.setAttribute('role', 'dialog'); p.setAttribute('aria-modal', 'true'); p.setAttribute('aria-labelledby', 'pa-t');
+    var dias = uteis(5).map(function (d, i) {
+      var v = SEM[d.getDay()] + ', ' + d.getDate() + ' de ' + MES[d.getMonth()];
+      return '<label class="pa-op pa-dia"><input type="radio" name="dia" value="' + v + '"' + (i ? '' : ' checked') + '><span><b>' + d.getDate() + '</b>' + SEM[d.getDay()].slice(0, 3) + '</span></label>';
+    }).join('');
+    p.innerHTML =
+      '<div class="pa-topo"><p class="rotulo">Bastos Lacerda Advogados</p><button type="button" class="pa-x" aria-label="Fechar">Fechar</button></div>' +
+      '<h2 id="pa-t" class="pa-tit">Agendar conversa</h2>' +
+      '<ol class="pa-etapas">' + ETAPAS.map(function (e, i) { return '<li' + (i ? '' : ' class="on"') + '><small>0' + (i + 1) + '</small>' + e + '</li>'; }).join('') + '</ol>' +
+      '<form class="pa-f" novalidate>' +
+      '<fieldset class="pa-et" data-e="1"><legend>Qual área envolve o assunto?</legend><div class="pa-lista">' +
+      AREAS.map(function (a, i) { return '<label class="pa-op"><input type="radio" name="area" value="' + a + '"' + (i === AREAS.length - 1 ? ' checked' : '') + '><span>' + a + '</span></label>'; }).join('') + '</div></fieldset>' +
+      '<fieldset class="pa-et" data-e="2" hidden><legend>Data e formato</legend><div class="pa-dias">' + dias + '</div>' +
+      '<div class="pa-par"><label class="pa-op"><input type="radio" name="hora" value="pela manhã" checked><span>Manhã</span></label><label class="pa-op"><input type="radio" name="hora" value="à tarde"><span>Tarde</span></label></div>' +
+      '<div class="pa-par"><label class="pa-op"><input type="radio" name="formato" value="na sede, em São Paulo" checked><span>Na sede</span></label><label class="pa-op"><input type="radio" name="formato" value="por videoconferência"><span>Videoconferência</span></label></div></fieldset>' +
+      '<fieldset class="pa-et" data-e="3" hidden><legend>Seus dados</legend>' +
+      '<label class="pa-c"><span>Nome</span><input name="nome" autocomplete="name"></label>' +
+      '<label class="pa-c"><span>Empresa</span><input name="empresa" autocomplete="organization"></label>' +
+      '<label class="pa-c"><span>E-mail</span><input name="email" type="email" autocomplete="email"></label>' +
+      '<label class="pa-ck"><input type="checkbox" name="priv"><span>Li o <a href="privacidade.html">aviso de privacidade</a> e concordo com o uso destes dados para o retorno do escritório.</span></label>' +
+      '<p class="pa-aviso">Não envie documentos nem informações sigilosas por aqui: eles são tratados depois, em canal adequado.</p></fieldset>' +
+      '<p class="pa-erro" aria-live="polite"></p>' +
+      '<div class="pa-pe"><button type="button" class="btn btn-linha pa-volta" hidden>Voltar</button><button type="submit" class="btn pa-segue">Continuar <span class="seta" aria-hidden="true">→</span></button></div>' +
+      '</form><div class="pa-ok" hidden tabindex="-1"></div>';
+    doc.body.appendChild(veu); doc.body.appendChild(p);
+    var f = p.querySelector('.pa-f');
+    p.querySelector('.pa-x').addEventListener('click', fecha); veu.addEventListener('click', fecha);
+    p.querySelector('.pa-volta').addEventListener('click', function () { vai(etapa - 1); });
+    f.addEventListener('submit', function (e) {
+      e.preventDefault(); var er = p.querySelector('.pa-erro'); er.textContent = '';
+      if (etapa < 3) { vai(etapa + 1); return; }
+      if (f.nome.value.trim().length < 2) { er.textContent = 'Informe o seu nome.'; f.nome.focus(); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim())) { er.textContent = 'Confira o e-mail.'; f.email.focus(); return; }
+      if (!f.priv.checked) { er.textContent = 'É preciso concordar com o aviso de privacidade.'; return; }
+      pronto(f);
+    });
+    doc.addEventListener('keydown', function (e) {
+      if (p.hidden) return;
+      if (e.key === 'Escape') fecha();
+      if (e.key === 'Tab') {
+        var fo = [].filter.call(p.querySelectorAll('button, input, a[href], [tabindex="-1"]'), function (x) { return x.offsetParent !== null; });
+        if (e.shiftKey && doc.activeElement === fo[0]) { e.preventDefault(); fo[fo.length - 1].focus(); }
+        else if (!e.shiftKey && doc.activeElement === fo[fo.length - 1]) { e.preventDefault(); fo[0].focus(); }
+      }
+    });
+  }
+  function vai(n) {
+    etapa = n;
+    [].forEach.call(p.querySelectorAll('.pa-et'), function (x) { x.hidden = +x.dataset.e !== n; });
+    [].forEach.call(p.querySelectorAll('.pa-etapas li'), function (li, i) { li.className = i + 1 === n ? 'on' : (i + 1 < n ? 'feito' : ''); });
+    p.querySelector('.pa-volta').hidden = n === 1;
+    p.querySelector('.pa-segue').firstChild.nodeValue = n === 3 ? 'Confirmar pedido ' : 'Continuar ';
+    var i = p.querySelector('.pa-et[data-e="' + n + '"] input:checked, .pa-et[data-e="' + n + '"] input'); if (i) i.focus({ preventScroll: true });
+  }
+  function pronto(f) {
+    var ok = p.querySelector('.pa-ok');
+    ok.innerHTML = '<p class="rotulo">Pedido registrado</p><h3>Obrigado, ' + esc(f.nome.value.trim().split(' ')[0]) + '.</h3>' +
+      '<dl class="pa-res"><div><dt>Área</dt><dd>' + esc(f.area.value) + '</dd></div><div><dt>Data</dt><dd>' + esc(f.dia.value) + ', ' + esc(f.hora.value) + '</dd></div><div><dt>Formato</dt><dd>' + esc(f.formato.value) + '</dd></div><div><dt>Empresa</dt><dd>' + esc(f.empresa.value.trim() || 'não informada') + '</dd></div><div><dt>Retorno</dt><dd>' + esc(f.email.value.trim()) + '</dd></div></dl>' +
+      '<p class="pa-nota">Um integrante da equipe confirma o horário por e-mail e indica o sócio responsável pela área.</p>' +
+      '<p class="pa-demo">Demonstração: nada foi enviado. Num site real, o pedido chega ao e-mail e ao WhatsApp do escritório.</p>' +
+      '<button type="button" class="btn pa-fim">Fechar</button>';
+    f.hidden = true; p.querySelector('.pa-etapas').hidden = true; ok.hidden = false; p.scrollTop = 0; ok.focus();
+    ok.querySelector('.pa-fim').addEventListener('click', fecha);
+  }
+  function abre(area) {
+    if (!p) monta();
+    var f = p.querySelector('.pa-f'), ok = p.querySelector('.pa-ok');
+    if (!ok.hidden) { ok.hidden = true; f.hidden = false; f.reset(); p.querySelector('.pa-etapas').hidden = false; }
+    if (area != null) f.area.value = AREAS[area];
+    p.querySelector('.pa-erro').textContent = '';
+    volta = doc.activeElement; veu.hidden = false; p.hidden = false; doc.documentElement.classList.add('pa-aberto');
+    requestAnimationFrame(function () { veu.classList.add('on'); p.classList.add('on'); });
+    vai(1);
+  }
+  function fecha() {
+    p.classList.remove('on'); veu.classList.remove('on'); doc.documentElement.classList.remove('pa-aberto');
+    setTimeout(function () { p.hidden = true; veu.hidden = true; }, calmo ? 0 : 420);
+    if (volta && volta.focus) volta.focus({ preventScroll: true });
+  }
+  doc.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-agendar]'); if (!a) return;
+    e.preventDefault(); e.stopPropagation();
+    var pg = (location.pathname.match(/area-([\w-]+)\.html/) || [])[1];
+    abre(a.dataset.agendar ? +a.dataset.agendar : (pg && pg in POR_PAGINA ? POR_PAGINA[pg] : null));
+  }, true);
+})();
+
+// ---------- como trabalhamos: a foto acompanha a etapa que está no meio da tela ----------
+(function () {
+  var et = [].slice.call(document.querySelectorAll('.proc-etapa')), fo = [].slice.call(document.querySelectorAll('.proc-fotos img'));
+  if (!et.length || !('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var i = +e.target.dataset.i;
+      et.forEach(function (x, k) { x.classList.toggle('on', k === i); });
+      fo.forEach(function (x, k) { x.classList.toggle('on', k === i); });
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  et.forEach(function (x) { io.observe(x); });
+})();

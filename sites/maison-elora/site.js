@@ -60,6 +60,12 @@
   }
 
   /* ---------- revelar ao rolar ---------- */
+  // títulos (h1/h2) ficam parados: bloco com título não sobe inteiro, só as partes sem título
+  $$('.rv').forEach(function (el) {
+    if (!el.querySelector('h1, h2')) return;
+    el.classList.remove('rv');
+    [].forEach.call(el.children, function (f) { if (!f.matches('h1, h2') && !f.querySelector('h1, h2')) f.classList.add('rv'); });
+  });
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
     $$('.rv, .rv-img').forEach(function (el) { io.observe(el); });
@@ -163,11 +169,11 @@
   }
 
   /* ---------- agendamento ---------- */
-  var ag = $('#agendamento');
-  if (ag) {
+  // o mesmo fluxo roda na página agendar.html e no painel lateral aberto por qualquer botão "Agendar"
+  function iniciaAgenda(ag, qs, rola) {
     var NOMES = ['Departamento', 'Serviço', 'Profissional', 'Data', 'Horário', 'Seus dados', 'Resumo'];
     var st = { dep: null, serv: null, pro: null, data: null, hora: null }, passo = 0, mesVer = null;
-    var qs = new URLSearchParams(location.search);
+    function sobe() { if (rola) rola(); else ag.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     var limite = new Date(hoje); limite.setDate(limite.getDate() + 60);
     var MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
@@ -284,10 +290,10 @@
         else if (box === 'op-serv') { st.serv = o.dataset.v; st.hora = null; passo = 2; }
         else if (box === 'op-pro') { st.pro = o.dataset.v; st.hora = null; passo = 3; }
         else if (box === 'op-hora') { st.hora = o.dataset.v; passo = 5; }
-        render(); ag.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        render(); sobe();
         return;
       }
-      if (d && !d.disabled) { st.data = new Date(+d.dataset.d); st.hora = null; passo = 4; render(); ag.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      if (d && !d.disabled) { st.data = new Date(+d.dataset.d); st.hora = null; passo = 4; render(); sobe(); return; }
       if (e.target.closest('.voltar')) { passo = Math.max(0, passo - 1); render(); }
     });
     $('#cal-ant').addEventListener('click', function () { mesVer = new Date(mesVer.getFullYear(), mesVer.getMonth() - 1, 1); cal(); });
@@ -300,8 +306,76 @@
       passo = 6; render();
     });
     $('#ag-enviar').addEventListener('click', function () { enviar(mensagem()); $('#ag-ok').hidden = false; });
-    $('#ag-recomecar').addEventListener('click', function () { st = { dep: null, serv: null, pro: null, data: null, hora: null }; mesVer = null; passo = 0; $('#ag-ok').hidden = true; history.replaceState(null, '', location.pathname); render(); });
+    $('#ag-recomecar').addEventListener('click', function () { st = { dep: null, serv: null, pro: null, data: null, hora: null }; mesVer = null; passo = 0; $('#ag-ok').hidden = true; if (!rola) history.replaceState(null, '', location.pathname); render(); });
     render.foco = false; render();
+  }
+  var ag = $('#agendamento');
+  if (ag) iniciaAgenda(ag, new URLSearchParams(location.search));
+
+  /* ---------- painel lateral de agendamento: abre sobre a página, em passos, sem sair dela ---------- */
+  var painel = null, painelAntes = null, molde = null;
+  function fechaPainel() {
+    if (!painel || painel.hidden) return;
+    painel.classList.remove('aberto'); document.body.style.overflow = '';
+    setTimeout(function () { painel.hidden = true; }, semMovP ? 0 : 320);
+    if (painelAntes && painelAntes.focus) painelAntes.focus();
+  }
+  var semMovP = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function montaPainel(qs) {
+    var corpo = $('.pa-corpo', painel);
+    corpo.innerHTML = '';
+    var a = molde.cloneNode(true); a.removeAttribute('style'); a.classList.add('no-painel');
+    corpo.appendChild(a);
+    iniciaAgenda(a, qs, function () { corpo.scrollTop = 0; });
+  }
+  function abrePainel(qs) {
+    painelAntes = document.activeElement;
+    if (!painel) {
+      painel = document.createElement('div'); painel.className = 'painel-ag'; painel.hidden = true;
+      painel.innerHTML = '<div class="pa-fundo" data-fecha></div><aside class="pa-caixa" role="dialog" aria-modal="true" aria-labelledby="pa-t"><div class="pa-topo"><p class="rotulo" id="pa-t">Agendar horário</p><button type="button" class="pa-x" data-fecha aria-label="Fechar">×</button></div><div class="pa-corpo"><p>Carregando a agenda…</p></div></aside>';
+      document.body.appendChild(painel);
+      painel.addEventListener('click', function (e) { if (e.target.closest('[data-fecha]')) fechaPainel(); });
+      document.addEventListener('keydown', function (e) {
+        if (painel.hidden || $('.br-sim:not([hidden])')) return;
+        if (e.key === 'Escape') fechaPainel();
+        if (e.key === 'Tab') { var f = $$('button:not([disabled]), a[href], input, textarea, select', painel).filter(function (x) { return x.offsetParent; }), ult = f[f.length - 1]; if (!f.length) return; if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); ult.focus(); } else if (!e.shiftKey && document.activeElement === ult) { e.preventDefault(); f[0].focus(); } }
+      });
+    }
+    painel.hidden = false; document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function () { painel.classList.add('aberto'); });
+    setTimeout(function () { var x = $('.pa-x', painel); if (x) x.focus(); }, 60);
+    if (molde) { montaPainel(qs); return; }
+    fetch('agendar.html').then(function (r) { return r.text(); }).then(function (t) {
+      var d0 = new DOMParser().parseFromString(t, 'text/html'), w = d0.querySelector('.ag-wrap');
+      if (!w) throw new Error('sem agenda');
+      // etapas + resumo num só bloco, com os mesmos ids (o painel é o único lugar da página com eles)
+      molde = document.createElement('div'); molde.className = 'pa-ag';
+      var et = w.querySelector('#agendamento'), rs = w.querySelector('.resumo');
+      molde.innerHTML = et.innerHTML; if (rs) molde.appendChild(rs);
+      molde.id = 'agendamento';
+      montaPainel(qs);
+    }).catch(function () { location.href = 'agendar.html' + (qs.toString() ? '?' + qs : ''); });
+  }
+  if (!ag) document.addEventListener('click', function (e) {
+    var l = e.target.closest('a[href^="agendar.html"]');
+    if (!l || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    var mc = $('.menu-cel'); if (mc && !mc.hidden && l.closest('.menu-cel')) { var hb = $('[aria-controls="' + mc.id + '"]'); if (hb) hb.click(); }
+    abrePainel(new URLSearchParams((l.getAttribute('href').split('?')[1] || '').replace(/&amp;/g, '&')));
+  });
+
+  /* ---------- a sua hora: a rolagem conta o processo (conversa, cuidado, resultado) e troca a foto fixa ---------- */
+  var proc = $('.processo');
+  if (proc) {
+    var pFotos = $$('.pr-fotos img', proc), pPassos = $$('.pr-passo', proc);
+    var ativaP = function (i) {
+      pFotos.forEach(function (f, k) { f.classList.toggle('on', k === i); });
+      pPassos.forEach(function (x, k) { x.classList.toggle('on', k === i); });
+    };
+    if ('IntersectionObserver' in window) {
+      var ioP = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) ativaP(+e.target.dataset.i); }); }, { rootMargin: '-45% 0px -45% 0px' });
+      pPassos.forEach(function (x) { ioP.observe(x); });
+    }
   }
 
   /* ---------- noivas: galeria com lightbox ---------- */
@@ -392,6 +466,13 @@
   var semMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   $$('video[data-auto]').forEach(function (v) {
     var bt = v.parentNode.querySelector('.vid-bt'), pausadoPeloUsuario = false;
+    // a capa fica no fundo da moldura e o vídeo entra em fade quando começa a tocar (sem troca seca)
+    var mold = v.closest('.moldura.vid');
+    if (mold && v.poster && !semMov) {
+      mold.style.backgroundImage = 'url("' + v.poster + '")';
+      mold.classList.add('espera');
+      v.addEventListener('playing', function () { mold.classList.remove('espera'); }, { once: true });
+    }
     function marca() { if (!bt) return; var t = !v.paused; bt.classList.toggle('tocando', t); bt.setAttribute('aria-label', t ? 'Pausar vídeo' : 'Reproduzir vídeo'); }
     function toca() { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
     v.addEventListener('play', marca); v.addEventListener('pause', marca);

@@ -18,7 +18,7 @@
       desc: 'Prédio com portaria 24 horas, a duas quadras da Av. Professor João Fiúsa. Sala com sacada, cozinha com armários, suíte com box blindex e área de serviço separada.', itens: ['Portaria 24 h', 'Sacada', 'Armários na cozinha', 'Piscina no condomínio', 'Aceita pet'] },
     { cod: 'PR-1034', tipo: 'Apartamento', titulo: 'Apartamento de 3 quartos perto do parque', bairro: 'Jardim Botânico', regiao: 'Zona Sul', area: 96, quartos: 3, suites: 1, banheiros: 2, vagas: 2, aluguel: 3600, cond: 890, iptu: 160, pet: true, mobiliado: false, usp: false, novo: false,
       fotos: [['pr1034-fachada', 1200, 800, 'Prédio residencial com varandas e vegetação'], ['pr1034-sala', 1200, 800, 'Sala ampla com janelas grandes e sofá azul']],
-      desc: 'Planta de 96 m² com sala para dois ambientes e varanda. Duas vagas cobertas, academia e salão de festas. A pé até o Parque Botânico.', itens: ['Varanda', '2 vagas cobertas', 'Academia', 'Salão de festas', 'Aceita pet'] },
+      desc: 'Planta de 96 m² com sala para dois ambientes e varanda. Duas vagas cobertas, academia e salão de festas. A pé até o Parque Botânico.', itens: ['Varanda', '2 vagas cobertas', 'Academia', 'Salão de festas', 'Aceita pet'] },
     { cod: 'PR-1047', tipo: 'Studio', titulo: 'Studio mobiliado a 8 minutos da USP', bairro: 'Vila Amélia', regiao: 'Zona Oeste', area: 32, quartos: 1, suites: 0, banheiros: 1, vagas: 1, aluguel: 1450, cond: 320, iptu: 35, pet: false, mobiliado: true, usp: true, novo: true,
       fotos: [['pr1047-studio', 1200, 801, 'Studio com cozinha integrada e sofá'], ['pr1047-ambientes', 1200, 801, 'Studio com bancada e portas de correr']],
       desc: 'Pronto para morar: cama, armários, geladeira, fogão cooktop, micro-ondas e mesa de estudo. Internet do prédio inclusa no condomínio. Ideal para estudante ou residente.', itens: ['Mobiliado', 'Internet inclusa', 'Lavanderia coletiva', 'Perto da USP', 'Bicicletário'] },
@@ -64,7 +64,7 @@
     nome: 'Carlos Menezes', email: 'proprietario@exemplo.com.br', conta: 'Banco Exemplo · ag. 0000 · c/c ****-7', pix: 'CPF ***.482.***-**',
     imoveis: [
       { cod: 'PR-0412', nome: 'Apartamento 2 quartos', bairro: 'Nova Aliança', situacao: 'Alugado', inquilino: 'Inquilino PF (exemplo)', pj: false, inicio: '03/2024', fim: '02/2027', reajuste: 'IGP-M em março', garantia: 'Seguro fiança' },
-      { cod: 'PR-0655', nome: 'Conjunto comercial 110 m²', bairro: 'Jardim Irajá', situacao: 'Alugado', inquilino: 'Clínica Exemplo Ltda (PJ)', pj: true, inicio: '01/2023', fim: '12/2027', reajuste: 'IPCA em janeiro', garantia: 'Título de capitalização' },
+      { cod: 'PR-0655', nome: 'Conjunto comercial 110 m²', bairro: 'Jardim Irajá', situacao: 'Alugado', inquilino: 'Clínica Exemplo Ltda (PJ)', pj: true, inicio: '01/2023', fim: '12/2027', reajuste: 'IPCA em janeiro', garantia: 'Título de capitalização' },
       { cod: 'PR-1073', nome: 'Casa térrea 3 quartos', bairro: 'Jardim Califórnia', situacao: 'Disponível', inquilino: 'Anunciada desde 05/08/2026', pj: false, inicio: '—', fim: '—', reajuste: '—', garantia: '—' }
     ]
   };

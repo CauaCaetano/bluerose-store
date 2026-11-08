@@ -484,3 +484,161 @@ p, li, dd, figcaption, small { text-wrap: pretty; }
   .sl-cab, .sl-grade { grid-template-columns: 1fr; gap: 16px; } .sl-card { padding: 24px; }
   .sd-medico-pag { grid-template-columns: 48px 1fr; } .sd-medico-pag .sd-ini { width: 48px; height: 48px; }
 }
+
+/* ---------- banca R3 (08/11/2026): cartão do doutor, um destaque só no topo, celular com respiro ---------- */
+/* botões dourados: o círculo da seta deixa de "sujar" o dourado */
+.bt-ouro i { background: rgba(26, 23, 20, .1); }
+.bt-contorno { background: transparent; color: var(--areia); box-shadow: inset 0 0 0 1px rgba(232, 220, 200, .32); padding: 0 22px; }
+.bt-contorno:hover { box-shadow: inset 0 0 0 1px var(--areia); }
+/* pílula do topo: navegação discreta e um único destaque claro, na cor dos títulos */
+.topo.pilula { background: rgba(26, 23, 20, .9); box-shadow: 0 12px 32px rgba(20, 16, 12, .22); padding-right: 5px; }
+.topo.pilula .menu a { color: rgba(232, 220, 200, .72); font-weight: 450; }
+.topo.pilula .menu a:hover { color: var(--areia); }
+.topo.pilula .bt-topo { background: var(--areia); color: var(--cafe); padding: 0 18px; min-height: 40px; font-size: 14px; }
+.topo.pilula .bt-topo:hover { background: #fff; }
+.topo.pilula .bt-topo i { display: none; }
+/* abertura: cartão do doutor com respiro, desfoque fino e separado da foto */
+.heroi-cartao { right: 48px; bottom: 112px; width: 300px; padding: 24px 26px 22px; border-radius: 18px; background: rgba(20, 17, 14, .46); border: 1px solid rgba(232, 220, 200, .16); -webkit-backdrop-filter: blur(20px) saturate(1.1); backdrop-filter: blur(20px) saturate(1.1); box-shadow: 0 30px 60px -24px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .06); }
+.hc-nome { gap: 4px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--linha-e); }
+.heroi-cartao ul { display: grid; gap: 6px; }
+.heroi-cartao li { padding: 0; }
+/* foto do protocolo: era uma foto só, sem comparação; tira a linha branca do meio */
+.comparar:not(:has(input))::after { content: none; }
+/* card de implantes: título em duas linhas sem buraco entre elas */
+.sv-destaque b { line-height: 1.05; }
+/* galeria sem buraco no fim da grade */
+.gl-grade figure.g-larga { grid-column: span 2; }
+/* links da tabela de preços viram botões */
+.tabela-hs a { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid var(--linha); border-radius: 999px; background: var(--papel); text-decoration: none; font-weight: 500; transition: border-color .2s; }
+.tabela-hs a::after { content: '\2192'; color: var(--ouro); }
+.tabela-hs a:hover { border-color: var(--ouro); }
+@media (max-width: 900px) {
+  /* três motivos: entrelinha maior e números com respiro da borda */
+  .razoes .painel-escuro { padding: 40px 28px; }
+  .razoes h2 { line-height: 1.08; }
+  .rz-lista { gap: 30px; }
+  .rz-lista li { grid-template-columns: 40px 1fr; }
+  .rz-lista span { padding-top: 4px; }
+  .rz-lista h3 { line-height: 1.25; }
+  /* barra do celular: ao lado do seletor de idioma, sem cobrir nada, e só depois da abertura */
+  .barra-cel { left: 82px; right: 12px; bottom: calc(70px + env(safe-area-inset-bottom)); padding: 0 18px; transition: opacity .3s, transform .3s, visibility 0s; }
+  .barra-cel.escondida { opacity: 0; visibility: hidden; transform: translateY(12px); transition: opacity .3s, transform .3s, visibility 0s .3s; }
+  .tabela-hs a { min-height: 40px; }
+  /* abertura: o telefone e o botão ficam acima do seletor de idioma e da faixa da Blue Rose */
+  .heroi-txt, .heroi.heroi-pag .heroi-txt { padding-bottom: 150px; }
+}
+
+/* ---------- lições dos vídeos (08/11/2026): um CTA, painel de agendamento, processo na rolagem, ritmo claro/escuro ---------- */
+/* painel lateral de agendamento */
+html.ag-aberto { overflow: hidden; }
+.ag-fundo { position: fixed; inset: 0; z-index: 2147483001; background: rgba(20, 16, 12, .55); opacity: 0; transition: opacity .3s cubic-bezier(.22, .61, .36, 1); }
+.ag-fundo.on { opacity: 1; }
+.ag-painel { position: fixed; z-index: 2147483002; top: 0; right: 0; bottom: 0; width: min(460px, 100%); display: flex; flex-direction: column; background: var(--cafe); color: var(--areia); box-shadow: -30px 0 60px rgba(0, 0, 0, .35); transform: translateX(100%); transition: transform .32s cubic-bezier(.22, .61, .36, 1); }
+.ag-painel.on { transform: none; }
+.ag-cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid var(--linha-e); }
+.ag-marca { font: italic 400 18px var(--it); color: var(--areia); }
+.ag-x, .ag-voltar { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--linha-e); background: transparent; color: var(--areia); font-size: 20px; cursor: pointer; display: grid; place-items: center; }
+.ag-x:hover, .ag-voltar:hover { border-color: var(--areia); }
+.ag-barra { height: 2px; background: var(--linha-e); }
+.ag-barra span { display: block; height: 100%; width: 0; background: var(--ouro); transition: width .35s cubic-bezier(.22, .61, .36, 1); }
+.ag-corpo { flex: 1; overflow-y: auto; padding: 34px 28px 40px; }
+.ag-passo { font-size: 12px; color: var(--ouro); margin-bottom: 10px; letter-spacing: .02em; }
+.ag-corpo h2 { color: var(--areia); font-size: 32px; letter-spacing: -.03em; margin-bottom: 24px; }
+.ag-ops { display: grid; gap: 8px; }
+.ag-op { min-height: 54px; padding: 12px 18px; border-radius: 14px; border: 1px solid var(--linha-e); background: rgba(255, 255, 255, .04); color: var(--areia); font: 500 16px var(--sans); text-align: left; cursor: pointer; transition: border-color .2s, background .2s; }
+.ag-op:hover { border-color: var(--ouro); }
+.ag-op.on { border-color: var(--ouro); background: rgba(184, 151, 90, .16); }
+.ag-ops-linha { grid-template-columns: 1fr 1fr; }
+.ag-ops-linha .ag-op { text-align: center; }
+.ag-form { display: grid; gap: 16px; }
+.ag-form label { display: grid; gap: 6px; font-size: 14px; color: var(--areia-2); }
+.ag-form input { min-height: 50px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--linha-e); background: rgba(255, 255, 255, .05); color: var(--areia); font: 500 16px var(--sans); }
+.ag-form input:focus { outline: none; border-color: var(--ouro); }
+.ag-form fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ag-form legend { font-size: 14px; color: var(--areia-2); margin-bottom: 8px; padding: 0; }
+.ag-erro { color: #f2b8a2; font-size: 14px; } .ag-erro:empty { display: none; }
+.ag-enviar { justify-self: start; }
+.ag-nota { font-size: 14px; color: var(--areia-2); border-left: 2px solid var(--ouro); padding-left: 12px; }
+.ag-ok { display: grid; gap: 16px; justify-items: start; }
+.ag-ok h2 { margin-bottom: 0 !important; }
+.ag-ok > p:not(.ag-nota) { color: var(--areia-2); }
+.ag-selo { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--ouro); color: var(--cafe); font-size: 24px; font-weight: 700; }
+.ag-ok dl { width: 100%; margin: 0; border-top: 1px solid var(--linha-e); }
+.ag-ok dl div { display: grid; grid-template-columns: 90px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--linha-e); }
+.ag-ok dt { font-size: 12px; color: var(--ouro); padding-top: 3px; } .ag-ok dd { margin: 0; font-size: 16px; }
+.bt-contorno-e { background: transparent; color: var(--areia); box-shadow: inset 0 0 0 1px rgba(232, 220, 200, .32); padding: 0 24px; }
+.bt-contorno-e:hover { box-shadow: inset 0 0 0 1px var(--areia); }
+
+/* bloco final em tela cheia, com um só botão */
+.final { min-height: 100vh; min-height: 100dvh; align-content: center; padding-top: 120px; padding-bottom: 120px; }
+.final h2 { font-size: clamp(44px, 6vw, 88px); max-width: 11em; }
+.final > .bt { min-height: 56px; font-size: 18px; padding-left: 28px; }
+.final .fn-contatos { margin-top: 36px; }
+
+/* o processo contado na rolagem, com foto real que troca a cada etapa */
+.cm-historia { display: grid; grid-template-columns: 1.05fr 1fr; gap: 64px; align-items: start; }
+.cm-palco { position: sticky; top: 96px; height: min(72vh, 620px); border-radius: 20px; overflow: hidden; background: var(--cafe); }
+.cm-palco img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .6s cubic-bezier(.22, .61, .36, 1); }
+.cm-palco img.on { opacity: 1; }
+.cm-palco figcaption { position: absolute; left: 16px; bottom: 16px; z-index: 1; font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(20, 16, 12, .6); color: #fff; }
+.cm-etapas li { min-height: 62vh; display: grid; align-content: center; gap: 10px; padding-left: 26px; border-left: 1px solid var(--linha); position: relative; }
+.cm-etapas li::before { content: ''; position: absolute; left: -1px; top: 50%; width: 2px; height: 0; background: var(--ouro); transform: translateY(-50%); transition: height .5s cubic-bezier(.22, .61, .36, 1); }
+.cm-etapas li.on::before { height: 120px; }
+.cm-etapas span { font-size: 12px; color: var(--ouro); letter-spacing: .04em; }
+.cm-etapas b { font-size: clamp(28px, 2.8vw, 40px); letter-spacing: -.035em; line-height: 1.05; }
+.cm-etapas p { font-size: 16px; color: var(--cinza); max-width: 28em; }
+.cm-etapas img { display: none; }
+@media (prefers-reduced-motion: reduce) { .cm-palco img, .cm-etapas li::before, .ag-painel, .ag-fundo { transition: none; } }
+
+/* tecnologia em fundo escuro: muda o assunto, muda o fundo */
+.precisao.escura { background: var(--cafe); color: var(--areia); margin: 40px 0; }
+.precisao.escura h2 { color: var(--areia); }
+.precisao.escura .pc-it em { color: var(--ouro-claro); }
+.precisao.escura ol, .precisao.escura ol li { border-color: var(--linha-e); }
+.precisao.escura .pc-txt > p:last-child { color: var(--areia-2); }
+.precisao.escura .pc-b { border-color: var(--cafe); box-shadow: 0 20px 40px rgba(0, 0, 0, .4); }
+
+@media (max-width: 900px) {
+  .ag-corpo { padding: 28px 20px 40px; }
+  .ag-corpo h2 { font-size: 28px; }
+  .final h2 { font-size: clamp(38px, 11vw, 52px); }
+  .cm-historia { grid-template-columns: 1fr; gap: 0; }
+  .cm-palco { display: none; }
+  .cm-etapas li { min-height: 0; padding: 0 0 34px; border-left: 0; }
+  .cm-etapas li::before { display: none; }
+  .cm-etapas img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; margin-bottom: 6px; }
+}
+html.ag-aberto .br-idi, html.ag-aberto .br-pill { visibility: hidden; }
+.precisao ol span { display: inline-block; width: 30px; margin-right: 10px; }
+.ag-tel { white-space: nowrap; }
+@media (max-width: 900px) { .heroi-pag .heroi-txt { padding-top: 130px; } }
+@media (max-width: 900px) { .heroi:not(.heroi-pag) .heroi-txt { padding-top: 210px; } }
+
+/* ---------- banca R4 (08/11/2026): cartão legível, títulos com ar, margens do celular ---------- */
+.heroi-cartao { background: rgba(20, 17, 14, .86); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-color: rgba(232, 220, 200, .2); }
+.heroi-cartao li { color: var(--areia); }
+.hc-nome small { color: var(--ouro-claro); }
+.razoes h2, .sd-txt h2, .doutor h2 { line-height: 1.08; }
+.razoes h2 em { display: inline-block; margin-top: .04em; }
+.situacao { padding-bottom: 72px; }
+.razoes { padding-top: 0; }
+@media (max-width: 900px) {
+  :root { --borda: 24px; }
+  .topo { padding: 0 20px; }
+  .heroi-txt, .heroi.heroi-pag .heroi-txt { padding-left: 24px; padding-right: 24px; }
+  .razoes .painel-escuro { padding: 40px 24px; }
+}
+@media (max-width: 900px) { .heroi::before { background: linear-gradient(0deg, var(--cafe) 46%, rgba(26, 23, 20, .7) 64%, rgba(26, 23, 20, .25)); } }
+@media (max-width: 900px) { .heroi-pag h1 em br { display: none; } }
+/* ---------- banca R5 (08/11/2026): título da abertura como bloco único; cards com respiro interno ---------- */
+.heroi h1 { line-height: .94; }
+.heroi h1 em { line-height: .94; }
+.heroi-pag h1 em { line-height: 1; }
+@media (max-width: 900px) {
+  .st-card { padding: 22px; }
+  .st-g { padding: 24px; }
+  .st-n { top: 16px; right: 16px; }
+}
+/* ---------- banca R6 (08/11/2026): acabamentos ---------- */
+.heroi-cartao { background: rgba(18, 15, 12, .92); border-color: rgba(232, 220, 200, .24); box-shadow: 0 34px 70px -18px rgba(0, 0, 0, .75), 0 0 0 1px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .07); }
+.qz-ops button { min-height: 56px; padding: 14px 18px; line-height: 1.35; gap: 14px; }

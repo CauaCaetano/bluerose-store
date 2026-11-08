@@ -432,3 +432,171 @@ p, li, dd, figcaption { text-wrap: pretty; }
 .caso:not(.ativo) .caso-tit, .caso:not(.ativo) figcaption, .caso:not(.ativo) .marca-agua, .caso:not(.ativo) .selo { opacity: 0; }
 /* abertura: o menu não invade a foto em 1280 e 1366 */
 @media (min-width: 961px) and (max-width: 1500px) { .heroi { grid-template-columns: 41% 1fr; } }
+
+/* ---------- rodada 3 (08/11/2026): banca rigorosa em tela real ---------- */
+/* topo amarrado à mesma grade de 1200 px do conteúdo (logo e menu nas margens das seções) */
+@media (min-width: 961px) {
+  .topo { padding: 0 max(24px, calc((100vw - 1200px) / 2)); }
+  /* menu mais enxuto: começa depois da foto e termina na margem do conteúdo */
+  .menu { gap: 2px; }
+  .dd-bt { font-size: 12px; letter-spacing: .07em; padding: 10px 7px; }
+  .topo-wa, .topo-ag { min-height: 48px; padding: 0 22px; font-size: 12px; }
+  .topo { gap: 12px; }
+}
+/* nada fixo na borda: sem aba vertical "Agendar avaliação" e sem coluna de redes sobre as fotos (o topo já tem Agendar e WhatsApp) */
+.aba-agenda, .lateral { display: none !important; }
+/* abertura sem faixa vazia antes da "Experiência"; parágrafo sem palavra sozinha */
+.heroi { min-height: 0; padding-bottom: 120px; }
+.heroi-sub { max-width: 28em; text-wrap: pretty; }
+/* carrossel: mesma margem interna em volta da foto, do título e da legenda */
+.caso { padding: 0 20px 24px; }
+.caso-tit { padding: 30px 10px 24px; }
+.caso figcaption { padding: 20px 4px 0; }
+/* link de chamada vira botão */
+.bt-mini, .caso figcaption .caso-link, .sv-link a { display: flex; align-items: center; justify-content: center; width: max-content; max-width: 100%; min-height: 44px; margin: 16px auto 0; padding: 0 22px; border: 1px solid var(--acc); border-radius: 999px; background: transparent; color: var(--tx); font: 600 12px/1.2 var(--f); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; text-align: center; transition: background .3s, color .3s; }
+.bt-mini:hover, .caso figcaption .caso-link:hover, .sv-link a:hover { background: var(--acc); color: var(--branco); }
+.sv-link a, .info4 .bt-mini { margin-left: 0; }
+.info4 .bt-mini { color: var(--tx); }
+.info4 .bt-mini:hover { color: var(--branco); }
+/* nomes na tabela de preços: texto da linha, sem sublinhado de chamada */
+.tabela tbody th a { text-decoration: none; border-bottom: 0; color: var(--tx); }
+.tabela tbody th a:hover { color: var(--acc-2); }
+@media (max-width: 560px) {
+  /* topo do celular só com logo e menu; o Agendar fica dentro do menu */
+  .topo-ag { display: none; }
+  .heroi h1 { font-size: clamp(58px, 17.5vw, 84px); line-height: 1.06; letter-spacing: -.01em; }
+  .heroi-txt { padding-top: 124px; }
+  .caso { padding: 0 14px 20px; }
+}
+
+/* ---------- lições dos vídeos (08/11/2026) ---------- */
+/* do espelho ao resultado: processo contado pela rolagem, foto presa com moldura cobre */
+.processo { background: var(--branco); padding: 130px var(--lado); }
+.pr-grade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 7vw, 100px); max-width: 1200px; margin: 0 auto; align-items: start; }
+.pr-fotos { position: sticky; top: 120px; aspect-ratio: 348 / 426; max-height: calc(100vh - 160px); overflow: hidden; outline: 1px solid var(--acc); outline-offset: 14px; background: var(--blush); }
+.pr-fotos img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.05); transition: opacity .8s cubic-bezier(.22, .61, .36, 1), transform 1.4s cubic-bezier(.22, .61, .36, 1); }
+.pr-fotos img.on { opacity: 1; transform: none; }
+.processo .pr-txt .olho { color: var(--acc-2); }
+.processo .pr-txt h2 { margin: 22px 0 10px; }
+.pr-passos { list-style: none; margin: 0; padding: 0; }
+.pr-passo { min-height: 56vh; display: flex; flex-direction: column; justify-content: center; border-bottom: 1px solid var(--blush-3); color: #8a7c78; transition: color .5s cubic-bezier(.22, .61, .36, 1); }
+.pr-passo.on { color: var(--tx); }
+.pr-n { font: 300 15px/1 var(--tit); letter-spacing: .1em; color: var(--acc-2); }
+.pr-passo h3 { font: 300 clamp(36px, 4vw, 56px)/1.1 var(--tit); margin: 14px 0 16px; color: inherit; }
+.pr-passo p { font-size: 16px; line-height: 1.9; max-width: 30em; color: inherit; }
+.pr-nota { font-size: 13px; color: var(--tx-2); margin-top: 20px; }
+@media (max-width: 960px) {
+  .processo { padding: 80px 16px; }
+  .pr-grade { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .processo .pr-txt { display: contents; }
+  .processo .pr-txt .olho { order: 0; } .processo .pr-txt h2 { order: 1; margin: 16px 0 34px; }
+  .pr-fotos { order: 2; top: 92px; z-index: 2; aspect-ratio: 16 / 11; outline-offset: 8px; margin: 0 8px; }
+  .pr-passos { order: 3; } .pr-nota { order: 4; }
+  .pr-passo { min-height: 42vh; }
+}
+@media (prefers-reduced-motion: reduce) { .pr-fotos img, .pr-passo { transition: none; } }
+
+/* dicas em vídeo numa faixa própria; o convite final ocupa a tela inteira, logo antes do rodapé */
+.escuro-dicas { padding: 100px 50px 90px; }
+.escuro-dicas h2 { margin-bottom: 50px; font-size: clamp(32px, 3.6vw, 48px); }
+.escuro-final, .escuro-curto { min-height: min(100svh, 900px); display: flex; flex-direction: column; justify-content: center; align-items: center; border-top: 1px solid rgba(255, 255, 255, .08); }
+.escuro-final .es-olho { position: relative; color: #e3a892; margin-bottom: 26px; }
+.escuro-final h2, .escuro-curto h2 { font-size: clamp(44px, 6.6vw, 96px); max-width: 12em; }
+.escuro-final .es-txt { position: relative; max-width: 34em; margin: 24px auto 0; font-size: 17px; color: #ead6cf; }
+.escuro-final .pilula { margin: 44px 0 0; }
+@media (max-width: 960px) { .escuro-dicas { padding: 70px 16px; } .escuro-final { padding: 90px 16px; } }
+
+/* agendamento em painel lateral, em passos, terminando no resumo */
+.agenda.ag-painel { margin: 0 0 0 auto; width: min(560px, 100vw); height: 100dvh; max-height: 100dvh; background: var(--branco); }
+.agenda.ag-painel[open] { display: block; animation: lado .42s cubic-bezier(.22, .61, .36, 1); }
+@keyframes lado { from { transform: translateX(100%); } }
+.ag-painel .ag-vaso, .ag-painel > .floreio { display: none; }
+.ag-painel .ag-fechar { right: 18px; top: 18px; }
+.ag-painel .ag-corpo { padding: 84px clamp(22px, 4vw, 48px) 110px; }
+.ag-prog { display: flex; gap: 6px; list-style: none; margin: 0 0 30px; padding: 0; }
+.ag-prog li { flex: 1; border-top: 2px solid var(--blush-3); padding-top: 8px; font: 600 10px/1.2 var(--f); letter-spacing: .1em; text-transform: uppercase; color: #8a7c78; }
+.ag-prog li.feito { border-color: var(--acc); }
+.ag-prog li.agora { border-color: var(--acc-2); color: var(--tx); }
+.ag-painel .ag-olho { font: 600 12px/1 var(--f); letter-spacing: .14em; color: var(--acc-2); }
+.ag-painel h2 { font: 300 clamp(32px, 3.4vw, 44px)/1.1 var(--tit); margin: 12px 0 10px; }
+.ag-painel .ag-sub { font-size: 15px; color: var(--tx-2); margin-bottom: 22px; }
+.ag-chips { display: grid; gap: 8px; }
+.ag-chip { display: flex; align-items: center; min-height: 52px; padding: 10px 20px; border: 1px solid var(--blush-3); border-radius: 999px; background: var(--branco); font: 500 15px/1.3 var(--f); text-align: left; cursor: pointer; transition: border-color .2s, background .2s; }
+.ag-chip:hover { border-color: var(--acc); }
+.ag-chip[aria-checked="true"] { border-color: var(--acc-2); background: var(--blush); box-shadow: inset 0 0 0 1px var(--acc-2); }
+.ag-pe { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--blush-3); }
+.pilula-cheia { background: var(--acc-2); border-color: var(--acc-2); color: var(--branco); }
+.pilula-cheia:hover { background: var(--tx); border-color: var(--tx); }
+.pilula:disabled { opacity: .4; cursor: default; }
+.ag-dados { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; max-width: none; }
+.ag-dados label { font: 600 11px/1.2 var(--f); letter-spacing: .12em; text-transform: uppercase; color: var(--acc-2); margin-top: 10px; }
+.ag-dados input.ruim { border-color: #a33b2a; }
+.ag-dados .ag-pe { grid-column: 1; }
+.ag-resumo { margin: 0; border-top: 1px solid var(--blush-3); }
+.ag-resumo div { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--blush-3); }
+.ag-resumo dt { font: 600 10.5px/1.6 var(--f); letter-spacing: .12em; text-transform: uppercase; color: var(--acc-2); }
+.ag-resumo dd { margin: 0; font-size: 15px; }
+.ag-demo { font-size: 13px; color: var(--tx-2); background: var(--blush); padding: 12px 14px; margin-top: 18px; }
+@media (max-width: 560px) { .agenda.ag-painel { width: 100vw; max-width: 100vw; } .ag-painel .ag-corpo { padding: 76px 18px 110px; } .ag-pe .pilula { padding: 0 18px; } }
+@media (prefers-reduced-motion: reduce) { .agenda.ag-painel[open] { animation: none; } }
+.ag-resumo + .ag-pe { border-top: 0; padding-top: 0; }
+.processo .pr-txt h2 { max-width: none; } .processo .pr-txt p:not(.olho) { margin-bottom: 0; font-size: 16px; line-height: 1.9; }
+
+/* ---------- rodada 4 (09/11/2026) ---------- */
+/* abertura: entrelinha justa no título; sem enfeites soltos fora da grade */
+.heroi h1 { line-height: 1.02; }
+.heroi h1 span + span { margin-top: .04em; }
+.floreio { display: none !important; }
+/* carrossel: selo com a mesma folga nos dois lados, nome protegido por um véu na base, laterais esmaecidas */
+.selo { left: 16px; top: 16px; padding: 8px 12px; }
+.caso-foto::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 42%; background: linear-gradient(transparent, rgba(40, 20, 16, .55)); pointer-events: none; }
+.marca-agua { z-index: 1; bottom: 22px; color: #fff; }
+.casos { position: relative; }
+.casos::before, .casos::after { content: ""; position: absolute; top: 0; bottom: 0; width: min(12vw, 170px); z-index: 2; pointer-events: none; }
+.casos::before { left: 0; background: linear-gradient(90deg, #fdf8f6, rgba(253, 248, 246, 0)); }
+.casos::after { right: 0; background: linear-gradient(270deg, #fdf8f6, rgba(253, 248, 246, 0)); }
+.car-nav, .aviso-foto { position: relative; z-index: 3; }
+/* cartões de tratamento: preço e duração sempre na mesma altura, no pé do cartão */
+.sv { align-items: stretch; }
+.sv .ic { align-self: center; }
+.sv > div { display: flex; flex-direction: column; }
+.sv dl { margin-top: auto; }
+.sv p { margin-bottom: 14px; }
+/* ícones com o mesmo traço, qualquer que seja o tamanho */
+.ic path, .ic circle, .ic rect, .ic ellipse, .ic line, .ic polyline { vector-effect: non-scaling-stroke; stroke-width: 1.6; }
+@media (max-width: 960px) { .casos::before, .casos::after { width: 24px; } }
+@media (max-width: 560px) {
+  /* celular: cartões da diferença mais compactos, sem vazios */
+  .dif { padding-top: 56px; padding-bottom: 80px; }
+  .dif h2 { margin: 28px 0 32px; }
+  .dif-grade { gap: 14px; }
+  .dif-top { padding: 22px 24px 18px; display: grid; grid-template-columns: 48px 1fr; gap: 16px; align-items: center; }
+  .dif-top .ic { width: 48px; height: 48px; margin: 0; }
+  .dif-c p { padding: 18px 24px 16px; }
+  .dif-c .seta { width: 52px; height: 52px; margin: 0 24px 22px; }
+  .dif-c .seta svg { width: 28px; }
+}
+@media (max-width: 960px) { .heroi { padding-bottom: 0; } }
+
+/* ---------- rodada 5 (09/11/2026) ---------- */
+/* abertura: parágrafo com entrelinha de leitura, bloco mais compacto e sem linhas onduladas atrás do texto */
+.heroi-sub { line-height: 1.6; font-size: 19px; margin: 26px 0 36px; max-width: 27em; }
+.heroi .ondas { display: none; }
+.heroi { background: var(--branco); }
+.heroi-txt .olho { margin-bottom: 26px; }
+@media (min-width: 961px) { .heroi-txt { padding-top: 0; align-self: center; } .heroi { align-items: center; min-height: min(100vh, 1000px); padding-bottom: 0; } .heroi-fotos { height: min(100vh, 1000px); } }
+@media (max-width: 960px) { .heroi-sub { font-size: 16.5px; } }
+/* carrossel: aviso "Foto ilustrativa" sai de cima da foto e vai para a legenda */
+.caso .selo { display: none; }
+.caso figcaption::before { content: "Foto ilustrativa"; font: 700 10.5px/1 var(--f); letter-spacing: .1em; text-transform: uppercase; color: var(--acc-2); display: block; margin-bottom: 8px; }
+/* celular: mais respiro lateral nos cartões */
+@media (max-width: 560px) {
+  .dif, .servicos { padding-left: 20px; padding-right: 20px; }
+  .sv { padding: 26px 24px; }
+}
+@media (max-width: 960px) {
+  /* celular: a foto da clínica abre a primeira tela, o texto vem logo abaixo */
+  .heroi-fotos { order: -2; height: 34vh; min-height: 230px; max-height: 320px; margin-top: 84px; }
+  .heroi-txt { order: -1; padding-top: 30px; padding-bottom: 56px; }
+}
+@media (max-width: 560px) { .heroi-txt { padding-top: 28px; } }

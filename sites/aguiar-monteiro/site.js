@@ -30,7 +30,13 @@
     $$('.ar').forEach(function (el) { io.observe(el); });
     if (!calmo) {
       var rv = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('vis'); rv.unobserve(e.target); } }); }, { rootMargin: '0px 0px -12% 0px' });
-      $$('.tb-grade > *, .eq-grade > *, .pg-grade > *, .sb-grade > *, .vi-bloco, .ca-bloco, .eq-lista > article, .pub-lista li, .artigo, .faq details').forEach(function (el, i) { el.classList.add('revela'); el.style.transitionDelay = (i % 4) * 0.08 + 's'; rv.observe(el); });
+      // títulos (h1/h2) ficam parados: bloco com título não sobe inteiro, só as partes sem título
+      var alvos = [];
+      $$('.tb-grade > *, .eq-grade > *, .pg-grade > *, .sb-grade > *, .vi-bloco, .ca-bloco, .eq-lista > article, .pub-lista li, .artigo, .faq details').forEach(function (el) {
+        if (!el.querySelector('h1, h2')) { alvos.push(el); return; }
+        Array.prototype.forEach.call(el.children, function (f) { if (!f.matches('h1, h2') && !f.querySelector('h1, h2')) alvos.push(f); });
+      });
+      alvos.forEach(function (el, i) { el.classList.add('revela'); el.style.transitionDelay = (i % 4) * 0.08 + 's'; rv.observe(el); });
     }
   } else { $$('.ar').forEach(function (el) { el.classList.add('ativo'); }); }
 
@@ -95,4 +101,139 @@
     window.BR_WA && window.BR_WA('Olá, Aguiar & Monteiro! Sou ' + n + ', saí da empresa ' + (c.emp.value.trim() || '(não informada)') + ' e quero falar com um advogado sobre o meu caso.' + (c.sigilo.checked ? ' Peço sigilo total.' : ''));
     c.innerHTML = '<p class="enviado">Pronto, ' + n.split(' ')[0].replace(/[<>&"]/g, '') + '. A mensagem abriu no WhatsApp: é só enviar por lá. O escritório retorna o contato pelo canal que você escolher.</p>';
   });
+})();
+
+// ---------- agendar conversa: painel lateral em 3 passos (assunto, dia e período, contato) e confirmação com resumo ----------
+// Demonstração: nada é enviado. Num site real, o pedido chega no WhatsApp e no e-mail do escritório.
+(function () {
+  'use strict';
+  var doc = document, calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ASSUNTOS = ['Fui demitido e não recebi tudo', 'Horas extras', 'Demitido doente ou machucado', 'Acidente no trabalho', 'Trabalho sem carteira', 'Humilhação ou assédio', 'Grávida e demitida', 'Outro problema'];
+  var PAGINA = { rescisao: 0, 'horas-extras': 1, acidente: 3, carteira: 4, 'assedio-moral': 5, gestantes: 6 };
+  var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  function diasUteis(n) {
+    var r = [], d = new Date(); d.setHours(12, 0, 0, 0);
+    while (r.length < n) { d.setDate(d.getDate() + 1); var w = d.getDay(); if (w > 0 && w < 6) r.push(new Date(d)); }
+    return r;
+  }
+  var SEM = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+  var MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  var painel, veu, passo = 1, dados = {}, voltaFoco = null;
+
+  function monta() {
+    veu = doc.createElement('div'); veu.className = 'ag-veu'; veu.hidden = true;
+    painel = doc.createElement('aside');
+    painel.className = 'ag'; painel.hidden = true;
+    painel.setAttribute('role', 'dialog'); painel.setAttribute('aria-modal', 'true'); painel.setAttribute('aria-labelledby', 'ag-t');
+    var dias = diasUteis(6).map(function (d, i) {
+      var v = SEM[d.getDay()] + ', ' + d.getDate() + ' de ' + MES[d.getMonth()];
+      return '<label class="ag-op ag-dia"><input type="radio" name="dia" value="' + v + '"' + (i === 0 ? ' checked' : '') + '><span><small>' + SEM[d.getDay()] + '</small><b>' + d.getDate() + '</b><small>' + MES[d.getMonth()] + '</small></span></label>';
+    }).join('');
+    painel.innerHTML =
+      '<div class="ag-cab"><p class="ag-passo" aria-live="polite">Passo <b>1</b> de 3</p><button type="button" class="ag-x" aria-label="Fechar">×</button></div>' +
+      '<h2 id="ag-t" class="ag-tit">Agendar conversa</h2>' +
+      '<ol class="ag-trilho" aria-hidden="true"><li class="on"></li><li></li><li></li></ol>' +
+      '<form class="ag-f" novalidate>' +
+      '<fieldset class="ag-et" data-p="1"><legend>O que aconteceu?</legend><div class="ag-grade">' +
+      ASSUNTOS.map(function (a, i) { return '<label class="ag-op"><input type="radio" name="assunto" value="' + a + '"' + (i === 0 ? ' checked' : '') + '><span>' + a + '</span></label>'; }).join('') +
+      '</div></fieldset>' +
+      '<fieldset class="ag-et" data-p="2" hidden><legend>Qual dia e período?</legend><div class="ag-dias">' + dias + '</div>' +
+      '<div class="ag-grade ag-per"><label class="ag-op"><input type="radio" name="periodo" value="manhã (9h às 12h)" checked><span>Manhã</span></label><label class="ag-op"><input type="radio" name="periodo" value="tarde (13h às 18h)"><span>Tarde</span></label></div>' +
+      '<div class="ag-grade ag-per"><label class="ag-op"><input type="radio" name="forma" value="no escritório" checked><span>No escritório</span></label><label class="ag-op"><input type="radio" name="forma" value="por vídeo no WhatsApp"><span>Por vídeo</span></label></div></fieldset>' +
+      '<fieldset class="ag-et" data-p="3" hidden><legend>Como falamos com você?</legend>' +
+      '<label class="ag-campo">Seu nome<input name="nome" autocomplete="name"></label>' +
+      '<label class="ag-campo">WhatsApp com DDD<input name="tel" inputmode="tel" autocomplete="tel" placeholder="(19) 99999-9999"></label>' +
+      '<label class="ag-ck"><input type="checkbox" name="sigilo" checked><span>Quero sigilo: a empresa não fica sabendo do contato.</span></label>' +
+      '<label class="ag-ck"><input type="checkbox" name="priv"><span>Li a <a href="privacidade.html">política de privacidade</a> e concordo com o uso destes dados para o retorno.</span></label></fieldset>' +
+      '<p class="ag-erro" aria-live="polite"></p>' +
+      '<div class="ag-pe"><button type="button" class="ag-volta" hidden>Voltar</button><button type="submit" class="ag-segue">Continuar</button></div>' +
+      '</form>' +
+      '<div class="ag-ok" hidden tabindex="-1"></div>';
+    doc.body.appendChild(veu); doc.body.appendChild(painel);
+    var f = painel.querySelector('.ag-f');
+    painel.querySelector('.ag-x').addEventListener('click', fecha);
+    veu.addEventListener('click', fecha);
+    painel.querySelector('.ag-volta').addEventListener('click', function () { mostra(passo - 1); });
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var er = painel.querySelector('.ag-erro'); er.textContent = '';
+      if (passo < 3) { mostra(passo + 1); return; }
+      var n = f.nome.value.trim(), t = f.tel.value.replace(/\D/g, '');
+      if (n.length < 2) { er.textContent = 'Escreva o seu nome.'; f.nome.focus(); return; }
+      if (t.length < 10) { er.textContent = 'Confira o WhatsApp com DDD.'; f.tel.focus(); return; }
+      if (!f.priv.checked) { er.textContent = 'Marque a concordância com a política de privacidade.'; return; }
+      confirma(f);
+    });
+    doc.addEventListener('keydown', function (e) {
+      if (painel.hidden) return;
+      if (e.key === 'Escape') fecha();
+      if (e.key === 'Tab') {
+        var fo = [].filter.call(painel.querySelectorAll('button, input, a[href], [tabindex="-1"]'), function (x) { return x.offsetParent !== null; });
+        if (!fo.length) return;
+        if (e.shiftKey && doc.activeElement === fo[0]) { e.preventDefault(); fo[fo.length - 1].focus(); }
+        else if (!e.shiftKey && doc.activeElement === fo[fo.length - 1]) { e.preventDefault(); fo[0].focus(); }
+      }
+    });
+  }
+  function mostra(p) {
+    passo = p;
+    [].forEach.call(painel.querySelectorAll('.ag-et'), function (et) { et.hidden = +et.dataset.p !== p; });
+    [].forEach.call(painel.querySelectorAll('.ag-trilho li'), function (li, i) { li.className = i < p ? 'on' : ''; });
+    painel.querySelector('.ag-passo b').textContent = p;
+    painel.querySelector('.ag-volta').hidden = p === 1;
+    painel.querySelector('.ag-segue').textContent = p === 3 ? 'Confirmar pedido' : 'Continuar';
+    var alvo = painel.querySelector('.ag-et[data-p="' + p + '"] input'); if (alvo) alvo.focus({ preventScroll: true });
+  }
+  function confirma(f) {
+    var nome = f.nome.value.trim().split(' ')[0];
+    var ok = painel.querySelector('.ag-ok');
+    ok.innerHTML = '<p class="ag-selo" aria-hidden="true">✓</p><h3>Pedido registrado, ' + esc(nome) + '.</h3>' +
+      '<dl class="ag-res"><div><dt>Assunto</dt><dd>' + esc(f.assunto.value) + '</dd></div><div><dt>Quando</dt><dd>' + esc(f.dia.value) + ', ' + esc(f.periodo.value) + '</dd></div><div><dt>Onde</dt><dd>' + esc(f.forma.value) + '</dd></div><div><dt>Retorno</dt><dd>WhatsApp ' + esc(f.tel.value) + (f.sigilo.checked ? ', com sigilo' : '') + '</dd></div></dl>' +
+      '<p class="ag-nota">O escritório confirma o horário pelo WhatsApp. Leve carteira de trabalho, holerites e o termo de rescisão, se tiver.</p>' +
+      '<p class="ag-demo">Demonstração: nada foi enviado. Num site real, o pedido chega no WhatsApp e no e-mail do escritório.</p>' +
+      '<button type="button" class="ag-fim">Fechar</button>';
+    f.hidden = true; painel.querySelector('.ag-trilho').hidden = true; painel.querySelector('.ag-passo').textContent = 'Pronto';
+    ok.hidden = false; painel.scrollTop = 0; ok.focus();
+    ok.querySelector('.ag-fim').addEventListener('click', fecha);
+  }
+  function abre(assunto) {
+    if (!painel) monta();
+    var f = painel.querySelector('.ag-f'), ok = painel.querySelector('.ag-ok');
+    if (!ok.hidden) { ok.hidden = true; f.hidden = false; f.reset(); painel.querySelector('.ag-trilho').hidden = false; painel.querySelector('.ag-passo').innerHTML = 'Passo <b>1</b> de 3'; }
+    if (assunto != null && ASSUNTOS[assunto]) f.assunto.value = ASSUNTOS[assunto];
+    painel.querySelector('.ag-erro').textContent = '';
+    voltaFoco = doc.activeElement;
+    veu.hidden = false; painel.hidden = false;
+    doc.documentElement.classList.add('ag-aberto');
+    requestAnimationFrame(function () { veu.classList.add('on'); painel.classList.add('on'); });
+    mostra(1);
+  }
+  function fecha() {
+    painel.classList.remove('on'); veu.classList.remove('on');
+    doc.documentElement.classList.remove('ag-aberto');
+    setTimeout(function () { painel.hidden = true; veu.hidden = true; }, calmo ? 0 : 380);
+    if (voltaFoco && voltaFoco.focus) voltaFoco.focus({ preventScroll: true });
+  }
+  doc.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-agendar]'); if (!a) return;
+    e.preventDefault(); e.stopPropagation();
+    var pg = (location.pathname.match(/area-([\w-]+)\.html/) || [])[1];
+    var as = a.dataset.agendar !== '' ? +a.dataset.agendar : (pg in PAGINA ? PAGINA[pg] : null);
+    abre(as);
+  }, true);
+})();
+
+// ---------- como funciona: a foto acompanha o passo que está no meio da tela ----------
+(function () {
+  var passos = [].slice.call(document.querySelectorAll('.pr-passo')), fotos = [].slice.call(document.querySelectorAll('.pr-fotos img'));
+  if (!passos.length || !('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var i = +e.target.dataset.i;
+      passos.forEach(function (p, k) { p.classList.toggle('on', k === i); });
+      fotos.forEach(function (f, k) { f.classList.toggle('on', k === i); });
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  passos.forEach(function (p) { io.observe(p); });
 })();

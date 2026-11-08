@@ -318,14 +318,14 @@
   if (voo) (function () {
     var imgs = $$('img', voo), bt = $('[data-voo-bt]', voo), leg = $('[data-voo-leg]', voo), i = 0, t = null;
     var legs = []; try { legs = JSON.parse(luz.getAttribute('data-luz-dados')).map(function (f) { return f.leg; }); } catch (e) {}
-    var parado = matchMedia('(prefers-reduced-motion: reduce)').matches, visivel = false;
+    var parado = true, visivel = false; /* só avança quando a pessoa pede */
     function passo() {
       imgs[i].classList.remove('on'); i = (i + 1) % imgs.length;
       void imgs[i].offsetWidth; imgs[i].classList.add('on');
       if (legs[i]) leg.textContent = legs[i];
     }
     function liga() { clearInterval(t); if (!parado && visivel) t = setInterval(passo, 6000); }
-    function marca() { bt.textContent = parado ? 'Continuar' : 'Pausar'; bt.setAttribute('aria-pressed', parado ? 'false' : 'true'); }
+    function marca() { bt.textContent = parado ? 'Passar as fotos' : 'Pausar'; bt.setAttribute('aria-pressed', parado ? 'false' : 'true'); }
     bt.addEventListener('click', function () { parado = !parado; marca(); liga(); });
     if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { visivel = es[0].isIntersecting; liga(); }).observe(voo);
     marca();
@@ -669,15 +669,21 @@
     g.rioNome = /córrego/i.test(p.aguaRes) ? 'Córrego' : /ribeirão/i.test(p.aguaRes) ? 'Ribeirão' : 'Rio';
     var tr = lado > 0 ? Math.PI / 2 : -Math.PI / 2, k;
     var nn = conta(/(\d+)\s+nascentes?/i, p.aguaRes, p.agua.indexOf('nascente') > -1 ? 1 : 0);
-    g.nascentes = []; for (k = 0; k < nn; k++) g.nascentes.push(g.ponto(0.8 + r() * 0.06, tr + (nn > 1 ? (k / (nn - 1) - 0.5) * 2.6 : 0.6)));
+    g.dentro = function (q) { var c = q[0] > 30 && q[0] < 570 && q[1] > 26 && q[1] < 314 && dentro(q[0], q[1], pol) && dentro(q[0] + 14, q[1], pol) && dentro(q[0] - 14, q[1], pol) && dentro(q[0], q[1] + 14, pol) && dentro(q[0], q[1] - 14, pol); return c; };
+    g.pontoDentro = function (c, t) { var q = g.ponto(c, t); while (!g.dentro(q) && c > 0.1) { c -= 0.04; q = g.ponto(c, t); } return q; };
+    g.nascentes = []; for (k = 0; k < nn; k++) g.nascentes.push(g.pontoDentro(0.8 + r() * 0.06, tr + (nn > 1 ? (k / (nn - 1) - 0.5) * 2.6 : 0.6)));
     var nr = conta(/(\d+)\s+represas?/i, p.aguaRes, /represa/i.test(p.aguaRes) ? 1 : 0), lago = /lago/i.test(p.aguaRes);
     var tot2 = nr + (lago ? 1 : 0); g.represas = [];
-    for (k = 0; k < tot2; k++) { var pt = g.ponto(0.66 + r() * 0.1, tr + (tot2 > 1 ? (k / (tot2 - 1) - 0.5) * 1.9 : -0.5)); g.represas.push({ x: pt[0], y: pt[1], rx: 17 + r() * 9, ry: 9 + r() * 5, rot: r() * 50 - 25, lago: lago && k === tot2 - 1 }); }
+    for (k = 0; k < tot2; k++) { var pt = g.pontoDentro(0.55 + r() * 0.08, tr + (tot2 > 1 ? (k / (tot2 - 1) - 0.5) * 1.9 : -0.5)); g.represas.push({ x: pt[0], y: pt[1], rx: 17 + r() * 9, ry: 9 + r() * 5, rot: r() * 50 - 25, lago: lago && k === tot2 - 1 }); }
     g.temPoco = p.agua.indexOf('poco') > -1 || /poço/i.test(p.aguaRes);
     var np = conta(/(\d+)\s+piv/i, p.aguaRes, 0);
-    g.pivos = []; for (k = 0; k < np; k++) g.pivos.push([sx + (k - (np - 1) / 2) * 92, sy + 24 * lado + (k % 2 ? -18 : 0)]);
-    g.sede = g.ponto(0.4, tr + 0.75);
+    g.pivos = []; for (k = 0; k < np; k++) g.pivos.push([sx + (k - (np - 1) / 2) * 92, sy + 62 * lado + (k % 2 ? 14 * lado : 0)]);
+    g.sede = g.pontoDentro(0.4, tr + 0.75);
     g.rioEm = function (x) { return g.rioY + 11 * Math.sin(x / 62 + g.rioF) + 6 * Math.sin(x / 23 + g.rioF * 2); };
+    // represas longe do rio e da divisa; sede fora dos pivôs
+    var folga = function (q, raio) { return dentro(q[0] + raio, q[1], pol) && dentro(q[0] - raio, q[1], pol) && dentro(q[0], q[1] + 18, pol) && dentro(q[0], q[1] - 18, pol) && (!g.temRio || Math.abs(q[1] - g.rioEm(q[0])) > 40); };
+    g.represas.forEach(function (e) { var n = 0; while (!folga([e.x, e.y], e.rx + 12) && n < 20) { e.x += (sx - e.x) * 0.12; e.y += (sy - e.y) * 0.12; n++; } });
+    g.pivos.forEach(function (q) { var dx = g.sede[0] - q[0], dy = g.sede[1] - q[1]; if (dx * dx + dy * dy < 56 * 56) { var t = Math.atan2(g.sede[1] - sy, g.sede[0] - sx) + Math.PI; g.sede = g.pontoDentro(0.42, t); } });
     return g;
   }
 
@@ -707,7 +713,9 @@
     var niveis = []; for (var v = Math.ceil((g.lo + 1) / passo) * passo; v < g.hi; v += passo) niveis.push(v);
     s += '<g class="cm-l" data-camada="altitude">';
     niveis.forEach(function (v, i) { var c = 1 - (v - g.lo) / amp; s += '<path d="' + g.anel(c) + '" fill="#fff" fill-opacity=".06" stroke="#1f2a22" stroke-opacity="' + (i % 2 ? '.42' : '.66') + '" stroke-width="' + (i % 2 ? '1' : '1.6') + '"/>'; });
-    niveis.forEach(function (v, i) { if (niveis.length > 5 && i % 2) return; var c = 1 - (v - g.lo) / amp, q = g.ponto(c, -0.8 + i * 0.1); s += '<text x="' + q[0].toFixed(0) + '" y="' + q[1].toFixed(0) + '" class="cm-cota">' + nf(v) + '</text>'; });
+    var obst = [g.sede, [g.sx, g.sy]].concat(g.nascentes, g.pivos, g.represas.map(function (e) { return [e.x, e.y]; }));
+    var longe = function (q) { for (var o = 0; o < obst.length; o++) { var dx = q[0] - obst[o][0], dy = q[1] - obst[o][1]; if (dx * dx + dy * dy < 44 * 44) return false; } if (g.temRio && Math.abs(q[1] - g.rioEm(q[0])) < 26) return false; return true; };
+    var cada = Math.max(1, Math.ceil(niveis.length / 3)); niveis.forEach(function (v, i) { if (i % cada) return; var c = 1 - (v - g.lo) / amp, q = null; for (var a = 0; a < 12 && !q; a++) { var qq = g.ponto(c, -0.8 + i * 0.12 + a * 0.52); if (g.dentro(qq) && longe(qq)) q = qq; } if (!q) return; s += '<text x="' + q[0].toFixed(0) + '" y="' + q[1].toFixed(0) + '" class="cm-cota">' + nf(v) + '</text>'; });
     s += '</g>';
     s += '<g class="cm-l" data-camada="agua">';
     if (g.temRio) { var rp = rioPath(g); s += '<path d="' + rp + '" fill="none" stroke="url(#cm-app-' + uid + ')" stroke-width="34"/><path d="' + rp + '" fill="none" stroke="#fff" stroke-width="7" stroke-opacity=".8"/><path d="' + rp + '" fill="none" stroke="#3f7f99" stroke-width="4.2" stroke-linecap="round"/>'; }
@@ -715,6 +723,7 @@
     g.represas.forEach(function (e) { s += '<ellipse cx="' + e.x.toFixed(1) + '" cy="' + e.y.toFixed(1) + '" rx="' + e.rx.toFixed(1) + '" ry="' + e.ry.toFixed(1) + '" transform="rotate(' + e.rot.toFixed(0) + ' ' + e.x.toFixed(1) + ' ' + e.y.toFixed(1) + ')" fill="#5b93aa" stroke="#fff" stroke-width="1.8"/>'; });
     var rApp = Math.min(18, Math.max(5, 50 / g.mpx));
     g.nascentes.forEach(function (q) { s += '<circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="' + rApp.toFixed(1) + '" fill="none" stroke="#2f6f88" stroke-width="1.1" stroke-dasharray="2 2"/><circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="3.6" fill="#2f6f88" stroke="#fff" stroke-width="1.4"/>'; });
+    if (g.temPoco) s += '<circle cx="' + (g.sede[0] + 22).toFixed(1) + '" cy="' + (g.sede[1] + 4).toFixed(1) + '" r="4.5" fill="#fff" stroke="#2f6f88" stroke-width="2"/>';
     s += '</g></g>';
     s += '<polygon points="' + polStr + '" fill="none" stroke="#1d3a2b" stroke-width="2.4" stroke-dasharray="9 4 2 4"/>';
     var alvoM = [20, 50, 100, 200, 250, 500, 1000, 2000].filter(function (m) { return m / g.mpx >= 60; })[0] || 2000, lpx = alvoM / g.mpx;
@@ -735,30 +744,28 @@
   function marcadores(g) {
     var p = g.p, m = [];
     var benf = p.benf.map(function (b) { return BENF[b] || b; }).join(', ');
-    m.push({ c: 'base', ic: 'sede', x: g.sede[0], y: g.sede[1], t: 'Sede e benfeitorias', d: benf.charAt(0).toUpperCase() + benf.slice(1) + '.' + (p.energia ? ' Energia: ' + p.energia + '.' : '') });
-    m.push({ c: 'altitude', ic: 'topo', x: g.sx, y: g.sy, t: 'Ponto mais alto: ' + nf(g.hi) + ' m', d: 'Relevo ' + String(p.topoTxt || p.topo).toLowerCase() + ', de ' + nf(g.lo) + ' a ' + nf(g.hi) + ' m de altitude.' });
-    if (g.nascentes.length) m.push({ c: 'agua', ic: 'agua', x: g.nascentes[0][0], y: g.nascentes[0][1], t: g.nascentes.length > 1 ? g.nascentes.length + ' nascentes' : 'Nascente', d: p.aguaRes + '. O círculo tracejado marca a APP de 50 m em volta de cada nascente.' });
-    if (g.represas.length) { var e = g.represas[0]; m.push({ c: 'agua', ic: 'agua', x: e.x, y: e.y, t: e.lago ? 'Lago' : (g.represas.length > 1 ? g.represas.length + ' represas' : 'Represa'), d: 'Espelho d’água para irrigação, gado ou lazer. Áreas e outorgas conferidas na visita técnica.' }); }
-    if (g.temPoco) m.push({ c: 'agua', ic: 'poco', x: g.sede[0] + 30, y: g.sede[1] + 18, t: 'Poço tubular', d: 'Abastece sede e casas. A vazão está na ficha técnica (exemplo).' });
-    if (g.pivos.length) m.push({ c: 'agua', ic: 'pivo', x: g.pivos[0][0], y: g.pivos[0][1], t: g.pivos.length + ' pivôs centrais', d: 'Irrigação por pivô com outorga em vigor (exemplo). Cada círculo é a área irrigada de um pivô.' });
-    if (g.temRio) { var xr = g.lado > 0 ? 470 : 140; m.push({ c: 'agua', ic: 'agua', x: xr, y: g.rioEm(xr), t: g.rioNome + ' na divisa', d: 'A faixa hachurada é a APP de beira de rio, preservada e declarada no CAR.' }); }
-    // afasta ícones sobrepostos (área de toque de 44 px também no celular)
-    for (var i = 1; i < m.length; i++) {
-      for (var volta = 0; volta < 12; volta++) {
-        var perto = null;
-        for (var j = 0; j < i; j++) { var dx = m[i].x - m[j].x, dy = m[i].y - m[j].y; if (dx * dx + dy * dy < 72 * 72) { perto = [dx, dy]; break; } }
-        if (!perto) break;
-        var dd = Math.sqrt(perto[0] * perto[0] + perto[1] * perto[1]) || 1;
-        m[i].x = Math.min(565, Math.max(35, m[i].x + perto[0] / dd * 40 + (dd < 2 ? 40 : 0)));
-        m[i].y = Math.min(305, Math.max(30, m[i].y + perto[1] / dd * 40));
+    // cada ícone fica em cima do próprio elemento desenhado; entre vários (nascentes, represas, pivôs),
+    // usa o primeiro que não encosta em outro ícone. Se nenhum couber, o item fica só na legenda.
+    var cands = [
+      { c: 'base', ic: 'sede', pos: [g.sede], t: 'Sede e benfeitorias', d: benf.charAt(0).toUpperCase() + benf.slice(1) + '.' + (p.energia ? ' Energia: ' + p.energia + '.' : '') },
+      { c: 'altitude', ic: 'topo', pos: [[g.sx, g.sy]], t: 'Ponto mais alto: ' + nf(g.hi) + ' m', d: 'Relevo ' + String(p.topoTxt || p.topo).toLowerCase() + ', de ' + nf(g.lo) + ' a ' + nf(g.hi) + ' m de altitude.' }
+    ];
+    if (g.pivos.length) cands.push({ c: 'agua', ic: 'pivo', pos: g.pivos, t: g.pivos.length + ' pivôs centrais', d: 'Irrigação por pivô com outorga em vigor (exemplo). Cada círculo é a área irrigada de um pivô.' });
+    if (g.represas.length) cands.push({ c: 'agua', ic: 'agua', pos: g.represas.map(function (e) { return [e.x, e.y]; }), t: g.represas[0].lago && g.represas.length === 1 ? 'Lago' : (g.represas.length > 1 ? g.represas.length + ' represas e lagos' : 'Represa'), d: 'Espelho d’água para irrigação, gado ou lazer. Áreas e outorgas conferidas na visita técnica.' });
+    if (g.nascentes.length) cands.push({ c: 'agua', ic: 'agua', pos: g.nascentes, t: g.nascentes.length > 1 ? g.nascentes.length + ' nascentes' : 'Nascente', d: p.aguaRes + '. O círculo tracejado marca a APP de 50 m em volta de cada nascente.' });
+    cands.forEach(function (cd) {
+      for (var k = 0; k < cd.pos.length; k++) {
+        var q = cd.pos[k], livre = true;
+        for (var j = 0; j < m.length; j++) { var dx = q[0] - m[j].x, dy = q[1] - m[j].y; if (dx * dx + dy * dy < 84 * 84) { livre = false; break; } }
+        if (livre) { m.push({ c: cd.c, ic: cd.ic, x: q[0], y: q[1], t: cd.t, d: cd.d }); return; }
       }
-    }
+    });
     return m;
   }
 
   function legenda(g, l) {
     var s = '';
-    if (l.solo) s += '<div class="cm-leg-g"><h4>Solo</h4><ul>' + g.solos.map(function (so) { return '<li><i style="background:' + so.cor + '"></i><span>' + esc(so.nome) + '</span><b>' + nf(so.pct * 100) + '% · ' + nf(so.ha, so.ha < 10 ? 1 : 0) + ' ha</b></li>'; }).join('') + '</ul></div>';
+    if (l.solo) s += '<div class="cm-leg-g"><h4>Solo</h4><ul>' + g.solos.map(function (so) { return '<li><i style="background:' + so.cor + '"></i><span>' + esc(so.nome) + '<small>' + nf(so.pct * 100) + '% da área · ' + nf(so.ha, so.ha < 10 ? 1 : 0) + ' ha</small></span></li>'; }).join('') + '</ul></div>';
     if (l.altitude) s += '<div class="cm-leg-g"><h4>Altitude</h4><ul><li><i class="cm-i-curva"></i><span>Curvas de nível a cada ' + passoDe(g.hi - g.lo) + ' m</span></li><li><i class="cm-i-topo"></i><span>De ' + nf(g.lo) + ' a ' + nf(g.hi) + ' m · relevo ' + esc(String(g.p.topoTxt || g.p.topo).toLowerCase()) + '</span></li></ul></div>';
     if (l.agua) {
       var it = [];
@@ -766,11 +773,11 @@
       if (g.nascentes.length) it.push('<li><i class="cm-i-nasc"></i><span>Nascentes</span><b>' + g.nascentes.length + '</b></li>');
       if (g.represas.length) it.push('<li><i class="cm-i-rep"></i><span>Represas e lagos</span><b>' + g.represas.length + '</b></li>');
       if (g.pivos.length) it.push('<li><i class="cm-i-pivo"></i><span>Pivôs centrais</span><b>' + g.pivos.length + '</b></li>');
-      if (g.temPoco) it.push('<li><i class="cm-i-poco"></i><span>Poço tubular</span><b>1</b></li>');
+      if (g.temPoco) it.push('<li><i class="cm-i-poco"></i><span>Poço tubular (ao lado da sede)</span><b>1</b></li>');
       s += '<div class="cm-leg-g"><h4>Água</h4><ul>' + it.join('') + '</ul></div>';
     }
     if (!s) s = '<p class="cm-vazio">Todas as camadas estão desligadas. Ligue uma delas para ver a legenda.</p>';
-    s += '<p class="cm-leg-rod">Divisa em traço e ponto · sede em quadrado · escala gráfica aproximada</p>';
+    s += '<p class="cm-leg-rod">Divisa da propriedade em traço e ponto. Escala gráfica aproximada.</p>';
     return s;
   }
 
@@ -845,4 +852,243 @@
     if (s) s.addEventListener('change', function () { atual = lista.filter(function (p) { return p.cod === s.value; })[0]; desenha(); });
     desenha();
   });
+})();
+
+/* ---------------- rodada 7: busca do hero recolhida no celular, CTA final e painel "Agendar visita" em passos */
+(function () {
+  'use strict';
+  var d = document;
+  var $ = function (s, el) { return (el || d).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || d).querySelectorAll(s)); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); }
+  var CAL = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>';
+  var SETA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+  // busca rápida do hero: no celular fica recolhida num botão
+  var btB = $('.bt-busca'), formB = $('#busca-rapida');
+  if (btB && formB) btB.addEventListener('click', function () {
+    var abre = !formB.classList.contains('aberta');
+    formB.classList.toggle('aberta', abre);
+    btB.setAttribute('aria-expanded', abre ? 'true' : 'false');
+    if (abre) { var c = $('select', formB); if (c) c.focus(); }
+  });
+
+  // bloco de CTA final em tela cheia (páginas que ainda não têm; a ficha em PDF fica de fora)
+  var rod = $('footer.rodape');
+  if (rod && !$('.cta-final') && !$('.folha')) {
+    var sec = d.createElement('section');
+    sec.className = 'cta-final'; sec.setAttribute('aria-labelledby', 'h-cta');
+    sec.innerHTML = '<img src="img/capa-m.webp" srcset="img/capa-m.webp 800w, img/capa.webp 1600w" sizes="100vw" width="1600" height="900" alt="Lavoura e mata nativa vistas de drone no interior paulista" loading="lazy">' +
+      '<div class="w"><p class="kicker">Visita acompanhada</p><h2 id="h-cta">Pise na terra <em>antes.</em></h2>' +
+      '<p class="lead">Escolha a propriedade, o dia e a forma: presencial, sobrevoo com drone ou vídeo com o consultor.</p>' +
+      '<div class="bts"><button type="button" class="bt bt-b" data-visita>' + CAL + 'Agendar visita</button><a class="bt bt-l" href="propriedades.html">Ver as propriedades ' + SETA + '</a></div></div>';
+    var main = $('main');
+    if (main && main.parentNode === rod.parentNode) main.appendChild(sec); else rod.parentNode.insertBefore(sec, rod);
+  }
+
+  // ---------------- painel lateral: agendar visita (envio simulado)
+  var TN = window.TN || { props: [] };
+  var props = (TN.props || []).slice().sort(function (a, b) { return a.cod < b.cod ? -1 : 1; });
+  var FORMAS = [
+    { v: 'presencial', t: 'Visita presencial', s: 'Consultor acompanha na propriedade, depois do termo de confidencialidade.' },
+    { v: 'sobrevoo', t: 'Visita com sobrevoo de drone', s: 'Percurso a pé e voo de drone sobre os talhões, se o tempo permitir.' },
+    { v: 'video', t: 'Videochamada com o consultor', s: 'Ficha técnica, mapas e fotos aéreas comentados, sem sair de casa.' }
+  ];
+  var HORAS = ['8h', '10h', '14h', '16h'];
+  var NOMES_PASSO = ['Propriedade', 'Data', 'Forma', 'Seus dados'];
+  var DIAS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+  var MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+  function datas() {
+    var r = [], x = new Date(); x.setHours(12, 0, 0, 0);
+    while (r.length < 8) {
+      x.setDate(x.getDate() + 1);
+      if (x.getDay() === 0) continue;
+      r.push({ v: x.toISOString().slice(0, 10), dia: DIAS[x.getDay()], n: x.getDate(), mes: MESES[x.getMonth()], longo: DIAS[x.getDay()] + ', ' + x.getDate() + ' de ' + MESES[x.getMonth()] });
+    }
+    return r;
+  }
+
+  var fundo, painel, corpo, rodp, btVolta, btSegue, passosEl, titulo, erroEl, antes = null, passo = 0;
+  var est = { cod: '', data: '', forma: '', hora: '', nome: '', tel: '', email: '' };
+
+  function monta() {
+    fundo = d.createElement('div'); fundo.className = 'vis-fundo'; fundo.hidden = true;
+    painel = d.createElement('div'); painel.className = 'vis'; painel.hidden = true;
+    painel.setAttribute('role', 'dialog'); painel.setAttribute('aria-modal', 'true'); painel.setAttribute('aria-labelledby', 'vis-t');
+    painel.innerHTML =
+      '<div class="vis-cab"><p class="kicker">Visita acompanhada</p><h2 id="vis-t">Agendar visita</h2>' +
+      '<button type="button" class="vis-x" aria-label="Fechar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>' +
+      '<ol class="vis-passos" aria-label="Etapas">' + NOMES_PASSO.map(function (n) { return '<li>' + n + '</li>'; }).join('') + '</ol></div>' +
+      '<div class="vis-corpo" tabindex="-1"></div>' +
+      '<div class="vis-rod"><button type="button" class="bt bt-s" data-vis-volta>Voltar</button><button type="button" class="bt bt-b" data-vis-segue>Continuar</button></div>';
+    d.body.appendChild(fundo); d.body.appendChild(painel);
+    corpo = $('.vis-corpo', painel); rodp = $('.vis-rod', painel); titulo = $('#vis-t', painel);
+    btVolta = $('[data-vis-volta]', painel); btSegue = $('[data-vis-segue]', painel); passosEl = $$('.vis-passos li', painel);
+    $('.vis-x', painel).addEventListener('click', fecha);
+    fundo.addEventListener('click', fecha);
+    btVolta.addEventListener('click', function () { if (passo === 4) { reinicia(); return; } if (passo > 0) mostra(passo - 1); });
+    btSegue.addEventListener('click', function () { if (passo === 4) { fecha(); return; } if (valida()) { if (passo === 3) mostra(4); else mostra(passo + 1); } });
+    painel.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); fecha(); return; }
+      if (e.key !== 'Tab') return;
+      var f = $$('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])', painel).filter(function (el) { return !el.disabled && !el.hidden && el.offsetParent !== null; });
+      if (!f.length) return;
+      var pri = f[0], ult = f[f.length - 1];
+      if (e.shiftKey && (d.activeElement === pri || d.activeElement === corpo)) { e.preventDefault(); ult.focus(); }
+      else if (!e.shiftKey && d.activeElement === ult) { e.preventDefault(); pri.focus(); }
+    });
+    corpo.addEventListener('change', function (e) {
+      var t = e.target; if (!t.name) return;
+      if (t.type === 'radio') est[t.name] = t.value;
+      if (erroEl) erroEl.classList.remove('on');
+    });
+    corpo.addEventListener('input', function (e) {
+      var t = e.target; if (t.name && t.type !== 'radio') { est[t.name] = t.value.trim(); t.removeAttribute('aria-invalid'); }
+      if (erroEl) erroEl.classList.remove('on');
+    });
+  }
+
+  function radio(nome, v, conteudo, cls) {
+    return '<label class="' + cls + '"><input type="radio" name="' + nome + '" value="' + esc(v) + '"' + (est[nome] === v ? ' checked' : '') + '>' + conteudo + '</label>';
+  }
+  function prop(cod) { return props.filter(function (p) { return p.cod === cod; })[0]; }
+
+  function mostra(n) {
+    passo = n;
+    var h = '';
+    if (n === 0) {
+      h = '<div><h3>Qual propriedade?</h3><p class="vis-sub">A localização exata só é passada depois do termo de confidencialidade.</p><div class="vis-lista" role="radiogroup" aria-label="Propriedade">' +
+        props.map(function (p) { return radio('cod', p.cod, '<span><b>' + esc(p.cod) + ' · ' + esc(p.titulo) + '</b><small>' + esc(p.regiao) + ' · ' + esc(p.precoTxt) + '</small></span>', 'vis-op'); }).join('') +
+        radio('cod', 'indefinida', '<span><b>Ainda não escolhi</b><small>O consultor indica as que combinam com o seu perfil.</small></span>', 'vis-op') +
+        '</div>';
+    } else if (n === 1) {
+      h = '<div><h3>Que dia?</h3><p class="vis-sub">Próximos dias úteis e sábados. O consultor confirma com o proprietário.</p><div class="vis-chips" role="radiogroup" aria-label="Data">' +
+        datas().map(function (x) { return radio('data', x.v, '<span>' + x.dia + '<b>' + x.n + '</b>' + x.mes + '</span>', 'vis-chip'); }).join('') + '</div>';
+    } else if (n === 2) {
+      h = '<div><span class="vis-rot" id="vis-rot-f">Forma da visita</span><div class="vis-lista" role="radiogroup" aria-labelledby="vis-rot-f">' +
+        FORMAS.map(function (f) { return radio('forma', f.v, '<span><b>' + f.t + '</b><small>' + f.s + '</small></span>', 'vis-op'); }).join('') + '</div>' +
+        '<span class="vis-rot" id="vis-rot-h">Horário</span><div class="vis-chips vis-horas" role="radiogroup" aria-labelledby="vis-rot-h">' +
+        HORAS.map(function (x) { return radio('hora', x, '<span><b>' + x + '</b></span>', 'vis-chip'); }).join('') + '</div>';
+    } else if (n === 3) {
+      h = '<div><h3>Seus dados</h3><p class="vis-sub">Para o consultor confirmar a visita e enviar o termo de confidencialidade.</p>' +
+        '<div class="vis-campo"><label for="vis-nome">Nome completo</label><input id="vis-nome" name="nome" type="text" autocomplete="name" value="' + esc(est.nome) + '"></div>' +
+        '<div class="vis-campo"><label for="vis-tel">WhatsApp com DDD</label><input id="vis-tel" name="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(16) 90000-0000" value="' + esc(est.tel) + '"></div>' +
+        '<div class="vis-campo"><label for="vis-email">E-mail (opcional)</label><input id="vis-email" name="email" type="email" autocomplete="email" value="' + esc(est.email) + '"></div>' +
+        '<p class="vis-nota"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg><span>Site de demonstração: ao confirmar, nada é enviado de verdade.</span></p>';
+    } else {
+      var p = prop(est.cod), dt = datas().filter(function (x) { return x.v === est.data; })[0], fm = FORMAS.filter(function (f) { return f.v === est.forma; })[0];
+      h = '<div><div class="vis-ok-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>' +
+        '<h3>Visita pré-agendada</h3><p class="vis-sub">O consultor confirma pelo WhatsApp em até 1 dia útil, depois do aceite do proprietário.</p>' +
+        '<dl class="vis-resumo">' +
+        '<div><dt>Propriedade</dt><dd>' + (p ? esc(p.cod + ' · ' + p.titulo) : 'A indicar pelo consultor') + '</dd></div>' +
+        '<div><dt>Data</dt><dd>' + (dt ? esc(dt.longo) : '') + ', ' + esc(est.hora) + '</dd></div>' +
+        '<div><dt>Forma</dt><dd>' + (fm ? esc(fm.t) : '') + '</dd></div>' +
+        '<div><dt>Contato</dt><dd>' + esc(est.nome) + '<br>' + esc(est.tel) + (est.email ? '<br>' + esc(est.email) : '') + '</dd></div>' +
+        '</dl>' +
+        '<p class="vis-nota"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg><span><b>Envio simulado.</b> Este é um site de exemplo: nenhuma mensagem foi enviada e nenhum dado saiu do seu navegador.</span></p>';
+    }
+    h += '<p class="vis-erro" role="alert"></p></div>';
+    corpo.innerHTML = h;
+    erroEl = $('.vis-erro', corpo);
+    passosEl.forEach(function (li, i) {
+      li.className = i < n || n === 4 ? 'feito' : (i === n ? 'agora' : '');
+      if (i === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    });
+    titulo.textContent = n === 4 ? 'Tudo certo' : 'Agendar visita';
+    btVolta.textContent = n === 4 ? 'Agendar outra' : 'Voltar';
+    btVolta.hidden = n === 0;
+    rodp.classList.toggle('so-um', n === 0);
+    btSegue.textContent = n === 4 ? 'Fechar' : (n === 3 ? 'Confirmar visita' : 'Continuar');
+    corpo.scrollTop = 0;
+    var alvo = n === 4 ? corpo : ($('input:checked', corpo) || $('input', corpo));
+    if (alvo) alvo.focus({ preventScroll: n === 0 });
+    if (n === 0) { var ck = $('input:checked', corpo); if (ck) ck.closest('label').scrollIntoView({ block: 'nearest' }); }
+  }
+
+  function erro(t, el) { erroEl.textContent = t; erroEl.classList.add('on'); if (el) { el.setAttribute('aria-invalid', 'true'); el.focus(); } }
+  function valida() {
+    if (passo === 0 && !est.cod) { erro('Escolha uma propriedade (ou "Ainda não escolhi").'); return false; }
+    if (passo === 1 && !est.data) { erro('Escolha um dia para a visita.'); return false; }
+    if (passo === 2 && !est.forma) { erro('Escolha a forma da visita.'); return false; }
+    if (passo === 2 && !est.hora) { erro('Escolha um horário.'); return false; }
+    if (passo === 3) {
+      var dig = (est.tel || '').replace(/\D/g, '');
+      if ((est.nome || '').length < 3) { erro('Digite seu nome.', $('#vis-nome', corpo)); return false; }
+      if (dig.length < 10 || dig.length > 13) { erro('Digite um WhatsApp com DDD.', $('#vis-tel', corpo)); return false; }
+      if (est.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(est.email)) { erro('Confira o e-mail ou deixe em branco.', $('#vis-email', corpo)); return false; }
+    }
+    return true;
+  }
+  function reinicia() { est.cod = ''; est.data = ''; est.forma = ''; est.hora = ''; mostra(0); }
+
+  var reduz = matchMedia('(prefers-reduced-motion: reduce)');
+  function abre(cod) {
+    if (!painel) monta();
+    antes = d.activeElement;
+    if (cod) est.cod = cod;
+    fundo.hidden = false; painel.hidden = false;
+    d.documentElement.classList.add('vis-aberto');
+    mostra(0);
+    void painel.offsetWidth;
+    fundo.classList.add('on'); painel.classList.add('on');
+  }
+  function fecha() {
+    if (!painel || painel.hidden) return;
+    fundo.classList.remove('on'); painel.classList.remove('on');
+    d.documentElement.classList.remove('vis-aberto');
+    var fim = function () { painel.hidden = true; fundo.hidden = true; };
+    if (reduz.matches) fim(); else setTimeout(fim, 380);
+    if (passo === 4) reinicia_silencioso();
+    if (antes && antes.focus) antes.focus();
+  }
+  function reinicia_silencioso() { est.cod = ''; est.data = ''; est.forma = ''; est.hora = ''; }
+
+  d.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-visita]'); if (!b) return;
+    e.preventDefault();
+    abre(b.getAttribute('data-cod') || '');
+  });
+})();
+
+/* ---------------- rodada 8: filtros do hero num painel de baixo no celular, números depois das fazendas no celular,
+   e um só "Agendar visita" na primeira tela da propriedade (o do topo some enquanto o da página está à vista) */
+(function () {
+  'use strict';
+  var d = document, cel = window.matchMedia('(max-width: 600px)');
+  var bt = d.querySelector('.bt-busca'), form = d.getElementById('busca-rapida'), bts = d.querySelector('.hero-voo .hero-in > .bts');
+  if (bt && bts) bts.appendChild(bt);
+  if (bt && form) {
+    var lugar = d.createComment('busca'); form.parentNode.insertBefore(lugar, form);   // o painel sobe para o body no celular (fica acima de tudo)
+    var volta = function () { if (form.parentNode !== lugar.parentNode) lugar.parentNode.insertBefore(form, lugar.nextSibling); };
+    var fundo = d.createElement('div'); fundo.className = 'busca-fundo'; fundo.hidden = true; d.body.appendChild(fundo);
+    var cab = d.createElement('div'); cab.className = 'busca-cab';
+    cab.innerHTML = '<p>Filtrar propriedades</p><button type="button" class="busca-x" aria-label="Fechar filtros">×</button>';
+    form.insertBefore(cab, form.firstChild);
+    var fecha = function () {
+      if (!form.classList.contains('aberta')) return;
+      form.classList.remove('aberta'); bt.setAttribute('aria-expanded', 'false'); fundo.hidden = true;
+      d.documentElement.classList.remove('busca-aberta'); volta(); bt.focus();
+    };
+    bt.addEventListener('click', function () {
+      var aberta = form.classList.contains('aberta');
+      fundo.hidden = !aberta || !cel.matches;
+      d.documentElement.classList.toggle('busca-aberta', aberta && cel.matches);
+      if (aberta && cel.matches) { d.body.appendChild(form); var c = form.querySelector('select'); if (c) c.focus(); } else volta();
+    });
+    cab.querySelector('.busca-x').addEventListener('click', fecha);
+    fundo.addEventListener('click', fecha);
+    d.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecha(); });
+  }
+  // números da carteira: no celular entram depois das fazendas em destaque
+  var num = d.querySelector('main > .numeros'), dest = d.getElementById('h-dest');
+  var sec = dest && dest.closest('section');
+  if (num && sec && cel.matches) sec.parentNode.insertBefore(num, sec.nextSibling);
+  // propriedade: o botão da página já está na primeira tela, então o do topo espera
+  var alvo = d.querySelector('main [data-visita][data-cod]'), topoBt = d.querySelector('.topo .bt-visita');
+  if (alvo && topoBt && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) {
+      es.forEach(function (x) { d.documentElement.classList.toggle('visita-a-vista', x.isIntersecting || x.boundingClientRect.top > 0); });
+    }).observe(alvo);
+  }
 })();

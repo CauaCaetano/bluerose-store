@@ -21,7 +21,7 @@
   var doCat = function (id) { return todos.filter(function (s) { return s.cat === id; }); };
   var nomeCat = function (c) { return en ? (c.en || c.n) : c.n; };
   var pasta = 'sites/'; // os sites de exemplo se traduzem sozinhos (idioma.js)
-  var MV = '?v=20261108'; // versão das miniaturas: suba quando trocar as imagens de img/sites
+  var MV = '?v=20261108b'; // versão das miniaturas: suba quando trocar as imagens de img/sites
   var thumb = function (s, cel) { return 'img/sites/' + s.slug + (cel ? '-mobile' : '') + '.webp' + MV; };
   var thumbPt = function (s, cel) { return 'img/sites/' + s.slug + (cel ? '-mobile' : '') + '.webp' + MV; };
   var imgTag = function (s, cel, extra) {

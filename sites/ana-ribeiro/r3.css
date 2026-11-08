@@ -1,6 +1,5 @@
-/* Ana Ribeiro · rodada 3 de design: transição entre páginas sem tela branca, cursor "Ver imóvel" (só desktop),
-   galeria do imóvel em rolagem horizontal com encaixe e revelação, títulos revelados por máscara, parallax curto
-   e o botão de concierge no WhatsApp. Tudo respeita prefers-reduced-motion. */
+/* Ana Ribeiro · rodada 3 de design: transição entre páginas sem tela branca,
+   galeria do imóvel em rolagem horizontal com encaixe e revelação das fotos e o botão de concierge no WhatsApp. Tudo respeita prefers-reduced-motion. */
 
 /* ---------- transição entre páginas: véu escuro que entra (saída 520 ms) e sobe (entrada 620 ms) ---------- */
 html { background: #1b2120; }
@@ -17,14 +16,8 @@ html.r3-sai main { transition: opacity 420ms ease, transform 520ms cubic-bezier(
 @keyframes r3-veu-cobre { from { transform: translateY(101%); } to { transform: translateY(0); } }
 @keyframes r3-main-chega { from { opacity: .4; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
-/* ---------- cursor "Ver imóvel" (só mouse; nada no toque) ---------- */
-.r3-cursor { position: fixed; left: 0; top: 0; z-index: 2147482000; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; display: grid; place-items: center; background: #d7c5a9; color: #1b2120; font: 600 12px/1.15 var(--sans); letter-spacing: .08em; text-transform: uppercase; text-align: center; pointer-events: none; transform: translate3d(-200px, -200px, 0) scale(0); transition: scale .28s cubic-bezier(.2, .7, .2, 1), opacity .2s; opacity: 0; will-change: transform; }
-.r3-cursor span { display: block; padding: 0 12px; }
-.r3-cursor.on { opacity: 1; scale: 1; }
-.r3-cursor.on { transform-origin: center; }
-body.r3-mouse [data-cursor], body.r3-mouse [data-cursor] * { cursor: none; }
-body.r3-mouse [data-cursor] button, body.r3-mouse [data-cursor] button * { cursor: pointer; }
-#destaques .g-q[data-cursor] { cursor: pointer; }
+/* foto do destaque (home) que leva ao imóvel: cursor normal de link */
+#destaques .g-q.r3-link { cursor: pointer; }
 
 /* ---------- galeria do imóvel: rolagem horizontal com encaixe ---------- */
 .cine { padding: clamp(18px, 2.4vw, 32px) 0 22px; }
@@ -56,10 +49,6 @@ body.r3-mouse [data-cursor] button, body.r3-mouse [data-cursor] button * { curso
   .cine .cn-bts { grid-column: 1; grid-row: 4; padding: 0 16px; }
 }
 
-/* ---------- títulos revelados por máscara (700 ms, uma vez) ---------- */
-.r3-t { clip-path: inset(0 0 100% 0); transform: translateY(.32em); }
-.r3-t.r3-v { clip-path: inset(-30% -8% -35% -8%); transform: none; transition: clip-path 700ms cubic-bezier(.7, 0, .2, 1) var(--atraso, 0s), transform 700ms cubic-bezier(.2, .7, .2, 1) var(--atraso, 0s); }
-
 /* ---------- concierge no WhatsApp: discreto, acima da faixa da Blue Rose ---------- */
 .r3-conc { position: fixed; right: 16px; bottom: 60px; z-index: 46; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 18px 0 14px; border: 1px solid rgba(215, 197, 169, .45); border-radius: 999px; background: rgba(27, 33, 32, .92); color: #f3ece2; font: 500 14px/1 var(--sans); text-decoration: none; box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: 0; transform: translateY(14px); pointer-events: none; transition: opacity .35s ease, transform .35s cubic-bezier(.2, .7, .2, 1), background .2s; }
 .r3-conc.ver { opacity: 1; transform: none; pointer-events: auto; }
@@ -85,8 +74,6 @@ body.r3-mouse [data-cursor] button, body.r3-mouse [data-cursor] button * { curso
 @media (prefers-reduced-motion: reduce) {
   html.r3-entra::after, html.r3-sai::after, html.r3-entra main { animation: none !important; content: none; }
   html.r3-sai main { opacity: 1; transform: none; }
-  .r3-t { clip-path: none; transform: none; }
   .cine.revela .cn-slide { clip-path: none; } .cine.revela .cn-slide img { transform: none; }
   .r3-conc { transition: none; }
-  .r3-cursor { transition: none; }
 }

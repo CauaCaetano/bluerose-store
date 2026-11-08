@@ -84,6 +84,13 @@
   });
 
   // ---------- revelar ao rolar (luz lateral) ----------
+  // títulos (h1/h2) ficam parados: bloco com título não sobe inteiro, só as partes sem título
+  $$('.revela, .sobe').forEach(function (el) {
+    if (!el.querySelector('h1, h2')) return;
+    var cls = el.classList.contains('revela') ? 'revela' : 'sobe';
+    el.classList.remove('revela', 'sobe');
+    [].forEach.call(el.children, function (f) { if (!f.matches('h1, h2') && !f.querySelector('h1, h2')) f.classList.add(cls); });
+  });
   var alvos = $$('.revela, .sobe');
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (en) { en.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('vista'); io.unobserve(x.target); } }); }, { rootMargin: '0px 0px -8% 0px' });

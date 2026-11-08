@@ -1,4 +1,4 @@
-// Ferreira Reformas · abertura presa (foto vira traço), topo que some e volta, menu do celular, fotos reveladas, títulos que sobem por linha,
+// Ferreira Reformas · abertura presa (foto vira traço), topo que some e volta, menu do celular, fotos reveladas, títulos parados,
 // miniaturas em paralaxe, abas que abrem, contadores, trilho de obras com fundo desfocado, faixas corridas, pilha de cartas,
 // orçamento em 4 passos (página orcamento.html; aceita ?tipo=), filtro de obras e formulários que viram mensagem no WhatsApp.
 // Cada bloco só roda se a seção existir na página.
@@ -35,6 +35,7 @@
       var p = Math.min(1, Math.max(0, y / (abre.offsetHeight - vh)));
       cena.style.setProperty('--corte', (p * 100).toFixed(2) + '%');
       cena.style.setProperty('--tx', Math.max(0, 1 - p * 2.2).toFixed(3));
+      cena.classList.toggle('so-traco', p > .5);
     }
     // topo: transparente sobre a foto de abertura; depois some ao descer e volta em creme ao subir
     var passou = y > vh * (abre ? .6 : .35);
@@ -62,7 +63,13 @@
   topo.addEventListener('focusin', function () { topo.classList.remove('escondido'); });
 
   // ---------- revelações ao aparecer ----------
-  var vistos = $$('.revela, .linhas, .sobe');
+  // títulos (h1/h2) ficam parados: bloco com título não sobe inteiro, só as partes sem título
+  $$('.sobe').forEach(function (el) {
+    if (!el.querySelector('h1, h2')) return;
+    el.classList.remove('sobe');
+    [].forEach.call(el.children, function (f) { if (!f.matches('h1, h2') && !f.querySelector('h1, h2')) f.classList.add('sobe'); });
+  });
+  var vistos = $$('.revela, .sobe');
   if (calmo || !('IntersectionObserver' in window)) vistos.forEach(function (el) { el.classList.add('visto'); });
   else {
     var obs = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visto'); obs.unobserve(e.target); } }); }, { threshold: .2 });
@@ -211,4 +218,105 @@
   // ?tipo=banheiro (vindo da home ou da página do serviço) já começa no passo 2
   var tipo = new URLSearchParams(location.search).get('tipo'), radio = tipo && T[tipo] ? $('input[name=tipo][value="' + tipo + '"]', q) : null;
   if (radio) { radio.checked = true; ir(1, false); } else ir(0);
+})();
+
+// ---------- orçamento em painel lateral: serviço → imóvel → quando → contato, termina no resumo (demonstração, nada é enviado) ----------
+(function () {
+  var PASSOS = [
+    { chave: 'obra', titulo: 'O que vamos reformar?', ops: [['Banheiro', 'revestimento, box e metais'], ['Cozinha', 'bancada, pontos e piso'], ['Piso', 'porcelanato, vinílico ou laminado'], ['Pintura', 'paredes e teto, com móveis cobertos']] },
+    { chave: 'terreno', titulo: 'Onde é a obra?', ops: [['Apartamento', 'cuidamos dos papéis do síndico'], ['Casa', 'Goiânia e região'], ['Comercial', 'loja, sala ou consultório']] },
+    { chave: 'area', titulo: 'Quando começar?', ops: [['Este mês', 'visita técnica em até 3 dias'], ['Próximo mês', 'reservamos a data no contrato'], ['Só pesquisando', 'mandamos a faixa de preço']] },
+    { chave: 'dados', titulo: 'Para quem mandamos?' }
+  ];
+  var ROT = { obra: 'Serviço', terreno: 'Imóvel', area: 'Início', nome: 'Nome', tel: 'WhatsApp' };
+  var calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var p = document.createElement('div');
+  p.className = 'orc orc-fr'; p.hidden = true;
+  p.innerHTML = '<div class="orc-fundo" data-fecha></div>' +
+    '<aside class="orc-painel" role="dialog" aria-modal="true" aria-labelledby="orc-t">' +
+    '<div class="orc-cab"><p class="orc-passo"></p><button type="button" class="orc-x" data-fecha aria-label="Fechar"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4l12 12M16 4L4 16"/></svg></button></div>' +
+    '<div class="orc-barra"><i></i></div>' +
+    '<form class="orc-corpo" novalidate></form></aside>';
+  document.body.appendChild(p);
+  var corpo = p.querySelector('.orc-corpo'), passoTx = p.querySelector('.orc-passo'), barra = p.querySelector('.orc-barra i');
+  var at = 0, resp = {}, volta = null;
+  function desenha() {
+    var s = PASSOS[at], h = '';
+    passoTx.textContent = at < PASSOS.length ? '[ 0' + (at + 1) + '/0' + PASSOS.length + ' ]' : '[ pronto ]';
+    barra.style.width = ((Math.min(at, PASSOS.length) + 1) / (PASSOS.length + 1) * 100) + '%';
+    if (!s) {
+      h = '<h2 id="orc-t" class="orc-tit" tabindex="-1">Orçamento pedido.</h2><p class="orc-tx">O Marcos responde pelo WhatsApp em até 2 horas úteis com a faixa de preço e a data da visita técnica grátis.</p><dl class="orc-res">';
+      ['obra', 'terreno', 'area', 'nome', 'tel'].forEach(function (k) { h += '<div><dt>' + ROT[k] + '</dt><dd></dd></div>'; });
+      h += '</dl><p class="orc-aviso">Demonstração: nada foi enviado. No site da Ferreira, o pedido chega no WhatsApp da obra.</p><div class="orc-bts"><button type="button" class="botao" data-fecha>Fechar</button></div>';
+      corpo.innerHTML = h;
+      var dds = corpo.querySelectorAll('dd');
+      ['obra', 'terreno', 'area', 'nome', 'tel'].forEach(function (k, i) { dds[i].textContent = resp[k] || '—'; });
+    } else if (s.ops) {
+      h = '<h2 id="orc-t" class="orc-tit" tabindex="-1">' + s.titulo + '</h2><fieldset class="orc-ops"><legend class="vh">' + s.titulo + '</legend>';
+      s.ops.forEach(function (o, i) { h += '<label><input type="radio" name="' + s.chave + '" value="' + o[0] + '"' + (resp[s.chave] === o[0] ? ' checked' : '') + '><span><b>' + o[0] + '</b><small>' + o[1] + '</small></span></label>'; });
+      h += '</fieldset><p class="orc-erro" aria-live="polite"></p>';
+    } else {
+      h = '<h2 id="orc-t" class="orc-tit" tabindex="-1">' + s.titulo + '</h2><div class="orc-campos"><label><span>Seu nome</span><input name="nome" autocomplete="name" maxlength="60"></label><label><span>WhatsApp com DDD</span><input name="tel" inputmode="tel" autocomplete="tel" maxlength="20"></label></div><p class="orc-erro" aria-live="polite"></p>';
+    }
+    if (s) h += '<div class="orc-bts">' + (at > 0 ? '<button type="button" class="orc-volta">Voltar</button>' : '') + '<button type="submit" class="botao">' + (at === PASSOS.length - 1 ? 'Pedir orçamento' : 'Continuar') + '</button></div>';
+    if (s) corpo.innerHTML = h;
+    if (s && !s.ops) { corpo.nome.value = resp.nome || ''; corpo.tel.value = resp.tel || ''; }
+    var t = corpo.querySelector('.orc-tit'); if (t) t.focus({ preventScroll: true });
+  }
+  corpo.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var s = PASSOS[at], erro = corpo.querySelector('.orc-erro');
+    if (s.ops) {
+      var m = corpo.querySelector('input:checked'); if (!m) { erro.textContent = 'Escolha uma opção para continuar.'; return; }
+      resp[s.chave] = m.value;
+    } else {
+      var n = corpo.nome.value.trim(), tl = corpo.tel.value.replace(/\D/g, '');
+      if (n.length < 2) { erro.textContent = 'Escreva o seu nome.'; corpo.nome.focus(); return; }
+      if (tl.length < 10) { erro.textContent = 'Confira o WhatsApp: DDD e número.'; corpo.tel.focus(); return; }
+      resp.nome = n; resp.tel = corpo.tel.value.trim();
+    }
+    at++; desenha();
+  });
+  corpo.addEventListener('change', function (e) { if (e.target.type === 'radio') { var er = corpo.querySelector('.orc-erro'); if (er) er.textContent = ''; } });
+  corpo.addEventListener('click', function (e) { if (e.target.closest('.orc-volta')) { at--; desenha(); } });
+  p.addEventListener('click', function (e) { if (e.target.closest('[data-fecha]')) fecha(); });
+  document.addEventListener('keydown', function (e) {
+    if (p.hidden) return;
+    if (e.key === 'Escape') fecha();
+    if (e.key === 'Tab') {
+      var f = [].filter.call(p.querySelectorAll('button, input, [tabindex="-1"]'), function (x) { return x.offsetParent !== null && x.tabIndex >= 0; });
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+  });
+  function abre(origem) {
+    volta = origem || document.activeElement; at = 0; resp = {};
+    p.hidden = false; document.documentElement.classList.add('orc-aberto');
+    desenha(); requestAnimationFrame(function () { p.classList.add('vis'); });
+  }
+  function fecha() {
+    p.classList.remove('vis'); document.documentElement.classList.remove('orc-aberto');
+    setTimeout(function () { p.hidden = true; if (volta && volta.focus) volta.focus(); }, calmo ? 0 : 420);
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-orc], .topo-bt'); if (!a) return;
+    e.preventDefault(); abre(a);
+  });
+})();
+
+// ---------- da visita à entrega: a foto de fundo troca conforme o cartão que passa ----------
+(function () {
+  var h = document.querySelector('.hist'); if (!h) return;
+  var fotos = h.querySelectorAll('.hist-fotos img'), passos = h.querySelectorAll('.hist-passo');
+  if (!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var i = +e.target.dataset.i;
+      passos.forEach(function (x, k) { x.classList.toggle('at', k === i); });
+      fotos.forEach(function (x, k) { x.classList.toggle('at', k === i); });
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  passos.forEach(function (x) { io.observe(x); });
 })();

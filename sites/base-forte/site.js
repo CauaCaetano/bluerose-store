@@ -1,5 +1,5 @@
-// Base Forte · topo que vira cartão, títulos que sobem linha a linha, linhas de relevo desenhadas na rolagem,
-// fotos com paralaxe e sombra, cursor próprio, etapas e calculadora de custo por m², casas entregues com ficha,
+// Base Forte · topo que vira cartão, títulos fixos (sem animação de entrada), linhas de relevo desenhadas na rolagem,
+// fotos com paralaxe e sombra, etapas e calculadora de custo por m², casas entregues com ficha,
 // depoimentos em carrossel, filme da obra em fotos e pedido de reunião pelo WhatsApp.
 (function () {
   'use strict';
@@ -21,25 +21,12 @@
   });
   $$('#menu a').forEach(function (a) { a.addEventListener('click', function () { if (topo.classList.contains('aberto')) btMenu.click(); }); });
 
-  // ---------- títulos que sobem linha a linha ----------
-  var titulos = $$('.linhas').map(function (el) { return { el: el, txt: el.textContent.trim() }; });
-  function quebra(t) {
-    var el = t.el;
-    el.innerHTML = t.txt.split(/\s+/).map(function (w) { return '<span class="w">' + w + '</span>'; }).join(' ');
-    var linhas = [], topoAt = null;
-    $$('.w', el).forEach(function (w) { var y = w.offsetTop; if (topoAt === null || Math.abs(y - topoAt) > 4) { linhas.push([]); topoAt = y; } linhas[linhas.length - 1].push(w.textContent); });
-    el.innerHTML = linhas.map(function (l, i) { return '<span class="l"><span style="transition-delay:' + (i * 0.09).toFixed(2) + 's">' + l.join(' ') + '</span></span>'; }).join('');
-    el.setAttribute('aria-label', t.txt);
-  }
-  function quebraTodos() { titulos.forEach(quebra); }
-  if (!calmo) { quebraTodos(); var largAnt = innerWidth, tq; addEventListener('resize', function () { if (innerWidth === largAnt) return; largAnt = innerWidth; clearTimeout(tq); tq = setTimeout(quebraTodos, 200); }); }
-
   // revelar ao aparecer
   $$('.sobre-baixo > *, .etapas-txt, .casa, .casas-intro, .faixa .grade > *:not(.faixa-tit), .calc-cab, .calc, .cl-res, .ac-cab, .ac-cima .bt, .ac-fotos > *, .final-pe, .final-img').forEach(function (el) { el.classList.add('sobe'); });
   var vistos = new IntersectionObserver(function (es) {
     es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('vis'); vistos.unobserve(e.target); } });
   }, { threshold: .15, rootMargin: '0px 0px -6% 0px' });
-  $$('.linhas, .sobe, .app').forEach(function (el) { vistos.observe(el); });
+  $$('.sobe, .app').forEach(function (el) { vistos.observe(el); });
 
   // contadores
   var conta = new IntersectionObserver(function (es) {
@@ -95,7 +82,7 @@
     });
   }
   // rede de segurança: o que já passou pela tela aparece mesmo se o observador perder o momento
-  function revela(vh) { $$('.sobe:not(.vis), .linhas:not(.vis), .app:not(.vis)').forEach(function (el) { if (el.getBoundingClientRect().top < vh * .95) el.classList.add('vis'); }); }
+  function revela(vh) { $$('.sobe:not(.vis), .app:not(.vis)').forEach(function (el) { if (el.getBoundingClientRect().top < vh * .95) el.classList.add('vis'); }); }
   function pede() { if (!pedido) { pedido = true; requestAnimationFrame(quadro); } }
   addEventListener('scroll', pede, { passive: true }); addEventListener('resize', pede); quadro();
 
@@ -105,18 +92,6 @@
     var alvo = document.getElementById(a.getAttribute('href').slice(1)); if (!alvo) return;
     e.preventDefault(); alvo.scrollIntoView({ behavior: calmo ? 'auto' : 'smooth' }); history.replaceState(null, '', a.getAttribute('href'));
   });
-
-  // ---------- cursor próprio ----------
-  var cur = $('.cursor'), curTx = $('span', cur), mx = -200, my = -200, cx = -200, cy = -200, curVivo = false;
-  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; if (!curVivo) { curVivo = true; cx = mx; cy = my; requestAnimationFrame(segue); } }, { passive: true });
-    document.addEventListener('mouseover', function (e) {
-      var alvo = e.target.closest('[data-cursor]'), botao = e.target.closest('a:not([data-cursor]), button, input, label, .depo-cartao');
-      if (alvo && !botao) { curTx.textContent = alvo.dataset.cursor; cur.classList.add('ativo'); } else cur.classList.remove('ativo');
-    });
-    document.addEventListener('mouseleave', function () { cur.classList.remove('ativo'); });
-  }
-  function segue() { cx += (mx - cx) * .2; cy += (my - cy) * .2; cur.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0)'; requestAnimationFrame(segue); }
 
   // ---------- etapas + calculadora ----------
   // etapa, parte do custo, meses (para 120 m²), o que entrega
@@ -354,4 +329,105 @@
       f.innerHTML = '<p class="ok-msg">' + (f.dataset.ok || 'Recebido, {nome}. Respondemos no seu WhatsApp hoje.').replace('{nome}', n.split(' ')[0].replace(/[<>&"]/g, '')) + '</p>';
     });
   });
+})();
+
+// ---------- pedir orçamento: painel lateral em 4 passos, termina num resumo (demonstração, nada é enviado) ----------
+(function () {
+  var PASSOS = [
+    { chave: 'obra', titulo: 'Que obra é?', ops: [['Casa térrea', 'tudo num piso só'], ['Sobrado', 'dois ou três pavimentos'], ['Ampliação', 'aumentar a casa que já existe']] },
+    { chave: 'terreno', titulo: 'E o terreno?', ops: [['Já tenho', 'com escritura ou contrato'], ['Estou procurando', 'ajudamos a avaliar o lote'], ['Ainda não sei', 'conversamos sobre as opções']] },
+    { chave: 'area', titulo: 'Qual o tamanho?', ops: [['Até 120 m²', 'de 2 a 3 quartos'], ['120 a 220 m²', 'de 3 a 4 quartos'], ['Acima de 220 m²', 'alto padrão']] },
+    { chave: 'dados', titulo: 'Para quem enviamos?' }
+  ];
+  var ROT = { obra: 'Obra', terreno: 'Terreno', area: 'Área', nome: 'Nome', tel: 'WhatsApp' };
+  var calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var p = document.createElement('div');
+  p.className = 'orc'; p.hidden = true;
+  p.innerHTML = '<div class="orc-fundo" data-fecha></div>' +
+    '<aside class="orc-painel" role="dialog" aria-modal="true" aria-labelledby="orc-t">' +
+    '<div class="orc-cab"><p class="orc-passo"></p><button type="button" class="orc-x" data-fecha aria-label="Fechar"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4l12 12M16 4L4 16"/></svg></button></div>' +
+    '<div class="orc-barra"><i></i></div>' +
+    '<form class="orc-corpo" novalidate></form></aside>';
+  document.body.appendChild(p);
+  var corpo = p.querySelector('.orc-corpo'), passoTx = p.querySelector('.orc-passo'), barra = p.querySelector('.orc-barra i');
+  var at = 0, resp = {}, volta = null;
+  function desenha() {
+    var s = PASSOS[at], h = '';
+    passoTx.textContent = at < PASSOS.length ? 'Passo ' + (at + 1) + ' de ' + PASSOS.length : 'Pronto';
+    barra.style.width = ((Math.min(at, PASSOS.length) + 1) / (PASSOS.length + 1) * 100) + '%';
+    if (!s) {
+      h = '<h2 id="orc-t" class="orc-tit" tabindex="-1">Pedido recebido.</h2><p class="orc-tx">Um engenheiro responde pelo WhatsApp em até 1 dia útil com o preço por m² e a próxima data de visita.</p><dl class="orc-res">';
+      ['obra', 'terreno', 'area', 'nome', 'tel'].forEach(function (k) { h += '<div><dt>' + ROT[k] + '</dt><dd></dd></div>'; });
+      h += '</dl><p class="orc-aviso">Demonstração: nada foi enviado. No site da construtora, o pedido chega no WhatsApp do engenheiro.</p><div class="orc-bts"><button type="button" class="bt bt-grad" data-fecha><span class="bt-tx">Fechar</span></button></div>';
+      corpo.innerHTML = h;
+      var dds = corpo.querySelectorAll('dd');
+      ['obra', 'terreno', 'area', 'nome', 'tel'].forEach(function (k, i) { dds[i].textContent = resp[k] || '—'; });
+    } else if (s.ops) {
+      h = '<h2 id="orc-t" class="orc-tit" tabindex="-1">' + s.titulo + '</h2><fieldset class="orc-ops"><legend class="vh">' + s.titulo + '</legend>';
+      s.ops.forEach(function (o, i) { h += '<label><input type="radio" name="' + s.chave + '" value="' + o[0] + '"' + (resp[s.chave] === o[0] ? ' checked' : '') + '><span><b>' + o[0] + '</b><small>' + o[1] + '</small></span></label>'; });
+      h += '</fieldset><p class="orc-erro" aria-live="polite"></p>';
+    } else {
+      h = '<h2 id="orc-t" class="orc-tit" tabindex="-1">' + s.titulo + '</h2><div class="orc-campos"><label><span>Seu nome</span><input name="nome" autocomplete="name" maxlength="60"></label><label><span>WhatsApp com DDD</span><input name="tel" inputmode="tel" autocomplete="tel" maxlength="20"></label></div><p class="orc-erro" aria-live="polite"></p>';
+    }
+    if (s) h += '<div class="orc-bts">' + (at > 0 ? '<button type="button" class="orc-volta">Voltar</button>' : '') + '<button type="submit" class="bt bt-grad"><span class="bt-tx">' + (at === PASSOS.length - 1 ? 'Enviar pedido' : 'Continuar') + '</span></button></div>';
+    if (s) corpo.innerHTML = h;
+    if (s && !s.ops) { corpo.nome.value = resp.nome || ''; corpo.tel.value = resp.tel || ''; }
+    var t = corpo.querySelector('.orc-tit'); if (t) t.focus({ preventScroll: true });
+  }
+  corpo.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var s = PASSOS[at], erro = corpo.querySelector('.orc-erro');
+    if (s.ops) {
+      var m = corpo.querySelector('input:checked'); if (!m) { erro.textContent = 'Escolha uma opção para continuar.'; return; }
+      resp[s.chave] = m.value;
+    } else {
+      var n = corpo.nome.value.trim(), tl = corpo.tel.value.replace(/\D/g, '');
+      if (n.length < 2) { erro.textContent = 'Escreva o seu nome.'; corpo.nome.focus(); return; }
+      if (tl.length < 10) { erro.textContent = 'Confira o WhatsApp: DDD e número.'; corpo.tel.focus(); return; }
+      resp.nome = n; resp.tel = corpo.tel.value.trim();
+    }
+    at++; desenha();
+  });
+  corpo.addEventListener('change', function (e) { if (e.target.type === 'radio') { var er = corpo.querySelector('.orc-erro'); if (er) er.textContent = ''; } });
+  corpo.addEventListener('click', function (e) { if (e.target.closest('.orc-volta')) { at--; desenha(); } });
+  p.addEventListener('click', function (e) { if (e.target.closest('[data-fecha]')) fecha(); });
+  document.addEventListener('keydown', function (e) {
+    if (p.hidden) return;
+    if (e.key === 'Escape') fecha();
+    if (e.key === 'Tab') {
+      var f = [].filter.call(p.querySelectorAll('button, input, [tabindex="-1"]'), function (x) { return x.offsetParent !== null && x.tabIndex >= 0; });
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+  });
+  function abre(origem) {
+    volta = origem || document.activeElement; at = 0; resp = {};
+    p.hidden = false; document.documentElement.classList.add('orc-aberto');
+    desenha(); requestAnimationFrame(function () { p.classList.add('vis'); });
+  }
+  function fecha() {
+    p.classList.remove('vis'); document.documentElement.classList.remove('orc-aberto');
+    setTimeout(function () { p.hidden = true; if (volta && volta.focus) volta.focus(); }, calmo ? 0 : 420);
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-orc], .bt-contato'); if (!a) return;
+    e.preventDefault(); abre(a);
+  });
+})();
+
+// ---------- do papel à chave: a rolagem troca a foto conforme a etapa ----------
+(function () {
+  var h = document.querySelector('.hist'); if (!h) return;
+  var fotos = h.querySelectorAll('.hist-fotos img'), passos = h.querySelectorAll('.hist-passo');
+  if (!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var i = +e.target.dataset.i;
+      passos.forEach(function (x, k) { x.classList.toggle('at', k === i); });
+      fotos.forEach(function (x, k) { x.classList.toggle('at', k === i); });
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  passos.forEach(function (x) { io.observe(x); });
 })();

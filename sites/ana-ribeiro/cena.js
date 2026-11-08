@@ -193,13 +193,13 @@ function inicia() {
       const sai = calmo.matches ? (t > i + .5 ? 1 : 0) : sobe(i, i + .75, t); // gira e sai de lado, como uma porta abrindo
       q.visible = chega > .001 && sai < .999;
       if (!q.visible) return;
-      const flut = parado ? 0 : Math.sin(tempo * .7 + i * 1.7) * .06;
+      const flut = 0; // rodada 7: sem movimento à toa, só com a rolagem e o mouse
       q.position.copy(b.pos).addScaledVector(b.dir, sai * b.esc * W * 1.6);
       q.position.y += -(1 - chega) * 3 * b.esc + sai * .8 + flut;
-      q.quaternion.copy(b.quat).multiply(giroQ.setFromAxisAngle(eix, -sai * 1.1 + (parado ? 0 : Math.sin(tempo * .5 + i) * .03)));
+      q.quaternion.copy(b.quat).multiply(giroQ.setFromAxisAngle(eix, -sai * 1.1));
       q.scale.setScalar(b.esc * (.55 + .45 * chega));
     });
-    if (!parado) poeira.rotation.y = tempo * .012;
+    poeira.rotation.y = t * .04;
 
     render.render(cena, cam);
     // assentou na rolagem: parado (reduced-motion ou botão de pausa) espera a próxima mudança; senão ~30 quadros/s

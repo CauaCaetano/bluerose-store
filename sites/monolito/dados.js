@@ -21,13 +21,13 @@ window.MONO_PJ = {
 ],
 [
 "sala-vista",
-"Sala com janela do piso ao teto voltada para o jardim",
+"Sala com janelas do piso ao teto voltadas para o jardim",
 1130,
 1600
 ],
 [
 "pia",
-"Lavabo com bancada de pedra e espelho oval",
+"Lavabo com cuba de apoio, espelho estreito e painel de madeira",
 1400,
 2335
 ],
@@ -66,7 +66,7 @@ window.MONO_PJ = {
 ],
 [
 "banho",
-"Banheiro da suíte com banheira de pedra e parede texturizada",
+"Banheiro da suíte em mármore claro, com box de vidro e banheira",
 1400,
 933
 ]
@@ -87,7 +87,7 @@ window.MONO_PJ = {
 ],
 [
 "casa-rodape",
-"Casa escalonada com piscina e gramado",
+"Casa escalonada com deque de madeira, piscina e gramado",
 1600,
 1200
 ],
@@ -114,7 +114,7 @@ window.MONO_PJ = {
 "fotos": [
 [
 "serra-fachada",
-"Casa térrea com laje longa e grande abertura para o gramado",
+"Casa térrea de fachada escura com caixilhos do piso ao teto voltados para o gramado",
 960,
 1200
 ],
@@ -141,13 +141,13 @@ window.MONO_PJ = {
 "fotos": [
 [
 "casa-moderna",
-"Casa branca de dois pavimentos com varanda sobre a piscina",
+"Casa clara com pergolado de madeira sobre a piscina",
 1280,
 1600
 ],
 [
 "casa2",
-"Casa branca com varanda gourmet e piscina no jardim",
+"Casa de dois pavimentos com varanda, deque e piscina no jardim",
 1400,
 934
 ]
@@ -162,19 +162,19 @@ window.MONO_PJ = {
 "fotos": [
 [
 "savassi-estar",
-"Estar com sofás claros, lareira e painel de madeira iluminado",
+"Estar claro com sofá em L e lareira revestida de pedra",
 1600,
 1298
 ],
 [
 "savassi-jantar",
-"Jantar com mesa escura, cadeiras estofadas e painéis de madeira",
+"Jantar com mesa de madeira escura e cortinas leves",
 1600,
 1298
 ],
 [
 "savassi-quarto",
-"Suíte com cabeceira clara, espelho redondo e luz suave",
+"Suíte clara com roupa de cama branca, espelho e armário",
 1600,
 900
 ],
@@ -195,25 +195,25 @@ window.MONO_PJ = {
 "fotos": [
 [
 "lourdes-estar",
-"Estar claro com forro de rasgos de luz e painel de madeira",
+"Estar claro com sofá cinza em L e mesa de madeira",
 1600,
 900
 ],
 [
 "lourdes-tv",
-"Painel da TV com lareira embutida e estante de nichos",
+"Painel da TV em madeira com lareira embutida e mesa de centro",
 1600,
 900
 ],
 [
 "lourdes-quarto",
-"Suíte com cabeceira em arco de madeira ripada",
+"Suíte com cabeceira de madeira clara e luminárias pendentes",
 1600,
 900
 ],
 [
 "lourdes-banho",
-"Banho revestido de travertino com luz indireta",
+"Banho em pedra clara com banheira e cuba sobre bancada",
 1600,
 1068
 ]
@@ -261,7 +261,7 @@ window.MONO_PJ = {
 "fotos": [
 [
 "consultorio-1",
-"Sala com estante em arco de madeira e mesa de trabalho",
+"Escritório com estante de madeira, mesa de trabalho e poltrona",
 1600,
 900
 ],
@@ -336,26 +336,16 @@ window.MONO_PJ = {
 "fotos": [
 [
 "func-depois",
-"Estar reformado com mesa redonda de madeira e estante",
+"Estar reformado com mesa de centro redonda e painel da TV",
 1600,
 900
 ],
 [
 "func-depois-2",
-"Estar com forro de luz indireta e pendentes",
+"Estar com forro de luz embutida e pendentes sobre a mesa",
 1600,
 900
 ]
-],
-"antes": [
-"func-antes",
-"Sala antes da reforma, com paredes inacabadas e piso em obra",
-1600,
-1200
-],
-"depois": [
-"func-depois",
-"Mesma sala depois da reforma, com estar mobiliado e marcenaria"
 ]
 },
 "reforma-sion": {
@@ -367,20 +357,10 @@ window.MONO_PJ = {
 "fotos": [
 [
 "sion-depois",
-"Estar reformado com painel de madeira e poltronas claras",
+"Estar reformado com painel de madeira ripado, sofá claro e mesa redonda",
 1600,
 1298
 ]
-],
-"antes": [
-"sion-antes",
-"Sala antes da reforma, com paredes descascadas e forro aberto",
-1600,
-1067
-],
-"depois": [
-"sion-depois",
-"Sala depois da reforma, com painel de madeira e poltronas"
 ]
 },
 "retrofit-carmo": {
@@ -392,20 +372,10 @@ window.MONO_PJ = {
 "fotos": [
 [
 "carmo-depois",
-"Cozinha integrada com marcenaria de madeira iluminada",
+"Cozinha integrada com armários de madeira clara e mesa de vidro",
 1600,
 1067
 ]
-],
-"antes": [
-"carmo-antes",
-"Ambiente antes do retrofit, com paredes manchadas e piso danificado",
-1600,
-1067
-],
-"depois": [
-"carmo-depois",
-"Ambiente depois do retrofit, com cozinha integrada e mesa de jantar"
 ]
 }
 };

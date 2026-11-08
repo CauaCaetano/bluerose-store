@@ -127,36 +127,105 @@
     });
   }
 
-  // ---------- manutenção ----------
+  // ---------- manutenção (portal de chamados) ----------
   function manutencao() {
     var meus = []; try { meus = JSON.parse(ss.get(CHAVE_C) || '[]'); } catch (e) {}
     var ETAPAS = ['Recebido', 'Em análise', 'Técnico agendado', 'Concluído'];
+    var TXT = ['Pedido registrado no portal.', 'Gestor avaliou: o reparo é do proprietário, sem custo para você.', 'Técnico de exemplo agendado para o turno escolhido.', 'Serviço concluído e fotografado pelo técnico.'];
+    var exemplo = inq.chamados.map(function (c) {
+      var h = [{ e: 0, d: c.data, t: TXT[0] }];
+      if (c.etapa >= 2) h.push({ e: 1, d: c.data, t: TXT[1] });
+      if (c.etapa >= 3) h.push({ e: 2, d: c.data, t: 'Técnico agendado: ' + c.prev + '.' });
+      if (c.etapa >= 4) h.push({ e: 3, d: c.prev.replace('Resolvido em ', ''), t: TXT[3] });
+      return Object.assign({ ex: true, hist: h, nota: c.etapa >= 4 ? 5 : 0 }, c);
+    });
+    var filtro = 'todos';
+    function salvar() { try { ss.set(CHAVE_C, JSON.stringify(meus)); } catch (e) { var semFoto = meus.map(function (c) { return Object.assign({}, c, { foto: null }); }); ss.set(CHAVE_C, JSON.stringify(semFoto)); } }
+    function todos() { return meus.concat(exemplo); }
+    function hoje() { return new Date().toLocaleDateString('pt-BR'); }
     function desenhar() {
-      $('#chamados').innerHTML = meus.concat(inq.chamados).map(function (c) {
-        var cls = c.status === 'Concluído' ? 'selo-ok' : c.status === 'Recebido' ? 'selo-pend' : 'selo-neutro';
-        return '<div class="chamado"><div class="chamado-cab"><b>' + esc(c.prot) + ' · ' + esc(c.cat) + '</b><span class="selo ' + cls + '">' + esc(c.status) + '</span></div><p><small>Aberto em ' + esc(c.data) + ' · ' + esc(c.comodo) + ' · urgência ' + esc(c.urg).toLowerCase() + '</small></p><p>' + esc(c.desc) + '</p><p><small>' + esc(c.prev) + '</small></p><ol class="linha-tempo">' + ETAPAS.map(function (e, i) { return '<li class="' + (i < c.etapa ? 'feito' : '') + '">' + e + '</li>'; }).join('') + '</ol></div>';
-      }).join('');
+      var lista = todos(), ab = lista.filter(function (c) { return c.etapa < 4 && !c.cancelado; }).length;
+      var vis = lista.filter(function (c) { return filtro === 'todos' || (filtro === 'abertos' ? c.etapa < 4 && !c.cancelado : c.etapa >= 4 || c.cancelado); });
+      $('#chamados').innerHTML = '<div class="ch-filtro" role="group" aria-label="Filtrar chamados">' +
+        [['todos', 'Todos (' + lista.length + ')'], ['abertos', 'Em andamento (' + ab + ')'], ['fechados', 'Concluídos (' + (lista.length - ab) + ')']].map(function (b) { return '<button type="button" data-ch-filtro="' + b[0] + '" aria-pressed="' + (filtro === b[0]) + '">' + b[1] + '</button>'; }).join('') + '</div>' +
+        (vis.length ? vis.map(cartao).join('') : '<p style="color:var(--suave)">Nenhum chamado neste filtro.</p>');
+    }
+    function cartao(c) {
+      var st = c.cancelado ? 'Cancelado' : ETAPAS[Math.min(3, c.etapa - 1)];
+      var cls = c.cancelado ? 'selo-neutro' : c.etapa >= 4 ? 'selo-ok' : c.etapa === 1 ? 'selo-pend' : 'selo-pet';
+      var datas = {}; (c.hist || []).forEach(function (h) { datas[h.e] = h.d; });
+      var acoes = '';
+      if (!c.cancelado && c.etapa < 4) {
+        acoes = '<div class="ch-acoes"><button type="button" class="bt bt-cla bt-peq" data-ch-avanca="' + c.prot + '">Ver próximo passo (simulação)</button>' +
+          (c.etapa === 1 ? '<button type="button" class="bt bt-link" data-ch-cancela="' + c.prot + '">Cancelar pedido</button>' : '') +
+          '<a href="#" class="bt bt-link" data-wa="' + esc('Olá, Prisma! Sobre o chamado ' + c.prot + ' (' + c.cat + ', ' + c.comodo + '): ') + '">Falar com a Prisma</a></div>';
+      }
+      var nota = '';
+      if (c.etapa >= 4 && !c.cancelado) {
+        nota = '<div class="ch-nota" role="group" aria-label="Avaliar o atendimento do chamado ' + c.prot + '"><span>' + (c.nota ? 'Sua avaliação:' : 'Como foi o atendimento?') + '</span>' +
+          [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" data-ch-nota="' + c.prot + '" data-n="' + n + '" class="' + (n <= c.nota ? 'on' : '') + '" aria-label="' + n + ' de 5" aria-pressed="' + (n === c.nota) + '">★</button>'; }).join('') + '</div>';
+      }
+      return '<div class="chamado"><div class="chamado-cab"><b>' + esc(c.prot) + ' · ' + esc(c.cat) + '</b><span class="selo ' + cls + '">' + st + '</span></div>' +
+        '<div class="chamado-corpo"><div><p><small>Aberto em ' + esc(c.data) + ' · ' + esc(c.comodo) + ' · urgência ' + esc(c.urg).toLowerCase() + (c.ex ? ' · exemplo' : '') + '</small></p><p>' + esc(c.desc) + '</p><p><small>' + esc(c.prev) + '</small></p></div>' +
+        (c.foto ? '<img class="ch-foto" src="' + c.foto + '" alt="Foto enviada no chamado ' + esc(c.prot) + '" width="88" height="88">' : '') + '</div>' +
+        '<ol class="linha-tempo">' + ETAPAS.map(function (e, i) { return '<li class="' + (i < c.etapa && !c.cancelado ? 'feito' : '') + '">' + e + (datas[i] && !c.cancelado ? '<small>' + datas[i] + '</small>' : '') + '</li>'; }).join('') + '</ol>' +
+        ((c.hist || []).length ? '<ul class="ch-msgs">' + c.hist.slice().reverse().map(function (h) { return '<li><b>' + h.d + '</b> · ' + esc(h.t) + '</li>'; }).join('') + '</ul>' : '') +
+        acoes + nota + '</div>';
     }
     desenhar();
-    var foto = $('#mn-foto'), prev = $('#mn-prev'), urlFoto = null;
+    function achar(p) { return todos().filter(function (c) { return c.prot === p; })[0]; }
+    $('#chamados').addEventListener('click', function (e) {
+      var t;
+      if ((t = e.target.closest('[data-ch-filtro]'))) { filtro = t.dataset.chFiltro; desenhar(); $('[data-ch-filtro="' + filtro + '"]').focus(); return; }
+      if ((t = e.target.closest('[data-ch-avanca]'))) {
+        var c = achar(t.dataset.chAvanca); if (!c) return;
+        c.etapa = Math.min(4, c.etapa + 1); c.status = ETAPAS[c.etapa - 1];
+        var txt = c.etapa === 3 ? 'Técnico de exemplo agendado: ' + (c.turno || 'horário comercial') + ', em até ' + (c.urg === 'Emergência' ? '24 horas' : c.urg === 'Média' ? '5 dias úteis' : '10 dias úteis') + '.' : TXT[c.etapa - 1];
+        c.hist = (c.hist || []).concat([{ e: c.etapa - 1, d: hoje(), t: txt }]);
+        if (c.etapa >= 4) c.prev = 'Resolvido em ' + hoje();
+        salvar(); desenhar(); U.aviso(c.prot + ': ' + c.status.toLowerCase() + '. Você recebe o aviso por e-mail e WhatsApp (demonstração).');
+        var nb = $('[data-ch-avanca="' + c.prot + '"]') || $('[data-ch-nota="' + c.prot + '"]'); if (nb) nb.focus();
+        return;
+      }
+      if ((t = e.target.closest('[data-ch-cancela]'))) {
+        var k = achar(t.dataset.chCancela); if (!k) return;
+        k.cancelado = true; k.hist = (k.hist || []).concat([{ e: 9, d: hoje(), t: 'Pedido cancelado por você.' }]); salvar(); desenhar(); U.aviso(k.prot + ' cancelado.');
+        return;
+      }
+      if ((t = e.target.closest('[data-ch-nota]'))) {
+        var n = achar(t.dataset.chNota); if (!n) return;
+        n.nota = +t.dataset.n; salvar(); desenhar(); U.aviso('Obrigado! Nota ' + n.nota + ' de 5 enviada ao gestor (demonstração).');
+        var nf = $('[data-ch-nota="' + n.prot + '"][data-n="' + n.nota + '"]'); if (nf) nf.focus();
+      }
+    });
+    var foto = $('#mn-foto'), prev = $('#mn-prev'), fotoDados = null;
     foto.addEventListener('change', function () {
-      if (urlFoto) URL.revokeObjectURL(urlFoto);
-      var f = foto.files && foto.files[0];
+      var f = foto.files && foto.files[0]; fotoDados = null;
       if (!f) { prev.hidden = true; $('#mn-foto-st').textContent = 'Nenhuma foto'; return; }
       if (!/^image\//.test(f.type)) { U.aviso('Escolha um arquivo de imagem.', 'ruim'); foto.value = ''; return; }
-      urlFoto = URL.createObjectURL(f); prev.src = urlFoto; prev.hidden = false; $('#mn-foto-st').textContent = 'Foto pronta (fica só no aparelho)';
+      var url = URL.createObjectURL(f), img = new Image();
+      img.onload = function () {
+        var k = Math.min(1, 480 / Math.max(img.width, img.height)), cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        try { fotoDados = cv.toDataURL('image/jpeg', 0.72); } catch (e) { fotoDados = null; }
+        prev.src = fotoDados || url; prev.hidden = false; $('#mn-foto-st').textContent = 'Foto pronta (fica só no aparelho)';
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = function () { U.aviso('Não foi possível ler esta imagem.', 'ruim'); URL.revokeObjectURL(url); };
+      img.src = url;
     });
     $('#form-manut').addEventListener('submit', function (e) {
       e.preventDefault(); if (!U.validar(this)) return;
       var urg = this.querySelector('input[name="urg"]:checked').value;
       var prazo = urg === 'Alta' ? 'Retorno em até 2 horas e atendimento em até 24 horas.' : urg === 'Média' ? 'Análise em até 1 dia útil e visita em até 5 dias úteis.' : 'Análise em até 2 dias úteis e visita em até 10 dias úteis.';
       var prot = 'CH-' + (2420 + meus.length + 1);
-      var c = { prot: prot, data: new Date().toLocaleDateString('pt-BR'), cat: this.cat.value.split(' (')[0], comodo: this.comodo.value, desc: this.desc.value.trim(), urg: urg === 'Alta' ? 'Emergência' : urg, status: 'Recebido', etapa: 1, prev: prazo + ' Turno preferido: ' + this.turno.value.toLowerCase() + '.' };
-      meus.unshift(c); ss.set(CHAVE_C, JSON.stringify(meus)); desenhar();
+      var c = { prot: prot, data: hoje(), cat: this.cat.value.split(' (')[0], comodo: this.comodo.value, desc: this.desc.value.trim(), urg: urg === 'Alta' ? 'Emergência' : urg, status: 'Recebido', etapa: 1, turno: this.turno.value.toLowerCase(), prev: prazo + ' Turno preferido: ' + this.turno.value.toLowerCase() + '.', foto: fotoDados, hist: [{ e: 0, d: hoje(), t: TXT[0] + (fotoDados ? ' Foto anexada.' : '') }], nota: 0 };
+      meus.unshift(c); salvar(); filtro = 'todos'; desenhar();
       var ok = $('#manut-ok');
-      ok.innerHTML = '<p style="margin:0 0 6px"><b>Pedido ' + prot + ' recebido.</b></p><p style="margin:0 0 6px">' + prazo + '</p><p style="margin:0">Você acompanha cada etapa abaixo. Demonstração: nada foi enviado; no site real, o chamado cai no sistema da administradora e o proprietário é avisado quando o reparo é dele.</p>';
+      ok.innerHTML = '<p style="margin:0 0 6px"><b>Pedido ' + prot + ' recebido.</b></p><p style="margin:0 0 6px">' + prazo + '</p><p style="margin:0">Acompanhe cada etapa abaixo e use "Ver próximo passo" para simular o andamento. Demonstração: nada foi enviado; no site real, o chamado cai no sistema da administradora e o proprietário é avisado quando o reparo é dele.</p>';
       ok.hidden = false; ok.focus();
-      this.reset(); prev.hidden = true; $('#mn-foto-st').textContent = 'Nenhuma foto';
+      this.reset(); prev.hidden = true; fotoDados = null; $('#mn-foto-st').textContent = 'Nenhuma foto';
     });
   }
 

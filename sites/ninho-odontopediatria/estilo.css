@@ -453,3 +453,190 @@ button, input, select, textarea { font: inherit; color: inherit; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .surge { opacity: 1; transform: none; }
 }
+
+/* ---------- banca R3 (08/11/2026): paleta da marca na abertura, sombras leves, celular mais limpo ---------- */
+h1, h2, h3 { text-wrap: balance; }
+p, li { text-wrap: pretty; }
+/* selo da abertura no verde-menta da marca (o lilás destoava) */
+.abre .selo { background: var(--menta-cl); color: var(--verde); box-shadow: inset 0 0 0 1.5px rgba(64, 86, 79, .12); }
+.abre .selo i { background: var(--pessego); }
+/* sombra suave, 4 a 6% de opacidade, em todos os cartões que usam a sombra da marca */
+:root { --sombra: 0 14px 34px -12px rgba(46, 63, 57, .06), 0 2px 6px rgba(46, 63, 57, .04); }
+/* um aviso só para as fotos de referência do espaço, em vez de um selo em cada foto */
+.mosaico figcaption { gap: 0; }
+.mosaico-nota { margin: 12px 0 0; }
+/* telefone do agendamento vira botão */
+.ligar-agora { margin-bottom: 10px; }
+.bt-ligar { min-height: 46px; padding: 10px 20px; }
+@media (max-width: 520px) {
+  /* uma única barra fixa (o topo), sem relevo pesado no botão */
+  .topo .bt-agendar { box-shadow: none; }
+}
+.abre h1 { text-wrap: wrap; }
+.onda-sobre-verde { background: var(--verde); }
+/* sem fio claro entre a seção e a onda que sai dela */
+.onda-baixo { margin-top: -1px; position: relative; }
+.bt-mini { min-height: 40px; padding: 6px 16px; font-size: .95rem; margin: 2px 0; }
+
+/* ---------- lições dos vídeos (08/11/2026): um CTA, painel de agendamento, passos na rolagem, chamada final em tela cheia ---------- */
+/* painel lateral de agendamento: creme, cantos de ninho, botões redondos */
+html.ag-aberto { overflow: hidden; }
+html.ag-aberto .br-idi, html.ag-aberto .br-pill { visibility: hidden; }
+.ag-fundo { position: fixed; inset: 0; z-index: 2147483001; background: rgba(46, 63, 57, .4); opacity: 0; transition: opacity .3s cubic-bezier(.22, .61, .36, 1); }
+.ag-fundo.on { opacity: 1; }
+.ag-painel { position: fixed; z-index: 2147483002; top: 10px; right: 10px; bottom: 10px; width: min(460px, calc(100% - 20px)); display: flex; flex-direction: column; background: var(--creme); color: var(--verde); border-radius: 34px; box-shadow: 0 30px 70px -20px rgba(46, 63, 57, .45); overflow: hidden; transform: translateX(calc(100% + 20px)); transition: transform .34s cubic-bezier(.22, .61, .36, 1); }
+.ag-painel.on { transform: none; }
+.ag-cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: var(--menta-cl); }
+.ag-marca { margin: 0; font: 600 1.05rem var(--titulo); }
+.ag-marca b { font-weight: 700; }
+.ag-x, .ag-voltar { width: 44px; height: 44px; border-radius: 50%; border: 0; background: #fff; color: var(--verde); font-size: 1.3rem; cursor: pointer; display: grid; place-items: center; }
+.ag-x:hover, .ag-voltar:hover { background: var(--menta); }
+.ag-barra { height: 6px; background: var(--menta-cl); }
+.ag-barra span { display: block; height: 100%; width: 0; background: var(--pessego); border-radius: 0 999px 999px 0; transition: width .35s cubic-bezier(.22, .61, .36, 1); }
+.ag-corpo { flex: 1; overflow-y: auto; padding: 28px 24px 34px; }
+.ag-passo { font: 600 .9rem var(--titulo); color: var(--bico); margin: 0 0 6px; }
+.ag-corpo h2 { font-size: 1.8rem; margin: 0 0 20px; }
+.ag-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ag-op { min-height: 58px; padding: 12px 14px; border-radius: 22px; border: 0; background: #fff; color: var(--verde); font: 600 1rem/1.25 var(--titulo); text-align: center; cursor: pointer; box-shadow: inset 0 0 0 2px var(--menta-cl); transition: box-shadow .2s, background .2s; }
+.ag-op:hover { box-shadow: inset 0 0 0 2px var(--menta); }
+.ag-op.on { background: var(--menta); box-shadow: none; }
+.ag-form { display: grid; gap: 16px; }
+.ag-form label { display: grid; gap: 6px; font: 600 1rem var(--titulo); }
+.ag-form input { min-height: 52px; padding: 12px 16px; border: 2px solid var(--menta-cl); border-radius: 18px; background: #fff; font-size: 1rem; }
+.ag-form input:focus { outline: none; border-color: var(--menta); }
+.ag-form fieldset { border: 0; margin: 0; padding: 0; }
+.ag-form legend { font: 600 1rem var(--titulo); margin-bottom: 8px; padding: 0; }
+.ag-erro { color: #A2402E; font-size: .95rem; margin: 0; } .ag-erro:empty { display: none; }
+.ag-enviar { width: 100%; }
+.ag-nota { font-size: .92rem; background: var(--lavanda-cl); border-radius: 18px; padding: 12px 14px; color: var(--tinta); margin: 0; }
+.ag-ok { display: grid; gap: 16px; justify-items: start; }
+.ag-ok h2 { margin: 0 !important; }
+.ag-ok > p:not(.ag-nota) { margin: 0; }
+.ag-selo { width: 60px; height: 68px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; display: grid; place-items: center; background: var(--menta); }
+.ag-selo svg { width: 28px; height: 28px; fill: none; stroke: var(--verde); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.ag-ok dl { width: 100%; margin: 0; background: #fff; border-radius: 22px; padding: 6px 16px; }
+.ag-ok dl div { display: grid; grid-template-columns: 74px 1fr; gap: 10px; padding: 10px 0; border-bottom: 2px dashed var(--menta-cl); }
+.ag-ok dl div:last-child { border-bottom: 0; }
+.ag-ok dt { font: 600 .9rem var(--titulo); color: var(--bico); } .ag-ok dd { margin: 0; font-weight: 600; }
+
+/* "como funciona" contado na rolagem: foto real em forma de ninho que troca a cada passo */
+.ph-historia { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 5vw, 70px); align-items: start; margin-top: 10px; }
+.ph-passos { display: block; }
+.ph-passos::before { display: none; }
+.ph-passos li { min-height: 52vh; display: grid; grid-template-columns: 76px 1fr; column-gap: 18px; align-content: center; text-align: left; padding: 0; }
+.ph-passos li::before { grid-row: span 2; margin: 0; transition: transform .4s cubic-bezier(.22, .61, .36, 1); }
+.ph-passos li.on::before { transform: scale(1.12) rotate(-6deg); }
+.ph-passos b { font-size: clamp(1.4rem, 2.2vw, 1.9rem); align-self: end; }
+.ph-passos p { font-size: 1.08rem; max-width: 26em; }
+.ph-passos img { display: none; }
+.ph-palco { position: sticky; top: 120px; aspect-ratio: 1 / 1; max-width: 520px; width: 100%; justify-self: end; background: rgba(255, 248, 239, .12); }
+.ph-palco img { position: absolute; inset: 0; opacity: 0; transition: opacity .6s cubic-bezier(.22, .61, .36, 1); }
+.ph-palco img.on { opacity: 1; }
+.ph-palco { position: sticky; }
+.ph-nota { text-align: right; color: var(--creme); opacity: .8; margin: 0 0 18px; }
+@media (prefers-reduced-motion: reduce) { .ph-palco img, .ph-passos li::before, .ag-painel, .ag-fundo { transition: none; } }
+
+/* chamada final em tela cheia, com um só botão */
+.sec-final { min-height: 100vh; min-height: 100dvh; display: grid; align-items: center; }
+.sec-final .chamada { padding: clamp(34px, 6vw, 80px); border-radius: 60px; grid-template-columns: auto 1fr; }
+.sec-final .chamada h2 { font-size: clamp(2.4rem, 5vw, 4rem); margin-bottom: 12px; }
+.sec-final .chamada p { font-size: 1.2rem; max-width: 34em; }
+.sec-final .chamada .acoes { grid-column: 2; justify-self: start; flex-direction: row; margin-top: 8px; }
+.sec-final .chamada .ave { width: clamp(110px, 14vw, 190px); align-self: start; }
+.bt-grande { min-height: 58px; padding: 14px 34px; font-size: 1.15rem; }
+
+@media (max-width: 900px) {
+  .ph-historia { grid-template-columns: 1fr; }
+  .ph-palco { display: none; }
+  .ph-passos li { min-height: 0; grid-template-columns: 64px 1fr; padding-bottom: 34px; }
+  .ph-passos img { display: block; grid-column: 1 / -1; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 44% 56% 38% 62% / 22% 20% 24% 22%; margin-bottom: 16px; order: -1; }
+  .ph-passos li::before { grid-row: auto; }
+  .ph-passos b { align-self: center; }
+  .ph-passos p { grid-column: 2; }
+  .ph-nota { text-align: left; }
+  .sec-final .chamada { grid-template-columns: 1fr; border-radius: 40px; }
+  .sec-final .chamada .acoes { grid-column: 1; }
+}
+@media (max-width: 520px) {
+  .ag-painel { top: 8px; right: 8px; bottom: 8px; width: calc(100% - 16px); border-radius: 28px; }
+  .ag-ops { grid-template-columns: 1fr; }
+  .ph-passos p { grid-column: 1 / -1; }
+}
+.ag-tel { white-space: nowrap; }
+.ag-ops.ag-ops-linha { grid-template-columns: 1fr 1fr; }
+.trilha a { text-decoration: none; font-weight: 700; border-bottom: 0; }
+.trilha a:hover { color: var(--tinta); }
+/* regra do dono: título não tem animação de entrada (nem blocos que contêm título) */
+.surge:is(h1, h2, h3, h4), .surge:has(h1, h2, h3, h4) { opacity: 1; transform: none; transition: none; }
+
+/* ---------- banca R4 (08/11/2026): menos "kit infantil", mais autoria e autoridade clínica ---------- */
+/* rótulos de seção: sai a pílula com contorno, entra um sobretítulo editorial com traço */
+.rotulo { display: inline-flex; align-items: center; gap: 10px; background: none; box-shadow: none; padding: 0; border-radius: 0; font: 700 .8rem/1.2 var(--texto); letter-spacing: .16em; color: var(--bico); margin-bottom: 14px; }
+.rotulo::before { content: ''; width: 22px; height: 2px; border-radius: 2px; background: currentColor; }
+.sec-verde .rotulo { color: var(--pessego); }
+.cab-centro .rotulo { justify-content: center; }
+/* botões sem o degrau de brinquedo: sombra curta e discreta */
+.bt { box-shadow: 0 1px 2px rgba(46, 63, 57, .12); }
+.bt:hover { box-shadow: 0 6px 16px -6px rgba(46, 63, 57, .35); }
+.bt:active { box-shadow: none; }
+.bt-claro { box-shadow: inset 0 0 0 2px var(--verde); }
+.bt-claro:hover { box-shadow: inset 0 0 0 2px var(--verde), 0 6px 16px -6px rgba(46, 63, 57, .3); }
+.menu-bt { background: transparent; box-shadow: inset 0 0 0 2px rgba(64, 86, 79, .22); }
+.menu-bt:hover { background: var(--menta-cl); }
+/* abertura: grifo do título com folga nas pontas e em cada linha; selo com respiro do topo */
+.abre h1 em { padding: 0 .14em; margin: 0 -.14em; -webkit-box-decoration-break: clone; box-decoration-break: clone; background: linear-gradient(transparent 66%, rgba(243, 189, 174, .85) 66%, rgba(243, 189, 174, .85) 90%, transparent 90%); }
+.abre { padding-top: clamp(52px, 7vw, 96px); }
+.abre .selo { margin-bottom: 22px; }
+.abre-arte .ave-grande { width: 34%; left: 2%; bottom: 0; }
+/* responsável técnica logo na abertura: autoridade antes do resto */
+.abre-resp { display: flex; align-items: center; gap: 14px; margin-top: 28px; padding-top: 22px; border-top: 2px dashed rgba(64, 86, 79, .14); max-width: 520px; }
+.resp-ini { flex: none; width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; background: var(--verde); color: var(--creme); font: 600 1rem var(--titulo); letter-spacing: .04em; }
+.abre-resp p { margin: 0; line-height: 1.4; }
+.abre-resp b { font-family: var(--titulo); font-weight: 600; font-size: 1.05rem; }
+.abre-resp small { display: block; font-size: .9rem; opacity: .85; }
+/* faixas por idade: fundo neutro em vez de mais um bloco rosa; cartão com borda fina e marca de cor no topo */
+.sec-pessego { background: #F6EFE6; }
+.faixa { border-radius: 26px; box-shadow: inset 0 0 0 1px rgba(64, 86, 79, .1); }
+.faixa::before { content: ''; position: absolute; left: 26px; right: 26px; top: 0; height: 4px; border-radius: 0 0 4px 4px; background: var(--pessego); }
+.faixa:nth-child(2)::before { background: var(--menta); }
+.faixa:nth-child(3)::before { background: var(--lavanda); }
+.faixa:hover { transform: translateY(-3px); }
+.faixa .idade { padding: 0; background: none !important; font: 700 .8rem/1.2 var(--texto); letter-spacing: .14em; text-transform: uppercase; color: var(--bico); }
+/* marcadores das listas com mais respiro do texto */
+.lista-ovo { gap: 12px; }
+.lista-ovo li { padding-left: 30px; }
+.lista-ovo li::before { width: 10px; height: 12px; top: .5em; left: 2px; }
+.destaque { border-radius: 32px; }
+@media (max-width: 520px) {
+  .abre { padding-top: 40px; }
+  .abre-resp { margin-top: 24px; }
+  .faixa { border-radius: 22px; }
+}
+.abre-resp b { display: block; }
+/* marca de cor da faixa etária no rótulo, em vez de um fio solto no topo do cartão */
+.faixa::before { content: none; }
+.faixa .idade { display: inline-flex; align-items: center; gap: 8px; }
+.faixa .idade::before { content: ''; width: 9px; height: 11px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: var(--pessego); }
+.faixa:nth-child(2) .idade::before { background: var(--menta); }
+.faixa:nth-child(3) .idade::before { background: var(--lavanda); }
+/* sobretítulos em terracota escura: contraste AA sobre creme e branco */
+.rotulo, .faixa .idade, .ag-passo, .ag-ok dt { color: #A3533D; }
+.sec-verde .rotulo { color: var(--pessego); }
+.abre h1 { text-wrap: balance; }
+/* ---------- banca R5 (08/11/2026): respiro da responsável técnica e ritmo único nos cartões por idade ---------- */
+.abre-resp { margin-top: 32px; padding-top: 28px; margin-bottom: 8px; }
+.faixa .idade { margin-bottom: 12px; }
+.faixa h3 { margin: 0 0 12px; }
+.faixa ul { margin: 0 0 16px; }
+.faixa ul li + li { margin-top: 4px; }
+.faixas { gap: 20px; }
+@media (max-width: 520px) {
+  .abre-fatos { flex-direction: row; flex-wrap: wrap; gap: 10px 18px; }
+  .abre-lead { font-size: 1.08rem; }
+  .faixas { gap: 16px; }
+  .faixa { padding: 24px 22px 20px; }
+}
+/* ---------- banca R6 (08/11/2026): acabamentos ---------- */
+.abre-resp small { line-height: 1.45; }
+.abre-resp small + small { margin-top: 3px; }
+@media (max-width: 520px) { .sec-pessego { padding-bottom: 84px; } }

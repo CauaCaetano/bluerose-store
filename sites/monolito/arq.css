@@ -467,3 +467,171 @@ em, .it { font-style: italic; }
   .js .ab-foto img, .js .pjt-capa img { animation: abre 1.4s cubic-bezier(.2, .7, .2, 1) both; }
   @keyframes abre { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 }
+
+/* ==========================================================================
+   rodada 3 (banca rigorosa): coluna única na abertura, botão do topo discreto,
+   grade de projetos com proporções coerentes e legenda sempre abaixo da foto
+   ========================================================================== */
+/* abertura: título, sobretítulo e texto na mesma coluna (compensa o recuo óptico da serifa) */
+.ab h1 { margin-left: -.045em; }
+.ab-tx .mono { margin-left: 0; }
+/* botão do topo: destaque discreto, no mesmo ritmo do menu */
+.bt-topo { min-height: 40px; padding: 0 16px; background: transparent; color: var(--grafite); border: 1px solid var(--grafite); font-size: 14px; }
+.bt-topo:hover { background: var(--grafite); color: var(--fundo); }
+/* chamada sublinhada vira botão */
+.lk { min-height: 52px; padding: 0 22px; border: 1px solid var(--linha); border-bottom: 1px solid var(--linha); color: var(--grafite); }
+.lk:hover { border-color: var(--grafite); color: var(--grafite); background: rgba(37, 39, 34, .04); }
+.lk::after { content: ''; width: 7px; height: 7px; border-top: 1px solid currentColor; border-right: 1px solid currentColor; transform: rotate(45deg); margin-left: 2px; }
+.sec.escuro .lk, .cta .lk { color: var(--fundo); border-color: #5a5c55; }
+
+/* projetos selecionados: três linhas de alturas iguais, foto larga 16:9 ao lado de uma vertical
+   que ocupa a mesma altura; nada de espaço morto entre elas */
+.selec { align-items: stretch; row-gap: clamp(48px, 5vw, 80px); }
+.selec > .pj { display: flex; flex-direction: column; margin-top: 0 !important; }
+.selec > .pj figure { position: relative; flex: 1 1 auto; aspect-ratio: auto !important; min-height: 0; }
+.selec > .pj figure img { position: absolute; inset: 0; }
+.selec .s1 { grid-column: 1 / span 8; } .selec .s1 figure { aspect-ratio: 16 / 9 !important; flex: none; }
+.selec .s2 { grid-column: 9 / span 4; }
+.selec .s3 { grid-column: 1 / span 4; }
+.selec .s4 { grid-column: 5 / span 8; } .selec .s4 figure { aspect-ratio: 16 / 9 !important; flex: none; }
+.selec .s5 { grid-column: 1 / span 8; } .selec .s5 figure { aspect-ratio: 16 / 9 !important; flex: none; }
+.selec .s6 { grid-column: 9 / span 4; }
+/* legenda: sempre abaixo da foto, nome e depois a ficha, alinhados à esquerda */
+.pj-tx, .mz-tx { display: block; }
+.pj-tx .mono, .mz-tx .mono { display: block; margin-top: 6px; text-align: left; }
+.pj-tx h3 { line-height: 1.1; }
+
+@media (max-width: 760px) {
+  .selec { row-gap: 52px; }
+  .selec > .pj figure, .selec .s1 figure, .selec .s4 figure, .selec .s5 figure { flex: none; aspect-ratio: 4 / 3 !important; }
+  .ab h1 { margin-left: -.04em; }
+  .ab-faixa { margin-top: 8px; }
+  .ab-pos { margin-bottom: 18px; }
+}
+
+/* ==========================================================================
+   lições dos vídeos: iniciar projeto em painel lateral, percurso croqui → obra → chave
+   ligado à rolagem, CTA final em tela cheia, referências honestas no lugar do falso antes/depois
+   ========================================================================== */
+/* painel: pedra clara, serifa nos títulos, mono nos rótulos, grafite nos botões */
+html.orc-aberto { overflow: hidden; }
+.orc { position: fixed; inset: 0; z-index: 2147483100; }
+.orc[hidden] { display: none; }
+.orc .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.orc-fundo { position: absolute; inset: 0; background: rgba(37, 39, 34, .42); opacity: 0; transition: opacity .45s cubic-bezier(.22, .61, .36, 1); }
+.orc-painel { position: absolute; top: 0; right: 0; bottom: 0; width: min(540px, 100%); display: flex; flex-direction: column; background: var(--fundo); color: var(--grafite); border-left: 1px solid var(--linha); transform: translateX(104%); transition: transform .45s cubic-bezier(.22, .61, .36, 1); }
+.orc.vis .orc-fundo { opacity: 1; }
+.orc.vis .orc-painel { transform: none; }
+.orc-cab { display: flex; justify-content: space-between; align-items: center; padding: 20px 32px 14px; }
+.orc-passo { font: 400 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--acc); }
+.orc-x { width: 44px; height: 44px; display: grid; place-items: center; background: none; border: 1px solid var(--linha); color: var(--grafite); cursor: pointer; }
+.orc-x:hover { border-color: var(--grafite); }
+.orc-x svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.3; }
+.orc-barra { height: 1px; margin: 0 32px; background: var(--linha); }
+.orc-barra i { display: block; height: 1px; width: 20%; background: var(--grafite); transition: width .45s cubic-bezier(.22, .61, .36, 1); }
+.orc-corpo { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding: 36px 32px 28px; }
+.orc-tit { font: 400 clamp(34px, 2.8vw, 46px)/1.02 var(--serif); outline: none; }
+.orc-tit em { color: var(--acc); }
+.orc-tx { color: var(--cinza-tx); line-height: 1.6; }
+.orc-ops { border: 0; padding: 0; margin: 0; display: grid; border-top: 1px solid var(--linha); }
+.orc-ops label { position: relative; cursor: pointer; }
+.orc-ops input { position: absolute; opacity: 0; inset: 0; }
+.orc-ops span { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 4px 16px; padding: 18px 4px; border-bottom: 1px solid var(--linha); transition: background .3s, padding .3s; }
+.orc-ops b { font: 400 25px/1.1 var(--serif); }
+.orc-ops small { font: 400 12px/1.4 var(--mono); letter-spacing: .03em; color: var(--cinza-tx); text-align: right; }
+.orc-ops label:hover span { background: rgba(37, 39, 34, .04); }
+.orc-ops input:checked + span { background: var(--grafite); color: var(--fundo); padding-inline: 16px; }
+.orc-ops input:checked + span small { color: #c9c7bd; }
+.orc-ops input:focus-visible + span { outline: 2px solid var(--grafite); outline-offset: 2px; }
+.orc-campos { display: grid; gap: 18px; }
+.orc-campos label { display: grid; gap: 8px; font: 400 12px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--cinza-tx); }
+.orc-campos input { height: 52px; padding: 0 14px; border: 1px solid var(--linha); background: transparent; font: inherit; font-family: var(--sans, inherit); font-size: 16px; letter-spacing: 0; text-transform: none; color: var(--grafite); }
+.orc-campos input:focus { outline: none; border-color: var(--grafite); }
+.orc-erro { min-height: 1.4em; color: #9b3b2a; font-size: 15px; }
+.orc-bts { margin-top: auto; display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding-top: 12px; }
+.orc-bts .bt { min-width: 190px; }
+.orc-volta { margin-right: auto; min-height: 52px; padding: 0 20px; background: transparent; border: 1px solid var(--linha); color: var(--grafite); font-size: 15px; cursor: pointer; }
+.orc-volta:hover { border-color: var(--grafite); }
+.orc-res { display: grid; border-top: 1px solid var(--linha); }
+.orc-res div { display: grid; grid-template-columns: 7.5em 1fr; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--linha); }
+.orc-res dt { font: 400 11.5px/1.7 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--cinza-tx); }
+.orc-aviso { font: 400 12px/1.6 var(--mono); color: var(--cinza-tx); }
+
+/* percurso: etapas à esquerda, foto presa à direita trocando com a rolagem */
+.perc .cab h2 em { color: var(--acc); }
+.perc-grade { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(28px, 4vw, 72px); align-items: start; }
+.perc-passos { list-style: none; margin: 0; padding: 0; counter-reset: none; }
+.perc .hist-passo { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; gap: 12px; border-top: 1px solid var(--linha); transition: opacity .6s cubic-bezier(.22, .61, .36, 1); }
+.perc .hist-passo > :not(h3) { opacity: .38; transition: opacity .6s cubic-bezier(.22, .61, .36, 1); }
+.perc .hist-passo.at > :not(h3) { opacity: 1; }
+.perc .hist-passo .num { color: var(--acc); }
+.perc .hist-passo h3 { font-size: clamp(32px, 3.2vw, 52px); line-height: 1.02; }
+.perc .hist-passo p { color: var(--cinza-tx); max-width: 40ch; }
+.perc .hist-fotos { position: sticky; top: 96px; height: calc(100vh - 140px); max-height: 760px; overflow: hidden; background: var(--pedra); }
+.perc .hist-fotos img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .8s cubic-bezier(.22, .61, .36, 1); }
+.perc .hist-fotos img.at { opacity: 1; }
+.perc .hist-cel { display: none; }
+.perc .legenda { margin-top: 16px; }
+
+/* chamada final em tela cheia */
+.cta { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; }
+.cta > .cx { width: 100%; }
+
+/* referências honestas no lugar do antes e depois (fotos de imóveis diferentes) */
+.conc-obra img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.par-ref { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 2vw, 24px); }
+.par-ref figure { margin: 0; }
+.par-ref img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+
+@media (max-width: 860px) {
+  .perc-grade { grid-template-columns: 1fr; }
+  .perc .hist-fotos { display: none; }
+  .perc .hist-passo { min-height: 0; padding: 22px 0 30px; }
+  .perc .hist-passo > :not(h3) { opacity: 1; }
+  .perc .hist-cel { display: block; margin: 0 0 10px; }
+  .perc .hist-cel img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .perc .hist-passo h3 { font-size: 34px; }
+  .par-ref { grid-template-columns: 1fr; }
+  .orc-cab { padding: 14px 16px 10px; }
+  .orc-barra { margin: 0 16px; }
+  .orc-corpo { padding: 26px 16px 20px; }
+  .orc-bts .bt { min-width: 0; flex: 1; }
+  .orc-ops b { font-size: 22px; }
+}
+@media (max-width: 420px) {
+  .topo-in { gap: 8px; }
+  .marca b { font-size: 19px; letter-spacing: .05em; }
+  .marca svg { width: 26px; height: 26px; }
+  .bt-topo { padding: 0 10px; font-size: 13px; min-height: 40px; }
+  .bt-menu { padding: 0 10px; min-height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orc-painel, .orc-fundo, .orc-barra i, .perc .hist-fotos img, .perc .hist-passo { transition: none; }
+}
+
+/* ==========================================================================
+   rodada 4: escala do subtítulo da abertura, folga do selo, respiro antes dos
+   projetos, nomes sem viúva e ficha com ar
+   ========================================================================== */
+.ab h1 { font-size: clamp(52px, 7.6vw, 132px); }
+.ab .lead { font-size: clamp(19px, 1.55vw, 25px); line-height: 1.5; max-width: 30ch; margin-top: 34px; }
+.ab-pos { margin-top: 14px; row-gap: 12px; }
+.ab-pos .selo { margin-top: 2px; }
+.sec.pedra:has(.selec) { padding-top: clamp(104px, 12vw, 180px); }
+.pj-tx h3 { text-wrap: balance; }
+.pj-tx .mono { margin-top: 8px; line-height: 1.75; letter-spacing: .06em; }
+@media (max-width: 760px) {
+  .ab { padding-top: 32px; }
+  .ab-tx .mono { margin-bottom: 26px; }
+  .ab .lead { margin-top: 24px; }
+  .pj-tx .mono { font-size: 11.5px; }
+}
+.selec .s2 img { object-position: 78% 50%; }
+
+/* rodada 5 (acabamento): respiro abaixo dos botões da abertura; título de projetos longe do topo fixo no celular */
+.ab { padding-bottom: clamp(72px, 8vw, 128px); }
+html { scroll-padding-top: 96px; }
+@media (max-width: 760px) {
+  .sec.pedra:has(.selec) { padding-top: 132px; }
+}
+.selec .s2 img { object-position: 78% 80%; }
