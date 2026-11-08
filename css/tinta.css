@@ -98,3 +98,23 @@ main > section:nth-of-type(odd):not(.ini-hero):not(.lx-hero)::after { background
   .np-faq details p { padding: 0 16px 18px; }
   .sis-mais, .vs-demo, .vs-pos-bt, .np-comparar p > a { min-height: 46px; justify-content: center; }
 }
+/* 08/11/2026 (pedido do dono): todo link de chamada sublinhado vira botão, no site inteiro */
+.hn-link, .hq-seta, .np-direto, .vs-tut, .aq-link, .preco2-perso, .vt-mais, .hq-servicos article > a, .stack li > a {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: color-mix(in srgb, currentColor 8%, transparent);
+  font-weight: 600; text-decoration: none !important; line-height: 1.2; transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.hn-link::after, .hq-seta::after, .np-direto::after, .vt-mais::after, .aq-link::after, .preco2-perso::after, .hq-servicos article > a::after { text-decoration: none; border: 0 !important; background-image: none !important; }
+.hn-link:hover, .hq-seta:hover, .np-direto:hover, .vs-tut:hover, .aq-link:hover, .preco2-perso:hover, .vt-mais:hover, .hq-servicos article > a:hover, .stack li > a:hover { background: color-mix(in srgb, currentColor 16%, transparent); transform: translateY(-1px); box-shadow: 0 8px 18px -10px rgba(20, 24, 32, .35); }
+.hn-link:active, .hq-seta:active, .np-direto:active, .vs-tut:active, .aq-link:active, .preco2-perso:active, .vt-mais:active, .hq-servicos article > a:active, .stack li > a:active { transform: scale(.97); }
+.hq-servicos article > a { margin-top: auto; align-self: flex-start; }
+.stack li > a { min-height: 36px; padding: 0 14px; font-size: .92em; }
+@media (max-width: 640px) { .hn-link, .hq-seta, .np-direto, .vt-mais, .aq-link, .preco2-perso, .hq-servicos article > a { min-height: 46px; } }
+.pl-preco { text-decoration: none !important; display: inline-flex; align-items: baseline; gap: 4px; padding: 8px 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: color-mix(in srgb, currentColor 8%, transparent); transition: background .2s ease, transform .2s ease; }
+.pl-preco:hover { background: color-mix(in srgb, currentColor 16%, transparent); transform: translateY(-1px); }
+.p-mosaico a, .p-mosaico a span { text-decoration: none !important; }
+.hq-servicos article > a { margin-top: 0; align-self: center; justify-self: end; white-space: nowrap; }
+@media (max-width: 640px) { .hq-servicos article > a { justify-self: start; white-space: normal; } }
+.hq-seta { justify-self: start; align-self: flex-start; width: auto !important; }
+.hn-arq > a { display: inline-flex; align-items: center; min-height: 38px; padding: 0 16px; margin-left: 6px; border-radius: 999px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: color-mix(in srgb, currentColor 8%, transparent); font-weight: 600; text-decoration: none !important; transition: background .2s ease, transform .2s ease; }
+.hn-arq > a:hover { background: color-mix(in srgb, currentColor 16%, transparent); transform: translateY(-1px); }

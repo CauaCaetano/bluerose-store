@@ -120,3 +120,7 @@ body.vt { background: #101b36; color: var(--creme); font: 400 17px/1.55 'Geist',
 @media (prefers-reduced-motion: reduce) {
   .vt *, .vt *::before, .vt *::after { transition: none !important; animation: none !important; }
 }
+/* 08/11/2026: links de chamada viram botão, como no resto do site */
+.vt-mais { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: color-mix(in srgb, currentColor 8%, transparent); font-weight: 600; text-decoration: none !important; transition: transform .2s ease, background .2s ease; }
+.vt-mais:hover { background: color-mix(in srgb, currentColor 16%, transparent); transform: translateY(-1px); }
+.vt-mais:active { transform: scale(.97); }
