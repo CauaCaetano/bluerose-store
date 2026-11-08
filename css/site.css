@@ -261,10 +261,10 @@ section { padding: 96px 0; }
 .c-ia img { margin: 8px -26px 0 auto; width: 88%; border-radius: 12px 0 0 0; border: 1px solid var(--line-2); border-right: none; border-bottom: none; }
 .c-sist { grid-column: span 2; padding-bottom: 0; }
 .c-sist img { margin: 10px -26px 0 0; width: calc(100% + 26px); border-radius: 12px 0 0 0; border: 1px solid var(--line-2); border-right: none; border-bottom: none; }
-.c-site { grid-column: span 2; flex-direction: row; gap: 18px; }
+.c-site { grid-column: span 3; flex-direction: row; gap: 18px; }
 .c-site .txt { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .c-site img { width: 38%; max-width: 150px; align-self: flex-end; margin-bottom: -26px; border-radius: 14px 14px 0 0; border: 1px solid var(--line-2); border-bottom: none; }
-.c-rotina { grid-column: span 2; background: var(--bg-2); }
+.c-rotina { grid-column: span 3; background: var(--bg-2); }
 .c-rotina pre { margin: 6px 0 0; font: 12.5px/1.6 var(--mono); color: var(--ink-2); white-space: pre; overflow-x: auto; }
 .c-rotina pre b { color: var(--ink); font-weight: 500; }
 @media (prefers-reduced-motion: reduce) { .cel { transition: none; } .cel:hover { transform: none; } }
