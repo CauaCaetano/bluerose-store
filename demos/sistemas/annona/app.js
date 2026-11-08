@@ -544,6 +544,7 @@ function pagar({ itens, desc = 0, servico = 0, titulo, origem, mesa = null, depo
           if (!c) { confirmar('Cliente novo', 'Esse nome não está no fiado. Quer cadastrar agora?', 'Cadastrar', () => formCliente({ nome: $('#pg-cli', j).value })); return; }
           const s = situCli(c), novoSaldo = s.k.saldo + v;
           const segue = () => { pag.push({ f, v, cli: c.id }); ex.innerHTML = ''; desenha(j); };
+          if (s.s === 'bloq' && !c.bloq && s.k.saldo > 0) { const vv = v; abrir(`${cab(`${t(c.nome)} está travado`, s.txt)}<p class="j-txt">Deve ${din(s.k.saldo)}. Se pagar a dívida agora (ou a parte atrasada), o crédito volta na hora e a compra de hoje entra no fiado, sem senha.</p><footer class="j-pe"><button type="button" class="bt" data-volta>Voltar</button><button type="button" class="bt cheio verde" data-rec>Receber a dívida agora</button></footer>`, (j2) => { $('[data-volta]', j2).addEventListener('click', () => pagar.reabre()); $('[data-rec]', j2).addEventListener('click', () => receber(c, () => { const s3 = situCli(c); if (s3.s !== 'bloq' && s3.k.saldo + vv <= c.limite) { pag.push({ f, v: vv, cli: c.id }); toast(`Crédito liberado: ${din(vv)} no fiado de ${c.nome}.`); } pagar.reabre(); })); }); return; }
           if (s.s === 'bloq') { toast(`${c.nome}: ${s.txt}. Só o dono libera em Fiado.`, true); return; }
           if (novoSaldo > c.limite) { const vv = v; liberar('fiado', `fiado de ${c.nome} acima do limite (${din(novoSaldo)} de ${din(c.limite)})`, () => { pag.push({ f, v: vv, cli: c.id }); pagar.reabre(); }); return; }
           segue();
@@ -602,7 +603,7 @@ function fechadasHoje() {
 }
 function telaMesa(m) {
   const tot = totalMesa(m), serv = Math.round(tot * (db.loja.servico || 0) / 100);
-  return `<section class="cab-tela"><div><a class="voltar" href="#mesas">← Todas as mesas</a><h2>${t(m.nome)}</h2><p>${m.pessoas} pessoa${m.pessoas === 1 ? '' : 's'} · aberta às ${horaBR(m.aberta)}</p></div><div class="acoes"><button type="button" class="bt" data-acao="pessoas" data-id="${m.id}">Pessoas</button><button type="button" class="bt" data-acao="parcial" data-id="${m.id}">${ico('imp')}Conta parcial</button><button type="button" class="bt" data-acao="separar" data-id="${m.id}" ${m.itens.length ? '' : 'disabled'}>Separar a conta</button></div></section>
+  return `<section class="cab-tela"><div><a class="voltar" href="#mesas">← Todas as mesas</a><h2>${t(m.nome)}</h2><p>${m.pessoas} pessoa${m.pessoas === 1 ? '' : 's'} · aberta às ${horaBR(m.aberta)}</p></div><div class="acoes"><button type="button" class="bt" data-acao="pessoas" data-id="${m.id}">Pessoas</button><button type="button" class="bt" data-acao="parcial" data-id="${m.id}">${ico('imp')}Conta parcial</button><button type="button" class="bt" data-acao="separar" data-id="${m.id}" ${m.itens.length ? '' : 'disabled'}>Separar a conta</button><button type="button" class="bt" data-acao="juntar" data-id="${m.id}" ${m.itens.length ? '' : 'disabled'}>Juntar ou trocar de mesa</button></div></section>
   <section class="pdv">
     <div class="pdv-esq">
       <form class="leitor" id="f-mesa" data-id="${m.id}" autocomplete="off"><span>${ico('busca')}</span><input id="leitor-mesa" placeholder="O que a mesa pediu? Nome ou código" aria-label="Produto pedido pela mesa"><button type="button" class="icone-bt" data-acao="camera-mesa" data-id="${m.id}" aria-label="Ler código pela câmera">${ico('cam')}</button></form>
@@ -634,6 +635,29 @@ function separarConta(m) {
         if (!m.itens.length) { db.mesas = db.mesas.filter((x) => x.id !== m.id); location.hash = '#mesas'; toast(`${m.nome} paga por completo.`); }
         grava(); mostra();
       } });
+    });
+  }, true);
+}
+// juntar mesas (tudo vai para outra) ou passar só alguns itens; destino pode ser uma mesa aberta ou uma nova
+function juntarMesa(m) {
+  const outras = db.mesas.filter((x) => x.id !== m.id);
+  abrir(`${cab(`Juntar ou trocar: ${t(m.nome)}`, 'Escolha para onde vão os itens')}<form class="form"><label>Para a mesa<select name="dest">${outras.map((x) => `<option value="${x.id}">${t(x.nome)} (${din(totalMesa(x))})</option>`).join('')}<option value="_nova">Uma mesa nova…</option></select></label><label class="nova-m" ${outras.length ? 'hidden' : ''}>Nome da mesa nova<input name="nome" placeholder="Mesa 9"></label>
+    <fieldset class="toda extras"><legend>O que vai</legend><label class="check"><input type="radio" name="o" value="tudo" checked> Tudo (juntar as mesas: a ${t(m.nome)} fecha)</label><label class="check"><input type="radio" name="o" value="parte"> Só os itens que eu marcar</label>
+    <ul class="separa" hidden>${m.itens.map((x, i) => `<li><label class="check"><input type="checkbox" data-it="${i}"> <span>${numBR(x.q, 2)}× ${t(x.nome)}</span><b>${din(Math.round(x.q * x.preco))}</b></label></li>`).join('')}</ul></fieldset>
+    <footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Passar os itens</button></footer></form>`, (j) => {
+    const f = $('form', j), ve = () => { $('.nova-m', j).hidden = f.dest.value !== '_nova'; $('.separa', j).hidden = f.o.value !== 'parte'; };
+    f.addEventListener('change', ve); ve();
+    f.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let d = db.mesas.find((x) => x.id === f.dest.value);
+      if (!d) { const nome = f.nome.value.trim(); if (!nome) { toast('Dê um nome para a mesa nova.', true); return; } if (db.mesas.some((x) => sa(x.nome) === sa(nome))) { toast('Já existe uma mesa aberta com esse nome.', true); return; } d = { id: uid('m'), nome, pessoas: 1, aberta: agora(), itens: [] }; db.mesas.push(d); }
+      const idx = f.o.value === 'tudo' ? m.itens.map((x, i) => i) : $$('[data-it]:checked', j).map((c) => Number(c.dataset.it));
+      if (!idx.length) { toast('Marque pelo menos um item.', true); return; }
+      idx.sort((a, b) => b - a).forEach((i) => { d.itens.push(m.itens[i]); m.itens.splice(i, 1); });
+      if (f.o.value === 'tudo') d.pessoas += m.pessoas;
+      const fechou = !m.itens.length; if (fechou) db.mesas = db.mesas.filter((x) => x.id !== m.id);
+      registra(`${fechou ? 'Mesas juntadas' : 'Itens passados'}: ${m.nome} → ${d.nome}`, 'mesa'); grava(); fechar(); location.hash = `#mesas/${d.id}`; mostra();
+      toast(fechou ? `${m.nome} juntada na ${d.nome}.` : `${idx.length} ${idx.length === 1 ? 'item foi' : 'itens foram'} para a ${d.nome}.`);
     });
   }, true);
 }
@@ -861,14 +885,16 @@ function formCliente(base = {}) {
     $('form', j).addEventListener('submit', (e) => { e.preventDefault(); const f = e.target, d = { nome: f.nome.value.trim(), tel: f.tel.value.trim(), limite: lerDin(f.lim.value) }; if (!c.id && db.clientes.some((x) => sa(x.nome) === sa(d.nome))) { toast('Já existe um cliente com esse nome.', true); return; } if (c.id) Object.assign(c, d); else db.clientes.push({ id: uid('c'), ...d, bloq: false, desde: hoje() }); grava(); fechar(); mostra(); toast('Cliente salvo.'); });
   });
 }
-function receber(c) {
+function receber(c, depois = null) {
   const k = contaFiado(c.id);
   abrir(`${cab(`Receber de ${t(c.nome)}`, `Deve ${din(k.saldo)}`)}<form class="form"><label>Valor recebido (R$)<input name="v" value="${campoDin(k.saldo)}" inputmode="decimal" required></label><label>Forma<select name="f"><option value="dinheiro">Dinheiro</option><option value="pix">Pix</option><option value="debito">Débito</option><option value="credito">Crédito</option></select></label><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio verde">Receber</button></footer></form>`, (j) => {
     $('form', j).addEventListener('submit', (e) => {
       e.preventDefault(); const v = Math.min(lerDin(e.target.v.value), k.saldo), fm = e.target.f.value; if (v <= 0) { toast('Digite o valor.', true); return; }
       db.fiado.push({ id: uid('f'), cli: c.id, data: agora(), tipo: 'pag', v, obs: FORMAS[fm], forma: fm }); registra(`${c.nome} pagou ${din(v)} do fiado (${FORMAS[fm]})`, 'fiado'); grava(); fechar(); mostra();
       const resta = contaFiado(c.id).saldo, msg = `Oi, ${c.nome.split(' ')[0]}! Recebemos ${din(v)} aqui no ${db.loja.nome}. ${resta ? `Ficou em aberto ${din(resta)}.` : 'Sua conta está quitada. Obrigado!'}`;
-      abrir(`${cab('Recebido', din(v))}<p class="j-txt">${resta ? `Ainda deve ${din(resta)}.` : 'Conta quitada.'}</p><footer class="j-pe">${c.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(c.tel, msg)}">${ico('zap')}Mandar o recibo no WhatsApp</a>` : ''}<button type="button" class="bt cheio" data-fechar>Ok</button></footer>`);
+      const s2 = situCli(c), livre = Math.max(0, c.limite - s2.k.saldo);
+      abrir(`${cab('Recebido', din(v))}<p class="j-txt">${resta ? `Ainda deve ${din(resta)}.` : 'Conta quitada.'} ${s2.s === 'bloq' ? `Continua travado: ${s2.txt}.` : `Pode pendurar até ${din(livre)} agora.`}</p><footer class="j-pe">${c.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(c.tel, msg)}">${ico('zap')}Mandar o recibo no WhatsApp</a>` : ''}<button type="button" class="bt cheio" data-fechar>${depois ? 'Voltar para a venda' : 'Ok'}</button></footer>`);
+      if (depois) aoFechar = depois;
     });
   });
 }
@@ -998,7 +1024,7 @@ const GUIA = [
   ['Venda no balcão', 'Em Vender, passe o código ou digite o nome. Produto de balança pede o peso. Escolha dinheiro (mostra o troco), Pix (mostra o QR), cartão ou fiado.'],
   ['Mesas do bar', 'Em Mesas, abra a mesa e vá lançando o que pedem. Garrafa com dose: escolha Dose e o estoque baixa só os ml servidos. Ao fechar, divide por pessoa e cobra o serviço se quiser.'],
   ['Cozinha e porções', 'Porção e lanche são “feitos na hora” e vão para a tela Cozinha assim que o garçom lança na mesa, com a observação (sem cebola) e os adicionais (cheddar + R$ 9). A cozinha marca Preparando e Pronto; o garçom vê na mesa.'],
-  ['Separar a conta', 'Na mesa, toque em Separar a conta: cada pessoa marca o que consumiu e paga só aquilo. O resto continua na mesa. Também dá para dividir igual por pessoa.'],
+  ['Separar e juntar', 'Na mesa, Juntar ou trocar de mesa passa tudo (ou só alguns itens) para outra mesa. Separar a conta: cada pessoa marca o que consumiu e paga só aquilo. O resto continua na mesa. Também dá para dividir igual por pessoa.'],
   ['Happy hour', 'No produto, ponha o preço de happy hour, os dias e o horário. Nesse horário a venda já sai com o preço certo, sem ninguém lembrar.'],
   ['Fiado com limite', 'Passe o caderno inteiro de uma vez (Fiado → Passar o caderno inteiro). Cada cliente tem limite. Passou do prazo, aparece o atraso; com mais de 15 dias o fiado trava sozinho. Cobre pelo WhatsApp com a mensagem pronta.'],
   ['Validades', 'A tela Validades mostra o que já venceu, o que vence em 7 dias e em 30 dias, com o dinheiro parado em cada lote.'],
@@ -1106,7 +1132,7 @@ document.addEventListener('click', (e) => {
     'limpar-venda': () => { estado.venda = { itens: [], cli: '', desc: 0 }; mostra(); },
     desconto: () => liberar('desconto', 'desconto na venda', () => abrir(`${cab('Desconto na venda')}<form class="form"><label>Desconto (R$)<input name="d" inputmode="decimal" value="${campoDin(estado.venda.desc)}"></label><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Aplicar</button></footer></form>`, (j) => $('form', j).addEventListener('submit', (ev) => { ev.preventDefault(); const sub = estado.venda.itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0); estado.venda.desc = Math.min(sub, lerDin(ev.target.d.value)); fechar(); mostra(); }))),
     'pagar-venda': () => pagar({ itens: estado.venda.itens, desc: estado.venda.desc, titulo: 'Receber', origem: 'balcao', depois: () => { estado.venda = { itens: [], cli: '', desc: 0 }; mostra(); } }),
-    'nova-mesa': novaMesa, separar: () => separarConta(db.mesas.find((m) => m.id === id)), 'caderno-todo': cadernoTodo, 'fechar-mesa': () => fecharMesa(db.mesas.find((m) => m.id === id)), parcial: () => fecharMesa(db.mesas.find((m) => m.id === id), true),
+    'nova-mesa': novaMesa, separar: () => separarConta(db.mesas.find((m) => m.id === id)), juntar: () => juntarMesa(db.mesas.find((m) => m.id === id)), 'caderno-todo': cadernoTodo, 'fechar-mesa': () => fecharMesa(db.mesas.find((m) => m.id === id)), parcial: () => fecharMesa(db.mesas.find((m) => m.id === id), true),
     'cancelar-mesa': () => { registra(`Mesa cancelada: ${(db.mesas.find((m) => m.id === id) || {}).nome}`, 'mesa'); db.mesas = db.mesas.filter((m) => m.id !== id); grava(); location.hash = '#mesas'; },
     pessoas: () => { const m = db.mesas.find((x) => x.id === id); abrir(`${cab('Pessoas na mesa')}<form class="form"><label>Quantas pessoas<input name="p" type="number" min="1" max="40" value="${m.pessoas}"></label><footer class="j-pe"><button class="bt cheio">Salvar</button></footer></form>`, (j) => $('form', j).addEventListener('submit', (ev) => { ev.preventDefault(); m.pessoas = Math.max(1, Number(ev.target.p.value) || 1); grava(); fechar(); mostra(); })); },
     'novo-produto': () => formProduto(), 'nova-entrada': () => liberar('entradas', 'dar entrada de mercadoria', () => formEntrada()), 'nova-perda': () => liberar('estoque', 'registrar perda', () => formPerda()), 'nova-pessoa': novaPessoa,
