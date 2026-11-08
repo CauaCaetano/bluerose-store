@@ -1,6 +1,6 @@
 // Peplo · abre sem internet: vende agora, sobe quando a conexão voltar.
-const CACHE = 'peplo-v6';
-const ARQUIVOS = ['app.html', 'app.js?v=6', 'estilo.css?v=4', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png', 'simbolo.svg'];
+const CACHE = 'peplo-v7';
+const ARQUIVOS = ['app.html', 'app.js?v=7', 'estilo.css?v=4', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png', 'simbolo.svg'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((l) => Promise.all(l.filter((k) => k !== CACHE && k.startsWith('peplo-')).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {

@@ -24,7 +24,8 @@ const somaMes = (iso, n) => { const [y, m, d] = iso.split('-').map(Number); cons
 const dias = (de, ate = hoje()) => Math.round((new Date(`${ate}T12:00`) - new Date(`${String(de).slice(0, 10)}T12:00`)) / 864e5);
 const dataBR = (iso) => (iso ? String(iso).slice(0, 10).split('-').reverse().join('/') : '');
 const horaBR = (iso) => (iso && iso.length > 10 ? new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '');
-const agora = () => new Date().toISOString();
+// horário local, sem fuso: com toISOString a venda das 21h em diante caía no dia seguinte (corrigido em 08/11/2026)
+const agora = () => { const d = new Date(); return `${isoD(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; };
 const telLimpo = (tel) => String(tel || '').replace(/\D/g, '');
 const zap = (tel, m) => `https://wa.me/${telLimpo(tel).length >= 12 ? '' : '55'}${telLimpo(tel)}?text=${encodeURIComponent(m)}`;
 const FORMAS = { dinheiro: 'Dinheiro', pix: 'Pix', debito: 'Cartão de débito', credito: 'Cartão de crédito', fiado: 'Fiado', loja: 'Crédito da loja' };
