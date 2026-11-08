@@ -157,8 +157,40 @@
     pet.appendChild(s);
   }
 
-  // ---------- dicas (cartões com “play”) ----------
-  $$('.reel').forEach(function (r) { r.addEventListener('click', function () { var v = r.getAttribute('aria-pressed') !== 'true'; $$('.reel').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); }); r.setAttribute('aria-pressed', String(v)); }); });
+  // ---------- dicas em vídeo: prévia no hover (computador) e janela com o vídeo ao clicar no play ----------
+  var dj = $('#dica-janela'), djv = dj && $('.dj-video', dj);
+  var passa = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  function toca(v) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+  $$('.reel').forEach(function (r) {
+    var v = $('video', r);
+    if (v && passa && !calmo) {
+      r.addEventListener('mouseenter', function () { r.classList.add('tocando'); toca(v); });
+      r.addEventListener('mouseleave', function () { r.classList.remove('tocando'); v.pause(); });
+    }
+    r.addEventListener('click', function () {
+      if (!dj || !v) return;
+      v.pause(); r.classList.remove('tocando');
+      var tit = $('.reel-tit', r).cloneNode(true), sm = $('small', tit); if (sm) sm.remove();
+      $('#dj-t', dj).textContent = tit.textContent.trim();
+      $('.dj-dica', dj).textContent = $('.reel-dica', r).textContent;
+      var src = $('source', v).getAttribute('src');
+      if (djv.getAttribute('data-src') !== src) { djv.setAttribute('data-src', src); djv.poster = v.getAttribute('poster'); djv.src = src; }
+      if (dj.showModal) dj.showModal(); else dj.setAttribute('open', '');
+      djv.currentTime = 0; toca(djv);
+    });
+  });
+  if (dj) {
+    var fechaDica = function () { djv.pause(); if (dj.open) { if (dj.close) dj.close(); else dj.removeAttribute('open'); } };
+    $('.dj-fechar', dj).addEventListener('click', fechaDica);
+    dj.addEventListener('click', function (e) { if (e.target === dj) fechaDica(); });
+    dj.addEventListener('close', function () { djv.pause(); });
+    $('[data-abrir-agenda]', dj).addEventListener('click', function () { fechaDica(); });
+  }
+
+  // ---------- vídeos de fundo: tocam só quando aparecem na tela (com movimento reduzido fica o pôster) ----------
+  if (!calmo && 'IntersectionObserver' in window) $$('video[data-auto]').forEach(function (v) {
+    new IntersectionObserver(function (e) { if (e[0].isIntersecting) toca(v); else v.pause(); }, { threshold: .25 }).observe(v);
+  });
 
   // ---------- pedido de avaliação em 3 passos (agendar.html) ----------
   var pf = $('[data-passos]');

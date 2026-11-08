@@ -197,8 +197,8 @@ body.na-areia .topo { background: var(--areia); }
 .insta-t a { text-underline-offset: 4px; text-decoration-thickness: 1px; }
 .insta-fila { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 22px; margin-top: 24px; }
 .zoom { display: block; overflow: hidden; border-radius: var(--raio); aspect-ratio: 1 / 1; }
-.zoom img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
-.zoom:hover img { transform: scale(1.05); }
+.zoom img, .zoom video { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.zoom:hover img, .zoom:hover video { transform: scale(1.05); }
 .rd-logo { position: relative; display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 2.5vw; margin: 96px var(--lado) 0; padding-top: 64px; border-top: 1px solid var(--linha); }
 .rd-ic { width: 9vw; height: 9vw; stroke-width: 1.6; }
 .rd-nome { font: 300 10.4vw/.9 var(--tit); text-transform: uppercase; letter-spacing: -.01em; white-space: nowrap; }

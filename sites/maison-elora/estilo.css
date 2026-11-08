@@ -500,6 +500,22 @@ p { margin: 0 0 1em; }
   html { scroll-behavior: auto; }
 }
 
+/* vídeos (Pexels, arquivos locais em video/) */
+.moldura.vid { position: relative; }
+.moldura.vid video, .heroi-foto video, .p-heroi figure video { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--areia); }
+.heroi-foto video { object-position: 50% 30%; }
+.n-heroi > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 40%; background: var(--areia); }
+.vid-bt { position: absolute; right: 14px; bottom: 14px; z-index: 3; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(41, 39, 36, .25); border-radius: 50%; background: rgba(248, 245, 239, .86); color: var(--tinta); cursor: pointer; transition: background .25s; }
+.vid-bt:hover { background: var(--marfim); }
+.vid-bt:focus-visible { outline: 2px solid var(--tinta); outline-offset: 3px; }
+.vid-bt svg { width: 16px; height: 16px; fill: currentColor; }
+.vid-bt .i-pausa, .vid-bt.tocando .i-play { display: none; }
+.vid-bt.tocando .i-pausa { display: inline; }
+@media (max-width: 640px) {
+  .n-heroi > video { position: relative; height: 360px; object-position: 75% 40%; }
+  .n-heroi > .vid-bt { top: 302px; bottom: auto; }
+}
+
 /* ---------- responsivo ---------- */
 @media (max-width: 1180px) {
   .nav { display: none; }

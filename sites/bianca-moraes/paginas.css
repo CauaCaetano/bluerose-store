@@ -139,8 +139,8 @@
 /* próximo tratamento */
 .prox { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 7vw, 100px); align-items: center; padding: 110px var(--lado) 130px; background: linear-gradient(var(--blush), var(--blush-2)); }
 .prox-foto { aspect-ratio: 1; overflow: hidden; }
-.prox-foto img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s; }
-.prox:hover .prox-foto img { transform: scale(1.04); }
+.prox-foto img, .prox-foto video { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s; }
+.prox:hover .prox-foto img, .prox:hover .prox-foto video { transform: scale(1.04); }
 .prox-tx { position: relative; padding: 40px 0; max-width: 460px; }
 .prox-tx .floreio { position: absolute; left: -64px; top: -6px; }
 .prox-tx .olho { color: var(--acc-2); }

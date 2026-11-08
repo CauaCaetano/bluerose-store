@@ -227,4 +227,11 @@
       grande.classList.add('troca');
     });
   });
+
+  // ---------- vídeos (abertura e Instagram): tocam só quando aparecem na tela; com movimento reduzido fica o pôster ----------
+  if (!calmo && 'IntersectionObserver' in window) $$('video[data-auto]').forEach(function (v) {
+    new IntersectionObserver(function (e) {
+      if (e[0].isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } else v.pause();
+    }, { threshold: .2 }).observe(v);
+  });
 })();

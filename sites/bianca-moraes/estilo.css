@@ -277,14 +277,25 @@ svg use, .ic, .lateral svg, .circ svg { fill: none; stroke: currentColor; stroke
 @keyframes petala { 0% { transform: translate(0, -40px) rotate(0); } 100% { transform: translate(var(--dx, 60px), 680px) rotate(var(--r, 300deg)); opacity: 0; } }
 .reels { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; max-width: 1340px; margin: 0 auto; }
 .reel { position: relative; aspect-ratio: 1; overflow: hidden; border: 0; padding: 0; background: #222; cursor: pointer; color: var(--branco); text-align: center; }
-.reel img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s, filter .5s; }
+.reel img, .reel video { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 1s, filter .5s; }
 .reel::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 40%, rgba(0, 0, 0, .65)); }
-.reel:hover img { transform: scale(1.06); }
+.reel:hover img, .reel:hover video { transform: scale(1.06); }
+.reel.tocando .play { opacity: 0; }
+.reel:focus-visible { outline: 2px solid var(--branco); outline-offset: 3px; }
 .play { position: absolute; z-index: 2; left: 50%; top: 46%; width: 0; height: 0; border-style: solid; border-width: 24px 0 24px 40px; border-color: transparent transparent transparent #fff; transform: translate(-40%, -50%); border-radius: 4px; filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .3)); transition: opacity .3s; }
 .reel-tit { position: absolute; z-index: 2; left: 10px; right: 10px; bottom: 18px; font: 800 clamp(13px, 1.2vw, 16px)/1.15 var(--f); text-transform: uppercase; transition: opacity .3s; }
 .reel-tit small { display: block; font: 400 10px/1 Georgia, serif; letter-spacing: .12em; margin-bottom: 6px; }
-.reel-dica { position: absolute; z-index: 3; inset: 0; display: grid; place-items: center; padding: 22px; background: rgba(42, 23, 20, .92); font: 300 clamp(13px, 1.15vw, 16px)/1.6 var(--tit); opacity: 0; transition: opacity .4s; }
-.reel[aria-pressed="true"] .reel-dica { opacity: 1; }
+.reel-dica { display: none; }
+/* janela do vídeo da dica */
+.dica-janela { width: min(980px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); border: 0; padding: 0; background: linear-gradient(110deg, #fff 40%, #fbeee9); color: var(--tx); overflow: auto; }
+.dica-janela[open] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); align-items: center; animation: entra .5s cubic-bezier(.2, .7, .2, 1); }
+.dica-janela::backdrop { background: rgba(42, 23, 20, .6); backdrop-filter: blur(3px); }
+.dj-video { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; background: #222; }
+.dj-tx { padding: 40px clamp(24px, 4vw, 54px); }
+.dj-olho { font: 400 12px/1 Georgia, serif; letter-spacing: .14em; text-transform: uppercase; color: var(--acc-2); margin: 0 0 14px; }
+.dj-tx h2 { font: 300 clamp(28px, 3.4vw, 42px)/1.15 var(--tit); margin: 0 0 18px; }
+.dj-dica { font-size: 16.5px; line-height: 1.85; margin: 0 0 28px; }
+.dica-janela .dj-fechar { top: 14px; right: 14px; background: rgba(255, 255, 255, .85); border-radius: 50%; }
 .es-redes { position: relative; margin-top: 50px; font: 500 17px var(--f); }
 
 /* ---------- rodapé ---------- */
@@ -367,6 +378,9 @@ svg use, .ic, .lateral svg, .circ svg { fill: none; stroke: currentColor; stroke
   .nu { border-left: 0; border-top: 1px solid var(--acc); padding: 36px 16px; }
   .nu:first-child { border-top: 0; }
   .reels { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .dica-janela[open] { grid-template-columns: 1fr; }
+  .dj-tx { padding: 26px 20px 30px; }
+  .dj-video { max-height: 56dvh; }
   .escuro { padding: 80px 16px 70px; }
   .escuro .pilula { margin-bottom: 70px; }
   .rd-fone { justify-content: flex-start; }

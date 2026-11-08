@@ -388,4 +388,19 @@
 
   /* ---------- horário de hoje em destaque ---------- */
   var hj = $('.horario tr[data-dia="' + new Date().getDay() + '"]'); if (hj) hj.classList.add('hoje');
+  /* ---------- vídeos: tocam só quando visíveis, pausam fora da tela, respeitam movimento reduzido ---------- */
+  var semMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  $$('video[data-auto]').forEach(function (v) {
+    var bt = v.parentNode.querySelector('.vid-bt'), pausadoPeloUsuario = false;
+    function marca() { if (!bt) return; var t = !v.paused; bt.classList.toggle('tocando', t); bt.setAttribute('aria-label', t ? 'Pausar vídeo' : 'Reproduzir vídeo'); }
+    function toca() { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+    v.addEventListener('play', marca); v.addEventListener('pause', marca);
+    if (bt) bt.addEventListener('click', function () { if (v.paused) { pausadoPeloUsuario = false; toca(); } else { pausadoPeloUsuario = true; v.pause(); } });
+    if (semMov) return;
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) { if (!pausadoPeloUsuario) toca(); } else if (!v.paused) v.pause(); });
+      }, { threshold: 0.2 }).observe(v);
+    } else toca();
+  });
 })();

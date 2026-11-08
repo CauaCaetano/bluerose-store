@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="../../js/idioma.js?v=18"></script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; media-src 'self' blob:; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Maison Élora · Salão de beleza e spa em Lourdes, Belo Horizonte</title>
@@ -14,11 +14,11 @@
 <link rel="preload" href="fontes/bodoni-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fontes/fontes.css?v=1">
 <link rel="stylesheet" href="../assets/moldura.css?v=5">
-<link rel="stylesheet" href="estilo.css?v=1">
+<link rel="stylesheet" href="estilo.css?v=2">
 <script src="../../js/leads-config.js?v=6" defer></script>
 <script src="../assets/moldura.js?v=7" defer></script>
 <script src="dados.js?v=1" defer></script>
-<script src="site.js?v=1" defer></script>
+<script src="site.js?v=2" defer></script>
 
 <meta property="og:title" content="Maison Élora · Salão de beleza e spa em Lourdes, Belo Horizonte">
 <meta property="og:description" content="Cabelo, unhas, sobrancelhas e cílios, estética, spa e Dia de Noiva no mesmo endereço em Lourdes, BH. Tabela de preços no site e agendamento por departamento e profissional.">
@@ -88,7 +88,7 @@
       <p class="lead">Cabelo, unhas, olhar, estética e spa no mesmo endereço em Lourdes. Hora marcada, café na chegada e uma equipe que conversa antes de começar.</p>
       <div class="bts"><a class="bt" href="agendar.html">Agendar horário <svg aria-hidden="true"><use href="#i-seta"/></svg></a><a class="link-seta" href="#departamentos">Ver departamentos</a></div>
     </div>
-    <figure class="heroi-foto"><div class="moldura"><img src="img/heroi.webp" alt="Cliente com cabelo castanho em ondas largas sentada no salão" width="933" height="1400" fetchpriority="high"></div><figcaption><span>Escova modelada, cabelo · foto ilustrativa</span><span>p. 01</span></figcaption></figure>
+    <figure class="heroi-foto"><div class="moldura vid"><video data-auto muted loop playsinline preload="none" poster="video/inicio-escova.webp" width="600" height="800" aria-label="Vídeo: cabeleireira modelando a escova com secador e escova redonda em cliente de cabelo castanho"><source src="video/inicio-escova.mp4" type="video/mp4"></video><button type="button" class="vid-bt" aria-label="Reproduzir vídeo"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="i-play" d="M6 4l10 6-10 6z"/><path class="i-pausa" d="M5.5 4h3v12h-3zM11.5 4h3v12h-3z"/></svg></button></div><figcaption><span>Escova modelada, cabelo · vídeo ilustrativo</span><span>p. 01</span></figcaption></figure>
     <figure class="heroi-mini"><div class="moldura"><img src="img/unh-nude.webp" alt="Mão com unhas nude e anéis dourados" width="1050" height="1400"></div></figure>
     <div class="heroi-dados"><div><b>5</b><span>departamentos no mesmo endereço</span></div><div><b>9</b><span>profissionais na equipe (exemplo)</span></div></div>
   </div>
@@ -256,7 +256,7 @@
       <div><p class="rd-rot">Horários</p><p>Segunda: 10h às 19h</p><p>Terça a sexta: 9h às 20h</p><p>Sábado: 8h às 18h</p><p>Domingo: fechado (noivas com hora marcada)</p></div>
       <div><p class="rd-rot">Endereço</p><p>Rua de Exemplo, 1200<br>Lourdes, Belo Horizonte, MG</p><p>Telefone (31) 3000-0000</p><a href="#" data-wa="Olá, Maison Élora! Vim pelo site.">WhatsApp (31) 90000-0000</a><a href="contato.html">Como chegar</a></div>
     </div>
-    <p class="rd-legal"><strong>Site de demonstração da Blue Rose. Profissionais, endereços, valores e integrações são ilustrativos.</strong> Maison Élora Beleza e Spa Ltda. é uma marca criada para exemplo · CNPJ 00.000.000/0001-00 (exemplo) · Responsável técnica pela estética: Luiza Martins, esteticista, registro de exemplo · Telefones de exemplo · Fotos: Pexels (licença Pexels), ilustrativas; as pessoas não são clientes nem profissionais do salão · <a href="privacidade.html">Política de privacidade</a></p>
+    <p class="rd-legal"><strong>Site de demonstração da Blue Rose. Profissionais, endereços, valores e integrações são ilustrativos.</strong> Maison Élora Beleza e Spa Ltda. é uma marca criada para exemplo · CNPJ 00.000.000/0001-00 (exemplo) · Responsável técnica pela estética: Luiza Martins, esteticista, registro de exemplo · Telefones de exemplo · Fotos e vídeos: Pexels (licença livre do Pexels), ilustrativos; as pessoas não são clientes nem profissionais do salão · <a href="privacidade.html">Política de privacidade</a></p>
   </div>
 </footer>
 <a class="flutua" href="agendar.html"><svg aria-hidden="true"><use href="#i-cal"/></svg>Agendar</a>
