@@ -500,3 +500,9 @@ fieldset.extras textarea { border: 1px solid #E5D5DC; border-radius: 10px; paddi
 .inst-ja { width: 100%; margin-bottom: 4px; }
 /* celular: a barra lateral some (o menu fica na barra de baixo e em Mais) */
 @media (max-width: 860px) { .lateral { display: none !important; } }
+
+/* vários caixas, balança, base de produtos */
+.esc-caixa { margin-left: auto; display: grid; gap: 4px; font-size: 13.5px; font-weight: 600; color: var(--ardosia); }
+.esc-caixa select { min-height: 42px; border: 1px solid var(--linha); border-radius: 10px; padding: 0 12px; background: #fff; font: 600 15px var(--corpo); color: var(--texto); }
+.off { margin: 0; display: flex; align-items: center; gap: 10px; background: var(--verde-claro); color: var(--verde-2); padding: 10px 14px; border-radius: 12px; font-size: 15px; }
+.off img { width: 44px; height: 44px; object-fit: contain; background: #fff; border-radius: 8px; }

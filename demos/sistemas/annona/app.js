@@ -103,6 +103,7 @@ function inicial() {
     const mult = x[5] <= x[6] ? 1 : 3; // o que está no mínimo continua no mínimo (lista de compras); o resto tem estoque de verdade
     const p = { id: `p${i + 1}`, nome: x[0], cat: x[1], un: x[2], custo: x[3], preco: x[4], q: r3(x[5] * mult), min: x[6], forn: x[7], cod: ean13(`7891${String(20261 + i * 37).padStart(5, '0')}${String(i).padStart(3, '0')}`), lotes: [], criado: somaDias(h, -90) };
     if (x[9]) p.parado = true;
+    if (x[2] === 'kg') p.plu = String(i + 1);
     const fo = Object.entries(FOTOS).filter(([n]) => x[0].startsWith(n)).sort((a, b) => b[0].length - a[0].length)[0]; if (fo) p.foto = `fotos/${fo[1]}.webp`;
     if (x[8]) { // dois lotes: o mais antigo vence antes
       const q1 = r3(p.q * 0.4), q2 = r3(p.q - q1);
@@ -137,7 +138,7 @@ function inicial() {
       const total = itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0), hora = sem >= 5 || sem === 0 ? 8 + Math.floor(r() * 15) : 7 + Math.floor(r() * 14);
       if (d === 0 && hora > hAgora) continue; // hoje: só as vendas até agora
       const f = formas[Math.floor(r() * formas.length)];
-      vendas.push({ id: uid('v'), n: vendas.length + 1, data: `${dia}T${pad(Math.min(hora, 23))}:${pad(Math.floor(r() * 60))}:00`, itens, total, desc: 0, pag: [{ f, v: total }], origem: 'balcao', vend: r() < 0.55 ? 'u2' : r() < 0.6 ? 'u1' : 'u3' });
+      vendas.push({ id: uid('v'), cx: r() < 0.6 ? 'c1' : 'c2', n: vendas.length + 1, data: `${dia}T${pad(Math.min(hora, 23))}:${pad(Math.floor(r() * 60))}:00`, itens, total, desc: 0, pag: [{ f, v: total }], origem: 'balcao', vend: r() < 0.55 ? 'u2' : r() < 0.6 ? 'u1' : 'u3' });
     }
   }
   vendas.sort((a, b) => a.data.localeCompare(b.data)); vendas.forEach((v, i) => { v.n = i + 1; });
@@ -163,10 +164,15 @@ function inicial() {
     { id: uid('x'), data: `${somaDias(h, -4)}T08:05:00`, p: pid('Pão francês').id, q: 0.8, motivo: 'Venceu', custo: 872, obs: '' },
     { id: uid('x'), data: `${somaDias(h, -9)}T15:30:00`, p: pid('Iogurte').id, q: 4, motivo: 'Venceu', custo: 756, obs: '' },
   ];
-  const caixa = { aberto: true, ab: `${h}T07:02:00`, troco: 15000, movs: [{ id: uid('k'), t: 'sangria', v: 18000, m: 'Pagamento do pão', d: `${h}T07:40:00` }] };
+  // dois inventários passados: o que sumiu sem explicação aparece no relatório de diferenças
+  const sumiu = [['Cerveja long neck', 6], ['Chocolate', 4], ['Picanha', 0.8], ['Cerveja lata', 12], ['Energético', 2]], ajI = [];
+  [[-41, 'Bebidas e frios'], [-12, 'Tudo']].forEach(([dd, cat], k) => sumiu.slice(k, k + 4).forEach(([n, q]) => { const p = pid(n); ajI.push({ id: uid('x'), data: `${somaDias(h, dd)}T07:30:00`, p: p.id, q: q * (k ? 1 : 0.5), motivo: 'Ajuste de inventário', custo: Math.round(q * (k ? 1 : 0.5) * p.custo), obs: 'Inventário' }); }));
+  perdas.push(...ajI);
+  const inventarios = [[-41, 'Bebidas e frios', 0], [-12, 'Tudo', 1]].map(([dd, cat, k]) => { const f2 = ajI.filter((x) => x.data.startsWith(somaDias(h, dd))).reduce((a, x) => a + x.custo, 0); return { id: uid('i'), data: somaDias(h, dd), cat, itens: Array(k ? 38 : 16).fill(0).map((z, ii) => ({ p: produtos[ii].id, c: 1 })), dif: -f2 + (k ? 349 : 0), falta: f2, sobra: k ? 349 : 0, quem: k ? 'Rafael Lima' : 'Sérgio Andrade' }; });
+  const caixa = { aberto: true, quem: 'Kátia Moreira', ab: `${h}T07:02:00`, troco: 15000, movs: [{ id: uid('k'), t: 'sangria', v: 18000, m: 'Pagamento do pão', d: `${h}T07:40:00` }] };
   return {
-    v: 1, demo: true,
-    loja: { nome: 'Mercadinho São José', slogan: 'Mercearia e empório', tel: '16 99123-4455', cidade: 'Franca', pix: 'mercadinhosaojose@email.com', prazo: 30, limite: 20000, servico: 10, vendSemPrazo: false },
+    v: 1, demo: true, terminais: [{ id: 'c1', nome: 'Caixa 1' }, { id: 'c2', nome: 'Caixa 2' }], caixasT: { c2: { aberto: true, quem: 'Sérgio Andrade', ab: `${h}T08:30:00`, troco: 10000, movs: [] } },
+    loja: { bal: { ativo: true, tipo: 'preco', dig: 4 }, nome: 'Mercadinho São José', slogan: 'Mercearia e empório', tel: '16 99123-4455', cidade: 'Franca', pix: 'mercadinhosaojose@email.com', prazo: 30, limite: 20000, servico: 10, vendSemPrazo: false },
     usuarios: [{ id: 'u1', nome: 'Sérgio Andrade', perfil: 'dono', tel: '16 99123-4455', email: 'sergio@mercadinhosaojose.com', pin: '1234', perms: {} }, { id: 'u2', nome: 'Kátia Moreira', perfil: 'caixa', tel: '16 99288-1043', pin: '', perms: { caixa: true } }, { id: 'u3', nome: 'Rafael Lima', perfil: 'repositor', tel: '16 99307-5521', pin: '', perms: { estoque: true, entradas: true } }], usuario: 'u1', meta: 0,
     atividades: [
       { data: `${somaDias(h, -2)}T16:12:00`, quem: 'Rafael Lima', txt: 'Perda: 1 Cerveja garrafa 600 ml (Quebrou)', tipo: 'perda' },
@@ -175,7 +181,7 @@ function inicial() {
       { data: `${somaDias(h, -4)}T19:05:00`, quem: 'Kátia Moreira', txt: 'Liberado com a senha do dono: fiado de Marquinhos (pedreiro) acima do limite', tipo: 'liberacao' },
       { data: `${somaDias(h, -5)}T08:40:00`, quem: 'Sérgio Andrade', txt: 'Preço da Cerveja lata 350 ml: R$ 4,99 → R$ 5,49', tipo: 'preco' },
     ],
-    fornecedores: F, produtos, clientes, fiado, vendas, entradas, perdas, caixa, caixas: [], inventarios: [], pedidos: [], ajustes: [],
+    fornecedores: F, produtos, clientes, fiado, vendas, entradas, perdas, caixa, caixas: [], inventarios, pedidos: [], ajustes: [],
   };
 }
 
@@ -190,6 +196,13 @@ if (novo) { grava(); history.replaceState(null, '', location.pathname + location
 if (db.mesas && db.mesas.length) db.mesas = [];
 window.veltriaDados = () => db;
 
+// vários caixas: o Caixa 1 fica em db.caixa (como sempre); os outros em db.caixasT; cada aparelho guarda qual é o seu
+db.terminais ||= [{ id: 'c1', nome: 'Caixa 1' }]; db.caixasT ||= {};
+const TERM = () => { let x = ''; try { x = localStorage.getItem('annona-caixa') || ''; } catch (e) { /* sem armazenamento */ } return db.terminais.some((y) => y.id === x) ? x : 'c1'; };
+const nomeTerm = (id) => (db.terminais.find((y) => y.id === id) || {}).nome || 'Caixa 1';
+const CXA = (t2 = TERM()) => (t2 === 'c1' ? db.caixa : (db.caixasT[t2] ||= { aberto: false, movs: [] }));
+const poeCXA = (t2, c) => { if (t2 === 'c1') db.caixa = c; else db.caixasT[t2] = c; };
+const doTerm = (x, t2) => (x.cx || 'c1') === t2;
 const prod = (id) => db.produtos.find((p) => p.id === id);
 const cli = (id) => db.clientes.find((c) => c.id === id);
 const forn = (id) => db.fornecedores.find((f) => f.id === id);
@@ -327,7 +340,7 @@ function marca() {
   n('#n-val', nv); n('#n-fiado', nf); n('#n-compras', nc);
   document.title = `${db.loja.nome} · Annona`;
   $('#lat-loja-ini').textContent = iniciais(db.loja.nome); $('#lat-loja-nome').textContent = db.loja.nome;
-  const lc = $('#lat-caixa'); lc.textContent = db.caixa.aberto ? `Caixa aberto desde ${horaBR(db.caixa.ab)}` : 'Caixa fechado'; lc.classList.toggle('fechado', !db.caixa.aberto);
+  const lc = $('#lat-caixa'), cx0 = CXA(); lc.textContent = cx0.aberto ? `${nomeTerm(TERM())} aberto desde ${horaBR(cx0.ab)}` : `${nomeTerm(TERM())} fechado`; lc.classList.toggle('fechado', !cx0.aberto);
   $('#lat-eu-av').textContent = iniciais(eu().nome); $('#lat-eu-nome').textContent = eu().nome; $('#lat-eu-papel').textContent = PAPEL[eu().perfil] || '';
 }
 
@@ -432,8 +445,8 @@ function linha(sem) {
     <g transform="translate(${Math.min(pts[im][0], W - 60)},${pts[im][1] < 44 ? pts[im][1] + 30 : pts[im][1] - 28})"><rect x="-54" y="-14" width="108" height="26" rx="8" class="balao"/><text y="4" text-anchor="middle" class="balao-t">${din(sem[im][1])}</text></g></svg>`;
 }
 function caixaTxt() {
-  const c = db.caixa;
-  return c.aberto ? `<p class="caixa-linha">${ico('caixa')} Caixa aberto desde ${horaBR(c.ab)}. Dinheiro esperado na gaveta: <b>${din(resumoCaixa().esperado)}</b>. <a href="#caixa">Ver o caixa</a></p>` : `<p class="caixa-linha alerta">${ico('alerta')} O caixa está fechado. <a href="#caixa">Abrir o caixa</a></p>`;
+  const c = CXA();
+  return c.aberto ? `<p class="caixa-linha">${ico('caixa')} ${t(nomeTerm(TERM()))} aberto desde ${horaBR(c.ab)}. Dinheiro esperado na gaveta: <b>${din(resumoCaixa().esperado)}</b>. <a href="#caixa">Ver o caixa</a></p>` : `<p class="caixa-linha alerta">${ico('alerta')} O caixa está fechado. <a href="#caixa">Abrir o caixa</a></p>`;
 }
 
 // ------------------------------------------------------------------ vender (balcão)
@@ -489,7 +502,7 @@ TELAS.vender = () => {
       ${v.itens.length ? `<ul class="itens">${v.itens.map((x, i) => itemLinha(x, i, 'venda')).join('')}</ul>` : '<p class="vazio">Passe o primeiro produto no leitor, digite o nome ou toque num dos mais vendidos.</p>'}
       <dl class="soma"><div><dt>Subtotal</dt><dd>${din(sub)}</dd></div>${v.desc ? `<div><dt>Desconto</dt><dd>− ${din(v.desc)}</dd></div>` : ''}<div class="total"><dt>Total</dt><dd>${din(tot)}</dd></div></dl>
       <div class="pdv-acoes"><button type="button" class="bt" data-acao="desconto" ${v.itens.length ? '' : 'disabled'}>Desconto</button><button type="button" class="bt cheio verde grande" data-acao="pagar-venda" ${v.itens.length ? '' : 'disabled'}>Receber ${din(tot)}</button></div>
-      ${db.caixa.aberto ? '' : '<p class="aviso-mini">O caixa está fechado. Você pode vender; o dinheiro entra no próximo caixa aberto.</p>'}
+      ${CXA().aberto ? '' : '<p class="aviso-mini">Este caixa está fechado. Você pode vender; o dinheiro entra no próximo caixa aberto.</p>'}
     </aside></section>`;
 };
 function itemLinha(x, i, onde) {
@@ -511,8 +524,17 @@ function poeNaVenda(p) {
     addItem(estado.venda.itens, p, { q, dose }); mostra(); setTimeout(() => { const l = $('#leitor'); if (l) l.focus(); }, 30);
   });
 }
+// etiqueta da balança (13 dígitos): 2 + PLU (4 dígitos + 0, ou 5 dígitos) + valor em 6 dígitos (centavos ou gramas) + dígito verificador
+function lerBalanca(s2) {
+  const bl = db.loja.bal; if (!bl || !bl.ativo || !/^2\d{12}$/.test(s2)) return null;
+  const dig = bl.dig === 5 ? 5 : 4, plu = Number(s2.slice(1, 1 + dig)), val = Number(s2.slice(6, 12)), p = ativos().find((x) => x.plu && Number(x.plu) === plu);
+  if (!p || !val) return null;
+  return { p, q: bl.tipo === 'peso' ? r3(val / 1000) : r3(val / p.preco) };
+}
 function lerNoBalcao(txt) {
   const s = String(txt || '').trim(); if (!s) return;
+  const bal = lerBalanca(s);
+  if (bal) { addItem(estado.venda.itens, bal.p, { q: bal.q }); mostra(); toast(`${bal.p.nome}: ${numBR(bal.q)} kg pela etiqueta da balança.`); setTimeout(() => { const l = $('#leitor'); if (l) l.focus(); }, 30); return; }
   const p = ativos().find((x) => x.cod === s);
   if (p) { poeNaVenda(p); return; }
   const l = buscaProd(s);
@@ -570,7 +592,7 @@ function pagar({ itens, desc = 0, servico = 0, titulo, origem, mesa = null, depo
       pag.push({ f, v }); ex.innerHTML = ''; desenha(j);
     }));
     $('#pg-fim', j).addEventListener('click', () => {
-      const venda = { id: uid('v'), n: (db.vendas.at(-1) || { n: 0 }).n + 1, data: agora(), itens: itens.map((x) => ({ ...x })), total, desc, servico, pag: pag.map((x) => ({ ...x })), origem, mesa, vend: db.usuario };
+      const venda = { id: uid('v'), cx: TERM(), n: (db.vendas.at(-1) || { n: 0 }).n + 1, data: agora(), itens: itens.map((x) => ({ ...x })), total, desc, servico, pag: pag.map((x) => ({ ...x })), origem, mesa, vend: db.usuario };
       venda.itens.forEach((x) => { const p = prod(x.p); if (p) baixar(p, qBaixa(x)); });
       pag.filter((x) => x.f === 'fiado').forEach((x) => db.fiado.push({ id: uid('f'), cli: x.cli, data: venda.data, tipo: 'compra', v: x.v, venda: venda.id, obs: `Venda nº ${venda.n}` }));
       if (desc) registra(`Desconto de ${din(desc)} na venda nº ${venda.n}`, 'desconto');
@@ -589,9 +611,11 @@ function comprovante(v) {
   const c = v.pag.find((x) => x.cli), cl = c && cli(c.cli);
   const linhas = v.itens.map((x) => `${numBR(x.q, 3)} ${x.nome}${(x.adics || []).length ? ` (+ ${x.adics.map((a) => a.n).join(', ')})` : ''} ${din(Math.round(x.q * x.preco))}`);
   const txt = `${db.loja.nome}\nVenda nº ${v.n} · ${dataBR(v.data)} ${horaBR(v.data)}\n\n${linhas.join('\n')}\n${v.servico ? `Serviço ${din(v.servico)}\n` : ''}${v.desc ? `Desconto −${din(v.desc)}\n` : ''}Total ${din(v.total)}\n${v.pag.map((x) => `${FORMAS[x.f]} ${din(x.v)}`).join('\n')}\n\nComprovante sem valor fiscal. Obrigado pela preferência!`;
-  abrir(`${cab('Venda concluída', `Nº ${v.n} · ${din(v.total)}`)}<pre class="cupom">${t(txt)}</pre><footer class="j-pe"><button type="button" class="bt" data-imp>${ico('imp')}Imprimir</button>${cl && cl.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(cl.tel, txt)}">${ico('zap')}Mandar no WhatsApp</a>` : ''}<button type="button" class="bt cheio" data-fechar>Nova venda</button></footer>`, (j) => {
-    $('[data-imp]', j).addEventListener('click', () => imprimir(txt));
-    if (db.loja.impAuto) imprimir(txt);
+  const fi = v.pag.find((x) => x.f === 'fiado'), assina = fi && cl ? `\n\nReconheço que fiquei devendo ${din(fi.v)}\nao ${db.loja.nome} por esta compra.\n\n\n______________________________\n${cl.nome}` : '';
+  const duasVias = assina ? `${txt}${assina}\n\n1ª via: fica com o comércio\n\n- - - - - - - - - - - - - - - -\n\n${txt}\n\n2ª via: do cliente` : txt;
+  abrir(`${cab('Venda concluída', `Nº ${v.n} · ${din(v.total)}`)}<pre class="cupom">${t(assina ? txt + assina : txt)}</pre><footer class="j-pe"><button type="button" class="bt" data-imp>${ico('imp')}${assina ? 'Imprimir 2 vias' : 'Imprimir'}</button>${cl && cl.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(cl.tel, txt)}">${ico('zap')}Mandar no WhatsApp</a>` : ''}<button type="button" class="bt cheio" data-fechar>Nova venda</button></footer>`, (j) => {
+    $('[data-imp]', j).addEventListener('click', () => imprimir(duasVias));
+    if (db.loja.impAuto) imprimir(duasVias);
     setTimeout(() => $('[data-imp]', j).focus(), 40); // Enter imprime
   });
 }
@@ -652,9 +676,11 @@ function formProduto(base = {}) {
     <label>Fornecedor<select name="forn"><option value="">—</option>${db.fornecedores.map((f) => `<option value="${f.id}"${p.forn === f.id ? ' selected' : ''}>${t(f.nome)}</option>`).join('')}</select></label>
     <label>Custo (R$)<input name="custo" value="${campoDin(p.custo)}" inputmode="decimal" placeholder="0,00"></label>
     <label>Preço de venda (R$)<input name="preco" value="${campoDin(p.preco)}" inputmode="decimal" required placeholder="0,00"></label>
+    <p class="toda off" id="off" hidden></p>
     <p class="toda margem" id="mg"></p>
     ${ed ? '' : '<label>Estoque agora<input name="q" inputmode="decimal" value="0"></label>'}
     <label>Estoque mínimo<input name="min" inputmode="decimal" value="${numBR(p.min)}"></label>
+    <label>Código na balança (PLU)<input name="plu" inputmode="numeric" value="${t(p.plu || '')}" placeholder="só para produto de balança"></label>
     ${ed ? `<p class="toda giro">Vende ${numBR(mediaDia(p), 1)} ${p.un === 'kg' ? 'kg' : 'un'} por dia · o estoque dura ${duraTxt(p)}${ultimaVenda(p) ? ` · última venda em ${dataBR(ultimaVenda(p))}` : ' · sem venda registrada'}</p>` : ''}
     <footer class="j-pe toda">${ed ? `<button type="button" class="bt perigo" data-arq>Tirar de linha</button><button type="button" class="bt" data-hist>Histórico</button><button type="button" class="bt" data-ajuste>Corrigir estoque</button>` : ''}<button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Salvar</button></footer>
   </form><datalist id="dl-cat">${cats().map((c) => `<option value="${t(c)}">`).join('')}</datalist>`, (j) => {
@@ -663,6 +689,21 @@ function formProduto(base = {}) {
       const c = lerDin(f.custo.value), pr = lerDin(f.preco.value); $('#mg', j).innerHTML = pr ? `Margem de <b>${margem(pr, c).toLocaleString('pt-BR')}%</b> · lucro de ${din(pr - c)} por ${f.un.value === 'kg' ? 'kg' : f.un.value === 'cx' ? 'caixa' : 'unidade'}` : '';
     };
     f.addEventListener('input', conta); conta();
+    // código novo e sem nome: procura na base aberta de produtos (nome, marca, tamanho e foto)
+    const busca = async () => {
+      const cod = f.cod.value.trim(); if (!/^\d{8,14}$/.test(cod) || f.nome.value.trim() || ed) return;
+      const st = $('#off', j); st.hidden = false; st.textContent = 'Procurando o produto pelo código…';
+      try {
+        const ctl = new AbortController(); setTimeout(() => ctl.abort(), 6000);
+        const r2 = await fetch(`https://world.openfoodfacts.org/api/v2/product/${cod}.json?fields=product_name,product_name_pt,brands,quantity,image_front_small_url`, { signal: ctl.signal });
+        const pr = (await r2.json()).product;
+        if (!pr || !(pr.product_name_pt || pr.product_name)) { st.textContent = 'Não achei esse código na base aberta. Escreva o nome.'; return; }
+        const nome = [pr.product_name_pt || pr.product_name, pr.brands ? pr.brands.split(',')[0] : '', pr.quantity || ''].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+        if (!f.nome.value.trim()) f.nome.value = nome;
+        if (pr.image_front_small_url) { p.foto = pr.image_front_small_url; st.innerHTML = `<img src="${t(pr.image_front_small_url)}" alt="" width="44" height="44"> Achei: <b>${t(nome)}</b>. Confira e ponha o preço.`; } else st.innerHTML = `Achei: <b>${t(nome)}</b>. Confira e ponha o preço.`;
+      } catch (e2) { st.textContent = 'Sem conexão com a base de produtos agora. Escreva o nome.'; }
+    };
+    f.cod.addEventListener('change', busca); setTimeout(busca, 50);
     $('[data-cam]', j).addEventListener('click', () => { const salvo = Object.fromEntries(new FormData(f)); lerCamera((cod) => formProduto({ ...p, ...lerForm(salvo), cod })); });
     if (ed) { $('[data-arq]', j).addEventListener('click', () => confirmar('Tirar de linha', `${t(p.nome)} sai das listas e da venda. O histórico continua nos relatórios.`, 'Tirar de linha', () => { p.arq = true; grava(); mostra(); toast('Produto tirado de linha.'); }, true)); $('[data-hist]', j).addEventListener('click', () => historico(p)); $('[data-ajuste]', j).addEventListener('click', () => liberar('estoque', `corrigir o estoque de ${p.nome}`, () => ajusteEstoque(p))); }
     f.addEventListener('submit', (e) => {
@@ -671,7 +712,7 @@ function formProduto(base = {}) {
       if (d.preco <= 0) { toast('Digite o preço de venda.', true); return; }
       if (ed && d.preco !== p.preco) registra(`Preço de ${p.nome}: ${din(p.preco)} → ${din(d.preco)}`, 'preco');
       if (ed && d.preco !== p.preco && !pode('entradas')) { liberar('entradas', `mudar o preço de ${p.nome}`, () => { Object.assign(p, d); if (!d.dose) delete p.dose; grava(); mostra(); toast('Produto salvo.'); }); return; }
-      if (ed) Object.assign(p, d); else { const n = { id: uid('p'), ...d, cod: d.cod || ean13(`2${String(Date.now()).slice(-11)}`), lotes: [], criado: hoje() }; db.produtos.push(n); }
+      if (ed) Object.assign(p, d); else { const n = { id: uid('p'), ...d, cod: d.cod || ean13(`2${String(Date.now()).slice(-11)}`), lotes: [], criado: hoje(), ...(p.foto ? { foto: p.foto } : {}) }; db.produtos.push(n); }
       if (!d.dose) delete p.dose;
       if (!d.hh) delete p.hh;
       grava(); fechar(); mostra(); toast(ed ? 'Produto salvo.' : 'Produto cadastrado. Para ele ter estoque com validade, dê entrada pela nota.');
@@ -691,7 +732,7 @@ function historico(p) {
   abrir(`${cab(`Histórico: ${t(p.nome)}`, `Agora: ${qtdTxt(p)} · entrou ${numBR(ent)} · vendeu ${numBR(sai)} · perdeu ${numBR(per)}`)}<div class="hist"><table class="tab"><thead><tr><th>Quando</th><th>O que foi</th><th>Qtd.</th><th>Ficou</th></tr></thead><tbody>${mv.slice(0, 120).map((m) => `<tr><td>${dataBR(m.d)} <small class="cod">${horaBR(m.d)}</small></td><td>${t(m.t)}<small class="cod">${t(m.ref)}</small></td><td class="${m.q < 0 ? 'verm-txt' : 'ok-txt'}">${m.q > 0 ? '+' : ''}${numBR(m.q)}</td><td>${numBR(m.saldo)}</td></tr>`).join('') || '<tr><td colspan="4" class="vazio">Nenhum movimento ainda.</td></tr>'}</tbody></table></div><footer class="j-pe"><button type="button" class="bt cheio" data-fechar>Ok</button></footer>`, null, true);
 }
 function lerForm(o) {
-  const d = { nome: String(o.nome || '').trim(), cod: String(o.cod || '').trim(), cat: String(o.cat || '').trim() || 'Outros', un: o.un || 'un', forn: o.forn || '', custo: lerDin(o.custo), preco: lerDin(o.preco), min: lerNum(o.min) };
+  const d = { plu: String(o.plu || '').replace(/\D/g, ''), nome: String(o.nome || '').trim(), cod: String(o.cod || '').trim(), cat: String(o.cat || '').trim() || 'Outros', un: o.un || 'un', forn: o.forn || '', custo: lerDin(o.custo), preco: lerDin(o.preco), min: lerNum(o.min) };
   if (o.q !== undefined) d.q = r3(lerNum(o.q));
   if (d.un === 'gf') d.dose = { ml: Math.max(1, Math.round(lerNum(o.ml) || 1000)), doseMl: Math.max(1, Math.round(lerNum(o.dml) || 50)), preco: lerDin(o.dpreco) };
   if ('adics' in o) {
@@ -839,7 +880,7 @@ function receber(c, depois = null) {
   abrir(`${cab(`Receber de ${t(c.nome)}`, `Deve ${din(k.saldo)}`)}<form class="form"><label>Valor recebido (R$)<input name="v" value="${campoDin(k.saldo)}" inputmode="decimal" required></label><label>Forma<select name="f"><option value="dinheiro">Dinheiro</option><option value="pix">Pix</option><option value="debito">Débito</option><option value="credito">Crédito</option></select></label><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio verde">Receber</button></footer></form>`, (j) => {
     $('form', j).addEventListener('submit', (e) => {
       e.preventDefault(); const v = Math.min(lerDin(e.target.v.value), k.saldo), fm = e.target.f.value; if (v <= 0) { toast('Digite o valor.', true); return; }
-      db.fiado.push({ id: uid('f'), cli: c.id, data: agora(), tipo: 'pag', v, obs: FORMAS[fm], forma: fm }); registra(`${c.nome} pagou ${din(v)} do fiado (${FORMAS[fm]})`, 'fiado'); grava(); fechar(); mostra();
+      db.fiado.push({ id: uid('f'), cli: c.id, data: agora(), tipo: 'pag', v, obs: FORMAS[fm], forma: fm, cx: TERM() }); registra(`${c.nome} pagou ${din(v)} do fiado (${FORMAS[fm]})`, 'fiado'); grava(); fechar(); mostra();
       const resta = contaFiado(c.id).saldo, msg = `Oi, ${c.nome.split(' ')[0]}! Recebemos ${din(v)} aqui no ${db.loja.nome}. ${resta ? `Ficou em aberto ${din(resta)}.` : 'Sua conta está quitada. Obrigado!'}`;
       const s2 = situCli(c), livre = Math.max(0, c.limite - s2.k.saldo);
       abrir(`${cab('Recebido', din(v))}<p class="j-txt">${resta ? `Ainda deve ${din(resta)}.` : 'Conta quitada.'} ${s2.s === 'bloq' ? `Continua travado: ${s2.txt}.` : `Pode pendurar até ${din(livre)} agora.`}</p><footer class="j-pe">${c.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(c.tel, msg)}">${ico('zap')}Mandar o recibo no WhatsApp</a>` : ''}<button type="button" class="bt cheio" data-fechar>${depois ? 'Voltar para a venda' : 'Ok'}</button></footer>`);
@@ -884,54 +925,68 @@ TELAS.inventario = () => {
   if (!iv) {
     const ult = db.inventarios.at(-1);
     return `<section class="cab-tela"><div><h2>Inventário</h2><p>Conte o que tem na prateleira, passe o código ou digite. No fim, o Annona mostra a diferença e corrige o estoque.</p></div></section>
-    <section class="bloco"><form class="form" id="f-inv"><label>O que contar<select name="cat"><option value="">Tudo</option>${cats().map((c) => `<option>${t(c)}</option>`).join('')}</select></label><button class="bt cheio">Começar a contagem</button></form>${ult ? `<p class="dica">Último inventário: ${dataBR(ult.data)}, ${ult.itens.length} produtos, diferença de ${din(ult.dif)} pelo custo.</p>` : ''}</section>`;
+    <section class="bloco"><form class="form" id="f-inv"><label>O que contar<select name="cat"><option value="">Tudo</option>${cats().map((c) => `<option>${t(c)}</option>`).join('')}</select></label><button class="bt cheio">Começar a contagem</button></form>${ult ? `<p class="dica">Último inventário: ${dataBR(ult.data)}, ${ult.itens.length} produtos, diferença de ${din(ult.dif)} pelo custo.</p>` : ''}</section>${divergencias()}`;
   }
   const l = iv.itens.map((x) => ({ ...x, p: prod(x.p) })).filter((x) => x.p), feitos = l.filter((x) => x.c !== null).length;
   return `<section class="cab-tela"><div><h2>Contando: ${t(iv.cat || 'todo o estoque')}</h2><p>${feitos} de ${l.length} contados.</p></div><div class="acoes"><button type="button" class="bt" data-acao="inv-cancelar">Cancelar</button><button type="button" class="bt cheio" data-acao="inv-fim">Terminar e ver diferenças</button></div></section>
   <form class="leitor" id="f-inv-cod" autocomplete="off"><span>${ico('busca')}</span><input id="inv-cod" placeholder="Passe o código: cada leitura soma 1"><button type="button" class="icone-bt" data-acao="camera-inv" aria-label="Ler pela câmera">${ico('cam')}</button></form>
   <section class="bloco sem-pad"><table class="tab grande"><thead><tr><th>Produto</th><th>Contei</th><th class="so-pc">Sistema diz</th></tr></thead><tbody>${l.map((x) => `<tr${x.c !== null ? ' class="feito"' : ''}><td><b>${t(x.p.nome)}</b><small class="cod">${t(x.p.cod)}</small></td><td><input class="mini-in" data-conta="${x.p.id}" inputmode="decimal" value="${x.c === null ? '' : numBR(x.c)}" placeholder="—" aria-label="Contagem de ${t(x.p.nome)}"></td><td class="so-pc">${qtdTxt(x.p)}</td></tr>`).join('')}</tbody></table></section>`;
 };
+// diferenças dos inventários: o que sumiu sem explicação (achado só na contagem) separado das perdas registradas
+function divergencias() {
+  const de = somaDias(hoje(), -90), inv = db.inventarios.filter((x) => x.data >= de);
+  const semExp = db.perdas.filter((x) => x.motivo === 'Ajuste de inventário' && x.data.slice(0, 10) >= de), reg = db.perdas.filter((x) => x.motivo !== 'Ajuste de inventário' && x.data.slice(0, 10) >= de);
+  const sV = semExp.reduce((a, x) => a + x.custo, 0), rV = reg.reduce((a, x) => a + x.custo, 0), por = {};
+  semExp.forEach((x) => { por[x.p] ||= { q: 0, v: 0, n: 0 }; por[x.p].q += x.q; por[x.p].v += x.custo; por[x.p].n++; });
+  const top = Object.entries(por).map(([pid, x]) => ({ p: prod(pid), ...x })).filter((x) => x.p).sort((a, b) => b.v - a.v).slice(0, 10);
+  if (!inv.length && !semExp.length) return '<p class="dica larga">Depois do primeiro inventário, aqui aparece o que sumiu sem explicação (estoque do sistema x prateleira), separado das perdas registradas.</p>';
+  return `<section class="cartoes tres"><div class="cartao"><div><small>Sumiu sem explicação (90 dias)</small><b class="verm-txt">${din(sV)}</b><span class="var">achado só na contagem</span></div></div><div class="cartao"><div><small>Perdas registradas (90 dias)</small><b>${din(rV)}</b><span class="var">venceu, quebrou, consumo…</span></div></div><div class="cartao"><div><small>Inventários feitos</small><b>${inv.length}</b><span class="var">${inv.length ? `último em ${dataBR(inv.at(-1).data)}` : ''}</span></div></div></section>
+  ${top.length ? `<section class="bloco sem-pad"><header class="pad"><h3>${ico('alerta')}Onde mais some</h3><span class="selo">diferença entre o sistema e a prateleira</span></header><table class="tab grande"><thead><tr><th>Produto</th><th>Faltou</th><th>Em dinheiro</th><th class="so-pc">Em quantos inventários</th></tr></thead><tbody>${top.map((x) => `<tr><td><span class="com-foto">${foto(x.p, 'mini')}<b>${t(x.p.nome)}</b></span></td><td>${qtdTxt(x.p, x.q)}</td><td class="verm-txt">${din(x.v)}</td><td class="so-pc">${x.n}</td></tr>`).join('')}</tbody></table></section>` : ''}
+  ${inv.length ? `<section class="bloco sem-pad"><header class="pad"><h3>Inventários</h3></header><table class="tab grande"><thead><tr><th>Dia</th><th>O que contou</th><th>Produtos</th><th>Faltou</th><th>Sobrou</th><th class="so-pc">Quem contou</th></tr></thead><tbody>${[...inv].reverse().map((x) => `<tr><td>${dataBR(x.data)}</td><td>${t(x.cat || 'Tudo')}</td><td>${x.itens.length}</td><td class="verm-txt">${din(x.falta ?? Math.max(0, -x.dif))}</td><td class="ok-txt">${din(x.sobra ?? Math.max(0, x.dif))}</td><td class="so-pc">${t(x.quem || '')}</td></tr>`).join('')}</tbody></table></section>` : ''}`;
+}
 function fimInventario() {
   const iv = estado.invent, l = iv.itens.filter((x) => x.c !== null).map((x) => ({ ...x, p: prod(x.p) })).filter((x) => x.p).map((x) => ({ ...x, dif: r3(x.c - x.p.q) })).filter((x) => Math.abs(x.dif) > 0.0005);
   const val = l.reduce((s, x) => s + Math.round(x.dif * x.p.custo), 0);
   abrir(`${cab('Diferenças do inventário', `${l.length} produto${l.length === 1 ? '' : 's'} diferente${l.length === 1 ? '' : 's'} · ${val < 0 ? 'faltou' : 'sobrou'} ${din(Math.abs(val))} pelo custo`)}${l.length ? `<table class="tab"><thead><tr><th>Produto</th><th>Sistema</th><th>Contei</th><th>Diferença</th></tr></thead><tbody>${l.map((x) => `<tr><td>${t(x.p.nome)}</td><td>${qtdTxt(x.p)}</td><td>${qtdTxt(x.p, x.c)}</td><td class="${x.dif < 0 ? 'verm-txt' : 'ok-txt'}">${x.dif > 0 ? '+' : ''}${numBR(x.dif)}</td></tr>`).join('')}</tbody></table>` : '<p class="j-txt">Tudo bateu com o sistema.</p>'}<footer class="j-pe"><button type="button" class="bt" data-fechar>Continuar contando</button><button type="button" class="bt cheio" data-ok>Corrigir o estoque</button></footer>`, (j) => {
     $('[data-ok]', j).addEventListener('click', () => {
       l.forEach((x) => registraAjuste(x.p, x.dif, 'Ajuste de inventário', 'Inventário'));
-      db.inventarios.push({ id: uid('i'), data: hoje(), cat: iv.cat, itens: iv.itens.filter((x) => x.c !== null), dif: val }); estado.invent = null; grava(); fechar(); mostra(); toast('Estoque corrigido pelo inventário.');
+      db.inventarios.push({ id: uid('i'), data: hoje(), cat: iv.cat, itens: iv.itens.filter((x) => x.c !== null), dif: val, falta: l.filter((x) => x.dif < 0).reduce((a, x) => a + Math.round(-x.dif * x.p.custo), 0), sobra: l.filter((x) => x.dif > 0).reduce((a, x) => a + Math.round(x.dif * x.p.custo), 0), quem: eu().nome }); estado.invent = null; grava(); fechar(); mostra(); toast('Estoque corrigido pelo inventário.');
     });
   }, true);
 }
 
 // ------------------------------------------------------------------ caixa do dia
-function resumoCaixa(c = db.caixa) {
-  const de = c.ab || agora(), ate = c.fe || '9999', vs = db.vendas.filter((v) => !v.cancelada && v.data >= de && v.data <= ate), por = {};
+function resumoCaixa(c = CXA(), t2 = TERM()) {
+  const de = c.ab || agora(), ate = c.fe || '9999', vs = db.vendas.filter((v) => !v.cancelada && doTerm(v, t2) && v.data >= de && v.data <= ate), por = {};
   vs.forEach((v) => v.pag.forEach((p) => { por[p.f] = (por[p.f] || 0) + p.v; }));
-  const receb = db.fiado.filter((f) => f.tipo === 'pag' && f.data >= de && f.data <= ate), rDin = receb.filter((f) => (f.forma || 'dinheiro') === 'dinheiro').reduce((s, f) => s + f.v, 0);
+  const receb = db.fiado.filter((f) => f.tipo === 'pag' && doTerm(f, t2) && f.data >= de && f.data <= ate), rDin = receb.filter((f) => (f.forma || 'dinheiro') === 'dinheiro').reduce((s, f) => s + f.v, 0);
   const san = (c.movs || []).filter((m) => m.t === 'sangria').reduce((s, m) => s + m.v, 0), sup = (c.movs || []).filter((m) => m.t === 'suprimento').reduce((s, m) => s + m.v, 0);
   return { vs, por, rDin, receb: receb.reduce((s, f) => s + f.v, 0), san, sup, esperado: (c.troco || 0) + (por.dinheiro || 0) + rDin + sup - san, total: vs.reduce((s, v) => s + v.total, 0) };
 }
+const outrosCaixas = () => (db.terminais.length > 1 ? `<section class="bloco"><header><h3>${ico('caixa')}Todos os caixas</h3></header><ul class="lista-simples">${db.terminais.map((x) => { const c2 = CXA(x.id), r2 = c2.aberto ? resumoCaixa(c2, x.id) : null; return `<li><b>${t(x.nome)}${x.id === TERM() ? ' <small class="cod">este aparelho</small>' : ''}</b><span>${c2.aberto ? `aberto às ${horaBR(c2.ab)} · ${r2.vs.length} vendas · ${din(r2.total)} · gaveta ${din(r2.esperado)}` : 'fechado'}</span></li>`; }).join('')}</ul></section>` : '');
+const escolheCaixa = () => (db.terminais.length > 1 ? `<label class="esc-caixa">Este aparelho é o<select data-term>${db.terminais.map((x) => `<option value="${x.id}"${x.id === TERM() ? ' selected' : ''}>${t(x.nome)}</option>`).join('')}</select></label>` : '');
 TELAS.caixa = () => {
-  const c = db.caixa;
-  if (!c.aberto) return `<section class="cab-tela"><div><h2>Caixa do dia</h2><p>O caixa está fechado.</p></div></section><section class="bloco"><form class="form" id="f-abre"><label>Troco na gaveta para começar (R$)<input name="troco" inputmode="decimal" value="150,00"></label><button class="bt cheio verde">Abrir o caixa</button></form></section>${historicoCaixa()}`;
+  const c = CXA(), nt = nomeTerm(TERM());
+  if (!c.aberto) return `<section class="cab-tela"><div><h2>${t(nt)}</h2><p>Este caixa está fechado.</p></div>${escolheCaixa()}</section><section class="bloco"><form class="form" id="f-abre"><label>Troco na gaveta para começar (R$)<input name="troco" inputmode="decimal" value="150,00"></label><button class="bt cheio verde">Abrir o caixa</button></form></section>${outrosCaixas()}${historicoCaixa()}`;
   const r = resumoCaixa();
-  return `<section class="cab-tela"><div><h2>Caixa do dia</h2><p>Aberto às ${horaBR(c.ab)} de ${dataBR(c.ab)} com ${din(c.troco)} de troco.</p></div><div class="acoes"><button type="button" class="bt" data-acao="sangria">Sangria</button><button type="button" class="bt" data-acao="suprimento">Suprimento</button><button type="button" class="bt cheio" data-acao="fechar-caixa">Fechar o caixa</button></div></section>
+  return `<section class="cab-tela"><div><h2>${t(nt)}</h2><p>Aberto às ${horaBR(c.ab)} de ${dataBR(c.ab)} com ${din(c.troco)} de troco.</p></div><div class="acoes"><button type="button" class="bt" data-acao="sangria">Sangria</button><button type="button" class="bt" data-acao="suprimento">Suprimento</button><button type="button" class="bt cheio" data-acao="fechar-caixa">Fechar o caixa</button></div>${escolheCaixa()}</section>
   <section class="cartoes">${Object.entries(FORMAS).map(([k, n]) => `<div class="cartao"><div><small>${n}</small><b>${din(r.por[k] || 0)}</b></div></div>`).join('')}<div class="cartao ouro-borda"><div><small>Fiado recebido</small><b>${din(r.receb)}</b></div></div></section>
   <section class="bloco"><dl class="soma larga"><div><dt>Troco inicial</dt><dd>${din(c.troco)}</dd></div><div><dt>Vendas em dinheiro</dt><dd>${din(r.por.dinheiro || 0)}</dd></div><div><dt>Fiado recebido em dinheiro</dt><dd>${din(r.rDin)}</dd></div><div><dt>Suprimentos</dt><dd>${din(r.sup)}</dd></div><div><dt>Sangrias</dt><dd>− ${din(r.san)}</dd></div><div class="total"><dt>Dinheiro que deve ter na gaveta</dt><dd>${din(r.esperado)}</dd></div></dl>
-  ${(c.movs || []).length ? `<ul class="lista-simples">${c.movs.map((m) => `<li><b>${m.t === 'sangria' ? 'Sangria' : 'Suprimento'}</b><span>${horaBR(m.d)} · ${t(m.m || '')}</span><b>${din(m.v)}</b></li>`).join('')}</ul>` : ''}</section>${historicoCaixa()}`;
+  ${(c.movs || []).length ? `<ul class="lista-simples">${c.movs.map((m) => `<li><b>${m.t === 'sangria' ? 'Sangria' : 'Suprimento'}</b><span>${horaBR(m.d)} · ${t(m.m || '')}</span><b>${din(m.v)}</b></li>`).join('')}</ul>` : ''}</section>${outrosCaixas()}${historicoCaixa()}`;
 };
 function historicoCaixa() {
-  return db.caixas.length ? `<section class="bloco sem-pad"><header class="pad"><h3>Caixas fechados</h3></header><table class="tab grande"><thead><tr><th>Dia</th><th>Vendas</th><th>Esperado</th><th>Contado</th><th>Diferença</th></tr></thead><tbody>${[...db.caixas].reverse().slice(0, 15).map((x) => `<tr><td>${dataBR(x.ab)}</td><td>${din(x.total)}</td><td>${din(x.esperado)}</td><td>${din(x.contado)}</td><td class="${x.contado - x.esperado < 0 ? 'verm-txt' : x.contado - x.esperado > 0 ? 'ok-txt' : ''}">${din(x.contado - x.esperado)}</td></tr>`).join('')}</tbody></table></section>` : '';
+  return db.caixas.length ? `<section class="bloco sem-pad"><header class="pad"><h3>Caixas fechados</h3></header><table class="tab grande"><thead><tr><th>Dia</th><th class="so-pc">Caixa</th><th>Vendas</th><th>Esperado</th><th>Contado</th><th>Diferença</th></tr></thead><tbody>${[...db.caixas].reverse().slice(0, 20).map((x) => `<tr><td>${dataBR(x.ab)}</td><td class="so-pc">${t(x.nome || 'Caixa 1')}${x.quem ? `<small class="cod">${t(x.quem)}</small>` : ''}</td><td>${din(x.total)}</td><td>${din(x.esperado)}</td><td>${din(x.contado)}</td><td class="${x.contado - x.esperado < 0 ? 'verm-txt' : x.contado - x.esperado > 0 ? 'ok-txt' : ''}">${din(x.contado - x.esperado)}</td></tr>`).join('')}</tbody></table></section>` : '';
 }
 function movCaixa(tipo) {
   abrir(`${cab(tipo === 'sangria' ? 'Sangria (tirar dinheiro da gaveta)' : 'Suprimento (pôr dinheiro na gaveta)')}<form class="form"><label>Valor (R$)<input name="v" inputmode="decimal" required></label><label>Motivo<input name="m" placeholder="${tipo === 'sangria' ? 'Pagamento do pão' : 'Troco'}"></label><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Registrar</button></footer></form>`, (j) => {
-    $('form', j).addEventListener('submit', (e) => { e.preventDefault(); const v = lerDin(e.target.v.value); if (v <= 0) { toast('Digite o valor.', true); return; } db.caixa.movs.push({ id: uid('k'), t: tipo, v, m: e.target.m.value.trim(), d: agora() }); registra(`${tipo === 'sangria' ? 'Sangria' : 'Suprimento'} de ${din(v)}${e.target.m.value.trim() ? ` (${e.target.m.value.trim()})` : ''}`, 'caixa'); grava(); fechar(); mostra(); });
+    $('form', j).addEventListener('submit', (e) => { e.preventDefault(); const v = lerDin(e.target.v.value); if (v <= 0) { toast('Digite o valor.', true); return; } CXA().movs.push({ id: uid('k'), t: tipo, v, m: e.target.m.value.trim(), d: agora() }); registra(`${tipo === 'sangria' ? 'Sangria' : 'Suprimento'} no ${nomeTerm(TERM())} de ${din(v)}${e.target.m.value.trim() ? ` (${e.target.m.value.trim()})` : ''}`, 'caixa'); grava(); fechar(); mostra(); });
   });
 }
 function fecharCaixa() {
   const r = resumoCaixa();
   abrir(`${cab('Fechar o caixa', `Deve ter ${din(r.esperado)} em dinheiro na gaveta`)}<form class="form"><label>Quanto você contou na gaveta (R$)<input name="c" inputmode="decimal" required></label><p class="mudo" id="dif"></p><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Fechar o caixa</button></footer></form>`, (j) => {
     const f = $('form', j); f.c.addEventListener('input', () => { const d = lerDin(f.c.value) - r.esperado; $('#dif', j).textContent = !f.c.value ? '' : d === 0 ? 'Bateu certinho.' : d < 0 ? `Faltando ${din(-d)}.` : `Sobrando ${din(d)}.`; });
-    f.addEventListener('submit', (e) => { e.preventDefault(); const c = db.caixa; c.fe = agora(); db.caixas.push({ ab: c.ab, fe: c.fe, troco: c.troco, movs: c.movs, esperado: r.esperado, contado: lerDin(f.c.value), total: r.total, por: r.por }); db.caixa = { aberto: false, movs: [] }; registra(`Caixa fechado: esperado ${din(r.esperado)}, contado ${din(lerDin(f.c.value))}`, 'caixa'); grava(); fechar(); mostra(); toast('Caixa fechado.'); });
+    f.addEventListener('submit', (e) => { e.preventDefault(); const t2 = TERM(), c = CXA(t2); c.fe = agora(); db.caixas.push({ ab: c.ab, fe: c.fe, troco: c.troco, movs: c.movs, esperado: r.esperado, contado: lerDin(f.c.value), total: r.total, por: r.por, cx: t2, nome: nomeTerm(t2), quem: eu().nome }); poeCXA(t2, { aberto: false, movs: [] }); registra(`${nomeTerm(t2)} fechado: esperado ${din(r.esperado)}, contado ${din(lerDin(f.c.value))}`, 'caixa'); grava(); fechar(); mostra(); toast('Caixa fechado.'); });
   });
 }
 
@@ -964,10 +1019,15 @@ TELAS.config = () => `<section class="cab-tela"><div><h2>Configurações</h2><p>
     <label class="check toda"><input type="checkbox" name="impAuto" ${db.loja.impAuto ? 'checked' : ''}> Imprimir o comprovante sozinho ao concluir a venda (impressora térmica de 80 mm)</label>
     <p class="dica toda">Para sair direto, sem a janela de impressão: no computador do caixa, abra o Chrome pelo atalho com <b>--kiosk-printing</b> no fim (botão direito no atalho → Propriedades → Destino). A impressora térmica precisa ser a padrão do Windows.</p>
     <footer class="j-pe toda"><button class="bt cheio">Salvar</button></footer></form></section>
+  <section class="bloco"><header><h3>Caixas</h3><button type="button" class="link" data-acao="novo-caixa">+ Novo caixa</button></header><p class="dica">Cada caixa abre, faz sangria e fecha separado. Em cada computador ou celular do caixa, escolha qual caixa ele é.</p><ul class="lista-simples">${db.terminais.map((x) => `<li><b>${t(x.nome)}</b><span>${x.id === TERM() ? 'este aparelho' : ''}</span>${x.id !== TERM() ? `<button type="button" class="link" data-usar-term="${x.id}">Usar neste aparelho</button>` : ''}</li>`).join('')}</ul></section>
+  <section class="bloco"><header><h3>Balança etiquetadora</h3></header><form class="form duas" id="f-bal"><label class="check toda"><input type="checkbox" name="ativo" ${db.loja.bal && db.loja.bal.ativo ? 'checked' : ''}> Ler a etiqueta da balança (código de barras que começa com 2)</label>
+    <label>A etiqueta traz<select name="tipo"><option value="preco"${(db.loja.bal || {}).tipo !== 'peso' ? ' selected' : ''}>O preço (R$)</option><option value="peso"${(db.loja.bal || {}).tipo === 'peso' ? ' selected' : ''}>O peso (kg)</option></select></label>
+    <label>Dígitos do código do produto (PLU)<select name="dig"><option value="4"${(db.loja.bal || {}).dig !== 5 ? ' selected' : ''}>4 (2 CCCC 0 VVVVVV D)</option><option value="5"${(db.loja.bal || {}).dig === 5 ? ' selected' : ''}>5 (2 CCCCC VVVVVV D)</option></select></label>
+    <p class="dica toda">No cadastro de cada produto de balança, preencha o “Código na balança (PLU)” igual ao da balança. Ao passar a etiqueta no caixa, o produto e o peso entram sozinhos.</p><footer class="j-pe toda"><button class="bt cheio">Salvar</button></footer></form></section>
   <section class="bloco"><header><h3>Cópia dos dados</h3></header><p class="dica">Guarde uma cópia de tudo num arquivo. Na conta, os dados já ficam na nuvem; a cópia é uma garantia a mais.</p><div class="acoes"><button type="button" class="bt" data-acao="copia">Baixar cópia</button><label class="bt">Restaurar cópia<input type="file" accept=".json,application/json" id="restaura" hidden></label></div></section>
   <section class="bloco"><header><h3>Nota fiscal</h3></header><p class="dica">O Annona não emite nota fiscal. A venda gera um comprovante sem valor fiscal para imprimir ou mandar no WhatsApp. Quem precisa de NFC-e continua usando o emissor que já tem e usa o Annona para estoque, validade, vendas, fiado, compras e lucro.</p></section>`;
 const GUIA = [
-  ['Cadastre os produtos', 'Em Estoque, toque em Novo produto e passe o código de barras no leitor (ou na câmera do celular). Quem já tem planilha usa Importar planilha.'],
+  ['Cadastre os produtos', 'Em Estoque, toque em Novo produto e passe o código de barras no leitor (ou na câmera do celular): se o produto estiver na base aberta, o nome e a foto aparecem sozinhos. Quem já tem planilha usa Importar planilha.'],
   ['Dê entrada pela nota', 'Em Entradas, toque em Ler o XML da nota. O Annona traz produto, quantidade, custo, lote e validade. Nota em caixa (CX C/12) vira unidade com o custo certo.'],
   ['Venda no balcão', 'Em Vender, passe o código ou digite o nome. Produto de balança pede o peso. Dinheiro mostra o troco, Pix mostra o QR, e ainda cartão ou fiado.'],
   ['Acompanhe as vendas', 'Em Vendas fica tudo o que foi vendido, com busca. Toque numa venda para ver os itens, imprimir de novo ou cancelar: o estoque volta sozinho e fica registrado quem cancelou.'],
@@ -975,10 +1035,11 @@ const GUIA = [
   ['Repor na hora certa', 'O Annona calcula quanto cada produto vende por dia e quantos dias o estoque dura. O que acaba em menos de 7 dias ou está no mínimo entra na lista de Compras, por fornecedor, pronta para o WhatsApp.'],
   ['Cuide do que está parado', 'Estoque → Parados há 30 dias mostra o dinheiro preso na prateleira. Faça oferta ou pare de comprar.'],
   ['Validades', 'A tela Validades mostra o que já venceu, o que vence em 7 e em 30 dias, com o dinheiro de cada lote.'],
-  ['Perdas e inventário', 'Quebrou, venceu ou sumiu: registre em Perdas. Uma vez por mês, conte a prateleira em Inventário e o estoque se corrige.'],
+  ['Perdas e inventário', 'Quebrou, venceu ou sumiu: registre em Perdas. Uma vez por mês, conte a prateleira em Inventário: o estoque se corrige e a tela mostra o que sumiu sem explicação, produto por produto, separado das perdas registradas.'],
   ['Preços', 'Reajustar preços muda uma categoria inteira por porcentagem, já arredondando para ,49 ou ,99.'],
-  ['Fiado com limite', 'Passe o caderno inteiro de uma vez. Cada cliente tem limite; passou do prazo, aparece o atraso, e com mais de 15 dias o fiado trava sozinho. Se ele pagar a dívida na hora, o crédito volta.'],
+  ['Fiado com limite', 'Passe o caderno inteiro de uma vez. Cada cliente tem limite; passou do prazo, aparece o atraso, e com mais de 15 dias o fiado trava sozinho. Se ele pagar a dívida na hora, o crédito volta. A venda no fiado imprime em 2 vias, com linha para o cliente assinar.'],
   ['Instale no celular e no computador', 'Toque em Instalar o app (no menu ou no topo). No iPhone: Safari → Compartilhar → Adicionar à Tela de Início. No Android: Chrome → três pontinhos → Instalar app. No computador: ícone de instalar na barra de endereço.'],
+  ['Vários caixas e balança', 'Em Configurações, crie o Caixa 2, o Caixa 3… e em cada computador escolha qual caixa ele é: cada um abre, faz sangria e fecha separado. Com balança etiquetadora, ligue “Ler a etiqueta da balança” e preencha o código PLU do produto.'],
   ['Caixa do dia e relatórios', 'Abra o caixa com o troco e feche contando a gaveta. Nos relatórios, veja vendas, lucro de verdade (já tirando as perdas) e quais produtos dão mais lucro.'],
 ];
 TELAS.guia = () => `<section class="cab-tela"><div><h2>Como usar o Annona</h2><p>${GUIA.length} passos, do cadastro ao lucro.</p></div></section><ol class="guia">${GUIA.map(([a, b]) => `<li><b>${a}</b><p>${b}</p></li>`).join('')}</ol>`;
@@ -1030,12 +1091,14 @@ function liga() {
   const fvb = $('#f-vbusca'); if (fvb) { const i = $('#vbusca'); fvb.addEventListener('submit', (e) => e.preventDefault()); i.addEventListener('input', () => { estado.vbusca = i.value; const pos = i.selectionStart; mostra(); const n2 = $('#vbusca'); n2.focus(); n2.setSelectionRange(pos, pos); }); }
   const fi = $('#f-inv'); if (fi) fi.addEventListener('submit', (e) => { e.preventDefault(); const c = e.target.cat.value; estado.invent = { cat: c, itens: comEstoque().filter((p) => !c || p.cat === c).map((p) => ({ p: p.id, c: null })) }; mostra(); });
   const fic = $('#f-inv-cod'); if (fic) fic.addEventListener('submit', (e) => { e.preventDefault(); const i = $('#inv-cod'); const v = i.value; i.value = ''; contaInv(v); });
+  $$('[data-term]').forEach((sel) => sel.addEventListener('change', () => { try { localStorage.setItem('annona-caixa', sel.value); } catch (e) { /* sem armazenamento */ } mostra(); toast(`Este aparelho agora é o ${nomeTerm(sel.value)}.`); }));
   $$('[data-perm]').forEach((c) => c.addEventListener('change', () => { const [ui, k] = c.dataset.perm.split('.'), u = db.usuarios.find((x) => x.id === ui); (u.perms ||= {})[k] = c.checked; registra(`${u.nome}: ${c.checked ? 'pode' : 'não pode mais'} ${PERMS.find((x) => x[0] === k)[1].toLowerCase()}`, 'equipe'); grava(); toast('Permissão salva.'); }));
   const fp = $('#f-perfil'); if (fp) fp.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target, u = eu(); if (f.pin.value && !/^\d{4}$/.test(f.pin.value)) { toast('A senha tem 4 números.', true); return; } Object.assign(u, { nome: f.nome.value.trim(), tel: f.tel.value.trim(), email: f.email.value.trim(), abrir: f.abrir.value }); if (f.pin.value) u.pin = f.pin.value; grava(); mostra(); toast('Perfil salvo.'); });
   const fmt = $('#f-meta'); if (fmt) fmt.m.addEventListener('change', () => { db.meta = lerDin(fmt.m.value); grava(); mostra(); toast('Meta salva.'); });
   $$('[data-conta]').forEach((inp) => inp.addEventListener('change', () => { const it = estado.invent.itens.find((x) => x.p === inp.dataset.conta); it.c = inp.value.trim() === '' ? null : r3(lerNum(inp.value)); inp.closest('tr').classList.toggle('feito', it.c !== null); }));
-  const fa = $('#f-abre'); if (fa) fa.addEventListener('submit', (e) => { e.preventDefault(); if (!pode('caixa')) { liberar('caixa', 'abrir o caixa', () => fa.requestSubmit()); return; } db.caixa = { aberto: true, ab: agora(), troco: lerDin(e.target.troco.value), movs: [] }; registra(`Caixa aberto com ${din(db.caixa.troco)} de troco`, 'caixa'); grava(); mostra(); toast('Caixa aberto. Boas vendas!'); });
+  const fa = $('#f-abre'); if (fa) fa.addEventListener('submit', (e) => { e.preventDefault(); if (!pode('caixa')) { liberar('caixa', 'abrir o caixa', () => fa.requestSubmit()); return; } poeCXA(TERM(), { aberto: true, ab: agora(), troco: lerDin(e.target.troco.value), movs: [], quem: eu().nome }); registra(`${nomeTerm(TERM())} aberto com ${din(CXA().troco)} de troco`, 'caixa'); grava(); mostra(); toast('Caixa aberto. Boas vendas!'); });
   const flj = $('#f-loja'); if (flj) flj.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; Object.assign(db.loja, { nome: f.nome.value.trim(), slogan: f.slogan.value.trim(), tel: f.tel.value.trim(), cidade: f.cidade.value.trim(), pix: f.pix.value.trim(), prazo: Math.max(1, Number(f.prazo.value) || 30), limite: lerDin(f.limite.value), impAuto: f.impAuto.checked }); grava(); mostra(); toast('Configurações salvas.'); });
+  const fbal = $('#f-bal'); if (fbal) fbal.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; db.loja.bal = { ativo: f.ativo.checked, tipo: f.tipo.value, dig: Number(f.dig.value) }; grava(); toast('Balança salva.'); });
   const xml = $('#xml'); if (xml) xml.addEventListener('click', (e) => { if (!pode('entradas')) { e.preventDefault(); liberar('entradas', 'dar entrada pela nota', () => xml.click()); } });
   if (xml) xml.addEventListener('change', () => { const a = xml.files[0]; if (!a) return; a.text().then((txt) => { try { formEntrada(lerXML(txt)); } catch (e) { toast('Esse arquivo não parece o XML de uma nota fiscal (NF-e).', true); } }); xml.value = ''; });
   const rs = $('#restaura'); if (rs) rs.addEventListener('change', () => { const a = rs.files[0]; if (!a) return; a.text().then((txt) => { try { const d = JSON.parse(txt); if (!Array.isArray(d.produtos)) throw new Error('x'); confirmar('Restaurar a cópia', 'Os dados de agora serão trocados pelos da cópia.', 'Restaurar', () => { db = d; grava(); mostra(); toast('Cópia restaurada.'); }, true); } catch (e) { toast('Esse arquivo não é uma cópia do Annona.', true); } }); rs.value = ''; });
@@ -1068,6 +1131,7 @@ document.addEventListener('click', (e) => {
     db.pedidos.push({ id: uid('o'), data: agora(), forn: f.id, itens: linhas.map(([p, q]) => ({ p: p.id, q })) }); grava(); window.open(zap(f.tel, txt), '_blank', 'noopener'); return;
   }
   if (ds.edforn) { formForn(forn(ds.edforn)); return; }
+  if (ds.usarTerm) { try { localStorage.setItem('annona-caixa', ds.usarTerm); } catch (e2) { /* sem armazenamento */ } mostra(); toast(`Este aparelho agora é o ${nomeTerm(ds.usarTerm)}.`); return; }
   if (ds.como) { db.usuario = ds.como; grava(); location.hash = `#${eu().abrir || 'painel'}`; mostra(); toast(`Agora você vê o sistema como ${eu().nome}.`); return; }
   if (ds.tiraU) { const u = db.usuarios.find((x) => x.id === ds.tiraU); confirmar('Tirar da equipe', `${t(u.nome)} perde o acesso. As vendas dela continuam nos relatórios.`, 'Tirar', () => { db.usuarios = db.usuarios.filter((x) => x.id !== u.id); registra(`${u.nome} saiu da equipe`, 'equipe'); grava(); mostra(); }, true); return; }
   const id = ds.id, A = {
@@ -1088,6 +1152,7 @@ document.addEventListener('click', (e) => {
     'exportar-estoque': () => baixarArq(`estoque-${hoje()}.csv`, csv([['Produto', 'Código', 'Categoria', 'Unidade', 'Estoque', 'Mínimo', 'Custo', 'Preço'], ...ativos().map((p) => [p.nome, p.cod, p.cat, UN[p.un], numBR(p.q), numBR(p.min), campoDin(p.custo), campoDin(p.preco)])])),
     'exportar-rel': () => { const [de, ate] = periodo(estado.rel); baixarArq(`vendas-${de}-a-${ate}.csv`, csv([['Nº', 'Data', 'Hora', 'Quem vendeu', 'Itens', 'Total', 'Lucro', 'Pagamento'], ...vendasEntre(de, ate).map((v) => [v.n, dataBR(v.data), horaBR(v.data), nomeU(v.vend), v.itens.map((x) => `${numBR(x.q)} ${x.nome}`).join(', '), campoDin(v.total), campoDin(lucroVenda(v)), v.pag.map((x) => FORMAS[x.f]).join(' + ')])])); },
     importar: importarPlanilha,
+    'novo-caixa': () => liberar('caixa', 'criar um caixa', () => { const n = db.terminais.length + 1; db.terminais.push({ id: `c${Date.now().toString(36)}`, nome: `Caixa ${n}` }); registra(`Caixa ${n} criado`, 'caixa'); grava(); mostra(); toast(`Caixa ${n} criado. No aparelho dele, toque em Usar neste aparelho.`); }),
     'exportar-vendas': () => { const [de, ate] = periodo(estado.vper || 'hoje'); baixarArq(`vendas-${de}-a-${ate}.csv`, csv([['Nº', 'Data', 'Hora', 'Situação', 'Itens', 'Total', 'Pagamento', 'Quem vendeu'], ...db.vendas.filter((v) => v.data.slice(0, 10) >= de && v.data.slice(0, 10) <= ate).map((v) => [v.n, dataBR(v.data), horaBR(v.data), v.cancelada ? `Cancelada: ${v.cancelada.motivo}` : 'Concluída', v.itens.map((x) => `${numBR(x.q)} ${x.nome}`).join(', '), campoDin(v.total), v.pag.map((x) => FORMAS[x.f]).join(' + '), nomeU(v.vend)])])); },
   };
   if (ds.acao && A[ds.acao]) A[ds.acao]();
