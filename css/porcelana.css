@@ -17,7 +17,7 @@
       rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, .34) 66%, rgba(255, 255, 255, .08) 70%, rgba(255, 255, 255, 0) 74%) fixed,
     radial-gradient(1300px 520px at 50% -6%, rgba(255, 252, 245, .75), rgba(255, 252, 245, 0) 70%) fixed,
     linear-gradient(180deg, rgba(255, 255, 255, 0) 55%, rgba(120, 100, 70, .06) 100%) fixed,
-    url("../img/porcelanato-creme.webp") 0 0 / 1200px auto repeat,
+    url("../img/porcelanato-creme.webp?v=2") 0 0 / 1200px auto repeat,
     #efe5d3;
 }
 
@@ -27,7 +27,7 @@ body, .hn, body.an-pagina { background: var(--porcelanato) !important; }
   /* celular: fundo fixo pesa na rolagem; o reflexo acompanha a página */
   :root, html[data-theme="light"] { --porcelanato:
     linear-gradient(104deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, .45) 22%, rgba(255, 255, 255, 0) 34%),
-    url("../img/porcelanato-creme.webp") 0 0 / 800px auto repeat, #efe5d3; }
+    url("../img/porcelanato-creme.webp?v=2") 0 0 / 800px auto repeat, #efe5d3; }
 }
 
 /* cartões: esmalte creme brilhante, com fio de luz em cima */
@@ -53,3 +53,9 @@ main::before { background-image: none !important; }
 
 /* sem a estampa, as seções não precisam isolar camadas; assim a foto do notebook (multiply) funde com o porcelanato */
 main > section.hq-anshur, main > section.an-topo { isolation: auto; }
+
+/* títulos numa cor só e sem itálico no fim (pedido do dono 09/11) */
+html:root body :is(h1, h2, h3, .sec-title) :is(em, i, .serif, span) {
+  font-style: normal !important; color: inherit !important; background: none !important;
+  -webkit-background-clip: border-box !important; background-clip: border-box !important; -webkit-text-fill-color: currentColor !important;
+}
