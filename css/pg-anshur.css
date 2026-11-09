@@ -262,3 +262,146 @@ main.an::before, main.an > section::before, main.an > section::after { content: 
 .an-fiscal b { color: var(--an-ob); }
 @media (max-width: 1100px) { .an-areas-mais { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 900px) { .an-areas, .an-opcoes { grid-template-columns: minmax(0, 1fr); } }
+
+/* 09/11 noite · painel de compradores r3: teste às cegas como gancho no topo, começar só com Usados e Trocas,
+   R$ 2.000 cobre todas as lojas, fiscal com etapas honestas e celular menos denso ("ver mais" com <details>) */
+.an-gancho { margin: 0 0 18px; max-width: 600px; padding: 16px 20px 16px 18px; border-radius: 14px; background: var(--an-ob); border-left: 5px solid var(--an-ouro); box-shadow: 0 18px 36px -24px rgba(17, 24, 32, .7); }
+.an-gancho p { margin: 0; }
+.an-gancho-rot { font-size: 12.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--an-ouro) !important; }
+.an-gancho-txt { margin-top: 6px !important; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.38; font-weight: 600; color: #F6F2EA !important; }
+.an-gancho-mini { margin-top: 6px !important; font-size: 14.5px; color: #cfd6d9 !important; }
+.an-cta-topo { margin: 0 0 22px; }
+
+/* segundo botão destacado: teste às cegas (ouro); "Quero contratar" segue como o principal */
+.an .an-btn-cegas { --btn-bg: rgba(193, 163, 106, .26); --btn-fg: var(--an-ob); --btn-bd: var(--an-ouro); --btn-bg-h: rgba(193, 163, 106, .42); --btn-fg-h: var(--an-ob); --btn-bd-h: var(--an-ouro-esc); border-width: 2px !important; }
+.an .an-oferta-preco .an-btn-cegas { --btn-bg: rgba(193, 163, 106, .14); --btn-fg: #F6F2EA; --btn-bd: var(--an-ouro); --btn-bg-h: rgba(193, 163, 106, .28); --btn-fg-h: #fff; --btn-bd-h: #d2b67f; }
+
+.an-lojas { display: grid; gap: 2px; padding: 12px 18px; border-radius: 14px; background: var(--an-salvia-esc); }
+.an-lojas b { font-size: clamp(18px, 1.7vw, 22px); line-height: 1.25; color: #F6F2EA; letter-spacing: -0.01em; }
+.an-lojas span { font-size: 14.5px; line-height: 1.45; color: #dfe6e1; }
+.an-lojas-dest { display: inline-block; padding: 2px 10px; border-radius: 8px; background: var(--an-ouro); color: var(--an-ob) !important; }
+.an-comece { margin: 0 0 18px; max-width: 600px; padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(76, 97, 85, .45); background: rgba(113, 135, 123, .14); font-size: 16px; line-height: 1.5; color: var(--an-ob) !important; }
+.an-comece b { color: var(--an-salvia-esc); }
+.an-comece a, .an-nota a, .an-areas-mais a { color: var(--an-ob); font-weight: 600; }
+
+.an-comece-bloco { margin: 0 0 22px; padding: clamp(18px, 2.6vw, 28px); border-radius: 18px; background: var(--an-cartao); border: 2px solid var(--an-salvia); max-width: 980px; }
+.an-comece-rot { margin: 0 0 6px; font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--an-salvia-esc) !important; }
+.an-comece-bloco h3 { font-size: clamp(22px, 2.4vw, 30px); line-height: 1.15; margin: 0 0 10px; }
+.an-comece-bloco p { margin: 0 0 10px; font-size: 16.5px; line-height: 1.55; max-width: 80ch; }
+.an-comece-bloco .an-comece-sem { margin: 0; padding: 10px 14px; border-radius: 10px; background: rgba(113, 135, 123, .16); color: var(--an-ob) !important; }
+
+/* fiscal: etapas sem data */
+.an-fiscal h3 { font-size: clamp(20px, 2vw, 24px); }
+.an-etapas { list-style: none; counter-reset: e; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.an-etapas li { counter-increment: e; display: grid; align-content: start; gap: 6px; padding: 14px 16px; border-radius: 12px; background: var(--an-marfim); border: 1px solid var(--an-linha); }
+.an-etapas li::before { content: "Etapa " counter(e); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #55626a; }
+.an-etapas b { font-size: 15.5px; line-height: 1.4; color: var(--an-ob); }
+.an-etapas span { justify-self: start; padding: 3px 10px; border-radius: 999px; font-size: 13.5px; font-weight: 700; background: rgba(17, 24, 32, .08); color: var(--an-gr); }
+.an-etapas li.ok span { background: var(--an-salvia-esc); color: #F6F2EA; }
+.an-etapas li.prox { border: 2px solid var(--an-ouro); }
+.an-etapas li.prox span { background: rgba(193, 163, 106, .3); color: var(--an-ob); }
+
+/* "ver mais" sem JS */
+.an-mais { margin-top: 14px; }
+.an-mais > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(17, 24, 32, .35); background: var(--an-cartao); font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--an-ob); }
+.an-mais > summary::-webkit-details-marker { display: none; }
+.an-mais > summary::after { content: "+"; font-size: 20px; line-height: 1; color: var(--an-ouro-esc); }
+.an-mais[open] > summary::after { content: "\2212"; }
+.an-mais > summary:hover { border-color: var(--an-ob); }
+.an-mais > summary:focus-visible { outline: 3px solid var(--an-ouro); outline-offset: 2px; }
+.an-mais[open] > summary { margin-bottom: 14px; }
+.an-dados-col { display: grid; min-width: 0; }
+
+@media (max-width: 1100px) { .an-etapas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .an-sec { padding: 52px 0; }
+  .an-h2 { font-size: clamp(28px, 8vw, 34px); }
+  .an-intro { font-size: 16.5px; margin-bottom: 20px; }
+  .an-topo h1 { font-size: 30px; }
+  .an-gancho { padding: 14px 16px; }
+  .an-gancho-txt { font-size: 17.5px; }
+  .an-sub { font-size: 16px; }
+  .an-etapas { grid-template-columns: minmax(0, 1fr); }
+  .an-etapas li { grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 10px; padding: 12px 14px; }
+  .an-etapas li::before { grid-column: 1 / -1; }
+  .an-mais > summary { display: flex; width: 100%; justify-content: space-between; border-radius: 12px; }
+  .an-dor p, .an-passos span, .an-area .an-lista li { font-size: 15px; }
+  .an-areas-mais article { padding: 16px 18px; }
+  .an-comece-bloco p { font-size: 15.5px; }
+}
+
+/* 09/11 noite · polimento visual (pedido do dono: "mais agradável visualmente"):
+   fundo creme igual ao resto do site, mais respiro entre blocos, títulos com hierarquia clara,
+   cartões e botões com o mesmo raio, borda e sombra, topo em cartões alinhados. Sem animação e sem cursor próprio. */
+.an-pagina {
+  --an-fundo: #f4eee2; --an-cartao: #fbf7ef; --an-marfim: #eee6d6;
+  --an-raio: 18px; --an-raio-p: 12px;
+  --an-sombra: 0 1px 2px rgba(17, 24, 32, .04), 0 22px 44px -36px rgba(17, 24, 32, .4);
+  background: radial-gradient(1200px 700px at 50% 0%, #fbf7ef, transparent 60%), #f4eee2 !important;
+}
+.an-sec { padding: clamp(72px, 9vw, 128px) 0; border-top: 1px solid rgba(17, 24, 32, .08); }
+.an-sec-marfim { background: var(--an-marfim); }
+.an-rot { margin-bottom: 16px; }
+.an-h2 { max-width: 22ch; margin-bottom: 20px; text-wrap: balance; }
+.an-intro { margin-bottom: 36px; text-wrap: pretty; }
+.an-h3 { margin: 64px 0 20px; }
+.an h3 { text-wrap: balance; }
+
+/* cartões com o mesmo raio, borda e sombra */
+.an-area, .an-mod, .an-opcao, .an-dor, .an-oferta-inclui, .an-oferta-preco, .an-comece-bloco { border-radius: var(--an-raio); box-shadow: var(--an-sombra); }
+.an-passos li, .an-tambem li, .an-areas-mais article, .an-garantias-dados li, .an-fiscal, .an-pontes li { border-radius: 16px; box-shadow: var(--an-sombra); }
+.an-areas, .an-modulos, .an-opcoes, .an-oferta, .an-dores { gap: 22px; }
+.an-tambem, .an-areas-mais, .an-garantias-dados { gap: 16px; }
+.an-area { padding: 16px 16px 26px; }
+.an-area-rot { margin-top: 20px; }
+.an-tela { border-radius: var(--an-raio-p); }
+
+/* topo: texto à esquerda em blocos alinhados; foto à direita acompanha a leitura */
+.an-topo { padding: clamp(40px, 5vw, 80px) 0 clamp(64px, 8vw, 112px); background: linear-gradient(180deg, var(--an-marfim) 0%, rgba(244, 238, 226, 0) 100%); }
+.an-topo-grade { align-items: start; }
+.an-topo-txt > * { max-width: 600px; }
+.an-topo h1 { margin-bottom: 18px; }
+.an-topo .an-sub { margin: 0 0 26px; font-size: clamp(17px, 1.4vw, 19px); }
+.an-gancho { margin-bottom: 20px; border-radius: var(--an-raio); }
+.an-cta-topo { margin: 0 0 12px; gap: 12px; }
+.an-cta-topo .btn { flex: 1 1 220px; }
+.an-demo-link { margin: 0 0 28px; font-size: 14.5px; line-height: 1.5; color: #55626a !important; }
+.an-demo-link a { color: var(--an-ob); font-weight: 600; text-underline-offset: 3px; }
+.an .an-topo .an-preco-topo { margin: 0 0 16px; padding: 20px; gap: 12px; border-radius: var(--an-raio); background: var(--an-cartao); border: 1px solid rgba(17, 24, 32, .1); box-shadow: var(--an-sombra); }
+.an-topo .an-selo { border-width: 1px; box-shadow: none; background: #fff; border-radius: var(--an-raio-p); }
+.an-lojas { border-radius: var(--an-raio-p); }
+.an-topo .an-vagas { background: transparent; }
+.an-comece { border-radius: var(--an-raio-p); margin-bottom: 14px; }
+.an-topo .an-nota { margin-top: 0; }
+@media (min-width: 901px) {
+  .an-topo-telas { position: sticky; top: 96px; margin-top: clamp(80px, 10vw, 150px); }
+}
+
+/* botões: mesma altura e espaço nos grupos */
+.an-cta { gap: 12px; }
+.an-oferta-preco .an-cta { margin-top: 20px; }
+.an-fim .an-cta { max-width: 760px; }
+
+/* oferta e garantia mais arejadas */
+.an-oferta { margin-top: 36px; }
+.an-oferta-depois { margin-bottom: 14px; }
+.an-faixa-garantia { margin-top: 22px; border-radius: var(--an-raio); border-width: 1px; box-shadow: var(--an-sombra); }
+.an-faixa-garantia div { padding: 22px 24px; }
+
+/* perguntas: caixas no mesmo padrão dos cartões */
+.an-pagina .np-faq { display: grid; gap: 12px; }
+.an-pagina .np-faq details { border-radius: 14px; padding: 16px 20px; box-shadow: var(--an-sombra); }
+.an-pagina .np-faq h2 { margin-bottom: 20px; }
+
+@media (max-width: 640px) {
+  .an-sec { padding: 60px 0; }
+  .an-intro { margin-bottom: 24px; }
+  .an-h3 { margin-top: 44px; }
+  .an-areas, .an-modulos, .an-opcoes, .an-oferta, .an-dores { gap: 16px; }
+  .an .an-topo .an-preco-topo { padding: 14px; }
+  .an-cta-topo .btn { flex-basis: 100%; }
+  .an-pagina .np-faq details { padding: 14px 16px; }
+}
+.an-comece-bloco { max-width: none; }
+.an-comece-bloco p { max-width: 90ch; }
+@media (max-width: 640px) { .an-mod-largo p { font-size: 16px; } .an-mod-largo h3 { font-size: 26px; } .an-cobre { font-size: 16px; } }
