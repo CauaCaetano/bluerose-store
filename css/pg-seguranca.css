@@ -1,0 +1,182 @@
+/* Segurança e dados (seguranca.html) + blocos de confiança e estados de carregando/erro (js/confianca.js, classes .cft-* e .br-estado).
+   Mesma família do topo da home: tinta #101b36, papel #f4ebdd, títulos em Cormorant. Sem animação de entrada.
+   Ritmo vertical: 48 entre seções, 32 entre parágrafos (rodada 4). Um accent só: azul #2f4c8a (numeração, links, marcadores). */
+.sg {
+  --sg-tinta: var(--hn-tinta, #101b36); --sg-papel: var(--hn-papel, #f4ebdd); --sg-folha: var(--hn-folha, #fbf6ee);
+  --sg-grafite: var(--hn-grafite, #464c58); --sg-linha: var(--hn-linha, #d9cbb3); --sg-azul: #2f4c8a;
+  --sg-nav: 68px; /* altura do menu fixo do site (site.css) */
+  background: var(--sg-papel); color: var(--sg-tinta);
+}
+@media (prefers-reduced-motion: no-preference) { html:has(main.sg) { scroll-behavior: smooth; } }
+.sg h1, .sg h2 { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; letter-spacing: -.01em; color: inherit; -webkit-text-fill-color: currentColor; background: none; text-wrap: balance; overflow-wrap: anywhere; }
+.sg section { padding: 0; }
+.sg a:not(.btn) { color: var(--sg-azul); text-underline-offset: 3px; }
+.sg a:focus-visible, .sg summary:focus-visible { outline: 2px solid var(--sg-azul); outline-offset: 3px; border-radius: 2px; }
+.sg .sg-acoes .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 22px; text-decoration: none; text-align: center; }
+
+/* topo */
+.sg .sg-topo { background: var(--sg-tinta); color: var(--sg-papel); padding: 64px 0; }
+.sg-topo-grade { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px 64px; align-items: end; }
+.sg-olho { margin: 0 0 16px; font: 600 13px/1.3 var(--font, 'Geist', system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; color: #b4c4e4; }
+.sg-topo h1 { font-size: clamp(38px, 5.2vw, 72px); line-height: 1.04; max-width: 16ch; }
+.sg-sub { margin: 24px 0 0; max-width: 56ch; color: #e2ddd2; font-size: 17px; line-height: 1.6; }
+.sg-acoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.sg-topo .btn-ghost { color: var(--sg-papel) !important; border: 1px solid rgba(244, 235, 221, .55) !important; background: transparent !important; }
+.sg-topo .btn-ghost:hover { border-color: var(--sg-papel) !important; }
+.sg-topo a:focus-visible { outline-color: #b4c4e4; }
+.sg-fatos { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid rgba(244, 235, 221, .25); }
+.sg-fatos li { display: grid; gap: 4px; padding: 16px 0; border-bottom: 1px solid rgba(244, 235, 221, .25); }
+.sg-fatos b { font: 500 24px/1.15 'Cormorant Garamond', Georgia, serif; color: var(--sg-papel); }
+.sg-fatos span { color: #d3d9e5; font-size: 15px; line-height: 1.5; }
+
+/* índice: quebra linha no computador; no celular vira uma faixa que rola de lado (só ela, nunca a página) */
+.sg-indice { position: sticky; top: var(--sg-nav); z-index: 5; background: var(--sg-folha); border-bottom: 1px solid var(--sg-linha); box-shadow: 0 6px 16px -14px rgba(16, 27, 54, .5); }
+.sg-indice .wrap { display: flex; flex-wrap: nowrap; gap: 2px; padding-top: 8px; padding-bottom: 8px; overflow-x: auto; scrollbar-width: thin; }
+.sg .sg-indice a { display: inline-flex; align-items: center; flex: none; min-height: 44px; padding: 0 10px; color: var(--sg-tinta); font-size: 15px; font-weight: 500; text-decoration: none; white-space: nowrap; border-radius: 6px; }
+.sg .sg-indice a:hover { background: var(--sg-papel); text-decoration: underline; }
+.sg .sg-indice a[aria-current] { background: var(--sg-tinta); color: var(--sg-papel); font-weight: 600; text-decoration: none; }
+.sg .sg-indice a[aria-current]:hover { background: var(--sg-tinta); }
+@media (max-width: 1299px) {
+  .sg-indice .wrap {
+    flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: thin;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
+    padding-right: 32px;
+  }
+  .sg-indice .wrap { padding-top: 4px; padding-bottom: 4px; }
+  .sg .sg-indice a { scroll-snap-align: start; font-size: 14.5px; padding: 0 10px; }
+}
+
+/* blocos */
+.sg .sg-bloco { position: relative; z-index: 1; background: var(--sg-papel); padding: 48px 0; border-bottom: 1px solid var(--sg-linha); scroll-margin-top: 48px; } /* soma com o scroll-padding-top de 84 px do site: a seção para logo abaixo do índice fixo */
+.sg .sg-claro { background: var(--sg-folha); }
+.sg-duas { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 48px; }
+.sg-num { margin: 0 0 12px; font: 600 13px var(--mono, ui-monospace, monospace); color: var(--sg-azul); }
+.sg-cab h2 { font-size: clamp(30px, 3.4vw, 46px); line-height: 1.08; }
+.sg-cab-linha { margin-bottom: 32px; }
+.sg-texto { min-width: 0; }
+.sg-texto > p { margin: 0 0 32px; color: var(--sg-grafite); font-size: 16.5px; line-height: 1.65; max-width: 60ch; }
+.sg-texto > :last-child { margin-bottom: 0; }
+.sg-texto b, .sg-lista b, .sg-passos b { color: var(--sg-tinta); font-weight: 600; }
+.sg-lista, .sg-passos { margin: 0 0 32px; padding: 0; list-style: none; display: grid; gap: 0; }
+.sg-lista li, .sg-passos li { padding: 18px 0; border-top: 1px solid var(--sg-linha); color: var(--sg-grafite); font-size: 16px; line-height: 1.6; }
+.sg-lista li { max-width: 60ch; }
+/* título de cada linha: em negrito 600, numa linha só dele */
+.sg-lista li > b:first-child, .sg-passos li > b:first-child { display: block; margin-bottom: 4px; font-size: 17px; line-height: 1.35; }
+.sg-lista li:last-child, .sg-passos li:last-child { border-bottom: 1px solid var(--sg-linha); }
+.sg-passos { counter-reset: sgp; }
+.sg-passos li { counter-increment: sgp; position: relative; padding-left: 48px; max-width: calc(60ch + 48px); }
+.sg-passos li::before { content: counter(sgp); position: absolute; left: 0; top: 16px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--sg-azul); font: 600 13px var(--font, system-ui, sans-serif); color: var(--sg-azul); }
+.sg-tabela { margin: 0 0 32px; display: grid; }
+.sg-tabela > div { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 24px; padding: 18px 0; border-top: 1px solid var(--sg-linha); }
+.sg-tabela > div:last-child { border-bottom: 1px solid var(--sg-linha); }
+.sg-tabela dt { font-weight: 600; font-size: 16px; line-height: 1.4; color: var(--sg-tinta); }
+.sg-tabela dd { margin: 0; max-width: 60ch; color: var(--sg-grafite); font-size: 16px; line-height: 1.6; }
+.sg-nota { max-width: 60ch; padding: 16px; border-left: 3px solid var(--sg-azul); background: rgba(47, 76, 138, .07); font-size: 15px !important; }
+
+/* diagrama do isolamento entre empresas */
+.sg-diagrama { margin: 0 0 32px; padding: 0; border: 1px solid var(--sg-linha); border-radius: 12px; background: var(--sg-papel); overflow: hidden; }
+.sg-diagrama img { display: block; width: 100%; height: auto; }
+@media (max-width: 760px) { .sg-diagrama img { max-width: 420px; margin: 0 auto; } }
+.sg-diagrama figcaption { padding: 24px; border-top: 1px solid var(--sg-linha); background: var(--sg-folha); }
+.sg-diagrama-t { margin: 0 0 12px; font: 600 17px/1.35 var(--font, 'Geist', system-ui, sans-serif); color: var(--sg-tinta); }
+.sg-diagrama ol { margin: 0; padding: 0 0 0 22px; display: grid; gap: 8px; }
+.sg-diagrama li { max-width: 60ch; color: var(--sg-grafite); font-size: 15.5px; line-height: 1.55; }
+.sg-diagrama li::marker { color: var(--sg-azul); font-weight: 600; }
+.sg-diagrama-obs { margin: 16px 0 0; max-width: 60ch; color: var(--sg-grafite); font-size: 14.5px; line-height: 1.55; }
+
+/* Quem consegue acessar: o diagrama é o elemento principal da seção, em largura total */
+.sg-acesso-cab { max-width: 68ch; margin-bottom: 32px; }
+.sg-acesso-cab > p:last-child { margin: 16px 0 0; color: var(--sg-grafite); font-size: 17px; line-height: 1.6; }
+.sg-acesso .sg-cab h2, .sg-acesso-cab h2 { font-size: clamp(30px, 3.4vw, 46px); line-height: 1.08; }
+.sg-diagrama-g { margin-bottom: 32px; box-shadow: 0 18px 40px -30px rgba(16, 27, 54, .55); }
+@media (min-width: 1024px) {
+  .sg-diagrama-g { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); }
+  .sg-diagrama-g picture { display: flex; align-items: center; }
+  .sg-diagrama-g figcaption { border-top: 0; border-left: 1px solid var(--sg-linha); padding: 32px; display: flex; flex-direction: column; justify-content: center; }
+}
+.sg-numeros { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--sg-linha); border-bottom: 1px solid var(--sg-linha); }
+.sg-numeros li { display: grid; gap: 4px; align-content: start; padding: 24px 24px 24px 0; min-width: 0; }
+.sg-numeros li + li { padding-left: 24px; border-left: 1px solid var(--sg-linha); }
+.sg-numeros b { font: 500 clamp(44px, 5vw, 64px)/1 'Cormorant Garamond', Georgia, serif; color: var(--sg-tinta); font-variant-numeric: lining-nums; }
+.sg-numeros span { color: var(--sg-grafite); font-size: 15.5px; line-height: 1.5; max-width: 28ch; }
+.sg-numeros-obs { margin: 16px 0 48px; max-width: 68ch; color: var(--sg-grafite); font-size: 14.5px; line-height: 1.55; }
+.sg-sub-cab { margin: 0; font: 600 13px/1.3 var(--font, 'Geist', system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; color: var(--sg-grafite); }
+@media (max-width: 760px) {
+  .sg-numeros { grid-template-columns: minmax(0, 1fr); }
+  .sg-numeros li, .sg-numeros li + li { grid-template-columns: 72px minmax(0, 1fr); align-items: center; gap: 16px; padding: 16px 0; border-left: 0; }
+  .sg-numeros li + li { border-top: 1px solid var(--sg-linha); }
+  .sg-numeros b { font-size: 44px; }
+}
+
+/* roteiro da demonstração (exportar/importar) */
+.sg-roteiro { margin: 0 0 32px; }
+.sg-roteiro-t { margin: 0 0 16px; font: 600 17px/1.35 var(--font, 'Geist', system-ui, sans-serif); color: var(--sg-tinta); }
+.sg-roteiro .sg-passos { margin-bottom: 0; }
+.sg-roteiro .sg-acoes { margin-top: 24px; }
+
+/* perguntas */
+
+/* fim */
+.sg .sg-fim { background: var(--sg-tinta); color: var(--sg-papel); padding: 64px 0; }
+.sg-fim h2 { font-size: clamp(30px, 3.6vw, 48px); line-height: 1.08; max-width: 22ch; }
+.sg-fim p { margin: 16px 0 0; color: #e2ddd2; font-size: 16.5px; }
+.sg-fim .btn-ghost { color: var(--sg-papel) !important; border: 1px solid rgba(244, 235, 221, .55) !important; background: transparent !important; }
+.sg-fim a:focus-visible { outline-color: #b4c4e4; }
+
+@media (max-width: 900px) {
+  .sg-topo-grade, .sg-duas { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+}
+@media (max-width: 560px) {
+  .sg .sg-topo { padding: 48px 0; }
+  .sg .sg-fim { padding: 48px 0; }
+  .sg-tabela > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .sg-acoes .btn { width: 100%; justify-content: center; }
+  .sg-diagrama figcaption { padding: 16px; }
+}
+
+/* ---------------------------------------------------------------- blocos de confiança (js/confianca.js)
+   Herdam a cor do texto da seção onde forem colocados: funcionam em fundo claro e escuro. */
+.cft { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; margin: 24px 0; }
+.cft-cartao { display: flex; flex-direction: column; gap: 10px; padding: 20px; border: 1px solid rgba(127, 127, 127, .35); border-radius: 10px; color: inherit; min-width: 0; }
+.cft-cartao :is(h2, h3, h4, h5, h6) { margin: 0; font: 500 23px/1.15 'Cormorant Garamond', Georgia, serif; color: inherit; -webkit-text-fill-color: currentColor; background: none; }
+.cft-cartao ul { margin: 0; padding: 0 0 0 18px; display: grid; gap: 6px; list-style: disc; }
+.cft-cartao li { font-size: 14.5px; line-height: 1.5; opacity: .88; }
+.cft-cartao .cft-mais { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border: 1px solid currentColor; border-radius: 999px; font-weight: 600; font-size: 14.5px; color: inherit; text-decoration: none; white-space: nowrap; transition: background-color .2s; }
+.cft-cartao .cft-mais:hover { background: rgba(127, 127, 127, .14); }
+.cft-cartao .cft-mais:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+/* ---------------------------------------------------------------- estados das demonstrações (window.brEstado em js/confianca.js)
+   .br-estado            caixa de estado (carregando, erro ou vazio), herda a cor do lugar onde está
+   .br-estado-sobre      a mesma caixa por cima de um iframe/palco (o pai ganha position: relative)
+   Sem animação quando a pessoa pede menos movimento. */
+.br-estado { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 160px; padding: 24px 16px; text-align: center; color: inherit; font-size: 15.5px; line-height: 1.5; }
+.br-estado[hidden] { display: none; }
+.br-estado p { margin: 0; max-width: 42ch; }
+.br-estado .br-estado-t { font-weight: 600; font-size: 16.5px; }
+.br-estado-roda { width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgba(127, 127, 127, .3); border-top-color: currentColor; animation: br-gira .8s linear infinite; }
+@keyframes br-gira { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .br-estado-roda { animation: none; border-top-color: rgba(127, 127, 127, .3); border-right-color: currentColor; } }
+.br-estado-erro .br-estado-marca { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 2px solid currentColor; font: 700 17px/1 var(--font, system-ui, sans-serif); }
+.br-estado .br-estado-bt { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border: 1px solid currentColor; border-radius: 999px; background: transparent; color: inherit; font: 600 15px/1 var(--font, system-ui, sans-serif); white-space: nowrap; cursor: pointer; }
+.br-estado .br-estado-bt:hover { background: rgba(127, 127, 127, .14); }
+.br-estado .br-estado-bt:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.br-estado .br-estado-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 20px; }
+.br-estado .br-estado-link { display: inline-flex; align-items: center; min-height: 44px; color: inherit; text-underline-offset: 3px; font-size: 14.5px; white-space: nowrap; }
+.br-estado-pai { position: relative; }
+.br-estado-sobre { position: absolute; inset: 0; z-index: 2; min-height: 0; background: var(--br-estado-fundo, rgba(244, 235, 221, .94)); color: var(--br-estado-cor, #101b36); border-radius: inherit; }
+
+/* ---------------------------------------------------------------- rodada 4 · banca Gemini (09/11)
+   Ícone de linha (traço 1,5 px, img/seguranca/diretrizes.svg) em cada diretriz e 32 px entre os blocos de cada seção. */
+.sg-lista-ico li { position: relative; padding-left: 40px; max-width: calc(60ch + 40px); }
+.sg-lista-ico li > .sg-ico + b { display: block; margin-bottom: 4px; font-size: 17px; line-height: 1.35; }
+.sg-lista-ico .sg-ico { position: absolute; left: 0; top: 18px; width: 24px; height: 24px; color: var(--sg-azul); }
+.sg-numeros-obs { margin-bottom: 32px; }
+.sg-acesso-cab, .sg-diagrama-g, .sg-diagrama, .sg-lista, .sg-passos, .sg-tabela, .sg-roteiro { margin-bottom: 32px; }
+@media (max-width: 900px) { .sg-duas { row-gap: 32px; } }
+@media (max-width: 380px) { .sg-lista-ico li { padding-left: 36px; } .sg-lista-ico .sg-ico { width: 22px; height: 22px; } }
+
+/* rodada 5: item ativo do índice com anel além do fundo */
+.sg .sg-indice a[aria-current] { box-shadow: 0 0 0 2px var(--sg-folha), 0 0 0 3px var(--sg-tinta); }
+
+/* 09/11: perguntas no formato de caixas do site inteiro (.np-faq em tinta.css) */
+.sg-faq.np-faq { margin-top: 24px; }

@@ -140,16 +140,22 @@
   var aviso = null;
   function fecharAviso() { if (aviso) { aviso.remove(); aviso = null; } }
   function mostrarAviso() {
-    // aviso de uma linha só, com um botão: sem o aceite, nada além do necessário é gravado (a escolha pode ser mudada no rodapé)
-    aviso = el('div', { class: 'aviso-cookies ck-linha', role: 'region', 'aria-label': T.titulo },
+    // faixa no topo da página, no fluxo (P1, 08/11): não fica por cima de botão, texto nem do assistente.
+    // Recusar e Aceitar com o mesmo peso; sem o aceite, nada além do necessário é gravado (a escolha muda no rodapé).
+    aviso = el('div', { class: 'aviso-cookies ck-faixa', role: 'region', 'aria-label': T.titulo },
       '<p>' + T.curto[0] + '<span class="ck-mais">' + T.curto[1] + '</span>. <a href="' + raiz + (EN ? 'privacy-en.html' : 'privacidade.html') + '#cookies">' + T.saiba + '</a></p>' +
-      '<button type="button" class="btn btn-primary" data-ck-acao="so">' + T.recusar + '</button><button type="button" class="btn btn-primary" data-ck-acao="todos">' + T.aceitar1 + '</button>');
+      '<div class="ck-acoes-aviso"><button type="button" class="btn btn-primary btn-s" data-ck-acao="so">' + T.recusar + '</button><button type="button" class="btn btn-primary btn-s" data-ck-acao="todos">' + T.aceitar1 + '</button></div>');
     aviso.addEventListener('click', function (e) {
       var b = e.target.closest('[data-ck-acao]'); if (!b) return;
       var sim = b.getAttribute('data-ck-acao') === 'todos';
+      // o foco não se perde ao sumir a faixa: vai para o início do conteúdo
+      var foco = document.activeElement && aviso.contains(document.activeElement);
       salvar(sim, sim); fecharAviso();
+      if (foco) { var m = document.querySelector('main, [role="main"]'); if (m) { if (!m.hasAttribute('tabindex')) m.setAttribute('tabindex', '-1'); m.focus({ preventScroll: true }); } }
     });
-    document.body.appendChild(aviso);
+    // logo depois do link "pular para o conteúdo" (se houver), antes do menu do topo
+    var skip = document.querySelector('body > .skip');
+    if (skip) skip.insertAdjacentElement('afterend', aviso); else document.body.insertBefore(aviso, document.body.firstChild);
   }
   // link "Preferências de cookies" no rodapé de todas as páginas
   function linkRodape() {

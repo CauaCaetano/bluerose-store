@@ -1,0 +1,264 @@
+/* P4 · componentes das páginas de demonstração (exemplos, como funciona, arquitetura).
+   Usa só os tokens do tema (site.css + creme/areia): --bg, --surface, --ink, --line, --marinho, --serif, --r-sm, --r-lg.
+   Sem animação de entrada em títulos; movimento só em hover/foco e respeitando prefers-reduced-motion. */
+
+/* ---------- aviso de exemplos fictícios (legível, perto do topo) ---------- */
+.pd-aviso { display: flex; gap: 14px; align-items: flex-start; margin: 28px 0 0; padding: 16px 20px; max-width: 760px; border: 1px solid var(--line-2); border-left: 4px solid var(--marinho, #101b36); border-radius: var(--r-sm, 4px); background: var(--surface, #fbf7ef); color: var(--ink, #101b36); font-size: 16px; line-height: 1.55; }
+.pd-aviso .ico { flex: none; width: 22px; height: 22px; margin-top: 1px; }
+.pd-aviso b { font-weight: 650; }
+.pd-aviso p { margin: 0; }
+
+/* ---------- filtros com área de toque de 44 px e estado ativo visível ---------- */
+.pd-filtros { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 0; padding: 0; list-style: none; }
+.pd-filtros button { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--ink); font: 500 15px/1 var(--font, system-ui, sans-serif); cursor: pointer; transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
+.pd-filtros button small { font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.pd-filtros button:hover { border-color: var(--ink-2); }
+.pd-filtros button[aria-pressed="true"] { background: var(--marinho, #101b36); border-color: var(--marinho, #101b36); color: #f4ebdd; }
+.pd-filtros button[aria-pressed="true"] small { color: #d8c8ae; }
+.pd-filtros button:focus-visible, .pd-ficha a:focus-visible, .pd-abas input:focus-visible + label { outline: 2px solid var(--accent-solid, #152e6b); outline-offset: 3px; }
+
+/* ---------- fichas dos sites de exemplo ---------- */
+.pd-fichas { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 24px; margin: 28px 0 0; padding: 0; list-style: none; }
+.pd-ficha { display: flex; flex-direction: column; border: 1px solid var(--line-2); border-radius: var(--r-lg, 6px); background: var(--surface, #fbf7ef); overflow: hidden; }
+.pd-ficha[hidden] { display: none; }
+.pd-ficha-txt { display: flex; flex-direction: column; gap: 10px; flex: 1; padding: 20px 22px 22px; }
+.pd-ficha h3 { margin: 0; font-family: var(--serif, Georgia, serif); font-weight: 500; font-size: 26px; line-height: 1.1; color: var(--ink); }
+.pd-ficha dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 12px; margin: 4px 0 0; font-size: 15px; line-height: 1.5; }
+.pd-ficha dt { color: var(--ink-3); font-weight: 500; }
+.pd-ficha dd { margin: 0; color: var(--ink); }
+.pd-ficha ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.pd-ficha li { position: relative; padding-left: 16px; }
+.pd-ficha li::before { content: ""; position: absolute; left: 0; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--prata, #85755c); }
+.pd-ficha .btn { align-self: flex-start; margin-top: auto; }
+.pd-ficha-acoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 8px; }
+
+/* ---------- moldura única de tela (mesma proporção, raio, borda e sombra em todas) ---------- */
+.pd-moldura { margin: 0; border: 1px solid var(--line-2); border-radius: var(--r-lg, 6px); background: var(--surface-2, #efe5d4); box-shadow: var(--shadow); overflow: hidden; }
+.pd-moldura::before { content: ""; display: block; height: 22px; border-bottom: 1px solid var(--line); background: radial-gradient(circle at 14px 50%, var(--line-2) 3.5px, transparent 4px), radial-gradient(circle at 28px 50%, var(--line-2) 3.5px, transparent 4px), radial-gradient(circle at 42px 50%, var(--line-2) 3.5px, transparent 4px), var(--surface, #fbf7ef); }
+.pd-moldura > img, .pd-moldura .pd-telas img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top center; }
+.pd-moldura figcaption { padding: 10px 14px; border-top: 1px solid var(--line); background: var(--surface, #fbf7ef); color: var(--ink-2); font-size: 14px; line-height: 1.45; }
+
+/* ---------- etapas (componente único para assinatura e site sob medida) ---------- */
+.pd-caminhos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-top: 40px; }
+.pd-caminho { padding: 28px; border: 1px solid var(--line-2); border-radius: var(--r-lg, 6px); background: var(--surface, #fbf7ef); }
+.pd-caminho h3 { margin: 0; font-family: var(--serif, Georgia, serif); font-weight: 500; font-size: clamp(26px, 2.4vw, 32px); line-height: 1.1; color: var(--ink); }
+.pd-caminho > p { margin: 8px 0 0; color: var(--ink-2); font-size: 15.5px; line-height: 1.55; }
+.pd-etapas { counter-reset: etapa; margin: 24px 0 0; padding: 0; list-style: none; }
+.pd-etapas li { counter-increment: etapa; position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; padding-bottom: 22px; }
+.pd-etapas li::before { content: counter(etapa); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--marinho, #101b36); color: #f4ebdd; font: 600 16px/1 var(--font, system-ui, sans-serif); font-variant-numeric: tabular-nums; }
+.pd-etapas li::after { content: ""; position: absolute; left: 19.5px; top: 44px; bottom: 4px; width: 1px; background: var(--line-2); }
+.pd-etapas li:last-child { padding-bottom: 0; }
+.pd-etapas li:last-child::after { display: none; }
+.pd-etapas strong { display: block; color: var(--ink); font-size: 16.5px; font-weight: 600; line-height: 1.35; padding-top: 9px; }
+.pd-etapas p { margin: 4px 0 0; color: var(--ink-2); font-size: 15px; line-height: 1.55; }
+.pd-fonte { margin: 20px 0 0; color: var(--ink-3); font-size: 14px; line-height: 1.5; }
+.pd-fonte a { color: var(--ink); text-underline-offset: 3px; }
+.pd-caminho .btn { margin-top: 20px; }
+
+/* ---------- rotina de um dia (mesmo componente nos quatro ramos) ---------- */
+.cf-ramo .cf-tela, .cf-ramo.inv .cf-tela { transform: none; transition: none; order: 0; }
+.cf-ramo .cf-tela.pd-moldura { border-radius: var(--r-lg, 6px); box-shadow: var(--shadow); }
+.cf-ramo .pd-nota-ramo { margin: 14px 0 0; color: var(--ink-3); font-size: 14px; line-height: 1.5; max-width: 52ch; }
+
+/* ---------- abas sem JavaScript (rádios): Planta, 3D, Acabamentos, Painel ---------- */
+.pd-abas { position: relative; }
+.pd-abas > input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.pd-abas-rotulos { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.pd-abas label { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--ink); font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+.pd-abas label:hover { border-color: var(--ink-2); }
+.pd-telas > figure { display: none; }
+#ab-planta:checked ~ .pd-abas-rotulos label[for="ab-planta"], #ab-3d:checked ~ .pd-abas-rotulos label[for="ab-3d"], #ab-acab:checked ~ .pd-abas-rotulos label[for="ab-acab"], #ab-painel:checked ~ .pd-abas-rotulos label[for="ab-painel"] { background: var(--marinho, #101b36); border-color: var(--marinho, #101b36); color: #f4ebdd; }
+#ab-planta:checked ~ .pd-telas .t-planta, #ab-3d:checked ~ .pd-telas .t-3d, #ab-acab:checked ~ .pd-telas .t-acab, #ab-painel:checked ~ .pd-telas .t-painel { display: block; }
+#ab-planta:focus-visible ~ .pd-abas-rotulos label[for="ab-planta"], #ab-3d:focus-visible ~ .pd-abas-rotulos label[for="ab-3d"], #ab-acab:focus-visible ~ .pd-abas-rotulos label[for="ab-acab"], #ab-painel:focus-visible ~ .pd-abas-rotulos label[for="ab-painel"] { outline: 2px solid var(--accent-solid, #152e6b); outline-offset: 3px; }
+
+/* ---------- legenda: funciona / ilustrativo / desativado ---------- */
+.pd-legenda { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 28px 0 0; padding: 0; list-style: none; }
+.pd-legenda li { padding: 18px 20px; border: 1px solid var(--line-2); border-radius: var(--r-sm, 4px); background: var(--surface, #fbf7ef); }
+.pd-legenda b { display: flex; align-items: center; gap: 10px; color: var(--ink); font-size: 16px; font-weight: 650; }
+.pd-legenda b::before { content: ""; flex: none; width: 12px; height: 12px; border-radius: 50%; }
+.pd-legenda .ok b::before { background: var(--ok, #18794e); }
+.pd-legenda .ilu b::before { background: transparent; border: 2px solid var(--ink-2); }
+.pd-legenda .off b::before { background: var(--ink-3); box-shadow: inset 0 0 0 3px var(--surface, #fbf7ef); outline: 1px solid var(--ink-3); }
+.pd-legenda p { margin: 8px 0 0; color: var(--ink-2); font-size: 15px; line-height: 1.55; }
+
+@media (max-width: 900px) {
+  .pd-caminhos, .pd-legenda { grid-template-columns: minmax(0, 1fr); }
+  .pd-caminho { padding: 22px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pd-filtros button, .pd-abas label { transition: none; }
+}
+
+/* =====================================================================
+   Rodada 3 (08/11/2026) · P4: ritmo 32/48/64, aviso leve, miniaturas 16/10,
+   um primário por bloco, atalhos em dois grupos e tela alinhada à linha do tempo.
+   Só tokens de css/tokens.css; .btn não é redefinido aqui.
+   ===================================================================== */
+
+/* ritmo: seção que continua o assunto da anterior encosta em 48 px */
+.pd-sec-topo { padding-bottom: var(--esp-7); }
+.pd-sec-junta { padding-top: var(--esp-7); }
+.pd-sec-sem-baixo { padding-bottom: 0; }
+.pd-h1 { max-width: 16ch; }
+
+/* aviso de demonstração: tom neutro, menor, só borda esquerda e fundo sutil */
+.pd-aviso { gap: var(--esp-3); margin-top: var(--esp-6); padding: var(--esp-3) var(--esp-4); max-width: 68ch; border: 0; border-left: 3px solid var(--c-taupe); border-radius: 0 var(--r-card) var(--r-card) 0; background: rgba(216, 200, 174, .2); color: var(--ink-2); font-size: var(--fs-corpo-p); line-height: 1.55; }
+.pd-aviso .ico { width: 18px; height: 18px; margin-top: 2px; color: var(--c-taupe-escuro); }
+.pd-aviso b { color: var(--ink); font-weight: 600; }
+
+/* cartões de categoria: miniatura 16/10 igual em todos, mesma altura, botão de verdade no pé */
+.cats { gap: var(--grade-gap); margin-top: var(--esp-7); align-items: stretch; }
+.cat-card { min-height: 100%; border-color: var(--line-2); border-radius: var(--r-card); box-shadow: var(--sombra-2); }
+.cat-card:hover { box-shadow: var(--sombra-3); }
+.cat-card:focus-visible { outline: var(--foco-largura) solid var(--foco-cor); outline-offset: var(--foco-offset); }
+.cat-pilha { aspect-ratio: 16 / 10; }
+.cat-pilha img { width: 70%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top center; left: calc(6% + var(--k) * 8%); top: calc(6% + var(--k) * 9%); border-radius: var(--r-card); }
+.cat-txt { flex: 1; gap: var(--esp-2); padding: var(--card-p); }
+.cat-txt strong { font-size: var(--fs-h4); }
+.cat-nomes { margin-bottom: var(--esp-4); font-size: var(--fs-corpo-p); line-height: 1.5; }
+.cat-txt .link { display: inline-flex; align-items: center; align-self: flex-start; gap: var(--esp-2); min-height: var(--alvo-min); margin-top: auto; padding: 0 var(--esp-4); border: 1px solid var(--c-taupe-escuro); border-radius: var(--r-btn); color: var(--c-marinho); font-family: var(--font-texto); font-size: var(--fs-label); font-weight: 600; line-height: 1; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; white-space: nowrap; transition: background-color var(--dur-rapida), border-color var(--dur-rapida); }
+.cat-card:hover .link { background: rgba(216, 200, 174, .35); border-color: var(--c-marinho); }
+.cat-txt .link .ico { width: 16px; height: 16px; }
+.cat-cta { justify-content: flex-start; border-style: dashed; box-shadow: none; }
+.cat-cta .cat-txt { padding: var(--card-p); }
+.cat-cta .cat-txt strong { font-size: var(--fs-h3); }
+.cat-cta .link { color: var(--c-marinho); }
+
+/* fichas: cartão com elevação no bege, títulos na escala */
+.pd-fichas { gap: var(--grade-gap); margin-top: var(--esp-6); }
+.pd-ficha { border-radius: var(--r-card); box-shadow: var(--sombra-2); }
+.pd-ficha-txt { padding: var(--card-p); }
+.pd-ficha h3 { font-size: var(--fs-h3); }
+.pd-ficha dl { font-size: var(--fs-corpo-p); }
+.pd-filtros { gap: var(--esp-2); margin-top: var(--esp-6); }
+.pd-filtros button { white-space: nowrap; }
+
+/* como funciona · atalhos em dois grupos que quebram linha */
+.cf-hero .cf-atalhos { display: grid; gap: var(--esp-4); margin-top: var(--esp-6); }
+.cf-atalhos-grupo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-2); }
+.cf-atalhos-grupo > span { flex: 0 0 8.5em; color: #d8c8ae; font-family: var(--font-texto); font-size: var(--fs-label); font-weight: 600; line-height: 1.3; letter-spacing: .12em; text-transform: uppercase; }
+.cf-hero .cf-atalhos a { min-height: var(--alvo-min); padding: 0 var(--esp-4); border-radius: var(--r-pill); font-size: var(--fs-corpo-p); font-weight: 500; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+@media (max-width: 760px) {
+  .cf-atalhos-grupo > span { flex-basis: 100%; }
+  .cf-hero .cf-atalhos a { padding: 0 var(--esp-3); }
+}
+
+/* como funciona · passos com elevação e respiro iguais */
+.pd-caminhos { gap: var(--grade-gap); margin-top: var(--esp-7); }
+.pd-caminho { padding: var(--card-p); border-radius: var(--r-card); box-shadow: var(--sombra-2); }
+.pd-caminho h3 { font-size: var(--fs-h3); }
+.pd-etapas { margin-top: var(--esp-5); }
+.pd-etapas li { padding-bottom: var(--esp-5); }
+.pd-caminho .btn { margin-top: var(--esp-5); }
+
+/* como funciona · um dia com cada sistema: a tela começa na altura do primeiro horário
+   e o botão fecha o bloco (no celular, logo depois da tela) */
+.cf-ramo .cf-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); column-gap: var(--esp-8); row-gap: 0; align-items: start; }
+.cf-ramo .cf-grid > div { display: contents; }
+.cf-ramo .cf-grid > div > .eyebrow { justify-self: start; }
+.cf-ramo .cf-grid > div > h2 { margin-bottom: 0; }
+@media (min-width: 901px) {
+  .cf-ramo .cf-grid > div > * { grid-column: 1; }
+  .cf-ramo .cf-grid > div > .eyebrow { grid-row: 1; grid-column: 1 / -1; }
+  .cf-ramo .cf-grid > div > h2 { grid-row: 2; }
+  .cf-ramo .cf-grid > div > .cf-dia { grid-row: 3; margin-top: var(--esp-7); }
+  .cf-ramo .cf-grid > div > .ctas { grid-row: 4; }
+  .cf-ramo .cf-grid > div > .cf-preco { grid-row: 5; }
+  .cf-ramo .cf-grid > .cf-tela { grid-column: 2; grid-row: 3 / span 3; align-self: start; margin-top: calc(var(--esp-7) + var(--esp-3)); }
+}
+.cf-dia li { padding: var(--esp-3) 0; }
+.cf-dia li + li { margin-top: var(--esp-3); }
+@media (max-width: 900px) {
+  .cf-ramo .cf-grid { grid-template-columns: minmax(0, 1fr); }
+  .cf-ramo .cf-grid > .cf-tela { order: 1; margin-top: var(--esp-6); }
+  .cf-ramo .cf-grid > div > .ctas { order: 2; margin-top: var(--esp-6); }
+  .cf-ramo .cf-grid > div > .cf-preco { order: 3; }
+  .cf-ramo .cf-grid > div > .cf-dia { margin-top: var(--esp-6); }
+}
+@media (max-width: 480px) {
+  .cf-ramo .ctas .btn, .pd-caminho .btn { width: 100%; justify-content: center; }
+}
+
+/* =====================================================================
+   Rodada 4 (09/11/2026) · P4: Como funciona com cartões de altura igual (padding 32),
+   linha do tempo com 32 px entre itens, "Veja funcionando em 15 segundos" com cartão
+   de resultado (print real da demonstração) e Exemplos com o preço logo abaixo do título.
+   O realce dos chips vem do componente global (site.js: BlueRose.destacar / .is-realce).
+   ===================================================================== */
+
+/* passo a passo: dois cartões da mesma altura, padding 32, botão no pé */
+.pd-caminhos { align-items: stretch; }
+.pd-caminho { display: flex; flex-direction: column; padding: var(--card-p); }
+.pd-etapas { margin-top: var(--ritmo-p); }
+.pd-etapas li { padding-bottom: var(--ritmo-p); }
+.pd-fonte { margin-top: var(--ritmo-p); }
+.pd-caminho > .btn { align-self: flex-start; margin-top: auto; }
+.pd-caminho > .pd-fonte { margin-bottom: var(--ritmo-p); }
+
+/* um dia com cada sistema: 32 px entre os horários */
+.cf-dia li { padding: 0; }
+.cf-dia li + li { margin-top: var(--ritmo-p); }
+.cf-dia li::after { top: 12px; }
+.cf-ramo .cf-grid > div > .ctas { margin-top: var(--ritmo-p); }
+
+/* veja funcionando em 15 segundos */
+.pd-15s-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--grade-gap); margin: var(--esp-sub-conteudo) 0 0; padding: 0; list-style: none; }
+.pd-15s-card { display: flex; flex-direction: column; min-width: 0; padding: var(--card-p); border: var(--borda-card); border-radius: var(--r-card); background: var(--c-creme-claro, var(--surface)); box-shadow: var(--sombra-card); }
+.pd-15s-prod { margin: 0; color: var(--ink-3); font-family: var(--font-texto); font-size: var(--fs-label); font-weight: 600; line-height: 1.3; letter-spacing: .1em; text-transform: uppercase; }
+.pd-15s-card h3 { margin: var(--esp-2) 0 0; font-family: var(--font-titulo); font-weight: 500; font-size: var(--fs-h3); line-height: 1.15; color: var(--ink); }
+.pd-15s-passos { counter-reset: p15; display: grid; gap: var(--esp-4); margin: var(--ritmo-p) 0 0; padding: 0; list-style: none; }
+.pd-15s-passos li { counter-increment: p15; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--esp-3); color: var(--ink-2); font-size: var(--fs-corpo-p); line-height: 1.55; }
+.pd-15s-passos li::before { content: counter(p15); display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--accent-unico); color: var(--accent-unico); font: 600 var(--fs-label)/1 var(--font-texto); font-variant-numeric: tabular-nums; }
+/* o resultado em destaque: borda do destaque único e rótulo próprio */
+.pd-15s-res { margin: var(--ritmo-p) 0 0; border: 2px solid var(--accent-unico); border-radius: var(--r-card); background: var(--bg); overflow: hidden; }
+.pd-15s-res figcaption { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--esp-2) var(--esp-3); padding: var(--esp-3) var(--esp-4); color: var(--ink); font-size: var(--fs-legenda); line-height: 1.45; }
+.pd-15s-rot { flex: none; color: var(--accent-unico); font-family: var(--font-texto); font-size: var(--fs-label); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.pd-15s-res .thumb { border-top: 1px solid var(--line-2); }
+.pd-15s-card > .btn { align-self: flex-start; margin-top: auto; }
+.pd-15s-card > .pd-15s-res { margin-bottom: var(--ritmo-p); }
+.pd-15s-nota { margin: var(--ritmo-m) 0 0; max-width: 68ch; color: var(--ink-2); font-size: var(--fs-corpo-p); line-height: 1.6; }
+.pd-15s-nota b { color: var(--ink); font-weight: 600; }
+@media (max-width: 900px) {
+  .pd-15s-grade { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .pd-15s-card > .btn { align-self: stretch; justify-content: center; }
+}
+
+/* exemplos: preço logo abaixo do título e "Abrir demonstração" como ação principal de cada cartão */
+.pd-preco-linha { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--esp-1) var(--esp-3); margin: var(--esp-titulo-sub) 0 0; color: var(--ink); font-size: var(--fs-corpo-g); line-height: 1.45; }
+.pd-preco-linha b { font-weight: 650; font-variant-numeric: tabular-nums; }
+.pd-preco-linha small { color: var(--ink-3); font-size: var(--fs-legenda); }
+.pd-h1 + .pd-preco-linha + .sec-lede { margin-top: var(--esp-4); }
+.cat-card.cat-com-acoes { cursor: default; }
+.cat-com-acoes .cat-pilha { display: block; width: 100%; padding: 0; border: 0; background: var(--bg-2); cursor: pointer; font: inherit; }
+.cat-com-acoes .cat-pilha:focus-visible { outline: var(--foco-largura) solid var(--foco-cor); outline-offset: calc(var(--foco-offset) * -2); }
+.cat-com-acoes:hover { transform: none; }
+.cat-acoes { display: flex; flex-wrap: wrap; gap: var(--esp-3); margin-top: auto; padding-top: var(--esp-2); }
+.cat-acoes .btn { --btn-h: var(--btn-h-s); --btn-px: var(--btn-px-s); }
+.cat-txt .cat-preco { margin: 0; color: var(--ink-2); font-size: var(--fs-legenda); }
+.cat-txt .cat-preco b { color: var(--ink); font-weight: 650; }
+.pd-ficha-preco { margin: 0; color: var(--ink-2); font-size: var(--fs-legenda); }
+.pd-ficha-preco b { color: var(--ink); font-weight: 650; font-size: var(--fs-corpo); }
+.pd-ficha-acoes .btn-primary { --btn-h: var(--btn-h-s); --btn-px: var(--btn-px-s); }
+
+/* =====================================================================
+   Rodada 4 · banca Gemini (09/11/2026), só como-funciona.html:
+   selos de confiança junto dos botões (mesmo desenho do css/pg-produtos.css) e hover sutil
+   nos cartões que abrem a demonstração (borda e sombra; sem movimento).
+   ===================================================================== */
+.pp-selo { display: inline-flex; align-items: flex-start; gap: var(--esp-2); margin: var(--esp-4) 0 0; padding: 10px 14px; max-width: 100%; box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent); border-radius: var(--r-card); background: color-mix(in srgb, currentColor 5%, transparent);
+  font-size: var(--fs-corpo-p); line-height: 1.45; font-weight: 500; color: var(--ink); }
+.pp-selo b { font-weight: 700; color: var(--ink); }
+.pp-selo-ico { flex: none; width: 20px; height: 20px; margin-top: 1px; color: var(--accent-unico); }
+.cf-ramo .cf-preco.pp-selo { margin-top: var(--esp-4); }
+.pd-15s-card > .pp-selo { margin-top: var(--esp-3); font-size: var(--fs-legenda); padding: 8px 12px; }
+.pd-15s-card > .pp-selo .pp-selo-ico { width: 18px; height: 18px; }
+@media (max-width: 379px) { .pp-selo { padding: 10px 12px; } }
+
+.pd-15s-card { transition: border-color var(--dur-rapida) ease, box-shadow var(--dur-media) ease; }
+@media (hover: hover) {
+  .pd-15s-card:hover { border-color: color-mix(in srgb, var(--accent-unico) 35%, var(--line)); box-shadow: var(--sombra-card-hover); }
+}
+@media (prefers-reduced-motion: reduce) { .pd-15s-card { transition: none; } }

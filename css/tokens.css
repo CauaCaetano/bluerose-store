@@ -1,0 +1,141 @@
+/* =============================================================
+   Blue Rose · tokens do sistema de design (P1, rodada 2 · 08/11/2026)
+   -------------------------------------------------------------
+   Fonte única de tamanhos, espaços, raios, sombras, camadas e tempos.
+   Importado no topo do site.css; as cores de superfície/texto (--bg, --ink…) seguem em
+   areia.css (paleta do dono, 22/10) e o componente de botão/foco/acessibilidade em tinta.css.
+   Regra: CSS de página usa var(--…) daqui; nada de px solto para fonte, espaço de seção ou raio.
+   Pontos de quebra (CSS não aceita var() em @media; usar estes valores):
+     --bp-p 480px · --bp-m 760px · --bp-g 1024px · --bp-xg 1300px
+   ============================================================= */
+:root {
+  /* ---------- cores da marca (identidade aprovada; não trocar) ---------- */
+  --c-marinho: #101b36;
+  --c-marinho-2: #22345a;
+  --c-creme: #f4ebdd;
+  --c-creme-2: #fffaf0;
+  --c-creme-claro: #f9f3e9;
+  --c-areia: #d8c8ae;
+  --c-taupe: #b5a58d;
+  --c-taupe-escuro: #6e604b;     /* texto pequeno em taupe sobre creme: 5,2:1 (AA) */
+  --c-ultramar: #2f4c8a;         /* ênfase sobre claro: 7,0:1 */
+  --c-azul-claro: #6cc4ff;       /* ênfase sobre marinho: 8,9:1 */
+  --c-erro: #a3261b;
+  --c-ok: #18794e;
+
+  /* ---------- tipografia ---------- */
+  --font-titulo: 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
+  --font-texto: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-dado: 'Geist Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  /* escala única (320 → 1920 px). Títulos em serifada, texto em Geist. */
+  --fs-display: clamp(2.5rem, 1.4rem + 4.6vw, 5.5rem);    /* 40 → 88  · topo da inicial e de páginas-vitrine */
+  --fs-h1: clamp(2.25rem, 1.6rem + 2.8vw, 4rem);          /* 36 → 64  · título do topo das páginas internas */
+  --fs-h2: clamp(2rem, 1.5rem + 2.2vw, 3.25rem);          /* 32 → 52  · título de seção */
+  --fs-h3: clamp(1.375rem, 1.2rem + 0.7vw, 1.75rem);      /* 22 → 28  · título de cartão/bloco */
+  --fs-h4: clamp(1.125rem, 1.06rem + 0.3vw, 1.3125rem);   /* 18 → 21  · subtítulo de item */
+  --fs-corpo-g: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);  /* 17 → 20  · linha fina abaixo do título */
+  --fs-corpo: 1rem;                                       /* 16 */
+  --fs-corpo-p: 0.9375rem;                                /* 15 */
+  --fs-legenda: 0.875rem;                                 /* 14 · legendas, notas */
+  --fs-label: 0.8125rem;                                  /* 13 · rótulos de campo e botões */
+  --fs-aux: 0.75rem;                                      /* 12 · rótulo pequeno (eyebrow), selos */
+  --lh-titulo: 1.04;
+  --lh-titulo-p: 1.18;
+  --lh-corpo: 1.6;
+  --lh-justo: 1.35;
+  --ls-titulo: -0.005em;
+  --ls-rotulo: 0.16em;
+  --ls-botao: 0.1em;
+  --medida-texto: 62ch;
+  --medida-titulo: 18ch;
+
+  /* ---------- espaçamento (base 4) ---------- */
+  --esp-1: 4px; --esp-2: 8px; --esp-3: 12px; --esp-4: 16px; --esp-5: 24px;
+  --esp-6: 32px; --esp-7: 48px; --esp-8: 64px; --esp-9: 96px; --esp-10: 128px;
+  /* ritmo vertical: só três passos, 32 / 48 / 64 (rodada 3) */
+  --ritmo-p: 32px;                                       /* dentro de um bloco: texto → botões, título → lista */
+  --ritmo-m: 48px;                                       /* entre blocos de uma seção; linha fina → conteúdo */
+  --ritmo-g: 64px;                                       /* entre seções */
+  --sec-y: var(--ritmo-g);                               /* respiro de cima/baixo de cada seção (48 no celular) */
+  --sec-y-topo: var(--ritmo-g);                          /* topo (hero) das páginas internas */
+  --esp-rotulo-titulo: var(--esp-4);                     /* eyebrow → título (16) */
+  --esp-titulo-sub: var(--esp-4);                        /* título → linha fina (16) */
+  --esp-sub-conteudo: var(--ritmo-m);                    /* linha fina → conteúdo */
+  --esp-conteudo-acoes: var(--ritmo-p);                  /* texto → botões */
+  --card-p: var(--ritmo-p);                              /* padding interno de cartão (24 no celular) */
+  --grade-gap: var(--esp-5);                             /* entre cartões (24) */
+  --lista-gap: var(--esp-3);
+  --form-gap: var(--esp-4);
+  --gutter: 16px;                                        /* margem lateral mínima no celular */
+
+  /* ---------- larguras ---------- */
+  --largura: 1200px;
+  --largura-estreita: 760px;
+  --largura-texto: 68ch;
+
+  /* ---------- raios, bordas, sombras ---------- */
+  --r-btn: 6px;
+  --r-campo: 6px;
+  --r-card: 6px;
+  --r-painel: 14px;
+  --r-pill: 999px;
+  --borda: 1px;
+  --sombra-1: 0 1px 2px rgba(16, 27, 54, 0.06);
+  --sombra-2: 0 1px 2px rgba(16, 27, 54, 0.05), 0 18px 40px -28px rgba(16, 27, 54, 0.32);
+  --sombra-3: 0 2px 6px rgba(16, 27, 54, 0.08), 0 30px 70px -30px rgba(16, 27, 54, 0.45);
+  /* cartão no fundo bege: borda areia + sombra curta e visível (elevação, rodada 3) */
+  --borda-card: 1px solid #cdbb9c;
+  --sombra-card: 0 1px 2px rgba(16, 27, 54, 0.07), 0 8px 24px -12px rgba(16, 27, 54, 0.28);
+  --sombra-card-hover: 0 2px 4px rgba(16, 27, 54, 0.08), 0 16px 36px -14px rgba(16, 27, 54, 0.36);
+  /* um destaque só: números, ícones de lista e realces usam esta cor (sem a cor de cada produto) */
+  --accent-unico: var(--c-marinho);                     /* rodada 4: numeração, ícones e realces em neutro (azul só na ação principal) */
+  /* azul exclusivo da AÇÃO PRINCIPAL (rodada 4): botão .btn-primary e o assistente. Links, selos e ações secundárias em neutro. */
+  --acao: var(--c-ultramar);                             /* fundo do primário no claro (creme em cima: 7,0:1) */
+  --acao-h: #263f74;
+  --acao-texto: var(--c-creme-2);
+  --acao-escuro: #3d63b8;                                /* fundo do primário sobre marinho (branco em cima: 5,9:1) */
+  --acao-escuro-h: #4a70c6;
+  --acao-escuro-texto: #ffffff;
+  --neutro-link: var(--c-marinho);                       /* links de texto e selos no claro */
+  --neutro-link-escuro: var(--c-creme);                  /* idem sobre marinho */
+  /* realce temporário de um cartão/seção aberto por um chip ou âncora (site.js: BlueRose.destacar) */
+  --realce-dur: 2s;
+  --realce-anel: rgba(181, 165, 141, .55);
+  /* miniaturas */
+  --thumb-proporcao: 16 / 10;
+
+  /* ---------- camadas (z-index) ---------- */
+  --z-base: 1;
+  --z-elevado: 10;
+  --z-nav: 50;
+  --z-assistente: 58;
+  --z-menu: 60;
+  --z-aviso: 62;
+  --z-modal: 70;
+
+  /* ---------- movimento ---------- */
+  --dur-rapida: 150ms;
+  --dur-media: 250ms;
+  --dur-lenta: 500ms;
+  --ease-saida: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---------- foco e alvos ---------- */
+  --foco-cor: var(--c-ultramar);
+  --foco-cor-escuro: var(--c-azul-claro);   /* sobre as faixas marinho */
+  --foco-largura: 3px;
+  --foco-offset: 2px;
+  --alvo-min: 44px;
+
+  /* ---------- botão (componente único em tinta.css) ---------- */
+  --btn-h-s: 44px; --btn-px-s: 18px;
+  --btn-h-m: 48px; --btn-px-m: 24px;
+  --btn-h-l: 56px; --btn-px-l: 32px;
+  --btn-fs: 0.8125rem;
+  --btn-ls: var(--ls-botao);
+}
+@media (max-width: 760px) {
+  :root { --sec-y: var(--ritmo-m); --sec-y-topo: var(--ritmo-m); --esp-sub-conteudo: var(--ritmo-p); --card-p: var(--esp-5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-rapida: 0ms; --dur-media: 0ms; --dur-lenta: 0ms; }
+}

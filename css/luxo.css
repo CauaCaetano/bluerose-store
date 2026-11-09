@@ -47,18 +47,12 @@ h3 { font-weight: 600; letter-spacing: 0; }
 h1 .serif, h2 .serif { color: transparent; }
 
 /* ---------- rótulos com fio de prata ---------- */
-.eyebrow { color: var(--prata); font-size: 11.5px; letter-spacing: 0.32em; }
+.eyebrow { color: var(--prata); }
 .eyebrow::before { content: ""; display: inline-block; width: 34px; height: 1px; margin-right: 14px; vertical-align: middle; background: linear-gradient(90deg, transparent, var(--prata)); filter: none; transform-origin: left; }
 .js .reveal.eyebrow::before { transform: scaleX(0); transition: transform 1.2s var(--ease) .2s; }
 .js .reveal.eyebrow.visto::before { transform: none; }
 
-/* ---------- botões de grife ---------- */
-.btn { border-radius: 2px; text-transform: uppercase; letter-spacing: 0.14em; font-size: 12.5px; font-weight: 600; min-height: 50px; padding: 0 28px; }
-.btn-primary { background: linear-gradient(180deg, #4a7cf5, #2a58d6); border: 1px solid rgba(255, 255, 255, 0.16); box-shadow: 0 18px 44px -18px rgba(58, 110, 240, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.18); }
-.btn-primary:hover { background: linear-gradient(180deg, #5a88f8, #3263e0); }
-.btn-ghost { border: 1px solid rgba(205, 214, 228, 0.35); color: var(--prata); background: transparent; }
-.btn-ghost:hover { border-color: var(--prata); color: #fff; background: rgba(205, 214, 228, 0.05); }
-.nav .btn { min-height: 42px; padding: 0 20px; font-size: 11.5px; }
+/* botões: componente único em tinta.css */
 
 /* ---------- cabeçalho e rodapé ---------- */
 .nav { background: rgba(5, 7, 11, 0.72); border-bottom: 1px solid var(--line); }
@@ -94,14 +88,14 @@ h1 .serif, h2 .serif { color: transparent; }
 .serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span { background: linear-gradient(180deg, #ffffff 0%, #cdd8ea 45%, #8fa2c4 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 /* números alinhados (a Cormorant usa números antigos por padrão) */
 h1, h2, h3, .sec-title, .preco2-valor, .prod-preco b, .lx-numeros b { font-variant-numeric: lining-nums; }
-@media (max-width: 600px) { .eyebrow { letter-spacing: .18em; font-size: 10.5px; } .eyebrow::before { width: 22px; margin-right: 10px; } }
+@media (max-width: 600px) { .eyebrow::before { width: 22px; margin-right: 10px; } }
 
 /* ---------- página "Como funciona por ramo" ---------- */
 .cf-hero { padding: 110px 0 40px; }
 .cf-hero h1 { font-size: clamp(48px, 6vw, 96px); max-width: 14ch; margin-top: 20px; }
 .cf-hero .sub { margin-top: 26px; font-size: 19px; color: var(--ink-2); max-width: 52ch; line-height: 1.65; }
 .cf-atalhos { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 36px; }
-.cf-atalhos a { padding: 12px 20px; border: 1px solid var(--line-2); border-radius: 2px; color: var(--prata); text-decoration: none; font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; transition: border-color .3s, color .3s, background .3s; }
+.cf-atalhos a { display: inline-flex; align-items: center; min-height: var(--alvo-min); padding: 0 20px; border: 1px solid var(--line-2); border-radius: var(--r-btn); color: var(--prata); text-decoration: none; font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; transition: border-color .3s, color .3s, background .3s; }
 .cf-atalhos a:hover { border-color: var(--prata); color: #fff; background: rgba(205, 214, 228, .05); }
 .cf-ramo { border-top: 1px solid var(--line); }
 .cf-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 72px; align-items: center; }

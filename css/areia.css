@@ -12,11 +12,11 @@
   --line-2: rgba(140, 122, 94, 0.32);
   --ink: #101b36;
   --ink-2: #3f4757;
-  --ink-3: #6b6355;
+  --ink-3: #625a4c;          /* P1: 5,3:1 no creme mais escuro (antes 4,6:1) */
   --accent: #101b36;
   --accent-solid: #101b36;
   --accent-soft: rgba(16, 27, 54, 0.06);
-  --prata: #85755c;
+  --prata: #6e604b;          /* P1: rótulos pequenos em taupe passam AA (antes #85755c, 3,8:1) */
   --prata-2: #b5a58d;
   --marinho: #101b36;
   --marinho-2: #182740;
@@ -32,11 +32,7 @@ body { background: radial-gradient(1200px 700px at 50% 0%, #f9f3e9, transparent 
 .serif, h1 em, h2 em, .sec-title em,
 .serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span { background: linear-gradient(180deg, #23324d 0%, #101b36 45%, #6e5f47 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-/* botões: marinho sólido, contorno em taupe */
-.btn-primary { background: #101b36; border: 1px solid #101b36; color: #f4ebdd; box-shadow: 0 16px 34px -20px rgba(16, 27, 54, 0.8), inset 0 1px 0 rgba(244, 235, 221, 0.12); }
-.btn-primary:hover { background: #1c2b45; }
-.btn-ghost { border: 1px solid #b5a58d; color: #101b36; }
-.btn-ghost:hover { border-color: #101b36; color: #101b36; background: rgba(216, 200, 174, 0.35); }
+/* botões: componente único em tinta.css */
 
 /* cartões: creme claro com borda areia */
 .preco2, .prod-c, .sis, .caminho, .sis-duas > div, .np-grade, .np-faq details, .ini-mais, .ini-oferta, .orc, .conta-caixa, .ini-calc-card {
@@ -73,10 +69,6 @@ select option, .conta-pag select option, .sup select option, .sup-fb-form select
 :is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero, .rodape-site) :is(.serif, h1 em, h2 em, .sec-title em, .serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span) {
   background: linear-gradient(180deg, #fbf6ec 0%, #e6d8c1 50%, #b5a58d 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.lx-hero .btn-ghost, .p-hero .btn-ghost, .np-hero .btn-ghost, .hero .btn-ghost, .cf-hero .btn-ghost, .rodape-site .btn-ghost { border-color: rgba(216, 200, 174, 0.5); color: #f4ebdd; }
-.lx-hero .btn-ghost:hover, .p-hero .btn-ghost:hover, .np-hero .btn-ghost:hover, .hero .btn-ghost:hover, .cf-hero .btn-ghost:hover { background: rgba(216, 200, 174, 0.1); border-color: #d8c8ae; }
-.lx-hero .btn-primary, .p-hero .btn-primary, .np-hero .btn-primary, .hero .btn-primary, .cf-hero .btn-primary, .nav .btn-primary { background: linear-gradient(180deg, #f4ebdd, #d8c8ae); border-color: rgba(244, 235, 221, 0.6); }
-.lx-hero .btn-primary:hover, .p-hero .btn-primary:hover, .np-hero .btn-primary:hover, .hero .btn-primary:hover, .cf-hero .btn-primary:hover, .nav .btn-primary:hover { background: #f4ebdd; }
 .rodape-site a:hover { color: #f4ebdd; }
 :is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .cf-atalhos a { color: #f4ebdd; border-color: rgba(216, 200, 174, 0.4); }
 :is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .cf-atalhos a:hover { border-color: #d8c8ae; background: rgba(216, 200, 174, 0.08); }

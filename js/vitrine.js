@@ -17,12 +17,31 @@
   var onda = document.createElement('div'); onda.className = 'vt-onda';
   corpo.insertBefore(fundo, corpo.firstChild); corpo.insertBefore(onda, fundo.nextSibling);
 
+  // a trilha vem separada por grupo (Sistemas | Sites de exemplo | Projetos para clientes | Arquitetura), com o nome do grupo em cima
+  var CURTO = { 'Sistemas prontos': 'Sistemas', 'Projetos para clientes': 'Para clientes', 'Plataforma de arquitetura': 'Arquitetura' };
+  var grupoAtual = null, caixaGrupo = null;
   var botoes = cenas.map(function (c, i) {
+    var g = c.dataset.grupo || '';
+    if (g !== grupoAtual) {
+      grupoAtual = g;
+      caixaGrupo = document.createElement('div');
+      caixaGrupo.className = 'vt-trilha-grupo';
+      var rot = document.createElement('span');
+      rot.className = 'vt-trilha-rot';
+      var solo = g === 'Início' || g === 'Próximo passo';
+      rot.textContent = solo ? '' : (CURTO[g] || g);
+      if (solo) caixaGrupo.classList.add('vt-trilha-solo');
+      caixaGrupo.appendChild(rot);
+      var fila = document.createElement('div'); fila.className = 'vt-trilha-fila';
+      caixaGrupo.appendChild(fila);
+      trilha.appendChild(caixaGrupo);
+    }
     var b = document.createElement('button');
     b.type = 'button'; b.innerHTML = '<span></span><i></i>';
     b.querySelector('span').textContent = c.dataset.nome;
+    if (g && g !== 'Início' && g !== 'Próximo passo') b.setAttribute('aria-label', c.dataset.nome + ' (' + (CURTO[g] || g) + ')');
     b.addEventListener('click', function (e) { pararAuto(); ir(i, e); });
-    trilha.appendChild(b);
+    caixaGrupo.querySelector('.vt-trilha-fila').appendChild(b);
     return b;
   });
 
@@ -84,7 +103,7 @@
     barra(i, restante);
     agenda();
     if (nova.classList.contains('vt-arq')) trocaAuto(nova);
-    history.replaceState(null, '', '#' + i);
+    history.replaceState(null, '', '#' + (nova.dataset.id || i));
   }
 
   function pintarPausa() {
@@ -118,6 +137,8 @@
 
   addEventListener('keydown', function (e) {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
+    var aberto = document.getElementById('dlg-indice');
+    if (aberto && aberto.open) return;
     if (e.key === 'ArrowRight' || e.key === 'PageDown') { pararAuto(); ir(atual + 1); }
     else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { pararAuto(); ir(atual - 1); }
     else if (e.key === ' ' && e.target === document.body) { e.preventDefault(); pausa.click(); }
@@ -126,6 +147,7 @@
   // roda do mouse e dedo também passam de cena
   var ultimoGiro = 0;
   addEventListener('wheel', function (e) {
+    if (e.target.closest && e.target.closest('dialog')) return;
     var agora = performance.now();
     if (Math.abs(e.deltaY) < 12 || agora - ultimoGiro < 850) return;
     ultimoGiro = agora; pararAuto(); ir(atual + (e.deltaY > 0 ? 1 : -1));
@@ -133,7 +155,7 @@
   var tx = 0, ty = 0;
   addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
   addEventListener('touchend', function (e) {
-    if (e.target.closest && e.target.closest('.vt-trilha')) return;
+    if (e.target.closest && e.target.closest('.vt-trilha, dialog')) return;
     var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
     pararAuto(); ir(atual + (dx < 0 ? 1 : -1));
@@ -184,7 +206,49 @@
 
   cenas.forEach(function (c) { c.setAttribute('aria-hidden', 'true'); c.inert = true; });
   pintarPausa();
-  var pedido = parseInt(location.hash.slice(1), 10);
-  fundo.style.background = cenas[pedido > 0 && pedido < cenas.length ? pedido : 0].dataset.cor;
-  ir(pedido > 0 && pedido < cenas.length ? pedido : 0);
+  // índice: todas as cenas agrupadas por categoria, para ir direto ao que interessa
+  var dlg = document.getElementById('dlg-indice'), caixa = dlg && dlg.querySelector('[data-indice]'), btIndice = document.getElementById('indice');
+  if (dlg && caixa && btIndice) {
+    var grupos = [];
+    cenas.forEach(function (c, i) {
+      var g = c.dataset.grupo || '';
+      if (!g || g === 'Início' || g === 'Próximo passo') return;
+      var achou = grupos.filter(function (x) { return x.nome === g; })[0];
+      if (!achou) { achou = { nome: g, itens: [] }; grupos.push(achou); }
+      achou.itens.push(i);
+    });
+    grupos.forEach(function (g) {
+      var sec = document.createElement('section');
+      var h = document.createElement('h3'); h.textContent = g.nome; sec.appendChild(h);
+      var ul = document.createElement('ul');
+      g.itens.forEach(function (i) {
+        var c = cenas[i], li = document.createElement('li'), b = document.createElement('button');
+        b.type = 'button';
+        var img = c.querySelector('.vt-tela img');
+        if (img) { var m = document.createElement('img'); m.src = img.getAttribute('src'); m.alt = ''; m.width = 320; m.height = 200; m.loading = 'lazy'; b.appendChild(m); }
+        var nome = document.createElement('span'); nome.textContent = (c.querySelector('h2') || {}).textContent || c.dataset.nome; b.appendChild(nome);
+        var tipo = c.querySelector('.vt-grupo'); if (tipo) { var sm = document.createElement('small'); sm.textContent = tipo.textContent; b.appendChild(sm); }
+        b.addEventListener('click', function () { dlg.close(); pararAuto(); ir(i); });
+        li.appendChild(b); ul.appendChild(li);
+      });
+      sec.appendChild(ul); caixa.appendChild(sec);
+    });
+    btIndice.addEventListener('click', function () {
+      pararAuto();
+      if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    });
+    dlg.addEventListener('click', function (e) { if (e.target === dlg || e.target.closest('[data-fechar]')) dlg.close(); });
+    dlg.addEventListener('close', function () { btIndice.focus(); });
+  }
+
+  // #arquitetura (ou o número antigo, #11) abre direto na cena
+  function cenaDoEndereco() {
+    var marca = location.hash.slice(1), n = parseInt(marca, 10);
+    if (isNaN(n)) n = cenas.map(function (c) { return c.dataset.id; }).indexOf(marca);
+    return n > 0 && n < cenas.length ? n : 0;
+  }
+  addEventListener('hashchange', function () { pararAuto(); ir(cenaDoEndereco()); });
+  var pedido = cenaDoEndereco();
+  fundo.style.background = cenas[pedido].dataset.cor;
+  ir(pedido);
 })();

@@ -124,3 +124,95 @@ body.vt { background: #101b36; color: var(--creme); font: 400 17px/1.55 'Geist',
 .vt-mais { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: color-mix(in srgb, currentColor 8%, transparent); font-weight: 600; text-decoration: none !important; transition: transform .2s ease, background .2s ease; }
 .vt-mais:hover { background: color-mix(in srgb, currentColor 16%, transparent); transform: translateY(-1px); }
 .vt-mais:active { transform: scale(.97); }
+
+/* 08/11/2026 · P4 rodada 2: títulos sem animação de entrada, telas padronizadas, controles de 44 px com estado ativo e índice */
+.vt-js .vt-txt > :is(h1, h2), .vt-js .ativa .vt-txt > :is(h1, h2) { opacity: 1; transform: none; transition: none; }
+.vt-js .saindo .vt-txt > :is(h1, h2) { opacity: 0; transform: none; transition: none; }
+
+.vt-topo { position: fixed; z-index: 6; top: 16px; left: clamp(20px, 4vw, 56px); right: clamp(20px, 4vw, 56px); display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; pointer-events: none; }
+.vt-topo > * { pointer-events: auto; }
+body.vt .vt-topo .vt-voltar { position: static; padding: 0 16px; border-radius: 999px; background: rgba(10, 16, 32, .35); text-decoration: none; box-shadow: inset 0 0 0 1px rgba(244, 235, 221, .35); }
+body.vt .vt-topo .vt-voltar:hover { background: rgba(244, 235, 221, .14); }
+body.vt .vt-topo .br-idi > button { min-height: 44px; padding: 0 14px; color: var(--creme); border-color: rgba(244, 235, 221, .35); background: rgba(10, 16, 32, .35); }
+
+/* mesma moldura em todas as telas: proporção 16:10, raio, borda e sombra iguais */
+.vt-tela { aspect-ratio: 16 / 10; border-radius: 8px; box-shadow: 0 0 0 1px rgba(244, 235, 221, .14), 0 30px 60px -28px rgba(0, 0, 0, .75); }
+.vt-tela > img { height: 100%; object-fit: cover; object-position: top center; }
+.vt-cel { aspect-ratio: 360 / 779; object-fit: cover; object-position: top; }
+
+/* trilha: a cena atual fica marcada com fundo, peso e barra cheia */
+.vt-trilha { right: 310px; }
+.vt-trilha button { min-height: 44px; padding: 0 10px 10px; border-radius: 4px 4px 0 0; }
+.vt-trilha button[aria-current] { color: #fff; font-weight: 600; background: rgba(244, 235, 221, .12); }
+.vt-trilha button:focus-visible { outline: 2px solid var(--azul); outline-offset: -2px; }
+.vt-ctrl button[aria-label="Continuar"] { background: var(--creme); color: #101b36; }
+.vt-ctrl .vt-indice-bt { width: auto; display: inline-flex; gap: 8px; padding: 0 14px; font: 600 15px 'Geist', system-ui, sans-serif; }
+.vt-trocas button:focus-visible { outline-offset: -3px; }
+.vt-trocas button:not([aria-pressed="true"]):hover { background: rgba(244, 235, 221, .12); }
+
+/* índice por categoria */
+.vt-dlg { width: min(1040px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); margin: auto; padding: 0; border: 0; border-radius: 10px; background: #0e1830; color: var(--creme); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .9); }
+.vt-dlg::backdrop { background: rgba(5, 8, 18, .72); }
+.vt-dlg-topo { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 24px; background: #0e1830; border-bottom: 1px solid rgba(244, 235, 221, .14); }
+.vt-dlg h2 { font-size: clamp(28px, 3vw, 38px); }
+.vt-dlg-x { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 4px; background: rgba(244, 235, 221, .14); color: var(--creme); cursor: pointer; }
+.vt-dlg-x:hover { background: rgba(244, 235, 221, .28); }
+.vt-dlg-grupos { padding: 8px 24px 28px; }
+.vt-dlg h3 { margin: 22px 0 12px; color: var(--apoio); font: 600 14px/1.3 'Geist', system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.vt-dlg ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.vt-dlg li button { display: flex; flex-direction: column; gap: 4px; width: 100%; min-height: 44px; padding: 0 0 12px; border: 0; border-radius: 6px; background: rgba(244, 235, 221, .06); color: var(--creme); text-align: left; cursor: pointer; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(244, 235, 221, .12); transition: background-color .2s; }
+.vt-dlg li button:hover { background: rgba(244, 235, 221, .14); }
+.vt-dlg li img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; margin-bottom: 6px; }
+.vt-dlg li span { padding: 0 12px; font-weight: 600; font-size: 16px; }
+.vt-dlg li small { padding: 0 12px; color: var(--apoio); font-size: 13.5px; }
+
+@media (max-width: 900px) {
+  .vt-topo { top: 12px; left: 16px; right: 16px; }
+  .vt-trilha { left: 16px; right: 16px; }
+  .vt-ctrl { left: 16px; right: 16px; }
+  .vt-palco:has(.vt-cel) { margin-bottom: 14vw; }
+  .vt-dlg-topo, .vt-dlg-grupos { padding-left: 16px; padding-right: 16px; }
+  .vt-dlg ul { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .vt-dlg li small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vt-dlg li button { transition: none; }
+}
+
+/* 08/11/2026 · P4 rodada 3: "Voltar ao site" evidente, trilha separada por grupo e raios iguais aos do site (6 px) */
+body.vt .vt-topo .vt-voltar { gap: 8px; padding: 0 18px 0 14px; border-radius: 6px; background: rgba(10, 16, 32, .6); box-shadow: inset 0 0 0 1.5px rgba(244, 235, 221, .8); color: var(--creme); font-weight: 600; transition: background-color .2s, color .2s; }
+body.vt .vt-topo .vt-voltar svg { flex: none; }
+body.vt .vt-topo .vt-voltar:hover { background: var(--creme); color: #101b36; }
+.vt-abrir, .vt-trocas, .vt-trocas button, .vt-ctrl button, .vt-mais { border-radius: 6px; }
+.vt-mais { border-color: rgba(244, 235, 221, .6); background: transparent; }
+.vt-mais:hover { background: rgba(244, 235, 221, .12); }
+
+.vt-trilha { align-items: flex-end; gap: 0; }
+.vt-trilha-grupo { display: flex; flex-direction: column; flex: 0 0 auto; margin-left: 10px; padding-left: 10px; border-left: 1px solid rgba(244, 235, 221, .24); }
+.vt-trilha-grupo:first-child { margin-left: 0; padding-left: 0; border-left: 0; }
+.vt-trilha-rot { min-height: 18px; padding: 0 10px; color: var(--apoio); font: 600 11px/18px 'Geist', system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+.vt-trilha-fila { display: flex; gap: 4px; }
+.vt-js .vt-cena { padding-bottom: 136px; }
+@media (max-width: 900px) {
+  .vt-js .vt-cena { padding-bottom: 160px; }
+  .vt-trilha-grupo { margin-left: 6px; padding-left: 6px; }
+}
+
+/* 09/11/2026 · P4 rodada 4: índice com peso secundário (contorno, sem fundo) e 64 px de respiro
+   entre o conteúdo da cena e a trilha de baixo (48 no celular); espaços internos só 16/32 */
+.vt-ctrl .vt-indice-bt { background: transparent; box-shadow: inset 0 0 0 1px rgba(244, 235, 221, .35); color: var(--apoio); font-weight: 500; }
+.vt-ctrl .vt-indice-bt:hover { background: rgba(244, 235, 221, .1); color: var(--creme); }
+.vt-js .vt-cena { padding-bottom: calc(22px + 62px + 64px); }
+.vt-d { margin-top: 16px; }
+.vt-abrir, .vt-trocas { margin-top: 32px; }
+.vt-nota { margin-top: 16px; }
+.vt-arq .vt-abrir { margin-top: 32px; }
+.vt-arq .vt-mais { margin-top: 16px; }
+.vt-fim-acoes { gap: 16px; margin-top: 32px; }
+.vt-fim-acoes > * { margin: 0; }
+@media (max-width: 900px) {
+  .vt-js .vt-cena { padding-bottom: calc(66px + 62px + 48px); }
+}
+
+/* rodada 5: a trilha rola; o fim esmaece para não parecer cortado */
+.vt-trilha { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); padding-right: 48px; }

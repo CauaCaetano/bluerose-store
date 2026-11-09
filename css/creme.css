@@ -37,11 +37,7 @@ body { background: radial-gradient(1200px 700px at 50% 0%, #fbf7ef, transparent 
 .serif, h1 em, h2 em, .sec-title em,
 .serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span { background: linear-gradient(180deg, #2a51a8 0%, #1d3b85 50%, #0f1d3a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-/* botões */
-.btn-primary { background: linear-gradient(180deg, #24499a, #142c66); border: 1px solid rgba(255, 255, 255, 0.14); color: #fbf7ef; box-shadow: 0 16px 36px -18px rgba(20, 44, 102, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.16); }
-.btn-primary:hover { background: linear-gradient(180deg, #2c55ad, #19357a); }
-.btn-ghost { border: 1px solid rgba(16, 32, 70, 0.32); color: var(--accent-solid); }
-.btn-ghost:hover { border-color: var(--accent-solid); color: var(--marinho); background: rgba(29, 59, 133, 0.05); }
+/* botões: componente único em tinta.css */
 
 /* cartões: creme mais claro, borda fina azul e sombra suave */
 .preco2, .prod-c, .sis, .caminho, .sis-duas > div, .np-grade, .np-faq details, .ini-mais, .ini-oferta, .orc, .conta-caixa, .ini-calc-card {
@@ -89,16 +85,11 @@ select option, .conta-pag select option, .sup select option, .sup-fb-form select
 .lx-hero h1 em .lx-p > span, .p-hero h1 em .lx-p > span, .np-hero h1 em .lx-p > span, .cf-hero h1 em .lx-p > span {
   background: linear-gradient(180deg, #ffffff 0%, #dfe6f4 45%, #9fb2d6 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.lx-hero .btn-ghost, .p-hero .btn-ghost, .np-hero .btn-ghost, .hero .btn-ghost, .cf-hero .btn-ghost, .rodape-site .btn-ghost { border-color: rgba(230, 222, 205, 0.4); color: #f4eee2; }
-.lx-hero .btn-primary, .p-hero .btn-primary, .np-hero .btn-primary, .hero .btn-primary, .cf-hero .btn-primary, .nav .btn-primary { background: linear-gradient(180deg, #f8f2e6, #e9dfcb); color: var(--marinho); border-color: rgba(255, 255, 255, 0.5); box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.6); }
-.lx-hero .btn-primary:hover, .p-hero .btn-primary:hover, .np-hero .btn-primary:hover, .hero .btn-primary:hover, .cf-hero .btn-primary:hover, .nav .btn-primary:hover { background: #fffaf0; }
 .rodape-site a { color: var(--ink-2); } .rodape-site a:hover { color: #fff; }
 /* destaques em itálico dentro das faixas azul-marinho: sempre claros (inclusive palavra por palavra) */
 :is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero, .rodape-site) :is(.serif, h1 em, h2 em, .sec-title em, .serif .lx-p > span, h1 em .lx-p > span, h2 em .lx-p > span) {
   background: linear-gradient(180deg, #ffffff 0%, #dfe6f4 45%, #9fb2d6 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-/* botão principal creme nas faixas: letra azul-marinho (uma regra antiga forçava branco) */
-:is(.nav, .lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .btn-primary { color: var(--marinho) !important; -webkit-text-fill-color: var(--marinho); }
 /* atalhos de ramo dentro da faixa azul-marinho (Como funciona): letra creme legível */
 :is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .cf-atalhos a { color: #e9e2d2; border-color: rgba(230, 222, 205, 0.35); }
 :is(.lx-hero, .p-hero, .np-hero, main > .hero, .cf-hero) .cf-atalhos a:hover { color: #fff; border-color: #e9e2d2; background: rgba(255, 255, 255, 0.06); }

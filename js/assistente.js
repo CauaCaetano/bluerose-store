@@ -2,9 +2,12 @@
  * Assistente virtual da Blue Rose Express (personagem em pixel art no canto da tela).
  *
  * Partes:
- *   PixelCharacter / CharacterAnimator  desenha o personagem num <canvas> a partir de img/assistente.png
- *                                       (4 poses na 1ª linha, as mesmas piscando na 2ª) e anima cabeça,
- *                                       cabelo, tronco (respiração), braço, mão e olhos por partes.
+ *   Chamada (pílula)                    botão minimizado no canto: avatar em pixel art (img/assistente-avatar.webp)
+ *                                       com anel azul, "Assistente Blue Rose · IA" e "Fale com o nosso Assistente"
+ *                                       em texto de verdade (pedido do dono, 08/11; substitui o personagem antigo).
+ *   Animador (máquina de estados)       poses e animações do avatar (img/assistente/*.webp, folhas horizontais de
+ *                                       quadros 128x128 recortados das poses do dono): neutro, abrindo, pensando,
+ *                                       falando, ideia, joinha, surpreso. As folhas só carregam quando o painel abre.
  *   AssistantKnowledge                  dúvidas e respostas prontas de cada parte do site, em
  *                                       js/assistente-dados.json (gerado do próprio site; nada é inventado).
  *   VirtualAssistant / AssistantChat    balão que muda de fala conforme a página e a seção na tela,
@@ -18,198 +21,16 @@
   window.__assistenteBR = true;
 
   var CFG = {
-    sprite: 'img/assistente.png?v=1',
-    dados: 'js/assistente-dados.json?v=17',
-    W: 111, H: 168, MARGEM: 3,           // tamanho de cada pose na folha; margem para o pulinho
+    avatar: 'img/assistente-avatar.webp?v=2',
+    folhas: ['expressoes', 'fala', 'pensando', 'ideia', 'joinha', 'gesto'],   // img/assistente/<nome>.webp
+    versaoFolhas: 2,
+    dados: 'js/assistente-dados.json?v=18',
   };
   var reduzMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   var semMovimento = function () { return !!(reduzMov && reduzMov.matches); };
   var guardar = {
     ler: function (k) { try { return JSON.parse(sessionStorage.getItem(k)); } catch (e) { return null; } },
     gravar: function (k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* aba anônima ou bloqueio */ } },
-  };
-
-  /* ===================================================================== */
-  /* PixelCharacter + CharacterAnimator                                    */
-  /* ===================================================================== */
-  var CABECA = 47, CINTURA = 100, CABELO = 13;      // linhas de corte (pixels da arte)
-  // partes que se movem sozinhas em cada pose: [x, y, largura, altura]
-  var PARTES = { 2: [0, 49, 38, 37], 3: [23, 22, 19, 42] };
-  var FAISCA = [23, 22, 15, 18];                     // traços amarelos da pose 3 ("ideia")
-  // estado da conversa -> pose e movimentos
-  var ESTADOS = {
-    idle:      { pose: 1 },
-    minimized: { pose: 1 },
-    greeting:  { pose: 2, braco: 'aceno' },
-    listening: { pose: 1, cabeca: 'atento' },
-    thinking:  { pose: 3, faisca: false, cabeca: 'pensa' },
-    explaining:{ pose: 2, braco: 'fala', cabeca: 'fala' },
-    idea:      { pose: 3, faisca: true, mao: 'ponto' },
-    confident: { pose: 4, cabeca: 'inclina' },
-    success:   { pose: 2, pulo: true, braco: 'fala' },
-    error:     { pose: 4, cabeca: 'nega' },
-  };
-
-  function CharacterAnimator(canvas, folha) {
-    this.cv = canvas;
-    this.ctx = canvas.getContext('2d');
-    this.ctx.imageSmoothingEnabled = false;
-    this.folha = folha;
-    this.prepararFaisca();
-    this.estado = 'idle';
-    this.pose = 1;
-    this.trans = null;                 // { de, inicio }
-    this.inicioEstado = 0;
-    this.proxPiscada = 0;
-    this.piscaAte = 0;
-    this.proxCabelo = 0;
-    this.cabeloAte = 0;
-    this.ultimaChave = '';
-    this.rodando = false;
-    var self = this;
-    this.passo = function () { self.quadro(performance.now()); };
-    document.addEventListener('visibilitychange', function () { document.hidden ? self.parar() : self.iniciar(); });
-    if (reduzMov && reduzMov.addEventListener) reduzMov.addEventListener('change', function () { self.ultimaChave = ''; self.desenharAgora(); });
-  }
-
-  // separa os traços da pose 3 ("ideia") numa camada própria, para piscarem sem mexer na mão
-  CharacterAnimator.prototype.prepararFaisca = function () {
-    var W = CFG.W, H = CFG.H;
-    var base = document.createElement('canvas'); base.width = this.folha.width; base.height = this.folha.height;
-    var b = base.getContext('2d'); b.drawImage(this.folha, 0, 0);
-    var faisca = document.createElement('canvas'); faisca.width = FAISCA[2]; faisca.height = FAISCA[3];
-    var f = faisca.getContext('2d');
-    for (var linha = 0; linha < 2; linha++) {
-      var x0 = 2 * W + FAISCA[0], y0 = linha * H + FAISCA[1];
-      var dados = b.getImageData(x0, y0, FAISCA[2], FAISCA[3]);
-      var so = f.createImageData(FAISCA[2], FAISCA[3]);
-      for (var i = 0; i < dados.data.length; i += 4) {
-        var px = (i / 4) % FAISCA[2], py = Math.floor(i / 4 / FAISCA[2]);
-        var naFaisca = FAISCA[1] + py < 36 || FAISCA[0] + px < 35;        // traços com contorno; o dedo fica de fora
-        if (dados.data[i + 3] && naFaisca) {
-          so.data.set(dados.data.subarray(i, i + 4), i);
-          dados.data[i + 3] = 0;
-        }
-      }
-      b.putImageData(dados, x0, y0);
-      if (linha === 0) f.putImageData(so, 0, 0);
-    }
-    this.fonte = base;           // folha sem os traços
-    this.faisca = faisca;        // só os traços
-  };
-
-  CharacterAnimator.prototype.definir = function (estado) {
-    if (!ESTADOS[estado]) estado = 'idle';
-    var nova = ESTADOS[estado].pose;
-    if (nova !== this.pose) {
-      this.trans = semMovimento() ? null : { de: this.pose, deEstado: this.estado, inicio: performance.now() };
-      this.pose = nova;
-    }
-    this.estado = estado;
-    this.inicioEstado = performance.now();
-    this.ultimaChave = '';
-    this.cv.setAttribute('data-estado', estado);
-    this.desenharAgora();
-  };
-
-  CharacterAnimator.prototype.iniciar = function () {
-    if (this.rodando || document.hidden) return;
-    this.rodando = true;
-    this.raf = setTimeout(this.passo, 0);
-  };
-  CharacterAnimator.prototype.parar = function () {
-    this.rodando = false;
-    if (this.raf) clearTimeout(this.raf);
-  };
-  CharacterAnimator.prototype.desenharAgora = function () { this.quadro(performance.now(), true); };
-
-  // calcula os movimentos do instante t (em pixels da arte, sempre inteiros)
-  CharacterAnimator.prototype.movimentos = function (t, estado) {
-    var e = ESTADOS[estado], m = { respira: 0, cabeca: [0, 0], cabelo: 0, parte: [0, 0], faisca: e.faisca !== false, pisca: false, corpo: 0 };
-    if (semMovimento()) return m;
-    var dt = t - this.inicioEstado;
-    // respiração: tronco e cabeça sobem 1 pixel em parte do ciclo
-    m.respira = (t % 2600) < 1100 ? 1 : 0;
-    // piscadas em intervalos variados (às vezes duas seguidas)
-    if (t > this.proxPiscada) {
-      this.piscaAte = t + 120;
-      this.proxPiscada = t + (Math.random() < 0.2 ? 260 : 2400 + Math.random() * 3800);
-    }
-    m.pisca = t < this.piscaAte && e.pose !== 3;
-    // cabelo: um balanço curto de vez em quando
-    if (t > this.proxCabelo) { this.cabeloAte = t + 380; this.proxCabelo = t + 2800 + Math.random() * 3500; }
-    m.cabelo = t < this.cabeloAte ? 1 : 0;
-    // cabeça
-    var c = e.cabeca;
-    if (c === 'fala') m.cabeca = [0, Math.floor(dt / 260) % 3 === 1 ? 1 : 0];
-    else if (c === 'atento') m.cabeca = [Math.floor(t / 1800) % 2, 0];
-    else if (c === 'inclina') m.cabeca = [Math.floor(t / 2200) % 3 === 0 ? 1 : 0, 0];
-    else if (c === 'pensa') m.cabeca = [0, Math.floor(t / 700) % 2];
-    else if (c === 'nega') m.cabeca = dt < 720 ? [[-1, 1, -1, 1, 0, 0][Math.floor(dt / 120)] || 0, 0] : [0, 0];
-    else if (estado === 'idle' || estado === 'minimized') m.cabeca = [0, (t % 7000) < 900 ? 1 : 0];   // olhar rápido para baixo
-    // braço da pose 2 e mão da pose 3
-    if (e.braco === 'aceno') m.parte = [Math.floor(dt / 160) % 2 ? -1 : 0, Math.floor(dt / 160) % 2 ? -1 : 0];
-    else if (e.braco === 'fala') m.parte = [0, Math.floor(dt / 420) % 2 ? -1 : 0];
-    if (e.mao === 'ponto') m.parte = [0, Math.floor(dt / 340) % 3 === 0 ? -1 : 0];
-    if (e.faisca) m.faisca = Math.floor(t / 300) % 4 !== 3;
-    if (e.pulo) m.corpo = dt < 640 ? [-2, -1, 0, 0, -1, 0, 0, 0][Math.floor(dt / 80)] || 0 : 0;
-    return m;
-  };
-
-  CharacterAnimator.prototype.quadro = function (t, forcar) {
-    // 12 quadros/s (ritmo da pixel art): acorda só quando vai desenhar, não a cada quadro da tela
-    if (this.rodando && !forcar) this.raf = setTimeout(this.passo, 1000 / 12);
-    var passoMs = 1000 / 12;                                   // ritmo de pixel art
-    if (!forcar && this.ultimoT && t - this.ultimoT < passoMs - 4) return;
-    this.ultimoT = t;
-    var m = this.movimentos(t, this.estado);
-    // troca de pose sem transparência (pixel art não mistura imagens):
-    // antecipação na pose antiga (desce 1 px), troca já abaixada e acomodação (sobe 1 px)
-    var tr = this.trans, poseVez = this.pose, mudanca = 0, mov = m;
-    if (tr) {
-      var d = t - tr.inicio;
-      if (d < 100) { poseVez = tr.de; mudanca = 1; mov = this.movimentos(t, tr.deEstado || 'idle'); }
-      else if (d < 200) mudanca = 1;
-      else if (d < 280) mudanca = -1;
-      else this.trans = tr = null;
-    }
-    var chave = JSON.stringify([poseVez, this.estado, mov, mudanca]);
-    if (chave === this.ultimaChave) return;
-    this.ultimaChave = chave;
-    this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
-    this.desenharPose(poseVez, mov, mudanca);
-  };
-
-  // desenha uma pose por partes: pernas, tronco, cabeça (com cabelo) e a parte móvel da pose
-  CharacterAnimator.prototype.desenharPose = function (pose, m, extraY) {
-    var ctx = this.ctx, W = CFG.W, H = CFG.H, f = this.fonte;
-    var sx = (pose - 1) * W, oy = CFG.MARGEM + (m.corpo || 0) + (extraY || 0);
-    var linhaCab = m.pisca ? H : 0;
-    var parte = PARTES[pose];
-    var tronco = oy - m.respira;
-    var blit = function (x, y, w, h, dx, dy, linha) { if (w > 0 && h > 0) ctx.drawImage(f, sx + x, (linha || 0) + y, w, h, dx + x, dy + y, w, h); };
-
-    ctx.save();
-    if (parte) {                         // a parte móvel não entra nas camadas de base
-      ctx.beginPath();
-      ctx.rect(0, 0, this.cv.width, this.cv.height);
-      ctx.rect(parte[0], parte[1] + tronco, parte[2], parte[3]);
-      ctx.clip('evenodd');
-    }
-    blit(0, CINTURA, W, H - CINTURA, 0, oy);                                   // pernas (paradas)
-    blit(0, CABECA, W, CINTURA - CABECA, 0, tronco);                           // tronco
-    if (m.respira) blit(0, CINTURA - 1, W, 1, 0, oy);                          // tapa a fresta da respiração
-    var cx = m.cabeca[0], cy = tronco + m.cabeca[1];
-    blit(0, CABELO, W, CABECA - CABELO, cx, cy, linhaCab);                     // rosto
-    blit(0, 0, W, CABELO, cx + m.cabelo, cy, linhaCab);                        // pontas do cabelo
-    ctx.restore();
-
-    if (parte) {
-      var px = parte[0] + m.parte[0], py = parte[1] + tronco + m.parte[1];
-      if (m.parte[0] || m.parte[1]) ctx.drawImage(f, sx + parte[0], parte[1], parte[2], parte[3], parte[0], parte[1] + tronco, parte[2], parte[3]);
-      ctx.drawImage(f, sx + parte[0], parte[1], parte[2], parte[3], px, py, parte[2], parte[3]);
-      if (pose === 3 && m.faisca) ctx.drawImage(this.faisca, FAISCA[0], FAISCA[1] + tronco);
-    }
   };
 
   /* ===================================================================== */
@@ -285,14 +106,20 @@
   VirtualAssistant.prototype.montar = function () {
     var self = this;
     var raiz = this.raiz = el('div', { classe: 'va', 'data-aberto': 'false' });
-    // personagem
-    this.cv = el('canvas', { classe: 'va-cv', width: CFG.W, height: CFG.H + CFG.MARGEM, 'aria-hidden': 'true' });
-    this.botao = el('button', { classe: 'va-alvo', type: 'button', 'aria-label': 'Abrir o assistente virtual da Blue Rose Express', 'aria-expanded': 'false', 'aria-controls': 'va-painel' });
+    // chamada minimizada: pílula com avatar, nome e etiqueta IA (texto de verdade, não imagem)
+    var avatar = function (classe) {
+      return el('span', { classe: classe, 'aria-hidden': 'true' }, [el('img', { src: CFG.avatar, alt: '', width: '256', height: '256', decoding: 'async' }), el('span', { classe: 'va-sp' })]);
+    };
+    this.botao = el('button', { classe: 'va-chamada', type: 'button', 'aria-label': 'Abrir o Assistente Blue Rose (IA)', 'aria-expanded': 'false', 'aria-controls': 'va-painel' }, [
+      avatar('va-av'),
+      el('span', { classe: 'va-chamada-txt', 'aria-hidden': 'true' }, [
+        el('b', null, [document.createTextNode('Assistente Blue Rose '), el('span', { classe: 'va-ia', texto: 'IA' })]),
+        el('small', { texto: 'Fale com o nosso Assistente' }),
+      ]),
+    ]);
     this.status = el('span', { classe: 'va-sr', role: 'status', 'aria-live': 'polite' });
-    var ponto = el('span', { classe: 'va-ponto', 'aria-hidden': 'true' });
     this.balaoTxt = el('button', { classe: 'va-balao-txt', type: 'button', texto: 'Olá! Precisa de ajuda?' });
     this.balao = el('div', { classe: 'va-balao', hidden: '' }, [this.balaoTxt, el('button', { classe: 'va-balao-x', type: 'button', 'aria-label': 'Fechar o aviso do assistente', texto: '×' })]);
-    var boneco = el('div', { classe: 'va-boneco' }, [this.cv, ponto, this.botao]);
     // painel
     this.lista = el('div', { classe: 'va-msgs', role: 'log', 'aria-live': 'polite', 'aria-relevant': 'additions' });
     this.onde = el('p', { classe: 'va-onde' });
@@ -302,7 +129,8 @@
       el('button', { type: 'button', 'data-va': 'equipe', texto: 'Falar com a equipe' }),
     ]);
     var cab = el('div', { classe: 'va-cab' }, [
-      el('div', null, [el('h2', { id: 'va-titulo', texto: 'Como posso ajudar?' }), this.onde]),
+      avatar('va-av va-av-cab'),
+      el('div', { classe: 'va-cab-txt' }, [el('h2', { id: 'va-titulo', texto: 'Como posso ajudar?' }), this.onde]),
       el('div', { classe: 'va-acoes' }, [
         el('button', { classe: 'va-btn-cab', type: 'button', 'data-va': 'limpar', title: 'Começar de novo', 'aria-label': 'Apagar a conversa e começar de novo', texto: '↺' }),
         el('button', { classe: 'va-btn-cab', type: 'button', 'data-va': 'minimizar', title: 'Minimizar', 'aria-label': 'Minimizar o painel', texto: '–' }),
@@ -311,13 +139,13 @@
     ]);
     var rodape = el('div', { classe: 'va-rodape' }, [this.rapidas, this.mais]);
     this.painel = el('div', { classe: 'va-painel', id: 'va-painel', role: 'dialog', 'aria-modal': 'false', 'aria-labelledby': 'va-titulo', hidden: '' }, [cab, this.lista, rodape]);
-    raiz.appendChild(this.painel); raiz.appendChild(this.balao); raiz.appendChild(boneco); raiz.appendChild(this.status);
+    raiz.appendChild(this.painel); raiz.appendChild(this.balao); raiz.appendChild(this.botao); raiz.appendChild(this.status);
     document.body.appendChild(raiz);
+    // reserva o espaço da pílula no fim da página (tinta.css: html.va-ativo): rolando até o fundo, ela não cobre nada
+    document.documentElement.classList.add('va-ativo');
 
     // eventos
     this.botao.addEventListener('click', function () { self.alternar(); });
-    this.botao.addEventListener('pointerenter', function () { self.reagir(); });
-    this.botao.addEventListener('focus', function () { self.reagir(); });
     this.balaoTxt.addEventListener('click', function () { self.abrir(); });
     this.balao.querySelector('.va-balao-x').addEventListener('click', function () {
       self.esconderBalao(); self.calado = true; guardar.gravar('br-assist-calado', true);
@@ -339,24 +167,15 @@
       self.perguntar(c.perguntas[+b.getAttribute('data-i')]);
     });
 
+    this.anim = new Animador(raiz);
+    // usuário digitando num campo do painel (pergunta escrita): pose confiante, parada
+    this.painel.addEventListener('input', function () { if (self.anim.atual === 'neutro') self.anim.ir('confiante'); });
+    // para conferir os estados (prints e testes): raiz.dispatchEvent(new CustomEvent('va-estado', { detail: 'joinha' }))
+    raiz.addEventListener('va-estado', function (e) { self.anim.carregar().then(function () { self.anim.ir(String(e.detail)); }); });
+    this.gestoRaro();
     this.ajustarAoAvisoDeCookies();
-    this.carregarSprite();
+    this.naoCobrir();
     this.carregarDados().then(function () { if (self.k) self.acompanharPagina(); });
-  };
-
-  VirtualAssistant.prototype.carregarSprite = function () {
-    var self = this, img = new Image();
-    img.decoding = 'async';
-    img.onload = function () {
-      self.anim = new CharacterAnimator(self.cv, img);
-      self.anim.definir('idle');
-      self.anim.iniciar();
-      self.raiz.classList.add('va-pronto');
-      // para depurar e gravar prévias: cv.dispatchEvent(new CustomEvent('va-estado', { detail: 'idea' }))
-      self.cv.addEventListener('va-estado', function (e) { self.estado(String(e.detail)); });
-    };
-    img.onerror = function () { self.raiz.classList.add('va-sem-sprite'); };
-    img.src = CFG.sprite;
   };
 
   VirtualAssistant.prototype.carregarDados = function () {
@@ -396,50 +215,99 @@
     if (!this.painel.hidden) { this.mostrarRapidas(); return; }
     // puxa assunto uma vez por parte do site, se o visitante não pediu silêncio
     if (this.calado || this.falados[id]) return;
-    // no celular o balão cobre o conteúdo: puxa assunto uma vez só
-    if (innerWidth < 700 && Object.keys(this.falados).length) return;
+    // minimizado por padrão (P1, 08/11): no celular e no tablet o balão não abre sozinho (cobriria o conteúdo);
+    // no computador fala uma vez por visita e só se não estiver sobre um controle
+    if (innerWidth < 1024 || Object.keys(this.falados).length) return;
     var self = this, atraso = inicial ? 2500 : 300;
     clearTimeout(this.falaT);
     this.falaT = setTimeout(function () {
       if (!self.painel.hidden || self.contexto !== id) return;
       self.falados[id] = true; guardar.gravar('br-assist-falados', self.falados);
+      if (self.raiz.classList.contains('va-recua')) return;
       self.mostrarBalao(id === 'inicio' || inicial ? 'greeting' : 'explaining');
+      self.desviar();
     }, atraso);
   };
 
-  // a pose só muda enquanto ele está falando (balão ou resposta); depois volta a ficar parado
-  var tempoDeFala = function (txt) {
-    var palavras = String(txt || '').split(/\s+/).length;
-    return Math.min(9000, 1600 + palavras * 260);
-  };
-  VirtualAssistant.prototype.estado = function (e, texto, fala) {
-    if (texto) this.status.textContent = texto;
-    var self = this, parado = function () { return self.painel.hidden ? 'idle' : 'listening'; };
-    (this.falaTs || []).forEach(clearTimeout);
-    this.falaTs = [];
-    if (!fala) { if (this.anim) this.anim.definir(e === 'minimized' ? 'idle' : e); return; }
-    // durante a fala ele alterna os gestos: mão aberta apresentando e dedo para cima no ponto principal
-    var total = tempoDeFala(fala), seq = SEQUENCIAS[e] || [e];
-    if (total < 2600) seq = seq.slice(0, 1);
-    var parte = total / seq.length;
-    seq.forEach(function (est, i) {
-      self.falaTs.push(setTimeout(function () { if (self.anim) self.anim.definir(est); }, Math.round(i * parte)));
+  /* ---------- Animador: máquina de estados do avatar ----------
+     Estados (data-anim na raiz .va; o CSS escolhe a folha e o ritmo):
+       neutro      parado (pose 1 das expressões)          abrindo   animado → neutro (~400 ms)
+       pensando    loop de 4 quadros a 5 q/s               falando   loop de 6 quadros a 10 q/s
+       ideia       4 quadros uma vez → neutro              joinha    4 quadros uma vez → neutro
+       gesto       dedo levantado, 3 quadros uma vez (fechado, no máximo a cada 40–60 s)
+       confiante / surpreso   poses paradas
+     Regras: só troca no fim do ciclo em curso (nada de pular no meio); com "reduzir movimento" só poses paradas. */
+  var CICLO = { pensando: 800, falando: 600, ideia: 720, joinha: 800, gesto: 600, abrindo: 400 };
+  var UMA_VEZ = { ideia: 1, joinha: 1, gesto: 1, abrindo: 1 };
+  function Animador(raiz) { this.raiz = raiz; this.atual = 'neutro'; this.inicio = 0; this.fila = []; this.t = 0; this.pronto = false; }
+  // carrega as folhas uma vez (só quando o painel abre); até lá a foto do avatar fica no lugar
+  Animador.prototype.carregar = function () {
+    if (this.carregando) return this.carregando;
+    var raiz = this.raiz, self = this;
+    this.carregando = Promise.all(CFG.folhas.map(function (n) {
+      return new Promise(function (ok) { var i = new Image(); i.onload = i.onerror = function () { ok(i.naturalWidth > 0); }; i.src = 'img/assistente/' + n + '.webp?v=' + CFG.versaoFolhas; });
+    })).then(function (r) {
+      if (r.indexOf(false) !== -1) return;          // faltou alguma folha: fica a foto parada
+      self.pronto = true; raiz.classList.add('va-anima'); self.mostrar(self.atual, true);
     });
-    this.falaTs.push(setTimeout(function () { if (self.anim) self.anim.definir(parado()); }, total));
+    return this.carregando;
   };
-  var SEQUENCIAS = { explaining: ['explaining', 'idea'], idea: ['idea', 'explaining', 'idea'], confident: ['confident', 'idea'] };
+  Animador.prototype.mostrar = function (e, forcar) {
+    clearTimeout(this.t);
+    if (!forcar && e === this.atual && !UMA_VEZ[e]) return;
+    this.atual = e; this.inicio = performance.now();
+    // reinicia a animação CSS do zero (mesmo estado repetido)
+    this.raiz.removeAttribute('data-anim'); void this.raiz.offsetWidth;
+    this.raiz.setAttribute('data-anim', e);
+    var self = this;
+    if (UMA_VEZ[e]) this.t = setTimeout(function () { self.mostrar(self.fila.shift() || 'neutro'); }, semMovimento() ? 700 : CICLO[e]);
+  };
+  // pede um estado: espera o ciclo atual terminar (loop) antes de trocar
+  Animador.prototype.ir = function (e, depois) {
+    this.fila = depois ? [].concat(depois) : [];
+    var c = CICLO[this.atual], self = this;
+    if (UMA_VEZ[this.atual]) { this.fila.unshift(e); return; }       // a animação de uma vez chama a próxima ao acabar
+    if (!c || semMovimento() || this.atual === e) return this.mostrar(e);
+    var falta = c - ((performance.now() - this.inicio) % c);
+    clearTimeout(this.t);
+    this.t = setTimeout(function () { self.mostrar(e); }, falta > c - 40 ? 0 : falta);
+  };
+  // fala por um tempo e termina no fim de um ciclo; depois segue para o próximo estado
+  Animador.prototype.falar = function (ms, depois) {
+    var self = this;
+    this.ir('falando');
+    clearTimeout(this.tFala);
+    var ciclos = Math.max(2, Math.round(ms / CICLO.falando));
+    this.tFala = setTimeout(function () { self.ir(depois || 'neutro'); }, ciclos * CICLO.falando + 60);
+  };
 
-  VirtualAssistant.prototype.reagir = function () { /* passar o mouse só levanta o personagem (CSS); não troca a pose */ };
+  // estado da conversa: anunciado para leitor de tela e refletido no avatar
+  VirtualAssistant.prototype.estado = function (e, texto) {
+    if (texto) this.status.textContent = texto;
+    this.raiz.setAttribute('data-estado', e || 'idle');
+  };
+
 
   VirtualAssistant.prototype.mostrarBalao = function (estado) {
     clearTimeout(this.balaoT);
     this.balao.hidden = false;
     this.balao.classList.remove('va-novo'); void this.balao.offsetWidth; this.balao.classList.add('va-novo');
     var self = this;
-    this.balaoT = setTimeout(function () { self.esconderBalao(); }, innerWidth < 700 ? 5000 : 9000);
+    this.balaoT = setTimeout(function () { self.esconderBalao(); }, 6000);
     this.estado(estado || 'greeting', this.balaoTxt.textContent, this.balaoTxt.textContent);
   };
   VirtualAssistant.prototype.esconderBalao = function () { clearTimeout(this.balaoT); this.balao.hidden = true; };
+
+  VirtualAssistant.prototype.gestoRaro = function () {
+    var self = this;
+    var proximo = function () {
+      setTimeout(function () {
+        if (self.anim.pronto && self.painel.hidden && !document.hidden && !semMovimento() && !self.raiz.classList.contains('va-recua')) self.anim.ir('gesto');
+        proximo();
+      }, 40000 + Math.random() * 20000);
+    };
+    proximo();
+  };
 
   VirtualAssistant.prototype.alternar = function () { this.painel.hidden ? this.abrir() : this.fechar(); };
 
@@ -449,7 +317,8 @@
     this.painel.hidden = false;
     this.raiz.setAttribute('data-aberto', 'true');
     this.botao.setAttribute('aria-expanded', 'true');
-    this.botao.setAttribute('aria-label', 'Fechar o assistente virtual');
+    this.botao.setAttribute('aria-label', 'Fechar o Assistente Blue Rose');
+    this.anim.carregar().then(function () { self.anim.ir('abrindo'); });
     this.carregarDados().then(function () {
       if (!self.lista.childElementCount) self.boasVindas();
       self.mostrarRapidas();
@@ -463,8 +332,9 @@
     this.painel.hidden = true;
     this.raiz.setAttribute('data-aberto', 'false');
     this.botao.setAttribute('aria-expanded', 'false');
-    this.botao.setAttribute('aria-label', 'Abrir o assistente virtual da Blue Rose Express');
+    this.botao.setAttribute('aria-label', 'Abrir o Assistente Blue Rose (IA)');
     this.estado('idle', 'Assistente minimizado.');
+    clearTimeout(this.anim.tFala); this.anim.ir('neutro');
     this.botao.focus({ preventScroll: true });
   };
 
@@ -484,6 +354,7 @@
     }
     if (!this.k) {
       this.desenharMsg({ de: 'bot', texto: ['Não consegui carregar as dúvidas agora. Você pode falar direto com a equipe pelo formulário de contato.'], links: [{ rotulo: 'Formulário de contato', href: 'index.html#contato' }] }, true);
+      var anim = this.anim; anim.carregar().then(function () { anim.ir('surpreso'); });
       return;
     }
     this.desenharMsg({ de: 'bot', texto: ['Olá! Sou o assistente virtual da Blue Rose Express. Posso ajudar você a navegar pelo site, encontrar nossos serviços e esclarecer suas dúvidas. Escolha uma dúvida abaixo:'] }, true);
@@ -522,6 +393,7 @@
   VirtualAssistant.prototype.perguntar = function (q) {
     if (!q || this.ocupado) return;
     var self = this, resp = this.k.resposta(q);
+    if (/obrigad|valeu|agrade[cç]|thank/i.test(q.p)) resp.estado = 'agradecido';
     this.desenharMsg({ de: 'eu', texto: [q.p] });
     this.responder(resp, resp.ramos ? this.ramos() : null);
   };
@@ -544,13 +416,17 @@
     var self = this;
     this.ocupado = true;
     this.digitando(true);
+    this.anim.ir('pensando');
     setTimeout(function () {
       self.digitando(false);
       self.desenharMsg({ de: 'bot', texto: r.texto, lista: r.lista, links: r.links });
       self.mostrarRapidas(botoes || null);
-      self.estado(r.estado || 'explaining', 'Resposta pronta.', (r.texto || []).join(' ') + ' ' + (r.lista || []).join(' '));
+      self.estado(r.estado || 'explaining', 'Resposta pronta.');
+      var txt = (r.texto || []).join(' ') + ' ' + (r.lista || []).join(' ');
+      var depois = r.estado === 'agradecido' || r.estado === 'success' ? 'joinha' : r.estado === 'error' ? 'surpreso' : (r.links && r.links.length ? 'ideia' : 'neutro');
+      self.anim.falar(Math.min(3600, 700 + txt.split(/\s+/).length * 70), depois);
       self.ocupado = false;
-    }, semMovimento() ? 0 : 650);
+    }, semMovimento() ? 0 : CICLO.pensando);
   };
 
   VirtualAssistant.prototype.desenharMsg = function (m, semGuardar) {
@@ -623,6 +499,71 @@
     window.addEventListener('resize', medir);
     setTimeout(medir, 1500);
     document.addEventListener('click', function () { setTimeout(medir, 350); });
+  };
+
+  // não cobrir nada (P1, 08/11): se o personagem (ou o balão) estiver em cima de um botão, link, campo, controle de
+  // vídeo ou formulário, ele se afasta para a borda (.va-recua). Confere ao rolar, ao mudar o tamanho e quando a página muda.
+  var INTERATIVO = 'a[href], button, input, select, textarea, label, summary, video, iframe, [role="button"], [role="tab"], [role="slider"], [tabindex]:not([tabindex="-1"]), .btn, form';
+  VirtualAssistant.prototype.naoCobrir = function () {
+    var self = this, pedido = 0;
+    var agendar = function () { if (!pedido) pedido = requestAnimationFrame(function () { pedido = 0; self.desviar(); }); };
+    window.addEventListener('scroll', agendar, { passive: true });
+    window.addEventListener('resize', agendar);
+    if (window.MutationObserver) new MutationObserver(agendar).observe(document.body, { childList: true });
+    // ao passar o mouse, tocar ou focar a parte visível ele volta até a próxima rolagem
+    this.raiz.addEventListener('pointerenter', function () { self.trazido = true; });
+    this.raiz.addEventListener('focusin', function () { self.trazido = true; });
+    setTimeout(agendar, 400);
+    setInterval(agendar, 2000);     // conteúdo que aparece com animação ou carrega depois
+  };
+  var temTexto = function (e) { for (var n = e.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && n.nodeValue.trim()) return true; return false; };
+  // rodada 4: o balão (e a chamada) também não podem ficar sobre mídia: foto, vídeo, ilustração ou maquete
+  var MIDIA = 'img, picture, video, canvas, iframe, svg:not(.ico), figure, [role="img"]';
+  var ehMidia = function (e) { return !!(e.closest && e.closest(MIDIA)); };
+  // qualquerTexto: para o balão, que é maior, também não pode ficar por cima de texto
+  VirtualAssistant.prototype.cobre = function (r, qualquerTexto) {
+    if (!r || !r.width || !r.height) return false;
+    // grade de pontos que vai até perto das bordas: pega também o botão que só encosta num canto (integração 08/11)
+    var xs = [r.left + 2, r.left + r.width * .25, r.left + r.width * .5, r.left + r.width * .75, r.right - 2],
+        ys = [r.top + 2, r.top + r.height * .25, r.top + r.height * .5, r.top + r.height * .75, r.bottom - 2];
+    var raiz = this.raiz;
+    // o personagem fica invisível ao toque por um instante para ver o que há embaixo dele
+    raiz.style.pointerEvents = 'none';
+    var alvo = null;
+    for (var i = 0; i < xs.length && !alvo; i++) for (var j = 0; j < ys.length && !alvo; j++) {
+      var x = Math.min(Math.max(xs[i], 0), innerWidth - 1), y = Math.min(Math.max(ys[j], 0), innerHeight - 1);
+      var pilha = document.elementsFromPoint ? document.elementsFromPoint(x, y) : [];
+      for (var k = 0; k < pilha.length; k++) {
+        var e = pilha[k];
+        if (raiz.contains(e)) continue;
+        if (e === document.body || e === document.documentElement) break;
+        if ((e.closest && e.closest(INTERATIVO)) || (qualquerTexto && (temTexto(e) || ehMidia(e)))) { alvo = e; break; }
+        var cs = getComputedStyle(e);
+        if (cs.backgroundColor !== 'rgba(0, 0, 0, 0)' || cs.backgroundImage !== 'none') break;   // fundo opaco: o que vem embaixo não aparece
+      }
+    }
+    raiz.style.pointerEvents = '';
+    return !!alvo;
+  };
+  VirtualAssistant.prototype.desviar = function () {
+    if (!this.painel.hidden) { this.raiz.classList.remove('va-recua'); return; }
+    if (this.trazido && this.raiz.matches(':hover, :focus-within')) return;
+    this.trazido = false;
+    // mede onde a chamada fica no lugar normal (desconta o deslocamento de quando está recuada: fica só uma borda de 14 px na margem)
+    var r = this.botao.getBoundingClientRect(), tela = innerWidth + 'x' + innerHeight;
+    if (this.raiz.classList.contains('va-recua')) {
+      // rodada 4: usa a última medida no lugar normal (no celular a aba recuada muda de tamanho); sem ela, desconta o deslocamento
+      if (this.rNormal && this.rNormalTela === tela) r = this.rNormal;
+      else { var dx = r.width + 2; r = { left: r.left - dx, right: r.right - dx, top: r.top, bottom: r.bottom, width: r.width, height: r.height }; }
+    } else if (r.width && getComputedStyle(this.raiz).transform === 'none') {
+      this.rNormal = { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height }; this.rNormalTela = tela;
+    }
+    // em qualquer largura (integração da rodada 4) não pode ficar sobre texto: no celular cobria o fim das linhas dos passos e no tablet/computador o fim de listas
+    var celular = true;
+    var cobre = this.cobre(r, celular);
+    this.raiz.classList.toggle('va-recua', cobre);
+    if (!this.balao.hidden && this.cobre(this.balao.getBoundingClientRect(), true)) this.esconderBalao();
+    if (cobre && !this.balao.hidden) this.esconderBalao();   // recuada, a fala também some
   };
 
   function iniciar() {

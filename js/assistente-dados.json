@@ -6,7 +6,7 @@
   "servicos": [
    [
     "Sistemas prontos",
-    "8 sistemas da Veltria, com 7 dias grátis.",
+    "Seis sistemas à venda, com demonstração aberta e 7 dias grátis nos da Veltria.",
     "sistemas.html"
    ],
    [
@@ -40,10 +40,9 @@
   "resposta_contato": "Respondemos em até 1 dia útil."
  },
  "planos": {
-  "nexo_basico": "Sistema pronto Básico: a partir de R$ 79/mês, para você e mais 5 pessoas da equipe, com 7 dias grátis, hospedagem, atualizações e cópias de segurança, assistente com IA grátis e suporte por chamado. Sem fidelidade.",
-  "nexo_pro": "Sistema pronto Pro: R$ 60 a mais por mês (a partir de R$ 139/mês), com equipe sem limite, avisos e mensagens prontas no WhatsApp (cobranças, confirmações e clientes sumidos), histórico da equipe e até 10 empresas ou filiais.",
+  "assinatura": "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
   "anual": "Pagando por ano, os sistemas prontos saem 20% mais baratos que 12 mensalidades.",
-  "compra": "Os sistemas prontos são só por assinatura, no Básico ou no Pro: sem entrada e sem fidelidade.",
+  "compra": "Os sistemas prontos são só por assinatura, num plano único (Assinatura): sem entrada e sem fidelidade.",
   "site_presenca": "Site Presença: R$ 690 (pronto em 2 dias úteis, site de 1 página com a sua marca, WhatsApp, SEO local e domínio .com.br no 1º ano).",
   "site_completo": "Site + automação: R$ 1.490 (pronto em 5 dias úteis, até 6 páginas, agenda, calculadora de orçamento e Perfil da Empresa no Google).",
   "automacao": "Automação de WhatsApp: R$ 890 (pronta em 3 dias úteis). As taxas da API oficial do WhatsApp são pagas direto à Meta.",
@@ -67,8 +66,8 @@
    "resposta": "Sim. Os oito sistemas da Veltria abrem no navegador com dados de exemplo, sem cadastro. Depois, você pode testar 7 dias grátis com os seus dados e a sua equipe."
   },
   {
-   "pergunta": "Qual a diferença entre o Básico e o Pro?",
-   "resposta": "Os sistemas são por assinatura, sem entrada e sem fidelidade. O Básico vale para você e mais 5 pessoas da equipe. O Pro custa R$ 60 a mais por mês e libera a equipe sem limite, o histórico de quem fez o quê e até 10 empresas. Indicando 3 pessoas que assinem, você ganha 1 mês do Pro pagando o Básico ( veja como )."
+   "pergunta": "Tem mais de um plano?",
+   "resposta": "Não. Os sistemas são por assinatura num plano único, a Assinatura, sem entrada e sem fidelidade. Ele inclui equipe sem limite, o histórico de quem fez o quê e até 10 empresas. Pagando por ano, sai 20% mais barato que 12 mensalidades."
   },
   {
    "pergunta": "Vocês levam os dados das minhas planilhas?",
@@ -108,7 +107,7 @@
   },
   {
    "pergunta": "Meus dados ficam guardados?",
-   "resposta": "Sim, na nuvem, com cópias de segurança. E você pode ligar o backup semanal: toda semana uma cópia completa chega no seu e-mail."
+   "resposta": "Sim, na nuvem, com cópias de segurança. E você exporta os seus dados para planilha quando quiser."
   },
   {
    "pergunta": "Como mando uma sugestão?",
@@ -122,8 +121,8 @@
    "pagina": "veltria-obras.html",
    "ramo": "Obras e reformas",
    "para": "Para empreiteiros e empresas de reforma.",
-   "mensal": "R$ 119",
-   "extra": "plano único com tudo incluso, ou R$ 1.142 por ano",
+   "mensal": "R$ 69",
+   "extra": "sem entrada, ou R$ 662 por ano",
    "demo": "demos/sistemas/obras-essencial/?celular=1",
    "teste": "app/obrasessencial/",
    "linha": "Veltria",
@@ -146,7 +145,7 @@
    "ramo": "Agenda e atendimento",
    "para": "Para salões, estética e barbearias, no app de celular Essencial.",
    "mensal": "a partir de R$ 49",
-   "extra": "sem entrada",
+   "extra": "sem entrada, ou R$ 470 por ano",
    "demo": "demos/sistemas/agenda-essencial/?celular=1",
    "teste": "app/agendaessencial/",
    "linha": "Veltria",
@@ -167,10 +166,10 @@
    "id": "financeiro",
    "nome": "Veltria Financeiro",
    "pagina": "veltria-financeiro.html",
-   "ramo": "Caixa e ordens de serviço",
-   "para": "Para autônomos, prestadores de serviço e grupos de empresas, no app de celular Essencial.",
+   "ramo": "Caixa e cobranças",
+   "para": "Para autônomo, MEI e prestador de serviço, no app de celular Essencial.",
    "mensal": "a partir de R$ 59",
-   "extra": "sem entrada",
+   "extra": "sem entrada, ou R$ 566 por ano",
    "demo": "demos/sistemas/financeiro-essencial/?celular=1",
    "teste": "app/financeiroessencial/",
    "linha": "Veltria",
@@ -187,38 +186,13 @@
    "negocio": "Assistência técnica e serviços"
   },
   {
-   "id": "gestao",
-   "nome": "Veltria Gestão",
-   "pagina": "veltria-gestao.html",
-   "ramo": "Estoque, compras e vendas",
-   "para": "Para distribuidoras, lojas e mercados, no app de celular Essencial (R$ 59 por mês, hoje em manutenção).",
-   "mensal": "a partir de R$ 59",
-   "extra": "sem entrada",
-   "demo": "demos/sistemas/gestao-essencial/?celular=1",
-   "teste": "app/gestaoessencial/",
-   "linha": "Veltria",
-   "palavras": [
-    "estoque",
-    "erp",
-    "distribuidora",
-    "loja",
-    "mercado",
-    "nota fiscal",
-    "nfe",
-    "compras",
-    "bling",
-    "varejo"
-   ],
-   "negocio": "Loja, mercado e distribuidora"
-  },
-  {
    "id": "juridico",
    "nome": "Veltria Jurídico",
    "pagina": "veltria-juridico.html",
    "ramo": "Processos e prazos",
-   "para": "Para escritórios de advocacia.",
-   "mensal": "R$ 149",
-   "extra": "sem entrada",
+   "para": "Para o advogado autônomo, no app de celular Essencial.",
+   "mensal": "R$ 89",
+   "extra": "sem entrada, ou R$ 854 por ano",
    "demo": "demos/sistemas/juridico-essencial/?celular=1",
    "teste": "app/juridicoessencial/",
    "linha": "Veltria",
@@ -293,7 +267,7 @@
      "p": "Qual a diferença entre a Veltria e os outros sistemas?",
      "e": "explaining",
      "r": [
-      "A Veltria são 8 sistemas com a mesma base, um para cada ramo: CRM, agenda, financeiro, estoque, jurídico, oficina, farmácia e obras.",
+      "A Veltria tem quatro sistemas prontos, um para cada ramo: Agenda, Financeiro, Jurídico e Obras, todos no app de celular Essencial.",
       "Também temos o Blue Rose Ofixl, um app para celular de serviços técnicos, que chega em breve ao Google Play."
      ]
     },
@@ -489,9 +463,9 @@
    "fala": "Nos preços você vê o valor e o prazo de cada plano. Quer que eu explique?",
    "perguntas": [
     {
-     "p": "Qual a diferença entre o Básico e o Pro?",
+     "p": "Tem mais de um plano?",
      "r": [
-      "Os sistemas são por assinatura, sem entrada e sem fidelidade. O Básico vale para você e mais 5 pessoas da equipe. O Pro custa R$ 60 a mais por mês e libera a equipe sem limite, o histórico de quem fez o quê e até 10 empresas. Indicando 3 pessoas que assinem, você ganha 1 mês do Pro pagando o Básico ( veja como )."
+      "Não. Os sistemas são por assinatura num plano único, a Assinatura, sem entrada e sem fidelidade. Ele inclui equipe sem limite, o histórico de quem fez o quê e até 10 empresas. Pagando por ano, sai 20% mais barato que 12 mensalidades."
      ],
      "e": "explaining",
      "k": []
@@ -500,7 +474,7 @@
      "p": "Quanto custam os sistemas prontos?",
      "e": "explaining",
      "r": [
-      "De R$ 59 a R$ 199 por mês, com 7 dias grátis e sem fidelidade. Os sistemas prontos são só por assinatura, no Básico ou no Pro: sem entrada e sem fidelidade."
+      "De R$ 49 a R$ 89 por mês, conforme o sistema, com 7 dias grátis nos da Veltria e sem fidelidade. Os sistemas prontos são só por assinatura, num plano único: sem entrada."
      ],
      "ramos": true
     },
@@ -527,12 +501,12 @@
      ]
     },
     {
-     "p": "Qual a diferença entre o Básico e o Pro?",
+     "p": "Tem mais de um plano?",
      "e": "explaining",
      "r": [],
      "l": [
-      "Sistema pronto Básico: a partir de R$ 79/mês, para você e mais 5 pessoas da equipe, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem fidelidade.",
-      "Sistema pronto Pro: R$ 60 a mais por mês (a partir de R$ 139/mês), com equipe sem limite, avisos e mensagens prontas no WhatsApp (cobranças, confirmações e clientes sumidos), histórico da equipe e até 10 empresas ou filiais."
+      "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
+      "Preço por sistema: Agenda R$ 49/mês, Financeiro R$ 59/mês, Peplo e Annona R$ 59/mês, Obras R$ 69/mês e Jurídico R$ 89/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
@@ -545,7 +519,7 @@
      "p": "Como funciona o Indique e ganhe?",
      "e": "idea",
      "r": [
-      "Cada conta tem um link de indicação único, em Minha conta e no Painel do dono. A cada 3 pessoas que assinarem pelo seu link, você ganha 1 mês de Pro pagando o Básico: 6 pessoas dão 2 meses, 9 dão 3 meses, e assim por diante.",
+      "Cada conta tem um link de indicação único, em Minha conta e no Painel do dono. A cada 3 pessoas que assinarem pelo seu link, você ganha 1 mês grátis: 6 pessoas dão 2 meses, 9 dão 3 meses, e assim por diante. O valor da próxima mensalidade paga volta para o seu cartão.",
       "Conta quando a pessoa cria uma conta nova pelo seu link e paga a primeira mensalidade, depois do teste grátis."
      ],
      "k": [
@@ -609,9 +583,9 @@
      "k": []
     },
     {
-     "p": "Qual a diferença entre o Básico e o Pro?",
+     "p": "Tem mais de um plano?",
      "r": [
-      "Os sistemas são por assinatura, sem entrada e sem fidelidade. O Básico vale para você e mais 5 pessoas da equipe. O Pro custa R$ 60 a mais por mês e libera a equipe sem limite, o histórico de quem fez o quê e até 10 empresas. Indicando 3 pessoas que assinem, você ganha 1 mês do Pro pagando o Básico ( veja como )."
+      "Não. Os sistemas são por assinatura num plano único, a Assinatura, sem entrada e sem fidelidade. Ele inclui equipe sem limite, o histórico de quem fez o quê e até 10 empresas. Pagando por ano, sai 20% mais barato que 12 mensalidades."
      ],
      "e": "explaining",
      "k": []
@@ -722,12 +696,12 @@
      ]
     },
     {
-     "p": "Qual a diferença entre o Básico e o Pro?",
+     "p": "Tem mais de um plano?",
      "e": "explaining",
      "r": [],
      "l": [
-      "Sistema pronto Básico: a partir de R$ 79/mês, para você e mais 5 pessoas da equipe, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem fidelidade.",
-      "Sistema pronto Pro: R$ 60 a mais por mês (a partir de R$ 139/mês), com equipe sem limite, avisos e mensagens prontas no WhatsApp (cobranças, confirmações e clientes sumidos), histórico da equipe e até 10 empresas ou filiais."
+      "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
+      "Preço por sistema: Agenda R$ 49/mês, Financeiro R$ 59/mês, Peplo e Annona R$ 59/mês, Obras R$ 69/mês e Jurídico R$ 89/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
@@ -763,7 +737,7 @@
      "p": "Meus dados ficam guardados?",
      "e": "confident",
      "r": [
-      "Sim, na nuvem, com cópias de segurança. E você pode ligar o backup semanal: toda semana uma cópia completa chega no seu e-mail."
+      "Sim, na nuvem, com cópias de segurança. E você exporta os seus dados para planilha quando quiser."
      ]
     }
    ]
@@ -939,7 +913,7 @@
      "p": "Como funciona o Indique e ganhe?",
      "e": "idea",
      "r": [
-      "Cada conta tem um link de indicação único, em Minha conta e no Painel do dono. A cada 3 pessoas que assinarem pelo seu link, você ganha 1 mês de Pro pagando o Básico: 6 pessoas dão 2 meses, 9 dão 3 meses, e assim por diante.",
+      "Cada conta tem um link de indicação único, em Minha conta e no Painel do dono. A cada 3 pessoas que assinarem pelo seu link, você ganha 1 mês grátis: 6 pessoas dão 2 meses, 9 dão 3 meses, e assim por diante. O valor da próxima mensalidade paga volta para o seu cartão.",
       "Conta quando a pessoa cria uma conta nova pelo seu link e paga a primeira mensalidade, depois do teste grátis."
      ],
      "k": [
@@ -970,14 +944,14 @@
      "p": "Como acho um sistema aqui?",
      "e": "idea",
      "r": [
-      "Use a barra Procurar sistema, no topo da lista: digite o nome ou o ramo (por exemplo, farmácia ou obra). Se ainda não tiver, aparece o botão para ver e testar."
+      "Use a barra Procurar sistema, no topo da lista: digite o nome ou o ramo (por exemplo, agenda ou obra). Se ainda não tiver, aparece o botão para ver e testar."
      ]
     },
     {
      "p": "Meus dados ficam guardados?",
      "e": "confident",
      "r": [
-      "Sim, na nuvem, com cópias de segurança. E você pode ligar o backup semanal: toda semana uma cópia completa chega no seu e-mail."
+      "Sim, na nuvem, com cópias de segurança. E você exporta os seus dados para planilha quando quiser."
      ]
     }
    ]
@@ -1058,7 +1032,7 @@
      "p": "Quanto custa o Veltria Obras?",
      "e": "explaining",
      "r": [
-      "R$ 119 por mês, plano único com tudo incluso, ou R$ 1.142 por ano. Tem 7 dias grátis e não tem fidelidade."
+      "R$ 69 por mês ou R$ 662 por ano (20% a menos). Tem 7 dias grátis e não tem fidelidade."
      ],
      "k": [
       [
@@ -1089,63 +1063,6 @@
      "e": "confident",
      "r": [
       "O Veltria Obras tem um plano único com tudo incluso: a equipe não tem limite de pessoas."
-     ]
-    },
-    {
-     "p": "Como começo a usar depois de assinar?",
-     "e": "idea",
-     "r": [
-      "Fica pronto na hora: você cria a empresa em branco, sobe as suas planilhas e convida a equipe. O vídeo tutorial desta página mostra cada passo. Ficou alguma dúvida? Escreva para o nosso e-mail: respondemos em até 1 dia útil."
-     ],
-     "k": [
-      [
-       "Ver o vídeo tutorial",
-       "#tutorial"
-      ]
-     ]
-    },
-    {
-     "p": "Vocês levam os dados das minhas planilhas?",
-     "r": [
-      "Sim. Nos sistemas prontos, você mesmo sobe as planilhas do Excel em Importar planilha e o sistema preenche nomes, datas, horários, valores e fotos sozinho, com vídeo tutorial de cada passo. Nos sistemas feitos sob medida, nós importamos e testamos com você antes de entregar."
-     ],
-     "e": "confident",
-     "k": []
-    },
-    {
-     "p": "Tem assistente com IA?",
-     "e": "idea",
-     "r": [
-      "Sim, grátis em todos os sistemas: 20 perguntas por dia por empresa. Quem quiser usar mais pode conectar a própria conta do Gemini ou do ChatGPT na janela do Assistente IA: vale só para aquela pessoa, e cada um da equipe conecta a sua se quiser. Ele vê só os números e avisos do resumo do dia, nunca telefones ou e-mails dos seus clientes."
-     ]
-    },
-    {
-     "p": "Se der erro, como peço ajuda?",
-     "e": "explaining",
-     "r": [
-      "Pelo item Suporte, no menu do sistema, ou em Minha conta: você abre um chamado e ele já leva a tela e os detalhes técnicos. Respondemos em até 1 dia útil, ali mesmo e no seu e-mail."
-     ]
-    }
-   ]
-  },
-  "sis-crm": {
-   "nome": "Veltria CRM",
-   "sistema": "crm",
-   "fala": "Esta é a página do Veltria CRM. Quer ver como ele funciona?",
-   "perguntas": [
-    {
-     "p": "Qual a diferença entre o Básico e o Pro?",
-     "e": "explaining",
-     "r": [],
-     "l": [
-      "Sistema pronto Básico: a partir de R$ 79/mês, para você e mais 5 pessoas da equipe, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem fidelidade.",
-      "Sistema pronto Pro: R$ 60 a mais por mês (a partir de R$ 139/mês), com equipe sem limite, avisos e mensagens prontas no WhatsApp (cobranças, confirmações e clientes sumidos), histórico da equipe e até 10 empresas ou filiais."
-     ],
-     "k": [
-      [
-       "Ver os planos",
-       "index.html#precos"
-      ]
      ]
     },
     {
@@ -1234,12 +1151,12 @@
      ]
     },
     {
-     "p": "Qual a diferença entre o Básico e o Pro?",
+     "p": "Tem mais de um plano?",
      "e": "explaining",
      "r": [],
      "l": [
-      "Sistema pronto Básico: a partir de R$ 79/mês, para você e mais 5 pessoas da equipe, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem fidelidade.",
-      "Sistema pronto Pro: R$ 60 a mais por mês (a partir de R$ 139/mês), com equipe sem limite, avisos e mensagens prontas no WhatsApp (cobranças, confirmações e clientes sumidos), histórico da equipe e até 10 empresas ou filiais."
+      "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
+      "Preço por sistema: Agenda R$ 49/mês, Financeiro R$ 59/mês, Peplo e Annona R$ 59/mês, Obras R$ 69/mês e Jurídico R$ 89/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
@@ -1294,7 +1211,7 @@
      "p": "Para quem é o Veltria Financeiro?",
      "e": "explaining",
      "r": [
-      "Para assistências técnicas, oficinas e prestadores. É o sistema de caixa e ordens de serviço."
+      "Para autônomo, MEI e prestador de serviço. No app de celular Essencial: o que entra dividido em potes, cobrança com PIX e lembrete no WhatsApp, limite do MEI e DAS à vista e contas fixas."
      ],
      "k": [
       [
@@ -1334,112 +1251,12 @@
      ]
     },
     {
-     "p": "Qual a diferença entre o Básico e o Pro?",
+     "p": "Tem mais de um plano?",
      "e": "explaining",
      "r": [],
      "l": [
-      "Sistema pronto Básico: a partir de R$ 79/mês, para você e mais 5 pessoas da equipe, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem fidelidade.",
-      "Sistema pronto Pro: R$ 60 a mais por mês (a partir de R$ 139/mês), com equipe sem limite, avisos e mensagens prontas no WhatsApp (cobranças, confirmações e clientes sumidos), histórico da equipe e até 10 empresas ou filiais."
-     ],
-     "k": [
-      [
-       "Ver os planos",
-       "index.html#precos"
-      ]
-     ]
-    },
-    {
-     "p": "Como começo a usar depois de assinar?",
-     "e": "idea",
-     "r": [
-      "Fica pronto na hora: você cria a empresa em branco, sobe as suas planilhas e convida a equipe. O vídeo tutorial desta página mostra cada passo. Ficou alguma dúvida? Escreva para o nosso e-mail: respondemos em até 1 dia útil."
-     ],
-     "k": [
-      [
-       "Ver o vídeo tutorial",
-       "#tutorial"
-      ]
-     ]
-    },
-    {
-     "p": "Vocês levam os dados das minhas planilhas?",
-     "r": [
-      "Sim. Nos sistemas prontos, você mesmo sobe as planilhas do Excel em Importar planilha e o sistema preenche nomes, datas, horários, valores e fotos sozinho, com vídeo tutorial de cada passo. Nos sistemas feitos sob medida, nós importamos e testamos com você antes de entregar."
-     ],
-     "e": "confident",
-     "k": []
-    },
-    {
-     "p": "Tem assistente com IA?",
-     "e": "idea",
-     "r": [
-      "Sim, grátis em todos os sistemas: 20 perguntas por dia por empresa. Quem quiser usar mais pode conectar a própria conta do Gemini ou do ChatGPT na janela do Assistente IA: vale só para aquela pessoa, e cada um da equipe conecta a sua se quiser. Ele vê só os números e avisos do resumo do dia, nunca telefones ou e-mails dos seus clientes."
-     ]
-    },
-    {
-     "p": "Se der erro, como peço ajuda?",
-     "e": "explaining",
-     "r": [
-      "Pelo item Suporte, no menu do sistema, ou em Minha conta: você abre um chamado e ele já leva a tela e os detalhes técnicos. Respondemos em até 1 dia útil, ali mesmo e no seu e-mail."
-     ]
-    }
-   ]
-  },
-  "sis-gestao": {
-   "nome": "Veltria Gestão",
-   "sistema": "gestao",
-   "fala": "Esta é a página do Veltria Gestão. Quer ver como ele funciona?",
-   "perguntas": [
-    {
-     "p": "Para quem é o Veltria Gestão?",
-     "e": "explaining",
-     "r": [
-      "Para distribuidoras, lojas e mercados. É o sistema de estoque, compras e vendas."
-     ],
-     "k": [
-      [
-       "Abrir a demonstração",
-       "demos/sistemas/gestao-essencial/?celular=1"
-      ]
-     ]
-    },
-    {
-     "p": "Quanto custa o Veltria Gestão?",
-     "e": "explaining",
-     "r": [
-      "R$ 129 por mês, sem entrada. Tem 7 dias grátis e não tem fidelidade."
-     ],
-     "k": [
-      [
-       "Testar 7 dias grátis",
-       "app/gestaoessencial/"
-      ]
-     ]
-    },
-    {
-     "p": "Como testo o Veltria Gestão?",
-     "e": "idea",
-     "r": [
-      "Abra a demonstração agora, sem cadastro. Se gostar, comece os 7 dias grátis com os seus dados e a sua equipe."
-     ],
-     "k": [
-      [
-       "Abrir a demonstração",
-       "demos/sistemas/gestao-essencial/?celular=1"
-      ],
-      [
-       "Testar 7 dias grátis",
-       "app/gestaoessencial/"
-      ]
-     ]
-    },
-    {
-     "p": "Qual a diferença entre o Básico e o Pro?",
-     "e": "explaining",
-     "r": [],
-     "l": [
-      "Sistema pronto Básico: a partir de R$ 79/mês, para você e mais 5 pessoas da equipe, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem fidelidade.",
-      "Sistema pronto Pro: R$ 60 a mais por mês (a partir de R$ 139/mês), com equipe sem limite, avisos e mensagens prontas no WhatsApp (cobranças, confirmações e clientes sumidos), histórico da equipe e até 10 empresas ou filiais."
+      "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
+      "Preço por sistema: Agenda R$ 49/mês, Financeiro R$ 59/mês, Peplo e Annona R$ 59/mês, Obras R$ 69/mês e Jurídico R$ 89/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
@@ -1534,140 +1351,12 @@
      ]
     },
     {
-     "p": "Qual a diferença entre o Básico e o Pro?",
+     "p": "Tem mais de um plano?",
      "e": "explaining",
      "r": [],
      "l": [
-      "Sistema pronto Básico: a partir de R$ 79/mês, para você e mais 5 pessoas da equipe, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem fidelidade.",
-      "Sistema pronto Pro: R$ 60 a mais por mês (a partir de R$ 139/mês), com equipe sem limite, avisos e mensagens prontas no WhatsApp (cobranças, confirmações e clientes sumidos), histórico da equipe e até 10 empresas ou filiais."
-     ],
-     "k": [
-      [
-       "Ver os planos",
-       "index.html#precos"
-      ]
-     ]
-    },
-    {
-     "p": "Como começo a usar depois de assinar?",
-     "e": "idea",
-     "r": [
-      "Fica pronto na hora: você cria a empresa em branco, sobe as suas planilhas e convida a equipe. O vídeo tutorial desta página mostra cada passo. Ficou alguma dúvida? Escreva para o nosso e-mail: respondemos em até 1 dia útil."
-     ],
-     "k": [
-      [
-       "Ver o vídeo tutorial",
-       "#tutorial"
-      ]
-     ]
-    },
-    {
-     "p": "Vocês levam os dados das minhas planilhas?",
-     "r": [
-      "Sim. Nos sistemas prontos, você mesmo sobe as planilhas do Excel em Importar planilha e o sistema preenche nomes, datas, horários, valores e fotos sozinho, com vídeo tutorial de cada passo. Nos sistemas feitos sob medida, nós importamos e testamos com você antes de entregar."
-     ],
-     "e": "confident",
-     "k": []
-    },
-    {
-     "p": "Tem assistente com IA?",
-     "e": "idea",
-     "r": [
-      "Sim, grátis em todos os sistemas: 20 perguntas por dia por empresa. Quem quiser usar mais pode conectar a própria conta do Gemini ou do ChatGPT na janela do Assistente IA: vale só para aquela pessoa, e cada um da equipe conecta a sua se quiser. Ele vê só os números e avisos do resumo do dia, nunca telefones ou e-mails dos seus clientes."
-     ]
-    },
-    {
-     "p": "Se der erro, como peço ajuda?",
-     "e": "explaining",
-     "r": [
-      "Pelo item Suporte, no menu do sistema, ou em Minha conta: você abre um chamado e ele já leva a tela e os detalhes técnicos. Respondemos em até 1 dia útil, ali mesmo e no seu e-mail."
-     ]
-    }
-   ]
-  },
-  "sis-oficina": {
-   "nome": "Veltria Oficina",
-   "sistema": "oficina",
-   "fala": "Esta é a página do Veltria Oficina. Quer ver como ele funciona?",
-   "perguntas": [
-    {
-     "p": "Qual a diferença entre o Básico e o Pro?",
-     "e": "explaining",
-     "r": [],
-     "l": [
-      "Sistema pronto Básico: a partir de R$ 79/mês, para você e mais 5 pessoas da equipe, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem fidelidade.",
-      "Sistema pronto Pro: R$ 60 a mais por mês (a partir de R$ 139/mês), com equipe sem limite, avisos e mensagens prontas no WhatsApp (cobranças, confirmações e clientes sumidos), histórico da equipe e até 10 empresas ou filiais."
-     ],
-     "k": [
-      [
-       "Ver os planos",
-       "index.html#precos"
-      ]
-     ]
-    },
-    {
-     "p": "Como começo a usar depois de assinar?",
-     "e": "idea",
-     "r": [
-      "Fica pronto na hora: você cria a empresa em branco, sobe as suas planilhas e convida a equipe. O vídeo tutorial desta página mostra cada passo. Ficou alguma dúvida? Escreva para o nosso e-mail: respondemos em até 1 dia útil."
-     ],
-     "k": [
-      [
-       "Ver o vídeo tutorial",
-       "#tutorial"
-      ]
-     ]
-    },
-    {
-     "p": "Vocês levam os dados das minhas planilhas?",
-     "r": [
-      "Sim. Nos sistemas prontos, você mesmo sobe as planilhas do Excel em Importar planilha e o sistema preenche nomes, datas, horários, valores e fotos sozinho, com vídeo tutorial de cada passo. Nos sistemas feitos sob medida, nós importamos e testamos com você antes de entregar."
-     ],
-     "e": "confident",
-     "k": []
-    },
-    {
-     "p": "Tem assistente com IA?",
-     "e": "idea",
-     "r": [
-      "Sim, grátis em todos os sistemas: 20 perguntas por dia por empresa. Quem quiser usar mais pode conectar a própria conta do Gemini ou do ChatGPT na janela do Assistente IA: vale só para aquela pessoa, e cada um da equipe conecta a sua se quiser. Ele vê só os números e avisos do resumo do dia, nunca telefones ou e-mails dos seus clientes."
-     ]
-    },
-    {
-     "p": "Se der erro, como peço ajuda?",
-     "e": "explaining",
-     "r": [
-      "Pelo item Suporte, no menu do sistema, ou em Minha conta: você abre um chamado e ele já leva a tela e os detalhes técnicos. Respondemos em até 1 dia útil, ali mesmo e no seu e-mail."
-     ]
-    }
-   ]
-  },
-  "sis-farmacia": {
-   "nome": "Veltria Farmácia",
-   "sistema": "farmacia",
-   "fala": "Esta é a página do Veltria Farmácia. Quer ver como ele funciona?",
-   "perguntas": [
-    {
-     "p": "Ele controla remédio controlado?",
-     "e": "explaining",
-     "r": [
-      "Sim. Controlados (Portaria 344) e antimicrobianos só saem no caixa com a receita registrada, e o sistema recusa receita vencida. O livro de controlados do mês é montado sozinho, com planilha para conferir e transmitir no SNGPC."
-     ]
-    },
-    {
-     "p": "Emite cupom fiscal?",
-     "e": "explaining",
-     "r": [
-      "Sim, NFC-e pela Focus NFe, com o código da Anvisa, o PMC, o lote e a validade de cada medicamento. Começamos em homologação e só depois passamos para valer."
-     ]
-    },
-    {
-     "p": "Qual a diferença entre o Básico e o Pro?",
-     "e": "explaining",
-     "r": [],
-     "l": [
-      "Sistema pronto Básico: a partir de R$ 79/mês, para você e mais 5 pessoas da equipe, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem fidelidade.",
-      "Sistema pronto Pro: R$ 60 a mais por mês (a partir de R$ 139/mês), com equipe sem limite, avisos e mensagens prontas no WhatsApp (cobranças, confirmações e clientes sumidos), histórico da equipe e até 10 empresas ou filiais."
+      "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, com 7 dias grátis, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
+      "Preço por sistema: Agenda R$ 49/mês, Financeiro R$ 59/mês, Peplo e Annona R$ 59/mês, Obras R$ 69/mês e Jurídico R$ 89/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<script src="js/idioma.js?v=18"></script>
+<script src="js/idioma.js?v=19"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co https://api.pwnedpasswords.com; frame-src 'self'; worker-src 'self'; child-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="google-site-verification" content="9VtEf9XpYbM6asga9XcXgOqwHD0Yl4kN5FaGFNU1NYU">
@@ -28,26 +28,28 @@
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png?v=2">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/cormorant-500-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css?v=66">
+<link rel="stylesheet" href="css/site.css?v=71">
 <script src="js/luxo.js?v=5" defer></script>
-<link rel="stylesheet" href="css/inicio.css?v=30">
-<link rel="stylesheet" href="css/luxo.css?v=21">
-<link rel="stylesheet" href="css/creme.css?v=1"><link rel="stylesheet" href="css/areia.css?v=3">
-<link rel="stylesheet" href="css/tinta.css?v=9">
+<link rel="stylesheet" href="css/inicio.css?v=36">
+<link rel="stylesheet" href="css/luxo.css?v=22">
+<link rel="stylesheet" href="css/creme.css?v=2"><link rel="stylesheet" href="css/areia.css?v=4">
+<link rel="stylesheet" href="css/tinta.css?v=12">
 <script>document.documentElement.classList.add('js')</script>
 <script src="js/contato.js?v=9" defer></script>
 <script src="js/leads-config.js?v=6" defer></script>
-<script src="js/site.js?v=23" defer></script>
+<script src="js/site.js?v=26" defer></script>
 <script src="js/planos.js?v=4" defer></script>
 <script src="js/paypal-config.js?v=1" defer></script>
 <script src="js/contratar.js?v=13" defer></script>
-<script src="js/videos.js?v=9" defer></script>
-<script src="js/conta.js?v=11" defer></script>
-<link rel="stylesheet" href="css/assistente.css?v=8">
-<script src="js/assistente.js?v=31" defer></script>
-<script src="js/cookies.js?v=3" defer></script>
+<script src="js/videos.js?v=14" defer></script>
+<script src="js/conta.js?v=12" defer></script>
+<link rel="stylesheet" href="css/assistente.css?v=11">
+<script src="js/assistente.js?v=36" defer></script>
+<script src="js/confianca.js?v=3" defer></script>
+<script src="js/cookies.js?v=4" defer></script>
+<script src="js/inicio.js?v=30" defer></script>
 </head>
-<body>
+<body class="sv">
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="nav">
@@ -72,10 +74,12 @@
   <section class="hero" aria-labelledby="titulo">
     <div class="wrap hero-grid">
       <div>
-      <p class="eyebrow">Sites e automação</p>
+      <p class="eyebrow">Feito do zero · pagamento único</p>
       <h1 id="titulo">Um site que traz cliente e um WhatsApp que <span class="serif">responde sozinho.</span></h1>
-      <p class="sub">Sites a partir de R$ 690, prontos em 2 dias úteis. Automação de WhatsApp a partir de R$ 890, pronta em 3. Pagamento único, com preço fechado.</p>
-      <div class="ctas"><a class="btn btn-primary" href="#precos">Ver os preços <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a class="btn btn-ghost" href="#sites-no-ar">Ver sites prontos</a></div>
+      <p class="sv-preco-topo"><span>Sites a partir de <b>R$&nbsp;690</b></span><span class="sv-preco-sep" aria-hidden="true">·</span><span>Automação de WhatsApp a partir de <b>R$&nbsp;890</b></span></p>
+      <p class="sub">Site pronto em 2 dias úteis, automação em 3. Pagamento único, com preço fechado por escrito antes de começar.</p>
+      <div class="ctas"><a class="btn btn-primary" href="#monte">Solicitar orçamento <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a><a class="btn btn-texto" href="#precos">Ver os preços</a></div>
+      <div class="sv-outra"><p><span class="sv-rotulo">Pronto para usar · mensal</span>Procura um sistema pronto, pago por mês? Isso é a <b>Veltria</b>, a partir de R$&nbsp;49/mês.</p><a class="btn btn-texto" href="sistemas.html">Ver os sistemas Veltria</a></div>
       </div>
       <div class="palco" role="img" aria-label="Sites de exemplo da Blue Rose no computador e no celular">
         <div class="palco-dash"><img src="img/sites/henrique-sato.webp?v=20261108e" width="1200" height="750" alt="" fetchpriority="high"></div>
@@ -87,46 +91,47 @@
 
   <section id="solucoes" aria-labelledby="t-serv">
     <div class="wrap">
-      <span class="eyebrow reveal">Soluções</span>
-      <h2 id="t-serv" class="sec-title reveal">Uma operação inteira, conectada.</h2>
-      <p class="sec-lede reveal">Sistemas organizam o dia a dia, automações tiram o trabalho repetitivo da equipe e a presença digital traz clientes. Tudo conversa entre si.</p>
+      <span class="eyebrow">O que fazemos</span>
+      <h2 id="t-serv" class="sec-title">Quatro tipos de projeto, todos com proposta por escrito.</h2>
+      <p class="sec-lede">Sites e automação de WhatsApp têm preço de tabela. Textos com IA e relatórios automáticos entram sob orçamento, dentro de um projeto.</p>
       <div class="bento">
-        <article class="cel c-whats reveal" style="--i:0">
+        <article class="cel c-whats" style="--i:0">
           <svg class="ico ico-cel" aria-hidden="true"><use href="img/icones.svg#i-whatsapp-logo"/></svg>
           <span class="tipo">Automação</span>
           <h3>Atendimento no WhatsApp</h3>
-          <p>Resposta na hora, perguntas de qualificação, direcionamento para agendar e lembrete de PIX pendente. No número que você já usa.</p>
+          <p>Resposta na hora, perguntas de qualificação, direcionamento para agendar e lembrete de PIX pendente.</p>
           <div class="mini-chat" role="img" aria-label="Trecho da conversa do qualificador de leads: o cliente pergunta, a automação qualifica e o lead quente vai para o corretor">
             <div class="msg cliente">Oi, vi o anúncio. Ainda está disponível?</div>
             <div class="msg bot">Está sim! Você procura apartamento, casa ou terreno?</div>
             <div class="msg cliente">Apartamento, Zona Sul, até R$ 350 mil.</div>
             <div class="msg sistema">✓ cliente interessado enviado ao corretor</div>
           </div>
-          <p class="prova">Funciona no número que você já usa. <a href="#demo">Ver funcionando</a></p>
+          <p class="sv-ilustra">Conversa de exemplo.</p>
+          <p class="prova">No número do seu negócio. <a href="#demo">Ver a simulação</a></p>
         </article>
-        <article class="cel c-ia reveal" style="--i:1">
+        <article class="cel c-ia" style="--i:1">
           <svg class="ico ico-cel" aria-hidden="true"><use href="img/icones.svg#i-robot"/></svg>
           <span class="tipo">Automação e IA</span>
           <h3>Textos e respostas com IA</h3>
-          <p>Descrições de produto, respostas prontas e resumos escritos pelo Claude a partir dos seus dados, sem inventar o que não foi informado.</p>
-<p class="prova">Exemplo real: “Caneca de cerâmica de 300 ml, perfeita para aquecer o café no micro-ondas durante o trabalho.”</p>
+          <p>Descrições de produto, respostas prontas e resumos escritos por IA a partir dos seus dados, sem inventar o que não foi informado. Sob orçamento.</p>
+<p class="prova">Teste você mesmo no <a href="laboratorio.html">Laboratório</a>, com o script original.</p>
         </article>
-        <article class="cel c-site reveal" style="--i:1">
+        <article class="cel c-site" style="--i:1">
           <div class="txt">
             <svg class="ico ico-cel" aria-hidden="true"><use href="img/icones.svg#i-browser"/></svg>
             <span class="tipo">Sites e presença digital</span>
             <h3>Sites que viram contato</h3>
             <p>Horários, serviços, preços e botão direto pro WhatsApp. No ar em poucos dias.</p>
-            <p class="prova">Veja: <a href="exemplos.html">15 sites de exemplo</a></p>
+            <p class="prova">Veja os <a href="exemplos.html">sites de demonstração</a>, por ramo.</p>
           </div>
           <img src="img/sites/henrique-sato-mobile.webp?v=20261108e" width="390" height="844" loading="lazy" alt="Site de exemplo de clínica odontológica aberto no celular">
         </article>
-        <article class="cel c-rotina reveal" style="--i:2">
+        <article class="cel c-rotina" style="--i:2">
           <svg class="ico ico-cel" aria-hidden="true"><use href="img/icones.svg#i-chart-line-up"/></svg>
           <span class="tipo">Sistemas e dados</span>
           <h3>Rotinas e relatórios</h3>
-          <p>A planilha de vendas vira resumo por categoria e por mês, sem copiar e colar.</p>
-<p class="prova">Exemplo: o total do mês por categoria, pronto toda manhã, sem abrir planilha.</p>
+          <p>A planilha de vendas vira resumo por categoria e por mês, sem copiar e colar. Sob orçamento.</p>
+<p class="prova">Exemplo ilustrativo: o total do mês por categoria, pronto toda manhã.</p>
         </article>
       </div>
     </div>
@@ -134,12 +139,12 @@
 
   <section id="demo" aria-labelledby="t-demo">
     <div class="wrap">
-      <div class="demo-head reveal">
-        <span class="eyebrow">Automação e IA</span>
+      <div class="demo-head">
+        <span class="eyebrow">Simulação</span>
         <h2 id="t-demo" class="sec-title">Veja uma automação trabalhando.</h2>
-        <p class="sec-lede">Escolha um cenário e aperte rodar. Cada etapa acende quando acontece, com as mesmas regras dos scripts reais.</p>
+        <p class="sec-lede">Escolha um cenário e clique em Rodar automação. Cada etapa acende quando acontece e, no fim, aparece o resumo que chega ao dono ou ao corretor.</p>
       </div>
-      <div class="demo reveal" data-demo>
+      <div class="demo" data-demo>
         <div class="demo-tabs" role="tablist" aria-label="Cenários">
           <button type="button" role="tab" aria-selected="true" data-cenario="lead"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-user-focus"/></svg>Lead no WhatsApp</button>
           <button type="button" role="tab" aria-selected="false" tabindex="-1" data-cenario="pix"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-receipt"/></svg>PIX esquecido</button>
@@ -160,61 +165,78 @@
           </div>
         </div>
       </div>
-      <p class="demo-nota">Simulação no navegador: nenhuma mensagem real é enviada. Em produção, as mesmas etapas se conectam à API oficial do WhatsApp e ao sistema de pagamento ou de agenda do seu negócio. Quer ver o script Python original rodando? <a class="link" href="laboratorio.html">Abra o Laboratório</a>.</p>
+      <div class="sv-entrega" data-entrega hidden></div>
+      <p class="demo-nota">Simulação no navegador: nenhuma mensagem real é enviada. Na entrega, a automação usa a API oficial do WhatsApp (Meta) ou a ferramenta indicada na proposta, como está nos <a class="link" href="termos.html#whatsapp">Termos</a>. O script Python original roda no <a class="link" href="laboratorio.html">Laboratório</a>.</p>
+      <p class="sv-dados">A automação mexe com dados dos seus clientes: conversas, nomes e telefones. <a class="btn btn-outline btn-s" href="seguranca.html">Como cuidamos dos dados</a></p>
     </div>
   </section>
 
   <section class="sites-sec" id="sites-no-ar" aria-labelledby="t-rolo">
     <div class="wrap rolo-topo">
       <div>
-        <span class="eyebrow reveal">Presença digital</span>
-        <h2 id="t-rolo" class="sec-title reveal">Também cuidamos de como o cliente chega até você.</h2>
-        <p class="sec-lede reveal">Sites com agenda, orçamento e WhatsApp que mandam o pedido direto para o seu sistema. Veja 29 exemplos no ar, separados por ramo.</p>
+        <span class="eyebrow">Sites de demonstração</span>
+        <h2 id="t-rolo" class="sec-title">Sites que já fizemos para mostrar o trabalho.</h2>
+        <p class="sec-lede">Com agenda, calculadora de orçamento e botão de WhatsApp. Abra e navegue como um cliente faria.</p>
+        <p class="sv-aviso">Sites de demonstração: marcas, pessoas, depoimentos e preços dentro deles são fictícios e nenhum é cliente da Blue Rose.</p>
       </div>
-      <a class="btn btn-ghost reveal" href="exemplos.html">Ver todos os exemplos<svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>
+      <a class="btn btn-ghost" href="exemplos.html">Ver todos os exemplos<svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>
     </div>
     <div class="wrap">
-      <div class="sites-filtro reveal" role="group" aria-label="Filtrar exemplos por ramo"><button type="button" data-cat="todos" aria-pressed="true">Destaques</button><button type="button" data-cat="odontologia" aria-pressed="false">Dentista</button><button type="button" data-cat="construcao" aria-pressed="false">Construção e reforma</button><button type="button" data-cat="advocacia" aria-pressed="false">Advocacia</button><button type="button" data-cat="estetica" aria-pressed="false">Estética</button><button type="button" data-cat="imobiliaria" aria-pressed="false">Imobiliária</button></div>
+      <div class="sites-filtro" role="group" aria-label="Filtrar exemplos por ramo"><button type="button" data-cat="todos" aria-pressed="true">Destaques</button><button type="button" data-cat="odontologia" aria-pressed="false">Dentista</button><button type="button" data-cat="construcao" aria-pressed="false">Construção e reforma</button><button type="button" data-cat="advocacia" aria-pressed="false">Advocacia</button><button type="button" data-cat="estetica" aria-pressed="false">Estética</button><button type="button" data-cat="imobiliaria" aria-pressed="false">Imobiliária</button></div>
       <div class="sites-grade" aria-live="polite"><a class="site-c" href="sites/henrique-sato/index.html" data-cat="odontologia" data-destaque><img src="img/sites/henrique-sato.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Dr. Henrique Sato"><span class="site-c-txt"><b>Dr. Henrique Sato</b><small>Dentista</small></span></a><a class="site-c" href="sites/atelier-oral/index.html" data-cat="odontologia" hidden><img src="img/sites/atelier-oral.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Atelier Oral"><span class="site-c-txt"><b>Atelier Oral</b><small>Dentista</small></span></a><a class="site-c" href="sites/ninho-odontopediatria/index.html" data-cat="odontologia" hidden><img src="img/sites/ninho-odontopediatria.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Ninho Odontopediatria"><span class="site-c-txt"><b>Ninho Odontopediatria</b><small>Dentista</small></span></a><a class="site-c" href="sites/ferreira-reformas/index.html" data-cat="construcao" hidden><img src="img/sites/ferreira-reformas.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Ferreira Reformas"><span class="site-c-txt"><b>Ferreira Reformas</b><small>Construção e reforma</small></span></a><a class="site-c" href="sites/base-forte/index.html" data-cat="construcao" data-destaque><img src="img/sites/base-forte.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Base Forte"><span class="site-c-txt"><b>Base Forte</b><small>Construção e reforma</small></span></a><a class="site-c" href="sites/monolito/index.html" data-cat="construcao" hidden><img src="img/sites/monolito.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Monólito"><span class="site-c-txt"><b>Monólito</b><small>Construção e reforma</small></span></a><a class="site-c" href="sites/patricia-leal/index.html" data-cat="advocacia" hidden><img src="img/sites/patricia-leal.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Dra. Patrícia Leal"><span class="site-c-txt"><b>Dra. Patrícia Leal</b><small>Advocacia</small></span></a><a class="site-c" href="sites/aguiar-monteiro/index.html" data-cat="advocacia" data-destaque><img src="img/sites/aguiar-monteiro.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Aguiar &amp; Monteiro"><span class="site-c-txt"><b>Aguiar &amp; Monteiro</b><small>Advocacia</small></span></a><a class="site-c" href="sites/bastos-lacerda/index.html" data-cat="advocacia" hidden><img src="img/sites/bastos-lacerda.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Bastos Lacerda"><span class="site-c-txt"><b>Bastos Lacerda</b><small>Advocacia</small></span></a><a class="site-c" href="sites/bianca-moraes/index.html" data-cat="estetica" hidden><img src="img/sites/bianca-moraes.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Dra. Bianca Moraes"><span class="site-c-txt"><b>Dra. Bianca Moraes</b><small>Estética</small></span></a><a class="site-c" href="sites/glow/index.html" data-cat="estetica" data-destaque><img src="img/sites/glow.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Glow Estética"><span class="site-c-txt"><b>Glow Estética</b><small>Estética</small></span></a><a class="site-c" href="sites/maison-elora/index.html" data-cat="estetica" hidden><img src="img/sites/maison-elora.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Maison Élora"><span class="site-c-txt"><b>Maison Élora</b><small>Estética</small></span></a><a class="site-c" href="sites/ana-ribeiro/index.html" data-cat="imobiliaria" data-destaque><img src="img/sites/ana-ribeiro.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Ana Ribeiro"><span class="site-c-txt"><b>Ana Ribeiro</b><small>Imobiliária</small></span></a><a class="site-c" href="sites/prisma-adm/index.html" data-cat="imobiliaria" hidden><img src="img/sites/prisma-adm.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Prisma Administração"><span class="site-c-txt"><b>Prisma Administração</b><small>Imobiliária</small></span></a><a class="site-c" href="sites/terra-nobre/index.html" data-cat="imobiliaria" hidden><img src="img/sites/terra-nobre.webp?v=20261108e" width="960" height="600" loading="lazy" alt="Site de exemplo Terra Nobre"><span class="site-c-txt"><b>Terra Nobre</b><small>Imobiliária</small></span></a></div>
     </div>
   </section>
 
   <section id="processo" aria-labelledby="t-proc">
     <div class="wrap">
-      <span class="eyebrow reveal">Implantação</span>
-      <h2 id="t-proc" class="sec-title reveal">Do diagnóstico ao sistema rodando na sua equipe.</h2>
-      <p class="sec-lede reveal">Preço fechado antes de começar. Você vê funcionando com os seus dados antes de pagar a segunda metade.</p>
+      <span class="eyebrow">Como contratar</span>
+      <h2 id="t-proc" class="sec-title">Da conversa ao site no seu domínio.</h2>
+      <p class="sec-lede">Do jeito que está nos <a class="link" href="termos.html#orcamento">Termos de Serviço</a>. Você só paga a segunda metade depois de ver o site pronto.</p>
       <ol class="trilho">
-        <li class="etapa"><span class="n">1</span><h3>Diagnóstico</h3><p>Uma conversa para entender como a sua empresa vende, atende e controla hoje.</p><p class="recebe">Você recebe: <b>o que resolver primeiro</b></p></li>
-        <li class="etapa"><span class="n">2</span><h3>Proposta</h3><p>Escolhemos o sistema pronto mais próximo ou desenhamos o sob medida, com escopo, prazo e valor fechados.</p><p class="recebe">Você recebe: <b>proposta por escrito</b></p></li>
-        <li class="etapa"><span class="n">3</span><h3>Implantação</h3><p>Configuramos com a sua marca, importamos clientes, produtos e históricos das planilhas e testamos com os seus dados.</p><p class="recebe">Você recebe: <b>o sistema com os seus dados</b></p></li>
-        <li class="etapa"><span class="n">4</span><h3>Treinamento e suporte</h3><p>Treinamos a equipe, colocamos no ar e acompanhamos as primeiras semanas de uso.</p><p class="recebe">Você recebe: <b>equipe usando e suporte</b></p></li>
+        <li class="etapa"><span class="n">1</span><h3>Conversa</h3><p>Você conta o que precisa pelo formulário, pelo WhatsApp ou por e-mail. Os planos da tabela também podem ser contratados direto aqui.</p><p class="recebe">Você recebe: <b>resposta em até 1 dia útil</b></p></li>
+        <li class="etapa"><span class="n">2</span><h3>Proposta</h3><p>Escopo, prazo, valor e a identificação de quem presta o serviço, por escrito, antes de qualquer pagamento.</p><p class="recebe">Você recebe: <b>proposta por escrito</b></p></li>
+        <li class="etapa"><span class="n">3</span><h3>Entrada e material</h3><p>Você paga a metade e manda textos, fotos, logo, preços e acessos. O prazo conta a partir daí, em dias úteis.</p><p class="recebe">Você recebe: <b>a data de entrega</b></p></li>
+        <li class="etapa"><span class="n">4</span><h3>Prévia e entrega</h3><p>Você vê o site num endereço de teste e pede os ajustes incluídos. Pagou o resto, ele vai para o seu domínio e os acessos passam para você.</p><p class="recebe">Você recebe: <b>o site e os acessos</b></p></li>
       </ol>
+      <div class="sv-escopo">
+        <div>
+          <h3>O que você fornece</h3>
+          <ul><li>Textos, fotos e logo (ou peça a identidade visual como adicional)</li><li>Serviços, preços, endereço e horários</li><li>Acesso ao domínio, se já tiver um</li><li>Uma pessoa para aprovar a prévia</li></ul>
+        </div>
+        <div>
+          <h3>O que está incluído</h3>
+          <ul><li>O que está escrito no plano escolhido ou na proposta</li><li>As rodadas de ajustes do plano</li><li>Domínio .com.br no 1º ano, nos planos Presença e Completo</li><li>Correção sem custo de erro técnico por 30 dias depois da entrega</li></ul>
+        </div>
+        <div>
+          <h3>O que não está incluído</h3>
+          <ul><li>Mudança de escopo: vira um novo orçamento</li><li>Ajustes depois das rodadas: R$ 70/hora</li><li>Renovação do domínio depois do 1º ano, salvo no plano de cuidado</li><li>Taxas da Meta pelo uso da API do WhatsApp</li><li>Garantia de posição no Google, de visitas ou de vendas</li></ul>
+        </div>
+      </div>
     </div>
   </section>
 
   <section id="analise-gratis" aria-labelledby="t-analise">
     <div class="wrap">
-      <span class="eyebrow reveal">Grátis, por escrito</span>
-      <h2 id="t-analise" class="sec-title reveal">Mande o seu site. Respondemos o que está fazendo você perder cliente.</h2>
-      <p class="sec-lede reveal">Olhamos o seu site como um cliente olharia, no celular, e devolvemos por escrito em até 1 dia útil o que corrigir primeiro. Sem reunião e sem compromisso. Não tem site? Mande o nome da empresa e mostramos como ele poderia ser.</p>
+      <span class="eyebrow">Grátis, por escrito</span>
+      <h2 id="t-analise" class="sec-title">Mande o seu site. Respondemos o que está fazendo você perder cliente.</h2>
+      <p class="sec-lede">Olhamos o seu site como um cliente olharia, no celular, e devolvemos por escrito em até 1 dia útil o que corrigir primeiro. Sem reunião e sem compromisso. Não tem site? Mande o nome da empresa e mostramos como ele poderia ser.</p>
       <ol class="trilho">
         <li class="etapa"><span class="n">1</span><h3>No celular</h3><p>Se abre rápido, se o texto cabe na tela e se o botão de chamar ou agendar aparece logo.</p><p class="recebe">Você recebe: <b>o que trava a visita</b></p></li>
         <li class="etapa"><span class="n">2</span><h3>No Google</h3><p>Se o Google acha a sua empresa pelo que você vende e pela sua cidade, e o que falta para aparecer.</p><p class="recebe">Você recebe: <b>o que falta para ser achado</b></p></li>
         <li class="etapa"><span class="n">3</span><h3>Na confiança</h3><p>Endereço, horários, preços, avaliações reais, política de privacidade e cadeado de segurança.</p><p class="recebe">Você recebe: <b>o que passa insegurança</b></p></li>
       </ol>
-      <p class="reveal"><a class="btn btn-primary" href="#contato" data-plano="Olá! Quero a análise grátis do meu site. O endereço é: ">Pedir a análise grátis</a></p>
+      <p><a class="btn btn-primary" href="#contato" data-plano="Olá! Quero a análise grátis do meu site. O endereço é: ">Pedir a análise grátis</a></p>
     </div>
   </section>
 
   <section id="precos" aria-labelledby="t-precos">
     <div class="wrap">
-      <span class="eyebrow reveal">Preços</span>
-      <h2 id="t-precos" class="sec-title reveal">Sites que fazem o cliente te achar e chamar. Preço fechado.</h2>
-      <p class="sec-lede reveal">Não é só uma página bonita: todo site sai pronto para aparecer no Google e no Bing (onde o ChatGPT procura) quando alguém busca o que você vende na sua cidade, com o botão do WhatsApp e o pedido de avaliação no Google. Pronto em 2 dias úteis. O pagamento é feito aqui mesmo, pelo Mercado Pago.</p>
+      <span class="eyebrow">Preços</span>
+      <h2 id="t-precos" class="sec-title">Sites que fazem o cliente te achar e chamar. Preço fechado.</h2>
+      <p class="sec-lede">Não é só uma página bonita: todo site sai preparado para o Google e o Bing acharem a sua empresa quando alguém busca o que você vende na sua cidade, com o botão do WhatsApp e o pedido de avaliação no Google. Pronto em 2 dias úteis. O pagamento é feito aqui mesmo, pelo Mercado Pago.</p>
       <div id="painel-unico">
       <div class="precos2">
-        <article class="preco2 reveal" style="--i:1">
+        <article class="preco2" style="--i:1">
           <span class="preco2-tag">Site</span><h3>Presença</h3>
           <p class="preco2-d">Para aparecer no Google e começar a receber pedidos.</p>
           <p class="preco2-valor">R$ 690</p>
@@ -225,7 +247,7 @@
           <button type="button" class="btn btn-ghost" data-contratar="presenca" data-nome="Site Presença">Contratar</button>
           <a class="preco2-perso" href="#monte" data-personalizar="presenca">Personalizar este plano</a>
           </div></article>
-        <article class="preco2 reveal dest" style="--i:2">
+        <article class="preco2 dest" style="--i:2">
           <span class="preco2-dest">Mais escolhido</span><span class="preco2-tag">Site + automação</span><h3>Completo</h3>
           <p class="preco2-d">O site e o WhatsApp atendendo juntos, 24 horas.</p>
           <p class="preco2-valor">R$ 1.490</p>
@@ -237,7 +259,7 @@
           <button type="button" class="btn btn-primary" data-contratar="completo" data-nome="Site + automação">Contratar</button>
           <a class="preco2-perso" href="#monte" data-personalizar="completo">Personalizar este plano</a>
           </div></article>
-        <article class="preco2 reveal" style="--i:3">
+        <article class="preco2" style="--i:3">
           <span class="preco2-tag">Automação</span><h3>Automação de WhatsApp</h3>
           <p class="preco2-d">Para quem já tem site e quer atender rápido, a qualquer hora.</p>
           <p class="preco2-valor">R$ 890</p>
@@ -249,7 +271,7 @@
           <button type="button" class="btn btn-ghost" data-contratar="automacao" data-nome="Automação de WhatsApp">Contratar</button>
           <span class="preco2-perso preco2-vazio" aria-hidden="true">&nbsp;</span>
           </div></article>
-        <article class="preco2 reveal" style="--i:4">
+        <article class="preco2" style="--i:4">
           <span class="preco2-tag">Site</span><h3>Site personalizado</h3>
           <p class="preco2-d">Feito do zero, com as páginas e as funções que o seu negócio pedir.</p>
           <p class="preco2-valor preco2-sob">Sob orçamento</p>
@@ -259,16 +281,16 @@
           <a class="btn btn-ghost" href="#contato" data-plano="Olá! Quero um orçamento de site personalizado.">Peça o orçamento</a>
           </div></article>
       </div>
-      <article class="preco2 preco2-erp reveal orc-site" id="monte">
+      <article class="preco2 preco2-erp orc-site" id="monte">
         <h3>Seu site totalmente personalizado</h3>
         <p class="preco2-d">Conte o que você precisa e receba a proposta por escrito, com o valor e o prazo fechados antes de começar.</p>
         <ul><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Feito do zero para o seu negócio</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Pronto para aparecer no Google e no Bing</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Botão do WhatsApp e pedido de avaliação no Google</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Testado no computador e no celular</span></li><li><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-check"/></svg><span>Política de privacidade e aviso de cookies</span></li></ul>
-        <div class="preco2-acao"><a class="btn btn-primary" href="#contato" data-plano="Olá! Quero um orçamento de site totalmente personalizado.">Peça o orçamento</a></div>
+        <div class="preco2-acao"><a class="btn btn-outline" href="#contato" data-plano="Olá! Quero um orçamento de site totalmente personalizado.">Peça o orçamento</a></div>
       </article>
-      <div class="precos2-extras reveal"><div><strong>Plano de cuidado (opcional)</strong><b>R$ 79/mês</b><span>Hospedagem, cópias de segurança, até 1 hora de ajustes por mês e relatório de visitas.</span></div><div><strong>Ajuste avulso</strong><b>R$ 70/hora</b><span>Para mudanças depois das rodadas incluídas.</span></div><div><strong>Contratou pelo site?</strong><b>Começa em 1 dia útil</b><span>Você recebe um e-mail para levantarmos o que precisa. Tudo o que for além do plano é orçado antes.</span></div></div>
-      <p class="planos-nota reveal">Sites e automações no pagamento único: entrada de 50% (aqui no site ou depois da proposta) e 50% na entrega. PIX, cartão em até 6x ou boleto. O que foi construído é seu.</p>
+      <div class="precos2-extras"><div><strong>Plano de cuidado (opcional)</strong><b>R$ 79/mês</b><span>Hospedagem, cópias de segurança, até 1 hora de ajustes por mês e relatório de visitas.</span></div><div><strong>Ajuste avulso</strong><b>R$ 70/hora</b><span>Para mudanças depois das rodadas incluídas.</span></div><div><strong>Contratou pelo site?</strong><b>Começa em 1 dia útil</b><span>Você recebe um e-mail para levantarmos o que precisa. Tudo o que for além do plano é orçado antes.</span></div></div>
+      <p class="planos-nota">Sites e automações no pagamento único: entrada de 50% (aqui no site ou depois da proposta) e 50% na entrega. PIX, cartão em até 6x ou boleto. O que foi construído é seu.</p>
       </div>
-      <div class="entrega reveal">
+      <div class="entrega">
         <details>
           <summary><div class="t1">O que vai em todo site entregue</div><div class="t2">Conferido item por item antes de publicar, em qualquer plano.</div></summary>
           <div class="entrega-grade">
@@ -279,7 +301,7 @@
           </div>
         </details>
       </div>
-      <div class="pagina-ou-site reveal">
+      <div class="pagina-ou-site">
         <div class="t1">Página ou site?</div><div class="t2">A <b>página</b> (plano Presença) tem um objetivo só: fazer a pessoa chamar, agendar ou pedir orçamento. É a melhor para anúncio e para quem está começando. O <b>site</b> (plano Completo) é a casa da empresa: serviços, fotos, quem atende e avaliações, para a pessoa conhecer e confiar. Negócio local quase sempre precisa dos dois, e o Completo já inclui a página.</div>
       </div>
       </div>
@@ -303,11 +325,27 @@
     </form>
   </dialog>
 
+  <section id="duvidas" class="sv-faq" aria-labelledby="t-duvidas">
+    <div class="wrap">
+      <span class="eyebrow">Dúvidas</span>
+      <h2 id="t-duvidas" class="sec-title">Perguntas sobre sites e automação.</h2>
+      <div class="sv-faq-lista np-faq">
+        <details><summary>Isto é a mesma coisa que a Veltria?</summary><p>Não. A Veltria são sistemas prontos que você aluga por mês. Aqui são projetos feitos para você, com pagamento único: o site ou a automação, depois de quitados, ficam seus.</p></details>
+        <details><summary>Em quanto tempo fica pronto?</summary><p>Presença em 2 dias úteis, automação em 3 e o plano Completo em 5, contados a partir da entrada e do material completo. O site personalizado tem o prazo escrito na proposta.</p></details>
+        <details><summary>E se eu desistir?</summary><p>Contratando como consumidor pela internet, você pode desistir em até 7 dias depois do aceite da proposta, com devolução integral. Depois disso e antes da entrega, há multa de 20% do valor do projeto, como está nos Termos.</p></details>
+        <details><summary>Preciso pagar mensalidade depois?</summary><p>Não é obrigatório. O plano de cuidado (R$ 79/mês) é opcional e cobre hospedagem, cópias de segurança, até 1 hora de ajustes por mês e relatório de visitas. Sem ele, mudanças são cobradas por hora, sempre orçadas antes.</p></details>
+        <details><summary>A automação usa o WhatsApp oficial?</summary><p>Ela usa a API oficial do WhatsApp (Meta) ou a ferramenta indicada na proposta, e segue as regras desses fornecedores. As taxas da Meta são pagas direto a ela.</p></details>
+        <details><summary>Vocês garantem que vou aparecer no Google?</summary><p>Não. O site sai preparado para o Google achar (Search Console, sitemap, títulos com o serviço e a cidade), mas posição, visitas e vendas dependem de fatores fora do nosso controle.</p></details>
+      </div>
+      <div class="sv-faq-pe"><a class="btn btn-primary" href="#monte">Solicitar orçamento</a><a class="btn btn-texto" href="termos.html">Ler os Termos de Serviço</a><a class="btn btn-texto" href="seguranca.html">Como cuidamos dos dados</a></div>
+    </div>
+  </section>
+
   <section id="contato" aria-labelledby="t-contato">
     <div class="wrap contato-grid">
-      <div class="reveal">
+      <div>
         <h2 id="t-contato" class="sec-title">Vamos falar sobre a sua operação.</h2>
-        <p class="sec-lede">Conte como a sua empresa trabalha hoje. Respondemos em até 1 dia útil com o sistema mais indicado e um valor fechado, sem compromisso.</p>
+        <p class="sec-lede">Conte como a sua empresa trabalha hoje. Respondemos em até 1 dia útil com o caminho mais indicado e um valor fechado, sem compromisso.</p>
         <div class="contato-alt">
           <a href="https://wa.me/WHATSAPP"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-whatsapp-logo"/></svg>Chamar no WhatsApp</a>
           <a href="mailto:EMAIL"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-envelope-simple"/></svg>Mandar um e-mail</a>
@@ -315,8 +353,9 @@
           <a href="https://www.instagram.com/cau4caetano/" target="_blank" rel="noopener"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-instagram-logo"/></svg>Cauã, fundador: @cau4caetano</a>
           <a href="https://www.instagram.com/leone.008/" target="_blank" rel="noopener"><svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-instagram-logo"/></svg>Lucas, vendas: @leone.008</a>
         </div>
+        <div data-confianca="quem-somos"></div>
       </div>
-      <form class="form reveal" data-form-contato novalidate>
+      <form class="form" data-form-contato novalidate>
         <div class="campo" data-campo="nome">
           <label for="f-nome">Seu nome</label>
           <input id="f-nome" name="nome" type="text" autocomplete="name" required>
@@ -336,7 +375,6 @@
           <legend>O que você quer resolver?</legend>
           <div class="chips">
             <label><input type="checkbox" name="interesse" value="Sistema de gestão (ERP)"><span>Sistema de gestão (ERP)</span></label>
-            <label><input type="checkbox" name="interesse" value="CRM de vendas"><span>CRM de vendas</span></label>
             <label><input type="checkbox" name="interesse" value="Agenda"><span>Agenda</span></label>
             <label><input type="checkbox" name="interesse" value="Financeiro"><span>Financeiro</span></label>
             <label><input type="checkbox" name="interesse" value="Jurídico"><span>Jurídico</span></label>
@@ -370,10 +408,10 @@
       <a href="como-funciona.html">Como funciona</a>
       <a href="exemplos.html">Sites</a>
       <a href="laboratorio.html">Laboratório</a>
-      <a href="demos/sistemas/gestao-essencial/?celular=1">Veltria Gestão ao vivo</a>
       <a href="https://www.instagram.com/blue.rose.express/" target="_blank" rel="noopener">Instagram @blue.rose.express</a>
       <a href="https://www.instagram.com/cau4caetano/" target="_blank" rel="noopener">@cau4caetano</a>
       <a href="https://www.instagram.com/leone.008/" target="_blank" rel="noopener">@leone.008</a>
+      <a href="seguranca.html">Segurança e dados</a>
       <a href="termos.html">Termos de Serviço</a>
       <a href="privacidade.html">Privacidade</a>
       <a href="checklist.html">Checklists grátis</a>

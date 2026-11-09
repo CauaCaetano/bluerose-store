@@ -2,11 +2,12 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<script src="js/idioma.js?v=19"></script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>O que a Blue Rose já construiu | Blue Rose Express</title>
-<meta name="description" content="Os melhores trabalhos da Blue Rose: sistemas Veltria, sites e a plataforma de arquitetura Multimodal, com telas reais para abrir e testar.">
+<meta name="description" content="Os trabalhos da Blue Rose: sistemas prontos, sites de exemplo, projetos para clientes e a plataforma de arquitetura Multimodal, com telas reais para abrir e testar.">
 <link rel="canonical" href="https://bluerose-store.com/vitrine.html">
 <meta property="og:type" content="website">
 <meta property="og:title" content="O que a Blue Rose já construiu">
@@ -15,19 +16,19 @@
 <meta property="og:image" content="https://bluerose-store.com/img/home/vitrine-capa.webp">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="img/blue-rose-favicon.png">
-<link rel="stylesheet" href="css/vitrine.css?v=4">
-<script src="js/vitrine.js?v=2" defer></script>
+<link rel="stylesheet" href="css/vitrine.css?v=8">
+<script src="js/vitrine.js?v=5" defer></script>
 </head>
 <body class="vt">
-<a class="vt-voltar" href="./">Voltar ao site</a>
+<div class="vt-topo nav-links"><a class="vt-voltar" href="./"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Voltar ao site</a></div>
 
 <main id="palco" class="vt-cenas" aria-live="polite">
 
-  <section class="vt-cena vt-abertura" data-nome="Início" data-cor="#101b36" data-tempo="4500">
+  <section class="vt-cena vt-abertura" data-nome="Início" data-id="inicio" data-grupo="Início" data-cor="#101b36" data-tempo="4500">
     <div class="vt-txt">
       <p class="vt-grupo">Blue Rose Express</p>
       <h1>O que a Blue Rose já construiu.</h1>
-      <p class="vt-d">Quatro sistemas, quatro sites, dois projetos para clientes e uma plataforma de arquitetura. Telas reais: passe por elas e abra o que quiser testar.</p>
+      <p class="vt-d">Seis sistemas prontos, quatro sites de exemplo, dois projetos para clientes e uma plataforma de arquitetura. Telas reais: passe por elas, use o índice e abra o que quiser testar.</p>
     </div>
     <div class="vt-palco" aria-hidden="true">
       <figure class="vt-tela vt-a1"><img src="img/sistemas/financeiro-essencial.webp" alt="" width="1200" height="750"></figure>
@@ -36,12 +37,13 @@
     </div>
   </section>
 
-  <section class="vt-cena" data-nome="Agenda" data-cor="#6f4638">
+  <section class="vt-cena" data-nome="Agenda" data-id="agenda" data-grupo="Sistemas prontos" data-cor="#6f4638">
     <div class="vt-txt">
-      <p class="vt-grupo">Sistema pronto · salão, estética e barbearia</p>
+      <p class="vt-grupo">Sistema pronto · quem atende com hora marcada</p>
       <h2>Veltria Agenda</h2>
-      <p class="vt-d">Horários de cada profissional, confirmação pelo WhatsApp e link para a cliente marcar sozinha.</p>
+      <p class="vt-d">O dia num relógio, link para a cliente marcar sozinha, sinal no PIX, confirmação no WhatsApp e lista de espera para encaixe.</p>
       <a class="vt-abrir" href="demos/sistemas/agenda-essencial/?celular=1" target="_blank" rel="noopener">Abrir a demonstração</a>
+      <p class="vt-nota">Tela da versão Essencial, com dados de exemplo.</p>
     </div>
     <div class="vt-palco">
       <figure class="vt-tela"><img src="img/sistemas/agenda-essencial.webp" alt="Tela do Veltria Agenda Essencial" width="1200" height="750" loading="lazy"></figure>
@@ -49,12 +51,13 @@
     </div>
   </section>
 
-  <section class="vt-cena" data-nome="Financeiro" data-cor="#203b32">
+  <section class="vt-cena" data-nome="Financeiro" data-id="financeiro" data-grupo="Sistemas prontos" data-cor="#203b32">
     <div class="vt-txt">
-      <p class="vt-grupo">Sistema pronto · empresa de serviço</p>
+      <p class="vt-grupo">Sistema pronto · autônomo e MEI</p>
       <h2>Veltria Financeiro</h2>
-      <p class="vt-d">Saldo, contas a pagar e a receber, cobrança de quem atrasou e previsão do caixa dos próximos meses.</p>
+      <p class="vt-d">Cada real que entra é dividido em potes (imposto, contas, salário e reserva), com cobrança por PIX, lembrete no WhatsApp e o limite do MEI à vista.</p>
       <a class="vt-abrir" href="demos/sistemas/financeiro-essencial/?celular=1" target="_blank" rel="noopener">Abrir a demonstração</a>
+      <p class="vt-nota">Tela da versão Essencial, com dados de exemplo.</p>
     </div>
     <div class="vt-palco">
       <figure class="vt-tela"><img src="img/sistemas/financeiro-essencial.webp" alt="Tela do Veltria Financeiro Essencial" width="1200" height="750" loading="lazy"></figure>
@@ -62,12 +65,13 @@
     </div>
   </section>
 
-  <section class="vt-cena" data-nome="Obras" data-cor="#46352d">
+  <section class="vt-cena" data-nome="Obras" data-id="obras" data-grupo="Sistemas prontos" data-cor="#46352d">
     <div class="vt-txt">
       <p class="vt-grupo">Sistema pronto · obras e reformas</p>
       <h2>Veltria Obras</h2>
-      <p class="vt-d">Cronograma, gastos, equipe e o que falta receber de cada obra, do escritório ou do canteiro.</p>
+      <p class="vt-d">Orçamento pelo WhatsApp que vira obra, cobrança de cada etapa por PIX, diário com fotos e os gastos de cada obra.</p>
       <a class="vt-abrir" href="demos/sistemas/obras-essencial/?celular=1" target="_blank" rel="noopener">Abrir a demonstração</a>
+      <p class="vt-nota">Tela da versão Essencial, com dados de exemplo.</p>
     </div>
     <div class="vt-palco">
       <figure class="vt-tela"><img src="img/sistemas/obras-essencial.webp" alt="Tela do Veltria Obras Essencial" width="1200" height="750" loading="lazy"></figure>
@@ -75,60 +79,92 @@
     </div>
   </section>
 
-  <section class="vt-cena" data-nome="Jurídico" data-cor="#542e38">
+  <section class="vt-cena" data-nome="Jurídico" data-id="juridico" data-grupo="Sistemas prontos" data-cor="#542e38">
     <div class="vt-txt">
-      <p class="vt-grupo">Sistema pronto · advocacia</p>
+      <p class="vt-grupo">Sistema pronto · advogado autônomo</p>
       <h2>Veltria Jurídico</h2>
-      <p class="vt-d">Busca as intimações do DJEN sozinho, conta os prazos e põe tudo na agenda de cada advogado.</p>
+      <p class="vt-d">Cada prazo mostra quantos dias úteis faltam, já sem feriados e recesso, e as intimações vêm explicadas em português simples.</p>
       <a class="vt-abrir" href="demos/sistemas/juridico-essencial/?celular=1" target="_blank" rel="noopener">Abrir a demonstração</a>
+      <p class="vt-nota">Tela da versão Essencial, com dados de exemplo.</p>
     </div>
     <div class="vt-palco">
-      <figure class="vt-tela"><img src="img/sistemas/juridico-essencial.webp" alt="Tela do Veltria Jurídico Essencial" width="1200" height="750" loading="lazy"></figure>
+      <figure class="vt-tela"><img src="img/sistemas/juridico-essencial.webp?v=8" alt="Tela do Veltria Jurídico Essencial" width="1200" height="750" loading="lazy"></figure>
       <img class="vt-cel" src="img/vitrine/juridico-cel.webp" alt="Veltria Jurídico Essencial no celular" width="360" height="779" loading="lazy">
     </div>
   </section>
 
-  <section class="vt-cena vt-site" data-nome="Monolito" data-cor="#2c3a2c">
+  <section class="vt-cena" data-nome="Peplo" data-id="peplo" data-grupo="Sistemas prontos" data-cor="#3d2f4a">
+    <div class="vt-txt">
+      <p class="vt-grupo">Sistema pronto · loja de roupas</p>
+      <h2>Peplo</h2>
+      <p class="vt-d">Fiado com limite e bloqueio de quem deve, estoque por tamanho e cor, caixa do dia e liquidação.</p>
+      <a class="vt-abrir" href="demos/sistemas/peplo/app.html" target="_blank" rel="noopener">Abrir a demonstração</a>
+      <p class="vt-nota">Tela com dados de exemplo.</p>
+    </div>
+    <div class="vt-palco">
+      <figure class="vt-tela"><img src="img/sistemas/peplo.webp" alt="Tela do Peplo com vendas, fiado e estoque, com dados de exemplo" width="1200" height="750" loading="lazy"></figure>
+      <img class="vt-cel" src="img/sistemas/peplo-cel.webp" alt="Peplo no celular" width="780" height="1688" loading="lazy">
+    </div>
+  </section>
+
+  <section class="vt-cena" data-nome="Annona" data-id="annona" data-grupo="Sistemas prontos" data-cor="#4a1a2c">
+    <div class="vt-txt">
+      <p class="vt-grupo">Sistema pronto · mercadinho e mercearia</p>
+      <h2>Annona</h2>
+      <p class="vt-d">Estoque e vendas com código de barras, entrada pela nota (XML), validade por lote e o que está parado.</p>
+      <a class="vt-abrir" href="demos/sistemas/annona/app.html" target="_blank" rel="noopener">Abrir a demonstração</a>
+      <p class="vt-nota">Tela com dados de exemplo. Não emite nota fiscal.</p>
+    </div>
+    <div class="vt-palco">
+      <figure class="vt-tela"><img src="img/sistemas/annona.webp" alt="Painel do Annona com vendas e lucro de hoje, validades e o que repor, com dados de exemplo" width="1200" height="750" loading="lazy"></figure>
+    </div>
+  </section>
+
+  <section class="vt-cena vt-site" data-nome="Monolito" data-id="monolito" data-grupo="Sites de exemplo" data-cor="#2c3a2c">
     <div class="vt-txt">
       <p class="vt-grupo">Site de exemplo · construtora</p>
       <h2>Monolito Engenharia</h2>
       <p class="vt-d">Casas de alto padrão, com uma maquete em 3D que o visitante gira com o dedo ou o mouse.</p>
       <a class="vt-abrir" href="sites/monolito/" target="_blank" rel="noopener">Abrir o site</a>
+      <p class="vt-nota">Exemplo: marca, pessoas e preços fictícios.</p>
     </div>
     <div class="vt-palco"><figure class="vt-tela"><img src="img/vitrine/site-monolito.webp?v=20261108b" alt="Página inicial do site Monolito Engenharia" width="1280" height="720" loading="lazy"></figure></div>
   </section>
 
-  <section class="vt-cena vt-site" data-nome="Ana Ribeiro" data-cor="#3b3226">
+  <section class="vt-cena vt-site" data-nome="Ana Ribeiro" data-id="ana-ribeiro" data-grupo="Sites de exemplo" data-cor="#3b3226">
     <div class="vt-txt">
       <p class="vt-grupo">Site de exemplo · corretora de imóveis</p>
       <h2>Ana Ribeiro</h2>
       <p class="vt-d">Página do imóvel com galeria, ficha e simulação, e a visita marcada num painel ao lado, sem sair da página.</p>
       <a class="vt-abrir" href="sites/ana-ribeiro/" target="_blank" rel="noopener">Abrir o site</a>
+      <p class="vt-nota">Exemplo: marca, pessoas e preços fictícios.</p>
     </div>
     <div class="vt-palco"><figure class="vt-tela"><img src="img/vitrine/site-ana-ribeiro.webp?v=20261108b" alt="Página inicial do site Ana Ribeiro Imóveis" width="1280" height="720" loading="lazy"></figure></div>
   </section>
 
-  <section class="vt-cena vt-site" data-nome="Bastos Lacerda" data-cor="#5a4630">
+  <section class="vt-cena vt-site" data-nome="Bastos Lacerda" data-id="bastos-lacerda" data-grupo="Sites de exemplo" data-cor="#5a4630">
     <div class="vt-txt">
       <p class="vt-grupo">Site de exemplo · advocacia empresarial</p>
       <h2>Bastos Lacerda</h2>
       <p class="vt-d">Busto escaneado em 3D e a conversa com o escritório marcada num painel ao lado.</p>
       <a class="vt-abrir" href="sites/bastos-lacerda/" target="_blank" rel="noopener">Abrir o site</a>
+      <p class="vt-nota">Exemplo: marca, pessoas e preços fictícios.</p>
     </div>
     <div class="vt-palco"><figure class="vt-tela"><img src="img/vitrine/site-bastos-lacerda.webp?v=20261108b" alt="Página inicial do site Bastos Lacerda" width="1280" height="720" loading="lazy"></figure></div>
   </section>
 
-  <section class="vt-cena vt-site" data-nome="Henrique Sato" data-cor="#1f2a2e">
+  <section class="vt-cena vt-site" data-nome="Henrique Sato" data-id="henrique-sato" data-grupo="Sites de exemplo" data-cor="#1f2a2e">
     <div class="vt-txt">
       <p class="vt-grupo">Site de exemplo · odontologia</p>
       <h2>Dr. Henrique Sato</h2>
       <p class="vt-d">Clínica de implantes: teste de 60 segundos e o agendamento da avaliação num painel ao lado, sem sair da página.</p>
       <a class="vt-abrir" href="sites/henrique-sato/" target="_blank" rel="noopener">Abrir o site</a>
+      <p class="vt-nota">Exemplo: marca, pessoas e preços fictícios.</p>
     </div>
     <div class="vt-palco"><figure class="vt-tela"><img src="img/vitrine/site-henrique-sato.webp?v=20261108b" alt="Página inicial do site Dr. Henrique Sato" width="1280" height="720" loading="lazy"></figure></div>
   </section>
 
-  <section class="vt-cena vt-cliente" data-nome="LEMAHE" data-cor="#536344">
+  <section class="vt-cena vt-cliente" data-nome="LEMAHE" data-id="lemahe" data-grupo="Projetos para clientes" data-cor="#536344">
     <div class="vt-txt">
       <p class="vt-grupo">Projeto para cliente · clínica de fisioterapia e estética</p>
       <h2>Clínica LEMAHE</h2>
@@ -147,7 +183,7 @@
     </div>
   </section>
 
-  <section class="vt-cena vt-cliente" data-nome="PlayCell" data-cor="#2f4c8a">
+  <section class="vt-cena vt-cliente" data-nome="PlayCell" data-id="playcell" data-grupo="Projetos para clientes" data-cor="#2f4c8a">
     <div class="vt-txt">
       <p class="vt-grupo">Projeto para cliente · loja de celulares</p>
       <h2>PlayCell</h2>
@@ -159,11 +195,12 @@
     </div>
   </section>
 
-  <section class="vt-cena vt-arq" data-nome="Arquitetura" data-cor="#101b36" data-tempo="11000">
+  <section class="vt-cena vt-arq" data-nome="Arquitetura" data-id="arquitetura" data-grupo="Plataforma de arquitetura" data-cor="#101b36" data-tempo="11000">
     <div class="vt-txt">
       <p class="vt-grupo">Plataforma em desenvolvimento</p>
       <h2>Multimodal Architecture</h2>
-      <p class="vt-d">Desenhe a planta em 2D, veja o mesmo projeto em 3D e exporte em PDF, DXF, SVG ou GLB. A demonstração usa dados fictícios e não pede conta.</p>
+      <p class="vt-d">Desenhe a planta em 2D, veja o mesmo projeto em 3D e exporte em PDF, DXF, SVG ou GLB.</p>
+      <p class="vt-nota">Demonstração com dados fictícios, sem conta. Agentes de IA, pagamentos e equipes estão desativados.</p>
       <div class="vt-trocas" role="group" aria-label="Escolher a tela">
         <button type="button" data-troca="0" aria-pressed="true">Planta</button>
         <button type="button" data-troca="1" aria-pressed="false">3D</button>
@@ -181,14 +218,14 @@
     </div>
   </section>
 
-  <section class="vt-cena vt-fim" data-nome="Próximo passo" data-cor="#101b36" data-tempo="0">
+  <section class="vt-cena vt-fim" data-nome="Próximo passo" data-id="fim" data-grupo="Próximo passo" data-cor="#101b36" data-tempo="0">
     <div class="vt-txt">
       <p class="vt-grupo">Agora é com você</p>
       <h2>Qual desses é o seu próximo passo?</h2>
       <div class="vt-fim-acoes">
         <a class="vt-abrir" href="sistemas.html">Ver os sistemas prontos</a>
         <a class="vt-abrir vt-claro" href="servicos.html">Pedir um projeto sob medida</a>
-        <a class="vt-mais" href="exemplos.html">Ver todos os sites de exemplo</a>
+        <a class="vt-mais" href="exemplos.html">Ver todos os sites</a>
       </div>
       <p class="vt-nota">Nos sites de exemplo, as marcas, as pessoas e os preços são fictícios.</p>
     </div>
@@ -198,9 +235,14 @@
 
 <nav class="vt-trilha" id="trilha" aria-label="Partes da apresentação" hidden></nav>
 <div class="vt-ctrl" id="ctrl" hidden>
+  <button type="button" id="indice" class="vt-indice-bt" aria-haspopup="dialog" aria-controls="dlg-indice"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Índice</span></button>
   <button type="button" id="ant" aria-label="Anterior"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
-  <button type="button" id="pausa" aria-label="Pausar"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path class="i-pausa" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/><path class="i-play" d="M8 5v14l11-7z" fill="currentColor"/></svg></button>
+  <button type="button" id="pausa" aria-label="Pausar"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path class="i-pausa" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/><path class="i-play" d="M7.5 5v14l11-7z" fill="currentColor"/></svg></button>
   <button type="button" id="prox" aria-label="Próximo"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
 </div>
+<dialog class="vt-dlg" id="dlg-indice" aria-labelledby="dlg-indice-t">
+  <div class="vt-dlg-topo"><h2 id="dlg-indice-t">Índice da apresentação</h2><button type="button" class="vt-dlg-x" data-fechar aria-label="Fechar o índice"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2"/></svg></button></div>
+  <div class="vt-dlg-grupos" data-indice></div>
+</dialog>
 </body>
 </html>

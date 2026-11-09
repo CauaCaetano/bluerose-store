@@ -131,7 +131,9 @@
       botoes.forEach(function (b) { b.disabled = true; });
       terminal.textContent = '';
       escrever('$ python ' + [pedido.script].concat(pedido.args.map(aspas)).join(' '), 'cmd');
-      ligar().then(function () {
+      // 1a execução: o Python (~10 MB) demora para ligar; o estado de carregando/erro (js/confianca.js) cobre o terminal
+      var ligando = (ligado || !window.brEstado) ? ligar() : window.brEstado.rodar(terminal, ligar, { texto: T.carregando, erro: T.falhaCarga, tempo: 60000, sobre: true });
+      ligando.then(function () {
         statusEl.textContent = T.rodando;
         return pedir(pedido, function (d) { escrever(d.texto, d.tipo === 'erro' ? 'err' : null); });
       }).then(function (fim) {

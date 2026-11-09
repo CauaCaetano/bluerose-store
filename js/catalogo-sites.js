@@ -11,8 +11,8 @@
   if (!dados) return;
   var en = (document.documentElement.lang || '').indexOf('en') === 0;
   var T = en
-    ? { sites: function (n) { return n + (n > 1 ? ' websites' : ' website'); }, abrir: 'Open website', paginas: 'pages', pagina: 'page', escolha: 'Choose a website to explore', ver: 'See the websites', plano: 'This model in the Complete plan', prazo: 'ready in 10 business days', preco: function (v) { return '$' + Math.max(0, Math.round(v * 0.8 / 100) * 100 - 10).toLocaleString('en-US'); }, plano3d: 'This model, with 3D', prazo3d: 'ready in 14 business days', preco3d: function (v) { return '$' + Math.max(0, Math.round(v * 0.8 / 100) * 100 - 10).toLocaleString('en-US'); }, quero: 'I want this one', comNome: 'Opens as' }
-    : { sites: function (n) { return n + (n > 1 ? ' sites' : ' site'); }, abrir: 'Abrir site', paginas: 'páginas', pagina: 'página', escolha: 'Escolha um site para navegar', ver: 'Ver os sites', plano: 'Este modelo no plano Completo', prazo: 'pronto em 5 dias úteis', preco: function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); }, plano3d: 'Este modelo, com 3D', prazo3d: 'pronto em 5 dias úteis', preco3d: function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); }, quero: 'Quero este', comNome: 'Abre como' };
+    ? { sites: function (n) { return n + (n > 1 ? ' websites' : ' website'); }, abrir: 'Open website', paginas: 'pages', pagina: 'page', escolha: 'Choose a website to explore', ver: 'See the websites', plano: 'A website like this:', prazo: 'ready in 10 business days', preco: function (v) { return '$' + Math.max(0, Math.round(v * 0.8 / 100) * 100 - 10).toLocaleString('en-US'); }, plano3d: 'A website like this, with 3D:', prazo3d: 'ready in 14 business days', preco3d: function (v) { return '$' + Math.max(0, Math.round(v * 0.8 / 100) * 100 - 10).toLocaleString('en-US'); }, quero: 'I want this one', comNome: 'Opens as' }
+    : { sites: function (n) { return n + (n > 1 ? ' sites' : ' site'); }, abrir: 'Abrir site', paginas: 'páginas', pagina: 'página', escolha: 'Escolha um site para navegar', ver: 'Ver os sites', plano: 'Um site como este:', prazo: 'pronto em 5 dias úteis', preco: function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); }, plano3d: 'Um site como este, com 3D:', prazo3d: 'pronto em 5 dias úteis', preco3d: function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); }, quero: 'Quero este', comNome: 'Abre como' };
   var TRES_D = ['bastos-lacerda', 'monolito', 'ana-ribeiro']; // sites com cena 3D: preço próprio
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); };
   var lang = en ? 'en' : 'pt';
@@ -197,6 +197,13 @@
     marcar();
   }
 
+  // preço de cada modelo (o mesmo do diálogo) e a faixa de uma lista de sites
+  var precoDe = function (s) { return TRES_D.indexOf(s.slug) >= 0 ? T.preco3d(s.preco || 2490) : T.preco(s.preco || 1490); };
+  var faixa = function (lista) {
+    var v = lista.filter(function (s) { return s.cat !== 'midia-kit'; }).map(function (s) { return s.preco || (TRES_D.indexOf(s.slug) >= 0 ? 2490 : 1490); });
+    if (!v.length) return null;
+    return { min: Math.min.apply(null, v), max: Math.max.apply(null, v) };
+  };
   var ico = function (n) { return '<svg class="ico" aria-hidden="true"><use href="img/icones.svg#i-' + n + '"/></svg>'; };
   var trocaParam = function (id) {
     try {
@@ -249,20 +256,81 @@
   }
   if (grade) {
     grade.innerHTML = dados.categorias.map(function (c, i) {
-      var lista = doCat(c.id);
-      return '<button type="button" class="cat-card" style="--i:' + i + '" data-cat="' + c.id + '">' +
-        '<span class="cat-pilha">' + lista.slice(0, 3).map(function (s, k) { return imgTag(s, false, 'alt="" style="--k:' + k + '"'); }).join('') + '</span>' +
-        '<span class="cat-txt"><span class="tipo">' + T.sites(lista.length) + '</span><strong>' + esc(nomeCat(c)) + '</strong><span class="cat-nomes">' + lista.map(function (s) { return esc(s.nome); }).join(' · ') + '</span><span class="link">' + T.ver + ico('arrow-right') + '</span></span></button>';
+      var lista = doCat(c.id), f = faixa(lista), prim = lista[0];
+      if (!prim) return '';
+      var fx = !f ? '' : (f.min === f.max ? T.preco(f.min) : (en ? 'From ' : 'De ') + T.preco(f.min) + (en ? ' to ' : ' a ') + T.preco(f.max));
+      return '<div class="cat-card cat-com-acoes" style="--i:' + i + '">' +
+        '<button type="button" class="cat-pilha" data-cat="' + c.id + '" aria-label="' + esc((en ? 'See the ' : 'Ver os ') + T.sites(lista.length) + (en ? ' for ' : ' de ') + nomeCat(c)) + '">' + lista.slice(0, 3).map(function (s, k) { return imgTag(s, false, 'alt="" style="--k:' + k + '"'); }).join('') + '</button>' +
+        '<span class="cat-txt"><span class="tipo">' + T.sites(lista.length) + '</span><strong>' + esc(nomeCat(c)) + '</strong><span class="cat-nomes">' + lista.map(function (s) { return esc(s.nome); }).join(' · ') + '</span>' +
+        (fx ? '<span class="cat-preco">' + (en ? 'Each model with your brand: ' : 'Cada modelo com a sua marca: ') + '<b>' + fx + '</b></span>' : '') +
+        '<span class="cat-acoes"><a class="btn btn-primary" data-site-link="' + prim.slug + '" href="' + url(prim) + '" aria-label="' + esc((en ? 'Open demo: ' : 'Abrir demonstração: ') + prim.nome) + '">' + (en ? 'Open demo' : 'Abrir demonstração') + '</a>' +
+        '<button type="button" class="btn btn-outline" data-cat="' + c.id + '">' + (en ? 'See the ' : 'Ver os ') + T.sites(lista.length) + '</button></span></span></div>';
     }).join('') + (dados.categorias.length % 3 === 2 ? '<a class="cat-card cat-cta" href="index.html#contato"><span class="cat-txt"><span class="tipo">Site sob medida</span><strong>Não achou o seu ramo?</strong><span class="cat-nomes">Fazemos o site do seu negócio do zero, no mesmo padrão destes exemplos.</span><span class="link">Falar com a Blue Rose</span></span></a>' : '');
     grade.querySelectorAll('[data-cat]').forEach(function (b) { b.addEventListener('click', function () { abrirCategoria(b.getAttribute('data-cat'), b); }); });
     var pedida = params.get('c');
     if (pedida) abrirCategoria(pedida);
   }
 
+  // ---------- linha de preço logo abaixo do título da página ----------
+  var linhaPreco = document.querySelector('[data-preco-sites]');
+  var fTodos = faixa(todos);
+  if (linhaPreco && fTodos && !en) {
+    linhaPreco.innerHTML = '<span>Cada modelo com a sua marca: <b>de ' + T.preco(fTodos.min) + ' a ' + T.preco(fTodos.max) + '</b></span><small>pagamento único · ' + T.prazo + ' · o preço de cada um está na ficha</small>';
+  }
+
+  // ---------- fichas: ramo, objetivo, recursos e link de cada exemplo ----------
+  // objetivo = a chamada principal do topo de cada site (conferida em sites/<slug>/index.html em 08/11/2026)
+  var OBJETIVO = {
+    'henrique-sato': 'Levar o paciente a agendar a avaliação',
+    'atelier-oral': 'Levar o paciente a agendar uma conversa',
+    'ninho-odontopediatria': 'Levar os responsáveis a agendar a consulta',
+    'ferreira-reformas': 'Gerar pedidos de orçamento',
+    'base-forte': 'Gerar pedidos de orçamento',
+    'monolito': 'Levar o cliente a iniciar o projeto',
+    'patricia-leal': 'Levar a pessoa a agendar uma conversa',
+    'aguiar-monteiro': 'Levar o trabalhador a agendar uma conversa',
+    'bastos-lacerda': 'Levar a empresa a agendar uma conversa',
+    'bianca-moraes': 'Levar a paciente a agendar',
+    'glow': 'Levar a cliente a agendar a avaliação na unidade mais perto',
+    'maison-elora': 'Levar a cliente a agendar o horário',
+    'ana-ribeiro': 'Levar o comprador a agendar a visita',
+    'prisma-adm': 'Levar proprietários e inquilinos a falar com a administradora',
+    'terra-nobre': 'Levar o comprador a agendar a visita'
+  };
+  var fichas = document.querySelector('[data-exemplos-fichas]');
+  if (fichas && !en) {
+    var filtros = fichas.querySelector('[data-fichas-filtros]'), listaF = fichas.querySelector('[data-fichas-lista]');
+    var catDe = function (id) { return dados.categorias.filter(function (x) { return x.id === id; })[0] || {}; };
+    var ordem = todos.slice().sort(function (a, b) {
+      var ca = dados.categorias.indexOf(catDe(a.cat)), cb = dados.categorias.indexOf(catDe(b.cat));
+      return ca - cb || (a.ordem || 0) - (b.ordem || 0);
+    });
+    listaF.innerHTML = ordem.map(function (s) {
+      var obj = OBJETIVO[s.slug];
+      return '<li class="pd-ficha" data-cat="' + esc(s.cat) + '">' +
+        '<figure class="pd-moldura">' + imgTag(s, false, 'alt="Página inicial do site de exemplo ' + esc(s.nome) + '"') + '</figure>' +
+        '<div class="pd-ficha-txt"><h3>' + esc(s.nome) + '</h3>' +
+        '<dl><dt>Ramo</dt><dd>' + esc(nomeCat(catDe(s.cat))) + (s.sub ? ' · ' + esc(s.sub) : '') + '</dd>' +
+        (obj ? '<dt>Objetivo</dt><dd>' + esc(obj) + '</dd>' : '') +
+        '<dt>Recursos</dt><dd><ul>' + (s.recursos || []).map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul></dd>' +
+        '<dt>Páginas</dt><dd>' + s.paginas + '</dd></dl>' +
+        (s.cat === 'midia-kit' ? '' : '<p class="pd-ficha-preco">Este modelo: <b>' + precoDe(s) + '</b> · ' + (TRES_D.indexOf(s.slug) >= 0 ? T.prazo3d : T.prazo) + '</p>') +
+        '<div class="pd-ficha-acoes"><a class="btn btn-primary" data-site-link="' + s.slug + '" href="' + url(s) + '" aria-label="Abrir demonstração: ' + esc(s.nome) + '">Abrir demonstração</a></div></div></li>';
+    }).join('');
+    var filtrar = function (id) {
+      filtros.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-f') === id)); });
+      listaF.querySelectorAll('.pd-ficha').forEach(function (li) { li.hidden = id !== 'todos' && li.getAttribute('data-cat') !== id; });
+    };
+    filtros.innerHTML = '<button type="button" data-f="todos" aria-pressed="true">Todos <small>' + todos.length + '</small></button>' +
+      dados.categorias.map(function (c) { return '<button type="button" data-f="' + esc(c.id) + '" aria-pressed="false">' + esc(nomeCat(c)) + ' <small>' + doCat(c.id).length + '</small></button>'; }).join('');
+    filtros.querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { filtrar(b.getAttribute('data-f')); }); });
+  }
+
   // ---------- vitrine (projetos) ----------
   var vit = document.querySelector('[data-vitrine-sites]');
   if (vit) {
     var barraCat = vit.querySelector('[data-v-cats]'), barraSites = vit.querySelector('[data-v-sites]'), palco = vit.querySelector('.vitrine-palco'), frame = palco.querySelector('iframe'), abrirTela = vit.querySelector('[data-v-abrir]');
+    if (window.brEstado) window.brEstado.iframe(frame, { texto: 'Abrindo o site de exemplo…' });   // estado de carregando/erro; o data-estado do HTML cobre o caso de o confianca.js carregar depois
     var mostrar = function (s) {
       frame.src = url(s); frame.title = s.nome; abrirTela.href = url(s);
       barraSites.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-slug') === s.slug); });

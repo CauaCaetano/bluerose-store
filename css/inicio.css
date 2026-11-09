@@ -18,7 +18,7 @@
    Home
    ============================================================= */
 .hn {
-  --hn-tinta: #101b36; --hn-tinta-2: #22345a; --hn-papel: #f4ebdd; --hn-folha: #fbf6ee; --hn-rosa: #2f4c8a;
+  --hn-tinta: #101b36; --hn-tinta-2: #22345a; --hn-papel: #f4ebdd; --hn-folha: #fbf6ee; --hn-rosa: #101b36;
   --hn-grafite: #4a4f5c; --hn-terracota: #9a4a31; --hn-linha: #d9cbb3; --hn-salvia: #3e6b4f;
   --hn-sombra: 0 1px 2px rgba(16, 27, 54, .06), 0 12px 32px -20px rgba(16, 27, 54, .25);
   --hn-r: 6px;
@@ -50,11 +50,7 @@ html:not(.hn-cantos) .hn main > section::after { background-image: none; }
 .hn .eyebrow::before { content: ""; width: 28px; height: 1px; margin: 0; background: var(--hn-linha); transform: none; filter: none; }
 .hn p { color: inherit; }
 
-/* botões: chapados, raio único, foco visível */
-.hn .btn { min-height: 48px; padding: 0 24px; border-radius: var(--hn-r); font: 600 14px/1 var(--font, 'Geist', system-ui, sans-serif); letter-spacing: .06em; text-transform: uppercase; }
-.hn .nav .btn { min-height: 42px; padding: 0 18px; font-size: 12.5px; }
-.hn .btn-ghost { border: 1px solid var(--hn-tinta); color: var(--hn-tinta); background: transparent; }
-.hn .btn-ghost:hover { background: rgba(16, 27, 54, .06); color: var(--hn-tinta); border-color: var(--hn-tinta); }
+/* botões: componente único de css/tinta.css (sem redefinir aqui) e foco visível */
 .hn .btn .ico { width: 16px; height: 16px; }
 .hn a:focus-visible, .hn button:focus-visible, .hn input:focus-visible, .hn textarea:focus-visible, .hn summary:focus-visible { outline: 2px solid var(--hn-rosa); outline-offset: 2px; }
 .hn .nav a:focus-visible, .hn .nav button:focus-visible, .hn .rodape-site a:focus-visible { outline-color: var(--hn-papel); }
@@ -85,7 +81,7 @@ html.js .hn .reveal.visto { opacity: 1; transform: none; }
 .hn-porta .hn-acoes { margin-top: auto; padding-top: 24px; }
 /* topo marinho: notebook com telas reais em movimento; o play leva a um site interativo de exemplo */
 .hn-topo::before, .hn-topo::after { content: none; }
-.hn main > section.hn-topo { --topo: #101b36; --topo-texto: #f4ebdd; --topo-apoio: #c5cddc; --topo-azul: #6cc4ff; z-index: 1; overflow: hidden; padding: 40px 0 72px; background: var(--topo); color: var(--topo-texto); }
+.hn main > section.hn-topo { --topo: #101b36; --topo-texto: #f4ebdd; --topo-apoio: #c5cddc; --topo-azul: #d8c8ae; z-index: 1; overflow: hidden; padding: 40px 0 72px; background: var(--topo); color: var(--topo-texto); }
 .hn-topo .wrap { display: grid; grid-template-columns: minmax(0, 1fr) min(40vw, 600px); column-gap: 40px; }
 .hn-topo .wrap > * { grid-column: 1; }
 .hn-topo .eyebrow { justify-self: start; }
@@ -115,8 +111,6 @@ html.js .hn .reveal.visto { opacity: 1; transform: none; }
 .hn-topo .hn-porta-d, .hn-topo .hn-lista li { color: var(--topo-apoio); }
 .hn-topo .hn-lista b { color: var(--topo-texto); }
 .hn-topo .hn-lista li::before { border-color: var(--topo-azul); }
-.hn .hn-topo .btn-primary { background: var(--topo-texto) !important; border-color: var(--topo-texto) !important; color: #101b36 !important; box-shadow: none !important; }
-.hn .hn-topo .btn-primary:hover { background: #fff !important; border-color: #fff !important; }
 .hn-topo .hn-link { color: var(--topo-texto); }
 .hn-topo .hn-link:hover { color: var(--topo-azul); }
 .hn-topo a:focus-visible { outline: 2px solid var(--topo-azul); outline-offset: 3px; }
@@ -198,7 +192,7 @@ html.js .hn .reveal.visto { opacity: 1; transform: none; }
 .hn-tabela tr:last-child th, .hn-tabela tr:last-child td { border-bottom: 1px solid var(--hn-linha); }
 .hn-tabela th { font-weight: 500; color: var(--hn-tinta); padding-right: 16px; }
 .hn-tabela td { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--hn-tinta); font-weight: 600; }
-.hn-medida td a { color: #2f4c8a; text-decoration: underline; text-underline-offset: 3px; white-space: normal; }
+.hn-medida td a { color: #101b36; text-decoration: underline; text-underline-offset: 3px; white-space: normal; }
 .hn-medida td a:hover { color: var(--hn-tinta); }
 .hn-preco-col .hn-lista { margin-top: 20px; }
 .hn-preco-col .hn-acoes { margin-top: auto; padding-top: 28px; }
@@ -268,3 +262,135 @@ html.js .hn .reveal.visto { opacity: 1; transform: none; }
   .hn-ramo, .hn-site { transition: none; }
 }
 
+
+/* =============================================================
+   servicos.html (08/11): blocos novos, só sob body.sv (este arquivo também é carregado pela arquitetura)
+   ============================================================= */
+.sv .sv-outra { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(244, 235, 221, .25); }
+.sv .sv-outra p { margin: 0; max-width: 40ch; font-size: 16px; line-height: 1.5; color: #c5cddc; }
+.sv .sv-outra b { color: #f4ebdd; }
+.sv .sv-outra .btn { min-height: 44px; }
+.sv .sv-ilustra { margin: 8px 0 0; font-size: 13px; opacity: .8; }
+.sv .sv-aviso { margin: 18px 0 0; max-width: 62ch; padding: 14px 16px; border: 1px solid rgba(16, 27, 54, .25); border-radius: 6px; background: #fbf6ee; color: #101b36; font-size: 15px; line-height: 1.55; }
+.sv .sv-aviso b { font-weight: 600; }
+.sv .sv-escopo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 clamp(24px, 3vw, 48px); margin-top: clamp(40px, 5vw, 64px); }
+.sv .sv-escopo > div { padding-top: 20px; border-top: 2px solid #101b36; }
+.sv .sv-escopo h3 { margin: 0; font: 500 clamp(24px, 2vw, 30px)/1.15 'Cormorant Garamond', Georgia, serif; color: #101b36; }
+.sv .sv-escopo ul { list-style: none; margin: 14px 0 0; padding: 0; }
+.sv .sv-escopo li { padding: 10px 0; border-top: 1px solid rgba(16, 27, 54, .14); font-size: 15.5px; line-height: 1.5; color: #464c58; }
+.sv .sv-escopo li:first-child { border-top: 0; }
+.sv .sv-faq-pe { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+@media (max-width: 900px) {
+  .sv .sv-escopo { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+}
+@media (max-width: 600px) {
+  .sv .sv-outra .btn, .sv .sv-faq-pe .btn { width: 100%; justify-content: center; }
+}
+
+/* =============================================================
+   Rodada 3 (P2, 08/11): preço de entrada logo abaixo do H1, rótulos fortes das duas portas,
+   resultado final da simulação em destaque, aviso de demonstração neutro.
+   ============================================================= */
+/* home: o notebook agora ocupa 4 linhas (sobrelinha, título, preço, texto) */
+.hn-topo .wrap > .hn-note { grid-row: 1 / span 4; }
+.hn-preco-topo, .sv .sv-preco-topo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: var(--esp-titulo-sub, 18px) 0 0; font: 500 var(--fs-corpo-g, 18px)/1.4 var(--font-texto, 'Geist', system-ui, sans-serif); }
+.hn-preco-topo { color: #c5cddc; }
+.hn-preco-topo b, .sv .sv-preco-topo b { font-weight: 700; color: #f4ebdd; white-space: nowrap; }
+.hn-preco-sep, .sv .sv-preco-sep { color: #d8c8ae; }
+.hn .hn-topo .hn-sub { margin-top: 14px; }
+/* rótulo forte: pronto x feito do zero, igual nas duas páginas */
+.hn .hn-topo .hn-rotulo, .sv .sv-rotulo { display: inline-flex; align-items: center; align-self: flex-start; min-height: 32px; padding: 4px 12px; border: 1px solid rgba(216, 200, 174, .55); border-radius: var(--r-pill, 999px); font: 600 var(--fs-label, 13px)/1.2 var(--font-texto, 'Geist', system-ui, sans-serif); letter-spacing: .06em; text-transform: uppercase; color: #d8c8ae; background: rgba(216, 200, 174, .08); }
+.sv .sv-rotulo { display: flex; width: max-content; max-width: 100%; margin: 0 0 10px; }
+.sv .sv-preco-topo { color: #c5cddc; }
+.sv .hero .sub { margin-top: 14px; }
+@media (max-width: 1000px) {
+  .hn-topo .wrap > .hn-note { grid-row: auto; }
+}
+@media (max-width: 480px) {
+  .hn-preco-topo, .sv .sv-preco-topo { flex-direction: column; gap: 2px; font-size: 17px; }
+  .hn-preco-sep, .sv .sv-preco-sep { display: none; }
+}
+
+/* servicos: aviso de demonstração em tom neutro e menor */
+.sv .sv-aviso { margin: 16px 0 0; padding: 2px 0 2px 12px; border: 0; border-left: 2px solid rgba(16, 27, 54, .28); border-radius: 0; background: none; color: var(--ink-3, #625a4c); font-size: var(--fs-legenda, 14px); line-height: 1.5; }
+
+/* servicos: simulação. Estado vazio que diz o que fazer; resultado final em destaque */
+.sv .chat-vazio[data-p2] { display: grid; gap: 6px; max-width: 34ch; color: var(--ink-3, #625a4c); font-size: var(--fs-legenda, 14px); line-height: 1.5; }
+.sv .chat-vazio[data-p2] b { color: #101b36; font-size: var(--fs-corpo, 16px); font-weight: 600; }
+.sv .msg.resultado.sv-final { border: 2px solid #101b36; background: #fff; }
+.sv .sv-entrega { margin-top: var(--esp-6, 24px); padding: var(--card-p, 24px); border: 1px solid rgba(16, 27, 54, .18); border-left: 4px solid #101b36; border-radius: var(--r-card, 6px); background: #fbf6ee; box-shadow: var(--sombra-2, 0 12px 32px -20px rgba(16, 27, 54, .3)); color: #101b36; }
+.sv .sv-entrega[hidden] { display: none; }
+.sv .sv-entrega-tag { margin: 0; font: 600 var(--fs-label, 13px)/1.3 var(--font-texto, 'Geist', system-ui, sans-serif); letter-spacing: .06em; text-transform: uppercase; color: #101b36; }
+.sv .sv-entrega h3 { margin: 6px 0 0; font: 500 var(--fs-h3, 26px)/1.15 'Cormorant Garamond', Georgia, serif; color: #101b36; }
+.sv .sv-entrega dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 12px 24px; margin: 16px 0 0; }
+.sv .sv-entrega dl > div { padding-top: 10px; border-top: 1px solid rgba(16, 27, 54, .14); }
+.sv .sv-entrega dt { font-size: var(--fs-label, 13px); color: var(--ink-3, #625a4c); }
+.sv .sv-entrega dd { margin: 2px 0 0; font-size: var(--fs-corpo, 16px); font-weight: 600; color: #101b36; overflow-wrap: anywhere; }
+.sv .sv-entrega-livre { grid-column: 1 / -1; }
+.sv .sv-entrega-pe { margin: 16px 0 0; font-size: var(--fs-legenda, 14px); line-height: 1.5; color: var(--ink-3, #625a4c); }
+.sv .demo-nota { font-size: var(--fs-legenda, 14px); }
+/* servicos: sobrelinha do topo legível (14 px) e alvos de 44 px nas abas da simulação, filtros e contatos */
+body.sv main .hero .eyebrow { font-size: var(--fs-legenda, 14px); letter-spacing: .06em; color: #d8c8ae; }
+body.sv .demo-tabs [role="tab"], body.sv .sites-filtro button { min-height: var(--alvo-min, 44px); }
+body.sv .contato-alt a, body.hn .contato-alt a { min-height: var(--alvo-min, 44px); display: inline-flex; align-items: center; }
+.sv .sv-preco-topo { flex-direction: column; gap: 2px; } .sv .sv-preco-sep { display: none; }
+
+/* =============================================================
+   Rodada 4 (P2, 09/11): destino explícito do "Ver o que já construímos" (Vitrine)
+   e ritmo do topo de Serviços: 48 px depois da linha de preço, 64 px antes dos botões.
+   ============================================================= */
+.hn-play-dest { padding: 2px 10px; border-radius: 4px; background: rgba(16, 27, 54, .82); color: #d8c8ae; font-size: var(--fs-aux, 12px); font-weight: 500; letter-spacing: .02em; }
+.sv .hero .sv-preco-topo + .sub { margin-top: var(--ritmo-m, 48px); }
+.sv .hero .sub + .ctas { margin-top: var(--ritmo-g, 64px); }
+@media (max-width: 480px) { .hn-play-bola { width: 52px; height: 52px; } .hn-play { gap: 6px; } }
+@media (max-width: 760px) {
+  .sv .hero .sv-preco-topo + .sub { margin-top: var(--ritmo-p, 32px); }
+  .sv .hero .sub + .ctas { margin-top: var(--ritmo-m, 48px); }
+  .hn-play-dest { font-size: 11px; padding: 1px 8px; }
+}
+
+/* =============================================================
+   Rodada 4 · Grok (09/11): Serviços
+   ============================================================= */
+/* quatro tipos de projeto: o mesmo padding (32 px) em todos e a conversa de exemplo inteira */
+@media (min-width: 641px) {
+  body.sv .bento .cel { padding: var(--ritmo-p, 32px); min-height: 280px; }
+  body.sv .bento .c-site img { margin-bottom: calc(-1 * var(--ritmo-p, 32px)); }
+}
+@media (max-width: 640px) {
+  body.sv .bento .cel { padding: var(--card-p, 24px); }
+  body.sv .bento .c-site img { margin-bottom: calc(-1 * var(--card-p, 24px)); }
+}
+body.sv .bento .c-whats { overflow: visible; }
+body.sv .mini-chat .msg { max-width: 92%; overflow-wrap: anywhere; }
+
+/* simulação: estado vazio com uma conversa apagada (esqueleto) acima da instrução */
+.sv .chat-vazio[data-p2] { justify-items: center; }
+.sv .sv-esqueleto { display: flex; flex-direction: column; gap: 8px; width: min(260px, 100%); margin: 0 0 var(--esp-4, 16px); }
+.sv .sv-esqueleto i { display: block; height: 30px; border-radius: 12px; background: rgba(16, 27, 54, .07); border: 1px dashed rgba(16, 27, 54, .16); }
+.sv .sv-esqueleto .sv-esq-c { width: 62%; align-self: flex-start; border-bottom-left-radius: 4px; }
+.sv .sv-esqueleto .sv-esq-b { width: 74%; align-self: flex-end; border-bottom-right-radius: 4px; background: rgba(16, 27, 54, .12); }
+.sv .sv-esqueleto i:nth-child(3) { width: 48%; }
+
+/* rodar automação: 32 px depois da lista de etapas; opção com caixa de 24 px e área de toque de 44 px */
+body.sv .demo-actions { margin-top: var(--ritmo-p, 32px); gap: 12px 20px; }
+body.sv .demo-actions .opcao { min-height: var(--alvo-min, 44px); gap: 10px; font-size: var(--fs-corpo-p, 15px); color: #101b36; }
+body.sv .demo-actions .opcao input { width: 24px; height: 24px; margin: 0; flex: none; accent-color: #101b36; }
+
+/* sites que já fizemos: filtro ativo bem marcado (fundo marinho cheio e anel duplo) */
+body.sv .sites-filtro button { border: 1px solid rgba(16, 27, 54, .3); color: #101b36; background: transparent; }
+body.sv .sites-filtro button[aria-pressed="true"] { background: #101b36; border-color: #101b36; color: #f4ebdd; font-weight: 600; box-shadow: 0 0 0 2px #f4ebdd, 0 0 0 4px #101b36; }
+
+/* fim da simulação: link para Segurança e dados */
+.sv .sv-dados { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: var(--ritmo-p, 32px) 0 0; font-size: var(--fs-corpo-p, 15px); color: #101b36; }
+
+/* rodada 5: o botão do notebook leva à Vitrine; seta em vez de play, menor e mais discreto */
+.hn-play-bola { width: 60px; height: 60px; background: rgba(244, 235, 221, .86); box-shadow: 0 0 0 6px rgba(16, 27, 54, .22); }
+.hn-play-bola svg { width: 24px; height: 24px; }
+/* rodada 5: esqueleto da conversa com brilho sutil */
+.sv .sv-esqueleto i { background-image: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .55) 50%, transparent 70%); background-size: 220% 100%; animation: sv-brilho 2.4s ease-in-out infinite; }
+@keyframes sv-brilho { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+@media (prefers-reduced-motion: reduce) { .sv .sv-esqueleto i { animation: none; background-image: none; } }
+
+/* 09/11: perguntas no formato de caixas do site inteiro (.np-faq em tinta.css) */
+.sv .sv-faq-lista { margin-top: 28px; }

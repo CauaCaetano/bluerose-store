@@ -29,7 +29,13 @@
     };
     botaoMenu.addEventListener('click', function () { alternar(!nav.classList.contains('aberto')); });
     nav.querySelectorAll('.nav-links a').forEach(function (a) { a.addEventListener('click', function () { alternar(false); }); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') alternar(false); });
+    // Esc fecha o menu e devolve o foco ao botão que o abriu (teclado não se perde)
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || !nav.classList.contains('aberto')) return;
+      var dentro = nav.contains(document.activeElement);
+      alternar(false);
+      if (dentro) botaoMenu.focus();
+    });
   }
 
   /* ---------------- revelação ao rolar ---------------- */
@@ -48,10 +54,10 @@
   /* ---------------- simulador de automações ---------------- */
   var T = EN ? {
     rodar: 'Run automation', denovo: 'Run again', rodando: 'Running…',
-    vazio: 'Press “Run automation” to watch each step happen.',
+    vazio: 'Pick a scenario and click “Run automation”.',
   } : {
     rodar: 'Rodar automação', denovo: 'Rodar de novo', rodando: 'Rodando…',
-    vazio: 'Aperte “Rodar automação” para ver cada etapa acontecer.',
+    vazio: 'Escolha um cenário e clique em “Rodar automação”.',
   };
 
   var DIAS = EN ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -586,4 +592,55 @@
   };
   setTimeout(confere, 1500);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) confere(); });
+})();
+
+/* Realce temporário (P1, rodada 4 · 09/11/2026): um chip ou âncora interna leva até o cartão/seção e o realça por ~2 s.
+   Vale para <a href="#id" data-destaque>, para qualquer âncora dentro de [data-destaque-chips], .pp-ramos ou .cf-atalhos,
+   e por código: BlueRose.destacar(elemento ou '#id'). O alvo pode mandar o realce para outro elemento com
+   data-destaque-alvo="#outro" (ex.: a âncora cai na seção e o realce vai no cartão). */
+(function () {
+  var calmo = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var timers = new Map();
+  var achar = function (alvo) {
+    if (!alvo) return null;
+    if (typeof alvo === 'string') {
+      try { alvo = alvo.charAt(0) === '#' ? document.getElementById(decodeURIComponent(alvo.slice(1))) : document.querySelector(alvo); } catch (e) { return null; }
+    }
+    return alvo && alvo.nodeType === 1 ? alvo : null;
+  };
+  var realcar = function (el) {
+    var outro = el.getAttribute('data-destaque-alvo');
+    if (outro) el = achar(outro) || el;
+    if (timers.has(el)) { clearTimeout(timers.get(el)); el.classList.remove('is-realce'); void el.offsetWidth; }
+    el.classList.add('is-realce');
+    timers.set(el, setTimeout(function () { el.classList.remove('is-realce'); timers.delete(el); }, 2200));
+  };
+  var destacar = function (alvo, opcoes) {
+    var el = achar(alvo); if (!el) return false;
+    opcoes = opcoes || {};
+    var rolar = opcoes.rolar !== false;
+    if (rolar) el.scrollIntoView({ behavior: calmo ? 'auto' : 'smooth', block: 'start' });
+    // realça quando a rolagem termina (ou logo, se não houver rolagem suave)
+    var feito = false;
+    var fim = function () { if (feito) return; feito = true; window.removeEventListener('scrollend', fim); realcar(el); };
+    if (rolar && !calmo && 'onscrollend' in window) { window.addEventListener('scrollend', fim); setTimeout(fim, 900); }
+    else setTimeout(fim, calmo ? 0 : 450);
+    // o foco vai junto (teclado e leitor de tela), sem rolar de novo
+    if (!el.hasAttribute('tabindex') && !el.matches('a[href], button, input, select, textarea, summary')) el.setAttribute('tabindex', '-1');
+    try { el.focus({ preventScroll: true }); } catch (e) {}
+    return true;
+  };
+  window.BlueRose = window.BlueRose || {};
+  window.BlueRose.destacar = destacar;
+  var CHIPS = 'a[href^="#"][data-destaque], [data-destaque-chips] a[href^="#"], .pp-ramos a[href^="#"], .cf-atalhos a[href^="#"]';
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest && e.target.closest(CHIPS);
+    if (!a) return;
+    var h = a.getAttribute('href');
+    if (!h || h.length < 2 || !achar(h)) return;
+    e.preventDefault();
+    if (history.replaceState) history.replaceState(null, '', h);
+    destacar(h);
+  });
 })();

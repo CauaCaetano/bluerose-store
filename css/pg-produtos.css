@@ -1,0 +1,251 @@
+/* Páginas de produto (P3 · rodada 2): sistemas.html, veltria-*.html, peplo.html, annona.html.
+   Só usa os tokens globais (--surface, --line, --ink, --ink-2, --ink-3, --sis, --r-lg, --r-sm).
+   Sem animação de entrada em títulos; sem cursor customizado. */
+
+/* ---------- seções comuns ---------- */
+.pp-sec { padding-block: clamp(40px, 6vw, 72px) 0; }
+.pp-sec > .sec-title { margin-bottom: 8px; }
+.pp-intro { color: var(--ink-2); max-width: 66ch; margin: 0 0 22px; font-size: 16.5px; line-height: 1.55; }
+
+/* selo "dados de exemplo" (legível, não miúdo) */
+.pp-exemplo { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 14px; padding: 8px 14px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink); font-size: 15px; font-weight: 600; line-height: 1.35; }
+.pp-exemplo::before { content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--accent-unico, #101b36); }
+
+/* ---------- demonstração: o que testar ---------- */
+.pp-demo { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 48px); align-items: start; }
+.pp-demo-foto { display: block; border-radius: var(--r-lg, 18px); overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+.pp-demo-foto img { display: block; width: 100%; height: auto; }
+.pp-testar { list-style: none; margin: 0 0 22px; padding: 0; display: grid; gap: 12px; counter-reset: pp; }
+.pp-testar li { position: relative; padding: 14px 16px 14px 52px; border-radius: var(--r-sm, 12px); background: var(--surface); border: 1px solid var(--line);
+  font-size: 16px; line-height: 1.5; color: var(--ink); counter-increment: pp; }
+.pp-testar li::before { content: counter(pp); position: absolute; left: 14px; top: 13px; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font: 700 13px/1 var(--mono, ui-monospace, monospace); color: #fff; background: var(--accent-unico, #101b36); }
+.pp-testar li b { font-weight: 650; }
+.pp-testar li small { display: block; margin-top: 4px; color: var(--ink-2); font-size: 14.5px; }
+
+/* ---------- botões da página (usa .btn global; só organiza) ---------- */
+.pp-bts { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.pp-bts .btn { min-height: 48px; }
+
+/* ---------- como funciona (componente de etapas) ---------- */
+.pp-passos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; counter-reset: passo; }
+.pp-passos li { position: relative; padding: 20px; border-radius: var(--r-lg, 18px); background: var(--surface); border: 1px solid var(--line); counter-increment: passo; }
+.pp-passos li::before { content: counter(passo, decimal-leading-zero); display: block; margin-bottom: 10px; font: 700 13px/1 var(--mono, ui-monospace, monospace); color: var(--accent-unico, #101b36); letter-spacing: .06em; }
+.pp-passos b { display: block; font-size: 17px; font-weight: 650; color: var(--ink); margin-bottom: 6px; }
+.pp-passos span { display: block; color: var(--ink-2); font-size: 15px; line-height: 1.5; }
+
+/* ---------- o que a assinatura inclui (lista visual com ícones) ---------- */
+.pp-inclui { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 14px; }
+.pp-inclui li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; align-items: start; padding: 18px; border-radius: var(--r-lg, 18px);
+  background: var(--surface); border: 1px solid var(--line); }
+.pp-inclui .pp-ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent-unico, #101b36) 12%, transparent); color: var(--accent-unico, #101b36); }
+.pp-inclui .pp-ico .ico { width: 22px; height: 22px; }
+.pp-inclui b { display: block; font-size: 16px; font-weight: 650; color: var(--ink); }
+.pp-inclui span:not(.pp-ico) { display: block; margin-top: 3px; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); }
+
+/* ---------- limites e compatibilidade ---------- */
+.pp-limites { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.pp-limites > div { padding: 22px; border-radius: var(--r-lg, 18px); background: var(--surface); border: 1px solid var(--line); }
+.pp-limites h3 { margin: 0 0 12px; font-size: 18px; font-weight: 650; font-family: var(--font, inherit); color: var(--ink); }
+.pp-limites ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.pp-limites li { position: relative; padding-left: 26px; font-size: 15.5px; line-height: 1.5; color: var(--ink); }
+.pp-limites li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 10px; height: 2px; background: var(--ink-3, #6b6b6b); }
+.pp-limites .pp-sim li::before { width: 6px; height: 11px; top: .3em; left: 6px; background: none; border: solid var(--accent-unico, #101b36); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+/* ---------- segurança e dados ---------- */
+.pp-dados { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px 32px; align-items: center; padding: clamp(20px, 3vw, 32px);
+  border-radius: var(--r-lg, 18px); background: var(--surface); border: 1px solid var(--line); }
+.pp-dados h2 { margin: 0 0 8px; }
+.pp-dados ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.pp-dados li { display: flex; gap: 10px; align-items: flex-start; font-size: 15.5px; line-height: 1.5; color: var(--ink); }
+.pp-dados li .ico { flex: none; width: 18px; height: 18px; margin-top: 3px; color: var(--accent-unico, #101b36); }
+
+/* ---------- catálogo (sistemas.html) ---------- */
+.pp-indice { padding-block: 8px 28px; }
+.pp-indice h2 { margin: 0 0 6px; }
+.pp-indice-grade { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pp-indice-grade a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; min-height: 64px; height: 100%; box-sizing: border-box;
+  padding: 14px 16px; border-radius: var(--r-sm, 12px); background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--c-taupe-escuro, #6e604b);
+  color: var(--ink); text-decoration: none; }
+.pp-indice-grade a:hover { border-color: var(--accent-unico, #101b36); }
+.pp-indice-grade a:focus-visible { outline: 3px solid var(--accent-unico, #101b36); outline-offset: 2px; }
+.pp-indice-grade b { font-size: 16px; font-weight: 650; }
+.pp-indice-grade small { grid-column: 1; font-size: 14px; color: var(--ink-2); }
+.pp-indice-grade em { grid-column: 2; grid-row: 1 / span 2; font-style: normal; font-weight: 650; font-size: 15px; white-space: nowrap; }
+.pp-fora { margin: 14px 0 0; font-size: 15px; color: var(--ink-2); line-height: 1.5; }
+
+/* cards do catálogo: botões iguais e sem quebra estranha */
+.sis-botoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 10px; }
+.sis-botoes .btn { min-height: 48px; white-space: normal; text-align: center; line-height: 1.2; }
+.sis-botoes .btn-primary { grid-column: 1 / -1; }
+.sis-limite { margin: 10px 0 0; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); }
+.sis-limite b { color: var(--ink); font-weight: 650; }
+
+/* ---------- responsivo ---------- */
+@media (max-width: 960px) {
+  .pp-passos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pp-indice-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .pp-demo, .pp-limites, .pp-dados { grid-template-columns: 1fr; }
+  .pp-passos, .pp-indice-grade { grid-template-columns: 1fr; }
+  .pp-bts .btn { flex: 1 1 100%; }
+  .pp-dados .btn { width: 100%; }
+}
+/* site.css força 2 colunas com !important; no celular os botões ficam um por linha, sem quebrar o texto */
+@media (max-width: 480px) {
+  .sis-corpo .sis-botoes { grid-template-columns: minmax(0, 1fr) !important; }
+  .sis-corpo .sis-botoes .btn { white-space: nowrap; }
+}
+/* título da seção do catálogo não encosta no parágrafo (o parágrafo tem margem negativa inline) */
+.sis-comparar .sec-title + .planos-nota { margin-top: 6px !important; }
+@media (prefers-reduced-motion: reduce) { .pp-indice-grade a, .pp-ramos a { transition: none; } }
+
+/* ===================== rodada 3 (P3 · 08/11) ===================== */
+/* um accent só: numeração e marcadores em neutro (rodada 4: azul só na ação principal) */
+.np .np-num, .pp-passos li::before { color: var(--accent-unico, #101b36); }
+.pp-testar li::before { background: var(--accent-unico, #101b36); }
+.pp-limites .pp-sim li::before { border-color: var(--accent-unico, #101b36); }
+.pp-inclui .pp-ico { background: rgba(16, 27, 54, .07); color: var(--accent-unico, #101b36); }
+.pp-dados li .ico { color: var(--accent-unico, #101b36); }
+
+/* preço logo abaixo do H1 */
+.pp-preco-h1 { margin: 0 0 var(--esp-4, 16px); font-size: var(--fs-corpo-g, 18px); line-height: 1.4; color: var(--ink-2); }
+.pp-preco-h1 b { color: var(--ink); font-weight: 700; white-space: nowrap; }
+.p-hero h1 + .pp-preco-h1 { margin-top: var(--esp-4, 16px); }
+:is(.np-hero, .p-hero) .pp-preco-h1 { color: color-mix(in srgb, var(--c-creme, #f4ebdd) 82%, transparent); }
+:is(.np-hero, .p-hero) .pp-preco-h1 b { color: var(--c-creme, #f4ebdd); }
+
+/* logo do produto menor: o título é a estrela */
+.np-hero-txt .np-logo { width: clamp(104px, 11vw, 140px); padding: 10px 12px; border-radius: 14px; margin-bottom: var(--esp-3, 12px); }
+.np-hero-txt .np-logo.np-logo-largo { width: clamp(150px, 16vw, 200px); max-width: 70%; padding: 0; margin: 4px 0 var(--esp-3, 12px) -4px; background: none; box-shadow: none; border-radius: 0; }
+
+/* escolher por ramo em 1 clique (sistemas.html) */
+.pp-ramos { margin-top: var(--esp-6, 24px); }
+.pp-ramos p { margin: 0 0 var(--esp-2, 8px); font-size: var(--fs-label, 13px); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: color-mix(in srgb, var(--c-creme, #f4ebdd) 80%, transparent); }
+.pp-ramos ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--esp-2, 8px); }
+.pp-ramos a { display: inline-flex; align-items: center; min-height: var(--alvo-min, 44px); padding: 0 16px; border-radius: var(--r-pill, 999px);
+  border: 1px solid color-mix(in srgb, var(--c-creme, #f4ebdd) 40%, transparent); color: var(--c-creme, #f4ebdd); text-decoration: none; font-size: var(--fs-corpo-p, 15px); font-weight: 500; white-space: nowrap;
+  transition: background var(--dur-rapida, 150ms) ease, border-color var(--dur-rapida, 150ms) ease; }
+.pp-ramos a:hover { background: color-mix(in srgb, var(--c-creme, #f4ebdd) 12%, transparent); border-color: var(--c-creme, #f4ebdd); }
+.pp-ramos a:focus-visible { outline: var(--foco-largura, 3px) solid var(--c-azul-claro, #6cc4ff); outline-offset: var(--foco-offset, 2px); }
+.sis { scroll-margin-top: 96px; }
+
+/* demonstração: fluxo principal em 15 s */
+.pp-fluxo-t { margin: 0 0 var(--esp-3, 12px); font-size: var(--fs-h4, 19px); font-weight: 650; color: var(--ink); line-height: 1.3; }
+.pp-mais-t { margin: var(--esp-8, 32px) 0 var(--esp-2, 8px); font: 600 var(--fs-label, 13px)/1.3 var(--font-texto, inherit); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.pp-mais { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--esp-2, 8px); }
+.pp-mais li { font-size: var(--fs-corpo-p, 15px); line-height: 1.5; color: var(--ink-2); padding-left: 14px; border-left: 2px solid var(--line); }
+.pp-mais li b { color: var(--ink); font-weight: 650; }
+.pp-mais a { display: inline-flex; align-items: center; min-height: var(--alvo-min, 44px); padding: 0 4px; margin: -12px 0; color: var(--accent-unico, #101b36); font-weight: 600; }
+
+/* nota fiscal hoje (Peplo) */
+.pp-nf { margin-top: var(--grade-gap, 16px); padding: var(--card-p, 22px); border-radius: var(--r-card, 6px); background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent-unico, #101b36); box-shadow: var(--sombra-1, none); }
+.pp-nf h3 { margin: 0 0 6px; font-size: 18px; font-weight: 650; font-family: var(--font-texto, inherit); color: var(--ink); }
+.pp-nf p { margin: 0 0 10px; color: var(--ink-2); font-size: 15.5px; }
+.pp-nf ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 15.5px; line-height: 1.5; color: var(--ink); max-width: 75ch; }
+.pp-limites li b { font-weight: 650; }
+
+/* cartões dos sistemas: link de texto embaixo, largura toda */
+.sis-botoes .btn-texto { grid-column: 1 / -1; }
+
+/* celular: cartões da mesma lista com a mesma altura */
+@media (max-width: 760px) {
+  .np-tres, .pp-passos, .pp-indice-grade { grid-auto-rows: 1fr; }
+  .pp-inclui li { min-height: 88px; }
+  .pp-ramos ul { gap: 6px; }
+  .pp-ramos a { padding: 0 14px; font-size: 14.5px; }
+}
+
+/* sistemas.html: respiro entre o topo escuro e o índice por ramo */
+.p-hero + .pp-indice { padding-top: var(--esp-sub-conteudo, 40px); }
+
+/* ===================== rodada 4 (P3 · 09/11) ===================== */
+/* rótulo acima do nome em todos os cartões de Sistemas */
+.sis-pronto { display: block; margin: 0 0 var(--esp-2, 8px); font: 600 var(--fs-label, 13px)/1.3 var(--font-texto, inherit); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+
+/* chips de ramo e índice: o realce de ~2 s vem do componente global (site.js: BlueRose.destacar, classe .is-realce) */
+
+/* Veja funcionando em 15 segundos: cartão do resultado final, com print real da demonstração */
+.pp-resultado { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: var(--esp-6, 24px); align-items: start;
+  margin: 0 0 var(--ritmo-p, 32px); padding: var(--ritmo-p, 32px); border-radius: var(--r-card, 6px);
+  background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--accent-unico, #101b36); box-shadow: var(--sombra-card, none); }
+.pp-res-foto { border-radius: var(--r-card, 6px); overflow: hidden; border: 1px solid var(--line); background: var(--bg); }
+.pp-res-foto img { display: block; width: 100%; height: auto; }
+.pp-resultado figcaption { display: grid; gap: var(--esp-2, 8px); min-width: 0; }
+.pp-res-rot { font: 600 var(--fs-label, 13px)/1.3 var(--font-texto, inherit); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.pp-res-t { font-size: var(--fs-h4, 19px); font-weight: 650; line-height: 1.3; color: var(--ink); }
+.pp-res-d { font-size: var(--fs-corpo-p, 15px); line-height: 1.55; color: var(--ink-2); }
+.pp-res-planilha { margin-top: var(--esp-2, 8px); padding-top: var(--esp-3, 12px); border-top: 1px solid var(--line); font-size: var(--fs-corpo-p, 15px); line-height: 1.55; color: var(--ink-2); }
+.pp-res-planilha b { color: var(--ink); font-weight: 650; }
+@media (max-width: 1100px) { .pp-resultado { grid-template-columns: 1fr; } .pp-res-foto { max-width: 260px; } }
+@media (max-width: 760px) { .pp-resultado { padding: var(--card-p, 20px); } }
+
+/* bloco curto de isolamento + link para Segurança (fim de Sistemas e de cada produto) */
+.pp-iso { padding-block: var(--ritmo-g, 64px) 0; }
+.pp-iso-caixa { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--esp-6, 24px) var(--ritmo-p, 32px); align-items: center;
+  padding: var(--ritmo-p, 32px); border-radius: var(--r-card, 6px); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--sombra-card, none); }
+.pp-iso-t { margin: 0 0 var(--esp-2, 8px); font: 650 var(--fs-h4, 19px)/1.3 var(--font-texto, inherit); color: var(--ink); }
+.pp-iso p { margin: 0; max-width: 72ch; font-size: var(--fs-corpo-p, 15px); line-height: 1.6; color: var(--ink-2); }
+.pp-iso-n { color: var(--ink); font-weight: 700; white-space: nowrap; }
+.pp-iso-data { color: var(--ink-3); font-size: var(--fs-legenda, 14px); }
+@media (max-width: 760px) { .pp-iso-caixa { grid-template-columns: 1fr; padding: var(--card-p, 20px); } .pp-iso-caixa .btn { width: 100%; } }
+.sis-comparar + .pp-iso { padding-bottom: var(--ritmo-g, 64px); }
+
+/* produtos: 48 antes e 64 depois do cartão de preço; Como funciona com altura igual e padding 32 */
+.np .vs .vs-grade { margin-top: var(--ritmo-m, 48px); margin-bottom: var(--ritmo-g, 64px); }
+.np .vs .vs-pos { margin-top: 0; }
+.pp-passos { grid-auto-rows: 1fr; }
+.pp-passos li { padding: var(--ritmo-p, 32px); height: 100%; box-sizing: border-box; }
+
+/* ===================== rodada 4 · banca Gemini (09/11) ===================== */
+/* selos de confiança junto dos botões: teste grátis (só nos Veltria) e demonstração (todas).
+   Herdam a cor do bloco: funcionam no creme e no topo marinho. Textos conferidos em termos.html e em demos/sistemas/base. */
+.pp-selo { display: inline-flex; align-items: flex-start; gap: var(--esp-2, 8px); margin: var(--esp-4, 16px) 0 0; padding: 10px 14px; max-width: 100%; box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent); border-radius: var(--r-card, 6px); background: color-mix(in srgb, currentColor 5%, transparent);
+  font-size: var(--fs-corpo-p, 15px); line-height: 1.45; font-weight: 500; color: inherit; list-style: none; }
+.pp-selo b { font-weight: 700; }
+.pp-selo-ico { flex: none; width: 20px; height: 20px; margin-top: 1px; color: var(--accent-unico, #2f4c8a); }
+.np-hero .pp-selo { color: var(--c-creme, #f4ebdd); }
+.np-hero .pp-selo-ico { color: var(--c-azul-claro, #6cc4ff); }
+.pp-selo + .np-nota { margin-top: var(--esp-2, 8px); }
+.np-final .pp-selo { margin-top: var(--esp-6, 24px); }
+.pp-bts + .pp-selo { margin-top: var(--esp-3, 12px); }
+.pp-selos { display: grid; gap: var(--esp-2, 8px); margin: var(--esp-4, 16px) 0 0; padding: 0; list-style: none; }
+.pp-selos .pp-selo { margin: 0; display: flex; font-size: var(--fs-legenda, 14px); padding: 8px 12px; }
+.pp-selos .pp-selo-ico { width: 18px; height: 18px; }
+
+/* "Depois, teste também": lista de atalhos num cartão, cada atalho com o seu botão */
+.pp-mais { gap: 0; border: var(--borda-card, 1px solid var(--line)); border-radius: var(--r-card, 6px); background: var(--surface); box-shadow: var(--sombra-card, none); overflow: hidden; }
+.pp-mais li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--esp-3, 12px) var(--esp-4, 16px);
+  padding: var(--esp-4, 16px); border-left: 0; }
+.pp-mais li + li { border-top: 1px solid var(--line); }
+.pp-mais-txt { min-width: 0; }
+.pp-mais a.btn { margin: 0; min-height: var(--btn-h-s, 44px); padding: 0 var(--btn-px-s, 16px); color: var(--ink); }
+@media (max-width: 480px) {
+  .pp-mais li { grid-template-columns: minmax(0, 1fr); }
+  .pp-mais a.btn { justify-self: start; }
+}
+
+/* celular: 16 px de respiro lateral iguais nos cartões de preço e nos chips de ramo */
+@media (max-width: 480px) {
+  .sis { padding: 16px; }
+  .sis-precos > div { padding: 12px 16px; }
+  .pp-indice-grade a { padding-inline: 16px; }
+}
+@media (max-width: 379px) {
+  .pp-ramos ul { gap: 8px; }
+  .pp-ramos li { max-width: 100%; }
+  .pp-ramos a { padding: 0 16px; max-width: 100%; box-sizing: border-box; }
+  .pp-selo { padding: 10px 12px; }
+}
+
+/* cartões que abrem a demonstração: hover sutil (borda e sombra, sem movimento) */
+.sis, .sis-foto, .pp-demo-foto { transition: border-color var(--dur-rapida, 150ms) ease, box-shadow var(--dur-media, 250ms) ease; }
+.sis-foto:hover img { transform: none; }
+@media (hover: hover) {
+  .sis:hover { border-color: color-mix(in srgb, var(--accent-unico, #2f4c8a) 35%, var(--line)); box-shadow: var(--sombra-card-hover, 0 10px 28px -18px rgba(16, 27, 54, .45)); }
+  .sis-foto:hover, .pp-demo-foto:hover { box-shadow: 0 12px 30px -18px rgba(16, 27, 54, .55) !important; border-color: color-mix(in srgb, var(--accent-unico, #2f4c8a) 45%, var(--line)) !important; }
+}
+@media (prefers-reduced-motion: reduce) { .sis, .sis-foto, .pp-demo-foto { transition: none; } }

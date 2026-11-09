@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 700" width="360" height="700" role="img" aria-labelledby="isc-t isc-d" font-family="Geist, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif">
+  <title id="isc-t">Como uma empresa fica separada da outra no banco de dados</title>
+  <desc id="isc-d">1. A pessoa da Empresa A entra com o próprio e-mail e senha. 2. A cada leitura e gravação, as regras do banco (RLS) conferem se aquele login faz parte da empresa; a regra está ligada em todas as tabelas. 3. Empresa A: sim, lê e grava só os dados dela. Empresa B: não, nada volta e nada é gravado.</desc>
+  <defs>
+    <marker id="isc-seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#2f4c8a"/>
+    </marker>
+    <marker id="isc-seta-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#6b6f78"/>
+    </marker>
+  </defs>
+  <rect width="360" height="700" fill="#f4ebdd"/>
+
+  <!-- 1 · entrar -->
+  <rect x="8" y="8" width="344" height="118" rx="12" fill="#fbf6ee" stroke="#d9cbb3" stroke-width="1.5"/>
+  <text x="28" y="40" font-size="13" font-weight="600" letter-spacing="1.2" fill="#2f4c8a">1 · ENTRAR</text>
+  <text x="28" y="72" font-size="20" font-weight="600" fill="#101b36">Pessoa da Empresa A</text>
+  <text x="28" y="104" font-size="15" fill="#464c58">Entra com o próprio e-mail e senha</text>
+
+  <line x1="180" y1="128" x2="180" y2="164" stroke="#2f4c8a" stroke-width="2.5" marker-end="url(#isc-seta)"/>
+
+  <!-- 2 · regras -->
+  <rect x="8" y="170" width="344" height="210" rx="12" fill="#101b36"/>
+  <text x="28" y="204" font-size="13" font-weight="600" letter-spacing="1.2" fill="#9fb4dc">2 · REGRAS NO BANCO (RLS)</text>
+  <text x="28" y="240" font-size="16" fill="#d9d4c8">A cada leitura e gravação,</text>
+  <text x="28" y="262" font-size="16" fill="#d9d4c8">o banco confere:</text>
+  <text x="28" y="300" font-size="20" font-weight="600" fill="#f4ebdd">Este login faz parte</text>
+  <text x="28" y="326" font-size="20" font-weight="600" fill="#f4ebdd">desta empresa?</text>
+  <text x="28" y="360" font-size="14" fill="#c5cddc">Ligada em todas as tabelas do banco.</text>
+
+  <line x1="120" y1="382" x2="96" y2="420" stroke="#2f4c8a" stroke-width="2.5" marker-end="url(#isc-seta)"/>
+  <line x1="240" y1="382" x2="264" y2="420" stroke="#6b6f78" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#isc-seta-c)"/>
+
+  <!-- 3 · empresa A -->
+  <rect x="8" y="428" width="344" height="122" rx="12" fill="#fbf6ee" stroke="#2f4c8a" stroke-width="2"/>
+  <text x="28" y="460" font-size="13" font-weight="600" letter-spacing="1.2" fill="#2f4c8a">3 · EMPRESA A</text>
+  <circle cx="41" cy="491" r="13" fill="#2f4c8a"/>
+  <path d="M34 491l5 5 9-10" fill="none" stroke="#fbf6ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="64" y="498" font-size="20" font-weight="600" fill="#101b36">Sim: lê e grava</text>
+  <text x="28" y="532" font-size="15" fill="#464c58">Só os dados desta empresa aparecem.</text>
+
+  <!-- empresa B -->
+  <rect x="8" y="566" width="344" height="122" rx="12" fill="#f4ebdd" stroke="#8a8f99" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="28" y="598" font-size="13" font-weight="600" letter-spacing="1.2" fill="#464c58">EMPRESA B</text>
+  <circle cx="41" cy="629" r="13" fill="none" stroke="#464c58" stroke-width="2"/>
+  <path d="M36 624l10 10M46 624l-10 10" stroke="#464c58" stroke-width="2.2" stroke-linecap="round"/>
+  <text x="64" y="636" font-size="20" font-weight="600" fill="#101b36">Não: nada volta</text>
+  <text x="28" y="670" font-size="15" fill="#464c58">Nem leitura, nem gravação.</text>
+</svg>
