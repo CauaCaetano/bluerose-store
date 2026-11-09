@@ -244,6 +244,12 @@
     '.vc-pessoa legend{font-size:.85rem;color:#6b7080;padding:0 4px}.vc-telas{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 10px}.vc-pessoa label{margin:2px 0}.vc-pessoa input[list]{width:100%;min-height:40px;border:1px solid #cfd2da;border-radius:10px;padding:0 10px;font:inherit}' +
     '.vc-caixa input[type=text]{width:100%;min-height:40px;border:1px solid #cfd2da;border-radius:10px;padding:0 10px;font:inherit}.vc-caixa input:disabled{background:#f1f0ec;color:#6b7080}.vc-dois{display:grid;grid-template-columns:1fr 90px;gap:10px}.vc-h3{margin:16px 0 4px;font-size:1rem}' +
     '.vc-av{width:48px;height:48px;border-radius:12px;background:#1d2230;color:#fff;display:grid;place-items:center;font:700 1.3rem system-ui,sans-serif;margin:4px 0 6px}' +
+    '.vc-pend{z-index:2147483000}.vc-pend .vc-caixa{width:min(460px,100%)}.vc-pend-bts{display:flex;flex-wrap:wrap;gap:0 6px}.vc-pend-bts .vc-bt{flex:1 1 150px;margin-right:0}' +
+    '.vc-pend-depois{display:block;margin:12px auto 0;background:none;border:0;color:#4a5060;text-decoration:underline;font:inherit;font-size:.9rem;cursor:pointer;min-height:36px;padding:0 8px}' +
+    '.vc-pix{text-align:center;margin-top:12px;border-top:1px solid #ecebe6;padding-top:10px}.vc-pix img{display:block;margin:6px auto;max-width:100%;height:auto;image-rendering:pixelated}.vc-pix-valor{font:700 1.4rem system-ui,sans-serif;margin:4px 0}' +
+    '.vc-pix label{text-align:left}.vc-pix textarea{width:100%;box-sizing:border-box;border:1px solid #cfd2da;border-radius:10px;padding:8px;font:12px/1.4 ui-monospace,monospace;resize:none;word-break:break-all}' +
+    '.vc-pix-estado{font-weight:600}.vc-ok{color:#1d6b3a}.vc-erro{color:#a3271b}.vc-pend-cartao{margin-top:12px;border-top:1px solid #ecebe6;padding-top:10px}.vc-pend-cartao input[type=email]{width:100%;box-sizing:border-box}.vc-check{display:flex!important;gap:8px;align-items:flex-start}' +
+    '.vc-pend .vc-bt:focus-visible,.vc-pend-depois:focus-visible,.vc-pend textarea:focus-visible,.vc-pend input:focus-visible{outline:3px solid #c9a227;outline-offset:2px}' +
     '.vc-convite{margin:10px 0}.vc-convite summary{display:inline-flex;align-items:center;list-style:none}.vc-convite summary::-webkit-details-marker{display:none}.vc-faixa .vc-salvo[data-e=ler]{color:#ffd58a;opacity:1}';
   function caixa(html, liga) {
     var v = document.createElement('div'); v.className = 'vc-veu'; v.innerHTML = '<div class="vc-caixa" role="dialog" aria-modal="true">' + html + '</div>'; document.body.appendChild(v);
@@ -631,6 +637,119 @@
   }
   function vigiaNaN() { semNaN(document.body); new MutationObserver(function (ms) { ms.forEach(function (m) { semNaN(m.target.nodeType === 3 ? m.target.parentNode || document.body : m.target); }); }).observe(document.body, { childList: true, subtree: true, characterData: true }); }
 
+  // ---------------------------------------------------------------- pagamento pendente no cartão (desde 09/11/2026)
+  // Assinatura no cartão sem nenhum pagamento aprovado e com cobrança recusada: aviso uma vez por dia (só para o dono,
+  // só no modo conta, nunca dentro de iframe), com Pix na própria janela ou outro cartão pelo Mercado Pago.
+  // O servidor (nexo-pagamentos, ação pendencia) decide; depois de pago ele responde pendente:false e o aviso não volta.
+  // Só lê e grava a marca do dia ('veltria-pendencia-<app>'): não toca nos dados da empresa.
+  var MARCA_PEND = 'veltria-pendencia-' + app;
+  var MOTIVO_MP = {
+    payment_method_not_ready: 'o banco informou que o cartão não estava pronto para a cobrança: pode estar vencido, bloqueado, sem limite ou pedindo para liberar compras online no app do banco.',
+    cc_rejected_high_risk: 'o pagamento foi recusado pela análise de segurança do Mercado Pago.'
+  };
+  var reais = function (v) { return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); };
+  var diaMes = function (d) { var p = String(d || '').slice(0, 10).split('-'); return p.length === 3 ? p[2] + '/' + p[1] : ''; };
+  var listaE = function (l) { return l.length < 2 ? l.join('') : l.slice(0, -1).join(', ') + ' e ' + l[l.length - 1]; };
+  function avisoPagamento() {
+    if (!info.dono || window.top !== window.self) return;
+    try { if (ler.call(localStorage, MARCA_PEND) === hojeSP()) return; } catch (e) { /* sem acesso ao armazenamento: pergunta mesmo assim */ }
+    pagamentos({ acao: 'pendencia', app: app }).then(function (r) { if (r && r.pendente) janelaPendencia(r); }).catch(function () { /* sem internet: tenta na próxima abertura */ });
+  }
+  function janelaPendencia(r) {
+    if (document.querySelector('.vc-pend')) return;
+    try { gravar.call(localStorage, MARCA_PEND, hojeSP()); } catch (e) { /* segue */ }
+    var ver = (window.VELTRIA_VERSOES || {})[app] || {}, nome = r.nome || ver.nome || 'sistema', datas = (r.datas || []).map(diaMes).filter(Boolean);
+    var vezes = r.tentativas > 1 ? ' (' + r.tentativas + ' tentativas)' : '', ate = diaMes(r.acesso_ate), pagar = r.valor_pagar || r.valor;
+    var motivo = MOTIVO_MP[r.motivo_mp] || 'o banco ou o Mercado Pago não aprovou a cobrança.';
+    var volta = document.activeElement;
+    var v = document.createElement('div'); v.className = 'vc-veu vc-pend';
+    v.innerHTML = '<div class="vc-caixa" role="dialog" aria-modal="true" aria-labelledby="vc-pend-t" aria-describedby="vc-pend-d">' +
+      '<h2 id="vc-pend-t">Seu pagamento não passou</h2>' +
+      '<div id="vc-pend-d"><p>O Mercado Pago tentou cobrar <b>' + esc(reais(r.valor)) + '</b> da sua assinatura do ' + esc(nome) + ' no cartão' + (datas.length ? ' em ' + esc(listaE(datas)) : '') + esc(vezes) + ', e a cobrança foi recusada.</p>' +
+      '<p class="vc-mudo">Motivo: ' + esc(motivo) + '</p>' +
+      (ate ? '<p>Seu app e seus dados continuam normais até <b>' + esc(ate) + '</b>.</p><p class="vc-mudo">Se o pagamento não entrar até ' + esc(ate) + ', a assinatura é suspensa e o app fica bloqueado até recebermos o pagamento. Seus dados continuam salvos (por até 90 dias) e voltam assim que você pagar.</p>'
+        : '<p class="vc-mudo">Sem o pagamento, o app fica bloqueado. Seus dados continuam salvos (por até 90 dias) e voltam assim que você pagar.</p>') +
+      '<p>Você pode continuar pagando por Pix ou com outro cartão:</p></div>' +
+      '<div class="vc-pend-bts"><button type="button" class="vc-bt" data-pend="pix">Pagar com Pix</button><button type="button" class="vc-bt vc-2" data-pend="cartao">Usar outro cartão</button></div>' +
+      '<div data-pend-area aria-live="polite"></div>' +
+      '<button type="button" class="vc-pend-depois" data-pend="depois">Lembrar amanhã</button></div>';
+    document.body.appendChild(v);
+    var cx = v.querySelector('.vc-caixa'), area = v.querySelector('[data-pend-area]'), espera = null, pago = false;
+    var fecha = function () { clearTimeout(espera); espera = null; v.remove(); document.removeEventListener('keydown', teclas, true); document.removeEventListener('focusin', prende, true); if (volta && volta.focus) try { volta.focus(); } catch (e) { /* segue */ } };
+    // a tela de trás não pega o foco enquanto a janela está aberta (o app pode focar um botão ao terminar de abrir)
+    function prende(e) { if (v.isConnected && !v.contains(e.target)) { var p = cx.querySelector('button:not([disabled])'); if (p) p.focus(); } }
+    document.addEventListener('focusin', prende, true);
+    // foco preso na janela; Esc fecha (lembra amanhã)
+    function teclas(e) {
+      if (e.key === 'Escape') { e.preventDefault(); fecha(); return; }
+      if (e.key !== 'Tab') return;
+      var f = [].slice.call(cx.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), textarea')).filter(function (x) { return x.offsetParent !== null; });
+      if (!f.length) return;
+      var i = f.indexOf(document.activeElement);
+      if (e.shiftKey && (i <= 0)) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && (i === f.length - 1 || i < 0)) { e.preventDefault(); f[0].focus(); }
+    }
+    document.addEventListener('keydown', teclas, true);
+    function pix(b) {
+      b.disabled = true; area.innerHTML = '<p class="vc-mudo" role="status">Gerando o QR Code…</p>';
+      pagamentos({ acao: 'pix', produto: r.produto, troca_de: r.id }).then(function (j) {
+        var b64 = /^[A-Za-z0-9+/=]+$/.test(j.qr_base64 || '') ? j.qr_base64 : '', hora = new Date(j.expira), val = isNaN(hora) ? '' : hora.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        area.innerHTML = '<div class="vc-pix"><p class="vc-pix-valor">' + esc(reais(j.valor)) + '</p>' +
+          (b64 ? '<img width="200" height="200" alt="QR Code do Pix de ' + esc(reais(j.valor)) + '" src="data:image/png;base64,' + b64 + '">' : '') +
+          '<p class="vc-mudo">Abra o app do seu banco, escolha Pix e leia o QR Code. No celular, copie o código e use o Pix copia e cola.</p>' +
+          '<label>Pix copia e cola<textarea readonly rows="3" data-pix-cod>' + esc(j.qr_code) + '</textarea></label>' +
+          '<button type="button" class="vc-bt" data-pix-copiar>Copiar o código</button>' +
+          '<p class="vc-pix-estado" role="status" data-pix-estado>Aguardando o pagamento…' + (val ? ' Este código vale até ' + esc(val) + '.' : '') + '</p>' +
+          '<p class="vc-mudo">Quando o Pix for confirmado, a cobrança no cartão é cancelada e o novo período começa nesse dia. Pelo Pix não há cobrança automática: você renova com um novo Pix em Minha conta.</p></div>';
+        var campo = area.querySelector('[data-pix-cod]'), bc = area.querySelector('[data-pix-copiar]'), estado = area.querySelector('[data-pix-estado]');
+        bc.onclick = function () {
+          campo.select();
+          var feito = function () { bc.textContent = 'Código copiado'; setTimeout(function () { bc.textContent = 'Copiar o código'; }, 2500); };
+          if (navigator.clipboard) navigator.clipboard.writeText(j.qr_code).then(feito, function () { document.execCommand('copy'); feito(); }); else { document.execCommand('copy'); feito(); }
+        };
+        bc.focus();
+        var n = 0;
+        (function conferir() {
+          espera = setTimeout(function () {
+            if (!v.isConnected || n++ > 360) return;
+            pagamentos({ acao: 'pix_conferir', id: j.id }).then(function (s) {
+              if (!v.isConnected) return;
+              if (s.status !== 'ativa' || String(s.pago_ate || '') === String(j.pago_ate || '')) return conferir();
+              pago = true;
+              area.innerHTML = '<p class="vc-pix-estado vc-ok" role="status">Pagamento confirmado, obrigado! Sua assinatura está em dia' + (s.pago_ate ? ' até ' + esc(s.pago_ate.split('-').reverse().join('/')) : '') + '.</p>';
+              v.querySelector('.vc-pend-bts').remove(); v.querySelector('#vc-pend-d').hidden = true; v.querySelector('#vc-pend-t').textContent = 'Tudo certo';
+              var d = v.querySelector('[data-pend=depois]'); d.textContent = 'Fechar'; d.focus();
+            }).catch(conferir);
+          }, 5000);
+        })();
+      }).catch(function (x) { b.disabled = false; area.innerHTML = '<p class="vc-erro" role="alert">' + esc(x.message || 'Não foi possível gerar o Pix agora. Tente de novo em alguns minutos.') + '</p>'; });
+    }
+    function cartao(b) {
+      clearTimeout(espera); espera = null;
+      v.querySelector('[data-pend=pix]').disabled = false; b.disabled = true;
+      area.innerHTML = '<form class="vc-pend-cartao"><p>A assinatura de <b>' + esc(reais(pagar)) + '/mês</b> passa para o novo cartão, pelo Mercado Pago. Quando o primeiro pagamento for aprovado, o cartão antigo é cancelado. Sem fidelidade.</p>' +
+        '<label>E-mail da sua conta do Mercado Pago<input type="email" name="mp" required autocomplete="email"></label>' +
+        '<label class="vc-check"><input type="checkbox" name="ok" required> Autorizo a cobrança mensal de ' + esc(reais(pagar)) + ' no novo cartão.</label>' +
+        '<p class="vc-erro" data-erro></p><button class="vc-bt">Abrir o Mercado Pago</button></form>';
+      var f = area.querySelector('form');
+      cliente().then(function (sb) { return sb.auth.getUser(); }).then(function (u) { if (u.data && u.data.user && !f.mp.value) f.mp.value = u.data.user.email || ''; }).catch(function () {});
+      f.mp.focus();
+      f.onsubmit = function (e) {
+        e.preventDefault(); if (!f.reportValidity()) return;
+        var bt = f.querySelector('button'); bt.disabled = true; bt.textContent = 'Abrindo o Mercado Pago…';
+        pagamentos({ acao: 'iniciar', produto: r.produto, troca_de: r.id, email_mp: f.mp.value.trim() }).then(function (j) {
+          // sobe o que faltou antes de sair do app (o pagehide também tenta)
+          return (pendente ? enviar() : Promise.resolve()).catch(function () {}).then(function () { location.href = j.link; });
+        }).catch(function (x) { bt.disabled = false; bt.textContent = 'Abrir o Mercado Pago'; f.querySelector('[data-erro]').textContent = x.message; });
+      };
+    }
+    v.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-pend]'); if (!b) return;
+      if (b.dataset.pend === 'depois') fecha(); else if (b.dataset.pend === 'pix') pix(b); else cartao(b);
+    });
+    window.__veltriaPendencia = { pago: function () { return pago; } }; // usado pelo teste automático
+    v.querySelector('[data-pend=pix]').focus();
+  }
+
   function montar() {
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     // tira a faixa de demonstração (a que tem o "Recomeçar") e põe a da conta no lugar
@@ -641,6 +760,7 @@
     marcar(estado);
     f.addEventListener('click', function (e) { var b = e.target.closest('[data-vc]'); if (!b) return; ({ assinatura: assinatura, perfil: perfil, equipe: equipe, config: configuracoes, dados: dadosEditor, zerar: confirmaZerar, sair: sair })[b.dataset.vc](); });
     vigiaNaN(); aplicarPermissoes();
+    setTimeout(avisoPagamento, 1200); // depois da tela abrir; não atrapalha as boas-vindas da empresa nova
     if (info.novo && info.dono && !sessionStorage.getItem('veltria-boas-vindas-' + info.espaco)) { sessionStorage.setItem('veltria-boas-vindas-' + info.espaco, '1'); setTimeout(boasVindas, 600); }
     // o app instalado no celular abre pela porta da conta, não pela demonstração
     var man = document.querySelector('link[rel=manifest]'); if (man) man.href = RAIZ + 'app/' + app + '/manifest.webmanifest';

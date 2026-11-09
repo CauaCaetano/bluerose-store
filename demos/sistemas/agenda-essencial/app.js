@@ -89,6 +89,7 @@ function novidades() {
   try { if (localStorage.getItem(NOVIDADES) === VISTA) return; } catch { return; }
   const visto = () => { try { localStorage.setItem(NOVIDADES, VISTA); } catch { /* sem espaço: mostra de novo na próxima */ } };
   if (!db.clientes.length && !db.ags.length) { visto(); return; } // conta nova: não há o que contar de novidade
+  visto(); // 09/11: marca ao mostrar: aparece uma vez só, mesmo se o app for fechado com o aviso aberto
   folha(`<h2>Seu app ganhou a sua cara</h2><p class="sub">Novidades desta atualização. Sua agenda, seus clientes e os valores continuam do mesmo jeito.</p>
     <ul class="novidades"><li><b>Sua foto ou logo no topo</b><span>No lugar da logo da Veltria, que atrapalhava no celular. Toque no seu nome lá em cima para trocar.</span></li>
     <li><b>Escolha a cor do app</b><span>Seis cores para combinar com o seu negócio, em Mais › Configurações › Sua marca no app.</span></li>

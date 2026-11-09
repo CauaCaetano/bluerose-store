@@ -1,5 +1,5 @@
 // Veltria CRM Essencial · abre sem internet: registra na rua, sobe quando a conexão voltar.
-const CACHE = 'crm-essencial-v11';
+const CACHE = 'crm-essencial-v12';
 const ARQUIVOS = ['app.html', 'app.js?v=6', 'estilo.css?v=4', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((l) => Promise.all(l.filter((k) => k !== CACHE && k.startsWith(CACHE.replace(/v\d+$/, ''))).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
