@@ -384,3 +384,4 @@ main :is(p, li, dd, td, figcaption, small) a:not(.btn):not([class]):not(nav a):n
 @media (min-width: 901px) { .nav-links a { white-space: nowrap; } }
 @media (min-width: 901px) and (max-width: 1360px) { .nav-links { gap: 14px; font-size: 13px; } .nav-links a { letter-spacing: .03em; } }
 @media (min-width: 901px) and (max-width: 1180px) { .nav-links a[href="como-funciona.html"] { display: none; } .nav-links .btn { padding-inline: 14px; } }
+.nav .brand { white-space: nowrap; flex: none; }

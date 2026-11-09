@@ -218,8 +218,9 @@ main.an::before, main.an > section::before, main.an > section::after { content: 
 .an-faixa-garantia div { align-content: start; }
 
 /* 09/11: topo com foto real (notebook e celular) e as telas da demonstração encaixadas em perspectiva */
-.an-topo-foto { margin: 0 -4% 0 -2%; }
-.an-topo-foto img { display: block; width: 100%; height: auto; }
-.an-foto-credito { margin: 2px 0 0; text-align: right; font-size: 11.5px; line-height: 1.35; color: #55626a; padding-right: 4%; }
+.an-topo { overflow-x: clip; }
+.an .an-topo-foto { margin: 0 -10% 0 -6%; }
+.an-topo-foto img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
+.an-foto-credito { margin: 2px 0 0; text-align: right; font-size: 11.5px; line-height: 1.35; color: #55626a; padding-right: 9%; }
 .an-foto-credito a { color: inherit; }
-@media (max-width: 900px) { .an-topo-foto { margin: 8px -8px 0; } .an-foto-credito { padding-right: 8px; } }
+@media (max-width: 900px) { .an .an-topo-foto { margin: 8px -8px 0; } .an-foto-credito { padding-right: 8px; } }
