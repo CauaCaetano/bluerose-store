@@ -72,3 +72,16 @@
 
 /* 07/11/2026: so o Essencial a venda: o cartao unico fica centralizado */
 .vs-grade:has(> .vs-card:only-child) { grid-template-columns: minmax(0, 520px); justify-content: center; }
+
+.vs-lado { display: contents; }
+/* 09/11: quando o ramo tem um plano só, o cartão ocupa a largura (texto e preço à esquerda, tutorial e botões à direita) */
+@media (min-width: 901px) {
+  .vs-grade:has(> .vs-card:only-child) { grid-template-columns: minmax(0, 1fr) !important; max-width: none; }
+  .vs-card:only-child { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); column-gap: 48px; align-items: start; padding: 36px 40px; }
+  .vs-card:only-child > * { grid-column: 1; }
+  .vs-card:only-child > .vs-chip { justify-self: start; }
+  .vs-card:only-child > .vs-lado { display: block; grid-column: 2; grid-row: 1 / span 6; align-self: start; }
+  .vs-card:only-child > .vs-lado .vs-tut { margin-top: 0; }
+  .vs-card:only-child > .vs-lado .vs-bts { margin-top: 16px; }
+  .vs-grade:has(> .vs-card:only-child) + .vs-pos { justify-content: flex-start; }
+}
