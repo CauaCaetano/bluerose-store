@@ -85,3 +85,15 @@
   .vs-card:only-child > .vs-lado .vs-bts { margin-top: 16px; }
   .vs-grade:has(> .vs-card:only-child) + .vs-pos { justify-content: flex-start; }
 }
+
+/* 09/11: assinatura mensal e anual lado a lado (quadro do plano e tabela de preços) */
+.vs-precos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 14px 0 6px; }
+.vs-p { display: grid; gap: 4px; align-content: start; margin: 0; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--surface); }
+.vs-p-anual { border-color: color-mix(in srgb, var(--accent-solid, #101b36) 45%, transparent); background: color-mix(in srgb, var(--accent-solid, #101b36) 4%, var(--surface)); }
+.vs-p-rot { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.vs-precos .vs-preco { margin: 0; }
+.vs-precos .vs-preco b { font-size: clamp(30px, 3vw, 40px); }
+.vs-p-eq { font-size: 13px; color: var(--ink-3); }
+@media (max-width: 420px) { .vs-precos { grid-template-columns: minmax(0, 1fr); } }
+.pl-tabela .pl-equiv { display: block; margin-top: 4px; font-size: 13px; color: var(--ink-3); }
+.pl-tabela .pl-col-anual small { color: var(--ink-3); }
