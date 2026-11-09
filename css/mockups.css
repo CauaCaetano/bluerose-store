@@ -1,0 +1,22 @@
+/* Fotos reais de notebook + celular no topo das páginas de sistema (09/11/2026).
+   A foto já vem recortada com fundo transparente: sem moldura, sem fundo preto e sem sombra de cartão. */
+.np-video.np-mockup { align-self: center; }
+.np-video.np-mockup a { display: block; border-radius: 0; }
+.np-video.np-mockup picture { display: block; }
+.np-video.np-mockup img { width: 100%; height: auto; border: 0; border-radius: 0; box-shadow: none; background: none; }
+.np-video.np-mockup a:focus-visible { outline: 2px solid var(--c-creme, #f4ebdd); outline-offset: 4px; }
+@media (min-width: 861px) { .np-video.np-mockup { margin-right: clamp(-48px, -2vw, 0px); } }
+
+/* Notebook real com a tela passando o vídeo dos sistemas (sistemas.html).
+   A foto tem a tela vazada; o vídeo fica por baixo, no retângulo da tela, e o aro da foto recorta as sobras. */
+.nb-tela { position: relative; margin: 0; aspect-ratio: 1200 / 735; }
+.nb-tela-video { position: absolute; left: 18.9%; top: 8.6%; width: 65.97%; height: 68.68%; object-fit: cover; background: #0c1a38; }
+.nb-tela picture, .nb-tela-foto { position: relative; display: block; width: 100%; height: auto; pointer-events: none; }
+.nb-tela figcaption { margin-top: 4px; font-size: 13px; color: color-mix(in srgb, var(--c-creme, #f4ebdd) 70%, transparent); text-align: center; }
+
+.sis-hero .sis-hero-grade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: clamp(24px, 3vw, 56px); align-items: center; }
+.sis-hero .sis-hero-grade > .nb-tela { margin-right: clamp(-40px, -2vw, 0px); }
+@media (max-width: 899px) {
+  .sis-hero .sis-hero-grade { grid-template-columns: 1fr; }
+  .sis-hero .sis-hero-grade > .nb-tela { width: 100%; max-width: 560px; margin: 8px auto 0; }
+}

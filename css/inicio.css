@@ -394,3 +394,8 @@ body.sv .sites-filtro button[aria-pressed="true"] { background: #101b36; border-
 
 /* 09/11: perguntas no formato de caixas do site inteiro (.np-faq em tinta.css) */
 .sv .sv-faq-lista { margin-top: 28px; }
+
+/* 09/11: o notebook do topo passa o comercial dos sistemas, sem botão nem rótulos por cima da tela; o notebook inteiro leva à Vitrine */
+a.hn-note { display: block; color: inherit; text-decoration: none; }
+.hn-topo a.hn-note:focus-visible { outline: 2px solid var(--topo-texto, #f4ebdd); outline-offset: 6px; border-radius: 8px; }
+.hn-note .hn-note-tela { background: #0c1a38; pointer-events: none; }

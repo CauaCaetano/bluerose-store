@@ -411,3 +411,9 @@ main.an::before, main.an > section::before, main.an > section::after { content: 
 .an-demo-link a.btn.an-btn-demo { background: #fff !important; color: var(--an-ob) !important; border: 1.5px solid var(--an-ob) !important; text-decoration: none; }
 .an-demo-link a.btn.an-btn-demo:hover { background: var(--an-ob) !important; color: #fff !important; }
 .an-demo-link span { font-size: 14px; color: #55626a; }
+
+/* demonstração e PDF lado a lado, na mesma grade dos botões de cima (pedido do dono 09/11) */
+.an-demo-link { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 598px; }
+.an-demo-link a.btn.an-btn-demo { width: 100% !important; margin: 0 !important; white-space: normal; text-align: center; justify-content: center; }
+.an-demo-link span { grid-column: 1 / -1; }
+@media (max-width: 560px) { .an-demo-link { grid-template-columns: minmax(0, 1fr); } }
