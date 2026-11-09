@@ -176,3 +176,47 @@ main.an::before, main.an > section::before, main.an > section::after { content: 
 
 /* sem as luzes azuis fixas do site atrás da página do Anshur */
 .an-pagina::before { content: none !important; display: none !important; }
+
+/* 09/11 · garantia em destaque no topo, escopo, diagrama de integração e dados por contrato */
+.an-topo .an-preco-topo { margin: 0 0 22px; max-width: 600px; padding: 0; border-left: 0; background: none; border-radius: 0; display: grid; gap: 10px; }
+.an-preco-linha { font-size: 18px; line-height: 1.45; color: var(--an-ob) !important; }
+.an-selo { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; border-radius: 14px; background: var(--an-cartao); border: 2px solid var(--an-ouro); box-shadow: 0 10px 24px -18px rgba(17, 24, 32, .45); font-size: 16px; line-height: 1.5; color: var(--an-ob) !important; }
+.an-selo b { font-weight: 700; }
+.an-selo-ico { flex: 0 0 auto; width: 30px; height: 30px; color: var(--an-salvia-esc); margin-top: 1px; }
+.an-escopo { margin: -8px 0 0; font-size: 15px; line-height: 1.5; max-width: 60ch; color: var(--an-txt2) !important; }
+.an-escopo b { color: var(--an-ob); }
+
+.an-diagrama { margin: 8px 0 0; }
+.an-diag { display: block; width: 100%; height: auto; }
+.an-diag-v { display: none; max-width: 420px; margin: 0 auto; }
+.an-pontes { list-style: none; padding: 0; margin: 22px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.an-pontes li { display: grid; align-content: start; gap: 6px; padding: 18px; border-radius: 14px; background: var(--an-cartao); border: 1px solid var(--an-linha); border-top: 3px solid var(--an-salvia); }
+.an-pontes b { font-size: 17px; color: var(--an-ob); }
+.an-pontes span { font-size: 15px; line-height: 1.5; color: var(--an-txt2); }
+
+.an-dados .an-garantias-dados { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.an-dados .an-garantias-dados li { background: var(--an-marfim); align-content: start; }
+.an-fora { margin: 18px 0 0; padding-top: 14px; border-top: 1px solid var(--an-linha); font-size: 15px; line-height: 1.5; }
+.an-fora b { color: var(--an-ob); }
+
+@media (max-width: 1100px) { .an-dados .an-garantias-dados { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 900px) { .an-pontes { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .an-diag-h { display: none; }
+  .an-diag-v { display: block; }
+  .an-selo { font-size: 15px; padding: 12px 14px; }
+  .an-preco-linha { font-size: 17px; }
+}
+
+/* 09/11 · oferta nova: vagas de Piloto Fundador e teste às cegas grátis */
+.an-topo .an-vagas { justify-self: start; margin: 0; background: var(--an-cartao); color: var(--an-ouro-esc) !important; border-color: var(--an-ouro); }
+.an-oferta-preco .an-vagas { margin: 0 0 12px; }
+.an-oferta-passo { margin: 0; font-size: 16px; line-height: 1.5; }
+.an-cegas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); align-items: center; }
+.an-cegas .an-cta { margin-top: 0; }
+.an-passos.an-cegas-passos { grid-template-columns: minmax(0, 1fr); margin: 0; }
+.an-cegas-passos li { grid-template-columns: auto minmax(0, 1fr); column-gap: 18px; row-gap: 6px; }
+.an-cegas-passos li::before { grid-row: span 2; }
+@media (max-width: 900px) { .an-cegas { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .an-cegas-passos li { grid-template-columns: minmax(0, 1fr); } .an-cegas-passos li::before { grid-row: auto; } }
+.an-faixa-garantia div { align-content: start; }
