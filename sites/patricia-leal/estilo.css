@@ -589,3 +589,8 @@ html.pn-aberto { overflow: hidden; }
 /* ---------- rodada 8 (acabamento): mais espaço entre o texto e o botão da linha ---------- */
 .linha { row-gap: 46px; }
 @media (max-width: 760px) { .linha { row-gap: 24px; } .linha > .circulo { margin-top: 12px; } }
+
+/* foto nova: no celular a foto termina antes do nome */
+@media (max-width: 720px) {
+  .abre-foto { -webkit-mask-image: linear-gradient(#000 80%, transparent 100%); mask-image: linear-gradient(#000 80%, transparent 100%); bottom: calc(132px + var(--logo-h, 17vw) * .3 + 26px); }
+}

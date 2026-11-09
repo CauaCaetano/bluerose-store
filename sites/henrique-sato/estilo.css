@@ -642,3 +642,17 @@ html.ag-aberto .br-idi, html.ag-aberto .br-pill { visibility: hidden; }
 /* ---------- banca R6 (08/11/2026): acabamentos ---------- */
 .heroi-cartao { background: rgba(18, 15, 12, .92); border-color: rgba(232, 220, 200, .24); box-shadow: 0 34px 70px -18px rgba(0, 0, 0, .75), 0 0 0 1px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .07); }
 .qz-ops button { min-height: 56px; padding: 14px 18px; line-height: 1.35; gap: 14px; }
+
+/* passo a passo: lista à esquerda e foto real presa à direita (sem vazio no lado direito) */
+.passos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .82fr); column-gap: clamp(40px, 6vw, 104px); align-items: start; }
+.passos > * { grid-column: 1; }
+.passos > .processo-foto { grid-column: 2; grid-row: 1 / span 4; align-self: stretch; margin: 0; }
+.processo-foto img { position: sticky; top: 110px; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 20px; display: block; }
+@media (max-width: 900px) {
+  .passos { display: block; }
+  .passos > .processo-foto { margin: 40px 0 8px; }
+  .processo-foto img { position: static; aspect-ratio: 16 / 10; border-radius: 16px; }
+}
+/* passo a passo no celular: a lista vem logo depois do título; a foto fica só no computador */
+@media (max-width: 900px) { .passos > .processo-foto { display: none; } }
+@media (min-width: 901px) { .passos { align-items: center; } .passos > .processo-foto { align-self: center; } .processo-foto img { position: static; } }
