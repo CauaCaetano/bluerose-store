@@ -457,3 +457,19 @@
 .hq-an-desk { display: block; width: 88%; height: auto; border-radius: 12px; box-shadow: 0 30px 60px -28px rgba(0, 0, 0, .7); }
 .hq-an-cel { position: absolute; right: 0; bottom: 0; width: 28%; height: auto; border-radius: 20px; border: 6px solid #0a0f14; box-shadow: 0 24px 48px -20px rgba(0, 0, 0, .75); }
 @media (max-width: 900px) { .hq-an-grade { grid-template-columns: minmax(0, 1fr); } .hq-an-acoes .btn { flex: 1 1 100%; justify-content: center; } }
+
+/* 09/11 (2): bloco do Anshur em creme como o resto do site; foto real de notebook e celular */
+.hn main > .hq-anshur { background: var(--q-creme); color: var(--q-marinho); border-top: 1px solid rgba(16, 27, 54, .14); }
+.hq-an-selo { color: #8a6f3c; }
+.hq-anshur h2 { color: #111820; }
+.hq-an-lede { color: #3d4650; }
+.hq-an-lista li { color: #202d35; }
+.hq-an-lista li::before { background: #c1a36a; }
+.hq-an-oferta { color: #111820; background: rgba(193, 163, 106, .12); border-color: rgba(193, 163, 106, .6); }
+.hq-an-oferta b { color: #8a6f3c; }
+.hq-anshur .btn-primary { background: #111820 !important; color: #e9e2d4 !important; border-color: #111820 !important; }
+.hq-anshur .btn-primary:hover { background: #202d35 !important; }
+.hq-anshur .btn-outline { color: #111820 !important; border-color: rgba(17, 24, 32, .55) !important; background: transparent !important; }
+.hq-anshur .btn-outline:hover { background: #111820 !important; color: #e9e2d4 !important; }
+.hq-an-midia { padding-bottom: 0; }
+.hq-an-midia img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; -webkit-mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 70%, transparent 100%); mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 70%, transparent 100%); }
