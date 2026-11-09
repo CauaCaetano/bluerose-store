@@ -1,0 +1,68 @@
+/* =============================================================
+   Blue Rose · fundo porcelana (prévia 09/11/2026)
+   Branco de estúdio com brilho de acrílico: céu claro em cima, "mesa" levemente acinzentada embaixo
+   e reflexo sob as imagens. Carregado depois do areia.css; para voltar, basta tirar o <link>.
+   ============================================================= */
+:root, html[data-theme="light"] {
+  --bg: #f6f5f2;
+  --bg-2: #eeece8;
+  --surface: #ffffff;
+  --surface-2: #f3f2ef;
+  --line: rgba(16, 27, 54, 0.08);
+  --line-2: rgba(16, 27, 54, 0.12);
+  --vidro: rgba(255, 255, 255, 0.72);
+  --vidro-borda: rgba(255, 255, 255, 0.9);
+  --shadow: 0 1px 1px rgba(16, 27, 54, 0.04), 0 30px 60px -36px rgba(16, 27, 54, 0.28);
+}
+
+/* estúdio: luz branca no alto, piso de porcelana com brilho no meio da tela */
+body {
+  background:
+    radial-gradient(1400px 620px at 50% -8%, #ffffff 0%, rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 52%, rgba(255, 255, 255, 0.75) 60%, rgba(255, 255, 255, 0) 74%),
+    linear-gradient(180deg, #fbfbfa 0%, #f4f3f0 55%, #e9e8e4 100%);
+  background-attachment: fixed;
+}
+::selection { background: rgba(16, 27, 54, 0.12); color: #101b36; }
+
+/* cartões: porcelana esmaltada (branco, borda de luz em cima, sombra curta e macia) */
+.preco2, .prod-c, .sis, .caminho, .sis-duas > div, .np-grade, .np-faq details, .ini-mais, .ini-oferta, .orc, .conta-caixa, .ini-calc-card,
+.an-card, .an-pagina .cartao {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbfa 60%, #f5f4f1 100%);
+  border-color: rgba(16, 27, 54, 0.08);
+  box-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(16, 27, 54, 0.05), 0 22px 44px -30px rgba(16, 27, 54, 0.32);
+}
+.preco2.dest { background: linear-gradient(180deg, #ffffff, #f4f3f0); border-color: rgba(16, 27, 54, 0.22); }
+
+/* faixas que eram creme ficam porcelana */
+.hn main > section:not(.lx-hero):not(.hq-anshur), .hq-anshur { background: transparent; }
+
+/* reflexo de acrílico sob fotos de produto e telas (Chrome, Edge e Safari; nos outros fica sem reflexo) */
+.prod-c .prod-foto img, .ini-vitrine img {
+  -webkit-box-reflect: below 2px linear-gradient(to bottom, transparent 0%, transparent 72%, rgba(255, 255, 255, 0.22) 100%);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .prod-c .prod-foto img, .ini-vitrine img { -webkit-box-reflect: none; }
+}
+
+/* rosas só no rodapé (pedido do dono 09/11): sem estampa nas laterais das seções, sem cantos no topo e sem rosinha nos rótulos */
+main > section:not(.ini-hero)::after, main > section.ini-hero::before, main > section.lx-hero::after { background-image: none !important; }
+main::before { background-image: none !important; }
+.eyebrow::before { content: none !important; }
+
+/* página inicial: o papel creme vira porcelana */
+.hn { --hn-papel: #f6f5f2; --hn-folha: #ffffff; --hn-linha: rgba(16, 27, 54, 0.08);
+  background:
+    radial-gradient(1400px 620px at 50% -8%, #ffffff 0%, rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 52%, rgba(255, 255, 255, 0.75) 60%, rgba(255, 255, 255, 0) 74%),
+    linear-gradient(180deg, #fbfbfa 0%, #f4f3f0 55%, #e9e8e4 100%) !important;
+  background-attachment: fixed !important; }
+
+/* fundos chapados em creme viram transparentes para o estúdio aparecer */
+main.lx-rosas, .hn main, .hn main > .hq-anshur { background: transparent !important; }
+/* página do Anshur: mesmo estúdio; faixas alternadas num cinza-porcelana bem leve */
+body.an-pagina { background:
+    radial-gradient(1400px 620px at 50% -8%, #ffffff 0%, rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, #fbfbfa 0%, #f4f3f0 55%, #e9e8e4 100%) !important; background-attachment: fixed !important; }
+.an-topo { background: linear-gradient(180deg, rgba(255, 255, 255, .9) 0%, rgba(255, 255, 255, 0) 100%) !important; }
+.an-sec-marfim, .an-fim { background: linear-gradient(180deg, rgba(236, 235, 231, .7), rgba(244, 243, 240, .7)) !important; }
