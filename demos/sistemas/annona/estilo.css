@@ -506,3 +506,51 @@ fieldset.extras textarea { border: 1px solid #E5D5DC; border-radius: 10px; paddi
 .esc-caixa select { min-height: 42px; border: 1px solid var(--linha); border-radius: 10px; padding: 0 12px; background: #fff; font: 600 15px var(--corpo); color: var(--texto); }
 .off { margin: 0; display: flex; align-items: center; gap: 10px; background: var(--verde-claro); color: var(--verde-2); padding: 10px 14px; border-radius: 12px; font-size: 15px; }
 .off img { width: 44px; height: 44px; object-fit: contain; background: #fff; border-radius: 8px; }
+
+/* código de barras desenhado: ficha do produto, ícone discreto na lista e etiquetas para imprimir */
+svg.barras { display: block; width: 100%; height: auto; stroke: none; }
+#f-prod { align-items: start; }
+.barras-ficha { display: flex; align-items: center; gap: 12px 14px; flex-wrap: wrap; margin-top: 8px; padding: 10px 12px; border: 1px dashed #E5D5DC; border-radius: 12px; background: var(--branco); }
+.barras-ficha svg.barras { width: 190px; max-width: 100%; flex: none; }
+.bf-txt { flex: 1 1 150px; min-width: 0; display: grid; gap: 4px; justify-items: start; font-size: 13px; color: var(--ardosia); }
+.bf-txt b { color: var(--texto); font-size: 13.5px; }
+.bf-txt.aviso { color: var(--ambar); }
+.cod-num { white-space: nowrap; }
+.mini-barras { display: inline-flex; vertical-align: -2px; margin-right: 4px; color: var(--ardosia); }
+.mini-barras svg { width: 15px; height: 13px; stroke-width: 1.6; stroke-linecap: butt; }
+.etq-tams { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.etq-tams legend { padding: 0; margin-bottom: 6px; font-size: 13.5px; font-weight: 600; color: #5A3A46; }
+.form label.etq-tam { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--linha); border-radius: 12px; cursor: pointer; font-weight: 400; }
+.form label.etq-tam:has(input:checked) { border-color: var(--azul); background: var(--azul-claro); }
+.form label.etq-tam input[type=radio] { width: auto; min-height: 0; padding: 0; accent-color: var(--azul); margin: 3px 0 0; flex: none; }
+.etq-tam b { display: block; color: var(--texto); font-weight: 700; } .etq-tam small { display: block; color: var(--ardosia); font-size: 12.5px; line-height: 1.35; }
+.etq-marca { display: flex; gap: 8px; flex-wrap: wrap; }
+.etq-lista { list-style: none; margin: 0; padding: 0; max-height: min(44dvh, 420px); overflow: auto; border: 1px solid var(--linha); border-radius: 12px; }
+.etq-lista li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--linha); }
+.etq-lista li:last-child { border-bottom: 0; }
+.etq-lista li.sem-cod { opacity: .55; }
+.etq-lista li.vazio { color: var(--ardosia); justify-content: center; padding: 18px; }
+.form .etq-lista label.check { flex: 1; min-width: 0; }
+.etq-lista label.check input { width: 20px; height: 20px; accent-color: var(--azul); flex: none; }
+.etq-lista label.check span { min-width: 0; } .etq-lista label.check b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--texto); }
+.form .etq-lista input.etq-q { width: 64px; min-height: 38px; padding: 0 6px; text-align: center; flex: none; }
+#etq-soma { font-weight: 600; }
+@media (max-width: 860px) { .etq-tams { grid-template-columns: 1fr; } }
+#folha-etiquetas { display: none; }
+@media print {
+  body.imprime-etq { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  body.imprime-etq > *:not(#folha-etiquetas) { display: none !important; }
+  #folha-etiquetas { display: block; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .etq-folha { box-sizing: border-box; width: var(--fw); height: var(--fh); padding: var(--mt) 0 0 var(--ml); display: grid; grid-template-columns: repeat(var(--col), var(--ew)); grid-auto-rows: var(--eh); column-gap: var(--gx); row-gap: var(--gy); align-content: start; overflow: hidden; break-after: page; }
+  .etq-folha:last-child { break-after: auto; }
+  .etq { box-sizing: border-box; min-width: 0; overflow: hidden; padding: 1.4mm 2.2mm 1mm; display: flex; flex-direction: column; justify-content: space-between; gap: .6mm; font-family: 'DM Sans', Arial, sans-serif; }
+  .etq-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.6mm; }
+  .etq-cab b { min-width: 0; font-size: 7.5pt; font-weight: 600; line-height: 1.15; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .etq-cab span { font: 800 12pt/1 var(--tit); white-space: nowrap; }
+  .etq-cab small { font-size: 7pt; font-weight: 700; }
+  .etq-barras { display: flex; justify-content: center; }
+  .etq-barras svg.barras { width: var(--bw); max-width: 100%; }
+  .etq-pequena .etq { padding: .9mm 1.6mm .7mm; }
+  .etq-pequena .etq-cab b { font-size: 6pt; -webkit-line-clamp: 1; }
+  .etq-pequena .etq-cab span { font-size: 9pt; }
+}

@@ -41,6 +41,70 @@ const MOTIVOS = ['Venceu', 'Quebrou', 'Estragou', 'Consumo da casa', 'Sumiu', 'A
 function ean13(base12) { const d = String(base12).padStart(12, '0').slice(0, 12); let s = 0; for (let i = 0; i < 12; i++) s += Number(d[i]) * (i % 2 ? 3 : 1); return d + ((10 - (s % 10)) % 10); }
 const eanValido = (c) => /^\d{13}$/.test(c) && ean13(c.slice(0, 12)) === c;
 
+// ------------------------------------------------------------------ código de barras desenhado (SVG feito aqui, sem biblioteca)
+// EAN-13 quando os 13 números conferem no dígito verificador, EAN-8 com 8, e Code 128 para qualquer outro código
+// (interno, de 12 números, com letras ou com o dígito errado). Só lê p.cod: nada é gravado nem convertido.
+const dvGS1 = (d) => { let s = 0; for (let i = 0; i < d.length; i++) s += Number(d[d.length - 1 - i]) * (i % 2 ? 1 : 3); return (10 - (s % 10)) % 10; };
+const ean8Valido = (c) => /^\d{8}$/.test(c) && dvGS1(c.slice(0, 7)) === Number(c[7]);
+const EAN_L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
+const EAN_R = EAN_L.map((x) => [...x].map((b) => (b === '1' ? '0' : '1')).join(''));
+const EAN_G = EAN_R.map((x) => [...x].reverse().join(''));
+const EAN_PAR = ['LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG', 'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'];
+const C128 = ['212222', '222122', '222221', '121223', '121322', '131222', '122213', '122312', '132212', '221213', '221312', '231212', '112232', '122132', '122231', '113222', '123122', '123221', '223211', '221132', '221231', '213212', '223112', '312131', '311222', '321122', '321221', '312212', '322112', '322211', '212123', '212321', '232121', '111323', '131123', '131321', '112313', '132113', '132311', '211313', '231113', '231311', '112133', '112331', '132131', '113123', '113321', '133121', '313121', '211331', '231131', '213113', '213311', '213131', '311123', '311321', '331121', '312113', '312311', '332111', '314111', '221411', '431111', '111224', '111422', '121124', '121421', '141122', '141221', '112214', '112412', '122114', '122411', '142112', '142211', '241211', '221114', '413111', '241112', '134111', '111242', '121142', '121241', '114212', '124112', '124211', '411212', '421112', '421211', '212141', '214121', '412121', '111143', '111341', '131141', '114113', '114311', '411113', '411311', '113141', '114131', '311141', '411131', '211412', '211214', '211232', '2331112'];
+// qual desenho cada código ganha, e um aviso quando o número parece EAN mas o último dígito não confere
+function tipoBarras(cod) {
+  const c = String(cod ?? '').trim();
+  if (!c) return { tipo: '', c };
+  if (eanValido(c)) return { tipo: 'EAN-13', c };
+  if (ean8Valido(c)) return { tipo: 'EAN-8', c };
+  if (!/^[\x20-\x7E]+$/.test(c) || c.length > 48) return { tipo: '', c, erro: 'Esse código tem letras ou símbolos que não dá para desenhar. Use só números e letras sem acento.' };
+  const aviso = /^\d{13}$/.test(c) ? `O último número não confere (pelo EAN-13 seria ${ean13(c.slice(0, 12)).slice(-1)}). Confira o código da embalagem; enquanto isso, a etiqueta sai em Code 128.`
+    : /^\d{8}$/.test(c) ? `O último número não confere (pelo EAN-8 seria ${dvGS1(c.slice(0, 7))}). A etiqueta sai em Code 128.` : '';
+  return { tipo: 'Code 128', c, aviso };
+}
+// Code 128: conjunto C (pares de números) quando o código é só número com quantidade par; senão conjunto B
+function code128(c) {
+  const so = /^\d+$/.test(c) && c.length % 2 === 0 && c.length >= 4;
+  const v = so ? [105, ...c.match(/\d\d/g).map(Number)] : [104, ...[...c].map((x) => x.charCodeAt(0) - 32)];
+  const ck = v.reduce((s, x, i) => s + x * (i || 1), 0) % 103;
+  return [...v, ck, 106].map((x) => C128[x]).join('');
+}
+// devolve o SVG (barras pretas em fundo branco, em unidades de módulo) ou '' quando não dá para desenhar.
+// alt = altura das barras em módulos; o número legível vai embaixo, como na embalagem.
+function barrasSVG(cod, { alt = 50, numeros = true, cls = 'barras' } = {}) {
+  const { tipo, c } = tipoBarras(cod); if (!tipo) return '';
+  const fs = 9, txtH = numeros ? 11 : 0, barras = [];   // [x, largura, longa?]
+  let larg = 0, txt = '';
+  const poe = (mods, x0, longa = false) => { let x = x0; for (const b of mods) { if (b === '1') barras.push([x, 1, longa]); x++; } };
+  const letra = (s, x) => `<text x="${x}" y="${alt + (tipo === 'Code 128' ? 9.5 : 8.5)}" text-anchor="middle" font-size="${fs}">${t(s)}</text>`;
+  if (tipo === 'EAN-13') {
+    const q = 11, par = EAN_PAR[c[0]]; larg = q + 95 + 7;
+    poe('101', q, true);
+    for (let i = 0; i < 6; i++) poe((par[i] === 'L' ? EAN_L : EAN_G)[c[i + 1]], q + 3 + i * 7);
+    poe('01010', q + 45, true);
+    for (let i = 0; i < 6; i++) poe(EAN_R[c[i + 7]], q + 50 + i * 7);
+    poe('101', q + 92, true);
+    if (numeros) { txt = letra(c[0], q - 5); for (let i = 0; i < 6; i++) { txt += letra(c[i + 1], q + 6.5 + i * 7) + letra(c[i + 7], q + 53.5 + i * 7); } }
+  } else if (tipo === 'EAN-8') {
+    const q = 7; larg = q + 67 + 7;
+    poe('101', q, true);
+    for (let i = 0; i < 4; i++) poe(EAN_L[c[i]], q + 3 + i * 7);
+    poe('01010', q + 31, true);
+    for (let i = 0; i < 4; i++) poe(EAN_R[c[i + 4]], q + 36 + i * 7);
+    poe('101', q + 64, true);
+    if (numeros) for (let i = 0; i < 4; i++) txt += letra(c[i], q + 6.5 + i * 7) + letra(c[i + 4], q + 39.5 + i * 7);
+  } else {
+    const q = 10; let x = q; const pad = code128(c);
+    [...pad].forEach((w, i) => { const n = Number(w); if (i % 2 === 0) barras.push([x, n, false]); x += n; });
+    larg = x + q; if (numeros) txt = letra(c, larg / 2);
+  }
+  // barras vizinhas viram um retângulo só (desenho mais leve e sem frestas na impressão)
+  const juntas = []; barras.forEach((b) => { const u = juntas[juntas.length - 1]; if (u && u[0] + u[1] === b[0] && u[2] === b[2]) u[1] += b[1]; else juntas.push([...b]); });
+  const ext = tipo === 'Code 128' || !numeros ? 0 : 5, h = alt + Math.max(ext, txtH);
+  const rects = juntas.map(([x, w, longa]) => `M${x} 0h${w}v${alt + (longa ? ext : 0)}h-${w}z`).join('');
+  return `<svg class="${cls}" viewBox="0 0 ${larg} ${h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Código de barras ${t(tipo)} ${t(c)}" data-tipo="${t(tipo)}" data-cod="${t(c)}"><rect width="${larg}" height="${h}" fill="#fff" stroke="none"/><path d="${rects}" fill="#000" stroke="none" shape-rendering="crispEdges"/>${txt ? `<g fill="#000" stroke="none" font-family="'DM Sans', Arial, sans-serif" font-weight="500">${txt}</g>` : ''}</svg>`;
+}
+
 // fotos de produto (Pexels, licença livre) só na demonstração; na conta, a loja põe a foto que quiser
 const FOTOS = {"Cerveja lata 350": "cerveja-lata", "Cerveja long neck": "cerveja-longneck", "Cerveja garrafa 600": "cerveja-600", "Cerveja puro malte": "cerveja-473", "Refrigerante lata": "refri-lata", "Água mineral": "agua", "Energético": "energetico", "Cachaça": "cachaca", "Conhaque": "conhaque", "Arroz": "arroz", "Feijão": "feijao", "Açúcar": "acucar", "Óleo": "oleo", "Café": "cafe", "Macarrão": "macarrao", "Leite": "leite", "Iogurte": "iogurte", "Queijo": "queijo", "Presunto": "presunto", "Pão francês": "pao-frances", "Pão de forma": "pao-forma", "Bolo": "bolo", "Tomate": "tomate", "Banana": "banana", "Batata palha": "batata-palha", "Batata": "batata", "Detergente": "detergente", "Sabão": "sabao", "Papel": "papel", "Sabonete": "sabonete", "Carvão": "carvao", "Gelo": "gelo", "Linguiça": "linguica", "Picanha": "picanha", "Amendoim": "amendoim", "Chocolate": "chocolate", "Uísque": "uisque", "Vodca": "vodca", "Manteiga": "manteiga"};
 // ------------------------------------------------------------------ demonstração: o Mercadinho São José (mercearia)
@@ -291,7 +355,7 @@ const ICO = {
   sacola: '<path d="M3 5h2l2 11h11l2-8H6.2"/><circle cx="9" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/>', cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
   caixa: '<path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M4 7l8 4 8-4M12 11v10"/>', gente: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/>', moeda: '<circle cx="12" cy="12" r="8"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6.5v11"/>',
   mesa: '<path d="M4 9h16M6 9v11M18 9v11M8 9V5h8v4"/>', taca: '<path d="M7 3h10l-1 7a4 4 0 0 1-8 0zM12 14v6M8 21h8"/>', trofeu: '<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8l-1-4H9z"/>',
-  relat: '<path d="M4 19h16M7 15v-3M12 15V8M17 15v-6"/>', xml: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13l-2 2 2 2M15 13l2 2-2 2"/>', subir: '<path d="M12 20V8M7 13l5-5 5 5M5 4h14"/>', pct: '<path d="M6 18L18 6"/><circle cx="7.5" cy="7.5" r="2"/><circle cx="16.5" cy="16.5" r="2"/>',
+  relat: '<path d="M4 19h16M7 15v-3M12 15V8M17 15v-6"/>', barras: '<path d="M4 6v12M7 6v12M10 6v12M14 6v12M16.5 6v12M20 6v12"/>', xml: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13l-2 2 2 2M15 13l2 2-2 2"/>', subir: '<path d="M12 20V8M7 13l5-5 5 5M5 4h14"/>', pct: '<path d="M6 18L18 6"/><circle cx="7.5" cy="7.5" r="2"/><circle cx="16.5" cy="16.5" r="2"/>',
 };
 const ico = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k] || ''}</svg>`;
 function toast(m, erro = false) { const d = document.createElement('div'); d.className = `toast${erro ? ' erro' : ''}`; d.textContent = m; $('#toasts').append(d); setTimeout(() => d.remove(), 4200); }
@@ -723,11 +787,11 @@ TELAS.estoque = () => {
   const f = sa(estado.filtro), c = estado.cat;
   const pr = new Set(parados().map((x) => x.id)), l = ativos().filter((p) => (!c || (c === '_baixo' ? baixos().includes(p) : c === '_parado' ? pr.has(p.id) : p.cat === c)) && (!f || sa(p.nome).includes(f) || p.cod.includes(estado.filtro.trim()))).sort((a, b) => a.cat.localeCompare(b.cat) || a.nome.localeCompare(b.nome));
   const nBaixo = baixos().length;
-  return `<section class="cab-tela"><div><h2>Estoque</h2><p>${ativos().length} produtos · ${din(valorEstoque())} em mercadoria pelo custo.</p></div><div class="acoes"><button type="button" class="bt" data-acao="exportar-estoque">Planilha</button><button type="button" class="bt" data-acao="importar">Importar planilha</button><button type="button" class="bt" data-acao="reajuste">Reajustar preços</button><button type="button" class="bt cheio" data-acao="novo-produto">${ico('mais')}Novo produto</button></div></section>
+  return `<section class="cab-tela"><div><h2>Estoque</h2><p>${ativos().length} produtos · ${din(valorEstoque())} em mercadoria pelo custo.</p></div><div class="acoes"><button type="button" class="bt" data-acao="exportar-estoque">Planilha</button><button type="button" class="bt" data-acao="importar">Importar planilha</button><button type="button" class="bt" data-acao="reajuste">Reajustar preços</button><button type="button" class="bt" data-acao="etiquetas">${ico('imp')}Imprimir etiquetas</button><button type="button" class="bt cheio" data-acao="novo-produto">${ico('mais')}Novo produto</button></div></section>
   <form class="leitor" id="f-busca-est" autocomplete="off"><span>${ico('busca')}</span><input id="busca-est" value="${t(estado.filtro)}" placeholder="Buscar pelo nome ou passar o código" aria-label="Buscar produto"><button type="button" class="icone-bt" data-acao="camera-estoque" aria-label="Ler código pela câmera">${ico('cam')}</button></form>
   <div class="chips"><button type="button" class="chip${!c ? ' on' : ''}" data-cat="">Todos</button><button type="button" class="chip alerta${c === '_baixo' ? ' on' : ''}" data-cat="_baixo">Repor (${nBaixo})</button><button type="button" class="chip${c === '_parado' ? ' on' : ''}" data-cat="_parado">Parados há 30 dias (${pr.size})</button>${cats().map((x) => `<button type="button" class="chip${c === x ? ' on' : ''}" data-cat="${t(x)}">${t(x)}</button>`).join('')}</div>
   <section class="bloco sem-pad"><table class="tab grande"><thead><tr><th>Produto</th><th>Estoque</th><th class="so-pc">Mínimo</th><th class="so-pc">Custo</th><th>Preço</th><th class="so-pc">Margem</th><th class="so-pc">Dura</th><th class="so-pc">Validade mais próxima</th></tr></thead><tbody>
-  ${l.map((p) => { const s = situ(p), lv = (p.lotes || []).filter((x) => x.val).sort((a, b) => a.val.localeCompare(b.val))[0]; return `<tr class="clica" data-prod="${p.id}"><td><span class="com-foto">${foto(p, 'mini')}<span><b>${t(p.nome)}</b><small class="cod">${t(p.cat)} · ${t(p.cod)}${p.dose ? ` · dose ${p.dose.doseMl} ml` : ''}</small></span></span></td><td><span class="tag ${s === 'ok' ? 'verde' : s === 'baixo' ? 'ambar' : 'verm'}">${qtdTxt(p)}</span></td><td class="so-pc">${qtdTxt(p, p.min)}</td><td class="so-pc">${din(p.custo)}</td><td>${din(p.preco)}${p.un === 'kg' ? '/kg' : ''}${p.dose ? `<small class="cod">dose ${din(p.dose.preco)}</small>` : ''}${p.hh ? `<small class="cod hh-txt">${t(hhTxt(p))}</small>` : ''}</td><td class="so-pc">${margem(p.preco, p.custo).toLocaleString('pt-BR')}%</td><td class="so-pc"><span class="tag ${duraTxt(p) === 'parado' ? 'cinza' : duraDias(p) < 7 ? 'ambar' : 'verde'}">${duraTxt(p)}</span></td><td class="so-pc">${lv ? `<span class="tag ${dias(hoje(), lv.val) <= 7 ? 'ambar' : 'cinza'}">${dataBR(lv.val)}</span>` : '<span class="mudo">—</span>'}</td></tr>`; }).join('') || '<tr><td colspan="8" class="vazio">Nenhum produto encontrado.</td></tr>'}
+  ${l.map((p) => { const s = situ(p), lv = (p.lotes || []).filter((x) => x.val).sort((a, b) => a.val.localeCompare(b.val))[0]; return `<tr class="clica" data-prod="${p.id}"><td><span class="com-foto">${foto(p, 'mini')}<span><b>${t(p.nome)}</b><small class="cod">${t(p.cat)} · <span class="cod-num">${tipoBarras(p.cod).tipo ? `<span class="mini-barras" title="Código de barras ${t(tipoBarras(p.cod).tipo)}">${ico('barras')}</span>` : ''}${t(p.cod)}</span>${p.dose ? ` · dose ${p.dose.doseMl} ml` : ''}</small></span></span></td><td><span class="tag ${s === 'ok' ? 'verde' : s === 'baixo' ? 'ambar' : 'verm'}">${qtdTxt(p)}</span></td><td class="so-pc">${qtdTxt(p, p.min)}</td><td class="so-pc">${din(p.custo)}</td><td>${din(p.preco)}${p.un === 'kg' ? '/kg' : ''}${p.dose ? `<small class="cod">dose ${din(p.dose.preco)}</small>` : ''}${p.hh ? `<small class="cod hh-txt">${t(hhTxt(p))}</small>` : ''}</td><td class="so-pc">${margem(p.preco, p.custo).toLocaleString('pt-BR')}%</td><td class="so-pc"><span class="tag ${duraTxt(p) === 'parado' ? 'cinza' : duraDias(p) < 7 ? 'ambar' : 'verde'}">${duraTxt(p)}</span></td><td class="so-pc">${lv ? `<span class="tag ${dias(hoje(), lv.val) <= 7 ? 'ambar' : 'cinza'}">${dataBR(lv.val)}</span>` : '<span class="mudo">—</span>'}</td></tr>`; }).join('') || '<tr><td colspan="8" class="vazio">Nenhum produto encontrado.</td></tr>'}
   </tbody></table></section>`;
 };
 function formProduto(base = {}) {
@@ -735,7 +799,7 @@ function formProduto(base = {}) {
   const ed = !!p.id;
   abrir(`${cab(ed ? t(p.nome) : 'Novo produto', ed ? `Estoque: ${qtdTxt(p)}` : '')}<form class="form duas" id="f-prod">
     <label class="toda">Nome do produto<input name="nome" value="${t(p.nome)}" required placeholder="Cerveja lata 350 ml"></label>
-    <label>Código de barras<span class="com-bt"><input name="cod" value="${t(p.cod)}" inputmode="numeric" placeholder="Passe no leitor"><button type="button" class="icone-bt" data-cam aria-label="Ler pela câmera">${ico('cam')}</button></span></label>
+    <div class="cod-cel"><label>Código de barras<span class="com-bt"><input name="cod" value="${t(p.cod)}" inputmode="numeric" placeholder="Passe no leitor"><button type="button" class="icone-bt" data-cam aria-label="Ler pela câmera">${ico('cam')}</button></span></label><div class="barras-ficha" id="barras-ficha" aria-live="polite"></div></div>
     <label>Categoria<input name="cat" value="${t(p.cat)}" list="dl-cat" placeholder="Mercearia"></label>
     <label>Vendido por<select name="un"><option value="un"${p.un === 'un' ? ' selected' : ''}>Unidade</option><option value="kg"${p.un === 'kg' ? ' selected' : ''}>Quilo (balança)</option><option value="cx"${p.un === 'cx' ? ' selected' : ''}>Caixa</option></select></label>
     <label>Fornecedor<select name="forn"><option value="">—</option>${db.fornecedores.map((f) => `<option value="${f.id}"${p.forn === f.id ? ' selected' : ''}>${t(f.nome)}</option>`).join('')}</select></label>
@@ -754,6 +818,14 @@ function formProduto(base = {}) {
       const c = lerDin(f.custo.value), pr = lerDin(f.preco.value); $('#mg', j).innerHTML = pr ? `Margem de <b>${margem(pr, c).toLocaleString('pt-BR')}%</b> · lucro de ${din(pr - c)} por ${f.un.value === 'kg' ? 'kg' : f.un.value === 'cx' ? 'caixa' : 'unidade'}` : '';
     };
     f.addEventListener('input', conta); conta();
+    const desenha = () => {
+      const box = $('#barras-ficha', j), info = tipoBarras(f.cod.value), svg = barrasSVG(f.cod.value, { alt: 46 });
+      const salvo = ed && info.c === p.cod;   // a etiqueta sai com o que está gravado
+      box.innerHTML = svg ? `${svg}<span class="bf-txt${info.aviso ? ' aviso' : ''}"><b>${t(info.tipo)}</b>${info.aviso ? t(info.aviso) : info.tipo === 'Code 128' ? 'Código interno ou de outro formato. Sai igual na etiqueta.' : 'Dígito verificador confere.'}${salvo ? `<button type="button" class="bt mini" data-etq-uma>${ico('imp')}Imprimir etiqueta</button>` : ''}</span>`
+        : `<span class="bf-txt${info.erro ? ' aviso' : ''}">${info.erro ? t(info.erro) : 'Sem código ainda. Passe no leitor, use a câmera ou digite. Se ficar em branco, ao salvar o Annona cria um código interno (começa com 2).'}</span>`;
+    };
+    f.cod.addEventListener('input', desenha); desenha();
+    j.addEventListener('click', (e) => { if (e.target.closest('[data-etq-uma]')) escolherEtiquetas(p); });
     // código novo e sem nome: procura na base aberta de produtos (nome, marca, tamanho e foto)
     const busca = async () => {
       const cod = f.cod.value.trim(); if (!/^\d{8,14}$/.test(cod) || f.nome.value.trim() || ed) return;
@@ -795,6 +867,70 @@ function historico(p) {
   let saldo = p.q; mv.forEach((m) => { m.saldo = saldo; saldo = r3(saldo - m.q); });
   const ent = mv.filter((m) => m.q > 0 && m.t === 'Entrada').reduce((a, m) => a + m.q, 0), sai = mv.filter((m) => m.t === 'Venda').reduce((a, m) => a - m.q, 0), per = mv.filter((m) => m.t.startsWith('Perda')).reduce((a, m) => a - m.q, 0);
   abrir(`${cab(`Histórico: ${t(p.nome)}`, `Agora: ${qtdTxt(p)} · entrou ${numBR(ent)} · vendeu ${numBR(sai)} · perdeu ${numBR(per)}`)}<div class="hist"><table class="tab"><thead><tr><th>Quando</th><th>O que foi</th><th>Qtd.</th><th>Ficou</th></tr></thead><tbody>${mv.slice(0, 120).map((m) => `<tr><td>${dataBR(m.d)} <small class="cod">${horaBR(m.d)}</small></td><td>${t(m.t)}<small class="cod">${t(m.ref)}</small></td><td class="${m.q < 0 ? 'verm-txt' : 'ok-txt'}">${m.q > 0 ? '+' : ''}${numBR(m.q)}</td><td>${numBR(m.saldo)}</td></tr>`).join('') || '<tr><td colspan="4" class="vazio">Nenhum movimento ainda.</td></tr>'}</tbody></table></div><footer class="j-pe"><button type="button" class="bt cheio" data-fechar>Ok</button></footer>`, null, true);
+}
+// etiquetas de gôndola em folha A4 (ou Carta) adesiva: medidas reais das folhas Pimaco, impressas em tamanho real (100%)
+const ETIQ = {
+  media: { nome: 'Média', det: '63,5 × 25,4 mm · 33 por folha A4 (Pimaco A4256)', folha: [210, 297], col: 3, lin: 11, w: 63.5, h: 25.4, mt: 8.8, ml: 7.25, gx: 2.5, gy: 0, bw: 40 },
+  pequena: { nome: 'Pequena de gôndola', det: '38,2 × 21,2 mm · 65 por folha A4 (Pimaco A4251)', folha: [210, 297], col: 5, lin: 13, w: 38.2, h: 21.2, mt: 10.7, ml: 4.5, gx: 2.5, gy: 0, bw: 34 },
+  carta: { nome: 'Carta', det: '66,7 × 25,4 mm · 30 por folha Carta (Pimaco 6180 e 6080)', folha: [215.9, 279.4], col: 3, lin: 10, w: 66.7, h: 25.4, mt: 12.7, ml: 4.76, gx: 3.175, gy: 0, bw: 40 },
+};
+const precoEtiq = (p) => `${din(p.preco)}${p.un === 'kg' ? '<small>/kg</small>' : ''}`;
+const umaEtiqueta = (p) => `<div class="etq"><div class="etq-cab"><b>${t(p.nome)}</b><span>${precoEtiq(p)}</span></div><div class="etq-barras">${barrasSVG(p.cod, { alt: 34 })}</div></div>`;
+// monta as folhas na própria página e chama a impressão; o resto da tela some só no papel
+function imprimirEtiquetas(itens, tam = 'media', inicio = 1) {
+  const m = ETIQ[tam] || ETIQ.media, porFolha = m.col * m.lin, lista = [];
+  for (let i = 1; i < inicio; i++) lista.push(null);   // folha já usada: pula as etiquetas que faltam
+  itens.forEach(({ p, q }) => { for (let i = 0; i < q; i++) lista.push(p); });
+  const folhas = [];
+  for (let i = 0; i < lista.length; i += porFolha) folhas.push(lista.slice(i, i + porFolha));
+  let d = $('#folha-etiquetas'); if (d) d.remove();
+  d = document.createElement('div'); d.id = 'folha-etiquetas'; d.className = `etq-${tam}`; d.setAttribute('aria-hidden', 'true');
+  d.style.cssText = `--fw:${m.folha[0]}mm;--fh:${m.folha[1]}mm;--ew:${m.w}mm;--eh:${m.h}mm;--mt:${m.mt}mm;--ml:${m.ml}mm;--gx:${m.gx}mm;--gy:${m.gy}mm;--col:${m.col};--bw:${m.bw}mm`;
+  d.innerHTML = `<style>@page { size: ${m.folha[0]}mm ${m.folha[1]}mm; margin: 0; }</style>${folhas.map((f) => `<section class="etq-folha">${f.map((p) => (p ? umaEtiqueta(p) : '<div class="etq vazia"></div>')).join('')}</section>`).join('')}`;
+  document.body.append(d); document.body.classList.add('imprime-etq');
+  const limpa = () => { removeEventListener('afterprint', limpa); const x = $('#folha-etiquetas'); if (x) x.remove(); document.body.classList.remove('imprime-etq'); };
+  addEventListener('afterprint', limpa);
+  setTimeout(() => { try { window.print(); } catch (e) { toast('Não consegui abrir a impressão.', true); } }, 60);
+  return folhas.length;
+}
+// escolher: todos, uma categoria ou só os marcados, com a quantidade de cada um
+function escolherEtiquetas(pre = null) {
+  const sel = new Map(ativos().map((p) => [p.id, { on: !pre, q: 1 }]));
+  if (pre) sel.set(pre.id, { on: true, q: 1 });
+  let tam = 'media', cat = pre ? '_marcados' : '';
+  const comCod = (p) => !!tipoBarras(p.cod).tipo;
+  const conta = () => { let n = 0; sel.forEach((v, id) => { if (v.on && comCod(prod(id))) n += v.q; }); return n; };
+  abrir(`${cab('Imprimir etiquetas', 'Nome, preço e código de barras para a gôndola e para o produto')}<form class="form" id="f-etq">
+    <fieldset class="etq-tams"><legend>Tamanho da etiqueta</legend>${Object.entries(ETIQ).map(([k, m]) => `<label class="etq-tam"><input type="radio" name="tam" value="${k}"${k === tam ? ' checked' : ''}><span><b>${m.nome}</b><small>${m.det}</small></span></label>`).join('')}</fieldset>
+    <div class="duas"><label>Quais produtos<select name="cat"><option value="">Todos os produtos</option>${cats().map((c) => `<option value="${t(c)}">${t(c)}</option>`).join('')}<option value="_marcados"${pre ? ' selected' : ''}>Só os marcados</option></select></label><label>Começar na etiqueta nº<input name="ini" inputmode="numeric" value="1" aria-describedby="etq-ini-dica"></label></div>
+    <p class="dica" id="etq-ini-dica">Folha já usada pela metade? Diga em qual etiqueta começar (contando da esquerda para a direita, de cima para baixo).</p>
+    <div class="etq-marca"><button type="button" class="bt mini" data-todos="1">Marcar todos</button><button type="button" class="bt mini" data-todos="0">Desmarcar todos</button></div>
+    <ul class="etq-lista" id="etq-lista"></ul>
+    <footer class="j-pe"><b id="etq-soma"></b><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">${ico('imp')}Imprimir</button></footer>
+  </form>`, (j) => {
+    const f = $('form', j), ul = $('#etq-lista', j);
+    const visiveis = () => ativos().filter((p) => (cat === '_marcados' ? sel.get(p.id).on : !cat || p.cat === cat)).sort((a, b) => a.cat.localeCompare(b.cat) || a.nome.localeCompare(b.nome));
+    const soma = () => { const n = conta(), m = ETIQ[tam], ini = Math.max(1, Math.min(m.col * m.lin, Math.round(lerNum(f.ini.value)) || 1)), fl = Math.ceil((n + ini - 1) / (m.col * m.lin)); $('#etq-soma', j).textContent = n ? `${n} etiqueta${n === 1 ? '' : 's'} · ${fl} folha${fl === 1 ? '' : 's'}` : 'Nenhuma etiqueta marcada'; };
+    const lista = () => {
+      ul.innerHTML = visiveis().map((p) => { const s = sel.get(p.id), ok = comCod(p); return `<li class="${ok ? '' : 'sem-cod'}"><label class="check"><input type="checkbox" data-etq="${p.id}"${s.on && ok ? ' checked' : ''}${ok ? '' : ' disabled'}><span><b>${t(p.nome)}</b><small class="cod">${ok ? `${t(p.cat)} · ${din(p.preco)}${p.un === 'kg' ? '/kg' : ''}` : 'sem código para desenhar'}</small></span></label><input class="etq-q" data-etq-q="${p.id}" inputmode="numeric" value="${s.q}" aria-label="Quantas etiquetas de ${t(p.nome)}"${ok ? '' : ' disabled'}></li>`; }).join('') || '<li class="vazio">Nenhum produto aqui.</li>';
+      soma();
+    };
+    $$('[name=tam]', j).forEach((r) => r.addEventListener('change', () => { tam = r.value; soma(); }));
+    f.cat.addEventListener('change', () => { cat = f.cat.value; if (cat && cat !== '_marcados') sel.forEach((v, id) => { v.on = prod(id).cat === cat; }); else if (!cat) sel.forEach((v) => { v.on = true; }); lista(); });
+    f.ini.addEventListener('input', soma);
+    $$('[data-todos]', j).forEach((b) => b.addEventListener('click', () => { const on = b.dataset.todos === '1'; visiveis().forEach((p) => { sel.get(p.id).on = on; }); lista(); }));
+    ul.addEventListener('change', (e) => { const c = e.target.closest('[data-etq]'); if (c) { sel.get(c.dataset.etq).on = c.checked; soma(); } });
+    ul.addEventListener('input', (e) => { const c = e.target.closest('[data-etq-q]'); if (c) { const q = Math.max(0, Math.min(500, Math.round(lerNum(c.value)) || 0)); sel.get(c.dataset.etqQ).q = q; if (q > 0 && !sel.get(c.dataset.etqQ).on) { sel.get(c.dataset.etqQ).on = true; $(`[data-etq="${c.dataset.etqQ}"]`, ul).checked = true; } soma(); } });
+    f.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const itens = ativos().filter((p) => sel.get(p.id).on && sel.get(p.id).q > 0 && comCod(p)).sort((a, b) => a.cat.localeCompare(b.cat) || a.nome.localeCompare(b.nome)).map((p) => ({ p, q: sel.get(p.id).q }));
+      if (!itens.length) { toast('Marque pelo menos um produto.', true); return; }
+      const m = ETIQ[tam], ini = Math.max(1, Math.min(m.col * m.lin, Math.round(lerNum(f.ini.value)) || 1));
+      fechar(); const n = imprimirEtiquetas(itens, tam, ini);
+      toast(`${n} folha${n === 1 ? '' : 's'} de etiquetas. Na impressão, deixe em tamanho real (100%), sem ajustar à página.`);
+    });
+    lista();
+  }, true);
 }
 function lerForm(o) {
   const d = { plu: String(o.plu || '').replace(/\D/g, ''), nome: String(o.nome || '').trim(), cod: String(o.cod || '').trim(), cat: String(o.cat || '').trim() || 'Outros', un: o.un || 'un', forn: o.forn || '', custo: lerDin(o.custo), preco: lerDin(o.preco), min: lerNum(o.min) };
@@ -1206,7 +1342,7 @@ document.addEventListener('click', (e) => {
     desconto: () => liberar('desconto', 'desconto na venda', () => abrir(`${cab('Desconto na venda')}<form class="form"><label>Desconto (R$)<input name="d" inputmode="decimal" value="${campoDin(estado.venda.desc)}"></label><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Aplicar</button></footer></form>`, (j) => $('form', j).addEventListener('submit', (ev) => { ev.preventDefault(); const sub = estado.venda.itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0); estado.venda.desc = Math.min(sub, lerDin(ev.target.d.value)); fechar(); mostra(); }))),
     'pagar-venda': () => pagar({ itens: estado.venda.itens, desc: estado.venda.desc, titulo: 'Receber', origem: 'balcao', depois: () => { estado.venda = { itens: [], cli: '', desc: 0 }; mostra(); } }),
     'caderno-todo': cadernoTodo,
-    'novo-produto': () => formProduto(), reajuste, 'nova-entrada': () => liberar('entradas', 'dar entrada de mercadoria', () => formEntrada()), 'nova-perda': () => liberar('estoque', 'registrar perda', () => formPerda()), 'nova-pessoa': novaPessoa,
+    'novo-produto': () => formProduto(), reajuste, etiquetas: () => escolherEtiquetas(), 'nova-entrada': () => liberar('entradas', 'dar entrada de mercadoria', () => formEntrada()), 'nova-perda': () => liberar('estoque', 'registrar perda', () => formPerda()), 'nova-pessoa': novaPessoa,
     'novo-cliente': () => formCliente(), 'editar-cliente': () => formCliente(cli(id)), receber: () => receber(cli(id)),
     bloquear: () => { cli(id).bloq = true; registra(`Fiado bloqueado: ${cli(id).nome}`, 'fiado'); grava(); mostra(); toast('Fiado bloqueado para este cliente.'); },
     liberar: () => { const c = cli(id); if (c.bloq) { c.bloq = false; grava(); mostra(); toast('Cliente desbloqueado.'); } else confirmar('Liberar o fiado', 'O cliente está com atraso. Liberar só desta vez? (Na próxima venda, decida de novo.)', 'Entendi', () => toast('Na venda, escolha Fiado normalmente: o dono pode passar o limite.'), false); },
