@@ -100,7 +100,7 @@ const T = {
   },
   intimacoes() {
     const l = [...db.intimacoes].sort((a, b) => b.dia.localeCompare(a.dia)), novas = l.filter((i) => !i.lida).length;
-    return `<h1>Intimações</h1><p class="sub">${novas ? `${novas} novas. ` : ''}Na versão contratada elas chegam sozinhas do Diário de Justiça Eletrônico pelo seu número da OAB.</p>
+    return `<h1>Intimações</h1><p class="sub">${novas ? `${novas} novas. ` : ''}Nesta versão as intimações não são buscadas sozinhas no Diário de Justiça Eletrônico: confira o DJEN e crie o prazo em + Prazo. Estas são de exemplo.</p>
       ${l.map((i) => `<article class="cartao ${i.lida ? '' : 'nova'}"><div style="display:flex;justify-content:space-between;gap:8px"><b>${h(cli(proc(i.proc)?.cli).nome)}</b><span class="etiq ${i.lida ? '' : 'ouro'}">${i.lida ? 'lida' : 'nova'}</span></div>
         <span class="mini">${h(proc(i.proc)?.cnj)} · ${dataBr(i.dia)}</span><div class="juridiques">${h(i.texto)}</div><div data-simples="${i.id}"></div>
         <div class="linha-bts"><button type="button" class="bt peq ouro" data-acao="explicar" data-id="${i.id}">Explicar em português simples</button><button type="button" class="bt peq" data-acao="prazo-da-int" data-id="${i.id}">Criar prazo</button>${i.lida ? '' : `<button type="button" class="bt peq" data-acao="lida" data-id="${i.id}">Marcar lida</button>`}</div></article>`).join('')}`;
