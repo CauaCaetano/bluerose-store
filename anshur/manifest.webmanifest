@@ -1,0 +1,10 @@
+{
+  "name": "Anshur",
+  "short_name": "Anshur",
+  "description": "Inteligência de margem para revendas de máquinas agrícolas: valor máximo na troca, pátio e histórico.",
+  "start_url": "./#visao",
+  "display": "standalone",
+  "background_color": "#F4F0E8",
+  "theme_color": "#F4F0E8",
+  "icons": [{ "src": "icone-192.png", "sizes": "192x192", "type": "image/png" }, { "src": "icone-512.png", "sizes": "512x512", "type": "image/png" }]
+}
