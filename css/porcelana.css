@@ -1,68 +1,55 @@
 /* =============================================================
-   Blue Rose · fundo porcelana (prévia 09/11/2026)
-   Branco de estúdio com brilho de acrílico: céu claro em cima, "mesa" levemente acinzentada embaixo
-   e reflexo sob as imagens. Carregado depois do areia.css; para voltar, basta tirar o <link>.
+   Blue Rose · porcelanato creme espelhado (09/11/2026)
+   Placas creme polidas (img/porcelanato-creme.webp, emenda sem costura, juntas de 80 cm) com reflexo de luz
+   de janela fixo na tela, como num piso polido. Carregado por último; para voltar, basta tirar o <link>.
    ============================================================= */
 :root, html[data-theme="light"] {
-  --bg: #f6f5f2;
-  --bg-2: #eeece8;
-  --surface: #ffffff;
-  --surface-2: #f3f2ef;
-  --line: rgba(16, 27, 54, 0.08);
-  --line-2: rgba(16, 27, 54, 0.12);
-  --vidro: rgba(255, 255, 255, 0.72);
-  --vidro-borda: rgba(255, 255, 255, 0.9);
-  --shadow: 0 1px 1px rgba(16, 27, 54, 0.04), 0 30px 60px -36px rgba(16, 27, 54, 0.28);
+  --bg: #efe5d3;
+  --bg-2: #e9ddc8;
+  --surface: #fffaf2;
+  --surface-2: #f6efe3;
+  --line: rgba(16, 27, 54, 0.09);
+  --line-2: rgba(140, 122, 94, 0.28);
+  --vidro: rgba(255, 250, 242, 0.72);
+  --vidro-borda: rgba(255, 255, 255, 0.85);
+  --porcelanato:
+    linear-gradient(104deg, rgba(255, 255, 255, 0) 14%, rgba(255, 255, 255, .5) 21%, rgba(255, 255, 255, .12) 25%, rgba(255, 255, 255, 0) 30%,
+      rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, .34) 66%, rgba(255, 255, 255, .08) 70%, rgba(255, 255, 255, 0) 74%) fixed,
+    radial-gradient(1300px 520px at 50% -6%, rgba(255, 252, 245, .75), rgba(255, 252, 245, 0) 70%) fixed,
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 55%, rgba(120, 100, 70, .06) 100%) fixed,
+    url("../img/porcelanato-creme.webp") 0 0 / 1200px auto repeat,
+    #efe5d3;
 }
 
-/* estúdio: luz branca no alto, piso de porcelana com brilho no meio da tela */
-body {
-  background:
-    radial-gradient(1400px 620px at 50% -8%, #ffffff 0%, rgba(255, 255, 255, 0) 70%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 52%, rgba(255, 255, 255, 0.75) 60%, rgba(255, 255, 255, 0) 74%),
-    linear-gradient(180deg, #fbfbfa 0%, #f4f3f0 55%, #e9e8e4 100%);
-  background-attachment: fixed;
+body, .hn, body.an-pagina { background: var(--porcelanato) !important; }
+::selection { background: rgba(216, 200, 174, 0.85); color: #101b36; }
+@media (max-width: 700px) {
+  /* celular: fundo fixo pesa na rolagem; o reflexo acompanha a página */
+  :root, html[data-theme="light"] { --porcelanato:
+    linear-gradient(104deg, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, .45) 22%, rgba(255, 255, 255, 0) 34%),
+    url("../img/porcelanato-creme.webp") 0 0 / 800px auto repeat, #efe5d3; }
 }
-::selection { background: rgba(16, 27, 54, 0.12); color: #101b36; }
 
-/* cartões: porcelana esmaltada (branco, borda de luz em cima, sombra curta e macia) */
-.preco2, .prod-c, .sis, .caminho, .sis-duas > div, .np-grade, .np-faq details, .ini-mais, .ini-oferta, .orc, .conta-caixa, .ini-calc-card,
-.an-card, .an-pagina .cartao {
-  background: linear-gradient(180deg, #ffffff 0%, #fbfbfa 60%, #f5f4f1 100%);
-  border-color: rgba(16, 27, 54, 0.08);
-  box-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(16, 27, 54, 0.05), 0 22px 44px -30px rgba(16, 27, 54, 0.32);
+/* cartões: esmalte creme brilhante, com fio de luz em cima */
+.preco2, .prod-c, .sis, .caminho, .sis-duas > div, .np-grade, .np-faq details, .ini-mais, .ini-oferta, .orc, .conta-caixa, .ini-calc-card {
+  background: linear-gradient(180deg, #fffcf6 0%, #fbf5ea 60%, #f5ecdd 100%);
+  border-color: rgba(140, 122, 94, 0.25);
+  box-shadow: inset 0 1px 0 #ffffff, 0 1px 2px rgba(16, 27, 54, 0.05), 0 22px 44px -30px rgba(60, 45, 20, 0.35);
 }
-.preco2.dest { background: linear-gradient(180deg, #ffffff, #f4f3f0); border-color: rgba(16, 27, 54, 0.22); }
 
-/* faixas que eram creme ficam porcelana */
-.hn main > section:not(.lx-hero):not(.hq-anshur), .hq-anshur { background: transparent; }
+/* fundos chapados viram transparentes para o porcelanato aparecer */
+main.lx-rosas, .hn main, .hn main > .hq-anshur, .an-topo { background: transparent !important; }
+.an-sec-marfim, .an-fim { background: rgba(255, 250, 240, .38) !important; }
 
-/* reflexo de acrílico sob fotos de produto e telas (Chrome, Edge e Safari; nos outros fica sem reflexo) */
+/* reflexo do piso sob as fotos de produto (Chrome, Edge e Safari) */
 .prod-c .prod-foto img, .ini-vitrine img {
   -webkit-box-reflect: below 2px linear-gradient(to bottom, transparent 0%, transparent 72%, rgba(255, 255, 255, 0.22) 100%);
 }
-@media (prefers-reduced-transparency: reduce) {
-  .prod-c .prod-foto img, .ini-vitrine img { -webkit-box-reflect: none; }
-}
 
-/* rosas só no rodapé (pedido do dono 09/11): sem estampa nas laterais das seções, sem cantos no topo e sem rosinha nos rótulos */
+/* rosas só no rodapé (pedido do dono 09/11): sem estampa nas laterais, sem cantos no topo e sem rosinha nos rótulos */
 main > section:not(.ini-hero)::after, main > section.ini-hero::before, main > section.lx-hero::after { background-image: none !important; }
 main::before { background-image: none !important; }
 .eyebrow::before { content: none !important; }
 
-/* página inicial: o papel creme vira porcelana */
-.hn { --hn-papel: #f6f5f2; --hn-folha: #ffffff; --hn-linha: rgba(16, 27, 54, 0.08);
-  background:
-    radial-gradient(1400px 620px at 50% -8%, #ffffff 0%, rgba(255, 255, 255, 0) 70%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 52%, rgba(255, 255, 255, 0.75) 60%, rgba(255, 255, 255, 0) 74%),
-    linear-gradient(180deg, #fbfbfa 0%, #f4f3f0 55%, #e9e8e4 100%) !important;
-  background-attachment: fixed !important; }
-
-/* fundos chapados em creme viram transparentes para o estúdio aparecer */
-main.lx-rosas, .hn main, .hn main > .hq-anshur { background: transparent !important; }
-/* página do Anshur: mesmo estúdio; faixas alternadas num cinza-porcelana bem leve */
-body.an-pagina { background:
-    radial-gradient(1400px 620px at 50% -8%, #ffffff 0%, rgba(255, 255, 255, 0) 70%),
-    linear-gradient(180deg, #fbfbfa 0%, #f4f3f0 55%, #e9e8e4 100%) !important; background-attachment: fixed !important; }
-.an-topo { background: linear-gradient(180deg, rgba(255, 255, 255, .9) 0%, rgba(255, 255, 255, 0) 100%) !important; }
-.an-sec-marfim, .an-fim { background: linear-gradient(180deg, rgba(236, 235, 231, .7), rgba(244, 243, 240, .7)) !important; }
+/* sem a estampa, as seções não precisam isolar camadas; assim a foto do notebook (multiply) funde com o porcelanato */
+main > section.hq-anshur, main > section.an-topo { isolation: auto; }

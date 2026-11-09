@@ -405,3 +405,9 @@ main.an::before, main.an > section::before, main.an > section::after { content: 
 .an-comece-bloco { max-width: none; }
 .an-comece-bloco p { max-width: 90ch; }
 @media (max-width: 640px) { .an-mod-largo p { font-size: 16px; } .an-mod-largo h3 { font-size: 26px; } .an-cobre { font-size: 16px; } }
+
+/* botão da demonstração bem visível no topo (pedido do dono 09/11) */
+.an-demo-link { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.an-demo-link a.btn.an-btn-demo { background: #fff !important; color: var(--an-ob) !important; border: 1.5px solid var(--an-ob) !important; text-decoration: none; }
+.an-demo-link a.btn.an-btn-demo:hover { background: var(--an-ob) !important; color: #fff !important; }
+.an-demo-link span { font-size: 14px; color: #55626a; }
