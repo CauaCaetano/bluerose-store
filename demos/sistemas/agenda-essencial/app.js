@@ -43,11 +43,17 @@ const MSGS = {
   retorno: { titulo: 'Chamar de volta quem sumiu', quando: 'Na lista de clientes que já passaram do tempo de voltar.', vars: ['nome', 'profissional', 'dias', 'servico', 'link', 'negocio'], sug: [
     'Oi, {nome}! Aqui é {profissional}. Já faz {dias} dias do seu último atendimento ({servico}). Vamos marcar o próximo? Escolha o horário aqui: {link}',
     'Oi, {nome}! Sentimos sua falta 💛 Já faz {dias} dias do seu último {servico}. Quer marcar? É só escolher o horário aqui: {link}'] },
+  // 09/11/2026: pagamento no fim do mês (botão "Cobrar no WhatsApp" da tela Fim do mês)
+  cobranca: { titulo: 'Cobrança do mês', quando: 'Botão "Cobrar no WhatsApp" da tela Fim do mês, para quem paga no fim do mês.', vars: ['nome', 'mes', 'lista', 'total', 'pix', 'negocio'], sug: [
+    'Oi, {nome}! Segue o resumo dos seus atendimentos de {mes}:\n{lista}\nTotal: {total}. Pode pagar no PIX {pix}. Obrigada! {negocio}',
+    'Oi, {nome}! Tudo bem? Fechei o mês de {mes}:\n{lista}\nFica {total}. Minha chave PIX: {pix}. Qualquer dúvida, me chama. {negocio}',
+    'Olá, {nome}. Atendimentos de {mes}:\n{lista}\nValor a pagar: {total}. PIX: {pix}. {negocio}'] },
 };
-const VAR_NOME = { nome: 'nome do cliente', servico: 'serviço', dia: 'dia', hora: 'hora', negocio: 'nome do seu negócio', sinal: 'sinal no PIX (só aparece se houver)', horarios: 'horários livres', profissional: 'seu nome', dias: 'dias sem vir', link: 'seu link de agendamento' };
+const VAR_NOME = { nome: 'nome do cliente', servico: 'serviço', dia: 'dia', hora: 'hora', negocio: 'nome do seu negócio', sinal: 'sinal no PIX (só aparece se houver)', horarios: 'horários livres', profissional: 'seu nome', dias: 'dias sem vir', link: 'seu link de agendamento', mes: 'mês', lista: 'datas e serviços do mês', total: 'quanto falta pagar', pix: 'sua chave PIX' };
 const textoMsg = (k) => (db.msgs && db.msgs[k]) || MSGS[k].sug[0];
 const msg = (k, v) => textoMsg(k).replace(/\{(\w+)\}/g, (m, x) => String((x === 'negocio' ? db.studio : v[x]) ?? '')).replace(/[ \t]{2,}/g, ' ').trim();
-const EXEMPLO_MSG = () => ({ nome: 'Marina', servico: (db.servicos[0]?.nome || 'atendimento').toLowerCase(), dia: nomeDia(2), hora: '14:30', sinal: `Sinal de ${din(30)} no PIX ${db.pix}.`, horarios: '9:00, 10:30, 15:00', profissional: db.pro.split(' ')[0], dias: 45, link: LINK });
+const EXEMPLO_MSG = () => ({ nome: 'Marina', servico: (db.servicos[0]?.nome || 'atendimento').toLowerCase(), dia: nomeDia(2), hora: '14:30', sinal: `Sinal de ${din(30)} no PIX ${db.pix}.`, horarios: '9:00, 10:30, 15:00', profissional: db.pro.split(' ')[0], dias: 45, link: LINK, mes: MES[new Date().getMonth()], lista: `• ${dm(data(-20))} · ${(db.servicos[0]?.nome || 'atendimento').toLowerCase()} · ${din(80)}\n• ${dm(data(-6))} · ${(db.servicos[0]?.nome || 'atendimento').toLowerCase()} · ${din(80)}`, total: din(160), pix: db.pix });
+const dm = (d) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 // guarda o texto (vazio ou igual à 1ª sugestão = volta ao padrão) e atualiza a prévia
 function salvaMsg(k, v) {
   db.msgs = db.msgs || {}; const x = String(v || '').trim();
@@ -83,18 +89,18 @@ function lerFoto(arq) {
   });
 }
 // novidades da atualização: aparece uma vez em cada aparelho; a marca fica fora dos dados da agenda
-const NOVIDADES = 'agenda-essencial-novidades', VISTA = '2026-11-07';
+const NOVIDADES = 'agenda-essencial-novidades', VISTA = '2026-11-09';
 function novidades() {
   if (window !== window.top || document.querySelector('.trava, .veu')) return;
   try { if (localStorage.getItem(NOVIDADES) === VISTA) return; } catch { return; }
   const visto = () => { try { localStorage.setItem(NOVIDADES, VISTA); } catch { /* sem espaço: mostra de novo na próxima */ } };
   if (!db.clientes.length && !db.ags.length) { visto(); return; } // conta nova: não há o que contar de novidade
   visto(); // 09/11: marca ao mostrar: aparece uma vez só, mesmo se o app for fechado com o aviso aberto
-  folha(`<h2>Seu app ganhou a sua cara</h2><p class="sub">Novidades desta atualização. Sua agenda, seus clientes e os valores continuam do mesmo jeito.</p>
-    <ul class="novidades"><li><b>Sua foto ou logo no topo</b><span>No lugar da logo da Veltria, que atrapalhava no celular. Toque no seu nome lá em cima para trocar.</span></li>
-    <li><b>Escolha a cor do app</b><span>Seis cores para combinar com o seu negócio, em Mais › Configurações › Sua marca no app.</span></li>
-    <li><b>Bom dia com o resumo de hoje</b><span>Quantos horários, quanto vai entrar, quantos faltam e se chegou pedido novo pelo link.</span></li></ul>
-    <div style="display:grid;gap:8px"><a class="bt cheio largo" href="#config" data-fecha>Personalizar agora</a><button type="button" class="bt largo" data-fecha>Ver depois</button></div>`, (f) => {
+  folha(`<h2>Pagamento no fim do mês</h2><p class="sub">Para quem não paga no dia. Sua agenda, seus clientes e os valores continuam do mesmo jeito.</p>
+    <ul class="novidades"><li><b>Escolha "No fim do mês" no cliente</b><span>Em Clientes › Editar. Ou marque todos de uma vez em Mais › Configurações › Pagamento dos clientes.</span></li>
+    <li><b>Os atendimentos somam sozinhos</b><span>Ao tocar em Atendido, o valor vai para a conta do mês, sem pedir pagamento no dia.</span></li>
+    <li><b>Tela Fim do mês</b><span>Mostra quem falta pagar, marca o que foi pago (até em partes) e cobra no WhatsApp com a lista do mês.</span></li></ul>
+    <div style="display:grid;gap:8px"><a class="bt cheio largo" href="#fimdomes" data-fecha>Ver o Fim do mês</a><button type="button" class="bt largo" data-fecha>Ver depois</button></div>`, (f) => {
     const veu = f.parentElement;
     veu.addEventListener('click', (e) => { if (e.target === veu || e.target.closest('[data-fecha]')) visto(); });
     veu.addEventListener('keydown', (e) => { if (e.key === 'Escape') visto(); });
@@ -147,7 +153,75 @@ const preco = (a) => (a.valor != null && a.valor !== '' ? Number(a.valor) : serv
 const ST = { marcado: ['marcado', ''], confirmado: ['confirmou', 'ok'], feito: ['atendido', 'ok'], faltou: ['faltou', 'ru'] };
 const estAss = () => { const a = db.assinatura; return a.status === 'vencida' ? 'vencida: pague para continuar' : a.renova ? `ativa · próxima em ${a.proxima} dias` : `cancelada · usa por mais ${a.proxima} dias`; };
 const RASC = () => ({ serv: db.servicos[0]?.id || 's1', cli: '', tel: '', dia: 0, ini: null, sinal: false, valor: '', remarca: null, rep: 0, repDias: null, repManual: false, repN: 3, repU: 'mes' });
-let dia = 0, rasc = RASC(), res = { modo: 'dia', d: 0, m: 0, a: 0 };
+let dia = 0, rasc = RASC(), res = { modo: 'dia', d: 0, m: 0, a: 0 }, fm = { n: null, filtro: 'todos' };
+
+// ------------------------------------------------------------------ pagamento no fim do mês (09/11/2026)
+// Só campos novos e opcionais; sem eles tudo funciona como antes (ninguém é mensalista):
+//  clientes[].pagamento = 'mes' (paga no fim do mês) ou 'atendimento'/ausente (paga no dia, como sempre foi);
+//  ags[].mes = true: o atendimento foi para a conta do mês (pago começa em 0 e sobe conforme os pagamentos do mês);
+//  ags[].antes = { pago, forma }: só em atendimento antigo que a pessoa passou para a conta do mês (dá para desfazer);
+//  db.pagMes = [{ id, cli, mes: 'AAAA-MM', valor, data: 'AAAA-MM-DD', forma }]: pagamentos do mês. Datas absolutas de
+//    propósito: não entram na regra dos "dias que andam" do conta-nuvem.js (que só mexe em ags[].dia e afins);
+//  db.pagPadrao = 'mes' | 'atendimento' (ausente = atendimento): como os clientes novos pagam.
+const mensal = (c) => !!c && c.pagamento === 'mes';
+const r2 = (v) => Math.round((Number(v) || 0) * 100) / 100;
+const chaveMes = (n) => `${Math.floor(n / 12)}-${pad((n % 12) + 1)}`;
+const nomeMes = (n) => `${MES[n % 12]} de ${Math.floor(n / 12)}`;
+const sinalPg = (a) => (a.sinal?.pago ? Number(a.sinal.valor) || 0 : 0);
+const agsDoMes = (n, cid) => db.ags.filter((a) => a.mes && a.st === 'feito' && (cid == null || a.cli === cid) && mesDe(a.dia) === n).sort((a, b) => a.dia - b.dia || a.ini - b.ini);
+const isoHoje = () => iso(0);
+const dataBR = (s) => { const [y, m, d] = String(s || '').split('-'); return d ? `${d}/${m}/${y}` : ''; };
+// no "Bom dia": quanto está a receber no fim do mês e, nos 3 últimos dias do mês e nos 5 primeiros do seguinte, quem cobrar
+function olaFimMes() {
+  if (!(db.pagMes || []).length && !db.ags.some((a) => a.mes)) return '';
+  const n0 = mesDe(0), h = data(0), d = h.getDate(), ult = new Date(h.getFullYear(), h.getMonth() + 1, 0).getDate(), agora = contaMes(n0);
+  const alvo = d > ult - 3 ? agora : d <= 5 ? contaMes(n0 - 1) : null;
+  const partes = [];
+  if (agora.falta) partes.push(`A receber no fim do mês: <b>${din(agora.falta)}</b>`); else if (agora.l.length) partes.push(`Fim do mês: tudo pago em ${MES[n0 % 12]}`);
+  if (alvo && alvo.cobrar) partes.push(`<a href="#fimdomes" data-fm="${alvo.n}">${alvo.cobrar} ${alvo.cobrar === 1 ? 'cliente' : 'clientes'} para cobrar${alvo.n !== n0 ? ` (${MES[alvo.n % 12]})` : ''}</a>`);
+  return partes.length ? `<p class="ola-s ola-mes">${partes.join(' · ')}</p>` : '';
+}
+// a conta de um mês (n = ano * 12 + mês): por cliente, quantos atendimentos, total, já pago e quanto falta
+function contaMes(n) {
+  const k = chaveMes(n), m = new Map(), item = (cid) => { if (!m.has(cid)) m.set(cid, { cli: cid, ags: [], pags: [], total: 0, pago: 0 }); return m.get(cid); };
+  agsDoMes(n).forEach((a) => { const x = item(a.cli); x.ags.push(a); x.total += preco(a); x.pago += sinalPg(a); });
+  (db.pagMes || []).filter((p) => p.mes === k).forEach((p) => { const x = item(p.cli); x.pags.push(p); x.pago += Number(p.valor) || 0; });
+  const l = [...m.values()].map((x) => ({ ...x, total: r2(x.total), pago: r2(x.pago), falta: Math.max(0, r2(x.total - x.pago)) }))
+    .sort((a, b) => (b.falta > 0) - (a.falta > 0) || sa(cli(a.cli).nome).localeCompare(sa(cli(b.cli).nome)));
+  const soma = (f) => r2(l.reduce((s, x) => s + x[f], 0));
+  return { n, k, l, total: soma('total'), pago: soma('pago'), falta: soma('falta'), cobrar: l.filter((x) => x.falta > 0).length };
+}
+// distribui os pagamentos do mês pelos atendimentos (do mais antigo ao mais novo): assim o Resumo e o Caixa contam o que entrou
+function realoca(cid, n) {
+  const k = chaveMes(n), l = agsDoMes(n, cid);
+  l.forEach((a) => { a.pago = 0; a.forma = null; });
+  (db.pagMes || []).filter((p) => p.cli === cid && p.mes === k).sort((a, b) => String(a.data).localeCompare(String(b.data))).forEach((p) => {
+    let resta = r2(p.valor);
+    for (const a of l) { if (resta <= 0) break; const deve = r2(preco(a) - sinalPg(a) - a.pago); if (deve <= 0) continue; const x = Math.min(deve, resta); a.pago = r2(a.pago + x); if (!a.forma) a.forma = p.forma; resta = r2(resta - x); }
+  });
+}
+// texto da cobrança de um cliente no mês (mensagem editável em Configurações › Mensagens do WhatsApp)
+function textoCobranca(x, n) {
+  const c = cli(x.cli), lista = x.ags.map((a) => `• ${dm(data(a.dia))} · ${serv(a.serv).nome.toLowerCase()} · ${din(preco(a))}`).join('\n') + (x.pago > 0 ? `\n(já pago: ${din(x.pago)})` : '');
+  return msg('cobranca', { nome: c.nome.split(' ')[0], mes: MES[n % 12], lista, total: din(x.falta || x.total), pix: db.pix || '' });
+}
+// planilha do fechamento do mês: o mesmo gerador do "Exportar para o Excel" (base/xlsx.js); CSV se o Excel não der
+function exportaMes(n, tipo) {
+  const c = contaMes(n), nome = `Fim do mês - ${nomeMes(n)} - ${db.studio || 'Agenda'}`.replace(/[\\/:*?"<>|]/g, '');
+  const M = (v) => ({ v: r2(v), t: 'moeda' }), TX = (v) => ({ v: String(v ?? ''), t: 'texto' });
+  const resumo = [['Cliente', 'WhatsApp', 'Atendimentos', 'Total', 'Já pago', 'Falta pagar', 'Situação']].concat(c.l.map((x) => [cli(x.cli).nome, TX(cli(x.cli).tel || ''), x.ags.length, M(x.total), M(x.pago), M(x.falta), x.falta > 0 ? (x.pago > 0 ? 'Pago em parte' : 'Falta pagar') : 'Pago'])).concat([['Total do mês', '', c.l.reduce((s, x) => s + x.ags.length, 0), M(c.total), M(c.pago), M(c.falta), '']]);
+  const atend = [['Data', 'Hora', 'Cliente', 'Serviço', 'Valor', 'Sinal pago', 'Pago']].concat(c.l.flatMap((x) => x.ags.map((a) => [iso(a.dia), hh(a.ini), cli(a.cli).nome, serv(a.serv).nome, M(preco(a)), M(sinalPg(a)), M(a.pago + sinalPg(a))])));
+  const pags = [['Data', 'Cliente', 'Valor', 'Forma']].concat(c.l.flatMap((x) => x.pags.map((p) => [String(p.data || ''), cli(p.cli).nome, M(p.valor), p.forma || ''])));
+  if (!c.l.length) { toast('Nada para exportar neste mês.'); return; }
+  const csv = () => {
+    const cel = (v) => { if (v && typeof v === 'object') v = v.t === 'moeda' ? r2(v.v).toFixed(2).replace('.', ',') : v.v; const s = typeof v === 'number' ? String(v).replace('.', ',') : /^\d{4}-\d{2}-\d{2}$/.test(String(v)) ? dataBR(v) : String(v ?? ''); return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+    const txt = '﻿' + [resumo, [], atend, [], pags].map((tab) => tab.map((l) => l.map(cel).join(';')).join('\r\n')).join('\r\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv;charset=utf-8' })); a.download = nome + '.csv'; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    toast('Planilha CSV baixada.');
+  };
+  if (tipo === 'csv') { csv(); return; }
+  import('../base/xlsx.js').then((x) => { x.baixarXlsx(nome, [{ nome: 'Fim do mês', linhas: resumo }, { nome: 'Atendimentos', linhas: atend }, { nome: 'Pagamentos', linhas: pags }]); toast('Planilha do Excel baixada.'); }).catch(csv);
+}
 // guarda o que já foi digitado no Novo horário antes de redesenhar a tela
 const guarda = () => { const g = (id) => document.getElementById(id); if (g('cli-n')) rasc.cli = g('cli-n').value; if (g('tel-n')) rasc.tel = g('tel-n').value; if (g('valor-n')) rasc.valor = g('valor-n').value; if (g('sinal')) rasc.sinal = g('sinal').checked; const rb = g('rep-box'); if (rb && g('marcar-bt')) { const r = lerRep(rb, rasc.dia); rasc.rep = r.freq; rasc.repDias = rasc.repManual ? r.dias : null; /* sem escolha manual, o dia da semana acompanha o dia marcado */ rasc.repN = r.n; rasc.repU = r.u; } };
 
@@ -182,11 +256,11 @@ function relogio(d) {
 const T = {
   dia() {
     const l = doDia(dia), usados = [...new Set(l.map((a) => a.serv))], hj = doDia(0), falta = hj.filter((a) => a.st === 'marcado' || a.st === 'confirmado');
-    const ola = `<section class="ola" aria-label="Resumo de hoje"><p class="ola-t">${saudacao()}${primeiroNome() ? `, ${t(primeiroNome())}` : ''}</p><p class="ola-s">${hj.length ? `Hoje: ${hj.length} ${hj.length === 1 ? 'horário' : 'horários'} · ${din(hj.reduce((s, a) => s + preco(a), 0))}${falta.length ? ` · faltam ${falta.length}` : ' · tudo atendido'}` : 'Hoje a agenda está livre.'}${db.pedidos.length ? ` · <a href="#link">${db.pedidos.length} ${db.pedidos.length === 1 ? 'pedido novo' : 'pedidos novos'}</a>` : ''}</p></section>`;
+    const ola = `<section class="ola" aria-label="Resumo de hoje"><p class="ola-t">${saudacao()}${primeiroNome() ? `, ${t(primeiroNome())}` : ''}</p><p class="ola-s">${hj.length ? `Hoje: ${hj.length} ${hj.length === 1 ? 'horário' : 'horários'} · ${din(hj.reduce((s, a) => s + preco(a), 0))}${falta.length ? ` · faltam ${falta.length}` : ' · tudo atendido'}` : 'Hoje a agenda está livre.'}${db.pedidos.length ? ` · <a href="#link">${db.pedidos.length} ${db.pedidos.length === 1 ? 'pedido novo' : 'pedidos novos'}</a>` : ''}</p>${olaFimMes()}</section>`;
     return `${ola}<div class="dias" role="group" aria-label="Escolher o dia">${Array.from({ length: 8 }, (_, i) => i - 1).map((o) => `<button type="button" data-dia="${o}" aria-pressed="${o === dia}"><small>${data(o).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')}</small><b>${data(o).getDate()}</b>${doDia(o).length ? '<i></i>' : ''}</button>`).join('')}</div>
       <div class="ir-data"><label>Ir para outra data<input type="date" id="ir-dia" value="${iso(dia)}"></label>${dia !== 0 ? '<button type="button" class="bt pq" data-dia="0">Hoje</button>' : ''}</div>
       ${relogio(dia)}<div class="legenda-c">${usados.map((s) => `<span style="--c:${serv(s).cor}">${t(serv(s).nome)}</span>`).join('')}</div>
-      <div class="tit-linha"><h2>${nomeDia(dia)[0].toUpperCase() + nomeDia(dia).slice(1)}${Math.abs(dia) > 1 ? ` · ${data(dia).toLocaleDateString('pt-BR')}` : ''}</h2><a class="bt pq" href="#resumo" data-res-dia="${dia}">Resumo do dia</a></div><div class="cartao">${l.map((a) => { const c = cli(a.cli), s = serv(a.serv); return `<div class="hora" data-ag="${a.id}" role="button" tabindex="0" style="position:relative"><span class="h">${hh(a.ini)}</span><span><b>${t(c.nome)}</b><small>${t(s.nome)} · ${s.min} min · ${din(preco(a))}${a.sinal ? ` · sinal ${din(a.sinal.valor)} ${a.sinal.pago ? 'pago' : 'pendente'}` : ''}</small></span><span class="selo ${ST[a.st][1]}">${ST[a.st][0]}</span></div>`; }).join('') || `<p class="livre">Nenhum horário neste dia. ${dia >= 0 ? `<button type="button" class="bt pq" data-novo-dia="${dia}">Marcar neste dia</button>` : ''}</p>`}</div>
+      <div class="tit-linha"><h2>${(Math.abs(dia) > 1 ? data(dia).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : nomeDia(dia)).replace(/^./, (x) => x.toUpperCase())}</h2><a class="bt pq" href="#resumo" data-res-dia="${dia}">Resumo do dia</a></div><div class="cartao">${l.map((a) => { const c = cli(a.cli), s = serv(a.serv); return `<div class="hora" data-ag="${a.id}" role="button" tabindex="0" style="position:relative"><span class="h">${hh(a.ini)}</span><span><b>${t(c.nome)}</b><small>${t(s.nome)} · ${s.min} min · ${din(preco(a))}${a.sinal ? ` · sinal ${din(a.sinal.valor)} ${a.sinal.pago ? 'pago' : 'pendente'}` : ''}</small></span><span class="selo ${ST[a.st][1]}">${ST[a.st][0]}</span></div>`; }).join('') || `<p class="livre">Nenhum horário neste dia. ${dia >= 0 ? `<button type="button" class="bt pq" data-novo-dia="${dia}">Marcar neste dia</button>` : ''}</p>`}</div>
       ${dia >= 0 && db.espera.length ? `<div class="cartao"><b>${db.espera.length} cliente(s) na lista de espera</b><p class="mini" style="margin:2px 0 8px">Se alguém desmarcar, ofereça o horário a quem está esperando.</p><a class="bt pq" href="#espera">Ver a lista</a></div>` : ''}`;
   },
   novo() {
@@ -213,7 +287,7 @@ const T = {
     const l = db.clientes.map((c) => ({ ...c, s: serv(c.serv), atraso: -c.ultima - serv(c.serv).retorno, marcada: db.ags.some((a) => a.cli === c.id && a.dia >= 0 && a.st !== 'cancelado') })).sort((a, b) => (b.atraso > 0 && !b.marcada) - (a.atraso > 0 && !a.marcada) || b.atraso - a.atraso);
     const chamar = l.filter((c) => c.ultima && c.atraso >= 0 && !c.marcada);
     return `<h1>Clientes</h1><p class="sub">${db.clientes.length} clientes. ${chamar.length ? `${chamar.length} já passaram do tempo de voltar e não têm horário marcado (aparecem primeiro).` : 'Todos em dia.'}</p><input type="search" id="busca-cli" class="busca" placeholder="Procurar cliente pelo nome" aria-label="Procurar cliente"><button type="button" class="bt cheio largo" data-acao="add-cliente" style="margin-bottom:12px">+ Adicionar cliente</button>
-      ${l.map((c) => `<div class="cartao" data-nome-cli="${t(sa(c.nome))}"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>${t(c.nome)}</b><small class="mini" style="display:block">${c.ultima ? `${t(c.s.nome)} há ${-c.ultima} dias · volta a cada ${c.s.retorno} dias` : 'cliente novo'}${c.valor != null ? ` · paga ${din(c.valor)}` : ''}${c.faltas ? ` · ${c.faltas} falta(s)` : ''}</small></div>${c.marcada ? '<span class="selo ok">tem horário</span>' : !c.ultima ? '<span class="selo">novo</span>' : c.atraso >= 0 ? '<span class="selo rs">hora de chamar</span>' : `<span class="selo">em ${-c.atraso} dias</span>`}</div>
+      ${l.map((c) => `<div class="cartao" data-nome-cli="${t(sa(c.nome))}"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>${t(c.nome)}</b><small class="mini" style="display:block">${c.ultima ? `${t(c.s.nome)} há ${-c.ultima} dias · volta a cada ${c.s.retorno} dias` : 'cliente novo'}${c.valor != null ? ` · paga ${din(c.valor)}` : ''}${mensal(c) ? ' · paga no fim do mês' : ''}${c.faltas ? ` · ${c.faltas} falta(s)` : ''}</small></div>${c.marcada ? '<span class="selo ok">tem horário</span>' : !c.ultima ? '<span class="selo">novo</span>' : c.atraso >= 0 ? '<span class="selo rs">hora de chamar</span>' : `<span class="selo">em ${-c.atraso} dias</span>`}</div>
         <div class="linha">${c.ultima && !c.marcada && c.atraso >= 0 && c.tel ? `<a class="bt pq rose" target="_blank" rel="noopener" href="${zap(c.tel, msg('retorno', { nome: c.nome.split(' ')[0], profissional: db.pro.split(' ')[0], dias: -c.ultima, servico: c.s.nome.toLowerCase(), link: LINK }))}">Chamar no WhatsApp</a>` : ''}<button type="button" class="bt pq" data-marca-cli="${c.id}">Marcar horário</button><button type="button" class="bt pq" data-edita-cli="${c.id}">Editar</button></div></div>`).join('')}`;
   },
   link() {
@@ -230,7 +304,30 @@ const T = {
     return `<a href="#mais">← Mais</a><h1>Caixa</h1><p class="sub">Últimos 7 dias e o que já está marcado.</p>
       <div class="cartao"><small class="mini">Recebido (7 dias)</small><p style="font:400 2rem var(--serif);margin:2px 0">${din(rec)}</p><small class="mini">Marcado pela frente: ${din(prev)}</small></div>
       <div class="cartao"><b>Faltas</b><p class="mini" style="margin:2px 0 0">${faltas.length} falta(s) custaram ${din(perdido)}. O sinal no PIX evita isso: ligue em Configurações.</p></div>
-      <h2>Atendimentos</h2><div class="cartao">${sem.filter((a) => a.st === 'feito').map((a) => `<div class="hora" style="cursor:default"><span class="h">${data(a.dia).getDate()}/${data(a.dia).getMonth() + 1}</span><span>${t(cli(a.cli).nome)}<small>${t(serv(a.serv).nome)}</small></span><span>${din(a.pago)}</span></div>`).join('') || '<p class="livre">Nada ainda.</p>'}</div>`;
+      <h2>Atendimentos</h2><div class="cartao">${sem.filter((a) => a.st === 'feito').map((a) => `<div class="hora" style="cursor:default"><span class="h">${data(a.dia).getDate()}/${data(a.dia).getMonth() + 1}</span><span>${t(cli(a.cli).nome)}<small>${t(serv(a.serv).nome)}</small></span><span>${a.mes && !a.pago ? '<span class="selo">fim do mês</span>' : din(a.pago)}</span></div>`).join('') || '<p class="livre">Nada ainda.</p>'}</div>`;
+  },
+  fimdomes() {
+    const n0 = mesDe(0), n = fm.n ?? n0, c = contaMes(n), f = fm.filtro, nMens = db.clientes.filter(mensal).length;
+    const pagos = c.l.filter((x) => x.falta <= 0), faltam = c.l.filter((x) => x.falta > 0), l = f === 'falta' ? faltam : f === 'pagos' ? pagos : c.l;
+    const antigos = db.ags.filter((a) => a.st === 'feito' && !a.mes && mesDe(a.dia) === n && mensal(cli(a.cli))), trazidos = agsDoMes(n).filter((a) => a.antes);
+    const cap = (s) => s[0].toUpperCase() + s.slice(1), nAt = c.l.reduce((s, x) => s + x.ags.length, 0);
+    const cartao = (x) => { const k = cli(x.cli), pn = t(k.nome.split(' ')[0]);
+      return `<div class="cartao fm-cli" data-nome-cli="${t(sa(k.nome))}"><div class="fm-topo"><div><b>${t(k.nome)}</b><small class="mini">${x.ags.length} ${x.ags.length === 1 ? 'atendimento' : 'atendimentos'} · total ${din(x.total)}${x.pago ? ` · pago ${din(x.pago)}` : ''}</small></div><span class="selo ${x.falta > 0 ? (x.pago > 0 ? 'at' : 'ru') : 'ok'}">${x.falta > 0 ? `falta ${din(x.falta)}` : 'pago'}</span></div>
+        <details class="fm-det"><summary>Ver datas${x.pags.length ? ' e pagamentos' : ''}</summary><div>${x.ags.map((a) => `<p><span>${dm(data(a.dia))} · ${t(serv(a.serv).nome)}</span><span>${din(preco(a))}</span></p>`).join('')}${x.pags.map((p) => `<p class="fm-pag"><span>Pago ${dataBR(p.data).slice(0, 5)} · ${t(p.forma === 'PIX' ? 'Pix' : p.forma || '')}</span><span>${din(p.valor)} <button type="button" class="bt pq" data-fm-despag="${t(p.id)}" aria-label="Desfazer o pagamento de ${din(p.valor)}">Desfazer</button></span></p>`).join('')}</div></details>
+        <div class="linha">${x.falta > 0 ? `<button type="button" class="bt pq cheio" data-fm-pagar="${t(x.cli)}">Marcar como pago</button>${k.tel ? `<button type="button" class="bt pq rose" data-fm-cobrar="${t(x.cli)}">Cobrar no WhatsApp</button>` : `<small class="mini">Sem WhatsApp anotado: edite ${pn} em Clientes para cobrar por aqui.</small>`}` : ''}</div></div>`; };
+    return `<a href="#mais">← Mais</a><h1>Fim do mês</h1><p class="sub">Quem paga no fim do mês: o que cada cliente fez, quanto já pagou e quanto falta.</p>
+      <div class="r-nav"><button type="button" class="bt pq" data-fmpasso="-1" aria-label="Mês anterior">‹</button><b class="r-tit">${cap(nomeMes(n))}</b><button type="button" class="bt pq" data-fmpasso="1" aria-label="Próximo mês">›</button></div>
+      <div class="r-grade"><div class="cartao"><small class="mini">A receber</small><b class="r-num">${din(c.falta)}</b><small class="mini">${c.cobrar ? `${c.cobrar} ${c.cobrar === 1 ? 'cliente' : 'clientes'} para cobrar` : 'ninguém devendo'}</small></div>
+      <div class="cartao"><small class="mini">Recebido</small><b class="r-num">${din(c.pago)}</b><small class="mini">de ${din(c.total)} no mês</small></div></div>
+      <p class="mini fm-conta">${nAt} ${nAt === 1 ? 'atendimento' : 'atendimentos'} de ${c.l.length} ${c.l.length === 1 ? 'cliente' : 'clientes'} na conta de ${MES[n % 12]}.</p>
+      ${nMens ? '' : `<div class="cartao"><b>Ninguém paga no fim do mês ainda</b><p class="mini" style="margin:4px 0 8px">Escolha "No fim do mês" no cliente (Clientes › Editar) ou marque todos de uma vez.</p><div class="linha" style="margin:0"><a class="bt pq cheio" href="#config" data-ir-pag>Marcar todos em Configurações</a><a class="bt pq" href="#clientes">Ir para Clientes</a></div></div>`}
+      ${antigos.length ? `<div class="cartao fm-aviso"><b>${antigos.length} ${antigos.length === 1 ? 'atendimento foi marcado' : 'atendimentos foram marcados'} como pago no dia</b><p class="mini" style="margin:4px 0 8px">São de clientes que agora pagam no fim do mês (${[...new Set(antigos.map((a) => cli(a.cli).nome.split(' ')[0]))].slice(0, 4).map(t).join(', ')}${new Set(antigos.map((a) => a.cli)).size > 4 ? '...' : ''}). Se ainda não pagaram, passe para a conta de ${MES[n % 12]}.</p><button type="button" class="bt pq" data-acao="fm-trazer">Passar para a conta do mês</button></div>` : ''}
+      ${trazidos.length ? `<p class="mini">${trazidos.length} atendimento(s) antigo(s) passaram para a conta do mês. <button type="button" class="bt pq" data-acao="fm-desfazer-trazer">Desfazer</button></p>` : ''}
+      ${c.l.length ? `<div class="chips" role="group" aria-label="Filtrar">${[['todos', `Todos (${c.l.length})`], ['falta', `Falta pagar (${faltam.length})`], ['pagos', `Pagos (${pagos.length})`]].map(([k, nm]) => `<button type="button" data-fmfiltro="${k}" aria-pressed="${f === k}">${nm}</button>`).join('')}</div>
+        ${l.map(cartao).join('') || `<p class="livre">${f === 'falta' ? 'Ninguém falta pagar neste mês.' : 'Ninguém pagou tudo ainda neste mês.'}</p>`}
+        <h2>Planilha do mês</h2><div class="linha" style="margin-top:0"><button type="button" class="bt pq" data-acao="fm-excel">Exportar para o Excel</button><button type="button" class="bt pq" data-acao="fm-csv">Exportar CSV</button></div>`
+      : `<p class="livre">Nenhum atendimento na conta de ${MES[n % 12]}${n === n0 ? ' ainda. Quando você tocar em Atendido num horário de quem paga no fim do mês, ele aparece aqui.' : '.'}</p>`}
+      <p class="mini" style="margin:16px 0 0">Os meses ficam guardados: nada aqui apaga atendimentos nem pagamentos.</p>`;
   },
   resumo() {
     const tabs = `<div class="chips" role="tablist">${[['dia', 'Dia'], ['mes', 'Mês'], ['ano', 'Ano']].map(([k, n]) => `<button type="button" role="tab" data-rmodo="${k}" aria-pressed="${res.modo === k}">${n}</button>`).join('')}</div>`;
@@ -239,7 +336,7 @@ const T = {
     if (res.modo === 'dia') {
       nav = `<button type="button" class="bt pq" data-rpasso="-1" aria-label="Dia anterior">‹</button><label class="r-data"><input type="date" id="r-dia" value="${iso(res.d)}" aria-label="Escolher o dia"></label><button type="button" class="bt pq" data-rpasso="1" aria-label="Próximo dia">›</button>`;
       l = noPeriodo((a) => a.dia === res.d); ant = noPeriodo((a) => a.dia === res.d - 7);
-      extra = `<h2>Horários do dia</h2><div class="cartao">${l.lista.map((a) => `<div class="hora" data-ag="${a.id}" role="button" tabindex="0"><span class="h">${hh(a.ini)}</span><span><b>${t(cli(a.cli).nome)}</b><small>${t(serv(a.serv).nome)}${a.forma ? ` · ${a.forma}` : ''}</small></span><span class="selo ${ST[a.st]?.[1] || ''}">${a.st === 'feito' ? din(a.pago + (a.sinal?.pago ? a.sinal.valor : 0)) : ST[a.st]?.[0] || a.st}</span></div>`).join('') || '<p class="livre">Nenhum horário neste dia.</p>'}</div>`;
+      extra = `<h2>Horários do dia</h2><div class="cartao">${l.lista.map((a) => `<div class="hora" data-ag="${a.id}" role="button" tabindex="0"><span class="h">${hh(a.ini)}</span><span><b>${t(cli(a.cli).nome)}</b><small>${t(serv(a.serv).nome)}${a.forma ? ` · ${a.forma}` : ''}</small></span><span class="selo ${ST[a.st]?.[1] || ''}">${a.st === 'feito' ? (a.mes && !a.pago && !sinalPg(a) ? 'fim do mês' : din(a.pago + (a.sinal?.pago ? a.sinal.valor : 0))) : ST[a.st]?.[0] || a.st}</span></div>`).join('') || '<p class="livre">Nenhum horário neste dia.</p>'}</div>`;
     } else if (res.modo === 'mes') {
       const alvo = mi + res.m, y = Math.floor(alvo / 12), m = alvo % 12, dias = new Date(y, m + 1, 0).getDate();
       nav = `<button type="button" class="bt pq" data-rpasso="-1" aria-label="Mês anterior">‹</button><b class="r-tit">${MES[m][0].toUpperCase() + MES[m].slice(1)} de ${y}</b><button type="button" class="bt pq" data-rpasso="1" aria-label="Próximo mês">›</button>`;
@@ -262,10 +359,11 @@ const T = {
       <div class="cartao"><small class="mini">Atendidos</small><b class="r-num">${l.feitos.length}</b><small class="mini">valor médio ${din(l.ticket)}</small></div>
       <div class="cartao"><small class="mini">Faltas</small><b class="r-num">${l.faltas.length}</b><small class="mini">${l.faltas.length ? `deixaram de entrar ${din(l.perdido)}` : 'nenhuma'}</small></div></div>
       ${l.feitos.length ? `<h2>Por serviço</h2><div class="cartao">${l.porServ.map(([s, n, v]) => `<div class="hora" style="cursor:default"><span class="h" style="color:${serv(s).cor}">●</span><span>${t(serv(s).nome)}<small>${n} atendimento(s)</small></span><span>${din(v)}</span></div>`).join('')}</div>
-      <h2>Como pagaram</h2><div class="chips">${l.formas.map(([f, v]) => `<span class="selo">${f}: ${din(v)}</span>`).join('')}</div>` : ''}${extra}`;
+      <h2>Como pagaram</h2><div class="chips">${l.formas.filter(([, v]) => v > 0).map(([f, v]) => `<span class="selo">${f}: ${din(v)}</span>`).join('')}</div>` : ''}${res.modo !== 'ano' ? resumoFimMes(l) : ''}${extra}`;
   },
   mais() {
-    const l = [['resumo', 'Resumo', 'do dia, do mês e do ano'], ['ia', 'Assistente', 'pergunte da sua agenda e dos clientes'], ['caixa', 'Caixa', 'quanto entrou e o que as faltas custaram'], ['espera', 'Lista de espera', `${db.espera.length} esperando encaixe`], ['assinatura', 'Minha assinatura', estAss()], ['dono', 'Painel do dono', 'ajudante e o que ela vê'], ['config', 'Configurações', 'sua foto e cor, tipo de negócio, horário, serviços, sinal, PIX']];
+    const fmx = contaMes(mesDe(0));
+    const l = [['fimdomes', 'Fim do mês', fmx.falta ? `${din(fmx.falta)} a receber de quem paga no fim do mês` : 'quem paga no fim do mês: a receber, cobrar e marcar pago'], ['resumo', 'Resumo', 'do dia, do mês e do ano'], ['ia', 'Assistente', 'pergunte da sua agenda e dos clientes'], ['caixa', 'Caixa', 'quanto entrou e o que as faltas custaram'], ['espera', 'Lista de espera', `${db.espera.length} esperando encaixe`], ['assinatura', 'Minha assinatura', estAss()], ['dono', 'Painel do dono', 'ajudante e o que ela vê'], ['config', 'Configurações', 'sua foto e cor, tipo de negócio, horário, pagamento, serviços, sinal, PIX']];
     return `<h1>Mais</h1><div class="lista-mais">${l.map(([k, n, s]) => `<a href="#${k}"><span><b>${n}</b><small>${t(s)}</small></span><span aria-hidden="true">›</span></a>`).join('')}<a href="#mais" data-acao="menu-comum"><span><b>Planilhas e busca</b><small>importar do Excel, exportar, procurar, imprimir, instalar o app</small></span><span aria-hidden="true">›</span></a></div><p class="creditos">Agenda feita com Veltria · Blue Rose</p>`;
   },
   ia() {
@@ -296,6 +394,10 @@ const T = {
       <p class="campo" style="margin:0 0 6px">Cor do app</p><div class="temas" role="group" aria-label="Cor do app">${TEMAS.map(([k, n, a, b]) => `<button type="button" data-cor-tema="${k}" aria-pressed="${temaAtual()[0] === k}" style="--a:${a};--b:${b}"><i aria-hidden="true"></i>${n}</button>`).join('')}</div>
       <h2>Tipo de negócio</h2><p class="mini" style="margin-top:-6px">Troca os serviços de exemplo. Você ajusta nomes, tempos e preços logo abaixo.</p><div class="chips">${Object.entries(MODELOS).map(([k, m]) => `<button type="button" data-tipo="${k}" aria-pressed="${(db.tipo || 'geral') === k}">${m.nome}</button>`).join('')}</div>${[['studio', 'Nome do espaço'], ['pro', 'Seu nome'], ['ramo', 'O que você faz'], ['pix', 'Chave PIX do sinal']].map(([k, n]) => `<label class="campo">${n}<input data-cfg="${k}" value="${t(db[k])}"></label>`).join('')}
       <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end"><label class="campo">Começo às<input data-cfg="abre" type="number" value="${db.abre}"></label><label class="campo">Término às<input data-cfg="fecha" type="number" value="${db.fecha}"></label><label class="campo">Sinal (%)<input data-cfg="sinalPct" type="number" value="${db.sinalPct}"></label><label class="campo">Pedir sinal acima de (R$)<input data-cfg="sinalAcima" type="number" value="${db.sinalAcima}"></label><label class="campo" style="grid-column:1/-1">Horários sugeridos de quanto em quanto<select data-cfg="passo">${[10, 15, 20, 30, 60].map((m) => `<option value="${m}" ${(db.passo || 30) === m ? 'selected' : ''}>${m} minutos</option>`).join('')}</select></label></div>
+      <h2 id="pagamento">Pagamento dos clientes</h2><p class="mini" style="margin-top:-6px">Quem paga no fim do mês não precisa pagar no dia: os atendimentos somam na tela Fim do mês. ${db.clientes.filter(mensal).length} de ${db.clientes.length} clientes pagam no fim do mês.</p>
+      <label class="campo">Clientes novos pagam<select id="pag-padrao"><option value="atendimento" ${db.pagPadrao === 'mes' ? '' : 'selected'}>No atendimento</option><option value="mes" ${db.pagPadrao === 'mes' ? 'selected' : ''}>No fim do mês</option></select></label>
+      ${db.pagPadrao === 'mes' ? '' : '<p class="mini" style="margin:-6px 0 10px">Se a maioria dos seus clientes paga no fim do mês, escolha "No fim do mês".</p>'}
+      <button type="button" class="bt largo" data-acao="todos-mes">Marcar todos os clientes como fim do mês</button>
       <h2>Serviços</h2><div class="cartao">${db.servicos.map((s, i) => `<div class="serv-ed"><span class="h" style="color:${s.cor}">●</span><input data-sv="${i}.nome" value="${t(s.nome)}" aria-label="Nome do serviço"><label>min<input data-sv="${i}.min" type="number" min="5" step="5" value="${s.min}"></label><label>R$<input data-sv="${i}.preco" type="number" min="0" step="0.01" value="${s.preco}"></label></div>`).join('')}</div><button type="button" class="bt largo" data-acao="add-serv">+ Adicionar serviço</button>${secMsgs()}<h2>App no celular</h2><p class="mini" style="margin-top:-6px">Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><button type="button" class="bt largo" data-acao="instalar">Instalar o app</button><p class="mini" style="margin-bottom:120px">Funciona sem internet: o que você marcar sobe quando a conexão voltar.</p>`;
   },
 };
@@ -310,6 +412,8 @@ function noPeriodo(filtro) {
   return { lista, feitos, faltas, abertos, rec, prev: abertos.reduce((s, a) => s + preco(a) - (a.sinal?.pago ? a.sinal.valor : 0), 0), perdido: faltas.reduce((s, a) => s + preco(a), 0), ticket: feitos.length ? rec / feitos.length : 0, porServ: agrupa((a) => a.serv), porCli: agrupa((a) => a.cli), formas: agrupa((a) => a.forma || 'Não anotado').map(([f, , v]) => [f, v]) };
 }
 function barras(l, rotulo) { const max = Math.max(1, ...l.map((x) => x[1])); return `<div class="barras" role="img" aria-label="Gráfico de barras">${l.map(([n, v], i) => `<span title="${n}: ${din(v)}"><i style="height:${Math.max(2, (v / max) * 100)}%"></i><small>${rotulo(i) ? n : ''}</small></span>`).join('')}</div>`; }
+// atendimentos já feitos de quem paga no fim do mês e que ainda não foram pagos (não entram em "Recebido")
+const resumoFimMes = (l) => { const v = r2(l.feitos.filter((a) => a.mes).reduce((s, a) => s + Math.max(0, preco(a) - sinalPg(a) - (Number(a.pago) || 0)), 0)); return v > 0 ? `<p class="cartao mini" style="margin-top:10px">Mais ${din(v)} de atendimentos feitos esperando o pagamento do fim do mês. <a href="#fimdomes">Ver o Fim do mês</a></p>` : ''; };
 const listaClientes = (l) => (l.porCli.length ? `<h2>Clientes que mais vieram</h2><div class="cartao">${l.porCli.slice(0, 5).map(([c, n, v]) => `<div class="hora" style="cursor:default"><span class="h">${n}×</span><span>${t(cli(c).nome)}</span><span>${din(v)}</span></div>`).join('')}</div>` : '');
 // aviso do horário digitado/escolhido e texto do botão de marcar (atualizados sem redesenhar a tela)
 function aviso() {
@@ -333,6 +437,7 @@ function responde(p) {
     const d = qd === 0 && !/hoje/.test(x) ? 1 : qd, l = doDia(d).filter((a) => a.st === 'marcado' || a.st === 'confirmado');
     return l.length ? `Lembretes de ${nomeDia(d).split(',')[0]} (${l.length}):\n\n${l.map((a) => `${hh(a.ini)} · ${primeiro(cli(a.cli).nome)}: "Oi, ${primeiro(cli(a.cli).nome)}! Lembrando do seu horário ${nomeDia(d).split(',')[0]} às ${hh(a.ini)} (${serv(a.serv).nome.toLowerCase()}). Responde SIM para confirmar ou me avisa se precisar trocar. ${eu}"`).join('\n\n')}\n\nPara mandar, toque no horário na tela Dia e depois em "Confirmar no WhatsApp".` : `${nomeDia(d)[0].toUpperCase() + nomeDia(d).slice(1).split(',')[0]} não tem ninguém marcado.`;
   }
+  if (/fim do mes|mensalist|cobrar|me deve|devendo|falta pagar/.test(x)) { const c = contaMes(mesDe(0)); return c.l.length ? `Fim do mês de ${MES[new Date().getMonth()]}: ${din(c.total)} em atendimentos, ${din(c.pago)} já pago e ${din(c.falta)} a receber.${c.cobrar ? ` Falta pagar: ${c.l.filter((y) => y.falta > 0).map((y) => `${primeiro(cli(y.cli).nome)} (${din(y.falta)})`).join(', ')}.` : ' Ninguém devendo.'} Está em Mais > Fim do mês, com o botão "Cobrar no WhatsApp".` : 'Ainda não há atendimentos na conta do fim do mês. Escolha "No fim do mês" no cliente (Clientes > Editar) e, ao tocar em Atendido, o valor vai para a conta do mês.'; }
   if (/falt|furo|furou/.test(x)) { const l = noPeriodo((a) => mesDe(a.dia) === mesDe(0)); return l.faltas.length ? `Neste mês foram ${l.faltas.length} falta(s): ${l.faltas.map((a) => `${primeiro(cli(a.cli).nome)} (${data(a.dia).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })})`).join(', ')}. Deixaram de entrar ${din(l.perdido)}. Para quem falta, peça sinal no PIX ao marcar.` : 'Neste mês ninguém faltou.'; }
   if (/sinal|pix/.test(x)) { const l = db.ags.filter((a) => a.dia >= 0 && a.sinal && !a.sinal.pago && a.st !== 'cancelado'); return l.length ? `Sinais esperando o PIX: ${l.map((a) => `${primeiro(cli(a.cli).nome)} ${din(a.sinal.valor)} (${nomeDia(a.dia).split(',')[0]} às ${hh(a.ini)})`).join(', ')}. Quando cair, toque no horário e em "Caiu".` : 'Nenhum sinal pendente: todos os sinais marcados já foram pagos.'; }
   if (/espera/.test(x)) return db.espera.length ? `Na lista de espera: ${db.espera.map((e) => `${e.nome} (${e.quer}, ${e.quando})`).join('; ')}.` : 'Ninguém na lista de espera.';
@@ -362,13 +467,15 @@ function responde(p) {
 function mostra() {
   const r = location.hash.slice(1) || 'dia', tela = $('#tela');
   tela.innerHTML = (T[r] || T.dia)();
-  const aba = { espera: 'dia', resumo: 'mais', ia: 'mais', caixa: 'mais', assinatura: 'mais', dono: 'mais', config: 'mais' }[r] ?? r;
+  const temMes = db.clientes.some(mensal) || db.ags.some((a) => a.mes), abaFm = document.querySelector('.pilula [data-aba="fimdomes"]'); if (abaFm) abaFm.hidden = !temMes;
+  document.querySelector('.pilula')?.classList.toggle('seis', temMes);
+  const aba = { espera: 'dia', resumo: 'mais', ia: 'mais', caixa: 'mais', assinatura: 'mais', dono: 'mais', config: 'mais', fimdomes: temMes ? 'fimdomes' : 'mais' }[r] ?? r;
   document.querySelectorAll('.pilula a').forEach((l) => { if (l.dataset.aba === aba) l.setAttribute('aria-current', 'page'); else l.removeAttribute('aria-current'); });
   aplicaTema(); $('#nome-studio').textContent = db.studio; $('#nome-pro').textContent = `${db.pro} · ${db.ramo}`; const ini = $('#iniciais'); if (db.foto) { ini.innerHTML = `<img src="${t(db.foto)}" alt="">`; ini.classList.add('com-foto'); } else { ini.textContent = db.pro.split(' ').map((p) => p[0]).slice(0, 2).join(''); ini.classList.remove('com-foto'); }
   if (!db.assinatura.renova && db.assinatura.status !== 'vencida' && r !== 'assinatura') tela.insertAdjacentHTML('afterbegin', `<p class="cartao" style="margin-top:12px;padding:8px 12px;background:#f1dfdd">Assinatura cancelada: você usa por mais ${db.assinatura.proxima} dias. <a href="#assinatura">Reativar</a></p>`);
   trava(r);
   if (r === 'ia') { const el = $('#ia-boneco'); if (el) import('../base/assistente-ia.js?v=2').then((m) => { const b = m.personagemIA(el, db.conversa.length ? 'parado' : 'ola'); if (!db.conversa.length) b.estado('ola', 2600); else if (/Pensando/.test(db.conversa[db.conversa.length - 1].t)) b.estado('pensando'); else b.estado('explicando', 4000); }).catch(() => el.remove()); }
-  document.title = `${{ dia: 'Dia', resumo: 'Resumo', novo: rasc.remarca ? 'Remarcar' : 'Novo horário', clientes: 'Clientes', link: 'Link', espera: 'Lista de espera', caixa: 'Caixa', mais: 'Mais', ia: 'Assistente', assinatura: 'Minha assinatura', dono: 'Painel do dono', config: 'Configurações' }[r] || 'Dia'} · ${db.studio || 'Agenda'}`;
+  document.title = `${{ dia: 'Dia', resumo: 'Resumo', novo: rasc.remarca ? 'Remarcar' : 'Novo horário', clientes: 'Clientes', fimdomes: 'Fim do mês', link: 'Link', espera: 'Lista de espera', caixa: 'Caixa', mais: 'Mais', ia: 'Assistente', assinatura: 'Minha assinatura', dono: 'Painel do dono', config: 'Configurações' }[r] || 'Dia'} · ${db.studio || 'Agenda'}`;
 }
 addEventListener('hashchange', () => { mostra(); $('#tela').focus({ preventScroll: true }); scrollTo(0, 0); });
 function trava(r) {
@@ -418,12 +525,13 @@ const textoRep = (r) => `${r.freq === 14 ? 'a cada 2 semanas' : 'toda semana'} (
 function abreHorario(id) {
   const a = db.ags.find((x) => x.id === id), c = cli(a.cli), s = serv(a.serv);
   const v = preco(a);
-  folha(`<h2>${hh(a.ini)} · ${t(c.nome)}</h2><p class="sub">${t(s.nome)} · ${s.min} min · ${din(v)}${a.valor != null ? ' (combinado)' : ''} · ${nomeDia(a.dia)}</p>${a.sinal ? `<p class="cartao" style="padding:8px 12px">Sinal de ${din(a.sinal.valor)}: <b>${a.sinal.pago ? 'pago' : 'esperando o PIX'}</b>${a.sinal.pago ? '' : ' <button type="button" class="bt pq" data-sinal-ok>Caiu</button>'}</p>` : ''}
+  folha(`<h2>${hh(a.ini)} · ${t(c.nome)}</h2><p class="sub">${t(s.nome)} · ${s.min} min · ${din(v)}${a.valor != null ? ' (combinado)' : ''} · ${nomeDia(a.dia)}</p>${a.sinal ? `<p class="cartao" style="padding:8px 12px">Sinal de ${din(a.sinal.valor)}: <b>${a.sinal.pago ? 'pago' : 'esperando o PIX'}</b>${a.sinal.pago ? '' : ' <button type="button" class="bt pq" data-sinal-ok>Caiu</button>'}</p>` : ''}${a.mes && a.st === 'feito' ? `<p class="cartao" style="padding:8px 12px">Na conta do fim do mês (${MES[mesDe(a.dia) % 12]}): ${a.pago + sinalPg(a) >= v ? 'pago' : 'esperando o pagamento'}. <a href="#fimdomes" data-fm="${mesDe(a.dia)}" data-fecha>Ver o Fim do mês</a></p>` : ''}
     <div style="display:grid;gap:8px">${a.st === 'feito' || a.st === 'faltou' ? '' : `${c.tel ? '' : '<p class="mini" style="margin:0">Sem WhatsApp anotado: edite o cliente em Clientes para confirmar por aqui.</p>'}<a class="bt rose largo" ${c.tel ? '' : 'hidden'} target="_blank" rel="noopener" href="${zap(c.tel, msg('confirmar', { nome: c.nome.split(' ')[0], servico: s.nome.toLowerCase(), dia: nomeDia(a.dia), hora: hh(a.ini), sinal: a.sinal && !a.sinal.pago ? `Sinal de ${din(a.sinal.valor)} no PIX ${db.pix}.` : '' }))}" data-confirmou>Confirmar no WhatsApp</a>
-    <button type="button" class="bt cheio largo" data-receber>Atendido: receber ${din(v - (a.sinal?.pago ? a.sinal.valor : 0))}</button><div class="linha" style="margin:0"><button type="button" class="bt pq" data-remarcar>Remarcar</button><button type="button" class="bt pq" data-faltou>Faltou</button><button type="button" class="bt pq" data-desmarcar>Desmarcar</button></div>${a.serie ? '<button type="button" class="bt largo" data-desmarcar-serie>Desmarcar este e os próximos</button>' : ''}`}${a.serie ? '' : '<button type="button" class="bt largo" data-repetir>Repetir toda semana</button>'}<button type="button" class="bt largo" data-fecha style="border-style:dashed">Fechar</button></div>`, (f, fecha) => {
+    ${mensal(c) ? `<button type="button" class="bt cheio largo" data-conta-mes>Atendido: vai para a conta de ${MES[mesDe(a.dia) % 12]} (${din(v - sinalPg(a))})</button><button type="button" class="bt largo" data-receber>Pagou hoje: receber agora</button>` : `<button type="button" class="bt cheio largo" data-receber>Atendido: receber ${din(v - (a.sinal?.pago ? a.sinal.valor : 0))}</button>`}<div class="linha" style="margin:0"><button type="button" class="bt pq" data-remarcar>Remarcar</button><button type="button" class="bt pq" data-faltou>Faltou</button><button type="button" class="bt pq" data-desmarcar>Desmarcar</button></div>${a.serie ? '<button type="button" class="bt largo" data-desmarcar-serie>Desmarcar este e os próximos</button>' : ''}`}${a.serie ? '' : '<button type="button" class="bt largo" data-repetir>Repetir toda semana</button>'}<button type="button" class="bt largo" data-fecha style="border-style:dashed">Fechar</button></div>`, (f, fecha) => {
     const ok = (fn, msg) => () => { fn(); grava(); fecha(); mostra(); if (msg) toast(msg); };
     f.querySelector('[data-sinal-ok]')?.addEventListener('click', ok(() => { a.sinal.pago = true; }, 'Sinal recebido. Horário garantido.'));
     f.querySelector('[data-confirmou]')?.addEventListener('click', () => { if (a.st === 'marcado') a.st = 'confirmado'; grava(); setTimeout(() => { fecha(); mostra(); }, 200); });
+    f.querySelector('[data-conta-mes]')?.addEventListener('click', ok(() => { a.st = 'feito'; a.mes = true; a.pago = 0; a.forma = null; c.ultima = a.dia; c.serv = a.serv; realoca(c.id, mesDe(a.dia)); }, `${din(v - sinalPg(a))} na conta de ${MES[mesDe(a.dia) % 12]} de ${c.nome.split(' ')[0]}. Próximo retorno em ${s.retorno} dias.`));
     f.querySelector('[data-receber]')?.addEventListener('click', () => { f.innerHTML = `<h2>Como ${t(c.nome.split(' ')[0])} pagou?</h2><div style="display:grid;gap:8px">${['PIX', 'Dinheiro', 'Cartão'].map((m) => `<button type="button" class="bt largo" data-forma="${m}">${m}</button>`).join('')}</div>`; f.querySelectorAll('[data-forma]').forEach((b) => b.addEventListener('click', ok(() => { a.st = 'feito'; a.forma = b.dataset.forma; a.pago = v - (a.sinal?.pago ? a.sinal.valor : 0); c.ultima = a.dia; c.serv = a.serv; }, `${din(v)} recebido. Próximo retorno em ${s.retorno} dias.`))); });
     f.querySelector('[data-remarcar]')?.addEventListener('click', () => { rasc = { ...RASC(), serv: a.serv, cli: c.nome, tel: c.tel || '', dia: Math.max(0, a.dia), valor: a.valor ?? '', sinal: !!a.sinal, remarca: a.id }; fecha(); location.hash = '#novo'; });
     f.querySelector('[data-faltou]')?.addEventListener('click', ok(() => { a.st = 'faltou'; c.faltas = (c.faltas || 0) + 1; }, c.faltas >= 1 ? `${c.nome.split(' ')[0]} já faltou antes: peça sinal na próxima.` : 'Falta registrada.'));
@@ -436,13 +544,45 @@ function abreHorario(id) {
     f.querySelector('[data-desmarcar]')?.addEventListener('click', ok(() => { a.st = 'cancelado'; }, db.espera.length ? `Horário livre. ${db.espera.length} cliente(s) na lista de espera: ofereça em Mais > Lista de espera.` : 'Horário desmarcado.'));
   });
 }
+// marcar o que o cliente pagou no mês (tudo ou uma parte), com a data e a forma
+function pagarFm(cid, n) {
+  const x = contaMes(n).l.find((y) => y.cli === cid); if (!x) return; const pn = t(cli(cid).nome.split(' ')[0]);
+  folha(`<h2>Pagamento de ${pn}</h2><p class="sub">${MES[n % 12][0].toUpperCase() + nomeMes(n).slice(1)}: total ${din(x.total)}${x.pago ? `, já pago ${din(x.pago)}` : ''}. Falta <b>${din(x.falta)}</b>.</p>
+    <form><label class="campo">Valor pago<input name="v" type="number" inputmode="decimal" min="0.01" step="0.01" value="${x.falta.toFixed(2)}" required></label>
+    <p class="mini" style="margin:-6px 0 10px">Pagou só uma parte? Escreva o valor que entrou: o resto continua em "falta pagar".</p>
+    <label class="campo">Data do pagamento<input name="d" type="date" value="${isoHoje()}" required></label>
+    <p class="campo" style="margin:0 0 6px">Forma de pagamento</p><div class="chips" role="group" aria-label="Forma de pagamento">${[['PIX', 'Pix'], ['Dinheiro', 'Dinheiro'], ['Cartão', 'Cartão'], ['Transferência', 'Transferência']].map(([v, nm], i) => `<button type="button" data-fpg="${v}" aria-pressed="${i === 0}">${nm}</button>`).join('')}</div>
+    <button class="bt cheio largo">Marcar como pago</button></form>`, (f, fecha) => {
+    f.querySelectorAll('[data-fpg]').forEach((b) => b.addEventListener('click', () => f.querySelectorAll('[data-fpg]').forEach((o) => o.setAttribute('aria-pressed', String(o === b)))));
+    f.querySelector('form').addEventListener('submit', (e) => {
+      e.preventDefault(); const fd = new FormData(e.target), v = r2(String(fd.get('v') || '').replace(',', '.')), d = String(fd.get('d') || '');
+      if (!(v > 0)) { toast('Escreva o valor que foi pago.'); return; }
+      const forma = f.querySelector('[data-fpg][aria-pressed="true"]')?.dataset.fpg || 'PIX';
+      db.pagMes = db.pagMes || []; db.pagMes.push({ id: uid(), cli: cid, mes: chaveMes(n), valor: v, data: /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : isoHoje(), forma });
+      realoca(cid, n); grava(); fecha(); mostra();
+      const r = contaMes(n).l.find((y) => y.cli === cid); toast(r && r.falta > 0 ? `${din(v)} recebido de ${cli(cid).nome.split(' ')[0]}. Falta ${din(r.falta)}.` : `${cli(cid).nome.split(' ')[0]} pagou tudo de ${MES[n % 12]}.`);
+    });
+  });
+}
+// cobrar no WhatsApp: a mensagem "Cobrança do mês" já com as datas, os serviços e o total; dá para mudar antes de abrir
+function cobrarFm(cid, n) {
+  const x = contaMes(n).l.find((y) => y.cli === cid), c = cli(cid); if (!x || !c.tel) return; const pn = t(c.nome.split(' ')[0]), txt = textoCobranca(x, n);
+  folha(`<h2>Cobrar ${pn}</h2><p class="sub">Confira o texto e mude se quiser. Ele abre pronto no WhatsApp de ${pn}.</p>
+    <label class="campo"><span class="sr">Mensagem da cobrança</span><textarea id="cob-txt" rows="9">${t(txt)}</textarea></label>
+    <p class="mini" style="margin:-4px 0 12px">Para mudar o texto de todas as cobranças: Mais › Configurações › Mensagens do WhatsApp › Cobrança do mês.</p>
+    <div style="display:grid;gap:8px"><a class="bt rose largo" id="cob-ir" target="_blank" rel="noopener" href="${zap(c.tel, txt)}">Abrir no WhatsApp</a><button type="button" class="bt largo" data-fecha style="border-style:dashed">Fechar</button></div>`, (f, fecha) => {
+    const ta = f.querySelector('#cob-txt'), a = f.querySelector('#cob-ir');
+    ta.addEventListener('input', () => { a.href = zap(c.tel, ta.value); });
+    a.addEventListener('click', () => setTimeout(fecha, 200));
+  });
+}
 const ACOES = {
   marcar: () => {
     const nome = $('#cli-n').value.trim(); if (!nome) { toast('Escreva o nome do cliente.'); $('#cli-n').focus(); return; }
     const hd = $('#hr-livre').value.trim(); if (hd) { const h = lerHora(hd); if (h === null) { toast('Horário inválido. Escreva assim: 9:10 ou 14:45.'); $('#hr-livre').focus(); return; } rasc.ini = h; }
     if (rasc.ini === null) { toast('Escolha ou digite o horário.'); return; }
     const tel = $('#tel-n').value.trim();
-    let c = db.clientes.find((x) => sa(x.nome) === sa(nome)); if (!c) { c = { id: uid(), nome, tel, ultima: 0, serv: rasc.serv, faltas: 0, valor: null }; db.clientes.push(c); } else if (tel) c.tel = tel;
+    let c = db.clientes.find((x) => sa(x.nome) === sa(nome)); if (!c) { c = { id: uid(), nome, tel, ultima: 0, serv: rasc.serv, faltas: 0, valor: null, ...(db.pagPadrao === 'mes' ? { pagamento: 'mes' } : {}) }; db.clientes.push(c); } else if (tel) c.tel = tel;
     const vd = $('#valor-n').value, valor = vd !== '' ? Number(vd) : c.valor ?? null, velho = rasc.remarca && db.ags.find((a) => a.id === rasc.remarca);
     const s = serv(rasc.serv), sinal = velho?.sinal || ($('#sinal').checked ? { valor: Math.round((valor ?? s.preco) * db.sinalPct / 100), pago: false } : null);
     if (velho) db.ags = db.ags.filter((a) => a !== velho);
@@ -455,17 +595,35 @@ const ACOES = {
     dia = rasc.dia; rasc = { ...RASC(), serv: rasc.serv, dia: rasc.dia }; grava(); location.hash = '#dia'; toast(txtMarcado);
     if (!velho && db.msgAuto !== false && c.tel) window.open(zap(c.tel, msg('marcado', { nome: c.nome.split(' ')[0], servico: s.nome.toLowerCase(), dia: nomeDia(novo.dia), hora: hh(novo.ini) })), '_blank', 'noopener');
   },
+  'todos-mes': () => {
+    const n = db.clientes.length; if (!n) { toast('Ainda não há clientes.'); return; }
+    if (!confirm(`Marcar os ${n} clientes como "No fim do mês"? Só muda a forma de pagamento deles: agenda, valores e histórico continuam iguais.`)) return;
+    db.clientes.forEach((c) => { c.pagamento = 'mes'; }); grava(); mostra(); toast(`${n} clientes agora pagam no fim do mês.`);
+  },
+  'fm-trazer': () => {
+    const n = fm.n ?? mesDe(0), l = db.ags.filter((a) => a.st === 'feito' && !a.mes && mesDe(a.dia) === n && mensal(cli(a.cli)));
+    if (!l.length || !confirm(`Passar ${l.length} atendimento(s) de ${MES[n % 12]} para a conta do mês? Eles foram marcados como pagos no dia; depois disso aparecem em "falta pagar" até você marcar o pagamento. Dá para desfazer.`)) return;
+    l.forEach((a) => { a.antes = { pago: a.pago, forma: a.forma ?? null }; a.mes = true; });
+    [...new Set(l.map((a) => a.cli))].forEach((cid) => realoca(cid, n)); grava(); mostra(); toast('Atendimentos na conta do mês.');
+  },
+  'fm-desfazer-trazer': () => {
+    const n = fm.n ?? mesDe(0), l = agsDoMes(n).filter((a) => a.antes); if (!l.length || !confirm(`Voltar ${l.length} atendimento(s) para "pago no dia", como estavam antes?`)) return;
+    l.forEach((a) => { a.pago = a.antes.pago; a.forma = a.antes.forma; delete a.mes; delete a.antes; });
+    [...new Set(l.map((a) => a.cli))].forEach((cid) => realoca(cid, n)); grava(); mostra(); toast('Pronto: voltaram como estavam.');
+  },
+  'fm-excel': () => exportaMes(fm.n ?? mesDe(0), 'xlsx'),
+  'fm-csv': () => exportaMes(fm.n ?? mesDe(0), 'csv'),
   'sem-remarcar': () => { rasc = RASC(); location.hash = '#dia'; },
-  'add-cliente': () => folha(`<h2>Adicionar cliente</h2><form><label class="campo">Nome<input name="n" required autocomplete="off"></label><label class="campo">WhatsApp<input name="t" inputmode="tel"></label><label class="campo">Quanto vai pagar (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Deixe vazio para usar o preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}">${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Anotação (opcional)<input name="o" placeholder="Ex.: prefere de manhã"></label><button class="bt cheio largo">Salvar cliente</button></form>`, (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => {
+  'add-cliente': () => folha(`<h2>Adicionar cliente</h2><form><label class="campo">Nome<input name="n" required autocomplete="off"></label><label class="campo">WhatsApp<input name="t" inputmode="tel"></label><label class="campo">Quanto vai pagar (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Deixe vazio para usar o preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}">${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Forma de pagamento<select name="p"><option value="atendimento">No atendimento</option><option value="mes" ${db.pagPadrao === 'mes' ? 'selected' : ''}>No fim do mês</option></select></label><label class="campo">Anotação (opcional)<input name="o" placeholder="Ex.: prefere de manhã"></label><button class="bt cheio largo">Salvar cliente</button></form>`, (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => {
     e.preventDefault(); const x = new FormData(e.target), nome = String(x.get('n')).trim(); if (!nome) return;
     if (db.clientes.some((c) => sa(c.nome) === sa(nome))) { toast('Já existe um cliente com esse nome.'); return; }
     const v = String(x.get('v') || '').trim();
-    db.clientes.push({ id: uid(), nome, tel: String(x.get('t') || ''), ultima: 0, serv: x.get('s'), faltas: 0, valor: v === '' ? null : Number(v), obs: String(x.get('o') || '') });
+    db.clientes.push({ id: uid(), nome, tel: String(x.get('t') || ''), ultima: 0, serv: x.get('s'), faltas: 0, valor: v === '' ? null : Number(v), obs: String(x.get('o') || ''), pagamento: x.get('p') === 'mes' ? 'mes' : 'atendimento' });
     grava(); fecha(); mostra(); toast(v === '' ? `${nome.split(' ')[0]} adicionado.` : `${nome.split(' ')[0]} adicionado, pagando ${din(Number(v))}.`);
   })),
   'edita-cli': (id) => { const c = db.clientes.find((x) => x.id === id); if (!c) return; const futuro = db.ags.filter((a) => a.cli === c.id && a.dia >= 0 && (a.st === 'marcado' || a.st === 'confirmado'));
-    folha(`<h2>Editar cliente</h2><form><label class="campo">Nome<input name="n" required value="${t(c.nome)}"></label><label class="campo">WhatsApp<input name="t" inputmode="tel" value="${t(c.tel)}"></label><label class="campo">Quanto paga (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" value="${c.valor ?? ''}" placeholder="Vazio = preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}" ${x.id === c.serv ? 'selected' : ''}>${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Anotação<input name="o" value="${t(c.obs || '')}"></label><button class="bt cheio largo">Salvar</button></form><button type="button" class="bt largo" data-apaga style="margin-top:8px;color:var(--verm)">${futuro.length ? `Apagar (tem ${futuro.length} horário(s) marcado(s))` : 'Apagar cliente'}</button>`, (f, fecha) => {
-      f.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); const x = new FormData(e.target), nome = String(x.get('n')).trim(); if (!nome) return; if (db.clientes.some((o) => o !== c && sa(o.nome) === sa(nome))) { toast('Já existe outro cliente com esse nome.'); return; } const v = String(x.get('v') || '').trim(); Object.assign(c, { nome, tel: String(x.get('t') || ''), valor: v === '' ? null : Number(v), serv: x.get('s'), obs: String(x.get('o') || '') }); grava(); fecha(); mostra(); toast('Cliente salvo.'); });
+    folha(`<h2>Editar cliente</h2><form><label class="campo">Nome<input name="n" required value="${t(c.nome)}"></label><label class="campo">WhatsApp<input name="t" inputmode="tel" value="${t(c.tel)}"></label><label class="campo">Quanto paga (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" value="${c.valor ?? ''}" placeholder="Vazio = preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}" ${x.id === c.serv ? 'selected' : ''}>${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Forma de pagamento<select name="p"><option value="atendimento">No atendimento</option><option value="mes" ${mensal(c) ? 'selected' : ''}>No fim do mês</option></select></label><label class="campo">Anotação<input name="o" value="${t(c.obs || '')}"></label><button class="bt cheio largo">Salvar</button></form><button type="button" class="bt largo" data-apaga style="margin-top:8px;color:var(--verm)">${futuro.length ? `Apagar (tem ${futuro.length} horário(s) marcado(s))` : 'Apagar cliente'}</button>`, (f, fecha) => {
+      f.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); const x = new FormData(e.target), nome = String(x.get('n')).trim(); if (!nome) return; if (db.clientes.some((o) => o !== c && sa(o.nome) === sa(nome))) { toast('Já existe outro cliente com esse nome.'); return; } const v = String(x.get('v') || '').trim(); Object.assign(c, { nome, tel: String(x.get('t') || ''), valor: v === '' ? null : Number(v), serv: x.get('s'), obs: String(x.get('o') || ''), pagamento: x.get('p') === 'mes' ? 'mes' : 'atendimento' }); grava(); fecha(); mostra(); toast('Cliente salvo.'); });
       f.querySelector('[data-apaga]').addEventListener('click', () => { if (!confirm(futuro.length ? `Apagar ${c.nome} e desmarcar ${futuro.length} horário(s)?` : `Apagar ${c.nome}?`)) return; futuro.forEach((a) => { a.st = 'cancelado'; }); db.clientes = db.clientes.filter((o) => o !== c); grava(); fecha(); mostra(); toast('Cliente apagado.'); });
     }); },
   'menu-comum': () => { const b = document.querySelector('.vk-mais'); if (b) b.click(); else toast('Abra de novo em alguns segundos.'); }, // menu da camada (o ••• fica escondido)
@@ -477,7 +635,7 @@ const ACOES = {
   'tira-foto': () => { delete db.foto; grava(); mostra(); toast('Foto tirada. O topo mostra as suas iniciais.'); },
   'add-serv': () => { const i = db.servicos.length; db.servicos.push({ id: 's' + Date.now().toString(36), nome: 'Novo serviço', min: 60, preco: 0, cor: COR[i % COR.length], retorno: 30 }); grava(); mostra(); setTimeout(() => document.querySelector(`[data-sv="${i}.nome"]`)?.select(), 30); },
   copiar: () => { navigator.clipboard?.writeText(LINK).catch(() => {}); toast('Link copiado. Cole na bio do Instagram.'); },
-  aceitar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); let c = db.clientes.find((x) => x.nome === p.nome); if (!c) { c = { id: uid(), nome: p.nome, tel: p.tel, ultima: 0, serv: p.serv, faltas: 0 }; db.clientes.push(c); } db.ags.push({ id: uid(), dia: p.dia, ini: p.ini, cli: c.id, serv: p.serv, st: 'confirmado', pago: 0, valor: c.valor ?? null, sinal: serv(p.serv).preco >= db.sinalAcima ? { valor: Math.round(serv(p.serv).preco * db.sinalPct / 100), pago: true } : null }); db.pedidos = db.pedidos.filter((x) => x !== p); grava(); mostra(); toast(`Horário de ${p.nome.split(' ')[0]} confirmado. Abrindo o WhatsApp para avisar.`); window.open(zap(p.tel, msg('aceito', { nome: p.nome.split(' ')[0], servico: serv(p.serv).nome.toLowerCase(), dia: nomeDia(p.dia), hora: hh(p.ini) })), '_blank', 'noopener'); },
+  aceitar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); let c = db.clientes.find((x) => x.nome === p.nome); if (!c) { c = { id: uid(), nome: p.nome, tel: p.tel, ultima: 0, serv: p.serv, faltas: 0, ...(db.pagPadrao === 'mes' ? { pagamento: 'mes' } : {}) }; db.clientes.push(c); } db.ags.push({ id: uid(), dia: p.dia, ini: p.ini, cli: c.id, serv: p.serv, st: 'confirmado', pago: 0, valor: c.valor ?? null, sinal: serv(p.serv).preco >= db.sinalAcima ? { valor: Math.round(serv(p.serv).preco * db.sinalPct / 100), pago: true } : null }); db.pedidos = db.pedidos.filter((x) => x !== p); grava(); mostra(); toast(`Horário de ${p.nome.split(' ')[0]} confirmado. Abrindo o WhatsApp para avisar.`); window.open(zap(p.tel, msg('aceito', { nome: p.nome.split(' ')[0], servico: serv(p.serv).nome.toLowerCase(), dia: nomeDia(p.dia), hora: hh(p.ini) })), '_blank', 'noopener'); },
   recusar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); window.open(zap(p.tel, msg('recusado', { nome: p.nome.split(' ')[0], horarios: livres(p.dia, serv(p.serv).min).slice(0, 3).map(hh).join(', ') })), '_blank', 'noopener'); },
   'tira-espera': (d) => { db.espera = db.espera.filter((e) => e.id !== d.e); grava(); mostra(); },
   'add-espera': () => folha('<h2>Lista de espera</h2><form><label class="campo">Nome<input name="n" required></label><label class="campo">WhatsApp<input name="t" inputmode="tel"></label><label class="campo">Quer<input name="q" placeholder="Mão e pé"></label><label class="campo">Quando pode<input name="w" placeholder="qualquer tarde"></label><button class="bt cheio largo">Pôr na lista</button></form>', (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); const x = new FormData(e.target); db.espera.push({ id: uid(), nome: x.get('n'), tel: x.get('t'), quer: x.get('q') || 'qualquer serviço', quando: x.get('w') || 'qualquer horário' }); grava(); fecha(); mostra(); })),
@@ -493,6 +651,13 @@ document.addEventListener('click', (e) => {
   const rdia = e.target.closest('[data-rdia]'); if (rdia) { rdia.setAttribute('aria-pressed', String(rdia.getAttribute('aria-pressed') !== 'true')); if ($('#marcar-bt')) { rasc.repManual = true; guarda(); } return; }
   const el = e.target;
   const ir = el.closest('[data-ir]'); if (ir) { location.hash = `#${ir.dataset.ir}`; return; }
+  const fml = el.closest('[data-fm]'); if (fml) { fm.n = Number(fml.dataset.fm); if (location.hash === '#fimdomes') mostra(); return; } // link: a navegação segue sozinha
+  const ipg = el.closest('[data-ir-pag]'); if (ipg) { setTimeout(() => document.getElementById('pagamento')?.scrollIntoView({ block: 'start' }), 80); return; }
+  const fmp = el.closest('[data-fmpasso]'); if (fmp) { fm.n = (fm.n ?? mesDe(0)) + Number(fmp.dataset.fmpasso); mostra(); return; }
+  const fmf = el.closest('[data-fmfiltro]'); if (fmf) { fm.filtro = fmf.dataset.fmfiltro; mostra(); return; }
+  const fpg = el.closest('[data-fm-pagar]'); if (fpg) { pagarFm(fpg.dataset.fmPagar, fm.n ?? mesDe(0)); return; }
+  const fcb = el.closest('[data-fm-cobrar]'); if (fcb) { cobrarFm(fcb.dataset.fmCobrar, fm.n ?? mesDe(0)); return; }
+  const fdp = el.closest('[data-fm-despag]'); if (fdp) { const p = (db.pagMes || []).find((x) => x.id === fdp.dataset.fmDespag); if (p && confirm(`Desfazer o pagamento de ${din(p.valor)} de ${cli(p.cli).nome.split(' ')[0]} (${dataBR(p.data)})?`)) { const n = fm.n ?? mesDe(0); db.pagMes = db.pagMes.filter((x) => x !== p); realoca(p.cli, n); grava(); mostra(); toast('Pagamento desfeito.'); } return; }
   const ag = el.closest('[data-ag]'); if (ag && !el.closest('.folha')) { abreHorario(ag.dataset.ag); return; }
   const rd = el.closest('[data-res-dia]'); if (rd) { res = { ...res, modo: 'dia', d: Number(rd.dataset.resDia) }; return; }
   const d = el.closest('[data-dia]'); if (d) { dia = Number(d.dataset.dia); mostra(); return; }
@@ -528,6 +693,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.
 document.addEventListener('change', (e) => {
   const el = e.target;
   if (el.dataset.msg) { salvaMsg(el.dataset.msg, el.value); toast('Mensagem salva.'); }
+  if (el.id === 'pag-padrao') { db.pagPadrao = el.value === 'mes' ? 'mes' : 'atendimento'; grava(); mostra(); setTimeout(() => document.getElementById('pagamento')?.scrollIntoView({ block: 'start' }), 30); toast(el.value === 'mes' ? 'Clientes novos vão pagar no fim do mês.' : 'Clientes novos vão pagar no atendimento.'); }
   if (el.id === 'msg-auto') { db.msgAuto = el.checked; grava(); toast(el.checked ? 'Ao marcar, o app abre o WhatsApp com a mensagem.' : 'Ao marcar, o app não abre mais o WhatsApp.'); }
   if (el.dataset.cfg) { db[el.dataset.cfg] = ['abre', 'fecha', 'sinalPct', 'sinalAcima', 'passo'].includes(el.dataset.cfg) ? Number(el.value) : el.value; grava(); mostra(); toast('Salvo.'); }
   if (el.dataset.sv) { const [i, k] = el.dataset.sv.split('.'), v = k === 'nome' ? el.value.trim() || db.servicos[i].nome : Math.max(0, Number(el.value) || 0); db.servicos[i][k] = k === 'min' ? Math.max(5, v) : v; grava(); toast('Serviço salvo.'); }

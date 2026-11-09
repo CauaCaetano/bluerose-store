@@ -198,3 +198,26 @@ html[data-tema="grafite"] { --noite: #27292e; --noite-2: #393c43; --noite-3: #1b
 .novidades { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 12px; }
 .novidades li { display: grid; gap: 2px; padding-left: 16px; border-left: 3px solid var(--rose); }
 .novidades li span { color: var(--tx-2); font-size: .9rem; }
+/* pagamento no fim do mês (09/11/2026) */
+.pilula a { white-space: nowrap; }
+.pilula.seis a { padding: 10px 7px; font-size: .8rem; }
+.pilula.seis .mais-um { margin: 0 2px; padding: 0; font-size: 1.7rem; }
+.ola-mes { margin-top: 2px; }
+.ola-mes b { color: var(--tx); font-weight: 600; }
+.fm-conta { margin: 8px 0 12px; }
+.fm-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.fm-topo > div { min-width: 0; } .fm-topo small { display: block; }
+.fm-det { margin-top: 8px; font-size: .86rem; }
+.fm-det summary { cursor: pointer; color: var(--noite-2); font-weight: 600; min-height: 32px; display: flex; align-items: center; }
+.fm-det p { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0; padding: 6px 0; border-bottom: 1px solid #ece2d8; font-variant-numeric: tabular-nums; }
+.fm-det p:last-child { border-bottom: 0; }
+.fm-det .fm-pag { color: #3b6853; } .fm-det .fm-pag .bt { min-height: 30px; margin-left: 6px; }
+.fm-aviso { border-color: #e7cfa6; background: #fbf4e8; }
+.campo textarea { width: 100%; min-height: 120px; border: 1px solid var(--nude); border-radius: 14px; padding: 10px 14px; background: #fff; color: var(--tx); font: inherit; resize: vertical; }
+.msg-previa { white-space: pre-line; }
+/* revisão no celular (09/11/2026) */
+.selo { align-self: flex-start; flex: none; } /* no cartão do cliente o selo esticava e virava uma mancha grande */
+.hora > .selo { align-self: center; }
+.tit-linha { margin: 18px 0 8px; } .tit-linha h2 { margin: 0; }
+.serv-ed > .h { align-self: start; margin-top: 12px; } /* a bolinha da cor ficava solta entre o nome e os campos */
+@media (max-width: 340px) { .pilula.seis a { padding: 10px 5px; font-size: .76rem; } .pilula.seis .mais-um { width: 42px; height: 42px; font-size: 1.6rem; } }
