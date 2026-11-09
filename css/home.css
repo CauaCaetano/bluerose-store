@@ -434,3 +434,26 @@
 .hq-demos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-width: 560px; }
 .hq-demos .btn { width: 100%; justify-content: center; }
 @media (max-width: 640px) { .hq-demos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* 09/11: Anshur como carro-chefe, acima dos sistemas prontos (cores do Anshur: obsidiana, ouro fosco, marfim) */
+.hn main > .hq-anshur { background: #111820; color: #e9e2d4; border-top: 0; }
+.hq-anshur { padding: clamp(56px, 7vw, 104px) 0; }
+.hq-an-grade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
+.hq-an-selo { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 22px; font-size: 14px; color: #c1a36a; }
+.hq-an-logo { height: 30px; width: auto; }
+.hq-anshur h2 { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; font-size: clamp(36px, 4.4vw, 62px); line-height: 1.04; color: #e9e2d4; text-wrap: balance; }
+.hq-an-lede { margin: 20px 0 0; max-width: 52ch; font-size: 17px; line-height: 1.6; color: rgba(233, 226, 212, .82); }
+.hq-an-lista { margin: 22px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.hq-an-lista li { position: relative; padding-left: 26px; font-size: 15.5px; line-height: 1.5; color: rgba(233, 226, 212, .9); }
+.hq-an-lista li::before { content: ""; position: absolute; left: 0; top: .55em; width: 12px; height: 2px; background: #c1a36a; }
+.hq-an-oferta { margin: 24px 0 0; padding: 14px 16px; border: 1px solid rgba(193, 163, 106, .45); border-radius: 10px; font-size: 15px; line-height: 1.5; color: #e9e2d4; background: rgba(193, 163, 106, .08); }
+.hq-an-oferta b { color: #c1a36a; }
+.hq-an-acoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+.hq-anshur .btn-primary { background: #c1a36a !important; color: #111820 !important; border-color: #c1a36a !important; }
+.hq-anshur .btn-primary:hover { background: #d3b77f !important; }
+.hq-anshur .btn-outline { color: #e9e2d4 !important; border-color: rgba(233, 226, 212, .6) !important; background: transparent !important; }
+.hq-anshur .btn-outline:hover { background: #e9e2d4 !important; color: #111820 !important; }
+.hq-an-midia { position: relative; margin: 0; padding-bottom: 36px; }
+.hq-an-desk { display: block; width: 88%; height: auto; border-radius: 12px; box-shadow: 0 30px 60px -28px rgba(0, 0, 0, .7); }
+.hq-an-cel { position: absolute; right: 0; bottom: 0; width: 28%; height: auto; border-radius: 20px; border: 6px solid #0a0f14; box-shadow: 0 24px 48px -20px rgba(0, 0, 0, .75); }
+@media (max-width: 900px) { .hq-an-grade { grid-template-columns: minmax(0, 1fr); } .hq-an-acoes .btn { flex: 1 1 100%; justify-content: center; } }
