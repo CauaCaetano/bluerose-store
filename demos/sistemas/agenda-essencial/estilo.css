@@ -221,3 +221,6 @@ html[data-tema="grafite"] { --noite: #27292e; --noite-2: #393c43; --noite-3: #1b
 .tit-linha { margin: 18px 0 8px; } .tit-linha h2 { margin: 0; }
 .serv-ed > .h { align-self: start; margin-top: 12px; } /* a bolinha da cor ficava solta entre o nome e os campos */
 @media (max-width: 340px) { .pilula.seis a { padding: 10px 5px; font-size: .76rem; } .pilula.seis .mais-um { width: 42px; height: 42px; font-size: 1.6rem; } }
+
+/* 09/11: com uma janela aberta, os avisos rápidos vão para o topo e não cobrem os botões dela */
+body:has(.veu) .toasts { top: calc(12px + env(safe-area-inset-top)); bottom: auto; }

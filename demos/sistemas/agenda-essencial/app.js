@@ -264,7 +264,7 @@ const T = {
       ${dia >= 0 && db.espera.length ? `<div class="cartao"><b>${db.espera.length} cliente(s) na lista de espera</b><p class="mini" style="margin:2px 0 8px">Se alguém desmarcar, ofereça o horário a quem está esperando.</p><a class="bt pq" href="#espera">Ver a lista</a></div>` : ''}`;
   },
   novo() {
-    const s = serv(rasc.serv), h = livres(rasc.dia, s.min, rasc.remarca), k = db.clientes.find((x) => sa(x.nome) === sa(rasc.cli)), val = rasc.valor !== '' ? Number(rasc.valor) : k?.valor ?? s.preco, pede = val >= db.sinalAcima;
+    const s = serv(rasc.serv), hAg = new Date().getHours() + new Date().getMinutes() / 60, h = livres(rasc.dia, s.min, rasc.remarca).filter((x) => rasc.dia !== 0 || x > hAg), k = db.clientes.find((x) => sa(x.nome) === sa(rasc.cli)), val = rasc.valor !== '' ? Number(rasc.valor) : k?.valor ?? s.preco, pede = val >= db.sinalAcima;
     const digitado = rasc.ini !== null && !h.some((x) => Math.abs(x - rasc.ini) < 1e-6), velho = rasc.remarca && db.ags.find((a) => a.id === rasc.remarca);
     const chips = [...new Set([0, 1, 2, 3, 4, 5, rasc.dia])].sort((a, b) => a - b);
     return `<h1>${velho ? 'Remarcar horário' : 'Novo horário'}</h1>${velho ? `<p class="cartao" style="padding:8px 12px">Remarcando ${t(cli(velho.cli).nome)}: era ${nomeDia(velho.dia).split(',')[0]} às ${hh(velho.ini)}. <button type="button" class="bt pq" data-acao="sem-remarcar">Desistir</button></p>` : ''}
