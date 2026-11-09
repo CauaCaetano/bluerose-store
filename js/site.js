@@ -592,6 +592,8 @@
   };
   setTimeout(confere, 1500);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) confere(); });
+  // aba aberta e visível também confere a cada minuto (09/11: o dono via a versão antiga com a aba parada)
+  setInterval(confere, 60000);
 })();
 
 /* Realce temporário (P1, rodada 4 · 09/11/2026): um chip ou âncora interna leva até o cartão/seção e o realça por ~2 s.
