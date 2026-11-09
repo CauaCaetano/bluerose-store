@@ -224,3 +224,41 @@ main.an::before, main.an > section::before, main.an > section::after { content: 
 .an-foto-credito { margin: 2px 0 0; text-align: right; font-size: 11.5px; line-height: 1.35; color: #55626a; padding-right: 9%; }
 .an-foto-credito a { color: inherit; }
 @media (max-width: 900px) { .an .an-topo-foto { margin: 8px -8px 0; } .an-foto-credito { padding-right: 8px; } }
+
+/* 09/11 tarde · portal com os sistemas da revenda: prints reais da demonstração, duas formas de usar e fiscal honesto */
+.an-topo h1 { font-size: clamp(32px, 3.5vw, 54px); max-width: 24ch; }
+.an-ficticio { margin: -8px 0 28px; max-width: 72ch; padding: 12px 16px; border-radius: 12px; border: 1px dashed rgba(17, 24, 32, .35); background: var(--an-cartao); font-size: 15px; line-height: 1.5; color: var(--an-txt2) !important; }
+.an-ficticio b { color: var(--an-ob); }
+.an-area-entrada { margin: 0 0 22px; }
+.an-area-entrada figcaption { margin: 12px 2px 0; font-size: 15px; line-height: 1.5; color: var(--an-txt2); max-width: 90ch; }
+.an-area-entrada figcaption b { color: var(--an-ob); }
+.an-areas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.an-area { min-width: 0; display: flex; flex-direction: column; padding: 14px 14px 24px; border-radius: 18px; background: var(--an-cartao); border: 1px solid var(--an-linha); }
+.an-area .an-tela { box-shadow: none; border-radius: 10px; }
+.an-area-rot { margin: 18px 8px 4px; font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--an-ouro-esc) !important; }
+.an-area h3 { font-size: clamp(22px, 2.2vw, 28px); line-height: 1.15; margin: 0 8px 14px; }
+.an-area .an-lista { margin: 0 8px; }
+.an-area .an-lista li { font-size: 15.5px; }
+.an-areas-mais { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+.an-areas-mais article { padding: 20px 22px; border-radius: 14px; background: var(--an-cartao); border: 1px solid var(--an-linha); border-top: 3px solid var(--an-ouro); }
+.an-areas-mais h3 { font-size: 21px; margin: 0 0 8px; }
+.an-areas-mais p { margin: 0; font-size: 15.5px; line-height: 1.55; }
+.an-areas-mais b { color: var(--an-ob); }
+
+.an-opcoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.an-opcao { min-width: 0; padding: clamp(22px, 3vw, 36px); border-radius: 20px; background: var(--an-cartao); border: 1px solid var(--an-linha); }
+.an-opcao-n { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--an-ouro-esc) !important; }
+.an-opcao h3 { font-size: clamp(24px, 2.4vw, 32px); line-height: 1.12; margin: 0 0 12px; }
+.an-opcao > p:not(.an-opcao-n) { margin: 0 0 18px; font-size: 16.5px; line-height: 1.55; }
+.an-opcao .an-lista li { font-size: 15.5px; }
+.an-opcao-escura { background: var(--an-ob); border-color: var(--an-ob); }
+.an-opcao-escura h3 { color: #F6F2EA; }
+.an-opcao-escura p:not(.an-opcao-n) { color: #cfd6d9 !important; }
+.an-opcao-escura .an-opcao-n { color: var(--an-ouro) !important; }
+.an-opcao-escura .an-lista li { color: #E9E2D4; }
+.an-fiscal { margin-top: 18px; padding: 20px 24px; border-radius: 16px; background: var(--an-cartao); border: 2px solid var(--an-salvia); }
+.an-fiscal h3 { font-size: 22px; margin: 0 0 8px; }
+.an-fiscal p { margin: 0; font-size: 16px; line-height: 1.6; max-width: 92ch; }
+.an-fiscal b { color: var(--an-ob); }
+@media (max-width: 1100px) { .an-areas-mais { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 900px) { .an-areas, .an-opcoes { grid-template-columns: minmax(0, 1fr); } }
