@@ -183,3 +183,8 @@ body:has(:is(input:not([type="checkbox"]):not([type="radio"]):not([type="button"
   .va.va-recua:not([data-aberto="true"]) { --va-h: 46px; --va-av: 46px; transform: translateX(max(12px, env(safe-area-inset-right))); opacity: .75; }
   .va.va-recua:not([data-aberto="true"]):hover, .va.va-recua:not([data-aberto="true"]):focus-within { transform: none; opacity: 1; }
 }
+
+/* 09/11: as perguntas prontas não podem engolir a conversa (o % não valia: o painel só tem max-height) */
+.va-rodape { max-height: min(196px, 32dvh); }
+.va-msgs { min-height: min(220px, 34dvh); }
+@media (max-width: 640px) { .va-rodape { max-height: min(176px, 28dvh); } }
