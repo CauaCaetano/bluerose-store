@@ -27,7 +27,7 @@
   };
   function normal(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
   // saíram da vitrine em 22/10/2026: quem já usa continua vendo, mas não aparecem como sugestão
-  var FORA_DE_VENDA = ['academia', 'restaurante', 'imobiliaria', 'cerimonial', 'pragas', 'clinica'];
+  var FORA_DE_VENDA = ['academia', 'restaurante', 'imobiliaria', 'cerimonial', 'pragas', 'clinica', 'juridico']; // Jurídico saiu da venda em 10/11/2026
   var PAGINA = { obras: 'veltria-obras.html', cerimonial: 'eternize.html', pragas: 'guard.html', ofixl: 'ofixl.html' };
   var hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   function data(s) { if (!s) return '—'; var p = String(s).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
@@ -137,7 +137,7 @@
       var d = r && r.data; if (!d || !d.codigo) return;
       var link = 'https://bluerose-store.com/?indica=' + d.codigo, naRoda = d.confirmados % 3;
       document.getElementById('ind-link').value = link;
-      document.getElementById('ind-zap').href = 'https://wa.me/?text=' + encodeURIComponent('Conheci os sistemas da Blue Rose e recomendo. Dá para testar 7 dias grátis por este link: ' + link);
+      document.getElementById('ind-zap').href = 'https://wa.me/?text=' + encodeURIComponent('Conheci os sistemas da Blue Rose e recomendo. Dá para ver a demonstração por este link: ' + link);
       document.getElementById('ind-barra').style.width = Math.round((naRoda / 3) * 100) + '%';
       document.getElementById('ind-texto').textContent = d.confirmados + (d.confirmados === 1 ? ' assinou' : ' assinaram') + ' · ' + naRoda + ' de 3 para o próximo mês grátis · ' + d.cadastrados + ' entraram pelo link';
       var dev = (d.devolvidos || [])[0], pr = document.getElementById('ind-premio'), txt = [];
@@ -188,7 +188,7 @@
       meusApps = {}; l.forEach(function (x) { if (x.app && ['teste', 'ativa', 'paga', 'pendente'].indexOf(x.status) >= 0) meusApps[x.app] = 1; });
       if (!doCache) indicacao();
       raiz.innerHTML = aviso + (doCache ? '<div class="conta-aviso" data-aviso-cache>Atualizando a lista…</div>' : '') + busca() + (l.length ? '<h2 class="conta-titulo">Seus sistemas</h2>' + l.map(cartao).join('') :
-        '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp?v=11" alt="" loading="lazy"><img src="img/sistemas/agenda.webp?v=11" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp?v=11" alt="" loading="lazy"></div><h3>Você ainda não tem testes nem assinaturas</h3><p>Escolha um dos sistemas e teste 7 dias grátis com os dados da sua empresa.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
+        '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp?v=11" alt="" loading="lazy"><img src="img/sistemas/agenda.webp?v=11" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp?v=11" alt="" loading="lazy"></div><h3>Você ainda não tem assinaturas</h3><p>Escolha um dos sistemas, veja a demonstração e assine pelo botão Pague aqui.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
       if (termo) filtrar();
     }
   }
@@ -205,7 +205,7 @@
     var res = raiz.querySelector('[data-busca-res]'); if (!res) return;
     if (!q) { res.innerHTML = ''; return; }
     var outros = q.length < 2 ? [] : Object.keys(CAT).filter(function (k) { return !meusApps[k] && FORA_DE_VENDA.indexOf(k) < 0 && bate(CAT[k][0], q); });
-    res.innerHTML = (vistos ? '' : '<p class="conta-busca-nada">Nenhum dos seus sistemas tem esse nome.</p>') + outros.map(function (k) { var pg = PAGINA[k] || 'veltria-' + k + '.html'; return '<div class="conta-busca-item"><b>' + esc(CAT[k][0]) + '</b><span>' + 'Você ainda não tem este sistema.</span><a class="btn btn-primary" href="' + pg + '">Ver e testar 7 dias grátis</a></div>'; }).join('');
+    res.innerHTML = (vistos ? '' : '<p class="conta-busca-nada">Nenhum dos seus sistemas tem esse nome.</p>') + outros.map(function (k) { var pg = PAGINA[k] || 'veltria-' + k + '.html'; return '<div class="conta-busca-item"><b>' + esc(CAT[k][0]) + '</b><span>' + 'Você ainda não tem este sistema.</span><a class="btn btn-primary" href="' + pg + '#precos">Ver e assinar</a></div>'; }).join('');
   }
   raiz.addEventListener('input', function (e) { if (e.target.id !== 'conta-q') return; termo = e.target.value; filtrar(); });
   raiz.addEventListener('click', function (e) {

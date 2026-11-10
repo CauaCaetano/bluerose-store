@@ -69,8 +69,7 @@
       custom: plano + '|' + (email || ''), 'return': location.origin + location.pathname + '?paypal=ok', cancel_return: location.href };
     if (p.assinatura) {
       q.cmd = '_xclick-subscriptions'; q.a3 = p.valor.toFixed(2); q.p3 = '1'; q.t3 = p.anual ? 'Y' : 'M'; q.src = '1'; q.sra = '1';
-      // sistemas da Veltria: os 7 dias grátis prometidos na página
-      if (/^a-sis-/.test(plano)) { q.a1 = '0'; q.p1 = '7'; q.t1 = 'D'; }
+      // desde 10/11/2026 sem período grátis: a primeira cobrança é feita na hora
     } else { q.cmd = '_xclick'; q.amount = p.valor.toFixed(2); }
     location.href = 'https://www.paypal.com/cgi-bin/webscr?' + new URLSearchParams(q).toString();
   }
@@ -83,6 +82,11 @@
     if (mensal) return [reais(mensal) + ' por mês', 'Sem entrada · hospedagem e suporte inclusos · sem fidelidade, cancele quando quiser'];
     if (total) return ['Entrada de ' + reais(total / 2) + ' agora', 'Total ' + reais(total) + ' · o saldo de ' + reais(total / 2) + ' só na entrega · à vista no Pix ou no cartão; parcelado no cartão leva os juros do Mercado Pago'];
     return ['', ''];
+  }
+
+  function meios(plano, assinatura) {
+    if (!assinatura) return '(PIX, cartão em até 6x ou boleto)';
+    return /-anual$/.test(plano) ? '(cartão de crédito, cobrado uma vez por ano)' : '(cartão de crédito, cobrado todo mês)';
   }
 
   // e-mail da conta do Mercado Pago (assinaturas) e mensagem de erro, criados uma vez
@@ -112,18 +116,8 @@
     var txt = pagar.textContent; pagar.textContent = 'Abrindo o Mercado Pago…'; pagar.setAttribute('aria-disabled', 'true'); erroCt.textContent = '';
     var emailMp = (document.getElementById('ct-mp') || {}).value || '';
     var plano = pagar.dataset.plano;
-    // aluguel da Veltria começa com os 7 dias grátis prometidos na página; quem já usou o teste vai direto para a assinatura
-    var nexo = /^a-sis-/.test(plano);
-    // quem já usou o teste não é levado à cobrança sem saber: avisa e só segue no segundo clique
-    var semTesteConfirmado = pagar.dataset.semTeste === plano;
-    window.BR_CONTA.pagar(plano, { emailMp: emailMp, teste: nexo && !semTesteConfirmado }).catch(function (x) {
-      if (nexo && x.dados && x.dados.sem_teste) {
-        pagar.dataset.semTeste = plano;
-        var aviso = new Error('Esta conta já usou os 7 dias grátis. Se continuar, a assinatura começa hoje e a primeira mensalidade é cobrada agora. Clique de novo para continuar.');
-        throw aviso;
-      }
-      throw x;
-    }).catch(function (x) {
+    // desde 10/11/2026 nenhum sistema tem teste grátis: a assinatura começa no pagamento
+    window.BR_CONTA.pagar(plano, { emailMp: emailMp, teste: false }).catch(function (x) {
       erroCt.textContent = x.message || 'Não foi possível abrir o pagamento. Tente de novo.'; pagar.textContent = txt; estado();
     });
   });
@@ -140,7 +134,7 @@
       var v = VALORES[plano] || valoresSistema(b);
       $('ct-titulo').textContent = b.getAttribute('data-nome');
       $('ct-valor').innerHTML = '<b>' + v[0] + '</b><small>' + v[1] + '</small>';
-      $('ct-meios').textContent = assinatura ? '(cartão de crédito, cobrado todo mês)' : '(PIX, cartão em até 6x ou boleto)';
+      $('ct-meios').textContent = meios(plano, assinatura);
       $('ct-fidelidade').textContent = assinatura ? (/^a-sis-/.test(plano) ? ' (sistemas da Veltria: sem fidelidade)' : ' (sem fidelidade)') : '';
       // sistemas prontos: ficam prontos na hora, com vídeos tutoriais (sites e automações seguem com implantação feita por nós)
       var passos = dlg.querySelector('.contratar-passos');
@@ -149,7 +143,7 @@
         passos.innerHTML = /^a-sis-/.test(plano)
           ? '<li>Você paga com segurança no <b>Mercado Pago</b> <span id="ct-meios"></span>.</li><li>O sistema fica pronto na hora: você cria a empresa em branco e sobe as suas planilhas.</li><li>Os vídeos tutoriais mostram cada passo. Precisa de ajuda? Escreva para o nosso e-mail e respondemos em até 1 dia útil.</li>'
           : passos.dataset.original;
-        $('ct-meios').textContent = assinatura ? '(cartão de crédito, cobrado todo mês)' : '(PIX, cartão em até 6x ou boleto)';
+        $('ct-meios').textContent = meios(plano, assinatura);
       }
       var pp = fora() && precoPaypal(b, plano);
       if (pp) {
@@ -158,7 +152,7 @@
           ? '<b>' + dinheiro(i, pp.valor) + (pp.anual ? ' por ano' : ' por mês') + '</b><small>Sem entrada · sem fidelidade, cancele quando quiser</small>'
           : '<b>Entrada de ' + dinheiro(i, pp.valor) + ' agora</b><small>Total ' + dinheiro(i, pp.total) + ' · o saldo só na entrega</small>';
         if (passos) passos.innerHTML = '<li>Você paga com segurança no <b>PayPal</b>, com cartão ou saldo PayPal, em ' + i.moeda + '.</li>' +
-          (/^a-sis-/.test(plano) ? '<li>Os 7 dias grátis começam agora; a primeira cobrança vem depois deles.</li><li>Em até 1 dia útil liberamos o sistema no e-mail da sua conta.</li>'
+          (/^a-sis-/.test(plano) ? '<li>A primeira cobrança é feita agora; as próximas, no mesmo dia de cada ' + (pp.anual ? 'ano' : 'mês') + '.</li><li>Em até 1 dia útil liberamos o sistema no e-mail da sua conta.</li>'
             : '<li>Em até 1 dia útil chega um e-mail para levantarmos o que você precisa.</li><li>Você vê a prévia antes da entrega e pede os ajustes incluídos.</li>');
       }
       pagar.dataset.paypal = pp ? JSON.stringify(pp) : '';

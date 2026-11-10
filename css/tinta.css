@@ -385,3 +385,13 @@ main :is(p, li, dd, td, figcaption, small) a:not(.btn):not([class]):not(nav a):n
 @media (min-width: 901px) and (max-width: 1360px) { .nav-links { gap: 14px; font-size: 13px; } .nav-links a { letter-spacing: .03em; } }
 @media (min-width: 901px) and (max-width: 1080px) { .nav-links a[href="como-funciona.html"] { display: none; } .nav-links .btn { padding-inline: 14px; } }
 .nav .brand { white-space: nowrap; flex: none; }
+
+/* ---------- Pague aqui (pedido do dono 10/11/2026: muita gente não achava onde pagar) ----------
+   No computador: botão cheio no menu, antes de "Agendar demonstração" (que vira contorno pela regra do primeiro .btn-primary).
+   No celular: o mesmo atalho fica sempre à vista no topo, ao lado do botão do menu. */
+.nav .wrap > .nav-pague { display: none; }
+@media (max-width: 900px) {
+  .nav .wrap > .nav-pague { display: inline-flex; margin-left: auto; white-space: nowrap; }
+  .nav .wrap > .nav-pague + .nav-toggle { margin-left: 8px; }
+}
+@media (max-width: 360px) { .nav .wrap > .nav-pague { --btn-px: 12px; } .nav .brand { font-size: 17px; letter-spacing: .12em; } }

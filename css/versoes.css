@@ -97,3 +97,18 @@
 @media (max-width: 420px) { .vs-precos { grid-template-columns: minmax(0, 1fr); } }
 .pl-tabela .pl-equiv { display: block; margin-top: 4px; font-size: 13px; color: var(--ink-3); }
 .pl-tabela .pl-col-anual small { color: var(--ink-3); }
+
+/* Pague aqui (10/11/2026): o preço de cada plano é o próprio botão de pagar */
+.pl-preco .pl-pague { margin-left: 10px; align-self: center; font-style: normal; font-size: 12.5px; font-weight: 700; letter-spacing: .02em; padding: 4px 10px; border-radius: 999px; background: var(--ink); color: var(--surface); white-space: nowrap; }
+.pl-pague-nota { margin: 14px 0 0; font-size: 15px; color: var(--ink-2); max-width: 70ch; }
+.np-cta .np-direto { margin-top: 2px; }
+/* sistemas.html: tabela "Pague aqui" com todos os sistemas */
+.pague { padding: 8px 0 40px; scroll-margin-top: 84px; }
+.pague .pl-tabela tbody th { width: 30%; }
+@media (max-width: 640px) {
+  .pl-preco .pl-pague { margin-left: 8px; padding: 3px 8px; font-size: 12px; }
+  .pague .pl-tabela tbody th { width: auto; }
+  .pl-tabela td { min-width: 0; }
+  .pl-preco { flex-wrap: wrap; row-gap: 6px; }
+}
+.sis-pague-topo { margin: 18px 0 0; }

@@ -164,7 +164,7 @@ const LOGO_G = '<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="tru
 
 function telaConta(sb, cfg, modo = 'criar', aviso = '') {
   return new Promise((resolver) => {
-    const titulos = { criar: ['Crie a sua conta', 'Leva menos de um minuto. No próximo passo você escolhe: testar 7 dias grátis ou assinar direto.'], entrar: ['Entrar', PLAY ? 'Use o mesmo e-mail e senha da sua conta Blue Rose.' : 'Acesse o sistema da sua empresa.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] };
+    const titulos = { criar: ['Crie a sua conta', 'Leva menos de um minuto. No próximo passo você assina, no cartão ou no Pix.'], entrar: ['Entrar', PLAY ? 'Use o mesmo e-mail e senha da sua conta Blue Rose.' : 'Acesse o sistema da sua empresa.'], esqueci: ['Recuperar a senha', 'Enviamos um link para criar uma senha nova.'] };
     const convite = modo === 'criar' ? (new URLSearchParams(location.search).get('convite') || '').trim().toLowerCase() : '';
     if (convite) titulos.criar = ['Você foi convidado', `Crie a sua conta com o e-mail <b>${esc(convite)}</b> para entrar na equipe da empresa no ${esc(cfg.nome)}. Não precisa cadastrar cartão: quem paga é o dono da empresa.`];
     const [t, s] = titulos[modo];
@@ -499,7 +499,7 @@ export async function iniciarNuvem(app, cfg) {
       if (!dono) return '';
       const r = sessao.indicacao; if (!r) { sessao.carregarIndicacao(); return ''; }
       if (r.erro) return '';
-      const link = `${SITE}?indica=${r.codigo}`, texto = `Uso o ${cfg.nome} da Blue Rose na minha empresa e recomendo. Teste 7 dias grátis por este link: ${link}`;
+      const link = `${SITE}?indica=${r.codigo}`, texto = `Uso o ${cfg.nome} da Blue Rose na minha empresa e recomendo. Veja a demonstração por este link: ${link}`;
       const naRoda = r.confirmados % 3, cortesia = (r.pro_ate || []).map((x) => x.ate).sort().pop();
       return `<div class="cartao"><div class="cartao-cab"><div><h3>Indique e ganhe</h3><div class="sub">A cada 3 indicações que assinam, você ganha 1 mês de Pro pagando o Básico</div></div>${et(`${r.confirmados} ${r.confirmados === 1 ? 'assinou' : 'assinaram'}`, r.confirmados ? 'ok' : '')}</div>
         <div class="cartao-corpo col" style="gap:12px">

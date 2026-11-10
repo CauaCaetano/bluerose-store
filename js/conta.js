@@ -1,9 +1,10 @@
 /*
  * Conta do cliente no site (Supabase Auth, a mesma dos sistemas em /app/).
- * Navegar não exige login. Comprar, alugar e começar o teste grátis exigem:
+ * Navegar não exige login. Comprar e assinar exigem:
  * BR_CONTA.exigirLogin() abre a janela de entrar/criar conta e devolve a sessão.
  * BR_CONTA.pagar(produto, { teste, emailMp }) cria o pagamento no servidor e leva ao Mercado Pago.
- * BR_CONTA.teste(app, nome, mensal) abre a janela do teste grátis de 7 dias (com cartão no Mercado Pago desde 26/10/2026; nada é cobrado nos 7 dias).
+ * BR_CONTA.teste(app, nome, mensal, direto) abre a janela da assinatura. Desde 10/11/2026 não há teste grátis para clientes novos:
+ * os botões (data-assinar-app, e data-teste nas páginas antigas) abrem sempre a assinatura direta, no cartão ou no Pix.
  */
 // não abre dentro de página de outro site (clickjacking)
 if (window.top !== window.self) { try { if (window.top.location.origin !== location.origin) throw 0; } catch (e) { window.top.location.href = location.href; } }
@@ -257,30 +258,22 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
     });
   }
 
-  // botões "Testar 7 dias grátis" (links para app/<sistema>/ marcados com data-teste)
+  // botões "Pague aqui" (data-assinar-app). Desde 10/11/2026 não há teste grátis: data-teste, que sobrou em alguma página, também vai à assinatura
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-teste],[data-assinar-app]'); if (!b) return;
     e.preventDefault();
-    var direto = b.hasAttribute('data-assinar-app');
-    teste(b.getAttribute(direto ? 'data-assinar-app' : 'data-teste'), b.getAttribute('data-teste-nome') || 'sistema', Number(b.getAttribute('data-teste-mensal')) || 0, direto);
+    teste(b.getAttribute('data-assinar-app') || b.getAttribute('data-teste'), b.getAttribute('data-teste-nome') || 'sistema', Number(b.getAttribute('data-teste-mensal')) || 0, true);
   });
 
-  // páginas dos sistemas: quem já tem o sistema vê "Abrir o sistema" no lugar do teste; quem não tem ganha a opção de assinar sem teste
+  // páginas dos sistemas: quem já tem o sistema vê "Abrir o sistema" no lugar do "Pague aqui"
   function ajustarBotoes() {
-    var bts = [].slice.call(document.querySelectorAll('a[data-teste]')); if (!bts.length) return;
-    document.querySelectorAll('.np-cta a[data-teste]').forEach(function (b) {
-      if (b.parentNode.querySelector('[data-assinar-app]')) return;
-      var l = document.createElement('a'); l.href = '#'; l.className = 'np-direto'; l.textContent = 'ou assine agora, sem teste';
-      l.setAttribute('data-assinar-app', b.getAttribute('data-teste')); l.setAttribute('data-teste-nome', b.getAttribute('data-teste-nome') || ''); l.setAttribute('data-teste-mensal', b.getAttribute('data-teste-mensal') || '');
-      b.parentNode.appendChild(l);
-    });
+    var bts = [].slice.call(document.querySelectorAll('a.btn[data-assinar-app], a.btn[data-teste]')); if (!bts.length) return;
     if (!sessaoGuardada()) return;
     acessos().then(function (m) {
       bts.forEach(function (b) {
-        var app = b.getAttribute('data-teste'); if (!m[app]) return;
-        b.removeAttribute('data-teste'); b.href = raiz + 'app/' + app + '/'; b.textContent = 'Abrir o sistema';
+        var app = b.getAttribute('data-assinar-app') || b.getAttribute('data-teste'); if (!m[app]) return;
+        b.removeAttribute('data-assinar-app'); b.removeAttribute('data-teste'); b.href = raiz + 'app/' + app + '/'; b.textContent = 'Abrir o sistema';
         var cta = b.closest('.np-cta'); if (!cta) return;
-        var d = cta.querySelector('[data-assinar-app]'); if (d) d.remove();
         var sec = cta.closest('.np-final'), h = sec && sec.querySelector('h2');
         if (h) h.textContent = m[app] === 'teste' ? 'O seu teste está valendo.' : 'O seu sistema está pronto.';
       });
