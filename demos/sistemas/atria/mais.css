@@ -1,0 +1,100 @@
+/* Atria · mais funções (mais.js): parcelas, preço justo, contrato, checklist, deslocamento e medir por foto.
+   Tudo com prefixo .mx-; usa a paleta Ardósia & Champagne do estilo.css. Botões grandes para usar com uma mão. */
+
+.mx-grande { min-height: 58px; font-size: 16.5px; margin-top: 12px; }
+.mx-aviso { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--mudo); margin: 10px 0; line-height: 1.4; }
+.mx-aviso svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--trena); }
+
+/* ------------------------------------------------------------- parcelas */
+.mx-parcelas { display: grid; gap: 10px; }
+.mx-parcela { background: var(--aparas); border-radius: var(--r-p); box-shadow: var(--sombra); padding: 12px 14px; border-left: 5px solid var(--giz); }
+.mx-parcela.perto { border-left-color: var(--trena); }
+.mx-parcela.vencida { border-left-color: var(--brasa); background: linear-gradient(90deg, var(--brasa-claro), var(--aparas) 60%); }
+.mx-parcela.paga { border-left-color: var(--musgo); opacity: .82; }
+.mx-parcela-topo { display: flex; align-items: center; gap: 12px; }
+.mx-parcela-n { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--lixa); font: 700 15px var(--f-num); color: var(--grafite); }
+.mx-parcela-n svg { width: 18px; height: 18px; }
+.mx-parcela.paga .mx-parcela-n { background: var(--musgo); color: #fff; }
+.mx-parcela-txt { flex: 1; min-width: 0; }
+.mx-parcela-txt b { display: block; font-weight: 700; font-size: 15.5px; }
+.mx-parcela-txt small { display: block; font-size: 13px; color: var(--mudo); }
+.mx-parcela.vencida .mx-parcela-txt small { color: var(--brasa); font-weight: 700; }
+.mx-parcela.perto .mx-parcela-txt small { color: #7A5E36; font-weight: 650; }
+.mx-parcela-valor { font-size: 18px; white-space: nowrap; }
+.mx-parcela-bts { display: grid; grid-template-columns: 1fr 1fr 54px; gap: 8px; margin-top: 10px; }
+.mx-parcela-bts .bt { min-height: 52px; padding: 0 10px; }
+.mx-parcela-bts a.bt { grid-column: 1 / -1; min-height: 40px; }
+
+/* ------------------------------------------------------------- preço justo */
+.mx-res { background: var(--grafite); color: var(--serragem); border-radius: var(--r); padding: 18px 18px 16px; box-shadow: var(--sombra); }
+.mx-res small { display: block; font-size: 12.5px; color: rgba(244,239,232,.72); text-transform: uppercase; letter-spacing: .08em; }
+.mx-res > b { display: block; font: 600 44px/1.05 var(--f-num); letter-spacing: -.04em; color: var(--trena); margin: 4px 0 12px; }
+.mx-res-dois { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 12px; border-top: 1px solid rgba(244,239,232,.16); }
+.mx-res-dois b { display: block; font: 600 22px var(--f-num); margin: 2px 0; }
+.mx-res-dois small + b + small { text-transform: none; letter-spacing: 0; }
+.mx-res-conta { margin: 12px 0 0; font-size: 12.5px; color: rgba(244,239,232,.72); }
+.mx-res-atual { margin: 8px 0 0; font-size: 13.5px; padding: 8px 10px; border-radius: 10px; background: rgba(95,127,106,.3); }
+.mx-res-atual.baixo { background: rgba(166,90,78,.45); }
+.mx-suf { display: flex; align-items: center; gap: 8px; }
+.mx-suf input { flex: 1; min-width: 0; }
+.mx-suf i { font-style: normal; color: var(--mudo); font-weight: 650; }
+
+/* ------------------------------------------------------------- contrato */
+.mx-opc { margin-bottom: 12px; }
+.mx-opc small { display: block; font-size: 13px; color: var(--mudo); margin-bottom: 6px; }
+.mx-contrato p { line-height: 1.55; margin: 0 0 8px; font-size: 14px; }
+.mx-lista-doc { margin: 0 0 8px; padding-left: 20px; line-height: 1.55; font-size: 14px; }
+.mx-local { margin-top: 18px !important; }
+.mx-assinaturas { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; text-align: center; }
+.mx-assinaturas > div { display: grid; align-content: end; gap: 4px; min-height: 90px; }
+.mx-assinaturas img { width: 100%; max-height: 80px; object-fit: contain; }
+.mx-assinaturas i { display: block; height: 60px; }
+.mx-assinaturas span { border-top: 1px solid #555; padding-top: 4px; font-size: 12.5px; color: #333; }
+.mx-assinaturas span small { display: block; color: #777; font-size: 11px; }
+.mx-aceite-ok { display: flex; gap: 6px; align-items: center; margin-top: 14px !important; font-size: 12.5px !important; color: var(--musgo); }
+.mx-aceite-ok svg { width: 16px; height: 16px; flex: none; }
+.mx-aceite { margin-top: 6px; }
+.mx-pad { margin-top: 12px; }
+.mx-pad-cab { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.mx-pad canvas { display: block; width: 100%; height: 160px; background: #fff; border: 2px dashed var(--linha); border-radius: var(--r-p); touch-action: none; cursor: crosshair; }
+.mx-pad small { display: block; text-align: center; color: var(--mudo); font-size: 12px; margin-top: 4px; }
+
+/* ------------------------------------------------------------- checklist */
+.mx-check-topo { background: var(--aparas); border-radius: var(--r); box-shadow: var(--sombra); padding: 14px 16px; }
+.mx-check-topo b { font-size: 20px; display: block; margin-bottom: 8px; }
+.mx-check-lista { padding: 4px 14px; }
+.mx-check { display: flex; align-items: center; gap: 14px; min-height: 58px; padding: 6px 0; border-bottom: 1px dashed var(--linha); cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+.mx-check:last-child { border-bottom: 0; }
+.mx-check .caixa { width: 34px; height: 34px; }
+.mx-check-n { flex: 1; font-size: 16px; font-weight: 600; }
+.mx-check.feito .mx-check-n { color: var(--mudo); text-decoration: line-through; }
+.mx-check-x { width: 44px; height: 44px; border: 0; background: transparent; color: var(--mudo); display: grid; place-items: center; cursor: pointer; border-radius: 10px; }
+.mx-check-x svg { width: 18px; height: 18px; }
+.mx-check:focus-visible { outline: 3px solid var(--giz); outline-offset: 2px; }
+
+/* ------------------------------------------------------------- deslocamento */
+.mx-km { margin-top: 10px; }
+.mx-km-nums { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-bottom: 10px; }
+.mx-km-nums small { display: block; font-size: 12px; color: var(--mudo); }
+.mx-km-nums b { display: block; font: 600 22px var(--f-num); letter-spacing: -.03em; }
+.mx-km > small { display: block; margin-bottom: 4px; }
+
+/* ------------------------------------------------------------- medir por foto */
+.mx-foto { position: relative; display: grid; justify-items: center; align-content: center; gap: 8px; min-height: 240px; padding: 20px; text-align: center; border: 2px dashed var(--linha); border-radius: var(--r); background: var(--aparas); cursor: pointer; color: var(--grafite); }
+.mx-foto input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.mx-foto svg { color: var(--giz); }
+.mx-foto b { font: 800 22px var(--f-tit); text-transform: uppercase; }
+.mx-foto small { color: var(--mudo); font-size: 13px; max-width: 260px; }
+.mx-instr { font-size: 15px; margin: 10px 0; padding: 10px 12px; background: var(--trena-claro); border-radius: var(--r-p); }
+.mx-instr b { font-family: var(--f-num); }
+.mx-tela-foto { margin-top: 10px; background: var(--grafite); border-radius: var(--r-p); overflow: hidden; display: grid; place-items: center; }
+.mx-tela-foto canvas { display: block; max-width: 100%; max-height: 64vh; width: auto; height: auto; touch-action: none; cursor: crosshair; }
+.mx-med { display: flex; align-items: center; gap: 10px; min-height: 48px; border-bottom: 1px dashed var(--linha); font-size: 15px; }
+.mx-med:last-child { border-bottom: 0; }
+.mx-med-n { width: 28px; height: 28px; border-radius: 50%; background: var(--grafite); color: var(--serragem); display: grid; place-items: center; font: 700 13px var(--f-num); flex: none; }
+.mx-med b { margin-left: auto; font-size: 16px; }
+
+@media print {
+  .mx-parcela-bts, .mx-pad, .mx-aceite { display: none !important; }
+  .mx-assinaturas img { max-height: 70px; }
+}

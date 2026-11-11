@@ -24,7 +24,7 @@
     avatar: 'img/assistente-avatar.webp?v=2',
     folhas: ['expressoes', 'fala', 'pensando', 'ideia', 'joinha', 'gesto'],   // img/assistente/<nome>.webp
     versaoFolhas: 2,
-    dados: 'js/assistente-dados.json?v=19',
+    dados: 'js/assistente-dados.json?v=20',
   };
   var reduzMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   var semMovimento = function () { return !!(reduzMov && reduzMov.matches); };
