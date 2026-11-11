@@ -272,3 +272,8 @@
 .pp-demo-acoes .pp-mais-t { margin: 10px 0 0; }
 @media (max-width: 900px) { .pp-demo-baixo { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 560px) { .pp-demo-baixo .pp-resultado { grid-template-columns: minmax(0, 1fr); } }
+
+/* 11/11: Ver demonstração e Contratar lado a lado; o link do preço embaixo, em linha própria */
+html body .sis-botoes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
+html body .sis-botoes .btn-primary { grid-column: auto !important; grid-row: auto !important; }
+html body .sis-botoes .btn-texto { grid-column: 1 / -1 !important; }
