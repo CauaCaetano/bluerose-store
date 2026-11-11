@@ -41,7 +41,7 @@ TELAS.recibo = (id) => {
   return `${cab('Recibo', `nº ${n}`)}
     <div class="acoes so-tela" style="margin-top:0"><button type="button" class="bt p" data-acao="imprimir">${ico('doc')}PDF / imprimir</button><button type="button" class="bt zap p" data-acao="recibo-zap" data-id="${f.id}">${ico('zap')}Mandar no WhatsApp</button></div>
     <article class="doc" id="doc">
-      <div class="doc-cab"><img src="simbolo.svg" alt="" width="50" height="50"><div><b>${t(eu.nome)}</b><small class="mudo">${t(eu.cidade)}-${t(eu.uf)} · WhatsApp ${t(eu.zap)}</small></div></div>
+      <div class="doc-cab"><img src="simbolo.svg?v=2" alt="" width="50" height="50"><div><b>${t(eu.nome)}</b><small class="mudo">${t(eu.cidade)}-${t(eu.uf)} · WhatsApp ${t(eu.zap)}</small></div></div>
       <h3 style="margin-top:18px">Recibo nº ${n}</h3>
       <p style="font-size:15px;line-height:1.6;margin:0">Recebi de <b>${t(c ? c.nome : 'cliente')}</b> a quantia de <b>${din(f.valor)}</b>${o ? `, referente a <b>${t(o.titulo.toLowerCase())}</b>` : ''}, pago${f.desc && /\((Pix|Dinheiro|Cartão|Transferência)\)$/i.test(f.desc) ? ` no ${t(f.desc.match(/\(([^)]+)\)$/)[1])}` : ''} em ${dataBR(f.data)}.</p>
       ${tt ? `<table style="margin-top:12px"><tr><td>Total do serviço</td><td>${din(tt.total)}</td></tr><tr><td>Pago até agora (com este)</td><td>${din(pagoAte)}</td></tr><tr class="tot"><td>${resta ? 'Falta pagar' : 'Quitado'}</td><td>${din(resta)}</td></tr></table>` : ''}

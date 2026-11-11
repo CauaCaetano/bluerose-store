@@ -186,7 +186,7 @@ TELAS.contrato = (id) => {
     <div class="acoes so-tela" style="margin-top:0"><button type="button" class="bt p" data-acao="imprimir">${ico('doc')}PDF / imprimir</button><button type="button" class="bt zap p" data-acao="contrato-zap" data-o="${o.id}">${ico('zap')}Mandar no WhatsApp</button></div>
     ${k ? '' : `<div class="so-tela mx-opc"><small>Quem compra o material?</small><div class="chips" role="group" aria-label="Quem compra o material"><button type="button" class="chip" data-acao="contrato-mat" data-o="${o.id}" data-v="prof" aria-pressed="${mat === 'prof'}">Eu compro</button><button type="button" class="chip" data-acao="contrato-mat" data-o="${o.id}" data-v="cliente" aria-pressed="${mat === 'cliente'}">O cliente compra</button></div></div>`}
     <article class="doc mx-contrato" id="doc">
-      <div class="doc-cab"><img src="simbolo.svg" alt="" width="50" height="50"><div><b>Contrato de serviço</b><small class="mudo">${t(o.titulo)}</small></div></div>
+      <div class="doc-cab"><img src="simbolo.svg?v=2" alt="" width="50" height="50"><div><b>Contrato de serviço</b><small class="mudo">${t(o.titulo)}</small></div></div>
       <h3>1. Quem são as partes</h3>
       <p><b>Contratante (cliente):</b> ${t(c.nome)}${c.end ? `, endereço ${t(c.end)}` : ''}${c.tel ? `, WhatsApp ${t(c.tel)}` : ''}.</p>
       <p><b>Contratado (profissional):</b> ${t(eu.nome)}, ${t(ofs)}, de ${t(eu.cidade)}-${t(eu.uf)}${eu.zap ? `, WhatsApp ${t(eu.zap)}` : ''}${eu.doc ? `, CPF/CNPJ ${t(eu.doc)}` : ', CPF/CNPJ ____________________'}.</p>
@@ -575,7 +575,7 @@ const linhasHtml = (s) => (String(s || '').trim() ? `<ul class="mx-lista-doc">${
 function docRdo(o, data) {
   const c = cliente(o.cliente), eu = db.perfil, r = rdoDe(o, data), eq = equipeDia(o, data), fotos = (o.diario || []).filter((x) => x.data === data && x.foto);
   const feitas = (o.etapas || []).filter((e) => e.feito).length, pct = o.etapas && o.etapas.length ? Math.round(feitas / o.etapas.length * 100) : 0;
-  return `<div class="doc-cab"><img src="simbolo.svg" alt="" width="50" height="50"><div><b>Relatório do dia</b><small class="mudo">${t(eu.nome)} · ${t(eu.cidade)}-${t(eu.uf)}${eu.zap ? ` · WhatsApp ${t(eu.zap)}` : ''}</small></div></div>
+  return `<div class="doc-cab"><img src="simbolo.svg?v=2" alt="" width="50" height="50"><div><b>Relatório do dia</b><small class="mudo">${t(eu.nome)} · ${t(eu.cidade)}-${t(eu.uf)}${eu.zap ? ` · WhatsApp ${t(eu.zap)}` : ''}</small></div></div>
     <table style="margin-top:12px"><tr><td>Data</td><td>${dataBR(data)}</td></tr><tr><td>Obra</td><td>${t(o.titulo)}</td></tr><tr><td>Cliente</td><td>${t(c.nome)}</td></tr>${c.end ? `<tr><td>Local</td><td>${t(c.end)}</td></tr>` : ''}<tr><td>Clima</td><td>${t(r.clima || 'não informado')}</td></tr><tr><td>Andamento</td><td>${pct}% das etapas</td></tr></table>
     <h3>Equipe do dia</h3><ul class="mx-lista-doc">${eq.map((p) => `<li>${t(p.nome)} · ${t(p.funcao)}</li>`).join('')}</ul>
     <h3>O que foi feito</h3>${linhasHtml(r.feito)}
@@ -592,7 +592,7 @@ TELAS.rdo = (id, data) => {
     <div class="acoes so-tela" style="margin-top:0"><button type="button" class="bt p" data-acao="imprimir">${ico('doc')}PDF / imprimir</button><button type="button" class="bt zap p" data-acao="rdo-zap" data-o="${o.id}" data-d="${d}">${ico('zap')}Mandar no WhatsApp</button></div>
     <section class="so-tela mx-rdo-form" data-rdo="${o.id}" data-d="${d}">
       <small class="mx-rotulo">Clima</small>
-      <div class="chips" role="group" aria-label="Clima">${CLIMAS.map((x) => `<button type="button" class="chip mx-chip-g" data-acao="rdo-clima" data-v="${x}" aria-pressed="${r.clima === x}">${x}</button>`).join('')}</div>
+      <div class="chips mx-chips-quebra" role="group" aria-label="Clima">${CLIMAS.map((x) => `<button type="button" class="chip mx-chip-g" data-acao="rdo-clima" data-v="${x}" aria-pressed="${r.clima === x}">${x}</button>`).join('')}</div>
       <label class="campo"><span>O que foi feito</span><textarea data-rdo-campo="feito" data-voz rows="4" placeholder="Uma coisa por linha">${t(r.feito)}</textarea></label>
       <label class="campo"><span>Próximos passos</span><textarea data-rdo-campo="proximos" data-voz rows="3">${t(r.proximos)}</textarea></label>
       <label class="campo"><span>Observações</span><textarea data-rdo-campo="obs" data-voz rows="2" placeholder="Falta de material, visita do cliente…">${t(r.obs)}</textarea></label>

@@ -31,6 +31,6 @@
     chave: 'annona-v1', mensal: 59, exemplo: 1, pagina: 'annona.html', logo: 'img/logos/annona-simbolo.png', semTeste: true };
   // Atria: app de celular para profissionais da construção e da reforma (marca própria); sem teste grátis, mensal R$ 39 ou anual R$ 374
   out.atria = { id: 'atria', categoria: 'atria', versao: '', nome: 'Atria', nomeCategoria: 'Atria', nomeVersao: '', pasta: 'atria', entrada: 'app.html',
-    chave: 'atria-v1', mensal: 39, anual: 374, exemplo: 1, pagina: 'atria.html', logo: 'demos/sistemas/atria/icone-192.png', semTeste: true };
+    chave: 'atria-v1', mensal: 39, anual: 374, exemplo: 1, pagina: 'atria.html', logo: 'demos/sistemas/atria/icone-192.png?v=2', semTeste: true };
   window.VELTRIA_VERSOES = out;
 })();

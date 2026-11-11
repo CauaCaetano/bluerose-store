@@ -66,7 +66,7 @@ export async function montarImagem(p, destino) {
   if (alto) { g.fillStyle = '#2E333B'; g.font = '800 64px "Big Shoulders Display", "Arial Narrow", sans-serif'; g.fillText(db.perfil.nome.toUpperCase(), 48, 100); }
   // rodapé com a marca do profissional
   const y0 = D.h - rodape; g.fillStyle = '#FBF9F5'; g.fillRect(0, y0, D.w, rodape); g.fillStyle = '#C2A37A'; g.fillRect(0, y0, D.w, 6);
-  try { const s = await carrega('simbolo.svg'); g.drawImage(s, 44, y0 + 42, 96 * s.width / s.height, 96); } catch { /* sem símbolo */ }
+  try { const s = await carrega('simbolo.svg?v=2'); g.drawImage(s, 44, y0 + 42, 96 * s.width / s.height, 96); } catch { /* sem símbolo */ }
   const o = p.obra ? db.obras.find((x) => x.id === p.obra) : null, serv = o ? o.titulo : ((OFICIOS[p.of] || {}).nome || 'Reforma');
   g.fillStyle = '#2E333B'; g.font = `800 ${alto ? 60 : 54}px "Big Shoulders Display", "Arial Narrow", sans-serif`; g.fillText(alto ? serv.toUpperCase().slice(0, 30) : db.perfil.nome.toUpperCase(), 200, y0 + 92);
   g.font = '500 34px "Rethink Sans", sans-serif'; g.fillStyle = '#434A54'; g.fillText(`${alto ? nomeOficios(db.perfil) : serv} · ${db.perfil.cidade}`.slice(0, 46), 200, y0 + 142);

@@ -153,13 +153,13 @@ async function buscarAchados(manual) {
   else if (manual) toast('Atualizado');
   barraBadges(); if (rotaAtual().nome === 'trabalhos') repinta();
 }
-function avisoLocal(n) { try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Atria', { body: `${n} trabalho${n > 1 ? 's' : ''} novo${n > 1 ? 's' : ''} achado${n > 1 ? 's' : ''} na sua cidade`, icon: 'icone-192.png' }); } catch { /* sem aviso */ } }
+function avisoLocal(n) { try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Atria', { body: `${n} trabalho${n > 1 ? 's' : ''} novo${n > 1 ? 's' : ''} achado${n > 1 ? 's' : ''} na sua cidade`, icon: 'icone-192.png?v=2' }); } catch { /* sem aviso */ } }
 function cartaoAchado(a) {
   const [nome, cor, letra] = ORIGENS[a.origem] || ORIGENS.site, tel = (a.trecho.match(/\(?\d{2}\)?\s?9?\d{4}-?\d{4}/) || [])[0];
   const salvo = !!(db.achadosSalvos || {})[a.id], visto = !!(db.achadosVistos || {})[a.id];
   return `<article class="cartao achado ${visto ? 'visto' : ''}"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="origem"><i style="background:${cor}">${letra}</i>${nome}</span><span>${a.novo ? '<span class="novo-badge">novo</span> ' : ''}${a.exemplo ? '<span class="exemplo">exemplo de achado</span>' : ''}</span></div>
     <h3>${t(a.titulo)}</h3><p style="margin:0 0 6px;font-size:13.5px;color:var(--grafite2)">${t(a.trecho)}</p><small class="mudo">${t(a.cidade)} · ${haQuanto(a.quando)}</small>
-    <div class="acoes"><a class="bt cheio p" href="${t(a.link)}" target="_blank" rel="noopener noreferrer" data-acao="abriu-achado" data-id="${t(a.id)}">${ico('link')}Abrir anúncio</a>${tel ? `<button type="button" class="bt zap p" data-acao="zap-achado" data-tel="${t(tel)}" data-tit="${t(a.titulo)}">${ico('zap')}Responder</button>` : ''}<button type="button" class="bt leve p" data-acao="salvar-achado" data-id="${t(a.id)}" aria-pressed="${salvo}">${ico('salvar')}${salvo ? 'Salvo' : 'Salvar'}</button><button type="button" class="bt leve p" data-acao="visto-achado" data-id="${t(a.id)}">${ico('olho')}${visto ? 'Visto' : 'Já vi'}</button></div></article>`;
+    <div class="acoes"><a class="bt cheio p" href="${t(a.link)}" target="_blank" rel="noopener noreferrer" data-acao="abriu-achado" data-id="${t(a.id)}">${ico('link')}Abrir anúncio</a>${tel ? `<button type="button" class="bt zap p" data-acao="zap-achado" data-tel="${t(tel)}" data-tit="${t(a.titulo)}">${ico('zap')}Responder</button>` : ''}<button type="button" class="bt leve p alterna" data-acao="salvar-achado" data-id="${t(a.id)}" aria-pressed="${salvo}" aria-label="${salvo ? 'Salvo: tocar para tirar dos salvos' : 'Salvar este trabalho'}">${ico('salvar')}${salvo ? 'Salvo' : 'Salvar'}</button><button type="button" class="bt leve p alterna" data-acao="visto-achado" data-id="${t(a.id)}" aria-pressed="${!!visto}">${ico(visto ? 'ok' : 'olho')}${visto ? 'Visto' : 'Já vi'}</button></div></article>`;
 }
 function telaAchados() {
   const cidade = db.buscaCidade || eu().cidade, ofs = db.buscaOficios && db.buscaOficios.length ? db.buscaOficios : meusOficios(eu()).map((x) => x.id), q = consultaDe(ofs, cidade);
@@ -233,7 +233,7 @@ ACOES['apagar-post'] = (b) => confirmar('Tirar do portfólio?', 'O trabalho sai 
 // cartão de visita: QR que abre o WhatsApp do profissional (funciona sem servidor)
 ACOES.cartao = () => {
   const ofs = meusOficios(eu()), link = zap(eu().zap, `Oi, ${eu().apelido}! Vi seu cartão e queria um orçamento.`);
-  folha({ titulo: 'Cartão de visita', corpo: `<div class="cartao-visita"><div><h3>${t(eu().nome)}</h3><p>${t(ofs.map((x) => x.nome).join(' · '))}</p><p style="margin-top:8px;opacity:.85">${t(eu().cidade)}-${t(eu().uf)} · WhatsApp ${t(eu().zap)}</p><p style="margin-top:10px;color:var(--trena);font-weight:700">Aponte a câmera e fale comigo</p></div><div class="qr">${qrSVG(link, 92, '#2E333B')}</div></div>
+  folha({ titulo: 'Cartão de visita', corpo: `<div class="cartao-visita"><div><img class="cv-marca" src="simbolo-claro.svg?v=2" alt="" width="34" height="34"><h3>${t(eu().nome)}</h3><p>${t(ofs.map((x) => x.nome).join(' · '))}</p><p style="margin-top:8px;opacity:.85">${t(eu().cidade)}-${t(eu().uf)} · WhatsApp ${t(eu().zap)}</p><p style="margin-top:10px;color:var(--trena);font-weight:700">Aponte a câmera e fale comigo</p></div><div class="qr">${qrSVG(link, 92, '#2E333B')}</div></div>
       <p class="mudo" style="font-size:12.5px">O QR abre o seu WhatsApp com a mensagem pronta. Mostre na obra, imprima no adesivo do carro ou mande junto com o antes e depois.</p>`,
     pe: `<button type="button" class="bt leve p" data-c>${ico('copiar')}Copiar link</button><button type="button" class="bt zap" data-z>${ico('zap')}Mandar no WhatsApp</button>`,
     aoAbrir: (f) => { const txt = `${eu().nome} · ${ofs.map((x) => x.nome).join(', ')} em ${eu().cidade}.\nOrçamento sem compromisso: ${link}`; $('[data-c]', f).onclick = () => copiar(link); $('[data-z]', f).onclick = () => abrirZap('', txt); } });
@@ -351,7 +351,7 @@ addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); pedidoInsta
 ACOES.instalar = () => {
   const inst = matchMedia('(display-mode: standalone)').matches || navigator.standalone, ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const passos = ios ? ['Toque em compartilhar (quadrado com seta), embaixo no Safari.', 'Toque em “Adicionar à Tela de Início”.', 'Toque em “Adicionar”.'] : ['Toque nos três pontinhos do Chrome, em cima.', 'Toque em “Instalar app” ou “Adicionar à tela inicial”.', 'Confirme. O Atria aparece junto com os seus apps.'];
-  folha({ titulo: inst ? 'Já instalado' : 'Instalar o Atria', corpo: `<div style="display:flex;gap:14px;align-items:center"><img src="icone-192.png" alt="" width="64" height="64" style="border-radius:16px"><p style="margin:0">Fica na tela do celular como um aplicativo e abre mesmo sem internet. O que fizer offline fica guardado.</p></div>${inst ? '' : pedidoInstalar ? '' : `<ol style="padding-left:20px;display:grid;gap:8px">${passos.map((x) => `<li>${t(x)}</li>`).join('')}</ol>`}`,
+  folha({ titulo: inst ? 'Já instalado' : 'Instalar o Atria', corpo: `<div style="display:flex;gap:14px;align-items:center"><img src="icone-192.png?v=2" alt="" width="64" height="64" style="border-radius:16px"><p style="margin:0">Fica na tela do celular como um aplicativo e abre mesmo sem internet. O que fizer offline fica guardado.</p></div>${inst ? '' : pedidoInstalar ? '' : `<ol style="padding-left:20px;display:grid;gap:8px">${passos.map((x) => `<li>${t(x)}</li>`).join('')}</ol>`}`,
     pe: !inst && pedidoInstalar ? '<button type="button" class="bt cheio largo" data-ok>Instalar agora</button>' : '',
     aoAbrir: (f, api) => { const b = $('[data-ok]', f); if (b) b.onclick = async () => { const p = pedidoInstalar; pedidoInstalar = null; p.prompt(); await p.userChoice.catch(() => ({})); api.fechar(); }; } });
 };
@@ -374,7 +374,7 @@ function cadastro(refazer) {
   const el = document.createElement('div'); el.className = 'onb'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Cadastro');
   document.body.appendChild(el);
   const PASSOS = [
-    () => `<div class="onb-marca"><img src="simbolo.svg" alt="" width="96" height="96"><h1>ATRIA</h1><p>O app de quem ergue, reforma e conserta.</p></div>
+    () => `<div class="onb-marca"><img src="logo.svg?v=2" alt="" width="210" height="208"><h1 class="so-leitor">Atria</h1><p>O app de quem ergue, reforma e conserta.</p></div>
       <ul class="onb-lista"><li>${ico('antesdepois')}Portfólio com antes e depois</li><li>${ico('lupa')}Trabalho na sua cidade</li><li>${ico('lista')}Orçamento, material e Pix</li><li>${ico('grafico')}Lucro do dia, da semana e do mês</li></ul>
       ${refazer ? '' : '<p class="exemplo" style="margin-top:14px">Demonstração: já vem com dados de exemplo do Marcos</p>'}`,
     () => `<h2>Como você se chama?</h2><label class="onb-foto"><input type="file" accept="image/*" data-foto aria-label="Foto de perfil">${dados.foto ? `<img src="${dados.foto}" alt="">` : `<span>${ico('camera')}Foto</span>`}</label>
@@ -561,6 +561,10 @@ function iniciar() {
   document.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role="checkbox"][data-acao]')) { e.preventDefault(); e.target.click(); } });
   addEventListener('hashchange', navegar);
   addEventListener('atria-pinta', () => desenha(true));
+  // alternâncias (salvar, visto, feito, comprado): microanimação só no botão que acabou de ser marcado
+  let tocado = null;
+  document.addEventListener('click', (e) => { const b = e.target.closest('[aria-pressed], [role="checkbox"]'); if (b && (b.dataset.acao || b.dataset.k)) tocado = `[data-acao="${b.dataset.acao || ''}"]${b.dataset.id ? `[data-id="${b.dataset.id}"]` : ''}${b.dataset.k ? `[data-k="${b.dataset.k}"]` : ''}${b.dataset.i ? `[data-i="${b.dataset.i}"]` : ''}${b.dataset.e ? `[data-e="${b.dataset.e}"]` : ''}`; }, true);
+  addEventListener('atria-pinta', () => { const sel = tocado; tocado = null; if (!sel) return; setTimeout(() => { try { const n = document.querySelector(sel); if (n && (n.getAttribute('aria-pressed') === 'true' || n.getAttribute('aria-checked') === 'true')) { n.classList.remove('acabou-marcar'); void n.offsetWidth; n.classList.add('acabou-marcar'); } } catch { /* seletor inválido */ } }, 30); });
   addEventListener('online', () => { const s = $('[data-sinc]'); if (s) { s.classList.remove('off'); s.textContent = 'tudo salvo'; } toast('Internet de volta'); });
   addEventListener('offline', () => { const s = $('[data-sinc]'); if (s) { s.classList.add('off'); s.textContent = 'sem internet, salvando no celular'; } toast('Sem internet: tudo continua salvo no celular'); });
   document.documentElement.classList.toggle('letra-grande', !!(db.perfil && db.perfil.letraGrande));

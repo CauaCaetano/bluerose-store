@@ -154,3 +154,6 @@
   .mx-etq-n { left: 2.5mm; top: 3mm; width: 7.5mm; height: 7.5mm; font-size: 10pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .mx-etq b { font-size: 10.5pt; } .mx-etq-med { font-size: 11pt; } .mx-etq small { font-size: 7.5pt; }
 }
+
+/* clima do RDO: quebra a linha em vez de rolar */
+.mx-chips-quebra { flex-wrap: wrap; overflow: visible; }

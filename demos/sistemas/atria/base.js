@@ -367,21 +367,61 @@ export const ir = (h) => { if (location.hash === `#${h}`) repinta(); else locati
 export const cab = (titulo, sub = '', { voltar = true, dica = '', direita = '' } = {}) => `<header class="cab">${voltar ? `<button type="button" class="voltar" data-acao="voltar" aria-label="Voltar">${ico('seta')}</button>` : ''}<h1>${titulo}${sub ? `<small>${sub}</small>` : ''}</h1>${direita}${dica ? `<button type="button" class="dica-bt" data-acao="dica" data-dica="${t(dica)}" aria-label="Dica desta tela">?</button>` : ''}</header>`;
 
 // ------------------------------------------------------------------ ditado: falar em vez de digitar (campos com data-voz)
+// Web Speech API: Chrome/Edge/Android e Safari recente, só em HTTPS e com o microfone liberado.
+// Onde não existe, o botão continua e explica como usar o microfone do teclado do celular (plano B que sempre funciona).
 const Reconhece = window.SpeechRecognition || window.webkitSpeechRecognition;
+const DICA_TECLADO = 'Toque no campo e use o microfone do teclado do celular (no Android, o 🎤 do Gboard; no iPhone, o 🎤 ao lado da barra de espaço).';
+export function vozSuporte() {
+  if (!Reconhece) return { ok: false, motivo: 'navegador' };
+  if (!window.isSecureContext) return { ok: false, motivo: 'https' };
+  try { if (document.featurePolicy && !document.featurePolicy.allowsFeature('microphone')) return { ok: false, motivo: 'moldura' }; } catch { /* sem a API: tenta */ }
+  return { ok: true };
+}
+const MSG_ERRO = {
+  'not-allowed': 'O microfone está bloqueado para o Atria. Toque no cadeado ao lado do endereço, em Permissões, libere o Microfone e tente de novo.',
+  'service-not-allowed': 'Este navegador não deixou usar o ditado. Use o microfone do teclado do celular.',
+  'no-speech': 'Não ouvi nada. Toque no microfone e fale perto do celular.',
+  'audio-capture': 'Não achei microfone neste aparelho.',
+  network: 'O ditado precisa de internet. Sem internet, use o microfone do teclado do celular.',
+  'language-not-supported': 'Este navegador não entende português no ditado. Use o microfone do teclado.',
+};
+let vozAtiva = null;
+function semDitado(campo, motivo) {
+  const porque = motivo === 'moldura' ? 'Aqui no computador o ditado fica desligado. No celular ele funciona.' : motivo === 'https' ? 'O ditado só funciona no endereço seguro (https).' : 'Este navegador não aceita ditado dentro do app.';
+  folha({ titulo: 'Falar em vez de digitar', corpo: `<p style="margin-top:0">${porque}</p><p class="voz-dica-box"><b>Use o microfone do teclado.</b> ${DICA_TECLADO}</p>`, pe: '<button type="button" class="bt cheio" data-fechar>Entendi</button>', aoFechar: () => { try { campo.focus(); } catch { /* sem foco */ } } });
+}
+function ouvir(campo, bt) {
+  if (vozAtiva) { vozAtiva.stop(); return; }
+  const r = new Reconhece(); r.lang = 'pt-BR'; r.interimResults = true; r.continuous = true; r.maxAlternatives = 1;
+  const base = campo.value && campo.tagName === 'TEXTAREA' ? `${campo.value.replace(/\s+$/, '')} ` : (campo.tagName === 'TEXTAREA' ? '' : '');
+  let final = '', ouviuAlgo = false, silencio = 0;
+  const caixa = bt.parentElement; const aviso = document.createElement('span'); aviso.className = 'voz-ao-vivo'; aviso.setAttribute('role', 'status'); aviso.textContent = 'Pedindo o microfone…'; caixa.append(aviso);
+  const fim = () => { bt.classList.remove('ouvindo'); bt.setAttribute('aria-pressed', 'false'); bt.setAttribute('aria-label', 'Falar em vez de digitar'); aviso.remove(); vozAtiva = null; clearTimeout(silencio); };
+  const escreve = (txt) => { campo.value = campo.tagName === 'TEXTAREA' ? base + txt : txt; campo.dispatchEvent(new Event('input', { bubbles: true })); };
+  r.onstart = () => { bt.classList.add('ouvindo'); bt.setAttribute('aria-pressed', 'true'); bt.setAttribute('aria-label', 'Parar de ouvir'); aviso.textContent = 'Ouvindo… fale agora. Toque de novo para parar.'; vibra(12); silencio = setTimeout(() => r.stop(), 12000); };
+  r.onresult = (e) => {
+    let parcial = ''; ouviuAlgo = true; clearTimeout(silencio); silencio = setTimeout(() => r.stop(), 4000);
+    for (let i = e.resultIndex; i < e.results.length; i++) { const x = e.results[i]; if (x.isFinal) final += `${x[0].transcript.trim()} `; else parcial += x[0].transcript; }
+    escreve((final + parcial).trim()); aviso.textContent = parcial ? `“${parcial.trim().slice(-60)}”` : 'Ouvindo… toque de novo para parar.';
+  };
+  r.onerror = (e) => { if (e.error === 'aborted') return; toast(`${MSG_ERRO[e.error] || 'Não deu para ouvir. Tente de novo, perto do celular.'}`, 'erro'); if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'network') semDitado(campo, 'erro'); };
+  r.onend = () => { if (ouviuAlgo) { escreve(final.trim() || campo.value.slice(base.length)); campo.dispatchEvent(new Event('change', { bubbles: true })); } fim(); };
+  vozAtiva = r;
+  try { r.start(); } catch { fim(); toast('Não deu para ligar o microfone agora. Tente de novo.', 'erro'); }
+}
 export function ligarVoz(raiz = document) {
-  if (!Reconhece) return;
   $$('[data-voz]:not([data-voz-ok])', raiz).forEach((campo) => {
     campo.dataset.vozOk = '1';
-    const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'voz-bt'; bt.setAttribute('aria-label', 'Falar em vez de digitar');
+    const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'voz-bt'; bt.setAttribute('aria-label', 'Falar em vez de digitar'); bt.setAttribute('aria-pressed', 'false');
     bt.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>';
     const caixa = document.createElement('span'); caixa.className = 'voz-caixa'; campo.replaceWith(caixa); caixa.append(campo, bt);
     bt.onclick = () => {
-      const r = new Reconhece(); r.lang = 'pt-BR'; r.interimResults = false; r.maxAlternatives = 1;
-      bt.classList.add('ouvindo'); vibra(10);
-      r.onresult = (e) => { const txt = e.results[0][0].transcript; campo.value = campo.value && campo.tagName === 'TEXTAREA' ? `${campo.value} ${txt}` : txt; campo.dispatchEvent(new Event('input', { bubbles: true })); campo.dispatchEvent(new Event('change', { bubbles: true })); };
-      r.onerror = () => toast('Não deu para ouvir. Tente de novo, perto do celular.', 'erro');
-      r.onend = () => bt.classList.remove('ouvindo');
-      try { r.start(); } catch { bt.classList.remove('ouvindo'); }
+      const s = vozSuporte(); if (!s.ok) { semDitado(campo, s.motivo); return; }
+      let explicado = false; try { explicado = localStorage.getItem('atria-voz-ok') === '1'; } catch { /* sem acesso */ }
+      if (explicado) { ouvir(campo, bt); return; }
+      folha({ titulo: 'Falar em vez de digitar', corpo: '<p style="margin-top:0">O celular vai pedir para o Atria usar o <b>microfone</b>. Toque em <b>Permitir</b>: ele só ouve enquanto o botão estiver vermelho, e o que você falar vira texto no campo.</p><p class="voz-dica-box">Precisa de internet para entender. Se não der, ' + DICA_TECLADO.charAt(0).toLowerCase() + DICA_TECLADO.slice(1) + '</p>',
+        pe: '<button type="button" class="bt leve" data-fechar>Agora não</button><button type="button" class="bt cheio" data-vai>Permitir e falar</button>',
+        aoAbrir: (f) => { $('[data-vai]', f).onclick = () => { try { localStorage.setItem('atria-voz-ok', '1'); } catch { /* sem acesso */ } $('[data-fechar]', f).click(); setTimeout(() => ouvir(campo, bt), 250); }; } });
     };
   });
 }
