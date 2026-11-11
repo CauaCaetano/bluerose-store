@@ -1,20 +1,24 @@
 // Atria · mais funções (11/11/2026): parcelas com vencimento e cobrança, preço justo (hora técnica),
 // contrato simples com aceite assinado com o dedo, checklist de ferramentas e EPI, quilometragem da obra
-// e medição por foto com objeto de referência. Tudo fica no aparelho (db + grava()). Dinheiro em centavos.
-import { $, $$, t, din, dinCurto, lerNum, numBR, uid, hoje, somaDias, dias, dataBR, quando, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js';
+// e medição por foto com objeto de referência. Depois: RDO (relatório diário), validade do EPI, cronograma com
+// alerta de atraso, fornecedores de chapas e etiquetas do plano de corte. Tudo fica no aparelho (db + grava()).
+// Dinheiro em centavos.
+import { $, $$, t, din, dinCurto, lerNum, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js';
 import { totais, cliente, STATUS } from './gestao.js';
 import { meusOficios } from './oficios.js';
+import { planoDeCorte } from './ferramentas.js';
 
 export const TELAS = {};
 export const ACOES = {};
-export const PAI_MAIS = { preco: 'gestao', contrato: 'obras', checklist: 'gestao', deslocamento: 'gestao', medir: 'ferramentas' };
+export const PAI_MAIS = { preco: 'gestao', contrato: 'obras', checklist: 'gestao', deslocamento: 'gestao', medir: 'ferramentas', rdo: 'obras', chapas: 'gestao', etiquetas: 'corte' };
 
 export const BLOCOS_GESTAO = `
   <a class="bloco" href="#preco"><span class="ic">${ico('moeda')}</span><span><b>Preço justo</b><small>Sua diária mínima e a hora técnica</small></span></a>
   <button type="button" class="bloco" data-acao="contrato-escolher"><span class="ic">${ico('doc')}</span><span><b>Contrato</b><small>Simples, com assinatura no dedo</small></span></button>
   <a class="bloco" href="#checklist"><span class="ic">${ico('lista')}</span><span><b>Checklist</b><small>Ferramentas e EPI antes de sair</small></span></a>
   <a class="bloco" href="#deslocamento"><span class="ic">${ico('mapa')}</span><span><b>Deslocamento</b><small>Km rodado e custo por obra</small></span></a>
-  <a class="bloco largo" href="#medir"><span class="ic">${ico('camera')}</span><span><b>Medir por foto</b><small>Com uma folha A4, bloco ou porta de referência</small></span>${ico('setaDir', 'width="20" height="20"')}</a>`;
+  <a class="bloco" href="#medir"><span class="ic">${ico('camera')}</span><span><b>Medir por foto</b><small>Com folha A4, bloco ou porta de referência</small></span></a>
+  <a class="bloco" href="#chapas"><span class="ic">${ico('chapa')}</span><span><b>Chapas e fornecedores</b><small>Preço de cada chapa e a mais barata</small></span></a>`;
 
 const ordinal = (n) => `${n}ª parcela`;
 const primeiro = (nome) => String(nome || '').split(' ')[0];
@@ -273,18 +277,28 @@ const OF_CHECK = { mestre: 'pedreiro', servente: 'pedreiro', armador: 'pedreiro'
 const EPI = ['Capacete', 'Luvas', 'Óculos de proteção', 'Botina', 'Protetor auricular', 'Máscara PFF2', 'Cinto para altura'];
 const slug = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 function checkDados() {
+  if (!db.checklist && !/[?&]conta=/.test(location.search)) { // demonstração: já mostra validades de exemplo
+    db.checklist = { dia: hoje(), marcas: {}, extras: [], validade: { [`e:${slug(EPI[0])}`]: somaDias(hoje(), 240), [`e:${slug(EPI[3])}`]: somaDias(hoje(), -2), [`e:${slug(EPI[5])}`]: somaDias(hoje(), 6) } };
+  }
   const ck = db.checklist = db.checklist || { dia: hoje(), marcas: {}, extras: [] };
   if (ck.dia !== hoje()) { ck.dia = hoje(); ck.marcas = {}; }
   ck.marcas = ck.marcas || {}; ck.extras = ck.extras || [];
   const ofs = meusOficios(db.perfil).map((o) => OF_CHECK[o.id] || o.id).filter((k) => FERR[k]);
   const ferr = [...new Set([...ofs.flatMap((k) => FERR[k]), ...FERR.geral])].map((n) => ({ k: `f:${slug(n)}`, n }));
   ck.extras.filter((x) => x.g === 'f').forEach((x) => ferr.push({ k: `x:${x.id}`, n: x.nome, extra: x.id }));
-  const epi = EPI.map((n) => ({ k: `e:${slug(n)}`, n }));
-  ck.extras.filter((x) => x.g === 'e').forEach((x) => epi.push({ k: `x:${x.id}`, n: x.nome, extra: x.id }));
+  const epi = EPI.map((n) => ({ k: `e:${slug(n)}`, n, epi: true }));
+  ck.extras.filter((x) => x.g === 'e').forEach((x) => epi.push({ k: `x:${x.id}`, n: x.nome, extra: x.id, epi: true }));
+  ck.validade = ck.validade || {};
   return { ck, ferr, epi };
 }
 const contaCheck = (l, ck) => l.filter((i) => ck.marcas[i.k]).length;
-const linhaCheck = (i, ck) => `<div class="mx-check ${ck.marcas[i.k] ? 'feito' : ''}" role="checkbox" aria-checked="${!!ck.marcas[i.k]}" tabindex="0" data-acao="check" data-k="${t(i.k)}"><span class="caixa">${ico('ok', 'stroke-width="3"')}</span><span class="mx-check-n">${t(i.n)}</span>${i.extra ? `<button type="button" class="mx-check-x" data-acao="check-tirar" data-id="${t(i.extra)}" aria-label="Tirar ${t(i.n)} da lista">${ico('x')}</button>` : ''}</div>`;
+// validade do EPI: "vence em X dias" / "vencido"
+function validadeEpi(iso) {
+  if (!iso) return null; const d = dias(hoje(), iso);
+  return d < 0 ? { txt: `Vencido há ${-d} ${-d === 1 ? 'dia' : 'dias'}`, cls: 'vencido', d } : d === 0 ? { txt: 'Vence hoje', cls: 'vencido', d } : { txt: d <= 15 ? `Vence em ${d} ${d === 1 ? 'dia' : 'dias'}` : `Troca em ${dataBR(iso)}`, cls: d <= 15 ? 'perto' : '', d };
+}
+const linhaCheck = (i, ck) => { const v = i.epi ? validadeEpi(ck.validade[i.k]) : null;
+  return `<div class="mx-check ${ck.marcas[i.k] ? 'feito' : ''}" role="checkbox" aria-checked="${!!ck.marcas[i.k]}" tabindex="0" data-acao="check" data-k="${t(i.k)}" ${i.epi ? `data-epi="${t(i.n)}"` : ''}><span class="caixa">${ico('ok', 'stroke-width="3"')}</span><span class="mx-check-n">${t(i.n)}${v ? `<small class="mx-val ${v.cls}">${v.txt}</small>` : ''}</span>${i.epi ? `<button type="button" class="mx-check-x mx-check-cal" data-acao="epi-validade" data-k="${t(i.k)}" data-n="${t(i.n)}" aria-label="Validade de ${t(i.n)}">${ico('calendario')}</button>` : ''}${i.extra ? `<button type="button" class="mx-check-x" data-acao="check-tirar" data-id="${t(i.extra)}" aria-label="Tirar ${t(i.n)} da lista">${ico('x')}</button>` : ''}</div>`; };
 TELAS.checklist = () => {
   const { ck, ferr, epi } = checkDados(), tot = ferr.length + epi.length, ok = contaCheck(ferr, ck) + contaCheck(epi, ck);
   return `${cab('Checklist', 'Antes de sair para a obra', { dica: 'Toque em cada item que já está no carro. Todo dia a lista começa zerada.' })}
@@ -303,12 +317,38 @@ function atualizaCheck() {
   const gf = $('[data-ck-g="ferr"]'); if (gf) gf.textContent = `${contaCheck(ferr, ck)} de ${ferr.length}`;
   if (ok === tot && tot) toast('Tudo pronto. Boa obra!');
 }
+let segurou = false; // toque longo no EPI abre a validade e não marca
 ACOES.check = (el, e) => {
   if (e && e.target.closest('.mx-check-x')) return;
+  if (segurou) { segurou = false; return; }
   const { ck } = checkDados(), k = el.dataset.k;
   if (ck.marcas[k]) delete ck.marcas[k]; else ck.marcas[k] = 1;
   grava(); vibra(8); el.classList.toggle('feito', !!ck.marcas[k]); el.setAttribute('aria-checked', !!ck.marcas[k]); atualizaCheck();
 };
+TELAS.checklist.montar = (tela) => {
+  let timer = null;
+  tela.addEventListener('pointerdown', (e) => { const el = e.target.closest('.mx-check[data-epi]'); if (!el || e.target.closest('button')) return; segurou = false; timer = setTimeout(() => { segurou = true; vibra(20); abrirValidade(el.dataset.k, el.dataset.epi); }, 550); });
+  const para = () => { clearTimeout(timer); timer = null; };
+  ['pointerup', 'pointercancel', 'pointerleave', 'scroll'].forEach((ev) => tela.addEventListener(ev, para, true));
+  tela.addEventListener('contextmenu', (e) => { if (e.target.closest('.mx-check[data-epi]')) e.preventDefault(); });
+};
+function abrirValidade(k, nome) {
+  const { ck } = checkDados();
+  formulario({ titulo: `Validade: ${nome}`, rotulo: 'Guardar', campos: [{ n: 'data', r: 'Vence ou trocar em', tipo: 'data', valor: ck.validade[k] || somaDias(hoje(), 180), dica: 'Veja a data na etiqueta. Luva e máscara PFF2 trocam antes: quando gastar ou sujar.' }],
+    extraPe: ck.validade[k] ? '<button type="button" class="bt leve p" data-sem>Sem data</button>' : '',
+    salvar: (v) => { if (!v.data) return 'Escolha a data.'; ck.validade[k] = v.data; grava(); repinta(); toast('Validade guardada'); },
+    depois: (f, api) => { const b = $('[data-sem]', f); if (b) b.onclick = () => { delete ck.validade[k]; grava(); api.fechar(); repinta(); }; } });
+}
+ACOES['epi-validade'] = (b) => abrirValidade(b.dataset.k, b.dataset.n);
+// sugestão no Início: EPI vencido ou vencendo em até 15 dias (no máximo 1)
+export function sugestoesEpi() {
+  if (!db.checklist || !db.checklist.validade) return [];
+  const { ck, epi } = checkDados();
+  const l = epi.map((i) => ({ i, v: validadeEpi(ck.validade[i.k]) })).filter((x) => x.v && x.v.d <= 15).sort((a, b) => a.v.d - b.v.d);
+  if (!l.length) return [];
+  const { i, v } = l[0];
+  return [{ p: v.d < 0 ? 8 : 5, cor: v.d < 0 ? 'brasa' : 'trena', ic: 'escudo', txt: `<b>${t(i.n)}</b>: ${v.d < 0 ? `vencido há ${-v.d} ${-v.d === 1 ? 'dia' : 'dias'}` : v.d === 0 ? 'vence hoje' : `vence em ${v.d} ${v.d === 1 ? 'dia' : 'dias'}`}. Troque antes da próxima obra.`, bt: ['Ver o checklist', '#checklist'] }];
+}
 ACOES['check-zerar'] = () => { const { ck } = checkDados(); ck.marcas = {}; ck.dia = hoje(); grava(); vibra(12); repinta(); toast('Lista zerada. Vá marcando o que põe no carro.'); };
 ACOES['check-novo'] = () => formulario({ titulo: 'Novo item', rotulo: 'Adicionar', campos: [{ n: 'nome', r: 'O que levar', obrig: true, voz: true, lista: ['Gerador', 'Betoneira', 'Andaime', 'Escada', 'Lona', 'Garrafa de água', 'Marmita'] }, { n: 'g', r: 'Em qual lista', tipo: 'sel', valor: 'f', ops: [['f', 'Ferramentas'], ['e', 'EPI']] }],
   salvar: (v) => { checkDados().ck.extras.push({ id: uid('ck'), nome: v.nome, g: v.g }); grava(); repinta(); } });
@@ -513,4 +553,194 @@ ACOES['md-obra'] = () => {
       o.hist.push({ data: hoje(), txt: `Medido por foto: ${md.medidas.map((m) => valorMedida(m).txt).join('; ')}${usa ? ` · orçamento com ${numBR(u.qtd, 2)} ${u.un}` : ''}` });
       grava(); toast(usa ? `Orçamento atualizado: ${numBR(u.qtd, 2)} ${u.un}` : 'Medidas guardadas no histórico da obra'); ir(`obra/${o.id}`);
     } });
+};
+
+// ================================================================== 7) RDO: relatório diário de obra
+const CLIMAS = ['Sol', 'Nublado', 'Chuva', 'Chuva forte'];
+export const botaoRdo = (o) => (o ? `<a class="bt leve largo mx-grande" href="#rdo/${o.id}">${ico('doc')}Relatório do dia (RDO)</a>` : '');
+// o que o app já sabe daquele dia: notas do diário e etapas marcadas como feitas
+function rdoSugerido(o, data) {
+  const notas = (o.diario || []).filter((x) => x.data === data && x.nota).map((x) => x.nota);
+  const etapas = (o.hist || []).filter((h) => h.data === data && /^Etapa feita: /.test(h.txt)).map((h) => `${h.txt.replace(/^Etapa feita: /, '')} (concluída)`);
+  const prox = (o.etapas || []).filter((e) => !e.feito).slice(0, 3).map((e) => e.nome);
+  return { clima: '', feito: [...notas, ...etapas].join('\n'), proximos: prox.join('\n'), obs: '' };
+}
+const rdoDe = (o, data) => ({ ...rdoSugerido(o, data), ...((o.rdo || {})[data] || {}) });
+function equipeDia(o, data) {
+  const l = [{ nome: db.perfil.nome, funcao: (meusOficios(db.perfil)[0] || {}).nome || 'Responsável' }];
+  (db.diarias || []).filter((d) => d.data === data && d.obra === o.id).forEach((d) => { const p = (db.equipe || []).find((x) => x.id === d.pessoa); if (p) l.push({ nome: p.nome, funcao: p.funcao || 'Ajudante' }); });
+  return l;
+}
+const linhasHtml = (s) => (String(s || '').trim() ? `<ul class="mx-lista-doc">${String(s).split('\n').map((x) => x.trim()).filter(Boolean).map((x) => `<li>${t(x)}</li>`).join('')}</ul>` : '<p class="mudo">—</p>');
+function docRdo(o, data) {
+  const c = cliente(o.cliente), eu = db.perfil, r = rdoDe(o, data), eq = equipeDia(o, data), fotos = (o.diario || []).filter((x) => x.data === data && x.foto);
+  const feitas = (o.etapas || []).filter((e) => e.feito).length, pct = o.etapas && o.etapas.length ? Math.round(feitas / o.etapas.length * 100) : 0;
+  return `<div class="doc-cab"><img src="simbolo.svg" alt="" width="50" height="50"><div><b>Relatório do dia</b><small class="mudo">${t(eu.nome)} · ${t(eu.cidade)}-${t(eu.uf)}${eu.zap ? ` · WhatsApp ${t(eu.zap)}` : ''}</small></div></div>
+    <table style="margin-top:12px"><tr><td>Data</td><td>${dataBR(data)}</td></tr><tr><td>Obra</td><td>${t(o.titulo)}</td></tr><tr><td>Cliente</td><td>${t(c.nome)}</td></tr>${c.end ? `<tr><td>Local</td><td>${t(c.end)}</td></tr>` : ''}<tr><td>Clima</td><td>${t(r.clima || 'não informado')}</td></tr><tr><td>Andamento</td><td>${pct}% das etapas</td></tr></table>
+    <h3>Equipe do dia</h3><ul class="mx-lista-doc">${eq.map((p) => `<li>${t(p.nome)} · ${t(p.funcao)}</li>`).join('')}</ul>
+    <h3>O que foi feito</h3>${linhasHtml(r.feito)}
+    ${fotos.length ? `<h3>Fotos do dia</h3><div class="mx-rdo-fotos">${fotos.map((f) => `<figure><img src="${f.foto}" alt="">${f.nota ? `<figcaption>${t(f.nota)}</figcaption>` : ''}</figure>`).join('')}</div>` : ''}
+    <h3>Próximos passos</h3>${linhasHtml(r.proximos)}
+    ${String(r.obs || '').trim() ? `<h3>Observações</h3><p>${t(r.obs).replace(/\n/g, '<br>')}</p>` : ''}
+    <div class="assina"><span>${t(eu.nome)}</span><span>${t(c.nome)}</span></div>`;
+}
+TELAS.rdo = (id, data) => {
+  const o = achar('obras', id); if (!o) return `${cab('Relatório do dia')}<div class="vazio"><b>Obra não encontrada</b></div>`;
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(data || '') ? data : hoje(), r = rdoDe(o, d), salvo = !!(o.rdo || {})[d];
+  return `${cab('Relatório do dia', t(o.titulo), { dica: 'O texto já vem do diário e das etapas marcadas. Ajuste, escolha o clima e mande para o cliente.' })}
+    <div class="mx-dia so-tela"><a class="bt leve" href="#rdo/${o.id}/${somaDias(d, -1)}" aria-label="Dia anterior">${ico('seta')}</a><b>${quando(d)}<small>${dataBR(d)}${salvo ? ' · salvo' : ''}</small></b><a class="bt leve" href="#rdo/${o.id}/${somaDias(d, 1)}" aria-label="Próximo dia" ${d >= hoje() ? 'aria-disabled="true" style="opacity:.35;pointer-events:none"' : ''}>${ico('setaDir')}</a></div>
+    <div class="acoes so-tela" style="margin-top:0"><button type="button" class="bt p" data-acao="imprimir">${ico('doc')}PDF / imprimir</button><button type="button" class="bt zap p" data-acao="rdo-zap" data-o="${o.id}" data-d="${d}">${ico('zap')}Mandar no WhatsApp</button></div>
+    <section class="so-tela mx-rdo-form" data-rdo="${o.id}" data-d="${d}">
+      <small class="mx-rotulo">Clima</small>
+      <div class="chips" role="group" aria-label="Clima">${CLIMAS.map((x) => `<button type="button" class="chip mx-chip-g" data-acao="rdo-clima" data-v="${x}" aria-pressed="${r.clima === x}">${x}</button>`).join('')}</div>
+      <label class="campo"><span>O que foi feito</span><textarea data-rdo-campo="feito" data-voz rows="4" placeholder="Uma coisa por linha">${t(r.feito)}</textarea></label>
+      <label class="campo"><span>Próximos passos</span><textarea data-rdo-campo="proximos" data-voz rows="3">${t(r.proximos)}</textarea></label>
+      <label class="campo"><span>Observações</span><textarea data-rdo-campo="obs" data-voz rows="2" placeholder="Falta de material, visita do cliente…">${t(r.obs)}</textarea></label>
+    </section>
+    <article class="doc" id="doc" data-rdo-doc>${docRdo(o, d)}</article>`;
+};
+const salvaRdo = (o, d, campo, v) => { o.rdo = o.rdo || {}; o.rdo[d] = { ...rdoDe(o, d), ...(o.rdo[d] || {}), [campo]: v }; grava(); const doc = $('[data-rdo-doc]'); if (doc) doc.innerHTML = docRdo(o, d); };
+TELAS.rdo.montar = (tela) => {
+  const sec = $('[data-rdo]', tela); if (!sec) return;
+  const o = achar('obras', sec.dataset.rdo), d = sec.dataset.d;
+  sec.addEventListener('input', (e) => { const c = e.target.closest('[data-rdo-campo]'); if (c) salvaRdo(o, d, c.dataset.rdoCampo, c.value); });
+};
+ACOES['rdo-clima'] = (b) => {
+  const sec = b.closest('[data-rdo]'), o = achar('obras', sec.dataset.rdo), d = sec.dataset.d;
+  salvaRdo(o, d, 'clima', b.dataset.v); vibra(6);
+  $$('[data-acao="rdo-clima"]', sec).forEach((x) => x.setAttribute('aria-pressed', x === b));
+};
+ACOES['rdo-zap'] = (b) => {
+  const o = achar('obras', b.dataset.o), d = b.dataset.d; if (!o) return;
+  const c = cliente(o.cliente), r = rdoDe(o, d), lista = (s) => String(s || '').split('\n').map((x) => x.trim()).filter(Boolean).map((x) => `• ${x}`).join('\n');
+  abrirZap(c.tel, `*Relatório do dia* · ${dataBR(d)}\n${o.titulo}\n${r.clima ? `Clima: ${r.clima}\n` : ''}Equipe: ${equipeDia(o, d).map((p) => primeiro(p.nome)).join(', ')}\n\n*Feito hoje:*\n${lista(r.feito) || '• —'}\n\n*Próximos passos:*\n${lista(r.proximos) || '• —'}${String(r.obs || '').trim() ? `\n\nObs.: ${r.obs.trim()}` : ''}\n\n${db.perfil.apelido || primeiro(db.perfil.nome)}`);
+  if (!(o.rdo || {})[d]) salvaRdo(o, d, 'enviado', hoje());
+};
+
+// ================================================================== 8) cronograma com alerta de atraso
+// dias de trabalho: segunda a sábado (domingo fica de fora)
+const diaUtil = (iso) => new Date(`${iso}T12:00`).getDay() !== 0;
+const proxUtil = (iso) => { let d = iso; while (!diaUtil(d)) d = somaDias(d, 1); return d; };
+function somaUteis(iso, n) { let d = proxUtil(iso), k = 0; while (k < n) { d = somaDias(d, 1); if (diaUtil(d)) k++; } return d; }
+function contaUteis(a, b) { let n = 0; for (let d = a; d <= b; d = somaDias(d, 1)) if (diaUtil(d)) n++; return n; }
+export function montarCronograma(o) {
+  const l = o.etapas || []; if (!l.length) return;
+  const ini = proxUtil(o.inicio || hoje()), fimObra = o.prazo && o.prazo > ini ? o.prazo : null;
+  const total = fimObra ? Math.max(l.length, contaUteis(ini, fimObra)) : l.length * 5, base = Math.floor(total / l.length);
+  let sobra = total - base * l.length, d = ini;
+  l.forEach((e) => { const n = Math.max(1, base + (sobra-- > 0 ? 1 : 0)); e.ini = proxUtil(d); e.fim = somaUteis(e.ini, n - 1); d = somaDias(e.fim, 1); });
+}
+const atrasoEtapa = (e) => (!e.feito && e.fim && e.fim < hoje() ? dias(e.fim) : 0);
+export function blocoCronograma(o) {
+  if (!o || !(o.etapas || []).length) return '';
+  const l = o.etapas, tem = l.some((e) => e.ini && e.fim);
+  if (!tem) return `<h2 class="sec">Cronograma</h2><button type="button" class="bt leve largo mx-grande" data-acao="crono-montar" data-o="${o.id}">${ico('calendario')}Montar cronograma</button><p class="mudo" style="font-size:12.5px;margin:6px 2px 0">Divide as etapas entre o começo e a entrega, de segunda a sábado.</p>`;
+  const H = hoje(), datas = l.filter((e) => e.ini).flatMap((e) => [e.ini, e.fim]), a = [...datas, H].sort()[0], b = [...datas, H].sort().slice(-1)[0];
+  const span = Math.max(1, dias(a, b) + 1), pos = (iso) => (dias(a, iso) / span) * 100, hojeP = pos(H) + 100 / span / 2;
+  const atrasadas = l.filter(atrasoEtapa);
+  return `<h2 class="sec">Cronograma ${atrasadas.length ? `<span class="tag brasa">${atrasadas.length} atrasada${atrasadas.length > 1 ? 's' : ''}</span>` : ''}</h2>
+    <div class="cartao mx-crono" style="--hoje:${hojeP.toFixed(2)}%">
+      <div class="mx-crono-eixo"><span>${dataCurta(a)}</span><b>hoje</b><span>${dataCurta(b)}</span></div>
+      ${l.map((e) => { const at = atrasoEtapa(e), andando = !e.feito && e.ini && e.ini <= H && e.fim >= H;
+        return `<button type="button" class="mx-crono-l ${e.feito ? 'feito' : ''} ${at ? 'atrasada' : ''} ${andando ? 'agora' : ''}" data-acao="crono-editar" data-o="${o.id}" data-e="${e.id}">
+          <span class="mx-crono-n"><b>${t(e.nome)}</b><small>${e.ini ? `${dataCurta(e.ini)} a ${dataCurta(e.fim)}` : 'sem data'}${e.feito ? ' · feita' : at ? ` · atrasada ${at} ${at === 1 ? 'dia' : 'dias'}` : andando ? ' · agora' : ''}</small></span>
+          <span class="mx-crono-trilho">${e.ini ? `<i style="left:${pos(e.ini).toFixed(2)}%;width:${Math.max(2, (dias(e.ini, e.fim) + 1) / span * 100).toFixed(2)}%"></i>` : ''}</span></button>`; }).join('')}
+      <button type="button" class="bt leve p" style="margin-top:10px" data-acao="crono-montar" data-o="${o.id}">${ico('recarregar')}Redistribuir datas</button>
+    </div>`;
+}
+ACOES['crono-montar'] = (b) => {
+  const o = achar('obras', b.dataset.o); if (!o) return;
+  const faz = () => { montarCronograma(o); o.hist.push({ data: hoje(), txt: 'Cronograma montado' }); grava(); vibra(10); repinta(); toast('Cronograma montado. Toque numa etapa para mudar as datas.'); };
+  if ((o.etapas || []).some((e) => e.ini)) confirmar('Redistribuir as datas?', 'As datas de todas as etapas serão refeitas entre o começo e a entrega da obra.', 'Redistribuir', faz); else faz();
+};
+ACOES['crono-editar'] = (b) => {
+  const o = achar('obras', b.dataset.o), e = o && o.etapas.find((x) => x.id === b.dataset.e); if (!e) return;
+  formulario({ titulo: e.nome, campos: [{ n: 'ini', r: 'Começa', tipo: 'data', valor: e.ini || hoje(), meio: true, obrig: true }, { n: 'fim', r: 'Termina', tipo: 'data', valor: e.fim || somaDias(hoje(), 3), meio: true, obrig: true }],
+    salvar: (v) => { if (v.fim < v.ini) return 'O fim não pode ser antes do começo.'; e.ini = v.ini; e.fim = v.fim; grava(); repinta(); } });
+};
+export function sugestoesCronograma() {
+  let pior = null;
+  (db.obras || []).filter((o) => o.status !== 'concluida').forEach((o) => (o.etapas || []).forEach((e) => { const a = atrasoEtapa(e); if (a && (!pior || a > pior.a)) pior = { o, e, a }; }));
+  if (!pior) return [];
+  const { o, e, a } = pior;
+  return [{ p: a >= 3 ? 9 : 7, cor: a >= 3 ? 'brasa' : 'trena', ic: 'alerta', txt: `<b>${t(e.nome)}</b> (${t(o.titulo.toLowerCase())}) está atrasada ${a} ${a === 1 ? 'dia' : 'dias'}.`, bt: ['Ver a obra', `#obra/${o.id}`] }];
+}
+
+// ================================================================== 9) chapas e fornecedores
+const TIPOS_CHAPA = ['MDF branco', 'MDF amadeirado', 'MDF cru', 'MDP branco', 'Compensado', 'Compensado naval', 'OSB'];
+function chapasDados() {
+  if (!db.chapas) {
+    const lj = db.lojas || [], id = (i) => (lj[i] ? lj[i].id : '');
+    db.chapas = [
+      { id: uid('ch'), loja: id(0), lojaNome: '', tipo: 'MDF branco', esp: 15, med: '2750x1840', preco: 28900, data: hoje(), exemplo: true },
+      { id: uid('ch'), loja: id(1), lojaNome: '', tipo: 'MDF branco', esp: 15, med: '2750x1840', preco: 30500, data: hoje(), exemplo: true },
+      { id: uid('ch'), loja: id(2), lojaNome: '', tipo: 'MDF branco', esp: 15, med: '2750x1840', preco: 27400, data: hoje(), exemplo: true },
+      { id: uid('ch'), loja: id(0), lojaNome: '', tipo: 'MDF branco', esp: 6, med: '2750x1840', preco: 13900, data: hoje(), exemplo: true },
+      { id: uid('ch'), loja: id(2), lojaNome: '', tipo: 'MDF amadeirado', esp: 18, med: '2750x1840', preco: 46900, data: hoje(), exemplo: true },
+      { id: uid('ch'), loja: id(1), lojaNome: '', tipo: 'OSB', esp: 15, med: '2440x1220', preco: 11900, data: hoje(), exemplo: true },
+    ];
+  }
+  return db.chapas;
+}
+const nomeFornecedor = (c) => { const l = c.loja ? achar('lojas', c.loja) : null; return l ? l.nome.replace(/ \(exemplo\)/, '') : (c.lojaNome || 'Sem fornecedor'); };
+const m2Chapa = (c) => { const [l, a] = String(c.med || '').split(/[x×*]/i).map((x) => lerNum(x)); return l && a ? (l / 1000) * (a / 1000) : 0; };
+const rotChapa = (c) => `${c.tipo} ${numBR(c.esp, 1)} mm`;
+TELAS.chapas = () => {
+  const l = chapasDados(), grupos = {}, porF = {};
+  l.forEach((c) => { (grupos[rotChapa(c)] = grupos[rotChapa(c)] || []).push(c); (porF[nomeFornecedor(c)] = porF[nomeFornecedor(c)] || []).push(c); });
+  const baratas = Object.entries(grupos).map(([k, g]) => { const s = [...g].sort((x, y) => x.preco - y.preco); return { k, c: s[0], outra: s[1], n: g.length }; });
+  return `${cab('Chapas e fornecedores', 'Onde cada chapa sai mais barata', { dica: 'Anote o preço de cada chapa quando pedir orçamento. O Atria mostra a mais barata de cada tipo e espessura.' })}
+    ${l.length ? `<h2 class="sec">Mais barata por tipo</h2>
+    <div class="lista">${baratas.map(({ k, c, outra, n }) => `<div class="linha" style="cursor:default"><span class="ic">${ico('chapa')}</span><span class="txt"><b>${t(k)}</b><small>${t(nomeFornecedor(c))} · ${t(c.med)}${outra ? ` · ${din(outra.preco - c.preco)} mais barata que a 2ª` : n === 1 ? ' · só 1 preço anotado' : ''}</small></span><span class="dir"><b>${din(c.preco)}</b>${m2Chapa(c) ? `<small class="mudo" style="font-size:11px">${din(Math.round(c.preco / m2Chapa(c)))}/m²</small>` : ''}</span></div>`).join('')}</div>
+    ${Object.entries(porF).sort((a, b) => a[0].localeCompare(b[0])).map(([f, g]) => `<h2 class="sec">${t(f)}</h2><div class="lista">${g.map((c) => `<button type="button" class="linha" data-acao="chapa-editar" data-id="${c.id}"><span class="txt"><b>${t(rotChapa(c))}</b><small>${t(c.med)} · ${dataBR(c.data)}${c.exemplo ? ' · exemplo' : ''}</small></span><span class="dir"><b>${din(c.preco)}</b></span>${ico('lapis', 'width="18" height="18"')}</button>`).join('')}</div>`).join('')}`
+    : '<div class="vazio"><b>Nenhuma chapa anotada</b>Anote o preço das chapas de cada fornecedor.</div>'}
+    <button type="button" class="bt cheio largo mx-grande" style="margin-top:16px" data-acao="chapa-nova">${ico('mais')}Anotar preço de chapa</button>`;
+};
+function formChapa(c) {
+  const lojas = db.lojas || [];
+  formulario({ titulo: c ? 'Editar chapa' : 'Preço de chapa', rotulo: 'Guardar',
+    campos: [{ n: 'forn', r: 'Fornecedor', obrig: true, valor: c ? nomeFornecedor(c) : '', lista: lojas.map((l) => l.nome.replace(/ \(exemplo\)/, '')), voz: true },
+      { n: 'tipo', r: 'Tipo', obrig: true, valor: c ? c.tipo : 'MDF branco', lista: TIPOS_CHAPA },
+      { n: 'esp', r: 'Espessura (mm)', tipo: 'num', meio: true, valor: c ? c.esp : 15, lista: ['6', '9', '12', '15', '18', '25'] },
+      { n: 'med', r: 'Medida (mm)', meio: true, valor: c ? c.med : '2750x1840', lista: ['2750x1840', '2750x1830', '2200x1600', '2440x1220', '2750x1850'] },
+      { n: 'preco', r: 'Preço da chapa', tipo: 'din', obrig: true, valor: c ? c.preco : '' }],
+    extraPe: c ? '<button type="button" class="bt leve p" data-apaga style="color:var(--brasa)">Apagar</button>' : '',
+    salvar: (v) => {
+      if (!v.preco) return 'Escreva o preço.'; if (!v.esp) return 'Escreva a espessura.';
+      const l = lojas.find((x) => x.nome.replace(/ \(exemplo\)/, '').toLowerCase() === v.forn.toLowerCase());
+      const dados = { loja: l ? l.id : '', lojaNome: l ? '' : v.forn, tipo: v.tipo, esp: v.esp, med: v.med.replace(/\s/g, '').replace(/×/g, 'x'), preco: v.preco, data: hoje(), exemplo: false };
+      if (c) Object.assign(c, dados); else chapasDados().push({ id: uid('ch'), ...dados });
+      grava(); repinta(); toast('Preço guardado');
+    },
+    depois: (f, api) => { const b = $('[data-apaga]', f); if (b) b.onclick = () => { db.chapas = db.chapas.filter((x) => x.id !== c.id); grava(); api.fechar(); repinta(); toast('Chapa apagada'); }; } });
+}
+ACOES['chapa-nova'] = () => formChapa(null);
+ACOES['chapa-editar'] = (b) => { const c = chapasDados().find((x) => x.id === b.dataset.id); if (c) formChapa(c); };
+
+// ================================================================== 10) etiquetas das peças do plano de corte
+const CHAPAS_CORTE = { mdf: ['MDF 2750 × 1840', 2750, 1840], mdf2: ['MDF 2750 × 1830', 2750, 1830], comp: ['Compensado 2200 × 1600', 2200, 1600], osb: ['OSB 2440 × 1220', 2440, 1220] };
+export const botaoEtiquetas = `<a class="bt leve largo mx-grande" href="#etiquetas">${ico('lista')}Etiquetas das peças</a>`;
+function etiquetasDados() {
+  const c = db.corte || { chapa: 'mdf', serra: 3, gira: true, pecas: [] }, [nomeC, L, A] = CHAPAS_CORTE[c.chapa] || CHAPAS_CORTE.mdf;
+  const r = planoDeCorte({ l: L, a: A }, (c.pecas || []).filter((p) => p.l > 0 && p.a > 0), { serra: c.serra, gira: c.gira });
+  let n = 0; const l = [];
+  r.chapas.forEach((ch, i) => ch.pecas.forEach((p) => { const orig = p.girada ? { l: p.a, a: p.l } : { l: p.l, a: p.a }; l.push({ n: ++n, nome: p.nome, l: orig.l, a: orig.a, chapa: i + 1, girada: p.girada }); }));
+  return { l, nomeC, nChapas: r.chapas.length, grandes: r.grandes || [] };
+}
+TELAS.etiquetas = () => {
+  const { l, nomeC, nChapas, grandes } = etiquetasDados(), o = db.etqObra ? achar('obras', db.etqObra) : null, cl = o ? cliente(o.cliente) : null;
+  return `${cab('Etiquetas das peças', `${l.length} peças · ${nChapas} ${nChapas === 1 ? 'chapa' : 'chapas'}`, { dica: 'Imprima em folha A4, recorte e cole cada etiqueta na peça logo depois do corte. Medidas em milímetros.' })}
+    ${l.length ? `<div class="acoes so-tela" style="margin-top:0"><button type="button" class="bt cheio" data-acao="imprimir">${ico('doc')}Imprimir</button><button type="button" class="bt" data-acao="etq-partilhar">${ico('partilhar')}Compartilhar</button></div>` : ''}
+    <label class="campo so-tela" style="margin-top:12px"><span>Obra nas etiquetas (opcional)</span><select data-etq-obra><option value="">Sem obra</option>${db.obras.filter((x) => x.status !== 'concluida' || x.id === db.etqObra).map((x) => `<option value="${x.id}" ${x.id === db.etqObra ? 'selected' : ''}>${t(x.titulo)} · ${t(primeiro(cliente(x.cliente).nome))}</option>`).join('')}</select></label>
+    ${grandes.length ? `<p class="explica so-tela"><b>${grandes.length} peça(s) não cabem na chapa</b> e ficaram sem etiqueta: ${t(grandes.map((p) => `${p.nome} ${p.l}×${p.a}`).join(', '))}.</p>` : ''}
+    ${l.length ? `<div class="mx-etq-grade">${l.map((p) => `<div class="mx-etq"><span class="mx-etq-n">${p.n}</span><b>${t(p.nome)}</b><span class="mx-etq-med num">${p.l} × ${p.a} mm</span><small>Chapa ${p.chapa} · ${t(nomeC)}${p.girada ? ' · girada' : ''}</small>${o ? `<small class="mx-etq-obra">${t(o.titulo)}${cl ? ` · ${t(primeiro(cl.nome))}` : ''}</small>` : ''}</div>`).join('')}</div>`
+      : '<div class="vazio"><b>Nenhuma peça</b>Escreva as peças no plano de corte.</div>'}
+    <a class="bt leve largo so-tela" style="margin-top:14px" href="#corte">${ico('chapa')}Voltar ao plano de corte</a>`;
+};
+TELAS.etiquetas.montar = (tela) => { const s = $('[data-etq-obra]', tela); if (s) s.onchange = () => { db.etqObra = s.value || ''; grava(); repinta(); }; };
+ACOES['etq-partilhar'] = async () => {
+  const { l, nomeC } = etiquetasDados(), o = db.etqObra ? achar('obras', db.etqObra) : null;
+  const txt = `Peças do plano de corte${o ? ` · ${o.titulo}` : ''} (${nomeC}, medidas em mm):\n${l.map((p) => `${p.n}. ${p.nome}: ${p.l} × ${p.a} (chapa ${p.chapa})`).join('\n')}`;
+  if (navigator.share) { try { await navigator.share({ title: 'Peças do plano de corte', text: txt }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  copiar(txt);
 };

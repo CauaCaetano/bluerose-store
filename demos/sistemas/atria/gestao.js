@@ -183,6 +183,7 @@ TELAS.obra = (id) => {
       <div class="progresso" style="margin:8px 0 4px"><i style="width:${pct}%" data-pct="${pct}"></i></div>
       ${o.etapas.map((e) => `<div class="etapa ${e.feito ? 'feito' : ''}" role="checkbox" aria-checked="${e.feito}" tabindex="0" data-acao="etapa" data-id="${o.id}" data-e="${e.id}"><span class="caixa">${ico('ok', 'stroke-width="3"')}</span><span>${t(e.nome)}</span></div>`).join('')}
       <button type="button" class="bt leve p" style="margin-top:8px" data-acao="nova-etapa" data-id="${o.id}">${ico('mais')}Etapa</button></div>
+    ${ganchos.crono ? ganchos.crono(o) : ''}
     <h2 class="sec">Dinheiro da obra</h2>
     <div class="cartao"><div class="valores">
       <div><span>Mão de obra</span><b>${din(tt.mo)}</b></div><div><span>Materiais (com ${o.orc.margem}% de margem)</span><b>${din(tt.matCobrado)}</b></div>
@@ -201,6 +202,7 @@ TELAS.obra = (id) => {
     <button type="button" class="bt leve largo" data-acao="novo-post" data-o="${o.id}">${ico('antesdepois')}${o.postado ? 'Postar de novo no portfólio' : 'Postar o antes e depois desta obra'}</button>
     ${ganchos.desloc ? ganchos.desloc(o) : ''}
     <h2 class="sec">Diário da obra <button type="button" class="bt leve p" data-acao="diario" data-id="${o.id}">${ico('camera')}Registrar</button></h2>
+    ${ganchos.rdo ? ganchos.rdo(o) : ''}
     ${(o.diario || []).length ? `<div class="diario">${[...o.diario].reverse().map((x) => `<figure>${x.foto ? `<img src="${x.foto}" alt="">` : cena(o.tipo, 'antes')}<figcaption><b>${dataCurta(x.data)}</b>${t(x.nota || '')}</figcaption></figure>`).join('')}</div>` : '<p class="mudo">Tire uma foto por dia: vira prova do serviço e o antes e depois do portfólio.</p>'}
     ${o.garantiaAte ? `<p class="explica"><b>Garantia até ${dataBR(o.garantiaAte)}.</b> O Atria lembra você de falar com o cliente perto do fim.</p>` : ''}
     <h2 class="sec">Histórico</h2>
@@ -788,9 +790,16 @@ const CALC = {
     sel: { diag: ['Assentamento', { 0: 'Reto (10% de perda)', 1: 'Diagonal (15% de perda)' }] },
     res(v) { const p = piso(v.area, v.lado, v.junta, v.esp, +v.diag === 1); return `<div class="dois-num"><div class="cartao"><small>Piso com perda</small><b>${numBR(p.m2, 1)} m²</b></div><div class="cartao"><small>Argamassa ${v.lado >= 60 ? 'AC-III' : 'AC-II'}</small><b>${p.argamassa} sacos</b></div><div class="cartao"><small>Rejunte</small><b>${numBR(p.kgRejunte, 1)} kg</b></div><div class="cartao"><small>Sacos de 5 kg</small><b>${p.rejunte}</b></div></div><p class="mudo" style="font-size:12.5px">Peça de ${v.lado} cm ou mais: dupla colagem (≈7 kg/m²). Rejunte pela fórmula dos fabricantes.</p>`; },
     mats(v) { const p = piso(v.area, v.lado, v.junta, v.esp, +v.diag === 1); return [[v.lado >= 60 ? 'Porcelanato 60x60 (m²)' : 'Piso cerâmico 45x45 (m²)', p.m2, 'm²'], [v.lado >= 60 ? 'Argamassa AC-III 20 kg' : 'Argamassa AC-II 20 kg', p.argamassa, 'saco'], ['Rejunte 5 kg', p.rejunte, 'saco']]; } },
-  tinta: { titulo: 'Tinta', v: { area: 120, demaos: 2, rend: 10 }, campos: [['area', 'Área (m²)'], ['demaos', 'Demãos'], ['rend', 'Rendimento (m² por litro por demão)']],
-    res(v) { const r = latasTinta(v.area, v.demaos, v.rend || 10); return `<div class="dois-num"><div class="cartao"><small>Litros</small><b>${numBR(r.litros, 1)} L</b></div><div class="cartao"><small>Comprar</small><b>${r.latas18 ? `${r.latas18}× 18 L` : ''}${r.latas18 && r.galoes ? ' + ' : ''}${r.galoes ? `${r.galoes}× 3,6 L` : ''}</b></div></div><p class="mudo" style="font-size:12.5px">Confira o rendimento no rótulo: parede porosa ou sem selador gasta mais.</p>`; },
-    mats(v) { const r = latasTinta(v.area, v.demaos, v.rend || 10); return [...(r.latas18 ? [['Tinta acrílica fosca 18 L', r.latas18, 'lata']] : []), ...(r.galoes ? [['Tinta acrílica fosca 3,6 L', r.galoes, 'galão']] : [])]; } },
+  tinta: { titulo: 'Pintura completa', v: { area: 120, demaos: 2, rend: 10, perda: 10, massa: 1, selador: 1 }, campos: [['area', 'Área de parede (m²)'], ['demaos', 'Demãos de tinta'], ['rend', 'Rendimento da tinta (m² por litro por demão)'], ['perda', 'Perda (%)']],
+    sel: { massa: ['Massa corrida', { 0: 'Não vai massa', 1: '1 demão de massa', 2: '2 demãos de massa' }], selador: ['Fundo / selador', { 0: 'Sem selador', 1: 'Com selador (1 demão)' }] },
+    calc(v) { const area = v.area * (1 + (v.perda || 0) / 100), r = latasTinta(area, v.demaos, v.rend || 10), massaKg = area * 0.6 * (+v.massa || 0), selL = +v.selador ? area / 10 : 0;
+      return { r, massaKg, baldes: Math.ceil(massaKg / 25 - 1e-9), selL, selLatas: Math.ceil(selL / 18 - 1e-9), lixas: Math.ceil(area / 8), area }; },
+    res(v) { const k = CALC.tinta.calc(v), r = k.r; return `<div class="dois-num"><div class="cartao"><small>Tinta</small><b>${numBR(r.litros, 1)} L</b><small>${r.latas18 ? `${r.latas18}× lata 18 L` : ''}${r.latas18 && r.galoes ? ' + ' : ''}${r.galoes ? `${r.galoes}× galão 3,6 L` : ''}</small></div>
+      <div class="cartao"><small>Massa corrida</small><b>${+v.massa ? `${numBR(k.massaKg, 0)} kg` : 'não vai'}</b><small>${+v.massa ? `${k.baldes}× balde 25 kg` : ''}</small></div>
+      <div class="cartao"><small>Fundo / selador</small><b>${+v.selador ? `${numBR(k.selL, 1)} L` : 'não vai'}</b><small>${+v.selador ? `${k.selLatas}× lata 18 L` : ''}</small></div>
+      <div class="cartao"><small>Lixa 150</small><b>${k.lixas} folhas</b><small>com ${v.perda || 0}% de perda: ${numBR(k.area, 0)} m²</small></div></div>
+      <p class="mudo" style="font-size:12.5px">Massa: cerca de 0,6 kg por m² por demão. Selador: 10 m² por litro. Confira o rendimento no rótulo: parede porosa gasta mais.</p>`; },
+    mats(v) { const k = CALC.tinta.calc(v), r = k.r; return [...(r.latas18 ? [['Tinta acrílica fosca 18 L', r.latas18, 'lata']] : []), ...(r.galoes ? [['Tinta acrílica fosca 3,6 L', r.galoes, 'galão']] : []), ...(+v.massa ? [['Massa corrida 25 kg', k.baldes, 'balde']] : []), ...(+v.selador ? [['Selador acrílico 18 L', k.selLatas, 'lata']] : []), ['Lixa 150 (folha)', k.lixas, 'un']]; } },
 };
 TELAS.calc = (k) => {
   const c = CALC[k] || CALC.traco;
@@ -823,6 +832,7 @@ TELAS.corte = () => {
     <div class="dois-num" style="margin-top:12px"><div class="cartao"><small>Chapas</small><b class="resultado">${r.chapas.length}</b></div><div class="cartao"><small>Aproveitamento</small><b class="resultado" style="color:${r.aproveitamento > .75 ? 'var(--musgo)' : 'var(--cedro)'}">${Math.round(r.aproveitamento * 100)}%</b></div></div>
     ${r.grandes.length ? `<p class="explica" style="background:var(--brasa-claro)"><b style="color:var(--brasa)">${r.grandes.length} peça(s) maior(es) que a chapa:</b> ${r.grandes.map((p) => t(p.nome)).join(', ')}.</p>` : ''}
     <div style="margin-top:12px">${r.chapas.map((ch, i) => `<div class="chapa"><header><span>Chapa ${i + 1} · ${ch.pecas.length} peças</span><b>${Math.round(ch.aproveitamento * 100)}%</b></header>${desenho(ch)}</div>`).join('')}</div>
+    ${ganchos.etiquetas || ''}
     <button type="button" class="bt cheio largo" data-acao="chapas-lista" data-n="${r.chapas.length}">${ico('lista')}Pôr ${r.chapas.length} chapas na lista de uma obra</button>`;
 };
 TELAS.corte.montar = (tela) => {

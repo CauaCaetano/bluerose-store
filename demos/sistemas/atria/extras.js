@@ -63,7 +63,7 @@ TELAS.equipe = () => {
     <div class="lista">${db.equipe.map((p) => { const ab = diariasDe(p).filter((d) => !d.pago), deve = ab.reduce((s, d) => s + d.valor, 0), sem = diariasDe(p).filter((d) => d.data >= semana[0] && d.data <= semana[1]).length;
       return `<div class="cartao"><div style="display:flex;gap:12px;align-items:center">${av(p.nome)}<div style="flex:1;min-width:0"><b>${t(p.nome)}</b><small class="mudo" style="display:block">${t(p.funcao || 'Ajudante')} · diária ${din(p.diaria)} · ${sem} nesta semana</small></div><div style="text-align:right"><b class="num" style="color:${deve ? 'var(--cedro)' : 'inherit'}">${din(deve)}</b><small class="mudo" style="display:block;font-size:11px">a pagar (${ab.length})</small></div></div>
         <div class="acoes"><button type="button" class="bt cheio p" data-acao="diaria" data-id="${p.id}">${ico('ok')}Trabalhou hoje</button><button type="button" class="bt p" data-acao="pagar-ajudante" data-id="${p.id}" ${deve ? '' : 'disabled'}>${ico('moeda')}Pagar ${dinCurto(deve)}</button></div></div>`; }).join('') || '<div class="vazio"><b>Ninguém cadastrado</b>Cadastre quem trabalha com você por diária.</div>'}</div>
-    <button type="button" class="bt leve largo" style="margin-top:14px" data-acao="novo-ajudante">${ico('mais')}Cadastrar ajudante</button>`;
+    <div class="acoes" style="margin-top:14px"><a class="bt cheio" href="#diarias">${ico('grafico')}Relatório das diárias</a><button type="button" class="bt leve" data-acao="novo-ajudante">${ico('mais')}Cadastrar ajudante</button></div>`;
 };
 ACOES['novo-ajudante'] = () => formulario({ titulo: 'Novo ajudante', campos: [{ n: 'nome', r: 'Nome', obrig: true, voz: true }, { n: 'funcao', r: 'Faz o quê', valor: 'Ajudante', lista: ['Ajudante', 'Servente', 'Meio-oficial', 'Pedreiro', 'Pintor'] }, { n: 'diaria', r: 'Valor da diária', tipo: 'din', meio: true, valor: 12000 }, { n: 'tel', r: 'WhatsApp', tipo: 'tel', meio: true }],
   salvar: (v) => { (db.equipe = db.equipe || []).push({ id: uid('p'), ...v }); grava(); repinta(); } });
@@ -106,3 +106,28 @@ ACOES['resumo-mes'] = () => {
     pe: `<button type="button" class="bt leve p" data-c>${ico('copiar')}Copiar</button><button type="button" class="bt zap" data-z>${ico('zap')}Mandar</button>`,
     aoAbrir: (f) => { $('[data-c]', f).onclick = () => copiar(txt); $('[data-z]', f).onclick = () => abrirZap('', txt); } });
 };
+
+// ------------------------------------------------------------------ relatório das diárias: por ajudante e por obra
+let modoDiarias = 'pessoa', mesDiarias = 0;
+TELAS.diarias = () => {
+  const ref = new Date(); ref.setDate(1); ref.setMonth(ref.getMonth() + mesDiarias);
+  const mes = `${ref.getFullYear()}-${String(ref.getMonth() + 1).padStart(2, '0')}`, nomeMes = ref.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const l = (db.diarias || []).filter((d) => d.data.startsWith(mes)), equipe = db.equipe || [];
+  const nomeP = (id) => (equipe.find((p) => p.id === id) || { nome: 'Ajudante' }).nome, nomeO = (id) => (id ? (achar('obras', id) || { titulo: 'Obra apagada' }).titulo : 'Sem obra');
+  const grupo = {}; l.forEach((d) => { const k = modoDiarias === 'pessoa' ? d.pessoa : d.obra || ''; (grupo[k] = grupo[k] || []).push(d); });
+  const total = l.reduce((s, d) => s + d.valor, 0), aberto = l.filter((d) => !d.pago).reduce((s, d) => s + d.valor, 0);
+  const txt = `Diárias de ${nomeMes}\n${Object.entries(grupo).map(([k, ds]) => `${modoDiarias === 'pessoa' ? nomeP(k) : nomeO(k)}: ${ds.length} diárias, ${din(ds.reduce((s, d) => s + d.valor, 0))}`).join('\n')}\nTotal: ${din(total)}`;
+  return `${cab('Diárias', nomeMes, { dica: 'Veja quanto cada ajudante trabalhou e quanto cada obra gastou de mão de obra de ajudante.' })}
+    <div class="acoes" style="margin-top:0"><button type="button" class="bt leve p" data-acao="diarias-mes" data-d="-1">${ico('seta')}Mês anterior</button>${mesDiarias < 0 ? `<button type="button" class="bt leve p" data-acao="diarias-mes" data-d="1">Próximo${ico('setaDir')}</button>` : ''}</div>
+    <div class="seg" role="group" data-seg style="margin-top:10px"><button type="button" data-acao="diarias-modo" data-m="pessoa" aria-pressed="${modoDiarias === 'pessoa'}">Por ajudante</button><button type="button" data-acao="diarias-modo" data-m="obra" aria-pressed="${modoDiarias === 'obra'}">Por obra</button><i></i></div>
+    <div class="dois-num" style="margin-top:12px"><div class="cartao"><small>Total do mês</small><b>${din(total)}</b></div><div class="cartao"><small>Falta pagar</small><b style="color:${aberto ? 'var(--cedro)' : 'inherit'}">${din(aberto)}</b></div></div>
+    <div class="lista" style="margin-top:12px">${Object.entries(grupo).map(([k, ds]) => { const sub = {}; ds.forEach((d) => { const kk = modoDiarias === 'pessoa' ? d.obra || '' : d.pessoa; sub[kk] = (sub[kk] || 0) + 1; });
+      return `<div class="cartao"><div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><b>${t(modoDiarias === 'pessoa' ? nomeP(k) : nomeO(k))}</b><b class="num">${din(ds.reduce((s, d) => s + d.valor, 0))}</b></div>
+        <small class="mudo">${ds.length} diárias · ${ds.filter((d) => !d.pago).length} a pagar</small>
+        <div class="valores" style="margin-top:8px">${Object.entries(sub).map(([kk, n]) => `<div><span>${t(modoDiarias === 'pessoa' ? nomeO(kk) : nomeP(kk))}</span><b>${n} ${n > 1 ? 'dias' : 'dia'}</b></div>`).join('')}</div></div>`; }).join('') || '<div class="vazio"><b>Nenhuma diária neste mês</b></div>'}</div>
+    <div class="acoes"><button type="button" class="bt leve" data-acao="diarias-copiar" data-txt="${t(txt)}">${ico('copiar')}Copiar resumo</button><button type="button" class="bt zap" data-acao="diarias-zap" data-txt="${t(txt)}">${ico('zap')}Mandar</button></div>`;
+};
+ACOES['diarias-modo'] = (b) => { modoDiarias = b.dataset.m; repinta(); };
+ACOES['diarias-mes'] = (b) => { mesDiarias = Math.min(0, mesDiarias + Number(b.dataset.d)); repinta(); };
+ACOES['diarias-copiar'] = (b) => copiar(b.dataset.txt);
+ACOES['diarias-zap'] = (b) => abrirZap('', b.dataset.txt);

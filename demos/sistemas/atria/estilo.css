@@ -514,5 +514,5 @@ img.av { display: block; }
 .diario figcaption b { display: block; font: 600 12px var(--f-num); color: var(--giz); }
 
 /* letra grande: tudo 12% maior (celular simples, sol) */
-html.letra-grande #tela, html.letra-grande .folha, html.letra-grande .barra { zoom: 1.12; }
-html.letra-grande .barra { zoom: 1; font-size: 13px; }
+html.letra-grande #tela, html.letra-grande .folha, html.letra-grande .tour-balao, html.letra-grande .toasts { zoom: 1.12; }
+html.letra-grande .barra a { font-size: 13px; } html.letra-grande .barra svg { width: 27px; height: 27px; }

@@ -21,7 +21,7 @@ const TELAS = { ...TG, ...TX };
 const ACOES = { ...AG, ...AX };
 ganchos.mei = cartaoMei;
 Object.assign(TELAS, MAIS.TELAS); Object.assign(ACOES, MAIS.ACOES);
-ganchos.parcelas = MAIS.blocoParcelas; ganchos.desloc = MAIS.blocoDeslocamento; ganchos.gerarParcelas = MAIS.gerarParcelas;
+ganchos.parcelas = MAIS.blocoParcelas; ganchos.rdo = MAIS.botaoRdo; ganchos.crono = MAIS.blocoCronograma; ganchos.etiquetas = MAIS.botaoEtiquetas; ganchos.desloc = MAIS.blocoDeslocamento; ganchos.gerarParcelas = MAIS.gerarParcelas;
 const TOPO = ['inicio', 'comunidade', 'gestao'];
 const tela = () => $('#tela');
 const eu = () => db.perfil;
@@ -46,7 +46,7 @@ function sugestoes() {
   db.obras.filter((o) => o.garantiaAte && dias(H, o.garantiaAte) >= 0 && dias(H, o.garantiaAte) <= 30 && !o.garantiaAvisada).slice(0, 1).forEach((o) => l.push({ p: 6, cor: '', ic: 'escudo', txt: `A garantia de <b>${t(o.titulo.toLowerCase())}</b> acaba em ${dias(H, o.garantiaAte)} dias. Um oi agora vira indicação.`, bt: ['Mandar mensagem', null, { acao: 'mensagens', m: 'garantia', o: o.id }] }));
   // MEI: DAS vence dia 20
   const dia = new Date().getDate(); if (dia >= 12 && dia <= 20 && !(db.dasPago || {})[H.slice(0, 7)]) l.push({ p: dia >= 18 ? 9 : 5, cor: dia >= 18 ? 'brasa' : '', ic: 'calendario', txt: `O DAS do MEI vence dia 20${dia >= 18 ? ` (faltam ${20 - dia} dias)` : ''}.`, bt: ['Já paguei', null, { acao: 'das-pago' }] });
-  l.push(...MAIS.sugestoesParcelas());
+  l.push(...MAIS.sugestoesParcelas(), ...MAIS.sugestoesEpi(), ...MAIS.sugestoesCronograma());
   const semana = new Date().getDay(), aPagar = (db.diarias || []).filter((x) => !x.pago).reduce((s, x) => s + x.valor, 0);
   if ((semana === 5 || semana === 6) && aPagar) l.push({ p: 9, cor: 'trena', ic: 'carrinho', txt: `Acerto dos ajudantes: <b>${din(aPagar)}</b> de diárias da semana.`, bt: ['Fazer o acerto', '#equipe'] });
   db.obras.filter((o) => o.status === 'andamento' && o.prazo && dias(H, o.prazo) >= 0 && dias(H, o.prazo) <= 3 && o.etapas.some((e) => !e.feito)).slice(0, 1).forEach((o) => { const ab = o.etapas.filter((e) => !e.feito).length; l.push({ p: 8, cor: 'brasa', ic: 'alerta', txt: `<b>${t(o.titulo)}</b> entrega ${quando(o.prazo)} e ainda tem ${ab} etapa${ab > 1 ? 's' : ''} aberta${ab > 1 ? 's' : ''}.`, bt: ['Ver a obra', `#obra/${o.id}`] }); });
@@ -343,7 +343,7 @@ ACOES.cadastro = () => cadastro(true);
 ACOES.tour = () => { ir('inicio'); setTimeout(tour, 450); };
 ACOES.voltar = () => { if (pilha.length > 1) history.back(); else ir(PAI[rotaAtual().nome] || 'inicio'); };
 ACOES.dica = (b) => folha({ titulo: 'Dica', corpo: `<div class="dica-flutua" style="animation:none">${ico('luz')}<p>${t(b.dataset.dica)}</p></div>` });
-const PAI = { ...MAIS.PAI_MAIS, post: 'comunidade', orcar: 'inicio', trabalhos: 'inicio', agenda: 'gestao', equipe: 'gestao', recibo: 'financeiro', obra: 'obras', obras: 'gestao', clientes: 'gestao', cliente: 'clientes', materiais: 'listas', listas: 'gestao', lojas: 'gestao', precos: 'gestao', financeiro: 'gestao', ferramentas: 'gestao', corte: 'ferramentas', medidas: 'ferramentas', calc: 'ferramentas', modelo: 'ferramentas', orcamento: 'obras', proposta: 'obras', trabalho: 'trabalhos', perfil: 'comunidade', post: 'comunidade', ajustes: 'gestao' };
+const PAI = { ...MAIS.PAI_MAIS, diarias: 'equipe', post: 'comunidade', orcar: 'inicio', trabalhos: 'inicio', agenda: 'gestao', equipe: 'gestao', recibo: 'financeiro', obra: 'obras', obras: 'gestao', clientes: 'gestao', cliente: 'clientes', materiais: 'listas', listas: 'gestao', lojas: 'gestao', precos: 'gestao', financeiro: 'gestao', ferramentas: 'gestao', corte: 'ferramentas', medidas: 'ferramentas', calc: 'ferramentas', modelo: 'ferramentas', orcamento: 'obras', proposta: 'obras', trabalho: 'trabalhos', perfil: 'comunidade', post: 'comunidade', ajustes: 'gestao' };
 
 // instalar
 let pedidoInstalar = null;
