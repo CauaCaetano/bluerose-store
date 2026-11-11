@@ -1,0 +1,66 @@
+/* Fortis · Início "Coluna" e a tela Orçar. Paleta Ardósia & Champagne. */
+
+/* =============================================================== C · coluna */
+.pc { display: grid; gap: 14px; padding-top: 12px; }
+.pc-capitel { position: relative; text-align: center; padding: 20px 18px 14px; background: var(--aparas); border-radius: 6px; box-shadow: var(--sombra); border-top: 6px solid var(--grafite); }
+.pc-capitel::before, .pc-capitel::after { content: ''; position: absolute; top: 10px; width: 30px; height: 30px; border: 2px solid var(--trena); border-radius: 50%; border-right-color: transparent; }
+.pc-capitel::before { left: 12px; transform: rotate(-45deg); } .pc-capitel::after { right: 12px; transform: rotate(135deg); }
+.pc-capitel h1 { font: 800 30px/1 var(--f-tit); text-transform: uppercase; margin: 0; }
+.pc-capitel p { margin: 8px 0 12px; font-size: 15.5px; color: var(--grafite); line-height: 1.35; color: var(--grafite2); }
+.pc-prox { display: inline-flex; align-items: center; min-height: 54px; box-shadow: inset 0 0 0 1.5px rgba(46,51,59,.25); padding: 0 22px; border-radius: 999px; border: 0; background: var(--trena); color: var(--grafite); font-weight: 700; font-size: 15.5px; text-decoration: none; cursor: pointer; }
+.pc-fuste { display: grid; gap: 10px; margin: 0 14px; }
+.pc-tambor { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 12px; min-height: 76px; padding: 0 18px; border-radius: 4px; text-decoration: none; color: var(--grafite);
+  background: repeating-linear-gradient(90deg, rgba(46,51,59,.05) 0 2px, transparent 2px 16px), linear-gradient(90deg, #E9E2D7, #FBF9F5 30%, #FBF9F5 70%, #E9E2D7); box-shadow: inset 0 0 0 1.5px rgba(46,51,59,.14); transition: transform .12s; }
+.pc-tambor:active { transform: scale(.98); }
+.pc-tambor svg:first-child { color: var(--giz); justify-self: center; }
+.pc-tambor b { font: 800 24px/1 var(--f-tit); text-transform: uppercase; letter-spacing: .03em; }
+.pc-pequenas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 14px; }
+.pc-bloco { display: grid; justify-items: center; gap: 6px; padding: 14px 4px; min-height: 84px; align-content: center; background: var(--aparas); border-radius: 4px; box-shadow: inset 0 0 0 1.5px rgba(46,51,59,.12); text-decoration: none; color: var(--grafite); }
+.pc-bloco svg { color: #9E8257; }
+.pc-bloco b { font: 800 16px/1.05 var(--f-tit); text-transform: uppercase; text-align: center; }
+.pc-base { text-decoration: none; color: var(--grafite); display: grid; justify-items: center; gap: 2px; padding: 16px 12px 14px; background: linear-gradient(var(--aparas), var(--aparas)) padding-box; border-top: 5px solid var(--lixa); box-shadow: 0 -5px 0 -1px var(--aparas), 0 -10px 0 -2px var(--lixa); border-radius: 4px; margin: 6px 0 0; }
+.pc-base small { font-size: 12px; color: var(--mudo); text-transform: uppercase; letter-spacing: .1em; }
+.pc-base b { font: 600 32px var(--f-num); letter-spacing: -.04em; }
+.pc-base span { font-size: 12.5px; color: var(--mudo); }
+/* a coluna se ergue: base, fuste, capitel */
+.pc-base { animation: sobe .45s var(--ease) both; } .pc-pequenas { animation: sobe .45s var(--ease) .1s both; } .pc-fuste { animation: sobe .45s var(--ease) .2s both; } .pc-capitel { animation: sobe .5s var(--ease) .32s both; }
+.conc-c .barra { background: var(--aparas); border-radius: 0; grid-template-columns: repeat(3, 1fr); height: calc(70px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 0 -2px var(--lixa), 0 -12px 0 -4px #EAE3D9, 0 -14px 24px -18px rgba(40,45,55,.5); }
+.conc-c .barra a { color: var(--mudo); font-size: 12.5px; padding-top: 14px; }
+.conc-c .barra a[aria-current="page"] { color: var(--grafite); }
+.conc-c .barra a[aria-current="page"] svg { color: var(--giz); }
+
+/* =============================================================== Orçar (mesmo estilo de cada conceito) */
+.orc { padding-top: 12px; }
+.orc-cab { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.orc-cab h1 { font: 800 34px/1 var(--f-tit); text-transform: uppercase; margin: 0; }
+.orc-passos { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.orc-passos li { position: relative; display: grid; gap: 10px; padding: 16px 14px 16px 58px; background: var(--aparas); box-shadow: var(--sombra); }
+.orc-n { position: absolute; left: 14px; top: 14px; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font: 700 15px var(--f-num); background: var(--grafite); color: var(--serragem); }
+.orc-passos b { font: 800 22px/1 var(--f-tit); text-transform: uppercase; padding-top: 4px; }
+.orc-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.orc-chip { min-height: 48px; padding: 0 14px; border: 1.5px solid rgba(46,51,59,.2); background: #fff; font-weight: 600; font-size: 14.5px; cursor: pointer; color: var(--grafite); }
+.orc-chip[aria-pressed="true"] { background: var(--grafite); color: var(--serragem); border-color: var(--grafite); }
+.orc-in { width: 100%; min-height: 56px; border: 1.5px solid rgba(46,51,59,.2); padding: 0 14px; font-size: 17px; background: #fff; outline: none; }
+.orc-in:focus { border-color: var(--giz); box-shadow: 0 0 0 4px rgba(111,133,151,.18); }
+.orc-valor { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.orc-valor small { display: block; font-size: 12.5px; color: var(--mudo); margin-bottom: 4px; }
+.orc-ok { position: sticky; z-index: 5; bottom: calc(var(--barra-h) + 12px + env(safe-area-inset-bottom)); box-shadow: 0 10px 24px -10px rgba(30,35,45,.55); margin-top: 16px; width: 100%; min-height: 64px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 0; background: var(--grafite); color: var(--serragem); font: 700 17px var(--f-txt); cursor: pointer; }
+.orc-dica { text-align: center; color: var(--mudo); font-size: 13.5px; }
+/* C: tambores da coluna */
+.orc-c .orc-passos li { border-radius: 4px; background: repeating-linear-gradient(90deg, rgba(46,51,59,.035) 0 2px, transparent 2px 16px), var(--aparas); }
+.orc-c .orc-n { background: var(--trena); color: var(--grafite); }
+.orc-c .orc-chip { border-radius: 999px; } .orc-c .orc-in { border-radius: 6px; }
+.orc-c .orc-ok { border-radius: 999px; background: var(--trena); color: var(--grafite); }
+
+.pc-selo { min-width: 30px; height: 30px; border-radius: 15px; background: var(--trena); color: var(--grafite); display: grid; place-items: center; font: 700 14px var(--f-num); padding: 0 8px; }
+/* o mesmo estilo de coluna nas outras telas: cabeçalho com friso, cartões de pedra, cantos quase retos */
+.conc-c { --r: 6px; --r-p: 4px; }
+.conc-c .cab { border-bottom: 1.5px solid var(--lixa); box-shadow: 0 4px 0 -2.5px var(--aparas), 0 5px 0 -2px var(--lixa); margin-bottom: 14px; padding-bottom: 12px; }
+.conc-c .bloco { background: repeating-linear-gradient(90deg, rgba(46,51,59,.035) 0 2px, transparent 2px 16px), var(--aparas); }
+.conc-c .bloco.escuro { background: var(--aparas); color: var(--grafite); box-shadow: inset 4px 0 0 var(--trena), var(--sombra); }
+.conc-c .bloco.escuro small { color: var(--mudo); } .conc-c .bloco.escuro .ic { background: var(--trena-claro); color: #7A5E36; }
+.conc-c .seg { border-radius: 6px; } .conc-c .seg button, .conc-c .seg i { border-radius: 4px; }
+.conc-c .bt { border-radius: 6px; } .conc-c .bt.cheio { background: var(--grafite); border-color: var(--grafite); }
+.conc-c .chip { border-radius: 4px; }
+.conc-c .lucro { background: var(--aparas); color: var(--grafite); box-shadow: inset 0 0 0 1.5px var(--lixa); }
+.conc-c .demo-faixa { background: #434A54; }

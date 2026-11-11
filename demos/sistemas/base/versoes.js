@@ -29,5 +29,8 @@
   // Annona: estoque e vendas do mercadinho e do bar (marca própria, fora da Veltria); sem teste grátis, Pix ou cartão
   out.annona = { id: 'annona', categoria: 'annona', versao: '', nome: 'Annona', nomeCategoria: 'Annona', nomeVersao: '', pasta: 'annona', entrada: 'app.html',
     chave: 'annona-v1', mensal: 59, exemplo: 1, pagina: 'annona.html', logo: 'img/logos/annona-simbolo.png', semTeste: true };
+  // Fortis: app de celular para profissionais da construção e da reforma (marca própria); sem teste grátis, mensal R$ 39 ou anual R$ 374
+  out.fortis = { id: 'fortis', categoria: 'fortis', versao: '', nome: 'Fortis', nomeCategoria: 'Fortis', nomeVersao: '', pasta: 'fortis', entrada: 'app.html',
+    chave: 'fortis-v1', mensal: 39, anual: 374, exemplo: 1, pagina: 'fortis.html', logo: 'demos/sistemas/fortis/icone-192.png', semTeste: true };
   window.VELTRIA_VERSOES = out;
 })();
