@@ -13,7 +13,7 @@ const reais = (v) => `R$ ${Number(v).toLocaleString('pt-BR')}`;
 const hoje = () => new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
 const dataBR = (d) => (d ? d.split('-').reverse().join('/') : '');
 const anual = (m) => Math.round(m * 12 * 0.8);
-const GOOGLE = ['atria', 'peplo'].includes(ID); // entrar/criar conta com o Google (pedido do dono para o Atria, 12/11)
+const GOOGLE = ['atria', 'peplo', 'annona', 'agendaessencial', 'obrasessencial', 'financeiroessencial'].includes(ID); // entrar/criar conta com o Google (pedido do dono para o Atria, 12/11)
 
 function tela(html) {
   $('#porta').innerHTML = `<header class="p-topo"><img src="${RAIZ}${V.logo}" alt="" width="56" height="56"><div><b>${esc(V.nome)}</b><small>Blue Rose Express</small></div></header>${html}`;
