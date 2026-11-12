@@ -310,29 +310,28 @@ function telaTeste(sb, cfg, email) {
   });
   return new Promise(() => {
     const preco = cfg.produto?.mensal || 0;
-    const f = tela(cfg, `<h1 class="entrada-t">Comece a usar o ${esc(cfg.nome)}</h1><p class="entrada-s">Teste 7 dias grátis com os dados da sua empresa ou, se já decidiu, assine direto.</p>
-      <div class="planos-escolha" role="radiogroup" aria-label="Plano depois do teste"><label><input type="radio" name="plano" value="" checked form="form-teste"><span><b>Mensal</b><small>R$ ${preco}/mês</small></span></label><label><input type="radio" name="plano" value="-anual" form="form-teste"><span><b>Anual <em>−20%</em></b><small>${reais(anual(preco))}/ano · sai ${reais(Math.round(anual(preco) / 12))}/mês</small></span></label></div>
-      <ul class="lista-teste"><li>${ic('credit-card', 'p')}<span>Para começar, cadastre o cartão no Mercado Pago.</span></li><li>${ic('calendar-check', 'p')}<span>Se não cancelar, a assinatura do plano escolhido começa sozinha no 8º dia.</span></li><li>${ic('x-circle', 'p')}<span>Cancele quando quiser em <a href="${SITE}conta.html" target="_top">Minha conta</a>. Cancelando no teste, nada é cobrado.</span></li><li>${ic('info', 'p')}<span>O teste grátis vale uma vez por cartão e por pessoa.</span></li></ul>
+    const f = tela(cfg, `<h1 class="entrada-t">Comece a usar o ${esc(cfg.nome)}</h1><p class="entrada-s">Assine e use com os dados da sua empresa. Sem fidelidade: cancele quando quiser.</p>
+      <div class="planos-escolha" role="radiogroup" aria-label="Plano"><label><input type="radio" name="plano" value="" checked form="form-teste"><span><b>Mensal</b><small>R$ ${preco}/mês</small></span></label><label><input type="radio" name="plano" value="-anual" form="form-teste"><span><b>Anual <em>−20%</em></b><small>${reais(anual(preco))}/ano · sai ${reais(Math.round(anual(preco) / 12))}/mês</small></span></label></div>
+      <ul class="lista-teste"><li>${ic('credit-card', 'p')}<span>A assinatura é feita no Mercado Pago, no cartão.</span></li><li>${ic('calendar-check', 'p')}<span>O sistema libera quando a primeira cobrança é aprovada.</span></li><li>${ic('info', 'p')}<span>Sem fidelidade: cancele quando quiser em Minha conta.</span></li></ul>
       <form class="col" style="gap:12px" novalidate id="form-teste"><label class="campo">E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="${esc(email)}" required><span class="ajuda">A assinatura fica na conta do Mercado Pago com este e-mail.</span></label>
         <label class="flex" style="gap:8px;align-items:flex-start;font-size:13px;color:var(--tx-2)"><input type="checkbox" name="ok" required style="margin-top:3px"><span>Tenho 18 anos ou mais. Li e aceito os <a href="${SITE}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática (depois do teste, se eu escolher o teste).</span></label>
-        <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Cadastrar cartão e começar o teste</button>
-        <button type="button" class="btn" style="height:40px" data-direto>Assinar agora, sem o teste grátis</button></form>
+        <p class="er-tx" data-erro role="alert" style="min-height:1em;font-size:13px"></p><button class="btn pri" style="height:40px">Assinar no Mercado Pago</button></form>
       <div class="entrada-links"><a href="${SITE}demos/sistemas/${cfg.id}/" target="_top">Ver a demonstração antes</a><span>·</span><a href="#" data-sair>Sair desta conta</a></div>`);
     document.querySelector('[data-sair]').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.reload(); };
     f.onsubmit = async (e) => {
       e.preventDefault(); if (!f.reportValidity()) return;
       const btn = f.querySelector('button'), erro = f.querySelector('[data-erro]'); btn.disabled = true; btn.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
       const sufixo = document.querySelector('[name=plano]:checked')?.value || '';
-      try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${sufixo}`, teste: true, email_mp: f.mp.value.trim() }); location.href = j.link; }
+      try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${sufixo}`, email_mp: f.mp.value.trim() }); location.href = j.link; }
       catch (x) {
-        btn.disabled = false; btn.textContent = 'Cadastrar cartão e começar o teste';
+        btn.disabled = false; btn.textContent = 'Assinar no Mercado Pago';
         if (x.dados?.sem_teste) { erro.innerHTML = `${esc(x.message)} <a href="#" data-assinar>Assinar ${sufixo ? `por ${reais(anual(preco))}/ano` : `por R$ ${preco}/mês`}</a>`; erro.querySelector('[data-assinar]').onclick = async (ev) => { ev.preventDefault(); try { const j = await pagamentos(sb, { acao: 'iniciar', produto: `a-sis-${cfg.id}${sufixo}`, email_mp: f.mp.value.trim() }); location.href = j.link; } catch (y) { erro.textContent = y.message; } }; }
         else erro.textContent = x.message;
       }
     };
-    // quem já decidiu assinar não precisa passar pelo teste
+    // sem teste grátis desde 10/11/2026: o botão de assinar direto saiu (o formulário já assina)
     const direto = f.querySelector('[data-direto]');
-    direto.onclick = async () => {
+    if (direto) direto.onclick = async () => {
       if (!f.reportValidity()) return;
       const erro = f.querySelector('[data-erro]'), sufixo = document.querySelector('[name=plano]:checked')?.value || '';
       direto.disabled = true; direto.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';

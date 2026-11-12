@@ -11,7 +11,7 @@
       brEstado.rodar(el, fn, { texto, erro })             carregando enquanto a promessa de fn() corre; erro com nova tentativa
       brEstado.iframe(frame, { tempo })                   o mesmo que data-estado, para iframes criados por script
    3) Índice com a seção atual destacada: <nav data-indice> (seguranca.html).
-   + <script src="js/confianca.js?v=3" defer></script> (ajuste o caminho em subpastas).
+   + <script src="js/confianca.js?v=4" defer></script> (ajuste o caminho em subpastas).
    O CSS (css/pg-seguranca.css, classes .cft-* e .br-estado*) é carregado sozinho se a página não tiver.
    Os textos dos blocos foram conferidos no código (nexo-pagamentos, camada.js, conta-pagina.js) e no Supabase em 08/11/2026.
    Não acrescente afirmação sem conferir: veja relatorios/site-teste-avaliacao/p5-blocos.md. */
@@ -24,9 +24,9 @@
 
   var B = {
     teste: {
-      t: 'Teste grátis de 7 dias',
-      l: ['Cartão cadastrado no Mercado Pago; nada é cobrado nos 7 dias.', 'Se não cancelar, a assinatura começa no 8º dia.', 'Vale uma vez por conta, e-mail, conta do Mercado Pago e cartão.'],
-      a: '#teste', m: 'Como funciona o teste'
+      t: 'Veja antes de assinar',
+      l: ['Demonstração grátis e sem cadastro, com dados de exemplo.', 'Sem teste grátis: assine quando quiser, mensal ou anual.', 'Sem fidelidade: cancele em Minha conta.'],
+      a: '#teste', m: 'Como funciona'
     },
     pagamento: {
       t: 'Pagamento pelo Mercado Pago',

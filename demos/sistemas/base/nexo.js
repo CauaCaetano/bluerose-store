@@ -535,7 +535,7 @@ function montar(app, cfg) {
   const voltar = cfg.paginaSite ? `<a class="faixa-voltar" href="${site}${cfg.paginaSite}" target="_top">${ic('arrow-left')}<span>Voltar<span class="so-larga"> ao site</span></span></a><span class="sep so-larga"></span>` : '';
   const faixaDemo = `<div class="faixa nao-imprime">${voltar}<span class="so-larga">Demonstração do <b>${esc(cfg.nome)}</b> · dados de exemplo, só neste navegador</span><span class="sep so-larga"></span>
       <button type="button" data-acao="recomecar">Recomeçar</button>
-      ${cfg.cta === false ? '' : `<a class="cta" href="${site}app/${cfg.id}/" target="_top">Testar grátis<span class="so-larga">&nbsp;7 dias com os seus dados</span></a>`}</div>`;
+      ${cfg.cta === false ? '' : `<a class="cta" href="${site}app/${cfg.id}/" target="_top">Assinar<span class="so-larga">&nbsp;e usar com os seus dados</span></a>`}</div>`;
   document.body.innerHTML = `
     ${app.nuvem ? app.sessao.faixa() : faixaDemo}
     <div class="app" id="app">
