@@ -336,7 +336,7 @@ const T = {
     if (res.modo === 'dia') {
       nav = `<button type="button" class="bt pq" data-rpasso="-1" aria-label="Dia anterior">‹</button><label class="r-data"><input type="date" id="r-dia" value="${iso(res.d)}" aria-label="Escolher o dia"></label><button type="button" class="bt pq" data-rpasso="1" aria-label="Próximo dia">›</button>`;
       l = noPeriodo((a) => a.dia === res.d); ant = noPeriodo((a) => a.dia === res.d - 7);
-      extra = `<h2>Horários do dia</h2><div class="cartao">${l.lista.map((a) => `<div class="hora" data-ag="${a.id}" role="button" tabindex="0"><span class="h">${hh(a.ini)}</span><span><b>${t(cli(a.cli).nome)}</b><small>${t(serv(a.serv).nome)}${a.forma ? ` · ${a.forma}` : ''}</small></span><span class="selo ${ST[a.st]?.[1] || ''}">${a.st === 'feito' ? (a.mes && !a.pago && !sinalPg(a) ? 'fim do mês' : din(a.pago + (a.sinal?.pago ? a.sinal.valor : 0))) : ST[a.st]?.[0] || a.st}</span></div>`).join('') || '<p class="livre">Nenhum horário neste dia.</p>'}</div>`;
+      extra = `<h2>Horários do dia</h2><div class="cartao">${l.lista.map((a) => `<div class="hora" data-ag="${a.id}" role="button" tabindex="0"><span class="h">${hh(a.ini)}</span><span><b>${t(cli(a.cli).nome)}</b><small>${t(serv(a.serv).nome)}${a.forma ? ` · ${t(a.forma)}` : ''}</small></span><span class="selo ${ST[a.st]?.[1] || ''}">${a.st === 'feito' ? (a.mes && !a.pago && !sinalPg(a) ? 'fim do mês' : din(a.pago + (a.sinal?.pago ? a.sinal.valor : 0))) : ST[a.st]?.[0] || a.st}</span></div>`).join('') || '<p class="livre">Nenhum horário neste dia.</p>'}</div>`;
     } else if (res.modo === 'mes') {
       const alvo = mi + res.m, y = Math.floor(alvo / 12), m = alvo % 12, dias = new Date(y, m + 1, 0).getDate();
       nav = `<button type="button" class="bt pq" data-rpasso="-1" aria-label="Mês anterior">‹</button><b class="r-tit">${MES[m][0].toUpperCase() + MES[m].slice(1)} de ${y}</b><button type="button" class="bt pq" data-rpasso="1" aria-label="Próximo mês">›</button>`;
@@ -359,7 +359,7 @@ const T = {
       <div class="cartao"><small class="mini">Atendidos</small><b class="r-num">${l.feitos.length}</b><small class="mini">valor médio ${din(l.ticket)}</small></div>
       <div class="cartao"><small class="mini">Faltas</small><b class="r-num">${l.faltas.length}</b><small class="mini">${l.faltas.length ? `deixaram de entrar ${din(l.perdido)}` : 'nenhuma'}</small></div></div>
       ${l.feitos.length ? `<h2>Por serviço</h2><div class="cartao">${l.porServ.map(([s, n, v]) => `<div class="hora" style="cursor:default"><span class="h" style="color:${serv(s).cor}">●</span><span>${t(serv(s).nome)}<small>${n} atendimento(s)</small></span><span>${din(v)}</span></div>`).join('')}</div>
-      <h2>Como pagaram</h2><div class="chips">${l.formas.filter(([, v]) => v > 0).map(([f, v]) => `<span class="selo">${f}: ${din(v)}</span>`).join('')}</div>` : ''}${res.modo !== 'ano' ? resumoFimMes(l) : ''}${extra}`;
+      <h2>Como pagaram</h2><div class="chips">${l.formas.filter(([, v]) => v > 0).map(([f, v]) => `<span class="selo">${t(f)}: ${din(v)}</span>`).join('')}</div>` : ''}${res.modo !== 'ano' ? resumoFimMes(l) : ''}${extra}`;
   },
   mais() {
     const fmx = contaMes(mesDe(0));

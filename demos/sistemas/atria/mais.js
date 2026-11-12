@@ -3,10 +3,10 @@
 // e medição por foto com objeto de referência. Depois: RDO (relatório diário), validade do EPI, cronograma com
 // alerta de atraso, fornecedores de chapas e etiquetas do plano de corte. Tudo fica no aparelho (db + grava()).
 // Dinheiro em centavos.
-import { $, $$, t, din, dinCurto, lerNum, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js?v=13';
-import { totais, cliente, STATUS } from './gestao.js?v=13';
-import { meusOficios } from './oficios.js?v=13';
-import { planoDeCorte } from './ferramentas.js?v=13';
+import { $, $$, t, din, dinCurto, lerNum, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js?v=14';
+import { totais, cliente, STATUS } from './gestao.js?v=14';
+import { meusOficios } from './oficios.js?v=14';
+import { planoDeCorte } from './ferramentas.js?v=14';
 
 export const TELAS = {};
 export const ACOES = {};
@@ -334,7 +334,7 @@ TELAS.checklist.montar = (tela) => {
 };
 function abrirValidade(k, nome) {
   const { ck } = checkDados();
-  formulario({ titulo: `Validade: ${nome}`, rotulo: 'Guardar', campos: [{ n: 'data', r: 'Vence ou trocar em', tipo: 'data', valor: ck.validade[k] || somaDias(hoje(), 180), dica: 'Veja a data na etiqueta. Luva e máscara PFF2 trocam antes: quando gastar ou sujar.' }],
+  formulario({ titulo: `Validade: ${t(nome)}`, rotulo: 'Guardar', campos: [{ n: 'data', r: 'Vence ou trocar em', tipo: 'data', valor: ck.validade[k] || somaDias(hoje(), 180), dica: 'Veja a data na etiqueta. Luva e máscara PFF2 trocam antes: quando gastar ou sujar.' }],
     extraPe: ck.validade[k] ? '<button type="button" class="bt leve p" data-sem>Sem data</button>' : '',
     salvar: (v) => { if (!v.data) return 'Escolha a data.'; ck.validade[k] = v.data; grava(); repinta(); toast('Validade guardada'); },
     depois: (f, api) => { const b = $('[data-sem]', f); if (b) b.onclick = () => { delete ck.validade[k]; grava(); api.fechar(); repinta(); }; } });
@@ -655,7 +655,7 @@ ACOES['crono-montar'] = (b) => {
 };
 ACOES['crono-editar'] = (b) => {
   const o = achar('obras', b.dataset.o), e = o && o.etapas.find((x) => x.id === b.dataset.e); if (!e) return;
-  formulario({ titulo: e.nome, campos: [{ n: 'ini', r: 'Começa', tipo: 'data', valor: e.ini || hoje(), meio: true, obrig: true }, { n: 'fim', r: 'Termina', tipo: 'data', valor: e.fim || somaDias(hoje(), 3), meio: true, obrig: true }],
+  formulario({ titulo: t(e.nome), campos: [{ n: 'ini', r: 'Começa', tipo: 'data', valor: e.ini || hoje(), meio: true, obrig: true }, { n: 'fim', r: 'Termina', tipo: 'data', valor: e.fim || somaDias(hoje(), 3), meio: true, obrig: true }],
     salvar: (v) => { if (v.fim < v.ini) return 'O fim não pode ser antes do começo.'; e.ini = v.ini; e.fim = v.fim; grava(); repinta(); } });
 };
 export function sugestoesCronograma() {

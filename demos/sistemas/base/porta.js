@@ -13,6 +13,7 @@ const reais = (v) => `R$ ${Number(v).toLocaleString('pt-BR')}`;
 const hoje = () => new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
 const dataBR = (d) => (d ? d.split('-').reverse().join('/') : '');
 const anual = (m) => Math.round(m * 12 * 0.8);
+const GOOGLE = ['atria'].includes(ID); // entrar/criar conta com o Google (pedido do dono para o Atria, 12/11)
 
 function tela(html) {
   $('#porta').innerHTML = `<header class="p-topo"><img src="${RAIZ}${V.logo}" alt="" width="56" height="56"><div><b>${esc(V.nome)}</b><small>Blue Rose Express</small></div></header>${html}`;
@@ -34,12 +35,22 @@ function telaConta(modo = 'entrar', aviso = '') {
     const criar = modo === 'criar';
     const f = tela(`<h1>${criar ? 'Crie a sua conta' : 'Entre na sua conta'}</h1><p class="p-sub">${criar ? 'A mesma conta vale para o site e para todos os sistemas.' : 'Use o e-mail e a senha da sua conta Blue Rose.'}</p>
       ${aviso ? `<p class="p-aviso">${esc(aviso)}</p>` : ''}
+      ${GOOGLE ? `<button type="button" class="p-google" data-google><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>${criar ? 'Criar conta com o Google' : 'Entrar com o Google'}</button>
+      <p class="p-google-nota">${criar ? `Ao continuar com o Google, você confirma ter 18 anos ou mais e aceita os <a href="${RAIZ}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a <a href="${RAIZ}privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.` : 'Sem senha: use a sua conta do Google.'}</p>
+      <p class="p-ou"><span>ou com e-mail e senha</span></p>` : ''}
       <form novalidate><label>E-mail<input name="email" type="email" autocomplete="email" required></label><label>Senha<input name="senha" type="password" minlength="8" autocomplete="${criar ? 'new-password' : 'current-password'}" required>${criar ? '<small>Pelo menos 8 caracteres.</small>' : ''}</label>
       ${criar ? `<label class="p-aceite"><input type="checkbox" name="ok" required><span>Tenho 18 anos ou mais e aceito os <a href="${RAIZ}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a <a href="${RAIZ}privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label>` : ''}
       <p class="p-erro" role="alert"></p><button class="p-bt">${criar ? 'Criar conta' : 'Entrar'}</button></form>
       <p class="p-links">${criar ? '<a href="#" data-modo="entrar">Já tenho conta</a>' : '<a href="#" data-modo="criar">Criar conta</a><span>·</span><a href="#" data-esqueci>Esqueci a senha</a>'}<span>·</span><a href="${RAIZ}${V.pagina}">Voltar ao site</a></p>`);
     f.querySelector('[data-modo]').onclick = (e) => { e.preventDefault(); telaConta(e.target.dataset.modo).then(ok); };
     const form = f.querySelector('form'), erro = f.querySelector('.p-erro');
+    f.querySelector('[data-google]')?.addEventListener('click', async (e) => {
+      const bt = e.currentTarget; bt.disabled = true;
+      try { localStorage.setItem('nexo-volta', location.href); } catch { /* ok */ }
+      // volta por app/ (o mesmo endereço do login com Google do site); de lá o inicio.js devolve para esta porta
+      const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${RAIZ}app/`, queryParams: { prompt: 'select_account' } } });
+      if (error) { bt.disabled = false; erro.textContent = 'Não deu para abrir o Google agora. Tente de novo ou use e-mail e senha.'; }
+    });
     f.querySelector('[data-esqueci]')?.addEventListener('click', async (e) => {
       e.preventDefault(); const email = form.email.value.trim(); if (!email) { erro.textContent = 'Escreva o seu e-mail acima e clique de novo.'; return; }
       try { localStorage.setItem('nexo-volta', location.href); } catch { /* ok */ }

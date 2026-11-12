@@ -1,7 +1,7 @@
 // Atria · funções essenciais da auditoria (11/11/2026): agenda com lembrete no calendário do celular,
 // recibo de pagamento (inclusive parcial), ajudantes por diária, MEI (limite do ano e DAS) e resumo do mês.
-import { $, $$, t, din, dinCurto, lerDin, hoje, somaDias, dias, dataBR, quando, uid, ico, av, db, grava, achar, toast, folha, formulario, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js?v=13';
-import { totais, cliente, somaPeriodo, intervalo, abrirMensagens } from './gestao.js?v=13';
+import { $, $$, t, din, dinCurto, lerDin, hoje, somaDias, dias, dataBR, quando, uid, ico, av, db, grava, achar, toast, folha, formulario, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js?v=14';
+import { totais, cliente, somaPeriodo, intervalo, abrirMensagens } from './gestao.js?v=14';
 
 export const TELAS = {};
 export const ACOES = {};
@@ -69,13 +69,13 @@ ACOES['novo-ajudante'] = () => formulario({ titulo: 'Novo ajudante', campos: [{ 
   salvar: (v) => { (db.equipe = db.equipe || []).push({ id: uid('p'), ...v }); grava(); repinta(); } });
 ACOES.diaria = (b) => {
   const p = (db.equipe || []).find((x) => x.id === b.dataset.id), ativas = db.obras.filter((o) => o.status !== 'concluida');
-  formulario({ titulo: `Diária de ${p.nome.split(' ')[0]}`, rotulo: 'Marcar diária',
+  formulario({ titulo: `Diária de ${t(p.nome.split(' ')[0])}`, rotulo: 'Marcar diária',
     campos: [{ n: 'data', r: 'Dia', tipo: 'data', meio: true, valor: hoje() }, { n: 'valor', r: 'Valor', tipo: 'din', meio: true, valor: p.diaria }, { n: 'obra', r: 'Em qual obra', tipo: 'sel', ops: [['', 'Sem obra'], ...ativas.map((o) => [o.id, o.titulo])] }],
     salvar: (v) => { if ((db.diarias = db.diarias || []).some((d) => d.pessoa === p.id && d.data === v.data)) return 'Essa diária já está marcada.'; db.diarias.push({ id: uid('d'), pessoa: p.id, data: v.data, valor: v.valor, obra: v.obra, pago: false }); grava(); vibra(10); repinta(); toast('Diária marcada'); } });
 };
 ACOES['pagar-ajudante'] = (b) => {
   const p = db.equipe.find((x) => x.id === b.dataset.id), ab = diariasDe(p).filter((d) => !d.pago), total = ab.reduce((s, d) => s + d.valor, 0);
-  folha({ titulo: `Pagar ${p.nome.split(' ')[0]}`, corpo: `<div class="lista">${ab.map((d) => `<div class="preco-linha"><span>${dataBR(d.data)}${d.obra ? ` · ${t((achar('obras', d.obra) || {}).titulo || '')}` : ''}</span><b>${din(d.valor)}</b></div>`).join('')}</div><div class="valores" style="margin-top:10px"><div class="total"><span>${ab.length} diárias</span><b>${din(total)}</b></div></div>`,
+  folha({ titulo: `Pagar ${t(p.nome.split(' ')[0])}`, corpo: `<div class="lista">${ab.map((d) => `<div class="preco-linha"><span>${dataBR(d.data)}${d.obra ? ` · ${t((achar('obras', d.obra) || {}).titulo || '')}` : ''}</span><b>${din(d.valor)}</b></div>`).join('')}</div><div class="valores" style="margin-top:10px"><div class="total"><span>${ab.length} diárias</span><b>${din(total)}</b></div></div>`,
     pe: `<button type="button" class="bt leve p" data-z>${ico('zap')}Mandar o resumo</button><button type="button" class="bt cheio" data-ok>Paguei ${din(total)}</button>`,
     aoAbrir: (f, api) => {
       $('[data-z]', f).onclick = () => abrirZap(p.tel, `Oi, ${p.nome.split(' ')[0]}! Suas diárias:\n${ab.map((d) => `• ${dataBR(d.data)}: ${din(d.valor)}`).join('\n')}\nTotal: ${din(total)}`);

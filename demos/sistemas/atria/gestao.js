@@ -1,12 +1,12 @@
 // Atria · gestão: obras, orçamento, proposta comercial, cobrança com Pix, materiais, lojas, preços, clientes,
 // financeiro, ferramentas de bancada e mensagens prontas.
-import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=13';
-import { cena, TIPOS_CENA } from './cenas.js?v=13';
-import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=13';
-import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=13';
-import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=13';
+import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=14';
+import { cena, TIPOS_CENA } from './cenas.js?v=14';
+import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=14';
+import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=14';
+import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=14';
 import { qrSVG } from '../base/qr.js';
-import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=13';
+import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=14';
 
 // jeitos de cobrar: os do ofício da obra (ou da pessoa) primeiro, depois os outros
 export const modosObra = (o) => [...new Set([...((OFICIOS[o.oficio] || {}).cobra || []), ...juntar(db.perfil, 'cobra'), ...Object.keys(MODOS_COBRAR)])];
@@ -293,7 +293,7 @@ export function cobrarPix(o, valor) {
   folha({
     titulo: 'Cobrar com Pix',
     corpo: `${db.pix.exemplo ? '<p class="explica"><b>Chave de exemplo.</b> Cadastre a sua chave para o QR valer de verdade.</p>' : ''}
-      <label class="campo"><span>Valor ${o ? `(${o.titulo})` : ''}</span><input data-v inputmode="decimal" value="${campoDin(centavos)}" placeholder="sem valor: o cliente digita"></label>
+      <label class="campo"><span>Valor ${o ? `(${t(o.titulo)})` : ''}</span><input data-v inputmode="decimal" value="${campoDin(centavos)}" placeholder="sem valor: o cliente digita"></label>
       ${o ? `<div class="chips" style="margin-top:-4px">${[['Entrada', tt.entrada], ['Falta receber', tt.saldo], ['Total', tt.total]].map(([r, v]) => `<button type="button" class="chip" data-sug="${v}">${r} <b>${dinCurto(v)}</b></button>`).join('')}</div>` : ''}
       <div style="display:grid;place-items:center;margin:12px 0"><div data-qr style="background:#fff;padding:10px;border-radius:16px;box-shadow:var(--sombra)"></div></div>
       <p style="font-size:12px;margin:0 0 4px" class="mudo">Pix copia e cola</p><p class="num" data-cc style="font-size:11.5px;word-break:break-all;background:var(--aparas);border-radius:12px;padding:10px;margin:0"></p>

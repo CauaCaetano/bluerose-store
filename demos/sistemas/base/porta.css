@@ -29,3 +29,11 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid 
 .p-carrega { color: #6b7080; text-align: center; padding: 30px 0; }
 @media (max-width: 420px) { .p-planos { grid-template-columns: 1fr; } }
 .p-topo img[src*="veltria-agenda"], .p-topo img[src*="veltria-gestao"], .p-topo img[src*="veltria-farmacia"] { background: #f7f2e8; }
+
+/* entrar com o Google (Atria) */
+.p-google { display: flex; align-items: center; justify-content: center; gap: .6rem; min-height: 46px; width: 100%; border: 1.5px solid #d6d9e0; border-radius: 12px; background: #fff; color: #1f1f1f; font: 600 1rem system-ui, sans-serif; cursor: pointer; }
+.p-google:disabled { opacity: .6; }
+.p-google:focus-visible { outline: 3px solid #4285f4; outline-offset: 2px; }
+.p-google-nota { margin: .5rem 0 0; font-size: .8rem; line-height: 1.45; opacity: .75; }
+.p-ou { display: flex; align-items: center; gap: .7rem; margin: 1rem 0 .4rem; font-size: .82rem; opacity: .7; }
+.p-ou::before, .p-ou::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .3; }

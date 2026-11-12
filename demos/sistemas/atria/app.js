@@ -3,18 +3,18 @@
 // achar trabalho (mural do app e achados na internet), clientes e obras, orçamento, proposta, Pix, lista de materiais,
 // lojas da cidade (OpenStreetMap), comparador de preços, dinheiro (lucro do dia, da semana e do mês) e ajuda automática.
 // Dados no aparelho (localStorage); na conta, o conta-nuvem.js leva para a nuvem. ?novo recomeça a demonstração.
-import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=13';
-import { cena, TIPOS_CENA } from './cenas.js?v=13';
-import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js?v=13';
-import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js?v=13';
+import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=14';
+import { cena, TIPOS_CENA } from './cenas.js?v=14';
+import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js?v=14';
+import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js?v=14';
 import { qrSVG } from '../base/qr.js';
-import { instalarConceitos, CONCEITO } from './conceitos.js?v=13';
-import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js?v=13';
-import { ganchos } from './gestao.js?v=13';
-import { ligarVoz } from './base.js?v=13';
-import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=13';
-import * as MAIS from './mais.js?v=13';
-import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=13';
+import { instalarConceitos, CONCEITO } from './conceitos.js?v=14';
+import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js?v=14';
+import { ganchos } from './gestao.js?v=14';
+import { ligarVoz } from './base.js?v=14';
+import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=14';
+import * as MAIS from './mais.js?v=14';
+import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=14';
 
 
 // ================================================================== telas e ações
@@ -97,7 +97,7 @@ TELAS.trabalhos = () => {
   const presentes = [...new Set(db.pedidos.map((p) => p.of))];
   const lista = db.pedidos.filter((p) => (filtroTrab === 'todos' ? true : filtroTrab === 'voce' ? meus.includes(p.of) : p.of === filtroTrab)).sort((a, b) => b.data.localeCompare(a.data));
   const corpo = abaTrab === 'mural'
-    ? `<div class="chips" role="group" aria-label="Filtrar por ofício"><button type="button" class="chip" data-acao="filtro-trab" data-f="voce" aria-pressed="${filtroTrab === 'voce'}">★ Para você<b>${db.pedidos.filter((p) => meus.includes(p.of)).length}</b></button>${presentes.map((k) => `<button type="button" class="chip" data-acao="filtro-trab" data-f="${k}" aria-pressed="${filtroTrab === k}">${t(nomeOf(k).split(' /')[0])}</button>`).join('')}<button type="button" class="chip" data-acao="filtro-trab" data-f="todos" aria-pressed="${filtroTrab === 'todos'}">Todos</button></div>
+    ? `<div class="chips" role="group" aria-label="Filtrar por ofício"><button type="button" class="chip" data-acao="filtro-trab" data-f="voce" aria-pressed="${filtroTrab === 'voce'}">★ Para você<b>${db.pedidos.filter((p) => meus.includes(p.of)).length}</b></button>${presentes.map((k) => `<button type="button" class="chip" data-acao="filtro-trab" data-f="${t(k)}" aria-pressed="${filtroTrab === k}">${t(nomeOf(k).split(' /')[0])}</button>`).join('')}<button type="button" class="chip" data-acao="filtro-trab" data-f="todos" aria-pressed="${filtroTrab === 'todos'}">Todos</button></div>
       <div class="lista" style="margin-top:8px">${lista.map(cartaoPedido).join('') || '<div class="vazio"><b>Nenhum pedido aqui</b>Puxe a tela para atualizar.</div>'}</div>
       <button type="button" class="bt leve largo" style="margin-top:12px" data-acao="publicar-pedido">${ico('mais')}Publicar um pedido de cliente</button>`
     : abaTrab === 'internet' ? telaAchados()
@@ -111,15 +111,15 @@ ACOES['aba-trab'] = (b) => { abaTrab = b.dataset.a; if (abaTrab === 'internet' &
 ACOES['filtro-trab'] = (b) => { filtroTrab = b.dataset.f; repinta(); };
 ACOES['publicar-pedido'] = () => formulario({ titulo: 'Publicar pedido', rotulo: 'Publicar no mural',
   campos: [{ n: 'titulo', r: 'O que o cliente precisa', obrig: true }, { n: 'of', r: 'Ofício', tipo: 'sel', valor: principal(eu()).id, ops: ORDEM_OFICIOS.map((k) => [k, OFICIOS[k].nome]) }, { n: 'desc', r: 'Detalhes', tipo: 'area' }, { n: 'bairro', r: 'Bairro', meio: true }, { n: 'prazo', r: 'Prazo', meio: true, lista: ['urgente', 'esta semana', 'até 15 dias', 'até 30 dias'] }],
-  salvar: (v) => { db.pedidos.unshift({ id: uid('j'), ...v, cidade: eu().cidade, faixa: '', cliente: 'Você', tel: '', data: new Date().toISOString().slice(0, 16), cena: CENA_DO_OFICIO[v.of] || 'muro', interesse: false }); grava(); repinta(); toast('Pedido no mural (na demonstração fica só neste celular)'); } });
+  salvar: (v) => { db.pedidos.unshift({ id: uid('j'), ...v, cidade: eu().cidade, faixa: '', cliente: 'Você', tel: '', data: new Date().toISOString().slice(0, 16), cena: CENA_DO_OFICIO[v.of] || 'muro', interesse: false }); grava(); repinta(); toast(ehReal() ? 'Pedido no mural (fica só neste aparelho)' : 'Pedido no mural (na demonstração fica só neste celular)'); } });
 
 TELAS.trabalho = (id) => {
   const p = achar('pedidos', id); if (!p) return cab('Pedido');
   return `${cab(t(p.titulo), `${t(p.cidade)} · ${haQuanto(p.data)}`)}
     <div class="cartao post" style="padding:0"><div class="post-midia">${cena(p.cena, 'antes')}</div><div style="padding:14px"><span class="tag giz">${t(nomeOf(p.of))}</span> <span class="exemplo">pedido de exemplo</span><p style="margin:10px 0">${t(p.desc)}</p>
       <div class="valores"><div><span>Bairro</span><b style="font-family:var(--f-txt)">${t(p.bairro)}</b></div><div><span>Prazo</span><b style="font-family:var(--f-txt)">${t(p.prazo)}</b></div>${p.faixa ? `<div><span>O cliente pensa em gastar</span><b>${t(p.faixa)}</b></div>` : ''}<div><span>Cliente</span><b style="font-family:var(--f-txt)">${t(p.cliente)}</b></div></div></div></div>
-    <div class="acoes"><button type="button" class="bt zap" data-acao="interesse" data-id="${p.id}">${ico('zap')}${p.interesse ? 'Falar de novo' : 'Tenho interesse'}</button><button type="button" class="bt" data-acao="pedido-obra" data-id="${p.id}">${ico('doc')}Virar orçamento</button></div>
-    <p class="mudo" style="font-size:12.5px">O endereço completo só aparece depois que o cliente responder. Na demonstração, a conversa no WhatsApp é simulada.</p>`;
+    <div class="acoes"><button type="button" class="bt zap" data-acao="interesse" data-id="${t(p.id)}">${ico('zap')}${p.interesse ? 'Falar de novo' : 'Tenho interesse'}</button><button type="button" class="bt" data-acao="pedido-obra" data-id="${t(p.id)}">${ico('doc')}Virar orçamento</button></div>
+    <p class="mudo" style="font-size:12.5px">O endereço completo só aparece depois que o cliente responder.${ehReal() ? '' : ' Na demonstração, a conversa no WhatsApp é simulada.'}</p>`;
 };
 ACOES.interesse = (b) => {
   const p = achar('pedidos', b.dataset.id); p.interesse = true; grava();
@@ -160,6 +160,8 @@ function exemplosAchados(ofs, cidade) {
 // Mercado Pago (função atria-creditos). Os créditos entram sozinhos quando o pagamento é aprovado.
 // Na demonstração tudo é simulado no aparelho e começa em 2 de 50, para mostrar o que acontece quando acaba.
 const ehReal = () => typeof window.atriaAcharTrabalho === 'function';
+// links que vêm da internet ou do servidor: só http(s) (bloqueia javascript:, data: etc.)
+const linkSeguro = (u) => (/^https?:\/\//i.test(String(u || '').trim()) ? String(u).trim() : '');
 const PACOTES_DEMO = [{ id: 'r10', valor: 10, qtd: 59 }, { id: 'r25', valor: 25, qtd: 149 }, { id: 'r50', valor: 50, qtd: 299 }];
 const PEND = 'atria-credito-pendente';
 let cred = null, travado = '', escolhaPac = 'r10';
@@ -235,7 +237,7 @@ async function pagarCreditos(pacoteId, forma) {
   let r;
   try { toast('Gerando o pagamento…'); r = await window.atriaCreditos.comprar(p.id, forma); } catch (e) { toast(e.message && e.message !== 'falhou' ? e.message : 'Não deu para gerar o pagamento agora. Tente de novo.', 'erro'); return; }
   gravarPend(r.id);
-  if (forma === 'cartao' && r.link) window.open(r.link, '_blank', 'noopener');
+  if (forma === 'cartao' && linkSeguro(r.link)) window.open(linkSeguro(r.link), '_blank', 'noopener');
   const api = folhaPagamento({ forma, p: { ...p, valor: r.valor, qtd: r.qtd }, ...r });
   const ate = Date.now() + (forma === 'pix' ? 3 : 10) * 60e3;
   const confere = async () => {
@@ -251,7 +253,7 @@ function folhaPagamento({ forma, p, qr_code, qr_base64, link, id, demo }) {
       ${pix ? `<div style="display:grid;place-items:center;margin:8px 0 12px"><div data-qr style="background:#fff;padding:10px;border-radius:16px;box-shadow:var(--sombra);width:220px;height:220px">${qr_base64 ? `<img src="data:image/png;base64,${qr_base64}" alt="QR Code do Pix" width="200" height="200" style="display:block;width:200px;height:200px">` : qrSVG(qr_code, 200, '#2E333B')}</div></div>
       <p style="font-size:12px;margin:0 0 4px" class="mudo">Pix copia e cola</p><p class="num" style="font-size:11.5px;word-break:break-all;background:var(--aparas);border-radius:12px;padding:10px;margin:0">${t(qr_code)}</p>`
       : demo ? '<p class="explica"><b>Demonstração:</b> na sua conta, o Mercado Pago abre para você pagar com cartão e os créditos entram sozinhos quando for aprovado.</p>'
-      : `<p class="explica"><b>O Mercado Pago abriu em outra aba.</b> Termine o pagamento lá e volte para cá: os créditos entram sozinhos.${link ? ` <a href="${t(link)}" target="_blank" rel="noopener noreferrer">Abrir de novo</a>` : ''}</p>`}
+      : `<p class="explica"><b>O Mercado Pago abriu em outra aba.</b> Termine o pagamento lá e volte para cá: os créditos entram sozinhos.${linkSeguro(link) ? ` <a href="${t(linkSeguro(link))}" target="_blank" rel="noopener noreferrer">Abrir de novo</a>` : ''}</p>`}
       <p data-status role="status" aria-live="polite" style="text-align:center;font-weight:600;margin:12px 0 0">${demo ? 'Demonstração: o pagamento vai ser aprovado em instantes…' : 'Aguardando o pagamento…'}</p>`,
     pe: `${pix ? `<button type="button" class="bt leve p" data-cancela>Cancelar</button><button type="button" class="bt cheio" data-copia style="flex:2">${ico('copiar')}Copiar código Pix</button>` : '<button type="button" class="bt cheio largo" data-fechar>Já paguei</button>'}`,
     aoAbrir: (f, api) => {
@@ -308,8 +310,8 @@ function cartaoAchado(a) {
   const [nome, cor, letra] = ORIGENS[a.origem] || ORIGENS.site, tel = (a.trecho.match(/\(?\d{2}\)?\s?9?\d{4}-?\d{4}/) || [])[0];
   const salvo = !!(db.achadosSalvos || {})[a.id], visto = !!(db.achadosVistos || {})[a.id];
   return `<article class="cartao achado ${visto ? 'visto' : ''}"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="origem"><i style="background:${cor}">${letra}</i>${nome}</span><span>${a.novo ? '<span class="novo-badge">novo</span> ' : ''}${a.exemplo ? '<span class="exemplo">exemplo de achado</span>' : ''}</span></div>
-    <h3>${t(a.titulo)}</h3><p style="margin:0 0 6px;font-size:13.5px;color:var(--grafite2)">${t(a.trecho)}</p><small class="mudo">${t(a.cidade)} · ${haQuanto(a.quando)}</small>
-    <div class="acoes"><a class="bt cheio p" href="${t(a.link)}" target="_blank" rel="noopener noreferrer" data-acao="abriu-achado" data-id="${t(a.id)}">${ico('link')}Abrir anúncio</a>${tel ? `<button type="button" class="bt zap p" data-acao="zap-achado" data-tel="${t(tel)}" data-tit="${t(a.titulo)}">${ico('zap')}Responder</button>` : ''}<button type="button" class="bt leve p alterna" data-acao="salvar-achado" data-id="${t(a.id)}" aria-pressed="${salvo}" aria-label="${salvo ? 'Salvo: tocar para tirar dos salvos' : 'Salvar este trabalho'}">${ico('salvar')}${salvo ? 'Salvo' : 'Salvar'}</button><button type="button" class="bt leve p alterna" data-acao="visto-achado" data-id="${t(a.id)}" aria-pressed="${!!visto}">${ico(visto ? 'ok' : 'olho')}${visto ? 'Visto' : 'Já vi'}</button></div></article>`;
+    <h3>${t(a.titulo)}</h3><p style="margin:0 0 6px;font-size:13.5px;color:var(--grafite2)">${t(a.trecho)}</p><small class="mudo">${t(a.cidade)} · ${t(haQuanto(a.quando))}</small>
+    <div class="acoes"><a class="bt cheio p" href="${t(linkSeguro(a.link) || '#')}" target="_blank" rel="noopener noreferrer" data-acao="abriu-achado" data-id="${t(a.id)}">${ico('link')}Abrir anúncio</a>${tel ? `<button type="button" class="bt zap p" data-acao="zap-achado" data-tel="${t(tel)}" data-tit="${t(a.titulo)}">${ico('zap')}Responder</button>` : ''}<button type="button" class="bt leve p alterna" data-acao="salvar-achado" data-id="${t(a.id)}" aria-pressed="${salvo}" aria-label="${salvo ? 'Salvo: tocar para tirar dos salvos' : 'Salvar este trabalho'}">${ico('salvar')}${salvo ? 'Salvo' : 'Salvar'}</button><button type="button" class="bt leve p alterna" data-acao="visto-achado" data-id="${t(a.id)}" aria-pressed="${!!visto}">${ico(visto ? 'ok' : 'olho')}${visto ? 'Visto' : 'Já vi'}</button></div></article>`;
 }
 function telaAchados() {
   if (!ehPro()) return painelPro('O Achar trabalho');
@@ -424,7 +426,7 @@ ACOES['novo-post'] = (b) => {
     corpo: `<div class="seg" data-seg role="group"><button type="button" data-t="ad" aria-pressed="true">Antes e depois</button><button type="button" data-t="foto" aria-pressed="false">Foto ou vídeo</button><i></i></div>
       <div class="foto-campo" style="margin-top:12px"><label data-antes><b>Antes</b>${fotoDiario ? `<img src="${fotoDiario.foto}" alt="">` : cena(cenaBase, 'antes')}<input type="file" accept="image/*,video/*" capture="environment" data-f="antes" aria-label="Foto ou vídeo de antes"></label><label><b>Depois</b>${cena(cenaBase, 'depois')}<input type="file" accept="image/*,video/*" capture="environment" data-f="depois" aria-label="Foto ou vídeo de depois"></label></div>
       <p class="mudo" style="font-size:12px;margin:6px 0 10px">Toque para tirar a foto, gravar um vídeo curto (até ${LIMITE_S} s e ${LIMITE_MB} MB) ou escolher da galeria. Sem foto, a demonstração usa a foto ilustrativa.</p>
-      <label class="campo"><span>Ofício</span><select data-of>${meusOficios(eu()).map((x) => `<option value="${x.id}" ${o && o.oficio === x.id ? 'selected' : ''}>${t(x.nome)}</option>`).join('')}</select></label>`,
+      <label class="campo"><span>Ofício</span><select data-of>${meusOficios(eu()).map((x) => `<option value="${t(x.id)}" ${o && o.oficio === x.id ? 'selected' : ''}>${t(x.nome)}</option>`).join('')}</select></label>`,
     pe: `<button type="button" class="bt leve" data-so>Só guardar</button><button type="button" class="bt cheio" data-ok style="flex:2">${ico('partilhar')}Guardar e postar</button>`,
     aoAbrir: (f, api) => {
       if (fotoDiario) antes = fotoDiario.foto;
@@ -518,9 +520,10 @@ TELAS.ajustes = () => `${cab('Ajustes')}
     <button type="button" class="linha" data-acao="tour"><span class="ic">${ico('ajuda')}</span><span class="txt"><b>Ver o passeio de novo</b><small>Mostra onde fica cada coisa</small></span></button>
     <button type="button" class="linha" data-acao="cadastro"><span class="ic">${ico('lapis')}</span><span class="txt"><b>Refazer o cadastro</b><small>Nome, foto, cidade e ofícios</small></span></button>
     <button type="button" class="linha" data-acao="exportar"><span class="ic">${ico('doc')}</span><span class="txt"><b>Cópia de segurança</b><small>Baixa um arquivo com todos os dados</small></span></button>
-    <button type="button" class="linha" data-acao="recomecar"><span class="ic">${ico('recarregar')}</span><span class="txt"><b>Recomeçar a demonstração</b><small>Volta os dados de exemplo</small></span></button>
+    ${ehReal() ? '' : `<button type="button" class="linha" data-acao="recomecar"><span class="ic">${ico('recarregar')}</span><span class="txt"><b>Recomeçar a demonstração</b><small>Volta os dados de exemplo</small></span></button>`}
   </div>
-  <div class="cartao" style="margin-top:14px"><b>Assinatura do Atria</b><p style="margin:6px 0 0">R$ 39 por mês ou R$ 374 por ano (20% a menos). Sem fidelidade: cancela quando quiser.</p><div class="acoes"><a class="bt cheio" href="../../../app/atria/">Assinar</a><a class="bt leve" href="../../../atria.html">Conhecer o Atria</a></div></div>`;
+  ${ehReal() ? `<div class="cartao" style="margin-top:14px"><b>Sua assinatura: Atria ${ehPro() ? 'Pro' : 'Básico'}</b><p style="margin:6px 0 0">Cobrança, cartão e cancelamento ficam em Minha conta. Sem fidelidade.</p><div class="acoes">${ehPro() ? '' : `<a class="bt cheio" href="${LINK_PRO}">Mudar para o Pro</a>`}<a class="bt leve" href="../../../conta.html">Minha conta</a></div></div>`
+    : `<div class="cartao" style="margin-top:14px"><b>Assinatura do Atria</b><p style="margin:6px 0 0">Básico R$ 39 por mês (R$ 374 por ano) ou Pro R$ 50 por mês (R$ 480 por ano), com o Achar trabalho e as lojas e preços. Sem fidelidade: cancela quando quiser.</p><div class="acoes"><a class="bt cheio" href="../../../app/atria/">Assinar</a><a class="bt leve" href="../../../atria.html">Conhecer o Atria</a></div></div>`}`;
 ACOES['letra-grande'] = () => { eu().letraGrande = !eu().letraGrande; grava(); document.documentElement.classList.toggle('letra-grande', !!eu().letraGrande); repinta(); toast(eu().letraGrande ? 'Letra grande ligada' : 'Letra normal'); };
 ACOES.recomecar = () => confirmar('Recomeçar a demonstração?', 'Os dados de exemplo voltam ao começo neste celular.', 'Recomeçar', () => { try { localStorage.removeItem(CHAVE); } catch { /* sem acesso */ } location.replace(location.pathname); });
 ACOES.exportar = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(db)], { type: 'application/json' })); a.download = `atria-copia-${hoje()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast('Cópia baixada'); };
