@@ -348,10 +348,10 @@
           linha('Equipe', ms.length + (ms.length === 1 ? ' pessoa' : ' pessoas') + (gestor && conv.length ? ' · ' + conv.length + ' convite(s) esperando' : '')) + '</ul>' +
           (gestor ? '<p class="vc-mudo">Convide pelo e-mail da pessoa: ela recebe o link, entra com o próprio login e já cai nesta empresa com o cargo e as telas que você escolher.</p><button class="vc-bt" data-pf="convidar">Convidar ou adicionar pessoa</button><button class="vc-bt vc-2" data-pf="equipe">Ver e editar a equipe</button>'
             : '<p class="vc-mudo">Para mudar seu cargo, seu acesso ou as telas que você vê, fale com o dono' + (dono ? ' (' + esc(dono.email) + ')' : '') + '.</p>') +
-          '<button class="vc-bt vc-2" data-pf="config">Configurações</button><button class="vc-bt vc-2" data-pf="sair">Sair</button>';
+          '<button class="vc-bt vc-2" data-pf="config">Configurações</button><button class="vc-bt vc-2" data-pf="sair">Sair</button><button class="vc-bt vc-2" data-pf="apagar">Sair e apagar deste aparelho</button>';
         cx.querySelector('#vc-pf').innerHTML = html;
       }).catch(function () { cx.querySelector('#vc-pf').innerHTML = '<p>Não consegui carregar o perfil. Confira a internet e tente de novo.</p>'; });
-      cx.addEventListener('click', function (e) { var b = e.target.closest('[data-pf]'); if (!b) return; fecha(); ({ convidar: function () { equipe(true); }, equipe: equipe, config: configuracoes, sair: sair })[b.dataset.pf](); });
+      cx.addEventListener('click', function (e) { var b = e.target.closest('[data-pf]'); if (!b) return; fecha(); ({ convidar: function () { equipe(true); }, equipe: equipe, config: configuracoes, sair: sair, apagar: sairApagar })[b.dataset.pf](); });
     });
   }
   function configuracoes() {
@@ -448,6 +448,28 @@
     }).catch(function () {});
   }
   function sair() { enviar().then(function () { return cliente(); }).then(function (sb) { return sb.auth.signOut(); }).then(function () { sessionStorage.removeItem('veltria-conta'); location.href = RAIZ + 'app/' + app + '/'; }); }
+  // sair e apagar deste aparelho (celular emprestado, perdido ou vendido): sobe tudo para a nuvem primeiro e só apaga
+  // se nada ficou pendente. Apaga os dados desta empresa, a sessão e, no Atria, os vídeos guardados só no aparelho.
+  function sairApagar() {
+    var aviso = 'Sair e apagar os dados deste aparelho?\n\nTudo o que está salvo na nuvem continua na sua conta e volta quando você entrar de novo.' +
+      (app === 'atria' ? '\n\nOs vídeos ficam só neste celular e serão apagados.' : '');
+    if (!confirm(aviso)) return;
+    if (navigator.onLine === false) { alert('Sem internet: conecte para salvar tudo na nuvem antes de apagar. Nada foi apagado.'); return; }
+    enviar().then(function () {
+      if (pendente) throw new Error('pendente');
+      return cliente().then(function (sb) { return sb.auth.signOut(); });
+    }).then(function () {
+      var tira = [], pre = 'conta:' + info.espaco + ':';
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && (k.indexOf(pre) === 0 || k === 'nexo-sessao' || k === 'nexo-volta' || (app === 'atria' && /^atria-/.test(k)))) tira.push(k);
+      }
+      tira.forEach(function (k) { tirar.call(localStorage, k); });
+      try { sessionStorage.clear(); } catch (e) { /* ok */ }
+      var foi = false, fim = function () { if (foi) return; foi = true; location.href = RAIZ + 'app/' + app + '/'; };
+      if (app === 'atria' && window.indexedDB) { var r = indexedDB.deleteDatabase('atria-midia'); r.onsuccess = r.onerror = r.onblocked = fim; setTimeout(fim, 2000); } else fim();
+    }).catch(function () { alert('Não consegui salvar tudo na nuvem agora, então nada foi apagado. Confira a internet e tente de novo.'); });
+  }
 
   // ---------------------------------------------------------------- Dados (editor de todas as listas)
   function dadosEditor(abrir) {

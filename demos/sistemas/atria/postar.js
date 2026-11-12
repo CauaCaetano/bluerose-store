@@ -1,15 +1,15 @@
 // Atria · "Postar": monta a imagem no formato de cada rede (feed 4:5, Stories e Status 9:16, Facebook 4:5) com a marca do
 // profissional, gera a legenda e o funil (chamada para o WhatsApp, sequência de posts e respostas prontas) e abre a rede pelo
 // compartilhamento do próprio celular, com a legenda já copiada. Sem servidor: quem aperta "publicar" é a pessoa, na rede.
-import { $, $$, t, ico, db, grava, toast, folha, copiar, comIA, abrirZap, zap, telLimpo, vibra } from './base.js?v=14';
-import { cena, fotoCena, cenaDesenho } from './cenas.js?v=14';
-import { arquivoDoVideo } from './midia.js?v=14';
+import { $, $$, t, ico, db, grava, toast, folha, copiar, comIA, abrirZap, zap, telLimpo, vibra } from './base.js?v=15';
+import { cena, fotoCena, cenaDesenho } from './cenas.js?v=15';
+import { arquivoDoVideo } from './midia.js?v=15';
 // post com vídeo (vitrine): compartilha o próprio vídeo, com a legenda copiada
 const videoDe = (p) => p.videoDepois || p.videoAntes || '';
 const arquivoPara = async (p, destino) => (videoDe(p) ? arquivoDoVideo(videoDe(p), `atria-${destino}`).catch(() => montarImagem(p, destino)) : montarImagem(p, destino));
 const previaHTML = (arq, rot, cls = '') => { const u = URL.createObjectURL(arq); return /^video\//.test(arq.type) ? `<video src="${u}" class="${cls}" playsinline muted loop autoplay controls aria-label="${rot}"></video>` : `<img src="${u}" alt="${rot}" class="${cls}">`; };
-import { meusOficios, principal, nomeOficios, OFICIOS } from './oficios.js?v=14';
-import { cliente } from './gestao.js?v=14';
+import { meusOficios, principal, nomeOficios, OFICIOS } from './oficios.js?v=15';
+import { cliente } from './gestao.js?v=15';
 
 export const DESTINOS = {
   feed: { nome: 'Instagram (feed)', curto: 'Instagram', ic: 'camera', w: 1080, h: 1350, rede: 'Instagram', dica: 'Escolha o Instagram, depois "Feed". Cole a legenda e toque em Compartilhar.' },

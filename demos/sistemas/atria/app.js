@@ -3,18 +3,18 @@
 // achar trabalho (mural do app e achados na internet), clientes e obras, orçamento, proposta, Pix, lista de materiais,
 // lojas da cidade (OpenStreetMap), comparador de preços, dinheiro (lucro do dia, da semana e do mês) e ajuda automática.
 // Dados no aparelho (localStorage); na conta, o conta-nuvem.js leva para a nuvem. ?novo recomeça a demonstração.
-import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=14';
-import { cena, TIPOS_CENA } from './cenas.js?v=14';
-import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js?v=14';
-import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js?v=14';
+import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=15';
+import { cena, TIPOS_CENA } from './cenas.js?v=15';
+import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js?v=15';
+import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js?v=15';
 import { qrSVG } from '../base/qr.js';
-import { instalarConceitos, CONCEITO } from './conceitos.js?v=14';
-import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js?v=14';
-import { ganchos } from './gestao.js?v=14';
-import { ligarVoz } from './base.js?v=14';
-import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=14';
-import * as MAIS from './mais.js?v=14';
-import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=14';
+import { instalarConceitos, CONCEITO } from './conceitos.js?v=15';
+import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js?v=15';
+import { ganchos } from './gestao.js?v=15';
+import { ligarVoz } from './base.js?v=15';
+import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=15';
+import * as MAIS from './mais.js?v=15';
+import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=15';
 
 
 // ================================================================== telas e ações
@@ -58,7 +58,7 @@ function sugestoes() {
   db.obras.filter((o) => o.venceSaldo && o.venceSaldo < H && totais(o).saldo > 0).forEach((o) => l.push({ p: 10, cor: 'brasa', ic: 'alerta', txt: `<b>${t(cliente(o.cliente).nome)}</b> está devendo ${din(totais(o).saldo)} há ${dias(o.venceSaldo)} dias.`, bt: ['Lembrar no WhatsApp', null, { acao: 'mensagens', m: 'pagamento', o: o.id }] }));
   obrasAtivas().forEach((o) => { const e = economiaLista(o); if (e.total > 1000) { const it = e.itens.sort((a, b) => b.e - a.e)[0]; l.push({ p: 8, cor: 'musgo', ic: 'moeda', txt: `${t(it.m.nome.split(' (')[0])} está ${din(it.m.preco - it.b.preco)} mais barato na ${t(nomeLojaCurta(it.b.loja))}. Na lista de <b>${t(o.titulo)}</b> dá ${din(e.total)} de economia.`, bt: ['Ver a lista', `#materiais/${o.id}`] }); } });
   const meus = meusOficios(eu()).map((x) => x.id);
-  db.pedidos.filter((p) => meus.includes(p.of) && !p.interesse && dias(p.data.slice(0, 10)) <= 1).slice(0, 1).forEach((p) => l.push({ p: 7, cor: 'giz', ic: 'sino', txt: `Pedido novo em ${t(p.cidade)}: <b>${t(p.titulo)}</b>.`, bt: ['Ver o pedido', `#trabalho/${p.id}`] }));
+  pedidosVis().filter((p) => meus.includes(p.of) && !p.interesse && dias(p.data.slice(0, 10)) <= 1).slice(0, 1).forEach((p) => l.push({ p: 7, cor: 'giz', ic: 'sino', txt: `Pedido novo em ${t(p.cidade)}: <b>${t(p.titulo)}</b>.`, bt: ['Ver o pedido', `#trabalho/${p.id}`] }));
   db.obras.filter((o) => o.status === 'concluida' && !o.postado && dias(o.fim || H) < 40).slice(0, 1).forEach((o) => l.push({ p: 6, cor: 'trena', ic: 'antesdepois', txt: `Poste o antes e depois de <b>${t(o.titulo)}</b>: perfil com fotos recebe mais pedidos.`, bt: ['Postar agora', null, { acao: 'novo-post', o: o.id }] }));
   db.obras.forEach((o) => (o.agenda || []).filter((a) => a.data === somaDias(H, 1)).forEach((a) => l.push({ p: 7, cor: 'giz', ic: 'calendario', txt: `Amanhã às ${t(a.hora)}: <b>${t(a.nota)}</b> (${t(cliente(o.cliente).nome.split(' ')[0])}).`, bt: ['Confirmar com o cliente', null, { acao: 'mensagens', m: 'visita', o: o.id }] })));
   const [, fim] = intervalo('mes'), lm = somaPeriodo(`${H.slice(0, 7)}-01`, H).l, falta = eu().meta - lm, rest = dias(H, fim) + 1;
@@ -84,7 +84,11 @@ ACOES.notifs = () => folha({ titulo: 'Avisos', corpo: `<div class="lista">${(db.
 ACOES['chave-pix'] = () => cadastrarPix();
 
 // ------------------------------------------------------------------ trabalhos: mural do app + achados na internet
-let abaTrab = 'mural', filtroTrab = 'voce';
+// Na conta paga o Mural fica de fora: os pedidos dele são exemplos da demonstração (telefones fictícios) e o mural de
+// verdade precisa de servidor. Ficam só os pedidos que a própria pessoa anotou. A tela abre em "Na internet" (busca real).
+function contaReal() { return typeof window.atriaAcharTrabalho === 'function'; }
+function pedidosVis() { return contaReal() ? (db.pedidos || []).filter((p) => p.cliente === 'Você') : db.pedidos; }
+let abaTrab = contaReal() ? 'internet' : 'mural', filtroTrab = 'voce';
 function cartaoPedido(p) {
   return `<a class="cartao pedido ${p.interesse ? 'feito' : ''}" href="#trabalho/${p.id}" style="display:block;text-decoration:none;color:inherit">
     <div class="mini">${cena(p.cena, 'antes', true)}</div><span class="tag ${p.interesse ? 'musgo' : 'giz'}">${ico(icOf(p.of), 'width="12" height="12" style="vertical-align:-1px"')} ${t(nomeOf(p.of))}</span> <span class="exemplo">exemplo</span>
@@ -94,17 +98,17 @@ function cartaoPedido(p) {
 }
 TELAS.trabalhos = () => {
   const meus = meusOficios(eu()).map((x) => x.id), novos = (db.achados || []).filter((a) => a.novo).length;
-  const presentes = [...new Set(db.pedidos.map((p) => p.of))];
-  const lista = db.pedidos.filter((p) => (filtroTrab === 'todos' ? true : filtroTrab === 'voce' ? meus.includes(p.of) : p.of === filtroTrab)).sort((a, b) => b.data.localeCompare(a.data));
+  const presentes = [...new Set(pedidosVis().map((p) => p.of))];
+  const lista = pedidosVis().filter((p) => (filtroTrab === 'todos' ? true : filtroTrab === 'voce' ? meus.includes(p.of) : p.of === filtroTrab)).sort((a, b) => b.data.localeCompare(a.data));
   const corpo = abaTrab === 'mural'
-    ? `<div class="chips" role="group" aria-label="Filtrar por ofício"><button type="button" class="chip" data-acao="filtro-trab" data-f="voce" aria-pressed="${filtroTrab === 'voce'}">★ Para você<b>${db.pedidos.filter((p) => meus.includes(p.of)).length}</b></button>${presentes.map((k) => `<button type="button" class="chip" data-acao="filtro-trab" data-f="${t(k)}" aria-pressed="${filtroTrab === k}">${t(nomeOf(k).split(' /')[0])}</button>`).join('')}<button type="button" class="chip" data-acao="filtro-trab" data-f="todos" aria-pressed="${filtroTrab === 'todos'}">Todos</button></div>
+    ? `<div class="chips" role="group" aria-label="Filtrar por ofício"><button type="button" class="chip" data-acao="filtro-trab" data-f="voce" aria-pressed="${filtroTrab === 'voce'}">★ Para você<b>${pedidosVis().filter((p) => meus.includes(p.of)).length}</b></button>${presentes.map((k) => `<button type="button" class="chip" data-acao="filtro-trab" data-f="${t(k)}" aria-pressed="${filtroTrab === k}">${t(nomeOf(k).split(' /')[0])}</button>`).join('')}<button type="button" class="chip" data-acao="filtro-trab" data-f="todos" aria-pressed="${filtroTrab === 'todos'}">Todos</button></div>
       <div class="lista" style="margin-top:8px">${lista.map(cartaoPedido).join('') || '<div class="vazio"><b>Nenhum pedido aqui</b>Puxe a tela para atualizar.</div>'}</div>
       <button type="button" class="bt leve largo" style="margin-top:12px" data-acao="publicar-pedido">${ico('mais')}Publicar um pedido de cliente</button>`
     : abaTrab === 'internet' ? telaAchados()
-      : `<div class="lista">${db.pedidos.filter((p) => p.interesse).map(cartaoPedido).join('')}${Object.values(db.achadosSalvos || {}).map(cartaoAchado).join('') || ''}</div>${db.pedidos.some((p) => p.interesse) || Object.keys(db.achadosSalvos || {}).length ? '' : '<div class="vazio"><b>Nada salvo ainda</b>Os pedidos em que você tiver interesse e os achados salvos aparecem aqui.</div>'}`;
+      : `<div class="lista">${pedidosVis().filter((p) => p.interesse).map(cartaoPedido).join('')}${Object.values(db.achadosSalvos || {}).map(cartaoAchado).join('') || ''}</div>${pedidosVis().some((p) => p.interesse) || Object.keys(db.achadosSalvos || {}).length ? '' : '<div class="vazio"><b>Nada salvo ainda</b>Os pedidos em que você tiver interesse e os achados salvos aparecem aqui.</div>'}`;
   return `${cab('Trabalhos', `${t(eu().cidade)} e região · ${eu().raio} km`, { dica: 'Mural: pedidos publicados por clientes dentro do Atria. Na internet: anúncios públicos da sua cidade achados por um buscador. Puxe a tela para baixo para atualizar.' })}
     <div class="puxar" data-puxar>${ico('recarregar')}<span>Solte para atualizar</span></div>
-    <div class="seg" role="group" aria-label="Onde procurar" data-seg><button type="button" data-acao="aba-trab" data-a="mural" aria-pressed="${abaTrab === 'mural'}">Mural</button><button type="button" data-acao="aba-trab" data-a="internet" aria-pressed="${abaTrab === 'internet'}">Na internet ${SELO_PRO}${novos ? ` <span class="novo-badge">${novos}</span>` : ''}</button><button type="button" data-acao="aba-trab" data-a="meus" aria-pressed="${abaTrab === 'meus'}">Salvos</button><i></i></div>
+    <div class="seg" role="group" aria-label="Onde procurar" data-seg>${contaReal() ? '' : `<button type="button" data-acao="aba-trab" data-a="mural" aria-pressed="${abaTrab === 'mural'}">Mural</button>`}<button type="button" data-acao="aba-trab" data-a="internet" aria-pressed="${abaTrab === 'internet'}">Na internet ${SELO_PRO}${novos ? ` <span class="novo-badge">${novos}</span>` : ''}</button><button type="button" data-acao="aba-trab" data-a="meus" aria-pressed="${abaTrab === 'meus'}">Salvos</button><i></i></div>
     <div style="margin-top:12px">${corpo}</div>`;
 };
 ACOES['aba-trab'] = (b) => { abaTrab = b.dataset.a; if (abaTrab === 'internet' && !db.achados) buscarAchados(); repinta(); };
@@ -689,7 +693,7 @@ function navegar() {
   }
 }
 function barraBadges() {
-  const n = (db.achados || []).filter((a) => a.novo).length + db.pedidos.filter((p) => !p.interesse && dias(p.data.slice(0, 10)) === 0 && meusOficios(eu()).some((o) => o.id === p.of)).length;
+  const n = (db.achados || []).filter((a) => a.novo).length + pedidosVis().filter((p) => !p.interesse && dias(p.data.slice(0, 10)) === 0 && meusOficios(eu()).some((o) => o.id === p.of)).length;
   const a = $('[data-tambor="trabalhos"]'); if (!a) return; let b = $('.pc-selo', a);
   if (n) { if (!b) { b = document.createElement('span'); b.className = 'pc-selo'; a.lastElementChild.replaceWith(b); } b.textContent = n; }
 }
