@@ -556,6 +556,13 @@
     };
   }
   window.__veltriaAnon = anonimizador; // usado pelo teste automático
+  // Atria: achados de trabalho reais (função achar-trabalho no servidor; a chave do buscador fica lá)
+  if (app === 'atria') window.atriaAcharTrabalho = function (o) {
+    return cliente().then(function (sb) { return sb.functions.invoke('achar-trabalho', { body: { cidade: o.cidade, oficios: o.oficios } }); }).then(function (r) {
+      if (r.error) return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { throw new Error(j.erro || 'falhou'); });
+      return (r.data && r.data.achados) || [];
+    });
+  };
   window.veltriaIA = function (pergunta) {
     if (window.veltriaMarca) window.veltriaMarca('ia');
     var d = window.veltriaDados ? window.veltriaDados() : JSON.parse(texto(NS) || '{}'), ver = (window.VELTRIA_VERSOES || {})[app] || {};
