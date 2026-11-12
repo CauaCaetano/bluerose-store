@@ -132,18 +132,145 @@ function exemplosAchados(ofs, cidade) {
   }));
   return out;
 }
+// ------------------------------------------------------------------ créditos do Achar trabalho
+// 50 atualizações grátis por mês por pessoa (o que já foi buscado na cidade nas últimas 12 h não conta). Depois disso,
+// ou quando o grátis de todos os assinantes do mês acaba, só com créditos pagos: Pix com QR na tela ou cartão no
+// Mercado Pago (função atria-creditos). Os créditos entram sozinhos quando o pagamento é aprovado.
+// Na demonstração tudo é simulado no aparelho e começa em 2 de 50, para mostrar o que acontece quando acaba.
+const ehReal = () => typeof window.atriaAcharTrabalho === 'function';
+const PACOTES_DEMO = [{ id: 'r10', valor: 10, qtd: 59 }, { id: 'r25', valor: 25, qtd: 149 }, { id: 'r50', valor: 50, qtd: 299 }];
+const PEND = 'atria-credito-pendente';
+let cred = null, travado = '', escolhaPac = 'r10';
+const lerPend = () => { try { return localStorage.getItem(PEND) || ''; } catch { return ''; } };
+const gravarPend = (id) => { try { if (id) localStorage.setItem(PEND, id); else localStorage.removeItem(PEND); } catch { /* sem acesso */ } };
+function credDemo() {
+  db.credDemo = db.credDemo || { usadas: 48, saldo: 0 };
+  return { gratis_mes: 50, gratis_restantes: Math.max(0, 50 - db.credDemo.usadas), gratis_global_acabou: false, saldo: db.credDemo.saldo, pacotes: PACOTES_DEMO };
+}
+const podeBuscar = (c) => !!c && ((c.gratis_restantes > 0 && !c.gratis_global_acabou) || c.saldo > 0);
+const motivoTrava = (c) => (c && c.gratis_global_acabou && c.gratis_restantes > 0 ? 'As buscas grátis do mês acabaram; compre créditos para continuar.' : `Suas ${(c && c.gratis_mes) || 50} atualizações grátis deste mês acabaram; compre créditos para continuar.`);
+function juntaCred(d) {
+  if (!d) return;
+  const n = {}; ['gratis_mes', 'gratis_restantes', 'gratis_global_acabou', 'saldo', 'pacotes'].forEach((k) => { if (d[k] !== undefined) n[k] = d[k]; });
+  cred = { ...(cred || {}), ...n };
+  travado = podeBuscar(cred) ? '' : travado || motivoTrava(cred); // sem grátis e sem crédito: a tela já abre travada
+}
+let credEm = 0;
+async function carregarCred() {
+  if (Date.now() - credEm < 60e3) return; // no máximo 1 vez por minuto (a tela se redesenha muitas vezes)
+  credEm = Date.now();
+  const antes = JSON.stringify([cred, travado]);
+  try { juntaCred(ehReal() ? await window.atriaCreditos.saldo() : credDemo()); } catch { /* sem conexão: fica como está */ }
+  const pend = ehReal() && lerPend();
+  if (pend) {
+    try { const d = await window.atriaCreditos.conferir(pend); if (d.status === 'paga') liberado(d); else if (d.status !== 'pendente') gravarPend(''); } catch { /* confere depois */ }
+  }
+  if (JSON.stringify([cred, travado]) !== antes && rotaAtual().nome === 'trabalhos' && abaTrab === 'internet') setTimeout(repinta, 0);
+}
+function liberado(d) {
+  gravarPend(''); juntaCred(d); travado = '';
+  const f = folhaAtual(); if (f && f.el.dataset.pagamento) f.fechar();
+  vibra(); toast(`Créditos liberados${d && d.qtd ? `: +${d.qtd} atualizações` : ''}`);
+  if (rotaAtual().nome === 'trabalhos') repinta();
+}
+const precoBR = (v) => `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+function blocoCreditos() {
+  const c = cred; if (!c) return '';
+  const linha = `<p class="mudo cred-linha" style="font-size:13px;margin:8px 0 0"><b style="color:var(--grafite)">${c.gratis_restantes} de ${c.gratis_mes}</b> grátis neste mês · <b style="color:var(--grafite)">${c.saldo}</b> ${c.saldo === 1 ? 'crédito' : 'créditos'} <button type="button" class="bt leve p" data-acao="comprar-creditos" style="margin-left:4px">${ico('moeda')}Comprar</button></p>`;
+  if (!travado) return linha;
+  const pacs = c.pacotes || PACOTES_DEMO;
+  return `${linha}<div class="cartao trava-cred" role="status" style="margin-top:12px;border:2px solid var(--trena);text-align:center">
+    <div aria-hidden="true" style="color:var(--trena)">${ico('lupa', 'width="34" height="34"')}</div>
+    <h3 style="margin:6px 0 4px">Suas buscas grátis do mês acabaram</h3>
+    <p style="margin:0 0 12px;font-size:14px;color:var(--grafite2)">${c.gratis_global_acabou && c.gratis_restantes > 0 ? 'As buscas grátis do mês acabaram para todos os assinantes; compre créditos para continuar.' : `Você já usou as ${c.gratis_mes} atualizações grátis deste mês. Compre créditos para continuar buscando.`} Os botões do Google e do Facebook continuam valendo de graça.</p>
+    ${opcoesPacotes(pacs)}
+    <div class="acoes" style="justify-content:center"><button type="button" class="bt cheio" data-acao="pagar-creditos" data-forma="pix">${ico('pix')}Pagar com Pix</button><button type="button" class="bt leve" data-acao="pagar-creditos" data-forma="cartao">${ico('moeda')}Cartão</button></div>
+    <p class="mudo" style="font-size:12px;margin:8px 0 0">1 crédito = 1 atualização. Os créditos não vencem e entram sozinhos quando o pagamento for aprovado.</p></div>`;
+}
+function opcoesPacotes(pacs) {
+  if (!pacs.some((p) => p.id === escolhaPac)) escolhaPac = pacs[0].id;
+  return `<div role="radiogroup" aria-label="Pacote de créditos" style="display:grid;grid-template-columns:repeat(${pacs.length},1fr);gap:8px;margin-bottom:12px">${pacs.map((p) => `<button type="button" class="chip" role="radio" data-acao="escolher-pacote" data-p="${t(p.id)}" aria-checked="${p.id === escolhaPac}" aria-pressed="${p.id === escolhaPac}" style="min-height:64px;border-radius:14px;padding:8px 4px;white-space:normal;text-align:center"><span style="display:block;font-family:var(--f-num);font-size:17px;font-weight:700">${precoBR(p.valor)}</span><span style="display:block;font-size:11.5px;font-weight:500;line-height:1.25;margin-top:2px">${p.qtd} atualizações</span></button>`).join('')}</div>`;
+}
+ACOES['escolher-pacote'] = (b) => { escolhaPac = b.dataset.p; const f = folhaAtual(); if (f && f.el.contains(b)) { $$('[data-acao="escolher-pacote"]', f.el).forEach((x) => { x.setAttribute('aria-pressed', x === b); x.setAttribute('aria-checked', x === b); }); } else repinta(); };
+ACOES['comprar-creditos'] = () => abrirCreditos();
+ACOES['pagar-creditos'] = (b) => pagarCreditos(escolhaPac, b.dataset.forma);
+function abrirCreditos() {
+  const c = cred || (ehReal() ? null : credDemo()); const pacs = (c && c.pacotes) || PACOTES_DEMO;
+  folha({ titulo: 'Créditos de busca', corpo: `<p style="margin:0 0 10px">${c ? `Você tem <b>${c.gratis_restantes} de ${c.gratis_mes}</b> atualizações grátis neste mês e <b>${c.saldo}</b> ${c.saldo === 1 ? 'crédito' : 'créditos'}.` : ''} Cada crédito é uma atualização do Achar trabalho.</p>${opcoesPacotes(pacs)}
+      <p class="explica"><b>Como funciona:</b> pague com Pix (o QR aparece aqui) ou com cartão no Mercado Pago. Quando o pagamento for aprovado, os créditos entram sozinhos e não vencem.${ehReal() ? '' : ' Na demonstração o pagamento é simulado.'}</p>`,
+    pe: `<button type="button" class="bt leve" data-forma="cartao">${ico('moeda')}Cartão</button><button type="button" class="bt cheio" data-forma="pix" style="flex:2">${ico('pix')}Pagar com Pix</button>`,
+    aoAbrir: (f) => { $$('[data-forma]', f).forEach((x) => { x.onclick = () => pagarCreditos(escolhaPac, x.dataset.forma); }); } });
+}
+let relogioPag = null;
+async function pagarCreditos(pacoteId, forma) {
+  const pacs = (cred && cred.pacotes) || PACOTES_DEMO, p = pacs.find((x) => x.id === pacoteId) || pacs[0];
+  clearInterval(relogioPag);
+  if (!ehReal()) { // demonstração: QR de mentira e aprovação em 4 segundos
+    const api = folhaPagamento({ forma, p, qr_code: 'Pix de demonstração do Atria: nenhum valor é cobrado.', demo: true });
+    relogioPag = setTimeout(() => { if (!api.el.isConnected) return; db.credDemo = db.credDemo || { usadas: 50, saldo: 0 }; db.credDemo.saldo += p.qtd; grava(); liberado({ ...credDemo(), qtd: p.qtd }); }, 4000);
+    return;
+  }
+  let r;
+  try { toast('Gerando o pagamento…'); r = await window.atriaCreditos.comprar(p.id, forma); } catch (e) { toast(e.message && e.message !== 'falhou' ? e.message : 'Não deu para gerar o pagamento agora. Tente de novo.', 'erro'); return; }
+  gravarPend(r.id);
+  if (forma === 'cartao' && r.link) window.open(r.link, '_blank', 'noopener');
+  const api = folhaPagamento({ forma, p: { ...p, valor: r.valor, qtd: r.qtd }, ...r });
+  const ate = Date.now() + (forma === 'pix' ? 3 : 10) * 60e3;
+  const confere = async () => {
+    if (!api.el.isConnected || Date.now() > ate) { clearInterval(relogioPag); const s = $('[data-status]', api.el); if (s) s.textContent = 'Ainda não chegou. Se você já pagou, os créditos entram sozinhos assim que o banco confirmar.'; return; }
+    try { const d = await window.atriaCreditos.conferir(r.id); if (d.status === 'paga') { clearInterval(relogioPag); liberado(d); } else if (d.status !== 'pendente') { clearInterval(relogioPag); gravarPend(''); const s = $('[data-status]', api.el); if (s) s.textContent = 'Este pagamento foi cancelado ou expirou. Gere outro.'; } } catch { /* tenta de novo */ }
+  };
+  relogioPag = setInterval(confere, 5000);
+}
+function folhaPagamento({ forma, p, qr_code, qr_base64, link, id, demo }) {
+  const pix = forma === 'pix';
+  return folha({ titulo: pix ? 'Pagar com Pix' : 'Pagar com cartão',
+    corpo: `<p style="margin:0 0 8px;text-align:center"><b style="font-size:20px">${precoBR(p.valor)}</b><br><span class="mudo">${p.qtd} atualizações do Achar trabalho</span></p>
+      ${pix ? `<div style="display:grid;place-items:center;margin:8px 0 12px"><div data-qr style="background:#fff;padding:10px;border-radius:16px;box-shadow:var(--sombra);width:220px;height:220px">${qr_base64 ? `<img src="data:image/png;base64,${qr_base64}" alt="QR Code do Pix" width="200" height="200" style="display:block;width:200px;height:200px">` : qrSVG(qr_code, 200, '#2E333B')}</div></div>
+      <p style="font-size:12px;margin:0 0 4px" class="mudo">Pix copia e cola</p><p class="num" style="font-size:11.5px;word-break:break-all;background:var(--aparas);border-radius:12px;padding:10px;margin:0">${t(qr_code)}</p>`
+      : demo ? '<p class="explica"><b>Demonstração:</b> na sua conta, o Mercado Pago abre para você pagar com cartão e os créditos entram sozinhos quando for aprovado.</p>'
+      : `<p class="explica"><b>O Mercado Pago abriu em outra aba.</b> Termine o pagamento lá e volte para cá: os créditos entram sozinhos.${link ? ` <a href="${t(link)}" target="_blank" rel="noopener noreferrer">Abrir de novo</a>` : ''}</p>`}
+      <p data-status role="status" aria-live="polite" style="text-align:center;font-weight:600;margin:12px 0 0">${demo ? 'Demonstração: o pagamento vai ser aprovado em instantes…' : 'Aguardando o pagamento…'}</p>`,
+    pe: `${pix ? `<button type="button" class="bt leve p" data-cancela>Cancelar</button><button type="button" class="bt cheio" data-copia style="flex:2">${ico('copiar')}Copiar código Pix</button>` : '<button type="button" class="bt cheio largo" data-fechar>Já paguei</button>'}`,
+    aoAbrir: (f, api) => {
+      f.dataset.pagamento = '1';
+      const cc = $('[data-copia]', f); if (cc) cc.onclick = () => copiar(qr_code);
+      const ca = $('[data-cancela]', f); if (ca) ca.onclick = async () => { clearInterval(relogioPag); api.fechar(); if (!demo && id) { gravarPend(''); try { await window.atriaCreditos.cancelar(id); } catch { /* expira sozinho em 30 min */ } } };
+    },
+    aoFechar: () => { if (forma !== 'pix' && !demo) setTimeout(() => { credEm = 0; carregarCred(); }, 1500); } });
+}
+
 let buscandoAchados = false, relogioAchados = null;
 async function buscarAchados(manual) {
-  if (buscandoAchados) return; buscandoAchados = true;
+  if (buscandoAchados) return;
+  // demonstração: conta as atualizações tocadas (as automáticas não contam)
+  if (!ehReal() && manual) {
+    const c = credDemo();
+    if (!podeBuscar(c)) { juntaCred(c); travado = motivoTrava(c); repinta(); abrirCreditos(); return; }
+    if (c.gratis_restantes > 0) db.credDemo.usadas++; else { db.credDemo.saldo--; toast(`1 crédito usado · restam ${db.credDemo.saldo}`); }
+    juntaCred(credDemo()); grava();
+  }
+  buscandoAchados = true;
   const cidade = db.buscaCidade || eu().cidade, ofs = (db.buscaOficios && db.buscaOficios.length ? db.buscaOficios : meusOficios(eu()).map((x) => x.id));
-  let lista;
+  let lista, erro = null;
   try {
     // na conta: função de servidor "achar-trabalho" (chave do buscador fica no servidor; cache por cidade para dividir a cota)
-    if (typeof window.atriaAcharTrabalho === 'function') lista = await window.atriaAcharTrabalho({ cidade, oficios: ofs, consulta: consultaDe(ofs, cidade) });
+    if (ehReal()) lista = await window.atriaAcharTrabalho({ cidade, oficios: ofs, auto: !manual });
     else { await new Promise((ok) => setTimeout(ok, 700)); lista = exemplosAchados(ofs, cidade); }
-  } catch { lista = null; }
+  } catch (e) { lista = null; erro = e; }
   buscandoAchados = false;
-  if (!lista) { if (manual) toast('Não deu para buscar agora. Tente de novo.', 'erro'); return; }
+  if (lista && lista.info) { juntaCred(lista.info); if (lista.info.pago) toast(`1 crédito usado · restam ${lista.info.saldo}`); }
+  if (!lista) {
+    const d = (erro && erro.dados) || {};
+    if (d.precisa_creditos || d.auto) {
+      juntaCred(d);
+      if (d.precisa_creditos) { travado = d.erro || motivoTrava(cred); if (manual) abrirCreditos(); }
+      if (rotaAtual().nome === 'trabalhos') repinta();
+      return;
+    }
+    if (manual) toast(d.erro || 'Não deu para buscar agora. Tente de novo.', 'erro');
+    return;
+  }
   const antes = new Set((db.achados || []).map((a) => a.id)), vistos = db.achadosVistos || {};
   const unicos = []; const ja = new Set();
   lista.forEach((a) => { const k = a.link + a.titulo; if (ja.has(k)) return; ja.add(k); unicos.push({ ...a, novo: !antes.has(a.id) && !vistos[a.id] && !!db.achados }); });
@@ -164,14 +291,15 @@ function cartaoAchado(a) {
 function telaAchados() {
   const cidade = db.buscaCidade || eu().cidade, ofs = db.buscaOficios && db.buscaOficios.length ? db.buscaOficios : meusOficios(eu()).map((x) => x.id), q = consultaDe(ofs, cidade);
   const real = typeof window.atriaAcharTrabalho === 'function';
-  return `<p class="explica"><b>De onde vêm os achados:</b> o Atria procura na internet, para a sua cidade e o seu ofício, <b>vagas de emprego</b> (Indeed, BNE, Catho e outros), <b>sites de pedidos de orçamento</b> (GetNinjas, Cronoshare) e <b>grupos do Facebook</b> onde clientes pedem serviço. O Facebook não mostra os posts dos grupos para buscadores: toque em Abrir, entre no grupo e veja os pedidos. ${real ? 'Atualiza algumas vezes por dia.' : 'Na demonstração os achados são exemplos, mas o botão abre a pesquisa de verdade no Google ou no Facebook com a mesma busca.'}</p>
+  return `<p class="explica"><b>De onde vêm os achados:</b> o Atria procura na internet, para a sua cidade e o seu ofício, <b>vagas de emprego</b> (Indeed, BNE, Catho e outros), <b>sites de pedidos de orçamento</b> (GetNinjas, Cronoshare) e <b>grupos do Facebook</b> onde clientes pedem serviço. O Facebook não mostra os posts dos grupos para buscadores: toque em Abrir, entre no grupo e veja os pedidos. ${real ? 'São 50 atualizações grátis por mês; depois, créditos pagos.' : 'Na demonstração os achados são exemplos, mas o botão abre a pesquisa de verdade no Google ou no Facebook com a mesma busca.'}</p>
     <div class="cartao"><div class="duas"><label class="campo"><span>Cidade</span><input data-busca-cid value="${t(cidade)}"></label><label class="campo"><span>Ofícios</span><input value="${t(ofs.map(nomeOf).join(', '))}" readonly data-acao="ofs-busca" style="cursor:pointer"></label></div>
       <small class="mudo" style="display:block;font-size:12px;word-break:break-word">Busca: <span class="num" style="font-size:11.5px">${t(q)}</span></small>
       <div class="acoes"><button type="button" class="bt p" data-acao="atualizar-achados">${ico('recarregar')}${buscandoAchados ? 'Buscando…' : 'Atualizar'}</button><a class="bt leve p" target="_blank" rel="noopener noreferrer" href="${linkGoogle(q)}">${ico('globo')}Google</a><a class="bt leve p" target="_blank" rel="noopener noreferrer" href="${linkFacebook(q)}">f Facebook</a><button type="button" class="bt leve p" data-acao="avisar-achados">${ico('sino')}Avisar</button></div></div>
+    ${blocoCreditos()}
     <div class="lista" style="margin-top:12px">${db.achados ? db.achados.map(cartaoAchado).join('') || '<div class="vazio"><b>Nada achado agora</b>Tente outra cidade ou ofício.</div>' : '<div class="vazio"><b>Buscando…</b></div>'}</div>
     ${db.achadosEm ? `<p class="mudo" style="font-size:12px">Última busca ${haQuanto(db.achadosEm)}.</p>` : ''}`;
 }
-ACOES['atualizar-achados'] = () => buscarAchados(true);
+ACOES['atualizar-achados'] = () => { if (travado && !podeBuscar(cred)) abrirCreditos(); else buscarAchados(true); };
 ACOES['abriu-achado'] = (a) => { (db.achadosVistos = db.achadosVistos || {})[a.dataset.id] = 1; const x = (db.achados || []).find((y) => y.id === a.dataset.id); if (x) x.novo = false; grava(); setTimeout(() => { barraBadges(); }, 50); return 'segue'; };
 ACOES['visto-achado'] = (b) => { (db.achadosVistos = db.achadosVistos || {})[b.dataset.id] = 1; const x = (db.achados || []).find((y) => y.id === b.dataset.id); if (x) x.novo = false; grava(); barraBadges(); repinta(); };
 ACOES['salvar-achado'] = (b) => { db.achadosSalvos = db.achadosSalvos || {}; const x = (db.achados || []).find((y) => y.id === b.dataset.id) || db.achadosSalvos[b.dataset.id]; if (db.achadosSalvos[b.dataset.id]) delete db.achadosSalvos[b.dataset.id]; else if (x) db.achadosSalvos[b.dataset.id] = { ...x, novo: false }; grava(); vibra(); repinta(); };
@@ -527,6 +655,7 @@ function ligarComparadores(el) {
 function ligarAchados(nome) {
   clearInterval(relogioAchados); relogioAchados = null;
   if (nome !== 'trabalhos') return;
+  carregarCred();
   if (!db.achados || Date.now() - new Date(db.achadosEm || 0).getTime() > 15 * 6e4) buscarAchados();
   relogioAchados = setInterval(() => { if (!document.hidden) buscarAchados(); }, 15 * 6e4);
 }

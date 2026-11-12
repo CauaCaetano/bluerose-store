@@ -557,11 +557,24 @@
   }
   window.__veltriaAnon = anonimizador; // usado pelo teste automático
   // Atria: achados de trabalho reais (função achar-trabalho no servidor; a chave do buscador fica lá)
-  if (app === 'atria') window.atriaAcharTrabalho = function (o) {
-    return cliente().then(function (sb) { return sb.functions.invoke('achar-trabalho', { body: { cidade: o.cidade, oficios: o.oficios } }); }).then(function (r) {
-      if (r.error) return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { throw new Error(j.erro || 'falhou'); });
-      return (r.data && r.data.achados) || [];
+  // 50 atualizações grátis por mês; depois, créditos pagos (função atria-creditos, Pix ou cartão pelo Mercado Pago).
+  // O erro leva .dados com o que o servidor respondeu (precisa_creditos, gratis_restantes, saldo); a lista leva .info.
+  function chamaAtria(fn, body) {
+    return cliente().then(function (sb) { return sb.functions.invoke(fn, { body: body }); }).then(function (r) {
+      if (r.error) return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { var e = new Error(j.erro || 'falhou'); e.dados = j; throw e; });
+      return r.data || {};
     });
+  }
+  if (app === 'atria') window.atriaAcharTrabalho = function (o) {
+    return chamaAtria('achar-trabalho', { cidade: o.cidade, oficios: o.oficios, auto: !!o.auto }).then(function (d) {
+      var l = d.achados || []; l.info = { gratis_mes: d.gratis_mes, gratis_restantes: d.gratis_restantes, gratis_global_acabou: d.gratis_global_acabou, saldo: d.saldo, pago: d.pago }; return l;
+    });
+  };
+  if (app === 'atria') window.atriaCreditos = {
+    saldo: function () { return chamaAtria('atria-creditos', { acao: 'saldo' }); },
+    comprar: function (pacote, forma) { return chamaAtria('atria-creditos', { acao: 'comprar', pacote: pacote, forma: forma }); },
+    conferir: function (id) { return chamaAtria('atria-creditos', { acao: 'conferir', id: id }); },
+    cancelar: function (id) { return chamaAtria('atria-creditos', { acao: 'cancelar', id: id }); },
   };
   window.veltriaIA = function (pergunta) {
     if (window.veltriaMarca) window.veltriaMarca('ia');
