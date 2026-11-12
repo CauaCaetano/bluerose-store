@@ -17,7 +17,7 @@ Cada foto foi recortada em 4:3 e convertida para WebP em dois tamanhos: `<cena>-
 | fotos/pergolado-antes(-p).webp | Quintal gramado com cerca, sem cobertura | Shazard R. | https://www.pexels.com/photo/wooden-shed-on-a-backyard-11903184/ | Pexels License |
 | fotos/pergolado-depois(-p).webp | Pergolado de madeira com banco no quintal | Matheus Bertelli | https://www.pexels.com/photo/13871294/ | Pexels License |
 | fotos/painel-antes(-p).webp | Sala vazia com paredes lisas | Peter Vang | https://www.pexels.com/photo/spacious-empty-room-with-wooden-flooring-35493915/ | Pexels License |
-| fotos/painel-depois(-p).webp | Sala com painel de madeira com frisos e TV na parede | Max Vakhtbovych | https://www.pexels.com/photo/7214461/ | Pexels License |
+| fotos/painel-depois(-p).webp | Painel ripado de madeira (ripas verticais espaçadas) com TV e rack branco suspenso | sheela sahani | https://unsplash.com/photos/mJk3xEjXnBU | Unsplash License |
 | fotos/escada-antes(-p).webp | Escada crua, sem revestimento, em ambiente branco | Shobhit Sharma | https://unsplash.com/photos/GER0LhJY37Q | Unsplash License |
 | fotos/escada-depois(-p).webp | Escada com degraus de madeira e corrimão | Srattha Nualsate | https://www.pexels.com/photo/wooden-staircase-with-ornamented-railing-in-a-house-13005094/ | Pexels License |
 | fotos/prateleira-antes(-p).webp | Parede branca vazia sobre piso de madeira | Designecologist | https://www.pexels.com/photo/wooden-flooring-against-white-wall-15226296/ | Pexels License |
@@ -31,7 +31,7 @@ Cada foto foi recortada em 4:3 e convertida para WebP em dois tamanhos: `<cena>-
 | fotos/fachada-antes(-p).webp | Casa térrea com pintura velha e desbotada (Antonina, PR) | Celine Santana | https://www.pexels.com/photo/28484028/ | Pexels License |
 | fotos/fachada-depois(-p).webp | Fachada de casa térrea recém-pintada | Ítalo Delani Lopez | https://www.pexels.com/photo/37993379/ | Pexels License |
 | fotos/quadro-antes(-p).webp | Quadro de luz aberto com fiação embolada | Ksenia Chernaya | https://www.pexels.com/photo/5767595/ | Pexels License |
-| fotos/quadro-depois(-p).webp | Quadro de disjuntores organizado, fios identificados por cor | ranjeet | https://www.pexels.com/photo/28950842/ | Pexels License |
+| fotos/quadro-depois(-p).webp | Quadro de disjuntores organizado, fios identificados por cor (recorte da parte de baixo, sem as etiquetas dos disjuntores) | ranjeet | https://www.pexels.com/photo/28950842/ | Pexels License |
 
 ## Vídeos
 

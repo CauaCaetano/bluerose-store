@@ -158,7 +158,7 @@ export function cenaDesenho(tipo, estado = 'depois') {
 }
 // 12/11/2026: os exemplos usam fotos reais de banco gratuito (Pexels/Unsplash, ver CREDITOS.md), 4:3, com o selo
 // "foto ilustrativa". mini = miniatura de 400 px (grades e listas). Se a foto falhar, aparece o desenho.
-export const fotoCena = (tipo, estado = 'depois', mini = false) => `fotos/${CENAS[tipo] ? tipo : 'guarda-roupa'}-${estado}${mini ? '-p' : ''}.webp?v=1`;
+export const fotoCena = (tipo, estado = 'depois', mini = false) => `fotos/${CENAS[tipo] ? tipo : 'guarda-roupa'}-${estado}${mini ? '-p' : ''}.webp?v=2`;
 export function cena(tipo, estado = 'depois', mini = false) {
   const c = CENAS[tipo] || CENAS['guarda-roupa'];
   return `<span class="cena-foto"><img src="${fotoCena(tipo, estado, mini)}" alt="${c.nome}, ${estado} (foto ilustrativa)" loading="lazy" decoding="async" width="${mini ? 400 : 1200}" height="${mini ? 300 : 900}" onerror="this.parentNode.classList.add('falhou')"><i>foto ilustrativa</i>${cenaDesenho(tipo, estado)}</span>`;
