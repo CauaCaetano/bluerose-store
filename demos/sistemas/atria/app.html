@@ -19,7 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Rethink+Sans:wght@400;500;600;700&family=Azeret+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilo.css?v=8">
 <link rel="stylesheet" href="conceitos.css?v=5">
-<link rel="stylesheet" href="mais.css?v=4">
+<link rel="stylesheet" href="mais.css?v=5">
 <script>
 // No computador o Atria aparece dentro de uma moldura de celular, com o QR para abrir no celular.
 // Dentro da moldura (iframe), no celular e no app instalado, abre normal. ?celular força o app sem moldura.
@@ -28,6 +28,12 @@
   var instalado = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   var grande = matchMedia('(min-width: 760px)').matches && matchMedia('(hover: hover) and (pointer: fine)').matches;
   if (!dentro && !instalado && grande && !q.has('celular') && !q.has('conta')) window.atriaMoldura = true;
+  // O app foi desenhado para 390 px: em celular mais estreito tudo encolhe na mesma proporção (até 80%),
+  // para nada quebrar linha nem cortar. Recalcula ao girar a tela. Fora da moldura do computador.
+  if (!window.atriaMoldura) {
+    var ajusta = function () { var w = Math.min(innerWidth, screen.width || innerWidth); document.documentElement.style.zoom = Math.max(0.8, Math.min(1, w / 390)).toFixed(3); };
+    ajusta(); addEventListener('resize', ajusta); addEventListener('orientationchange', ajusta);
+  }
 })();
 </script>
 <script src="../base/versoes.js?v=48"></script>

@@ -157,3 +157,8 @@
 
 /* clima do RDO: quebra a linha em vez de rolar */
 .mx-chips-quebra { flex-wrap: wrap; overflow: visible; }
+
+/* 12/11: quebra de linha equilibrada em botões, títulos e rótulos (nada de uma palavra sozinha na linha de baixo) */
+.bt, button, h1, h2, h3, .atalho, .linha .txt b { text-wrap: balance; }
+p, small, li, .explica { text-wrap: pretty; }
+.atalho small { text-wrap: balance; }
