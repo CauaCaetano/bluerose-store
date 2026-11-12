@@ -22,5 +22,17 @@
         "60:CA:D4:12:2F:3A:17:05:4E:9E:81:35:A8:A0:F2:EC:36:7A:8F:13:01:97:6A:39:BE:54:0B:AE:D6:16:55:61"
       ]
     }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bluerosestore.atria",
+      "sha256_cert_fingerprints": [
+        "E7:A8:97:1D:90:75:66:54:B1:8A:F5:08:90:8F:4B:FD:CD:0C:D6:4C:30:1E:17:C0:BB:9D:DB:25:19:82:6A:53"
+      ]
+    }
   }
 ]

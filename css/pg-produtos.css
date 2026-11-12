@@ -277,3 +277,9 @@
 html body .sis-botoes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
 html body .sis-botoes .btn-primary { grid-column: auto !important; grid-row: auto !important; }
 html body .sis-botoes .btn-texto { grid-column: 1 / -1 !important; }
+
+/* Atria: botão de instalar o app (APK) */
+.np-cta { flex-wrap: wrap; }
+.np-cta .btn-instalar { flex: 1 1 100%; max-width: 448px; justify-content: center; }
+.pp-instalar-nota { max-width: 448px; margin: .7rem 0 0; font-size: .86rem; line-height: 1.5; opacity: .8; }
+.pp-instalar-nota a { color: inherit; text-decoration: underline; }
