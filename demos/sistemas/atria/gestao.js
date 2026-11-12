@@ -1,11 +1,12 @@
 // Atria · gestão: obras, orçamento, proposta comercial, cobrança com Pix, materiais, lojas, preços, clientes,
 // financeiro, ferramentas de bancada e mensagens prontas.
-import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js';
-import { cena, TIPOS_CENA } from './cenas.js';
-import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js';
-import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js';
+import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=12';
+import { cena, TIPOS_CENA } from './cenas.js?v=12';
+import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=12';
+import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=12';
+import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=12';
 import { qrSVG } from '../base/qr.js';
-import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js';
+import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=12';
 
 // jeitos de cobrar: os do ofício da obra (ou da pessoa) primeiro, depois os outros
 export const modosObra = (o) => [...new Set([...((OFICIOS[o.oficio] || {}).cobra || []), ...juntar(db.perfil, 'cobra'), ...Object.keys(MODOS_COBRAR)])];
@@ -107,7 +108,7 @@ export function abrirMensagens(momento = 'contato', obraId = '', clienteId = '',
 // registro de projetos: A fazer (aprovado, ainda não começou), Em andamento e Feitos; orçamentos à parte
 export const GRUPOS_OBRA = { afazer: ['A fazer', (o) => o.status === 'aprovada'], andamento: ['Em andamento', (o) => o.status === 'andamento'], feitos: ['Feitos', (o) => o.status === 'concluida'], orcamento: ['Orçamentos', (o) => o.status === 'orcamento'] };
 export const contagemObras = () => Object.fromEntries(Object.entries(GRUPOS_OBRA).map(([k, [, f]]) => [k, db.obras.filter(f).length]));
-function fotoObra(o) { const f = [...(o.diario || [])].reverse().find((x) => x.foto); return f ? `<img src="${f.foto}" alt="" style="width:100%;height:100%;object-fit:cover">` : cena(o.tipo, o.status === 'concluida' ? 'depois' : 'antes'); }
+function fotoObra(o) { const f = [...(o.diario || [])].reverse().find((x) => x.foto); return f ? `<img src="${f.foto}" alt="" style="width:100%;height:100%;object-fit:cover">` : cena(o.tipo, o.status === 'concluida' ? 'depois' : 'antes', true); }
 function cartaoObra(o) {
   const c = cliente(o.cliente), tt = totais(o), feitas = o.etapas.filter((e) => e.feito).length, pct = o.etapas.length ? Math.round(feitas / o.etapas.length * 100) : 0;
   const datas = o.status === 'concluida' ? `feito em ${dataCurta(o.fim || o.prazo)}` : o.status === 'andamento' ? `começou ${dataCurta(o.inicio || o.criada)} · entrega ${dataCurta(o.prazo)}` : o.status === 'aprovada' ? `começa ${o.inicio ? dataCurta(o.inicio) : 'a combinar'} · entrega ${dataCurta(o.prazo)}` : `pedido em ${dataCurta(o.criada)}`;
@@ -203,7 +204,7 @@ TELAS.obra = (id) => {
     ${ganchos.desloc ? ganchos.desloc(o) : ''}
     <h2 class="sec">Diário da obra <button type="button" class="bt leve p" data-acao="diario" data-id="${o.id}">${ico('camera')}Registrar</button></h2>
     ${ganchos.rdo ? ganchos.rdo(o) : ''}
-    ${(o.diario || []).length ? `<div class="diario">${[...o.diario].reverse().map((x) => `<figure>${x.foto ? `<img src="${x.foto}" alt="">` : cena(o.tipo, 'antes')}<figcaption><b>${dataCurta(x.data)}</b>${t(x.nota || '')}</figcaption></figure>`).join('')}</div>` : '<p class="mudo">Tire uma foto por dia: vira prova do serviço e o antes e depois do portfólio.</p>'}
+    ${(o.diario || []).length ? `<div class="diario">${[...o.diario].reverse().map((x) => `<figure>${x.video ? htmlVideo(x.video, x.foto, 'Vídeo do diário') : x.foto ? `<img src="${x.foto}" alt="">` : cena(o.tipo, 'antes')}<figcaption><b>${dataCurta(x.data)}</b>${t(x.nota || '')}</figcaption></figure>`).join('')}</div>` : '<p class="mudo">Tire uma foto por dia: vira prova do serviço e o antes e depois do portfólio.</p>'}
     ${o.garantiaAte ? `<p class="explica"><b>Garantia até ${dataBR(o.garantiaAte)}.</b> O Atria lembra você de falar com o cliente perto do fim.</p>` : ''}
     <h2 class="sec">Histórico</h2>
     <div class="lista">${[...o.hist].reverse().map((h) => `<div style="display:flex;gap:10px;font-size:14px"><span class="num mudo" style="font-size:12px;min-width:46px">${dataCurta(h.data)}</span><span>${t(h.txt)}${h.fin ? ` <a class="bt leve p" href="#recibo/${h.fin}" style="min-height:30px;margin-left:6px">Recibo</a>` : ''}</span></div>`).join('')}</div>
@@ -240,14 +241,16 @@ ACOES['apagar-obra'] = (b) => confirmar('Apagar obra?', 'A obra, a lista de mate
   toast('Obra apagada', 'ok', { rotulo: 'Desfazer', fazer: () => { db.obras.splice(i, 0, o); grava(); repinta(); } });
 });
 ACOES.diario = (b) => {
-  const o = achar('obras', b.dataset.id); let foto = '';
-  folha({ titulo: 'Diário da obra', corpo: `<label class="foto-campo" style="display:block"><label style="display:grid;aspect-ratio:4/3"><b>Foto de hoje</b><span>${ico('camera', 'width="34" height="34"')}<br>Tirar foto</span><input type="file" accept="image/*" capture="environment" data-f></label></label>
+  const o = achar('obras', b.dataset.id); let foto = '', video = '';
+  folha({ titulo: 'Diário da obra', corpo: `<label class="foto-campo" style="display:block"><label style="display:grid;aspect-ratio:4/3"><b>Foto ou vídeo de hoje</b><span>${ico('camera', 'width="34" height="34"')}<br>Tirar foto ou gravar vídeo (até ${LIMITE_S} s)</span><input type="file" accept="image/*,video/*" capture="environment" data-f></label></label>
     <label class="campo" style="margin-top:12px"><span>O que foi feito</span><textarea data-n data-voz rows="3" placeholder="Ex.: assentei 12 m² e rejuntei a parede do box"></textarea></label>`,
     pe: '<button type="button" class="bt cheio largo" data-ok>Guardar no diário</button>',
     aoAbrir: (f, api) => {
       ligarVoz(f);
-      $('[data-f]', f).onchange = async (e) => { const a = e.target.files[0]; if (!a) return; foto = await new Promise((ok) => { const img = new Image(), u = URL.createObjectURL(a); img.onload = () => { const k = Math.min(1, 900 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = img.width * k; c.height = img.height * k; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); ok(c.toDataURL('image/jpeg', 0.72)); }; img.src = u; }); const l = e.target.closest('label'); l.querySelector('span').innerHTML = `<img src="${foto}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`; };
-      $('[data-ok]', f).onclick = () => { const nota = $('[data-n]', f).value.trim(); if (!foto && !nota) { toast('Tire uma foto ou escreva o que foi feito', 'erro'); return; } (o.diario = o.diario || []).push({ id: uid('d'), data: hoje(), nota, foto }); grava(); api.fechar(); repinta(); toast('Guardado no diário'); };
+      $('[data-f]', f).onchange = async (e) => { const a = e.target.files[0]; if (!a) return;
+        if (ehVideo(a)) { try { toast('Preparando o vídeo…'); const r = await guardarArquivoVideo(a, uid('v')); foto = r.capa; video = r.video; e.target.closest('label').querySelector('span').innerHTML = `<span style="position:absolute;inset:0">${htmlVideo(video, foto)}</span>`; } catch (x) { toast(x.message || 'Não deu para ler esse vídeo', 'erro'); } return; }
+        video = ''; foto = await new Promise((ok) => { const img = new Image(), u = URL.createObjectURL(a); img.onload = () => { const k = Math.min(1, 900 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = img.width * k; c.height = img.height * k; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); ok(c.toDataURL('image/jpeg', 0.72)); }; img.src = u; }); const l = e.target.closest('label'); l.querySelector('span').innerHTML = `<img src="${foto}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`; };
+      $('[data-ok]', f).onclick = () => { const nota = $('[data-n]', f).value.trim(); if (!foto && !nota) { toast('Tire uma foto ou escreva o que foi feito', 'erro'); return; } (o.diario = o.diario || []).push({ id: uid('d'), data: hoje(), nota, foto, ...(video ? { video } : {}) }); grava(); api.fechar(); repinta(); toast('Guardado no diário'); };
     } });
 };
 ACOES.mensagens = (b) => abrirMensagens(b.dataset.m || 'contato', b.dataset.o || '', b.dataset.c || '');
@@ -771,7 +774,7 @@ TELAS.ferramentas = () => {
     <a class="bloco" href="#modelo"><span class="ic">${ico('lista')}</span><span><b>Lista por modelo</b><small>Medidas viram lista de material (${juntar(db.perfil, 'modelos').map((m) => MODELOS[m].nome.toLowerCase()).slice(0, 2).join(', ') || 'vários serviços'}…)</small></span></a>
     <button type="button" class="bloco" data-acao="mensagens"><span class="ic">${ico('zap')}</span><span><b>Mensagens</b><small>Prontas para cada momento da obra</small></span></button>
     <button type="button" class="bloco" data-acao="pix"><span class="ic">${ico('pix')}</span><span><b>Cobrar no Pix</b><small>QR e copia e cola com a sua chave</small></span></button>
-    <a class="bloco" href="#precos"><span class="ic">${ico('moeda')}</span><span><b>Preços</b><small>Onde cada material está mais barato</small></span></a>
+    <a class="bloco" href="#precos"><span class="ic">${ico('moeda')}</span><span><b>Preços <span class="selo-pro">Pro</span></b><small>Onde cada material está mais barato</small></span></a>
     <a class="bloco" href="#medidas"><span class="ic">${ico('regua')}</span><span><b>Medidas</b><small>Polegada, m², m³ de madeira</small></span></a>
     ${outras.map((k) => bloco(k, false)).join('')}
   </div>`;

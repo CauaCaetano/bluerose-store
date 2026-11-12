@@ -2,10 +2,10 @@
 // fuste (3 ações largas caneladas), 3 blocos e a base (lucro do mês, toque abre o Dinheiro); a coluna se ergue ao abrir.
 // A navegação é a base da coluna: 3 degraus (Início, Vitrine, Gestão).
 // Regras: 1 número em destaque, 6 ações grandes (ícone + 1 palavra), próxima ação em 1 frase, toque de 56 px ou mais.
-import { $, $$, t, din, dinCurto, hoje, dias, ico, db, grava, uid, sa, toast, repinta, ir, vibra, somaDias, achar } from './base.js';
-import { MODOS_COBRAR, meusOficios, principal, nomeOficios } from './oficios.js';
-import { totais, cliente, somaPeriodo, intervalo, cobrarPix, SERVICOS_SUGERIDOS, CENA_DO_OFICIO, contagemObras } from './gestao.js';
-import { OFICIOS } from './oficios.js';
+import { $, $$, t, din, dinCurto, hoje, dias, ico, db, grava, uid, sa, toast, repinta, ir, vibra, somaDias, achar } from './base.js?v=12';
+import { MODOS_COBRAR, meusOficios, principal, nomeOficios } from './oficios.js?v=12';
+import { totais, cliente, somaPeriodo, intervalo, cobrarPix, SERVICOS_SUGERIDOS, CENA_DO_OFICIO, contagemObras } from './gestao.js?v=12';
+import { OFICIOS } from './oficios.js?v=12';
 
 export const CONCEITO = 'c';
 

@@ -549,3 +549,37 @@ html.letra-grande .folha .duas, html.letra-grande .folha .dois-num { grid-templa
 @keyframes marcaPop { 0% { transform: scale(1); } 40% { transform: scale(1.3); } 100% { transform: scale(1); } }
 .acabou-marcar svg, .acabou-marcar .caixa { animation: marcaPop .32s cubic-bezier(.3,1.6,.5,1); }
 @media (prefers-reduced-motion: reduce) { .acabou-marcar svg, .acabou-marcar .caixa { animation: none; } }
+
+/* plano Pro (12/11/2026): selo nos itens do Pro e painel para quem está no Básico */
+.selo-pro { display: inline-flex; align-items: center; font: 700 10px/1 var(--f-txt); text-transform: uppercase; letter-spacing: .08em; color: #2E333B; background: linear-gradient(135deg, #E9C98B, #C99A4A); border-radius: 999px; padding: 4px 7px; vertical-align: middle; white-space: nowrap; }
+.selo-pro.grande { font-size: 11.5px; padding: 6px 11px; }
+.pro-trava { text-align: center; border: 2px solid #C99A4A; padding: 18px 16px; }
+.pro-trava h3 { margin: 10px 0 6px; }
+.pro-trava p { margin: 0 0 10px; color: var(--grafite2); font-size: 14px; }
+.pro-trava ul { list-style: none; padding: 0; margin: 0 0 14px; text-align: left; display: grid; gap: 8px; font-size: 14px; }
+.pro-trava li { display: flex; gap: 8px; align-items: flex-start; }
+.pro-trava li svg { flex: none; margin-top: 2px; color: #B08236; }
+.pro-trava small { display: block; margin-top: 8px; color: var(--grafite2); font-size: 12px; }
+
+/* exemplos com foto real (12/11/2026): foto ilustrativa 4:3 com selo discreto; o desenho só aparece se a foto falhar */
+.cena-foto { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; background: var(--lixa, #e8e2d8); }
+.cena-foto > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.cena-foto > svg.cena { display: none; width: 100%; height: 100%; }
+.cena-foto.falhou > img, .cena-foto.falhou > i { display: none; }
+.cena-foto.falhou > svg.cena { display: block; }
+.cena-foto > i { position: absolute; right: 6px; bottom: 6px; font: 600 9.5px/1 var(--f-txt); font-style: normal; letter-spacing: .02em; color: #fff; background: rgba(20, 22, 26, .55); padding: 3px 6px; border-radius: 999px; pointer-events: none; }
+.pedido .mini .cena-foto > i, .ob-foto .cena-foto > i, .vt-esc .cena-foto > i, .grade a .cena-foto > i { display: none; }
+.diario figure .cena-foto { height: auto; aspect-ratio: 4 / 3; }
+.foto-campo label .cena-foto { position: absolute; inset: 0; }
+.ad .cena-foto > i { left: 8px; right: auto; }
+
+/* vídeo curto (12/11/2026): sem som e em repetição; tocar liga o som */
+.midia-v { position: relative; display: block; width: 100%; height: 100%; background: #14161a; }
+.midia-v > video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.midia-som { position: absolute; right: 8px; bottom: 8px; width: 36px; height: 36px; border-radius: 50%; border: 0; display: grid; place-items: center; color: #fff; background: rgba(20, 22, 26, .6); cursor: pointer; }
+.midia-som .som-on { display: none; } .midia-v.com-som .midia-som .som-on { display: inline; } .midia-v.com-som .midia-som .som-off { display: none; }
+.midia-falta { position: absolute; left: 8px; right: 52px; bottom: 10px; font: 600 11px/1.3 var(--f-txt); font-style: normal; color: #fff; background: rgba(20, 22, 26, .6); padding: 4px 8px; border-radius: 8px; }
+.post-midia > .midia-v { height: 100%; }
+.diario figure .midia-v { aspect-ratio: 4 / 3; height: auto; }
+.foto-campo label > .midia-v { position: absolute; inset: 0; }
+.px-previa video, .px-sim video { display: block; width: 100%; max-height: 60vh; border-radius: 12px; background: #14161a; }

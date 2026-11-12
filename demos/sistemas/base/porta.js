@@ -61,20 +61,28 @@ function telaConta(modo = 'entrar', aviso = '') {
 }
 
 // ---------------------------------------------------------------- teste grátis ou assinatura
-function telaPlano({ email, venceu, semTeste, motivo }) {
+// sistemas com dois planos (V.planos, ex.: Atria Básico e Pro): as 4 opções; ?plano=pro marca o Pro;
+// upgrade (Básico → Pro) mostra só o Pro. A assinatura nova cancela a antiga do mesmo sistema (nexo-pagamentos).
+const PEDIU_PRO = new URLSearchParams(location.search).get('plano') === 'pro';
+function opcoesDePlano(upgrade) {
+  if (!V.planos) return [['', 'Assinatura mensal', V.mensal, 'equipe sem limite, histórico e até 10 empresas'], ...(V.semAnual ? [] : [['-anual', 'Assinatura anual', anual(V.mensal), '12 meses com 20% a menos']])];
+  const P = V.planos.pro, pro = [['-pro', 'Pro mensal', P.mensal, P.det], ['-pro-anual', 'Pro anual', P.anual, `${P.det}; 12 meses com 20% a menos`]];
+  return upgrade ? pro : [['', 'Básico mensal', V.mensal, V.planos.basico], ['-anual', 'Básico anual', V.anual || anual(V.mensal), `${V.planos.basico}; 12 meses com 20% a menos`], ...pro];
+}
+function telaPlano({ email, venceu, semTeste, motivo, upgrade }) {
   return new Promise(() => {
-    const opcoes = [['', 'Assinatura mensal', V.mensal, 'equipe sem limite, histórico e até 10 empresas'], ...(V.semAnual ? [] : [['-anual', 'Assinatura anual', anual(V.mensal), '12 meses com 20% a menos']])];
+    const opcoes = opcoesDePlano(upgrade), marcado = upgrade || !PEDIU_PRO ? 0 : opcoes.findIndex(([s]) => s === '-pro');
     // sistemas sem teste grátis (V.semTeste, ex.: Peplo): paga na hora no cartão aqui ou no Pix pela página do sistema
     if (V.semTeste) semTeste = true;
-    const f = tela(`<h1>${venceu ? 'O acesso venceu' : `Comece a usar o ${esc(V.nome)}`}</h1>
-      <p class="p-sub">${venceu ? 'Seus dados estão guardados. Assine para voltar a usar de onde parou.' : V.semTeste ? `Assine e o ${esc(V.nome)} fica liberado assim que o pagamento for aprovado. Sem fidelidade: cancele quando quiser em Minha conta. Prefere Pix? <a href="${RAIZ}${V.pagina}#precos">Pague com Pix pela página do ${esc(V.nome)}</a>.` : 'Teste 7 dias grátis com os dados da sua empresa. Cadastre o cartão no Mercado Pago: nada é cobrado nos 7 dias e, se não cancelar, a assinatura do plano escolhido começa no 8º dia.'}</p>
+    const f = tela(`<h1>${upgrade ? `Mude para o ${esc(V.nome)} Pro` : venceu ? 'O acesso venceu' : `Comece a usar o ${esc(V.nome)}`}</h1>
+      <p class="p-sub">${upgrade ? `Tudo o que você já tem, mais ${esc(V.planos.pro.det.replace(/^tudo do Básico \+ /, ''))}. A assinatura do Básico é encerrada quando o Pro começar, sem cobrança em dobro. Prefere Pix? <a href="${RAIZ}${V.pagina}#precos">Pague com Pix pela página do ${esc(V.nome)}</a>.` : venceu ? 'Seus dados estão guardados. Assine para voltar a usar de onde parou.' : V.semTeste ? `Assine e o ${esc(V.nome)} fica liberado assim que o pagamento for aprovado. Sem fidelidade: cancele quando quiser em Minha conta. Prefere Pix? <a href="${RAIZ}${V.pagina}#precos">Pague com Pix pela página do ${esc(V.nome)}</a>.` : 'Teste 7 dias grátis com os dados da sua empresa. Cadastre o cartão no Mercado Pago: nada é cobrado nos 7 dias e, se não cancelar, a assinatura do plano escolhido começa no 8º dia.'}</p>
       ${motivo ? `<p class="p-aviso">${esc(motivo)}</p>` : ''}
-      ${venceu || semTeste ? '' : `<button class="p-bt" data-teste>Começar os 7 dias grátis</button><p class="p-ou">ou assine agora</p>`}
-      <form novalidate><fieldset class="p-planos"><legend>Plano</legend>${opcoes.map(([suf, nome, valor, det], i) => `<label><input type="radio" name="plano" value="${suf}" ${i ? '' : 'checked'}><span><b>${nome}</b><em>${reais(valor)}${suf.includes('anual') ? '/ano' : '/mês'}</em><small>${det}</small></span></label>`).join('')}</fieldset>
+      ${venceu || semTeste || upgrade ? '' : `<button class="p-bt" data-teste>Começar os 7 dias grátis</button><p class="p-ou">ou assine agora</p>`}
+      <form novalidate><fieldset class="p-planos"><legend>Plano</legend>${opcoes.map(([suf, nome, valor, det], i) => `<label><input type="radio" name="plano" value="${suf}" ${i === Math.max(0, marcado) ? 'checked' : ''}><span><b>${nome}</b><em>${reais(valor)}${suf.includes('anual') ? '/ano' : '/mês'}</em><small>${det}</small></span></label>`).join('')}</fieldset>
       <label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="${esc(email)}" required><small>A assinatura fica nessa conta do Mercado Pago, no cartão. Sem fidelidade: cancele quando quiser em Minha conta.</small></label>
       <label class="p-aceite"><input type="checkbox" name="ok" required><span>Tenho 18 anos ou mais e aceito os <a href="${RAIZ}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática do plano escolhido.</span></label>
-      <p class="p-erro" role="alert"></p><button class="p-bt ${venceu || semTeste ? '' : 'p-bt-2'}">Assinar no Mercado Pago</button></form>
-      <p class="p-links"><a href="${RAIZ}demos/sistemas/${V.pasta}/">Ver a demonstração</a><span>·</span><a href="${RAIZ}conta.html">Minha conta</a><span>·</span><a href="#" data-sair>Sair</a></p>`);
+      <p class="p-erro" role="alert"></p><button class="p-bt ${venceu || semTeste || upgrade ? '' : 'p-bt-2'}">Assinar no Mercado Pago</button></form>
+      <p class="p-links">${upgrade ? `<a href="${RAIZ}demos/sistemas/${V.pasta}/${V.entrada}?conta=${V.id}">Voltar ao app</a><span>·</span>` : ''}<a href="${RAIZ}demos/sistemas/${V.pasta}/">Ver a demonstração</a><span>·</span><a href="${RAIZ}conta.html">Minha conta</a><span>·</span><a href="#" data-sair>Sair</a></p>`);
     f.querySelector('[data-sair]').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.reload(); };
     const form = f.querySelector('form'), erro = f.querySelector('.p-erro');
     f.querySelector('[data-teste]')?.addEventListener('click', async (e) => {
@@ -150,6 +158,11 @@ async function entrar() {
   await sb.rpc('nexo_aceitar_convites').then(() => {}, () => {});
   let { data: espacos } = await sb.from('nexo_espacos').select('id,nome,plano,teste_ate,dono,nivel').eq('app', V.id).order('criado');
   espacos = espacos || [];
+  if (PEDIU_PRO && V.planos && espacos.some(valeEspaco) && !espacos.some((e) => valeEspaco(e) && e.nivel === 'pro')) {
+    const r = await pagamentos({ acao: 'status' }).catch(() => ({ assinaturas: [] })), h = hoje();
+    const temPro = (r.assinaturas || []).some((a) => a.app === V.id && /-pro(-anual)?$/.test(a.produto || '') && valeAssinatura(a, h));
+    if (!temPro) return telaPlano({ email: session.user.email, upgrade: true, motivo: (r.assinaturas || []).some((a) => a.app === V.id && /-pro/.test(a.produto || '') && a.status === 'pendente') ? 'Estamos esperando a confirmação do Mercado Pago. Se você já pagou, atualize a página em alguns minutos.' : '' });
+  }
   const meus = espacos.filter((e) => e.dono === session.user.id);
   let esp = espacos.find((e) => e.id === localStorage.getItem(`nexo-espaco-${V.id}`) && valeEspaco(e)) || espacos.find(valeEspaco);
   if (!esp && MANUTENCAO) { await telaManutencao(false); return; }

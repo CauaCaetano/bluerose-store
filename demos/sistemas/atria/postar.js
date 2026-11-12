@@ -1,10 +1,15 @@
 // Atria · "Postar": monta a imagem no formato de cada rede (feed 4:5, Stories e Status 9:16, Facebook 4:5) com a marca do
 // profissional, gera a legenda e o funil (chamada para o WhatsApp, sequência de posts e respostas prontas) e abre a rede pelo
 // compartilhamento do próprio celular, com a legenda já copiada. Sem servidor: quem aperta "publicar" é a pessoa, na rede.
-import { $, $$, t, ico, db, grava, toast, folha, copiar, comIA, abrirZap, zap, telLimpo, vibra } from './base.js';
-import { cena } from './cenas.js';
-import { meusOficios, principal, nomeOficios, OFICIOS } from './oficios.js';
-import { cliente } from './gestao.js';
+import { $, $$, t, ico, db, grava, toast, folha, copiar, comIA, abrirZap, zap, telLimpo, vibra } from './base.js?v=12';
+import { cena, fotoCena, cenaDesenho } from './cenas.js?v=12';
+import { arquivoDoVideo } from './midia.js?v=12';
+// post com vídeo (vitrine): compartilha o próprio vídeo, com a legenda copiada
+const videoDe = (p) => p.videoDepois || p.videoAntes || '';
+const arquivoPara = async (p, destino) => (videoDe(p) ? arquivoDoVideo(videoDe(p), `atria-${destino}`).catch(() => montarImagem(p, destino)) : montarImagem(p, destino));
+const previaHTML = (arq, rot, cls = '') => { const u = URL.createObjectURL(arq); return /^video\//.test(arq.type) ? `<video src="${u}" class="${cls}" playsinline muted loop autoplay controls aria-label="${rot}"></video>` : `<img src="${u}" alt="${rot}" class="${cls}">`; };
+import { meusOficios, principal, nomeOficios, OFICIOS } from './oficios.js?v=12';
+import { cliente } from './gestao.js?v=12';
 
 export const DESTINOS = {
   feed: { nome: 'Instagram (feed)', curto: 'Instagram', ic: 'camera', w: 1080, h: 1350, rede: 'Instagram', dica: 'Escolha o Instagram, depois "Feed". Cole a legenda e toque em Compartilhar.' },
@@ -49,8 +54,9 @@ const svgSrc = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(s
 function cobre(g, img, x, y, w, h) { const k = Math.max(w / img.width, h / img.height), iw = img.width * k, ih = img.height * k; g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip(); g.drawImage(img, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih); g.restore(); }
 function selo(g, txt, x, y, cor, fundo) { g.font = '700 30px "Rethink Sans", sans-serif'; const w = g.measureText(txt).width + 40; g.fillStyle = fundo; g.beginPath(); g.roundRect(x, y, w, 54, 27); g.fill(); g.fillStyle = cor; g.fillText(txt, x + 20, y + 37); return w; }
 async function fotos(p) {
-  const antes = p.fotoAntes ? p.fotoAntes : svgSrc(cena(p.cena || 'muro', 'antes')), depois = p.fotoDepois ? p.fotoDepois : svgSrc(cena(p.cena || 'muro', 'depois'));
-  return { antes: await carrega(antes), depois: await carrega(depois) };
+  // exemplo sem foto da pessoa: foto ilustrativa da cena (fotos/), e o desenho se ela não carregar
+  const um = (foto, estado) => (foto ? carrega(foto) : carrega(fotoCena(p.cena || 'muro', estado)).catch(() => carrega(svgSrc(cenaDesenho(p.cena || 'muro', estado)))));
+  return { antes: await um(p.fotoAntes, 'antes'), depois: await um(p.fotoDepois, 'depois') };
 }
 export async function montarImagem(p, destino) {
   const D = DESTINOS[destino], c = document.createElement('canvas'); c.width = D.w; c.height = D.h; const g = c.getContext('2d');
@@ -92,10 +98,10 @@ export function abrirPostar(p) {
       <div class="px-previa" data-previa></div>
       <label class="campo" style="margin-top:12px"><span>Legenda (já vai copiada)</span><textarea data-leg data-voz rows="7">${t(legenda)}</textarea></label>
       <div class="acoes" style="margin-top:-4px"><button type="button" class="bt leve p" data-ia>${ico('ia')}Outra legenda</button><button type="button" class="bt leve p" data-funil>${ico('lista')}Funil: depois de postar</button></div>
-      <p class="explica" style="margin-top:12px">O Atria prepara a imagem no tamanho certo e a legenda. Você escolhe a rede no seu celular e toca em <b>publicar</b>. Publicar sozinho, sem abrir a rede, fica para uma próxima versão.</p>`,
+      <p class="explica" style="margin-top:12px">${videoDe(p) ? 'O Atria manda o seu vídeo e a legenda (Reels, Stories, Status ou feed).' : 'O Atria prepara a imagem no tamanho certo e a legenda.'} Você escolhe a rede no seu celular e toca em <b>publicar</b>. Publicar sozinho, sem abrir a rede, fica para uma próxima versão.</p>`,
     pe: '<button type="button" class="bt cheio largo" data-ir>Preparar e abrir</button>',
     aoAbrir: async (f, api) => {
-      const previa = async () => { const d = [...escolha][0] || 'feed', arq = await montarImagem(p, d), u = URL.createObjectURL(arq); $('[data-previa]', f).innerHTML = `<img src="${u}" alt="Prévia ${t(DESTINOS[d].nome)}" class="${DESTINOS[d].h > 1400 ? 'alto' : ''}">`; };
+      const previa = async () => { const d = [...escolha][0] || 'feed', arq = await arquivoPara(p, d); $('[data-previa]', f).innerHTML = previaHTML(arq, `Prévia ${t(DESTINOS[d].nome)}`, DESTINOS[d].h > 1400 ? 'alto' : ''); };
       $$('[data-d]', f).forEach((b) => { b.onclick = () => {
         const k = b.dataset.d;
         if (k === 'todos') escolha = escolha.size === 4 ? new Set(['feed']) : new Set(Object.keys(DESTINOS));
@@ -120,12 +126,12 @@ function guiado(p, lista, legenda) {
     folha({ titulo: lista.length > 1 ? `${i + 1} de ${lista.length} · ${D.curto}` : D.nome, classe: 'px-folha',
       corpo: `<ol class="px-check">${lista.map((x, j) => `<li class="${feito[x] ? 'feito' : j === i ? 'agora' : ''}">${feito[x] ? ico('ok', 'width="18" height="18"') : `<span>${j + 1}</span>`}${DESTINOS[x].nome}</li>`).join('')}</ol>
         <p style="font-size:16px;margin:14px 0 6px"><b>Como fazer:</b> ${D.dica}</p><p class="mudo" style="margin:0">A legenda já está copiada. Na rede, toque e segure no campo de texto e escolha <b>Colar</b>.</p>`,
-      pe: `<button type="button" class="bt leve p" data-baixar>${ico('doc')}Baixar imagem</button><button type="button" class="bt cheio" data-abrir style="flex:2">${ico(D.ic)}Abrir ${D.rede}</button>`,
+      pe: `<button type="button" class="bt leve p" data-baixar>${ico('doc')}${videoDe(p) ? 'Baixar vídeo' : 'Baixar imagem'}</button><button type="button" class="bt cheio" data-abrir style="flex:2">${ico(D.ic)}Abrir ${D.rede}</button>`,
       aoAbrir: (f, api) => {
         const proximo = () => { feito[k] = true; api.fechar(true); if (i + 1 < lista.length) passo(i + 1); else { toast(lista.length > 1 ? 'Pronto: postado em tudo o que escolheu' : 'Pronto!'); (p.postadoEm = p.postadoEm || {})[k] = new Date().toISOString().slice(0, 10); grava(); setTimeout(() => abrirFunil(p), 400); } };
-        $('[data-baixar]', f).onclick = async () => { const a = await montarImagem(p, k), l = document.createElement('a'); l.href = URL.createObjectURL(a); l.download = a.name; l.click(); toast('Imagem salva no celular'); };
+        $('[data-baixar]', f).onclick = async () => { const a = await arquivoPara(p, k), l = document.createElement('a'); l.href = URL.createObjectURL(a); l.download = a.name; l.click(); toast(/^video\//.test(a.type) ? 'Vídeo salvo no celular' : 'Imagem salva no celular'); };
         $('[data-abrir]', f).onclick = async () => {
-          const arq = await montarImagem(p, k);
+          const arq = await arquivoPara(p, k);
           if (demo() && !window.atriaCompartilharDeVerdade) { simulacao(k, arq, legenda, async () => { const r = await abrir(k, arq, legenda); if (r !== 'cancelou') proximo(); }, proximo); return; }
           const r = await abrir(k, arq, legenda);
           if (r === 'baixou') toast('Imagem baixada e legenda copiada. Abra o app da rede e poste a imagem.');
@@ -136,9 +142,9 @@ function guiado(p, lista, legenda) {
   passo(0);
 }
 function simulacao(k, arq, legenda, deVerdade, seguir) {
-  const u = URL.createObjectURL(arq), D = DESTINOS[k];
+  const D = DESTINOS[k];
   folha({ titulo: `${D.rede} · simulação`, classe: 'px-folha',
-    corpo: `<div class="px-sim"><img src="${u}" alt=""><pre>${t(legenda.slice(0, 220))}${legenda.length > 220 ? '…' : ''}</pre></div><p class="explica">Isto é a demonstração: nada foi publicado. No seu celular, este botão abre o ${D.rede} com esta imagem e a legenda copiada; você só toca em publicar.</p>`,
+    corpo: `<div class="px-sim">${previaHTML(arq, '')}<pre>${t(legenda.slice(0, 220))}${legenda.length > 220 ? '…' : ''}</pre></div><p class="explica">Isto é a demonstração: nada foi publicado. No seu celular, este botão abre o ${D.rede} com esta imagem e a legenda copiada; você só toca em publicar.</p>`,
     pe: '<button type="button" class="bt leve p" data-real>Abrir no meu celular</button><button type="button" class="bt cheio" data-ok>Entendi, próximo</button>',
     aoAbrir: (f, api) => { $('[data-ok]', f).onclick = () => { api.fechar(true); seguir(); }; $('[data-real]', f).onclick = () => { api.fechar(true); deVerdade(); }; } });
 }

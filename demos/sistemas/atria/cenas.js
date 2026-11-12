@@ -150,9 +150,16 @@ Object.assign(CENAS, {
 
 export const TIPOS_CENA = Object.fromEntries(Object.entries(CENAS).map(([k, v]) => [k, v.nome]));
 
-// estado: 'antes' | 'depois'
-export function cena(tipo, estado = 'depois') {
+// estado: 'antes' | 'depois'. Desenho (reserva quando a foto não carrega)
+export function cenaDesenho(tipo, estado = 'depois') {
   const c = CENAS[tipo] || CENAS['guarda-roupa'];
   const u = `c${(seq++).toString(36)}`;
   return `<svg class="cena" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${c.nome}, ${estado} (desenho de exemplo)"><defs>${madeira(u)}</defs>${c[estado](u)}</svg>`;
+}
+// 12/11/2026: os exemplos usam fotos reais de banco gratuito (Pexels/Unsplash, ver CREDITOS.md), 4:3, com o selo
+// "foto ilustrativa". mini = miniatura de 400 px (grades e listas). Se a foto falhar, aparece o desenho.
+export const fotoCena = (tipo, estado = 'depois', mini = false) => `fotos/${CENAS[tipo] ? tipo : 'guarda-roupa'}-${estado}${mini ? '-p' : ''}.webp?v=1`;
+export function cena(tipo, estado = 'depois', mini = false) {
+  const c = CENAS[tipo] || CENAS['guarda-roupa'];
+  return `<span class="cena-foto"><img src="${fotoCena(tipo, estado, mini)}" alt="${c.nome}, ${estado} (foto ilustrativa)" loading="lazy" decoding="async" width="${mini ? 400 : 1200}" height="${mini ? 300 : 900}" onerror="this.parentNode.classList.add('falhou')"><i>foto ilustrativa</i>${cenaDesenho(tipo, estado)}</span>`;
 }

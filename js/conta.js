@@ -209,24 +209,29 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       var h = hojeBR(), m = {};
       (j.assinaturas || []).forEach(function (a) {
         var fim = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop();
-        if (a.app && (['ativa', 'paga'].indexOf(a.status) >= 0 || (a.status === 'teste' && a.teste_ate >= h) || (a.status === 'cancelada' && fim && fim >= h))) m[a.app] = a.status === 'teste' ? 'teste' : 'assinado';
+        if (a.app && (['ativa', 'paga'].indexOf(a.status) >= 0 || (a.status === 'teste' && a.teste_ate >= h) || (a.status === 'cancelada' && fim && fim >= h))) {
+          m[a.app] = a.status === 'teste' ? 'teste' : 'assinado';
+          if (/-pro(-anual)?$/.test(a.produto || '')) m[a.app + ':pro'] = true; // plano Pro (Atria, desde 12/11/2026)
+        }
       });
       return m;
     }).catch(function () { acessoCache = null; return {}; });
     return acessoCache;
   }
-  function assinarDireto(app, emailMp) { return chamar({ acao: 'iniciar', produto: 'a-sis-' + app, email_mp: emailMp || '' }).then(function (j) { location.href = j.link; }); }
+  function assinarDireto(app, emailMp, produto) { return chamar({ acao: 'iniciar', produto: produto || 'a-sis-' + app, email_mp: emailMp || '' }).then(function (j) { location.href = j.link; }); }
   // a oferta de lançamento (50% nos 3 primeiros meses) foi encerrada em 17/10/2026
   function vagas() { return Promise.resolve(0); }
-  function teste(app, nome, mensal, direto) {
+  // produto: plano diferente do básico do sistema (data-produto, ex.: a-sis-atria-pro). Quem já tem o Básico pode mudar para o Pro.
+  function teste(app, nome, mensal, direto, produto) {
+    var pro = /-pro(-anual)?$/.test(produto || '');
     return exigirLogin((direto ? 'Para assinar o ' : 'Para começar o teste grátis do ') + nome + ', entre ou crie a sua conta.').then(function (s) {
       return Promise.all([s, acessos(), vagas()]);
     }).then(function (sm) {
       var s = sm[0], n = sm[2];
-      if (sm[1][app]) { location.href = raiz + 'app/' + app + '/'; return; }
+      if (sm[1][app] && (!pro || sm[1][app + ':pro'])) { location.href = raiz + 'app/' + app + '/'; return; }
       var metade = Math.round(mensal * 50) / 100;
       var oferta = n > 0 ? '<li class="conta-oferta"><b>Oferta de lançamento:</b> ' + reais(metade) + '/mês nos 3 primeiros meses, depois ' + reais(mensal) + '/mês. Restam ' + n + (n === 1 ? ' vaga' : ' vagas') + '.</li>' : '';
-      var d = janela('<span class="eyebrow">' + (direto ? 'Assinatura' : 'Teste grátis de 7 dias') + '</span><h3 id="conta-t">' + esc(nome) + '</h3>' + (direto ?
+      var d = janela('<span class="eyebrow">' + (direto ? (pro && sm[1][app] ? 'Mudar para o Pro' : 'Assinatura') : 'Teste grátis de 7 dias') + '</span><h3 id="conta-t">' + esc(nome) + '</h3>' + (direto ?
         '<ul class="conta-lista">' + oferta + '<li>Assinatura de <b>' + reais(n > 0 ? metade : mensal) + '/mês</b> no cartão, pelo Mercado Pago. Sem fidelidade.</li><li>O sistema fica liberado assim que o pagamento é confirmado.</li><li>Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>.</li></ul>' :
         '<ul class="conta-lista"><li>Use com os dados da sua empresa por <b>7 dias sem pagar nada</b>.</li><li>Para começar, <b>cadastre o cartão no Mercado Pago</b>. Nada é cobrado nos 7 dias.</li><li>Se não cancelar, a assinatura de ' + reais(mensal) + '/mês começa no 8º dia, com tudo o que você cadastrou. Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>.</li>' + oferta + '</ul>') +
         '<form class="conta-form" novalidate>' + (true ? '<label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="' + esc(s.user.email) + '" required><small>' + (direto ? 'A assinatura fica na conta do Mercado Pago com este e-mail.' : 'O cartão do teste fica na conta do Mercado Pago com este e-mail.') + '</small></label>' : '') +
@@ -237,13 +242,13 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       f.onsubmit = function (e) {
         e.preventDefault(); if (!f.reportValidity()) return;
         bt.disabled = true; bt.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
-        (direto ? assinarDireto(app, f.mp.value.trim())
+        (direto ? assinarDireto(app, f.mp.value.trim(), produto)
           : chamar({ acao: 'iniciar', produto: 'a-sis-' + app, teste: true, email_mp: f.mp.value.trim() }).then(function (j) { location.href = j.link; })
         ).catch(function (x) {
           bt.disabled = false; bt.textContent = direto ? 'Assinar agora' : 'Começar o teste grátis';
           if (x.dados && x.dados.sem_teste) {
             erro.innerHTML = esc(x.message) + ' <a href="#" data-assinar>Assinar agora</a>';
-            erro.querySelector('[data-assinar]').onclick = function (ev) { ev.preventDefault(); d.close ? d.close() : null; teste(app, nome, mensal, true); };
+            erro.querySelector('[data-assinar]').onclick = function (ev) { ev.preventDefault(); d.close ? d.close() : null; teste(app, nome, mensal, true, produto); };
           } else erro.textContent = x.message;
         });
       };
@@ -251,10 +256,10 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       if (bp) bp.onclick = function () {
         erro.textContent = '';
         if (!f.ok.checked) { erro.textContent = 'Marque a caixa de aceite dos Termos para continuar.'; f.ok.focus(); return; }
-        pix('a-sis-' + app, nome, false);
+        pix(produto || 'a-sis-' + app, nome, false);
       };
       var bd = f.querySelector('[data-direto]');
-      if (bd) bd.onclick = function () { if (d.close) d.close(); teste(app, nome, mensal, true); };
+      if (bd) bd.onclick = function () { if (d.close) d.close(); teste(app, nome, mensal, true, produto); };
     });
   }
 
@@ -262,7 +267,7 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-teste],[data-assinar-app]'); if (!b) return;
     e.preventDefault();
-    teste(b.getAttribute('data-assinar-app') || b.getAttribute('data-teste'), b.getAttribute('data-teste-nome') || 'sistema', Number(b.getAttribute('data-teste-mensal')) || 0, true);
+    teste(b.getAttribute('data-assinar-app') || b.getAttribute('data-teste'), b.getAttribute('data-teste-nome') || 'sistema', Number(b.getAttribute('data-teste-mensal')) || 0, true, b.getAttribute('data-produto') || '');
   });
 
   // páginas dos sistemas: quem já tem o sistema vê "Abrir o sistema" no lugar do "Pague aqui"

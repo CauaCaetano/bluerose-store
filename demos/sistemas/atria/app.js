@@ -3,17 +3,18 @@
 // achar trabalho (mural do app e achados na internet), clientes e obras, orçamento, proposta, Pix, lista de materiais,
 // lojas da cidade (OpenStreetMap), comparador de preços, dinheiro (lucro do dia, da semana e do mês) e ajuda automática.
 // Dados no aparelho (localStorage); na conta, o conta-nuvem.js leva para a nuvem. ?novo recomeça a demonstração.
-import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js';
-import { cena, TIPOS_CENA } from './cenas.js';
-import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js';
-import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js';
+import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=12';
+import { cena, TIPOS_CENA } from './cenas.js?v=12';
+import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js?v=12';
+import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js?v=12';
 import { qrSVG } from '../base/qr.js';
-import { instalarConceitos, CONCEITO } from './conceitos.js';
-import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js';
-import { ganchos } from './gestao.js';
-import { ligarVoz } from './base.js';
-import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js';
-import * as MAIS from './mais.js';
+import { instalarConceitos, CONCEITO } from './conceitos.js?v=12';
+import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js?v=12';
+import { ganchos } from './gestao.js?v=12';
+import { ligarVoz } from './base.js?v=12';
+import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=12';
+import * as MAIS from './mais.js?v=12';
+import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=12';
 
 
 // ================================================================== telas e ações
@@ -21,6 +22,27 @@ const TELAS = { ...TG, ...TX };
 const ACOES = { ...AG, ...AX };
 ganchos.mei = cartaoMei;
 Object.assign(TELAS, MAIS.TELAS); Object.assign(ACOES, MAIS.ACOES);
+
+// ------------------------------------------------------------------ plano Pro (12/11/2026)
+// Básico (R$ 39): tudo, menos Achar trabalho (achados na internet) e lojas e preços. Pro (R$ 50): tudo, com 50
+// atualizações do Achar trabalho por mês. Na conta, o plano vem da empresa (conta-nuvem.js: window.atriaPlano);
+// na demonstração fica tudo liberado, com o selo "Pro" nesses itens.
+const ehPro = () => !window.atriaPlano || window.atriaPlano === 'pro';
+const SELO_PRO = '<span class="selo-pro" aria-label="do plano Pro">Pro</span>';
+const LINK_PRO = '../../../app/atria/?plano=pro';
+function painelPro(nome) {
+  return `<div class="cartao pro-trava" role="status"><span class="selo-pro grande">Atria Pro</span>
+    <h3>${t(nome)} é do Atria Pro</h3><p><b>Disponível no Atria Pro — R$ 50/mês.</b> Tudo o que você já usa, mais:</p>
+    <ul><li>${ico('lupa', 'width="18" height="18"')}Achar trabalho na internet: vagas, pedidos de orçamento e grupos da sua cidade (50 atualizações por mês)</li><li>${ico('loja', 'width="18" height="18"')}Lojas de material da cidade no mapa</li><li>${ico('moeda', 'width="18" height="18"')}Comparador de preços: onde cada material está mais barato</li></ul>
+    <a class="bt cheio largo" href="${LINK_PRO}">${ico('estrela')}Mudar para o Pro</a><small>ou R$ 480 por ano (20% a menos). Sem fidelidade: o Básico é encerrado quando o Pro começar, sem cobrança em dobro.</small></div>`;
+}
+const abrirPro = (nome = 'Este recurso') => folha({ titulo: 'Atria Pro', corpo: painelPro(nome) });
+[['lojas', 'Lojas', 'Lojas da cidade no mapa'], ['precos', 'Preços', 'Onde cada material está mais barato']].forEach(([k, tit, sub]) => {
+  const orig = TELAS[k], montar = orig.montar;
+  TELAS[k] = (...a) => (ehPro() ? orig(...a) : `${cab(tit, sub)}${painelPro(tit === 'Lojas' ? 'O mapa de lojas' : 'O comparador de preços')}`);
+  if (montar) TELAS[k].montar = (...a) => { if (ehPro()) montar(...a); };
+});
+['ver-economia', 'aplicar-economia'].forEach((k) => { const f = ACOES[k]; if (f) ACOES[k] = (b) => (ehPro() ? f(b) : abrirPro('Comprar onde é mais barato')); });
 ganchos.parcelas = MAIS.blocoParcelas; ganchos.rdo = MAIS.botaoRdo; ganchos.crono = MAIS.blocoCronograma; ganchos.etiquetas = MAIS.botaoEtiquetas; ganchos.desloc = MAIS.blocoDeslocamento; ganchos.gerarParcelas = MAIS.gerarParcelas;
 const TOPO = ['inicio', 'comunidade', 'gestao'];
 const tela = () => $('#tela');
@@ -65,7 +87,7 @@ ACOES['chave-pix'] = () => cadastrarPix();
 let abaTrab = 'mural', filtroTrab = 'voce';
 function cartaoPedido(p) {
   return `<a class="cartao pedido ${p.interesse ? 'feito' : ''}" href="#trabalho/${p.id}" style="display:block;text-decoration:none;color:inherit">
-    <div class="mini">${cena(p.cena, 'antes')}</div><span class="tag ${p.interesse ? 'musgo' : 'giz'}">${ico(icOf(p.of), 'width="12" height="12" style="vertical-align:-1px"')} ${t(nomeOf(p.of))}</span> <span class="exemplo">exemplo</span>
+    <div class="mini">${cena(p.cena, 'antes', true)}</div><span class="tag ${p.interesse ? 'musgo' : 'giz'}">${ico(icOf(p.of), 'width="12" height="12" style="vertical-align:-1px"')} ${t(nomeOf(p.of))}</span> <span class="exemplo">exemplo</span>
     <h3>${t(p.titulo)}</h3><p>${t(p.desc.length > 90 ? `${p.desc.slice(0, 88)}…` : p.desc)}</p>
     <div class="meta">${ico('pin', 'width="14" height="14"')}${t(p.cidade)} · ${t(p.bairro)} · ${haQuanto(p.data)}${p.faixa ? ` · <b style="color:var(--grafite)">${t(p.faixa)}</b>` : ''}</div>
     <div class="faixa"><small class="mudo">Prazo: ${t(p.prazo)}</small>${p.interesse ? `<span class="tag musgo">${ico('ok', 'width="12" height="12" style="vertical-align:-1px"')} interesse enviado</span>` : `<span class="bt cheio p">Tenho interesse</span>`}</div></a>`;
@@ -82,7 +104,7 @@ TELAS.trabalhos = () => {
       : `<div class="lista">${db.pedidos.filter((p) => p.interesse).map(cartaoPedido).join('')}${Object.values(db.achadosSalvos || {}).map(cartaoAchado).join('') || ''}</div>${db.pedidos.some((p) => p.interesse) || Object.keys(db.achadosSalvos || {}).length ? '' : '<div class="vazio"><b>Nada salvo ainda</b>Os pedidos em que você tiver interesse e os achados salvos aparecem aqui.</div>'}`;
   return `${cab('Trabalhos', `${t(eu().cidade)} e região · ${eu().raio} km`, { dica: 'Mural: pedidos publicados por clientes dentro do Atria. Na internet: anúncios públicos da sua cidade achados por um buscador. Puxe a tela para baixo para atualizar.' })}
     <div class="puxar" data-puxar>${ico('recarregar')}<span>Solte para atualizar</span></div>
-    <div class="seg" role="group" aria-label="Onde procurar" data-seg><button type="button" data-acao="aba-trab" data-a="mural" aria-pressed="${abaTrab === 'mural'}">Mural</button><button type="button" data-acao="aba-trab" data-a="internet" aria-pressed="${abaTrab === 'internet'}">Na internet${novos ? ` <span class="novo-badge">${novos}</span>` : ''}</button><button type="button" data-acao="aba-trab" data-a="meus" aria-pressed="${abaTrab === 'meus'}">Salvos</button><i></i></div>
+    <div class="seg" role="group" aria-label="Onde procurar" data-seg><button type="button" data-acao="aba-trab" data-a="mural" aria-pressed="${abaTrab === 'mural'}">Mural</button><button type="button" data-acao="aba-trab" data-a="internet" aria-pressed="${abaTrab === 'internet'}">Na internet ${SELO_PRO}${novos ? ` <span class="novo-badge">${novos}</span>` : ''}</button><button type="button" data-acao="aba-trab" data-a="meus" aria-pressed="${abaTrab === 'meus'}">Salvos</button><i></i></div>
     <div style="margin-top:12px">${corpo}</div>`;
 };
 ACOES['aba-trab'] = (b) => { abaTrab = b.dataset.a; if (abaTrab === 'internet' && !db.achados) buscarAchados(); repinta(); };
@@ -147,8 +169,8 @@ function credDemo() {
   db.credDemo = db.credDemo || { usadas: 48, saldo: 0 };
   return { gratis_mes: 50, gratis_restantes: Math.max(0, 50 - db.credDemo.usadas), gratis_global_acabou: false, saldo: db.credDemo.saldo, pacotes: PACOTES_DEMO };
 }
-const podeBuscar = (c) => !!c && ((c.gratis_restantes > 0 && !c.gratis_global_acabou) || c.saldo > 0);
-const motivoTrava = (c) => (c && c.gratis_global_acabou && c.gratis_restantes > 0 ? 'As buscas grátis do mês acabaram; compre créditos para continuar.' : `Suas ${(c && c.gratis_mes) || 50} atualizações grátis deste mês acabaram; compre créditos para continuar.`);
+const podeBuscar = (c) => !!c && (c.gratis_restantes > 0 || c.saldo > 0);
+const motivoTrava = (c) => `Suas ${(c && c.gratis_mes) || 50} atualizações deste mês acabaram; compre créditos para continuar.`;
 function juntaCred(d) {
   if (!d) return;
   const n = {}; ['gratis_mes', 'gratis_restantes', 'gratis_global_acabou', 'saldo', 'pacotes'].forEach((k) => { if (d[k] !== undefined) n[k] = d[k]; });
@@ -157,7 +179,7 @@ function juntaCred(d) {
 }
 let credEm = 0;
 async function carregarCred() {
-  if (Date.now() - credEm < 60e3) return; // no máximo 1 vez por minuto (a tela se redesenha muitas vezes)
+  if (!ehPro() || Date.now() - credEm < 60e3) return; // no máximo 1 vez por minuto (a tela se redesenha muitas vezes)
   credEm = Date.now();
   const antes = JSON.stringify([cred, travado]);
   try { juntaCred(ehReal() ? await window.atriaCreditos.saldo() : credDemo()); } catch { /* sem conexão: fica como está */ }
@@ -176,13 +198,13 @@ function liberado(d) {
 const precoBR = (v) => `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 function blocoCreditos() {
   const c = cred; if (!c) return '';
-  const linha = `<p class="mudo cred-linha" style="font-size:13px;margin:8px 0 0"><b style="color:var(--grafite)">${c.gratis_restantes} de ${c.gratis_mes}</b> grátis neste mês · <b style="color:var(--grafite)">${c.saldo}</b> ${c.saldo === 1 ? 'crédito' : 'créditos'} <button type="button" class="bt leve p" data-acao="comprar-creditos" style="margin-left:4px">${ico('moeda')}Comprar</button></p>`;
+  const linha = `<p class="mudo cred-linha" style="font-size:13px;margin:8px 0 0"><b style="color:var(--grafite)">${c.gratis_restantes} de ${c.gratis_mes}</b> do mês · <b style="color:var(--grafite)">${c.saldo}</b> ${c.saldo === 1 ? 'crédito' : 'créditos'} <button type="button" class="bt leve p" data-acao="comprar-creditos" style="margin-left:4px">${ico('moeda')}Comprar</button></p>`;
   if (!travado) return linha;
   const pacs = c.pacotes || PACOTES_DEMO;
   return `${linha}<div class="cartao trava-cred" role="status" style="margin-top:12px;border:2px solid var(--trena);text-align:center">
     <div aria-hidden="true" style="color:var(--trena)">${ico('lupa', 'width="34" height="34"')}</div>
-    <h3 style="margin:6px 0 4px">Suas buscas grátis do mês acabaram</h3>
-    <p style="margin:0 0 12px;font-size:14px;color:var(--grafite2)">${c.gratis_global_acabou && c.gratis_restantes > 0 ? 'As buscas grátis do mês acabaram para todos os assinantes; compre créditos para continuar.' : `Você já usou as ${c.gratis_mes} atualizações grátis deste mês. Compre créditos para continuar buscando.`} Os botões do Google e do Facebook continuam valendo de graça.</p>
+    <h3 style="margin:6px 0 4px">As 50 atualizações do mês acabaram</h3>
+    <p style="margin:0 0 12px;font-size:14px;color:var(--grafite2)">Você já usou as ${c.gratis_mes} atualizações do mês que vêm no Pro. Compre créditos para continuar buscando; no mês que vem as 50 voltam. Os botões do Google e do Facebook continuam valendo de graça.</p>
     ${opcoesPacotes(pacs)}
     <div class="acoes" style="justify-content:center"><button type="button" class="bt cheio" data-acao="pagar-creditos" data-forma="pix">${ico('pix')}Pagar com Pix</button><button type="button" class="bt leve" data-acao="pagar-creditos" data-forma="cartao">${ico('moeda')}Cartão</button></div>
     <p class="mudo" style="font-size:12px;margin:8px 0 0">1 crédito = 1 atualização. Os créditos não vencem e entram sozinhos quando o pagamento for aprovado.</p></div>`;
@@ -196,7 +218,7 @@ ACOES['comprar-creditos'] = () => abrirCreditos();
 ACOES['pagar-creditos'] = (b) => pagarCreditos(escolhaPac, b.dataset.forma);
 function abrirCreditos() {
   const c = cred || (ehReal() ? null : credDemo()); const pacs = (c && c.pacotes) || PACOTES_DEMO;
-  folha({ titulo: 'Créditos de busca', corpo: `<p style="margin:0 0 10px">${c ? `Você tem <b>${c.gratis_restantes} de ${c.gratis_mes}</b> atualizações grátis neste mês e <b>${c.saldo}</b> ${c.saldo === 1 ? 'crédito' : 'créditos'}.` : ''} Cada crédito é uma atualização do Achar trabalho.</p>${opcoesPacotes(pacs)}
+  folha({ titulo: 'Créditos de busca', corpo: `<p style="margin:0 0 10px">${c ? `Você tem <b>${c.gratis_restantes} de ${c.gratis_mes}</b> atualizações do mês e <b>${c.saldo}</b> ${c.saldo === 1 ? 'crédito' : 'créditos'}.` : ''} Cada crédito é uma atualização do Achar trabalho.</p>${opcoesPacotes(pacs)}
       <p class="explica"><b>Como funciona:</b> pague com Pix (o QR aparece aqui) ou com cartão no Mercado Pago. Quando o pagamento for aprovado, os créditos entram sozinhos e não vencem.${ehReal() ? '' : ' Na demonstração o pagamento é simulado.'}</p>`,
     pe: `<button type="button" class="bt leve" data-forma="cartao">${ico('moeda')}Cartão</button><button type="button" class="bt cheio" data-forma="pix" style="flex:2">${ico('pix')}Pagar com Pix</button>`,
     aoAbrir: (f) => { $$('[data-forma]', f).forEach((x) => { x.onclick = () => pagarCreditos(escolhaPac, x.dataset.forma); }); } });
@@ -242,7 +264,7 @@ function folhaPagamento({ forma, p, qr_code, qr_base64, link, id, demo }) {
 
 let buscandoAchados = false, relogioAchados = null;
 async function buscarAchados(manual) {
-  if (buscandoAchados) return;
+  if (buscandoAchados || !ehPro()) return;
   // demonstração: conta as atualizações tocadas (as automáticas não contam)
   if (!ehReal() && manual) {
     const c = credDemo();
@@ -262,6 +284,7 @@ async function buscarAchados(manual) {
   if (lista && lista.info) { juntaCred(lista.info); if (lista.info.pago) toast(`1 crédito usado · restam ${lista.info.saldo}`); }
   if (!lista) {
     const d = (erro && erro.dados) || {};
+    if (d.precisa_pro) { if (rotaAtual().nome === 'trabalhos') repinta(); return; }
     if (d.precisa_creditos || d.auto) {
       juntaCred(d);
       if (d.precisa_creditos) { travado = d.erro || motivoTrava(cred); if (manual) abrirCreditos(); }
@@ -289,9 +312,10 @@ function cartaoAchado(a) {
     <div class="acoes"><a class="bt cheio p" href="${t(a.link)}" target="_blank" rel="noopener noreferrer" data-acao="abriu-achado" data-id="${t(a.id)}">${ico('link')}Abrir anúncio</a>${tel ? `<button type="button" class="bt zap p" data-acao="zap-achado" data-tel="${t(tel)}" data-tit="${t(a.titulo)}">${ico('zap')}Responder</button>` : ''}<button type="button" class="bt leve p alterna" data-acao="salvar-achado" data-id="${t(a.id)}" aria-pressed="${salvo}" aria-label="${salvo ? 'Salvo: tocar para tirar dos salvos' : 'Salvar este trabalho'}">${ico('salvar')}${salvo ? 'Salvo' : 'Salvar'}</button><button type="button" class="bt leve p alterna" data-acao="visto-achado" data-id="${t(a.id)}" aria-pressed="${!!visto}">${ico(visto ? 'ok' : 'olho')}${visto ? 'Visto' : 'Já vi'}</button></div></article>`;
 }
 function telaAchados() {
+  if (!ehPro()) return painelPro('O Achar trabalho');
   const cidade = db.buscaCidade || eu().cidade, ofs = db.buscaOficios && db.buscaOficios.length ? db.buscaOficios : meusOficios(eu()).map((x) => x.id), q = consultaDe(ofs, cidade);
   const real = typeof window.atriaAcharTrabalho === 'function';
-  return `<p class="explica"><b>De onde vêm os achados:</b> o Atria procura na internet, para a sua cidade e o seu ofício, <b>vagas de emprego</b> (Indeed, BNE, Catho e outros), <b>sites de pedidos de orçamento</b> (GetNinjas, Cronoshare) e <b>grupos do Facebook</b> onde clientes pedem serviço. O Facebook não mostra os posts dos grupos para buscadores: toque em Abrir, entre no grupo e veja os pedidos. ${real ? 'São 50 atualizações grátis por mês; depois, créditos pagos.' : 'Na demonstração os achados são exemplos, mas o botão abre a pesquisa de verdade no Google ou no Facebook com a mesma busca.'}</p>
+  return `<p class="explica"><b>De onde vêm os achados:</b> o Atria procura na internet, para a sua cidade e o seu ofício, <b>vagas de emprego</b> (Indeed, BNE, Catho e outros), <b>sites de pedidos de orçamento</b> (GetNinjas, Cronoshare) e <b>grupos do Facebook</b> onde clientes pedem serviço. O Facebook não mostra os posts dos grupos para buscadores: toque em Abrir, entre no grupo e veja os pedidos. ${real ? 'O Pro tem 50 atualizações por mês; depois, créditos.' : 'Na demonstração os achados são exemplos, mas o botão abre a pesquisa de verdade no Google ou no Facebook com a mesma busca.'}</p>
     <div class="cartao"><div class="duas"><label class="campo"><span>Cidade</span><input data-busca-cid value="${t(cidade)}"></label><label class="campo"><span>Ofícios</span><input value="${t(ofs.map(nomeOf).join(', '))}" readonly data-acao="ofs-busca" style="cursor:pointer"></label></div>
       <small class="mudo" style="display:block;font-size:12px;word-break:break-word">Busca: <span class="num" style="font-size:11.5px">${t(q)}</span></small>
       <div class="acoes"><button type="button" class="bt p" data-acao="atualizar-achados">${ico('recarregar')}${buscandoAchados ? 'Buscando…' : 'Atualizar'}</button><a class="bt leve p" target="_blank" rel="noopener noreferrer" href="${linkGoogle(q)}">${ico('globo')}Google</a><a class="bt leve p" target="_blank" rel="noopener noreferrer" href="${linkFacebook(q)}">f Facebook</a><button type="button" class="bt leve p" data-acao="avisar-achados">${ico('sino')}Avisar</button></div></div>
@@ -319,9 +343,11 @@ ACOES['ofs-busca'] = () => {
 function comparador(antes, depois, rotulo = '') {
   return `<div class="ad" role="slider" tabindex="0" aria-label="Antes e depois${rotulo ? `: ${t(rotulo)}` : ''}. Arraste para comparar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><div class="ad-depois">${depois}</div><div class="ad-antes">${antes}</div><span class="rot a">Antes</span><span class="rot d">Depois</span><span class="ad-linha"></span><span class="ad-alca">${ico('antesdepois')}</span></div>`;
 }
+// foto ou vídeo (o vídeo fica no aparelho: midia.js); sem nenhum dos dois, a foto ilustrativa da cena
+const slot = (foto, video, rot) => (video ? htmlVideo(video, foto, rot) : foto ? `<img src="${foto}" alt="${rot}">` : '');
 function midiaPost(p) {
-  if (p.tipo === 'ad') return comparador(p.fotoAntes ? `<img src="${p.fotoAntes}" alt="Antes">` : cena(p.cena, 'antes'), p.fotoDepois ? `<img src="${p.fotoDepois}" alt="Depois">` : cena(p.cena, 'depois'), p.texto.slice(0, 40));
-  return p.fotoDepois ? `<img src="${p.fotoDepois}" alt="${t(p.texto.slice(0, 60))}">` : cena(p.cena, 'depois');
+  if (p.tipo === 'ad') return comparador(slot(p.fotoAntes, p.videoAntes, 'Antes') || cena(p.cena, 'antes'), slot(p.fotoDepois, p.videoDepois, 'Depois') || cena(p.cena, 'depois'), p.texto.slice(0, 40));
+  return slot(p.fotoDepois, p.videoDepois, t(p.texto.slice(0, 60))) || cena(p.cena, 'depois');
 }
 const meusPosts = () => db.posts.filter((p) => p.autor === 'eu').sort((a, b) => b.data.localeCompare(a.data));
 let abaPerfil = 'ad';
@@ -333,12 +359,26 @@ TELAS.comunidade = () => {
     <div class="cartao vt-topo">${avEu('g')}<div class="vt-id"><b>${t(eu().nome)}</b><small>${t(ofs.map((o) => o.nome).join(' · '))}</small><small>${ico('pin', 'width="14" height="14" style="vertical-align:-2px"')} ${t(eu().cidade)} e até ${eu().raio} km</small></div></div>
     <button type="button" class="bt cheio largo" data-acao="postar-escolher" style="margin-top:10px;min-height:56px">${ico('partilhar')}Postar nas redes</button><div class="acoes" style="margin-top:8px"><button type="button" class="bt leve" data-acao="cartao">${ico('zap')}Cartão de visita</button><button type="button" class="bt leve" data-acao="editar-perfil">${ico('lapis')}Editar</button></div>
     <div class="stats"><div><b>${feitas}</b><small>obras feitas</small></div><div><b>${posts.length}</b><small>no portfólio</small></div><div><b>${numBR1(media)}</b><small>avaliação <span class="exemplo" style="font-size:9px;padding:2px 5px">exemplo</span></small></div></div>
-    <div class="seg" role="group" data-seg><button type="button" data-acao="aba-perfil" data-a="ad" aria-pressed="${abaPerfil === 'ad'}">Antes e depois</button><button type="button" data-acao="aba-perfil" data-a="foto" aria-pressed="${abaPerfil === 'foto'}">Fotos</button><button type="button" data-acao="aba-perfil" data-a="av" aria-pressed="${abaPerfil === 'av'}">Avaliações</button><i></i></div>
+    <div class="seg" role="group" data-seg><button type="button" data-acao="aba-perfil" data-a="ad" aria-pressed="${abaPerfil === 'ad'}">Antes e depois</button><button type="button" data-acao="aba-perfil" data-a="foto" aria-pressed="${abaPerfil === 'foto'}">Fotos e vídeos</button><button type="button" data-acao="aba-perfil" data-a="av" aria-pressed="${abaPerfil === 'av'}">Avaliações</button><i></i></div>
     <div style="margin-top:12px">${abaPerfil === 'av' ? `<div class="lista">${db.avaliacoes.map((a) => `<div class="cartao"><span class="estrelas" aria-label="${a.nota} estrelas">${'★'.repeat(a.nota)}${'☆'.repeat(5 - a.nota)}</span> <span class="exemplo">exemplo</span><p style="margin:6px 0">${t(a.txt)}</p><small class="mudo">${t(a.nome)} · ${dataBR(a.data)}</small></div>`).join('')}</div><p class="mudo" style="font-size:12px">Peça avaliação no WhatsApp quando terminar uma obra (mensagem pronta em Mensagens).</p>`
-      : `<div class="grade">${grade.map((x) => `<a href="#post/${x.id}" aria-label="${t(x.texto.slice(0, 50))}">${x.fotoDepois ? `<img src="${x.fotoDepois}" alt="">` : cena(x.cena, 'depois')}${x.tipo === 'ad' ? '<em>antes e depois</em>' : ''}</a>`).join('')}<button type="button" class="vt-novo" data-acao="novo-post" aria-label="Guardar novo antes e depois">${ico('camera', 'width="30" height="30"')}<span>Novo</span></button></div>`}</div>`;
+      : `${db.posts.some((x) => String(x.videoAntes || x.videoDepois || '').startsWith('idb:')) || (db.obras || []).some((o) => (o.diario || []).some((x) => x.video)) ? `<button type="button" class="bt leve p" data-acao="videos-aparelho" style="margin-bottom:10px">${ico('camera')}Vídeos no aparelho</button>` : ''}<div class="grade">${grade.map((x) => `<a href="#post/${x.id}" aria-label="${t(x.texto.slice(0, 50))}">${x.fotoDepois ? `<img src="${x.fotoDepois}" alt="">` : cena(x.cena, 'depois', true)}${x.tipo === 'ad' ? '<em>antes e depois</em>' : x.videoDepois ? '<em>vídeo</em>' : ''}</a>`).join('')}<button type="button" class="vt-novo" data-acao="novo-post" aria-label="Guardar novo antes e depois, foto ou vídeo">${ico('camera', 'width="30" height="30"')}<span>Novo</span></button></div>`}</div>`;
 };
 TELAS.perfil = () => TELAS.comunidade();
 ACOES['aba-perfil'] = (b) => { abaPerfil = b.dataset.a; repinta(); };
+// vídeos guardados neste aparelho: espaço usado e apagar (a capa continua no portfólio como foto)
+ACOES['videos-aparelho'] = async () => {
+  const lista = await listarVideos().catch(() => []), est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate().catch(() => null) : null;
+  const usado = lista.reduce((s, v) => s + v.tam, 0);
+  const dono = (id) => { const ref = `idb:${id}`, p = db.posts.find((x) => x.videoAntes === ref || x.videoDepois === ref); if (p) return t(p.texto.slice(0, 50)); const o = (db.obras || []).find((x) => (x.diario || []).some((d) => d.video === ref)); return o ? `Diário: ${t(o.titulo)}` : 'Sem uso (pode apagar)'; };
+  folha({ titulo: 'Vídeos no aparelho', corpo: `<p style="margin:0 0 10px">Os vídeos ficam só neste celular (não vão para a nuvem). Ocupam <b>${mb(usado)}</b>${est && est.quota ? ` de ${mb(est.quota)} livres para o app` : ''}.</p>
+      <div class="lista">${lista.map((v) => `<div class="linha" style="cursor:default"><span class="ic">${ico('camera')}</span><span class="txt"><b style="white-space:normal">${dono(v.id)}</b><small>${mb(v.tam)}</small></span><button type="button" class="bt leve p" data-apaga="${t(v.id)}" style="color:var(--brasa)">${ico('lixo')}Apagar</button></div>`).join('') || '<p class="mudo">Nenhum vídeo guardado.</p>'}</div>`,
+    aoAbrir: (f, api) => { $$('[data-apaga]', f).forEach((b) => { b.onclick = async () => {
+      const id = b.dataset.apaga, ref = `idb:${id}`; await apagarVideo(id).catch(() => {});
+      db.posts.forEach((p) => { if (p.videoAntes === ref) p.videoAntes = ''; if (p.videoDepois === ref) p.videoDepois = ''; });
+      (db.obras || []).forEach((o) => (o.diario || []).forEach((d) => { if (d.video === ref) d.video = ''; }));
+      grava(); api.fechar(true); toast('Vídeo apagado. A capa continua como foto.'); repinta(); ACOES['videos-aparelho']();
+    }; }); } });
+};
 TELAS.post = (id) => {
   const p = achar('posts', id); if (!p) return cab('Trabalho');
   const o = p.obra ? achar('obras', p.obra) : null;
@@ -353,7 +393,7 @@ ACOES.funil = (b) => abrirFunil(achar('posts', b.dataset.id));
 ACOES['postar-escolher'] = () => {
   const l = meusPosts();
   if (!l.length) { ACOES['novo-post']({ dataset: {} }); return; }
-  folha({ titulo: 'O que postar?', corpo: `<div class="grade" style="margin:0">${l.map((x) => `<button type="button" class="vt-esc" data-p="${x.id}">${x.fotoDepois ? `<img src="${x.fotoDepois}" alt="">` : cena(x.cena, 'depois')}</button>`).join('')}</div>`,
+  folha({ titulo: 'O que postar?', corpo: `<div class="grade" style="margin:0">${l.map((x) => `<button type="button" class="vt-esc" data-p="${x.id}">${x.fotoDepois ? `<img src="${x.fotoDepois}" alt="">` : cena(x.cena, 'depois', true)}</button>`).join('')}</div>`,
     pe: `<button type="button" class="bt leve largo" data-novo>${ico('camera')}Fotos novas</button>`,
     aoAbrir: (f, api) => { $$('[data-p]', f).forEach((x) => { x.onclick = () => { api.fechar(true); abrirPostar(achar('posts', x.dataset.p)); }; }); $('[data-novo]', f).onclick = () => { api.fechar(true); ACOES['novo-post']({ dataset: {} }); }; } });
 };
@@ -377,21 +417,38 @@ function lerFoto(arq, max = 1000) {
 }
 ACOES['novo-post'] = (b) => {
   const o = b && b.dataset && b.dataset.o ? achar('obras', b.dataset.o) : null;
-  let tipo = 'ad', antes = '', depois = '';
+  let tipo = 'ad', antes = '', depois = '', vAntes = '', vDepois = '';
   const cenaBase = o ? o.tipo : CENA_DO_OFICIO[principal(eu()).id] || 'muro';
   const fotoDiario = o && (o.diario || []).find((x) => x.foto);
   folha({ titulo: o ? 'Guardar o antes e depois' : 'Novo trabalho',
-    corpo: `<div class="seg" data-seg role="group"><button type="button" data-t="ad" aria-pressed="true">Antes e depois</button><button type="button" data-t="foto" aria-pressed="false">Foto</button><i></i></div>
-      <div class="foto-campo" style="margin-top:12px"><label data-antes><b>Antes</b>${fotoDiario ? `<img src="${fotoDiario.foto}" alt="">` : cena(cenaBase, 'antes')}<input type="file" accept="image/*" capture="environment" data-f="antes" aria-label="Foto de antes"></label><label><b>Depois</b>${cena(cenaBase, 'depois')}<input type="file" accept="image/*" capture="environment" data-f="depois" aria-label="Foto de depois"></label></div>
-      <p class="mudo" style="font-size:12px;margin:6px 0 10px">Toque para tirar a foto ou escolher da galeria. Sem foto, a demonstração usa a ilustração de exemplo.</p>
+    corpo: `<div class="seg" data-seg role="group"><button type="button" data-t="ad" aria-pressed="true">Antes e depois</button><button type="button" data-t="foto" aria-pressed="false">Foto ou vídeo</button><i></i></div>
+      <div class="foto-campo" style="margin-top:12px"><label data-antes><b>Antes</b>${fotoDiario ? `<img src="${fotoDiario.foto}" alt="">` : cena(cenaBase, 'antes')}<input type="file" accept="image/*,video/*" capture="environment" data-f="antes" aria-label="Foto ou vídeo de antes"></label><label><b>Depois</b>${cena(cenaBase, 'depois')}<input type="file" accept="image/*,video/*" capture="environment" data-f="depois" aria-label="Foto ou vídeo de depois"></label></div>
+      <p class="mudo" style="font-size:12px;margin:6px 0 10px">Toque para tirar a foto, gravar um vídeo curto (até ${LIMITE_S} s e ${LIMITE_MB} MB) ou escolher da galeria. Sem foto, a demonstração usa a foto ilustrativa.</p>
       <label class="campo"><span>Ofício</span><select data-of>${meusOficios(eu()).map((x) => `<option value="${x.id}" ${o && o.oficio === x.id ? 'selected' : ''}>${t(x.nome)}</option>`).join('')}</select></label>`,
     pe: `<button type="button" class="bt leve" data-so>Só guardar</button><button type="button" class="bt cheio" data-ok style="flex:2">${ico('partilhar')}Guardar e postar</button>`,
     aoAbrir: (f, api) => {
       if (fotoDiario) antes = fotoDiario.foto;
       ligarSeg($('[data-seg]', f), (bt) => { tipo = bt.dataset.t; $('[data-antes]', f).hidden = tipo !== 'ad'; });
-      $$('[data-f]', f).forEach((inp) => { inp.onchange = async () => { const arq = inp.files[0]; if (!arq) return; try { const url = await lerFoto(arq); if (inp.dataset.f === 'antes') antes = url; else depois = url; const lab = inp.closest('label'); lab.querySelector('svg.cena, img')?.remove(); lab.insertAdjacentHTML('beforeend', `<img src="${url}" alt="">`); } catch { toast('Não deu para ler essa foto', 'erro'); } }; });
+      $$('[data-f]', f).forEach((inp) => { inp.onchange = async () => {
+        const arq = inp.files[0]; if (!arq) return; const ehAntes = inp.dataset.f === 'antes', lab = inp.closest('label');
+        try {
+          let html;
+          if (ehVideo(arq)) {
+            toast('Preparando o vídeo…');
+            const r = await guardarArquivoVideo(arq, uid('v'));
+            if (ehAntes) { antes = r.capa; vAntes = r.video; } else { depois = r.capa; vDepois = r.video; }
+            html = htmlVideo(r.video, r.capa, ehAntes ? 'Vídeo de antes' : 'Vídeo de depois');
+          } else {
+            const url = await lerFoto(arq);
+            if (ehAntes) { antes = url; vAntes = ''; } else { depois = url; vDepois = ''; }
+            html = `<img src="${url}" alt="">`;
+          }
+          lab.querySelectorAll(':scope > svg.cena, :scope > img, :scope > .cena-foto, :scope > .midia-v').forEach((x) => x.remove());
+          lab.insertAdjacentHTML('beforeend', html);
+        } catch (e) { toast(e && e.message && !/^foto$/.test(e.message) ? e.message : 'Não deu para ler esse arquivo', 'erro'); }
+      }; });
       const salvar = (postar) => {
-        const of = $('[data-of]', f).value, p = { id: uid('s'), autor: 'eu', of, tipo, cena: cenaBase, fotoAntes: tipo === 'ad' ? antes : '', fotoDepois: depois, obra: o ? o.id : '', data: new Date().toISOString().slice(0, 16) };
+        const of = $('[data-of]', f).value, p = { id: uid('s'), autor: 'eu', of, tipo, cena: cenaBase, fotoAntes: tipo === 'ad' ? antes : '', fotoDepois: depois, videoAntes: tipo === 'ad' ? vAntes : '', videoDepois: vDepois, obra: o ? o.id : '', data: new Date().toISOString().slice(0, 16) };
         p.texto = legendaModelo(p);
         db.posts.unshift(p); if (o) o.postado = true; grava(); api.fechar(true); vibra(20);
         if (postar) abrirPostar(p); else { toast('Guardado no portfólio'); ir(`post/${p.id}`); }
@@ -441,8 +498,8 @@ TELAS.gestao = () => {
       <a class="bloco" href="#equipe"><span class="ic">${ico('carrinho')}</span><span><b>Ajudantes</b><small>Diárias e pagamento</small></span></a>
       ${MAIS.BLOCOS_GESTAO}
       <a class="bloco" href="#listas"><span class="ic">${ico('lista')}</span><span><b>Material</b><small>Listas por obra</small></span></a>
-      <a class="bloco" href="#lojas"><span class="ic">${ico('loja')}</span><span><b>Lojas</b><small>Mapa da cidade</small></span></a>
-      <a class="bloco" href="#precos"><span class="ic">${ico('moeda')}</span><span><b>Preços</b><small>Onde é mais barato</small></span></a>
+      <a class="bloco" href="#lojas"><span class="ic">${ico('loja')}</span><span><b>Lojas ${SELO_PRO}</b><small>Mapa da cidade</small></span></a>
+      <a class="bloco" href="#precos"><span class="ic">${ico('moeda')}</span><span><b>Preços ${SELO_PRO}</b><small>Onde é mais barato</small></span></a>
       <a class="bloco" href="#ferramentas"><span class="ic">${ico('ferramenta')}</span><span><b>Bancada</b><small>Calculadoras do seu ofício</small></span></a>
       <button type="button" class="bloco" data-acao="mensagens"><span class="ic">${ico('zap')}</span><span><b>Mensagens</b><small>Prontas para cada momento</small></span></button>
       <button type="button" class="bloco" data-acao="pix"><span class="ic">${ico('pix')}</span><span><b>Pix</b><small>QR e copia e cola</small></span></button>
@@ -703,6 +760,7 @@ function iniciar() {
   if (!db.cadastro) setTimeout(() => cadastro(false), 250);
   else if (!db.tour) setTimeout(tour, 700);
   if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+  ligarVideos();
 }
 
 if (!window.atriaMoldura) iniciar();

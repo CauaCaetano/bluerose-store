@@ -109,12 +109,23 @@ export const ico = (n, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stro
 
 // ------------------------------------------------------------------ dados
 export let db = null;
+const videosExemplo = (d) => [
+  { id: 's9', autor: 'eu', of: 'azulejista', tipo: 'foto', cena: 'piso', videoDepois: 'videos/piso-assentando.mp4', fotoDepois: 'videos/piso-assentando.webp', exemplo: true, texto: 'Porcelanato sendo assentado com argamassa dupla colagem. Vídeo curto direto do celular, na obra.', data: `${d(-1)}T17:20`, curtidas: 38, curti: false, salvo: false, coms: [] },
+  { id: 's10', autor: 'eu', of: 'pedreiro', tipo: 'foto', cena: 'fachada', videoDepois: 'videos/parede-pintando.mp4', fotoDepois: 'videos/parede-pintando.webp', exemplo: true, texto: 'Última demão antes da entrega. Vídeo vertical, pronto para o Status e os Stories.', data: `${d(-6)}T15:05`, curtidas: 22, curti: false, salvo: false, coms: [] },
+];
 export function carregar() {
   const q = new URLSearchParams(location.search);
   if (q.has('novo')) { try { localStorage.removeItem(CHAVE); } catch { /* sem acesso */ } }
   // quem abriu quando o app se chamava Fortis continua com os dados
   try { if (!localStorage.getItem(CHAVE) && localStorage.getItem('fortis-v1')) localStorage.setItem(CHAVE, localStorage.getItem('fortis-v1')); } catch { /* sem acesso */ }
-  try { const d = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (d && d.v === 1) { db = d; return db; } } catch { /* dado estragado: recomeça com o exemplo */ }
+  try {
+    const d = JSON.parse(localStorage.getItem(CHAVE) || 'null');
+    if (d && d.v === 1) {
+      // demonstração aberta antes de 12/11/2026: ganha os vídeos de exemplo da vitrine
+      if (!q.has('conta') && Array.isArray(d.posts) && !d.posts.some((p) => p.id === 's9')) { d.posts.push(...videosExemplo((n) => somaDias(hoje(), n))); db = d; grava(); }
+      db = d; return db;
+    }
+  } catch { /* dado estragado: recomeça com o exemplo */ }
   db = exemplo(); grava(); return db;
 }
 let avisouCheio = false;
@@ -208,6 +219,7 @@ function exemplo() {
   ];
   const com = (autor, txt) => ({ id: uid('k'), autor, txt });
   const posts = [
+    ...videosExemplo(d),
     { id: 's1', autor: 'p1', of: 'marceneiro', tipo: 'ad', cena: 'cozinha', texto: 'Cozinha toda em MDF amadeirado, 9 dias do corte à instalação. 14 portas e 6 gavetas aproveitando cada canto.', data: `${d(0)}T07:40`, curtidas: 86, curti: false, salvo: false, coms: [com('p6', 'Acabamento top! Qual fita de borda você usou?'), com('p2', 'Ficou muito bom, Rafa.')] },
     { id: 's2', autor: 'eu', of: 'azulejista', tipo: 'ad', cena: 'banheiro', obra: 'o6', texto: 'Banheiro inteiro em porcelanato 60x60 com nivelador. Do azulejo quebrado ao box novo em 8 dias.', data: `${d(-12)}T19:10`, curtidas: 54, curti: false, salvo: false, coms: [com('p6', 'Junta alinhadinha. Parabéns!')] },
     { id: 's3', autor: 'p2', of: 'eletricista', tipo: 'ad', cena: 'quadro', texto: 'Quadro antigo com fio derretido virou quadro novo com DR e circuitos separados. Segurança primeiro.', data: `${d(-1)}T18:00`, curtidas: 31, curti: true, salvo: false, coms: [] },

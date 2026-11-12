@@ -561,10 +561,12 @@
   // O erro leva .dados com o que o servidor respondeu (precisa_creditos, gratis_restantes, saldo); a lista leva .info.
   function chamaAtria(fn, body) {
     return cliente().then(function (sb) { return sb.functions.invoke(fn, { body: body }); }).then(function (r) {
-      if (r.error) return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { var e = new Error(j.erro || 'falhou'); e.dados = j; throw e; });
+      if (r.error) return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { if (j.precisa_pro) window.atriaPlano = 'basico'; var e = new Error(j.erro || 'falhou'); e.dados = j; throw e; });
       return r.data || {};
     });
   }
+  // plano da empresa (nexo_espacos.nivel, trazido pela porta): o Básico não tem Achar trabalho nem lojas e preços
+  if (app === 'atria') window.atriaPlano = info && info.nivel === 'pro' ? 'pro' : 'basico';
   if (app === 'atria') window.atriaAcharTrabalho = function (o) {
     return chamaAtria('achar-trabalho', { cidade: o.cidade, oficios: o.oficios, auto: !!o.auto }).then(function (d) {
       var l = d.achados || []; l.info = { gratis_mes: d.gratis_mes, gratis_restantes: d.gratis_restantes, gratis_global_acabou: d.gratis_global_acabou, saldo: d.saldo, pago: d.pago }; return l;
