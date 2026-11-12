@@ -34,5 +34,17 @@
         "E7:A8:97:1D:90:75:66:54:B1:8A:F5:08:90:8F:4B:FD:CD:0C:D6:4C:30:1E:17:C0:BB:9D:DB:25:19:82:6A:53"
       ]
     }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bluerosestore.peplo",
+      "sha256_cert_fingerprints": [
+        "D2:55:D9:95:A5:D9:DE:5D:F7:67:0D:EE:C0:A1:90:8D:27:D8:5D:31:20:FE:CD:69:96:DA:D3:FC:B8:AC:87:CB"
+      ]
+    }
   }
 ]
