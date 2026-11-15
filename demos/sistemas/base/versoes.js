@@ -34,5 +34,9 @@
     chave: 'atria-v1', mensal: 39, anual: 374, exemplo: 1, pagina: 'atria.html', logo: 'demos/sistemas/atria/icone-192.png?v=2', semTeste: true,
     // 12/11/2026: dois planos. Básico R$ 39 (anual R$ 374) e Pro R$ 50 (anual R$ 480) com Achar trabalho e lojas e preços
     planos: { basico: 'tudo, menos Achar trabalho e lojas e preços', pro: { mensal: 50, anual: 480, det: 'tudo do Básico + Achar trabalho (50 por mês) e lojas e preços' } } };
+  // Popina: restaurante, lanchonete, pizzaria e bar (marca própria, 15/11/2026): comanda no celular, cozinha, caixa com Pix,
+  // cardápio online com QR e delivery, estoque por ficha técnica; sem teste grátis, mensal R$ 79 ou anual R$ 758
+  out.popina = { id: 'popina', categoria: 'popina', versao: '', nome: 'Popina', nomeCategoria: 'Popina', nomeVersao: '', pasta: 'popina', entrada: 'app.html',
+    chave: 'popina-v1', mensal: 79, anual: 758, exemplo: 1, pagina: 'popina.html', logo: 'img/logos/popina-simbolo.png', semTeste: true };
   window.VELTRIA_VERSOES = out;
 })();

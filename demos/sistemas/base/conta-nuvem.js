@@ -136,7 +136,10 @@
     sessionStorage.setItem('veltria-conta', JSON.stringify(info));
   }
   // recarrega a tela com os dados juntados; o que ainda não subiu sobe logo depois (info.pendente)
-  function recarrega(msg) { info.pendente = pendente; sessionStorage.setItem('veltria-conta', JSON.stringify(info)); recarregando = true; pendente = false; aviso(msg); setTimeout(function () { location.reload(); }, 1600); }
+  function recarrega(msg) {
+    // telas que se redesenham sozinhas (Popina: salão, cozinha e caixa ao vivo) não recarregam a página
+    if (typeof window.veltriaAoVivo === 'function') { try { window.veltriaAoVivo(); return; } catch (e) { /* cai no recarregar */ } }
+    info.pendente = pendente; sessionStorage.setItem('veltria-conta', JSON.stringify(info)); recarregando = true; pendente = false; aviso(msg); setTimeout(function () { location.reload(); }, 1600); }
   function enviar() {
     clearTimeout(timer);
     // nada gravado ainda (empresa nova, antes da primeira alteração): não há o que subir
@@ -213,6 +216,34 @@
         });
       });
     }).catch(function () {});
+  }
+  // Popina: os aparelhos do restaurante (garçom, cozinha, caixa) se atualizam na hora pelo tempo real do banco,
+  // e os pedidos do cardápio online (QR na mesa e delivery) entram pela fila popina_pedidos
+  var trazendo = false;
+  function trazerPopina() {
+    if (app !== 'popina' || recarregando || trazendo || typeof window.popinaChegou !== 'function') return;
+    if (window.veltriaPermissoes && window.veltriaPermissoes.so_leitura) return;
+    trazendo = true;
+    cliente().then(function (sb) {
+      return sb.from('popina_pedidos').select('id,tipo,mesa,dados,criado').eq('espaco', info.espaco).order('criado').limit(50).then(function (r) {
+        if (r.error || !r.data || !r.data.length) return;
+        // importa primeiro e grava neste aparelho; só depois tira da fila. Se o aparelho cair no meio, o pedido
+        // continua na fila e entra na próxima conferência; os ids são fixos ('w' + id), então dois aparelhos que
+        // importarem o mesmo pedido ficam com um só depois da fusão
+        window.popinaChegou(r.data);
+        return sb.from('popina_pedidos').delete().in('id', r.data.map(function (x) { return x.id; }));
+      });
+    }).catch(function () {}).then(function () { trazendo = false; });
+  }
+  if (app === 'popina') {
+    cliente().then(function (sb) {
+      sb.channel('popina-' + info.espaco)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'nexo_registros', filter: 'espaco=eq.' + info.espaco }, function () { setTimeout(puxar, 250); })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'popina_pedidos', filter: 'espaco=eq.' + info.espaco }, function () { trazerPopina(); })
+        .subscribe();
+    }).catch(function () {});
+    setInterval(function () { puxar(); trazerPopina(); }, 10000); // reserva, se o tempo real cair
+    setTimeout(trazerPopina, 2500);
   }
   document.addEventListener('visibilitychange', puxar);
   setInterval(function () { puxar(); trazerPedidos(); }, 30000);

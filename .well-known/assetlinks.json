@@ -94,5 +94,17 @@
         "B5:EC:EE:F5:82:20:F7:97:1C:ED:4A:0D:08:22:12:28:2A:E6:A1:47:E6:31:72:58:4A:AE:DF:96:A9:22:3C:E3"
       ]
     }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bluerosestore.popina",
+      "sha256_cert_fingerprints": [
+        "91:24:0A:D5:49:1D:DE:09:6B:70:0C:50:B3:3A:80:45:D0:B5:C3:97:9E:82:7A:10:D5:7B:12:98:87:78:8D:3A"
+      ]
+    }
   }
 ]

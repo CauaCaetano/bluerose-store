@@ -184,6 +184,35 @@
     "conta azul"
    ],
    "negocio": "Assistência técnica e serviços"
+  },
+  {
+   "id": "popina",
+   "nome": "Popina",
+   "pagina": "popina.html",
+   "ramo": "Restaurante, lanchonete, pizzaria e bar",
+   "para": "Para restaurantes, lanchonetes, pizzarias e bares: comanda no celular do garçom, tela da cozinha e do bar, cardápio com QR na mesa, delivery com taxa por bairro, caixa com Pix e conta dividida, estoque pela ficha técnica.",
+   "mensal": "R$ 79",
+   "extra": "sem teste grátis (a demonstração é aberta), ou R$ 758 por ano; equipe e aparelhos sem limite; não emite nota fiscal",
+   "demo": "demos/sistemas/popina/app.html",
+   "teste": "app/popina/",
+   "linha": "Marca própria da Blue Rose",
+   "palavras": [
+    "restaurante",
+    "lanchonete",
+    "pizzaria",
+    "bar",
+    "comanda",
+    "garçom",
+    "garcom",
+    "cardápio",
+    "cardapio",
+    "delivery",
+    "cozinha",
+    "mesa",
+    "popina",
+    "hamburgueria"
+   ],
+   "negocio": "Restaurante e lanchonete"
   }
  ],
  "contextos": {
