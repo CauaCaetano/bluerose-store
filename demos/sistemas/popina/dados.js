@@ -81,7 +81,7 @@ export const CONFIG = {
   pix: { tipo: 'aleatoria', chave: '1f3c2a8e-0000-4000-8000-00000000c0de', exemplo: true },
   garcons: ['Rafael', 'Bruna', 'Diego'],
   // o que o cliente vê no cardápio online (a cara do restaurante) e as regras do delivery
-  loja: { cor: '#B4532F', tema: 'claro', logo: 'img/c-logo-exemplo.webp?v=1', capa: 'fotos/capa.webp', boasVindas: 'Pizzas · Massas · Grelhados', endereco: 'Rua das Palmeiras, 210 · Centro', instagram: 'cantinaferraz', aviso: 'Sábado tem feijoada completa no almoço',
+  loja: { cor: '#B4532F', tema: 'claro', template: 'taverna', estilo: 'rustico', logo: 'img/c-logo-exemplo.webp?v=1', capa: 'fotos/capa.webp', boasVindas: 'Pizzas · Massas · Grelhados', endereco: 'Rua das Palmeiras, 210 · Centro', instagram: 'cantinaferraz', aviso: 'Sábado tem feijoada completa no almoço',
     horarios: [[['11:00', '15:00'], ['18:00', '23:30']], [], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '00:30']], [['11:00', '15:30'], ['18:00', '00:30']]],
     aceitaQR: true, delivery: true, retirada: true, pedidoMinimo: 30, tempoEntrega: '40 a 60 min', tempoRetirada: '20 a 30 min', pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'],
     areas: [{ nome: 'Salão', de: 1, ate: 8 }, { nome: 'Varanda', de: 9, ate: 12 }], couvert: 0, comissao: 10 },
@@ -126,7 +126,7 @@ export function estadoInicial(agora = Date.now()) {
   const chamados = [{ id: 'c1', mesa: 8, tipo: 'garcom', ts: agora - 1 * MIN, origem: 'QR' }];
   const pedidosQR = [{ id: 'q1', mesa: 2, ts: agora - 3 * MIN, itens: [{ prod: 'xburger', qtd: 2, obs: '' }, { prod: 'refri', qtd: 2, obs: '' }], nome: 'Mesa 2 (QR)' }];
   return {
-    versao: 1, exemplo: 3, criado: agora, config: JSON.parse(JSON.stringify(CONFIG)), categorias: CATEGORIAS.map((c) => ({ ...c })),
+    versao: 1, exemplo: 4, criado: agora, config: JSON.parse(JSON.stringify(CONFIG)), categorias: CATEGORIAS.map((c) => ({ ...c })),
     produtos: PRODUTOS.map((p) => JSON.parse(JSON.stringify(p))), insumos: INSUMOS.map((i) => ({ ...i })), bairros: BAIRROS.map((b) => ({ ...b })),
     comandas, chamados, pedidosQR, vendas: historico(agora), numPedido: 43,
     clientes: CLIENTES.map((c) => ({ ...c })), entregadores: ENTREGADORES.map((e) => ({ ...e })), cupons: CUPONS.map((c) => ({ ...c })),

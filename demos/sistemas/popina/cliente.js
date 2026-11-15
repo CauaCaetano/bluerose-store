@@ -1,9 +1,9 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=11';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=11';
-import { ico, folha, toast, $, $$ } from './ui.js?v=11';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=12';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=12';
+import { ico, folha, toast, $, $$ } from './ui.js?v=12';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -24,7 +24,7 @@ async function rpc(fn, args) {
   if (!r.ok) throw new Error('rede');
   return r.json();
 }
-const lojaPadrao = () => ({ cor: '#B4532F', tema: 'claro', estilo: 'rustico', creditos: true, horarios: [], aceitaQR: true, delivery: true, retirada: true, pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], areas: [] });
+const lojaPadrao = () => ({ cor: '#B4532F', tema: 'claro', estilo: 'moderno', creditos: true, horarios: [], aceitaQR: true, delivery: true, retirada: true, pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], areas: [] });
 async function daNuvem() {
   const d = await rpc('popina_cardapio', { p_espaco: R });
   if (d.erro) throw new Error(d.erro);
@@ -80,9 +80,9 @@ function tema() {
   document.body.style.setProperty('--marca', cor); document.body.style.setProperty('--marca-txt', claro ? '#1d1712' : '#fff');
   // estilo escolhido pelo restaurante (só os conhecidos viram classe); no rústico o fundo é sempre o pergaminho
   // luxo e realeza usam a base do moderno com a paleta e os ornamentos do template
-  const est = ['rustico', 'moderno', 'luxo', 'realeza'].includes(L.estilo) ? L.estilo : 'rustico';
-  document.body.classList.remove('est-rustico', 'est-moderno', 'est-luxo', 'est-realeza'); document.body.classList.add(`est-${est}`);
-  if (est === 'luxo' || est === 'realeza') document.body.classList.add('est-moderno');
+  const est = ['rustico', 'moderno', 'luxo', 'realeza', 'japones'].includes(L.estilo) ? L.estilo : (L.estilo === undefined ? 'rustico' : 'moderno');
+  document.body.classList.remove('est-rustico', 'est-moderno', 'est-luxo', 'est-realeza', 'est-japones'); document.body.classList.add(`est-${est}`);
+  if (est === 'luxo' || est === 'realeza' || est === 'japones') document.body.classList.add('est-moderno');
   document.body.classList.toggle('escuro', L.tema === 'escuro' && est === 'moderno');
   $('meta[name=theme-color]').content = cor;
   document.title = `${M.nome} · Cardápio`;

@@ -1,13 +1,13 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=11';
-import './cozinha.js?v=11';
-import './caixa.js?v=11';
-import './pedidos.js?v=11';
-import './mais.js?v=11';
-import './gestao.js?v=11';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=11';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=11';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=11';
+import './salao.js?v=12';
+import './cozinha.js?v=12';
+import './caixa.js?v=12';
+import './pedidos.js?v=12';
+import './mais.js?v=12';
+import './gestao.js?v=12';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=12';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=12';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=12';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -54,8 +54,10 @@ function marcaTopo() {
   $('#topo-nome').textContent = m ? (db.config.cidade || '') : db.config.nome;
   document.body.classList.toggle('marca-propria', m);
   // template escolhido em Gestão › Aparência (Taverna é o visual de base; Luxo e Realeza vêm por cima)
-  const tp = ['luxo', 'realeza'].includes(L.template) ? L.template : 'taverna';
-  ['taverna', 'luxo', 'realeza'].forEach((x) => document.body.classList.toggle(`tpl-${x}`, x === tp));
+  // Básico é o padrão de quem começa; a demonstração usa o Taverna (dados.js)
+  const TPLS = ['basico', 'taverna', 'luxo', 'realeza', 'japones'], tp = TPLS.includes(L.template) ? L.template : 'basico';
+  TPLS.forEach((x) => document.body.classList.toggle(`tpl-${x}`, x === tp));
+  if (/^#[0-9a-f]{6}$/i.test(L.cor || '')) document.body.style.setProperty('--loja-cor', L.cor);
 }
 addEventListener('popina-plano', () => { marcaTopo(); dispatchEvent(new HashChangeEvent('hashchange')); });
 ouvir(contadores);

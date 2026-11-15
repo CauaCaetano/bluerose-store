@@ -296,3 +296,22 @@ body.est-realeza .tag{background:#F3D683!important;color:#5A3A08!important}body.
 body.est-realeza .cli-mais{box-shadow:0 0 0 2px #D9B25A!important}
 body.est-realeza .cli-ver{background:linear-gradient(180deg,#AA2633,#8E1B26)!important;color:#F3D683!important;box-shadow:inset 0 0 0 1.5px #D9B25A,0 14px 28px -14px rgba(90,10,20,.7)!important}
 body.est-realeza .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:28px;background:#18215C url(img/tr-damasco.webp?v=1) 0 0/440px auto;border-top:2px solid #D9B25A}
+
+/* ---------- estilo JAPONÊS do cardápio (template Japonês): papel washi, vermelho laca, madeira e cerejeira ---------- */
+body.est-japones{--marca:#B3212B!important;--marca-txt:#FFF6EE!important;--fundo:#F5EEDF;--cartao:#FBF6EA;--linha2:#D6B886;--txt:#1E1A17;--txt2:#5A4E44;
+  background:#F5EEDF repeating-linear-gradient(115deg,rgba(160,130,90,.035) 0 2px,transparent 2px 7px)!important}
+body.est-japones h1,body.est-japones h2,body.est-japones .cli-prod-txt b,body.est-japones .cli-dest b,body.est-japones .cli-preco,body.est-japones .cli-ver,body.est-japones .cli-fita b{font-family:"Shippori Mincho",Georgia,serif!important;font-weight:800!important}
+body.est-japones .cli-capa{border-bottom:3px solid #B88A52}
+body.est-japones .cli-capa::after{content:"";position:absolute;right:0;bottom:-6px;width:170px;height:74px;background:url(img/tj-sakura.webp?v=1) right bottom/contain no-repeat;pointer-events:none;z-index:2}
+body.est-japones .cli-logo{box-shadow:0 0 0 3px #B3212B,0 8px 20px -8px rgba(0,0,0,.5)!important}
+body.est-japones .cli-fita{background:#B3212B!important;color:#FFF6EE!important;border-radius:4px!important;clip-path:polygon(2% 12%,8% 0,94% 6%,100% 40%,97% 100%,4% 92%,0 60%)}
+body.est-japones .cli-h2{color:#1E1A17!important}
+body.est-japones .cli-h2::before{content:"";width:22px;height:22px;flex:none;border-radius:4px;background:#B3212B;box-shadow:inset 0 0 0 3px #B3212B,inset 0 0 0 5px #F5EEDF}
+body.est-japones .cli-h2::after{background:#C9A06A!important;opacity:1!important;height:1px!important}
+body.est-japones .cli-prod,body.est-japones .cli-dest,body.est-japones .cli-modo-bts .bt,body.est-japones .cli-busca,body.est-japones .cli-cats a{border:1.5px solid #D6B886!important;border-radius:6px!important;background:#FBF6EA!important}
+body.est-japones .cli-cats a.on{background:#B3212B!important;color:#FFF6EE!important;border-color:#B3212B!important}
+body.est-japones .cli-modo-bts .bt .ico{color:#B3212B!important}
+body.est-japones .cli-preco{color:#B3212B!important}
+body.est-japones .tag{background:#F3E2C4!important;color:#7A4A12!important}body.est-japones .tag.verde{background:#E5EDD6!important;color:#56702A!important}
+body.est-japones .cli-ver{background:#B3212B!important;color:#FFF6EE!important;box-shadow:inset 0 0 0 1.5px #8E1820,0 14px 28px -14px rgba(120,20,25,.6)!important}
+body.est-japones .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;background:url(img/tj-ondas.webp?v=1) 0 100%/auto 30px repeat-x;opacity:.7}

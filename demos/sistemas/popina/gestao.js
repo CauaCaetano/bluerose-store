@@ -1,10 +1,10 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=11';
-import { acao, ir } from './nucleo.js?v=11';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=11';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=11';
-import { situacao, textoHorarios } from './opcoes.js?v=11';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=12';
+import { acao, ir } from './nucleo.js?v=12';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=12';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=12';
+import { situacao, textoHorarios } from './opcoes.js?v=12';
 import { qrSVG } from '../base/qr.js';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -23,7 +23,7 @@ function reduzir(arq, W, H, q = 0.74) {
 
 // estilos do cardápio do cliente: o restaurante escolhe a cara (a cor e o logo são sempre os dele)
 const ESTILOS = [['rustico', 'Rústico', 'Pergaminho, louros e mosaico. Cantina, pizzaria, comida caseira'], ['moderno', 'Moderno', 'Limpo, com a cor do seu logo. Hamburgueria, café, japonês, açaí'],
-  ['luxo', 'Luxo', 'Mármore claro e dourado. Restaurante fino'], ['realeza', 'Realeza', 'Veludo azul, ouro e carmesim. Casa clássica']];
+  ['luxo', 'Luxo', 'Mármore claro e dourado. Restaurante fino'], ['realeza', 'Realeza', 'Veludo azul, ouro e carmesim. Casa clássica'], ['japones', 'Japonês', 'Papel washi, vermelho laca e cerejeira']];
 // a cor que mais aparece no logo (ignora branco, preto e cinza) vira a cor do restaurante
 function corDoLogo(src) {
   return new Promise((ok) => {
@@ -58,12 +58,14 @@ function planoMarca() {
 // ------------------------------------------------------------------ aparência: template do sistema, logo, capa, cores e estilo do cardápio
 // templates do sistema inteiro (telas da equipe e cardápio), cada um com a sua paleta; conceitos do GPT em relatorios/popina/conceitos-gpt
 export const TEMPLATES = [
+  ['basico', 'Básico', 'Sem tema: limpo, só com a cor e o logo do seu restaurante. É o padrão', 'moderno'],
   ['taverna', 'Taverna', 'Pergaminho, madeira e mosaico. Cantina, pizzaria, comida caseira', 'rustico'],
   ['luxo', 'Luxo', 'Mármore claro e dourado. Restaurante fino, alta gastronomia', 'luxo'],
   ['realeza', 'Realeza', 'Veludo azul, ouro e carmesim. Casa clássica, salão de eventos', 'realeza'],
+  ['japones', 'Japonês', 'Papel washi, madeira, vermelho laca e cerejeira. Culinária japonesa', 'japones'],
 ];
 TELAS_MAIS.aparencia = () => {
-  const L = lojaCfg(), c = db.config, tpl = L.template || 'taverna';
+  const L = lojaCfg(), c = db.config, tpl = L.template || 'basico';
   return volta('mais', 'Aparência e templates', 'A cara do sistema da equipe e do cardápio do cliente') + `
   <form class="form larga" data-loja>
     <section class="bloco-form"><h2>Template do sistema</h2><p class="mudo">Muda as telas do salão, da cozinha, do caixa e da gestão, e o estilo do cardápio do cliente. Dá para trocar quando quiser; nada se perde.</p>

@@ -1,0 +1,90 @@
+/* Popina · template BÁSICO (padrão de quem começa): sem tema, limpo, só com a cor e o logo do restaurante.
+   A cor vem de Gestão › Aparência (--loja-cor, posta pelo app.js). Vem por cima do visual Taverna e tira texturas e ornamentos. */
+body.tpl-basico{--b-cor:var(--loja-cor,#B4532F);--b-fundo:#F5F6F8;--b-cartao:#FFFFFF;--b-borda:#E2E5EA;--b-tinta:#1F2328;--b-mudo:#6A7280;--b-verde:#2F9E44;--b-amarelo:#E8A317;
+  --g-serif:"Figtree",system-ui,sans-serif;--g-tinta:#1F2328;--g-tinta2:#4B5563;background:var(--b-fundo)!important;color:var(--b-tinta);font-family:"Figtree",system-ui,sans-serif}
+body.tpl-basico *{font-family:"Figtree",system-ui,sans-serif!important}
+body.tpl-basico:not(.cliente)::before{display:none!important}
+@media (min-width:900px){body.tpl-basico:not(.cliente){padding-left:0!important}body.tpl-basico .topo,body.tpl-basico .demo-faixa{margin-left:0!important;padding-left:24px!important}}
+body.tpl-basico .topo{background:#fff!important;border-bottom:1px solid var(--b-borda)!important;backdrop-filter:none}
+body.tpl-basico .topo::before,body.tpl-basico .topo::after{display:none!important}
+body.tpl-basico .topo>div>b{letter-spacing:0!important;font-weight:800!important;color:var(--b-tinta)!important;text-transform:none!important}
+body.tpl-basico .nav a{color:var(--b-mudo)!important;font-weight:600!important;text-transform:none!important;letter-spacing:0!important}
+body.tpl-basico .nav a.on{background:color-mix(in srgb,var(--b-cor) 12%,#fff)!important;color:var(--b-cor)!important;box-shadow:none!important;clip-path:none!important;border-radius:10px}
+body.tpl-basico .topo-perfil span{background:var(--b-cor)!important;color:#fff!important;box-shadow:none!important}
+body.tpl-basico .topo-sino em{background:var(--b-cor)!important}
+/* sem ornamentos */
+body.tpl-basico img[src*="louro"],body.tpl-basico .aqueduto-img,body.tpl-basico .folhas-img,body.tpl-basico .g-aqueduto,body.tpl-basico .cx-aqueduto,body.tpl-basico .louro-img,body.tpl-basico .cab-pedidos .aqueduto-img{display:none!important}
+body.tpl-basico .prancheta::after,body.tpl-basico .presilha,body.tpl-basico .kds-col .trilho,body.tpl-basico .pd-quadro::after,body.tpl-basico .kds-col.pronto::after{display:none!important}
+body.tpl-basico h1,body.tpl-basico .cab-salao h1,body.tpl-basico .cab-cozinha h1,body.tpl-basico .cab-pedidos h1,body.tpl-basico .cab-caixa h1,body.tpl-basico .cab-gestao h1,body.tpl-basico .cab-g h1{font-weight:800!important;text-transform:none!important;letter-spacing:-.01em!important;color:var(--b-tinta)!important;-webkit-text-fill-color:var(--b-tinta)!important;background:none!important;text-shadow:none!important;font-size:30px!important}
+/* cartões brancos */
+body.tpl-basico .prancheta,body.tpl-basico .ticket-dia,body.tpl-basico .cartao-caixa,body.tpl-basico .comanda-papel,body.tpl-basico .conta-det,body.tpl-basico .link-cardapio,body.tpl-basico .area,body.tpl-basico .kds.quadro,
+body.tpl-basico .gestao-nav,body.tpl-basico .g-card,body.tpl-basico .gestao-corpo .bloco,body.tpl-basico .gestao-corpo .bloco-form,body.tpl-basico .gestao-corpo .tabela-rolo,body.tpl-basico .gestao-corpo .resumo-dia>*{
+  border:1px solid var(--b-borda)!important;border-image:none!important;border-radius:14px!important;background:var(--b-cartao)!important;box-shadow:0 1px 2px rgba(16,24,40,.06)!important;color:var(--b-tinta)!important;-webkit-mask:none!important;mask:none!important;clip-path:none!important}
+body.tpl-basico .prancheta{padding:16px 12px 12px!important}
+body.tpl-basico .prancheta-cab,body.tpl-basico .prancheta .fila,body.tpl-basico .fila-vazia{background:none!important}
+body.tpl-basico .prancheta-cab h2,body.tpl-basico .ticket-cab h2,body.tpl-basico .cx-h2,body.tpl-basico .h2-pagar,body.tpl-basico .comanda-papel .sec-tit h2,body.tpl-basico .gestao-corpo .sec-tit h2{color:var(--b-tinta)!important;text-transform:none!important;letter-spacing:0!important;font-weight:800!important;background:none!important;clip-path:none!important;font-size:18px!important}
+body.tpl-basico .gestao-corpo .sec-tit h2::before{display:none}
+body.tpl-basico .prancheta-sub{color:var(--b-mudo)!important}
+body.tpl-basico .fila-item{background:#fff!important;border:1px solid var(--b-borda)!important;border-radius:10px!important;box-shadow:none!important}
+body.tpl-basico .fila-txt b{text-transform:none!important;font-weight:700!important}
+body.tpl-basico .faixa.ouro{background:var(--b-amarelo)!important}body.tpl-basico .faixa.oliva{background:var(--b-verde)!important}body.tpl-basico .faixa.terra{background:var(--b-cor)!important}body.tpl-basico .faixa.amarelo{background:#F2C14E!important}
+body.tpl-basico .bt.cheio,body.tpl-basico .fila-item .bt.cheio{background:var(--b-cor)!important;border-color:var(--b-cor)!important;color:#fff!important;box-shadow:none!important}
+body.tpl-basico .bt.oliva,body.tpl-basico .fila-item .bt.oliva{background:var(--b-verde)!important;border-color:var(--b-verde)!important;color:#fff!important}
+body.tpl-basico .bt.claro,body.tpl-basico .gestao-corpo .bt:not(.cheio):not(.oliva):not(.perigo){background:#fff!important;border:1px solid var(--b-borda)!important;color:var(--b-tinta)!important;box-shadow:none!important}
+body.tpl-basico .ticket-total,body.tpl-basico .conta-det .totais .total,body.tpl-basico .comanda-papel .totais .total{border:0!important;border-image:none!important;border-radius:10px!important;clip-path:none!important;background:var(--b-cor)!important;margin-left:0!important;margin-right:0!important;padding:0 16px!important}
+body.tpl-basico .ticket-total span,body.tpl-basico .ticket-total b,body.tpl-basico .conta-det .totais .total span,body.tpl-basico .conta-det .totais .total b,body.tpl-basico .comanda-papel .totais .total span,body.tpl-basico .comanda-papel .totais .total b{color:#fff!important;margin:0!important}
+body.tpl-basico .ticket-linha .ico{color:var(--b-mudo)!important}
+/* salão */
+body.tpl-basico .legenda i.ocupada{background:var(--b-cor)!important}body.tpl-basico .legenda i.pronto{background:var(--b-verde)!important}body.tpl-basico .legenda i.conta{background:var(--b-amarelo)!important}
+body.tpl-basico .legenda i.chamou{background:#fff!important;box-shadow:inset 0 0 0 2px var(--b-cor)!important}body.tpl-basico .legenda i.livre{background:#fff!important;box-shadow:inset 0 0 0 1px var(--b-borda)!important}
+body.tpl-basico .fita,body.tpl-basico .fita.verde,body.tpl-basico .g-fita,body.tpl-basico .kds-col .placa,body.tpl-basico .cab-comanda .fita-mesa,body.tpl-basico .cab-conta .fita{border:0!important;border-image:none!important;clip-path:none!important;background:none!important;color:var(--b-tinta)!important;
+  text-transform:none!important;letter-spacing:0!important;font-weight:800!important;height:auto!important;padding:0!important;font-size:17px!important}
+body.tpl-basico .fita::before,body.tpl-basico .g-fita::before,body.tpl-basico .fita .ico,body.tpl-basico .g-fita .ico,body.tpl-basico .fita-mesa img{display:none!important}
+body.tpl-basico .area{padding:16px!important}
+body.tpl-basico .area-cab{margin:0 0 12px!important;align-items:center!important}
+body.tpl-basico .area-cab span{margin:0!important;color:var(--b-mudo)!important}
+body.tpl-basico .mesa{border-radius:12px!important;box-shadow:none!important;background-image:none}
+body.tpl-basico .mesa b{font-weight:800!important}
+body.tpl-basico .mesa.ocupada,body.tpl-basico .mesa.chamou{background:var(--b-cor)!important;color:#fff!important}
+body.tpl-basico .mesa.pronto,body.tpl-basico .mesa.qr{background:var(--b-verde)!important;color:#fff!important}
+body.tpl-basico .mesa.conta{background:var(--b-amarelo)!important;color:#1F2328!important}
+body.tpl-basico .mesa.livre{background:#fff!important;color:var(--b-tinta)!important;box-shadow:inset 0 0 0 1px var(--b-borda)!important}
+body.tpl-basico .salao-dir .mesa.chamou{box-shadow:0 0 0 3px color-mix(in srgb,var(--b-cor) 35%,#fff)!important}
+body.tpl-basico .mesa-sinal{background:rgba(0,0,0,.18)!important;box-shadow:none!important;color:#fff!important}
+/* cozinha, pedidos e caixa */
+body.tpl-basico .kds.quadro{padding:10px!important}
+body.tpl-basico .kds-col+.kds-col{border-left:1px solid var(--b-borda)!important;box-shadow:none!important}
+body.tpl-basico .kds-col .placa{margin:6px auto 12px!important}
+body.tpl-basico .kds-col .placa span{color:var(--b-mudo)!important}
+body.tpl-basico .kds .ticket{border:1px solid var(--b-borda)!important;border-left:4px solid var(--b-cor)!important;border-image:none!important;border-radius:10px!important;background:#fff!important;box-shadow:none!important;-webkit-mask:none!important;mask:none!important;margin-bottom:10px!important;padding:10px!important}
+body.tpl-basico .kds .ticket.preparo{border-left-color:var(--b-amarelo)!important}body.tpl-basico .kds .ticket.pronto{border-left-color:var(--b-verde)!important}
+body.tpl-basico .kds .tk-tit b{color:var(--b-tinta)!important;font-weight:800!important}
+body.tpl-basico .kds .relogio b{color:var(--b-cor)!important}
+body.tpl-basico .seg-coz{background:#fff!important;border-color:var(--b-borda)!important}
+body.tpl-basico .seg-coz button[aria-pressed=true]{background:var(--b-cor)!important;color:#fff!important}
+body.tpl-basico .cc-topo small,body.tpl-basico .cc-topo span,body.tpl-basico .cc-formas span,body.tpl-basico .cc-formas .ico{color:var(--b-mudo)!important}
+body.tpl-basico .cc-topo b,body.tpl-basico .cc-formas b{color:var(--b-tinta)!important}
+body.tpl-basico .cartao-caixa{padding:14px!important}
+body.tpl-basico .cc-formas,body.tpl-basico .cc-formas>div{border-color:var(--b-borda)!important}
+body.tpl-basico .cc-bts .bt{background:#fff!important;border:1px solid var(--b-borda)!important;color:var(--b-tinta)!important}
+body.tpl-basico .cc-bts .bt.escuro{background:var(--b-cor)!important;border-color:var(--b-cor)!important;color:#fff!important}
+body.tpl-basico .conta-linha{background:#fff!important;border:1px solid var(--b-borda)!important;box-shadow:none!important}
+body.tpl-basico .conta-linha.on{border:1.5px solid var(--b-cor)!important}
+body.tpl-basico .conta-det .itens,body.tpl-basico .conta-det .forma{background:#fff!important;border-color:var(--b-borda)!important}
+body.tpl-basico .conta-det .forma .ico{color:var(--b-cor)!important}
+/* gestão */
+body.tpl-basico .gestao-nav{padding:12px 8px!important}
+body.tpl-basico .gestao-nav .mg-grupo h3.g-fita{font-size:12px!important;text-transform:uppercase!important;letter-spacing:.06em!important;color:var(--b-mudo)!important}
+body.tpl-basico .gestao-nav .mg-grupo+.mg-grupo{border-top-color:var(--b-borda)!important}
+body.tpl-basico .gestao-nav .mg-grupo>a{border-bottom:0!important}
+body.tpl-basico .gestao-nav .mg-grupo>a.on{background:color-mix(in srgb,var(--b-cor) 10%,#fff)!important;border:0!important;border-radius:8px!important}
+body.tpl-basico .gestao-nav .mg-grupo>a.on .mm-ico,body.tpl-basico .gestao-nav .mg-grupo>a.on b{color:var(--b-cor)!important}
+body.tpl-basico .g-cols i{background:var(--b-cor)!important}
+body.tpl-basico .gestao-corpo .resumo-dia>.ka.alerta{background:#FFF1F0!important;color:#C0392B!important}
+body.tpl-basico .gestao-corpo .chip.on{background:var(--b-cor)!important;border-color:var(--b-cor)!important;color:#fff!important}
+body.tpl-basico .cab-comanda .bt-ico{background:#fff!important;border-color:var(--b-borda)!important;box-shadow:none!important}
+body.tpl-basico [data-tela=mesa] .barra-acoes::after{display:none!important}
+body.tpl-basico .folha{background:#fff!important}
+body.tpl-basico .folha-cab h2::before,body.tpl-basico .folha-cab h2::after{display:none!important}
+body.tpl-basico .folha-pe{background:#F9FAFB!important;border-top-color:var(--b-borda)!important}
+@media (max-width:899px){body.tpl-basico .nav{background:#fff!important;border-top:1px solid var(--b-borda)!important}body.tpl-basico .nav a.on{background:none!important;color:var(--b-cor)!important}}
