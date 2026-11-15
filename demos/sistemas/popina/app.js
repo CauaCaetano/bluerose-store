@@ -1,13 +1,13 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=14';
-import './cozinha.js?v=14';
-import './caixa.js?v=14';
-import './pedidos.js?v=14';
-import './mais.js?v=14';
-import './gestao.js?v=14';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=14';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=14';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=14';
+import './salao.js?v=15';
+import './cozinha.js?v=15';
+import './caixa.js?v=15';
+import './pedidos.js?v=15';
+import './mais.js?v=15';
+import './gestao.js?v=15';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=15';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=15';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=15';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -55,7 +55,7 @@ function marcaTopo() {
   document.body.classList.toggle('marca-propria', m);
   // template escolhido em Gestão › Aparência (Taverna é o visual de base; Luxo e Realeza vêm por cima)
   // Básico é o padrão de quem começa; a demonstração usa o Taverna (dados.js)
-  const TPLS = ['basico', 'taverna', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria'], tp = TPLS.includes(L.template) ? L.template : 'basico';
+  const TPLS = ['basico', 'taverna', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria', 'hamburgueria', 'pub', 'chines', 'balada'], tp = TPLS.includes(L.template) ? L.template : 'basico';
   TPLS.forEach((x) => document.body.classList.toggle(`tpl-${x}`, x === tp));
   if (/^#[0-9a-f]{6}$/i.test(L.cor || '')) document.body.style.setProperty('--loja-cor', L.cor);
 }
