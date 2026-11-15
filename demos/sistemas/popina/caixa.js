@@ -1,10 +1,10 @@
 // Popina · caixa: contas abertas, fechar conta (serviço, desconto, dividir, pagar em partes), Pix com QR e o caixa do dia.
-import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2 } from './loja.js?v=4';
-import { registrar, acao, ir } from './nucleo.js?v=4';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=4';
-import { pix } from './pix.js?v=4';
+import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2 } from './loja.js?v=8';
+import { registrar, acao, ir } from './nucleo.js?v=8';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=8';
+import { pix } from './pix.js?v=8';
 import { qrSVG } from '../base/qr.js';
-import { linhaItem, abrirSeletor } from './salao.js?v=4';
+import { linhaItem, abrirSeletor } from './salao.js?v=8';
 
 const FORMAS = [['Dinheiro', 'dinheiro'], ['Pix', 'pix'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao']];
 const ONDE = (c) => (c.tipo === 'mesa' ? `Mesa ${c.mesa}` : c.tipo === 'delivery' ? `Delivery #${c.num}` : `Balcão #${c.num}`);
@@ -13,17 +13,18 @@ const abertas = () => db.comandas.slice().sort((a, b) => (b.pediuConta ? 1 : 0) 
 function painelCaixa() {
   if (!db.caixa) return `<section class="cartao-caixa fechado"><div><b>Caixa fechado</b><p>Abra o caixa com o troco para começar o dia.</p></div><button type="button" class="bt cheio" data-acao="abrir-caixa">Abrir caixa</button></section>`;
   const r = caixaResumo();
-  return `<section class="cartao-caixa"><div class="cc-topo"><div><small>Caixa aberto há ${tempo(db.caixa.aberto)}${db.caixa.operador ? ` · ${t(db.caixa.operador)}` : ''}</small><b>${din(r.total)}</b><span>${r.vendas.length} vendas hoje</span></div>
-    <div class="cc-bts"><button type="button" class="bt" data-acao="mov" data-t="sangria">Sangria</button><button type="button" class="bt" data-acao="mov" data-t="suprimento">Suprimento</button><button type="button" class="bt escuro" data-acao="fechar-caixa">Fechar caixa</button></div></div>
-    <div class="cc-formas">${Object.entries(r.porForma).map(([f, v]) => `<div><span>${t(f)}</span><b>${dinCurto(v)}</b></div>`).join('') || '<div><span>Sem vendas ainda</span></div>'}<div><span>Na gaveta</span><b>${dinCurto(r.dinheiroNaGaveta)}</b></div><div class="cc-conta" title="Como chegou neste valor"><span>Troco ${dinCurto(db.caixa?.troco || 0)} + dinheiro ${dinCurto(r.porForma.Dinheiro || 0)}${r.suprimento ? ` + suprimento ${dinCurto(r.suprimento)}` : ''}${r.sangria ? ` − sangria ${dinCurto(r.sangria)}` : ''}</span></div></div></section>`;
+  const IF = { Dinheiro: 'dinheiro', Pix: 'pix' };
+  return `<section class="cartao-caixa"><div class="cc-topo"><img class="cx-louro" src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74"><div><small>Caixa aberto há ${tempo(db.caixa.aberto)}${db.caixa.operador ? ` · ${t(db.caixa.operador)}` : ''}</small><b>${din(r.total)}</b><span>${r.vendas.length} vendas hoje</span></div><img class="cx-louro" src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></div>
+    <div class="cc-bts"><button type="button" class="bt" data-acao="mov" data-t="sangria">Sangria</button><button type="button" class="bt" data-acao="mov" data-t="suprimento">Suprimento</button><button type="button" class="bt escuro" data-acao="fechar-caixa">Fechar caixa</button></div>
+    <div class="cc-formas">${Object.entries(r.porForma).map(([f, v]) => `<div>${ico(IF[f] || 'cartao')}<span>${t(f)}</span><b>${din(v)}</b></div>`).join('') || '<div><span>Sem vendas ainda</span></div>'}<div title="Troco ${dinCurto(db.caixa?.troco || 0)} + dinheiro ${dinCurto(r.porForma.Dinheiro || 0)}${r.suprimento ? ` + suprimento ${dinCurto(r.suprimento)}` : ''}${r.sangria ? ` − sangria ${dinCurto(r.sangria)}` : ''}">${ico('cofre')}<span>Na gaveta</span><b>${din(r.dinheiroNaGaveta)}</b></div></div></section>`;
 }
 function listaContas(sel) {
   return abertas().map((c) => { const v = conta(c);
-    return `<a class="conta-linha ${c.id === sel ? 'on' : ''} ${c.pediuConta ? 'pediu' : ''}" href="#caixa/${c.id}"><div><b>${ONDE(c)}</b><small>${c.tipo === 'mesa' ? `${c.pessoas} pessoas · ` : c.cliente?.nome ? t(c.cliente.nome) + ' · ' : ''}${tempo(c.aberta)}${c.pediuConta ? ' · pediu a conta' : ''}</small></div><span>${dinCurto(v.total)}</span></a>`; }).join('') || '<div class="vazio">Nenhuma conta aberta.</div>';
+    return `<a class="conta-linha ${c.id === sel ? 'on' : ''} ${c.pediuConta ? 'pediu' : ''}" href="#caixa/${c.id}"><i class="cl-ico">${ico(c.tipo === 'mesa' ? 'mesa' : c.tipo === 'delivery' ? 'moto' : 'sacola')}</i><div><b>${ONDE(c)}</b><small>${c.tipo === 'mesa' ? `${c.pessoas} pessoas · ` : c.cliente?.nome ? t(c.cliente.nome) + ' · ' : ''}${tempo(c.aberta)}${c.pediuConta ? ' · pediu a conta' : ''}</small></div><span>${din(v.total)}</span>${ico('dir')}</a>`; }).join('') || '<div class="vazio">Nenhuma conta aberta.</div>';
 }
 function detalhe(c) {
   const v = conta(c), it = itensValidos(c);
-  return `<div class="conta-det"><header class="cab-tela"><a class="bt-ico so-cel" href="#caixa" aria-label="Voltar">${ico('voltar')}</a><div><h1>${ONDE(c)}</h1><p>${c.tipo === 'mesa' ? `${c.pessoas} pessoas · ` : ''}aberta há ${tempo(c.aberta)}</p></div></header>
+  return `<div class="conta-det"><header class="cab-conta"><a class="bt-ico so-cel" href="#caixa" aria-label="Voltar">${ico('voltar')}</a><h1 class="fita">${ONDE(c)}</h1><p>${c.tipo === 'mesa' ? `${c.pessoas} pessoas · ` : ''}aberta há ${tempo(c.aberta)}</p><img class="cx-aqueduto" src="img/aqueduto.webp?v=2" alt="" width="340" height="88"></header>
     ${navigator.onLine ? '' : '<p class="aviso ouro">Sem internet: o pagamento fica guardado neste aparelho e vai para os outros quando a conexão voltar. Não cobre esta conta em outro caixa até lá.</p>'}
     <ul class="itens">${c.itens.map((i) => linhaItem(c, i, false)).join('')}</ul>
     <section class="totais">
@@ -35,7 +36,7 @@ function detalhe(c) {
       ${v.pago ? `<div class="pago"><span>Já pago (${c.pagamentos.map((p) => t(p.forma)).join(', ')})</span><b>${din(v.pago)}</b></div><div class="total falta"><span>Falta</span><b>${din(v.falta)}</b></div>` : ''}
     </section>
     <div class="dividir"><button type="button" class="bt" data-acao="dividir" data-c="${c.id}">${ico('divide')}Dividir a conta</button><button type="button" class="bt" data-acao="imprimir-conta" data-c="${c.id}">${ico('impressora')}Pré-conta</button></div>
-    ${v.falta <= 0.009 ? `<h2 class="h2-pagar">Tudo pago</h2><button type="button" class="bt cheio grande" style="width:100%" data-acao="concluir" data-c="${c.id}">${ico('check')}Concluir ${c.tipo === 'mesa' ? 'e liberar a mesa' : 'o pedido'}</button></div>` : `<h2 class="h2-pagar">Receber ${din(v.falta)}</h2>
+    ${v.falta <= 0.009 ? `<h2 class="h2-pagar">Tudo pago</h2><button type="button" class="bt cheio grande" style="width:100%" data-acao="concluir" data-c="${c.id}">${ico('check')}Concluir ${c.tipo === 'mesa' ? 'e liberar a mesa' : 'o pedido'}</button></div>` : `<h2 class="h2-pagar"><img src="img/c-louro-esq.webp?v=1" alt="" width="30" height="31">Receber ${din(v.falta)}<img src="img/c-louro-dir.webp?v=1" alt="" width="30" height="31"></h2>
     <div class="formas">${FORMAS.map(([f, i]) => `<button type="button" class="forma" data-acao="pagar" data-c="${c.id}" data-f="${f}">${ico(i)}<span>${f}</span></button>`).join('')}</div></div>`}`;
 }
 registrar('caixa', {
@@ -43,8 +44,8 @@ registrar('caixa', {
   html(id) {
     const c = id ? comanda(id) : null;
     return `<div class="caixa ${c ? 'com-det' : ''}"><div class="caixa-lista">
-        <header class="cab-tela"><div><h1>Caixa</h1><p>${db.comandas.length} contas abertas</p></div><button type="button" class="bt cheio" data-acao="venda-rapida">${ico('mais2')}Venda rápida</button></header>
-        ${painelCaixa()}<div class="sec-tit"><h2>Contas abertas</h2><span>quem pediu a conta aparece primeiro</span></div><nav class="contas">${listaContas(c?.id)}</nav></div>
+        <header class="cab-tela cab-caixa"><div><h1><img src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74">Caixa<img src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></h1><p>${db.comandas.length} contas abertas</p></div><button type="button" class="bt cheio" data-acao="venda-rapida">${ico('mais2')}Venda rápida</button></header>
+        ${painelCaixa()}<h2 class="cx-h2" title="Quem pediu a conta aparece primeiro"><img src="img/c-louro-esq.webp?v=1" alt="" width="30" height="31">Contas abertas<img src="img/c-louro-dir.webp?v=1" alt="" width="30" height="31"></h2><nav class="contas">${listaContas(c?.id)}</nav></div>
       <div class="caixa-det">${c ? detalhe(c) : '<div class="vazio grande">Escolha uma conta para fechar.</div>'}</div></div>`;
   },
 });

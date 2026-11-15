@@ -1,8 +1,8 @@
 // Popina · balcão e delivery: pedidos por etapa, pedido novo (telefone, balcão ou cardápio online), taxa por bairro e WhatsApp pronto.
-import { db, t, din, dinCurto, tempo, comanda, conta, novoPedido, enviar, grava, itensValidos, linkCardapio, clientePorTel, lojaCfg } from './loja.js?v=4';
-import { registrar, acao, ir } from './nucleo.js?v=4';
-import { ico, folha, toast, $, $$ } from './ui.js?v=4';
-import { linhaItem, abrirSeletor } from './salao.js?v=4';
+import { db, t, din, dinCurto, tempo, comanda, conta, novoPedido, enviar, grava, itensValidos, linkCardapio, clientePorTel, lojaCfg } from './loja.js?v=8';
+import { registrar, acao, ir } from './nucleo.js?v=8';
+import { ico, folha, toast, $, $$ } from './ui.js?v=8';
+import { linhaItem, abrirSeletor } from './salao.js?v=8';
 
 const ETAPAS = [['novo', 'Recebidos'], ['preparo', 'Preparando'], ['saiu', 'Saiu para entrega'], ['pronto_retirar', 'Pronto para retirar']];
 function etapa(c) {
@@ -19,17 +19,19 @@ function msgDe(c, tipo) {
   if (tipo === 'saiu') return `${nome}, seu pedido #${c.num} saiu para entrega e chega em instantes! ${c.pagarNaEntrega ? `Pagamento na entrega: ${c.pagarNaEntrega}, ${dinCurto(v.falta)}.` : ''}`;
   return `${nome}, seu pedido #${c.num} está pronto para retirar na ${db.config.nome}. Total ${dinCurto(v.total)}.`;
 }
+// comanda de papel pendurada no trilho (conceito do GPT: relatorios/popina/conceitos-gpt/4-pedidos-pc.png)
 function cartao(c) {
   const v = conta(c), e = etapa(c);
+  const ok = (r) => `${ico('check')}${r}`;
   const bt = c.tipo === 'delivery'
-    ? (e === 'saiu' ? `<button type="button" class="bt cheio" data-acao="entregue" data-c="${c.id}">Entregue</button>` : `<button type="button" class="bt ${e === 'preparo_ok' ? 'cheio' : ''}" data-acao="saiu" data-c="${c.id}" ${e === 'preparo_ok' ? '' : 'title="Libera quando a cozinha marcar pronto"'}>${ico('moto')}Saiu</button>`)
-    : (e === 'pronto_retirar' ? `<a class="bt cheio" href="#caixa/${c.id}">Cobrar e entregar</a>` : '');
-  return `<article class="pedido"><header><b>#${c.num} · ${t(c.cliente?.nome || 'Cliente')}</b><span>${tempo(c.aberta)}</span></header>
-    <p class="mudo">${c.tipo === 'delivery' ? `${ico('moto')}${t(c.cliente?.end || '')} · ${t(c.cliente?.bairro || '')}` : `${ico('sacola')}Retirada no balcão`} · ${t(c.origem || '')}</p>
-    <p>${itensValidos(c).map((i) => `${i.qtd}× ${t(i.nome)}`).join(', ') || '<em>sem itens</em>'}</p>
-    <p class="pg ${v.falta <= 0 ? 'pago' : ''}">${v.falta <= 0 ? 'Pago' : c.pagarNaEntrega ? `Paga na entrega: ${t(c.pagarNaEntrega)}` : 'A pagar'}</p>
-    <footer><b>${dinCurto(v.total)}</b><span></span>
-      <a class="bt-ico" href="#pedidos/ver/${c.id}" aria-label="Abrir pedido">${ico('dir')}</a>${bt}</footer></article>`;
+    ? (e === 'saiu' ? `<button type="button" class="bt cheio" data-acao="entregue" data-c="${c.id}">${ok('Entregue')}</button>` : e === 'preparo_ok' ? `<button type="button" class="bt claro" data-acao="saiu" data-c="${c.id}">${ok('Saiu')}</button>` : '')
+    : (e === 'pronto_retirar' ? `<a class="bt oliva" href="#caixa/${c.id}">${ok('Retirado')}</a>` : '');
+  const pg = v.falta <= 0 ? ['pago', 'Pago'] : c.pagarNaEntrega ? ['entrega', `Paga na entrega: ${t(c.pagarNaEntrega)}`] : ['apagar', 'A pagar'];
+  const onde = c.tipo === 'delivery' ? `${ico('pino')}${t([c.cliente?.end, c.cliente?.bairro].filter(Boolean).join(' · '))}` : `${ico('loja')}Retirada no balcão`;
+  return `<article class="ticket pd ${e === 'preparo_ok' ? 'preparo' : e === 'pronto_retirar' ? 'pronto' : e}"><header><i class="tk-ico">${ico(c.tipo === 'delivery' ? 'moto' : 'sacola')}</i><div class="tk-tit"><b>#${c.num} · ${t(c.cliente?.nome || 'Cliente')}</b><small>${onde}</small></div><span class="relogio"><b>${tempo(c.aberta)}</b></span></header>
+    <p class="pd-itens">${itensValidos(c).map((i) => `${i.qtd}× ${t(i.nome)}`).join(', ') || '<em>sem itens</em>'}</p>
+    <p class="pg ${pg[0]}">${pg[1]}</p>
+    <footer><b>${dinCurto(v.total)}</b><span></span>${bt || `<a class="bt-ico" href="#pedidos/ver/${c.id}" aria-label="Abrir pedido">${ico('dir')}</a>`}</footer></article>`;
 }
 registrar('pedidos', {
   titulo: 'Pedidos', aba: 'pedidos',
@@ -39,10 +41,11 @@ registrar('pedidos', {
     const ps = db.comandas.filter((c) => c.tipo !== 'mesa');
     const grupos = { novo: [], preparo: [], saiu: [], pronto_retirar: [] };
     ps.forEach((c) => { const e = etapa(c); (grupos[e === 'preparo_ok' ? 'preparo' : e] ||= []).push(c); });
-    return `<header class="cab-tela"><div><h1>Balcão e delivery</h1><p>${ps.length} pedidos em andamento</p></div>
-      <div class="linha-bts"><a class="bt" href="#pedidos/novo/balcao">${ico('sacola')}Balcão</a><a class="bt cheio" href="#pedidos/novo/delivery">${ico('moto')}Delivery</a></div></header>
-      <div class="link-cardapio">${ico('qr')}<div><b>Cardápio online para delivery</b><span>Os clientes pedem pelo link e o pedido cai aqui sozinho.</span></div><a class="bt" href="${linkCardapio('delivery=1')}" target="_blank" rel="noopener">Abrir</a></div>
-      <section class="colunas">${ETAPAS.map(([e, r]) => `<div class="coluna"><h2>${r} <span>${grupos[e]?.length || 0}</span></h2>${(grupos[e] || []).map(cartao).join('') || '<div class="vazio">Nada aqui.</div>'}</div>`).join('')}</section>`;
+    const COL = { novo: 'novo', preparo: 'preparo', saiu: 'saiu', pronto_retirar: 'pronto' };
+    return `<header class="cab-pedidos"><h1><img src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74">Pedidos<img src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></h1><img class="aqueduto-img" src="img/aqueduto.webp?v=2" alt="" width="340" height="88">
+      <div class="linha-bts"><a class="bt claro" href="#pedidos/novo/balcao">${ico('mais2')}Balcão</a><a class="bt cheio" href="#pedidos/novo/delivery">${ico('moto')}Delivery</a></div></header>
+      <div class="link-cardapio">${ico('qr')}<div><b>Cardápio online para delivery</b><span>Os clientes pedem pelo link e o pedido cai aqui sozinho.</span></div><button type="button" class="bt oliva" data-acao="copiar-link">${ico('link')}Copiar link</button></div>
+      <section class="kds quadro pd-quadro">${ETAPAS.map(([e, r]) => `<div class="kds-col ${COL[e]}"><h2 class="placa">${r.toUpperCase()} <span>(${grupos[e]?.length || 0})</span></h2><div class="trilho" aria-hidden="true"></div>${(grupos[e] || []).map(cartao).join('') || '<div class="vazio-quadro">Nada aqui.</div>'}</div>`).join('')}</section>`;
   },
   montar(el, modo) {
     if (modo !== 'novo') return;
@@ -119,3 +122,5 @@ acao('via-entrega', (b) => {
     <div class="l"><span>${v.falta <= 0 ? 'Pago' : `A receber${c.pagarNaEntrega ? ': ' + e(c.pagarNaEntrega) : ''}`}</span><span>${v.falta > 0 ? din(v.falta) : ''}</span></div><script>print();setTimeout(()=>close(),400)<\/script>`);
   w.document.close();
 });
+
+acao('copiar-link', async () => { const u = new URL(linkCardapio('delivery=1'), location.href).href; try { await navigator.clipboard.writeText(u); toast('Link do cardápio copiado'); } catch { window.open(u, '_blank', 'noopener'); } });

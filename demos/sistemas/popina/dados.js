@@ -61,7 +61,7 @@ export const PRODUTOS = [
   P('fritas', 'porcoes', 'Batata frita', 'Porção de 400 g, crocante. Acompanha maionese da casa.', 29.9, 'cozinha', { adicionais: [{ nome: 'Cheddar e bacon', preco: 12 }], ficha: [['batata', 400]] }),
   P('isca', 'porcoes', 'Isca de frango', 'Tirinhas de frango empanadas, 500 g, com molho.', 44.9, 'cozinha', { ficha: [['frango', 500]] }),
   P('calabresa_acebolada', 'porcoes', 'Calabresa acebolada', 'Calabresa fatiada na chapa com cebola. Acompanha pão.', 36.9, 'cozinha', { ficha: [['calabresa', 350], ['cebola', 120]] }),
-  P('refri', 'bebidas', 'Refrigerante lata', 'Coca-Cola, Guaraná ou Fanta, 350 ml.', 7.0, 'bar', { ficha: [['refri', 1]] }),
+  P('refri', 'bebidas', 'Refrigerante lata', 'Coca-Cola, Guaraná ou Fanta, 350 ml.', 7.0, 'bar', { ficha: [['refri', 1]], foto: '' }),
   P('cerveja', 'bebidas', 'Cerveja long neck', 'Long neck 330 ml bem gelada.', 11.9, 'bar', { ficha: [['cerveja', 1]] }),
   P('suco', 'bebidas', 'Suco natural', 'Laranja, limão, maracujá ou abacaxi com hortelã, 500 ml.', 12.9, 'bar', { ficha: [['suco', 100]] }),
   P('caipirinha', 'bebidas', 'Caipirinha', 'Limão, açúcar e cachaça artesanal.', 19.9, 'bar'),

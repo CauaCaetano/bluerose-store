@@ -39,6 +39,10 @@ const P = {
   coroa: '<path d="M4 17l-1-9 5 4 4-6 4 6 5-4-1 9H4z"/><path d="M4 20h16"/>',
   folha: '<path d="M5 19C5 10 10 5 20 4c-1 10-6 15-15 15z"/><path d="M5 19L13 11"/>',
   carrinho: '<path d="M3 4h2.5l2.2 10.5h10.6L20.5 7H7"/><circle cx="9.5" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',
+  pino: '<path d="M12 21s-6.5-5.8-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 15.2 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.3"/>',
+  loja: '<path d="M4 10h16M5 10V20h14V10M4 10l1.5-5h13L20 10"/><path d="M10 20v-5h4v5"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  cofre: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 11h18M10 14h4"/>',
 };
 export const ico = (n, extra = '') => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" ${extra}>${P[n] || ''}</svg>`;
 

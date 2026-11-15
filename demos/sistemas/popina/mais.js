@@ -1,7 +1,7 @@
 // Popina · Mais: cardápio (preços, esgotado, ficha técnica), estoque, relatórios, QR das mesas, ajustes e o papel deste aparelho.
-import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa } from './loja.js?v=4';
-import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=4';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=4';
+import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa } from './loja.js?v=8';
+import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=8';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=8';
 import { qrSVG } from '../base/qr.js';
 
 export const GRUPOS = [
@@ -13,13 +13,13 @@ export const GRUPOS = [
 const ALIAS = { qr: 'mesas' };
 function menuGestao(atual) {
   const baixo = estoqueBaixo().length;
-  return GRUPOS.map(([g, l]) => `<div class="mg-grupo"><h3>${g}</h3>${l.map(([id, nome, ic, det]) => `<a href="#mais/${id}" class="${id === atual ? 'on' : ''}"><span class="mm-ico">${ico(ic)}</span><span><b>${nome}${id === 'estoque' && baixo ? ` <em class="badge">${baixo}</em>` : ''}</b><small>${det}</small></span>${ico('dir')}</a>`).join('')}</div>`).join('');
+  return GRUPOS.map(([g, l], k) => `<div class="mg-grupo"><h3 class="g-fita g${k}">${g}</h3>${l.map(([id, nome, ic, det]) => `<a href="#mais/${id}" class="${id === atual ? 'on' : ''}"><span class="mm-ico">${ico(ic)}</span><span><b>${nome}${id === 'estoque' && baixo ? ` <em class="badge">${baixo}</em>` : ''}</b><small>${det}</small></span>${ico('dir')}</a>`).join('')}</div>`).join('');
 }
 registrar('mais', {
   titulo: 'Gestão', aba: 'mais',
   html(sec, x) {
     sec = ALIAS[sec] || sec;
-    const corpo = sec && TELAS_MAIS[sec] ? TELAS_MAIS[sec](x) : `<header class="cab-tela"><div><h1>Gestão</h1><p>${t(db.config.nome)}</p></div></header>${resumoDia()}<nav class="menu-mais so-cel-bloco">${menuGestao('')}</nav>`;
+    const corpo = sec && TELAS_MAIS[sec] ? TELAS_MAIS[sec](x) : `<header class="cab-gestao"><h1><img src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74">Gestão<img src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></h1><img class="g-aqueduto" src="img/aqueduto.webp?v=2" alt="" width="340" height="88"></header>${resumoDia()}${painelDia()}<nav class="menu-mais so-cel-bloco">${menuGestao('')}</nav>`;
     return `<div class="gestao ${sec ? 'com-sec' : ''}"><aside class="gestao-nav" aria-label="Seções da gestão">${menuGestao(sec || '')}</aside><div class="gestao-corpo">${corpo}</div></div>`;
   },
   montar(el, sec) { MONTAR[ALIAS[sec] || sec]?.(el); },
@@ -29,9 +29,29 @@ function resumoDia() {
   const ini = new Date(); ini.setHours(0, 0, 0, 0);
   const v = db.vendas.filter((x) => x.ts >= ini.getTime() && !x.cancelado), tot = r2(v.reduce((s2, x) => s2 + x.total, 0));
   const abertas = db.comandas.length, baixo = estoqueBaixo().length;
-  return `<section class="resumo-dia"><div><small>Vendido hoje</small><b>${dinCurto(tot)}</b><span>${v.length} contas</span></div><div><small>Contas abertas</small><b>${abertas}</b><span>agora</span></div><div><small>Ticket médio</small><b>${dinCurto(v.length ? tot / v.length : 0)}</b><span>hoje</span></div><div class="${baixo ? 'alerta' : ''}"><small>Estoque</small><b>${baixo}</b><span>${baixo === 1 ? 'item para repor' : 'itens para repor'}</span></div></section>`;
+  // os quatro números do dia em papel rasgado, cada um com a sua faixa de cor (conceito 6-gestao-pc.png)
+  return `<section class="resumo-dia"><div class="kv">${ico('moedas')}<small>Vendido hoje</small><b>${din(tot)}</b><span>${v.length} ${v.length === 1 ? 'conta' : 'contas'}</span></div><div class="ko">${ico('pessoas')}<small>Contas abertas</small><b>${abertas}</b></div><div class="kl">${ico('etiqueta')}<small>Ticket médio</small><b>${din(v.length ? tot / v.length : 0)}</b></div><a href="#mais/estoque" class="ka ${baixo ? 'alerta' : ''}">${ico('estoque')}<small>Estoque</small><b>${baixo}</b><span>${baixo === 1 ? 'item para repor' : 'itens para repor'}</span></a></section>`;
 }
-export const volta = (h, tit, sub = '') => `<header class="cab-tela"><a class="bt-ico so-cel" href="#${h}" aria-label="Voltar">${ico('voltar')}</a><div><h1>${tit}</h1>${sub ? `<p>${sub}</p>` : ''}</div></header>`;
+// o dia em gráfico: vendas por hora, mais vendidos e garçons (só o que fechou hoje)
+function painelDia() {
+  const ini = new Date(); ini.setHours(0, 0, 0, 0);
+  const v = db.vendas.filter((x) => x.ts >= ini.getTime() && !x.cancelado);
+  const ph = {}; v.forEach((x) => { const h = new Date(x.ts).getHours(); ph[h] = (ph[h] || 0) + x.total; });
+  const horas = Array.from({ length: 13 }, (_, k) => [k + 11, ph[k + 11] || 0]);
+  const max = Math.max(...horas.map((x) => x[1]), 1), passo = Math.max(50, Math.ceil(max / 8 / 50) * 50), teto = passo * 8;
+  const qtd = {}; v.forEach((x) => x.itens.forEach((i) => { qtd[i.nome] = (qtd[i.nome] || 0) + i.qtd; }));
+  const rank = Object.entries(qtd).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const ga = {}; v.filter((x) => x.garcom).forEach((x) => { ga[x.garcom] = (ga[x.garcom] || 0) + x.total; });
+  const gl = Object.entries(ga).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const bebida = (n) => /refri|suco|cerveja|água|agua|coca|chopp|vinho|caipi/i.test(n);
+  return `<div class="g-painel"><section class="g-card g-grafico"><h2 class="g-fita g0">Vendas por hora</h2>
+      <div class="g-barras"><div class="g-eixo">${Array.from({ length: 9 }, (_, k) => `<span>R$ ${(teto - k * passo).toLocaleString('pt-BR')}</span>`).join('')}</div>
+      <div class="g-cols">${horas.map(([h, val]) => `<div title="${h}h: ${din(val)}"><i style="height:${(val / teto) * 100}%"></i><small>${h}h</small></div>`).join('')}</div></div></section>
+    <div class="g-lado"><section class="g-card"><h2 class="g-fita g1">Mais vendidos hoje</h2><ul class="g-lista">${rank.map(([n, q]) => `<li>${ico(bebida(n) ? 'pedidos' : 'cloche')}<span>${t(n)}</span><b>${q}</b></li>`).join('') || '<li><span>Nada vendido ainda hoje</span></li>'}</ul></section>
+      <section class="g-card"><h2 class="g-fita g2">Garçons</h2><ul class="g-lista">${gl.map(([g, val]) => `<li>${ico('pessoas')}<span>${t(g)}</span><b>${din(val)}</b></li>`).join('') || '<li><span>Sem vendas de salão hoje</span></li>'}</ul></section></div></div>`;
+}
+// cabeçalho das telas da gestão: título com louros e o aqueduto (conceito 7-gestao-cardapio-pc.png)
+export const volta = (h, tit, sub = '') => `<header class="cab-tela cab-g"><a class="bt-ico so-cel" href="#${h}" aria-label="Voltar">${ico('voltar')}</a><div><h1><img src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74">${tit}<img src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></h1>${sub ? `<p>${sub}</p>` : ''}</div><img class="g-aqueduto" src="img/aqueduto.webp?v=2" alt="" width="340" height="88"></header>`;
 
 export const TELAS_MAIS = {
   // ---------------- cardápio
@@ -236,7 +256,7 @@ acao('editar-prod', (b) => {
 });
 acao('cardapio-exemplo', async () => {
   if (!(await confirma('Carregar os 22 pratos de exemplo, com fotos e fichas técnicas? Depois é só trocar nomes e preços e apagar o que não serve.', 'Carregar'))) return;
-  const { cardapioExemplo } = await import('./dados.js?v=4'); const ex = cardapioExemplo();
+  const { cardapioExemplo } = await import('./dados.js?v=8'); const ex = cardapioExemplo();
   db.produtos.push(...ex.produtos.filter((p) => !prod(p.id))); ex.insumos.forEach((i) => { if (!insumo(i.id)) db.insumos.push(i); });
   grava(); toast('Cardápio de exemplo carregado');
 });
@@ -309,7 +329,7 @@ acao('imprimir-qr', () => {
   w.document.close();
 });
 acao('papel', (b) => { setPapel(b.dataset.p); toast(`Este aparelho agora é: ${PAPEIS[b.dataset.p][0]}`); ir(PAPEIS[b.dataset.p][1]); });
-acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=4'); recomecar(); ir('salao'); } });
+acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=8'); recomecar(); ir('salao'); } });
 
 acao('ordem', (b) => {
   const p = prod(b.dataset.p), l = db.produtos.filter((x) => x.cat === p.cat), k = l.indexOf(p), alvo = l[k + Number(b.dataset.d)]; if (!alvo) return;

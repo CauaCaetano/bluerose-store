@@ -1,10 +1,10 @@
 // Popina · salão do garçom: a fila do que fazer agora (conceito C escolhido pelo dono) + as mesas, e a comanda da mesa.
 import { db, t, din, dinCurto, tempo, minutos, prod, comanda, comandaDaMesa, fila, estadoMesa, conta, valorItem, abrirMesa, adicionarItem, enviar,
-  mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg } from './loja.js?v=4';
-import { registrar, acao, ir } from './nucleo.js?v=4';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=4';
-import { OBS_RAPIDAS } from './dados.js?v=4';
-import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=4';
+  mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg } from './loja.js?v=8';
+import { registrar, acao, ir } from './nucleo.js?v=8';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=8';
+import { OBS_RAPIDAS } from './dados.js?v=8';
+import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=8';
 
 // a tela do salão segue o conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/1-salao-pc.png)
 const ROTULO = { conta: 'Levar a conta', chamou: 'Mesa chamou', pronto: 'Prato pronto', qr: 'Pedido pelo QR' };
@@ -92,7 +92,7 @@ acao('nova-comanda', () => {
 });
 
 // ------------------------------------------------------------------ comanda da mesa
-const STATUS = { rascunho: ['A enviar', 'rasc'], novo: ['Na fila', 'novo'], preparo: ['Preparando', 'prep'], pronto: ['Pronto', 'pronto'], entregue: ['Entregue', 'ok'] };
+const STATUS = { rascunho: ['A enviar', 'rasc'], novo: ['Na cozinha', 'novo'], preparo: ['Na cozinha', 'prep'], pronto: ['Pronto', 'pronto'], entregue: ['Entregue', 'ok'] };
 export function linhaItem(c, i, editavel = true) {
   const [rot, cls] = STATUS[i.status] || ['', ''];
   const extras = [...(i.adic || []).map(rotAdic), i.obs ? t(i.obs) : ""].filter(Boolean).join(" · ");
@@ -108,15 +108,15 @@ registrar('mesa', {
       <div class="abrir-mesa"><p>Quantas pessoas?</p><div class="pessoas">${[1, 2, 3, 4, 5, 6, 8, 10].map((p) => `<button type="button" class="chip" data-acao="abrir-mesa" data-n="${n}" data-p="${p}">${p}</button>`).join('')}</div></div>`;
     const v = conta(c), rasc = c.itens.filter((i) => i.status === 'rascunho');
     const enviados = c.itens.filter((i) => i.status !== 'rascunho');
-    return `<header class="cab-tela"><a class="bt-ico" href="#salao" aria-label="Voltar">${ico('voltar')}</a><div><h1>Mesa ${n}</h1><p>${c.pessoas} pessoas · aberta há ${tempo(c.aberta)}${c.garcom ? ` · ${t(c.garcom)}` : ''}</p></div>
-        <button type="button" class="bt-ico" data-acao="mesa-menu" data-c="${c.id}" aria-label="Mais opções da mesa">${ico('mais')}</button></header>
+    return `<header class="cab-tela cab-comanda"><a class="bt-ico" href="#salao" aria-label="Voltar">${ico('voltar')}</a><div><h1 class="fita-mesa"><img src="img/c-louro-esq.webp?v=1" alt="" width="30" height="31">Mesa ${n}<img src="img/c-louro-dir.webp?v=1" alt="" width="30" height="31"></h1><p>${c.pessoas} pessoas · aberta há ${tempo(c.aberta)}${c.garcom ? ` · ${t(c.garcom)}` : ''}</p></div>
+        <button type="button" class="bt-ico" data-acao="mesa-menu" data-c="${c.id}" aria-label="Mais opções da mesa">${ico('mais')}</button></header><div class="comanda-papel">
       ${c.pediuConta ? `<div class="aviso ouro">${ico('conta')}Pediu a conta há ${tempo(c.pediuConta)}</div>` : ''}
-      ${rasc.length ? `<section class="bloco"><div class="sec-tit"><h2>A enviar</h2><span>${rasc.length} ${rasc.length === 1 ? 'item' : 'itens'}</span></div><ul class="itens">${rasc.map((i) => linhaItem(c, i)).join('')}</ul></section>` : ''}
-      <section class="bloco"><div class="sec-tit"><h2>Já pedido</h2><span>${enviados.length ? '' : 'nada ainda'}</span></div><ul class="itens">${enviados.map((i) => linhaItem(c, i)).join('')}</ul></section>
-      <section class="totais"><div><span>Consumo</span><b>${din(v.sub)}</b></div>${c.servico ? `<div><span>Serviço ${db.config.servico}%</span><b>${din(v.servico)}</b></div>` : ''}<div class="total"><span>Total</span><b>${din(v.total)}</b></div></section>
+      ${rasc.length ? `<section class="bloco"><div class="sec-tit"><h2><img src="img/c-louro-esq.webp?v=1" alt="" width="30" height="31">A enviar<img src="img/c-louro-dir.webp?v=1" alt="" width="30" height="31"></h2><span>${rasc.length} ${rasc.length === 1 ? 'item' : 'itens'}</span></div><ul class="itens">${rasc.map((i) => linhaItem(c, i)).join('')}</ul></section>` : ''}
+      <section class="bloco"><div class="sec-tit"><h2><img src="img/c-louro-esq.webp?v=1" alt="" width="30" height="31">Já pedido<img src="img/c-louro-dir.webp?v=1" alt="" width="30" height="31"></h2><span>${enviados.length ? '' : 'nada ainda'}</span></div><ul class="itens">${enviados.map((i) => linhaItem(c, i)).join('')}</ul></section>
+      <section class="totais"><div><span>Consumo</span><b>${din(v.sub)}</b></div>${c.servico ? `<div><span>Serviço ${db.config.servico}%</span><b>${din(v.servico)}</b></div>` : ''}<div class="total"><span>Total</span><b>${din(v.total)}</b></div></section></div>
       <div class="barra-acoes">
         <button type="button" class="bt" data-acao="cardapio-pick" data-c="${c.id}">${ico('mais2')}Itens</button>
-        ${rasc.length ? `<button type="button" class="bt cheio grande" data-acao="enviar" data-c="${c.id}">Enviar para a cozinha (${rasc.reduce((s, i) => s + i.qtd, 0)})</button>`
+        ${rasc.length ? `<button type="button" class="bt cheio grande" data-acao="enviar" data-c="${c.id}">${ico('chef')}Enviar para a cozinha (${rasc.reduce((s, i) => s + i.qtd, 0)})</button>`
           : `<button type="button" class="bt cheio grande" data-acao="pre-conta" data-c="${c.id}">${ico('conta')}Conta · ${dinCurto(v.total)}</button>`}
       </div>`;
   },
