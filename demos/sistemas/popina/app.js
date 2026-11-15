@@ -1,13 +1,13 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=9';
-import './cozinha.js?v=9';
-import './caixa.js?v=9';
-import './pedidos.js?v=9';
-import './mais.js?v=9';
-import './gestao.js?v=9';
-import { db, recomecar, ouvir, linkCardapio, CONTA } from './loja.js?v=9';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=9';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=9';
+import './salao.js?v=10';
+import './cozinha.js?v=10';
+import './caixa.js?v=10';
+import './pedidos.js?v=10';
+import './mais.js?v=10';
+import './gestao.js?v=10';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=10';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=10';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=10';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -41,10 +41,20 @@ function contadores() {
   const coz = db.comandas.reduce((s, c) => s + c.itens.filter((i) => i.status === 'novo' && !i.cancelado).length, 0);
   const ped = db.comandas.filter((c) => c.tipo !== 'mesa').length;
   [['salao', fila], ['cozinha', coz], ['pedidos', ped]].forEach(([k, n]) => { const e = $(`[data-cont="${k}"]`); if (e) e.textContent = n ? n : ''; });
-  $('#topo-nome').textContent = db.config.nome;
+  marcaTopo();
   $('[data-sino]').textContent = fila || '';
   $('[data-iniciais]').textContent = (db.config.nome || 'P').split(/\s+/).filter((w) => w.length > 2 || /^[A-ZÀ-Ú]/.test(w)).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || 'P';
 }
+// plano "Popina com a sua marca": o topo mostra o logo e o nome do restaurante no lugar do Popina
+function marcaTopo() {
+  const m = window.popinaPlano === 'marca', L = lojaCfg(), img = document.querySelector('.topo > img'), b = document.querySelector('.topo > div > b');
+  window.popinaNome = db.config.nome;
+  if (img) { const src = m && L.logo ? L.logo : 'simbolo.png?v=1'; if (img.getAttribute('src') !== src) img.src = src; }
+  if (b) b.textContent = m ? db.config.nome : 'POPINA';
+  $('#topo-nome').textContent = m ? (db.config.cidade || '') : db.config.nome;
+  document.body.classList.toggle('marca-propria', m);
+}
+addEventListener('popina-plano', () => { marcaTopo(); dispatchEvent(new HashChangeEvent('hashchange')); });
 ouvir(contadores);
 // conexão: sem internet, cada aparelho guarda o que foi feito e envia quando ela voltar
 function conexao() {

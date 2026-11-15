@@ -622,6 +622,8 @@
   // o sistema pode abrir perfil, equipe, convites, assinatura e configurações de dentro das próprias telas (Popina: Mais › Minha conta)
   window.veltriaAbrir = { perfil: perfil, equipe: equipe, convidar: function () { equipe(true); }, configuracoes: configuracoes, assinatura: assinatura, sair: sair, sairApagar: sairApagar, papel: info.dono ? 'dono' : (info.papel || 'membro') };
   if (app === 'atria') window.atriaPlano = info && info.nivel === 'pro' ? 'pro' : 'basico';
+  // Popina: plano "com a sua marca" (nivel pro) põe o logo e o nome do restaurante no lugar do Popina
+  if (app === 'popina') { window.popinaPlano = info && info.nivel === 'pro' ? 'marca' : 'basico'; dispatchEvent(new Event('popina-plano')); }
   if (app === 'atria') window.atriaAcharTrabalho = function (o) {
     return chamaAtria('achar-trabalho', { cidade: o.cidade, oficios: o.oficios, auto: !!o.auto }).then(function (d) {
       var l = d.achados || []; l.info = { gratis_mes: d.gratis_mes, gratis_restantes: d.gratis_restantes, gratis_global_acabou: d.gratis_global_acabou, saldo: d.saldo, pago: d.pago }; return l;

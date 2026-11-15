@@ -1,10 +1,10 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=9';
-import { acao, ir } from './nucleo.js?v=9';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=9';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=9';
-import { situacao, textoHorarios } from './opcoes.js?v=9';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=10';
+import { acao, ir } from './nucleo.js?v=10';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=10';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=10';
+import { situacao, textoHorarios } from './opcoes.js?v=10';
 import { qrSVG } from '../base/qr.js';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -40,6 +40,20 @@ function corDoLogo(src) {
   });
 }
 
+// plano "Popina com a sua marca" (nivel pro na conta): o que muda e como ver; na demonstração dá para ver como fica
+function planoMarca() {
+  const m = window.popinaPlano === 'marca';
+  if (m) return `<section class="bloco-form plano-marca on"><h2>Popina com a sua marca</h2>
+    <p>O topo do sistema mostra o seu logo e o seu nome, a aba do navegador leva o nome do restaurante e o cardápio não fala do Popina em lugar nenhum.</p>
+    <p>Endereço do seu cardápio: <code>${t(linkCardapio('delivery=1'))}</code></p>
+    <p class="mudo">Tem domínio próprio (por exemplo cardapio.seurestaurante.com.br)? Fale com o suporte que a gente configura para ele abrir o seu cardápio.</p>
+    ${CONTA ? '' : '<div class="linha-bts"><button type="button" class="bt" data-prever-marca>Voltar ao plano normal na demonstração</button></div>'}</section>`;
+  return `<section class="bloco-form plano-marca"><h2>Popina com a sua marca</h2>
+    <p>No plano com a sua marca, o topo do sistema mostra o seu logo e o seu nome no lugar do Popina, a aba do navegador leva o nome do restaurante, o cardápio não fala do Popina em lugar nenhum e o link do cardápio fica sem o nome do sistema. Tem domínio próprio? A gente configura para ele abrir o seu cardápio.</p>
+    <p><b>R$ 129 por mês</b> ou <b>R$ 1.238 por ano</b> (20% a menos).</p>
+    <div class="linha-bts">${CONTA ? '<a class="bt cheio" href="/popina.html#precos" target="_blank" rel="noopener">Ver o plano e assinar</a>' : '<button type="button" class="bt cheio" data-prever-marca>Ver como fica na demonstração</button>'}</div></section>`;
+}
+
 // ------------------------------------------------------------------ restaurante e cardápio online
 TELAS_MAIS.loja = () => {
   const L = lojaCfg(), c = db.config, st = situacao(L.horarios);
@@ -58,6 +72,7 @@ TELAS_MAIS.loja = () => {
       <div class="campo"><span>Fundo do cardápio</span><div class="seg"><button type="button" data-tema="claro" aria-pressed="${L.tema !== 'escuro'}">Claro</button><button type="button" data-tema="escuro" aria-pressed="${L.tema === 'escuro'}">Escuro</button></div><small class="mudo">No estilo rústico o fundo é sempre o pergaminho.</small></div>
       <label class="interruptor bloco-int"><input type="checkbox" name="creditos" ${L.creditos !== false ? 'checked' : ''}><span></span>Mostrar “Cardápio feito com o Popina” no rodapé</label>
     </section>
+    ${planoMarca()}
     <section class="bloco-form"><h2>Contato e endereço</h2>
       <label class="campo"><span>Endereço</span><input name="endereco" value="${t(L.endereco)}" placeholder="Rua, número · bairro"></label>
       <div class="duas-c"><label class="campo"><span>Cidade</span><input name="cidade" value="${t(c.cidade)}"></label><label class="campo"><span>WhatsApp do restaurante</span><input name="whatsapp" inputmode="tel" value="${t(c.whatsapp)}" placeholder="(16) 99999-0000"></label></div>
@@ -90,6 +105,7 @@ MONTAR.loja = (el) => {
   f.addEventListener('click', async (e) => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.cor) { cor = b.dataset.cor; $$('[data-cor]', f).forEach((x) => x.classList.toggle('on', x === b)); f.cor.value = cor; return; }
+    if ('preverMarca' in b.dataset && !CONTA) { window.popinaPlano = window.popinaPlano === 'marca' ? 'basico' : 'marca'; dispatchEvent(new Event('popina-plano')); toast(window.popinaPlano === 'marca' ? 'Assim fica com a sua marca: veja o topo' : 'De volta ao plano normal'); return; }
     if (b.dataset.estilo) { estiloSel = b.dataset.estilo; $$('[data-estilo]', f).forEach((x) => x.classList.toggle('on', x === b)); return; }
     if (b.dataset.tema) { temaSel = b.dataset.tema; $$('[data-tema]', f).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); return; }
     if (b.dataset.tira) { setLoja({ [b.dataset.tira]: '' }); toast(b.dataset.tira === 'logo' ? 'Logo tirado' : 'Capa tirada'); return; }

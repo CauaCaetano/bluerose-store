@@ -1,8 +1,8 @@
 // Popina · o estado do restaurante e as regras (enviar para a cozinha, baixar estoque, fechar conta, caixa).
 // Guarda no aparelho (localStorage) e avisa as outras abas na hora (BroadcastChannel). Na conta real, a mesma
 // interface (window.popinaNuvem) troca isso pela nuvem com tempo real entre os aparelhos.
-import { estadoInicial, estadoVazio } from './dados.js?v=9';
-import { precoTam, nomeItem, opcaoReal } from './opcoes.js?v=9';
+import { estadoInicial, estadoVazio } from './dados.js?v=10';
+import { precoTam, nomeItem, opcaoReal } from './opcoes.js?v=10';
 
 export const CHAVE = 'popina-v1';
 // conta real: conta-nuvem.js (carregado antes) troca a chave pela da empresa e sobe cada alteração para a nuvem
@@ -219,7 +219,7 @@ export const fmtQtd = (q, unid) => unid === 'g' && Math.abs(q) >= 1000 ? `${(q /
 // ------------------------------------------------------------------ cardápio online (conta real)
 // endereço do cardápio do cliente: na conta real leva o restaurante (r=); na demonstração, o exemplo deste aparelho
 export function linkCardapio(extra = '') {
-  const u = new URL('cardapio.html', location.href); u.search = '';
+  const u = window.popinaPlano === 'marca' && ESPACO ? new URL('/cardapio/', location.href) : new URL('cardapio.html', location.href); u.search = '';
   if (ESPACO) u.searchParams.set('r', ESPACO);
   new URLSearchParams(extra).forEach((v, k) => u.searchParams.set(k, v));
   return u.href;

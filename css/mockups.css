@@ -35,3 +35,5 @@
 .pm-nota{text-align:center;font-size:.82rem;opacity:.6;margin-top:18px}
 @media (max-width:760px){.pm-tres{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pm-tres figcaption b{font-size:.85rem}.pm-tres figcaption span{font-size:.75rem}.pm-lista{grid-template-columns:1fr 1fr}}
 @media (max-width:460px){.pm-lista{grid-template-columns:1fr}}
+.pm-plano{text-align:center;max-width:720px;margin:22px auto 0;font-size:1rem;line-height:1.6}
+.pm-plano a{font-weight:700}

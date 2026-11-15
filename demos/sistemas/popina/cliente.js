@@ -1,9 +1,9 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=9';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=9';
-import { ico, folha, toast, $, $$ } from './ui.js?v=9';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=10';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=10';
+import { ico, folha, toast, $, $$ } from './ui.js?v=10';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -149,7 +149,7 @@ function rodape() {
   const L = M.loja, hoje = new Date().getDay();
   $('#cli-rodape').innerHTML = `${L.horarios?.some((d) => d?.length) ? `<h3 id="horarios">Horários</h3><ul class="cli-horarios">${textoHorarios(L.horarios).map(([d, h], k) => `<li class="${k === hoje ? 'hoje' : ''}"><span>${d[0].toUpperCase() + d.slice(1)}</span><span>${h}</span></li>`).join('')}</ul>` : ''}
     ${L.endereco ? `<p>${t(L.endereco)}${M.cidade ? ` · ${t(M.cidade)}` : ''}</p>` : ''}
-    ${L.creditos !== false ? `<p>Cardápio feito com o Popina${R ? '' : ' · <a href="fotos/CREDITOS.md" target="_blank" rel="noopener">créditos das fotos</a>'}</p>` : ''}`;
+    ${L.creditos !== false && !M.marca ? `<p>Cardápio feito com o Popina${R ? '' : ' · <a href="fotos/CREDITOS.md" target="_blank" rel="noopener">créditos das fotos</a>'}</p>` : ''}`;
 }
 
 // ------------------------------------------------------------------ escolher um prato

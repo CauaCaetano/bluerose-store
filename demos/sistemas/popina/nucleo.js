@@ -1,5 +1,5 @@
 // Popina · registro das telas e das ações, rota pelo endereço (#salao, #mesa/5...) e redesenho quando os dados mudam.
-import { ouvir } from './loja.js?v=9';
+import { ouvir } from './loja.js?v=10';
 
 export const TELAS = {};
 export const ACOES = {};
@@ -29,7 +29,7 @@ export function desenhar(forcar = true) {
   document.querySelectorAll('[data-aba]').forEach((a) => a.classList.toggle('on', a.dataset.aba === (tela.aba || nome)));
   tela.montar?.(el, ...args);
   if (y) scrollTo(0, y);
-  document.title = `${tela.titulo ? tela.titulo + ' · ' : ''}Popina`;
+  document.title = `${tela.titulo ? tela.titulo + ' · ' : ''}${window.popinaPlano === 'marca' ? (window.popinaNome || 'Sistema') : 'Popina'}`;
 }
 export function iniciarRotas() {
   addEventListener('hashchange', () => desenhar(true));
