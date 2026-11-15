@@ -1,12 +1,10 @@
 // Popina · tela da cozinha e do bar (KDS): cada envio vira um ticket, na ordem de chegada, com o tempo correndo.
 // "Começar" e "Pronto" avisam o garçom na hora (a fila dele mostra o prato pronto).
-import { db, t, tempo, minutos, comanda, mudarStatus } from './loja.js?v=3';
-import { registrar, acao } from './nucleo.js?v=3';
-import { ico, toast, bip } from './ui.js?v=3';
-import { rotAdic } from './opcoes.js?v=3';
-import { LOURO } from './salao.js?v=3';
+import { db, t, tempo, minutos, comanda, mudarStatus } from './loja.js?v=4';
+import { registrar, acao } from './nucleo.js?v=4';
+import { ico, toast, bip, folha } from './ui.js?v=4';
 
-let setor = (() => { try { return localStorage.getItem('popina-setor') || 'cozinha'; } catch { return 'cozinha'; } })();
+let setor = (() => { try { const s = localStorage.getItem('popina-setor'); return s === 'bar' ? 'bar' : 'cozinha'; } catch { return 'cozinha'; } })();
 let vistos = new Set();
 
 // agrupa itens por comanda + horário de envio (um ticket por envio)
@@ -24,19 +22,26 @@ const ONDE = (c) => (c.tipo === 'mesa' ? `Mesa ${c.mesa}` : c.tipo === 'delivery
 // relógio que anda de segundo em segundo (mm:ss) em cada comanda da tela
 const mmss = (ms) => { const s2 = Math.max(0, Math.floor(ms / 1000)); const h = Math.floor(s2 / 3600), m = Math.floor((s2 % 3600) / 60), x = s2 % 60; return `${h ? h + ':' : ''}${String(m).padStart(2, '0')}:${String(x).padStart(2, '0')}`; };
 let relogio = 0;
+// a tela segue o conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/2-cozinha-tablet.png):
+// comanda de papel pendurada no trilho, sem botões; tocar na comanda abre as ações (começar, pronto, item a item, imprimir)
+const opcao = (a) => { const n = String(a.nome); return n.includes(': ') ? n.split(': ').slice(1).join(': ') : n; };
+function notas(i) {
+  const l = (i.adic || []).map((a) => { const grupo = String(a.nome).split(': ')[0]; const forte = /ponto/i.test(grupo);
+    return `<em class="kn ${forte ? 'forte' : ''}">${ico('fala')}${t(String(a.nome).includes(': ') ? opcao(a) : '+ ' + a.nome)}</em>`; });
+  if (i.obs) { const sem = /^\s*(sem|não|nao|tirar)\b/i.test(i.obs); l.push(`<em class="kn ${sem ? 'forte alerta' : ''}">${ico(sem ? 'alerta' : 'fala')}${t(i.obs)}</em>`); }
+  return l.join('');
+}
 function ticket(k) {
-  const m = minutos(k.env), atraso = k.estado === 'pronto' ? '' : m >= 25 ? 'atrasado' : m >= 15 ? 'atencao' : '';
-  const prontos = k.itens.filter((i) => i.status === 'pronto' || i.status === 'entregue').length, ico2 = k.c.tipo === 'mesa' ? 'salao' : k.c.tipo === 'delivery' ? 'moto' : 'sacola';
+  const m = minutos(k.env), atrasado = k.estado === 'preparo' && m >= 10;
+  const prontos = k.itens.filter((i) => i.status === 'pronto' || i.status === 'entregue').length, ico2 = k.c.tipo === 'mesa' ? 'mesa' : k.c.tipo === 'delivery' ? 'moto' : 'sacola';
   const quando = k.estado === 'pronto' ? Math.max(...k.itens.map((i) => i.pronto || k.env)) : k.env;
-  return `<article class="ticket ${k.estado} ${atraso}">
-    <header><i class="tk-ico">${ico(ico2)}</i><div class="tk-tit"><b>${ONDE(k.c)}</b><small>${k.c.tipo === 'mesa' ? `${k.c.pessoas || 2} pessoas${k.c.garcom ? ` · ${t(k.c.garcom)}` : ''}` : t(k.c.cliente?.nome || '') + (k.c.tipo === 'delivery' ? ' · entrega' : ' · retirada')}</small></div>
-      <span class="relogio" data-desde="${quando}" data-pronto="${k.estado === 'pronto' ? 1 : ''}">${k.estado === 'pronto' ? `<small>Pronto há</small> ` : ''}<b>${mmss(Date.now() - quando)}</b></span></header>
-    <ul>${k.itens.map((i) => `<li class="${i.status}"><b>${i.qtd}×</b><div>${t(i.nome)}${(i.adic || []).map((a) => `<em class="nota ${String(a.nome).includes(': ') ? 'esc' : 'mais'}">${rotAdic(a)}</em>`).join('')}${i.obs ? `<em class="nota obs">${ico('conta')}${t(i.obs)}</em>` : ''}</div>
-      ${k.estado !== 'pronto' && i.status !== 'pronto' ? `<button type="button" class="bt-ico" data-acao="item-pronto" data-c="${k.c.id}" data-i="${i.id}" aria-label="${t(i.nome)} pronto">${ico('check')}</button>` : '<i class="ok-item">' + ico('check') + '</i>'}</li>`).join('')}</ul>
-    ${k.estado !== 'pronto' && k.itens.length ? `<div class="tk-prog" title="${prontos} de ${k.itens.length} prontos"><i style="width:${Math.max(6, (prontos / k.itens.length) * 100)}%"></i></div>` : ''}
-    <footer>${k.estado === 'novo' ? `<button type="button" class="bt cheio grande" data-acao="comecar" data-c="${k.c.id}" data-env="${k.env}">Começar a preparar</button><button type="button" class="link pular" data-acao="tudo-pronto" data-c="${k.c.id}" data-env="${k.env}">Já está pronto</button>`
-      : k.estado === 'preparo' ? `<button type="button" class="bt cheio grande" data-acao="tudo-pronto" data-c="${k.c.id}" data-env="${k.env}">Pronto</button>`
-        : `<span class="pronto-txt">${ico('check')}Pronto, aguardando o garçom</span>`}<button type="button" class="bt-ico tk-imp" data-acao="imprimir-ticket" data-c="${k.c.id}" data-env="${k.env}" aria-label="Imprimir esta comanda">${ico('impressora')}</button></footer></article>`;
+  const sub = k.c.tipo === 'mesa' ? `${ico('pessoas')}${k.c.pessoas || 2} pessoas` : t(k.c.cliente?.nome || (k.c.tipo === 'delivery' ? 'Entrega' : 'Retirada no balcão'));
+  const rel = k.estado === 'pronto' ? `<span class="relogio pronto" data-desde="${quando}">${ico('okcirc')}<small>Pronto há <b>${mmss(Date.now() - quando)}</b></small></span>`
+    : `<span class="relogio ${atrasado ? 'atrasado' : ''}" data-desde="${quando}">${atrasado ? ico('relogio') : ''}<b>${mmss(Date.now() - quando)}</b></span>`;
+  return `<article class="ticket ${k.estado}" data-acao="ticket-abrir" data-c="${k.c.id}" data-env="${k.env}" tabindex="0" role="button" aria-label="${ONDE(k.c)}: abrir ações">
+    <header><i class="tk-ico">${ico(ico2)}</i><div class="tk-tit"><b>${ONDE(k.c)}</b><small>${sub}</small></div>${rel}</header>
+    <ul>${k.itens.map((i) => `<li class="${i.status}"><span>${i.qtd}× ${t(i.nome)}</span>${notas(i)}</li>`).join('')}</ul>
+    ${k.estado === 'preparo' ? `<div class="tk-prog" title="${prontos} de ${k.itens.length} prontos"><i style="width:${Math.max(12, ((prontos + .6) / k.itens.length) * 100)}%"></i></div>` : ''}</article>`;
 }
 registrar('cozinha', {
   titulo: 'Cozinha', aba: 'cozinha',
@@ -46,10 +51,10 @@ registrar('cozinha', {
     // som quando chega pedido novo (só os que ainda não tinham aparecido neste aparelho)
     const chave = novos.map((k) => `${k.c.id}-${k.env}`); const inedito = chave.some((x) => !vistos.has(x)); vistos = new Set(chave);
     if (inedito && document.body.dataset.tocou) bip(990);
-    return `<header class="cab-cozinha"><h1>${LOURO}${setor === 'bar' ? 'Bar' : setor === 'tudo' ? 'Cozinha e bar' : 'Cozinha'}${LOURO}</h1>
-      <div class="seg" role="group" aria-label="Setor">${[['cozinha', 'Cozinha'], ['bar', 'Bar'], ['tudo', 'Tudo']].map(([v, r]) => `<button type="button" data-acao="setor" data-s="${v}" aria-pressed="${setor === v}">${r}</button>`).join('')}</div>
-      <button type="button" class="bt-ico grande" data-acao="tela-cheia" aria-label="Tela cheia">${ico('planta')}</button></header>
-      <section class="kds quadro">${cols.map(([e, r]) => `<div class="kds-col ${e}"><h2 class="placa">${LOURO}${r} <span>(${l.filter((k) => k.estado === e).length})</span></h2><div class="trilho"></div>${l.filter((k) => k.estado === e).map(ticket).join('') || '<div class="vazio-quadro">Nada aqui.</div>'}</div>`).join('')}</section>`;
+    return `<header class="cab-cozinha"><h1><img src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74">${setor === 'bar' ? 'Bar' : 'Cozinha'}<img src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></h1>
+      <div class="seg-coz" role="group" aria-label="Setor">${[['cozinha', 'Cozinha', 'chef'], ['bar', 'Bar', 'taca']].map(([v, r, i]) => `<button type="button" data-acao="setor" data-s="${v}" aria-pressed="${setor === v}">${ico(i)}${r}</button>`).join('')}</div>
+      <button type="button" class="bt-tela" data-acao="tela-cheia" aria-label="Tela cheia">${ico('telacheia')}</button></header>
+      <section class="kds quadro">${cols.map(([e, r]) => `<div class="kds-col ${e}"><h2 class="placa">${r.toUpperCase()} <span>(${l.filter((k) => k.estado === e).length})</span></h2><div class="trilho" aria-hidden="true"></div>${l.filter((k) => k.estado === e).map(ticket).join('') || '<div class="vazio-quadro">Nada aqui.</div>'}</div>`).join('')}</section>`;
   },
   montar() {
     clearInterval(relogio);
@@ -59,6 +64,19 @@ registrar('cozinha', {
     }, 1000);
   },
 });
+acao('ticket-abrir', (b) => {
+  const c = comanda(b.dataset.c), env = Number(b.dataset.env); if (!c) return;
+  const itens = c.itens.filter((i) => i.enviado === env && !i.cancelado && (setor === 'tudo' || i.setor === setor));
+  const estado = itens.every((i) => i.status === 'pronto') ? 'pronto' : itens.some((i) => i.status === 'preparo') ? 'preparo' : 'novo';
+  const d = `data-c="${c.id}" data-env="${env}"`;
+  folha({ titulo: ONDE(c), corpo: `<ul class="lista-itens">${itens.map((i) => `<li><b>${i.qtd}×</b><span style="flex:1;margin:0">${t(i.nome)}${notas(i) ? `<small>${notas(i).replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<\/?em[^>]*>/g, ' · ').replace(/^ · | · $/g, '')}</small>` : ''}</span>
+      ${i.status === 'pronto' ? `<i class="ok-item">${ico('check')}</i>` : `<button type="button" class="bt" data-acao="item-pronto" data-c="${c.id}" data-i="${i.id}">${ico('check')}Pronto</button>`}</li>`).join('')}</ul>`,
+  pe: `<button type="button" class="bt" data-acao="imprimir-ticket" ${d}>${ico('impressora')}Imprimir</button>
+    ${estado === 'novo' ? `<button type="button" class="bt" data-acao="tudo-pronto" ${d}>Já está pronto</button><button type="button" class="bt cheio" data-acao="comecar" ${d}>Começar a preparar</button>`
+      : estado === 'preparo' ? `<button type="button" class="bt cheio" data-acao="tudo-pronto" ${d}>Tudo pronto</button>` : ''}`,
+  aoAbrir: (f, fechar) => f.addEventListener('click', (e) => { if (e.target.closest('[data-acao]')) setTimeout(fechar, 0); }) });
+});
+document.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('.ticket[data-acao]')) { e.preventDefault(); e.target.click(); } });
 acao('tela-cheia', () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.().catch(() => toast('Este aparelho não deixa tela cheia')); });
 // comanda impressa (impressora comum ou térmica pelo navegador): grande, só o que a cozinha precisa
 acao('imprimir-ticket', (b) => {

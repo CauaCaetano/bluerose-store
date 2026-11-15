@@ -29,6 +29,16 @@ const P = {
   calendario: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',
   louro: '<path d="M12 21c-4-1.5-6.8-5-7.4-10M12 21c4-1.5 6.8-5 7.4-10"/><path d="M5 14c-1.6-.4-2.4-1.6-2.4-3 1.5 0 2.5 1 2.4 3zM4.6 10.6c-1.4-.8-1.8-2.1-1.4-3.4 1.4.4 2 1.6 1.4 3.4zM5.4 7.4C4.4 6.3 4.4 5 5.1 3.9c1.1.8 1.2 2.1.3 3.5zM7.6 17.6c-1.7.1-2.8-.8-3.2-2.1 1.5-.4 2.7.4 3.2 2.1zM19 14c1.6-.4 2.4-1.6 2.4-3-1.5 0-2.5 1-2.4 3zM19.4 10.6c1.4-.8 1.8-2.1 1.4-3.4-1.4.4-2 1.6-1.4 3.4zM18.6 7.4c1-1.1 1-2.4.3-3.5-1.1.8-1.2 2.1-.3 3.5zM16.4 17.6c1.7.1 2.8-.8 3.2-2.1-1.5-.4-2.7.4-3.2 2.1z"/>',
   chevron: '<path d="M6 9l6 6 6-6"/>',
+  // ícones do conceito da cozinha e do cardápio (GPT)
+  chef: '<path d="M7 14.5A4 4 0 0 1 6.5 6.6 5 5 0 0 1 16 5.5a4 4 0 0 1 1 9"/><path d="M7 14.5h10V19H7z"/>',
+  taca: '<path d="M7 3h10l-.5 5a4.5 4.5 0 0 1-9 0L7 3z"/><path d="M12 12.5V20M8.5 20h7M7.3 7h9.4"/>',
+  telacheia: '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>',
+  alerta: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.2v.3"/>',
+  fala: '<path d="M5 18.5l1.2-3.4A7 7 0 1 1 9 18l-4 .5z"/>',
+  okcirc: '<circle cx="12" cy="12" r="9" fill="currentColor" stroke="none"/><path d="M7.8 12.3l2.8 2.8 5.6-5.8" stroke="#fff" stroke-width="2.2"/>',
+  coroa: '<path d="M4 17l-1-9 5 4 4-6 4 6 5-4-1 9H4z"/><path d="M4 20h16"/>',
+  folha: '<path d="M5 19C5 10 10 5 20 4c-1 10-6 15-15 15z"/><path d="M5 19L13 11"/>',
+  carrinho: '<path d="M3 4h2.5l2.2 10.5h10.6L20.5 7H7"/><circle cx="9.5" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',
 };
 export const ico = (n, extra = '') => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" ${extra}>${P[n] || ''}</svg>`;
 

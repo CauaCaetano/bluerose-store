@@ -10,9 +10,10 @@
 <link rel="icon" href="icone-192.png?v=1" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Libre+Caslon+Text:wght@400;700&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilo.css?v=3">
 <link rel="stylesheet" href="cardapio.css?v=3">
+<link rel="stylesheet" href="cardapio-gpt.css?v=1">
 </head>
 <body class="cliente">
 <div class="cli-pagina">
@@ -27,20 +28,21 @@
           </div>
       </div>
     </header>
-    <div class="cli-pills" id="cli-pills"></div>
-    <div id="cli-modo" class="cli-modo"></div>
+        <div id="cli-modo" class="cli-modo"></div>
     <div id="cli-aviso"></div>
     <div class="cli-barra-busca" id="cli-nav">
       <label class="cli-busca"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" id="cli-q" placeholder="Buscar no cardápio" aria-label="Buscar no cardápio"></label>
       <nav class="cli-cats" id="cli-cats" aria-label="Categorias"></nav>
     </div>
     <main id="cli-lista" class="cli-lista"><p class="cli-carregando">Abrindo o cardápio…</p></main>
+    <div id="cli-aviso-fim"></div>
+    <div class="cli-pills" id="cli-pills"></div>
     <footer class="cli-rodape" id="cli-rodape"></footer>
   </div>
   <aside class="cli-sacola-lado" id="cli-sacola-lado" aria-label="Seu pedido"></aside>
 </div>
 <div class="cli-barra" id="cli-barra"></div>
 <script src="../../../app/config.js"></script>
-<script type="module" src="cliente.js?v=3"></script>
+<script type="module" src="cliente.js?v=4"></script>
 </body>
 </html>

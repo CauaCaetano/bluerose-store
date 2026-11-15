@@ -1,10 +1,10 @@
 // Popina · caixa: contas abertas, fechar conta (serviço, desconto, dividir, pagar em partes), Pix com QR e o caixa do dia.
-import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2 } from './loja.js?v=3';
-import { registrar, acao, ir } from './nucleo.js?v=3';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=3';
-import { pix } from './pix.js?v=3';
+import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2 } from './loja.js?v=4';
+import { registrar, acao, ir } from './nucleo.js?v=4';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=4';
+import { pix } from './pix.js?v=4';
 import { qrSVG } from '../base/qr.js';
-import { linhaItem, abrirSeletor } from './salao.js?v=3';
+import { linhaItem, abrirSeletor } from './salao.js?v=4';
 
 const FORMAS = [['Dinheiro', 'dinheiro'], ['Pix', 'pix'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao']];
 const ONDE = (c) => (c.tipo === 'mesa' ? `Mesa ${c.mesa}` : c.tipo === 'delivery' ? `Delivery #${c.num}` : `Balcão #${c.num}`);

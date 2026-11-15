@@ -1,8 +1,8 @@
 // Popina · o estado do restaurante e as regras (enviar para a cozinha, baixar estoque, fechar conta, caixa).
 // Guarda no aparelho (localStorage) e avisa as outras abas na hora (BroadcastChannel). Na conta real, a mesma
 // interface (window.popinaNuvem) troca isso pela nuvem com tempo real entre os aparelhos.
-import { estadoInicial, estadoVazio } from './dados.js?v=3';
-import { precoTam, nomeItem, opcaoReal } from './opcoes.js?v=3';
+import { estadoInicial, estadoVazio } from './dados.js?v=4';
+import { precoTam, nomeItem, opcaoReal } from './opcoes.js?v=4';
 
 export const CHAVE = 'popina-v1';
 // conta real: conta-nuvem.js (carregado antes) troca a chave pela da empresa e sobe cada alteração para a nuvem
@@ -15,7 +15,7 @@ let ouvintes = [];
 export let db = carregar();
 
 function carregar() {
-  try { const d = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (d && d.versao === 1 && (CONTA || d.exemplo === 2)) return d; /* a conta real nunca é trocada pelo exemplo */ } catch { /* sem acesso */ }
+  try { const d = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (d && d.versao === 1 && (CONTA || d.exemplo === 3)) return d; /* a conta real nunca é trocada pelo exemplo */ } catch { /* sem acesso */ }
   const d = CONTA ? estadoVazio(CONTA.empresa || 'Meu restaurante') : estadoInicial();
   try { localStorage.setItem(CHAVE, JSON.stringify(d)); } catch { /* sem acesso */ }
   return d;

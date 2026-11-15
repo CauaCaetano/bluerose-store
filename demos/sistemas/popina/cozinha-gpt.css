@@ -1,0 +1,84 @@
+/* Popina · cozinha igual ao conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/2-cozinha-tablet.png).
+   Quadro, placas, trilho com argolas, comandas de papel rasgado e o aqueduto recortados da própria imagem. */
+.cab-cozinha{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 14px}
+.cab-cozinha h1{flex:1;display:flex;align-items:center;gap:10px;margin:0;font:700 32px var(--g-serif);text-transform:uppercase;letter-spacing:.02em;color:var(--g-tinta)}
+.cab-cozinha h1 img{width:38px;height:auto}
+.seg-coz{display:flex;background:#FBF1E4;border:1.5px solid #E2CDB2;border-radius:12px;padding:3px}
+.seg-coz button{display:flex;align-items:center;gap:10px;border:0;background:none;border-radius:9px;padding:0 22px;height:42px;font:400 18px var(--g-serif);color:var(--g-tinta);cursor:pointer}
+.seg-coz button .ico{width:26px;height:26px;stroke-width:1.5}
+.seg-coz button[aria-pressed=true]{background:#B0532C;color:#FFF6EA;box-shadow:inset 0 -2px 0 rgba(0,0,0,.14)}
+.bt-tela{display:grid;place-items:center;width:44px;height:44px;border:0;background:none;color:var(--g-tinta);cursor:pointer}
+.bt-tela .ico{width:34px;height:34px;stroke-width:1.6}
+
+/* quadro de madeira com moldura */
+.kds.quadro{border-style:solid;border-width:22px;border-image:url(img/k-quadro.webp?v=1) 26 stretch;border-radius:0;box-shadow:none;padding:0;
+  background:#572B12 padding-box;background-image:repeating-linear-gradient(90deg,rgba(255,210,160,.03) 0 3px,transparent 3px 11px),linear-gradient(#5E3015,#512811);background-clip:padding-box;gap:0}
+.kds-col{padding:0 12px 16px;min-width:0}
+.kds-col+.kds-col{border-left:3px solid rgba(25,12,5,.45);box-shadow:-1px 0 0 rgba(255,220,180,.06)}
+.kds-col .placa{clip-path:none;box-shadow:none;border-radius:0;display:flex;align-items:center;justify-content:center;gap:8px;width:max-content;max-width:100%;height:62px;box-sizing:border-box;
+  margin:4px auto 0;padding:0 6px;font:700 25px var(--g-serif);letter-spacing:.02em;text-transform:uppercase;
+  border-style:solid;border-width:0 18px 0 60px;border-image:url(img/k-placa-novos.webp?v=1) 0 18 0 60 fill stretch;background:none;color:#7A2215}
+.kds-col .placa span{font:400 23px var(--g-serif);color:inherit;background:none;padding:0;border-radius:0}
+.kds-col.preparo .placa{border-width:0 18px 0 52px;border-image:url(img/k-placa-prep.webp?v=1) 0 18 0 52 fill stretch;background:none;color:#3E2512}
+.kds-col.pronto .placa{border-width:0 18px 0 53px;border-image:url(img/k-placa-pronto.webp?v=1) 0 18 0 53 fill stretch;background:none;color:#FFF5DE}
+.kds-col .trilho{position:relative;z-index:2;height:45px;margin:-4px -6px 0;border-radius:0;box-shadow:none;background:none;
+  border-style:solid;border-width:0 60px;border-image:url(img/k-trilho.webp?v=2) 0 60 fill stretch;pointer-events:none}
+.kds-col .trilho+.ticket{margin-top:-6px}
+.vazio-quadro{color:#D9C6AA;text-align:center;padding:18px 0;font:400 15px var(--g-serif)}
+
+/* comanda de papel rasgado, a faixa de cor já vem no papel */
+.kds .ticket{-webkit-mask:none;mask:none;border-radius:0;box-shadow:none;margin:0 0 6px;padding:2px 8px 8px 6px;cursor:pointer;
+  border-style:solid;border-width:10px 14px 8px 20px;border-image:url(img/k-tk-novo.webp?v=2) 10 14 8 20 stretch;background:#F7EBD6 padding-box;color:var(--g-tinta)}
+.kds .ticket.preparo{border-image-source:url(img/k-tk-prep.webp?v=2)}
+.kds .ticket.pronto{border-image-source:url(img/k-tk-pronto.webp?v=2);opacity:1}
+.kds .ticket header{padding-top:4px}
+.kds .ticket.preparo .relogio:not(.atrasado){color:var(--g-tinta)}
+.kds .ticket .tk-tit b{white-space:normal;overflow:visible}
+.kds .ticket{padding-bottom:12px}
+.kds .ticket::before{display:none}
+.kds .ticket:focus-visible{outline:3px solid #E9B44C;outline-offset:2px}
+.kds .ticket header{display:flex;align-items:flex-start;gap:10px;padding:0 0 8px;border-bottom:1.5px solid #D5C2A4;margin-bottom:6px}
+.kds .tk-ico{color:#8A2A1C;flex:none;margin-top:2px}.kds .tk-ico .ico{width:30px;height:30px;stroke-width:1.5}
+.kds .ticket.preparo .tk-ico,.kds .ticket.pronto .tk-ico{color:var(--g-tinta)}
+.kds .tk-tit b{display:block;font:700 23px/1.15 var(--g-serif);color:#7A2215}
+.kds .ticket.preparo .tk-tit b,.kds .ticket.pronto .tk-tit b{color:var(--g-tinta)}
+.kds .tk-tit small{display:flex;align-items:center;gap:5px;font:400 14px var(--g-serif);color:var(--g-tinta2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kds .tk-tit small .ico{width:15px;height:15px}
+.kds .relogio{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none;color:#8A1E14;background:none;padding:0}
+.kds .relogio b{font:700 27px/1 var(--g-serif);font-variant-numeric:tabular-nums}
+.kds .ticket.preparo .relogio{color:var(--g-tinta)}
+.kds .tk-tit{flex:1;min-width:0}.kds .tk-tit b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kds .ticket.preparo .relogio.atrasado{background:#F6C45A;color:#8A1E14;border-radius:7px;padding:6px 12px}
+.kds .relogio.atrasado .ico{width:24px;height:24px;stroke-width:2}
+.kds .relogio.pronto{flex-direction:column;align-items:flex-end;gap:2px;color:#5E7A2C}
+.kds .relogio.pronto .ico{width:28px;height:28px;color:#4F7A2A}
+.kds .relogio.pronto small{font:600 14px var(--g-serif);color:#5E6E2A;white-space:nowrap}
+.kds .relogio.pronto b{font-size:16px}
+.kds .ticket ul{list-style:none;margin:0;padding:0}
+.kds .ticket li{display:block;font:400 18.5px/1.4 var(--g-serif);color:var(--g-tinta);padding:0;border:0;text-decoration:none;opacity:1}
+.kds .ticket li span{text-decoration:none}
+.kds .ticket li em.kn{display:flex;align-items:center;gap:10px;margin:6px 0 2px;padding:5px 14px;border-radius:6px;background:#F8D586;color:#3B2A22;font:700 16px/1.3 var(--g-serif);font-style:normal;text-transform:none;letter-spacing:0}
+.kds .ticket li em.kn .ico{width:20px;height:20px;stroke-width:1.8;flex:none;margin:0}
+.kds .ticket li em.kn.forte{background:#F2C6BD;color:#8A1E14;text-transform:uppercase;letter-spacing:.01em}
+.kds .tk-prog{height:10px;border-radius:5px;background:#D3C7B1;margin:10px 0 2px;overflow:hidden}
+.kds .tk-prog i{display:block;height:100%;border-radius:5px;background:#D29A1F}
+
+@media (min-width:900px){
+  /* na cozinha o topo vira o do conceito: logo, COZINHA com louros, Cozinha/Bar, sino e tela cheia */
+  body:has(main[data-tela=cozinha]) .topo .nav,body:has(main[data-tela=cozinha]) .topo-div,body:has(main[data-tela=cozinha]) .topo-perfil{display:none}
+  body:has(main[data-tela=cozinha]) .topo-dir{margin-right:86px}
+  main[data-tela=cozinha]{padding:0 8px 10px 0}
+  .cab-cozinha{position:fixed;z-index:30;top:var(--topo-top,0);left:0;right:0;height:100px;margin:0;padding:0 22px 0 380px;pointer-events:none;flex-wrap:nowrap}
+  .cab-cozinha>*{pointer-events:auto}
+  .cab-cozinha h1{flex:none;font-size:42px;gap:12px}
+  .cab-cozinha h1 img{width:50px}
+  .seg-coz{margin-left:auto;margin-right:150px}
+  .kds.quadro{grid-template-columns:repeat(3,minmax(0,1fr));min-height:calc(100dvh - 112px);align-items:stretch}
+  .kds-col.pronto{position:relative;padding-bottom:250px}
+  .kds-col.pronto::after{content:"";position:absolute;right:-14px;bottom:-14px;width:380px;height:248px;background:url(img/k-aqueduto.webp?v=1) 0 0/100% 100% no-repeat;pointer-events:none;
+    -webkit-mask:radial-gradient(120% 125% at 100% 100%,#000 62%,transparent 98%);mask:radial-gradient(120% 125% at 100% 100%,#000 62%,transparent 98%)}
+}
+@media (max-width:899px){
+  .kds .ticket li{font-size:17px}.kds .tk-tit b{font-size:21px}.kds .relogio b{font-size:23px}
+  .kds-col .placa{font-size:21px}
+}

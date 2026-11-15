@@ -1,7 +1,7 @@
 // Popina · Mais: cardápio (preços, esgotado, ficha técnica), estoque, relatórios, QR das mesas, ajustes e o papel deste aparelho.
-import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa } from './loja.js?v=3';
-import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=3';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=3';
+import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa } from './loja.js?v=4';
+import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=4';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=4';
 import { qrSVG } from '../base/qr.js';
 
 export const GRUPOS = [
@@ -236,7 +236,7 @@ acao('editar-prod', (b) => {
 });
 acao('cardapio-exemplo', async () => {
   if (!(await confirma('Carregar os 22 pratos de exemplo, com fotos e fichas técnicas? Depois é só trocar nomes e preços e apagar o que não serve.', 'Carregar'))) return;
-  const { cardapioExemplo } = await import('./dados.js?v=3'); const ex = cardapioExemplo();
+  const { cardapioExemplo } = await import('./dados.js?v=4'); const ex = cardapioExemplo();
   db.produtos.push(...ex.produtos.filter((p) => !prod(p.id))); ex.insumos.forEach((i) => { if (!insumo(i.id)) db.insumos.push(i); });
   grava(); toast('Cardápio de exemplo carregado');
 });
@@ -309,7 +309,7 @@ acao('imprimir-qr', () => {
   w.document.close();
 });
 acao('papel', (b) => { setPapel(b.dataset.p); toast(`Este aparelho agora é: ${PAPEIS[b.dataset.p][0]}`); ir(PAPEIS[b.dataset.p][1]); });
-acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=3'); recomecar(); ir('salao'); } });
+acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=4'); recomecar(); ir('salao'); } });
 
 acao('ordem', (b) => {
   const p = prod(b.dataset.p), l = db.produtos.filter((x) => x.cat === p.cat), k = l.indexOf(p), alvo = l[k + Number(b.dataset.d)]; if (!alvo) return;

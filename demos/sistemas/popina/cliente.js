@@ -1,9 +1,9 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=3';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=3';
-import { ico, folha, toast, $, $$ } from './ui.js?v=3';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=4';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=4';
+import { ico, folha, toast, $, $$ } from './ui.js?v=4';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -83,14 +83,14 @@ function tema() {
   document.title = `${M.nome} · Cardápio`;
 }
 const LOURO = '<svg class="louro" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20C9 15 12 10 13 3"/><path d="M8 15c-2.5 0-4-1.2-4.5-3 2.4-.4 4 .6 4.5 3zM10 11.5c-2.2-.6-3.3-2.1-3.3-3.9 2.2.2 3.4 1.6 3.3 3.9zM12 7.5c-1.6-1.1-2.1-2.8-1.7-4.4 1.9.8 2.5 2.4 1.7 4.4zM9.5 14.5c1-2.2 2.8-3.1 4.7-2.8-.9 2-2.6 3-4.7 2.8zM11.5 10.5c1.3-1.9 3-2.4 4.8-1.8-1.2 1.7-2.9 2.3-4.8 1.8z"/></svg>';
-const tituloSec = (n) => `<h2 class="cli-h2">${LOURO}<span>${t(n)}</span>${LOURO}</h2>`;
+const tituloSec = (n) => `<h2 class="cli-h2"><img src="img/c-louro-esq.webp?v=1" alt="" width="30" height="31"><span>${t(n)}</span><img src="img/c-louro-dir.webp?v=1" alt="" width="30" height="31"></h2>`;
 const SVG = { local: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>', relogio: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>', zap: '<svg viewBox="0 0 24 24"><path d="M4 20l1.4-4A8 8 0 1 1 8 18.6z"/></svg>', insta: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.6"/></svg>' };
 function topo() {
   const L = M.loja, st = situacao(L.horarios);
   const capa = $('#cli-capa-foto'); if (L.capa) { capa.style.backgroundImage = `url("${L.capa.replace(/"/g, '')}")`; capa.classList.remove('sem'); } else { capa.style.backgroundImage = ''; capa.classList.add('sem'); }
   const lg = $('#cli-logo'); if (L.logo) { lg.style.backgroundImage = `url("${L.logo.replace(/"/g, '')}")`; lg.textContent = ''; lg.classList.remove('ini'); } else { lg.style.backgroundImage = ''; lg.textContent = M.nome.split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase(); lg.classList.add('ini'); }
   $('#cli-nome').textContent = M.nome; $('#cli-boas').textContent = L.boasVindas || M.cidade || '';
-  $('#cli-status').innerHTML = st.texto ? `<a class="cli-selo ${st.aberto ? 'aberto' : 'fechado'}" href="#horarios">${SVG.relogio}<span>${t(st.texto.replace('Fechado agora · ', 'Fechado · '))}</span></a>` : '';
+  $('#cli-status').innerHTML = st.texto ? `<a class="cli-selo ${st.aberto ? 'aberto' : 'fechado'}" href="#horarios">${SVG.relogio}<span>${st.aberto ? `Aberto<br>${t(st.texto.replace(/^Aberto /, ''))}` : `Fechado<br>${t(st.texto.replace(/^Fechado agora · /, '').replace('abre hoje às', 'abre às'))}`}</span></a>` : '';
   const zap = String(M.whatsapp || '').replace(/\D/g, '');
   $('#cli-pills').innerHTML = [
     L.endereco ? `<a class="pill" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${L.endereco} ${M.cidade || ''}`)}" target="_blank" rel="noopener">${SVG.local}${t(L.endereco)}</a>` : '',
@@ -102,8 +102,8 @@ const nomeMesaDe = (n) => { const a = (M.loja.areas || []).find((x) => n >= x.de
 function caixaModo() {
   const L = M.loja, el = $('#cli-modo');
   if (mesa) {
-    el.innerHTML = `<div class="cli-modo-caixa na-mesa"><div class="cli-fita">${ico('salao')}<b>${t(nomeMesaDe(mesa))}</b></div><small>${L.aceitaQR === false ? 'Faça o pedido com o garçom' : 'Peça por aqui: o garçom confirma e vai para a cozinha'}</small>
-      <div class="cli-modo-bts"><button type="button" class="bt" data-chamar>${ico('sino')}Chamar garçom</button><button type="button" class="bt" data-conta>${ico('conta')}Ver a conta</button></div></div>`;
+    el.innerHTML = `<div class="cli-modo-caixa na-mesa"><div class="cli-fita-linha"><div class="cli-fita"><b>${t(nomeMesaDe(mesa))}</b></div><img class="cli-aqueduto" src="img/c-aqueduto.webp?v=1" alt="" width="180" height="50"></div>${L.aceitaQR === false ? '<small>Faça o pedido com o garçom</small>' : ''}
+      <div class="cli-modo-bts"><button type="button" class="bt" data-chamar>${ico('cloche')}Chamar garçom</button><button type="button" class="bt" data-conta>${ico('conta')}Ver a conta</button></div></div>`;
     $('[data-chamar]', el).onclick = chamar; $('[data-conta]', el).onclick = verConta; return;
   }
   const ops = [['delivery', 'Entregar', L.delivery !== false], ['balcao', 'Vou buscar', L.retirada !== false]].filter((x) => x[2]);
@@ -120,13 +120,14 @@ function acompanharLink() {
 function avisos() {
   const L = M.loja, st = situacao(L.horarios);
   $('#cli-aviso').innerHTML = (!mesa && !st.aberto ? `<div class="cli-aviso fechado">${t(st.texto)}. Você pode olhar o cardápio; os pedidos voltam quando abrir.</div>` : '')
-    + (L.aviso ? `<div class="cli-aviso">${t(L.aviso)}</div>` : '') + acompanharLink();
+    + acompanharLink();
+  $('#cli-aviso-fim').innerHTML = L.aviso ? `<div class="cli-aviso">${t(L.aviso)}</div>` : '';
   $('[data-acomp]')?.addEventListener('click', () => acompanhar(guardado('ultimo')));
 }
 
 // ------------------------------------------------------------------ cardápio
 const precoCard = (p) => `<span class="cli-preco">${p.promoDe ? `<s>${din(p.promoDe)}</s>` : ''}${p.tamanhos?.length ? `<small>a partir de</small> ${din(aPartir(p))}` : din(p.preco)}${p.porKg ? '<small>/kg · pesado no balcão</small>' : ''}</span>`;
-const tags = (p) => ((p.tags || []).length ? `<span class="cli-tags">${p.tags.map((x) => `<i class="tag ${/vegetari|vegan/i.test(x) ? 'verde' : ''}">${t(x)}</i>`).join('')}</span>` : '');
+const tags = (p) => ((p.tags || []).length ? `<span class="cli-tags">${p.tags.map((x) => { const v = /vegetari|vegan/i.test(x); return `<i class="tag ${v ? 'verde' : ''}">${ico(v ? 'folha' : 'coroa')}${t(x)}</i>`; }).join('')}</span>` : '');
 const cartao = (p) => `<button type="button" class="cli-prod ${p.ativo === false ? 'off' : ''}" data-p="${p.id}" ${p.ativo === false ? 'aria-disabled="true"' : ''}>
   <span class="cli-prod-txt">${tags(p)}<b>${t(p.nome)}</b>${p.desc ? `<p>${t(p.desc)}</p>` : ''}${p.ativo === false ? '<span class="cli-preco">Esgotado hoje</span>' : precoCard(p)}</span>
   ${p.foto ? `<img src="${t(p.foto)}" alt="" loading="lazy">` : ''}${p.ativo === false || p.porKg ? '' : '<i class="cli-mais" aria-hidden="true">+</i>'}</button>`;
@@ -135,7 +136,7 @@ function lista() {
   const cats = M.categorias.filter((c) => visiveis.some((p) => p.cat === c.id));
   const dest = !busca ? M.produtos.filter((p) => p.destaque && p.ativo !== false) : [];
   $('#cli-cats').innerHTML = (dest.length ? '<a href="#sec-destaques" class="on">Destaques</a>' : '') + cats.map((c, k) => `<a href="#sec-${c.id}" class="${!k && !dest.length ? 'on' : ''}">${t(c.nome)}</a>`).join('');
-  $('#cli-lista').innerHTML = (dest.length ? `<section class="cli-sec" id="sec-destaques">${tituloSec('Destaques da casa')}<div class="cli-destaques">${dest.map((p) => `<button type="button" class="cli-dest" data-p="${p.id}">${p.foto ? `<img src="${t(p.foto)}" alt="" loading="lazy">` : ''}<span><b>${t(p.nome)}</b>${precoCard(p)}</span></button>`).join('')}</div></section>` : '')
+  $('#cli-lista').innerHTML = (dest.length ? `<section class="cli-sec" id="sec-destaques">${tituloSec('Destaques da casa')}<div class="cli-destaques">${dest.map((p) => `<button type="button" class="cli-dest" data-p="${p.id}" aria-label="${t(p.nome)}, ${p.tamanhos?.length ? 'a partir de ' + din(aPartir(p)) : din(p.preco)}">${p.foto ? `<img src="${t(p.foto)}" alt="" loading="lazy">` : ''}<span><b>${t(p.nome)}</b></span></button>`).join('')}</div></section>` : '')
     + (cats.map((c) => `<section class="cli-sec" id="sec-${c.id}">${tituloSec(c.nome)}<div class="cli-grade">${visiveis.filter((p) => p.cat === c.id).map(cartao).join('')}</div></section>`).join('')
     || `<p class="cli-vazio">${busca ? `Nada encontrado para “${t(busca)}”.` : 'O cardápio ainda está sendo montado.'}</p>`);
   const links = $$('#cli-cats a');
@@ -201,7 +202,7 @@ let ouvirSacola = null;
 function desenhaSacola() {
   $('#cli-sacola-lado').innerHTML = htmlSacola(true);
   const n = sacola.reduce((s, i) => s + i.qtd, 0);
-  $('#cli-barra').innerHTML = n ? `<button type="button" class="bt cheio" data-abre>${LOURO}<span>${ico('sacola')} Ver pedido (${n})</span><b>${din(Math.max(0, sub() - (cupom?.desconto || 0)))}</b>${LOURO}</button>` : '';
+  $('#cli-barra').innerHTML = n ? `<button type="button" class="cli-ver" data-abre><span>${ico('carrinho')}Ver pedido (${n})</span><i aria-hidden="true"></i><b>${din(Math.max(0, sub() - (cupom?.desconto || 0)))}</b>${ico('dir')}</button>` : '';
   $('[data-abre]')?.addEventListener('click', () => folha({ titulo: 'Seu pedido', corpo: '<div data-sac></div>', pe: `<button type="button" class="bt cheio grande" data-ir>${mesa ? 'Mandar para o garçom' : 'Continuar'}</button>`,
     aoAbrir: (f, fechar) => {
       const sac = $('[data-sac]', f); ligarSacola(sac, fechar);
