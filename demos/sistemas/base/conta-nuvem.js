@@ -321,7 +321,7 @@
   // as telas que a pessoa não vê somem do menu (aplicarPermissoes, ao abrir o sistema).
   var CARGOS = { vetnature: ['Veterinário(a)', 'Recepção', 'Banho e tosa', 'Gerente'], agenda: ['Recepção', 'Profissional', 'Gerente', 'Caixa'], crm: ['Vendedor', 'Pré-vendas', 'Gerente comercial', 'Financeiro'], farmacia: ['Balconista', 'Farmacêutico', 'Caixa', 'Gerente'],
     financeiro: ['Financeiro', 'Contador', 'Gerente', 'Auxiliar'], gestao: ['Caixa', 'Estoquista', 'Vendedor', 'Gerente'], juridico: ['Advogado', 'Estagiário', 'Secretária', 'Financeiro'],
-    obras: ['Engenheiro', 'Mestre de obras', 'Compras', 'Financeiro'], oficina: ['Mecânico', 'Recepção', 'Peças', 'Gerente'] }[app.replace(/(essencial|completo|avancado)$/, '')] || ['Gerente', 'Atendimento', 'Financeiro'];
+    obras: ['Engenheiro', 'Mestre de obras', 'Compras', 'Financeiro'], oficina: ['Mecânico', 'Recepção', 'Peças', 'Gerente'], popina: ['Garçom', 'Cozinha', 'Bar', 'Caixa', 'Entregador', 'Gerente'] }[app.replace(/(essencial|completo|avancado)$/, '')] || ['Gerente', 'Atendimento', 'Financeiro'];
   function telasDoMenu() {
     var vistas = {}, l = [];
     document.querySelectorAll('a[href^="#"]').forEach(function (a) {
@@ -619,6 +619,8 @@
     });
   }
   // plano da empresa (nexo_espacos.nivel, trazido pela porta): o Básico não tem Achar trabalho nem lojas e preços
+  // o sistema pode abrir perfil, equipe, convites, assinatura e configurações de dentro das próprias telas (Popina: Mais › Minha conta)
+  window.veltriaAbrir = { perfil: perfil, equipe: equipe, convidar: function () { equipe(true); }, configuracoes: configuracoes, assinatura: assinatura, sair: sair, sairApagar: sairApagar, papel: info.dono ? 'dono' : (info.papel || 'membro') };
   if (app === 'atria') window.atriaPlano = info && info.nivel === 'pro' ? 'pro' : 'basico';
   if (app === 'atria') window.atriaAcharTrabalho = function (o) {
     return chamaAtria('achar-trabalho', { cidade: o.cidade, oficios: o.oficios, auto: !!o.auto }).then(function (d) {

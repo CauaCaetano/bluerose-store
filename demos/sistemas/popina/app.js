@@ -1,12 +1,13 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=1';
-import './cozinha.js?v=1';
-import './caixa.js?v=1';
-import './pedidos.js?v=1';
-import './mais.js?v=1';
-import { db, recomecar, ouvir, linkCardapio, CONTA } from './loja.js?v=1';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=1';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=1';
+import './salao.js?v=2';
+import './cozinha.js?v=2';
+import './caixa.js?v=2';
+import './pedidos.js?v=2';
+import './mais.js?v=2';
+import './gestao.js?v=2';
+import { db, recomecar, ouvir, linkCardapio, CONTA } from './loja.js?v=2';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=2';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=2';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -15,7 +16,9 @@ const real = !!CONTA;
 addEventListener('popina-chegou', (e) => { bip(); toast(e.detail === 1 ? 'Chegou um pedido pelo cardápio online' : `Chegaram ${e.detail} pedidos pelo cardápio online`); });
 
 // navegação: barra de baixo no celular, trilho à esquerda no tablet/computador
-const ABAS = [['salao', 'Salão', 'salao'], ['pedidos', 'Pedidos', 'pedidos'], ['cozinha', 'Cozinha', 'cozinha'], ['caixa', 'Caixa', 'caixa'], ['mais', 'Mais', 'mais']];
+const ABAS = [['salao', 'Salão', 'salao'], ['pedidos', 'Pedidos', 'pedidos'], ['cozinha', 'Cozinha', 'cozinha'], ['caixa', 'Caixa', 'caixa'], ['mais', 'Gestão', 'mais']];
+// o menu mora dentro do topo: no computador fica no meio da barra; no celular vira a barra de baixo
+document.querySelector('.topo').insertBefore($('#nav'), document.querySelector('.ao-vivo'));
 $('#nav').innerHTML = ABAS.map(([h, n, i]) => `<a href="#${h}" data-aba="${h}">${ico(i)}<span>${n}</span><em class="contador" data-cont="${h}"></em></a>`).join('');
 function contadores() {
   const fila = db.comandas.reduce((s, c) => s + c.itens.filter((i) => i.status === 'pronto').length, 0) + db.chamados.filter((x) => !x.atendido).length + db.pedidosQR.length + db.comandas.filter((c) => c.pediuConta).length;

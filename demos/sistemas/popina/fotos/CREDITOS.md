@@ -22,3 +22,4 @@ Edited Version by: Arad · Public domain · https://commons.wikimedia.org/wiki/F
 - isca.webp: File:Crispy Chicken Strips - FotoosVanRobin.jpg · FotoosVanRobin from Netherlands · CC BY-SA 2.0 · https://commons.wikimedia.org/wiki/File:Crispy_Chicken_Strips_-_FotoosVanRobin.jpg
 - xbacon.webp: File:2019-02-15 20 51 38 A bacon cheeseburger and french fries at the Applebee's in Fair Lakes, Fairfax County, Virginia.jpg · Famartin · CC BY-SA 4.0 · https://commons.wikimedia.org/wiki/File:2019-02-15_20_51_38_A_bacon_cheeseburger_and_french_fries_at_the_Applebee%27s_in_Fair_Lakes,_Fairfax_County,_Virginia.jpg
 - quilo.webp: File:Christmas buffet, Baltic Princess, 20241217 - 02.jpg · AleWi · CC BY-SA 4.0 · https://commons.wikimedia.org/wiki/File:Christmas_buffet,_Baltic_Princess,_20241217_-_02.jpg
+- capa.webp: File:Pizza in oven.jpg · Dimitri Neyt (DimiTalen, DimiCalifornia) · Public domain · https://commons.wikimedia.org/wiki/File:Pizza_in_oven.jpg

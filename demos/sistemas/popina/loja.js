@@ -1,7 +1,8 @@
 // Popina · o estado do restaurante e as regras (enviar para a cozinha, baixar estoque, fechar conta, caixa).
 // Guarda no aparelho (localStorage) e avisa as outras abas na hora (BroadcastChannel). Na conta real, a mesma
 // interface (window.popinaNuvem) troca isso pela nuvem com tempo real entre os aparelhos.
-import { estadoInicial, estadoVazio } from './dados.js?v=1';
+import { estadoInicial, estadoVazio } from './dados.js?v=2';
+import { precoTam, nomeItem, opcaoReal } from './opcoes.js?v=2';
 
 export const CHAVE = 'popina-v1';
 // conta real: conta-nuvem.js (carregado antes) troca a chave pela da empresa e sobe cada alteração para a nuvem
@@ -14,7 +15,7 @@ let ouvintes = [];
 export let db = carregar();
 
 function carregar() {
-  try { const d = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (d && d.versao === 1) return d; } catch { /* sem acesso */ }
+  try { const d = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (d && d.versao === 1 && (CONTA || d.exemplo === 2)) return d; /* a conta real nunca é trocada pelo exemplo */ } catch { /* sem acesso */ }
   const d = CONTA ? estadoVazio(CONTA.empresa || 'Meu restaurante') : estadoInicial();
   try { localStorage.setItem(CHAVE, JSON.stringify(d)); } catch { /* sem acesso */ }
   return d;
@@ -79,13 +80,14 @@ export function novoPedido(tipo, cliente = {}, extra = {}) {
   db.comandas.push(c); grava(); return c;
 }
 // item ainda não enviado (rascunho do garçom) -> status 'rascunho'
-export function adicionarItem(c, { prodId, qtd = 1, obs = '', adic = [], meia = null, kg = 0 }) {
+export function adicionarItem(c, { prodId, qtd = 1, obs = '', adic = [], meia = null, kg = 0, tam = '' }) {
   const p = prod(prodId); if (!p) return;
-  let nome = p.nome, preco = p.preco;
+  const tm = tam && p.tamanhos?.length ? p.tamanhos.find((x) => x.nome === tam) : null;
+  let nome = nomeItem(p, { tam: tm?.nome }), preco = precoTam(p, tm?.nome);
   // por quilo: o prato pesado vira 1 item com o valor do peso (o estoque baixa a ficha × kg)
   if (p.porKg && kg > 0) { nome = `${p.nome} · ${kg.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} kg`; preco = r2(p.preco * kg); qtd = 1; }
-  if (meia) { const a = prod(meia.a), b = prod(meia.b); nome = `Pizza meia ${a.nome.replace(/^Pizza /, '')} / meia ${b.nome.replace(/^Pizza /, '')}`; preco = Math.max(a.preco, b.preco); }
-  c.itens.push({ id: uid('i'), prod: prodId, nome, qtd, preco, setor: p.setor, obs, adic, meia, status: 'rascunho', ...(p.porKg && kg > 0 ? { kg } : {}) });
+  if (meia) { const b = prod(meia.b); if (b) { nome = nomeItem(p, { tam: tm?.nome, meia }, b); preco = Math.max(precoTam(p, tm?.nome), precoTam(b, tm?.nome)); } }
+  c.itens.push({ id: uid('i'), prod: prodId, nome, qtd, preco: r2(preco), setor: p.setor, obs, adic, meia, status: 'rascunho', ...(p.porKg && kg > 0 ? { kg } : {}), ...(tm ? { tam: tm.nome, fator: Number(tm.fator) || 1 } : {}) });
   grava();
 }
 // envia os rascunhos para a cozinha/bar e baixa o estoque pela ficha técnica
@@ -104,7 +106,7 @@ function fichaDoItem(i) {
 }
 // sinal: 1 baixa, -1 devolve (item cancelado antes de preparar)
 function baixar(i, sinal) {
-  const fator = i.kg || i.qtd; fichaDoItem(i).forEach((f) => { const ins = insumo(f.insumo); if (ins) { const k = `${ins.geracao || 0}:${APARELHO}`; ins.baixas = ins.baixas || {}; ins.baixas[k] = r2((ins.baixas[k] || 0) + sinal * f.qtd * fator); } });
+  const fator = (i.kg || i.qtd) * (i.fator || 1); fichaDoItem(i).forEach((f) => { const ins = insumo(f.insumo); if (ins) { const k = `${ins.geracao || 0}:${APARELHO}`; ins.baixas = ins.baixas || {}; ins.baixas[k] = r2((ins.baixas[k] || 0) + sinal * f.qtd * fator); } });
 }
 // venda no balcão do caixa (restaurante a quilo, bebida, sobremesa): já sai entregue, sem ir para a cozinha
 export function venderDireto(c) {
@@ -113,7 +115,7 @@ export function venderDireto(c) {
   if (n) grava(); return n;
 }
 export function mudarStatus(c, item, status) {
-  item.status = status;
+  item.status = status; if (status === 'pronto') item.pronto = Date.now();
   if (status === 'preparo') item.inicio = Date.now();
   if (status === 'pronto') item.pronto = Date.now();
   if (status === 'entregue') item.entregue = Date.now();
@@ -139,7 +141,8 @@ export function fechar(c) {
   if (!db.comandas.includes(c)) return false;
   const v = conta(c);
   db.vendas.push({ id: db.vendas.some((x) => x.id === c.id) ? `${c.id}-${Date.now().toString(36)}` : c.id, ts: Date.now(), tipo: c.tipo, mesa: c.mesa, num: c.num, itens: itensValidos(c).map((i) => ({ prod: i.prod, nome: i.nome, qtd: i.qtd, preco: valorItem(i) / i.qtd })),
-    total: v.total, servico: v.servico, entrega: v.entrega, desconto: v.desconto, pagamentos: c.pagamentos, forma: c.pagamentos.length === 1 ? c.pagamentos[0].forma : 'Dividido', cancelados: c.itens.filter((i) => i.cancelado).length, garcom: c.garcom || '' });
+    total: v.total, servico: v.servico, entrega: v.entrega, desconto: v.desconto, pagamentos: c.pagamentos, forma: c.pagamentos.length === 1 ? c.pagamentos[0].forma : 'Dividido', cancelados: c.itens.filter((i) => i.cancelado).length, garcom: c.garcom || '', entregador: c.entregador || '', cupom: c.cupom || '', cliente: c.cliente?.tel ? String(c.cliente.tel).replace(/\D/g, '') : '' });
+  if (c.tipo !== 'mesa') registrarCliente(c, v.total);
   db.comandas = db.comandas.filter((x) => x !== c);
   db.chamados = db.chamados.filter((x) => x.mesa !== c.mesa || c.tipo !== 'mesa');
   grava();
@@ -173,7 +176,7 @@ export function estadoMesa(n) {
 export function atenderChamado(x) { x.atendido = Date.now(); db.chamados = db.chamados.filter((y) => !y.atendido); grava(); }
 export function confirmarQR(q) {
   const c = abrirMesa(q.mesa, 2, '');
-  q.itens.forEach((i) => adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic || [], meia: i.meia || null }));
+  q.itens.forEach((i) => adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic || [], meia: i.meia || null, tam: i.tam || '' }));
   db.pedidosQR = db.pedidosQR.filter((x) => x !== q);
   enviar(c); return c;
 }
@@ -224,11 +227,12 @@ export function linkCardapio(extra = '') {
 // o que o cliente mandou é conferido de novo aqui: preço, adicionais e sabores vêm sempre do cardápio do restaurante
 function itensLimpos(itens) {
   return (Array.isArray(itens) ? itens : []).map((i) => {
-    const p = prod(i?.prod); if (!p || p.porKg) return null; // prato por quilo só no balcão, pesado
+    const p = prod(i?.prod); if (!p || p.porKg || p.ativo === false) return null; // prato por quilo só no balcão, pesado
     const qtd = Math.min(30, Math.max(1, Math.round(Number(i.qtd) || 1)));
-    const adic = (Array.isArray(i.adic) ? i.adic : []).map((a) => (p.adicionais || []).find((x) => x.nome === a?.nome)).filter(Boolean);
+    const adic = (Array.isArray(i.adic) ? i.adic : []).map((a) => opcaoReal(p, a?.nome)).filter(Boolean);
+    const tam = p.tamanhos?.some((x) => x.nome === i.tam) ? i.tam : '';
     const b = i.meia && prod(i.meia.b); const meia = p.pizza && b?.pizza ? { a: p.id, b: b.id } : null;
-    return { prod: p.id, qtd, obs: String(i.obs || '').slice(0, 120), adic, meia };
+    return { prod: p.id, qtd, obs: String(i.obs || '').slice(0, 160), adic, meia, tam };
   }).filter(Boolean);
 }
 window.popinaChegou = (lista) => {
@@ -247,8 +251,59 @@ window.popinaChegou = (lista) => {
       if (comanda(id)) return;
       const c = novoPedido(r.tipo, { nome: String(d.nome || '').slice(0, 80), tel: String(d.tel || ''), end: r.tipo === 'delivery' ? String(d.end || '').slice(0, 160) : '', bairro: r.tipo === 'delivery' ? String(d.bairro || '') : '' },
         { origem: 'Cardápio online', pagarNaEntrega: String(d.pagar || '').slice(0, 60), id });
-      itens.forEach((i) => adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic, meia: i.meia })); novos++;
+      itens.forEach((i) => adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic, meia: i.meia, tam: i.tam }));
+      if (d.cupom) aplicarCupom(c, String(d.cupom).slice(0, 24)); // o restaurante confere o cupom de novo com as regras dele
+      novos++;
     }
   });
   if (novos) { grava(); dispatchEvent(new CustomEvent('popina-chegou', { detail: novos })); }
 };
+
+// ------------------------------------------------------------------ loja: a cara do restaurante e as regras do cardápio online
+export const LOJA_PADRAO = {
+  cor: '#B4532F', tema: 'claro', logo: '', capa: '', boasVindas: '', endereco: '', instagram: '', aviso: '',
+  // horários por dia da semana (0 = domingo): lista de turnos [abre, fecha]; fecha depois da meia-noite vale ("18:00", "01:00")
+  horarios: [[['11:00', '15:00']], [], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:59']], [['11:00', '15:30'], ['18:00', '23:59']]],
+  aceitaQR: true, delivery: true, retirada: true, pedidoMinimo: 0, tempoEntrega: '40 a 60 min', tempoRetirada: '20 a 30 min',
+  pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], areas: [], couvert: 0, comissao: 10,
+};
+export const lojaCfg = () => ({ ...LOJA_PADRAO, ...(db.config.loja || {}) });
+export function setLoja(parcial) { db.config.loja = { ...lojaCfg(), ...parcial }; grava(); }
+// nome da mesa conforme a área (Varanda 3, Salão 7...) ou só o número
+export function nomeMesa(n) {
+  const a = lojaCfg().areas.find((x) => n >= x.de && n <= x.ate);
+  return a ? `${a.nome} · ${n}` : `Mesa ${n}`;
+}
+
+// ------------------------------------------------------------------ clientes do delivery e do balcão (pelo telefone)
+const soDig = (s) => String(s || '').replace(/\D/g, '');
+export const clientePorTel = (tel) => { const d = soDig(tel); return d.length >= 10 ? (db.clientes || []).find((x) => x.id === 't' + d) : null; };
+export function registrarCliente(c, total) {
+  const d = soDig(c.cliente?.tel); if (d.length < 10) return;
+  db.clientes ||= [];
+  let x = db.clientes.find((y) => y.id === 't' + d);
+  if (!x) { x = { id: 't' + d, tel: d, nome: '', pedidos: 0, total: 0, primeiro: Date.now() }; db.clientes.push(x); }
+  Object.assign(x, { nome: c.cliente.nome || x.nome, ...(c.cliente.end ? { end: c.cliente.end, bairro: c.cliente.bairro } : {}), pedidos: x.pedidos + 1, total: r2(x.total + total), ultimo: Date.now() });
+}
+
+// ------------------------------------------------------------------ cupons (cardápio online e balcão)
+export function validarCupom(codigo, subtotal, agora = Date.now()) {
+  const cp = (db.cupons || []).find((x) => x.codigo.toUpperCase() === String(codigo || '').trim().toUpperCase());
+  if (!cp || !cp.ativo) return { erro: 'Cupom não encontrado.' };
+  if (cp.ate && agora > Date.parse(cp.ate + 'T23:59:59')) return { erro: 'Este cupom venceu.' };
+  if (cp.limite && (cp.usos || 0) >= cp.limite) return { erro: 'Este cupom já foi usado o máximo de vezes.' };
+  if (subtotal < (cp.minimo || 0)) return { erro: `Vale para pedidos a partir de ${din(cp.minimo)}.` };
+  const desconto = r2(cp.tipo === '%' ? subtotal * cp.valor / 100 : Math.min(cp.valor, subtotal));
+  return { cupom: cp, desconto };
+}
+export function aplicarCupom(c, codigo) {
+  const v = validarCupom(codigo, conta(c).sub); if (v.erro) return v;
+  c.cupom = v.cupom.codigo; c.desconto = v.desconto; v.cupom.usos = (v.cupom.usos || 0) + 1; grava(); return v;
+}
+
+// ------------------------------------------------------------------ entregadores (saída e acerto do dia)
+export function acertoEntregadores(desde) {
+  const r = {};
+  db.vendas.filter((v) => v.ts >= desde && v.entregador).forEach((v) => { (r[v.entregador] ||= { entregas: 0, taxas: 0 }); r[v.entregador].entregas++; r[v.entregador].taxas = r2(r[v.entregador].taxas + (v.entrega || 0)); });
+  return r;
+}

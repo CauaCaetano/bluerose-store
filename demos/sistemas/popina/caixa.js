@@ -1,10 +1,10 @@
 // Popina · caixa: contas abertas, fechar conta (serviço, desconto, dividir, pagar em partes), Pix com QR e o caixa do dia.
-import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2 } from './loja.js?v=1';
-import { registrar, acao, ir } from './nucleo.js?v=1';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=1';
-import { pix } from './pix.js?v=1';
+import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2 } from './loja.js?v=2';
+import { registrar, acao, ir } from './nucleo.js?v=2';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=2';
+import { pix } from './pix.js?v=2';
 import { qrSVG } from '../base/qr.js';
-import { linhaItem, abrirSeletor } from './salao.js?v=1';
+import { linhaItem, abrirSeletor } from './salao.js?v=2';
 
 const FORMAS = [['Dinheiro', 'dinheiro'], ['Pix', 'pix'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao']];
 const ONDE = (c) => (c.tipo === 'mesa' ? `Mesa ${c.mesa}` : c.tipo === 'delivery' ? `Delivery #${c.num}` : `Balcão #${c.num}`);
@@ -15,7 +15,7 @@ function painelCaixa() {
   const r = caixaResumo();
   return `<section class="cartao-caixa"><div class="cc-topo"><div><small>Caixa aberto há ${tempo(db.caixa.aberto)}${db.caixa.operador ? ` · ${t(db.caixa.operador)}` : ''}</small><b>${din(r.total)}</b><span>${r.vendas.length} vendas hoje</span></div>
     <div class="cc-bts"><button type="button" class="bt" data-acao="mov" data-t="sangria">Sangria</button><button type="button" class="bt" data-acao="mov" data-t="suprimento">Suprimento</button><button type="button" class="bt escuro" data-acao="fechar-caixa">Fechar caixa</button></div></div>
-    <div class="cc-formas">${Object.entries(r.porForma).map(([f, v]) => `<div><span>${t(f)}</span><b>${dinCurto(v)}</b></div>`).join('') || '<div><span>Sem vendas ainda</span></div>'}<div><span>Na gaveta</span><b>${dinCurto(r.dinheiroNaGaveta)}</b></div></div></section>`;
+    <div class="cc-formas">${Object.entries(r.porForma).map(([f, v]) => `<div><span>${t(f)}</span><b>${dinCurto(v)}</b></div>`).join('') || '<div><span>Sem vendas ainda</span></div>'}<div><span>Na gaveta</span><b>${dinCurto(r.dinheiroNaGaveta)}</b></div><div class="cc-conta" title="Como chegou neste valor"><span>Troco ${dinCurto(db.caixa?.troco || 0)} + dinheiro ${dinCurto(r.porForma.Dinheiro || 0)}${r.suprimento ? ` + suprimento ${dinCurto(r.suprimento)}` : ''}${r.sangria ? ` − sangria ${dinCurto(r.sangria)}` : ''}</span></div></div></section>`;
 }
 function listaContas(sel) {
   return abertas().map((c) => { const v = conta(c);

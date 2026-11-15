@@ -23,6 +23,27 @@ export const INSUMOS = [
 
 const P = (id, cat, nome, desc, preco, setor, extra = {}) => ({ id, cat, nome, desc, preco, setor, foto: `fotos/${id}.webp`, ativo: true, adicionais: [], ficha: [], ...extra });
 const AD_LANCHE = [{ nome: 'Bacon', preco: 6 }, { nome: 'Ovo', preco: 3 }, { nome: 'Queijo extra', preco: 4 }, { nome: 'Cheddar', preco: 5 }];
+const PONTO = { id: 'ponto', nome: 'Ponto da carne', min: 1, max: 1, opcoes: [{ nome: 'Mal passado' }, { nome: 'Ao ponto' }, { nome: 'Bem passado' }] };
+const EXTRAS = {
+  parmegiana: { destaque: true, tags: ['Mais pedido'], serve: 'Serve 1 pessoa bem', grupos: [PONTO, { id: 'acomp', nome: 'Trocar acompanhamento', min: 0, max: 1, opcoes: [{ nome: 'Purê no lugar da fritas', preco: 0 }, { nome: 'Salada no lugar do arroz', preco: 0 }] }] },
+  executivo: { tags: ['Almoço'], grupos: [{ id: 'salada', nome: 'Salada', min: 1, max: 1, opcoes: [{ nome: 'Alface e tomate' }, { nome: 'Sem salada' }] }] },
+  risoto: { tags: ['Vegetariano'] },
+  feijoada: { tags: ['Só sábado'] },
+  xburger: { grupos: [PONTO] },
+  xbacon: { destaque: true, tags: ['Mais pedido'], grupos: [PONTO] },
+  xsalada: { grupos: [PONTO], promoDe: 37.9 },
+  pz_calabresa: { destaque: true, grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }, { nome: 'Chocolate', preco: 11 }] }] },
+  pz_mucarela: { tags: ['Vegetariano'], grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }] }] },
+  pz_portuguesa: { grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }] }] },
+  pz_frango: { grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }] }] },
+  fritas: { serve: 'Serve 2 pessoas' },
+  isca: { serve: 'Serve 3 pessoas', grupos: [{ id: 'molho', nome: 'Molhos', min: 1, max: 2, opcoes: [{ nome: 'Barbecue' }, { nome: 'Mostarda e mel' }, { nome: 'Maionese da casa' }, { nome: 'Cheddar', preco: 4 }] }] },
+  refri: { grupos: [{ id: 'sabor', nome: 'Sabor', min: 1, max: 1, opcoes: [{ nome: 'Coca-Cola' }, { nome: 'Coca-Cola sem açúcar' }, { nome: 'Guaraná' }, { nome: 'Fanta laranja' }] }] },
+  suco: { grupos: [{ id: 'sabor', nome: 'Sabor', min: 1, max: 1, opcoes: [{ nome: 'Laranja' }, { nome: 'Limão' }, { nome: 'Maracujá' }, { nome: 'Abacaxi com hortelã' }] }, { id: 'acucar', nome: 'Açúcar', min: 1, max: 1, opcoes: [{ nome: 'Com açúcar' }, { nome: 'Sem açúcar' }, { nome: 'Com adoçante' }] }] },
+  agua: { grupos: [{ id: 'gas', nome: 'Tipo', min: 1, max: 1, opcoes: [{ nome: 'Sem gás' }, { nome: 'Com gás' }] }] },
+  caipirinha: { grupos: [{ id: 'fruta', nome: 'Fruta', min: 1, max: 1, opcoes: [{ nome: 'Limão' }, { nome: 'Morango', preco: 3 }, { nome: 'Maracujá', preco: 3 }] }] },
+  petit: { destaque: true, tags: ['Novo'] },
+};
 export const PRODUTOS = [
   P('parmegiana', 'pratos', 'Filé à parmegiana', 'Contrafilé empanado, molho de tomate e muçarela gratinada. Acompanha arroz e fritas.', 64.9, 'cozinha', { ficha: [['carne', 220], ['molho', 80], ['queijo', 90], ['arroz', 150], ['batata', 150]] }),
   P('executivo', 'pratos', 'Prato executivo de frango', 'Peito de frango grelhado, arroz, feijão, salada e fritas.', 34.9, 'cozinha', { ficha: [['frango', 180], ['arroz', 150], ['feijao', 120], ['batata', 100], ['alface', 0.2], ['tomate', 40]] }),
@@ -47,7 +68,9 @@ export const PRODUTOS = [
   P('agua', 'bebidas', 'Água mineral', 'Com ou sem gás, 500 ml.', 5.0, 'bar'),
   P('petit', 'sobremesas', 'Petit gâteau', 'Bolinho de chocolate quente com sorvete de creme.', 24.9, 'cozinha', { ficha: [['chocolate', 60]] }),
   P('pudim', 'sobremesas', 'Pudim de leite', 'Pudim caseiro com calda de caramelo.', 14.9, 'cozinha', { ficha: [['leite_cond', 80], ['ovo', 1]] }),
-].map((p) => ({ ...p, ficha: p.ficha.map(([insumo, qtd]) => ({ insumo, qtd })) }));
+].map((p) => ({ ...p, ficha: p.ficha.map(([insumo, qtd]) => ({ insumo, qtd })), ...(EXTRAS[p.id] || {}) }))
+  // pizza: broto (4 pedaços, 60% do preço, metade da ficha) e grande (8 pedaços)
+  .map((p) => (p.pizza ? { ...p, tamanhos: [{ nome: 'Broto · 4 pedaços', preco: Math.round(p.preco * 0.6 * 10) / 10 - 0.1, fator: 0.5 }, { nome: 'Grande · 8 pedaços', preco: p.preco, fator: 1 }] } : p));
 
 export const OBS_RAPIDAS = ['Sem cebola', 'Sem tomate', 'Bem passado', 'Ao ponto', 'Mal passado', 'Sem gelo', 'Com gelo e limão', 'Molho à parte', 'Pouco sal', 'Para viagem'];
 
@@ -57,13 +80,24 @@ export const CONFIG = {
   nome: 'Cantina Ferraz', cidade: 'Orlândia', servico: 10, mesas: 12, whatsapp: '16999990000',
   pix: { tipo: 'aleatoria', chave: '1f3c2a8e-0000-4000-8000-00000000c0de', exemplo: true },
   garcons: ['Rafael', 'Bruna', 'Diego'],
+  // o que o cliente vê no cardápio online (a cara do restaurante) e as regras do delivery
+  loja: { cor: '#B4532F', tema: 'claro', logo: '', capa: 'fotos/capa.webp', boasVindas: 'Comida caseira, pizza no forno a lenha e lanche na chapa.', endereco: 'Rua das Palmeiras, 210 · Centro', instagram: 'cantinaferraz', aviso: 'Sábado tem feijoada completa no almoço',
+    horarios: [[['11:00', '15:00'], ['18:00', '23:30']], [], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '00:30']], [['11:00', '15:30'], ['18:00', '00:30']]],
+    aceitaQR: true, delivery: true, retirada: true, pedidoMinimo: 30, tempoEntrega: '40 a 60 min', tempoRetirada: '20 a 30 min', pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'],
+    areas: [{ nome: 'Salão', de: 1, ate: 8 }, { nome: 'Varanda', de: 9, ate: 12 }], couvert: 0, comissao: 10 },
 };
+// exemplo: clientes do delivery, entregadores e cupons
+export const CLIENTES = [['16991234567', 'Patrícia Lima', 'Rua das Acácias, 120', 'Jardim Paulista', 7, 412.6], ['16998887766', 'Marcos Andrade', 'Av. Brasil, 1450, ap 32', 'Centro', 4, 238.9], ['16997776655', 'Fernanda Rocha', 'Rua Goiás, 88', 'Vila Nova', 11, 689.4], ['16996665544', 'Lucas Prado', 'Rua Bahia, 301', 'Jardim Boa Vista', 2, 97.8]]
+  .map(([tel, nome, end, bairro, pedidos, total], k) => ({ id: 't' + tel, tel, nome, end, bairro, pedidos, total, primeiro: Date.now() - (60 + k * 9) * 864e5, ultimo: Date.now() - (k * 3 + 1) * 864e5 }));
+export const ENTREGADORES = [{ id: 'e1', nome: 'Júnior', tel: '16995554433' }, { id: 'e2', nome: 'Wellington', tel: '16994443322' }];
+export const CUPONS = [{ id: 'cp1', codigo: 'BEMVINDO10', tipo: '%', valor: 10, minimo: 40, ate: '', limite: 0, usos: 3, ativo: true, desc: '10% no primeiro pedido pelo link' }, { id: 'cp2', codigo: 'FRETEZERO', tipo: 'R$', valor: 6, minimo: 60, ate: '', limite: 50, usos: 12, ativo: true, desc: 'R$ 6 de desconto (paga a entrega)' }];
 
 const MIN = 60e3;
 // conta real nova: sem nada de exemplo (o cardápio de exemplo pode ser carregado em Mais › Cardápio)
 export function estadoVazio(nome = 'Meu restaurante', agora = Date.now()) {
   return {
-    versao: 1, criado: agora, config: { nome, cidade: '', servico: 10, mesas: 10, whatsapp: '', pix: { tipo: '', chave: '', exemplo: false }, garcons: [] },
+    versao: 1, criado: agora, config: { nome, cidade: '', servico: 10, mesas: 10, whatsapp: '', pix: { tipo: '', chave: '', exemplo: false }, garcons: [], loja: {} },
+    clientes: [], entregadores: [], cupons: [],
     categorias: CATEGORIAS.map((c) => ({ ...c })), produtos: [], insumos: [], bairros: [],
     comandas: [], chamados: [], pedidosQR: [], vendas: [], numPedido: 1, caixa: null, compras: [],
   };
@@ -92,9 +126,10 @@ export function estadoInicial(agora = Date.now()) {
   const chamados = [{ id: 'c1', mesa: 8, tipo: 'garcom', ts: agora - 1 * MIN, origem: 'QR' }];
   const pedidosQR = [{ id: 'q1', mesa: 2, ts: agora - 3 * MIN, itens: [{ prod: 'xburger', qtd: 2, obs: '' }, { prod: 'refri', qtd: 2, obs: '' }], nome: 'Mesa 2 (QR)' }];
   return {
-    versao: 1, criado: agora, config: JSON.parse(JSON.stringify(CONFIG)), categorias: CATEGORIAS.map((c) => ({ ...c })),
+    versao: 1, exemplo: 2, criado: agora, config: JSON.parse(JSON.stringify(CONFIG)), categorias: CATEGORIAS.map((c) => ({ ...c })),
     produtos: PRODUTOS.map((p) => JSON.parse(JSON.stringify(p))), insumos: INSUMOS.map((i) => ({ ...i })), bairros: BAIRROS.map((b) => ({ ...b })),
     comandas, chamados, pedidosQR, vendas: historico(agora), numPedido: 43,
+    clientes: CLIENTES.map((c) => ({ ...c })), entregadores: ENTREGADORES.map((e) => ({ ...e })), cupons: CUPONS.map((c) => ({ ...c })),
     caixa: { aberto: agora - 5 * 3600e3, troco: 200, movimentos: [{ tipo: 'sangria', valor: 100, motivo: 'Depósito no banco', ts: agora - 2 * 3600e3 }], operador: 'Bruna' },
     compras: [],
   };
@@ -115,7 +150,7 @@ function historico(agora) {
       for (let j = 0; j < n; j++) { const p = PRODUTOS[Math.floor(r() * PRODUTOS.length)]; itens.push({ prod: p.id, nome: p.nome, qtd: 1 + Math.floor(r() * 2), preco: p.preco }); }
       const sub = itens.reduce((s, i) => s + i.qtd * i.preco, 0); const tipo = r() < 0.6 ? 'mesa' : r() < 0.5 ? 'delivery' : 'balcao';
       const total = Math.round((sub * (tipo === 'mesa' ? 1.1 : 1) + (tipo === 'delivery' ? 6 : 0)) * 100) / 100;
-      v.push({ id: `h${d}-${k}`, ts, tipo, itens, total, servico: tipo === 'mesa' ? Math.round(sub * 10) / 100 : 0, forma: formas[Math.floor(r() * formas.length)], cancelado: r() < 0.02 });
+      v.push({ id: `h${d}-${k}`, ts, tipo, itens, total, servico: tipo === 'mesa' ? Math.round(sub * 10) / 100 : 0, forma: formas[Math.floor(r() * formas.length)], cancelado: r() < 0.02, garcom: tipo === 'mesa' ? ['Rafael', 'Bruna', 'Diego'][Math.floor(r() * 3)] : '' });
     }
   }
   return v;
