@@ -1,13 +1,13 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=15';
-import './cozinha.js?v=15';
-import './caixa.js?v=15';
-import './pedidos.js?v=15';
-import './mais.js?v=15';
-import './gestao.js?v=15';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=15';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=15';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=15';
+import './salao.js?v=16';
+import './cozinha.js?v=16';
+import './caixa.js?v=16';
+import './pedidos.js?v=16';
+import './mais.js?v=16';
+import './gestao.js?v=16';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=16';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=16';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=16';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -56,6 +56,8 @@ function marcaTopo() {
   // template escolhido em Gestão › Aparência (Taverna é o visual de base; Luxo e Realeza vêm por cima)
   // Básico é o padrão de quem começa; a demonstração usa o Taverna (dados.js)
   const TPLS = ['basico', 'taverna', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria', 'hamburgueria', 'pub', 'chines', 'balada'], tp = TPLS.includes(L.template) ? L.template : 'basico';
+  const V = window.POPINA_TPLV || {};
+  if (V[tp] && !document.querySelector(`link[data-tpl="${tp}"]`)) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = `tpl-${tp}.css?v=${V[tp]}`; l.dataset.tpl = tp; document.head.append(l); }
   TPLS.forEach((x) => document.body.classList.toggle(`tpl-${x}`, x === tp));
   if (/^#[0-9a-f]{6}$/i.test(L.cor || '')) document.body.style.setProperty('--loja-cor', L.cor);
 }
@@ -90,4 +92,6 @@ if (!papel() && !q.get('papel')) {
   aoAbrir: (fo, fechar) => $$('[data-p]', fo).forEach((b) => { b.onclick = () => { setPapel(b.dataset.p); fechar(); ir(PAPEIS[b.dataset.p][1]); }; }) }), 300);
 }
 iniciarRotas(); contadores();
+// a primeira tela já está desenhada: some a abertura (setTimeout, porque requestAnimationFrame para em aba escondida)
+setTimeout(() => { document.body.classList.add('pronto'); setTimeout(() => document.getElementById('abertura')?.remove(), 400); }, 0);
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});

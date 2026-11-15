@@ -1,10 +1,10 @@
 // Popina · salão do garçom: a fila do que fazer agora (conceito C escolhido pelo dono) + as mesas, e a comanda da mesa.
 import { db, t, din, dinCurto, tempo, minutos, prod, comanda, comandaDaMesa, fila, estadoMesa, conta, valorItem, abrirMesa, adicionarItem, enviar,
-  mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg } from './loja.js?v=15';
-import { registrar, acao, ir } from './nucleo.js?v=15';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=15';
-import { OBS_RAPIDAS } from './dados.js?v=15';
-import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=15';
+  mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg } from './loja.js?v=16';
+import { registrar, acao, ir } from './nucleo.js?v=16';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=16';
+import { OBS_RAPIDAS } from './dados.js?v=16';
+import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=16';
 
 // a tela do salão segue o conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/1-salao-pc.png)
 const ROTULO = { conta: 'Levar a conta', chamou: 'Mesa chamou', pronto: 'Prato pronto', qr: 'Pedido pelo QR' };

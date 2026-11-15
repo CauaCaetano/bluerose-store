@@ -1,10 +1,10 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=15';
-import { acao, ir } from './nucleo.js?v=15';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=15';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=15';
-import { situacao, textoHorarios } from './opcoes.js?v=15';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=16';
+import { acao, ir } from './nucleo.js?v=16';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=16';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=16';
+import { situacao, textoHorarios } from './opcoes.js?v=16';
 import { qrSVG } from '../base/qr.js';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
