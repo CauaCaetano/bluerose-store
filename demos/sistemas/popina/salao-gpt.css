@@ -1,0 +1,143 @@
+/* Popina · tela do salão igual ao conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/1-salao-pc.png).
+   Texturas (mosaico, prancheta, papel, pincel, fitas, ramos) recortadas da própria imagem. Medidas tiradas dela em 1388 px. */
+:root{--g-serif:"Libre Caslon Text",Georgia,serif;--g-bg:#FBEEDF;--g-tinta:#3B2A22;--g-tinta2:#6B5A4F;
+  --g-ocup:#B5502A;--g-verde:#6E6A2C;--g-conta:#D8932B;--g-livre:#FBEEDE;--g-borda:#D9BC98;--g-madeira:#5A3B28}
+body:not(.cliente){background-color:var(--g-bg)}
+
+/* topo */
+.topo b{font:700 22px var(--g-serif);letter-spacing:.04em}
+.topo small{font:400 13px var(--g-serif);color:var(--g-tinta)}
+.nav a span{font-family:var(--g-serif)}
+.topo-dir{display:none}
+.ao-vivo:not(.off){display:none}
+
+/* prancheta: moldura de madeira com presilha (border-image da imagem) */
+.prancheta{border-style:solid;border-width:56px 16px 28px;border-image:url(img/prancheta.webp?v=1) 56 16 28 stretch;border-image-outset:0;
+  background:var(--g-madeira) padding-box;box-shadow:none;border-radius:0;padding:0 4px 4px;color:#FBF1E2}
+.prancheta::before,.prancheta .presilha{display:none}
+.prancheta-cab{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;margin:2px 0 16px;background:var(--g-madeira);border-radius:4px;padding:2px 0 4px}
+.prancheta-cab h2{font:700 20.5px var(--g-serif);text-transform:uppercase;letter-spacing:.01em;color:#FBF1E2;margin:0;text-align:center;white-space:nowrap}
+.prancheta-cab{gap:0}.prancheta-cab .louro-p{margin:0 -6px}
+.prancheta-sub{font:400 14.5px var(--g-serif);color:#E6D5BC;margin:4px 0 0;text-align:center}
+.louro-p{width:44px;height:60px;flex:none}
+.prancheta-cab>div{flex:1}
+.prancheta .fila{display:flex;flex-direction:column;gap:10px;background:var(--g-madeira);border-radius:4px}
+.fila-item{display:flex;align-items:center;min-height:64px;padding:8px 10px 8px 22px;border-radius:8px;position:relative;
+  background:linear-gradient(#FCF6EC,#F3E9D8);box-shadow:0 2px 0 rgba(30,15,5,.45),inset 0 0 0 1px rgba(255,255,255,.5);gap:12px}
+.fila-item .faixa{position:absolute;left:7px;top:8px;bottom:8px;width:7px;border-radius:4px}
+.faixa.ouro{background:#C68A33}.faixa.oliva{background:#727030}.faixa.terra{background:#BE5E36}.faixa.amarelo{background:#EFBA4B}
+.fila-ico{width:34px;height:34px;color:var(--g-tinta)}.fila-ico .ico{width:30px;height:30px;stroke-width:1.6}
+.fila-item.chamou .fila-ico{color:#BE5E36}
+.fila-txt{flex:1;min-width:0}
+.fila-txt b{display:block;font:700 18px/1.2 var(--g-serif);color:var(--g-tinta)}
+.fila-txt span{display:block;font:400 15px/1.35 var(--g-serif);color:var(--g-tinta2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fila-item .bt{min-height:36px;padding:0 16px;border-radius:9px;font:700 16px var(--g-serif);border:0;box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
+.fila-item .bt.cheio{background:#B0532E;color:#FFF6EA}
+.fila-item .bt.oliva{background:#8A8450;color:#FFF6EA}
+.fila-vazia{background:var(--g-madeira)}
+
+/* resumo do dia: papel rasgado com a faixa verde de pincel e o louro embaixo */
+.ticket-dia{-webkit-mask:none;mask:none;border-radius:0;box-shadow:none;position:relative;
+  border-style:solid;border-width:16px 16px 24px;border-image:url(img/papel.webp?v=1) 16 16 24 stretch;background:#FBEEDC padding-box;padding:2px 10px 12px;margin-bottom:28px}
+.ticket-cab{display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #D8C3A6;padding:4px 0 12px;margin-bottom:8px}
+.ticket-cab h2{font:700 21px var(--g-serif);letter-spacing:.01em;text-transform:uppercase;color:var(--g-tinta)}
+.ticket-cab span{display:flex;align-items:center;gap:7px;font:400 15px var(--g-serif);color:var(--g-tinta)}
+.ticket-cab .ico{width:19px;height:19px}
+.ticket-linha{padding:6px 0;font:400 16px var(--g-serif);align-items:center}
+.ticket-linha span{gap:14px;color:var(--g-tinta2)}
+.ticket-linha .ico{width:26px;height:26px;color:var(--g-tinta);stroke-width:1.5}
+.ticket-linha b{font:400 18px var(--g-serif);color:var(--g-tinta)}
+.ticket-linha:first-of-type b{font-weight:700}
+.ticket-total{clip-path:none;border-radius:0;margin:12px -6px 2px;padding:0 8px;min-height:30px;
+  border-style:solid;border-width:12px 18px;border-image:url(img/pincel-verde.webp?v=3) 12 18 fill stretch;background:none;position:relative}
+.ticket-dia .ticket-linha:nth-last-of-type(1){border-bottom:1.5px solid #D8C3A6;padding-bottom:12px}
+.ticket-total span{display:flex;align-items:center;gap:12px;font:400 17px var(--g-serif);color:#FFF6E8}
+.ticket-total .ico{width:24px;height:24px;stroke-width:2}
+.ticket-total b{font:700 25px var(--g-serif);color:#FFF6E8}
+.louro-img{position:absolute;left:50%;bottom:-44px;width:162px;height:auto;transform:translateX(-50%);pointer-events:none}
+
+/* cabeçalho, legenda, áreas e mesas */
+.cab-salao{position:relative;display:flex;align-items:flex-end;gap:0;margin:0;min-height:88px}
+.cab-salao h1{font:700 46px/1 var(--g-serif);text-transform:uppercase;letter-spacing:.01em;color:var(--g-tinta);margin:0 0 12px 6px;position:relative;z-index:1}
+.aqueduto-img{width:340px;height:auto;margin-left:-4px;mix-blend-mode:multiply;display:none}
+.folhas-img{display:none}
+.legenda{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 22px;margin:6px 26px 28px 0;font:400 14.5px var(--g-serif);color:var(--g-tinta)}
+.legenda span{display:flex;align-items:center;gap:7px}
+.legenda i{width:17px;height:17px;border-radius:3px;display:inline-block;border:0}
+.legenda i.ocupada{background:var(--g-ocup)}.legenda i.pronto{background:var(--g-verde)}.legenda i.conta{background:#E3A43A}
+.legenda i.chamou{background:var(--g-livre);box-shadow:inset 0 0 0 2px #B5502A}.legenda i.livre{background:var(--g-livre);box-shadow:inset 0 0 0 1.5px var(--g-borda)}
+.area{position:relative;border:1.5px solid #E7D2B8;border-radius:18px;background:rgba(255,248,238,.35);padding:26px 22px 28px;margin:0 0 30px}
+.area-cab{display:flex;justify-content:space-between;align-items:flex-start;margin:-44px 0 20px -6px}
+.area-cab span{font:400 16px var(--g-serif);color:var(--g-tinta2);margin:22px 4px 0 0}
+.fita{display:inline-flex;align-items:center;gap:14px;height:58px;box-sizing:border-box;padding:0 22px 0 10px;font:700 24px var(--g-serif);color:#FFF6E8;
+  clip-path:none;border-style:solid;border-width:10px 18px 10px 54px;border-image:url(img/fita-terra.webp?v=2) 10 19 10 54 fill stretch;background:none}
+.fita.verde{border-image:url(img/fita-verde.webp?v=4) 10 19 10 54 fill stretch}
+.fita .ico{width:30px;height:30px;color:#E6B65A;fill:currentColor;fill-opacity:.4;stroke-width:1.4}
+.salao-dir .mesas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px 28px}
+.salao-dir .mesa.chamou{outline:0;border:0;animation:none;box-shadow:0 2px 3px rgba(90,45,20,.22)}
+.mesa{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:108px;border-radius:18px;
+  font-family:var(--g-serif);text-decoration:none;box-shadow:0 2px 3px rgba(90,45,20,.22);border:0}
+.mesa b{font:700 34px/1 var(--g-serif)}
+.mesa small{font:400 16px var(--g-serif);margin-top:6px;opacity:1}
+.mesa.ocupada,.mesa.chamou{background:linear-gradient(170deg,#C05B31,#B04C26);color:#FFF6EA}
+.mesa.pronto,.mesa.qr{background:linear-gradient(170deg,#77732F,#696527);color:#FFF6EA;box-shadow:0 2px 3px rgba(60,55,20,.25)}
+.mesa.conta{background:linear-gradient(170deg,#E09B30,#D38D27);color:#FFF6EA}
+.mesa.livre{background:var(--g-livre);color:var(--g-tinta);box-shadow:inset 0 0 0 1.5px var(--g-borda),0 1px 2px rgba(90,45,20,.1)}
+.mesa-sinal{position:absolute;top:-9px;right:-7px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:0;box-shadow:none;color:#FFF6EA}
+.mesa-sinal .ico{width:22px;height:22px;stroke-width:1.7}
+.mesa.ocupada .mesa-sinal,.mesa.chamou .mesa-sinal{background:#A44626}
+.mesa.pronto .mesa-sinal,.mesa.qr .mesa-sinal{background:#6B6728}
+.mesa.conta .mesa-sinal{background:#D99A2E}
+
+@media (min-width:900px){
+  body:not(.cliente){padding-left:52px!important}
+  body:not(.cliente)::before{width:52px;background:url(img/mosaico.webp?v=1) 0 0/52px auto repeat-y;border:0;opacity:1}
+  .demo-faixa{display:none!important}
+  .topo{margin-left:-52px!important;padding-left:100px!important;padding-right:22px;height:100px;background:#FCF0E3;border-bottom:1px solid #EAD8C3;backdrop-filter:none;gap:14px;position:sticky}
+  .topo::before{content:"";position:absolute;left:0;top:0;width:112px;height:100px;background:url(img/canto.webp?v=1) 0 0/112px auto no-repeat}
+  .topo>img{width:86px;height:auto}
+  .topo>div:not(.topo-dir){line-height:1.1}
+  .nav{gap:16px}
+  .nav a{height:42px;padding:0 18px;border-radius:8px;font-size:18px;color:var(--g-tinta);gap:10px}
+  .nav a .ico{width:28px;height:28px;stroke-width:1.5}
+  .nav a.on{background:#B0532C;color:#FFF6EA;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
+  .nav .contador{display:none!important}
+  .topo-dir{display:flex;align-items:center;gap:22px;margin-left:auto}
+  .ao-vivo.off{margin-left:0}
+  .topo-sino{position:relative;color:var(--g-tinta);display:grid}
+  .topo-sino .ico{width:30px;height:30px;stroke-width:1.5}
+  .topo-sino em:not(:empty){position:absolute;top:-8px;right:-9px;min-width:21px;height:21px;border-radius:11px;background:#B5502A;color:#fff;font:700 12px/21px var(--f-txt);font-style:normal;text-align:center;padding:0 5px}
+  .topo-div{width:1px;height:38px;background:#D9C2A5}
+  .topo-perfil{display:flex;align-items:center;gap:8px;background:none;border:0;cursor:pointer;color:var(--g-tinta);padding:0}
+  .topo-perfil span{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#B85830;color:#FFF6EA;font:700 18px var(--g-serif)}
+  .topo-perfil .ico{width:20px;height:20px}
+  main{padding:8px 22px 50px 18px}
+  .salao-grade{grid-template-columns:404px minmax(0,1fr);gap:26px;align-items:start}
+  .salao-esq .ticket-dia{width:408px;margin-left:-2px;margin-top:16px}
+  .aqueduto-img{display:block;position:absolute;left:168px;top:6px;mix-blend-mode:normal}
+  .cab-salao{min-height:96px;padding-top:4px}
+  .folhas-img{display:block;position:absolute;top:0;right:0;width:228px;height:auto;pointer-events:none;z-index:0}
+  .topo>img{width:86px}
+  .topo b{font-size:34px;letter-spacing:.03em;line-height:1}
+  .topo small{font-size:19px;margin-top:2px;letter-spacing:.01em}
+  .salao-dir{position:relative;z-index:1}
+  .mesa{min-height:108px}
+  [data-tela=salao]{position:relative}
+}
+@media (max-width:899px){
+  .prancheta{border-width:46px 13px 23px}
+  .mesas{grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:14px}
+  .mesa{min-height:76px}.mesa b{font-size:26px}.mesa small{font-size:13px}
+  .mesa-sinal{width:30px;height:30px;top:-7px;right:-5px}.mesa-sinal .ico{width:16px;height:16px}
+  .area{padding:22px 14px 18px}.area-cab{margin:-38px 0 14px -24px}.fita{height:48px;font-size:20px}
+  .legenda{justify-content:flex-start;margin:4px 0 26px}
+  .cab-salao{min-height:0}.cab-salao h1{font-size:34px}
+  .salao-dir .mesas{gap:14px 12px}
+  .ticket-cab h2{font-size:18px}.ticket-cab span{font-size:13.5px}
+  .ticket-linha{font-size:15px}.ticket-total b{font-size:21px}.ticket-total span{font-size:15px}
+  .area-cab span{font-size:14px}
+}
+.ticket-cab span,.ticket-total span,.ticket-total b,.area-cab span{white-space:nowrap}
+/* ícone da Gestão: a coroa de louro desenhada no conceito */
+.nav a[data-aba=mais] .ico{background:currentColor;-webkit-mask:url(img/ico-gestao.webp?v=2) center/contain no-repeat;mask:url(img/ico-gestao.webp?v=2) center/contain no-repeat}
+.nav a[data-aba=mais] .ico>*{display:none}

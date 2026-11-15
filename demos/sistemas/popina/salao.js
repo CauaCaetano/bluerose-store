@@ -1,27 +1,27 @@
 // Popina · salão do garçom: a fila do que fazer agora (conceito C escolhido pelo dono) + as mesas, e a comanda da mesa.
 import { db, t, din, dinCurto, tempo, minutos, prod, comanda, comandaDaMesa, fila, estadoMesa, conta, valorItem, abrirMesa, adicionarItem, enviar,
-  mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg } from './loja.js?v=2';
-import { registrar, acao, ir } from './nucleo.js?v=2';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=2';
-import { OBS_RAPIDAS } from './dados.js?v=2';
-import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=2';
+  mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg } from './loja.js?v=3';
+import { registrar, acao, ir } from './nucleo.js?v=3';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=3';
+import { OBS_RAPIDAS } from './dados.js?v=3';
+import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=3';
 
-const ROTULO = { conta: 'Levar a conta', chamou: 'Chamou o garçom', pronto: 'Prato pronto', qr: 'Pedido pelo QR' };
-const COR = { conta: 'ouro', chamou: 'terra', pronto: 'oliva', qr: 'ouro' };
-const saudacao = () => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; };
-const resumoItens = (l) => l.map((i) => `${i.qtd > 1 ? i.qtd + ' ' : ''}${i.nome}`).join(', ');
+// a tela do salão segue o conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/1-salao-pc.png)
+const ROTULO = { conta: 'Levar a conta', chamou: 'Mesa chamou', pronto: 'Prato pronto', qr: 'Pedido pelo QR' };
+const COR = { conta: 'ouro', chamou: 'terra', pronto: 'oliva', qr: 'amarelo' };
+const nItens = (l) => { const n = l.reduce((s, i) => s + (i.qtd || 1), 0); return `${n} ${n === 1 ? 'item' : 'itens'}`; };
+const onde = (c) => c.tipo === 'mesa' ? `Mesa ${c.mesa}` : `${c.tipo === 'delivery' ? 'Delivery' : 'Balcão'} #${c.num}`;
 
 function cartaoFila(f) {
-  const quando = tempo(f.ts);
-  if (f.tipo === 'conta') { const v = conta(f.c); return linha(f.tipo, `Mesa ${f.c.mesa}`, `${din(v.total)} · há ${quando}`, 'Levar', `abrir-conta" data-id="${f.c.id}`); }
-  if (f.tipo === 'chamou') return linha(f.tipo, `Mesa ${f.x.mesa}`, `${f.x.origem === 'QR' ? 'pelo QR' : 'chamou'} · há ${quando}`, 'Ir', `atender" data-id="${f.x.id}`);
-  if (f.tipo === 'pronto') { const onde = f.c.tipo === 'mesa' ? `Mesa ${f.c.mesa}` : `${f.c.tipo === 'delivery' ? 'Delivery' : 'Balcão'} #${f.c.num}`; return linha(f.tipo, onde, `${resumoItens(f.itens)} · pronto há ${quando}`, 'Levei', `levei" data-id="${f.c.id}`); }
-  return linha(f.tipo, `Mesa ${f.q.mesa}`, `${resumoItens(f.q.itens.map((i) => ({ qtd: i.qtd, nome: prod(i.prod)?.nome || '' })))} · há ${quando}`, 'Ver', `ver-qr" data-id="${f.q.id}`);
+  if (f.tipo === 'conta') return linha(f.tipo, `Mesa ${f.c.mesa}`, din(conta(f.c).total), 'Levar', `abrir-conta" data-id="${f.c.id}`);
+  if (f.tipo === 'chamou') return linha(f.tipo, `Mesa ${f.x.mesa}`, `há ${tempo(f.ts)}`, 'Ir', `atender" data-id="${f.x.id}`);
+  if (f.tipo === 'pronto') return linha(f.tipo, onde(f.c), nItens(f.itens), 'Levei', `levei" data-id="${f.c.id}`);
+  return linha(f.tipo, `Mesa ${f.q.mesa}`, nItens(f.q.itens), 'Ver', `ver-qr" data-id="${f.q.id}`);
 }
-// cada pendência é um papelzinho preso na prancheta: ícone, o que fazer, onde, e o botão
-const ICO_FILA = { conta: 'conta', chamou: 'sino', pronto: 'prato', qr: 'qr' };
+// cada pendência é um papelzinho preso na prancheta: faixa de cor, ícone, o que fazer, onde, e o botão
+const ICO_FILA = { conta: 'conta', chamou: 'sino', pronto: 'cloche', qr: 'qr' };
 const linha = (tipo, titulo, det, bt, acaoAttr) => `<article class="fila-item ${tipo}"><span class="faixa ${COR[tipo]}"></span><i class="fila-ico">${ico(ICO_FILA[tipo])}</i>
-  <div class="fila-txt"><b>${ROTULO[tipo]}</b><span><strong>${t(titulo)}</strong> · ${t(det)}</span></div>
+  <div class="fila-txt"><b>${ROTULO[tipo]}</b><span>${t(titulo)} • ${t(det)}</span></div>
   <button type="button" class="bt ${tipo === 'pronto' || tipo === 'qr' ? 'oliva' : 'cheio'}" data-acao="${acaoAttr}">${bt}</button></article>`;
 // ramo de louro (o mesmo do logo), usado nos títulos
 export const LOURO = '<svg class="louro" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20C9 15 12 10 13 3"/><path d="M8 15c-2.5 0-4-1.2-4.5-3 2.4-.4 4 .6 4.5 3zM10 11.5c-2.2-.6-3.3-2.1-3.3-3.9 2.2.2 3.4 1.6 3.3 3.9zM12 7.5c-1.6-1.1-2.1-2.8-1.7-4.4 1.9.8 2.5 2.4 1.7 4.4zM9.5 14.5c1-2.2 2.8-3.1 4.7-2.8-.9 2-2.6 3-4.7 2.8zM11.5 10.5c1.3-1.9 3-2.4 4.8-1.8-1.2 1.7-2.9 2.3-4.8 1.8z"/></svg>';
@@ -33,35 +33,35 @@ registrar('salao', {
     const areas = (L.areas.length ? L.areas : [{ nome: 'Salão', de: 1, ate: n }]).map((a) => ({ ...a, ate: Math.min(a.ate, n) })).filter((a) => a.de <= n);
     const fora = Array.from({ length: n }, (_, k) => k + 1).filter((m) => !areas.some((a) => m >= a.de && m <= a.ate));
     if (fora.length) areas.push({ nome: 'Outras mesas', de: fora[0], ate: fora.at(-1), lista: fora });
-    const ICO = { qr: 'qr', pronto: 'prato', conta: 'conta', chamou: 'sino' };
+    const ICO = { qr: 'qr', pronto: 'cloche', conta: 'conta', chamou: 'sino' };
     const tile = (m) => {
       const e = estadoMesa(m), c = comandaDaMesa(m);
       return `<a class="mesa ${e}" href="#mesa/${m}" aria-label="Mesa ${m}, ${({ livre: 'livre', ocupada: 'ocupada', pronto: 'com prato pronto', conta: 'pediu a conta', chamou: 'chamou o garçom', qr: 'pedido pelo QR esperando' })[e]}">${ICO[e] ? `<i class="mesa-sinal">${ico(ICO[e])}</i>` : ''}<b>${m}</b>${c ? `<small>${tempo(c.aberta)}</small>` : ''}</a>`;
     };
-    const cont = (lst) => lst.reduce((s, m) => s + (comandaDaMesa(m) ? 1 : 0), 0);
-    const contaE = (e) => Array.from({ length: n }, (_, k) => estadoMesa(k + 1)).filter((x) => x === e).length;
-    // resumo do dia (o que já fechou hoje e o que está aberto agora)
+    const ocup = (lst) => lst.reduce((s, m) => s + (comandaDaMesa(m) ? 1 : 0), 0);
+    const est = Array.from({ length: n }, (_, k) => estadoMesa(k + 1)), contaE = (...e) => est.filter((x) => e.includes(x)).length;
+    // resumo do dia: vendas sem o serviço, o serviço, o delivery e a soma
     const ini = new Date(); ini.setHours(0, 0, 0, 0);
     const vh = db.vendas.filter((v) => v.ts >= ini.getTime() && !v.cancelado), soma = (lst, f) => lst.reduce((s, v) => s + (f(v) || 0), 0);
-    const del = vh.filter((v) => v.tipo === 'delivery'), aberto = soma(db.comandas, (c) => conta(c).total);
-    return `<header class="cab-salao"><div class="cab-tit"><h1>Salão</h1><p>${saudacao()} · ${l.length ? `${l.length} ${l.length === 1 ? 'coisa' : 'coisas'} para agora` : 'nada pendente agora'}</p></div>
-      <svg class="aqueduto" viewBox="0 0 220 60" aria-hidden="true"><path d="M2 58h216M10 58V26h200v32M10 26h200M18 26v-6h184v6"/><path d="M28 58V40a14 14 0 0 1 28 0v18M70 58V40a14 14 0 0 1 28 0v18M112 58V40a14 14 0 0 1 28 0v18M154 58V40a14 14 0 0 1 28 0v18"/><path d="M34 26v-4m32 4v-4m32 4v-4m32 4v-4m32 4v-4"/></svg>
-      <div class="cab-acoes"><button type="button" class="bt cheio nova" data-acao="nova-comanda">${ico('mais2')}<span>Nova comanda</span></button><button type="button" class="bt-ico grande" data-acao="planta" aria-label="Ver a planta do salão">${ico('planta')}</button></div></header>
+    const del = vh.filter((v) => v.tipo === 'delivery'), loja = vh.filter((v) => v.tipo !== 'delivery');
+    const hoje = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }).replace('.', '').replace(' de ', ' ');
+    return `<img class="folhas-img" src="img/folhas.webp?v=2" alt="" width="228" height="88">
       <div class="salao-grade">
         <div class="salao-esq">
-          <section class="prancheta" aria-label="O que fazer agora"><span class="presilha" aria-hidden="true"></span>
-            <h2>${LOURO}O que fazer agora${LOURO}</h2><p class="prancheta-sub">${l.length} ${l.length === 1 ? 'pendência' : 'pendências'} · ao vivo</p>
+          <section class="prancheta" aria-label="O que fazer agora">
+            <div class="prancheta-cab"><img class="louro-p" src="img/louro-esq.webp?v=1" alt="" width="44" height="60"><div><h2>O que fazer agora</h2><p class="prancheta-sub">${l.length} ${l.length === 1 ? 'pendência' : 'pendências'} • em tempo real</p></div><img class="louro-p" src="img/louro-dir.webp?v=1" alt="" width="44" height="60"></div>
             <div class="fila">${l.map(cartaoFila).join('') || '<div class="fila-vazia">Quando uma mesa pedir a conta, chamar ou um prato ficar pronto, aparece aqui.</div>'}</div></section>
-          <section class="ticket-dia" aria-label="Resumo do dia"><div class="ticket-cab"><h2>Resumo do dia</h2><span>${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</span></div>
-            <div class="ticket-linha"><span>${ico('caixa')}Vendido (${vh.length} contas)</span><b>${din(soma(vh, (v) => v.total))}</b></div>
-            <div class="ticket-linha"><span>${ico('conta')}Serviço (${db.config.servico}%)</span><b>${din(soma(vh, (v) => v.servico))}</b></div>
-            <div class="ticket-linha"><span>${ico('moto')}Delivery (${del.length} pedidos)</span><b>${din(soma(del, (v) => v.total))}</b></div>
-            <div class="ticket-linha"><span>${ico('relogio')}Em aberto agora</span><b>${din(aberto)}</b></div>
-            <div class="ticket-total"><span>Total do dia</span><b>${din(soma(vh, (v) => v.total) + aberto)}</b></div></section>
+          <section class="ticket-dia" aria-label="Resumo do dia"><div class="ticket-cab"><h2>Resumo do dia</h2><span>${ico('calendario')}Hoje, ${hoje}</span></div>
+            <div class="ticket-linha"><span>${ico('moedas')}Vendas (bruto)</span><b>${din(soma(loja, (v) => v.total - (v.servico || 0)))}</b></div>
+            <div class="ticket-linha"><span>${ico('etiqueta')}Serviço (${db.config.servico}%)</span><b>${din(soma(loja, (v) => v.servico))}</b></div>
+            <div class="ticket-linha"><span>${ico('moto')}Delivery (${del.length} ${del.length === 1 ? 'pedido' : 'pedidos'})</span><b>${din(soma(del, (v) => v.total))}</b></div>
+            <div class="ticket-total"><span>${ico('grafico')}Total do dia</span><b>${din(soma(vh, (v) => v.total))}</b></div>
+            <img class="louro-img" src="img/louro.webp?v=2" alt="" width="162" height="50"></section>
         </div>
         <div class="salao-dir">
-          <div class="legenda"><span><i class="ocupada"></i>Ocupada (${contaE('ocupada')})</span><span><i class="pronto"></i>Prato pronto (${contaE('pronto')})</span><span><i class="conta"></i>Conta (${contaE('conta')})</span><span><i class="chamou"></i>Chamou (${contaE('chamou')})</span><span><i class="qr"></i>Pedido pelo QR (${contaE('qr')})</span><span><i class="livre"></i>Livre (${contaE('livre')})</span></div>
-          ${areas.map((a) => { const lst = a.lista || Array.from({ length: a.ate - a.de + 1 }, (_, k) => a.de + k); return `<section class="area"><div class="area-cab"><h2 class="fita">${LOURO}${t(a.nome)}</h2><span>${lst.length} mesas · ${lst.length - cont(lst)} livres</span></div><div class="mesas">${lst.map(tile).join('')}</div></section>`; }).join('')}
+          <header class="cab-salao"><h1>Salão</h1><img class="aqueduto-img" src="img/aqueduto.webp?v=2" alt="" width="340" height="88"></header>
+          <div class="legenda"><span><i class="ocupada"></i>Ocupada (${contaE('ocupada')})</span><span><i class="pronto"></i>Prato pronto (${contaE('pronto', 'qr')})</span><span><i class="conta"></i>Conta (${contaE('conta')})</span><span><i class="chamou"></i>Chamada (${contaE('chamou')})</span><span><i class="livre"></i>Livre (${contaE('livre')})</span></div>
+          ${areas.map((a, k) => { const lst = a.lista || Array.from({ length: a.ate - a.de + 1 }, (_, j) => a.de + j), o = ocup(lst); return `<section class="area"><div class="area-cab"><h2 class="fita ${k % 2 ? 'verde' : ''}">${t(a.nome)}</h2><span>${lst.length} ${lst.length === 1 ? 'mesa' : 'mesas'} • ${o} ${o === 1 ? 'ocupada' : 'ocupadas'}</span></div><div class="mesas">${lst.map(tile).join('')}</div></section>`; }).join('')}
         </div>
       </div>`;
   },

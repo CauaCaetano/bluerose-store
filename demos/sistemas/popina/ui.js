@@ -21,6 +21,14 @@ const P = {
   troca: '<path d="M7 7h12l-3-3M17 17H5l3 3"/>', pessoas: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M15 20c0-2.6 1.6-4.6 4-4.6"/>',
   impressora: '<path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M7 14h10v6H7z"/>', planta: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><rect x="6" y="14" width="4" height="4"/><circle cx="16" cy="16" r="2"/>',
   ao_vivo: '<circle cx="12" cy="12" r="3"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4"/>', divide: '<path d="M12 3v18M6 9l-3 3 3 3M18 9l3 3-3 3"/>',
+  // ícones do conceito do salão (GPT)
+  mesa: '<path d="M3 9.5h18M6 9.5V20M18 9.5V20M9 9.5v5.5M15 9.5v5.5M4.5 9.5L6 6h12l1.5 3.5"/>',
+  cloche: '<path d="M3 18h18M5 18a7 7 0 0 1 14 0"/><path d="M12 11v-1.5M10.5 9.5h3"/><path d="M10 3.5c-.5.7.5 1.2 0 2M14 3.5c-.5.7.5 1.2 0 2"/>',
+  moedas: '<ellipse cx="10" cy="6" rx="5.5" ry="2.2"/><path d="M4.5 6v3c0 1.2 2.5 2.2 5.5 2.2s5.5-1 5.5-2.2V6M4.5 9v3c0 1.2 2.5 2.2 5.5 2.2"/><ellipse cx="14" cy="14" rx="5.5" ry="2.2"/><path d="M8.5 14v3c0 1.2 2.5 2.2 5.5 2.2s5.5-1 5.5-2.2v-3"/>',
+  etiqueta: '<path d="M3.5 12.5V4.5h8l9 9-8 8-9-9z"/><circle cx="8" cy="9" r="1.5"/>',
+  calendario: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',
+  louro: '<path d="M12 21c-4-1.5-6.8-5-7.4-10M12 21c4-1.5 6.8-5 7.4-10"/><path d="M5 14c-1.6-.4-2.4-1.6-2.4-3 1.5 0 2.5 1 2.4 3zM4.6 10.6c-1.4-.8-1.8-2.1-1.4-3.4 1.4.4 2 1.6 1.4 3.4zM5.4 7.4C4.4 6.3 4.4 5 5.1 3.9c1.1.8 1.2 2.1.3 3.5zM7.6 17.6c-1.7.1-2.8-.8-3.2-2.1 1.5-.4 2.7.4 3.2 2.1zM19 14c1.6-.4 2.4-1.6 2.4-3-1.5 0-2.5 1-2.4 3zM19.4 10.6c1.4-.8 1.8-2.1 1.4-3.4-1.4.4-2 1.6-1.4 3.4zM18.6 7.4c1-1.1 1-2.4.3-3.5-1.1.8-1.2 2.1-.3 3.5zM16.4 17.6c1.7.1 2.8-.8 3.2-2.1-1.5-.4-2.7.4-3.2 2.1z"/>',
+  chevron: '<path d="M6 9l6 6 6-6"/>',
 };
 export const ico = (n, extra = '') => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" ${extra}>${P[n] || ''}</svg>`;
 
