@@ -315,3 +315,42 @@ body.est-japones .cli-preco{color:#B3212B!important}
 body.est-japones .tag{background:#F3E2C4!important;color:#7A4A12!important}body.est-japones .tag.verde{background:#E5EDD6!important;color:#56702A!important}
 body.est-japones .cli-ver{background:#B3212B!important;color:#FFF6EE!important;box-shadow:inset 0 0 0 1.5px #8E1820,0 14px 28px -14px rgba(120,20,25,.6)!important}
 body.est-japones .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;background:url(img/tj-ondas.webp?v=1) 0 100%/auto 30px repeat-x;opacity:.7}
+
+/* ---------- estilo ITALIANO do cardápio (template Japonês): italiano ---------- */
+body.est-italiano{--marca:#B8261E!important;--marca-txt:#FFF6EE!important;--fundo:#F6EFE1;--cartao:#FFFBF3;--linha2:#D4AE78;--txt:#2B2420;--txt2:#5A4E44;
+  background:#F6EFE1 repeating-linear-gradient(115deg,rgba(160,130,90,.035) 0 2px,transparent 2px 7px)!important}
+body.est-italiano h1,body.est-italiano h2,body.est-italiano .cli-prod-txt b,body.est-italiano .cli-dest b,body.est-italiano .cli-preco,body.est-italiano .cli-ver,body.est-italiano .cli-fita b{font-family:"Playfair Display",Georgia,serif!important;font-weight:800!important}
+body.est-italiano .cli-capa{border-bottom:3px solid #B88A52}
+body.est-italiano .cli-capa::after{content:"";position:absolute;right:0;bottom:-6px;width:170px;height:74px;background:url(img/ti-ramo.webp?v=1) right bottom/contain no-repeat;pointer-events:none;z-index:2}
+body.est-italiano .cli-logo{box-shadow:0 0 0 3px #B8261E,0 8px 20px -8px rgba(0,0,0,.5)!important}
+body.est-italiano .cli-fita{background:#B8261E!important;color:#FFF6EE!important;border-radius:4px!important;clip-path:polygon(2% 12%,8% 0,94% 6%,100% 40%,97% 100%,4% 92%,0 60%)}
+body.est-italiano .cli-h2{color:#2B2420!important}
+body.est-italiano .cli-h2::before{content:"";width:22px;height:22px;flex:none;border-radius:4px;background:#B8261E;box-shadow:inset 0 0 0 3px #B8261E,inset 0 0 0 5px #F6EFE1}
+body.est-italiano .cli-h2::after{background:#C9A06A!important;opacity:1!important;height:1px!important}
+body.est-italiano .cli-prod,body.est-italiano .cli-dest,body.est-italiano .cli-modo-bts .bt,body.est-italiano .cli-busca,body.est-italiano .cli-cats a{border:1.5px solid #D4AE78!important;border-radius:6px!important;background:#FFFBF3!important}
+body.est-italiano .cli-cats a.on{background:#B8261E!important;color:#FFF6EE!important;border-color:#B8261E!important}
+body.est-italiano .cli-modo-bts .bt .ico{color:#B8261E!important}
+body.est-italiano .cli-preco{color:#B8261E!important}
+body.est-italiano .tag{background:#F3E2C4!important;color:#7A4A12!important}body.est-italiano .tag.verde{background:#E5EDD6!important;color:#56702A!important}
+body.est-italiano .cli-ver{background:#B8261E!important;color:#FFF6EE!important;box-shadow:inset 0 0 0 1.5px #8E1C15,0 14px 28px -14px rgba(120,20,25,.6)!important}
+body.est-italiano .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;background:repeating-conic-gradient(#C8352B 0 25%,#FFFDF8 0 50%) 0 100%/14px 14px;opacity:.7}
+
+/* ---------- estilo CHURRASCARIA do cardápio (template Japonês): churrascaria ---------- */
+body.est-churrascaria{--marca:#A8231A!important;--marca-txt:#FFF6EE!important;--fundo:#F1E4CC;--cartao:#FAF1E2;--linha2:#C99A62;--txt:#2E2118;--txt2:#5A4E44;
+  background:#F1E4CC repeating-linear-gradient(115deg,rgba(160,130,90,.035) 0 2px,transparent 2px 7px)!important}
+body.est-churrascaria h1,body.est-churrascaria h2,body.est-churrascaria .cli-prod-txt b,body.est-churrascaria .cli-dest b,body.est-churrascaria .cli-preco,body.est-churrascaria .cli-ver,body.est-churrascaria .cli-fita b{font-family:"Playfair Display",Georgia,serif!important;font-weight:800!important}
+body.est-churrascaria .cli-capa{border-bottom:3px solid #B88A52}
+body.est-churrascaria .cli-capa::after{content:"";position:absolute;right:0;bottom:-6px;width:170px;height:74px;background:url(img/tc-espetos.webp?v=1) right bottom/contain no-repeat;pointer-events:none;z-index:2}
+body.est-churrascaria .cli-logo{box-shadow:0 0 0 3px #A8231A,0 8px 20px -8px rgba(0,0,0,.5)!important}
+body.est-churrascaria .cli-fita{background:#A8231A!important;color:#FFF6EE!important;border-radius:4px!important;clip-path:polygon(2% 12%,8% 0,94% 6%,100% 40%,97% 100%,4% 92%,0 60%)}
+body.est-churrascaria .cli-h2{color:#2E2118!important}
+body.est-churrascaria .cli-h2::before{content:"";width:22px;height:22px;flex:none;border-radius:4px;background:#A8231A;box-shadow:inset 0 0 0 3px #A8231A,inset 0 0 0 5px #F1E4CC}
+body.est-churrascaria .cli-h2::after{background:#C9A06A!important;opacity:1!important;height:1px!important}
+body.est-churrascaria .cli-prod,body.est-churrascaria .cli-dest,body.est-churrascaria .cli-modo-bts .bt,body.est-churrascaria .cli-busca,body.est-churrascaria .cli-cats a{border:1.5px solid #C99A62!important;border-radius:6px!important;background:#FAF1E2!important}
+body.est-churrascaria .cli-cats a.on{background:#A8231A!important;color:#FFF6EE!important;border-color:#A8231A!important}
+body.est-churrascaria .cli-modo-bts .bt .ico{color:#A8231A!important}
+body.est-churrascaria .cli-preco{color:#A8231A!important}
+body.est-churrascaria .tag{background:#F3E2C4!important;color:#7A4A12!important}body.est-churrascaria .tag.verde{background:#E5EDD6!important;color:#56702A!important}
+body.est-churrascaria .cli-ver{background:#A8231A!important;color:#FFF6EE!important;box-shadow:inset 0 0 0 1.5px #7E1A12,0 14px 28px -14px rgba(120,20,25,.6)!important}
+body.est-churrascaria .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;background:url(img/tc-grelha.webp?v=1) 0 100%/auto 30px repeat-x;opacity:.7}
+body.est-italiano .cli-capa::after,body.est-churrascaria .cli-capa::after{width:120px;height:62px;bottom:-4px}
