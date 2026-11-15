@@ -354,3 +354,43 @@ body.est-churrascaria .tag{background:#F3E2C4!important;color:#7A4A12!important}
 body.est-churrascaria .cli-ver{background:#A8231A!important;color:#FFF6EE!important;box-shadow:inset 0 0 0 1.5px #7E1A12,0 14px 28px -14px rgba(120,20,25,.6)!important}
 body.est-churrascaria .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;background:url(img/tc-grelha.webp?v=1) 0 100%/auto 30px repeat-x;opacity:.7}
 body.est-italiano .cli-capa::after,body.est-churrascaria .cli-capa::after{width:120px;height:62px;bottom:-4px}
+
+/* ---------- estilo MEXICANO do cardápio (template Japonês): mexicano ---------- */
+body.est-mexicano{--marca:#B51F1F!important;--marca-txt:#FFF6EE!important;--fundo:#F6EBD6;--cartao:#FDF6E8;--linha2:#D6A066;--txt:#2A1F1A;--txt2:#5A4E44;
+  background:#F6EBD6 repeating-linear-gradient(115deg,rgba(160,130,90,.035) 0 2px,transparent 2px 7px)!important}
+body.est-mexicano h1,body.est-mexicano h2,body.est-mexicano .cli-prod-txt b,body.est-mexicano .cli-dest b,body.est-mexicano .cli-preco,body.est-mexicano .cli-ver,body.est-mexicano .cli-fita b{font-family:"Playfair Display",Georgia,serif!important;font-weight:800!important}
+body.est-mexicano .cli-capa{border-bottom:3px solid #B88A52}
+body.est-mexicano .cli-capa::after{content:"";position:absolute;right:0;bottom:-6px;width:170px;height:74px;background:url(img/tm-sombrero.webp?v=1) right bottom/contain no-repeat;pointer-events:none;z-index:2}
+body.est-mexicano .cli-logo{box-shadow:0 0 0 3px #B51F1F,0 8px 20px -8px rgba(0,0,0,.5)!important}
+body.est-mexicano .cli-fita{background:#B51F1F!important;color:#FFF6EE!important;border-radius:4px!important;clip-path:polygon(2% 12%,8% 0,94% 6%,100% 40%,97% 100%,4% 92%,0 60%)}
+body.est-mexicano .cli-h2{color:#2A1F1A!important}
+body.est-mexicano .cli-h2::before{content:"";width:22px;height:22px;flex:none;border-radius:4px;background:#B51F1F;box-shadow:inset 0 0 0 3px #B51F1F,inset 0 0 0 5px #F6EBD6}
+body.est-mexicano .cli-h2::after{background:#C9A06A!important;opacity:1!important;height:1px!important}
+body.est-mexicano .cli-prod,body.est-mexicano .cli-dest,body.est-mexicano .cli-modo-bts .bt,body.est-mexicano .cli-busca,body.est-mexicano .cli-cats a{border:1.5px solid #D6A066!important;border-radius:6px!important;background:#FDF6E8!important}
+body.est-mexicano .cli-cats a.on{background:#B51F1F!important;color:#FFF6EE!important;border-color:#B51F1F!important}
+body.est-mexicano .cli-modo-bts .bt .ico{color:#B51F1F!important}
+body.est-mexicano .cli-preco{color:#B51F1F!important}
+body.est-mexicano .tag{background:#F3E2C4!important;color:#7A4A12!important}body.est-mexicano .tag.verde{background:#E5EDD6!important;color:#56702A!important}
+body.est-mexicano .cli-ver{background:#B51F1F!important;color:#FFF6EE!important;box-shadow:inset 0 0 0 1.5px #951818,0 14px 28px -14px rgba(120,20,25,.6)!important}
+body.est-mexicano .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;background:url(img/tm-azulejo.webp?v=1) 0 100%/auto 30px repeat-x;opacity:.7}
+body.est-mexicano .cli-capa::after{width:120px;height:62px;bottom:-4px}
+
+/* ---------- estilo PIZZARIA do cardápio (template Japonês): pizzaria ---------- */
+body.est-pizzaria{--marca:#B8231C!important;--marca-txt:#FFF6EE!important;--fundo:#F7EEDD;--cartao:#FCF6EA;--linha2:#D49C5E;--txt:#2A2420;--txt2:#5A4E44;
+  background:#F7EEDD repeating-linear-gradient(115deg,rgba(160,130,90,.035) 0 2px,transparent 2px 7px)!important}
+body.est-pizzaria h1,body.est-pizzaria h2,body.est-pizzaria .cli-prod-txt b,body.est-pizzaria .cli-dest b,body.est-pizzaria .cli-preco,body.est-pizzaria .cli-ver,body.est-pizzaria .cli-fita b{font-family:"Playfair Display",Georgia,serif!important;font-weight:800!important}
+body.est-pizzaria .cli-capa{border-bottom:3px solid #B88A52}
+body.est-pizzaria .cli-capa::after{content:"";position:absolute;right:0;bottom:-6px;width:170px;height:74px;background:url(img/tp-fatia.webp?v=1) right bottom/contain no-repeat;pointer-events:none;z-index:2}
+body.est-pizzaria .cli-logo{box-shadow:0 0 0 3px #B8231C,0 8px 20px -8px rgba(0,0,0,.5)!important}
+body.est-pizzaria .cli-fita{background:#B8231C!important;color:#FFF6EE!important;border-radius:4px!important;clip-path:polygon(2% 12%,8% 0,94% 6%,100% 40%,97% 100%,4% 92%,0 60%)}
+body.est-pizzaria .cli-h2{color:#2A2420!important}
+body.est-pizzaria .cli-h2::before{content:"";width:22px;height:22px;flex:none;border-radius:4px;background:#B8231C;box-shadow:inset 0 0 0 3px #B8231C,inset 0 0 0 5px #F7EEDD}
+body.est-pizzaria .cli-h2::after{background:#C9A06A!important;opacity:1!important;height:1px!important}
+body.est-pizzaria .cli-prod,body.est-pizzaria .cli-dest,body.est-pizzaria .cli-modo-bts .bt,body.est-pizzaria .cli-busca,body.est-pizzaria .cli-cats a{border:1.5px solid #D49C5E!important;border-radius:6px!important;background:#FCF6EA!important}
+body.est-pizzaria .cli-cats a.on{background:#B8231C!important;color:#FFF6EE!important;border-color:#B8231C!important}
+body.est-pizzaria .cli-modo-bts .bt .ico{color:#B8231C!important}
+body.est-pizzaria .cli-preco{color:#B8231C!important}
+body.est-pizzaria .tag{background:#F3E2C4!important;color:#7A4A12!important}body.est-pizzaria .tag.verde{background:#E5EDD6!important;color:#56702A!important}
+body.est-pizzaria .cli-ver{background:#B8231C!important;color:#FFF6EE!important;box-shadow:inset 0 0 0 1.5px #931A14,0 14px 28px -14px rgba(120,20,25,.6)!important}
+body.est-pizzaria .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;background:url(img/tp-balcao.webp?v=1) 0 100%/auto 30px repeat-x;opacity:.7}
+body.est-pizzaria .cli-capa::after{width:120px;height:62px;bottom:-4px}

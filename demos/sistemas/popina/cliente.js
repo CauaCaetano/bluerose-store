@@ -1,9 +1,9 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=13';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=13';
-import { ico, folha, toast, $, $$ } from './ui.js?v=13';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=14';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=14';
+import { ico, folha, toast, $, $$ } from './ui.js?v=14';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -80,9 +80,9 @@ function tema() {
   document.body.style.setProperty('--marca', cor); document.body.style.setProperty('--marca-txt', claro ? '#1d1712' : '#fff');
   // estilo escolhido pelo restaurante (só os conhecidos viram classe); no rústico o fundo é sempre o pergaminho
   // luxo e realeza usam a base do moderno com a paleta e os ornamentos do template
-  const est = ['rustico', 'moderno', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria'].includes(L.estilo) ? L.estilo : (L.estilo === undefined ? 'rustico' : 'moderno');
-  document.body.classList.remove('est-rustico', 'est-moderno', 'est-luxo', 'est-realeza', 'est-japones', 'est-italiano', 'est-churrascaria'); document.body.classList.add(`est-${est}`);
-  if (['luxo', 'realeza', 'japones', 'italiano', 'churrascaria'].includes(est)) document.body.classList.add('est-moderno');
+  const est = ['rustico', 'moderno', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria'].includes(L.estilo) ? L.estilo : (L.estilo === undefined ? 'rustico' : 'moderno');
+  document.body.classList.remove('est-rustico', 'est-moderno', 'est-luxo', 'est-realeza', 'est-japones', 'est-italiano', 'est-churrascaria', 'est-mexicano', 'est-pizzaria'); document.body.classList.add(`est-${est}`);
+  if (['luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria'].includes(est)) document.body.classList.add('est-moderno');
   document.body.classList.toggle('escuro', L.tema === 'escuro' && est === 'moderno');
   $('meta[name=theme-color]').content = cor;
   document.title = `${M.nome} · Cardápio`;

@@ -1,10 +1,10 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=13';
-import { acao, ir } from './nucleo.js?v=13';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=13';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=13';
-import { situacao, textoHorarios } from './opcoes.js?v=13';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=14';
+import { acao, ir } from './nucleo.js?v=14';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=14';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=14';
+import { situacao, textoHorarios } from './opcoes.js?v=14';
 import { qrSVG } from '../base/qr.js';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -24,7 +24,8 @@ function reduzir(arq, W, H, q = 0.74) {
 // estilos do cardápio do cliente: o restaurante escolhe a cara (a cor e o logo são sempre os dele)
 const ESTILOS = [['rustico', 'Rústico', 'Pergaminho, louros e mosaico. Cantina, pizzaria, comida caseira'], ['moderno', 'Moderno', 'Limpo, com a cor do seu logo. Hamburgueria, café, japonês, açaí'],
   ['luxo', 'Luxo', 'Mármore claro e dourado. Restaurante fino'], ['realeza', 'Realeza', 'Veludo azul, ouro e carmesim. Casa clássica'], ['japones', 'Japonês', 'Papel washi, vermelho laca e cerejeira'],
-  ['italiano', 'Italiano', 'Toalha xadrez, oliveira e cerâmica pintada'], ['churrascaria', 'Churrascaria', 'Papel kraft, madeira e brasa']];
+  ['italiano', 'Italiano', 'Toalha xadrez, oliveira e cerâmica pintada'], ['churrascaria', 'Churrascaria', 'Papel kraft, madeira e brasa'],
+  ['mexicano', 'Mexicano', 'Talavera, pimenta e cempasúchil'], ['pizzaria', 'Pizzaria', 'Forno a lenha, madeira e lousa']];
 // a cor que mais aparece no logo (ignora branco, preto e cinza) vira a cor do restaurante
 function corDoLogo(src) {
   return new Promise((ok) => {
@@ -66,6 +67,8 @@ export const TEMPLATES = [
   ['japones', 'Japonês', 'Papel washi, madeira, vermelho laca e cerejeira. Culinária japonesa', 'japones'],
   ['italiano', 'Italiano', 'Estuque toscano, toalha xadrez, oliveira e cerâmica pintada. Cantina, trattoria, massas', 'italiano'],
   ['churrascaria', 'Churrascaria', 'Papel kraft, madeira, couro e brasa. Churrascaria, parrilla, espetinho', 'churrascaria'],
+  ['mexicano', 'Mexicano', 'Adobe, azulejo de talavera, pimenta e cempasúchil. Comida mexicana, tex-mex', 'mexicano'],
+  ['pizzaria', 'Pizzaria', 'Forno a lenha, madeira com farinha e placas de lousa. Pizzaria, esfiharia, delivery', 'pizzaria'],
 ];
 TELAS_MAIS.aparencia = () => {
   const L = lojaCfg(), c = db.config, tpl = L.template || 'basico';
