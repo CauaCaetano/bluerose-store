@@ -1,9 +1,9 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=8';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=8';
-import { ico, folha, toast, $, $$ } from './ui.js?v=8';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=9';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=9';
+import { ico, folha, toast, $, $$ } from './ui.js?v=9';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -24,7 +24,7 @@ async function rpc(fn, args) {
   if (!r.ok) throw new Error('rede');
   return r.json();
 }
-const lojaPadrao = () => ({ cor: '#B4532F', tema: 'claro', horarios: [], aceitaQR: true, delivery: true, retirada: true, pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], areas: [] });
+const lojaPadrao = () => ({ cor: '#B4532F', tema: 'claro', estilo: 'rustico', creditos: true, horarios: [], aceitaQR: true, delivery: true, retirada: true, pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], areas: [] });
 async function daNuvem() {
   const d = await rpc('popina_cardapio', { p_espaco: R });
   if (d.erro) throw new Error(d.erro);
@@ -78,7 +78,10 @@ function tema() {
   const L = M.loja, cor = /^#[0-9a-f]{6}$/i.test(L.cor || '') ? L.cor : '#B4532F';
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(cor.slice(i, i + 2), 16)); const claro = (0.299 * r + 0.587 * g + 0.114 * b) > 165;
   document.body.style.setProperty('--marca', cor); document.body.style.setProperty('--marca-txt', claro ? '#1d1712' : '#fff');
-  document.body.classList.toggle('escuro', L.tema === 'escuro');
+  // estilo escolhido pelo restaurante (só os conhecidos viram classe); no rústico o fundo é sempre o pergaminho
+  const est = ['rustico', 'moderno'].includes(L.estilo) ? L.estilo : 'rustico';
+  document.body.classList.remove('est-rustico', 'est-moderno'); document.body.classList.add(`est-${est}`);
+  document.body.classList.toggle('escuro', L.tema === 'escuro' && est !== 'rustico');
   $('meta[name=theme-color]').content = cor;
   document.title = `${M.nome} · Cardápio`;
 }
@@ -90,7 +93,7 @@ function topo() {
   const capa = $('#cli-capa-foto'); if (L.capa) { capa.style.backgroundImage = `url("${L.capa.replace(/"/g, '')}")`; capa.classList.remove('sem'); } else { capa.style.backgroundImage = ''; capa.classList.add('sem'); }
   const lg = $('#cli-logo'); if (L.logo) { lg.style.backgroundImage = `url("${L.logo.replace(/"/g, '')}")`; lg.textContent = ''; lg.classList.remove('ini'); } else { lg.style.backgroundImage = ''; lg.textContent = M.nome.split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase(); lg.classList.add('ini'); }
   $('#cli-nome').textContent = M.nome; $('#cli-boas').textContent = L.boasVindas || M.cidade || '';
-  $('#cli-status').innerHTML = st.texto ? `<a class="cli-selo ${st.aberto ? 'aberto' : 'fechado'}" href="#horarios">${SVG.relogio}<span>${st.aberto ? `Aberto<br>${t(st.texto.replace(/^Aberto /, ''))}` : `Fechado<br>${t(st.texto.replace(/^Fechado agora · /, '').replace('abre hoje às', 'abre às'))}`}</span></a>` : '';
+  $('#cli-status').innerHTML = st.texto ? `<a class="cli-selo ${st.aberto ? 'aberto' : 'fechado'}" href="#horarios">${SVG.relogio}<span>${st.aberto ? `Aberto<br> ${t(st.texto.replace(/^Aberto /, ''))}` : `Fechado<br> ${t(st.texto.replace(/^Fechado agora · /, '').replace('abre hoje às', 'abre às'))}`}</span></a>` : '';
   const zap = String(M.whatsapp || '').replace(/\D/g, '');
   $('#cli-pills').innerHTML = [
     L.endereco ? `<a class="pill" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${L.endereco} ${M.cidade || ''}`)}" target="_blank" rel="noopener">${SVG.local}${t(L.endereco)}</a>` : '',
@@ -146,7 +149,7 @@ function rodape() {
   const L = M.loja, hoje = new Date().getDay();
   $('#cli-rodape').innerHTML = `${L.horarios?.some((d) => d?.length) ? `<h3 id="horarios">Horários</h3><ul class="cli-horarios">${textoHorarios(L.horarios).map(([d, h], k) => `<li class="${k === hoje ? 'hoje' : ''}"><span>${d[0].toUpperCase() + d.slice(1)}</span><span>${h}</span></li>`).join('')}</ul>` : ''}
     ${L.endereco ? `<p>${t(L.endereco)}${M.cidade ? ` · ${t(M.cidade)}` : ''}</p>` : ''}
-    <p>Cardápio feito com o Popina${R ? '' : ' · <a href="fotos/CREDITOS.md" target="_blank" rel="noopener">créditos das fotos</a>'}</p>`;
+    ${L.creditos !== false ? `<p>Cardápio feito com o Popina${R ? '' : ' · <a href="fotos/CREDITOS.md" target="_blank" rel="noopener">créditos das fotos</a>'}</p>` : ''}`;
 }
 
 // ------------------------------------------------------------------ escolher um prato

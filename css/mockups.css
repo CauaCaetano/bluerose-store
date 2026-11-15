@@ -20,3 +20,18 @@
   .sis-hero .sis-hero-grade { grid-template-columns: 1fr; }
   .sis-hero .sis-hero-grade > .nb-tela { width: 100%; max-width: 560px; margin: 8px auto 0; }
 }
+
+/* Popina: "Com a cara do seu restaurante" (três cardápios de exemplo em celular real) */
+.pm-tres{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,3vw,40px);max-width:1040px;margin:28px auto 8px;align-items:start}
+.pm-tres figure{margin:0;text-align:center}
+.pm-tres img{width:100%;max-width:320px;height:auto;display:block;margin:0 auto}
+.pm-tres figcaption{margin-top:10px;display:flex;flex-direction:column;gap:2px}
+.pm-tres figcaption b{font-size:1.05rem}
+.pm-tres figcaption span{font-size:.92rem;opacity:.75}
+.pm-lista{list-style:none;padding:0;margin:26px auto 0;max-width:1040px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.pm-lista li{display:flex;flex-direction:column;gap:4px}
+.pm-lista b{font-size:1rem}
+.pm-lista span{font-size:.93rem;line-height:1.5;opacity:.82}
+.pm-nota{text-align:center;font-size:.82rem;opacity:.6;margin-top:18px}
+@media (max-width:760px){.pm-tres{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pm-tres figcaption b{font-size:.85rem}.pm-tres figcaption span{font-size:.75rem}.pm-lista{grid-template-columns:1fr 1fr}}
+@media (max-width:460px){.pm-lista{grid-template-columns:1fr}}

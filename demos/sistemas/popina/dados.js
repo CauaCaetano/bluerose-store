@@ -65,7 +65,7 @@ export const PRODUTOS = [
   P('cerveja', 'bebidas', 'Cerveja long neck', 'Long neck 330 ml bem gelada.', 11.9, 'bar', { ficha: [['cerveja', 1]] }),
   P('suco', 'bebidas', 'Suco natural', 'Laranja, limão, maracujá ou abacaxi com hortelã, 500 ml.', 12.9, 'bar', { ficha: [['suco', 100]] }),
   P('caipirinha', 'bebidas', 'Caipirinha', 'Limão, açúcar e cachaça artesanal.', 19.9, 'bar'),
-  P('agua', 'bebidas', 'Água mineral', 'Com ou sem gás, 500 ml.', 5.0, 'bar'),
+  P('agua', 'bebidas', 'Água mineral', 'Com ou sem gás, 500 ml.', 5.0, 'bar', { foto: '' }),
   P('petit', 'sobremesas', 'Petit gâteau', 'Bolinho de chocolate quente com sorvete de creme.', 24.9, 'cozinha', { ficha: [['chocolate', 60]] }),
   P('pudim', 'sobremesas', 'Pudim de leite', 'Pudim caseiro com calda de caramelo.', 14.9, 'cozinha', { ficha: [['leite_cond', 80], ['ovo', 1]] }),
 ].map((p) => ({ ...p, ficha: p.ficha.map(([insumo, qtd]) => ({ insumo, qtd })), ...(EXTRAS[p.id] || {}) }))

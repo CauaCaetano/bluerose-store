@@ -300,3 +300,4 @@
   .link-cardapio .bt{width:100%;justify-content:center}
 }
 @media (max-width:899px){.cab-caixa h1{font-size:28px!important}.cab-caixa h1 img{width:28px}.cab-caixa .bt.cheio{font-size:15px;padding:0 12px}}
+.estilos{display:grid;grid-template-columns:1fr 1fr;gap:10px}.estilo{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:12px 14px;border-radius:9px;border:1.5px solid #DCC6A8;background:#FFFBF3;cursor:pointer;color:#3B2A22}.estilo b{font:700 16px var(--g-serif,Georgia)}.estilo small{font-size:12.5px;color:#6B5A4F}.estilo.on{border-color:#B0532C;box-shadow:inset 0 0 0 1.5px #B0532C;background:#FBEDE1}

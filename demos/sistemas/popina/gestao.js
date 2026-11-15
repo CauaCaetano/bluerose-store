@@ -1,10 +1,10 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=8';
-import { acao, ir } from './nucleo.js?v=8';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=8';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=8';
-import { situacao, textoHorarios } from './opcoes.js?v=8';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=9';
+import { acao, ir } from './nucleo.js?v=9';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=9';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=9';
+import { situacao, textoHorarios } from './opcoes.js?v=9';
 import { qrSVG } from '../base/qr.js';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -18,6 +18,25 @@ function reduzir(arq, W, H, q = 0.74) {
     img.onload = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'); const e = Math.max(W / img.width, H / img.height), w = img.width * e, h = img.height * e;
       x.drawImage(img, (W - w) / 2, (H - h) / 2, w, h); URL.revokeObjectURL(u); ok(c.toDataURL('image/webp', q)); };
     img.onerror = () => { URL.revokeObjectURL(u); falha(new Error('imagem')); }; img.src = u;
+  });
+}
+
+// estilos do cardápio do cliente: o restaurante escolhe a cara (a cor e o logo são sempre os dele)
+const ESTILOS = [['rustico', 'Rústico', 'Pergaminho, louros e mosaico. Cantina, pizzaria, comida caseira'], ['moderno', 'Moderno', 'Limpo, com a cor do seu logo. Hamburgueria, café, japonês, açaí']];
+// a cor que mais aparece no logo (ignora branco, preto e cinza) vira a cor do restaurante
+function corDoLogo(src) {
+  return new Promise((ok) => {
+    const img = new Image(); img.onload = () => {
+      const c = document.createElement('canvas'); c.width = c.height = 48; const x = c.getContext('2d'); x.drawImage(img, 0, 0, 48, 48);
+      const d = x.getImageData(0, 0, 48, 48).data, cx = {};
+      for (let i = 0; i < d.length; i += 4) {
+        const [r, g, b, a] = [d[i], d[i + 1], d[i + 2], d[i + 3]]; const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+        if (a < 200 || mx - mn < 40 || mx < 50 || mn > 225) continue;
+        const k = [r, g, b].map((v) => Math.round(v / 32) * 32).join(','); (cx[k] ||= { n: 0, r: 0, g: 0, b: 0 }); cx[k].n++; cx[k].r += r; cx[k].g += g; cx[k].b += b;
+      }
+      const m = Object.values(cx).sort((a, b) => b.n - a.n)[0]; if (!m) return ok('');
+      ok('#' + [m.r, m.g, m.b].map((v) => Math.round(v / m.n).toString(16).padStart(2, '0')).join(''));
+    }; img.onerror = () => ok(''); img.src = src;
   });
 }
 
@@ -35,7 +54,9 @@ TELAS_MAIS.loja = () => {
       <label class="campo"><span>Nome do restaurante</span><input name="nome" value="${t(c.nome)}" maxlength="60"></label>
       <label class="campo"><span>Frase de boas-vindas</span><input name="boasVindas" value="${t(L.boasVindas)}" maxlength="120" placeholder="Ex.: Pizza no forno a lenha desde sempre"></label>
       <div class="campo"><span>Cor do restaurante</span><div class="cores">${CORES.map((x) => `<button type="button" class="cor ${x.toLowerCase() === String(L.cor).toLowerCase() ? 'on' : ''}" data-cor="${x}" style="background:${x}" aria-label="Cor ${x}"></button>`).join('')}<label class="cor livre" title="Outra cor"><input type="color" name="cor" value="${t(L.cor)}"></label></div></div>
-      <div class="campo"><span>Fundo do cardápio</span><div class="seg"><button type="button" data-tema="claro" aria-pressed="${L.tema !== 'escuro'}">Claro</button><button type="button" data-tema="escuro" aria-pressed="${L.tema === 'escuro'}">Escuro</button></div></div>
+      <div class="campo"><span>Estilo do cardápio</span><div class="estilos">${ESTILOS.map(([k, n, d]) => `<button type="button" class="estilo ${(L.estilo || 'rustico') === k ? 'on' : ''}" data-estilo="${k}"><b>${n}</b><small>${d}</small></button>`).join('')}</div></div>
+      <div class="campo"><span>Fundo do cardápio</span><div class="seg"><button type="button" data-tema="claro" aria-pressed="${L.tema !== 'escuro'}">Claro</button><button type="button" data-tema="escuro" aria-pressed="${L.tema === 'escuro'}">Escuro</button></div><small class="mudo">No estilo rústico o fundo é sempre o pergaminho.</small></div>
+      <label class="interruptor bloco-int"><input type="checkbox" name="creditos" ${L.creditos !== false ? 'checked' : ''}><span></span>Mostrar “Cardápio feito com o Popina” no rodapé</label>
     </section>
     <section class="bloco-form"><h2>Contato e endereço</h2>
       <label class="campo"><span>Endereço</span><input name="endereco" value="${t(L.endereco)}" placeholder="Rua, número · bairro"></label>
@@ -64,11 +85,12 @@ TELAS_MAIS.loja = () => {
 };
 MONTAR.loja = (el) => {
   const f = $('[data-loja]', el); if (!f) return;
-  let cor = lojaCfg().cor, temaSel = lojaCfg().tema;
+  let cor = lojaCfg().cor, temaSel = lojaCfg().tema, estiloSel = lojaCfg().estilo || 'rustico';
   const horarios = () => $$('[data-dia]', f).map((li) => $$('.turno', li).map((tu) => [$('[data-a]', tu).value, $('[data-f]', tu).value]).filter(([a, b]) => a && b));
   f.addEventListener('click', async (e) => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.cor) { cor = b.dataset.cor; $$('[data-cor]', f).forEach((x) => x.classList.toggle('on', x === b)); f.cor.value = cor; return; }
+    if (b.dataset.estilo) { estiloSel = b.dataset.estilo; $$('[data-estilo]', f).forEach((x) => x.classList.toggle('on', x === b)); return; }
     if (b.dataset.tema) { temaSel = b.dataset.tema; $$('[data-tema]', f).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); return; }
     if (b.dataset.tira) { setLoja({ [b.dataset.tira]: '' }); toast(b.dataset.tira === 'logo' ? 'Logo tirado' : 'Capa tirada'); return; }
     if ('maisTurno' in b.dataset) { const li = b.closest('[data-dia]'); const h = horarios(); h[li.dataset.dia].push(['18:00', '23:00']); setLoja({ horarios: h }); return; }
@@ -78,7 +100,10 @@ MONTAR.loja = (el) => {
   });
   f.cor.addEventListener('input', () => { cor = f.cor.value; $$('[data-cor]', f).forEach((x) => x.classList.remove('on')); });
   $$('input[name=pag]', f).forEach((i) => { i.onchange = () => i.closest('.chip').classList.toggle('on', i.checked); });
-  const img = async (inp, campo, W, H) => { const a = inp.files?.[0]; if (!a) return; try { setLoja({ [campo]: await reduzir(a, W, H) }); toast(campo === 'logo' ? 'Logo salvo' : 'Capa salva'); } catch { toast('Não consegui abrir essa imagem. Tente outra.'); } };
+  const img = async (inp, campo, W, H) => { const a = inp.files?.[0]; if (!a) return; try {
+    const v = await reduzir(a, W, H);
+    if (campo === 'logo') { const c2 = await corDoLogo(v); setLoja(c2 ? { logo: v, cor: c2 } : { logo: v }); toast(c2 ? 'Logo salvo. A cor do cardápio agora é a do seu logo (dá para trocar abaixo).' : 'Logo salvo'); return; }
+    setLoja({ [campo]: v }); toast('Capa salva'); } catch { toast('Não consegui abrir essa imagem. Tente outra.'); } };
   $('[data-arq-logo]', f).onchange = (e) => img(e.target, 'logo', 320, 320);
   $('[data-arq-capa]', f).onchange = (e) => img(e.target, 'capa', 1200, 520);
   f.onsubmit = (e) => {
@@ -86,7 +111,7 @@ MONTAR.loja = (el) => {
     c.nome = f.nome.value.trim() || c.nome; c.cidade = f.cidade.value.trim(); c.whatsapp = f.whatsapp.value.replace(/\D/g, '');
     db.bairros = db.bairros.map((b, k) => ({ nome: f[`b_nome_${k}`].value.trim(), taxa: num(f[`b_taxa_${k}`].value) })).filter((b) => b.nome);
     if (f.b_nome_n.value.trim()) db.bairros.push({ nome: f.b_nome_n.value.trim(), taxa: num(f.b_taxa_n.value) });
-    setLoja({ cor, tema: temaSel, boasVindas: f.boasVindas.value.trim(), endereco: f.endereco.value.trim(), instagram: f.instagram.value.trim().replace(/^@/, ''), aviso: f.aviso.value.trim(),
+    setLoja({ cor, tema: temaSel, estilo: estiloSel, creditos: f.creditos.checked, boasVindas: f.boasVindas.value.trim(), endereco: f.endereco.value.trim(), instagram: f.instagram.value.trim().replace(/^@/, ''), aviso: f.aviso.value.trim(),
       horarios: horarios(), aceitaQR: f.aceitaQR.checked, delivery: f.delivery.checked, retirada: f.retirada.checked, tempoEntrega: f.tempoEntrega.value.trim(), tempoRetirada: f.tempoRetirada.value.trim(),
       pedidoMinimo: r2(num(f.pedidoMinimo.value)), pagamentos: $$('input[name=pag]:checked', f).map((i) => i.value) });
     toast('Salvo. O cardápio online já mostra assim.');
