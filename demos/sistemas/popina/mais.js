@@ -1,11 +1,11 @@
 // Popina · Mais: cardápio (preços, esgotado, ficha técnica), estoque, relatórios, QR das mesas, ajustes e o papel deste aparelho.
-import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa } from './loja.js?v=10';
-import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=10';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=10';
+import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa } from './loja.js?v=11';
+import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=11';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=11';
 import { qrSVG } from '../base/qr.js';
 
 export const GRUPOS = [
-  ['Restaurante', [['loja', 'Restaurante e cardápio online', 'salao', 'Logo, capa, cor, horários, entrega e o link'], ['mesas', 'Mesas e QR', 'qr', 'Áreas do salão, número de mesas, QR de cada mesa'], ['ajustes', 'Caixa e regras', 'caixa', 'Pix, serviço, garçons e comissão, balança']]],
+  ['Restaurante', [['aparencia', 'Aparência e templates', 'ajustes', 'Template, logo, capa, cores e estilo do cardápio'], ['loja', 'Restaurante e cardápio online', 'salao', 'Contato, horários, entrega e o link'], ['mesas', 'Mesas e QR', 'qr', 'Áreas do salão, número de mesas, QR de cada mesa'], ['ajustes', 'Caixa e regras', 'caixa', 'Pix, serviço, garçons e comissão, balança']]],
   ['Cardápio e estoque', [['cardapio', 'Cardápio', 'cardapio', 'Pratos, tamanhos, complementos, fotos e preços'], ['estoque', 'Estoque', 'estoque', 'O que tem, o que acaba, compras']]],
   ['Vendas e clientes', [['relatorios', 'Relatórios', 'grafico', 'Vendas, garçons, horários, mais vendidos'], ['clientes', 'Clientes', 'pessoas', 'Quem pede no delivery e quanto gasta'], ['entregadores', 'Entregadores', 'moto', 'Quem levou cada pedido e o acerto do dia'], ['cupons', 'Cupons', 'conta', 'Descontos do cardápio online']]],
   ['Equipe e conta', [['equipe', 'Equipe e convites', 'pessoas', 'Quem usa, cargo e o que cada um vê'], ['conta', 'Minha conta', 'ajustes', 'Perfil, assinatura e sair'], ['aparelho', 'Este aparelho', 'ao_vivo', 'Garçom, cozinha, caixa ou dono']]],
@@ -256,7 +256,7 @@ acao('editar-prod', (b) => {
 });
 acao('cardapio-exemplo', async () => {
   if (!(await confirma('Carregar os 22 pratos de exemplo, com fotos e fichas técnicas? Depois é só trocar nomes e preços e apagar o que não serve.', 'Carregar'))) return;
-  const { cardapioExemplo } = await import('./dados.js?v=10'); const ex = cardapioExemplo();
+  const { cardapioExemplo } = await import('./dados.js?v=11'); const ex = cardapioExemplo();
   db.produtos.push(...ex.produtos.filter((p) => !prod(p.id))); ex.insumos.forEach((i) => { if (!insumo(i.id)) db.insumos.push(i); });
   grava(); toast('Cardápio de exemplo carregado');
 });
@@ -329,7 +329,7 @@ acao('imprimir-qr', () => {
   w.document.close();
 });
 acao('papel', (b) => { setPapel(b.dataset.p); toast(`Este aparelho agora é: ${PAPEIS[b.dataset.p][0]}`); ir(PAPEIS[b.dataset.p][1]); });
-acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=10'); recomecar(); ir('salao'); } });
+acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=11'); recomecar(); ir('salao'); } });
 
 acao('ordem', (b) => {
   const p = prod(b.dataset.p), l = db.produtos.filter((x) => x.cat === p.cat), k = l.indexOf(p), alvo = l[k + Number(b.dataset.d)]; if (!alvo) return;

@@ -1,8 +1,8 @@
 // Popina · tela da cozinha e do bar (KDS): cada envio vira um ticket, na ordem de chegada, com o tempo correndo.
 // "Começar" e "Pronto" avisam o garçom na hora (a fila dele mostra o prato pronto).
-import { db, t, tempo, minutos, comanda, mudarStatus } from './loja.js?v=10';
-import { registrar, acao } from './nucleo.js?v=10';
-import { ico, toast, bip, folha } from './ui.js?v=10';
+import { db, t, tempo, minutos, comanda, mudarStatus } from './loja.js?v=11';
+import { registrar, acao } from './nucleo.js?v=11';
+import { ico, toast, bip, folha } from './ui.js?v=11';
 
 let setor = (() => { try { const s = localStorage.getItem('popina-setor'); return s === 'bar' ? 'bar' : 'cozinha'; } catch { return 'cozinha'; } })();
 let vistos = new Set();

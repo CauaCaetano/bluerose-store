@@ -1,13 +1,13 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=10';
-import './cozinha.js?v=10';
-import './caixa.js?v=10';
-import './pedidos.js?v=10';
-import './mais.js?v=10';
-import './gestao.js?v=10';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=10';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=10';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=10';
+import './salao.js?v=11';
+import './cozinha.js?v=11';
+import './caixa.js?v=11';
+import './pedidos.js?v=11';
+import './mais.js?v=11';
+import './gestao.js?v=11';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=11';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=11';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=11';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -53,6 +53,9 @@ function marcaTopo() {
   if (b) b.textContent = m ? db.config.nome : 'POPINA';
   $('#topo-nome').textContent = m ? (db.config.cidade || '') : db.config.nome;
   document.body.classList.toggle('marca-propria', m);
+  // template escolhido em Gestão › Aparência (Taverna é o visual de base; Luxo e Realeza vêm por cima)
+  const tp = ['luxo', 'realeza'].includes(L.template) ? L.template : 'taverna';
+  ['taverna', 'luxo', 'realeza'].forEach((x) => document.body.classList.toggle(`tpl-${x}`, x === tp));
 }
 addEventListener('popina-plano', () => { marcaTopo(); dispatchEvent(new HashChangeEvent('hashchange')); });
 ouvir(contadores);

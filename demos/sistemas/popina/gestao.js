@@ -1,10 +1,10 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=10';
-import { acao, ir } from './nucleo.js?v=10';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=10';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=10';
-import { situacao, textoHorarios } from './opcoes.js?v=10';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=11';
+import { acao, ir } from './nucleo.js?v=11';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=11';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=11';
+import { situacao, textoHorarios } from './opcoes.js?v=11';
 import { qrSVG } from '../base/qr.js';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -22,7 +22,8 @@ function reduzir(arq, W, H, q = 0.74) {
 }
 
 // estilos do cardápio do cliente: o restaurante escolhe a cara (a cor e o logo são sempre os dele)
-const ESTILOS = [['rustico', 'Rústico', 'Pergaminho, louros e mosaico. Cantina, pizzaria, comida caseira'], ['moderno', 'Moderno', 'Limpo, com a cor do seu logo. Hamburgueria, café, japonês, açaí']];
+const ESTILOS = [['rustico', 'Rústico', 'Pergaminho, louros e mosaico. Cantina, pizzaria, comida caseira'], ['moderno', 'Moderno', 'Limpo, com a cor do seu logo. Hamburgueria, café, japonês, açaí'],
+  ['luxo', 'Luxo', 'Mármore claro e dourado. Restaurante fino'], ['realeza', 'Realeza', 'Veludo azul, ouro e carmesim. Casa clássica']];
 // a cor que mais aparece no logo (ignora branco, preto e cinza) vira a cor do restaurante
 function corDoLogo(src) {
   return new Promise((ok) => {
@@ -54,11 +55,20 @@ function planoMarca() {
     <div class="linha-bts">${CONTA ? '<a class="bt cheio" href="/popina.html#precos" target="_blank" rel="noopener">Ver o plano e assinar</a>' : '<button type="button" class="bt cheio" data-prever-marca>Ver como fica na demonstração</button>'}</div></section>`;
 }
 
-// ------------------------------------------------------------------ restaurante e cardápio online
-TELAS_MAIS.loja = () => {
-  const L = lojaCfg(), c = db.config, st = situacao(L.horarios);
-  return volta('mais', 'Restaurante e cardápio online', 'Do jeito que o cliente vê no celular quando lê o QR ou abre o link') + `
+// ------------------------------------------------------------------ aparência: template do sistema, logo, capa, cores e estilo do cardápio
+// templates do sistema inteiro (telas da equipe e cardápio), cada um com a sua paleta; conceitos do GPT em relatorios/popina/conceitos-gpt
+export const TEMPLATES = [
+  ['taverna', 'Taverna', 'Pergaminho, madeira e mosaico. Cantina, pizzaria, comida caseira', 'rustico'],
+  ['luxo', 'Luxo', 'Mármore claro e dourado. Restaurante fino, alta gastronomia', 'luxo'],
+  ['realeza', 'Realeza', 'Veludo azul, ouro e carmesim. Casa clássica, salão de eventos', 'realeza'],
+];
+TELAS_MAIS.aparencia = () => {
+  const L = lojaCfg(), c = db.config, tpl = L.template || 'taverna';
+  return volta('mais', 'Aparência e templates', 'A cara do sistema da equipe e do cardápio do cliente') + `
   <form class="form larga" data-loja>
+    <section class="bloco-form"><h2>Template do sistema</h2><p class="mudo">Muda as telas do salão, da cozinha, do caixa e da gestão, e o estilo do cardápio do cliente. Dá para trocar quando quiser; nada se perde.</p>
+      <div class="tpls">${TEMPLATES.map(([k, n, d]) => `<button type="button" class="tpl ${tpl === k ? 'on' : ''}" data-tpl="${k}"><img src="img/tpl-${k}.webp?v=1" alt="" width="480" height="300" loading="lazy"><b>${n}${tpl === k ? ' <em>em uso</em>' : ''}</b><small>${d}</small></button>`).join('')}</div>
+    </section>
     <section class="bloco-form"><h2>Identidade</h2>
       <div class="loja-visual">
         <div class="loja-capa" data-capa style="${L.capa ? `background-image:url('${t(L.capa)}')` : ''}"><label class="bt">${ico('mais2')}${L.capa ? 'Trocar a capa' : 'Pôr foto de capa'}<input type="file" accept="image/*" data-arq-capa hidden></label>${L.capa ? '<button type="button" class="link claro" data-tira="capa">Tirar</button>' : ''}</div>
@@ -73,6 +83,17 @@ TELAS_MAIS.loja = () => {
       <label class="interruptor bloco-int"><input type="checkbox" name="creditos" ${L.creditos !== false ? 'checked' : ''}><span></span>Mostrar “Cardápio feito com o Popina” no rodapé</label>
     </section>
     ${planoMarca()}
+    <div class="salvar-fixo"><button class="bt cheio grande">Salvar</button></div>
+  </form>`;
+};
+MONTAR.aparencia = (el) => MONTAR.loja(el);
+
+// ------------------------------------------------------------------ restaurante e cardápio online
+TELAS_MAIS.loja = () => {
+  const L = lojaCfg(), c = db.config, st = situacao(L.horarios);
+  return volta('mais', 'Restaurante e cardápio online', 'Do jeito que o cliente vê no celular quando lê o QR ou abre o link') + `
+  <form class="form larga" data-loja>
+    <p class="mudo">Logo, capa, cores, template e estilo do cardápio ficam em <a href="#mais/aparencia">Aparência e templates</a>.</p>
     <section class="bloco-form"><h2>Contato e endereço</h2>
       <label class="campo"><span>Endereço</span><input name="endereco" value="${t(L.endereco)}" placeholder="Rua, número · bairro"></label>
       <div class="duas-c"><label class="campo"><span>Cidade</span><input name="cidade" value="${t(c.cidade)}"></label><label class="campo"><span>WhatsApp do restaurante</span><input name="whatsapp" inputmode="tel" value="${t(c.whatsapp)}" placeholder="(16) 99999-0000"></label></div>
@@ -106,6 +127,7 @@ MONTAR.loja = (el) => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.cor) { cor = b.dataset.cor; $$('[data-cor]', f).forEach((x) => x.classList.toggle('on', x === b)); f.cor.value = cor; return; }
     if ('preverMarca' in b.dataset && !CONTA) { window.popinaPlano = window.popinaPlano === 'marca' ? 'basico' : 'marca'; dispatchEvent(new Event('popina-plano')); toast(window.popinaPlano === 'marca' ? 'Assim fica com a sua marca: veja o topo' : 'De volta ao plano normal'); return; }
+    if (b.dataset.tpl) { const k = b.dataset.tpl, tp = TEMPLATES.find((x) => x[0] === k); if (!tp) return; setLoja({ template: k, estilo: tp[3] }); toast(`Template ${tp[1]} aplicado no sistema e no cardápio`); return; }
     if (b.dataset.estilo) { estiloSel = b.dataset.estilo; $$('[data-estilo]', f).forEach((x) => x.classList.toggle('on', x === b)); return; }
     if (b.dataset.tema) { temaSel = b.dataset.tema; $$('[data-tema]', f).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); return; }
     if (b.dataset.tira) { setLoja({ [b.dataset.tira]: '' }); toast(b.dataset.tira === 'logo' ? 'Logo tirado' : 'Capa tirada'); return; }
@@ -114,22 +136,27 @@ MONTAR.loja = (el) => {
     if ('copiaSeg' in b.dataset) { const h = horarios(); [2, 3, 4, 5].forEach((d) => { h[d] = h[1].map((x) => [...x]); }); setLoja({ horarios: h }); toast('Horário de segunda copiado para terça a sexta'); return; }
     if ('copiar' in b.dataset) { navigator.clipboard?.writeText(linkCardapio('delivery=1')).then(() => toast('Link copiado')).catch(() => toast('Não deu para copiar: segure o link e copie')); }
   });
-  f.cor.addEventListener('input', () => { cor = f.cor.value; $$('[data-cor]', f).forEach((x) => x.classList.remove('on')); });
+  f.cor?.addEventListener('input', () => { cor = f.cor.value; $$('[data-cor]', f).forEach((x) => x.classList.remove('on')); });
   $$('input[name=pag]', f).forEach((i) => { i.onchange = () => i.closest('.chip').classList.toggle('on', i.checked); });
   const img = async (inp, campo, W, H) => { const a = inp.files?.[0]; if (!a) return; try {
     const v = await reduzir(a, W, H);
     if (campo === 'logo') { const c2 = await corDoLogo(v); setLoja(c2 ? { logo: v, cor: c2 } : { logo: v }); toast(c2 ? 'Logo salvo. A cor do cardápio agora é a do seu logo (dá para trocar abaixo).' : 'Logo salvo'); return; }
     setLoja({ [campo]: v }); toast('Capa salva'); } catch { toast('Não consegui abrir essa imagem. Tente outra.'); } };
-  $('[data-arq-logo]', f).onchange = (e) => img(e.target, 'logo', 320, 320);
-  $('[data-arq-capa]', f).onchange = (e) => img(e.target, 'capa', 1200, 520);
+  if ($('[data-arq-logo]', f)) $('[data-arq-logo]', f).onchange = (e) => img(e.target, 'logo', 320, 320);
+  if ($('[data-arq-capa]', f)) $('[data-arq-capa]', f).onchange = (e) => img(e.target, 'capa', 1200, 520);
   f.onsubmit = (e) => {
     e.preventDefault(); const c = db.config;
-    c.nome = f.nome.value.trim() || c.nome; c.cidade = f.cidade.value.trim(); c.whatsapp = f.whatsapp.value.replace(/\D/g, '');
-    db.bairros = db.bairros.map((b, k) => ({ nome: f[`b_nome_${k}`].value.trim(), taxa: num(f[`b_taxa_${k}`].value) })).filter((b) => b.nome);
-    if (f.b_nome_n.value.trim()) db.bairros.push({ nome: f.b_nome_n.value.trim(), taxa: num(f.b_taxa_n.value) });
-    setLoja({ cor, tema: temaSel, estilo: estiloSel, creditos: f.creditos.checked, boasVindas: f.boasVindas.value.trim(), endereco: f.endereco.value.trim(), instagram: f.instagram.value.trim().replace(/^@/, ''), aviso: f.aviso.value.trim(),
-      horarios: horarios(), aceitaQR: f.aceitaQR.checked, delivery: f.delivery.checked, retirada: f.retirada.checked, tempoEntrega: f.tempoEntrega.value.trim(), tempoRetirada: f.tempoRetirada.value.trim(),
-      pedidoMinimo: r2(num(f.pedidoMinimo.value)), pagamentos: $$('input[name=pag]:checked', f).map((i) => i.value) });
+    const p = {};
+    if (f.nome) { c.nome = f.nome.value.trim() || c.nome; Object.assign(p, { cor, tema: temaSel, estilo: estiloSel, creditos: f.creditos.checked, boasVindas: f.boasVindas.value.trim() }); }
+    if (f.cidade) {
+      c.cidade = f.cidade.value.trim(); c.whatsapp = f.whatsapp.value.replace(/\D/g, '');
+      db.bairros = db.bairros.map((b, k) => ({ nome: f[`b_nome_${k}`].value.trim(), taxa: num(f[`b_taxa_${k}`].value) })).filter((b) => b.nome);
+      if (f.b_nome_n.value.trim()) db.bairros.push({ nome: f.b_nome_n.value.trim(), taxa: num(f.b_taxa_n.value) });
+      Object.assign(p, { endereco: f.endereco.value.trim(), instagram: f.instagram.value.trim().replace(/^@/, ''), aviso: f.aviso.value.trim(),
+        horarios: horarios(), aceitaQR: f.aceitaQR.checked, delivery: f.delivery.checked, retirada: f.retirada.checked, tempoEntrega: f.tempoEntrega.value.trim(), tempoRetirada: f.tempoRetirada.value.trim(),
+        pedidoMinimo: r2(num(f.pedidoMinimo.value)), pagamentos: $$('input[name=pag]:checked', f).map((i) => i.value) });
+    }
+    setLoja(p);
     toast('Salvo. O cardápio online já mostra assim.');
   };
 };

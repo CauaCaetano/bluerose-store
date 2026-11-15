@@ -1,8 +1,8 @@
 // Popina · o estado do restaurante e as regras (enviar para a cozinha, baixar estoque, fechar conta, caixa).
 // Guarda no aparelho (localStorage) e avisa as outras abas na hora (BroadcastChannel). Na conta real, a mesma
 // interface (window.popinaNuvem) troca isso pela nuvem com tempo real entre os aparelhos.
-import { estadoInicial, estadoVazio } from './dados.js?v=10';
-import { precoTam, nomeItem, opcaoReal } from './opcoes.js?v=10';
+import { estadoInicial, estadoVazio } from './dados.js?v=11';
+import { precoTam, nomeItem, opcaoReal } from './opcoes.js?v=11';
 
 export const CHAVE = 'popina-v1';
 // conta real: conta-nuvem.js (carregado antes) troca a chave pela da empresa e sobe cada alteração para a nuvem
@@ -261,7 +261,7 @@ window.popinaChegou = (lista) => {
 
 // ------------------------------------------------------------------ loja: a cara do restaurante e as regras do cardápio online
 export const LOJA_PADRAO = {
-  cor: '#B4532F', tema: 'claro', estilo: 'rustico', creditos: true, logo: '', capa: '', boasVindas: '', endereco: '', instagram: '', aviso: '',
+  cor: '#B4532F', tema: 'claro', template: 'taverna', estilo: 'rustico', creditos: true, logo: '', capa: '', boasVindas: '', endereco: '', instagram: '', aviso: '',
   // horários por dia da semana (0 = domingo): lista de turnos [abre, fecha]; fecha depois da meia-noite vale ("18:00", "01:00")
   horarios: [[['11:00', '15:00']], [], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:59']], [['11:00', '15:30'], ['18:00', '23:59']]],
   aceitaQR: true, delivery: true, retirada: true, pedidoMinimo: 0, tempoEntrega: '40 a 60 min', tempoRetirada: '20 a 30 min',

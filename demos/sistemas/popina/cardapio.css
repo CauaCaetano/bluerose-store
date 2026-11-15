@@ -260,3 +260,39 @@ body.est-moderno .cli-ver i{width:1px;height:26px;background:currentColor;opacit
 body.est-moderno .cli-ver b{font-size:18px}
 body.est-moderno .cli-barra:empty{display:none}
 @media (min-width:1080px){body.est-moderno .cli-barra{display:none}}
+
+/* ---------- estilo LUXO do cardápio (template Luxo): mármore claro, dourado e bordô ---------- */
+body.est-luxo{--marca:#8E2A3A!important;--marca-txt:#FFF7EF!important;--fundo:#FBF8F1;--cartao:#FFFFFF;--linha2:#EADBB8;--txt:#3A2E22;--txt2:#7A6A58;
+  background:linear-gradient(rgba(255,253,248,.7),rgba(255,253,248,.7)),url(img/tl-marmore.webp?v=2) 0 0/800px auto!important}
+body.est-luxo h1,body.est-luxo h2,body.est-luxo .cli-prod-txt b,body.est-luxo .cli-dest b,body.est-luxo .cli-preco,body.est-luxo .cli-ver{font-family:"Playfair Display",Georgia,serif!important;font-weight:500!important}
+body.est-luxo .cli-capa-foto::after{background:linear-gradient(180deg,transparent 30%,rgba(40,28,14,.45))}
+body.est-luxo .cli-logo{box-shadow:0 0 0 2px #C9A35A,0 8px 20px -8px rgba(120,90,30,.6)!important}
+body.est-luxo .cli-id-txt h1{letter-spacing:.06em;text-transform:uppercase;font-size:24px!important}
+body.est-luxo .cli-fita{background:linear-gradient(180deg,#E9D29A,#C9A35A)!important;color:#3B2A12!important;box-shadow:inset 0 0 0 1px #B08A44}
+body.est-luxo .cli-h2{text-transform:uppercase;letter-spacing:.08em;color:#9C7A3C!important;font-size:18px!important}
+body.est-luxo .cli-h2::after{background:#D9BE85!important;opacity:1!important;height:1px!important}
+body.est-luxo .cli-prod,body.est-luxo .cli-dest,body.est-luxo .cli-modo-bts .bt,body.est-luxo .cli-busca,body.est-luxo .cli-cats a{border:1px solid #E3CC98!important;box-shadow:0 6px 16px -12px rgba(120,90,30,.5)!important}
+body.est-luxo .cli-cats a.on{background:linear-gradient(180deg,#E9D29A,#C9A35A)!important;color:#3B2A12!important;border-color:#B08A44!important}
+body.est-luxo .cli-modo-bts .bt .ico{color:#8E2A3A!important}
+body.est-luxo .cli-preco{color:#8E2A3A!important}
+body.est-luxo .tag{background:#F6ECD6!important;color:#7A5A22!important}body.est-luxo .tag.verde{background:#E7EEE1!important;color:#5A7550!important}
+body.est-luxo .cli-ver{background:linear-gradient(180deg,#E9D29A,#C9A35A)!important;color:#3B2A12!important;box-shadow:inset 0 0 0 1px #B08A44,0 14px 28px -14px rgba(120,90,30,.7)!important}
+/* ---------- estilo REALEZA do cardápio (template Realeza): veludo azul, ouro, carmesim e pergaminho ---------- */
+body.est-realeza{--marca:#8E1B26!important;--marca-txt:#F3D683!important;--fundo:#F4E7C8;--cartao:#FBF3DE;--linha2:#D9B25A;--txt:#3A2412;--txt2:#5E4630;background:#F4E7C8!important}
+body.est-realeza h1,body.est-realeza h2,body.est-realeza .cli-prod-txt b,body.est-realeza .cli-dest b,body.est-realeza .cli-preco,body.est-realeza .cli-ver,body.est-realeza .cli-fita b,body.est-realeza .cli-cats a{font-family:"Cinzel",Georgia,serif!important}
+body.est-realeza .cli-capa{background:#18215C url(img/tr-damasco.webp?v=1) 0 0/880px auto!important;border-bottom:3px solid #D9B25A}
+body.est-realeza .cli-capa-foto::after{background:linear-gradient(180deg,rgba(24,33,92,.15),rgba(24,33,92,.85))}
+body.est-realeza .cli-id-txt h1{color:#F3D683!important;text-shadow:0 2px 0 #4A3510}
+body.est-realeza .cli-id-txt p{color:#E9D9AE!important}
+body.est-realeza .cli-logo{box-shadow:0 0 0 3px #D9B25A,0 8px 20px -8px rgba(0,0,0,.6)!important}
+body.est-realeza .cli-fita{background:linear-gradient(180deg,#AA2633,#8E1B26)!important;color:#F3D683!important;box-shadow:inset 0 0 0 1.5px #D9B25A;border-radius:6px!important}
+body.est-realeza .cli-h2{color:#8E1B26!important;text-transform:uppercase;letter-spacing:.04em}
+body.est-realeza .cli-h2::after{background:#D9B25A!important;opacity:1!important}
+body.est-realeza .cli-prod,body.est-realeza .cli-dest,body.est-realeza .cli-modo-bts .bt,body.est-realeza .cli-busca,body.est-realeza .cli-cats a{border:1.5px solid #D9B25A!important;border-radius:10px!important;background:#FBF3DE!important}
+body.est-realeza .cli-cats a.on{background:linear-gradient(180deg,#AA2633,#8E1B26)!important;color:#F3D683!important}
+body.est-realeza .cli-modo-bts .bt .ico{color:#8E1B26!important}
+body.est-realeza .cli-preco{color:#8E1B26!important}
+body.est-realeza .tag{background:#F3D683!important;color:#5A3A08!important}body.est-realeza .tag.verde{background:#1F5E33!important;color:#F3D683!important}
+body.est-realeza .cli-mais{box-shadow:0 0 0 2px #D9B25A!important}
+body.est-realeza .cli-ver{background:linear-gradient(180deg,#AA2633,#8E1B26)!important;color:#F3D683!important;box-shadow:inset 0 0 0 1.5px #D9B25A,0 14px 28px -14px rgba(90,10,20,.7)!important}
+body.est-realeza .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:28px;background:#18215C url(img/tr-damasco.webp?v=1) 0 0/440px auto;border-top:2px solid #D9B25A}

@@ -308,3 +308,12 @@
 .plano-marca{border-left:4px solid #B0532C!important}
 .plano-marca.on{border-left-color:#5F6B2B!important}
 .plano-marca code{word-break:break-all;font-size:13px}
+
+/* Gestão › Aparência: cartões dos templates */
+.tpls{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.tpl{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:8px 8px 12px;border-radius:12px;border:1.5px solid #DCC6A8;background:#FFFBF3;cursor:pointer;color:#3B2A22}
+.tpl img{width:100%;height:auto;border-radius:8px;display:block}
+.tpl b{font:700 17px var(--g-serif,Georgia);padding:0 4px}
+.tpl b em{font:700 11px/1 sans-serif;font-style:normal;background:#5F6B2B;color:#fff;border-radius:99px;padding:3px 8px;vertical-align:middle;margin-left:6px}
+.tpl small{font-size:13px;color:#6B5A4F;padding:0 4px}
+.tpl.on{border-color:#B0532C;box-shadow:inset 0 0 0 2px #B0532C}

@@ -1,0 +1,124 @@
+/* Popina · template REALEZA: veludo azul-real adamascado, ouro, carmesim, esmeralda e pergaminho real.
+   Conceito do GPT: relatorios/popina/conceitos-gpt/10-template-realeza-salao.png. Vem por cima do visual Taverna. */
+body.tpl-realeza{--r-azul:#1C2668;--r-azul2:#2A3A8C;--r-ouro:#D9B25A;--r-ourocl:#F3D683;--r-carm:#8E1B26;--r-carm2:#AA2633;--r-esm:#1F5E33;--r-esm2:#2C7A45;--r-perg:#F4E7C8;--r-tinta:#3A2412;
+  --r-tit:"Cinzel",Georgia,serif;--g-tinta:#3A2412;--g-tinta2:#5E4630;
+  background:#1C2668 url(img/tr-damasco.webp?v=1) 0 0/880px auto!important;color:var(--r-tinta)}
+body.tpl-realeza:not(.cliente)::before{background:linear-gradient(90deg,#141C52 0 40px,var(--r-ouro) 40px 42px,#141C52 42px 46px,var(--r-ouro) 46px 47px,transparent 47px)!important;border:0!important}
+/* topo */
+body.tpl-realeza .topo{background:#18215C url(img/tr-damasco.webp?v=1) 0 0/880px auto!important;border-bottom:2px solid var(--r-ouro)!important;box-shadow:0 2px 0 #8C6A24}
+body.tpl-realeza .topo::before{display:none!important}
+body.tpl-realeza .topo>div>b{font-family:var(--r-tit)!important;color:var(--r-ourocl)!important;letter-spacing:.06em!important}
+body.tpl-realeza .topo small{color:#E9D9AE!important;font-family:var(--r-tit)!important;letter-spacing:.14em;text-transform:uppercase;font-size:11.5px!important}
+body.tpl-realeza .nav a{font-family:var(--r-tit)!important;color:#F1E3BC!important;letter-spacing:.04em;font-size:15px!important}
+body.tpl-realeza .nav a .ico{color:var(--r-ourocl)}
+body.tpl-realeza .nav a.on{background:linear-gradient(180deg,var(--r-carm2),var(--r-carm))!important;color:var(--r-ourocl)!important;box-shadow:inset 0 0 0 1.5px var(--r-ouro),0 3px 8px -3px rgba(0,0,0,.5)!important;border-radius:9px}
+body.tpl-realeza .topo-sino{color:var(--r-ourocl)!important}
+body.tpl-realeza .topo-div{background:var(--r-ouro)!important}
+body.tpl-realeza .topo-perfil{color:var(--r-ourocl)!important}
+body.tpl-realeza .topo-perfil span{background:var(--r-azul2)!important;color:var(--r-ourocl)!important;box-shadow:inset 0 0 0 2px var(--r-ouro);font-family:var(--r-tit)!important}
+body.tpl-realeza .ao-vivo{background:var(--r-azul2);color:var(--r-ourocl)}
+/* títulos dourados sobre o veludo */
+body.tpl-realeza .cab-salao h1,body.tpl-realeza .cab-cozinha h1,body.tpl-realeza .cab-pedidos h1,body.tpl-realeza .cab-caixa h1,body.tpl-realeza .cab-gestao h1,body.tpl-realeza .cab-g h1{font-family:var(--r-tit)!important;color:var(--r-ourocl)!important;text-shadow:0 2px 0 #6E5214,0 4px 12px rgba(0,0,0,.5)}
+body.tpl-realeza .cab-g p,body.tpl-realeza .cab-caixa p,body.tpl-realeza .cab-cozinha p{color:#E9D9AE!important}
+body.tpl-realeza .cab-salao .aqueduto-img,body.tpl-realeza .cab-pedidos .aqueduto-img,body.tpl-realeza .g-aqueduto,body.tpl-realeza .cx-aqueduto{content:url(img/tr-palacio.webp?v=1);mix-blend-mode:normal}
+body.tpl-realeza .folhas-img{display:none!important}
+body.tpl-realeza img[src*="louro-esq"]{content:url(img/tr-louro-esq.webp?v=1)}
+body.tpl-realeza img[src*="louro-dir"]{content:url(img/tr-louro-dir.webp?v=1)}
+/* painéis de pergaminho real com moldura de ouro */
+body.tpl-realeza .prancheta,body.tpl-realeza .ticket-dia,body.tpl-realeza .comanda-papel,body.tpl-realeza .conta-det,body.tpl-realeza .gestao-nav,body.tpl-realeza .g-card,body.tpl-realeza .cartao-caixa{
+  border-style:solid!important;border-width:30px!important;border-image:url(img/tr-moldura.webp?v=1) 46 stretch!important;border-radius:0!important;background:var(--r-perg) padding-box!important;box-shadow:0 14px 30px -18px rgba(0,0,0,.7)!important;color:var(--r-tinta)!important}
+body.tpl-realeza .gestao-corpo .bloco,body.tpl-realeza .gestao-corpo .bloco-form,body.tpl-realeza .gestao-corpo .tabela-rolo,body.tpl-realeza .gestao-corpo .resumo-dia>*,body.tpl-realeza .link-cardapio,body.tpl-realeza .area{
+  border:2px solid var(--r-ouro)!important;border-image:none!important;border-radius:12px!important;background:var(--r-perg)!important;box-shadow:inset 0 0 0 4px var(--r-perg),inset 0 0 0 5px #C9A04A,0 12px 26px -18px rgba(0,0,0,.7)!important;color:var(--r-tinta)!important}
+body.tpl-realeza .prancheta{position:relative;margin-top:60px!important;padding:0 2px 4px!important}
+body.tpl-realeza .prancheta::after{content:"";position:absolute;top:-96px;left:50%;width:212px;height:114px;transform:translateX(-50%);background:url(img/tr-brasao.webp?v=1) center/contain no-repeat;pointer-events:none}
+body.tpl-realeza .prancheta-cab{background:linear-gradient(180deg,var(--r-azul2),var(--r-azul))!important;border-radius:6px!important;padding:10px 4px!important;margin:0 0 10px!important}
+body.tpl-realeza .prancheta-cab h2{font-family:var(--r-tit)!important;color:var(--r-ourocl)!important}
+body.tpl-realeza .prancheta-sub{color:#E9D9AE!important}
+body.tpl-realeza .prancheta .fila,body.tpl-realeza .fila-vazia{background:none!important;color:var(--r-tinta)!important}
+body.tpl-realeza .fila-item{background:#FBF3DE!important;border:1px solid #DCC28A!important;border-radius:6px!important;box-shadow:0 2px 0 rgba(120,80,20,.25)!important}
+body.tpl-realeza .fila-txt b{font-family:var(--r-tit)!important;font-size:16px!important}
+body.tpl-realeza .faixa.ouro{background:var(--r-ouro)!important}body.tpl-realeza .faixa.oliva{background:var(--r-esm)!important}body.tpl-realeza .faixa.terra{background:var(--r-carm)!important}body.tpl-realeza .faixa.amarelo{background:#E9C04A!important}
+/* botões */
+body.tpl-realeza .bt.cheio,body.tpl-realeza .fila-item .bt.cheio{background:linear-gradient(180deg,var(--r-carm2),var(--r-carm))!important;border:1.5px solid var(--r-ouro)!important;color:var(--r-ourocl)!important;font-family:var(--r-tit)!important}
+body.tpl-realeza .bt.oliva,body.tpl-realeza .fila-item .bt.oliva{background:linear-gradient(180deg,var(--r-esm2),var(--r-esm))!important;border:1.5px solid var(--r-ouro)!important;color:var(--r-ourocl)!important;font-family:var(--r-tit)!important}
+body.tpl-realeza .bt.claro,body.tpl-realeza .gestao-corpo .bt:not(.cheio):not(.oliva):not(.perigo){background:#FBF3DE!important;border:1.5px solid #C9A04A!important;color:var(--r-tinta)!important}
+/* títulos de painel como faixa carmesim */
+body.tpl-realeza .ticket-cab h2,body.tpl-realeza .cx-h2,body.tpl-realeza .h2-pagar,body.tpl-realeza .comanda-papel .sec-tit h2,body.tpl-realeza .gestao-corpo .sec-tit h2{font-family:var(--r-tit)!important;color:var(--r-carm)!important;background:none!important;clip-path:none!important}
+body.tpl-realeza .cx-h2,body.tpl-realeza .h2-pagar{color:var(--r-ourocl)!important}
+body.tpl-realeza .conta-det .h2-pagar{color:var(--r-carm)!important}
+body.tpl-realeza .ticket-total,body.tpl-realeza .conta-det .totais .total,body.tpl-realeza .comanda-papel .totais .total{border:1.5px solid var(--r-ouro)!important;border-image:none!important;border-radius:8px!important;background:linear-gradient(180deg,var(--r-carm2),var(--r-carm))!important;margin-left:0!important;margin-right:0!important;padding:0 16px!important}
+body.tpl-realeza .ticket-total span,body.tpl-realeza .ticket-total b,body.tpl-realeza .conta-det .totais .total span,body.tpl-realeza .conta-det .totais .total b,body.tpl-realeza .comanda-papel .totais .total span,body.tpl-realeza .comanda-papel .totais .total b{color:var(--r-ourocl)!important;margin:0!important;font-family:var(--r-tit)!important}
+body.tpl-realeza .louro-img{content:url(img/tr-coroa.webp?v=1);width:200px!important;bottom:-70px!important}
+body.tpl-realeza .ticket-dia{margin-bottom:60px!important}
+/* salão */
+body.tpl-realeza .legenda{background:var(--r-perg);border:1.5px solid var(--r-ouro);border-radius:10px;padding:6px 14px;width:max-content;margin-left:auto!important;color:var(--r-tinta)!important}
+body.tpl-realeza .legenda i.ocupada{background:var(--r-carm)!important}body.tpl-realeza .legenda i.pronto{background:var(--r-esm)!important}body.tpl-realeza .legenda i.conta{background:#C99A2E!important}
+body.tpl-realeza .legenda i.chamou{background:#FBE7A6!important;box-shadow:inset 0 0 0 2px #E2B84A!important}body.tpl-realeza .legenda i.livre{background:var(--r-azul2)!important;box-shadow:none!important}
+body.tpl-realeza .area{padding-top:30px!important}
+body.tpl-realeza .fita,body.tpl-realeza .fita.verde,body.tpl-realeza .g-fita,body.tpl-realeza .kds-col .placa,body.tpl-realeza .cab-comanda .fita-mesa,body.tpl-realeza .cab-conta .fita,body.tpl-realeza .ticket-cab h2{border-style:solid!important;border-width:0 60px 0 72px!important;border-image:url(img/tr-faixa.webp?v=1) 0 70 0 84 fill stretch!important;
+  background:none!important;clip-path:none!important;color:var(--r-ourocl)!important;font-family:var(--r-tit)!important;text-transform:uppercase;letter-spacing:.06em;height:56px;display:inline-flex;align-items:center;padding:0 2px!important;text-shadow:0 1px 0 #4A0C12}
+body.tpl-realeza .ticket-cab h2{height:46px;font-size:15px!important;border-width:0 44px 0 52px!important}
+body.tpl-realeza .fita .ico,body.tpl-realeza .g-fita .ico{display:none}
+body.tpl-realeza .area-cab span{color:var(--r-tinta)!important}
+body.tpl-realeza .mesa{border-radius:10px!important;font-family:var(--r-tit)!important;color:var(--r-ourocl)!important;box-shadow:inset 0 0 0 2px var(--r-ouro),inset 0 0 0 4px rgba(0,0,0,.18),0 6px 12px -8px rgba(0,0,0,.6)!important}
+body.tpl-realeza .mesa b{font-family:var(--r-tit)!important;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+body.tpl-realeza .mesa.ocupada,body.tpl-realeza .mesa.chamou{background:linear-gradient(170deg,var(--r-carm2),var(--r-carm))!important}
+body.tpl-realeza .mesa.pronto,body.tpl-realeza .mesa.qr{background:linear-gradient(170deg,var(--r-esm2),var(--r-esm))!important}
+body.tpl-realeza .mesa.conta{background:linear-gradient(170deg,#E2B248,#B8861E)!important;color:#FFF6DC!important}
+body.tpl-realeza .mesa.livre{background:linear-gradient(170deg,#3550A8,#22377F)!important;color:var(--r-ourocl)!important}
+body.tpl-realeza .salao-dir .mesa.chamou{box-shadow:inset 0 0 0 2px #FFE27A,0 0 0 2px #E2B84A,0 0 20px rgba(255,214,110,.8)!important}
+body.tpl-realeza .mesa-sinal{background:none!important;box-shadow:none!important;color:inherit!important}
+/* cozinha e pedidos */
+body.tpl-realeza .kds.quadro{border:2px solid var(--r-ouro)!important;border-image:none!important;border-radius:14px!important;background:rgba(20,28,82,.55)!important;padding:10px!important}
+body.tpl-realeza .kds-col+.kds-col{border-left:1px solid rgba(217,178,90,.5)!important;box-shadow:none!important}
+body.tpl-realeza .kds-col .trilho{display:none}
+body.tpl-realeza .kds-col .placa{margin:8px auto 12px!important;font-size:15px!important;width:max-content}
+body.tpl-realeza .kds-col .placa span{color:inherit!important}
+body.tpl-realeza .kds .ticket{border:1.5px solid #C9A04A!important;border-left:6px solid var(--r-carm)!important;border-image:none!important;border-radius:8px!important;background:var(--r-perg)!important;margin-bottom:10px!important;padding:10px 10px 10px 8px!important}
+body.tpl-realeza .kds .ticket.preparo{border-left-color:#C99A2E!important}body.tpl-realeza .kds .ticket.pronto{border-left-color:var(--r-esm)!important}
+body.tpl-realeza .kds .tk-tit b{color:var(--r-tinta)!important;font-family:var(--r-tit)!important}
+body.tpl-realeza .kds .relogio b{color:var(--r-carm)!important}
+body.tpl-realeza .kds-col.pronto::after,body.tpl-realeza .pd-quadro::after{opacity:0!important}
+body.tpl-realeza .vazio-quadro{color:#E9D9AE!important}
+body.tpl-realeza .seg-coz{background:var(--r-azul2)!important;border-color:var(--r-ouro)!important}
+body.tpl-realeza .seg-coz button{color:var(--r-ourocl)!important}
+body.tpl-realeza .seg-coz button[aria-pressed=true]{background:linear-gradient(180deg,var(--r-carm2),var(--r-carm))!important}
+body.tpl-realeza .bt-tela{color:var(--r-ourocl)!important}
+/* caixa */
+body.tpl-realeza .cartao-caixa{padding:4px 8px!important}
+body.tpl-realeza .cc-topo b,body.tpl-realeza .cc-formas b{color:var(--r-tinta)!important;font-family:var(--r-tit)!important}
+body.tpl-realeza .cc-topo small,body.tpl-realeza .cc-topo span,body.tpl-realeza .cc-formas span,body.tpl-realeza .cc-formas .ico{color:#5E4630!important}
+body.tpl-realeza .cc-formas,body.tpl-realeza .cc-formas>div{border-color:#DCC28A!important}
+body.tpl-realeza .cc-bts .bt{background:#FBF3DE!important;border:1.5px solid #C9A04A!important;color:var(--r-tinta)!important}
+body.tpl-realeza .cc-bts .bt.escuro{background:linear-gradient(180deg,var(--r-carm2),var(--r-carm))!important;color:var(--r-ourocl)!important}
+body.tpl-realeza .conta-linha{background:var(--r-perg)!important;border:1.5px solid #C9A04A!important}
+body.tpl-realeza .conta-linha.on{border:2px solid var(--r-carm)!important}
+body.tpl-realeza .conta-det .itens,body.tpl-realeza .conta-det .forma{background:#FBF3DE!important;border-color:#DCC28A!important}
+body.tpl-realeza .conta-det .forma .ico{color:var(--r-carm)!important}
+/* gestão */
+body.tpl-realeza .gestao-nav{padding:6px 2px!important}
+body.tpl-realeza .gestao-nav .mg-grupo h3.g-fita{font-size:13px!important;height:46px;border-width:0 44px 0 52px!important}
+body.tpl-realeza .gestao-nav .mg-grupo>a{border-bottom-color:#E3CFA0!important}
+body.tpl-realeza .gestao-nav .mg-grupo>a.on{background:#FBF3DE!important;border-color:var(--r-carm)!important}
+body.tpl-realeza .gestao-nav .mg-grupo>a.on .mm-ico,body.tpl-realeza .gestao-nav .mg-grupo>a.on b{color:var(--r-carm)!important}
+body.tpl-realeza .g-cols i{background:linear-gradient(var(--r-carm2),var(--r-carm))!important}
+body.tpl-realeza .gestao-corpo .resumo-dia>.ka.alerta{background:#F7DDD8!important;color:var(--r-carm)!important}
+body.tpl-realeza .gestao-corpo .chip.on{background:var(--r-carm)!important;border-color:var(--r-carm)!important}
+/* comanda e folha */
+body.tpl-realeza .cab-comanda p{color:#E9D9AE!important}
+body.tpl-realeza .cab-comanda .bt-ico{background:var(--r-perg)!important;border:1.5px solid var(--r-ouro)!important}
+body.tpl-realeza [data-tela=mesa] .barra-acoes::after{background:url(img/tr-coroa.webp?v=1) center/auto 100% no-repeat!important;height:44px!important}
+body.tpl-realeza .folha{background:var(--r-perg)!important}
+body.tpl-realeza .folha-pe{background:#EEDDB5!important;border-top-color:#C9A04A!important}
+@media (max-width:899px){body.tpl-realeza .nav{background:#18215C!important;border-top:2px solid var(--r-ouro)!important}body.tpl-realeza .nav a.on{background:none!important;box-shadow:none!important;color:var(--r-ourocl)!important}
+  body.tpl-realeza .prancheta,body.tpl-realeza .ticket-dia,body.tpl-realeza .comanda-papel,body.tpl-realeza .conta-det,body.tpl-realeza .cartao-caixa{border-width:22px!important}}
+body.tpl-realeza .prancheta,body.tpl-realeza .ticket-dia,body.tpl-realeza .comanda-papel,body.tpl-realeza .conta-det,body.tpl-realeza .gestao-nav,body.tpl-realeza .g-card,body.tpl-realeza .cartao-caixa{border-width:24px!important;border-image-slice:30!important}
+body.tpl-realeza .ticket-cab h2{white-space:nowrap;font-size:13px!important}
+body.tpl-realeza .cab-conta .fita{white-space:nowrap;font-size:20px!important;height:50px}
+body.tpl-realeza .pd-quadro .placa,body.tpl-realeza .kds-col .placa{font-size:12.5px!important;border-width:0 40px 0 50px!important;white-space:nowrap;height:48px}
+body.tpl-realeza .pd-quadro .placa span,body.tpl-realeza .kds-col .placa span{font-size:12px!important}
+@media (max-width:899px){body.tpl-realeza .prancheta{margin-top:10px!important}body.tpl-realeza .prancheta::after{display:none}body.tpl-realeza .prancheta-cab h2{font-size:16px!important;white-space:normal}body.tpl-realeza .cab-comanda .fita-mesa{white-space:nowrap;font-size:20px!important;border-width:0 40px 0 46px!important}body.tpl-realeza .cab-comanda .fita-mesa img{display:none}body.tpl-realeza .topo::after{background-image:url(img/tr-palacio.webp?v=1)!important}}
+@media (max-width:899px){body.tpl-realeza .nav a{font-size:11.5px!important;letter-spacing:0!important;min-width:0}}
+@media (max-width:899px){body.tpl-realeza .salao-grade,body.tpl-realeza .gestao{grid-template-columns:minmax(0,1fr)!important}body.tpl-realeza .salao-esq,body.tpl-realeza .gestao-corpo{min-width:0}body.tpl-realeza .prancheta,body.tpl-realeza .ticket-dia,body.tpl-realeza .g-card{box-sizing:border-box;max-width:100%;min-width:0}body.tpl-realeza .prancheta-cab .louro-p{width:28px!important;height:auto}body.tpl-realeza .ticket-cab{flex-wrap:wrap;gap:6px}body.tpl-realeza .g-card h2.g-fita,body.tpl-realeza .gestao-corpo .resumo-dia b{white-space:normal!important}}
+@media (max-width:899px){body.tpl-realeza .legenda{width:auto!important;margin-left:0!important}body.tpl-realeza .g-painel{grid-template-columns:minmax(0,1fr)!important}body.tpl-realeza .g-barras{overflow-x:auto}body.tpl-realeza .g-card h2.g-fita{max-width:100%;font-size:15px!important;border-width:0 40px 0 50px!important}}
+@media (max-width:899px){body.tpl-realeza .area-cab{flex-wrap:wrap;margin-left:-10px!important}body.tpl-realeza .area-cab span{margin-top:4px!important}body.tpl-realeza .area .fita{font-size:15px!important;border-width:0 44px 0 52px!important;height:48px}}
