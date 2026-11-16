@@ -214,6 +214,7 @@
   .nv-bt:hover{background:#AD8E55}.nv-bt[disabled]{opacity:.55;pointer-events:none}
   .nv-bt.linha{background:transparent;border:1px solid rgba(17,24,32,.22)}
   a.nv-bt{text-decoration:none;box-sizing:border-box}
+  .nv-sso{margin-top:6px}.nv-ou{text-align:center;color:#5b6472;margin:14px 0 0;font-size:14px}
   .nv-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:16px;font-size:14px}
   .nv-links button,.nv-link{background:none;border:0;padding:6px 0;color:#7A6131;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
   .nv-msg{margin-top:12px;font-size:14px;padding:10px 12px;border-radius:8px;background:#F4F0E8}.nv-msg.erro{background:#F6E3E1;color:#9E3F3B}.nv-msg.ok{background:#E3ECE6;color:#4A6154}
@@ -261,15 +262,33 @@
   }
 
   // ---------- telas de conta ----------
+  // Entrar com Google ou Microsoft: os botões só aparecem quando o provedor estiver ligado no Supabase
+  // (a configuração pública do Auth diz quais estão ligados; nada aparece enquanto o dono não criar as chaves)
+  async function botoesSSO() {
+    const caixaSSO = tela.querySelector('.nv-sso'); if (!caixaSSO) return;
+    let ext = {};
+    try { const r = await fetch(`${CFG.url}/auth/v1/settings`, { headers: { apikey: CFG.chave } }); ext = (await r.json()).external || {}; } catch (e) { return; }
+    const P = [['google', 'Entrar com Google'], ['azure', 'Entrar com Microsoft']].filter(([k]) => ext[k]);
+    if (!P.length || !tela.contains(caixaSSO)) return;
+    caixaSSO.hidden = false;
+    caixaSSO.innerHTML = '<p class="nv-ou">ou</p>' + P.map(([k, n]) => `<button type="button" class="nv-bt linha" data-sso="${k}">${n}</button>`).join('');
+    caixaSSO.querySelectorAll('[data-sso]').forEach((b) => { b.onclick = async () => {
+      ocupado(b, true, 'Abrindo…');
+      const { error } = await sb.auth.signInWithOAuth({ provider: b.dataset.sso, options: { redirectTo: location.origin + location.pathname, scopes: b.dataset.sso === 'azure' ? 'email' : undefined } });
+      if (error) { ocupado(b, false, b.textContent); msg(mensagem(error)); }
+    }; });
+  }
   function telaEntrar(aviso) {
     caixa(`<h1 id="nv-t">Entrar no Anshur</h1><p>Acesso aos dados da sua revenda.</p>
       <form id="nv-f" novalidate><label for="nv-email">E-mail</label><input id="nv-email" type="email" autocomplete="email" required>
       <label for="nv-senha">Senha</label><input id="nv-senha" type="password" autocomplete="current-password" required>
       <button class="nv-bt" type="submit">Entrar</button></form>
       <p class="nv-msg" hidden></p>
+      <div class="nv-sso" hidden></div>
       <div class="nv-links"><button type="button" id="nv-criar">Criar conta</button><button type="button" id="nv-esqueci">Esqueci a senha</button>${linkDemo}</div>`);
     if (aviso) msg(aviso.texto, aviso.tipo);
     ligarDemo();
+    botoesSSO();
     tela.querySelector('#nv-criar').onclick = telaCriar;
     tela.querySelector('#nv-esqueci').onclick = telaEsqueci;
     tela.querySelector('#nv-f').onsubmit = async (e) => {
