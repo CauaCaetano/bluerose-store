@@ -1,9 +1,9 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=18';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=18';
-import { ico, folha, toast, $, $$ } from './ui.js?v=18';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom } from './loja.js?v=19';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=19';
+import { ico, folha, toast, $, $$ } from './ui.js?v=19';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';

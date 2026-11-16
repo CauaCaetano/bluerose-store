@@ -1,13 +1,13 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=18';
-import './cozinha.js?v=18';
-import './caixa.js?v=18';
-import './pedidos.js?v=18';
-import './mais.js?v=18';
-import './gestao.js?v=18';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=18';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=18';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=18';
+import './salao.js?v=19';
+import './cozinha.js?v=19';
+import './caixa.js?v=19';
+import './pedidos.js?v=19';
+import './mais.js?v=19';
+import './gestao.js?v=19';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=19';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=19';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=19';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -61,6 +61,7 @@ function marcaTopo() {
   TPLS.forEach((x) => document.body.classList.toggle(`tpl-${x}`, x === tp));
   // logo do Popina no estilo do template (o Taverna usa o original); no plano com a marca, o logo do restaurante
   if (img) { const src = m && L.logo ? L.logo : logoPopina(tp); if (img.getAttribute('src') !== src) img.src = src; img.style.objectFit = 'contain'; }
+  if (window.POPINA_ICONE && window.POPINA_ICONE_ATUAL !== tp) { window.POPINA_ICONE_ATUAL = tp; window.POPINA_ICONE(tp); }
   if (/^#[0-9a-f]{6}$/i.test(L.cor || '')) document.body.style.setProperty('--loja-cor', L.cor);
 }
 addEventListener('popina-plano', () => { marcaTopo(); dispatchEvent(new HashChangeEvent('hashchange')); });

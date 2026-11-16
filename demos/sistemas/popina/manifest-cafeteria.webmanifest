@@ -1,0 +1,38 @@
+{
+  "name": "Popina",
+  "short_name": "Popina",
+  "description": "Comanda no celular, tela da cozinha, caixa com Pix, delivery e estoque para restaurantes.",
+  "start_url": "app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F6EEDF",
+  "theme_color": "#3A2618",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "img/icones/cafeteria-192.png?v=1",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icones/cafeteria-512.png?v=1",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icones/cafeteria-192-maskable.png?v=1",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "img/icones/cafeteria-512-maskable.png?v=1",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

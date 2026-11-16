@@ -7,10 +7,10 @@
 <title>Popina · sistema para restaurante, lanchonete e pizzaria</title>
 <meta name="description" content="Popina: cardápio digital com QR, comanda no celular do garçom, tela da cozinha, caixa com Pix, delivery e estoque com ficha técnica.">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#3B2A22">
-<link rel="icon" href="icone-192.png?v=1" type="image/png">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
+<meta name="theme-color" content="#3B2A22" id="m-tema">
+<link rel="icon" href="icone-192.png?v=1" type="image/png" id="l-icone">
+<link rel="manifest" href="manifest.webmanifest" id="l-manifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=1" id="l-apple">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Popina">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -44,6 +44,11 @@ body.pronto #abertura{opacity:0;visibility:hidden;pointer-events:none}
   try { d = JSON.parse(localStorage.getItem('popina-v1') || 'null'); } catch (e) {}
   var L = (d && d.config && d.config.loja) || {}, tp = C[L.template] ? L.template : (d ? 'basico' : 'taverna');
   window.POPINA_TPL = tp; window.POPINA_LOJA = { nome: (d && d.config && d.config.nome) || 'Popina', logo: L.logo || '', cor: L.cor || '' };
+  /* ícone e cor da barra do celular no estilo do template (o Taverna usa os originais) */
+  window.POPINA_ICONE = function (t) { var TM = {basico:'#B4532F',luxo:'#B8914A',realeza:'#14213D',japones:'#B3212B',italiano:'#B8261E',churrascaria:'#A8231A',mexicano:'#B51F1F',pizzaria:'#B8231C',hamburgueria:'#C8201E',pub:'#1F4A2E',chines:'#B0141B',balada:'#120C2A',cafeteria:'#3A2618'}; if (!TM[t]) return; var g = function (i) { return document.getElementById(i); };
+    g('l-icone').href = 'img/icones/' + t + '-192.png?v=1'; g('l-apple').href = 'img/icones/' + t + '-apple.png?v=1';
+    g('l-manifest').href = 'manifest-' + t + '.webmanifest?v=1'; g('m-tema').content = TM[t]; };
+  window.POPINA_ICONE(tp);
   if (V[tp]) document.write('<link rel="stylesheet" href="tpl-' + tp + '.css?v=' + V[tp] + '" data-tpl="' + tp + '">');
 })();
 </script>
@@ -66,6 +71,6 @@ body.pronto #abertura{opacity:0;visibility:hidden;pointer-events:none}
   <span class="ao-vivo" title="Os aparelhos do restaurante se atualizam sozinhos"><i></i>Ao vivo</span></header>
 <main id="tela" tabindex="-1"></main>
 <nav id="nav" class="nav" aria-label="Seções"></nav>
-<script type="module" src="app.js?v=18"></script>
+<script type="module" src="app.js?v=19"></script>
 </body>
 </html>
