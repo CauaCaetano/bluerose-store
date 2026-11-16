@@ -452,3 +452,115 @@
 /* ---------- Relatórios no celular: período quebra linha e o gráfico por hora rola dentro do cartão ---------- */
 .per-filtro .chips{flex-wrap:wrap}
 @media (max-width:899px){.barras{overflow-x:auto;max-width:100%}.barras>div{min-width:14px}}
+
+/* ---------- Financeiro e produção (financeiro.js, producao.js): reaproveita tabela, kpis, resumo, chips e lista-res ---------- */
+.fin-st{display:inline-block;font-style:normal;font-weight:700;font-size:12.5px;padding:2px 10px;border-radius:999px;background:var(--creme2);color:var(--tinta2);white-space:nowrap}
+.fin-paga,.fin-recebida,.fin-ok{background:var(--oliva-cl);color:var(--oliva)}
+.fin-parcial,.fin-hoje{background:var(--ouro-cl);color:#6B4A0E}
+.fin-st.fin-vencida{background:var(--terra);color:#fff}
+.tabela tr.fin-atraso td{background:var(--terra-cl)}
+.tabela tr.fin-atraso td:first-child{box-shadow:inset 3px 0 0 var(--terra)}
+.kpis>div.fin-alerta{border-color:var(--terra);background:var(--terra-cl)}
+.tabela .acoes .bt.pq,.res-bts .bt.pq{min-height:36px;padding:6px 12px;font-size:13.5px}
+.tabela td.acoes{white-space:nowrap}
+.fin-seg a{flex:1;padding:11px;border-radius:9px;font-weight:700;font-size:13.5px;text-align:center;color:var(--tinta2);text-decoration:none}
+.fin-seg a[aria-pressed=true]{background:var(--papel);color:var(--tinta);box-shadow:var(--sombra)}
+.fin-itens li select{flex:2;min-width:0}.fin-itens li input{flex:1;min-width:0;max-width:110px}.fin-itens li small{min-width:42px;color:var(--mudo)}
+.fin-total{display:block;font:700 22px var(--f-tit);padding-top:8px}
+.fin-receb input{min-height:40px;max-width:150px}
+.fin-barra{display:block;height:5px;margin-top:4px;border-radius:99px;background:var(--creme2);overflow:hidden}.fin-barra i{display:block;height:100%;background:var(--terra)}
+.linha-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;margin:0 0 12px}.linha-form .campo{flex:1;min-width:180px;margin:0}
+.fiado-info{min-height:20px;margin:4px 0 0;font-size:14px}
+.fin-dre>div{display:grid;grid-template-columns:1fr auto 56px;gap:10px;align-items:baseline}
+.fin-dre>div small{color:var(--mudo);font-size:12.5px;text-align:right}
+.fin-dre>div.sub{font-weight:700}.fin-dre>div.sub span{font-family:var(--f-tit)}
+.fin-dre>div.fin-neg b{color:var(--terra2)}
+.fin-dre .fin-margem{border:0}
+.prd-tem{font-size:13px;font-weight:700;color:var(--tinta2)}
+.prd-lista>li.prd-baixo{border-color:var(--terra)}
+.prd-custo{margin:8px 0;padding:10px 12px;border-radius:12px;background:var(--creme2)}
+.prd-consumo{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px}
+.prd-consumo li{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--linha)}.prd-consumo small{color:var(--mudo)}
+.prd-check{list-style:none;margin:10px 0;padding:0;display:grid;gap:8px}
+.prd-check>li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--papel);border:1px solid var(--linha)}
+.prd-check>li>div{flex:1;min-width:0}.prd-check small{display:block;color:var(--mudo)}
+.prd-check>li.vazio{display:block}
+.prd-marca{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:2px solid var(--linha);background:var(--papel);color:transparent;cursor:pointer}
+.prd-marca .ico{width:22px;height:22px}
+.prd-marca:hover{border-color:var(--oliva);color:var(--oliva)}
+.prd-check>li.feito{opacity:.7}.prd-check>li.feito .prd-marca{border-color:var(--oliva);background:var(--oliva);color:#fff;cursor:default}
+.prd-q{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.prd-q input,.prd-pct input{width:90px;min-height:44px;border:1.5px solid var(--linha);border-radius:10px;padding:0 10px;font:inherit;background:var(--papel);color:inherit}
+.prd-pct{display:flex;align-items:center;gap:6px}.prd-pct input{width:72px}
+.prd-fefo{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.prd-fefo li{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:12px;background:var(--ouro-cl);color:#6B4A0E}.prd-fefo .ico{width:18px;height:18px;flex:none;margin-top:2px}
+@media (max-width:599px){.fin-dre>div{grid-template-columns:1fr auto}.fin-dre>div small{display:none}.prd-check>li{flex-wrap:wrap}.fin-itens li{flex-wrap:wrap}.fin-itens li select{flex-basis:100%}}
+
+/* ---------- Funções da casa, rodada 2: alertas do salão, rodízio pausado, cartão perdido, turnos, reservas, eventos, bar, portaria, divisão e planta ---------- */
+.painel-tipo{margin:0 0 14px}
+.painel-tipo>div>a{display:block;color:inherit;text-decoration:none}
+.painel-tipo span{display:block;overflow:hidden;text-overflow:ellipsis}
+.alertas-salao{display:grid;gap:6px;margin:0 0 10px}
+.alertas-salao .aviso{margin:0;align-items:flex-start}
+.alertas-salao .aviso a{color:inherit;font-weight:800}
+.aviso.alerta-mesa{background:var(--ouro-cl);color:#6B4A0E}
+.aviso.alerta-kds,.aviso.perdido{background:var(--terra-cl);color:var(--terra2)}
+.aviso.reserva-mesa{background:var(--oliva-cl);color:var(--oliva);align-items:flex-start}
+.aviso.pausa-rod{background:var(--creme2);color:var(--tinta)}
+.aviso.pausa-rod .bt{margin-left:auto;min-height:38px}
+.aviso .ico{flex:none}
+.pausa-tot{margin:0 0 10px;font-size:13px}
+.mesa.indisp{background:repeating-linear-gradient(135deg,var(--creme2) 0 6px,var(--papel) 6px 12px);color:var(--mudo);border-color:var(--linha)}
+.mesa.pausada{opacity:.72;box-shadow:inset 0 0 0 3px rgba(255,255,255,.55)}
+.cartao-ind.perdido{border-color:var(--terra);background:var(--terra-cl)}.cartao-ind.perdido small{color:var(--terra2);font-weight:700}
+.cartao-ind.pausada{background:var(--creme2);color:var(--tinta2)}
+.prod.fora-turno{opacity:.55;cursor:not-allowed}.prod.fora-turno em{font-weight:700}
+.res-extra{display:flex!important;flex-wrap:wrap;gap:4px 12px;margin-top:3px}
+.res-extra span{display:inline-flex;align-items:center;gap:5px;font-weight:700}
+.res-extra .ico{width:16px;height:16px}
+.res-alerg{color:var(--terra2)}.res-ocasiao{color:var(--oliva)}
+.rodada-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.rodada-cats .campo{margin:0}
+.kg-faixa{margin-top:6px}
+.ev-status{margin:4px 0 10px}
+.orc-ev{margin-bottom:10px}
+.orc-ev .interruptor{font-weight:600}
+.orc-ev .atrasada span{color:#B42318}
+.lista-res.eventos .st-res{margin-left:auto}
+.ev-confirmado .st-res{background:var(--oliva-cl);color:var(--oliva)}.ev-realizado .st-res{background:var(--creme2);color:var(--mudo)}
+.barris .barra{display:block;height:10px;margin:6px 0 4px;border-radius:99px;background:var(--creme2);overflow:hidden}
+.barris .barra i{display:block;height:100%;border-radius:99px;background:var(--oliva)}
+.barris li.baixo .barra i{background:var(--terra)}
+.port-ings{margin:0 0 12px}
+.lot-conta{flex-basis:100%;color:var(--mudo)}
+.vit-fecha li>div:first-child{flex:1;min-width:150px}
+.div-itens li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:10px 12px;border-bottom:1px solid var(--linha)}
+.div-itens li>div:first-child{flex:1;min-width:160px;display:flex;flex-wrap:wrap;gap:2px 10px;justify-content:space-between}
+.div-itens li small{flex-basis:100%}
+.div-ps{gap:6px}.div-ps .chip{min-width:40px;justify-content:center;padding:0 10px}
+.div-ps .chip:disabled{opacity:.55;cursor:not-allowed}
+.div-pessoas{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:12px}
+.div-pessoa{display:grid;gap:8px;padding:12px;border-radius:14px;background:var(--papel);border:1px solid var(--linha)}
+.div-pessoa .campo{margin:0}
+.div-pessoa.pago{background:var(--oliva-cl);border-color:var(--oliva)}
+.div-cab{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.div-cab small{color:var(--mudo)}
+.div-resto{margin-top:12px}
+.planta-livre{position:relative;width:100%;border-radius:18px;background:var(--creme2) radial-gradient(var(--linha) 1px,transparent 1px) 0 0/calc(100% / 24) calc(100% / 16);overflow:hidden;touch-action:none}
+.planta-livre .mesa-planta{position:absolute;aspect-ratio:auto;font-size:11px;line-height:1.1;text-align:center;padding:2px;box-sizing:border-box;user-select:none}
+.planta-livre .mesa-planta b{font-size:clamp(14px,2.2vw,22px)}
+.planta-livre .mesa-planta.off{background:repeating-linear-gradient(135deg,var(--creme2) 0 6px,var(--papel) 6px 12px);color:var(--mudo);border-style:dashed}
+.planta-livre.editando .mesa-planta{cursor:grab;border:2px solid var(--terra);background:var(--papel);color:var(--tinta)}
+.planta-livre .mesa-planta.arrastando{cursor:grabbing;z-index:2;box-shadow:0 10px 24px -8px rgba(59,42,34,.45);transform:scale(1.04)}
+.kds .ticket .tk-reserva{display:grid;gap:4px;margin:6px 10px 0}
+.kds .ticket .tk-reserva em.kn{display:flex;align-items:center;gap:8px;margin:0;padding:5px 12px;border-radius:6px;background:#F8D586;color:#3B2A22;font:700 15px/1.3 var(--g-serif,inherit);font-style:normal}
+.kds .ticket .tk-reserva em.kn.forte{background:#F2C6BD;color:#8A1E14;text-transform:uppercase}
+.kds .ticket .tk-reserva .ico{width:18px;height:18px;flex:none}
+@media (max-width:599px){.div-pessoas{grid-template-columns:1fr}.planta-livre .mesa-planta small{display:none}}
+@media (prefers-reduced-motion:reduce){.planta-livre .mesa-planta.arrastando{transform:none}}
+
+/* ---------- celular: horários dos turnos em uma coluna e botões grandes dentro da tela ---------- */
+@media (max-width:899px){
+  .duas:has(.duas-c),.tres:has(.duas-c){grid-template-columns:minmax(0,1fr)!important}
+  .campo,.duas-c{min-width:0}.duas-c input{min-width:0;width:100%}
+  .bt.grande{max-width:100%;box-sizing:border-box;white-space:normal}
+}

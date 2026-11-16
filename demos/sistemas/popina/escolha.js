@@ -1,8 +1,8 @@
 // Popina · escolha do template (tipo de casa): na primeira entrada e ao trocar em Gestão › Aparência.
 // Lista os 14 tipos; ao tocar num, mostra fotos reais (carrossel), as funções que vêm nele, "Usar este template" e "Voltar".
-import { PERFIS, MODULOS, diferenca } from './perfis.js?v=21';
-import { lojaCfg, setLoja } from './loja.js?v=21';
-import { ico, toast } from './ui.js?v=21';
+import { PERFIS, MODULOS, diferenca } from './perfis.js?v=22';
+import { lojaCfg, setLoja } from './loja.js?v=22';
+import { ico, toast } from './ui.js?v=22';
 
 export const TIPOS = [['basico', 'Básico'], ['taverna', 'Taverna'], ['luxo', 'Luxo'], ['realeza', 'Realeza'], ['japones', 'Japonês'], ['italiano', 'Italiano'], ['churrascaria', 'Churrascaria'],
   ['mexicano', 'Mexicano'], ['pizzaria', 'Pizzaria'], ['hamburgueria', 'Hamburgueria'], ['pub', 'Bar e pub'], ['chines', 'Chinês'], ['balada', 'Balada'], ['cafeteria', 'Cafeteria']];
@@ -61,6 +61,13 @@ const CSS = `
 .esc-aviso{background:#FFF6E2;border:1px solid #EBCB86;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45;margin-top:14px}
 .esc-aviso b{display:block;margin-bottom:4px}
 .esc-depois{background:none;border:0;color:#5E554B;text-decoration:underline;font:500 14px "Figtree",system-ui,sans-serif;cursor:pointer;padding:6px}
+.esc-conf{max-width:760px}
+.esc-lista li{padding:0}
+.esc-chk{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;cursor:pointer}
+.esc-chk input{width:22px;height:22px;margin-top:1px;flex:none;accent-color:#1F1B16}
+.esc-chk b{display:block;font-size:15px}.esc-chk small{display:block;color:#5E554B;font-size:13.5px;line-height:1.4;margin-top:2px}
+.esc-mais{margin-top:16px}.esc-mais summary{cursor:pointer;font-weight:700;padding:10px 0;color:#3A3129}
+.esc-mais .esc-lista{margin-top:8px}
 @media (max-width:820px){.esc-det{grid-template-columns:1fr}.esc-in{padding:20px 16px 32px}}
 @media (prefers-reduced-motion:reduce){.esc,.esc-card{transition:none}.esc-trilho{scroll-behavior:auto}}
 `;
@@ -118,8 +125,29 @@ export function abrirEscolha({ primeira = false, abrir = '', aoFechar } = {}) {
     pts.forEach((b) => { b.onclick = () => vai(+b.dataset.i); });
     tr.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') vai(idx() + 1); if (e.key === 'ArrowLeft') vai(idx() - 1); });
     el.querySelector('[data-usar]').onclick = () => {
+      // na primeira entrada, antes de começar: confirmar as funções recomendadas (pode desmarcar ou ligar outras)
+      if (primeira) { confirmar(k); return; }
       setLoja({ template: k, estilo: ESTILO[k] || k, escolhido: true });
       toast(`Template ${nome(k)} aplicado no sistema e no cardápio`); fechar();
+    };
+  }
+
+  function confirmar(k) {
+    const p = PERFIS[k], rec = new Set(p.liga), outras = Object.keys(MODULOS).filter((m) => !rec.has(m));
+    const linha = (m, on) => `<li><label class="esc-chk"><input type="checkbox" data-m="${m}" ${on ? 'checked' : ''}><span><b>${MODULOS[m][0]}</b><small>${MODULOS[m][1]}</small></span></label></li>`;
+    el.innerHTML = `<div class="esc-in esc-conf"><button type="button" class="esc-volta" data-volta>${ico('chevron')}Voltar</button>
+      <h1 style="margin-top:16px">Confirme as funções do seu negócio</h1>
+      <p class="esc-sub">Estas são as recomendadas para <b>${p.tipo}</b>. Desmarque o que você não usa; dá para mudar quando quiser em Gestão › Aparência › Funções do negócio.</p>
+      <ul class="esc-mods esc-lista">${p.liga.map((m) => linha(m, true)).join('')}</ul>
+      <details class="esc-mais"><summary>Ver outras funções (${outras.length})</summary><ul class="esc-mods esc-lista">${outras.map((m) => linha(m, false)).join('')}</ul></details>
+      <div class="esc-bts"><button type="button" class="esc-usar" data-comecar>Começar a usar</button></div></div>`;
+    el.scrollTop = 0;
+    el.querySelector('[data-volta]').onclick = () => detalhe(k);
+    el.querySelector('[data-comecar]').onclick = () => {
+      const modulos = {};
+      el.querySelectorAll('[data-m]').forEach((c) => { if (c.checked !== rec.has(c.dataset.m)) modulos[c.dataset.m] = c.checked; });
+      setLoja({ template: k, estilo: ESTILO[k] || k, escolhido: true, modulos });
+      toast(`Pronto: ${nome(k)} com as suas funções`); fechar();
     };
   }
   if (abrir && PERFIS[abrir]) detalhe(abrir); else lista();

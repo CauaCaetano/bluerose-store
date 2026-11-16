@@ -1,13 +1,13 @@
 // Popina · salão do garçom: a fila do que fazer agora (conceito C escolhido pelo dono) + as mesas, e a comanda da mesa.
 import { db, t, din, dinCurto, tempo, minutos, prod, comanda, comandaDaMesa, fila, estadoMesa, conta, valorItem, abrirMesa, adicionarItem, enviar,
   mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg,
-  temCouvert, juntarMesas, transferirItens, marcar, quemAgora, temPin, vendaDeHoje, tem, ondeComanda, couvertLigado, abrirCartao, cartaoAberto, proximoCartao, proximaEtapa, restaVitrine } from './loja.js?v=21';
-import { registrar, acao, ir } from './nucleo.js?v=21';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=21';
-import { OBS_RAPIDAS } from './dados.js?v=21';
-import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=21';
-import { modulosAtivos } from './perfis.js?v=21';
-import { TIPOS_RODIZIO, valorRodizio, pessoasRodizio, inclusoRodizio, cabeNaRodada, precoAgora, precoFracoes, ETAPAS, ordemEtapa, ALERGENOS, ymd } from './precos.js?v=21';
+  temCouvert, juntarMesas, transferirItens, marcar, quemAgora, temPin, vendaDeHoje, tem, ondeComanda, couvertLigado, abrirCartao, cartaoAberto, proximoCartao, proximaEtapa, restaVitrine, ouvir, auditar } from './loja.js?v=22';
+import { registrar, acao, ir } from './nucleo.js?v=22';
+import { ico, folha, toast, confirma, autorizar, bip, $, $$ } from './ui.js?v=22';
+import { OBS_RAPIDAS } from './dados.js?v=22';
+import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=22';
+import { modulosAtivos } from './perfis.js?v=22';
+import { TIPOS_RODIZIO, valorRodizio, pessoasRodizio, inclusoRodizio, cabeNaRodadaCat, precoAgora, precoFracoes, ETAPAS, ordemEtapa, ALERGENOS, ymd, esquecidas, noTurno, turnoDe, TURNOS, precoKg } from './precos.js?v=22';
 
 // a tela do salão segue o conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/1-salao-pc.png)
 const ROTULO = { conta: 'Levar a conta', chamou: 'Mesa chamou', pronto: 'Prato pronto', qr: 'Pedido pelo QR' };
@@ -41,7 +41,8 @@ registrar('salao', {
       const e = estadoMesa(m), c = comandaDaMesa(m);
       // cartão verde e vermelho (churrascaria): a bolinha mostra o que a mesa sinalizou
       const cr = c && tem('cartaoRodizio') ? `<i class="mesa-cartao ${c.cartaoVerde ? 'verde' : 'vermelho'}" title="${c.cartaoVerde ? 'Cartão verde: quer mais' : 'Cartão vermelho: pausa'}"></i>` : '';
-      return `<a class="mesa ${e}" href="#mesa/${m}" aria-label="Mesa ${m}, ${({ livre: 'livre', ocupada: 'ocupada', pronto: 'com prato pronto', conta: 'pediu a conta', chamou: 'chamou o garçom', qr: 'pedido pelo QR esperando' })[e]}${cr ? (c.cartaoVerde ? ', cartão verde' : ', cartão vermelho') : ''}">${ICO[e] ? `<i class="mesa-sinal">${ico(ICO[e])}</i>` : ''}${cr}<b>${m}</b>${c ? `<small>${tempo(c.aberta)}</small>` : ''}</a>`;
+      const off = !c && db.config.planta?.[m]?.off, pausa = c?.pausaRod;
+      return `<a class="mesa ${e}${off ? ' indisp' : ''}${pausa ? ' pausada' : ''}" href="#mesa/${m}" aria-label="Mesa ${m}, ${off ? 'indisponível' : ({ livre: 'livre', ocupada: 'ocupada', pronto: 'com prato pronto', conta: 'pediu a conta', chamou: 'chamou o garçom', qr: 'pedido pelo QR esperando' })[e]}${cr ? (c.cartaoVerde ? ', cartão verde' : ', cartão vermelho') : ''}${pausa ? ', rodízio pausado' : ''}">${ICO[e] ? `<i class="mesa-sinal">${ico(ICO[e])}</i>` : ''}${cr}<b>${m}</b>${c ? `<small>${tempo(c.aberta)}</small>` : ''}</a>`;
     };
     const ocup = (lst) => lst.reduce((s, m) => s + (comandaDaMesa(m) ? 1 : 0), 0);
     const est = Array.from({ length: n }, (_, k) => estadoMesa(k + 1)), contaE = (...e) => est.filter((x) => e.includes(x)).length;
@@ -65,7 +66,7 @@ registrar('salao', {
         </div>
         <div class="salao-dir">
           <header class="cab-salao"><h1>Salão</h1><img class="aqueduto-img" src="img/aqueduto.webp?v=2" alt="" width="340" height="88"></header>
-          ${barraFuncoes()}
+          ${alertasSalao()}${barraFuncoes()}
           <div class="legenda"><span><i class="ocupada"></i>Ocupada (${contaE('ocupada')})</span><span><i class="pronto"></i>Prato pronto (${contaE('pronto', 'qr')})</span><span><i class="conta"></i>Conta (${contaE('conta')})</span><span><i class="chamou"></i>Chamada (${contaE('chamou')})</span><span><i class="livre"></i>Livre (${contaE('livre')})</span></div>
           ${areas.map((a, k) => { const lst = a.lista || Array.from({ length: a.ate - a.de + 1 }, (_, j) => a.de + j), o = ocup(lst); return `<section class="area"><div class="area-cab"><h2 class="fita ${k % 2 ? 'verde' : ''}">${t(a.nome)}</h2><span>${lst.length} ${lst.length === 1 ? 'mesa' : 'mesas'} • ${o} ${o === 1 ? 'ocupada' : 'ocupadas'}</span></div><div class="mesas">${lst.map(tile).join('')}</div></section>`; }).join('')}
           ${cartoesAbertos()}
@@ -74,6 +75,18 @@ registrar('salao', {
   },
 });
 
+// alertas: mesa sem item novo e sem atenção há X minutos e comanda atrasada na cozinha (Gestão › Caixa e regras)
+function alertasSalao() {
+  const A = lojaCfg().alertas || {}, kds = Number(A.kds) || 10, agora = Date.now();
+  const mesas = esquecidas(db.comandas, Number(A.mesa ?? 25), agora);
+  const atras = [];
+  db.comandas.forEach((c) => { const env = {}; c.itens.filter((i) => !i.cancelado && ['novo', 'preparo'].includes(i.status) && i.enviado).forEach((i) => { env[i.enviado] = 1; });
+    Object.keys(env).forEach((ts) => { const m = Math.floor((agora - Number(ts)) / 60e3); if (m >= kds) atras.push({ c, m }); }); });
+  atras.sort((a, b) => b.m - a.m);
+  if (!mesas.length && !atras.length) return '';
+  return `<div class="alertas-salao" role="status">${mesas.length ? `<p class="aviso alerta-mesa">${ico('relogio')}<span>Sem atenção: ${mesas.slice(0, 6).map((x) => `<a href="#mesa/${x.c.mesa}">mesa ${x.c.mesa} há ${x.min} min</a>`).join(', ')}</span></p>` : ''}
+    ${atras.length ? `<p class="aviso alerta-kds">${ico('chef')}<span>Cozinha atrasada: ${[...new Map(atras.map((x) => [x.c.id, x])).values()].slice(0, 6).map((x) => `${t(ondeComanda(x.c))} há ${x.m} min`).join(', ')}</span></p>` : ''}</div>`;
+}
 // atalhos das funções da casa no salão (só as ligadas): reservas e fila, passador, cartões, portaria, eventos
 function barraFuncoes() {
   const hoje = ymd(), res = (db.reservas || []).filter((r) => r.data === hoje && ['pendente', 'confirmada'].includes(r.status)).length, fila = (db.fila || []).length;
@@ -93,7 +106,7 @@ function cartoesAbertos() {
   const l = db.comandas.filter((c) => c.tipo === 'cartao').sort((a, b) => a.cartao - b.cartao);
   if (!l.length) return '';
   return `<section class="area"><div class="area-cab"><h2 class="fita">Cartões</h2><span>${l.length} ${l.length === 1 ? 'aberto' : 'abertos'}</span></div>
-    <div class="cartoes-abertos">${l.map((c) => `<a class="cartao-ind ${c.pediuConta ? 'conta' : ''}" href="#cartao/${c.cartao}"><b>${c.cartao}</b><small>${t(c.nome || (c.naMesa ? `mesa ${c.naMesa}` : ''))}</small><em>${dinCurto(conta(c).total)}</em></a>`).join('')}</div></section>`;
+    <div class="cartoes-abertos">${l.map((c) => `<a class="cartao-ind ${c.pediuConta ? 'conta' : ''} ${c.perdido ? 'perdido' : ''}" href="#cartao/${c.cartao}"><b>${c.cartao}</b><small>${c.perdido ? 'perdido' : t(c.nome || (c.naMesa ? `mesa ${c.naMesa}` : ''))}</small><em>${dinCurto(conta(c).total)}</em></a>`).join('')}</div></section>`;
 }
 // abre um cartão numerado (o próximo livre já vem sugerido); naMesa liga o cartão a uma mesa
 function pedirCartao(naMesa = 0) {
@@ -154,7 +167,8 @@ export function linhasTotais(c, v = conta(c)) {
     ${v.rodizio ? `<div><span>Rodízio (${rod})</span><b>${din(v.rodizio)}</b></div>` : ''}
     ${v.pacote ? `<div><span>Pacote do evento (${v.presentes} convidados)</span><b>${din(v.pacote)}</b></div>` : ''}
     ${v.ingresso ? `<div><span>Entrada${c.ingresso?.nome ? ` · ${t(c.ingresso.nome)}` : ''}</span><b>${din(v.ingresso)}</b></div>` : ''}
-    ${c.consumacao ? `<div><span>Consumação mínima ${dinCurto(c.consumacao)}${v.consumacao ? ' · falta consumir' : ' · atingida'}</span><b>${v.consumacao ? din(v.consumacao) : ''}</b></div>` : ''}
+    ${c.consumacao ? `<div class="cons-linha"><span>Crédito de consumação</span><b>${din(c.consumacao)}</b></div><div class="cons-linha"><span>Consumido</span><b>${din(Math.min(v.sub, c.consumacao))}</b></div><div class="cons-linha"><span>${v.consumacao ? 'Saldo a cobrar (não consumido)' : 'Consumação mínima atingida'}</span><b>${v.consumacao ? din(v.consumacao) : ''}</b></div>` : ''}
+    ${v.perdido ? `<div><span>Taxa do cartão perdido</span><b>${din(v.perdido)}</b></div>` : ''}
     ${v.servico ? `<div><span>Serviço ${db.config.servico}%</span><b>${din(v.servico)}</b></div>` : ''}${v.couvert ? `<div><span>${c.evento ? 'Couvert artístico' : `Couvert (${c.pessoas} × ${din(lojaCfg().couvert)})`}</span><b>${din(v.couvert)}</b></div>` : ''}${v.desconto ? `<div><span>Desconto</span><b>− ${din(v.desconto)}</b></div>` : ''}<div class="total"><span>Total</span><b>${din(v.total)}</b></div>`;
 }
 // a comanda aberta (mesa ou cartão individual): o que enviar, o que já foi, os totais e as ações
@@ -167,6 +181,9 @@ function telaComanda(c, titulo, voltar) {
   return `<header class="cab-tela cab-comanda"><a class="bt-ico" href="#${voltar}" aria-label="Voltar">${ico('voltar')}</a><div><h1 class="fita-mesa">${lt(t(titulo))}</h1><p>${sub} · aberta há ${tempo(c.aberta)}${c.garcom ? ` · ${t(c.garcom)}` : ''}</p></div>
         <button type="button" class="bt-ico" data-acao="mesa-menu" data-c="${c.id}" aria-label="Mais opções">${ico('mais')}</button></header><div class="comanda-papel">
       ${c.pediuConta ? `<div class="aviso ouro">${ico('conta')}Pediu a conta há ${tempo(c.pediuConta)}</div>` : ''}
+      ${c.perdido ? `<div class="aviso perdido">${ico('alerta')}Cartão perdido: nada novo entra nesta conta. Cobre no caixa${Number(lojaCfg().taxaCartaoPerdido) > 0 ? ` com a taxa de ${din(lojaCfg().taxaCartaoPerdido)}` : ''}.</div>` : ''}
+      ${c.reserva ? `<div class="aviso reserva-mesa">${ico(c.reserva.restricoes ? 'alerta' : 'coroa')}<span>Reserva de ${t(c.reserva.nome)}${c.reserva.ocasiao ? ` · <b>${t(c.reserva.ocasiao)}</b>` : ''}${c.reserva.restricoes ? `<br><b>Restrições: ${t(c.reserva.restricoes)}</b>` : ''}</span></div>` : ''}
+      ${c.rodizio ? avisoPausa(c) : ''}
       ${c.tipo === 'mesa' && tem('cartaoRodizio') ? `<div class="cartao-rod-mesa"><span>Cartão da mesa</span><button type="button" class="cartao-rod ${c.cartaoVerde ? 'verde' : 'vermelho'}" data-acao="cartao-rod" data-c="${c.id}" aria-pressed="${!!c.cartaoVerde}">${c.cartaoVerde ? 'Verde: quer mais' : 'Vermelho: pausa'}</button>${c.passou ? `<small>Último passe há ${tempo(c.passou)}</small>` : ''}</div>` : ''}
       ${rasc.length ? `<section class="bloco"><div class="sec-tit"><h2>${lt('A enviar')}</h2><span>${rasc.length} ${rasc.length === 1 ? 'item' : 'itens'}</span></div><ul class="itens">${rasc.map((i) => linhaItem(c, i)).join('')}</ul></section>` : ''}
       <section class="bloco"><div class="sec-tit"><h2>${lt('Já pedido')}</h2><span>${enviados.length ? '' : 'nada ainda'}</span></div><ul class="itens">${enviados.map((i) => linhaItem(c, i)).join('')}</ul></section>
@@ -174,12 +191,21 @@ function telaComanda(c, titulo, voltar) {
         <div class="cartoes-abertos">${cartoes.map((x) => `<a class="cartao-ind" href="#cartao/${x.cartao}"><b>${x.cartao}</b><small>${t(x.nome || '')}</small><em>${dinCurto(conta(x).total)}</em></a>`).join('')}<button type="button" class="cartao-ind novo" data-acao="abrir-cartao" data-mesa="${c.mesa}"><b>+</b><small>Abrir cartão</small></button></div></section>` : ''}
       <section class="totais">${linhasTotais(c, v)}</section></div>
       <div class="barra-acoes">
-        <button type="button" class="bt" data-acao="cardapio-pick" data-c="${c.id}">${ico('mais2')}Itens</button>
+        ${c.perdido ? '' : `<button type="button" class="bt" data-acao="cardapio-pick" data-c="${c.id}">${ico('mais2')}Itens</button>`}
         ${livres.length ? `<button type="button" class="bt cheio grande" data-acao="enviar" data-c="${c.id}">${ico('chef')}Enviar para a cozinha (${livres.reduce((s, i) => s + i.qtd, 0)})</button>`
           : prox >= 0 ? `<button type="button" class="bt cheio grande" data-acao="liberar-etapa" data-c="${c.id}">${ico('chef')}Liberar próxima etapa: ${ETAPAS[prox][1]}</button>`
             : `<button type="button" class="bt cheio grande" data-acao="pre-conta" data-c="${c.id}">${ico('conta')}Conta · ${dinCurto(v.total)}</button>`}
       </div>`;
 }
+// rodízio pausado: quanto tempo e quantas pessoas; as pausas anteriores somam no total
+const minPausa = (c) => Math.round(((c.pausasRod || []).reduce((s, p) => s + (p.ate - p.de), 0) + (c.pausaRod ? Date.now() - c.pausaRod.ts : 0)) / 60e3);
+function avisoPausa(c) {
+  const tot = minPausa(c);
+  if (c.pausaRod) return `<div class="aviso pausa-rod">${ico('relogio')}<span>Rodízio pausado há <b>${tempo(c.pausaRod.ts)}</b>${c.pausaRod.pessoas < pessoasRodizio(c.rodizio) ? ` (${c.pausaRod.pessoas} de ${pessoasRodizio(c.rodizio)} pessoas)` : ''}${tot > Math.round((Date.now() - c.pausaRod.ts) / 60e3) ? ` · ${tot} min no total` : ''}</span><button type="button" class="bt" data-acao="rod-retomar" data-c="${c.id}">Retomar</button></div>`;
+  return tot ? `<p class="mudo pausa-tot">Rodízio já ficou pausado ${tot} min</p>` : '';
+}
+// pessoas que estão comendo agora (as pausadas não contam no limite da rodada)
+const pessoasAtivas = (c) => Math.max(1, (c.pessoas || 1) - (c.pausaRod?.pessoas || 0));
 registrar('mesa', {
   titulo: 'Comanda', aba: 'salao',
   html(n) {
@@ -190,7 +216,8 @@ registrar('mesa', {
       const res = tem('reservas') ? (db.reservas || []).filter((r) => r.data === ymd() && Number(r.mesa) === n && ['pendente', 'confirmada'].includes(r.status)) : [];
       const R = lojaCfg().rodizio || {};
       return `<header class="cab-tela"><a class="bt-ico" href="#salao" aria-label="Voltar">${ico('voltar')}</a><div><h1>Mesa ${n}</h1><p>Livre</p></div></header>
-      ${res.map((r) => `<p class="aviso ouro">${ico('calendario')}Reservada às ${t(r.hora)} para ${t(r.nome)} (${r.pessoas} pessoas)</p>`).join('')}
+      ${res.map((r) => `<p class="aviso ouro">${ico('calendario')}Reservada às ${t(r.hora)} para ${t(r.nome)} (${r.pessoas} pessoas)${r.restricoes ? ` · restrições: ${t(r.restricoes)}` : ''}</p>`).join('')}
+      ${db.config.planta?.[n]?.off ? `<p class="aviso perdido">${ico('alerta')}Mesa marcada como indisponível na planta. <button type="button" class="link" data-acao="mesa-disp" data-m="${n}">Liberar a mesa</button></p>` : ''}
       <div class="abrir-mesa">${gs.length ? `<p>Garçom</p><div class="pessoas" style="margin-bottom:16px">${gs.map((x) => `<button type="button" class="chip ${x === g ? 'on' : ''}" data-acao="escolher-garcom" data-g="${t(x)}" aria-pressed="${x === g}">${t(x)}</button>`).join('')}</div>` : ''}
         ${tem('rodizio') ? `<div class="rodizio-abrir" data-rodizio="${n}"><p>Rodízio: quantas pessoas de cada?</p>
           ${TIPOS_RODIZIO.filter(([k]) => k !== 'meia' || Number(R.meia) > 0).map(([k, nome]) => `<div class="rod-linha"><span><b>${nome}</b><small>${din(R[k] || 0)} por pessoa</small></span><div class="qtd"><button type="button" class="bt-ico" data-rmenos="${k}" aria-label="Menos ${nome}">−</button><b data-rq="${k}">${k === 'adulto' ? 2 : 0}</b><button type="button" class="bt-ico" data-rmais="${k}" aria-label="Mais ${nome}">+</button></div></div>`).join('')}
@@ -227,13 +254,20 @@ registrar('passador', {
   titulo: 'Passador', aba: 'salao',
   html() {
     const ocup = db.comandas.filter((c) => c.tipo === 'mesa').sort((a, b) => a.mesa - b.mesa);
-    const desde = (c) => c.passou || c.aberta, verdes = ocup.filter((c) => c.cartaoVerde).sort((a, b) => desde(a) - desde(b));
+    const desde = (c) => c.passou || c.aberta, verdes = ocup.filter((c) => c.cartaoVerde && !c.pausaRod).sort((a, b) => desde(a) - desde(b));
     return `<header class="cab-tela"><a class="bt-ico" href="#salao" aria-label="Voltar">${ico('voltar')}</a><div><h1>Passador</h1><p>${verdes.length} ${verdes.length === 1 ? 'mesa quer' : 'mesas querem'} mais · a que espera há mais tempo vem primeiro</p></div></header>
       ${tem('cartaoRodizio') ? '' : '<p class="aviso ouro">O cartão verde e vermelho está desligado. Ligue em Gestão › Aparência e templates.</p>'}
       <ul class="passador">${verdes.map((c) => `<li><b>Mesa ${c.mesa}</b><span>${c.pessoas} pessoas · sem passar há <strong>${tempo(desde(c))}</strong></span><button type="button" class="bt cheio grande" data-acao="passei" data-c="${c.id}">${ico('check')}Passei</button></li>`).join('') || '<li class="vazio">Nenhuma mesa com o cartão verde agora.</li>'}</ul>
       <div class="sec-tit"><h2>Todas as mesas</h2><span>toque para virar o cartão</span></div>
-      <div class="cartoes-abertos">${ocup.map((c) => `<button type="button" class="cartao-ind ${c.cartaoVerde ? 'verde' : 'vermelho'}" data-acao="cartao-rod" data-c="${c.id}" aria-pressed="${!!c.cartaoVerde}"><b>${c.mesa}</b><small>${c.cartaoVerde ? 'verde' : 'vermelho'}</small></button>`).join('') || '<div class="vazio">Nenhuma mesa ocupada.</div>'}</div>`;
+      <div class="cartoes-abertos">${ocup.map((c) => `<button type="button" class="cartao-ind ${c.pausaRod ? 'pausada' : c.cartaoVerde ? 'verde' : 'vermelho'}" data-acao="cartao-rod" data-c="${c.id}" aria-pressed="${!!c.cartaoVerde}"><b>${c.mesa}</b><small>${c.pausaRod ? 'pausada' : c.cartaoVerde ? 'verde' : 'vermelho'}</small></button>`).join('') || '<div class="vazio">Nenhuma mesa ocupada.</div>'}</div>`;
   },
+});
+// o cartão sincroniza entre os aparelhos (grava → nuvem/abas → ouvir redesenha a tela); o passador toca quando uma mesa nova fica verde
+let verdesVistos = null;
+ouvir(() => {
+  const v = new Set(db.comandas.filter((c) => c.tipo === 'mesa' && c.cartaoVerde && !c.pausaRod).map((c) => c.id));
+  if (verdesVistos && location.hash.startsWith('#passador') && [...v].some((id) => !verdesVistos.has(id)) && document.body.dataset.tocou) bip(1040);
+  verdesVistos = v;
 });
 acao('cartao-rod', (b) => { const c = comanda(b.dataset.c); if (!c) return; c.cartaoVerde = !c.cartaoVerde; if (c.cartaoVerde && !c.passou) c.passou = Date.now(); marcar(c, 'cartao', c.cartaoVerde ? 'Virou o cartão para o verde' : 'Virou o cartão para o vermelho'); grava(); });
 acao('passei', (b) => { const c = comanda(b.dataset.c); if (!c) return; c.passou = Date.now(); grava(); toast(`Mesa ${c.mesa}: passe registrado`); });
@@ -246,8 +280,9 @@ acao('escolher-garcom', (b) => {
   try { localStorage.setItem('popina-garcom', b.dataset.g); } catch { /* sem acesso */ }
   $$('[data-acao="escolher-garcom"]').forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
 });
-acao('abrir-mesa', (b) => { const c = abrirMesa(Number(b.dataset.n), Number(b.dataset.p), garcomEscolhido()); abrirSeletor(c); });
-acao('abrir-rodizio', (b) => {
+acao('mesa-disp', (b) => { const x = db.config.planta?.[b.dataset.m]; if (x) { delete x.off; grava(); toast(`Mesa ${b.dataset.m} liberada`); } });
+acao('abrir-mesa', (b) => { if (db.config.planta?.[b.dataset.n]?.off) return toast('Mesa indisponível: libere antes de abrir'); const c = abrirMesa(Number(b.dataset.n), Number(b.dataset.p), garcomEscolhido()); abrirSeletor(c); });
+acao('abrir-rodizio', (b) => { if (db.config.planta?.[b.dataset.n]?.off) return toast('Mesa indisponível: libere antes de abrir');
   let q = {}; try { q = JSON.parse(b.closest('[data-rodizio]').dataset.q || '{}'); } catch { /* nada */ }
   const n = pessoasRodizio(q); if (!n) return toast('Escolha quantas pessoas');
   const c = abrirMesa(Number(b.dataset.n), n, garcomEscolhido(), Object.fromEntries(Object.entries(q).filter(([, x]) => x > 0))); abrirSeletor(c);
@@ -297,6 +332,8 @@ acao('mesa-menu', (b) => {
   folha({ titulo: ondeComanda(c), corpo: `<div class="lista-bts">
       <button type="button" class="bt" data-servico>${c.servico ? 'Tirar' : 'Cobrar'} os ${db.config.servico}% de serviço</button>
       ${cv ? `<button type="button" class="bt" data-couvert>${temCouvert(c) ? 'Tirar' : 'Cobrar'} o couvert (${din(cv)} por pessoa)</button>` : ''}
+      ${ehMesa && c.rodizio && tem('rodizio') ? `<button type="button" class="bt" data-pausa>${ico('relogio')}${c.pausaRod ? 'Retomar o rodízio' : 'Pausar o rodízio'}${minPausa(c) ? ` (${minPausa(c)} min pausado)` : ''}</button>` : ''}
+      ${c.tipo === 'cartao' ? `<button type="button" class="bt ${c.perdido ? '' : 'perigo'}" data-perdido>${ico('alerta')}${c.perdido ? 'Cartão encontrado: liberar' : 'Cartão perdido: bloquear'}</button>` : ''}
       ${ehMesa && c.rodizio && tem('rodizio') ? `<button type="button" class="bt" data-rodizio>${ico('pessoas')}Pessoas no rodízio (${pessoasRodizio(c.rodizio)})</button>` : ehMesa ? `<button type="button" class="bt" data-pessoas>${ico('pessoas')}Mudar número de pessoas (${c.pessoas})</button>` : ''}
       <button type="button" class="bt" data-garcom>${ico('pessoas')}Garçom: ${t(c.garcom || 'nenhum')} · trocar</button>
       ${ehMesa && outras.length ? `<button type="button" class="bt" data-juntar>${ico('mesa')}Juntar outra mesa nesta</button>` : ''}
@@ -305,6 +342,13 @@ acao('mesa-menu', (b) => {
       <div class="sec-tit"><h2>Histórico</h2></div>${linhaTempo(c)}`,
   aoAbrir: (f, fechar) => {
     $('[data-rodizio]', f)?.addEventListener('click', () => { fechar(); mudarRodizio(c); });
+    $('[data-pausa]', f)?.addEventListener('click', () => { fechar(); if (c.pausaRod) retomarRodizio(c); else pausarRodizio(c); });
+    $('[data-perdido]', f)?.addEventListener('click', async () => {
+      fechar();
+      if (c.perdido) { delete c.perdido; marcar(c, 'perdido', 'Cartão encontrado: liberado'); grava(); return toast(`Cartão ${c.cartao} liberado`); }
+      if (!(await confirma(`Marcar o cartão ${c.cartao} como perdido? Nada novo entra nele e o caixa cobra${Number(lojaCfg().taxaCartaoPerdido) > 0 ? ` a taxa de ${din(lojaCfg().taxaCartaoPerdido)}` : ''}.`, 'Bloquear o cartão', true))) return;
+      c.perdido = { ts: Date.now(), quem: quemAgora(c) }; marcar(c, 'perdido', 'Cartão perdido: bloqueado'); auditar('cartao-perdido', { item: `Cartão ${c.cartao}`, valor: Number(lojaCfg().taxaCartaoPerdido) || 0, motivo: 'Cartão perdido' }); grava(); toast(`Cartão ${c.cartao} bloqueado`);
+    });
     $('[data-servico]', f).onclick = () => { c.servico = !c.servico; marcar(c, 'servico', c.servico ? 'Voltou a cobrar o serviço' : 'Tirou o serviço'); grava(); fechar(); };
     $('[data-couvert]', f)?.addEventListener('click', () => { c.couvert = !temCouvert(c); marcar(c, 'couvert', c.couvert ? 'Voltou a cobrar o couvert' : 'Tirou o couvert'); grava(); fechar(); });
     $('[data-pessoas]', f)?.addEventListener('click', () => { const p = Number(prompt('Quantas pessoas na mesa?', c.pessoas)); if (p > 0 && p !== c.pessoas) { marcar(c, 'pessoas', `Pessoas: ${c.pessoas} → ${p}`); c.pessoas = p; grava(); } fechar(); });
@@ -344,6 +388,23 @@ function passarItens(c) {
   }; }) });
 }
 
+// pausar o rodízio (a mesa saiu para fumar, criança dormiu...): o passador pula a mesa e a rodada conta só quem está comendo
+function pausarRodizio(c) {
+  const n = pessoasRodizio(c.rodizio) || c.pessoas || 1; let q = n;
+  folha({ titulo: `Pausar o rodízio · mesa ${c.mesa}`, corpo: `<p class="mudo">Quantas pessoas param agora? O tempo pausado fica registrado na mesa.</p><div class="qtd"><button type="button" class="bt-ico grande" data-menos aria-label="Menos">−</button><b data-q>${q}</b><button type="button" class="bt-ico grande" data-mais aria-label="Mais">+</button></div><p class="centro mudo" data-txt></p>`,
+    pe: '<button type="button" class="bt cheio grande" data-ok>Pausar</button>',
+    aoAbrir: (f, fechar) => {
+      const at = () => { $('[data-q]', f).textContent = q; $('[data-txt]', f).textContent = q >= n ? 'A mesa toda pausa' : `${n - q} ${n - q === 1 ? 'continua' : 'continuam'} comendo`; };
+      $('[data-menos]', f).onclick = () => { q = Math.max(1, q - 1); at(); }; $('[data-mais]', f).onclick = () => { q = Math.min(n, q + 1); at(); }; at();
+      $('[data-ok]', f).onclick = () => { c.pausaRod = { ts: Date.now(), pessoas: q }; if (q >= n) c.cartaoVerde = false; marcar(c, 'pausa', `Rodízio pausado (${q} de ${n} pessoas)`); grava(); fechar(); toast(`Mesa ${c.mesa}: rodízio pausado`); };
+    } });
+}
+function retomarRodizio(c) {
+  if (!c.pausaRod) return; const min = Math.round((Date.now() - c.pausaRod.ts) / 60e3);
+  (c.pausasRod ||= []).push({ de: c.pausaRod.ts, ate: Date.now(), pessoas: c.pausaRod.pessoas }); delete c.pausaRod;
+  marcar(c, 'pausa', `Rodízio retomado depois de ${min} min`); grava(); toast(`Mesa ${c.mesa}: rodízio retomado`);
+}
+acao('rod-retomar', (b) => { const c = comanda(b.dataset.c); if (c) retomarRodizio(c); });
 // mudar as pessoas do rodízio depois de aberta (chegou mais alguém, criança que não vai comer…)
 function mudarRodizio(c) {
   const R = lojaCfg().rodizio || {}, q = { adulto: 0, crianca: 0, meia: 0, ...c.rodizio };
@@ -364,12 +425,13 @@ function mudarRodizio(c) {
 function precoNaComanda(c, p) {
   const L = lojaCfg(), M = modulosAtivos(L);
   if (c.rodizio && M.has('rodizio') && inclusoRodizio(L.rodizio, p.id)) return { txt: 'Incluso no rodízio', marca: 'Rodízio', cls: 'rod' };
-  if (p.tamanhos?.length || p.porKg) return { txt: p.porKg ? `${din(p.preco)}/kg` : `a partir de ${din(aPartir(p))}` };
+  if (p.tamanhos?.length || p.porKg) { const pk = p.porKg ? precoKg(p) : null; return pk ? { txt: `${din(pk.preco)}/kg${pk.ate ? ` até ${pk.ate}` : ''}`, ...(pk.desde ? { marca: `Desde ${pk.desde}`, cls: 'promo' } : {}) } : { txt: `a partir de ${din(aPartir(p))}` }; }
   const a = precoAgora(p, p.preco, { loja: L, mods: M });
   return a.motivo ? { txt: `<s>${din(p.preco)}</s> ${din(a.preco)}`, marca: a.motivo, cls: a.motivo === 'Prato do dia' ? 'dia' : 'promo' } : { txt: din(p.preco) };
 }
 export function abrirSeletor(c, aoTerminar) {
   const L = lojaCfg(), M = modulosAtivos(L), dia = M.has('pratoDoDia') ? (L.pratoDoDia || [])[new Date().getDay()] : null;
+  const foraTurno = (p) => !noTurno(p, db.categorias, L.turnos), nomeTurno = (p) => (TURNOS.find((x) => x[0] === turnoDe(p, db.categorias))?.[1] || '').toLowerCase();
   let cat = db.categorias[0].id, busca = '';
   const lista = () => db.produtos.filter((p) => (busca ? p.nome.toLowerCase().includes(busca.toLowerCase()) : p.cat === cat));
   const marcasProd = (p, pr) => {
@@ -379,11 +441,11 @@ export function abrirSeletor(c, aoTerminar) {
     if (M.has('alergenicos') && p.alergenos?.length) l.push(`<i class="marca-item alg" title="${t(p.alergenos.map((a) => ALERGENOS.find((x) => x[0] === a)?.[1] || a).join(', '))}">${t(p.alergenos.map((a) => ALERGENOS.find((x) => x[0] === a)?.[1] || a).join(' · '))}</i>`);
     return l.join('');
   };
-  const grade = () => lista().map((p) => { const pr = precoNaComanda(c, p), hoje = dia?.prod === p.id;
-    return `<button type="button" class="prod ${p.ativo ? '' : 'esgotado'} ${hoje ? 'prato-dia' : ''}" data-p="${p.id}" ${p.ativo ? '' : 'disabled'}>
-      ${p.foto ? `<img src="${t(p.foto)}" alt="" loading="lazy" onerror="this.remove()">` : ''}<span><b>${t(p.nome)}</b><em>${p.ativo ? pr.txt : p.esgotouVitrine === ymd() ? 'Esgotou na vitrine' : 'Esgotado'}</em>${marcasProd(p, pr)}</span></button>`; }).join('');
+  const grade = () => lista().map((p) => { const pr = precoNaComanda(c, p), hoje = dia?.prod === p.id, ft = foraTurno(p), ok = p.ativo && !ft;
+    return `<button type="button" class="prod ${p.ativo ? '' : 'esgotado'} ${ft ? 'fora-turno' : ''} ${hoje ? 'prato-dia' : ''}" data-p="${p.id}" ${ok ? '' : 'disabled'}>
+      ${p.foto ? `<img src="${t(p.foto)}" alt="" loading="lazy" onerror="this.remove()">` : ''}<span><b>${t(p.nome)}</b><em>${ft ? `Só no ${nomeTurno(p)}` : p.ativo ? pr.txt : p.esgotouVitrine === ymd() ? 'Esgotou na vitrine' : 'Esgotado'}</em>${marcasProd(p, pr)}</span></button>`; }).join('');
   const contagem = () => { const n = c.itens.filter((i) => i.status === 'rascunho').reduce((s, i) => s + i.qtd, 0); return n ? `Pronto · ${n} a enviar` : 'Pronto'; };
-  const pd = dia?.prod && db.produtos.find((x) => x.id === dia.prod);
+  const pd = dia?.prod && db.produtos.find((x) => x.id === dia.prod && !foraTurno(x));
   folha({ titulo: `Itens · ${c.tipo === 'mesa' || c.tipo === 'cartao' || c.tipo === 'evento' ? ondeComanda(c).toLowerCase() : `pedido #${c.num}`}`, larga: true,
     corpo: `${pd ? `<button type="button" class="prato-dia-faixa" data-p="${pd.id}">${ico('coroa')}<span><b>Prato do dia: ${t(pd.nome)}</b><small>${din(dia.preco)} só hoje</small></span></button>` : ''}
       <label class="busca">${ico('busca')}<input type="search" data-busca placeholder="Buscar no cardápio" aria-label="Buscar no cardápio"></label>
@@ -400,6 +462,8 @@ export function abrirSeletor(c, aoTerminar) {
 }
 // pedido por rodada (rodízio): peças inclusas ainda não entregues contam na rodada atual
 export function rodadaAtual(c) { return c.itens.filter((i) => i.rodizio && !i.cancelado && i.status !== 'entregue').reduce((s, i) => s + i.qtd, 0); }
+// as peças da rodada com a categoria (o limite pode ser por categoria)
+export const itensRodada = (c) => c.itens.filter((i) => i.rodizio && !i.cancelado && i.status !== 'entregue').map((i) => ({ cat: prod(i.prod)?.cat || '', qtd: i.qtd }));
 function detalheItem(c, p, depois) {
   if (!p) return;
   if (p.porKg) return pesarItem(c, p, depois);
@@ -420,10 +484,10 @@ function detalheItem(c, p, depois) {
       const it = op.item(f);
       // pedido por rodada: não deixa passar do limite de peças inclusas por pessoa
       if (inc && M.has('rodadas')) {
-        const r = cabeNaRodada(L.rodizio, c.pessoas, rodadaAtual(c), it.qtd);
-        if (!r.ok) return toast(r.resta ? `Nesta rodada cabem só mais ${r.resta} ${r.resta === 1 ? 'peça' : 'peças'} (limite ${r.limite}). Envie e espere chegar para pedir mais.` : `Limite da rodada atingido (${r.limite} peças). Espere esta rodada chegar à mesa para pedir mais.`);
+        const r = cabeNaRodadaCat(L.rodizio, pessoasAtivas(c), itensRodada(c), p.cat, it.qtd), onde = r.cat ? ` de ${db.categorias.find((x) => x.id === r.cat)?.nome.toLowerCase() || 'esta categoria'}` : '';
+        if (!r.ok) return toast(r.resta ? `Nesta rodada cabem só mais ${r.resta} ${r.resta === 1 ? 'peça' : 'peças'}${onde} (limite ${r.limite}). Envie e espere chegar para pedir mais.` : `Limite da rodada${onde} atingido (${r.limite} peças). Espere esta rodada chegar à mesa para pedir mais.`);
       }
-      adicionarItem(c, it);
+      if (adicionarItem(c, it) === false) return toast(c.perdido ? 'Cartão perdido: libere o cartão antes de lançar' : 'Não deu para lançar este item');
       fechar(); toast(`${it.qtd}× ${p.nome} na comanda`); depois?.();
     };
   } });
@@ -431,24 +495,86 @@ function detalheItem(c, p, depois) {
 
 // prato por quilo: digita o peso da balança (em gramas) e o valor aparece na hora
 export function pesarItem(c, p, depois) {
-  folha({ titulo: p.nome, corpo: `<p class="mudo">${din(p.preco)} o quilo. Digite o peso que a balança mostrou${db.config.tara ? `; o prato vazio (${db.config.tara} g) já é descontado` : ''}.</p>
+  const pk = precoKg(p), kgPreco = pk.preco;
+  folha({ titulo: p.nome, corpo: `<p class="mudo">${din(kgPreco)} o quilo${pk.desde ? ` (preço desde ${pk.desde})` : pk.ate ? ` até ${pk.ate}` : ''}. Digite o peso que a balança mostrou${db.config.tara ? `; o prato vazio (${db.config.tara} g) já é descontado` : ''}.</p>
     <label class="campo peso"><span>Peso que a balança mostrou (gramas)</span><input data-g inputmode="numeric" placeholder="Ex.: 452" autocomplete="off"></label>
     <div class="chips quebra">${[300, 400, 500, 600].map((g) => `<button type="button" class="chip" data-gr="${g}">${g} g</button>`).join('')}</div>
     <p class="peso-valor" data-v>R$ 0,00</p><p class="peso-conta" data-conta>Aceita de 20 g a 5 kg</p>`,
   pe: '<button type="button" class="bt cheio grande" data-add disabled>Adicionar</button>',
   aoAbrir: (f, fechar) => {
     const g = $('[data-g]', f); const tara = Number(db.config.tara || 0); const kg = () => Math.max(0, (Number(String(g.value).replace(/\D/g, '')) - tara) / 1000);
-    const atual = () => { const k = kg(), bruto = Number(String(g.value).replace(/\D/g, '')) || 0; $('[data-v]', f).textContent = k ? `${din(p.preco * k)}` : 'R$ 0,00'; $('[data-conta]', f).textContent = bruto ? (tara ? `${bruto} g na balança − ${tara} g do prato = ${Math.max(0, bruto - tara)} g` : `${bruto} g`) + ` × ${din(p.preco)}/kg` : 'Aceita de 20 g a 5 kg'; $('[data-add]', f).disabled = !(k > 0.02 && k < 5); };
+    const atual = () => { const k = kg(), bruto = Number(String(g.value).replace(/\D/g, '')) || 0; $('[data-v]', f).textContent = k ? `${din(kgPreco * k)}` : 'R$ 0,00'; $('[data-conta]', f).textContent = bruto ? (tara ? `${bruto} g na balança − ${tara} g do prato = ${Math.max(0, bruto - tara)} g` : `${bruto} g`) + ` × ${din(kgPreco)}/kg` : 'Aceita de 20 g a 5 kg'; $('[data-add]', f).disabled = !(k > 0.02 && k < 5); };
     g.oninput = atual; $$('[data-gr]', f).forEach((b) => { b.onclick = () => { g.value = b.dataset.gr; atual(); g.focus(); }; });
-    $('[data-add]', f).onclick = () => { const k = kg(); if (!(k > 0.02 && k < 5)) return toast('Confira o peso: entre 20 g e 5 kg'); adicionarItem(c, { prodId: p.id, kg: k }); fechar(); toast(`${p.nome}: ${din(p.preco * k)}`); depois?.(); };
+    $('[data-add]', f).onclick = () => { const k = kg(); if (!(k > 0.02 && k < 5)) return toast('Confira o peso: entre 20 g e 5 kg'); if (adicionarItem(c, { prodId: p.id, kg: k }) === false) return toast('Cartão perdido: libere o cartão antes de lançar'); fechar(); toast(`${p.nome}: ${din(precoKg(p).preco * k)}`); depois?.(); };
     setTimeout(() => g.focus(), 80);
   } });
 }
 
-// ------------------------------------------------------------------ planta do salão (visão opcional, tablet e caixa)
+// ------------------------------------------------------------------ planta do salão: ver o estado das mesas e, no modo editar, arrastar (mouse e toque)
+// db.config.planta[mesa] = { x, y, lugares, nome, off, forma }: posição numa grade de 24 × 16 (cada mesa ocupa 3 × 3)
+const PW = 24, PH = 16, PT = 3;
+function posPlanta(m) {
+  const x = db.config.planta?.[m];
+  if (x && Number.isFinite(x.x) && Number.isFinite(x.y)) return x;
+  const k = m - 1; return { x: (k % 6) * 4 + 0.5, y: Math.floor(k / 6) * 4 + 0.5 }; // sem posição salva: em fileiras de 6
+}
+function htmlPlanta(editar) {
+  const n = db.config.mesas, P = db.config.planta || {}, linhas = Math.max(PH, ...Array.from({ length: n }, (_, k) => posPlanta(k + 1).y + PT + 0.5));
+  const mesas = Array.from({ length: n }, (_, k) => {
+    const m = k + 1, e = estadoMesa(m), c = comandaDaMesa(m), x = P[m] || {}, pos = posPlanta(m);
+    const est = `left:${(pos.x / PW) * 100}%;top:${(pos.y / linhas) * 100}%;width:${(PT / PW) * 100}%;height:${(PT / linhas) * 100}%`;
+    const txt = `<b>${t(x.nome || m)}</b><small>${x.off ? 'indisponível' : c ? dinCurto(conta(c).total) : `${x.lugares || 4} lugares`}</small>`;
+    return editar ? `<button type="button" class="mesa-planta ${x.forma === 'quadrada' || (!x.forma && m % 3 === 2) ? 'quadrada' : ''} ${x.off ? 'off' : ''}" data-pm="${m}" style="${est}" aria-label="Mesa ${m}: arraste para mover, toque para ajustar">${txt}</button>`
+      : `<a class="mesa-planta ${e} ${x.forma === 'quadrada' || (!x.forma && m % 3 === 2) ? 'quadrada' : ''} ${x.off ? 'off' : ''}" href="#mesa/${m}" data-fechar style="${est}">${txt}</a>`;
+  }).join('');
+  return `<div class="planta-livre ${editar ? 'editando' : ''}" data-planta style="aspect-ratio:${PW}/${linhas}">${mesas}</div>
+    <p class="mudo" style="margin-top:10px">${editar ? 'Arraste as mesas na grade. Toque numa mesa para mudar o nome, os lugares, o formato ou marcar como indisponível.' : 'Toque numa mesa para abrir. Use “Editar a planta” para arrumar as mesas como no salão.'}</p>`;
+}
 acao('planta', () => {
-  const n = db.config.mesas;
-  const mesas = Array.from({ length: n }, (_, k) => { const m = k + 1, e = estadoMesa(m), c = comandaDaMesa(m);
-    return `<a class="mesa-planta ${e} ${m % 3 === 2 ? 'quadrada' : ''}" href="#mesa/${m}" data-fechar><b>${m}</b><small>${c ? dinCurto(conta(c).total) : 'livre'}</small></a>`; }).join('');
-  folha({ titulo: 'Planta do salão', larga: true, corpo: `<div class="planta">${mesas}</div><p class="mudo" style="margin-top:10px">A posição das mesas pode ser ajustada em Mais › Ajustes (na conta real).</p>` });
+  let editar = false;
+  folha({ titulo: 'Planta do salão', larga: true, corpo: `<div data-pl>${htmlPlanta(false)}</div>`, pe: '<button type="button" class="bt" data-ed>Editar a planta</button>',
+    aoAbrir: (f) => {
+      const box = $('[data-pl]', f), bt = $('[data-ed]', f);
+      const desenha = () => { box.innerHTML = htmlPlanta(editar); bt.textContent = editar ? 'Pronto' : 'Editar a planta'; bt.classList.toggle('cheio', editar); if (editar) ligarArraste(box, desenha); };
+      bt.onclick = () => { editar = !editar; desenha(); if (!editar) toast('Planta salva'); };
+    } });
 });
+// arrastar com o dedo ou o mouse (pointer events), encaixando na grade; toque sem arrastar abre o ajuste da mesa
+function ligarArraste(box, desenha) {
+  const area = $('[data-planta]', box); let ativo = null;
+  area.addEventListener('pointerdown', (e) => {
+    const el = e.target.closest('[data-pm]'); if (!el) return;
+    e.preventDefault(); el.setPointerCapture(e.pointerId);
+    const r = area.getBoundingClientRect(), m = Number(el.dataset.pm), pos = posPlanta(m);
+    ativo = { el, m, r, x0: e.clientX, y0: e.clientY, px: pos.x, py: pos.y, moveu: false, linhas: r.height / (r.width / PW) };
+  });
+  area.addEventListener('pointermove', (e) => {
+    if (!ativo) return; const dx = e.clientX - ativo.x0, dy = e.clientY - ativo.y0;
+    if (!ativo.moveu && Math.hypot(dx, dy) < 6) return; ativo.moveu = true; ativo.el.classList.add('arrastando');
+    const cel = ativo.r.width / PW, nx = Math.max(0, Math.min(PW - PT, Math.round((ativo.px + dx / cel) * 2) / 2)), ny = Math.max(0, Math.min(ativo.linhas - PT, Math.round((ativo.py + dy / cel) * 2) / 2));
+    ativo.nx = nx; ativo.ny = ny; ativo.el.style.left = `${(nx / PW) * 100}%`; ativo.el.style.top = `${(ny / ativo.linhas) * 100}%`;
+  });
+  const solta = () => {
+    if (!ativo) return; const a = ativo; ativo = null;
+    if (!a.moveu) return ajustarMesa(a.m, desenha);
+    db.config.planta ||= {}; db.config.planta[a.m] = { ...(db.config.planta[a.m] || {}), x: a.nx ?? a.px, y: a.ny ?? a.py }; grava(); desenha();
+  };
+  area.addEventListener('pointerup', solta); area.addEventListener('pointercancel', () => { ativo = null; desenha(); });
+}
+function ajustarMesa(m, depois) {
+  const x = db.config.planta?.[m] || {};
+  folha({ titulo: `Mesa ${m}`, corpo: `<div class="duas-c"><label class="campo"><span>Nome na planta (opcional)</span><input data-n value="${t(x.nome || '')}" maxlength="16" placeholder="${m}"></label><label class="campo"><span>Lugares</span><input data-l inputmode="numeric" value="${x.lugares || 4}"></label></div>
+    <div class="campo"><span>Formato</span><div class="seg" role="group">${[['redonda', 'Redonda'], ['quadrada', 'Quadrada']].map(([k, n]) => `<button type="button" data-fm="${k}" aria-pressed="${(x.forma || (m % 3 === 2 ? 'quadrada' : 'redonda')) === k}">${n}</button>`).join('')}</div></div>
+    <label class="interruptor bloco-int"><input type="checkbox" data-off ${x.off ? 'checked' : ''}><span></span>Indisponível (quebrada, reservada para evento, área fechada)</label>`,
+  pe: '<button type="button" class="bt cheio grande" data-ok>Salvar a mesa</button>',
+  aoAbrir: (f, fechar) => {
+    let forma = x.forma || (m % 3 === 2 ? 'quadrada' : 'redonda');
+    $$('[data-fm]', f).forEach((b) => { b.onclick = () => { forma = b.dataset.fm; $$('[data-fm]', f).forEach((y) => y.setAttribute('aria-pressed', String(y === b))); }; });
+    $('[data-ok]', f).onclick = () => {
+      const pos = posPlanta(m); db.config.planta ||= {};
+      db.config.planta[m] = { ...x, x: pos.x, y: pos.y, nome: $('[data-n]', f).value.trim(), lugares: Math.max(1, Math.min(40, Math.round(Number($('[data-l]', f).value)) || 4)), forma, off: $('[data-off]', f).checked };
+      if (!db.config.planta[m].off) delete db.config.planta[m].off;
+      grava(); fechar(); depois?.();
+    };
+  } });
+}

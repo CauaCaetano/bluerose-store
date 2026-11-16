@@ -1,7 +1,7 @@
 // Popina · as opções de um produto, iguais para o garçom e para o cliente do cardápio online:
 // tamanho (P/M/G, broto/grande), pizza em frações e borda, combo, grupos de complementos (obrigatórios ou não, com mínimo
 // e máximo e preço por opção), pimenta e ponto (funções da casa), observação e quantidade. O preço final sai sempre daqui.
-import { precoAgora, precoFracoes, precoBorda, faltaCombo, FRACAO_NOME } from './precos.js?v=21';
+import { precoAgora, precoFracoes, precoBorda, faltaCombo, FRACAO_NOME } from './precos.js?v=22';
 
 // escolhas obrigatórias que as funções da casa põem no prato marcado (o nome vira "Grupo: opção" na comanda e na cozinha)
 export const ESCOLHAS_CASA = {
@@ -9,11 +9,14 @@ export const ESCOLHAS_CASA = {
   pontoCarne: ['pcarne', 'Ponto da carne', ['Mal passado', 'Ao ponto', 'Bem passado']],
   pontoMassa: ['pmassa', 'Ponto da massa', ['Al dente', 'Macia']],
 };
+// cada prato escolhe se pede a escolha da casa: '' (não pede), 'opcional' ou 'obrigatorio'; o valor antigo true vale como obrigatório
+export const modoEscolha = (v) => (v === 'opcional' ? 'opcional' : v === true || v === 'obrigatorio' ? 'obrigatorio' : '');
 // grupos do produto (os "adicionais" antigos viram um grupo opcional); ext.mods: funções ligadas (pimenta e ponto)
 export function gruposDe(p, ext = {}) {
   const g = (p.grupos || []).map((x, i) => ({ id: x.id || `g${i}`, nome: x.nome, min: Number(x.min) || 0, max: Number(x.max) || 1, opcoes: x.opcoes || [] }));
   Object.entries(ESCOLHAS_CASA).forEach(([k, [id, nome, ops]]) => {
-    if (p[k] && ext.mods?.has?.(k) && !g.some((x) => x.nome.toLowerCase() === nome.toLowerCase())) g.unshift({ id, nome, min: 1, max: 1, opcoes: ops.map((o) => ({ nome: o })), casa: true });
+    const modo = modoEscolha(p[k]);
+    if (modo && ext.mods?.has?.(k) && !g.some((x) => x.nome.toLowerCase() === nome.toLowerCase())) g.unshift({ id, nome, min: modo === 'obrigatorio' ? 1 : 0, max: 1, opcoes: ops.map((o) => ({ nome: o })), casa: true });
   });
   if (p.adicionais?.length) g.push({ id: 'adic', nome: 'Adicionais', min: 0, max: 20, opcoes: p.adicionais });
   return g;

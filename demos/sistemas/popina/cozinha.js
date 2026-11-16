@@ -1,9 +1,9 @@
 // Popina · tela da cozinha e do bar (KDS): cada envio vira um ticket, na ordem de chegada, com o tempo correndo.
 // "Começar" e "Pronto" avisam o garçom na hora (a fila dele mostra o prato pronto).
-import { db, t, tempo, minutos, comanda, mudarStatus, ondeComanda, tem, prod } from './loja.js?v=21';
-import { ETAPAS, ALERGENOS } from './precos.js?v=21';
-import { registrar, acao } from './nucleo.js?v=21';
-import { ico, toast, bip, folha } from './ui.js?v=21';
+import { db, t, tempo, minutos, comanda, mudarStatus, ondeComanda, tem, prod, lojaCfg } from './loja.js?v=22';
+import { ETAPAS, ALERGENOS } from './precos.js?v=22';
+import { registrar, acao } from './nucleo.js?v=22';
+import { ico, toast, bip, folha } from './ui.js?v=22';
 
 let setor = (() => { try { const s = localStorage.getItem('popina-setor'); return s === 'bar' ? 'bar' : 'cozinha'; } catch { return 'cozinha'; } })();
 let vistos = new Set();
@@ -39,8 +39,10 @@ function notas(i) {
   if (i.obs) { const sem = /^\s*(sem|não|nao|tirar)\b|alerg/i.test(i.obs); l.push(`<em class="kn ${sem ? 'forte alerta' : ''}">${ico(sem ? 'alerta' : 'fala')}${t(i.obs)}</em>`); }
   return l.join('');
 }
+// mesa que veio de reserva: restrições (alergias) e ocasião aparecem no topo da comanda
+const reservaTk = (c) => (c.reserva?.restricoes || c.reserva?.ocasiao ? `<p class="tk-reserva">${c.reserva.restricoes ? `<em class="kn forte alerta">${ico('alerta')}Restrições: ${t(c.reserva.restricoes)}</em>` : ''}${c.reserva.ocasiao ? `<em class="kn">${ico('coroa')}${t(c.reserva.ocasiao)}</em>` : ''}</p>` : '');
 function ticket(k) {
-  const m = minutos(k.env), atrasado = k.estado === 'preparo' && m >= 10;
+  const m = minutos(k.env), atrasado = k.estado !== 'pronto' && m >= (Number(lojaCfg().alertas?.kds) || 10); // atraso configurável em Gestão › Caixa e regras
   const prontos = k.itens.filter((i) => i.status === 'pronto' || i.status === 'entregue').length, ico2 = k.c.tipo === 'mesa' ? 'mesa' : k.c.tipo === 'delivery' ? 'moto' : k.c.tipo === 'cartao' ? 'cartao' : k.c.tipo === 'evento' ? 'coroa' : 'sacola';
   const quando = k.estado === 'pronto' ? Math.max(...k.itens.map((i) => i.pronto || k.env)) : k.env;
   const sub = k.c.tipo === 'mesa' ? `${ico('pessoas')}${k.c.pessoas || 2} pessoas${k.c.rodizio ? ' · rodízio' : ''}` : k.c.tipo === 'cartao' ? t(k.c.nome || 'Comanda individual') : k.c.tipo === 'evento' ? 'Evento' : t(k.c.cliente?.nome || (k.c.tipo === 'delivery' ? 'Entrega' : 'Retirada no balcão'));
@@ -48,7 +50,7 @@ function ticket(k) {
     : `<span class="relogio ${atrasado ? 'atrasado' : ''}" data-desde="${quando}">${atrasado ? ico('relogio') : ''}<b>${mmss(Date.now() - quando)}</b></span>`;
   return `<article class="ticket ${k.estado}" data-acao="ticket-abrir" data-c="${k.c.id}" data-env="${k.env}" tabindex="0" role="button" aria-label="${ONDE(k.c)}: abrir ações">
     <header><i class="tk-ico">${ico(ico2)}</i><div class="tk-tit"><b>${ONDE(k.c)}</b><small>${sub}</small></div>${rel}</header>
-    <ul>${k.itens.map((i) => `<li class="${i.status}"><span>${i.qtd}× ${t(i.nome)}</span>${notas(i)}</li>`).join('')}</ul>
+    ${reservaTk(k.c)}<ul>${k.itens.map((i) => `<li class="${i.status}"><span>${i.qtd}× ${t(i.nome)}</span>${notas(i)}</li>`).join('')}</ul>
     ${k.estado === 'preparo' ? `<div class="tk-prog" title="${prontos} de ${k.itens.length} prontos"><i style="width:${Math.max(12, ((prontos + .6) / k.itens.length) * 100)}%"></i></div>` : ''}</article>`;
 }
 registrar('cozinha', {
@@ -77,7 +79,7 @@ acao('ticket-abrir', (b) => {
   const itens = c.itens.filter((i) => i.enviado === env && !i.cancelado && (setor === 'tudo' || i.setor === setor));
   const estado = itens.every((i) => i.status === 'pronto') ? 'pronto' : itens.some((i) => i.status === 'preparo') ? 'preparo' : 'novo';
   const d = `data-c="${c.id}" data-env="${env}"`;
-  folha({ titulo: ONDE(c), corpo: `<ul class="lista-itens">${itens.map((i) => `<li><b>${i.qtd}×</b><span style="flex:1;margin:0">${t(i.nome)}${notas(i) ? `<small>${notas(i).replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<\/?em[^>]*>/g, ' · ').replace(/^ · | · $/g, '')}</small>` : ''}</span>
+  folha({ titulo: ONDE(c), corpo: `${c.reserva?.restricoes ? `<p class="aviso perdido">${ico('alerta')}Restrições: ${t(c.reserva.restricoes)}</p>` : ''}<ul class="lista-itens">${itens.map((i) => `<li><b>${i.qtd}×</b><span style="flex:1;margin:0">${t(i.nome)}${notas(i) ? `<small>${notas(i).replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<\/?em[^>]*>/g, ' · ').replace(/^ · | · $/g, '')}</small>` : ''}</span>
       ${i.status === 'pronto' ? `<i class="ok-item">${ico('check')}</i>` : `<button type="button" class="bt" data-acao="item-pronto" data-c="${c.id}" data-i="${i.id}">${ico('check')}Pronto</button>`}</li>`).join('')}</ul>`,
   pe: `<button type="button" class="bt" data-acao="imprimir-ticket" ${d}>${ico('impressora')}Imprimir</button>
     ${estado === 'novo' ? `<button type="button" class="bt" data-acao="tudo-pronto" ${d}>Já está pronto</button><button type="button" class="bt cheio" data-acao="comecar" ${d}>Começar a preparar</button>`
@@ -93,7 +95,7 @@ acao('imprimir-ticket', (b) => {
   const w = window.open('', '_blank', 'width=380,height=600'); if (!w) return toast('Libere as janelas para imprimir');
   const e = (x) => String(x ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
   w.document.write(`<!doctype html><meta charset="utf-8"><title>${e(ONDE(c))}</title><style>@page{size:80mm auto;margin:4mm}body{font:14px/1.35 system-ui,sans-serif;width:72mm;margin:0}h1{font-size:22px;margin:0 0 2px}p{margin:0 0 8px;font-size:12px}li{margin:6px 0;font-size:16px}em{display:block;font-style:normal;font-weight:700;text-transform:uppercase;font-size:13px}ul{list-style:none;padding:0;border-top:1px dashed #000;border-bottom:1px dashed #000;padding:6px 0}</style>
-    <h1>${e(ONDE(c))}</h1><p>${new Date(env).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}${c.garcom ? ` · ${e(c.garcom)}` : ''}${c.cliente?.nome ? ` · ${e(c.cliente.nome)}` : ''}</p>
+    <h1>${e(ONDE(c))}</h1><p>${new Date(env).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}${c.garcom ? ` · ${e(c.garcom)}` : ''}${c.cliente?.nome ? ` · ${e(c.cliente.nome)}` : ''}</p>${c.reserva?.restricoes ? `<em>RESTRIÇÕES: ${e(c.reserva.restricoes)}</em>` : ''}${c.reserva?.ocasiao ? `<p>${e(c.reserva.ocasiao)}</p>` : ''}
     <ul>${its.map((i) => `<li><b>${i.qtd}× ${e(i.nome)}</b>${i.etapa ? `<em>${e(NOME_ETAPA[i.etapa] || i.etapa)}</em>` : ''}${(i.combo || []).map((x) => `<em>${e(x.grupo)}: ${e(x.nome)}</em>`).join('')}${(i.adic || []).map((a) => `<em>${e(a.nome)}</em>`).join('')}${alergenos(i).length ? `<em>Contém ${e(alergenos(i).join(', '))}</em>` : ''}${i.obs ? `<em>${e(i.obs)}</em>` : ''}</li>`).join('')}</ul><script>print();setTimeout(()=>close(),400)<\/script>`);
   w.document.close();
 });

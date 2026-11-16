@@ -1,26 +1,28 @@
 // Popina · Mais: cardápio (preços, esgotado, ficha técnica), estoque, relatórios, QR das mesas, ajustes e o papel deste aparelho.
 import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa,
-  regras, temPin, auditar, quemAgora, registrarPerda, ajustarEstoque, MOTIVOS_PERDA, consumoVenda, custoVenda } from './loja.js?v=21';
-import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=21';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=21';
+  regras, temPin, auditar, quemAgora, registrarPerda, ajustarEstoque, MOTIVOS_PERDA, consumoVenda, custoVenda } from './loja.js?v=22';
+import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=22';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=22';
 import { qrSVG } from '../base/qr.js';
-import { temModulo, modulosAtivos } from './perfis.js?v=21';
-import { ALERGENOS, ETAPAS } from './precos.js?v=21';
+import { temModulo, modulosAtivos } from './perfis.js?v=22';
+import { ALERGENOS, ETAPAS, TURNOS } from './precos.js?v=22';
+import { modoEscolha } from './opcoes.js?v=22';
 
 // cada seção: [id, nome, ícone, detalhe, função da casa que precisa estar ligada (opcional), endereço próprio (opcional)]
 export const GRUPOS = [
   ['Restaurante', [['aparencia', 'Aparência e templates', 'ajustes', 'Template, logo, capa, cores e estilo do cardápio'], ['loja', 'Restaurante e cardápio online', 'salao', 'Contato, horários, entrega e o link'], ['mesas', 'Mesas e QR', 'qr', 'Áreas do salão, número de mesas, QR de cada mesa'], ['ajustes', 'Caixa e regras', 'caixa', 'Pix, serviço, garçons e comissão, balança']]],
   ['Cardápio e estoque', [['cardapio', 'Cardápio', 'cardapio', 'Pratos, tamanhos, complementos, fotos e preços'], ['estoque', 'Estoque', 'estoque', 'O que tem, o que acaba, compras']]],
   ['Vendas e clientes', [['relatorios', 'Relatórios', 'grafico', 'Vendas, garçons, horários, mais vendidos'], ['clientes', 'Clientes', 'pessoas', 'Quem pede no delivery e quanto gasta'], ['entregadores', 'Entregadores', 'moto', 'Quem levou cada pedido e o acerto do dia', 'delivery'], ['cupons', 'Cupons', 'conta', 'Descontos do cardápio online']]],
-  ['Funções do negócio', [['funcoes', 'Regras das funções', 'ajustes', 'Rodízio, pizza, happy hour, prato do dia, fidelidade e mais', 'regras'], ['reservas', 'Reservas e fila', 'calendario', 'Reservas por dia e fila de espera na porta', 'reservas'],
+  ['Funções do negócio', [['funcoes', 'Regras das funções', 'ajustes', 'Rodízio, pizza, happy hour, cardápio por turno, fidelidade e mais'], ['reservas', 'Reservas e fila', 'calendario', 'Reservas por dia e fila de espera na porta', 'reservas'],
     ['eventos', 'Eventos', 'coroa', 'Pacote por pessoa, convidados e check-in', 'eventos'], ['encomendas', 'Encomendas', 'calendario', 'Pedidos para outro dia e hora', 'encomendas'], ['vitrine', 'Vitrine do dia', 'loja', 'Quanto foi feito hoje e quanto resta', 'vitrine'],
-    ['portaria', 'Portaria', 'pessoas', 'Entrada, consumação mínima e lotação', 'portaria', '#portaria'], ['senhas', 'Painel de retirada', 'telacheia', 'As senhas na TV do balcão', 'senha', '#senhas']]],
+    ['bar', 'Bar: chopp e doses', 'taca', 'Barris de chopp, garrafas em doses e cartões', 'bar'],
+    ['portaria', 'Portaria', 'pessoas', 'Entrada, lotes, lista VIP, promoters e lotação', 'portaria', '#portaria'], ['senhas', 'Painel de retirada', 'telacheia', 'As senhas na TV do balcão', 'senha', '#senhas']]],
   ['Equipe e conta', [['equipe', 'Equipe e convites', 'pessoas', 'Quem usa, cargo e o que cada um vê'], ['conta', 'Minha conta', 'ajustes', 'Perfil, assinatura e sair'], ['aparelho', 'Este aparelho', 'ao_vivo', 'Garçom, cozinha, caixa ou dono']]],
 ];
 const ALIAS = { qr: 'mesas' };
 // funções que têm regras para o dono ajustar (Gestão › Regras das funções)
 export const COM_REGRAS = ['rodizio', 'rodadas', 'meiaMeia', 'happyHour', 'pratoDoDia', 'fidelidade', 'encomendas', 'portaria', 'couvert'];
-const secaoLigada = (mod) => { if (!mod) return true; const m = modulosAtivos(lojaCfg()); return mod === 'regras' ? COM_REGRAS.some((k) => m.has(k)) : m.has(mod); };
+const secaoLigada = (mod) => { if (!mod) return true; const m = modulosAtivos(lojaCfg()); return mod === 'regras' ? COM_REGRAS.some((k) => m.has(k)) : mod === 'bar' ? m.has('comandaIndividual') : m.has(mod); };
 function menuGestao(atual) {
   const baixo = estoqueBaixo().length;
   return GRUPOS.map(([g, l]) => [g, l.filter((x) => secaoLigada(x[4]))]).filter(([, l]) => l.length).map(([g, l], k) => `<div class="mg-grupo"><h3 class="g-fita g${k % 4}">${g}</h3>${l.map(([id, nome, ic, det, , href]) => `<a href="${href || `#mais/${id}`}" class="${id === atual ? 'on' : ''}"><span class="mm-ico">${ico(ic)}</span><span><b>${nome}${id === 'estoque' && baixo ? ` <em class="badge">${baixo}</em>` : ''}</b><small>${det}</small></span>${ico('dir')}</a>`).join('')}</div>`).join('');
@@ -43,6 +45,9 @@ function resumoDia() {
   // os quatro números do dia em papel rasgado, cada um com a sua faixa de cor (conceito 6-gestao-pc.png)
   return `<section class="resumo-dia"><div class="kv">${ico('moedas')}<small>Vendido hoje</small><b>${din(tot)}</b><span>${v.length} ${v.length === 1 ? 'conta' : 'contas'}</span></div><div class="ko">${ico('pessoas')}<small>Contas abertas</small><b>${abertas}</b></div><div class="kl">${ico('etiqueta')}<small>Ticket médio</small><b>${din(v.length ? tot / v.length : 0)}</b></div><a href="#mais/estoque" class="ka ${baixo ? 'alerta' : ''}">${ico('estoque')}<small>Estoque</small><b>${baixo}</b><span>${baixo === 1 ? 'item para repor' : 'itens para repor'}</span></a></section>`;
 }
+// cartões do dia que importam para o tipo de negócio (funcoes.js registra: rodízio, portaria, cafeteria, pizzaria, bar, reservas)
+export const PAINEL_TIPO = [];
+const painelTipo = () => { const l = PAINEL_TIPO.map((f) => { try { return f(); } catch { return ''; } }).join(''); return l ? `<section class="resumo-dia painel-tipo" aria-label="O dia no seu tipo de negócio">${l}</section>` : ''; };
 // o dia em gráfico: vendas por hora, mais vendidos e garçons (só o que fechou hoje)
 function painelDia() {
   const ini = new Date(); ini.setHours(0, 0, 0, 0);
@@ -55,7 +60,7 @@ function painelDia() {
   const ga = {}; v.filter((x) => x.garcom).forEach((x) => { ga[x.garcom] = (ga[x.garcom] || 0) + x.total; });
   const gl = Object.entries(ga).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const bebida = (n) => /refri|suco|cerveja|água|agua|coca|chopp|vinho|caipi/i.test(n);
-  return `<div class="g-painel"><section class="g-card g-grafico"><h2 class="g-fita g0">Vendas por hora</h2>
+  return `${painelTipo()}<div class="g-painel"><section class="g-card g-grafico"><h2 class="g-fita g0">Vendas por hora</h2>
       <div class="g-barras"><div class="g-eixo">${Array.from({ length: 9 }, (_, k) => `<span>R$ ${(teto - k * passo).toLocaleString('pt-BR')}</span>`).join('')}</div>
       <div class="g-cols">${horas.map(([h, val]) => `<div title="${h}h: ${din(val)}"><i style="height:${(val / teto) * 100}%"></i><small>${h}h</small></div>`).join('')}</div></div></section>
     <div class="g-lado"><section class="g-card"><h2 class="g-fita g1">Mais vendidos hoje</h2><ul class="g-lista">${rank.map(([n, q]) => `<li>${ico(bebida(n) ? 'pedidos' : 'cloche')}<span>${t(n)}</span><b>${q}</b></li>`).join('') || '<li><span>Nada vendido ainda hoje</span></li>'}</ul></section>
@@ -115,7 +120,7 @@ export const TELAS_MAIS = {
     return volta('mais', 'Estoque', 'Baixa sozinho a cada pedido enviado, pela ficha técnica de cada prato') + `<p class="legenda-est"><span><i class="ok"></i>Tranquilo</span><span><i class="medio"></i>Perto do mínimo</span><span><i class="baixo"></i>Repor agora</span><span>Barra cheia = o dobro do mínimo</span></p>
       <div class="linha-bts"><button type="button" class="bt cheio" data-acao="compra">${ico('mais2')}Entrada de compra</button><button type="button" class="bt" data-acao="perda">${ico('lixo')}Registrar perda</button><button type="button" class="bt" data-acao="inventario">${ico('check')}Inventário</button><button type="button" class="bt" data-acao="editar-insumo">Novo insumo</button><button type="button" class="bt" data-acao="lista-compras">Lista de compras</button></div>
       <ul class="lista-estoque">${l.map((i) => { const p = Math.max(0, Math.min(100, (saldo(i) / ((i.minimo || 1) * 2)) * 100)); const nivel = saldo(i) <= i.minimo ? 'baixo' : saldo(i) <= i.minimo * 1.5 ? 'medio' : '';
-        return `<li class="${nivel}"><div><b>${t(i.nome)}</b><small>${fmtQtd(saldo(i), i.unid)} · mínimo ${fmtQtd(i.minimo, i.unid)} · ${din(i.custo)}/${t(i.compra)}</small><span class="barra"><i style="width:${p}%"></i></span></div>${nivel === 'baixo' ? `<em class="badge">Comprar ${Math.max(1, Math.ceil((i.minimo * 2 - saldo(i)) / i.fator))} ${t(i.compra)}</em>` : ''}<button type="button" class="bt-ico" data-acao="hist-insumo" data-i="${i.id}" aria-label="Movimentações de ${t(i.nome)}" title="Movimentações">${ico('relogio')}</button><button type="button" class="bt-ico" data-acao="editar-insumo" data-i="${i.id}" aria-label="Editar ${t(i.nome)}">${ico('ajustes')}</button></li>`; }).join('') || '<li class="vazio">Nenhum insumo ainda. Cadastre o que você compra (carne, queijo, bebidas…) para o estoque baixar sozinho a cada pedido.</li>'}</ul>`;
+        return `<li class="${nivel}"><div><b>${t(i.nome)}</b><small>${fmtQtd(saldo(i), i.unid, i.fator)} · mínimo ${fmtQtd(i.minimo, i.unid, i.fator)} · ${din(i.custo)}/${t(i.compra)}</small><span class="barra"><i style="width:${p}%"></i></span></div>${nivel === 'baixo' ? `<em class="badge">Comprar ${Math.max(1, Math.ceil((i.minimo * 2 - saldo(i)) / i.fator))} ${t(i.compra)}</em>` : ''}<button type="button" class="bt-ico" data-acao="hist-insumo" data-i="${i.id}" aria-label="Movimentações de ${t(i.nome)}" title="Movimentações">${ico('relogio')}</button><button type="button" class="bt-ico" data-acao="editar-insumo" data-i="${i.id}" aria-label="Editar ${t(i.nome)}">${ico('ajustes')}</button></li>`; }).join('') || '<li class="vazio">Nenhum insumo ainda. Cadastre o que você compra (carne, queijo, bebidas…) para o estoque baixar sozinho a cada pedido.</li>'}</ul>`;
   },
   // ---------------- relatórios
   relatorios(per) {
@@ -199,6 +204,7 @@ export const TELAS_MAIS = {
       <div class="duas-c"><label class="campo"><span>Taxa de serviço (%)</span><input name="servico" inputmode="numeric" value="${c.servico}"></label><label class="campo"><span>Comissão dos garçons (% do serviço que vai para eles)</span><input name="comissao" inputmode="numeric" value="${L.comissao ?? 10}"></label></div>
       <label class="campo"><span>Garçons (separados por vírgula)</span><input name="garcons" value="${t((c.garcons || []).join(', '))}"></label>
       <label class="campo"><span>Peso do prato vazio, para comida por quilo (gramas)</span><input name="tara" inputmode="numeric" value="${c.tara || ''}" placeholder="0"></label>
+      <div class="duas-c"><label class="campo"><span>Avisar mesa sem atenção depois de (minutos, 0 desliga)</span><input name="al_mesa" inputmode="numeric" value="${L.alertas?.mesa ?? 25}"></label><label class="campo"><span>Comanda atrasada na cozinha depois de (minutos)</span><input name="al_kds" inputmode="numeric" value="${L.alertas?.kds ?? 10}"></label></div>
       <div class="sec-tit"><h2>Gerente e conferência</h2></div>
       <p class="mudo">Com o PIN, só o gerente libera: desconto acima do limite, cancelar item já enviado, cancelar venda fechada, reabrir conta e sangria. Sem PIN, nada trava, mas tudo fica registrado.</p>
       <div class="duas-c"><label class="campo"><span>PIN do gerente (4 números)</span><input name="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="${temPin() ? '•••• (já tem PIN; digite para trocar)' : 'Sem PIN'}"></label>
@@ -236,7 +242,7 @@ export const MONTAR = {
       if (tirar || novoPin) auditar('pin', { motivo: tirar ? 'PIN do gerente tirado' : R.pin ? 'PIN do gerente trocado' : 'PIN do gerente criado' });
       if (lim !== R.limiteDesconto || muda.conferenciaCega !== R.conferenciaCega) auditar('regras', { motivo: `Desconto sem PIN até ${lim}% · conferência cega ${muda.conferenciaCega ? 'ligada' : 'desligada'}` });
       db.config.regras = { ...R, ...muda };
-      setLoja({ comissao: Math.max(0, Math.min(100, Number(f.comissao.value) || 0)) });
+      setLoja({ comissao: Math.max(0, Math.min(100, Number(f.comissao.value) || 0)), alertas: { mesa: Math.max(0, Math.min(240, Math.round(num(f.al_mesa.value)))), kds: Math.max(1, Math.min(120, Math.round(num(f.al_kds.value)) || 10)) } });
       toast('Salvo');
     };
   },
@@ -277,14 +283,21 @@ acao('editar-prod', (b) => {
   const blocoCasa = () => {
     const l = [];
     if (MD.has('combos')) l.push(`<div class="campo"><span>Combo: grupos com o que o cliente escolhe (de 2 a 4). O preço do combo é o preço acima.</span><div data-combo>${blocosCombo()}</div><button type="button" class="link" data-maiscombo>+ Grupo do combo</button></div>`);
-    const fl = [['picancia', 'Pede o nível de pimenta (suave, médio, picante, extra)'], ['pontoCarne', 'Pede o ponto da carne'], ['pontoMassa', 'Pede o ponto da massa (al dente ou macia)'], ['vitrine', 'Vitrine: sai pronto, sem passar pela cozinha']].filter(([k]) => MD.has(k));
-    fl.forEach(([k, n]) => l.push(`<label class="interruptor bloco-int"><input type="checkbox" data-flag="${k}" ${p[k] ? 'checked' : ''}><span></span>${n}</label>`));
+    const esc = [['picancia', 'Nível de pimenta'], ['pontoCarne', 'Ponto da carne'], ['pontoMassa', 'Ponto da massa']].filter(([k]) => MD.has(k));
+    if (esc.length) l.push(`<div class="${esc.length > 1 ? 'tres-c' : ''}">${esc.map(([k, n]) => `<label class="campo"><span>${n}</span><select data-escolha="${k}">${[['', 'Não pede'], ['opcional', 'Opcional'], ['obrigatorio', 'Obrigatório']].map(([v, r]) => `<option value="${v}" ${modoEscolha(p[k]) === v ? 'selected' : ''}>${r}</option>`).join('')}</select></label>`).join('')}</div>`);
+    if (MD.has('vitrine')) l.push(`<label class="interruptor bloco-int"><input type="checkbox" data-flag="vitrine" ${p.vitrine ? 'checked' : ''}><span></span>Vitrine: sai pronto, sem passar pela cozinha</label>`);
     if (MD.has('etapas') || MD.has('harmonizacao')) l.push(`<div class="duas-c">${MD.has('etapas') ? `<label class="campo"><span>Etapa do prato</span><select data-etapa><option value="">Sem etapa (sai na hora)</option>${ETAPAS.map(([k, n]) => `<option value="${k}" ${p.etapa === k ? 'selected' : ''}>${n}</option>`).join('')}</select></label>` : ''}
       ${MD.has('harmonizacao') ? `<label class="campo"><span>Combina com (bebida sugerida)</span><select data-harm><option value="">Nenhuma</option>${db.produtos.filter((x) => x.id !== p.id).sort((a, b) => (a.setor === 'bar' ? 0 : 1) - (b.setor === 'bar' ? 0 : 1)).map((x) => `<option value="${x.id}" ${p.harmoniza === x.id ? 'selected' : ''}>${t(x.nome)}</option>`).join('')}</select></label>` : ''}</div>`);
     if (MD.has('alergenicos')) l.push(`<div class="campo"><span>Alergênicos e dietas</span><div class="chips quebra">${ALERGENOS.map(([k, n, tipo]) => `<label class="chip ${(p.alergenos || []).includes(k) ? 'on' : ''}"><input type="checkbox" data-alg value="${k}" ${(p.alergenos || []).includes(k) ? 'checked' : ''} hidden>${tipo === 'contem' ? 'Contém ' + n.toLowerCase() : n}</label>`).join('')}</div></div>`);
     if (MD.has('porcoesFamilia')) l.push(`<div class="campo"><span>Porções para compartilhar: vire os tamanhos “Para 2” e “Para 4 pessoas”, cada um com o seu preço.</span><button type="button" class="link" data-familia>+ Para 2 e para 4 pessoas</button></div>`);
+    const TU = lojaCfg().turnos || {};
+    if (TU.ligado) l.push(`<label class="campo"><span>Disponível em</span><select data-turno><option value="">Sempre (ou o turno da categoria)</option>${TURNOS.map(([k, n]) => `<option value="${k}" ${p.turno === k ? 'selected' : ''}>Só no ${n.toLowerCase()} (${t((TU[k] || []).join(' às '))})</option>`).join('')}</select></label>`);
+    if (p.setor === 'bar' || p.ml) l.push(`<label class="campo"><span>Chopp de barril: ml por copo (o barril baixa a cada venda; vazio = não é chopp)</span><input data-ml inputmode="numeric" value="${p.ml || ''}" placeholder="Ex.: 300"></label>`);
     return l.length ? `<section class="bloco-form casa-prato"><h2>Funções do negócio</h2>${l.join('')}</section>` : '';
   };
+  // quilo: preço por horário (ex.: R$ 69,90 até 14h30 e R$ 49,90 depois)
+  const fx = (p.faixasKg || []).concat([{}, {}]).slice(0, 2);
+  const blocoKg = () => `<div class="campo" data-kgbox ${p.porKg ? '' : 'hidden'}><span>Preço do quilo por horário (opcional): a partir de que hora vale outro preço</span>${fx.map((x, k) => `<div class="duas-c kg-faixa"><input data-kgde="${k}" type="time" value="${t(x.de || '')}" aria-label="A partir das"><input data-kgpr="${k}" inputmode="decimal" value="${x.preco ? dec2(x.preco) : ''}" placeholder="Preço do quilo" aria-label="Preço do quilo a partir desse horário"></div>`).join('')}</div>`;
   const linhasTam = () => tams.map((x, k) => `<li><input data-tn="${k}" value="${t(x.nome)}" placeholder="Ex.: Grande" aria-label="Tamanho"><input data-tp="${k}" inputmode="decimal" value="${dec2(x.preco)}" aria-label="Preço do tamanho" placeholder="Preço"><input data-tf="${k}" inputmode="decimal" value="${vir(x.fator ?? 1)}" aria-label="Quanto gasta da ficha (1 = inteira)" title="Quanto gasta da ficha técnica: 1 = inteira, 0,5 = metade"><button type="button" class="bt-ico" data-ttira="${k}" aria-label="Tirar tamanho">${ico('lixo')}</button></li>`).join('');
   const blocosGrupo = () => grupos.map((g, k) => `<div class="grupo-ed" data-g="${k}"><div class="grupo-cab"><input data-gn value="${t(g.nome)}" placeholder="Ex.: Ponto da carne, Borda, Molhos" aria-label="Nome do grupo">
       <label class="interruptor"><input type="checkbox" data-gobr ${g.min ? 'checked' : ''}><span></span><em>Obrigatório</em></label>
@@ -307,11 +320,12 @@ acao('editar-prod', (b) => {
     <label class="campo"><span>Descrição (aparece para o cliente)</span><textarea data-d rows="2" maxlength="240">${t(p.desc)}</textarea></label>
     <label class="interruptor bloco-int"><input type="checkbox" data-pizza ${p.pizza ? 'checked' : ''}><span></span>É pizza: aceita meia a meia e cobra o sabor mais caro</label>
     <label class="interruptor bloco-int"><input type="checkbox" data-kg ${p.porKg ? 'checked' : ''}><span></span>Vendido por quilo: o preço é do quilo e pede o peso na hora</label>
+    ${blocoKg()}
     <div class="duas-c"><label class="campo"><span>Preço antigo, para promoção (opcional)</span><input data-promo inputmode="decimal" value="${p.promoDe ? vir(p.promoDe) : ''}" placeholder="aparece riscado"></label><label class="campo"><span>Serve (opcional)</span><input data-serve value="${t(p.serve || '')}" placeholder="Ex.: Serve 2 pessoas"></label></div>
     <div class="duas-c"><label class="campo"><span>Etiquetas (separadas por vírgula)</span><input data-tags value="${t((p.tags || []).join(', '))}" placeholder="Vegetariano, Picante, Novo"></label>
       <label class="interruptor bloco-int" style="align-self:end"><input type="checkbox" data-dest ${p.destaque ? 'checked' : ''}><span></span>Destaque no topo do cardápio</label></div>
     <div class="campo"><span>Tamanhos (opcional: P, M, G, broto…). O preço de cada tamanho vale no lugar do preço acima.</span><ul class="ficha-ed tam-ed" data-tams>${linhasTam()}</ul><button type="button" class="link" data-maistam>+ Tamanho</button></div>
-    <div class="campo"><span>Complementos e escolhas (ponto da carne, borda, molhos, sabor…)</span><div data-grupos>${blocosGrupo()}</div><button type="button" class="link" data-maisgrupo>+ Grupo de opções</button></div>
+    <div class="campo"><span>Complementos e escolhas (ponto da carne, borda, molhos, sabor…)</span><div data-grupos>${blocosGrupo()}</div><button type="button" class="link" data-maisgrupo>+ Grupo de opções</button> <button type="button" class="link" data-bebida>+ Montagem de bebida (tamanho, leite, temperatura, extra e xarope)</button></div>
     <div class="campo"><span>Adicionais soltos (cada um soma no preço)</span><ul class="ficha-ed" data-adic>${linhasAdic()}</ul><button type="button" class="link" data-maisadic>+ Adicional</button></div>
     ${blocoCasa()}
     <div class="campo"><span>Ficha técnica: o que sai do estoque a cada 1 vendido</span>${db.insumos.length ? `<ul class="ficha-ed" data-ficha>${linhasFicha()}</ul><button type="button" class="link" data-maisficha>+ Insumo na ficha</button>` : '<p class="mudo">Cadastre os insumos em Mais › Estoque para o sistema baixar o estoque e calcular o custo do prato.</p>'}</div>
@@ -344,6 +358,13 @@ acao('editar-prod', (b) => {
       $('[data-maistam]', f).onclick = () => { lerListas(); tams.push({ nome: '', preco: 0, fator: 1 }); redesenha(); $(`[data-tn="${tams.length - 1}"]`, f)?.focus(); };
       $('[data-maisgrupo]', f).onclick = () => { lerListas(); grupos.push({ id: uid('g'), nome: '', min: 0, max: 1, opcoes: [] }); redesenha(); $$('[data-gn]', f).at(-1)?.focus(); };
       $('[data-maisadic]', f).onclick = () => { lerListas(); adic.push({ nome: '', preco: 0 }); redesenha(); $(`[data-an="${adic.length - 1}"]`, f)?.focus(); };
+      $('[data-kg]', f).addEventListener('change', (e) => { $('[data-kgbox]', f).hidden = !e.target.checked; });
+      // cafeteria: os grupos de uma bebida montada, prontos para ajustar os preços
+      $('[data-bebida]', f).onclick = () => {
+        lerListas(); const tem = (n) => grupos.some((g) => g.nome.toLowerCase() === n.toLowerCase()); let n = 0;
+        MONTAGEM_BEBIDA.forEach((g) => { if (!tem(g.nome)) { grupos.push({ id: uid('g'), ...g, opcoes: g.opcoes.map((o) => ({ ...o })) }); n++; } });
+        redesenha(); toast(n ? `${n} grupos criados: confira os preços` : 'A montagem de bebida já está neste produto');
+      };
       const mostraFoto = () => { $('[data-foto]', f).innerHTML = caixaFoto(); $('[data-tfoto]', f).textContent = foto ? 'Trocar a foto' : 'Pôr foto'; $('[data-semfoto]', f).hidden = !foto; };
       $('[data-arq]', f).onchange = async (e) => {
         const a = e.target.files?.[0]; if (!a) return;
@@ -366,6 +387,10 @@ acao('editar-prod', (b) => {
         if (cbOk.length === 1) { toast('O combo precisa de pelo menos 2 grupos com opções'); return; }
         const casa = {};
         $$('[data-flag]', f).forEach((i) => { casa[i.dataset.flag] = i.checked; });
+        $$('[data-escolha]', f).forEach((i) => { casa[i.dataset.escolha] = i.value; });
+        if ($('[data-turno]', f)) casa.turno = $('[data-turno]', f).value;
+        if ($('[data-ml]', f)) casa.ml = Math.max(0, Math.round(num($('[data-ml]', f).value))) || 0;
+        casa.faixasKg = [0, 1].map((k) => ({ de: $(`[data-kgde="${k}"]`, f)?.value || '', preco: r2(num($(`[data-kgpr="${k}"]`, f)?.value)) })).filter((x) => x.de && x.preco > 0);
         if ($('[data-etapa]', f)) casa.etapa = $('[data-etapa]', f).value;
         if ($('[data-harm]', f)) casa.harmoniza = $('[data-harm]', f).value;
         if ($('[data-alg]', f)) casa.alergenos = $$('[data-alg]:checked', f).map((i) => i.value);
@@ -382,19 +407,27 @@ acao('editar-prod', (b) => {
     },
   });
 });
+export const MONTAGEM_BEBIDA = [
+  { nome: 'Tamanho', min: 1, max: 1, opcoes: [{ nome: 'P', preco: 0 }, { nome: 'M', preco: 2 }, { nome: 'G', preco: 4 }] },
+  { nome: 'Leite', min: 1, max: 1, opcoes: [{ nome: 'Integral', preco: 0 }, { nome: 'Desnatado', preco: 0 }, { nome: 'Sem lactose', preco: 1.5 }, { nome: 'Vegetal (aveia)', preco: 3 }] },
+  { nome: 'Temperatura', min: 1, max: 1, opcoes: [{ nome: 'Quente', preco: 0 }, { nome: 'Gelado', preco: 0 }] },
+  { nome: 'Extra dose de café', min: 0, max: 2, opcoes: [{ nome: 'Dose extra', preco: 4 }, { nome: 'Dose dupla extra', preco: 7 }] },
+  { nome: 'Xarope', min: 0, max: 2, opcoes: [{ nome: 'Baunilha', preco: 3 }, { nome: 'Caramelo', preco: 3 }, { nome: 'Avelã', preco: 3 }] },
+];
 acao('cardapio-exemplo', async () => {
   if (!(await confirma('Carregar os 22 pratos de exemplo, com fotos e fichas técnicas? Depois é só trocar nomes e preços e apagar o que não serve.', 'Carregar'))) return;
-  const { cardapioExemplo } = await import('./dados.js?v=21'); const ex = cardapioExemplo();
+  const { cardapioExemplo } = await import('./dados.js?v=22'); const ex = cardapioExemplo();
   db.produtos.push(...ex.produtos.filter((p) => !prod(p.id))); ex.insumos.forEach((i) => { if (!insumo(i.id)) db.insumos.push(i); });
   grava(); toast('Cardápio de exemplo carregado');
 });
 acao('categorias', () => {
-  const linhas = () => db.categorias.map((c, k) => `<li><input data-cn="${k}" value="${t(c.nome)}" aria-label="Nome da categoria"><small>${db.produtos.filter((p) => p.cat === c.id).length} pratos</small></li>`).join('');
+  const TU = lojaCfg().turnos || {};
+  const linhas = () => db.categorias.map((c, k) => `<li><input data-cn="${k}" value="${t(c.nome)}" aria-label="Nome da categoria">${TU.ligado ? `<select data-ct="${k}" aria-label="Turno de ${t(c.nome)}"><option value="">Sempre</option>${TURNOS.map(([v, n]) => `<option value="${v}" ${c.turno === v ? 'selected' : ''}>Só ${n.toLowerCase()}</option>`).join('')}</select>` : ''}<small>${db.produtos.filter((p) => p.cat === c.id).length} pratos</small></li>`).join('');
   folha({
-    titulo: 'Categorias', corpo: `<p class="mudo">Categoria sem prato não aparece para o cliente.</p><ul class="ficha-ed" data-l>${linhas()}</ul><button type="button" class="link" data-mais>+ Categoria</button>`,
+    titulo: 'Categorias', corpo: `<p class="mudo">Categoria sem prato não aparece para o cliente.${TU.ligado ? ' O turno esconde a categoria fora do horário.' : ''}</p><ul class="ficha-ed" data-l>${linhas()}</ul><button type="button" class="link" data-mais>+ Categoria</button>`,
     pe: '<button type="button" class="bt cheio grande" data-ok>Salvar</button>',
     aoAbrir: (f, fechar) => {
-      const ler = () => db.categorias.forEach((c, k) => { const v = $(`[data-cn="${k}"]`, f)?.value.trim(); if (v) c.nome = v; });
+      const ler = () => db.categorias.forEach((c, k) => { const v = $(`[data-cn="${k}"]`, f)?.value.trim(); if (v) c.nome = v; const tu = $(`[data-ct="${k}"]`, f); if (tu) { if (tu.value) c.turno = tu.value; else delete c.turno; } });
       $('[data-mais]', f).onclick = () => { ler(); db.categorias.push({ id: uid('c'), nome: 'Nova categoria' }); $('[data-l]', f).innerHTML = linhas(); $(`[data-cn="${db.categorias.length - 1}"]`, f).select(); };
       $('[data-ok]', f).onclick = () => { ler(); grava(); fechar(); toast('Categorias salvas'); };
     },
@@ -407,7 +440,7 @@ acao('editar-insumo', (b) => {
   folha({
     titulo: novo ? 'Novo insumo' : i.nome, corpo: `
     <label class="campo"><span>Nome</span><input data-n value="${t(i.nome)}" placeholder="Ex.: Queijo muçarela" maxlength="60"></label>
-    <div class="duas-c"><label class="campo"><span>Usa na receita em</span><select data-u>${[['g', 'gramas (g)'], ['ml', 'mililitros (ml)'], ['un', 'unidades']].map(([v, n]) => `<option value="${v}" ${i.unid === v ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+    <div class="duas-c"><label class="campo"><span>Usa na receita em</span><select data-u>${[['g', 'gramas (g)'], ['ml', 'mililitros (ml)'], ['un', 'unidades'], ['dose', 'doses (garrafa)']].map(([v, n]) => `<option value="${v}" ${i.unid === v ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
       <label class="campo"><span>Compra em</span><input data-c value="${t(i.compra)}" placeholder="kg, L, cx 12…"></label></div>
     <div class="duas-c"><label class="campo"><span>Quanto vem em 1 <i data-cl>${t(i.compra)}</i></span><input data-f inputmode="decimal" value="${vir(i.fator)}"></label>
       <label class="campo"><span>Preço de 1 <i data-cl>${t(i.compra)}</i> (R$)</span><input data-p inputmode="decimal" value="${vir(i.custo)}"></label></div>
@@ -520,7 +553,7 @@ acao('imprimir-qr', () => {
   w.document.close();
 });
 acao('papel', (b) => { setPapel(b.dataset.p); toast(`Este aparelho agora é: ${PAPEIS[b.dataset.p][0]}`); ir(PAPEIS[b.dataset.p][1]); });
-acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=21'); recomecar(); ir('salao'); } });
+acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=22'); recomecar(); ir('salao'); } });
 
 acao('ordem', (b) => {
   const p = prod(b.dataset.p), l = db.produtos.filter((x) => x.cat === p.cat), k = l.indexOf(p), alvo = l[k + Number(b.dataset.d)]; if (!alvo) return;

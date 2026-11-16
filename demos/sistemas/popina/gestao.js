@@ -1,14 +1,22 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=21';
-import { acao, ir } from './nucleo.js?v=21';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=21';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=21';
-import { situacao, textoHorarios } from './opcoes.js?v=21';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=22';
+import { acao, ir } from './nucleo.js?v=22';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=22';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=22';
+import { situacao, textoHorarios } from './opcoes.js?v=22';
 import { qrSVG } from '../base/qr.js';
-import { abrirEscolha } from './escolha.js?v=21';
-import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=21';
-import './funcoes.js?v=21';
+import { abrirEscolha } from './escolha.js?v=22';
+import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=22';
+import './funcoes.js?v=22';
+import { HUB_FINANCEIRO } from './financeiro.js?v=22';
+import { HUB_PRODUCAO } from './producao.js?v=22';
+import { GRUPOS } from './mais.js?v=22';
+// financeiro e produção entram no menu da Gestão antes de "Equipe e conta"
+if (!GRUPOS.some((g) => g[0] === 'Financeiro')) {
+  const i = GRUPOS.findIndex((g) => g[0] === 'Equipe e conta');
+  GRUPOS.splice(i < 0 ? GRUPOS.length : i, 0, ['Financeiro', HUB_FINANCEIRO], ['Produção e compras', HUB_PRODUCAO]);
+}
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const CORES = ['#B4532F', '#8C2F39', '#5F6B2B', '#2F5D50', '#1F4E79', '#3B2A22', '#C27C0E', '#6B3FA0', '#D1495B', '#111111'];

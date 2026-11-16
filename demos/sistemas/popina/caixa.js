@@ -1,13 +1,16 @@
 // Popina · caixa: contas abertas, fechar conta (serviço, desconto, dividir, pagar em partes), Pix com QR e o caixa do dia.
 import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2,
-  temCouvert, lojaCfg, marcar, darDesconto, regras, temPin, quemAgora, cancelarVenda, reabrirVenda, vendaDeHoje, ondeComanda, couvertLigado, tem, fidelidade, clientePorTel, darPremio } from './loja.js?v=21';
-import { registrar, acao, ir } from './nucleo.js?v=21';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=21';
-import { pix } from './pix.js?v=21';
+  temCouvert, lojaCfg, marcar, darDesconto, regras, temPin, quemAgora, cancelarVenda, reabrirVenda, vendaDeHoje, ondeComanda, couvertLigado, tem, fidelidade, clientePorTel, darPremio } from './loja.js?v=22';
+import { registrar, acao, ir } from './nucleo.js?v=22';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=22';
+import { pix } from './pix.js?v=22';
 import { qrSVG } from '../base/qr.js';
-import { linhaItem, abrirSeletor } from './salao.js?v=21';
+import { linhaItem, abrirSeletor } from './salao.js?v=22';
+import { vencePremio } from './loja.js?v=22';
+import { dividirPorPessoa } from './precos.js?v=22';
+import { FORMA_FIADO, pedirFiado } from './financeiro.js?v=22';
 
-const FORMAS = [['Dinheiro', 'dinheiro'], ['Pix', 'pix'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao']];
+const FORMAS = [['Dinheiro', 'dinheiro'], ['Pix', 'pix'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao'], [FORMA_FIADO, 'conta']];
 const ONDE = (c) => ondeComanda(c);
 const ICO_TIPO = { mesa: 'mesa', delivery: 'moto', cartao: 'cartao', evento: 'coroa' };
 // cartão fidelidade no fechamento: carimbos do cliente pelo telefone e o prêmio quando completa
@@ -16,7 +19,7 @@ function blocoFidelidade(c) {
   const F = fidelidade(), x = clientePorTel(c.cliente?.tel), n = x?.carimbos || 0;
   if (!x) return `<div class="fidel-cx"><b>${ico('etiqueta')}Cartão fidelidade</b><div class="fidel-tel"><input data-fidel-tel inputmode="tel" placeholder="WhatsApp do cliente" aria-label="WhatsApp do cliente para o cartão fidelidade" value="${t(c.cliente?.tel || '')}"><button type="button" class="bt" data-acao="fidel-tel" data-c="${c.id}">Usar</button></div><small class="mudo">Com o telefone, esta compra ganha carimbo${F.minimo ? ` (a partir de ${dinCurto(F.minimo)})` : ''}.</small></div>`;
   return `<div class="fidel-cx"><b>${ico('etiqueta')}Cartão fidelidade · ${t(x.nome || '')}</b><div class="carimbos" aria-label="${n} de ${F.compras} carimbos">${Array.from({ length: F.compras }, (_, k) => `<i class="${k < n ? 'on' : ''}"></i>`).join('')}</div>
-    <small>${n} de ${F.compras} carimbos${n >= F.compras ? ` · prêmio liberado: ${t(F.premio)}` : ''}</small>${n >= F.compras ? `<button type="button" class="bt cheio" data-acao="dar-premio" data-tel="${t(x.tel)}">${ico('check')}Dar prêmio</button>` : ''}</div>`;
+    <small>${n} de ${F.compras} carimbos${n >= F.compras ? (vencePremio(x, F) && Date.now() > vencePremio(x, F) ? ` · o prêmio venceu em ${new Date(vencePremio(x, F)).toLocaleDateString('pt-BR')}` : ` · prêmio liberado: ${t(F.premio)}${vencePremio(x, F) ? ` (vale até ${new Date(vencePremio(x, F)).toLocaleDateString('pt-BR')})` : ''}`) : ''}</small>${n >= F.compras && !(vencePremio(x, F) && Date.now() > vencePremio(x, F)) ? `<button type="button" class="bt cheio" data-acao="dar-premio" data-tel="${t(x.tel)}">${ico('check')}Dar prêmio</button>` : ''}<button type="button" class="link" data-acao="fidel-hist" data-tel="${t(x.tel)}">Histórico</button></div>`;
 }
 acao('fidel-tel', (b) => { const c = comanda(b.dataset.c), tel = String($('[data-fidel-tel]')?.value || '').replace(/\D/g, ''); if (!c) return; if (tel.length < 10) return toast('Escreva o WhatsApp com DDD'); c.cliente = { ...(c.cliente || {}), tel, nome: c.cliente?.nome || clientePorTel(tel)?.nome || '' }; grava(); toast(clientePorTel(tel) ? 'Cliente encontrado' : 'Cliente novo: o cartão começa nesta compra'); });
 acao('dar-premio', async (b) => { const x = clientePorTel(b.dataset.tel); if (!x) return; if (!(await confirma(`Entregar o prêmio (${fidelidade().premio}) e zerar o cartão de ${x.nome || 'cliente'}?`, 'Dar prêmio'))) return; if (darPremio(x)) toast('Prêmio entregue. O cartão recomeçou.'); });
@@ -38,6 +41,7 @@ function listaContas(sel) {
 function detalhe(c) {
   const v = conta(c), it = itensValidos(c);
   return `<div class="conta-det"><header class="cab-conta"><a class="bt-ico so-cel" href="#caixa" aria-label="Voltar">${ico('voltar')}</a><h1 class="fita">${ONDE(c)}</h1><p>${c.tipo === 'mesa' ? `${c.pessoas} pessoas · ` : ''}aberta há ${tempo(c.aberta)}</p><img class="cx-aqueduto" src="img/aqueduto.webp?v=2" alt="" width="340" height="88"></header>
+    ${c.perdido ? `<p class="aviso perdido">${ico('alerta')}Cartão ${c.cartao} perdido: bloqueado para novos lançamentos${v.perdido ? `; a taxa de ${din(v.perdido)} já está na conta` : ''}.</p>` : ''}
     ${navigator.onLine ? '' : '<p class="aviso ouro">Sem internet: o pagamento fica guardado neste aparelho e vai para os outros quando a conexão voltar. Não cobre esta conta em outro caixa até lá.</p>'}
     <ul class="itens">${c.itens.map((i) => linhaItem(c, i, false)).join('')}</ul>
     <section class="totais">
@@ -45,7 +49,8 @@ function detalhe(c) {
       ${v.rodizio ? `<div><span>Rodízio (${c.pessoas} pessoas)</span><b>${din(v.rodizio)}</b></div>` : ''}
       ${v.pacote ? `<div><span>Pacote do evento (${v.presentes} convidados)</span><b>${din(v.pacote)}</b></div>` : ''}
       ${v.ingresso ? `<div><span>Entrada${c.ingresso?.nome ? ` · ${t(c.ingresso.nome)}` : ''}</span><b>${din(v.ingresso)}</b></div>` : ''}
-      ${v.consumacao ? `<div><span>Consumação mínima (${dinCurto(c.consumacao)}; consumiu ${dinCurto(v.sub)})</span><b>${din(v.consumacao)}</b></div>` : ''}
+      ${c.consumacao ? `<div><span>Crédito de consumação</span><b>${din(c.consumacao)}</b></div><div><span>Consumido</span><b>${din(Math.min(v.sub, c.consumacao))}</b></div><div><span>${v.consumacao ? 'Saldo a cobrar (não consumido)' : 'Consumação mínima atingida'}</span><b>${v.consumacao ? din(v.consumacao) : ''}</b></div>` : ''}
+      ${v.perdido ? `<div><span>Taxa do cartão perdido</span><b>${din(v.perdido)}</b></div>` : ''}
       ${['mesa', 'cartao', 'evento'].includes(c.tipo) ? `<div><label class="interruptor"><input type="checkbox" data-acao="servico" data-c="${c.id}" ${c.servico ? 'checked' : ''}><span></span>Serviço ${db.config.servico}%</label><b>${din(v.servico)}</b></div>` : ''}
       ${c.evento && v.couvert ? `<div><span>Couvert artístico</span><b>${din(v.couvert)}</b></div>` : ''}
       ${(c.tipo === 'mesa' || c.tipo === 'cartao') && couvertLigado() && Number(lojaCfg().couvert) > 0 ? `<div><label class="interruptor"><input type="checkbox" data-acao="couvert" data-c="${c.id}" ${temCouvert(c) ? 'checked' : ''}><span></span>Couvert (${c.pessoas} × ${dinCurto(lojaCfg().couvert)})</label><b>${din(v.couvert)}</b></div>` : ''}
@@ -101,24 +106,95 @@ acao('desconto', (b) => {
     };
   } });
 });
-acao('dividir', (b) => {
-  const c = comanda(b.dataset.c), v = conta(c); let n = c.pessoas || 2;
-  folha({ titulo: 'Dividir a conta', corpo: `<div class="seg grande" role="group"><button type="button" aria-pressed="true" data-modo="igual">Igual</button><button type="button" aria-pressed="false" data-modo="itens">Por itens</button></div>
-    <div data-igual><div class="qtd"><button type="button" class="bt-ico grande" data-menos>−</button><b data-n>${n}</b><button type="button" class="bt-ico grande" data-mais>+</button></div><p class="centro" data-parte></p></div>
-    <div data-itens hidden><p class="mudo">Marque o que esta pessoa consumiu. O serviço entra proporcional.</p><ul class="itens marcar">${itensValidos(c).map((i) => `<li><label><input type="checkbox" data-it="${i.id}"><span>${i.qtd}× ${t(i.nome)}</span><b>${din(valorItem(i))}</b></label></li>`).join('')}</ul><p class="centro" data-sel></p></div>`,
-  pe: '<button type="button" class="bt cheio grande" data-cobrar>Cobrar esta parte</button>',
+// dividir: igual entre N pessoas, ou por pessoa (os itens de cada um, um item dividido entre várias, valor livre, gorjeta e a forma de cada um)
+// o que cada pessoa pagou fica no pagamento (pessoa, itens); item já pago não muda de dono, e quem pagou não é cobrado de novo
+const FORMAS_DIV = ['Dinheiro', 'Pix', 'Cartão de débito', 'Cartão de crédito'];
+acao('dividir', (b) => abrirDivisao(comanda(b.dataset.c)));
+function abrirDivisao(c) {
+  if (!c || !db.comandas.includes(c)) return;
+  const v = conta(c), its = itensValidos(c), D = c.divisao ? JSON.parse(JSON.stringify(c.divisao)) : { id: Date.now().toString(36), n: c.pessoas || 2, atrib: {}, livre: {}, gorjeta: {}, formas: {} };
+  let n = Math.max(2, D.n || 2), modo = c.divisao ? 'pessoas' : 'igual';
+  const pagoDe = (k) => (c.pagamentos || []).filter((p) => p.divisao === D.id && p.pessoa === k + 1);
+  const travados = new Set((c.pagamentos || []).flatMap((p) => p.itens || []));
+  const minN = Math.max(2, ...(c.pagamentos || []).filter((p) => p.divisao === D.id).map((p) => p.pessoa || 0));
+  const fator = v.sub > 0 ? v.total / v.sub : 1;
+  const calc = () => dividirPorPessoa({ itens: its.map((i) => ({ id: i.id, valor: valorItem(i) })), atrib: D.atrib, n, fator, livre: D.livre, gorjeta: D.gorjeta });
+  const htmlItens = () => its.map((i) => { const tr = travados.has(i.id), sel = D.atrib[i.id] || [];
+    return `<li><div><span>${i.qtd}× ${t(i.nome)}</span><b>${din(valorItem(i))}</b>${tr ? '<small class="mudo">já pago</small>' : sel.length > 1 ? `<small class="mudo">dividido em ${sel.length}</small>` : ''}</div>
+      <div class="chips div-ps" role="group" aria-label="Quem consumiu ${t(i.nome)}">${Array.from({ length: n }, (_, k) => `<button type="button" class="chip ${sel.includes(k) ? 'on' : ''}" data-it="${i.id}" data-k="${k}" ${tr ? 'disabled' : ''} aria-pressed="${sel.includes(k)}">${k + 1}</button>`).join('')}</div></li>`; }).join('');
+  const htmlPessoas = () => { const R = calc(); return R.pessoas.map((p) => { const pg = pagoDe(p.k), forma = D.formas[p.k] || 'Pix';
+    return `<div class="div-pessoa ${pg.length ? 'pago' : ''}"><div class="div-cab"><b>Pessoa ${p.k + 1}</b><small>${p.itens.length ? `${p.itens.length} ${p.itens.length === 1 ? 'item' : 'itens'} · ${dinCurto(p.base)} com serviço` : 'sem itens marcados'}</small></div>
+      ${pg.length ? `<p class="ok-txt">${ico('check')}Pagou ${pg.map((x) => `${dinCurto(x.valor)}${x.gorjeta ? ` + ${dinCurto(x.gorjeta)} de gorjeta` : ''} em ${t(x.forma)}`).join(', ')}</p>` : `
+      <div class="duas-c"><label class="campo"><span>Valor livre (R$)</span><input data-livre="${p.k}" inputmode="decimal" value="${D.livre[p.k] != null && D.livre[p.k] !== '' ? String(D.livre[p.k]).replace('.', ',') : ''}" placeholder="${dinCurto(p.base)}"></label>
+        <label class="campo"><span>Gorjeta (R$)</span><input data-gorj="${p.k}" inputmode="decimal" value="${D.gorjeta[p.k] ? String(D.gorjeta[p.k]).replace('.', ',') : ''}" placeholder="0,00"></label></div>
+      <div class="chips quebra">${FORMAS_DIV.map((f) => `<button type="button" class="chip ${f === forma ? 'on' : ''}" data-fk="${p.k}" data-f="${t(f)}">${t(f)}</button>`).join('')}</div>
+      <button type="button" class="bt cheio" data-cobrar="${p.k}">Cobrar ${din(p.cobrar)}</button>`}</div>`; }).join(''); };
+  const resto = () => { const R = calc(), falta = conta(c).falta, aPagar = r2(R.pessoas.filter((p) => !pagoDe(p.k).length).reduce((s, p) => s + p.valor, 0));
+    return `Falta na conta: <b>${din(falta)}</b>${R.semDono.length ? ` · sem dono: <b>${din(R.semDonoValor)}</b> (${R.semDono.length} ${R.semDono.length === 1 ? 'item' : 'itens'})` : ''}${Math.abs(aPagar - falta) > 0.009 && !R.semDono.length ? ` · as partes somam ${din(aPagar)}` : ''}`; };
+  folha({ titulo: 'Dividir a conta', larga: true, corpo: `<div class="seg grande" role="group"><button type="button" aria-pressed="${modo === 'igual'}" data-modo="igual">Igual</button><button type="button" aria-pressed="${modo === 'pessoas'}" data-modo="pessoas">Por pessoa</button></div>
+    <div data-igual ${modo === 'igual' ? '' : 'hidden'}><div class="qtd"><button type="button" class="bt-ico grande" data-menos>−</button><b data-n>${n}</b><button type="button" class="bt-ico grande" data-mais>+</button></div><p class="centro" data-parte></p>
+      <button type="button" class="bt cheio grande" style="width:100%" data-cobrar-igual>Cobrar uma parte</button></div>
+    <div data-pessoas ${modo === 'pessoas' ? '' : 'hidden'}><div class="qtd"><button type="button" class="bt-ico grande" data-pmenos>−</button><b data-pn>${n} pessoas</b><button type="button" class="bt-ico grande" data-pmais>+</button></div>
+      <p class="mudo">Toque no número de quem consumiu cada item. Marcar mais de um divide o item entre eles. Serviço e couvert entram na proporção.</p>
+      ${v.sub > 0 ? '' : '<p class="aviso ouro">Esta conta não tem itens com preço: use “Igual” ou o valor livre de cada pessoa.</p>'}
+      <ul class="itens div-itens" data-lista>${htmlItens()}</ul><div class="div-pessoas" data-cards>${htmlPessoas()}</div><p class="centro div-resto" data-resto>${resto()}</p></div>`,
+  aoFechar: () => { if (db.comandas.includes(c) && Object.keys(D.atrib).length) { D.n = n; c.divisao = D; grava(); } },
   aoAbrir: (f, fechar) => {
-    let modo = 'igual';
-    const parteIgual = () => partes(v.falta, n)[0];
-    const parteItens = () => { const ids = $$('[data-it]:checked', f).map((x) => x.dataset.it); const s = itensValidos(c).filter((i) => ids.includes(i.id)).reduce((a, i) => a + valorItem(i), 0); return r2(v.sub ? s * (v.total / v.sub) : s); };
-    const atual = () => { $('[data-n]', f).textContent = n; $('[data-parte]', f).innerHTML = `${n} partes de <b>${din(parteIgual())}</b>`; $('[data-sel]', f).innerHTML = `Esta parte: <b>${din(parteItens())}</b>`; };
-    $('[data-menos]', f).onclick = () => { n = Math.max(2, n - 1); atual(); }; $('[data-mais]', f).onclick = () => { n++; atual(); };
-    $$('[data-it]', f).forEach((x) => { x.onchange = atual; });
-    $$('[data-modo]', f).forEach((x) => { x.onclick = () => { modo = x.dataset.modo; $$('[data-modo]', f).forEach((y) => y.setAttribute('aria-pressed', y === x)); $('[data-igual]', f).hidden = modo !== 'igual'; $('[data-itens]', f).hidden = modo !== 'itens'; }; });
-    $('[data-cobrar]', f).onclick = () => { const valor = modo === 'igual' ? parteIgual() : parteItens(); if (!(valor > 0)) return toast('Marque pelo menos um item'); fechar(); escolherForma(c, valor); };
-    atual();
+    const igual = () => { $('[data-n]', f).textContent = n; $('[data-parte]', f).innerHTML = `${n} partes de <b>${din(partes(conta(c).falta, n)[0])}</b>`; };
+    const tudo = () => { $('[data-pn]', f).textContent = `${n} pessoas`; $('[data-lista]', f).innerHTML = htmlItens(); $('[data-cards]', f).innerHTML = htmlPessoas(); $('[data-resto]', f).innerHTML = resto(); };
+    const totais = () => { const R = calc(); R.pessoas.forEach((p) => { const bt = $(`[data-cobrar="${p.k}"]`, f); if (bt) bt.textContent = `Cobrar ${din(p.cobrar)}`; }); $('[data-resto]', f).innerHTML = resto(); };
+    $('[data-menos]', f).onclick = () => { n = Math.max(2, n - 1); igual(); }; $('[data-mais]', f).onclick = () => { n++; igual(); };
+    $('[data-pmenos]', f).onclick = () => { if (n <= minN) return toast('Quem já pagou continua na divisão'); n--; Object.keys(D.atrib).forEach((id) => { D.atrib[id] = D.atrib[id].filter((k) => k < n); }); tudo(); };
+    $('[data-pmais]', f).onclick = () => { if (n >= 30) return; n++; tudo(); };
+    $$('[data-modo]', f).forEach((x) => { x.onclick = () => { modo = x.dataset.modo; $$('[data-modo]', f).forEach((y) => y.setAttribute('aria-pressed', String(y === x))); $('[data-igual]', f).hidden = modo !== 'igual'; $('[data-pessoas]', f).hidden = modo !== 'pessoas'; if (modo === 'igual') igual(); else tudo(); }; });
+    f.addEventListener('click', (e) => {
+      const it = e.target.closest('[data-it]');
+      if (it && !it.disabled) { const id = it.dataset.it, k = Number(it.dataset.k), l = D.atrib[id] || []; D.atrib[id] = l.includes(k) ? l.filter((x) => x !== k) : [...l, k].sort((a, b) => a - b); return tudo(); }
+      const fk = e.target.closest('[data-fk]');
+      if (fk) { D.formas[fk.dataset.fk] = fk.dataset.f; $$(`[data-fk="${fk.dataset.fk}"]`, f).forEach((y) => y.classList.toggle('on', y === fk)); return; }
+      const cb = e.target.closest('[data-cobrar]');
+      if (cb) {
+        const k = Number(cb.dataset.cobrar), R = calc(), p = R.pessoas[k], falta = conta(c).falta; if (pagoDe(k).length) return;
+        const abertas = R.pessoas.filter((x) => !pagoDe(x.k).length && x.valor > 0);
+        // a última pessoa, com tudo dividido e sem valor livre, paga exatamente o que falta (os centavos não sobram)
+        let valor = abertas.length === 1 && abertas[0].k === k && !R.semDono.length && p.livre == null ? falta : Math.min(p.valor, falta);
+        valor = r2(valor); if (!(valor > 0)) return toast('Nada a cobrar desta pessoa');
+        D.n = n; c.divisao = D; grava(); fechar();
+        receberParte(c, D.formas[k] || 'Pix', valor, { pessoa: k + 1, divisao: D.id, itens: p.itens.map((x) => x.id), ...(p.gorjeta ? { gorjeta: p.gorjeta } : {}) }, () => abrirDivisao(c));
+      }
+    });
+    f.addEventListener('input', (e) => {
+      const x = e.target, val = String(x.value).trim(), nr = r2(Number(val.replace(/\./g, '').replace(',', '.')) || 0);
+      if (x.dataset.livre != null) { if (val === '') delete D.livre[x.dataset.livre]; else D.livre[x.dataset.livre] = nr; totais(); }
+      if (x.dataset.gorj != null) { D.gorjeta[x.dataset.gorj] = nr; totais(); }
+    });
+    $('[data-cobrar-igual]', f).onclick = () => { const valor = partes(conta(c).falta, n)[0]; if (!(valor > 0)) return toast('Nada a cobrar'); fechar(); escolherForma(c, valor); };
+    igual();
   } });
-});
+}
+// recebe a parte de uma pessoa (com a gorjeta à parte) e volta para a divisão enquanto faltar alguém
+function receberParte(c, forma, valor, extra, depois) {
+  const total = r2(valor + (extra.gorjeta || 0)), gj = extra.gorjeta ? ` (${din(valor)} + ${din(extra.gorjeta)} de gorjeta)` : '';
+  const fim = (mais = {}) => { concluir(c, forma, valor, { ...extra, ...mais }); if (db.comandas.includes(c) && depois) setTimeout(depois, 260); };
+  if (forma === 'Dinheiro') {
+    folha({ titulo: `Dinheiro · ${din(total)}${gj}`, corpo: `<label class="campo"><span>Quanto a pessoa deu</span><input data-dado inputmode="decimal" placeholder="${String(total.toFixed(2)).replace('.', ',')}"></label><p class="troco" data-troco>Troco: ${din(0)}</p>`,
+      pe: '<button type="button" class="bt cheio grande" data-ok>Recebido</button>',
+      aoAbrir: (f, fechar) => {
+        const dado = () => Number(String($('[data-dado]', f).value || total).replace(',', '.')) || 0;
+        $('[data-dado]', f).oninput = () => { const tr = dado() - total; $('[data-troco]', f).innerHTML = tr >= 0 ? `Troco: <b>${din(tr)}</b>` : `<span class="erro">Faltam ${din(-tr)}</span>`; };
+        $('[data-ok]', f).onclick = () => { if (dado() < total - 0.009) return toast('O valor dado é menor que a parte'); fechar(); fim({ dado: dado(), troco: r2(dado() - total) }); };
+      } });
+    return;
+  }
+  if (forma === 'Pix') {
+    const cfg = db.config; if (!cfg.pix?.chave) { toast('Cadastre a chave Pix do restaurante em Mais › Ajustes para gerar o QR'); return ir('mais/ajustes'); }
+    const codigo = pix({ chave: cfg.pix.chave, nome: cfg.nome, cidade: cfg.cidade, valor: total, txid: `POPINA${(c.mesa || c.num || '')}P${extra.pessoa || ''}${Date.now().toString(36)}`.slice(0, 25) });
+    folha({ titulo: `Pix · ${din(total)}${gj}`, corpo: `${cfg.pix.exemplo ? '<p class="aviso ouro">Chave de exemplo. Cadastre a chave do restaurante em Mais › Ajustes para o QR valer de verdade.</p>' : ''}<div class="qr-pix">${qrSVG(codigo, 240)}</div>`,
+      pe: '<button type="button" class="bt cheio grande" data-ok>Recebi o Pix</button>', aoAbrir: (f, fechar) => { $('[data-ok]', f).onclick = () => { fechar(); fim(); }; } });
+    return;
+  }
+  fim();
+}
 function escolherForma(c, valor) {
   folha({ titulo: `Receber ${din(valor)}`, corpo: `<div class="formas">${FORMAS.map(([f, i]) => `<button type="button" class="forma" data-f="${f}">${ico(i)}<span>${f}</span></button>`).join('')}</div>`,
     aoAbrir: (f, fechar) => $$('[data-f]', f).forEach((b) => { b.onclick = () => { fechar(); receber(c, b.dataset.f, valor); }; }) });
@@ -127,6 +203,8 @@ function escolherForma(c, valor) {
 acao('concluir', (b) => { const c = comanda(b.dataset.c); if (!c) return; fechar(c); ir('caixa'); toast(`${c.tipo === 'mesa' ? `Mesa ${c.mesa}` : `Pedido #${c.num}`} concluído`); });
 acao('pagar', (b) => { const c = comanda(b.dataset.c); receber(c, b.dataset.f, conta(c).falta); });
 function receber(c, forma, valor) {
+  // fiado: pede o cliente, confere o limite e lança na conta dele (financeiro.js) antes de fechar
+  if (forma === FORMA_FIADO) return pedirFiado(c, valor, (extra) => concluir(c, forma, valor, extra));
   if (forma === 'Dinheiro') {
     folha({ titulo: `Dinheiro · ${din(valor)}`, corpo: `<label class="campo"><span>Quanto o cliente deu</span><input data-dado inputmode="decimal" placeholder="${String(valor.toFixed(2)).replace('.', ',')}"></label>
       <div class="chips">${[valor, Math.ceil(valor / 10) * 10, Math.ceil(valor / 50) * 50, Math.ceil(valor / 100) * 100].filter((x, k, a) => a.indexOf(x) === k).map((x) => `<button type="button" class="chip" data-v="${x}">${dinCurto(x)}</button>`).join('')}</div>

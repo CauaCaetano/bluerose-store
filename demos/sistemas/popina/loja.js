@@ -1,10 +1,10 @@
 // Popina · o estado do restaurante e as regras (enviar para a cozinha, baixar estoque, fechar conta, caixa).
 // Guarda no aparelho (localStorage) e avisa as outras abas na hora (BroadcastChannel). Na conta real, a mesma
 // interface (window.popinaNuvem) troca isso pela nuvem com tempo real entre os aparelhos.
-import { estadoInicial, estadoVazio } from './dados.js?v=21';
-import { precoTam, nomeItem, opcaoReal, nomeSabores } from './opcoes.js?v=21';
-import { temModulo, modulosAtivos } from './perfis.js?v=21';
-import { valorRodizio, inclusoRodizio, precoAgora, precoFracoes, precoBorda, faltaCombo, faltaConsumacao, ordemEtapa, ymd } from './precos.js?v=21';
+import { estadoInicial, estadoVazio } from './dados.js?v=22';
+import { precoTam, nomeItem, opcaoReal, nomeSabores } from './opcoes.js?v=22';
+import { temModulo, modulosAtivos } from './perfis.js?v=22';
+import { valorRodizio, inclusoRodizio, precoAgora, precoFracoes, precoBorda, faltaCombo, faltaConsumacao, ordemEtapa, ymd, precoKg, noTurno, mlDaVenda } from './precos.js?v=22';
 
 export const CHAVE = 'popina-v1';
 // conta real: conta-nuvem.js (carregado antes) troca a chave pela da empresa e sobe cada alteração para a nuvem
@@ -17,7 +17,7 @@ let ouvintes = [];
 export let db = carregar();
 
 function carregar() {
-  try { const d = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (d && d.versao === 1 && (CONTA || d.exemplo === 6)) return d; /* a conta real nunca é trocada pelo exemplo */ } catch { /* sem acesso */ }
+  try { const d = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (d && d.versao === 1 && (CONTA || d.exemplo === 7)) return d; /* a conta real nunca é trocada pelo exemplo */ } catch { /* sem acesso */ }
   const d = CONTA ? estadoVazio(CONTA.empresa || 'Meu restaurante') : estadoInicial();
   try { localStorage.setItem(CHAVE, JSON.stringify(d)); } catch { /* sem acesso */ }
   return d;
@@ -75,9 +75,11 @@ export function conta(c) {
   const couvert = r2((temCouvert(c) ? Number(L.couvert) * (c.pessoas || 0) : 0) + (ev ? presentes * (Number(ev.couvert) || 0) : 0));
   const entrega = c.tipo === 'delivery' ? r2(c.taxaEntrega || 0) : 0;
   const desconto = r2(c.desconto || 0);
-  const total = r2(Math.max(0, sub + rodizio + pacote + ingresso + consumacao + servico + couvert + entrega - desconto));
+  // cartão perdido (comanda individual): a taxa configurada entra na conta
+  const perdido = c.tipo === 'cartao' && c.perdido ? r2(Number(L.taxaCartaoPerdido) || 0) : 0;
+  const total = r2(Math.max(0, sub + rodizio + pacote + ingresso + consumacao + servico + couvert + entrega + perdido - desconto));
   const pago = r2((c.pagamentos || []).reduce((s, p) => s + p.valor, 0));
-  return { sub, rodizio, pacote, presentes, ingresso, consumacao, servico, couvert, entrega, desconto, total, pago, falta: r2(Math.max(0, total - pago)) };
+  return { sub, rodizio, pacote, presentes, ingresso, consumacao, servico, couvert, entrega, perdido, desconto, total, pago, falta: r2(Math.max(0, total - pago)) };
 }
 const SERVICO_EM = ['mesa', 'cartao', 'evento'];
 // couvert: só com a função ligada; configuração antiga com valor salvo e sem escolha do dono continua cobrando
@@ -155,7 +157,8 @@ export function novoPedido(tipo, cliente = {}, extra = {}) {
 }
 // item ainda não enviado (rascunho do garçom) -> status 'rascunho'
 export function adicionarItem(c, { prodId, qtd = 1, obs = '', adic = [], meia = null, kg = 0, tam = '', sabores = null, combo = null }) {
-  const p = prod(prodId); if (!p) return;
+  const p = prod(prodId); if (!p) return false;
+  if (c.perdido) return false; // cartão perdido: nada novo entra até ser encontrado
   const L = lojaCfg(), M = modulosAtivos(L);
   const tm = tam && p.tamanhos?.length ? p.tamanhos.find((x) => x.nome === tam) : null;
   let nome = nomeItem(p, { tam: tm?.nome }), preco = precoTam(p, tm?.nome), promo = '';
@@ -165,7 +168,7 @@ export function adicionarItem(c, { prodId, qtd = 1, obs = '', adic = [], meia = 
   if (sab?.length > 1) { nome = nomeSabores(sab, tm?.nome); preco = precoFracoes(sab.map((x) => precoTam(x, tm?.nome)), regra); meia = sab.length === 2 ? { a: sab[0].id, b: sab[1].id } : null; }
   else if (meia) { const b = prod(meia.b); if (b) { nome = nomeItem(p, { tam: tm?.nome, meia }, b); preco = precoFracoes([precoTam(p, tm?.nome), precoTam(b, tm?.nome)], regra); } }
   // por quilo: o prato pesado vira 1 item com o valor do peso (o estoque baixa a ficha × kg)
-  if (p.porKg && kg > 0) { nome = `${p.nome} · ${kg.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} kg`; preco = r2(p.preco * kg); qtd = 1; }
+  if (p.porKg && kg > 0) { const pk = precoKg(p); nome = `${p.nome} · ${kg.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} kg`; preco = r2(pk.preco * kg); qtd = 1; if (pk.desde) promo = `Quilo desde ${pk.desde}`; }
   else if (!(sab?.length > 1) && !meia) { const pa = precoAgora(p, preco, { loja: L, mods: M, tam: tm?.nome }); if (pa.motivo) { preco = pa.preco; promo = pa.motivo; } }
   // combo: os componentes escolhidos vão junto (a cozinha vê cada um); o preço é o do combo
   const cmb = M.has('combos') && p.combo?.length && Array.isArray(combo) && !faltaCombo(p.combo, combo) ? combo.map((x) => ({ g: x.g, grupo: p.combo[x.g].nome, prod: x.prod, nome: prod(x.prod)?.nome || '' })) : null;
@@ -175,7 +178,7 @@ export function adicionarItem(c, { prodId, qtd = 1, obs = '', adic = [], meia = 
   c.itens.push({ id: uid('i'), prod: prodId, nome, qtd, preco: r2(preco), setor: p.setor, obs, adic, meia, status: 'rascunho', ...(p.porKg && kg > 0 ? { kg } : {}), ...(tm ? { tam: tm.nome, fator: Number(tm.fator) || 1 } : {}),
     ...(sab?.length > 2 ? { sabores: sab.map((x) => x.id) } : {}), ...(cmb ? { combo: cmb } : {}), ...(rod ? { rodizio: true } : {}), ...(promo ? { promo } : {}),
     ...(M.has('etapas') && p.etapa ? { etapa: p.etapa } : {}), ...(M.has('vitrine') && p.vitrine ? { vitrine: true } : {}) });
-  grava();
+  grava(); return true;
 }
 // borda de pizza (configurada na loja) no tamanho escolhido: { nome: 'Borda: Catupiry', preco }
 export function bordaReal(p, nome, tam) {
@@ -206,8 +209,15 @@ export function enviar(c, liberar = false) {
 // a próxima etapa que está esperando (índice em ETAPAS) ou -1
 export const proximaEtapa = (c) => { const l = c.itens.filter((i) => i.status === 'rascunho' && i.segura).map((i) => ordemEtapa(i.etapa)).filter((x) => x >= 0); return l.length ? Math.min(...l) : -1; };
 // vitrine: quantidade feita no dia, por produto (vira esgotado quando acaba)
-export function vitrineHoje() { const d = ymd(); if (db.vitrine?.dia !== d) db.vitrine = { dia: d, qtd: {}, feito: {} }; return db.vitrine; }
-export const restaVitrine = (id) => { const v = db.vitrine; return v?.dia === ymd() && v.qtd?.[id] != null ? v.qtd[id] : null; };
+// o que foi "levar para amanhã" no fechamento da vitrine entra como feito no dia seguinte
+export function vitrineHoje() {
+  const d = ymd(); if (db.vitrine?.dia === d) return db.vitrine;
+  const a = db.vitrineAmanha?.dia === d ? { ...(db.vitrineAmanha.qtd || {}) } : {};
+  db.vitrine = { dia: d, qtd: { ...a }, feito: { ...a }, ...(Object.keys(a).length ? { deOntem: { ...a } } : {}) };
+  if (db.vitrineAmanha?.dia === d) delete db.vitrineAmanha;
+  return db.vitrine;
+}
+export const restaVitrine = (id) => { const v = db.vitrine; if (v?.dia === ymd()) return v.qtd?.[id] ?? null; const a = db.vitrineAmanha; return a?.dia === ymd() && a.qtd?.[id] != null ? a.qtd[id] : null; };
 function tirarVitrine(id, q) {
   const v = vitrineHoje(); if (v.qtd[id] == null) return;
   v.qtd[id] = Math.max(0, v.qtd[id] - q);
@@ -233,6 +243,13 @@ function fichaDoItem(i) {
 // sinal: 1 baixa, -1 devolve (item cancelado antes de preparar)
 function baixar(i, sinal) {
   const fator = (i.kg || i.qtd) * (i.fator || 1); fichaDoItem(i).forEach((f) => { const ins = insumo(f.insumo); if (ins) { const k = `${ins.geracao || 0}:${APARELHO}`; ins.baixas = ins.baixas || {}; ins.baixas[k] = r2((ins.baixas[k] || 0) + sinal * f.qtd * fator); } });
+  baixarBarril(i, sinal);
+}
+// chopp: cada copo vendido tira os ml do produto do barril que está na torneira (por aparelho, como as baixas do estoque)
+export const barrilDe = (prodId) => (db.barris || []).find((b) => !b.fim && (b.prods || []).includes(prodId));
+function baixarBarril(i, sinal) {
+  const p = prod(i.prod), b = p?.ml ? barrilDe(i.prod) : null; if (!b) return;
+  b.usado ||= {}; b.usado[APARELHO] = r2((b.usado[APARELHO] || 0) + sinal * mlDaVenda(p.ml, i.qtd, i.fator || 1));
 }
 // venda no balcão do caixa (restaurante a quilo, bebida, sobremesa): já sai entregue, sem ir para a cozinha
 export function venderDireto(c) {
@@ -301,7 +318,7 @@ export function fechar(c) {
   db.vendas.push({ id: db.vendas.some((x) => x.id === c.id) ? `${c.id}-${Date.now().toString(36)}` : c.id, ts: Date.now(), tipo: c.tipo, mesa: c.mesa, num: c.num,
     itens: itensValidos(c).map((i) => ({ prod: i.prod, nome: i.nome, qtd: i.qtd, preco: valorItem(i) / i.qtd, setor: i.setor, ...(i.kg ? { kg: i.kg } : {}), ...(i.fator ? { fator: i.fator } : {}), ...(i.meia ? { meia: i.meia } : {}), ...(i.sabores ? { sabores: i.sabores } : {}), ...(i.combo ? { combo: i.combo } : {}), ...(i.rodizio ? { rodizio: true } : {}) })),
     total: v.total, servico: v.servico, couvert: v.couvert, entrega: v.entrega, desconto: v.desconto, onde: ondeComanda(c),
-    ...(v.rodizio ? { rodizio: v.rodizio, rodizioPessoas: c.rodizio } : {}), ...(v.pacote ? { pacote: v.pacote, evento: c.evento } : {}), ...(v.ingresso ? { ingresso: v.ingresso } : {}), ...(v.consumacao ? { consumacao: v.consumacao } : {}), pagamentos: c.pagamentos, forma: c.pagamentos.length === 1 ? c.pagamentos[0].forma : 'Dividido', cancelados: c.itens.filter((i) => i.cancelado).length, garcom: c.garcom || '', entregador: c.entregador || '', cupom: c.cupom || '', cliente: c.cliente?.tel ? String(c.cliente.tel).replace(/\D/g, '') : '',
+    ...(v.rodizio ? { rodizio: v.rodizio, rodizioPessoas: c.rodizio } : {}), ...(v.pacote ? { pacote: v.pacote, evento: c.evento } : {}), ...(v.ingresso ? { ingresso: v.ingresso } : {}), ...(v.consumacao ? { consumacao: v.consumacao } : {}), ...(v.perdido ? { taxaPerdido: v.perdido } : {}), pagamentos: c.pagamentos, forma: c.pagamentos.length === 1 ? c.pagamentos[0].forma : 'Dividido', cancelados: c.itens.filter((i) => i.cancelado).length, garcom: c.garcom || '', entregador: c.entregador || '', cupom: c.cupom || '', cliente: c.cliente?.tel ? String(c.cliente.tel).replace(/\D/g, '') : '',
     pessoas: c.pessoas || 0, servicoOn: !!c.servico, couvertOn: c.couvert !== false, aberta: c.aberta, hist: c.hist || [],
     ...(v.desconto ? { descontoMotivo: c.descontoInfo?.motivo || (c.cupom ? `Cupom ${c.cupom}` : ''), descontoQuem: c.descontoInfo?.quem || '' } : {}) });
   registrarCliente(c, v.total);
@@ -384,8 +401,10 @@ export function caixaResumo() {
   const mov = db.caixa?.movimentos || [];
   const sangria = r2(mov.filter((m) => m.tipo === 'sangria').reduce((s, m) => s + m.valor, 0));
   const suprimento = r2(mov.filter((m) => m.tipo === 'suprimento').reduce((s, m) => s + m.valor, 0));
-  const dinheiro = r2((db.caixa?.troco || 0) + (porForma.Dinheiro || 0) - sangria + suprimento);
-  return { vendas, total: r2(vendas.reduce((s, v) => s + v.total, 0)), porForma, sangria, suprimento, dinheiroNaGaveta: dinheiro, servico: r2(vendas.reduce((s, v) => s + (v.servico || 0), 0)) };
+  // gorjeta da divisão por pessoa: fica fora do faturamento, mas a de dinheiro está na gaveta
+  const gorj = {}; vendas.forEach((v) => (v.pagamentos || []).forEach((p) => { if (p.gorjeta) gorj[p.forma] = r2((gorj[p.forma] || 0) + p.gorjeta); }));
+  const dinheiro = r2((db.caixa?.troco || 0) + (porForma.Dinheiro || 0) + (gorj.Dinheiro || 0) - sangria + suprimento);
+  return { vendas, total: r2(vendas.reduce((s, v) => s + v.total, 0)), porForma, sangria, suprimento, dinheiroNaGaveta: dinheiro, servico: r2(vendas.reduce((s, v) => s + (v.servico || 0), 0)), gorjetas: r2(Object.values(gorj).reduce((s, x) => s + x, 0)) };
 }
 export function abrirCaixa(troco, operador) { db.caixa = { aberto: Date.now(), troco: r2(troco), movimentos: [], operador }; grava(); }
 export function movimento(tipo, valor, motivo, quem = quemAgora()) {
@@ -442,7 +461,9 @@ export function consumoVenda(v) {
 }
 // custo teórico da venda (ficha técnica × preço de compra de hoje)
 export const custoVenda = (v) => r2(Object.entries(consumoVenda(v)).reduce((s, [id, q]) => { const i = insumo(id); return s + (i ? (q / (i.fator || 1)) * (i.custo || 0) : 0); }, 0));
-export const fmtQtd = (q, unid) => unid === 'g' && Math.abs(q) >= 1000 ? `${(q / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} kg`
+// doses de garrafa: o estoque aparece em garrafas fracionadas (fator = doses por garrafa)
+export const fmtQtd = (q, unid, fator = 0) => unid === 'dose' && fator > 0 ? `${(q / fator).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} garrafas (${Number(q).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} doses)`
+  : unid === 'g' && Math.abs(q) >= 1000 ? `${(q / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} kg`
   : unid === 'ml' && Math.abs(q) >= 1000 ? `${(q / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} L`
     : `${Number(q).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} ${unid}`;
 
@@ -457,7 +478,7 @@ export function linkCardapio(extra = '') {
 // o que o cliente mandou é conferido de novo aqui: preço, adicionais e sabores vêm sempre do cardápio do restaurante
 function itensLimpos(itens) {
   return (Array.isArray(itens) ? itens : []).map((i) => {
-    const p = prod(i?.prod); if (!p || p.porKg || p.ativo === false) return null; // prato por quilo só no balcão, pesado
+    const p = prod(i?.prod); if (!p || p.porKg || p.ativo === false || !noTurno(p, db.categorias, lojaCfg().turnos)) return null; // por quilo só no balcão; fora do turno não entra
     const qtd = Math.min(30, Math.max(1, Math.round(Number(i.qtd) || 1)));
     const tam = p.tamanhos?.some((x) => x.nome === i.tam) ? i.tam : '';
     const ext = { mods: modulosAtivos(lojaCfg()) };
@@ -504,6 +525,8 @@ export const LOJA_PADRAO = {
   horarios: [[['11:00', '15:00']], [], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:59']], [['11:00', '15:30'], ['18:00', '23:59']]],
   aceitaQR: true, delivery: true, retirada: true, pedidoMinimo: 0, tempoEntrega: '40 a 60 min', tempoRetirada: '20 a 30 min',
   pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], areas: [], couvert: 0, comissao: 10,
+  // alertas (minutos): mesa sem atenção no salão e comanda atrasada na cozinha
+  alertas: { mesa: 25, kds: 10 },
 };
 export const lojaCfg = () => ({ ...LOJA_PADRAO, ...(db.config.loja || {}) });
 export function setLoja(parcial) { db.config.loja = { ...lojaCfg(), ...parcial }; grava(); }
@@ -522,14 +545,32 @@ export function registrarCliente(c, total) {
   let x = db.clientes.find((y) => y.id === 't' + d);
   if (!x) { x = { id: 't' + d, tel: d, nome: '', pedidos: 0, total: 0, primeiro: Date.now() }; db.clientes.push(x); }
   Object.assign(x, { nome: c.cliente.nome || x.nome, ...(c.cliente.end ? { end: c.cliente.end, bairro: c.cliente.bairro } : {}), pedidos: x.pedidos + 1, total: r2(x.total + total), ultimo: Date.now() });
-  // cartão fidelidade: um carimbo por compra paga a partir do valor mínimo
-  if (tem('fidelidade') && total >= fidelidade().minimo) x.carimbos = (x.carimbos || 0) + 1;
+  // cartão fidelidade: um carimbo por compra paga com produtos que valem, a partir do valor mínimo
+  if (tem('fidelidade')) {
+    const F = fidelidade(); vencerPremio(x, F);
+    const val = valorFidelidade(c, F);
+    if (val > 0 && val >= F.minimo) { x.carimbos = (x.carimbos || 0) + 1; histFid(x, 'carimbo', val); if (x.carimbos >= F.compras && !x.premioDesde) x.premioDesde = Date.now(); }
+  }
 }
-export const FIDELIDADE_PADRAO = { compras: 10, premio: 'Um prato à sua escolha', minimo: 0 };
+// alvo '' = a compra toda; 'cat' ou 'prod' = só o que está em ids conta para o mínimo e para ganhar o carimbo
+export const FIDELIDADE_PADRAO = { compras: 10, premio: 'Um prato à sua escolha', minimo: 0, alvo: '', ids: [], validade: 0 };
 export const fidelidade = () => ({ ...FIDELIDADE_PADRAO, ...(lojaCfg().fidelidade || {}) });
+export function valorFidelidade(c, F = fidelidade()) {
+  if (!F.alvo || !(F.ids || []).length) return conta(c).total;
+  return r2(itensValidos(c).filter((i) => (F.alvo === 'cat' ? F.ids.includes(prod(i.prod)?.cat) : F.ids.includes(i.prod))).reduce((s, i) => s + valorItem(i), 0));
+}
+function histFid(x, tipo, valor = 0) { (x.histFid ||= []).push({ t: Date.now(), tipo, ...(valor ? { valor: r2(valor) } : {}) }); if (x.histFid.length > 120) x.histFid.splice(0, x.histFid.length - 120); }
+// prêmio liberado vale N dias (0 = não vence); vencido, os carimbos do cartão completo saem
+export const vencePremio = (x, F = fidelidade()) => (F.validade > 0 && x?.premioDesde && (x.carimbos || 0) >= F.compras ? x.premioDesde + F.validade * 864e5 : 0);
+function vencerPremio(x, F) {
+  const v = vencePremio(x, F); if (!v || Date.now() <= v) return false;
+  x.carimbos -= F.compras; histFid(x, 'venceu'); x.premioDesde = x.carimbos >= F.compras ? Date.now() : null; return true;
+}
 export function darPremio(x, quem = quemAgora()) {
-  const F = fidelidade(); if (!x || (x.carimbos || 0) < F.compras) return false;
-  x.carimbos -= F.compras; x.premios = (x.premios || 0) + 1;
+  const F = fidelidade(); if (!x) return false;
+  if (vencerPremio(x, F)) { grava(); return false; }
+  if ((x.carimbos || 0) < F.compras) return false;
+  x.carimbos -= F.compras; x.premios = (x.premios || 0) + 1; histFid(x, 'premio'); x.premioDesde = x.carimbos >= F.compras ? Date.now() : null;
   auditar('premio', { quem, item: F.premio, motivo: `Cartão fidelidade de ${x.nome || x.tel}` }); grava(); return true;
 }
 
@@ -538,7 +579,8 @@ export function reservaLimpa(d = {}) {
   const data = /^\d{4}-\d{2}-\d{2}$/.test(d.data || '') ? d.data : '', hora = /^\d{2}:\d{2}$/.test(d.hora || '') ? d.hora : '';
   const nome = String(d.nome || '').trim().slice(0, 80), pessoas = Math.min(60, Math.max(1, Math.round(Number(d.pessoas) || 0)));
   if (!data || !hora || !nome) return null;
-  return { data, hora, nome, tel: String(d.tel || '').replace(/\D/g, '').slice(0, 13), pessoas, obs: String(d.obs || '').slice(0, 160), mesa: 0 };
+  return { data, hora, nome, tel: String(d.tel || '').replace(/\D/g, '').slice(0, 13), pessoas, obs: String(d.obs || '').slice(0, 160), mesa: 0,
+    ...(d.restricoes ? { restricoes: String(d.restricoes).slice(0, 160) } : {}), ...(d.ocasiao ? { ocasiao: String(d.ocasiao).slice(0, 60) } : {}) };
 }
 // encomenda: data e hora futuras respeitando a antecedência mínima (em horas)
 export const antecedencia = () => Math.max(0, Number(lojaCfg().encomendas?.antecedencia ?? 24));

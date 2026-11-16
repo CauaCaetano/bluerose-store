@@ -1,11 +1,11 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=21';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=21';
-import { modulosAtivos } from './perfis.js?v=21';
-import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodada, ALERGENOS, passaFiltro, ymd } from './precos.js?v=21';
-import { ico, folha, toast, $, $$ } from './ui.js?v=21';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=22';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=22';
+import { modulosAtivos } from './perfis.js?v=22';
+import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg } from './precos.js?v=22';
+import { ico, folha, toast, $, $$ } from './ui.js?v=22';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -155,7 +155,7 @@ const precoCard = (p) => {
   if (incluso(p)) return '<span class="cli-preco incluso">Incluso no rodízio</span>';
   const a = !p.tamanhos?.length && !p.porKg ? preco(p) : null;
   if (a?.motivo) return `<span class="cli-preco"><s>${din(p.preco)}</s>${din(a.preco)}<small class="cli-motivo">${t(a.motivo)}${a.ate ? ` até ${t(a.ate)}` : ''}</small></span>`;
-  return `<span class="cli-preco">${p.promoDe ? `<s>${din(p.promoDe)}</s>` : ''}${p.tamanhos?.length ? `<small>a partir de</small> ${din(aPartir(p))}` : din(p.preco)}${p.porKg ? '<small>/kg · pesado no balcão</small>' : ''}</span>`;
+  return `<span class="cli-preco">${p.promoDe ? `<s>${din(p.promoDe)}</s>` : ''}${p.tamanhos?.length ? `<small>a partir de</small> ${din(aPartir(p))}` : din(p.porKg ? precoKg(p).preco : p.preco)}${p.porKg ? `<small>/kg · pesado no balcão${precoKg(p).ate ? ` · até ${precoKg(p).ate}` : ''}</small>` : ''}</span>`;
 };
 const tags = (p) => {
   const md = mods(), l = (p.tags || []).map((x) => { const v = /vegetari|vegan/i.test(x); return `<i class="tag ${v ? 'verde' : ''}">${ico(v ? 'folha' : 'coroa')}${t(x)}</i>`; });
@@ -169,11 +169,12 @@ const cartao = (p) => `<button type="button" class="cli-prod ${p.ativo === false
   ${p.foto ? `<img src="${t(p.foto)}" alt="" loading="lazy">` : ''}${p.ativo === false || p.porKg ? '' : '<i class="cli-mais" aria-hidden="true">+</i>'}</button>`;
 function lista() {
   const md = mods(), filtrando = md.has('alergenicos') && filtros.length;
-  const visiveis = M.produtos.filter((p) => (!busca || `${p.nome} ${p.desc || ''}`.toLowerCase().includes(busca.toLowerCase())) && (!filtrando || passaFiltro(p, filtros)));
+  const noHorario = (p) => noTurno(p, M.categorias, M.loja.turnos);
+  const visiveis = M.produtos.filter((p) => noHorario(p) && (!busca || `${p.nome} ${p.desc || ''}`.toLowerCase().includes(busca.toLowerCase())) && (!filtrando || passaFiltro(p, filtros)));
   // prato do dia (preço especial só hoje), no topo do cardápio
-  const pd = md.has('pratoDoDia') && !busca ? pratoDoDia(M.loja.pratoDoDia) : null, pdp = pd && M.produtos.find((p) => p.id === pd.prod && p.ativo !== false);
+  const pd = md.has('pratoDoDia') && !busca ? pratoDoDia(M.loja.pratoDoDia) : null, pdp = pd && M.produtos.find((p) => p.id === pd.prod && p.ativo !== false && noHorario(p));
   const cats = M.categorias.filter((c) => visiveis.some((p) => p.cat === c.id));
-  const dest = !busca ? M.produtos.filter((p) => p.destaque && p.ativo !== false) : [];
+  const dest = !busca ? M.produtos.filter((p) => p.destaque && p.ativo !== false && noHorario(p)) : [];
   $('#cli-cats').innerHTML = (dest.length ? '<a href="#sec-destaques" class="on">Destaques</a>' : '') + cats.map((c, k) => `<a href="#sec-${c.id}" class="${!k && !dest.length ? 'on' : ''}">${t(c.nome)}</a>`).join('');
   const chipsAlg = md.has('alergenicos') ? `<div class="cli-filtros" role="group" aria-label="Filtrar por restrição">${ALERGENOS.map(([k, n, tipo]) => `<button type="button" class="cli-filtro ${filtros.includes(k) ? 'on' : ''}" data-filtro="${k}" aria-pressed="${filtros.includes(k)}">${tipo === 'contem' ? `Sem ${t(n.toLowerCase())}` : t(n)}</button>`).join('')}</div>` : '';
   $('#cli-lista').innerHTML = chipsAlg + (pdp ? `<section class="cli-sec cli-dia" id="sec-dia">${tituloSec('Prato do dia')}<button type="button" class="cli-prato-dia" data-p="${pdp.id}">${pdp.foto ? `<img src="${t(pdp.foto)}" alt="" loading="lazy">` : ''}<span><small>Hoje</small><b>${t(pdp.nome)}</b>${pdp.desc ? `<p>${t(pdp.desc)}</p>` : ''}<span class="cli-preco"><s>${din(pdp.preco)}</s>${din(pd.preco)}</span></span></button></section>` : '') + (dest.length ? `<section class="cli-sec" id="sec-destaques">${tituloSec('Destaques da casa')}<div class="cli-destaques">${dest.map((p) => `<button type="button" class="cli-dest" data-p="${p.id}" aria-label="${t(p.nome)}, ${p.tamanhos?.length ? 'a partir de ' + din(aPartir(p)) : din(p.preco)}">${p.foto ? `<img src="${t(p.foto)}" alt="" loading="lazy">` : ''}<span><b>${t(p.nome)}</b></span></button>`).join('')}</div></section>` : '')
@@ -193,7 +194,7 @@ function rodape() {
 // ------------------------------------------------------------------ escolher um prato
 function detalhe(p) {
   if (!p || p.ativo === false) return;
-  if (p.porKg) return toast(`${p.nome}: ${din(p.preco)} o quilo. Monte o prato no buffet e pese no balcão.`);
+  if (p.porKg) return toast(`${p.nome}: ${din(precoKg(p).preco)} o quilo${precoKg(p).ate ? ` até ${precoKg(p).ate}` : ''}. Monte o prato no buffet e pese no balcão.`);
   if (mesa && M.loja.aceitaQR === false) return toast('Os pedidos desta mesa são feitos com o garçom.');
   const md = mods(), inc = incluso(p);
   const op = formOpcoes(p, { produtos: M.produtos, din, t, obsRapidas: [], mods: md, loja: M.loja, incluso: inc });
@@ -216,8 +217,8 @@ function detalhe(p) {
         const it = op.item(f), b = it.meia && P(it.meia.b);
         // pedido por rodada: o que já está na sacola e na mesa conta no limite de peças inclusas
         if (inc && md.has('rodadas') && !R) {
-          const c = comandaDaMesa(mesa), ja = sacola.filter((x) => incluso(P(x.prod) || {})).reduce((s, x) => s + x.qtd, 0) + (c ? c.itens.filter((i) => i.rodizio && !i.cancelado && i.status !== 'entregue').reduce((s, i) => s + i.qtd, 0) : 0);
-          const r = cabeNaRodada(M.loja.rodizio, c?.pessoas || 1, ja, it.qtd);
+          const c = comandaDaMesa(mesa), ja = [...sacola.filter((x) => incluso(P(x.prod) || {})).map((x) => ({ cat: P(x.prod)?.cat || '', qtd: x.qtd })), ...(c ? c.itens.filter((i) => i.rodizio && !i.cancelado && i.status !== 'entregue').map((i) => ({ cat: P(i.prod)?.cat || '', qtd: i.qtd })) : [])];
+          const r = cabeNaRodadaCat(M.loja.rodizio, Math.max(1, (c?.pessoas || 1) - (c?.pausaRod?.pessoas || 0)), ja, p.cat, it.qtd);
           if (!r.ok) return toast(r.resta ? `Nesta rodada cabem só mais ${r.resta} ${r.resta === 1 ? 'peça' : 'peças'}. Mande o pedido e peça o resto na próxima rodada.` : `Limite desta rodada atingido (${r.limite} peças). Espere chegar à mesa para pedir mais.`);
         }
         sacola.push({ k: uid(), prod: p.id, nome: nomeItem(p, { tam: it.tam, meia: it.meia, sabores: it.sabores }, b, M.produtos), qtd: it.qtd, unit: it.unit, tam: it.tam, adic: it.adic, obs: it.obs, meia: it.meia, sabores: it.sabores, combo: it.combo,
@@ -235,6 +236,7 @@ function reservar() {
       <label class="campo"><span>Seu nome</span><input name="nome" autocomplete="name" value="${t(ant.nome || '')}"></label>
       <label class="campo"><span>WhatsApp</span><input name="tel" type="tel" inputmode="tel" autocomplete="tel" value="${t(ant.tel || '')}"></label>
       <label class="campo"><span>Observação (opcional)</span><input name="obs" maxlength="140" placeholder="Aniversário, cadeirão, perto da janela…"></label>
+      <label class="campo"><span>Alergias ou restrições (opcional)</span><input name="restricoes" maxlength="140" placeholder="Ex.: alergia a camarão, sem glúten"></label>
       <p class="erro" data-erro role="alert"></p></form>`,
   pe: '<button type="button" class="bt cheio grande" data-ok>Pedir a reserva</button>',
   aoAbrir: (f, fechar) => {
@@ -243,14 +245,14 @@ function reservar() {
       if (!v('nome')) { erro.textContent = 'Escreva seu nome.'; return; }
       if (v('tel').replace(/\D/g, '').length < 10) { erro.textContent = 'Escreva o WhatsApp com DDD para confirmarmos a reserva.'; return; }
       if (!v('data') || v('data') < hoje || !v('hora')) { erro.textContent = 'Escolha o dia e a hora.'; return; }
-      const d = { data: v('data'), hora: v('hora'), pessoas: Number(v('pessoas')) || 2, nome: v('nome'), tel: v('tel'), obs: v('obs') };
+      const d = { data: v('data'), hora: v('hora'), pessoas: Number(v('pessoas')) || 2, nome: v('nome'), tel: v('tel'), obs: v('obs'), restricoes: v('restricoes') };
       guardado('cliente', { ...ant, nome: d.nome, tel: d.tel });
       const r = await api.reserva(d).catch(() => null);
       if (!r || r.erro) {
         // sem a fila da nuvem: manda pelo WhatsApp do restaurante
         const zap = String(M.whatsapp || '').replace(/\D/g, '');
         if (!zap) { erro.textContent = r?.erro || 'Não deu para mandar agora. Tente de novo.'; return; }
-        window.open(`https://wa.me/55${zap.replace(/^55/, '')}?text=${encodeURIComponent(`Olá! Quero reservar uma mesa: ${d.pessoas} pessoas, ${d.data.split('-').reverse().join('/')} às ${d.hora}. Nome: ${d.nome}.${d.obs ? ` ${d.obs}` : ''}`)}`, '_blank', 'noopener');
+        window.open(`https://wa.me/55${zap.replace(/^55/, '')}?text=${encodeURIComponent(`Olá! Quero reservar uma mesa: ${d.pessoas} pessoas, ${d.data.split('-').reverse().join('/')} às ${d.hora}. Nome: ${d.nome}.${d.obs ? ` ${d.obs}` : ''}${d.restricoes ? ` Restrições: ${d.restricoes}.` : ''}`)}`, '_blank', 'noopener');
       }
       fechar(); toast('Pedido de reserva enviado. O restaurante confirma pelo WhatsApp.');
     };

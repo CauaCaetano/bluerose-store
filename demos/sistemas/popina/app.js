@@ -1,14 +1,14 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=21';
-import './cozinha.js?v=21';
-import './caixa.js?v=21';
-import './pedidos.js?v=21';
-import './mais.js?v=21';
-import './gestao.js?v=21';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=21';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=21';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=21';
-import { abrirEscolha } from './escolha.js?v=21';
+import './salao.js?v=22';
+import './cozinha.js?v=22';
+import './caixa.js?v=22';
+import './pedidos.js?v=22';
+import './mais.js?v=22';
+import './gestao.js?v=22';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=22';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=22';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=22';
+import { abrirEscolha } from './escolha.js?v=22';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
