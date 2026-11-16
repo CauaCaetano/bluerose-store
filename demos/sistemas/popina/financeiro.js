@@ -2,10 +2,10 @@
 // fiado (conta do cliente), fluxo de caixa, DRE gerencial e margem por canal. Cada tela entra na Gestão (#mais/<id>).
 // Dados: db.fornecedores, db.notasCompra, db.contas, db.fiado { lanc, limites }, db.lotes e db.config.fin.
 // A entrada no estoque usa entradaCompra (a mesma da tela de Estoque); o custo teórico usa custoVenda (o mesmo CMV dos relatórios).
-import { db, t, din, dinCurto, grava, r2, uid, insumo, entradaCompra, custoVenda, custoPrato, partes, auditar, quemAgora, ouvir, clientePorTel, ondeComanda, lojaCfg, movimento, fmtQtd, CONTA, APARELHO } from './loja.js?v=23';
-import { acao, ir } from './nucleo.js?v=23';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=23';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=23';
+import { db, t, din, dinCurto, grava, r2, uid, insumo, entradaCompra, custoVenda, custoPrato, partes, auditar, quemAgora, ouvir, clientePorTel, ondeComanda, lojaCfg, movimento, fmtQtd, CONTA, APARELHO } from './loja.js?v=24';
+import { acao, ir } from './nucleo.js?v=24';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=24';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=24';
 
 // entradas do hub da Gestão: [id, nome, ícone, detalhe]
 export const HUB_FINANCEIRO = [
@@ -13,10 +13,10 @@ export const HUB_FINANCEIRO = [
   ['compras', 'Compras', 'carrinho', 'Notas, recebimento, parcelas e histórico de preços'],
   ['contas', 'Contas a pagar e receber', 'conta', 'Vencimentos, contas do mês e pagamentos'],
   ['fiado', 'Fiado', 'etiqueta', 'Conta dos clientes, limite e recebimentos'],
-  ['conciliacao', 'Conciliação', 'check', 'Esperado × recebido por dia e forma de pagamento'],
+  ['conciliacao', 'Conferir recebimentos', 'check', 'Confere se o que caiu no banco e na maquininha bate com o vendido (conciliação)'],
   ['fluxo', 'Fluxo de caixa', 'moedas', 'Entradas e saídas por dia e os próximos 30 dias'],
-  ['dre', 'DRE gerencial', 'grafico', 'Receita, CMV, taxas, despesas e resultado'],
-  ['margens', 'Margem por canal', 'cardapio', 'Margem de cada prato no salão e no delivery'],
+  ['dre', 'Resultado do mês (DRE)', 'grafico', 'Quanto entrou, quanto gastou e quanto sobrou'],
+  ['margens', 'Lucro por prato', 'cardapio', 'Quanto sobra de cada prato no salão e no delivery'],
 ];
 
 // ------------------------------------------------------------------ utilidades

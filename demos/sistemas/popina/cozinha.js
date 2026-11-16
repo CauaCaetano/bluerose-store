@@ -1,9 +1,9 @@
 // Popina · tela da cozinha e do bar (KDS): cada envio vira um ticket, na ordem de chegada, com o tempo correndo.
 // "Começar" e "Pronto" avisam o garçom na hora (a fila dele mostra o prato pronto).
-import { db, t, tempo, minutos, comanda, mudarStatus, ondeComanda, tem, prod, lojaCfg } from './loja.js?v=23';
-import { ETAPAS, ALERGENOS, ESTACOES_PADRAO, estacaoDe, filaForno } from './precos.js?v=23';
-import { registrar, acao } from './nucleo.js?v=23';
-import { ico, toast, bip, folha } from './ui.js?v=23';
+import { db, t, tempo, minutos, comanda, mudarStatus, ondeComanda, tem, prod, lojaCfg } from './loja.js?v=24';
+import { ETAPAS, ALERGENOS, ESTACOES_PADRAO, estacaoDe, filaForno } from './precos.js?v=24';
+import { registrar, acao } from './nucleo.js?v=24';
+import { ico, toast, bip, folha } from './ui.js?v=24';
 
 const guarda = (k, v) => { try { if (v === undefined) return localStorage.getItem(k) || ''; localStorage.setItem(k, v); } catch { /* sem acesso */ } return ''; };
 let setor = (() => { const s = guarda('popina-setor'); return ['bar', 'forno'].includes(s) ? s : 'cozinha'; })();
@@ -87,6 +87,7 @@ function ticket(k) {
     <header><i class="tk-ico">${ico(ico2)}</i><div class="tk-tit"><b>${ONDE(k.c)}</b><small>${sub}</small></div>${rel}</header>
     ${reservaTk(k.c)}<ul>${k.itens.map((i) => `<li class="${i.status}"><span>${i.qtd}× ${t(i.nome)}</span>${notas(i)}</li>`).join('')}</ul>
     ${k.espera?.length ? `<p class="tk-espera">${k.itens.every((i) => i.status === 'pronto') ? `${ico('okcirc')}Sua parte pronta · ` : ''}esperando ${t(k.espera.join(', '))}</p>` : ''}
+    <p class="tk-dica">${k.estado === 'novo' ? 'Toque para começar a preparar' : k.estado === 'preparo' ? 'Toque quando ficar pronto' : 'O garçom já foi avisado'}</p>
     ${k.estado === 'preparo' ? `<div class="tk-prog" title="${prontos} de ${k.itens.length} prontos"><i style="width:${Math.max(12, ((prontos + .6) / k.itens.length) * 100)}%"></i></div>` : ''}</article>`;
 }
 registrar('cozinha', {
@@ -103,7 +104,7 @@ registrar('cozinha', {
       <div class="seg-coz" role="group" aria-label="Setor">${setores.map(([v, r, i]) => `<button type="button" data-acao="setor" data-s="${v}" aria-pressed="${S === v}">${ico(i)}${r}${v === 'forno' && tirar ? ` <em class="badge">${tirar}</em>` : ''}</button>`).join('')}</div>
       <button type="button" class="bt-tela" data-acao="tela-cheia" aria-label="Tela cheia">${ico('telacheia')}</button></header>
       ${porEstacao() ? `<div class="chips estacoes-coz" role="group" aria-label="Estação">${[['', 'Todas'], ...estacoes().map((x) => [x.id, x.nome])].map(([v, n]) => `<button type="button" class="chip ${estacaoAgora() === v ? 'on' : ''}" data-acao="estacao" data-e="${t(v)}" aria-pressed="${estacaoAgora() === v}">${t(n)} <b>${db.comandas.reduce((s, c) => s + c.itens.filter((i) => ativo(i) && i.status !== 'pronto' && i.setor === 'cozinha' && (!v || estDe(i) === v)).length, 0)}</b></button>`).join('')}</div>` : ''}
-      ${S === 'forno' ? htmlForno() : `<section class="kds quadro">${cols.map(([e, r]) => `<div class="kds-col ${e}"><h2 class="placa">${r.toUpperCase()} <span>(${l.filter((k) => k.estado === e).length})</span></h2><div class="trilho" aria-hidden="true"></div>${l.filter((k) => k.estado === e).map(ticket).join('') || '<div class="vazio-quadro">Nada aqui.</div>'}</div>`).join('')}</section>`}`;
+      ${S === 'forno' ? htmlForno() : `<section class="kds quadro">${cols.map(([e, r]) => `<div class="kds-col ${e}"><h2 class="placa">${r.toUpperCase()} <span>(${l.filter((k) => k.estado === e).length})</span></h2><div class="trilho" aria-hidden="true"></div>${l.filter((k) => k.estado === e).map(ticket).join('') || `<div class="vazio-quadro">${e === 'novo' ? 'Nenhum pedido novo. Quando o garçom enviar, aparece aqui com um som.' : e === 'preparo' ? 'Nada sendo preparado.' : 'Nada pronto esperando.'}</div>`}</div>`).join('')}</section>`}`;
   },
   montar() {
     clearInterval(relogio);

@@ -153,3 +153,31 @@ body.tpl-chines .prancheta-cab,body.tpl-chines .ticket-cab{background:#B0141B!im
 body.tpl-chines .prancheta-cab h2,body.tpl-chines .ticket-cab h2{color:#F1C75A!important;}
 body.tpl-chines .prancheta-cab .prancheta-sub,body.tpl-chines .ticket-cab span,body.tpl-chines .ticket-cab small{color:#F6E2B8!important}
 body.tpl-chines .cab-salao .aqueduto-img,body.tpl-chines .cab-pedidos .aqueduto-img,body.tpl-chines .g-aqueduto,body.tpl-chines .cx-aqueduto{height:74px!important;width:auto!important;max-width:none!important}
+/* cortes e sobreposições (16/11): no celular o desfoque do topo prendia a barra de abas em cima do logo; nome e endereço dos pedidos quebram linha em vez de cortar */
+@media (max-width:899px){body.tpl-chines .topo{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
+body.tpl-chines .kds .tk-tit b,body.tpl-chines .kds .ticket.pd .tk-tit b{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere}
+body.tpl-chines .kds .tk-tit small{white-space:normal!important;overflow:visible!important;align-items:flex-start!important}
+body.tpl-chines .kds .tk-tit small .ico{flex:none;margin-top:2px}
+/* enfeites fixos do salão: o de cima desce para baixo do topo (antes ficava cortado por ele) e os dois passam por trás dos painéis */
+@media (min-width:900px){body.tpl-chines .salao-dir::after{top:102px!important;height:96px!important;z-index:-1!important}
+body.tpl-chines .salao-dir::before{z-index:-1!important}
+}
+/* placas: recorte pelo medalhão redondo e pela ponta recortada (sem o fundo quadrado da imagem) e texto que cabe */
+body.tpl-chines .fita,body.tpl-chines .fita.verde,body.tpl-chines .g-fita,body.tpl-chines .kds-col .placa,body.tpl-chines .cab-comanda .fita-mesa,body.tpl-chines .cab-conta .fita{clip-path:polygon(35.6px 3px,28.7px 0.8px,21.8px 0.5px,15px 2px,8.8px 5.2px,3.7px 9.9px,0 15.8px,0 36.1px,2.3px 42.3px,7px 47.4px,12.9px 51.1px,19.5px 53.2px,26.4px 53.5px,33.2px 52px,35.6px 51px,calc(100% - 21px) 51px,calc(100% - 12px) 48px,calc(100% - 9px) 39px,calc(100% - 1px) 35px,calc(100% - 1px) 18px,calc(100% - 9px) 15px,calc(100% - 12px) 6px,calc(100% - 21px) 3px)!important;max-width:100%;white-space:nowrap}
+body.tpl-chines .kds-col .placa{font-size:13.5px!important;letter-spacing:.01em!important}
+/* molduras: some o fundo da foto acima do friso (cantos quadrados e a lanterna cortada), fica o friso e o enfeite do meio */
+body.tpl-chines .prancheta,body.tpl-chines .ticket-dia,body.tpl-chines .comanda-papel,body.tpl-chines .cartao-caixa{--mk:linear-gradient(#000 0 0) 0 100%/100% calc(100% - 17px) no-repeat,linear-gradient(90deg,transparent calc(3.6px + 35.5%),#000 0 calc(-2.4px + 60%),transparent 0) 0 9px/100% 9px no-repeat,linear-gradient(90deg,transparent calc(2.2px + 40.5%),#000 0 calc(-1px + 55%),transparent 0) 0 0/100% 18px no-repeat;-webkit-mask:var(--mk);mask:var(--mk)}
+/* "O que fazer agora": a prancheta não passa da coluna (antes invadia o título e os avisos do salão) e o detalhe do pedido quebra linha em vez de cortar */
+body.tpl-chines .salao-esq>*{min-width:0}
+body.tpl-chines .fila-txt{min-width:0}
+body.tpl-chines .fila-txt span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;display:block!important;-webkit-line-clamp:unset!important}
+/* gestão: os quadros brancos ganham respiro por dentro (antes o texto encostava e passava da borda: primeiros passos, relatórios, DRE e outras) */
+body.tpl-chines .gestao-corpo .bloco{padding:12px 14px}
+body.tpl-chines .gestao-corpo .guia-passos{padding:0 14px 12px!important}
+body.tpl-chines .g-cols{padding-right:6px}
+/* caixa: os três botões do cartão cabem na coluna (no celular "Fechar caixa" passava da tela) */
+body.tpl-chines .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+body.tpl-chines .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;text-align:center}
+/* pedidos: o texto do cartão "Cardápio online" não encosta na borda */
+body.tpl-chines .link-cardapio{padding-right:12px!important}

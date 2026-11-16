@@ -188,3 +188,19 @@ h1,.cab-tela h1,.cab-salao h1{font-family:var(--f-cab);font-weight:800;letter-sp
   .demo-faixa{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:6px 12px;gap:8px}
   .demo-faixa>*{flex:none}
 }
+
+/* só a Taverna (16/11): enfeites sem a borda reta do recorte e botões do caixa sem passar da tela */
+body.tpl-taverna{--tv-borda:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent),linear-gradient(transparent,#000 12%,#000 88%,transparent)}
+body.tpl-taverna .aqueduto-img,body.tpl-taverna .g-aqueduto,body.tpl-taverna .cx-aqueduto,body.tpl-taverna .louro-img,body.tpl-taverna .topo::after{-webkit-mask:var(--tv-borda);-webkit-mask-composite:source-in;mask:var(--tv-borda);mask-composite:intersect}
+body.tpl-taverna .folhas-img{-webkit-mask:linear-gradient(90deg,transparent,#000 14%),linear-gradient(#000 80%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 14%),linear-gradient(#000 80%,transparent);mask-composite:intersect}
+body.tpl-taverna .cc-bts{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr)!important}
+body.tpl-taverna .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1}
+body.tpl-taverna .gestao-nav h3.g-fita{letter-spacing:.02em}
+body.tpl-taverna .pd-quadro .kds-col .placa{font-size:14.5px!important;letter-spacing:0!important}
+body.tpl-taverna .kds .ticket.pd .tk-tit b{white-space:normal!important}
+body.tpl-taverna .kds .ticket>:has(>.tk-tit){flex-wrap:wrap;row-gap:4px}
+body.tpl-taverna .kds .ticket .tk-tit{flex:1 1 120px}
+@media (max-width:899px){body.tpl-taverna .fila-txt span{white-space:normal;overflow:visible;text-overflow:clip}
+  body.tpl-taverna .conta-det .totais .total,body.tpl-taverna .comanda-papel .totais .total{padding:0 4px!important}
+  body.tpl-taverna .conta-det .totais .total span,body.tpl-taverna .comanda-papel .totais .total span{font-size:22px!important;margin-left:0!important}
+  body.tpl-taverna .conta-det .totais .total b,body.tpl-taverna .comanda-papel .totais .total b{font-size:24px!important}}

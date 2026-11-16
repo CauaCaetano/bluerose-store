@@ -117,3 +117,11 @@ body.tpl-luxo .cab-comanda .fita-mesa img{display:none}
 body.tpl-luxo .fita .ico{display:none}
 body.tpl-luxo .topo::after{background-image:url(img/tl-arco.webp?v=1)!important}
 @media (max-width:899px){body.tpl-luxo .nav a{font-size:11px!important;letter-spacing:.02em!important;min-width:0}}
+/* nada cortado: textos que quebram linha em vez de reticências, botões do caixa cabendo no cartão */
+body.tpl-luxo .fila-txt span,body.tpl-luxo .kds .ticket .tk-tit b,body.tpl-luxo .kds .ticket.pd .tk-tit b,body.tpl-luxo .tk-tit small{white-space:normal!important;overflow:visible!important;overflow-wrap:anywhere}
+body.tpl-luxo .cab-salao .aqueduto-img,body.tpl-luxo .cab-pedidos .aqueduto-img{height:84px!important;width:auto!important;max-width:46%;object-fit:contain}
+body.tpl-luxo .gestao-corpo .bloco{padding:0 16px 12px!important}
+body.tpl-luxo .gestao-corpo .resumo-dia>*{padding-left:16px!important;padding-right:16px!important}
+body.tpl-luxo .ticket-dia{padding:8px 16px 14px!important}
+body.tpl-luxo .gestao-nav .g-fita,body.tpl-luxo .g-card h2.g-fita{margin-left:0!important}
+body.tpl-luxo .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important}body.tpl-luxo .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;padding:4px 6px!important}

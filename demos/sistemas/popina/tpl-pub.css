@@ -153,3 +153,31 @@ body.tpl-pub .prancheta-cab,body.tpl-pub .ticket-cab{background:#1F4A2E!importan
 body.tpl-pub .prancheta-cab h2,body.tpl-pub .ticket-cab h2{color:#E8C064!important;}
 body.tpl-pub .prancheta-cab .prancheta-sub,body.tpl-pub .ticket-cab span,body.tpl-pub .ticket-cab small{color:#E9DFC4!important}
 body.tpl-pub .cab-salao .aqueduto-img,body.tpl-pub .cab-pedidos .aqueduto-img,body.tpl-pub .g-aqueduto,body.tpl-pub .cx-aqueduto{height:74px!important;width:auto!important;max-width:none!important}
+/* cortes e sobreposições (16/11): no celular o desfoque do topo prendia a barra de abas em cima do logo; nome e endereço dos pedidos quebram linha em vez de cortar */
+@media (max-width:899px){body.tpl-pub .topo{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
+body.tpl-pub .kds .tk-tit b,body.tpl-pub .kds .ticket.pd .tk-tit b{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere}
+body.tpl-pub .kds .tk-tit small{white-space:normal!important;overflow:visible!important;align-items:flex-start!important}
+body.tpl-pub .kds .tk-tit small .ico{flex:none;margin-top:2px}
+/* enfeites fixos do salão: o de cima desce para baixo do topo (antes ficava cortado por ele) e os dois passam por trás dos painéis */
+@media (min-width:900px){body.tpl-pub .salao-dir::after{top:102px!important;height:96px!important;z-index:-1!important}
+body.tpl-pub .salao-dir::before{z-index:-1!important}
+}
+/* placas: recorte pelo contorno de madeira das pontas (sem o fundo quadrado da imagem) e texto que cabe */
+body.tpl-pub .fita,body.tpl-pub .fita.verde,body.tpl-pub .g-fita,body.tpl-pub .kds-col .placa,body.tpl-pub .cab-comanda .fita-mesa,body.tpl-pub .cab-conta .fita{clip-path:polygon(17px 1px,calc(100% - 17px) 1px,calc(100% - 8px) 10px,calc(100% - 1px) 21px,calc(100% - 1px) 35px,calc(100% - 8px) 45px,calc(100% - 17px) 53px,17px 53px,6px 45px,1px 35px,1px 21px,6px 10px)!important;max-width:100%;white-space:nowrap}
+body.tpl-pub .kds-col .placa{font-size:13.5px!important;letter-spacing:.01em!important}
+/* molduras: some o fundo da foto acima da madeira (cantos quadrados e a folha cortada), fica a moldura e o enfeite do meio */
+body.tpl-pub .prancheta,body.tpl-pub .ticket-dia,body.tpl-pub .comanda-papel,body.tpl-pub .cartao-caixa{--mk:linear-gradient(#000 0 0) 0 100%/100% calc(100% - 21px) no-repeat,linear-gradient(90deg,transparent calc(6.1px + 26.5%),#000 0 calc(-6.4px + 74.5%),transparent 0) 0 14px/100% 8px no-repeat,linear-gradient(90deg,transparent calc(3.8px + 35.4%),#000 0 calc(-4.1px + 65.7%),transparent 0) 0 7px/100% 15px no-repeat,linear-gradient(90deg,transparent calc(1.5px + 44.2%),#000 0 calc(-1.8px + 56.8%),transparent 0) 0 0/100% 22px no-repeat;-webkit-mask:var(--mk);mask:var(--mk)}
+/* "O que fazer agora": a prancheta não passa da coluna (antes invadia o título e os avisos do salão) e o detalhe do pedido quebra linha em vez de cortar */
+body.tpl-pub .salao-esq>*{min-width:0}
+body.tpl-pub .fila-txt{min-width:0}
+body.tpl-pub .fila-txt span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;display:block!important;-webkit-line-clamp:unset!important}
+/* gestão: os quadros brancos ganham respiro por dentro (antes o texto encostava e passava da borda: primeiros passos, relatórios, DRE e outras) */
+body.tpl-pub .gestao-corpo .bloco{padding:12px 14px}
+body.tpl-pub .gestao-corpo .guia-passos{padding:0 14px 12px!important}
+body.tpl-pub .g-cols{padding-right:6px}
+/* caixa: os três botões do cartão cabem na coluna (no celular "Fechar caixa" passava da tela) */
+body.tpl-pub .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+body.tpl-pub .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;text-align:center}
+/* pedidos: o texto do cartão "Cardápio online" não encosta na borda */
+body.tpl-pub .link-cardapio{padding-right:12px!important}

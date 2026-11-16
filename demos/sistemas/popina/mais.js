@@ -1,17 +1,17 @@
 // Popina · Mais: cardápio (preços, esgotado, ficha técnica), estoque, relatórios, QR das mesas, ajustes e o papel deste aparelho.
 import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa,
-  regras, temPin, auditar, quemAgora, registrarPerda, ajustarEstoque, MOTIVOS_PERDA, consumoVenda, custoVenda } from './loja.js?v=23';
-import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=23';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=23';
+  regras, temPin, auditar, quemAgora, registrarPerda, ajustarEstoque, MOTIVOS_PERDA, consumoVenda, custoVenda } from './loja.js?v=24';
+import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=24';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=24';
 import { qrSVG } from '../base/qr.js';
-import { temModulo, modulosAtivos } from './perfis.js?v=23';
-import { ALERGENOS, ETAPAS, TURNOS } from './precos.js?v=23';
-import { modoEscolha } from './opcoes.js?v=23';
+import { temModulo, modulosAtivos } from './perfis.js?v=24';
+import { ALERGENOS, ETAPAS, TURNOS } from './precos.js?v=24';
+import { modoEscolha } from './opcoes.js?v=24';
 
 // cada seção: [id, nome, ícone, detalhe, função da casa que precisa estar ligada (opcional), endereço próprio (opcional)]
 export const GRUPOS = [
   ['Restaurante', [['aparencia', 'Aparência e templates', 'ajustes', 'Template, logo, capa, cores e estilo do cardápio'], ['loja', 'Restaurante e cardápio online', 'salao', 'Contato, horários, entrega e o link'], ['mesas', 'Mesas e QR', 'qr', 'Áreas do salão, número de mesas, QR de cada mesa'], ['ajustes', 'Caixa e regras', 'caixa', 'Pix, serviço, garçons e comissão, balança']]],
-  ['Cardápio e estoque', [['cardapio', 'Cardápio', 'cardapio', 'Pratos, tamanhos, complementos, fotos e preços'], ['estoque', 'Estoque', 'estoque', 'O que tem, o que acaba, compras']]],
+  ['Cardápio e estoque', [['cardapio', 'Cardápio', 'cardapio', 'Pratos, tamanhos, complementos, fotos e preços'], ['estoque', 'Estoque', 'estoque', 'Ingredientes e bebidas: o que tem, o que acaba, compras']]],
   ['Vendas e clientes', [['relatorios', 'Relatórios', 'grafico', 'Vendas, garçons, horários, mais vendidos'], ['clientes', 'Clientes', 'pessoas', 'Quem pede no delivery e quanto gasta'], ['entregadores', 'Entregadores', 'moto', 'Quem levou cada pedido e o acerto do dia', 'delivery'], ['cupons', 'Cupons', 'conta', 'Descontos do cardápio online']]],
   ['Funções do negócio', [['funcoes', 'Regras das funções', 'ajustes', 'Rodízio, pizza, happy hour, cardápio por turno, fidelidade e mais'], ['reservas', 'Reservas e fila', 'calendario', 'Reservas por dia e fila de espera na porta', 'reservas'],
     ['eventos', 'Eventos', 'coroa', 'Pacote por pessoa, convidados e check-in', 'eventos'], ['encomendas', 'Encomendas', 'calendario', 'Pedidos para outro dia e hora', 'encomendas'], ['vitrine', 'Vitrine do dia', 'loja', 'Quanto foi feito hoje e quanto resta', 'vitrine'],
@@ -331,7 +331,7 @@ acao('editar-prod', (b) => {
     <div class="campo"><span>Complementos e escolhas (ponto da carne, borda, molhos, sabor…)</span><div data-grupos>${blocosGrupo()}</div><button type="button" class="link" data-maisgrupo>+ Grupo de opções</button> <button type="button" class="link" data-bebida>+ Montagem de bebida (tamanho, leite, temperatura, extra e xarope)</button></div>
     <div class="campo"><span>Adicionais soltos (cada um soma no preço)</span><ul class="ficha-ed" data-adic>${linhasAdic()}</ul><button type="button" class="link" data-maisadic>+ Adicional</button></div>
     ${blocoCasa()}
-    <div class="campo"><span>Ficha técnica: o que sai do estoque a cada 1 vendido</span>${db.insumos.length ? `<ul class="ficha-ed" data-ficha>${linhasFicha()}</ul><button type="button" class="link" data-maisficha>+ Insumo na ficha</button>` : '<p class="mudo">Cadastre os insumos em Mais › Estoque para o sistema baixar o estoque e calcular o custo do prato.</p>'}</div>
+    <div class="campo"><span>Ficha técnica: o que sai do estoque a cada 1 vendido</span>${db.insumos.length ? `<ul class="ficha-ed" data-ficha>${linhasFicha()}</ul><button type="button" class="link" data-maisficha>+ Insumo na ficha</button>` : '<p class="mudo">Cadastre os insumos em Gestão › Estoque para o sistema baixar o estoque e calcular o custo do prato.</p>'}</div>
     ${novo ? '' : '<button type="button" class="bt perigo" data-apagar>Apagar este prato</button>'}`,
     pe: '<button type="button" class="bt cheio grande" data-ok>Salvar</button>',
     aoAbrir: (f, fechar) => {
@@ -419,7 +419,7 @@ export const MONTAGEM_BEBIDA = [
 ];
 acao('cardapio-exemplo', async () => {
   if (!(await confirma('Carregar os 22 pratos de exemplo, com fotos e fichas técnicas? Depois é só trocar nomes e preços e apagar o que não serve.', 'Carregar'))) return;
-  const { cardapioExemplo } = await import('./dados.js?v=23'); const ex = cardapioExemplo();
+  const { cardapioExemplo } = await import('./dados.js?v=24'); const ex = cardapioExemplo();
   db.produtos.push(...ex.produtos.filter((p) => !prod(p.id))); ex.insumos.forEach((i) => { if (!insumo(i.id)) db.insumos.push(i); });
   grava(); toast('Cardápio de exemplo carregado');
 });
@@ -556,7 +556,7 @@ acao('imprimir-qr', () => {
   w.document.close();
 });
 acao('papel', (b) => { setPapel(b.dataset.p); toast(`Este aparelho agora é: ${PAPEIS[b.dataset.p][0]}`); ir(PAPEIS[b.dataset.p][1]); });
-acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=23'); recomecar(); ir('salao'); } });
+acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=24'); recomecar(); ir('salao'); } });
 
 acao('ordem', (b) => {
   const p = prod(b.dataset.p), l = db.produtos.filter((x) => x.cat === p.cat), k = l.indexOf(p), alvo = l[k + Number(b.dataset.d)]; if (!alvo) return;

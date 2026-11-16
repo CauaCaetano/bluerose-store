@@ -91,4 +91,8 @@ body.est-rustico .cli-dest{scroll-snap-align:start}
 body.est-rustico .cli-prod-txt b{font-size:16.5px!important;padding-right:88px}
 body.est-rustico .cli-selo{max-width:124px;text-align:left}
 body.est-rustico .cli-aqueduto{-webkit-mask:radial-gradient(closest-side,#000 72%,transparent);mask:radial-gradient(closest-side,#000 72%,transparent)}
+/* etiquetas (mais pedido, alergênicos, serve N) em linha acima do nome: no canto elas cobriam o nome quando eram muitas */
+body.est-rustico .cli-tags{position:static!important;margin:0 0 3px}
+body.est-rustico .cli-prod-txt b{padding-right:0!important}
+body.est-rustico .cli-prod-txt p{padding-right:36px!important}
 body.est-rustico .cli-fita-linha{min-width:0}body.est-rustico .cli-aqueduto{width:auto!important;flex:1 1 0;min-width:0;max-width:180px;margin-right:0}body.est-rustico .cli-fita{flex:none}

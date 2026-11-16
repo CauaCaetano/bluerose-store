@@ -1,14 +1,14 @@
 // Popina · salão do garçom: a fila do que fazer agora (conceito C escolhido pelo dono) + as mesas, e a comanda da mesa.
 import { db, t, din, dinCurto, tempo, minutos, prod, comanda, comandaDaMesa, fila, estadoMesa, conta, valorItem, abrirMesa, adicionarItem, enviar,
   mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg,
-  temCouvert, juntarMesas, transferirItens, marcar, quemAgora, temPin, vendaDeHoje, tem, ondeComanda, couvertLigado, abrirCartao, cartaoAberto, proximoCartao, proximaEtapa, restaVitrine, ouvir, auditar } from './loja.js?v=23';
-import { registrar, acao, ir } from './nucleo.js?v=23';
-import { ico, folha, toast, confirma, autorizar, bip, $, $$ } from './ui.js?v=23';
-import { OBS_RAPIDAS } from './dados.js?v=23';
-import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas } from './opcoes.js?v=23';
-import { modulosAtivos } from './perfis.js?v=23';
+  temCouvert, juntarMesas, transferirItens, marcar, quemAgora, temPin, vendaDeHoje, tem, ondeComanda, couvertLigado, abrirCartao, cartaoAberto, proximoCartao, proximaEtapa, restaVitrine, ouvir, auditar } from './loja.js?v=24';
+import { registrar, acao, ir } from './nucleo.js?v=24';
+import { ico, folha, toast, confirma, autorizar, bip, $, $$ } from './ui.js?v=24';
+import { OBS_RAPIDAS } from './dados.js?v=24';
+import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas } from './opcoes.js?v=24';
+import { modulosAtivos } from './perfis.js?v=24';
 import { TIPOS_RODIZIO, valorRodizio, pessoasRodizio, inclusoRodizio, cabeNaRodadaCat, precoAgora, precoFracoes, ETAPAS, ordemEtapa, ALERGENOS, ymd, esquecidas, noTurno, turnoDe, TURNOS, precoKg,
-  tiposRodizio, comemRodizio, linhasRodizio, limiteRodada, faixasDoKg } from './precos.js?v=23';
+  tiposRodizio, comemRodizio, linhasRodizio, limiteRodada, faixasDoKg } from './precos.js?v=24';
 
 // a tela do salão segue o conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/1-salao-pc.png)
 const ROTULO = { conta: 'Levar a conta', chamou: 'Mesa chamou', pronto: 'Prato pronto', qr: 'Pedido pelo QR' };
@@ -17,9 +17,9 @@ const nItens = (l) => { const n = l.reduce((s, i) => s + (i.qtd || 1), 0); retur
 const onde = (c) => ondeComanda(c);
 
 function cartaoFila(f) {
-  if (f.tipo === 'conta') return linha(f.tipo, `Mesa ${f.c.mesa}`, din(conta(f.c).total), 'Levar', `abrir-conta" data-id="${f.c.id}`);
-  if (f.tipo === 'chamou') return linha(f.tipo, `Mesa ${f.x.mesa}`, `há ${tempo(f.ts)}`, 'Ir', `atender" data-id="${f.x.id}`);
-  if (f.tipo === 'pronto') return linha(f.tipo, onde(f.c), nItens(f.itens), 'Levei', `levei" data-id="${f.c.id}`);
+  if (f.tipo === 'conta') return linha(f.tipo, `Mesa ${f.c.mesa}`, din(conta(f.c).total), 'Ver', `abrir-conta" data-id="${f.c.id}`);
+  if (f.tipo === 'chamou') return linha(f.tipo, `Mesa ${f.x.mesa}`, `há ${tempo(f.ts)}`, 'Atendi', `atender" data-id="${f.x.id}`);
+  if (f.tipo === 'pronto') return linha(f.tipo, onde(f.c), nItens(f.itens), 'Entreguei', `levei" data-id="${f.c.id}`);
   return linha(f.tipo, `Mesa ${f.q.mesa}`, nItens(f.q.itens), 'Ver', `ver-qr" data-id="${f.q.id}`);
 }
 // cada pendência é um papelzinho preso na prancheta: faixa de cor, ícone, o que fazer, onde, e o botão
@@ -57,7 +57,7 @@ registrar('salao', {
         <div class="salao-esq">
           <section class="prancheta" aria-label="O que fazer agora">
             <div class="prancheta-cab"><img class="louro-p" src="img/louro-esq.webp?v=1" alt="" width="44" height="60"><div><h2>O que fazer agora</h2><p class="prancheta-sub">${l.length} ${l.length === 1 ? 'pendência' : 'pendências'} • em tempo real</p></div><img class="louro-p" src="img/louro-dir.webp?v=1" alt="" width="44" height="60"></div>
-            <div class="fila">${l.map(cartaoFila).join('') || '<div class="fila-vazia">Quando uma mesa pedir a conta, chamar ou um prato ficar pronto, aparece aqui.</div>'}</div></section>
+            <div class="fila">${l.map(cartaoFila).join('') || '<div class="fila-vazia">Tudo em dia. Quando uma mesa pedir a conta, chamar ou um prato ficar pronto, aparece aqui. Para abrir uma mesa, toque nela no mapa.</div>'}</div></section>
           <section class="ticket-dia" aria-label="Resumo do dia"><div class="ticket-cab"><h2>Resumo do dia</h2><span>${ico('calendario')}Hoje, ${hoje}</span></div>
             <div class="ticket-linha"><span>${ico('moedas')}Vendas (bruto)</span><b>${din(soma(loja, (v) => v.total - (v.servico || 0)))}</b></div>
             <div class="ticket-linha"><span>${ico('etiqueta')}Serviço (${db.config.servico}%)</span><b>${din(soma(loja, (v) => v.servico))}</b></div>
@@ -187,13 +187,13 @@ function telaComanda(c, titulo, voltar) {
       ${c.reserva ? `<div class="aviso reserva-mesa">${ico(c.reserva.restricoes ? 'alerta' : 'coroa')}<span>Reserva de ${t(c.reserva.nome)}${c.reserva.ocasiao ? ` · <b>${t(c.reserva.ocasiao)}</b>` : ''}${c.reserva.restricoes ? `<br><b>Restrições: ${t(c.reserva.restricoes)}</b>` : ''}</span></div>` : ''}
       ${c.rodizio ? avisoPausa(c) : ''}
       ${c.tipo === 'mesa' && tem('cartaoRodizio') ? `<div class="cartao-rod-mesa"><span>Cartão da mesa</span><button type="button" class="cartao-rod ${c.cartaoVerde ? 'verde' : 'vermelho'}" data-acao="cartao-rod" data-c="${c.id}" aria-pressed="${!!c.cartaoVerde}">${c.cartaoVerde ? 'Verde: quer mais' : 'Vermelho: pausa'}</button>${c.passou ? `<small>Último passe há ${tempo(c.passou)}</small>` : ''}</div>` : ''}
-      ${rasc.length ? `<section class="bloco"><div class="sec-tit"><h2>${lt('A enviar')}</h2><span>${rasc.length} ${rasc.length === 1 ? 'item' : 'itens'}</span></div><ul class="itens">${rasc.map((i) => linhaItem(c, i)).join('')}</ul></section>` : ''}
+      ${rasc.length ? `<section class="bloco"><div class="sec-tit"><h2>${lt('A enviar')}</h2><span>${rasc.length} ${rasc.length === 1 ? 'item' : 'itens'}</span></div>${livres.length ? '<p class="mudo a-enviar-dica">Ainda não foram para a cozinha. Toque em “Enviar para a cozinha” lá embaixo.</p>' : ''}<ul class="itens">${rasc.map((i) => linhaItem(c, i)).join('')}</ul></section>` : ''}
       <section class="bloco"><div class="sec-tit"><h2>${lt('Já pedido')}</h2><span>${enviados.length ? '' : 'nada ainda'}</span></div><ul class="itens">${enviados.map((i) => linhaItem(c, i)).join('')}</ul></section>
       ${c.tipo === 'mesa' && tem('comandaIndividual') ? `<section class="bloco"><div class="sec-tit"><h2>${lt('Cartões nesta mesa')}</h2><span>cada pessoa paga o seu</span></div>
         <div class="cartoes-abertos">${cartoes.map((x) => `<a class="cartao-ind" href="#cartao/${x.cartao}"><b>${x.cartao}</b><small>${t(x.nome || '')}</small><em>${dinCurto(conta(x).total)}</em></a>`).join('')}<button type="button" class="cartao-ind novo" data-acao="abrir-cartao" data-mesa="${c.mesa}"><b>+</b><small>Abrir cartão</small></button></div></section>` : ''}
       <section class="totais">${linhasTotais(c, v)}</section></div>
       <div class="barra-acoes">
-        ${c.perdido ? '' : `<button type="button" class="bt" data-acao="cardapio-pick" data-c="${c.id}">${ico('mais2')}Itens</button>`}
+        ${c.perdido ? '' : `<button type="button" class="bt" data-acao="cardapio-pick" data-c="${c.id}">${ico('mais2')}Adicionar</button>`}
         ${livres.length ? `<button type="button" class="bt cheio grande" data-acao="enviar" data-c="${c.id}">${ico('chef')}Enviar para a cozinha (${livres.reduce((s, i) => s + i.qtd, 0)})</button>`
           : prox >= 0 ? `<button type="button" class="bt cheio grande" data-acao="liberar-etapa" data-c="${c.id}">${ico('chef')}Liberar próxima etapa: ${ETAPAS[prox][1]}</button>`
             : `<button type="button" class="bt cheio grande" data-acao="pre-conta" data-c="${c.id}">${ico('conta')}Conta · ${dinCurto(v.total)}</button>`}
@@ -226,7 +226,7 @@ registrar('mesa', {
           ${tiposRodizio(R).map(([k, nome]) => `<div class="rod-linha"><span><b>${nome}</b><small>${Number(R[k]) ? `${din(R[k])} por pessoa` : 'sem cobrança'}</small></span><div class="qtd"><button type="button" class="bt-ico" data-rmenos="${k}" aria-label="Menos ${nome}">−</button><b data-rq="${k}">${k === 'adulto' ? 2 : 0}</b><button type="button" class="bt-ico" data-rmais="${k}" aria-label="Mais ${nome}">+</button></div></div>`).join('')}
           <p class="rod-total" data-rtotal></p>
           <div class="linha-bts"><button type="button" class="bt cheio grande" data-acao="abrir-rodizio" data-n="${n}">Abrir no rodízio</button></div>
-          <p class="mudo" style="margin-top:14px">Ou sem rodízio (à la carte): quantas pessoas?</p></div>` : '<p>Quantas pessoas?</p>'}
+          <p class="mudo" style="margin-top:14px">Ou sem rodízio (à la carte): quantas pessoas?</p></div>` : '<p>Quantas pessoas? <small class="mudo">Toque no número e a mesa abre na hora.</small></p>'}
         <div class="pessoas">${[1, 2, 3, 4, 5, 6, 8, 10].map((p) => `<button type="button" class="chip" data-acao="abrir-mesa" data-n="${n}" data-p="${p}">${p}</button>`).join('')}</div></div>
       ${fechadas.length ? `<section class="bloco"><div class="sec-tit"><h2>Fechadas hoje nesta mesa</h2></div><div class="lista-bts">${fechadas.slice(0, 3).map((v) => `<button type="button" class="bt" data-acao="ver-venda" data-v="${t(v.id)}">${ico('relogio')}${new Date(v.ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · ${din(v.total)}${v.garcom ? ` · ${t(v.garcom)}` : ''}</button>`).join('')}</div></section>` : ''}`;
     }
@@ -447,7 +447,11 @@ export function abrirSeletor(c, aoTerminar) {
   const grade = () => lista().map((p) => { const pr = precoNaComanda(c, p), hoje = dia?.prod === p.id, ft = foraTurno(p), ok = p.ativo && !ft;
     return `<button type="button" class="prod ${p.ativo ? '' : 'esgotado'} ${ft ? 'fora-turno' : ''} ${hoje ? 'prato-dia' : ''}" data-p="${p.id}" ${ok ? '' : 'disabled'}>
       ${p.foto ? `<img src="${t(p.foto)}" alt="" loading="lazy" onerror="this.remove()">` : ''}<span><b>${t(p.nome)}</b><em>${ft ? `Só no ${nomeTurno(p)}` : p.ativo ? pr.txt : p.esgotouVitrine === ymd() ? 'Esgotou na vitrine' : 'Esgotado'}</em>${marcasProd(p, pr)}</span></button>`; }).join('');
-  const contagem = () => { const n = c.itens.filter((i) => i.status === 'rascunho').reduce((s, i) => s + i.qtd, 0); return n ? `Pronto · ${n} a enviar` : 'Pronto'; };
+  const naMesa = ['mesa', 'cartao', 'evento'].includes(c.tipo);
+  const contagem = () => { const n = c.itens.filter((i) => i.status === 'rascunho').reduce((s, i) => s + i.qtd, 0); return naMesa ? (n ? 'Voltar à comanda' : 'Pronto') : n ? `Pronto · ${n} a enviar` : 'Pronto'; };
+  // na mesa, o garçom já manda para a cozinha daqui, sem precisar voltar à comanda
+  const aEnviar = () => c.itens.filter((i) => i.status === 'rascunho' && !i.segura).reduce((s, i) => s + i.qtd, 0);
+  const btEnviar = () => `${ico('chef')}Enviar para a cozinha (${aEnviar()})`;
   const pd = dia?.prod && db.produtos.find((x) => x.id === dia.prod && !foraTurno(x));
   // rodízio com pedido por rodada: o garçom vê quantas peças ainda cabem nesta rodada (geral e por categoria)
   const rodada = () => { if (!(c.rodizio && M.has('rodizio') && M.has('rodadas'))) return ''; const R = L.rodizio || {}, n = pessoasAtivas(c), its = itensRodada(c), g = cabeNaRodadaCat(R, n, its, '', 0);
@@ -458,10 +462,13 @@ export function abrirSeletor(c, aoTerminar) {
       <label class="busca">${ico('busca')}<input type="search" data-busca placeholder="Buscar no cardápio" aria-label="Buscar no cardápio"></label>
       <div class="chips" role="tablist">${db.categorias.map((k) => `<button type="button" class="chip ${k.id === cat ? 'on' : ''}" data-cat="${k.id}">${t(k.nome)}</button>`).join('')}</div>
       <div class="grade-prod" data-grade>${grade()}</div>`,
-    pe: `<button type="button" class="bt cheio grande" data-fechar data-pronto>${contagem()}</button>`,
+    pe: naMesa ? `<button type="button" class="bt grande" data-fechar data-pronto>${contagem()}</button><button type="button" class="bt cheio grande" data-enviar-ja ${aEnviar() ? '' : 'style="display:none"'}>${btEnviar()}</button>`
+      : `<button type="button" class="bt cheio grande" data-fechar data-pronto>${contagem()}</button>`,
     aoFechar: aoTerminar,
-    aoAbrir: (f) => {
-      const redesenha = () => { $('[data-grade]', f).innerHTML = grade(); $('[data-pronto]', f).textContent = contagem(); const r = $('[data-rodada]', f); if (r) r.outerHTML = rodada(); };
+    aoAbrir: (f, fechar) => {
+      const ej = $('[data-enviar-ja]', f);
+      if (ej) ej.onclick = () => { const n = enviar(c); fechar(); avisoEnvio(c, n); };
+      const redesenha = () => { $('[data-grade]', f).innerHTML = grade(); $('[data-pronto]', f).textContent = contagem(); if (ej) { ej.style.display = aEnviar() ? '' : 'none'; ej.innerHTML = btEnviar(); } const r = $('[data-rodada]', f); if (r) r.outerHTML = rodada(); };
       $('[data-busca]', f).oninput = (e) => { busca = e.target.value; redesenha(); };
       $$('[data-cat]', f).forEach((b) => { b.onclick = () => { cat = b.dataset.cat; busca = ''; $('[data-busca]', f).value = ''; $$('[data-cat]', f).forEach((x) => x.classList.toggle('on', x === b)); redesenha(); }; });
       f.addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (b && f.contains(b) && !b.disabled) detalheItem(c, prod(b.dataset.p), () => redesenha()); });

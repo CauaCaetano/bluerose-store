@@ -154,3 +154,31 @@ body.tpl-cafeteria .prancheta-cab h2,body.tpl-cafeteria .ticket-cab h2{color:#F3
 body.tpl-cafeteria .prancheta-cab .prancheta-sub,body.tpl-cafeteria .ticket-cab span,body.tpl-cafeteria .ticket-cab small{color:#D9D1C2!important}
 body.tpl-cafeteria .cab-salao h1,body.tpl-cafeteria .cab-cozinha h1,body.tpl-cafeteria .cab-pedidos h1,body.tpl-cafeteria .cab-caixa h1,body.tpl-cafeteria .cab-gestao h1,body.tpl-cafeteria .cab-g h1{font-style:italic;text-transform:none!important}
 body.tpl-cafeteria .cab-salao .aqueduto-img,body.tpl-cafeteria .cab-pedidos .aqueduto-img,body.tpl-cafeteria .g-aqueduto,body.tpl-cafeteria .cx-aqueduto{height:74px!important;width:auto!important;max-width:none!important}
+/* cortes e sobreposições (16/11): no celular o desfoque do topo prendia a barra de abas em cima do logo; nome e endereço dos pedidos quebram linha em vez de cortar */
+@media (max-width:899px){body.tpl-cafeteria .topo{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
+body.tpl-cafeteria .kds .tk-tit b,body.tpl-cafeteria .kds .ticket.pd .tk-tit b{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere}
+body.tpl-cafeteria .kds .tk-tit small{white-space:normal!important;overflow:visible!important;align-items:flex-start!important}
+body.tpl-cafeteria .kds .tk-tit small .ico{flex:none;margin-top:2px}
+/* enfeites fixos do salão: o de cima desce para baixo do topo (antes ficava cortado por ele) e os dois passam por trás dos painéis */
+@media (min-width:900px){body.tpl-cafeteria .salao-dir::after{top:102px!important;height:96px!important;z-index:-1!important}
+body.tpl-cafeteria .salao-dir::before{z-index:-1!important}
+}
+/* placas: recorte pelo contorno da etiqueta de madeira (sem o fundo quadrado da imagem; o barbante fica) e texto que cabe */
+body.tpl-cafeteria .fita,body.tpl-cafeteria .fita.verde,body.tpl-cafeteria .g-fita,body.tpl-cafeteria .kds-col .placa,body.tpl-cafeteria .cab-comanda .fita-mesa,body.tpl-cafeteria .cab-conta .fita{clip-path:polygon(0 7px,2px 0,21px 0,22px 5px,calc(100% - 13px) 3px,100% 14px,100% 41px,calc(100% - 11px) 53px,0 54px)!important;max-width:100%;white-space:nowrap}
+body.tpl-cafeteria .kds-col .placa{font-size:13.5px!important;letter-spacing:.01em!important}
+/* molduras: some o fundo da foto acima da madeira (cantos quadrados), fica a moldura e o cabide do meio */
+body.tpl-cafeteria .prancheta,body.tpl-cafeteria .ticket-dia,body.tpl-cafeteria .comanda-papel,body.tpl-cafeteria .cartao-caixa{--mk:linear-gradient(#000 0 0) 0 100%/100% calc(100% - 18px) no-repeat,linear-gradient(90deg,transparent calc(3.4px + 35.7%),#000 0 calc(-3.6px + 64.8%),transparent 0) 0 8px/100% 11px no-repeat,linear-gradient(90deg,transparent calc(.6px + 47.3%),#000 0 calc(-.8px + 53.2%),transparent 0) 0 0/100% 10px no-repeat;-webkit-mask:var(--mk);mask:var(--mk)}
+/* "O que fazer agora": a prancheta não passa da coluna (antes invadia o título e os avisos do salão) e o detalhe do pedido quebra linha em vez de cortar */
+body.tpl-cafeteria .salao-esq>*{min-width:0}
+body.tpl-cafeteria .fila-txt{min-width:0}
+body.tpl-cafeteria .fila-txt span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;display:block!important;-webkit-line-clamp:unset!important}
+/* gestão: os quadros brancos ganham respiro por dentro (antes o texto encostava e passava da borda: primeiros passos, relatórios, DRE e outras) */
+body.tpl-cafeteria .gestao-corpo .bloco{padding:12px 14px}
+body.tpl-cafeteria .gestao-corpo .guia-passos{padding:0 14px 12px!important}
+body.tpl-cafeteria .g-cols{padding-right:6px}
+/* caixa: os três botões do cartão cabem na coluna (no celular "Fechar caixa" passava da tela) */
+body.tpl-cafeteria .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+body.tpl-cafeteria .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;text-align:center}
+/* pedidos: o texto do cartão "Cardápio online" não encosta na borda */
+body.tpl-cafeteria .link-cardapio{padding-right:12px!important}

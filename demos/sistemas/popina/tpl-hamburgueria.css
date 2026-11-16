@@ -156,3 +156,31 @@ body.tpl-hamburgueria .prancheta-cab h2,body.tpl-hamburgueria .ticket-cab h2,bod
 body.tpl-hamburgueria .cab-salao h1,body.tpl-hamburgueria .cab-cozinha h1,body.tpl-hamburgueria .cab-pedidos h1,body.tpl-hamburgueria .cab-caixa h1,body.tpl-hamburgueria .cab-gestao h1,body.tpl-hamburgueria .cab-g h1{text-transform:none!important;letter-spacing:-.01em!important}
 body.tpl-hamburgueria .prancheta-cab{box-shadow:0 6px 0 -2px #FFFDF8,0 9px 0 -2px #C8201E!important}
 body.tpl-hamburgueria .cab-salao .aqueduto-img,body.tpl-hamburgueria .cab-pedidos .aqueduto-img,body.tpl-hamburgueria .g-aqueduto,body.tpl-hamburgueria .cx-aqueduto{height:74px!important;width:auto!important;max-width:none!important}
+/* cortes e sobreposições (16/11): no celular o desfoque do topo prendia a barra de abas em cima do logo; nome e endereço dos pedidos quebram linha em vez de cortar */
+@media (max-width:899px){body.tpl-hamburgueria .topo{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
+body.tpl-hamburgueria .kds .tk-tit b,body.tpl-hamburgueria .kds .ticket.pd .tk-tit b{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere}
+body.tpl-hamburgueria .kds .tk-tit small{white-space:normal!important;overflow:visible!important;align-items:flex-start!important}
+body.tpl-hamburgueria .kds .tk-tit small .ico{flex:none;margin-top:2px}
+/* enfeites fixos do salão: o de cima desce para baixo do topo (antes ficava cortado por ele) e os dois passam por trás dos painéis */
+@media (min-width:900px){body.tpl-hamburgueria .salao-dir::after{top:102px!important;height:96px!important;z-index:-1!important}
+body.tpl-hamburgueria .salao-dir::before{z-index:-1!important}
+}
+/* placas: recorte pela borda vermelha arredondada (sem o fundo quadrado da imagem nas pontas) e texto que cabe */
+body.tpl-hamburgueria .fita,body.tpl-hamburgueria .fita.verde,body.tpl-hamburgueria .g-fita,body.tpl-hamburgueria .kds-col .placa,body.tpl-hamburgueria .cab-comanda .fita-mesa,body.tpl-hamburgueria .cab-conta .fita{clip-path:inset(4px 0 1px round 17px)!important;max-width:100%;white-space:nowrap}
+body.tpl-hamburgueria .kds-col .placa{font-size:13.5px!important;letter-spacing:.01em!important}
+/* prancheta: some o fundo da foto acima do aro (cantos quadrados e o pedaço vermelho), fica só o aro e o prendedor */
+body.tpl-hamburgueria .prancheta,body.tpl-hamburgueria .ticket-dia,body.tpl-hamburgueria .comanda-papel,body.tpl-hamburgueria .cartao-caixa{--mk:linear-gradient(#000 0 0) 0 100%/100% calc(100% - 21px) no-repeat,linear-gradient(90deg,transparent calc(3.9px + 35.1%),#000 0 calc(3.9px + 64.9%),transparent 0) 0 9px/100% 13px no-repeat,linear-gradient(90deg,transparent calc(.7px + 46.6%),#000 0 calc(-1.2px + 55.4%),transparent 0) 0 0/100% 10px no-repeat;-webkit-mask:var(--mk);mask:var(--mk)}
+/* "O que fazer agora": a prancheta não passa da coluna (antes invadia o título e os avisos do salão) e o detalhe do pedido quebra linha em vez de cortar */
+body.tpl-hamburgueria .salao-esq>*{min-width:0}
+body.tpl-hamburgueria .fila-txt{min-width:0}
+body.tpl-hamburgueria .fila-txt span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;display:block!important;-webkit-line-clamp:unset!important}
+/* gestão: os quadros brancos ganham respiro por dentro (antes o texto encostava e passava da borda: primeiros passos, relatórios, DRE e outras) */
+body.tpl-hamburgueria .gestao-corpo .bloco{padding:12px 14px}
+body.tpl-hamburgueria .gestao-corpo .guia-passos{padding:0 14px 12px!important}
+body.tpl-hamburgueria .g-cols{padding-right:6px}
+/* caixa: os três botões do cartão cabem na coluna (no celular "Fechar caixa" passava da tela) */
+body.tpl-hamburgueria .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+body.tpl-hamburgueria .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;text-align:center}
+/* pedidos: o texto do cartão "Cardápio online" não encosta na borda */
+body.tpl-hamburgueria .link-cardapio{padding-right:12px!important}

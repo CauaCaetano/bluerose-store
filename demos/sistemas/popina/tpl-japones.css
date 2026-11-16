@@ -147,3 +147,29 @@ body.tpl-japones .louro-img{content:url(img/tj-sakura2.webp?v=1);width:150px!imp
 
 /* celular: o gráfico e o botão grande da mesa não passam da tela (a fonte e as placas do japonês são mais largas) */
 @media (max-width:899px){body.tpl-japones .g-painel>*,body.tpl-japones .g-lado,body.tpl-japones .g-card{min-width:0;max-width:100%}body.tpl-japones .barra-acoes .bt.grande{min-width:0;white-space:normal}body.tpl-japones main{overflow-x:clip}}
+
+/* cortes e emendas (16/11): nada de enfeite cortado, texto encostado na ponta da placa ou caixa do recorte aparecendo */
+body.tpl-japones{--j-borda:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent),linear-gradient(transparent,#000 14%,#000 86%,transparent)}
+body.tpl-japones .fita,body.tpl-japones .fita.verde,body.tpl-japones .g-fita,body.tpl-japones .kds-col .placa,body.tpl-japones .cab-comanda .fita-mesa,body.tpl-japones .cab-conta .fita{padding-right:18px!important;
+  clip-path:polygon(0 35%,10px 35%,24px 0,30px 0,44px 35%,100% 35%,100% 100%,0 100%)!important}
+body.tpl-japones .gestao-nav .mg-grupo h3.g-fita{height:50px!important;padding-top:18px!important}
+body.tpl-japones .cab-salao .aqueduto-img,body.tpl-japones .cab-pedidos .aqueduto-img,body.tpl-japones .g-aqueduto,body.tpl-japones .cx-aqueduto,body.tpl-japones .folhas-img,body.tpl-japones .salao-dir::before,body.tpl-japones .topo::after{
+  -webkit-mask:var(--j-borda);-webkit-mask-composite:source-in;mask:var(--j-borda);mask-composite:intersect}
+body.tpl-japones .prancheta::after,body.tpl-japones .louro-img{-webkit-mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
+body.tpl-japones .gestao-corpo .bloco{padding:12px 13px!important}
+@keyframes tj-entra{from{opacity:0}}
+body.tpl-japones #tela.tela-entra>.salao-grade{animation-name:tj-entra}
+@media (max-width:899px){
+  body.tpl-japones .topo{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  body.tpl-japones .prancheta::after{right:-6px}
+}
+@media (max-width:899px){body.tpl-japones .fila-txt span{white-space:normal;overflow:visible;text-overflow:clip}}
+body.tpl-japones .cc-bts{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr)!important}body.tpl-japones .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1}
+body.tpl-japones .link-cardapio{padding:10px 14px!important}body.tpl-japones .pd-quadro .kds-col .placa{font-size:14px!important;letter-spacing:.03em!important}body.tpl-japones .kds .ticket.pd .tk-tit b{white-space:normal!important}
+body.tpl-japones .g-card h2.g-fita{font-size:17px!important;letter-spacing:.06em!important}
+/* moldura de shoji sem a faixa de papel acima da barra (ficam o gancho do meio e a cerejeira da prancheta) */
+body.tpl-japones .ticket-dia,body.tpl-japones .comanda-papel,body.tpl-japones .cartao-caixa{clip-path:polygon(-12px 17px,30% 17px,38% 1px,62% 1px,70% 17px,calc(100% + 12px) 17px,calc(100% + 12px) calc(100% + 30px),-12px calc(100% + 30px))}
+body.tpl-japones .prancheta{clip-path:polygon(-12px 17px,30% 17px,38% 1px,62% 1px,70% 17px,calc(100% - 130px) 17px,calc(100% - 50px) -44px,calc(100% + 26px) -44px,calc(100% + 26px) calc(100% + 30px),-12px calc(100% + 30px))}
+@media (max-width:899px){body.tpl-japones .salao-grade{grid-template-columns:minmax(0,1fr)!important}body.tpl-japones .topo{background:rgba(255,253,248,.97)!important}}
+@media (max-width:899px){body.tpl-japones .fila-txt b{font-size:14px!important;letter-spacing:.02em!important}}
+@media (max-width:899px){body.tpl-japones .fila-item .bt{padding:0 10px!important;font-size:14.5px!important;letter-spacing:0!important}}

@@ -88,3 +88,11 @@ body.tpl-basico .folha{background:#fff!important}
 body.tpl-basico .folha-cab h2::before,body.tpl-basico .folha-cab h2::after{display:none!important}
 body.tpl-basico .folha-pe{background:#F9FAFB!important;border-top-color:var(--b-borda)!important}
 @media (max-width:899px){body.tpl-basico .nav{background:#fff!important;border-top:1px solid var(--b-borda)!important}body.tpl-basico .nav a.on{background:none!important;color:var(--b-cor)!important}}
+/* nada cortado: textos que quebram linha em vez de reticências, botões do caixa cabendo no cartão, respiro nos blocos */
+body.tpl-basico .fila-txt span,body.tpl-basico .kds .ticket .tk-tit b,body.tpl-basico .kds .ticket.pd .tk-tit b,body.tpl-basico .tk-tit small{white-space:normal!important;overflow:visible!important;overflow-wrap:anywhere}
+body.tpl-basico .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important}body.tpl-basico .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;padding:4px 6px!important}
+body.tpl-basico .gestao-corpo .bloco{padding:0 16px 12px!important}
+body.tpl-basico .mesa-sinal{top:6px!important;right:6px!important;width:30px!important;height:30px!important}body.tpl-basico .mesa-sinal .ico{width:17px;height:17px}
+body.tpl-basico .ticket-dia{padding:8px 16px 14px!important}
+body.tpl-basico .conta-det{padding-top:14px!important}
+body.tpl-basico .link-cardapio{padding:12px 14px!important;box-sizing:border-box;max-width:100%}body.tpl-basico .link-cardapio>*{min-width:0}

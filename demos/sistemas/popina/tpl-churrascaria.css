@@ -149,3 +149,32 @@ body.tpl-churrascaria .area-cab::after{content:"";position:absolute;left:150px;w
   body.tpl-churrascaria .salao-dir::after{content:"";position:fixed;right:0;top:58px;width:250px;height:128px;background:url(img/tc-espetos.webp?v=1) right top/contain no-repeat;pointer-events:none;z-index:0}
   body.tpl-churrascaria main>*{position:relative;z-index:1}
 }
+
+/* cortes e emendas (16/11): placa sem o quadrado de papel nos cantos, faixa de couro presa à placa, espetos abaixo do topo */
+body.tpl-churrascaria .fita,body.tpl-churrascaria .fita.verde,body.tpl-churrascaria .g-fita,body.tpl-churrascaria .kds-col .placa,body.tpl-churrascaria .cab-comanda .fita-mesa,body.tpl-churrascaria .cab-conta .fita{padding:0 10px!important;
+  clip-path:polygon(11px 1px,calc(100% - 11px) 1px,100% 27%,100% 73%,calc(100% - 11px) calc(100% - 1px),11px calc(100% - 1px),0 73%,0 27%)!important}
+body.tpl-churrascaria .area-cab{position:relative;z-index:0}
+body.tpl-churrascaria .area-cab .fita{order:0;position:relative;z-index:1;flex:none}
+body.tpl-churrascaria .area-cab>span{order:2}
+body.tpl-churrascaria .area-cab::after{position:relative;left:auto;top:auto;order:1;flex:0 1 150px;min-width:0;margin:13px auto 0 -18px;height:28px;z-index:0}
+body.tpl-churrascaria .gestao-corpo .bloco{padding:12px 13px!important}
+@media (min-width:900px){
+  body.tpl-churrascaria .salao-dir::after{top:100px;height:100px;-webkit-mask:linear-gradient(90deg,transparent,#000 16%),linear-gradient(transparent,#000 14%,#000 86%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 16%),linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-composite:intersect}
+  body.tpl-churrascaria .salao-dir::before{-webkit-mask:linear-gradient(90deg,transparent,#000 22%),linear-gradient(transparent,#000 30%);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 22%),linear-gradient(transparent,#000 30%);mask-composite:intersect}
+}
+/* a entrada da tela com deslize (translate) prende os enfeites fixos na coluna; no salão ela entra só com o fade */
+@keyframes tc-entra{from{opacity:0}}
+body.tpl-churrascaria #tela.tela-entra>.salao-grade{animation-name:tc-entra}
+@media (max-width:899px){
+  body.tpl-churrascaria .topo{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  body.tpl-churrascaria .area-cab::after{display:none}
+}
+@media (max-width:899px){body.tpl-churrascaria .fila-txt span{white-space:normal;overflow:visible;text-overflow:clip}}
+body.tpl-churrascaria .cc-bts{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr)!important}body.tpl-churrascaria .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1}
+body.tpl-churrascaria .link-cardapio{padding:10px 14px!important}body.tpl-churrascaria .pd-quadro .kds-col .placa{font-size:14px!important;letter-spacing:.03em!important}body.tpl-churrascaria .kds .ticket.pd .tk-tit b{white-space:normal!important}
+/* moldura sem a faixa de papel por cima da madeira (fica só o enfeite do meio) */
+body.tpl-churrascaria .prancheta,body.tpl-churrascaria .ticket-dia,body.tpl-churrascaria .comanda-papel,body.tpl-churrascaria .cartao-caixa{clip-path:polygon(-12px 12px,33% 12px,40% 0,60% 0,67% 12px,calc(100% + 12px) 12px,calc(100% + 12px) calc(100% + 30px),-12px calc(100% + 30px))}
+@media (min-width:900px){body.tpl-churrascaria .pd-quadro .kds-col .placa{font-size:13px!important;letter-spacing:0!important}}
+@media (max-width:899px){body.tpl-churrascaria .salao-grade{grid-template-columns:minmax(0,1fr)!important}body.tpl-churrascaria .topo{background:rgba(255,253,248,.97)!important}}
+@media (max-width:899px){body.tpl-churrascaria .fila-txt b{font-size:14px!important;letter-spacing:.02em!important}}
+@media (max-width:899px){body.tpl-churrascaria .fila-item .bt{padding:0 10px!important;font-size:14.5px!important;letter-spacing:0!important}}

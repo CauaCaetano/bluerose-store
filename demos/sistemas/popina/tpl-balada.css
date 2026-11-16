@@ -169,3 +169,36 @@ body.tpl-balada .bt-tela,body.tpl-balada .cab-cozinha .bt-tela{color:#F2EEFF!imp
 body.tpl-balada .cab-salao .aqueduto-img,body.tpl-balada .cab-pedidos .aqueduto-img,body.tpl-balada .g-aqueduto,body.tpl-balada .cx-aqueduto{height:74px!important;width:auto!important;max-width:none!important}
 /* títulos de seção soltos no fundo escuro da gestão (camarotes, portaria): texto claro */
 body.tpl-balada .gestao-corpo>.sec-tit h2{color:#F2EEFF!important}body.tpl-balada .gestao-corpo>.sec-tit span{color:#CFC8F5!important}
+/* cortes e sobreposições (16/11): no celular o desfoque do topo prendia a barra de abas em cima do logo; nome e endereço dos pedidos quebram linha em vez de cortar */
+@media (max-width:899px){body.tpl-balada .topo{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
+body.tpl-balada .kds .tk-tit b,body.tpl-balada .kds .ticket.pd .tk-tit b{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere}
+body.tpl-balada .kds .tk-tit small{white-space:normal!important;overflow:visible!important;align-items:flex-start!important}
+body.tpl-balada .kds .tk-tit small .ico{flex:none;margin-top:2px}
+/* placas de néon: cantos arredondados como o néon (sem o fundo quadrado do recorte) e texto que cabe sem entrar no ícone */
+body.tpl-balada .fita,body.tpl-balada .fita.verde,body.tpl-balada .g-fita,body.tpl-balada .kds-col .placa,body.tpl-balada .cab-comanda .fita-mesa,body.tpl-balada .cab-conta .fita{clip-path:inset(0 round 16px)!important;max-width:100%;white-space:nowrap}
+body.tpl-balada .kds-col .placa{font-size:13.5px!important;letter-spacing:.01em!important}
+/* taças do salão: abaixo do topo (antes ficavam cortadas por ele) e atrás dos painéis */
+@media (min-width:900px){body.tpl-balada .salao-dir::after{top:102px!important;height:96px!important;z-index:-1!important;background-position:center!important}
+body.tpl-balada .salao-dir::before{z-index:-1!important}
+}
+/* "O que fazer agora": a prancheta não passa da coluna (antes invadia o título e os avisos do salão) e o detalhe do pedido quebra linha em vez de cortar */
+body.tpl-balada .salao-esq>*{min-width:0}
+body.tpl-balada .fila-txt{min-width:0}
+body.tpl-balada .fila-txt span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;display:block!important;-webkit-line-clamp:unset!important}
+/* gestão: os quadros brancos ganham respiro por dentro (antes o texto encostava e passava da borda: primeiros passos, relatórios, DRE e outras) */
+body.tpl-balada .gestao-corpo .bloco{padding:12px 14px}
+body.tpl-balada .gestao-corpo .guia-passos{padding:0 14px 12px!important}
+body.tpl-balada .g-cols{padding-right:6px}
+/* caixa: os três botões do cartão cabem na coluna (no celular "Fechar caixa" passava da tela) */
+body.tpl-balada .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+body.tpl-balada .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;text-align:center}
+/* pedidos: o texto do cartão "Cardápio online" não encosta na borda */
+body.tpl-balada .link-cardapio{padding-right:12px!important}
+
+/* 16/11: leitura nos quadros claros da Balada (texto claro sumia no branco) */
+body.tpl-balada .r4-card,body.tpl-balada .r4-card h2,body.tpl-balada .r4-pend b,body.tpl-balada .r4-meta>div,body.tpl-balada .r4-meta b{color:#24163D!important}
+body.tpl-balada .r4-card h2 a,body.tpl-balada .r4-pend em{color:#B0127A!important}
+body.tpl-balada .linha-bts .bt.claro,body.tpl-balada .bt.claro{color:#24163D!important}
+body.tpl-balada .bt.claro .ico{color:#B0127A}
+body.tpl-balada .salao-funcoes .bt{color:#24163D!important;opacity:1!important}body.tpl-balada .salao-funcoes .bt .ico{color:#B0127A}

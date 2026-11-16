@@ -1,14 +1,15 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=23';
-import './cozinha.js?v=23';
-import './caixa.js?v=23';
-import './pedidos.js?v=23';
-import './mais.js?v=23';
-import './gestao.js?v=23';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=23';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=23';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=23';
-import { abrirEscolha } from './escolha.js?v=23';
+import './salao.js?v=24';
+import './cozinha.js?v=24';
+import './caixa.js?v=24';
+import './pedidos.js?v=24';
+import './mais.js?v=24';
+import './gestao.js?v=24';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=24';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=24';
+import { ico, folha, $, $$, toast, bip, confirma } from './ui.js?v=24';
+import './ajuda.js?v=24';
+import { abrirEscolha } from './escolha.js?v=24';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -35,7 +36,7 @@ $('.topo-perfil').onclick = () => folha({ titulo: db.config.nome || 'Conta', cor
   <a class="bt" href="#mais/conta" data-fechar>${ico('pessoas')}Minha conta e equipe</a>
   ${real ? '' : `<button type="button" class="bt" data-m="recomecar">${ico('troca')}Recomeçar a demonstração</button>`}</div>`,
 aoAbrir: (f, fechar) => $$('[data-m]', f).forEach((b) => { b.onclick = () => { fechar(); const m = b.dataset.m;
-  if (m === 'recomecar') { recomecar(); ir('salao'); toast('Demonstração recomeçada'); }
+  if (m === 'recomecar') confirma('Recomeçar a demonstração? Tudo o que você fez aqui volta ao exemplo do início.', 'Recomeçar', true).then((ok) => { if (ok) { recomecar(); ir('salao'); toast('Demonstração recomeçada'); } });
   else { const x = document.createElement('button'); x.dataset.acao = m === 'nova' ? 'nova-comanda' : 'planta'; x.hidden = true; document.body.append(x); x.click(); x.remove(); } }; }) });
 function contadores() {
   const fila = db.comandas.reduce((s, c) => s + c.itens.filter((i) => i.status === 'pronto').length, 0) + db.chamados.filter((x) => !x.atendido).length + db.pedidosQR.length + db.comandas.filter((c) => c.pediuConta).length;
@@ -86,13 +87,13 @@ if (!real) {
     <a href="${linkCardapio('mesa=4')}">${ico('qr')}Cardápio do cliente</a>
     <button type="button" data-recomecar>Recomeçar</button>`;
   document.body.prepend(f);
-  $('[data-recomecar]', f).onclick = () => { recomecar(); ir('salao'); toast('Demonstração recomeçada'); };
+  $('[data-recomecar]', f).onclick = async () => { if (!(await confirma('Recomeçar a demonstração? Tudo o que você fez aqui volta ao exemplo do início.', 'Recomeçar', true))) return; recomecar(); ir('salao'); toast('Demonstração recomeçada'); };
 }
 document.body.addEventListener('pointerdown', () => { document.body.dataset.tocou = '1'; }, { once: true });
 
 // primeira entrada do dono: escolher o tipo da casa (template); só depois pergunta o papel do aparelho
 const escolher = !lojaCfg().escolhido && !q.get('papel') && (!papel() || papel() === 'dono');
-const perguntarPapel = () => folha({ titulo: 'Quem vai usar este aparelho?', corpo: `<p class="mudo">Cada celular, tablet ou computador do restaurante abre direto na tela que precisa. Dá para trocar depois em Mais › Este aparelho.</p>
+const perguntarPapel = () => folha({ titulo: 'Quem vai usar este aparelho?', corpo: `<p class="mudo">Cada celular, tablet ou computador do restaurante abre direto na tela que precisa. Dá para trocar depois em Gestão › Este aparelho.</p>
     <div class="papeis">${Object.entries(PAPEIS).map(([k, [nome]]) => `<button type="button" class="papel" data-p="${k}"><b>${nome}</b><small>${{ garcom: 'Celular do garçom: fila do que fazer e as mesas', cozinha: 'Tela da cozinha e do bar', caixa: 'Computador do caixa: fechar contas', dono: 'Vê tudo, relatórios e ajustes' }[k]}</small></button>`).join('')}</div>`,
   aoAbrir: (fo, fechar) => $$('[data-p]', fo).forEach((b) => { b.onclick = () => { setPapel(b.dataset.p); fechar(); ir(PAPEIS[b.dataset.p][1]); }; }) });
 if (escolher) setTimeout(() => abrirEscolha({ primeira: true, aoFechar: () => { if (!papel() && !q.get('papel')) setTimeout(perguntarPapel, 250); } }), 200);

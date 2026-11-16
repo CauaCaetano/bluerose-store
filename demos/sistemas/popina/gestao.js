@@ -1,18 +1,18 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=23';
-import { acao, ir } from './nucleo.js?v=23';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=23';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=23';
-import { situacao, textoHorarios } from './opcoes.js?v=23';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=24';
+import { acao, ir } from './nucleo.js?v=24';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=24';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=24';
+import { situacao, textoHorarios } from './opcoes.js?v=24';
 import { qrSVG } from '../base/qr.js';
-import { abrirEscolha } from './escolha.js?v=23';
-import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=23';
-import './funcoes.js?v=23';
-import { HUB_FINANCEIRO } from './financeiro.js?v=23';
-import { HUB_PRODUCAO } from './producao.js?v=23';
-import { HUB_OPERACAO } from './operacao.js?v=23';
-import { GRUPOS } from './mais.js?v=23';
+import { abrirEscolha } from './escolha.js?v=24';
+import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=24';
+import './funcoes.js?v=24';
+import { HUB_FINANCEIRO } from './financeiro.js?v=24';
+import { HUB_PRODUCAO } from './producao.js?v=24';
+import { HUB_OPERACAO } from './operacao.js?v=24';
+import { GRUPOS } from './mais.js?v=24';
 // financeiro e produção entram no menu da Gestão antes de "Equipe e conta"
 if (!GRUPOS.some((g) => g[0] === 'Financeiro')) {
   const i = GRUPOS.findIndex((g) => g[0] === 'Equipe e conta');
@@ -39,7 +39,10 @@ function reduzir(arq, W, H, q = 0.74) {
 }
 
 // estilos do cardápio do cliente: o restaurante escolhe a cara (a cor e o logo são sempre os dele)
-const ESTILOS = [['rustico', 'Rústico', 'Pergaminho, louros e mosaico. Cantina, pizzaria, comida caseira'], ['moderno', 'Moderno', 'Limpo, com a cor do seu logo. Hamburgueria, café, japonês, açaí'],
+// 'igual' = o cardápio segue o template do sistema (padrão); os outros deixam o cardápio com outro visual
+const ESTILO_DO_TPL = { basico: 'moderno', taverna: 'rustico' };
+const estiloAtual = (L) => (!L.estilo || L.estilo === 'igual' || L.estilo === (ESTILO_DO_TPL[L.template] || L.template) ? 'igual' : L.estilo);
+const ESTILOS = [['igual', 'Igual ao template', 'O cardápio do cliente com o mesmo visual das telas do sistema (recomendado)'], ['rustico', 'Rústico', 'Pergaminho, louros e mosaico. Cantina, pizzaria, comida caseira'], ['moderno', 'Moderno', 'Limpo, com a cor do seu logo. Hamburgueria, café, japonês, açaí'],
   ['luxo', 'Luxo', 'Mármore claro e dourado. Restaurante fino'], ['realeza', 'Realeza', 'Veludo azul, ouro e carmesim. Casa clássica'], ['japones', 'Japonês', 'Papel washi, vermelho laca e cerejeira'],
   ['italiano', 'Italiano', 'Toalha xadrez, oliveira e cerâmica pintada'], ['churrascaria', 'Churrascaria', 'Papel kraft, madeira e brasa'],
   ['mexicano', 'Mexicano', 'Talavera, pimenta e cempasúchil'], ['pizzaria', 'Pizzaria', 'Forno a lenha, madeira e lousa'],
@@ -113,8 +116,8 @@ TELAS_MAIS.aparencia = () => {
       <label class="campo"><span>Nome do restaurante</span><input name="nome" value="${t(c.nome)}" maxlength="60"></label>
       <label class="campo"><span>Frase de boas-vindas</span><input name="boasVindas" value="${t(L.boasVindas)}" maxlength="120" placeholder="Ex.: Pizza no forno a lenha desde sempre"></label>
       <div class="campo"><span>Cor do restaurante</span><div class="cores">${CORES.map((x) => `<button type="button" class="cor ${x.toLowerCase() === String(L.cor).toLowerCase() ? 'on' : ''}" data-cor="${x}" style="background:${x}" aria-label="Cor ${x}"></button>`).join('')}<label class="cor livre" title="Outra cor"><input type="color" name="cor" value="${t(L.cor)}"></label></div></div>
-      <div class="campo"><span>Estilo do cardápio</span><div class="estilos">${ESTILOS.map(([k, n, d]) => `<button type="button" class="estilo ${(L.estilo || 'rustico') === k ? 'on' : ''}" data-estilo="${k}"><b>${n}</b><small>${d}</small></button>`).join('')}</div></div>
-      <div class="campo"><span>Fundo do cardápio</span><div class="seg"><button type="button" data-tema="claro" aria-pressed="${L.tema !== 'escuro'}">Claro</button><button type="button" data-tema="escuro" aria-pressed="${L.tema === 'escuro'}">Escuro</button></div><small class="mudo">No estilo rústico o fundo é sempre o pergaminho.</small></div>
+      <div class="campo"><span>Visual do cardápio do cliente</span><small class="mudo">Já vem igual ao template escolhido. Escolha outro só se quiser o cardápio diferente das telas do sistema.</small><div class="estilos">${ESTILOS.map(([k, n, d]) => `<button type="button" class="estilo ${estiloAtual(L) === k ? 'on' : ''}" data-estilo="${k}"><b>${n}</b><small>${d}</small></button>`).join('')}</div></div>
+      <div class="campo"><span>Fundo do cardápio</span><div class="seg"><button type="button" data-tema="claro" aria-pressed="${L.tema !== 'escuro'}">Claro</button><button type="button" data-tema="escuro" aria-pressed="${L.tema === 'escuro'}">Escuro</button></div><small class="mudo">O fundo escuro vale para o visual Moderno (template Básico); os outros templates usam o fundo do próprio template.</small></div>
       <label class="interruptor bloco-int"><input type="checkbox" name="creditos" ${L.creditos !== false ? 'checked' : ''}><span></span>Mostrar “Cardápio feito com o Popina” no rodapé</label>
     </section>
     ${planoMarca()}
@@ -160,7 +163,7 @@ TELAS_MAIS.loja = () => {
 };
 MONTAR.loja = (el) => {
   const f = $('[data-loja]', el); if (!f) return;
-  let cor = lojaCfg().cor, temaSel = lojaCfg().tema, estiloSel = lojaCfg().estilo || 'rustico';
+  let cor = lojaCfg().cor, temaSel = lojaCfg().tema, estiloSel = lojaCfg().estilo || 'igual';
   const horarios = () => $$('[data-dia]', f).map((li) => $$('.turno', li).map((tu) => [$('[data-a]', tu).value, $('[data-f]', tu).value]).filter(([a, b]) => a && b));
   f.addEventListener('click', async (e) => {
     const b = e.target.closest('button'); if (!b) return;

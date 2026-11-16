@@ -1,11 +1,11 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=23';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas, aplicarCota } from './opcoes.js?v=23';
-import { modulosAtivos } from './perfis.js?v=23';
-import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg, comemRodizio } from './precos.js?v=23';
-import { ico, folha, toast, $, $$ } from './ui.js?v=23';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=24';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas, aplicarCota } from './opcoes.js?v=24';
+import { modulosAtivos } from './perfis.js?v=24';
+import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg, comemRodizio } from './precos.js?v=24';
+import { ico, folha, toast, $, $$ } from './ui.js?v=24';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -33,7 +33,7 @@ async function rpc(fn, args) {
   if (!r.ok) throw new Error('rede');
   return r.json();
 }
-const lojaPadrao = () => ({ cor: '#B4532F', tema: 'claro', estilo: 'moderno', creditos: true, horarios: [], aceitaQR: true, delivery: true, retirada: true, pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], areas: [] });
+const lojaPadrao = () => ({ cor: '#B4532F', tema: 'claro', estilo: 'igual', creditos: true, horarios: [], aceitaQR: true, delivery: true, retirada: true, pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], areas: [] });
 async function daNuvem() {
   const d = await rpc('popina_cardapio', { p_espaco: R });
   if (d.erro) throw new Error(d.erro);
@@ -88,17 +88,28 @@ const api = R ? {
 };
 
 // ------------------------------------------------------------------ aparência do restaurante
+const VISUAIS = ['basico', 'taverna', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria', 'hamburgueria', 'pub', 'chines', 'balada', 'cafeteria'];
+const DO_ESTILO = { rustico: 'taverna', moderno: 'basico' };
+// estilo 'igual' (ou vazio) = o do template; um estilo conhecido = escolha do dono; restaurante antigo sem template nem estilo = rústico
+function visualCardapio(L) {
+  const e = DO_ESTILO[L.estilo] || L.estilo;
+  if (e !== 'igual' && VISUAIS.includes(e)) return e;
+  if (VISUAIS.includes(L.template)) return L.template;
+  return L.estilo === undefined ? 'taverna' : 'basico';
+}
 function tema() {
   const L = M.loja, cor = /^#[0-9a-f]{6}$/i.test(L.cor || '') ? L.cor : '#B4532F';
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(cor.slice(i, i + 2), 16)); const claro = (0.299 * r + 0.587 * g + 0.114 * b) > 165;
-  document.body.style.setProperty('--marca', cor); document.body.style.setProperty('--marca-txt', claro ? '#1d1712' : '#fff');
-  // estilo escolhido pelo restaurante (só os conhecidos viram classe); no rústico o fundo é sempre o pergaminho
-  // luxo e realeza usam a base do moderno com a paleta e os ornamentos do template
-  const est = ['rustico', 'moderno', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria', 'hamburgueria', 'pub', 'chines', 'balada', 'cafeteria'].includes(L.estilo) ? L.estilo : (L.estilo === undefined ? 'rustico' : 'moderno');
-  document.body.classList.remove('est-rustico', 'est-moderno', 'est-luxo', 'est-realeza', 'est-japones', 'est-italiano', 'est-churrascaria', 'est-mexicano', 'est-pizzaria', 'est-hamburgueria', 'est-pub', 'est-chines', 'est-balada', 'est-cafeteria'); document.body.classList.add(`est-${est}`);
-  if (['luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria', 'hamburgueria', 'pub', 'chines', 'balada', 'cafeteria'].includes(est)) document.body.classList.add('est-moderno');
-  document.body.classList.toggle('escuro', L.tema === 'escuro' && est === 'moderno');
-  $('meta[name=theme-color]').content = cor;
+  // o cardápio usa o visual do template do sistema (o mesmo das telas da equipe); o dono pode escolher outro em Gestão › Aparência.
+  // Taverna = o rústico do conceito aprovado; Básico = o moderno, com a cor do restaurante; os outros 12 = cardapio-tpl.css (classe cv-<template>)
+  const v = visualCardapio(L), B = document.body.classList, tematico = v !== 'taverna' && v !== 'basico';
+  B.remove(...[...B].filter((c) => /^(est|cv)-/.test(c) || c === 'cv'));
+  B.add(v === 'taverna' ? 'est-rustico' : 'est-moderno');
+  if (tematico) B.add('cv', `cv-${v}`); else if (v === 'basico') B.add('cv-basico');
+  // a cor do restaurante vale no Básico e no Taverna; nos templates com paleta própria a cor é a do template (como nas telas do sistema)
+  if (tematico) { document.body.style.removeProperty('--marca'); document.body.style.removeProperty('--marca-txt'); } else { document.body.style.setProperty('--marca', cor); document.body.style.setProperty('--marca-txt', claro ? '#1d1712' : '#fff'); }
+  B.toggle('escuro', L.tema === 'escuro' && v === 'basico');
+  $('meta[name=theme-color]').content = (tematico && getComputedStyle(document.body).getPropertyValue('--t-barra-meta').trim()) || cor;
   document.title = `${M.nome} · Cardápio`;
 }
 const LOURO = '<svg class="louro" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20C9 15 12 10 13 3"/><path d="M8 15c-2.5 0-4-1.2-4.5-3 2.4-.4 4 .6 4.5 3zM10 11.5c-2.2-.6-3.3-2.1-3.3-3.9 2.2.2 3.4 1.6 3.3 3.9zM12 7.5c-1.6-1.1-2.1-2.8-1.7-4.4 1.9.8 2.5 2.4 1.7 4.4zM9.5 14.5c1-2.2 2.8-3.1 4.7-2.8-.9 2-2.6 3-4.7 2.8zM11.5 10.5c1.3-1.9 3-2.4 4.8-1.8-1.2 1.7-2.9 2.3-4.8 1.8z"/></svg>';

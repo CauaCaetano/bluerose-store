@@ -22,11 +22,11 @@ body.tpl-realeza .cab-salao h1,body.tpl-realeza .cab-cozinha h1,body.tpl-realeza
 body.tpl-realeza .cab-g p,body.tpl-realeza .cab-caixa p,body.tpl-realeza .cab-cozinha p{color:#E9D9AE!important}
 body.tpl-realeza .cab-salao .aqueduto-img,body.tpl-realeza .cab-pedidos .aqueduto-img,body.tpl-realeza .g-aqueduto,body.tpl-realeza .cx-aqueduto{content:url(img/tr-palacio.webp?v=1);mix-blend-mode:normal}
 body.tpl-realeza .folhas-img{display:none!important}
-body.tpl-realeza img[src*="louro-esq"]{content:url(img/tr-louro-esq.webp?v=1)}
-body.tpl-realeza img[src*="louro-dir"]{content:url(img/tr-louro-dir.webp?v=1)}
+body.tpl-realeza img[src*="louro-esq"]{content:url(img/tr-louro-esq2.webp?v=1)}
+body.tpl-realeza img[src*="louro-dir"]{content:url(img/tr-louro-dir2.webp?v=1)}
 /* painéis de pergaminho real com moldura de ouro */
 body.tpl-realeza .prancheta,body.tpl-realeza .ticket-dia,body.tpl-realeza .comanda-papel,body.tpl-realeza .conta-det,body.tpl-realeza .gestao-nav,body.tpl-realeza .g-card,body.tpl-realeza .cartao-caixa{
-  border-style:solid!important;border-width:30px!important;border-image:url(img/tr-moldura.webp?v=1) 46 stretch!important;border-radius:0!important;background:var(--r-perg) padding-box!important;box-shadow:0 14px 30px -18px rgba(0,0,0,.7)!important;color:var(--r-tinta)!important}
+  border-style:solid!important;border-width:30px!important;border-image:url(img/tr-moldura2.webp?v=1) 46 stretch!important;border-radius:0!important;background:var(--r-perg) padding-box!important;box-shadow:0 14px 30px -18px rgba(0,0,0,.7)!important;color:var(--r-tinta)!important}
 body.tpl-realeza .gestao-corpo .bloco,body.tpl-realeza .gestao-corpo .bloco-form,body.tpl-realeza .gestao-corpo .tabela-rolo,body.tpl-realeza .gestao-corpo .resumo-dia>*,body.tpl-realeza .link-cardapio,body.tpl-realeza .area{
   border:2px solid var(--r-ouro)!important;border-image:none!important;border-radius:12px!important;background:var(--r-perg)!important;box-shadow:inset 0 0 0 4px var(--r-perg),inset 0 0 0 5px #C9A04A,0 12px 26px -18px rgba(0,0,0,.7)!important;color:var(--r-tinta)!important}
 body.tpl-realeza .prancheta{position:relative;margin-top:60px!important;padding:0 2px 4px!important}
@@ -122,3 +122,22 @@ body.tpl-realeza .pd-quadro .placa span,body.tpl-realeza .kds-col .placa span{fo
 @media (max-width:899px){body.tpl-realeza .salao-grade,body.tpl-realeza .gestao{grid-template-columns:minmax(0,1fr)!important}body.tpl-realeza .salao-esq,body.tpl-realeza .gestao-corpo{min-width:0}body.tpl-realeza .prancheta,body.tpl-realeza .ticket-dia,body.tpl-realeza .g-card{box-sizing:border-box;max-width:100%;min-width:0}body.tpl-realeza .prancheta-cab .louro-p{width:28px!important;height:auto}body.tpl-realeza .ticket-cab{flex-wrap:wrap;gap:6px}body.tpl-realeza .g-card h2.g-fita,body.tpl-realeza .gestao-corpo .resumo-dia b{white-space:normal!important}}
 @media (max-width:899px){body.tpl-realeza .legenda{width:auto!important;margin-left:0!important}body.tpl-realeza .g-painel{grid-template-columns:minmax(0,1fr)!important}body.tpl-realeza .g-barras{overflow-x:auto}body.tpl-realeza .g-card h2.g-fita{max-width:100%;font-size:15px!important;border-width:0 40px 0 50px!important}}
 @media (max-width:899px){body.tpl-realeza .area-cab{flex-wrap:wrap;margin-left:-10px!important}body.tpl-realeza .area-cab span{margin-top:4px!important}body.tpl-realeza .area .fita{font-size:15px!important;border-width:0 44px 0 52px!important;height:48px}}
+/* fitas inteiras: faixa simétrica sem fundo, pontas e flores-de-lis completas dos dois lados (borda = 84px da imagem na escala da altura) */
+body.tpl-realeza .fita,body.tpl-realeza .fita.verde,body.tpl-realeza .g-fita,body.tpl-realeza .kds-col .placa,body.tpl-realeza .pd-quadro .placa,body.tpl-realeza .cab-comanda .fita-mesa,body.tpl-realeza .cab-conta .fita,body.tpl-realeza .ticket-cab h2{border-image:url(img/tr-faixa2.webp?v=1) 0 84 0 84 fill stretch!important;border-width:0 64px!important;padding:0 4px!important;box-sizing:border-box;max-width:100%}
+body.tpl-realeza .ticket-cab h2,body.tpl-realeza .gestao-nav .mg-grupo h3.g-fita{border-width:0 52px!important}
+body.tpl-realeza .pd-quadro .placa,body.tpl-realeza .kds-col .placa{border-width:0 55px!important}
+body.tpl-realeza .cab-conta .fita{border-width:0 57px!important}
+body.tpl-realeza .fila-txt span,body.tpl-realeza .kds .ticket .tk-tit b,body.tpl-realeza .kds .ticket.pd .tk-tit b,body.tpl-realeza .tk-tit small{white-space:normal!important;overflow:visible!important;overflow-wrap:anywhere}
+body.tpl-realeza .pd-quadro .placa,body.tpl-realeza .kds-col .placa{white-space:normal!important;text-align:center;line-height:1.1;justify-content:center;max-width:100%}
+@media (max-width:899px){body.tpl-realeza .area-cab{margin-left:0!important}body.tpl-realeza .area-cab>span{flex-basis:100%;margin:6px 0 0 6px!important}}
+body.tpl-realeza [data-tela=mesa] .barra-acoes{padding-bottom:48px!important}
+body.tpl-realeza .g-card h2.g-fita{white-space:nowrap!important;height:48px!important;font-size:15px!important;letter-spacing:.03em!important;border-width:0 54px!important;padding:0 4px!important}
+@media (max-width:899px){body.tpl-realeza .g-cols{padding-right:8px}body.tpl-realeza .g-cols small{font-size:9px!important;letter-spacing:-.02em;white-space:nowrap}}
+body.tpl-realeza .gestao-corpo .resumo-dia>*{padding-left:16px!important;padding-right:16px!important}
+body.tpl-realeza .gestao-corpo .bloco{padding:0 14px 12px!important}
+body.tpl-realeza .per-datas .campo>span,body.tpl-realeza .gestao-corpo>.campo>span{color:#E9D9AE!important}
+body.tpl-realeza .gestao-nav .mg-grupo h3.g-fita{margin-left:0!important;margin-right:0!important}
+body.tpl-realeza .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important}body.tpl-realeza .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;padding:4px 6px!important}
+@media (max-width:899px){body.tpl-realeza .cc-bts .bt{font-size:14px!important}}
+body.tpl-realeza .ticket-cab{flex-wrap:wrap;row-gap:4px;column-gap:8px}body.tpl-realeza .ticket-cab>*{min-width:0}
+@media (max-width:899px){body.tpl-realeza .area .fita{border-width:0 55px!important}}

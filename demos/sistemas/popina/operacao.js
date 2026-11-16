@@ -1,18 +1,18 @@
 // Popina · operação do dia a dia: pendências do dono (uma lista só com o que precisa de atenção hoje), metas do mês,
 // consumo interno e cortesias, divisão das gorjetas e manutenção dos equipamentos. Cada tela entra na Gestão (#mais/<id>).
 // Dados: db.consumoInterno, db.config.gorjeta, db.gorjetaPagas, db.config.metas e db.equipamentos.
-import { db, t, din, dinCurto, grava, r2, uid, prod, quemAgora, auditar, ouvir, consumoVenda, custoVenda, estoqueBaixo, insumo } from './loja.js?v=23';
-import { acao } from './nucleo.js?v=23';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=23';
-import { TELAS_MAIS, MONTAR, volta, TOPO_GESTAO } from './mais.js?v=23';
+import { db, t, din, dinCurto, grava, r2, uid, prod, quemAgora, auditar, ouvir, consumoVenda, custoVenda, estoqueBaixo, insumo } from './loja.js?v=24';
+import { acao } from './nucleo.js?v=24';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=24';
+import { TELAS_MAIS, MONTAR, volta, TOPO_GESTAO } from './mais.js?v=24';
 import { garantirFin, ymd, somaDias, dataCurta, contaPaga, restaConta, periodo, filtroPeriodo, ligaPeriodo, dre, conciliacaoPendente, clientesFiado, baixarEstoque, novaConta, pagarConta, zap, gerarRecorrentes,
-  esperadoDia, conferirDia, custoUnit, valorConferido, totalNota, fornecedor } from './financeiro.js?v=23';
-import { vencendo, rendimentoBaixo, custoUnRec, consumoProducao } from './producao.js?v=23';
+  esperadoDia, conferirDia, custoUnit, valorConferido, totalNota, fornecedor } from './financeiro.js?v=24';
+import { vencendo, rendimentoBaixo, custoUnRec, consumoProducao } from './producao.js?v=24';
 
 // entradas do hub da Gestão: [id, nome, ícone, detalhe]
 export const HUB_OPERACAO = [
   ['pendencias', 'Pendências de hoje', 'sino', 'Tudo o que precisa da sua atenção, num lugar só'],
-  ['metas', 'Metas do mês', 'grafico', 'Faturamento, ticket médio, CMV e a projeção do mês'],
+  ['metas', 'Metas do mês', 'grafico', 'Quanto vender no mês, gasto médio por conta, custo dos ingredientes (CMV) e a previsão'],
   ['consumo', 'Consumo interno e cortesias', 'cloche', 'Refeição da equipe, degustação, dono e cortesias'],
   ['gorjetas', 'Gorjetas e 10%', 'moedas', 'Quanto entrou e quanto fica para cada um'],
   ['manutencao', 'Manutenção', 'ajustes', 'Equipamentos, preventivas, defeitos e custos'],

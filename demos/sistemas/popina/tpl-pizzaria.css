@@ -156,3 +156,29 @@ body.tpl-pizzaria .cab-salao h1,body.tpl-pizzaria .cab-cozinha h1,body.tpl-pizza
 body.tpl-pizzaria .cab-salao .aqueduto-img,body.tpl-pizzaria .cab-pedidos .aqueduto-img,body.tpl-pizzaria .g-aqueduto,body.tpl-pizzaria .cx-aqueduto{height:78px!important;width:auto!important;max-width:none!important}
 @media (max-width:899px){body.tpl-pizzaria .fita,body.tpl-pizzaria .fita.verde,body.tpl-pizzaria .g-fita,body.tpl-pizzaria .kds-col .placa,body.tpl-pizzaria .cab-comanda .fita-mesa,body.tpl-pizzaria .cab-conta .fita{border-width:0 20px 0 48px!important;font-size:15px!important}}
 body.tpl-pizzaria .nav a.on{clip-path:polygon(2% 14%,7% 2%,95% 6%,100% 42%,97% 98%,4% 92%,0 58%)!important}
+
+/* cortes e emendas (16/11): pá de pizza sem o quadrado de papel em volta, enfeites sem a borda reta do recorte, fatia abaixo do topo */
+body.tpl-pizzaria{--p-borda:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent),linear-gradient(transparent,#000 12%,#000 88%,transparent)}
+body.tpl-pizzaria .fita,body.tpl-pizzaria .fita.verde,body.tpl-pizzaria .g-fita,body.tpl-pizzaria .kds-col .placa,body.tpl-pizzaria .cab-comanda .fita-mesa,body.tpl-pizzaria .cab-conta .fita{padding:0 8px!important;
+  clip-path:polygon(1px 35%,8px 19%,30px 17%,46px 22%,51px 3%,57px 0,calc(100% - 12px) 0,calc(100% - 2px) 15%,100% 35%,100% 65%,calc(100% - 2px) 85%,calc(100% - 12px) 100%,57px 100%,51px 97%,46px 80%,30px 84%,8px 82%,1px 66%)!important}
+body.tpl-pizzaria .cab-salao .aqueduto-img,body.tpl-pizzaria .cab-pedidos .aqueduto-img,body.tpl-pizzaria .g-aqueduto,body.tpl-pizzaria .cx-aqueduto{-webkit-mask:var(--p-borda);-webkit-mask-composite:source-in;mask:var(--p-borda);mask-composite:intersect}
+body.tpl-pizzaria .gestao-corpo .bloco{padding:12px 13px!important}
+@keyframes tp-entra{from{opacity:0}}
+body.tpl-pizzaria #tela.tela-entra>.salao-grade{animation-name:tp-entra}
+@media (min-width:900px){
+  body.tpl-pizzaria .salao-dir::after{top:100px;height:100px;-webkit-mask:linear-gradient(90deg,transparent,#000 16%),linear-gradient(transparent,#000 14%,#000 86%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 16%),linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-composite:intersect}
+  body.tpl-pizzaria .salao-dir::before{-webkit-mask:linear-gradient(90deg,transparent,#000 22%),linear-gradient(transparent,#000 30%);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 22%),linear-gradient(transparent,#000 30%);mask-composite:intersect}
+}
+@media (max-width:899px){
+  body.tpl-pizzaria .topo{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  body.tpl-pizzaria .fita,body.tpl-pizzaria .fita.verde,body.tpl-pizzaria .g-fita,body.tpl-pizzaria .kds-col .placa,body.tpl-pizzaria .cab-comanda .fita-mesa,body.tpl-pizzaria .cab-conta .fita{
+    clip-path:polygon(1px 35%,5px 19%,19px 17%,30px 22%,33px 3%,37px 0,calc(100% - 8px) 0,calc(100% - 1px) 15%,100% 35%,100% 65%,calc(100% - 1px) 85%,calc(100% - 8px) 100%,37px 100%,33px 97%,30px 80%,19px 84%,5px 82%,1px 66%)!important}
+}
+@media (max-width:899px){body.tpl-pizzaria .fila-txt span{white-space:normal;overflow:visible;text-overflow:clip}}
+body.tpl-pizzaria .cc-bts{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr)!important}body.tpl-pizzaria .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1}
+body.tpl-pizzaria .link-cardapio{padding:10px 14px!important}body.tpl-pizzaria .pd-quadro .kds-col .placa{font-size:14px!important;letter-spacing:.03em!important}body.tpl-pizzaria .kds .ticket.pd .tk-tit b{white-space:normal!important}
+body.tpl-pizzaria .g-card h2.g-fita{font-size:18px!important}
+@media (min-width:900px){body.tpl-pizzaria .pd-quadro .kds-col .placa{font-size:12px!important;letter-spacing:0!important}}
+@media (max-width:899px){body.tpl-pizzaria .salao-grade{grid-template-columns:minmax(0,1fr)!important}body.tpl-pizzaria .topo{background:rgba(255,253,248,.97)!important}}
+@media (max-width:899px){body.tpl-pizzaria .fila-txt b{font-size:14px!important;letter-spacing:.02em!important}}
+@media (max-width:899px){body.tpl-pizzaria .fila-item .bt{padding:0 10px!important;font-size:14.5px!important;letter-spacing:0!important}}

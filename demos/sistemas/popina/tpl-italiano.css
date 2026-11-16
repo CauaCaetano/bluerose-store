@@ -149,3 +149,11 @@ body.tpl-italiano .area-cab::after{content:"";position:absolute;left:150px;width
   body.tpl-italiano .salao-dir::after{content:"";position:fixed;right:0;top:58px;width:250px;height:128px;background:url(img/ti-ramo.webp?v=1) right top/contain no-repeat;pointer-events:none;z-index:0}
   body.tpl-italiano main>*{position:relative;z-index:1}
 }
+/* nada cortado: textos que quebram linha em vez de reticências, botões do caixa cabendo no cartão, respiro nos blocos */
+body.tpl-italiano .fila-txt span,body.tpl-italiano .kds .ticket .tk-tit b,body.tpl-italiano .kds .ticket.pd .tk-tit b,body.tpl-italiano .tk-tit small{white-space:normal!important;overflow:visible!important;overflow-wrap:anywhere}
+body.tpl-italiano .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important}body.tpl-italiano .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;padding:4px 6px!important}
+body.tpl-italiano .gestao-corpo .bloco{padding:0 16px 12px!important}
+body.tpl-italiano .salao-dir::before,body.tpl-italiano .salao-dir::after{z-index:-1!important}
+body.tpl-italiano .gestao-nav .g-fita{margin-left:0!important}
+body.tpl-italiano .link-cardapio{padding:12px 14px!important;box-sizing:border-box;max-width:100%}body.tpl-italiano .link-cardapio>*{min-width:0}
+body.tpl-italiano .gestao-corpo .resumo-dia>*{padding-left:16px!important;padding-right:16px!important}

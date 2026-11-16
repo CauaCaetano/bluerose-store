@@ -149,3 +149,29 @@ body.tpl-mexicano .area-cab::after{content:"";position:absolute;left:150px;width
   body.tpl-mexicano .salao-dir::after{content:"";position:fixed;right:0;top:58px;width:250px;height:128px;background:url(img/tm-sombrero.webp?v=1) right top/contain no-repeat;pointer-events:none;z-index:0}
   body.tpl-mexicano main>*{position:relative;z-index:1}
 }
+
+/* cortes e emendas (16/11): placa sem o quadrado de papel nos cantos, faixa de azulejo presa à placa, sombrero abaixo do topo */
+body.tpl-mexicano .fita,body.tpl-mexicano .fita.verde,body.tpl-mexicano .g-fita,body.tpl-mexicano .kds-col .placa,body.tpl-mexicano .cab-comanda .fita-mesa,body.tpl-mexicano .cab-conta .fita{padding:0 10px!important;
+  clip-path:polygon(15px 0,calc(100% - 15px) 0,100% 28%,100% 72%,calc(100% - 15px) 100%,15px 100%,0 72%,0 28%)!important}
+body.tpl-mexicano .area-cab{position:relative;z-index:0}
+body.tpl-mexicano .area-cab .fita{order:0;position:relative;z-index:1;flex:none}
+body.tpl-mexicano .area-cab>span{order:2}
+body.tpl-mexicano .area-cab::after{position:relative;left:auto;top:auto;order:1;flex:0 1 150px;min-width:0;margin:13px auto 0 -18px;height:28px;z-index:0}
+body.tpl-mexicano .gestao-corpo .bloco{padding:12px 13px!important}
+@keyframes tm-entra{from{opacity:0}}
+body.tpl-mexicano #tela.tela-entra>.salao-grade{animation-name:tm-entra}
+@media (min-width:900px){body.tpl-mexicano .salao-dir::after{top:100px;height:100px;-webkit-mask:linear-gradient(90deg,transparent,#000 16%),linear-gradient(transparent,#000 14%,#000 86%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 16%),linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-composite:intersect}
+  body.tpl-mexicano .salao-dir::before{-webkit-mask:linear-gradient(90deg,transparent,#000 18%),linear-gradient(transparent,#000 24%);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 18%),linear-gradient(transparent,#000 24%);mask-composite:intersect}}
+@media (max-width:899px){
+  body.tpl-mexicano .topo{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  body.tpl-mexicano .area-cab::after{display:none}
+}
+@media (max-width:899px){body.tpl-mexicano .fila-txt span{white-space:normal;overflow:visible;text-overflow:clip}}
+body.tpl-mexicano .cc-bts{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr)!important}body.tpl-mexicano .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1}
+body.tpl-mexicano .link-cardapio{padding:10px 14px!important}body.tpl-mexicano .pd-quadro .kds-col .placa{font-size:14px!important;letter-spacing:.03em!important}body.tpl-mexicano .kds .ticket.pd .tk-tit b{white-space:normal!important}
+/* moldura sem a faixa de papel por cima da madeira (fica só o enfeite do meio) */
+body.tpl-mexicano .prancheta,body.tpl-mexicano .ticket-dia,body.tpl-mexicano .comanda-papel,body.tpl-mexicano .cartao-caixa{clip-path:polygon(-12px 14px,32% 14px,38% 0,62% 0,68% 14px,calc(100% + 12px) 14px,calc(100% + 12px) calc(100% + 30px),-12px calc(100% + 30px))}
+@media (min-width:900px){body.tpl-mexicano .pd-quadro .kds-col .placa{font-size:13px!important;letter-spacing:0!important}}
+@media (max-width:899px){body.tpl-mexicano .salao-grade{grid-template-columns:minmax(0,1fr)!important}body.tpl-mexicano .topo{background:rgba(255,253,248,.97)!important}}
+@media (max-width:899px){body.tpl-mexicano .fila-txt b{font-size:14px!important;letter-spacing:.02em!important}}
+@media (max-width:899px){body.tpl-mexicano .fila-item .bt{padding:0 10px!important;font-size:14.5px!important;letter-spacing:0!important}}

@@ -1,14 +1,14 @@
 // Popina · caixa: contas abertas, fechar conta (serviço, desconto, dividir, pagar em partes), Pix com QR e o caixa do dia.
 import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2,
-  temCouvert, lojaCfg, marcar, darDesconto, regras, temPin, quemAgora, cancelarVenda, reabrirVenda, vendaDeHoje, ondeComanda, couvertLigado, tem, fidelidade, clientePorTel, darPremio } from './loja.js?v=23';
-import { registrar, acao, ir } from './nucleo.js?v=23';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=23';
-import { pix } from './pix.js?v=23';
+  temCouvert, lojaCfg, marcar, darDesconto, regras, temPin, quemAgora, cancelarVenda, reabrirVenda, vendaDeHoje, ondeComanda, couvertLigado, tem, fidelidade, clientePorTel, darPremio } from './loja.js?v=24';
+import { registrar, acao, ir } from './nucleo.js?v=24';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=24';
+import { pix } from './pix.js?v=24';
 import { qrSVG } from '../base/qr.js';
-import { linhaItem, abrirSeletor } from './salao.js?v=23';
-import { vencePremio } from './loja.js?v=23';
-import { dividirPorPessoa, linhasRodizio, cnpjValido, fmtCnpj, ymd } from './precos.js?v=23';
-import { FORMA_FIADO, pedirFiado, novaConta } from './financeiro.js?v=23';
+import { linhaItem, abrirSeletor } from './salao.js?v=24';
+import { vencePremio } from './loja.js?v=24';
+import { dividirPorPessoa, linhasRodizio, cnpjValido, fmtCnpj, ymd } from './precos.js?v=24';
+import { FORMA_FIADO, pedirFiado, novaConta } from './financeiro.js?v=24';
 
 // conta faturada para empresa (função ligada): fecha com CNPJ e razão social e vira conta a receber
 // (o fluxo de caixa deve tratar esta forma como o fiado: entra quando a conta a receber for paga, não na venda)
@@ -36,12 +36,12 @@ function painelCaixa() {
   const r = caixaResumo();
   const IF = { Dinheiro: 'dinheiro', Pix: 'pix' };
   return `<section class="cartao-caixa"><div class="cc-topo"><img class="cx-louro" src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74"><div><small>Caixa aberto há ${tempo(db.caixa.aberto)}${db.caixa.operador ? ` · ${t(db.caixa.operador)}` : ''}</small><b>${din(r.total)}</b><span>${r.vendas.length} vendas hoje</span></div><img class="cx-louro" src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></div>
-    <div class="cc-bts"><button type="button" class="bt" data-acao="mov" data-t="sangria">Sangria</button><button type="button" class="bt" data-acao="mov" data-t="suprimento">Suprimento</button><button type="button" class="bt escuro" data-acao="fechar-caixa">Fechar caixa</button></div>
+    <div class="cc-bts"><button type="button" class="bt" data-acao="mov" data-t="sangria" title="Sangria: tirar dinheiro da gaveta">Tirar dinheiro</button><button type="button" class="bt" data-acao="mov" data-t="suprimento" title="Suprimento: pôr dinheiro (troco) na gaveta">Pôr dinheiro</button><button type="button" class="bt escuro" data-acao="fechar-caixa">Fechar caixa</button></div>
     <div class="cc-formas">${Object.entries(r.porForma).map(([f, v]) => `<div>${ico(IF[f] || 'cartao')}<span>${t(f)}</span><b>${din(v)}</b></div>`).join('') || '<div><span>Sem vendas ainda</span></div>'}<div title="Troco ${dinCurto(db.caixa?.troco || 0)} + dinheiro ${dinCurto(r.porForma.Dinheiro || 0)}${r.suprimento ? ` + suprimento ${dinCurto(r.suprimento)}` : ''}${r.sangria ? ` − sangria ${dinCurto(r.sangria)}` : ''}">${ico('cofre')}<span>Na gaveta</span><b>${din(r.dinheiroNaGaveta)}</b></div></div></section>${hist}`;
 }
 function listaContas(sel) {
   return abertas().map((c) => { const v = conta(c);
-    return `<a class="conta-linha ${c.id === sel ? 'on' : ''} ${c.pediuConta ? 'pediu' : ''}" href="#caixa/${c.id}"><i class="cl-ico">${ico(ICO_TIPO[c.tipo] || 'sacola')}</i><div><b>${ONDE(c)}</b><small>${c.tipo === 'mesa' ? `${c.pessoas} pessoas · ` : c.cliente?.nome ? t(c.cliente.nome) + ' · ' : ''}${tempo(c.aberta)}${c.pediuConta ? ' · pediu a conta' : ''}</small></div><span>${din(v.total)}</span>${ico('dir')}</a>`; }).join('') || '<div class="vazio">Nenhuma conta aberta.</div>';
+    return `<a class="conta-linha ${c.id === sel ? 'on' : ''} ${c.pediuConta ? 'pediu' : ''}" href="#caixa/${c.id}"><i class="cl-ico">${ico(ICO_TIPO[c.tipo] || 'sacola')}</i><div><b>${ONDE(c)}</b><small>${c.tipo === 'mesa' ? `${c.pessoas} pessoas · ` : c.cliente?.nome ? t(c.cliente.nome) + ' · ' : ''}${tempo(c.aberta)}${c.pediuConta ? ' · pediu a conta' : ''}</small></div><span>${din(v.total)}</span>${ico('dir')}</a>`; }).join('') || '<div class="vazio">Nenhuma conta aberta agora. As mesas abertas pelo garçom aparecem aqui sozinhas.</div>';
 }
 function detalhe(c) {
   const v = conta(c), it = itensValidos(c);
@@ -65,7 +65,7 @@ function detalhe(c) {
       ${v.pago ? `<div class="pago"><span>Já pago (${c.pagamentos.map((p) => t(p.forma)).join(', ')})</span><b>${din(v.pago)}</b></div><div class="total falta"><span>Falta</span><b>${din(v.falta)}</b></div>` : ''}
     </section>
     ${blocoFidelidade(c)}
-    <div class="dividir"><button type="button" class="bt" data-acao="dividir" data-c="${c.id}">${ico('divide')}Dividir a conta</button><button type="button" class="bt" data-acao="imprimir-conta" data-c="${c.id}">${ico('impressora')}Pré-conta</button></div>
+    <div class="dividir"><button type="button" class="bt" data-acao="dividir" data-c="${c.id}">${ico('divide')}Dividir a conta</button><button type="button" class="bt" data-acao="imprimir-conta" data-c="${c.id}">${ico('impressora')}Imprimir a conta</button></div>
     ${v.falta <= 0.009 ? `<h2 class="h2-pagar">Tudo pago</h2><button type="button" class="bt cheio grande" style="width:100%" data-acao="concluir" data-c="${c.id}">${ico('check')}Concluir ${c.tipo === 'mesa' ? 'e liberar a mesa' : 'o pedido'}</button></div>` : `<h2 class="h2-pagar"><img src="img/c-louro-esq.webp?v=1" alt="" width="30" height="31">Receber ${din(v.falta)}<img src="img/c-louro-dir.webp?v=1" alt="" width="30" height="31"></h2>
     <div class="formas">${FORMAS.map(([f, i]) => `<button type="button" class="forma" data-acao="pagar" data-c="${c.id}" data-f="${f}">${ico(i)}<span>${f}</span></button>`).join('')}</div></div>`}`;
 }
@@ -76,7 +76,7 @@ registrar('caixa', {
     return `<div class="caixa ${c ? 'com-det' : ''}"><div class="caixa-lista">
         <header class="cab-tela cab-caixa"><div><h1><img src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74">Caixa<img src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></h1><p>${db.comandas.length} contas abertas</p></div><button type="button" class="bt cheio" data-acao="venda-rapida">${ico('mais2')}Venda rápida</button></header>
         ${painelCaixa()}<h2 class="cx-h2" title="Quem pediu a conta aparece primeiro"><img src="img/c-louro-esq.webp?v=1" alt="" width="30" height="31">Contas abertas<img src="img/c-louro-dir.webp?v=1" alt="" width="30" height="31"></h2><nav class="contas">${listaContas(c?.id)}</nav></div>
-      <div class="caixa-det">${c ? detalhe(c) : '<div class="vazio grande">Escolha uma conta para fechar.</div>'}</div></div>`;
+      <div class="caixa-det">${c ? detalhe(c) : '<div class="vazio grande"><b>Toque numa conta para cobrar.</b><br>Quem pediu a conta aparece primeiro na lista. Para vender sem mesa, use “Venda rápida”.</div>'}</div></div>`;
   },
 });
 acao('servico', (b) => { const c = comanda(b.dataset.c); c.servico = b.checked ?? !c.servico; marcar(c, 'servico', c.servico ? 'Voltou a cobrar o serviço' : 'Tirou o serviço'); grava(); });
@@ -200,9 +200,9 @@ function receberParte(c, forma, valor, extra, depois) {
     return;
   }
   if (forma === 'Pix') {
-    const cfg = db.config; if (!cfg.pix?.chave) { toast('Cadastre a chave Pix do restaurante em Mais › Ajustes para gerar o QR'); return ir('mais/ajustes'); }
+    const cfg = db.config; if (!cfg.pix?.chave) { toast('Cadastre a chave Pix do restaurante em Gestão › Caixa e regras para gerar o QR'); return ir('mais/ajustes'); }
     const codigo = pix({ chave: cfg.pix.chave, nome: cfg.nome, cidade: cfg.cidade, valor: total, txid: `POPINA${(c.mesa || c.num || '')}P${extra.pessoa || ''}${Date.now().toString(36)}`.slice(0, 25) });
-    folha({ titulo: `Pix · ${din(total)}${gj}`, corpo: `${cfg.pix.exemplo ? '<p class="aviso ouro">Chave de exemplo. Cadastre a chave do restaurante em Mais › Ajustes para o QR valer de verdade.</p>' : ''}<div class="qr-pix">${qrSVG(codigo, 240)}</div>`,
+    folha({ titulo: `Pix · ${din(total)}${gj}`, corpo: `${cfg.pix.exemplo ? '<p class="aviso ouro">Chave de exemplo. Cadastre a chave do restaurante em Gestão › Caixa e regras para o QR valer de verdade.</p>' : ''}<div class="qr-pix">${qrSVG(codigo, 240)}</div>`,
       pe: '<button type="button" class="bt cheio grande" data-ok>Recebi o Pix</button>', aoAbrir: (f, fechar) => { $('[data-ok]', f).onclick = () => { fechar(); fim(); }; } });
     return;
   }
@@ -234,9 +234,9 @@ function receber(c, forma, valor) {
   }
   if (forma === 'Pix') {
     const cfg = db.config;
-    if (!cfg.pix?.chave) { toast('Cadastre a chave Pix do restaurante em Mais › Ajustes para gerar o QR'); return ir('mais/ajustes'); }
+    if (!cfg.pix?.chave) { toast('Cadastre a chave Pix do restaurante em Gestão › Caixa e regras para gerar o QR'); return ir('mais/ajustes'); }
     const codigo = pix({ chave: cfg.pix.chave, nome: cfg.nome, cidade: cfg.cidade, valor, txid: `POPINA${(c.mesa || c.num || '')}${Date.now().toString(36)}`.slice(0, 25) });
-    folha({ titulo: `Pix · ${din(valor)}`, corpo: `${cfg.pix.exemplo ? '<p class="aviso ouro">Chave de exemplo. Cadastre a chave do restaurante em Mais › Ajustes para o QR valer de verdade.</p>' : ''}
+    folha({ titulo: `Pix · ${din(valor)}`, corpo: `${cfg.pix.exemplo ? '<p class="aviso ouro">Chave de exemplo. Cadastre a chave do restaurante em Gestão › Caixa e regras para o QR valer de verdade.</p>' : ''}
       <div class="qr-pix">${qrSVG(codigo, 240)}</div><label class="campo"><span>Pix copia e cola</span><textarea readonly rows="3">${codigo}</textarea></label>
       <p class="mudo">O dinheiro cai direto na conta do restaurante. Confira no app do banco antes de confirmar.</p>`,
     pe: '<button type="button" class="bt" data-copiar>Copiar código</button><button type="button" class="bt cheio" data-ok>Recebi o Pix</button>',
