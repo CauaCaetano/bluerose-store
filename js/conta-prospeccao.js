@@ -60,6 +60,7 @@
     var botao = '';
     if (acao) {
       if (!p.whatsapp) botao = '<button type="button" class="btn btn-primary" disabled>Sem WhatsApp publicado</button>';
+      else if (p.contato_confirmar) botao = '<button type="button" class="btn btn-primary" disabled>Contato a confirmar</button>';
       else if (!ap) botao = '<button type="button" class="btn btn-primary pp-zap" disabled title="Marque “Textos aprovados” no topo do painel">Abrir WhatsApp com a mensagem</button>';
       else botao = '<a class="btn btn-primary pp-zap" data-enviar="' + p.id + '" data-acao="' + acao + '" target="_blank" rel="noopener noreferrer" href="https://wa.me/' +
         esc(p.whatsapp) + '?text=' + encodeURIComponent(msg) + '">Abrir WhatsApp com a mensagem</a>';
@@ -79,6 +80,9 @@
       (ev.teste_cegas ? ' · teste ' + ev.teste_cegas + 'x' : '') + (ev.assinar ? ' · assinar ' + ev.assinar + 'x' : '') + '</dd></div>' +
       '</dl>' +
       '<p class="pp-just"><b>Por que esta prioridade:</b> ' + esc(p.justificativa) + '</p>' +
+      (p.contato_confirmar && !final ? '<form class="pp-confirmar" data-confirmar="' + p.id + '"><p class="af-aviso"><b>Contato a confirmar:</b> ' + esc(p.contato_obs || 'contato não achado na página da própria empresa') +
+        '. Fica fora da fila até você confirmar o WhatsApp na página da empresa.</p><label>WhatsApp da empresa (DDD + celular)<input name="z" inputmode="tel" maxlength="20" value="' +
+        esc(p.whatsapp ? fone(p.whatsapp) : '') + '"></label><button class="btn btn-ghost">Confirmar contato</button><span role="status"></span></form>' : '') +
       '<details class="pp-fontes"><summary>Fontes (' + (p.fontes || []).length + ')</summary><ul>' + (p.fontes || []).map(function (f) {
         var u = /^https:\/\//.test(f.url || '') ? f.url : null;
         return '<li>' + esc(f.fonte) + ', ' + dia(f.data) + (u ? ': <a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u.replace(/^https:\/\/(www\.)?/, '').slice(0, 70)) + '</a>' : '') + '</li>';
@@ -140,7 +144,7 @@
       '<p class="pp-cont">' + l.length + ' de ' + D.prospects.length + ' revendas</p>' +
       '<ul class="pp-lista">' + l.slice(0, 200).map(function (p) {
         return '<li><button type="button" class="pp-item" data-ver="' + p.id + '"><span><b>' + esc(p.empresa) + '</b> · ' + esc(p.cidade || '—') + '/' + esc(p.uf) + '</span>' +
-          '<small>Faixa ' + esc(p.faixa) + ' · ' + p.pontuacao + ' pts · ' + (p.anuncios_usados || 0) + ' usados · ' + esc(NOME_ETAPA[p.etapa]) + (p.proximo_contato ? ' · próximo ' + dia(p.proximo_contato) : '') + (p.whatsapp ? '' : ' · sem WhatsApp') + '</small></button></li>';
+          '<small>Faixa ' + esc(p.faixa) + ' · ' + p.pontuacao + ' pts · ' + (p.anuncios_usados || 0) + ' usados · ' + esc(NOME_ETAPA[p.etapa]) + (p.proximo_contato ? ' · próximo ' + dia(p.proximo_contato) : '') + (p.whatsapp ? '' : ' · sem WhatsApp') + (p.contato_confirmar ? ' · contato a confirmar' : '') + '</small></button></li>';
       }).join('') + '</ul>' + (l.length > 200 ? '<p class="ind-regras">Mostrando 200. Use os filtros para achar as outras.</p>' : '') + (sel ? detalhe() : '');
   }
   function detalhe() { var p = porId(sel); return p ? '<div class="pp-detalhe" id="pp-detalhe">' + cartao(p, acaoNaFila(p.id)) + '</div>' : ''; }
@@ -195,6 +199,11 @@
     var st = f.querySelector('[role=status]');
     if (f.id === 'pp-limites') {
       rpc('anshur_prosp_config', { p_aprovados: null, p_limite_novos: Number(f.n.value), p_limite_retomadas: Number(f.r.value) })
+        .then(recarregar).catch(function (er) { if (st) st.textContent = 'Não deu: ' + er.message; });
+    } else if (f.dataset.confirmar) {
+      if (!confirm('Confirma que achou esse WhatsApp na página da própria empresa? A revenda volta para a fila.')) return;
+      if (st) st.textContent = 'Confirmando…';
+      rpc('anshur_prosp_confirmar_contato', { p_id: Number(f.dataset.confirmar), p_whatsapp: f.z.value || null })
         .then(recarregar).catch(function (er) { if (st) st.textContent = 'Não deu: ' + er.message; });
     } else if (f.dataset.nota) {
       if (st) st.textContent = 'Salvando…';
