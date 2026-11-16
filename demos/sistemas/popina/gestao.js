@@ -1,11 +1,14 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=19';
-import { acao, ir } from './nucleo.js?v=19';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=19';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=19';
-import { situacao, textoHorarios } from './opcoes.js?v=19';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=20';
+import { acao, ir } from './nucleo.js?v=20';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=20';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=20';
+import { situacao, textoHorarios } from './opcoes.js?v=20';
 import { qrSVG } from '../base/qr.js';
+import { abrirEscolha } from './escolha.js?v=20';
+import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=20';
+import './funcoes.js?v=20';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const CORES = ['#B4532F', '#8C2F39', '#5F6B2B', '#2F5D50', '#1F4E79', '#3B2A22', '#C27C0E', '#6B3FA0', '#D1495B', '#111111'];
@@ -81,8 +84,11 @@ TELAS_MAIS.aparencia = () => {
   const L = lojaCfg(), c = db.config, tpl = L.template || 'basico';
   return volta('mais', 'Aparência e templates', 'A cara do sistema da equipe e do cardápio do cliente') + `
   <form class="form larga" data-loja>
-    <section class="bloco-form"><h2>Template do sistema</h2><p class="mudo">Muda as telas do salão, da cozinha, do caixa e da gestão, e o estilo do cardápio do cliente. Dá para trocar quando quiser; nada se perde.</p>
+    <section class="bloco-form"><h2>Template do sistema</h2><p class="mudo">Muda o visual das telas e do cardápio do cliente <b>e as funções</b> de cada tipo de casa. Toque num template para ver as fotos e o que vem nele antes de trocar; nada do que você cadastrou se perde.</p>
       <div class="tpls">${TEMPLATES.map(([k, n, d]) => `<button type="button" class="tpl ${tpl === k ? 'on' : ''}" data-tpl="${k}"><img src="img/tpl-${k}.webp?v=1" alt="" width="480" height="300" loading="lazy"><b>${n}${tpl === k ? ' <em>em uso</em>' : ''}</b><small>${d}</small></button>`).join('')}</div>
+    </section>
+    <section class="bloco-form"><h2>Funções da casa</h2><p class="mudo">O template ${PERFIS[tpl] ? `<b>${PERFIS[tpl].tipo}</b>` : ''} já liga as funções certas para o seu tipo de casa. Ligue ou desligue as que quiser; isso não muda o visual.</p>
+      <ul class="mods-casa">${Object.entries(MODULOS).map(([k, [n, d]]) => `<li><label><input type="checkbox" data-mod="${k}" ${modulosAtivos(L).has(k) ? 'checked' : ''}><span><b>${n}</b><small>${d}</small></span></label></li>`).join('')}</ul>
     </section>
     <section class="bloco-form"><h2>Identidade</h2>
       <div class="loja-visual">
@@ -101,7 +107,11 @@ TELAS_MAIS.aparencia = () => {
     <div class="salvar-fixo"><button class="bt cheio grande">Salvar</button></div>
   </form>`;
 };
-MONTAR.aparencia = (el) => MONTAR.loja(el);
+MONTAR.aparencia = (el) => {
+  MONTAR.loja(el);
+  // funções da casa: o que o dono liga/desliga por cima do padrão do template
+  $$('[data-mod]', el).forEach((c) => { c.onchange = () => { const L = lojaCfg(); setLoja({ modulos: { ...(L.modulos || {}), [c.dataset.mod]: c.checked } }); toast(`${MODULOS[c.dataset.mod][0]} ${c.checked ? 'ligado' : 'desligado'}`); }; });
+};
 
 // ------------------------------------------------------------------ restaurante e cardápio online
 TELAS_MAIS.loja = () => {
@@ -142,7 +152,8 @@ MONTAR.loja = (el) => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.cor) { cor = b.dataset.cor; $$('[data-cor]', f).forEach((x) => x.classList.toggle('on', x === b)); f.cor.value = cor; return; }
     if ('preverMarca' in b.dataset && !CONTA) { window.popinaPlano = window.popinaPlano === 'marca' ? 'basico' : 'marca'; dispatchEvent(new Event('popina-plano')); toast(window.popinaPlano === 'marca' ? 'Assim fica com a sua marca: veja o topo' : 'De volta ao plano normal'); return; }
-    if (b.dataset.tpl) { const k = b.dataset.tpl, tp = TEMPLATES.find((x) => x[0] === k); if (!tp) return; setLoja({ template: k, estilo: tp[3] }); toast(`Template ${tp[1]} aplicado no sistema e no cardápio`); return; }
+    // template: abre as fotos e as funções dele, com "Usar este template", o aviso do que muda e "Voltar"
+    if (b.dataset.tpl) { abrirEscolha({ abrir: b.dataset.tpl }); return; }
     if (b.dataset.estilo) { estiloSel = b.dataset.estilo; $$('[data-estilo]', f).forEach((x) => x.classList.toggle('on', x === b)); return; }
     if (b.dataset.tema) { temaSel = b.dataset.tema; $$('[data-tema]', f).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); return; }
     if (b.dataset.tira) { setLoja({ [b.dataset.tira]: '' }); toast(b.dataset.tira === 'logo' ? 'Logo tirado' : 'Capa tirada'); return; }
@@ -181,7 +192,7 @@ TELAS_MAIS.mesas = () => {
   const L = lojaCfg(), n = db.config.mesas;
   return volta('mais', 'Mesas e QR', 'Quantas mesas, as áreas do salão e o QR de cada mesa') + `
   <form class="form" data-mesas>
-    <div class="duas-c"><label class="campo"><span>Número de mesas</span><input name="mesas" inputmode="numeric" value="${n}"></label><label class="campo"><span>Couvert por pessoa (R$, opcional)</span><input name="couvert" inputmode="decimal" value="${L.couvert ? vir(L.couvert) : ''}" placeholder="0,00"></label></div>
+    <div class="duas-c"><label class="campo"><span>Número de mesas</span><input name="mesas" inputmode="numeric" value="${n}"></label>${couvertLigado() ? `<label class="campo"><span>Couvert por pessoa (R$, opcional)</span><input name="couvert" inputmode="decimal" value="${L.couvert ? vir(L.couvert) : ''}" placeholder="0,00"></label>` : ''}</div>
     <div class="campo"><span>Áreas (ex.: Salão das mesas 1 a 8, Varanda da 9 à 12)</span><ul class="areas">${L.areas.map((a, k) => `<li><input name="a_nome_${k}" value="${t(a.nome)}" aria-label="Nome da área"><input name="a_de_${k}" inputmode="numeric" value="${a.de}" aria-label="Da mesa"><i>a</i><input name="a_ate_${k}" inputmode="numeric" value="${a.ate}" aria-label="Até a mesa"></li>`).join('')}<li><input name="a_nome_n" placeholder="Nova área"><input name="a_de_n" inputmode="numeric" placeholder="de"><i>a</i><input name="a_ate_n" inputmode="numeric" placeholder="até"></li></ul></div>
     <button class="bt cheio grande">Salvar</button></form>
   <div class="sec-tit"><h2>QR das mesas</h2><span>imprima e cole em cada mesa</span></div>
@@ -197,19 +208,20 @@ MONTAR.mesas = (el) => {
     const L = lojaCfg();
     const areas = L.areas.map((a, k) => ({ nome: f[`a_nome_${k}`].value.trim(), de: Math.round(num(f[`a_de_${k}`].value)), ate: Math.round(num(f[`a_ate_${k}`].value)) })).filter((a) => a.nome && a.de > 0 && a.ate >= a.de);
     if (f.a_nome_n.value.trim() && num(f.a_de_n.value) > 0 && num(f.a_ate_n.value) >= num(f.a_de_n.value)) areas.push({ nome: f.a_nome_n.value.trim(), de: Math.round(num(f.a_de_n.value)), ate: Math.round(num(f.a_ate_n.value)) });
-    setLoja({ areas, couvert: r2(num(f.couvert.value)) }); toast('Mesas salvas');
+    setLoja({ areas, ...(f.couvert ? { couvert: r2(num(f.couvert.value)) } : {}) }); toast('Mesas salvas');
   };
 };
 
 // ------------------------------------------------------------------ clientes do delivery e do balcão
 TELAS_MAIS.clientes = (x) => {
   const l = (db.clientes || []).slice().sort((a, b) => (b.ultimo || 0) - (a.ultimo || 0));
+  const fid = tem('fidelidade'), F = fidelidade();
   const fil = x ? l.filter((c) => `${c.nome} ${c.tel} ${c.bairro || ''}`.toLowerCase().includes(decodeURIComponent(x).toLowerCase())) : l;
   return volta('mais', 'Clientes', 'Quem pediu por delivery, retirada ou pelo link, com o histórico de cada um') + `
   <label class="busca">${ico('busca')}<input type="search" data-busca-cli value="${t(decodeURIComponent(x || ''))}" placeholder="Buscar por nome, telefone ou bairro" aria-label="Buscar cliente"></label>
-  <div class="tabela-rolo"><table class="tabela"><thead><tr><th>Cliente</th><th>Bairro</th><th class="num">Pedidos</th><th class="num">Total</th><th>Último pedido</th><th></th></tr></thead><tbody>
-  ${fil.map((c) => `<tr><td><b>${t(c.nome || 'Sem nome')}</b><small>${t(fmtTel(c.tel))}</small></td><td>${t(c.bairro || '—')}</td><td class="num">${c.pedidos}</td><td class="num">${dinCurto(c.total)}</td><td>${c.ultimo ? new Date(c.ultimo).toLocaleDateString('pt-BR') : '—'}</td>
-    <td class="acoes"><a class="bt-ico" href="https://wa.me/55${c.tel}" target="_blank" rel="noopener" aria-label="WhatsApp de ${t(c.nome)}">${ico('zap')}</a><button type="button" class="bt-ico" data-acao="cliente-ed" data-id="${c.id}" title="Editar" aria-label="Editar ${t(c.nome)}">${ico('ajustes')}</button></td></tr>`).join('') || '<tr><td colspan="6" class="vazio">Os clientes aparecem aqui sozinhos a cada pedido de delivery ou retirada com telefone.</td></tr>'}
+  <div class="tabela-rolo"><table class="tabela"><thead><tr><th>Cliente</th><th>Bairro</th><th class="num">Pedidos</th><th class="num">Total</th>${fid ? '<th class="num">Carimbos</th>' : ''}<th>Último pedido</th><th></th></tr></thead><tbody>
+  ${fil.map((c) => `<tr><td><b>${t(c.nome || 'Sem nome')}</b><small>${t(fmtTel(c.tel))}</small></td><td>${t(c.bairro || '—')}</td><td class="num">${c.pedidos}</td><td class="num">${dinCurto(c.total)}</td>${fid ? `<td class="num">${(c.carimbos || 0) >= F.compras ? `<b class="ok-txt">${c.carimbos} de ${F.compras} · prêmio</b>` : `${c.carimbos || 0} de ${F.compras}`}</td>` : ''}<td>${c.ultimo ? new Date(c.ultimo).toLocaleDateString('pt-BR') : '—'}</td>
+    <td class="acoes"><a class="bt-ico" href="https://wa.me/55${c.tel}" target="_blank" rel="noopener" aria-label="WhatsApp de ${t(c.nome)}">${ico('zap')}</a><button type="button" class="bt-ico" data-acao="cliente-ed" data-id="${c.id}" title="Editar" aria-label="Editar ${t(c.nome)}">${ico('ajustes')}</button></td></tr>`).join('') || `<tr><td colspan="${fid ? 7 : 6}" class="vazio">Os clientes aparecem aqui sozinhos a cada pedido de delivery ou retirada com telefone.</td></tr>`}
   </tbody></table></div>`;
 };
 const fmtTel = (d) => { d = String(d || ''); return d.length === 11 ? `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}` : d.length === 10 ? `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}` : d; };
@@ -220,10 +232,12 @@ acao('cliente-ed', (b) => {
   folha({ titulo: c.nome || 'Cliente', corpo: `<label class="campo"><span>Nome</span><input data-n value="${t(c.nome)}"></label>
     <label class="campo"><span>Endereço</span><input data-e value="${t(c.end || '')}"></label><label class="campo"><span>Bairro</span><select data-b><option value="">—</option>${db.bairros.map((x) => `<option ${x.nome === c.bairro ? 'selected' : ''}>${t(x.nome)}</option>`).join('')}</select></label>
     <label class="campo"><span>Anotação (alergia, preferência…)</span><input data-o value="${t(c.obs || '')}" maxlength="140"></label>
+    ${tem('fidelidade') ? `<div class="fidel-cx"><b>${ico('etiqueta')}Cartão fidelidade</b><div class="carimbos">${Array.from({ length: fidelidade().compras }, (_, k) => `<i class="${k < (c.carimbos || 0) ? 'on' : ''}"></i>`).join('')}</div><small>${c.carimbos || 0} de ${fidelidade().compras} carimbos${c.premios ? ` · ${c.premios} ${c.premios === 1 ? 'prêmio entregue' : 'prêmios entregues'}` : ''}</small>${(c.carimbos || 0) >= fidelidade().compras ? `<button type="button" class="bt cheio" data-premio>${ico('check')}Dar prêmio: ${t(fidelidade().premio)}</button>` : ''}</div>` : ''}
     <div class="sec-tit"><h2>Últimos pedidos</h2><span>${c.pedidos} no total · ${din(c.total)}</span></div>
     <ul class="lista-itens">${ped.map((v) => `<li><span>${new Date(v.ts).toLocaleDateString('pt-BR')} · ${v.itens.map((i) => `${i.qtd}× ${t(i.nome)}`).join(', ')}</span><span>${din(v.total)}</span></li>`).join('') || '<li class="mudo">Os pedidos de antes do Popina não aparecem aqui.</li>'}</ul>`,
   pe: '<button type="button" class="bt cheio grande" data-ok>Salvar</button>',
-  aoAbrir: (f, fechar) => { $('[data-ok]', f).onclick = () => { Object.assign(c, { nome: $('[data-n]', f).value.trim(), end: $('[data-e]', f).value.trim(), bairro: $('[data-b]', f).value, obs: $('[data-o]', f).value.trim() }); grava(); fechar(); toast('Cliente salvo'); }; } });
+  aoAbrir: (f, fechar) => { $('[data-premio]', f)?.addEventListener('click', async () => { fechar(); if (await confirma(`Entregar o prêmio e zerar o cartão de ${c.nome || 'cliente'}?`, 'Dar prêmio') && darPremio(c)) toast('Prêmio entregue. O cartão recomeçou.'); });
+    $('[data-ok]', f).onclick = () => { Object.assign(c, { nome: $('[data-n]', f).value.trim(), end: $('[data-e]', f).value.trim(), bairro: $('[data-b]', f).value, obs: $('[data-o]', f).value.trim() }); grava(); fechar(); toast('Cliente salvo'); }; } });
 });
 
 // ------------------------------------------------------------------ entregadores e acerto

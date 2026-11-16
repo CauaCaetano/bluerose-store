@@ -494,3 +494,33 @@ body.est-cafeteria .tag{background:#F3E2C4!important;color:#7A4A12!important}bod
 body.est-cafeteria .cli-ver{background:#9E3A26!important;color:#FFF6EE!important;box-shadow:inset 0 0 0 1.5px #7E2C1C,0 14px 28px -14px rgba(120,20,25,.6)!important}
 body.est-cafeteria .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;background:url(img/tcf-azulejo.webp?v=1) 0 100%/auto 24px repeat-x;opacity:.7}
 body.est-cafeteria .cli-capa::after{width:120px;height:62px;bottom:-4px}
+
+/* ---------- Funções da casa no cardápio: happy hour, rodízio, prato do dia, alergênicos, harmonização, senha e fidelidade ---------- */
+.cli-faixa{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:10px 16px;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--marca) 12%,var(--cartao));color:var(--txt);border:1px solid color-mix(in srgb,var(--marca) 30%,transparent)}
+.cli-faixa .ico{width:20px;height:20px;color:var(--marca);flex:none}
+.cli-faixa b{font-weight:800}.cli-faixa span{color:var(--txt2);font-size:13.5px;flex-basis:100%}
+.cli-faixa.happy{background:color-mix(in srgb,#E3A43A 18%,var(--cartao));border-color:color-mix(in srgb,#E3A43A 45%,transparent)}
+.cli-preco s{opacity:.6;font-weight:400;margin-right:6px}
+.cli-preco .cli-motivo{display:block;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--marca)}
+.cli-preco.incluso{color:var(--marca);font-weight:800}
+.tag.familia{font-size:12px!important;padding:3px 10px!important}
+.tag.alg{background:transparent!important;border:1px solid var(--linha2,var(--linha));color:var(--txt2)!important;font-weight:700}
+.tag.alg.verde{border-color:color-mix(in srgb,#56702A 40%,transparent)}
+.cli-filtros{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 10px;scrollbar-width:none}
+.cli-filtro{flex:none;min-height:36px;padding:0 14px;border-radius:999px;border:1.5px solid var(--linha2,var(--linha));background:var(--cartao);color:var(--txt);font-weight:700;font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap}
+.cli-filtro.on{background:var(--marca);border-color:var(--marca);color:var(--marca-txt)}
+.cli-prato-dia{display:flex;gap:14px;align-items:stretch;width:100%;padding:0;border-radius:16px;border:2px solid var(--marca);background:var(--cartao);color:var(--txt);text-align:left;cursor:pointer;overflow:hidden;font:inherit}
+.cli-prato-dia img{width:42%;max-width:220px;object-fit:cover;aspect-ratio:4/3}
+.cli-prato-dia>span{display:flex;flex-direction:column;gap:4px;padding:12px 14px 12px 0}
+.cli-prato-dia>span:first-child{padding-left:14px}
+.cli-prato-dia small{font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--marca);font-size:12px}
+.cli-prato-dia b{font-size:18px}.cli-prato-dia p{margin:0;color:var(--txt2);font-size:13.5px}
+.cli-harmoniza{display:flex;align-items:center;gap:10px;margin:14px 0 4px;padding:10px 14px;border-radius:14px;border:1px dashed var(--linha2,var(--linha));background:color-mix(in srgb,var(--marca) 6%,var(--cartao))}
+.cli-harmoniza .ico{width:22px;height:22px;color:var(--marca);flex:none}
+.cli-harmoniza span{flex:1;display:flex;flex-direction:column}.cli-harmoniza small{color:var(--txt2);font-size:12px}.cli-harmoniza em{font-style:normal;font-weight:700;color:var(--marca)}
+.cli-senha{display:flex;flex-direction:column;align-items:center;gap:2px;margin:12px auto 6px;padding:14px 22px;border-radius:16px;background:var(--marca);color:var(--marca-txt);max-width:280px}
+.cli-senha small{font-weight:800;text-transform:uppercase;letter-spacing:.08em;opacity:.85}.cli-senha b{font-size:64px;line-height:1}.cli-senha span{font-size:13px;opacity:.9;text-align:center}
+.cli-det-serve.grande{font-size:17px;font-weight:800}
+.op-fracoes .seg{margin:4px 0 8px}.op-frac-txt{margin:0 0 6px}
+.op-casa legend{color:var(--marca)}
+@media (max-width:420px){.cli-prato-dia{flex-direction:column}.cli-prato-dia img{width:100%;max-width:none}.cli-prato-dia>span{padding:0 14px 12px}}

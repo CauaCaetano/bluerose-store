@@ -24,25 +24,31 @@ export const INSUMOS = [
 const P = (id, cat, nome, desc, preco, setor, extra = {}) => ({ id, cat, nome, desc, preco, setor, foto: `fotos/${id}.webp`, ativo: true, adicionais: [], ficha: [], ...extra });
 const AD_LANCHE = [{ nome: 'Bacon', preco: 6 }, { nome: 'Ovo', preco: 3 }, { nome: 'Queijo extra', preco: 4 }, { nome: 'Cheddar', preco: 5 }];
 const PONTO = { id: 'ponto', nome: 'Ponto da carne', min: 1, max: 1, opcoes: [{ nome: 'Mal passado' }, { nome: 'Ao ponto' }, { nome: 'Bem passado' }] };
+// funções da casa no exemplo (aparecem quando o template liga a função): etapa, pimenta, ponto, harmonização, alergênicos, vitrine, combo
+const AL = (...a) => ({ alergenos: a });
 const EXTRAS = {
-  parmegiana: { destaque: true, tags: ['Mais pedido'], serve: 'Serve 1 pessoa bem', grupos: [PONTO, { id: 'acomp', nome: 'Trocar acompanhamento', min: 0, max: 1, opcoes: [{ nome: 'Purê no lugar da fritas', preco: 0 }, { nome: 'Salada no lugar do arroz', preco: 0 }] }] },
-  executivo: { tags: ['Almoço'], grupos: [{ id: 'salada', nome: 'Salada', min: 1, max: 1, opcoes: [{ nome: 'Alface e tomate' }, { nome: 'Sem salada' }] }] },
-  risoto: { tags: ['Vegetariano'] },
-  feijoada: { tags: ['Só sábado'] },
-  xburger: { grupos: [PONTO] },
-  xbacon: { destaque: true, tags: ['Mais pedido'], grupos: [PONTO] },
-  xsalada: { grupos: [PONTO], promoDe: 37.9 },
-  pz_calabresa: { destaque: true, grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }, { nome: 'Chocolate', preco: 11 }] }] },
-  pz_mucarela: { tags: ['Vegetariano'], grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }] }] },
-  pz_portuguesa: { grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }] }] },
-  pz_frango: { grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }] }] },
-  fritas: { serve: 'Serve 2 pessoas' },
-  isca: { serve: 'Serve 3 pessoas', grupos: [{ id: 'molho', nome: 'Molhos', min: 1, max: 2, opcoes: [{ nome: 'Barbecue' }, { nome: 'Mostarda e mel' }, { nome: 'Maionese da casa' }, { nome: 'Cheddar', preco: 4 }] }] },
+  parmegiana: { destaque: true, tags: ['Mais pedido'], serve: 'Serve 1 pessoa bem', etapa: 'principal', harmoniza: 'vinho', ...AL('gluten', 'lactose', 'ovo'), grupos: [PONTO, { id: 'acomp', nome: 'Trocar acompanhamento', min: 0, max: 1, opcoes: [{ nome: 'Purê no lugar da fritas', preco: 0 }, { nome: 'Salada no lugar do arroz', preco: 0 }] }] },
+  executivo: { tags: ['Almoço'], etapa: 'principal', grupos: [{ id: 'salada', nome: 'Salada', min: 1, max: 1, opcoes: [{ nome: 'Alface e tomate' }, { nome: 'Sem salada' }] }] },
+  risoto: { tags: ['Vegetariano'], etapa: 'principal', harmoniza: 'vinho', ...AL('lactose', 'vegetariano') },
+  feijoada: { tags: ['Só sábado'], etapa: 'principal', harmoniza: 'caipirinha' },
+  xburger: { grupos: [PONTO], ...AL('gluten', 'lactose') },
+  xbacon: { destaque: true, tags: ['Mais pedido'], grupos: [PONTO], ...AL('gluten', 'lactose') },
+  xsalada: { grupos: [PONTO], promoDe: 37.9, ...AL('gluten', 'lactose') },
+  frango_lanche: { picancia: true, ...AL('gluten', 'ovo') },
+  pz_calabresa: { destaque: true, harmoniza: 'cerveja', ...AL('gluten', 'lactose'), grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }, { nome: 'Chocolate', preco: 11 }] }] },
+  pz_mucarela: { tags: ['Vegetariano'], ...AL('gluten', 'lactose', 'vegetariano'), grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }] }] },
+  pz_portuguesa: { ...AL('gluten', 'lactose', 'ovo'), grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }] }] },
+  pz_frango: { ...AL('gluten', 'lactose'), grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }] }] },
+  fritas: { serve: 'Serve 2 pessoas', ...AL('vegano') },
+  isca: { serve: 'Serve 3 pessoas', picancia: true, ...AL('gluten'), grupos: [{ id: 'molho', nome: 'Molhos', min: 1, max: 2, opcoes: [{ nome: 'Barbecue' }, { nome: 'Mostarda e mel' }, { nome: 'Maionese da casa' }, { nome: 'Cheddar', preco: 4 }] }] },
   refri: { grupos: [{ id: 'sabor', nome: 'Sabor', min: 1, max: 1, opcoes: [{ nome: 'Coca-Cola' }, { nome: 'Coca-Cola sem açúcar' }, { nome: 'Guaraná' }, { nome: 'Fanta laranja' }] }] },
   suco: { grupos: [{ id: 'sabor', nome: 'Sabor', min: 1, max: 1, opcoes: [{ nome: 'Laranja' }, { nome: 'Limão' }, { nome: 'Maracujá' }, { nome: 'Abacaxi com hortelã' }] }, { id: 'acucar', nome: 'Açúcar', min: 1, max: 1, opcoes: [{ nome: 'Com açúcar' }, { nome: 'Sem açúcar' }, { nome: 'Com adoçante' }] }] },
   agua: { grupos: [{ id: 'gas', nome: 'Tipo', min: 1, max: 1, opcoes: [{ nome: 'Sem gás' }, { nome: 'Com gás' }] }] },
   caipirinha: { grupos: [{ id: 'fruta', nome: 'Fruta', min: 1, max: 1, opcoes: [{ nome: 'Limão' }, { nome: 'Morango', preco: 3 }, { nome: 'Maracujá', preco: 3 }] }] },
-  petit: { destaque: true, tags: ['Novo'] },
+  petit: { destaque: true, tags: ['Novo'], etapa: 'sobremesa', ...AL('gluten', 'lactose', 'ovo') },
+  pudim: { etapa: 'sobremesa', ...AL('lactose', 'ovo') },
+  suco: { ...AL('vegano') },
+  calabresa_acebolada: { serve: 'Para 2 ou para 4 pessoas', picancia: true, tamanhos: [{ nome: 'Para 2 pessoas', preco: 36.9, fator: 1 }, { nome: 'Para 4 pessoas', preco: 64.9, fator: 2 }] },
 };
 export const PRODUTOS = [
   P('parmegiana', 'pratos', 'Filé à parmegiana', 'Contrafilé empanado, molho de tomate e muçarela gratinada. Acompanha arroz e fritas.', 64.9, 'cozinha', { ficha: [['carne', 220], ['molho', 80], ['queijo', 90], ['arroz', 150], ['batata', 150]] }),
@@ -68,6 +74,14 @@ export const PRODUTOS = [
   P('agua', 'bebidas', 'Água mineral', 'Com ou sem gás, 500 ml.', 5.0, 'bar', { foto: '' }),
   P('petit', 'sobremesas', 'Petit gâteau', 'Bolinho de chocolate quente com sorvete de creme.', 24.9, 'cozinha', { ficha: [['chocolate', 60]] }),
   P('pudim', 'sobremesas', 'Pudim de leite', 'Pudim caseiro com calda de caramelo.', 14.9, 'cozinha', { ficha: [['leite_cond', 80], ['ovo', 1]] }),
+  // itens das funções da casa (entrada, massa com ponto, vinho, carne com ponto, combo e vitrine)
+  P('bruschetta', 'porcoes', 'Bruschetta de tomate', 'Pão italiano tostado, tomate, manjericão e azeite. 4 unidades.', 24.9, 'cozinha', { foto: '', etapa: 'entrada', alergenos: ['gluten', 'vegano'], ficha: [['tomate', 120]] }),
+  P('espaguete', 'pratos', 'Espaguete à bolonhesa', 'Massa fresca com molho de carne cozido devagar e parmesão.', 46.9, 'cozinha', { foto: '', pontoMassa: true, etapa: 'principal', harmoniza: 'vinho', alergenos: ['gluten', 'lactose', 'ovo'], ficha: [['carne', 120], ['molho', 150], ['queijo', 30]] }),
+  P('picanha', 'porcoes', 'Picanha na chapa', 'Picanha fatiada na chapa com cebola, farofa e vinagrete.', 89.9, 'cozinha', { foto: '', pontoCarne: true, serve: 'Serve 2 pessoas', harmoniza: 'cerveja', ficha: [['carne', 400], ['cebola', 80]] }),
+  P('vinho', 'bebidas', 'Vinho tinto (taça)', 'Taça de 150 ml do tinto da casa.', 24.9, 'bar', { foto: '' }),
+  P('combo_burger', 'lanches', 'Combo da casa', 'Escolha o lanche, o acompanhamento e a bebida, com preço fechado.', 54.9, 'cozinha', { foto: 'fotos/xburger.webp', tags: ['Combo'], combo: [{ nome: 'Lanche', itens: ['xburger', 'xsalada', 'frango_lanche'] }, { nome: 'Acompanhamento', itens: ['fritas', 'pao_queijo'] }, { nome: 'Bebida', itens: ['refri', 'cerveja', 'agua'] }] }),
+  P('pao_queijo', 'lanches', 'Pão de queijo (6 unidades)', 'Feito aqui todo dia, sai quentinho da vitrine.', 12.9, 'cozinha', { foto: '', vitrine: true, alergenos: ['lactose', 'ovo'] }),
+  P('bolo', 'sobremesas', 'Bolo de cenoura com chocolate', 'Fatia generosa do bolo do dia, da vitrine.', 11.9, 'cozinha', { foto: '', vitrine: true, etapa: 'sobremesa', alergenos: ['gluten', 'lactose', 'ovo'] }),
 ].map((p) => ({ ...p, ficha: p.ficha.map(([insumo, qtd]) => ({ insumo, qtd })), ...(EXTRAS[p.id] || {}) }))
   // pizza: broto (4 pedaços, 60% do preço, metade da ficha) e grande (8 pedaços)
   .map((p) => (p.pizza ? { ...p, tamanhos: [{ nome: 'Broto · 4 pedaços', preco: Math.round(p.preco * 0.6 * 10) / 10 - 0.1, fator: 0.5 }, { nome: 'Grande · 8 pedaços', preco: p.preco, fator: 1 }] } : p));
@@ -84,15 +98,25 @@ export const CONFIG = {
   loja: { cor: '#B4532F', tema: 'claro', template: 'taverna', estilo: 'rustico', logo: 'img/c-logo-exemplo.webp?v=1', capa: 'fotos/capa.webp', boasVindas: 'Pizzas · Massas · Grelhados', endereco: 'Rua das Palmeiras, 210 · Centro', instagram: 'cantinaferraz', aviso: 'Sábado tem feijoada completa no almoço',
     horarios: [[['11:00', '15:00'], ['18:00', '23:30']], [], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '00:30']], [['11:00', '15:30'], ['18:00', '00:30']]],
     aceitaQR: true, delivery: true, retirada: true, pedidoMinimo: 30, tempoEntrega: '40 a 60 min', tempoRetirada: '20 a 30 min', pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'],
-    areas: [{ nome: 'Salão', de: 1, ate: 8 }, { nome: 'Varanda', de: 9, ate: 12 }], couvert: 0, comissao: 10 },
+    areas: [{ nome: 'Salão', de: 1, ate: 8 }, { nome: 'Varanda', de: 9, ate: 12 }], couvert: 0, comissao: 10,
+    // regras das funções da casa (cada uma só vale com a função ligada pelo template ou pelo dono)
+    rodizio: { adulto: 69.9, crianca: 34.9, meia: 49.9, porRodada: 4, inclusos: ['pz_calabresa', 'pz_mucarela', 'pz_portuguesa', 'pz_frango', 'fritas', 'isca', 'bruschetta', 'pudim'] },
+    fracoes: { regra: 'caro', bordas: [{ nome: 'Catupiry', precos: [6, 9] }, { nome: 'Cheddar', precos: [6, 9] }, { nome: 'Chocolate', precos: [8, 11] }] },
+    happyHour: [{ id: 'hh1', nome: 'Happy hour', dias: [1, 2, 3, 4, 5], de: '17:00', ate: '19:00', alvo: 'prod', ids: ['cerveja', 'caipirinha', 'fritas'], tipo: '%', valor: 30, ativo: true }],
+    pratoDoDia: [{ prod: 'parmegiana', preco: 54.9 }, { prod: 'executivo', preco: 29.9 }, { prod: 'executivo', preco: 29.9 }, { prod: 'espaguete', preco: 39.9 }, { prod: 'risoto', preco: 44.9 }, { prod: 'parmegiana', preco: 56.9 }, { prod: 'feijoada', preco: 42.9 }],
+    fidelidade: { compras: 8, premio: 'Uma pizza broto de muçarela', minimo: 30 },
+    encomendas: { antecedencia: 24 },
+    portaria: { capacidade: 180, ingressos: [{ nome: 'Pista', preco: 40, consumacao: 30 }, { nome: 'Camarote', preco: 120, consumacao: 100 }, { nome: 'Nome na lista', preco: 0, consumacao: 20 }] } },
 };
 // exemplo: clientes do delivery, entregadores e cupons
 export const CLIENTES = [['16991234567', 'Patrícia Lima', 'Rua das Acácias, 120', 'Jardim Paulista', 7, 412.6], ['16998887766', 'Marcos Andrade', 'Av. Brasil, 1450, ap 32', 'Centro', 4, 238.9], ['16997776655', 'Fernanda Rocha', 'Rua Goiás, 88', 'Vila Nova', 11, 689.4], ['16996665544', 'Lucas Prado', 'Rua Bahia, 301', 'Jardim Boa Vista', 2, 97.8]]
-  .map(([tel, nome, end, bairro, pedidos, total], k) => ({ id: 't' + tel, tel, nome, end, bairro, pedidos, total, primeiro: Date.now() - (60 + k * 9) * 864e5, ultimo: Date.now() - (k * 3 + 1) * 864e5 }));
+  .map(([tel, nome, end, bairro, pedidos, total], k) => ({ id: 't' + tel, tel, nome, end, bairro, pedidos, total, carimbos: [6, 3, 8, 1][k], primeiro: Date.now() - (60 + k * 9) * 864e5, ultimo: Date.now() - (k * 3 + 1) * 864e5 }));
 export const ENTREGADORES = [{ id: 'e1', nome: 'Júnior', tel: '16995554433' }, { id: 'e2', nome: 'Wellington', tel: '16994443322' }];
 export const CUPONS = [{ id: 'cp1', codigo: 'BEMVINDO10', tipo: '%', valor: 10, minimo: 40, ate: '', limite: 0, usos: 3, ativo: true, desc: '10% no primeiro pedido pelo link' }, { id: 'cp2', codigo: 'FRETEZERO', tipo: 'R$', valor: 6, minimo: 60, ate: '', limite: 50, usos: 12, ativo: true, desc: 'R$ 6 de desconto (paga a entrega)' }];
 
 const MIN = 60e3;
+const ymdEx = (ts) => { const d = new Date(ts); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const amanha15 = (agora) => { const d = new Date(agora + 864e5); d.setHours(15, 0, 0, 0); return d.getTime(); };
 // conta real nova: sem nada de exemplo (o cardápio de exemplo pode ser carregado em Mais › Cardápio)
 export function estadoVazio(nome = 'Meu restaurante', agora = Date.now()) {
   return {
@@ -122,17 +146,70 @@ export function estadoInicial(agora = Date.now()) {
     { id: `b1-${agora}`, tipo: 'delivery', num: 41, aberta: agora - 22 * MIN, cliente: { nome: 'Patrícia Lima', tel: '16991234567', end: 'Rua das Acácias, 120', bairro: 'Jardim Paulista' }, taxaEntrega: 6, entrega: 'preparo', itens: [it('xbacon', 2, 'preparo', 20), it('fritas', 1, 'preparo', 20), it('refri', 2, 'novo', 20)], pagamentos: [], pagarNaEntrega: 'Pix', servico: false, origem: 'cardápio online' },
     { id: `b2-${agora}`, tipo: 'delivery', num: 40, aberta: agora - 35 * MIN, cliente: { nome: 'Marcos Andrade', tel: '16998887766', end: 'Av. Brasil, 1450, ap 32', bairro: 'Centro' }, taxaEntrega: 5, entrega: 'saiu', saiu: agora - 6 * MIN, itens: [it('pz_portuguesa', 1, 'entregue', 33), it('cerveja', 2, 'entregue', 33)], pagamentos: [{ forma: 'Cartão de crédito', valor: 93.7 }], servico: false, origem: 'telefone' },
     { id: `b3-${agora}`, tipo: 'balcao', num: 42, aberta: agora - 4 * MIN, cliente: { nome: 'Juliana' }, itens: [it('xsalada', 1, 'novo', 3), it('suco', 1, 'novo', 3)], pagamentos: [], servico: false, origem: 'balcão' },
+    // encomenda para amanhã às 15h (entra no quadro de pedidos no dia)
+    { id: `b4-${agora}`, tipo: 'balcao', num: 39, aberta: agora - 26 * 60 * MIN, cliente: { nome: 'Sônia Prado', tel: '16992223344' }, encomenda: { para: amanha15(agora) }, itens: [it('pz_calabresa', 2, 'rascunho', 0, { enviado: undefined }), it('bolo', 4, 'rascunho', 0, { enviado: undefined })], pagamentos: [{ forma: 'Pix', valor: 167.4, ts: agora - 26 * 60 * MIN }], servico: false, origem: 'WhatsApp' },
   ];
+  const hoje = ymdEx(agora);
+  const reservas = [{ id: 'r1', data: hoje, hora: '20:00', nome: 'Carla Mendes', tel: '16991112233', pessoas: 4, mesa: 7, obs: 'Aniversário', status: 'confirmada', origem: 'Balcão', criado: agora - 2 * 864e5 },
+    { id: 'r2', data: hoje, hora: '21:30', nome: 'Roberto Lima', tel: '16995556677', pessoas: 2, mesa: 0, obs: '', status: 'pendente', origem: 'Cardápio online', criado: agora - 90 * MIN }];
+  const fila = [{ id: 'f1', nome: 'Família Souza', pessoas: 5, tel: '16993334455', ts: agora - 12 * MIN }];
+  const eventos = [{ id: 'ev1', nome: 'Aniversário de 15 anos da Laura', data: ymdEx(agora + 5 * 864e5), hora: '20:00', pacote: 89.9, couvert: 15, obs: 'Buffet de massas e pizzas, refrigerante e suco à vontade',
+    convidados: ['Laura Ferraz', 'Marta Ferraz', 'João Ferraz', 'Beatriz Lima', 'Gabriel Souza', 'Sofia Andrade', 'Pedro Rocha', 'Helena Prado', 'Lucas Martins', 'Alice Costa'].map((nome, k) => ({ id: `g${k + 1}`, nome })) }];
+  const vitrine = { dia: hoje, feito: { pao_queijo: 24, bolo: 8 }, qtd: { pao_queijo: 17, bolo: 5 } };
   const chamados = [{ id: 'c1', mesa: 8, tipo: 'garcom', ts: agora - 1 * MIN, origem: 'QR' }];
   const pedidosQR = [{ id: 'q1', mesa: 2, ts: agora - 3 * MIN, itens: [{ prod: 'xburger', qtd: 2, obs: '' }, { prod: 'refri', qtd: 2, obs: '' }], nome: 'Mesa 2 (QR)' }];
+  const vendas = historico(agora), ctl = controleExemplo(vendas, agora);
   return {
-    versao: 1, exemplo: 4, criado: agora, config: JSON.parse(JSON.stringify(CONFIG)), categorias: CATEGORIAS.map((c) => ({ ...c })),
+    versao: 1, exemplo: 6, criado: agora, reservas, fila, eventos, vitrine, config: JSON.parse(JSON.stringify(CONFIG)), categorias: CATEGORIAS.map((c) => ({ ...c })),
     produtos: PRODUTOS.map((p) => JSON.parse(JSON.stringify(p))), insumos: INSUMOS.map((i) => ({ ...i })), bairros: BAIRROS.map((b) => ({ ...b })),
-    comandas, chamados, pedidosQR, vendas: historico(agora), numPedido: 43,
+    comandas, chamados, pedidosQR, vendas, numPedido: 43,
     clientes: CLIENTES.map((c) => ({ ...c })), entregadores: ENTREGADORES.map((e) => ({ ...e })), cupons: CUPONS.map((c) => ({ ...c })),
-    caixa: { aberto: agora - 5 * 3600e3, troco: 200, movimentos: [{ tipo: 'sangria', valor: 100, motivo: 'Depósito no banco', ts: agora - 2 * 3600e3 }], operador: 'Bruna' },
-    compras: [],
+    caixa: { aberto: agora - 5 * 3600e3, troco: 200, movimentos: [{ tipo: 'sangria', valor: 100, motivo: 'Depósito no banco', ts: agora - 2 * 3600e3, quem: 'Bruna' }], operador: 'Bruna' },
+    compras: [], ...ctl,
   };
+}
+
+// exemplo do controle: descontos com motivo, venda cancelada, itens cancelados, perdas e 3 caixas fechados
+function controleExemplo(v, agora) {
+  const auditoria = [], H = 3600e3, DIA = 864e5;
+  const aud = (t, tipo, d) => auditoria.push({ id: `a${auditoria.length + 1}`, t, tipo, ...d });
+  const MOT_D = ['Cliente frequente', 'Demora no pedido', 'Cortesia da casa', 'Aniversário'], MOT_C = ['Cobrado em duplicidade', 'Lançado errado', 'Cliente desistiu'];
+  v.forEach((x, k) => {
+    if (x.tipo === 'mesa') { x.mesa = 1 + (k % 12); x.pessoas = 2 + (k % 4); }
+    // um desconto a cada 23 contas do salão
+    if (x.tipo === 'mesa' && k % 23 === 5 && !x.cancelado) {
+      const sub = x.itens.reduce((s, i) => s + i.qtd * i.preco, 0); x.desconto = Math.round(sub * 10) / 100; x.total = Math.round((x.total - x.desconto) * 100) / 100;
+      x.descontoMotivo = MOT_D[k % MOT_D.length]; x.descontoQuem = x.garcom;
+      aud(x.ts - 5 * MIN, 'desconto', { quem: x.garcom, mesa: x.mesa, valor: x.desconto, motivo: x.descontoMotivo, pct: 10 });
+    }
+    if (x.cancelado) { x.cancelado = { ts: x.ts + 20 * MIN, motivo: MOT_C[k % MOT_C.length], quem: 'Bruna · PIN do gerente', estoque: false }; aud(x.cancelado.ts, 'estorno', { quem: x.cancelado.quem, venda: x.id, mesa: x.mesa, valor: x.total, motivo: x.cancelado.motivo }); }
+  });
+  // garante uma venda cancelada ontem
+  const ontem = new Date(agora - DIA).toDateString(), vc = v.filter((x) => new Date(x.ts).toDateString() === ontem && !x.cancelado).at(-1);
+  if (vc) { vc.cancelado = { ts: vc.ts + 15 * MIN, motivo: 'Cobrado em duplicidade', quem: 'Bruna · PIN do gerente', estoque: false }; aud(vc.cancelado.ts, 'estorno', { quem: vc.cancelado.quem, venda: vc.id, mesa: vc.mesa, valor: vc.total, motivo: vc.cancelado.motivo }); }
+  // itens cancelados depois de enviados
+  [[1, 3, 'Rafael', 'Filé à parmegiana', 64.9, 'Saiu errado'], [2, 6, 'Diego', 'Cerveja long neck', 23.8, 'Lançado errado'], [4, 8, 'Bruna', 'Batata frita', 29.9, 'Cliente desistiu'], [6, 2, 'Rafael', 'Pizza calabresa', 59.9, 'Demorou demais']]
+    .forEach(([d, mesa, quem, item, valor, motivo]) => aud(agora - d * DIA - 3 * H, 'cancelar-item', { quem: `${quem} · PIN do gerente`, mesa, item, qtd: valor > 20 && item.startsWith('Cerveja') ? 2 : 1, valor, motivo }));
+  // perdas de estoque e um ajuste de inventário (custo na mesma conta do sistema: quantidade ÷ fator × preço)
+  const movEstoque = [['tomate', -400, 'perda', 'Vencido', 1], ['cerveja', -2, 'perda', 'Quebra: caixa caiu na entrega', 2], ['carne', -220, 'perda', 'Erro de preparo', 3], ['refri', -3, 'perda', 'Consumo interno', 4], ['alface', -2, 'perda', 'Vencido', 5], ['queijo', -150, 'ajuste', 'Inventário', 6]]
+    .map(([id, qtd, tipo, motivo, d], k) => { const i = INSUMOS.find((x) => x.id === id); return { id: `e${k + 1}`, t: agora - d * DIA - 2 * H, insumo: id, tipo, qtd, motivo, quem: k % 2 ? 'Diego' : 'Bruna', custo: Math.round((qtd / i.fator) * i.custo * 100) / 100 }; });
+  movEstoque.filter((m) => m.tipo === 'perda').forEach((m) => aud(m.t, 'perda', { quem: m.quem, item: INSUMOS.find((i) => i.id === m.insumo).nome, qtd: -m.qtd, valor: m.custo, motivo: m.motivo }));
+  // 3 caixas fechados (os últimos dias com venda)
+  const fechamentos = [], difs = [[0, ''], [-12.5, 'Troco a mais para a mesa 7'], [3, 'Moedas não contadas na abertura']];
+  for (let d = 1; d <= 10 && fechamentos.length < 3; d++) {
+    const dia = new Date(agora - d * DIA), vd = v.filter((x) => new Date(x.ts).toDateString() === dia.toDateString() && !x.cancelado); if (!vd.length) continue;
+    const n = fechamentos.length, base = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate()).getTime(), aberto = base + 10.5 * H, fechado = base + 23.75 * H;
+    const porForma = {}; vd.forEach((x) => { porForma[x.forma] = Math.round(((porForma[x.forma] || 0) + x.total) * 100) / 100; });
+    const movimentos = n === 0 ? [{ tipo: 'sangria', valor: 300, motivo: 'Depósito no banco', ts: base + 16 * H, quem: 'Bruna' }] : n === 1 ? [{ tipo: 'suprimento', valor: 50, motivo: 'Troco extra', ts: base + 18 * H, quem: 'Diego' }] : [];
+    const sang = movimentos.filter((m) => m.tipo === 'sangria').reduce((s, m) => s + m.valor, 0), sup = movimentos.filter((m) => m.tipo === 'suprimento').reduce((s, m) => s + m.valor, 0);
+    const gaveta = Math.round((200 + (porForma.Dinheiro || 0) - sang + sup) * 100) / 100, [dif, motivo] = difs[n], op = n % 2 ? 'Diego' : 'Bruna';
+    const cega = n === 1 ? { cega: true, contadoPorForma: { ...porForma, Dinheiro: gaveta + dif }, esperadoPorForma: { ...porForma, Dinheiro: gaveta } } : {};
+    fechamentos.push({ id: `f${n + 1}`, aberto, troco: 200, movimentos, operador: op, fechado, fechadoPor: op, motivo, abertas: [],
+      resumo: { total: Math.round(vd.reduce((s, x) => s + x.total, 0) * 100) / 100, vendas: vd.length, porForma, sangria: sang, suprimento: sup, servico: Math.round(vd.reduce((s, x) => s + (x.servico || 0), 0) * 100) / 100, gaveta, contado: Math.round((gaveta + dif) * 100) / 100, diferenca: dif, ...cega } });
+    if (dif) aud(fechado, 'caixa-diferenca', { quem: op, valor: dif, motivo });
+  }
+  aud(agora - 2 * H, 'sangria', { quem: 'Bruna', valor: 100, motivo: 'Depósito no banco' });
+  return { fechamentos: fechamentos.reverse(), auditoria: auditoria.sort((a, b) => a.t - b.t), movEstoque };
 }
 
 // 30 dias de vendas fechadas (para relatórios): mais movimento na sexta e no sábado, almoço e jantar

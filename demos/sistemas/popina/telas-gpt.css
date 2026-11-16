@@ -317,3 +317,138 @@
 .tpl b em{font:700 11px/1 sans-serif;font-style:normal;background:#5F6B2B;color:#fff;border-radius:99px;padding:3px 8px;vertical-align:middle;margin-left:6px}
 .tpl small{font-size:13px;color:#6B5A4F;padding:0 4px}
 .tpl.on{border-color:#B0532C;box-shadow:inset 0 0 0 2px #B0532C}
+
+/* ===== Controle do salão, caixa e estoque (juntar/transferir, histórico da mesa, histórico de caixas, relatórios por período) ===== */
+.cx-hist{display:inline-flex;align-items:center;gap:6px;margin:10px 0 4px}
+.cx-hist .ico{width:18px;height:18px}
+.linha-tempo{list-style:none;margin:8px 0 0;padding:0 0 0 14px;border-left:2px solid var(--linha)}
+.linha-tempo li{position:relative;display:flex;gap:10px;padding:6px 0;font-size:14px}
+.linha-tempo li::before{content:"";position:absolute;left:-20px;top:11px;width:10px;height:10px;border-radius:50%;background:var(--papel);border:2px solid var(--mudo)}
+.linha-tempo li.lt-abriu::before,.linha-tempo li.lt-reabriu::before{border-color:var(--oliva)}
+.linha-tempo li.lt-cancelou::before,.linha-tempo li.lt-desconto::before{border-color:var(--terra)}
+.linha-tempo li.lt-fechou::before{background:var(--tinta);border-color:var(--tinta)}
+.linha-tempo time{flex:none;width:44px;font-weight:700;color:var(--mudo);font-variant-numeric:tabular-nums}
+.linha-tempo b{display:block;font-weight:600}
+.linha-tempo small{display:block;color:var(--mudo);font-size:12.5px}
+.prop.valor{grid-template-columns:minmax(110px,1.3fr) 1fr auto}
+.prop.valor small{color:var(--mudo);font-weight:400}
+.per-filtro{margin-bottom:12px}
+.per-datas{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px}
+.per-datas .campo{margin:0;flex:1 1 140px}
+.per-datas .bt{min-height:48px}
+.cartao-resumo{background:var(--papel);border:1px solid var(--linha);border-radius:var(--raio);padding:6px 14px 10px}
+.abc{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;font-style:normal;font-weight:800;font-size:13px;color:#fff;background:var(--mudo)}
+.abc-A{background:var(--oliva)}.abc-B{background:var(--ouro)}.abc-C{background:var(--terra)}
+.tab-caixas tbody tr{cursor:pointer}
+.tab-caixas tbody tr:hover,.tab-caixas tbody tr:focus-visible{background:var(--creme2);outline:none}
+.tab-caixas .acoes .ico{width:18px;height:18px;color:var(--mudo)}
+.tab-inv .inv-q{width:100%;min-width:90px;min-height:42px;border:1.5px solid var(--linha);border-radius:10px;background:var(--papel);padding:6px 10px;font:inherit;color:inherit}
+@media (max-width:599px){.prop.valor{grid-template-columns:1fr auto}.prop.valor i{grid-column:1 / -1;order:3}.per-datas .bt{width:100%}}
+
+/* ---------- Funções da casa (Gestão › Aparência): liga/desliga por tipo de casa ---------- */
+.mods-casa{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.mods-casa label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--linha,rgba(0,0,0,.12));border-radius:12px;background:rgba(255,255,255,.55);cursor:pointer}
+.mods-casa input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--loja-cor,#B4532F)}
+.mods-casa b{display:block;font-size:14.5px}
+.mods-casa small{display:block;opacity:.75;font-size:13px;line-height:1.35;margin-top:2px}
+
+/* ===== Funções da casa (rodízio, cartões, passador, etapas, reservas, eventos, portaria, senhas, vitrine, fidelidade) ===== */
+.tres-c{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.salao-funcoes{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.salao-funcoes .bt{min-height:42px}
+.mesa{position:relative}
+.mesa-cartao{position:absolute;left:-6px;top:-6px;width:18px;height:18px;border-radius:50%;border:2px solid var(--papel);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.mesa-cartao.verde,.cartao-ind.verde,.cartao-rod.verde{background:#2E8B3E;border-color:#2E8B3E}
+.mesa-cartao.vermelho,.cartao-ind.vermelho,.cartao-rod.vermelho{background:#C0392B;border-color:#C0392B}
+.mesa-cartao.verde,.mesa-cartao.vermelho{border-color:var(--papel)}
+.cartoes-abertos{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:6px 0 10px}
+.cartao-ind{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--linha);background:var(--papel);color:var(--tinta);text-decoration:none;cursor:pointer;font:inherit;text-align:left}
+.cartao-ind b{font-size:22px;line-height:1}.cartao-ind small{color:var(--mudo);font-size:12px;min-height:14px}.cartao-ind em{font-style:normal;font-weight:700;font-size:13px}
+.cartao-ind.conta{border-color:var(--ouro);box-shadow:inset 0 0 0 1.5px var(--ouro)}
+.cartao-ind.novo{border-style:dashed;align-items:center;justify-content:center}
+.cartao-ind.verde,.cartao-ind.vermelho{color:#fff}.cartao-ind.verde small,.cartao-ind.vermelho small{color:#fff;opacity:.9}
+.cartao-rod-mesa{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 12px}
+.cartao-rod-mesa span{font-weight:700}.cartao-rod-mesa small{color:var(--mudo)}
+.cartao-rod{min-height:44px;padding:0 18px;border-radius:999px;border:2px solid;color:#fff;font:700 15px var(--f-txt,inherit);cursor:pointer}
+.passador{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:8px}
+.passador li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:12px 14px;border-radius:14px;background:var(--papel);border:1px solid var(--linha);border-left:6px solid #2E8B3E}
+.passador li b{font-size:20px}.passador li span{flex:1;color:var(--tinta2)}.passador li strong{color:var(--tinta)}
+.passador li.vazio{border-left-width:1px;display:block}
+.marca-item{display:inline-block;margin:3px 4px 0 0;padding:1px 8px;border-radius:999px;font:700 11px/1.6 var(--f-txt,inherit);font-style:normal;background:var(--creme2);color:var(--tinta2);vertical-align:middle}
+.marca-item.rod{background:var(--oliva-cl);color:var(--oliva)}.marca-item.promo,.marca-item.dia{background:var(--ouro-cl);color:#6B4A0E}
+.marca-item.etapa{background:var(--terra-cl);color:var(--terra2)}.marca-item.vit{background:var(--oliva-cl);color:var(--oliva)}.marca-item.fam{background:var(--creme2);color:var(--tinta)}
+.marca-item.alg{background:transparent;border:1px solid var(--linha);color:var(--mudo);font-weight:600}
+.prod.prato-dia{border-color:var(--ouro);box-shadow:inset 0 0 0 2px var(--ouro)}
+.prato-dia-faixa{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 10px;padding:10px 14px;border-radius:14px;border:1.5px solid var(--ouro);background:var(--ouro-cl);color:var(--tinta);text-align:left;cursor:pointer;font:inherit}
+.prato-dia-faixa .ico{width:24px;height:24px;color:#8A6410;flex:none}.prato-dia-faixa span{display:flex;flex-direction:column}.prato-dia-faixa small{color:var(--tinta2)}
+.rodizio-abrir{margin:0 0 6px}
+.rod-linha{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--linha)}
+.rod-linha span{display:flex;flex-direction:column}.rod-linha small{color:var(--mudo)}
+.rod-linha .qtd{margin:0;gap:14px}.rod-linha .qtd b{font-size:22px;min-width:28px}
+.rod-total{font-weight:800;font-size:17px;margin:10px 0}
+.serve-grande{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px;margin:4px 0 10px}
+.serve-grande .ico{width:22px;height:22px}
+.aviso-alg{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:#FBE3DF;color:#8A1E14;font-weight:700;font-size:13.5px;margin:0 0 10px}
+.aviso-alg .ico{width:18px;height:18px;flex:none}
+.harmoniza{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 0;padding:10px 14px;border-radius:14px;border:1px dashed var(--linha);background:var(--creme2)}
+.harmoniza span{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.harmoniza small{color:var(--mudo)}.harmoniza .ico{width:20px;height:20px}
+.op-casa legend{color:var(--terra2)}
+.op-fracoes .seg{margin:4px 0 8px}.op-frac-txt{margin:0 0 6px}
+.fidel-cx{display:flex;flex-direction:column;gap:6px;margin:12px 0;padding:12px 14px;border-radius:14px;border:1px solid var(--linha);background:var(--papel)}
+.fidel-cx>b{display:flex;align-items:center;gap:8px}.fidel-cx .ico{width:18px;height:18px}
+.fidel-tel{display:flex;gap:8px}.fidel-tel input{flex:1;min-height:44px;border:1.5px solid var(--linha);border-radius:10px;padding:0 12px;font:inherit;background:var(--papel);color:inherit}
+.carimbos{display:flex;flex-wrap:wrap;gap:6px}
+.carimbos i{width:22px;height:22px;border-radius:50%;border:2px dashed var(--linha)}
+.carimbos i.on{border:2px solid var(--terra);background:var(--terra)}
+.regras-hh,.pratos-dia{list-style:none;margin:8px 0;padding:0;display:grid;gap:8px}
+.regras-hh li{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--linha);border-radius:12px}
+.regras-hh li div{flex:1}.regras-hh small{display:block;color:var(--mudo)}
+.regras-hh li.vazio{display:block}
+.pratos-dia li{display:grid;grid-template-columns:90px 1fr 120px;gap:8px;align-items:center}
+.pratos-dia select,.pratos-dia input{min-height:44px;border:1.5px solid var(--linha);border-radius:10px;padding:0 10px;font:inherit;background:var(--papel);color:inherit;min-width:0}
+.lista-res{list-style:none;margin:8px 0 14px;padding:0;display:grid;gap:8px}
+.lista-res>li{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:12px 14px;border-radius:14px;background:var(--papel);border:1px solid var(--linha)}
+.lista-res>li.vazio{display:block}
+.lista-res time{font-weight:800;font-size:17px;min-width:48px;font-variant-numeric:tabular-nums}
+.lista-res>li>div:not(.res-bts){flex:1;min-width:160px}.lista-res small{display:block;color:var(--mudo)}
+.lista-res .res-bts{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lista-res.eventos a{display:flex;align-items:center;gap:14px;width:100%;color:inherit;text-decoration:none}
+.lista-res.eventos a div{flex:1}
+.st-res{font-style:normal;font-weight:700;font-size:12.5px;padding:2px 10px;border-radius:999px;background:var(--creme2);color:var(--tinta2)}
+.res-confirmada .st-res{background:var(--oliva-cl);color:var(--oliva)}.res-pendente .st-res{background:var(--ouro-cl);color:#6B4A0E}
+.res-chegou{opacity:.75}.res-naoveio,.res-cancelada{opacity:.55}
+.data-res{min-height:44px;border:1.5px solid var(--linha);border-radius:10px;padding:0 10px;font:inherit;background:var(--papel);color:inherit}
+.campo-linha{flex:1;min-width:180px;min-height:44px;border:1.5px solid var(--linha);border-radius:10px;padding:0 12px;font:inherit;background:var(--papel);color:inherit}
+.convidados{list-style:none;margin:10px 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.conv{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid var(--linha);background:var(--papel);color:var(--tinta);font:inherit;text-align:left;cursor:pointer}
+.conv b{flex:1}.conv small{color:var(--mudo)}.conv .ico{width:20px;height:20px;flex:none}
+.conv.on{border-color:var(--oliva);background:var(--oliva-cl)}.conv.on .ico{color:var(--oliva)}
+.lotacao{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:16px 18px;margin:0 0 12px;border-radius:var(--raio,16px);background:var(--papel);border:1px solid var(--linha)}
+.lotacao small{display:block;color:var(--mudo)}.lotacao b{font-size:40px;line-height:1}.lotacao b span{font-size:18px;color:var(--mudo);font-weight:600}
+.lotacao .barra{flex:1;min-width:160px;height:14px;border-radius:99px;background:var(--creme2);overflow:hidden}
+.lotacao .barra i{display:block;height:100%;background:var(--oliva);border-radius:99px}
+.lotacao.cheia .barra i{background:var(--terra)}.lotacao em{font-style:normal;font-weight:700}
+.senha-mini{display:inline-grid;place-items:center;min-width:34px;height:34px;padding:0 6px;border-radius:10px;background:var(--tinta);color:#fff;font-weight:800;font-size:17px;margin-left:auto}
+.senha-grande{display:flex;flex-direction:column;align-items:center;gap:2px;margin:6px 0 14px;padding:16px;border-radius:var(--raio,16px);background:var(--tinta);color:#fff;text-align:center}
+.senha-grande small{opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.08em}.senha-grande b{font-size:72px;line-height:1}.senha-grande span{opacity:.85;font-size:13.5px}
+.painel-senhas{min-height:calc(100vh - 140px);display:flex;flex-direction:column;gap:14px}
+.painel-senhas header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.painel-senhas h1{margin:0}
+.senhas-cols{flex:1;display:grid;grid-template-columns:1fr 1.4fr;gap:14px}
+.senhas-cols section{border-radius:var(--raio,16px);padding:18px;background:var(--papel);border:1px solid var(--linha)}
+.senhas-cols h2{margin:0 0 14px;font-size:clamp(20px,2.6vw,34px);text-transform:uppercase}
+.senhas-cols .senhas-ok{background:var(--oliva);border-color:var(--oliva);color:#fff}.senhas-ok h2{color:#fff}
+.senhas{display:flex;flex-wrap:wrap;gap:12px}
+.senhas b{display:grid;place-items:center;min-width:clamp(70px,9vw,140px);padding:6px 12px;border-radius:14px;font-size:clamp(40px,7vw,110px);line-height:1.1;font-variant-numeric:tabular-nums;background:var(--creme2);color:var(--tinta)}
+.senhas-ok .senhas b{background:#fff;color:var(--oliva)}
+.senhas b.nova{animation:senha-pisca 1s ease-in-out 4}
+@keyframes senha-pisca{50%{transform:scale(1.08);box-shadow:0 0 0 6px rgba(255,255,255,.45)}}
+:fullscreen .painel-senhas{min-height:100vh;padding:20px}
+.kds .ticket li em.kn.etapa{background:#DCE5B8;color:#4B5A1C;text-transform:uppercase}
+.casa-prato{margin-top:6px}
+@media (max-width:599px){.tres-c{grid-template-columns:1fr}.pratos-dia li{grid-template-columns:1fr 1fr}.pratos-dia li b{grid-column:1 / -1}.senhas-cols{grid-template-columns:1fr}.lotacao b{font-size:32px}}
+@media (prefers-reduced-motion:reduce){.senhas b.nova{animation:none}}
+
+/* ---------- Relatórios no celular: período quebra linha e o gráfico por hora rola dentro do cartão ---------- */
+.per-filtro .chips{flex-wrap:wrap}
+@media (max-width:899px){.barras{overflow-x:auto;max-width:100%}.barras>div{min-width:14px}}

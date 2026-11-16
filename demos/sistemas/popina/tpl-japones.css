@@ -144,3 +144,6 @@ body.tpl-japones .louro-img{content:url(img/tj-sakura2.webp?v=1);width:150px!imp
   body.tpl-japones .folhas-img{display:block!important;content:url(img/tj-sakura.webp?v=1);width:315px!important;top:0!important}
   body.tpl-japones main>*{position:relative;z-index:1}
 }
+
+/* celular: o gráfico e o botão grande da mesa não passam da tela (a fonte e as placas do japonês são mais largas) */
+@media (max-width:899px){body.tpl-japones .g-painel>*,body.tpl-japones .g-lado,body.tpl-japones .g-card{min-width:0;max-width:100%}body.tpl-japones .barra-acoes .bt.grande{min-width:0;white-space:normal}body.tpl-japones main{overflow-x:clip}}

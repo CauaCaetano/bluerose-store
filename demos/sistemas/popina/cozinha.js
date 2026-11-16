@@ -1,8 +1,9 @@
 // Popina · tela da cozinha e do bar (KDS): cada envio vira um ticket, na ordem de chegada, com o tempo correndo.
 // "Começar" e "Pronto" avisam o garçom na hora (a fila dele mostra o prato pronto).
-import { db, t, tempo, minutos, comanda, mudarStatus } from './loja.js?v=19';
-import { registrar, acao } from './nucleo.js?v=19';
-import { ico, toast, bip, folha } from './ui.js?v=19';
+import { db, t, tempo, minutos, comanda, mudarStatus, ondeComanda, tem, prod } from './loja.js?v=20';
+import { ETAPAS, ALERGENOS } from './precos.js?v=20';
+import { registrar, acao } from './nucleo.js?v=20';
+import { ico, toast, bip, folha } from './ui.js?v=20';
 
 let setor = (() => { try { const s = localStorage.getItem('popina-setor'); return s === 'bar' ? 'bar' : 'cozinha'; } catch { return 'cozinha'; } })();
 let vistos = new Set();
@@ -18,7 +19,10 @@ function tickets() {
   });
   return l.sort((a, b) => a.env - b.env);
 }
-const ONDE = (c) => (c.tipo === 'mesa' ? `Mesa ${c.mesa}` : c.tipo === 'delivery' ? `Delivery #${c.num}` : `Balcão #${c.num}`);
+const ONDE = (c) => ondeComanda(c);
+const NOME_ETAPA = Object.fromEntries(ETAPAS);
+// alergênicos do prato (função ligada): a cozinha vê destacado o que o prato contém
+const alergenos = (i) => (tem('alergenicos') ? (prod(i.prod)?.alergenos || []).map((a) => ALERGENOS.find((x) => x[0] === a)).filter((x) => x && x[2] === 'contem').map((x) => x[1]) : []);
 // relógio que anda de segundo em segundo (mm:ss) em cada comanda da tela
 const mmss = (ms) => { const s2 = Math.max(0, Math.floor(ms / 1000)); const h = Math.floor(s2 / 3600), m = Math.floor((s2 % 3600) / 60), x = s2 % 60; return `${h ? h + ':' : ''}${String(m).padStart(2, '0')}:${String(x).padStart(2, '0')}`; };
 let relogio = 0;
@@ -26,16 +30,20 @@ let relogio = 0;
 // comanda de papel pendurada no trilho, sem botões; tocar na comanda abre as ações (começar, pronto, item a item, imprimir)
 const opcao = (a) => { const n = String(a.nome); return n.includes(': ') ? n.split(': ').slice(1).join(': ') : n; };
 function notas(i) {
-  const l = (i.adic || []).map((a) => { const grupo = String(a.nome).split(': ')[0]; const forte = /ponto/i.test(grupo);
-    return `<em class="kn ${forte ? 'forte' : ''}">${ico('fala')}${t(String(a.nome).includes(': ') ? opcao(a) : '+ ' + a.nome)}</em>`; });
-  if (i.obs) { const sem = /^\s*(sem|não|nao|tirar)\b/i.test(i.obs); l.push(`<em class="kn ${sem ? 'forte alerta' : ''}">${ico(sem ? 'alerta' : 'fala')}${t(i.obs)}</em>`); }
+  // etapa do prato (sequência), componentes do combo, ponto e pimenta destacados, alergênicos e observação
+  const l = i.etapa ? [`<em class="kn etapa">${ico('chef')}${t(NOME_ETAPA[i.etapa] || i.etapa)}</em>`] : [];
+  (i.combo || []).forEach((x) => l.push(`<em class="kn">${ico('cloche')}${t(x.grupo)}: ${t(x.nome)}</em>`));
+  (i.adic || []).forEach((a) => { const grupo = String(a.nome).split(': ')[0]; const forte = /ponto|pimenta/i.test(grupo);
+    l.push(`<em class="kn ${forte ? 'forte' : ''}">${ico('fala')}${t(String(a.nome).includes(': ') ? (forte ? String(a.nome) : opcao(a)) : '+ ' + a.nome)}</em>`); });
+  const alg = alergenos(i); if (alg.length) l.push(`<em class="kn forte alerta">${ico('alerta')}Contém ${t(alg.join(', ').toLowerCase())}</em>`);
+  if (i.obs) { const sem = /^\s*(sem|não|nao|tirar)\b|alerg/i.test(i.obs); l.push(`<em class="kn ${sem ? 'forte alerta' : ''}">${ico(sem ? 'alerta' : 'fala')}${t(i.obs)}</em>`); }
   return l.join('');
 }
 function ticket(k) {
   const m = minutos(k.env), atrasado = k.estado === 'preparo' && m >= 10;
-  const prontos = k.itens.filter((i) => i.status === 'pronto' || i.status === 'entregue').length, ico2 = k.c.tipo === 'mesa' ? 'mesa' : k.c.tipo === 'delivery' ? 'moto' : 'sacola';
+  const prontos = k.itens.filter((i) => i.status === 'pronto' || i.status === 'entregue').length, ico2 = k.c.tipo === 'mesa' ? 'mesa' : k.c.tipo === 'delivery' ? 'moto' : k.c.tipo === 'cartao' ? 'cartao' : k.c.tipo === 'evento' ? 'coroa' : 'sacola';
   const quando = k.estado === 'pronto' ? Math.max(...k.itens.map((i) => i.pronto || k.env)) : k.env;
-  const sub = k.c.tipo === 'mesa' ? `${ico('pessoas')}${k.c.pessoas || 2} pessoas` : t(k.c.cliente?.nome || (k.c.tipo === 'delivery' ? 'Entrega' : 'Retirada no balcão'));
+  const sub = k.c.tipo === 'mesa' ? `${ico('pessoas')}${k.c.pessoas || 2} pessoas${k.c.rodizio ? ' · rodízio' : ''}` : k.c.tipo === 'cartao' ? t(k.c.nome || 'Comanda individual') : k.c.tipo === 'evento' ? 'Evento' : t(k.c.cliente?.nome || (k.c.tipo === 'delivery' ? 'Entrega' : 'Retirada no balcão'));
   const rel = k.estado === 'pronto' ? `<span class="relogio pronto" data-desde="${quando}">${ico('okcirc')}<small>Pronto há <b>${mmss(Date.now() - quando)}</b></small></span>`
     : `<span class="relogio ${atrasado ? 'atrasado' : ''}" data-desde="${quando}">${atrasado ? ico('relogio') : ''}<b>${mmss(Date.now() - quando)}</b></span>`;
   return `<article class="ticket ${k.estado}" data-acao="ticket-abrir" data-c="${k.c.id}" data-env="${k.env}" tabindex="0" role="button" aria-label="${ONDE(k.c)}: abrir ações">
@@ -86,7 +94,7 @@ acao('imprimir-ticket', (b) => {
   const e = (x) => String(x ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
   w.document.write(`<!doctype html><meta charset="utf-8"><title>${e(ONDE(c))}</title><style>@page{size:80mm auto;margin:4mm}body{font:14px/1.35 system-ui,sans-serif;width:72mm;margin:0}h1{font-size:22px;margin:0 0 2px}p{margin:0 0 8px;font-size:12px}li{margin:6px 0;font-size:16px}em{display:block;font-style:normal;font-weight:700;text-transform:uppercase;font-size:13px}ul{list-style:none;padding:0;border-top:1px dashed #000;border-bottom:1px dashed #000;padding:6px 0}</style>
     <h1>${e(ONDE(c))}</h1><p>${new Date(env).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}${c.garcom ? ` · ${e(c.garcom)}` : ''}${c.cliente?.nome ? ` · ${e(c.cliente.nome)}` : ''}</p>
-    <ul>${its.map((i) => `<li><b>${i.qtd}× ${e(i.nome)}</b>${(i.adic || []).map((a) => `<em>${e(a.nome)}</em>`).join('')}${i.obs ? `<em>${e(i.obs)}</em>` : ''}</li>`).join('')}</ul><script>print();setTimeout(()=>close(),400)<\/script>`);
+    <ul>${its.map((i) => `<li><b>${i.qtd}× ${e(i.nome)}</b>${i.etapa ? `<em>${e(NOME_ETAPA[i.etapa] || i.etapa)}</em>` : ''}${(i.combo || []).map((x) => `<em>${e(x.grupo)}: ${e(x.nome)}</em>`).join('')}${(i.adic || []).map((a) => `<em>${e(a.nome)}</em>`).join('')}${alergenos(i).length ? `<em>Contém ${e(alergenos(i).join(', '))}</em>` : ''}${i.obs ? `<em>${e(i.obs)}</em>` : ''}</li>`).join('')}</ul><script>print();setTimeout(()=>close(),400)<\/script>`);
   w.document.close();
 });
 const doTicket = (b) => { const c = comanda(b.dataset.c); const env = Number(b.dataset.env); return { c, itens: c ? c.itens.filter((i) => i.enviado === env && !i.cancelado && (setor === 'tudo' || i.setor === setor)) : [] }; };

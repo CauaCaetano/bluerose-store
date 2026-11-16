@@ -1,13 +1,14 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=19';
-import './cozinha.js?v=19';
-import './caixa.js?v=19';
-import './pedidos.js?v=19';
-import './mais.js?v=19';
-import './gestao.js?v=19';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=19';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=19';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=19';
+import './salao.js?v=20';
+import './cozinha.js?v=20';
+import './caixa.js?v=20';
+import './pedidos.js?v=20';
+import './mais.js?v=20';
+import './gestao.js?v=20';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=20';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=20';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=20';
+import { abrirEscolha } from './escolha.js?v=20';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -88,12 +89,13 @@ if (!real) {
 }
 document.body.addEventListener('pointerdown', () => { document.body.dataset.tocou = '1'; }, { once: true });
 
-// primeira vez neste aparelho: perguntar o papel
-if (!papel() && !q.get('papel')) {
-  setTimeout(() => folha({ titulo: 'Quem vai usar este aparelho?', corpo: `<p class="mudo">Cada celular, tablet ou computador do restaurante abre direto na tela que precisa. Dá para trocar depois em Mais › Este aparelho.</p>
+// primeira entrada do dono: escolher o tipo da casa (template); só depois pergunta o papel do aparelho
+const escolher = !lojaCfg().escolhido && !q.get('papel') && (!papel() || papel() === 'dono');
+const perguntarPapel = () => folha({ titulo: 'Quem vai usar este aparelho?', corpo: `<p class="mudo">Cada celular, tablet ou computador do restaurante abre direto na tela que precisa. Dá para trocar depois em Mais › Este aparelho.</p>
     <div class="papeis">${Object.entries(PAPEIS).map(([k, [nome]]) => `<button type="button" class="papel" data-p="${k}"><b>${nome}</b><small>${{ garcom: 'Celular do garçom: fila do que fazer e as mesas', cozinha: 'Tela da cozinha e do bar', caixa: 'Computador do caixa: fechar contas', dono: 'Vê tudo, relatórios e ajustes' }[k]}</small></button>`).join('')}</div>`,
-  aoAbrir: (fo, fechar) => $$('[data-p]', fo).forEach((b) => { b.onclick = () => { setPapel(b.dataset.p); fechar(); ir(PAPEIS[b.dataset.p][1]); }; }) }), 300);
-}
+  aoAbrir: (fo, fechar) => $$('[data-p]', fo).forEach((b) => { b.onclick = () => { setPapel(b.dataset.p); fechar(); ir(PAPEIS[b.dataset.p][1]); }; }) });
+if (escolher) setTimeout(() => abrirEscolha({ primeira: true, aoFechar: () => { if (!papel() && !q.get('papel')) setTimeout(perguntarPapel, 250); } }), 200);
+else if (!papel() && !q.get('papel')) setTimeout(perguntarPapel, 300);
 iniciarRotas(); contadores();
 // a primeira tela já está desenhada: some a abertura (setTimeout, porque requestAnimationFrame para em aba escondida)
 setTimeout(() => { document.body.classList.add('pronto'); setTimeout(() => document.getElementById('abertura')?.remove(), 400); }, 0);

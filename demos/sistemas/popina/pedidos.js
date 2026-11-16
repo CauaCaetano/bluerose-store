@@ -1,8 +1,9 @@
 // Popina · balcão e delivery: pedidos por etapa, pedido novo (telefone, balcão ou cardápio online), taxa por bairro e WhatsApp pronto.
-import { db, t, din, dinCurto, tempo, comanda, conta, novoPedido, enviar, grava, itensValidos, linkCardapio, clientePorTel, lojaCfg } from './loja.js?v=19';
-import { registrar, acao, ir } from './nucleo.js?v=19';
-import { ico, folha, toast, $, $$ } from './ui.js?v=19';
-import { linhaItem, abrirSeletor } from './salao.js?v=19';
+import { db, t, din, dinCurto, tempo, comanda, conta, novoPedido, enviar, grava, itensValidos, linkCardapio, clientePorTel, lojaCfg, tem, encomendaValida, antecedencia } from './loja.js?v=20';
+import { ymd } from './precos.js?v=20';
+import { registrar, acao, ir } from './nucleo.js?v=20';
+import { ico, folha, toast, $, $$ } from './ui.js?v=20';
+import { linhaItem, abrirSeletor } from './salao.js?v=20';
 
 const ETAPAS = [['novo', 'Recebidos'], ['preparo', 'Preparando'], ['saiu', 'Saiu para entrega'], ['pronto_retirar', 'Pronto para retirar']];
 function etapa(c) {
@@ -12,12 +13,15 @@ function etapa(c) {
   if (it.every((i) => ['pronto', 'entregue'].includes(i.status))) return c.tipo === 'delivery' ? 'preparo_ok' : 'pronto_retirar';
   return 'preparo';
 }
+// encomenda para outro dia: fica fora do quadro até o dia (aparece em Encomendas)
+export const encomendaFutura = (c) => !!c.encomenda?.para && ymd(c.encomenda.para) > ymd();
+export const quandoEnc = (ts) => new Date(ts).toLocaleString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 const zap = (tel, msg) => `https://wa.me/55${String(tel || '').replace(/\D/g, '').replace(/^55/, '')}?text=${encodeURIComponent(msg)}`;
 function msgDe(c, tipo) {
   const v = conta(c), nome = (c.cliente?.nome || '').split(' ')[0];
   if (tipo === 'confirmado') return `Olá, ${nome}! Seu pedido #${c.num} na ${db.config.nome} foi confirmado e já está sendo preparado. Total ${dinCurto(v.total)}. Obrigado!`;
   if (tipo === 'saiu') return `${nome}, seu pedido #${c.num} saiu para entrega e chega em instantes! ${c.pagarNaEntrega ? `Pagamento na entrega: ${c.pagarNaEntrega}, ${dinCurto(v.falta)}.` : ''}`;
-  return `${nome}, seu pedido #${c.num} está pronto para retirar na ${db.config.nome}. Total ${dinCurto(v.total)}.`;
+  return `${nome}, seu pedido #${c.num}${c.senha ? ` (senha ${c.senha})` : ''} está pronto para retirar na ${db.config.nome}. Total ${dinCurto(v.total)}.`;
 }
 // comanda de papel pendurada no trilho (conceito do GPT: relatorios/popina/conceitos-gpt/4-pedidos-pc.png)
 function cartao(c) {
@@ -28,7 +32,8 @@ function cartao(c) {
     : (e === 'pronto_retirar' ? `<a class="bt oliva" href="#caixa/${c.id}">${ok('Retirado')}</a>` : '');
   const pg = v.falta <= 0 ? ['pago', 'Pago'] : c.pagarNaEntrega ? ['entrega', `Paga na entrega: ${t(c.pagarNaEntrega)}`] : ['apagar', 'A pagar'];
   const onde = c.tipo === 'delivery' ? `${ico('pino')}${t([c.cliente?.end, c.cliente?.bairro].filter(Boolean).join(' · '))}` : `${ico('loja')}Retirada no balcão`;
-  return `<article class="ticket pd ${e === 'preparo_ok' ? 'preparo' : e === 'pronto_retirar' ? 'pronto' : e}"><header><i class="tk-ico">${ico(c.tipo === 'delivery' ? 'moto' : 'sacola')}</i><div class="tk-tit"><b>#${c.num} · ${t(c.cliente?.nome || 'Cliente')}</b><small>${onde}</small></div><span class="relogio"><b>${tempo(c.aberta)}</b></span></header>
+  return `<article class="ticket pd ${e === 'preparo_ok' ? 'preparo' : e === 'pronto_retirar' ? 'pronto' : e}"><header><i class="tk-ico">${ico(c.tipo === 'delivery' ? 'moto' : 'sacola')}</i><div class="tk-tit"><b>#${c.num} · ${t(c.cliente?.nome || 'Cliente')}</b><small>${onde}</small></div>${c.senha ? `<span class="senha-mini" title="Senha">${c.senha}</span>` : ''}<span class="relogio"><b>${tempo(c.aberta)}</b></span></header>
+    ${c.encomenda?.para ? `<p class="pg entrega">${ico('calendario')}Encomenda para ${quandoEnc(c.encomenda.para)}</p>` : ''}
     <p class="pd-itens">${itensValidos(c).map((i) => `${i.qtd}× ${t(i.nome)}`).join(', ') || '<em>sem itens</em>'}</p>
     <p class="pg ${pg[0]}">${pg[1]}</p>
     <footer><b>${dinCurto(v.total)}</b><span></span>${bt || `<a class="bt-ico" href="#pedidos/ver/${c.id}" aria-label="Abrir pedido">${ico('dir')}</a>`}</footer></article>`;
@@ -38,17 +43,19 @@ registrar('pedidos', {
   html(modo, x) {
     if (modo === 'novo') return formNovo(x || 'delivery');
     if (modo === 'ver') { const c = comanda(x); return c ? verPedido(c) : '<div class="vazio">Pedido não encontrado (talvez já tenha sido fechado).</div>'; }
-    const ps = db.comandas.filter((c) => c.tipo !== 'mesa');
+    const ps = db.comandas.filter((c) => (c.tipo === 'delivery' || c.tipo === 'balcao') && !encomendaFutura(c));
+    const futuras = db.comandas.filter(encomendaFutura).length;
     const grupos = { novo: [], preparo: [], saiu: [], pronto_retirar: [] };
     ps.forEach((c) => { const e = etapa(c); (grupos[e === 'preparo_ok' ? 'preparo' : e] ||= []).push(c); });
     const COL = { novo: 'novo', preparo: 'preparo', saiu: 'saiu', pronto_retirar: 'pronto' };
     return `<header class="cab-pedidos"><h1><img src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74">Pedidos<img src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></h1><img class="aqueduto-img" src="img/aqueduto.webp?v=2" alt="" width="340" height="88">
-      <div class="linha-bts"><a class="bt claro" href="#pedidos/novo/balcao">${ico('mais2')}Balcão</a><a class="bt cheio" href="#pedidos/novo/delivery">${ico('moto')}Delivery</a></div></header>
-      <div class="link-cardapio">${ico('qr')}<div><b>Cardápio online para delivery</b><span>Os clientes pedem pelo link e o pedido cai aqui sozinho.</span></div><button type="button" class="bt oliva" data-acao="copiar-link">${ico('link')}Copiar link</button></div>
+      <div class="linha-bts">${tem('senha') ? `<a class="bt claro" href="#senhas">${ico('telacheia')}Painel de retirada</a>` : ''}${tem('encomendas') ? `<a class="bt claro" href="#mais/encomendas">${ico('calendario')}Encomendas${futuras ? ` (${futuras})` : ''}</a>` : ''}<a class="bt claro" href="#pedidos/novo/balcao">${ico('mais2')}Balcão</a>${tem('delivery') ? `<a class="bt cheio" href="#pedidos/novo/delivery">${ico('moto')}Delivery</a>` : ''}</div></header>
+      ${tem('delivery') ? `<div class="link-cardapio">${ico('qr')}<div><b>Cardápio online para delivery</b><span>Os clientes pedem pelo link e o pedido cai aqui sozinho.</span></div><button type="button" class="bt oliva" data-acao="copiar-link">${ico('link')}Copiar link</button></div>` : ''}
       <section class="kds quadro pd-quadro">${ETAPAS.map(([e, r]) => `<div class="kds-col ${COL[e]}"><h2 class="placa">${r.toUpperCase()} <span>(${grupos[e]?.length || 0})</span></h2><div class="trilho" aria-hidden="true"></div>${(grupos[e] || []).map(cartao).join('') || '<div class="vazio-quadro">Nada aqui.</div>'}</div>`).join('')}</section>`;
   },
-  montar(el, modo) {
+  montar(el, modo, x) {
     if (modo !== 'novo') return;
+    if (x === 'delivery' && !tem('delivery')) { el.innerHTML = `<div class="vazio">O delivery está desligado. Ligue em Gestão › Aparência e templates.</div>`; return; }
     const f = $('form', el); const tipo = f.dataset.tipo;
     const taxa = () => { const b = db.bairros.find((x) => x.nome === f.bairro?.value); $('[data-taxa]', el) && ($('[data-taxa]', el).textContent = b ? `Taxa de entrega: ${din(b.taxa)}` : ''); };
     f.bairro?.addEventListener('change', taxa); taxa();
@@ -64,7 +71,10 @@ registrar('pedidos', {
       e.preventDefault();
       if (!f.nome.value.trim()) return toast('Escreva o nome do cliente');
       if (tipo === 'delivery' && (!f.end.value.trim() || !f.bairro.value)) return toast('Endereço e bairro são obrigatórios na entrega');
-      const c = novoPedido(tipo, { nome: f.nome.value.trim(), tel: f.tel?.value || '', end: f.end?.value || '', bairro: f.bairro?.value || '' }, { origem: f.origem.value, pagarNaEntrega: f.pagar?.value || '' });
+      // encomenda: data e hora futuras, com a antecedência mínima do restaurante
+      let enc = null;
+      if (f.para?.value) { const ts = encomendaValida(f.para.value); if (!ts) return toast(`A encomenda precisa de pelo menos ${antecedencia()} horas de antecedência`); enc = { para: ts }; }
+      const c = novoPedido(tipo, { nome: f.nome.value.trim(), tel: f.tel?.value || '', end: f.end?.value || '', bairro: f.bairro?.value || '' }, { origem: f.origem.value, pagarNaEntrega: f.pagar?.value || '', ...(enc ? { encomenda: enc } : {}) });
       ir(`pedidos/ver/${c.id}`); setTimeout(() => abrirSeletor(c), 80);
     };
   },
@@ -78,12 +88,15 @@ function formNovo(tipo) {
       <label class="campo"><span>Endereço (rua, número, complemento)</span><input name="end" required></label>
       <label class="campo"><span>Bairro</span><select name="bairro" required><option value="">Escolha</option>${db.bairros.map((b) => `<option>${t(b.nome)}</option>`).join('')}</select><small data-taxa class="mudo"></small></label>
       <label class="campo"><span>Paga na entrega com</span><select name="pagar"><option value="">Já pagou / pagar no balcão</option><option>Pix</option><option>Dinheiro</option><option>Cartão (maquininha)</option></select></label>` : ''}
+      ${tem('encomendas') ? `<label class="campo"><span>Encomenda para (opcional: deixe vazio se é para agora)</span><input name="para" type="datetime-local"><small class="mudo">Antecedência mínima de ${antecedencia()} horas. A encomenda entra no quadro no dia.</small></label>` : ''}
       <label class="campo"><span>Pedido feito por</span><select name="origem"><option>${tipo === 'delivery' ? 'telefone' : 'balcão'}</option><option>WhatsApp</option><option>Instagram</option></select></label>
       <button class="bt cheio grande">Escolher os itens</button></form>`;
 }
 function verPedido(c) {
   const v = conta(c), rasc = c.itens.filter((i) => i.status === 'rascunho');
   return `<header class="cab-tela"><a class="bt-ico" href="#pedidos" aria-label="Voltar">${ico('voltar')}</a><div><h1>#${c.num} · ${t(c.cliente?.nome || '')}</h1><p>${c.tipo === 'delivery' ? `${t(c.cliente?.end || '')} · ${t(c.cliente?.bairro || '')}` : 'Retirada no balcão'}</p></div></header>
+    ${c.senha ? `<div class="senha-grande"><small>Senha</small><b>${c.senha}</b><span>Diga ao cliente: quando aparecer no painel, é só retirar</span></div>` : ''}
+    ${c.encomenda?.para ? `<p class="aviso ouro">${ico('calendario')}Encomenda para ${quandoEnc(c.encomenda.para)}${encomendaFutura(c) ? '. Entra no quadro da cozinha no dia.' : ''}</p>` : ''}
     <ul class="itens">${c.itens.map((i) => linhaItem(c, i)).join('')}</ul>
     <section class="totais"><div><span>Itens</span><b>${din(v.sub)}</b></div>${v.entrega ? `<div><span>Entrega</span><b>${din(v.entrega)}</b></div>` : ''}<div class="total"><span>Total</span><b>${din(v.total)}</b></div></section>
     <div class="barra-acoes"><button type="button" class="bt" data-acao="cardapio-pick" data-c="${c.id}">${ico('mais2')}Itens</button>
