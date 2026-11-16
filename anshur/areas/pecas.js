@@ -6,7 +6,7 @@
   const P = raiz.PECAS, R = raiz.ANSHUR_AREAS;
   if (!R) return;
   // sem as regras (areas/pecas-regras.js não carregou): fica honesta como "Em breve", sem tela
-  if (!P) { R.registrar({ id: 'pecas', nome: 'Peças e Estoque', curto: 'Peças', ordem: 50, pronta: false, perfis: ['dono', 'gerente', 'oficina', 'financeiro', 'auditor'], descricao: 'Catálogo, SKU, localização, entradas, saídas, inventário e compras.', icone: '<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>', previsto: ['Catálogo de peças com SKU e localização', 'Entradas, saídas, transferências entre lojas e inventário', 'Fornecedores, compras e estoque mínimo', 'Custos e compras no Financeiro'], jaExiste: 'Hoje: compras de peças podem ser lançadas como contas a pagar no Financeiro.' }); return; }
+  if (!P) { R.registrar({ id: 'pecas', nome: 'Peças e Estoque', curto: 'Peças', ordem: 50, pronta: false, perfis: ['dono', 'gerente', 'oficina', 'financeiro', 'auditor'], descricao: 'Catálogo, SKU, localização, entradas, saídas, inventário, compras, curva ABC, giro e estoque parado.', icone: '<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>', previsto: ['Catálogo de peças com SKU e localização', 'Entradas, saídas, transferências entre lojas e inventário', 'Fornecedores, compras e estoque mínimo', 'Custos e compras no Financeiro'], jaExiste: 'Hoje: compras de peças podem ser lançadas como contas a pagar no Financeiro.' }); return; }
   const VER = ['dono', 'gerente', 'oficina', 'financeiro', 'auditor'];
   let U = null;
   const F = () => raiz.FINANCEIRO || null;
@@ -54,6 +54,7 @@
     const r = P.resumo(est(), fl()), ab = P.abaixoMinimo(est(), fl()), pp = P.garantir(est());
     const movs = pp.movimentos.filter((m) => !fl().loja || m.loja === fl().loja || m.para === fl().loja).slice().sort((a, b) => String(b.quando).localeCompare(String(a.quando))).slice(0, 10);
     const abc = P.curvaABC(est(), { hoje: U.hojeISO(), loja: fl().loja });
+    const par = P.parado(est(), { hoje: U.hojeISO(), ...fl() });
     U.tela.innerHTML = cab('Peças e Estoque', `Saldo e custo médio recalculados de cada movimento${fl().loja ? ' · loja ' + esc(fl().loja) : ''}. Compra vira conta a pagar; venda de balcão, conta a receber.`, botoes()) + `
       <div class="kpis fin-k">
         <a class="kpi k-marfim" href="#pc-catalogo"><span class="rot">${I.caixa}Estoque a custo</span><span class="val">${brl(r.valor)}</span><span class="exp">${r.itens} ${r.itens === 1 ? 'peça com saldo' : 'peças com saldo'}</span></a>
@@ -65,7 +66,10 @@
         <section class="painel"><div class="painel-cab"><h2>${I.alerta}Abaixo do mínimo</h2><p><a class="link" href="#pc-compras">Pedido sugerido</a></p></div>
           ${ab.length ? `<ul class="fin-saldos">${ab.slice(0, 8).map((x) => `<li><span><b>${esc(x.peca.descricao)}</b><span>${esc(x.peca.sku)}${x.loja ? ' · ' + esc(x.loja) : ''} · mínimo ${q3(x.minimo)}</span></span><b class="${x.saldo <= 0 ? 'neg' : ''}">${q3(x.saldo)} ${esc(x.peca.unidade)}</b></li>`).join('')}</ul>` : vazio('Nenhuma peça abaixo do mínimo.')}</section>
         <section class="painel"><div class="painel-cab"><h2>${I.lista}Últimas movimentações</h2><p><a class="link" href="#pc-mov">Ver todas</a></p></div>${tabelaMov(movs, true)}</section>
-      </div>`;
+      </div>
+      <section class="painel bloco" id="pc-parado"><div class="painel-cab"><h2>${I.caixa}Estoque parado</h2><p><a class="link" href="#pc-abc">Giro e curva ABC</a></p></div>
+        <p class="sub" style="margin:4px 0 10px">Peças com saldo e sem nenhuma saída (OS ou balcão) há ${par.dias} dias ou mais: ${brl(par.valor)} a custo em ${par.linhas.length} ${par.linhas.length === 1 ? 'item' : 'itens'}. Dinheiro parado na prateleira: promoção, devolução ao fornecedor ou transferência para outra loja.</p>
+        ${par.linhas.length ? `<ul class="fin-saldos">${par.linhas.slice(0, 8).map((x) => `<li class="clicavel" tabindex="0" data-peca="${esc(x.peca.id)}"><span><b>${esc(x.peca.descricao)}</b><span>${esc(x.peca.sku)}${x.peca.local ? ' · ' + esc(x.peca.local) : ''} · ${x.ultimaSaida ? 'última saída há ' + x.semSaidaDias + ' dias' : 'nunca saiu (entrou há ' + x.semSaidaDias + ' dias)'}</span></span><b>${brl(x.valor)}</b></li>`).join('')}</ul>` : vazio(`Nenhuma peça parada há ${par.dias} dias ou mais.`)}</section>`;
     ligarBotoes();
   }
   const botoes = () => (editor() ? `<button class="btn btn-ouro" type="button" data-pc="entrada">${I.entra}<span>Entrada (compra)</span></button><button class="btn btn-linha" type="button" data-pc="xml">${I.doc}<span>Importar XML</span></button><button class="btn btn-linha" type="button" data-pc="balcao">${I.sai}<span>Venda de balcão</span></button><button class="btn btn-linha" type="button" data-pc="transf">${I.troca}<span>Transferir</span></button>` : '<span class="tag declarado">Só leitura</span>');
@@ -356,11 +360,14 @@
   let abcDias = 365;
   function telaABC() {
     const c = P.curvaABC(est(), { hoje: U.hojeISO(), dias: abcDias, loja: fl().loja });
-    U.tela.innerHTML = cab('Curva ABC', 'Peças ordenadas pelo valor consumido (OS e balcão, a custo). A: até 80% do valor; B: até 95%; C: o resto e o que não girou. Estoque mínimo e compras devem olhar primeiro a classe A.', '') + `
+    const g = new Map(P.giro(est(), { hoje: U.hojeISO(), dias: abcDias, loja: fl().loja }).map((x) => [x.peca.id, x]));
+    const cob = (x) => (!x || !(x.qtd > 0) ? '—' : x.cobertura === Infinity ? 'sem saída' : x.cobertura > 999 ? '999+ dias' : x.cobertura + ' dias');
+    const giroTxt = (x) => (!x || x.giro == null ? '—' : x.giro.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '×');
+    U.tela.innerHTML = cab('Curva ABC e giro', 'Peças ordenadas pelo valor consumido (OS e balcão, a custo). A: até 80% do valor; B: até 95%; C: o resto e o que não girou. Giro = consumo levado para 12 meses ÷ estoque a custo hoje; cobertura = quantos dias o saldo dura no ritmo do período. Estoque mínimo e compras devem olhar primeiro a classe A; a classe C sem saída é estoque parado.', '') + `
       <div class="kpis fin-k fin-kpis3">${['A', 'B', 'C'].map((k) => `<div class="kpi ${k === 'A' ? 'k-marfim' : ''}"><span class="rot">${I.barras}Classe ${k}</span><span class="val">${c.resumo[k].n}</span><span class="exp">${brl(c.resumo[k].valor)} consumidos</span></div>`).join('')}</div>
       <section class="painel"><div class="fin-filtros"><div class="abas-modo" role="group" aria-label="Período">${[[90, '90 dias'], [180, '6 meses'], [365, '12 meses']].map(([v, n]) => `<button type="button" data-dias="${v}" aria-pressed="${abcDias === v}">${n}</button>`).join('')}</div></div>
-        ${c.linhas.length ? `<div class="tabela-wrap"><table class="tabela fin-tab"><thead><tr><th>Classe</th><th>Peça</th><th class="n">Consumo</th><th class="n oc-esconde">% acumulado</th></tr></thead><tbody>
-          ${c.linhas.map((l) => `<tr data-peca="${esc(l.peca.id)}" class="clicavel" tabindex="0"><td><span class="risco ${l.classe === 'A' ? 'alto' : l.classe === 'B' ? 'medio' : 'baixo'}">${l.classe}</span></td><td><b>${esc(l.peca.descricao)}</b><span class="fin-sub">${esc(l.peca.sku)}${l.semGiro ? ' · sem giro no período' : ''}</span></td><td class="n">${brl(l.valor)}</td><td class="n oc-esconde">${l.valor ? U.pct(l.acumulado) : '—'}</td></tr>`).join('')}</tbody></table></div>` : vazio('Nenhuma peça cadastrada.')}</section>`;
+        ${c.linhas.length ? `<div class="tabela-wrap"><table class="tabela fin-tab"><thead><tr><th>Classe</th><th>Peça</th><th class="n">Consumo</th><th class="n">Giro/ano</th><th class="n oc-esconde">Cobertura</th><th class="n oc-esconde">% acumulado</th></tr></thead><tbody>
+          ${c.linhas.map((l) => { const x = g.get(l.peca.id); return `<tr data-peca="${esc(l.peca.id)}" class="clicavel" tabindex="0"><td><span class="risco ${l.classe === 'A' ? 'alto' : l.classe === 'B' ? 'medio' : 'baixo'}">${l.classe}</span></td><td><b>${esc(l.peca.descricao)}</b><span class="fin-sub">${esc(l.peca.sku)}${l.semGiro ? ' · sem giro no período' : ''}${x && x.qtd > 0 ? ' · ' + q3(x.qtd) + ' ' + esc(l.peca.unidade) + ' em estoque' : ''}</span></td><td class="n">${brl(l.valor)}</td><td class="n">${giroTxt(x)}</td><td class="n oc-esconde">${cob(x)}</td><td class="n oc-esconde">${l.valor ? U.pct(l.acumulado) : '—'}</td></tr>`; }).join('')}</tbody></table></div>` : vazio('Nenhuma peça cadastrada.')}</section>`;
     U.$$('[data-dias]', U.tela).forEach((b) => b.onclick = () => { abcDias = +b.dataset.dias; telaABC(); });
     ligarBotoes();
   }
@@ -447,14 +454,14 @@
   const IT = (aba, rotulo, curto, icone) => ({ aba, rotulo, curto, icone });
   R.registrar({
     id: 'pecas', nome: 'Peças e Estoque', curto: 'Peças', ordem: 50, pronta: true, inicio: 'pc-painel', perfis: VER,
-    descricao: 'Catálogo, SKU, localização, entradas, saídas, inventário e compras.',
+    descricao: 'Catálogo, SKU, localização, entradas, saídas, inventário, compras, curva ABC, giro e estoque parado.',
     icone: '<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',
     acao: { rotulo: 'Entrada de peças', href: '#pc-mov', novo: true },
     atalhos: ['pc-painel', 'pc-catalogo', 'pc-mov', 'pc-compras'],
     dados: { pecas: ['catalogo', 'movimentos', 'inventarios', 'pedidos', 'compras', 'vendas'], cadastros: ['clientes', 'fornecedores'] },
     menu: [
       { grupo: 'Estoque', itens: [IT('pc-painel', 'Painel de peças', 'Painel', '<path d="M4 13h6V4H4zM14 20h6V11h-6zM14 4v4h6V4zM4 20h6v-4H4z"/>'), IT('pc-catalogo', 'Catálogo de peças', 'Catálogo', '<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>'), IT('pc-mov', 'Movimentações', 'Movimentos', '<path d="M4 7h13l-3-3M20 17H7l3 3"/>')] },
-      { grupo: 'Controle', itens: [IT('pc-compras', 'Compras e estoque mínimo', 'Compras', '<path d="M3 4h2l2.4 11h11L21 7H7M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>'), IT('pc-inventario', 'Inventário', 'Inventário', '<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>'), IT('pc-abc', 'Curva ABC', 'ABC', '<path d="M4 20h16M7 16v-5M11 16V7M15 16v-7M19 16V5"/>')] }
+      { grupo: 'Controle', itens: [IT('pc-compras', 'Compras e estoque mínimo', 'Compras', '<path d="M3 4h2l2.4 11h11L21 7H7M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>'), IT('pc-inventario', 'Inventário', 'Inventário', '<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>'), IT('pc-abc', 'Curva ABC e giro', 'ABC', '<path d="M4 20h16M7 16v-5M11 16V7M15 16v-7M19 16V5"/>')] }
     ],
     telas: { 'pc-painel': T(telaPainel), 'pc-catalogo': T(telaCatalogo), 'pc-mov': T(telaMov), 'pc-inventario': T(telaInventario), 'pc-compras': T(telaCompras), 'pc-abc': T(telaABC) },
     permissoes: { 'pc-painel': VER, 'pc-catalogo': VER, 'pc-mov': VER, 'pc-inventario': VER, 'pc-compras': VER, 'pc-abc': VER },

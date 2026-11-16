@@ -76,7 +76,8 @@
           <div class="campo inteiro"><label for="f-modelo">Modelo</label><select id="f-modelo" data-k="modelo" ${t.marca && t.marca !== CG.OUTRO ? '' : 'disabled'} ${inv('modelo')}><option value="">${t.marca ? 'Escolha…' : 'Escolha a marca antes'}</option>${opcoes(modelos.map((m) => [m, m]).concat([[CG.OUTRO, 'Outro modelo (não está na lista)']]), t.marca === CG.OUTRO ? CG.OUTRO : t.modelo)}</select>${err('modelo')}
             ${fora ? `<p class="tc-fora" role="alert" id="tc-fora">${esc(CG.FORA)}<span>Não vamos inventar uma avaliação nem trocar por um modelo parecido. Escolha outra troca com um modelo da lista ou mande esta por mensagem.</span></p>` : ''}</div>
           <div class="campo"><label for="f-ano">Ano da máquina</label><input id="f-ano" data-k="ano" inputmode="numeric" maxlength="4" placeholder="Ex.: 2019" value="${esc(t.ano)}" ${inv('ano')}>${err('ano')}</div>
-          <div class="campo"><label for="f-horas">Horas no horímetro</label><input id="f-horas" data-k="horas" inputmode="numeric" placeholder="Ex.: 4200" value="${esc(t.horas)}" ${inv('horas')}>${err('horas')}</div>
+          ${CG.semHoras(t.tipo) ? '<div class="campo"><span class="rot-campo">Horas no horímetro</span><p class="sub" id="f-sem-horas">Implemento não tem horímetro: conta o ano e o estado.</p></div>'
+            : `<div class="campo"><label for="f-horas">Horas no horímetro</label><input id="f-horas" data-k="horas" inputmode="numeric" placeholder="Ex.: 4200" value="${esc(t.horas)}" ${inv('horas')}>${err('horas')}</div>`}
           <div class="campo inteiro"><label for="f-estado">Estado na troca</label><select id="f-estado" data-k="estado" ${inv('estado')}><option value="">Escolha…</option>${opcoes(CG.ESTADOS.map((e) => [e.id, `${e.nome} (nota ${e.nota} de 5)`]), t.estado)}</select>${err('estado')}</div>
           <div class="campo"><label for="f-pago">Quanto a revenda pagou na troca</label><input id="f-pago" data-k="pago" data-dinheiro inputmode="decimal" placeholder="R$ 185.000,00" value="${t.pago > 0 ? esc(realC(t.pago).slice(3)) : ''}" ${inv('pago')}>${err('pago')}</div>
           <div class="campo"><label for="f-vendido">Por quanto vendeu depois</label><input id="f-vendido" data-k="vendido" data-dinheiro inputmode="decimal" placeholder="R$ 210.000,00" value="${t.vendido > 0 ? esc(realC(t.vendido).slice(3)) : ''}" ${inv('vendido')}>${err('vendido')}</div>
@@ -160,7 +161,7 @@
       <section class="painel" aria-labelledby="tc-t2">
         <div class="painel-cab"><h2 id="tc-t2">Ordem da análise</h2><p>${porData ? 'Pela data da troca' : 'Pela ordem do cadastro'}</p></div>
         <p class="ajuda">O Anshur avalia uma troca por vez, da mais antiga para a mais recente, sem olhar quanto vocês pagaram nem por quanto venderam. A primeira usa só a base de mercado (preços pedidos em anúncios públicos); cada troca seguinte usa também as trocas de vocês que vieram antes dela, nunca as que vieram depois.${semData ? ` ${semData === CG.TOTAL ? 'Nenhuma troca tem data' : semData + ' trocas estão sem data'}: usamos a ordem do cadastro.` : ''}</p>
-        <ol class="tc-ordem">${maqs.map((m, k) => { const h = CG.historicoPara(k, maqs); return `<li><b>${k + 1}</b><div>${esc(m.marca + ' ' + m.modelo)} · ${m.ano} · ${m.horas.toLocaleString('pt-BR')} h${m.entrada ? ' · troca em ' + dataBR(m.entrada) : ' · sem data'}
+        <ol class="tc-ordem">${maqs.map((m, k) => { const h = CG.historicoPara(k, maqs); return `<li><b>${k + 1}</b><div>${esc(m.marca + ' ' + m.modelo)} · ${m.ano} · ${CG.semHoras(m.tipo) ? 'sem horímetro' : m.horas.toLocaleString('pt-BR') + ' h'}${m.entrada ? ' · troca em ' + dataBR(m.entrada) : ' · sem data'}
           <span>${h.usadas.length ? `Avaliada com a base de mercado + ${h.usadas.length === 1 ? 'a troca' : 'as trocas'} ${lista(h.usadas.map((j) => j + 1))} desta lista` : 'Avaliada só com a base de mercado'}${h.foraPorData.length ? ` (a troca ${lista(h.foraPorData.map((j) => j + 1))} ainda não tinha sido vendida e fica de fora)` : ''}.</span></div></li>`; }).join('')}</ol>
         <div class="tc-nav"><button class="btn btn-linha" type="button" id="tc-voltar1">← Editar as trocas</button><button class="btn btn-ouro" type="button" id="tc-calc">Executar a análise</button></div>
       </section>`;
@@ -180,13 +181,13 @@
       const aj = (nome, v) => `<li class="sub-item"><span>${nome}</span><b>${Math.abs(v) >= 1000 ? sinal(v) : 'efeito pequeno'}</b></li>`;
       return `<article class="tc-card ${l.dif > 0 ? 'acima' : 'dentro'}" data-pos="${l.pos}" data-historico="${l.usadas.join(',')}">
         <div class="tc-card-cab"><div><h3>${esc(l.maq.marca + ' ' + l.maq.modelo)} · ${l.maq.ano}</h3>
-          <p>${CG.TIPOS[l.maq.tipo]} · ${l.maq.horas.toLocaleString('pt-BR')} h · estado ${nomeEstado(l.troca.estado).toLowerCase()} · ${l.maq.entrada ? 'troca em ' + dataBR(l.maq.entrada) : 'sem data'}${l.cadastro !== l.pos ? ` · cadastrada como troca ${l.cadastro}` : ''}</p></div><span class="tc-pos" aria-label="Posição ${l.pos} na ordem">${l.pos}</span></div>
+          <p>${CG.TIPOS[l.maq.tipo]} · ${CG.semHoras(l.maq.tipo) ? 'sem horímetro' : l.maq.horas.toLocaleString('pt-BR') + ' h'} · estado ${nomeEstado(l.troca.estado).toLowerCase()} · ${l.maq.entrada ? 'troca em ' + dataBR(l.maq.entrada) : 'sem data'}${l.cadastro !== l.pos ? ` · cadastrada como troca ${l.cadastro}` : ''}</p></div><span class="tc-pos" aria-label="Posição ${l.pos} na ordem">${l.pos}</span></div>
         <p class="tc-hist" data-hist>${l.usadas.length ? `Histórico usado: base de mercado + ${l.usadas.length === 1 ? 'a troca' : 'as trocas'} ${lista(l.usadas)} desta lista.` : 'Histórico usado: só a base de mercado (anúncios públicos). Nenhuma troca de vocês entrou no cálculo desta.'}${l.foraPorData.length ? ` A troca ${lista(l.foraPorData)} ficou de fora: ainda não tinha sido vendida nesta data.` : ''}</p>
         <ul class="tc-linhas">
           <li><span>Referência de mercado do modelo (mediana dos anúncios, levada para 1 ano de uso)</span><b>${real(r.ref)}</b></li>
           <li><span>Venda estimada pelo Anshur${l.usadas.length ? '' : ' <small class="sub">(só com preços pedidos em anúncio)</small>'}</span><b>${real(r.venda)}</b></li>
           <li class="sub-item"><span>Ajustes frente às máquinas parecidas do cálculo:</span><b></b></li>
-          ${aj('Idade', l.ajustes.idade)}${aj('Horas de uso', l.ajustes.horas)}${aj('Conservação', l.ajustes.conservacao)}
+          ${aj('Idade', l.ajustes.idade)}${CG.semHoras(l.maq.tipo) ? '' : aj('Horas de uso', l.ajustes.horas)}${aj('Conservação', l.ajustes.conservacao)}
           <li><span>Custo de preparo previsto</span><b class="neg">− ${real(r.preparo)}</b></li>
           <li><span>Margem-alvo (${Math.round(r.margem * 100)}% da venda)</span><b class="neg">− ${real(l.margemValor)}</b></li>
           <li class="total"><span>Valor máximo recomendado pelo Anshur</span><b data-teto>${real(r.teto)}</b></li>

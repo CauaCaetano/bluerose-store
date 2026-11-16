@@ -12,12 +12,28 @@
     corteAtipico: 2.5                       // resíduo acima de 2,5 desvios = venda atípica (fora do treino)
   };
   const HANO = { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270 };
-  const catalogo = (t) => (A.modelos || []).find((m) => m.modelo === t.modelo);
+  // implemento (grade, arado, subsolador, roçadeira, distribuidor, carreta, enfardadeira, plataforma, pulverizador de arrasto...)
+  // é rebocado ou acoplado: não tem horímetro. O valor sai do ano e do estado; a perda por ano vem dos próprios dados
+  // (trocas da revenda e anúncios de implementos), nunca das horas.
+  const SEM_HORAS = { implemento: true };
+  const semHoras = (tipo) => !!SEM_HORAS[tipo];
+  const MER = () => raiz.MERCADO || null;
+  // catálogo: modelos da revenda (dados.js / modelos importados) e, para implemento, também a base de mercado.
+  // Implemento casa por tipo + marca + modelo ("Grade aradora 14 discos" existe em várias marcas); máquina, pelo modelo (como sempre).
+  function catalogo(t) {
+    const lista = A.modelos || [];
+    if (semHoras(t.tipo)) {
+      const igual = (m) => m.tipo === t.tipo && m.marca === t.marca && m.modelo === t.modelo;
+      return lista.find(igual) || (MER() ? MER().modelos.find(igual) : null) || null;
+    }
+    return lista.find((m) => m.modelo === t.modelo);
+  }
   const refDe = (t) => t.referencia || (catalogo(t) || {}).base;
   const hAnoDe = (t) => t.hAno || (catalogo(t) || {}).hAno || HANO[t.tipo] || 800;
   const anoDe = (iso) => (iso ? +iso.slice(0, 4) : new Date().getFullYear());
-  // idade na data da avaliação (para validar o passado com a idade daquele dia)
-  const feat = (t, dataRef) => [1, anoDe(dataRef) - t.ano, t.horas / (hAnoDe(t) * 12), t.cond / 100];
+  // idade na data da avaliação (para validar o passado com a idade daquele dia); implemento: desgaste de horas = 0
+  const desgaste = (t) => (semHoras(t.tipo) ? 0 : (t.horas || 0) / (hAnoDe(t) * 12));
+  const feat = (t, dataRef) => [1, anoDe(dataRef) - t.ano, desgaste(t), t.cond / 100];
   const preparoPrevisto = (t) => Math.round((100 - t.cond) * refDe(t) * 0.0004 / 100) * 100;
 
   function minimos(X, y) {
@@ -57,8 +73,16 @@
   // opts.margem: margem-alvo
   // opts.dataIdade: data em que a idade da máquina é contada (padrão: opts.ate). Usado pelo teste às cegas público,
   //   que avalia uma troca antiga na data dela sem cortar a base de referência por data. Sem ele, nada muda.
+  // implemento sem histórico informado: as vendas da revenda + os anúncios públicos de implementos (base de mercado),
+  // quando a base está carregada. O erro validado continua medido só nas vendas da revenda.
+  function historicoPadrao(maq) {
+    const rev = A.todasTrocas || A.trocas || [];
+    if (!semHoras(maq.tipo) || !MER()) return rev;
+    return rev.concat(MER().comparaveis(maq.cond).filter((c) => c.tipo === maq.tipo));
+  }
   function avaliar(maq, opts = {}) {
-    const hist = (opts.historico || A.todasTrocas || A.trocas).filter((t) => t.vendido && t.id !== opts.excluir && refDe(t) && (!opts.ate || (t.saida && t.saida < opts.ate)));
+    const usaMercado = !opts.historico && semHoras(maq.tipo) && !!MER();
+    const hist = (opts.historico || historicoPadrao(maq)).filter((t) => t.vendido && t.id !== opts.excluir && refDe(t) && (!opts.ate || (t.saida && t.saida < opts.ate)));
     const doTipo = hist.filter((t) => t.tipo === maq.tipo);
     const base = doTipo.length >= 8 ? doTipo : hist;
     if (base.length < QUALIDADE.minimoTreino || !refDe(maq)) return null;
@@ -67,7 +91,7 @@
     const dataIdade = opts.dataIdade || opts.ate;
     const x = feat(maq, dataIdade);
     const vendaBruta = ref * Math.exp(x.reduce((s, v, j) => s + v * m.w[j], 0));
-    const margem = opts.margem ?? A.margemAlvo;
+    const margem = opts.margem ?? A.margemAlvo ?? 0.14; // 14% = margem-alvo padrão sugerida a uma revenda nova
     const preparo = preparoPrevisto(maq);
     const venda = Math.round(vendaBruta / 1000) * 1000;
     const teto = Math.floor((venda * (1 - margem) - preparo) / 1000) * 1000;
@@ -75,14 +99,18 @@
     const resultado = venda - teto - preparo; // mesma conta que aparece na tela
 
     const usados = base.filter((t) => !m.atipicas.includes(t)).filter((t) => t.tipo === maq.tipo);
-    const comp = usados.map((t) => ({ t, d: (t.modelo === maq.modelo ? 0 : t.marca === maq.marca ? 5 : 7) + Math.abs(t.ano - maq.ano) * 0.6 + Math.abs(t.horas - maq.horas) / (hAnoDe(t) * 1.5) + Math.abs(t.cond - maq.cond) / 15 }))
+    // implemento: o "modelo" (ex.: Grade aradora 16 discos) se repete entre marcas; mesmo modelo de outra marca fica atrás da mesma marca
+    const igualModelo = (t) => t.modelo === maq.modelo && (!semHoras(maq.tipo) || t.marca === maq.marca);
+    const distModelo = (t) => (igualModelo(t) ? 0 : t.modelo === maq.modelo ? 3 : t.marca === maq.marca ? 5 : 7);
+    const comp = usados.map((t) => ({ t, d: distModelo(t) +Math.abs(t.ano - maq.ano) * 0.6 + (semHoras(maq.tipo) ? 0 : Math.abs(t.horas - maq.horas) / (hAnoDe(t) * 1.5)) + Math.abs(t.cond - maq.cond) / 15 }))
       .sort((a, b) => a.d - b.d).slice(0, 4).map((c) => c.t);
     const comDias = comp.filter((t) => t.diasPatio != null); // anúncio de mercado não tem dias de pátio
     const dias = comDias.length ? Math.round(comDias.reduce((s, t) => s + t.diasPatio, 0) / comDias.length) : null;
-    const mesmoModelo = usados.filter((t) => t.modelo === maq.modelo).length;
+    const mesmoModelo = usados.filter(igualModelo).length;
 
     // qualidade: erro medido em previsões passadas que o motor não conhecia
-    const qualidade = opts.semValidacao ? null : validar(opts.historico || A.todasTrocas || A.trocas).porTipo[maq.tipo] || null;
+    const qualidade = opts.semValidacao ? null : validar(opts.historico || A.todasTrocas || A.trocas || []).porTipo[maq.tipo] || null;
+    const mercadoUsado = usados.filter((t) => String(t.id).startsWith('mercado-')).length;
     let confianca = 'baixa';
     if (qualidade && qualidade.n >= QUALIDADE.minimoValidacao) {
       if (doTipo.length >= QUALIDADE.alta.amostras && qualidade.mape <= QUALIDADE.alta.mape) confianca = 'alta';
@@ -92,16 +120,18 @@
     if (!qualidade || qualidade.n < QUALIDADE.minimoValidacao) limites.push('Ainda não há previsões passadas suficientes para medir o erro deste tipo de máquina.');
     if (mesmoModelo < 3) limites.push(`Só ${mesmoModelo} ${mesmoModelo === 1 ? 'venda' : 'vendas'} do mesmo modelo no histórico.`);
     if (doTipo.length < 8) limites.push('Poucas vendas deste tipo: usamos o histórico geral da revenda.');
-    if (usados.length && maq.horas > Math.max(...usados.map((t) => t.horas))) limites.push('Horas acima de todas as máquinas vendidas: estimativa menos segura.');
+    if (!semHoras(maq.tipo) && usados.length && maq.horas > Math.max(...usados.map((t) => t.horas))) limites.push('Horas acima de todas as máquinas vendidas: estimativa menos segura.');
+    if (semHoras(maq.tipo)) limites.push('Implemento não tem horímetro: o valor considera o ano e o estado na inspeção.');
+    if (usaMercado && mercadoUsado) limites.push(`${mercadoUsado} anúncios públicos de implementos (preço pedido, coleta de ${MER().coleta.split('-').reverse().join('/')}) entram como referência de mercado; preço pedido costuma ficar acima do preço fechado, e as vendas da revenda corrigem isso à medida que entram.`);
     if (m.atipicas.length) limites.push(`${m.atipicas.length} ${m.atipicas.length === 1 ? 'venda atípica ficou' : 'vendas atípicas ficaram'} fora do cálculo.`);
 
     const media = [0, 1, 2, 3].map((j) => usados.reduce((s, t) => s + feat(t, dataIdade)[j], 0) / Math.max(1, usados.length));
     const nomes = ['', 'Ano', 'Horas de uso', 'Estado na inspeção'];
-    const motivos = [1, 2, 3].map((j) => ({ nome: nomes[j], valor: Math.round(venda * (1 - Math.exp(-(x[j] - media[j]) * m.w[j])) / 1000) * 1000 }))
+    const motivos = (semHoras(maq.tipo) ? [1, 3] : [1, 2, 3]).map((j) => ({ nome: nomes[j], valor: Math.round(venda * (1 - Math.exp(-(x[j] - media[j]) * m.w[j])) / 1000) * 1000 }))
       .filter((mo) => Math.abs(mo.valor) >= 2000).sort((a, b) => Math.abs(b.valor) - Math.abs(a.valor));
 
     return { venda, teto, faixa: [Math.min(piso, teto), teto], preparo, resultado, margem, margemSobreVenda: resultado / venda, dispersao: m.dp,
-      comp, dias, motivos, base: m.n, doTipo: doTipo.length, mesmoModelo, atipicas: m.atipicas.length, confianca, limites, qualidade, ref };
+      comp, dias, motivos, base: m.n, doTipo: doTipo.length, mesmoModelo, atipicas: m.atipicas.length, confianca, limites, qualidade, ref, mercado: mercadoUsado, semHoras: semHoras(maq.tipo) };
   }
 
   // validação temporal (walk-forward): para cada venda, o motor só conhece o que tinha sido vendido antes da troca
@@ -123,5 +153,5 @@
     return out;
   }
 
-  raiz.MOTOR = { avaliar, validar, catalogo, refDe, preparoPrevisto, QUALIDADE, HANO };
+  raiz.MOTOR = { avaliar, validar, catalogo, refDe, preparoPrevisto, QUALIDADE, HANO, SEM_HORAS, semHoras, historicoPadrao };
 })(typeof window !== 'undefined' ? window : globalThis);

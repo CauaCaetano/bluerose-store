@@ -11,7 +11,7 @@
   const DIA = 864e5;
   const diasEntre = (a, b) => Math.max(0, Math.round((new Date(String(b).slice(0, 10) + 'T12:00:00') - new Date(String(a).slice(0, 10) + 'T12:00:00')) / DIA));
   const real = (v) => (v < 0 ? '−' : '') + 'R$ ' + Math.abs(Math.round(v || 0)).toLocaleString('pt-BR');
-  const NOMES = { trator: 'Trator', colhedora: 'Colhedora de cana', pulverizador: 'Pulverizador', plantadeira: 'Plantadeira' };
+  const NOMES = { trator: 'Trator', colhedora: 'Colhedora de cana', pulverizador: 'Pulverizador', plantadeira: 'Plantadeira', implemento: 'Implemento' };
   const nomeMaq = (t) => [t && t.marca, t && t.modelo].filter(Boolean).join(' ') + (t && t.ano ? ' ' + t.ano : '');
 
   // ---------- fotos guiadas por tipo (10 a 15) e o que cada uma ajuda a avaliar na ficha ----------
@@ -58,6 +58,17 @@
       ['rodas', 'Rodas e transmissão', 'Pneus de transporte e correntes/engrenagens', ['pneus', 'transmissao']],
       ['hidraulico', 'Hidráulico e marcadores', 'Cilindros, mangueiras e marcadores de linha', ['hidraulico']],
       ['monitor', 'Monitor de plantio', 'Monitor e sensores (se tiver)', ['cabine']],
+      CHASSI],
+    // implemento (grade, arado, subsolador, roçadeira, distribuidor, carreta, enfardadeira, plataforma): rebocado ou acoplado,
+    // sem cabine, motor nem horímetro
+    implemento: [...BASE,
+      ['cabecalho', 'Cabeçalho e engate', 'Cabeçalho, engate, pino e macaco de apoio', ['lataria']],
+      ['orgaos', 'Órgãos de trabalho', 'Discos, hastes, facas, linhas ou rotor de perto', ['transmissao']],
+      ['desgaste', 'Desgaste de perto', 'Um disco, faca ou ponteira com régua ou trena ao lado', ['transmissao']],
+      ['cardan', 'Cardã e caixa', 'Cardã, proteção e caixa de transmissão (se tiver)', ['hidraulico']],
+      ['hidraulico', 'Hidráulico', 'Cilindros, mangueiras e engates rápidos', ['hidraulico']],
+      ['rodas', 'Rodas e pneus', 'Pneus, cubos e rodas de controle', ['pneus']],
+      ['estrutura', 'Estrutura e soldas', 'Chassi por baixo: trincas, soldas e ferrugem', ['lataria']],
       CHASSI]
   };
   const angulosDe = (tipo) => (ANGULOS[tipo] || ANGULOS.trator).map(([id, nome, dica, itens]) => ({ id, nome, dica, itens }));

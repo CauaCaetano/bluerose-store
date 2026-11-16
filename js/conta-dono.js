@@ -44,11 +44,26 @@
       (d.por_sistema.length ? '<h3>Receita por sistema</h3><div class="af-tabela"><table><thead><tr><th>Sistema</th><th>Assinantes</th><th>Por mês</th></tr></thead><tbody>' + d.por_sistema.map(function (s) {
         return '<tr><td>' + esc(sistema(s.app)) + '</td><td>' + s.ativas + '</td><td>' + reais(s.receita) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '') +
       '<h3>Assinantes</h3><div id="pd-assinantes"><p class="ind-regras">Carregando…</p></div>' +
+      '<h3>Contratos aceitos (Termo de Assinatura do Anshur)</h3><div id="pd-contratos"><p class="ind-regras">Carregando…</p></div>' +
       '<h3>Últimos contatos pelo site</h3>' + (d.contatos.length ? '<div class="af-tabela"><table><thead><tr><th>Data</th><th>Nome</th><th>Negócio</th><th>WhatsApp</th><th>Mensagem</th></tr></thead><tbody>' + d.contatos.map(function (c) {
         return '<tr><td>' + dia(c.criado_em) + '</td><td>' + esc(c.nome || '—') + '</td><td>' + esc(c.negocio || '—') + '</td><td>' + esc(c.whatsapp || '—') + '</td><td>' + esc((c.mensagem || '').slice(0, 140)) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="ind-regras">Nenhum contato ainda.</p>') +
       '<p class="ind-regras"><a class="btn btn-ghost" href="#af-dono">Ver os afiliados</a></p>';
     rpc('nexo_painel_dono_assinantes').then(function (l) { assinantes = l || []; document.getElementById('pd-assinantes').innerHTML = tabela(); }).catch(function () {
       document.getElementById('pd-assinantes').innerHTML = '<p class="ind-regras">Não deu para carregar os assinantes agora.</p>'; });
+    rpc('anshur_contratos_aceites_dono').then(function (l) { document.getElementById('pd-contratos').innerHTML = contratos(l || []); }).catch(function () {
+      document.getElementById('pd-contratos').innerHTML = '<p class="ind-regras">Não deu para carregar os contratos agora.</p>'; });
+  }
+  // aceites eletrônicos do Termo do Anshur, com o link do comprovante (texto exato, versão e hash)
+  var SIT_CTR = { ativa: 'Ativa', pendente: 'Aguardando pagamento', cancelada: 'Cancelada', recusada: 'Pagamento recusado', expirada: 'Expirada', teste: 'Em teste' };
+  function cnpjF(c) { c = String(c || ''); return c.length === 14 ? c.slice(0, 2) + '.' + c.slice(2, 5) + '.' + c.slice(5, 8) + '/' + c.slice(8, 12) + '-' + c.slice(12) : c; }
+  function contratos(l) {
+    if (!l.length) return '<p class="ind-regras">Nenhum aceite ainda.</p>';
+    return '<div class="af-tabela"><table><thead><tr><th>Data</th><th>Revenda</th><th>CNPJ</th><th>Aceito por</th><th>Conta</th><th>Versão</th><th>Assinatura</th><th>Comprovante</th></tr></thead><tbody>' + l.map(function (a) {
+      var h = new Date(a.aceito_em).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      return '<tr><td>' + esc(h) + '</td><td>' + esc(a.razao_social) + '</td><td>' + esc(cnpjF(a.cnpj)) + '</td><td>' + esc(a.nome) + ' (' + esc(a.cargo) + ')</td><td>' + esc(a.email) + '</td>' +
+        '<td>' + esc(a.versao) + '</td><td>' + esc(a.assinatura ? (SIT_CTR[a.assinatura_status] || a.assinatura_status) : '—') + '</td>' +
+        '<td><a href="contrato-anshur-comprovante.html?id=' + encodeURIComponent(a.id) + '" class="btn btn-ghost" target="_blank" rel="noopener">Abrir</a></td></tr>';
+    }).join('') + '</tbody></table></div>';
   }
   bloco.addEventListener('click', function (e) {
     var b = e.target.closest('[data-filtro]'); if (!b) return;

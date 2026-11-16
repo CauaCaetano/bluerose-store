@@ -48,7 +48,7 @@
   });
   const pausa = () => new Promise((r) => setTimeout(r, 0));
 
-  const ctxPrevia = () => ({ ambiente: U.OP ? 'op' : 'demo', existentes: U.A.todasTrocas || U.A.trocas, catalogo: U.A.modelos, refDe: U.M.refDe, lojas: U.estado.lojas || [], anoMax: new Date().getFullYear(), hoje: U.hojeISO() });
+  const ctxPrevia = () => ({ ambiente: U.OP ? 'op' : 'demo', existentes: U.A.todasTrocas || U.A.trocas, catalogo: U.A.modelos, refDe: U.M.refDe, lojas: U.estado.lojas || [], lojaPadrao: U.estado.lojaAtual || (U.estado.lojas || [])[0] || '', anoMax: new Date().getFullYear(), hoje: U.hojeISO() });
   const pastaRegistro = () => (S.origem && S.origem.pasta ? (D.garantirDms(U.estado).pastas.find((p) => p.id === S.origem.id) || null) : null);
   function recalcular() { S.previa = S.tabelas.length ? D.previa(S.tabelas, U.estado, ctxPrevia()) : null; if (S.previa && (!S.filtro || !contaFiltro(S.filtro))) S.filtro = filtroInicial(); }
 
@@ -134,7 +134,7 @@
   function desfazer(id) {
     const lote = D.garantirDms(U.estado).lotes.find((l) => l.id === id); if (!lote || lote.desfeito) return;
     const mov = D.movimentosDepois(U.estado, lote);
-    U.confirmar('Desfazer esta importação?', `Saem ${n(lote.criados.length, 'registro que entrou', 'registros que entraram')} nela${lote.atualizados.length ? ` e ${n(lote.atualizados.length, 'registro alterado volta', 'registros alterados voltam')} ao que eram antes` : ''}.${mov ? ` Atenção: ${n(mov, 'lançamento feito depois', 'lançamentos feitos depois')} nessas máquinas (venda, preço, preparo ou custo) também ${mov === 1 ? 'sai' : 'saem'}.` : ''} O resto da revenda não muda.`, 'Desfazer', () => {
+    U.confirmar('Desfazer esta importação?', `Saem ${n(lote.criados.length, 'registro que entrou', 'registros que entraram')} nela${lote.atualizados.length ? ` e ${n(lote.atualizados.length, 'registro alterado volta', 'registros alterados voltam')} ao que eram antes` : ''}.${mov ? ` Atenção: ${n(mov, 'lançamento feito depois', 'lançamentos feitos depois')} nesses registros (venda, preço, preparo, custo ou movimento de peça) também ${mov === 1 ? 'sai' : 'saem'}.` : ''} O resto da revenda não muda.`, 'Desfazer', () => {
       const r = D.desfazer(U.estado, id, { usuario: U.eu().nome });
       if (!r.ok) { U.toast(r.motivo, true); return; }
       U.log('importacao', `Importação desfeita: ${n(r.removidos, 'registro removido', 'registros removidos')}, ${n(r.restaurados, 'restaurado', 'restaurados')}`, { ref: id });
@@ -149,11 +149,12 @@
   const doFiltro = (f) => (S.previa ? S.previa.itens.filter((it) => (f === 'aviso' ? it.avisos && it.avisos.length && !['erro', 'ignorada'].includes(it.status) : it.status === f)) : []);
   const contaFiltro = (f) => doFiltro(f).length;
   const filtroInicial = () => (FILTROS.find(([f]) => contaFiltro(f)) || ['novo'])[0];
-  const ENT_CURTO = { historico: 'Histórico (vendida)', estoque: 'Pátio', clientes: 'Cliente' };
+  const ENT_CURTO = { historico: 'Histórico (vendida)', estoque: 'Pátio', clientes: 'Cliente', pecas: 'Peça' };
   function descricao(it) {
     const r = it.reg;
     if (!r) return { t: it.origem, d: '' };
     if (it.ent === 'clientes') return { t: r.nome || r.documento || 'Cliente', d: [r.documento, r.cidade, r.telefone].filter(Boolean).join(' · ') };
+    if (it.ent === 'pecas') return { t: [r.codigo, r.descricao].filter(Boolean).join(' · ') || 'Peça', d: [r.marca, r.aplicacao, `${(r.quantidade || 0).toLocaleString('pt-BR')} em estoque${r.loja ? ' (' + r.loja + ')' : ''}`, r.custo > 0 ? 'custo ' + r.custo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '', r.preco > 0 ? 'venda ' + r.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '', r.local].filter(Boolean).join(' · ') };
     const t = [r.marca, r.modelo].filter(Boolean).join(' ') + (r.ano >= 1950 ? ' · ' + r.ano : '');
     const val = [r.pago > 0 ? U.real(r.pago) : '', r.vendido > 0 ? U.real(r.vendido) : ''].filter(Boolean).join(' → ');
     const dts = [r.entrada ? U.data(r.entrada) : '', r.saida ? U.data(r.saida) : ''].filter(Boolean).join(' → ');
@@ -178,13 +179,13 @@
   function htmlTabela(t, idx) {
     const rec = t.mapa.filter(Boolean).length, dados = Math.max(0, t.linhas.length - t.cabIdx - 1);
     const fonte = t.perfil ? '<span class="tag comprovado">perfil salvo reaplicado</span>' : t.semCab ? '<span class="tag declarado">sem cabeçalho: ordem da planilha modelo</span>' : '';
-    const opts = (sel) => `<option value="">Não importar esta coluna</option>${D.CAMPOS.map(([k, r]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}`;
+    const opts = (sel) => `<option value="">Não importar esta coluna</option>${D.camposDe(t.entidade).map(([k, r]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}`;
     return `<details class="dms-arq" data-tab="${idx}" ${S.abertas.has(t.origem) ? 'open' : ''}><summary><span class="dms-arq-nome"><b>${esc(t.origem)}</b>
         <small>${n(dados, 'linha', 'linhas')} · ${esc(t.codificacao)}${t.separador ? ' · separado por ' + esc(t.separador) : ''} · ${rec} de ${t.cab.length} colunas reconhecidas</small></span>${fonte}<span class="dms-arq-ent">${esc(D.ENTIDADES[t.entidade] || '')}</span></summary>
       <div class="dms-arq-corpo">
         ${t.cortada ? `<p class="nota-rodape neg">Arquivo muito grande: só as primeiras ${D.LIMITE_LINHAS.toLocaleString('pt-BR')} linhas entram. Exporte por período.</p>` : ''}
         <div class="dms-arq-op"><div class="campo"><label for="ent-${idx}">O que este arquivo traz</label><select id="ent-${idx}" data-ent="${idx}">${Object.entries(D.ENTIDADES).map(([k, r]) => `<option value="${k}" ${t.entidade === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></div>
-          ${t.entidade !== 'clientes' && t.entidade !== 'ignorar' ? `<div class="campo"><label for="tp-${idx}">Categoria quando a linha não disser</label><select id="tp-${idx}" data-tp="${idx}"><option value="">Não preencher (a linha precisa dizer)</option>${Object.entries(U.NOMES).map(([k, r]) => `<option value="${k}" ${t.tipoPadrao === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></div>` : ''}</div>
+          ${t.entidade !== 'clientes' && t.entidade !== 'ignorar' && t.entidade !== 'pecas' ? `<div class="campo"><label for="tp-${idx}">Categoria quando a linha não disser</label><select id="tp-${idx}" data-tp="${idx}"><option value="">Não preencher (a linha precisa dizer)</option>${Object.entries(U.NOMES).map(([k, r]) => `<option value="${k}" ${t.tipoPadrao === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></div>` : ''}</div>
         <p class="rot-campo" style="margin-top:14px">Colunas do arquivo e o campo do Anshur</p>
         <ul class="dms-mapa">${t.cab.map((h, i) => `<li class="${t.mapa[i] ? '' : 'sem'}"><div><b>${esc(h || 'Coluna ' + (i + 1))}</b><small>${esc(exemplos(t, i)) || 'vazia'}</small></div>
           <select aria-label="Campo do Anshur para a coluna ${esc(h || i + 1)}" data-col="${idx}:${i}">${opts(t.mapa[i])}</select></li>`).join('')}</ul>
@@ -198,7 +199,7 @@
     const lista = doFiltro(S.filtro), vis = lista.slice(0, S.mostrar);
     return `<section class="painel bloco" aria-labelledby="dms-pv"><div class="painel-cab"><h2 id="dms-pv">3. Prévia: nada foi gravado ainda</h2></div>
       <div class="kpis dms-kpis" aria-live="polite">
-        ${kpi('Novos', c.novos, [c.historico ? n(c.historico, 'no histórico', 'no histórico') : '', c.estoque ? n(c.estoque, 'no pátio', 'no pátio') : '', c.clientes ? n(c.clientes, 'cliente', 'clientes') : ''].filter(Boolean).join(' · ') || 'nenhum', 'ok')}
+        ${kpi('Novos', c.novos, [c.historico ? n(c.historico, 'no histórico', 'no histórico') : '', c.estoque ? n(c.estoque, 'no pátio', 'no pátio') : '', c.clientes ? n(c.clientes, 'cliente', 'clientes') : '', c.pecas ? n(c.pecas, 'peça', 'peças') : ''].filter(Boolean).join(' · ') || 'nenhum', 'ok')}
         ${kpi('Atualizados', c.atualizados, 'registros que já existiam')}
         ${kpi('Duplicados', c.duplicados, c.duplicados ? `${c.pulados} ${c.pulados === 1 ? 'pulado' : 'pulados'}, você decide` : 'nenhum', c.duplicados ? 'dup' : '')}
         ${kpi('Com erro', c.erros, c.erros ? 'ficam de fora, veja o motivo' : 'nenhum', c.erros ? 'erro' : '')}
@@ -217,7 +218,7 @@
     return `<section class="painel bloco" aria-labelledby="dms-lt"><h2 id="dms-lt">Importações feitas</h2>
       <ul class="dms-lotes">${lotes.map((l) => { const c = l.contagens || {};
         return `<li class="${l.id === feito && !l.desfeito ? 'recente' : ''}"><div><b>${new Date(l.quando).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })} · ${esc(l.origem && l.origem.nome || 'arquivos')}</b>
-          <span>${n(l.criados.length, 'novo', 'novos')} · ${n(l.atualizados.length + Math.max(0, (c.atualizados || 0) - l.atualizados.length), 'atualizado', 'atualizados')} · ${n(c.erros || 0, 'linha com erro', 'linhas com erro')}${l.usuario ? ' · por ' + esc(l.usuario) : ''}</span>
+          <span>${n(c.novos != null ? c.novos : l.criados.length, 'novo', 'novos')} · ${n(l.atualizados.length + Math.max(0, (c.atualizados || 0) - l.atualizados.length), 'atualizado', 'atualizados')} · ${n(c.erros || 0, 'linha com erro', 'linhas com erro')}${l.usuario ? ' · por ' + esc(l.usuario) : ''}</span>
           ${l.desfeito ? `<small>Desfeita em ${new Date(l.desfeito.quando).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}${l.desfeito.usuario ? ' por ' + esc(l.desfeito.usuario) : ''}: ${n(l.desfeito.removidos, 'registro saiu', 'registros saíram')}.</small>` : ''}
           ${l.erros && l.erros.length && !l.desfeito ? `<details><summary>Linhas que ficaram de fora</summary><ul>${l.erros.slice(0, 15).map((e) => `<li>${esc(e.origem)}, linha ${e.linha}: ${esc(e.motivo)}</li>`).join('')}</ul></details>` : ''}</div>
           ${l.desfeito ? '<span class="tag declarado">Desfeita</span>' : pode() ? `<button class="btn btn-linha" type="button" data-desfazer="${esc(l.id)}">Desfazer esta importação</button>` : ''}</li>`; }).join('')}</ul></section>`;
@@ -227,7 +228,7 @@
     const pasta = pastas[0], u = pasta && pasta.ultima;
     const fs = temPastaFS(), dir = temPastaInput();
     return `<section class="painel bloco" aria-labelledby="dms-or"><h2 id="dms-or">1. De onde vêm os dados</h2>
-      <p class="sub" style="margin:6px 0 4px">Peça ao seu sistema para exportar o relatório de usados (vendas, trocas e estoque) e, se quiser, os clientes, em CSV, TXT ou Excel, numa pasta do computador. O Anshur lê a pasta inteira, inclusive as subpastas, e ignora o que não for planilha.</p>
+      <p class="sub" style="margin:6px 0 4px">Peça ao seu sistema para exportar o relatório de usados e implementos (vendas, trocas e estoque) e, se quiser, os clientes e o estoque de peças (código, descrição, aplicação, quantidade, custo, preço e localização), em CSV, TXT ou Excel, numa pasta do computador. O Anshur lê a pasta inteira, inclusive as subpastas, e ignora o que não for planilha.</p>
       ${pasta ? `<div class="dms-pasta"><div><b>Pasta ligada: ${esc(pasta.nome)}</b><span>${u ? `Última sincronização ${new Date(u.quando).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}: ${n(u.novos || 0, 'novo', 'novos')}, ${n(u.atualizados || 0, 'atualizado', 'atualizados')}, ${n(u.erros || 0, 'linha com erro', 'linhas com erro')} · ${n((u.lidos || 0), 'arquivo lido', 'arquivos lidos')}${u.semMudanca ? `, ${u.semMudanca} sem mudança` : ''}` : 'Ainda não sincronizada'}</span></div>
         <button class="btn btn-ouro" type="button" id="dms-sinc" ${S.lendo ? 'disabled' : ''}>Sincronizar de novo</button></div>` : ''}
       <div class="acoes">
@@ -268,7 +269,7 @@
     const pi = $('#dms-pasta-in'); if (pi) pi.onchange = () => arquivosEscolhidos(pi, true);
     const ai = $('#dms-arq-in'); if (ai) ai.onchange = () => arquivosEscolhidos(ai, false);
     $$('details.dms-arq').forEach((d) => d.addEventListener('toggle', () => { const t = S.tabelas[+d.dataset.tab]; if (!t) return; if (d.open) S.abertas.add(t.origem); else S.abertas.delete(t.origem); }));
-    $$('[data-ent]').forEach((s) => s.onchange = () => { const t = S.tabelas[+s.dataset.ent]; t.entidade = s.value; t.perfil = null; recalcular(); desenhar(); });
+    $$('[data-ent]').forEach((s) => s.onchange = () => { D.trocarEntidade(S.tabelas[+s.dataset.ent], s.value); recalcular(); desenhar(); });
     $$('[data-tp]').forEach((s) => s.onchange = () => { const t = S.tabelas[+s.dataset.tp]; t.tipoPadrao = s.value; t.perfil = null; recalcular(); desenhar(); });
     $$('[data-col]').forEach((s) => s.onchange = () => {
       const [ti, ci] = s.dataset.col.split(':').map(Number), t = S.tabelas[ti];
@@ -284,7 +285,7 @@
   }
   function tela(ui) {
     U = ui;
-    ui.tela.innerHTML = `<div class="titulo"><div><h1>Trazer do meu sistema</h1><p>Os dados do seu sistema atual (vendas de usados, trocas, estoque e clientes) entram no Anshur sem digitar nada. Você confere tudo antes de gravar e pode desfazer depois.</p></div></div>
+    ui.tela.innerHTML = `<div class="titulo"><div><h1>Trazer do meu sistema</h1><p>Os dados do seu sistema atual (vendas de usados e implementos, trocas, estoque, clientes e peças) entram no Anshur sem digitar nada. Você confere tudo antes de gravar e pode desfazer depois.</p></div></div>
       <div id="dms-raiz" class="dms"></div>`;
     desenhar();
   }

@@ -95,15 +95,99 @@
   var erroCt = document.createElement('p'); erroCt.className = 'conta-erro'; erroCt.setAttribute('role', 'alert');
   aceite.closest('label').insertAdjacentElement('beforebegin', mpCampo);
   pagar.insertAdjacentElement('beforebegin', erroCt);
+
+  // ---------------- Anshur: Termo de Assinatura com aceite eletrônico (dados da revenda + caixa própria + registro no banco)
+  function ehAnshur(p) { return /^a-sis-anshur/.test(p || ''); }
+  function contratoJs() {
+    if (window.BR_CONTRATO) return Promise.resolve(window.BR_CONTRATO);
+    var src = (document.querySelector('script[src*="js/contratar.js"]').getAttribute('src').split('js/contratar.js')[0] || '') + 'js/contrato-anshur.js?v=1';
+    return new Promise(function (ok, falha) { var s = document.createElement('script'); s.src = src; s.onload = function () { ok(window.BR_CONTRATO); }; s.onerror = falha; document.head.appendChild(s); });
+  }
+  var ctr = document.createElement('div'); ctr.className = 'ctr-bloco'; ctr.hidden = true;
+  ctr.innerHTML = '<fieldset class="ctr-campos"><legend>Dados da revenda (contratante)</legend>' +
+    '<label>Razão social<input id="ct-razao" autocomplete="organization" maxlength="200" required></label>' +
+    '<label>CNPJ<input id="ct-cnpj" inputmode="text" autocomplete="off" maxlength="18" placeholder="00.000.000/0000-00" required aria-describedby="ct-cnpj-msg"><small id="ct-cnpj-msg" aria-live="polite"></small></label>' +
+    '<div class="ctr-duas"><label>Seu nome completo<input id="ct-nome" autocomplete="name" maxlength="120" required></label>' +
+    '<label>Seu cargo<input id="ct-cargo" autocomplete="organization-title" maxlength="80" placeholder="Ex.: sócio, diretor" required></label></div>' +
+    '<small>Quem aceita declara ter poderes para contratar em nome da revenda.</small></fieldset>' +
+    '<details class="ctr-ler"><summary>Ler o Termo aqui, sem sair do pagamento</summary><div class="ctr-painel" id="ct-termo-texto" tabindex="0" aria-label="Texto do Termo de Assinatura do Anshur">Carregando o Termo…</div></details>' +
+    '<label class="contratar-aceite"><input type="checkbox" id="ct-aceite-anshur"> <span>Li e aceito o <a href="contrato-anshur.html" target="_blank" rel="noopener">Termo de Assinatura do Anshur (versão 1)</a>, em nome da revenda informada acima.</span></label>';
+  aceite.closest('label').insertAdjacentElement('afterend', ctr);
+  var $c = function (id) { return ctr.querySelector('#' + id); };
+  var termo = null, aceiteFeito = null;
+  function cnpjOk() { return window.BR_CONTRATO && window.BR_CONTRATO.cnpjValido($c('ct-cnpj').value); }
+  function camposOk() {
+    return $c('ct-razao').value.trim().length >= 2 && cnpjOk() && $c('ct-nome').value.trim().length >= 2 && $c('ct-cargo').value.trim().length >= 2;
+  }
+  function anshurOk() { return !ehAnshur(pagar.dataset.plano) || (camposOk() && $c('ct-aceite-anshur').checked && !!termo); }
+  function prepararAnshur() {
+    aceiteFeito = null; $c('ct-aceite-anshur').checked = false;
+    contratoJs().then(function (C) { return C.carregar(); }).then(function (t) {
+      termo = t; $c('ct-termo-texto').innerHTML = window.BR_CONTRATO.html(t.texto); estado();
+    }).catch(function (x) { termo = null; $c('ct-termo-texto').textContent = (x && x.message) || 'Não foi possível abrir o Termo agora.'; estado(); });
+  }
+  ctr.addEventListener('input', function (e) {
+    if (e.target.id === 'ct-cnpj') {
+      var v = e.target.value, limpo = window.BR_CONTRATO ? window.BR_CONTRATO.cnpjLimpo(v) : v, msg = $c('ct-cnpj-msg');
+      var ok = cnpjOk();
+      e.target.setAttribute('aria-invalid', limpo.length >= 14 && !ok ? 'true' : 'false');
+      msg.textContent = limpo.length >= 14 ? (ok ? 'CNPJ conferido.' : 'CNPJ inválido: confira os números.') : '';
+      msg.className = limpo.length >= 14 && !ok ? 'ctr-erro-campo' : '';
+    }
+    aceiteFeito = null; estado();
+  });
+  ctr.addEventListener('change', estado);
+  ctr.addEventListener('blur', function (e) {
+    if (e.target.id === 'ct-cnpj' && cnpjOk()) e.target.value = window.BR_CONTRATO.cnpjFormatado(e.target.value);
+  }, true);
+  function faltaAnshur() {
+    if ($c('ct-razao').value.trim().length < 2) return $c('ct-razao');
+    if (!cnpjOk()) return $c('ct-cnpj');
+    if ($c('ct-nome').value.trim().length < 2) return $c('ct-nome');
+    if ($c('ct-cargo').value.trim().length < 2) return $c('ct-cargo');
+    if (!$c('ct-aceite-anshur').checked) return $c('ct-aceite-anshur');
+    return null;
+  }
+  // grava o aceite (com o hash do texto lido aqui) antes de abrir o pagamento
+  function registrarAceite() {
+    if (!ehAnshur(pagar.dataset.plano)) return Promise.resolve(null);
+    if (aceiteFeito) return Promise.resolve(aceiteFeito);
+    if (!termo) return Promise.reject(new Error('O Termo ainda não carregou. Tente de novo em instantes.'));
+    if (!window.BR_CONTA) return Promise.reject(new Error('Entre na sua conta para aceitar o Termo.'));
+    return window.BR_CONTA.sb().then(function (c) {
+      return c.rpc('anshur_contrato_aceitar', { p_versao: termo.versao, p_hash: termo.hash, p_razao_social: $c('ct-razao').value.trim(),
+        p_cnpj: window.BR_CONTRATO.cnpjLimpo($c('ct-cnpj').value), p_nome: $c('ct-nome').value.trim(), p_cargo: $c('ct-cargo').value.trim(), p_produto: pagar.dataset.plano });
+    }).then(function (r) {
+      if (r.error) throw new Error(r.error.message || 'Não foi possível registrar o aceite.');
+      aceiteFeito = r.data;
+      var n = ctr.querySelector('.ctr-ok') || ctr.appendChild(Object.assign(document.createElement('p'), { className: 'ctr-ok' }));
+      n.setAttribute('role', 'status');
+      n.textContent = 'Aceite registrado em ' + window.BR_CONTRATO.dataHora(r.data.aceito_em) + '. O comprovante fica em Minha conta.';
+      return r.data;
+    });
+  }
+
   function estado() {
-    var ok = aceite.checked;
+    var ok = aceite.checked && anshurOk();
     pagar.setAttribute('aria-disabled', ok ? 'false' : 'true');
     pagar.href = '#';
   }
   aceite.addEventListener('change', estado);
   pagar.addEventListener('click', function (e) {
     e.preventDefault();
-    if (pagar.getAttribute('aria-disabled') === 'true') { aceite.focus(); return; }
+    if (pagar.getAttribute('aria-disabled') === 'true') {
+      if (!aceite.checked) { aceite.focus(); return; }
+      var f = ehAnshur(pagar.dataset.plano) && faltaAnshur();
+      if (f) { erroCt.textContent = f.id === 'ct-cnpj' ? 'Informe um CNPJ válido.' : f.id === 'ct-aceite-anshur' ? 'Marque o aceite do Termo de Assinatura do Anshur.' : 'Preencha os dados da revenda.'; f.focus(); }
+      else if (ehAnshur(pagar.dataset.plano) && !termo) erroCt.textContent = 'O Termo ainda não carregou. Tente de novo em instantes.';
+      return;
+    }
+    if (ehAnshur(pagar.dataset.plano) && !aceiteFeito) {
+      var txt0 = pagar.textContent; pagar.textContent = 'Registrando o aceite…'; pagar.setAttribute('aria-disabled', 'true'); erroCt.textContent = '';
+      registrarAceite().then(function () { pagar.textContent = txt0; estado(); pagar.click(); })
+        .catch(function (x) { pagar.textContent = txt0; estado(); erroCt.textContent = x.message || 'Não foi possível registrar o aceite. Tente de novo.'; });
+      return;
+    }
     if (!/(^|\.)bluerose-store\.com$/.test(location.hostname)) { erroCt.textContent = 'Ambiente de teste: o pagamento fica desligado e nada é cobrado. No site oficial este botão abre o Mercado Pago.'; return; }
     if (fora()) {
       try {
@@ -140,7 +224,7 @@
       var passos = dlg.querySelector('.contratar-passos');
       if (passos) {
         if (!passos.dataset.original) passos.dataset.original = passos.innerHTML;
-        passos.innerHTML = /^a-sis-/.test(plano)
+        passos.innerHTML = /^a-sis-/.test(plano) && !ehAnshur(plano)
           ? '<li>Você paga com segurança no <b>Mercado Pago</b> <span id="ct-meios"></span>.</li><li>O sistema fica pronto na hora: você cria a empresa em branco e sobe as suas planilhas.</li><li>Os vídeos tutoriais mostram cada passo. Precisa de ajuda? Escreva para o nosso e-mail e respondemos em até 1 dia útil.</li>'
           : passos.dataset.original;
         $('ct-meios').textContent = meios(plano, assinatura);
@@ -161,6 +245,8 @@
       pagar.dataset.plano = plano;
       erroCt.textContent = '';
       mpCampo.hidden = !assinatura || !!pp;
+      ctr.hidden = !ehAnshur(plano);
+      if (ehAnshur(plano)) prepararAnshur();
       var s = window.BR_CONTA && window.BR_CONTA.sessao(); var mp = document.getElementById('ct-mp'); if (mp && !mp.value && s) mp.value = s.user.email;
       estado();
       dlg.showModal();

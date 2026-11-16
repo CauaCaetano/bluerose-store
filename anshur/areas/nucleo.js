@@ -24,7 +24,7 @@
 
   R.registrar({
     id: 'usados', nome: 'Usados e Trocas', curto: 'Usados', ordem: 10, inicio: 'visao',
-    descricao: 'Avaliação com IA, pátio, aprovações, passaportes, compradores e teste às cegas.',
+    descricao: 'Avaliação com IA de máquinas e implementos, pátio, aprovações, passaportes, compradores e teste às cegas.',
     icone: '<path d="M4 7h13l-3-3M20 17H7l3 3"/>',
     acao: { rotulo: 'Nova avaliação', href: '#avaliar' }, atalhos: ['visao', 'avaliar', 'patio', 'aprovacoes'],
     menu: [

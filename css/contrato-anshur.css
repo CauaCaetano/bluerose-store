@@ -1,0 +1,45 @@
+/* Termo de Assinatura do Anshur: página do contrato, campos do aceite no checkout, comprovante e listas em Minha conta */
+.ctr-versao { display: inline-block; padding: 4px 10px; border: 1px solid var(--accent); border-radius: 999px; }
+.ctr-hash { display: block; margin-top: 6px; font: 500 12.5px var(--mono); overflow-wrap: anywhere; word-break: break-all; color: var(--ink); }
+.ctr-conferencia p + p, .ctr-conferencia p + div, .ctr-conferencia div + p { margin-top: 14px; }
+.ctr-acoes { display: flex; flex-wrap: wrap; gap: 10px; }
+.legal-texto, .ctr-texto { overflow-wrap: anywhere; }
+
+/* checkout: o diálogo cresce, então rola por dentro sem passar da tela */
+dialog.contratar { max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; }
+.ctr-campos { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line-2); border-radius: 12px; }
+.ctr-campos legend { padding: 0 6px; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.ctr-campos label { display: grid; gap: 5px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+.ctr-campos input { font: inherit; font-weight: 400; color: var(--ink); background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 12px; min-width: 0; width: 100%; }
+.ctr-campos input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ctr-campos input[aria-invalid=true] { border-color: #c0392b; }
+.ctr-campos small { font-weight: 400; color: var(--ink-3); font-size: 12.5px; }
+.ctr-campos .ctr-erro-campo { color: #c0392b; }
+.ctr-duas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .ctr-duas { grid-template-columns: 1fr; } }
+.ctr-ler summary { cursor: pointer; font-size: 14px; color: var(--accent); }
+.ctr-painel { margin-top: 8px; max-height: 260px; overflow-y: auto; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+.ctr-painel h4 { font-size: 14px; margin: 12px 0 4px; color: var(--ink); }
+.ctr-painel p + p { margin-top: 6px; }
+.ctr-ok { font-size: 13px; color: var(--ink-2); }
+
+/* comprovante */
+.ctr-comp dl { display: grid; grid-template-columns: minmax(0, 180px) minmax(0, 1fr); gap: 8px 16px; margin: 18px 0; }
+.ctr-comp dt { color: var(--ink-3); font-size: 13.5px; }
+.ctr-comp dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+@media (max-width: 560px) { .ctr-comp dl { grid-template-columns: 1fr; gap: 2px; } .ctr-comp dd { margin-bottom: 10px; } }
+.ctr-selo { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+.ctr-selo.ok { background: rgba(46, 160, 67, .15); color: #2e8540; }
+.ctr-selo.erro { background: rgba(192, 57, 43, .15); color: #c0392b; }
+.ctr-texto { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
+.ctr-texto h4 { font-size: 16px; margin: 18px 0 6px; }
+.ctr-texto p { color: var(--ink-2); line-height: 1.6; }
+.ctr-texto p + p { margin-top: 8px; }
+.ctr-tabela { overflow-x: auto; }
+
+@media print {
+  .nav, .rodape-site, .skip, .ctr-acoes, .assist, [class*=cookie] { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .ctr-comp, .ctr-comp * { color: #000 !important; }
+  .legal { padding-top: 0; }
+}

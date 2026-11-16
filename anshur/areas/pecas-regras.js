@@ -228,6 +228,37 @@
     return { linhas, total, resumo, de, ate: hoje };
   }
 
+  // ---------- giro e estoque parado ----------
+  // giro anual = consumo do período a custo (OS + balcão), levado para 12 meses ÷ valor do estoque hoje;
+  // cobertura = quantos dias o saldo de hoje dura no ritmo de saída do período. Sem saída no período: giro 0, cobertura infinita.
+  // Parado = peça com saldo e sem nenhuma saída há `dias` dias (ou nunca saiu e entrou há mais de `dias`).
+  function giro(est, { hoje = hojeISO(), dias = 365, loja = '', lojas = null } = {}) {
+    const de = somarDias(hoje, -dias), cons = new Map(), qtdS = new Map(), ultSaida = new Map(), primEntrada = new Map();
+    garantir(est).movimentos.forEach((m) => {
+      if (m.data > hoje) return;
+      const daLoja = !loja || m.loja === loja || m.para === loja;
+      if (!daLoja) return;
+      if (m.tipo === 'saida') {
+        if (!ultSaida.has(m.peca) || m.data > ultSaida.get(m.peca)) ultSaida.set(m.peca, m.data);
+        if (m.data >= de) { cons.set(m.peca, r2((cons.get(m.peca) || 0) + m.qtd * (m.custo || 0))); qtdS.set(m.peca, r3((qtdS.get(m.peca) || 0) + m.qtd)); }
+      }
+      if (m.tipo === 'entrada' || (m.tipo === 'ajuste' && m.qtd > 0)) { if (!primEntrada.has(m.peca) || m.data < primEntrada.get(m.peca)) primEntrada.set(m.peca, m.data); }
+    });
+    return estoque(est, { loja, lojas, ate: hoje }).map((e) => {
+      const consumo = cons.get(e.peca.id) || 0, saiu = qtdS.get(e.peca.id) || 0, ult = ultSaida.get(e.peca.id) || null;
+      const desde = ult || primEntrada.get(e.peca.id) || null;
+      return { peca: e.peca, qtd: e.qtd, valor: Math.max(0, e.valor), custoMedio: e.custoMedio, consumo, saiu,
+        giro: e.valor > 0 ? r2(consumo * (365 / dias) / e.valor) : null,
+        cobertura: e.qtd > 0 ? (saiu > 0 ? Math.round(e.qtd / (saiu / dias)) : Infinity) : 0,
+        ultimaSaida: ult, semSaidaDias: desde ? diasEntre(desde, hoje) : null };
+    });
+  }
+  function parado(est, { hoje = hojeISO(), dias = 180, loja = '', lojas = null } = {}) {
+    const linhas = giro(est, { hoje, dias: 365, loja, lojas }).filter((g) => g.qtd > 0 && g.semSaidaDias != null && g.semSaidaDias >= dias)
+      .sort((a, b) => b.valor - a.valor || b.semSaidaDias - a.semSaidaDias);
+    return { linhas, valor: r2(linhas.reduce((s, x) => s + x.valor, 0)), dias };
+  }
+
   // ---------- NF-e de compra (XML): leitura simples, sem validar assinatura ----------
   const tag = (s, t) => { const m = String(s).match(new RegExp(`<(?:\\w+:)?${t}(?:\\s[^>]*)?>([\\s\\S]*?)</(?:\\w+:)?${t}>`)); return m ? m[1].trim() : ''; };
   const tags = (s, t) => { const out = [], re = new RegExp(`<(?:\\w+:)?${t}(?:\\s[^>]*)?>([\\s\\S]*?)</(?:\\w+:)?${t}>`, 'g'); let m; while ((m = re.exec(String(s)))) out.push(m[1]); return out; };
@@ -263,5 +294,5 @@
 
   raiz.PECAS = { UNIDADES, ORIGENS, r2, r3, somarDias, diasEntre, normal, vazio, garantir, ativas, peca, nomePeca, proximoSku, salvarPeca, compativel, buscar,
     replay, posicao, estoque, saida, transferir, entradaCompra, vendaBalcao, inventario, abaixoMinimo, pedidoSugerido, criarPedido, cancelarPedido, textoPedido,
-    curvaABC, lerNFe, casarNFe, resumo, podeVer, podeEditar, podeAjustar, novoId, movimento: mov };
+    curvaABC, giro, parado, lerNFe, casarNFe, resumo, podeVer, podeEditar, podeAjustar, novoId, movimento: mov };
 })(typeof window !== 'undefined' ? window : globalThis);

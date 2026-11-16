@@ -1,7 +1,7 @@
 // Teste às cegas público (teste-as-cegas.html): regras sem tela. Roda só no navegador; nada é enviado.
 // Usa o motor de avaliação real (motor.js); não tem conta própria de preço.
 // Base geral = BASE REAL DE MERCADO (mercado.js / mercado-anuncios.js): catálogo com a referência de cada modelo calculada
-// dos anúncios públicos coletados em 16/11/2026 e os próprios anúncios como comparáveis. São PREÇOS PEDIDOS em anúncio,
+// dos anúncios públicos (a data da coleta vem dos dados) e os próprios anúncios como comparáveis. São PREÇOS PEDIDOS em anúncio,
 // não preços de venda fechada. Nada da demonstração (dados.js, revenda fictícia) entra aqui.
 // Validação temporal (walk-forward): as trocas vão em ordem cronológica e cada uma é avaliada só com a base de mercado
 // mais as trocas da revenda que vieram antes dela (e, quando há datas, que já tinham sido vendidas na data dela).
@@ -13,7 +13,9 @@
     { id: 'regular', nome: 'Regular', nota: 3 },
     { id: 'ruim', nome: 'Ruim', nota: 2 }
   ];
-  const TIPOS = { trator: 'Trator', colhedora: 'Colhedora', pulverizador: 'Pulverizador', plantadeira: 'Plantadeira' };
+  const TIPOS = { trator: 'Trator', colhedora: 'Colhedora', pulverizador: 'Pulverizador', plantadeira: 'Plantadeira', implemento: 'Implemento' };
+  // implemento (grade, arado, subsolador, roçadeira, distribuidor, carreta, plataforma...) não tem horímetro
+  const semHoras = (tipo) => tipo === 'implemento';
   const OUTRO = '__outro';
   const FORA = 'Este modelo ainda não está disponível no catálogo de avaliação do Anshur.';
   const TOTAL = 5;
@@ -50,7 +52,7 @@
     if (t.tipo && t.marca && t.modelo && !doCatalogo(ctx.modelos, t)) e.modelo = FORA;
     const ano = inteiro(t.ano), horas = inteiro(t.horas), dias = inteiro(t.dias);
     if (!(ehInteiro(ano) && ano >= 1990 && ano <= anoMax)) e.ano = `Informe o ano da máquina (1990 a ${anoMax}).`;
-    if (!(ehInteiro(horas) && horas >= 0 && horas <= 100000)) e.horas = 'Informe as horas (número inteiro, 0 ou mais).';
+    if (!semHoras(t.tipo) && !(ehInteiro(horas) && horas >= 0 && horas <= 100000)) e.horas = 'Informe as horas (número inteiro, 0 ou mais).';
     if (!condDe(t.estado)) e.estado = 'Escolha o estado.';
     if (!(t.pago > 0)) e.pago = 'Informe quanto a revenda pagou na troca.';
     if (!(t.vendido > 0)) e.vendido = 'Informe por quanto vendeu depois.';
@@ -78,7 +80,7 @@
   // modelos (opcional): catálogo de mercado; a máquina leva a referência e as horas/ano do modelo para o motor
   // não procurar no catálogo da demonstração
   function paraMotor(t, n, modelos) {
-    const m = { id: 'R' + n, tipo: t.tipo, marca: t.marca, modelo: t.modelo, ano: +t.ano, horas: +t.horas, cond: condDe(t.estado),
+    const m = { id: 'R' + n, tipo: t.tipo, marca: t.marca, modelo: t.modelo, ano: +t.ano, horas: semHoras(t.tipo) ? 0 : +t.horas, cond: condDe(t.estado),
       pago: t.pago, vendido: t.vendido, diasPatio: +t.dias, origem: 'Teste às cegas' };
     const c = modelos ? doCatalogo(modelos, t) : null;
     if (c) { m.referencia = c.base; m.hAno = c.hAno; }
@@ -134,12 +136,12 @@
       diasAcima: (() => { const a = ok.filter((l) => l.dif > 0); return a.length ? Math.round(a.reduce((s, l) => s + l.maq.diasPatio, 0) / a.length) : null; })(),
       erroVendaMedio: ok.length ? soma((l) => Math.abs(l.erroVenda)) / ok.length : 0
     };
-    return { linhas, resumo, porData, semData, limites: limites(linhas, { porData, semData, mercado: ctx.mercado, modelos: ctx.modelos }) };
+    return { linhas, resumo, porData, semData, mercado: ctx.mercado, limites: limites(linhas, { porData, semData, mercado: ctx.mercado, modelos: ctx.modelos }) };
   }
 
   const SITES = { 'Agrofy': 'Agrofy (agrofy.com.br)', 'Tratores e Colheitadeiras': 'Tratores e Colheitadeiras (tratoresecolheitadeiras.com.br)' };
   const dataBR = (iso) => iso.split('-').reverse().join('/');
-  const textoBase = (m) => `Base de mercado: ${m.n.toLocaleString('pt-BR')} anúncios públicos de máquinas usadas coletados em ${dataBR(m.coleta)} (fontes: ${m.fontes.map((f) => SITES[f] || f).join('; ')}), cobrindo ${m.modelos} modelos. São preços pedidos, não de venda fechada.`;
+  const textoBase = (m) => `Base de mercado: ${m.n.toLocaleString('pt-BR')} anúncios públicos de máquinas e implementos usados coletados em ${dataBR(m.coleta)} (fontes: ${m.fontes.map((f) => SITES[f] || f).join('; ')}), cobrindo ${m.modelos} modelos. São preços pedidos, não de venda fechada.`;
 
   function limites(linhas, info) {
     const m = info.mercado;
@@ -155,6 +157,7 @@
     if (info.semData) out.push(`${info.semData === linhas.length ? 'Nenhuma troca tem' : info.semData + ' de ' + linhas.length + ' trocas estão sem'} data: usamos a ordem em que você cadastrou e contamos a idade da máquina como se a troca fosse hoje, o que tende a baixar o valor recomendado. Com as datas, o teste fica mais justo.`);
     const fora = linhas.filter((l) => l.foraPorData.length);
     if (fora.length) out.push(`Em ${fora.length} ${fora.length === 1 ? 'troca' : 'trocas'}, alguma troca anterior ainda não tinha sido vendida na data dela e ficou fora do histórico (o Anshur ainda não saberia aquele preço).`);
+    if (linhas.some((l) => semHoras(l.maq.tipo))) out.push('Implemento não tem horímetro: é avaliado pelo ano e pelo estado. Cada "modelo" de implemento é o grupo e o porte que os anúncios informam (ex.: Grade aradora 16 discos), por fabricante; a perda por ano é medida nos anúncios do próprio grupo.');
     const sem = linhas.filter((l) => !l.r);
     if (sem.length) out.push(`${sem.length} ${sem.length === 1 ? 'troca não pôde' : 'trocas não puderam'} ser avaliadas por falta de referência e ficaram fora do resumo.`);
     return out;
@@ -169,10 +172,11 @@
     if (s.liquido > 0) l.push(`No total, o Anshur teria mandado pagar ${real(s.liquido)} a menos (${real(s.pago)} pagos x ${real(s.recomendado)} recomendados).`);
     else l.push(`No total, a revenda pagou ${real(-s.liquido)} abaixo do recomendado (${real(s.pago)} pagos x ${real(s.recomendado)} recomendados).`);
     res.linhas.filter((x) => x.r).forEach((x) => l.push(`${x.pos}. ${x.maq.marca} ${x.maq.modelo} ${x.maq.ano}: pagou ${real(x.maq.pago)}, máximo Anshur ${real(x.r.teto)} (${x.dif > 0 ? '+' : ''}${pct(x.difPct)})`));
-    l.push('Estimativa com base em preços pedidos em anúncios públicos (nov/2026) e em 5 negócios, sem precisão estatística.');
+    const mes = res.mercado && res.mercado.coleta ? res.mercado.coleta.slice(5, 7) + '/' + res.mercado.coleta.slice(0, 4) : '';
+    l.push(`Estimativa com base em preços pedidos em anúncios públicos${mes ? ' (' + mes + ')' : ''} e em ${s.n} negócios, sem precisão estatística.`);
     return l.join('\n');
   }
 
-  const API = { ESTADOS, TIPOS, OUTRO, FORA, TOTAL, MARGEM, contextoMercado, textoBase, condDe, somaDias, doCatalogo, validar, valida, ordenar, paraMotor, historicoPara, analisar, textoResumo };
+  const API = { ESTADOS, TIPOS, semHoras, OUTRO, FORA, TOTAL, MARGEM, contextoMercado, textoBase, condDe, somaDias, doCatalogo, validar, valida, ordenar, paraMotor, historicoPara, analisar, textoResumo };
   if (typeof module !== 'undefined') module.exports = API; else raiz.CEGAS = API;
 })(typeof window !== 'undefined' ? window : globalThis);

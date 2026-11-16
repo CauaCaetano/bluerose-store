@@ -1,6 +1,6 @@
 (function () {
   const A = window.ANSHUR, M = window.MOTOR, G = window.GRAFICOS, K = window.COMUM, IMPL = window.IMPLANTACAO;
-  const { C, real, mil, pct, esc, data, diasDesde, diasEntre, hojeISO, NOMES, FICHA, estado } = K;
+  const { C, real, mil, pct, esc, data, diasDesde, diasEntre, hojeISO, NOMES, FICHA, fichaDe, condFicha, semHoras, horasTxt, estado } = K;
   const tela = document.getElementById('tela');
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -204,7 +204,9 @@
     trator: ic('<path d="M5 17V9h7l2 4h4v4"/><path d="M8 9V6"/><circle cx="8" cy="17" r="3"/><circle cx="18" cy="18" r="2"/>', 'ico maq-svg'),
     colhedora: ic('<path d="M2 16h14V9H9l-2 3H2z"/><path d="M16 11l5-5M19 6h3"/><circle cx="6" cy="17.5" r="2.5"/><circle cx="13" cy="17.5" r="2.5"/>', 'ico maq-svg'),
     pulverizador: ic('<path d="M4 15V8h6l2 3h6v4z"/><path d="M1 13h22M3 13v2M21 13v2"/><circle cx="7" cy="17" r="2.5"/><circle cx="16" cy="17" r="2.5"/>', 'ico maq-svg'),
-    plantadeira: ic('<path d="M2 9h20M3 9l2-3h14l2 3M5 9v6M10 9v6M15 9v6M20 9v6"/><circle cx="5" cy="17" r="1.6"/><circle cx="10" cy="17" r="1.6"/><circle cx="15" cy="17" r="1.6"/><circle cx="20" cy="17" r="1.6"/>', 'ico maq-svg')
+    plantadeira: ic('<path d="M2 9h20M3 9l2-3h14l2 3M5 9v6M10 9v6M15 9v6M20 9v6"/><circle cx="5" cy="17" r="1.6"/><circle cx="10" cy="17" r="1.6"/><circle cx="15" cy="17" r="1.6"/><circle cx="20" cy="17" r="1.6"/>', 'ico maq-svg'),
+    // implemento: grade de discos puxada pelo cabeçalho
+    implemento: ic('<path d="M1 12h5M6 9h16v6H6z"/><circle cx="9" cy="18" r="2"/><circle cx="14" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M9 9V6M19 9V6"/>', 'ico maq-svg')
   };
   const VENDEDORES = () => { const l = [...new Set(A.trocas.map((t) => t.vendedor).filter((v) => v && !/Avalia|demonstra/i.test(v)))].sort(); return l.length ? l : ['Gerente de usados']; };
   // calendário agrícola da região (cana, soja e milho no nordeste paulista): quando cada tipo de máquina costuma ter procura
@@ -212,6 +214,7 @@
     colhedora: { janela: 'janeiro a março', motivo: 'usinas e fornecedores fecham frota antes da safra da cana, que começa em abril', meses: [0, 1, 2] },
     pulverizador: { janela: 'julho a setembro', motivo: 'preparação para o plantio da soja e para os tratos da cana', meses: [6, 7, 8] },
     plantadeira: { janela: 'julho a setembro', motivo: 'o plantio da soja começa com as chuvas, a partir de setembro', meses: [6, 7, 8] },
+    implemento: { janela: 'maio a setembro', motivo: 'preparo de solo, calagem e reforma do canavial acontecem na seca, antes do plantio', meses: [4, 5, 6, 7, 8] },
     trator: { janela: 'março a junho e agosto a outubro', motivo: 'colheita e preparo de solo puxam a procura em duas épocas', meses: [2, 3, 4, 5, 7, 8, 9] }
   };
   const janelaVenda = (tipo) => { const s = SAFRA[tipo]; if (!s) return ''; const m = new Date().getMonth(); return s.meses.includes(m) ? `Estamos na melhor época para vender (${s.janela}): ${s.motivo}.` : `Melhor época para vender: ${s.janela}, porque ${s.motivo}.`; };
@@ -283,7 +286,7 @@
       </section>
       <section class="painel bloco agir"><div class="painel-cab"><div><h2>${ICO.alvo}Onde você precisa agir</h2><p>${agir.length} máquinas que mais pesam no seu capital hoje</p></div></div>
         <div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Máquina</th><th>Idade (dias)</th><th class="n">Capital preso</th><th class="n">Margem estimada</th><th>Risco</th><th>Recomendação</th></tr></thead>
-        <tbody>${agir.map((i) => { const nv = nivelRisco(i); return `<tr class="clicavel" tabindex="0" data-id="${i.t.id}"><td class="maq">${fotoMini(i.t)}<span><b>${esc(NOMES[i.t.tipo].split(' ')[0] + ' ' + i.t.marca + ' ' + i.t.modelo)}</b><span>${i.t.ano} · ${i.t.horas.toLocaleString('pt-BR')} h</span></span></td>
+        <tbody>${agir.map((i) => { const nv = nivelRisco(i); return `<tr class="clicavel" tabindex="0" data-id="${i.t.id}"><td class="maq">${fotoMini(i.t)}<span><b>${esc(NOMES[i.t.tipo].split(' ')[0] + ' ' + i.t.marca + ' ' + i.t.modelo)}</b><span>${i.t.ano} · ${horasTxt(i.t)}</span></span></td>
           <td><span class="dias ${i.faixa}">${i.dias} dias</span></td><td class="n forte">${mil(i.t.pago)}</td><td class="n ${i.margem < 0.06 ? 'neg' : ''}">${pct(i.margem)}</td><td><span class="risco ${nv.cls}">${nv.ico}${nv.nome}</span></td><td><span class="reco">${ICO.etiqueta}${esc(i.acao)}</span></td></tr>`; }).join('')}</tbody></table></div>
       </section>`;
     $$('tr.clicavel', tela).forEach((tr) => { const abre = () => detalheMaquina(tr.dataset.id); tr.onclick = abre; tr.onkeydown = (e) => { if (e.key === 'Enter') abre(); }; });
@@ -309,8 +312,16 @@
   let fotosGrandes = {};
   const RT = window.RETENCAO;
   ['input', 'change', 'click'].forEach((ev) => tela.addEventListener(ev, (e) => { if (e.target.closest && e.target.closest('#passo') && /(^#|\/)avaliar$/.test(location.hash || '')) guardarRascunho(); }));
-  const condDe = (f) => Math.round(FICHA.reduce((s, [k]) => s + f[k], 0) / FICHA.length * 20);
-  const maqAv = () => ({ tipo: av.tipo, marca: av.marca, modelo: av.modelo, ano: av.ano, horas: av.horas, cond: condDe(av.ficha), ficha: { ...av.ficha } });
+  // nota geral = média dos itens da ficha que valem para o tipo (implemento não tem motor, câmbio nem cabine)
+  const condDe = (f, tipo = av.tipo) => condFicha(f, tipo);
+  const maqAv = () => ({ tipo: av.tipo, marca: av.marca, modelo: av.modelo, ano: av.ano, horas: semHoras(av.tipo) ? 0 : av.horas, cond: condDe(av.ficha), ficha: { ...av.ficha } });
+  // catálogo da avaliação: os modelos da revenda e, em implementos, também os da base pública de mercado (anúncios reais)
+  function catalogoAv(tipo) {
+    const proprios = A.modelos.filter((m) => m.tipo === tipo);
+    if (!semHoras(tipo) || !window.MERCADO) return proprios;
+    return proprios.concat(window.MERCADO.modelos.filter((m) => m.tipo === tipo && !proprios.some((x) => x.marca === m.marca && x.modelo === m.modelo)))
+      .sort((a, b) => a.marca.localeCompare(b.marca, 'pt-BR') || a.modelo.localeCompare(b.modelo, 'pt-BR', { numeric: true }));
+  }
   const num = (s) => { const v = parseFloat(String(s).replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')); return isFinite(v) ? v : 0; };
 
   function telaAvaliar() {
@@ -322,13 +333,13 @@
       <div id="passo"></div>
       ${estado.avaliacoes.length ? `<section class="painel bloco"><div class="painel-cab"><h2>Avaliações registradas</h2><p>${estado.avaliacoes.length} nesta demonstração</p></div>
         <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Data</th><th>Máquina</th><th class="n">Valor máximo</th><th class="n">Venda estimada</th><th>Situação</th></tr></thead><tbody>
-        ${estado.avaliacoes.slice().reverse().map((a) => `<tr><td>${data(a.data)}</td><td class="maq"><b>${esc(a.maq.marca + ' ' + a.maq.modelo)}</b><span>${a.maq.ano} · ${a.maq.horas.toLocaleString('pt-BR')} h</span></td><td class="n">${mil(a.teto)}</td><td class="n">${mil(a.venda)}</td><td>${{ troca: 'Virou troca', desistiu: 'Cliente desistiu' }[a.status] || (a.status === 'aberta' ? 'Em negociação' : '—')}${a.ia ? ' <span class="tag comprovado">IA revisada</span>' : ''}</td></tr>`).join('')}</tbody></table></div></section>` : ''}`;
+        ${estado.avaliacoes.slice().reverse().map((a) => `<tr><td>${data(a.data)}</td><td class="maq"><b>${esc(a.maq.marca + ' ' + a.maq.modelo)}</b><span>${a.maq.ano} · ${horasTxt(a.maq)}</span></td><td class="n">${mil(a.teto)}</td><td class="n">${mil(a.venda)}</td><td>${{ troca: 'Virou troca', desistiu: 'Cliente desistiu' }[a.status] || (a.status === 'aberta' ? 'Em negociação' : '—')}${a.ia ? ' <span class="tag comprovado">IA revisada</span>' : ''}</td></tr>`).join('')}</tbody></table></div></section>` : ''}`;
     $$('.etapas button', tela).forEach((b) => b.onclick = () => irPasso(+b.dataset.p));
     const zr = $('#rascunho-zerar'); if (zr) zr.onclick = () => { limparRascunho(true); telaAvaliar(); };
     desenharPasso();
   }
   function irPasso(p) {
-    if (p > 1 && !(av.horas > 0)) { av.passo = 1; desenharPasso(); toast('Informe as horas do horímetro para continuar.', true); return; }
+    if (p > 1 && !semHoras(av.tipo) && !(av.horas > 0)) { av.passo = 1; desenharPasso(); toast('Informe as horas do horímetro para continuar.', true); return; }
     // nada da IA entra no resultado sem o avaliador decidir item a item
     if (p > 3 && iaPendentes() > 0) { toast(`Revise as ${iaPendentes()} sugestões da IA (aceitar ou manter a sua nota) antes do resultado.`, true); p = 3; }
     av.passo = p;
@@ -340,18 +351,22 @@
   function desenharPasso() {
     const caixa = $('#passo'); if (!caixa) return;
     const tipos = Object.keys(NOMES);
-    const marcas = [...new Set(A.modelos.filter((m) => m.tipo === av.tipo).map((m) => m.marca))];
-    if (!marcas.includes(av.marca)) av.marca = marcas[0];
-    const modelos = A.modelos.filter((m) => m.tipo === av.tipo && m.marca === av.marca);
-    if (!modelos.some((m) => m.modelo === av.modelo)) av.modelo = modelos[0].modelo;
-    const anos = []; for (let a = anoAtual; a >= anoAtual - 15; a--) anos.push(a);
+    const cat = catalogoAv(av.tipo);
+    const marcas = [...new Set(cat.map((m) => m.marca))];
+    if (!marcas.includes(av.marca)) av.marca = marcas[0] || '';
+    const modelos = cat.filter((m) => m.marca === av.marca);
+    if (!modelos.some((m) => m.modelo === av.modelo)) av.modelo = modelos[0] ? modelos[0].modelo : '';
+    const sh = semHoras(av.tipo), anos = []; for (let a = anoAtual; a >= anoAtual - (sh ? 30 : 15); a--) anos.push(a);
+    if (!anos.includes(av.ano)) av.ano = anos.includes(+av.ano) ? +av.ano : anoAtual - 5;
     let h = '';
     if (av.passo === 1) h = `<section class="painel passo"><h2>Identificação da máquina</h2><div class="campos tres" style="margin-top:14px">
         <div class="campo"><label for="f-tipo">Categoria</label><select id="f-tipo">${tipos.map((k) => `<option value="${k}" ${k === av.tipo ? 'selected' : ''}>${NOMES[k]}</option>`).join('')}</select></div>
         <div class="campo"><label for="f-marca">Fabricante</label><select id="f-marca">${marcas.map((m) => `<option ${m === av.marca ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select></div>
         <div class="campo"><label for="f-modelo">Modelo</label><select id="f-modelo">${modelos.map((m) => `<option ${m.modelo === av.modelo ? 'selected' : ''}>${esc(m.modelo)}</option>`).join('')}</select></div>
         <div class="campo"><label for="f-ano">Ano</label><select id="f-ano">${anos.map((a) => `<option ${a === av.ano ? 'selected' : ''}>${a}</option>`).join('')}</select></div>
-        <div class="campo"><label for="f-horas">Horas trabalhadas</label><input id="f-horas" type="number" inputmode="numeric" min="0" step="10" value="${av.horas || ''}" required aria-describedby="e-horas"><span class="erro-campo" id="e-horas"></span></div>
+        ${sh ? `<div class="campo"><span class="rot-campo">Horas trabalhadas</span><p class="sub" id="f-sem-horas" style="margin-top:8px">Implemento não tem horímetro: o valor sai do ano, do modelo e do estado na inspeção.</p></div>`
+          : `<div class="campo"><label for="f-horas">Horas trabalhadas</label><input id="f-horas" type="number" inputmode="numeric" min="0" step="10" value="${av.horas || ''}" required aria-describedby="e-horas"><span class="erro-campo" id="e-horas"></span></div>`}
+        ${!modelos.length ? `<p class="conta neg inteiro">Ainda não há modelos de ${esc(NOMES[av.tipo].toLowerCase())} no catálogo. Adicione em Configurações › Catálogo de modelos.</p>` : ''}
         <div class="campo"><label for="f-local">Localização da máquina</label><input id="f-local" value="${esc(av.local)}" autocomplete="off"></div>
         <div class="campo"><label for="f-nova">Máquina nova desta negociação</label><select id="f-nova"><option value="">Nenhuma / não financiada</option>${(A.financiadas || []).filter((f) => !f.venda).map((f) => `<option value="${f.chassi}" ${av.nova === f.chassi ? 'selected' : ''}>${esc(f.marca + ' ' + f.modelo)} · ${f.chassi}</option>`).join('')}</select></div>
         <div class="campo inteiro"><label for="f-obs">Informações adicionais</label><textarea id="f-obs" rows="2" placeholder="Ex.: piloto automático, pneus novos há 1 safra">${esc(av.obs)}</textarea></div>
@@ -359,13 +374,13 @@
     if (av.passo === 2) h = passoFotos();
     if (av.passo === 3) { const c = condDe(av.ficha); h = `<section class="painel passo"><div class="painel-cab"><h2>Inspeção</h2><p>Nota de 1 (ruim) a 5 (ótimo)</p></div>
         ${av.ia ? `<p class="conta ia-aviso">${av.ia.exemplo ? '<span class="tag declarado">Exemplo</span> ' : ''}A IA olhou ${av.ia.nFotos} fotos e <b>sugeriu</b> notas. Quem decide é você: aceite ou mantenha a sua nota em cada item${iaPendentes() ? ` (<b id="ia-falta">${iaPendentes()} para revisar</b>)` : ' (tudo revisado)'}.</p>` : '<p class="ajuda">Tire as fotos guiadas no passo anterior e a IA sugere as notas; você confere e decide item a item.</p>'}
-        ${FICHA.map(([k, n, d]) => `<div class="criterio"><div><b id="r-${k}">${n}</b><p>${d}</p>${linhaIA(k)}</div><div class="notas" role="group" aria-labelledby="r-${k}">${[1, 2, 3, 4, 5].map((v) => `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${av.ficha[k] === v}">${v}</button>`).join('')}</div></div>`).join('')}
+        ${fichaDe(av.tipo).map(([k, n, d]) => `<div class="criterio"><div><b id="r-${k}">${n}</b><p>${d}</p>${linhaIA(k)}</div><div class="notas" role="group" aria-labelledby="r-${k}">${[1, 2, 3, 4, 5].map((v) => `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${av.ficha[k] === v}">${v}</button>`).join('')}</div></div>`).join('')}
         ${avariasIA()}
         <div style="margin-top:16px"><span class="rot-campo">Nota geral</span> <b id="nota-geral">${c}/100</b><div class="medidor"><i id="medidor" style="width:${c}%"></i></div></div>
         <h2 style="margin-top:22px">Documentação e evidências</h2>
         <div class="campos" style="margin-top:14px">
           <div class="campo inteiro"><span class="rot-campo">Verificado pela revenda</span><div class="checks">
-            <label class="check"><input type="checkbox" data-v="horimetro" ${av.verif.horimetro ? 'checked' : ''}> Horímetro conferido com foto</label>
+            ${semHoras(av.tipo) ? '' : `<label class="check"><input type="checkbox" data-v="horimetro" ${av.verif.horimetro ? 'checked' : ''}> Horímetro conferido com foto</label>`}
             <label class="check"><input type="checkbox" data-v="notas" ${av.verif.notas ? 'checked' : ''}> Notas ou ordens de serviço entregues</label>
             <label class="check"><input type="checkbox" data-v="chassi" ${av.verif.chassi ? 'checked' : ''}> Chassi e número de série conferidos</label></div></div>
           <div class="campo inteiro"><label for="f-decl">Declarado pelo cliente (ainda sem comprovante)</label><textarea id="f-decl" rows="2" placeholder="Ex.: motor retificado em 2023, sempre revisado na concessionária">${esc(av.declarado)}</textarea></div>
@@ -380,7 +395,7 @@
       $('#f-marca').onchange = (e) => { av.marca = e.target.value; desenharPasso(); };
       $('#f-modelo').onchange = (e) => { av.modelo = e.target.value; };
       $('#f-ano').onchange = (e) => { av.ano = +e.target.value; };
-      $('#f-horas').oninput = (e) => { av.horas = Math.max(0, +e.target.value || 0); $('#e-horas').textContent = av.horas > 0 ? '' : 'Informe as horas do horímetro.'; };
+      if ($('#f-horas')) $('#f-horas').oninput = (e) => { av.horas = Math.max(0, +e.target.value || 0); $('#e-horas').textContent = av.horas > 0 ? '' : 'Informe as horas do horímetro.'; };
       $('#f-local').oninput = (e) => { av.local = e.target.value; };
       $('#f-nova').onchange = (e) => { av.nova = e.target.value; };
       $('#f-obs').oninput = (e) => { av.obs = e.target.value; };
@@ -552,6 +567,7 @@
               <div><span>Erro histórico validado</span><b>${r.qualidade && r.qualidade.n >= M.QUALIDADE.minimoValidacao ? pct(r.qualidade.mape) + ' (' + r.qualidade.n + ' testes)' : 'sem amostra'}</b></div>
               <div><span>Erro médio em reais</span><b>${r.qualidade && r.qualidade.n >= M.QUALIDADE.minimoValidacao ? mil(r.qualidade.mae) : '—'}</b></div>
               <div><span>Vendas atípicas excluídas</span><b>${r.atipicas}</b></div>
+              ${r.mercado ? `<div><span>Anúncios públicos de mercado</span><b>${r.mercado}</b></div>` : ''}
             </div>
             <p class="nota-rodape">Erro validado: o Anshur previu vendas antigas usando só o que tinha sido vendido antes de cada troca e comparou com o preço real. Alta = 12+ vendas do tipo e erro até 6%; moderada = 8+ vendas e erro até 10%; abaixo disso, baixa.</p>
           </section>
@@ -577,8 +593,9 @@
             </ul>
             ${r.limites.length ? `<p class="nota-rodape"><b>Limitações:</b> ${r.limites.map(esc).join(' ')}</p>` : ''}
           </section>
-          <section class="painel bloco"><h2>Trocas semelhantes já vendidas</h2><div class="comparaveis" style="margin-top:10px">
-            ${r.comp.map((t) => `<div class="comp"><div><b>${esc(t.marca + ' ' + t.modelo)} · ${t.ano}</b><span>${t.horas.toLocaleString('pt-BR')} h · pago ${mil(t.pago)} · ${t.diasPatio} dias</span></div><div style="text-align:right"><b>${mil(t.vendido)}</b><span>vendido</span></div></div>`).join('')}
+          <section class="painel bloco"><h2>${r.mercado ? 'Trocas e anúncios semelhantes' : 'Trocas semelhantes já vendidas'}</h2><div class="comparaveis" style="margin-top:10px">
+            ${r.comp.map((t) => String(t.id).startsWith('mercado-') ? `<div class="comp"><div><b>${esc(t.marca + ' ' + t.modelo)} · ${t.ano}</b><span>Anúncio público · ${esc(t.fonte || '')}</span></div><div style="text-align:right"><b>${mil(t.vendido)}</b><span>preço pedido</span></div></div>`
+              : `<div class="comp"><div><b>${esc(t.marca + ' ' + t.modelo)} · ${t.ano}</b><span>${horasTxt(t)} · pago ${mil(t.pago)} · ${t.diasPatio} dias</span></div><div style="text-align:right"><b>${mil(t.vendido)}</b><span>vendido</span></div></div>`).join('')}
           </div></section>
         </div>
       </div>
@@ -674,7 +691,7 @@
         <div class="campo"><label for="p-ordem">Ordenar por</label><select id="p-ordem">${[['risco', 'Maior risco de margem'], ['capital', 'Maior capital imobilizado'], ['dias', 'Maior tempo no pátio'], ['margem', 'Menor margem projetada']].map(([v, n]) => `<option value="${v}" ${fp.ordem === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
       </div>
       <section class="painel"><div class="tabela-wrap"><table class="tabela"><thead><tr><th><span class="sr">Comparar</span></th><th>Máquina</th><th>Entrada</th><th class="n">Dias</th><th class="n">Aquisição</th><th class="n">Preparo</th><th class="n">Custo total</th><th class="n">Anunciado</th><th class="n">Venda estimada</th><th class="n">Margem</th><th>Situação</th></tr></thead>
-        <tbody>${itens.length ? itens.map((i) => `<tr class="clicavel" tabindex="0" data-id="${i.t.id}"><td><input type="checkbox" class="comp-chk" value="${i.t.id}" ${comparar.has(i.t.id) ? 'checked' : ''} aria-label="Comparar ${esc(i.t.modelo)}"></td><td class="maq">${fotoMini(i.t)}<span><b>${esc(i.t.marca + ' ' + i.t.modelo)}</b><span>${NOMES[i.t.tipo]} · ${i.t.ano} · ${i.t.horas.toLocaleString('pt-BR')} h</span></span></td>
+        <tbody>${itens.length ? itens.map((i) => `<tr class="clicavel" tabindex="0" data-id="${i.t.id}"><td><input type="checkbox" class="comp-chk" value="${i.t.id}" ${comparar.has(i.t.id) ? 'checked' : ''} aria-label="Comparar ${esc(i.t.modelo)}"></td><td class="maq">${fotoMini(i.t)}<span><b>${esc(i.t.marca + ' ' + i.t.modelo)}</b><span>${NOMES[i.t.tipo]} · ${i.t.ano} · ${horasTxt(i.t)}</span></span></td>
           <td>${data(i.t.entrada)}</td><td class="n">${i.dias} <span class="tag ${i.faixa}">${C.NOMES_IDADE[i.faixa]}</span></td><td class="n">${mil(i.t.pago)}</td><td class="n">${mil(i.t.preparo)}</td><td class="n">${mil(i.custo)}</td><td class="n">${mil(i.t.anuncio)}</td><td class="n">${mil(i.venda)}</td>
           <td class="n ${i.margem < 0.06 ? 'neg' : ''}">${pct(i.margem)}</td><td>${esc(i.acao)}</td></tr>`).join('') : `<tr><td colspan="11" class="vazio">${todos.length ? 'Nenhuma máquina com esses filtros.' : 'O pátio está vazio. Use Adicionar para cadastrar a primeira máquina.'}</td></tr>`}</tbody></table></div>
         <p class="nota-rodape">Toque numa máquina para ver os detalhes, simular redução de preço e abrir o passaporte.</p></section>`;
@@ -698,7 +715,7 @@
     abrirCamada('gaveta', `
       <div class="galeria-ficha">${[0, 1, 2].map((k) => { const f = F.de(t, k); return `<img src="${f.propria ? f.u : (k ? F.mini(f.u) : f.u)}" alt="Foto ${k + 1} de ${esc(t.marca + ' ' + t.modelo)}" loading="lazy">`; }).join('')}</div>
       <span class="tag ${i.faixa}">${C.NOMES_IDADE[i.faixa]} · ${i.dias} dias</span>
-      <h2 style="font-size:22px;margin-top:10px">${esc(t.marca + ' ' + t.modelo)}</h2><p class="sub">${NOMES[t.tipo]} · ${t.ano} · ${t.horas.toLocaleString('pt-BR')} h · ${esc(t.origem)}</p>
+      <h2 style="font-size:22px;margin-top:10px">${esc(t.marca + ' ' + t.modelo)}</h2><p class="sub">${NOMES[t.tipo]} · ${t.ano} · ${horasTxt(t)} · ${esc(t.origem)}</p>
       <div class="det">
         <div><span>Aquisição</span><b>${real(t.pago)}</b></div><div><span>Preparação</span><b>${real(t.preparo)}</b></div>
         <div><span>Custo total</span><b>${real(i.custo)}</b></div><div><span>Preço anunciado</span><b>${real(t.anuncio)}</b></div>
@@ -851,7 +868,7 @@
         <p class="nota-rodape">Registrado: previsão gravada no dia em que a troca foi fechada no Anshur. Reconstituído: o que o motor diria naquele dia, usando só as vendas anteriores.</p>
       </section>
       <section class="painel bloco"><div class="tabela-wrap"><table class="tabela"><thead><tr><th>Venda</th><th>Máquina</th><th class="n">Recomendado</th><th class="n">Pago</th><th class="n">Diferença</th><th class="n">Preparo</th><th class="n">Venda</th><th class="n">Margem</th><th class="n">Resultado</th></tr></thead>
-        <tbody>${linhas.length ? linhas.map((l) => `<tr><td>${data(l.t.saida)}</td><td class="maq"><b>${esc(l.t.marca + ' ' + l.t.modelo)}</b><span>${l.t.ano} · ${l.t.horas.toLocaleString('pt-BR')} h · ${l.t.diasPatio} dias</span></td>
+        <tbody>${linhas.length ? linhas.map((l) => `<tr><td>${data(l.t.saida)}</td><td class="maq"><b>${esc(l.t.marca + ' ' + l.t.modelo)}</b><span>${l.t.ano} · ${horasTxt(l.t)} · ${l.t.diasPatio} dias</span></td>
           <td class="n">${l.r ? mil(l.r.teto) : '—'}</td><td class="n">${mil(l.t.pago)}</td><td class="n ${l.dif > 0 ? 'neg' : 'pos'}">${l.dif > 0 ? '+' : ''}${mil(l.dif)}</td><td class="n">${mil(l.t.preparo)}</td><td class="n">${mil(l.t.vendido)}</td>
           <td class="n ${l.m < 0 ? 'neg' : ''}">${pct(l.m)}</td><td class="n ${l.res < 0 ? 'neg' : 'pos'}">${mil(l.res)}</td></tr>`).join('') : '<tr><td colspan="9" class="vazio">Nenhuma troca com esses filtros.</td></tr>'}</tbody></table></div>
         <p class="nota-rodape">"Recomendado" é o valor máximo que o Anshur indicaria na data da troca, aprendendo só com as vendas anteriores. A diferença é um ponto para revisar a decisão, não um prejuízo comprovado.</p></section>`;
@@ -879,7 +896,7 @@
     if (tc.modo === 'revenda') {
       if (!recentes.length) { corpo.innerHTML = `<section class="painel vazio">Ainda não há trocas com data suficiente para o teste. <button class="link" type="button" id="ir-imp">Importar planilha</button></section>`; $('#ir-imp').onclick = () => { tc.modo = 'minhas'; telaTeste(); }; return; }
       corpo.innerHTML = `<section class="painel passo"><div class="painel-cab"><h2>1. Escolha as trocas</h2><p><span id="qtd">${tc.selecionadas.size}</span> selecionadas</p></div>
-        <div class="selecao">${recentes.map((t) => `<label><input type="checkbox" value="${t.id}" ${tc.selecionadas.has(t.id) ? 'checked' : ''}> ${esc(t.marca + ' ' + t.modelo)} · ${t.ano} · ${t.horas.toLocaleString('pt-BR')} h<span>troca em ${data(t.entrada)}</span></label>`).join('')}</div>
+        <div class="selecao">${recentes.map((t) => `<label><input type="checkbox" value="${t.id}" ${tc.selecionadas.has(t.id) ? 'checked' : ''}> ${esc(t.marca + ' ' + t.modelo)} · ${t.ano} · ${horasTxt(t)}<span>troca em ${data(t.entrada)}</span></label>`).join('')}</div>
         <div class="acoes"><button class="btn btn-ouro" type="button" id="rodar">Avaliar sem ver o resultado</button></div></section><div id="revelacao"></div>`;
       $$('.selecao input', corpo).forEach((c) => c.onchange = () => { c.checked ? tc.selecionadas.add(c.value) : tc.selecionadas.delete(c.value); $('#qtd').textContent = tc.selecionadas.size; });
       $('#rodar').onclick = (e) => {
@@ -939,7 +956,7 @@
     if (!res.length) { toast('Não foi possível avaliar essas trocas: histórico insuficiente antes delas.', true); return; }
     botao.classList.add('carregando');
     caixa.innerHTML = `<section class="placar bloco" aria-live="polite"><span class="sub">Avaliando ${res.length} trocas sem ver o valor pago…</span><div class="grande" id="placar-val">—</div><p id="placar-txt"></p></section>
-      <div class="cegas">${res.map((c, i) => `<article class="cega" id="cega-${i}"><h3>${esc(c.t.marca + ' ' + c.t.modelo)} · ${c.t.ano} · ${c.t.horas.toLocaleString('pt-BR')} h</h3>
+      <div class="cegas">${res.map((c, i) => `<article class="cega" id="cega-${i}"><h3>${esc(c.t.marca + ' ' + c.t.modelo)} · ${c.t.ano} · ${horasTxt(c.t)}</h3>
         <div class="linhas"><div><span>Anshur recomendaria até</span><b class="oculto" data-a>calculando</b></div><div><span>A revenda pagou</span><b class="oculto" data-p>••••••</b></div><div><span>Vendeu por</span><b class="oculto" data-v>••••••</b></div><div><span>Diferença</span><b class="oculto" data-d>••••••</b></div></div></article>`).join('')}</div>`;
     caixa.scrollIntoView({ behavior: reduzido ? 'auto' : 'smooth', block: 'start' });
     const passo = reduzido ? 0 : 420;
@@ -978,7 +995,7 @@
       <div class="cartoes escalonado">${itens.map((i) => {
         const comp = (i.t.manutencoes || []).filter((m) => m.comNota).length, tot = (i.t.manutencoes || []).length;
         return `<article class="cartao-pp"><img class="pp-foto" src="${F.de(i.t).propria ? F.de(i.t).u : F.mini(F.de(i.t).u)}" alt="${esc(i.t.marca + ' ' + i.t.modelo)}" loading="lazy"><span class="id">ANS-${esc(i.t.id)}</span><h2 style="font-size:17px">${esc(i.t.marca + ' ' + i.t.modelo)}</h2>
-          <p class="sub">${NOMES[i.t.tipo]} · ${i.t.ano} · ${i.t.horas.toLocaleString('pt-BR')} h · anunciado ${mil(i.t.anuncio)}</p>
+          <p class="sub">${NOMES[i.t.tipo]} · ${i.t.ano} · ${horasTxt(i.t)} · anunciado ${mil(i.t.anuncio)}</p>
           <p class="sub"><span class="tag comprovado">${comp} comprovadas</span> <span class="tag declarado">${tot - comp} declaradas</span></p>
           <div class="acoes" style="margin-top:4px"><a class="btn btn-ouro" href="passaporte.html?id=${i.t.id}">Abrir</a><button class="btn btn-linha" type="button" data-copiar="${i.t.id}">Copiar link</button></div></article>`;
       }).join('')}</div>`;
@@ -1543,7 +1560,7 @@
     $('#c-prem').onclick = abrirPremissas; ligarLGPD(); ligarLojas(); ligarIAConfig(); ligarAvisos();
     $('#c-alc').onclick = () => { salvarAlcadas(tela); toast('Alçadas salvas.'); rota(); };
     $('#c-modelo').onclick = () => formulario('Adicionar modelo ao catálogo', [{ k: 'tipo', r: 'Categoria', tipo: 'select', ops: Object.entries(NOMES) }, { k: 'marca', r: 'Fabricante', lista: 'dl-marca', obr: true }, { k: 'modelo', r: 'Modelo', lista: 'dl-modelo', obr: true }, { k: 'base', r: 'Referência de preço seminovo (R$)', num: true, obr: true }], { tipo: 'trator' }, (v) => {
-      A.modelos.push({ tipo: v.tipo, marca: v.marca, modelo: v.modelo, base: v.base, hAno: { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270 }[v.tipo], importado: true });
+      A.modelos.push({ tipo: v.tipo, marca: v.marca, modelo: v.modelo, base: v.base, hAno: { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270, implemento: 0 }[v.tipo], importado: true });
       estado.modelosExtra = (estado.modelosExtra || []).concat([{ tipo: v.tipo, marca: v.marca, modelo: v.modelo, base: v.base }]); salvar(); log('config', `Modelo ${v.marca} ${v.modelo} adicionado ao catálogo`); fecharCamada(true); toast('Modelo adicionado.'); rota();
     });
     const caixaCopias = $('#c-copias');
@@ -1793,7 +1810,7 @@
   function abrirComparacao() {
     const l = [...comparar].map((id) => A.trocas.find((t) => t.id === id)).filter(Boolean).map(infoPatio);
     if (l.length < 2) { toast('Marque 2 ou 3 máquinas para comparar.', true); return; }
-    const linhas = [['Foto', (i) => `<img src="${F.de(i.t).propria ? F.de(i.t).u : F.mini(F.de(i.t).u)}" alt="" style="width:100%;max-width:220px;border-radius:10px;aspect-ratio:4/3;object-fit:cover">`], ['Ano · horas', (i) => `${i.t.ano} · ${i.t.horas.toLocaleString('pt-BR')} h`], ['Aquisição', (i) => real(i.t.pago)], ['Preparação', (i) => real(i.t.preparo)], ['Custo financeiro', (i) => real(i.juros)], ['Dias no pátio', (i) => `<span class="dias ${i.faixa}">${i.dias} dias</span>`], ['Venda estimada', (i) => real(i.venda)], ['Margem esperada', (i) => `<b class="${i.margem < 0.06 ? 'neg' : 'pos'}">${pct(i.margem)}</b>`], ['Risco de oficina', (i) => { const h = historicoModelo(i.t.modelo); return h.reserva ? real(h.reserva) + ' em média' : 'sem histórico'; }], ['Época de venda', (i) => esc((SAFRA[i.t.tipo] || {}).janela || '—')], ['Recomendação', (i) => esc(i.acao)]];
+    const linhas = [['Foto', (i) => `<img src="${F.de(i.t).propria ? F.de(i.t).u : F.mini(F.de(i.t).u)}" alt="" style="width:100%;max-width:220px;border-radius:10px;aspect-ratio:4/3;object-fit:cover">`], ['Ano · horas', (i) => `${i.t.ano} · ${horasTxt(i.t)}`], ['Aquisição', (i) => real(i.t.pago)], ['Preparação', (i) => real(i.t.preparo)], ['Custo financeiro', (i) => real(i.juros)], ['Dias no pátio', (i) => `<span class="dias ${i.faixa}">${i.dias} dias</span>`], ['Venda estimada', (i) => real(i.venda)], ['Margem esperada', (i) => `<b class="${i.margem < 0.06 ? 'neg' : 'pos'}">${pct(i.margem)}</b>`], ['Risco de oficina', (i) => { const h = historicoModelo(i.t.modelo); return h.reserva ? real(h.reserva) + ' em média' : 'sem histórico'; }], ['Época de venda', (i) => esc((SAFRA[i.t.tipo] || {}).janela || '—')], ['Recomendação', (i) => esc(i.acao)]];
     abrirCamada('gaveta larga', `<h2 style="font-size:24px">Comparar máquinas</h2><div class="tabela-wrap" style="margin-top:14px"><table class="tabela grande comparar"><thead><tr><th></th>${l.map((i) => `<th>${esc(i.t.marca + ' ' + i.t.modelo)}</th>`).join('')}</tr></thead><tbody>${linhas.map(([n, f]) => `<tr><td><b>${n}</b></td>${l.map((i) => `<td>${f(i)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`);
   }
 
@@ -1892,10 +1909,11 @@
   // ---------- horímetro suspeito ----------
   function checaHorimetro(maq) {
     const avisos = [];
+    if (semHoras(maq.tipo)) return avisos; // implemento não tem horímetro
     const hAno = (M.catalogo(maq) || {}).hAno || { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270 }[maq.tipo] || 800;
     const idade = Math.max(1, anoAtual - maq.ano), esperado = hAno * idade;
-    if (maq.horas > 0 && maq.horas < esperado * 0.35) avisos.push(`Horas muito abaixo do normal: ${maq.horas.toLocaleString('pt-BR')} h para ${idade} anos de uso (o comum seria perto de ${Math.round(esperado / 100) * 100} h). Confira o painel e o histórico de revisões.`);
-    if (maq.horas > esperado * 2) avisos.push(`Horas muito acima do normal para a idade: ${maq.horas.toLocaleString('pt-BR')} h. Revise o estado do motor e da transmissão.`);
+    if (maq.horas > 0 && maq.horas < esperado * 0.35) avisos.push(`Horas muito abaixo do normal: ${horasTxt(maq)} para ${idade} anos de uso (o comum seria perto de ${Math.round(esperado / 100) * 100} h). Confira o painel e o histórico de revisões.`);
+    if (maq.horas > esperado * 2) avisos.push(`Horas muito acima do normal para a idade: ${horasTxt(maq)}. Revise o estado do motor e da transmissão.`);
     const mans = (maq.manutencoes || []).filter((m) => +m.horas > maq.horas);
     if (mans.length) avisos.push(`Há revisão registrada com ${(+mans[0].horas).toLocaleString('pt-BR')} h, mais do que o horímetro mostra hoje: possível troca ou adulteração do horímetro.`);
     return avisos;
@@ -1906,7 +1924,7 @@
     const l = estado.pendentes.slice().reverse();
     tela.innerHTML = `<div class="titulo"><div><h1>Aprovações</h1><p>Trocas que o vendedor quer fechar acima do valor máximo. Só entram no pátio depois que um gerente ou o dono aprovar.</p></div></div>
       ${NV && NV.semInternet() ? '<p class="conta">Sem internet: os pedidos aparecem, mas aprovar ou recusar só funciona com internet.</p>' : ''}
-      <section class="painel">${l.length ? l.map((p) => `<div class="aprov ${p.status}"><div><b>${esc(p.maq.marca + ' ' + p.maq.modelo)} · ${p.maq.ano} · ${p.maq.horas.toLocaleString('pt-BR')} h</b>${p.semInternet ? ' <span class="tag declarado">Feito sem internet</span>' : ''}
+      <section class="painel">${l.length ? l.map((p) => `<div class="aprov ${p.status}"><div><b>${esc(p.maq.marca + ' ' + p.maq.modelo)} · ${p.maq.ano} · ${horasTxt(p.maq)}</b>${p.semInternet ? ' <span class="tag declarado">Feito sem internet</span>' : ''}
         <span>Pedido por ${esc(p.por)} em ${new Date(p.quando).toLocaleString('pt-BR')} · quer pagar <b class="neg">${real(p.valor)}</b>, máximo recomendado ${real(p.rec.teto)} (<b class="neg">+${real(p.valor - p.rec.teto)}</b>)</span>
         <span>Motivo: ${esc(p.motivo || '—')}</span>${p.status !== 'pendente' ? `<span>${p.status === 'aprovada' ? 'Aprovada' : 'Recusada'} por ${esc(p.decisao.por)} em ${new Date(p.decisao.quando).toLocaleString('pt-BR')}</span>` : ''}</div>
         ${p.retrato ? `<button class="link" type="button" data-rt="${p.retrato}">Ver retrato da avaliação</button>` : ''}
@@ -1959,7 +1977,7 @@
   // =====================================================================================
   // V7: alçadas por tipo de máquina, retrato imutável da avaliação e contraproposta guiada
   // =====================================================================================
-  const ALCADA_PADRAO = { trator: { vendedor: 5000, gerente: 40000 }, colhedora: { vendedor: 0, gerente: 0 }, pulverizador: { vendedor: 3000, gerente: 30000 }, plantadeira: { vendedor: 3000, gerente: 20000 } };
+  const ALCADA_PADRAO = { trator: { vendedor: 5000, gerente: 40000 }, colhedora: { vendedor: 0, gerente: 0 }, pulverizador: { vendedor: 3000, gerente: 30000 }, plantadeira: { vendedor: 3000, gerente: 20000 }, implemento: { vendedor: 1000, gerente: 10000 } };
   const alcadas = () => Object.assign({}, ALCADA_PADRAO, estado.alcadas || {});
   // nível de quem pode liberar um valor acima do teto: livre (o próprio vendedor), gerente ou dono
   function nivelExigido(tipo, excesso) {
@@ -2151,8 +2169,8 @@
   // anúncio pronto para os portais
   function gerarAnuncio(t) {
     const i = infoPatio(t), f = [0, 1, 2].map((k) => F.de(t, k)), link = new URL('passaporte.html?id=' + t.id, location.href).href;
-    const titulo = `${NOMES[t.tipo]} ${t.marca} ${t.modelo} ${t.ano} · ${t.horas.toLocaleString('pt-BR')} h`;
-    const texto = `${titulo}\n\n${t.marca} ${t.modelo}, ano ${t.ano}, ${t.horas.toLocaleString('pt-BR')} horas. Inspeção da revenda: ${t.cond}/100.\n${(t.manutencoes || []).filter((m) => m.comNota).length} manutenções com nota fiscal.\nPreço: ${real(t.anuncio)}.\n\nFicha completa, fotos e histórico: ${link}\n${A.revenda.nome} · ${t.loja || A.revenda.cidade}`;
+    const titulo = `${NOMES[t.tipo]} ${t.marca} ${t.modelo} ${t.ano} · ${horasTxt(t)}`;
+    const texto = `${titulo}\n\n${t.marca} ${t.modelo}, ano ${t.ano}, ${horasTxt(t)}oras. Inspeção da revenda: ${t.cond}/100.\n${(t.manutencoes || []).filter((m) => m.comNota).length} manutenções com nota fiscal.\nPreço: ${real(t.anuncio)}.\n\nFicha completa, fotos e histórico: ${link}\n${A.revenda.nome} · ${t.loja || A.revenda.cidade}`;
     abrirCamada('modal', `<h2>Anúncio pronto</h2><p class="sub">Copie e cole no Agrofy, Mercado Máquinas, Facebook ou WhatsApp. O link leva ao passaporte com QR Code.</p>
       <div class="campo" style="margin-top:12px"><label for="an-tit">Título</label><input id="an-tit" value="${esc(titulo)}"></div>
       <div class="campo" style="margin-top:10px"><label for="an-txt">Descrição</label><textarea id="an-txt" rows="9">${esc(texto)}</textarea></div>
@@ -2777,7 +2795,7 @@
       html: () => {
         const p = C.patio(A.todasTrocas), cap = p.reduce((s, t) => s + t.pago, 0), ult = p.slice().sort((a, b) => String(b.entrada).localeCompare(String(a.entrada))).slice(0, 5);
         return `<p class="impl-numero"><b>${p.length}</b><span>${p.length === 1 ? 'máquina' : 'máquinas'} no pátio hoje${p.length ? ' · ' + mil(cap) + ' parados' : ''}</span></p>
-          ${ult.length ? `<ul class="impl-lista">${ult.map((t) => `<li><b>${esc(t.marca + ' ' + t.modelo)}</b><span>${t.ano} · ${t.horas.toLocaleString('pt-BR')} h · ${diasDesde(t.entrada)} dias no pátio</span></li>`).join('')}</ul>` : ''}
+          ${ult.length ? `<ul class="impl-lista">${ult.map((t) => `<li><b>${esc(t.marca + ' ' + t.modelo)}</b><span>${t.ano} · ${horasTxt(t)} · ${diasDesde(t.entrada)} dias no pátio</span></li>`).join('')}</ul>` : ''}
           <div class="acoes"><button class="btn btn-ouro" type="button" id="im-dms">Trazer do meu sistema atual</button><button class="btn btn-linha" type="button" id="im-maq">${ic('<path d="M12 5v14M5 12h14"/>')}Cadastrar máquina do pátio</button><a class="btn btn-linha" href="#documentos">Puxar de nota, foto ou PDF</a>${p.length ? '<a class="btn btn-linha" href="#patio">Ver o pátio</a>' : ''}</div>`;
       },
       ligar: (i) => { $('#im-dms').onclick = () => irImportarDms(i); $('#im-maq').onclick = () => addMaquinaManual({}, undefined, (t) => { if (A.todasTrocas !== A.trocas && !A.todasTrocas.some((x) => x.id === t.id)) A.todasTrocas.push({ ...t }); desenharImpl(i); }); }

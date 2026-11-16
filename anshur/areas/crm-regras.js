@@ -114,7 +114,7 @@
       return { lead: l, ultimo: ult, parado: diasEntre(ult, hoje), futura };
     }).filter((x) => !x.futura && x.parado >= dias).sort((a, b) => b.parado - a.parado);
   }
-  const NOMES_TIPO = { trator: 'trator', colhedora: 'colhedora', pulverizador: 'pulverizador', plantadeira: 'plantadeira' };
+  const NOMES_TIPO = { trator: 'trator', colhedora: 'colhedora', pulverizador: 'pulverizador', plantadeira: 'plantadeira', implemento: 'implemento' };
   // mensagem pronta (a pessoa confere e envia no WhatsApp; nada sai sozinho)
   function mensagemFollowup({ nome, revenda, vendedor, interesse, proposta, etapa } = {}) {
     const pn = String(nome || '').split(' ')[0] || 'tudo bem';

@@ -28,7 +28,7 @@
     ['termo', 'Termo de entrega técnica assinado pelo cliente']
   ];
   // mesmas alçadas dos usados (app.js › ALCADA_PADRAO, Configurações › Alçadas): quanto acima do limite cada um libera
-  const ALCADA_PADRAO = { trator: { vendedor: 5000, gerente: 40000 }, colhedora: { vendedor: 0, gerente: 0 }, pulverizador: { vendedor: 3000, gerente: 30000 }, plantadeira: { vendedor: 3000, gerente: 20000 } };
+  const ALCADA_PADRAO = { trator: { vendedor: 5000, gerente: 40000 }, colhedora: { vendedor: 0, gerente: 0 }, pulverizador: { vendedor: 3000, gerente: 30000 }, plantadeira: { vendedor: 3000, gerente: 20000 }, implemento: { vendedor: 1000, gerente: 10000 } };
   const NOME_NIVEL = { livre: 'dentro da alçada do vendedor', gerente: 'precisa do gerente', dono: 'só o dono libera' };
 
   const vazio = () => ({ catalogo: [], pedidos: [], reservas: [], propostas: [], vendas: [] });

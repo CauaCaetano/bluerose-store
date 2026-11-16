@@ -70,7 +70,7 @@
     A.garantias = []; A.financiadas = []; // nada fictício no ambiente real (o que for cadastrado entra por estado.extras)
     // modelos que vieram na planilha e não estão no catálogo entram com a referência (Fipe) informada
     (estado.historico || []).forEach((t) => {
-      if (!A.modelos.some((m) => m.modelo === t.modelo) && t.referencia) A.modelos.push({ tipo: t.tipo, marca: t.marca || '—', modelo: t.modelo, base: t.referencia, hAno: { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270 }[t.tipo] || 800, importado: true });
+      if (!A.modelos.some((m) => m.modelo === t.modelo && (t.tipo !== 'implemento' || m.marca === t.marca)) && t.referencia) A.modelos.push({ tipo: t.tipo, marca: t.marca || '—', modelo: t.modelo, base: t.referencia, hAno: { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270 }[t.tipo] || 800, importado: true });
     });
   } else {
     estado.fechadas.forEach((t) => { if (!A.trocas.some((x) => x.id === t.id)) A.trocas.push({ ...t }); });
@@ -150,7 +150,7 @@
     if (N && ambiente === 'op' && CRITICOS.has(tipo)) N.evento(tipo, texto);
   }
 
-  (estado.modelosExtra || []).forEach((m) => { if (!A.modelos.some((x) => x.modelo === m.modelo)) A.modelos.push({ ...m, hAno: { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270 }[m.tipo] || 800, importado: true }); });
+  (estado.modelosExtra || []).forEach((m) => { if (!A.modelos.some((x) => x.modelo === m.modelo && (m.tipo !== 'implemento' || x.marca === m.marca))) A.modelos.push({ ...m, hAno: { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270 }[m.tipo] || 800, importado: true }); });
   aplicarMovimentos(A.trocas, estado);
   aplicarFinanceiro(A.trocas, estado);
   // várias lojas: cada máquina pertence a uma unidade; o motor aprende com todas, as telas mostram a loja escolhida
@@ -187,7 +187,7 @@
   const data = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR') : '—');
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  const NOMES = { trator: 'Trator', colhedora: 'Colhedora de cana', pulverizador: 'Pulverizador', plantadeira: 'Plantadeira' };
+  const NOMES = { trator: 'Trator', colhedora: 'Colhedora de cana', pulverizador: 'Pulverizador', plantadeira: 'Plantadeira', implemento: 'Implemento' };
   const FICHA = [
     ['motor', 'Motor', 'Partida, fumaça, ruído, vazamentos e compressão aparente.'],
     ['transmissao', 'Transmissão', 'Troca de marchas, embreagem, folgas e ruídos.'],
@@ -196,6 +196,19 @@
     ['cabine', 'Cabine e eletrônica', 'Painel, ar-condicionado, monitor e chicotes.'],
     ['lataria', 'Lataria e pintura', 'Amassados, ferrugem, solda e repintura.']
   ];
+  // implemento (grade, arado, roçadeira, distribuidor, carreta, enfardadeira, plataforma...): sem motor, câmbio, cabine nem horímetro.
+  // Usa as mesmas chaves da ficha (a IA e o passaporte continuam iguais), com o que se olha num implemento.
+  const FICHA_IMPLEMENTO = [
+    ['transmissao', 'Órgãos de trabalho', 'Discos, hastes, facas, linhas, rotor ou esteira: desgaste, folgas e trincas.'],
+    ['hidraulico', 'Hidráulico e cardã', 'Cilindros, mangueiras, comandos, cardã e caixa de transmissão.'],
+    ['pneus', 'Rodas e pneus', 'Pneus de transporte, cubos, rolamentos e rodas de controle.'],
+    ['lataria', 'Estrutura e pintura', 'Chassi, cabeçalho, soldas, trincas, ferrugem e repintura.']
+  ];
+  const fichaDe = (tipo) => (tipo === 'implemento' ? FICHA_IMPLEMENTO : FICHA);
+  // nota 0 a 100 = média das notas (1 a 5) dos itens que valem para o tipo × 20
+  const condFicha = (f, tipo) => { const l = fichaDe(tipo); return Math.round(l.reduce((s, [k]) => s + (+f[k] || 0), 0) / l.length * 20); };
+  const semHoras = (tipo) => tipo === 'implemento';
+  const horasTxt = (t) => (t && semHoras(t.tipo) ? 'sem horímetro' : `${(+(t && t.horas) || 0).toLocaleString('pt-BR')} h`);
   // marca: A e N com a diagonal compartilhada; o topo dourado da haste é a valorização
   const logo = (tam = 32, claro = true) => `<svg width="${tam}" height="${tam}" viewBox="0 0 64 64" aria-hidden="true"><path d="M4 56 24 8h9l17 41V8h9v48H47L28.5 13 13 56Z" fill="${claro ? '#111820' : '#E9E2D4'}"/><path d="M50 8h9v14h-9z" fill="#C1A36A"/></svg>`;
 
@@ -424,7 +437,7 @@
   // recarregar só depois de terminar de enviar ao servidor
   const recarregar = () => (N && ambiente === 'op' ? N.recarregar() : location.reload());
   if (N && ambiente === 'op') { N.aoSalvarNoServidor = () => avisarOutrasAbas('servidor'); }
-  raiz.COMUM = { A, ambiente, aoMudarEmOutraAba, nuvem: N && ambiente === 'op' ? N : null, lojasPermitidas, lembrarLoja, recarregar, repo, estado, cfg, PADRAO, PERFIS, usuarioAtual, registrar, real, mil, pct, hojeISO, diasEntre, diasDesde, data, esc, NOMES, FICHA, logo, C,
+  raiz.COMUM = { A, ambiente, aoMudarEmOutraAba, nuvem: N && ambiente === 'op' ? N : null, lojasPermitidas, lembrarLoja, recarregar, repo, estado, cfg, PADRAO, PERFIS, usuarioAtual, registrar, real, mil, pct, hojeISO, diasEntre, diasDesde, data, esc, NOMES, FICHA, FICHA_IMPLEMENTO, fichaDe, condFicha, semHoras, horasTxt, logo, C,
     fecharTroca, registrarPreparo, registrarVenda, registrarCustos, aplicarMovimentos, margemOperacao, relatorioMargem,
     cad: CAD, garantirCadastro, acharCadastro, normal, digitos, custosDoFinanceiro, aplicarFinanceiro,
     ehLinkWhatsApp, lerWhatsApp, mascararNumero, abrirWhatsApp, simularWhatsApp, whatsappReal, AVISO_WA_DEMO,
