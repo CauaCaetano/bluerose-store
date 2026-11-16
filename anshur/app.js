@@ -893,12 +893,12 @@
       <p class="sub" style="margin:6px 0 14px">Cole do Excel ou abra o CSV do seu sistema. Os dados são lidos só neste navegador: nada é enviado.</p>
       <p class="ajuda">Colunas (com ou sem cabeçalho, nesta ordem se não houver): <b>categoria; fabricante; modelo; ano; horas; estado (1 a 5); valor pago na troca; valor vendido; dias no pátio; Fipe (opcional); data da troca; data da venda</b>. Valores podem vir como "R$ 210.000,00". Com as datas, o teste usa só as vendas anteriores a cada troca.</p>
       <div class="campo" style="margin-top:12px"><label for="cola">Trocas</label><textarea class="cola" id="cola" placeholder="Categoria;Fabricante;Modelo;Ano;Horas;Estado;Valor pago;Valor vendido;Dias;Fipe;Data da troca;Data da venda">${esc(tc.texto)}</textarea></div>
-      <div class="acoes"><button class="btn btn-ouro" type="button" id="conferir">Conferir planilha</button><label class="btn btn-linha" style="cursor:pointer">Abrir arquivo CSV<input type="file" accept=".csv,.txt,text/csv" id="arquivo" class="sr"></label><button class="btn btn-linha" type="button" id="modelo">Baixar planilha modelo</button></div>
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="conferir">Conferir planilha</button><label class="btn btn-linha" style="cursor:pointer">Abrir arquivo (CSV ou Excel)<input type="file" accept=".csv,.txt,.tsv,.xlsx,.xls,.ods,text/csv" id="arquivo" class="sr"></label><button class="btn btn-linha" type="button" id="modelo">Baixar planilha modelo</button></div>
       <div id="previa"></div></section>${blocoSync()}<div id="revelacao"></div>`;
     ligarBotoesSync(corpo);
     $('#cola').oninput = (e) => { tc.texto = e.target.value; tc.previa = null; $('#previa').innerHTML = ''; };
     $('#modelo').onclick = baixarModeloTrocas;
-    $('#arquivo').onchange = (e) => { const f = e.target.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { tc.texto = String(rd.result); $('#cola').value = tc.texto; conferir(); }; rd.onerror = () => toast('Não foi possível ler o arquivo.', true); rd.readAsText(f, 'utf-8'); };
+    $('#arquivo').onchange = async (e) => { const f = e.target.files[0]; if (!f) return; e.target.value = ''; try { const l = await lerTexto(f, () => {}); tc.texto = l.texto || ''; $('#cola').value = tc.texto; conferir(); } catch (er) { toast(`Não foi possível ler o arquivo: ${er.message}`, true); } };
     $('#conferir').onclick = conferir;
     if (tc.previa) mostrarPrevia();
   }
@@ -1165,54 +1165,17 @@
     req.onerror = () => erro(req.error);
     req.onsuccess = () => { const tx = req.result.transaction('kv', modo), st = tx.objectStore('kv'); const r = fn(st); tx.oncomplete = () => ok(r && r.result); tx.onerror = () => erro(tx.error); };
   });
-  const temPasta = () => 'showDirectoryPicker' in window;
-  async function sincronizar(pedir) {
-    if (!OP || !temPasta()) return 'indisponivel';
-    let h; try { h = await idb('readonly', (st) => st.get('pasta')); } catch (e) { return 'erro'; }
-    if (!h) return 'sem-pasta';
-    let perm = await h.queryPermission({ mode: 'read' });
-    if (perm !== 'granted' && pedir) perm = await h.requestPermission({ mode: 'read' });
-    if (perm !== 'granted') return 'permissao';
-    let maisNovo = null;
-    for await (const ent of h.values()) {
-      if (ent.kind !== 'file' || !/\.(csv|txt)$/i.test(ent.name)) continue;
-      const f = await ent.getFile(); if (!maisNovo || f.lastModified > maisNovo.lastModified) maisNovo = f;
-    }
-    if (!maisNovo) return 'vazia';
-    const lido = window.IMPORTAR.ler(await maisNovo.text(), { refDe: M.refDe, anoMax: anoAtual });
-    const chave = (t) => [t.tipo, t.modelo, t.ano, t.horas, t.pago, t.vendido].join('|');
-    const ja = new Set((estado.historico || []).map(chave));
-    const novas = lido.aceitas.filter((t) => t.entrada && t.saida && !ja.has(chave(t))).map((t, i) => ({ ...t, id: 'H' + ((estado.historico || []).length + i + 1), ficha: { motor: t.cond / 20, transmissao: t.cond / 20, hidraulico: t.cond / 20, pneus: t.cond / 20, cabine: t.cond / 20, lataria: t.cond / 20 }, manutencoes: [] }));
-    estado.historico = (estado.historico || []).concat(novas);
-    estado.ultimaSync = { arquivo: maisNovo.name, data: new Date().toISOString(), novas: novas.length, rejeitadas: lido.rejeitadas.length };
-    salvar();
-    return novas.length ? 'novas' : 'em-dia';
-  }
-  async function ligarPasta() {
-    try {
-      const h = await window.showDirectoryPicker({ mode: 'read' });
-      await idb('readwrite', (st) => st.put(h, 'pasta'));
-      const r = await sincronizar(true);
-      toast(r === 'novas' ? `Pasta ligada: ${estado.ultimaSync.novas} trocas novas importadas.` : r === 'vazia' ? 'Pasta ligada, mas ainda não há CSV nela.' : 'Pasta ligada.');
-      if (r === 'novas') setTimeout(() => K.recarregar(), 900); else rota();
-    } catch (e) { if (e.name !== 'AbortError') toast('Não foi possível ligar a pasta.', true); }
-  }
+  // A leitura da pasta do sistema (DMS) agora fica na tela "Trazer do meu sistema" (areas/importar.js, regras em dms.js):
+  // lê a pasta inteira (CSV, TXT, Excel, subpastas), mostra a prévia antes de gravar e cada importação pode ser desfeita.
   function blocoSync() {
-    if (!OP) return `<section class="painel bloco"><h2>${ICO.linha}Atualização automática com o seu sistema</h2>
-      <p class="sub" style="margin:6px 0 12px">No ambiente com os dados da sua revenda, o Anshur pode ler sozinho a planilha que o seu sistema exporta todo dia numa pasta do computador. Ninguém precisa subir arquivo.</p>
-      <button class="btn btn-linha" type="button" id="ir-op">Usar com os dados da minha revenda</button></section>`;
-    const u = estado.ultimaSync;
-    return `<section class="painel bloco"><h2>${ICO.linha}Atualização automática com o seu sistema</h2>
-      <p class="sub" style="margin:6px 0 12px">Programe o seu sistema (DMS) para exportar o relatório de trocas todo dia numa pasta. O Anshur lê o arquivo mais novo dessa pasta sempre que é aberto e importa só as trocas novas. Funciona no Chrome e no Edge do computador; nada sai do computador.</p>
-      ${u ? `<p class="conta">Última sincronização: ${new Date(u.data).toLocaleString('pt-BR')} · arquivo ${esc(u.arquivo)} · ${u.novas} trocas novas${u.rejeitadas ? ` · ${u.rejeitadas} linhas com erro` : ''}.</p>` : ''}
-      ${temPasta() ? '<div class="acoes"><button class="btn btn-ouro" type="button" id="ligar-pasta">Escolher pasta de exportação</button><button class="btn btn-linha" type="button" id="sinc-agora">Sincronizar agora</button></div>' : '<p class="conta">Este navegador não permite ler pastas. Use o Chrome ou o Edge no computador.</p>'}</section>`;
+    const pastas = ((estado.dms && estado.dms.pastas) || []).slice().sort((a, b) => String(b.ultima && b.ultima.quando).localeCompare(String(a.ultima && a.ultima.quando)));
+    const u = pastas[0] && pastas[0].ultima;
+    return `<section class="painel bloco"><h2>${ICO.linha}Trazer do meu sistema atual</h2>
+      <p class="sub" style="margin:6px 0 12px">O Anshur lê as exportações do seu sistema (DMS/ERP) numa pasta do computador ou em arquivos: vendas de usados, trocas, estoque e clientes, em CSV, TXT ou Excel. Você confere a prévia antes de gravar e pode desfazer depois.</p>
+      ${u ? `<p class="conta">Última sincronização (${esc(pastas[0].nome)}): ${new Date(u.quando).toLocaleString('pt-BR')} · ${u.novos || 0} novos · ${u.atualizados || 0} atualizados${u.erros ? ` · ${u.erros} linhas com erro` : ''}.</p>` : ''}
+      ${pode('importar') ? '<div class="acoes"><a class="btn btn-ouro" href="#/config/importar">Trazer do meu sistema</a></div>' : '<p class="conta">A importação é feita pelo dono ou pelo gerente.</p>'}</section>`;
   }
-  function ligarBotoesSync(raiz) {
-    const a = $('#ligar-pasta', raiz), b = $('#sinc-agora', raiz), c = $('#ir-op', raiz);
-    if (a) a.onclick = ligarPasta;
-    if (b) b.onclick = async () => { const r = await sincronizar(true); toast({ novas: `${estado.ultimaSync.novas} trocas novas importadas.`, 'em-dia': 'Tudo em dia: nenhuma troca nova.', 'sem-pasta': 'Escolha a pasta primeiro.', vazia: 'A pasta não tem CSV.', permissao: 'O navegador não liberou a leitura da pasta.' }[r] || 'Não foi possível sincronizar.', !['novas', 'em-dia'].includes(r)); if (r === 'novas') setTimeout(() => K.recarregar(), 900); };
-    if (c) c.onclick = () => { K.repo.trocarAmbiente('op'); location.hash = '#teste'; K.recarregar(); };
-  }
+  function ligarBotoesSync() { /* o bloco só tem um link para a tela de importação */ }
 
   // =====================================================================================
   // V5: fotos, usuários e permissões, auditoria, adicionar em todas as páginas, documentos,
@@ -1336,10 +1299,10 @@
   const carregar = (src) => new Promise((ok, erro) => { if ([...document.scripts].some((s) => s.src === src)) return ok(); const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => erro(new Error('Sem internet para carregar o leitor.')); document.head.appendChild(s); });
   async function lerTexto(arquivo, progresso) {
     const nome = arquivo.name.toLowerCase();
-    if (/\.(csv|txt)$/.test(nome)) return { tipo: 'planilha', texto: await arquivo.text() };
+    if (/\.(csv|txt|tsv)$/.test(nome)) return { tipo: 'planilha', texto: window.DMS ? window.DMS.decodificar(new Uint8Array(await arquivo.arrayBuffer())).texto : await arquivo.text() };
     if (/\.(xlsx|xls|ods)$/.test(nome)) {
       progresso('Abrindo a planilha…'); await carregar('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
-      const wb = window.XLSX.read(await arquivo.arrayBuffer(), { type: 'array' });
+      let wb; try { wb = window.XLSX.read(await arquivo.arrayBuffer(), { type: 'array', dateNF: 'dd/mm/yyyy' }); } catch (e) { throw new Error(/password|encrypt/i.test(String(e && e.message)) ? 'planilha protegida por senha: tire a senha no Excel e salve de novo' : 'não foi possível abrir esta planilha'); }
       return { tipo: 'planilha', texto: window.XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]], { FS: ';' }) };
     }
     if (/\.pdf$/.test(nome)) {
@@ -1572,8 +1535,8 @@
           <div class="tabela-wrap" style="max-height:320px;overflow:auto"><table class="tabela"><thead><tr><th>Modelo</th><th>Categoria</th><th class="n">Referência</th></tr></thead><tbody>${A.modelos.map((m) => `<tr><td><b>${esc(m.marca)}</b> ${esc(m.modelo)}</td><td>${NOMES[m.tipo]}</td><td class="n">${mil(m.base)}</td></tr>`).join('')}</tbody></table></div>
           <div class="acoes"><button class="btn btn-linha" type="button" id="c-modelo">Adicionar modelo</button></div></section>
         <section class="painel"><h2>${ICO.linha}Integrações e dados</h2>
-          <ul class="lista-motivos" style="margin-top:8px"><li><span>Sincronização com a pasta do sistema (DMS)</span><b>${estado.ultimaSync ? 'Ligada' : 'Desligada'}</b></li><li><span>Documentos recebidos</span><b>${estado.documentos.length}</b></li><li><span>Atividades registradas</span><b>${estado.atividades.length}</b></li></ul>
-          <div class="acoes"><a class="btn btn-linha" href="#teste">Sincronizar com o sistema</a><button class="btn btn-linha" type="button" id="c-backup">Baixar cópia de segurança</button><label class="btn btn-linha" style="cursor:pointer">Restaurar cópia<input type="file" accept=".json" id="c-restaura" class="sr"></label><button class="btn btn-linha" type="button" id="c-instalar">Instalar o app</button></div></section>
+          <ul class="lista-motivos" style="margin-top:8px"><li><span>Importação do sistema atual (DMS)</span><b>${(estado.dms && estado.dms.pastas && estado.dms.pastas.length) || estado.ultimaSync ? 'Pasta ligada' : (estado.dms && estado.dms.lotes && estado.dms.lotes.length) ? 'Por arquivos' : 'Ainda não'}</b></li><li><span>Documentos recebidos</span><b>${estado.documentos.length}</b></li><li><span>Atividades registradas</span><b>${estado.atividades.length}</b></li></ul>
+          <div class="acoes"><a class="btn btn-linha" href="#/config/importar">Trazer do meu sistema</a><button class="btn btn-linha" type="button" id="c-backup">Baixar cópia de segurança</button><label class="btn btn-linha" style="cursor:pointer">Restaurar cópia<input type="file" accept=".json" id="c-restaura" class="sr"></label><button class="btn btn-linha" type="button" id="c-instalar">Instalar o app</button></div></section>
       ${K.nuvem && !K.nuvem.offline && ['dono', 'gerente', 'auditor'].includes(eu().perfil) ? '<section class="painel bloco" id="c-copias"><h2>Cópias diárias no servidor</h2><p class="sub">Carregando…</p></section>' : ''}
       </div>`;
     $('#c-salvar').onclick = () => { salvarDadosRevenda(lerCamposRevenda('c')); toast('Dados da revenda salvos.'); setTimeout(() => K.recarregar(), 600); };
@@ -2782,6 +2745,8 @@
       html: () => {
         const n = C.vendidas(A.todasTrocas).length, u = (implEstado() || {}).importacao;
         return `<p class="impl-numero"><b>${n}</b><span>${n === 1 ? 'troca vendida' : 'trocas vendidas'} no histórico${n < IMPL.MIN_HISTORICO ? ` · o Anshur precisa de pelo menos ${IMPL.MIN_HISTORICO}` : ''}</span></p>
+          <div class="impl-dms"><div><b>Trazer do meu sistema atual</b><span>Aponte a pasta onde o seu sistema exporta as vendas de usados (ou escolha os arquivos). O Anshur reconhece as colunas, mostra a prévia e você grava.</span></div><button class="btn btn-ouro" type="button" id="im-dms">Trazer do meu sistema atual</button></div>
+          <p class="rot-campo" style="margin-top:14px">Ou pela planilha modelo do Anshur</p>
           <ol class="impl-sub">
             <li><div><b>Baixe a planilha modelo</b><span>Colunas: categoria, fabricante, modelo, ano, horas, estado (1 a 5), valor pago na troca, valor vendido, dias no pátio, Fipe (opcional), data da troca e data da venda. Apague a linha de exemplo antes de enviar.</span></div><button class="btn btn-linha" type="button" id="im-modelo">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Baixar planilha modelo</button></li>
             <li><div><b>Envie a planilha</b><span>A planilha preenchida ou a exportação do seu sistema atual, em CSV ou Excel. O Anshur reconhece as colunas pelo nome.</span></div><label class="btn btn-ouro impl-arquivo">${ic('<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>')}Enviar planilha<input type="file" id="im-arq" accept=".csv,.txt,.xlsx,.xls,.ods" class="sr"></label></li>
@@ -2791,11 +2756,12 @@
           <div id="im-previa">${implPrevia ? previaImpl() : ''}</div>
           ${u && !implPrevia ? `<div class="impl-ultima"><b>Última planilha: ${esc(u.arquivo)}</b><span>${data(String(u.quando).slice(0, 10))} · ${u.entraram} ${u.entraram === 1 ? 'troca entrou' : 'trocas entraram'} no histórico · ${u.problemas} ${u.problemas === 1 ? 'linha com problema' : 'linhas com problema'}</span>
             ${u.avisos && u.avisos.length ? `<ul>${u.avisos.map((a) => `<li>Linha ${a.linha}: ${esc(a.motivo)}</li>`).join('')}</ul>` : ''}</div>` : ''}
-          <p class="nota-rodape">Prefere uma por vez? <button class="link" type="button" id="im-manual">Adicionar uma venda antiga à mão</button>. O seu sistema exporta todo dia numa pasta? <a class="link" href="#teste">Ligar a pasta do sistema</a>.</p>`;
+          <p class="nota-rodape">Prefere uma por vez? <button class="link" type="button" id="im-manual">Adicionar uma venda antiga à mão</button>. O seu sistema exporta todo dia numa pasta? <button class="link" type="button" id="im-dms2">Ligar a pasta do sistema</button>.</p>`;
       },
       ligar: (i) => {
         $('#im-modelo').onclick = baixarModeloTrocas;
         $('#im-manual').onclick = addVendaManual;
+        $('#im-dms').onclick = $('#im-dms2').onclick = () => irImportarDms(i);
         $('#im-arq').onchange = async (ev) => {
           const f = ev.target.files[0]; if (!f) return;
           const caixa = $('#im-previa'); caixa.innerHTML = `<div class="carregando-linha" style="margin-top:12px"><span class="giro"></span><b id="im-st">Lendo ${esc(f.name)}…</b></div>`;
@@ -2812,9 +2778,9 @@
         const p = C.patio(A.todasTrocas), cap = p.reduce((s, t) => s + t.pago, 0), ult = p.slice().sort((a, b) => String(b.entrada).localeCompare(String(a.entrada))).slice(0, 5);
         return `<p class="impl-numero"><b>${p.length}</b><span>${p.length === 1 ? 'máquina' : 'máquinas'} no pátio hoje${p.length ? ' · ' + mil(cap) + ' parados' : ''}</span></p>
           ${ult.length ? `<ul class="impl-lista">${ult.map((t) => `<li><b>${esc(t.marca + ' ' + t.modelo)}</b><span>${t.ano} · ${t.horas.toLocaleString('pt-BR')} h · ${diasDesde(t.entrada)} dias no pátio</span></li>`).join('')}</ul>` : ''}
-          <div class="acoes"><button class="btn btn-ouro" type="button" id="im-maq">${ic('<path d="M12 5v14M5 12h14"/>')}Cadastrar máquina do pátio</button><a class="btn btn-linha" href="#documentos">Puxar de nota, foto ou PDF</a>${p.length ? '<a class="btn btn-linha" href="#patio">Ver o pátio</a>' : ''}</div>`;
+          <div class="acoes"><button class="btn btn-ouro" type="button" id="im-dms">Trazer do meu sistema atual</button><button class="btn btn-linha" type="button" id="im-maq">${ic('<path d="M12 5v14M5 12h14"/>')}Cadastrar máquina do pátio</button><a class="btn btn-linha" href="#documentos">Puxar de nota, foto ou PDF</a>${p.length ? '<a class="btn btn-linha" href="#patio">Ver o pátio</a>' : ''}</div>`;
       },
-      ligar: (i) => { $('#im-maq').onclick = () => addMaquinaManual({}, undefined, (t) => { if (A.todasTrocas !== A.trocas && !A.todasTrocas.some((x) => x.id === t.id)) A.todasTrocas.push({ ...t }); desenharImpl(i); }); }
+      ligar: (i) => { $('#im-dms').onclick = () => irImportarDms(i); $('#im-maq').onclick = () => addMaquinaManual({}, undefined, (t) => { if (A.todasTrocas !== A.trocas && !A.todasTrocas.some((x) => x.id === t.id)) A.todasTrocas.push({ ...t }); desenharImpl(i); }); }
     },
     avaliacao: {
       html: () => `<p class="impl-numero"><b>${sinaisImpl().avaliacoes}</b><span>${sinaisImpl().avaliacoes === 1 ? 'avaliação registrada' : 'avaliações registradas'}</span></p>
@@ -2832,6 +2798,8 @@
       }
     }
   };
+  // abre a importação do sistema atual com a faixa "Voltar à implantação" no alto
+  const irImportarDms = (i) => { ssS(IMPL_VOLTA, String(i)); location.hash = '#/config/importar'; };
   const pessoasImpl = () => estado.usuarios.map((u) => `<li>${avatarHTML(u, 32)}<span><b>${esc(u.nome)}</b><small>${esc(K.PERFIS[u.perfil] || u.perfil)}${u.email ? ' · ' + esc(u.email) : ''}</small></span></li>`).join('');
 
   // planilha do histórico: lê com o importador, separa o que não pode entrar e mostra para conferir
@@ -2984,11 +2952,12 @@
   atualizarAvatar(); eu().ultimoAcesso = new Date().toISOString(); if (!K.nuvem) salvar();
   $$('.menu a').forEach((a) => { if (!pode(a.dataset.aba)) a.hidden = true; });
   $$('.menu-grupo').forEach((g) => { let x = g.nextElementSibling, algum = false; while (x && x.tagName === 'A') { if (!x.hidden) algum = true; x = x.nextElementSibling; } g.hidden = !algum; });
-  if (OP) sincronizar(false).then((r) => { if (r === 'novas') { toast(`Sincronizado com o seu sistema: ${estado.ultimaSync.novas} trocas novas.`); setTimeout(() => K.recarregar(), 1200); } else if (r === 'permissao') toast('Toque em Teste às cegas › Importar planilha › Sincronizar agora para atualizar com o seu sistema.'); }).catch(() => {});
   semearDemo();
   // contexto que cada área (areas/*.js) recebe para desenhar as próprias telas: as mesmas ferramentas do app
   const UI = { A, K, C, G, M, estado, tela, $, $$, ICO, ic, esc, real, mil, pct, data, hojeISO, diasDesde, diasEntre, num, NOMES, OP, NV, toast, abrirCamada, fecharCamada, confirmar, formulario, baixarCSV, salvar,
     log, eu, pode, rota, conta, contar, mascarar, somenteLeitura, fotoMini, irArea, abrirInstalacao };
+  // pasta do sistema já liberada (Chrome/Edge): confere se o sistema exportou algo novo e avisa; a gravação passa sempre pela prévia
+  if (window.DMS_UI && pode('importar')) setTimeout(() => { window.DMS_UI.verificarAoAbrir(UI).catch(() => {}); }, 2500);
   Object.assign(UI, { SAFRA, alcadas }); // calendário de safra e alçadas dos usados, reutilizados por Máquinas Novas e CRM
   window.ANSHUR_UI = UI;
   if (AR) AR.lista().forEach((a) => { if (a.iniciar) try { a.iniciar(UI); } catch (e) { console.error('Área ' + a.id, e); } });

@@ -1,8 +1,10 @@
 // Leitura de trocas coladas do Excel ou de CSV do sistema da revenda. Roda só no navegador: nada é enviado.
 (function (raiz) {
   // datas primeiro: "data da troca" não pode cair na coluna de valor pago
+  // "vendedor" vem antes para não ser lido como valor vendido; cabeçalhos com _ . - viram espaço ("DATA_VENDA", "Dt. Venda")
   const COLUNAS = {
-    entrada: /data da troca|entrada|dt.*troca/, saida: /data da venda|sa[ií]da|dt.*venda/,
+    vendedor: /vendedor|consultor/,
+    entrada: /data da troca|data troca|data (da )?entrada|entrada|dt.*troca|dt.*entrada/, saida: /data da venda|data venda|sa[ií]da|dt.*venda/,
     tipo: /categ|tipo|grupo/, marca: /fabric|marca/, modelo: /modelo/, ano: /^ano|ano\b|fabrica[cç][aã]o/, horas: /hora|hor[ií]metro/,
     estado: /estado|nota|condi/, pago: /pago|troca|compra|aquisi/, vendido: /vend|venda/, dias: /dias|perman|p[aá]tio/,
     fipe: /fipe|refer/
@@ -23,9 +25,10 @@
     return v;
   }
   function numero(s) { const v = dinheiro(s); return v; }
-  // aceita dd/mm/aaaa, dd/mm/aa e aaaa-mm-dd; devolve ISO ou null
+  // aceita dd/mm/aaaa, dd/mm/aa e aaaa-mm-dd (com ou sem hora) e a data serial do Excel; devolve ISO ou null
   function dataISO(s) {
-    const t = String(s ?? '').trim(); if (!t) return null;
+    const t = String(s ?? '').trim().replace(/[T\s]+\d{1,2}:\d{2}(:\d{2}(\.\d+)?)?$/, ''); if (!t) return null;
+    if (/^\d{5}$/.test(t) && +t > 59 && +t < 90000) return new Date(Date.UTC(1899, 11, 30) + +t * 864e5).toISOString().slice(0, 10);
     let m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     let a, me, d;
     if (m) { a = +m[1]; me = +m[2]; d = +m[3]; }
@@ -54,7 +57,7 @@
       sep = sep || separador(bruta);
       const c = dividir(bruta, sep);
       if (!mapa) {
-        const cab = c.map(semAcento);
+        const cab = c.map((x) => semAcento(x).replace(/[_.\-/]+/g, ' ').replace(/\s+/g, ' ').trim());
         const ehCab = !c.some((x) => /\d{4}/.test(x)) && cab.some((x) => /modelo|categ|pago|vend/.test(x));
         if (ehCab) {
           mapa = {}; cab.forEach((h, i) => { const k = Object.keys(COLUNAS).find((k) => !(k in mapa) && COLUNAS[k].test(h)); if (k) mapa[k] = i; });
