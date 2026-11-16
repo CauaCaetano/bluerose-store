@@ -96,3 +96,6 @@ body.tpl-basico .mesa-sinal{top:6px!important;right:6px!important;width:30px!imp
 body.tpl-basico .ticket-dia{padding:8px 16px 14px!important}
 body.tpl-basico .conta-det{padding-top:14px!important}
 body.tpl-basico .link-cardapio{padding:12px 14px!important;box-sizing:border-box;max-width:100%}body.tpl-basico .link-cardapio>*{min-width:0}
+/* pente-fino 16/11 (g1): "Nada aqui." e o aviso do caixa vazio estavam claros demais */
+body.tpl-basico .vazio-quadro{color:var(--b-mudo)!important;border-color:var(--b-borda)!important}
+body.tpl-basico .caixa-det .vazio,body.tpl-basico .caixa-det .vazio b{color:#4B5563!important}

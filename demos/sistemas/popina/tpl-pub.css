@@ -16,7 +16,7 @@ body.tpl-pub .topo-sino em{background:var(--l-bordo)!important}
 /* títulos */
 body.tpl-pub .cab-salao h1,body.tpl-pub .cab-cozinha h1,body.tpl-pub .cab-pedidos h1,body.tpl-pub .cab-caixa h1,body.tpl-pub .cab-gestao h1,body.tpl-pub .cab-g h1{font-family:var(--l-tit)!important;font-weight:500!important;letter-spacing:.04em;color:#2A2018!important;
   background:linear-gradient(180deg,#C08A44,#2A2018);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-body.tpl-pub .cab-salao .aqueduto-img,body.tpl-pub .cab-pedidos .aqueduto-img,body.tpl-pub .g-aqueduto,body.tpl-pub .cx-aqueduto{content:url(img/tb-fachada.webp?v=1);mix-blend-mode:normal}
+body.tpl-pub .cab-salao .aqueduto-img,body.tpl-pub .cab-pedidos .aqueduto-img,body.tpl-pub .g-aqueduto,body.tpl-pub .cx-aqueduto{content:url(img/tb-fachada.webp?v=2);mix-blend-mode:normal}
 body.tpl-pub .folhas-img{display:none!important}
 body.tpl-pub img[src*="louro-esq"],body.tpl-pub img[src*="k-louro-esq"]{content:url(img/tl-louro-esq.webp?v=1)}
 body.tpl-pub img[src*="louro-dir"],body.tpl-pub img[src*="k-louro-dir"]{content:url(img/tl-louro-dir.webp?v=1)}
@@ -25,7 +25,7 @@ body.tpl-pub .prancheta,body.tpl-pub .ticket-dia,body.tpl-pub .cartao-caixa,body
 body.tpl-pub .gestao-nav,body.tpl-pub .g-card,body.tpl-pub .gestao-corpo .bloco,body.tpl-pub .gestao-corpo .bloco-form,body.tpl-pub .gestao-corpo .tabela-rolo,body.tpl-pub .gestao-corpo .resumo-dia>*{
   border:1px solid var(--l-borda)!important;border-image:none!important;border-radius:16px!important;background:rgba(255,253,248,.92)!important;box-shadow:0 12px 30px -20px rgba(120,90,30,.55),inset 0 0 0 4px rgba(255,255,255,.6)!important;color:var(--l-tinta)!important}
 body.tpl-pub .prancheta{padding:22px 12px 12px!important;position:relative;margin-top:14px}
-body.tpl-pub .prancheta::after{content:"";position:absolute;top:-22px;left:50%;width:88px;height:44px;transform:translateX(-50%);background:url(img/tb-chopes.webp?v=1) center/contain no-repeat}
+body.tpl-pub .prancheta::after{content:"";position:absolute;top:-22px;left:50%;width:88px;height:44px;transform:translateX(-50%);background:url(img/tb-chopes.webp?v=2) center/contain no-repeat}
 body.tpl-pub .prancheta-cab,body.tpl-pub .prancheta .fila,body.tpl-pub .fila-vazia{background:none!important}
 body.tpl-pub .prancheta-cab h2,body.tpl-pub .ticket-cab h2,body.tpl-pub .cx-h2,body.tpl-pub .h2-pagar,body.tpl-pub .comanda-papel .sec-tit h2,body.tpl-pub .gestao-corpo .sec-tit h2{font-family:var(--l-tit)!important;font-weight:500!important;color:#2A2018!important;letter-spacing:.06em;background:none!important;clip-path:none!important}
 body.tpl-pub .prancheta-sub{color:var(--l-mudo)!important;letter-spacing:.12em;text-transform:uppercase;font-size:12px!important}
@@ -44,7 +44,7 @@ body.tpl-pub .ticket-dia .ticket-linha:nth-last-of-type(1){border-bottom-color:#
 body.tpl-pub .ticket-total,body.tpl-pub .conta-det .totais .total,body.tpl-pub .comanda-papel .totais .total{border:1px solid #9C6E34!important;border-image:none!important;border-radius:10px!important;
   background:linear-gradient(180deg,#E8C994,#C08A44)!important;margin-left:0!important;margin-right:0!important;padding:0 16px!important}
 body.tpl-pub .ticket-total span,body.tpl-pub .ticket-total b,body.tpl-pub .conta-det .totais .total span,body.tpl-pub .conta-det .totais .total b,body.tpl-pub .comanda-papel .totais .total span,body.tpl-pub .comanda-papel .totais .total b{color:#3B2A12!important;margin:0!important;font-family:var(--l-tit)!important}
-body.tpl-pub .louro-img{content:url(img/tb-chopes.webp?v=1);width:88px!important;bottom:-30px!important}
+body.tpl-pub .louro-img{content:url(img/tb-chopes.webp?v=2);width:88px!important;bottom:-30px!important}
 /* salão: legenda, áreas e mesas */
 body.tpl-pub .legenda{color:var(--l-tinta)!important}
 body.tpl-pub .legenda i.ocupada{background:var(--l-bordo)!important}body.tpl-pub .legenda i.pronto{background:var(--l-salvia)!important}body.tpl-pub .legenda i.conta{background:#D9B76A!important}
@@ -115,19 +115,19 @@ body.tpl-pub .fita::before,body.tpl-pub .g-fita::before,body.tpl-pub .kds-col .p
   clip-path:polygon(15px 0,calc(100% - 15px) 0,100% 50%,calc(100% - 15px) 100%,15px 100%,0 50%)}
 body.tpl-pub .cab-comanda .fita-mesa img{display:none}
 body.tpl-pub .fita .ico{display:none}
-body.tpl-pub .topo::after{background-image:url(img/tb-fachada.webp?v=1)!important}
+body.tpl-pub .topo::after{background-image:url(img/tb-fachada.webp?v=2)!important}
 @media (max-width:899px){body.tpl-pub .nav a{font-size:11px!important;letter-spacing:.02em!important;min-width:0}}
 
 
 /* pub: moldura de madeira, placas do conceito, faixa da esquerda e enfeites dos cantos */
 body.tpl-pub{background:#F3E9D6 repeating-linear-gradient(115deg,rgba(150,110,60,.04) 0 2px,transparent 2px 7px)!important}
-body.tpl-pub:not(.cliente)::before{background:url(img/tb-madeira.webp?v=1) 0 0/42px auto repeat-y!important;width:42px!important;border-right:2px solid var(--l-ouro)!important}
+body.tpl-pub:not(.cliente)::before{background:url(img/tb-madeira.webp?v=2) 0 0/42px auto repeat-y!important;width:42px!important;border-right:2px solid var(--l-ouro)!important}
 body.tpl-pub img[src*="louro"]{content:none;visibility:hidden;width:0!important}
 body.tpl-pub .folhas-img{display:none!important}
 body.tpl-pub .prancheta::after{display:none!important}
 body.tpl-pub .prancheta,body.tpl-pub .ticket-dia,body.tpl-pub .comanda-papel,body.tpl-pub .cartao-caixa{border-style:solid!important;border-width:32px 13px 14px!important;border-image:url(img/tb-moldura.webp?v=1) 50 20 22 20 stretch!important;border-radius:0!important;background:var(--l-papel) padding-box!important}
 body.tpl-pub .fita,body.tpl-pub .fita.verde,body.tpl-pub .g-fita,body.tpl-pub .kds-col .placa,body.tpl-pub .cab-comanda .fita-mesa,body.tpl-pub .cab-conta .fita{clip-path:none!important;background:none!important;
-  border-style:solid!important;border-width:0 49px 0 50px!important;border-image:url(img/tb-placa.webp?v=1) 0 62 0 64 fill stretch!important;color:#E8C064!important;height:54px!important;padding:0 6px!important;display:inline-flex!important;align-items:center;gap:6px;line-height:1!important;box-sizing:border-box!important;font-weight:800!important;letter-spacing:.04em!important}
+  border-style:solid!important;border-width:0 49px 0 50px!important;border-image:url(img/tb-placa.webp?v=2) 0 62 0 64 fill stretch!important;color:#E8C064!important;height:54px!important;padding:0 6px!important;display:inline-flex!important;align-items:center;gap:6px;line-height:1!important;box-sizing:border-box!important;font-weight:800!important;letter-spacing:.04em!important}
 body.tpl-pub .fita::before,body.tpl-pub .g-fita::before,body.tpl-pub .kds-col .placa::before,body.tpl-pub .cab-comanda .fita-mesa::before,body.tpl-pub .cab-conta .fita::before{display:none}
 body.tpl-pub .fita .ico,body.tpl-pub .g-fita .ico{color:#E8C064!important}
 body.tpl-pub .cab-salao h1,body.tpl-pub .cab-cozinha h1,body.tpl-pub .cab-pedidos h1,body.tpl-pub .cab-caixa h1,body.tpl-pub .cab-gestao h1,body.tpl-pub .cab-g h1{-webkit-text-fill-color:#1F4A2E!important;color:#1F4A2E!important;background:none!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.01em!important}
@@ -146,7 +146,7 @@ body.tpl-pub .area-cab::after{content:"";position:absolute;left:150px;width:170p
 @media (min-width:900px){
   body.tpl-pub main::after{content:"";position:fixed;left:42px;right:0;bottom:0;height:46px;background:url(img/tb-balcao.webp?v=1) 0 100%/auto 46px repeat-x;opacity:.95;pointer-events:none;z-index:0;-webkit-mask:linear-gradient(transparent,#000 40%);mask:linear-gradient(transparent,#000 40%)}
   body.tpl-pub .salao-dir::before{content:"";position:fixed;right:0;bottom:0;width:300px;height:88px;background:url(img/tb-dardos.webp?v=1) right bottom/contain no-repeat;pointer-events:none;z-index:0}
-  body.tpl-pub .salao-dir::after{content:"";position:fixed;right:0;top:58px;width:250px;height:128px;background:url(img/tb-chopes.webp?v=1) right top/contain no-repeat;pointer-events:none;z-index:0}
+  body.tpl-pub .salao-dir::after{content:"";position:fixed;right:0;top:58px;width:250px;height:128px;background:url(img/tb-chopes.webp?v=2) right top/contain no-repeat;pointer-events:none;z-index:0}
   body.tpl-pub main>*{position:relative;z-index:1}
 }
 body.tpl-pub .prancheta-cab,body.tpl-pub .ticket-cab{background:#1F4A2E!important;border-radius:4px!important;padding:12px 10px!important;margin-bottom:10px!important}
@@ -181,3 +181,21 @@ body.tpl-pub .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 body.tpl-pub .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;text-align:center}
 /* pedidos: o texto do cartão "Cardápio online" não encosta na borda */
 body.tpl-pub .link-cardapio{padding-right:12px!important}
+
+/* 16/11 pente-fino: sem os enfeites fixos dos cantos e da barra de baixo (fotos em caixa, passavam por trás de textos e linhas); sem o recorte solto ao lado das placas; a cena do título não encosta nele */
+@media (min-width:900px){body.tpl-pub .salao-dir::before,body.tpl-pub .salao-dir::after,body.tpl-pub main::after{content:none!important;display:none!important}}
+body.tpl-pub .area-cab::after{content:none!important;display:none!important}
+body.tpl-pub .louro-img{display:none!important}
+body.tpl-pub .cab-salao .aqueduto-img,body.tpl-pub .cab-pedidos .aqueduto-img,body.tpl-pub .g-aqueduto{margin-left:14px!important}
+
+/* 16/11 pente-fino: letra apagada mais escura no creme (avisos, dicas, "Nada aqui.", textos de apoio) e mesa "Conta" num dourado mais fundo para o tempo em branco ler bem */
+body.tpl-pub{--mudo:#6B5B4C}
+body.tpl-pub .vazio-quadro{color:#8A7660!important}
+body.tpl-pub .mesa.conta{background:linear-gradient(170deg,#C98516,#9C5E0A)!important}
+
+/* 16/11 pente-fino: no celular a barra "Adicionar / Conta" da mesa era transparente e ficava por cima dos itens da comanda; agora tem fundo, e o valor da conta cabe numa linha */
+@media (max-width:899px){body.tpl-pub .barra-acoes{background:#F3E9D6!important;box-shadow:-16px 0 0 #F3E9D6,16px 0 0 #F3E9D6,0 -10px 12px -6px #F3E9D6!important;z-index:5}
+body.tpl-pub .barra-acoes .bt{white-space:nowrap!important;font-size:15px!important;min-width:0}}
+
+/* 16/11 pente-fino: o topo era meio transparente; ao rolar, a placa da mesa e os títulos apareciam por trás do nome do restaurante */
+body.tpl-pub .topo{background:#FFFCF5!important}

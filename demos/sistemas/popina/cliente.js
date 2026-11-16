@@ -1,11 +1,11 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=29';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas, aplicarCota } from './opcoes.js?v=29';
-import { modulosAtivos } from './perfis.js?v=29';
-import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg, comemRodizio } from './precos.js?v=29';
-import { ico, folha, toast, $, $$ } from './ui.js?v=29';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=30';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas, aplicarCota } from './opcoes.js?v=30';
+import { modulosAtivos } from './perfis.js?v=30';
+import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg, comemRodizio } from './precos.js?v=30';
+import { ico, folha, toast, $, $$ } from './ui.js?v=30';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -183,7 +183,8 @@ const precoCard = (p) => {
 const tags = (p) => {
   const md = mods(), l = (p.tags || []).map((x) => { const v = /vegetari|vegan/i.test(x); return `<i class="tag ${v ? 'verde' : ''}">${ico(v ? 'folha' : 'coroa')}${t(x)}</i>`; });
   if (md.has('porcoesFamilia') && p.serve) l.unshift(`<i class="tag familia">${ico('pessoas')}${t(p.serve)}</i>`);
-  if (md.has('alergenicos')) (p.alergenos || []).forEach((a) => { const x = ALERGENOS.find((y) => y[0] === a); if (x) l.push(`<i class="tag alg ${x[2] === 'dieta' ? 'verde' : ''}" title="${x[2] === 'contem' ? 'Contém' : ''} ${t(x[1])}">${x[2] === 'contem' ? `Contém ${t(x[1].toLowerCase())}` : t(x[1])}</i>`); });
+  const ja = new Set((p.tags || []).map((x) => x.toLowerCase())); // a dieta (ex.: Vegetariano) pode vir na tag e no alérgeno: mostra uma vez só
+  if (md.has('alergenicos')) (p.alergenos || []).forEach((a) => { const x = ALERGENOS.find((y) => y[0] === a); if (x && x[2] === 'dieta' && ja.has(x[1].toLowerCase())) return; if (x) l.push(`<i class="tag alg ${x[2] === 'dieta' ? 'verde' : ''}" title="${x[2] === 'contem' ? 'Contém' : ''} ${t(x[1])}">${x[2] === 'contem' ? `Contém ${t(x[1].toLowerCase())}` : t(x[1])}</i>`); });
   return l.length ? `<span class="cli-tags">${l.join('')}</span>` : '';
 };
 const esgotado = (p) => (p.esgotouVitrine === ymd() ? 'Esgotou na vitrine' : 'Esgotado hoje');

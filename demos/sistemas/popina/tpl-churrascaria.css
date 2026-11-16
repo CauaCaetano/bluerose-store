@@ -178,3 +178,25 @@ body.tpl-churrascaria .prancheta,body.tpl-churrascaria .ticket-dia,body.tpl-chur
 @media (max-width:899px){body.tpl-churrascaria .salao-grade{grid-template-columns:minmax(0,1fr)!important}body.tpl-churrascaria .topo{background:rgba(255,253,248,.97)!important}}
 @media (max-width:899px){body.tpl-churrascaria .fila-txt b{font-size:14px!important;letter-spacing:.02em!important}}
 @media (max-width:899px){body.tpl-churrascaria .fila-item .bt{padding:0 10px!important;font-size:14.5px!important;letter-spacing:0!important}}
+
+/* pente-fino 16/11: painéis da gestão sem o papel rasgado do Taverna, barras na cor do template, verde com contraste, barra da mesa no celular com fundo */
+body.tpl-churrascaria .gestao-corpo .kpis>div,body.tpl-churrascaria .gestao-corpo .cartao-acao,body.tpl-churrascaria .gestao-corpo .resumo-dia>.ka.alerta{border:1px solid var(--l-borda)!important;border-image:none!important;border-radius:14px!important;background:rgba(255,253,248,.94)!important;box-shadow:0 10px 26px -20px rgba(120,90,30,.55)!important}
+body.tpl-churrascaria .gestao-corpo .resumo-dia>.ka.alerta{background:#FBEDEE!important;border-color:#E7B9BE!important}
+body.tpl-churrascaria .gestao-corpo .barras i{background:linear-gradient(180deg,#C2381F,#8A1C14)!important}body.tpl-churrascaria .gestao-corpo .barras.sem i{background:linear-gradient(180deg,#5E8A34,#3F6420)!important}
+body.tpl-churrascaria .bt.oliva,body.tpl-churrascaria .fila-item .bt.oliva{background:linear-gradient(180deg,#6F875F,#55703F)!important;border-color:#55703F!important}
+body.tpl-churrascaria .mesa.pronto,body.tpl-churrascaria .mesa.qr{background:linear-gradient(170deg,#6F875F,#55703F)!important}
+@media (max-width:899px){
+  body.tpl-churrascaria [data-tela=mesa] .barra-acoes{background:linear-gradient(180deg,rgba(255,255,255,0),#FAF1E2 18px)!important;margin:0 -16px!important;padding:18px 16px 12px!important;bottom:calc(var(--nav-h) - 1px)!important}
+  body.tpl-churrascaria [data-tela=mesa] .barra-acoes::after{display:none!important}
+  body.tpl-churrascaria [data-tela=mesa] .barra-acoes .bt{font-size:16px!important;white-space:nowrap;min-width:0}
+}
+
+/* pente-fino 16/11 (churrascaria): moldura sem a borla vermelha na lateral e sem a parede creme em cima; pampa com as bordas esfumadas e longe do aviso;
+   carne na tábua (buracos dentro da carne), espetos (faixa de ruído em cima) e cuia (recorte em caixa) saem; a tira de couro solta ao lado da placa da área sai; mesa "conta" com o tempo legível */
+body.tpl-churrascaria .prancheta,body.tpl-churrascaria .ticket-dia,body.tpl-churrascaria .comanda-papel,body.tpl-churrascaria .cartao-caixa{border-image-source:url(img/tc-moldura.webp?v=2)!important}
+body.tpl-churrascaria .cab-salao .aqueduto-img,body.tpl-churrascaria .cab-pedidos .aqueduto-img,body.tpl-churrascaria .g-aqueduto,body.tpl-churrascaria .cx-aqueduto{content:url(img/tc-pampa.webp?v=2)!important}
+body.tpl-churrascaria .cab-salao .aqueduto-img,body.tpl-churrascaria .cab-pedidos .aqueduto-img{height:84px!important;width:auto!important;top:0!important}
+body.tpl-churrascaria .topo::after{background-image:url(img/tc-pampa.webp?v=2)!important}
+body.tpl-churrascaria .salao-dir::before,body.tpl-churrascaria .salao-dir::after,body.tpl-churrascaria .area-cab::after{display:none!important}
+body.tpl-churrascaria .louro-img,body.tpl-churrascaria img.louro-img{display:none!important}
+body.tpl-churrascaria .mesa.conta{background:linear-gradient(170deg,#C9661A,#A44E0C)!important}

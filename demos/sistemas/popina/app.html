@@ -17,11 +17,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:wght@500;600;800&family=Shippori+Mincho:wght@600;800&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Figtree:wght@400;500;600;700;800&family=Libre+Caslon+Text:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:wght@500;600;800&family=Shippori+Mincho:wght@600;800&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Figtree:wght@400;500;600;700;800&family=Libre+Caslon+Text:wght@400;700&display=swap"></noscript>
-<link rel="stylesheet" href="estilo.css?v=4">
-<link rel="stylesheet" href="taberna.css?v=3">
-<link rel="stylesheet" href="salao-gpt.css?v=3">
-<link rel="stylesheet" href="cozinha-gpt.css?v=6">
-<link rel="stylesheet" href="telas-gpt.css?v=26">
+<link rel="stylesheet" href="estilo.css?v=5">
+<link rel="stylesheet" href="taberna.css?v=4">
+<link rel="stylesheet" href="salao-gpt.css?v=4">
+<link rel="stylesheet" href="cozinha-gpt.css?v=7">
+<link rel="stylesheet" href="telas-gpt.css?v=27">
 <style>
 /* abertura: aparece na hora, com a cor do template e o logo do restaurante, e some quando a tela está pronta */
 #abertura{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;color:var(--ab-txt,#3B2A22);transition:opacity .28s ease,visibility .28s;
@@ -40,7 +40,7 @@ body.pronto #abertura{opacity:0;visibility:hidden;pointer-events:none}
 <script>
 /* só o CSS do template em uso é baixado; os outros entram na hora se o dono trocar em Gestão › Aparência */
 (function () {
-  var V = window.POPINA_TPLV = {luxo:17,realeza:20,japones:14,italiano:13,churrascaria:13,mexicano:13,pizzaria:13,hamburgueria:13,pub:13,chines:13,balada:14,basico:13,cafeteria:13}, C = window.POPINA_TPLC = {basico:['#F5F6F8','','#1F2328'],taverna:['#F3E7CF','#B4532F','#3B2A22'],luxo:['#FBF8F1','#B8914A','#3A2E22'],realeza:['#14213D','#C9A35A','#F5E9CC'],japones:['#F5EEDF','#B3212B','#1E1A17'],italiano:['#F6EFE1','#B8261E','#2B2420'],churrascaria:['#F1E4CC','#A8231A','#2E2118'],mexicano:['#F6EBD6','#B51F1F','#2A1F1A'],pizzaria:['#F7EEDD','#B8231C','#2A2420'],hamburgueria:['#F6EEDC','#C8201E','#1E1A17'],pub:['#F3E9D6','#1F4A2E','#2A2018'],chines:['#F7EEDB','#B0141B','#2A1A16'],balada:['#120C2A','#FF2FB9','#F2EEFF'],cafeteria:['#F6EEDF','#9E3A26','#3A2618']}, d = null;
+  var V = window.POPINA_TPLV = {luxo:18,realeza:21,japones:15,italiano:14,churrascaria:14,mexicano:14,pizzaria:14,hamburgueria:14,pub:14,chines:14,balada:15,basico:14,cafeteria:14}, C = window.POPINA_TPLC = {basico:['#F5F6F8','','#1F2328'],taverna:['#F3E7CF','#B4532F','#3B2A22'],luxo:['#FBF8F1','#B8914A','#3A2E22'],realeza:['#14213D','#C9A35A','#F5E9CC'],japones:['#F5EEDF','#B3212B','#1E1A17'],italiano:['#F6EFE1','#B8261E','#2B2420'],churrascaria:['#F1E4CC','#A8231A','#2E2118'],mexicano:['#F6EBD6','#B51F1F','#2A1F1A'],pizzaria:['#F7EEDD','#B8231C','#2A2420'],hamburgueria:['#F6EEDC','#C8201E','#1E1A17'],pub:['#F3E9D6','#1F4A2E','#2A2018'],chines:['#F7EEDB','#B0141B','#2A1A16'],balada:['#120C2A','#FF2FB9','#F2EEFF'],cafeteria:['#F6EEDF','#9E3A26','#3A2618']}, d = null;
   try { d = JSON.parse(localStorage.getItem('popina-v1') || 'null'); } catch (e) {}
   var L = (d && d.config && d.config.loja) || {}, tp = C[L.template] ? L.template : (d ? 'basico' : 'taverna');
   window.POPINA_TPL = tp; window.POPINA_LOJA = { nome: (d && d.config && d.config.nome) || 'Popina', logo: L.logo || '', cor: L.cor || '' };
@@ -71,6 +71,6 @@ body.pronto #abertura{opacity:0;visibility:hidden;pointer-events:none}
   <span class="ao-vivo" title="Os aparelhos do restaurante se atualizam sozinhos"><i></i>Ao vivo</span></header>
 <main id="tela" tabindex="-1"></main>
 <nav id="nav" class="nav" aria-label="Seções"></nav>
-<script type="module" src="app.js?v=29"></script>
+<script type="module" src="app.js?v=30"></script>
 </body>
 </html>

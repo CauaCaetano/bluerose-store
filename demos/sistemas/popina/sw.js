@@ -1,8 +1,8 @@
 // Popina · funciona sem internet: guarda as telas e as fotos; os dados ficam no aparelho e sobem quando a rede volta.
-const CACHE = 'popina-v29';
+const CACHE = 'popina-v30';
 const BASE = ['app.html', 'cardapio.html', 'estilo.css?v=3', 'taberna.css?v=2', 'cardapio.css?v=3', 'simbolo.png?v=1', 'icone-192.png?v=1',
-  'app.js?v=29', 'nucleo.js?v=29', 'loja.js?v=29', 'dados.js?v=29', 'ui.js?v=29', 'pix.js?v=29', 'opcoes.js?v=29', 'salao.js?v=29', 'cozinha.js?v=29',
-  'caixa.js?v=29', 'pedidos.js?v=29', 'mais.js?v=29', 'gestao.js?v=29', 'cliente.js?v=29', '../base/qr.js'];
+  'app.js?v=30', 'nucleo.js?v=30', 'loja.js?v=30', 'dados.js?v=30', 'ui.js?v=30', 'pix.js?v=30', 'opcoes.js?v=30', 'salao.js?v=30', 'cozinha.js?v=30',
+  'caixa.js?v=30', 'pedidos.js?v=30', 'mais.js?v=30', 'gestao.js?v=30', 'cliente.js?v=30', '../base/qr.js'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(BASE)).catch(() => {})); self.skipWaiting(); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k))))); self.clients.claim(); });
 // rede primeiro (sempre a versão nova), cache quando estiver sem internet

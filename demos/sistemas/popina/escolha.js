@@ -1,14 +1,14 @@
 // Popina · escolha do template (tipo de casa): na primeira entrada e ao trocar em Gestão › Aparência.
 // Lista os 14 tipos; ao tocar num, mostra fotos reais (carrossel), as funções que vêm nele, "Usar este template" e "Voltar".
-import { PERFIS, MODULOS, diferenca } from './perfis.js?v=29';
-import { lojaCfg, setLoja } from './loja.js?v=29';
-import { ico, toast } from './ui.js?v=29';
+import { PERFIS, MODULOS, diferenca } from './perfis.js?v=30';
+import { lojaCfg, setLoja } from './loja.js?v=30';
+import { ico, toast } from './ui.js?v=30';
 
 export const TIPOS = [['basico', 'Básico'], ['taverna', 'Taverna'], ['luxo', 'Luxo'], ['realeza', 'Realeza'], ['japones', 'Japonês'], ['italiano', 'Italiano'], ['churrascaria', 'Churrascaria'],
   ['mexicano', 'Mexicano'], ['pizzaria', 'Pizzaria'], ['hamburgueria', 'Hamburgueria'], ['pub', 'Bar e pub'], ['chines', 'Chinês'], ['balada', 'Balada'], ['cafeteria', 'Cafeteria']];
 const ESTILO = { basico: 'moderno', taverna: 'rustico' };
 const FOTOS = [['salao', 'O salão'], ['cardapio', 'O cardápio no celular do cliente'], ['cozinha', 'A tela da cozinha'], ['gestao', 'A gestão do dono']];
-const logo = (k) => (k === 'taverna' ? 'simbolo.png?v=1' : `img/logo-${k}.webp?v=1`);
+const logo = (k) => (k === 'taverna' ? 'simbolo.png?v=1' : `img/logo-${k}.webp?v=2`);
 const nome = (k) => (TIPOS.find((t) => t[0] === k) || [k, k])[1];
 
 const CSS = `
@@ -90,7 +90,7 @@ export function abrirEscolha({ primeira = false, abrir = '', aoFechar } = {}) {
       <p class="esc-sub">Cada template muda o visual do sistema e do cardápio <b>e as funções</b>: rodízio na churrascaria, senha de balcão na cafeteria, portaria na balada. Toque num deles para ver as fotos e tudo o que vem nele. Dá para trocar depois em Gestão › Aparência.</p></div>
       ${primeira ? '' : `<button type="button" class="esc-volta" data-fechar>${ico('chevron')}Voltar</button>`}</div>
       <div class="esc-grade">${TIPOS.map(([k, n]) => `<button type="button" class="esc-card" data-k="${k}">
-        <img class="f" src="img/escolha/${k}-salao.webp?v=1" alt="" loading="lazy" decoding="async" width="960" height="600">
+        <img class="f" src="img/escolha/${k}-salao.webp?v=2" alt="" loading="lazy" decoding="async" width="960" height="600">
         <span class="t"><img src="${logo(k)}" alt="" width="44" height="44" loading="lazy"><span><b>${n}${k === atual && !primeira ? '<span class="uso">em uso</span>' : ''}</b><small>${PERFIS[k].tipo}</small></span></span></button>`).join('')}</div>
       ${primeira ? '<p style="text-align:center;margin-top:22px"><button type="button" class="esc-depois" data-depois>Decidir depois (fica o Básico)</button></p>' : ''}</div>`;
     el.scrollTop = 0;
@@ -104,7 +104,7 @@ export function abrirEscolha({ primeira = false, abrir = '', aoFechar } = {}) {
     const dif = !primeira && atual && atual !== k ? diferenca(atual, k) : null;
     el.innerHTML = `<div class="esc-in"><button type="button" class="esc-volta" data-volta>${ico('chevron')}Voltar para os templates</button>
       <div class="esc-det"><div><div class="esc-car" aria-roledescription="carrossel" aria-label="Fotos do template ${nome(k)}">
-        <div class="esc-trilho" tabindex="0">${FOTOS.map(([f, leg]) => `<figure class="esc-slide"><img src="img/escolha/${k}-${f}.webp?v=1" alt="${leg} no template ${nome(k)}" decoding="async"><figcaption>${leg}</figcaption></figure>`).join('')}</div>
+        <div class="esc-trilho" tabindex="0">${FOTOS.map(([f, leg]) => `<figure class="esc-slide"><img src="img/escolha/${k}-${f}.webp?v=2" alt="${leg} no template ${nome(k)}" decoding="async"><figcaption>${leg}</figcaption></figure>`).join('')}</div>
         <button type="button" class="esc-seta ant" aria-label="Foto anterior">${ico('chevron')}</button><button type="button" class="esc-seta prox" aria-label="Próxima foto">${ico('chevron')}</button></div>
         <div class="esc-pontos">${FOTOS.map((f, i) => `<button type="button" aria-label="Foto ${i + 1}" data-i="${i}"></button>`).join('')}</div></div>
       <div class="esc-info"><h2><img src="${logo(k)}" alt="" width="46" height="46">${nome(k)}</h2><p class="tp">${p.tipo}</p><p class="dest">${p.destaque}</p>

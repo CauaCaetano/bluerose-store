@@ -49,7 +49,7 @@ body:not(.cliente){background-color:var(--g-bg)}
 .ticket-linha b{font:400 18px var(--g-serif);color:var(--g-tinta)}
 .ticket-linha:first-of-type b{font-weight:700}
 .ticket-total{clip-path:none;border-radius:0;margin:12px -6px 2px;padding:0 8px;min-height:30px;
-  border-style:solid;border-width:12px 18px;border-image:url(img/pincel-verde.webp?v=3) 12 18 fill stretch;background:none;position:relative}
+  border-style:solid;border-width:12px 18px;border-image:url(img/pincel-verde2.webp?v=1) 12 18 fill stretch;background:none;position:relative}
 .ticket-dia .ticket-linha:nth-last-of-type(1){border-bottom:1.5px solid #D8C3A6;padding-bottom:12px}
 .ticket-total span{display:flex;align-items:center;gap:12px;font:400 17px var(--g-serif);color:#FFF6E8}
 .ticket-total .ico{width:24px;height:24px;stroke-width:2}

@@ -175,3 +175,10 @@ body.tpl-mexicano .prancheta,body.tpl-mexicano .ticket-dia,body.tpl-mexicano .co
 @media (max-width:899px){body.tpl-mexicano .salao-grade{grid-template-columns:minmax(0,1fr)!important}body.tpl-mexicano .topo{background:rgba(255,253,248,.97)!important}}
 @media (max-width:899px){body.tpl-mexicano .fila-txt b{font-size:14px!important;letter-spacing:.02em!important}}
 @media (max-width:899px){body.tpl-mexicano .fila-item .bt{padding:0 10px!important;font-size:14.5px!important;letter-spacing:0!important}}
+
+/* pente-fino 16/11: placa e moldura recortadas no próprio arquivo (sem os cantos quadrados de papel); sem o molcajete fixo no canto (foto com borda reta passando por trás dos quadros); no celular a placa da área cabe junto da contagem */
+body.tpl-mexicano .fita,body.tpl-mexicano .fita.verde,body.tpl-mexicano .g-fita,body.tpl-mexicano .kds-col .placa,body.tpl-mexicano .cab-comanda .fita-mesa,body.tpl-mexicano .cab-conta .fita{border-image:url(img/tm-placa.webp?v=2) 0 61 0 60 fill stretch!important}
+body.tpl-mexicano .prancheta,body.tpl-mexicano .ticket-dia,body.tpl-mexicano .comanda-papel,body.tpl-mexicano .cartao-caixa{border-image:url(img/tm-moldura.webp?v=2) 46 22 24 22 stretch!important}
+@media (min-width:900px){body.tpl-mexicano .salao-dir::before{content:none!important;display:none!important}}
+@media (max-width:899px){body.tpl-mexicano .area-cab .fita{border-width:0 34px!important;font-size:15px!important;height:46px!important}
+  body.tpl-mexicano .area-cab>span{font-size:13.5px}}

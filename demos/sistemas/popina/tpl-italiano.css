@@ -157,3 +157,27 @@ body.tpl-italiano .salao-dir::before,body.tpl-italiano .salao-dir::after{z-index
 body.tpl-italiano .gestao-nav .g-fita{margin-left:0!important}
 body.tpl-italiano .link-cardapio{padding:12px 14px!important;box-sizing:border-box;max-width:100%}body.tpl-italiano .link-cardapio>*{min-width:0}
 body.tpl-italiano .gestao-corpo .resumo-dia>*{padding-left:16px!important;padding-right:16px!important}
+
+/* pente-fino 16/11: painéis da gestão sem o papel rasgado do Taverna, barras na cor do template, verde com contraste, barra da mesa no celular com fundo */
+body.tpl-italiano .gestao-corpo .kpis>div,body.tpl-italiano .gestao-corpo .cartao-acao,body.tpl-italiano .gestao-corpo .resumo-dia>.ka.alerta{border:1px solid var(--l-borda)!important;border-image:none!important;border-radius:14px!important;background:rgba(255,253,248,.94)!important;box-shadow:0 10px 26px -20px rgba(120,90,30,.55)!important}
+body.tpl-italiano .gestao-corpo .resumo-dia>.ka.alerta{background:#FBEDEE!important;border-color:#E7B9BE!important}
+body.tpl-italiano .gestao-corpo .barras i{background:linear-gradient(180deg,#D0402F,#9E1F18)!important}body.tpl-italiano .gestao-corpo .barras.sem i{background:linear-gradient(180deg,#5E8A34,#3F6420)!important}
+body.tpl-italiano .bt.oliva,body.tpl-italiano .fila-item .bt.oliva{background:linear-gradient(180deg,#6F875F,#55703F)!important;border-color:#55703F!important}
+body.tpl-italiano .mesa.pronto,body.tpl-italiano .mesa.qr{background:linear-gradient(170deg,#6F875F,#55703F)!important}
+@media (max-width:899px){
+  body.tpl-italiano [data-tela=mesa] .barra-acoes{background:linear-gradient(180deg,rgba(255,255,255,0),#FBF6EA 18px)!important;margin:0 -16px!important;padding:18px 16px 12px!important;bottom:calc(var(--nav-h) - 1px)!important}
+  body.tpl-italiano [data-tela=mesa] .barra-acoes::after{display:none!important}
+  body.tpl-italiano [data-tela=mesa] .barra-acoes .bt{font-size:16px!important;white-space:nowrap;min-width:0}
+}
+
+/* pente-fino 16/11 (italiano): moldura sem a parede creme e a mancha vermelha em cima; placa de azulejo sem a toalha nos cantos; Toscana com as bordas esfumadas;
+   azeite, ramo de tomate e prato saem (recorte em caixa, com buracos); a tira xadrez solta ao lado da placa da área sai; mesa "conta" com o tempo legível */
+body.tpl-italiano .prancheta,body.tpl-italiano .ticket-dia,body.tpl-italiano .comanda-papel,body.tpl-italiano .cartao-caixa{border-image-source:url(img/ti-moldura.webp?v=2)!important}
+body.tpl-italiano .fita,body.tpl-italiano .fita.verde,body.tpl-italiano .g-fita,body.tpl-italiano .kds-col .placa,body.tpl-italiano .cab-comanda .fita-mesa,body.tpl-italiano .cab-conta .fita{border-image-source:url(img/ti-placa.webp?v=2)!important}
+body.tpl-italiano .cab-salao .aqueduto-img,body.tpl-italiano .cab-pedidos .aqueduto-img,body.tpl-italiano .g-aqueduto,body.tpl-italiano .cx-aqueduto{content:url(img/ti-toscana.webp?v=2)!important}
+body.tpl-italiano .topo::after{background-image:url(img/ti-toscana.webp?v=2)!important}
+body.tpl-italiano .salao-dir::before,body.tpl-italiano .salao-dir::after,body.tpl-italiano .area-cab::after{display:none!important}
+body.tpl-italiano .louro-img,body.tpl-italiano img.louro-img{display:none!important}
+body.tpl-italiano .mesa.conta{background:linear-gradient(170deg,#C98A1C,#A66C10)!important}
+
+body.tpl-italiano .mesa.conta{background:linear-gradient(170deg,#B57A14,#93600A)!important}

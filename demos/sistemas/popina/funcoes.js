@@ -3,13 +3,13 @@
 // Cada tela só aparece com a função ligada (Gestão › Aparência e templates).
 import { db, t, din, dinCurto, grava, r2, uid, tempo, lojaCfg, setLoja, tem, comandaDaMesa, abrirMesa, conta, itensValidos, ouvir,
   abrirCartao, cartaoAberto, proximoCartao, vitrineHoje, prod, couvertLigado, marcar, insumo, saldo, fmtQtd, custoPrato, registrarPerda, auditar, quemAgora,
-  clientePorTel, fidelidade, vencePremio, ajustarEstoque } from './loja.js?v=29';
-import { registrar, acao, ir } from './nucleo.js?v=29';
-import { ico, folha, toast, confirma, bip, $, $$ } from './ui.js?v=29';
-import { TELAS_MAIS, MONTAR, volta, PAINEL_TIPO } from './mais.js?v=29';
-import { abrirSeletor } from './salao.js?v=29';
-import { TIPOS_RODIZIO, ymd, TURNOS, loteAtual, lotacao, antesDe, noite, estadoBarril, fecharBarril, orcamentoEvento, pessoasRodizio, ESTACOES_PADRAO, faixasDoKg, estadoGarrafa, perdaGarrafa, comissaoPromoter } from './precos.js?v=29';
-import { resumoCamarotes } from './tipos.js?v=29';
+  clientePorTel, fidelidade, vencePremio, ajustarEstoque } from './loja.js?v=30';
+import { registrar, acao, ir } from './nucleo.js?v=30';
+import { ico, folha, toast, confirma, bip, $, $$ } from './ui.js?v=30';
+import { TELAS_MAIS, MONTAR, volta, PAINEL_TIPO } from './mais.js?v=30';
+import { abrirSeletor } from './salao.js?v=30';
+import { TIPOS_RODIZIO, ymd, TURNOS, loteAtual, lotacao, antesDe, noite, estadoBarril, fecharBarril, orcamentoEvento, pessoasRodizio, ESTACOES_PADRAO, faixasDoKg, estadoGarrafa, perdaGarrafa, comissaoPromoter } from './precos.js?v=30';
+import { resumoCamarotes } from './tipos.js?v=30';
 
 const num = (v) => { const s = String(v ?? '').trim(); return Number(/,/.test(s) ? s.replace(/\./g, '').replace(',', '.') : s) || 0; };
 const vir = (n) => String(n ?? '').replace('.', ',');

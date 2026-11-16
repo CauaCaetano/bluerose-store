@@ -173,3 +173,30 @@ body.tpl-japones .prancheta{clip-path:polygon(-12px 17px,30% 17px,38% 1px,62% 1p
 @media (max-width:899px){body.tpl-japones .salao-grade{grid-template-columns:minmax(0,1fr)!important}body.tpl-japones .topo{background:rgba(255,253,248,.97)!important}}
 @media (max-width:899px){body.tpl-japones .fila-txt b{font-size:14px!important;letter-spacing:.02em!important}}
 @media (max-width:899px){body.tpl-japones .fila-item .bt{padding:0 10px!important;font-size:14.5px!important;letter-spacing:0!important}}
+
+/* pente-fino 16/11: painéis da gestão sem o papel rasgado do Taverna, barras na cor do template, verde com contraste, barra da mesa no celular com fundo */
+body.tpl-japones .gestao-corpo .kpis>div,body.tpl-japones .gestao-corpo .cartao-acao,body.tpl-japones .gestao-corpo .resumo-dia>.ka.alerta{border:1px solid var(--l-borda)!important;border-image:none!important;border-radius:14px!important;background:rgba(255,253,248,.94)!important;box-shadow:0 10px 26px -20px rgba(120,90,30,.55)!important}
+body.tpl-japones .gestao-corpo .resumo-dia>.ka.alerta{background:#FBEDEE!important;border-color:#E7B9BE!important}
+body.tpl-japones .gestao-corpo .barras i{background:linear-gradient(180deg,#CC3A33,#A81E26)!important}body.tpl-japones .gestao-corpo .barras.sem i{background:linear-gradient(180deg,#D2AE78,#B88A52)!important}
+body.tpl-japones .bt.oliva,body.tpl-japones .fila-item .bt.oliva{background:linear-gradient(180deg,#6F875F,#55703F)!important;border-color:#55703F!important}
+body.tpl-japones .mesa.pronto,body.tpl-japones .mesa.qr{background:linear-gradient(170deg,#6F875F,#55703F)!important}
+@media (max-width:899px){
+  body.tpl-japones [data-tela=mesa] .barra-acoes{background:linear-gradient(180deg,rgba(255,255,255,0),#FBF6EA 18px)!important;margin:0 -16px!important;padding:18px 16px 12px!important;bottom:calc(var(--nav-h) - 1px)!important}
+  body.tpl-japones [data-tela=mesa] .barra-acoes::after{display:none!important}
+  body.tpl-japones [data-tela=mesa] .barra-acoes .bt{font-size:16px!important;white-space:nowrap;min-width:0}
+}
+
+/* japonês: a cerejeira grande solta acima do salão saiu (deixava um vão vazio); o torii do canto saiu (ficava cortado atrás das áreas); o Fuji não encosta no aviso; ondas sem a pedra cinza */
+@media (min-width:900px){body.tpl-japones .folhas-img{display:none!important}body.tpl-japones .salao-dir::before{display:none!important}
+  body.tpl-japones main::after{background-image:url(img/tj-ondas.webp?v=2)!important}}
+body.tpl-japones .mesa::after{background-image:url(img/tj-ondas.webp?v=2)!important}
+body.tpl-japones .cab-salao .aqueduto-img,body.tpl-japones .cab-pedidos .aqueduto-img{height:86px!important;width:auto!important;top:0!important}
+body.tpl-japones .sec-tit h2::before{display:none!important}
+body.tpl-japones .fita,body.tpl-japones .g-fita,body.tpl-japones .kds-col .placa{padding-left:10px!important}
+
+/* Fuji sem a moldura do recorte (v2); mesa "conta" com o tempo legível */
+body.tpl-japones .cab-salao .aqueduto-img,body.tpl-japones .cab-pedidos .aqueduto-img,body.tpl-japones .g-aqueduto,body.tpl-japones .cx-aqueduto{content:url(img/tj-fuji.webp?v=2)}
+body.tpl-japones .topo::after{background-image:url(img/tj-fuji.webp?v=2)!important}
+body.tpl-japones .mesa.conta{background:linear-gradient(170deg,#C98A1C,#A66C10)!important}
+
+body.tpl-japones .mesa.conta{background:linear-gradient(170deg,#B57A14,#93600A)!important}

@@ -3,11 +3,11 @@
 // Um preparo é um insumo com i.preparo = { rende, validade, itens: [{ insumo, qtd }] } (qtd líquida, na unidade do ingrediente).
 // Aproveitamento: i.aprov = % (peso líquido ÷ bruto). A ficha técnica guarda o que sai do estoque (bruto): ao mudar o
 // aproveitamento, as fichas são reescaladas para manter o líquido; assim o custo do prato e a baixa já contam a perda.
-import { db, t, din, dinCurto, grava, r2, uid, insumo, saldo, APARELHO, registrarPerda, consumoVenda, fmtQtd, auditar, quemAgora, ouvir, custoPrato } from './loja.js?v=29';
-import { acao, ir } from './nucleo.js?v=29';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=29';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=29';
-import { fornecedor, abrirNovaCompra, criarLote, ymd, somaDias, dataCurta, zap } from './financeiro.js?v=29';
+import { db, t, din, dinCurto, grava, r2, uid, insumo, saldo, APARELHO, registrarPerda, consumoVenda, fmtQtd, auditar, quemAgora, ouvir, custoPrato } from './loja.js?v=30';
+import { acao, ir } from './nucleo.js?v=30';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=30';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=30';
+import { fornecedor, abrirNovaCompra, criarLote, ymd, somaDias, dataCurta, zap } from './financeiro.js?v=30';
 
 // entradas do hub da Gestão: [id, nome, ícone, detalhe]
 export const HUB_PRODUCAO = [

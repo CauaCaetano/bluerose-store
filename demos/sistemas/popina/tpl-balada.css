@@ -209,3 +209,25 @@ body.tpl-balada .louro-img{display:none!important}
 body.tpl-balada .fita,body.tpl-balada .fita.verde,body.tpl-balada .g-fita,body.tpl-balada .kds-col .placa,body.tpl-balada .cab-comanda .fita-mesa,body.tpl-balada .cab-conta .fita{border-image:none!important;border:2px solid #FF5FD2!important;border-radius:14px!important;background:linear-gradient(180deg,#2C1656,#150B2E)!important;box-shadow:inset 0 0 0 1px rgba(34,211,238,.55),0 0 14px rgba(255,47,185,.6)!important;color:#FFFFFF!important;min-height:46px!important;height:auto!important;padding:6px 16px!important}
 body.tpl-balada .fila-vazia{color:#3A2A5C!important;font-weight:600}
 body.tpl-balada .cab-comanda p,body.tpl-balada .cab-conta p{color:#D9CCF5!important}
+/* 16/11 pente-fino: no celular a pista ao lado do logo era uma foto em caixa com bordas retas; agora esmaece nas bordas como a do título */
+body.tpl-balada .topo::after{-webkit-mask:radial-gradient(closest-side,#000 62%,transparent);mask:radial-gradient(closest-side,#000 62%,transparent);background-size:cover!important;background-position:center!important;border-radius:0}
+
+/* 16/11 pente-fino: textos que sumiam. Nos quadros claros (estoque, bar, reservas, QR das mesas, cartões da conta, aparelho, relatórios, abrir mesa) a letra herdava o lilás claro do fundo escuro; no fundo escuro, o subtítulo das telas da gestão, o título "Gerente e conferência" e o "Histórico de caixas" estavam escuros */
+body.tpl-balada .gestao-corpo li,body.tpl-balada .papeis .papel,body.tpl-balada .cartoes-acao .cartao-acao,body.tpl-balada .grade-qr figure,body.tpl-balada .kpis>div,body.tpl-balada .lista-res li,body.tpl-balada .abrir-mesa,body.tpl-balada .abrir-mesa .chip{color:#24163D!important}
+body.tpl-balada .abrir-mesa .chip.on,body.tpl-balada .abrir-mesa .chip[aria-pressed=true]{color:#FFFFFF!important}
+body.tpl-balada .cab-g p,body.tpl-balada .cab-tela p{color:#CFC8F5!important}
+body.tpl-balada .gestao-corpo form>.sec-tit h2,body.tpl-balada .gestao-corpo .form>.sec-tit h2{color:#F2EEFF!important}
+body.tpl-balada .cx-hist,body.tpl-balada .caixa-lista>.link{color:#FF8FDF!important}
+/* 16/11 pente-fino: mesa "Conta" num dourado mais fundo para o tempo em branco ler bem; "Nada aqui." legível no quadro claro */
+body.tpl-balada .mesa.conta{background:linear-gradient(170deg,#C98A12,#9A6608)!important}
+body.tpl-balada .vazio-quadro{color:#6E6290!important}
+/* 16/11 pente-fino: no celular a lista da Gestão (cartões claros) e o "3 pessoas · aberta há" da conta no caixa ficavam com letra clara no claro */
+body.tpl-balada .menu-mais a,body.tpl-balada .menu-mais a b{color:#24163D!important}body.tpl-balada .menu-mais a small{color:#5E5578!important}
+body.tpl-balada .conta-det .cab-conta p{color:#5E5578!important}
+
+/* 16/11 pente-fino: no celular a barra "Adicionar / Conta" da mesa era transparente e ficava por cima dos itens da comanda; agora tem fundo, e o valor da conta cabe numa linha */
+@media (max-width:899px){body.tpl-balada .barra-acoes{background:#140D2E!important;box-shadow:-16px 0 0 #140D2E,16px 0 0 #140D2E,0 -10px 12px -6px #140D2E!important;z-index:5}
+body.tpl-balada .barra-acoes .bt{white-space:nowrap!important;font-size:15px!important;min-width:0}}
+
+/* 16/11 pente-fino: o topo era meio transparente; ao rolar, a placa da mesa e os títulos apareciam por trás do nome do restaurante */
+body.tpl-balada .topo{background:#140D2E!important}

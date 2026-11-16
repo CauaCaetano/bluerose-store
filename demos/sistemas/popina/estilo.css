@@ -1,7 +1,7 @@
 /* Popina · visual próprio (taberna romana: terracota, oliva, ouro sobre creme). Celular primeiro; tablet e computador com trilho lateral. */
 :root{
   --terra:#B4532F;--terra2:#963F20;--terra-cl:#F4DCCD;--oliva:#5F6B2B;--oliva-cl:#E3E7CF;--ouro:#D9A441;--ouro-cl:#F6E7C4;
-  --creme:#FBF3E8;--creme2:#F3E8D8;--papel:#FFFDF9;--tinta:#3B2A22;--tinta2:#6B5A4F;--mudo:#8E7E72;--linha:#E6D8C6;
+  --creme:#FBF3E8;--creme2:#F3E8D8;--papel:#FFFDF9;--tinta:#3B2A22;--tinta2:#6B5A4F;--mudo:#6F6258;--linha:#E6D8C6;
   --raio:16px;--sombra:0 1px 0 rgba(59,42,34,.04),0 6px 18px -10px rgba(59,42,34,.28);
   --f-tit:"Cinzel",Georgia,serif;--f-txt:"Figtree",system-ui,sans-serif;
   --nav-h:68px;--topo-h:56px;

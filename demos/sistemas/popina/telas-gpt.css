@@ -113,7 +113,7 @@
 .conta-det .totais>div b{font:700 18px var(--g-serif)}
 .conta-det .totais .link{font:700 17px var(--g-serif);color:#9A3A1E}
 .conta-det .totais .total{border-top:0;margin:10px -12px 0;padding:0 18px;height:64px;box-sizing:border-box;
-  border-style:solid;border-width:0 75px 0 95px;border-image:url(img/x-total.webp?v=1) 0 75 0 95 fill stretch;background:none;color:#FFF6E6}
+  border-style:solid;border-width:0 75px 0 95px;border-image:url(img/total-taverna.webp?v=1) 0 75 0 95 fill stretch;background:none;color:#FFF6E6}
 .conta-det .totais .total span{font:700 28px var(--g-serif);margin-left:-50px}
 .conta-det .totais .total b{font:700 32px var(--g-serif);margin-right:-40px}
 .conta-det .dividir{gap:14px}
@@ -266,7 +266,7 @@
 .comanda-papel .totais>div{font:400 18px var(--g-serif);color:var(--g-tinta)}
 .comanda-papel .totais>div b{font:700 19px var(--g-serif)}
 .comanda-papel .totais .total{border-top:0;margin:10px -8px 0;padding:0 10px;height:58px;box-sizing:border-box;
-  border-style:solid;border-width:0 75px 0 95px;border-image:url(img/x-total.webp?v=1) 0 75 0 95 fill stretch;color:#FFF6E6}
+  border-style:solid;border-width:0 75px 0 95px;border-image:url(img/total-taverna.webp?v=1) 0 75 0 95 fill stretch;color:#FFF6E6}
 .comanda-papel .totais .total span{font:700 26px var(--g-serif);margin-left:-30px}
 .comanda-papel .totais .total b{font:700 28px var(--g-serif);margin-right:-30px;color:#FFF6E6}
 [data-tela=mesa] .barra-acoes{background:none!important;border:0!important;box-shadow:none!important;padding:8px 0 32px!important;gap:12px}
@@ -786,3 +786,17 @@ nav a.on{animation:aba-on .35s cubic-bezier(.3,1.5,.5,1)}
 .contador:not(:empty){animation:conta-pula .4s cubic-bezier(.3,1.6,.5,1)}
 @keyframes conta-pula{from{scale:.4}}
 .pd-quadro::after{content:none!important;display:none!important}
+/* celular: a placa da área (SALÃO, VARANDA) não sai mais para fora do quadro */
+@media (max-width:899px){.area-cab{margin-left:0!important}}
+
+/* pente-fino 16/11 (comuns): barra Adicionar/Conta da mesa no celular com fundo (o conteúdo não aparece por baixo);
+   trigo do Taverna nos títulos da Gestão só no Taverna */
+@media (max-width:899px){[data-tela=mesa] .barra-acoes{-webkit-backdrop-filter:blur(16px) saturate(1.15);backdrop-filter:blur(16px) saturate(1.15);border-radius:16px}}
+body:not(.tpl-taverna) .gestao-corpo .sec-tit h2::before{content:none!important;display:none!important}
+
+/* pente-fino 16/11 (comuns): sem o enfeite embaixo dos botões da comanda (cobria os itens ao rolar); etiqueta B da curva ABC legível */
+[data-tela=mesa] .barra-acoes::after{content:none!important;display:none!important}
+.abc-B{color:#2B1E18!important}
+/* celular: a coluna da esquerda do salão nunca passa da largura da tela */
+@media (max-width:899px){.salao-grade{grid-template-columns:minmax(0,1fr)!important}.salao-esq{min-width:0!important;max-width:100%!important;box-sizing:border-box}}
+@media (max-width:899px){.area-cab{min-width:0;max-width:100%}.area-cab span{margin-right:0!important;white-space:normal!important;text-align:right;min-width:0}}

@@ -184,3 +184,11 @@ body.tpl-hamburgueria .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!impo
 body.tpl-hamburgueria .cc-bts .bt{min-width:0;white-space:normal;line-height:1.1;text-align:center}
 /* pedidos: o texto do cartão "Cardápio online" não encosta na borda */
 body.tpl-hamburgueria .link-cardapio{padding-right:12px!important}
+
+/* pente-fino 16/11: placa e prancheta recortadas no próprio arquivo (sem os cantos quadrados de papel); sem o milkshake fixo no canto (foto com borda reta passando por trás dos quadros) */
+body.tpl-hamburgueria .fita,body.tpl-hamburgueria .fita.verde,body.tpl-hamburgueria .g-fita,body.tpl-hamburgueria .kds-col .placa,body.tpl-hamburgueria .cab-comanda .fita-mesa,body.tpl-hamburgueria .cab-conta .fita{border-image:url(img/th-placa.webp?v=2) 0 46 0 46 fill stretch!important;clip-path:none!important}
+body.tpl-hamburgueria .prancheta,body.tpl-hamburgueria .ticket-dia,body.tpl-hamburgueria .comanda-papel,body.tpl-hamburgueria .cartao-caixa{border-image:url(img/th-moldura.webp?v=2) 52 16 16 16 stretch!important}
+@media (min-width:900px){body.tpl-hamburgueria .salao-dir::before{content:none!important;display:none!important}}
+@media (max-width:899px){body.tpl-hamburgueria .area-cab::after{display:none!important}
+  body.tpl-hamburgueria .fila-item .bt{padding:0 10px!important;font-size:14.5px!important;letter-spacing:0!important}
+  body.tpl-hamburgueria .fila-txt b{font-size:14px!important;letter-spacing:.02em!important}}

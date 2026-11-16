@@ -1,14 +1,14 @@
 // Popina · caixa: contas abertas, fechar conta (serviço, desconto, dividir, pagar em partes), Pix com QR e o caixa do dia.
 import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2,
-  temCouvert, lojaCfg, marcar, darDesconto, regras, temPin, quemAgora, cancelarVenda, reabrirVenda, vendaDeHoje, ondeComanda, couvertLigado, tem, fidelidade, clientePorTel, darPremio } from './loja.js?v=29';
-import { registrar, acao, ir } from './nucleo.js?v=29';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=29';
-import { pix } from './pix.js?v=29';
+  temCouvert, lojaCfg, marcar, darDesconto, regras, temPin, quemAgora, cancelarVenda, reabrirVenda, vendaDeHoje, ondeComanda, couvertLigado, tem, fidelidade, clientePorTel, darPremio } from './loja.js?v=30';
+import { registrar, acao, ir } from './nucleo.js?v=30';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=30';
+import { pix } from './pix.js?v=30';
 import { qrSVG } from '../base/qr.js';
-import { linhaItem, abrirSeletor } from './salao.js?v=29';
-import { vencePremio } from './loja.js?v=29';
-import { dividirPorPessoa, linhasRodizio, cnpjValido, fmtCnpj, ymd } from './precos.js?v=29';
-import { FORMA_FIADO, pedirFiado, novaConta } from './financeiro.js?v=29';
+import { linhaItem, abrirSeletor } from './salao.js?v=30';
+import { vencePremio } from './loja.js?v=30';
+import { dividirPorPessoa, linhasRodizio, cnpjValido, fmtCnpj, ymd } from './precos.js?v=30';
+import { FORMA_FIADO, pedirFiado, novaConta } from './financeiro.js?v=30';
 
 // conta faturada para empresa (função ligada): fecha com CNPJ e razão social e vira conta a receber
 // (o fluxo de caixa deve tratar esta forma como o fiado: entra quando a conta a receber for paga, não na venda)
@@ -72,7 +72,8 @@ function detalhe(c) {
 registrar('caixa', {
   titulo: 'Caixa', aba: 'caixa',
   html(id) {
-    const c = id ? comanda(id) : null;
+    // no computador o lado direito nunca fica vazio: abre sozinho a primeira conta (quem pediu a conta vem primeiro)
+    const c = id ? comanda(id) : (innerWidth >= 900 ? abertas()[0] || null : null);
     return `<div class="caixa ${c ? 'com-det' : ''}"><div class="caixa-lista">
         <header class="cab-tela cab-caixa"><div><h1><img src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74">Caixa<img src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></h1><p>${db.comandas.length} contas abertas</p></div><button type="button" class="bt cheio" data-acao="venda-rapida">${ico('mais2')}Venda rápida</button></header>
         ${painelCaixa()}<h2 class="cx-h2" title="Quem pediu a conta aparece primeiro"><img src="img/c-louro-esq.webp?v=1" alt="" width="30" height="31">Contas abertas<img src="img/c-louro-dir.webp?v=1" alt="" width="30" height="31"></h2><nav class="contas">${listaContas(c?.id)}</nav></div>

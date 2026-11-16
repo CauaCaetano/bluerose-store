@@ -182,3 +182,8 @@ body.tpl-pizzaria .g-card h2.g-fita{font-size:18px!important}
 @media (max-width:899px){body.tpl-pizzaria .salao-grade{grid-template-columns:minmax(0,1fr)!important}body.tpl-pizzaria .topo{background:rgba(255,253,248,.97)!important}}
 @media (max-width:899px){body.tpl-pizzaria .fila-txt b{font-size:14px!important;letter-spacing:.02em!important}}
 @media (max-width:899px){body.tpl-pizzaria .fila-item .bt{padding:0 10px!important;font-size:14.5px!important;letter-spacing:0!important}}
+
+/* pente-fino 16/11: pá de pizza e moldura recortadas no próprio arquivo (o recorte em polígono deixava o quadrado de papel); balcão de farinha sem emenda reta na repetição */
+body.tpl-pizzaria .fita,body.tpl-pizzaria .fita.verde,body.tpl-pizzaria .g-fita,body.tpl-pizzaria .kds-col .placa,body.tpl-pizzaria .cab-comanda .fita-mesa,body.tpl-pizzaria .cab-conta .fita{border-image:url(img/tp-placa.webp?v=2) 0 58 0 140 fill stretch!important;clip-path:none!important}
+body.tpl-pizzaria .prancheta,body.tpl-pizzaria .ticket-dia,body.tpl-pizzaria .comanda-papel,body.tpl-pizzaria .cartao-caixa{border-image:url(img/tp-moldura.webp?v=2) 18 20 20 20 stretch!important}
+@media (min-width:900px){body.tpl-pizzaria main::after{background-image:url(img/tp-balcao.webp?v=2)!important}}

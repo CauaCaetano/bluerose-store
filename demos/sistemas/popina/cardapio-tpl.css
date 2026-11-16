@@ -331,3 +331,41 @@ body.cv-luxo{--t-orn:none;--t-pe-cena:none}
 body.cv-luxo .cli-aqueduto,body.cv-luxo .cli-sacola-lado::before,body.cv-luxo .cli-capa::before{display:none!important;content:none!important}
 body.cv-luxo .cli-fita,body.cv-luxo .cli-h2 span{border-image:none!important;border:1.5px solid #C9A35A!important;border-radius:12px!important;background:linear-gradient(180deg,#FFFDF7,#F3EAD8)!important;box-shadow:inset 0 0 0 3px #FFFDF7,inset 0 0 0 4px rgba(201,163,90,.45),0 4px 12px -6px rgba(107,82,50,.45)!important;color:#5B4428!important;min-height:44px!important;height:auto!important;padding:6px 18px!important;clip-path:none!important}
 body.cv-luxo{--t-faixa:linear-gradient(90deg,#C9A35A,#C9A35A) 0 9px/100% 1.5px no-repeat}
+
+/* 16/11 pente-fino (pub, chinês, balada, cafeteria): placas sem o fundo quadrado do recorte, enfeites sem pedaços soltos e sem corte reto, greca sem a tigela no meio; Balada sem o globo em caixa ao lado da mesa */
+body.cv-pub{--t-placa:url(img/tb-placa.webp?v=2);--t-cena:url(img/tb-fachada.webp?v=2);--t-orn:url(img/tb-chopes.webp?v=2);--t-pe-cena:none;--t-lado:url(img/tb-madeira.webp?v=2) 0 0/100% auto repeat-y}
+body.cv-chines{--t-placa:url(img/tc2-placa.webp?v=2);--t-cena:url(img/tc2-pavilhao.webp?v=2);--t-orn:url(img/tc2-dragao.webp?v=2);--t-faixa:url(img/tc2-greca.webp?v=2) 0 0/auto 100% repeat-x}
+body.cv-cafeteria{--t-placa:url(img/tcf-placa.webp?v=2);--t-cena:url(img/tcf-cafe.webp?v=2);--t-orn:url(img/tcf-bolo.webp?v=2)}
+body.cv-balada .cli-aqueduto{display:none!important;content:none!important}
+
+/* pente-fino 16/11 (mexicano, pizzaria, hamburgueria): placas recortadas no próprio arquivo, balcão da pizzaria sem emenda */
+body.cv-mexicano{--t-placa:url(img/tm-placa.webp?v=2)}
+body.cv-pizzaria{--t-placa:url(img/tp-placa.webp?v=2);--t-faixa:url(img/tp-balcao.webp?v=2) 0 0/auto 100% repeat-x}
+body.cv-hamburgueria{--t-placa:url(img/th-placa.webp?v=2)}
+
+/* pente-fino 16/11 (japonês): Fuji sem a moldura do recorte, ondas sem a pedra cinza, cerejeira sem a ponta cortada reta */
+body.cv-japones{--t-cena:url(img/tj-fuji.webp?v=2);--t-faixa:url(img/tj-ondas.webp?v=2) 0 100%/auto 100% repeat-x,#F5EEDF}
+body.cv-japones .cli-capa::before,body.cv-japones .cli-sacola-lado::before{-webkit-mask:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);mask:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent)}
+body.cv-japones .cli-prod-txt p{display:block!important;-webkit-line-clamp:unset!important;overflow:visible!important}
+
+/* pente-fino 16/11 (italiano, churrascaria, luxo): descrição do prato inteira (sem reticências); enfeites recortados em caixa saem (ramo de tomate, azeite, espetos, carne na tábua); placas, moldura e cenas com as versões limpas */
+body.cv-luxo .cli-prod-txt p,body.cv-italiano .cli-prod-txt p,body.cv-churrascaria .cli-prod-txt p{display:block!important;-webkit-line-clamp:unset!important;overflow:visible!important}
+body.cv-italiano{--t-placa:url(img/ti-placa.webp?v=2);--t-cena:url(img/ti-toscana.webp?v=2);--t-orn:none;--t-pe-cena:none}
+body.cv-churrascaria{--t-cena:url(img/tc-pampa.webp?v=2);--t-orn:none;--t-pe-cena:none}
+body.cv-italiano .cli-sacola-lado::before,body.cv-italiano .cli-capa::before,body.cv-italiano .cli-rodape::after,
+body.cv-churrascaria .cli-sacola-lado::before,body.cv-churrascaria .cli-capa::before,body.cv-churrascaria .cli-rodape::after{display:none!important;content:none!important}
+
+/* japonês: "Chamar garçom" numa linha só no celular (a fonte Shippori é mais larga) */
+@media (max-width:480px){body.cv-japones .cli-modo-bts .bt{font-size:14.5px!important;letter-spacing:0!important;white-space:nowrap;padding-left:8px!important;padding-right:8px!important;gap:6px!important}}
+
+/* pente-fino 16/11 (g1) · Realeza: brasão e coroa sem buracos azuis; descrição inteira; palácio miúdo some no celular */
+body.cv-realeza{--t-pe-cena:url(img/tr-brasao.webp?v=2);--t-orn:url(img/tr-coroa.webp?v=2)}
+body.cv-realeza .cli-prod-txt p{-webkit-line-clamp:unset;line-clamp:unset;display:block;overflow:visible}
+@media (max-width:639px){body.cv-realeza img.cli-aqueduto{display:none}}
+/* pente-fino 16/11 (g1) · Básico: descrição do prato inteira, sem reticências */
+body.cv-basico .cli-prod-txt p{-webkit-line-clamp:unset;line-clamp:unset;display:block;overflow:visible}
+/* pente-fino 16/11 (g1) · Taverna (cardápio rústico = body.est-rustico, não tem classe cv-): selos dourados com letra escura, descrição inteira, selo "fechado" menos espremido */
+body.est-rustico .cli-tags .tag:not(.verde){color:#3A2412!important}
+body.est-rustico .cli-prod-txt p{-webkit-line-clamp:unset;line-clamp:unset;display:block;overflow:visible}
+@media (max-width:639px){body.est-rustico .cli-selo{max-width:168px!important;font-size:12px!important}}
+@media (max-width:639px){body.cv-realeza img.cli-aqueduto{display:none!important}}

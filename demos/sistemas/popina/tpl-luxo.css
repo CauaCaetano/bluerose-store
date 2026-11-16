@@ -132,3 +132,15 @@ body.tpl-luxo .topo::after{background-image:none!important}
 body.tpl-luxo .fita,body.tpl-luxo .fita.verde,body.tpl-luxo .g-fita,body.tpl-luxo .kds-col .placa,body.tpl-luxo .cab-comanda .fita-mesa,body.tpl-luxo .cab-conta .fita{border-image:none!important;border:1.5px solid #C9A35A!important;border-radius:12px!important;background:linear-gradient(180deg,#FFFDF7,#F3EAD8)!important;box-shadow:inset 0 0 0 3px #FFFDF7,inset 0 0 0 4px rgba(201,163,90,.45),0 4px 12px -6px rgba(107,82,50,.45)!important;color:#5B4428!important;min-height:44px!important;height:auto!important;padding:6px 18px!important;clip-path:none!important}
 body.tpl-luxo .fita::before,body.tpl-luxo .fita::after,body.tpl-luxo .g-fita::before,body.tpl-luxo .g-fita::after,body.tpl-luxo .kds-col .placa::before,body.tpl-luxo .kds-col .placa::after,body.tpl-luxo .cab-comanda .fita-mesa::before,body.tpl-luxo .cab-comanda .fita-mesa::after{display:none!important}
 body.tpl-luxo .prancheta::after{display:none!important}body.tpl-luxo img.louro-img{display:none!important}
+
+/* pente-fino 16/11: painéis da gestão sem o papel rasgado do Taverna, barras na cor do template, verde com contraste, barra da mesa no celular com fundo */
+body.tpl-luxo .gestao-corpo .kpis>div,body.tpl-luxo .gestao-corpo .cartao-acao,body.tpl-luxo .gestao-corpo .resumo-dia>.ka.alerta{border:1px solid var(--l-borda)!important;border-image:none!important;border-radius:14px!important;background:rgba(255,253,248,.94)!important;box-shadow:0 10px 26px -20px rgba(120,90,30,.55)!important}
+body.tpl-luxo .gestao-corpo .resumo-dia>.ka.alerta{background:#FBEDEE!important;border-color:#E7B9BE!important}
+body.tpl-luxo .gestao-corpo .barras i{background:linear-gradient(180deg,#A8485A,#8E2A3A)!important}body.tpl-luxo .gestao-corpo .barras.sem i{background:linear-gradient(180deg,#D9B76A,#B8914A)!important}
+body.tpl-luxo .bt.oliva,body.tpl-luxo .fila-item .bt.oliva{background:linear-gradient(180deg,#6F875F,#55703F)!important;border-color:#55703F!important}
+body.tpl-luxo .mesa.pronto,body.tpl-luxo .mesa.qr{background:linear-gradient(170deg,#6F875F,#55703F)!important}
+@media (max-width:899px){
+  body.tpl-luxo [data-tela=mesa] .barra-acoes{background:linear-gradient(180deg,rgba(255,255,255,0),#FBF6EA 18px)!important;margin:0 -16px!important;padding:18px 16px 12px!important;bottom:calc(var(--nav-h) - 1px)!important}
+  body.tpl-luxo [data-tela=mesa] .barra-acoes::after{display:none!important}
+  body.tpl-luxo [data-tela=mesa] .barra-acoes .bt{font-size:16px!important;white-space:nowrap;min-width:0}
+}

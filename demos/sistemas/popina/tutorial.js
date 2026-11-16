@@ -1,7 +1,7 @@
 // Popina · tutorial guiado: um passeio curto na primeira entrada (o menu de cima, tela por tela) e o tutorial completo,
 // aberto em Minha conta, que vai em cada tela e mostra onde tocar. Destaca o elemento com um recorte e explica num cartão.
-import { lojaCfg } from './loja.js?v=29';
-import { ir, papel } from './nucleo.js?v=29';
+import { lojaCfg } from './loja.js?v=30';
+import { ir, papel } from './nucleo.js?v=30';
 
 const ler = (k) => { try { return localStorage.getItem(k); } catch { return '1'; } };
 const gravar = (k) => { try { localStorage.setItem(k, '1'); } catch { /* sem acesso: só não lembra */ } };

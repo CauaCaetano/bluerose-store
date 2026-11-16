@@ -26,11 +26,11 @@ body.tpl-realeza img[src*="louro-esq"]{content:url(img/tr-louro-esq2.webp?v=1)}
 body.tpl-realeza img[src*="louro-dir"]{content:url(img/tr-louro-dir2.webp?v=1)}
 /* painéis de pergaminho real com moldura de ouro */
 body.tpl-realeza .prancheta,body.tpl-realeza .ticket-dia,body.tpl-realeza .comanda-papel,body.tpl-realeza .conta-det,body.tpl-realeza .gestao-nav,body.tpl-realeza .g-card,body.tpl-realeza .cartao-caixa{
-  border-style:solid!important;border-width:30px!important;border-image:url(img/tr-moldura2.webp?v=1) 46 stretch!important;border-radius:0!important;background:var(--r-perg) padding-box!important;box-shadow:0 14px 30px -18px rgba(0,0,0,.7)!important;color:var(--r-tinta)!important}
+  border-style:solid!important;border-width:30px!important;border-image:url(img/tr-moldura2.webp?v=2) 46 stretch!important;border-radius:0!important;background:var(--r-perg) padding-box!important;box-shadow:0 14px 30px -18px rgba(0,0,0,.7)!important;color:var(--r-tinta)!important}
 body.tpl-realeza .gestao-corpo .bloco,body.tpl-realeza .gestao-corpo .bloco-form,body.tpl-realeza .gestao-corpo .tabela-rolo,body.tpl-realeza .gestao-corpo .resumo-dia>*,body.tpl-realeza .link-cardapio,body.tpl-realeza .area{
   border:2px solid var(--r-ouro)!important;border-image:none!important;border-radius:12px!important;background:var(--r-perg)!important;box-shadow:inset 0 0 0 4px var(--r-perg),inset 0 0 0 5px #C9A04A,0 12px 26px -18px rgba(0,0,0,.7)!important;color:var(--r-tinta)!important}
 body.tpl-realeza .prancheta{position:relative;margin-top:60px!important;padding:0 2px 4px!important}
-body.tpl-realeza .prancheta::after{content:"";position:absolute;top:-96px;left:50%;width:212px;height:114px;transform:translateX(-50%);background:url(img/tr-brasao.webp?v=1) center/contain no-repeat;pointer-events:none}
+body.tpl-realeza .prancheta::after{content:"";position:absolute;top:-96px;left:50%;width:212px;height:114px;transform:translateX(-50%);background:url(img/tr-brasao.webp?v=2) center/contain no-repeat;pointer-events:none}
 body.tpl-realeza .prancheta-cab{background:linear-gradient(180deg,var(--r-azul2),var(--r-azul))!important;border-radius:6px!important;padding:10px 4px!important;margin:0 0 10px!important}
 body.tpl-realeza .prancheta-cab h2{font-family:var(--r-tit)!important;color:var(--r-ourocl)!important}
 body.tpl-realeza .prancheta-sub{color:#E9D9AE!important}
@@ -48,7 +48,7 @@ body.tpl-realeza .cx-h2,body.tpl-realeza .h2-pagar{color:var(--r-ourocl)!importa
 body.tpl-realeza .conta-det .h2-pagar{color:var(--r-carm)!important}
 body.tpl-realeza .ticket-total,body.tpl-realeza .conta-det .totais .total,body.tpl-realeza .comanda-papel .totais .total{border:1.5px solid var(--r-ouro)!important;border-image:none!important;border-radius:8px!important;background:linear-gradient(180deg,var(--r-carm2),var(--r-carm))!important;margin-left:0!important;margin-right:0!important;padding:0 16px!important}
 body.tpl-realeza .ticket-total span,body.tpl-realeza .ticket-total b,body.tpl-realeza .conta-det .totais .total span,body.tpl-realeza .conta-det .totais .total b,body.tpl-realeza .comanda-papel .totais .total span,body.tpl-realeza .comanda-papel .totais .total b{color:var(--r-ourocl)!important;margin:0!important;font-family:var(--r-tit)!important}
-body.tpl-realeza .louro-img{content:url(img/tr-coroa.webp?v=1);width:200px!important;bottom:-70px!important}
+body.tpl-realeza .louro-img{content:url(img/tr-coroa.webp?v=2);width:200px!important;bottom:-70px!important}
 body.tpl-realeza .ticket-dia{margin-bottom:60px!important}
 /* salão */
 body.tpl-realeza .legenda{background:var(--r-perg);border:1.5px solid var(--r-ouro);border-radius:10px;padding:6px 14px;width:max-content;margin-left:auto!important;color:var(--r-tinta)!important}
@@ -107,7 +107,7 @@ body.tpl-realeza .gestao-corpo .chip.on{background:var(--r-carm)!important;borde
 /* comanda e folha */
 body.tpl-realeza .cab-comanda p{color:#E9D9AE!important}
 body.tpl-realeza .cab-comanda .bt-ico{background:var(--r-perg)!important;border:1.5px solid var(--r-ouro)!important}
-body.tpl-realeza [data-tela=mesa] .barra-acoes::after{background:url(img/tr-coroa.webp?v=1) center/auto 100% no-repeat!important;height:44px!important}
+body.tpl-realeza [data-tela=mesa] .barra-acoes::after{background:url(img/tr-coroa.webp?v=2) center/auto 100% no-repeat!important;height:44px!important}
 body.tpl-realeza .folha{background:var(--r-perg)!important}
 body.tpl-realeza .folha-pe{background:#EEDDB5!important;border-top-color:#C9A04A!important}
 @media (max-width:899px){body.tpl-realeza .nav{background:#18215C!important;border-top:2px solid var(--r-ouro)!important}body.tpl-realeza .nav a.on{background:none!important;box-shadow:none!important;color:var(--r-ourocl)!important}
@@ -141,3 +141,20 @@ body.tpl-realeza .cc-bts{grid-template-columns:repeat(3,minmax(0,1fr))!important
 @media (max-width:899px){body.tpl-realeza .cc-bts .bt{font-size:14px!important}}
 body.tpl-realeza .ticket-cab{flex-wrap:wrap;row-gap:4px;column-gap:8px}body.tpl-realeza .ticket-cab>*{min-width:0}
 @media (max-width:899px){body.tpl-realeza .area .fita{border-width:0 55px!important}}
+/* pente-fino 16/11: contraste e painéis sem fundo */
+body.tpl-realeza .cab-tela h1{color:var(--r-ourocl)!important;font-family:var(--r-tit)!important;text-shadow:0 2px 0 #6E5214}
+body.tpl-realeza .cab-tela>div>p,body.tpl-realeza .pd-dica,body.tpl-realeza .caixa-det .vazio,body.tpl-realeza .caixa-det .vazio b{color:#E9D9AE!important}
+body.tpl-realeza .caixa-det .vazio{border-color:rgba(217,178,90,.6)!important}
+body.tpl-realeza .cx-hist{color:var(--r-ourocl)!important}
+body.tpl-realeza .mesa.conta{background:linear-gradient(170deg,#B8861E,#86600F)!important;color:#FFF3D0!important}
+body.tpl-realeza .gestao-corpo>form.form{border:2px solid var(--r-ouro)!important;border-radius:12px!important;background:var(--r-perg)!important;box-shadow:inset 0 0 0 4px var(--r-perg),inset 0 0 0 5px #C9A04A,0 12px 26px -18px rgba(0,0,0,.7)!important;color:var(--r-tinta)!important;padding:18px 20px!important}
+body.tpl-realeza .gestao-corpo>.sec-tit h2{color:var(--r-ourocl)!important;font-family:var(--r-tit)!important}
+body.tpl-realeza .gestao-corpo>.sec-tit span,body.tpl-realeza .gestao-corpo>p.mudo,body.tpl-realeza .gestao-corpo>.vazio,body.tpl-realeza .gestao-corpo>p.legenda-est,body.tpl-realeza .gestao-corpo>p.legenda-est span{color:#E9D9AE!important}
+body.tpl-realeza .gestao-corpo>.vazio a{color:var(--r-ourocl)!important}
+body.tpl-realeza .gestao-corpo .bloco,body.tpl-realeza .gestao-corpo .bloco-form,body.tpl-realeza .gestao-corpo>form.form,body.tpl-realeza .gestao-corpo .r4-card,body.tpl-realeza .prancheta,body.tpl-realeza .g-card,body.tpl-realeza .cartao-caixa,body.tpl-realeza .conta-det,body.tpl-realeza .comanda-papel,body.tpl-realeza .folha{--mudo:#6E5A44}
+body.tpl-realeza .gestao-corpo .r4-card{border:2px solid var(--r-ouro)!important;border-radius:12px!important;background:var(--r-perg)!important;box-shadow:inset 0 0 0 4px var(--r-perg),inset 0 0 0 5px #C9A04A,0 12px 26px -18px rgba(0,0,0,.7)!important;color:var(--r-tinta)!important}
+body.tpl-realeza .gestao-corpo .r4-card h2{font-family:var(--r-tit)!important;color:var(--r-carm)!important}
+/* a coroa embaixo dos botões da comanda passava por cima dos itens (a barra é fixa ao rolar): sai */
+body.tpl-realeza [data-tela=mesa] .barra-acoes::after{display:none!important}
+body.tpl-realeza [data-tela=mesa] .barra-acoes{padding-bottom:10px!important}
+body.tpl-realeza .gestao-corpo .resumo-dia>.ka.alerta{border-image:none!important;border:2px solid var(--r-carm)!important}

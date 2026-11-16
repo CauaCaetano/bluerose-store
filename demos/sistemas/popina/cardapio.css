@@ -331,3 +331,9 @@ body.cli-entrando :is(.cli-dest,.cli-prod):nth-child(n+5){animation-delay:.48s}
 @media (hover:hover){.cli-prod:hover,.cli-dest:hover{translate:0 -3px}}
 .onda-toque{position:fixed;z-index:600;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;pointer-events:none;background:currentColor;opacity:.3;animation:onda-toque .55s cubic-bezier(.2,.7,.3,1) forwards}
 @keyframes onda-toque{to{transform:scale(7);opacity:0}}
+
+/* pente-fino 16/11 (comuns): descrição do prato inteira; aviso no alto (não cobre o total da sacola); botão ainda bloqueado legível */
+.cli-prod-txt p{display:block!important;-webkit-line-clamp:unset!important;overflow:visible!important}
+body.cliente .toast{top:16px;bottom:auto!important;transform:translate(-50%,-20px)}
+body.cliente .toast.on{transform:translate(-50%,0)}
+body.cliente .folha button:disabled,body.cliente .folha .bt:disabled{opacity:1!important;background:#E6E0D6!important;color:#4A4038!important;border-color:#D2C9BB!important}

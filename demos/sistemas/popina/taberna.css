@@ -204,3 +204,10 @@ body.tpl-taverna .kds .ticket .tk-tit{flex:1 1 120px}
   body.tpl-taverna .conta-det .totais .total,body.tpl-taverna .comanda-papel .totais .total{padding:0 4px!important}
   body.tpl-taverna .conta-det .totais .total span,body.tpl-taverna .comanda-papel .totais .total span{font-size:22px!important;margin-left:0!important}
   body.tpl-taverna .conta-det .totais .total b,body.tpl-taverna .comanda-papel .totais .total b{font-size:24px!important}}
+/* pente-fino 16/11 (g1): faixa do total sem caixa clara em volta e sem o trigo por cima do valor; mosaico não passa por cima da comanda */
+body.tpl-taverna .conta-det .totais .total,body.tpl-taverna .comanda-papel .totais .total{border-image-source:url(img/total-taverna.webp?v=1)!important}
+body.tpl-taverna .conta-det .totais .total b,body.tpl-taverna .comanda-papel .totais .total b{margin-right:0!important}
+body.tpl-taverna .ticket-total{border-image-source:url(img/pincel-verde2.webp?v=1)!important}
+body.tpl-taverna [data-tela=mesa] .barra-acoes::after{display:none!important}
+body.tpl-taverna [data-tela=mesa] .barra-acoes{padding-bottom:10px!important}
+body.tpl-taverna .caixa-det .vazio,body.tpl-taverna .caixa-det .vazio b{color:#6E5A44!important}
