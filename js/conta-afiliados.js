@@ -66,6 +66,7 @@
       if (!f.aceite.checked) { st.textContent = 'Marque que leu as regras.'; return; }
       bt.disabled = true; st.textContent = 'Ativando…';
       rpc('nexo_virar_afiliado', { p_aceite: true }).then(function (r) {
+        if (r === 'email') { st.textContent = 'Confirme primeiro o seu e-mail (abra o link que enviamos quando você criou a conta) e tente de novo.'; bt.disabled = false; return; }
         if (r === 'pausado') { st.textContent = 'Seu link de afiliado está pausado. Fale com a gente pelo WhatsApp.'; bt.disabled = false; return; }
         if (r !== 'ok') { st.textContent = 'Não deu para ativar agora. Tente de novo.'; bt.disabled = false; return; }
         return painelAfiliado();
@@ -78,14 +79,16 @@
     return rpc('nexo_afiliados_admin').then(function (d) {
       if (!d) return;
       blocoDono.hidden = false;
-      var devido = d.afiliados.reduce(function (s, a) { return s + Number(a.disponivel); }, 0);
-      blocoDono.innerHTML = '<h2>Afiliados (só você vê)</h2>' + numeros([['Afiliados', d.afiliados.length], ['A pagar agora', reais(devido)]]) +
+      var soma = function (k) { return d.afiliados.reduce(function (s, a) { return s + Number(a[k] || 0); }, 0); };
+      blocoDono.innerHTML = '<h2>Afiliados (só você vê)</h2>' + numeros([['Afiliados', d.afiliados.length], ['Vendido por eles (total)', reais(soma('vendido'))], ['Vendido este mês', reais(soma('vendido_mes'))], ['A pagar agora', reais(soma('disponivel'))], ['Já pago', reais(soma('pago'))]]) +
+        '<p class="ind-regras">Ordem: quem mais vendeu primeiro. "Vendido" é o valor que os clientes indicados pagaram (sem estornos); a comissão é ' + (d.afiliados[0] ? Number(d.afiliados[0].pct) : 10) + '% disso. Pagamento todo dia 10.</p>' +
         '<form class="af-form" id="af-novo"><label>E-mail da conta do afiliado<input type="email" name="email" required autocomplete="off"></label><button class="btn btn-primary">Adicionar</button><span role="status"></span></form>' +
         d.afiliados.map(function (a) {
           return '<article class="af-item"><h3>' + esc(a.email) + (a.ativo ? '' : ' (pausado)') + '</h3>' +
             '<p>Link: <code>bluerose-store.com/?indica=' + esc(a.codigo || '') + '</code><br>Pix: ' + (a.pix ? esc(a.pix) : 'ainda não informou') + '</p>' +
-            numeros([['Visitas', a.cliques], ['Contas', a.cadastros], ['Pagantes', a.vendas], ['Aguardando', reais(a.aguardando)], ['A pagar', reais(a.disponivel)], ['Pago', reais(a.pago)]]) +
-            '<div class="af-acoes"><button type="button" class="btn btn-primary" data-pagar="' + esc(a.usuario) + '" data-valor="' + esc(a.disponivel) + '"' + (Number(a.disponivel) > 0 && a.pix ? '' : ' disabled') + '>Já fiz o Pix de ' + reais(a.disponivel) + '</button>' +
+            (a.pix_recente ? '<p class="af-aviso">Atenção: a chave Pix foi trocada em ' + dia(a.pix_alterado_em) + '. Antes de pagar, confirme com a pessoa por outro canal que foi ela mesma.</p>' : '') +
+            numeros([['Vendeu (total)', reais(a.vendido)], ['Vendeu no mês', reais(a.vendido_mes)], ['Visitas', a.cliques], ['Contas', a.cadastros], ['Pagantes', a.vendas], ['Meses de Anshur', a.anshur_meses || 0], ['Aguardando', reais(a.aguardando)], ['A pagar', reais(a.disponivel)], ['Pago', reais(a.pago)]]) +
+            '<div class="af-acoes"><button type="button" class="btn btn-primary" data-pagar="' + esc(a.usuario) + '" data-recente="' + (a.pix_recente ? '1' : '') + '" data-valor="' + esc(a.disponivel) + '"' + (Number(a.disponivel) > 0 && a.pix ? '' : ' disabled') + '>Já fiz o Pix de ' + reais(a.disponivel) + '</button>' +
             '<button type="button" class="btn btn-ghost" data-pausar="' + esc(a.email) + '" data-ativo="' + (a.ativo ? '0' : '1') + '">' + (a.ativo ? 'Pausar' : 'Reativar') + '</button></div>' +
             '<form class="af-form" data-lancar="' + esc(a.usuario) + '"><label>Sistema sob medida vendido<input name="desc" required minlength="3" maxlength="120"></label><label>Valor total recebido (R$)<input name="total" type="number" min="1" step="0.01" required></label><button class="btn btn-ghost">Lançar comissão de ' + Number(a.pct) + '%</button><span role="status"></span></form></article>';
         }).join('') +
@@ -117,6 +120,7 @@
     }
     var feito;
     if (b.dataset && b.dataset.pagar) {
+      if (b.dataset.recente && !window.confirm('A chave Pix deste afiliado foi trocada há poucos dias. Você confirmou com a pessoa por outro canal que a chave nova é dela?')) return;
       if (!window.confirm('Confirma que o Pix de ' + reais(b.dataset.valor) + ' já foi feito?')) return;
       feito = rpc('nexo_afiliado_admin_pagar', { p_afiliado: b.dataset.pagar });
     } else if (b.dataset && b.dataset.pausar) feito = rpc('nexo_afiliado_admin_salvar', { p_email: b.dataset.pausar, p_ativo: b.dataset.ativo === '1' });
