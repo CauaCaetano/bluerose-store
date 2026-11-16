@@ -64,16 +64,13 @@
 .kds .tk-prog i{display:block;height:100%;border-radius:5px;background:#D29A1F}
 
 @media (min-width:900px){
-  /* na cozinha o topo vira o do conceito: logo, COZINHA com louros, Cozinha/Bar, sino e tela cheia */
-  body:has(main[data-tela=cozinha]) .topo .nav,body:has(main[data-tela=cozinha]) .topo-div,body:has(main[data-tela=cozinha]) .topo-perfil{display:none}
-  body:has(main[data-tela=cozinha]) .topo-dir{margin-right:86px}
+  /* a cozinha mantém o menu de cima (Salão, Pedidos, Caixa, Gestão): o título fica na tela, não por cima do topo */
   main[data-tela=cozinha]{padding:0 8px 10px 0}
-  .cab-cozinha{position:fixed;z-index:30;top:var(--topo-top,0);left:0;right:0;height:100px;margin:0;padding:0 22px 0 380px;pointer-events:none;flex-wrap:nowrap}
-  .cab-cozinha>*{pointer-events:auto}
+  .cab-cozinha{margin:6px 0 14px;flex-wrap:nowrap}
   .cab-cozinha h1{flex:none;font-size:42px;gap:12px}
   .cab-cozinha h1 img{width:50px}
-  .seg-coz{margin-left:auto;margin-right:150px}
-  .kds.quadro{grid-template-columns:repeat(3,minmax(0,1fr));min-height:calc(100dvh - 112px);align-items:stretch}
+  .seg-coz{margin-left:auto}
+  .kds.quadro{grid-template-columns:repeat(3,minmax(0,1fr));min-height:calc(100dvh - 220px);align-items:stretch}
   .kds-col.pronto{position:relative;padding-bottom:250px}
   .kds-col.pronto::after{content:"";position:absolute;right:-14px;bottom:-14px;width:380px;height:248px;background:url(img/k-aqueduto.webp?v=1) 0 0/100% 100% no-repeat;pointer-events:none;
     -webkit-mask:radial-gradient(120% 125% at 100% 100%,#000 62%,transparent 98%);mask:radial-gradient(120% 125% at 100% 100%,#000 62%,transparent 98%)}

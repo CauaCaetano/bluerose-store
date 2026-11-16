@@ -656,7 +656,9 @@ nav a .ico{transition:scale .2s cubic-bezier(.3,.7,.4,1)}nav a.on .ico{scale:1.0
 @media (prefers-reduced-motion:reduce){#tela.tela-entra>*{animation:none}.clicou{animation:none}button:active,.bt:active{scale:none}}
 
 /* ---------- 16/11: Gestão ocupa a tela larga (antes ficava tudo no meio, com sobra dos lados) ---------- */
-@media (min-width:1500px){main{max-width:min(1640px,calc(100vw - 120px))}}
+/* tela grande: tudo usa a largura toda; na Gestão o menu fica colado na borda esquerda, nunca no meio */
+@media (min-width:1500px){main{max-width:calc(100vw - 48px)!important}}
+@media (min-width:900px){main[data-tela=mais]{margin-left:16px!important;margin-right:16px!important;max-width:none!important}}
 .resumo-dia.painel-tipo{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))!important}
 /* pendências e metas no topo da Gestão: mesma letra e o mesmo tamanho do resto da tela */
 .r4-topo .r4-card{padding:16px 18px}

@@ -1,11 +1,11 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=24';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas, aplicarCota } from './opcoes.js?v=24';
-import { modulosAtivos } from './perfis.js?v=24';
-import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg, comemRodizio } from './precos.js?v=24';
-import { ico, folha, toast, $, $$ } from './ui.js?v=24';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=25';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas, aplicarCota } from './opcoes.js?v=25';
+import { modulosAtivos } from './perfis.js?v=25';
+import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg, comemRodizio } from './precos.js?v=25';
+import { ico, folha, toast, $, $$ } from './ui.js?v=25';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -33,7 +33,7 @@ async function rpc(fn, args) {
   if (!r.ok) throw new Error('rede');
   return r.json();
 }
-const lojaPadrao = () => ({ cor: '#B4532F', tema: 'claro', estilo: 'igual', creditos: true, horarios: [], aceitaQR: true, delivery: true, retirada: true, pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], areas: [] });
+const lojaPadrao = () => ({ cor: '#B4532F', tema: 'claro', estilo: 'moderno', creditos: true, horarios: [], aceitaQR: true, delivery: true, retirada: true, pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], areas: [] });
 async function daNuvem() {
   const d = await rpc('popina_cardapio', { p_espaco: R });
   if (d.erro) throw new Error(d.erro);
@@ -90,12 +90,12 @@ const api = R ? {
 // ------------------------------------------------------------------ aparência do restaurante
 const VISUAIS = ['basico', 'taverna', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria', 'hamburgueria', 'pub', 'chines', 'balada', 'cafeteria'];
 const DO_ESTILO = { rustico: 'taverna', moderno: 'basico' };
-// estilo 'igual' (ou vazio) = o do template; um estilo conhecido = escolha do dono; restaurante antigo sem template nem estilo = rústico
+// o cliente vê o cardápio básico (limpo, com a cor e o logo do restaurante); só segue o template se o dono escolher 'igual' em Aparência
 function visualCardapio(L) {
   const e = DO_ESTILO[L.estilo] || L.estilo;
   if (e !== 'igual' && VISUAIS.includes(e)) return e;
-  if (VISUAIS.includes(L.template)) return L.template;
-  return L.estilo === undefined ? 'taverna' : 'basico';
+  if (e === 'igual' && VISUAIS.includes(L.template)) return L.template;
+  return 'basico';
 }
 function tema() {
   const L = M.loja, cor = /^#[0-9a-f]{6}$/i.test(L.cor || '') ? L.cor : '#B4532F';

@@ -1,18 +1,18 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=24';
-import { acao, ir } from './nucleo.js?v=24';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=24';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=24';
-import { situacao, textoHorarios } from './opcoes.js?v=24';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=25';
+import { acao, ir } from './nucleo.js?v=25';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=25';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=25';
+import { situacao, textoHorarios } from './opcoes.js?v=25';
 import { qrSVG } from '../base/qr.js';
-import { abrirEscolha } from './escolha.js?v=24';
-import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=24';
-import './funcoes.js?v=24';
-import { HUB_FINANCEIRO } from './financeiro.js?v=24';
-import { HUB_PRODUCAO } from './producao.js?v=24';
-import { HUB_OPERACAO } from './operacao.js?v=24';
-import { GRUPOS } from './mais.js?v=24';
+import { abrirEscolha } from './escolha.js?v=25';
+import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=25';
+import './funcoes.js?v=25';
+import { HUB_FINANCEIRO } from './financeiro.js?v=25';
+import { HUB_PRODUCAO } from './producao.js?v=25';
+import { HUB_OPERACAO } from './operacao.js?v=25';
+import { GRUPOS } from './mais.js?v=25';
 // financeiro e produção entram no menu da Gestão antes de "Equipe e conta"
 if (!GRUPOS.some((g) => g[0] === 'Financeiro')) {
   const i = GRUPOS.findIndex((g) => g[0] === 'Equipe e conta');
@@ -40,9 +40,8 @@ function reduzir(arq, W, H, q = 0.74) {
 
 // estilos do cardápio do cliente: o restaurante escolhe a cara (a cor e o logo são sempre os dele)
 // 'igual' = o cardápio segue o template do sistema (padrão); os outros deixam o cardápio com outro visual
-const ESTILO_DO_TPL = { basico: 'moderno', taverna: 'rustico' };
-const estiloAtual = (L) => (!L.estilo || L.estilo === 'igual' || L.estilo === (ESTILO_DO_TPL[L.template] || L.template) ? 'igual' : L.estilo);
-const ESTILOS = [['igual', 'Igual ao template', 'O cardápio do cliente com o mesmo visual das telas do sistema (recomendado)'], ['rustico', 'Rústico', 'Pergaminho, louros e mosaico. Cantina, pizzaria, comida caseira'], ['moderno', 'Moderno', 'Limpo, com a cor do seu logo. Hamburgueria, café, japonês, açaí'],
+const estiloAtual = (L) => (!L.estilo ? 'moderno' : L.estilo);
+const ESTILOS = [['moderno', 'Básico', 'Limpo, com a cor e o logo do seu restaurante (recomendado)'], ['igual', 'Igual ao template', 'O cardápio do cliente com o mesmo visual das telas do sistema'], ['rustico', 'Rústico', 'Pergaminho, louros e mosaico. Cantina, pizzaria, comida caseira'],
   ['luxo', 'Luxo', 'Mármore claro e dourado. Restaurante fino'], ['realeza', 'Realeza', 'Veludo azul, ouro e carmesim. Casa clássica'], ['japones', 'Japonês', 'Papel washi, vermelho laca e cerejeira'],
   ['italiano', 'Italiano', 'Toalha xadrez, oliveira e cerâmica pintada'], ['churrascaria', 'Churrascaria', 'Papel kraft, madeira e brasa'],
   ['mexicano', 'Mexicano', 'Talavera, pimenta e cempasúchil'], ['pizzaria', 'Pizzaria', 'Forno a lenha, madeira e lousa'],
@@ -76,7 +75,7 @@ function planoMarca() {
   return `<section class="bloco-form plano-marca"><h2>Popina com a sua marca</h2>
     <p>No plano com a sua marca, o topo do sistema mostra o seu logo e o seu nome no lugar do Popina, a aba do navegador leva o nome do restaurante, o cardápio não fala do Popina em lugar nenhum e o link do cardápio fica sem o nome do sistema. Tem domínio próprio? A gente configura para ele abrir o seu cardápio.</p>
     <p><b>R$ 129 por mês</b> ou <b>R$ 1.238 por ano</b> (20% a menos).</p>
-    <div class="linha-bts">${CONTA ? '<a class="bt cheio" href="/popina.html#precos" target="_blank" rel="noopener">Ver o plano e assinar</a>' : '<button type="button" class="bt cheio" data-prever-marca>Ver como fica na demonstração</button>'}</div></section>`;
+    <div class="linha-bts">${CONTA ? '<a class="bt cheio" href="/popina.html#precos">Ver o plano e assinar</a>' : '<button type="button" class="bt cheio" data-prever-marca>Ver como fica na demonstração</button>'}</div></section>`;
 }
 
 // ------------------------------------------------------------------ aparência: template do sistema, logo, capa, cores e estilo do cardápio
@@ -156,14 +155,14 @@ TELAS_MAIS.loja = () => {
       <div class="campo"><span>Bairros e taxa de entrega</span><ul class="bairros">${db.bairros.map((b, k) => `<li><input name="b_nome_${k}" value="${t(b.nome)}" aria-label="Bairro"><input name="b_taxa_${k}" value="${vir(b.taxa)}" inputmode="decimal" aria-label="Taxa de ${t(b.nome)}"></li>`).join('')}<li><input name="b_nome_n" placeholder="Novo bairro"><input name="b_taxa_n" placeholder="Taxa" inputmode="decimal"></li></ul></div>
     </section>
     <section class="bloco-form link-loja"><h2>Link do cardápio</h2><p class="mudo">Ponha na bio do Instagram, no WhatsApp e no Google. O QR de cada mesa fica em Mesas e QR.</p>
-      <div class="link-caixa"><div class="link-qr">${qrSVG(linkCardapio('delivery=1'), 120, '#3B2A22')}</div><div><code>${t(linkCardapio('delivery=1'))}</code><div class="linha-bts"><button type="button" class="bt" data-copiar>Copiar o link</button><a class="bt" href="${linkCardapio('delivery=1')}" target="_blank" rel="noopener">Ver como o cliente vê</a></div></div></div>
+      <div class="link-caixa"><div class="link-qr">${qrSVG(linkCardapio('delivery=1'), 120, '#3B2A22')}</div><div><code>${t(linkCardapio('delivery=1'))}</code><div class="linha-bts"><button type="button" class="bt" data-copiar>Copiar o link</button><a class="bt" href="${linkCardapio('delivery=1')}">Ver como o cliente vê</a></div></div></div>
     </section>
     <div class="salvar-fixo"><button class="bt cheio grande">Salvar</button></div>
   </form>`;
 };
 MONTAR.loja = (el) => {
   const f = $('[data-loja]', el); if (!f) return;
-  let cor = lojaCfg().cor, temaSel = lojaCfg().tema, estiloSel = lojaCfg().estilo || 'igual';
+  let cor = lojaCfg().cor, temaSel = lojaCfg().tema, estiloSel = lojaCfg().estilo || 'moderno';
   const horarios = () => $$('[data-dia]', f).map((li) => $$('.turno', li).map((tu) => [$('[data-a]', tu).value, $('[data-f]', tu).value]).filter(([a, b]) => a && b));
   f.addEventListener('click', async (e) => {
     const b = e.target.closest('button'); if (!b) return;
@@ -213,7 +212,7 @@ TELAS_MAIS.mesas = () => {
     <div class="campo"><span>Áreas (ex.: Salão das mesas 1 a 8, Varanda da 9 à 12)</span><ul class="areas">${L.areas.map((a, k) => `<li><input name="a_nome_${k}" value="${t(a.nome)}" aria-label="Nome da área"><input name="a_de_${k}" inputmode="numeric" value="${a.de}" aria-label="Da mesa"><i>a</i><input name="a_ate_${k}" inputmode="numeric" value="${a.ate}" aria-label="Até a mesa"></li>`).join('')}<li><input name="a_nome_n" placeholder="Nova área"><input name="a_de_n" inputmode="numeric" placeholder="de"><i>a</i><input name="a_ate_n" inputmode="numeric" placeholder="até"></li></ul></div>
     <button class="bt cheio grande">Salvar</button></form>
   <div class="sec-tit"><h2>QR das mesas</h2><span>imprima e cole em cada mesa</span></div>
-  <div class="linha-bts"><button type="button" class="bt cheio" data-acao="imprimir-qr">${ico('impressora')}Imprimir todos</button><a class="bt" href="${linkCardapio('mesa=1')}" target="_blank" rel="noopener">Ver como o cliente vê</a></div>
+  <div class="linha-bts"><button type="button" class="bt cheio" data-acao="imprimir-qr">${ico('impressora')}Imprimir todos</button><a class="bt" href="${linkCardapio('mesa=1')}">Ver como o cliente vê</a></div>
   <div class="grade-qr">${Array.from({ length: n }, (_, k) => `<figure>${qrSVG(linkCardapio(`mesa=${k + 1}`), 140, '#3B2A22')}<figcaption>${t(nomeArea(k + 1))}</figcaption></figure>`).join('')}</div>`;
 };
 const nomeArea = (m) => { const a = lojaCfg().areas.find((x) => m >= x.de && m <= x.ate); return a ? `${a.nome} · ${m}` : `Mesa ${m}`; };
@@ -360,7 +359,7 @@ TELAS_MAIS.conta = () => {
     <button type="button" class="cartao-acao" data-conta="convidar">${ico('mais2')}<b>Convidar pessoa</b><span>Garçons, cozinha e caixa, cada um com o próprio login.</span></button>
     <button type="button" class="cartao-acao sair" data-conta="sair">${ico('voltar')}<b>Sair</b><span>Sai deste aparelho. Seus dados ficam guardados na nuvem.</span></button>
   </div>
-  ${real ? '' : `<p class="aviso ouro">Isto é a demonstração. Para ter tudo isso de verdade, assine em <a href="../../../popina.html#precos" target="_blank" rel="noopener">bluerose-store.com/popina</a>.</p>`}`;
+  ${real ? '' : `<p class="aviso ouro">Isto é a demonstração. Para ter tudo isso de verdade, assine em <a href="../../../popina.html#precos">bluerose-store.com/popina</a>.</p>`}`;
 };
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-conta]'); if (!b) return;

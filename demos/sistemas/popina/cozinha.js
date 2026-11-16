@@ -1,9 +1,9 @@
 // Popina · tela da cozinha e do bar (KDS): cada envio vira um ticket, na ordem de chegada, com o tempo correndo.
 // "Começar" e "Pronto" avisam o garçom na hora (a fila dele mostra o prato pronto).
-import { db, t, tempo, minutos, comanda, mudarStatus, ondeComanda, tem, prod, lojaCfg } from './loja.js?v=24';
-import { ETAPAS, ALERGENOS, ESTACOES_PADRAO, estacaoDe, filaForno } from './precos.js?v=24';
-import { registrar, acao } from './nucleo.js?v=24';
-import { ico, toast, bip, folha } from './ui.js?v=24';
+import { db, t, tempo, minutos, comanda, mudarStatus, ondeComanda, tem, prod, lojaCfg } from './loja.js?v=25';
+import { ETAPAS, ALERGENOS, ESTACOES_PADRAO, estacaoDe, filaForno } from './precos.js?v=25';
+import { registrar, acao } from './nucleo.js?v=25';
+import { ico, toast, bip, folha } from './ui.js?v=25';
 
 const guarda = (k, v) => { try { if (v === undefined) return localStorage.getItem(k) || ''; localStorage.setItem(k, v); } catch { /* sem acesso */ } return ''; };
 let setor = (() => { const s = guarda('popina-setor'); return ['bar', 'forno'].includes(s) ? s : 'cozinha'; })();

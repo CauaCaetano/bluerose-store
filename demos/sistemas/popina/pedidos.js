@@ -1,9 +1,9 @@
 // Popina · balcão e delivery: pedidos por etapa, pedido novo (telefone, balcão ou cardápio online), taxa por bairro e WhatsApp pronto.
-import { db, t, din, dinCurto, tempo, comanda, conta, novoPedido, enviar, grava, itensValidos, linkCardapio, clientePorTel, lojaCfg, tem, encomendaValida, antecedencia } from './loja.js?v=24';
-import { ymd } from './precos.js?v=24';
-import { registrar, acao, ir, ACOES } from './nucleo.js?v=24';
-import { ico, folha, toast, $, $$ } from './ui.js?v=24';
-import { linhaItem, abrirSeletor } from './salao.js?v=24';
+import { db, t, din, dinCurto, tempo, comanda, conta, novoPedido, enviar, grava, itensValidos, linkCardapio, clientePorTel, lojaCfg, tem, encomendaValida, antecedencia } from './loja.js?v=25';
+import { ymd } from './precos.js?v=25';
+import { registrar, acao, ir, ACOES } from './nucleo.js?v=25';
+import { ico, folha, toast, $, $$ } from './ui.js?v=25';
+import { linhaItem, abrirSeletor } from './salao.js?v=25';
 
 const ETAPAS = [['novo', 'Recebidos'], ['preparo', 'Preparando'], ['saiu', 'Saiu para entrega'], ['pronto_retirar', 'Pronto para retirar']];
 function etapa(c) {

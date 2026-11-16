@@ -1,14 +1,14 @@
 // Popina · salão do garçom: a fila do que fazer agora (conceito C escolhido pelo dono) + as mesas, e a comanda da mesa.
 import { db, t, din, dinCurto, tempo, minutos, prod, comanda, comandaDaMesa, fila, estadoMesa, conta, valorItem, abrirMesa, adicionarItem, enviar,
   mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg,
-  temCouvert, juntarMesas, transferirItens, marcar, quemAgora, temPin, vendaDeHoje, tem, ondeComanda, couvertLigado, abrirCartao, cartaoAberto, proximoCartao, proximaEtapa, restaVitrine, ouvir, auditar } from './loja.js?v=24';
-import { registrar, acao, ir } from './nucleo.js?v=24';
-import { ico, folha, toast, confirma, autorizar, bip, $, $$ } from './ui.js?v=24';
-import { OBS_RAPIDAS } from './dados.js?v=24';
-import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas } from './opcoes.js?v=24';
-import { modulosAtivos } from './perfis.js?v=24';
+  temCouvert, juntarMesas, transferirItens, marcar, quemAgora, temPin, vendaDeHoje, tem, ondeComanda, couvertLigado, abrirCartao, cartaoAberto, proximoCartao, proximaEtapa, restaVitrine, ouvir, auditar } from './loja.js?v=25';
+import { registrar, acao, ir } from './nucleo.js?v=25';
+import { ico, folha, toast, confirma, autorizar, bip, $, $$ } from './ui.js?v=25';
+import { OBS_RAPIDAS } from './dados.js?v=25';
+import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas } from './opcoes.js?v=25';
+import { modulosAtivos } from './perfis.js?v=25';
 import { TIPOS_RODIZIO, valorRodizio, pessoasRodizio, inclusoRodizio, cabeNaRodadaCat, precoAgora, precoFracoes, ETAPAS, ordemEtapa, ALERGENOS, ymd, esquecidas, noTurno, turnoDe, TURNOS, precoKg,
-  tiposRodizio, comemRodizio, linhasRodizio, limiteRodada, faixasDoKg } from './precos.js?v=24';
+  tiposRodizio, comemRodizio, linhasRodizio, limiteRodada, faixasDoKg } from './precos.js?v=25';
 
 // a tela do salão segue o conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/1-salao-pc.png)
 const ROTULO = { conta: 'Levar a conta', chamou: 'Mesa chamou', pronto: 'Prato pronto', qr: 'Pedido pelo QR' };

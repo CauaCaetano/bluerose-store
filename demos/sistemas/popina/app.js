@@ -1,15 +1,15 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=24';
-import './cozinha.js?v=24';
-import './caixa.js?v=24';
-import './pedidos.js?v=24';
-import './mais.js?v=24';
-import './gestao.js?v=24';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=24';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=24';
-import { ico, folha, $, $$, toast, bip, confirma } from './ui.js?v=24';
-import './ajuda.js?v=24';
-import { abrirEscolha } from './escolha.js?v=24';
+import './salao.js?v=25';
+import './cozinha.js?v=25';
+import './caixa.js?v=25';
+import './pedidos.js?v=25';
+import './mais.js?v=25';
+import './gestao.js?v=25';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=25';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=25';
+import { ico, folha, $, $$, toast, bip, confirma } from './ui.js?v=25';
+import './ajuda.js?v=25';
+import { abrirEscolha } from './escolha.js?v=25';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -31,8 +31,8 @@ document.querySelector('.topo').append(dirTopo);
 $('.topo-perfil').onclick = () => folha({ titulo: db.config.nome || 'Conta', corpo: `<div class="lista-bts">
   <button type="button" class="bt" data-m="nova">${ico('mais2')}Nova comanda</button>
   <button type="button" class="bt" data-m="planta">${ico('planta')}Planta do salão</button>
-  ${real ? '' : `<a class="bt" href="app.html?papel=cozinha#cozinha" target="_blank" rel="noopener">${ico('cozinha')}Abrir a cozinha em outra aba</a>
-  <a class="bt" href="${linkCardapio('mesa=4')}" target="_blank" rel="noopener">${ico('qr')}Cardápio do cliente</a>`}
+  ${real ? '' : `<a class="bt" href="app.html?papel=cozinha#cozinha">${ico('cozinha')}Ver a tela da cozinha</a>
+  <a class="bt" href="${linkCardapio('mesa=4')}">${ico('qr')}Cardápio do cliente</a>`}
   <a class="bt" href="#mais/conta" data-fechar>${ico('pessoas')}Minha conta e equipe</a>
   ${real ? '' : `<button type="button" class="bt" data-m="recomecar">${ico('troca')}Recomeçar a demonstração</button>`}</div>`,
 aoAbrir: (f, fechar) => $$('[data-m]', f).forEach((b) => { b.onclick = () => { fechar(); const m = b.dataset.m;
