@@ -48,7 +48,7 @@
           return '<tr><td>' + dia(x.quando) + '</td><td>' + esc(x.descricao) + '</td><td>' + reais(x.valor) + '</td><td>' + esc(situacao(x)) + '</td></tr>';
         }).join('') + '</tbody></table></div>' : '<p class="ind-regras">Sua primeira comissão aparece aqui depois do primeiro pagamento aprovado.</p>') +
         '<p class="ind-regras"><b>Anshur:</b> além dos ' + pct + '%, cada revenda que assinar o Anshur pelo seu link te dá 1 mês de acesso ao Anshur (2 assinaturas, 2 meses, e assim por diante).</p>' +
-        '<p class="ind-regras">A venda conta quando a pessoa cria uma conta nova pelo seu link. O teste grátis não conta, e pagamento estornado cancela a comissão. Pagamos por Pix uma vez por mês os valores com mais de 30 dias. No site, a comissão anda depois que o cliente paga o saldo.</p>';
+        '<p class="ind-regras">A venda conta quando a pessoa cria uma conta nova pelo seu link. O teste grátis não conta, e pagamento estornado cancela a comissão. Pagamos por Pix todo dia 10 os valores com mais de 30 dias. No site, a comissão anda depois que o cliente paga o saldo.</p>';
     });
   }
 
