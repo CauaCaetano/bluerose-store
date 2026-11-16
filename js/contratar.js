@@ -111,7 +111,7 @@
     '<label>Seu cargo<input id="ct-cargo" autocomplete="organization-title" maxlength="80" placeholder="Ex.: sócio, diretor" required></label></div>' +
     '<small>Quem aceita declara ter poderes para contratar em nome da revenda.</small></fieldset>' +
     '<details class="ctr-ler"><summary>Ler o Termo aqui, sem sair do pagamento</summary><div class="ctr-painel" id="ct-termo-texto" tabindex="0" aria-label="Texto do Termo de Assinatura do Anshur">Carregando o Termo…</div></details>' +
-    '<label class="contratar-aceite"><input type="checkbox" id="ct-aceite-anshur"> <span>Li e aceito o <a href="contrato-anshur.html" target="_blank" rel="noopener">Termo de Assinatura do Anshur (versão 1)</a>, em nome da revenda informada acima.</span></label>';
+    '<label class="contratar-aceite"><input type="checkbox" id="ct-aceite-anshur"> <span>Li e aceito o <a href="contrato-anshur.html" target="_blank" rel="noopener">Termo de Assinatura do Anshur (versão 2)</a>, em nome da revenda informada acima.</span></label>';
   aceite.closest('label').insertAdjacentElement('afterend', ctr);
   var $c = function (id) { return ctr.querySelector('#' + id); };
   var termo = null, aceiteFeito = null;

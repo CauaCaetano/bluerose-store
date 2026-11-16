@@ -5,7 +5,7 @@
  */
 (function () {
   'use strict';
-  var VERSAO = 1;
+  var VERSAO = 2;
   var s = document.querySelector('script[src*="js/contrato-anshur.js"]');
   var raiz = s ? s.getAttribute('src').split('js/contrato-anshur.js')[0] : '';
   var ARQUIVO = raiz + 'docs/contrato-anshur-v' + VERSAO + '.txt?v=1';
