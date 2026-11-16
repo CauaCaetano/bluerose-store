@@ -1,11 +1,11 @@
 // Popina · funções por tipo de negócio (rodada 4): vinho da casa a granel, camarotes e promoters (balada),
 // os cartões do painel de cada tipo e os exemplos da demonstração que só aparecem no template certo.
-import { db, t, din, dinCurto, grava, r2, uid, tempo, lojaCfg, tem, conta, prod, insumo, saldo, quemAgora, auditar, abrirCartao, cartaoAberto, proximoCartao, ouvir, comandaDaMesa, CONTA } from './loja.js?v=25';
-import { acao } from './nucleo.js?v=25';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=25';
-import { TELAS_MAIS, volta, PAINEL_TIPO, GRUPOS } from './mais.js?v=25';
-import { estadoBarril, fecharBarril, noite, faltaConsumacao, comissaoPromoter, filaForno, estacaoDe, ESTACOES_PADRAO, precoKg, faixasDoKg, ymd, lotacao } from './precos.js?v=25';
-import { exemploTipo } from './dados.js?v=25';
+import { db, t, din, dinCurto, grava, r2, uid, tempo, lojaCfg, tem, conta, prod, insumo, saldo, quemAgora, auditar, abrirCartao, cartaoAberto, proximoCartao, ouvir, comandaDaMesa, CONTA } from './loja.js?v=26';
+import { acao } from './nucleo.js?v=26';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=26';
+import { TELAS_MAIS, volta, PAINEL_TIPO, GRUPOS } from './mais.js?v=26';
+import { estadoBarril, fecharBarril, noite, faltaConsumacao, comissaoPromoter, filaForno, estacaoDe, ESTACOES_PADRAO, precoKg, faixasDoKg, ymd, lotacao } from './precos.js?v=26';
+import { exemploTipo } from './dados.js?v=26';
 
 const num = (v) => { const s = String(v ?? '').trim(); return Number(/,/.test(s) ? s.replace(/\./g, '').replace(',', '.') : s) || 0; };
 const vir = (n) => String(n ?? '').replace('.', ',');

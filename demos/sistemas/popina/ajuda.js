@@ -1,9 +1,9 @@
 // Popina · ajuda para quem usa pela primeira vez: dica curta em cada tela (some no "Entendi"), primeiros passos do dono
 // com checklist, busca no menu da Gestão e aviso de itens que ficaram sem enviar para a cozinha.
 // Nada aqui cobre a tela: tudo entra no fluxo da página, com as cores e letras do template (classes .bt, .mudo, .busca).
-import { db, ouvir, lojaCfg, comandaDaMesa, cartaoAberto } from './loja.js?v=25';
-import { DEPOIS, papel } from './nucleo.js?v=25';
-import { ico, toast, $, $$ } from './ui.js?v=25';
+import { db, ouvir, lojaCfg, comandaDaMesa, cartaoAberto } from './loja.js?v=26';
+import { DEPOIS, papel } from './nucleo.js?v=26';
+import { ico, toast, $, $$ } from './ui.js?v=26';
 
 const ler = (k, pad) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sem acesso: a ajuda só não fica guardada */ } };

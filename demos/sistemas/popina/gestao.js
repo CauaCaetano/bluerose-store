@@ -1,18 +1,18 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=25';
-import { acao, ir } from './nucleo.js?v=25';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=25';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=25';
-import { situacao, textoHorarios } from './opcoes.js?v=25';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=26';
+import { acao, ir } from './nucleo.js?v=26';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=26';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=26';
+import { situacao, textoHorarios } from './opcoes.js?v=26';
 import { qrSVG } from '../base/qr.js';
-import { abrirEscolha } from './escolha.js?v=25';
-import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=25';
-import './funcoes.js?v=25';
-import { HUB_FINANCEIRO } from './financeiro.js?v=25';
-import { HUB_PRODUCAO } from './producao.js?v=25';
-import { HUB_OPERACAO } from './operacao.js?v=25';
-import { GRUPOS } from './mais.js?v=25';
+import { abrirEscolha } from './escolha.js?v=26';
+import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=26';
+import './funcoes.js?v=26';
+import { HUB_FINANCEIRO } from './financeiro.js?v=26';
+import { HUB_PRODUCAO } from './producao.js?v=26';
+import { HUB_OPERACAO } from './operacao.js?v=26';
+import { GRUPOS } from './mais.js?v=26';
 // financeiro e produção entram no menu da Gestão antes de "Equipe e conta"
 if (!GRUPOS.some((g) => g[0] === 'Financeiro')) {
   const i = GRUPOS.findIndex((g) => g[0] === 'Equipe e conta');

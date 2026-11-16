@@ -1,8 +1,8 @@
 // Popina · escolha do template (tipo de casa): na primeira entrada e ao trocar em Gestão › Aparência.
 // Lista os 14 tipos; ao tocar num, mostra fotos reais (carrossel), as funções que vêm nele, "Usar este template" e "Voltar".
-import { PERFIS, MODULOS, diferenca } from './perfis.js?v=25';
-import { lojaCfg, setLoja } from './loja.js?v=25';
-import { ico, toast } from './ui.js?v=25';
+import { PERFIS, MODULOS, diferenca } from './perfis.js?v=26';
+import { lojaCfg, setLoja } from './loja.js?v=26';
+import { ico, toast } from './ui.js?v=26';
 
 export const TIPOS = [['basico', 'Básico'], ['taverna', 'Taverna'], ['luxo', 'Luxo'], ['realeza', 'Realeza'], ['japones', 'Japonês'], ['italiano', 'Italiano'], ['churrascaria', 'Churrascaria'],
   ['mexicano', 'Mexicano'], ['pizzaria', 'Pizzaria'], ['hamburgueria', 'Hamburgueria'], ['pub', 'Bar e pub'], ['chines', 'Chinês'], ['balada', 'Balada'], ['cafeteria', 'Cafeteria']];
@@ -34,10 +34,10 @@ const CSS = `
 .esc-volta .ico{width:18px;height:18px;transform:rotate(90deg)}
 .esc-det{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;margin-top:18px;align-items:start}
 .esc-car{position:relative;border-radius:16px;overflow:hidden;background:#1F1B16}
-.esc-trilho{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.esc-trilho{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;align-items:flex-start}
 .esc-trilho::-webkit-scrollbar{display:none}
-.esc-slide{flex:0 0 100%;scroll-snap-align:center;margin:0;position:relative;display:grid;place-items:center;aspect-ratio:16/10;background:#2A241E}
-.esc-slide img{width:100%!important;height:100%!important;max-width:none!important;object-fit:contain!important;display:block}
+.esc-slide{flex:0 0 100%;scroll-snap-align:center;margin:0;position:relative;display:grid;place-items:center;aspect-ratio:16/10;background:#2A241E;overflow:hidden;align-self:flex-start}
+.esc-slide img{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;object-fit:contain!important;display:block}
 .esc-slide figcaption{position:absolute;left:12px;bottom:12px;background:rgba(20,16,12,.78);color:#fff;font-size:13px;font-weight:600;padding:6px 10px;border-radius:8px}
 .esc-seta{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#1F1B16;display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 18px -8px rgba(0,0,0,.5)}
 .esc-seta.ant{left:10px}.esc-seta.prox{right:10px}

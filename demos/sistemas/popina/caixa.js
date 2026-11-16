@@ -1,14 +1,14 @@
 // Popina · caixa: contas abertas, fechar conta (serviço, desconto, dividir, pagar em partes), Pix com QR e o caixa do dia.
 import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2,
-  temCouvert, lojaCfg, marcar, darDesconto, regras, temPin, quemAgora, cancelarVenda, reabrirVenda, vendaDeHoje, ondeComanda, couvertLigado, tem, fidelidade, clientePorTel, darPremio } from './loja.js?v=25';
-import { registrar, acao, ir } from './nucleo.js?v=25';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=25';
-import { pix } from './pix.js?v=25';
+  temCouvert, lojaCfg, marcar, darDesconto, regras, temPin, quemAgora, cancelarVenda, reabrirVenda, vendaDeHoje, ondeComanda, couvertLigado, tem, fidelidade, clientePorTel, darPremio } from './loja.js?v=26';
+import { registrar, acao, ir } from './nucleo.js?v=26';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=26';
+import { pix } from './pix.js?v=26';
 import { qrSVG } from '../base/qr.js';
-import { linhaItem, abrirSeletor } from './salao.js?v=25';
-import { vencePremio } from './loja.js?v=25';
-import { dividirPorPessoa, linhasRodizio, cnpjValido, fmtCnpj, ymd } from './precos.js?v=25';
-import { FORMA_FIADO, pedirFiado, novaConta } from './financeiro.js?v=25';
+import { linhaItem, abrirSeletor } from './salao.js?v=26';
+import { vencePremio } from './loja.js?v=26';
+import { dividirPorPessoa, linhasRodizio, cnpjValido, fmtCnpj, ymd } from './precos.js?v=26';
+import { FORMA_FIADO, pedirFiado, novaConta } from './financeiro.js?v=26';
 
 // conta faturada para empresa (função ligada): fecha com CNPJ e razão social e vira conta a receber
 // (o fluxo de caixa deve tratar esta forma como o fiado: entra quando a conta a receber for paga, não na venda)
