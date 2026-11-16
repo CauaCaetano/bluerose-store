@@ -167,3 +167,5 @@ body.tpl-balada .vazio{color:#DCD6FF!important;border-color:rgba(255,95,210,.5)!
 body.tpl-balada .bt-tela,body.tpl-balada .cab-cozinha .bt-tela{color:#F2EEFF!important;border-color:rgba(255,255,255,.4)!important}
 @media (max-width:899px){body.tpl-balada .nav{background:rgba(16,10,38,.95)!important;border-top:1px solid rgba(255,47,185,.5)!important}}
 body.tpl-balada .cab-salao .aqueduto-img,body.tpl-balada .cab-pedidos .aqueduto-img,body.tpl-balada .g-aqueduto,body.tpl-balada .cx-aqueduto{height:74px!important;width:auto!important;max-width:none!important}
+/* títulos de seção soltos no fundo escuro da gestão (camarotes, portaria): texto claro */
+body.tpl-balada .gestao-corpo>.sec-tit h2{color:#F2EEFF!important}body.tpl-balada .gestao-corpo>.sec-tit span{color:#CFC8F5!important}

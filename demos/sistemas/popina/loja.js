@@ -1,10 +1,10 @@
 // Popina · o estado do restaurante e as regras (enviar para a cozinha, baixar estoque, fechar conta, caixa).
 // Guarda no aparelho (localStorage) e avisa as outras abas na hora (BroadcastChannel). Na conta real, a mesma
 // interface (window.popinaNuvem) troca isso pela nuvem com tempo real entre os aparelhos.
-import { estadoInicial, estadoVazio } from './dados.js?v=22';
-import { precoTam, nomeItem, opcaoReal, nomeSabores } from './opcoes.js?v=22';
-import { temModulo, modulosAtivos } from './perfis.js?v=22';
-import { valorRodizio, inclusoRodizio, precoAgora, precoFracoes, precoBorda, faltaCombo, faltaConsumacao, ordemEtapa, ymd, precoKg, noTurno, mlDaVenda } from './precos.js?v=22';
+import { estadoInicial, estadoVazio } from './dados.js?v=23';
+import { precoTam, nomeItem, opcaoReal, nomeSabores, aplicarCota, aplicarComboEtapas } from './opcoes.js?v=23';
+import { temModulo, modulosAtivos } from './perfis.js?v=23';
+import { valorRodizio, inclusoRodizio, precoAgora, precoFracoes, precoBorda, faltaCombo, faltaConsumacao, ordemEtapa, ymd, precoKg, noTurno, mlDaVenda } from './precos.js?v=23';
 
 export const CHAVE = 'popina-v1';
 // conta real: conta-nuvem.js (carregado antes) troca a chave pela da empresa e sobe cada alteração para a nuvem
@@ -17,7 +17,7 @@ let ouvintes = [];
 export let db = carregar();
 
 function carregar() {
-  try { const d = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (d && d.versao === 1 && (CONTA || d.exemplo === 7)) return d; /* a conta real nunca é trocada pelo exemplo */ } catch { /* sem acesso */ }
+  try { const d = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (d && d.versao === 1 && (CONTA || d.exemplo === 8)) return d; /* a conta real nunca é trocada pelo exemplo */ } catch { /* sem acesso */ }
   const d = CONTA ? estadoVazio(CONTA.empresa || 'Meu restaurante') : estadoInicial();
   try { localStorage.setItem(CHAVE, JSON.stringify(d)); } catch { /* sem acesso */ }
   return d;
@@ -175,6 +175,8 @@ export function adicionarItem(c, { prodId, qtd = 1, obs = '', adic = [], meia = 
   // rodízio: item incluso entra com preço zero (os adicionais continuam cobrados)
   const rod = !!(c.rodizio && M.has('rodizio') && inclusoRodizio(L.rodizio, p.id));
   if (rod) { preco = 0; promo = ''; }
+  // vitrine: o que sobrou ontem e foi "vender amanhã com desconto" sai com o desconto até acabar
+  else if (M.has('vitrine') && p.vitrine) { const pv = db.vitrine?.dia === ymd() ? db.vitrine.promo?.[p.id] : null; if (pv && pv.qtd >= qtd && pv.pct > 0) { preco = r2(preco * (1 - pv.pct / 100)); promo = 'Do dia anterior'; pv.qtd -= qtd; } }
   c.itens.push({ id: uid('i'), prod: prodId, nome, qtd, preco: r2(preco), setor: p.setor, obs, adic, meia, status: 'rascunho', ...(p.porKg && kg > 0 ? { kg } : {}), ...(tm ? { tam: tm.nome, fator: Number(tm.fator) || 1 } : {}),
     ...(sab?.length > 2 ? { sabores: sab.map((x) => x.id) } : {}), ...(cmb ? { combo: cmb } : {}), ...(rod ? { rodizio: true } : {}), ...(promo ? { promo } : {}),
     ...(M.has('etapas') && p.etapa ? { etapa: p.etapa } : {}), ...(M.has('vitrine') && p.vitrine ? { vitrine: true } : {}) });
@@ -202,9 +204,18 @@ export function enviar(c, liberar = false) {
     com.filter((i) => !manda.includes(i)).forEach((i) => { i.segura = true; });
   }
   manda.forEach((i) => { delete i.segura; i.status = i.vitrine ? 'entregue' : 'novo'; i.enviado = agora; if (i.vitrine) { i.entregue = agora; tirarVitrine(i.prod, i.qtd); } n++; baixar(i, 1); });
+  baixarEmbalagens(c, manda);
   const esperam = c.itens.filter((i) => i.status === 'rascunho' && i.segura).length;
   if (n) marcar(c, 'enviou', `Enviou ${n} ${n === 1 ? 'item' : 'itens'} para a cozinha e o bar${esperam ? ` (${esperam} esperando a próxima etapa)` : ''}`);
   grava(); return n;
+}
+// embalagem automática (delivery e balcão): a caixa da pizza pelo tamanho e, uma vez por pedido, a embalagem do delivery
+// L.embalagem = { pizza: [{ tam: 'Broto', insumo: 'cx_broto' }, { tam: '', insumo: 'cx_grande' }], delivery: 'emb_delivery' }
+function baixarEmbalagens(c, itens) {
+  const L = lojaCfg(), E = L.embalagem || {}; if (!temModulo(L, 'embalagem') || !['delivery', 'balcao'].includes(c.tipo)) return;
+  const sai = (id, q) => { const ins = insumo(id); if (!ins || !(q > 0)) return; const k = `${ins.geracao || 0}:${APARELHO}`; ins.baixas ||= {}; ins.baixas[k] = r2((ins.baixas[k] || 0) + q); (c.emb ||= {})[id] = (c.emb[id] || 0) + q; };
+  itens.forEach((i) => { if (!prod(i.prod)?.pizza) return; const tm = String(i.tam || '').toLowerCase(), l = E.pizza || []; const r = l.find((x) => x.tam && tm.includes(String(x.tam).toLowerCase())) || l.find((x) => !x.tam); if (r) sai(r.insumo, i.qtd); });
+  if (c.tipo === 'delivery' && E.delivery && !c.emb?.[E.delivery] && itens.length) sai(E.delivery, 1);
 }
 // a próxima etapa que está esperando (índice em ETAPAS) ou -1
 export const proximaEtapa = (c) => { const l = c.itens.filter((i) => i.status === 'rascunho' && i.segura).map((i) => ordemEtapa(i.etapa)).filter((x) => x >= 0); return l.length ? Math.min(...l) : -1; };
@@ -213,7 +224,8 @@ export const proximaEtapa = (c) => { const l = c.itens.filter((i) => i.status ==
 export function vitrineHoje() {
   const d = ymd(); if (db.vitrine?.dia === d) return db.vitrine;
   const a = db.vitrineAmanha?.dia === d ? { ...(db.vitrineAmanha.qtd || {}) } : {};
-  db.vitrine = { dia: d, qtd: { ...a }, feito: { ...a }, ...(Object.keys(a).length ? { deOntem: { ...a } } : {}) };
+  const pr = db.vitrineAmanha?.dia === d && db.vitrineAmanha.promo ? JSON.parse(JSON.stringify(db.vitrineAmanha.promo)) : null; // de ontem com desconto
+  db.vitrine = { dia: d, qtd: { ...a }, feito: { ...a }, ...(Object.keys(a).length ? { deOntem: { ...a } } : {}), ...(pr ? { promo: pr } : {}) };
   if (db.vitrineAmanha?.dia === d) delete db.vitrineAmanha;
   return db.vitrine;
 }
@@ -364,13 +376,15 @@ export function reabrirVenda(v, motivo, quem = quemAgora()) {
   grava(); return { c };
 }
 
+// cozinha por estação: o pedido só aparece pronto para o garçom quando todas as estações daquele envio terminaram
+export const prontoDeVez = (c, i) => !tem('estacoes') || c.itens.every((x) => x.cancelado || x.enviado !== i.enviado || x.setor !== i.setor || ['pronto', 'entregue'].includes(x.status));
 // ------------------------------------------------------------------ fila do garçom (o que fazer agora)
 export function fila(garcom = '') {
   const l = [], agora = Date.now();
   db.comandas.filter((c) => c.tipo === 'mesa' && c.pediuConta).forEach((c) => l.push({ tipo: 'conta', c, ts: c.pediuConta, prioridade: 3 }));
   db.chamados.filter((x) => !x.atendido).forEach((x) => l.push({ tipo: 'chamou', x, c: comandaDaMesa(x.mesa), ts: x.ts, prioridade: 2 }));
   db.comandas.forEach((c) => {
-    const prontos = c.itens.filter((i) => i.status === 'pronto' && !i.cancelado);
+    const prontos = c.itens.filter((i) => i.status === 'pronto' && !i.cancelado && prontoDeVez(c, i));
     if (prontos.length) l.push({ tipo: 'pronto', c, itens: prontos, ts: Math.min(...prontos.map((i) => i.pronto || agora)), prioridade: 2.5 });
   });
   db.pedidosQR.forEach((q) => l.push({ tipo: 'qr', q, ts: q.ts, prioridade: 2.8 }));
@@ -380,14 +394,15 @@ export function estadoMesa(n) {
   const c = comandaDaMesa(n);
   if (!c) return db.pedidosQR.some((q) => q.mesa === n) ? 'qr' : 'livre';
   if (c.pediuConta) return 'conta';
-  if (c.itens.some((i) => i.status === 'pronto' && !i.cancelado)) return 'pronto';
+  if (c.itens.some((i) => i.status === 'pronto' && !i.cancelado && prontoDeVez(c, i))) return 'pronto';
   if (db.chamados.some((x) => x.mesa === n && !x.atendido)) return 'chamou';
   return 'ocupada';
 }
 export function atenderChamado(x) { x.atendido = Date.now(); db.chamados = db.chamados.filter((y) => !y.atendido); grava(); }
 export function confirmarQR(q) {
   const c = abrirMesa(q.mesa, 2, '');
-  q.itens.forEach((i) => adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic || [], meia: i.meia || null, tam: i.tam || '', sabores: i.sabores || null, combo: i.combo || null }));
+  q.itens.forEach((i) => { if (adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic || [], meia: i.meia || null, tam: i.tam || '', sabores: i.sabores || null, combo: i.combo || null }) && i.comboUp) c.itens.at(-1).comboUp = i.comboUp; });
+  if (tem('comboEtapas')) aplicarComboEtapas(c.itens, lojaCfg(), prod);
   db.pedidosQR = db.pedidosQR.filter((x) => x !== q);
   enviar(c); return c;
 }
@@ -482,11 +497,11 @@ function itensLimpos(itens) {
     const qtd = Math.min(30, Math.max(1, Math.round(Number(i.qtd) || 1)));
     const tam = p.tamanhos?.some((x) => x.nome === i.tam) ? i.tam : '';
     const ext = { mods: modulosAtivos(lojaCfg()) };
-    const adic = (Array.isArray(i.adic) ? i.adic : []).map((a) => opcaoReal(p, a?.nome, ext) || bordaReal(p, a?.nome, tam)).filter(Boolean);
+    const adic = aplicarCota(p, (Array.isArray(i.adic) ? i.adic : []).map((a) => opcaoReal(p, a?.nome, ext) || bordaReal(p, a?.nome, tam)).filter(Boolean), ext);
     const b = i.meia && prod(i.meia.b); const meia = p.pizza && b?.pizza ? { a: p.id, b: b.id } : null;
     const sabores = p.pizza && Array.isArray(i.sabores) ? i.sabores.map(prod).filter((x) => x?.pizza && x.ativo !== false).map((x) => x.id).slice(0, 4) : null;
     const combo = p.combo?.length && Array.isArray(i.combo) && !faltaCombo(p.combo, i.combo.map((x) => ({ g: Number(x?.g), prod: String(x?.prod) }))) ? i.combo.map((x) => ({ g: Number(x.g), prod: String(x.prod) })) : null;
-    return { prod: p.id, qtd, obs: String(i.obs || '').slice(0, 160), adic, meia, tam, sabores, combo };
+    return { prod: p.id, qtd, obs: String(i.obs || '').slice(0, 160), adic, meia, tam, sabores, combo, ...(['acomp', 'bebida'].includes(i.comboUp) ? { comboUp: i.comboUp, qtd: 1 } : {}) };
   }).filter(Boolean);
 }
 window.popinaChegou = (lista) => {
@@ -510,7 +525,8 @@ window.popinaChegou = (lista) => {
       const para = encomendaValida(d.para);
       const c = novoPedido(r.tipo, { nome: String(d.nome || '').slice(0, 80), tel: String(d.tel || ''), end: r.tipo === 'delivery' ? String(d.end || '').slice(0, 160) : '', bairro: r.tipo === 'delivery' ? String(d.bairro || '') : '' },
         { origem: 'Cardápio online', pagarNaEntrega: String(d.pagar || '').slice(0, 60), id, ...(para ? { encomenda: { para } } : {}) });
-      itens.forEach((i) => adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic, meia: i.meia, tam: i.tam, sabores: i.sabores, combo: i.combo }));
+      itens.forEach((i) => { if (adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic, meia: i.meia, tam: i.tam, sabores: i.sabores, combo: i.combo }) && i.comboUp) c.itens.at(-1).comboUp = i.comboUp; });
+      if (tem('comboEtapas')) aplicarComboEtapas(c.itens, lojaCfg(), prod); // desconto do combo em etapas, conferido aqui
       if (d.cupom) aplicarCupom(c, String(d.cupom).slice(0, 24)); // o restaurante confere o cupom de novo com as regras dele
       novos++;
     }

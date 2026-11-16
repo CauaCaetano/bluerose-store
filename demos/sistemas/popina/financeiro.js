@@ -2,10 +2,10 @@
 // fiado (conta do cliente), fluxo de caixa, DRE gerencial e margem por canal. Cada tela entra na Gestão (#mais/<id>).
 // Dados: db.fornecedores, db.notasCompra, db.contas, db.fiado { lanc, limites }, db.lotes e db.config.fin.
 // A entrada no estoque usa entradaCompra (a mesma da tela de Estoque); o custo teórico usa custoVenda (o mesmo CMV dos relatórios).
-import { db, t, din, dinCurto, grava, r2, uid, insumo, entradaCompra, custoVenda, custoPrato, partes, auditar, quemAgora, ouvir, clientePorTel, ondeComanda, lojaCfg, movimento, fmtQtd, CONTA } from './loja.js?v=22';
-import { acao, ir } from './nucleo.js?v=22';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=22';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=22';
+import { db, t, din, dinCurto, grava, r2, uid, insumo, entradaCompra, custoVenda, custoPrato, partes, auditar, quemAgora, ouvir, clientePorTel, ondeComanda, lojaCfg, movimento, fmtQtd, CONTA, APARELHO } from './loja.js?v=23';
+import { acao, ir } from './nucleo.js?v=23';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=23';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=23';
 
 // entradas do hub da Gestão: [id, nome, ícone, detalhe]
 export const HUB_FINANCEIRO = [
@@ -13,6 +13,7 @@ export const HUB_FINANCEIRO = [
   ['compras', 'Compras', 'carrinho', 'Notas, recebimento, parcelas e histórico de preços'],
   ['contas', 'Contas a pagar e receber', 'conta', 'Vencimentos, contas do mês e pagamentos'],
   ['fiado', 'Fiado', 'etiqueta', 'Conta dos clientes, limite e recebimentos'],
+  ['conciliacao', 'Conciliação', 'check', 'Esperado × recebido por dia e forma de pagamento'],
   ['fluxo', 'Fluxo de caixa', 'moedas', 'Entradas e saídas por dia e os próximos 30 dias'],
   ['dre', 'DRE gerencial', 'grafico', 'Receita, CMV, taxas, despesas e resultado'],
   ['margens', 'Margem por canal', 'cardapio', 'Margem de cada prato no salão e no delivery'],
@@ -56,9 +57,9 @@ export function periodo(p = '30') {
   else r = { de: mais(hoje, -29), ate: fim, rot: 'Últimos 30 dias', id: '30' };
   return { id: p || '30', ...r, dias: Math.max(1, Math.round((r.ate - r.de) / DIA)) };
 }
-const filtroPeriodo = (rota, P) => `<div class="filtros per-filtro"><div class="chips">${[['hoje', 'Hoje'], ['ontem', 'Ontem'], ['7', '7 dias'], ['30', '30 dias'], ['mes', 'Este mês']].map(([k, n]) => `<a class="chip ${P.id === k ? 'on' : ''}" href="#mais/${rota}/${k}">${n}</a>`).join('')}</div>
+export const filtroPeriodo = (rota, P) => `<div class="filtros per-filtro"><div class="chips">${[['hoje', 'Hoje'], ['ontem', 'Ontem'], ['7', '7 dias'], ['30', '30 dias'], ['mes', 'Este mês']].map(([k, n]) => `<a class="chip ${P.id === k ? 'on' : ''}" href="#mais/${rota}/${k}">${n}</a>`).join('')}</div>
   <form class="per-datas" data-per="${rota}"><label class="campo"><span>De</span><input type="date" name="de" value="${ymd(P.de)}"></label><label class="campo"><span>Até</span><input type="date" name="ate" value="${ymd(P.ate - 1)}"></label><button class="bt ${P.id === 'per' ? 'cheio' : ''}">Ver período</button></form></div>`;
-const ligaPeriodo = (el) => { const f = $('[data-per]', el); if (f) f.onsubmit = (e) => { e.preventDefault(); if (!f.de.value || !f.ate.value) return toast('Escolha as duas datas'); ir(`mais/${f.dataset.per}/${f.de.value}~${f.ate.value}`); }; };
+export const ligaPeriodo = (el) => { const f = $('[data-per]', el); if (f) f.onsubmit = (e) => { e.preventDefault(); if (!f.de.value || !f.ate.value) return toast('Escolha as duas datas'); ir(`mais/${f.dataset.per}/${f.de.value}~${f.ate.value}`); }; };
 
 // ------------------------------------------------------------------ fornecedores
 export const fornecedor = (id) => (db.fornecedores || []).find((f) => f.id === id);
@@ -86,17 +87,73 @@ export function novaCompra({ fornecedor: fo = '', data = ymd(), itens = [], fret
 }
 // recebe o que chegou (receb = { índice: quantidade na unidade de compra }; sem receb = tudo o que falta).
 // Cada item entra no estoque pela entradaCompra (atualiza o saldo e o preço de compra) e, com validade, vira um lote.
-export function receberCompra(n, receb = null, validades = {}) {
-  if (!n) return 0; let k2 = 0;
+// Conferência (opc): divergencias = { índice: { tipo, motivo } } (faltou, veio a mais, trocado, avariado) e encerrar = o que
+// faltou não vem mais. Só entra no estoque o que chegou; "veio a mais" aceita passar do pedido. Ao fechar, a conta a pagar
+// da compra se ajusta ao valor conferido (preço de cada item × o que chegou + frete).
+export const DIVERGENCIAS = [['ok', 'Conferido'], ['faltou', 'Faltou'], ['amais', 'Veio a mais'], ['trocado', 'Trocado'], ['avariado', 'Avariado']];
+export const nomeDiv = (k) => DIVERGENCIAS.find((d) => d[0] === k)?.[1] || k;
+export function receberCompra(n, receb = null, validades = {}, opc = {}) {
+  if (!n) return 0; let k2 = 0; const div = opc.divergencias || {}, quem = quemAgora();
   n.itens.forEach((it, k) => {
-    const falta = r2(it.qtd - (it.recebido || 0)), q = r2(Math.min(falta, receb ? Number(receb[k]) || 0 : falta)); if (!(q > 0)) return;
+    const falta = r2(Math.max(0, it.qtd - (it.recebido || 0))), d = div[k];
+    let q = r2(receb ? Math.max(0, Number(receb[k]) || 0) : falta); if (d?.tipo !== 'amais') q = Math.min(q, falta);
+    if (d && d.tipo && d.tipo !== 'ok') (n.divergencias ||= []).push({ id: uid('dv'), k, insumo: it.insumo, tipo: d.tipo, esperado: falta, chegou: q, motivo: String(d.motivo || '').trim().slice(0, 140), ts: Date.now(), quem });
+    else if (opc.encerrar && q < falta - 0.0001) (n.divergencias ||= []).push({ id: uid('dv'), k, insumo: it.insumo, tipo: 'faltou', esperado: falta, chegou: q, motivo: 'Não veio', ts: Date.now(), quem });
+    if (!(q > 0)) return;
     entradaCompra(it.insumo, q, custoUnit(n, it)); it.recebido = r2((it.recebido || 0) + q); k2++;
     const i = insumo(it.insumo);
     if (validades[k] && i) criarLote({ insumo: i.id, qtd: q * (i.fator || 1), validade: validades[k], origem: 'compra', ref: n.id });
   });
-  n.status = n.itens.every((it) => it.recebido >= it.qtd - 0.0001) ? 'recebida' : n.itens.some((it) => it.recebido > 0) ? 'parcial' : 'aberta';
-  if (k2) { n.recebidaEm = Date.now(); auditar('compra-recebida', { item: fornecedor(n.fornecedor)?.nome || 'Compra', valor: totalNota(n), motivo: STATUS_COMPRA[n.status] }); }
-  grava(); return k2;
+  if (opc.encerrar) n.encerrada = { ts: Date.now(), quem };
+  n.status = opc.encerrar || n.itens.every((it) => it.recebido >= it.qtd - 0.0001) ? 'recebida' : n.itens.some((it) => it.recebido > 0) ? 'parcial' : 'aberta';
+  if (n.status === 'recebida') ajustarContasCompra(n, n.divergencias?.length ? `Conferência: ${n.divergencias.map((x) => `${insumo(x.insumo)?.nome || ''} ${nomeDiv(x.tipo).toLowerCase()}`).join(', ')}` : 'Conferência do recebimento');
+  if (k2 || opc.encerrar) { n.recebidaEm = Date.now(); auditar('compra-recebida', { item: fornecedor(n.fornecedor)?.nome || 'Compra', valor: valorConferido(n), motivo: `${STATUS_COMPRA[n.status]}${n.divergencias?.length ? ' · com divergência' : ''}` }); }
+  grava(); return k2 || (opc.encerrar ? 1 : 0);
+}
+// valor do que chegou de fato (preço de cada item × quantidade recebida + frete); antes de fechar a compra vale o total da nota
+export const valorConferido = (n) => (n.status === 'recebida' ? r2(n.itens.reduce((s, it) => s + (it.qtd ? (it.total / it.qtd) * (it.recebido || 0) : 0), 0) + (Number(n.frete) || 0)) : totalNota(n));
+export const valorDevido = (n) => (n.valorAjustado ?? totalNota(n));
+// diferença entre o que a conta cobra e o conferido: abate das parcelas em aberto (da última para a primeira) ou soma na última;
+// se tudo já foi pago, a sobra vira crédito a receber do fornecedor
+function abater(c, valor, motivo) { const a = r2(Math.min(valor, restaConta(c))); if (!(a > 0)) return 0; c.valorOriginal ??= c.valor; c.valor = r2(c.valor - a); (c.ajustes ||= []).push({ valor: -a, motivo, ts: Date.now(), quem: quemAgora() }); return a; }
+function creditoFornecedor(fo, valor, motivo) { return novaConta({ tipo: 'receber', desc: `Crédito com ${fornecedor(fo)?.nome || 'fornecedor'}`, categoria: 'outros', valor, venc: somaDias(ymd(), 7), fornecedor: fo, obs: motivo }); }
+export function ajustarContasCompra(n, motivo = 'Conferência do recebimento') {
+  garantirFin();
+  const alvo = valorConferido(n), delta = r2(alvo - valorDevido(n)); n.valorAjustado = alvo; if (Math.abs(delta) < 0.01) return 0;
+  const cts = db.contas.filter((c) => c.compra === n.id && c.tipo === 'pagar').sort((a, b) => b.venc.localeCompare(a.venc));
+  if (!cts.length) return delta; // sem conta ainda: quando gerar, já sai pelo valor conferido
+  if (delta < 0) { let resta = -delta; cts.forEach((c) => { resta = r2(resta - abater(c, resta, motivo)); }); if (resta > 0.009) creditoFornecedor(n.fornecedor, resta, `${motivo} · compra de ${dataCurta(n.data)}`); }
+  else { const c = cts.find((x) => !contaPaga(x)) || null; if (c) { c.valorOriginal ??= c.valor; c.valor = r2(c.valor + delta); (c.ajustes ||= []).push({ valor: delta, motivo, ts: Date.now(), quem: quemAgora() }); } else novaConta({ tipo: 'pagar', desc: `Diferença da compra de ${fornecedor(n.fornecedor)?.nome || 'fornecedor'}`, categoria: 'fornecedor', valor: delta, venc: somaDias(ymd(), 7), fornecedor: n.fornecedor, compra: n.id, obs: motivo }); }
+  return delta;
+}
+// baixa do estoque fora da venda (devolução, consumo interno), pelo mesmo caminho das vendas (chave geração:aparelho)
+export function baixarEstoque(insumoId, q, tipo, motivo, quem = quemAgora()) {
+  const i = insumo(insumoId); q = r2(q); if (!i || !(q > 0)) return 0;
+  const k = `${i.geracao || 0}:${APARELHO}`; i.baixas ||= {}; i.baixas[k] = r2((i.baixas[k] || 0) + q);
+  const custo = r2((q / (i.fator || 1)) * (i.custo || 0));
+  (db.movEstoque ||= []).push({ id: uid('e'), t: Date.now(), insumo: i.id, tipo, qtd: -q, motivo, quem, custo: -custo });
+  if (db.movEstoque.length > 5000) db.movEstoque.splice(0, db.movEstoque.length - 5000);
+  return custo;
+}
+// devolução ao fornecedor: tira do estoque (qtd na unidade de compra) e vira abatimento numa conta a pagar ou crédito a receber
+export const DESTINOS_DEV = [['abater', 'Abater numa conta a pagar'], ['receber', 'O fornecedor devolve o dinheiro (conta a receber)']];
+export function devolverFornecedor(n, k, qtd, motivo, destino = 'abater', contaId = '') {
+  garantirFin();
+  const it = n?.itens?.[k]; if (!it) return { erro: 'Item não encontrado' };
+  const pode = r2((it.recebido || 0) - (it.devolvido || 0)); qtd = r2(qtd);
+  if (!(qtd > 0)) return { erro: 'Informe a quantidade' }; if (qtd > pode + 0.0001) return { erro: `Só chegou ${vir(pode)} desse item` };
+  if (String(motivo || '').trim().length < 3) return { erro: 'Escreva o motivo da devolução' };
+  const i = insumo(it.insumo), valor = r2(qtd * custoUnit(n, it)), quem = quemAgora(), fo = fornecedor(n.fornecedor)?.nome || 'fornecedor';
+  baixarEstoque(it.insumo, qtd * (i?.fator || 1), 'devolucao', `Devolução a ${fo}: ${motivo}`, quem);
+  it.devolvido = r2((it.devolvido || 0) + qtd);
+  const txt = `Devolução de ${vir(qtd)} ${i?.compra || ''} de ${i?.nome || ''}: ${motivo}`;
+  let conta = null, credito = 0;
+  if (destino === 'abater') { conta = db.contas.find((c) => c.id === contaId && !contaPaga(c)); const a = conta ? abater(conta, valor, txt) : 0; if (valor - a > 0.009) credito = r2(valor - a); }
+  else credito = valor;
+  const cr = credito ? creditoFornecedor(n.fornecedor, credito, txt) : null;
+  (n.devolucoes ||= []).push({ id: uid('dv'), k, insumo: it.insumo, qtd, valor, motivo: String(motivo).trim().slice(0, 140), destino, conta: conta?.id || '', credito: cr?.id || '', ts: Date.now(), quem });
+  auditar('devolucao', { quem, item: i?.nome || '', qtd, valor, motivo: `${fo} · ${motivo}` });
+  grava(); return { ok: true, valor, conta, credito: cr };
 }
 // lote (compra com validade ou produção): qtd na unidade da receita
 export function criarLote({ insumo: id, qtd, validade, origem = 'compra', ref = '', data = ymd() }) {
@@ -107,7 +164,7 @@ export function criarLote({ insumo: id, qtd, validade, origem = 'compra', ref = 
 // a compra vira conta a pagar: à vista (opcional já paga) ou em N parcelas a cada "intervalo" dias
 export function gerarContasCompra(n, { parcelas = 1, primeiro = n.data, intervalo = 30, paga = false, forma = 'Pix' } = {}) {
   garantirFin();
-  const N = Math.max(1, Math.min(24, Math.round(parcelas) || 1)), vals = partes(totalNota(n), N), nome = fornecedor(n.fornecedor)?.nome || 'fornecedor';
+  const N = Math.max(1, Math.min(24, Math.round(parcelas) || 1)), vals = partes(valorDevido(n), N), nome = fornecedor(n.fornecedor)?.nome || 'fornecedor';
   const l = vals.map((v, k) => novaConta({ tipo: 'pagar', desc: `Compra de ${nome}${N > 1 ? ` · ${k + 1}/${N}` : ''}`, categoria: 'fornecedor', valor: v, venc: somaDias(primeiro, k * intervalo), fornecedor: n.fornecedor, compra: n.id, ...(N > 1 ? { parcela: `${k + 1}/${N}` } : {}) }));
   if (paga && N === 1) pagarConta(l[0], l[0].valor, primeiro, forma);
   n.contas = l.map((c) => c.id); grava(); return l;
@@ -152,9 +209,24 @@ export function pagarConta(c, valor, data = ymd(), forma = 'Pix') {
   auditar(c.tipo === 'pagar' ? 'conta-paga' : 'conta-recebida', { valor, motivo: `${c.desc} · ${forma}` });
   grava(); return prox || true;
 }
+// despesas que se repetem: quando chega o mês do vencimento, a do mês seguinte já aparece (uma vez só, sem duplicar)
+export function gerarRecorrentes(hoje = ymd()) {
+  garantirFin(); const mes = hoje.slice(0, 7); let n = 0;
+  for (let volta = 0; volta < 24; volta++) {
+    const l = db.contas.filter((c) => c.recorrente && !c.proxima && c.venc.slice(0, 7) <= mes); if (!l.length) break;
+    l.forEach((c) => {
+      const venc = somaMes(c.venc, 1), ja = db.contas.find((x) => x !== c && x.tipo === c.tipo && x.recorrente && x.desc === c.desc && x.venc.slice(0, 7) === venc.slice(0, 7));
+      if (ja) { c.proxima = ja.id; return; }
+      const p = novaConta({ tipo: c.tipo, desc: c.desc, categoria: c.categoria, valor: c.valorOriginal ?? c.valor, venc, recorrente: true, fornecedor: c.fornecedor, obs: c.obs }); p.auto = true; c.proxima = p.id; n++;
+    });
+  }
+  if (n) grava(); return n;
+}
 
 // ------------------------------------------------------------------ fiado (conta do cliente, pelo telefone)
 export const FORMA_FIADO = 'Fiado (conta do cliente)';
+// conta faturada (caixa.js) vira conta a receber: no fluxo e na conciliação só conta quando a empresa paga
+const aPrazo = (f) => f === FORMA_FIADO || f === 'Faturado (empresa)';
 const cidDe = (tel) => 't' + soDig(tel);
 export const saldoFiado = (cid) => { garantirFin(); return soma(db.fiado.lanc.filter((l) => l.cliente === cid), (l) => (l.tipo === 'compra' ? l.valor : -l.valor)); };
 export const limiteFiado = (cid) => { garantirFin(); const x = db.fiado.limites[cid]; return x != null ? Number(x) : Number(finCfg().limiteFiado) || 0; };
@@ -224,7 +296,7 @@ export function fluxo(de, ate) {
   garantirFin();
   const dentro = (ts) => ts >= de && ts < ate, m = {};
   const D = (k) => (m[k] ||= { vendas: 0, formas: {}, fiado: 0, receber: 0, pagar: 0, sangria: 0 });
-  db.vendas.filter((v) => !v.cancelado && dentro(v.ts)).forEach((v) => pagamentosVenda(v).forEach((p) => { if (p.forma === FORMA_FIADO) return; const d = D(ymd(v.ts)); d.vendas += p.valor; d.formas[p.forma] = (d.formas[p.forma] || 0) + p.valor; }));
+  db.vendas.filter((v) => !v.cancelado && dentro(v.ts)).forEach((v) => pagamentosVenda(v).forEach((p) => { if (aPrazo(p.forma)) return; const d = D(ymd(v.ts)); d.vendas += p.valor; d.formas[p.forma] = (d.formas[p.forma] || 0) + p.valor; }));
   db.fiado.lanc.filter((l) => l.tipo === 'receb' && dentro(l.ts)).forEach((l) => { D(ymd(l.ts)).fiado += l.valor; });
   db.contas.forEach((c) => (c.pagamentos || []).forEach((p) => { if (dentro(tsDia(p.data))) D(p.data)[c.tipo] += p.valor; }));
   sangrias().filter((s) => dentro(s.ts)).forEach((s) => { D(ymd(s.ts)).sangria += s.valor; });
@@ -261,8 +333,11 @@ export function dre(de, ate) {
   // despesas = contas a pagar pagas no período; compras de fornecedor ficam de fora (o custo delas já está no CMV)
   const desp = {}; db.contas.filter((c) => c.tipo === 'pagar' && c.categoria !== 'fornecedor').forEach((c) => (c.pagamentos || []).forEach((p) => { if (dentro(tsDia(p.data))) desp[c.categoria] = r2((desp[c.categoria] || 0) + p.valor); }));
   const despesas = soma(Object.values(desp), (x) => x);
-  const resultado = r2(liquida - repasse - cmv - taxas - despesas);
-  return { vendas: vP.length, bruta, descontos, cancelamentos, liquida, servico, comissao, repasse, cmv, porForma, taxas, desp, despesas, resultado, margem: liquida ? r2((resultado / liquida) * 100) : 0 };
+  // consumo interno e cortesias: custo pela ficha técnica, fora das vendas (Operação › Consumo interno)
+  const ciL = (db.consumoInterno || []).filter((x) => dentro(x.ts)), consumo = soma(ciL, (x) => x.custo), consumoTipo = {};
+  ciL.forEach((x) => { consumoTipo[x.tipo] = r2((consumoTipo[x.tipo] || 0) + x.custo); });
+  const resultado = r2(liquida - repasse - cmv - taxas - despesas - consumo);
+  return { vendas: vP.length, bruta, descontos, cancelamentos, liquida, servico, comissao, repasse, cmv, porForma, taxas, desp, despesas, consumo, consumoTipo, resultado, margem: liquida ? r2((resultado / liquida) * 100) : 0 };
 }
 
 // ------------------------------------------------------------------ margem por canal (salão × delivery)
@@ -321,12 +396,15 @@ TELAS_MAIS.compras = (filtro = '') => {
   const ins = [...new Set(db.notasCompra.flatMap((n) => n.itens.map((i) => i.insumo)))].map(insumo).filter(Boolean).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
   const precos = ins.flatMap((i) => ultimosPrecos(i.id).map((u) => ({ i, ...u })));
   const aReceber = db.notasCompra.filter((n) => n.status !== 'recebida').length;
+  const de30ts = Date.now() - 30 * DIA, ocorr = db.notasCompra.flatMap((n) => [...(n.divergencias || []).map((x) => ({ ...x, n, dev: false })), ...(n.devolucoes || []).map((x) => ({ ...x, n, dev: true }))]).filter((x) => x.ts >= de30ts).sort((a, b) => b.ts - a.ts);
   return volta('mais', 'Compras', `${ult.length} nos últimos 30 dias · ${din(soma(ult, totalNota))}`) + `<div class="linha-bts"><button type="button" class="bt cheio" data-acao="fin-compra">${ico('mais2')}Nova compra</button><a class="bt" href="#mais/sugestao">Sugestão de compra</a><a class="bt" href="#mais/fornecedores">Fornecedores</a></div>
     <div class="filtros"><div class="chips">${[['', 'Todas'], ['aberta', 'A receber'], ['parcial', 'Recebida parcial'], ['recebida', 'Recebidas']].map(([k, n]) => `<a class="chip ${filtro === k ? 'on' : ''}" href="#mais/compras/${k}">${n}${k === '' && aReceber ? ` <em class="badge">${aReceber}</em>` : ''}</a>`).join('')}</div></div>
     <section class="bloco"><div class="tabela-rolo"><table class="tabela"><thead><tr><th>Data</th><th>Fornecedor</th><th>Itens</th><th class="num">Total</th><th>Situação</th><th></th></tr></thead><tbody>
     ${l.map((n) => `<tr><td>${dataCurta(n.data)}</td><td><b>${t(fornecedor(n.fornecedor)?.nome || 'Sem fornecedor')}</b></td><td><small>${n.itens.map((it) => { const i = insumo(it.insumo); return `${vir(it.qtd)} ${t(i?.compra || '')} ${t(i?.nome || '?')}${it.recebido < it.qtd && n.status === 'parcial' ? ` (chegou ${vir(it.recebido || 0)})` : ''}`; }).join(' · ')}</small></td>
-      <td class="num">${dinCurto(totalNota(n))}</td><td>${pill(n.status, STATUS_COMPRA[n.status])}</td>
+      <td class="num">${dinCurto(valorDevido(n))}${Math.abs(valorDevido(n) - totalNota(n)) > 0.009 ? `<small>nota ${dinCurto(totalNota(n))}</small>` : ''}</td><td>${pill(n.status, STATUS_COMPRA[n.status])}${n.divergencias?.length ? ` ${pill('vencida', 'Divergência')}` : ''}</td>
       <td class="acoes">${n.status !== 'recebida' ? `<button type="button" class="bt pq" data-acao="fin-receber" data-id="${n.id}">Receber</button>` : ''}<button type="button" class="bt-ico" data-acao="fin-ver-compra" data-id="${n.id}" aria-label="Ver a compra">${ico('dir')}</button></td></tr>`).join('') || '<tr><td colspan="6" class="vazio">Nenhuma compra registrada. Toque em Nova compra para lançar a nota do fornecedor.</td></tr>'}</tbody></table></div></section>
+    ${ocorr.length ? `<section class="bloco"><div class="sec-tit"><h2>Divergências e devoluções</h2><span>últimos 30 dias</span></div><div class="tabela-rolo"><table class="tabela"><thead><tr><th>Quando</th><th>Fornecedor</th><th>Item</th><th>O que houve</th><th class="num">Valor</th></tr></thead><tbody>
+      ${ocorr.map((x) => { const i = insumo(x.insumo), pu = x.n.itens[x.k]?.qtd ? x.n.itens[x.k].total / x.n.itens[x.k].qtd : 0; return `<tr><td>${new Date(x.ts).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</td><td>${t(fornecedor(x.n.fornecedor)?.nome || '')}</td><td><b>${t(i?.nome || '')}</b></td><td>${x.dev ? `${pill('ok', 'Devolução')} ${vir(x.qtd)} ${t(i?.compra || '')}` : `${pill(x.tipo === 'amais' ? 'aberta' : 'vencida', nomeDiv(x.tipo))} esperado ${vir(x.esperado)}, chegou ${vir(x.chegou)}`}<small>${t(x.motivo || '')}</small></td><td class="num">${x.dev ? `−${dinCurto(x.valor)}` : dinCurto(r2((x.chegou - x.esperado) * pu))}</td></tr>`; }).join('')}</tbody></table></div></section>` : ''}
     <section class="bloco"><div class="sec-tit"><h2>Histórico de preços</h2><span>último preço de cada fornecedor e a variação contra a compra anterior</span></div>
       <div class="tabela-rolo"><table class="tabela"><thead><tr><th>Insumo</th><th>Fornecedor</th><th class="num">Último</th><th class="num">Antes</th><th class="num">Variação</th><th></th></tr></thead><tbody>
       ${precos.map((x) => `<tr><td><b>${t(x.i.nome)}</b></td><td>${t(fornecedor(x.fornecedor)?.nome || 'Sem fornecedor')}</td><td class="num">${dinCurto(x.ultimo.preco)}/${t(x.i.compra)}<small>${dataCurta(x.ultimo.data)}</small></td><td class="num">${x.antes ? `${dinCurto(x.antes.preco)}<small>${dataCurta(x.antes.data)}</small>` : '<small class="mudo">primeira</small>'}</td>
@@ -346,8 +424,11 @@ acao('fin-ver-compra', (b) => {
     <div class="tabela-rolo"><table class="tabela"><thead><tr><th>Insumo</th><th class="num">Pedido</th><th class="num">Chegou</th><th class="num">Total</th><th class="num">Custo com frete</th></tr></thead><tbody>
     ${n.itens.map((it) => { const i = insumo(it.insumo); return `<tr><td>${t(i?.nome || '?')}</td><td class="num">${vir(it.qtd)} ${t(i?.compra || '')}</td><td class="num">${vir(it.recebido || 0)}</td><td class="num">${dinCurto(it.total)}</td><td class="num">${dinCurto(custoUnit(n, it))}/${t(i?.compra || '')}</td></tr>`; }).join('')}</tbody></table></div>
     <div class="resumo"><div><span>Itens</span><b>${din(totalItens(n))}</b></div><div><span>Frete</span><b>${din(n.frete || 0)}</b></div><div class="total"><span>Total</span><b>${din(totalNota(n))}</b></div></div>
-    ${cts.length ? `<p class="mudo" style="margin-top:10px">Contas a pagar: ${cts.map((c) => `${t(c.parcela || 'à vista')} ${dinCurto(c.valor)} vence ${dataCurta(c.venc)} (${NOME_SIT[situacaoConta(c)].toLowerCase()})`).join(' · ')}</p>` : ''}`,
-  pe: `${n.status !== 'recebida' ? `<button type="button" class="bt cheio" data-fechar data-acao="fin-receber" data-id="${n.id}">Receber</button>` : ''}${!cts.length ? `<button type="button" class="bt" data-fechar data-acao="fin-gerar-contas" data-id="${n.id}">Gerar conta a pagar</button>` : ''}` });
+    ${Math.abs(valorDevido(n) - totalNota(n)) > 0.009 ? `<p class="aviso ouro">${ico('alerta')}Conferido ${din(valorDevido(n))} (nota ${din(totalNota(n))}): a conta a pagar foi ajustada.</p>` : ''}
+    ${n.divergencias?.length ? `<h3 class="r4-sub">Divergências no recebimento</h3><ul class="r4-mini">${n.divergencias.map((x) => { const i = insumo(x.insumo); return `<li>${pill(x.tipo === 'amais' ? 'aberta' : 'vencida', nomeDiv(x.tipo))}<span><b>${t(i?.nome || '')}</b>: esperado ${vir(x.esperado)}, chegou ${vir(x.chegou)} ${t(i?.compra || '')}${x.motivo ? ` · ${t(x.motivo)}` : ''}<small>${new Date(x.ts).toLocaleDateString('pt-BR')} · ${t(x.quem || '')}</small></span></li>`; }).join('')}</ul>` : ''}
+    ${n.devolucoes?.length ? `<h3 class="r4-sub">Devoluções ao fornecedor</h3><ul class="r4-mini">${n.devolucoes.map((x) => { const i = insumo(x.insumo); return `<li>${pill('ok', dinCurto(x.valor))}<span><b>${vir(x.qtd)} ${t(i?.compra || '')} de ${t(i?.nome || '')}</b> · ${t(x.motivo)}<small>${x.destino === 'abater' && x.conta ? 'abatido na conta a pagar' : 'crédito a receber do fornecedor'} · ${new Date(x.ts).toLocaleDateString('pt-BR')}</small></span></li>`; }).join('')}</ul>` : ''}
+    ${cts.length ? `<p class="mudo" style="margin-top:10px">Contas a pagar: ${cts.map((c) => `${t(c.parcela || 'à vista')} ${dinCurto(c.valor)}${c.ajustes?.length ? ` (era ${dinCurto(c.valorOriginal)})` : ''} vence ${dataCurta(c.venc)} (${NOME_SIT[situacaoConta(c)].toLowerCase()})`).join(' · ')}</p>` : ''}`,
+  pe: `${n.status !== 'recebida' ? `<button type="button" class="bt cheio" data-fechar data-acao="fin-receber" data-id="${n.id}">Receber</button>` : ''}${n.itens.some((it) => (it.recebido || 0) - (it.devolvido || 0) > 0.0001) ? `<button type="button" class="bt" data-fechar data-acao="fin-devolver" data-id="${n.id}">Devolver ao fornecedor</button>` : ''}${!cts.length ? `<button type="button" class="bt" data-fechar data-acao="fin-gerar-contas" data-id="${n.id}">Gerar conta a pagar</button>` : ''}` });
 });
 // nova compra (pre = { fornecedor, itens: [{ insumo, qtd, total }] } quando vem da sugestão de compra)
 export function abrirNovaCompra(pre = {}) {
@@ -392,37 +473,85 @@ export function abrirNovaCompra(pre = {}) {
 acao('fin-compra', () => abrirNovaCompra());
 acao('fin-gerar-contas', (b) => {
   const n = (db.notasCompra || []).find((x) => x.id === b.dataset.id); if (!n) return;
-  folha({ titulo: 'Gerar conta a pagar', corpo: `<p class="mudo">Total da compra: ${din(totalNota(n))}</p><div class="tres-c"><label class="campo"><span>Parcelas</span><input data-np inputmode="numeric" value="1"></label><label class="campo"><span>Primeiro vencimento</span><input type="date" data-pv value="${somaDias(n.data, 30)}"></label><label class="campo"><span>A cada (dias)</span><input data-iv inputmode="numeric" value="30"></label></div>`,
+  folha({ titulo: 'Gerar conta a pagar', corpo: `<p class="mudo">Total da compra: ${din(valorDevido(n))}</p><div class="tres-c"><label class="campo"><span>Parcelas</span><input data-np inputmode="numeric" value="1"></label><label class="campo"><span>Primeiro vencimento</span><input type="date" data-pv value="${somaDias(n.data, 30)}"></label><label class="campo"><span>A cada (dias)</span><input data-iv inputmode="numeric" value="30"></label></div>`,
     pe: '<button type="button" class="bt cheio grande" data-ok>Gerar</button>',
     aoAbrir: (f, fechar) => { $('[data-ok]', f).onclick = () => { const l = gerarContasCompra(n, { parcelas: num($('[data-np]', f).value) || 1, primeiro: $('[data-pv]', f).value || n.data, intervalo: Math.max(1, num($('[data-iv]', f).value) || 30) }); fechar(); toast(`${l.length} ${l.length === 1 ? 'conta gerada' : 'parcelas geradas'}`); }; } });
 });
-// recebimento: o que chegou de cada item (parcial deixa a compra como "recebida parcial") e a validade opcional do lote
+// recebimento com conferência: pedido × chegou por item, divergência com motivo, validade do lote e, se o que faltou
+// não vem mais, a compra fecha e a conta a pagar se ajusta ao conferido
 export function abrirReceber(n) {
   if (!n) return;
   const l = n.itens.map((it, k) => [it, k]).filter(([it]) => it.recebido < it.qtd - 0.0001);
   if (!l.length) { toast('Esta compra já foi recebida'); return; }
-  folha({ titulo: 'Receber compra', larga: true, corpo: `<p class="mudo">${t(fornecedor(n.fornecedor)?.nome || 'Sem fornecedor')} · ${dataCurta(n.data)}. Confira o que chegou; o que faltar fica para depois.</p>
-    <div class="tabela-rolo"><table class="tabela fin-receb"><thead><tr><th>Insumo</th><th class="num">Falta chegar</th><th>Chegou agora</th><th>Validade (opcional)</th></tr></thead><tbody>
-    ${l.map(([it, k]) => { const i = insumo(it.insumo), falta = r2(it.qtd - (it.recebido || 0)); return `<tr><td><b>${t(i?.nome || '?')}</b><small>${dinCurto(custoUnit(n, it))}/${t(i?.compra || '')}</small></td><td class="num">${vir(falta)} ${t(i?.compra || '')}</td>
-      <td><input class="inv-q" data-rq="${k}" inputmode="decimal" value="${vir(falta)}" aria-label="Quanto chegou de ${t(i?.nome || '')}"></td><td><input type="date" data-rv="${k}" aria-label="Validade de ${t(i?.nome || '')}" min="${ymd()}"></td></tr>`; }).join('')}</tbody></table></div>`,
-  pe: '<button type="button" class="bt cheio grande" data-ok>Dar entrada no estoque</button>',
+  const optsDiv = DIVERGENCIAS.map(([k, nm]) => `<option value="${k}">${nm}</option>`).join('');
+  folha({ titulo: 'Receber e conferir', larga: true, corpo: `<p class="mudo">${t(fornecedor(n.fornecedor)?.nome || 'Sem fornecedor')} · compra de ${dataCurta(n.data)}. Confira item por item: só entra no estoque o que chegou.</p>
+    <ul class="r4-conf">${l.map(([it, k]) => { const i = insumo(it.insumo), falta = r2(it.qtd - (it.recebido || 0)); return `<li data-k="${k}"><div class="r4-conf-tit"><b>${t(i?.nome || '?')}</b><small>pedido ${vir(falta)} ${t(i?.compra || '')}${it.recebido ? ` (já chegou ${vir(it.recebido)})` : ''} · ${dinCurto(it.qtd ? it.total / it.qtd : 0)}/${t(i?.compra || '')}</small></div>
+      <div class="r4-conf-campos"><label class="campo"><span>Chegou (${t(i?.compra || '')})</span><input data-rq="${k}" data-falta="${falta}" inputmode="decimal" value="${vir(falta)}"></label>
+        <label class="campo"><span>Situação</span><select data-rd="${k}">${optsDiv}</select></label>
+        <label class="campo r4-larga"><span>Motivo da divergência</span><input data-rm="${k}" maxlength="140" placeholder="Ex.: 2 caixas amassadas"></label>
+        <label class="campo"><span>Validade (opcional)</span><input type="date" data-rv="${k}" min="${ymd()}"></label></div></li>`; }).join('')}</ul>
+    <label class="interruptor bloco-int"><input type="checkbox" data-enc><span></span>O que faltou não vem mais: fechar a compra e ajustar a conta a pagar</label>
+    <div class="resumo"><div><span>Pedido</span><b>${din(valorDevido(n))}</b></div><div class="total"><span>Conferido</span><b data-conf></b></div></div><p class="mudo" data-dif></p>`,
+  pe: '<button type="button" class="bt cheio grande" data-ok>Confirmar recebimento</button>',
   aoAbrir: (f, fechar) => {
+    const ler = () => { const receb = {}, div = {}; $$('[data-rq]', f).forEach((x) => { receb[x.dataset.rq] = Math.max(0, num(x.value)); }); $$('[data-rd]', f).forEach((x) => { div[x.dataset.rd] = { tipo: x.value, motivo: $(`[data-rm="${x.dataset.rd}"]`, f).value }; }); return { receb, div }; };
+    const conta = () => {
+      const { receb, div } = ler();
+      const v = r2(n.itens.reduce((s2, it, k) => { const ch = (it.recebido || 0) + (receb[k] ?? 0); const q = div[k]?.tipo === 'amais' ? ch : Math.min(it.qtd, ch); return s2 + (it.qtd ? (it.total / it.qtd) * q : 0); }, 0) + (Number(n.frete) || 0));
+      $('[data-conf]', f).textContent = din(v);
+      const d = r2(v - valorDevido(n)), enc = $('[data-enc]', f).checked || Object.values(div).every((x) => x.tipo !== 'faltou') && n.itens.every((it, k) => (it.recebido || 0) + (receb[k] ?? 0) >= it.qtd - 0.0001);
+      $('[data-dif]', f).textContent = Math.abs(d) < 0.01 ? 'Bate com o pedido.' : enc ? `A conta a pagar ${d < 0 ? 'cai' : 'sobe'} ${din(Math.abs(d))} ao confirmar.` : `Diferença de ${din(Math.abs(d))}: o que falta fica a receber até você fechar a compra.`;
+    };
+    f.addEventListener('input', (e) => {
+      const q = e.target.closest('[data-rq]');
+      if (q) { const k = q.dataset.rq, falta = Number(q.dataset.falta), v = num(q.value), s2 = $(`[data-rd="${k}"]`, f);
+        if (v > falta + 0.0001) s2.value = 'amais'; else if (v < falta - 0.0001 && (s2.value === 'ok' || s2.value === 'amais')) s2.value = 'faltou'; else if (Math.abs(v - falta) < 0.0001 && (s2.value === 'faltou' || s2.value === 'amais')) s2.value = 'ok'; }
+      conta();
+    });
+    f.addEventListener('change', (e) => { if (e.target.matches('[data-rd]') && ['trocado', 'avariado'].includes(e.target.value)) $('[data-enc]', f).checked = true; conta(); });
+    conta();
     $('[data-ok]', f).onclick = () => {
-      const receb = {}, val = {}; $$('[data-rq]', f).forEach((x) => { receb[x.dataset.rq] = Math.max(0, num(x.value)); }); $$('[data-rv]', f).forEach((x) => { if (x.value) val[x.dataset.rv] = x.value; });
-      const k = receberCompra(n, receb, val); fechar();
-      toast(k ? (n.status === 'recebida' ? 'Compra recebida, estoque atualizado' : 'Recebida em parte, o resto fica a receber') : 'Nada entrou no estoque');
+      const { receb, div } = ler(), val = {}; $$('[data-rv]', f).forEach((x) => { if (x.value) val[x.dataset.rv] = x.value; });
+      const sem = Object.entries(div).find(([, d]) => d.tipo !== 'ok' && d.tipo !== 'amais' && String(d.motivo).trim().length < 3 && d.tipo !== 'faltou');
+      if (sem) { toast('Escreva o motivo do item trocado ou avariado'); return $(`[data-rm="${sem[0]}"]`, f).focus(); }
+      const enc = $('[data-enc]', f).checked, k = receberCompra(n, receb, val, { divergencias: div, encerrar: enc }); fechar();
+      const dv = n.divergencias?.filter((x) => Date.now() - x.ts < 5000).length || 0;
+      toast(!k ? 'Nada entrou no estoque' : n.status === 'recebida' ? `Compra recebida${dv ? ` com ${dv} ${dv === 1 ? 'divergência' : 'divergências'}` : ''}${Math.abs(valorDevido(n) - totalNota(n)) > 0.009 ? ` · conta ajustada para ${din(valorDevido(n))}` : ''}` : 'Recebida em parte, o resto fica a receber');
       ir('mais/compras');
     };
   } });
 }
 acao('fin-receber', (b) => abrirReceber((db.notasCompra || []).find((x) => x.id === b.dataset.id)));
+acao('fin-devolver', (b) => {
+  garantirFin();
+  const n = (db.notasCompra || []).find((x) => x.id === b.dataset.id); if (!n) return;
+  const its = n.itens.map((it, k) => [it, k]).filter(([it]) => (it.recebido || 0) - (it.devolvido || 0) > 0.0001);
+  if (!its.length) return toast('Nada desta compra para devolver');
+  const abertas = db.contas.filter((c) => c.tipo === 'pagar' && !contaPaga(c) && (c.compra === n.id || (n.fornecedor && c.fornecedor === n.fornecedor))).sort((a, c) => (a.compra === n.id ? -1 : 0) - (c.compra === n.id ? -1 : 0) || a.venc.localeCompare(c.venc));
+  folha({ titulo: 'Devolver ao fornecedor', corpo: `<p class="mudo">${t(fornecedor(n.fornecedor)?.nome || 'Sem fornecedor')} · compra de ${dataCurta(n.data)}. Sai do estoque e vira abatimento ou crédito.</p>
+    <label class="campo"><span>Item</span><select data-k>${its.map(([it, k]) => { const i = insumo(it.insumo); return `<option value="${k}">${t(i?.nome || '?')} (até ${vir(r2((it.recebido || 0) - (it.devolvido || 0)))} ${t(i?.compra || '')})</option>`; }).join('')}</select></label>
+    <div class="duas-c"><label class="campo"><span>Quantidade (unidade de compra)</span><input data-q inputmode="decimal"></label><div class="campo"><span>Valor</span><b class="fin-total" data-v>R$ 0,00</b></div></div>
+    <label class="campo"><span>Motivo</span><input data-m maxlength="140" placeholder="Ex.: Embalagem violada"></label>
+    <label class="campo"><span>O que fazer com o valor</span><select data-dest>${DESTINOS_DEV.map(([k, nm]) => `<option value="${k}" ${k === 'abater' && !abertas.length ? 'disabled' : ''} ${k === (abertas.length ? 'abater' : 'receber') ? 'selected' : ''}>${nm}</option>`).join('')}</select></label>
+    <label class="campo" data-cx ${abertas.length ? '' : 'hidden'}><span>Conta a pagar</span><select data-c>${abertas.map((c) => `<option value="${c.id}">${t(c.desc)} · falta ${dinCurto(restaConta(c))} · vence ${dataCurta(c.venc)}</option>`).join('')}</select></label>`,
+  pe: '<button type="button" class="bt cheio grande" data-ok>Registrar devolução</button>',
+  aoAbrir: (f, fechar) => {
+    const val = () => { const it = n.itens[Number($('[data-k]', f).value)]; $('[data-v]', f).textContent = din(r2(num($('[data-q]', f).value) * custoUnit(n, it))); };
+    f.addEventListener('input', val); f.addEventListener('change', (e) => { if (e.target.matches('[data-dest]')) $('[data-cx]', f).hidden = e.target.value !== 'abater'; val(); }); val();
+    $('[data-ok]', f).onclick = () => {
+      const r = devolverFornecedor(n, Number($('[data-k]', f).value), num($('[data-q]', f).value), $('[data-m]', f).value, $('[data-dest]', f).value, $('[data-c]', f)?.value || '');
+      if (r.erro) return toast(r.erro);
+      fechar(); toast(`Devolução de ${din(r.valor)} registrada${r.conta ? ' e abatida da conta' : ''}${r.credito ? ` · crédito de ${din(r.credito.valor)} a receber` : ''}`);
+    };
+  } });
+});
 
 // ---------------- contas a pagar e a receber
 TELAS_MAIS.contas = (arg = '') => {
   garantirFin();
   const [tipo0, filtro = ''] = String(arg || '').split('~'), tipo = tipo0 === 'receber' ? 'receber' : 'pagar', hoje = ymd(), em7 = somaDias(hoje, 7), mes = hoje.slice(0, 7);
   const todas = db.contas.filter((c) => c.tipo === tipo), abertas = todas.filter((c) => !contaPaga(c));
-  const F = { '': (c) => !contaPaga(c), vencidas: (c) => situacaoConta(c, hoje) === 'vencida', hoje: (c) => situacaoConta(c, hoje) === 'hoje', 7: (c) => !contaPaga(c) && c.venc <= em7, mes: (c) => c.venc.startsWith(mes), pagas: contaPaga };
+  const F = { rec: (c) => c.recorrente && !contaPaga(c), '': (c) => !contaPaga(c), vencidas: (c) => situacaoConta(c, hoje) === 'vencida', hoje: (c) => situacaoConta(c, hoje) === 'hoje', 7: (c) => !contaPaga(c) && c.venc <= em7, mes: (c) => c.venc.startsWith(mes), pagas: contaPaga };
   const l = todas.filter(F[filtro] || F['']).sort((a, b) => (filtro === 'pagas' ? b.venc.localeCompare(a.venc) : a.venc.localeCompare(b.venc)));
   const venc = abertas.filter((c) => c.venc < hoje), hj = abertas.filter((c) => c.venc === hoje), sete = abertas.filter((c) => c.venc <= em7);
   const pagoMes = soma(todas.flatMap((c) => c.pagamentos || []).filter((p) => p.data.startsWith(mes)), (p) => p.valor);
@@ -432,9 +561,9 @@ TELAS_MAIS.contas = (arg = '') => {
     <section class="kpis"><div class="${venc.length ? 'fin-alerta' : ''}"><small>Vencidas</small><b>${dinCurto(soma(venc, restaConta))}</b><span>${venc.length} ${venc.length === 1 ? 'conta' : 'contas'}</span></div><div><small>Vence hoje</small><b>${dinCurto(soma(hj, restaConta))}</b><span>${hj.length} ${hj.length === 1 ? 'conta' : 'contas'}</span></div>
       <div><small>Próximos 7 dias</small><b>${dinCurto(soma(sete, restaConta))}</b><span>com as vencidas</span></div><div><small>${tipo === 'pagar' ? 'Pago' : 'Recebido'} no mês</small><b>${dinCurto(pagoMes)}</b><span>${new Date().toLocaleDateString('pt-BR', { month: 'long' })}</span></div></section>
     <div class="linha-bts"><button type="button" class="bt cheio" data-acao="fin-conta" data-tipo="${tipo}">${ico('mais2')}Nova conta a ${tipo}</button></div>
-    <div class="filtros"><div class="chips">${[['', 'Em aberto'], ['vencidas', 'Vencidas'], ['hoje', 'Hoje'], ['7', '7 dias'], ['mes', 'Este mês'], ['pagas', tipo === 'pagar' ? 'Pagas' : 'Recebidas']].map(([k, n]) => `<a class="chip ${filtro === k ? 'on' : ''}" href="#mais/contas/${rot}${k}">${n}</a>`).join('')}</div></div>
+    <div class="filtros"><div class="chips">${[['', 'Em aberto'], ['vencidas', 'Vencidas'], ['hoje', 'Hoje'], ['7', '7 dias'], ['mes', 'Este mês'], ['rec', 'Todo mês'], ['pagas', tipo === 'pagar' ? 'Pagas' : 'Recebidas']].map(([k, n]) => `<a class="chip ${filtro === k ? 'on' : ''}" href="#mais/contas/${rot}${k}">${n}</a>`).join('')}</div></div>
     <section class="bloco"><div class="tabela-rolo"><table class="tabela fin-contas"><thead><tr><th>Vence</th><th>Conta</th><th class="num">Valor</th><th class="num">Falta</th><th>Situação</th><th></th></tr></thead><tbody>
-    ${l.map((c) => { const s = situacaoConta(c, hoje), pg = pagoConta(c); return `<tr class="${s === 'vencida' ? 'fin-atraso' : s === 'paga' ? 'off' : ''}"><td>${dataCurta(c.venc)}</td><td><b>${t(c.desc)}</b><small>${[nomeCat(c.categoria), c.recorrente ? 'todo mês' : '', c.fornecedor ? t(fornecedor(c.fornecedor)?.nome || '') : '', pg && !contaPaga(c) ? `já ${tipo === 'pagar' ? 'pago' : 'recebido'} ${dinCurto(pg)}` : ''].filter(Boolean).join(' · ')}</small></td>
+    ${l.map((c) => { const s = situacaoConta(c, hoje), pg = pagoConta(c); return `<tr class="${s === 'vencida' ? 'fin-atraso' : s === 'paga' ? 'off' : ''}"><td>${dataCurta(c.venc)}</td><td><b>${t(c.desc)}</b><small>${[nomeCat(c.categoria), c.recorrente ? (c.auto ? 'todo mês · gerada sozinha' : 'todo mês') : '', c.ajustes?.length ? `ajustada de ${dinCurto(c.valorOriginal ?? c.valor)}` : '', c.fornecedor ? t(fornecedor(c.fornecedor)?.nome || '') : '', pg && !contaPaga(c) ? `já ${tipo === 'pagar' ? 'pago' : 'recebido'} ${dinCurto(pg)}` : ''].filter(Boolean).join(' · ')}</small></td>
       <td class="num">${dinCurto(c.valor)}</td><td class="num">${contaPaga(c) ? '' : `<b>${dinCurto(restaConta(c))}</b>`}</td><td>${pill(s, NOME_SIT[s])}</td>
       <td class="acoes">${contaPaga(c) ? '' : `<button type="button" class="bt pq ${s === 'vencida' ? 'cheio' : ''}" data-acao="fin-pagar" data-id="${c.id}">${verbo}</button>`}<button type="button" class="bt-ico" data-acao="fin-conta" data-id="${c.id}" aria-label="Editar ${t(c.desc)}">${ico('ajustes')}</button></td></tr>`; }).join('') || `<tr><td colspan="6" class="vazio">Nenhuma conta ${filtro === 'pagas' ? (tipo === 'pagar' ? 'paga' : 'recebida') : 'nesse filtro'}.</td></tr>`}</tbody></table></div></section>`;
 };
@@ -445,7 +574,7 @@ acao('fin-conta', (b) => {
   folha({ titulo: novo ? `Nova conta a ${tipo}` : x.desc, corpo: `<label class="campo"><span>Descrição</span><input data-d maxlength="100" value="${t(x.desc)}" placeholder="${tipo === 'pagar' ? 'Ex.: Conta de energia' : 'Ex.: Saldo do evento'}"></label>
     <div class="duas-c"><label class="campo"><span>Categoria</span><select data-cat>${sel(cats, x.categoria)}</select></label><label class="campo"><span>Valor (R$)</span><input data-v inputmode="decimal" value="${x.valor ? dec2(x.valor) : ''}" placeholder="0,00"></label></div>
     <div class="duas-c"><label class="campo"><span>Vencimento</span><input type="date" data-venc value="${x.venc}"></label>${tipo === 'pagar' ? `<label class="campo"><span>Fornecedor (opcional)</span><select data-fo>${optsForn(x.fornecedor || '')}</select></label>` : '<span></span>'}</div>
-    <label class="interruptor bloco-int"><input type="checkbox" data-rec ${x.recorrente ? 'checked' : ''}><span></span>Repete todo mês: ao quitar, gera a do mês seguinte</label>
+    <label class="interruptor bloco-int"><input type="checkbox" data-rec ${x.recorrente ? 'checked' : ''}><span></span>Repete todo mês: a do mês seguinte aparece sozinha</label>
     <label class="campo"><span>Observação (opcional)</span><input data-obs maxlength="200" value="${t(x.obs || '')}"></label>
     ${c?.pagamentos?.length ? `<p class="mudo">${c.pagamentos.map((p) => `${dataCurta(p.data)} ${dinCurto(p.valor)} (${t(p.forma)})`).join(' · ')}</p>` : ''}
     ${!novo && !c.pagamentos?.length ? '<button type="button" class="bt perigo" data-apagar>Apagar conta</button>' : ''}`,
@@ -467,7 +596,7 @@ acao('fin-pagar', (b) => {
   folha({ titulo: `${verbo} · ${c.desc}`, corpo: `<p class="mudo">Valor ${din(c.valor)}${pagoConta(c) ? ` · já ${c.tipo === 'pagar' ? 'pago' : 'recebido'} ${din(pagoConta(c))}` : ''} · vence ${dataCurta(c.venc)}</p>
     <div class="duas-c"><label class="campo"><span>Valor (menos que o total fica em aberto)</span><input data-v inputmode="decimal" value="${dec2(resta)}"></label><label class="campo"><span>Data</span><input type="date" data-dt value="${ymd()}"></label></div>
     <label class="campo"><span>Forma</span><select data-fp>${FORMAS_CONTA.map((x) => `<option>${x}</option>`).join('')}</select></label>
-    ${c.recorrente && !c.proxima ? `<p class="mudo">Ao quitar, a de ${dataCurta(somaMes(c.venc, 1))} é gerada.</p>` : ''}`,
+    ${c.recorrente && !c.proxima ? `<p class="mudo">A de ${dataCurta(somaMes(c.venc, 1))} é gerada sozinha.</p>` : ''}${c.ajustes?.length ? `<p class="mudo">Ajustes: ${c.ajustes.map((a) => `${a.valor < 0 ? '−' : '+'}${dinCurto(Math.abs(a.valor))} (${t(a.motivo)})`).join(' · ')}</p>` : ''}`,
   pe: `<button type="button" class="bt cheio grande" data-ok>${verbo}</button>`,
   aoAbrir: (f, fechar) => {
     $('[data-ok]', f).onclick = () => {
@@ -559,9 +688,10 @@ TELAS_MAIS.dre = (per) => {
       ${linha('CMV teórico (ficha técnica × preço de compra)', d.cmv)}
       ${linha(`Taxas de cartão e Pix (débito ${vir(F.taxas.debito)}%, crédito ${vir(F.taxas.credito)}%, Pix ${vir(F.taxas.pix)}%)`, d.taxas)}
       ${CATEGORIAS_PAGAR.filter(([k]) => d.desp[k]).map(([k, n]) => linha(`Despesa: ${n}`, d.desp[k])).join('') || linha('Despesas (nenhuma conta paga no período)', 0)}
+      ${d.consumo ? linha(`Consumo interno e cortesias (custo; ${Object.entries(d.consumoTipo).map(([k, v]) => `${t(k).toLowerCase()} ${dinCurto(v)}`).join(', ')})`, d.consumo) : ''}
       ${linha('Resultado operacional', d.resultado, `total sub ${d.resultado < 0 ? 'fin-neg' : ''}`, '+')}
       <div class="fin-margem"><span>Margem operacional</span><b class="${d.margem < 0 ? 'erro' : 'ok-txt'}">${vir(d.margem)}%</b></div></div>
-      <p class="mudo">Despesas são as contas a pagar quitadas no período. Pagamentos a fornecedor não entram aqui: o custo das mercadorias já está no CMV. Sem perdas de estoque, impostos sobre a venda e depreciação, a não ser que estejam lançados como conta.</p></section>
+      <p class="mudo">Despesas são as contas a pagar quitadas no período. Pagamentos a fornecedor não entram aqui: o custo das mercadorias já está no CMV. Consumo interno e cortesias entram pelo custo, separados das vendas. Sem perdas de estoque, impostos sobre a venda e depreciação, a não ser que estejam lançados como conta.</p></section>
     <form class="form bloco-form" data-taxas><h2>Taxas das maquininhas e do Pix</h2><div class="tres-c"><label class="campo"><span>Débito (%)</span><input name="debito" inputmode="decimal" value="${vir(F.taxas.debito)}"></label><label class="campo"><span>Crédito (%)</span><input name="credito" inputmode="decimal" value="${vir(F.taxas.credito)}"></label><label class="campo"><span>Pix (%)</span><input name="pix" inputmode="decimal" value="${vir(F.taxas.pix)}"></label></div><button class="bt">Salvar taxas</button></form>`;
 };
 MONTAR.dre = (el) => {
@@ -583,6 +713,72 @@ TELAS_MAIS.margens = () => {
 MONTAR.margens = (el) => {
   const f = $('[data-canal]', el); if (f) f.onsubmit = (e) => { e.preventDefault(); setFin({ delivery: { embalagem: r2(Math.max(0, num(f.emb.value))), comissao: r2(Math.max(0, Math.min(60, num(f.com.value)))) } }); toast('Custos do delivery salvos'); };
 };
+
+// ------------------------------------------------------------------ conciliação: o que devia cair × o que caiu, por dia e forma
+export const GRUPOS_PG = [['dinheiro', 'Dinheiro'], ['pix', 'Pix'], ['debito', 'Débito'], ['credito', 'Crédito'], ['app', 'App de delivery'], ['outros', 'Outras formas']];
+export const grupoForma = (f) => (aPrazo(f) ? null : /ifood|rappi|aiqfome|99 ?food|\bapp\b/i.test(f) ? 'app' : /d[ée]bito/i.test(f) ? 'debito' : /cr[ée]dito|cart[aã]o/i.test(f) ? 'credito' : /pix/i.test(f) ? 'pix' : /dinheiro/i.test(f) ? 'dinheiro' : 'outros');
+// vendas do dia por grupo: bruto, taxa (maquininha, Pix ou comissão do app) e o esperado = bruto − taxa
+export function esperadoDia(dia, F = finCfg()) {
+  const de = tsDia(dia) - 12 * 36e5, ate = de + DIA, g = {};
+  db.vendas.filter((v) => !v.cancelado && v.ts >= de && v.ts < ate).forEach((v) => pagamentosVenda(v).forEach((p) => { const k = grupoForma(p.forma); if (!k) return; (g[k] ||= { bruto: 0, taxa: 0 }).bruto += Number(p.valor) || 0; }));
+  Object.entries(g).forEach(([k, x]) => { const pct = k === 'app' ? Number(F.delivery.comissao) || 0 : k === 'debito' ? F.taxas.debito : k === 'credito' ? F.taxas.credito : k === 'pix' ? F.taxas.pix : 0; x.bruto = r2(x.bruto); x.taxa = r2(x.bruto * pct / 100); x.esperado = r2(x.bruto - x.taxa); });
+  return g;
+}
+export const conciliacaoDia = (dia) => (db.conciliacao || {})[dia] || null;
+export function conferirDia(dia, inf, ok = true) {
+  db.conciliacao ||= {};
+  const e = esperadoDia(dia), dif = r2(Object.keys(e).reduce((s, k) => s + ((inf[k] ?? e[k].esperado) - e[k].esperado), 0));
+  db.conciliacao[dia] = { inf: Object.fromEntries(Object.entries(inf).map(([k, v]) => [k, r2(v)])), ok: ok ? Date.now() : 0, quem: quemAgora(), dif };
+  if (ok) auditar('conciliacao', { valor: dif, motivo: `Conferido o dia ${dataCurta(dia)}${dif ? ` com diferença de ${din(dif)}` : ''}` });
+  grava(); return dif;
+}
+// por dia: esperado, informado (o que a pessoa disse que caiu; sem informar, conta o esperado só depois de conferido)
+export function linhasConciliacao(de, ate) {
+  const l = [];
+  for (let d = new Date(de); d.getTime() < ate; d.setDate(d.getDate() + 1)) {
+    const dia = ymd(d.getTime()), e = esperadoDia(dia), ks = Object.keys(e); if (!ks.length) continue;
+    const c = conciliacaoDia(dia), esp = soma(ks, (k) => e[k].esperado), inf = c ? soma(ks, (k) => c.inf?.[k] ?? e[k].esperado) : 0;
+    l.push({ dia, e, c, bruto: soma(ks, (k) => e[k].bruto), taxa: soma(ks, (k) => e[k].taxa), esperado: esp, informado: c ? inf : null, dif: c ? r2(inf - esp) : 0, ok: !!c?.ok });
+  }
+  return l.reverse();
+}
+// dias passados (até 7 para trás) com venda e sem conferência
+export const conciliacaoPendente = (dias = 7) => { const hoje = ymd(); return linhasConciliacao(tsDia(somaDias(hoje, -dias)) - 12 * 36e5, tsDia(hoje) - 12 * 36e5).filter((x) => !x.ok); };
+
+TELAS_MAIS.conciliacao = (per) => {
+  garantirFin();
+  const P = periodo(per || '7'), l = linhasConciliacao(P.de, P.ate), hoje = ymd(), pend = l.filter((x) => !x.ok && x.dia < hoje);
+  const difs = l.filter((x) => x.ok && Math.abs(x.dif) > 0.009), porG = {};
+  l.forEach((x) => Object.entries(x.e).forEach(([k, v]) => { const g = (porG[k] ||= { esperado: 0, informado: 0, conf: 0 }); g.esperado += v.esperado; if (x.ok) { g.conf += v.esperado; g.informado += x.c.inf?.[k] ?? v.esperado; } }));
+  const st = (x) => (x.ok ? (Math.abs(x.dif) > 0.009 ? pill('vencida', `Diferença ${x.dif > 0 ? '+' : '−'}${dinCurto(Math.abs(x.dif))}`) : pill('ok', 'Conferido')) : x.dia === hoje ? pill('aberta', 'Dia em andamento') : pill('hoje', 'A conferir'));
+  return volta('mais', 'Conciliação', `${P.rot} · o que devia cair na conta (vendas − taxas) × o que caiu de fato`) + filtroPeriodo('conciliacao', P) + `
+    <section class="kpis"><div class="${pend.length ? 'fin-alerta' : ''}"><small>Dias a conferir</small><b>${pend.length}</b><span>sem contar hoje</span></div><div><small>Esperado</small><b>${dinCurto(soma(l, (x) => x.esperado))}</b><span>já sem as taxas</span></div>
+      <div><small>Taxas do período</small><b>${dinCurto(soma(l, (x) => x.taxa))}</b><span>maquininha, Pix e app</span></div><div class="${difs.length ? 'fin-alerta' : ''}"><small>Diferenças</small><b>${dinCurto(soma(difs, (x) => x.dif))}</b><span>${difs.length} ${difs.length === 1 ? 'dia' : 'dias'} com diferença</span></div></section>
+    <section class="bloco"><div class="sec-tit"><h2>Por dia</h2><span>toque em Conferir e informe o que caiu em cada forma</span></div><div class="tabela-rolo"><table class="tabela r4-conc"><thead><tr><th>Dia</th><th class="num">Vendas</th><th class="num">Esperado</th><th class="num">Recebido</th><th>Situação</th><th></th></tr></thead><tbody>
+    ${l.map((x) => `<tr class="${x.ok ? '' : x.dia < hoje ? 'fin-atraso' : ''}"><td>${new Date(`${x.dia}T12:00`).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })}</td><td class="num">${dinCurto(x.bruto)}</td><td class="num">${dinCurto(x.esperado)}</td><td class="num">${x.informado == null ? '' : `<b>${dinCurto(x.informado)}</b>`}</td><td>${st(x)}</td>
+      <td class="acoes"><button type="button" class="bt pq ${!x.ok && x.dia < hoje ? 'cheio' : ''}" data-acao="fin-conciliar" data-dia="${x.dia}">${x.ok ? 'Ver' : 'Conferir'}</button></td></tr>`).join('') || '<tr><td colspan="6" class="vazio">Sem vendas no período.</td></tr>'}</tbody></table></div></section>
+    <section class="bloco"><div class="sec-tit"><h2>Por forma de pagamento</h2><span>nos dias conferidos</span></div><div class="tabela-rolo"><table class="tabela"><thead><tr><th>Forma</th><th class="num">Esperado</th><th class="num">Conferido</th><th class="num">Recebido</th><th class="num">Diferença</th></tr></thead><tbody>
+    ${GRUPOS_PG.filter(([k]) => porG[k]).map(([k, nm]) => { const g = porG[k], d = r2(g.informado - g.conf); return `<tr><td><b>${nm}</b></td><td class="num">${dinCurto(g.esperado)}</td><td class="num">${dinCurto(g.conf)}</td><td class="num">${dinCurto(g.informado)}</td><td class="num"><b class="${Math.abs(d) > 0.009 ? 'erro' : 'ok-txt'}">${d > 0 ? '+' : ''}${dinCurto(d)}</b></td></tr>`; }).join('') || '<tr><td colspan="5" class="vazio">Sem vendas no período.</td></tr>'}</tbody></table></div>
+    <p class="mudo">Taxas usadas: débito ${vir(finCfg().taxas.debito)}%, crédito ${vir(finCfg().taxas.credito)}%, Pix ${vir(finCfg().taxas.pix)}%, app ${vir(finCfg().delivery.comissao)}%. Ajuste em <a href="#mais/dre">DRE</a> e em <a href="#mais/margens">Margem por canal</a>.</p></section>`;
+};
+MONTAR.conciliacao = ligaPeriodo;
+acao('fin-conciliar', (b) => {
+  const dia = b.dataset.dia, e = esperadoDia(dia), c = conciliacaoDia(dia), ks = GRUPOS_PG.filter(([k]) => e[k]);
+  folha({ titulo: `Conferir ${new Date(`${dia}T12:00`).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })}`, larga: true, corpo: `<p class="mudo">Informe quanto caiu de fato em cada forma (extrato do banco, da maquininha e do app). Em branco conta o esperado.</p>
+    <ul class="r4-concf">${ks.map(([k, nm]) => `<li><div><b>${nm}</b><small>vendas ${dinCurto(e[k].bruto)}${e[k].taxa ? ` − taxa ${dinCurto(e[k].taxa)}` : ''} = esperado <b>${dinCurto(e[k].esperado)}</b></small></div><label class="campo"><span>Recebido</span><input data-g="${k}" inputmode="decimal" value="${c?.inf?.[k] != null ? dec2(c.inf[k]) : ''}" placeholder="${dec2(e[k].esperado)}"></label><b class="r4-dif" data-d="${k}"></b></li>`).join('')}</ul>
+    <button type="button" class="link" data-tudo>Preencher tudo com o esperado</button>
+    <div class="resumo"><div><span>Esperado</span><b>${din(soma(ks, ([k]) => e[k].esperado))}</b></div><div class="total"><span>Diferença</span><b data-tot></b></div></div>
+    ${c?.ok ? `<p class="mudo">Conferido por ${t(c.quem || '')} em ${new Date(c.ok).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}.</p>` : ''}`,
+  pe: '<button type="button" class="bt" data-salvar>Só salvar</button><button type="button" class="bt cheio" data-ok>Conferir o dia</button>',
+  aoAbrir: (f, fechar) => {
+    const ler = () => Object.fromEntries($$('[data-g]', f).map((x) => [x.dataset.g, x.value.trim() === '' ? e[x.dataset.g].esperado : num(x.value)]));
+    const calc = () => { const inf = ler(); let tot = 0; Object.entries(inf).forEach(([k, v]) => { const d = r2(v - e[k].esperado); tot += d; const el = $(`[data-d="${k}"]`, f); el.textContent = Math.abs(d) < 0.01 ? 'ok' : `${d > 0 ? '+' : '−'}${dinCurto(Math.abs(d))}`; el.className = `r4-dif ${Math.abs(d) < 0.01 ? 'ok-txt' : 'erro'}`; }); $('[data-tot]', f).textContent = din(r2(tot)); };
+    f.addEventListener('input', calc); calc();
+    $('[data-tudo]', f).onclick = () => { $$('[data-g]', f).forEach((x) => { x.value = dec2(e[x.dataset.g].esperado); }); calc(); };
+    $('[data-salvar]', f).onclick = () => { conferirDia(dia, ler(), false); fechar(); toast('Valores salvos'); };
+    $('[data-ok]', f).onclick = () => { const d = conferirDia(dia, ler(), true); fechar(); toast(Math.abs(d) < 0.01 ? 'Dia conferido, tudo bateu' : `Dia conferido com diferença de ${din(d)}`); };
+  } });
+});
 
 // ------------------------------------------------------------------ demonstração: fornecedores, compras, contas e fiado (uma vez)
 export function semearFinanceiro() {
@@ -632,5 +828,6 @@ export function semearFinanceiro() {
   grava(); return true;
 }
 semearFinanceiro();
-// "Recomeçar a demonstração" troca o db inteiro: semeia de novo quando os dados novos chegarem
-ouvir(() => { if (db.exemplo && !db.fornecedores) semearFinanceiro(); });
+gerarRecorrentes();
+// "Recomeçar a demonstração" troca o db inteiro: semeia de novo quando os dados novos chegarem; as contas do mês seguinte aparecem sozinhas
+ouvir(() => { if (db.exemplo && !db.fornecedores) semearFinanceiro(); if (db.contas) gerarRecorrentes(); });

@@ -1,7 +1,7 @@
 // Popina · as opções de um produto, iguais para o garçom e para o cliente do cardápio online:
 // tamanho (P/M/G, broto/grande), pizza em frações e borda, combo, grupos de complementos (obrigatórios ou não, com mínimo
 // e máximo e preço por opção), pimenta e ponto (funções da casa), observação e quantidade. O preço final sai sempre daqui.
-import { precoAgora, precoFracoes, precoBorda, faltaCombo, FRACAO_NOME } from './precos.js?v=22';
+import { precoAgora, precoFracoes, precoBorda, faltaCombo, FRACAO_NOME } from './precos.js?v=23';
 
 // escolhas obrigatórias que as funções da casa põem no prato marcado (o nome vira "Grupo: opção" na comanda e na cozinha)
 export const ESCOLHAS_CASA = {
@@ -13,7 +13,9 @@ export const ESCOLHAS_CASA = {
 export const modoEscolha = (v) => (v === 'opcional' ? 'opcional' : v === true || v === 'obrigatorio' ? 'obrigatorio' : '');
 // grupos do produto (os "adicionais" antigos viram um grupo opcional); ext.mods: funções ligadas (pimenta e ponto)
 export function gruposDe(p, ext = {}) {
-  const g = (p.grupos || []).map((x, i) => ({ id: x.id || `g${i}`, nome: x.nome, min: Number(x.min) || 0, max: Number(x.max) || 1, opcoes: x.opcoes || [] }));
+  // cota grátis (função "Adicionais com cota grátis"): as primeiras N opções saem de graça; da próxima em diante, o preço extra (ou o da opção)
+  const cota = (x) => (ext.mods?.has?.('cotaAdicionais') && Number(x.gratis) > 0 ? { gratis: Math.round(Number(x.gratis)), extra: x.extra != null && x.extra !== '' ? Number(x.extra) : null } : {});
+  const g = (p.grupos || []).map((x, i) => ({ id: x.id || `g${i}`, nome: x.nome, min: Number(x.min) || 0, max: Number(x.max) || 1, opcoes: x.opcoes || [], ...cota(x) }));
   Object.entries(ESCOLHAS_CASA).forEach(([k, [id, nome, ops]]) => {
     const modo = modoEscolha(p[k]);
     if (modo && ext.mods?.has?.(k) && !g.some((x) => x.nome.toLowerCase() === nome.toLowerCase())) g.unshift({ id, nome, min: modo === 'obrigatorio' ? 1 : 0, max: 1, opcoes: ops.map((o) => ({ nome: o })), casa: true });
@@ -34,6 +36,49 @@ export function opcaoReal(p, nome, ext = {}) {
     }
   }
   return null;
+}
+
+// preço de cada opção escolhida num grupo com cota: as N primeiras grátis, as outras pelo preço extra (ou o da opção)
+export const precoNaCota = (g, o, pos) => (g.gratis > 0 ? (pos < g.gratis ? 0 : g.extra ?? (Number(o.preco) || 0)) : Number(o.preco) || 0);
+// refaz os preços dos adicionais pela cota (o que veio do cardápio do cliente é conferido aqui)
+export function aplicarCota(p, adic = [], ext = {}) {
+  const gs = gruposDe(p, ext).filter((g) => g.gratis > 0); if (!gs.length) return adic;
+  const pos = {};
+  return adic.map((a) => {
+    const g = gs.find((x) => String(a.nome).startsWith(`${x.nome}: `)); if (!g) return a;
+    const o = g.opcoes.find((y) => `${g.nome}: ${y.nome}` === a.nome) || {}, k = (pos[g.id] = (pos[g.id] ?? -1) + 1);
+    return { ...a, preco: precoNaCota(g, o, k) };
+  });
+}
+const legendaCota = (g, din) => (g.gratis > 0 ? ` · até ${g.gratis} grátis${g.extra != null ? `, depois + ${din(g.extra)} cada` : ''}` : '');
+
+// combo em etapas (hamburgueria): depois do lanche, "Quer transformar em combo?" → acompanhamento → bebida, com desconto
+// L.comboEtapas = { cats: ['lanches'], acomp: ['fritas'], bebida: ['refri'], desconto: 8 }
+export function ofertaCombo(p, L = {}, mods = new Set(), produtos = []) {
+  const C = L.comboEtapas; if (!mods.has?.('comboEtapas') || !C || !p || p.combo?.length || !(C.cats || []).includes(p.cat)) return null;
+  const ok = (id) => produtos.find((x) => x.id === id && x.ativo !== false && !x.porKg);
+  const acomp = (C.acomp || []).map(ok).filter(Boolean), bebida = (C.bebida || []).map(ok).filter(Boolean);
+  if (!acomp.length || !bebida.length) return null;
+  const desconto = Math.max(0, Number(C.desconto) || 0), menor = (l) => Math.min(...l.map((x) => Number(x.preco) || 0));
+  return { acomp, bebida, desconto, aPartir: Math.max(0, menor(acomp) + menor(bebida) - desconto) };
+}
+// as escolhas de uma bebida no combo: o primeiro grupo obrigatório vira os botões (Coca-Cola, Guaraná...); os outros obrigatórios vão na 1ª opção
+export function escolhasCombo(b) {
+  const obr = (b.grupos || []).filter((g) => (Number(g.min) || 0) >= 1 && (g.opcoes || []).length), resto = obr.slice(1).map((g) => ({ nome: `${g.nome}: ${g.opcoes[0].nome}`, preco: Number(g.opcoes[0].preco) || 0 }));
+  if (!obr.length) return [{ rot: b.nome, adic: [], preco: Number(b.preco) || 0 }];
+  return obr[0].opcoes.map((o) => ({ rot: `${b.nome} · ${o.nome}`, adic: [{ nome: `${obr[0].nome}: ${o.nome}`, preco: Number(o.preco) || 0 }, ...resto], preco: (Number(b.preco) || 0) + (Number(o.preco) || 0) + resto.reduce((s, x) => s + x.preco, 0) }));
+}
+// confere o desconto do combo na comanda: cada acompanhamento marcado só ganha o desconto com um lanche e uma bebida do combo junto
+export function aplicarComboEtapas(itens = [], L = {}, prodFn = () => null) {
+  const C = L.comboEtapas; if (!C) return 0;
+  const des = Math.max(0, Number(C.desconto) || 0), rasc = itens.filter((i) => !i.cancelado && i.status === 'rascunho');
+  const ja = rasc.filter((i) => i.comboUp === 'acomp' && i.comboDesc).length;
+  let lanches = rasc.filter((i) => !i.comboUp && !i.combo && !i.rodizio && (C.cats || []).includes(prodFn(i.prod)?.cat)).reduce((s, i) => s + (i.qtd || 1), 0) - ja;
+  let bebidas = rasc.filter((i) => i.comboUp === 'bebida').length - ja, n = 0;
+  rasc.filter((i) => i.comboUp === 'acomp' && !i.comboDesc).forEach((i) => {
+    if (lanches > 0 && bebidas > 0 && des > 0) { i.comboDesc = Math.min(des, i.preco); i.preco = Math.round(Math.max(0, i.preco - des) * 100) / 100; i.promo = 'Combo'; lanches--; bebidas--; n++; }
+  });
+  return n;
 }
 
 // estado da escolha e o HTML do formulário; ligar() conecta os botões e chama mudou() a cada toque
@@ -59,8 +104,8 @@ export function formOpcoes(p, { produtos, din, t, obsRapidas = [], obsLivre = tr
       <p class="mudo op-frac-txt" data-frac-txt hidden></p><div class="op-lista" data-sabores hidden>${pizzas.map((x) => `<label class="op"><input type="checkbox" name="sabor" value="${x.id}"><span>${curto(x)}</span></label>`).join('')}</div></fieldset>`
     : pizzas.length ? `<fieldset class="op-grupo"><legend>Meia a meia <em>opcional · cobra o sabor mais caro</em></legend><div class="op-lista">${pizzas.map((x) => `<label class="op"><input type="checkbox" name="meia" value="${x.id}"><span>½ ${curto(x)}</span></label>`).join('')}</div></fieldset>` : ''}
     ${bordas.length ? `<fieldset class="op-grupo"><legend>Borda <em>opcional · preço conforme o tamanho</em></legend><div class="op-lista"><label class="op"><input type="radio" name="borda" value="-1" checked><span>Sem borda</span></label><span data-bordas style="display:contents">${htmlBordas()}</span></div></fieldset>` : ''}
-    ${grupos.map((g) => `<fieldset class="op-grupo ${g.casa ? 'op-casa' : ''}" data-g="${g.id}"><legend>${t(g.nome)} <em>${g.min ? `obrigatório${g.max > 1 ? ` · escolha ${g.min === g.max ? g.min : `de ${g.min} a ${g.max}`}` : ''}` : `opcional${g.max > 1 && g.max < 20 ? ` · até ${g.max}` : ''}`}</em></legend><div class="op-lista">
-      ${g.opcoes.map((o, k) => `<label class="op"><input type="${g.max === 1 ? 'radio' : 'checkbox'}" name="g-${g.id}" value="${k}"><span>${t(o.nome)}</span>${Number(o.preco) ? `<b>+ ${din(o.preco)}</b>` : ''}</label>`).join('')}</div></fieldset>`).join('')}
+    ${grupos.map((g) => `<fieldset class="op-grupo ${g.casa ? 'op-casa' : ''}" data-g="${g.id}"><legend>${t(g.nome)} <em>${g.min ? `obrigatório${g.max > 1 ? ` · escolha ${g.min === g.max ? g.min : `de ${g.min} a ${g.max}`}` : ''}` : `opcional${g.max > 1 && g.max < 20 ? ` · até ${g.max}` : ''}`}${legendaCota(g, din)}</em></legend><div class="op-lista">
+      ${g.opcoes.map((o, k) => `<label class="op"><input type="${g.max === 1 ? 'radio' : 'checkbox'}" name="g-${g.id}" value="${k}"><span>${t(o.nome)}</span>${Number(o.preco) && !g.gratis ? `<b>+ ${din(o.preco)}</b>` : ''}</label>`).join('')}</div>${g.gratis ? `<p class="mudo op-cota" data-cota="${g.id}">${g.gratis === 1 ? 'Sai 1 grátis' : `Saem ${g.gratis} grátis`}</p>` : ''}</fieldset>`).join('')}
     ${obsRapidas.length || obsLivre ? `<fieldset class="op-grupo"><legend>Alguma observação?</legend>${obsRapidas.length ? `<div class="chips quebra">${obsRapidas.map((o) => `<button type="button" class="chip" data-obs="${t(o)}">${t(o)}</button>`).join('')}</div>` : ''}
       ${obsLivre ? `<input class="op-livre" data-livre maxlength="120" placeholder="Escreva aqui (opcional)" aria-label="Observação">` : ''}</fieldset>` : ''}
     <div class="qtd"><button type="button" class="bt-ico grande" data-menos aria-label="Menos">−</button><b data-q>1</b><button type="button" class="bt-ico grande" data-mais aria-label="Mais">+</button></div>`;
@@ -73,7 +118,7 @@ export function formOpcoes(p, { produtos, din, t, obsRapidas = [], obsLivre = tr
     return b + escolhidas().reduce((a, o) => a + o.preco, 0);
   };
   function escolhidas() {
-    const l = grupos.flatMap((g) => (s.esc[g.id] || []).map((k) => ({ nome: g.id === 'adic' ? g.opcoes[k].nome : `${g.nome}: ${g.opcoes[k].nome}`, preco: Number(g.opcoes[k].preco) || 0 })));
+    const l = grupos.flatMap((g) => (s.esc[g.id] || []).map((k, pos) => ({ nome: g.id === 'adic' ? g.opcoes[k].nome : `${g.nome}: ${g.opcoes[k].nome}`, preco: precoNaCota(g, g.opcoes[k], pos) })));
     const b = bordas[s.borda]; if (b) l.unshift({ nome: `Borda: ${b.nome}`, preco: precoBorda(b, idxTam()) });
     return l;
   }
@@ -109,7 +154,10 @@ export function formOpcoes(p, { produtos, din, t, obsRapidas = [], obsLivre = tr
       ins.forEach((i) => { i.onchange = () => {
         let sel = ins.filter((x) => x.checked).map((x) => Number(x.value));
         if (g.max > 1 && sel.length > g.max) { i.checked = false; sel = sel.filter((x) => x !== Number(i.value)); }
-        s.esc[g.id] = sel; mudou();
+        s.esc[g.id] = sel;
+        // cota grátis: diz quantos ainda saem de graça e quanto custa o próximo
+        const ct = q(`[data-cota="${g.id}"]`); if (ct) { const r = g.gratis - sel.length; ct.textContent = r > 0 ? `Ainda ${r === 1 ? 'sai 1 grátis' : `saem ${r} grátis`}` : `Grátis usados (${g.gratis}). Cada um a mais: ${g.extra != null ? `+ ${din(g.extra)}` : 'o preço da opção'}`; }
+        mudou();
       }; });
     });
     qa('[data-obs]').forEach((b) => { b.onclick = () => { const on = b.classList.toggle('on'); s.obs = on ? [...s.obs, b.dataset.obs] : s.obs.filter((x) => x !== b.dataset.obs); }; });

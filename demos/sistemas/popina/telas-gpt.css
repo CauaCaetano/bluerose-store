@@ -564,3 +564,69 @@
   .campo,.duas-c{min-width:0}.duas-c input{min-width:0;width:100%}
   .bt.grande{max-width:100%;box-sizing:border-box;white-space:normal}
 }
+
+/* ---------- rodada 4: funções por tipo de negócio (forno, estações, doses, granel, camarotes, senhas, quilo, combo) ---------- */
+.seg-coz{flex-wrap:wrap;max-width:100%}.seg-coz .badge{margin-left:4px;background:#C0392B;color:#fff;border-radius:99px;padding:0 7px;font:700 13px var(--f-txt)}
+.estacoes-coz{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}.estacoes-coz .chip b{margin-left:4px;opacity:.7}
+.kds .ticket li em.kn.est{background:#E2E8F4;color:#2B3E66}
+.kds .ticket .tk-espera{margin:6px 10px 0;padding:5px 10px;border-radius:6px;background:#FCE8C8;color:#6B3E0A;font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px}
+.kds .ticket .tk-espera .ico{width:16px;height:16px}
+.forno{display:grid;gap:10px}.forno>.mudo{color:#E9DCC8;margin:0}
+.forno-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.forno-cols>div{display:grid;align-content:start;gap:10px;min-width:0}.forno-cols .placa{margin:0 0 4px}
+.forno-item{display:grid;gap:8px;padding:12px 14px;border-radius:12px;background:var(--papel,#FFFDF9);color:var(--tinta,#3B2A22);border:2px solid #E2CDB2}
+.forno-item .fi-tit b{display:block;font-size:18px}.forno-item .fi-tit small,.forno-item .fi-tempo small{display:block;color:var(--mudo,#8E7E72)}
+.forno-item .fi-tempo b{font-size:28px;font-variant-numeric:tabular-nums;line-height:1.1}
+.forno-item .barra{display:block;height:8px;border-radius:99px;background:var(--creme2,#F3E8D8);overflow:hidden}.forno-item .barra i{display:block;height:100%;background:#D9A441}
+.forno-item.tirar{border-color:#C0392B;background:#FDECEA;animation:forno-pisca 1.2s ease-in-out infinite}.forno-item.tirar .fi-tempo b{color:#A1271B}.forno-item.tirar .barra i{background:#C0392B}
+.forno-item.espera{border-style:dashed}
+@keyframes forno-pisca{50%{box-shadow:0 0 0 5px rgba(192,57,43,.25)}}
+.garrafa-aberta{display:flex;align-items:center;gap:10px;margin:8px 0 4px}
+.garrafa-aberta .gf-ico{flex:none;width:18px;height:40px;border:2px solid var(--tinta2,#6B5A4F);border-radius:6px 6px 4px 4px;position:relative;overflow:hidden;background:var(--papel)}
+.garrafa-aberta .gf-ico i{position:absolute;left:0;right:0;bottom:0;background:#C98B2B}
+.garrafa-aberta b{display:block}.garrafa-aberta small{color:var(--mudo)}
+.granel-tams{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.granel-tams span{display:grid;min-width:92px;padding:8px 10px;border-radius:10px;background:var(--creme2);text-align:center}.granel-tams b{font-size:22px;font-variant-numeric:tabular-nums}
+.camarotes{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:10px 0 18px}
+.camarote{display:grid;gap:6px;align-content:start;padding:14px;border-radius:var(--raio);background:var(--papel);border:1.5px solid var(--linha);box-shadow:var(--sombra);min-width:0}
+.camarote header{display:flex;justify-content:space-between;align-items:center;gap:8px}.camarote header b{font-size:18px}
+.camarote p{margin:0}.camarote .badge{font-style:normal}
+.camarote.ocupado{border-color:var(--oliva)}.camarote.reservado{border-color:var(--ouro)}
+.camarote .barra{display:block;height:10px;border-radius:99px;background:var(--creme2);overflow:hidden}.camarote .barra i{display:block;height:100%;background:var(--oliva)}
+.camarote .cam-cons b{font-size:17px}
+.senha-chamando{display:grid;justify-items:center;gap:2px;margin:0 0 14px;padding:14px;border-radius:var(--raio);background:var(--terra);color:#fff;text-align:center}
+.senha-chamando small{font-weight:800;text-transform:uppercase;letter-spacing:.1em;opacity:.9}
+.senha-chamando b{font-size:clamp(90px,16vw,220px);line-height:1;font-variant-numeric:tabular-nums}
+.senha-chamando span{font-size:clamp(16px,2vw,24px)}
+.senha-chamando.nova{animation:senha-pisca 1s ease-in-out 5}
+.senha-grande .bt{margin-top:10px}
+.rodada-aviso{display:flex;align-items:flex-start;gap:10px;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:var(--oliva-cl);color:var(--tinta)}
+.rodada-aviso b{display:block}.rodada-aviso small{display:block;color:var(--tinta2)}.rodada-aviso .ico{flex:none;width:22px;height:22px;margin-top:2px}
+.rodada-aviso.cheia{background:var(--terra-cl)}
+.combo-oferta{display:flex;gap:12px;align-items:center;padding:14px;border-radius:14px;background:var(--ouro-cl);margin:0}
+.combo-oferta .ico{width:30px;height:30px;flex:none}.combo-oferta b{display:block;font-size:17px}.combo-oferta small{color:var(--tinta2)}
+.combo-passo{font-weight:800;margin:0}.combo-passo em{display:block;font-style:normal;font-weight:500;color:var(--mudo)}
+.kg-faixas{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.kg-faixas span{display:grid;padding:8px 12px;border-radius:10px;border:1.5px solid var(--linha);background:var(--papel)}.kg-faixas span.on{border-color:var(--oliva);background:var(--oliva-cl)}
+.kg-faixas small{color:var(--mudo)}
+.taras .chip,.quem-item .chips .chip{min-height:42px}
+.vit-fecha .vit-conta{display:flex;align-items:center;gap:6px}.vit-fecha .vit-conta input{width:70px;min-width:0}
+.vit-perda{margin:10px 0 0;font-size:16px}.vit-ult{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.vit-ult .ico{width:16px;height:16px}
+.totais .rod-detalhe{font-size:13.5px;color:var(--tinta2);padding-left:12px}
+.emb-saiu{display:flex;align-items:center;gap:8px}.emb-saiu .ico{width:18px;height:18px;flex:none}
+.op-cota{margin:6px 0 0;font-weight:700;color:var(--oliva)}
+.div-ps .chip.todos{font-weight:800}
+@media (max-width:899px){
+  .seg-coz button{padding:0 12px;font-size:16px;gap:6px}.seg-coz button .ico{width:20px;height:20px}
+  .forno-cols,.camarotes{grid-template-columns:minmax(0,1fr)}
+  .lista-estoque .res-bts{display:flex;gap:6px;flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){.forno-item.tirar,.senha-chamando.nova{animation:none}}
+/* celular: as 5 abas cabem em 390 px mesmo com os contadores (letra serifada larga do template) */
+@media (max-width:899px){.nav{overflow:hidden}.nav a{min-width:0}.nav a span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}body.tpl-realeza .nav a{font-size:13px!important;letter-spacing:0}}
+@media (max-width:599px){.cab-conta{flex-wrap:wrap;row-gap:6px}.cab-conta p{min-width:0;flex:1 1 160px}}
+/* cartões da rodada 4 com fundo de papel: o texto não herda a cor clara dos templates escuros */
+.camarote,.forno-item,.granel-tams span,.kg-faixas span,.combo-oferta,.rodada-aviso{color:var(--tinta,#3B2A22)}
+.forno>.mudo{color:var(--tinta2,#6B5A4F);background:rgba(255,253,249,.88);padding:6px 12px;border-radius:8px;width:max-content;max-width:100%;box-sizing:border-box}
+.forno{grid-template-columns:minmax(0,1fr)}
+@media (max-width:899px){.salao-esq,.prancheta,.fila,.fila-item,.fila-item>*{min-width:0}.fila-item b,.fila-item small,.fila-item span{overflow-wrap:anywhere}}

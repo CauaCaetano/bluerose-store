@@ -1,9 +1,9 @@
 // Popina · balcão e delivery: pedidos por etapa, pedido novo (telefone, balcão ou cardápio online), taxa por bairro e WhatsApp pronto.
-import { db, t, din, dinCurto, tempo, comanda, conta, novoPedido, enviar, grava, itensValidos, linkCardapio, clientePorTel, lojaCfg, tem, encomendaValida, antecedencia } from './loja.js?v=22';
-import { ymd } from './precos.js?v=22';
-import { registrar, acao, ir } from './nucleo.js?v=22';
-import { ico, folha, toast, $, $$ } from './ui.js?v=22';
-import { linhaItem, abrirSeletor } from './salao.js?v=22';
+import { db, t, din, dinCurto, tempo, comanda, conta, novoPedido, enviar, grava, itensValidos, linkCardapio, clientePorTel, lojaCfg, tem, encomendaValida, antecedencia } from './loja.js?v=23';
+import { ymd } from './precos.js?v=23';
+import { registrar, acao, ir } from './nucleo.js?v=23';
+import { ico, folha, toast, $, $$ } from './ui.js?v=23';
+import { linhaItem, abrirSeletor } from './salao.js?v=23';
 
 const ETAPAS = [['novo', 'Recebidos'], ['preparo', 'Preparando'], ['saiu', 'Saiu para entrega'], ['pronto_retirar', 'Pronto para retirar']];
 function etapa(c) {
@@ -95,15 +95,18 @@ function formNovo(tipo) {
 function verPedido(c) {
   const v = conta(c), rasc = c.itens.filter((i) => i.status === 'rascunho');
   return `<header class="cab-tela"><a class="bt-ico" href="#pedidos" aria-label="Voltar">${ico('voltar')}</a><div><h1>#${c.num} · ${t(c.cliente?.nome || '')}</h1><p>${c.tipo === 'delivery' ? `${t(c.cliente?.end || '')} · ${t(c.cliente?.bairro || '')}` : 'Retirada no balcão'}</p></div></header>
-    ${c.senha ? `<div class="senha-grande"><small>Senha</small><b>${c.senha}</b><span>Diga ao cliente: quando aparecer no painel, é só retirar</span></div>` : ''}
+    ${c.senha ? `<div class="senha-grande"><small>Senha</small><b>${c.senha}</b><span>Diga ao cliente: quando aparecer no painel, é só retirar</span>${tem('senha') ? `<button type="button" class="bt" data-acao="chamar-senha" data-c="${c.id}">${ico('sino')}${c.chamada ? 'Chamar de novo no painel' : 'Chamar no painel'}</button>` : ''}</div>` : ''}
     ${c.encomenda?.para ? `<p class="aviso ouro">${ico('calendario')}Encomenda para ${quandoEnc(c.encomenda.para)}${encomendaFutura(c) ? '. Entra no quadro da cozinha no dia.' : ''}</p>` : ''}
     <ul class="itens">${c.itens.map((i) => linhaItem(c, i)).join('')}</ul>
+    ${c.emb && tem('embalagem') ? `<p class="mudo emb-saiu">${ico('sacola')}Embalagem que saiu do estoque: ${Object.entries(c.emb).map(([id, q]) => `${q}× ${t(db.insumos.find((x) => x.id === id)?.nome || id)}`).join(', ')}</p>` : ''}
     <section class="totais"><div><span>Itens</span><b>${din(v.sub)}</b></div>${v.entrega ? `<div><span>Entrega</span><b>${din(v.entrega)}</b></div>` : ''}<div class="total"><span>Total</span><b>${din(v.total)}</b></div></section>
     <div class="barra-acoes"><button type="button" class="bt" data-acao="cardapio-pick" data-c="${c.id}">${ico('mais2')}Itens</button>
       ${rasc.length ? `<button type="button" class="bt cheio grande" data-acao="enviar-pedido" data-c="${c.id}">Enviar para a cozinha</button>` : `<a class="bt cheio grande" href="#caixa/${c.id}">Cobrar · ${dinCurto(v.falta)}</a>`}</div>
     <div class="linha-bts" style="margin-top:12px"><button type="button" class="bt" data-acao="via-entrega" data-c="${c.id}">${ico('impressora')}Imprimir a via${c.tipo === 'delivery' ? ' de entrega' : ''}</button></div>
     ${c.cliente?.tel ? `<div class="linha-bts" style="margin-top:12px"><a class="bt zap" href="${zap(c.cliente.tel, msgDe(c, 'confirmado'))}" target="_blank" rel="noopener">${ico('zap')}Confirmar no WhatsApp</a></div>` : ''}`;
 }
+// chama a senha na TV do balcão: o painel mostra o número grande, toca e fala "Senha 12"
+acao('chamar-senha', (b) => { const c = comanda(b.dataset.c); if (!c?.senha) return; c.chamada = Date.now(); grava(); toast(`Senha ${c.senha} chamada no painel`); });
 acao('enviar-pedido', (b) => { const c = comanda(b.dataset.c); enviar(c); toast('Enviado para a cozinha'); ir('pedidos'); });
 acao('saiu', (b) => {
   const c = comanda(b.dataset.c); if (etapa(c) !== 'preparo_ok') return toast('A cozinha ainda não marcou o pedido como pronto');

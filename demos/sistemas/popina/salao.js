@@ -1,13 +1,14 @@
 // Popina · salão do garçom: a fila do que fazer agora (conceito C escolhido pelo dono) + as mesas, e a comanda da mesa.
 import { db, t, din, dinCurto, tempo, minutos, prod, comanda, comandaDaMesa, fila, estadoMesa, conta, valorItem, abrirMesa, adicionarItem, enviar,
   mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg,
-  temCouvert, juntarMesas, transferirItens, marcar, quemAgora, temPin, vendaDeHoje, tem, ondeComanda, couvertLigado, abrirCartao, cartaoAberto, proximoCartao, proximaEtapa, restaVitrine, ouvir, auditar } from './loja.js?v=22';
-import { registrar, acao, ir } from './nucleo.js?v=22';
-import { ico, folha, toast, confirma, autorizar, bip, $, $$ } from './ui.js?v=22';
-import { OBS_RAPIDAS } from './dados.js?v=22';
-import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=22';
-import { modulosAtivos } from './perfis.js?v=22';
-import { TIPOS_RODIZIO, valorRodizio, pessoasRodizio, inclusoRodizio, cabeNaRodadaCat, precoAgora, precoFracoes, ETAPAS, ordemEtapa, ALERGENOS, ymd, esquecidas, noTurno, turnoDe, TURNOS, precoKg } from './precos.js?v=22';
+  temCouvert, juntarMesas, transferirItens, marcar, quemAgora, temPin, vendaDeHoje, tem, ondeComanda, couvertLigado, abrirCartao, cartaoAberto, proximoCartao, proximaEtapa, restaVitrine, ouvir, auditar } from './loja.js?v=23';
+import { registrar, acao, ir } from './nucleo.js?v=23';
+import { ico, folha, toast, confirma, autorizar, bip, $, $$ } from './ui.js?v=23';
+import { OBS_RAPIDAS } from './dados.js?v=23';
+import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas } from './opcoes.js?v=23';
+import { modulosAtivos } from './perfis.js?v=23';
+import { TIPOS_RODIZIO, valorRodizio, pessoasRodizio, inclusoRodizio, cabeNaRodadaCat, precoAgora, precoFracoes, ETAPAS, ordemEtapa, ALERGENOS, ymd, esquecidas, noTurno, turnoDe, TURNOS, precoKg,
+  tiposRodizio, comemRodizio, linhasRodizio, limiteRodada, faixasDoKg } from './precos.js?v=23';
 
 // a tela do salão segue o conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/1-salao-pc.png)
 const ROTULO = { conta: 'Levar a conta', chamou: 'Mesa chamou', pronto: 'Prato pronto', qr: 'Pedido pelo QR' };
@@ -154,7 +155,8 @@ export function linhaItem(c, i, editavel = true) {
   if (i.vitrine && i.status === 'entregue') rot = 'Da vitrine';
   const extras = [...(i.combo || []).map((x) => `${t(x.grupo)}: ${t(x.nome)}`), ...(i.adic || []).map(rotAdic), i.obs ? t(i.obs) : ""].filter(Boolean).join(" · ");
   // marcas das funções da casa: rodízio (preço zero), happy hour e prato do dia, etapa do prato
-  const marcas = [i.rodizio ? '<em class="marca-item rod">Rodízio</em>' : '', i.promo ? `<em class="marca-item promo">${t(i.promo)}</em>` : '', i.etapa ? `<em class="marca-item etapa">${t(NOME_ETAPA[i.etapa] || i.etapa)}</em>` : ''].join('');
+  const quem = tem('consumoMesa') && c.tipo === 'mesa' ? (i.daMesa ? '<em class="marca-item fam">Da mesa</em>' : i.pessoa ? `<em class="marca-item etapa">Pessoa ${i.pessoa}</em>` : '') : '';
+  const marcas = [i.rodizio ? '<em class="marca-item rod">Rodízio</em>' : '', i.promo ? `<em class="marca-item promo">${t(i.promo)}</em>` : '', i.etapa ? `<em class="marca-item etapa">${t(NOME_ETAPA[i.etapa] || i.etapa)}</em>` : '', quem].join('');
   return `<li class="item ${i.cancelado ? 'cancelado' : ''}"><div class="item-q">${i.qtd}×</div><div class="item-txt"><b>${t(i.nome)}</b>${marcas}${extras ? `<small>${extras}</small>` : ''}${i.cancelado ? `<small class="erro">Cancelado${i.cancelado.motivo ? ': ' + t(i.cancelado.motivo) : ''}</small>` : ''}</div>
     <div class="item-dir"><span>${din(valorItem(i))}</span>${i.cancelado ? '' : `<em class="st ${cls}">${rot}</em>`}</div>
     ${editavel && !i.cancelado && i.status !== 'entregue' ? `<button type="button" class="bt-ico" data-acao="item-menu" data-c="${c.id}" data-i="${i.id}" aria-label="Opções de ${t(i.nome)}">${ico('mais')}</button>` : ''}</li>`;
@@ -162,7 +164,7 @@ export function linhaItem(c, i, editavel = true) {
 // linhas de totais da comanda (consumo, rodízio, evento, portaria, serviço, couvert, desconto)
 export function linhasTotais(c, v = conta(c)) {
   const L = lojaCfg(), R = L.rodizio || {};
-  const rod = c.rodizio ? TIPOS_RODIZIO.filter(([k]) => c.rodizio[k]).map(([k, n]) => `${c.rodizio[k]} ${n.split(' ')[0].toLowerCase()}${c.rodizio[k] > 1 && k !== 'meia' ? (k === 'crianca' ? 's' : 's') : ''} × ${dinCurto(R[k] || 0)}`).join(' + ') : '';
+  const rod = c.rodizio ? linhasRodizio(R, c.rodizio).map((x) => `${x.qtd} ${x.nome} × ${x.preco ? dinCurto(x.preco) : 'sem cobrança'}`).join(' + ') : '';
   return `<div><span>Consumo</span><b>${din(v.sub)}</b></div>
     ${v.rodizio ? `<div><span>Rodízio (${rod})</span><b>${din(v.rodizio)}</b></div>` : ''}
     ${v.pacote ? `<div><span>Pacote do evento (${v.presentes} convidados)</span><b>${din(v.pacote)}</b></div>` : ''}
@@ -205,7 +207,8 @@ function avisoPausa(c) {
   return tot ? `<p class="mudo pausa-tot">Rodízio já ficou pausado ${tot} min</p>` : '';
 }
 // pessoas que estão comendo agora (as pausadas não contam no limite da rodada)
-const pessoasAtivas = (c) => Math.max(1, (c.pessoas || 1) - (c.pausaRod?.pessoas || 0));
+// quem come as peças do rodízio agora (só buffet e "não come" não contam no limite por rodada)
+const pessoasAtivas = (c) => Math.max(1, (c.rodizio ? comemRodizio(c.rodizio) || c.pessoas || 1 : c.pessoas || 1) - (c.pausaRod?.pessoas || 0));
 registrar('mesa', {
   titulo: 'Comanda', aba: 'salao',
   html(n) {
@@ -220,7 +223,7 @@ registrar('mesa', {
       ${db.config.planta?.[n]?.off ? `<p class="aviso perdido">${ico('alerta')}Mesa marcada como indisponível na planta. <button type="button" class="link" data-acao="mesa-disp" data-m="${n}">Liberar a mesa</button></p>` : ''}
       <div class="abrir-mesa">${gs.length ? `<p>Garçom</p><div class="pessoas" style="margin-bottom:16px">${gs.map((x) => `<button type="button" class="chip ${x === g ? 'on' : ''}" data-acao="escolher-garcom" data-g="${t(x)}" aria-pressed="${x === g}">${t(x)}</button>`).join('')}</div>` : ''}
         ${tem('rodizio') ? `<div class="rodizio-abrir" data-rodizio="${n}"><p>Rodízio: quantas pessoas de cada?</p>
-          ${TIPOS_RODIZIO.filter(([k]) => k !== 'meia' || Number(R.meia) > 0).map(([k, nome]) => `<div class="rod-linha"><span><b>${nome}</b><small>${din(R[k] || 0)} por pessoa</small></span><div class="qtd"><button type="button" class="bt-ico" data-rmenos="${k}" aria-label="Menos ${nome}">−</button><b data-rq="${k}">${k === 'adulto' ? 2 : 0}</b><button type="button" class="bt-ico" data-rmais="${k}" aria-label="Mais ${nome}">+</button></div></div>`).join('')}
+          ${tiposRodizio(R).map(([k, nome]) => `<div class="rod-linha"><span><b>${nome}</b><small>${Number(R[k]) ? `${din(R[k])} por pessoa` : 'sem cobrança'}</small></span><div class="qtd"><button type="button" class="bt-ico" data-rmenos="${k}" aria-label="Menos ${nome}">−</button><b data-rq="${k}">${k === 'adulto' ? 2 : 0}</b><button type="button" class="bt-ico" data-rmais="${k}" aria-label="Mais ${nome}">+</button></div></div>`).join('')}
           <p class="rod-total" data-rtotal></p>
           <div class="linha-bts"><button type="button" class="bt cheio grande" data-acao="abrir-rodizio" data-n="${n}">Abrir no rodízio</button></div>
           <p class="mudo" style="margin-top:14px">Ou sem rodízio (à la carte): quantas pessoas?</p></div>` : '<p>Quantas pessoas?</p>'}
@@ -232,8 +235,8 @@ registrar('mesa', {
   montar(el) {
     // rodízio: + e − por tipo de pessoa, com o total por pessoa na hora
     const box = $('[data-rodizio]', el); if (!box) return;
-    const R = lojaCfg().rodizio || {}, q = { adulto: 2, crianca: 0, meia: 0 };
-    const atual = () => { Object.keys(q).forEach((k) => { const e = $(`[data-rq="${k}"]`, box); if (e) e.textContent = q[k]; }); $('[data-rtotal]', box).textContent = `${pessoasRodizio(q)} pessoas · ${din(valorRodizio(R, q))}`; box.dataset.q = JSON.stringify(q); };
+    const R = lojaCfg().rodizio || {}, q = Object.fromEntries(TIPOS_RODIZIO.map(([k]) => [k, k === 'adulto' ? 2 : 0]));
+    const atual = () => { Object.keys(q).forEach((k) => { const e = $(`[data-rq="${k}"]`, box); if (e) e.textContent = q[k]; }); const fora = pessoasRodizio(q) - comemRodizio(q); $('[data-rtotal]', box).textContent = `${pessoasRodizio(q)} pessoas${fora ? ` (${fora} fora do rodízio)` : ''} · ${din(valorRodizio(R, q))}`; box.dataset.q = JSON.stringify(q); };
     $$('[data-rmais]', box).forEach((b) => { b.onclick = () => { q[b.dataset.rmais]++; atual(); }; });
     $$('[data-rmenos]', box).forEach((b) => { b.onclick = () => { q[b.dataset.rmenos] = Math.max(0, q[b.dataset.rmenos] - 1); atual(); }; });
     atual();
@@ -407,8 +410,8 @@ function retomarRodizio(c) {
 acao('rod-retomar', (b) => { const c = comanda(b.dataset.c); if (c) retomarRodizio(c); });
 // mudar as pessoas do rodízio depois de aberta (chegou mais alguém, criança que não vai comer…)
 function mudarRodizio(c) {
-  const R = lojaCfg().rodizio || {}, q = { adulto: 0, crianca: 0, meia: 0, ...c.rodizio };
-  folha({ titulo: `Rodízio · mesa ${c.mesa}`, corpo: TIPOS_RODIZIO.filter(([k]) => k !== 'meia' || Number(R.meia) > 0 || q.meia).map(([k, nome]) => `<div class="rod-linha"><span><b>${nome}</b><small>${din(R[k] || 0)} por pessoa</small></span><div class="qtd"><button type="button" class="bt-ico" data-rmenos="${k}" aria-label="Menos ${nome}">−</button><b data-rq="${k}">${q[k]}</b><button type="button" class="bt-ico" data-rmais="${k}" aria-label="Mais ${nome}">+</button></div></div>`).join('') + '<p class="rod-total" data-rtotal></p>',
+  const R = lojaCfg().rodizio || {}, q = { ...Object.fromEntries(TIPOS_RODIZIO.map(([k]) => [k, 0])), ...c.rodizio };
+  folha({ titulo: `Rodízio · mesa ${c.mesa}`, corpo: '<p class="mudo">Quem come o rodízio e quem não come: cada um paga o seu preço na conta.</p>' + tiposRodizio(R, q).map(([k, nome]) => `<div class="rod-linha"><span><b>${nome}</b><small>${Number(R[k]) ? `${din(R[k])} por pessoa` : 'sem cobrança'}</small></span><div class="qtd"><button type="button" class="bt-ico" data-rmenos="${k}" aria-label="Menos ${nome}">−</button><b data-rq="${k}">${q[k]}</b><button type="button" class="bt-ico" data-rmais="${k}" aria-label="Mais ${nome}">+</button></div></div>`).join('') + '<p class="rod-total" data-rtotal></p>',
     pe: '<button type="button" class="bt cheio grande" data-ok>Salvar</button>',
     aoAbrir: (f, fechar) => {
       const atual = () => { Object.keys(q).forEach((k) => { const e = $(`[data-rq="${k}"]`, f); if (e) e.textContent = q[k]; }); $('[data-rtotal]', f).textContent = `${pessoasRodizio(q)} pessoas · ${din(valorRodizio(R, q))}`; };
@@ -446,15 +449,19 @@ export function abrirSeletor(c, aoTerminar) {
       ${p.foto ? `<img src="${t(p.foto)}" alt="" loading="lazy" onerror="this.remove()">` : ''}<span><b>${t(p.nome)}</b><em>${ft ? `Só no ${nomeTurno(p)}` : p.ativo ? pr.txt : p.esgotouVitrine === ymd() ? 'Esgotou na vitrine' : 'Esgotado'}</em>${marcasProd(p, pr)}</span></button>`; }).join('');
   const contagem = () => { const n = c.itens.filter((i) => i.status === 'rascunho').reduce((s, i) => s + i.qtd, 0); return n ? `Pronto · ${n} a enviar` : 'Pronto'; };
   const pd = dia?.prod && db.produtos.find((x) => x.id === dia.prod && !foraTurno(x));
+  // rodízio com pedido por rodada: o garçom vê quantas peças ainda cabem nesta rodada (geral e por categoria)
+  const rodada = () => { if (!(c.rodizio && M.has('rodizio') && M.has('rodadas'))) return ''; const R = L.rodizio || {}, n = pessoasAtivas(c), its = itensRodada(c), g = cabeNaRodadaCat(R, n, its, '', 0);
+    const cats = Object.entries(R.rodadaCat || {}).filter(([, v]) => Number(v) > 0).map(([k]) => { const r = cabeNaRodadaCat(R, n, its, k, 0); return `${t(db.categorias.find((x) => x.id === k)?.nome || k)}: ${r.limite - r.resta} de ${r.limite}`; });
+    return g.limite ? `<p class="aviso rodada-aviso ${g.resta ? '' : 'cheia'}" data-rodada>${ico('relogio')}<span><b>Rodada: ${g.limite - g.resta} de ${g.limite} peças${g.resta ? ` · cabem mais ${g.resta}` : ' · limite atingido'}</b><small>${limiteRodada(R).porPessoa} por pessoa × ${n} ${n === 1 ? 'pessoa' : 'pessoas'} comendo${cats.length ? ` · ${cats.join(' · ')}` : ''}. A rodada libera quando as peças chegam à mesa.</small></span></p>` : ''; };
   folha({ titulo: `Itens · ${c.tipo === 'mesa' || c.tipo === 'cartao' || c.tipo === 'evento' ? ondeComanda(c).toLowerCase() : `pedido #${c.num}`}`, larga: true,
-    corpo: `${pd ? `<button type="button" class="prato-dia-faixa" data-p="${pd.id}">${ico('coroa')}<span><b>Prato do dia: ${t(pd.nome)}</b><small>${din(dia.preco)} só hoje</small></span></button>` : ''}
+    corpo: `${rodada()}${pd ? `<button type="button" class="prato-dia-faixa" data-p="${pd.id}">${ico('coroa')}<span><b>Prato do dia: ${t(pd.nome)}</b><small>${din(dia.preco)} só hoje</small></span></button>` : ''}
       <label class="busca">${ico('busca')}<input type="search" data-busca placeholder="Buscar no cardápio" aria-label="Buscar no cardápio"></label>
       <div class="chips" role="tablist">${db.categorias.map((k) => `<button type="button" class="chip ${k.id === cat ? 'on' : ''}" data-cat="${k.id}">${t(k.nome)}</button>`).join('')}</div>
       <div class="grade-prod" data-grade>${grade()}</div>`,
     pe: `<button type="button" class="bt cheio grande" data-fechar data-pronto>${contagem()}</button>`,
     aoFechar: aoTerminar,
     aoAbrir: (f) => {
-      const redesenha = () => { $('[data-grade]', f).innerHTML = grade(); $('[data-pronto]', f).textContent = contagem(); };
+      const redesenha = () => { $('[data-grade]', f).innerHTML = grade(); $('[data-pronto]', f).textContent = contagem(); const r = $('[data-rodada]', f); if (r) r.outerHTML = rodada(); };
       $('[data-busca]', f).oninput = (e) => { busca = e.target.value; redesenha(); };
       $$('[data-cat]', f).forEach((b) => { b.onclick = () => { cat = b.dataset.cat; busca = ''; $('[data-busca]', f).value = ''; $$('[data-cat]', f).forEach((x) => x.classList.toggle('on', x === b)); redesenha(); }; });
       f.addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (b && f.contains(b) && !b.disabled) detalheItem(c, prod(b.dataset.p), () => redesenha()); });
@@ -472,13 +479,17 @@ function detalheItem(c, p, depois) {
   // harmonização: a bebida sugerida para o prato, com um toque para pôr na comanda
   const hp = M.has('harmonizacao') && p.harmoniza ? prod(p.harmoniza) : null;
   const alg = M.has('alergenicos') && p.alergenos?.length ? `<p class="aviso-alg">${ico('alerta')}${t(p.alergenos.map((a) => ALERGENOS.find((x) => x[0] === a)?.[1] || a).join(' · '))}</p>` : '';
-  folha({ titulo: p.nome, corpo: `${p.desc ? `<p class="mudo">${t(p.desc)}</p>` : ''}${M.has('porcoesFamilia') && p.serve ? `<p class="serve-grande">${ico('pessoas')}${t(p.serve)}</p>` : ''}${alg}${inc ? '<p class="aviso ouro">Incluso no rodízio: entra sem custo na conta.</p>' : ''}${op.html}
+  // consumo da mesa e individual: o item é da mesa (divide entre todos na conta) ou de uma pessoa
+  const quemOn = M.has('consumoMesa') && c.tipo === 'mesa', np = Math.min(12, Math.max(1, c.pessoas || 2)); let dono = quemOn && p.serve ? 'mesa' : '';
+  const htmlQuem = quemOn ? `<fieldset class="op-grupo quem-item"><legend>De quem é? <em>a divisão da conta já vem pronta</em></legend><div class="chips quebra">${[['mesa', 'Da mesa (divide entre todos)'], ...Array.from({ length: np }, (_, k) => [String(k + 1), `Pessoa ${k + 1}`]), ['', 'Não marcar']].map(([v, n]) => `<button type="button" class="chip ${dono === v ? 'on' : ''}" data-dono="${v}" aria-pressed="${dono === v}">${n}</button>`).join('')}</div></fieldset>` : '';
+  folha({ titulo: p.nome, corpo: `${p.desc ? `<p class="mudo">${t(p.desc)}</p>` : ''}${M.has('porcoesFamilia') && p.serve ? `<p class="serve-grande">${ico('pessoas')}${t(p.serve)}</p>` : ''}${alg}${inc ? '<p class="aviso ouro">Incluso no rodízio: entra sem custo na conta.</p>' : ''}${htmlQuem}${op.html}
     ${hp && hp.ativo !== false ? `<div class="harmoniza"><span>${ico('taca')}<b>Combina com ${t(hp.nome)}</b><small>${din(hp.preco)}</small></span><button type="button" class="bt" data-harm>Pôr junto</button></div>` : ''}`,
   pe: `<button type="button" class="bt cheio grande" data-add>Adicionar · ${din(p.preco)}</button>`,
   aoAbrir: (f, fechar) => {
     const bt = $('[data-add]', f);
     op.ligar(f, () => { const fl = op.falta(); bt.textContent = fl || `Adicionar · ${din(op.unit() * op.s.qtd)}`; bt.classList.toggle('pendente', !!fl); });
     $('[data-harm]', f)?.addEventListener('click', () => { fechar(); detalheItem(c, hp, depois); });
+    $$('[data-dono]', f).forEach((x) => { x.onclick = () => { dono = x.dataset.dono; $$('[data-dono]', f).forEach((y) => { y.classList.toggle('on', y === x); y.setAttribute('aria-pressed', String(y === x)); }); }; });
     bt.onclick = () => {
       const fl = op.falta(); if (fl) { toast(fl); f.querySelector('.op-grupo [type=radio]:not(:checked), .op-grupo [type=checkbox]')?.closest('.op-grupo')?.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
       const it = op.item(f);
@@ -488,21 +499,57 @@ function detalheItem(c, p, depois) {
         if (!r.ok) return toast(r.resta ? `Nesta rodada cabem só mais ${r.resta} ${r.resta === 1 ? 'peça' : 'peças'}${onde} (limite ${r.limite}). Envie e espere chegar para pedir mais.` : `Limite da rodada${onde} atingido (${r.limite} peças). Espere esta rodada chegar à mesa para pedir mais.`);
       }
       if (adicionarItem(c, it) === false) return toast(c.perdido ? 'Cartão perdido: libere o cartão antes de lançar' : 'Não deu para lançar este item');
-      fechar(); toast(`${it.qtd}× ${p.nome} na comanda`); depois?.();
+      if (quemOn && dono) { const novo = c.itens.at(-1); if (dono === 'mesa') novo.daMesa = true; else novo.pessoa = Number(dono); grava(); }
+      fechar(); toast(`${it.qtd}× ${p.nome} na comanda`);
+      // combo em etapas: depois do lanche, oferece o acompanhamento e a bebida com desconto
+      const of = !inc && ofertaCombo(p, L, M, db.produtos);
+      if (of) return setTimeout(() => oferecerCombo(c, of, depois), 260);
+      depois?.();
     };
   } });
+}
+// "Quer transformar em combo?" → acompanhamento → bebida; o desconto entra no acompanhamento (conferido por aplicarComboEtapas)
+export function oferecerCombo(c, of, depois) {
+  const bebidas = of.bebida.flatMap((b) => escolhasCombo(b).map((x) => ({ ...x, prod: b.id }))); let acomp = null;
+  const passo1 = () => `<p class="combo-oferta">${ico('cloche')}<span><b>Acompanhamento + bebida com ${din(of.desconto)} de desconto</b><small>O combo sai a partir de + ${din(of.aPartir)}</small></span></p>`;
+  const passo2 = () => `<p class="combo-passo">1 de 2 · Escolha o acompanhamento</p><div class="papeis">${of.acomp.map((a) => `<button type="button" class="papel" data-ac="${a.id}"><b>${t(a.nome)}</b><small>${din(a.preco)}</small></button>`).join('')}</div>`;
+  const passo3 = () => `<p class="combo-passo">2 de 2 · Escolha a bebida <em>${t(acomp.nome)} já está no combo</em></p><div class="papeis">${bebidas.map((x, k) => `<button type="button" class="papel" data-be="${k}"><b>${t(x.rot)}</b><small>${din(x.preco)}</small></button>`).join('')}</div>`;
+  folha({ titulo: 'Quer transformar em combo?', corpo: `<div data-combo>${passo1()}</div>`,
+    pe: '<button type="button" class="bt" data-fechar data-so>Só o lanche</button><button type="button" class="bt cheio grande" data-quero>Quero o combo</button>', aoFechar: depois,
+    aoAbrir: (f, fechar) => {
+      const box = $('[data-combo]', f), pe = f.querySelector('[data-quero]');
+      pe.onclick = () => { box.innerHTML = passo2(); pe.hidden = true; f.querySelector('[data-so]').textContent = 'Desistir do combo'; };
+      box.addEventListener('click', (e) => {
+        const a = e.target.closest('[data-ac]'), b = e.target.closest('[data-be]');
+        if (a) { acomp = prod(a.dataset.ac); box.innerHTML = passo3(); return; }
+        if (b && acomp) {
+          const x = bebidas[Number(b.dataset.be)];
+          if (adicionarItem(c, { prodId: acomp.id }) !== false) c.itens.at(-1).comboUp = 'acomp';
+          if (adicionarItem(c, { prodId: x.prod, adic: x.adic }) !== false) c.itens.at(-1).comboUp = 'bebida';
+          const n = aplicarComboEtapas(c.itens, lojaCfg(), prod); grava(); fechar();
+          toast(n ? `Combo montado: ${acomp.nome} e ${x.rot} · − ${din(of.desconto)}` : 'Acompanhamento e bebida na comanda');
+        }
+      });
+    } });
 }
 
 // prato por quilo: digita o peso da balança (em gramas) e o valor aparece na hora
 export function pesarItem(c, p, depois) {
-  const pk = precoKg(p), kgPreco = pk.preco;
-  folha({ titulo: p.nome, corpo: `<p class="mudo">${din(kgPreco)} o quilo${pk.desde ? ` (preço desde ${pk.desde})` : pk.ate ? ` até ${pk.ate}` : ''}. Digite o peso que a balança mostrou${db.config.tara ? `; o prato vazio (${db.config.tara} g) já é descontado` : ''}.</p>
+  const pk = precoKg(p), kgPreco = pk.preco, L = lojaCfg();
+  // tara em um toque: cada tipo de prato tem o seu peso (Regras das funções); sem a lista, vale a tara única dos Ajustes
+  const taras = tem('quilo') && (L.taras || []).length ? L.taras : db.config.tara ? [{ nome: 'Prato', g: Number(db.config.tara) }] : [];
+  let tara = taras[0]?.g || 0;
+  const fx = faixasDoKg(p);
+  folha({ titulo: p.nome, corpo: `<p class="mudo">${din(kgPreco)} o quilo${pk.desde ? ` (preço desde ${pk.desde})` : pk.ate ? ` até ${pk.ate}` : ''}. Digite o peso que a balança mostrou; o prato escolhido é descontado.</p>
+    ${fx.length > 1 ? `<div class="kg-faixas">${fx.map((x) => `<span class="${x.preco === kgPreco && (x.de || '') === (pk.desde || '') ? 'on' : ''}"><small>${x.de ? `a partir das ${x.de}` : 'na abertura'}${x.ate ? ` até ${x.ate}` : ''}</small><b>${din(x.preco)}/kg</b></span>`).join('')}</div>` : ''}
+    ${taras.length ? `<div class="campo"><span>Tara: o prato vazio (um toque)</span><div class="chips quebra taras">${[...taras, { nome: 'Sem prato', g: 0 }].map((x, k) => `<button type="button" class="chip ${k === 0 ? 'on' : ''}" data-tara="${x.g}" aria-pressed="${k === 0}">${t(x.nome)}${x.g ? ` · ${x.g} g` : ''}</button>`).join('')}</div></div>` : ''}
     <label class="campo peso"><span>Peso que a balança mostrou (gramas)</span><input data-g inputmode="numeric" placeholder="Ex.: 452" autocomplete="off"></label>
     <div class="chips quebra">${[300, 400, 500, 600].map((g) => `<button type="button" class="chip" data-gr="${g}">${g} g</button>`).join('')}</div>
     <p class="peso-valor" data-v>R$ 0,00</p><p class="peso-conta" data-conta>Aceita de 20 g a 5 kg</p>`,
   pe: '<button type="button" class="bt cheio grande" data-add disabled>Adicionar</button>',
   aoAbrir: (f, fechar) => {
-    const g = $('[data-g]', f); const tara = Number(db.config.tara || 0); const kg = () => Math.max(0, (Number(String(g.value).replace(/\D/g, '')) - tara) / 1000);
+    $$('[data-tara]', f).forEach((b) => { b.onclick = () => { tara = Number(b.dataset.tara) || 0; $$('[data-tara]', f).forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); }); atual(); g.focus(); }; });
+    const g = $('[data-g]', f); const kg = () => Math.max(0, (Number(String(g.value).replace(/\D/g, '')) - tara) / 1000);
     const atual = () => { const k = kg(), bruto = Number(String(g.value).replace(/\D/g, '')) || 0; $('[data-v]', f).textContent = k ? `${din(kgPreco * k)}` : 'R$ 0,00'; $('[data-conta]', f).textContent = bruto ? (tara ? `${bruto} g na balança − ${tara} g do prato = ${Math.max(0, bruto - tara)} g` : `${bruto} g`) + ` × ${din(kgPreco)}/kg` : 'Aceita de 20 g a 5 kg'; $('[data-add]', f).disabled = !(k > 0.02 && k < 5); };
     g.oninput = atual; $$('[data-gr]', f).forEach((b) => { b.onclick = () => { g.value = b.dataset.gr; atual(); g.focus(); }; });
     $('[data-add]', f).onclick = () => { const k = kg(); if (!(k > 0.02 && k < 5)) return toast('Confira o peso: entre 20 g e 5 kg'); if (adicionarItem(c, { prodId: p.id, kg: k }) === false) return toast('Cartão perdido: libere o cartão antes de lançar'); fechar(); toast(`${p.nome}: ${din(precoKg(p).preco * k)}`); depois?.(); };

@@ -3,12 +3,13 @@
 // Cada tela só aparece com a função ligada (Gestão › Aparência e templates).
 import { db, t, din, dinCurto, grava, r2, uid, tempo, lojaCfg, setLoja, tem, comandaDaMesa, abrirMesa, conta, itensValidos, ouvir,
   abrirCartao, cartaoAberto, proximoCartao, vitrineHoje, prod, couvertLigado, marcar, insumo, saldo, fmtQtd, custoPrato, registrarPerda, auditar, quemAgora,
-  clientePorTel, fidelidade, vencePremio } from './loja.js?v=22';
-import { registrar, acao, ir } from './nucleo.js?v=22';
-import { ico, folha, toast, confirma, bip, $, $$ } from './ui.js?v=22';
-import { TELAS_MAIS, MONTAR, volta, PAINEL_TIPO } from './mais.js?v=22';
-import { abrirSeletor } from './salao.js?v=22';
-import { TIPOS_RODIZIO, ymd, TURNOS, loteAtual, lotacao, antesDe, noite, estadoBarril, fecharBarril, orcamentoEvento, pessoasRodizio } from './precos.js?v=22';
+  clientePorTel, fidelidade, vencePremio, ajustarEstoque } from './loja.js?v=23';
+import { registrar, acao, ir } from './nucleo.js?v=23';
+import { ico, folha, toast, confirma, bip, $, $$ } from './ui.js?v=23';
+import { TELAS_MAIS, MONTAR, volta, PAINEL_TIPO } from './mais.js?v=23';
+import { abrirSeletor } from './salao.js?v=23';
+import { TIPOS_RODIZIO, ymd, TURNOS, loteAtual, lotacao, antesDe, noite, estadoBarril, fecharBarril, orcamentoEvento, pessoasRodizio, ESTACOES_PADRAO, faixasDoKg, estadoGarrafa, perdaGarrafa, comissaoPromoter } from './precos.js?v=23';
+import { resumoCamarotes } from './tipos.js?v=23';
 
 const num = (v) => { const s = String(v ?? '').trim(); return Number(/,/.test(s) ? s.replace(/\./g, '').replace(',', '.') : s) || 0; };
 const vir = (n) => String(n ?? '').replace('.', ',');
@@ -25,7 +26,7 @@ TELAS_MAIS.funcoes = () => {
   const L = lojaCfg(), R = L.rodizio || {}, F = L.fracoes || {}, FI = L.fidelidade || {}, PO = L.portaria || {}, prods = db.produtos.map((p) => [p.id, p.nome]);
   const s = [];
   if (tem('rodizio')) s.push(`<section class="bloco-form"><h2>Rodízio</h2><p class="mudo">Preço por pessoa. Os itens marcados entram na conta com preço zero; os outros são cobrados à parte.</p>
-    <div class="tres-c">${TIPOS_RODIZIO.map(([k, n]) => `<label class="campo"><span>${n}${k === 'meia' ? ' (opcional)' : ''}</span><input name="rod_${k}" inputmode="decimal" value="${R[k] ? vir(R[k]) : ''}" placeholder="0,00"></label>`).join('')}</div>
+    <div class="tres-c">${TIPOS_RODIZIO.filter(([k]) => k !== 'fora').map(([k, n]) => `<label class="campo"><span>${n}${['meia', 'vegetariano', 'buffet'].includes(k) ? ' (opcional)' : ''}</span><input name="rod_${k}" inputmode="decimal" value="${R[k] ? vir(R[k]) : ''}" placeholder="0,00"></label>`).join('')}</div>
     ${tem('rodadas') ? `<label class="campo"><span>Pedido por rodada: peças inclusas por pessoa a cada rodada (0 = sem limite)</span><input name="rod_rodada" inputmode="numeric" value="${R.porRodada || ''}" placeholder="Ex.: 6"></label>
       <div class="campo"><span>Limite por categoria (vazio = o limite geral acima; 0 = sem limite nesta categoria)</span><div class="rodada-cats">${db.categorias.filter((c) => db.produtos.some((p) => p.cat === c.id)).map((c) => `<label class="campo"><span>${t(c.nome)}</span><input name="rc_${c.id}" inputmode="numeric" value="${R.rodadaCat?.[c.id] ?? ''}" placeholder="geral"></label>`).join('')}</div></div>` : ''}
     <div class="campo"><span>Inclusos no rodízio</span>${chipsDe(prods, R.inclusos || [], 'rod_inc')}</div></section>`);
@@ -48,10 +49,11 @@ TELAS_MAIS.funcoes = () => {
   if (tem('portaria')) s.push(`<section class="bloco-form"><h2>Portaria</h2><label class="campo"><span>Capacidade da casa (pessoas)</span><input name="po_cap" inputmode="numeric" value="${PO.capacidade || ''}" placeholder="Ex.: 300"></label>
     <label class="campo"><span>Tipos de ingresso: um por linha, com preço e consumação mínima. Ex.: Pista | 40 | 30</span><textarea name="po_ing" rows="4" placeholder="Pista | 40 | 30">${t((PO.ingressos || []).map((x) => `${x.nome} | ${vir(x.preco)} | ${vir(x.consumacao || 0)}`).join('\n'))}</textarea></label>
     <label class="campo"><span>Lotes: um por linha, na ordem em que viram. Tipo | lote | preço | quantidade (0 = sem limite). Quando um lote esgota, o próximo entra sozinho.</span><textarea name="po_lotes" rows="4" placeholder="Pista | 1º lote | 30 | 100">${t((PO.ingressos || []).flatMap((x) => (x.lotes || []).map((l) => `${x.nome} | ${l.nome} | ${vir(l.preco)} | ${l.qtd || 0}`)).join('\n'))}</textarea></label>
-    <div class="duas-c"><label class="campo"><span>Promoters: um por linha. Código | nome</span><textarea name="po_prom" rows="3" placeholder="ANA | Ana Clara">${t((PO.promoters || []).map((x) => `${x.codigo} | ${x.nome}`).join('\n'))}</textarea></label>
+    <div class="duas-c"><label class="campo"><span>Promoters: um por linha. Código | nome | R$ por entrada paga | % do consumo dos camarotes</span><textarea name="po_prom" rows="3" placeholder="ANA | Ana Clara | 5 | 10">${t((PO.promoters || []).map((x) => [x.codigo, x.nome, ...(x.porEntrada || x.pctConsumo ? [vir(x.porEntrada || 0), vir(x.pctConsumo || 0)] : [])].join(' | ')).join('\n'))}</textarea></label>
       <label class="campo"><span>Consumação mínima de quem entra pela lista VIP (R$)</span><input name="po_vipc" inputmode="decimal" value="${PO.vipConsumacao ? vir(PO.vipConsumacao) : ''}" placeholder="0,00"></label></div></section>`);
   if (tem('comandaIndividual')) s.push(`<section class="bloco-form"><h2>Comanda individual</h2><label class="campo"><span>Taxa do cartão perdido (R$), cobrada na conta do cartão marcado como perdido</span><input name="ci_taxa" inputmode="decimal" value="${L.taxaCartaoPerdido ? vir(L.taxaCartaoPerdido) : ''}" placeholder="0,00"></label></section>`);
   if (couvertLigado()) s.push(`<section class="bloco-form"><h2>Couvert</h2><label class="campo"><span>Couvert por pessoa (R$), cobrado na conta da mesa</span><input name="couvert" inputmode="decimal" value="${L.couvert ? vir(L.couvert) : ''}" placeholder="0,00"></label></section>`);
+  regrasRodada4(L, s, prods);
   // cardápio por turno: vale para todos os tipos de negócio
   const TU = L.turnos || {};
   s.push(`<section class="bloco-form"><h2>Cardápio por turno</h2><p class="mudo">Pratos e categorias marcados “só no almoço” ou “só no jantar” somem do cardápio do cliente fora do horário; o garçom vê “só no almoço”. Marque no prato (Cardápio › editar) ou na categoria.</p>
@@ -67,7 +69,7 @@ MONTAR.funcoes = (el) => {
     const linhas = (v) => v.split('\n').map((l) => l.split('|').map((x) => x.trim())).filter((x) => x[0]);
     if (f.rod_adulto) {
       const rc = {}; $$('[name^=rc_]', f).forEach((i) => { if (i.value.trim() !== '') rc[i.name.slice(3)] = Math.max(0, Math.round(num(i.value))); });
-      p.rodizio = { ...(L.rodizio || {}), adulto: r2(num(f.rod_adulto.value)), crianca: r2(num(f.rod_crianca.value)), meia: r2(num(f.rod_meia.value)), inclusos: $$('[name=rod_inc]:checked', f).map((i) => i.value), ...(f.rod_rodada ? { porRodada: Math.max(0, Math.round(num(f.rod_rodada.value))), rodadaCat: rc } : {}) };
+      p.rodizio = { ...(L.rodizio || {}), adulto: r2(num(f.rod_adulto.value)), crianca: r2(num(f.rod_crianca.value)), meia: r2(num(f.rod_meia.value)), vegetariano: r2(num(f.rod_vegetariano?.value)), buffet: r2(num(f.rod_buffet?.value)), inclusos: $$('[name=rod_inc]:checked', f).map((i) => i.value), ...(f.rod_rodada ? { porRodada: Math.max(0, Math.round(num(f.rod_rodada.value))), rodadaCat: rc } : {}) };
     }
     if (f.fr_regra) p.fracoes = { regra: f.fr_regra.value, bordas: f.fr_bordas.value.split('\n').map((l) => l.split('|').map((x) => x.trim())).filter((x) => x[0]).map(([nome, ...pr]) => ({ nome: nome.slice(0, 40), precos: pr.map(num).filter((x) => x >= 0).slice(0, 6) })) };
     if (f.pd_prod_0) p.pratoDoDia = DIAS.map((_, k) => { const id = f[`pd_prod_${k}`].value, pr = r2(num(f[`pd_preco_${k}`].value)); return id ? { prod: id, preco: pr || prod(id)?.preco || 0 } : null; });
@@ -80,15 +82,69 @@ MONTAR.funcoes = (el) => {
     if (f.po_cap) {
       const lotes = linhas(f.po_lotes.value).map(([tipo, nome, pr, q]) => ({ tipo, nome: String(nome || '').slice(0, 30), preco: r2(num(pr)), qtd: Math.max(0, Math.round(num(q))) })).filter((l) => l.nome);
       p.portaria = { ...(L.portaria || {}), capacidade: Math.max(0, Math.round(num(f.po_cap.value))), vipConsumacao: r2(num(f.po_vipc.value)),
-        promoters: linhas(f.po_prom.value).map(([cod, nome]) => ({ codigo: cod.toUpperCase().replace(/\s+/g, '').slice(0, 12), nome: String(nome || cod).slice(0, 40) })),
+        promoters: linhas(f.po_prom.value).map(([cod, nome, pe, pc]) => ({ codigo: cod.toUpperCase().replace(/\s+/g, '').slice(0, 12), nome: String(nome || cod).slice(0, 40), ...(num(pe) > 0 ? { porEntrada: r2(num(pe)) } : {}), ...(num(pc) > 0 ? { pctConsumo: Math.min(100, r2(num(pc))) } : {}) })),
         ingressos: linhas(f.po_ing.value).map(([nome, pr, cons]) => { const ls = lotes.filter((l) => l.tipo.toLowerCase() === nome.toLowerCase()).map(({ tipo, ...l }) => l); return { nome: nome.slice(0, 40), preco: r2(num(pr)), consumacao: r2(num(cons)), ...(ls.length ? { lotes: ls } : {}) }; }) };
     }
     if (f.ci_taxa) p.taxaCartaoPerdido = r2(num(f.ci_taxa.value));
     if (f.couvert) p.couvert = r2(num(f.couvert.value));
     if (f.tu_on) p.turnos = { ligado: f.tu_on.checked, ...Object.fromEntries(TURNOS.map(([k]) => [k, [f[`tu_${k}_de`].value || '', f[`tu_${k}_ate`].value || '']])) };
+    salvarRodada4(f, L, p, linhas);
     setLoja(p); toast('Regras salvas');
   };
 };
+// ------------------------------------------------------------------ regras da rodada 4 (forno, embalagem, estações, combo em etapas, cota, quilo, vitrine, camarotes, porções, faturado)
+const slug = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 20);
+const opInsumos = (sel) => `<option value="">Nenhuma</option>${db.insumos.filter((i) => i.unid === 'un').map((i) => `<option value="${t(i.id)}" ${i.id === sel ? 'selected' : ''}>${t(i.nome)}</option>`).join('')}`;
+function regrasRodada4(L, s, prods) {
+  if (tem('forno')) { const FO = L.forno || {}; s.push(`<section class="bloco-form"><h2>Fila do forno</h2><p class="mudo">A cozinha vê a ordem das pizzas, a previsão de saída e o aviso de tirar do forno. O tempo vale para o tamanho que tiver o nome escrito.</p>
+    <div class="duas-c"><label class="campo"><span>Pizzas no forno ao mesmo tempo</span><input name="fo_cap" inputmode="numeric" value="${FO.capacidade || 6}"></label><label class="campo"><span>Tempo padrão (minutos)</span><input name="fo_pad" inputmode="numeric" value="${FO.padrao || 10}"></label></div>
+    <label class="campo"><span>Tempo por tamanho: um por linha. Tamanho | minutos. Ex.: Broto | 7</span><textarea name="fo_tempos" rows="3" placeholder="Broto | 7">${t((FO.tempos || []).map((x) => `${x.tam} | ${x.min}`).join('\n'))}</textarea></label></section>`); }
+  if (tem('embalagem')) { const E = L.embalagem || {}, pz = E.pizza || [], peq = pz.find((x) => x.tam) || {}, gde = pz.find((x) => !x.tam) || {};
+    s.push(`<section class="bloco-form"><h2>Embalagem automática</h2><p class="mudo">No delivery e na retirada, a caixa da pizza sai do estoque pelo tamanho; a embalagem do delivery sai uma vez por pedido. Cadastre as embalagens no Estoque (unidade).</p>
+    <div class="tres-c"><label class="campo"><span>Tamanho da caixa pequena (o nome contém)</span><input name="em_tam" value="${t(peq.tam || 'Broto')}" maxlength="20"></label><label class="campo"><span>Caixa pequena</span><select name="em_peq">${opInsumos(peq.insumo)}</select></label><label class="campo"><span>Caixa dos outros tamanhos</span><select name="em_gde">${opInsumos(gde.insumo)}</select></label></div>
+    <label class="campo"><span>Embalagem do delivery (uma por pedido)</span><select name="em_del">${opInsumos(E.delivery)}</select></label></section>`); }
+  if (tem('estacoes')) { const ES = L.estacoes?.length ? L.estacoes : ESTACOES_PADRAO, M = L.estacaoCat || {};
+    s.push(`<section class="bloco-form"><h2>Cozinha por estação</h2><p class="mudo">Cada categoria vai para uma estação (o prato pode ter a sua no cadastro). Na tela da cozinha, cada estação vê só o que é dela, e o garçom só é avisado quando todas terminam.</p>
+    <label class="campo"><span>Estações: uma por linha</span><textarea name="es_nomes" rows="4">${t(ES.map((x) => x.nome).join('\n'))}</textarea></label>
+    <div class="rodada-cats">${db.categorias.filter((c) => db.produtos.some((p) => p.cat === c.id && p.setor !== 'bar')).map((c) => `<label class="campo"><span>${t(c.nome)}</span><select name="es_cat_${c.id}"><option value="">Cozinha geral</option>${ES.map((x) => `<option value="${t(x.id)}" ${M[c.id] === x.id ? 'selected' : ''}>${t(x.nome)}</option>`).join('')}</select></label>`).join('')}</div></section>`); }
+  if (tem('comboEtapas')) { const C = L.comboEtapas || {};
+    s.push(`<section class="bloco-form"><h2>Combo em etapas</h2><p class="mudo">Depois de escolher o lanche, o cliente (e o garçom) vê “Quer transformar em combo?”: escolhe o acompanhamento e a bebida, e o desconto entra sozinho.</p>
+    <label class="campo"><span>Desconto do combo (R$)</span><input name="ce_desc" inputmode="decimal" value="${vir(C.desconto ?? 8)}"></label>
+    <div class="campo"><span>Categorias que oferecem o combo</span>${chipsDe(db.categorias.map((c) => [c.id, c.nome]), C.cats || [], 'ce_cat')}</div>
+    <div class="campo"><span>Acompanhamentos</span>${chipsDe(prods, C.acomp || [], 'ce_ac')}</div><div class="campo"><span>Bebidas</span>${chipsDe(prods, C.bebida || [], 'ce_be')}</div></section>`); }
+  if (tem('cotaAdicionais')) { const gs = db.produtos.flatMap((p) => (p.grupos || []).map((g, k) => ({ p, g, k })).filter((x) => (Number(x.g.max) || 1) > 1));
+    s.push(`<section class="bloco-form"><h2>Adicionais com cota grátis</h2><p class="mudo">Nos grupos com mais de uma escolha (molhos, complementos): até quantos saem de graça e quanto custa cada um a mais (vazio = o preço da opção).</p>
+    ${gs.length ? `<div class="tabela-rolo"><table class="tabela"><thead><tr><th>Prato · grupo</th><th class="num">Grátis</th><th class="num">Cada a mais (R$)</th></tr></thead><tbody>${gs.map(({ p, g, k }) => `<tr><td><b>${t(p.nome)}</b><small>${t(g.nome)} · até ${g.max}</small></td><td class="num"><input class="inv-q" name="ct_${p.id}_${k}_g" inputmode="numeric" value="${g.gratis || ''}" placeholder="0" aria-label="Grátis em ${t(g.nome)} de ${t(p.nome)}"></td><td class="num"><input class="inv-q" name="ct_${p.id}_${k}_e" inputmode="decimal" value="${g.extra != null ? vir(g.extra) : ''}" placeholder="da opção" aria-label="Preço a mais em ${t(g.nome)} de ${t(p.nome)}"></td></tr>`).join('')}</tbody></table></div>` : '<p class="vazio">Nenhum prato tem grupo com mais de uma escolha. Crie em Cardápio › editar › Complementos.</p>'}</section>`); }
+  if (tem('quilo')) { const kg = db.produtos.filter((p) => p.porKg);
+    s.push(`<section class="bloco-form"><h2>Venda por quilo</h2><p class="mudo">Tara em um toque: na hora de pesar, o garçom ou o caixa toca no tipo de prato e o peso dele sai sozinho.</p>
+    <label class="campo"><span>Pratos e potes: um por linha. Nome | gramas. Ex.: Prato raso | 350</span><textarea name="kg_taras" rows="3" placeholder="Prato raso | 350">${t((L.taras || []).map((x) => `${x.nome} | ${x.g}`).join('\n'))}</textarea></label>
+    ${kg.map((p) => `<p class="mudo"><b>${t(p.nome)}</b>: ${faixasDoKg(p).map((f) => `${f.de ? `das ${f.de}` : 'na abertura'}${f.ate ? ` até ${f.ate}` : ''} ${din(f.preco)}/kg`).join(' · ')}. Mude o preço por horário no cadastro do prato.</p>`).join('')}</section>`); }
+  if (tem('vitrine')) s.push(`<section class="bloco-form"><h2>Vitrine</h2><label class="campo"><span>Desconto do que sobrou e volta amanhã (%)</span><input name="vt_desc" inputmode="numeric" value="${L.vitrineDesconto ?? 30}"></label></section>`);
+  if (tem('camarotes')) s.push(`<section class="bloco-form"><h2>Camarotes</h2><p class="mudo">A consumação do camarote vira o crédito do cartão na chegada; o que não for consumido é cobrado no fim. A comissão de cada promoter fica na Portaria (código | nome | R$ por entrada | %).</p>
+    <label class="campo"><span>Um por linha. Nome | capacidade | consumação (R$) | pacote</span><textarea name="cm_lista" rows="4" placeholder="Camarote 1 | 10 | 1500 | 1 whisky e 6 energéticos">${t((L.camarotes || []).map((x) => `${x.nome} | ${x.capacidade} | ${vir(x.consumacao)} | ${x.pacote || ''}`).join('\n'))}</textarea></label></section>`);
+  if (tem('faturado')) s.push(`<section class="bloco-form"><h2>Conta faturada</h2><label class="campo"><span>Prazo padrão para a empresa pagar (dias)</span><input name="fa_prazo" inputmode="numeric" value="${L.faturadoPrazo ?? 30}"></label></section>`);
+  if (tem('porcoesFamilia')) { const l = db.produtos.filter((p) => p.tamanhos?.length && !p.pizza && p.setor !== 'bar');
+    if (l.length) s.push(`<section class="bloco-form"><h2>Porções por tamanho</h2><p class="mudo">Cada tamanho tem o seu preço e multiplica a ficha técnica (o G gasta mais insumo que o P). Ajuste em Cardápio › editar › Tamanhos (o 3º campo: quanto gasta da ficha, 1 = inteira).</p>
+    <div class="tabela-rolo"><table class="tabela"><thead><tr><th>Prato · tamanho</th><th class="num">Preço</th><th class="num">× ficha</th><th class="num">Custo</th><th class="num">Margem</th></tr></thead><tbody>${l.flatMap((p) => p.tamanhos.map((tm) => { const c = r2(custoPrato(p) * (Number(tm.fator) || 1)); return `<tr><td><b>${t(p.nome)}</b><small>${t(tm.nome)}</small></td><td class="num">${dinCurto(tm.preco)}</td><td class="num">${vir(Number(tm.fator) || 1)}×</td><td class="num">${dinCurto(c)}</td><td class="num">${tm.preco ? Math.round((1 - c / tm.preco) * 100) : 0}%</td></tr>`; })).join('')}</tbody></table></div></section>`); }
+}
+function salvarRodada4(f, L, p, linhas) {
+  if (f.fo_cap) p.forno = { capacidade: Math.max(1, Math.round(num(f.fo_cap.value)) || 6), padrao: Math.max(1, Math.round(num(f.fo_pad.value)) || 10), tempos: linhas(f.fo_tempos.value).map(([tam, m]) => ({ tam: tam.slice(0, 30), min: Math.max(1, Math.round(num(m)) || 10) })) };
+  if (f.em_del) p.embalagem = { pizza: [...(f.em_peq.value ? [{ tam: f.em_tam.value.trim() || 'Broto', insumo: f.em_peq.value }] : []), ...(f.em_gde.value ? [{ tam: '', insumo: f.em_gde.value }] : [])], delivery: f.em_del.value };
+  if (f.es_nomes) {
+    const velhas = L.estacoes?.length ? L.estacoes : ESTACOES_PADRAO, usadas = new Set();
+    p.estacoes = f.es_nomes.value.split('\n').map((x) => x.trim()).filter(Boolean).slice(0, 10).map((nome) => { let id = velhas.find((v) => v.nome.toLowerCase() === nome.toLowerCase())?.id || slug(nome) || uid('es'); while (usadas.has(id)) id += '2'; usadas.add(id); return { id, nome: nome.slice(0, 30) }; });
+    p.estacaoCat = Object.fromEntries($$('[name^=es_cat_]', f).filter((x) => x.value && p.estacoes.some((e) => e.id === x.value)).map((x) => [x.name.slice(7), x.value]));
+  }
+  if (f.ce_desc) p.comboEtapas = { desconto: Math.max(0, r2(num(f.ce_desc.value))), cats: $$('[name=ce_cat]:checked', f).map((i) => i.value), acomp: $$('[name=ce_ac]:checked', f).map((i) => i.value), bebida: $$('[name=ce_be]:checked', f).map((i) => i.value) };
+  // cota: fica no grupo do próprio prato
+  $$('[name^=ct_][name$=_g]', f).forEach((x) => { const [, ...r] = x.name.split('_'), k = Number(r.at(-2)), pid = r.slice(0, -2).join('_'), pr = prod(pid), g = pr?.grupos?.[k]; if (!g) return;
+    const gr = Math.max(0, Math.round(num(x.value))), ex = f[`ct_${pid}_${k}_e`]?.value.trim() || ''; if (gr) { g.gratis = gr; if (ex !== '') g.extra = r2(num(ex)); else delete g.extra; } else { delete g.gratis; delete g.extra; } });
+  if (f.kg_taras) p.taras = linhas(f.kg_taras.value).map(([nome, g]) => ({ nome: nome.slice(0, 30), g: Math.max(0, Math.min(3000, Math.round(num(g)))) })).filter((x) => x.g > 0).slice(0, 8);
+  if (f.vt_desc) p.vitrineDesconto = Math.max(0, Math.min(90, Math.round(num(f.vt_desc.value))));
+  if (f.cm_lista) p.camarotes = linhas(f.cm_lista.value).map(([nome, cap, cons, pac], k) => ({ id: (L.camarotes || []).find((x) => x.nome.toLowerCase() === nome.toLowerCase())?.id || `cam${Date.now().toString(36)}${k}`, nome: nome.slice(0, 30), capacidade: Math.max(1, Math.round(num(cap)) || 10), consumacao: r2(num(cons)), pacote: String(pac || '').slice(0, 120) }));
+  if (f.fa_prazo) p.faturadoPrazo = Math.max(0, Math.min(180, Math.round(num(f.fa_prazo.value))));
+}
+
 // happy hour: editar uma regra (dias, horário, o que entra e o desconto)
 acao('hh-ativo', (b) => { const L = lojaCfg(); setLoja({ happyHour: (L.happyHour || []).map((h) => (h.id === b.dataset.id ? { ...h, ativo: b.checked } : h)) }); });
 acao('hh-ed', (b) => {
@@ -312,39 +368,57 @@ TELAS_MAIS.vitrine = () => {
   const sobra = l.filter((p) => (v.qtd?.[p.id] || 0) > 0).length;
   return volta('mais', 'Vitrine do dia', 'Itens que saem prontos, sem passar pela cozinha. Quando acaba, vira “Esgotou na vitrine”.') + (l.length ? `
     ${v.fechada ? `<p class="aviso ouro">${ico('check')}Vitrine fechada hoje às ${new Date(v.fechada).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}.</p>` : ''}
+    ${(db.vitrineHist || []).length ? (() => { const h = db.vitrineHist.at(-1); return `<p class="mudo vit-ult">${ico('relogio')}Último fechamento (${new Date(`${h.dia}T12:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}): ${h.itens.map((x) => `${x.qtd}× ${t(x.nome)} → ${DESTINO_VIT.find((d) => d[0] === x.dest)?.[1].toLowerCase() || x.dest}`).join(' · ')} · <b>perda ${dinCurto(h.perda)}</b></p>`; })() : ''}
     <form class="form" data-vitrine>
     <div class="tabela-rolo"><table class="tabela"><thead><tr><th>Item</th><th class="num">Feito hoje</th><th class="num">Vendido</th><th class="num">Resta</th></tr></thead><tbody>
-    ${l.map((p) => { const f = v.feito?.[p.id], r = v.qtd?.[p.id], on = v.deOntem?.[p.id]; return `<tr class="${r === 0 ? 'off' : ''}"><td><b>${t(p.nome)}</b>${on ? `<small>${on} de ontem</small>` : ''}${r === 0 ? '<small class="erro">Esgotou na vitrine</small>' : ''}</td><td class="num"><input class="inv-q" name="vt_${p.id}" inputmode="numeric" value="${f ?? ''}" placeholder="sem limite" aria-label="Feito hoje de ${t(p.nome)}"></td><td class="num">${f != null ? f - (r ?? f) : '—'}</td><td class="num"><b>${r ?? '—'}</b></td></tr>`; }).join('')}</tbody></table></div>
+    ${l.map((p) => { const f = v.feito?.[p.id], r = v.qtd?.[p.id], on = v.deOntem?.[p.id]; return `<tr class="${r === 0 ? 'off' : ''}"><td><b>${t(p.nome)}</b>${on ? `<small>${on} de ontem${v.promo?.[p.id]?.pct ? ` · ${v.promo[p.id].qtd} ainda com ${v.promo[p.id].pct}% de desconto` : ''}</small>` : ''}${r === 0 ? '<small class="erro">Esgotou na vitrine</small>' : ''}</td><td class="num"><input class="inv-q" name="vt_${p.id}" inputmode="numeric" value="${f ?? ''}" placeholder="sem limite" aria-label="Feito hoje de ${t(p.nome)}"></td><td class="num">${f != null ? f - (r ?? f) : '—'}</td><td class="num"><b>${r ?? '—'}</b></td></tr>`; }).join('')}</tbody></table></div>
     <div class="linha-bts"><button class="bt cheio grande">Salvar a vitrine</button>${sobra ? `<button type="button" class="bt grande" data-acao="vitrine-fechar">${ico('check')}Fechar vitrine do dia (${sobra} ${sobra === 1 ? 'item sobrou' : 'itens sobraram'})</button>` : ''}</div></form>` : '<div class="vazio">Marque os itens de vitrine no cadastro do prato (Gestão › Cardápio › editar › Vitrine).</div>');
 };
 // fechar a vitrine: para cada item que sobrou, descartar (perda: vencido), doar ou levar para amanhã
-const DESTINO_VIT = [['descartar', 'Descartar'], ['doar', 'Doar'], ['amanha', 'Amanhã']];
+// custo do item da vitrine: a ficha técnica ou, sem ficha, o custo anotado no prato
+const custoVit = (p) => custoPrato(p) || Number(p.custo) || 0;
+const DESTINO_VIT = [['descartar', 'Descartar'], ['doar', 'Doar'], ['amanha', 'Amanhã com desconto']];
 acao('vitrine-fechar', () => {
-  const v = vitrineHoje(), l = db.produtos.filter((p) => p.vitrine && (v.qtd?.[p.id] || 0) > 0);
+  const v = vitrineHoje(), l = db.produtos.filter((p) => p.vitrine && (v.qtd?.[p.id] || 0) > 0), pct = Number(lojaCfg().vitrineDesconto ?? 30);
   if (!l.length) return toast('Nada sobrou na vitrine');
-  folha({ titulo: 'Fechar vitrine do dia', corpo: `<p class="mudo">O que sobrou hoje. Descartar e doar baixam o estoque pela ficha e entram nas perdas do relatório; “amanhã” volta como feito no dia seguinte.</p>
-    <ul class="lista-res vit-fecha">${l.map((p) => `<li><div><b>${v.qtd[p.id]}× ${t(p.nome)}</b><small>custo ${dinCurto(custoPrato(p) * v.qtd[p.id])}</small></div><div class="seg" role="group" aria-label="Destino de ${t(p.nome)}">${DESTINO_VIT.map(([k, n]) => `<button type="button" data-vp="${p.id}" data-dest="${k}" aria-pressed="${k === 'amanha'}">${n}</button>`).join('')}</div></li>`).join('')}</ul>`,
+  // contagem rápida: o caixa confere quanto sobrou de verdade (vem preenchido com o que o sistema calcula)
+  folha({ titulo: 'Fechar vitrine do dia', corpo: `<p class="mudo">Conte o que sobrou e escolha o destino. Descartar e doar entram nas perdas (em R$) e baixam o estoque pela ficha; “amanhã” volta no dia seguinte com ${pct}% de desconto.</p>
+    <ul class="lista-res vit-fecha">${l.map((p) => `<li><div><b>${t(p.nome)}</b><small>o sistema diz ${v.qtd[p.id]} · custo ${dinCurto(custoVit(p))} cada</small></div><label class="vit-conta"><span>Sobrou</span><input data-vq="${p.id}" inputmode="numeric" value="${v.qtd[p.id]}" aria-label="Quantos ${t(p.nome)} sobraram"></label><div class="seg" role="group" aria-label="Destino de ${t(p.nome)}">${DESTINO_VIT.map(([k, n]) => `<button type="button" data-vp="${p.id}" data-dest="${k}" aria-pressed="${k === 'amanha'}">${n}</button>`).join('')}</div></li>`).join('')}</ul>
+    <p class="vit-perda" data-perda></p>`,
   pe: '<button type="button" class="bt cheio grande" data-ok>Fechar a vitrine</button>',
   aoAbrir: (f, fechar) => {
     const dest = Object.fromEntries(l.map((p) => [p.id, 'amanha']));
-    $$('[data-vp]', f).forEach((b) => { b.onclick = () => { dest[b.dataset.vp] = b.dataset.dest; $$(`[data-vp="${b.dataset.vp}"]`, f).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); }; });
+    const qtd = (p) => Math.max(0, Math.round(num($(`[data-vq="${p.id}"]`, f)?.value)));
+    const perdaR = () => r2(l.reduce((s, p) => s + (dest[p.id] === 'amanha' ? 0 : custoVit(p) * qtd(p)) + (v.qtd[p.id] > qtd(p) ? custoVit(p) * (v.qtd[p.id] - qtd(p)) : 0), 0));
+    const mostra = () => { $('[data-perda]', f).innerHTML = `Perda de hoje: <b>${din(perdaR())}</b>${l.some((p) => qtd(p) < v.qtd[p.id]) ? ' (inclui o que sumiu na contagem)' : ''}`; };
+    $$('[data-vp]', f).forEach((b) => { b.onclick = () => { dest[b.dataset.vp] = b.dataset.dest; $$(`[data-vp="${b.dataset.vp}"]`, f).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); mostra(); }; });
+    $$('[data-vq]', f).forEach((x) => { x.oninput = mostra; }); mostra();
     $('[data-ok]', f).onclick = () => {
-      const quem = quemAgora(), amanha = somaDia(ymd(), 1), leva = {}; let perdas = 0;
+      const quem = quemAgora(), amanha = somaDia(ymd(), 1), leva = {}, hist = []; let perdas = 0; const perdaTotal = perdaR();
       l.forEach((p) => {
+        // o que sumiu na contagem (comido, quebrado) também é perda
+        const sumiu = Math.max(0, v.qtd[p.id] - qtd(p)); if (sumiu) { if ((p.ficha || []).length) p.ficha.forEach((x) => registrarPerda(x.insumo, x.qtd * sumiu, `Faltou na contagem da vitrine (${sumiu}× ${p.nome})`, quem)); perdas++; }
+        v.qtd[p.id] = qtd(p);
         const q = v.qtd[p.id], d = dest[p.id];
+        hist.push({ prod: p.id, nome: p.nome, qtd: q, dest: d, custo: d === 'amanha' ? 0 : r2(custoVit(p) * q), ...(sumiu ? { sumiu } : {}) });
+        if (!q) { p.ativo = false; p.esgotouVitrine = v.dia; return; }
         if (d === 'amanha') leva[p.id] = q;
         else {
           const motivo = d === 'doar' ? 'Doação: sobra da vitrine' : 'Vencido: sobra da vitrine';
           // sem ficha técnica, a perda fica registrada pelo produto (o custo entra como zero)
           if ((p.ficha || []).length) p.ficha.forEach((x) => registrarPerda(x.insumo, x.qtd * q, `${motivo} (${q}× ${p.nome})`, quem));
-          else { (db.movEstoque ||= []).push({ id: uid('e'), t: Date.now(), insumo: '', prod: p.id, nome: p.nome, tipo: 'perda', qtd: -q, motivo, quem, custo: 0 }); auditar('perda', { quem, item: p.nome, qtd: q, valor: 0, motivo }); }
+          else { (db.movEstoque ||= []).push({ id: uid('e'), t: Date.now(), insumo: '', prod: p.id, nome: p.nome, tipo: "perda", qtd: -q, motivo, quem, custo: -r2(custoVit(p) * q) }); auditar("perda", { quem, item: p.nome, qtd: q, valor: r2(custoVit(p) * q), motivo }); }
           perdas++;
         }
         v.qtd[p.id] = 0; p.ativo = false; p.esgotouVitrine = v.dia;
       });
-      if (Object.keys(leva).length) db.vitrineAmanha = { dia: amanha, qtd: { ...(db.vitrineAmanha?.dia === amanha ? db.vitrineAmanha.qtd : {}), ...leva } };
+      if (Object.keys(leva).length) {
+        const ja = db.vitrineAmanha?.dia === amanha ? db.vitrineAmanha : { qtd: {}, promo: {} };
+        db.vitrineAmanha = { dia: amanha, qtd: { ...ja.qtd, ...leva }, promo: { ...(ja.promo || {}), ...(pct > 0 ? Object.fromEntries(Object.entries(leva).map(([id, q]) => [id, { qtd: q, pct }])) : {}) } };
+      }
+      (db.vitrineHist ||= []).push({ dia: v.dia, itens: hist, perda: perdaTotal }); if (db.vitrineHist.length > 60) db.vitrineHist.splice(0, db.vitrineHist.length - 60);
       v.fechada = Date.now(); grava(); fechar();
-      toast(`Vitrine fechada${perdas ? ` · ${perdas} ${perdas === 1 ? 'item' : 'itens'} nas perdas` : ''}${Object.keys(leva).length ? ' · o resto volta amanhã' : ''}`);
+      toast(`Vitrine fechada · perda ${din(perdaTotal)}${Object.keys(leva).length ? ` · o resto volta amanhã com ${pct}% de desconto` : ''}`);
     };
   } });
 });
@@ -416,7 +490,7 @@ registrar('portaria', {
     return `<header class="cab-tela"><a class="bt-ico" href="#salao" aria-label="Voltar">${ico('voltar')}</a><div><h1>Portaria</h1><p>${L.entradas} entradas · ${L.saidas} saídas · ${L.reentradas} reentradas${R.valor ? ` · ${dinCurto(R.valor)} em ingressos` : ''}</p></div></header>
       <section class="lotacao ${pct >= 90 ? 'cheia' : ''}"><div><small>Dentro agora</small><b>${L.dentro}${cap ? ` <span>de ${cap}</span>` : ''}</b></div>${cap ? `<span class="barra"><i style="width:${pct}%"></i></span><em>${pct}%${pct >= 100 ? ' · casa cheia' : ''}</em>` : '<em>Defina a capacidade em Gestão › Regras das funções</em>'}
         <small class="lot-conta">entradas ${L.entradas} − saídas ${L.saidas} + reentradas ${L.reentradas}</small></section>
-      <div class="linha-bts"><button type="button" class="bt cheio grande" data-acao="portaria-entrada">${ico('mais2')}Registrar entrada</button><button type="button" class="bt grande" data-acao="portaria-saida-rapida">${ico('voltar')}Saída sem cartão</button></div>
+      <div class="linha-bts"><button type="button" class="bt cheio grande" data-acao="portaria-entrada">${ico('mais2')}Registrar entrada</button><button type="button" class="bt grande" data-acao="portaria-saida-rapida">${ico('voltar')}Saída sem cartão</button>${tem('camarotes') ? `<a class="bt grande" href="#mais/camarotes">${ico('coroa')}Camarotes</a>` : ''}</div>
       <div class="kpis port-ings">${ings.map((x) => `<div><small>${t(x.nome)}${x.lote ? ` · ${t(x.lote)}` : ''}</small><b>${x.esgotado ? 'Esgotado' : din(x.preco)}</b><span>${x.esgotado ? 'todos os lotes vendidos' : x.lote && x.resta !== Infinity ? `restam ${x.resta} neste lote` : x.consumacao ? `consumação ${dinCurto(x.consumacao)}` : 'à venda'}</span></div>`).join('')}
         ${consCobrar ? `<div><small>Consumação a cobrar</small><b>${dinCurto(consCobrar)}</b><span>de quem ainda não consumiu o mínimo</span></div>` : ''}</div>
       <div class="sec-tit"><h2>Lista VIP</h2><span>${vips.filter((v) => v.entrou).length} de ${vips.length} chegaram · toque no nome para o check-in</span></div>
@@ -438,10 +512,13 @@ function relPromoters(R, P) {
   if (!proms.length && !Object.keys(R.porPromoter).some(Boolean)) return '';
   const cods = [...new Set([...proms.map((p) => p.codigo), ...Object.keys(R.porPromoter).filter(Boolean), ...hist.flatMap((h) => Object.keys(h.porPromoter || {}).filter(Boolean))])];
   const tot = (cod) => hist.reduce((s, h) => s + (h.porPromoter?.[cod]?.n || 0), 0);
+  // comissão (R$ por entrada paga + % do consumo dos camarotes que ele trouxe), quando o promoter tem comissão
+  const comOn = proms.some((p) => p.porEntrada || p.pctConsumo), RC = comOn && tem('camarotes') ? resumoCamarotes() : { porPromoter: {} };
+  const com = (c, x) => { const p = proms.find((y) => y.codigo === c); return p ? comissaoPromoter(p, { pagantes: x.pagantes, consumo: RC.porPromoter[c]?.consumo || 0 }).total : 0; };
   return `<div class="sec-tit"><h2>Entradas por promoter</h2><span>esta noite e as ${hist.length} anteriores</span></div>
-    <div class="tabela-rolo"><table class="tabela"><thead><tr><th>Promoter</th><th class="num">Hoje</th><th class="num">Pagantes</th><th class="num">Ingressos</th><th class="num">Noites anteriores</th></tr></thead><tbody>
-    ${cods.map((c) => { const x = R.porPromoter[c] || { n: 0, pagantes: 0, valor: 0 }; return `<tr><td><b>${t(nomePromoter(c))}</b><small>${t(c)}</small></td><td class="num">${x.n}</td><td class="num">${x.pagantes}</td><td class="num">${dinCurto(x.valor)}</td><td class="num">${tot(c)}</td></tr>`; }).join('')}
-    ${R.porPromoter[''] ? `<tr><td>Sem promoter</td><td class="num">${R.porPromoter[''].n}</td><td class="num">${R.porPromoter[''].pagantes}</td><td class="num">${dinCurto(R.porPromoter[''].valor)}</td><td class="num">${hist.reduce((s, h) => s + (h.porPromoter?.['']?.n || 0), 0)}</td></tr>` : ''}</tbody></table></div>`;
+    <div class="tabela-rolo"><table class="tabela"><thead><tr><th>Promoter</th><th class="num">Hoje</th><th class="num">Pagantes</th><th class="num">Ingressos</th>${comOn ? '<th class="num">Comissão hoje</th>' : ''}<th class="num">Noites anteriores</th></tr></thead><tbody>
+    ${cods.map((c) => { const x = R.porPromoter[c] || { n: 0, pagantes: 0, valor: 0 }; return `<tr><td><b>${t(nomePromoter(c))}</b><small>${t(c)}</small></td><td class="num">${x.n}</td><td class="num">${x.pagantes}</td><td class="num">${dinCurto(x.valor)}</td>${comOn ? `<td class="num"><b>${dinCurto(com(c, x))}</b></td>` : ''}<td class="num">${tot(c)}</td></tr>`; }).join('')}
+    ${R.porPromoter[''] ? `<tr><td>Sem promoter</td><td class="num">${R.porPromoter[''].n}</td><td class="num">${R.porPromoter[''].pagantes}</td><td class="num">${dinCurto(R.porPromoter[''].valor)}</td>${comOn ? '<td class="num">—</td>' : ''}<td class="num">${hist.reduce((s, h) => s + (h.porPromoter?.['']?.n || 0), 0)}</td></tr>` : ''}</tbody></table></div>`;
 }
 // entrada: ingresso (com o lote da vez), promoter, cartão e nome; vip = check-in pela lista (cortesia até o horário)
 function entrada(vip = null) {
@@ -503,16 +580,27 @@ acao('portaria-saida-rapida', () => { const po = portariaHoje(), x = po.entradas
 
 // ------------------------------------------------------------------ painel de retirada (TV do balcão): senhas preparando e prontas
 const prontaSenha = (c) => { const it = itensValidos(c).filter((i) => i.status !== 'rascunho'); return it.length && it.every((i) => ['pronto', 'entregue'].includes(i.status)); };
-let prontasVistas = new Set();
+let prontasVistas = new Set(), chamadaVista = Date.now();
+const prontoEm = (c) => Math.max(0, ...itensValidos(c).map((i) => i.pronto || i.entregue || 0));
+// voz do navegador ("Senha 12"), quando o aparelho tem
+const falar = (txt) => { try { if (!('speechSynthesis' in window) || navigator.webdriver) return; /* navegador de teste automático nunca fala */ const u = new SpeechSynthesisUtterance(txt); u.lang = 'pt-BR'; u.rate = 0.95; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch { /* sem voz */ } };
+// a TV precisa de um toque para liberar o som (regra dos navegadores)
+// som e voz só depois de apertar "Ligar o som" nesta tela (um toque em qualquer outro lugar não liga); apertar de novo desliga
+acao('senha-som', () => { const b = document.body.dataset; if (b.somSenha) { delete b.somSenha; try { speechSynthesis.cancel(); } catch { /* sem voz */ } } else { b.tocou = '1'; b.somSenha = '1'; bip(1180); } dispatchEvent(new HashChangeEvent('hashchange')); });
 registrar('senhas', {
   titulo: 'Painel de retirada', aba: 'pedidos',
   html() {
     const l = db.comandas.filter((c) => c.tipo === 'balcao' && c.senha).sort((a, b) => a.senha - b.senha);
     const prontas = l.filter(prontaSenha), prep = l.filter((c) => !prontaSenha(c));
     const novas = prontas.filter((c) => !prontasVistas.has(c.id)); prontasVistas = new Set(prontas.map((c) => c.id));
-    if (novas.length && document.body.dataset.tocou) bip(1180);
-    return `<div class="painel-senhas"><header><h1>${t(db.config.nome)}</h1><div class="linha-bts"><a class="bt" href="#pedidos">${ico('voltar')}Pedidos</a><button type="button" class="bt" data-acao="tela-cheia">${ico('telacheia')}Tela cheia</button></div></header>
+    // chamando agora: a senha chamada de novo no balcão ou a última que ficou pronta (número grande, som e voz)
+    const chamada = prontas.slice().sort((a, b) => (b.chamada || prontoEm(b)) - (a.chamada || prontoEm(a)))[0];
+    const novaChamada = prontas.find((c) => c.chamada && c.chamada > chamadaVista);
+    if ((novas.length || novaChamada) && document.body.dataset.somSenha) { bip(1180); setTimeout(() => bip(1480), 220); falar(`Senha ${(novaChamada || novas.at(-1)).senha}`); }
+    chamadaVista = Math.max(chamadaVista, ...prontas.map((c) => c.chamada || 0));
+    return `<div class="painel-senhas"><header><h1>${t(db.config.nome)}</h1><div class="linha-bts"><a class="bt" href="#pedidos">${ico('voltar')}Pedidos</a><button type="button" class="bt" data-acao="senha-som">${ico('sino')}${document.body.dataset.somSenha ? 'Som ligado (desligar)' : 'Ligar o som'}</button><button type="button" class="bt" data-acao="tela-cheia">${ico('telacheia')}Tela cheia</button></div></header>
       ${tem('senha') ? '' : '<p class="aviso ouro">A senha de balcão está desligada: os pedidos novos não ganham número.</p>'}
+      ${chamada ? `<section class="senha-chamando ${novas.includes(chamada) || chamada === novaChamada ? 'nova' : ''}" aria-live="assertive"><small>Chamando agora</small><b>${chamada.senha}</b><span>${t(chamada.cliente?.nome || 'Pode retirar no balcão')}</span></section>` : ''}
       <div class="senhas-cols"><section class="senhas-prep"><h2>Preparando</h2><div class="senhas">${prep.map((c) => `<b>${c.senha}</b>`).join('') || '<p>—</p>'}</div></section>
         <section class="senhas-ok"><h2>Pronto, pode retirar</h2><div class="senhas">${prontas.map((c) => `<b class="${novas.includes(c) ? 'nova' : ''}">${c.senha}</b>`).join('') || '<p>—</p>'}</div></section></div></div>`;
   },
@@ -530,7 +618,7 @@ setTimeout(() => { contadorPedidos(); vitrineNovoDia(); }, 0);
 // ------------------------------------------------------------------ bar: chopp por barril, garrafas em doses e cartões
 const mlDe = (b) => Number(prod((b.prods || [])[0])?.ml) || 0;
 TELAS_MAIS.bar = () => {
-  const ativos = (db.barris || []).filter((b) => !b.fim), velhos = (db.barris || []).filter((b) => b.fim).sort((a, b) => b.fim - a.fim).slice(0, 8);
+  const chopp = (db.barris || []).filter((b) => b.tipo !== 'granel'), ativos = chopp.filter((b) => !b.fim), velhos = chopp.filter((b) => b.fim).sort((a, b) => b.fim - a.fim).slice(0, 8);
   const garrafas = db.insumos.filter((i) => i.unid === 'dose'), cartoes = db.comandas.filter((c) => c.tipo === 'cartao'), perdidos = cartoes.filter((c) => c.perdido);
   return volta('mais', 'Bar: chopp e doses', 'Cada copo vendido baixa o barril; cada dose baixa a garrafa') + `
     <div class="sec-tit"><h2>Barris na torneira</h2><span>${ativos.length} ${ativos.length === 1 ? 'barril' : 'barris'}</span></div>
@@ -545,7 +633,11 @@ TELAS_MAIS.bar = () => {
     <div class="sec-tit"><h2>Garrafas em doses</h2><span>o estoque fica em garrafas fracionadas</span></div>
     <div class="linha-bts"><button type="button" class="bt" data-acao="garrafa-nova">${ico('mais2')}Nova garrafa</button></div>
     <ul class="lista-estoque">${garrafas.map((i) => { const p = Math.max(0, Math.min(100, (saldo(i) / ((i.minimo || 1) * 2)) * 100)), doses = db.produtos.filter((x) => (x.ficha || []).some((f) => f.insumo === i.id));
-      return `<li class="${saldo(i) <= i.minimo ? 'baixo' : ''}"><div><b>${t(i.nome)}</b><small>${fmtQtd(saldo(i), 'dose', i.fator)} · ${i.fator} doses por garrafa · ${din(i.custo)} a garrafa${doses.length ? ` · vende em: ${t(doses.map((x) => x.nome).join(', '))}` : ''}</small><span class="barra"><i style="width:${p}%"></i></span></div><button type="button" class="bt-ico" data-acao="editar-insumo" data-i="${i.id}" aria-label="Editar ${t(i.nome)}">${ico('ajustes')}</button></li>`; }).join('') || '<li class="vazio">Nenhuma garrafa em doses. Cadastre a garrafa e quantas doses ela rende.</li>'}</ul>
+      // garrafa aberta: quanto resta dela (doses e ml), as fechadas e a perda medida nas conferências dos últimos 30 dias
+      const g = estadoGarrafa(saldo(i), i.fator, i.mlDose), perda = (db.movEstoque || []).filter((m) => m.insumo === i.id && m.tipo === 'perda' && m.t >= Date.now() - 30 * 864e5), pd = -perda.reduce((s, m) => s + m.qtd, 0);
+      return `<li class="${saldo(i) <= i.minimo ? 'baixo' : ''}"><div><b>${t(i.nome)}</b><small>${fmtQtd(saldo(i), 'dose', i.fator)} · ${i.fator} doses${i.mlDose ? ` de ${i.mlDose} ml` : ''} por garrafa · ${din(i.custo)} a garrafa${doses.length ? ` · vende em: ${t(doses.map((x) => x.nome).join(', '))}` : ''}</small>
+        <div class="garrafa-aberta"><span class="gf-ico" aria-hidden="true"><i style="height:${g.aberta ? g.pct : 0}%"></i></span><span><b>${g.aberta ? `Garrafa aberta: restam ${vir(g.aberta)} de ${i.fator} doses${i.mlDose ? ` (${g.ml} ml)` : ''}` : 'Nenhuma garrafa aberta'}</b><small>${g.fechadas} ${g.fechadas === 1 ? 'fechada' : 'fechadas'}${pd ? ` · perda no mês: ${vir(r2(pd))} doses (${dinCurto((pd / i.fator) * i.custo)})` : ''}</small></span></div>
+        <span class="barra"><i style="width:${p}%"></i></span></div><div class="res-bts"><button type="button" class="bt" data-acao="garrafa-conferir" data-i="${i.id}">Conferir a aberta</button><button type="button" class="bt-ico" data-acao="editar-insumo" data-i="${i.id}" aria-label="Editar ${t(i.nome)}">${ico('ajustes')}</button></div></li>`; }).join('') || '<li class="vazio">Nenhuma garrafa em doses. Cadastre a garrafa e quantas doses ela rende.</li>'}</ul>
     <div class="sec-tit"><h2>Cartões</h2><span>${cartoes.length} abertos${perdidos.length ? ` · ${perdidos.length} perdidos` : ''}</span></div>
     <div class="cartoes-abertos">${cartoes.sort((a, b) => a.cartao - b.cartao).map((c) => `<a class="cartao-ind ${c.perdido ? 'perdido' : ''}" href="#cartao/${c.cartao}"><b>${c.cartao}</b><small>${c.perdido ? 'perdido' : t(c.nome || '')}</small><em>${dinCurto(conta(c).total)}</em></a>`).join('') || '<div class="vazio">Nenhum cartão aberto.</div>'}</div>`;
 };
@@ -584,6 +676,23 @@ acao('barril-trocar', (b) => {
     }
     db.barris.push(novo); toast(`Barril trocado · rendimento ${vir(fx.rendimento)}%${fx.perdaMl ? ` · perda de ${vir(e.litros)} L registrada` : ''}`);
   });
+});
+// conferir a garrafa aberta: mede o que sobrou (ml ou doses); a diferença para o sistema vira perda (dose maior, derramou)
+acao('garrafa-conferir', (b) => {
+  const i = insumo(b.dataset.i); if (!i) return; const ml = Number(i.mlDose) || 50, g = estadoGarrafa(saldo(i), i.fator, ml);
+  folha({ titulo: `Conferir · ${i.nome}`, corpo: `<p class="mudo">O sistema diz que a garrafa aberta tem <b>${vir(g.aberta)} doses (${g.ml} ml)</b>. Meça o que sobrou de verdade.</p>
+    <div class="duas-c"><label class="campo"><span>Sobrou na garrafa (ml)</span><input data-ml inputmode="numeric" value="${g.ml}"></label><label class="campo"><span>ml por dose</span><input data-dose inputmode="numeric" value="${ml}"></label></div><p class="peso-conta" data-dif></p>`,
+  pe: '<button type="button" class="bt cheio grande" data-ok>Registrar a conferência</button>',
+  aoAbrir: (f, fechar) => {
+    const calc = () => { const d = Math.max(1, num($('[data-dose]', f).value)), real = r2(num($('[data-ml]', f).value) / d), p = perdaGarrafa(g.aberta, real); $('[data-dif]', f).textContent = p > 0 ? `Perda: ${vir(p)} doses (${dinCurto((p / i.fator) * i.custo)})` : p < 0 ? `Sobrou ${vir(-p)} doses a mais que o sistema: o estoque é acertado` : 'Bate com o sistema'; return { d, real, p }; };
+    $$('input', f).forEach((x) => { x.oninput = calc; }); calc();
+    $('[data-ok]', f).onclick = () => {
+      const { d, real, p } = calc(); i.mlDose = Math.round(d);
+      if (p > 0) registrarPerda(i.id, p, 'Conferência da garrafa aberta', quemAgora());
+      else if (p < 0) ajustarEstoque(i.id, r2(saldo(i) - p), 'Conferência da garrafa aberta', quemAgora(), false);
+      grava(); fechar(); toast(p > 0 ? `Perda de ${vir(p)} doses registrada` : `Conferido: ${vir(real)} doses na garrafa aberta`);
+    };
+  } });
 });
 // garrafa vendida em doses: vira um insumo em doses (1 garrafa = N doses) e, se quiser, o produto "Dose de…"
 acao('garrafa-nova', () => folha({ titulo: 'Nova garrafa em doses', corpo: `<label class="campo"><span>Garrafa</span><input data-n maxlength="60" placeholder="Ex.: Whisky 12 anos (1 L)"></label>
@@ -633,7 +742,7 @@ PAINEL_TIPO.push(() => {
     l.push(card('No forno', pedidos.filter((c) => c.itens.some((i) => i.status === 'preparo' && !i.cancelado)).length, `${pedidos.filter((c) => c.entrega === 'saiu').length} saíram para entrega`, '#pedidos'));
   }
   if (tem('encomendas')) { const e = db.comandas.filter((c) => c.encomenda?.para && ymd(c.encomenda.para) === hojeY); l.push(card('Encomendas de hoje', e.length, e.length ? `a próxima às ${new Date(Math.min(...e.map((c) => c.encomenda.para))).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : 'nenhuma para hoje', '#mais/encomendas')); }
-  if (tem('comandaIndividual') && (db.barris || []).some((b) => !b.fim)) { const bs = db.barris.filter((b) => !b.fim); l.push(card('Barris', `${vir(r2(bs.reduce((s, b) => s + estadoBarril(b).litros, 0)))} L`, t(bs.map((b) => `${b.nome}: ${vir(estadoBarril(b).litros)} L`).join(' · ')), '#mais/bar')); }
+  if (tem('comandaIndividual') && (db.barris || []).some((b) => !b.fim && b.tipo !== 'granel')) { const bs = db.barris.filter((b) => !b.fim && b.tipo !== 'granel'); l.push(card('Barris', `${vir(r2(bs.reduce((s, b) => s + estadoBarril(b).litros, 0)))} L`, t(bs.map((b) => `${b.nome}: ${vir(estadoBarril(b).litros)} L`).join(' · ')), '#mais/bar')); }
   if (tem('comandaIndividual')) { const cs = db.comandas.filter((c) => c.tipo === 'cartao'), pd = cs.filter((c) => c.perdido).length; l.push(card('Cartões abertos', cs.length, `${dinCurto(cs.reduce((s, c) => s + conta(c).total, 0))}${pd ? ` · ${pd} perdidos` : ''}`)); }
   if (tem('reservas')) { const r = (db.reservas || []).filter((x) => x.data === hojeY && ['pendente', 'confirmada', 'chegou'].includes(x.status)); l.push(card('Reservas de hoje', r.length, `${r.reduce((s, x) => s + x.pessoas, 0)} pessoas${(db.fila || []).length ? ` · fila ${db.fila.length}` : ''}`, '#mais/reservas')); }
   if (tem('eventos')) { const e = (db.eventos || []).filter((x) => x.data === hojeY), prox = (db.eventos || []).filter((x) => x.data > hojeY).sort((a, b) => a.data.localeCompare(b.data))[0];

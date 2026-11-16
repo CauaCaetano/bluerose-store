@@ -1,11 +1,11 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=22';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic } from './opcoes.js?v=22';
-import { modulosAtivos } from './perfis.js?v=22';
-import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg } from './precos.js?v=22';
-import { ico, folha, toast, $, $$ } from './ui.js?v=22';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=23';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas, aplicarCota } from './opcoes.js?v=23';
+import { modulosAtivos } from './perfis.js?v=23';
+import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg, comemRodizio } from './precos.js?v=23';
+import { ico, folha, toast, $, $$ } from './ui.js?v=23';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -60,7 +60,8 @@ const api = R ? {
   pedido: async (tipo, d) => {
     const para = encomendaValida(d.para);
     const c = novoPedido(tipo, { nome: d.nome, tel: d.tel, end: d.end, bairro: d.bairro }, { origem: 'Cardápio online', pagarNaEntrega: d.pagar, ...(para ? { encomenda: { para } } : {}) });
-    d.itens.forEach((i) => adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic, meia: i.meia, tam: i.tam, sabores: i.sabores, combo: i.combo }));
+    d.itens.forEach((i) => { if (adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: aplicarCota(P(i.prod) || {}, i.adic || [], { mods: mods() }), meia: i.meia, tam: i.tam, sabores: i.sabores, combo: i.combo }) && i.comboUp) c.itens.at(-1).comboUp = i.comboUp; });
+    if (mods().has('comboEtapas')) aplicarComboEtapas(c.itens, M.loja, P); // o desconto do combo em etapas é conferido aqui
     if (d.cupom) aplicarCupom(c, d.cupom);
     return { ok: true, id: c.id, num: c.num, senha: c.senha || 0 };
   },
@@ -135,13 +136,24 @@ function acompanharLink() {
   const u = guardado('ultimo'); if (!u || Date.now() - u.ts > 6 * 3600e3) return '';
   return `<div class="cli-acomp"><div><b>Seu pedido de ${new Date(u.ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</b><small>Veja em que pé está</small></div><button type="button" class="bt" data-acomp>Acompanhar</button></div>`;
 }
+// rodízio com pedido por rodada: o cliente vê quantas peças já pediu nesta rodada e quantas ainda cabem
+const pecasNaRodada = () => { const c = comandaDaMesa(mesa); return [...sacola.filter((x) => incluso(P(x.prod) || {})).map((x) => ({ cat: P(x.prod)?.cat || '', qtd: x.qtd })), ...(c ? c.itens.filter((i) => i.rodizio && !i.cancelado && i.status !== 'entregue').map((i) => ({ cat: P(i.prod)?.cat || '', qtd: i.qtd })) : [])]; };
+const comendo = () => { const c = comandaDaMesa(mesa); return Math.max(1, (c?.rodizio ? comemRodizio(c.rodizio) || c.pessoas : c?.pessoas || 1) - (c?.pausaRod?.pessoas || 0)); };
+function faixaRodada() {
+  if (!naMesaRodizio()) return '';
+  const L = M.loja, lim = mods().has('rodadas') ? Number(L.rodizio?.porRodada) || 0 : 0;
+  if (!lim) return `<div class="cli-faixa rodizio" data-rodada-cli>${ico('cloche')}<b>Rodízio</b><span>Os itens marcados “incluso” não somam na conta</span></div>`;
+  if (R) return `<div class="cli-faixa rodizio" data-rodada-cli>${ico('cloche')}<b>Rodízio: até ${lim} peças por pessoa a cada rodada</b><span>Peça de novo quando a rodada chegar à mesa. Os itens “incluso” não somam na conta.</span></div>`;
+  const r = cabeNaRodadaCat(L.rodizio, comendo(), pecasNaRodada(), '', 0);
+  return `<div class="cli-faixa rodizio ${r.resta ? '' : 'cheia'}" data-rodada-cli>${ico('cloche')}<b>Rodada: ${r.limite - r.resta} de ${r.limite} peças${r.resta ? ` · cabem mais ${r.resta}` : ' · limite atingido'}</b><span>${lim} peças por pessoa a cada rodada. Quando a rodada chegar à mesa, dá para pedir mais.</span></div>`;
+}
 function avisos() {
   const L = M.loja, st = situacao(L.horarios);
   const md = mods(), hh = md.has('happyHour') ? (L.happyHour || []).find((x) => naJanela(x)) : null;
   const cli = guardado('cliente'), x = md.has('fidelidade') && !R && cli?.tel ? clientePorTel(cli.tel) : null, F = md.has('fidelidade') ? { ...fidelidade(), ...(L.fidelidade || {}) } : null;
   $('#cli-aviso').innerHTML = (!mesa && !st.aberto ? `<div class="cli-aviso fechado">${t(st.texto)}. Você pode olhar o cardápio; os pedidos voltam quando abrir.</div>` : '')
     + (hh ? `<div class="cli-faixa happy">${ico('taca')}<b>${t(hh.nome || 'Happy hour')} até ${t(hh.ate)}</b><span>Preço especial já aplicado nos itens marcados</span></div>` : '')
-    + (naMesaRodizio() ? `<div class="cli-faixa rodizio">${ico('cloche')}<b>Rodízio</b><span>Os itens marcados “incluso” não somam na conta${md.has('rodadas') && Number(L.rodizio?.porRodada) ? `; até ${L.rodizio.porRodada} peças por pessoa a cada rodada` : ''}</span></div>` : '')
+    + faixaRodada()
     + (x && F ? `<div class="cli-faixa fidel">${ico('etiqueta')}<b>Você tem ${Math.min(x.carimbos || 0, F.compras)} de ${F.compras} carimbos</b><span>${(x.carimbos || 0) >= F.compras ? `Prêmio liberado: ${t(F.premio)}. Peça no balcão.` : `Ao completar: ${t(F.premio)}`}</span></div>` : F && !mesa ? `<div class="cli-faixa fidel">${ico('etiqueta')}<b>Cartão fidelidade</b><span>A cada ${F.compras} compras${F.minimo ? ` a partir de ${din(F.minimo)}` : ''}: ${t(F.premio)}. Informe o seu WhatsApp no pedido.</span></div>` : '')
     + (md.has('reservas') && !mesa ? `<div class="cli-acomp"><div><b>Quer reservar uma mesa?</b><small>Escolha o dia, a hora e quantas pessoas</small></div><button type="button" class="bt" data-reservar>Reservar mesa</button></div>` : '')
     + acompanharLink();
@@ -217,14 +229,36 @@ function detalhe(p) {
         const it = op.item(f), b = it.meia && P(it.meia.b);
         // pedido por rodada: o que já está na sacola e na mesa conta no limite de peças inclusas
         if (inc && md.has('rodadas') && !R) {
-          const c = comandaDaMesa(mesa), ja = [...sacola.filter((x) => incluso(P(x.prod) || {})).map((x) => ({ cat: P(x.prod)?.cat || '', qtd: x.qtd })), ...(c ? c.itens.filter((i) => i.rodizio && !i.cancelado && i.status !== 'entregue').map((i) => ({ cat: P(i.prod)?.cat || '', qtd: i.qtd })) : [])];
-          const r = cabeNaRodadaCat(M.loja.rodizio, Math.max(1, (c?.pessoas || 1) - (c?.pausaRod?.pessoas || 0)), ja, p.cat, it.qtd);
+          const r = cabeNaRodadaCat(M.loja.rodizio, comendo(), pecasNaRodada(), p.cat, it.qtd);
           if (!r.ok) return toast(r.resta ? `Nesta rodada cabem só mais ${r.resta} ${r.resta === 1 ? 'peça' : 'peças'}. Mande o pedido e peça o resto na próxima rodada.` : `Limite desta rodada atingido (${r.limite} peças). Espere chegar à mesa para pedir mais.`);
         }
         sacola.push({ k: uid(), prod: p.id, nome: nomeItem(p, { tam: it.tam, meia: it.meia, sabores: it.sabores }, b, M.produtos), qtd: it.qtd, unit: it.unit, tam: it.tam, adic: it.adic, obs: it.obs, meia: it.meia, sabores: it.sabores, combo: it.combo,
           ...(it.combo?.length ? { comboTxt: it.combo.map((x) => `${p.combo[x.g]?.nome}: ${P(x.prod)?.nome || ''}`).join(' · ') } : {}) });
         fechar(); desenhaSacola(); toast(`${it.qtd}× ${p.nome} no pedido`);
+        // combo em etapas: "Quer transformar em combo?" → acompanhamento → bebida, com o desconto
+        const of = !inc && ofertaCombo(p, M.loja, md, M.produtos);
+        if (of) setTimeout(() => comboCliente(of), 260);
       };
+    } });
+}
+function comboCliente(of) {
+  const bebidas = of.bebida.flatMap((b) => escolhasCombo(b).map((x) => ({ ...x, prod: b.id, nome: b.nome }))); let acomp = null;
+  folha({ titulo: 'Quer transformar em combo?', corpo: `<div data-combo><p class="cli-combo-oferta">${ico('cloche')}<span><b>Acompanhamento + bebida com ${din(of.desconto)} de desconto</b><small>O combo sai a partir de + ${din(of.aPartir)}</small></span></p></div>`,
+    pe: '<button type="button" class="bt" data-fechar data-so>Só o lanche</button><button type="button" class="bt cheio grande" data-quero>Quero o combo</button>',
+    aoAbrir: (f, fechar) => {
+      const box = $('[data-combo]', f), q = $('[data-quero]', f);
+      q.onclick = () => { q.hidden = true; $('[data-so]', f).textContent = 'Desistir do combo';
+        box.innerHTML = `<p class="cli-combo-passo">1 de 2 · Escolha o acompanhamento</p><div class="cli-combo-ops">${of.acomp.map((a) => `<button type="button" class="cli-combo-op" data-ac="${a.id}"><b>${t(a.nome)}</b><small>${din(Math.max(0, preco(a).preco - of.desconto))} <s>${din(preco(a).preco)}</s></small></button>`).join('')}</div>`; };
+      box.addEventListener('click', (e) => {
+        const a = e.target.closest('[data-ac]'), b = e.target.closest('[data-be]');
+        if (a) { acomp = P(a.dataset.ac); box.innerHTML = `<p class="cli-combo-passo">2 de 2 · Escolha a bebida <em>${t(acomp.nome)} já está no combo</em></p><div class="cli-combo-ops">${bebidas.map((x, k) => `<button type="button" class="cli-combo-op" data-be="${k}"><b>${t(x.rot)}</b><small>${din(x.preco)}</small></button>`).join('')}</div>`; return; }
+        if (b && acomp) {
+          const x = bebidas[Number(b.dataset.be)], pa = preco(acomp).preco;
+          sacola.push({ k: uid(), prod: acomp.id, nome: acomp.nome, qtd: 1, unit: Math.max(0, Math.round((pa - of.desconto) * 100) / 100), tam: '', adic: [], obs: '', meia: null, comboUp: 'acomp', comboTxt: `Combo: − ${din(of.desconto)}` });
+          sacola.push({ k: uid(), prod: x.prod, nome: x.nome, qtd: 1, unit: x.preco, tam: '', adic: x.adic, obs: '', meia: null, comboUp: 'bebida', comboTxt: 'Combo' });
+          fechar(); desenhaSacola(); toast(`Combo montado · − ${din(of.desconto)}`);
+        }
+      });
     } });
 }
 // reservar mesa pelo cardápio: a reserva chega como pendente para o restaurante confirmar
@@ -291,6 +325,7 @@ async function revalidarCupom() { if (!cupom) return; const r = await api.cupom(
 let ouvirSacola = null;
 function desenhaSacola() {
   $('#cli-sacola-lado').innerHTML = htmlSacola(true);
+  const fr = $('[data-rodada-cli]'); if (fr && M) fr.outerHTML = faixaRodada();
   const n = sacola.reduce((s, i) => s + i.qtd, 0);
   $('#cli-barra').innerHTML = n ? `<button type="button" class="cli-ver" data-abre><span>${ico('carrinho')}Ver pedido (${n})</span><i aria-hidden="true"></i><b>${din(Math.max(0, sub() - (cupom?.desconto || 0)))}</b>${ico('dir')}</button>` : '';
   $('[data-abre]')?.addEventListener('click', () => folha({ titulo: 'Seu pedido', corpo: '<div data-sac></div>', pe: `<button type="button" class="bt cheio grande" data-ir>${mesa ? 'Mandar para o garçom' : 'Continuar'}</button>`,
@@ -305,7 +340,7 @@ function desenhaSacola() {
 // ------------------------------------------------------------------ mandar o pedido
 async function finalizar() {
   if (!sacola.length) return;
-  const itens = sacola.map(({ prod, qtd, obs, adic, meia, tam, sabores, combo }) => ({ prod, qtd, obs, adic, meia, tam, ...(sabores ? { sabores } : {}), ...(combo ? { combo } : {}) }));
+  const itens = sacola.map(({ prod, qtd, obs, adic, meia, tam, sabores, combo, comboUp }) => ({ prod, qtd, obs, adic, meia, tam, ...(sabores ? { sabores } : {}), ...(combo ? { combo } : {}), ...(comboUp ? { comboUp } : {}) }));
   if (mesa) {
     folha({ titulo: 'Mandar o pedido?', corpo: `<p class="mudo">O garçom confirma em instantes e o pedido segue para a cozinha. O valor entra na conta da ${t(nomeMesaDe(mesa))}.</p><div class="sacola-tot"><div class="total"><span>Total</span><span>${din(sub())}</span></div></div>`,
       pe: '<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio" data-ok>Mandar</button>',

@@ -1,12 +1,12 @@
 // Popina · Mais: cardápio (preços, esgotado, ficha técnica), estoque, relatórios, QR das mesas, ajustes e o papel deste aparelho.
 import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa,
-  regras, temPin, auditar, quemAgora, registrarPerda, ajustarEstoque, MOTIVOS_PERDA, consumoVenda, custoVenda } from './loja.js?v=22';
-import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=22';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=22';
+  regras, temPin, auditar, quemAgora, registrarPerda, ajustarEstoque, MOTIVOS_PERDA, consumoVenda, custoVenda } from './loja.js?v=23';
+import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=23';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=23';
 import { qrSVG } from '../base/qr.js';
-import { temModulo, modulosAtivos } from './perfis.js?v=22';
-import { ALERGENOS, ETAPAS, TURNOS } from './precos.js?v=22';
-import { modoEscolha } from './opcoes.js?v=22';
+import { temModulo, modulosAtivos } from './perfis.js?v=23';
+import { ALERGENOS, ETAPAS, TURNOS } from './precos.js?v=23';
+import { modoEscolha } from './opcoes.js?v=23';
 
 // cada seção: [id, nome, ícone, detalhe, função da casa que precisa estar ligada (opcional), endereço próprio (opcional)]
 export const GRUPOS = [
@@ -32,7 +32,7 @@ registrar('mais', {
   html(sec, x) {
     sec = ALIAS[sec] || sec;
     const mod = GRUPOS.flatMap((g) => g[1]).find((y) => y[0] === sec)?.[4];
-    const corpo = sec && TELAS_MAIS[sec] && !secaoLigada(mod) ? volta('mais', 'Função desligada') + '<div class="vazio">Esta função está desligada. Ligue em <a href="#mais/aparencia">Aparência e templates</a>.</div>' : sec && TELAS_MAIS[sec] ? TELAS_MAIS[sec](x) : `<header class="cab-gestao"><h1><img src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74">Gestão<img src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></h1><img class="g-aqueduto" src="img/aqueduto.webp?v=2" alt="" width="340" height="88"></header>${resumoDia()}${painelDia()}<nav class="menu-mais so-cel-bloco">${menuGestao('')}</nav>`;
+    const corpo = sec && TELAS_MAIS[sec] && !secaoLigada(mod) ? volta('mais', 'Função desligada') + '<div class="vazio">Esta função está desligada. Ligue em <a href="#mais/aparencia">Aparência e templates</a>.</div>' : sec && TELAS_MAIS[sec] ? TELAS_MAIS[sec](x) : `<header class="cab-gestao"><h1><img src="img/k-louro-esq.webp?v=1" alt="" width="56" height="74">Gestão<img src="img/k-louro-dir.webp?v=1" alt="" width="56" height="74"></h1><img class="g-aqueduto" src="img/aqueduto.webp?v=2" alt="" width="340" height="88"></header>${topoGestao()}${resumoDia()}${painelDia()}<nav class="menu-mais so-cel-bloco">${menuGestao('')}</nav>`;
     return `<div class="gestao ${sec ? 'com-sec' : ''}"><aside class="gestao-nav" aria-label="Seções da gestão">${menuGestao(sec || '')}</aside><div class="gestao-corpo">${corpo}</div></div>`;
   },
   montar(el, sec) { MONTAR[ALIAS[sec] || sec]?.(el); },
@@ -45,6 +45,9 @@ function resumoDia() {
   // os quatro números do dia em papel rasgado, cada um com a sua faixa de cor (conceito 6-gestao-pc.png)
   return `<section class="resumo-dia"><div class="kv">${ico('moedas')}<small>Vendido hoje</small><b>${din(tot)}</b><span>${v.length} ${v.length === 1 ? 'conta' : 'contas'}</span></div><div class="ko">${ico('pessoas')}<small>Contas abertas</small><b>${abertas}</b></div><div class="kl">${ico('etiqueta')}<small>Ticket médio</small><b>${din(v.length ? tot / v.length : 0)}</b></div><a href="#mais/estoque" class="ka ${baixo ? 'alerta' : ''}">${ico('estoque')}<small>Estoque</small><b>${baixo}</b><span>${baixo === 1 ? 'item para repor' : 'itens para repor'}</span></a></section>`;
 }
+// topo da gestão: pendências do dono e metas do mês (operacao.js registra)
+export const TOPO_GESTAO = [];
+const topoGestao = () => TOPO_GESTAO.map((f) => { try { return f(); } catch { return ''; } }).join('');
 // cartões do dia que importam para o tipo de negócio (funcoes.js registra: rodízio, portaria, cafeteria, pizzaria, bar, reservas)
 export const PAINEL_TIPO = [];
 const painelTipo = () => { const l = PAINEL_TIPO.map((f) => { try { return f(); } catch { return ''; } }).join(''); return l ? `<section class="resumo-dia painel-tipo" aria-label="O dia no seu tipo de negócio">${l}</section>` : ''; };
@@ -416,7 +419,7 @@ export const MONTAGEM_BEBIDA = [
 ];
 acao('cardapio-exemplo', async () => {
   if (!(await confirma('Carregar os 22 pratos de exemplo, com fotos e fichas técnicas? Depois é só trocar nomes e preços e apagar o que não serve.', 'Carregar'))) return;
-  const { cardapioExemplo } = await import('./dados.js?v=22'); const ex = cardapioExemplo();
+  const { cardapioExemplo } = await import('./dados.js?v=23'); const ex = cardapioExemplo();
   db.produtos.push(...ex.produtos.filter((p) => !prod(p.id))); ex.insumos.forEach((i) => { if (!insumo(i.id)) db.insumos.push(i); });
   grava(); toast('Cardápio de exemplo carregado');
 });
@@ -524,14 +527,14 @@ acao('hist-insumo', (b) => {
   const i = insumo(b.dataset.i); if (!i) return;
   const de = Date.now() - 30 * DIA, l = [];
   (db.compras || []).filter((c) => c.insumo === i.id && c.ts >= de).forEach((c) => l.push({ t: c.ts, tipo: 'Entrada de compra', q: c.qtd * i.fator, det: `${vir(c.qtd)} ${i.compra}${c.custo ? ` · ${din(c.custo)}/${i.compra}` : ''}` }));
-  (db.movEstoque || []).filter((m) => m.insumo === i.id && m.t >= de).forEach((m) => l.push({ t: m.t, tipo: m.tipo === 'perda' ? 'Perda' : 'Ajuste', q: m.qtd, det: [m.motivo, m.quem].filter(Boolean).join(' · ') }));
+  (db.movEstoque || []).filter((m) => m.insumo === i.id && m.t >= de).forEach((m) => l.push({ t: m.t, tipo: { perda: 'Perda', ajuste: 'Ajuste', producao: 'Produção', devolucao: 'Devolução ao fornecedor', consumo: 'Consumo interno' }[m.tipo] || 'Ajuste', q: m.qtd, det: [m.motivo, m.quem].filter(Boolean).join(' · ') }));
   const dia = {}; db.vendas.filter((v) => v.ts >= de && (!v.cancelado || (v.cancelado.estoque === false && !v.cancelado.reaberta))).forEach((v) => { const q = consumoVenda(v)[i.id]; if (q) { const k = ymd(v.ts); dia[k] = (dia[k] || 0) + q; } });
   Object.entries(dia).forEach(([k, q]) => l.push({ t: new Date(`${k}T23:59`).getTime(), tipo: 'Baixas por venda', q: -q, det: 'soma do dia', soDia: true }));
   l.sort((a, b2) => b2.t - a.t);
   folha({ titulo: i.nome, larga: true, corpo: `<p class="mudo">Tem agora ${fmtQtd(saldo(i), i.unid)} · últimos 30 dias</p>
     <div class="tabela-rolo"><table class="tabela"><thead><tr><th>Quando</th><th>Movimento</th><th class="num">Quantidade</th><th>Detalhe</th></tr></thead><tbody>
     ${l.map((x) => `<tr><td>${new Date(x.t).toLocaleString('pt-BR', x.soDia ? { day: '2-digit', month: '2-digit' } : { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</td><td>${x.tipo}</td><td class="num"><b class="${x.q < 0 ? 'erro' : 'ok-txt'}">${x.q < 0 ? '−' : '+'}${fmtQtd(Math.abs(x.q), i.unid)}</b></td><td><small>${t(x.det)}</small></td></tr>`).join('') || '<tr><td colspan="4" class="vazio">Nenhuma movimentação nos últimos 30 dias.</td></tr>'}</tbody></table></div>`,
-  pe: `<button type="button" class="bt" data-fechar data-acao="perda" data-i="${i.id}">${ico('lixo')}Registrar perda</button>` });
+  pe: `<a class="bt" href="#mais/rastreio/${i.id}" data-fechar>${ico('etiqueta')}Lotes e rastreio</a><button type="button" class="bt" data-fechar data-acao="perda" data-i="${i.id}">${ico('lixo')}Registrar perda</button>` });
 });
 // registro de auditoria (somente leitura): as últimas 200 ações sensíveis
 const NOME_AUD = { desconto: 'Desconto', 'desconto-tirado': 'Desconto tirado', 'cancelar-item': 'Item cancelado', estorno: 'Venda cancelada', reabrir: 'Conta reaberta', sangria: 'Sangria', suprimento: 'Suprimento', perda: 'Perda de estoque', 'caixa-diferenca': 'Caixa não bateu', pin: 'PIN do gerente', regras: 'Regras do caixa' };
@@ -553,7 +556,7 @@ acao('imprimir-qr', () => {
   w.document.close();
 });
 acao('papel', (b) => { setPapel(b.dataset.p); toast(`Este aparelho agora é: ${PAPEIS[b.dataset.p][0]}`); ir(PAPEIS[b.dataset.p][1]); });
-acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=22'); recomecar(); ir('salao'); } });
+acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=23'); recomecar(); ir('salao'); } });
 
 acao('ordem', (b) => {
   const p = prod(b.dataset.p), l = db.produtos.filter((x) => x.cat === p.cat), k = l.indexOf(p), alvo = l[k + Number(b.dataset.d)]; if (!alvo) return;

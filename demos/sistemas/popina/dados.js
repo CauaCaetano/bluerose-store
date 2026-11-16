@@ -19,12 +19,16 @@ export const INSUMOS = [
   ['ovo', 'Ovo', 'un', 'bdj 30', 30, 74, 30, 22.0], ['refri', 'Refrigerante lata', 'un', 'fardo 12', 12, 41, 24, 33.0],
   ['cerveja', 'Cerveja long neck', 'un', 'cx 24', 24, 66, 48, 129.0], ['suco', 'Polpa de fruta', 'g', 'kg', 1000, 3800, 2000, 19.0],
   ['chocolate', 'Chocolate meio amargo', 'g', 'kg', 1000, 1600, 1000, 52.0], ['leite_cond', 'Leite condensado', 'g', 'cx', 395, 2370, 1185, 7.5],
-  ['whisky', 'Whisky 12 anos (garrafa de 1 L)', 'dose', 'garrafa', 20, 66, 20, 189.0],
-].map(([id, nome, unid, compra, fator, estoque, minimo, custo]) => ({ id, nome, unid, compra, fator, estoque, minimo, custo }));
+  ['whisky', 'Whisky 12 anos (garrafa de 1 L)', 'dose', 'garrafa', 20, 66, 20, 189.0], ['gin', 'Gin (garrafa de 750 ml)', 'dose', 'garrafa', 15, 22, 15, 119.0],
+  // embalagens que saem sozinhas do estoque (função Embalagem automática)
+  ['cx_broto', 'Caixa de pizza broto', 'un', 'pct 50', 50, 52, 25, 45.0], ['cx_grande', 'Caixa de pizza grande', 'un', 'pct 50', 50, 38, 25, 62.0], ['emb_delivery', 'Embalagem do delivery (sacola e lacre)', 'un', 'pct 100', 100, 140, 60, 38.0],
+].map(([id, nome, unid, compra, fator, estoque, minimo, custo]) => ({ id, nome, unid, compra, fator, estoque, minimo, custo, ...(unid === 'dose' ? { mlDose: 50 } : {}) }));
 
 const P = (id, cat, nome, desc, preco, setor, extra = {}) => ({ id, cat, nome, desc, preco, setor, foto: `fotos/${id}.webp`, ativo: true, adicionais: [], ficha: [], ...extra });
 const AD_LANCHE = [{ nome: 'Bacon', preco: 6 }, { nome: 'Ovo', preco: 3 }, { nome: 'Queijo extra', preco: 4 }, { nome: 'Cheddar', preco: 5 }];
 const PONTO = { id: 'ponto', nome: 'Ponto da carne', min: 1, max: 1, opcoes: [{ nome: 'Mal passado' }, { nome: 'Ao ponto' }, { nome: 'Bem passado' }] };
+// molhos com cota grátis (função "Adicionais com cota grátis"): até 2 sem custo; do 3º em diante, R$ 3 cada (sem a função, cada um sai pelo preço dele)
+const MOLHOS = { id: 'molhos', nome: 'Molhos', min: 0, max: 6, gratis: 2, extra: 3, opcoes: [{ nome: 'Barbecue', preco: 3 }, { nome: 'Mostarda e mel', preco: 3 }, { nome: 'Maionese da casa', preco: 3 }, { nome: 'Maionese verde', preco: 3 }, { nome: 'Cheddar cremoso', preco: 3 }, { nome: 'Picante', preco: 3 }] };
 // funções da casa no exemplo (aparecem quando o template liga a função): etapa, pimenta, ponto, harmonização, alergênicos, vitrine, combo
 const AL = (...a) => ({ alergenos: a });
 const EXTRAS = {
@@ -33,9 +37,9 @@ const EXTRAS = {
   risoto: { tags: ['Vegetariano'], etapa: 'principal', harmoniza: 'vinho', ...AL('lactose', 'vegetariano') },
   feijoada: { tags: ['Só sábado'], turno: 'almoco', etapa: 'principal', harmoniza: 'caipirinha' },
   quilo: { faixasKg: [{ de: '14:30', preco: 49.9 }] },
-  xburger: { grupos: [PONTO], ...AL('gluten', 'lactose') },
-  xbacon: { destaque: true, tags: ['Mais pedido'], grupos: [PONTO], ...AL('gluten', 'lactose') },
-  xsalada: { grupos: [PONTO], promoDe: 37.9, ...AL('gluten', 'lactose') },
+  xburger: { grupos: [PONTO, MOLHOS], ...AL('gluten', 'lactose') },
+  xbacon: { destaque: true, tags: ['Mais pedido'], grupos: [PONTO, MOLHOS], ...AL('gluten', 'lactose') },
+  xsalada: { grupos: [PONTO, MOLHOS], promoDe: 37.9, ...AL('gluten', 'lactose') },
   frango_lanche: { picancia: true, ...AL('gluten', 'ovo') },
   pz_calabresa: { destaque: true, harmoniza: 'cerveja', ...AL('gluten', 'lactose'), grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }, { nome: 'Chocolate', preco: 11 }] }] },
   pz_mucarela: { tags: ['Vegetariano'], ...AL('gluten', 'lactose', 'vegetariano'), grupos: [{ id: 'borda', nome: 'Borda', min: 0, max: 1, opcoes: [{ nome: 'Catupiry', preco: 9 }, { nome: 'Cheddar', preco: 9 }] }] },
@@ -82,10 +86,11 @@ export const PRODUTOS = [
   P('picanha', 'porcoes', 'Picanha na chapa', 'Picanha fatiada na chapa com cebola, farofa e vinagrete.', 89.9, 'cozinha', { foto: '', pontoCarne: true, serve: 'Serve 2 pessoas', harmoniza: 'cerveja', ficha: [['carne', 400], ['cebola', 80]] }),
   P('vinho', 'bebidas', 'Vinho tinto (taça)', 'Taça de 150 ml do tinto da casa.', 24.9, 'bar', { foto: '' }),
   P('combo_burger', 'lanches', 'Combo da casa', 'Escolha o lanche, o acompanhamento e a bebida, com preço fechado.', 54.9, 'cozinha', { foto: 'fotos/xburger.webp', tags: ['Combo'], combo: [{ nome: 'Lanche', itens: ['xburger', 'xsalada', 'frango_lanche'] }, { nome: 'Acompanhamento', itens: ['fritas', 'pao_queijo'] }, { nome: 'Bebida', itens: ['refri', 'cerveja', 'agua'] }] }),
-  P('pao_queijo', 'lanches', 'Pão de queijo (6 unidades)', 'Feito aqui todo dia, sai quentinho da vitrine.', 12.9, 'cozinha', { foto: '', vitrine: true, alergenos: ['lactose', 'ovo'] }),
+  P('pao_queijo', 'lanches', 'Pão de queijo (6 unidades)', 'Feito aqui todo dia, sai quentinho da vitrine.', 12.9, 'cozinha', { foto: '', vitrine: true, custo: 4.2, alergenos: ['lactose', 'ovo'] }),
   P('chopp', 'bebidas', 'Chopp pilsen 300 ml', 'Tirado na hora, do barril.', 12.9, 'bar', { foto: '', ml: 300 }),
   P('dose_whisky', 'bebidas', 'Dose de whisky 12 anos', 'Dose de 50 ml, pura ou com gelo.', 29.9, 'bar', { foto: '', ficha: [['whisky', 1]] }),
-  P('bolo', 'sobremesas', 'Bolo de cenoura com chocolate', 'Fatia generosa do bolo do dia, da vitrine.', 11.9, 'cozinha', { foto: '', vitrine: true, etapa: 'sobremesa', alergenos: ['gluten', 'lactose', 'ovo'] }),
+  P('gin_tonica', 'bebidas', 'Gin tônica', 'Dose de 50 ml de gin, água tônica, limão e gelo.', 32.9, 'bar', { foto: '', ficha: [['gin', 1]] }),
+  P('bolo', 'sobremesas', 'Bolo de cenoura com chocolate', 'Fatia generosa do bolo do dia, da vitrine.', 11.9, 'cozinha', { foto: '', vitrine: true, custo: 3.6, etapa: 'sobremesa', alergenos: ['gluten', 'lactose', 'ovo'] }),
 ].map((p) => ({ ...p, ficha: p.ficha.map(([insumo, qtd]) => ({ insumo, qtd })), ...(EXTRAS[p.id] || {}) }))
   // pizza: broto (4 pedaços, 60% do preço, metade da ficha) e grande (8 pedaços)
   .map((p) => (p.pizza ? { ...p, tamanhos: [{ nome: 'Broto · 4 pedaços', preco: Math.round(p.preco * 0.6 * 10) / 10 - 0.1, fator: 0.5 }, { nome: 'Grande · 8 pedaços', preco: p.preco, fator: 1 }] } : p));
@@ -104,7 +109,7 @@ export const CONFIG = {
     aceitaQR: true, delivery: true, retirada: true, pedidoMinimo: 30, tempoEntrega: '40 a 60 min', tempoRetirada: '20 a 30 min', pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'],
     areas: [{ nome: 'Salão', de: 1, ate: 8 }, { nome: 'Varanda', de: 9, ate: 12 }], couvert: 0, comissao: 10,
     // regras das funções da casa (cada uma só vale com a função ligada pelo template ou pelo dono)
-    rodizio: { adulto: 69.9, crianca: 34.9, meia: 49.9, porRodada: 4, rodadaCat: { pizzas: 2, sobremesas: 0 }, inclusos: ['pz_calabresa', 'pz_mucarela', 'pz_portuguesa', 'pz_frango', 'fritas', 'isca', 'bruschetta', 'pudim'] },
+    rodizio: { adulto: 69.9, crianca: 34.9, meia: 49.9, vegetariano: 54.9, buffet: 39.9, porRodada: 4, rodadaCat: { pizzas: 2, sobremesas: 0 }, inclusos: ['pz_calabresa', 'pz_mucarela', 'pz_portuguesa', 'pz_frango', 'fritas', 'isca', 'bruschetta', 'pudim', 'sushi_salmao', 'hot_roll', 'uramaki'] },
     fracoes: { regra: 'caro', bordas: [{ nome: 'Catupiry', precos: [6, 9] }, { nome: 'Cheddar', precos: [6, 9] }, { nome: 'Chocolate', precos: [8, 11] }] },
     happyHour: [{ id: 'hh1', nome: 'Happy hour', dias: [1, 2, 3, 4, 5], de: '17:00', ate: '19:00', alvo: 'prod', ids: ['cerveja', 'caipirinha', 'fritas'], tipo: '%', valor: 30, ativo: true }],
     pratoDoDia: [{ prod: 'parmegiana', preco: 54.9 }, { prod: 'executivo', preco: 29.9 }, { prod: 'executivo', preco: 29.9 }, { prod: 'espaguete', preco: 39.9 }, { prod: 'risoto', preco: 44.9 }, { prod: 'parmegiana', preco: 56.9 }, { prod: 'feijoada', preco: 42.9 }],
@@ -112,7 +117,17 @@ export const CONFIG = {
     turnos: { ligado: true, almoco: ['11:00', '15:00'], jantar: ['18:00', '23:30'] },
     taxaCartaoPerdido: 30, alertas: { mesa: 25, kds: 10 },
     encomendas: { antecedencia: 24 },
-    portaria: { capacidade: 180, vipConsumacao: 0, promoters: [{ codigo: 'ANA', nome: 'Ana Clara' }, { codigo: 'LEO', nome: 'Léo Martins' }],
+    // rodada 4 (cada uma só aparece com a função ligada): forno, embalagem, estações, combo em etapas, tara, vitrine, camarotes
+    forno: { capacidade: 6, padrao: 10, tempos: [{ tam: 'Broto', min: 7 }, { tam: 'Grande', min: 11 }] },
+    embalagem: { pizza: [{ tam: 'Broto', insumo: 'cx_broto' }, { tam: '', insumo: 'cx_grande' }], delivery: 'emb_delivery' },
+    estacoes: [{ id: 'chapa', nome: 'Chapa quente' }, { id: 'frio', nome: 'Balcão frio' }, { id: 'forno', nome: 'Forno' }, { id: 'fritura', nome: 'Fritura' }, { id: 'sobremesa', nome: 'Sobremesa' }],
+    estacaoCat: { pratos: 'chapa', lanches: 'chapa', pizzas: 'forno', porcoes: 'fritura', sobremesas: 'sobremesa' },
+    comboEtapas: { cats: ['lanches'], acomp: ['fritas', 'pao_queijo'], bebida: ['refri', 'suco', 'cerveja', 'agua'], desconto: 8 },
+    taras: [{ nome: 'Prato raso', g: 350 }, { nome: 'Prato fundo', g: 420 }, { nome: 'Marmitex', g: 30 }],
+    vitrineDesconto: 30,
+    camarotes: [{ id: 'cam1', nome: 'Camarote 1', capacidade: 10, consumacao: 1500, pacote: '1 whisky 12 anos, 6 energéticos, gelo e frutas' }, { id: 'cam2', nome: 'Camarote 2', capacidade: 8, consumacao: 1000, pacote: '1 gin, 6 tônicas e gelo' },
+      { id: 'cam3', nome: 'Camarote VIP', capacidade: 15, consumacao: 2500, pacote: '2 whiskies, 1 espumante e 12 energéticos' }],
+    portaria: { capacidade: 180, vipConsumacao: 0, promoters: [{ codigo: 'ANA', nome: 'Ana Clara', porEntrada: 5, pctConsumo: 10 }, { codigo: 'LEO', nome: 'Léo Martins', porEntrada: 4, pctConsumo: 8 }],
       ingressos: [{ nome: 'Pista', preco: 40, consumacao: 30, lotes: [{ nome: '1º lote', preco: 30, qtd: 5 }, { nome: '2º lote', preco: 40, qtd: 100 }, { nome: 'Na porta', preco: 50, qtd: 0 }] }, { nome: 'Camarote', preco: 120, consumacao: 100 }, { nome: 'Nome na lista', preco: 0, consumacao: 20 }] } },
 };
 // exemplo: clientes do delivery, entregadores e cupons
@@ -146,11 +161,16 @@ export function estadoInicial(agora = Date.now()) {
     mesa(1, 2, 38, 'Rafael', [it('executivo', 2, 'entregue', 30), it('suco', 2, 'entregue', 34), it('pudim', 1, 'preparo', 3)]),
     mesa(3, 4, 52, 'Bruna', [it('parmegiana', 2, 'pronto', 18), it('risoto', 1, 'pronto', 18), it('cerveja', 4, 'entregue', 45), it('fritas', 1, 'entregue', 40)]),
     mesa(5, 3, 70, 'Rafael', [it('pz_calabresa', 1, 'entregue', 50, { meia: { a: 'pz_calabresa', b: 'pz_portuguesa' }, nome: 'Pizza meia calabresa / meia portuguesa', preco: 64.9 }), it('refri', 3, 'entregue', 60), it('petit', 2, 'entregue', 15)], { pediuConta: agora - 2 * MIN }),
-    mesa(6, 6, 12, 'Diego', [it('isca', 1, 'preparo', 6), it('cerveja', 6, 'entregue', 10), it('calabresa_acebolada', 1, 'novo', 1)]),
+    // da mesa (divide entre todos) e de uma pessoa só: aparece com a função "Consumo da mesa e individual"
+    mesa(6, 6, 12, 'Diego', [it('isca', 1, 'preparo', 6, { daMesa: true }), it('cerveja', 6, 'entregue', 10), it('calabresa_acebolada', 1, 'novo', 1, { daMesa: true }), it('caipirinha', 1, 'entregue', 9, { pessoa: 2 }), it('gin_tonica', 1, 'entregue', 9, { pessoa: 4 })]),
     mesa(8, 2, 25, 'Bruna', [it('xbacon', 1, 'preparo', 9, { obs: 'Sem cebola', adic: [{ nome: 'Ovo', preco: 3 }] }), it('xburger', 1, 'preparo', 9), it('refri', 2, 'entregue', 20)]),
     mesa(10, 4, 41, 'Diego', [it('feijoada', 3, 'entregue', 30), it('caipirinha', 2, 'entregue', 35), it('agua', 1, 'entregue', 35)]),
     mesa(11, 2, 19, 'Rafael', [it('pz_mucarela', 1, 'pronto', 16, { meia: { a: 'pz_mucarela', b: 'pz_frango' }, nome: 'Pizza meia muçarela / meia frango com catupiry', preco: 64.9 })]),
-    { id: `b1-${agora}`, tipo: 'delivery', num: 41, aberta: agora - 22 * MIN, cliente: { nome: 'Patrícia Lima', tel: '16991234567', end: 'Rua das Acácias, 120', bairro: 'Jardim Paulista' }, taxaEntrega: 6, entrega: 'preparo', itens: [it('xbacon', 2, 'preparo', 20), it('fritas', 1, 'preparo', 20), it('refri', 2, 'novo', 20)], pagamentos: [], pagarNaEntrega: 'Pix', servico: false, origem: 'cardápio online' },
+    { id: `b1-${agora}`, tipo: 'delivery', num: 41, aberta: agora - 22 * MIN, cliente: { nome: 'Patrícia Lima', tel: '16991234567', end: 'Rua das Acácias, 120', bairro: 'Jardim Paulista' }, taxaEntrega: 6, entrega: 'preparo', itens: [it('xbacon', 2, 'preparo', 20), it('fritas', 1, 'pronto', 20), it('refri', 2, 'novo', 20)], pagamentos: [], pagarNaEntrega: 'Pix', servico: false, origem: 'cardápio online' },
+    // pizzas no forno e na fila (fila do forno e caixa de pizza por tamanho)
+    { id: `b5-${agora}`, tipo: 'delivery', num: 38, aberta: agora - 12 * MIN, cliente: { nome: 'Fernanda Rocha', tel: '16997776655', end: 'Rua Goiás, 88', bairro: 'Vila Nova' }, taxaEntrega: 7, entrega: 'preparo', emb: { cx_grande: 1, cx_broto: 1, emb_delivery: 1 },
+      itens: [it('pz_calabresa', 1, 'preparo', 11, { tam: 'Grande · 8 pedaços', fator: 1, nome: 'Pizza calabresa (Grande · 8 pedaços)', inicio: agora - 8 * MIN }), it('pz_mucarela', 1, 'novo', 3, { tam: 'Broto · 4 pedaços', fator: 0.5, nome: 'Pizza muçarela (Broto · 4 pedaços)', preco: 32.8 }), it('refri', 2, 'entregue', 11)],
+      pagamentos: [{ forma: 'Pix', valor: 113.7 }], servico: false, origem: 'cardápio online' },
     { id: `b2-${agora}`, tipo: 'delivery', num: 40, aberta: agora - 35 * MIN, cliente: { nome: 'Marcos Andrade', tel: '16998887766', end: 'Av. Brasil, 1450, ap 32', bairro: 'Centro' }, taxaEntrega: 5, entrega: 'saiu', saiu: agora - 6 * MIN, itens: [it('pz_portuguesa', 1, 'entregue', 33), it('cerveja', 2, 'entregue', 33)], pagamentos: [{ forma: 'Cartão de crédito', valor: 93.7 }], servico: false, origem: 'telefone' },
     { id: `b3-${agora}`, tipo: 'balcao', num: 42, aberta: agora - 4 * MIN, cliente: { nome: 'Juliana' }, itens: [it('xsalada', 1, 'novo', 3), it('suco', 1, 'novo', 3)], pagamentos: [], servico: false, origem: 'balcão' },
     // encomenda para amanhã às 15h (entra no quadro de pedidos no dia)
@@ -167,7 +187,9 @@ export function estadoInicial(agora = Date.now()) {
     sinal: { valor: 2500, ts: agora - 20 * 864e5, forma: 'Pix' },
     parcelas: [{ id: 'pa1', venc: ymdEx(agora - 5 * 864e5), valor: 2000, pago: agora - 5 * 864e5 }, { id: 'pa2', venc: ymdEx(agora + 3 * 864e5), valor: 3000, pago: null }],
     convidados: ['Laura Ferraz', 'Marta Ferraz', 'João Ferraz', 'Beatriz Lima', 'Gabriel Souza', 'Sofia Andrade', 'Pedro Rocha', 'Helena Prado', 'Lucas Martins', 'Alice Costa'].map((nome, k) => ({ id: `g${k + 1}`, nome })) }];
-  const vitrine = { dia: hoje, feito: { pao_queijo: 24, bolo: 8 }, qtd: { pao_queijo: 17, bolo: 5 } };
+  // 6 bolos de ontem voltaram com 30% de desconto (2 já vendidos); a vitrine de ontem fechou com perda
+  const vitrine = { dia: hoje, feito: { pao_queijo: 24, bolo: 8 }, qtd: { pao_queijo: 17, bolo: 5 }, deOntem: { bolo: 6 }, promo: { bolo: { qtd: 4, pct: 30 } } };
+  const vitrineHist = [{ dia: ymdEx(agora - 864e5), itens: [{ prod: 'pao_queijo', nome: 'Pão de queijo (6 unidades)', qtd: 3, dest: 'descartar', custo: 12.6 }, { prod: 'bolo', nome: 'Bolo de cenoura com chocolate', qtd: 6, dest: 'amanha', custo: 0 }], perda: 12.6 }];
   // barril de 50 L na torneira, com 31 L restantes (19 L vendidos em copos de 300 ml)
   const barris = [{ id: 'br1', nome: 'Chopp pilsen', prods: ['chopp'], litros: 50, custo: 520, inicio: agora - 2 * 864e5, usado: { ex: 19000 } },
     { id: 'br0', nome: 'Chopp pilsen', prods: ['chopp'], litros: 50, custo: 520, inicio: agora - 6 * 864e5, fim: agora - 2 * 864e5, usado: { ex: 47100 }, perdaMl: 2900, rendimento: 94.2 }];
@@ -177,11 +199,17 @@ export function estadoInicial(agora = Date.now()) {
     ent(64, 'Camarote', '', 120, 'LEO'), ent(52, 'Lista VIP', '', 0, 'LEO', { nome: 'Rafaela Nunes', vip: 'v3' })] };
   const vip = [{ id: 'v1', nome: 'Bruno Tavares', noite: nt, ate: '00:30', promoter: 'ANA' }, { id: 'v2', nome: 'Camila Duarte', noite: nt, ate: '00:30', promoter: 'ANA' },
     { id: 'v3', nome: 'Rafaela Nunes', noite: nt, ate: '23:59', promoter: 'LEO', entrou: agora - 52 * MIN }];
+  // balada: camarotes reservados nesta noite (um já chegou e consome no cartão 51, que entra com o template Balada)
+  const camaroteRes = [{ id: 'cr1', camarote: 'cam1', noite: nt, nome: 'Aniversário do Thiago', tel: '16990001122', pessoas: 10, promoter: 'LEO', sinal: 500, cartao: 51, chegou: agora - 40 * MIN, criado: agora - 3 * 864e5 },
+    { id: 'cr2', camarote: 'cam3', noite: nt, nome: 'Turma da Juliana', tel: '16990003344', pessoas: 12, promoter: 'ANA', sinal: 800, criado: agora - 2 * 864e5 }];
+  // conta faturada: empresas que já fecharam conta faturada (CNPJ de exemplo)
+  const empresas = [{ cnpj: '11.222.333/0001-81', razao: 'Construtora Horizonte Ltda (exemplo)', contato: 'Financeiro', tel: '1633334444', prazo: 30 }];
+  const faturados = [{ id: 'fat1', ts: agora - 6 * 864e5, cnpj: '11.222.333/0001-81', razao: 'Construtora Horizonte Ltda (exemplo)', valor: 1840, onde: 'Almoço de negócios · mesa 4', venc: ymdEx(agora + 24 * 864e5), exemplo: true }];
   const chamados = [{ id: 'c1', mesa: 8, tipo: 'garcom', ts: agora - 1 * MIN, origem: 'QR' }];
   const pedidosQR = [{ id: 'q1', mesa: 2, ts: agora - 3 * MIN, itens: [{ prod: 'xburger', qtd: 2, obs: '' }, { prod: 'refri', qtd: 2, obs: '' }], nome: 'Mesa 2 (QR)' }];
   const vendas = historico(agora), ctl = controleExemplo(vendas, agora);
   return {
-    versao: 1, exemplo: 7, criado: agora, reservas, fila, eventos, vitrine, barris, portaria, vip, config: JSON.parse(JSON.stringify(CONFIG)), categorias: CATEGORIAS.map((c) => ({ ...c })),
+    versao: 1, exemplo: 8, criado: agora, reservas, fila, eventos, vitrine, vitrineHist, barris, portaria, vip, camaroteRes, empresas, faturados, config: JSON.parse(JSON.stringify(CONFIG)), categorias: CATEGORIAS.map((c) => ({ ...c })),
     produtos: PRODUTOS.map((p) => JSON.parse(JSON.stringify(p))), insumos: INSUMOS.map((i) => ({ ...i })), bairros: BAIRROS.map((b) => ({ ...b })),
     comandas, chamados, pedidosQR, vendas, numPedido: 43,
     clientes: CLIENTES.map((c) => ({ ...c })), entregadores: ENTREGADORES.map((e) => ({ ...e })), cupons: CUPONS.map((c) => ({ ...c })),
@@ -212,7 +240,7 @@ function controleExemplo(v, agora) {
   [[1, 3, 'Rafael', 'Filé à parmegiana', 64.9, 'Saiu errado'], [2, 6, 'Diego', 'Cerveja long neck', 23.8, 'Lançado errado'], [4, 8, 'Bruna', 'Batata frita', 29.9, 'Cliente desistiu'], [6, 2, 'Rafael', 'Pizza calabresa', 59.9, 'Demorou demais']]
     .forEach(([d, mesa, quem, item, valor, motivo]) => aud(agora - d * DIA - 3 * H, 'cancelar-item', { quem: `${quem} · PIN do gerente`, mesa, item, qtd: valor > 20 && item.startsWith('Cerveja') ? 2 : 1, valor, motivo }));
   // perdas de estoque e um ajuste de inventário (custo na mesma conta do sistema: quantidade ÷ fator × preço)
-  const movEstoque = [['tomate', -400, 'perda', 'Vencido', 1], ['cerveja', -2, 'perda', 'Quebra: caixa caiu na entrega', 2], ['carne', -220, 'perda', 'Erro de preparo', 3], ['refri', -3, 'perda', 'Consumo interno', 4], ['alface', -2, 'perda', 'Vencido', 5], ['queijo', -150, 'ajuste', 'Inventário', 6]]
+  const movEstoque = [['whisky', -1.5, 'perda', 'Conferência da garrafa aberta', 2], ['tomate', -400, 'perda', 'Vencido', 1],['cerveja', -2, 'perda', 'Quebra: caixa caiu na entrega', 2], ['carne', -220, 'perda', 'Erro de preparo', 3], ['refri', -3, 'perda', 'Consumo interno', 4], ['alface', -2, 'perda', 'Vencido', 5], ['queijo', -150, 'ajuste', 'Inventário', 6]]
     .map(([id, qtd, tipo, motivo, d], k) => { const i = INSUMOS.find((x) => x.id === id); return { id: `e${k + 1}`, t: agora - d * DIA - 2 * H, insumo: id, tipo, qtd, motivo, quem: k % 2 ? 'Diego' : 'Bruna', custo: Math.round((qtd / i.fator) * i.custo * 100) / 100 }; });
   movEstoque.filter((m) => m.tipo === 'perda').forEach((m) => aud(m.t, 'perda', { quem: m.quem, item: INSUMOS.find((i) => i.id === m.insumo).nome, qtd: -m.qtd, valor: m.custo, motivo: m.motivo }));
   // 3 caixas fechados (os últimos dias com venda)
@@ -231,6 +259,39 @@ function controleExemplo(v, agora) {
   }
   aud(agora - 2 * H, 'sangria', { quem: 'Bruna', valor: 100, motivo: 'Depósito no banco' });
   return { fechamentos: fechamentos.reverse(), auditoria: auditoria.sort((a, b) => a.t - b.t), movEstoque };
+}
+
+// exemplos que só fazem sentido num tipo de negócio: entram quando a demonstração está nesse template e saem quando ele muda
+// (cada coisa leva exTpl com os templates em que aparece). Tudo inventado e marcado como exemplo.
+export function exemploTipo(agora = Date.now()) {
+  const MIN2 = 60e3, P2 = (id, cat, nome, desc, preco, setor, extra = {}) => ({ id, cat, nome, desc, preco, setor, foto: '', ativo: true, adicionais: [], ficha: [], exemplo: true, ...extra });
+  const item = (p, qtd, status, minAtras, extra = {}) => ({ id: `x${p.id}${minAtras}`, prod: p.id, nome: p.nome, qtd, preco: p.preco, setor: p.setor, obs: '', adic: [], status, enviado: agora - minAtras * MIN2, ...(status === 'pronto' ? { pronto: agora - MIN2 } : {}), ...(status === 'preparo' ? { inicio: agora - Math.max(1, minAtras - 1) * MIN2 } : {}), ...extra });
+  const base = (id) => PRODUTOS.find((x) => x.id === id);
+  // japonês: peças do rodízio no balcão frio e na fritura
+  const sushi = P2('sushi_salmao', 'pratos', 'Sushi de salmão (2 peças)', 'Niguiri de salmão fresco.', 16.9, 'cozinha', { estacao: 'frio', alergenos: ['frutosmar'], exTpl: ['japones'] });
+  const hot = P2('hot_roll', 'pratos', 'Hot roll (4 peças)', 'Salmão e cream cheese empanados, com molho tarê.', 19.9, 'cozinha', { estacao: 'fritura', alergenos: ['frutosmar', 'gluten', 'lactose'], exTpl: ['japones'] });
+  const ura = P2('uramaki', 'pratos', 'Uramaki Filadélfia (4 peças)', 'Salmão, cream cheese e cebolinha.', 21.9, 'cozinha', { estacao: 'frio', alergenos: ['frutosmar', 'lactose'], exTpl: ['japones'] });
+  // chinês: porção P, M e G com a ficha multiplicada (a G gasta 2,5 vezes a P)
+  const yak = P2('yakisoba', 'pratos', 'Yakisoba de frango e carne', 'Macarrão na chapa com legumes, frango e carne. P serve 1, M serve 2, G serve 4.', 34.9, 'cozinha', { estacao: 'chapa', serve: 'P serve 1 · M serve 2 · G serve 4', picancia: 'opcional',
+    tamanhos: [{ nome: 'P · 1 pessoa', preco: 34.9, fator: 1 }, { nome: 'M · 2 pessoas', preco: 54.9, fator: 1.6 }, { nome: 'G · 4 pessoas', preco: 79.9, fator: 2.5 }], ficha: [{ insumo: 'frango', qtd: 120 }, { insumo: 'carne', qtd: 60 }, { insumo: 'cebola', qtd: 40 }], exTpl: ['chines'] });
+  // vinho da casa a granel: taça, meia jarra e jarra saem do mesmo garrafão (o ml da taça × o tamanho)
+  const vinho = P2('vinho_casa', 'bebidas', 'Vinho tinto da casa', 'Tinto seco servido do garrafão: taça, meia jarra ou jarra.', 19.9, 'bar', { ml: 150, granel: true, harmoniza: '',
+    tamanhos: [{ nome: 'Taça 150 ml', preco: 19.9, fator: 1 }, { nome: 'Meia jarra 500 ml', preco: 54.9, fator: 3.34 }, { nome: 'Jarra 1 L', preco: 99.9, fator: 6.67 }], exTpl: ['italiano', 'taverna'] });
+  const mesa9 = (tpl, extra, itens) => ({ id: `m9-${tpl}`, tipo: 'mesa', mesa: 9, aberta: agora - 34 * MIN2, garcom: 'Rafael', itens, pagamentos: [], servico: true, exTpl: [tpl], ...extra });
+  const comandas = [
+    mesa9('churrascaria', { pessoas: 6, rodizio: { adulto: 3, crianca: 1, buffet: 1, fora: 1 }, cartaoVerde: true }, [item(base('cerveja'), 3, 'entregue', 30), item(base('refri'), 2, 'entregue', 30), item(base('agua'), 1, 'entregue', 28)]),
+    mesa9('japones', { pessoas: 2, rodizio: { adulto: 2 } }, [item(sushi, 3, 'preparo', 6, { preco: 0, rodizio: true }), item(hot, 2, 'novo', 2, { preco: 0, rodizio: true }), item(base('refri'), 2, 'entregue', 20)]),
+    mesa9('chines', { pessoas: 4 }, [item(yak, 1, 'preparo', 7, { tam: 'G · 4 pessoas', fator: 2.5, nome: 'Yakisoba de frango e carne (G · 4 pessoas)', preco: 79.9 }), item(base('fritas'), 1, 'pronto', 7), item(base('refri'), 4, 'entregue', 25)]),
+    // senha de balcão: uma pronta (chamada no painel da TV) e uma preparando
+    { id: 'bs5-senha', tipo: 'balcao', num: 36, senha: 5, aberta: agora - 14 * MIN2, cliente: { nome: 'Carlos' }, itens: [item(base('xburger'), 1, 'pronto', 12), item(base('refri'), 1, 'pronto', 12)], pagamentos: [{ forma: 'Pix', valor: 39.9 }], servico: false, origem: 'balcão', chamada: agora - MIN2, exTpl: ['hamburgueria', 'cafeteria'] },
+    { id: 'bs6-senha', tipo: 'balcao', num: 37, senha: 6, aberta: agora - 6 * MIN2, cliente: { nome: 'Lívia' }, itens: [item(base('xbacon'), 1, 'preparo', 5), item(base('suco'), 1, 'novo', 5)], pagamentos: [{ forma: 'Cartão de débito', valor: 51.8 }], servico: false, origem: 'balcão', exTpl: ['hamburgueria', 'cafeteria'] },
+    // balada: o cartão do camarote 1, com a consumação do pacote
+    { id: 'k51-balada', tipo: 'cartao', cartao: 51, pessoas: 10, nome: 'Camarote 1 · Aniversário do Thiago', aberta: agora - 40 * MIN2, garcom: '', consumacao: 1500, camarote: 'cam1', promoter: 'LEO', itens: [item(base('dose_whisky'), 12, 'entregue', 35), item(base('gin_tonica'), 6, 'entregue', 20), item(base('agua'), 4, 'entregue', 15)], pagamentos: [], servico: true, exTpl: ['balada'] },
+  ];
+  // garrafão de 20 L do tinto da casa (12,4 L servidos) e o anterior, trocado com 0,6 L de perda
+  const barris = [{ id: 'gr1', tipo: 'granel', nome: 'Garrafão tinto da casa', prods: ['vinho_casa'], litros: 20, custo: 260, inicio: agora - 3 * 864e5, usado: { ex: 12400 }, exTpl: ['italiano', 'taverna'] },
+    { id: 'gr0', tipo: 'granel', nome: 'Garrafão tinto da casa', prods: ['vinho_casa'], litros: 20, custo: 260, inicio: agora - 8 * 864e5, fim: agora - 3 * 864e5, usado: { ex: 19400 }, perdaMl: 600, rendimento: 97, exTpl: ['italiano', 'taverna'] }];
+  return { produtos: [sushi, hot, ura, yak, vinho], comandas, barris };
 }
 
 // 30 dias de vendas fechadas (para relatórios): mais movimento na sexta e no sábado, almoço e jantar

@@ -524,3 +524,19 @@ body.est-cafeteria .cli-capa::after{width:120px;height:62px;bottom:-4px}
 .op-fracoes .seg{margin:4px 0 8px}.op-frac-txt{margin:0 0 6px}
 .op-casa legend{color:var(--marca)}
 @media (max-width:420px){.cli-prato-dia{flex-direction:column}.cli-prato-dia img{width:100%;max-width:none}.cli-prato-dia>span{padding:0 14px 12px}}
+
+/* ---------- rodada 4: combo em etapas, cota grátis dos adicionais e o limite da rodada ---------- */
+.cli-faixa.rodizio.cheia{background:color-mix(in srgb,#C0392B 14%,var(--cartao));border-color:color-mix(in srgb,#C0392B 40%,transparent)}
+.cli-combo-oferta{display:flex;gap:12px;align-items:center;padding:14px;border-radius:14px;background:color-mix(in srgb,var(--marca) 12%,var(--cartao));margin:0}
+.cli-combo-oferta .ico{width:30px;height:30px;flex:none;color:var(--marca)}.cli-combo-oferta b{display:block;font-size:17px}.cli-combo-oferta small{color:var(--txt2)}
+.cli-combo-passo{font-weight:800;margin:0 0 10px}.cli-combo-passo em{display:block;font-style:normal;font-weight:500;color:var(--txt2)}
+.cli-combo-ops{display:grid;gap:8px}
+.cli-combo-op{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;min-height:52px;padding:10px 14px;border-radius:12px;border:1.5px solid color-mix(in srgb,var(--txt) 15%,transparent);background:var(--cartao);color:var(--txt);font:inherit;text-align:left;cursor:pointer;box-sizing:border-box}
+.cli-combo-op:hover,.cli-combo-op:focus-visible{border-color:var(--marca)}
+.cli-combo-op small{white-space:nowrap;font-weight:700}.cli-combo-op s{opacity:.6;font-weight:400;margin-left:4px}
+.op-cota{margin:6px 0 0;font-weight:700;color:var(--marca)}
+
+/* faixa da demonstração no cardápio (demo-cardapio.js) */
+.demo-cardapio{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:7px 14px;background:#2A1E16;color:#F3E8D8;font:13px/1.3 system-ui,sans-serif}
+.demo-cardapio a{color:#F3E8D8;text-decoration:none;background:rgba(255,255,255,.1);border-radius:999px;padding:5px 11px}
+.demo-cardapio a:hover{background:rgba(255,255,255,.18)}

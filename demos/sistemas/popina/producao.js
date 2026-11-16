@@ -3,11 +3,11 @@
 // Um preparo é um insumo com i.preparo = { rende, validade, itens: [{ insumo, qtd }] } (qtd líquida, na unidade do ingrediente).
 // Aproveitamento: i.aprov = % (peso líquido ÷ bruto). A ficha técnica guarda o que sai do estoque (bruto): ao mudar o
 // aproveitamento, as fichas são reescaladas para manter o líquido; assim o custo do prato e a baixa já contam a perda.
-import { db, t, din, dinCurto, grava, r2, uid, insumo, saldo, APARELHO, registrarPerda, consumoVenda, fmtQtd, auditar, quemAgora, ouvir, custoPrato } from './loja.js?v=22';
-import { acao, ir } from './nucleo.js?v=22';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=22';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=22';
-import { fornecedor, abrirNovaCompra, criarLote, ymd, somaDias, dataCurta, zap } from './financeiro.js?v=22';
+import { db, t, din, dinCurto, grava, r2, uid, insumo, saldo, APARELHO, registrarPerda, consumoVenda, fmtQtd, auditar, quemAgora, ouvir, custoPrato } from './loja.js?v=23';
+import { acao, ir } from './nucleo.js?v=23';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=23';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=23';
+import { fornecedor, abrirNovaCompra, criarLote, ymd, somaDias, dataCurta, zap } from './financeiro.js?v=23';
 
 // entradas do hub da Gestão: [id, nome, ícone, detalhe]
 export const HUB_PRODUCAO = [
@@ -16,6 +16,8 @@ export const HUB_PRODUCAO = [
   ['lotes', 'Lotes e validade', 'calendario', 'O que vence, qual usar primeiro e descarte'],
   ['sugestao', 'Sugestão de compra', 'carrinho', 'Quanto pedir de cada fornecedor'],
   ['aproveitamento', 'Aproveitamento', 'folha', 'Fator de correção: peso líquido e bruto'],
+  ['rendimento', 'Rendimento real', 'grafico', 'Previsto × real de cada preparo e a perda em R$'],
+  ['rastreio', 'Rastreabilidade', 'etiqueta', 'De que lote veio e em que produção foi usado'],
 ];
 
 const DIA = 864e5;
@@ -76,19 +78,28 @@ export function consumoProducao(i, qtd) {
   const f = qtd / (Number(i.preparo?.rende) || 1);
   return (i.preparo?.itens || []).map((x) => { const j = insumo(x.insumo); return j ? { j, q: r2((x.qtd * f) / aprov(j)) } : null; }).filter(Boolean);
 }
-// produzir: tira os ingredientes, soma o rendimento no estoque e cria o lote com a validade
-export function produzir(id, qtd, { data = ymd(), validade = null, quem = quemAgora() } = {}) {
+// quais lotes de um insumo saem numa baixa de q: primeiro o que vence antes (FEFO); o que não tem lote fica "sem lote"
+export function lotesParaBaixa(id, q) {
+  let resta = r2(q); const l = [];
+  lotesAtivos(id).forEach((x) => { if (resta <= 0) return; const u = r2(Math.min(resta, x.resta)); if (u > 0) { l.push({ lote: x.id, qtd: u }); resta = r2(resta - u); } });
+  return l;
+}
+// produzir: tira os ingredientes (pela receita prevista), soma no estoque o que rendeu de fato e cria o lote com a validade.
+// Guarda de que lote saiu cada ingrediente (rastreabilidade) e o previsto × real (rendimento)
+export function produzir(id, qtd, { data = ymd(), validade = null, quem = quemAgora(), real = null } = {}) {
   garantir();
   const i = insumo(id); qtd = r2(qtd); if (!ehPreparo(i) || !(qtd > 0)) return null;
+  const rendeu = real == null || !(Number(real) >= 0) ? qtd : r2(Number(real));
   const cons = consumoProducao(i, qtd), custo = r2(cons.reduce((s, { j, q }) => s + q * custoUnRec(j), 0));
+  const usados = cons.map(({ j, q }) => ({ j, q, lotes: lotesParaBaixa(j.id, q) }));
   cons.forEach(({ j, q }) => { tirar(j, q); mov(j, -q, `Produção: ${i.nome}`, quem); });
-  i.estoque = r2((i.estoque || 0) + qtd); mov(i, qtd, 'Produção', quem);
-  const dias = validade ?? i.preparo.validade ?? 3, lote = criarLote({ insumo: i.id, qtd, validade: somaDias(data, dias), origem: 'producao', data });
-  db.producoes.push({ id: uid('pr'), insumo: i.id, qtd, data, ts: Date.now(), lote: lote.id, custo, quem, consumo: cons.map(({ j, q }) => ({ insumo: j.id, qtd: q })) });
+  i.estoque = r2((i.estoque || 0) + rendeu); mov(i, rendeu, 'Produção', quem);
+  const pid = uid('pr'), dias = validade ?? i.preparo.validade ?? 3, lote = rendeu > 0 ? criarLote({ insumo: i.id, qtd: rendeu, validade: somaDias(data, dias), origem: 'producao', ref: pid, data }) : null;
+  db.producoes.push({ id: pid, insumo: i.id, qtd: rendeu, previsto: qtd, real: rendeu, data, ts: Date.now(), lote: lote?.id || '', custo, quem, consumo: usados.map(({ j, q, lotes }) => ({ insumo: j.id, qtd: q, lotes })) });
   if (db.producoes.length > 2000) db.producoes.splice(0, db.producoes.length - 2000);
   atualizarCustos();
-  auditar('producao', { quem, item: i.nome, qtd: fmtQtd(qtd, i.unid), valor: custo, motivo: `Produção · lote vence ${dataCurta(lote.validade)}` });
-  grava(); return lote;
+  auditar('producao', { quem, item: i.nome, qtd: fmtQtd(rendeu, i.unid), valor: custo, motivo: `Produção${rendeu < qtd ? ` · rendeu ${fmtQtd(rendeu, i.unid)} de ${fmtQtd(qtd, i.unid)} previstos` : ''}${lote ? ` · lote vence ${dataCurta(lote.validade)}` : ''}` });
+  grava(); return lote || { id: '', validade: data };
 }
 
 // ------------------------------------------------------------------ lotes e validade
@@ -124,7 +135,7 @@ export function descartarLote(loteId) {
 export function consumoPeriodo(dias = 14, agora = Date.now()) {
   const de = agora - dias * DIA, m = {};
   db.vendas.filter((v) => v.ts >= de && v.ts <= agora && (!v.cancelado || (v.cancelado.estoque === false && !v.cancelado.reaberta))).forEach((v) => Object.entries(consumoVenda(v)).forEach(([id, q]) => { m[id] = (m[id] || 0) + q; }));
-  (db.movEstoque || []).filter((x) => x.tipo === 'producao' && x.qtd < 0 && x.t >= de && x.t <= agora).forEach((x) => { m[x.insumo] = (m[x.insumo] || 0) - x.qtd; });
+  (db.movEstoque || []).filter((x) => (x.tipo === 'producao' || x.tipo === 'consumo') && x.qtd < 0 && x.t >= de && x.t <= agora).forEach((x) => { m[x.insumo] = (m[x.insumo] || 0) - x.qtd; });
   return m;
 }
 export const consumoMedio = (id, dias = 14, m = consumoPeriodo(dias)) => r4((m[id] || 0) / dias);
@@ -214,17 +225,22 @@ acao('prd-preparo', (b) => {
 export function abrirProduzir(id, qtd = 0, aoFeito = null) {
   const i = insumo(id); if (!ehPreparo(i)) return;
   const q0 = qtd || i.preparo.rende;
-  folha({ titulo: `Produzir ${i.nome}`, corpo: `<div class="tres-c"><label class="campo"><span>Quantidade (${t(i.unid)})</span><input data-q inputmode="decimal" value="${vir(q0)}"></label><label class="campo"><span>Data</span><input type="date" data-d value="${ymd()}"></label><label class="campo"><span>Validade (dias)</span><input data-v inputmode="numeric" value="${i.preparo.validade}"></label></div>
+  folha({ titulo: `Produzir ${i.nome}`, corpo: `<div class="tres-c"><label class="campo"><span>Previsto (${t(i.unid)})</span><input data-q inputmode="decimal" value="${vir(q0)}"></label><label class="campo"><span>Data</span><input type="date" data-d value="${ymd()}"></label><label class="campo"><span>Validade (dias)</span><input data-v inputmode="numeric" value="${i.preparo.validade}"></label></div>
+    <div class="duas-c"><label class="campo"><span>Rendeu de fato (${t(i.unid)})</span><input data-real inputmode="decimal" value="${vir(q0)}"></label><div class="campo"><span>Rendimento</span><b class="fin-total" data-pct>100%</b></div></div>
     <div class="chips">${[0.5, 1, 2].map((k) => `<button type="button" class="chip" data-x="${k}">${k === 0.5 ? 'Meia receita' : k === 1 ? '1 receita' : '2 receitas'}</button>`).join('')}</div>
     <p class="mudo" style="margin-top:10px">Tira do estoque:</p><ul class="prd-consumo" data-c></ul>`,
   pe: '<button type="button" class="bt cheio grande" data-ok>Produzir e criar o lote</button>',
   aoAbrir: (f, fechar) => {
-    const prev = () => { const q = num($('[data-q]', f).value); $('[data-c]', f).innerHTML = consumoProducao(i, q).map(({ j, q: c }) => `<li><span>${t(j.nome)}</span><b class="${saldo(j) < c ? 'erro' : ''}">${fmtQtd(c, j.unid)}</b><small>tem ${fmtQtd(saldo(j), j.unid)}</small></li>`).join('') || '<li>Sem ingredientes na receita.</li>'; };
+    let realMexido = false; $('[data-real]', f).addEventListener('input', () => { realMexido = true; });
+    const pct = () => { const q = num($('[data-q]', f).value), r = num($('[data-real]', f).value), p2 = q ? Math.round((r / q) * 1000) / 10 : 0; const el = $('[data-pct]', f); el.textContent = `${vir(p2)}%${p2 < rendMin() ? ' · abaixo do esperado' : ''}`; el.className = `fin-total ${p2 < rendMin() ? 'erro' : ''}`; };
+    f.addEventListener('input', pct);
+    const prev = () => { if (!realMexido) $('[data-real]', f).value = $('[data-q]', f).value; pct(); const q = num($('[data-q]', f).value); $('[data-c]', f).innerHTML = consumoProducao(i, q).map(({ j, q: c }) => `<li><span>${t(j.nome)}</span><b class="${saldo(j) < c ? 'erro' : ''}">${fmtQtd(c, j.unid)}</b><small>tem ${fmtQtd(saldo(j), j.unid)}</small></li>`).join('') || '<li>Sem ingredientes na receita.</li>'; };
     $('[data-q]', f).oninput = prev; $$('[data-x]', f).forEach((x) => { x.onclick = () => { $('[data-q]', f).value = vir(r2(i.preparo.rende * Number(x.dataset.x))); prev(); }; }); prev();
     $('[data-ok]', f).onclick = () => {
       const q = num($('[data-q]', f).value); if (!(q > 0)) return toast('Informe a quantidade');
-      const lote = produzir(i.id, q, { data: $('[data-d]', f).value || ymd(), validade: Math.max(0, Math.round(num($('[data-v]', f).value))) });
-      fechar(); if (lote) { toast(`${fmtQtd(q, i.unid)} de ${i.nome} no estoque · vence ${dataCurta(lote.validade)}`); aoFeito?.(lote); }
+      const rv = $('[data-real]', f).value.trim(), real = rv === '' ? q : Math.max(0, num(rv));
+      const lote = produzir(i.id, q, { data: $('[data-d]', f).value || ymd(), validade: Math.max(0, Math.round(num($('[data-v]', f).value))), real });
+      fechar(); if (lote) { toast(`${fmtQtd(real, i.unid)} de ${i.nome} no estoque${real < q - 0.0001 ? ` (${Math.round((real / q) * 100)}% do previsto)` : ''} · vence ${dataCurta(lote.validade)}`); aoFeito?.(lote); }
     };
   } });
 }
@@ -268,9 +284,9 @@ TELAS_MAIS.lotes = () => {
   garantir();
   const hoje = ymd(), venc = vencendo(3, hoje), fe = fefo(), todos = todosLotes();
   const linha = (l) => { const i = insumo(l.insumo), s = situLote(l, hoje); return `<tr class="${s === 'vencido' ? 'fin-atraso' : ''}"><td><b>${t(i?.nome || '?')}</b><small>${l.origem === 'producao' ? 'Produção' : 'Compra'} de ${dataCurta(l.data)}</small></td><td class="num">${fmtQtd(l.resta, i?.unid || '')}${l.resta < l.qtd ? `<small>de ${fmtQtd(l.qtd, i?.unid || '')}</small>` : ''}</td><td>${dataCurta(l.validade)}</td><td>${pill({ vencido: 'vencida', hoje: 'hoje', amanha: 'hoje', perto: 'aberta', ok: 'ok' }[s], NOME_LOTE[s])}</td>
-    <td class="acoes"><button type="button" class="bt pq ${s === 'vencido' ? 'perigo' : ''}" data-acao="prd-descartar" data-l="${l.id}">Descartar</button></td></tr>`; };
+    <td class="acoes"><a class="bt-ico" href="#mais/rastreio/${l.insumo}" aria-label="Rastrear ${t(i?.nome || '')}">${ico('etiqueta')}</a><button type="button" class="bt pq ${s === 'vencido' ? 'perigo' : ''}" data-acao="prd-descartar" data-l="${l.id}">Descartar</button></td></tr>`; };
   const tab = (l, vazio) => `<div class="tabela-rolo"><table class="tabela"><thead><tr><th>Lote</th><th class="num">Resta</th><th>Validade</th><th>Situação</th><th></th></tr></thead><tbody>${l.map(linha).join('') || `<tr><td colspan="5" class="vazio">${vazio}</td></tr>`}</tbody></table></div>`;
-  return volta('mais', 'Lotes e validade', 'Lotes das compras com validade e das produções. O que resta é estimado: sai primeiro o lote mais velho') + `<div class="linha-bts"><button type="button" class="bt" data-acao="prd-lote">${ico('mais2')}Novo lote</button><a class="bt" href="#mais/producao">Produção do dia</a></div>
+  return volta('mais', 'Lotes e validade', 'Lotes das compras com validade e das produções. O que resta é estimado: sai primeiro o lote mais velho') + `<div class="linha-bts"><button type="button" class="bt" data-acao="prd-lote">${ico('mais2')}Novo lote</button><a class="bt" href="#mais/producao">Produção do dia</a><a class="bt" href="#mais/rastreio">Rastreabilidade</a></div>
     ${fe.length ? `<section class="bloco"><div class="sec-tit"><h2>Use primeiro</h2><span>o lote que vence antes</span></div><ul class="prd-fefo">${fe.map((x) => `<li>${ico('alerta')}<span><b>${t(x.insumo?.nome || '')}</b>: use primeiro o lote de ${dataCurta(x.lote.data)} (vence ${dataCurta(x.lote.validade)}, resta ${fmtQtd(x.lote.resta, x.insumo?.unid || '')})</span></li>`).join('')}</ul></section>` : ''}
     <section class="bloco"><div class="sec-tit"><h2>Vencendo</h2><span>vencidos e próximos 3 dias</span></div>${tab(venc, 'Nada vencendo nos próximos 3 dias.')}</section>
     <section class="bloco"><div class="sec-tit"><h2>Todos os lotes com saldo</h2><span>${todos.length}</span></div>${tab(todos, 'Nenhum lote. Informe a validade ao receber uma compra ou produza um preparo.')}</section>`;
@@ -323,6 +339,62 @@ MONTAR.aproveitamento = (el) => {
   const f = $('[data-aprov]', el); if (!f) return;
   f.onsubmit = (e) => { e.preventDefault(); let n = 0; db.insumos.filter((i) => !ehPreparo(i)).forEach((i) => { const inp = f[`a_${i.id}`]; if (!inp) return; const v = inp.value.trim() === '' ? 100 : Math.max(1, Math.min(100, num(inp.value))); if (setAproveitamento(i.id, v, false)) n++; });
     if (n) { atualizarCustos(); auditar('aproveitamento', { motivo: `${n} ${n === 1 ? 'insumo' : 'insumos'} com aproveitamento novo` }); grava(); } toast(n ? `Aproveitamento salvo · fichas ajustadas em ${n} ${n === 1 ? 'insumo' : 'insumos'}` : 'Nada mudou'); };
+};
+
+// ------------------------------------------------------------------ rendimento real (previsto × real)
+export const rendMin = () => Number(db.config?.rendMin) || 95;
+// produções com o real informado; perda = (previsto − real) × custo por unidade prevista
+export const producoesComReal = (de = 0) => (db.producoes || []).filter((x) => x.previsto > 0 && x.real != null && x.ts >= de);
+export function rendimentoPorPreparo(dias = 60) {
+  const de = Date.now() - dias * DIA, m = {};
+  producoesComReal(de).forEach((x) => { (m[x.insumo] ||= []).push(x); });
+  return Object.entries(m).map(([id, l]) => {
+    l.sort((a, b) => b.ts - a.ts); const i = insumo(id);
+    const pcts = l.map((x) => (x.real / x.previsto) * 100), prev = l.reduce((s, x) => s + x.previsto, 0), real = l.reduce((s, x) => s + x.real, 0);
+    const perda = r2(l.reduce((s, x) => s + Math.max(0, x.previsto - x.real) * ((x.custo || 0) / x.previsto), 0));
+    return { insumo: i, id, l, n: l.length, prev: r2(prev), real: r2(real), media: r2(prev ? (real / prev) * 100 : 100), pior: r2(Math.min(...pcts)), ultimo: r2(pcts[0]), perda };
+  }).filter((x) => x.insumo).sort((a, b) => a.media - b.media);
+}
+// alerta: preparo cuja última produção (7 dias) rendeu abaixo do mínimo
+export const rendimentoBaixo = () => { const de = Date.now() - 7 * DIA; return rendimentoPorPreparo(60).filter((x) => x.l[0].ts >= de && x.ultimo < rendMin()); };
+TELAS_MAIS.rendimento = () => {
+  garantir();
+  const l = rendimentoPorPreparo(60), min = rendMin(), perda = r2(l.reduce((s, x) => s + x.perda, 0)), baixos = l.filter((x) => x.ultimo < min || x.media < min);
+  const ult = producoesComReal(Date.now() - 60 * DIA).sort((a, b) => b.ts - a.ts).slice(0, 12);
+  const pc = (v) => `<b class="${v < min ? 'erro' : 'ok-txt'}">${vir(v)}%</b>`;
+  return volta('mais', 'Rendimento real', 'O que a receita devia render × o que rendeu de fato, nos últimos 60 dias') + `<div class="linha-bts"><a class="bt cheio" href="#mais/preparos">${ico('chef')}Produzir um preparo</a><a class="bt" href="#mais/producao">Produção do dia</a></div>
+    <section class="kpis"><div class="${perda > 0 ? 'fin-alerta' : ''}"><small>Perda no rendimento</small><b>${dinCurto(perda)}</b><span>custo do que não rendeu</span></div><div><small>Produções conferidas</small><b>${l.reduce((s, x) => s + x.n, 0)}</b><span>com o real informado</span></div>
+      <div class="${baixos.length ? 'fin-alerta' : ''}"><small>Abaixo de ${vir(min)}%</small><b>${baixos.length}</b><span>${baixos.length === 1 ? 'preparo' : 'preparos'}</span></div><div><small>Pior média</small><b>${l[0] ? `${vir(l[0].media)}%` : '—'}</b><span>${t(l[0]?.insumo.nome || 'sem dados')}</span></div></section>
+    ${baixos.length ? `<p class="aviso ouro">${ico('alerta')}${baixos.map((x) => `${t(x.insumo.nome)} rendeu ${vir(x.ultimo)}% na última produção`).join(' · ')}. Confira a receita, a balança e o desperdício no preparo.</p>` : ''}
+    <section class="bloco"><div class="sec-tit"><h2>Por preparo</h2><span>média, pior produção e perda em R$</span></div><div class="tabela-rolo"><table class="tabela"><thead><tr><th>Preparo</th><th class="num">Produções</th><th class="num">Previsto</th><th class="num">Real</th><th class="num">Média</th><th class="num">Pior</th><th class="num">Perda</th></tr></thead><tbody>
+    ${l.map((x) => `<tr class="${x.media < min ? 'fin-atraso' : ''}"><td><b>${t(x.insumo.nome)}</b><small>última ${vir(x.ultimo)}%</small></td><td class="num">${x.n}</td><td class="num">${fmtQtd(x.prev, x.insumo.unid)}</td><td class="num">${fmtQtd(x.real, x.insumo.unid)}</td><td class="num">${pc(x.media)}</td><td class="num">${pc(x.pior)}</td><td class="num">${x.perda ? `<b class="erro">${dinCurto(x.perda)}</b>` : ''}</td></tr>`).join('') || '<tr><td colspan="7" class="vazio">Ao produzir, informe quanto rendeu de fato. As produções aparecem aqui.</td></tr>'}</tbody></table></div></section>
+    <section class="bloco"><div class="sec-tit"><h2>Últimas produções</h2></div><div class="tabela-rolo"><table class="tabela"><thead><tr><th>Quando</th><th>Preparo</th><th class="num">Previsto</th><th class="num">Real</th><th class="num">%</th><th>Quem</th></tr></thead><tbody>
+    ${ult.map((x) => { const i = insumo(x.insumo); return `<tr><td>${dataCurta(x.data)}</td><td>${t(i?.nome || '?')}</td><td class="num">${fmtQtd(x.previsto, i?.unid || '')}</td><td class="num">${fmtQtd(x.real, i?.unid || '')}</td><td class="num">${pc(r2((x.real / x.previsto) * 100))}</td><td>${t(x.quem || '')}</td></tr>`; }).join('') || '<tr><td colspan="6" class="vazio">Nenhuma produção com o real informado.</td></tr>'}</tbody></table></div></section>
+    <form class="form linha-form" data-rmin><label class="campo"><span>Avisar quando render menos que (%)</span><input name="min" inputmode="decimal" value="${vir(min)}"></label><button class="bt">Salvar</button></form>`;
+};
+MONTAR.rendimento = (el) => { const f = $('[data-rmin]', el); if (f) f.onsubmit = (e) => { e.preventDefault(); db.config.rendMin = Math.max(50, Math.min(100, num(f.min.value) || 95)); grava(); toast('Limite salvo'); }; };
+
+// ------------------------------------------------------------------ rastreabilidade: lote de compra → produção → lote produzido
+const nomeLote = (l) => { if (!l) return 'Lote apagado'; const fo = l.origem === 'compra' ? (db.notasCompra || []).find((n) => n.id === l.ref) : null; return `${l.origem === 'producao' ? 'Produção' : 'Compra'} de ${dataCurta(l.data)}${fo ? ` · ${fornecedor(fo.fornecedor)?.nome || ''}` : ''} · vence ${dataCurta(l.validade)}`; };
+export const producaoDoLote = (l) => (db.producoes || []).find((p) => p.lote === l.id || (l.ref && p.id === l.ref));
+// produções que usaram um lote
+export const usadoEm = (loteId) => (db.producoes || []).filter((p) => (p.consumo || []).some((c) => (c.lotes || []).some((x) => x.lote === loteId)));
+TELAS_MAIS.rastreio = (id) => {
+  garantir();
+  const i = insumo(id), comLote = [...new Set((db.lotes || []).map((l) => l.insumo))].map(insumo).filter(Boolean).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  const escolha = `<div class="filtros"><div class="chips">${comLote.map((x) => `<a class="chip ${x === i ? 'on' : ''}" href="#mais/rastreio/${x.id}">${t(x.nome)}</a>`).join('')}</div></div>`;
+  if (!i) {
+    const ult = (db.producoes || []).slice().sort((a, b) => b.ts - a.ts).slice(0, 10);
+    return volta('mais', 'Rastreabilidade', 'Escolha um insumo ou preparo para ver os lotes, de onde vieram e onde foram usados') + escolha + `
+      <section class="bloco"><div class="sec-tit"><h2>Últimas produções</h2><span>feito com</span></div><ul class="r4-mini">${ult.map((p) => { const j = insumo(p.insumo); return `<li>${ico('chef')}<span><b><a href="#mais/rastreio/${p.insumo}">${t(j?.nome || '?')}</a></b> · ${dataCurta(p.data)} · ${fmtQtd(p.real ?? p.qtd, j?.unid || '')}<small>${(p.consumo || []).map((c) => { const k = insumo(c.insumo); return `${t(k?.nome || '')}${c.lotes?.length ? ` (${c.lotes.map((x) => { const l = (db.lotes || []).find((y) => y.id === x.lote); return l ? `lote de ${dataCurta(l.data)}` : 'lote'; }).join(', ')})` : ' (sem lote)'}`; }).join(' · ')}</small></span></li>`; }).join('') || '<li class="vazio">Nenhuma produção ainda.</li>'}</ul></section>`;
+  }
+  const lotes = (db.lotes || []).filter((l) => l.insumo === i.id).sort((a, b) => b.criado - a.criado), ativos = Object.fromEntries(lotesAtivos(i.id).map((l) => [l.id, l.resta]));
+  return volta('mais', `Rastreio · ${t(i.nome)}`, `${lotes.length} ${lotes.length === 1 ? 'lote' : 'lotes'} · tem ${fmtQtd(saldo(i), i.unid)}`) + escolha + `<div class="linha-bts"><a class="bt" href="#mais/rastreio">Todos</a><a class="bt" href="#mais/lotes">Lotes e validade</a></div>
+    ${lotes.map((l) => { const p = l.origem === 'producao' ? producaoDoLote(l) : null, us = usadoEm(l.id), nc = l.origem === 'compra' ? (db.notasCompra || []).find((n) => n.id === l.ref) : null;
+      return `<section class="bloco r4-lote"><div class="sec-tit"><h2>${nomeLote(l)}</h2><span>${fmtQtd(l.qtd, i.unid)}${ativos[l.id] != null ? ` · resta ${fmtQtd(ativos[l.id], i.unid)}` : l.descartado ? ' · descartado' : ' · usado'}</span></div>
+        ${p ? `<p class="r4-rot">Feito com</p><ul class="r4-mini">${(p.consumo || []).map((c) => { const k = insumo(c.insumo); return `<li>${ico('folha')}<span><b>${fmtQtd(c.qtd, k?.unid || '')} de ${t(k?.nome || '?')}</b><small>${c.lotes?.length ? c.lotes.map((x) => `${fmtQtd(x.qtd, k?.unid || '')} do ${nomeLote((db.lotes || []).find((y) => y.id === x.lote)).replace(/^./, (m) => m.toLowerCase())}`).join(' · ') : 'sem lote registrado'}</small></span>${k ? `<a class="bt-ico" href="#mais/rastreio/${k.id}" aria-label="Rastrear ${t(k.nome)}">${ico('dir')}</a>` : ''}</li>`; }).join('')}</ul><p class="mudo">Por ${t(p.quem || '')}${p.previsto ? ` · previsto ${fmtQtd(p.previsto, i.unid)}, rendeu ${fmtQtd(p.real, i.unid)}` : ''}</p>` : ''}
+        ${nc ? `<p class="mudo">Nota de ${dataCurta(nc.data)} · ${t(fornecedor(nc.fornecedor)?.nome || 'sem fornecedor')}${nc.divergencias?.some((x) => x.insumo === i.id) ? ' · teve divergência no recebimento' : ''}</p>` : ''}
+        <p class="r4-rot">Usado em</p>${us.length ? `<ul class="r4-mini">${us.map((u) => { const k = insumo(u.insumo), q = (u.consumo || []).flatMap((c) => c.lotes || []).filter((x) => x.lote === l.id).reduce((s, x) => s + x.qtd, 0); return `<li>${ico('chef')}<span><b>${t(k?.nome || '?')}</b> · produção de ${dataCurta(u.data)}<small>usou ${fmtQtd(r2(q), i.unid)} deste lote${u.lote ? ' · gerou um lote' : ''}</small></span>${k ? `<a class="bt-ico" href="#mais/rastreio/${k.id}" aria-label="Rastrear ${t(k.nome)}">${ico('dir')}</a>` : ''}</li>`; }).join('')}</ul>` : '<p class="mudo">Nenhuma produção usou este lote (as vendas não marcam lote).</p>'}</section>`; }).join('') || '<div class="vazio">Este insumo não tem lotes. Informe a validade ao receber a compra ou produza o preparo.</div>'}`;
 };
 
 // ------------------------------------------------------------------ demonstração: preparos, aproveitamento e lotes (uma vez)

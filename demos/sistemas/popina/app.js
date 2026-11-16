@@ -1,14 +1,14 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=22';
-import './cozinha.js?v=22';
-import './caixa.js?v=22';
-import './pedidos.js?v=22';
-import './mais.js?v=22';
-import './gestao.js?v=22';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=22';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=22';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=22';
-import { abrirEscolha } from './escolha.js?v=22';
+import './salao.js?v=23';
+import './cozinha.js?v=23';
+import './caixa.js?v=23';
+import './pedidos.js?v=23';
+import './mais.js?v=23';
+import './gestao.js?v=23';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=23';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=23';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=23';
+import { abrirEscolha } from './escolha.js?v=23';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -80,9 +80,10 @@ addEventListener('online', conexao); addEventListener('offline', conexao); conex
 // faixa da demonstração (some na conta real)
 if (!real) {
   const f = document.createElement('div'); f.className = 'demo-faixa';
-  f.innerHTML = `<span><b>Demonstração</b> · restaurante de exemplo</span>
-    <a href="app.html?papel=cozinha#cozinha" target="_blank" rel="noopener">${ico('cozinha')}Abrir a cozinha em outra aba</a>
-    <a href="${linkCardapio('mesa=4')}" target="_blank" rel="noopener">${ico('qr')}Cardápio do cliente</a>
+  // tudo na mesma aba (pedido do dono): nada de abrir aba nova; sempre dá para voltar ao site
+  f.innerHTML = `<a href="../../../popina.html">← Voltar ao site</a><span><b>Demonstração</b> · restaurante de exemplo</span>
+    ${q.get('papel') === 'cozinha' ? `<a href="app.html">${ico('salao')}Voltar ao sistema</a>` : `<a href="app.html?papel=cozinha#cozinha">${ico('cozinha')}Ver a tela da cozinha</a>`}
+    <a href="${linkCardapio('mesa=4')}">${ico('qr')}Cardápio do cliente</a>
     <button type="button" data-recomecar>Recomeçar</button>`;
   document.body.prepend(f);
   $('[data-recomecar]', f).onclick = () => { recomecar(); ir('salao'); toast('Demonstração recomeçada'); };
