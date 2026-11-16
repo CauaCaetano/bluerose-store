@@ -1,13 +1,13 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=16';
-import './cozinha.js?v=16';
-import './caixa.js?v=16';
-import './pedidos.js?v=16';
-import './mais.js?v=16';
-import './gestao.js?v=16';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=16';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=16';
-import { ico, folha, $, $$, toast, bip } from './ui.js?v=16';
+import './salao.js?v=18';
+import './cozinha.js?v=18';
+import './caixa.js?v=18';
+import './pedidos.js?v=18';
+import './mais.js?v=18';
+import './gestao.js?v=18';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=18';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=18';
+import { ico, folha, $, $$, toast, bip } from './ui.js?v=18';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
@@ -46,19 +46,21 @@ function contadores() {
   $('[data-iniciais]').textContent = (db.config.nome || 'P').split(/\s+/).filter((w) => w.length > 2 || /^[A-ZÀ-Ú]/.test(w)).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || 'P';
 }
 // plano "Popina com a sua marca": o topo mostra o logo e o nome do restaurante no lugar do Popina
+const logoPopina = (tp) => (tp === 'taverna' ? 'simbolo.png?v=1' : `img/logo-${tp}.webp?v=1`);
 function marcaTopo() {
   const m = window.popinaPlano === 'marca', L = lojaCfg(), img = document.querySelector('.topo > img'), b = document.querySelector('.topo > div > b');
   window.popinaNome = db.config.nome;
-  if (img) { const src = m && L.logo ? L.logo : 'simbolo.png?v=1'; if (img.getAttribute('src') !== src) img.src = src; }
   if (b) b.textContent = m ? db.config.nome : 'POPINA';
   $('#topo-nome').textContent = m ? (db.config.cidade || '') : db.config.nome;
   document.body.classList.toggle('marca-propria', m);
   // template escolhido em Gestão › Aparência (Taverna é o visual de base; Luxo e Realeza vêm por cima)
   // Básico é o padrão de quem começa; a demonstração usa o Taverna (dados.js)
-  const TPLS = ['basico', 'taverna', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria', 'hamburgueria', 'pub', 'chines', 'balada'], tp = TPLS.includes(L.template) ? L.template : 'basico';
+  const TPLS = ['basico', 'taverna', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria', 'hamburgueria', 'pub', 'chines', 'balada', 'cafeteria'], tp = TPLS.includes(L.template) ? L.template : 'basico';
   const V = window.POPINA_TPLV || {};
   if (V[tp] && !document.querySelector(`link[data-tpl="${tp}"]`)) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = `tpl-${tp}.css?v=${V[tp]}`; l.dataset.tpl = tp; document.head.append(l); }
   TPLS.forEach((x) => document.body.classList.toggle(`tpl-${x}`, x === tp));
+  // logo do Popina no estilo do template (o Taverna usa o original); no plano com a marca, o logo do restaurante
+  if (img) { const src = m && L.logo ? L.logo : logoPopina(tp); if (img.getAttribute('src') !== src) img.src = src; img.style.objectFit = 'contain'; }
   if (/^#[0-9a-f]{6}$/i.test(L.cor || '')) document.body.style.setProperty('--loja-cor', L.cor);
 }
 addEventListener('popina-plano', () => { marcaTopo(); dispatchEvent(new HashChangeEvent('hashchange')); });

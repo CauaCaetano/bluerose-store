@@ -474,3 +474,23 @@ body.est-balada .tag{background:#F3E2C4!important;color:#7A4A12!important}body.e
 body.est-balada .cli-ver{background:#C2187A!important;color:#FFF6EE!important;box-shadow:inset 0 0 0 1.5px #9C1062,0 14px 28px -14px rgba(120,20,25,.6)!important}
 body.est-balada .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;background:linear-gradient(90deg,#FF2FB9,#22D3EE) 0 100%/100% 4px no-repeat;opacity:.7}
 body.est-balada .cli-capa::after{width:120px;height:62px;bottom:-4px}
+
+/* ---------- estilo CAFETERIA do cardápio (template Japonês): papel washi, vermelho laca, madeira e cerejeira ---------- */
+body.est-cafeteria{--marca:#9E3A26!important;--marca-txt:#FFF6EE!important;--fundo:#F6EEDF;--cartao:#FFF9EF;--linha2:#D8B07A;--txt:#3A2618;--txt2:#5A4E44;
+  background:#F6EEDF repeating-linear-gradient(115deg,rgba(160,130,90,.035) 0 2px,transparent 2px 7px)!important}
+body.est-cafeteria h1,body.est-cafeteria h2,body.est-cafeteria .cli-prod-txt b,body.est-cafeteria .cli-dest b,body.est-cafeteria .cli-preco,body.est-cafeteria .cli-ver,body.est-cafeteria .cli-fita b{font-family:"Playfair Display",Georgia,serif!important;font-weight:800!important}
+body.est-cafeteria .cli-capa{border-bottom:3px solid #B88A52}
+body.est-cafeteria .cli-capa::after{content:"";position:absolute;right:0;bottom:-6px;width:170px;height:74px;background:url(img/tcf-bolo.webp?v=1) right bottom/contain no-repeat;pointer-events:none;z-index:2}
+body.est-cafeteria .cli-logo{box-shadow:0 0 0 3px #9E3A26,0 8px 20px -8px rgba(0,0,0,.5)!important}
+body.est-cafeteria .cli-fita{background:#9E3A26!important;color:#FFF6EE!important;border-radius:4px!important;clip-path:polygon(2% 12%,8% 0,94% 6%,100% 40%,97% 100%,4% 92%,0 60%)}
+body.est-cafeteria .cli-h2{color:#3A2618!important}
+body.est-cafeteria .cli-h2::before{content:"";width:22px;height:22px;flex:none;border-radius:4px;background:#9E3A26;box-shadow:inset 0 0 0 3px #9E3A26,inset 0 0 0 5px #F6EEDF}
+body.est-cafeteria .cli-h2::after{background:#C9A06A!important;opacity:1!important;height:1px!important}
+body.est-cafeteria .cli-prod,body.est-cafeteria .cli-dest,body.est-cafeteria .cli-modo-bts .bt,body.est-cafeteria .cli-busca,body.est-cafeteria .cli-cats a{border:1.5px solid #D8B07A!important;border-radius:6px!important;background:#FFF9EF!important}
+body.est-cafeteria .cli-cats a.on{background:#9E3A26!important;color:#FFF6EE!important;border-color:#9E3A26!important}
+body.est-cafeteria .cli-modo-bts .bt .ico{color:#9E3A26!important}
+body.est-cafeteria .cli-preco{color:#9E3A26!important}
+body.est-cafeteria .tag{background:#F3E2C4!important;color:#7A4A12!important}body.est-cafeteria .tag.verde{background:#E5EDD6!important;color:#56702A!important}
+body.est-cafeteria .cli-ver{background:#9E3A26!important;color:#FFF6EE!important;box-shadow:inset 0 0 0 1.5px #7E2C1C,0 14px 28px -14px rgba(120,20,25,.6)!important}
+body.est-cafeteria .cli-barra::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;background:url(img/tcf-azulejo.webp?v=1) 0 100%/auto 24px repeat-x;opacity:.7}
+body.est-cafeteria .cli-capa::after{width:120px;height:62px;bottom:-4px}

@@ -1,10 +1,10 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=16';
-import { acao, ir } from './nucleo.js?v=16';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=16';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=16';
-import { situacao, textoHorarios } from './opcoes.js?v=16';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores } from './loja.js?v=18';
+import { acao, ir } from './nucleo.js?v=18';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=18';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=18';
+import { situacao, textoHorarios } from './opcoes.js?v=18';
 import { qrSVG } from '../base/qr.js';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -27,7 +27,7 @@ const ESTILOS = [['rustico', 'Rústico', 'Pergaminho, louros e mosaico. Cantina,
   ['italiano', 'Italiano', 'Toalha xadrez, oliveira e cerâmica pintada'], ['churrascaria', 'Churrascaria', 'Papel kraft, madeira e brasa'],
   ['mexicano', 'Mexicano', 'Talavera, pimenta e cempasúchil'], ['pizzaria', 'Pizzaria', 'Forno a lenha, madeira e lousa'],
   ['hamburgueria', 'Hamburgueria', 'Xadrez vermelho, inox e mostarda'], ['pub', 'Bar e pub', 'Carvalho, latão e verde garrafa'],
-  ['chines', 'Chinês', 'Laca vermelha, dourado e jade'], ['balada', 'Balada', 'Néon magenta e ciano']];
+  ['chines', 'Chinês', 'Laca vermelha, dourado e jade'], ['balada', 'Balada', 'Néon magenta e ciano'], ['cafeteria', 'Cafeteria', 'Café, caramelo e azulejo hidráulico']];
 // a cor que mais aparece no logo (ignora branco, preto e cinza) vira a cor do restaurante
 function corDoLogo(src) {
   return new Promise((ok) => {
@@ -75,6 +75,7 @@ export const TEMPLATES = [
   ['pub', 'Bar e pub', 'Carvalho, latão, verde garrafa e âmbar do chope. Bar, pub, boteco, choperia', 'pub'],
   ['chines', 'Chinês', 'Papel de arroz, laca vermelha, dourado e jade. Comida chinesa, oriental, yakisoba', 'chines'],
   ['balada', 'Balada', 'Pista à noite com néon, painéis claros. Balada, casa noturna, lounge, eventos', 'balada'],
+  ['cafeteria', 'Cafeteria', 'Madeira clara, azulejo hidráulico, café e caramelo. Cafeteria, padaria, confeitaria, brunch', 'cafeteria'],
 ];
 TELAS_MAIS.aparencia = () => {
   const L = lojaCfg(), c = db.config, tpl = L.template || 'basico';
