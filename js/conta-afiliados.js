@@ -2,8 +2,18 @@
 // Quem decide o que cada conta vê é o banco (nexo_meu_afiliado e nexo_afiliados_admin devolvem nulo para as demais).
 (function () {
   'use strict';
-  var C = window.BR_CONTA, blocoAf = document.getElementById('afiliado'), blocoDono = document.getElementById('af-dono');
-  if (!C || !blocoAf || !blocoDono) return;
+  // roda em Minha conta e na própria página de Afiliados (lá não existe o painel do dono: usa um bloco solto)
+  var C = window.BR_CONTA, blocoAf = document.getElementById('afiliado'), blocoDono = document.getElementById('af-dono') || document.createElement('div');
+  if (!C || !blocoAf) return;
+  var naPagina = blocoAf.hasAttribute('data-pagina');
+  function pedirLogin() {
+    blocoAf.hidden = false;
+    blocoAf.innerHTML = '<h2>Seu painel de afiliado</h2><p>Para pegar o seu link e ver os seus ganhos, entre na sua conta. Não tem? Crie agora, é grátis e leva menos de um minuto.</p>' +
+      '<button type="button" class="btn btn-primary" id="af-login">Entrar ou criar conta</button>';
+    document.getElementById('af-login').addEventListener('click', function () {
+      C.exigirLogin('Para ser afiliado, entre ou crie a sua conta.').then(function () { painelAfiliado().catch(function () {}); });
+    });
+  }
   var esc = C.esc, reais = C.reais, cliente = null;
   function dia(d) { return d ? String(d).slice(8, 10) + '/' + String(d).slice(5, 7) + '/' + String(d).slice(0, 4) : ''; }
   function rpc(nome, args) {
@@ -120,6 +130,7 @@
     cliente = c;
     var feito = false;
     c.auth.onAuthStateChange(function (ev, s) {
+      if (!s && naPagina && !feito) { pedirLogin(); return; }
       if (!s || feito) return;
       feito = true;
       setTimeout(function () { painelAfiliado().catch(function () {}); painelDono().catch(function () {}); }, 0); // fora do aviso de login: chamar o banco aqui dentro pode travar a sessão

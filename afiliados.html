@@ -48,7 +48,9 @@
 <script src="js/assistente.js?v=40" defer></script>
 <script src="js/cookies.js?v=4" defer></script>
 <link rel="stylesheet" href="css/porcelana.css?v=5">
-<link rel="stylesheet" href="css/pg-afiliados.css?v=1">
+<link rel="stylesheet" href="css/afiliados.css?v=2">
+<link rel="stylesheet" href="css/pg-afiliados.css?v=2">
+<script src="js/conta-afiliados.js?v=5" defer></script>
 </head>
 <body>
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -78,7 +80,7 @@
       <p class="eyebrow">Programa de afiliados</p>
       <h1 id="titulo">Indique a Blue Rose e ganhe 10% de cada pagamento.</h1>
       <p class="sub">Você cria sua conta no site, ativa o programa em Minha conta e recebe um link só seu. Quem assinar por ele gera comissão para você, todo mês, por até 12 meses.</p>
-      <div class="ctas"><a class="btn btn-primary" href="conta.html#afiliado">Criar conta e pegar meu link</a><a class="btn btn-ghost" href="#regras">Ler as regras</a></div>
+      <div class="ctas"><a class="btn btn-primary" href="#painel">Pegar meu link</a><a class="btn btn-ghost" href="#regras">Ler as regras</a></div>
     </div>
   </section>
 
@@ -87,13 +89,19 @@
       <h2 id="t-passos" class="sec-title">Como entrar, em 3 passos.</h2>
       <ol class="af-passos">
         <li><b>Crie sua conta no nosso site.</b><span>É obrigatório: o link de afiliado e as comissões ficam na sua conta. Se já tem conta, é só entrar.</span></li>
-        <li><b>Ative em Minha conta.</b><span>Em "Programa de afiliados", marque que leu as regras e toque em "Quero ser afiliado". O link aparece na hora.</span></li>
-        <li><b>Compartilhe o link.</b><span>Mande no WhatsApp, no Instagram ou onde quiser. Em Minha conta você vê as visitas, as contas criadas, as vendas e quanto tem a receber.</span></li>
+        <li><b>Ative aqui mesmo.</b><span>No painel logo abaixo, marque que leu as regras e toque em "Quero ser afiliado". O link aparece na hora.</span></li>
+        <li><b>Compartilhe o link.</b><span>Mande no WhatsApp, no Instagram ou onde quiser. Neste painel (e em Minha conta) você vê as visitas, as contas criadas, as vendas e quanto tem a receber.</span></li>
       </ol>
-      <div class="ctas"><a class="btn btn-primary" href="conta.html#afiliado">Ir para Minha conta</a></div>
+      <div class="ctas"><a class="btn btn-primary" href="#painel">Abrir o meu painel</a></div>
     </div>
   </section>
 
+
+  <section class="af-sec af-painel-sec" id="painel" aria-label="Seu painel de afiliado">
+    <div class="wrap">
+      <div class="conta-bloco conta-indica af-principal" id="afiliado" data-pagina><h2>Seu painel de afiliado</h2><p>Carregando…</p></div>
+    </div>
+  </section>
   <section class="af-sec af-ganhos" aria-labelledby="t-ganhos">
     <div class="wrap">
       <h2 id="t-ganhos" class="sec-title">Quanto você ganha.</h2>
@@ -120,7 +128,7 @@
         <li><b>Sem vínculo.</b> Não há vínculo de emprego, sociedade, representação nem exclusividade. Você não fala nem assina em nome da Blue Rose.</li>
         <li><b>Mudanças e saída.</b> Mudança no percentual vale só para vendas novas, com aviso antes. Qualquer lado pode encerrar por escrito; comissões de pagamentos já aprovados continuam devidas. Link usado fora das regras pode ser pausado.</li>
       </ol>
-      <div class="ctas"><a class="btn btn-primary" href="conta.html#afiliado">Criar conta e pegar meu link</a><a class="btn btn-ghost" href="sistemas.html">Ver o que você vai indicar</a></div>
+      <div class="ctas"><a class="btn btn-primary" href="#painel">Pegar meu link</a><a class="btn btn-ghost" href="sistemas.html">Ver o que você vai indicar</a></div>
     </div>
   </section>
 </main>

@@ -13,3 +13,4 @@
 .af-exemplo{margin-top:18px;padding:14px 18px;border-left:3px solid #C1A36A;background:rgba(193,163,106,.1);border-radius:8px}
 .af-regras{margin:22px 0 0;padding-left:22px;display:grid;gap:10px;max-width:820px}
 .af-sec .ctas{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px}
+.af-painel-sec .af-principal{max-width:820px;margin:0 auto;padding:24px;border-radius:18px;background:rgba(255,255,255,.75);border:1px solid rgba(16,27,54,.14);box-shadow:0 12px 30px -18px rgba(16,27,54,.35)}
