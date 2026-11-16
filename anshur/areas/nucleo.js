@@ -16,7 +16,8 @@
     documentos: '<path d="M4 7h6l2 2h8v10H4zM12 12v5M9.5 14.5 12 12l2.5 2.5"/>', usuarios: '<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21v-1a8 8 0 0 1 16 0v1"/>',
     perfil: '<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 21a7 7 0 0 1 14 0"/><path d="M19 4h3M20.5 2.5v3"/>',
     config: '<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM4 12h2M18 12h2M12 4v2M12 18v2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4"/>',
-    cadastros: '<path d="M4 5h16v14H4zM8 9h8M8 13h5"/>'
+    cadastros: '<path d="M4 5h16v14H4zM8 9h8M8 13h5"/>',
+    implantacao: '<path d="M4 20h16M6 20V10l6-5 6 5v10M10 14l1.5 1.5L15 12"/>'
   };
   const it = (aba, rotulo, curto) => I(aba, rotulo, curto, ICO[aba]);
 
@@ -45,9 +46,9 @@
 
   R.registrar({
     id: 'config', nome: 'Configurações', curto: 'Ajustes', ordem: 90, inicio: 'config', perfis: ['dono', 'gerente', 'vendedor', 'oficina', 'financeiro', 'auditor'],
-    descricao: 'Dados da revenda, lojas, equipe e perfis, cadastros, documentos, IA, avisos e instalação.',
+    descricao: 'Implantação guiada, dados da revenda, lojas, equipe e perfis, cadastros, documentos, IA, avisos e instalação.',
     icone: ICO.config,
-    menu: [{ grupo: 'Sistema', itens: [it('config', 'Configurações', 'Ajustes'), it('usuarios', 'Usuários', 'Usuários'), it('cadastros', 'Clientes e fornecedores', 'Cadastros'), it('documentos', 'Documentos', 'Documentos'), it('perfil', 'Meu perfil', 'Perfil')] }],
+    menu: [{ grupo: 'Sistema', itens: [it('config', 'Configurações', 'Ajustes'), it('implantacao', 'Implantação guiada', 'Implantação'), it('usuarios', 'Usuários', 'Usuários'), it('cadastros', 'Clientes e fornecedores', 'Cadastros'), it('documentos', 'Documentos', 'Documentos'), it('perfil', 'Meu perfil', 'Perfil')] }],
     numero: (ui) => ({ valor: String(ui.estado.usuarios.length), texto: `pessoas na equipe · ${ui.estado.lojas.length || 1} ${ui.estado.lojas.length === 1 ? 'loja' : 'lojas'}` })
   });
 })(typeof window !== 'undefined' ? window : globalThis);

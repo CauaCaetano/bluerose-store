@@ -26,3 +26,26 @@
 .af-area:not(:has(> :not([hidden]))) { display: none; }
 
 .af-aceite{display:flex;gap:8px;align-items:flex-start;font-weight:400}.af-aceite input{width:auto;margin-top:3px}
+
+/* Painel do dono */
+.pd-bloco h2 small{font-size:.6em;font-weight:500;opacity:.7}
+.pd-bloco h3{margin:22px 0 8px}
+.pd-filtros{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.pd-filtro{border:1px solid rgba(16,27,54,.2);background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:14px;cursor:pointer}
+.pd-filtro.on{background:#101b36;color:#fff;border-color:#101b36}
+.pd-sit{display:inline-block;padding:2px 9px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.pd-sit.ok{background:#E3F1E6;color:#1E5B2E}.pd-sit.erro{background:#FBE4DF;color:#8A2214}.pd-sit.neutro{background:#ECEAE4;color:#4A4038}
+
+/* Minha conta: pasta "Sistemas" */
+.conta-pasta{margin:18px 0;border:1px solid rgba(16,27,54,.14);border-radius:16px;background:rgba(255,255,255,.55)}
+.conta-pasta>summary{display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer;list-style:none;font-size:1.25rem}
+.conta-pasta>summary::-webkit-details-marker{display:none}
+.conta-pasta>summary .conta-titulo{margin:0}
+.conta-pasta-ico{width:30px;height:24px;border-radius:4px 6px 6px 6px;background:#C1A36A;position:relative;flex:none}
+.conta-pasta-ico::before{content:"";position:absolute;left:0;top:-5px;width:13px;height:7px;border-radius:3px 3px 0 0;background:#C1A36A}
+.conta-pasta[open] .conta-pasta-ico{background:#D9BF86}
+.conta-pasta-n{margin-left:auto;min-width:28px;text-align:center;padding:2px 9px;border-radius:999px;background:#101b36;color:#fff;font-size:14px;font-weight:700}
+.conta-pasta>summary::after{content:"";width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin:0 4px 4px 4px;transition:transform .2s}
+.conta-pasta[open]>summary::after{transform:rotate(-135deg);margin-bottom:-4px}
+.conta-pasta-corpo{padding:0 14px 14px}
+.pd-passos{margin:8px 0 12px;padding-left:22px;display:grid;gap:6px}.pd-qr{display:inline-block;padding:10px;background:#fff;border-radius:12px;border:1px solid rgba(16,27,54,.14)}.pd-qr img{display:block}

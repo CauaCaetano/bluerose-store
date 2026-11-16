@@ -187,11 +187,18 @@
       mostrarResumo(l);
       meusApps = {}; l.forEach(function (x) { if (x.app && ['teste', 'ativa', 'paga', 'pendente'].indexOf(x.status) >= 0) meusApps[x.app] = 1; });
       if (!doCache) indicacao();
-      raiz.innerHTML = aviso + (doCache ? '<div class="conta-aviso" data-aviso-cache>Atualizando a lista…</div>' : '') + busca() + (l.length ? '<h2 class="conta-titulo">Seus sistemas</h2>' + l.map(cartao).join('') :
+      raiz.innerHTML = aviso + (doCache ? '<div class="conta-aviso" data-aviso-cache>Atualizando a lista…</div>' : '') + busca() + (l.length ? '<details class="conta-pasta" id="conta-pasta"' + (termo || pastaAberta() ? ' open' : '') + '><summary><span class="conta-pasta-ico" aria-hidden="true"></span><span class="conta-titulo">Sistemas</span><span class="conta-pasta-n">' + l.length + '</span></summary><div class="conta-pasta-corpo">' + l.map(cartao).join('') + '</div></details>' :
         '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp?v=11" alt="" loading="lazy"><img src="img/sistemas/agenda.webp?v=11" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp?v=11" alt="" loading="lazy"></div><h3>Você ainda não tem assinaturas</h3><p>Escolha um dos sistemas, veja a demonstração e assine pelo botão Pague aqui.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
       if (termo) filtrar();
     }
   }
+  function pastaAberta() { try { return localStorage.getItem('conta-pasta-sistemas') === '1'; } catch (e) { return false; } }
+  document.addEventListener('toggle', function (e) {
+    if (e.target && e.target.id === 'conta-pasta') { try { localStorage.setItem('conta-pasta-sistemas', e.target.open ? '1' : '0'); } catch (x) { /* sem acesso */ } }
+  }, true);
+  document.addEventListener('input', function (e) {
+    if (e.target && e.target.id === 'conta-q' && e.target.value) { var p = document.getElementById('conta-pasta'); if (p) p.open = true; }
+  });
   function busca() {
     return '<div class="conta-busca"><label class="vh" for="conta-q">Procurar sistema</label><input id="conta-q" type="search" value="' + esc(termo) + '" placeholder="Procurar sistema pelo nome (ex.: agenda, farmácia, CRM)" autocomplete="off"><div class="conta-busca-res" data-busca-res></div></div>';
   }

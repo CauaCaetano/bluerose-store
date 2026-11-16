@@ -1,5 +1,5 @@
 (function () {
-  const A = window.ANSHUR, M = window.MOTOR, G = window.GRAFICOS, K = window.COMUM;
+  const A = window.ANSHUR, M = window.MOTOR, G = window.GRAFICOS, K = window.COMUM, IMPL = window.IMPLANTACAO;
   const { C, real, mil, pct, esc, data, diasDesde, diasEntre, hojeISO, NOMES, FICHA, estado } = K;
   const tela = document.getElementById('tela');
   const $ = (s, r = document) => r.querySelector(s);
@@ -145,6 +145,8 @@
       $('#nao', c).onclick = () => fecharCamada();
     });
   }
+  // planilha modelo do histórico de trocas: as mesmas colunas que o importador (importar.js) reconhece
+  function baixarModeloTrocas() { baixarCSV(IMPL.MODELO.arquivo, IMPL.linhasModelo()); }
   function baixarCSV(nome, linhas) {
     const csv = '﻿' + linhas.map((l) => l.map((c) => { const s = String(c ?? ''); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(';')).join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
@@ -220,7 +222,7 @@
   function semDados() {
     tela.innerHTML = `<div class="titulo"><div><h1>Bem-vindo ao Anshur</h1><p>Este é o ambiente com os dados reais da sua revenda. Ele começa vazio e não se mistura com a demonstração.</p></div></div>
       <section class="painel"><h2>Comece pelo histórico de trocas</h2><p class="sub" style="margin:6px 0 14px">Importe de 10 a 200 trocas já vendidas (planilha do Excel ou CSV do seu sistema). O Anshur aprende com elas, mede o próprio erro e passa a avaliar as próximas trocas. ${K.nuvem ? 'Os dados ficam na conta da revenda.' : 'Os dados ficam só neste navegador.'}</p>
-      <div class="acoes"><a class="btn btn-ouro" href="#teste">Importar histórico</a><button class="btn btn-linha" type="button" id="volta-demo">Ver a demonstração</button></div></section>`;
+      <div class="acoes">${IMPL.podeVer(K.usuarioAtual().perfil) ? '<a class="btn btn-ouro" href="#/config/implantacao">Começar a implantação guiada</a><a class="btn btn-linha" href="#teste">Só importar o histórico</a>' : '<a class="btn btn-ouro" href="#teste">Importar histórico</a>'}<button class="btn btn-linha" type="button" id="volta-demo">Ver a demonstração</button></div></section>`;
     $('#volta-demo').onclick = () => { K.repo.trocarAmbiente('demo'); K.recarregar(); };
   }
 
@@ -261,7 +263,7 @@
 
     const coresIdade = { normal: '#3E6B57', atencao: '#71877B', alerta: '#E2D6BF', critico: '#C1A36A' };
     const nomesRosca = { normal: 'Até 30 dias', atencao: '31 a 60 dias', alerta: '61 a 90 dias', critico: 'Acima de 90 dias' };
-    tela.innerHTML = `
+    tela.innerHTML = `${avisoImplantacao()}
       <div class="titulo"><div><h1>Visão geral da revenda</h1><p>Onde está o seu dinheiro e o que fazer hoje.</p></div>
         <div class="acoes"><a class="btn btn-linha" href="#patio">Ver pátio completo</a><button class="btn btn-linha" type="button" id="premissas-v">Premissas</button>${botaoAdicionar([{ nome: 'Nova avaliação', desc: 'Quanto pagar no usado da troca', acao: () => { location.hash = '#avaliar'; } }, { nome: 'Máquina no pátio', desc: 'Cadastrar à mão', acao: () => addMaquinaManual() }, { nome: 'Documento ou planilha', desc: 'Foto, PDF, CSV ou Excel', acao: () => { location.hash = '#documentos'; } }])}</div></div>
       <div class="kpis escalonado">
@@ -895,7 +897,7 @@
       <div id="previa"></div></section>${blocoSync()}<div id="revelacao"></div>`;
     ligarBotoesSync(corpo);
     $('#cola').oninput = (e) => { tc.texto = e.target.value; tc.previa = null; $('#previa').innerHTML = ''; };
-    $('#modelo').onclick = () => baixarCSV('anshur-modelo-trocas.csv', [['Categoria', 'Fabricante', 'Modelo', 'Ano', 'Horas', 'Estado (1 a 5)', 'Valor pago na troca', 'Valor vendido', 'Dias no pátio', 'Fipe (opcional)', 'Data da troca', 'Data da venda'], ['Trator', 'Massey Ferguson', 'MF 4709', '2019', '5200', '3', 'R$ 210.000,00', 'R$ 265.000,00', '48', '', '10/03/2025', '27/04/2025']]);
+    $('#modelo').onclick = baixarModeloTrocas;
     $('#arquivo').onchange = (e) => { const f = e.target.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { tc.texto = String(rd.result); $('#cola').value = tc.texto; conferir(); }; rd.onerror = () => toast('Não foi possível ler o arquivo.', true); rd.readAsText(f, 'utf-8'); };
     $('#conferir').onclick = conferir;
     if (tc.previa) mostrarPrevia();
@@ -1220,8 +1222,8 @@
   const fotoMini = (t, cls = 'maq-foto') => { const f = F.de(t); const src = f.propria ? f.u : F.mini(f.u); return `<img class="${cls}" src="${src}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;maq-ico&quot;>${ICO[t.tipo] ? '' : ''}</span>'">`; };
   const eu = () => K.usuarioAtual();
   const PERM = {
-    dono: ['hoje', 'visao', 'avaliar', 'patio', 'trocas', 'teste', 'passaportes', 'vendedores', 'garantias', 'financiamento', 'relatorio', 'documentos', 'atividades', 'usuarios', 'config', 'compradores', 'mercado', 'aprovacoes', 'rotina', 'memoria', 'historico'],
-    gerente: ['hoje', 'visao', 'avaliar', 'patio', 'trocas', 'teste', 'passaportes', 'vendedores', 'garantias', 'financiamento', 'relatorio', 'documentos', 'atividades', 'compradores', 'mercado', 'aprovacoes', 'rotina', 'memoria', 'historico'],
+    dono: ['hoje', 'implantacao', 'visao', 'avaliar', 'patio', 'trocas', 'teste', 'passaportes', 'vendedores', 'garantias', 'financiamento', 'relatorio', 'documentos', 'atividades', 'usuarios', 'config', 'compradores', 'mercado', 'aprovacoes', 'rotina', 'memoria', 'historico'],
+    gerente: ['hoje', 'implantacao', 'visao', 'avaliar', 'patio', 'trocas', 'teste', 'passaportes', 'vendedores', 'garantias', 'financiamento', 'relatorio', 'documentos', 'atividades', 'compradores', 'mercado', 'aprovacoes', 'rotina', 'memoria', 'historico'],
     vendedor: ['hoje', 'visao', 'avaliar', 'patio', 'passaportes', 'documentos', 'compradores', 'mercado', 'aprovacoes', 'rotina', 'memoria'],
     oficina: ['hoje', 'patio', 'passaportes', 'garantias', 'documentos', 'rotina'],
     financeiro: ['hoje', 'visao', 'patio', 'trocas', 'garantias', 'financiamento', 'relatorio', 'documentos', 'atividades', 'rotina', 'memoria', 'historico'],
@@ -1285,11 +1287,12 @@
     if (!M.catalogo(t) && v.referencia) A.modelos.push({ tipo: t.tipo, marca: t.marca, modelo: t.modelo, base: v.referencia, hAno: 800, importado: true });
     estado.fechadas.push(t); A.trocas.push({ ...t }); return t;
   }
-  function addMaquinaManual(pre = {}, docId) {
+  // depois: quem chamou continua na própria tela (ex.: implantação) em vez de ir para o pátio
+  function addMaquinaManual(pre = {}, docId, depois) {
     formulario('Adicionar máquina ao pátio', CAMPOS_MAQ, { tipo: 'trator', entrada: hojeISO(), ...pre }, (v) => {
       const t = criarMaquina(v, docId ? { docs: [docId] } : {}); salvar(); cacheLimpa();
       log('maquina', `Máquina adicionada ao pátio: ${t.marca} ${t.modelo} por ${real(t.pago)}`, { ref: t.id });
-      fecharCamada(true); toast('Máquina adicionada ao pátio.'); location.hash = '#patio'; rota();
+      fecharCamada(true); toast('Máquina adicionada ao pátio.'); if (typeof depois === 'function') { depois(t); return; } location.hash = '#patio'; rota();
     }, 'Sugestões aparecem enquanto você digita, mas pode escrever qualquer valor.');
   }
   function addVendaManual() {
@@ -1463,6 +1466,13 @@
     $$('[data-tirar]', tela).forEach((b) => b.onclick = () => { const u = estado.usuarios.find((x) => x.id === b.dataset.tirar); confirmar(`Remover ${u.nome}?`, 'A pessoa deixa de aparecer na lista. As atividades dela continuam no histórico.', 'Remover', () => { estado.usuarios = estado.usuarios.filter((x) => x !== u); log('usuario', `Usuário ${u.nome} removido`); salvar(); rota(); }); });
   }
 
+  // link do convite com copiar e mandar pelo WhatsApp (tela Equipe e implantação guiada)
+  function mostrarConvite(caixa, link, email) {
+    const txt = `Você foi convidado para o Anshur da ${A.revenda.nome}. Crie sua conta com o e-mail ${email} neste link (vale 7 dias): ${link}`;
+    caixa.innerHTML = `<div class="campo" style="margin-top:12px"><label for="cv-url">Link do convite para ${esc(email)}</label><input id="cv-url" readonly value="${esc(link)}"></div>
+      <div class="acoes"><button class="btn btn-linha" type="button" id="cv-copiar">Copiar link</button><a class="btn btn-linha" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">Mandar pelo WhatsApp</a></div>`;
+    $('#cv-copiar', caixa).onclick = () => { $('#cv-url', caixa).select(); (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast('Link copiado.'), () => { document.execCommand('copy'); toast('Link copiado.'); }); };
+  }
   // equipe com conta: convites por link, perfil e lojas definidos pelo dono, conferidos pelo servidor
   function telaEquipe() {
     const NV = K.nuvem, souDono = eu().perfil === 'dono', gere = ['dono', 'gerente'].includes(eu().perfil) && !NV.somenteLeitura;
@@ -1488,12 +1498,7 @@
         <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Perfil</th>${paginas.map(([, n]) => `<th class="n">${n}</th>`).join('')}<th class="n">Aprovar acima do teto</th></tr></thead><tbody>
         ${Object.entries(K.PERFIS).map(([p, n]) => `<tr><td><b>${n}</b></td>${paginas.map(([k]) => `<td class="n">${PERM[p].includes(k) ? '<span class="pos">✓</span>' : '<span class="sub">—</span>'}</td>`).join('')}<td class="n">${['dono', 'gerente'].includes(p) ? '<span class="pos">✓</span>' : '<span class="sub">—</span>'}</td></tr>`).join('')}</tbody></table></div>
         <p class="nota-rodape">O auditor só lê: o servidor recusa qualquer gravação dele. A restrição por loja vale nas telas; os dados da revenda são um conjunto único.</p></section>`;
-    const mostrarLink = (link, email) => {
-      const txt = `Você foi convidado para o Anshur da ${A.revenda.nome}. Crie sua conta com o e-mail ${email} neste link (vale 7 dias): ${link}`;
-      $('#cv-link').innerHTML = `<div class="campo" style="margin-top:12px"><label for="cv-url">Link do convite para ${esc(email)}</label><input id="cv-url" readonly value="${esc(link)}"></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="cv-copiar">Copiar link</button><a class="btn btn-linha" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">Mandar pelo WhatsApp</a></div>`;
-      $('#cv-copiar').onclick = () => { $('#cv-url').select(); (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast('Link copiado.'), () => { document.execCommand('copy'); toast('Link copiado.'); }); };
-    };
+    const mostrarLink = (link, email) => mostrarConvite($('#cv-link'), link, email);
     const carregarConvites = async () => {
       const box = $('#cv-pend'); if (!box) return;
       try {
@@ -1526,21 +1531,33 @@
   }
 
   // ---------- configurações ----------
+  // dados da revenda: o mesmo salvamento em Configurações e na implantação guiada
+  function salvarDadosRevenda({ nome, cnpj, cidade, marcas }) {
+    if (K.nuvem && nome.length >= 2 && ['dono', 'gerente'].includes(eu().perfil)) K.nuvem.renomear(nome, cidade).catch((e) => toast(e.message, true));
+    estado.nomeRevenda = nome; estado.cnpj = cnpj; estado.cidadeRevenda = cidade; estado.marcasRevenda = marcas;
+    salvar(); log('config', 'Dados da revenda atualizados');
+  }
+  const camposRevenda = (p) => `${sugestoes()}<div class="campos" style="margin-top:12px">
+            <div class="campo"><label for="${p}-nome">Nome da revenda</label><input id="${p}-nome" value="${esc(estado.nomeRevenda || A.revenda.nome)}"></div>
+            <div class="campo"><label for="${p}-cnpj">CNPJ</label><input id="${p}-cnpj" value="${esc(estado.cnpj || '')}" placeholder="00.000.000/0000-00" inputmode="numeric"></div>
+            <div class="campo"><label for="${p}-cid">Cidade</label><input id="${p}-cid" list="dl-cidade" value="${esc(estado.cidadeRevenda || A.revenda.cidade)}"></div>
+            <div class="campo"><label for="${p}-marcas">Marcas que a revenda representa</label><input id="${p}-marcas" list="dl-marca" value="${esc(estado.marcasRevenda || '')}" placeholder="Ex.: Case IH, Jacto"></div>
+          </div>`;
+  const lerCamposRevenda = (p) => ({ nome: $('#' + p + '-nome').value.trim(), cnpj: $('#' + p + '-cnpj').value.trim(), cidade: $('#' + p + '-cid').value.trim(), marcas: $('#' + p + '-marcas').value.trim() });
+  // alçadas de aprovação: a mesma tabela em Configurações e na implantação guiada
+  const tabelaAlcadas = () => `<div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Tipo</th><th class="n">Vendedor libera até (R$)</th><th class="n">Gerente libera até (R$)</th><th>Acima disso</th></tr></thead><tbody>
+        ${Object.entries(alcadas()).map(([k, a]) => `<tr><td><b>${NOMES[k]}</b></td><td class="n"><input class="campo-in" style="max-width:150px;text-align:right" data-alc="${k}|vendedor" inputmode="numeric" aria-label="${NOMES[k]}: vendedor libera até" value="${a.vendedor.toLocaleString('pt-BR')}"></td><td class="n"><input class="campo-in" style="max-width:150px;text-align:right" data-alc="${k}|gerente" inputmode="numeric" aria-label="${NOMES[k]}: gerente libera até" value="${a.gerente.toLocaleString('pt-BR')}"></td><td>Só o dono</td></tr>`).join('')}</tbody></table></div>`;
+  function salvarAlcadas(raiz) { const n = {}; $$('[data-alc]', raiz).forEach((i) => { const [k, q] = i.dataset.alc.split('|'); n[k] = n[k] || {}; n[k][q] = Math.max(0, num(i.value) || 0); }); Object.values(n).forEach((a) => { if (a.gerente < a.vendedor) a.gerente = a.vendedor; }); estado.alcadas = n; log('config', 'Alçadas de aprovação alteradas'); salvar(); }
   function telaConfig() {
-    const passos = primeirosPassos();
+    const impl = situacaoImpl(), pi = IMPL.progresso(impl), fimImpl = IMPL.concluida(implEstado(), impl);
     tela.innerHTML = `
       <div class="titulo"><div><h1>Configurações</h1><p>Dados da revenda, regras comerciais, integrações e os seus dados.</p></div>${botaoAdicionar([{ nome: 'Usuário', desc: 'Gerente, vendedor, oficina ou financeiro', acao: () => addUsuario() }, { nome: 'Modelo no catálogo', desc: 'Com a referência de preço', acao: () => $('#c-modelo').click() }])}</div>
-      <section class="painel"><div class="painel-cab"><h2>${ICO.baixo}Primeiros passos</h2><p>${passos.filter((p) => p.ok).length} de ${passos.length} concluídos</p></div>
-        <div class="progresso"><i style="width:${passos.filter((p) => p.ok).length / passos.length * 100}%"></i></div>
-        <ul class="passos-on">${passos.map((p) => `<li class="${p.ok ? 'ok' : ''}">${p.ok ? ICO.baixo : '<span class="bolinha"></span>'}<span><b>${esc(p.nome)}</b><span>${esc(p.desc)}</span></span>${p.ok ? '' : `<a class="btn btn-linha" href="${p.ir}">Fazer agora</a>`}</li>`).join('')}</ul></section>
+      ${IMPL.podeVer(eu().perfil) ? `<section class="painel impl-atalho" id="c-impl"><div class="painel-cab"><h2>${ICO.baixo}Primeiros passos: implantação guiada</h2><p>${pi.texto}${fimImpl ? ' · concluída' : ''}</p></div>
+        <div class="progresso"><i style="width:${pi.pct * 100}%"></i></div>
+        <p class="sub">${fimImpl ? 'Tudo pronto. Dá para rever qualquer etapa quando quiser.' : `Próxima: <b>${esc((impl.find((e) => !e.ok) || {}).titulo || '')}</b>. Cada etapa tem a ação ali mesmo, sem precisar de ninguém da Blue Rose.`}</p>
+        <div class="acoes"><a class="btn ${fimImpl ? 'btn-linha' : 'btn-ouro'}" href="#/config/implantacao">${fimImpl ? 'Rever a implantação' : pi.feitas ? 'Continuar a implantação' : 'Começar a implantação'}</a></div></section>` : ''}
       <div class="grade-2 bloco">
-        <section class="painel"><h2>${ICO.camadas}Dados da revenda</h2>${sugestoes()}
-          <div class="campos" style="margin-top:12px">
-            <div class="campo"><label for="c-nome">Nome da revenda</label><input id="c-nome" value="${esc(estado.nomeRevenda || A.revenda.nome)}"></div>
-            <div class="campo"><label for="c-cnpj">CNPJ</label><input id="c-cnpj" value="${esc(estado.cnpj || '')}" placeholder="00.000.000/0000-00" inputmode="numeric"></div>
-            <div class="campo"><label for="c-cid">Cidade</label><input id="c-cid" list="dl-cidade" value="${esc(estado.cidadeRevenda || A.revenda.cidade)}"></div>
-            <div class="campo"><label for="c-marcas">Marcas que a revenda representa</label><input id="c-marcas" list="dl-marca" value="${esc(estado.marcasRevenda || '')}" placeholder="Ex.: Case IH, Jacto"></div>
-          </div><div class="acoes"><button class="btn btn-ouro" type="button" id="c-salvar">Salvar dados</button></div></section>
+        <section class="painel"><h2>${ICO.camadas}Dados da revenda</h2>${camposRevenda('c')}<div class="acoes"><button class="btn btn-ouro" type="button" id="c-salvar">Salvar dados</button></div></section>
         <section class="painel"><h2>${ICO.moedas}Regras comerciais</h2>
           <div class="numeros"><div><span>Margem-alvo</span><b>${pct(K.cfg.margemAlvo, 0)}</b></div><div><span>Custo do capital</span><b>${pct(K.cfg.jurosMes)} a.m.</b></div><div><span>Comissão</span><b>${pct(K.cfg.comissaoPct)}</b></div>
             <div><span>Desconto por troca acima</span><b>${pct(K.cfg.descontoAcima, 0)}</b></div><div><span>Hora da oficina</span><b>${real(K.cfg.valorHora)}</b></div><div><span>Base do custo</span><b>${K.cfg.baseJuros === 'total' ? 'Pago + preparo' : 'Valor pago'}</b></div></div>
@@ -1548,8 +1565,7 @@
       </div>
       ${blocoInstalar()}${blocoIAConfig()}${blocoAvisos()}${blocoLojas()}${blocoLGPD()}
       <section class="painel bloco"><h2>${ICO.alvo}Alçadas de aprovação por tipo de máquina</h2><p class="sub" style="margin:6px 0 12px">Quanto acima do valor máximo cada um pode liberar. Acima da alçada do gerente, só o dono libera. Zero = qualquer valor acima precisa de aprovação.</p>
-        <div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Tipo</th><th class="n">Vendedor libera até (R$)</th><th class="n">Gerente libera até (R$)</th><th>Acima disso</th></tr></thead><tbody>
-        ${Object.entries(alcadas()).map(([k, a]) => `<tr><td><b>${NOMES[k]}</b></td><td class="n"><input class="campo-in" style="max-width:150px;text-align:right" data-alc="${k}|vendedor" inputmode="numeric" value="${a.vendedor.toLocaleString('pt-BR')}"></td><td class="n"><input class="campo-in" style="max-width:150px;text-align:right" data-alc="${k}|gerente" inputmode="numeric" value="${a.gerente.toLocaleString('pt-BR')}"></td><td>Só o dono</td></tr>`).join('')}</tbody></table></div>
+        ${tabelaAlcadas()}
         <div class="acoes"><button class="btn btn-ouro" type="button" id="c-alc">Salvar alçadas</button></div></section>
       <div class="grade-2 bloco">
         <section class="painel"><h2>${ICO.barras}Catálogo de modelos</h2><p class="sub" style="margin:6px 0 10px">Referências de preço usadas pelo motor. Modelos novos entram com a Fipe.</p>
@@ -1560,9 +1576,9 @@
           <div class="acoes"><a class="btn btn-linha" href="#teste">Sincronizar com o sistema</a><button class="btn btn-linha" type="button" id="c-backup">Baixar cópia de segurança</button><label class="btn btn-linha" style="cursor:pointer">Restaurar cópia<input type="file" accept=".json" id="c-restaura" class="sr"></label><button class="btn btn-linha" type="button" id="c-instalar">Instalar o app</button></div></section>
       ${K.nuvem && !K.nuvem.offline && ['dono', 'gerente', 'auditor'].includes(eu().perfil) ? '<section class="painel bloco" id="c-copias"><h2>Cópias diárias no servidor</h2><p class="sub">Carregando…</p></section>' : ''}
       </div>`;
-    $('#c-salvar').onclick = () => { if (K.nuvem && $('#c-nome').value.trim().length >= 2 && ['dono', 'gerente'].includes(eu().perfil)) K.nuvem.renomear($('#c-nome').value.trim(), $('#c-cid').value.trim()).catch((e) => toast(e.message, true)); estado.nomeRevenda = $('#c-nome').value.trim(); estado.cnpj = $('#c-cnpj').value.trim(); estado.cidadeRevenda = $('#c-cid').value.trim(); estado.marcasRevenda = $('#c-marcas').value.trim(); salvar(); log('config', 'Dados da revenda atualizados'); toast('Dados da revenda salvos.'); setTimeout(() => K.recarregar(), 600); };
+    $('#c-salvar').onclick = () => { salvarDadosRevenda(lerCamposRevenda('c')); toast('Dados da revenda salvos.'); setTimeout(() => K.recarregar(), 600); };
     $('#c-prem').onclick = abrirPremissas; ligarLGPD(); ligarLojas(); ligarIAConfig(); ligarAvisos();
-    $('#c-alc').onclick = () => { const n = {}; $$('[data-alc]', tela).forEach((i) => { const [k, q] = i.dataset.alc.split('|'); n[k] = n[k] || {}; n[k][q] = Math.max(0, num(i.value) || 0); }); Object.values(n).forEach((a) => { if (a.gerente < a.vendedor) a.gerente = a.vendedor; }); estado.alcadas = n; log('config', 'Alçadas de aprovação alteradas'); salvar(); toast('Alçadas salvas.'); rota(); };
+    $('#c-alc').onclick = () => { salvarAlcadas(tela); toast('Alçadas salvas.'); rota(); };
     $('#c-modelo').onclick = () => formulario('Adicionar modelo ao catálogo', [{ k: 'tipo', r: 'Categoria', tipo: 'select', ops: Object.entries(NOMES) }, { k: 'marca', r: 'Fabricante', lista: 'dl-marca', obr: true }, { k: 'modelo', r: 'Modelo', lista: 'dl-modelo', obr: true }, { k: 'base', r: 'Referência de preço seminovo (R$)', num: true, obr: true }], { tipo: 'trator' }, (v) => {
       A.modelos.push({ tipo: v.tipo, marca: v.marca, modelo: v.modelo, base: v.base, hAno: { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270 }[v.tipo], importado: true });
       estado.modelosExtra = (estado.modelosExtra || []).concat([{ tipo: v.tipo, marca: v.marca, modelo: v.modelo, base: v.base }]); salvar(); log('config', `Modelo ${v.marca} ${v.modelo} adicionado ao catálogo`); fecharCamada(true); toast('Modelo adicionado.'); rota();
@@ -1581,17 +1597,12 @@
     $('#c-restaura').onchange = (e) => { const f = e.target.files[0]; if (!f) return; f.text().then((tx) => { let d; try { d = JSON.parse(tx); } catch (er) { toast('Arquivo inválido.', true); return; } if (!d || !Array.isArray(d.fechadas)) { toast('Este arquivo não é uma cópia do Anshur.', true); return; } confirmar('Restaurar esta cópia?', 'Os dados atuais deste ambiente serão substituídos pelos da cópia.', 'Restaurar', () => { K.repo.gravar(d); K.recarregar(); }); }); };
     $('#c-instalar').onclick = simularInstalacao;
   }
-  function primeirosPassos() {
-    return [
-      { nome: 'Dados da revenda', desc: 'Nome, CNPJ e cidade', ok: !!estado.cnpj, ir: '#config' },
-      { nome: 'Regras comerciais', desc: 'Margem-alvo, custo do capital e comissão', ok: !!(estado.config && Object.keys(estado.config).length), ir: '#config' },
-      { nome: 'Equipe', desc: 'Cadastre gerente, vendedores e oficina', ok: estado.usuarios.length > 1, ir: '#usuarios' },
-      { nome: 'Histórico de vendas', desc: 'Importe as trocas já vendidas', ok: C.vendidas().length >= 10, ir: '#teste' },
-      { nome: 'Estoque atual', desc: 'Máquinas que estão hoje no pátio', ok: C.patio().length > 0, ir: '#patio' },
-      { nome: 'Primeira avaliação', desc: 'Avalie uma troca de verdade', ok: estado.avaliacoes.length > 0 || estado.fechadas.some((t) => t.previsto), ir: '#avaliar' },
-      { nome: 'Primeiro relatório', desc: 'Abra o relatório da semana', ok: estado.atividades.some((a) => a.tipo === 'relatorio'), ir: '#relatorio' }
-    ];
-  }
+  // primeiros passos = as etapas da implantação guiada (uma lista só), com o que dá para detectar sozinho
+  const implEstado = () => estado.implantacao || null;
+  const sinaisImpl = () => ({ cnpj: estado.cnpj, lojas: estado.lojas.length, config: Object.keys(estado.config || {}).length, alcadas: !!estado.alcadas, usuarios: estado.usuarios.length,
+    vendidas: C.vendidas(A.todasTrocas).length, patio: C.patio(A.todasTrocas).length, avaliacoes: estado.avaliacoes.length + estado.fechadas.filter((t) => t.previsto).length,
+    instalado: !!(window.ANSHUR_INSTALAR && window.ANSHUR_INSTALAR.instalado()), avisos: !!estado.avisos });
+  const situacaoImpl = () => IMPL.situacao(implEstado(), sinaisImpl());
 
   // ---------- instalação (simulação) ----------
   let promptInstalar = null;
@@ -2609,6 +2620,7 @@
     const rec = recentes().map((r) => { const a = AR.area(r.sis), x = a && itensVisiveis(a).find((y) => y.aba === r.aba); return a && x && areaVisivel(a) ? { a, x } : null; }).filter(Boolean).slice(0, 6);
     tela.innerHTML = `<div class="titulo inicio-titulo"><div><h1>${saud}${nome ? ', ' + esc(nome) : ''}</h1><p>${esc(A.revenda.nome)} · ${esc(PERFIL_NOME(eu().perfil))} · ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}</p></div>
         ${areaAtual && AR.area(areaAtual) && areaVisivel(AR.area(areaAtual)) && AR.area(areaAtual).pronta ? `<a class="btn btn-ouro" href="${urlSis(areaAtual)}" data-area="${areaAtual}">Continuar em ${esc(AR.area(areaAtual).nome)}</a>` : ''}</div>
+      ${avisoImplantacao()}
       <div class="portal-busca"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"/></svg><input id="portal-q" type="search" placeholder="Procurar sistema ou tela (ex.: contas a pagar, OS, pátio)" aria-label="Procurar sistema ou tela" autocomplete="off"><div id="portal-res" class="portal-res" hidden></div></div>
       ${rec.length ? `<div class="recentes"><h2 class="areas-sub">Abertos por último</h2><div class="chips">${rec.map(({ a, x }) => `<a class="chip" href="${urlSis(a.id, x.aba)}">${svgI(x.icone || a.icone)}<span>${esc(x.rotulo)}<small>${esc(a.nome)}</small></span></a>`).join('')}</div></div>` : ''}
       <h2 class="areas-sub">${favs.length ? 'Sistemas (favoritos primeiro)' : 'Sistemas'}</h2>
@@ -2636,6 +2648,286 @@
     q.onkeydown = (e) => { if (e.key === 'Enter') { const p = $('a', res); if (p) { e.preventDefault(); location.hash = p.getAttribute('href'); } } if (e.key === 'Escape') { q.value = ''; q.oninput(); } };
   }
   TELAS.inicio = telaInicio;
+
+  // =====================================================================================
+  // IMPLANTAÇÃO GUIADA: a revenda se implanta sozinha, etapa por etapa, sem reunião nem visita.
+  // Regras puras em implantacao.js; aqui a tela, que reaproveita o que já existe (dados da revenda, lojas, premissas,
+  // alçadas, convites, importador do histórico, cadastro de máquina, avaliação, instalação e avisos).
+  // Progresso em estado.implantacao (vai para a nuvem); a etapa aberta fica neste aparelho.
+  // =====================================================================================
+  const IMPL_VOLTA = 'anshur-impl-volta';
+  const ssG = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
+  const ssS = (k, v) => { try { if (v != null && v !== '') sessionStorage.setItem(k, v); else sessionStorage.removeItem(k); } catch (e) { /* sem armazenamento */ } };
+  const ICO_OK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  const implGravar = (imp) => { estado.implantacao = imp; salvar(); };
+  const implBase = () => implEstado() || IMPL.novo(hojeISO());
+  const implGuardada = () => lsG(chaveU('impl-etapa'));
+  const implGuardar = (v) => lsS(chaveU('impl-etapa'), String(v));
+  let implPrevia = null; // planilha lida, esperando a conferência (só nesta tela)
+
+  // aviso fixo do painel inicial enquanto a implantação não termina (só dono e gerente; o dono pode esconder)
+  function avisoImplantacao() {
+    const lista = situacaoImpl();
+    if (!IMPL.mostrarAviso({ imp: implEstado(), perfil: eu().perfil, lista })) return '';
+    const p = IMPL.progresso(lista), prox = lista.find((e) => !e.ok) || lista[0];
+    return `<section class="impl-aviso" aria-label="Implantação guiada"><div class="impl-aviso-txt"><b>Implantação: ${p.texto}</b><span>Próxima: ${esc(prox.titulo)}</span>
+      <div class="progresso" aria-hidden="true"><i style="width:${p.pct * 100}%"></i></div></div>
+      <div class="impl-aviso-acoes"><a class="btn btn-ouro" href="#/config/implantacao">Continuar</a>${eu().perfil === 'dono' ? '<button class="btn btn-linha" type="button" data-impl-esconder>Esconder</button>' : ''}</div></section>`;
+  }
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-impl-esconder]')) return;
+    implGravar(Object.assign(implBase(), { escondido: true })); log('implantacao', 'Aviso da implantação escondido do painel');
+    toast('Aviso escondido. A implantação continua em Configurações › Implantação guiada.'); rota();
+  });
+
+  // o que já está feito em cada etapa (texto curto, usado na etapa e no resumo final)
+  function resumoImpl(id) {
+    const s = sinaisImpl(), lojas = estado.lojas;
+    return {
+      revenda: `${A.revenda.nome}${estado.cnpj ? ' · CNPJ ' + estado.cnpj : ' · sem CNPJ'}${estado.cidadeRevenda ? ' · ' + estado.cidadeRevenda : ''}`,
+      lojas: lojas.length ? `${lojas.length} ${lojas.length === 1 ? 'loja' : 'lojas'}: ${lojas.join(', ')}` : 'Uma loja só',
+      regras: `Margem-alvo ${pct(K.cfg.margemAlvo, 0)}, custo do capital ${pct(K.cfg.jurosMes)} ao mês, comissão ${pct(K.cfg.comissaoPct)}${estado.alcadas ? ', alçadas definidas' : ''}`,
+      equipe: `${s.usuarios} ${s.usuarios === 1 ? 'pessoa' : 'pessoas'} com acesso${(implEstado() || {}).convites ? ` · ${implEstado().convites} ${implEstado().convites === 1 ? 'convite' : 'convites'} pela implantação` : ''}`,
+      historico: `${s.vendidas} ${s.vendidas === 1 ? 'troca vendida' : 'trocas vendidas'} no histórico`,
+      estoque: `${s.patio} ${s.patio === 1 ? 'máquina' : 'máquinas'} no pátio hoje`,
+      avaliacao: `${s.avaliacoes} ${s.avaliacoes === 1 ? 'avaliação registrada' : 'avaliações registradas'}`,
+      instalar: [s.instalado ? 'Instalado neste aparelho' : '', s.avisos || (implEstado() || {}).avisos ? 'avisos por e-mail escolhidos' : ''].filter(Boolean).join(' · ') || 'Marcada como feita'
+    }[id] || '';
+  }
+
+  function telaImplantacao() {
+    if (ssG(IMPL_VOLTA) != null) ssS(IMPL_VOLTA, '');
+    if (!implEstado()) implGravar(IMPL.novo(hojeISO()));
+    desenharImpl(IMPL.inicial(situacaoImpl(), implGuardada()));
+  }
+  function irEtapa(i) {
+    implGuardar(i); implPrevia = null; desenharImpl(i);
+    window.scrollTo({ top: 0, behavior: reduzido ? 'auto' : 'smooth' });
+  }
+  function desenharImpl(i) {
+    const lista = situacaoImpl(), p = IMPL.progresso(lista);
+    tela.innerHTML = `<div class="titulo"><div><h1>Implantação guiada</h1><p>Oito etapas para a ${esc(A.revenda.nome)} começar a usar o Anshur por conta própria. Pode parar e continuar depois, em qualquer aparelho: o progresso fica salvo na revenda.</p></div></div>
+      <section class="painel impl-topo" aria-label="Progresso da implantação"><div class="impl-prog"><b>${p.texto}</b><span>${IMPL.todasFeitas(lista) ? 'tudo pronto' : 'concluídas'}</span></div>
+        <div class="progresso grande" role="progressbar" aria-label="Etapas concluídas" aria-valuemin="0" aria-valuemax="${p.total}" aria-valuenow="${p.feitas}"><i style="width:${p.pct * 100}%"></i></div>
+        <ol class="impl-trilha">${lista.map((e, k) => `<li><button type="button" data-impl-ir="${k}" class="${e.ok ? 'ok' : e.pulada ? 'pulada' : ''}" ${k === i ? 'aria-current="step"' : ''} aria-label="Etapa ${e.n}: ${esc(e.titulo)}${e.ok ? ', concluída' : e.pulada ? ', pulada' : ''}"><span class="impl-n">${e.ok ? ICO_OK : e.n}</span><span class="impl-rot">${esc(e.curto)}</span></button></li>`).join('')}</ol></section>
+      <div id="impl-corpo"></div>`;
+    $$('[data-impl-ir]', tela).forEach((b) => { b.onclick = () => irEtapa(+b.dataset.implIr); });
+    if (i === 'fim') implFim(lista); else implEtapa(lista, i);
+  }
+
+  // ação de cada etapa: html (feita ali mesmo), ligar (eventos) e antes (roda no "Concluir e seguir"; false = não segue)
+  const ACAO_IMPL = {
+    revenda: {
+      html: () => camposRevenda('im'),
+      antes: () => {
+        const v = lerCamposRevenda('im');
+        if (v.nome.length < 2) { toast('Informe o nome da revenda.', true); $('#im-nome').focus(); return false; }
+        if (v.cnpj && K.digitos(v.cnpj).length !== 14) { toast('O CNPJ tem 14 números. Confira.', true); $('#im-cnpj').focus(); return false; }
+        salvarDadosRevenda(v); A.revenda.nome = v.nome; if (v.cidade) A.revenda.cidade = v.cidade;
+        const r = $('#revenda'); if (r && r.lastChild && r.lastChild.nodeType === 3) r.lastChild.textContent = v.nome;
+        return true;
+      }
+    },
+    lojas: {
+      html: () => `${blocoLojas()}<p class="nota-rodape">${estado.lojas.length ? 'Cada loja nova aparece no seletor de loja do cabeçalho.' : 'A revenda tem uma loja só? Não precisa cadastrar nada: toque em "Concluir e seguir".'}</p>`,
+      ligar: () => ligarLojas()
+    },
+    regras: {
+      html: () => `<div class="numeros"><div><span>Margem-alvo na troca</span><b>${pct(K.cfg.margemAlvo, 0)}</b></div><div><span>Custo do capital</span><b>${pct(K.cfg.jurosMes)} ao mês</b></div><div><span>Comissão do vendedor</span><b>${pct(K.cfg.comissaoPct)}</b></div></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="im-prem">Alterar margem, custo do capital e comissão</button></div>
+        <h3 class="impl-h3">Alçadas de aprovação</h3><p class="sub" style="margin-bottom:10px">Quanto acima do valor máximo cada um pode pagar sem pedir aprovação. Acima da alçada do gerente, só o dono libera. Zero = qualquer valor acima precisa de aprovação.</p>
+        ${tabelaAlcadas()}<p class="nota-rodape">As alçadas são salvas quando você toca em "Concluir e seguir".</p>`,
+      ligar: () => { $('#im-prem').onclick = abrirPremissas; },
+      antes: () => { salvarAlcadas($('#impl-acao')); return true; }
+    },
+    equipe: {
+      html: () => {
+        const souDono = eu().perfil === 'dono', semGerente = !estado.usuarios.some((u) => u.perfil === 'gerente');
+        const perfis = ['gerente', 'vendedor', 'oficina', 'financeiro', 'auditor'].filter((p) => souDono || p !== 'gerente');
+        const padrao = souDono && semGerente ? 'gerente' : 'vendedor';
+        return `<ul class="impl-pessoas" id="im-equipe">${pessoasImpl()}</ul>
+          <form id="im-cv" class="campos" style="margin-top:14px" novalidate>${NV ? '' : '<div class="campo"><label for="im-cv-nome">Nome da pessoa</label><input id="im-cv-nome" autocomplete="off"></div>'}
+            <div class="campo"><label for="im-cv-email">E-mail da pessoa</label><input id="im-cv-email" type="email" autocomplete="off"></div>
+            <div class="campo"><label for="im-cv-perfil">Perfil</label><select id="im-cv-perfil">${perfis.map((p) => `<option value="${p}" ${p === padrao ? 'selected' : ''}>${esc(K.PERFIS[p])}</option>`).join('')}</select></div>
+            <div class="acoes" style="margin-top:0;grid-column:1 / -1"><button class="btn btn-ouro" type="submit">${NV ? 'Gerar convite' : 'Convidar'}</button></div></form>
+          <div id="im-cv-link"></div>
+          <p class="nota-rodape">${NV ? 'O convite vale 7 dias e só funciona com o e-mail convidado. A pessoa cria a senha e entra direto na revenda.' : OP ? 'Sem a conta da revenda, a pessoa fica cadastrada só neste navegador.' : 'Demonstração: o convite é simulado e nada é enviado.'} Perfis, lojas e remoção de acesso ficam em <a class="link" href="#usuarios">Usuários</a>.</p>`;
+      },
+      ligar: () => {
+        const f = $('#im-cv'); if (!f) return;
+        f.onsubmit = async (ev) => {
+          ev.preventDefault();
+          const email = $('#im-cv-email').value.trim().toLowerCase(), perfil = $('#im-cv-perfil').value, nomeEl = $('#im-cv-nome'), nome = nomeEl ? nomeEl.value.trim() : '', bt = f.querySelector('button[type="submit"]');
+          if (NV || email) { if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('Confira o e-mail.', true); $('#im-cv-email').focus(); return; } }
+          if (!NV && nome.length < 2) { toast('Informe o nome da pessoa.', true); nomeEl.focus(); return; }
+          const caixa = $('#im-cv-link'); bt.disabled = true;
+          try {
+            if (NV) {
+              const link = await NV.convidar(email, perfil); log('equipe', `Convite gerado para ${email} como ${K.PERFIS[perfil]} (implantação)`);
+              const imp = implBase(); imp.convites = (imp.convites || 0) + 1; implGravar(imp); mostrarConvite(caixa, link, email);
+            } else {
+              estado.usuarios.push({ id: 'u' + Date.now(), nome, email, perfil }); log('usuario', `Usuário ${nome} criado como ${K.PERFIS[perfil]} (implantação)`);
+              const imp = implBase(); imp.convites = (imp.convites || 0) + 1; implGravar(imp);
+              const txt = `Você foi convidado para o Anshur da ${A.revenda.nome} como ${K.PERFIS[perfil]}. Crie sua conta${email ? ' com o e-mail ' + email : ''} pelo link do convite.`;
+              caixa.innerHTML = `<p class="impl-detectado" role="status">${ICO.baixo}<span>${esc(nome)} entrou na equipe como ${esc(K.PERFIS[perfil])}. ${OP ? 'Com a conta da revenda, cada pessoa recebe um link e entra com a própria senha.' : 'Demonstração: o convite foi simulado e nada foi enviado. Na versão contratada, a pessoa recebe um link para criar a senha.'}</span></p>
+                <div class="acoes"><a class="btn btn-linha" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">Ver a mensagem do convite</a></div>`;
+              f.reset(); $('#im-equipe').innerHTML = pessoasImpl();
+            }
+          } catch (er) { toast(er.message, true); }
+          bt.disabled = false;
+        };
+      }
+    },
+    historico: {
+      html: () => {
+        const n = C.vendidas(A.todasTrocas).length, u = (implEstado() || {}).importacao;
+        return `<p class="impl-numero"><b>${n}</b><span>${n === 1 ? 'troca vendida' : 'trocas vendidas'} no histórico${n < IMPL.MIN_HISTORICO ? ` · o Anshur precisa de pelo menos ${IMPL.MIN_HISTORICO}` : ''}</span></p>
+          <ol class="impl-sub">
+            <li><div><b>Baixe a planilha modelo</b><span>Colunas: categoria, fabricante, modelo, ano, horas, estado (1 a 5), valor pago na troca, valor vendido, dias no pátio, Fipe (opcional), data da troca e data da venda. Apague a linha de exemplo antes de enviar.</span></div><button class="btn btn-linha" type="button" id="im-modelo">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Baixar planilha modelo</button></li>
+            <li><div><b>Envie a planilha</b><span>A planilha preenchida ou a exportação do seu sistema atual, em CSV ou Excel. O Anshur reconhece as colunas pelo nome.</span></div><label class="btn btn-ouro impl-arquivo">${ic('<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>')}Enviar planilha<input type="file" id="im-arq" accept=".csv,.txt,.xlsx,.xls,.ods" class="sr"></label></li>
+            <li><div><b>Confira o que entrou</b><span>Antes de entrar no histórico, você vê quantas trocas foram lidas e quais linhas têm problema.</span></div></li>
+          </ol>
+          <details class="impl-colar"><summary>Ou cole as linhas copiadas do Excel</summary><div class="campo" style="margin-top:10px"><label for="im-cola">Linhas da planilha</label><textarea class="cola" id="im-cola" placeholder="${esc(IMPL.MODELO.cabecalho.join(';'))}"></textarea></div><div class="acoes"><button class="btn btn-linha" type="button" id="im-conferir">Conferir linhas</button></div></details>
+          <div id="im-previa">${implPrevia ? previaImpl() : ''}</div>
+          ${u && !implPrevia ? `<div class="impl-ultima"><b>Última planilha: ${esc(u.arquivo)}</b><span>${data(String(u.quando).slice(0, 10))} · ${u.entraram} ${u.entraram === 1 ? 'troca entrou' : 'trocas entraram'} no histórico · ${u.problemas} ${u.problemas === 1 ? 'linha com problema' : 'linhas com problema'}</span>
+            ${u.avisos && u.avisos.length ? `<ul>${u.avisos.map((a) => `<li>Linha ${a.linha}: ${esc(a.motivo)}</li>`).join('')}</ul>` : ''}</div>` : ''}
+          <p class="nota-rodape">Prefere uma por vez? <button class="link" type="button" id="im-manual">Adicionar uma venda antiga à mão</button>. O seu sistema exporta todo dia numa pasta? <a class="link" href="#teste">Ligar a pasta do sistema</a>.</p>`;
+      },
+      ligar: (i) => {
+        $('#im-modelo').onclick = baixarModeloTrocas;
+        $('#im-manual').onclick = addVendaManual;
+        $('#im-arq').onchange = async (ev) => {
+          const f = ev.target.files[0]; if (!f) return;
+          const caixa = $('#im-previa'); caixa.innerHTML = `<div class="carregando-linha" style="margin-top:12px"><span class="giro"></span><b id="im-st">Lendo ${esc(f.name)}…</b></div>`;
+          try { const l = await lerTexto(f, (m) => { const s = $('#im-st'); if (s) s.textContent = m; }); lerPlanilhaImpl(l.texto || '', f.name, i); }
+          catch (er) { caixa.innerHTML = `<p class="neg" style="margin-top:12px">${esc(f.name)}: ${esc(er.message)}</p>`; }
+          ev.target.value = '';
+        };
+        $('#im-conferir').onclick = () => { const t = $('#im-cola').value; if (!t.trim()) { toast('Cole as linhas da planilha.', true); return; } lerPlanilhaImpl(t, 'linhas coladas', i); };
+        ligarPreviaImpl(i);
+      }
+    },
+    estoque: {
+      html: () => {
+        const p = C.patio(A.todasTrocas), cap = p.reduce((s, t) => s + t.pago, 0), ult = p.slice().sort((a, b) => String(b.entrada).localeCompare(String(a.entrada))).slice(0, 5);
+        return `<p class="impl-numero"><b>${p.length}</b><span>${p.length === 1 ? 'máquina' : 'máquinas'} no pátio hoje${p.length ? ' · ' + mil(cap) + ' parados' : ''}</span></p>
+          ${ult.length ? `<ul class="impl-lista">${ult.map((t) => `<li><b>${esc(t.marca + ' ' + t.modelo)}</b><span>${t.ano} · ${t.horas.toLocaleString('pt-BR')} h · ${diasDesde(t.entrada)} dias no pátio</span></li>`).join('')}</ul>` : ''}
+          <div class="acoes"><button class="btn btn-ouro" type="button" id="im-maq">${ic('<path d="M12 5v14M5 12h14"/>')}Cadastrar máquina do pátio</button><a class="btn btn-linha" href="#documentos">Puxar de nota, foto ou PDF</a>${p.length ? '<a class="btn btn-linha" href="#patio">Ver o pátio</a>' : ''}</div>`;
+      },
+      ligar: (i) => { $('#im-maq').onclick = () => addMaquinaManual({}, undefined, (t) => { if (A.todasTrocas !== A.trocas && !A.todasTrocas.some((x) => x.id === t.id)) A.todasTrocas.push({ ...t }); desenharImpl(i); }); }
+    },
+    avaliacao: {
+      html: () => `<p class="impl-numero"><b>${sinaisImpl().avaliacoes}</b><span>${sinaisImpl().avaliacoes === 1 ? 'avaliação registrada' : 'avaliações registradas'}</span></p>
+        <ol class="passos-instalar"><li>Toque em "Fazer a avaliação agora".</li><li>Informe a máquina, as horas e o estado; se quiser, tire as fotos guiadas.</li><li>Veja o valor máximo a pagar e registre a avaliação.</li><li>Toque em "Voltar à implantação", no alto da tela.</li></ol>
+        <div class="acoes"><button class="btn btn-ouro" type="button" id="im-avaliar">Fazer a avaliação agora</button></div>`,
+      ligar: (i) => { $('#im-avaliar').onclick = () => { ssS(IMPL_VOLTA, String(i)); location.hash = '#/usados/avaliar'; }; }
+    },
+    instalar: {
+      html: () => `${INS && INS.instalado() ? `<p class="impl-detectado">${ICO.baixo}<span>O Anshur já está instalado neste aparelho. Falta o outro (computador ou celular)? Abra o Anshur nele e use o botão Instalar do cabeçalho.</span></p>` : blocoInstalar()}
+        ${eu().perfil === 'dono' ? blocoAvisos() : '<p class="nota-rodape">Os avisos por e-mail são escolhidos pelo dono.</p>'}`,
+      ligar: (i) => {
+        ligarAvisos();
+        // avisos escolhidos = etapa feita: redesenha para a barra de progresso e a trilha mostrarem na hora
+        const b = $('#av-salvar'); if (b) b.addEventListener('click', () => { const imp = implBase(); if (!imp.avisos) { imp.avisos = true; implGravar(imp); setTimeout(() => { if ($('#impl-acao')) desenharImpl(i); }, 600); } });
+      }
+    }
+  };
+  const pessoasImpl = () => estado.usuarios.map((u) => `<li>${avatarHTML(u, 32)}<span><b>${esc(u.nome)}</b><small>${esc(K.PERFIS[u.perfil] || u.perfil)}${u.email ? ' · ' + esc(u.email) : ''}</small></span></li>`).join('');
+
+  // planilha do histórico: lê com o importador, separa o que não pode entrar e mostra para conferir
+  function lerPlanilhaImpl(texto, arquivo, i) {
+    const p = window.IMPORTAR.ler(texto, { refDe: M.refDe, anoMax: anoAtual });
+    const chave = (t) => [t.tipo, K.normal(t.modelo), t.ano, t.horas, t.pago, t.vendido].join('|');
+    const ja = new Set(A.todasTrocas.map(chave));
+    const rejeitadas = p.rejeitadas.slice(), aceitas = [], repetidas = [];
+    p.aceitas.forEach((t) => {
+      const linha = +String(t.id).slice(1);
+      if (IMPL.ehExemplo(t)) rejeitadas.push({ linha, motivo: 'linha de exemplo do modelo: apague ou troque pelos seus dados' });
+      else if (!t.entrada || !t.saida) rejeitadas.push({ linha, motivo: 'sem data da troca ou da venda: o histórico precisa das duas' });
+      else if (ja.has(chave(t))) repetidas.push(t);
+      else aceitas.push(t);
+    });
+    rejeitadas.sort((a, b) => a.linha - b.linha);
+    implPrevia = { arquivo, aceitas, rejeitadas, repetidas };
+    $('#im-previa').innerHTML = previaImpl(); ligarPreviaImpl(i);
+  }
+  function previaImpl() {
+    const p = implPrevia; if (!p) return '';
+    return `<div class="impl-previa" aria-live="polite"><p class="conta"><b>${p.aceitas.length} ${p.aceitas.length === 1 ? 'troca pronta' : 'trocas prontas'} para entrar</b> · ${p.rejeitadas.length} ${p.rejeitadas.length === 1 ? 'linha com problema' : 'linhas com problema'}${p.repetidas.length ? ` · ${p.repetidas.length} já ${p.repetidas.length === 1 ? 'estava' : 'estavam'} no histórico` : ''} · ${esc(p.arquivo)}</p>
+      ${p.rejeitadas.length ? `<div class="tabela-wrap" style="margin-top:10px"><table class="tabela"><thead><tr><th>Linha</th><th>O que corrigir</th></tr></thead><tbody>${p.rejeitadas.slice(0, 12).map((r) => `<tr><td>${r.linha}</td><td class="neg">${esc(r.motivo)}</td></tr>`).join('')}</tbody></table></div>${p.rejeitadas.length > 12 ? `<p class="nota-rodape">E mais ${p.rejeitadas.length - 12} linhas com problema.</p>` : ''}` : ''}
+      ${p.aceitas.length ? `<div class="tabela-wrap" style="margin-top:10px"><table class="tabela"><thead><tr><th>Máquina</th><th class="n">Ano</th><th class="n">Pago</th><th class="n">Vendido</th><th>Troca → venda</th></tr></thead><tbody>${p.aceitas.slice(0, 6).map((t) => `<tr><td class="maq"><b>${esc((t.marca ? t.marca + ' ' : '') + t.modelo)}</b><span>${NOMES[t.tipo]}</span></td><td class="n">${t.ano}</td><td class="n">${real(t.pago)}</td><td class="n">${real(t.vendido)}</td><td>${data(t.entrada)} → ${data(t.saida)}</td></tr>`).join('')}</tbody></table></div>${p.aceitas.length > 6 ? `<p class="nota-rodape">Mostrando 6 de ${p.aceitas.length}.</p>` : ''}` : ''}
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="im-importar" ${p.aceitas.length ? '' : 'disabled'}>Colocar ${p.aceitas.length} ${p.aceitas.length === 1 ? 'troca' : 'trocas'} no histórico</button><button class="btn btn-linha" type="button" id="im-cancelar">Cancelar</button></div></div>`;
+  }
+  function ligarPreviaImpl(i) {
+    const b = $('#im-importar'), c = $('#im-cancelar');
+    if (c) c.onclick = () => { implPrevia = null; $('#im-previa').innerHTML = ''; };
+    if (b) b.onclick = () => {
+      const p = implPrevia; if (!p || !p.aceitas.length) return;
+      const n = importarHistorico(p.aceitas);
+      const imp = implBase(); imp.importacao = { quando: new Date().toISOString(), arquivo: p.arquivo, entraram: n, problemas: p.rejeitadas.length, avisos: p.rejeitadas.slice(0, 12).map((r) => ({ linha: r.linha, motivo: r.motivo })) };
+      log('importacao', `Histórico importado na implantação: ${n} ${n === 1 ? 'troca' : 'trocas'} (${p.arquivo})`); implGravar(imp); implGuardar(i);
+      toast(`${n} ${n === 1 ? 'troca entrou' : 'trocas entraram'} no histórico.`); implPrevia = null;
+      setTimeout(() => K.recarregar(), 700); // o motor e as telas passam a usar o histórico novo
+    };
+  }
+  // mesmo formato do "Usar como histórico" e da sincronização com a pasta do sistema
+  function importarHistorico(aceitas) {
+    const chave = (t) => [t.tipo, t.modelo, t.ano, t.horas, t.pago, t.vendido].join('|');
+    const ficha = (t) => ({ motor: t.cond / 20, transmissao: t.cond / 20, hidraulico: t.cond / 20, pneus: t.cond / 20, cabine: t.cond / 20, lataria: t.cond / 20 });
+    if (OP) {
+      const ja = new Set((estado.historico || []).map(chave));
+      const novas = aceitas.filter((t) => !ja.has(chave(t))).map((t, k) => ({ ...t, id: 'H' + ((estado.historico || []).length + k + 1), ficha: ficha(t), manutencoes: [] }));
+      estado.historico = (estado.historico || []).concat(novas); salvar(); return novas.length;
+    }
+    // demonstração: entram como trocas vendidas da revenda fictícia (somem em "Restaurar dados demonstrativos")
+    const ja = new Set(A.todasTrocas.map(chave)), base = Date.now().toString(36).toUpperCase();
+    const novas = aceitas.filter((t) => !ja.has(chave(t))).map((t, k) => ({ ...t, id: 'IMP' + base + k, ficha: ficha(t), manutencoes: [], fotos: [], anuncio: t.vendido, vendedor: 'Histórico importado', idAgro: false }));
+    estado.fechadas.push(...novas); salvar(); return novas.length;
+  }
+
+  function implEtapa(lista, i) {
+    const e = lista[i], a = ACAO_IMPL[e.id] || {}, imp = implEstado() || {}, f = (imp.feitas || {})[e.id], ultima = i === lista.length - 1;
+    const tag = e.ok ? `<span class="tag comprovado">${e.auto ? 'Concluída' : 'Marcada como feita'}</span>` : e.pulada ? '<span class="tag declarado">Pulada por agora</span>' : '';
+    $('#impl-corpo').innerHTML = `<section class="painel impl-etapa passo" aria-labelledby="impl-t">
+      <div class="impl-etapa-cab"><span class="impl-num">Etapa ${e.n} de ${lista.length}</span>${tag}</div>
+      <h2 id="impl-t" tabindex="-1">${esc(e.titulo)}</h2>
+      <div class="impl-guia"><p><b>Por que importa.</b> ${esc(e.porque)}</p><p><b>O que fazer.</b> ${esc(e.fazer)}</p></div>
+      <div class="impl-acao" id="impl-acao">${a.html ? a.html(i) : ''}</div>
+      ${e.auto ? `<p class="impl-detectado">${ICO.baixo}<span>Feito: ${esc(resumoImpl(e.id))}.</span></p>` : e.manual && f ? `<p class="impl-detectado">${ICO.baixo}<span>Marcada como feita por ${esc(f.por || 'alguém da equipe')} em ${data(String(f.quando).slice(0, 10))}. <button class="link" type="button" id="impl-desmarcar">Desmarcar</button></span></p>` : ''}
+      <div class="impl-nav"><button class="btn btn-linha" type="button" id="impl-voltar" ${i === 0 ? 'disabled' : ''}>${ic('<path d="M15 6l-6 6 6 6"/>')}Voltar</button>
+        <span class="impl-nav-dir">${e.ok ? '' : '<button class="btn btn-linha" type="button" id="impl-pular">Pular por agora</button>'}<button class="btn btn-ouro" type="button" id="impl-ok">${e.ok ? (ultima ? 'Ver o resumo' : 'Seguir') : ultima ? 'Concluir' : 'Concluir e seguir'}${ic('<path d="M9 6l6 6-6 6"/>')}</button></span></div></section>`;
+    if (a.ligar) a.ligar(i);
+    $('#impl-voltar').onclick = () => irEtapa(Math.max(0, i - 1));
+    const pu = $('#impl-pular'); if (pu) pu.onclick = () => { implGravar(IMPL.pular(implBase(), e.id)); const k = IMPL.proxima(situacaoImpl(), i); irEtapa(k < 0 ? 'fim' : k); };
+    const dm = $('#impl-desmarcar'); if (dm) dm.onclick = () => { implGravar(IMPL.desmarcar(implBase(), e.id)); log('implantacao', `Implantação: etapa "${e.titulo}" desmarcada`); desenharImpl(i); };
+    $('#impl-ok').onclick = async (ev) => {
+      if (a.antes) { const bt = ev.currentTarget; bt.disabled = true; let ok = false; try { ok = await a.antes(); } finally { bt.disabled = false; } if (ok === false) return; }
+      if (!e.manual) { implGravar(IMPL.marcar(implBase(), e.id, eu().nome)); log('implantacao', `Implantação: etapa "${e.titulo}" concluída`); }
+      const k = IMPL.proxima(situacaoImpl(), i); irEtapa(k < 0 ? 'fim' : k);
+    };
+  }
+  function implFim(lista) {
+    const falta = lista.filter((e) => !e.ok), imp = implBase();
+    if (!falta.length && !imp.concluida) { imp.concluida = hojeISO(); implGravar(imp); log('implantacao', 'Implantação concluída'); }
+    const ajuda = `<div class="impl-ajuda"><h3 class="impl-h3">Precisa de ajuda?</h3><p>Escreva pela conversa no WhatsApp com a Blue Rose, a mesma em que o Anshur foi contratado. O atendimento é por escrito: mande a dúvida e, se der, um print da tela. Não precisa marcar reunião nem ligação.</p></div>`;
+    $('#impl-corpo').innerHTML = `<section class="painel impl-etapa impl-fim passo" aria-labelledby="impl-t">
+      ${falta.length ? `<h2 id="impl-t" tabindex="-1">Falta pouco: ${falta.length} ${falta.length === 1 ? 'etapa' : 'etapas'}</h2><p class="sub">O que já está pronto continua valendo. As etapas que faltam podem ser feitas a qualquer hora.</p>`
+        : `<div class="impl-feito">${ICO_OK}</div><h2 id="impl-t" tabindex="-1">Implantação concluída</h2><p class="sub">A ${esc(A.revenda.nome)} está pronta para usar o Anshur no dia a dia${imp.concluida ? ` (concluída em ${data(imp.concluida)})` : ''}.</p>`}
+      <ul class="impl-resumo">${lista.map((e, k) => `<li class="${e.ok ? 'ok' : ''}">${e.ok ? ICO.baixo : '<span class="bolinha"></span>'}<span><b>${esc(e.titulo)}</b><span>${e.ok ? esc(resumoImpl(e.id)) : e.pulada ? 'Pulada por agora' : 'Ainda não feita'}</span></span>${e.ok ? '' : `<button class="btn btn-linha" type="button" data-impl-ir="${k}">Fazer agora</button>`}</li>`).join('')}</ul>
+      ${ajuda}
+      <div class="impl-nav"><button class="btn btn-linha" type="button" data-impl-ir="0">Rever as etapas</button><span class="impl-nav-dir">${falta.length && !imp.concluida ? '<button class="btn btn-linha" type="button" id="impl-encerrar">Encerrar assim mesmo</button>' : ''}<a class="btn btn-ouro" href="#/">Ir para o portal</a></span></div></section>`;
+    $$('[data-impl-ir]', $('#impl-corpo')).forEach((b) => { b.onclick = () => irEtapa(+b.dataset.implIr); });
+    const en = $('#impl-encerrar'); if (en) en.onclick = () => confirmar('Encerrar a implantação?', 'O aviso some do painel. As etapas que faltam continuam em Configurações › Implantação guiada.', 'Encerrar', () => { implGravar(Object.assign(implBase(), { concluida: hojeISO() })); log('implantacao', 'Implantação encerrada com etapas pendentes'); toast('Implantação encerrada.'); desenharImpl('fim'); });
+  }
+  TELAS.implantacao = telaImplantacao;
+  // faixa "voltar à implantação" enquanto a pessoa faz a primeira avaliação em outra tela
+  // fica fora da área da tela (antes do <main>): as telas que se redesenham sozinhas não apagam a faixa
+  function atualizarFaixaImpl(aba) {
+    const ant = $('#impl-volta'); if (ant) ant.remove();
+    const v = ssG(IMPL_VOLTA); if (aba === 'implantacao' || v == null || !IMPL.podeVer(eu().perfil)) return;
+    const e = IMPL.ETAPAS[+v] || IMPL.ETAPAS[6];
+    tela.insertAdjacentHTML('beforebegin', `<div class="impl-volta" id="impl-volta" role="region" aria-label="Implantação guiada"><span>Implantação · etapa ${(+v || 0) + 1} de ${IMPL.TOTAL}: <b>${esc(e.titulo)}</b></span><a class="btn btn-ouro" href="#/config/implantacao">Voltar à implantação</a></div>`);
+  }
 
   // endereço → { sis, aba }: portal, sistema ou endereço antigo (#tela)
   function resolver(primeiraVez) {
@@ -2669,7 +2961,7 @@
     const fn = telaDe(r.aba);
     // o botão principal do cabeçalho some quando a própria tela já mostra o mesmo botão (sem ação repetida na tela)
     const semRepetir = () => { const nv = $('.cab-nova'); if (!nv) return; const t = ($('span', nv).textContent || '').trim().toLowerCase(); nv.classList.toggle('repetido', !!t && $$('.titulo a, .titulo button', tela).some((b) => b.textContent.trim().toLowerCase() === t)); };
-    const desenhar = () => { tela.classList.remove('saindo'); fn(); semRepetir(); tela.classList.remove('entrando'); void tela.offsetWidth; tela.classList.add('entrando'); };
+    const desenhar = () => { tela.classList.remove('saindo'); fn(); atualizarFaixaImpl(r.aba); semRepetir(); tela.classList.remove('entrando'); void tela.offsetWidth; tela.classList.add('entrando'); };
     if (primeira || reduzido) { primeira = false; desenhar(); return; }
     tela.classList.add('saindo');
     setTimeout(() => { desenhar(); window.scrollTo(0, 0); }, 120);
@@ -2717,5 +3009,9 @@
   window.addEventListener('resize', moverIndicador);
   // com conta: o que o app ajustou só para abrir (padrões, lojas, perfis do servidor) não vira alteração a enviar
   if (NV && NV.marcarVista) NV.marcarVista(estado);
+  // revenda recém-criada (dono ou gerente, nada importado ainda): a implantação guiada abre sozinha
+  if (IMPL.deveAbrirSozinha({ imp: estado.implantacao, perfil: eu().perfil, ambiente: OP ? 'op' : 'demo', temDados: A.todasTrocas.length > 0 || (estado.historico || []).length > 0 || estado.avaliacoes.length > 0 })) {
+    estado.implantacao = IMPL.novo(hojeISO()); salvar(); history.replaceState(null, '', '#/config/implantacao');
+  }
   rota();
 })();
