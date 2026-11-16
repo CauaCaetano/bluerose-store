@@ -1,7 +1,7 @@
 // Popina · tutorial guiado: um passeio curto na primeira entrada (o menu de cima, tela por tela) e o tutorial completo,
 // aberto em Minha conta, que vai em cada tela e mostra onde tocar. Destaca o elemento com um recorte e explica num cartão.
-import { lojaCfg } from './loja.js?v=30';
-import { ir, papel } from './nucleo.js?v=30';
+import { lojaCfg } from './loja.js?v=31';
+import { ir, papel } from './nucleo.js?v=31';
 
 const ler = (k) => { try { return localStorage.getItem(k); } catch { return '1'; } };
 const gravar = (k) => { try { localStorage.setItem(k, '1'); } catch { /* sem acesso: só não lembra */ } };
@@ -68,7 +68,7 @@ export async function tutorial(passos, aoFim) {
     car.classList.add('troca');
     if (rota && decodeURIComponent(location.hash.slice(1)) !== rota) { ir(rota); await espera(450); }
     alvo = visivel(sel);
-    if (alvo) { alvo.scrollIntoView({ block: 'center', behavior: 'instant' }); await espera(60); }
+    if (alvo) { alvo.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' }); if (scrollX) scrollTo(0, scrollY); document.documentElement.scrollLeft = 0; document.body.scrollLeft = 0; await espera(60); }
     car.querySelector('small').textContent = `${i + 1} de ${passos.length}`;
     car.querySelector('b').textContent = tit; car.querySelector('p').innerHTML = txt;
     car.querySelector('.tut-volta').hidden = i === 0;
@@ -76,7 +76,7 @@ export async function tutorial(passos, aoFim) {
     fundo.classList.toggle('sem-alvo', !alvo);
     posicionar(); car.classList.remove('troca'); car.querySelector('.tut-prox').focus({ preventScroll: true });
   };
-  const fim = () => { fundo.remove(); removeEventListener('resize', posicionar); removeEventListener('keydown', tecla); ativo = false; aoFim?.(); };
+  const fim = () => { scrollTo(0, scrollY); document.documentElement.scrollLeft = 0; document.body.scrollLeft = 0; fundo.remove(); removeEventListener('resize', posicionar); removeEventListener('keydown', tecla); ativo = false; aoFim?.(); };
   const tecla = (e) => { if (e.key === 'Escape') fim(); if (e.key === 'ArrowRight') car.querySelector('.tut-prox').click(); };
   addEventListener('resize', posicionar); addEventListener('keydown', tecla);
   car.querySelector('.tut-pular').onclick = fim;

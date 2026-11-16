@@ -800,3 +800,19 @@ body:not(.tpl-taverna) .gestao-corpo .sec-tit h2::before{content:none!important;
 /* celular: a coluna da esquerda do salão nunca passa da largura da tela */
 @media (max-width:899px){.salao-grade{grid-template-columns:minmax(0,1fr)!important}.salao-esq{min-width:0!important;max-width:100%!important;box-sizing:border-box}}
 @media (max-width:899px){.area-cab{min-width:0;max-width:100%}.area-cab span{margin-right:0!important;white-space:normal!important;text-align:right;min-width:0}}
+/* a página nunca rola para o lado (nem por scrollIntoView do tutorial) */
+html,body{overflow-x:clip}
+
+/* telas médias (900–1279 px: notebook pequeno, tablet deitado): o menu de cima cabe inteiro, sem cortar Gestão, sino e conta */
+@media (min-width:900px) and (max-width:1279px){
+  .topo{gap:8px!important}
+  .topo>img{width:56px!important;height:auto!important}
+  .topo>div{min-width:0;flex:0 1 auto}
+  .topo>div b{font-size:17px!important}
+  #topo-nome{display:none!important}
+  #nav{gap:2px!important;margin:0 auto!important;min-width:0}
+  #nav a{padding:8px 9px!important;font-size:14.5px!important;gap:6px!important;letter-spacing:0!important}
+  #nav a .ico,#nav a svg{width:18px!important;height:18px!important}
+  .topo-dir{margin-right:0!important;gap:6px!important;flex:none}
+}
+@media (min-width:900px) and (max-width:1039px){#nav a span{font-size:13.5px!important}#nav a{padding:8px 7px!important}}
