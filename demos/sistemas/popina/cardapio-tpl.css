@@ -310,3 +310,9 @@ body.cv-realeza .cli-h2 span{font-size:15px;letter-spacing:.03em}
 body.cv-realeza .cli-fita b{font-size:14.5px;letter-spacing:.03em}
 body.cv-realeza .cli-modo-bts .bt,body.cv-realeza .cli-cats a{font-size:14px}
 body.cv-pizzaria .cli-modo-bts .bt{font-size:14.5px}
+
+/* horários centralizados na caixa, sem a imagem decorativa embaixo */
+body.cv .cli-rodape{padding-bottom:18px;text-align:center}
+body.cv .cli-rodape::after{content:none;display:none}
+body.cv .cli-horarios{max-width:400px;margin:0 auto 12px}
+body.cv .cli-horarios li{max-width:none;text-align:left}

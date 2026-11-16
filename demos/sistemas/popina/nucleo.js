@@ -1,5 +1,5 @@
 // Popina · registro das telas e das ações, rota pelo endereço (#salao, #mesa/5...) e redesenho quando os dados mudam.
-import { ouvir } from './loja.js?v=26';
+import { ouvir } from './loja.js?v=27';
 
 export const TELAS = {};
 export const ACOES = {};

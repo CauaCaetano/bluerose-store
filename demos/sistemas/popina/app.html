@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="taberna.css?v=3">
 <link rel="stylesheet" href="salao-gpt.css?v=3">
 <link rel="stylesheet" href="cozinha-gpt.css?v=5">
-<link rel="stylesheet" href="telas-gpt.css?v=21">
+<link rel="stylesheet" href="telas-gpt.css?v=22">
 <style>
 /* abertura: aparece na hora, com a cor do template e o logo do restaurante, e some quando a tela está pronta */
 #abertura{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;color:var(--ab-txt,#3B2A22);transition:opacity .28s ease,visibility .28s;
@@ -40,7 +40,7 @@ body.pronto #abertura{opacity:0;visibility:hidden;pointer-events:none}
 <script>
 /* só o CSS do template em uso é baixado; os outros entram na hora se o dono trocar em Gestão › Aparência */
 (function () {
-  var V = window.POPINA_TPLV = {luxo:7,realeza:10,japones:4,italiano:3,churrascaria:3,mexicano:3,pizzaria:3,hamburgueria:3,pub:3,chines:3,balada:4,basico:3,cafeteria:3}, C = window.POPINA_TPLC = {basico:['#F5F6F8','','#1F2328'],taverna:['#F3E7CF','#B4532F','#3B2A22'],luxo:['#FBF8F1','#B8914A','#3A2E22'],realeza:['#14213D','#C9A35A','#F5E9CC'],japones:['#F5EEDF','#B3212B','#1E1A17'],italiano:['#F6EFE1','#B8261E','#2B2420'],churrascaria:['#F1E4CC','#A8231A','#2E2118'],mexicano:['#F6EBD6','#B51F1F','#2A1F1A'],pizzaria:['#F7EEDD','#B8231C','#2A2420'],hamburgueria:['#F6EEDC','#C8201E','#1E1A17'],pub:['#F3E9D6','#1F4A2E','#2A2018'],chines:['#F7EEDB','#B0141B','#2A1A16'],balada:['#120C2A','#FF2FB9','#F2EEFF'],cafeteria:['#F6EEDF','#9E3A26','#3A2618']}, d = null;
+  var V = window.POPINA_TPLV = {luxo:9,realeza:12,japones:6,italiano:5,churrascaria:5,mexicano:5,pizzaria:5,hamburgueria:5,pub:5,chines:5,balada:6,basico:5,cafeteria:5}, C = window.POPINA_TPLC = {basico:['#F5F6F8','','#1F2328'],taverna:['#F3E7CF','#B4532F','#3B2A22'],luxo:['#FBF8F1','#B8914A','#3A2E22'],realeza:['#14213D','#C9A35A','#F5E9CC'],japones:['#F5EEDF','#B3212B','#1E1A17'],italiano:['#F6EFE1','#B8261E','#2B2420'],churrascaria:['#F1E4CC','#A8231A','#2E2118'],mexicano:['#F6EBD6','#B51F1F','#2A1F1A'],pizzaria:['#F7EEDD','#B8231C','#2A2420'],hamburgueria:['#F6EEDC','#C8201E','#1E1A17'],pub:['#F3E9D6','#1F4A2E','#2A2018'],chines:['#F7EEDB','#B0141B','#2A1A16'],balada:['#120C2A','#FF2FB9','#F2EEFF'],cafeteria:['#F6EEDF','#9E3A26','#3A2618']}, d = null;
   try { d = JSON.parse(localStorage.getItem('popina-v1') || 'null'); } catch (e) {}
   var L = (d && d.config && d.config.loja) || {}, tp = C[L.template] ? L.template : (d ? 'basico' : 'taverna');
   window.POPINA_TPL = tp; window.POPINA_LOJA = { nome: (d && d.config && d.config.nome) || 'Popina', logo: L.logo || '', cor: L.cor || '' };
@@ -71,6 +71,6 @@ body.pronto #abertura{opacity:0;visibility:hidden;pointer-events:none}
   <span class="ao-vivo" title="Os aparelhos do restaurante se atualizam sozinhos"><i></i>Ao vivo</span></header>
 <main id="tela" tabindex="-1"></main>
 <nav id="nav" class="nav" aria-label="Seções"></nav>
-<script type="module" src="app.js?v=26"></script>
+<script type="module" src="app.js?v=27"></script>
 </body>
 </html>

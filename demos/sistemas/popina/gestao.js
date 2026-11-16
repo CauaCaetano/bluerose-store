@@ -1,18 +1,18 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=26';
-import { acao, ir } from './nucleo.js?v=26';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=26';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=26';
-import { situacao, textoHorarios } from './opcoes.js?v=26';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=27';
+import { acao, ir } from './nucleo.js?v=27';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=27';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=27';
+import { situacao, textoHorarios } from './opcoes.js?v=27';
 import { qrSVG } from '../base/qr.js';
-import { abrirEscolha } from './escolha.js?v=26';
-import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=26';
-import './funcoes.js?v=26';
-import { HUB_FINANCEIRO } from './financeiro.js?v=26';
-import { HUB_PRODUCAO } from './producao.js?v=26';
-import { HUB_OPERACAO } from './operacao.js?v=26';
-import { GRUPOS } from './mais.js?v=26';
+import { abrirEscolha } from './escolha.js?v=27';
+import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=27';
+import './funcoes.js?v=27';
+import { HUB_FINANCEIRO } from './financeiro.js?v=27';
+import { HUB_PRODUCAO } from './producao.js?v=27';
+import { HUB_OPERACAO } from './operacao.js?v=27';
+import { GRUPOS } from './mais.js?v=27';
 // financeiro e produção entram no menu da Gestão antes de "Equipe e conta"
 if (!GRUPOS.some((g) => g[0] === 'Financeiro')) {
   const i = GRUPOS.findIndex((g) => g[0] === 'Equipe e conta');
@@ -98,7 +98,7 @@ export const TEMPLATES = [
 ];
 TELAS_MAIS.aparencia = () => {
   const L = lojaCfg(), c = db.config, tpl = L.template || 'basico';
-  return volta('mais', 'Aparência e templates', 'A cara do sistema da equipe e do cardápio do cliente') + `
+  return volta('mais', 'Aparência e templates', 'A cara do sistema da equipe e do cardápio do cliente') + blocoMarca(false) + `
   <form class="form larga" data-loja>
     <section class="bloco-form"><h2>Template do sistema</h2><p class="mudo">Muda o visual das telas e do cardápio do cliente <b>e as funções</b> de cada tipo de negócio. Toque num template para ver as fotos e o que vem nele antes de trocar; nada do que você cadastrou se perde.</p>
       <div class="tpls">${TEMPLATES.map(([k, n, d]) => `<button type="button" class="tpl ${tpl === k ? 'on' : ''}" data-tpl="${k}"><img src="img/tpl-${k}.webp?v=1" alt="" width="480" height="300" loading="lazy"><b>${n}${tpl === k ? ' <em>em uso</em>' : ''}</b><small>${d}</small></button>`).join('')}</div>
@@ -109,8 +109,6 @@ TELAS_MAIS.aparencia = () => {
     <section class="bloco-form"><h2>Identidade</h2>
       <div class="loja-visual">
         <div class="loja-capa" data-capa style="${L.capa ? `background-image:url('${t(L.capa)}')` : ''}"><label class="bt">${ico('mais2')}${L.capa ? 'Trocar a capa' : 'Pôr foto de capa'}<input type="file" accept="image/*" data-arq-capa hidden></label>${L.capa ? '<button type="button" class="link claro" data-tira="capa">Tirar</button>' : ''}</div>
-        <div class="loja-logo" data-logo style="${L.logo ? `background-image:url('${t(L.logo)}')` : `background:${t(L.cor)}`}">${L.logo ? '' : t(c.nome.split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase())}</div>
-        <div class="loja-logo-bts"><label class="bt">${L.logo ? 'Trocar o logo' : 'Pôr o logo'}<input type="file" accept="image/*" data-arq-logo hidden></label>${L.logo ? '<button type="button" class="link" data-tira="logo">Tirar</button>' : ''}</div>
       </div>
       <label class="campo"><span>Nome do restaurante</span><input name="nome" value="${t(c.nome)}" maxlength="60"></label>
       <label class="campo"><span>Frase de boas-vindas</span><input name="boasVindas" value="${t(L.boasVindas)}" maxlength="120" placeholder="Ex.: Pizza no forno a lenha desde sempre"></label>
@@ -119,14 +117,51 @@ TELAS_MAIS.aparencia = () => {
       <div class="campo"><span>Fundo do cardápio</span><div class="seg"><button type="button" data-tema="claro" aria-pressed="${L.tema !== 'escuro'}">Claro</button><button type="button" data-tema="escuro" aria-pressed="${L.tema === 'escuro'}">Escuro</button></div><small class="mudo">O fundo escuro vale para o visual Moderno (template Básico); os outros templates usam o fundo do próprio template.</small></div>
       <label class="interruptor bloco-int"><input type="checkbox" name="creditos" ${L.creditos !== false ? 'checked' : ''}><span></span>Mostrar “Cardápio feito com o Popina” no rodapé</label>
     </section>
-    ${planoMarca()}
     <div class="salvar-fixo"><button class="bt cheio grande">Salvar</button></div>
   </form>`;
 };
 MONTAR.aparencia = (el) => {
-  MONTAR.loja(el);
+  MONTAR.loja(el); MONTAR.marca(el);
   // funções da casa: o que o dono liga/desliga por cima do padrão do template
   $$('[data-mod]', el).forEach((c) => { c.onchange = () => { const L = lojaCfg(); setLoja({ modulos: { ...(L.modulos || {}), [c.dataset.mod]: c.checked } }); toast(`${MODULOS[c.dataset.mod][0]} ${c.checked ? 'ligado' : 'desligado'}`); }; });
+};
+
+// ------------------------------------------------------------------ sua marca: logo e nome do restaurante, num lugar só e fácil de achar
+// comNome: na Aparência o nome já fica em Identidade, então lá o bloco mostra só o logo e o plano
+export function blocoMarca(comNome = true) {
+  const L = lojaCfg(), c = db.config, m = window.popinaPlano === 'marca';
+  const ini = t(c.nome.split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase());
+  return `
+  <form class="form larga bloco-marca" data-marca>
+    <section class="bloco-form"><h2>${comNome ? '1. O seu logo' : 'Sua marca: o seu logo'}</h2>
+      <div class="marca-logo-linha">
+        <div class="marca-ava" style="${L.logo ? `background-image:url('${t(L.logo)}')` : `background:${t(L.cor)}`}">${L.logo ? '' : ini}</div>
+        <div><p>${m ? 'Aparece no topo do sistema, no lugar do logo do Popina, e no cardápio do cliente.' : 'Aparece no cardápio do cliente. No plano com a sua marca, aparece também no topo do sistema, no lugar do Popina.'}</p>
+          <div class="linha-bts"><label class="bt cheio">${ico('mais2')}${L.logo ? 'Trocar o logo' : 'Enviar o meu logo'}<input type="file" accept="image/*" data-marca-logo hidden></label>${L.logo ? '<button type="button" class="bt" data-marca-tira>Tirar o logo</button>' : ''}</div>
+          <p class="mudo">Foto ou arquivo do logo (PNG ou JPG). A cor do cardápio passa a ser a do logo; dá para trocar em Aparência.</p></div>
+      </div>
+    </section>
+    ${comNome ? `<section class="bloco-form"><h2>2. O nome do restaurante</h2>
+      <label class="campo"><span>${m ? 'Nome que aparece no topo, na aba do navegador e no cardápio' : 'Nome que aparece no cardápio do cliente'}</span><input name="nome" value="${t(c.nome)}" maxlength="60" required></label>
+      <div class="linha-bts"><button class="bt cheio">Salvar o nome</button></div>
+    </section>` : ''}
+    ${planoMarca()}
+  </form>`;
+}
+TELAS_MAIS.marca = () => volta('mais', 'Sua marca', 'O seu logo e o seu nome no sistema e no cardápio do cliente') + blocoMarca(true);
+MONTAR.marca = (el) => {
+  const f = $('[data-marca]', el); if (!f) return;
+  $('[data-marca-logo]', f).onchange = async (e) => {
+    const a = e.target.files?.[0]; if (!a) return;
+    try { const v = await reduzir(a, 320, 320); const c2 = await corDoLogo(v); setLoja(c2 ? { logo: v, cor: c2 } : { logo: v }); toast('Logo salvo'); }
+    catch { toast('Não consegui abrir essa imagem. Tente outra.'); }
+  };
+  f.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if ('marcaTira' in b.dataset) { setLoja({ logo: '' }); toast('Logo tirado'); }
+    if ('preverMarca' in b.dataset && !CONTA) { window.popinaPlano = window.popinaPlano === 'marca' ? 'basico' : 'marca'; dispatchEvent(new Event('popina-plano')); toast(window.popinaPlano === 'marca' ? 'Assim fica com a sua marca: veja o topo' : 'De volta ao plano normal'); }
+  });
+  f.onsubmit = (e) => { e.preventDefault(); if (!f.nome) return; const n = f.nome.value.trim(); if (!n) return; db.config.nome = n; grava(); toast('Nome salvo'); };
 };
 
 // ------------------------------------------------------------------ restaurante e cardápio online
@@ -359,8 +394,10 @@ TELAS_MAIS.conta = () => {
     <button type="button" class="cartao-acao" data-conta="convidar">${ico('mais2')}<b>Convidar pessoa</b><span>Garçons, cozinha e caixa, cada um com o próprio login.</span></button>
     <button type="button" class="cartao-acao sair" data-conta="sair">${ico('voltar')}<b>Sair</b><span>Sai deste aparelho. Seus dados ficam guardados na nuvem.</span></button>
   </div>
-  ${real ? '' : `<p class="aviso ouro">Isto é a demonstração. Para ter tudo isso de verdade, assine em <a href="../../../popina.html#precos">bluerose-store.com/popina</a>.</p>`}`;
+  ${real ? '' : `<p class="aviso ouro">Isto é a demonstração. Para ter tudo isso de verdade, assine em <a href="../../../popina.html#precos">bluerose-store.com/popina</a>.</p>`}
+  ${blocoMarca(true)}`;
 };
+MONTAR.conta = (el) => MONTAR.marca(el);
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-conta]'); if (!b) return;
   const f = window.veltriaAbrir?.[b.dataset.conta];

@@ -1,15 +1,15 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=26';
-import './cozinha.js?v=26';
-import './caixa.js?v=26';
-import './pedidos.js?v=26';
-import './mais.js?v=26';
-import './gestao.js?v=26';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=26';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=26';
-import { ico, folha, $, $$, toast, bip, confirma } from './ui.js?v=26';
-import './ajuda.js?v=26';
-import { abrirEscolha } from './escolha.js?v=26';
+import './salao.js?v=27';
+import './cozinha.js?v=27';
+import './caixa.js?v=27';
+import './pedidos.js?v=27';
+import './mais.js?v=27';
+import './gestao.js?v=27';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=27';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=27';
+import { ico, folha, $, $$, toast, bip, confirma } from './ui.js?v=27';
+import './ajuda.js?v=27';
+import { abrirEscolha } from './escolha.js?v=27';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);

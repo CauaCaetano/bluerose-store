@@ -657,7 +657,7 @@ nav a .ico{transition:scale .2s cubic-bezier(.3,.7,.4,1)}nav a.on .ico{scale:1.0
 
 /* ---------- 16/11: Gestão ocupa a tela larga (antes ficava tudo no meio, com sobra dos lados) ---------- */
 /* tela grande: tudo usa a largura toda; na Gestão o menu fica colado na borda esquerda, nunca no meio */
-@media (min-width:1500px){main{max-width:calc(100vw - 48px)!important}}
+@media (min-width:1500px){main{max-width:calc(100vw - 120px)!important}}
 @media (min-width:900px){main[data-tela=mais]{margin-left:16px!important;margin-right:16px!important;max-width:none!important}}
 .resumo-dia.painel-tipo{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))!important}
 /* pendências e metas no topo da Gestão: mesma letra e o mesmo tamanho do resto da tela */
@@ -721,3 +721,11 @@ body.arrastando-pd{cursor:grabbing}
 .cc-bts>*{min-width:0;white-space:normal}
 /* 16/11: o desfoque do topo prendia o menu de baixo no topo do celular (em todos os templates) */
 @media (max-width:899px){.topo{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
+
+/* a dica de primeira vez fica por cima dos enfeites; o enfeite fixo do canto de cima some enquanto ela está na tela */
+.dica-1a{position:relative;z-index:3}
+body:has(.dica-1a) .salao-dir::after{display:none!important}
+
+/* Sua marca: logo grande ao lado do texto */
+.marca-logo-linha{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.marca-logo-linha>div:last-child{flex:1 1 260px;min-width:0}.marca-logo-linha p{margin:0 0 10px}
+.marca-logo-linha .marca-ava{width:112px;height:112px;flex:none;border-radius:50%;background-size:cover;background-position:center;display:grid;place-items:center;color:#fff;font:800 34px/1 system-ui,sans-serif;box-shadow:0 0 0 3px #fff,0 6px 18px -8px rgba(0,0,0,.4)}
