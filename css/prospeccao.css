@@ -1,0 +1,57 @@
+/* Minha conta: Prospecção do Anshur (só o dono vê) */
+#prospeccao { min-width: 0; max-width: 100%; }
+#prospeccao h2 small { font-size: .6em; font-weight: 500; opacity: .7; }
+#prospeccao p { overflow-wrap: anywhere; }
+.pp-aprov { margin: 12px 0 16px; padding: 14px 16px; border-radius: 14px; background: #FBF1DE; border: 1px solid #E8D3A8; }
+.pp-aprov.ok { background: #E3F1E6; border-color: #BFDDC6; }
+.pp-aprov p { margin: 0 0 10px; font-size: 14px; color: var(--ink); }
+.pp-limites { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin-top: 12px; }
+.pp-limites label { flex: 0 1 150px; font-size: 13px; color: var(--ink-2); }
+.pp-limites input, .pp-filtro input, .pp-filtro select, .pp-nota textarea {
+  display: block; width: 100%; margin-top: 4px; padding: 9px 11px; border-radius: 10px; border: 1px solid var(--line-2, rgba(16,27,54,.2));
+  background: rgba(255,255,255,.7); color: var(--ink); font: inherit; font-size: 14px; box-sizing: border-box; }
+.pp-limites [role=status]:empty, .pp-nota [role=status]:empty, .pp-status:empty { display: none; }
+.pp-cont { font-size: 14px; color: var(--ink-2); margin: 8px 0 12px; }
+.pp-cartao { margin: 0 0 16px; padding: 16px; border-radius: 16px; border: 1px solid rgba(16,27,54,.14); background: rgba(255,255,255,.6); min-width: 0; }
+.pp-cartao header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.pp-cartao h4 { margin: 0; font-size: 17px; flex: 1 1 100%; overflow-wrap: anywhere; }
+.pp-faixa, .pp-acao, .pp-etapa { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.pp-faixa.fA { background: #E3F1E6; color: #1E5B2E; } .pp-faixa.fB { background: #FBF1DE; color: #7A5513; } .pp-faixa.fC { background: #ECEAE4; color: #4A4038; }
+.pp-acao { background: #101b36; color: #fff; } .pp-etapa { background: #ECEAE4; color: #4A4038; }
+.pp-dados { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px 16px; margin: 0 0 10px; }
+.pp-dados div { min-width: 0; } .pp-dados .pp-larga { grid-column: 1 / -1; }
+.pp-dados dt { font-size: 12px; color: var(--ink-3); } .pp-dados dd { margin: 2px 0 0; font-size: 14px; overflow-wrap: anywhere; }
+.pp-just { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; margin: 6px 0; }
+.pp-fontes { font-size: 13px; margin: 6px 0 10px; } .pp-fontes summary { cursor: pointer; color: var(--ink-2); }
+.pp-fontes ul { margin: 6px 0 0; padding-left: 18px; } .pp-fontes li { overflow-wrap: anywhere; margin: 3px 0; }
+.pp-rot { font-size: 12px; color: var(--ink-3); margin: 10px 0 4px; text-transform: uppercase; letter-spacing: .04em; }
+.pp-msg { white-space: pre-wrap; font-size: 14px; line-height: 1.5; padding: 12px 14px; border-radius: 12px; background: #F4F1EA; border-left: 3px solid #25D366; overflow-wrap: anywhere; max-height: 340px; overflow-y: auto; }
+#prospeccao > h2 { font-size: clamp(22px, 4vw, 30px); margin: 0 0 6px; }
+.pp-botoes { margin-top: 12px; }
+#prospeccao .pp-botoes .btn, #prospeccao .pp-aprov .btn, #prospeccao .pp-limites .btn, #prospeccao .pp-nota .btn {
+  white-space: normal; min-width: 0; max-width: 100%; font-size: 12.5px; letter-spacing: .04em; padding: 10px 14px; line-height: 1.25; box-sizing: border-box; }
+.pp-zap { background: #1E7A45 !important; border-color: #1E7A45 !important; color: #fff !important; }
+.pp-zap[disabled] { background: #9AA59E !important; border-color: #9AA59E !important; opacity: 1 !important; }
+.pp-perigo { color: #8A2214 !important; border-color: rgba(138,34,20,.35) !important; }
+.pp-nota-bloq { font-size: 13px; color: #7A5513; margin: 8px 0 0; }
+.pp-nota { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; margin-top: 12px; }
+.pp-nota label { flex: 1 1 260px; font-size: 13px; color: var(--ink-2); } .pp-nota [role=status] { flex-basis: 100%; font-size: 13px; color: var(--ink-2); }
+.pp-status { font-size: 13px; color: #8A2214; margin: 8px 0 0; }
+.pp-quadro { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin: 6px 0 16px; }
+.pp-coluna { min-width: 0; padding: 10px; border-radius: 12px; background: rgba(16,27,54,.04); }
+.pp-coluna h4 { margin: 0 0 6px; font-size: 13.5px; display: flex; justify-content: space-between; gap: 6px; }
+.pp-coluna ul, .pp-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 360px; overflow-y: auto; }
+.pp-lista { max-height: none; }
+.pp-item { display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(16,27,54,.12); background: #fff; font: inherit; font-size: 13.5px; color: var(--ink); cursor: pointer; }
+.pp-item span { display: block; overflow-wrap: anywhere; } .pp-item small { display: block; color: var(--ink-3); font-size: 12px; margin-top: 2px; overflow-wrap: anywhere; }
+.pp-item:hover, .pp-item:focus-visible { border-color: #101b36; }
+.pp-mais { font-size: 12px; color: var(--ink-3); padding: 4px 2px; }
+.pp-filtro { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 10px; margin: 6px 0 4px; }
+.pp-filtro label { font-size: 13px; color: var(--ink-2); min-width: 0; }
+.pp-detalhe { margin-top: 16px; scroll-margin-top: 90px; }
+.pp-ok { margin: 0 0 12px; }
+@media (max-width: 640px) {
+  .pp-filtro { grid-template-columns: 1fr 1fr; } .pp-filtro label:first-child { grid-column: 1 / -1; }
+  .pp-cartao { padding: 12px; } #prospeccao .pp-botoes .btn { flex: 1 1 calc(50% - 8px); text-align: center; padding: 10px 8px; } #prospeccao .pp-botoes .pp-zap { flex-basis: 100%; }
+  .pp-dados { grid-template-columns: 1fr 1fr; }
+}
