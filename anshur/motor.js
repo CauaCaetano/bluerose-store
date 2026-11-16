@@ -2,7 +2,7 @@
 // log(preço de venda / referência do modelo) = a + b·idade + c·desgaste de horas + d·condição
 // Validação temporal: cada troca é avaliada só com vendas concluídas ANTES da data em que ela entrou.
 (function (raiz) {
-  const A = raiz.ANSHUR;
+  const A = raiz.ANSHUR || {}; // o teste às cegas público não carrega a demonstração: cada máquina traz referência e hAno
   // limites de qualidade da estimativa (documentados e configuráveis)
   const QUALIDADE = {
     alta: { amostras: 12, mape: 0.06 },     // ≥ 12 vendas do tipo e erro validado ≤ 6%
@@ -12,9 +12,9 @@
     corteAtipico: 2.5                       // resíduo acima de 2,5 desvios = venda atípica (fora do treino)
   };
   const HANO = { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270 };
-  const catalogo = (t) => A.modelos.find((m) => m.modelo === t.modelo);
+  const catalogo = (t) => (A.modelos || []).find((m) => m.modelo === t.modelo);
   const refDe = (t) => t.referencia || (catalogo(t) || {}).base;
-  const hAnoDe = (t) => (catalogo(t) || {}).hAno || HANO[t.tipo] || 800;
+  const hAnoDe = (t) => t.hAno || (catalogo(t) || {}).hAno || HANO[t.tipo] || 800;
   const anoDe = (iso) => (iso ? +iso.slice(0, 4) : new Date().getFullYear());
   // idade na data da avaliação (para validar o passado com a idade daquele dia)
   const feat = (t, dataRef) => [1, anoDe(dataRef) - t.ano, t.horas / (hAnoDe(t) * 12), t.cond / 100];
@@ -55,6 +55,8 @@
   // opts.excluir: id que não pode avaliar a si mesmo
   // opts.ate: só usa vendas concluídas antes desta data (validação temporal, sem vazamento)
   // opts.margem: margem-alvo
+  // opts.dataIdade: data em que a idade da máquina é contada (padrão: opts.ate). Usado pelo teste às cegas público,
+  //   que avalia uma troca antiga na data dela sem cortar a base de referência por data. Sem ele, nada muda.
   function avaliar(maq, opts = {}) {
     const hist = (opts.historico || A.todasTrocas || A.trocas).filter((t) => t.vendido && t.id !== opts.excluir && refDe(t) && (!opts.ate || (t.saida && t.saida < opts.ate)));
     const doTipo = hist.filter((t) => t.tipo === maq.tipo);
@@ -62,7 +64,8 @@
     if (base.length < QUALIDADE.minimoTreino || !refDe(maq)) return null;
     const m = treinar(base);
     const ref = refDe(maq);
-    const x = feat(maq, opts.ate);
+    const dataIdade = opts.dataIdade || opts.ate;
+    const x = feat(maq, dataIdade);
     const vendaBruta = ref * Math.exp(x.reduce((s, v, j) => s + v * m.w[j], 0));
     const margem = opts.margem ?? A.margemAlvo;
     const preparo = preparoPrevisto(maq);
@@ -74,7 +77,8 @@
     const usados = base.filter((t) => !m.atipicas.includes(t)).filter((t) => t.tipo === maq.tipo);
     const comp = usados.map((t) => ({ t, d: (t.modelo === maq.modelo ? 0 : t.marca === maq.marca ? 5 : 7) + Math.abs(t.ano - maq.ano) * 0.6 + Math.abs(t.horas - maq.horas) / (hAnoDe(t) * 1.5) + Math.abs(t.cond - maq.cond) / 15 }))
       .sort((a, b) => a.d - b.d).slice(0, 4).map((c) => c.t);
-    const dias = comp.length ? Math.round(comp.reduce((s, t) => s + (t.diasPatio || 0), 0) / comp.length) : null;
+    const comDias = comp.filter((t) => t.diasPatio != null); // anúncio de mercado não tem dias de pátio
+    const dias = comDias.length ? Math.round(comDias.reduce((s, t) => s + t.diasPatio, 0) / comDias.length) : null;
     const mesmoModelo = usados.filter((t) => t.modelo === maq.modelo).length;
 
     // qualidade: erro medido em previsões passadas que o motor não conhecia
@@ -91,7 +95,7 @@
     if (usados.length && maq.horas > Math.max(...usados.map((t) => t.horas))) limites.push('Horas acima de todas as máquinas vendidas: estimativa menos segura.');
     if (m.atipicas.length) limites.push(`${m.atipicas.length} ${m.atipicas.length === 1 ? 'venda atípica ficou' : 'vendas atípicas ficaram'} fora do cálculo.`);
 
-    const media = [0, 1, 2, 3].map((j) => usados.reduce((s, t) => s + feat(t, opts.ate)[j], 0) / Math.max(1, usados.length));
+    const media = [0, 1, 2, 3].map((j) => usados.reduce((s, t) => s + feat(t, dataIdade)[j], 0) / Math.max(1, usados.length));
     const nomes = ['', 'Ano', 'Horas de uso', 'Estado na inspeção'];
     const motivos = [1, 2, 3].map((j) => ({ nome: nomes[j], valor: Math.round(venda * (1 - Math.exp(-(x[j] - media[j]) * m.w[j])) / 1000) * 1000 }))
       .filter((mo) => Math.abs(mo.valor) >= 2000).sort((a, b) => Math.abs(b.valor) - Math.abs(a.valor));
@@ -119,5 +123,5 @@
     return out;
   }
 
-  raiz.MOTOR = { avaliar, validar, catalogo, refDe, preparoPrevisto, QUALIDADE };
+  raiz.MOTOR = { avaliar, validar, catalogo, refDe, preparoPrevisto, QUALIDADE, HANO };
 })(typeof window !== 'undefined' ? window : globalThis);

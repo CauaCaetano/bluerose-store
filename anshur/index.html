@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=24">
+<link rel="stylesheet" href="estilo.css?v=26">
 </head>
 <body>
 <a class="pular" href="#tela">Ir para o conteúdo</a>
@@ -32,11 +32,14 @@
   .demo-fita .df-txt b { color: #E9E2D4; }
   .demo-fita .df-contratar { background: #C1A36A; color: #111820; }
   .demo-fita .df-contratar:hover { background: #D1B57E; }
-  @media (max-width: 640px) { .demo-fita .df-txt { display: none; } .demo-fita { justify-content: space-between; } }
+  .demo-fita .df-cegas { border: 1px solid rgba(193, 163, 106, .75); color: #E9E2D4; }
+  .demo-fita .df-cegas:hover { background: rgba(193, 163, 106, .16); }
+  @media (max-width: 640px) { .demo-fita .df-txt { display: none; } .demo-fita { justify-content: space-between; flex-wrap: wrap; gap: 6px; padding: 6px 10px; } .demo-fita a { min-height: 32px; padding: 0 10px; font-size: 12.5px; } }
 </style>
 <div class="demo-fita" role="region" aria-label="Demonstração">
   <a class="df-voltar" href="../anshur.html">← Voltar ao site</a>
   <span class="df-txt">Demonstração do <b>Anshur</b> · revenda inventada, todos os dados são fictícios</span>
+  <a class="df-cegas" href="teste-as-cegas.html">Teste às cegas grátis</a>
   <a class="df-contratar" href="../anshur.html#assinar">Preço e contratação</a>
 </div>
 <div class="casca">
@@ -72,12 +75,12 @@
 </div>
 <div id="camada"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<script src="instalar.js?v=24"></script>
-<script src="areas.js?v=24"></script>
-<script src="dados.js?v=24"></script>
-<script src="fotos.js?v=24"></script>
+<script src="instalar.js?v=26"></script>
+<script src="areas.js?v=26"></script>
+<script src="dados.js?v=26"></script>
+<script src="fotos.js?v=26"></script>
 <!-- nuvem.js: na demonstração carrega o app na hora; no ambiente real, entra na conta e carrega os dados do servidor antes -->
-<script src="nuvem.js?v=24" data-app="comum.js?v=24 importar.js?v=24 implantacao.js?v=24 motor.js?v=24 retencao.js?v=24 graficos.js?v=24 areas/nucleo.js?v=24 areas/novas-regras.js?v=24 areas/novas.js?v=24 areas/financeiro-regras.js?v=24 areas/financeiro.js?v=24 areas/pecas-regras.js?v=24 areas/oficina-regras.js?v=24 areas/oficina.js?v=24 areas/pecas.js?v=24 areas/crm-regras.js?v=24 areas/crm.js?v=24 areas/fiscal-regras.js?v=24 areas/fiscal.js?v=24 app.js?v=24"></script>
+<script src="nuvem.js?v=26" data-app="comum.js?v=26 importar.js?v=26 implantacao.js?v=26 motor.js?v=26 retencao.js?v=26 graficos.js?v=26 areas/nucleo.js?v=26 areas/novas-regras.js?v=26 areas/novas.js?v=26 areas/financeiro-regras.js?v=26 areas/financeiro.js?v=26 areas/pecas-regras.js?v=26 areas/oficina-regras.js?v=26 areas/oficina.js?v=26 areas/pecas.js?v=26 areas/crm-regras.js?v=26 areas/crm.js?v=26 areas/fiscal-regras.js?v=26 areas/fiscal.js?v=26 app.js?v=26"></script>
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch(() => {}); let novo = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (!novo) { novo = true; location.reload(); } }); }</script>
 </body>
 </html>

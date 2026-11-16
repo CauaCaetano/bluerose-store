@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teste às cegas · Anshur</title>
+<meta name="description" content="Teste às cegas grátis do Anshur: informe 5 trocas antigas da sua revenda e veja quanto o Anshur teria mandado pagar em cada uma. Sem cadastro; tudo é calculado no seu navegador.">
+<meta name="theme-color" content="#F4F0E8">
+<meta property="og:title" content="Teste às cegas do Anshur">
+<meta property="og:description" content="5 trocas antigas, o motor de avaliação do Anshur e a comparação com o que a revenda pagou. Sem cadastro, nada sai do seu navegador.">
+<link rel="icon" href="icone-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icone-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css?v=26">
+<link rel="stylesheet" href="teste-as-cegas.css?v=26">
+</head>
+<body class="tc-pagina">
+<a class="pular" href="#tc-conteudo">Ir para o conteúdo</a>
+<header class="tc-topo">
+  <a class="tc-marca" href="index.html" aria-label="Anshur, voltar à demonstração"><img src="logo/anshur-logo.png?v=5" alt="Anshur" width="120" height="30"></a>
+  <nav class="tc-links" aria-label="Voltar">
+    <a class="btn btn-linha" href="index.html">Voltar à demonstração</a>
+    <a class="btn btn-linha" href="../anshur.html">Voltar ao site</a>
+  </nav>
+</header>
+<main class="tc-main" id="tc-conteudo" tabindex="-1">
+  <section class="tc-intro">
+    <p class="tc-rot">Teste às cegas · grátis</p>
+    <h1>Quanto o Anshur teria mandado pagar nas suas últimas trocas?</h1>
+    <p class="tc-lead">Informe 5 trocas antigas que a revenda já vendeu. O Anshur avalia cada uma sem olhar quanto vocês pagaram, usando só o que já sabia na época, e depois compara com o que aconteceu de verdade.</p>
+    <p class="tc-privado"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z"/></svg><span><b>Nada sai do seu navegador.</b> Sem login, sem cadastro e sem dados de cliente. O cálculo roda aqui mesmo e nenhuma informação é enviada ao nosso servidor. O rascunho fica guardado só neste aparelho até você apagar.</span></p>
+  </section>
+  <section class="tc-base" id="tc-base" aria-label="Base de mercado usada no teste"></section>
+  <ol class="tc-etapas" aria-label="Etapas do teste">
+    <li data-etapa="1"><b>1</b><span>Informar as 5 trocas</span></li>
+    <li data-etapa="2"><b>2</b><span>Executar a análise</span></li>
+    <li data-etapa="3"><b>3</b><span>Ver os resultados</span></li>
+  </ol>
+  <div id="tc-tela" aria-live="polite"></div>
+</main>
+<footer class="tc-rodape">
+  <p>Anshur · inteligência de margem para revendas de máquinas agrícolas. O valor máximo é uma recomendação: quem decide é o gerente.</p>
+  <button class="link" type="button" id="tc-apagar">Apagar meus dados</button>
+</footer>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<!-- Sem dados.js: o teste às cegas não usa nada da demonstração fictícia. Base = anúncios reais (mercado-anuncios.js). -->
+<script src="importar.js?v=26"></script>
+<script src="motor.js?v=26"></script>
+<script src="mercado-anuncios.js?v=26"></script>
+<script src="mercado.js?v=26"></script>
+<script src="cegas.js?v=26"></script>
+<script src="teste-as-cegas.js?v=26"></script>
+</body>
+</html>
