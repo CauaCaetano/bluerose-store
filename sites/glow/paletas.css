@@ -1,7 +1,0 @@
-/* Glow · cores por idioma (versão "editorial claro", 08/11/2026). O fundo marfim e o texto grafite ficam iguais em todos os idiomas;
-   muda só o tom do destaque. Substitui a versão gerada para o visual marrom antigo. */
-html[data-paleta="pt-PT"] { --ameixa: #5E3A55; --ameixa-esc: #4A2D43; --rosa: #B4807F; }
-html[data-paleta="es"] { --ameixa: #6B3A44; --ameixa-esc: #552E36; --rosa: #BF8574; }
-html[data-paleta="en"] { --ameixa: #4F3E5C; --ameixa-esc: #3E3049; --rosa: #A98592; }
-html[data-paleta="it"] { --ameixa: #6A4148; --ameixa-esc: #543339; --rosa: #BE8A7C; }
-html[data-paleta="fr"] { --ameixa: #5A3D58; --ameixa-esc: #472F45; --rosa: #B48496; }

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Anshur · portal da revenda</title>
+<meta name="description" content="Anshur: o sistema da revenda de máquinas agrícolas. Usados e trocas com IA, financeiro completo, relatórios e mais. Demonstração com dados fictícios.">
+<meta name="theme-color" content="#F4F0E8">
+<meta property="og:title" content="Anshur · inteligência de margem para revendas de máquinas agrícolas">
+<meta property="og:description" content="Proteja sua margem na troca. Recupere seu capital no pátio.">
+<link rel="icon" href="icone-192.png" type="image/png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Anshur">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css?v=23">
+</head>
+<body>
+<a class="pular" href="#tela">Ir para o conteúdo</a>
+<!-- site oficial: faixa da demonstração com o botão para voltar à página do Anshur (mesma aba) -->
+<style>
+  .demo-fita { display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: #111820; color: #E9E2D4; font: 500 13px/1.3 Inter, system-ui, sans-serif; }
+  .demo-fita a { display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; border-radius: 999px; text-decoration: none; font-weight: 600; white-space: nowrap; }
+  .demo-fita .df-voltar { border: 1px solid rgba(233, 226, 212, .45); color: #E9E2D4; }
+  .demo-fita .df-voltar:hover { background: rgba(233, 226, 212, .1); }
+  .demo-fita .df-txt { flex: 1; min-width: 0; color: #C9C2B4; }
+  .demo-fita .df-txt b { color: #E9E2D4; }
+  .demo-fita .df-contratar { background: #C1A36A; color: #111820; }
+  .demo-fita .df-contratar:hover { background: #D1B57E; }
+  @media (max-width: 640px) { .demo-fita .df-txt { display: none; } .demo-fita { justify-content: space-between; } }
+</style>
+<div class="demo-fita" role="region" aria-label="Demonstração">
+  <a class="df-voltar" href="../anshur.html">← Voltar ao site</a>
+  <span class="df-txt">Demonstração do <b>Anshur</b> · revenda inventada, todos os dados são fictícios</span>
+  <a class="df-contratar" href="../anshur.html#assinar">Preço e contratação</a>
+</div>
+<div class="casca">
+  <!-- celular: barra de baixo com o menu do sistema aberto (no computador o menu fica na barra do sistema, no cabeçalho) -->
+  <aside class="lateral" aria-label="Menu do sistema no celular">
+    <a class="marca" href="#/" id="marca" aria-label="Anshur, portal"></a>
+    <nav class="menu" id="menu" aria-label="Menu do sistema">
+      <span class="menu-indicador" aria-hidden="true"></span>
+    </nav>
+    <p class="lateral-rodape">Dados demonstrativos de uma revenda fictícia.</p>
+  </aside>
+  <div class="principal">
+    <header class="cabecalho">
+      <div class="cab-linha">
+        <button class="area-troca sis-grade" id="sis-grade" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Sistemas: voltar ao portal ou abrir outro sistema" title="Sistemas e portal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h3v3H5zM10.5 5h3v3h-3zM16 5h3v3h-3zM5 10.5h3v3H5zM10.5 10.5h3v3h-3zM16 10.5h3v3h-3zM5 16h3v3H5zM10.5 16h3v3h-3zM16 16h3v3h-3z"/></svg><span>Sistemas</span></button>
+        <a class="sis-nome" id="sis-nome" href="#/"></a>
+        <div class="cab-info"><b id="revenda"></b><span id="refdata"></span></div>
+        <select class="loja-sel" id="loja-sel" aria-label="Loja"></select>
+        <span class="selo-demo">Dados demonstrativos</span>
+        <button class="sino busca-btn" type="button" id="busca-btn" aria-label="Buscar em todos os sistemas (Ctrl+K)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"/></svg><span class="kbd">Ctrl K</span></button>
+        <button class="sino" type="button" id="instalar-btn" aria-label="Instalar o app" title="Instalar o Anshur"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
+        <button class="sino" type="button" id="sino" aria-label="Alertas"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/></svg><b id="sino-n" hidden></b></button>
+        <a class="btn btn-ouro cab-nova" href="#/usados/avaliar" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Nova avaliação</span></a>
+        <div class="perfil">
+          <button class="avatar" id="perfil" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Perfil e opções">SA</button>
+          <div class="perfil-menu" id="perfil-menu" role="menu" hidden></div>
+        </div>
+      </div>
+      <nav class="sis-barra" id="sis-barra" aria-label="Menu do sistema"></nav>
+    </header>
+    <main id="tela" tabindex="-1"></main>
+  </div>
+</div>
+<div id="camada"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="instalar.js?v=23"></script>
+<script src="areas.js?v=23"></script>
+<script src="dados.js?v=23"></script>
+<script src="fotos.js?v=23"></script>
+<!-- nuvem.js: na demonstração carrega o app na hora; no ambiente real, entra na conta e carrega os dados do servidor antes -->
+<script src="nuvem.js?v=23" data-app="comum.js?v=23 importar.js?v=23 motor.js?v=23 retencao.js?v=23 graficos.js?v=23 areas/nucleo.js?v=23 areas/novas-regras.js?v=23 areas/novas.js?v=23 areas/financeiro-regras.js?v=23 areas/financeiro.js?v=23 areas/pecas-regras.js?v=23 areas/oficina-regras.js?v=23 areas/oficina.js?v=23 areas/pecas.js?v=23 areas/crm-regras.js?v=23 areas/crm.js?v=23 areas/fiscal-regras.js?v=23 areas/fiscal.js?v=23 app.js?v=23"></script>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch(() => {}); let novo = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (!novo) { novo = true; location.reload(); } }); }</script>
+</body>
+</html>

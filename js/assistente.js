@@ -24,7 +24,7 @@
     avatar: 'img/assistente-avatar.webp?v=2',
     folhas: ['expressoes', 'fala', 'pensando', 'ideia', 'joinha', 'gesto'],   // img/assistente/<nome>.webp
     versaoFolhas: 2,
-    dados: 'js/assistente-dados.json?v=21',
+    dados: 'js/assistente-dados.json?v=22',
   };
   var reduzMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   var semMovimento = function () { return !!(reduzMov && reduzMov.matches); };
@@ -45,7 +45,7 @@
   // contexto da página (as seções da página inicial são tratadas à parte)
   AssistantKnowledge.prototype.contextoDaPagina = function () {
     var p = paginaAtual(), d = this.d;
-    var porPagina = { 'sistemas.html': 'sistemas', 'exemplos.html': 'sites', 'projetos.html': 'cases', 'laboratorio.html': 'laboratorio', 'conta.html': 'conta', 'termos.html': 'legal', 'privacidade.html': 'legal' };
+    var porPagina = { 'sistemas.html': 'sistemas', 'laboratorio.html': 'laboratorio', 'conta.html': 'conta', 'termos.html': 'legal', 'privacidade.html': 'legal' };
     if (porPagina[p]) return porPagina[p];
     for (var i = 0; i < d.sistemas.length; i++) {
       var s = d.sistemas[i];
@@ -380,7 +380,7 @@
   // todas as partes do site, para quem quer ver as dúvidas de outro assunto
   VirtualAssistant.prototype.outras = function () {
     var self = this, r = this.rapidas; r.textContent = '';
-    var ids = ['inicio', 'produtos', 'precos', 'perguntas', 'sites', 'solucoes', 'processo', 'conta', 'contato'];
+    var ids = ['inicio', 'produtos', 'precos', 'perguntas', 'solucoes', 'processo', 'conta', 'contato'];
     ids.forEach(function (id) {
       var b = el('button', { type: 'button', classe: 'va-tema', texto: self.k.ctx(id).nome });
       b.addEventListener('click', function () { self.contexto = id; self.onde.textContent = 'Assunto: ' + self.k.ctx(id).nome; self.mostrarRapidas(); var p = r.querySelector('button'); if (p) p.focus(); });

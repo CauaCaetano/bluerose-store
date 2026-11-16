@@ -1,0 +1,15 @@
+/* página do programa de afiliados */
+.af-sec{padding:56px 0}
+.af-sec .wrap{max-width:1040px}
+.af-passos{list-style:none;counter-reset:p;margin:22px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px}
+.af-passos li{counter-increment:p;display:grid;gap:6px;padding:20px;border-radius:16px;background:rgba(255,255,255,.6);border:1px solid rgba(16,27,54,.12)}
+.af-passos li::before{content:counter(p);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#101b36;color:#fff;font-weight:700}
+.af-passos span,.af-cartoes p,.af-regras li{line-height:1.55}
+.af-cartoes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px;margin-top:22px}
+.af-cartoes article{padding:22px;border-radius:16px;background:rgba(255,255,255,.6);border:1px solid rgba(16,27,54,.12)}
+.af-cartoes h3{margin:0 0 8px;font-size:1.15rem}
+.af-cartoes .af-destaque{background:#101b36;color:#F4EFE6;border-color:#101b36}
+.af-cartoes .af-destaque h3{color:#E6C98A}
+.af-exemplo{margin-top:18px;padding:14px 18px;border-left:3px solid #C1A36A;background:rgba(193,163,106,.1);border-radius:8px}
+.af-regras{margin:22px 0 0;padding-left:22px;display:grid;gap:10px;max-width:820px}
+.af-sec .ctas{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px}

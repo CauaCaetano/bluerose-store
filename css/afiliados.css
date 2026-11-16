@@ -24,3 +24,5 @@
 .af-principal { min-width: 0; max-width: 100%; margin-top: 16px; overflow: hidden; }
 .af-area { margin-top: 20px; }
 .af-area:not(:has(> :not([hidden]))) { display: none; }
+
+.af-aceite{display:flex;gap:8px;align-items:flex-start;font-weight:400}.af-aceite input{width:auto;margin-top:3px}

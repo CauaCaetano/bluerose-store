@@ -382,8 +382,11 @@ main :is(p, li, dd, td, figcaption, small) a:not(.btn):not([class]):not(nav a):n
 
 /* 09/11: com o item Anshur no menu, os links não quebram linha; telas médias apertam o espaço */
 @media (min-width: 901px) { .nav-links a { white-space: nowrap; } }
-@media (min-width: 901px) and (max-width: 1360px) { .nav-links { gap: 14px; font-size: 13px; } .nav-links a { letter-spacing: .03em; } }
-@media (min-width: 901px) and (max-width: 1080px) { .nav-links a[href="como-funciona.html"] { display: none; } .nav-links .btn { padding-inline: 14px; } }
+@media (min-width: 901px) and (max-width: 1500px) { .nav-links { gap: 14px; font-size: 13px; } .nav-links a { letter-spacing: .03em; } }
+/* 16/11: Anshur de volta no menu; "Como funciona" sai do menu até 1180 px (continua no rodapé e no celular) */
+@media (min-width: 901px) and (max-width: 1180px) { .nav-links a[href="como-funciona.html"] { display: none; } .nav-links .btn { padding-inline: 14px; } }
+@media (min-width: 901px) and (max-width: 1040px) { .nav-links { gap: 10px; font-size: 12px; } .nav-links a { letter-spacing: .02em; } .nav-links .btn { padding-inline: 10px; } .nav .brand { letter-spacing: .14em; } }
+@media (min-width: 901px) and (max-width: 990px) { .nav .brand { font-size: 0; letter-spacing: 0; gap: 0; } }
 .nav .brand { white-space: nowrap; flex: none; }
 
 /* ---------- Pague aqui (pedido do dono 10/11/2026: muita gente não achava onde pagar) ----------
