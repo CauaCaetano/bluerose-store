@@ -653,7 +653,7 @@ button:active,.bt:active,.chip:active,nav a:active,.mesa:active,.papel:active,.c
 .clicou{animation:onda-clique .45s ease-out}
 /* aba ativa do menu: a marca desliza em vez de aparecer de repente */
 nav a .ico{transition:scale .2s cubic-bezier(.3,.7,.4,1)}nav a.on .ico{scale:1.08}
-@media (prefers-reduced-motion:reduce){#tela.tela-entra>*{animation:none}.clicou{animation:none}button:active,.bt:active{scale:none}}
+
 
 /* ---------- 16/11: Gestão ocupa a tela larga (antes ficava tudo no meio, com sobra dos lados) ---------- */
 /* tela grande: tudo usa a largura toda; na Gestão o menu fica colado na borda esquerda, nunca no meio */
@@ -746,3 +746,43 @@ body:has(.dica-1a) .salao-dir::after{display:none!important}
 .tut-cartao-conta{outline:2px solid #F4C150}
 @media (prefers-reduced-motion:reduce){.tut-recorte,.tut-cartao{transition:none}}
 .marca-capa{aspect-ratio:1200/520;max-width:520px;border-radius:14px;background:#E9DFD0 center/cover no-repeat;display:grid;place-items:center;color:#7A6E60;font-weight:600;margin-bottom:10px;border:1px solid rgba(0,0,0,.08)}
+
+/* ===== animações (16/11): tela que entra deslizando, itens em cascata, toque com onda, folhas e avisos com mola ===== */
+@keyframes tela-entra{from{opacity:0;translate:0 22px;scale:.985}}
+#tela.tela-entra>:not(.fab){animation:tela-entra .5s cubic-bezier(.2,.85,.25,1) backwards}
+@keyframes item-entra{from{opacity:0;translate:0 16px;scale:.94}}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card){animation:item-entra .48s cubic-bezier(.2,.85,.25,1.15) backwards}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(n+15){animation-delay:.55s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(1){animation-delay:0.085s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(2){animation-delay:0.120s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(3){animation-delay:0.155s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(4){animation-delay:0.190s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(5){animation-delay:0.225s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(6){animation-delay:0.260s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(7){animation-delay:0.295s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(8){animation-delay:0.330s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(9){animation-delay:0.365s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(10){animation-delay:0.400s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(11){animation-delay:0.435s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(12){animation-delay:0.470s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(13){animation-delay:0.505s}
+#tela.tela-entra :is(.mesa,.fila-item,.ticket,.cartao-acao,.mg-grupo a,.r4-pend>li,.conta-linha,.kds-col,.r4-card,.guia-passos li,.pt-item,.mesa-planta,.tpl,.estilo,.res-card):nth-child(14){animation-delay:0.540s}
+/* onda do toque: um círculo que nasce no dedo e se abre (fica por cima, não corta nada) */
+.onda-toque{position:fixed;z-index:600;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;pointer-events:none;background:currentColor;opacity:.32;animation:onda-toque .55s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes onda-toque{to{transform:scale(7);opacity:0}}
+/* botões: afundam no toque e voltam com mola */
+button,.bt,.chip,nav a,.mesa,.papel,.conta-linha,.ko,.kv,.fila-item,.cartao-acao{transition:background-color .2s,color .2s,border-color .2s,box-shadow .25s,scale .22s cubic-bezier(.3,1.6,.5,1),translate .22s cubic-bezier(.3,1.4,.5,1)}
+button:active,.bt:active,.chip:active,nav a:active,.mesa:active,.papel:active,.conta-linha:active,a.ko:active,.fila-item:active,.cartao-acao:active{scale:.94}
+@media (hover:hover){.mesa:hover,.cartao-acao:hover,.fila-item:hover{translate:0 -3px;box-shadow:0 12px 24px -10px rgba(43,30,24,.35)}}
+/* aba do menu: a marcação da aba atual aparece com um pulo */
+nav a.on{animation:aba-on .35s cubic-bezier(.3,1.5,.5,1)}
+@keyframes aba-on{from{scale:.9}}
+/* folhas (janelas) e avisos com mola */
+.folha-fundo{transition:opacity .28s}
+.folha{transform:translateY(60px) scale(.98)!important;transition:transform .42s cubic-bezier(.2,1.1,.3,1)!important}
+.folha-fundo.aberta .folha{transform:none!important}
+@media (min-width:900px){.folha{transform:translateX(60px)!important}.folha-fundo.aberta .folha{transform:none!important}}
+.toast{transition:opacity .25s,transform .38s cubic-bezier(.2,1.4,.4,1)!important}
+.contador:not(:empty){animation:conta-pula .4s cubic-bezier(.3,1.6,.5,1)}
+@keyframes conta-pula{from{scale:.4}}
+.pd-quadro::after{content:none!important;display:none!important}

@@ -1,7 +1,7 @@
 // Popina · as opções de um produto, iguais para o garçom e para o cliente do cardápio online:
 // tamanho (P/M/G, broto/grande), pizza em frações e borda, combo, grupos de complementos (obrigatórios ou não, com mínimo
 // e máximo e preço por opção), pimenta e ponto (funções da casa), observação e quantidade. O preço final sai sempre daqui.
-import { precoAgora, precoFracoes, precoBorda, faltaCombo, FRACAO_NOME } from './precos.js?v=28';
+import { precoAgora, precoFracoes, precoBorda, faltaCombo, FRACAO_NOME } from './precos.js?v=29';
 
 // escolhas obrigatórias que as funções da casa põem no prato marcado (o nome vira "Grupo: opção" na comanda e na cozinha)
 export const ESCOLHAS_CASA = {

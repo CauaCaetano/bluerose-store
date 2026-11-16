@@ -79,3 +79,5 @@
   .kds .ticket li{font-size:17px}.kds .tk-tit b{font-size:21px}.kds .relogio b{font-size:23px}
   .kds-col .placa{font-size:21px}
 }
+/* 16/11: sem a imagem do aqueduto na coluna Prontos (recorte ruim e cursor desenhado no arquivo) */
+.kds-col.pronto{padding-bottom:14px!important}.kds-col.pronto::after{content:none!important;display:none!important}

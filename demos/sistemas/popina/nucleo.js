@@ -1,5 +1,5 @@
 // Popina · registro das telas e das ações, rota pelo endereço (#salao, #mesa/5...) e redesenho quando os dados mudam.
-import { ouvir } from './loja.js?v=28';
+import { ouvir } from './loja.js?v=29';
 
 export const TELAS = {};
 export const ACOES = {};
@@ -49,6 +49,8 @@ export function iniciarRotas() {
   document.addEventListener('pointerdown', (e) => {
     const b = e.target.closest(CLICAVEL); if (!b || b.disabled) return;
     b.classList.remove('clicou'); void b.offsetWidth; b.classList.add('clicou');
+    const o = document.createElement('span'); o.className = 'onda-toque'; o.style.left = `${e.clientX}px`; o.style.top = `${e.clientY}px`; o.style.color = getComputedStyle(b).color;
+    document.body.append(o); setTimeout(() => o.remove(), 600);
     setTimeout(() => b.classList.remove('clicou'), 450);
   }, { passive: true });
   document.addEventListener('click', (e) => {

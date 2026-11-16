@@ -1,12 +1,12 @@
 // Popina · Mais: cardápio (preços, esgotado, ficha técnica), estoque, relatórios, QR das mesas, ajustes e o papel deste aparelho.
 import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa,
-  regras, temPin, auditar, quemAgora, registrarPerda, ajustarEstoque, MOTIVOS_PERDA, consumoVenda, custoVenda } from './loja.js?v=28';
-import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=28';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=28';
+  regras, temPin, auditar, quemAgora, registrarPerda, ajustarEstoque, MOTIVOS_PERDA, consumoVenda, custoVenda } from './loja.js?v=29';
+import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=29';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=29';
 import { qrSVG } from '../base/qr.js';
-import { temModulo, modulosAtivos } from './perfis.js?v=28';
-import { ALERGENOS, ETAPAS, TURNOS } from './precos.js?v=28';
-import { modoEscolha } from './opcoes.js?v=28';
+import { temModulo, modulosAtivos } from './perfis.js?v=29';
+import { ALERGENOS, ETAPAS, TURNOS } from './precos.js?v=29';
+import { modoEscolha } from './opcoes.js?v=29';
 
 // cada seção: [id, nome, ícone, detalhe, função da casa que precisa estar ligada (opcional), endereço próprio (opcional)]
 export const GRUPOS = [
@@ -419,7 +419,7 @@ export const MONTAGEM_BEBIDA = [
 ];
 acao('cardapio-exemplo', async () => {
   if (!(await confirma('Carregar os 22 pratos de exemplo, com fotos e fichas técnicas? Depois é só trocar nomes e preços e apagar o que não serve.', 'Carregar'))) return;
-  const { cardapioExemplo } = await import('./dados.js?v=28'); const ex = cardapioExemplo();
+  const { cardapioExemplo } = await import('./dados.js?v=29'); const ex = cardapioExemplo();
   db.produtos.push(...ex.produtos.filter((p) => !prod(p.id))); ex.insumos.forEach((i) => { if (!insumo(i.id)) db.insumos.push(i); });
   grava(); toast('Cardápio de exemplo carregado');
 });
@@ -556,7 +556,7 @@ acao('imprimir-qr', () => {
   w.document.close();
 });
 acao('papel', (b) => { setPapel(b.dataset.p); toast(`Este aparelho agora é: ${PAPEIS[b.dataset.p][0]}`); ir(PAPEIS[b.dataset.p][1]); });
-acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=28'); recomecar(); ir('salao'); } });
+acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=29'); recomecar(); ir('salao'); } });
 
 acao('ordem', (b) => {
   const p = prod(b.dataset.p), l = db.produtos.filter((x) => x.cat === p.cat), k = l.indexOf(p), alvo = l[k + Number(b.dataset.d)]; if (!alvo) return;

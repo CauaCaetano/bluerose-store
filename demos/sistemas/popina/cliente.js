@@ -1,11 +1,11 @@
 // Popina · cardápio do cliente. ?mesa=N: pede da mesa (o garçom confirma), chama o garçom e vê a conta.
 // ?delivery=1: entrega ou retirada, com bairro, cupom e pagamento. r=<restaurante>: o cardápio de verdade (nuvem);
 // sem r: o restaurante de exemplo deste aparelho. A cara (capa, logo, cor, tema, horários) vem do restaurante.
-import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=28';
-import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas, aplicarCota } from './opcoes.js?v=28';
-import { modulosAtivos } from './perfis.js?v=28';
-import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg, comemRodizio } from './precos.js?v=28';
-import { ico, folha, toast, $, $$ } from './ui.js?v=28';
+import { db, t, din, uid, grava, ouvir, comandaDaMesa, conta, novoPedido, adicionarItem, comanda, lojaCfg, validarCupom, aplicarCupom, clientePorTel, fidelidade, reservaLimpa, encomendaValida } from './loja.js?v=29';
+import { formOpcoes, aPartir, situacao, textoHorarios, nomeItem, rotAdic, ofertaCombo, escolhasCombo, aplicarComboEtapas, aplicarCota } from './opcoes.js?v=29';
+import { modulosAtivos } from './perfis.js?v=29';
+import { precoAgora, naJanela, pratoDoDia, inclusoRodizio, cabeNaRodadaCat, ALERGENOS, passaFiltro, ymd, noTurno, precoKg, comemRodizio } from './precos.js?v=29';
+import { ico, folha, toast, $, $$ } from './ui.js?v=29';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';

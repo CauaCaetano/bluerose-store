@@ -317,3 +317,17 @@ body.est-moderno .cli-barra:empty{display:none}
 /* filtros (sem glúten, vegano...) quebram linha em vez de sumir na borda */
 .cli-filtros{flex-wrap:wrap;overflow:visible}
 body.cv .cli-filtros{flex-wrap:wrap!important;overflow:visible!important}
+body:not(.est-rustico) .cli-capa-foto:not(.sem){height:auto!important;aspect-ratio:1200/520}
+
+/* ===== animações do cardápio (16/11): entrada em cascata na abertura, toque com onda e botões com mola ===== */
+@keyframes cli-entra{from{opacity:0;translate:0 18px;scale:.97}}
+body.cli-entrando :is(.cli-capa,.cli-id,.cli-modo-caixa,.cli-barra-busca,.cli-filtros,.cli-h2,.cli-dest,.cli-prod){animation:cli-entra .55s cubic-bezier(.2,.85,.25,1.1) backwards}
+body.cli-entrando .cli-id{animation-delay:.08s}body.cli-entrando .cli-modo-caixa{animation-delay:.14s}body.cli-entrando .cli-barra-busca{animation-delay:.2s}
+body.cli-entrando :is(.cli-dest,.cli-prod):nth-child(1){animation-delay:.24s}body.cli-entrando :is(.cli-dest,.cli-prod):nth-child(2){animation-delay:.3s}
+body.cli-entrando :is(.cli-dest,.cli-prod):nth-child(3){animation-delay:.36s}body.cli-entrando :is(.cli-dest,.cli-prod):nth-child(4){animation-delay:.42s}
+body.cli-entrando :is(.cli-dest,.cli-prod):nth-child(n+5){animation-delay:.48s}
+.cli-prod,.cli-dest,button{transition:scale .22s cubic-bezier(.3,1.6,.5,1),box-shadow .25s,translate .22s}
+.cli-prod:active,.cli-dest:active,button:active{scale:.96}
+@media (hover:hover){.cli-prod:hover,.cli-dest:hover{translate:0 -3px}}
+.onda-toque{position:fixed;z-index:600;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;pointer-events:none;background:currentColor;opacity:.3;animation:onda-toque .55s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes onda-toque{to{transform:scale(7);opacity:0}}

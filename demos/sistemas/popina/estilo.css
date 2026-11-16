@@ -335,7 +335,7 @@ main{padding:14px 16px 28px;max-width:1280px;margin:0 auto;outline:0}
   [data-tela=salao] .mesas{grid-column:2;grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
   [data-tela=salao] .legenda{grid-column:2}
 }
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.25s!important;transition-duration:.15s!important}}
 
 /* editores (prato, insumo, categorias) */
 .sem-foto{display:grid;place-items:center;width:52px;height:52px;border-radius:10px;background:var(--creme2);color:var(--mudo);flex:none}
