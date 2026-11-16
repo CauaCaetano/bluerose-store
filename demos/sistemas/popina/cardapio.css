@@ -313,3 +313,7 @@ body.est-moderno .cli-barra:empty{display:none}
 .demo-cardapio a:hover{background:rgba(255,255,255,.18)}
 
 .cli-rodape{text-align:center}.cli-horarios{max-width:400px;margin:0 auto 12px}.cli-horarios li{max-width:none;text-align:left}
+
+/* filtros (sem glúten, vegano...) quebram linha em vez de sumir na borda */
+.cli-filtros{flex-wrap:wrap;overflow:visible}
+body.cv .cli-filtros{flex-wrap:wrap!important;overflow:visible!important}

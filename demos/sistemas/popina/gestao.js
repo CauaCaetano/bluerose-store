@@ -1,18 +1,18 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=27';
-import { acao, ir } from './nucleo.js?v=27';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=27';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=27';
-import { situacao, textoHorarios } from './opcoes.js?v=27';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=28';
+import { acao, ir } from './nucleo.js?v=28';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=28';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=28';
+import { situacao, textoHorarios } from './opcoes.js?v=28';
 import { qrSVG } from '../base/qr.js';
-import { abrirEscolha } from './escolha.js?v=27';
-import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=27';
-import './funcoes.js?v=27';
-import { HUB_FINANCEIRO } from './financeiro.js?v=27';
-import { HUB_PRODUCAO } from './producao.js?v=27';
-import { HUB_OPERACAO } from './operacao.js?v=27';
-import { GRUPOS } from './mais.js?v=27';
+import { abrirEscolha } from './escolha.js?v=28';
+import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=28';
+import './funcoes.js?v=28';
+import { HUB_FINANCEIRO } from './financeiro.js?v=28';
+import { HUB_PRODUCAO } from './producao.js?v=28';
+import { HUB_OPERACAO } from './operacao.js?v=28';
+import { GRUPOS } from './mais.js?v=28';
 // financeiro e produção entram no menu da Gestão antes de "Equipe e conta"
 if (!GRUPOS.some((g) => g[0] === 'Financeiro')) {
   const i = GRUPOS.findIndex((g) => g[0] === 'Equipe e conta');
@@ -98,7 +98,7 @@ export const TEMPLATES = [
 ];
 TELAS_MAIS.aparencia = () => {
   const L = lojaCfg(), c = db.config, tpl = L.template || 'basico';
-  return volta('mais', 'Aparência e templates', 'A cara do sistema da equipe e do cardápio do cliente') + blocoMarca(false) + `
+  return volta('mais', 'Aparência e templates', 'A cara do sistema da equipe e do cardápio do cliente') + `
   <form class="form larga" data-loja>
     <section class="bloco-form"><h2>Template do sistema</h2><p class="mudo">Muda o visual das telas e do cardápio do cliente <b>e as funções</b> de cada tipo de negócio. Toque num template para ver as fotos e o que vem nele antes de trocar; nada do que você cadastrou se perde.</p>
       <div class="tpls">${TEMPLATES.map(([k, n, d]) => `<button type="button" class="tpl ${tpl === k ? 'on' : ''}" data-tpl="${k}"><img src="img/tpl-${k}.webp?v=1" alt="" width="480" height="300" loading="lazy"><b>${n}${tpl === k ? ' <em>em uso</em>' : ''}</b><small>${d}</small></button>`).join('')}</div>
@@ -107,9 +107,6 @@ TELAS_MAIS.aparencia = () => {
       <ul class="mods-casa">${Object.entries(MODULOS).map(([k, [n, d]]) => `<li><label><input type="checkbox" data-mod="${k}" ${modulosAtivos(L).has(k) ? 'checked' : ''}><span><b>${n}</b><small>${d}</small></span></label></li>`).join('')}</ul>
     </section>
     <section class="bloco-form"><h2>Identidade</h2>
-      <div class="loja-visual">
-        <div class="loja-capa" data-capa style="${L.capa ? `background-image:url('${t(L.capa)}')` : ''}"><label class="bt">${ico('mais2')}${L.capa ? 'Trocar a capa' : 'Pôr foto de capa'}<input type="file" accept="image/*" data-arq-capa hidden></label>${L.capa ? '<button type="button" class="link claro" data-tira="capa">Tirar</button>' : ''}</div>
-      </div>
       <label class="campo"><span>Nome do restaurante</span><input name="nome" value="${t(c.nome)}" maxlength="60"></label>
       <label class="campo"><span>Frase de boas-vindas</span><input name="boasVindas" value="${t(L.boasVindas)}" maxlength="120" placeholder="Ex.: Pizza no forno a lenha desde sempre"></label>
       <div class="campo"><span>Cor do restaurante</span><div class="cores">${CORES.map((x) => `<button type="button" class="cor ${x.toLowerCase() === String(L.cor).toLowerCase() ? 'on' : ''}" data-cor="${x}" style="background:${x}" aria-label="Cor ${x}"></button>`).join('')}<label class="cor livre" title="Outra cor"><input type="color" name="cor" value="${t(L.cor)}"></label></div></div>
@@ -138,10 +135,15 @@ export function blocoMarca(comNome = true) {
         <div class="marca-ava" style="${L.logo ? `background-image:url('${t(L.logo)}')` : `background:${t(L.cor)}`}">${L.logo ? '' : ini}</div>
         <div><p>${m ? 'Aparece no topo do sistema, no lugar do logo do Popina, e no cardápio do cliente.' : 'Aparece no cardápio do cliente. No plano com a sua marca, aparece também no topo do sistema, no lugar do Popina.'}</p>
           <div class="linha-bts"><label class="bt cheio">${ico('mais2')}${L.logo ? 'Trocar o logo' : 'Enviar o meu logo'}<input type="file" accept="image/*" data-marca-logo hidden></label>${L.logo ? '<button type="button" class="bt" data-marca-tira>Tirar o logo</button>' : ''}</div>
-          <p class="mudo">Foto ou arquivo do logo (PNG ou JPG). A cor do cardápio passa a ser a do logo; dá para trocar em Aparência.</p></div>
+          <p class="mudo">Foto ou arquivo do logo (PNG ou JPG). A cor do cardápio passa a ser a do logo; dá para trocar em Aparência e templates.</p></div>
       </div>
     </section>
-    ${comNome ? `<section class="bloco-form"><h2>2. O nome do restaurante</h2>
+    <section class="bloco-form"><h2>2. A foto de capa</h2>
+      <div class="marca-capa" style="${L.capa ? `background-image:url('${t(L.capa)}')` : ''}">${L.capa ? '' : '<span>Sem capa</span>'}</div>
+      <p class="mudo">A foto grande no alto do cardápio do cliente: a fachada, o salão ou um prato. Fica melhor deitada (mais larga que alta).</p>
+      <div class="linha-bts"><label class="bt cheio">${ico('mais2')}${L.capa ? 'Trocar a capa' : 'Enviar a foto de capa'}<input type="file" accept="image/*" data-marca-capa hidden></label>${L.capa ? '<button type="button" class="bt" data-marca-tira-capa>Tirar a capa</button>' : ''}</div>
+    </section>
+    ${comNome ? `<section class="bloco-form"><h2>3. O nome do restaurante</h2>
       <label class="campo"><span>${m ? 'Nome que aparece no topo, na aba do navegador e no cardápio' : 'Nome que aparece no cardápio do cliente'}</span><input name="nome" value="${t(c.nome)}" maxlength="60" required></label>
       <div class="linha-bts"><button class="bt cheio">Salvar o nome</button></div>
     </section>` : ''}
@@ -156,9 +158,14 @@ MONTAR.marca = (el) => {
     try { const v = await reduzir(a, 320, 320); const c2 = await corDoLogo(v); setLoja(c2 ? { logo: v, cor: c2 } : { logo: v }); toast('Logo salvo'); }
     catch { toast('Não consegui abrir essa imagem. Tente outra.'); }
   };
+  $('[data-marca-capa]', f).onchange = async (e) => {
+    const a = e.target.files?.[0]; if (!a) return;
+    try { setLoja({ capa: await reduzir(a, 1200, 520) }); toast('Capa salva'); } catch { toast('Não consegui abrir essa imagem. Tente outra.'); }
+  };
   f.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
     if ('marcaTira' in b.dataset) { setLoja({ logo: '' }); toast('Logo tirado'); }
+    if ('marcaTiraCapa' in b.dataset) { setLoja({ capa: '' }); toast('Capa tirada'); }
     if ('preverMarca' in b.dataset && !CONTA) { window.popinaPlano = window.popinaPlano === 'marca' ? 'basico' : 'marca'; dispatchEvent(new Event('popina-plano')); toast(window.popinaPlano === 'marca' ? 'Assim fica com a sua marca: veja o topo' : 'De volta ao plano normal'); }
   });
   f.onsubmit = (e) => { e.preventDefault(); if (!f.nome) return; const n = f.nome.value.trim(); if (!n) return; db.config.nome = n; grava(); toast('Nome salvo'); };
@@ -169,7 +176,7 @@ TELAS_MAIS.loja = () => {
   const L = lojaCfg(), c = db.config, st = situacao(L.horarios);
   return volta('mais', 'Restaurante e cardápio online', 'Do jeito que o cliente vê no celular quando lê o QR ou abre o link') + `
   <form class="form larga" data-loja>
-    <p class="mudo">Logo, capa, cores, template e estilo do cardápio ficam em <a href="#mais/aparencia">Aparência e templates</a>.</p>
+    <p class="mudo">Logo e capa ficam em <a href="#mais/conta">Minha conta</a>; cores, template e estilo do cardápio em <a href="#mais/aparencia">Aparência e templates</a>.</p>
     <section class="bloco-form"><h2>Contato e endereço</h2>
       <label class="campo"><span>Endereço</span><input name="endereco" value="${t(L.endereco)}" placeholder="Rua, número · bairro"></label>
       <div class="duas-c"><label class="campo"><span>Cidade</span><input name="cidade" value="${t(c.cidade)}"></label><label class="campo"><span>WhatsApp do restaurante</span><input name="whatsapp" inputmode="tel" value="${t(c.whatsapp)}" placeholder="(16) 99999-0000"></label></div>
@@ -388,6 +395,7 @@ TELAS_MAIS.conta = () => {
   const real = CONTA && window.veltriaAbrir;
   return volta('mais', 'Minha conta', real ? `${t(CONTA.empresa || db.config.nome)} · ${window.veltriaAbrir.papel === 'dono' ? 'dono' : 'equipe'}` : 'Na conta de verdade, aqui ficam o seu perfil, a assinatura e a saída') + `
   <div class="cartoes-acao">
+    <button type="button" class="cartao-acao tut-cartao-conta" data-tutorial>${ico('alerta')}<b>Tutorial completo</b><span>Passa por cada tela do sistema e mostra onde tocar, passo a passo.</span></button>
     <button type="button" class="cartao-acao" data-conta="perfil">${ico('pessoas')}<b>Meu perfil</b><span>Seu e-mail, seu cargo e o que você pode ver e fazer.</span></button>
     <button type="button" class="cartao-acao" data-conta="assinatura">${ico('cartao')}<b>Assinatura</b><span>Plano, próxima cobrança e troca para o anual com 20% a menos.</span></button>
     <button type="button" class="cartao-acao" data-conta="configuracoes">${ico('ajustes')}<b>Dados da empresa</b><span>Nome e cidade da empresa na conta.</span></button>

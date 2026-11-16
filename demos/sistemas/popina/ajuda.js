@@ -1,9 +1,9 @@
 // Popina · ajuda para quem usa pela primeira vez: dica curta em cada tela (some no "Entendi"), primeiros passos do dono
 // com checklist, busca no menu da Gestão e aviso de itens que ficaram sem enviar para a cozinha.
 // Nada aqui cobre a tela: tudo entra no fluxo da página, com as cores e letras do template (classes .bt, .mudo, .busca).
-import { db, ouvir, lojaCfg, comandaDaMesa, cartaoAberto } from './loja.js?v=27';
-import { DEPOIS, papel } from './nucleo.js?v=27';
-import { ico, toast, $, $$ } from './ui.js?v=27';
+import { db, ouvir, lojaCfg, comandaDaMesa, cartaoAberto } from './loja.js?v=28';
+import { DEPOIS, papel } from './nucleo.js?v=28';
+import { ico, toast, $, $$ } from './ui.js?v=28';
 
 const ler = (k, pad) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sem acesso: a ajuda só não fica guardada */ } };
@@ -46,7 +46,7 @@ document.addEventListener('click', (e) => { if (e.target.closest('[data-acao="en
 
 const PASSOS = [
   ['tipo', 'Escolher o tipo e o visual do restaurante', '#mais/aparencia', () => !!lojaCfg().escolhido],
-  ['logo', 'Pôr o logo e o nome do restaurante', '#mais/marca', () => !!lojaCfg().logo],
+  ['logo', 'Pôr o logo e o nome do restaurante', '#mais/conta', () => !!lojaCfg().logo],
   ['loja', 'Conferir nome, telefone e horários', '#mais/loja'],
   ['prato', 'Cadastrar ou ajustar um prato do cardápio', '#mais/cardapio'],
   ['mesas', 'Conferir as mesas e imprimir os QR', '#mais/mesas'],
@@ -72,11 +72,11 @@ function primeirosPassos(el) {
 // ------------------------------------------------------------------ busca no menu da Gestão
 // palavras que as pessoas usam e que não estão no nome da função
 const PALAVRAS = {
-  marca: 'logo marca nome minha marca topo plano pro', aparencia: 'cor logo visual tema template tipo foto capa', loja: 'endereco telefone whatsapp horario entrega taxa link site online', mesas: 'qr codigo area varanda imprimir mesa',
+  aparencia: 'cor visual tema template tipo estilo', loja: 'endereco telefone whatsapp horario entrega taxa link site online', mesas: 'qr codigo area varanda imprimir mesa',
   ajustes: 'pix chave servico 10% garcom comissao balanca pin senha gerente alerta regra caixa', cardapio: 'prato preco foto produto item esgotado tamanho complemento adicional bebida',
   estoque: 'ingrediente insumo acabou repor minimo falta', relatorios: 'vendas relatorio mais vendidos horario faturamento cancelamento desconto ticket',
   clientes: 'cliente delivery telefone', entregadores: 'motoboy entrega acerto', cupons: 'desconto promocao cupom', funcoes: 'rodizio pizza happy hour turno fidelidade regra',
-  reservas: 'reserva fila espera', equipe: 'garcom funcionario convite cargo permissao usuario cozinheiro', conta: 'assinatura plano sair senha perfil pagamento',
+  reservas: 'reserva fila espera', equipe: 'garcom funcionario convite cargo permissao usuario cozinheiro', conta: 'assinatura plano sair senha perfil pagamento logo marca nome capa foto tutorial ajuda',
   aparelho: 'celular tablet computador papel cozinha caixa garcom', fornecedores: 'fornecedor distribuidora', compras: 'nota compra boleto receber mercadoria chegou',
   contas: 'boleto conta pagar receber vencimento aluguel luz agua despesa', fiado: 'pendura fiado deve', conciliacao: 'maquininha banco cartao bater conferir conciliacao',
   fluxo: 'dinheiro entrada saida', dre: 'lucro prejuizo resultado dre', margens: 'lucro margem custo', preparos: 'receita molho massa', producao: 'pre-preparo',

@@ -1,10 +1,10 @@
 // Popina · o estado do restaurante e as regras (enviar para a cozinha, baixar estoque, fechar conta, caixa).
 // Guarda no aparelho (localStorage) e avisa as outras abas na hora (BroadcastChannel). Na conta real, a mesma
 // interface (window.popinaNuvem) troca isso pela nuvem com tempo real entre os aparelhos.
-import { estadoInicial, estadoVazio } from './dados.js?v=27';
-import { precoTam, nomeItem, opcaoReal, nomeSabores, aplicarCota, aplicarComboEtapas } from './opcoes.js?v=27';
-import { temModulo, modulosAtivos } from './perfis.js?v=27';
-import { valorRodizio, inclusoRodizio, precoAgora, precoFracoes, precoBorda, faltaCombo, faltaConsumacao, ordemEtapa, ymd, precoKg, noTurno, mlDaVenda } from './precos.js?v=27';
+import { estadoInicial, estadoVazio } from './dados.js?v=28';
+import { precoTam, nomeItem, opcaoReal, nomeSabores, aplicarCota, aplicarComboEtapas } from './opcoes.js?v=28';
+import { temModulo, modulosAtivos } from './perfis.js?v=28';
+import { valorRodizio, inclusoRodizio, precoAgora, precoFracoes, precoBorda, faltaCombo, faltaConsumacao, ordemEtapa, ymd, precoKg, noTurno, mlDaVenda } from './precos.js?v=28';
 
 export const CHAVE = 'popina-v1';
 // conta real: conta-nuvem.js (carregado antes) troca a chave pela da empresa e sobe cada alteração para a nuvem
