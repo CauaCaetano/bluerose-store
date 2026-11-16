@@ -1,5 +1,5 @@
 // Popina · peças da interface: ícones, folha que sobe de baixo, aviso rápido, confirmação.
-import { t, pinConfere } from './loja.js?v=20';
+import { t, pinConfere } from './loja.js?v=21';
 export const $ = (s, el = document) => el.querySelector(s);
 export const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 

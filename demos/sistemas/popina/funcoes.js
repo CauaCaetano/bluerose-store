@@ -2,12 +2,12 @@
 // reservas e fila de espera, eventos, encomendas, vitrine do dia, portaria e o painel de retirada das senhas.
 // Cada tela só aparece com a função ligada (Gestão › Aparência e templates).
 import { db, t, din, dinCurto, grava, r2, uid, tempo, lojaCfg, setLoja, tem, comandaDaMesa, abrirMesa, conta, itensValidos, ouvir,
-  abrirCartao, cartaoAberto, proximoCartao, vitrineHoje, prod, couvertLigado, marcar } from './loja.js?v=20';
-import { registrar, acao, ir } from './nucleo.js?v=20';
-import { ico, folha, toast, confirma, bip, $, $$ } from './ui.js?v=20';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=20';
-import { abrirSeletor } from './salao.js?v=20';
-import { TIPOS_RODIZIO, ymd } from './precos.js?v=20';
+  abrirCartao, cartaoAberto, proximoCartao, vitrineHoje, prod, couvertLigado, marcar } from './loja.js?v=21';
+import { registrar, acao, ir } from './nucleo.js?v=21';
+import { ico, folha, toast, confirma, bip, $, $$ } from './ui.js?v=21';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=21';
+import { abrirSeletor } from './salao.js?v=21';
+import { TIPOS_RODIZIO, ymd } from './precos.js?v=21';
 
 const num = (v) => { const s = String(v ?? '').trim(); return Number(/,/.test(s) ? s.replace(/\./g, '').replace(',', '.') : s) || 0; };
 const vir = (n) => String(n ?? '').replace('.', ',');
@@ -42,7 +42,7 @@ TELAS_MAIS.funcoes = () => {
   if (tem('portaria')) s.push(`<section class="bloco-form"><h2>Portaria</h2><label class="campo"><span>Capacidade da casa (pessoas)</span><input name="po_cap" inputmode="numeric" value="${PO.capacidade || ''}" placeholder="Ex.: 300"></label>
     <label class="campo"><span>Tipos de ingresso: um por linha, com preço e consumação mínima. Ex.: Pista | 40 | 30</span><textarea name="po_ing" rows="4" placeholder="Pista | 40 | 30">${t((PO.ingressos || []).map((x) => `${x.nome} | ${vir(x.preco)} | ${vir(x.consumacao || 0)}`).join('\n'))}</textarea></label></section>`);
   if (couvertLigado()) s.push(`<section class="bloco-form"><h2>Couvert</h2><label class="campo"><span>Couvert por pessoa (R$), cobrado na conta da mesa</span><input name="couvert" inputmode="decimal" value="${L.couvert ? vir(L.couvert) : ''}" placeholder="0,00"></label></section>`);
-  return volta('mais', 'Regras das funções', 'Preços e regras das funções ligadas para o seu tipo de casa') + `<form class="form larga" data-funcoes>${s.join('') || '<div class="vazio">Nenhuma função com regras ligada.</div>'}
+  return volta('mais', 'Regras das funções', 'Preços e regras das funções ligadas para o seu tipo de negócio') + `<form class="form larga" data-funcoes>${s.join('') || '<div class="vazio">Nenhuma função com regras ligada.</div>'}
     ${s.length ? '<div class="salvar-fixo"><button class="bt cheio grande">Salvar</button></div>' : ''}</form>`;
 };
 MONTAR.funcoes = (el) => {

@@ -1,18 +1,18 @@
 // Popina · Mais: cardápio (preços, esgotado, ficha técnica), estoque, relatórios, QR das mesas, ajustes e o papel deste aparelho.
 import { db, t, din, dinCurto, prod, insumo, grava, custoPrato, estoqueBaixo, entradaCompra, fmtQtd, r2, uid, linkCardapio, CONTA, saldo, lojaCfg, setLoja, nomeMesa,
-  regras, temPin, auditar, quemAgora, registrarPerda, ajustarEstoque, MOTIVOS_PERDA, consumoVenda, custoVenda } from './loja.js?v=20';
-import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=20';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=20';
+  regras, temPin, auditar, quemAgora, registrarPerda, ajustarEstoque, MOTIVOS_PERDA, consumoVenda, custoVenda } from './loja.js?v=21';
+import { registrar, acao, ir, PAPEIS, papel, setPapel } from './nucleo.js?v=21';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=21';
 import { qrSVG } from '../base/qr.js';
-import { temModulo, modulosAtivos } from './perfis.js?v=20';
-import { ALERGENOS, ETAPAS } from './precos.js?v=20';
+import { temModulo, modulosAtivos } from './perfis.js?v=21';
+import { ALERGENOS, ETAPAS } from './precos.js?v=21';
 
 // cada seção: [id, nome, ícone, detalhe, função da casa que precisa estar ligada (opcional), endereço próprio (opcional)]
 export const GRUPOS = [
   ['Restaurante', [['aparencia', 'Aparência e templates', 'ajustes', 'Template, logo, capa, cores e estilo do cardápio'], ['loja', 'Restaurante e cardápio online', 'salao', 'Contato, horários, entrega e o link'], ['mesas', 'Mesas e QR', 'qr', 'Áreas do salão, número de mesas, QR de cada mesa'], ['ajustes', 'Caixa e regras', 'caixa', 'Pix, serviço, garçons e comissão, balança']]],
   ['Cardápio e estoque', [['cardapio', 'Cardápio', 'cardapio', 'Pratos, tamanhos, complementos, fotos e preços'], ['estoque', 'Estoque', 'estoque', 'O que tem, o que acaba, compras']]],
   ['Vendas e clientes', [['relatorios', 'Relatórios', 'grafico', 'Vendas, garçons, horários, mais vendidos'], ['clientes', 'Clientes', 'pessoas', 'Quem pede no delivery e quanto gasta'], ['entregadores', 'Entregadores', 'moto', 'Quem levou cada pedido e o acerto do dia', 'delivery'], ['cupons', 'Cupons', 'conta', 'Descontos do cardápio online']]],
-  ['Funções da casa', [['funcoes', 'Regras das funções', 'ajustes', 'Rodízio, pizza, happy hour, prato do dia, fidelidade e mais', 'regras'], ['reservas', 'Reservas e fila', 'calendario', 'Reservas por dia e fila de espera na porta', 'reservas'],
+  ['Funções do negócio', [['funcoes', 'Regras das funções', 'ajustes', 'Rodízio, pizza, happy hour, prato do dia, fidelidade e mais', 'regras'], ['reservas', 'Reservas e fila', 'calendario', 'Reservas por dia e fila de espera na porta', 'reservas'],
     ['eventos', 'Eventos', 'coroa', 'Pacote por pessoa, convidados e check-in', 'eventos'], ['encomendas', 'Encomendas', 'calendario', 'Pedidos para outro dia e hora', 'encomendas'], ['vitrine', 'Vitrine do dia', 'loja', 'Quanto foi feito hoje e quanto resta', 'vitrine'],
     ['portaria', 'Portaria', 'pessoas', 'Entrada, consumação mínima e lotação', 'portaria', '#portaria'], ['senhas', 'Painel de retirada', 'telacheia', 'As senhas na TV do balcão', 'senha', '#senhas']]],
   ['Equipe e conta', [['equipe', 'Equipe e convites', 'pessoas', 'Quem usa, cargo e o que cada um vê'], ['conta', 'Minha conta', 'ajustes', 'Perfil, assinatura e sair'], ['aparelho', 'Este aparelho', 'ao_vivo', 'Garçom, cozinha, caixa ou dono']]],
@@ -283,7 +283,7 @@ acao('editar-prod', (b) => {
       ${MD.has('harmonizacao') ? `<label class="campo"><span>Combina com (bebida sugerida)</span><select data-harm><option value="">Nenhuma</option>${db.produtos.filter((x) => x.id !== p.id).sort((a, b) => (a.setor === 'bar' ? 0 : 1) - (b.setor === 'bar' ? 0 : 1)).map((x) => `<option value="${x.id}" ${p.harmoniza === x.id ? 'selected' : ''}>${t(x.nome)}</option>`).join('')}</select></label>` : ''}</div>`);
     if (MD.has('alergenicos')) l.push(`<div class="campo"><span>Alergênicos e dietas</span><div class="chips quebra">${ALERGENOS.map(([k, n, tipo]) => `<label class="chip ${(p.alergenos || []).includes(k) ? 'on' : ''}"><input type="checkbox" data-alg value="${k}" ${(p.alergenos || []).includes(k) ? 'checked' : ''} hidden>${tipo === 'contem' ? 'Contém ' + n.toLowerCase() : n}</label>`).join('')}</div></div>`);
     if (MD.has('porcoesFamilia')) l.push(`<div class="campo"><span>Porções para compartilhar: vire os tamanhos “Para 2” e “Para 4 pessoas”, cada um com o seu preço.</span><button type="button" class="link" data-familia>+ Para 2 e para 4 pessoas</button></div>`);
-    return l.length ? `<section class="bloco-form casa-prato"><h2>Funções da casa</h2>${l.join('')}</section>` : '';
+    return l.length ? `<section class="bloco-form casa-prato"><h2>Funções do negócio</h2>${l.join('')}</section>` : '';
   };
   const linhasTam = () => tams.map((x, k) => `<li><input data-tn="${k}" value="${t(x.nome)}" placeholder="Ex.: Grande" aria-label="Tamanho"><input data-tp="${k}" inputmode="decimal" value="${dec2(x.preco)}" aria-label="Preço do tamanho" placeholder="Preço"><input data-tf="${k}" inputmode="decimal" value="${vir(x.fator ?? 1)}" aria-label="Quanto gasta da ficha (1 = inteira)" title="Quanto gasta da ficha técnica: 1 = inteira, 0,5 = metade"><button type="button" class="bt-ico" data-ttira="${k}" aria-label="Tirar tamanho">${ico('lixo')}</button></li>`).join('');
   const blocosGrupo = () => grupos.map((g, k) => `<div class="grupo-ed" data-g="${k}"><div class="grupo-cab"><input data-gn value="${t(g.nome)}" placeholder="Ex.: Ponto da carne, Borda, Molhos" aria-label="Nome do grupo">
@@ -384,7 +384,7 @@ acao('editar-prod', (b) => {
 });
 acao('cardapio-exemplo', async () => {
   if (!(await confirma('Carregar os 22 pratos de exemplo, com fotos e fichas técnicas? Depois é só trocar nomes e preços e apagar o que não serve.', 'Carregar'))) return;
-  const { cardapioExemplo } = await import('./dados.js?v=20'); const ex = cardapioExemplo();
+  const { cardapioExemplo } = await import('./dados.js?v=21'); const ex = cardapioExemplo();
   db.produtos.push(...ex.produtos.filter((p) => !prod(p.id))); ex.insumos.forEach((i) => { if (!insumo(i.id)) db.insumos.push(i); });
   grava(); toast('Cardápio de exemplo carregado');
 });
@@ -520,7 +520,7 @@ acao('imprimir-qr', () => {
   w.document.close();
 });
 acao('papel', (b) => { setPapel(b.dataset.p); toast(`Este aparelho agora é: ${PAPEIS[b.dataset.p][0]}`); ir(PAPEIS[b.dataset.p][1]); });
-acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=20'); recomecar(); ir('salao'); } });
+acao('recomecar', async () => { if (await confirma('Apagar tudo e voltar aos dados de exemplo?', 'Recomeçar', true)) { const { recomecar } = await import('./loja.js?v=21'); recomecar(); ir('salao'); } });
 
 acao('ordem', (b) => {
   const p = prod(b.dataset.p), l = db.produtos.filter((x) => x.cat === p.cat), k = l.indexOf(p), alvo = l[k + Number(b.dataset.d)]; if (!alvo) return;

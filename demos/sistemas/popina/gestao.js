@@ -1,14 +1,14 @@
 // Popina · gestão do restaurante (PC e celular): a cara e as regras do cardápio online, mesas e áreas, clientes,
 // entregadores, cupons, equipe com convites e permissões, e a conta (perfil, assinatura, sair).
-import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=20';
-import { acao, ir } from './nucleo.js?v=20';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=20';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=20';
-import { situacao, textoHorarios } from './opcoes.js?v=20';
+import { db, t, din, dinCurto, grava, r2, uid, CONTA, ESPACO, lojaCfg, setLoja, linkCardapio, acertoEntregadores, couvertLigado, tem, fidelidade, darPremio } from './loja.js?v=21';
+import { acao, ir } from './nucleo.js?v=21';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=21';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=21';
+import { situacao, textoHorarios } from './opcoes.js?v=21';
 import { qrSVG } from '../base/qr.js';
-import { abrirEscolha } from './escolha.js?v=20';
-import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=20';
-import './funcoes.js?v=20';
+import { abrirEscolha } from './escolha.js?v=21';
+import { MODULOS, PERFIS, modulosAtivos } from './perfis.js?v=21';
+import './funcoes.js?v=21';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const CORES = ['#B4532F', '#8C2F39', '#5F6B2B', '#2F5D50', '#1F4E79', '#3B2A22', '#C27C0E', '#6B3FA0', '#D1495B', '#111111'];
@@ -84,10 +84,10 @@ TELAS_MAIS.aparencia = () => {
   const L = lojaCfg(), c = db.config, tpl = L.template || 'basico';
   return volta('mais', 'Aparência e templates', 'A cara do sistema da equipe e do cardápio do cliente') + `
   <form class="form larga" data-loja>
-    <section class="bloco-form"><h2>Template do sistema</h2><p class="mudo">Muda o visual das telas e do cardápio do cliente <b>e as funções</b> de cada tipo de casa. Toque num template para ver as fotos e o que vem nele antes de trocar; nada do que você cadastrou se perde.</p>
+    <section class="bloco-form"><h2>Template do sistema</h2><p class="mudo">Muda o visual das telas e do cardápio do cliente <b>e as funções</b> de cada tipo de negócio. Toque num template para ver as fotos e o que vem nele antes de trocar; nada do que você cadastrou se perde.</p>
       <div class="tpls">${TEMPLATES.map(([k, n, d]) => `<button type="button" class="tpl ${tpl === k ? 'on' : ''}" data-tpl="${k}"><img src="img/tpl-${k}.webp?v=1" alt="" width="480" height="300" loading="lazy"><b>${n}${tpl === k ? ' <em>em uso</em>' : ''}</b><small>${d}</small></button>`).join('')}</div>
     </section>
-    <section class="bloco-form"><h2>Funções da casa</h2><p class="mudo">O template ${PERFIS[tpl] ? `<b>${PERFIS[tpl].tipo}</b>` : ''} já liga as funções certas para o seu tipo de casa. Ligue ou desligue as que quiser; isso não muda o visual.</p>
+    <section class="bloco-form"><h2>Funções do negócio</h2><p class="mudo">O template ${PERFIS[tpl] ? `<b>${PERFIS[tpl].tipo}</b>` : ''} já liga as funções certas para o seu tipo de negócio. Ligue ou desligue as que quiser; isso não muda o visual.</p>
       <ul class="mods-casa">${Object.entries(MODULOS).map(([k, [n, d]]) => `<li><label><input type="checkbox" data-mod="${k}" ${modulosAtivos(L).has(k) ? 'checked' : ''}><span><b>${n}</b><small>${d}</small></span></label></li>`).join('')}</ul>
     </section>
     <section class="bloco-form"><h2>Identidade</h2>

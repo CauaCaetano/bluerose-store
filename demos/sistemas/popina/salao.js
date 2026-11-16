@@ -1,13 +1,13 @@
 // Popina · salão do garçom: a fila do que fazer agora (conceito C escolhido pelo dono) + as mesas, e a comanda da mesa.
 import { db, t, din, dinCurto, tempo, minutos, prod, comanda, comandaDaMesa, fila, estadoMesa, conta, valorItem, abrirMesa, adicionarItem, enviar,
   mudarStatus, cancelarItem, atenderChamado, confirmarQR, recusarQR, transferir, grava, itensValidos, lojaCfg,
-  temCouvert, juntarMesas, transferirItens, marcar, quemAgora, temPin, vendaDeHoje, tem, ondeComanda, couvertLigado, abrirCartao, cartaoAberto, proximoCartao, proximaEtapa, restaVitrine } from './loja.js?v=20';
-import { registrar, acao, ir } from './nucleo.js?v=20';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=20';
-import { OBS_RAPIDAS } from './dados.js?v=20';
-import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=20';
-import { modulosAtivos } from './perfis.js?v=20';
-import { TIPOS_RODIZIO, valorRodizio, pessoasRodizio, inclusoRodizio, cabeNaRodada, precoAgora, precoFracoes, ETAPAS, ordemEtapa, ALERGENOS, ymd } from './precos.js?v=20';
+  temCouvert, juntarMesas, transferirItens, marcar, quemAgora, temPin, vendaDeHoje, tem, ondeComanda, couvertLigado, abrirCartao, cartaoAberto, proximoCartao, proximaEtapa, restaVitrine } from './loja.js?v=21';
+import { registrar, acao, ir } from './nucleo.js?v=21';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=21';
+import { OBS_RAPIDAS } from './dados.js?v=21';
+import { formOpcoes, aPartir, nomeItem, precoTam, rotAdic } from './opcoes.js?v=21';
+import { modulosAtivos } from './perfis.js?v=21';
+import { TIPOS_RODIZIO, valorRodizio, pessoasRodizio, inclusoRodizio, cabeNaRodada, precoAgora, precoFracoes, ETAPAS, ordemEtapa, ALERGENOS, ymd } from './precos.js?v=21';
 
 // a tela do salão segue o conceito do GPT aprovado pelo dono (relatorios/popina/conceitos-gpt/1-salao-pc.png)
 const ROTULO = { conta: 'Levar a conta', chamou: 'Mesa chamou', pronto: 'Prato pronto', qr: 'Pedido pelo QR' };

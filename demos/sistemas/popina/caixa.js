@@ -1,11 +1,11 @@
 // Popina · caixa: contas abertas, fechar conta (serviço, desconto, dividir, pagar em partes), Pix com QR e o caixa do dia.
 import { db, t, din, dinCurto, tempo, comanda, conta, valorItem, itensValidos, pagar, fechar, partes, novoPedido, venderDireto, caixaResumo, abrirCaixa, movimento, fecharCaixa, grava, r2,
-  temCouvert, lojaCfg, marcar, darDesconto, regras, temPin, quemAgora, cancelarVenda, reabrirVenda, vendaDeHoje, ondeComanda, couvertLigado, tem, fidelidade, clientePorTel, darPremio } from './loja.js?v=20';
-import { registrar, acao, ir } from './nucleo.js?v=20';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=20';
-import { pix } from './pix.js?v=20';
+  temCouvert, lojaCfg, marcar, darDesconto, regras, temPin, quemAgora, cancelarVenda, reabrirVenda, vendaDeHoje, ondeComanda, couvertLigado, tem, fidelidade, clientePorTel, darPremio } from './loja.js?v=21';
+import { registrar, acao, ir } from './nucleo.js?v=21';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=21';
+import { pix } from './pix.js?v=21';
 import { qrSVG } from '../base/qr.js';
-import { linhaItem, abrirSeletor } from './salao.js?v=20';
+import { linhaItem, abrirSeletor } from './salao.js?v=21';
 
 const FORMAS = [['Dinheiro', 'dinheiro'], ['Pix', 'pix'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao']];
 const ONDE = (c) => ondeComanda(c);

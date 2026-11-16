@@ -1,8 +1,8 @@
 // Popina · escolha do template (tipo de casa): na primeira entrada e ao trocar em Gestão › Aparência.
 // Lista os 14 tipos; ao tocar num, mostra fotos reais (carrossel), as funções que vêm nele, "Usar este template" e "Voltar".
-import { PERFIS, MODULOS, diferenca } from './perfis.js?v=20';
-import { lojaCfg, setLoja } from './loja.js?v=20';
-import { ico, toast } from './ui.js?v=20';
+import { PERFIS, MODULOS, diferenca } from './perfis.js?v=21';
+import { lojaCfg, setLoja } from './loja.js?v=21';
+import { ico, toast } from './ui.js?v=21';
 
 export const TIPOS = [['basico', 'Básico'], ['taverna', 'Taverna'], ['luxo', 'Luxo'], ['realeza', 'Realeza'], ['japones', 'Japonês'], ['italiano', 'Italiano'], ['churrascaria', 'Churrascaria'],
   ['mexicano', 'Mexicano'], ['pizzaria', 'Pizzaria'], ['hamburgueria', 'Hamburgueria'], ['pub', 'Bar e pub'], ['chines', 'Chinês'], ['balada', 'Balada'], ['cafeteria', 'Cafeteria']];
@@ -79,7 +79,7 @@ export function abrirEscolha({ primeira = false, abrir = '', aoFechar } = {}) {
 
   function lista() {
     el.innerHTML = `<div class="esc-in"><div class="esc-topo"><div>
-      <h1>${primeira ? 'Qual é o tipo da sua casa?' : 'Trocar o template'}</h1>
+      <h1>${primeira ? 'Qual é o tipo do seu negócio?' : 'Trocar o template'}</h1>
       <p class="esc-sub">Cada template muda o visual do sistema e do cardápio <b>e as funções</b>: rodízio na churrascaria, senha de balcão na cafeteria, portaria na balada. Toque num deles para ver as fotos e tudo o que vem nele. Dá para trocar depois em Gestão › Aparência.</p></div>
       ${primeira ? '' : `<button type="button" class="esc-volta" data-fechar>${ico('chevron')}Voltar</button>`}</div>
       <div class="esc-grade">${TIPOS.map(([k, n]) => `<button type="button" class="esc-card" data-k="${k}">
