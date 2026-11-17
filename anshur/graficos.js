@@ -6,7 +6,7 @@
     const L = largura, H = altura, pe = 34, pd = 12, ps = 14, pi = 28;
     // escala com folga dos dois lados; funciona com valores negativos e com todos iguais
     const ys = pontos.map((p) => p.v), lo = Math.min(...ys), hi = Math.max(...ys), folga = (hi - lo) * 0.12 || Math.abs(hi) * 0.1 || 1;
-    const min = lo - folga, max = hi + folga * 1.6;
+    const min = lo >= 0 ? Math.max(0, lo - folga) : lo - folga, max = hi + folga * 1.6; // valores que nunca são negativos não ganham eixo negativo
     const x = (i) => pe + (i / Math.max(1, pontos.length - 1)) * (L - pe - pd);
     const y = (v) => ps + (1 - (v - min) / (max - min || 1)) * (H - ps - pi);
     const d = pontos.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(p.v).toFixed(1)}`).join(' ');

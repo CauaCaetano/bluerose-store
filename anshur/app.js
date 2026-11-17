@@ -181,8 +181,9 @@
 
   function infoPatio(t) {
     const dias = diasDesde(t.entrada), r = recHoje(t), custo = C.custo(t);
-    const venda = r ? r.venda : t.anuncio;
-    const margem = C.margemProjetada(venda, custo);
+    // sem vendas suficientes para estimar e sem preço anunciado: venda e margem ficam desconhecidas ("—"), nunca zero
+    const venda = r ? r.venda : (t.anuncio > 0 ? t.anuncio : NaN);
+    const margem = isFinite(venda) ? C.margemProjetada(venda, custo) : NaN;
     const faixa = C.faixaIdade(dias);
     const juros = C.custoFinanceiro(t, dias);
     let acao = 'Acompanhar';
@@ -243,7 +244,8 @@
     const itens = C.patio().map(infoPatio);
     const vendidas = C.vendidas();
     const capital = itens.reduce((s, i) => s + i.t.pago, 0);
-    const resultadoEst = itens.reduce((s, i) => s + i.venda - i.custo, 0);
+    const comEst = itens.filter((i) => isFinite(i.venda)), semEst = itens.length - comEst.length;
+    const resultadoEst = comEst.length ? comEst.reduce((s, i) => s + i.venda - i.custo, 0) : NaN;
     const margemReal = vendidas.reduce((s, t) => s + C.margem(t), 0) / Math.max(1, vendidas.length);
     const velhos = itens.filter((i) => i.dias > 90);
     const capVelho = velhos.reduce((s, i) => s + i.t.pago, 0);
@@ -281,7 +283,7 @@
       <div class="kpis escalonado">
         <a class="kpi k-marfim" href="#patio"><span class="rot">${ICO.moedas}Capital imobilizado</span><span class="val">${conta(capital, 'mil')}</span><span class="exp">Pago nas ${itens.length} máquinas do pátio</span></a>
         <a class="kpi k-salvia" href="#trocas"><span class="rot">${ICO.pct}Margem média realizada</span><span class="val">${conta(margemReal, 'pct')}</span><span class="exp">Nas ${vendidas.length} trocas vendidas</span></a>
-        <a class="kpi k-marfim" href="#trocas"><span class="rot">${ICO.barras}Resultado bruto do estoque</span><span class="val">${conta(resultadoEst, 'mil')}</span><span class="exp">Estimativa, não lucro garantido</span></a>
+        <a class="kpi k-marfim" href="#trocas"><span class="rot">${ICO.barras}Resultado bruto do estoque</span><span class="val">${isFinite(resultadoEst) ? conta(resultadoEst, 'mil') : '—'}</span><span class="exp">${!comEst.length ? 'Sem base para estimar: faltam vendas registradas' : semEst ? `Estimativa de ${comEst.length} de ${itens.length} máquinas (as outras ainda sem base)` : 'Estimativa, não lucro garantido'}</span></a>
         <a class="kpi k-risco" href="#patio" id="kpi-90"><span class="rot">${ICO.alerta}Acima de 90 dias</span><span class="val">${conta(velhos.length, 'int')} ${velhos.length === 1 ? 'máquina' : 'máquinas'}</span><span class="pilula">${mil(capVelho)}</span></a>
       </div>
       <p class="conta" style="margin:-4px 0 16px">Custo financeiro estimado do estoque: <b>${mil(custoCap)}</b> até hoje (${pct(K.cfg.jurosMes)} ao mês sobre ${K.cfg.baseJuros === 'total' ? 'valor pago + preparação' : 'o valor pago'}, proporcional aos dias de cada máquina). É custo de oportunidade, não prejuízo realizado. <button class="link" type="button" id="premissas-v2">Alterar premissa</button></p>
@@ -308,6 +310,8 @@
   const anoAtual = new Date().getFullYear();
   const av = { passo: 1, tipo: 'trator', marca: 'Massey Ferguson', modelo: 'MF 4709', ano: anoAtual - 5, horas: 3900, local: 'Orlândia, SP', obs: '',
     ficha: { motor: 4, transmissao: 4, hidraulico: 3, pneus: 2, cabine: 4, lataria: 3 }, fotos: [], verif: { horimetro: false, notas: false, chassi: false }, declarado: '', fipe: '', anuncios: ['', '', ''], ia: null };
+  // no ambiente real a avaliação começa em branco (o exemplo preenchido é só da demonstração)
+  if (K.ambiente === 'op') Object.assign(av, { marca: null, modelo: null, horas: 0, local: '' });
   const AV0 = JSON.parse(JSON.stringify(av));
   const chaveRascunho = () => (NV ? `anshur-rascunho:${NV.revenda.id}:${NV.usuario.id}` : 'anshur-rascunho-' + K.ambiente);
   let rascunhoDe = null, rascunhoTimer = null;
@@ -758,7 +762,7 @@
     const todos = C.patio().map(infoPatio);
     const q = (fp.busca || '').toLowerCase();
     let itens = todos.filter((i) => (!q || [i.t.marca, i.t.modelo, i.t.chassi, i.t.vendedor, i.t.loja].join(' ').toLowerCase().includes(q)) && (!fp.tipo || i.t.tipo === fp.tipo) && (!fp.marca || i.t.marca === fp.marca) && (!fp.idade || i.faixa === fp.idade));
-    const ord = { risco: (a, b) => b.risco - a.risco, capital: (a, b) => b.t.pago - a.t.pago, dias: (a, b) => b.dias - a.dias, margem: (a, b) => a.margem - b.margem };
+    const ord = { risco: (a, b) => b.risco - a.risco, capital: (a, b) => b.t.pago - a.t.pago, dias: (a, b) => b.dias - a.dias, margem: (a, b) => (isFinite(a.margem) ? a.margem : 9) - (isFinite(b.margem) ? b.margem : 9) };
     itens.sort(ord[fp.ordem]);
     const cap = itens.reduce((s, i) => s + i.t.pago, 0), velhos = itens.filter((i) => i.dias > 90);
     const marcas = [...new Set(todos.map((i) => i.t.marca))].sort();

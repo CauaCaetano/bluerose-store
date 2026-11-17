@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=34">
+<link rel="stylesheet" href="estilo.css?v=35">
 </head>
 <body>
 <a class="pular" href="#tela">Ir para o conteúdo</a>
@@ -81,12 +81,12 @@
 <div class="folha" id="menu-folha" role="dialog" aria-modal="true" aria-label="Mais opções" hidden></div>
 <div id="camada"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<script src="instalar.js?v=34"></script>
-<script src="areas.js?v=34"></script>
-<script src="dados.js?v=34"></script>
-<script src="fotos.js?v=34"></script>
+<script src="instalar.js?v=35"></script>
+<script src="areas.js?v=35"></script>
+<script src="dados.js?v=35"></script>
+<script src="fotos.js?v=35"></script>
 <!-- nuvem.js: na demonstração carrega o app na hora; no ambiente real, entra na conta e carrega os dados do servidor antes -->
-<script src="nuvem.js?v=34" data-app="comum.js?v=34 importar.js?v=34 dms.js?v=34 implantacao.js?v=34 motor.js?v=34 mercado.js?v=34 retencao.js?v=34 graficos.js?v=34 areas/nucleo.js?v=34 areas/importar.js?v=34 areas/novas-regras.js?v=34 areas/novas.js?v=34 areas/financeiro-regras.js?v=34 areas/financeiro.js?v=34 areas/pecas-regras.js?v=34 areas/oficina-regras.js?v=34 areas/oficina.js?v=34 areas/pecas.js?v=34 areas/crm-regras.js?v=34 areas/crm.js?v=34 areas/fiscal-regras.js?v=34 areas/fiscal.js?v=34 app.js?v=34"></script>
+<script src="nuvem.js?v=35" data-app="comum.js?v=35 importar.js?v=35 dms.js?v=35 implantacao.js?v=35 motor.js?v=35 mercado.js?v=35 retencao.js?v=35 graficos.js?v=35 areas/nucleo.js?v=35 areas/importar.js?v=35 areas/novas-regras.js?v=35 areas/novas.js?v=35 areas/financeiro-regras.js?v=35 areas/financeiro.js?v=35 areas/pecas-regras.js?v=35 areas/oficina-regras.js?v=35 areas/oficina.js?v=35 areas/pecas.js?v=35 areas/crm-regras.js?v=35 areas/crm.js?v=35 areas/fiscal-regras.js?v=35 areas/fiscal.js?v=35 app.js?v=35"></script>
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch(() => {}); const tinha = !!navigator.serviceWorker.controller; let novo = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinha) { if (!novo) { novo = true; location.reload(); } return; } performance.getEntriesByType('resource').forEach((r) => { if (/^https:\/\/(cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com)\//.test(r.name)) fetch(r.name, { mode: 'cors', credentials: 'omit' }).catch(() => {}); }); }); }</script>
 </body>
 </html>

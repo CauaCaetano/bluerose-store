@@ -64,6 +64,9 @@
   A.margemAlvo = cfg.margemAlvo;
 
   if (ambiente === 'op') {
+    // o catálogo da demonstração (dados.js) tem preços de referência INVENTADOS: no ambiente real ele não entra.
+    // Aqui só ficam modelos da própria revenda (planilha com Fipe, Configurações ou o modelo novo do Avaliar troca).
+    A.modelos = [];
     A.revenda = N ? { nome: estado.nomeRevenda || N.revenda.nome, cidade: estado.cidadeRevenda || N.revenda.cidade || 'dados reais', aviso: 'Dados da sua revenda, guardados na conta da revenda' }
       : { nome: estado.nomeRevenda || 'Minha revenda', cidade: estado.cidadeRevenda || 'dados reais', aviso: 'Dados da sua revenda, guardados só neste navegador' };
     A.trocas = (estado.historico || []).map((t) => ({ ...t })).concat(estado.fechadas.map((t) => ({ ...t })));
@@ -174,8 +177,11 @@
   }
 
   // ---------- formatação ----------
-  const real = (v) => (v < 0 ? '−' : '') + 'R$ ' + Math.abs(Math.round(v)).toLocaleString('pt-BR');
+  // valor desconhecido (sem estimativa) aparece como "—", nunca como R$ 0
+  const semValor = (v) => v == null || (typeof v === 'number' && !isFinite(v));
+  const real = (v) => (semValor(v) ? '—' : (v < 0 ? '−' : '') + 'R$ ' + Math.abs(Math.round(v)).toLocaleString('pt-BR'));
   const mil = (v) => {
+    if (semValor(v)) return '—';
     const s = v < 0 ? '−' : '', a = Math.abs(v);
     if (a >= 1e6) return s + 'R$ ' + (a / 1e6).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' mi';
     return s + 'R$ ' + Math.round(a / 1000).toLocaleString('pt-BR') + ' mil';
