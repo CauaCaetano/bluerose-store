@@ -7,11 +7,11 @@
   // celular: cada linha de tabela vira um cartão (o CSS usa o nome da coluna guardado em data-rot)
   const rotularTabelas = () => $$('table', tela).forEach((t) => {
     const ths = $$('thead th', t).map((th) => th.textContent.trim()); if (!ths.length) return;
-    $$('tbody tr, tfoot tr', t).forEach((tr) => { let i = 0; [...tr.children].forEach((td) => { if (!td.hasAttribute('data-rot')) td.setAttribute('data-rot', ths[i] || ''); i += td.colSpan || 1; }); });
+    $$('tbody tr, tfoot tr', t).forEach((tr) => { let i = 0; [...tr.children].forEach((td) => { if (!td.hasAttribute('data-rot')) { td.setAttribute('data-rot', ths[i] || ''); if (/e-?mail|emitente|descri|observa|endere/i.test(ths[i] || '') || /@/.test(td.textContent)) td.classList.add('larga'); } i += td.colSpan || 1; }); });
     t.classList.add('tab-cartao');
   });
   let rotPend = false;
-  new MutationObserver(() => { if (rotPend) return; rotPend = true; requestAnimationFrame(() => { rotPend = false; rotularTabelas(); }); }).observe(tela, { childList: true, subtree: true });
+  new MutationObserver(() => { if (rotPend) return; rotPend = true; requestAnimationFrame(() => { rotPend = false; rotularTabelas(); $$('.titulo .btn-linha', tela).forEach((b) => { if (b.scrollWidth > b.clientWidth + 1) b.classList.add('cheia'); }); }); }).observe(tela, { childList: true, subtree: true });
 
   // ---------- cabeçalho ----------
   $('#marca').innerHTML = '<img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="216" height="54">';

@@ -1802,3 +1802,29 @@ body[data-modo] #menu { display: none !important; }
   .demo-fita { gap: 4px !important; padding: 6px 8px !important; }
   .demo-fita a { padding: 0 11px !important; }
 }
+@media (max-width: 600px) {
+  /* e-mail e textos longos ocupam a linha inteira do cartão */
+  table.tab-cartao td.larga { grid-column: 1 / -1; overflow-wrap: anywhere; }
+  /* botão principal da área vira "+" ao lado do nome, sem empurrar o título para baixo */
+  .area-cab-linha { flex-wrap: nowrap !important; align-items: center; }
+  .area-cab .cab-nova { flex: none; width: 44px; min-width: 44px; height: 44px; min-height: 44px; padding: 0 !important; justify-content: center; margin-left: auto; border-radius: 12px; }
+  .area-cab .cab-nova span { display: none !important; }
+  /* ações do topo: a principal na linha toda, as outras lado a lado */
+  .titulo .acoes { display: flex; flex-wrap: wrap; width: 100%; }
+  .titulo .acoes > .btn-ouro, .titulo .acoes > .add-wrap:has(> .btn-ouro) { flex: 1 1 100%; order: -1; justify-content: center; }
+  .titulo .acoes > .add-wrap:has(> .btn-ouro) > .btn, .titulo .acoes > .add-wrap > .btn-linha { width: 100%; justify-content: center; }
+  .titulo .acoes > .add-wrap:has(> .btn-linha) { flex: 1 1 calc(50% - 4px); }
+  .titulo .acoes > .btn-linha { flex: 1 1 calc(50% - 4px); justify-content: center; }
+  /* abas de filtro: sombra na ponta indica que dá para rolar */
+  .abas-modo { -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent); mask-image: linear-gradient(90deg, #000 86%, transparent); padding-right: 24px; }
+}
+@media (max-width: 600px) {
+  .titulo .fin-acoes { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+  .titulo .fin-acoes > .btn-ouro { flex: 1 1 100%; order: -1; justify-content: center; }
+  .titulo .fin-acoes > .btn-linha { flex: 1 1 calc(50% - 4px); justify-content: center; min-height: 42px; padding: 0 10px; font-size: 14.5px; }
+}
+@media (max-width: 600px) {
+  .titulo .fin-acoes > .btn-linha, .titulo .acoes > .btn-linha { white-space: nowrap; font-size: 13.5px; padding: 0 8px; gap: 6px; }
+  .titulo .fin-acoes > .btn-linha svg, .titulo .acoes > .btn-linha svg { width: 17px; height: 17px; flex: none; }
+}
+@media (max-width: 600px) { .titulo .btn-linha.cheia { flex-basis: 100% !important; } }
