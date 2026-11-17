@@ -27,8 +27,30 @@
   // textos v2 aprovados pelo dono em 17/11/2026 (prospeccao-mensagens-v2-para-aprovar.md): benefícios, um pedido só
   function linkTeste(p) { return SITE + 'anshur/teste-as-cegas.html?p=' + p.codigo; }
   // Trutina (conferência de safra): textos aguardando a aprovação do dono no painel (botão "Textos aprovados" da aba Trutina)
+  // associação, sindicato ou cooperativa: proposta de parceria para os associados, não venda direta
+  function mensagemParceiro(p, acao, l, e) {
+    if (acao === 'retomada1') return [
+      'Olá! Retomando a mensagem sobre a conferência das cargas para os associados.',
+      'Uma conta simples: numa entrega de 20 mil sacas, R$ 0,50 a menos por saca no desconto ou no preço são R$ 10 mil. Na cana, um ponto de ATR mal apurado em todas as cargas pesa da mesma forma.',
+      'Para a ' + e + ' não tem custo nenhum: cada associado confere as 20 primeiras cargas de graça, e a entidade oferece isso como um benefício a mais.',
+      'Como funciona: ' + l,
+      'Se não for o momento, me avisa e eu paro por aqui.'].join('\n\n');
+    if (acao === 'retomada2') return [
+      'Olá! Última mensagem para não incomodar.',
+      'Se fizer sentido oferecer aos associados: eles mandam o contrato, os romaneios ou tickets e a liquidação (foto ou PDF) e recebem em poucas horas as diferenças de peso, descontos, ATR, preço e valor, carga por carga.',
+      'As 20 primeiras cargas de cada associado são grátis e não há custo para a entidade. Detalhes: ' + l,
+      'Obrigado pela atenção!\nBlue Rose Express'].join('\n\n');
+    return ['Olá, tudo bem?',
+      'Sou da Blue Rose Express, de Orlândia. Escrevo para a ' + e + ' porque temos um serviço que pode ser um benefício para os associados.',
+      'Quando a safra é entregue, quase nenhum produtor confere carga por carga se o peso, os descontos de umidade e impureza, o ATR, o preço e o valor pago batem com o contrato. Uma diferença pequena por carga vira muito dinheiro no fim da safra.',
+      'A gente faz essa conferência: o produtor manda o contrato, os romaneios e a liquidação (foto ou PDF) e recebe em poucas horas as diferenças em reais, com a mensagem pronta para cobrar o armazém ou a usina.',
+      'Para o associado, as *20 primeiras cargas são grátis*. Para a entidade, não há custo nenhum. Basta divulgar, se achar que vale.',
+      'Como funciona: ' + l,
+      'Se não fizer sentido, é só me avisar que não mando mais mensagem.'].join('\n\n');
+  }
   function mensagemSafra(p, acao) {
-    var l = link(p), e = p.empresa;
+    var l = link(p), e = String(p.empresa || '').split(' - ')[0].split(' (')[0];
+    if (/^Tipo: parceiro/.test(p.notas || '')) return mensagemParceiro(p, acao, l, e);
     if (acao === 'retomada1') return [
       'Olá! Retomando a mensagem sobre a conferência da safra.',
       'Uma conta simples: numa entrega de 20 mil sacas, R$ 0,50 a menos por saca no desconto ou no preço são R$ 10 mil que ficaram no armazém. É esse tipo de diferença que a gente acha, carga por carga.',
