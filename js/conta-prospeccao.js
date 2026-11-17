@@ -7,6 +7,7 @@
   var esc = C.esc, cliente = null, D = null, aba = 'hoje', sel = null, filtro = { q: '', faixa: '', uf: '', etapa: '' };
   var SITE = 'https://bluerose-store.com/';
   var CELULAR = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent || '');
+  var ZAP = (function () { try { return localStorage.getItem('br-prosp-zap') === 'web' ? 'web' : 'app'; } catch (e) { return 'app'; } })();
   // uma aba por produto: cada um com a sua fila, os seus limites e a sua aprovação de textos
   // Trutina saiu da prospecção em 17/11 (dados ficam no banco); 17/11: uma aba para cada sistema à venda no site
   var PRODUTOS = {
@@ -174,6 +175,9 @@
       else if (!ap) botao = '<button type="button" class="btn btn-primary pp-zap" disabled title="Marque “Textos aprovados” no topo do painel">Abrir WhatsApp com a mensagem</button>';
       // no computador abre sempre na MESMA aba do WhatsApp Web (janela "br-whatsapp"), sem abrir o app nem uma aba nova a cada cliente;
       // no celular segue pelo wa.me (abre o app). O envio continua sendo do dono: a mensagem chega pronta e ele aperta Enter.
+      // no computador, "app" usa o WhatsApp instalado (whatsapp://): ele já está aberto e só troca de conversa, sem recarregar nem abrir aba
+      else if (!CELULAR && ZAP === 'app') botao = '<a class="btn btn-primary pp-zap" data-enviar="' + p.id + '" data-acao="' + acao + '" href="whatsapp://send?phone=' +
+        esc(p.whatsapp) + '&text=' + encodeURIComponent(msg) + '">Mandar pelo WhatsApp do computador</a>';
       else botao = '<a class="btn btn-primary pp-zap" data-enviar="' + p.id + '" data-acao="' + acao + '" target="' + (CELULAR ? '_blank' : 'br-whatsapp') + '" rel="noreferrer" href="' +
         (CELULAR ? 'https://wa.me/' + esc(p.whatsapp) + '?text=' : 'https://web.whatsapp.com/send?phone=' + esc(p.whatsapp) + '&text=') + encodeURIComponent(msg) + '">' +
         (CELULAR ? 'Abrir WhatsApp com a mensagem' : 'Mandar pelo WhatsApp Web') + '</a>';
@@ -291,7 +295,10 @@
         ? '<p><b>Textos aprovados</b> em ' + dia(c.aprovado_em) + '. O botão de abrir o WhatsApp está ligado.</p><button type="button" class="btn btn-ghost" data-aprovar="0">Desfazer a aprovação</button>'
         : '<p><b>Textos ainda não aprovados.</b> Leia as mensagens nos cartões; enquanto não aprovar, o botão de abrir o WhatsApp fica desligado.</p><button type="button" class="btn btn-primary" data-aprovar="1">Textos aprovados</button>') +
       '<form class="pp-limites" id="pp-limites"><label>Novos por dia<input name="n" type="number" min="0" max="50" value="' + c.limite_novos + '"></label>' +
-      '<label>Retomadas por dia<input name="r" type="number" min="0" max="50" value="' + c.limite_retomadas + '"></label><button class="btn btn-ghost">Salvar limites</button><span role="status"></span></form></div>' +
+      '<label>Retomadas por dia<input name="r" type="number" min="0" max="50" value="' + c.limite_retomadas + '"></label><button class="btn btn-ghost">Salvar limites</button><span role="status"></span></form>' +
+      (CELULAR ? '' : '<p class="pp-zap-escolha">Mandar pelo: <button type="button" class="btn ' + (ZAP === 'app' ? 'btn-primary' : 'btn-ghost') + '" data-zap="app" aria-pressed="' + (ZAP === 'app') + '">WhatsApp do computador</button> ' +
+        '<button type="button" class="btn ' + (ZAP === 'web' ? 'btn-primary' : 'btn-ghost') + '" data-zap="web" aria-pressed="' + (ZAP === 'web') + '">WhatsApp Web</button> ' +
+        '<small>' + (ZAP === 'app' ? 'Usa o aplicativo do WhatsApp instalado no computador: ele só troca de conversa, sem recarregar. Na primeira vez o navegador pergunta se pode abrir o WhatsApp; marque "sempre permitir".' : 'Abre sempre a mesma aba do WhatsApp Web, mas ela recarrega a cada contato.') + '</small></p>') + '</div>' +
       '<div class="pd-filtros" role="tablist" aria-label="Partes da prospecção">' + abas.map(function (a) {
         return '<button type="button" role="tab" class="pd-filtro' + (aba === a[0] ? ' on' : '') + '" data-aba="' + a[0] + '" aria-selected="' + (aba === a[0]) + '">' + esc(a[1]) + '</button>';
       }).join('') + '</div><div id="pp-corpo">' + ({ hoje: telaHoje, quadro: telaQuadro, numeros: telaNumeros, todas: telaTodas, fundadores: telaFundadores }[aba])() + '</div>';
@@ -304,8 +311,9 @@
   function status(el, t) { var s = el && el.closest('.pp-cartao'); s = s && s.querySelector('.pp-status'); if (s) s.textContent = t; }
 
   bloco.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-produto],[data-aba],[data-ver],[data-etapa],[data-enviar],[data-aprovar]');
+    var t = e.target.closest('[data-produto],[data-aba],[data-ver],[data-etapa],[data-enviar],[data-aprovar],[data-zap]');
     if (!t) return;
+    if (t.dataset.zap) { ZAP = t.dataset.zap; try { localStorage.setItem('br-prosp-zap', ZAP); } catch (er) { /* sem armazenamento */ } desenhar(); return; }
     if (t.dataset.produto) {
       produto = t.dataset.produto; aba = 'hoje'; sel = null; filtro = { q: '', faixa: '', uf: '', etapa: '' };
       try { localStorage.setItem('br-prosp-produto', produto); } catch (er) { /* sem armazenamento */ }
