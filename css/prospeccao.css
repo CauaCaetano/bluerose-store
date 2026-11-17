@@ -32,6 +32,10 @@
   white-space: normal; min-width: 0; max-width: 100%; font-size: 12.5px; letter-spacing: .04em; padding: 10px 14px; line-height: 1.25; box-sizing: border-box; }
 .pp-zap { background: #1E7A45 !important; border-color: #1E7A45 !important; color: #fff !important; }
 .pp-zap[disabled] { background: #9AA59E !important; border-color: #9AA59E !important; opacity: 1 !important; }
+/* escolha do WhatsApp (computador ou Web): rótulo, dois botões com respiro e a explicação numa linha própria */
+#prospeccao .pp-zap-escolha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 16px 0 0; font-size: 13px; color: var(--ink-2); }
+#prospeccao .pp-zap-escolha .btn { margin: 0; }
+#prospeccao .pp-zap-escolha small { flex: 1 0 100%; margin-top: 2px; font-size: 12.5px; line-height: 1.5; color: var(--ink-2); }
 .pp-perigo { color: #8A2214 !important; border-color: rgba(138,34,20,.35) !important; }
 .pp-nota-bloq { font-size: 13px; color: #7A5513; margin: 8px 0 0; }
 .pp-nota { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; margin-top: 12px; }
