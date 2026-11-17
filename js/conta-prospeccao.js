@@ -6,6 +6,7 @@
   if (!C || !bloco) return;
   var esc = C.esc, cliente = null, D = null, aba = 'hoje', sel = null, filtro = { q: '', faixa: '', uf: '', etapa: '' };
   var SITE = 'https://bluerose-store.com/';
+  var CELULAR = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent || '');
   // uma aba por produto: cada um com a sua fila, os seus limites e a sua aprovação de textos
   // Trutina saiu da prospecção em 17/11 (dados ficam no banco); 17/11: uma aba para cada sistema à venda no site
   var PRODUTOS = {
@@ -171,8 +172,11 @@
       if (!p.whatsapp) botao = '<button type="button" class="btn btn-primary" disabled>Sem WhatsApp publicado</button>';
       else if (p.contato_confirmar) botao = '<button type="button" class="btn btn-primary" disabled>Contato a confirmar</button>';
       else if (!ap) botao = '<button type="button" class="btn btn-primary pp-zap" disabled title="Marque “Textos aprovados” no topo do painel">Abrir WhatsApp com a mensagem</button>';
-      else botao = '<a class="btn btn-primary pp-zap" data-enviar="' + p.id + '" data-acao="' + acao + '" target="_blank" rel="noopener noreferrer" href="https://wa.me/' +
-        esc(p.whatsapp) + '?text=' + encodeURIComponent(msg) + '">Abrir WhatsApp com a mensagem</a>';
+      // no computador abre sempre na MESMA aba do WhatsApp Web (janela "br-whatsapp"), sem abrir o app nem uma aba nova a cada cliente;
+      // no celular segue pelo wa.me (abre o app). O envio continua sendo do dono: a mensagem chega pronta e ele aperta Enter.
+      else botao = '<a class="btn btn-primary pp-zap" data-enviar="' + p.id + '" data-acao="' + acao + '" target="' + (CELULAR ? '_blank' : 'br-whatsapp') + '" rel="noreferrer" href="' +
+        (CELULAR ? 'https://wa.me/' + esc(p.whatsapp) + '?text=' : 'https://web.whatsapp.com/send?phone=' + esc(p.whatsapp) + '&text=') + encodeURIComponent(msg) + '">' +
+        (CELULAR ? 'Abrir WhatsApp com a mensagem' : 'Mandar pelo WhatsApp Web') + '</a>';
     }
     return '<article class="pp-cartao" data-id="' + p.id + '">' +
       '<header><h4>' + esc(p.empresa) + '</h4><span class="pp-faixa f' + esc(p.faixa) + '">Faixa ' + esc(p.faixa) + ' · ' + p.pontuacao + ' pts</span>' +
@@ -229,7 +233,7 @@
   function telaNumeros() {
     var m = D.metricas || [], t = { faixa: 'Todas', total: 0, contatados: 0, abriram: 0, responderam: 0, teste: 0, assinaram: 0, nao_contatar: 0 };
     m.forEach(function (x) { for (var k in t) if (k !== 'faixa') t[k] += x[k] || 0; });
-    return '<div class="af-tabela"><table><thead><tr><th>Faixa</th><th>' + (produto === 'anshur' ? 'Revendas' : 'Empresas') + '</th><th>Contatadas</th><th>Abriram o link</th><th>Responderam</th><th>Teste às cegas</th><th>Assinaram</th><th>Não contatar</th></tr></thead><tbody>' +
+    return '<div class="af-tabela"><table><thead><tr><th>Faixa</th><th>' + (produto === 'anshur' ? 'Revendas' : 'Empresas') + '</th><th>Contatadas</th><th>Abriram o link</th><th>Responderam</th><th>' + (produto === 'anshur' ? 'Teste às cegas' : 'Viu a demonstração') + '</th><th>Assinaram</th><th>Não contatar</th></tr></thead><tbody>' +
       m.concat([t]).map(function (x) {
         return '<tr><td>' + esc(x.faixa) + '</td><td>' + x.total + '</td><td>' + x.contatados + '</td><td>' + x.abriram + ' <small>(' + pct(x.abriram, x.contatados) + ')</small></td><td>' + x.responderam +
           ' <small>(' + pct(x.responderam, x.contatados) + ')</small></td><td>' + x.teste + ' <small>(' + pct(x.teste, x.contatados) + ')</small></td><td>' + x.assinaram + ' <small>(' + pct(x.assinaram, x.contatados) + ')</small></td><td>' + x.nao_contatar + '</td></tr>';

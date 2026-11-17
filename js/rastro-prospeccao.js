@@ -40,9 +40,10 @@
   if (/teste-as-cegas/.test(location.pathname)) enviar('teste_cegas');
   function tipoDoClique(el) {
     var href = (el.getAttribute('href') || '').toLowerCase(), txt = (el.textContent || '').toLowerCase();
-    if (el.hasAttribute('data-contratar') || /^\s*assinar/.test(txt)) return 'assinar';
+    // nas páginas dos sistemas (Agenda, Financeiro, Peplo, Annona, Atria, Popina): "Pague aqui", "Contratar", "Assinar" e a demonstração
+    if (el.hasAttribute('data-contratar') || el.hasAttribute('data-assinar-app') || /^\s*(assinar|contratar|pague aqui)/.test(txt) || href.indexOf('#pague') >= 0) return 'assinar';
     if (href.indexOf('teste-as-cegas') >= 0 || el.classList.contains('an-btn-cegas') || txt.indexOf('teste às cegas') >= 0) return 'teste_cegas';
-    if (/(^|\/)anshur\/?(index\.html)?$/.test(href) || txt.indexOf('demonstração') >= 0) return 'demonstracao';
+    if (/(^|\/)anshur\/?(index\.html)?$/.test(href) || href.indexOf('demos/') >= 0 || txt.indexOf('demonstração') >= 0) return 'demonstracao';
     return null;
   }
   document.addEventListener('click', function (e) {
