@@ -6,7 +6,7 @@
   "servicos": [
    [
     "Sistemas prontos",
-    "Cinco sistemas à venda, com demonstração aberta e pagamento no Pix ou no cartão.",
+    "Seis sistemas à venda, com demonstração aberta e pagamento no Pix ou no cartão.",
     "sistemas.html"
    ],
    [
@@ -93,27 +93,32 @@
  ],
  "sistemas": [
   {
-   "id": "obras",
-   "nome": "Veltria Obras",
-   "pagina": "veltria-obras.html",
-   "ramo": "Obras e reformas",
-   "para": "Para empreiteiros e empresas de reforma.",
-   "mensal": "R$ 69",
-   "extra": "sem entrada, ou R$ 662 por ano",
-   "demo": "demos/sistemas/obras-essencial/?celular=1",
-   "teste": "app/obrasessencial/",
-   "linha": "Veltria",
+   "id": "atria",
+   "nome": "Atria",
+   "pagina": "atria.html",
+   "ramo": "Construção e reforma",
+   "para": "App de celular para quem trabalha na construção e na reforma: orçamento por m², diária, ponto ou empreitada pronto no WhatsApp, Pix com QR direto na sua conta, sem taxa do app, e vitrine com o seu antes e depois.",
+   "mensal": "a partir de R$ 39",
+   "extra": "Pro R$ 50 por mês, ou R$ 374 por ano no Básico",
+   "demo": "demos/sistemas/atria/app.html",
+   "teste": "app/atria/",
+   "linha": "Marca própria da Blue Rose",
    "palavras": [
     "obra",
     "reforma",
     "construc",
     "empreiteir",
     "pedreiro",
-    "construtora",
-    "roseconstruct",
-    "canteiro"
+    "azulejista",
+    "eletricista",
+    "encanador",
+    "pintor",
+    "marceneiro",
+    "gesseiro",
+    "canteiro",
+    "atria"
    ],
-   "negocio": "Obras e reformas"
+   "negocio": "Construção e reforma"
   },
   {
    "id": "agenda",
@@ -250,7 +255,7 @@
      "p": "Qual a diferença entre a Veltria e os outros sistemas?",
      "e": "explaining",
      "r": [
-      "A Veltria tem três sistemas prontos, um para cada ramo: Agenda, Financeiro e Obras, todos no app de celular Essencial.",
+      "A Veltria tem dois sistemas prontos, um para cada ramo: Agenda e Financeiro, os dois no app de celular Essencial.",
       "Também temos o Blue Rose Ofixl, um app para celular de serviços técnicos, que chega em breve ao Google Play."
      ]
     },
@@ -452,7 +457,7 @@
      "r": [],
      "l": [
       "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
-      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro R$ 59/mês, Peplo e Annona R$ 59/mês e Obras R$ 69/mês. No plano anual, 20% a menos."
+      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês e Popina R$ 79/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
@@ -624,7 +629,7 @@
      "r": [],
      "l": [
       "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
-      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro R$ 59/mês, Peplo e Annona R$ 59/mês e Obras R$ 69/mês. No plano anual, 20% a menos."
+      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês e Popina R$ 79/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
@@ -780,7 +785,7 @@
      "p": "Como acho um sistema aqui?",
      "e": "idea",
      "r": [
-      "Use a barra Procurar sistema, no topo da lista: digite o nome ou o ramo (por exemplo, agenda ou obra). Se ainda não tiver, aparece o botão para ver e testar."
+      "Use a barra Procurar sistema, no topo da lista: digite o nome ou o ramo (por exemplo, agenda ou financeiro). Se ainda não tiver, aparece o botão para ver e testar."
      ]
     },
     {
@@ -846,98 +851,6 @@
     }
    ]
   },
-  "sis-obras": {
-   "nome": "Veltria Obras",
-   "sistema": "obras",
-   "fala": "Esta é a página do Veltria Obras. Quer ver como ele funciona?",
-   "perguntas": [
-    {
-     "p": "Para quem é o Veltria Obras?",
-     "e": "explaining",
-     "r": [
-      "Para empreiteiros e empresas de reforma. É o sistema de obras e reformas."
-     ],
-     "k": [
-      [
-       "Abrir a demonstração",
-       "demos/sistemas/obras-essencial/?celular=1"
-      ]
-     ]
-    },
-    {
-     "p": "Quanto custa o Veltria Obras?",
-     "e": "explaining",
-     "r": [
-      "R$ 69 por mês ou R$ 662 por ano (20% a menos). Não tem fidelidade."
-     ],
-     "k": [
-      [
-       "Pague aqui",
-       "veltria-obras.html#precos"
-      ]
-     ]
-    },
-    {
-     "p": "Como testo o Veltria Obras?",
-     "e": "idea",
-     "r": [
-      "Abra a demonstração agora, sem cadastro. Se gostar, assine pelo botão Pague aqui, no Pix ou no cartão."
-     ],
-     "k": [
-      [
-       "Abrir a demonstração",
-       "demos/sistemas/obras-essencial/?celular=1"
-      ],
-      [
-       "Pague aqui",
-       "veltria-obras.html#precos"
-      ]
-     ]
-    },
-    {
-     "p": "Quantas pessoas podem usar?",
-     "e": "confident",
-     "r": [
-      "O Veltria Obras tem um plano único com tudo incluso: a equipe não tem limite de pessoas."
-     ]
-    },
-    {
-     "p": "Como começo a usar depois de assinar?",
-     "e": "idea",
-     "r": [
-      "Fica pronto na hora: você cria a empresa em branco, sobe as suas planilhas e convida a equipe. O vídeo tutorial desta página mostra cada passo. Ficou alguma dúvida? Escreva para o nosso e-mail: respondemos em até 1 dia útil."
-     ],
-     "k": [
-      [
-       "Ver o vídeo tutorial",
-       "#tutorial"
-      ]
-     ]
-    },
-    {
-     "p": "Vocês levam os dados das minhas planilhas?",
-     "r": [
-      "Sim. Nos sistemas prontos, você mesmo sobe as planilhas do Excel em Importar planilha e o sistema preenche nomes, datas, horários, valores e fotos sozinho, com vídeo tutorial de cada passo. Nos sistemas feitos sob medida, nós importamos e testamos com você antes de entregar."
-     ],
-     "e": "confident",
-     "k": []
-    },
-    {
-     "p": "Tem assistente com IA?",
-     "e": "idea",
-     "r": [
-      "Sim, grátis em todos os sistemas: 20 perguntas por dia por empresa. Quem quiser usar mais pode conectar a própria conta do Gemini ou do ChatGPT na janela do Assistente IA: vale só para aquela pessoa, e cada um da equipe conecta a sua se quiser. Ele vê só os números e avisos do resumo do dia, nunca telefones ou e-mails dos seus clientes."
-     ]
-    },
-    {
-     "p": "Se der erro, como peço ajuda?",
-     "e": "explaining",
-     "r": [
-      "Pelo item Suporte, no menu do sistema, ou em Minha conta: você abre um chamado e ele já leva a tela e os detalhes técnicos. Respondemos em até 1 dia útil, ali mesmo e no seu e-mail."
-     ]
-    }
-   ]
-  },
   "sis-agenda": {
    "nome": "Veltria Agenda",
    "sistema": "agenda",
@@ -992,7 +905,7 @@
      "r": [],
      "l": [
       "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
-      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro R$ 59/mês, Peplo e Annona R$ 59/mês e Obras R$ 69/mês. No plano anual, 20% a menos."
+      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês e Popina R$ 79/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
@@ -1092,7 +1005,7 @@
      "r": [],
      "l": [
       "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
-      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro R$ 59/mês, Peplo e Annona R$ 59/mês e Obras R$ 69/mês. No plano anual, 20% a menos."
+      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês e Popina R$ 79/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [

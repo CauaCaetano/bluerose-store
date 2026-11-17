@@ -7,7 +7,16 @@
   var esc = C.esc, cliente = null, D = null, aba = 'hoje', sel = null, filtro = { q: '', faixa: '', uf: '', etapa: '' };
   var SITE = 'https://bluerose-store.com/';
   // uma aba por produto: cada um com a sua fila, os seus limites e a sua aprovação de textos
-  var PRODUTOS = { anshur: { nome: 'Anshur', alvo: 'revendas de máquinas' } };  // Trutina saiu da prospecção em 17/11 (dados ficam no banco)
+  // Trutina saiu da prospecção em 17/11 (dados ficam no banco); 17/11: uma aba para cada sistema à venda no site
+  var PRODUTOS = {
+    anshur: { nome: 'Anshur', alvo: 'revendas de máquinas' },
+    agenda: { nome: 'Agenda', alvo: 'salões, barbearias, estética e quem atende com hora marcada' },
+    financeiro: { nome: 'Financeiro', alvo: 'autônomos, MEIs e prestadores de serviço' },
+    peplo: { nome: 'Peplo', alvo: 'lojas de roupas' },
+    annona: { nome: 'Annona', alvo: 'mercadinhos, mercearias e empórios' },
+    atria: { nome: 'Atria', alvo: 'profissionais da construção e da reforma' },
+    popina: { nome: 'Popina', alvo: 'restaurantes, lanchonetes, pizzarias e bares' }
+  };
   var produto = (function () { try { return PRODUTOS[localStorage.getItem('br-prosp-produto')] ? localStorage.getItem('br-prosp-produto') : 'anshur'; } catch (e) { return 'anshur'; } })();
   var ETAPAS = [['novo', 'Novo'], ['contatado', 'Contatado'], ['retomada1', 'Retomada 1'], ['retomada2', 'Retomada 2'], ['abriu_link', 'Abriu o link'],
     ['respondeu', 'Respondeu'], ['teste', 'Teste às cegas'], ['negociando', 'Negociando'], ['assinou', 'Assinou'], ['perdido', 'Perdido'], ['nao_contatar', 'Não contatar']];
@@ -18,7 +27,54 @@
   function rpc(nome, args) { return cliente.rpc(nome, args || {}).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data; }); }
   function fone(z) { var d = String(z || '').replace(/^55/, ''); return d.length === 11 ? '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7) : d; }
   function porId(id) { for (var i = 0; i < D.prospects.length; i++) if (D.prospects[i].id === id) return D.prospects[i]; return null; }
-  function link(p) { return SITE + (p.produto === 'safra' ? 'trutina.html' : 'anshur.html') + '?p=' + p.codigo; }
+  function link(p) { return SITE + (SIS[p.produto] ? SIS[p.produto].pag : p.produto === 'safra' ? 'trutina.html' : 'anshur.html') + '?p=' + p.codigo; }
+
+  // textos dos sistemas (aguardam a aprovação do dono em cada aba): benefício da página de cada sistema, preço e o link
+  var SIS = {
+    agenda: { pag: 'veltria-agenda.html', nome: 'Veltria Agenda', preco: 'R$ 49/mês (ou R$ 470/ano)', ramo: 'atende com hora marcada',
+      dor: 'Quem marca horário pelo WhatsApp passa o dia respondendo "tem horário?" e ainda perde dinheiro com cliente que falta.',
+      ganho: 'No Veltria Agenda a cliente marca sozinha pelo seu link, o sinal no Pix segura o horário e a confirmação sai pronta. Menos falta, menos horário vazio e menos tempo no WhatsApp.',
+      conta: 'Uma falta por semana num serviço de R$ 60 são uns R$ 240 por mês. Evitar só uma já paga o mês do sistema.' },
+    financeiro: { pag: 'veltria-financeiro.html', nome: 'Veltria Financeiro', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'trabalha por conta própria',
+      dor: 'Para quem trabalha por conta própria, o difícil é saber quanto pode tirar para si, cobrar quem atrasa e não estourar o limite do MEI.',
+      ganho: 'O Veltria Financeiro, no celular, divide cada entrada em potes, manda a cobrança com Pix e lembrete no WhatsApp, guarda as contas fixas e lê o extrato do banco.',
+      conta: 'Receber em dia um único cliente que costuma atrasar já paga alguns meses do sistema.' },
+    peplo: { pag: 'peplo.html', nome: 'Peplo', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'vende roupa',
+      dor: 'Em loja de roupas, o dinheiro some no fiado que não volta e na peça que fica parada no estoque.',
+      ganho: 'O Peplo põe limite e bloqueio para quem deve, manda a cobrança no WhatsApp, controla o estoque por tamanho e cor e mostra o caixa do dia e as peças paradas.',
+      conta: 'Uma única cliente do fiado que volta a pagar já cobre meses do sistema.' },
+    annona: { pag: 'annona.html', nome: 'Annona', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'tem mercadinho',
+      dor: 'Em mercadinho, o lucro vai embora na mercadoria que vence na prateleira e no fiado sem controle, e no fim do mês fica difícil saber quanto sobrou.',
+      ganho: 'O Annona controla o estoque com código de barras e validade por lote, dá entrada pela nota (XML), mostra o que está parado, o fiado com limite e o lucro de cada produto.',
+      conta: 'Deixar de perder algumas caixas de produto vencido por mês já paga o sistema.' },
+    atria: { pag: 'atria.html', nome: 'Atria', preco: 'R$ 39/mês no Básico (o Pro, com busca de trabalho, é R$ 50)', ramo: 'trabalha com obra e reforma',
+      dor: 'Quem trabalha com obra perde serviço por demorar no orçamento e perde dinheiro cobrando no improviso.',
+      ganho: 'O Atria é um app de celular que faz o orçamento por m², diária ou empreitada, cobra no Pix direto na sua conta, monta seu portfólio de antes e depois e funciona até sem internet. No Pro, ainda mostra trabalho na sua cidade.',
+      conta: 'Fechar um serviço a mais por mês por mandar o orçamento na hora já paga o app várias vezes.' },
+    popina: { pag: 'popina.html', nome: 'Popina', preco: 'R$ 79/mês (ou R$ 758/ano)', ramo: 'tem restaurante',
+      dor: 'Em restaurante, pedido anotado no papel atrasa a cozinha, sai errado e some na hora de fechar a conta.',
+      ganho: 'No Popina o pedido sai do celular do garçom e aparece na cozinha na hora, a mesa tem cardápio digital com QR, o delivery tem taxa por bairro e o caixa fecha com Pix e divisão de conta.',
+      conta: 'Um pedido errado a menos por dia já paga o sistema no mês.' }
+  };
+  function mensagemSistema(p, acao) {
+    var s = SIS[p.produto], l = link(p), e = String(p.empresa || '').split(' - ')[0].split(' (')[0];
+    if (acao === 'retomada1') return [
+      'Olá! Retomando rápido a mensagem sobre o ' + s.nome + '.',
+      s.conta,
+      'Dá para ver funcionando, sem cadastro: ' + l,
+      'Se não for o momento, me avisa e eu paro por aqui.'].join('\n\n');
+    if (acao === 'retomada2') return [
+      'Olá! Última mensagem para não incomodar.',
+      'Fica o resumo: ' + s.ganho,
+      'Custa ' + s.preco + ', direto pelo site, sem fidelidade. Detalhes: ' + l,
+      'Obrigado pela atenção!\nBlue Rose Express'].join('\n\n');
+    return ['Olá, tudo bem?',
+      'Sou da Blue Rose Express, de Orlândia. Vi o perfil de ' + e + ' em ' + p.cidade + ', por isso a mensagem.',
+      s.dor,
+      s.ganho,
+      'Dá para ver funcionando, sem cadastro: ' + l,
+      'Custa ' + s.preco + ', sem fidelidade. Se não fizer sentido, é só me avisar que não mando mais mensagem.'].join('\n\n');
+  }
   function recente(p) {
     if (!p.anuncios_data || !p.anuncios_usados) return false;
     return (new Date(D.hoje + 'T12:00:00') - new Date(p.anuncios_data + 'T12:00:00')) / 864e5 < 30;
@@ -72,6 +128,7 @@
   }
   function mensagem(p, acao) {
     if (p.produto === 'safra') return mensagemSafra(p, acao);
+    if (SIS[p.produto]) return mensagemSistema(p, acao);
     var lugar = p.cidade + '/' + p.uf, l = link(p), lt = linkTeste(p), e = p.empresa;
     // oferta de fundador só aparece enquanto houver vaga (some sozinha quando as 3 forem usadas)
     var vagas = Math.max(0, 3 - FUND.length);
@@ -124,7 +181,7 @@
       '<div><dt>Cidade</dt><dd>' + esc(p.cidade || '—') + '/' + esc(p.uf) + (p.lojas && p.lojas.length > 1 ? ' (' + p.lojas.length + ' lojas)' : '') + '</dd></div>' +
       '<div><dt>WhatsApp da empresa</dt><dd>' + (p.whatsapp ? esc(fone(p.whatsapp)) : '—') + '</dd></div>' +
       '<div><dt>Telefone</dt><dd>' + esc(p.telefone || '—') + '</dd></div>' +
-      (p.produto === 'safra' ? '' : '<div><dt>Anúncios de usados</dt><dd>' + (p.anuncios_usados || 0) + (p.anuncios_data ? ' <small>(contados em ' + dia(p.anuncios_data) + ')</small>' : '') + '</dd></div>' +
+      (p.produto !== 'anshur' ? '<div class="pp-larga"><dt>Ramo</dt><dd>' + esc((p.categorias || []).join(', ') || '—') + '</dd></div>' : '<div><dt>Anúncios de usados</dt><dd>' + (p.anuncios_usados || 0) + (p.anuncios_data ? ' <small>(contados em ' + dia(p.anuncios_data) + ')</small>' : '') + '</dd></div>' +
       '<div class="pp-larga"><dt>Categorias</dt><dd>' + esc((p.categorias || []).join(', ') || '—') + '</dd></div>' +
       '<div class="pp-larga"><dt>Marcas anunciadas</dt><dd>' + esc((p.marcas || []).join(', ') || '—') + '</dd></div>') +
       '<div><dt>Próximo contato</dt><dd>' + dia(p.proximo_contato) + '</dd></div>' +
@@ -143,7 +200,7 @@
       (final ? '<p class="af-aviso">Esta empresa pediu para não ser contatada. Fica fora da fila para sempre.</p>' :
         '<div class="af-acoes pp-botoes">' + botao +
         '<button type="button" class="btn btn-ghost" data-etapa="respondeu">Respondeu</button>' +
-        '<button type="button" class="btn btn-ghost" data-etapa="teste">' + (p.produto === 'safra' ? 'Mandou os papéis' : 'Teste às cegas') + '</button>' +
+        '<button type="button" class="btn btn-ghost" data-etapa="teste">' + (p.produto === 'safra' ? 'Mandou os papéis' : p.produto === 'anshur' ? 'Teste às cegas' : 'Viu a demonstração') + '</button>' +
         '<button type="button" class="btn btn-ghost" data-etapa="negociando">Negociando</button>' +
         '<button type="button" class="btn btn-ghost" data-etapa="assinou">Assinou</button>' +
         '<button type="button" class="btn btn-ghost" data-etapa="perdido">Perdido</button>' +
@@ -172,7 +229,7 @@
   function telaNumeros() {
     var m = D.metricas || [], t = { faixa: 'Todas', total: 0, contatados: 0, abriram: 0, responderam: 0, teste: 0, assinaram: 0, nao_contatar: 0 };
     m.forEach(function (x) { for (var k in t) if (k !== 'faixa') t[k] += x[k] || 0; });
-    return '<div class="af-tabela"><table><thead><tr><th>Faixa</th><th>Revendas</th><th>Contatadas</th><th>Abriram o link</th><th>Responderam</th><th>Teste às cegas</th><th>Assinaram</th><th>Não contatar</th></tr></thead><tbody>' +
+    return '<div class="af-tabela"><table><thead><tr><th>Faixa</th><th>' + (produto === 'anshur' ? 'Revendas' : 'Empresas') + '</th><th>Contatadas</th><th>Abriram o link</th><th>Responderam</th><th>Teste às cegas</th><th>Assinaram</th><th>Não contatar</th></tr></thead><tbody>' +
       m.concat([t]).map(function (x) {
         return '<tr><td>' + esc(x.faixa) + '</td><td>' + x.total + '</td><td>' + x.contatados + '</td><td>' + x.abriram + ' <small>(' + pct(x.abriram, x.contatados) + ')</small></td><td>' + x.responderam +
           ' <small>(' + pct(x.responderam, x.contatados) + ')</small></td><td>' + x.teste + ' <small>(' + pct(x.teste, x.contatados) + ')</small></td><td>' + x.assinaram + ' <small>(' + pct(x.assinaram, x.contatados) + ')</small></td><td>' + x.nao_contatar + '</td></tr>';
@@ -193,10 +250,10 @@
       '<label>Faixa<select name="faixa">' + opt([['', 'Todas'], ['A', 'A'], ['B', 'B'], ['C', 'C']], filtro.faixa) + '</select></label>' +
       '<label>UF<select name="uf">' + opt([['', 'Todas']].concat(Object.keys(ufs).sort().map(function (u) { return [u, u]; })), filtro.uf) + '</select></label>' +
       '<label>Etapa<select name="etapa">' + opt([['', 'Todas']].concat(ETAPAS), filtro.etapa) + '</select></label></form>' +
-      '<p class="pp-cont">' + l.length + ' de ' + D.prospects.length + ' revendas</p>' +
+      '<p class="pp-cont">' + l.length + ' de ' + D.prospects.length + (produto === 'anshur' ? ' revendas' : ' empresas') + '</p>' +
       '<ul class="pp-lista">' + l.slice(0, 200).map(function (p) {
         return '<li><button type="button" class="pp-item" data-ver="' + p.id + '"><span><b>' + esc(p.empresa) + '</b> · ' + esc(p.cidade || '—') + '/' + esc(p.uf) + '</span>' +
-          '<small>Faixa ' + esc(p.faixa) + ' · ' + p.pontuacao + ' pts · ' + (p.anuncios_usados || 0) + ' usados · ' + esc(NOME_ETAPA[p.etapa]) + (p.proximo_contato ? ' · próximo ' + dia(p.proximo_contato) : '') + (p.whatsapp ? '' : ' · sem WhatsApp') + (p.contato_confirmar ? ' · contato a confirmar' : '') + '</small></button></li>';
+          '<small>Faixa ' + esc(p.faixa) + ' · ' + p.pontuacao + ' pts · ' + (p.produto === 'anshur' ? (p.anuncios_usados || 0) + ' usados · ' : '') + esc(NOME_ETAPA[p.etapa]) + (p.proximo_contato ? ' · próximo ' + dia(p.proximo_contato) : '') + (p.whatsapp ? '' : ' · sem WhatsApp') + (p.contato_confirmar ? ' · contato a confirmar' : '') + '</small></button></li>';
       }).join('') + '</ul>' + (l.length > 200 ? '<p class="ind-regras">Mostrando 200. Use os filtros para achar as outras.</p>' : '') + (sel ? detalhe() : '');
   }
   function detalhe() { var p = porId(sel); return p ? '<div class="pp-detalhe" id="pp-detalhe">' + cartao(p, acaoNaFila(p.id)) + '</div>' : ''; }
