@@ -418,3 +418,11 @@ main.an::before, main.an > section::before, main.an > section::after { content: 
 .an-demo-link span { grid-column: 1 / -1; }
 @media (max-width: 560px) { .an-demo-link { grid-template-columns: minmax(0, 1fr); } }
 .an-instalar { margin-top: -14px; }
+/* oferta de fundador (3 primeiras revendas) */
+.an-fundador { display: grid; gap: 8px; padding: 16px 18px; border-radius: 14px; background: #FBF6EC; border: 1.5px solid #C1A36A; }
+.an-fundador[hidden] { display: none; }
+.an-fund-tit { margin: 0; font-size: clamp(17px, 1.6vw, 20px); line-height: 1.3; color: var(--an-ob); }
+.an-fund-txt { margin: 0; font-size: 14.5px; line-height: 1.5; color: #4A565E; }
+.an-fund-vagas { font-weight: 700; color: #7A6131; }
+.an-fund-btn { justify-self: start; }
+@media (max-width: 560px) { .an-fund-btn { justify-self: stretch; text-align: center; justify-content: center; } }

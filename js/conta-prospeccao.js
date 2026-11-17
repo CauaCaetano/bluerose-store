@@ -25,25 +25,31 @@
   function linkTeste(p) { return SITE + 'anshur/teste-as-cegas.html?p=' + p.codigo; }
   function mensagem(p, acao) {
     var lugar = p.cidade + '/' + p.uf, l = link(p), lt = linkTeste(p), e = p.empresa;
+    // oferta de fundador só aparece enquanto houver vaga (some sozinha quando as 3 forem usadas)
+    var vagas = Math.max(0, 3 - FUND.length);
+    var fund = function (t) { return vagas ? [t] : []; };
     if (acao === 'retomada1') return [
       'Olá! Retomando rápido a mensagem sobre o usado da troca.',
       'Uma conta simples: se em uma troca de trator a revenda paga R$ 20 mil acima do que devia, esse valor sai direto do lucro da venda. Basta evitar isso *uma vez* para pagar 10 meses do Anshur (R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade).',
-      'Quer ver se isso acontece aí? O teste com as trocas de vocês mostra na hora:\n' + lt,
+      'Quer ver se isso acontece aí? O teste com as trocas de vocês mostra na hora:\n' + lt].concat(fund(
+      'E ainda há vaga na oferta de fundador: as 3 primeiras revendas usam o *1º mês sem custo*.'), [
       'Se preferir só olhar o sistema funcionando: ' + l,
-      'Se não for o momento, me avisa e eu paro por aqui.'].join('\n\n');
+      'Se não for o momento, me avisa e eu paro por aqui.']).join('\n\n');
     if (acao === 'retomada2') return [
       'Olá! Última mensagem para não incomodar.',
       'Fica o resumo: o Anshur ajuda a ' + e + ' a não pagar caro no usado da troca, a enxergar o dinheiro parado no pátio e a só fechar acima do valor máximo com aprovação do gerente ou do dono.',
-      'Contratação direto pelo site, sem reunião: R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade. Cancela quando quiser.',
+      'Contratação direto pelo site, sem reunião: R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade. Cancela quando quiser.'].concat(fund(
+      'Se entrar agora, ainda pega uma das últimas vagas de fundador: *1º mês sem custo*.'), [
       'Teste com as trocas de vocês: ' + lt + '\nDemonstração: ' + l,
-      'Obrigado pela atenção!\nBlue Rose Express'].join('\n\n');
+      'Obrigado pela atenção!\nBlue Rose Express']).join('\n\n');
     return ['Olá, tudo bem?',
       'Vi que a ' + e + ' trabalha com máquinas usadas em ' + lugar + ', por isso a mensagem.',
       'Em revenda, boa parte do lucro da venda da máquina nova vai embora no usado que entra na troca: paga-se um pouco a mais para fechar o negócio, a máquina fica parada no pátio e, quando vende, a margem já sumiu.',
       'O Anshur mostra *antes de fechar* o valor máximo que a ' + e + ' pode pagar naquele usado sem perder dinheiro, com base nas trocas que vocês mesmos já venderam.',
       'Dá para conferir isso com números de vocês, de graça e sem cadastro: coloque 5 trocas antigas e veja, troca por troca, quanto teria ficado no caixa:\n' + lt,
-      'Leva uns 5 minutos e nada sai do seu computador.',
-      'Se não fizer sentido para vocês, é só me avisar que não mando mais mensagem.'].join('\n\n');
+      'Leva uns 5 minutos e nada sai do seu computador.'].concat(fund(
+      'E as 3 primeiras revendas que entrarem usam o *1º mês sem custo* (oferta de fundador).'), [
+      'Se não fizer sentido para vocês, é só me avisar que não mando mais mensagem.']).join('\n\n');
   }
 
   function acaoNaFila(id) {
@@ -147,8 +153,23 @@
   }
   function detalhe() { var p = porId(sel); return p ? '<div class="pp-detalhe" id="pp-detalhe">' + cartao(p, acaoNaFila(p.id)) + '</div>' : ''; }
 
+  // oferta de fundador: as 3 primeiras revendas usam o 1º mês sem custo (o dono libera pelo e-mail da conta da revenda)
+  var FUND = [];
+  var MSG_FUND = { ok: 'Vaga liberada: a revenda já pode usar o Anshur por 30 dias, sem custo.', esgotado: 'As 3 vagas já foram usadas.', ja_e_fundador: 'Esse e-mail já é fundador.',
+    sem_conta: 'Não achei conta confirmada com esse e-mail. Peça para a revenda criar a conta grátis em bluerose-store.com (Entrar › Criar conta) e confirmar o e-mail; depois libere aqui.',
+    email_invalido: 'Confira o e-mail.', negado: 'Só a conta do dono, com o código do celular, libera vagas.' };
+  function telaFundadores() {
+    var rest = Math.max(0, 3 - FUND.length);
+    return '<p class="ind-regras"><b>Oferta de fundador:</b> as 3 primeiras revendas usam o 1º mês sem custo. Em troca, no fim do mês, contam por escrito como foi (só publique com a autorização dela por escrito). Depois seguem no preço normal: a revenda assina pelo site e a liberação grátis é encerrada sozinha. <b>' + rest + ' de 3 vagas</b> livres.</p>' +
+      (rest ? '<form class="af-form" id="pp-fund"><label>E-mail da conta da revenda<input name="e" type="email" required autocomplete="off" placeholder="voce@revenda.com.br"></label>' +
+        '<label>Nome da revenda<input name="r" maxlength="120" placeholder="Ex.: WS Máquinas Agrícolas"></label><button class="btn btn-primary">Liberar 1º mês sem custo</button><span role="status"></span></form>' : '') +
+      (FUND.length ? '<div class="af-tabela"><table><thead><tr><th>Revenda</th><th>Conta</th><th>Liberado em</th><th>Grátis até</th><th>Já assinou?</th></tr></thead><tbody>' + FUND.map(function (f) {
+        return '<tr><td>' + esc(f.revenda || '—') + '</td><td>' + esc(f.email) + '</td><td>' + dia(String(f.liberado_em).slice(0, 10)) + '</td><td>' + dia(f.ate) + '</td><td>' + (f.pagando ? 'Sim' : 'Ainda não') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' : '<p class="ind-regras">Nenhuma vaga usada ainda.</p>');
+  }
+
   function desenhar() {
-    var c = D.config, abas = [['hoje', 'Fila de hoje'], ['quadro', 'Quadro'], ['numeros', 'Números'], ['todas', 'Todas']];
+    var c = D.config, abas = [['hoje', 'Fila de hoje'], ['quadro', 'Quadro'], ['numeros', 'Números'], ['todas', 'Todas'], ['fundadores', 'Fundadores']];
     bloco.hidden = false;
     bloco.innerHTML = '<h2>Prospecção do Anshur <small>(só você vê)</small></h2>' +
       '<p class="ind-regras">' + D.prospects.length + ' revendas de dados públicos de empresas. O painel monta a mensagem e abre o WhatsApp; quem envia é você. Nada sai sozinho.</p>' +
@@ -159,10 +180,13 @@
       '<label>Retomadas por dia<input name="r" type="number" min="0" max="50" value="' + c.limite_retomadas + '"></label><button class="btn btn-ghost">Salvar limites</button><span role="status"></span></form></div>' +
       '<div class="pd-filtros" role="tablist" aria-label="Partes da prospecção">' + abas.map(function (a) {
         return '<button type="button" role="tab" class="pd-filtro' + (aba === a[0] ? ' on' : '') + '" data-aba="' + a[0] + '" aria-selected="' + (aba === a[0]) + '">' + esc(a[1]) + '</button>';
-      }).join('') + '</div><div id="pp-corpo">' + ({ hoje: telaHoje, quadro: telaQuadro, numeros: telaNumeros, todas: telaTodas }[aba])() + '</div>';
+      }).join('') + '</div><div id="pp-corpo">' + ({ hoje: telaHoje, quadro: telaQuadro, numeros: telaNumeros, todas: telaTodas, fundadores: telaFundadores }[aba])() + '</div>';
   }
 
-  function recarregar() { return rpc('anshur_prosp_painel').then(function (d) { if (d) { D = d; desenhar(); } }); }
+  function recarregar() {
+    return Promise.all([rpc('anshur_prosp_painel'), rpc('anshur_fundadores_lista').catch(function () { return null; })])
+      .then(function (r) { if (r[1]) FUND = r[1]; if (r[0]) { D = r[0]; desenhar(); } });
+  }
   function status(el, t) { var s = el && el.closest('.pp-cartao'); s = s && s.querySelector('.pp-status'); if (s) s.textContent = t; }
 
   bloco.addEventListener('click', function (e) {
@@ -195,7 +219,15 @@
   bloco.addEventListener('submit', function (e) {
     var f = e.target; e.preventDefault();
     var st = f.querySelector('[role=status]');
-    if (f.id === 'pp-limites') {
+    if (f.id === 'pp-fund') {
+      var em = f.e.value.trim(), rv = f.r.value.trim();
+      if (!confirm('Liberar 30 dias de Anshur sem custo para ' + em + (rv ? ' (' + rv + ')' : '') + '? Isso usa 1 das 3 vagas de fundador e não se desfaz por aqui.')) return;
+      if (st) st.textContent = 'Liberando…';
+      rpc('anshur_fundador_liberar', { p_email: em, p_revenda: rv }).then(function (r) {
+        if (r === 'ok') return recarregar().then(function () { var s = bloco.querySelector('#pp-corpo'); if (s) s.insertAdjacentHTML('afterbegin', '<p class="af-aviso pp-ok">' + esc(MSG_FUND.ok) + '</p>'); });
+        if (st) st.textContent = MSG_FUND[r] || ('Não deu: ' + r);
+      }).catch(function (er) { if (st) st.textContent = 'Não deu: ' + er.message; });
+    } else if (f.id === 'pp-limites') {
       rpc('anshur_prosp_config', { p_aprovados: null, p_limite_novos: Number(f.n.value), p_limite_retomadas: Number(f.r.value) })
         .then(recarregar).catch(function (er) { if (st) st.textContent = 'Não deu: ' + er.message; });
     } else if (f.dataset.confirmar) {
