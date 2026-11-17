@@ -323,7 +323,19 @@
   ['input', 'change', 'click'].forEach((ev) => tela.addEventListener(ev, (e) => { if (e.target.closest && e.target.closest('#passo') && /(^#|\/)avaliar$/.test(location.hash || '')) guardarRascunho(); }));
   // nota geral = média dos itens da ficha que valem para o tipo (implemento não tem motor, câmbio nem cabine)
   const condDe = (f, tipo = av.tipo) => condFicha(f, tipo);
-  const maqAv = () => ({ tipo: av.tipo, marca: av.marca, modelo: av.modelo, ano: av.ano, horas: semHoras(av.tipo) ? 0 : av.horas, cond: condDe(av.ficha), ficha: { ...av.ficha } });
+  // modelo digitado que não está no catálogo da revenda nem na base de mercado: precisa da referência de preço
+  // (enquanto a base de implementos ainda está baixando, não dá para saber; espera)
+  const modeloNovo = () => !!(av.marca && av.modelo) && !(semHoras(av.tipo) && !window.MERCADO && window.MERCADO_CARREGAR && !mercadoFalhou) && !M.catalogo({ tipo: av.tipo, marca: av.marca, modelo: av.modelo });
+  const maqAv = () => ({ tipo: av.tipo, marca: av.marca, modelo: av.modelo, ano: av.ano, horas: semHoras(av.tipo) ? 0 : av.horas, cond: condDe(av.ficha), ficha: { ...av.ficha }, ...(modeloNovo() && av.refNova > 0 ? { referencia: av.refNova } : {}) });
+  // ao sair da etapa 1 com um modelo novo, ele entra no catálogo da revenda (o mesmo que Configurações › Adicionar modelo faz)
+  function guardarModeloNovo() {
+    if (!modeloNovo() || !(av.refNova > 0)) return;
+    const hAno = { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270, implemento: 0 }[av.tipo];
+    A.modelos.push({ tipo: av.tipo, marca: av.marca, modelo: av.modelo, base: av.refNova, hAno, importado: true });
+    estado.modelosExtra = (estado.modelosExtra || []).concat([{ tipo: av.tipo, marca: av.marca, modelo: av.modelo, base: av.refNova }]);
+    salvar(); log('config', `Modelo ${av.marca} ${av.modelo} adicionado ao catálogo pela avaliação`);
+    toast(`${av.marca} ${av.modelo} entrou no catálogo da revenda.`);
+  }
   // catálogo da avaliação: os modelos da revenda e, em implementos, também os da base pública de mercado (anúncios reais)
   // carrega mercado-anuncios.js na primeira avaliação de implemento (não no abrir do app); ao chegar, redesenha o passo
   let mercadoFalhou = false;
@@ -368,8 +380,10 @@
   function desenharLado() {
     const lado = $('#av-lado'), lay = $('.av-layout'); if (!lado || !lay) return;
     lay.classList.toggle('cheio', av.passo === 4); lado.hidden = av.passo === 4; if (av.passo === 4) return;
-    let r = null; try { if (semHoras(av.tipo) || av.horas > 0) r = M.avaliar(maqAv()); } catch (e) { r = null; }
+    const semRef = modeloNovo() && !(av.refNova > 0);
+    let r = null; try { if (!semRef && (semHoras(av.tipo) || av.horas > 0)) r = M.avaliar(maqAv()); } catch (e) { r = null; }
     const cab = '<div class="painel-cab"><h2>Resultado da avaliação</h2><p>Prévia com o que já foi preenchido</p></div>';
+    if (semRef) { lado.innerHTML = `<section class="painel av-res">${cab}<div class="estado-vazio">${ic('<path d="M4 19h16M6 15l4-4 3 3 5-6"/>')}<b>Modelo novo no catálogo</b><p>Informe a referência de preço seminovo de ${esc(av.marca + ' ' + av.modelo)} e o valor máximo aparece aqui.</p></div></section>`; return; }
     if (!r) { lado.innerHTML = `<section class="painel av-res">${cab}<div class="estado-vazio">${ic('<path d="M4 19h16M6 15l4-4 3 3 5-6"/>')}<b>${!semHoras(av.tipo) && !(av.horas > 0) ? 'Falta informar as horas' : 'Ainda sem base para esta máquina'}</b><p>${!semHoras(av.tipo) && !(av.horas > 0) ? 'Com o horímetro preenchido, o valor máximo aparece aqui na hora.' : `São precisas pelo menos ${M.QUALIDADE.minimoTreino} vendas com referência de preço deste tipo de máquina.`}</p></div></section>`; return; }
     lado.innerHTML = `<section class="painel av-res" aria-live="polite">${cab}
       <div class="av-res-topo"><span>Valor máximo recomendado na troca</span><b>${real(r.teto)}</b><small>Faixa de negociação: ${mil(r.faixa[0])} a ${mil(r.faixa[1])}</small></div>
@@ -383,7 +397,10 @@
   ['input', 'change'].forEach((ev) => tela.addEventListener(ev, (e) => { if (e.target.closest && e.target.closest('#passo')) { clearTimeout(ladoTimer); ladoTimer = setTimeout(desenharLado, 220); } }));
   tela.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('#passo .notas button')) { clearTimeout(ladoTimer); ladoTimer = setTimeout(desenharLado, 120); } });
   function irPasso(p) {
+    if (p > 1 && (!String(av.marca || '').trim() || !String(av.modelo || '').trim())) { av.passo = 1; desenharPasso(); toast('Informe o fabricante e o modelo para continuar.', true); return; }
+    if (p > 1 && modeloNovo() && !(av.refNova > 0)) { av.passo = 1; desenharPasso(); toast('Modelo novo: informe a referência de preço seminovo para continuar.', true); if ($('#f-ref')) { $('#f-ref').focus(); $('#e-ref').textContent = 'Informe a referência de preço do modelo novo.'; } return; }
     if (p > 1 && !semHoras(av.tipo) && !(av.horas > 0)) { av.passo = 1; desenharPasso(); toast('Informe as horas do horímetro para continuar.', true); return; }
+    if (p > 1) guardarModeloNovo();
     // nada da IA entra no resultado sem o avaliador decidir item a item
     if (p > 3 && iaPendentes() > 0) { toast(`Revise as ${iaPendentes()} sugestões da IA (aceitar ou manter a sua nota) antes do resultado.`, true); p = 3; }
     av.passo = p;
@@ -397,9 +414,11 @@
     const tipos = Object.keys(NOMES);
     const cat = catalogoAv(av.tipo);
     const marcas = [...new Set(cat.map((m) => m.marca))];
-    if (!marcas.includes(av.marca)) av.marca = marcas[0] || '';
+    // fabricante e modelo: a lista sugere, mas aceita texto livre (modelo novo pede a referência de preço)
+    if (av.marca == null) av.marca = marcas[0] || '';
     const modelos = cat.filter((m) => m.marca === av.marca);
-    if (!modelos.some((m) => m.modelo === av.modelo)) av.modelo = modelos[0] ? modelos[0].modelo : '';
+    if (av.modelo == null) av.modelo = modelos[0] ? modelos[0].modelo : '';
+    const novo = modeloNovo();
     const sh = semHoras(av.tipo), anos = []; for (let a = anoAtual; a >= anoAtual - (sh ? 30 : 15); a--) anos.push(a);
     if (!anos.includes(av.ano)) av.ano = anos.includes(+av.ano) ? +av.ano : anoAtual - 5;
     let h = '';
@@ -407,11 +426,11 @@
     if (av.passo === 1) h = `<section class="painel passo form-etapa"><div class="painel-cab"><h2>Identificação</h2><p>Campos com <abbr class="obr" title="obrigatório">*</abbr> são obrigatórios</p></div>
       <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">1</span>Máquina<small>Qual máquina o cliente quer dar na troca</small></legend><div class="campos quatro">
         <div class="campo"><label for="f-tipo">Categoria ${obr}</label><select id="f-tipo">${tipos.map((k) => `<option value="${k}" ${k === av.tipo ? 'selected' : ''}>${NOMES[k]}</option>`).join('')}</select></div>
-        <div class="campo"><label for="f-marca">Fabricante ${obr}</label><select id="f-marca">${marcas.map((m) => `<option ${m === av.marca ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select></div>
-        <div class="campo"><label for="f-modelo">Modelo ${obr}</label><select id="f-modelo">${modelos.map((m) => `<option ${m.modelo === av.modelo ? 'selected' : ''}>${esc(m.modelo)}</option>`).join('')}</select></div>
+        <div class="campo"><label for="f-marca">Fabricante ${obr}</label><input id="f-marca" list="dl-av-marca" value="${esc(av.marca)}" autocomplete="off" required placeholder="Escolha ou digite"><datalist id="dl-av-marca">${marcas.map((m) => `<option value="${esc(m)}"></option>`).join('')}</datalist></div>
+        <div class="campo"><label for="f-modelo">Modelo ${obr}</label><input id="f-modelo" list="dl-av-modelo" value="${esc(av.modelo)}" autocomplete="off" required placeholder="Escolha ou digite"><datalist id="dl-av-modelo">${modelos.map((m) => `<option value="${esc(m.modelo)}"></option>`).join('')}</datalist></div>
         <div class="campo curto"><label for="f-ano">Ano ${obr}</label><select id="f-ano">${anos.map((a) => `<option ${a === av.ano ? 'selected' : ''}>${a}</option>`).join('')}</select></div>
         ${sh && !window.MERCADO && window.MERCADO_CARREGAR && !mercadoFalhou ? '<p class="sub inteiro carregando-linha" id="f-mercado-carregando" role="status"><span class="spin" aria-hidden="true"></span>Carregando os modelos da base de mercado de implementos…</p>' : ''}
-        ${!modelos.length && !(sh && !window.MERCADO && window.MERCADO_CARREGAR && !mercadoFalhou) ? `<p class="conta neg inteiro">Ainda não há modelos de ${esc(NOMES[av.tipo].toLowerCase())} no catálogo. Adicione em Configurações › Catálogo de modelos.</p>` : ''}
+        ${novo ? `<div class="campo inteiro f-novo"><label for="f-ref">Referência de preço seminovo (R$) ${obr}</label><input id="f-ref" inputmode="numeric" placeholder="R$" value="${av.refNova ? esc(String(av.refNova)) : ''}" required aria-describedby="a-ref e-ref"><span class="ajuda" id="a-ref"><b>${esc(av.marca + ' ' + av.modelo)}</b> ainda não está no catálogo. Informe quanto vale um seminovo deste modelo; ao continuar, ele entra no catálogo da revenda.</span><span class="erro-campo" id="e-ref" role="alert"></span></div>` : ''}
       </div></fieldset>
       <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">2</span>Condição e uso<small>Horímetro, onde a máquina está e o que o cliente contou</small></legend><div class="campos">
         ${sh ? `<div class="campo"><span class="rot-campo">Horas trabalhadas</span><p class="sub" id="f-sem-horas" style="margin-top:8px">Implemento não tem horímetro: o valor sai do ano, do modelo e do estado na inspeção.</p></div>`
@@ -442,9 +461,12 @@
     caixa.innerHTML = h;
     $$('[data-ir]', caixa).forEach((b) => b.onclick = () => irPasso(av.passo + +b.dataset.ir));
     if (av.passo === 1) {
-      $('#f-tipo').onchange = (e) => { const tinha = av.fotos.some(Boolean) || av.ia; av.tipo = e.target.value; if (tinha) { av.fotos = []; av.ia = null; fotosGrandes = {}; toast('Tipo trocado: as fotos guiadas e as sugestões da IA foram zeradas (a lista de fotos muda por tipo).'); } desenharPasso(); };
-      $('#f-marca').onchange = (e) => { av.marca = e.target.value; desenharPasso(); };
-      $('#f-modelo').onchange = (e) => { av.modelo = e.target.value; };
+      $('#f-tipo').onchange = (e) => { const tinha = av.fotos.some(Boolean) || av.ia; av.tipo = e.target.value; av.marca = null; av.modelo = null; av.refNova = 0; if (tinha) { av.fotos = []; av.ia = null; fotosGrandes = {}; toast('Tipo trocado: as fotos guiadas e as sugestões da IA foram zeradas (a lista de fotos muda por tipo).'); } desenharPasso(); };
+      $('#f-marca').oninput = (e) => { av.marca = e.target.value; };
+      $('#f-marca').onchange = (e) => { av.marca = e.target.value.trim(); if (!catalogoAv(av.tipo).some((m) => m.marca === av.marca && m.modelo === av.modelo)) av.modelo = ''; desenharPasso(); $('#f-modelo').focus(); };
+      $('#f-modelo').oninput = (e) => { av.modelo = e.target.value; };
+      $('#f-modelo').onchange = (e) => { av.modelo = e.target.value.trim(); desenharPasso(); if (modeloNovo()) $('#f-ref').focus(); };
+      if ($('#f-ref')) $('#f-ref').oninput = (e) => { av.refNova = num(e.target.value); $('#e-ref').textContent = av.refNova > 0 ? '' : 'Informe a referência de preço do modelo novo.'; };
       $('#f-ano').onchange = (e) => { av.ano = +e.target.value; };
       if ($('#f-horas')) $('#f-horas').oninput = (e) => { av.horas = Math.max(0, +e.target.value || 0); $('#e-horas').textContent = av.horas > 0 ? '' : 'Informe as horas do horímetro.'; };
       $('#f-local').oninput = (e) => { av.local = e.target.value; };
