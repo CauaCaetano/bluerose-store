@@ -139,7 +139,7 @@
     return { linhas, resumo, porData, semData, mercado: ctx.mercado, limites: limites(linhas, { porData, semData, mercado: ctx.mercado, modelos: ctx.modelos }) };
   }
 
-  const SITES = { 'Agrofy': 'Agrofy (agrofy.com.br)', 'Tratores e Colheitadeiras': 'Tratores e Colheitadeiras (tratoresecolheitadeiras.com.br)' };
+  const SITES = { 'Agrofy': 'Agrofy (agrofy.com.br)', 'Tratores e Colheitadeiras': 'Tratores e Colheitadeiras (tratoresecolheitadeiras.com.br)', 'MF Rural': 'MF Rural (mfrural.com.br)' };
   const dataBR = (iso) => iso.split('-').reverse().join('/');
   const textoBase = (m) => `Base de mercado: ${m.n.toLocaleString('pt-BR')} anúncios públicos de máquinas e implementos usados coletados em ${dataBR(m.coleta)} (fontes: ${m.fontes.map((f) => SITES[f] || f).join('; ')}), cobrindo ${m.modelos} modelos. São preços pedidos, não de venda fechada.`;
 

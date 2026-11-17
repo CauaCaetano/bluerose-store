@@ -214,6 +214,7 @@
   .nv-bt:hover{background:#AD8E55}.nv-bt[disabled]{opacity:.55;pointer-events:none}
   .nv-bt.linha{background:transparent;border:1px solid rgba(17,24,32,.22)}
   a.nv-bt{text-decoration:none;box-sizing:border-box}
+  .nv-dica{display:block;color:#5b6472;font-size:13px;margin:-4px 0 6px}
   .nv-sso{margin-top:6px}.nv-ou{text-align:center;color:#5b6472;margin:14px 0 0;font-size:14px}
   .nv-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:16px;font-size:14px}
   .nv-links button,.nv-link{background:none;border:0;padding:6px 0;color:#7A6131;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
@@ -280,7 +281,7 @@
   }
   function telaEntrar(aviso) {
     caixa(`<h1 id="nv-t">Entrar no Anshur</h1><p>Acesso aos dados da sua revenda.</p>
-      <form id="nv-f" novalidate><label for="nv-email">E-mail</label><input id="nv-email" type="email" autocomplete="email" required>
+      <form id="nv-f" novalidate><label for="nv-email">E-mail da empresa</label><input id="nv-email" type="email" autocomplete="email" placeholder="voce@suarevenda.com.br" required>
       <label for="nv-senha">Senha</label><input id="nv-senha" type="password" autocomplete="current-password" required>
       <button class="nv-bt" type="submit">Entrar</button></form>
       <p class="nv-msg" hidden></p>
@@ -302,9 +303,10 @@
     };
   }
   function telaCriar() {
-    caixa(`<h1 id="nv-t">Criar conta</h1><p>Uma conta por pessoa. Depois você cria a revenda ou entra com o convite que recebeu.</p>
+    caixa(`<h1 id="nv-t">Criar conta</h1><p>Use o <b>e-mail da sua empresa</b>, o mesmo que você usa no trabalho (ex.: voce@suarevenda.com.br). Uma conta por pessoa: gerente, vendedores e oficina criam cada um a sua com o e-mail deles. Depois você cria a revenda ou entra com o convite que recebeu.</p>
       <form id="nv-f" novalidate><label for="nv-nome">Seu nome</label><input id="nv-nome" autocomplete="name" required maxlength="120">
-      <label for="nv-email">E-mail</label><input id="nv-email" type="email" autocomplete="email" required>
+      <label for="nv-email">E-mail da empresa</label><input id="nv-email" type="email" autocomplete="email" placeholder="voce@suarevenda.com.br" required>
+      <small class="nv-dica">A revenda ainda não tem e-mail próprio? Pode usar o e-mail que vocês já usam para trabalhar.</small>
       <label for="nv-senha">Senha (mínimo 8, com letras e números)</label><input id="nv-senha" type="password" autocomplete="new-password" minlength="8" required>
       <button class="nv-bt" type="submit">Criar conta</button></form>
       <p class="nv-msg" hidden></p>

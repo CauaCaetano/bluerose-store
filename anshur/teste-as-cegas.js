@@ -1,7 +1,8 @@
 // Tela do teste às cegas público. Tudo roda neste navegador: não há fetch nem envio de dados.
 // O cálculo é o do motor real (motor.js) através de cegas.js, com a validação temporal (walk-forward).
 // Base geral = base REAL de mercado (mercado.js): nada da demonstração fictícia (dados.js nem é carregado nesta página).
-(function () {
+// A base de anúncios (mercado-anuncios.js, ~1,5 MB) é baixada depois que a página aparece (MERCADO_CARREGAR, em mercado.js).
+function iniciarTesteCegas() {
   const MER = window.MERCADO, M = window.MOTOR, CG = window.CEGAS, IMP = window.IMPORTAR;
   const CHAVE = 'anshur-teste-cegas-v1';
   const $ = (s, r = document) => r.querySelector(s);
@@ -242,4 +243,16 @@
   };
   desenharBase();
   desenhar();
+}
+
+(function () {
+  const tela = document.getElementById('tc-tela');
+  if (window.MERCADO) { iniciarTesteCegas(); return; }
+  if (tela) tela.innerHTML = '<section class="painel" role="status"><p>Carregando a base de mercado (anúncios públicos de máquinas e implementos usados)…</p></section>';
+  const tentar = () => window.MERCADO_CARREGAR().then(iniciarTesteCegas, () => {
+    if (!tela) return;
+    tela.innerHTML = '<section class="painel" role="alert"><p>Não foi possível baixar a base de mercado. Confira a internet e tente de novo.</p><button class="btn btn-ouro" type="button" id="tc-tentar">Tentar de novo</button></section>';
+    document.getElementById('tc-tentar').onclick = tentar;
+  });
+  tentar();
 })();

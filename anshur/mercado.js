@@ -1,7 +1,7 @@
 /// Base REAL de preços de mercado do Anshur (anúncios públicos de máquinas e implementos usados). A data da coleta vem
 // dos dados (MERCADO_DADOS.coleta); a base é atualizada todo mês por ferramentas/atualizar_mercado.py.
 // Os dados ficam em mercado-anuncios.js (gerado por ferramentas/atualizar_mercado.py → coletar_mercado.py + limpar_mercado.py).
-// Fontes: Agrofy e Tratores e Colheitadeiras. São PREÇOS PEDIDOS em anúncios, não preços de venda fechada.
+// Fontes: Agrofy, Tratores e Colheitadeiras e MF Rural. São PREÇOS PEDIDOS em anúncios, não preços de venda fechada.
 //
 // O que este arquivo calcula, sempre a partir dos próprios anúncios (nada chutado):
 // 1. Depreciação por ano de cada categoria: inclinação de log(preço) contra a idade DENTRO de cada modelo
@@ -19,10 +19,12 @@
 //    Anúncio não informa o estado: o comparável recebe o mesmo estado da máquina avaliada (a base de mercado não ajusta
 //    conservação; esse ajuste só vem das trocas da própria revenda). Anúncio sem horas recebe as horas típicas da idade
 //    (hAno × idade), então as horas só pesam pelo que os anúncios com horas e as trocas da revenda mostram.
+//
+// CARGA SOB DEMANDA: mercado-anuncios.js (~1,5 MB) NÃO é baixado ao abrir o app. Quem precisa dos anúncios (avaliação de
+// implemento, teste às cegas) chama MERCADO_CARREGAR(), que injeta o arquivo uma vez só (mesma versão ?v= deste arquivo),
+// monta window.MERCADO e avisa com o evento 'anshur:mercado'. Se os dados já estiverem na página (Node, testes), monta na hora.
 (function (raiz) {
-  const D = raiz.MERCADO_DADOS;
-  if (!D) return;
-  const ANO = +D.coleta.slice(0, 4);
+  let ANO = 0;
   const MIN_HORAS = 5;
   const idadeDe = (a) => ANO - a.ano;
   const chave = (x) => x.tipo + '|' + x.marca + '|' + x.modelo;
@@ -80,6 +82,7 @@
   }
 
   function montar(dados) {
+    ANO = +String(dados.coleta).slice(0, 4);
     const anuncios = dados.anuncios, dep = depreciacao(anuncios), hor = horasPorAno(anuncios);
     const padraoH = (tipo) => ((raiz.MOTOR && raiz.MOTOR.HANO) || {})[tipo] || 800;
     const grupos = new Map();
@@ -115,7 +118,40 @@
       doCatalogo, comparaveis, mediana, referencia, depDe: (x) => depDe(dep, x), MIN_DEP_GRUPO };
   }
 
-  const API = montar(D);
-  API.montar = montar;
-  raiz.MERCADO = API;
+  function iniciar() {
+    if (raiz.MERCADO) return raiz.MERCADO;
+    const D = raiz.MERCADO_DADOS;
+    if (!D) return null;
+    const API = montar(D);
+    API.montar = montar;
+    raiz.MERCADO = API;
+    return API;
+  }
+
+  // arquivo de dados ao lado deste, com a mesma versão (?v=) para o cache do navegador e do service worker
+  const doc = typeof document !== 'undefined' ? document : null;
+  const eu = doc && doc.currentScript && doc.currentScript.src ? doc.currentScript.src : '';
+  const ARQ = eu ? eu.replace(/mercado\.js(\?|$)/, 'mercado-anuncios.js$1') : 'mercado-anuncios.js';
+  let promessa = null;
+  function carregar() {
+    if (iniciar()) return Promise.resolve(raiz.MERCADO);
+    if (!doc) return Promise.reject(new Error('base de mercado indisponível'));
+    if (!promessa) {
+      promessa = new Promise((ok, erro) => {
+        const s = doc.createElement('script');
+        s.src = ARQ; s.async = true;
+        s.onload = () => {
+          const api = iniciar();
+          if (!api) { promessa = null; erro(new Error('base de mercado vazia')); return; }
+          try { raiz.dispatchEvent(new CustomEvent('anshur:mercado', { detail: api })); } catch (e) { /* navegador antigo: segue sem o aviso */ }
+          ok(api);
+        };
+        s.onerror = () => { promessa = null; s.remove(); erro(new Error('sem internet para baixar a base de mercado')); };
+        doc.head.appendChild(s);
+      });
+    }
+    return promessa;
+  }
+  raiz.MERCADO_CARREGAR = carregar;
+  iniciar();
 })(typeof window !== 'undefined' ? window : globalThis);

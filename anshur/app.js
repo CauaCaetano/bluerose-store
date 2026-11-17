@@ -316,6 +316,15 @@
   const condDe = (f, tipo = av.tipo) => condFicha(f, tipo);
   const maqAv = () => ({ tipo: av.tipo, marca: av.marca, modelo: av.modelo, ano: av.ano, horas: semHoras(av.tipo) ? 0 : av.horas, cond: condDe(av.ficha), ficha: { ...av.ficha } });
   // catálogo da avaliação: os modelos da revenda e, em implementos, também os da base pública de mercado (anúncios reais)
+  // carrega mercado-anuncios.js na primeira avaliação de implemento (não no abrir do app); ao chegar, redesenha o passo
+  let mercadoFalhou = false;
+  function pedirMercado(tipo) {
+    if (!semHoras(tipo) || window.MERCADO || !window.MERCADO_CARREGAR) return;
+    window.MERCADO_CARREGAR().then(() => { mercadoFalhou = false; }, () => {
+      if (!mercadoFalhou) { mercadoFalhou = true; if ($('#passo')) { desenharPasso(); toast('Sem internet para baixar a base de mercado de implementos: a avaliação usa só as trocas da revenda.', true); } }
+    });
+  }
+  window.addEventListener('anshur:mercado', () => { recCache.clear(); if ($('#passo')) desenharPasso(); else if ($('#resultado')) desenharResultado(); });
   function catalogoAv(tipo) {
     const proprios = A.modelos.filter((m) => m.tipo === tipo);
     if (!semHoras(tipo) || !window.MERCADO) return proprios;
@@ -350,6 +359,7 @@
 
   function desenharPasso() {
     const caixa = $('#passo'); if (!caixa) return;
+    pedirMercado(av.tipo);
     const tipos = Object.keys(NOMES);
     const cat = catalogoAv(av.tipo);
     const marcas = [...new Set(cat.map((m) => m.marca))];
@@ -366,7 +376,8 @@
         <div class="campo"><label for="f-ano">Ano</label><select id="f-ano">${anos.map((a) => `<option ${a === av.ano ? 'selected' : ''}>${a}</option>`).join('')}</select></div>
         ${sh ? `<div class="campo"><span class="rot-campo">Horas trabalhadas</span><p class="sub" id="f-sem-horas" style="margin-top:8px">Implemento não tem horímetro: o valor sai do ano, do modelo e do estado na inspeção.</p></div>`
           : `<div class="campo"><label for="f-horas">Horas trabalhadas</label><input id="f-horas" type="number" inputmode="numeric" min="0" step="10" value="${av.horas || ''}" required aria-describedby="e-horas"><span class="erro-campo" id="e-horas"></span></div>`}
-        ${!modelos.length ? `<p class="conta neg inteiro">Ainda não há modelos de ${esc(NOMES[av.tipo].toLowerCase())} no catálogo. Adicione em Configurações › Catálogo de modelos.</p>` : ''}
+        ${sh && !window.MERCADO && window.MERCADO_CARREGAR && !mercadoFalhou ? '<p class="sub inteiro" id="f-mercado-carregando" role="status">Carregando os modelos da base de mercado de implementos…</p>' : ''}
+        ${!modelos.length && !(sh && !window.MERCADO && window.MERCADO_CARREGAR && !mercadoFalhou) ? `<p class="conta neg inteiro">Ainda não há modelos de ${esc(NOMES[av.tipo].toLowerCase())} no catálogo. Adicione em Configurações › Catálogo de modelos.</p>` : ''}
         <div class="campo"><label for="f-local">Localização da máquina</label><input id="f-local" value="${esc(av.local)}" autocomplete="off"></div>
         <div class="campo"><label for="f-nova">Máquina nova desta negociação</label><select id="f-nova"><option value="">Nenhuma / não financiada</option>${(A.financiadas || []).filter((f) => !f.venda).map((f) => `<option value="${f.chassi}" ${av.nova === f.chassi ? 'selected' : ''}>${esc(f.marca + ' ' + f.modelo)} · ${f.chassi}</option>`).join('')}</select></div>
         <div class="campo inteiro"><label for="f-obs">Informações adicionais</label><textarea id="f-obs" rows="2" placeholder="Ex.: piloto automático, pneus novos há 1 safra">${esc(av.obs)}</textarea></div>
@@ -474,8 +485,22 @@
     const ang = RT.angulosDe(av.tipo), tem = new Set(ang.filter((a, i) => av.fotos[i]).map((a) => a.id));
     const viu = (k) => ang.some((a) => tem.has(a.id) && a.itens.includes(k));
     const base = { motor: [3, 'Mangueiras ressecadas e resto de óleo perto da bomba injetora (foto Motor).'], transmissao: [4, 'Sem vazamento visível na caixa (foto Transmissão).'], hidraulico: [3, 'Engate traseiro com folga aparente e mangueira remendada (foto Hidráulico).'], pneus: [2, 'Garras dos pneus traseiros gastas, cerca de 30% de vida (foto Pneus traseiros).'], cabine: [4, 'Painel inteiro e bancos em bom estado (foto Cabine).'], lataria: [3, 'Ferrugem leve no para-lama esquerdo e repintura no capô (foto Lateral esquerda).'] };
+    if (av.tipo === 'implemento') return exemploIAImplemento(ang, tem, viu);
     const itens = {}; Object.keys(base).forEach((k) => { itens[k] = viu(k) ? { nota: base[k][0], justificativa: base[k][1] } : { nota: null, justificativa: 'Não dá para ver: falta a foto deste item.' }; });
     return { itens, avarias: viu('pneus') ? [{ descricao: 'Desgaste forte nas garras dos pneus traseiros', foto: 'pneus-tras', gravidade: 'moderada' }] : [], faltando: ang.filter((a) => !tem.has(a.id)).slice(0, 6).map((a) => ({ angulo: a.id, motivo: 'foto não tirada' })), observacao: 'Exemplo fixo da demonstração: na conta da revenda a IA olha as fotos de verdade.' };
+  }
+  // implemento: só os 4 itens que existem (órgãos de trabalho, hidráulico/cardã, rodas, estrutura); motor e cabine "não se aplica"
+  function exemploIAImplemento(ang, tem, viu) {
+    const base = { transmissao: [3, 'Discos com a borda gasta, cerca de 40% de vida; um mancal com folga aparente (foto Desgaste de perto).'],
+      hidraulico: [4, 'Cilindros sem vazamento; cardã com a proteção inteira (foto Cardã e caixa).'],
+      pneus: [3, 'Pneus de transporte com garras médias e um corte lateral leve (foto Rodas e pneus).'],
+      lataria: [3, 'Ferrugem superficial no chassi e solda antiga no cabeçalho, sem trinca (foto Estrutura e soldas).'] };
+    const itens = { motor: { nota: null, justificativa: 'Não se aplica a implemento.' }, cabine: { nota: null, justificativa: 'Não se aplica a implemento.' } };
+    Object.keys(base).forEach((k) => { itens[k] = viu(k) ? { nota: base[k][0], justificativa: base[k][1] } : { nota: null, justificativa: 'Não dá para ver: falta a foto deste item.' }; });
+    const avarias = [];
+    if (viu('transmissao')) avarias.push({ descricao: 'Mancal de disco com folga e graxa vazando', foto: tem.has('desgaste') ? 'desgaste' : 'orgaos', gravidade: 'moderada' });
+    if (viu('lataria')) avarias.push({ descricao: 'Solda antiga no cabeçalho: conferir se não há trinca por baixo', foto: tem.has('estrutura') ? 'estrutura' : 'cabecalho', gravidade: 'leve' });
+    return { itens, avarias, faltando: ang.filter((a) => !tem.has(a.id)).slice(0, 6).map((a) => ({ angulo: a.id, motivo: 'foto não tirada' })), observacao: 'Exemplo fixo da demonstração: na conta da revenda a IA olha as fotos de verdade.' };
   }
   async function analisarIA(b) {
     const ang = RT.angulosDe(av.tipo), idx = ang.map((a, i) => i).filter((i) => av.fotos[i]);
@@ -488,7 +513,7 @@
       try {
         const fotos = idx.map((i) => ({ angulo: ang[i].id, mime: 'image/jpeg', dados: String(fotosGrandes[ang[i].id] || av.fotos[i]).split(',')[1] }));
         const r = await NV.ia('analisar', { tipo: av.tipo, maquina: { tipo: av.tipo, marca: av.marca, modelo: av.modelo, ano: av.ano, horas: av.horas }, fotos });
-        sugestao = RT.limparSugestao(r.sugestao, ang.map((a) => a.id)); provedor = r.provedor; modelo = r.modelo;
+        sugestao = RT.limparSugestao(r.sugestao, ang.map((a) => a.id), av.tipo); provedor = r.provedor; modelo = r.modelo;
         if (r.restantes != null) toast(`Análise pronta. Restam ${r.restantes} análises grátis hoje.`);
       } catch (e) { b.disabled = false; b.textContent = 'Analisar com IA'; toast(e.message, true); return; }
     }
