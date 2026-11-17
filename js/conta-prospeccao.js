@@ -7,7 +7,7 @@
   var esc = C.esc, cliente = null, D = null, aba = 'hoje', sel = null, filtro = { q: '', faixa: '', uf: '', etapa: '' };
   var SITE = 'https://bluerose-store.com/';
   // uma aba por produto: cada um com a sua fila, os seus limites e a sua aprovação de textos
-  var PRODUTOS = { anshur: { nome: 'Anshur', alvo: 'revendas de máquinas' }, safra: { nome: 'Trutina', alvo: 'produtores e fornecedores de cana' } };
+  var PRODUTOS = { anshur: { nome: 'Anshur', alvo: 'revendas de máquinas' } };  // Trutina saiu da prospecção em 17/11 (dados ficam no banco)
   var produto = (function () { try { return PRODUTOS[localStorage.getItem('br-prosp-produto')] ? localStorage.getItem('br-prosp-produto') : 'anshur'; } catch (e) { return 'anshur'; } })();
   var ETAPAS = [['novo', 'Novo'], ['contatado', 'Contatado'], ['retomada1', 'Retomada 1'], ['retomada2', 'Retomada 2'], ['abriu_link', 'Abriu o link'],
     ['respondeu', 'Respondeu'], ['teste', 'Teste às cegas'], ['negociando', 'Negociando'], ['assinou', 'Assinou'], ['perdido', 'Perdido'], ['nao_contatar', 'Não contatar']];
