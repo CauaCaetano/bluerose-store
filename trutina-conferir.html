@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Trutina: conferir (uso interno)</title>
+<link rel="icon" href="img/trutina/trutina-icone-32.png" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/trutina.css?v=2">
+<link rel="stylesheet" href="css/trutina-conferir.css?v=1">
+<script src="js/safra-motor.js?v=2" defer></script>
+<script src="js/trutina-conferir.js?v=1" defer></script>
+</head>
+<body class="tc">
+<header class="tr-topo"><a class="tr-marca" href="trutina.html"><img src="img/trutina/trutina-logo.png" alt="Trutina" width="214" height="61"></a><span class="tc-interno">Ferramenta interna · os papéis do cliente ficam só neste navegador</span></header>
+<main class="tc-main">
+  <section id="tc-bloqueio" class="tc-caixa" hidden><h1>Uso interno</h1><p>Esta ferramenta é da equipe da Trutina. Entre em <a href="conta.html">Minha conta</a> com a conta do dono (com o código do celular) e volte a esta página.</p></section>
+  <form id="tc-form" class="tc-caixa" hidden novalidate>
+    <h1>Conferir uma safra</h1>
+    <fieldset><legend>Produtor e contrato</legend>
+      <div class="tc-grade">
+        <label>Produto<select name="produto"><option value="soja">Soja</option><option value="milho">Milho</option><option value="sorgo">Sorgo</option><option value="trigo">Trigo</option><option value="cafe">Café</option><option value="cana">Cana (ATR)</option></select></label>
+        <label>Nome do produtor<input name="produtor" autocomplete="off"></label>
+        <label>CPF ou CNPJ do produtor (do contrato)<input name="doc" inputmode="numeric" autocomplete="off" aria-describedby="tc-doc-ajuda"><small id="tc-doc-ajuda">Controla as 20 cargas grátis. Só a impressão (hash) vai para o servidor, nunca o número.</small></label>
+        <label>Armazém ou usina<input name="comprador" autocomplete="off"></label>
+      </div>
+      <p class="tc-cota" id="tc-cota" aria-live="polite"></p>
+    </fieldset>
+    <fieldset class="tc-graos"><legend>Regras do contrato (grãos)</legend>
+      <div class="tc-grade">
+        <label>Preço por saca (R$)<input name="preco" inputmode="decimal" placeholder="se o preço for fixo"></label>
+        <label>Umidade padrão (%)<input name="umidade" inputmode="decimal" placeholder="14"></label>
+        <label>Impureza padrão (%)<input name="impureza" inputmode="decimal" placeholder="1"></label>
+        <label>Avariados padrão (%)<input name="avariados" inputmode="decimal" placeholder="8"></label>
+        <label>Retenção previdenciária<select name="regime"><option value="nao_conferir">Não conferir</option><option value="pf">Pessoa física (comercialização)</option><option value="pf_folha">Pessoa física (opção pela folha)</option></select></label>
+      </div>
+      <label>Tabela de desconto de umidade do contrato (uma faixa por linha: "umidade até ; desconto %")<textarea name="tabela" rows="4" placeholder="14,5 ; 0,8&#10;15,5 ; 2,1&#10;16,5 ; 3,4"></textarea><small>Sem tabela, a diferença sai como referência (perda real de água) e o relatório pede a tabela ao armazém.</small></label>
+    </fieldset>
+    <fieldset class="tc-cana" hidden><legend>Cana</legend>
+      <label>Preço do kg de ATR (R$), se for o mesmo para todas as cargas<input name="precoAtr" inputmode="decimal" placeholder="ex.: 1,1012"></label>
+    </fieldset>
+    <fieldset><legend>Cargas</legend>
+      <p class="tc-ajuda">Cole aqui a planilha (direto do Excel ou CSV), com uma linha de títulos. Colunas reconhecidas: <code id="tc-colunas"></code>. <button type="button" class="tc-linkbtn" id="tc-modelo">Baixar planilha modelo</button></p>
+      <textarea name="cargas" rows="10" spellcheck="false" required></textarea>
+      <div class="tc-grade tc-graos">
+        <label>Total de kg na liquidação (opcional)<input name="liqKg" inputmode="decimal"></label>
+        <label>Total pago na liquidação, R$ (opcional)<input name="liqValor" inputmode="decimal"></label>
+      </div>
+    </fieldset>
+    <div class="tc-acoes"><button class="tr-btn">Conferir</button><span id="tc-status" role="status"></span></div>
+  </form>
+  <section id="tc-resultado" class="tc-caixa" hidden aria-live="polite"></section>
+</main>
+</body>
+</html>

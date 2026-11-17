@@ -1,0 +1,20 @@
+/* Trutina: ferramenta interna de conferência */
+.tc-interno { margin-left: auto; color: var(--tr-cinza); font-size: 14px; }
+.tc-main { max-width: 1040px; margin: 0 auto; padding: 8px 20px 60px; }
+.tc-caixa { background: #fff; border: 1px solid var(--tr-pedra); border-radius: var(--tr-raio); padding: 24px; margin-bottom: 20px; }
+.tc-caixa h1, .tc-caixa h2 { margin: 0 0 16px; font-size: 30px; }
+fieldset { border: 0; border-top: 1px solid var(--tr-pedra); margin: 0; padding: 16px 0; }
+legend { font-weight: 700; color: var(--tr-oliva); padding-right: 8px; }
+.tc-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 18px; margin: 8px 0; }
+.tc-caixa label { display: grid; gap: 4px; font-size: 14px; font-weight: 600; color: #3A4234; }
+.tc-caixa input, .tc-caixa select, .tc-caixa textarea { font: inherit; font-weight: 400; font-size: 15px; padding: 9px 11px; border: 1px solid #CFC6AF; border-radius: 6px; background: #FFFDF8; width: 100%; }
+.tc-caixa textarea[name="cargas"] { font-family: ui-monospace, Consolas, monospace; font-size: 13.5px; }
+.tc-caixa small { font-weight: 400; color: var(--tr-cinza); font-size: 13px; }
+.tc-ajuda { font-size: 14px; color: var(--tr-cinza); margin: 4px 0 8px; }
+.tc-ajuda code { font-size: 12.5px; }
+.tc-linkbtn { border: 0; background: none; padding: 0; color: var(--tr-oliva); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.tc-cota { margin: 6px 0 0; font-size: 14.5px; }
+.tc-acoes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
+.tc-acoes button { cursor: pointer; border: 0; }
+.tc-acoes .tr-btn-claro { border: 1.5px solid var(--tr-oliva); }
+@media print { .tr-topo, #tc-form, .tc-sem-impressao { display: none !important; } body { background: #fff; } .tc-caixa { border: 0; padding: 0; } }

@@ -35,6 +35,11 @@
     return isFinite(n) ? n : null;
   };
   var r2 = function (n) { return Math.round(n * 100) / 100; };
+  // números no padrão brasileiro nos textos (1.200 kg, 2,9%, R$ 118,00)
+  var fN = function (n, c) { return Number(n).toLocaleString('pt-BR', { minimumFractionDigits: c || 0, maximumFractionDigits: c === undefined ? 2 : c }); };
+  var fKg = function (n) { return fN(Math.round(n), 0) + ' kg'; };
+  var fR = function (n) { return 'R$ ' + fN(n, 2); };
+  var fP = function (n) { return fN(r2(n)) + '%'; };
 
   // desconto de umidade em % do peso:
   // - tabela do contrato: [[umidadeAte, descontoPct], ...] em ordem crescente (pega a 1ª faixa que cobre)
@@ -84,11 +89,11 @@
       // 2. peso líquido = bruto − tara
       var liq = g.bruto !== null && g.tara !== null ? g.bruto - g.tara : g.liquido;
       if (g.bruto !== null && g.tara !== null && g.liquido !== null && Math.abs(g.liquido - liq) > c.toleranciaKg)
-        achar('peso', 'Peso líquido informado (' + g.liquido + ' kg) diferente de bruto − tara (' + liq + ' kg).', null, liq - g.liquido);
+        achar('peso', 'Peso líquido informado (' + fKg(g.liquido) + ') diferente de bruto − tara (' + fKg(liq) + ').', null, liq - g.liquido);
       if (liq === null || liq <= 0) { achar('dados', 'Sem peso para conferir esta carga.'); linhas.push(L); return; }
       // 3. descontos de qualidade
       var du = descUmidade(g.umidade, c), di = descExcedente(g.impureza, c.impureza), da = c.descontaAvariados ? descExcedente(g.avariados, c.avariados) : 0;
-      if (du.fonte === 'fora_da_tabela') achar('tabela', 'Umidade ' + g.umidade + '% acima da última faixa da tabela do contrato: confirme o desconto com o armazém.');
+      if (du.fonte === 'fora_da_tabela') achar('tabela', 'Umidade ' + fP(g.umidade) + ' acima da última faixa da tabela do contrato: confirme o desconto com o armazém.');
       var pctDevido = (du.pct || 0) + di + da;
       var descDevidoKg = liq * pctDevido / 100;
       var finalDevido = liq - descDevidoKg;
@@ -98,24 +103,24 @@
         var difKg = finalDevido - finalPago;
         if (Math.abs(difKg) > c.toleranciaKg) {
           var reais = preco !== null ? difKg / SACA * preco : null;
-          var base = 'Desconto de qualidade: devido ' + Math.round(descDevidoKg) + ' kg (' + r2(pctDevido) + '%: umidade ' + r2(du.pct || 0) + '%, impureza ' + r2(di) + '%' + (da ? ', avariados ' + r2(da) + '%' : '') + '), aplicado ' + Math.round(liq - finalPago) + ' kg.';
+          var base = 'Desconto de qualidade: devido ' + fKg(descDevidoKg) + ' (' + fP(pctDevido) + ': umidade ' + fP(du.pct || 0) + ', impureza ' + fP(di) + (da ? ', avariados ' + fP(da) : '') + '), aplicado ' + fKg(liq - finalPago) + '.';
           if (du.fonte === 'referencia' && difKg > 0) achar('qualidade_ref', base + ' Sem a tabela do contrato, usamos a perda real de água como referência: pergunte ao armazém qual tabela foi usada.', reais, difKg);
           else achar('qualidade', base, reais, difKg);
         }
       }
       // 4. preço do contrato
       if (c.preco !== null && g.preco !== null && Math.abs(g.preco - c.preco) > 0.005)
-        achar('preco', 'Preço pago R$ ' + g.preco.toFixed(2) + '/sc, contrato R$ ' + c.preco.toFixed(2) + '/sc.', (finalPago !== null ? finalPago : finalDevido) / SACA * (c.preco - g.preco));
+        achar('preco', 'Preço pago ' + fR(g.preco) + '/sc, contrato ' + fR(c.preco) + '/sc.', (finalPago !== null ? finalPago : finalDevido) / SACA * (c.preco - g.preco));
       // 5. valor da carga = sacas pagas × preço
       var valorCalc = finalPago !== null && g.preco !== null ? finalPago / SACA * g.preco : null;
       if (valorCalc !== null && g.valor !== null && Math.abs(valorCalc - g.valor) > c.toleranciaReais)
-        achar('valor', 'Valor pago R$ ' + g.valor.toFixed(2) + ' não fecha com sacas × preço (R$ ' + valorCalc.toFixed(2) + ').', valorCalc - g.valor);
+        achar('valor', 'Valor pago ' + fR(g.valor) + ' não fecha com sacas × preço (' + fR(valorCalc) + ').', valorCalc - g.valor);
       // 6. retenção previdenciária (Funrural)
       var fe = funruralEsperado(c.regime, g.data), bruto$ = g.valor !== null ? g.valor : valorCalc;
       if (fe !== null && g.funrural !== null && bruto$ !== null) {
         var fd = bruto$ * fe;
         tot.funruralPago += g.funrural; tot.funruralDevido += fd;
-        if (g.funrural - fd > c.toleranciaReais) achar('funrural', 'Retenção de R$ ' + g.funrural.toFixed(2) + ' acima do esperado para o regime (' + (fe * 100).toFixed(2) + '% = R$ ' + fd.toFixed(2) + '). Conferir com o contador.', g.funrural - fd);
+        if (g.funrural - fd > c.toleranciaReais) achar('funrural', 'Retenção de ' + fR(g.funrural) + ' acima do esperado para o regime (' + fP(fe * 100) + ' = ' + fR(fd) + '). Conferir com o contador.', g.funrural - fd);
       }
       L.dif = L.achados.reduce(function (s, a) { return s + (a.reais || 0); }, 0);
       tot.cargas++; tot.liquidoKg += liq; tot.finalDevidoKg += finalDevido; if (finalPago !== null) tot.finalPagoKg += finalPago;
@@ -129,9 +134,9 @@
     if (liquidacao) {
       var lk = num(liquidacao.kg), lv = num(liquidacao.valor);
       if (lk !== null && Math.abs(lk - tot.finalPagoKg) > c.toleranciaKg * Math.max(1, tot.cargas))
-        gerais.push({ tipo: 'liquidacao', texto: 'A liquidação fala em ' + Math.round(lk) + ' kg, mas as cargas pagas somam ' + Math.round(tot.finalPagoKg) + ' kg.', kg: Math.round(tot.finalPagoKg - lk) });
+        gerais.push({ tipo: 'liquidacao', texto: 'A liquidação fala em ' + fKg(lk) + ', mas as cargas pagas somam ' + fKg(tot.finalPagoKg) + '.', kg: Math.round(tot.finalPagoKg - lk) });
       if (lv !== null && Math.abs(lv - tot.valorPago) > c.toleranciaReais * Math.max(1, tot.cargas))
-        gerais.push({ tipo: 'liquidacao', texto: 'A liquidação fala em R$ ' + lv.toFixed(2) + ', mas as cargas somam R$ ' + tot.valorPago.toFixed(2) + '.', reais: r2(tot.valorPago - lv) });
+        gerais.push({ tipo: 'liquidacao', texto: 'A liquidação fala em ' + fR(lv) + ', mas as cargas somam ' + fR(tot.valorPago) + '.', reais: r2(tot.valorPago - lv) });
     }
     gerais.forEach(function (a) { if (a.reais > 0) tot.aFavor += a.reais; });
     for (var k in tot) tot[k] = r2(tot[k]);
@@ -149,7 +154,7 @@
       if (g.ticket) { var t = String(g.ticket).trim(); if (vistos[t]) L.achados.push({ tipo: 'duplicado', texto: 'Ticket ' + t + ' repetido (já está na carga ' + vistos[t] + ').' }); else vistos[t] = i + 1; }
       if (g.toneladas === null || g.atr === null || g.precoAtr === null) { L.achados.push({ tipo: 'dados', texto: 'Faltam toneladas, ATR ou preço do ATR para conferir.' }); linhas.push(L); return; }
       var devido = g.toneladas * g.atr * g.precoAtr;
-      if (g.valor !== null && Math.abs(devido - g.valor) > tol) L.achados.push({ tipo: 'valor', texto: g.toneladas + ' t × ' + g.atr + ' kg ATR/t × R$ ' + g.precoAtr + '/kg = R$ ' + devido.toFixed(2) + '; pago R$ ' + g.valor.toFixed(2) + '.', reais: r2(devido - g.valor) });
+      if (g.valor !== null && Math.abs(devido - g.valor) > tol) L.achados.push({ tipo: 'valor', texto: fN(g.toneladas) + ' t × ' + fN(g.atr) + ' kg ATR/t × R$ ' + fN(g.precoAtr, 4) + '/kg = ' + fR(devido) + '; pago ' + fR(g.valor) + '.', reais: r2(devido - g.valor) });
       L.dif = L.achados.reduce(function (s, a) { return s + (a.reais || 0); }, 0);
       tot.cargas++; tot.toneladas += g.toneladas; tot.valorDevido += devido; if (g.valor !== null) tot.valorPago += g.valor;
       L.achados.forEach(function (a) { if (a.reais > 0) tot.aFavor += a.reais; else if (a.reais < 0) tot.contra += -a.reais; });
