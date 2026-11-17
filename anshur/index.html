@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=30">
+<link rel="stylesheet" href="estilo.css?v=31">
 </head>
 <body>
 <a class="pular" href="#tela">Ir para o conteúdo</a>
@@ -34,7 +34,7 @@
   .demo-fita .df-contratar:hover { background: #D1B57E; }
   .demo-fita .df-cegas { border: 1px solid rgba(193, 163, 106, .75); color: #E9E2D4; }
   .demo-fita .df-cegas:hover { background: rgba(193, 163, 106, .16); }
-  @media (max-width: 640px) { .demo-fita .df-txt { display: none; } .demo-fita { justify-content: space-between; flex-wrap: wrap; gap: 6px; padding: 6px 10px; } .demo-fita a { min-height: 32px; padding: 0 10px; font-size: 12.5px; } }
+  @media (max-width: 640px) { .demo-fita .df-txt { display: none; } .demo-fita { justify-content: space-between; flex-wrap: wrap; gap: 6px; padding: 6px 10px; } .demo-fita a { min-height: 44px; padding: 0 12px; font-size: 13px; } }
 </style>
 <div class="demo-fita" role="region" aria-label="Demonstração">
   <a class="df-voltar" href="../anshur.html">← Voltar ao site</a>
@@ -42,45 +42,51 @@
   <a class="df-cegas" href="teste-as-cegas.html">Teste às cegas grátis</a>
   <a class="df-contratar" href="../anshur.html#assinar">Preço e contratação</a>
 </div>
+<header class="cabecalho">
+  <div class="cab-linha">
+    <button class="area-troca sis-grade" id="sis-grade" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Sistemas: abrir outro sistema ou voltar ao início" title="Sistemas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Sistemas</span></button>
+    <a class="marca" href="#/" id="marca" aria-label="Anshur: início"></a>
+    <div class="cab-revenda"><div class="cab-info"><b id="revenda"></b><span id="refdata"></span></div><select class="loja-sel" id="loja-sel" aria-label="Loja"></select></div>
+    <button class="busca-campo busca-btn" type="button" id="busca-btn" aria-label="Buscar em todos os sistemas (Ctrl+K)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"/></svg><span class="busca-txt">Buscar máquinas, clientes, OS, notas…</span><span class="kbd">Ctrl K</span></button>
+    <span class="selo-demo">Dados demonstrativos</span>
+    <button class="sino" type="button" id="instalar-btn" aria-label="Instalar o app" title="Instalar o Anshur"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
+    <button class="sino" type="button" id="sino" aria-label="Avisos e alertas"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/></svg><b id="sino-n" hidden></b></button>
+    <div class="perfil">
+      <button class="avatar" id="perfil" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Perfil e opções">SA</button>
+      <div class="perfil-menu" id="perfil-menu" role="menu" hidden></div>
+    </div>
+  </div>
+</header>
 <div class="casca">
-  <!-- celular: barra de baixo com o menu do sistema aberto (no computador o menu fica na barra do sistema, no cabeçalho) -->
-  <aside class="lateral" aria-label="Menu do sistema no celular">
-    <a class="marca" href="#/" id="marca" aria-label="Anshur, portal"></a>
-    <nav class="menu" id="menu" aria-label="Menu do sistema">
-      <span class="menu-indicador" aria-hidden="true"></span>
-    </nav>
+  <!-- computador: os sistemas numa coluna à esquerda (recolhível) quando um sistema está aberto -->
+  <aside class="lateral" id="lateral" aria-label="Sistemas">
+    <button class="lat-recolher" id="lat-recolher" type="button" aria-expanded="true" aria-controls="lat-areas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg><span class="sr">Recolher ou abrir a lista de sistemas</span></button>
+    <nav class="lat-areas" id="lat-areas" aria-label="Sistemas"></nav>
     <p class="lateral-rodape">Dados demonstrativos de uma revenda fictícia.</p>
   </aside>
   <div class="principal">
-    <header class="cabecalho">
-      <div class="cab-linha">
-        <button class="area-troca sis-grade" id="sis-grade" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Sistemas: voltar ao portal ou abrir outro sistema" title="Sistemas e portal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h3v3H5zM10.5 5h3v3h-3zM16 5h3v3h-3zM5 10.5h3v3H5zM10.5 10.5h3v3h-3zM16 10.5h3v3h-3zM5 16h3v3H5zM10.5 16h3v3h-3zM16 16h3v3h-3z"/></svg><span>Sistemas</span></button>
-        <a class="sis-nome" id="sis-nome" href="#/"></a>
-        <div class="cab-info"><b id="revenda"></b><span id="refdata"></span></div>
-        <select class="loja-sel" id="loja-sel" aria-label="Loja"></select>
-        <span class="selo-demo">Dados demonstrativos</span>
-        <button class="sino busca-btn" type="button" id="busca-btn" aria-label="Buscar em todos os sistemas (Ctrl+K)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"/></svg><span class="kbd">Ctrl K</span></button>
-        <button class="sino" type="button" id="instalar-btn" aria-label="Instalar o app" title="Instalar o Anshur"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
-        <button class="sino" type="button" id="sino" aria-label="Alertas"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/></svg><b id="sino-n" hidden></b></button>
+    <div class="area-cab" id="area-cab">
+      <div class="area-cab-linha">
+        <nav class="migalhas" aria-label="Você está em"><a class="sis-nome" id="sis-nome" href="#/"></a><span class="mig-sep" aria-hidden="true">›</span><span class="mig-aba" id="mig-aba"></span></nav>
         <a class="btn btn-ouro cab-nova" href="#/usados/avaliar" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Nova avaliação</span></a>
-        <div class="perfil">
-          <button class="avatar" id="perfil" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Perfil e opções">SA</button>
-          <div class="perfil-menu" id="perfil-menu" role="menu" hidden></div>
-        </div>
       </div>
-      <nav class="sis-barra" id="sis-barra" aria-label="Menu do sistema"></nav>
-    </header>
+      <nav class="sis-barra" id="sis-barra" aria-label="Telas do sistema"></nav>
+    </div>
     <main id="tela" tabindex="-1"></main>
   </div>
 </div>
+<!-- celular: barra fixa embaixo (Início + 3 destinos + Mais) e a folha "Mais" com todas as telas -->
+<nav class="menu" id="menu" aria-label="Navegação principal"></nav>
+<div class="folha-fundo" id="menu-fundo" hidden></div>
+<div class="folha" id="menu-folha" role="dialog" aria-modal="true" aria-label="Mais opções" hidden></div>
 <div id="camada"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<script src="instalar.js?v=30"></script>
-<script src="areas.js?v=30"></script>
-<script src="dados.js?v=30"></script>
-<script src="fotos.js?v=30"></script>
+<script src="instalar.js?v=31"></script>
+<script src="areas.js?v=31"></script>
+<script src="dados.js?v=31"></script>
+<script src="fotos.js?v=31"></script>
 <!-- nuvem.js: na demonstração carrega o app na hora; no ambiente real, entra na conta e carrega os dados do servidor antes -->
-<script src="nuvem.js?v=30" data-app="comum.js?v=30 importar.js?v=30 dms.js?v=30 implantacao.js?v=30 motor.js?v=30 mercado.js?v=30 retencao.js?v=30 graficos.js?v=30 areas/nucleo.js?v=30 areas/importar.js?v=30 areas/novas-regras.js?v=30 areas/novas.js?v=30 areas/financeiro-regras.js?v=30 areas/financeiro.js?v=30 areas/pecas-regras.js?v=30 areas/oficina-regras.js?v=30 areas/oficina.js?v=30 areas/pecas.js?v=30 areas/crm-regras.js?v=30 areas/crm.js?v=30 areas/fiscal-regras.js?v=30 areas/fiscal.js?v=30 app.js?v=30"></script>
+<script src="nuvem.js?v=31" data-app="comum.js?v=31 importar.js?v=31 dms.js?v=31 implantacao.js?v=31 motor.js?v=31 mercado.js?v=31 retencao.js?v=31 graficos.js?v=31 areas/nucleo.js?v=31 areas/importar.js?v=31 areas/novas-regras.js?v=31 areas/novas.js?v=31 areas/financeiro-regras.js?v=31 areas/financeiro.js?v=31 areas/pecas-regras.js?v=31 areas/oficina-regras.js?v=31 areas/oficina.js?v=31 areas/pecas.js?v=31 areas/crm-regras.js?v=31 areas/crm.js?v=31 areas/fiscal-regras.js?v=31 areas/fiscal.js?v=31 app.js?v=31"></script>
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch(() => {}); const tinha = !!navigator.serviceWorker.controller; let novo = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinha) { if (!novo) { novo = true; location.reload(); } return; } performance.getEntriesByType('resource').forEach((r) => { if (/^https:\/\/(cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com)\//.test(r.name)) fetch(r.name, { mode: 'cors', credentials: 'omit' }).catch(() => {}); }); }); }</script>
 </body>
 </html>

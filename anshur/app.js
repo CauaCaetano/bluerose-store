@@ -21,7 +21,8 @@
   const ehDono = () => K.usuarioAtual().perfil === 'dono';
   menuPerfil.innerHTML = `<p><b>${esc(K.usuarioAtual().nome)}</b><span>${K.PERFIS[K.usuarioAtual().perfil]} · ${esc(A.revenda.nome)}${OP ? ' · dados reais' : ''}${NV ? '<br>' + esc(NV.usuario.email || '') : ''}</span></p>
     <label class="perfil-loja" for="loja-sel-m">Loja<select id="loja-sel-m" aria-label="Loja"></select></label>
-    <button type="button" role="menuitem" id="m-portal">Voltar ao portal</button>
+    <button type="button" role="menuitem" id="m-portal">Voltar ao início</button>
+    <button type="button" role="menuitem" id="m-pref" data-preferencias>Preferências deste aparelho</button>
     <button type="button" role="menuitem" id="m-perfil">Meu perfil</button>
     <button type="button" role="menuitem" id="m-instalar">Instalar o app</button>
     <button type="button" role="menuitem" id="m-premissas">Premissas da revenda</button>
@@ -266,9 +267,9 @@
 
     const coresIdade = { normal: '#3E6B57', atencao: '#71877B', alerta: '#E2D6BF', critico: '#C1A36A' };
     const nomesRosca = { normal: 'Até 30 dias', atencao: '31 a 60 dias', alerta: '61 a 90 dias', critico: 'Acima de 90 dias' };
-    tela.innerHTML = `${avisoImplantacao()}
+    tela.innerHTML = `
       <div class="titulo"><div><h1>Visão geral da revenda</h1><p>Onde está o seu dinheiro e o que fazer hoje.</p></div>
-        <div class="acoes"><a class="btn btn-linha" href="#patio">Ver pátio completo</a><button class="btn btn-linha" type="button" id="premissas-v">Premissas</button>${botaoAdicionar([{ nome: 'Nova avaliação', desc: 'Quanto pagar no usado da troca', acao: () => { location.hash = '#avaliar'; } }, { nome: 'Máquina no pátio', desc: 'Cadastrar à mão', acao: () => addMaquinaManual() }, { nome: 'Documento ou planilha', desc: 'Foto, PDF, CSV ou Excel', acao: () => { location.hash = '#documentos'; } }])}</div></div>
+        <div class="acoes"><a class="btn btn-linha" href="#patio">Ver pátio completo</a><button class="btn btn-linha" type="button" id="premissas-v">Premissas</button>${botaoAdicionar([{ nome: 'Nova avaliação', desc: 'Quanto pagar no usado da troca', acao: () => { location.hash = '#avaliar'; } }, { nome: 'Máquina no pátio', desc: 'Cadastrar à mão', acao: () => addMaquinaManual() }, { nome: 'Documento ou planilha', desc: 'Foto, PDF, CSV ou Excel', acao: () => { location.hash = '#documentos'; } }], 'Novo cadastro')}</div></div>
       <div class="kpis escalonado">
         <a class="kpi k-marfim" href="#patio"><span class="rot">${ICO.moedas}Capital imobilizado</span><span class="val">${conta(capital, 'mil')}</span><span class="exp">Pago nas ${itens.length} máquinas do pátio</span></a>
         <a class="kpi k-salvia" href="#trocas"><span class="rot">${ICO.pct}Margem média realizada</span><span class="val">${conta(margemReal, 'pct')}</span><span class="exp">Nas ${vendidas.length} trocas vendidas</span></a>
@@ -333,33 +334,58 @@
   }
   const num = (s) => { const v = parseFloat(String(s).replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')); return isFinite(v) ? v : 0; };
 
+  const NOMES_PASSO = ['Identificação', 'Fotos', 'Inspeção', 'Resultado'];
   function telaAvaliar() {
-    const nomesPasso = ['Identificação', 'Fotos', 'Inspeção', 'Resultado'];
     tela.innerHTML = `
-      <div class="titulo"><div><h1>Avaliar troca</h1><p>Quanto vale pagar no usado que o cliente oferece, com base nas trocas que a ${esc(A.revenda.nome)} já vendeu.</p></div>${botaoAdicionar([{ nome: 'Preencher com documento', desc: 'Foto da nota ou do CRV da máquina', acao: () => { location.hash = '#documentos'; } }, { nome: 'Novo modelo no catálogo', desc: 'Modelo que ainda não está na lista', acao: () => { location.hash = '#config'; } }])}</div>
-      <nav class="etapas" aria-label="Etapas da avaliação">${nomesPasso.map((n, i) => `<button type="button" data-p="${i + 1}" ${av.passo === i + 1 ? 'aria-current="step"' : ''} class="${av.passo > i + 1 ? 'feita' : ''}">${n}</button>`).join('')}</nav>
-      ${rascunhoDe ? `<p class="conta" id="rascunho-aviso">Rascunho guardado neste aparelho (${new Date(rascunhoDe).toLocaleString('pt-BR')}). <button class="link" type="button" id="rascunho-zerar">Começar do zero</button></p>` : ''}
-      <div id="passo"></div>
-      ${estado.avaliacoes.length ? `<section class="painel bloco"><div class="painel-cab"><h2>Avaliações registradas</h2><p>${estado.avaliacoes.length} nesta demonstração</p></div>
+      <div class="titulo"><div><h1>Avaliar troca</h1><p>Descubra quanto a ${esc(A.revenda.nome)} pode pagar no usado que o cliente oferece, com base nas trocas que ela já vendeu.</p></div>${botaoAdicionar([{ nome: 'Preencher com documento', desc: 'Foto da nota ou do CRV da máquina', acao: () => { location.hash = '#documentos'; } }, { nome: 'Novo modelo no catálogo', desc: 'Modelo que ainda não está na lista', acao: () => { location.hash = '#config'; } }], 'Outras formas de preencher', true)}</div>
+      <nav class="etapas" aria-label="Etapas da avaliação"><ol>${NOMES_PASSO.map((n, i) => `<li><button type="button" data-p="${i + 1}" ${av.passo === i + 1 ? 'aria-current="step"' : ''} class="${av.passo > i + 1 ? 'feita' : ''}"><span class="et-n" aria-hidden="true">${i + 1}</span><span class="et-nome">${n}</span></button></li>`).join('')}</ol></nav>
+      <div class="etapa-movel" id="etapa-movel" aria-live="polite"></div>
+      ${rascunhoDe ? `<p class="conta rascunho" id="rascunho-aviso">${ic('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}<span>Rascunho salvo neste aparelho (${new Date(rascunhoDe).toLocaleString('pt-BR')}). Pode sair e voltar depois.</span> <button class="link" type="button" id="rascunho-zerar">Começar do zero</button></p>` : ''}
+      <div class="av-layout"><div id="passo"></div><aside class="av-lado" id="av-lado" aria-label="Prévia do resultado da avaliação"></aside></div>
+      ${estado.avaliacoes.length ? `<section class="painel bloco"><div class="painel-cab"><h2>Avaliações registradas</h2><p>${estado.avaliacoes.length} ${OP ? 'na revenda' : 'nesta demonstração'}</p></div>
         <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Data</th><th>Máquina</th><th class="n">Valor máximo</th><th class="n">Venda estimada</th><th>Situação</th></tr></thead><tbody>
         ${estado.avaliacoes.slice().reverse().map((a) => `<tr><td>${data(a.data)}</td><td class="maq"><b>${esc(a.maq.marca + ' ' + a.maq.modelo)}</b><span>${a.maq.ano} · ${horasTxt(a.maq)}</span></td><td class="n">${mil(a.teto)}</td><td class="n">${mil(a.venda)}</td><td>${{ troca: 'Virou troca', desistiu: 'Cliente desistiu' }[a.status] || (a.status === 'aberta' ? 'Em negociação' : '—')}${a.ia ? ' <span class="tag comprovado">IA revisada</span>' : ''}</td></tr>`).join('')}</tbody></table></div></section>` : ''}`;
     $$('.etapas button', tela).forEach((b) => b.onclick = () => irPasso(+b.dataset.p));
     const zr = $('#rascunho-zerar'); if (zr) zr.onclick = () => { limparRascunho(true); telaAvaliar(); };
     desenharPasso();
   }
+  // celular: "Etapa 1 de 4", o nome da etapa, a barra de progresso e o que vem depois (sem espremer 4 abas)
+  function marcarEtapas() {
+    $$('.etapas button', tela).forEach((b) => { const n = +b.dataset.p; b.classList.toggle('feita', n < av.passo); if (n === av.passo) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    const m = $('#etapa-movel'); if (!m) return;
+    m.innerHTML = `<p><b>Etapa ${av.passo} de 4</b> · ${NOMES_PASSO[av.passo - 1]}</p><div class="progresso" role="progressbar" aria-label="Etapas da avaliação" aria-valuemin="1" aria-valuemax="4" aria-valuenow="${av.passo}"><i style="width:${av.passo * 25}%"></i></div>${av.passo < 4 ? `<small>Depois: ${NOMES_PASSO[av.passo]}</small>` : ''}`;
+  }
+  // prévia do resultado ao lado do formulário (computador) ou embaixo (celular): o mesmo motor da etapa 4
+  let ladoTimer = null;
+  function desenharLado() {
+    const lado = $('#av-lado'), lay = $('.av-layout'); if (!lado || !lay) return;
+    lay.classList.toggle('cheio', av.passo === 4); lado.hidden = av.passo === 4; if (av.passo === 4) return;
+    let r = null; try { if (semHoras(av.tipo) || av.horas > 0) r = M.avaliar(maqAv()); } catch (e) { r = null; }
+    const cab = '<div class="painel-cab"><h2>Resultado da avaliação</h2><p>Prévia com o que já foi preenchido</p></div>';
+    if (!r) { lado.innerHTML = `<section class="painel av-res">${cab}<div class="estado-vazio">${ic('<path d="M4 19h16M6 15l4-4 3 3 5-6"/>')}<b>${!semHoras(av.tipo) && !(av.horas > 0) ? 'Falta informar as horas' : 'Ainda sem base para esta máquina'}</b><p>${!semHoras(av.tipo) && !(av.horas > 0) ? 'Com o horímetro preenchido, o valor máximo aparece aqui na hora.' : `São precisas pelo menos ${M.QUALIDADE.minimoTreino} vendas com referência de preço deste tipo de máquina.`}</p></div></section>`; return; }
+    lado.innerHTML = `<section class="painel av-res" aria-live="polite">${cab}
+      <div class="av-res-topo"><span>Valor máximo recomendado na troca</span><b>${real(r.teto)}</b><small>Faixa de negociação: ${mil(r.faixa[0])} a ${mil(r.faixa[1])}</small></div>
+      <dl class="av-res-num"><div><dt>Confiança da estimativa</dt><dd><span class="conf ${r.confianca}">${r.confianca}</span></dd></div><div><dt>Margem prevista</dt><dd>${pct(r.margemSobreVenda, 1)}</dd></div><div><dt>Custo de preparo</dt><dd>${mil(r.preparo)}</dd></div><div><dt>Venda estimada</dt><dd>${mil(r.venda)}</dd></div></dl>
+      ${av.passo < 3 ? '<p class="nota-rodape">A prévia usa as notas de inspeção atuais; ela muda quando você avaliar o estado na etapa 3.</p>' : ''}
+      <button class="btn btn-ouro btn-largo" type="button" data-ir-res>Ver resultado completo${ic('<path d="M5 12h14M13 6l6 6-6 6"/>')}</button>
+      <p class="ajuda">Registrar a avaliação, fechar a troca ou pedir aprovação: na etapa 4.</p>
+      ${r.comp && r.comp.length ? `<h3 class="av-comp-tit">${r.mercado ? 'Trocas e anúncios semelhantes' : 'Trocas semelhantes já vendidas'}</h3><ul class="av-comp">${r.comp.slice(0, 3).map((t) => `<li><span><b>${esc(t.marca + ' ' + t.modelo)}</b> ${t.ano}${String(t.id).startsWith('mercado-') ? ' · anúncio' : ''}</span><b>${mil(t.vendido)}</b></li>`).join('')}</ul>` : ''}</section>`;
+    $('[data-ir-res]', lado).onclick = () => irPasso(4);
+  }
+  ['input', 'change'].forEach((ev) => tela.addEventListener(ev, (e) => { if (e.target.closest && e.target.closest('#passo')) { clearTimeout(ladoTimer); ladoTimer = setTimeout(desenharLado, 220); } }));
+  tela.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('#passo .notas button')) { clearTimeout(ladoTimer); ladoTimer = setTimeout(desenharLado, 120); } });
   function irPasso(p) {
     if (p > 1 && !semHoras(av.tipo) && !(av.horas > 0)) { av.passo = 1; desenharPasso(); toast('Informe as horas do horímetro para continuar.', true); return; }
     // nada da IA entra no resultado sem o avaliador decidir item a item
     if (p > 3 && iaPendentes() > 0) { toast(`Revise as ${iaPendentes()} sugestões da IA (aceitar ou manter a sua nota) antes do resultado.`, true); p = 3; }
     av.passo = p;
-    $$('.etapas button', tela).forEach((b) => { const n = +b.dataset.p; b.classList.toggle('feita', n < p); if (n === p) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
     desenharPasso(); window.scrollTo({ top: 0, behavior: reduzido ? 'auto' : 'smooth' });
   }
-  const navPasso = (ultimo) => `<div class="acoes">${av.passo > 1 ? '<button class="btn btn-linha" type="button" data-ir="-1">Voltar</button>' : ''}${ultimo ? '' : '<button class="btn btn-ouro" type="button" data-ir="1">Continuar</button>'}</div>`;
+  const navPasso = (ultimo) => `<div class="acoes rodape-passo">${av.passo > 1 ? '<button class="btn btn-linha" type="button" data-ir="-1">Voltar</button>' : ''}<span class="salvo-auto">${ic('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}Rascunho salvo automaticamente</span>${ultimo ? '' : `<button class="btn btn-ouro" type="button" data-ir="1">Continuar: ${NOMES_PASSO[av.passo]}</button>`}</div>`;
 
   function desenharPasso() {
     const caixa = $('#passo'); if (!caixa) return;
-    pedirMercado(av.tipo);
+    pedirMercado(av.tipo); marcarEtapas();
     const tipos = Object.keys(NOMES);
     const cat = catalogoAv(av.tipo);
     const marcas = [...new Set(cat.map((m) => m.marca))];
@@ -369,19 +395,25 @@
     const sh = semHoras(av.tipo), anos = []; for (let a = anoAtual; a >= anoAtual - (sh ? 30 : 15); a--) anos.push(a);
     if (!anos.includes(av.ano)) av.ano = anos.includes(+av.ano) ? +av.ano : anoAtual - 5;
     let h = '';
-    if (av.passo === 1) h = `<section class="painel passo"><h2>Identificação da máquina</h2><div class="campos tres" style="margin-top:14px">
-        <div class="campo"><label for="f-tipo">Categoria</label><select id="f-tipo">${tipos.map((k) => `<option value="${k}" ${k === av.tipo ? 'selected' : ''}>${NOMES[k]}</option>`).join('')}</select></div>
-        <div class="campo"><label for="f-marca">Fabricante</label><select id="f-marca">${marcas.map((m) => `<option ${m === av.marca ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select></div>
-        <div class="campo"><label for="f-modelo">Modelo</label><select id="f-modelo">${modelos.map((m) => `<option ${m.modelo === av.modelo ? 'selected' : ''}>${esc(m.modelo)}</option>`).join('')}</select></div>
-        <div class="campo"><label for="f-ano">Ano</label><select id="f-ano">${anos.map((a) => `<option ${a === av.ano ? 'selected' : ''}>${a}</option>`).join('')}</select></div>
-        ${sh ? `<div class="campo"><span class="rot-campo">Horas trabalhadas</span><p class="sub" id="f-sem-horas" style="margin-top:8px">Implemento não tem horímetro: o valor sai do ano, do modelo e do estado na inspeção.</p></div>`
-          : `<div class="campo"><label for="f-horas">Horas trabalhadas</label><input id="f-horas" type="number" inputmode="numeric" min="0" step="10" value="${av.horas || ''}" required aria-describedby="e-horas"><span class="erro-campo" id="e-horas"></span></div>`}
-        ${sh && !window.MERCADO && window.MERCADO_CARREGAR && !mercadoFalhou ? '<p class="sub inteiro" id="f-mercado-carregando" role="status">Carregando os modelos da base de mercado de implementos…</p>' : ''}
+    const obr = '<abbr class="obr" title="obrigatório">*</abbr>';
+    if (av.passo === 1) h = `<section class="painel passo form-etapa"><div class="painel-cab"><h2>Identificação</h2><p>Campos com <abbr class="obr" title="obrigatório">*</abbr> são obrigatórios</p></div>
+      <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">1</span>Máquina<small>Qual máquina o cliente quer dar na troca</small></legend><div class="campos quatro">
+        <div class="campo"><label for="f-tipo">Categoria ${obr}</label><select id="f-tipo">${tipos.map((k) => `<option value="${k}" ${k === av.tipo ? 'selected' : ''}>${NOMES[k]}</option>`).join('')}</select></div>
+        <div class="campo"><label for="f-marca">Fabricante ${obr}</label><select id="f-marca">${marcas.map((m) => `<option ${m === av.marca ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select></div>
+        <div class="campo"><label for="f-modelo">Modelo ${obr}</label><select id="f-modelo">${modelos.map((m) => `<option ${m.modelo === av.modelo ? 'selected' : ''}>${esc(m.modelo)}</option>`).join('')}</select></div>
+        <div class="campo curto"><label for="f-ano">Ano ${obr}</label><select id="f-ano">${anos.map((a) => `<option ${a === av.ano ? 'selected' : ''}>${a}</option>`).join('')}</select></div>
+        ${sh && !window.MERCADO && window.MERCADO_CARREGAR && !mercadoFalhou ? '<p class="sub inteiro carregando-linha" id="f-mercado-carregando" role="status"><span class="spin" aria-hidden="true"></span>Carregando os modelos da base de mercado de implementos…</p>' : ''}
         ${!modelos.length && !(sh && !window.MERCADO && window.MERCADO_CARREGAR && !mercadoFalhou) ? `<p class="conta neg inteiro">Ainda não há modelos de ${esc(NOMES[av.tipo].toLowerCase())} no catálogo. Adicione em Configurações › Catálogo de modelos.</p>` : ''}
-        <div class="campo"><label for="f-local">Localização da máquina</label><input id="f-local" value="${esc(av.local)}" autocomplete="off"></div>
-        <div class="campo"><label for="f-nova">Máquina nova desta negociação</label><select id="f-nova"><option value="">Nenhuma / não financiada</option>${(A.financiadas || []).filter((f) => !f.venda).map((f) => `<option value="${f.chassi}" ${av.nova === f.chassi ? 'selected' : ''}>${esc(f.marca + ' ' + f.modelo)} · ${f.chassi}</option>`).join('')}</select></div>
+      </div></fieldset>
+      <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">2</span>Condição e uso<small>Horímetro, onde a máquina está e o que o cliente contou</small></legend><div class="campos">
+        ${sh ? `<div class="campo"><span class="rot-campo">Horas trabalhadas</span><p class="sub" id="f-sem-horas" style="margin-top:8px">Implemento não tem horímetro: o valor sai do ano, do modelo e do estado na inspeção.</p></div>`
+          : `<div class="campo"><label for="f-horas">Horas trabalhadas ${obr}</label><input id="f-horas" type="number" inputmode="numeric" min="0" step="10" value="${av.horas || ''}" required aria-describedby="a-horas e-horas"><span class="ajuda" id="a-horas">Número do horímetro, só números (ex.: 3900).</span><span class="erro-campo" id="e-horas" role="alert"></span></div>`}
+        <div class="campo"><label for="f-local">Localização da máquina</label><input id="f-local" value="${esc(av.local)}" autocomplete="off" aria-describedby="a-local"><span class="ajuda" id="a-local">Cidade e estado onde a máquina está hoje.</span></div>
         <div class="campo inteiro"><label for="f-obs">Informações adicionais</label><textarea id="f-obs" rows="2" placeholder="Ex.: piloto automático, pneus novos há 1 safra">${esc(av.obs)}</textarea></div>
-      </div>${navPasso()}</section>`;
+      </div></fieldset>
+      <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">3</span>Negociação<small>A máquina nova que o cliente está comprando; se estiver no floor plan, o resultado mostra o juro que ela já custou</small></legend><div class="campos">
+        <div class="campo inteiro"><label for="f-nova">Máquina nova desta negociação</label><select id="f-nova"><option value="">Nenhuma / não financiada</option>${(A.financiadas || []).filter((f) => !f.venda).map((f) => `<option value="${f.chassi}" ${av.nova === f.chassi ? 'selected' : ''}>${esc(f.marca + ' ' + f.modelo)} · ${f.chassi}</option>`).join('')}</select></div>
+      </div></fieldset>${navPasso()}</section>`;
     if (av.passo === 2) h = passoFotos();
     if (av.passo === 3) { const c = condDe(av.ficha); h = `<section class="painel passo"><div class="painel-cab"><h2>Inspeção</h2><p>Nota de 1 (ruim) a 5 (ótimo)</p></div>
         ${av.ia ? `<p class="conta ia-aviso">${av.ia.exemplo ? '<span class="tag declarado">Exemplo</span> ' : ''}A IA olhou ${av.ia.nFotos} fotos e <b>sugeriu</b> notas. Quem decide é você: aceite ou mantenha a sua nota em cada item${iaPendentes() ? ` (<b id="ia-falta">${iaPendentes()} para revisar</b>)` : ' (tudo revisado)'}.</p>` : '<p class="ajuda">Tire as fotos guiadas no passo anterior e a IA sugere as notas; você confere e decide item a item.</p>'}
@@ -431,6 +463,7 @@
       $$('[data-an]', caixa).forEach((i) => i.oninput = () => { av.anuncios[+i.dataset.an] = i.value; });
     }
     if (av.passo === 4) desenharResultado();
+    desenharLado();
   }
 
   // ---------- AVALIAÇÃO FOTOGRÁFICA COM IA (a IA sugere; o avaliador decide item a item) ----------
@@ -701,7 +734,7 @@
     const marcas = [...new Set(todos.map((i) => i.t.marca))].sort();
     tela.innerHTML = `
       <div class="titulo"><div><h1>Pátio de máquinas</h1><p>Saiba onde seu capital está parado e quais equipamentos exigem atenção.</p></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="exportar">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Exportar</button><button class="btn btn-linha" type="button" id="comparar">Comparar (<span id="n-comp">${comparar.size}</span>)</button>${botaoAdicionar([{ nome: 'Cadastrar à mão', desc: 'Máquina que entrou no pátio', acao: () => addMaquinaManual() }, { nome: 'Puxar de documento', desc: 'Foto da nota, PDF ou planilha', acao: () => { location.hash = '#documentos'; } }, { nome: 'Avaliar uma troca', desc: 'Calcular o valor máximo antes de fechar', acao: () => { location.hash = '#avaliar'; } }])}</div></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="exportar">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Exportar</button><button class="btn btn-linha" type="button" id="comparar">Comparar (<span id="n-comp">${comparar.size}</span>)</button>${botaoAdicionar([{ nome: 'Cadastrar à mão', desc: 'Máquina que entrou no pátio', acao: () => addMaquinaManual() }, { nome: 'Puxar de documento', desc: 'Foto da nota, PDF ou planilha', acao: () => { location.hash = '#documentos'; } }, { nome: 'Avaliar uma troca', desc: 'Calcular o valor máximo antes de fechar', acao: () => { location.hash = '#avaliar'; } }], 'Cadastrar máquina')}</div></div>
       <div class="kpis escalonado">
         <div class="kpi k-marfim"><span class="rot">${ICO.barras}Máquinas no pátio</span><span class="val">${conta(itens.length, 'int')}</span></div>
         <div class="kpi k-marfim"><span class="rot">${ICO.moedas}Capital imobilizado</span><span class="val">${conta(cap, 'mil')}</span></div>
@@ -850,7 +883,7 @@
 
     tela.innerHTML = `
       <div class="titulo"><div><h1>Inteligência de trocas</h1><p>Onde a revenda ganhou e onde perdeu dinheiro nas trocas já vendidas.</p></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="exportar">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Exportar</button>${botaoAdicionar([{ nome: 'Venda antiga à mão', desc: 'Troca que já foi vendida', acao: addVendaManual }, { nome: 'Importar planilha', desc: 'Histórico do seu sistema', acao: () => { tc.modo = 'minhas'; location.hash = '#teste'; } }, { nome: 'Puxar de documento', desc: 'Foto, PDF ou Excel', acao: () => { location.hash = '#documentos'; } }])}</div></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="exportar">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Exportar</button>${botaoAdicionar([{ nome: 'Venda antiga à mão', desc: 'Troca que já foi vendida', acao: addVendaManual }, { nome: 'Importar planilha', desc: 'Histórico do seu sistema', acao: () => { tc.modo = 'minhas'; location.hash = '#teste'; } }, { nome: 'Puxar de documento', desc: 'Foto, PDF ou Excel', acao: () => { location.hash = '#documentos'; } }], 'Registrar venda antiga')}</div></div>
       <div class="filtros">
         <div class="campo"><label for="t-per">Período</label><select id="t-per">${[['12', 'Últimos 12 meses'], ['24', 'Últimos 24 meses'], ['tudo', 'Todo o histórico']].map(([v, n]) => `<option value="${v}" ${ft.periodo === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
         <div class="campo"><label for="t-tipo">Categoria</label><select id="t-tipo"><option value="">Todas</option>${Object.keys(NOMES).map((k) => `<option value="${k}" ${ft.tipo === k ? 'selected' : ''}>${NOMES[k]}</option>`).join('')}</select></div>
@@ -910,7 +943,7 @@
     const recentes = C.vendidas().filter((t) => rec(t)).sort((a, b) => b.saida.localeCompare(a.saida)).slice(0, 16);
     if (!tc.selecionadas) tc.selecionadas = new Set(recentes.slice(0, 8).map((t) => t.id));
     tela.innerHTML = `
-      <div class="titulo"><div><h1>Quanto você pagou a mais sem perceber?</h1><p>O Anshur avalia trocas antigas sem ver quanto foi pago, usando só o que tinha sido vendido antes de cada uma. Depois revelamos e comparamos.</p></div>${botaoAdicionar([{ nome: 'Colar ou abrir planilha', desc: 'Trocas antigas do seu sistema', acao: () => { tc.modo = 'minhas'; telaTeste(); } }, { nome: 'Venda antiga à mão', desc: 'Uma troca por vez', acao: addVendaManual }])}</div>
+      <div class="titulo"><div><h1>Quanto você pagou a mais sem perceber?</h1><p>O Anshur avalia trocas antigas sem ver quanto foi pago, usando só o que tinha sido vendido antes de cada uma. Depois revelamos e comparamos.</p></div>${botaoAdicionar([{ nome: 'Colar ou abrir planilha', desc: 'Trocas antigas do seu sistema', acao: () => { tc.modo = 'minhas'; telaTeste(); } }, { nome: 'Venda antiga à mão', desc: 'Uma troca por vez', acao: addVendaManual }], 'Trazer vendas antigas')}</div>
       <div class="abas-modo" role="group" aria-label="Origem das trocas">
         <button type="button" data-m="revenda" aria-pressed="${tc.modo === 'revenda'}">${OP ? 'Trocas já importadas' : 'Trocas da demonstração'}</button>
         <button type="button" data-m="minhas" aria-pressed="${tc.modo === 'minhas'}">${OP ? 'Importar planilha' : 'Usar minhas trocas'}</button>
@@ -1016,7 +1049,7 @@
     const itens = C.patio().map(infoPatio).sort((a, b) => b.t.entrada.localeCompare(a.t.entrada));
     if (!itens.length) { tela.innerHTML = '<div class="titulo"><div><h1>Passaportes</h1><p>Nenhuma máquina no pátio. Ao fechar uma troca, o passaporte é criado automaticamente.</p></div></div><a class="btn btn-ouro" href="#avaliar">Avaliar uma troca</a>'; return; }
     tela.innerHTML = `
-      <div class="titulo"><div><h1>Passaportes</h1><p>A ficha pública de cada usado do pátio: o comprador aponta o celular no QR Code e vê inspeção, documentos e manutenções.</p></div>${botaoAdicionar([{ nome: 'Máquina no pátio', desc: 'O passaporte é criado junto', acao: () => addMaquinaManual() }])}</div>
+      <div class="titulo"><div><h1>Passaportes</h1><p>A ficha pública de cada usado do pátio: o comprador aponta o celular no QR Code e vê inspeção, documentos e manutenções.</p></div>${botaoAdicionar([{ nome: 'Máquina no pátio', desc: 'O passaporte é criado junto', acao: () => addMaquinaManual() }], 'Cadastrar máquina no pátio')}</div>
       <div class="cartoes escalonado">${itens.map((i) => {
         const comp = (i.t.manutencoes || []).filter((m) => m.comNota).length, tot = (i.t.manutencoes || []).length;
         return `<article class="cartao-pp"><img class="pp-foto" src="${F.de(i.t).propria ? F.de(i.t).u : F.mini(F.de(i.t).u)}" alt="${esc(i.t.marca + ' ' + i.t.modelo)}" loading="lazy"><span class="id">ANS-${esc(i.t.id)}</span><h2 style="font-size:17px">${esc(i.t.marca + ' ' + i.t.modelo)}</h2>
@@ -1058,7 +1091,7 @@
     const melhorMargem = vs.slice().sort((a, b) => b.margem - a.margem)[0];
     const maisAcima = vs.slice().sort((a, b) => b.acima - a.acima)[0];
     tela.innerHTML = `
-      <div class="titulo"><div><h1>Vendedores</h1><p>Quem traz resultado nas trocas e quem paga caro demais no usado.</p></div>${botaoAdicionar([{ nome: 'Adicionar vendedor', desc: 'Entra na equipe com perfil de vendedor', acao: () => addUsuario({ perfil: 'vendedor', nome: '', email: '' }) }])}</div>
+      <div class="titulo"><div><h1>Vendedores</h1><p>Quem traz resultado nas trocas e quem paga caro demais no usado.</p></div>${botaoAdicionar([{ nome: 'Adicionar vendedor', desc: 'Entra na equipe com perfil de vendedor', acao: () => addUsuario({ perfil: 'vendedor', nome: '', email: '' }) }], 'Novo vendedor')}</div>
       <div class="kpis escalonado">
         <div class="kpi k-marfim"><span class="rot">${ICO.moedas}Melhor resultado</span><span class="val">${esc(vs[0].nome)}</span><span class="exp">${mil(vs[0].resultado)} em ${vs[0].trocas} trocas</span></div>
         <div class="kpi k-salvia"><span class="rot">${ICO.pct}Melhor margem</span><span class="val">${pct(melhorMargem.margem)}</span><span class="exp">${esc(melhorMargem.nome)}</span></div>
@@ -1080,7 +1113,7 @@
   const fg = { status: '' };
   function telaGarantias() {
     const lista = (A.garantias || []).slice().sort((a, b) => b.data.localeCompare(a.data));
-    if (!lista.length) { tela.innerHTML = `<div class="titulo"><div><h1>Garantias a receber</h1><p>Nenhuma ordem de serviço em garantia cadastrada.</p></div>${botaoAdicionar([{ nome: 'OS à mão', desc: 'Serviço feito em garantia', acao: () => addGarantia() }, { nome: 'Puxar de documento', desc: 'Foto ou PDF', acao: () => { location.hash = '#documentos'; } }])}</div>`; return; }
+    if (!lista.length) { tela.innerHTML = `<div class="titulo"><div><h1>Garantias a receber</h1><p>Nenhuma ordem de serviço em garantia cadastrada.</p></div>${botaoAdicionar([{ nome: 'OS à mão', desc: 'Serviço feito em garantia', acao: () => addGarantia() }, { nome: 'Puxar de documento', desc: 'Foto ou PDF', acao: () => { location.hash = '#documentos'; } }], 'Registrar OS em garantia')}</div>`; return; }
     const aReceber = lista.filter((g) => g.status === 'aguardando');
     const glosa = lista.reduce((s, g) => s + (g.status === 'parcial' || g.status === 'negado' ? g.valor - g.pago : 0), 0);
     const vencidas = aReceber.filter((g) => diasDesde(g.data) > 60);
@@ -1090,7 +1123,7 @@
     const porMarca = {}; lista.forEach((g) => { if (g.status !== 'pago') porMarca[g.marca] = (porMarca[g.marca] || 0) + g.valor - g.pago; });
     tela.innerHTML = `
       <div class="titulo"><div><h1>Garantias a receber</h1><p>Serviços que a oficina fez em garantia e o que o fabricante ainda não pagou ou pagou a menos.</p></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="exp-gar">Exportar cobrança</button>${botaoAdicionar([{ nome: 'OS à mão', desc: 'Serviço feito em garantia', acao: () => addGarantia() }, { nome: 'Puxar de documento', desc: 'Foto ou PDF da OS ou do extrato', acao: () => { location.hash = '#documentos'; } }])}</div></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="exp-gar">Exportar cobrança</button>${botaoAdicionar([{ nome: 'OS à mão', desc: 'Serviço feito em garantia', acao: () => addGarantia() }, { nome: 'Puxar de documento', desc: 'Foto ou PDF da OS ou do extrato', acao: () => { location.hash = '#documentos'; } }], 'Registrar OS em garantia')}</div></div>
       <div class="kpis escalonado">
         <div class="kpi k-marfim"><span class="rot">${ICO.moedas}A receber do fabricante</span><span class="val">${conta(aReceber.reduce((s, g) => s + g.valor, 0), 'mil')}</span><span class="exp">${aReceber.length} ordens aguardando pagamento</span></div>
         <div class="kpi k-risco"><span class="rot">${ICO.alerta}Glosado ou negado</span><span class="val">${conta(glosa, 'mil')}</span><span class="exp">Diferença entre o serviço feito e o que foi pago</span></div>
@@ -1122,11 +1155,11 @@
   }
   function telaFinanciamento() {
     const lista = (A.financiadas || []).map((f) => ({ f, j: jurosFin(f) })).sort((a, b) => b.j.aposVenda - a.j.aposVenda);
-    if (!lista.length) { tela.innerHTML = `<div class="titulo"><div><h1>Estoque financiado</h1><p>Nenhuma máquina financiada cadastrada.</p></div>${botaoAdicionar([{ nome: 'Máquina financiada à mão', desc: 'Chassi, valor, banco e taxa', acao: () => addFinanciada() }, { nome: 'Puxar de documento', desc: 'Contrato ou extrato', acao: () => { location.hash = '#documentos'; } }])}</div>`; return; }
+    if (!lista.length) { tela.innerHTML = `<div class="titulo"><div><h1>Estoque financiado</h1><p>Nenhuma máquina financiada cadastrada.</p></div>${botaoAdicionar([{ nome: 'Máquina financiada à mão', desc: 'Chassi, valor, banco e taxa', acao: () => addFinanciada() }, { nome: 'Puxar de documento', desc: 'Contrato ou extrato', acao: () => { location.hash = '#documentos'; } }], 'Cadastrar máquina financiada')}</div>`; return; }
     const vendidasAbertas = lista.filter((x) => x.f.venda && !x.f.quitacao);
     const perdido = lista.reduce((s, x) => s + x.j.aposVenda, 0);
     tela.innerHTML = `
-      <div class="titulo"><div><h1>Estoque financiado</h1><p>Máquinas novas no floor plan: juros que continuam correndo depois que a máquina já foi vendida.</p></div>${botaoAdicionar([{ nome: 'Máquina financiada à mão', desc: 'Chassi, valor, banco e taxa', acao: () => addFinanciada() }, { nome: 'Puxar de documento', desc: 'Contrato ou extrato do banco', acao: () => { location.hash = '#documentos'; } }])}</div>
+      <div class="titulo"><div><h1>Estoque financiado</h1><p>Máquinas novas no floor plan: juros que continuam correndo depois que a máquina já foi vendida.</p></div>${botaoAdicionar([{ nome: 'Máquina financiada à mão', desc: 'Chassi, valor, banco e taxa', acao: () => addFinanciada() }, { nome: 'Puxar de documento', desc: 'Contrato ou extrato do banco', acao: () => { location.hash = '#documentos'; } }], 'Cadastrar máquina financiada')}</div>
       <div class="kpis escalonado">
         <div class="kpi k-marfim"><span class="rot">${ICO.moedas}Financiado em estoque</span><span class="val">${conta(lista.filter((x) => !x.f.venda).reduce((s, x) => s + x.f.valor, 0), 'mil')}</span><span class="exp">${lista.filter((x) => !x.f.venda).length} máquinas novas no pátio</span></div>
         <div class="kpi k-risco"><span class="rot">${ICO.alerta}Juros pagos após a venda</span><span class="val">${conta(perdido, 'mil')}</span><span class="exp">Dinheiro que dava para ter economizado quitando no dia da venda</span></div>
@@ -1240,9 +1273,15 @@
   const log = (tipo, texto, extra) => { K.registrar(tipo, texto, extra); };
 
   // ---------- botão Adicionar (manual ou puxando de documento) ----------
-  function botaoAdicionar(opcoes) {
+  // rótulo sempre diz o que vai ser criado; com uma opção só, o botão faz direto (sem menu)
+  function botaoAdicionar(opcoes, rotulo, secundario) {
     if (eu().perfil === 'auditor') return '<span class="tag declarado">Só leitura</span>';
-    const id = 'add' + Math.random().toString(36).slice(2, 7);
+    const id = 'add' + Math.random().toString(36).slice(2, 7), cls = secundario ? 'btn-linha' : 'btn-ouro';
+    if (opcoes.length === 1) {
+      setTimeout(() => { const b = document.getElementById(id); if (b) b.onclick = () => opcoes[0].acao(); });
+      return `<button class="btn ${cls}" type="button" id="${id}" title="${esc(opcoes[0].desc || '')}">${ic('<path d="M12 5v14M5 12h14"/>')}${esc(rotulo || opcoes[0].nome)}</button>`;
+    }
+    const seta = '<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';
     setTimeout(() => {
       const b = document.getElementById(id); if (!b) return;
       const m = b.nextElementSibling;
@@ -1250,7 +1289,7 @@
       document.addEventListener('click', () => { m.hidden = true; }, { once: true });
       $$('button', m).forEach((x, i) => x.onclick = () => { m.hidden = true; opcoes[i].acao(); });
     });
-    return `<div class="add-wrap"><button class="btn btn-ouro" type="button" id="${id}" aria-haspopup="menu" aria-expanded="false">${ic('<path d="M12 5v14M5 12h14"/>')}Adicionar</button>
+    return `<div class="add-wrap"><button class="btn ${cls}" type="button" id="${id}" aria-haspopup="menu" aria-expanded="false">${secundario ? '' : ic('<path d="M12 5v14M5 12h14"/>')}${esc(rotulo || 'Adicionar')}${seta}</button>
       <div class="add-menu" role="menu" hidden>${opcoes.map((o) => `<button type="button" role="menuitem"><b>${esc(o.nome)}</b><span>${esc(o.desc)}</span></button>`).join('')}</div></div>`;
   }
   const lista = (id, itens) => `<datalist id="${id}">${[...new Set(itens.filter(Boolean))].map((v) => `<option value="${esc(v)}">`).join('')}</datalist>`;
@@ -1392,7 +1431,7 @@
   function telaDocumentos() {
     const docs = estado.documentos.slice().reverse();
     tela.innerHTML = `
-      <div class="titulo"><div><h1>Central de documentos</h1><p>Mande foto de nota, ordem de serviço, contrato, PDF ou planilha. O Anshur lê, sugere o preenchimento e você confere antes de salvar.</p></div>${botaoAdicionar([{ nome: 'Escolher arquivo', desc: 'Foto, PDF, CSV ou Excel', acao: () => $('#doc-arq').click() }, { nome: 'Cadastrar sem documento', desc: 'Máquina, garantia ou financiamento à mão', acao: () => addMaquinaManual() }])}</div>
+      <div class="titulo"><div><h1>Central de documentos</h1><p>Mande foto de nota, ordem de serviço, contrato, PDF ou planilha. O Anshur lê, sugere o preenchimento e você confere antes de salvar.</p></div>${botaoAdicionar([{ nome: 'Escolher arquivo', desc: 'Foto, PDF, CSV ou Excel', acao: () => $('#doc-arq').click() }, { nome: 'Cadastrar sem documento', desc: 'Máquina, garantia ou financiamento à mão', acao: () => addMaquinaManual() }], 'Enviar documento')}</div>
       <label class="soltar" id="soltar"><input type="file" id="doc-arq" accept="image/*,.pdf,.csv,.txt,.xlsx,.xls,.ods" multiple class="sr">
         ${ic('<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>', 'ico grande')}<b>Arraste arquivos aqui ou toque para escolher</b><span>Fotos (JPG, PNG), PDF, CSV e Excel · também dá para tirar foto pelo celular</span></label>
       <div id="doc-proc"></div>
@@ -1458,7 +1497,7 @@
     if (K.nuvem) return telaEquipe();
     const paginas = [['visao', 'Visão geral'], ['avaliar', 'Avaliar troca'], ['patio', 'Pátio'], ['trocas', 'Inteligência'], ['vendedores', 'Vendedores'], ['garantias', 'Garantias'], ['financiamento', 'Financiado'], ['relatorio', 'Relatórios'], ['config', 'Configurações']];
     tela.innerHTML = `
-      <div class="titulo"><div><h1>Usuários e permissões</h1><p>Quem usa o Anshur e o que cada perfil pode ver e fazer.</p></div>${botaoAdicionar([{ nome: 'Adicionar usuário', desc: 'Nome, e-mail e perfil', acao: () => addUsuario() }])}</div>
+      <div class="titulo"><div><h1>Usuários e permissões</h1><p>Quem usa o Anshur e o que cada perfil pode ver e fazer.</p></div>${botaoAdicionar([{ nome: 'Adicionar usuário', desc: 'Nome, e-mail e perfil', acao: () => addUsuario() }], 'Novo usuário')}</div>
       <section class="painel"><div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Nome</th><th>Perfil</th><th>E-mail</th><th>Atividades</th><th></th></tr></thead><tbody>
         ${estado.usuarios.map((u) => `<tr><td>${avatarHTML(u, 36)} <b>${esc(u.nome)}</b>${u.id === eu().id ? ' <span class="tag comprovado">você</span>' : ''}</td><td>${K.PERFIS[u.perfil]}</td><td>${esc(u.email || '—')}</td><td>${estado.atividades.filter((a) => a.usuario === u.nome).length}</td>
           <td style="white-space:nowrap"><button class="link" type="button" data-entrar="${u.id}">Entrar como</button> · <button class="link" type="button" data-editar="${u.id}">Editar</button>${u.perfil !== 'dono' ? ` · <button class="link neg" type="button" data-tirar="${u.id}">Remover</button>` : ''}</td></tr>`).join('')}</tbody></table></div></section>
@@ -1555,34 +1594,60 @@
   function salvarAlcadas(raiz) { const n = {}; $$('[data-alc]', raiz).forEach((i) => { const [k, q] = i.dataset.alc.split('|'); n[k] = n[k] || {}; n[k][q] = Math.max(0, num(i.value) || 0); }); Object.values(n).forEach((a) => { if (a.gerente < a.vendedor) a.gerente = a.vendedor; }); estado.alcadas = n; log('config', 'Alçadas de aprovação alteradas'); salvar(); }
   function telaConfig() {
     const impl = situacaoImpl(), pi = IMPL.progresso(impl), fimImpl = IMPL.concluida(implEstado(), impl);
+    const verImpl = IMPL.podeVer(eu().perfil);
+    const CATS = [['revenda', 'Revenda', 'Dados cadastrais, lojas e marcas', ICO.camadas], ['operacao', 'Operação', 'Regras comerciais, alçadas e catálogo', ICO.moedas], ['equipe', 'Equipe', 'Usuários, convites e permissões', '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M17 11a3 3 0 1 0 0-6M22 21v-1a5 5 0 0 0-4-4.9"/></svg>'],
+      ['dados', 'Dados e integrações', 'Importação, documentos, IA, cópias e privacidade', ICO.linha], ['sistema', 'Sistema', 'Avisos, instalação, preferências e segurança', ICO.alerta]];
+    const cab = (id, t, d) => `<header class="cfg-cat-cab" id="cfg-${id}" tabindex="-1"><h2>${t}</h2><p>${d}</p></header>`;
+    const nUs = estado.usuarios.length, convites = (implEstado() || {}).convites || 0;
     tela.innerHTML = `
-      <div class="titulo"><div><h1>Configurações</h1><p>Dados da revenda, regras comerciais, integrações e os seus dados.</p></div>${botaoAdicionar([{ nome: 'Usuário', desc: 'Gerente, vendedor, oficina ou financeiro', acao: () => addUsuario() }, { nome: 'Modelo no catálogo', desc: 'Com a referência de preço', acao: () => $('#c-modelo').click() }])}</div>
-      ${IMPL.podeVer(eu().perfil) ? `<section class="painel impl-atalho" id="c-impl"><div class="painel-cab"><h2>${ICO.baixo}Primeiros passos: implantação guiada</h2><p>${pi.texto}${fimImpl ? ' · concluída' : ''}</p></div>
+      <div class="titulo"><div><h1>Configurações</h1><p>Tudo o que define como a ${esc(A.revenda.nome)} usa o Anshur, organizado por assunto.</p></div></div>
+      ${verImpl && !fimImpl ? `<section class="painel impl-atalho" id="c-impl"><div class="impl-atalho-txt"><h2>${ICO.baixo}Implantação guiada · ${pi.texto}</h2>
         <div class="progresso"><i style="width:${pi.pct * 100}%"></i></div>
-        <p class="sub">${fimImpl ? 'Tudo pronto. Dá para rever qualquer etapa quando quiser.' : `Próxima: <b>${esc((impl.find((e) => !e.ok) || {}).titulo || '')}</b>. Cada etapa tem a ação ali mesmo, sem precisar de ninguém da Blue Rose.`}</p>
-        <div class="acoes"><a class="btn ${fimImpl ? 'btn-linha' : 'btn-ouro'}" href="#/config/implantacao">${fimImpl ? 'Rever a implantação' : pi.feitas ? 'Continuar a implantação' : 'Começar a implantação'}</a></div></section>` : ''}
-      <div class="grade-2 bloco">
-        <section class="painel"><h2>${ICO.camadas}Dados da revenda</h2>${camposRevenda('c')}<div class="acoes"><button class="btn btn-ouro" type="button" id="c-salvar">Salvar dados</button></div></section>
-        <section class="painel"><h2>${ICO.moedas}Regras comerciais</h2>
-          <div class="numeros"><div><span>Margem-alvo</span><b>${pct(K.cfg.margemAlvo, 0)}</b></div><div><span>Custo do capital</span><b>${pct(K.cfg.jurosMes)} a.m.</b></div><div><span>Comissão</span><b>${pct(K.cfg.comissaoPct)}</b></div>
-            <div><span>Desconto por troca acima</span><b>${pct(K.cfg.descontoAcima, 0)}</b></div><div><span>Hora da oficina</span><b>${real(K.cfg.valorHora)}</b></div><div><span>Base do custo</span><b>${K.cfg.baseJuros === 'total' ? 'Pago + preparo' : 'Valor pago'}</b></div></div>
-          <div class="acoes"><button class="btn btn-linha" type="button" id="c-prem">Alterar regras</button></div></section>
-      </div>
-      ${blocoInstalar()}${blocoIAConfig()}${blocoAvisos()}${blocoLojas()}${blocoLGPD()}
-      <section class="painel bloco"><h2>${ICO.alvo}Alçadas de aprovação por tipo de máquina</h2><p class="sub" style="margin:6px 0 12px">Quanto acima do valor máximo cada um pode liberar. Acima da alçada do gerente, só o dono libera. Zero = qualquer valor acima precisa de aprovação.</p>
-        ${tabelaAlcadas()}
-        <div class="acoes"><button class="btn btn-ouro" type="button" id="c-alc">Salvar alçadas</button></div></section>
-      <div class="grade-2 bloco">
-        <section class="painel"><h2>${ICO.barras}Catálogo de modelos</h2><p class="sub" style="margin:6px 0 10px">Referências de preço usadas pelo motor. Modelos novos entram com a Fipe.</p>
-          <div class="tabela-wrap" style="max-height:320px;overflow:auto"><table class="tabela"><thead><tr><th>Modelo</th><th>Categoria</th><th class="n">Referência</th></tr></thead><tbody>${A.modelos.map((m) => `<tr><td><b>${esc(m.marca)}</b> ${esc(m.modelo)}</td><td>${NOMES[m.tipo]}</td><td class="n">${mil(m.base)}</td></tr>`).join('')}</tbody></table></div>
-          <div class="acoes"><button class="btn btn-linha" type="button" id="c-modelo">Adicionar modelo</button></div></section>
-        <section class="painel"><h2>${ICO.linha}Integrações e dados</h2>
-          <ul class="lista-motivos" style="margin-top:8px"><li><span>Importação do sistema atual (DMS)</span><b>${(estado.dms && estado.dms.pastas && estado.dms.pastas.length) || estado.ultimaSync ? 'Pasta ligada' : (estado.dms && estado.dms.lotes && estado.dms.lotes.length) ? 'Por arquivos' : 'Ainda não'}</b></li><li><span>Documentos recebidos</span><b>${estado.documentos.length}</b></li><li><span>Atividades registradas</span><b>${estado.atividades.length}</b></li></ul>
-          <div class="acoes"><a class="btn btn-linha" href="#/config/importar">Trazer do meu sistema</a><button class="btn btn-linha" type="button" id="c-backup">Baixar cópia de segurança</button><label class="btn btn-linha" style="cursor:pointer">Restaurar cópia<input type="file" accept=".json" id="c-restaura" class="sr"></label><button class="btn btn-linha" type="button" id="c-instalar">Instalar o app</button></div></section>
-      ${K.nuvem && !K.nuvem.offline && ['dono', 'gerente', 'auditor'].includes(eu().perfil) ? '<section class="painel bloco" id="c-copias"><h2>Cópias diárias no servidor</h2><p class="sub">Carregando…</p></section>' : ''}
+        <p class="sub">Próxima: <b>${esc((impl.find((e) => !e.ok) || {}).titulo || '')}</b>. Cada etapa tem a ação ali mesmo, sem precisar de ninguém da Blue Rose.</p></div>
+        <a class="btn btn-ouro" href="#/config/implantacao">${pi.feitas ? 'Continuar implantação' : 'Começar a implantação'}</a></section>` : ''}
+      <div class="cfg-layout">
+        <nav class="cfg-nav" aria-label="Assuntos das configurações">${CATS.map(([id, t, d, ic_]) => `<a href="#cfg-${id}" data-cfg="${id}">${ic_}<span><b>${t}</b><small>${d}</small></span></a>`).join('')}</nav>
+        <div class="cfg-conteudo">
+          ${cab('revenda', 'Revenda', 'Quem é a revenda, onde ela atende e quais marcas representa.')}
+          <section class="painel"><h2>${ICO.camadas}Dados da revenda</h2>${camposRevenda('c')}<div class="acoes"><button class="btn btn-ouro" type="button" id="c-salvar">Salvar dados da revenda</button></div></section>
+          ${blocoLojas()}
+          ${cab('operacao', 'Operação', 'As regras que o Anshur usa para avaliar, aprovar e calcular margem.')}
+          <section class="painel"><h2>${ICO.moedas}Regras comerciais</h2>
+            <div class="numeros"><div><span>Margem-alvo</span><b>${pct(K.cfg.margemAlvo, 0)}</b></div><div><span>Custo do capital</span><b>${pct(K.cfg.jurosMes)} a.m.</b></div><div><span>Comissão</span><b>${pct(K.cfg.comissaoPct)}</b></div>
+              <div><span>Desconto por troca acima</span><b>${pct(K.cfg.descontoAcima, 0)}</b></div><div><span>Hora da oficina</span><b>${real(K.cfg.valorHora)}</b></div><div><span>Base do custo</span><b>${K.cfg.baseJuros === 'total' ? 'Pago + preparo' : 'Valor pago'}</b></div></div>
+            <div class="acoes"><button class="btn btn-linha" type="button" id="c-prem">Alterar regras comerciais</button></div></section>
+          <section class="painel"><h2>${ICO.alvo}Alçadas de aprovação por tipo de máquina</h2><p class="sub" style="margin:6px 0 12px">Quanto acima do valor máximo cada um pode liberar. Acima da alçada do gerente, só o dono libera. Zero = qualquer valor acima precisa de aprovação.</p>
+            ${tabelaAlcadas()}
+            <div class="acoes"><button class="btn btn-ouro" type="button" id="c-alc">Salvar alçadas</button></div></section>
+          <section class="painel"><h2>${ICO.barras}Catálogo de modelos</h2><p class="sub" style="margin:6px 0 10px">Referências de preço usadas pelo motor. Modelos novos entram com a Fipe.</p>
+            <div class="tabela-wrap tabela-rola"><table class="tabela"><thead><tr><th>Modelo</th><th>Categoria</th><th class="n">Referência</th></tr></thead><tbody>${A.modelos.map((m) => `<tr><td><b>${esc(m.marca)}</b> ${esc(m.modelo)}</td><td>${NOMES[m.tipo]}</td><td class="n">${mil(m.base)}</td></tr>`).join('')}</tbody></table></div>
+            <div class="acoes"><button class="btn btn-linha" type="button" id="c-modelo">${ic('<path d="M12 5v14M5 12h14"/>')}Novo modelo no catálogo</button></div></section>
+          ${cab('equipe', 'Equipe', 'Quem usa o Anshur, com qual perfil, e os convites em aberto.')}
+          <section class="painel"><h2>${CATS[2][3]}Usuários e permissões</h2><p class="sub" style="margin:6px 0 12px">${nUs} ${nUs === 1 ? 'pessoa' : 'pessoas'} com acesso${convites ? ` · ${convites} ${convites === 1 ? 'convite enviado' : 'convites enviados'} pela implantação` : ''}. Cada perfil (dono, gerente, vendedor, oficina, financeiro, auditor) vê só o que precisa.</p>
+            <div class="acoes">${pode('usuarios') && !somenteLeitura() ? `<button class="btn btn-ouro" type="button" id="c-usuario">${ic('<path d="M12 5v14M5 12h14"/>')}Novo usuário</button>` : ''}<a class="btn btn-linha" href="#/config/usuarios">Ver usuários e perfis</a><a class="btn btn-linha" href="#/config/perfil">Meu perfil</a></div></section>
+          ${cab('dados', 'Dados e integrações', 'O que entra no Anshur, o que sai dele e como os dados ficam protegidos.')}
+          <section class="painel"><h2>${ICO.linha}Integrações e dados</h2>
+            <ul class="lista-motivos" style="margin-top:8px"><li><span>Importação do sistema atual (DMS)</span><b>${(estado.dms && estado.dms.pastas && estado.dms.pastas.length) || estado.ultimaSync ? 'Pasta ligada' : (estado.dms && estado.dms.lotes && estado.dms.lotes.length) ? 'Por arquivos' : 'Ainda não'}</b></li><li><span>Documentos recebidos</span><b>${estado.documentos.length}</b></li><li><span>Atividades registradas</span><b>${estado.atividades.length}</b></li></ul>
+            <div class="acoes"><a class="btn btn-linha" href="#/config/importar">Trazer do meu sistema</a><a class="btn btn-linha" href="#/config/documentos">Central de documentos</a><a class="btn btn-linha" href="#/config/cadastros">Clientes e fornecedores</a><button class="btn btn-linha" type="button" id="c-backup">Baixar cópia de segurança</button><label class="btn btn-linha" style="cursor:pointer">Restaurar cópia<input type="file" accept=".json" id="c-restaura" class="sr"></label></div></section>
+          ${K.nuvem && !K.nuvem.offline && ['dono', 'gerente', 'auditor'].includes(eu().perfil) ? '<section class="painel" id="c-copias"><h2>Cópias diárias no servidor</h2><div class="esqueleto" aria-hidden="true"><i></i><i></i><i></i></div><p class="sub" role="status">Carregando as cópias…</p></section>' : ''}
+          ${blocoIAConfig()}${blocoLGPD()}
+          ${cab('sistema', 'Sistema', 'Avisos por e-mail, instalação neste aparelho, preferências e segurança.')}
+          ${blocoAvisos()}
+          <section class="painel"><h2>${ICO.alerta}Este aparelho e segurança</h2><p class="sub" style="margin:6px 0 12px">Preferências valem só para você, neste aparelho. A segurança explica onde os dados ficam.</p>
+            <div class="acoes"><button class="btn btn-linha" type="button" data-preferencias>Preferências deste aparelho</button><button class="btn btn-linha" type="button" id="c-instalar">Instalar o app</button><button class="btn btn-linha" type="button" id="c-seg">Segurança dos dados</button>${verImpl && fimImpl ? '<a class="btn btn-linha" href="#/config/implantacao">Rever a implantação guiada</a>' : ''}</div></section>
+          ${blocoInstalar()}
+        </div>
       </div>`;
     $('#c-salvar').onclick = () => { salvarDadosRevenda(lerCamposRevenda('c')); toast('Dados da revenda salvos.'); setTimeout(() => K.recarregar(), 600); };
     $('#c-prem').onclick = abrirPremissas; ligarLGPD(); ligarLojas(); ligarIAConfig(); ligarAvisos();
+    const cu = $('#c-usuario'); if (cu) cu.onclick = () => addUsuario();
+    $('#c-seg').onclick = () => $('#m-seg').click();
+    // menu de assuntos: leva até a seção e marca onde a pessoa está
+    $$('.cfg-nav a', tela).forEach((l) => l.onclick = (e) => { e.preventDefault(); const alvo = $('#cfg-' + l.dataset.cfg); alvo.scrollIntoView({ behavior: reduzido ? 'auto' : 'smooth', block: 'start' }); alvo.focus({ preventScroll: true }); });
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver((ents) => { ents.forEach((en) => { if (!en.isIntersecting) return; const id = en.target.id.slice(4); $$('.cfg-nav a', tela).forEach((l) => { if (l.dataset.cfg === id) l.setAttribute('aria-current', 'true'); else l.removeAttribute('aria-current'); }); }); }, { rootMargin: '-15% 0px -70% 0px' });
+      $$('.cfg-cat-cab', tela).forEach((h) => obs.observe(h));
+    }
     $('#c-alc').onclick = () => { salvarAlcadas(tela); toast('Alçadas salvas.'); rota(); };
     $('#c-modelo').onclick = () => formulario('Adicionar modelo ao catálogo', [{ k: 'tipo', r: 'Categoria', tipo: 'select', ops: Object.entries(NOMES) }, { k: 'marca', r: 'Fabricante', lista: 'dl-marca', obr: true }, { k: 'modelo', r: 'Modelo', lista: 'dl-modelo', obr: true }, { k: 'base', r: 'Referência de preço seminovo (R$)', num: true, obr: true }], { tipo: 'trator' }, (v) => {
       A.modelos.push({ tipo: v.tipo, marca: v.marca, modelo: v.modelo, base: v.base, hAno: { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270, implemento: 0 }[v.tipo], importado: true });
@@ -1597,7 +1662,7 @@
       $$('[data-restaurar]', caixaCopias).forEach((b) => b.onclick = () => confirmar(`Restaurar a cópia de ${data(b.dataset.restaurar)}?`, 'Os dados atuais da revenda serão trocados pelos daquele dia, para todos da equipe. Antes, baixe uma cópia de segurança se quiser guardar a versão atual.', 'Restaurar', async () => {
         try { await K.nuvem.restaurarCopia(b.dataset.restaurar); toast('Cópia restaurada.'); setTimeout(() => location.reload(), 700); } catch (e) { toast(e.message, true); }
       }));
-    }, (e) => { caixaCopias.innerHTML = `<h2>Cópias diárias no servidor</h2><p class="neg">${esc(e.message)}</p>`; });
+    }, () => { caixaCopias.innerHTML = '<h2>Cópias diárias no servidor</h2><div class="estado-erro" role="alert"><b>Não foi possível carregar as cópias agora.</b><p>Nada foi alterado nos seus dados. Verifique a internet e abra esta tela de novo.</p></div>'; });
     $('#c-backup').onclick = () => { const url = URL.createObjectURL(new Blob([JSON.stringify(estado, null, 1)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = `anshur-copia-${hojeISO()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); log('config', 'Cópia de segurança baixada'); salvar(); toast('Cópia de segurança gerada.'); };
     $('#c-restaura').onchange = (e) => { const f = e.target.files[0]; if (!f) return; f.text().then((tx) => { let d; try { d = JSON.parse(tx); } catch (er) { toast('Arquivo inválido.', true); return; } if (!d || !Array.isArray(d.fechadas)) { toast('Este arquivo não é uma cópia do Anshur.', true); return; } confirmar('Restaurar esta cópia?', 'Os dados atuais deste ambiente serão substituídos pelos da cópia.', 'Restaurar', () => { K.repo.gravar(d); K.recarregar(); }); }); };
     $('#c-instalar').onclick = simularInstalacao;
@@ -1683,7 +1748,7 @@
     log('relatorio', `Relatório ${nomeP.toLowerCase()} aberto`); salvar();
     tela.innerHTML = `
       <div class="titulo"><div><h1>Relatórios</h1><p>${nomeP}: ${data(atual[0])}${atual[0] !== atual[1] ? ' a ' + data(atual[1]) : ''}, comparado com ${data(ant[0])}${ant[0] !== ant[1] ? ' a ' + data(ant[1]) : ''}.</p></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="r-csv">Exportar CSV</button><button class="btn btn-linha" type="button" onclick="print()">Imprimir ou PDF</button>${botaoAdicionar([{ nome: 'Anotação no relatório', desc: 'Fica no histórico de atividades do período', acao: () => formulario('Adicionar anotação', [{ k: 'texto', r: 'Anotação', obr: true, inteiro: true }], {}, (v) => { log('anotacao', v.texto); salvar(); fecharCamada(true); toast('Anotação registrada.'); rota(); }) }])}</div></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="r-csv">Exportar CSV</button><button class="btn btn-linha" type="button" onclick="print()">Imprimir ou PDF</button>${botaoAdicionar([{ nome: 'Anotação no relatório', desc: 'Fica no histórico de atividades do período', acao: () => formulario('Adicionar anotação', [{ k: 'texto', r: 'Anotação', obr: true, inteiro: true }], {}, (v) => { log('anotacao', v.texto); salvar(); fecharCamada(true); toast('Anotação registrada.'); rota(); }) }], 'Nova anotação', true)}</div></div>
       ${abasRel()}
       <article class="relatorio" style="max-width:none">
         <img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="190" height="48"><p class="sub" style="margin-top:6px">${esc(A.revenda.nome)} · relatório ${nomeP.toLowerCase()} · emitido em ${new Date().toLocaleString('pt-BR')} por ${esc(eu().nome)}</p>
@@ -1796,7 +1861,7 @@
   // ---------- auditoria ----------
   function telaAtividades() {
     const l = estado.atividades;
-    tela.innerHTML = `<div class="titulo"><div><h1>Atividades</h1><p>Tudo o que foi feito no sistema, por quem e quando.</p></div>${botaoAdicionar([{ nome: 'Anotação', desc: 'Registro manual (visita, ligação, combinado)', acao: () => formulario('Adicionar anotação', [{ k: 'texto', r: 'O que aconteceu', obr: true, inteiro: true }], {}, (v) => { log('anotacao', v.texto); salvar(); fecharCamada(true); toast('Anotação registrada.'); rota(); }) }])}</div>
+    tela.innerHTML = `<div class="titulo"><div><h1>Atividades</h1><p>Tudo o que foi feito no sistema, por quem e quando.</p></div>${botaoAdicionar([{ nome: 'Anotação', desc: 'Registro manual (visita, ligação, combinado)', acao: () => formulario('Adicionar anotação', [{ k: 'texto', r: 'O que aconteceu', obr: true, inteiro: true }], {}, (v) => { log('anotacao', v.texto); salvar(); fecharCamada(true); toast('Anotação registrada.'); rota(); }) }], 'Nova anotação')}</div>
       <section class="painel">${l.length ? `<ul class="linha-tempo grande">${l.slice(0, 200).map((a) => `<li><b>${esc(a.texto)}</b><span>${new Date(a.quando).toLocaleString('pt-BR')} · ${esc(a.usuario)} (${K.PERFIS[a.perfil] || ''})</span></li>`).join('')}</ul>` : '<p class="vazio">Nenhuma atividade ainda. Avaliações, trocas, vendas, documentos e mudanças de regra aparecem aqui.</p>'}
       <p class="nota-rodape">${K.nuvem ? 'Trocas, aprovações, preços, vendas, convites e exclusões também vão para a trilha do servidor, abaixo, que ninguém da revenda consegue alterar ou apagar.' : 'Na demonstração o registro fica neste navegador. Na conta da revenda, as atividades críticas vão também para uma trilha no servidor que não pode ser alterada.'}</p></section>
       ${K.nuvem && !K.nuvem.offline ? '<section class="painel bloco" id="ev-srv"><h2>Trilha do servidor</h2><p class="sub">Carregando…</p></section>' : ''}`;
@@ -1878,7 +1943,7 @@
     const l = A.compradores || [];
     const patio = C.patio();
     tela.innerHTML = `
-      <div class="titulo"><div><h1>Compradores</h1><p>Quem está procurando máquina. Quando entra um usado que combina, o Anshur avisa na hora.</p></div>${botaoAdicionar([{ nome: 'Comprador à mão', desc: 'Nome, o que procura e quanto paga', acao: () => addComprador() }, { nome: 'Importar lista', desc: 'Planilha de contatos', acao: () => { location.hash = '#documentos'; } }])}</div>
+      <div class="titulo"><div><h1>Compradores</h1><p>Quem está procurando máquina. Quando entra um usado que combina, o Anshur avisa na hora.</p></div>${botaoAdicionar([{ nome: 'Comprador à mão', desc: 'Nome, o que procura e quanto paga', acao: () => addComprador() }, { nome: 'Importar lista', desc: 'Planilha de contatos', acao: () => { location.hash = '#documentos'; } }], 'Novo comprador')}</div>
       <div class="kpis escalonado">
         <div class="kpi k-marfim"><span class="rot">${ICO.alvo}Compradores ativos</span><span class="val">${l.length}</span></div>
         <div class="kpi k-salvia"><span class="rot">${ICO.baixo}Máquinas com comprador</span><span class="val">${patio.filter((t) => compradoresPara(t).length).length} de ${patio.length}</span></div>
@@ -1920,7 +1985,7 @@
     const cores = { trator: '#3E6B57', colhedora: '#C1A36A', pulverizador: '#71877B', plantadeira: '#202D35' };
     const anunciosRec = (A.anuncios || []).slice().sort((a, b) => b.data.localeCompare(a.data));
     tela.innerHTML = `
-      <div class="titulo"><div><h1>Monitor de mercado</h1><p>Anúncios e leilões de fora da revenda: se o mercado de um tipo de máquina cai, o Anshur avisa antes de você pagar caro na troca.</p></div>${botaoAdicionar([{ nome: 'Anúncio ou leilão à mão', desc: 'Preço, ano, horas e onde viu', acao: addAnuncio }, { nome: 'Importar lista de anúncios', desc: 'Planilha exportada ou copiada do portal', acao: () => { location.hash = '#documentos'; } }])}</div>
+      <div class="titulo"><div><h1>Monitor de mercado</h1><p>Anúncios e leilões de fora da revenda: se o mercado de um tipo de máquina cai, o Anshur avisa antes de você pagar caro na troca.</p></div>${botaoAdicionar([{ nome: 'Anúncio ou leilão à mão', desc: 'Preço, ano, horas e onde viu', acao: addAnuncio }, { nome: 'Importar lista de anúncios', desc: 'Planilha exportada ou copiada do portal', acao: () => { location.hash = '#documentos'; } }], 'Registrar anúncio')}</div>
       <div class="kpis escalonado">${tipos.map((k) => { const v = variacaoMercado(k); return `<div class="kpi ${v != null && v < -0.05 ? 'k-risco' : v != null && v > 0.03 ? 'k-salvia' : 'k-marfim'}"><span class="rot">${ICO[k]}${NOMES[k]}</span><span class="val">${v == null ? '—' : (v > 0 ? '▲ ' : '▼ ') + pct(Math.abs(v))}</span><span class="exp">${v == null ? 'Poucos anúncios ainda' : 'Últimos 2 meses contra os 3 anteriores'}</span></div>`; }).join('')}</div>
       <section class="painel"><div class="painel-cab"><h2>${ICO.linha}Índice de preço observado</h2><p>100 = preço esperado pela referência do modelo</p></div>
         ${tipos.map((k) => { const ix = indiceMercado(k); return ix.length > 1 ? `<div style="margin:10px 0 2px"><b style="color:${cores[k]}">${NOMES[k]}</b> <span class="sub">${ix.reduce((s, x) => s + x.n, 0)} anúncios</span></div>${G.linha(ix.slice(-7), { formato: (v) => Math.round(v) + '', altura: 130, largura: innerWidth >= 960 ? 1100 : 560 })}` : ''; }).join('') || '<p class="vazio">Registre anúncios para formar o índice.</p>'}</section>
@@ -2513,31 +2578,59 @@
     lsS(chaveU('recentes'), JSON.stringify(l.slice(0, 8)));
   }
   let menuDe = null;
+  // quantas telas cabem como aba no computador (as outras vão para "Mais"); no celular as telas ficam na folha "Mais"
+  const abasVisiveis = () => (innerWidth >= 1280 ? 6 : innerWidth >= 1000 ? 5 : 4);
+  // ordem das abas: tela inicial do sistema, os atalhos escolhidos pela área e depois a ordem do menu
+  function ordemAbas(a, its) {
+    const pri = [a.inicio].concat(a.atalhos || []), peso = (x) => { const i = pri.indexOf(x.aba); return i < 0 ? 99 : i; };
+    return its.slice().sort((x, y) => peso(x) - peso(y) || its.indexOf(x) - its.indexOf(y));
+  }
+  const ICO_INICIO = '<path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6"/>';
+  const ICO_MAIS = '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>';
+  const ICO_AVISOS = '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>';
   function montarMenu(id) {
-    const chave = id || 'portal'; if (menuDe === chave) return; menuDe = chave;
+    const chave = (id || 'portal') + ':' + abasVisiveis(); if (menuDe === chave) return; menuDe = chave;
     const a = id && AR.area(id);
     const grupos = a ? a.menu.map((g) => ({ grupo: g.grupo, its: g.itens.filter((x) => pode(x.aba) && telaDe(x.aba)) })).filter((g) => g.its.length) : [];
-    // celular: barra de baixo com 4 atalhos do sistema + "Mais" (todos os itens do sistema por grupo)
-    const menu = $('#menu'); $$('a, .menu-grupo', menu).forEach((x) => x.remove());
-    let html = '', n = 0;
-    const atalhos = a ? a.atalhos || [] : [];
-    const link = (x) => { const at = atalhos.length ? atalhos.includes(x.aba) : n < 4; n++; return `<a href="${urlSis(a.id, x.aba)}" data-aba="${x.aba}" data-curto="${esc(x.curto || x.rotulo)}" class="${at ? 'atalho' : ''}">${svgI(x.icone)}<span>${esc(x.rotulo)}</span></a>`; };
-    grupos.forEach((g) => { html += `<p class="menu-grupo">${esc(g.grupo)}</p>` + g.its.map(link).join(''); });
-    const mais = $('#menu-mais', menu);
-    if (mais) mais.insertAdjacentHTML('beforebegin', html); else menu.insertAdjacentHTML('beforeend', html);
-    // computador: barra do sistema com menus suspensos por grupo (como nos ERPs)
+    const todos = a ? grupos.flatMap((g) => g.its.map((x) => Object.assign({ grupo: g.grupo }, x))).filter((x, i, l) => l.findIndex((y) => y.aba === x.aba) === i) : [];
+    const ordem = a ? ordemAbas(a, todos) : [];
+    // computador: abas da área (até 6, com ícone) e "Mais" com o resto, agrupado pelo assunto
+    const n = ordem.length <= abasVisiveis() ? ordem.length : abasVisiveis() - 1;
+    const vis = ordem.slice(0, n), resto = todos.filter((x) => !vis.includes(x));
     const seta = '<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';
-    $('#sis-barra').innerHTML = grupos.map((g, i) => g.its.length === 1
-      ? `<a class="sb-item" href="${urlSis(a.id, g.its[0].aba)}" data-aba="${g.its[0].aba}">${esc(g.its[0].rotulo)}</a>`
-      : `<div class="sb-grupo"><button type="button" class="sb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="sb-pop-${i}">${esc(g.grupo)}${seta}</button><div class="sb-pop" id="sb-pop-${i}" role="menu" hidden>${g.its.map((x) => `<a role="menuitem" href="${urlSis(a.id, x.aba)}" data-aba="${x.aba}">${svgI(x.icone)}<span>${esc(x.rotulo)}</span></a>`).join('')}</div></div>`).join('');
-    // cabeçalho: nome do sistema (ou a marca no portal), título da aba do navegador e o botão principal do sistema
+    const gruposResto = [...new Set(resto.map((x) => x.grupo))];
+    $('#sis-barra').innerHTML = vis.map((x) => `<a class="sb-item" href="${urlSis(a.id, x.aba)}" data-aba="${x.aba}">${svgI(x.icone)}<span>${esc(x.rotulo)}</span></a>`).join('')
+      + (resto.length ? `<div class="sb-grupo sb-mais"><button type="button" class="sb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="sb-pop-mais">${svgI(ICO_MAIS)}<span>Mais</span>${seta}</button><div class="sb-pop" id="sb-pop-mais" role="menu" hidden>${gruposResto.map((g) => `${gruposResto.length > 1 ? `<p class="sb-pop-g">${esc(g)}</p>` : ''}${resto.filter((x) => x.grupo === g).map((x) => `<a role="menuitem" href="${urlSis(a.id, x.aba)}" data-aba="${x.aba}">${svgI(x.icone)}<span>${esc(x.rotulo)}</span></a>`).join('')}`).join('')}</div></div>` : '');
+    // computador: sistemas à esquerda (recolhível)
+    const as = areasVisiveis();
+    $('#lat-areas').innerHTML = `<a href="#/" class="lat-item" data-ir-inicio>${svgI(ICO_INICIO)}<span>Início</span></a>` + as.map((x) => x.pronta
+      ? `<a href="${urlSis(x.id)}" class="lat-item" data-area="${x.id}" ${a && x.id === a.id ? 'aria-current="true"' : ''}>${svgI(x.icone)}<span>${esc(x.nome)}</span></a>`
+      : `<a href="#/" class="lat-item breve" data-breve="${x.id}">${svgI(x.icone)}<span>${esc(x.nome)}</span></a>`).join('');
+    // cabeçalho da área: onde a pessoa está (sistema › tela) e a ação principal do sistema
     const nomeSis = $('#sis-nome');
     nomeSis.href = a ? urlSis(a.id) : '#/';
-    nomeSis.innerHTML = a ? `<span class="sis-ico">${svgI(a.icone)}</span><span class="sis-txt"><small>Anshur</small><b>${esc(a.nome)}</b></span>` : '<img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="132" height="33">';
-    nomeSis.setAttribute('aria-label', a ? `Anshur ${a.nome}: tela inicial do sistema` : 'Anshur: portal');
+    nomeSis.innerHTML = a ? `<span class="sis-ico">${svgI(a.icone)}</span><span class="sis-txt"><b>${esc(a.nome)}</b></span>` : '';
+    nomeSis.setAttribute('aria-label', a ? `${a.nome}: tela inicial do sistema` : 'Início');
     document.title = a ? `Anshur ${a.nome} · ${A.revenda.nome}` : `Anshur · ${A.revenda.nome}`;
     const nova = $('.cab-nova');
     if (nova) { const ac = a && a.acao ? a.acao : null; nova.hidden = !ac || somenteLeitura(); if (ac) { nova.href = /^#\//.test(ac.href) ? ac.href : urlSis(a.id, ac.href.slice(1)); $('span', nova).textContent = ac.rotulo; nova.setAttribute('aria-label', ac.rotulo); nova.onclick = ac.novo && a.novo ? (e) => { e.preventDefault(); a.novo(UI); } : null; } }
+    // celular: barra fixa com Início + 3 destinos + Mais
+    const usados = AR.area('usados'), temUsados = usados && areaVisivel(usados) && usados.pronta;
+    const destinos = a ? ordem.slice(0, 3).map((x) => ({ href: urlSis(a.id, x.aba), aba: x.aba, ico: x.icone, rot: x.curto || x.rotulo }))
+      : [temUsados ? { href: urlSis('usados'), area: 'usados', ico: usados.icone, rot: 'Usados' } : null,
+        temUsados && pode('avaliar') ? { href: urlSis('usados', 'avaliar'), aba: 'avaliar', ico: '<path d="M4 7h13l-3-3M20 17H7l3 3"/>', rot: 'Avaliar' } : null,
+        { href: '#/hoje', aba: 'hoje', ico: ICO_AVISOS, rot: 'Avisos' }].filter(Boolean);
+    const outros = as.filter((x) => x.pronta && !destinos.some((d) => d.area === x.id));
+    while (!a && destinos.length < 3 && outros.length) { const x = outros.shift(); destinos.splice(destinos.length - 1, 0, { href: urlSis(x.id), area: x.id, ico: x.icone, rot: x.curto || x.nome }); }
+    $('#menu').innerHTML = `<a href="#/" class="atalho" data-aba="inicio" data-ir-inicio>${svgI(ICO_INICIO)}<span>Início</span></a>`
+      + destinos.map((d) => `<a href="${d.href}" class="atalho" ${d.aba ? `data-aba="${d.aba}"` : `data-area-barra="${d.area}"`}>${svgI(d.ico)}<span>${esc(d.rot)}</span></a>`).join('')
+      + `<button type="button" id="menu-mais" class="menu-mais" aria-expanded="false" aria-controls="menu-folha">${svgI(ICO_MAIS)}<span>Mais</span></button>`;
+    // folha "Mais" (celular): todas as telas do sistema por assunto, os outros sistemas e as opções da pessoa
+    const linhaF = (href, ico, rot, extra = '') => `<a href="${href}" ${extra}>${svgI(ico)}<span>${esc(rot)}</span></a>`;
+    $('#menu-folha').innerHTML = `<div class="folha-cab"><b>${a ? esc(a.nome) : 'Mais opções'}</b><button type="button" class="fechar" data-fecha-folha aria-label="Fechar">×</button></div>
+      ${a ? grupos.map((g) => `<p class="folha-g">${esc(g.grupo)}</p><div class="folha-lista">${g.its.map((x) => linhaF(urlSis(a.id, x.aba), x.icone, x.rotulo, `data-aba="${x.aba}"`)).join('')}</div>`).join('') : ''}
+      <p class="folha-g">${a ? 'Outros sistemas' : 'Sistemas'}</p><div class="folha-lista">${linhaF('#/', ICO_INICIO, 'Início', 'data-ir-inicio')}${as.filter((x) => x.pronta && (!a || x.id !== a.id)).map((x) => linhaF(urlSis(x.id), x.icone, x.nome, `data-area="${x.id}"`)).join('')}</div>
+      <p class="folha-g">Você</p><div class="folha-lista">${linhaF('#/hoje', ICO_AVISOS, 'Tarefas do dia', 'data-aba="hoje"')}${linhaF('#/rotina', '<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>', 'Rotina da equipe', 'data-aba="rotina"')}<button type="button" data-preferencias>${svgI('<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM4 12h2M18 12h2M12 4v2M12 18v2"/>')}<span>Preferências deste aparelho</span></button>${INS && !INS.instalado() ? `<button type="button" data-instalar-m>${svgI('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}<span>Instalar o aplicativo</span></button>` : ''}${linhaF('#/config/perfil', '<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 21a7 7 0 0 1 14 0"/>', 'Meu perfil', 'data-aba="perfil"')}</div>`;
     document.body.dataset.modo = a ? 'sistema' : 'portal';
     document.body.dataset.areaAtual = id || 'inicio';
   }
@@ -2555,6 +2648,40 @@
     const l = $$('a', pop), i = l.indexOf(document.activeElement); (l[(i + (e.key === 'ArrowDown' ? 1 : -1) + l.length) % l.length]).focus(); e.preventDefault();
   });
   document.addEventListener('click', (e) => { if (!e.target.closest('#sis-barra')) fecharSuspensos(); });
+  // abas que não cabem na largura (nomes longos, tela estreita) vão para "Mais": a página nunca rola para o lado
+  const SETA_MAIS = '<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';
+  function encaixarAbas() {
+    const bar = $('#sis-barra'); if (!bar || !bar.offsetParent) return;
+    const rotulos = () => $$('.sb-grupo', bar).forEach((g) => { const at = g.querySelector('a[aria-current]'); g.classList.toggle('atual', !!at); const sp = $('.sb-btn > span', g); if (sp) sp.textContent = at ? 'Mais: ' + at.textContent.trim() : 'Mais'; });
+    for (let i = 0; i < 12; i++) {
+      rotulos(); if (bar.scrollWidth <= bar.clientWidth + 1) break;
+      const its = $$(':scope > a.sb-item', bar); if (its.length <= 2) break;
+      let mais = $('.sb-mais', bar);
+      if (!mais) { bar.insertAdjacentHTML('beforeend', `<div class="sb-grupo sb-mais"><button type="button" class="sb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="sb-pop-mais">${svgI(ICO_MAIS)}<span>Mais</span>${SETA_MAIS}</button><div class="sb-pop" id="sb-pop-mais" role="menu" hidden></div></div>`); mais = $('.sb-mais', bar); }
+      const ult = its[its.length - 1]; ult.className = ''; ult.setAttribute('role', 'menuitem'); $('.sb-pop', mais).prepend(ult);
+    }
+    rotulos();
+  }
+  // celular: folha "Mais" (todas as telas do sistema, os outros sistemas e as opções da pessoa)
+  function abrirFolha(sim) {
+    const f = $('#menu-folha'), fu = $('#menu-fundo'), b = $('#menu-mais'); if (!f) return;
+    f.hidden = !sim; fu.hidden = !sim; document.body.classList.toggle('menu-aberto', sim); if (b) b.setAttribute('aria-expanded', sim);
+    if (sim) setTimeout(() => { const l = f.querySelector('a[aria-current]') || f.querySelector('a, button'); if (l) l.focus(); }, 30);
+  }
+  const fecharFolha = () => { const f = $('#menu-folha'); if (f && !f.hidden) abrirFolha(false); };
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#menu-mais')) { abrirFolha($('#menu-folha').hidden); return; }
+    if (e.target.closest('#menu-fundo, [data-fecha-folha]')) { abrirFolha(false); return; }
+    if (e.target.closest('[data-preferencias]')) { e.preventDefault(); fecharFolha(); abrirPreferencias(); return; }
+    if (e.target.closest('[data-instalar-m]')) { fecharFolha(); simularInstalacao(); return; }
+    if (e.target.closest('#menu-folha a')) fecharFolha();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.body.classList.contains('menu-aberto')) { abrirFolha(false); const b = $('#menu-mais'); if (b) b.focus(); } });
+  // computador: lista dos sistemas à esquerda, recolhível (fica lembrado neste aparelho)
+  const latRec = () => lsG(chaveU('lateral')) === 'recolhida';
+  function aplicarLateral() { const r = latRec(), b = $('#lat-recolher'); document.body.classList.toggle('lat-recolhida', r); b.setAttribute('aria-expanded', String(!r)); b.title = r ? 'Mostrar os nomes dos sistemas' : 'Recolher a lista de sistemas'; }
+  $('#lat-recolher').onclick = () => { lsS(chaveU('lateral'), latRec() ? '' : 'recolhida'); aplicarLateral(); };
+  aplicarLateral();
   function irArea(id) {
     const a = AR.area(id); if (!a) return;
     if (!a.pronta) { abrirEmBreve(a); return; }
@@ -2573,7 +2700,7 @@
     if ($('#area-pop')) { fecharTrocaArea(); return; }
     const r = botao.getBoundingClientRect(), as = areasVisiveis();
     const pop = document.createElement('div'); pop.id = 'area-pop'; pop.className = 'area-pop'; pop.setAttribute('role', 'menu'); pop.setAttribute('aria-label', 'Sistemas');
-    pop.innerHTML = `<a href="#/" role="menuitem" data-ir-inicio class="pop-portal">${svgI('<path d="M10 19l-7-7 7-7M3 12h18"/>')}<span><b>Voltar ao portal</b><small>Todos os sistemas e os avisos do dia</small></span></a>` + as.map((a) => a.pronta
+    pop.innerHTML = `<a href="#/" role="menuitem" data-ir-inicio class="pop-portal">${svgI('<path d="M10 19l-7-7 7-7M3 12h18"/>')}<span><b>Voltar ao início</b><small>O que fazer hoje, números e todos os sistemas do dia</small></span></a>` + as.map((a) => a.pronta
       ? `<div class="pop-linha"><a href="${urlSis(a.id)}" role="menuitem" data-area="${a.id}" class="${a.id === areaAtual && document.body.dataset.modo === 'sistema' ? 'atual' : ''}">${svgI(a.icone)}<span><b>${esc(a.nome)}</b><small>${esc(a.descricao.split(/[,.]/)[0])}</small></span></a><a class="pop-aba" href="${urlSis(a.id)}" target="_blank" rel="noopener" title="Abrir ${esc(a.nome)} em nova aba" aria-label="Abrir ${esc(a.nome)} em nova aba">${svgI(ICO_NOVA_ABA)}</a></div>`
       : `<a href="#/" role="menuitem" data-breve="${a.id}" class="breve">${svgI(a.icone)}<span><b>${esc(a.nome)}</b><small>Em breve</small></span></a>`).join('');
     document.body.appendChild(pop);
@@ -2586,7 +2713,7 @@
   }
   document.addEventListener('click', (e) => {
     const tr = e.target.closest('.area-troca'); if (tr) { e.preventDefault(); e.stopPropagation(); abrirTrocaArea(tr); return; }
-    const fav = e.target.closest('[data-fav]'); if (fav) { e.preventDefault(); const l = favoritos(), id = fav.dataset.fav; lsS(chaveU('favoritos'), JSON.stringify(l.includes(id) ? l.filter((x) => x !== id) : l.concat(id))); toast(l.includes(id) ? 'Tirado dos favoritos.' : 'Sistema nos favoritos: aparece primeiro no portal.'); telaInicio(); return; }
+    const fav = e.target.closest('[data-fav]'); if (fav) { e.preventDefault(); const l = favoritos(), id = fav.dataset.fav; lsS(chaveU('favoritos'), JSON.stringify(l.includes(id) ? l.filter((x) => x !== id) : l.concat(id))); toast(l.includes(id) ? 'Tirado dos favoritos.' : 'Sistema nos favoritos: aparece primeiro no início.'); fav.setAttribute('aria-pressed', String(!l.includes(id))); if (document.body.dataset.modo === 'portal') telaInicio(); return; }
     if (e.target.closest('[target="_blank"]')) { fecharTrocaArea(); return; }
     const ar = e.target.closest('[data-area]'); if (ar && !e.ctrlKey && !e.metaKey && !e.shiftKey) { e.preventDefault(); fecharTrocaArea(); document.body.classList.remove('menu-aberto'); irArea(ar.dataset.area); return; }
     const br = e.target.closest('[data-breve]'); if (br) { e.preventDefault(); fecharTrocaArea(); document.body.classList.remove('menu-aberto'); abrirEmBreve(AR.area(br.dataset.breve)); return; }
@@ -2608,50 +2735,106 @@
     return todas.sort((a, b) => a.nivel - b.nivel || (ORDEM_CAT[a.cat] ?? 9) - (ORDEM_CAT[b.cat] ?? 9) || (b.valor || 0) - (a.valor || 0));
   }
 
-  // ---------- PORTAL ----------
+  // ---------- INÍCIO (painel de trabalho): o que fazer hoje, números da revenda, atalhos e sistemas ----------
+  const ICO_SETA = '<path d="M5 12h14M13 6l6 6-6 6"/>';
+  // número curto do cartão do sistema (o primeiro trecho do número vivo da área)
+  function numeroArea(a) { let n = null; try { n = a.numero ? a.numero(UI) : null; } catch (er) { n = null; } return n; }
+  // indicadores com dados de verdade, só das áreas que a pessoa vê; variação só quando existe comparação real
+  function indicadoresPortal() {
+    const l = [], vis = (id) => { const a = AR.area(id); return a && a.pronta && areaVisivel(a); };
+    if (vis('usados') && pode('patio')) {
+      const p = C.patio(), v = p.filter((t) => diasDesde(t.entrada) > 90).length;
+      l.push({ id: 'patio', rot: 'Capital parado no pátio', ico: '<path d="M3 20V9l9-5 9 5v11M7 20v-6h10v6"/>', val: mil(C.capitalImobilizado()), exp: `${p.length} ${p.length === 1 ? 'máquina' : 'máquinas'} no pátio${v ? ` · ${v} há mais de 90 dias` : ''}`, per: 'Hoje', alerta: v > 0, ir: urlSis('usados', 'patio') });
+    }
+    if (vis('relatorios') || (vis('usados') && pode('trocas'))) {
+      const vend = C.vendidas(), noPer = (a, b) => vend.filter((t) => t.saida && diasDesde(t.saida) >= a && diasDesde(t.saida) <= b);
+      const ag = noPer(0, 30), ant = noPer(31, 60), soma = (x) => x.reduce((s, t) => s + (t.vendido || 0), 0), sa = soma(ag), sb = soma(ant);
+      l.push({ id: 'vendas', rot: 'Usados vendidos', ico: '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>', val: mil(sa), exp: `${ag.length} ${ag.length === 1 ? 'máquina vendida' : 'máquinas vendidas'}`, per: 'Últimos 30 dias', varia: sb > 0 ? (sa - sb) / sb : null, ir: vis('relatorios') && pode('relatorio') ? urlSis('relatorios') : urlSis('usados', 'trocas') });
+    }
+    if (vis('financeiro') && window.FINANCEIRO) {
+      try {
+        const F = window.FINANCEIRO; F.garantir(estado);
+        const r = F.resumo(estado, { hoje: hojeISO(), loja: estado.lojaAtual || '', lojas: K.lojasPermitidas, ctx: { trocas: A.todasTrocas || A.trocas || [], financiadas: A.financiadas || [], cfg: K.cfg, hoje: hojeISO() } });
+        l.push({ id: 'receber', rot: 'Contas a receber', ico: '<path d="M4 7h16v12H4zM4 11h16M8 15h3"/>', val: mil(r.receberVencido.valor + r.receber7.valor), exp: `${r.receberVencido.n ? `${r.receberVencido.n} ${r.receberVencido.n === 1 ? 'vencida' : 'vencidas'} · ` : ''}${r.receber7.n} nos próximos 7 dias`, per: 'Vencidas e 7 dias', alerta: r.receberVencido.n > 0, ir: urlSis('financeiro', 'fin-receber') });
+        l.push({ id: 'saldo', rot: 'Saldo em bancos e caixa', ico: '<path d="M3 10l9-6 9 6M5 10v9M19 10v9M9 10v9M15 10v9M3 21h18"/>', val: mil(r.saldo), exp: `a pagar hoje: ${mil(r.pagarHoje.valor)}`, per: 'Hoje', ir: urlSis('financeiro') });
+      } catch (er) { /* sem financeiro: segue com os outros */ }
+    }
+    ['crm', 'oficina', 'novas', 'pecas'].forEach((id) => {
+      if (!vis(id)) return; const a = AR.area(id), n = numeroArea(a); if (!n) return;
+      const [t1, ...resto] = String(n.texto).split(' · ');
+      l.push({ id, rot: a.nome, ico: a.icone, val: n.valor, exp: t1 + (resto[0] ? ' · ' + resto[0] : ''), per: 'Agora', alerta: !!n.alerta, ir: urlSis(id) });
+    });
+    return l.slice(0, 4);
+  }
+  // atalhos de trabalho: no máximo 6, só do que a pessoa pode fazer
+  function atalhosPortal() {
+    const l = [], vis = (id) => { const a = AR.area(id); return a && a.pronta && areaVisivel(a) ? a : null; };
+    const deAcao = (id, rot) => { const a = vis(id); if (!a || !a.acao || somenteLeitura()) return null; const ab = a.acao.href.replace(/^#\/?([^/]*\/)?/, ''); if (!pode(ab)) return null; return { rot: rot || a.acao.rotulo, ico: a.icone, href: /^#\//.test(a.acao.href) ? a.acao.href : urlSis(id, ab), novo: a.acao.novo && a.novo ? id : '' }; };
+    const u = vis('usados');
+    if (u && pode('avaliar') && !somenteLeitura()) l.push({ rot: 'Avaliar troca', ico: '<path d="M4 7h13l-3-3M20 17H7l3 3"/>', href: urlSis('usados', 'avaliar'), destaque: true });
+    if (u && pode('patio')) l.push({ rot: 'Consultar pátio', ico: '<path d="M3 20V9l9-5 9 5v11M7 20v-6h10v6"/>', href: urlSis('usados', 'patio') });
+    [deAcao('crm', 'Nova oportunidade'), deAcao('oficina', 'Abrir OS'), deAcao('pecas', 'Entrada de peças')].forEach((x) => { if (x) l.push(x); });
+    if (vis('financeiro')) l.push({ rot: 'Consultar financeiro', ico: AR.area('financeiro').icone, href: urlSis('financeiro') });
+    if (l.length < 6) [deAcao('novas', 'Nova proposta'), vis('relatorios') ? { rot: 'Ver relatórios', ico: AR.area('relatorios').icone, href: urlSis('relatorios') } : null].forEach((x) => { if (x && l.length < 6) l.push(x); });
+    if (l.length && !l.some((x) => x.destaque)) l[0].destaque = true;
+    return l.slice(0, 6);
+  }
   function telaInicio() {
     const as = areasVisiveis(), fixa = lsG(chaveU('area-fixa')) || '', favs = favoritos();
     const h = new Date().getHours(), saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite', nome = primeiroNome(eu());
     const prontas = as.filter((a) => a.pronta).sort((x, y) => (favs.includes(y.id) ? 1 : 0) - (favs.includes(x.id) ? 1 : 0)), breves = as.filter((a) => !a.pronta);
     const ordem = as.filter((a) => a.pronta);
     const cartao = (a) => {
-      if (!a.pronta) return `<div class="area-caixa"><button type="button" class="area-cartao breve" data-breve="${a.id}"><span class="area-ico">${svgI(a.icone)}</span><span class="area-nome">${esc(a.nome)}<span class="tag declarado">Em breve</span></span><span class="area-desc">${esc(a.descricao)}</span><span class="area-num">${esc(a.jaExiste || 'Ainda não está pronto.')}</span></button></div>`;
-      let n = null; try { n = a.numero ? a.numero(UI) : null; } catch (er) { n = null; }
-      const fav = favs.includes(a.id), i = ordem.indexOf(a);
-      return `<div class="area-caixa" data-sis="${a.id}" data-busca="${esc(K.normal(a.nome + ' ' + a.descricao + ' ' + itensVisiveis(a).map((x) => x.rotulo).join(' ')))}"><a class="area-cartao ${fav ? 'favorito' : ''}" href="${urlSis(a.id)}" data-area="${a.id}"><span class="area-ico">${svgI(a.icone)}</span><span class="area-nome">${esc(a.nome)}${a.id === fixa ? '<span class="tag comprovado">Abre direto</span>' : ''}</span><span class="area-desc">${esc(a.descricao)}</span>
-        ${n ? `<span class="area-num ${n.alerta ? 'alerta' : ''}"><b>${esc(n.valor)}</b> ${esc(n.texto)}</span>` : '<span class="area-num"></span>'}<span class="area-ir">${i >= 0 && i < 9 ? `<kbd>Alt ${i + 1}</kbd>` : ''}Abrir<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
-        <div class="area-extra"><button type="button" class="area-mini ${fav ? 'ligado' : ''}" data-fav="${a.id}" aria-pressed="${fav}" title="${fav ? 'Tirar dos favoritos' : 'Favoritar'}" aria-label="${fav ? 'Tirar' : 'Pôr'} ${esc(a.nome)} ${fav ? 'dos' : 'nos'} favoritos">${svgI(ICO_ESTRELA)}</button><a class="area-mini" href="${urlSis(a.id)}" target="_blank" rel="noopener" title="Abrir em nova aba" aria-label="Abrir ${esc(a.nome)} em nova aba">${svgI(ICO_NOVA_ABA)}</a></div></div>`;
+      if (!a.pronta) return `<div class="area-caixa"><button type="button" class="area-cartao breve" data-breve="${a.id}"><span class="area-ico">${svgI(a.icone)}</span><span class="area-txt"><span class="area-nome">${esc(a.nome)}</span><span class="area-num">Em breve</span></span></button></div>`;
+      const n = numeroArea(a), i = ordem.indexOf(a), curto = n ? String(n.texto).split(' · ')[0] : '';
+      return `<div class="area-caixa" data-sis="${a.id}"><a class="area-cartao ${favs.includes(a.id) ? 'favorito' : ''}" href="${urlSis(a.id)}" data-area="${a.id}" ${i >= 0 && i < 9 ? `aria-keyshortcuts="Alt+${i + 1}"` : ''}><span class="area-ico">${svgI(a.icone)}</span><span class="area-txt"><span class="area-nome">${esc(a.nome)}${a.id === fixa ? '<span class="tag comprovado">Abre direto</span>' : ''}${favs.includes(a.id) ? '<span class="tag declarado">Favorito</span>' : ''}</span>
+        <span class="area-num ${n && n.alerta ? 'alerta' : ''}">${n ? `<b>${esc(n.valor)}</b> ${esc(curto)}` : esc(a.descricao.split(/[,.]/)[0])}</span><span class="area-desc sr">${esc(a.descricao)}</span></span><span class="area-ir" aria-hidden="true">${svgI(ICO_SETA)}</span></a></div>`;
     };
     const tarefas = tarefasDoDia(), urg = tarefas.filter((x) => x.nivel <= 2);
-    const rec = recentes().map((r) => { const a = AR.area(r.sis), x = a && itensVisiveis(a).find((y) => y.aba === r.aba); return a && x && areaVisivel(a) ? { a, x } : null; }).filter(Boolean).slice(0, 6);
-    tela.innerHTML = `<div class="titulo inicio-titulo"><div><h1>${saud}${nome ? ', ' + esc(nome) : ''}</h1><p>${esc(A.revenda.nome)} · ${esc(PERFIL_NOME(eu().perfil))} · ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}</p></div>
-        ${areaAtual && AR.area(areaAtual) && areaVisivel(AR.area(areaAtual)) && AR.area(areaAtual).pronta ? `<a class="btn btn-ouro" href="${urlSis(areaAtual)}" data-area="${areaAtual}">Continuar em ${esc(AR.area(areaAtual).nome)}</a>` : ''}</div>
+    const rec = recentes().map((r) => { const a = AR.area(r.sis), x = a && itensVisiveis(a).find((y) => y.aba === r.aba); return a && x && areaVisivel(a) ? { a, x } : null; }).filter(Boolean).slice(0, 4);
+    const kpis = indicadoresPortal(), ats = atalhosPortal();
+    const icoTarefa = (t) => { const a = AR.area(t.area); return svgI(t.cat === 'aprovar' ? '<path d="M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/>' : t.cat === 'comprador' ? '<path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM3 21a9 9 0 0 1 18 0"/>' : a ? a.icone : ICO_AVISOS); };
+    const dataLonga = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    const contexto = `${esc(A.revenda.nome)} · ${estado.lojaAtual ? 'loja ' + esc(estado.lojaAtual) : estado.lojas.length > 1 ? 'todas as lojas' : esc(PERFIL_NOME(eu().perfil))}`;
+    const cont = areaAtual && AR.area(areaAtual) && areaVisivel(AR.area(areaAtual)) && AR.area(areaAtual).pronta ? AR.area(areaAtual) : null;
+    tela.innerHTML = `<div class="portal">
+      <div class="titulo portal-ola"><div><h1>${saud}${nome ? ', ' + esc(nome) : ''}</h1><p><span class="ola-data">${svgI('<path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/>')}${esc(dataLonga.charAt(0).toUpperCase() + dataLonga.slice(1))}</span><span class="ola-ctx">${contexto}</span></p></div>
+        ${cont ? `<a class="btn btn-linha" href="${urlSis(cont.id)}" data-area="${cont.id}">Continuar em ${esc(cont.nome)}${svgI(ICO_SETA)}</a>` : ''}</div>
       ${avisoImplantacao()}
-      <div class="portal-busca"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"/></svg><input id="portal-q" type="search" placeholder="Procurar sistema ou tela (ex.: contas a pagar, OS, pátio)" aria-label="Procurar sistema ou tela" autocomplete="off"><div id="portal-res" class="portal-res" hidden></div></div>
-      ${rec.length ? `<div class="recentes"><h2 class="areas-sub">Abertos por último</h2><div class="chips">${rec.map(({ a, x }) => `<a class="chip" href="${urlSis(a.id, x.aba)}">${svgI(x.icone || a.icone)}<span>${esc(x.rotulo)}<small>${esc(a.nome)}</small></span></a>`).join('')}</div></div>` : ''}
-      <h2 class="areas-sub">${favs.length ? 'Sistemas (favoritos primeiro)' : 'Sistemas'}</h2>
-      <div class="areas-grade" id="areas-grade">${prontas.map(cartao).join('')}</div>
-      ${breves.length ? `<h2 class="areas-sub">Em construção</h2><div class="areas-grade breves">${breves.map(cartao).join('')}</div>` : ''}
-      <section class="painel avisos-dia" aria-label="Avisos do dia"><div class="painel-cab"><h2>${ICO.alvo}Avisos do dia</h2><p>${tarefas.length ? `${urg.length} para hoje · ${tarefas.length} no total, de todos os sistemas que você usa` : 'Nada pendente agora'}</p></div>
-        ${tarefas.length ? `<ul class="acoes-dia">${tarefas.slice(0, 5).map((a) => `<li class="n${a.nivel}"><div><span class="cat">${esc(a.catNome || CAT_NOME[a.cat] || 'Usados')}</span><b>${esc(a.titulo)}</b><span>${esc(a.txt)}</span></div>${botaoAcao(a, 'btn-linha')}</li>`).join('')}</ul>
-          <div class="acoes"><a class="btn btn-linha" href="#/hoje">Ver todas as tarefas do dia (${tarefas.length})</a><a class="btn btn-linha" href="#/rotina">Rotina da equipe</a></div>`
-        : '<p class="vazio">Nenhuma aprovação, conta vencida, OS atrasada ou retorno de cliente pendente para o seu perfil.</p>'}</section>
-      <div class="grade-2 bloco inicio-rodape">
-        <section class="painel"><h2><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Ao abrir o Anshur</h2><p class="sub">Neste aparelho, para ${esc(eu().nome)}. Cada sistema também pode ficar aberto numa aba própria do navegador (botão ${svgI(ICO_NOVA_ABA).replace('<svg', '<svg class="ico-inline"')} do cartão).</p>
-          <div class="campo" style="margin-top:12px"><label for="in-fixa">Abrir em</label><select id="in-fixa"><option value="">Este portal</option>${ordem.map((a) => `<option value="${a.id}" ${a.id === fixa ? 'selected' : ''}>Direto no ${esc(a.nome)}</option>`).join('')}</select></div></section>
-        ${blocoInstalar()}
-      </div>`;
+      <div class="portal-grade">
+        <section class="painel avisos-dia portal-hoje" aria-labelledby="h-hoje"><div class="painel-cab"><h2 id="h-hoje">${svgI('<path d="M9 11l3 3 8-8M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11"/>')}O que fazer hoje</h2>${tarefas.length ? `<span class="contador" title="${urg.length} para hoje · ${tarefas.length} no total">${tarefas.length}</span>` : ''}</div>
+          ${tarefas.length ? `<p class="sub hoje-resumo">${urg.length} para hoje · ${tarefas.length} no total, de todos os sistemas que você usa</p><ul class="acoes-dia">${tarefas.slice(0, 5).map((a, i) => `<li class="n${a.nivel}${i === 0 ? ' primeira' : ''}"><span class="tarefa-ico" aria-hidden="true">${icoTarefa(a)}</span><div class="tarefa-txt"><span class="cat">${esc(a.catNome || CAT_NOME[a.cat] || 'Usados')}</span><b>${esc(a.titulo)}</b><span>${esc(a.txt)}</span></div>${botaoAcao(a, i === 0 ? 'btn-ouro' : 'btn-linha')}</li>`).join('')}</ul>
+            <div class="acoes"><a class="btn btn-linha" href="#/hoje">Ver todas as pendências (${tarefas.length})</a><a class="btn btn-linha" href="#/rotina">Rotina da equipe</a></div>`
+          : `<div class="estado-vazio ok">${svgI('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}<b>Está tudo em dia.</b><p>Nenhuma pendência precisa da sua atenção agora.</p><a class="btn btn-linha" href="#/rotina">Ver a rotina da equipe</a></div>`}
+          ${rec.length ? `<div class="recentes"><h3 class="areas-sub">Abertos por último</h3><div class="chips">${rec.map(({ a, x }) => `<a class="chip" href="${urlSis(a.id, x.aba)}">${svgI(x.icone || a.icone)}<span>${esc(x.rotulo)}<small>${esc(a.nome)}</small></span></a>`).join('')}</div></div>` : ''}
+        </section>
+        <div class="portal-dir">
+          ${kpis.length ? `<section class="painel portal-numeros" aria-labelledby="h-num"><div class="painel-cab"><h2 id="h-num">${svgI('<path d="M5 20V10M12 20V4M19 20v-7"/>')}Números da revenda</h2><p>${estado.lojaAtual ? 'Loja ' + esc(estado.lojaAtual) : estado.lojas.length > 1 ? 'Todas as lojas' : esc(A.revenda.nome)}</p></div>
+            <div class="kpis-portal">${kpis.map((k) => `<a class="kpi-p ${k.alerta ? 'alerta' : ''}" href="${k.ir}" data-kpi="${k.id}"><span class="kpi-p-rot">${svgI(k.ico)}${esc(k.rot)}</span><b class="kpi-p-val">${esc(k.val)}</b><span class="kpi-p-exp">${esc(k.exp)}</span><span class="kpi-p-per">${k.varia != null ? `<span class="varia ${k.varia >= 0 ? 'sobe' : 'desce'}">${k.varia >= 0 ? '▲' : '▼'} ${pct(Math.abs(k.varia), 0)}</span> vs. 30 dias anteriores` : esc(k.per)}</span></a>`).join('')}</div></section>` : ''}
+          ${ats.length ? `<section class="portal-atalhos" aria-labelledby="h-at"><h2 class="sec-tit" id="h-at">${svgI('<path d="M13 3L4 14h7l-1 7 9-11h-7z"/>')}Acesso rápido</h2>
+            <div class="atalhos">${ats.map((x) => `<a class="atalho-btn ${x.destaque ? 'destaque' : ''}" href="${x.href}" ${x.novo ? `data-atalho-novo="${x.novo}"` : ''}>${svgI(x.ico)}<span>${esc(x.rot)}</span>${svgI(ICO_SETA).replace('<svg', '<svg class="seta-at"')}</a>`).join('')}</div></section>` : ''}
+          <section class="portal-sistemas" aria-labelledby="h-sis"><h2 class="sec-tit" id="h-sis">${svgI(ICO_MAIS)}Sistemas</h2>
+            ${['Comercial', 'Operação', 'Gestão'].map((g) => { const l = prontas.filter((a) => (GRUPO_AREA[a.id] || 'Gestão') === g); return l.length ? `<div class="sis-grupo"><h3 class="sis-grupo-tit">${g}</h3><div class="areas-grade">${l.map(cartao).join('')}</div></div>` : ''; }).join('')}
+            ${breves.length ? `<div class="sis-grupo"><h3 class="sis-grupo-tit">Em construção</h3><div class="areas-grade breves">${breves.map(cartao).join('')}</div></div>` : ''}
+          </section>
+        </div>
+      </div></div>`;
     ligarAcoes(tela);
-    $('#in-fixa').onchange = (e) => { lsS(chaveU('area-fixa'), e.target.value); toast(e.target.value ? `O Anshur vai abrir direto no ${AR.area(e.target.value).nome}.` : 'O Anshur vai abrir neste portal.'); telaInicio(); };
-    // busca do portal: filtra os cartões e mostra as telas que combinam
-    const q = $('#portal-q'), res = $('#portal-res');
-    q.oninput = () => {
-      const t = K.normal(q.value);
-      $$('.area-caixa[data-sis]').forEach((c) => { c.hidden = !!t && !c.dataset.busca.includes(t); });
-      const telas = t ? acoesDasAreas().filter(([n]) => K.normal(n).includes(t)).slice(0, 8) : [];
-      res.hidden = !telas.length; res.innerHTML = telas.map(([n, h]) => `<a href="${h}">${esc(n)}</a>`).join('');
-    };
-    q.onkeydown = (e) => { if (e.key === 'Enter') { const p = $('a', res); if (p) { e.preventDefault(); location.hash = p.getAttribute('href'); } } if (e.key === 'Escape') { q.value = ''; q.oninput(); } };
+    $$('[data-atalho-novo]', tela).forEach((b) => b.onclick = (e) => { const a = AR.area(b.dataset.atalhoNovo); if (!a || !a.novo) return; e.preventDefault(); location.hash = b.getAttribute('href'); setTimeout(() => a.novo(UI), 200); });
+  }
+  const GRUPO_AREA = { usados: 'Comercial', novas: 'Comercial', crm: 'Comercial', oficina: 'Operação', pecas: 'Operação', financeiro: 'Gestão', fiscal: 'Gestão', relatorios: 'Gestão', config: 'Gestão' };
+  // preferências deste aparelho (saíram do painel): onde o Anshur abre, sistemas favoritos e instalação
+  function abrirPreferencias() {
+    const pm = $('#perfil-menu'); if (pm && !pm.hidden) { pm.hidden = true; $('#perfil').setAttribute('aria-expanded', 'false'); }
+    const ordem = areasVisiveis().filter((a) => a.pronta), fixa = lsG(chaveU('area-fixa')) || '', favs = favoritos();
+    abrirCamada('modal pref-modal', `<h2>Preferências deste aparelho</h2><p class="sub">Para ${esc(eu().nome)}, só neste aparelho. Nada muda para o resto da equipe.</p>
+      <div class="campo" style="margin-top:20px"><label for="in-fixa">Ao abrir o Anshur, mostrar</label><select id="in-fixa"><option value="">O início (o que fazer hoje e os sistemas)</option>${ordem.map((a) => `<option value="${a.id}" ${a.id === fixa ? 'selected' : ''}>Direto o sistema ${esc(a.nome)}</option>`).join('')}</select></div>
+      <fieldset class="pref-favs"><legend>Sistemas favoritos</legend><p class="ajuda">Os favoritos aparecem primeiro na lista de sistemas do início.</p>
+        <div class="pref-lista">${ordem.map((a) => `<button type="button" class="pref-fav" data-fav="${a.id}" aria-pressed="${favs.includes(a.id)}">${svgI(ICO_ESTRELA)}<span>${esc(a.nome)}</span></button>`).join('')}</div></fieldset>
+      ${blocoInstalar()}
+      <p class="nota-rodape">Dica: cada sistema também abre numa aba própria do navegador (Ctrl + clique no sistema).</p>`, (c) => {
+      $('#in-fixa', c).onchange = (e) => { lsS(chaveU('area-fixa'), e.target.value); toast(e.target.value ? `O Anshur vai abrir direto no ${AR.area(e.target.value).nome}.` : 'O Anshur vai abrir no início.'); if (document.body.dataset.modo === 'portal') telaInicio(); };
+    });
   }
   TELAS.inicio = telaInicio;
 
@@ -2676,9 +2859,9 @@
     const lista = situacaoImpl();
     if (!IMPL.mostrarAviso({ imp: implEstado(), perfil: eu().perfil, lista })) return '';
     const p = IMPL.progresso(lista), prox = lista.find((e) => !e.ok) || lista[0];
-    return `<section class="impl-aviso" aria-label="Implantação guiada"><div class="impl-aviso-txt"><b>Implantação: ${p.texto}</b><span>Próxima: ${esc(prox.titulo)}</span>
+    return `<section class="impl-aviso" aria-label="Implantação guiada"><span class="impl-aviso-ico" aria-hidden="true">${svgI('<path d="M4 20h16M6 20V10l6-5 6 5v10M10 14l1.5 1.5L15 12"/>')}</span><div class="impl-aviso-txt"><b>Implantação guiada · ${p.texto}</b><span>Próxima: ${esc(prox.titulo)}</span>
       <div class="progresso" aria-hidden="true"><i style="width:${p.pct * 100}%"></i></div></div>
-      <div class="impl-aviso-acoes"><a class="btn btn-ouro" href="#/config/implantacao">Continuar</a>${eu().perfil === 'dono' ? '<button class="btn btn-linha" type="button" data-impl-esconder>Esconder</button>' : ''}</div></section>`;
+      <div class="impl-aviso-acoes"><a class="btn btn-ouro" href="#/config/implantacao">Continuar implantação</a>${eu().perfil === 'dono' ? '<button class="btn btn-linha" type="button" data-impl-esconder>Esconder</button>' : ''}</div></section>`;
   }
   document.addEventListener('click', (e) => {
     if (!e.target.closest('[data-impl-esconder]')) return;
@@ -2966,12 +3149,18 @@
     montarMenu(r.sis);
     fecharTrocaArea(); fecharSuspensos();
     $$('.menu a, #sis-barra a').forEach((a) => { if (a.dataset.aba === r.aba) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-    $$('#sis-barra .sb-grupo').forEach((g) => g.classList.toggle('atual', !!g.querySelector('a[aria-current]')));
-    moverIndicador();
+    $$('#menu-folha a[data-aba]').forEach((a) => { if (a.dataset.aba === r.aba) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    encaixarAbas();
+    const itAtual = r.sis && itensVisiveis(AR.area(r.sis)).find((x) => x.aba === r.aba);
+    $('#mig-aba').textContent = itAtual ? itAtual.rotulo : r.sis ? (AR.item(r.aba) || {}).rotulo || '' : '';
+    $('#mig-aba').closest('.migalhas').classList.toggle('so-area', !$('#mig-aba').textContent || (r.sis && $('#mig-aba').textContent === AR.area(r.sis).nome));
+    // celular: a barra de baixo marca "Mais" quando a tela atual não está nela
+    const mm = $('#menu-mais'); if (mm) mm.classList.toggle('ativo', !$('#menu a[aria-current="page"]') && r.aba !== 'inicio');
+    fecharFolha();
     fecharCamada(true);
     const fn = telaDe(r.aba);
     // o botão principal do cabeçalho some quando a própria tela já mostra o mesmo botão (sem ação repetida na tela)
-    const semRepetir = () => { const nv = $('.cab-nova'); if (!nv) return; const t = ($('span', nv).textContent || '').trim().toLowerCase(); nv.classList.toggle('repetido', !!t && $$('.titulo a, .titulo button', tela).some((b) => b.textContent.trim().toLowerCase() === t)); };
+    const semRepetir = () => { const nv = $('.cab-nova'); if (!nv) return; const t = ($('span', nv).textContent || '').trim().toLowerCase(); nv.classList.toggle('repetido', (!!t && $$('.titulo a, .titulo button', tela).some((b) => b.textContent.trim().toLowerCase() === t)) || (!!r.sis && nv.getAttribute('href') === urlSis(r.sis, r.aba) && !nv.onclick) || $$('.titulo .btn-ouro', tela).length > 0); };
     const desenhar = () => { tela.classList.remove('saindo'); fn(); atualizarFaixaImpl(r.aba); semRepetir(); tela.classList.remove('entrando'); void tela.offsetWidth; tela.classList.add('entrando'); };
     if (primeira || reduzido) { primeira = false; desenhar(); return; }
     tela.classList.add('saindo');
@@ -3006,19 +3195,9 @@
   if (AR) AR.lista().forEach((a) => { if (a.iniciar) try { a.iniciar(UI); } catch (e) { console.error('Área ' + a.id, e); } });
   atualizarSino();
   window.addEventListener('hashchange', rota);
-  // celular: barra com 4 atalhos + "Mais", que abre todos os módulos por categoria
-  (() => {
-    const menu = $('#menu'); if (!menu || $('#menu-mais')) return;
-    menu.insertAdjacentHTML('beforeend', '<button type="button" id="menu-mais" class="menu-mais" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><b>Mais</b></button>');
-    document.body.insertAdjacentHTML('beforeend', '<div class="menu-fundo" id="menu-fundo"></div>');
-    const abrir = (sim) => { document.body.classList.toggle('menu-aberto', sim); $('#menu-mais').setAttribute('aria-expanded', sim); $('#menu-mais b').textContent = sim ? 'Fechar' : 'Mais'; };
-    $('#menu-mais').onclick = () => abrir(!document.body.classList.contains('menu-aberto'));
-    $('#menu-fundo').onclick = () => abrir(false);
-    menu.addEventListener('click', (e) => { if (e.target.closest('a')) abrir(false); });
-    const marcar = () => { const a = $('.menu a[aria-current="page"]'); $('#menu-mais').classList.toggle('ativo', !!a && !a.classList.contains('atalho')); };
-    window.addEventListener('hashchange', () => setTimeout(marcar, 50)); setTimeout(marcar, 300);
-  })();
-  window.addEventListener('resize', moverIndicador);
+  // a quantidade de abas visíveis muda com a largura: remonta o menu quando cruza um limite
+  let redimTimer = null;
+  window.addEventListener('resize', () => { clearTimeout(redimTimer); redimTimer = setTimeout(() => { const r = resolver(false); if (!r.sis) return; menuDe = null; montarMenu(r.sis); $$('.menu a, #sis-barra a, #menu-folha a[data-aba]').forEach((a) => { if (a.dataset.aba === r.aba) a.setAttribute('aria-current', 'page'); }); encaixarAbas(); }, 150); });
   // com conta: o que o app ajustou só para abrir (padrões, lojas, perfis do servidor) não vira alteração a enviar
   if (NV && NV.marcarVista) NV.marcarVista(estado);
   // revenda recém-criada (dono ou gerente, nada importado ainda): a implantação guiada abre sozinha
