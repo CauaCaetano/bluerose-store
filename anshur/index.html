@@ -19,6 +19,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilo.css?v=36">
+<!-- conta real (entrou pelo login, convite ou app instalado): a faixa de demonstração não aparece -->
+<script>try { if (localStorage.getItem('anshur-ambiente') === 'op' || /[?&](entrar|convite)\b/.test(location.search)) document.documentElement.classList.add('anshur-real'); } catch (e) {}</script>
 </head>
 <body>
 <a class="pular" href="#tela">Ir para o conteúdo</a>
@@ -34,6 +36,7 @@
   .demo-fita .df-contratar:hover { background: #D1B57E; }
   .demo-fita .df-cegas { border: 1px solid rgba(193, 163, 106, .75); color: #E9E2D4; }
   .demo-fita .df-cegas:hover { background: rgba(193, 163, 106, .16); }
+  .demo-fita[hidden], html.anshur-real .demo-fita { display: none !important; }
   @media (max-width: 640px) { .demo-fita .df-txt, .demo-fita .df-l { display: none; } .demo-fita { justify-content: space-between; gap: 6px; padding: 6px 10px; } .demo-fita a { min-height: 40px; padding: 0 12px; font-size: 13px; } }
 </style>
 <div class="demo-fita" role="region" aria-label="Demonstração">

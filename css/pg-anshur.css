@@ -417,3 +417,4 @@ main.an::before, main.an > section::before, main.an > section::after { content: 
 .an-demo-link a.btn.an-btn-demo { width: 100% !important; margin: 0 !important; white-space: normal; text-align: center; justify-content: center; }
 .an-demo-link span { grid-column: 1 / -1; }
 @media (max-width: 560px) { .an-demo-link { grid-template-columns: minmax(0, 1fr); } }
+.an-instalar { margin-top: -14px; }

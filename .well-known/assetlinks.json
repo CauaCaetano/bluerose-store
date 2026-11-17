@@ -106,5 +106,17 @@
         "91:24:0A:D5:49:1D:DE:09:6B:70:0C:50:B3:3A:80:45:D0:B5:C3:97:9E:82:7A:10:D5:7B:12:98:87:78:8D:3A"
       ]
     }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bluerosestore.anshur",
+      "sha256_cert_fingerprints": [
+        "2A:20:48:25:2B:1C:9C:CD:04:06:3D:F8:D9:91:A0:FB:CA:0E:2F:2E:9B:69:15:4A:08:EE:0E:D3:B3:60:68:8E"
+      ]
+    }
   }
 ]
