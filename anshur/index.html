@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=31">
+<link rel="stylesheet" href="estilo.css?v=32">
 </head>
 <body>
 <a class="pular" href="#tela">Ir para o conteúdo</a>
@@ -34,13 +34,13 @@
   .demo-fita .df-contratar:hover { background: #D1B57E; }
   .demo-fita .df-cegas { border: 1px solid rgba(193, 163, 106, .75); color: #E9E2D4; }
   .demo-fita .df-cegas:hover { background: rgba(193, 163, 106, .16); }
-  @media (max-width: 640px) { .demo-fita .df-txt { display: none; } .demo-fita { justify-content: space-between; flex-wrap: wrap; gap: 6px; padding: 6px 10px; } .demo-fita a { min-height: 44px; padding: 0 12px; font-size: 13px; } }
+  @media (max-width: 640px) { .demo-fita .df-txt, .demo-fita .df-l { display: none; } .demo-fita { justify-content: space-between; gap: 6px; padding: 6px 10px; } .demo-fita a { min-height: 40px; padding: 0 12px; font-size: 13px; } }
 </style>
 <div class="demo-fita" role="region" aria-label="Demonstração">
-  <a class="df-voltar" href="../anshur.html">← Voltar ao site</a>
+  <a class="df-voltar" href="../anshur.html">← <span class="df-l">Voltar ao </span>site</a>
   <span class="df-txt">Demonstração do <b>Anshur</b> · revenda inventada, todos os dados são fictícios</span>
-  <a class="df-cegas" href="teste-as-cegas.html">Teste às cegas grátis</a>
-  <a class="df-contratar" href="../anshur.html#assinar">Preço e contratação</a>
+  <a class="df-cegas" href="teste-as-cegas.html">Teste às cegas<span class="df-l"> grátis</span></a>
+  <a class="df-contratar" href="../anshur.html#assinar">Preço<span class="df-l"> e contratação</span></a>
 </div>
 <header class="cabecalho">
   <div class="cab-linha">
@@ -81,12 +81,12 @@
 <div class="folha" id="menu-folha" role="dialog" aria-modal="true" aria-label="Mais opções" hidden></div>
 <div id="camada"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<script src="instalar.js?v=31"></script>
-<script src="areas.js?v=31"></script>
-<script src="dados.js?v=31"></script>
-<script src="fotos.js?v=31"></script>
+<script src="instalar.js?v=32"></script>
+<script src="areas.js?v=32"></script>
+<script src="dados.js?v=32"></script>
+<script src="fotos.js?v=32"></script>
 <!-- nuvem.js: na demonstração carrega o app na hora; no ambiente real, entra na conta e carrega os dados do servidor antes -->
-<script src="nuvem.js?v=31" data-app="comum.js?v=31 importar.js?v=31 dms.js?v=31 implantacao.js?v=31 motor.js?v=31 mercado.js?v=31 retencao.js?v=31 graficos.js?v=31 areas/nucleo.js?v=31 areas/importar.js?v=31 areas/novas-regras.js?v=31 areas/novas.js?v=31 areas/financeiro-regras.js?v=31 areas/financeiro.js?v=31 areas/pecas-regras.js?v=31 areas/oficina-regras.js?v=31 areas/oficina.js?v=31 areas/pecas.js?v=31 areas/crm-regras.js?v=31 areas/crm.js?v=31 areas/fiscal-regras.js?v=31 areas/fiscal.js?v=31 app.js?v=31"></script>
+<script src="nuvem.js?v=32" data-app="comum.js?v=32 importar.js?v=32 dms.js?v=32 implantacao.js?v=32 motor.js?v=32 mercado.js?v=32 retencao.js?v=32 graficos.js?v=32 areas/nucleo.js?v=32 areas/importar.js?v=32 areas/novas-regras.js?v=32 areas/novas.js?v=32 areas/financeiro-regras.js?v=32 areas/financeiro.js?v=32 areas/pecas-regras.js?v=32 areas/oficina-regras.js?v=32 areas/oficina.js?v=32 areas/pecas.js?v=32 areas/crm-regras.js?v=32 areas/crm.js?v=32 areas/fiscal-regras.js?v=32 areas/fiscal.js?v=32 app.js?v=32"></script>
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch(() => {}); const tinha = !!navigator.serviceWorker.controller; let novo = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinha) { if (!novo) { novo = true; location.reload(); } return; } performance.getEntriesByType('resource').forEach((r) => { if (/^https:\/\/(cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com)\//.test(r.name)) fetch(r.name, { mode: 'cors', credentials: 'omit' }).catch(() => {}); }); }); }</script>
 </body>
 </html>

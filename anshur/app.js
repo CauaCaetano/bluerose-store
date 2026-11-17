@@ -4,6 +4,14 @@
   const tela = document.getElementById('tela');
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  // celular: cada linha de tabela vira um cartão (o CSS usa o nome da coluna guardado em data-rot)
+  const rotularTabelas = () => $$('table', tela).forEach((t) => {
+    const ths = $$('thead th', t).map((th) => th.textContent.trim()); if (!ths.length) return;
+    $$('tbody tr, tfoot tr', t).forEach((tr) => { let i = 0; [...tr.children].forEach((td) => { if (!td.hasAttribute('data-rot')) td.setAttribute('data-rot', ths[i] || ''); i += td.colSpan || 1; }); });
+    t.classList.add('tab-cartao');
+  });
+  let rotPend = false;
+  new MutationObserver(() => { if (rotPend) return; rotPend = true; requestAnimationFrame(() => { rotPend = false; rotularTabelas(); }); }).observe(tela, { childList: true, subtree: true });
 
   // ---------- cabeçalho ----------
   $('#marca').innerHTML = '<img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="216" height="54">';
@@ -734,7 +742,7 @@
     const marcas = [...new Set(todos.map((i) => i.t.marca))].sort();
     tela.innerHTML = `
       <div class="titulo"><div><h1>Pátio de máquinas</h1><p>Saiba onde seu capital está parado e quais equipamentos exigem atenção.</p></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="exportar">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Exportar</button><button class="btn btn-linha" type="button" id="comparar">Comparar (<span id="n-comp">${comparar.size}</span>)</button>${botaoAdicionar([{ nome: 'Cadastrar à mão', desc: 'Máquina que entrou no pátio', acao: () => addMaquinaManual() }, { nome: 'Puxar de documento', desc: 'Foto da nota, PDF ou planilha', acao: () => { location.hash = '#documentos'; } }, { nome: 'Avaliar uma troca', desc: 'Calcular o valor máximo antes de fechar', acao: () => { location.hash = '#avaliar'; } }], 'Cadastrar máquina')}</div></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="exportar">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Exportar</button><button class="btn btn-linha" type="button" id="comparar">Comparar <span id="n-comp" class="n-comp">${comparar.size}</span></button>${botaoAdicionar([{ nome: 'Cadastrar à mão', desc: 'Máquina que entrou no pátio', acao: () => addMaquinaManual() }, { nome: 'Puxar de documento', desc: 'Foto da nota, PDF ou planilha', acao: () => { location.hash = '#documentos'; } }, { nome: 'Avaliar uma troca', desc: 'Calcular o valor máximo antes de fechar', acao: () => { location.hash = '#avaliar'; } }], 'Cadastrar máquina')}</div></div>
       <div class="kpis escalonado">
         <div class="kpi k-marfim"><span class="rot">${ICO.barras}Máquinas no pátio</span><span class="val">${conta(itens.length, 'int')}</span></div>
         <div class="kpi k-marfim"><span class="rot">${ICO.moedas}Capital imobilizado</span><span class="val">${conta(cap, 'mil')}</span></div>
@@ -2616,7 +2624,7 @@
     if (nova) { const ac = a && a.acao ? a.acao : null; nova.hidden = !ac || somenteLeitura(); if (ac) { nova.href = /^#\//.test(ac.href) ? ac.href : urlSis(a.id, ac.href.slice(1)); $('span', nova).textContent = ac.rotulo; nova.setAttribute('aria-label', ac.rotulo); nova.onclick = ac.novo && a.novo ? (e) => { e.preventDefault(); a.novo(UI); } : null; } }
     // celular: barra fixa com Início + 3 destinos + Mais
     const usados = AR.area('usados'), temUsados = usados && areaVisivel(usados) && usados.pronta;
-    const destinos = a ? ordem.slice(0, 3).map((x) => ({ href: urlSis(a.id, x.aba), aba: x.aba, ico: x.icone, rot: x.curto || x.rotulo }))
+    const destinos = a ? ordem.slice(0, 3).map((x) => ({ href: urlSis(a.id, x.aba), aba: x.aba, ico: x.icone, rot: ({ 'Implantação': 'Implantar', 'Documentos': 'Docs', 'Movimentos': 'Movim.' })[x.curto || x.rotulo] || x.curto || x.rotulo }))
       : [temUsados ? { href: urlSis('usados'), area: 'usados', ico: usados.icone, rot: 'Usados' } : null,
         temUsados && pode('avaliar') ? { href: urlSis('usados', 'avaliar'), aba: 'avaliar', ico: '<path d="M4 7h13l-3-3M20 17H7l3 3"/>', rot: 'Avaliar' } : null,
         { href: '#/hoje', aba: 'hoje', ico: ICO_AVISOS, rot: 'Avisos' }].filter(Boolean);

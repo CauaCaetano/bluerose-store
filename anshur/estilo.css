@@ -1753,3 +1753,52 @@ body[data-modo] #menu { display: none !important; }
 .gaveta { padding: var(--s-6) var(--s-6) var(--s-10); }
 @media (max-width: 599px) { .modal { padding: var(--s-5) var(--s-4); } .gaveta { padding: var(--s-5) var(--s-4) var(--s-10); } }
 @media print { #lateral, .area-cab, #menu, .folha { display: none !important; } body[data-modo="sistema"] .casca { display: block !important; } }
+
+/* ---------- v32: ajustes da revisão (rótulos inteiros no celular) ---------- */
+@media (max-width: 767px) {
+  #menu a, #menu button { font-size: 12px; letter-spacing: -.01em; padding: 6px 0; }
+}
+.impl-trilha .impl-rot { overflow-wrap: normal; word-break: normal; hyphens: none; }
+@media (max-width: 480px) { .impl-trilha { gap: 6px; } .impl-trilha button { padding: 8px 2px; } .impl-trilha .impl-rot { font-size: 12px; letter-spacing: -.01em; } }
+.n-comp { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: #EFE8DA; color: var(--grafite); font-size: 12.5px; font-weight: 700; }
+@media (max-width: 767px) {
+  .principal { padding-bottom: calc(var(--barra-h) + 28px + env(safe-area-inset-bottom)) !important; }
+}
+@media (max-width: 600px) {
+  /* tabelas viram cartões, um por linha */
+  .tabela-wrap { overflow: visible; margin: 0; padding: 0; }
+  table.tab-cartao, table.tab-cartao tbody, table.tab-cartao tfoot { display: block; width: 100%; min-width: 0 !important; }
+  table.tab-cartao thead { display: none; }
+  table.tab-cartao tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 14px; padding: 14px 16px; margin: 0 0 10px; border: 1px solid var(--borda); border-radius: 12px; background: #fff; }
+  table.tab-cartao tfoot tr { background: #F6F1E7; }
+  table.tab-cartao td, table.tab-cartao th { display: block; padding: 0 !important; border: 0 !important; text-align: left !important; min-width: 0; width: auto !important; white-space: normal !important; overflow-wrap: anywhere; position: static !important; background: none !important; }
+  table.tab-cartao td:first-child, table.tab-cartao td[colspan] { grid-column: 1 / -1; font-weight: 600; font-size: 16px; }
+  table.tab-cartao td:not(:first-child):not([colspan])[data-rot]:not([data-rot=""])::before { content: attr(data-rot); display: block; margin-bottom: 2px; font-size: 12.5px; font-weight: 600; color: #6B747B; }
+  table.tab-cartao td:empty { display: none; }
+  table.tab-cartao td:last-child:has(.btn, button) { grid-column: 1 / -1; }
+  /* migalhas: o título da página já aparece logo abaixo */
+  .migalhas .mig-sep, .migalhas .mig-aba { display: none; }
+  /* ações do topo mais compactas */
+  .titulo .acoes { gap: 8px; }
+  .titulo .acoes .btn-linha { min-height: 42px; padding: 0 12px; font-size: 14.5px; }
+  .impl-aviso-acoes { display: flex; gap: 8px; }
+  .impl-aviso-acoes .btn-ouro { flex: 1 1 auto; white-space: nowrap; padding: 0 12px; }
+  .impl-aviso-acoes .btn-linha { flex: none; padding: 0 14px; }
+}
+.fin-sug .btn { flex: none; white-space: nowrap; } .fin-sug > span { min-width: 0; }
+@media (max-width: 600px) {
+  table.tab-cartao td * { white-space: normal !important; max-width: 100%; }
+  table.tab-cartao td .btn, table.tab-cartao td button { white-space: nowrap !important; }
+  table.tab-cartao tr { overflow: hidden; }
+  .abas-modo { display: flex; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .abas-modo button { flex: none; white-space: nowrap; }
+}
+@media (max-width: 600px) { table.tab-cartao td, table.tab-cartao th { min-width: 0 !important; max-width: none !important; } }
+@media (max-width: 600px) {
+  .abas-modo { flex-wrap: nowrap !important; display: flex !important; width: auto; }
+  .impl-aviso-acoes { flex-wrap: nowrap; }
+  .impl-aviso-acoes .btn { font-size: 14.5px; min-height: 44px; }
+  .impl-aviso-acoes .btn-ouro { flex: 1 1 auto; }
+  .demo-fita { gap: 4px !important; padding: 6px 8px !important; }
+  .demo-fita a { padding: 0 11px !important; }
+}
