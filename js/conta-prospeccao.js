@@ -6,6 +6,9 @@
   if (!C || !bloco) return;
   var esc = C.esc, cliente = null, D = null, aba = 'hoje', sel = null, filtro = { q: '', faixa: '', uf: '', etapa: '' };
   var SITE = 'https://bluerose-store.com/';
+  // uma aba por produto: cada um com a sua fila, os seus limites e a sua aprovação de textos
+  var PRODUTOS = { anshur: { nome: 'Anshur', alvo: 'revendas de máquinas' }, safra: { nome: 'Trutina', alvo: 'produtores e fornecedores de cana' } };
+  var produto = (function () { try { return PRODUTOS[localStorage.getItem('br-prosp-produto')] ? localStorage.getItem('br-prosp-produto') : 'anshur'; } catch (e) { return 'anshur'; } })();
   var ETAPAS = [['novo', 'Novo'], ['contatado', 'Contatado'], ['retomada1', 'Retomada 1'], ['retomada2', 'Retomada 2'], ['abriu_link', 'Abriu o link'],
     ['respondeu', 'Respondeu'], ['teste', 'Teste às cegas'], ['negociando', 'Negociando'], ['assinou', 'Assinou'], ['perdido', 'Perdido'], ['nao_contatar', 'Não contatar']];
   var NOME_ETAPA = {}; ETAPAS.forEach(function (e) { NOME_ETAPA[e[0]] = e[1]; });
@@ -15,7 +18,7 @@
   function rpc(nome, args) { return cliente.rpc(nome, args || {}).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data; }); }
   function fone(z) { var d = String(z || '').replace(/^55/, ''); return d.length === 11 ? '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7) : d; }
   function porId(id) { for (var i = 0; i < D.prospects.length; i++) if (D.prospects[i].id === id) return D.prospects[i]; return null; }
-  function link(p) { return SITE + 'anshur.html?p=' + p.codigo; }
+  function link(p) { return SITE + (p.produto === 'safra' ? 'trutina.html' : 'anshur.html') + '?p=' + p.codigo; }
   function recente(p) {
     if (!p.anuncios_data || !p.anuncios_usados) return false;
     return (new Date(D.hoje + 'T12:00:00') - new Date(p.anuncios_data + 'T12:00:00')) / 864e5 < 30;
@@ -23,7 +26,30 @@
 
   // textos v2 aprovados pelo dono em 17/11/2026 (prospeccao-mensagens-v2-para-aprovar.md): benefícios, um pedido só
   function linkTeste(p) { return SITE + 'anshur/teste-as-cegas.html?p=' + p.codigo; }
+  // Trutina (conferência de safra): textos aguardando a aprovação do dono no painel (botão "Textos aprovados" da aba Trutina)
+  function mensagemSafra(p, acao) {
+    var l = link(p), e = p.empresa;
+    if (acao === 'retomada1') return [
+      'Olá! Retomando a mensagem sobre a conferência da safra.',
+      'Uma conta simples: numa entrega de 20 mil sacas, R$ 0,50 a menos por saca no desconto ou no preço são R$ 10 mil que ficaram no armazém. É esse tipo de diferença que a gente acha, carga por carga.',
+      'As 20 primeiras cargas a gente confere de graça. Depois, só cobra se achar diferença maior que o valor do serviço.',
+      'Como funciona: ' + l,
+      'Se não for o momento, me avisa e eu paro por aqui.'].join('\n\n');
+    if (acao === 'retomada2') return [
+      'Olá! Última mensagem para não incomodar.',
+      'Se quiser conferir a safra: manda por aqui o contrato, os romaneios e a liquidação (foto ou PDF), e devolvemos em poucas horas as diferenças de peso, desconto de umidade/impureza, preço e valor, já com a mensagem pronta para cobrar o armazém ou a usina.',
+      'As 20 primeiras cargas são grátis. Detalhes: ' + l,
+      'Obrigado pela atenção!\nBlue Rose Express'].join('\n\n');
+    return ['Olá, tudo bem?',
+      'Vi que ' + e + ' trabalha com ' + (/(cana|usina)/i.test((p.categorias || []).join(' ') + ' ' + (p.justificativa || '')) ? 'cana' : 'grãos') + ' em ' + p.cidade + '/' + p.uf + ', por isso a mensagem.',
+      'Quando a safra é entregue, quase ninguém confere carga por carga se o peso, o desconto de umidade e impureza, o preço e o valor pago batem com o contrato. Uma diferença pequena por carga vira muito dinheiro no fim da safra.',
+      'A gente faz essa conferência por você: manda por aqui o contrato, os romaneios e a liquidação (pode ser foto ou PDF) e em poucas horas recebe as diferenças em reais, com a mensagem pronta para cobrar o armazém ou a usina.',
+      'As *20 primeiras cargas são grátis*. Depois, só cobra se achar diferença maior que o valor do serviço.',
+      'Como funciona: ' + l,
+      'Se não fizer sentido, é só me avisar que não mando mais mensagem.'].join('\n\n');
+  }
   function mensagem(p, acao) {
+    if (p.produto === 'safra') return mensagemSafra(p, acao);
     var lugar = p.cidade + '/' + p.uf, l = link(p), lt = linkTeste(p), e = p.empresa;
     // oferta de fundador só aparece enquanto houver vaga (some sozinha quando as 3 forem usadas)
     var vagas = Math.max(0, 3 - FUND.length);
@@ -76,9 +102,9 @@
       '<div><dt>Cidade</dt><dd>' + esc(p.cidade || '—') + '/' + esc(p.uf) + (p.lojas && p.lojas.length > 1 ? ' (' + p.lojas.length + ' lojas)' : '') + '</dd></div>' +
       '<div><dt>WhatsApp da empresa</dt><dd>' + (p.whatsapp ? esc(fone(p.whatsapp)) : '—') + '</dd></div>' +
       '<div><dt>Telefone</dt><dd>' + esc(p.telefone || '—') + '</dd></div>' +
-      '<div><dt>Anúncios de usados</dt><dd>' + (p.anuncios_usados || 0) + (p.anuncios_data ? ' <small>(contados em ' + dia(p.anuncios_data) + ')</small>' : '') + '</dd></div>' +
+      (p.produto === 'safra' ? '' : '<div><dt>Anúncios de usados</dt><dd>' + (p.anuncios_usados || 0) + (p.anuncios_data ? ' <small>(contados em ' + dia(p.anuncios_data) + ')</small>' : '') + '</dd></div>' +
       '<div class="pp-larga"><dt>Categorias</dt><dd>' + esc((p.categorias || []).join(', ') || '—') + '</dd></div>' +
-      '<div class="pp-larga"><dt>Marcas anunciadas</dt><dd>' + esc((p.marcas || []).join(', ') || '—') + '</dd></div>' +
+      '<div class="pp-larga"><dt>Marcas anunciadas</dt><dd>' + esc((p.marcas || []).join(', ') || '—') + '</dd></div>') +
       '<div><dt>Próximo contato</dt><dd>' + dia(p.proximo_contato) + '</dd></div>' +
       '<div><dt>Link próprio</dt><dd><code>?p=' + esc(p.codigo) + '</code>' + (ev.abriu_link ? ' · abriu ' + ev.abriu_link + 'x' : '') + (ev.demonstracao ? ' · demo ' + ev.demonstracao + 'x' : '') +
       (ev.teste_cegas ? ' · teste ' + ev.teste_cegas + 'x' : '') + (ev.assinar ? ' · assinar ' + ev.assinar + 'x' : '') + '</dd></div>' +
@@ -92,10 +118,10 @@
         return '<li>' + esc(f.fonte) + ', ' + dia(f.data) + (u ? ': <a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u.replace(/^https:\/\/(www\.)?/, '').slice(0, 70)) + '</a>' : '') + '</li>';
       }).join('') + '</ul></details>' +
       (msg ? '<p class="pp-rot">Mensagem pronta (' + esc(ACAO[acao]) + ')</p><div class="pp-msg" tabindex="0">' + esc(msg) + '</div>' : '') +
-      (final ? '<p class="af-aviso">Esta revenda pediu para não ser contatada. Fica fora da fila para sempre.</p>' :
+      (final ? '<p class="af-aviso">Esta empresa pediu para não ser contatada. Fica fora da fila para sempre.</p>' :
         '<div class="af-acoes pp-botoes">' + botao +
         '<button type="button" class="btn btn-ghost" data-etapa="respondeu">Respondeu</button>' +
-        '<button type="button" class="btn btn-ghost" data-etapa="teste">Teste às cegas</button>' +
+        '<button type="button" class="btn btn-ghost" data-etapa="teste">' + (p.produto === 'safra' ? 'Mandou os papéis' : 'Teste às cegas') + '</button>' +
         '<button type="button" class="btn btn-ghost" data-etapa="negociando">Negociando</button>' +
         '<button type="button" class="btn btn-ghost" data-etapa="assinou">Assinou</button>' +
         '<button type="button" class="btn btn-ghost" data-etapa="perdido">Perdido</button>' +
@@ -169,10 +195,15 @@
   }
 
   function desenhar() {
-    var c = D.config, abas = [['hoje', 'Fila de hoje'], ['quadro', 'Quadro'], ['numeros', 'Números'], ['todas', 'Todas'], ['fundadores', 'Fundadores']];
+    var c = D.config, abas = [['hoje', 'Fila de hoje'], ['quadro', 'Quadro'], ['numeros', 'Números'], ['todas', 'Todas']].concat(produto === 'anshur' ? [['fundadores', 'Fundadores']] : []);
+    if (aba === 'fundadores' && produto !== 'anshur') aba = 'hoje';
+    var tot = {}; (D.produtos || []).forEach(function (x) { tot[x.produto] = x.total; });
     bloco.hidden = false;
-    bloco.innerHTML = '<h2>Prospecção do Anshur <small>(só você vê)</small></h2>' +
-      '<p class="ind-regras">' + D.prospects.length + ' revendas de dados públicos de empresas. O painel monta a mensagem e abre o WhatsApp; quem envia é você. Nada sai sozinho.</p>' +
+    bloco.innerHTML = '<h2>Prospecção <small>(só você vê)</small></h2>' +
+      '<div class="pp-produtos" role="tablist" aria-label="Produto">' + Object.keys(PRODUTOS).map(function (k) {
+        return '<button type="button" role="tab" class="pp-produto' + (produto === k ? ' on' : '') + '" data-produto="' + k + '" aria-selected="' + (produto === k) + '">' + esc(PRODUTOS[k].nome) + ' <b>' + (tot[k] || 0) + '</b></button>';
+      }).join('') + '</div>' +
+      '<p class="ind-regras"><b>' + esc(PRODUTOS[produto].nome) + ':</b> ' + D.prospects.length + ' ' + esc(PRODUTOS[produto].alvo) + ', só com contato comercial publicado. O painel monta a mensagem e abre o WhatsApp; quem envia é você. Nada sai sozinho.</p>' +
       '<div class="pp-aprov' + (c.textos_aprovados ? ' ok' : '') + '">' + (c.textos_aprovados
         ? '<p><b>Textos aprovados</b> em ' + dia(c.aprovado_em) + '. O botão de abrir o WhatsApp está ligado.</p><button type="button" class="btn btn-ghost" data-aprovar="0">Desfazer a aprovação</button>'
         : '<p><b>Textos ainda não aprovados.</b> Leia as mensagens nos cartões; enquanto não aprovar, o botão de abrir o WhatsApp fica desligado.</p><button type="button" class="btn btn-primary" data-aprovar="1">Textos aprovados</button>') +
@@ -184,20 +215,26 @@
   }
 
   function recarregar() {
-    return Promise.all([rpc('anshur_prosp_painel'), rpc('anshur_fundadores_lista').catch(function () { return null; })])
+    return Promise.all([rpc('anshur_prosp_painel', { p_produto: produto }), produto === 'anshur' ? rpc('anshur_fundadores_lista').catch(function () { return null; }) : Promise.resolve(null)])
       .then(function (r) { if (r[1]) FUND = r[1]; if (r[0]) { D = r[0]; desenhar(); } });
   }
   function status(el, t) { var s = el && el.closest('.pp-cartao'); s = s && s.querySelector('.pp-status'); if (s) s.textContent = t; }
 
   bloco.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-aba],[data-ver],[data-etapa],[data-enviar],[data-aprovar]');
+    var t = e.target.closest('[data-produto],[data-aba],[data-ver],[data-etapa],[data-enviar],[data-aprovar]');
     if (!t) return;
+    if (t.dataset.produto) {
+      produto = t.dataset.produto; aba = 'hoje'; sel = null; filtro = { q: '', faixa: '', uf: '', etapa: '' };
+      try { localStorage.setItem('br-prosp-produto', produto); } catch (er) { /* sem armazenamento */ }
+      recarregar().catch(function (er) { alert('Não deu: ' + er.message); });
+      return;
+    }
     if (t.dataset.aba) { aba = t.dataset.aba; sel = null; desenhar(); return; }
     if (t.dataset.ver) { sel = Number(t.dataset.ver); desenhar(); var d = document.getElementById('pp-detalhe'); if (d && d.scrollIntoView) d.scrollIntoView({ block: 'start' }); return; }
     if (t.dataset.aprovar) {
       var sim = t.dataset.aprovar === '1';
       if (sim && !confirm('Confirma que leu e aprova os 3 textos (primeiro contato e as 2 retomadas)? Depois disso o botão abre o WhatsApp com a mensagem pronta, e você aperta enviar.')) return;
-      rpc('anshur_prosp_config', { p_aprovados: sim }).then(recarregar).catch(function (er) { alert('Não deu: ' + er.message); });
+      rpc('anshur_prosp_config', { p_aprovados: sim, p_produto: produto }).then(recarregar).catch(function (er) { alert('Não deu: ' + er.message); });
       return;
     }
     var id = Number(t.closest('.pp-cartao').dataset.id);
@@ -228,7 +265,7 @@
         if (st) st.textContent = MSG_FUND[r] || ('Não deu: ' + r);
       }).catch(function (er) { if (st) st.textContent = 'Não deu: ' + er.message; });
     } else if (f.id === 'pp-limites') {
-      rpc('anshur_prosp_config', { p_aprovados: null, p_limite_novos: Number(f.n.value), p_limite_retomadas: Number(f.r.value) })
+      rpc('anshur_prosp_config', { p_aprovados: null, p_limite_novos: Number(f.n.value), p_limite_retomadas: Number(f.r.value), p_produto: produto })
         .then(recarregar).catch(function (er) { if (st) st.textContent = 'Não deu: ' + er.message; });
     } else if (f.dataset.confirmar) {
       if (!confirm('Confirma que achou esse WhatsApp na página da própria empresa? A revenda volta para a fila.')) return;

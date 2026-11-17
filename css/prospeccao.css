@@ -59,3 +59,12 @@
 .pp-confirmar .af-aviso { flex-basis: 100%; margin: 0; }
 .pp-confirmar label { flex: 1 1 220px; font-size: 13px; color: var(--ink-2); }
 .pp-confirmar [role=status] { flex-basis: 100%; font-size: 13px; color: var(--ink-2); } .pp-confirmar [role=status]:empty { display: none; }
+
+/* abas por produto (Anshur, Trutina...) no topo da prospecção */
+.pp-produtos{display:flex;flex-wrap:wrap;gap:0;margin:10px 0 14px;border-bottom:2px solid rgba(16,27,54,.12)}
+.pp-produto{border:0;background:none;padding:12px 18px;margin-bottom:-2px;border-bottom:3px solid transparent;font:inherit;font-size:17px;font-weight:600;color:#55606b;cursor:pointer}
+.pp-produto b{display:inline-block;min-width:24px;margin-left:6px;padding:1px 8px;border-radius:999px;background:#eef0f3;font-size:13px;color:#101b36}
+.pp-produto:hover{color:#101b36}
+.pp-produto.on{color:#101b36;border-bottom-color:#101b36}
+.pp-produto.on b{background:#101b36;color:#fff}
+.pp-produto:focus-visible{outline:2px solid #101b36;outline-offset:2px}
