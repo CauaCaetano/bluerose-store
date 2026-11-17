@@ -18,6 +18,8 @@
   const semHoras = (tipo) => tipo === 'implemento';
   const OUTRO = '__outro';
   const FORA = 'Este modelo ainda não está disponível no catálogo de avaliação do Anshur.';
+  const REF_FALTA = 'Este modelo não está na base de anúncios: informe o preço de referência (Fipe ou quanto vale um seminovo dele).';
+  const HANO_PADRAO = { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270, implemento: 0 };
   const TOTAL = 5;
   const MARGEM = 0.14; // margem-alvo padrão do Anshur (a mesma sugerida a uma revenda nova); aparece no cálculo de cada troca
 
@@ -49,7 +51,8 @@
     if (!TIPOS[t.tipo]) e.tipo = 'Escolha a categoria.';
     if (!t.marca) e.marca = 'Escolha a marca.';
     if (!t.modelo) e.modelo = 'Escolha o modelo.';
-    if (t.tipo && t.marca && t.modelo && !doCatalogo(ctx.modelos, t)) e.modelo = FORA;
+    // modelo fora da base de anúncios: vale com o preço de referência que a revenda informa (Fipe ou valor de um seminovo)
+    if (t.tipo && t.marca && t.modelo && !doCatalogo(ctx.modelos, t) && !(t.ref > 0)) e.ref = REF_FALTA;
     const ano = inteiro(t.ano), horas = inteiro(t.horas), dias = inteiro(t.dias);
     if (!(ehInteiro(ano) && ano >= 1990 && ano <= anoMax)) e.ano = `Informe o ano da máquina (1990 a ${anoMax}).`;
     if (!semHoras(t.tipo) && !(ehInteiro(horas) && horas >= 0 && horas <= 100000)) e.horas = 'Informe as horas (número inteiro, 0 ou mais).';
@@ -84,6 +87,7 @@
       pago: t.pago, vendido: t.vendido, diasPatio: +t.dias, origem: 'Teste às cegas' };
     const c = modelos ? doCatalogo(modelos, t) : null;
     if (c) { m.referencia = c.base; m.hAno = c.hAno; }
+    else if (t.ref > 0) { m.referencia = t.ref; m.hAno = HANO_PADRAO[t.tipo] || 750; m.refInformada = true; }
     if (t.data) { m.entrada = t.data; m.saida = somaDias(t.data, +t.dias); }
     return m;
   }
@@ -158,6 +162,8 @@
     const fora = linhas.filter((l) => l.foraPorData.length);
     if (fora.length) out.push(`Em ${fora.length} ${fora.length === 1 ? 'troca' : 'trocas'}, alguma troca anterior ainda não tinha sido vendida na data dela e ficou fora do histórico (o Anshur ainda não saberia aquele preço).`);
     if (linhas.some((l) => semHoras(l.maq.tipo))) out.push('Implemento não tem horímetro: é avaliado pelo ano e pelo estado. Cada "modelo" de implemento é o grupo e o porte que os anúncios informam (ex.: Grade aradora 16 discos), por fabricante; a perda por ano é medida nos anúncios do próprio grupo.');
+    const inf = linhas.filter((l) => l.maq.refInformada).length;
+    if (inf) out.push(`${inf} ${inf === 1 ? 'troca usou' : 'trocas usaram'} o preço de referência informado por vocês (modelo fora da base de anúncios): a precisão depende desse valor.`);
     const sem = linhas.filter((l) => !l.r);
     if (sem.length) out.push(`${sem.length} ${sem.length === 1 ? 'troca não pôde' : 'trocas não puderam'} ser avaliadas por falta de referência e ficaram fora do resumo.`);
     return out;
@@ -177,6 +183,6 @@
     return l.join('\n');
   }
 
-  const API = { ESTADOS, TIPOS, semHoras, OUTRO, FORA, TOTAL, MARGEM, contextoMercado, textoBase, condDe, somaDias, doCatalogo, validar, valida, ordenar, paraMotor, historicoPara, analisar, textoResumo };
+  const API = { ESTADOS, TIPOS, semHoras, OUTRO, FORA, REF_FALTA, TOTAL, MARGEM, contextoMercado, textoBase, condDe, somaDias, doCatalogo, validar, valida, ordenar, paraMotor, historicoPara, analisar, textoResumo };
   if (typeof module !== 'undefined') module.exports = API; else raiz.CEGAS = API;
 })(typeof window !== 'undefined' ? window : globalThis);

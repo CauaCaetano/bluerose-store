@@ -25,7 +25,7 @@ function iniciarTesteCegas() {
     const porTipo = Object.keys(CG.TIPOS).map((k) => [k, MODELOS.filter((m) => m.tipo === k)]).filter(([, l]) => l.length);
     el.innerHTML = `<p>${esc(CG.textoBase(CTX.mercado))}</p>
       <details><summary>Ver os ${MODELOS.length} modelos cobertos</summary>
-        <p class="sub">Referência = mediana dos anúncios do modelo levada para 1 ano de uso. Modelo com menos de ${MER.minimo} anúncios fica de fora.</p>
+        <p class="sub">Referência = mediana dos anúncios do modelo levada para 1 ano de uso. Modelo com menos de ${MER.minimo} anúncios não entra na lista, mas pode ser avaliado: é só digitar a marca e o modelo e informar o preço de referência (Fipe ou valor de um seminovo).</p>
         ${porTipo.map(([k, l]) => `<h3>${CG.TIPOS[k]} (${l.length})</h3><ul class="tc-cobertos">${l.map((m) => `<li data-modelo="${esc(m.marca + ' ' + m.modelo)}"><span>${esc(m.marca)} ${esc(m.modelo)}</span><small>${m.anuncios} anúncios · ${m.anos[0]}–${m.anos[1]} · mediana ${real(m.mediana)}</small></li>`).join('')}</ul>`).join('')}
       </details>`;
   }
@@ -64,7 +64,9 @@ function iniciarTesteCegas() {
     const modelos = MODELOS.filter((m) => m.tipo === t.tipo && m.marca === t.marca).map((m) => m.modelo);
     const err = (k) => (erros[k] && erros[k] !== CG.FORA && (ver || (st.tocou || {})[i + k]) ? `<p class="tc-erro" id="e-${k}">${esc(erros[k])}</p>` : '');
     const inv = (k) => (erros[k] && erros[k] !== CG.FORA && (ver || (st.tocou || {})[i + k]) ? 'aria-invalid="true" aria-describedby="e-' + k + '"' : '');
-    const fora = erros.modelo === CG.FORA || t.marca === CG.OUTRO || t.modelo === CG.OUTRO;
+    // marca e modelo: a lista sugere, mas aceita qualquer nome; fora da base, pede o preço de referência
+    if (t.marca === CG.OUTRO) t.marca = ''; if (t.modelo === CG.OUTRO) t.modelo = '';
+    const novo = !!(t.tipo && t.marca && t.modelo && !CG.doCatalogo(MODELOS, t));
     tela.innerHTML = `
       <section class="painel tc-form" aria-labelledby="tc-t1">
         <div class="tc-progresso"><p id="tc-prog-txt"></p><div class="tc-barra" aria-hidden="true"><i id="tc-prog-barra"></i></div></div>
@@ -73,9 +75,9 @@ function iniciarTesteCegas() {
         <p class="ajuda">Use trocas que a revenda já vendeu. Não precisa de nome nem CPF do cliente: só a máquina e os valores.</p>
         <div class="campos">
           <div class="campo"><label for="f-tipo">Categoria</label><select id="f-tipo" data-k="tipo" ${inv('tipo')}><option value="">Escolha…</option>${opcoes(tipos.map((k) => [k, CG.TIPOS[k]]), t.tipo)}</select>${err('tipo')}</div>
-          <div class="campo"><label for="f-marca">Marca</label><select id="f-marca" data-k="marca" ${t.tipo ? '' : 'disabled'} ${inv('marca')}><option value="">${t.tipo ? 'Escolha…' : 'Escolha a categoria antes'}</option>${opcoes(marcas.map((m) => [m, m]).concat([[CG.OUTRO, 'Outra marca (não está na lista)']]), t.marca)}</select>${err('marca')}</div>
-          <div class="campo inteiro"><label for="f-modelo">Modelo</label><select id="f-modelo" data-k="modelo" ${t.marca && t.marca !== CG.OUTRO ? '' : 'disabled'} ${inv('modelo')}><option value="">${t.marca ? 'Escolha…' : 'Escolha a marca antes'}</option>${opcoes(modelos.map((m) => [m, m]).concat([[CG.OUTRO, 'Outro modelo (não está na lista)']]), t.marca === CG.OUTRO ? CG.OUTRO : t.modelo)}</select>${err('modelo')}
-            ${fora ? `<p class="tc-fora" role="alert" id="tc-fora">${esc(CG.FORA)}<span>Não vamos inventar uma avaliação nem trocar por um modelo parecido. Escolha outra troca com um modelo da lista ou mande esta por mensagem.</span></p>` : ''}</div>
+          <div class="campo"><label for="f-marca">Marca</label><input id="f-marca" data-k="marca" data-livre list="dl-tc-marca" autocomplete="off" placeholder="${t.tipo ? 'Escolha ou digite' : 'Escolha a categoria antes'}" value="${esc(t.marca)}" ${t.tipo ? '' : 'disabled'} ${inv('marca')}><datalist id="dl-tc-marca">${marcas.map((m) => `<option value="${esc(m)}"></option>`).join('')}</datalist>${err('marca')}</div>
+          <div class="campo inteiro"><label for="f-modelo">Modelo</label><input id="f-modelo" data-k="modelo" data-livre list="dl-tc-modelo" autocomplete="off" placeholder="${t.marca ? 'Escolha ou digite' : 'Escolha a marca antes'}" value="${esc(t.modelo)}" ${t.marca ? '' : 'disabled'} ${inv('modelo')}><datalist id="dl-tc-modelo">${modelos.map((m) => `<option value="${esc(m)}"></option>`).join('')}</datalist>${err('modelo')}</div>
+          ${novo ? `<div class="campo inteiro tc-novo"><label for="f-ref">Preço de referência deste modelo</label><input id="f-ref" data-k="ref" data-dinheiro inputmode="decimal" placeholder="Fipe ou valor de um seminovo, ex.: R$ 450.000,00" value="${t.ref > 0 ? esc(realC(t.ref).slice(3)) : ''}" ${inv('ref')}>${err('ref')}<p class="tc-dica"><b>${esc(t.marca + ' ' + t.modelo)}</b> não está na nossa base de anúncios. Com o preço de referência, o teste avalia esta troca normalmente.</p></div>` : ''}
           <div class="campo"><label for="f-ano">Ano da máquina</label><input id="f-ano" data-k="ano" inputmode="numeric" maxlength="4" placeholder="Ex.: 2019" value="${esc(t.ano)}" ${inv('ano')}>${err('ano')}</div>
           ${CG.semHoras(t.tipo) ? '<div class="campo"><span class="rot-campo">Horas no horímetro</span><p class="sub" id="f-sem-horas">Implemento não tem horímetro: conta o ano e o estado.</p></div>'
             : `<div class="campo"><label for="f-horas">Horas no horímetro</label><input id="f-horas" data-k="horas" inputmode="numeric" placeholder="Ex.: 4200" value="${esc(t.horas)}" ${inv('horas')}>${err('horas')}</div>`}
@@ -99,10 +101,20 @@ function iniciarTesteCegas() {
         if (el.hasAttribute('data-dinheiro')) { const v = IMP.dinheiro(el.value); tr[k] = v > 0 ? Math.round(v * 100) / 100 : null; }
         else if (['ano', 'horas', 'dias'].includes(k)) tr[k] = el.value.replace(/\D/g, '') === '' ? '' : +el.value.replace(/\D/g, '');
         else tr[k] = el.value;
-        if (k === 'tipo') { tr.marca = ''; tr.modelo = ''; }
-        if (k === 'marca') tr.modelo = tr.marca === CG.OUTRO ? CG.OUTRO : '';
+        if (k === 'tipo') { tr.marca = ''; tr.modelo = ''; tr.ref = null; }
         guardar();
       };
+      if (el.hasAttribute('data-livre')) {
+        el.addEventListener('input', () => { st.trocas[i][k] = el.value; guardar(); atualizarProgresso(); });
+        el.addEventListener('change', () => {
+          const tr = st.trocas[i]; tr[k] = el.value.trim();
+          // trocou a marca: o modelo da marca anterior sai (o digitado à mão para a mesma marca fica)
+          if (k === 'marca' && tr.modelo && !MODELOS.some((m) => m.tipo === tr.tipo && m.marca === tr.marca && m.modelo === tr.modelo) && MODELOS.some((m) => m.tipo === tr.tipo && m.modelo === tr.modelo)) tr.modelo = '';
+          guardar(); tocar(i, k); etapa1();
+          const prox = $(k === 'marca' ? '#f-modelo' : ($('#f-ref') ? '#f-ref' : '#f-ano')); if (prox && !prox.disabled) prox.focus();
+        });
+        return;
+      }
       if (el.tagName === 'SELECT' || el.type === 'date') el.addEventListener('change', () => { ler(); tocar(i, k); etapa1(); const novo = $('#' + el.id); if (novo && !novo.disabled) novo.focus(); });
       else {
         el.addEventListener('input', () => { if (['ano', 'horas', 'dias'].includes(k)) el.value = el.value.replace(/\D/g, ''); ler(); atualizarProgresso(); });
