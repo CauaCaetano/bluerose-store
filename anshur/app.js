@@ -1,3242 +1,774 @@
-(function () {
-  const A = window.ANSHUR, M = window.MOTOR, G = window.GRAFICOS, K = window.COMUM, IMPL = window.IMPLANTACAO;
-  const { C, real, mil, pct, esc, data, diasDesde, diasEntre, hojeISO, NOMES, FICHA, fichaDe, condFicha, semHoras, horasTxt, estado } = K;
-  const tela = document.getElementById('tela');
-  const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  // celular: cada linha de tabela vira um cartão (o CSS usa o nome da coluna guardado em data-rot)
-  const rotularTabelas = () => $$('table', tela).forEach((t) => {
-    const ths = $$('thead th', t).map((th) => th.textContent.trim()); if (!ths.length) return;
-    $$('tbody tr, tfoot tr', t).forEach((tr) => { let i = 0; [...tr.children].forEach((td) => { if (!td.hasAttribute('data-rot')) { td.setAttribute('data-rot', ths[i] || ''); if (/e-?mail|emitente|descri|observa|endere/i.test(ths[i] || '') || /@/.test(td.textContent)) td.classList.add('larga'); } i += td.colSpan || 1; }); });
-    t.classList.add('tab-cartao');
-  });
-  let rotPend = false;
-  new MutationObserver(() => { if (rotPend) return; rotPend = true; requestAnimationFrame(() => { rotPend = false; rotularTabelas(); $$('.titulo .btn-linha', tela).forEach((b) => { if (b.scrollWidth > b.clientWidth + 1) b.classList.add('cheia'); }); }); }).observe(tela, { childList: true, subtree: true });
-
-  // ---------- cabeçalho ----------
-  $('#marca').innerHTML = '<img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="216" height="54">';
-  $('#revenda').innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20V9l9-5 9 5v11M7 20v-6h10v6"/></svg>${esc(A.revenda.nome)}`;
-  $('#refdata').innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></svg>${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '')}`;
-  const btnPerfil = $('#perfil'), menuPerfil = $('#perfil-menu');
-  btnPerfil.onclick = (e) => { e.stopPropagation(); const ab = menuPerfil.hidden; menuPerfil.hidden = !ab; btnPerfil.setAttribute('aria-expanded', ab); };
-  document.addEventListener('click', (e) => { if (!menuPerfil.hidden && !menuPerfil.contains(e.target)) { menuPerfil.hidden = true; btnPerfil.setAttribute('aria-expanded', 'false'); } });
-  const OP = K.ambiente === 'op';
-  const NV = K.nuvem; // conta no servidor (só no ambiente real)
-  const seloNuvem = () => { if (!NV) return; const n = NV.pendentes(); $('.selo-demo').textContent = NV.semInternet() ? 'Sem internet' + (n ? ` · ${n} esperando` : '') : n ? `Enviando ${n}…` : 'Minha revenda'; };
-  $('.selo-demo').textContent = OP ? (NV && NV.offline ? 'Sem internet' : 'Minha revenda') : 'Dados demonstrativos';
-  if (NV) { seloNuvem(); window.addEventListener('anshur:nuvem', seloNuvem); }
-  $('.lateral-rodape').textContent = OP ? (NV ? 'Dados da sua revenda, guardados na conta da revenda.' : 'Dados reais da sua revenda, guardados só neste navegador.') : 'Dados demonstrativos de uma revenda fictícia.';
-  const ehDono = () => K.usuarioAtual().perfil === 'dono';
-  menuPerfil.innerHTML = `<p><b>${esc(K.usuarioAtual().nome)}</b><span>${K.PERFIS[K.usuarioAtual().perfil]} · ${esc(A.revenda.nome)}${OP ? ' · dados reais' : ''}${NV ? '<br>' + esc(NV.usuario.email || '') : ''}</span></p>
+(function(){const y=window.ANSHUR,Q=window.MOTOR,ya=window.GRAFICOS,x=window.COMUM,K=window.IMPLANTACAO,{C:I,real:M,mil:E,pct:P,esc:c,data:N,diasDesde:qa,diasEntre:le,hojeISO:z,NOMES:V,FICHA:Zt,fichaDe:as,condFicha:es,semHoras:ka,horasTxt:pa,estado:b}=x,w=document.getElementById("tela"),l=(a,e=document)=>e.querySelector(a),R=(a,e=document)=>[...e.querySelectorAll(a)],os=()=>R("table",w).forEach(a=>{const e=R("thead th",a).map(o=>o.textContent.trim());e.length&&(R("tbody tr, tfoot tr",a).forEach(o=>{let t=0;[...o.children].forEach(s=>{s.hasAttribute("data-rot")||(s.setAttribute("data-rot",e[t]||""),(/e-?mail|emitente|descri|observa|endere/i.test(e[t]||"")||/@/.test(s.textContent))&&s.classList.add("larga")),t+=s.colSpan||1})}),a.classList.add("tab-cartao"))});let Ge=!1;new MutationObserver(()=>{Ge||(Ge=!0,requestAnimationFrame(()=>{Ge=!1,os(),R(".titulo .btn-linha",w).forEach(a=>{a.scrollWidth>a.clientWidth+1&&a.classList.add("cheia")})}))}).observe(w,{childList:!0,subtree:!0}),l("#marca").innerHTML='<img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="216" height="54">',l("#revenda").innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20V9l9-5 9 5v11M7 20v-6h10v6"/></svg>${c(y.revenda.nome)}`,l("#refdata").innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></svg>${new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"}).replace(".","")}`;const Me=l("#perfil"),Ja=l("#perfil-menu");Me.onclick=a=>{a.stopPropagation();const e=Ja.hidden;Ja.hidden=!e,Me.setAttribute("aria-expanded",e)},document.addEventListener("click",a=>{!Ja.hidden&&!Ja.contains(a.target)&&(Ja.hidden=!0,Me.setAttribute("aria-expanded","false"))});const X=x.ambiente==="op",C=x.nuvem,Oo=()=>{if(!C)return;const a=C.pendentes();l(".selo-demo").textContent=C.semInternet()?"Sem internet"+(a?` \xB7 ${a} esperando`:""):a?`Enviando ${a}\u2026`:"Minha revenda"};l(".selo-demo").textContent=X?C&&C.offline?"Sem internet":"Minha revenda":"Dados demonstrativos",C&&(Oo(),window.addEventListener("anshur:nuvem",Oo)),l(".lateral-rodape").textContent=X?C?"Dados da sua revenda, guardados na conta da revenda.":"Dados reais da sua revenda, guardados s\xF3 neste navegador.":"Dados demonstrativos de uma revenda fict\xEDcia.";const ts=()=>x.usuarioAtual().perfil==="dono";Ja.innerHTML=`<p><b>${c(x.usuarioAtual().nome)}</b><span>${x.PERFIS[x.usuarioAtual().perfil]} \xB7 ${c(y.revenda.nome)}${X?" \xB7 dados reais":""}${C?"<br>"+c(C.usuario.email||""):""}</span></p>
     <label class="perfil-loja" for="loja-sel-m">Loja<select id="loja-sel-m" aria-label="Loja"></select></label>
-    <button type="button" role="menuitem" id="m-portal">Voltar ao início</button>
-    <button type="button" role="menuitem" id="m-pref" data-preferencias>Preferências deste aparelho</button>
+    <button type="button" role="menuitem" id="m-portal">Voltar ao in\xEDcio</button>
+    <button type="button" role="menuitem" id="m-pref" data-preferencias>Prefer\xEAncias deste aparelho</button>
     <button type="button" role="menuitem" id="m-perfil">Meu perfil</button>
     <button type="button" role="menuitem" id="m-instalar">Instalar o app</button>
     <button type="button" role="menuitem" id="m-premissas">Premissas da revenda</button>
-    <button type="button" role="menuitem" id="m-seg">Segurança dos dados</button>
-    <button type="button" role="menuitem" id="m-ambiente">${OP ? 'Voltar para a demonstração' : 'Usar com os dados da minha revenda'}</button>
-    ${NV ? `<button type="button" role="menuitem" id="m-nome">Nome da revenda</button>${(NV.revendas || []).length > 1 ? '<button type="button" role="menuitem" id="m-trocar">Trocar de revenda</button>' : ''}${ehDono() && !NV.offline ? '<button type="button" role="menuitem" id="m-apagar">Excluir a revenda e todos os dados</button>' : ''}<button type="button" role="menuitem" id="m-sair">Sair da conta</button>`
-      : OP ? '<button type="button" role="menuitem" id="m-nome">Nome da revenda</button><button type="button" role="menuitem" id="m-apagar">Apagar dados da minha revenda</button>' : '<button type="button" role="menuitem" id="m-restaurar">Restaurar dados demonstrativos</button>'}`;
-  const fechaMenu = () => { menuPerfil.hidden = true; btnPerfil.setAttribute('aria-expanded', 'false'); };
-  $('#m-perfil').onclick = () => { fechaMenu(); location.hash = '#/config/perfil'; };
-  $('#m-portal').onclick = () => { fechaMenu(); location.hash = '#/'; };
-  $('#m-instalar').onclick = () => { fechaMenu(); $('#instalar-btn').click(); };
-  $('#m-premissas').onclick = () => { fechaMenu(); abrirPremissas(); };
-  $('#m-seg').onclick = () => { fechaMenu(); abrirCamada('modal', `<h2>Segurança dos dados</h2>
-      <p class="sub" style="margin-bottom:12px">O que acontece hoje com os seus números, sem promessa além do que existe.</p>
-      ${NV ? `<ul style="margin:0;padding-left:20px;display:grid;gap:8px;font-size:16px">
-        <li><b>Os dados da revenda ficam no servidor</b> (banco Postgres no Supabase), separados por revenda: cada pessoa só vê a revenda para a qual foi convidada.</li>
-        <li>Cada pessoa entra com e-mail e senha próprios. O perfil (dono, gerente, vendedor, oficina, financeiro, auditor) é definido pelo dono e conferido pelo servidor.</li>
-        <li>Trocas fechadas, aprovações, preços, vendas, convites e exclusões também vão para uma trilha no servidor que ninguém da revenda consegue alterar ou apagar.</li>
-        <li>Documentos ficam numa pasta privada da revenda (até 10 MB cada); o link para abrir um original vale 2 minutos.</li>
-        <li>Sem internet, o Anshur abre a última cópia deste aparelho: dá para consultar o pátio e cadastrar avaliações. O que for feito fica guardado no aparelho e é enviado quando a internet voltar; troca acima da alçada vira pedido de aprovação.</li>
-        <li>O dono baixa uma cópia completa quando quiser (Configurações) e pode pedir a exclusão de tudo pelo menu do perfil.</li>
-      </ul>` : `<ul style="margin:0;padding-left:20px;display:grid;gap:8px;font-size:16px">
-        <li><b>Nesta versão, nada sai do seu computador.</b> Planilhas importadas, avaliações e trocas ficam guardadas só neste navegador.</li>
-        <li>A demonstração e o ambiente com os dados da sua revenda são separados e não se misturam.</li>
-        <li>Você pode apagar os dados da sua revenda a qualquer momento pelo menu do perfil.</li>
-        <li>As planilhas exportadas são suas: dá para levar os dados para outro sistema quando quiser.</li>
-      </ul>`}`); };
-  $('#m-ambiente').onclick = () => { fechaMenu(); confirmar(OP ? 'Voltar para a demonstração?' : 'Usar com os dados da sua revenda?', OP ? (NV ? 'Seus dados continuam na conta da revenda; você pode voltar quando quiser.' : 'Seus dados continuam guardados neste navegador; você pode voltar quando quiser.') : 'Abre um ambiente separado, vazio, para importar o histórico real de trocas. A demonstração não se mistura com ele.', 'Trocar', () => { K.repo.trocarAmbiente(OP ? 'demo' : 'op'); location.hash = OP ? '#visao' : '#teste'; K.recarregar(); }); };
-  if (OP) {
-    $('#m-nome').onclick = () => { fechaMenu(); abrirCamada('modal', `<h2>Nome da revenda</h2><div class="campos" style="margin-top:12px"><div class="campo"><label for="n-nome">Nome</label><input id="n-nome" value="${esc(estado.nomeRevenda || '')}"></div><div class="campo"><label for="n-cid">Cidade</label><input id="n-cid" value="${esc(estado.cidadeRevenda || '')}"></div></div><div class="acoes"><button class="btn btn-ouro" type="button" id="n-ok">Salvar</button></div>`, (c) => { $('#n-ok', c).onclick = async () => { estado.nomeRevenda = $('#n-nome', c).value.trim(); estado.cidadeRevenda = $('#n-cid', c).value.trim(); if (NV && estado.nomeRevenda.length >= 2 && ['dono', 'gerente'].includes(K.usuarioAtual().perfil)) await NV.renomear(estado.nomeRevenda, estado.cidadeRevenda).catch((e) => toast(e.message, true)); salvar(); K.recarregar(); }; }); };
-    if (NV) {
-      const tr = $('#m-trocar'); if (tr) tr.onclick = () => { fechaMenu(); NV.trocarRevenda(); };
-      $('#m-sair').onclick = () => { fechaMenu(); NV.sair(); };
-      const ap = $('#m-apagar');
-      if (ap) ap.onclick = () => { fechaMenu(); abrirCamada('modal', `<h2>Excluir a revenda e todos os dados</h2>
-        <p class="sub" style="margin:6px 0 12px">Apaga do servidor, para sempre, tudo de <b>${esc(NV.revenda.nome)}</b>: trocas, avaliações, documentos, equipe, convites e a trilha de atividades. Antes, baixe uma cópia em Configurações. Não dá para desfazer.</p>
-        <div class="campo"><label for="x-conf">Para confirmar, digite o nome da revenda: <b>${esc(NV.revenda.nome)}</b></label><input id="x-conf" autocomplete="off"></div>
-        <div class="acoes"><button class="btn btn-perigo" type="button" id="x-ok">Excluir para sempre</button></div>`, (c) => {
-        $('#x-ok', c).onclick = async (e) => {
-          const v = $('#x-conf', c).value.trim(); if (v !== NV.revenda.nome) { toast('O nome digitado não confere.', true); return; }
-          e.currentTarget.disabled = true; e.currentTarget.textContent = 'Excluindo…';
-          try { await NV.excluirRevenda(v); toast('Revenda e dados excluídos do servidor.'); setTimeout(() => location.reload(), 900); }
-          catch (er) { toast(er.message, true); e.currentTarget.disabled = false; e.currentTarget.textContent = 'Excluir para sempre'; }
-        };
-      }); };
-    } else $('#m-apagar').onclick = () => { fechaMenu(); confirmar('Apagar os dados da sua revenda?', 'Remove deste navegador o histórico importado, as avaliações e as trocas registradas no ambiente real. Não dá para desfazer.', 'Apagar', () => { K.repo.apagar('op'); K.recarregar(); }); };
-  } else {
-    $('#m-restaurar').onclick = () => { fechaMenu(); confirmar('Restaurar dados demonstrativos?', 'As avaliações, trocas fechadas, vendas e preços alterados nesta demonstração serão apagados deste navegador.', 'Restaurar', () => { K.restaurar(); location.hash = '#visao'; K.recarregar(); }); };
-  }
-  function abrirPremissas() {
-    const cfg = K.cfg;
-    abrirCamada('modal', `<h2>Premissas da revenda</h2><p class="sub">São decisões comerciais da revenda, não resultados garantidos. Mudam os cálculos de todas as telas a partir de agora; avaliações já registradas guardam as premissas do dia.</p>
-      <div class="campo" style="margin-top:16px"><label for="p-margem">Margem-alvo na troca: <b id="p-mv">${pct(cfg.margemAlvo, 0)}</b></label><input class="deslizar" id="p-margem" type="range" min="8" max="22" step="1" value="${Math.round(cfg.margemAlvo * 100)}"></div>
-      <div class="campo" style="margin-top:14px"><label for="p-juros">Custo do capital: <b id="p-jv">${pct(cfg.jurosMes)}</b> ao mês</label><input class="deslizar" id="p-juros" type="range" min="0.5" max="3" step="0.1" value="${(cfg.jurosMes * 100).toFixed(1)}"><span class="ajuda">Taxa que a revenda paga ou deixa de ganhar com o dinheiro parado (ex.: CDI, capital de giro, floor plan).</span></div>
-      <div class="campo" style="margin-top:14px"><label for="p-base">Base do custo do capital</label><select id="p-base"><option value="aquisicao" ${cfg.baseJuros === 'aquisicao' ? 'selected' : ''}>Valor pago na troca</option><option value="total" ${cfg.baseJuros === 'total' ? 'selected' : ''}>Valor pago + preparação</option></select></div>
-      <p class="conta">Custo do capital por máquina = base × taxa mensal × dias no pátio ÷ 30. É uma estimativa de custo de oportunidade: não entra no custo da máquina nem é prejuízo realizado.</p>
-      <div class="campos" style="margin-top:14px"><div class="campo"><label for="p-com">Comissão do vendedor (% da venda do usado)</label><input id="p-com" inputmode="decimal" value="${(cfg.comissaoPct * 100).toLocaleString('pt-BR')}"></div>
-      <div class="campo"><label for="p-desc">Parte do valor pago acima do recomendado que sai da comissão (%)</label><input id="p-desc" inputmode="numeric" value="${Math.round(cfg.descontoAcima * 100)}"></div>
-      <div class="campo"><label for="p-hora">Valor da hora da oficina (R$)</label><input id="p-hora" inputmode="numeric" value="${cfg.valorHora}"></div></div>
-      <div class="acoes"><button class="btn btn-ouro" type="button" id="p-ok">Aplicar</button><button class="btn btn-linha" type="button" id="p-pad">Voltar ao padrão</button></div>`, (c) => {
-      const m = $('#p-margem', c), j = $('#p-juros', c);
-      m.oninput = () => { $('#p-mv', c).textContent = m.value + '%'; }; j.oninput = () => { $('#p-jv', c).textContent = String(j.value).replace('.', ',') + '%'; };
-      const aplicar = (v) => { Object.assign(cfg, v); A.margemAlvo = cfg.margemAlvo; estado.config = { margemAlvo: cfg.margemAlvo, jurosMes: cfg.jurosMes, baseJuros: cfg.baseJuros, comissaoPct: cfg.comissaoPct, descontoAcima: cfg.descontoAcima, valorHora: cfg.valorHora }; delete estado.margem; K.registrar('config', 'Regras comerciais alteradas'); salvar(); cacheLimpa(); fecharCamada(); toast('Premissas aplicadas.'); rota(); };
-      $('#p-ok', c).onclick = () => aplicar({ margemAlvo: +m.value / 100, jurosMes: +j.value / 100, baseJuros: $('#p-base', c).value, comissaoPct: Math.max(0, num($('#p-com', c).value)) / 100, descontoAcima: Math.min(100, Math.max(0, num($('#p-desc', c).value))) / 100, valorHora: Math.max(0, num($('#p-hora', c).value)) || K.PADRAO.valorHora });
-      $('#p-pad', c).onclick = () => aplicar({ ...K.PADRAO });
-    });
-  }
-
-  // ---------- utilidades de interface ----------
-  function toast(msg, erro) {
-    if (NV && !erro && NV.pendentes()) {
-      msg = String(msg).replace(/\b([Ss])alv(o|a|os|as)\b/g, (x, s1, f) => (s1 === 'S' ? 'G' : 'g') + 'uardad' + f);
-      if (/guardad|registrad|aplicad|lançad|enviad|marcad|adicionad|atualizad/i.test(msg)) msg += NV.semInternet() ? ' Fica neste aparelho e vai para o servidor quando a internet voltar.' : ' Enviando ao servidor…';
-    }
-    const t = document.createElement('div'); t.className = 'toast' + (erro ? ' erro' : ''); t.setAttribute('role', erro ? 'alert' : 'status'); t.textContent = msg;
-    $('#toasts').appendChild(t); setTimeout(() => { t.classList.add('saindo'); setTimeout(() => t.remove(), 220); }, 3200);
-  }
-  document.addEventListener('pointerdown', (e) => {
-    const b = e.target.closest('.btn'); if (!b) return;
-    const r = b.getBoundingClientRect(), o = document.createElement('span'), d = Math.max(r.width, r.height);
-    o.className = 'onda'; o.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
-    b.appendChild(o); setTimeout(() => o.remove(), 520);
-  });
-  const reduzido = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const FMT = { mil, pct: (v) => pct(v), int: (v) => Math.round(v).toLocaleString('pt-BR'), real, dias: (v) => Math.round(v) + ' dias' };
-  function contar(raiz = tela) {
-    $$('[data-conta]', raiz).forEach((el) => {
-      const alvo = +el.dataset.conta, f = FMT[el.dataset.fmt || 'int'];
-      if (reduzido) { el.textContent = f(alvo); return; }
-      const t0 = performance.now(), dur = 800;
-      const passo = (t) => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = f(alvo * e); if (k < 1) requestAnimationFrame(passo); };
-      requestAnimationFrame(passo);
-      setTimeout(() => { el.textContent = f(alvo); }, dur + 150); // garante o número final mesmo com a aba em segundo plano
-    });
-  }
-  const conta = (v, fmt) => `<span data-conta="${v}" data-fmt="${fmt}">${FMT[fmt](0)}</span>`;
-
-  // modal e gaveta
-  let fecharAtual = null;
-  function abrirCamada(tipo, conteudo, aoAbrir) {
-    fecharCamada(true);
-    const camada = $('#camada');
-    camada.innerHTML = `<div class="fundo-camada"></div><div class="${tipo}" role="dialog" aria-modal="true" tabindex="-1"><button class="fechar" type="button" aria-label="Fechar">×</button>${conteudo}</div>`;
-    const fundo = camada.firstElementChild, caixa = fundo.nextElementSibling, antes = document.activeElement;
-    requestAnimationFrame(() => { fundo.classList.add('aberta'); caixa.classList.add('aberta'); });
-    const esc_ = (e) => { if (e.key === 'Escape') fecharCamada(); };
-    document.addEventListener('keydown', esc_);
-    fecharAtual = () => { document.removeEventListener('keydown', esc_); fundo.classList.remove('aberta'); caixa.classList.remove('aberta'); setTimeout(() => { if (camada.contains(caixa)) camada.innerHTML = ''; }, 280); if (antes && antes.focus) antes.focus(); };
-    fundo.onclick = () => fecharCamada(); $('.fechar', caixa).onclick = () => fecharCamada();
-    setTimeout(() => (caixa.querySelector('input,select,button:not(.fechar)') || caixa).focus(), 60);
-    if (aoAbrir) aoAbrir(caixa);
-    return caixa;
-  }
-  function fecharCamada(imediato) {
-    if (!fecharAtual) return; const f = fecharAtual; fecharAtual = null;
-    if (imediato) { $('#camada').innerHTML = ''; } else f();
-  }
-  function confirmar(titulo, texto, botao, aoConfirmar) {
-    abrirCamada('modal', `<h2>${esc(titulo)}</h2><p class="sub">${esc(texto)}</p><div class="acoes"><button class="btn btn-ouro" type="button" id="sim">${esc(botao)}</button><button class="btn btn-linha" type="button" id="nao">Cancelar</button></div>`, (c) => {
-      $('#sim', c).onclick = () => { fecharCamada(); aoConfirmar(); };
-      $('#nao', c).onclick = () => fecharCamada();
-    });
-  }
-  // planilha modelo do histórico de trocas: as mesmas colunas que o importador (importar.js) reconhece
-  function baixarModeloTrocas() { baixarCSV(IMPL.MODELO.arquivo, IMPL.linhasModelo()); }
-  function baixarCSV(nome, linhas) {
-    const csv = '﻿' + linhas.map((l) => l.map((c) => { const s = String(c ?? ''); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(';')).join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-    const a = document.createElement('a'); a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast('Planilha gerada: ' + nome);
-  }
-  // com conta, a faixa da nuvem já avisa quando não dá para gravar (só leitura ou sem internet)
-  const salvar = () => { if (!K.gravar(estado) && !K.nuvem) toast('Não foi possível salvar neste navegador.', true); };
-
-  // ---------- contas ----------
-  const recCache = new Map();
-  const cacheLimpa = () => recCache.clear();
-  // estimativa de hoje para máquinas do pátio (aprende com tudo que já foi vendido)
-  const recHoje = (t) => { const k = 'h' + t.id + '|' + A.margemAlvo; if (!recCache.has(k)) recCache.set(k, M.avaliar(t, { excluir: t.id })); return recCache.get(k); };
-  // o que o Anshur teria dito no dia da troca: só com vendas concluídas antes daquela data (sem vazamento)
-  const recEpoca = (t) => {
-    const k = 'e' + t.id + '|' + A.margemAlvo;
-    if (!recCache.has(k)) recCache.set(k, t.previsto ? { ...t.previsto, registrado: true } : M.avaliar(t, { excluir: t.id, ate: t.entrada, semValidacao: true }));
-    return recCache.get(k);
-  };
-  const rec = recEpoca;
-
-  function infoPatio(t) {
-    const dias = diasDesde(t.entrada), r = recHoje(t), custo = C.custo(t);
-    // sem vendas suficientes para estimar e sem preço anunciado: venda e margem ficam desconhecidas ("—"), nunca zero
-    const venda = r ? r.venda : (t.anuncio > 0 ? t.anuncio : NaN);
-    const margem = isFinite(venda) ? C.margemProjetada(venda, custo) : NaN;
-    const faixa = C.faixaIdade(dias);
-    const juros = C.custoFinanceiro(t, dias);
-    let acao = 'Acompanhar';
-    if (dias > 90 && margem < 0.06) acao = 'Priorizar venda: margem já baixa';
-    else if (t.anuncio > venda * 1.06 && dias > 45) acao = 'Revisar preço de venda';
-    else if (t.preparoEst && t.preparo > t.preparoEst * 1.4) acao = 'Revisar custo de preparação';
-    else if (dias > 90) acao = 'Priorizar negociação';
-    else if (dias > 60) acao = 'Revisar anúncio e divulgação';
-    const risco = custo * (dias / 90) * (1 + Math.max(0, 0.12 - margem) * 6);
-    return { t, dias, venda, custo, margem, faixa, juros, acao, risco };
-  }
-
-  // ---------- VISÃO GERAL ----------
-  // ícones de traço (mesma espessura em todo o sistema)
-  const ic = (d, cls = 'ico') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
-  const ICO = {
-    moedas: ic('<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>'),
-    pct: ic('<circle cx="12" cy="12" r="9"/><path d="M8.5 15.5l7-7"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/>'),
-    barras: ic('<path d="M4 20h16M7 16v-5M11 16V7M15 16v-7M19 16V5"/>'),
-    alerta: ic('<path d="M12 3 2 20h20L12 3zM12 10v4M12 17v.5"/>'),
-    linha: ic('<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>'),
-    camadas: ic('<path d="M12 3 2 8l10 5 10-5-10-5zM2 13l10 5 10-5"/>'),
-    alvo: ic('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>'),
-    etiqueta: ic('<path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="7.5" r="1.4"/>'),
-    alto: ic('<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16v.5"/>'),
-    medio: ic('<path d="M12 3 2 20h20L12 3zM12 10v4M12 17v.5"/>'),
-    baixo: ic('<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/>'),
-    trator: ic('<path d="M5 17V9h7l2 4h4v4"/><path d="M8 9V6"/><circle cx="8" cy="17" r="3"/><circle cx="18" cy="18" r="2"/>', 'ico maq-svg'),
-    colhedora: ic('<path d="M2 16h14V9H9l-2 3H2z"/><path d="M16 11l5-5M19 6h3"/><circle cx="6" cy="17.5" r="2.5"/><circle cx="13" cy="17.5" r="2.5"/>', 'ico maq-svg'),
-    pulverizador: ic('<path d="M4 15V8h6l2 3h6v4z"/><path d="M1 13h22M3 13v2M21 13v2"/><circle cx="7" cy="17" r="2.5"/><circle cx="16" cy="17" r="2.5"/>', 'ico maq-svg'),
-    plantadeira: ic('<path d="M2 9h20M3 9l2-3h14l2 3M5 9v6M10 9v6M15 9v6M20 9v6"/><circle cx="5" cy="17" r="1.6"/><circle cx="10" cy="17" r="1.6"/><circle cx="15" cy="17" r="1.6"/><circle cx="20" cy="17" r="1.6"/>', 'ico maq-svg'),
-    // implemento: grade de discos puxada pelo cabeçalho
-    implemento: ic('<path d="M1 12h5M6 9h16v6H6z"/><circle cx="9" cy="18" r="2"/><circle cx="14" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M9 9V6M19 9V6"/>', 'ico maq-svg')
-  };
-  const VENDEDORES = () => { const l = [...new Set(A.trocas.map((t) => t.vendedor).filter((v) => v && !/Avalia|demonstra/i.test(v)))].sort(); return l.length ? l : ['Gerente de usados']; };
-  // calendário agrícola da região (cana, soja e milho no nordeste paulista): quando cada tipo de máquina costuma ter procura
-  const SAFRA = {
-    colhedora: { janela: 'janeiro a março', motivo: 'usinas e fornecedores fecham frota antes da safra da cana, que começa em abril', meses: [0, 1, 2] },
-    pulverizador: { janela: 'julho a setembro', motivo: 'preparação para o plantio da soja e para os tratos da cana', meses: [6, 7, 8] },
-    plantadeira: { janela: 'julho a setembro', motivo: 'o plantio da soja começa com as chuvas, a partir de setembro', meses: [6, 7, 8] },
-    implemento: { janela: 'maio a setembro', motivo: 'preparo de solo, calagem e reforma do canavial acontecem na seca, antes do plantio', meses: [4, 5, 6, 7, 8] },
-    trator: { janela: 'março a junho e agosto a outubro', motivo: 'colheita e preparo de solo puxam a procura em duas épocas', meses: [2, 3, 4, 5, 7, 8, 9] }
-  };
-  const janelaVenda = (tipo) => { const s = SAFRA[tipo]; if (!s) return ''; const m = new Date().getMonth(); return s.meses.includes(m) ? `Estamos na melhor época para vender (${s.janela}): ${s.motivo}.` : `Melhor época para vender: ${s.janela}, porque ${s.motivo}.`; };
-
-  // risco em 3 níveis, com cor + ícone + texto
-  const nivelRisco = (i) => (i.dias > 90 || i.margem < 0.06 ? { nome: 'Alto', cls: 'alto', ico: ICO.alto } : i.dias > 60 || i.margem < 0.10 ? { nome: 'Médio', cls: 'medio', ico: ICO.medio } : { nome: 'Baixo', cls: 'baixo', ico: ICO.baixo });
-
-  function semDados() {
-    tela.innerHTML = `<div class="titulo"><div><h1>Bem-vindo ao Anshur</h1><p>Este é o ambiente com os dados reais da sua revenda. Ele começa vazio e não se mistura com a demonstração.</p></div></div>
-      <section class="painel"><h2>Comece pelo histórico de trocas</h2><p class="sub" style="margin:6px 0 14px">Importe de 10 a 200 trocas já vendidas (planilha do Excel ou CSV do seu sistema). O Anshur aprende com elas, mede o próprio erro e passa a avaliar as próximas trocas. ${K.nuvem ? 'Os dados ficam na conta da revenda.' : 'Os dados ficam só neste navegador.'}</p>
-      <div class="acoes">${IMPL.podeVer(K.usuarioAtual().perfil) ? '<a class="btn btn-ouro" href="#/config/implantacao">Começar a implantação guiada</a><a class="btn btn-linha" href="#teste">Só importar o histórico</a>' : '<a class="btn btn-ouro" href="#teste">Importar histórico</a>'}<button class="btn btn-linha" type="button" id="volta-demo">Ver a demonstração</button></div></section>`;
-    $('#volta-demo').onclick = () => { K.repo.trocarAmbiente('demo'); K.recarregar(); };
-  }
-
-  function telaVisao() {
-    if (!A.trocas.length) return semDados();
-    const itens = C.patio().map(infoPatio);
-    const vendidas = C.vendidas();
-    const capital = itens.reduce((s, i) => s + i.t.pago, 0);
-    const comEst = itens.filter((i) => isFinite(i.venda)), semEst = itens.length - comEst.length;
-    const resultadoEst = comEst.length ? comEst.reduce((s, i) => s + i.venda - i.custo, 0) : NaN;
-    const margemReal = vendidas.reduce((s, t) => s + C.margem(t), 0) / Math.max(1, vendidas.length);
-    const velhos = itens.filter((i) => i.dias > 90);
-    const capVelho = velhos.reduce((s, i) => s + i.t.pago, 0);
-
-    // capital imobilizado no fim de cada um dos últimos 6 meses
-    const meses = [];
-    for (let k = 5; k >= 0; k--) {
-      const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - k + 1); d.setDate(0);
-      const fim = k === 0 ? hojeISO() : d.toISOString().slice(0, 10);
-      const v = A.trocas.filter((t) => t.entrada <= fim && (!t.saida || t.saida > fim)).reduce((s, t) => s + t.pago, 0);
-      meses.push({ r: new Date(fim + 'T12:00:00').toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''), v });
-    }
-    // margem prevista x realizada nos meses com venda
-    const porMes = {};
-    vendidas.forEach((t) => { const k = t.saida.slice(0, 7); (porMes[k] = porMes[k] || []).push(t); });
-    const ult = Object.keys(porMes).sort().slice(-6).map((k) => {
-      // só entram vendas que tinham previsão na data da troca (validação temporal)
-      const ts = porMes[k].filter((t) => rec(t));
-      if (!ts.length) return null;
-      const prev = ts.reduce((s, t) => { const r = rec(t); return s + C.margemProjetada(r.venda, t.pago + (r.preparo || t.preparoEst || t.preparo)); }, 0) / ts.length;
-      const realz = ts.reduce((s, t) => s + C.margem(t), 0) / ts.length;
-      return { r: new Date(k + '-15T12:00:00').toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '') + ` (${ts.length})`, a: prev, b: realz };
-    }).filter(Boolean);
-    const custoCap = itens.reduce((s, i) => s + i.juros, 0);
-    const faixas = ['normal', 'atencao', 'alerta', 'critico'];
-    const nomesF = { normal: '0–30 dias', atencao: '31–60 dias', alerta: '61–90 dias', critico: '+90 dias' };
-    const idade = faixas.map((f) => { const g = itens.filter((i) => i.faixa === f); return { r: nomesF[f], v: g.reduce((s, i) => s + i.t.pago, 0), cls: f, extra: `${g.length} ${g.length === 1 ? 'máquina' : 'máquinas'}` }; });
-    const agir = itens.slice().sort((a, b) => b.risco - a.risco).slice(0, 6);
-
-    const coresIdade = { normal: '#3E6B57', atencao: '#71877B', alerta: '#E2D6BF', critico: '#C1A36A' };
-    const nomesRosca = { normal: 'Até 30 dias', atencao: '31 a 60 dias', alerta: '61 a 90 dias', critico: 'Acima de 90 dias' };
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Visão geral da revenda</h1><p>Onde está o seu dinheiro e o que fazer hoje.</p></div>
-        <div class="acoes"><a class="btn btn-linha" href="#patio">Ver pátio completo</a><button class="btn btn-linha" type="button" id="premissas-v">Premissas</button>${botaoAdicionar([{ nome: 'Nova avaliação', desc: 'Quanto pagar no usado da troca', acao: () => { location.hash = '#avaliar'; } }, { nome: 'Máquina no pátio', desc: 'Cadastrar à mão', acao: () => addMaquinaManual() }, { nome: 'Documento ou planilha', desc: 'Foto, PDF, CSV ou Excel', acao: () => { location.hash = '#documentos'; } }], 'Novo cadastro')}</div></div>
+    <button type="button" role="menuitem" id="m-seg">Seguran\xE7a dos dados</button>
+    <button type="button" role="menuitem" id="m-ambiente">${X?"Voltar para a demonstra\xE7\xE3o":"Usar com os dados da minha revenda"}</button>
+    ${C?`<button type="button" role="menuitem" id="m-nome">Nome da revenda</button>${(C.revendas||[]).length>1?'<button type="button" role="menuitem" id="m-trocar">Trocar de revenda</button>':""}${ts()&&!C.offline?'<button type="button" role="menuitem" id="m-apagar">Excluir a revenda e todos os dados</button>':""}<button type="button" role="menuitem" id="m-sair">Sair da conta</button>`:X?'<button type="button" role="menuitem" id="m-nome">Nome da revenda</button><button type="button" role="menuitem" id="m-apagar">Apagar dados da minha revenda</button>':'<button type="button" role="menuitem" id="m-restaurar">Restaurar dados demonstrativos</button>'}`;const ga=()=>{Ja.hidden=!0,Me.setAttribute("aria-expanded","false")};if(l("#m-perfil").onclick=()=>{ga(),location.hash="#/config/perfil"},l("#m-portal").onclick=()=>{ga(),location.hash="#/"},l("#m-instalar").onclick=()=>{ga(),l("#instalar-btn").click()},l("#m-premissas").onclick=()=>{ga(),Ya()},l("#m-seg").onclick=()=>{ga(),oa("modal",`<h2>Seguran\xE7a dos dados</h2>
+      <p class="sub" style="margin-bottom:12px">O que acontece hoje com os seus n\xFAmeros, sem promessa al\xE9m do que existe.</p>
+      ${C?`<ul style="margin:0;padding-left:20px;display:grid;gap:8px;font-size:16px">
+        <li><b>Os dados da revenda ficam no servidor</b> (banco Postgres no Supabase), separados por revenda: cada pessoa s\xF3 v\xEA a revenda para a qual foi convidada.</li>
+        <li>Cada pessoa entra com e-mail e senha pr\xF3prios. O perfil (dono, gerente, vendedor, oficina, financeiro, auditor) \xE9 definido pelo dono e conferido pelo servidor.</li>
+        <li>Trocas fechadas, aprova\xE7\xF5es, pre\xE7os, vendas, convites e exclus\xF5es tamb\xE9m v\xE3o para uma trilha no servidor que ningu\xE9m da revenda consegue alterar ou apagar.</li>
+        <li>Documentos ficam numa pasta privada da revenda (at\xE9 10 MB cada); o link para abrir um original vale 2 minutos.</li>
+        <li>Sem internet, o Anshur abre a \xFAltima c\xF3pia deste aparelho: d\xE1 para consultar o p\xE1tio e cadastrar avalia\xE7\xF5es. O que for feito fica guardado no aparelho e \xE9 enviado quando a internet voltar; troca acima da al\xE7ada vira pedido de aprova\xE7\xE3o.</li>
+        <li>O dono baixa uma c\xF3pia completa quando quiser (Configura\xE7\xF5es) e pode pedir a exclus\xE3o de tudo pelo menu do perfil.</li>
+      </ul>`:`<ul style="margin:0;padding-left:20px;display:grid;gap:8px;font-size:16px">
+        <li><b>Nesta vers\xE3o, nada sai do seu computador.</b> Planilhas importadas, avalia\xE7\xF5es e trocas ficam guardadas s\xF3 neste navegador.</li>
+        <li>A demonstra\xE7\xE3o e o ambiente com os dados da sua revenda s\xE3o separados e n\xE3o se misturam.</li>
+        <li>Voc\xEA pode apagar os dados da sua revenda a qualquer momento pelo menu do perfil.</li>
+        <li>As planilhas exportadas s\xE3o suas: d\xE1 para levar os dados para outro sistema quando quiser.</li>
+      </ul>`}`)},l("#m-ambiente").onclick=()=>{ga(),va(X?"Voltar para a demonstra\xE7\xE3o?":"Usar com os dados da sua revenda?",X?C?"Seus dados continuam na conta da revenda; voc\xEA pode voltar quando quiser.":"Seus dados continuam guardados neste navegador; voc\xEA pode voltar quando quiser.":"Abre um ambiente separado, vazio, para importar o hist\xF3rico real de trocas. A demonstra\xE7\xE3o n\xE3o se mistura com ele.","Trocar",()=>{x.repo.trocarAmbiente(X?"demo":"op"),location.hash=X?"#visao":"#teste",x.recarregar()})},X)if(l("#m-nome").onclick=()=>{ga(),oa("modal",`<h2>Nome da revenda</h2><div class="campos" style="margin-top:12px"><div class="campo"><label for="n-nome">Nome</label><input id="n-nome" value="${c(b.nomeRevenda||"")}"></div><div class="campo"><label for="n-cid">Cidade</label><input id="n-cid" value="${c(b.cidadeRevenda||"")}"></div></div><div class="acoes"><button class="btn btn-ouro" type="button" id="n-ok">Salvar</button></div>`,a=>{l("#n-ok",a).onclick=async()=>{b.nomeRevenda=l("#n-nome",a).value.trim(),b.cidadeRevenda=l("#n-cid",a).value.trim(),C&&b.nomeRevenda.length>=2&&["dono","gerente"].includes(x.usuarioAtual().perfil)&&await C.renomear(b.nomeRevenda,b.cidadeRevenda).catch(e=>A(e.message,!0)),T(),x.recarregar()}})},C){const a=l("#m-trocar");a&&(a.onclick=()=>{ga(),C.trocarRevenda()}),l("#m-sair").onclick=()=>{ga(),C.sair()};const e=l("#m-apagar");e&&(e.onclick=()=>{ga(),oa("modal",`<h2>Excluir a revenda e todos os dados</h2>
+        <p class="sub" style="margin:6px 0 12px">Apaga do servidor, para sempre, tudo de <b>${c(C.revenda.nome)}</b>: trocas, avalia\xE7\xF5es, documentos, equipe, convites e a trilha de atividades. Antes, baixe uma c\xF3pia em Configura\xE7\xF5es. N\xE3o d\xE1 para desfazer.</p>
+        <div class="campo"><label for="x-conf">Para confirmar, digite o nome da revenda: <b>${c(C.revenda.nome)}</b></label><input id="x-conf" autocomplete="off"></div>
+        <div class="acoes"><button class="btn btn-perigo" type="button" id="x-ok">Excluir para sempre</button></div>`,o=>{l("#x-ok",o).onclick=async t=>{const s=l("#x-conf",o).value.trim();if(s!==C.revenda.nome){A("O nome digitado n\xE3o confere.",!0);return}t.currentTarget.disabled=!0,t.currentTarget.textContent="Excluindo\u2026";try{await C.excluirRevenda(s),A("Revenda e dados exclu\xEDdos do servidor."),setTimeout(()=>location.reload(),900)}catch(i){A(i.message,!0),t.currentTarget.disabled=!1,t.currentTarget.textContent="Excluir para sempre"}}})})}else l("#m-apagar").onclick=()=>{ga(),va("Apagar os dados da sua revenda?","Remove deste navegador o hist\xF3rico importado, as avalia\xE7\xF5es e as trocas registradas no ambiente real. N\xE3o d\xE1 para desfazer.","Apagar",()=>{x.repo.apagar("op"),x.recarregar()})};else l("#m-restaurar").onclick=()=>{ga(),va("Restaurar dados demonstrativos?","As avalia\xE7\xF5es, trocas fechadas, vendas e pre\xE7os alterados nesta demonstra\xE7\xE3o ser\xE3o apagados deste navegador.","Restaurar",()=>{x.restaurar(),location.hash="#visao",x.recarregar()})};function Ya(){const a=x.cfg;oa("modal",`<h2>Premissas da revenda</h2><p class="sub">S\xE3o decis\xF5es comerciais da revenda, n\xE3o resultados garantidos. Mudam os c\xE1lculos de todas as telas a partir de agora; avalia\xE7\xF5es j\xE1 registradas guardam as premissas do dia.</p>
+      <div class="campo" style="margin-top:16px"><label for="p-margem">Margem-alvo na troca: <b id="p-mv">${P(a.margemAlvo,0)}</b></label><input class="deslizar" id="p-margem" type="range" min="8" max="22" step="1" value="${Math.round(a.margemAlvo*100)}"></div>
+      <div class="campo" style="margin-top:14px"><label for="p-juros">Custo do capital: <b id="p-jv">${P(a.jurosMes)}</b> ao m\xEAs</label><input class="deslizar" id="p-juros" type="range" min="0.5" max="3" step="0.1" value="${(a.jurosMes*100).toFixed(1)}"><span class="ajuda">Taxa que a revenda paga ou deixa de ganhar com o dinheiro parado (ex.: CDI, capital de giro, floor plan).</span></div>
+      <div class="campo" style="margin-top:14px"><label for="p-base">Base do custo do capital</label><select id="p-base"><option value="aquisicao" ${a.baseJuros==="aquisicao"?"selected":""}>Valor pago na troca</option><option value="total" ${a.baseJuros==="total"?"selected":""}>Valor pago + prepara\xE7\xE3o</option></select></div>
+      <p class="conta">Custo do capital por m\xE1quina = base \xD7 taxa mensal \xD7 dias no p\xE1tio \xF7 30. \xC9 uma estimativa de custo de oportunidade: n\xE3o entra no custo da m\xE1quina nem \xE9 preju\xEDzo realizado.</p>
+      <div class="campos" style="margin-top:14px"><div class="campo"><label for="p-com">Comiss\xE3o do vendedor (% da venda do usado)</label><input id="p-com" inputmode="decimal" value="${(a.comissaoPct*100).toLocaleString("pt-BR")}"></div>
+      <div class="campo"><label for="p-desc">Parte do valor pago acima do recomendado que sai da comiss\xE3o (%)</label><input id="p-desc" inputmode="numeric" value="${Math.round(a.descontoAcima*100)}"></div>
+      <div class="campo"><label for="p-hora">Valor da hora da oficina (R$)</label><input id="p-hora" inputmode="numeric" value="${a.valorHora}"></div></div>
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="p-ok">Aplicar</button><button class="btn btn-linha" type="button" id="p-pad">Voltar ao padr\xE3o</button></div>`,e=>{const o=l("#p-margem",e),t=l("#p-juros",e);o.oninput=()=>{l("#p-mv",e).textContent=o.value+"%"},t.oninput=()=>{l("#p-jv",e).textContent=String(t.value).replace(".",",")+"%"};const s=i=>{Object.assign(a,i),y.margemAlvo=a.margemAlvo,b.config={margemAlvo:a.margemAlvo,jurosMes:a.jurosMes,baseJuros:a.baseJuros,comissaoPct:a.comissaoPct,descontoAcima:a.descontoAcima,valorHora:a.valorHora},delete b.margem,x.registrar("config","Regras comerciais alteradas"),T(),Pa(),U(),A("Premissas aplicadas."),Z()};l("#p-ok",e).onclick=()=>s({margemAlvo:+o.value/100,jurosMes:+t.value/100,baseJuros:l("#p-base",e).value,comissaoPct:Math.max(0,ra(l("#p-com",e).value))/100,descontoAcima:Math.min(100,Math.max(0,ra(l("#p-desc",e).value)))/100,valorHora:Math.max(0,ra(l("#p-hora",e).value))||x.PADRAO.valorHora}),l("#p-pad",e).onclick=()=>s({...x.PADRAO})})}function A(a,e){C&&!e&&C.pendentes()&&(a=String(a).replace(/\b([Ss])alv(o|a|os|as)\b/g,(t,s,i)=>(s==="S"?"G":"g")+"uardad"+i),/guardad|registrad|aplicad|lançad|enviad|marcad|adicionad|atualizad/i.test(a)&&(a+=C.semInternet()?" Fica neste aparelho e vai para o servidor quando a internet voltar.":" Enviando ao servidor\u2026"));const o=document.createElement("div");o.className="toast"+(e?" erro":""),o.setAttribute("role",e?"alert":"status"),o.textContent=a,l("#toasts").appendChild(o),setTimeout(()=>{o.classList.add("saindo"),setTimeout(()=>o.remove(),220)},3200)}document.addEventListener("pointerdown",a=>{const e=a.target.closest(".btn");if(!e)return;const o=e.getBoundingClientRect(),t=document.createElement("span"),s=Math.max(o.width,o.height);t.className="onda",t.style.cssText=`width:${s}px;height:${s}px;left:${a.clientX-o.left-s/2}px;top:${a.clientY-o.top-s/2}px`,e.appendChild(t),setTimeout(()=>t.remove(),520)});const Fa=matchMedia("(prefers-reduced-motion: reduce)").matches,Io={mil:E,pct:a=>P(a),int:a=>Math.round(a).toLocaleString("pt-BR"),real:M,dias:a=>Math.round(a)+" dias"};function $a(a=w){R("[data-conta]",a).forEach(e=>{const o=+e.dataset.conta,t=Io[e.dataset.fmt||"int"];if(Fa){e.textContent=t(o);return}const s=performance.now(),i=800,n=m=>{const r=Math.min(1,(m-s)/i),p=1-Math.pow(1-r,3);e.textContent=t(o*p),r<1&&requestAnimationFrame(n)};requestAnimationFrame(n),setTimeout(()=>{e.textContent=t(o)},i+150)})}const ia=(a,e)=>`<span data-conta="${a}" data-fmt="${e}">${Io[e](0)}</span>`;let Ae=null;function oa(a,e,o){U(!0);const t=l("#camada");t.innerHTML=`<div class="fundo-camada"></div><div class="${a}" role="dialog" aria-modal="true" tabindex="-1"><button class="fechar" type="button" aria-label="Fechar">\xD7</button>${e}</div>`;const s=t.firstElementChild,i=s.nextElementSibling,n=document.activeElement;requestAnimationFrame(()=>{s.classList.add("aberta"),i.classList.add("aberta")});const m=r=>{r.key==="Escape"&&U()};return document.addEventListener("keydown",m),Ae=()=>{document.removeEventListener("keydown",m),s.classList.remove("aberta"),i.classList.remove("aberta"),setTimeout(()=>{t.contains(i)&&(t.innerHTML="")},280),n&&n.focus&&n.focus()},s.onclick=()=>U(),l(".fechar",i).onclick=()=>U(),setTimeout(()=>(i.querySelector("input,select,button:not(.fechar)")||i).focus(),60),o&&o(i),i}function U(a){if(!Ae)return;const e=Ae;Ae=null,a?l("#camada").innerHTML="":e()}function va(a,e,o,t){oa("modal",`<h2>${c(a)}</h2><p class="sub">${c(e)}</p><div class="acoes"><button class="btn btn-ouro" type="button" id="sim">${c(o)}</button><button class="btn btn-linha" type="button" id="nao">Cancelar</button></div>`,s=>{l("#sim",s).onclick=()=>{U(),t()},l("#nao",s).onclick=()=>U()})}function Vo(){Ea(K.MODELO.arquivo,K.linhasModelo())}function Ea(a,e){const o="\uFEFF"+e.map(i=>i.map(n=>{const m=String(n??"");return/[;"\n]/.test(m)?'"'+m.replace(/"/g,'""')+'"':m}).join(";")).join(`
+`),t=URL.createObjectURL(new Blob([o],{type:"text/csv;charset=utf-8"})),s=document.createElement("a");s.href=t,s.download=a,document.body.appendChild(s),s.click(),s.remove(),setTimeout(()=>URL.revokeObjectURL(t),1e3),A("Planilha gerada: "+a)}const T=()=>{!x.gravar(b)&&!x.nuvem&&A("N\xE3o foi poss\xEDvel salvar neste navegador.",!0)},Ha=new Map,Pa=()=>Ha.clear(),ss=a=>{const e="h"+a.id+"|"+y.margemAlvo;return Ha.has(e)||Ha.set(e,Q.avaliar(a,{excluir:a.id})),Ha.get(e)},Ba=a=>{const e="e"+a.id+"|"+y.margemAlvo;return Ha.has(e)||Ha.set(e,a.previsto?{...a.previsto,registrado:!0}:Q.avaliar(a,{excluir:a.id,ate:a.entrada,semValidacao:!0})),Ha.get(e)};function Ta(a){const e=qa(a.entrada),o=ss(a),t=I.custo(a),s=o?o.venda:a.anuncio>0?a.anuncio:NaN,i=isFinite(s)?I.margemProjetada(s,t):NaN,n=I.faixaIdade(e),m=I.custoFinanceiro(a,e);let r="Acompanhar";e>90&&i<.06?r="Priorizar venda: margem j\xE1 baixa":a.anuncio>s*1.06&&e>45?r="Revisar pre\xE7o de venda":a.preparoEst&&a.preparo>a.preparoEst*1.4?r="Revisar custo de prepara\xE7\xE3o":e>90?r="Priorizar negocia\xE7\xE3o":e>60&&(r="Revisar an\xFAncio e divulga\xE7\xE3o");const p=t*(e/90)*(1+Math.max(0,.12-i)*6);return{t:a,dias:e,venda:s,custo:t,margem:i,faixa:n,juros:m,acao:r,risco:p}}const _=(a,e="ico")=>`<svg class="${e}" viewBox="0 0 24 24" aria-hidden="true">${a}</svg>`,q={moedas:_('<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>'),pct:_('<circle cx="12" cy="12" r="9"/><path d="M8.5 15.5l7-7"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/>'),barras:_('<path d="M4 20h16M7 16v-5M11 16V7M15 16v-7M19 16V5"/>'),alerta:_('<path d="M12 3 2 20h20L12 3zM12 10v4M12 17v.5"/>'),linha:_('<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>'),camadas:_('<path d="M12 3 2 8l10 5 10-5-10-5zM2 13l10 5 10-5"/>'),alvo:_('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>'),etiqueta:_('<path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="7.5" r="1.4"/>'),alto:_('<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16v.5"/>'),medio:_('<path d="M12 3 2 20h20L12 3zM12 10v4M12 17v.5"/>'),baixo:_('<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/>'),trator:_('<path d="M5 17V9h7l2 4h4v4"/><path d="M8 9V6"/><circle cx="8" cy="17" r="3"/><circle cx="18" cy="18" r="2"/>',"ico maq-svg"),colhedora:_('<path d="M2 16h14V9H9l-2 3H2z"/><path d="M16 11l5-5M19 6h3"/><circle cx="6" cy="17.5" r="2.5"/><circle cx="13" cy="17.5" r="2.5"/>',"ico maq-svg"),pulverizador:_('<path d="M4 15V8h6l2 3h6v4z"/><path d="M1 13h22M3 13v2M21 13v2"/><circle cx="7" cy="17" r="2.5"/><circle cx="16" cy="17" r="2.5"/>',"ico maq-svg"),plantadeira:_('<path d="M2 9h20M3 9l2-3h14l2 3M5 9v6M10 9v6M15 9v6M20 9v6"/><circle cx="5" cy="17" r="1.6"/><circle cx="10" cy="17" r="1.6"/><circle cx="15" cy="17" r="1.6"/><circle cx="20" cy="17" r="1.6"/>',"ico maq-svg"),implemento:_('<path d="M1 12h5M6 9h16v6H6z"/><circle cx="9" cy="18" r="2"/><circle cx="14" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M9 9V6M19 9V6"/>',"ico maq-svg")},No=()=>{const a=[...new Set(y.trocas.map(e=>e.vendedor).filter(e=>e&&!/Avalia|demonstra/i.test(e)))].sort();return a.length?a:["Gerente de usados"]},ye={colhedora:{janela:"janeiro a mar\xE7o",motivo:"usinas e fornecedores fecham frota antes da safra da cana, que come\xE7a em abril",meses:[0,1,2]},pulverizador:{janela:"julho a setembro",motivo:"prepara\xE7\xE3o para o plantio da soja e para os tratos da cana",meses:[6,7,8]},plantadeira:{janela:"julho a setembro",motivo:"o plantio da soja come\xE7a com as chuvas, a partir de setembro",meses:[6,7,8]},implemento:{janela:"maio a setembro",motivo:"preparo de solo, calagem e reforma do canavial acontecem na seca, antes do plantio",meses:[4,5,6,7,8]},trator:{janela:"mar\xE7o a junho e agosto a outubro",motivo:"colheita e preparo de solo puxam a procura em duas \xE9pocas",meses:[2,3,4,5,7,8,9]}},is=a=>{const e=ye[a];if(!e)return"";const o=new Date().getMonth();return e.meses.includes(o)?`Estamos na melhor \xE9poca para vender (${e.janela}): ${e.motivo}.`:`Melhor \xE9poca para vender: ${e.janela}, porque ${e.motivo}.`},ns=a=>a.dias>90||a.margem<.06?{nome:"Alto",cls:"alto",ico:q.alto}:a.dias>60||a.margem<.1?{nome:"M\xE9dio",cls:"medio",ico:q.medio}:{nome:"Baixo",cls:"baixo",ico:q.baixo};function zo(){w.innerHTML=`<div class="titulo"><div><h1>Bem-vindo ao Anshur</h1><p>Este \xE9 o ambiente com os dados reais da sua revenda. Ele come\xE7a vazio e n\xE3o se mistura com a demonstra\xE7\xE3o.</p></div></div>
+      <section class="painel"><h2>Comece pelo hist\xF3rico de trocas</h2><p class="sub" style="margin:6px 0 14px">Importe de 10 a 200 trocas j\xE1 vendidas (planilha do Excel ou CSV do seu sistema). O Anshur aprende com elas, mede o pr\xF3prio erro e passa a avaliar as pr\xF3ximas trocas. ${x.nuvem?"Os dados ficam na conta da revenda.":"Os dados ficam s\xF3 neste navegador."}</p>
+      <div class="acoes">${K.podeVer(x.usuarioAtual().perfil)?'<a class="btn btn-ouro" href="#/config/implantacao">Come\xE7ar a implanta\xE7\xE3o guiada</a><a class="btn btn-linha" href="#teste">S\xF3 importar o hist\xF3rico</a>':'<a class="btn btn-ouro" href="#teste">Importar hist\xF3rico</a>'}<button class="btn btn-linha" type="button" id="volta-demo">Ver a demonstra\xE7\xE3o</button></div></section>`,l("#volta-demo").onclick=()=>{x.repo.trocarAmbiente("demo"),x.recarregar()}}function rs(){if(!y.trocas.length)return zo();const a=I.patio().map(Ta),e=I.vendidas(),o=a.reduce((h,f)=>h+f.t.pago,0),t=a.filter(h=>isFinite(h.venda)),s=a.length-t.length,i=t.length?t.reduce((h,f)=>h+f.venda-f.custo,0):NaN,n=e.reduce((h,f)=>h+I.margem(f),0)/Math.max(1,e.length),m=a.filter(h=>h.dias>90),r=m.reduce((h,f)=>h+f.t.pago,0),p=[];for(let h=5;h>=0;h--){const f=new Date;f.setDate(1),f.setMonth(f.getMonth()-h+1),f.setDate(0);const k=h===0?z():f.toISOString().slice(0,10),sa=y.trocas.filter(da=>da.entrada<=k&&(!da.saida||da.saida>k)).reduce((da,Y)=>da+Y.pago,0);p.push({r:new Date(k+"T12:00:00").toLocaleDateString("pt-BR",{month:"short"}).replace(".",""),v:sa})}const d={};e.forEach(h=>{const f=h.saida.slice(0,7);(d[f]=d[f]||[]).push(h)});const $=Object.keys(d).sort().slice(-6).map(h=>{const f=d[h].filter(da=>Ba(da));if(!f.length)return null;const k=f.reduce((da,Y)=>{const ea=Ba(Y);return da+I.margemProjetada(ea.venda,Y.pago+(ea.preparo||Y.preparoEst||Y.preparo))},0)/f.length,sa=f.reduce((da,Y)=>da+I.margem(Y),0)/f.length;return{r:new Date(h+"-15T12:00:00").toLocaleDateString("pt-BR",{month:"short"}).replace(".","")+` (${f.length})`,a:k,b:sa}}).filter(Boolean),u=a.reduce((h,f)=>h+f.juros,0),g=["normal","atencao","alerta","critico"],j={normal:"0\u201330 dias",atencao:"31\u201360 dias",alerta:"61\u201390 dias",critico:"+90 dias"},S=g.map(h=>{const f=a.filter(k=>k.faixa===h);return{r:j[h],v:f.reduce((k,sa)=>k+sa.t.pago,0),cls:h,extra:`${f.length} ${f.length===1?"m\xE1quina":"m\xE1quinas"}`}}),H=a.slice().sort((h,f)=>f.risco-h.risco).slice(0,6),O={normal:"#3E6B57",atencao:"#71877B",alerta:"#E2D6BF",critico:"#C1A36A"},aa={normal:"At\xE9 30 dias",atencao:"31 a 60 dias",alerta:"61 a 90 dias",critico:"Acima de 90 dias"};w.innerHTML=`
+      <div class="titulo"><div><h1>Vis\xE3o geral da revenda</h1><p>Onde est\xE1 o seu dinheiro e o que fazer hoje.</p></div>
+        <div class="acoes"><a class="btn btn-linha" href="#patio">Ver p\xE1tio completo</a><button class="btn btn-linha" type="button" id="premissas-v">Premissas</button>${la([{nome:"Nova avalia\xE7\xE3o",desc:"Quanto pagar no usado da troca",acao:()=>{location.hash="#avaliar"}},{nome:"M\xE1quina no p\xE1tio",desc:"Cadastrar \xE0 m\xE3o",acao:()=>ve()},{nome:"Documento ou planilha",desc:"Foto, PDF, CSV ou Excel",acao:()=>{location.hash="#documentos"}}],"Novo cadastro")}</div></div>
       <div class="kpis escalonado">
-        <a class="kpi k-marfim" href="#patio"><span class="rot">${ICO.moedas}Capital imobilizado</span><span class="val">${conta(capital, 'mil')}</span><span class="exp">Pago nas ${itens.length} máquinas do pátio</span></a>
-        <a class="kpi k-salvia" href="#trocas"><span class="rot">${ICO.pct}Margem média realizada</span><span class="val">${conta(margemReal, 'pct')}</span><span class="exp">Nas ${vendidas.length} trocas vendidas</span></a>
-        <a class="kpi k-marfim" href="#trocas"><span class="rot">${ICO.barras}Resultado bruto do estoque</span><span class="val">${isFinite(resultadoEst) ? conta(resultadoEst, 'mil') : '—'}</span><span class="exp">${!comEst.length ? 'Sem base para estimar: faltam vendas registradas' : semEst ? `Estimativa de ${comEst.length} de ${itens.length} máquinas (as outras ainda sem base)` : 'Estimativa, não lucro garantido'}</span></a>
-        <a class="kpi k-risco" href="#patio" id="kpi-90"><span class="rot">${ICO.alerta}Acima de 90 dias</span><span class="val">${conta(velhos.length, 'int')} ${velhos.length === 1 ? 'máquina' : 'máquinas'}</span><span class="pilula">${mil(capVelho)}</span></a>
+        <a class="kpi k-marfim" href="#patio"><span class="rot">${q.moedas}Capital imobilizado</span><span class="val">${ia(o,"mil")}</span><span class="exp">Pago nas ${a.length} m\xE1quinas do p\xE1tio</span></a>
+        <a class="kpi k-salvia" href="#trocas"><span class="rot">${q.pct}Margem m\xE9dia realizada</span><span class="val">${ia(n,"pct")}</span><span class="exp">Nas ${e.length} trocas vendidas</span></a>
+        <a class="kpi k-marfim" href="#trocas"><span class="rot">${q.barras}Resultado bruto do estoque</span><span class="val">${isFinite(i)?ia(i,"mil"):"\u2014"}</span><span class="exp">${t.length?s?`Estimativa de ${t.length} de ${a.length} m\xE1quinas (as outras ainda sem base)`:"Estimativa, n\xE3o lucro garantido":"Sem base para estimar: faltam vendas registradas"}</span></a>
+        <a class="kpi k-risco" href="#patio" id="kpi-90"><span class="rot">${q.alerta}Acima de 90 dias</span><span class="val">${ia(m.length,"int")} ${m.length===1?"m\xE1quina":"m\xE1quinas"}</span><span class="pilula">${E(r)}</span></a>
       </div>
-      <p class="conta" style="margin:-4px 0 16px">Custo financeiro estimado do estoque: <b>${mil(custoCap)}</b> até hoje (${pct(K.cfg.jurosMes)} ao mês sobre ${K.cfg.baseJuros === 'total' ? 'valor pago + preparação' : 'o valor pago'}, proporcional aos dias de cada máquina). É custo de oportunidade, não prejuízo realizado. <button class="link" type="button" id="premissas-v2">Alterar premissa</button></p>
+      <p class="conta" style="margin:-4px 0 16px">Custo financeiro estimado do estoque: <b>${E(u)}</b> at\xE9 hoje (${P(x.cfg.jurosMes)} ao m\xEAs sobre ${x.cfg.baseJuros==="total"?"valor pago + prepara\xE7\xE3o":"o valor pago"}, proporcional aos dias de cada m\xE1quina). \xC9 custo de oportunidade, n\xE3o preju\xEDzo realizado. <button class="link" type="button" id="premissas-v2">Alterar premissa</button></p>
       <div class="grade-2">
-        <section class="painel"><div class="painel-cab"><h2>${ICO.linha}Capital imobilizado nos últimos 6 meses</h2></div>${G.linha(meses)}</section>
-        <section class="painel"><div class="painel-cab"><h2>${ICO.camadas}Idade do estoque <small>(por valor)</small></h2></div>${G.rosca(idade.map((x) => ({ r: nomesRosca[x.cls], v: x.v, cor: coresIdade[x.cls] })))}</section>
+        <section class="painel"><div class="painel-cab"><h2>${q.linha}Capital imobilizado nos \xFAltimos 6 meses</h2></div>${ya.linha(p)}</section>
+        <section class="painel"><div class="painel-cab"><h2>${q.camadas}Idade do estoque <small>(por valor)</small></h2></div>${ya.rosca(S.map(h=>({r:aa[h.cls],v:h.v,cor:O[h.cls]})))}</section>
       </div>
-      <section class="painel bloco"><div class="painel-cab"><h2>Margem prevista x realizada</h2><p>Por mês de venda (nº de vendas)</p></div>
-        ${ult.length ? G.barrasDuplas(ult, ['Prevista', 'Realizada'], { largura: innerWidth >= 960 ? 1100 : 560, altura: 200 }) : '<p class="vazio">Ainda não há vendas com previsão feita antes da troca.</p>'}
+      <section class="painel bloco"><div class="painel-cab"><h2>Margem prevista x realizada</h2><p>Por m\xEAs de venda (n\xBA de vendas)</p></div>
+        ${$.length?ya.barrasDuplas($,["Prevista","Realizada"],{largura:innerWidth>=960?1100:560,altura:200}):'<p class="vazio">Ainda n\xE3o h\xE1 vendas com previs\xE3o feita antes da troca.</p>'}
         <div class="legenda"><span><i style="background:#B9C2BC"></i>Prevista pelo Anshur na entrada</span><span><i style="background:var(--ouro)"></i>Realizada na venda</span></div>
       </section>
-      <section class="painel bloco agir"><div class="painel-cab"><div><h2>${ICO.alvo}Onde você precisa agir</h2><p>${agir.length} máquinas que mais pesam no seu capital hoje</p></div></div>
-        <div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Máquina</th><th>Idade (dias)</th><th class="n">Capital preso</th><th class="n">Margem estimada</th><th>Risco</th><th>Recomendação</th></tr></thead>
-        <tbody>${agir.map((i) => { const nv = nivelRisco(i); return `<tr class="clicavel" tabindex="0" data-id="${i.t.id}"><td class="maq">${fotoMini(i.t)}<span><b>${esc(NOMES[i.t.tipo].split(' ')[0] + ' ' + i.t.marca + ' ' + i.t.modelo)}</b><span>${i.t.ano} · ${horasTxt(i.t)}</span></span></td>
-          <td><span class="dias ${i.faixa}">${i.dias} dias</span></td><td class="n forte">${mil(i.t.pago)}</td><td class="n ${i.margem < 0.06 ? 'neg' : ''}">${pct(i.margem)}</td><td><span class="risco ${nv.cls}">${nv.ico}${nv.nome}</span></td><td><span class="reco">${ICO.etiqueta}${esc(i.acao)}</span></td></tr>`; }).join('')}</tbody></table></div>
-      </section>`;
-    $$('tr.clicavel', tela).forEach((tr) => { const abre = () => detalheMaquina(tr.dataset.id); tr.onclick = abre; tr.onkeydown = (e) => { if (e.key === 'Enter') abre(); }; });
-    $('#premissas-v').onclick = abrirPremissas; $('#premissas-v2').onclick = abrirPremissas;
-    $('#kpi-90').onclick = () => { fp.idade = 'critico'; };
-    contar();
-  }
-
-  // ---------- AVALIAR ----------
-  const anoAtual = new Date().getFullYear();
-  const av = { passo: 1, tipo: 'trator', marca: 'Massey Ferguson', modelo: 'MF 4709', ano: anoAtual - 5, horas: 3900, local: 'Orlândia, SP', obs: '',
-    ficha: { motor: 4, transmissao: 4, hidraulico: 3, pneus: 2, cabine: 4, lataria: 3 }, fotos: [], verif: { horimetro: false, notas: false, chassi: false }, declarado: '', fipe: '', anuncios: ['', '', ''], ia: null };
-  // no ambiente real a avaliação começa em branco (o exemplo preenchido é só da demonstração)
-  if (K.ambiente === 'op') Object.assign(av, { marca: null, modelo: null, horas: 0, local: '' });
-  const AV0 = JSON.parse(JSON.stringify(av));
-  const chaveRascunho = () => (NV ? `anshur-rascunho:${NV.revenda.id}:${NV.usuario.id}` : 'anshur-rascunho-' + K.ambiente);
-  let rascunhoDe = null, rascunhoTimer = null;
-  try { const r = JSON.parse(localStorage.getItem(chaveRascunho())); if (r && r.av) { Object.assign(av, r.av); rascunhoDe = r.quando; } } catch (e) { /* sem rascunho */ }
-  // só guarda quando a avaliação mudou desde o último rascunho ou registro (cliques que não mudam nada não criam rascunho)
-  let rascunhoUltimo = JSON.stringify(av);
-  function guardarRascunho() { clearTimeout(rascunhoTimer); rascunhoTimer = setTimeout(() => { const j = JSON.stringify(av); if (j === rascunhoUltimo) return; rascunhoUltimo = j; try { rascunhoDe = new Date().toISOString(); localStorage.setItem(chaveRascunho(), JSON.stringify({ av, quando: rascunhoDe })); } catch (e) { /* sem espaço: segue sem rascunho */ } }, 250); }
-  function limparRascunho(zerar) { clearTimeout(rascunhoTimer); rascunhoDe = null; try { localStorage.removeItem(chaveRascunho()); } catch (e) { /* sem */ } if (zerar) { Object.assign(av, JSON.parse(JSON.stringify(AV0))); fotosGrandes = {}; } rascunhoUltimo = JSON.stringify(av); }
-  // fotos em 1280 px só na memória desta tela (vão para a IA e, com conta e internet, para a pasta privada da revenda);
-  // no rascunho e nos dados ficam miniaturas leves
-  let fotosGrandes = {};
-  const RT = window.RETENCAO;
-  ['input', 'change', 'click'].forEach((ev) => tela.addEventListener(ev, (e) => { if (e.target.closest && e.target.closest('#passo') && /(^#|\/)avaliar$/.test(location.hash || '')) guardarRascunho(); }));
-  // nota geral = média dos itens da ficha que valem para o tipo (implemento não tem motor, câmbio nem cabine)
-  const condDe = (f, tipo = av.tipo) => condFicha(f, tipo);
-  // modelo digitado que não está no catálogo da revenda nem na base de mercado: precisa da referência de preço
-  // (enquanto a base de implementos ainda está baixando, não dá para saber; espera)
-  const modeloNovo = () => !!(av.marca && av.modelo) && !(semHoras(av.tipo) && !window.MERCADO && window.MERCADO_CARREGAR && !mercadoFalhou) && !M.catalogo({ tipo: av.tipo, marca: av.marca, modelo: av.modelo });
-  const maqAv = () => ({ tipo: av.tipo, marca: av.marca, modelo: av.modelo, ano: av.ano, horas: semHoras(av.tipo) ? 0 : av.horas, cond: condDe(av.ficha), ficha: { ...av.ficha }, ...(modeloNovo() && av.refNova > 0 ? { referencia: av.refNova } : {}) });
-  // ao sair da etapa 1 com um modelo novo, ele entra no catálogo da revenda (o mesmo que Configurações › Adicionar modelo faz)
-  function guardarModeloNovo() {
-    if (!modeloNovo() || !(av.refNova > 0)) return;
-    const hAno = { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270, implemento: 0 }[av.tipo];
-    A.modelos.push({ tipo: av.tipo, marca: av.marca, modelo: av.modelo, base: av.refNova, hAno, importado: true });
-    estado.modelosExtra = (estado.modelosExtra || []).concat([{ tipo: av.tipo, marca: av.marca, modelo: av.modelo, base: av.refNova }]);
-    salvar(); log('config', `Modelo ${av.marca} ${av.modelo} adicionado ao catálogo pela avaliação`);
-    toast(`${av.marca} ${av.modelo} entrou no catálogo da revenda.`);
-  }
-  // catálogo da avaliação: os modelos da revenda e, em implementos, também os da base pública de mercado (anúncios reais)
-  // carrega mercado-anuncios.js na primeira avaliação de implemento (não no abrir do app); ao chegar, redesenha o passo
-  let mercadoFalhou = false;
-  function pedirMercado(tipo) {
-    if (!semHoras(tipo) || window.MERCADO || !window.MERCADO_CARREGAR) return;
-    window.MERCADO_CARREGAR().then(() => { mercadoFalhou = false; }, () => {
-      if (!mercadoFalhou) { mercadoFalhou = true; if ($('#passo')) { desenharPasso(); toast('Sem internet para baixar a base de mercado de implementos: a avaliação usa só as trocas da revenda.', true); } }
-    });
-  }
-  window.addEventListener('anshur:mercado', () => { recCache.clear(); if ($('#passo')) desenharPasso(); else if ($('#resultado')) desenharResultado(); });
-  function catalogoAv(tipo) {
-    const proprios = A.modelos.filter((m) => m.tipo === tipo);
-    if (!semHoras(tipo) || !window.MERCADO) return proprios;
-    return proprios.concat(window.MERCADO.modelos.filter((m) => m.tipo === tipo && !proprios.some((x) => x.marca === m.marca && x.modelo === m.modelo)))
-      .sort((a, b) => a.marca.localeCompare(b.marca, 'pt-BR') || a.modelo.localeCompare(b.modelo, 'pt-BR', { numeric: true }));
-  }
-  const num = (s) => { const v = parseFloat(String(s).replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')); return isFinite(v) ? v : 0; };
-
-  const NOMES_PASSO = ['Identificação', 'Fotos', 'Inspeção', 'Resultado'];
-  function telaAvaliar() {
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Avaliar troca</h1><p>Descubra quanto a ${esc(A.revenda.nome)} pode pagar no usado que o cliente oferece, com base nas trocas que ela já vendeu.</p></div>${botaoAdicionar([{ nome: 'Preencher com documento', desc: 'Foto da nota ou do CRV da máquina', acao: () => { location.hash = '#documentos'; } }, { nome: 'Novo modelo no catálogo', desc: 'Modelo que ainda não está na lista', acao: () => { location.hash = '#config'; } }], 'Outras formas de preencher', true)}</div>
-      <nav class="etapas" aria-label="Etapas da avaliação"><ol>${NOMES_PASSO.map((n, i) => `<li><button type="button" data-p="${i + 1}" ${av.passo === i + 1 ? 'aria-current="step"' : ''} class="${av.passo > i + 1 ? 'feita' : ''}"><span class="et-n" aria-hidden="true">${i + 1}</span><span class="et-nome">${n}</span></button></li>`).join('')}</ol></nav>
+      <section class="painel bloco agir"><div class="painel-cab"><div><h2>${q.alvo}Onde voc\xEA precisa agir</h2><p>${H.length} m\xE1quinas que mais pesam no seu capital hoje</p></div></div>
+        <div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>M\xE1quina</th><th>Idade (dias)</th><th class="n">Capital preso</th><th class="n">Margem estimada</th><th>Risco</th><th>Recomenda\xE7\xE3o</th></tr></thead>
+        <tbody>${H.map(h=>{const f=ns(h);return`<tr class="clicavel" tabindex="0" data-id="${h.t.id}"><td class="maq">${ue(h.t)}<span><b>${c(V[h.t.tipo].split(" ")[0]+" "+h.t.marca+" "+h.t.modelo)}</b><span>${h.t.ano} \xB7 ${pa(h.t)}</span></span></td>
+          <td><span class="dias ${h.faixa}">${h.dias} dias</span></td><td class="n forte">${E(h.t.pago)}</td><td class="n ${h.margem<.06?"neg":""}">${P(h.margem)}</td><td><span class="risco ${f.cls}">${f.ico}${f.nome}</span></td><td><span class="reco">${q.etiqueta}${c(h.acao)}</span></td></tr>`}).join("")}</tbody></table></div>
+      </section>`,R("tr.clicavel",w).forEach(h=>{const f=()=>we(h.dataset.id);h.onclick=f,h.onkeydown=k=>{k.key==="Enter"&&f()}}),l("#premissas-v").onclick=Ya,l("#premissas-v2").onclick=Ya,l("#kpi-90").onclick=()=>{ua.idade="critico"},$a()}const Da=new Date().getFullYear(),v={passo:1,tipo:"trator",marca:"Massey Ferguson",modelo:"MF 4709",ano:Da-5,horas:3900,local:"Orl\xE2ndia, SP",obs:"",ficha:{motor:4,transmissao:4,hidraulico:3,pneus:2,cabine:4,lataria:3},fotos:[],verif:{horimetro:!1,notas:!1,chassi:!1},declarado:"",fipe:"",anuncios:["","",""],ia:null};x.ambiente==="op"&&Object.assign(v,{marca:null,modelo:null,horas:0,local:""});const ds=JSON.parse(JSON.stringify(v)),_e=()=>C?`anshur-rascunho:${C.revenda.id}:${C.usuario.id}`:"anshur-rascunho-"+x.ambiente;let Ua=null,Je=null;try{const a=JSON.parse(localStorage.getItem(_e()));a&&a.av&&(Object.assign(v,a.av),Ua=a.quando)}catch{}let Qe=JSON.stringify(v);function Qa(){clearTimeout(Je),Je=setTimeout(()=>{const a=JSON.stringify(v);if(a!==Qe){Qe=a;try{Ua=new Date().toISOString(),localStorage.setItem(_e(),JSON.stringify({av:v,quando:Ua}))}catch{}}},250)}function qe(a){clearTimeout(Je),Ua=null;try{localStorage.removeItem(_e())}catch{}a&&(Object.assign(v,JSON.parse(JSON.stringify(ds))),Za={}),Qe=JSON.stringify(v)}let Za={};const na=window.RETENCAO;["input","change","click"].forEach(a=>w.addEventListener(a,e=>{e.target.closest&&e.target.closest("#passo")&&/(^#|\/)avaliar$/.test(location.hash||"")&&Qa()}));const We=(a,e=v.tipo)=>es(a,e),ae=()=>!!(v.marca&&v.modelo)&&!(ka(v.tipo)&&!window.MERCADO&&window.MERCADO_CARREGAR&&!ce)&&!Q.catalogo({tipo:v.tipo,marca:v.marca,modelo:v.modelo}),Fo=()=>({tipo:v.tipo,marca:v.marca,modelo:v.modelo,ano:v.ano,horas:ka(v.tipo)?0:v.horas,cond:We(v.ficha),ficha:{...v.ficha},...ae()&&v.refNova>0?{referencia:v.refNova}:{}});function ls(){if(!ae()||!(v.refNova>0))return;const a={trator:750,colhedora:2600,pulverizador:820,plantadeira:270,implemento:0}[v.tipo];y.modelos.push({tipo:v.tipo,marca:v.marca,modelo:v.modelo,base:v.refNova,hAno:a,importado:!0}),b.modelosExtra=(b.modelosExtra||[]).concat([{tipo:v.tipo,marca:v.marca,modelo:v.modelo,base:v.refNova}]),T(),L("config",`Modelo ${v.marca} ${v.modelo} adicionado ao cat\xE1logo pela avalia\xE7\xE3o`),A(`${v.marca} ${v.modelo} entrou no cat\xE1logo da revenda.`)}let ce=!1;function cs(a){!ka(a)||window.MERCADO||!window.MERCADO_CARREGAR||window.MERCADO_CARREGAR().then(()=>{ce=!1},()=>{ce||(ce=!0,l("#passo")&&(ma(),A("Sem internet para baixar a base de mercado de implementos: a avalia\xE7\xE3o usa s\xF3 as trocas da revenda.",!0)))})}window.addEventListener("anshur:mercado",()=>{Ha.clear(),l("#passo")?ma():l("#resultado")&&ao()});function Ho(a){const e=y.modelos.filter(o=>o.tipo===a);return!ka(a)||!window.MERCADO?e:e.concat(window.MERCADO.modelos.filter(o=>o.tipo===a&&!e.some(t=>t.marca===o.marca&&t.modelo===o.modelo))).sort((o,t)=>o.marca.localeCompare(t.marca,"pt-BR")||o.modelo.localeCompare(t.modelo,"pt-BR",{numeric:!0}))}const ra=a=>{const e=parseFloat(String(a).replace(/[^\d,.-]/g,"").replace(/\./g,"").replace(",","."));return isFinite(e)?e:0},ke=["Identifica\xE7\xE3o","Fotos","Inspe\xE7\xE3o","Resultado"];function Xe(){w.innerHTML=`
+      <div class="titulo"><div><h1>Avaliar troca</h1><p>Descubra quanto a ${c(y.revenda.nome)} pode pagar no usado que o cliente oferece, com base nas trocas que ela j\xE1 vendeu.</p></div>${la([{nome:"Preencher com documento",desc:"Foto da nota ou do CRV da m\xE1quina",acao:()=>{location.hash="#documentos"}},{nome:"Novo modelo no cat\xE1logo",desc:"Modelo que ainda n\xE3o est\xE1 na lista",acao:()=>{location.hash="#config"}}],"Outras formas de preencher",!0)}</div>
+      <nav class="etapas" aria-label="Etapas da avalia\xE7\xE3o"><ol>${ke.map((e,o)=>`<li><button type="button" data-p="${o+1}" ${v.passo===o+1?'aria-current="step"':""} class="${v.passo>o+1?"feita":""}"><span class="et-n" aria-hidden="true">${o+1}</span><span class="et-nome">${e}</span></button></li>`).join("")}</ol></nav>
       <div class="etapa-movel" id="etapa-movel" aria-live="polite"></div>
-      ${rascunhoDe ? `<p class="conta rascunho" id="rascunho-aviso">${ic('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}<span>Rascunho salvo neste aparelho (${new Date(rascunhoDe).toLocaleString('pt-BR')}). Pode sair e voltar depois.</span> <button class="link" type="button" id="rascunho-zerar">Começar do zero</button></p>` : ''}
-      <div class="av-layout"><div id="passo"></div><aside class="av-lado" id="av-lado" aria-label="Prévia do resultado da avaliação"></aside></div>
-      ${estado.avaliacoes.length ? `<section class="painel bloco"><div class="painel-cab"><h2>Avaliações registradas</h2><p>${estado.avaliacoes.length} ${OP ? 'na revenda' : 'nesta demonstração'}</p></div>
-        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Data</th><th>Máquina</th><th class="n">Valor máximo</th><th class="n">Venda estimada</th><th>Situação</th></tr></thead><tbody>
-        ${estado.avaliacoes.slice().reverse().map((a) => `<tr><td>${data(a.data)}</td><td class="maq"><b>${esc(a.maq.marca + ' ' + a.maq.modelo)}</b><span>${a.maq.ano} · ${horasTxt(a.maq)}</span></td><td class="n">${mil(a.teto)}</td><td class="n">${mil(a.venda)}</td><td>${{ troca: 'Virou troca', desistiu: 'Cliente desistiu' }[a.status] || (a.status === 'aberta' ? 'Em negociação' : '—')}${a.ia ? ' <span class="tag comprovado">IA revisada</span>' : ''}</td></tr>`).join('')}</tbody></table></div></section>` : ''}`;
-    $$('.etapas button', tela).forEach((b) => b.onclick = () => irPasso(+b.dataset.p));
-    const zr = $('#rascunho-zerar'); if (zr) zr.onclick = () => { limparRascunho(true); telaAvaliar(); };
-    desenharPasso();
-  }
-  // celular: "Etapa 1 de 4", o nome da etapa, a barra de progresso e o que vem depois (sem espremer 4 abas)
-  function marcarEtapas() {
-    $$('.etapas button', tela).forEach((b) => { const n = +b.dataset.p; b.classList.toggle('feita', n < av.passo); if (n === av.passo) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
-    const m = $('#etapa-movel'); if (!m) return;
-    m.innerHTML = `<p><b>Etapa ${av.passo} de 4</b> · ${NOMES_PASSO[av.passo - 1]}</p><div class="progresso" role="progressbar" aria-label="Etapas da avaliação" aria-valuemin="1" aria-valuemax="4" aria-valuenow="${av.passo}"><i style="width:${av.passo * 25}%"></i></div>${av.passo < 4 ? `<small>Depois: ${NOMES_PASSO[av.passo]}</small>` : ''}`;
-  }
-  // prévia do resultado ao lado do formulário (computador) ou embaixo (celular): o mesmo motor da etapa 4
-  let ladoTimer = null;
-  function desenharLado() {
-    const lado = $('#av-lado'), lay = $('.av-layout'); if (!lado || !lay) return;
-    lay.classList.toggle('cheio', av.passo === 4); lado.hidden = av.passo === 4; if (av.passo === 4) return;
-    const semRef = modeloNovo() && !(av.refNova > 0);
-    let r = null; try { if (!semRef && (semHoras(av.tipo) || av.horas > 0)) r = M.avaliar(maqAv()); } catch (e) { r = null; }
-    const cab = '<div class="painel-cab"><h2>Resultado da avaliação</h2><p>Prévia com o que já foi preenchido</p></div>';
-    if (semRef) { lado.innerHTML = `<section class="painel av-res">${cab}<div class="estado-vazio">${ic('<path d="M4 19h16M6 15l4-4 3 3 5-6"/>')}<b>Modelo novo no catálogo</b><p>Informe a referência de preço seminovo de ${esc(av.marca + ' ' + av.modelo)} e o valor máximo aparece aqui.</p></div></section>`; return; }
-    if (!r) { lado.innerHTML = `<section class="painel av-res">${cab}<div class="estado-vazio">${ic('<path d="M4 19h16M6 15l4-4 3 3 5-6"/>')}<b>${!semHoras(av.tipo) && !(av.horas > 0) ? 'Falta informar as horas' : 'Ainda sem base para esta máquina'}</b><p>${!semHoras(av.tipo) && !(av.horas > 0) ? 'Com o horímetro preenchido, o valor máximo aparece aqui na hora.' : `São precisas pelo menos ${M.QUALIDADE.minimoTreino} vendas com referência de preço deste tipo de máquina.`}</p></div></section>`; return; }
-    lado.innerHTML = `<section class="painel av-res" aria-live="polite">${cab}
-      <div class="av-res-topo"><span>Valor máximo recomendado na troca</span><b>${real(r.teto)}</b><small>Faixa de negociação: ${mil(r.faixa[0])} a ${mil(r.faixa[1])}</small></div>
-      <dl class="av-res-num"><div><dt>Confiança da estimativa</dt><dd><span class="conf ${r.confianca}">${r.confianca}</span></dd></div><div><dt>Margem prevista</dt><dd>${pct(r.margemSobreVenda, 1)}</dd></div><div><dt>Custo de preparo</dt><dd>${mil(r.preparo)}</dd></div><div><dt>Venda estimada</dt><dd>${mil(r.venda)}</dd></div></dl>
-      ${av.passo < 3 ? '<p class="nota-rodape">A prévia usa as notas de inspeção atuais; ela muda quando você avaliar o estado na etapa 3.</p>' : ''}
-      <button class="btn btn-ouro btn-largo" type="button" data-ir-res>Ver resultado completo${ic('<path d="M5 12h14M13 6l6 6-6 6"/>')}</button>
-      <p class="ajuda">Registrar a avaliação, fechar a troca ou pedir aprovação: na etapa 4.</p>
-      ${r.comp && r.comp.length ? `<h3 class="av-comp-tit">${r.mercado ? 'Trocas e anúncios semelhantes' : 'Trocas semelhantes já vendidas'}</h3><ul class="av-comp">${r.comp.slice(0, 3).map((t) => `<li><span><b>${esc(t.marca + ' ' + t.modelo)}</b> ${t.ano}${String(t.id).startsWith('mercado-') ? ' · anúncio' : ''}</span><b>${mil(t.vendido)}</b></li>`).join('')}</ul>` : ''}</section>`;
-    $('[data-ir-res]', lado).onclick = () => irPasso(4);
-  }
-  ['input', 'change'].forEach((ev) => tela.addEventListener(ev, (e) => { if (e.target.closest && e.target.closest('#passo')) { clearTimeout(ladoTimer); ladoTimer = setTimeout(desenharLado, 220); } }));
-  tela.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('#passo .notas button')) { clearTimeout(ladoTimer); ladoTimer = setTimeout(desenharLado, 120); } });
-  function irPasso(p) {
-    if (p > 1 && (!String(av.marca || '').trim() || !String(av.modelo || '').trim())) { av.passo = 1; desenharPasso(); toast('Informe o fabricante e o modelo para continuar.', true); return; }
-    if (p > 1 && modeloNovo() && !(av.refNova > 0)) { av.passo = 1; desenharPasso(); toast('Modelo novo: informe a referência de preço seminovo para continuar.', true); if ($('#f-ref')) { $('#f-ref').focus(); $('#e-ref').textContent = 'Informe a referência de preço do modelo novo.'; } return; }
-    if (p > 1 && !semHoras(av.tipo) && !(av.horas > 0)) { av.passo = 1; desenharPasso(); toast('Informe as horas do horímetro para continuar.', true); return; }
-    if (p > 1) guardarModeloNovo();
-    // nada da IA entra no resultado sem o avaliador decidir item a item
-    if (p > 3 && iaPendentes() > 0) { toast(`Revise as ${iaPendentes()} sugestões da IA (aceitar ou manter a sua nota) antes do resultado.`, true); p = 3; }
-    av.passo = p;
-    desenharPasso(); window.scrollTo({ top: 0, behavior: reduzido ? 'auto' : 'smooth' });
-  }
-  const navPasso = (ultimo) => `<div class="acoes rodape-passo">${av.passo > 1 ? '<button class="btn btn-linha" type="button" data-ir="-1">Voltar</button>' : ''}<span class="salvo-auto">${ic('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}Rascunho salvo automaticamente</span>${ultimo ? '' : `<button class="btn btn-ouro" type="button" data-ir="1">Continuar: ${NOMES_PASSO[av.passo]}</button>`}</div>`;
-
-  function desenharPasso() {
-    const caixa = $('#passo'); if (!caixa) return;
-    pedirMercado(av.tipo); marcarEtapas();
-    const tipos = Object.keys(NOMES);
-    const cat = catalogoAv(av.tipo);
-    const marcas = [...new Set(cat.map((m) => m.marca))];
-    // fabricante e modelo: a lista sugere, mas aceita texto livre (modelo novo pede a referência de preço)
-    if (av.marca == null) av.marca = marcas[0] || '';
-    const modelos = cat.filter((m) => m.marca === av.marca);
-    if (av.modelo == null) av.modelo = modelos[0] ? modelos[0].modelo : '';
-    const novo = modeloNovo();
-    const sh = semHoras(av.tipo), anos = []; for (let a = anoAtual; a >= anoAtual - (sh ? 30 : 15); a--) anos.push(a);
-    if (!anos.includes(av.ano)) av.ano = anos.includes(+av.ano) ? +av.ano : anoAtual - 5;
-    let h = '';
-    const obr = '<abbr class="obr" title="obrigatório">*</abbr>';
-    if (av.passo === 1) h = `<section class="painel passo form-etapa"><div class="painel-cab"><h2>Identificação</h2><p>Campos com <abbr class="obr" title="obrigatório">*</abbr> são obrigatórios</p></div>
-      <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">1</span>Máquina<small>Qual máquina o cliente quer dar na troca</small></legend><div class="campos quatro">
-        <div class="campo"><label for="f-tipo">Categoria ${obr}</label><select id="f-tipo">${tipos.map((k) => `<option value="${k}" ${k === av.tipo ? 'selected' : ''}>${NOMES[k]}</option>`).join('')}</select></div>
-        <div class="campo"><label for="f-marca">Fabricante ${obr}</label><input id="f-marca" list="dl-av-marca" value="${esc(av.marca)}" autocomplete="off" required placeholder="Escolha ou digite"><datalist id="dl-av-marca">${marcas.map((m) => `<option value="${esc(m)}"></option>`).join('')}</datalist></div>
-        <div class="campo"><label for="f-modelo">Modelo ${obr}</label><input id="f-modelo" list="dl-av-modelo" value="${esc(av.modelo)}" autocomplete="off" required placeholder="Escolha ou digite"><datalist id="dl-av-modelo">${modelos.map((m) => `<option value="${esc(m.modelo)}"></option>`).join('')}</datalist></div>
-        <div class="campo curto"><label for="f-ano">Ano ${obr}</label><select id="f-ano">${anos.map((a) => `<option ${a === av.ano ? 'selected' : ''}>${a}</option>`).join('')}</select></div>
-        ${sh && !window.MERCADO && window.MERCADO_CARREGAR && !mercadoFalhou ? '<p class="sub inteiro carregando-linha" id="f-mercado-carregando" role="status"><span class="spin" aria-hidden="true"></span>Carregando os modelos da base de mercado de implementos…</p>' : ''}
-        ${novo ? `<div class="campo inteiro f-novo"><label for="f-ref">Referência de preço seminovo (R$) ${obr}</label><input id="f-ref" inputmode="numeric" placeholder="R$" value="${av.refNova ? esc(String(av.refNova)) : ''}" required aria-describedby="a-ref e-ref"><span class="ajuda" id="a-ref"><b>${esc(av.marca + ' ' + av.modelo)}</b> ainda não está no catálogo. Informe quanto vale um seminovo deste modelo; ao continuar, ele entra no catálogo da revenda.</span><span class="erro-campo" id="e-ref" role="alert"></span></div>` : ''}
+      ${Ua?`<p class="conta rascunho" id="rascunho-aviso">${_('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}<span>Rascunho salvo neste aparelho (${new Date(Ua).toLocaleString("pt-BR")}). Pode sair e voltar depois.</span> <button class="link" type="button" id="rascunho-zerar">Come\xE7ar do zero</button></p>`:""}
+      <div class="av-layout"><div id="passo"></div><aside class="av-lado" id="av-lado" aria-label="Pr\xE9via do resultado da avalia\xE7\xE3o"></aside></div>
+      ${b.avaliacoes.length?`<section class="painel bloco"><div class="painel-cab"><h2>Avalia\xE7\xF5es registradas</h2><p>${b.avaliacoes.length} ${X?"na revenda":"nesta demonstra\xE7\xE3o"}</p></div>
+        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Data</th><th>M\xE1quina</th><th class="n">Valor m\xE1ximo</th><th class="n">Venda estimada</th><th>Situa\xE7\xE3o</th></tr></thead><tbody>
+        ${b.avaliacoes.slice().reverse().map(e=>`<tr><td>${N(e.data)}</td><td class="maq"><b>${c(e.maq.marca+" "+e.maq.modelo)}</b><span>${e.maq.ano} \xB7 ${pa(e.maq)}</span></td><td class="n">${E(e.teto)}</td><td class="n">${E(e.venda)}</td><td>${{troca:"Virou troca",desistiu:"Cliente desistiu"}[e.status]||(e.status==="aberta"?"Em negocia\xE7\xE3o":"\u2014")}${e.ia?' <span class="tag comprovado">IA revisada</span>':""}</td></tr>`).join("")}</tbody></table></div></section>`:""}`,R(".etapas button",w).forEach(e=>e.onclick=()=>pe(+e.dataset.p));const a=l("#rascunho-zerar");a&&(a.onclick=()=>{qe(!0),Xe()}),ma()}function ps(){R(".etapas button",w).forEach(e=>{const o=+e.dataset.p;e.classList.toggle("feita",o<v.passo),o===v.passo?e.setAttribute("aria-current","step"):e.removeAttribute("aria-current")});const a=l("#etapa-movel");a&&(a.innerHTML=`<p><b>Etapa ${v.passo} de 4</b> \xB7 ${ke[v.passo-1]}</p><div class="progresso" role="progressbar" aria-label="Etapas da avalia\xE7\xE3o" aria-valuemin="1" aria-valuemax="4" aria-valuenow="${v.passo}"><i style="width:${v.passo*25}%"></i></div>${v.passo<4?`<small>Depois: ${ke[v.passo]}</small>`:""}`)}let Ee=null;function Ke(){const a=l("#av-lado"),e=l(".av-layout");if(!a||!e||(e.classList.toggle("cheio",v.passo===4),a.hidden=v.passo===4,v.passo===4))return;const o=ae()&&!(v.refNova>0);let t=null;try{!o&&(ka(v.tipo)||v.horas>0)&&(t=Q.avaliar(Fo()))}catch{t=null}const s='<div class="painel-cab"><h2>Resultado da avalia\xE7\xE3o</h2><p>Pr\xE9via com o que j\xE1 foi preenchido</p></div>';if(o){a.innerHTML=`<section class="painel av-res">${s}<div class="estado-vazio">${_('<path d="M4 19h16M6 15l4-4 3 3 5-6"/>')}<b>Modelo novo no cat\xE1logo</b><p>Informe a refer\xEAncia de pre\xE7o seminovo de ${c(v.marca+" "+v.modelo)} e o valor m\xE1ximo aparece aqui.</p></div></section>`;return}if(!t){a.innerHTML=`<section class="painel av-res">${s}<div class="estado-vazio">${_('<path d="M4 19h16M6 15l4-4 3 3 5-6"/>')}<b>${!ka(v.tipo)&&!(v.horas>0)?"Falta informar as horas":"Ainda sem base para esta m\xE1quina"}</b><p>${!ka(v.tipo)&&!(v.horas>0)?"Com o hor\xEDmetro preenchido, o valor m\xE1ximo aparece aqui na hora.":`S\xE3o precisas pelo menos ${Q.QUALIDADE.minimoTreino} vendas com refer\xEAncia de pre\xE7o deste tipo de m\xE1quina.`}</p></div></section>`;return}a.innerHTML=`<section class="painel av-res" aria-live="polite">${s}
+      <div class="av-res-topo"><span>Valor m\xE1ximo recomendado na troca</span><b>${M(t.teto)}</b><small>Faixa de negocia\xE7\xE3o: ${E(t.faixa[0])} a ${E(t.faixa[1])}</small></div>
+      <dl class="av-res-num"><div><dt>Confian\xE7a da estimativa</dt><dd><span class="conf ${t.confianca}">${t.confianca}</span></dd></div><div><dt>Margem prevista</dt><dd>${P(t.margemSobreVenda,1)}</dd></div><div><dt>Custo de preparo</dt><dd>${E(t.preparo)}</dd></div><div><dt>Venda estimada</dt><dd>${E(t.venda)}</dd></div></dl>
+      ${v.passo<3?'<p class="nota-rodape">A pr\xE9via usa as notas de inspe\xE7\xE3o atuais; ela muda quando voc\xEA avaliar o estado na etapa 3.</p>':""}
+      <button class="btn btn-ouro btn-largo" type="button" data-ir-res>Ver resultado completo${_('<path d="M5 12h14M13 6l6 6-6 6"/>')}</button>
+      <p class="ajuda">Registrar a avalia\xE7\xE3o, fechar a troca ou pedir aprova\xE7\xE3o: na etapa 4.</p>
+      ${t.comp&&t.comp.length?`<h3 class="av-comp-tit">${t.mercado?"Trocas e an\xFAncios semelhantes":"Trocas semelhantes j\xE1 vendidas"}</h3><ul class="av-comp">${t.comp.slice(0,3).map(i=>`<li><span><b>${c(i.marca+" "+i.modelo)}</b> ${i.ano}${String(i.id).startsWith("mercado-")?" \xB7 an\xFAncio":""}</span><b>${E(i.vendido)}</b></li>`).join("")}</ul>`:""}</section>`,l("[data-ir-res]",a).onclick=()=>pe(4)}["input","change"].forEach(a=>w.addEventListener(a,e=>{e.target.closest&&e.target.closest("#passo")&&(clearTimeout(Ee),Ee=setTimeout(Ke,220))})),w.addEventListener("click",a=>{a.target.closest&&a.target.closest("#passo .notas button")&&(clearTimeout(Ee),Ee=setTimeout(Ke,120))});function pe(a){if(a>1&&(!String(v.marca||"").trim()||!String(v.modelo||"").trim())){v.passo=1,ma(),A("Informe o fabricante e o modelo para continuar.",!0);return}if(a>1&&ae()&&!(v.refNova>0)){v.passo=1,ma(),A("Modelo novo: informe a refer\xEAncia de pre\xE7o seminovo para continuar.",!0),l("#f-ref")&&(l("#f-ref").focus(),l("#e-ref").textContent="Informe a refer\xEAncia de pre\xE7o do modelo novo.");return}if(a>1&&!ka(v.tipo)&&!(v.horas>0)){v.passo=1,ma(),A("Informe as horas do hor\xEDmetro para continuar.",!0);return}a>1&&ls(),a>3&&Se()>0&&(A(`Revise as ${Se()} sugest\xF5es da IA (aceitar ou manter a sua nota) antes do resultado.`,!0),a=3),v.passo=a,ma(),window.scrollTo({top:0,behavior:Fa?"auto":"smooth"})}const Ye=a=>`<div class="acoes rodape-passo">${v.passo>1?'<button class="btn btn-linha" type="button" data-ir="-1">Voltar</button>':""}<span class="salvo-auto">${_('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}Rascunho salvo automaticamente</span>${a?"":`<button class="btn btn-ouro" type="button" data-ir="1">Continuar: ${ke[v.passo]}</button>`}</div>`;function ma(){const a=l("#passo");if(!a)return;cs(v.tipo),ps();const e=Object.keys(V),o=Ho(v.tipo),t=[...new Set(o.map(d=>d.marca))];v.marca==null&&(v.marca=t[0]||"");const s=o.filter(d=>d.marca===v.marca);v.modelo==null&&(v.modelo=s[0]?s[0].modelo:"");const i=ae(),n=ka(v.tipo),m=[];for(let d=Da;d>=Da-(n?30:15);d--)m.push(d);m.includes(v.ano)||(v.ano=m.includes(+v.ano)?+v.ano:Da-5);let r="";const p='<abbr class="obr" title="obrigat\xF3rio">*</abbr>';if(v.passo===1&&(r=`<section class="painel passo form-etapa"><div class="painel-cab"><h2>Identifica\xE7\xE3o</h2><p>Campos com <abbr class="obr" title="obrigat\xF3rio">*</abbr> s\xE3o obrigat\xF3rios</p></div>
+      <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">1</span>M\xE1quina<small>Qual m\xE1quina o cliente quer dar na troca</small></legend><div class="campos quatro">
+        <div class="campo"><label for="f-tipo">Categoria ${p}</label><select id="f-tipo">${e.map(d=>`<option value="${d}" ${d===v.tipo?"selected":""}>${V[d]}</option>`).join("")}</select></div>
+        <div class="campo"><label for="f-marca">Fabricante ${p}</label><input id="f-marca" list="dl-av-marca" value="${c(v.marca)}" autocomplete="off" required placeholder="Escolha ou digite"><datalist id="dl-av-marca">${t.map(d=>`<option value="${c(d)}"></option>`).join("")}</datalist></div>
+        <div class="campo"><label for="f-modelo">Modelo ${p}</label><input id="f-modelo" list="dl-av-modelo" value="${c(v.modelo)}" autocomplete="off" required placeholder="Escolha ou digite"><datalist id="dl-av-modelo">${s.map(d=>`<option value="${c(d.modelo)}"></option>`).join("")}</datalist></div>
+        <div class="campo curto"><label for="f-ano">Ano ${p}</label><select id="f-ano">${m.map(d=>`<option ${d===v.ano?"selected":""}>${d}</option>`).join("")}</select></div>
+        ${n&&!window.MERCADO&&window.MERCADO_CARREGAR&&!ce?'<p class="sub inteiro carregando-linha" id="f-mercado-carregando" role="status"><span class="spin" aria-hidden="true"></span>Carregando os modelos da base de mercado de implementos\u2026</p>':""}
+        ${i?`<div class="campo inteiro f-novo"><label for="f-ref">Refer\xEAncia de pre\xE7o seminovo (R$) ${p}</label><input id="f-ref" inputmode="numeric" placeholder="R$" value="${v.refNova?c(String(v.refNova)):""}" required aria-describedby="a-ref e-ref"><span class="ajuda" id="a-ref"><b>${c(v.marca+" "+v.modelo)}</b> ainda n\xE3o est\xE1 no cat\xE1logo. Informe quanto vale um seminovo deste modelo; ao continuar, ele entra no cat\xE1logo da revenda.</span><span class="erro-campo" id="e-ref" role="alert"></span></div>`:""}
       </div></fieldset>
-      <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">2</span>Condição e uso<small>Horímetro, onde a máquina está e o que o cliente contou</small></legend><div class="campos">
-        ${sh ? `<div class="campo"><span class="rot-campo">Horas trabalhadas</span><p class="sub" id="f-sem-horas" style="margin-top:8px">Implemento não tem horímetro: o valor sai do ano, do modelo e do estado na inspeção.</p></div>`
-          : `<div class="campo"><label for="f-horas">Horas trabalhadas ${obr}</label><input id="f-horas" type="number" inputmode="numeric" min="0" step="10" value="${av.horas || ''}" required aria-describedby="a-horas e-horas"><span class="ajuda" id="a-horas">Número do horímetro, só números (ex.: 3900).</span><span class="erro-campo" id="e-horas" role="alert"></span></div>`}
-        <div class="campo"><label for="f-local">Localização da máquina</label><input id="f-local" value="${esc(av.local)}" autocomplete="off" aria-describedby="a-local"><span class="ajuda" id="a-local">Cidade e estado onde a máquina está hoje.</span></div>
-        <div class="campo inteiro"><label for="f-obs">Informações adicionais</label><textarea id="f-obs" rows="2" placeholder="Ex.: piloto automático, pneus novos há 1 safra">${esc(av.obs)}</textarea></div>
+      <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">2</span>Condi\xE7\xE3o e uso<small>Hor\xEDmetro, onde a m\xE1quina est\xE1 e o que o cliente contou</small></legend><div class="campos">
+        ${n?'<div class="campo"><span class="rot-campo">Horas trabalhadas</span><p class="sub" id="f-sem-horas" style="margin-top:8px">Implemento n\xE3o tem hor\xEDmetro: o valor sai do ano, do modelo e do estado na inspe\xE7\xE3o.</p></div>':`<div class="campo"><label for="f-horas">Horas trabalhadas ${p}</label><input id="f-horas" type="number" inputmode="numeric" min="0" step="10" value="${v.horas||""}" required aria-describedby="a-horas e-horas"><span class="ajuda" id="a-horas">N\xFAmero do hor\xEDmetro, s\xF3 n\xFAmeros (ex.: 3900).</span><span class="erro-campo" id="e-horas" role="alert"></span></div>`}
+        <div class="campo"><label for="f-local">Localiza\xE7\xE3o da m\xE1quina</label><input id="f-local" value="${c(v.local)}" autocomplete="off" aria-describedby="a-local"><span class="ajuda" id="a-local">Cidade e estado onde a m\xE1quina est\xE1 hoje.</span></div>
+        <div class="campo inteiro"><label for="f-obs">Informa\xE7\xF5es adicionais</label><textarea id="f-obs" rows="2" placeholder="Ex.: piloto autom\xE1tico, pneus novos h\xE1 1 safra">${c(v.obs)}</textarea></div>
       </div></fieldset>
-      <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">3</span>Negociação<small>A máquina nova que o cliente está comprando; se estiver no floor plan, o resultado mostra o juro que ela já custou</small></legend><div class="campos">
-        <div class="campo inteiro"><label for="f-nova">Máquina nova desta negociação</label><select id="f-nova"><option value="">Nenhuma / não financiada</option>${(A.financiadas || []).filter((f) => !f.venda).map((f) => `<option value="${f.chassi}" ${av.nova === f.chassi ? 'selected' : ''}>${esc(f.marca + ' ' + f.modelo)} · ${f.chassi}</option>`).join('')}</select></div>
-      </div></fieldset>${navPasso()}</section>`;
-    if (av.passo === 2) h = passoFotos();
-    if (av.passo === 3) { const c = condDe(av.ficha); h = `<section class="painel passo"><div class="painel-cab"><h2>Inspeção</h2><p>Nota de 1 (ruim) a 5 (ótimo)</p></div>
-        ${av.ia ? `<p class="conta ia-aviso">${av.ia.exemplo ? '<span class="tag declarado">Exemplo</span> ' : ''}A IA olhou ${av.ia.nFotos} fotos e <b>sugeriu</b> notas. Quem decide é você: aceite ou mantenha a sua nota em cada item${iaPendentes() ? ` (<b id="ia-falta">${iaPendentes()} para revisar</b>)` : ' (tudo revisado)'}.</p>` : '<p class="ajuda">Tire as fotos guiadas no passo anterior e a IA sugere as notas; você confere e decide item a item.</p>'}
-        ${fichaDe(av.tipo).map(([k, n, d]) => `<div class="criterio"><div><b id="r-${k}">${n}</b><p>${d}</p>${linhaIA(k)}</div><div class="notas" role="group" aria-labelledby="r-${k}">${[1, 2, 3, 4, 5].map((v) => `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${av.ficha[k] === v}">${v}</button>`).join('')}</div></div>`).join('')}
-        ${avariasIA()}
-        <div style="margin-top:16px"><span class="rot-campo">Nota geral</span> <b id="nota-geral">${c}/100</b><div class="medidor"><i id="medidor" style="width:${c}%"></i></div></div>
-        <h2 style="margin-top:22px">Documentação e evidências</h2>
+      <fieldset class="grupo-campos"><legend><span class="gc-n" aria-hidden="true">3</span>Negocia\xE7\xE3o<small>A m\xE1quina nova que o cliente est\xE1 comprando; se estiver no floor plan, o resultado mostra o juro que ela j\xE1 custou</small></legend><div class="campos">
+        <div class="campo inteiro"><label for="f-nova">M\xE1quina nova desta negocia\xE7\xE3o</label><select id="f-nova"><option value="">Nenhuma / n\xE3o financiada</option>${(y.financiadas||[]).filter(d=>!d.venda).map(d=>`<option value="${d.chassi}" ${v.nova===d.chassi?"selected":""}>${c(d.marca+" "+d.modelo)} \xB7 ${d.chassi}</option>`).join("")}</select></div>
+      </div></fieldset>${Ye()}</section>`),v.passo===2&&(r=ms()),v.passo===3){const d=We(v.ficha);r=`<section class="painel passo"><div class="painel-cab"><h2>Inspe\xE7\xE3o</h2><p>Nota de 1 (ruim) a 5 (\xF3timo)</p></div>
+        ${v.ia?`<p class="conta ia-aviso">${v.ia.exemplo?'<span class="tag declarado">Exemplo</span> ':""}A IA olhou ${v.ia.nFotos} fotos e <b>sugeriu</b> notas. Quem decide \xE9 voc\xEA: aceite ou mantenha a sua nota em cada item${Se()?` (<b id="ia-falta">${Se()} para revisar</b>)`:" (tudo revisado)"}.</p>`:'<p class="ajuda">Tire as fotos guiadas no passo anterior e a IA sugere as notas; voc\xEA confere e decide item a item.</p>'}
+        ${as(v.tipo).map(([$,u,g])=>`<div class="criterio"><div><b id="r-${$}">${u}</b><p>${g}</p>${fs($)}</div><div class="notas" role="group" aria-labelledby="r-${$}">${[1,2,3,4,5].map(j=>`<button type="button" data-k="${$}" data-v="${j}" aria-pressed="${v.ficha[$]===j}">${j}</button>`).join("")}</div></div>`).join("")}
+        ${gs()}
+        <div style="margin-top:16px"><span class="rot-campo">Nota geral</span> <b id="nota-geral">${d}/100</b><div class="medidor"><i id="medidor" style="width:${d}%"></i></div></div>
+        <h2 style="margin-top:22px">Documenta\xE7\xE3o e evid\xEAncias</h2>
         <div class="campos" style="margin-top:14px">
           <div class="campo inteiro"><span class="rot-campo">Verificado pela revenda</span><div class="checks">
-            ${semHoras(av.tipo) ? '' : `<label class="check"><input type="checkbox" data-v="horimetro" ${av.verif.horimetro ? 'checked' : ''}> Horímetro conferido com foto</label>`}
-            <label class="check"><input type="checkbox" data-v="notas" ${av.verif.notas ? 'checked' : ''}> Notas ou ordens de serviço entregues</label>
-            <label class="check"><input type="checkbox" data-v="chassi" ${av.verif.chassi ? 'checked' : ''}> Chassi e número de série conferidos</label></div></div>
-          <div class="campo inteiro"><label for="f-decl">Declarado pelo cliente (ainda sem comprovante)</label><textarea id="f-decl" rows="2" placeholder="Ex.: motor retificado em 2023, sempre revisado na concessionária">${esc(av.declarado)}</textarea></div>
-          <div class="campo"><label for="f-fipe">Tabela Fipe desta máquina (opcional)</label><input id="f-fipe" inputmode="numeric" placeholder="R$" value="${esc(av.fipe)}"></div>
-          <div class="campo"><span class="rot-campo">Anúncios parecidos (opcional)</span><div style="display:flex;gap:6px">${av.anuncios.map((a, i) => `<input aria-label="Preço do anúncio ${i + 1}" data-an="${i}" inputmode="numeric" placeholder="R$" value="${esc(a)}" style="min-height:42px;padding:9px;border-radius:6px;border:1px solid rgba(17,24,32,.16);background:var(--marinho);width:100%">`).join('')}</div></div>
-        </div>${navPasso()}</section>`; }
-    if (av.passo === 4) h = `<div class="passo" id="resultado"></div>`;
-    caixa.innerHTML = h;
-    $$('[data-ir]', caixa).forEach((b) => b.onclick = () => irPasso(av.passo + +b.dataset.ir));
-    if (av.passo === 1) {
-      $('#f-tipo').onchange = (e) => { const tinha = av.fotos.some(Boolean) || av.ia; av.tipo = e.target.value; av.marca = null; av.modelo = null; av.refNova = 0; if (tinha) { av.fotos = []; av.ia = null; fotosGrandes = {}; toast('Tipo trocado: as fotos guiadas e as sugestões da IA foram zeradas (a lista de fotos muda por tipo).'); } desenharPasso(); };
-      $('#f-marca').oninput = (e) => { av.marca = e.target.value; };
-      $('#f-marca').onchange = (e) => { av.marca = e.target.value.trim(); if (!catalogoAv(av.tipo).some((m) => m.marca === av.marca && m.modelo === av.modelo)) av.modelo = ''; desenharPasso(); $('#f-modelo').focus(); };
-      $('#f-modelo').oninput = (e) => { av.modelo = e.target.value; };
-      $('#f-modelo').onchange = (e) => { av.modelo = e.target.value.trim(); desenharPasso(); if (modeloNovo()) $('#f-ref').focus(); };
-      if ($('#f-ref')) $('#f-ref').oninput = (e) => { av.refNova = num(e.target.value); $('#e-ref').textContent = av.refNova > 0 ? '' : 'Informe a referência de preço do modelo novo.'; };
-      $('#f-ano').onchange = (e) => { av.ano = +e.target.value; };
-      if ($('#f-horas')) $('#f-horas').oninput = (e) => { av.horas = Math.max(0, +e.target.value || 0); $('#e-horas').textContent = av.horas > 0 ? '' : 'Informe as horas do horímetro.'; };
-      $('#f-local').oninput = (e) => { av.local = e.target.value; };
-      $('#f-nova').onchange = (e) => { av.nova = e.target.value; };
-      $('#f-obs').oninput = (e) => { av.obs = e.target.value; };
-    }
-    if (av.passo === 2) ligarFotos(caixa);
-    if (av.passo === 3) {
-      $$('.notas button', caixa).forEach((b) => b.onclick = () => {
-        const k = b.dataset.k, v = +b.dataset.v;
-        av.ficha[k] = v; $$('button', b.parentNode).forEach((x) => x.setAttribute('aria-pressed', x === b));
-        // escolher uma nota com sugestão pendente é a decisão do avaliador sobre aquele item
-        const s = av.ia && av.ia.sugestao.itens[k];
-        if (s && s.nota && !av.ia.decisoes[k]) { av.ia.decisoes[k] = { sugerida: s.nota, final: v, acao: v === s.nota ? 'aceitou' : 'alterou' }; desenharPasso(); return; }
-        const c = condDe(av.ficha); $('#nota-geral').textContent = c + '/100'; $('#medidor').style.width = c + '%';
-      });
-      $$('[data-ia-aceita]', caixa).forEach((b) => b.onclick = () => { const k = b.dataset.iaAceita, s = av.ia.sugestao.itens[k]; av.ficha[k] = s.nota; av.ia.decisoes[k] = { sugerida: s.nota, final: s.nota, acao: 'aceitou' }; guardarRascunho(); desenharPasso(); });
-      $$('[data-ia-mantem]', caixa).forEach((b) => b.onclick = () => { const k = b.dataset.iaMantem, s = av.ia.sugestao.itens[k]; av.ia.decisoes[k] = { sugerida: s.nota, final: av.ficha[k], acao: 'manteve' }; guardarRascunho(); desenharPasso(); });
-      $$('[data-ia-rever]', caixa).forEach((b) => b.onclick = () => { delete av.ia.decisoes[b.dataset.iaRever]; guardarRascunho(); desenharPasso(); });
-      $$('[data-avaria]', caixa).forEach((b) => b.onclick = () => { av.ia.avariasDec[+b.dataset.avaria] = b.dataset.conf === '1' ? 'confirmada' : 'descartada'; guardarRascunho(); desenharPasso(); });
-      $$('input[data-v]', caixa).forEach((c) => c.onchange = () => { av.verif[c.dataset.v] = c.checked; });
-      $('#f-decl').oninput = (e) => { av.declarado = e.target.value; };
-      $('#f-fipe').oninput = (e) => { av.fipe = e.target.value; };
-      $$('[data-an]', caixa).forEach((i) => i.oninput = () => { av.anuncios[+i.dataset.an] = i.value; });
-    }
-    if (av.passo === 4) desenharResultado();
-    desenharLado();
-  }
-
-  // ---------- AVALIAÇÃO FOTOGRÁFICA COM IA (a IA sugere; o avaliador decide item a item) ----------
-  const NOME_ITEM = Object.fromEntries(FICHA.map(([k, n]) => [k, n]));
-  function passoFotos() {
-    const ang = RT.angulosDe(av.tipo), n = ang.filter((a, i) => av.fotos[i]).length;
-    return `<section class="painel passo"><div class="painel-cab"><h2>Fotos guiadas · ${NOMES[av.tipo]}</h2><p><b id="fotos-n">${n}</b> de ${ang.length} fotos</p></div>
-      <p class="ajuda">Siga a lista: cada foto ajuda a avaliar um item da ficha. O ideal é tirar todas (de 10 a 15); com 3 ou mais a IA já sugere as notas. As fotos são reduzidas no aparelho (1280 px) antes de qualquer envio.</p>
-      <div class="fotos fotos-guiadas">${ang.map((a, i) => `<label class="foto ${av.fotos[i] ? 'tem' : ''}" style="${av.fotos[i] ? `background-image:url(${av.fotos[i]})` : ''}"><span class="foto-nome">${esc(a.nome)}</span><span class="foto-dica">${esc(a.dica)}</span><input type="file" accept="image/*" capture="environment" data-i="${i}" aria-label="Foto: ${esc(a.nome)}. ${esc(a.dica)}"></label>`).join('')}</div>
-      <div class="ia-caixa" id="ia-caixa">${blocoIA(n)}</div>${navPasso()}</section>`;
-  }
-  function blocoIA(n) {
-    const quem = OP ? (NV ? 'IA definida pelo dono em Configurações (padrão: IA da Blue Rose, Gemini grátis, 30 análises por dia)' : 'IA disponível na conta da revenda') : 'Na demonstração a análise mostra um <b>exemplo fixo</b>: nenhuma foto sai deste aparelho';
-    if (av.ia) {
-      const s = av.ia.sugestao, falt = s.faltando || [], ang = RT.angulosDe(av.tipo);
-      return `<h3>${av.ia.exemplo ? '<span class="tag declarado">Exemplo</span> ' : ''}Sugestões da IA prontas</h3>
-        <p class="sub">Analisou ${av.ia.nFotos} fotos em ${new Date(av.ia.quando).toLocaleString('pt-BR')}${av.ia.provedor ? ' · ' + esc(av.ia.provedor === 'blue_rose' ? 'IA da Blue Rose' : av.ia.provedor === 'exemplo' ? 'exemplo da demonstração' : 'IA própria da revenda') : ''}. Nada foi aplicado: revise item a item na Inspeção.</p>
-        ${(s.avarias || []).length ? `<p style="margin-top:8px"><b>${s.avarias.length} ${s.avarias.length === 1 ? 'possível avaria vista' : 'possíveis avarias vistas'}</b> (confira na Inspeção).</p>` : ''}
-        ${falt.length ? `<p class="sub" style="margin-top:6px"><b>Fotos faltando ou sem nitidez:</b> ${falt.map((f) => esc(((ang.find((a) => a.id === f.angulo) || {}).nome || f.angulo) + ' (' + f.motivo + ')')).join('; ')}</p>` : ''}
-        ${s.observacao ? `<p class="sub" style="margin-top:6px">${esc(s.observacao)}</p>` : ''}
-        <div class="acoes"><button class="btn btn-ouro" type="button" data-ir="1">Revisar na Inspeção</button><button class="btn btn-linha" type="button" id="ia-analisar">Analisar de novo</button></div>`;
-    }
-    return `<h3>Avaliação das fotos com IA</h3><p class="sub">${quem}. A IA sugere nota por item, possíveis avarias e fotos faltando; não inventa defeito (diz "não dá para ver") e não salva nada sem a sua revisão.</p>
-      <div class="acoes"><button class="btn btn-ouro" type="button" id="ia-analisar" ${n >= 3 ? '' : 'disabled'}>Analisar ${n} ${n === 1 ? 'foto' : 'fotos'} com IA</button>${n < 3 ? '<span class="sub">Tire pelo menos 3 fotos.</span>' : ''}</div>`;
-  }
-  const comprimir = (arq, lado, q) => new Promise((ok, erro) => {
-    const img = new Image(), url = URL.createObjectURL(arq);
-    img.onload = () => { const cv = document.createElement('canvas'), k = Math.min(1, lado / Math.max(img.width, img.height)); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url); ok(cv.toDataURL('image/jpeg', q)); };
-    img.onerror = () => { URL.revokeObjectURL(url); erro(new Error('imagem')); }; img.src = url;
-  });
-  function ligarFotos(caixa) {
-    const ang = RT.angulosDe(av.tipo);
-    $$('input[type=file]', caixa).forEach((inp) => inp.onchange = async () => {
-      const arq = inp.files[0]; if (!arq) return; const i = +inp.dataset.i;
-      try {
-        const [grande, mini] = await Promise.all([comprimir(arq, 1280, 0.7), comprimir(arq, 480, 0.62)]);
-        fotosGrandes[ang[i].id] = grande; av.fotos[i] = mini; guardarRascunho();
-        const lab = inp.parentNode; lab.classList.add('tem'); lab.style.backgroundImage = `url(${mini})`;
-        const n = ang.filter((a, j) => av.fotos[j]).length; $('#fotos-n').textContent = n;
-        if (!av.ia) { $('#ia-caixa').innerHTML = blocoIA(n); ligarIA(caixa); }
-        toast(`Foto adicionada: ${ang[i].nome}.`);
-      } catch (e) { toast('Não foi possível ler essa imagem.', true); }
-    });
-    ligarIA(caixa);
-  }
-  function ligarIA(caixa) {
-    const b = $('#ia-analisar', caixa); if (b) b.onclick = () => analisarIA(b);
-    $$('#ia-caixa [data-ir]', caixa).forEach((x) => x.onclick = () => irPasso(av.passo + +x.dataset.ir));
-  }
-  // exemplo da demonstração: fixo, marcado "Exemplo", sem enviar foto a lugar nenhum
-  function exemploIA() {
-    const ang = RT.angulosDe(av.tipo), tem = new Set(ang.filter((a, i) => av.fotos[i]).map((a) => a.id));
-    const viu = (k) => ang.some((a) => tem.has(a.id) && a.itens.includes(k));
-    const base = { motor: [3, 'Mangueiras ressecadas e resto de óleo perto da bomba injetora (foto Motor).'], transmissao: [4, 'Sem vazamento visível na caixa (foto Transmissão).'], hidraulico: [3, 'Engate traseiro com folga aparente e mangueira remendada (foto Hidráulico).'], pneus: [2, 'Garras dos pneus traseiros gastas, cerca de 30% de vida (foto Pneus traseiros).'], cabine: [4, 'Painel inteiro e bancos em bom estado (foto Cabine).'], lataria: [3, 'Ferrugem leve no para-lama esquerdo e repintura no capô (foto Lateral esquerda).'] };
-    if (av.tipo === 'implemento') return exemploIAImplemento(ang, tem, viu);
-    const itens = {}; Object.keys(base).forEach((k) => { itens[k] = viu(k) ? { nota: base[k][0], justificativa: base[k][1] } : { nota: null, justificativa: 'Não dá para ver: falta a foto deste item.' }; });
-    return { itens, avarias: viu('pneus') ? [{ descricao: 'Desgaste forte nas garras dos pneus traseiros', foto: 'pneus-tras', gravidade: 'moderada' }] : [], faltando: ang.filter((a) => !tem.has(a.id)).slice(0, 6).map((a) => ({ angulo: a.id, motivo: 'foto não tirada' })), observacao: 'Exemplo fixo da demonstração: na conta da revenda a IA olha as fotos de verdade.' };
-  }
-  // implemento: só os 4 itens que existem (órgãos de trabalho, hidráulico/cardã, rodas, estrutura); motor e cabine "não se aplica"
-  function exemploIAImplemento(ang, tem, viu) {
-    const base = { transmissao: [3, 'Discos com a borda gasta, cerca de 40% de vida; um mancal com folga aparente (foto Desgaste de perto).'],
-      hidraulico: [4, 'Cilindros sem vazamento; cardã com a proteção inteira (foto Cardã e caixa).'],
-      pneus: [3, 'Pneus de transporte com garras médias e um corte lateral leve (foto Rodas e pneus).'],
-      lataria: [3, 'Ferrugem superficial no chassi e solda antiga no cabeçalho, sem trinca (foto Estrutura e soldas).'] };
-    const itens = { motor: { nota: null, justificativa: 'Não se aplica a implemento.' }, cabine: { nota: null, justificativa: 'Não se aplica a implemento.' } };
-    Object.keys(base).forEach((k) => { itens[k] = viu(k) ? { nota: base[k][0], justificativa: base[k][1] } : { nota: null, justificativa: 'Não dá para ver: falta a foto deste item.' }; });
-    const avarias = [];
-    if (viu('transmissao')) avarias.push({ descricao: 'Mancal de disco com folga e graxa vazando', foto: tem.has('desgaste') ? 'desgaste' : 'orgaos', gravidade: 'moderada' });
-    if (viu('lataria')) avarias.push({ descricao: 'Solda antiga no cabeçalho: conferir se não há trinca por baixo', foto: tem.has('estrutura') ? 'estrutura' : 'cabecalho', gravidade: 'leve' });
-    return { itens, avarias, faltando: ang.filter((a) => !tem.has(a.id)).slice(0, 6).map((a) => ({ angulo: a.id, motivo: 'foto não tirada' })), observacao: 'Exemplo fixo da demonstração: na conta da revenda a IA olha as fotos de verdade.' };
-  }
-  async function analisarIA(b) {
-    const ang = RT.angulosDe(av.tipo), idx = ang.map((a, i) => i).filter((i) => av.fotos[i]);
-    if (idx.length < 3) { toast('Tire pelo menos 3 fotos.', true); return; }
-    let sugestao, provedor = 'exemplo', modelo = '';
-    if (!NV) sugestao = exemploIA();
-    else {
-      if (NV.semInternet()) { toast('Sem internet: a IA analisa quando a conexão voltar. Você pode seguir e dar as notas à mão.', true); return; }
-      b.disabled = true; b.textContent = 'Analisando as fotos…';
-      try {
-        const fotos = idx.map((i) => ({ angulo: ang[i].id, mime: 'image/jpeg', dados: String(fotosGrandes[ang[i].id] || av.fotos[i]).split(',')[1] }));
-        const r = await NV.ia('analisar', { tipo: av.tipo, maquina: { tipo: av.tipo, marca: av.marca, modelo: av.modelo, ano: av.ano, horas: av.horas }, fotos });
-        sugestao = RT.limparSugestao(r.sugestao, ang.map((a) => a.id), av.tipo); provedor = r.provedor; modelo = r.modelo;
-        if (r.restantes != null) toast(`Análise pronta. Restam ${r.restantes} análises grátis hoje.`);
-      } catch (e) { b.disabled = false; b.textContent = 'Analisar com IA'; toast(e.message, true); return; }
-    }
-    av.ia = { quando: new Date().toISOString(), exemplo: !NV, provedor, modelo, nFotos: idx.length, sugestao, decisoes: {}, avariasDec: {} };
-    // itens sem nota sugerida ("não dá para ver") não pedem decisão: ficam com a nota do avaliador
-    guardarRascunho(); desenharPasso();
-    if (!NV) toast('Exemplo pronto (demonstração). Revise na Inspeção.');
-  }
-  const iaPendentes = () => { if (!av.ia) return 0; const s = av.ia.sugestao; return Object.keys(s.itens).filter((k) => s.itens[k].nota && !av.ia.decisoes[k]).length + (s.avarias || []).filter((x, i) => !av.ia.avariasDec[i]).length; };
-  function linhaIA(k) {
-    if (!av.ia) return ''; const s = av.ia.sugestao.itens[k]; if (!s) return '';
-    if (!s.nota) return `<p class="ia-linha ia-nada">IA: ${esc(s.justificativa || 'não dá para ver nas fotos')}</p>`;
-    const d = av.ia.decisoes[k];
-    if (d) return `<p class="ia-linha ia-feita">IA sugeriu ${d.sugerida} · você ${d.acao === 'aceitou' ? 'aceitou' : d.acao === 'manteve' ? 'manteve ' + d.final : 'escolheu ' + d.final} <button class="link" type="button" data-ia-rever="${k}">rever</button></p>`;
-    return `<div class="ia-linha ia-pendente"><span><b>IA sugere ${s.nota}</b> · ${esc(s.justificativa)}</span><span class="ia-bts"><button class="btn btn-linha" type="button" data-ia-aceita="${k}">Aceitar ${s.nota}</button><button class="btn btn-linha" type="button" data-ia-mantem="${k}">Manter ${av.ficha[k]}</button></span></div>`;
-  }
-  function avariasIA() {
-    if (!av.ia || !(av.ia.sugestao.avarias || []).length) return '';
-    const ang = RT.angulosDe(av.tipo);
-    return `<div class="ia-avarias"><b>Possíveis avarias vistas pela IA</b>${av.ia.sugestao.avarias.map((x, i) => { const d = av.ia.avariasDec[i]; return `<div class="ia-linha ${d ? 'ia-feita' : 'ia-pendente'}"><span>${esc(x.descricao)} <span class="sub">· ${esc(x.gravidade)}${x.foto ? ' · foto ' + esc((ang.find((a) => a.id === x.foto) || {}).nome || x.foto) : ''}</span></span>${d ? `<span>${d === 'confirmada' ? 'Você confirmou' : 'Você descartou'}</span>` : `<span class="ia-bts"><button class="btn btn-linha" type="button" data-avaria="${i}" data-conf="1">Confere</button><button class="btn btn-linha" type="button" data-avaria="${i}" data-conf="0">Não confere</button></span>`}</div>`; }).join('')}</div>`;
-  }
-  // o que a IA sugeriu e o que o avaliador decidiu (vai para a avaliação, o retrato e a trilha do servidor)
-  function resumoIA() {
-    if (!av.ia) return null;
-    const s = av.ia.sugestao, d = av.ia.decisoes, ks = Object.keys(d);
-    const n = (a) => ks.filter((k) => d[k].acao === a).length;
-    const av_ = (s.avarias || []).map((x, i) => ({ descricao: x.descricao, decisao: av.ia.avariasDec[i] || 'sem revisão' }));
-    const texto = `${av.ia.exemplo ? 'EXEMPLO (demonstração): ' : ''}IA sugeriu ${Object.entries(s.itens).map(([k, v]) => `${NOME_ITEM[k]} ${v.nota || '—'}`).join(', ')}; o avaliador aceitou ${n('aceitou')}, alterou ${n('alterou')}, manteve ${n('manteve')}${ks.filter((k) => d[k].acao !== 'aceitou').length ? ' (' + ks.filter((k) => d[k].acao !== 'aceitou').map((k) => `${NOME_ITEM[k]}: ${d[k].sugerida}→${d[k].final}`).join(', ') + ')' : ''}${av_.length ? `; avarias: ${av_.filter((x) => x.decisao === 'confirmada').length} confirmadas, ${av_.filter((x) => x.decisao === 'descartada').length} descartadas` : ''}.`;
-    return { quando: av.ia.quando, exemplo: !!av.ia.exemplo, provedor: av.ia.provedor, modelo: av.ia.modelo, fotos: av.ia.nFotos, decisoes: d, avarias: av_, faltando: (s.faltando || []).map((f) => f.angulo), resumo: texto };
-  }
-  // com conta e internet, as fotos em 1280 px vão para a pasta privada da revenda (no JSON ficam só miniaturas)
-  async function subirFotos(id, grandes, tipo) {
-    if (!NV || NV.semInternet() || !NV.subirDoc) return [];
-    const ang = RT.angulosDe(tipo), out = [];
-    for (const a of ang) {
-      const d = grandes[a.id]; if (!d) continue;
-      try { const bin = atob(d.split(',')[1]), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); out.push({ angulo: a.id, caminho: await NV.subirDoc(id + '-foto', new File([u8], a.id + '.jpg', { type: 'image/jpeg' })) }); } catch (e) { /* segue: a miniatura fica nos dados */ }
-    }
-    return out;
-  }
-  const zerarFotosIA = () => { av.fotos = []; av.ia = null; fotosGrandes = {}; };
-
-  function desenharResultado() {
-    const maq = maqAv(), r = M.avaliar(maq), caixa = $('#resultado');
-    if (!r) { caixa.innerHTML = `<section class="painel vazio">Histórico insuficiente para avaliar esta máquina: são precisas pelo menos ${M.QUALIDADE.minimoTreino} vendas com referência de preço.${OP ? ' <a class="link" href="#teste">Importar histórico</a>' : ''}</section>`; return; }
-    const fipe = num(av.fipe), anuncios = av.anuncios.map(num).filter((v) => v > 0);
-    const hist = historicoModelo(maq.modelo);
-    if (av.reserva && hist.reserva > 0) { r.teto = Math.floor((r.teto - hist.reserva) / 1000) * 1000; r.resultado = r.venda - r.teto - r.preparo; r.margemSobreVenda = r.resultado / r.venda; r.faixa = [Math.min(r.faixa[0], r.teto), r.teto]; }
-    const nova = (A.financiadas || []).find((f) => f.chassi === av.nova), jn = nova ? jurosFin(nova) : null;
-    const mediaAn = anuncios.length ? anuncios.reduce((s, v) => s + v, 0) / anuncios.length : 0;
-    caixa.innerHTML = `
+            ${ka(v.tipo)?"":`<label class="check"><input type="checkbox" data-v="horimetro" ${v.verif.horimetro?"checked":""}> Hor\xEDmetro conferido com foto</label>`}
+            <label class="check"><input type="checkbox" data-v="notas" ${v.verif.notas?"checked":""}> Notas ou ordens de servi\xE7o entregues</label>
+            <label class="check"><input type="checkbox" data-v="chassi" ${v.verif.chassi?"checked":""}> Chassi e n\xFAmero de s\xE9rie conferidos</label></div></div>
+          <div class="campo inteiro"><label for="f-decl">Declarado pelo cliente (ainda sem comprovante)</label><textarea id="f-decl" rows="2" placeholder="Ex.: motor retificado em 2023, sempre revisado na concession\xE1ria">${c(v.declarado)}</textarea></div>
+          <div class="campo"><label for="f-fipe">Tabela Fipe desta m\xE1quina (opcional)</label><input id="f-fipe" inputmode="numeric" placeholder="R$" value="${c(v.fipe)}"></div>
+          <div class="campo"><span class="rot-campo">An\xFAncios parecidos (opcional)</span><div style="display:flex;gap:6px">${v.anuncios.map(($,u)=>`<input aria-label="Pre\xE7o do an\xFAncio ${u+1}" data-an="${u}" inputmode="numeric" placeholder="R$" value="${c($)}" style="min-height:42px;padding:9px;border-radius:6px;border:1px solid rgba(17,24,32,.16);background:var(--marinho);width:100%">`).join("")}</div></div>
+        </div>${Ye()}</section>`}v.passo===4&&(r='<div class="passo" id="resultado"></div>'),a.innerHTML=r,R("[data-ir]",a).forEach(d=>d.onclick=()=>pe(v.passo+ +d.dataset.ir)),v.passo===1&&(l("#f-tipo").onchange=d=>{const $=v.fotos.some(Boolean)||v.ia;v.tipo=d.target.value,v.marca=null,v.modelo=null,v.refNova=0,$&&(v.fotos=[],v.ia=null,Za={},A("Tipo trocado: as fotos guiadas e as sugest\xF5es da IA foram zeradas (a lista de fotos muda por tipo).")),ma()},l("#f-marca").oninput=d=>{v.marca=d.target.value},l("#f-marca").onchange=d=>{v.marca=d.target.value.trim(),Ho(v.tipo).some($=>$.marca===v.marca&&$.modelo===v.modelo)||(v.modelo=""),ma(),l("#f-modelo").focus()},l("#f-modelo").oninput=d=>{v.modelo=d.target.value},l("#f-modelo").onchange=d=>{v.modelo=d.target.value.trim(),ma(),ae()&&l("#f-ref").focus()},l("#f-ref")&&(l("#f-ref").oninput=d=>{v.refNova=ra(d.target.value),l("#e-ref").textContent=v.refNova>0?"":"Informe a refer\xEAncia de pre\xE7o do modelo novo."}),l("#f-ano").onchange=d=>{v.ano=+d.target.value},l("#f-horas")&&(l("#f-horas").oninput=d=>{v.horas=Math.max(0,+d.target.value||0),l("#e-horas").textContent=v.horas>0?"":"Informe as horas do hor\xEDmetro."}),l("#f-local").oninput=d=>{v.local=d.target.value},l("#f-nova").onchange=d=>{v.nova=d.target.value},l("#f-obs").oninput=d=>{v.obs=d.target.value}),v.passo===2&&us(a),v.passo===3&&(R(".notas button",a).forEach(d=>d.onclick=()=>{const $=d.dataset.k,u=+d.dataset.v;v.ficha[$]=u,R("button",d.parentNode).forEach(S=>S.setAttribute("aria-pressed",S===d));const g=v.ia&&v.ia.sugestao.itens[$];if(g&&g.nota&&!v.ia.decisoes[$]){v.ia.decisoes[$]={sugerida:g.nota,final:u,acao:u===g.nota?"aceitou":"alterou"},ma();return}const j=We(v.ficha);l("#nota-geral").textContent=j+"/100",l("#medidor").style.width=j+"%"}),R("[data-ia-aceita]",a).forEach(d=>d.onclick=()=>{const $=d.dataset.iaAceita,u=v.ia.sugestao.itens[$];v.ficha[$]=u.nota,v.ia.decisoes[$]={sugerida:u.nota,final:u.nota,acao:"aceitou"},Qa(),ma()}),R("[data-ia-mantem]",a).forEach(d=>d.onclick=()=>{const $=d.dataset.iaMantem,u=v.ia.sugestao.itens[$];v.ia.decisoes[$]={sugerida:u.nota,final:v.ficha[$],acao:"manteve"},Qa(),ma()}),R("[data-ia-rever]",a).forEach(d=>d.onclick=()=>{delete v.ia.decisoes[d.dataset.iaRever],Qa(),ma()}),R("[data-avaria]",a).forEach(d=>d.onclick=()=>{v.ia.avariasDec[+d.dataset.avaria]=d.dataset.conf==="1"?"confirmada":"descartada",Qa(),ma()}),R("input[data-v]",a).forEach(d=>d.onchange=()=>{v.verif[d.dataset.v]=d.checked}),l("#f-decl").oninput=d=>{v.declarado=d.target.value},l("#f-fipe").oninput=d=>{v.fipe=d.target.value},R("[data-an]",a).forEach(d=>d.oninput=()=>{v.anuncios[+d.dataset.an]=d.value})),v.passo===4&&ao(),Ke()}const Bo=Object.fromEntries(Zt.map(([a,e])=>[a,e]));function ms(){const a=na.angulosDe(v.tipo),e=a.filter((o,t)=>v.fotos[t]).length;return`<section class="painel passo"><div class="painel-cab"><h2>Fotos guiadas \xB7 ${V[v.tipo]}</h2><p><b id="fotos-n">${e}</b> de ${a.length} fotos</p></div>
+      <p class="ajuda">Siga a lista: cada foto ajuda a avaliar um item da ficha. O ideal \xE9 tirar todas (de 10 a 15); com 3 ou mais a IA j\xE1 sugere as notas. As fotos s\xE3o reduzidas no aparelho (1280 px) antes de qualquer envio.</p>
+      <div class="fotos fotos-guiadas">${a.map((o,t)=>`<label class="foto ${v.fotos[t]?"tem":""}" style="${v.fotos[t]?`background-image:url(${v.fotos[t]})`:""}"><span class="foto-nome">${c(o.nome)}</span><span class="foto-dica">${c(o.dica)}</span><input type="file" accept="image/*" capture="environment" data-i="${t}" aria-label="Foto: ${c(o.nome)}. ${c(o.dica)}"></label>`).join("")}</div>
+      <div class="ia-caixa" id="ia-caixa">${Uo(e)}</div>${Ye()}</section>`}function Uo(a){const e=X?C?"IA definida pelo dono em Configura\xE7\xF5es (padr\xE3o: IA da Blue Rose, Gemini gr\xE1tis, 30 an\xE1lises por dia)":"IA dispon\xEDvel na conta da revenda":"Na demonstra\xE7\xE3o a an\xE1lise mostra um <b>exemplo fixo</b>: nenhuma foto sai deste aparelho";if(v.ia){const o=v.ia.sugestao,t=o.faltando||[],s=na.angulosDe(v.tipo);return`<h3>${v.ia.exemplo?'<span class="tag declarado">Exemplo</span> ':""}Sugest\xF5es da IA prontas</h3>
+        <p class="sub">Analisou ${v.ia.nFotos} fotos em ${new Date(v.ia.quando).toLocaleString("pt-BR")}${v.ia.provedor?" \xB7 "+c(v.ia.provedor==="blue_rose"?"IA da Blue Rose":v.ia.provedor==="exemplo"?"exemplo da demonstra\xE7\xE3o":"IA pr\xF3pria da revenda"):""}. Nada foi aplicado: revise item a item na Inspe\xE7\xE3o.</p>
+        ${(o.avarias||[]).length?`<p style="margin-top:8px"><b>${o.avarias.length} ${o.avarias.length===1?"poss\xEDvel avaria vista":"poss\xEDveis avarias vistas"}</b> (confira na Inspe\xE7\xE3o).</p>`:""}
+        ${t.length?`<p class="sub" style="margin-top:6px"><b>Fotos faltando ou sem nitidez:</b> ${t.map(i=>c(((s.find(n=>n.id===i.angulo)||{}).nome||i.angulo)+" ("+i.motivo+")")).join("; ")}</p>`:""}
+        ${o.observacao?`<p class="sub" style="margin-top:6px">${c(o.observacao)}</p>`:""}
+        <div class="acoes"><button class="btn btn-ouro" type="button" data-ir="1">Revisar na Inspe\xE7\xE3o</button><button class="btn btn-linha" type="button" id="ia-analisar">Analisar de novo</button></div>`}return`<h3>Avalia\xE7\xE3o das fotos com IA</h3><p class="sub">${e}. A IA sugere nota por item, poss\xEDveis avarias e fotos faltando; n\xE3o inventa defeito (diz "n\xE3o d\xE1 para ver") e n\xE3o salva nada sem a sua revis\xE3o.</p>
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="ia-analisar" ${a>=3?"":"disabled"}>Analisar ${a} ${a===1?"foto":"fotos"} com IA</button>${a<3?'<span class="sub">Tire pelo menos 3 fotos.</span>':""}</div>`}const Go=(a,e,o)=>new Promise((t,s)=>{const i=new Image,n=URL.createObjectURL(a);i.onload=()=>{const m=document.createElement("canvas"),r=Math.min(1,e/Math.max(i.width,i.height));m.width=Math.round(i.width*r),m.height=Math.round(i.height*r),m.getContext("2d").drawImage(i,0,0,m.width,m.height),URL.revokeObjectURL(n),t(m.toDataURL("image/jpeg",o))},i.onerror=()=>{URL.revokeObjectURL(n),s(new Error("imagem"))},i.src=n});function us(a){const e=na.angulosDe(v.tipo);R("input[type=file]",a).forEach(o=>o.onchange=async()=>{const t=o.files[0];if(!t)return;const s=+o.dataset.i;try{const[i,n]=await Promise.all([Go(t,1280,.7),Go(t,480,.62)]);Za[e[s].id]=i,v.fotos[s]=n,Qa();const m=o.parentNode;m.classList.add("tem"),m.style.backgroundImage=`url(${n})`;const r=e.filter((p,d)=>v.fotos[d]).length;l("#fotos-n").textContent=r,v.ia||(l("#ia-caixa").innerHTML=Uo(r),_o(a)),A(`Foto adicionada: ${e[s].nome}.`)}catch{A("N\xE3o foi poss\xEDvel ler essa imagem.",!0)}}),_o(a)}function _o(a){const e=l("#ia-analisar",a);e&&(e.onclick=()=>bs(e)),R("#ia-caixa [data-ir]",a).forEach(o=>o.onclick=()=>pe(v.passo+ +o.dataset.ir))}function vs(){const a=na.angulosDe(v.tipo),e=new Set(a.filter((i,n)=>v.fotos[n]).map(i=>i.id)),o=i=>a.some(n=>e.has(n.id)&&n.itens.includes(i)),t={motor:[3,"Mangueiras ressecadas e resto de \xF3leo perto da bomba injetora (foto Motor)."],transmissao:[4,"Sem vazamento vis\xEDvel na caixa (foto Transmiss\xE3o)."],hidraulico:[3,"Engate traseiro com folga aparente e mangueira remendada (foto Hidr\xE1ulico)."],pneus:[2,"Garras dos pneus traseiros gastas, cerca de 30% de vida (foto Pneus traseiros)."],cabine:[4,"Painel inteiro e bancos em bom estado (foto Cabine)."],lataria:[3,"Ferrugem leve no para-lama esquerdo e repintura no cap\xF4 (foto Lateral esquerda)."]};if(v.tipo==="implemento")return hs(a,e,o);const s={};return Object.keys(t).forEach(i=>{s[i]=o(i)?{nota:t[i][0],justificativa:t[i][1]}:{nota:null,justificativa:"N\xE3o d\xE1 para ver: falta a foto deste item."}}),{itens:s,avarias:o("pneus")?[{descricao:"Desgaste forte nas garras dos pneus traseiros",foto:"pneus-tras",gravidade:"moderada"}]:[],faltando:a.filter(i=>!e.has(i.id)).slice(0,6).map(i=>({angulo:i.id,motivo:"foto n\xE3o tirada"})),observacao:"Exemplo fixo da demonstra\xE7\xE3o: na conta da revenda a IA olha as fotos de verdade."}}function hs(a,e,o){const t={transmissao:[3,"Discos com a borda gasta, cerca de 40% de vida; um mancal com folga aparente (foto Desgaste de perto)."],hidraulico:[4,"Cilindros sem vazamento; card\xE3 com a prote\xE7\xE3o inteira (foto Card\xE3 e caixa)."],pneus:[3,"Pneus de transporte com garras m\xE9dias e um corte lateral leve (foto Rodas e pneus)."],lataria:[3,"Ferrugem superficial no chassi e solda antiga no cabe\xE7alho, sem trinca (foto Estrutura e soldas)."]},s={motor:{nota:null,justificativa:"N\xE3o se aplica a implemento."},cabine:{nota:null,justificativa:"N\xE3o se aplica a implemento."}};Object.keys(t).forEach(n=>{s[n]=o(n)?{nota:t[n][0],justificativa:t[n][1]}:{nota:null,justificativa:"N\xE3o d\xE1 para ver: falta a foto deste item."}});const i=[];return o("transmissao")&&i.push({descricao:"Mancal de disco com folga e graxa vazando",foto:e.has("desgaste")?"desgaste":"orgaos",gravidade:"moderada"}),o("lataria")&&i.push({descricao:"Solda antiga no cabe\xE7alho: conferir se n\xE3o h\xE1 trinca por baixo",foto:e.has("estrutura")?"estrutura":"cabecalho",gravidade:"leve"}),{itens:s,avarias:i,faltando:a.filter(n=>!e.has(n.id)).slice(0,6).map(n=>({angulo:n.id,motivo:"foto n\xE3o tirada"})),observacao:"Exemplo fixo da demonstra\xE7\xE3o: na conta da revenda a IA olha as fotos de verdade."}}async function bs(a){const e=na.angulosDe(v.tipo),o=e.map((n,m)=>m).filter(n=>v.fotos[n]);if(o.length<3){A("Tire pelo menos 3 fotos.",!0);return}let t,s="exemplo",i="";if(!C)t=vs();else{if(C.semInternet()){A("Sem internet: a IA analisa quando a conex\xE3o voltar. Voc\xEA pode seguir e dar as notas \xE0 m\xE3o.",!0);return}a.disabled=!0,a.textContent="Analisando as fotos\u2026";try{const n=o.map(r=>({angulo:e[r].id,mime:"image/jpeg",dados:String(Za[e[r].id]||v.fotos[r]).split(",")[1]})),m=await C.ia("analisar",{tipo:v.tipo,maquina:{tipo:v.tipo,marca:v.marca,modelo:v.modelo,ano:v.ano,horas:v.horas},fotos:n});t=na.limparSugestao(m.sugestao,e.map(r=>r.id),v.tipo),s=m.provedor,i=m.modelo,m.restantes!=null&&A(`An\xE1lise pronta. Restam ${m.restantes} an\xE1lises gr\xE1tis hoje.`)}catch(n){a.disabled=!1,a.textContent="Analisar com IA",A(n.message,!0);return}}v.ia={quando:new Date().toISOString(),exemplo:!C,provedor:s,modelo:i,nFotos:o.length,sugestao:t,decisoes:{},avariasDec:{}},Qa(),ma(),C||A("Exemplo pronto (demonstra\xE7\xE3o). Revise na Inspe\xE7\xE3o.")}const Se=()=>{if(!v.ia)return 0;const a=v.ia.sugestao;return Object.keys(a.itens).filter(e=>a.itens[e].nota&&!v.ia.decisoes[e]).length+(a.avarias||[]).filter((e,o)=>!v.ia.avariasDec[o]).length};function fs(a){if(!v.ia)return"";const e=v.ia.sugestao.itens[a];if(!e)return"";if(!e.nota)return`<p class="ia-linha ia-nada">IA: ${c(e.justificativa||"n\xE3o d\xE1 para ver nas fotos")}</p>`;const o=v.ia.decisoes[a];return o?`<p class="ia-linha ia-feita">IA sugeriu ${o.sugerida} \xB7 voc\xEA ${o.acao==="aceitou"?"aceitou":o.acao==="manteve"?"manteve "+o.final:"escolheu "+o.final} <button class="link" type="button" data-ia-rever="${a}">rever</button></p>`:`<div class="ia-linha ia-pendente"><span><b>IA sugere ${e.nota}</b> \xB7 ${c(e.justificativa)}</span><span class="ia-bts"><button class="btn btn-linha" type="button" data-ia-aceita="${a}">Aceitar ${e.nota}</button><button class="btn btn-linha" type="button" data-ia-mantem="${a}">Manter ${v.ficha[a]}</button></span></div>`}function gs(){if(!v.ia||!(v.ia.sugestao.avarias||[]).length)return"";const a=na.angulosDe(v.tipo);return`<div class="ia-avarias"><b>Poss\xEDveis avarias vistas pela IA</b>${v.ia.sugestao.avarias.map((e,o)=>{const t=v.ia.avariasDec[o];return`<div class="ia-linha ${t?"ia-feita":"ia-pendente"}"><span>${c(e.descricao)} <span class="sub">\xB7 ${c(e.gravidade)}${e.foto?" \xB7 foto "+c((a.find(s=>s.id===e.foto)||{}).nome||e.foto):""}</span></span>${t?`<span>${t==="confirmada"?"Voc\xEA confirmou":"Voc\xEA descartou"}</span>`:`<span class="ia-bts"><button class="btn btn-linha" type="button" data-avaria="${o}" data-conf="1">Confere</button><button class="btn btn-linha" type="button" data-avaria="${o}" data-conf="0">N\xE3o confere</button></span>`}</div>`}).join("")}</div>`}function Ga(){if(!v.ia)return null;const a=v.ia.sugestao,e=v.ia.decisoes,o=Object.keys(e),t=n=>o.filter(m=>e[m].acao===n).length,s=(a.avarias||[]).map((n,m)=>({descricao:n.descricao,decisao:v.ia.avariasDec[m]||"sem revis\xE3o"})),i=`${v.ia.exemplo?"EXEMPLO (demonstra\xE7\xE3o): ":""}IA sugeriu ${Object.entries(a.itens).map(([n,m])=>`${Bo[n]} ${m.nota||"\u2014"}`).join(", ")}; o avaliador aceitou ${t("aceitou")}, alterou ${t("alterou")}, manteve ${t("manteve")}${o.filter(n=>e[n].acao!=="aceitou").length?" ("+o.filter(n=>e[n].acao!=="aceitou").map(n=>`${Bo[n]}: ${e[n].sugerida}\u2192${e[n].final}`).join(", ")+")":""}${s.length?`; avarias: ${s.filter(n=>n.decisao==="confirmada").length} confirmadas, ${s.filter(n=>n.decisao==="descartada").length} descartadas`:""}.`;return{quando:v.ia.quando,exemplo:!!v.ia.exemplo,provedor:v.ia.provedor,modelo:v.ia.modelo,fotos:v.ia.nFotos,decisoes:e,avarias:s,faltando:(a.faltando||[]).map(n=>n.angulo),resumo:i}}async function $s(a,e,o){if(!C||C.semInternet()||!C.subirDoc)return[];const t=na.angulosDe(o),s=[];for(const i of t){const n=e[i.id];if(n)try{const m=atob(n.split(",")[1]),r=new Uint8Array(m.length);for(let p=0;p<m.length;p++)r[p]=m.charCodeAt(p);s.push({angulo:i.id,caminho:await C.subirDoc(a+"-foto",new File([r],i.id+".jpg",{type:"image/jpeg"}))})}catch{}}return s}const Ze=()=>{v.fotos=[],v.ia=null,Za={}};function ao(){const a=Fo(),e=Q.avaliar(a),o=l("#resultado");if(!e){o.innerHTML=`<section class="painel vazio">Hist\xF3rico insuficiente para avaliar esta m\xE1quina: s\xE3o precisas pelo menos ${Q.QUALIDADE.minimoTreino} vendas com refer\xEAncia de pre\xE7o.${X?' <a class="link" href="#teste">Importar hist\xF3rico</a>':""}</section>`;return}const t=ra(v.fipe),s=v.anuncios.map(ra).filter(d=>d>0),i=to(a.modelo);v.reserva&&i.reserva>0&&(e.teto=Math.floor((e.teto-i.reserva)/1e3)*1e3,e.resultado=e.venda-e.teto-e.preparo,e.margemSobreVenda=e.resultado/e.venda,e.faixa=[Math.min(e.faixa[0],e.teto),e.teto]);const n=(y.financiadas||[]).find(d=>d.chassi===v.nova),m=n?so(n):null,r=s.length?s.reduce((d,$)=>d+$,0)/s.length:0;o.innerHTML=`
       <div class="grade-2">
         <div>
           <section class="res-topo">
-            <span class="rot">VALOR MÁXIMO RECOMENDADO NA TROCA</span>
-            <div class="grande">${conta(r.teto, 'real')}</div>
-            <p class="sub">Faixa de negociação: ${real(r.faixa[0])} a ${real(r.faixa[1])}</p>
-            <span class="conf ${r.confianca}">Qualidade da estimativa: ${r.confianca}</span>
-            ${r.confianca === 'baixa' ? '<p class="sub" style="margin-top:8px">Dados insuficientes para uma recomendação confiável. Use como referência e decida com o gerente.</p>' : ''}
+            <span class="rot">VALOR M\xC1XIMO RECOMENDADO NA TROCA</span>
+            <div class="grande">${ia(e.teto,"real")}</div>
+            <p class="sub">Faixa de negocia\xE7\xE3o: ${M(e.faixa[0])} a ${M(e.faixa[1])}</p>
+            <span class="conf ${e.confianca}">Qualidade da estimativa: ${e.confianca}</span>
+            ${e.confianca==="baixa"?'<p class="sub" style="margin-top:8px">Dados insuficientes para uma recomenda\xE7\xE3o confi\xE1vel. Use como refer\xEAncia e decida com o gerente.</p>':""}
           </section>
-          ${nova ? `<section class="painel bloco" style="border-color:#F0CFCB;background:#FBEDEB"><h2 style="color:#8E2F2B">${ICO.alerta}Juro do floor plan nesta negociação</h2>
-            <p style="font-size:18px;margin-top:8px">${esc(nova.marca + ' ' + nova.modelo)} (${nova.chassi}) está no estoque desde ${data(nova.entrada)}. ${jn.emCarencia ? `Ainda em carência até ${data(jn.inicio)}.` : `Já custou <b class="neg">${real(jn.total)}</b> de juros e soma <b class="neg">${real(nova.valor * nova.taxaMes / 30)} por dia</b>.`}</p>
-            <p class="sub" style="margin-top:6px">Cada dia sem fechar esta venda é juro pago ao banco. Use isso na negociação do usado.</p></section>` : ''}
-          ${hist.n ? `<section class="painel bloco"><h2>${ICO.etiqueta}Histórico de oficina deste modelo</h2>
-            <ul class="lista-motivos" style="margin-top:8px">${hist.defeitos.slice(0, 4).map((d) => `<li><span>${esc(d.servico)} <span class="sub">· ${d.n} ${d.n === 1 ? 'vez' : 'vezes'}</span></span><b>${real(d.media)}</b></li>`).join('') || '<li><span>Nenhum defeito recorrente registrado.</span></li>'}</ul>
-            <p class="conta">Nas ${hist.trocas} trocas deste modelo, o preparo passou do previsto em média ${real(hist.reserva)} por máquina.${hist.reserva > 0 ? ` <label class="check" style="margin-top:8px"><input type="checkbox" id="reserva" ${av.reserva ? 'checked' : ''}> Descontar essa reserva de risco do valor máximo</label>` : ''}</p></section>` : ''}
-          ${(() => { const hv = checaHorimetro({ ...maq, manutencoes: [] }); const vm = variacaoMercado(maq.tipo); const cs = compradoresPara({ ...maq, anuncio: Math.round(r.venda * 1.08) }); return (hv.length ? `<section class="painel bloco" style="border-color:#F0CFCB;background:#FBEDEB"><h2 style="color:#8E2F2B">${ICO.alerta}Horímetro: confira antes de fechar</h2><ul class="lista-motivos">${hv.map((x) => `<li><span>${esc(x)}</span></li>`).join('')}</ul></section>` : '')
-            + (vm != null ? `<section class="painel bloco ${vm < -0.05 ? 'aviso-ruim' : ''}"><h2>${ICO.linha}Mercado de ${NOMES[maq.tipo].toLowerCase()}</h2><p style="font-size:17px;margin-top:6px">Anúncios e leilões ${vm < 0 ? 'caíram' : 'subiram'} <b class="${vm < 0 ? 'neg' : 'pos'}">${pct(Math.abs(vm))}</b> nos últimos 2 meses.${vm < -0.05 ? ' O histórico da revenda ainda não reflete essa queda: considere negociar abaixo do valor máximo.' : ''}</p><a class="link" href="#mercado">Ver monitor de mercado</a></section>` : '')
-            + `<section class="painel bloco"><h2>${ICO.alvo}Quem compraria esta máquina</h2>${cs.length ? `<p style="margin:6px 0 8px">${cs.length} ${cs.length === 1 ? 'comprador cadastrado procura' : 'compradores cadastrados procuram'} algo assim:</p>${cs.slice(0, 3).map((c) => `<span class="tag comprovado" style="margin:0 6px 6px 0">${esc(c.nome)} · até ${mil(c.precoMax)}</span>`).join('')}` : '<p class="sub" style="margin-top:6px">Nenhum comprador cadastrado procura esta máquina agora.</p>'}</section>`; })()}
-          ${blocoBarter(r.teto, 'bt-av')}
+          ${n?`<section class="painel bloco" style="border-color:#F0CFCB;background:#FBEDEB"><h2 style="color:#8E2F2B">${q.alerta}Juro do floor plan nesta negocia\xE7\xE3o</h2>
+            <p style="font-size:18px;margin-top:8px">${c(n.marca+" "+n.modelo)} (${n.chassi}) est\xE1 no estoque desde ${N(n.entrada)}. ${m.emCarencia?`Ainda em car\xEAncia at\xE9 ${N(m.inicio)}.`:`J\xE1 custou <b class="neg">${M(m.total)}</b> de juros e soma <b class="neg">${M(n.valor*n.taxaMes/30)} por dia</b>.`}</p>
+            <p class="sub" style="margin-top:6px">Cada dia sem fechar esta venda \xE9 juro pago ao banco. Use isso na negocia\xE7\xE3o do usado.</p></section>`:""}
+          ${i.n?`<section class="painel bloco"><h2>${q.etiqueta}Hist\xF3rico de oficina deste modelo</h2>
+            <ul class="lista-motivos" style="margin-top:8px">${i.defeitos.slice(0,4).map(d=>`<li><span>${c(d.servico)} <span class="sub">\xB7 ${d.n} ${d.n===1?"vez":"vezes"}</span></span><b>${M(d.media)}</b></li>`).join("")||"<li><span>Nenhum defeito recorrente registrado.</span></li>"}</ul>
+            <p class="conta">Nas ${i.trocas} trocas deste modelo, o preparo passou do previsto em m\xE9dia ${M(i.reserva)} por m\xE1quina.${i.reserva>0?` <label class="check" style="margin-top:8px"><input type="checkbox" id="reserva" ${v.reserva?"checked":""}> Descontar essa reserva de risco do valor m\xE1ximo</label>`:""}</p></section>`:""}
+          ${(()=>{const d=Ie({...a,manutencoes:[]}),$=Oe(a.tipo),u=Va({...a,anuncio:Math.round(e.venda*1.08)});return(d.length?`<section class="painel bloco" style="border-color:#F0CFCB;background:#FBEDEB"><h2 style="color:#8E2F2B">${q.alerta}Hor\xEDmetro: confira antes de fechar</h2><ul class="lista-motivos">${d.map(g=>`<li><span>${c(g)}</span></li>`).join("")}</ul></section>`:"")+($!=null?`<section class="painel bloco ${$<-.05?"aviso-ruim":""}"><h2>${q.linha}Mercado de ${V[a.tipo].toLowerCase()}</h2><p style="font-size:17px;margin-top:6px">An\xFAncios e leil\xF5es ${$<0?"ca\xEDram":"subiram"} <b class="${$<0?"neg":"pos"}">${P(Math.abs($))}</b> nos \xFAltimos 2 meses.${$<-.05?" O hist\xF3rico da revenda ainda n\xE3o reflete essa queda: considere negociar abaixo do valor m\xE1ximo.":""}</p><a class="link" href="#mercado">Ver monitor de mercado</a></section>`:"")+`<section class="painel bloco"><h2>${q.alvo}Quem compraria esta m\xE1quina</h2>${u.length?`<p style="margin:6px 0 8px">${u.length} ${u.length===1?"comprador cadastrado procura":"compradores cadastrados procuram"} algo assim:</p>${u.slice(0,3).map(g=>`<span class="tag comprovado" style="margin:0 6px 6px 0">${c(g.nome)} \xB7 at\xE9 ${E(g.precoMax)}</span>`).join("")}`:'<p class="sub" style="margin-top:6px">Nenhum comprador cadastrado procura esta m\xE1quina agora.</p>'}</section>`})()}
+          ${Gs(e.teto,"bt-av")}
           <section class="painel bloco"><h2>Qualidade dos dados</h2>
             <div class="numeros">
-              <div><span>Vendas usadas no cálculo</span><b>${r.base}</b></div>
-              <div><span>Do mesmo tipo · mesmo modelo</span><b>${r.doTipo} · ${r.mesmoModelo}</b></div>
-              <div><span>Dispersão dos preços</span><b>± ${pct(r.dispersao, 1)}</b></div>
-              <div><span>Erro histórico validado</span><b>${r.qualidade && r.qualidade.n >= M.QUALIDADE.minimoValidacao ? pct(r.qualidade.mape) + ' (' + r.qualidade.n + ' testes)' : 'sem amostra'}</b></div>
-              <div><span>Erro médio em reais</span><b>${r.qualidade && r.qualidade.n >= M.QUALIDADE.minimoValidacao ? mil(r.qualidade.mae) : '—'}</b></div>
-              <div><span>Vendas atípicas excluídas</span><b>${r.atipicas}</b></div>
-              ${r.mercado ? `<div><span>Anúncios públicos de mercado</span><b>${r.mercado}</b></div>` : ''}
+              <div><span>Vendas usadas no c\xE1lculo</span><b>${e.base}</b></div>
+              <div><span>Do mesmo tipo \xB7 mesmo modelo</span><b>${e.doTipo} \xB7 ${e.mesmoModelo}</b></div>
+              <div><span>Dispers\xE3o dos pre\xE7os</span><b>\xB1 ${P(e.dispersao,1)}</b></div>
+              <div><span>Erro hist\xF3rico validado</span><b>${e.qualidade&&e.qualidade.n>=Q.QUALIDADE.minimoValidacao?P(e.qualidade.mape)+" ("+e.qualidade.n+" testes)":"sem amostra"}</b></div>
+              <div><span>Erro m\xE9dio em reais</span><b>${e.qualidade&&e.qualidade.n>=Q.QUALIDADE.minimoValidacao?E(e.qualidade.mae):"\u2014"}</b></div>
+              <div><span>Vendas at\xEDpicas exclu\xEDdas</span><b>${e.atipicas}</b></div>
+              ${e.mercado?`<div><span>An\xFAncios p\xFAblicos de mercado</span><b>${e.mercado}</b></div>`:""}
             </div>
-            <p class="nota-rodape">Erro validado: o Anshur previu vendas antigas usando só o que tinha sido vendido antes de cada troca e comparou com o preço real. Alta = 12+ vendas do tipo e erro até 6%; moderada = 8+ vendas e erro até 10%; abaixo disso, baixa.</p>
+            <p class="nota-rodape">Erro validado: o Anshur previu vendas antigas usando s\xF3 o que tinha sido vendido antes de cada troca e comparou com o pre\xE7o real. Alta = 12+ vendas do tipo e erro at\xE9 6%; moderada = 8+ vendas e erro at\xE9 10%; abaixo disso, baixa.</p>
           </section>
           <section class="painel bloco">
             <div class="numeros">
-              <div><span>Venda estimada</span><b>${real(r.venda)}</b></div>
-              <div><span>Preparação estimada</span><b>${real(r.preparo)}</b></div>
-              <div><span>Resultado bruto projetado</span><b>${real(r.resultado)}</b></div>
-              <div><span>Margem sobre a venda</span><b>${pct(r.margemSobreVenda, 2)}</b></div>
-              <div><span>Tempo estimado de pátio</span><b>${r.dias ? r.dias + ' dias' : '—'}</b></div>
-              <div><span>Margem-alvo (premissa)</span><b>${pct(r.margem, 0)}</b></div>
+              <div><span>Venda estimada</span><b>${M(e.venda)}</b></div>
+              <div><span>Prepara\xE7\xE3o estimada</span><b>${M(e.preparo)}</b></div>
+              <div><span>Resultado bruto projetado</span><b>${M(e.resultado)}</b></div>
+              <div><span>Margem sobre a venda</span><b>${P(e.margemSobreVenda,2)}</b></div>
+              <div><span>Tempo estimado de p\xE1tio</span><b>${e.dias?e.dias+" dias":"\u2014"}</b></div>
+              <div><span>Margem-alvo (premissa)</span><b>${P(e.margem,0)}</b></div>
             </div>
-            <p class="conta">Conta: ${real(r.venda)} de venda − ${real(r.teto)} pagos na troca − ${real(r.preparo)} de preparo = ${real(r.resultado)}.</p>
-            ${fipe || mediaAn ? `<div class="conta">${fipe ? `Fipe informada: ${real(fipe)}. O valor máximo fica ${pct(1 - r.teto / fipe)} abaixo, porque a troca precisa deixar margem e pagar o preparo. ` : ''}${mediaAn ? `Média de ${anuncios.length} ${anuncios.length === 1 ? 'anúncio' : 'anúncios'}: ${real(mediaAn)}. Anúncio é preço pedido, não preço vendido; a venda estimada fica ${pct(Math.abs(1 - r.venda / mediaAn))} ${r.venda < mediaAn ? 'abaixo' : 'acima'}.` : ''}</div>` : ''}
+            <p class="conta">Conta: ${M(e.venda)} de venda \u2212 ${M(e.teto)} pagos na troca \u2212 ${M(e.preparo)} de preparo = ${M(e.resultado)}.</p>
+            ${t||r?`<div class="conta">${t?`Fipe informada: ${M(t)}. O valor m\xE1ximo fica ${P(1-e.teto/t)} abaixo, porque a troca precisa deixar margem e pagar o preparo. `:""}${r?`M\xE9dia de ${s.length} ${s.length===1?"an\xFAncio":"an\xFAncios"}: ${M(r)}. An\xFAncio \xE9 pre\xE7o pedido, n\xE3o pre\xE7o vendido; a venda estimada fica ${P(Math.abs(1-e.venda/r))} ${e.venda<r?"abaixo":"acima"}.`:""}</div>`:""}
           </section>
         </div>
         <div>
           <section class="painel"><h2>Por que recomendamos este valor?</h2>
             <ul class="lista-motivos" style="margin-top:10px">
-              ${r.motivos.map((m) => `<li><span>${m.nome} comparado às máquinas do mesmo tipo</span><b class="${m.valor >= 0 ? 'pos' : 'neg'}">${m.valor >= 0 ? '+' : '−'} ${mil(Math.abs(m.valor))}</b></li>`).join('')}
-              <li><span>Preparação pelo estado da inspeção (${maq.cond}/100)</span><b class="neg">− ${mil(r.preparo)}</b></li>
-              <li><span>Margem-alvo da revenda</span><b class="neg">− ${mil(r.venda * r.margem)}</b></li>
+              ${e.motivos.map(d=>`<li><span>${d.nome} comparado \xE0s m\xE1quinas do mesmo tipo</span><b class="${d.valor>=0?"pos":"neg"}">${d.valor>=0?"+":"\u2212"} ${E(Math.abs(d.valor))}</b></li>`).join("")}
+              <li><span>Prepara\xE7\xE3o pelo estado da inspe\xE7\xE3o (${a.cond}/100)</span><b class="neg">\u2212 ${E(e.preparo)}</b></li>
+              <li><span>Margem-alvo da revenda</span><b class="neg">\u2212 ${E(e.venda*e.margem)}</b></li>
             </ul>
-            ${r.limites.length ? `<p class="nota-rodape"><b>Limitações:</b> ${r.limites.map(esc).join(' ')}</p>` : ''}
+            ${e.limites.length?`<p class="nota-rodape"><b>Limita\xE7\xF5es:</b> ${e.limites.map(c).join(" ")}</p>`:""}
           </section>
-          <section class="painel bloco"><h2>${r.mercado ? 'Trocas e anúncios semelhantes' : 'Trocas semelhantes já vendidas'}</h2><div class="comparaveis" style="margin-top:10px">
-            ${r.comp.map((t) => String(t.id).startsWith('mercado-') ? `<div class="comp"><div><b>${esc(t.marca + ' ' + t.modelo)} · ${t.ano}</b><span>Anúncio público · ${esc(t.fonte || '')}</span></div><div style="text-align:right"><b>${mil(t.vendido)}</b><span>preço pedido</span></div></div>`
-              : `<div class="comp"><div><b>${esc(t.marca + ' ' + t.modelo)} · ${t.ano}</b><span>${horasTxt(t)} · pago ${mil(t.pago)} · ${t.diasPatio} dias</span></div><div style="text-align:right"><b>${mil(t.vendido)}</b><span>vendido</span></div></div>`).join('')}
+          <section class="painel bloco"><h2>${e.mercado?"Trocas e an\xFAncios semelhantes":"Trocas semelhantes j\xE1 vendidas"}</h2><div class="comparaveis" style="margin-top:10px">
+            ${e.comp.map(d=>String(d.id).startsWith("mercado-")?`<div class="comp"><div><b>${c(d.marca+" "+d.modelo)} \xB7 ${d.ano}</b><span>An\xFAncio p\xFAblico \xB7 ${c(d.fonte||"")}</span></div><div style="text-align:right"><b>${E(d.vendido)}</b><span>pre\xE7o pedido</span></div></div>`:`<div class="comp"><div><b>${c(d.marca+" "+d.modelo)} \xB7 ${d.ano}</b><span>${pa(d)} \xB7 pago ${E(d.pago)} \xB7 ${d.diasPatio} dias</span></div><div style="text-align:right"><b>${E(d.vendido)}</b><span>vendido</span></div></div>`).join("")}
           </div></section>
         </div>
       </div>
-      <div class="acoes"><button class="btn btn-linha" type="button" data-ir="-1">Voltar</button><button class="btn btn-linha" type="button" id="registrar">Registrar avaliação</button><button class="btn btn-linha" type="button" id="premissas">Ajustar premissas</button><button class="btn btn-ouro" type="button" id="fechar-troca">Fechar troca</button></div>
-      <p class="nota-rodape">O valor máximo é uma recomendação. Quem decide o valor pago é o gerente.</p>`;
-    $('[data-ir]', caixa).onclick = () => irPasso(3);
-    ligarBarter(caixa, r.teto, 'bt-av');
-    const res_ = $('#reserva', caixa); if (res_) res_.onchange = () => { av.reserva = res_.checked; desenharResultado(); toast(av.reserva ? 'Reserva de risco descontada do valor máximo.' : 'Reserva de risco retirada.'); };
-    $('#registrar').onclick = (e) => {
-      const b = e.currentTarget; b.classList.add('carregando');
-      // a avaliação congela os números e as premissas do dia: não é recalculada quando o modelo muda
-      const ia = resumoIA();
-      tirarRetrato(maq, r, { decisao: 'Avaliação registrada', ia: ia ? ia.resumo : null }).then((rt) => { const id = 'AV' + Date.now(); estado.avaliacoes.push({ retrato: rt.id, id, data: hojeISO(), por: eu().nome, loja: estado.lojaAtual || '', status: 'aberta', maq, teto: r.teto, venda: r.venda, preparo: r.preparo, faixa: r.faixa, confianca: r.confianca, amostras: r.base, mape: r.qualidade ? r.qualidade.mape : null, premissas: { margemAlvo: r.margem, jurosMes: K.cfg.jurosMes }, ...(ia ? { ia } : {}), fotos: av.fotos.filter(Boolean).length }); log('avaliacao', `Avaliação registrada: ${maq.marca} ${maq.modelo} ${maq.ano}, máximo ${real(r.teto)}`); if (ia) log('ia', `Avaliação ${maq.marca} ${maq.modelo}: ${ia.resumo}`, { ref: id }); salvar(); zerarFotosIA(); limparRascunho(); b.classList.remove('carregando'); toast('Avaliação registrada com retrato imutável.'); telaAvaliar(); });
-    };
-    $('#premissas').onclick = abrirPremissas;
-    $('#fechar-troca').onclick = () => abrirCamada('modal', `<h2>Fechar troca</h2><p class="sub">Registre o valor efetivamente negociado. Ele pode ser diferente do valor máximo recomendado.</p>
+      <div class="acoes"><button class="btn btn-linha" type="button" data-ir="-1">Voltar</button><button class="btn btn-linha" type="button" id="registrar">Registrar avalia\xE7\xE3o</button><button class="btn btn-linha" type="button" id="premissas">Ajustar premissas</button><button class="btn btn-ouro" type="button" id="fechar-troca">Fechar troca</button></div>
+      <p class="nota-rodape">O valor m\xE1ximo \xE9 uma recomenda\xE7\xE3o. Quem decide o valor pago \xE9 o gerente.</p>`,l("[data-ir]",o).onclick=()=>pe(3),_s(o,e.teto,"bt-av");const p=l("#reserva",o);p&&(p.onchange=()=>{v.reserva=p.checked,ao(),A(v.reserva?"Reserva de risco descontada do valor m\xE1ximo.":"Reserva de risco retirada.")}),l("#registrar").onclick=d=>{const $=d.currentTarget;$.classList.add("carregando");const u=Ga();xo(a,e,{decisao:"Avalia\xE7\xE3o registrada",ia:u?u.resumo:null}).then(g=>{const j="AV"+Date.now();b.avaliacoes.push({retrato:g.id,id:j,data:z(),por:D().nome,loja:b.lojaAtual||"",status:"aberta",maq:a,teto:e.teto,venda:e.venda,preparo:e.preparo,faixa:e.faixa,confianca:e.confianca,amostras:e.base,mape:e.qualidade?e.qualidade.mape:null,premissas:{margemAlvo:e.margem,jurosMes:x.cfg.jurosMes},...u?{ia:u}:{},fotos:v.fotos.filter(Boolean).length}),L("avaliacao",`Avalia\xE7\xE3o registrada: ${a.marca} ${a.modelo} ${a.ano}, m\xE1ximo ${M(e.teto)}`),u&&L("ia",`Avalia\xE7\xE3o ${a.marca} ${a.modelo}: ${u.resumo}`,{ref:j}),T(),Ze(),qe(),$.classList.remove("carregando"),A("Avalia\xE7\xE3o registrada com retrato imut\xE1vel."),Xe()})},l("#premissas").onclick=Ya,l("#fechar-troca").onclick=()=>oa("modal",`<h2>Fechar troca</h2><p class="sub">Registre o valor efetivamente negociado. Ele pode ser diferente do valor m\xE1ximo recomendado.</p>
       <div class="campos" style="margin-top:16px">
-        <div class="campo"><label for="t-valor">Valor pago na troca</label><input id="t-valor" inputmode="numeric" value="${r.teto.toLocaleString('pt-BR')}"></div>
-        <div class="campo"><label for="t-data">Data</label><input id="t-data" type="date" value="${hojeISO()}" max="${hojeISO()}"></div>
-        <div class="campo"><label for="t-vend">Vendedor</label><select id="t-vend">${VENDEDORES().map((v) => `<option>${esc(v)}</option>`).join('')}</select></div>
-        <div class="campo" id="t-aprov-box" hidden><label for="t-aprov">Aprovado por (gerente)</label><input id="t-aprov" list="dl-gerentes" placeholder="Nome de quem autorizou" value="${podeAprovar() ? esc(eu().nome) : ''}">${lista('dl-gerentes', estado.usuarios.filter((u) => ['dono', 'gerente'].includes(u.perfil)).map((u) => u.nome))}</div>
+        <div class="campo"><label for="t-valor">Valor pago na troca</label><input id="t-valor" inputmode="numeric" value="${e.teto.toLocaleString("pt-BR")}"></div>
+        <div class="campo"><label for="t-data">Data</label><input id="t-data" type="date" value="${z()}" max="${z()}"></div>
+        <div class="campo"><label for="t-vend">Vendedor</label><select id="t-vend">${No().map(d=>`<option>${c(d)}</option>`).join("")}</select></div>
+        <div class="campo" id="t-aprov-box" hidden><label for="t-aprov">Aprovado por (gerente)</label><input id="t-aprov" list="dl-gerentes" placeholder="Nome de quem autorizou" value="${Es()?c(D().nome):""}">${wa("dl-gerentes",b.usuarios.filter(d=>["dono","gerente"].includes(d.perfil)).map(d=>d.nome))}</div>
         <div class="campo inteiro" id="t-mot-box" hidden><label for="t-mot">Motivo para pagar acima</label><input id="t-mot" placeholder="Ex.: cliente fecha a compra de uma colhedora nova"></div>
       </div>
-      <p class="conta" id="t-aviso">Valor máximo recomendado: ${real(r.teto)}.</p>
-      <div class="acoes"><button class="btn btn-ouro" type="button" id="t-ok">Confirmar troca</button><button class="btn btn-linha" type="button" id="t-nao">Cancelar</button></div>`, (c) => {
-      const inp = $('#t-valor', c), aviso = $('#t-aviso', c);
-      const checar = () => {
-        const v = num(inp.value), d = v - r.teto;
-        $('#t-aprov-box', c).hidden = !(d > 0); $('#t-mot-box', c).hidden = !(d > 0);
-        const nv = nivelExigido(maq.tipo, d);
-        $('#t-aprov-box', c).hidden = !(d > 0) || nv === 'livre'; $('#t-mot-box', c).hidden = !(d > 0);
-        aviso.innerHTML = !(v > 0) ? '<span class="neg">Informe o valor pago.</span>' : d > 0 ? `<span class="neg">${real(d)} acima do valor máximo recomendado (${NOME_NIVEL[nv]} para ${NOMES[maq.tipo].toLowerCase()}). A margem projetada cai para ${pct((r.venda - v - r.preparo) / r.venda)}. Pela regra da revenda, ${pct(K.cfg.descontoAcima, 0)} do valor acima (${real(d * K.cfg.descontoAcima)}) sai da comissão do vendedor.</span>
-          <div class="contra"><b>Antes de pagar acima, ofereça ao cliente:</b>${contraproposta(d, r).map((o) => `<div><b>${esc(o.t)}</b><span>${esc(o.d)}</span></div>`).join('')}</div>` : `Dentro do valor máximo recomendado (${real(r.teto)}). Margem projetada: ${pct((r.venda - v - r.preparo) / r.venda)}.`;
-      };
-      inp.oninput = checar; checar();
-      $('#t-nao', c).onclick = () => fecharCamada();
-      $('#t-ok', c).onclick = async (e) => {
-        const v = num(inp.value), dt = $('#t-data', c).value || hojeISO();
-        if (!(v > 0)) { inp.focus(); toast('Informe o valor pago na troca.', true); return; }
-        const acima = v > r.teto, aprov = $('#t-aprov', c).value.trim(), mot = $('#t-mot', c).value.trim();
-        const nivel = nivelExigido(maq.tipo, v - r.teto);
-        // sem internet, a aprovação acima da alçada não vale: a troca vira pedido e só conta quando aprovada com internet
-        const semRedeAprov = acima && nivel !== 'livre' && NV && NV.semInternet();
-        if (acima && !mot) { $('#t-mot', c).focus(); toast('Acima do recomendado: informe o motivo.', true); return; }
-        if (acima && nivel !== 'livre' && podeLiberar(nivel) && !aprov && !semRedeAprov) { $('#t-aprov', c).focus(); toast('Informe quem aprovou.', true); return; }
-        if (acima && (!podeLiberar(nivel) || semRedeAprov)) {
-          const rt = await tirarRetrato(maq, r, { valorPago: Math.round(v), decisao: 'Pedido de aprovação (' + NOME_NIVEL[nivel] + ')', motivo: mot });
-          const ped = { id: 'P' + Date.now() + Math.random().toString(36).slice(2, 5), nivel, semInternet: !!semRedeAprov, retrato: rt.id, quando: new Date().toISOString(), por: eu().nome, maq, rec: { teto: r.teto, venda: r.venda, preparo: r.preparo, dias: r.dias, margem: r.margem, margemSobreVenda: r.margemSobreVenda, confianca: r.confianca, doTipo: r.doTipo, qualidade: r.qualidade ? { mape: r.qualidade.mape } : null }, valor: Math.round(v), data: dt, motivo: mot, status: 'pendente', extra: { vendedor: $('#t-vend', c).value, negociacao: av.nova || null, origem: av.local || 'Troca registrada', fotos: av.fotos.filter(Boolean).slice(0, 4), verif: { ...av.verif }, ...(resumoIA() ? { ia: resumoIA() } : {}) } };
-          estado.pendentes.push(ped); log('aprovacao', `Pedido de aprovação: ${maq.marca} ${maq.modelo} por ${real(v)} (máximo ${real(r.teto)})${semRedeAprov ? ', feito sem internet' : ''}`); if (resumoIA()) log('ia', `Pedido ${maq.marca} ${maq.modelo}: ${resumoIA().resumo}`); salvar(); zerarFotosIA(); limparRascunho(); atualizarSino();
-          fecharCamada(true); toast(semRedeAprov ? 'Sem internet: a troca virou pedido de aprovação (pendente). Ela só entra no pátio depois de aprovada com internet.' : nivel === 'dono' ? 'Pedido enviado ao dono: para este tipo de máquina, só ele libera.' : 'Pedido enviado ao gerente. A troca só entra no pátio depois da aprovação.'); location.hash = '#aprovacoes'; return;
-        }
-        const b = e.currentTarget; b.classList.add('carregando');
-        const rtF = await tirarRetrato(maq, r, { valorPago: Math.round(v), decisao: acima ? (nivel === 'livre' ? 'Acima do teto, dentro da alçada do vendedor' : 'Acima do teto, aprovada por ' + aprov) : 'Dentro do valor máximo', motivo: mot });
-        setTimeout(() => {
-          const t = K.fecharTroca(estado, maq, r, v, dt, { retrato: rtF.id, vendedor: $('#t-vend', c).value, negociacao: av.nova || null, aprovacao: acima ? { por: nivel === 'livre' ? eu().nome + ' (alçada do vendedor)' : aprov, motivo: mot, excesso: v - r.teto, data: hojeISO() } : null, origem: av.local || 'Troca registrada',
-            manutencoes: av.declarado ? [{ servico: av.declarado, horas: av.horas, comNota: av.verif.notas }] : [], fotos: av.fotos.filter(Boolean).slice(0, 4), verif: { ...av.verif }, ...(resumoIA() ? { ia: resumoIA() } : {}) });
-          const id = t.id;
-          A.trocas.push({ ...t }); const iaT = resumoIA(); if (iaT) log('ia', `Troca ${t.marca} ${t.modelo}: ${iaT.resumo}`, { ref: t.id }); const subir = subirFotos(t.id, { ...fotosGrandes }, av.tipo); zerarFotosIA(); limparRascunho(); subir.then((l) => { if (!l.length) return; const f = estado.fechadas.find((x) => x.id === id); if (f) { f.fotosArq = l; salvar(); } }); log('troca', `Troca fechada: ${t.marca} ${t.modelo} por ${real(t.pago)} (máximo recomendado ${real(r.teto)})${t.aprovacao ? `, acima do teto, aprovada por ${t.aprovacao.por}` : ''}`, { ref: t.id }); salvar(); cacheLimpa();
-          fecharCamada(true);
-          abrirCamada('modal', `<h2>Troca registrada</h2><p class="sub">${esc(t.marca + ' ' + t.modelo)} entrou no pátio por ${real(t.pago)}. O passaporte foi criado e a visão geral já foi atualizada.</p>
-            <div class="acoes"><a class="btn btn-ouro" href="passaporte.html?id=${id}">Abrir passaporte</a><a class="btn btn-linha" href="#patio" id="ir-patio">Ver no pátio</a></div>`, (cc) => { $('#ir-patio', cc).onclick = () => fecharCamada(true); });
-          toast('Troca registrada no pátio.');
-        }, 500);
-      };
-    });
-    contar(caixa);
-  }
-
-  // ---------- PÁTIO ----------
-  const fp = { tipo: '', marca: '', idade: '', ordem: 'risco' };
-  function telaPatio() {
-    const todos = C.patio().map(infoPatio);
-    const q = (fp.busca || '').toLowerCase();
-    let itens = todos.filter((i) => (!q || [i.t.marca, i.t.modelo, i.t.chassi, i.t.vendedor, i.t.loja].join(' ').toLowerCase().includes(q)) && (!fp.tipo || i.t.tipo === fp.tipo) && (!fp.marca || i.t.marca === fp.marca) && (!fp.idade || i.faixa === fp.idade));
-    const ord = { risco: (a, b) => b.risco - a.risco, capital: (a, b) => b.t.pago - a.t.pago, dias: (a, b) => b.dias - a.dias, margem: (a, b) => (isFinite(a.margem) ? a.margem : 9) - (isFinite(b.margem) ? b.margem : 9) };
-    itens.sort(ord[fp.ordem]);
-    const cap = itens.reduce((s, i) => s + i.t.pago, 0), velhos = itens.filter((i) => i.dias > 90);
-    const marcas = [...new Set(todos.map((i) => i.t.marca))].sort();
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Pátio de máquinas</h1><p>Saiba onde seu capital está parado e quais equipamentos exigem atenção.</p></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="exportar">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Exportar</button><button class="btn btn-linha" type="button" id="comparar">Comparar <span id="n-comp" class="n-comp">${comparar.size}</span></button>${botaoAdicionar([{ nome: 'Cadastrar à mão', desc: 'Máquina que entrou no pátio', acao: () => addMaquinaManual() }, { nome: 'Puxar de documento', desc: 'Foto da nota, PDF ou planilha', acao: () => { location.hash = '#documentos'; } }, { nome: 'Avaliar uma troca', desc: 'Calcular o valor máximo antes de fechar', acao: () => { location.hash = '#avaliar'; } }], 'Cadastrar máquina')}</div></div>
+      <p class="conta" id="t-aviso">Valor m\xE1ximo recomendado: ${M(e.teto)}.</p>
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="t-ok">Confirmar troca</button><button class="btn btn-linha" type="button" id="t-nao">Cancelar</button></div>`,d=>{const $=l("#t-valor",d),u=l("#t-aviso",d),g=()=>{const j=ra($.value),S=j-e.teto;l("#t-aprov-box",d).hidden=!(S>0),l("#t-mot-box",d).hidden=!(S>0);const H=vt(a.tipo,S);l("#t-aprov-box",d).hidden=!(S>0)||H==="livre",l("#t-mot-box",d).hidden=!(S>0),u.innerHTML=j>0?S>0?`<span class="neg">${M(S)} acima do valor m\xE1ximo recomendado (${ht[H]} para ${V[a.tipo].toLowerCase()}). A margem projetada cai para ${P((e.venda-j-e.preparo)/e.venda)}. Pela regra da revenda, ${P(x.cfg.descontoAcima,0)} do valor acima (${M(S*x.cfg.descontoAcima)}) sai da comiss\xE3o do vendedor.</span>
+          <div class="contra"><b>Antes de pagar acima, ofere\xE7a ao cliente:</b>${Ws(S,e).map(O=>`<div><b>${c(O.t)}</b><span>${c(O.d)}</span></div>`).join("")}</div>`:`Dentro do valor m\xE1ximo recomendado (${M(e.teto)}). Margem projetada: ${P((e.venda-j-e.preparo)/e.venda)}.`:'<span class="neg">Informe o valor pago.</span>'};$.oninput=g,g(),l("#t-nao",d).onclick=()=>U(),l("#t-ok",d).onclick=async j=>{const S=ra($.value),H=l("#t-data",d).value||z();if(!(S>0)){$.focus(),A("Informe o valor pago na troca.",!0);return}const O=S>e.teto,aa=l("#t-aprov",d).value.trim(),h=l("#t-mot",d).value.trim(),f=vt(a.tipo,S-e.teto),k=O&&f!=="livre"&&C&&C.semInternet();if(O&&!h){l("#t-mot",d).focus(),A("Acima do recomendado: informe o motivo.",!0);return}if(O&&f!=="livre"&&se(f)&&!aa&&!k){l("#t-aprov",d).focus(),A("Informe quem aprovou.",!0);return}if(O&&(!se(f)||k)){const Y=await xo(a,e,{valorPago:Math.round(S),decisao:"Pedido de aprova\xE7\xE3o ("+ht[f]+")",motivo:h}),ea={id:"P"+Date.now()+Math.random().toString(36).slice(2,5),nivel:f,semInternet:!!k,retrato:Y.id,quando:new Date().toISOString(),por:D().nome,maq:a,rec:{teto:e.teto,venda:e.venda,preparo:e.preparo,dias:e.dias,margem:e.margem,margemSobreVenda:e.margemSobreVenda,confianca:e.confianca,doTipo:e.doTipo,qualidade:e.qualidade?{mape:e.qualidade.mape}:null},valor:Math.round(S),data:H,motivo:h,status:"pendente",extra:{vendedor:l("#t-vend",d).value,negociacao:v.nova||null,origem:v.local||"Troca registrada",fotos:v.fotos.filter(Boolean).slice(0,4),verif:{...v.verif},...Ga()?{ia:Ga()}:{}}};b.pendentes.push(ea),L("aprovacao",`Pedido de aprova\xE7\xE3o: ${a.marca} ${a.modelo} por ${M(S)} (m\xE1ximo ${M(e.teto)})${k?", feito sem internet":""}`),Ga()&&L("ia",`Pedido ${a.marca} ${a.modelo}: ${Ga().resumo}`),T(),Ze(),qe(),te(),U(!0),A(k?"Sem internet: a troca virou pedido de aprova\xE7\xE3o (pendente). Ela s\xF3 entra no p\xE1tio depois de aprovada com internet.":f==="dono"?"Pedido enviado ao dono: para este tipo de m\xE1quina, s\xF3 ele libera.":"Pedido enviado ao gerente. A troca s\xF3 entra no p\xE1tio depois da aprova\xE7\xE3o."),location.hash="#aprovacoes";return}j.currentTarget.classList.add("carregando");const da=await xo(a,e,{valorPago:Math.round(S),decisao:O?f==="livre"?"Acima do teto, dentro da al\xE7ada do vendedor":"Acima do teto, aprovada por "+aa:"Dentro do valor m\xE1ximo",motivo:h});setTimeout(()=>{const Y=x.fecharTroca(b,a,e,S,H,{retrato:da.id,vendedor:l("#t-vend",d).value,negociacao:v.nova||null,aprovacao:O?{por:f==="livre"?D().nome+" (al\xE7ada do vendedor)":aa,motivo:h,excesso:S-e.teto,data:z()}:null,origem:v.local||"Troca registrada",manutencoes:v.declarado?[{servico:v.declarado,horas:v.horas,comNota:v.verif.notas}]:[],fotos:v.fotos.filter(Boolean).slice(0,4),verif:{...v.verif},...Ga()?{ia:Ga()}:{}}),ea=Y.id;y.trocas.push({...Y});const Aa=Ga();Aa&&L("ia",`Troca ${Y.marca} ${Y.modelo}: ${Aa.resumo}`,{ref:Y.id});const Ti=$s(Y.id,{...Za},v.tipo);Ze(),qe(),Ti.then(Ue=>{if(!Ue.length)return;const Yt=b.fechadas.find(Di=>Di.id===ea);Yt&&(Yt.fotosArq=Ue,T())}),L("troca",`Troca fechada: ${Y.marca} ${Y.modelo} por ${M(Y.pago)} (m\xE1ximo recomendado ${M(e.teto)})${Y.aprovacao?`, acima do teto, aprovada por ${Y.aprovacao.por}`:""}`,{ref:Y.id}),T(),Pa(),U(!0),oa("modal",`<h2>Troca registrada</h2><p class="sub">${c(Y.marca+" "+Y.modelo)} entrou no p\xE1tio por ${M(Y.pago)}. O passaporte foi criado e a vis\xE3o geral j\xE1 foi atualizada.</p>
+            <div class="acoes"><a class="btn btn-ouro" href="passaporte.html?id=${ea}">Abrir passaporte</a><a class="btn btn-linha" href="#patio" id="ir-patio">Ver no p\xE1tio</a></div>`,Ue=>{l("#ir-patio",Ue).onclick=()=>U(!0)}),A("Troca registrada no p\xE1tio.")},500)}}),$a(o)}const ua={tipo:"",marca:"",idade:"",ordem:"risco"};function eo(){const a=I.patio().map(Ta),e=(ua.busca||"").toLowerCase();let o=a.filter(r=>(!e||[r.t.marca,r.t.modelo,r.t.chassi,r.t.vendedor,r.t.loja].join(" ").toLowerCase().includes(e))&&(!ua.tipo||r.t.tipo===ua.tipo)&&(!ua.marca||r.t.marca===ua.marca)&&(!ua.idade||r.faixa===ua.idade));const t={risco:(r,p)=>p.risco-r.risco,capital:(r,p)=>p.t.pago-r.t.pago,dias:(r,p)=>p.dias-r.dias,margem:(r,p)=>(isFinite(r.margem)?r.margem:9)-(isFinite(p.margem)?p.margem:9)};o.sort(t[ua.ordem]);const s=o.reduce((r,p)=>r+p.t.pago,0),i=o.filter(r=>r.dias>90),n=[...new Set(a.map(r=>r.t.marca))].sort();w.innerHTML=`
+      <div class="titulo"><div><h1>P\xE1tio de m\xE1quinas</h1><p>Saiba onde seu capital est\xE1 parado e quais equipamentos exigem aten\xE7\xE3o.</p></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="exportar">${_('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Exportar</button><button class="btn btn-linha" type="button" id="comparar">Comparar <span id="n-comp" class="n-comp">${Wa.size}</span></button>${la([{nome:"Cadastrar \xE0 m\xE3o",desc:"M\xE1quina que entrou no p\xE1tio",acao:()=>ve()},{nome:"Puxar de documento",desc:"Foto da nota, PDF ou planilha",acao:()=>{location.hash="#documentos"}},{nome:"Avaliar uma troca",desc:"Calcular o valor m\xE1ximo antes de fechar",acao:()=>{location.hash="#avaliar"}}],"Cadastrar m\xE1quina")}</div></div>
       <div class="kpis escalonado">
-        <div class="kpi k-marfim"><span class="rot">${ICO.barras}Máquinas no pátio</span><span class="val">${conta(itens.length, 'int')}</span></div>
-        <div class="kpi k-marfim"><span class="rot">${ICO.moedas}Capital imobilizado</span><span class="val">${conta(cap, 'mil')}</span></div>
-        <div class="kpi k-salvia"><span class="rot">${ICO.linha}Permanência média</span><span class="val">${conta(itens.reduce((s, i) => s + i.dias, 0) / Math.max(1, itens.length), 'dias')}</span></div>
-        <div class="kpi k-risco"><span class="rot">${ICO.alerta}Acima de 90 dias</span><span class="val">${velhos.length} ${velhos.length === 1 ? 'máquina' : 'máquinas'}</span><span class="pilula">${mil(velhos.reduce((s, i) => s + i.t.pago, 0))}</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.barras}M\xE1quinas no p\xE1tio</span><span class="val">${ia(o.length,"int")}</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.moedas}Capital imobilizado</span><span class="val">${ia(s,"mil")}</span></div>
+        <div class="kpi k-salvia"><span class="rot">${q.linha}Perman\xEAncia m\xE9dia</span><span class="val">${ia(o.reduce((r,p)=>r+p.dias,0)/Math.max(1,o.length),"dias")}</span></div>
+        <div class="kpi k-risco"><span class="rot">${q.alerta}Acima de 90 dias</span><span class="val">${i.length} ${i.length===1?"m\xE1quina":"m\xE1quinas"}</span><span class="pilula">${E(i.reduce((r,p)=>r+p.t.pago,0))}</span></div>
       </div>
-      <div class="campo" style="margin-bottom:12px"><label for="p-busca">Buscar no pátio</label><input id="p-busca" placeholder="Modelo, marca, chassi ou vendedor" value="${esc(fp.busca || '')}"></div>
+      <div class="campo" style="margin-bottom:12px"><label for="p-busca">Buscar no p\xE1tio</label><input id="p-busca" placeholder="Modelo, marca, chassi ou vendedor" value="${c(ua.busca||"")}"></div>
       <div class="filtros">
-        <div class="campo"><label for="p-tipo">Categoria</label><select id="p-tipo"><option value="">Todas</option>${Object.keys(NOMES).map((k) => `<option value="${k}" ${fp.tipo === k ? 'selected' : ''}>${NOMES[k]}</option>`).join('')}</select></div>
-        <div class="campo"><label for="p-marca">Fabricante</label><select id="p-marca"><option value="">Todos</option>${marcas.map((m) => `<option ${fp.marca === m ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select></div>
-        <div class="campo"><label for="p-idade">Tempo de pátio</label><select id="p-idade"><option value="">Todos</option>${['normal', 'atencao', 'alerta', 'critico'].map((f) => `<option value="${f}" ${fp.idade === f ? 'selected' : ''}>${C.NOMES_IDADE[f]}</option>`).join('')}</select></div>
-        <div class="campo"><label for="p-ordem">Ordenar por</label><select id="p-ordem">${[['risco', 'Maior risco de margem'], ['capital', 'Maior capital imobilizado'], ['dias', 'Maior tempo no pátio'], ['margem', 'Menor margem projetada']].map(([v, n]) => `<option value="${v}" ${fp.ordem === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+        <div class="campo"><label for="p-tipo">Categoria</label><select id="p-tipo"><option value="">Todas</option>${Object.keys(V).map(r=>`<option value="${r}" ${ua.tipo===r?"selected":""}>${V[r]}</option>`).join("")}</select></div>
+        <div class="campo"><label for="p-marca">Fabricante</label><select id="p-marca"><option value="">Todos</option>${n.map(r=>`<option ${ua.marca===r?"selected":""}>${c(r)}</option>`).join("")}</select></div>
+        <div class="campo"><label for="p-idade">Tempo de p\xE1tio</label><select id="p-idade"><option value="">Todos</option>${["normal","atencao","alerta","critico"].map(r=>`<option value="${r}" ${ua.idade===r?"selected":""}>${I.NOMES_IDADE[r]}</option>`).join("")}</select></div>
+        <div class="campo"><label for="p-ordem">Ordenar por</label><select id="p-ordem">${[["risco","Maior risco de margem"],["capital","Maior capital imobilizado"],["dias","Maior tempo no p\xE1tio"],["margem","Menor margem projetada"]].map(([r,p])=>`<option value="${r}" ${ua.ordem===r?"selected":""}>${p}</option>`).join("")}</select></div>
       </div>
-      <section class="painel"><div class="tabela-wrap"><table class="tabela"><thead><tr><th><span class="sr">Comparar</span></th><th>Máquina</th><th>Entrada</th><th class="n">Dias</th><th class="n">Aquisição</th><th class="n">Preparo</th><th class="n">Custo total</th><th class="n">Anunciado</th><th class="n">Venda estimada</th><th class="n">Margem</th><th>Situação</th></tr></thead>
-        <tbody>${itens.length ? itens.map((i) => `<tr class="clicavel" tabindex="0" data-id="${i.t.id}"><td><input type="checkbox" class="comp-chk" value="${i.t.id}" ${comparar.has(i.t.id) ? 'checked' : ''} aria-label="Comparar ${esc(i.t.modelo)}"></td><td class="maq">${fotoMini(i.t)}<span><b>${esc(i.t.marca + ' ' + i.t.modelo)}</b><span>${NOMES[i.t.tipo]} · ${i.t.ano} · ${horasTxt(i.t)}</span></span></td>
-          <td>${data(i.t.entrada)}</td><td class="n">${i.dias} <span class="tag ${i.faixa}">${C.NOMES_IDADE[i.faixa]}</span></td><td class="n">${mil(i.t.pago)}</td><td class="n">${mil(i.t.preparo)}</td><td class="n">${mil(i.custo)}</td><td class="n">${mil(i.t.anuncio)}</td><td class="n">${mil(i.venda)}</td>
-          <td class="n ${i.margem < 0.06 ? 'neg' : ''}">${pct(i.margem)}</td><td>${esc(i.acao)}</td></tr>`).join('') : `<tr><td colspan="11" class="vazio">${todos.length ? 'Nenhuma máquina com esses filtros.' : 'O pátio está vazio. Use Adicionar para cadastrar a primeira máquina.'}</td></tr>`}</tbody></table></div>
-        <p class="nota-rodape">Toque numa máquina para ver os detalhes, simular redução de preço e abrir o passaporte.</p></section>`;
-    ['tipo', 'marca', 'idade', 'ordem'].forEach((k) => { $('#p-' + k).onchange = (e) => { fp[k] = e.target.value; telaPatio(); }; });
-    let tb; $('#p-busca').oninput = (e) => { clearTimeout(tb); tb = setTimeout(() => { fp.busca = e.target.value; telaPatio(); const el = $('#p-busca'); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }, 250); };
-    $$('.comp-chk', tela).forEach((c) => { c.onclick = (e) => e.stopPropagation(); c.onchange = () => { if (c.checked) { if (comparar.size >= 3) { c.checked = false; toast('Compare no máximo 3 máquinas.', true); return; } comparar.add(c.value); } else comparar.delete(c.value); $('#n-comp').textContent = comparar.size; }; });
-    $('#comparar').onclick = abrirComparacao;
-    $$('tr.clicavel', tela).forEach((tr) => { const abre = () => detalheMaquina(tr.dataset.id); tr.onclick = abre; tr.onkeydown = (e) => { if (e.key === 'Enter') abre(); }; });
-    $('#exportar').onclick = () => baixarCSV('anshur-patio.csv', [['Máquina', 'Categoria', 'Ano', 'Horas', 'Entrada', 'Dias', 'Aquisição', 'Preparo', 'Custo total', 'Anunciado', 'Venda estimada', 'Margem projetada', 'Situação']]
-      .concat(itens.map((i) => [i.t.marca + ' ' + i.t.modelo, NOMES[i.t.tipo], i.t.ano, i.t.horas, data(i.t.entrada), i.dias, i.t.pago, i.t.preparo, i.custo, i.t.anuncio, i.venda, (i.margem * 100).toFixed(1).replace('.', ',') + '%', i.acao])));
-    contar();
-  }
-
-  const linhaItem = (it) => `<div class="item-prep" style="display:grid;grid-template-columns:2fr 1fr 0.7fr;gap:8px"><input class="campo-in" data-f="desc" aria-label="Serviço ou peça" placeholder="Ex.: troca do kit de embreagem" value="${esc(it.desc || '')}"><input class="campo-in" data-f="pecas" inputmode="numeric" aria-label="Peças em reais" placeholder="Peças R$" value="${it.pecas ? it.pecas.toLocaleString('pt-BR') : ''}"><input class="campo-in" data-f="horas" inputmode="decimal" aria-label="Horas de oficina" placeholder="Horas" value="${it.horas || ''}"></div>`;
-
-  function detalheMaquina(id) {
-    const t = A.trocas.find((x) => x.id === id); if (!t) return;
-    const i = infoPatio(t);
-    const mov = [{ data: t.entrada, txt: `Entrada no pátio por ${real(t.pago)}` }, { data: t.entrada, txt: `Preparo: ${real(t.preparo)}${t.preparoEst ? ` (previsto ${real(t.preparoEst)})` : ''}` }]
-      .concat((t.precos || []).map((p) => ({ data: p.data, txt: `${p.motivo}: ${real(p.valor)}` }))).sort((a, b) => a.data.localeCompare(b.data));
-    abrirCamada('gaveta', `
-      <div class="galeria-ficha">${[0, 1, 2].map((k) => { const f = F.de(t, k); return `<img src="${f.propria ? f.u : (k ? F.mini(f.u) : f.u)}" alt="Foto ${k + 1} de ${esc(t.marca + ' ' + t.modelo)}" loading="lazy">`; }).join('')}</div>
-      <span class="tag ${i.faixa}">${C.NOMES_IDADE[i.faixa]} · ${i.dias} dias</span>
-      <h2 style="font-size:22px;margin-top:10px">${esc(t.marca + ' ' + t.modelo)}</h2><p class="sub">${NOMES[t.tipo]} · ${t.ano} · ${horasTxt(t)} · ${esc(t.origem)}</p>
+      <section class="painel"><div class="tabela-wrap"><table class="tabela"><thead><tr><th><span class="sr">Comparar</span></th><th>M\xE1quina</th><th>Entrada</th><th class="n">Dias</th><th class="n">Aquisi\xE7\xE3o</th><th class="n">Preparo</th><th class="n">Custo total</th><th class="n">Anunciado</th><th class="n">Venda estimada</th><th class="n">Margem</th><th>Situa\xE7\xE3o</th></tr></thead>
+        <tbody>${o.length?o.map(r=>`<tr class="clicavel" tabindex="0" data-id="${r.t.id}"><td><input type="checkbox" class="comp-chk" value="${r.t.id}" ${Wa.has(r.t.id)?"checked":""} aria-label="Comparar ${c(r.t.modelo)}"></td><td class="maq">${ue(r.t)}<span><b>${c(r.t.marca+" "+r.t.modelo)}</b><span>${V[r.t.tipo]} \xB7 ${r.t.ano} \xB7 ${pa(r.t)}</span></span></td>
+          <td>${N(r.t.entrada)}</td><td class="n">${r.dias} <span class="tag ${r.faixa}">${I.NOMES_IDADE[r.faixa]}</span></td><td class="n">${E(r.t.pago)}</td><td class="n">${E(r.t.preparo)}</td><td class="n">${E(r.custo)}</td><td class="n">${E(r.t.anuncio)}</td><td class="n">${E(r.venda)}</td>
+          <td class="n ${r.margem<.06?"neg":""}">${P(r.margem)}</td><td>${c(r.acao)}</td></tr>`).join(""):`<tr><td colspan="11" class="vazio">${a.length?"Nenhuma m\xE1quina com esses filtros.":"O p\xE1tio est\xE1 vazio. Use Adicionar para cadastrar a primeira m\xE1quina."}</td></tr>`}</tbody></table></div>
+        <p class="nota-rodape">Toque numa m\xE1quina para ver os detalhes, simular redu\xE7\xE3o de pre\xE7o e abrir o passaporte.</p></section>`,["tipo","marca","idade","ordem"].forEach(r=>{l("#p-"+r).onchange=p=>{ua[r]=p.target.value,eo()}});let m;l("#p-busca").oninput=r=>{clearTimeout(m),m=setTimeout(()=>{ua.busca=r.target.value,eo();const p=l("#p-busca");p.focus(),p.setSelectionRange(p.value.length,p.value.length)},250)},R(".comp-chk",w).forEach(r=>{r.onclick=p=>p.stopPropagation(),r.onchange=()=>{if(r.checked){if(Wa.size>=3){r.checked=!1,A("Compare no m\xE1ximo 3 m\xE1quinas.",!0);return}Wa.add(r.value)}else Wa.delete(r.value);l("#n-comp").textContent=Wa.size}}),l("#comparar").onclick=Vs,R("tr.clicavel",w).forEach(r=>{const p=()=>we(r.dataset.id);r.onclick=p,r.onkeydown=d=>{d.key==="Enter"&&p()}}),l("#exportar").onclick=()=>Ea("anshur-patio.csv",[["M\xE1quina","Categoria","Ano","Horas","Entrada","Dias","Aquisi\xE7\xE3o","Preparo","Custo total","Anunciado","Venda estimada","Margem projetada","Situa\xE7\xE3o"]].concat(o.map(r=>[r.t.marca+" "+r.t.modelo,V[r.t.tipo],r.t.ano,r.t.horas,N(r.t.entrada),r.dias,r.t.pago,r.t.preparo,r.custo,r.t.anuncio,r.venda,(r.margem*100).toFixed(1).replace(".",",")+"%",r.acao]))),$a()}const oo=a=>`<div class="item-prep" style="display:grid;grid-template-columns:2fr 1fr 0.7fr;gap:8px"><input class="campo-in" data-f="desc" aria-label="Servi\xE7o ou pe\xE7a" placeholder="Ex.: troca do kit de embreagem" value="${c(a.desc||"")}"><input class="campo-in" data-f="pecas" inputmode="numeric" aria-label="Pe\xE7as em reais" placeholder="Pe\xE7as R$" value="${a.pecas?a.pecas.toLocaleString("pt-BR"):""}"><input class="campo-in" data-f="horas" inputmode="decimal" aria-label="Horas de oficina" placeholder="Horas" value="${a.horas||""}"></div>`;function we(a){const e=y.trocas.find(s=>s.id===a);if(!e)return;const o=Ta(e),t=[{data:e.entrada,txt:`Entrada no p\xE1tio por ${M(e.pago)}`},{data:e.entrada,txt:`Preparo: ${M(e.preparo)}${e.preparoEst?` (previsto ${M(e.preparoEst)})`:""}`}].concat((e.precos||[]).map(s=>({data:s.data,txt:`${s.motivo}: ${M(s.valor)}`}))).sort((s,i)=>s.data.localeCompare(i.data));oa("gaveta",`
+      <div class="galeria-ficha">${[0,1,2].map(s=>{const i=ha.de(e,s);return`<img src="${i.propria?i.u:s?ha.mini(i.u):i.u}" alt="Foto ${s+1} de ${c(e.marca+" "+e.modelo)}" loading="lazy">`}).join("")}</div>
+      <span class="tag ${o.faixa}">${I.NOMES_IDADE[o.faixa]} \xB7 ${o.dias} dias</span>
+      <h2 style="font-size:22px;margin-top:10px">${c(e.marca+" "+e.modelo)}</h2><p class="sub">${V[e.tipo]} \xB7 ${e.ano} \xB7 ${pa(e)} \xB7 ${c(e.origem)}</p>
       <div class="det">
-        <div><span>Aquisição</span><b>${real(t.pago)}</b></div><div><span>Preparação</span><b>${real(t.preparo)}</b></div>
-        <div><span>Custo total</span><b>${real(i.custo)}</b></div><div><span>Preço anunciado</span><b>${real(t.anuncio)}</b></div>
-        <div><span>Venda estimada</span><b>${real(i.venda)}</b></div><div><span>Margem projetada</span><b class="${i.margem < 0.06 ? 'neg' : ''}">${pct(i.margem)}</b></div>
-        <div><span>Custo financeiro estimado</span><b>${real(i.juros)}</b></div><div><span>Recomendação</span><b>${esc(i.acao)}</b></div>
+        <div><span>Aquisi\xE7\xE3o</span><b>${M(e.pago)}</b></div><div><span>Prepara\xE7\xE3o</span><b>${M(e.preparo)}</b></div>
+        <div><span>Custo total</span><b>${M(o.custo)}</b></div><div><span>Pre\xE7o anunciado</span><b>${M(e.anuncio)}</b></div>
+        <div><span>Venda estimada</span><b>${M(o.venda)}</b></div><div><span>Margem projetada</span><b class="${o.margem<.06?"neg":""}">${P(o.margem)}</b></div>
+        <div><span>Custo financeiro estimado</span><b>${M(o.juros)}</b></div><div><span>Recomenda\xE7\xE3o</span><b>${c(o.acao)}</b></div>
       </div>
-      ${t.previsto ? `<p class="conta">Previsto no dia da troca (${data(t.previsto.data)}): valor máximo ${real(t.previsto.teto)}, venda ${real(t.previsto.venda)}, preparo ${real(t.previsto.preparo)}, ${t.previsto.dias || '—'} dias de pátio, qualidade ${t.previsto.confianca}. Pago: ${real(t.pago)}.</p>` : ''}
-      <p class="conta">${esc(janelaVenda(t.tipo))}</p>
-      ${t.aprovacao ? `<p class="conta">Troca acima do recomendado em ${real(t.aprovacao.excesso)}, aprovada por ${esc(t.aprovacao.por)}: ${esc(t.aprovacao.motivo)}.</p>` : ''}
-      ${manterOuVender(i)}
+      ${e.previsto?`<p class="conta">Previsto no dia da troca (${N(e.previsto.data)}): valor m\xE1ximo ${M(e.previsto.teto)}, venda ${M(e.previsto.venda)}, preparo ${M(e.previsto.preparo)}, ${e.previsto.dias||"\u2014"} dias de p\xE1tio, qualidade ${e.previsto.confianca}. Pago: ${M(e.pago)}.</p>`:""}
+      <p class="conta">${c(is(e.tipo))}</p>
+      ${e.aprovacao?`<p class="conta">Troca acima do recomendado em ${M(e.aprovacao.excesso)}, aprovada por ${c(e.aprovacao.por)}: ${c(e.aprovacao.motivo)}.</p>`:""}
+      ${ai(o)}
       <section class="painel" style="margin-top:6px"><h2>Ordem de preparo na oficina</h2>
-        <p class="sub" style="margin:4px 0 12px">Peças e horas de mão de obra (R$ ${K.cfg.valorHora}/h). O total vira o preparo real e é comparado com o previsto${t.preparoEst ? ` (${real(t.preparoEst)})` : ''}.</p>
-        <div id="itens-prep" style="display:grid;gap:8px">${((estado.preparos[t.id] && estado.preparos[t.id].itens) || []).map((it) => linhaItem(it)).join('') || linhaItem({})}</div>
+        <p class="sub" style="margin:4px 0 12px">Pe\xE7as e horas de m\xE3o de obra (R$ ${x.cfg.valorHora}/h). O total vira o preparo real e \xE9 comparado com o previsto${e.preparoEst?` (${M(e.preparoEst)})`:""}.</p>
+        <div id="itens-prep" style="display:grid;gap:8px">${(b.preparos[e.id]&&b.preparos[e.id].itens||[]).map(s=>oo(s)).join("")||oo({})}</div>
         <div class="acoes" style="margin-top:10px"><button class="btn btn-linha" type="button" id="add-item">Adicionar item</button><span class="conta" id="tot-prep" style="margin:0"></span></div>
         <div class="acoes" style="margin-top:8px"><button class="btn btn-ouro" type="button" id="g-prep-ok">Salvar preparo</button></div>
       </section>
       <section class="painel" style="margin-top:6px"><h2>Registrar a venda</h2>
-        <p class="sub" style="margin:4px 0 12px">A venda fecha a conta da máquina e ensina o motor.</p>
+        <p class="sub" style="margin:4px 0 12px">A venda fecha a conta da m\xE1quina e ensina o motor.</p>
         <div class="campos">
           <div class="campo"><label for="g-venda">Valor da venda</label><input id="g-venda" inputmode="numeric" placeholder="R$"></div>
-          <div class="campo"><label for="g-data">Data da venda</label><input id="g-data" type="date" value="${hojeISO()}" min="${t.entrada}" max="${hojeISO()}"></div>
-          <div class="campo"><label for="g-com">Comissão paga (R$, se já souber)</label><input id="g-com" inputmode="numeric" placeholder="Deixe vazio se não souber"></div>
-          <div class="campo"><label for="g-jur">Juros do floor plan (R$, se houver)</label><input id="g-jur" inputmode="numeric" placeholder="Deixe vazio se não houver"></div>
+          <div class="campo"><label for="g-data">Data da venda</label><input id="g-data" type="date" value="${z()}" min="${e.entrada}" max="${z()}"></div>
+          <div class="campo"><label for="g-com">Comiss\xE3o paga (R$, se j\xE1 souber)</label><input id="g-com" inputmode="numeric" placeholder="Deixe vazio se n\xE3o souber"></div>
+          <div class="campo"><label for="g-jur">Juros do floor plan (R$, se houver)</label><input id="g-jur" inputmode="numeric" placeholder="Deixe vazio se n\xE3o houver"></div>
         </div>
         <div class="acoes" style="margin-top:12px"><button class="btn btn-ouro" type="button" id="g-vender">Registrar venda</button></div>
       </section>
-      <section class="painel" style="margin-top:6px"><h2>Simular redução de preço</h2>
-        <p class="sub" style="margin:4px 0 12px">Só simula. Os valores da máquina não mudam até você aplicar.</p>
-        <label class="rot-campo" for="sim">Redução sobre o anúncio: <b id="sim-pct">0%</b></label>
+      <section class="painel" style="margin-top:6px"><h2>Simular redu\xE7\xE3o de pre\xE7o</h2>
+        <p class="sub" style="margin:4px 0 12px">S\xF3 simula. Os valores da m\xE1quina n\xE3o mudam at\xE9 voc\xEA aplicar.</p>
+        <label class="rot-campo" for="sim">Redu\xE7\xE3o sobre o an\xFAncio: <b id="sim-pct">0%</b></label>
         <input class="deslizar" id="sim" type="range" min="0" max="15" step="1" value="0">
         <div class="det" id="sim-res"></div>
-        <button class="btn btn-linha" type="button" id="aplicar" disabled>Aplicar novo preço</button>
+        <button class="btn btn-linha" type="button" id="aplicar" disabled>Aplicar novo pre\xE7o</button>
       </section>
-      <section style="margin-top:18px"><h2 style="font-size:18px;margin-bottom:12px">Linha do tempo da máquina</h2>
-        <ul class="linha-tempo">${mov.map((m) => `<li>${esc(m.txt)}<span>${data(m.data)}</span></li>`).concat(estado.atividades.filter((a) => a.ref === t.id).map((a) => `<li>${esc(a.texto)}<span>${new Date(a.quando).toLocaleString('pt-BR')} · ${esc(a.usuario)}</span></li>`)).join('')}</ul></section>
-      <section style="margin-top:12px"><h2 style="font-size:18px;margin-bottom:8px">Compradores interessados</h2>${(() => { const cs = compradoresPara(t); return cs.length ? cs.slice(0, 5).map((c) => `<span class="tag comprovado" style="margin:0 6px 6px 0">${esc(c.nome)} · ${esc(c.cidade || '')} · até ${mil(c.precoMax)}</span>`).join('') : '<p class="sub">Ninguém cadastrado procura esta máquina. <a class="link" href="#compradores">Cadastrar comprador</a></p>'; })()}</section>
-      ${checaHorimetro(t).length ? `<p class="conta neg">${checaHorimetro(t).map(esc).join(' ')}</p>` : ''}
-      <section style="margin-top:12px"><h2 style="font-size:18px;margin-bottom:8px">Documentos</h2>${(t.docs || []).length ? `<ul class="lista-motivos">${t.docs.map((d) => { const doc = estado.documentos.find((x) => x.id === d); return `<li><span>${esc(doc ? doc.nome : d)}</span><b>${doc ? esc(doc.tipo) : ''}</b></li>`; }).join('')}</ul>` : '<p class="sub">Nenhum documento anexado.</p>'}<a class="btn btn-linha" href="#documentos" style="margin-top:8px">Anexar documento</a></section>
-      <div class="acoes"><a class="btn btn-ouro" href="passaporte.html?id=${t.id}">Abrir passaporte</a><button class="btn btn-linha" type="button" id="gerar-an">Gerar anúncio</button><button class="btn btn-linha" type="button" id="exp-dms">Exportar para o sistema</button>${t.retrato ? '<button class="btn btn-linha" type="button" id="ver-rt">Retrato da avaliação</button>' : ''}</div>`, (c) => {
-      if ($('#ver-rt', c)) $('#ver-rt', c).onclick = () => verRetrato(t.retrato);
-      $('#exp-dms', c).onclick = () => exportarParaDMS(t); $('#gerar-an', c).onclick = () => gerarAnuncio(t);
-      const s = $('#sim', c), res = $('#sim-res', c), ap = $('#aplicar', c);
-      const atual = () => {
-        const p = +s.value / 100, novo = Math.round(t.anuncio * (1 - p) / 1000) * 1000;
-        // vendas costumam fechar abaixo do anúncio; usamos a mesma relação atual entre venda estimada e anúncio
-        const vendaNova = Math.min(i.venda, novo * Math.min(1, i.venda / t.anuncio)) || novo;
-        const m = (vendaNova - i.custo) / vendaNova;
-        $('#sim-pct', c).textContent = s.value + '%';
-        res.innerHTML = `<div><span>Novo anúncio</span><b>${real(novo)}</b></div><div><span>Margem projetada</span><b class="${m < 0.06 ? 'neg' : ''}">${pct(m)} <small class="sub">(hoje ${pct(i.margem)})</small></b></div><div><span>Resultado bruto</span><b>${real(vendaNova - i.custo)}</b></div><div><span>Diferença</span><b class="neg">${real(vendaNova - i.venda)}</b></div>`;
-        ap.disabled = !(+s.value > 0); ap.dataset.novo = novo;
-      };
-      s.oninput = atual; atual();
-      const lerItens = () => $$('.item-prep', c).map((l) => ({ desc: $('[data-f=desc]', l).value.trim(), pecas: num($('[data-f=pecas]', l).value), horas: num($('[data-f=horas]', l).value) })).filter((it) => it.desc || it.pecas || it.horas);
-      const totalItens = () => lerItens().reduce((s, it) => s + it.pecas + it.horas * K.cfg.valorHora, 0);
-      const mostraTotal = () => { const tot = totalItens(); $('#tot-prep', c).innerHTML = `Total: <b>${real(tot)}</b>${t.preparoEst ? ` · previsto ${real(t.preparoEst)} · <span class="${tot > t.preparoEst ? 'neg' : 'pos'}">${tot > t.preparoEst ? '+' : ''}${real(tot - t.preparoEst)}</span>` : ''}`; };
-      $('#itens-prep', c).addEventListener('input', mostraTotal); mostraTotal();
-      $('#add-item', c).onclick = () => { $('#itens-prep', c).insertAdjacentHTML('beforeend', linhaItem({})); $$('.item-prep', c).at(-1).querySelector('input').focus(); };
-      $('#g-prep-ok', c).onclick = () => {
-        const itens = lerItens(), v = totalItens(); if (!itens.length) { toast('Adicione ao menos um item de preparo.', true); return; }
-        K.registrarPreparo(estado, t.id, v, hojeISO()); estado.preparos[t.id].itens = itens; t.preparo = Math.round(v); log('preparo', `Preparo de ${t.marca} ${t.modelo} registrado: ${real(v)}`, { ref: t.id }); salvar(); cacheLimpa(); toast('Preparo registrado: ' + real(v) + '.'); rota();
-      };
-      $('#g-vender', c).onclick = () => {
-        const v = num($('#g-venda', c).value), dv = $('#g-data', c).value;
-        if (!(v > 0)) { $('#g-venda', c).focus(); toast('Informe o valor da venda.', true); return; }
-        if (!dv || dv < t.entrada) { toast('A data da venda não pode ser antes da troca.', true); return; }
-        const res = v - t.pago - t.preparo, comS = $('#g-com', c).value.trim(), jurS = $('#g-jur', c).value.trim();
-        confirmar('Registrar venda?', `${t.marca} ${t.modelo} vendida por ${real(v)} em ${data(dv)}. Resultado bruto: ${real(res)} (${pct(res / v)}). A máquina sai do pátio.`, 'Registrar venda', () => {
-          K.registrarVenda(estado, t.id, v, dv); t.vendido = Math.round(v); t.saida = dv; t.diasPatio = diasEntre(t.entrada, dv);
-          const cs = {}; if (comS) cs.comissao = num(comS); if (jurS) cs.juros = num(jurS);
-          if (Object.keys(cs).length) t.custos = Object.assign({}, t.custos, K.registrarCustos(estado, t.id, cs, eu().nome));
-          log('venda', `Venda registrada: ${t.marca} ${t.modelo} por ${real(v)}`, { ref: t.id }); salvar(); cacheLimpa();
-          toast('Venda registrada. Veja o previsto x realizado em Inteligência de trocas.'); rota();
-        });
-      };
-      ap.onclick = () => confirmar('Aplicar novo preço?', `O anúncio passa de ${real(t.anuncio)} para ${real(+ap.dataset.novo)}.`, 'Aplicar', () => {
-        const reg = { data: hojeISO(), valor: +ap.dataset.novo, motivo: 'Redução de preço' };
-        (estado.precos[t.id] = estado.precos[t.id] || []).push(reg); t.precos = (t.precos || []).concat(reg); t.anuncio = reg.valor; log('preco', `Preço de ${t.marca} ${t.modelo} alterado para ${real(reg.valor)}`, { ref: t.id }); salvar();
-        toast('Novo preço aplicado.'); rota();
-      });
-    });
-  }
-
-  // ---------- INTELIGÊNCIA DE TROCAS ----------
-  const ft = { periodo: 'tudo', tipo: '', resultado: '' };
-  function telaTrocas() {
-    const limite = ft.periodo === 'tudo' ? '' : (() => { const d = new Date(); d.setMonth(d.getMonth() - +ft.periodo); return d.toISOString().slice(0, 10); })();
-    const vend = C.vendidas().filter((t) => (!limite || t.saida >= limite) && (!ft.tipo || t.tipo === ft.tipo) && (!ft.resultado || (ft.resultado === 'pos' ? C.resultado(t) >= 0 : C.resultado(t) < 0)))
-      .sort((a, b) => b.saida.localeCompare(a.saida));
-    const linhas = vend.map((t) => { const r = rec(t); return { t, r, dif: r ? t.pago - r.teto : 0, res: C.resultado(t), m: C.margem(t) }; });
-    const prej = linhas.filter((l) => l.res < 0);
-    const excesso = linhas.reduce((s, l) => s + Math.max(0, l.dif), 0);
-    // fontes de perda calculadas dos registros
-    const fontes = [
-      { r: 'Pago acima do recomendado', v: excesso, cls: 'critico', extra: `${linhas.filter((l) => l.dif > 0).length} trocas` },
-      { r: 'Preparo acima do previsto', v: linhas.reduce((s, l) => s + Math.max(0, l.t.preparo - (l.t.preparoEst || l.t.preparo)), 0), cls: 'alerta', extra: `${linhas.filter((l) => l.t.preparoEst && l.t.preparo > l.t.preparoEst).length} trocas` },
-      { r: 'Venda abaixo da estimativa', v: linhas.reduce((s, l) => s + Math.max(0, (l.r ? l.r.venda : l.t.vendido) - l.t.vendido), 0), cls: 'atencao', extra: `${linhas.filter((l) => l.r && l.r.venda > l.t.vendido).length} trocas` },
-      { r: 'Pátio acima de 90 dias', v: linhas.reduce((s, l) => s + C.custoFinanceiro(l.t, Math.max(0, l.t.diasPatio - 90)), 0), cls: 'neutro', extra: `custo financeiro estimado (${pct(K.cfg.jurosMes)} a.m.), não é prejuízo realizado` }
-    ].sort((a, b) => b.v - a.v);
-    const val = M.validar();
-    const tiposVal = Object.keys(val.porTipo).sort((a, b) => val.porTipo[b].n - val.porTipo[a].n);
-    // previsto x realizado: registrado no dia da troca ou reconstituído só com as vendas anteriores a ela
-    const pxr = linhas.filter((l) => l.r).slice(0, 12);
-    const porTri = {};
-    vend.forEach((t) => { const d = new Date(t.saida + 'T12:00:00'), k = d.getFullYear() + ' T' + (Math.floor(d.getMonth() / 3) + 1); (porTri[k] = porTri[k] || []).push(C.margem(t)); });
-    const tri = Object.keys(porTri).sort().map((k) => ({ r: k.slice(2), v: porTri[k].reduce((s, v) => s + v, 0) / porTri[k].length }));
-    const perdasTipo = Object.keys(NOMES).map((k) => ({ r: NOMES[k].split(' ')[0], v: -prej.filter((l) => l.t.tipo === k).reduce((s, l) => s + l.res, 0), cls: 'critico', extra: `${prej.filter((l) => l.t.tipo === k).length} com prejuízo` })).filter((p) => p.v > 0);
-
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Inteligência de trocas</h1><p>Onde a revenda ganhou e onde perdeu dinheiro nas trocas já vendidas.</p></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="exportar">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Exportar</button>${botaoAdicionar([{ nome: 'Venda antiga à mão', desc: 'Troca que já foi vendida', acao: addVendaManual }, { nome: 'Importar planilha', desc: 'Histórico do seu sistema', acao: () => { tc.modo = 'minhas'; location.hash = '#teste'; } }, { nome: 'Puxar de documento', desc: 'Foto, PDF ou Excel', acao: () => { location.hash = '#documentos'; } }], 'Registrar venda antiga')}</div></div>
+      <section style="margin-top:18px"><h2 style="font-size:18px;margin-bottom:12px">Linha do tempo da m\xE1quina</h2>
+        <ul class="linha-tempo">${t.map(s=>`<li>${c(s.txt)}<span>${N(s.data)}</span></li>`).concat(b.atividades.filter(s=>s.ref===e.id).map(s=>`<li>${c(s.texto)}<span>${new Date(s.quando).toLocaleString("pt-BR")} \xB7 ${c(s.usuario)}</span></li>`)).join("")}</ul></section>
+      <section style="margin-top:12px"><h2 style="font-size:18px;margin-bottom:8px">Compradores interessados</h2>${(()=>{const s=Va(e);return s.length?s.slice(0,5).map(i=>`<span class="tag comprovado" style="margin:0 6px 6px 0">${c(i.nome)} \xB7 ${c(i.cidade||"")} \xB7 at\xE9 ${E(i.precoMax)}</span>`).join(""):'<p class="sub">Ningu\xE9m cadastrado procura esta m\xE1quina. <a class="link" href="#compradores">Cadastrar comprador</a></p>'})()}</section>
+      ${Ie(e).length?`<p class="conta neg">${Ie(e).map(c).join(" ")}</p>`:""}
+      <section style="margin-top:12px"><h2 style="font-size:18px;margin-bottom:8px">Documentos</h2>${(e.docs||[]).length?`<ul class="lista-motivos">${e.docs.map(s=>{const i=b.documentos.find(n=>n.id===s);return`<li><span>${c(i?i.nome:s)}</span><b>${i?c(i.tipo):""}</b></li>`}).join("")}</ul>`:'<p class="sub">Nenhum documento anexado.</p>'}<a class="btn btn-linha" href="#documentos" style="margin-top:8px">Anexar documento</a></section>
+      <div class="acoes"><a class="btn btn-ouro" href="passaporte.html?id=${e.id}">Abrir passaporte</a><button class="btn btn-linha" type="button" id="gerar-an">Gerar an\xFAncio</button><button class="btn btn-linha" type="button" id="exp-dms">Exportar para o sistema</button>${e.retrato?'<button class="btn btn-linha" type="button" id="ver-rt">Retrato da avalia\xE7\xE3o</button>':""}</div>`,s=>{l("#ver-rt",s)&&(l("#ver-rt",s).onclick=()=>bt(e.retrato)),l("#exp-dms",s).onclick=()=>Js(e),l("#gerar-an",s).onclick=()=>ei(e);const i=l("#sim",s),n=l("#sim-res",s),m=l("#aplicar",s),r=()=>{const u=+i.value/100,g=Math.round(e.anuncio*(1-u)/1e3)*1e3,j=Math.min(o.venda,g*Math.min(1,o.venda/e.anuncio))||g,S=(j-o.custo)/j;l("#sim-pct",s).textContent=i.value+"%",n.innerHTML=`<div><span>Novo an\xFAncio</span><b>${M(g)}</b></div><div><span>Margem projetada</span><b class="${S<.06?"neg":""}">${P(S)} <small class="sub">(hoje ${P(o.margem)})</small></b></div><div><span>Resultado bruto</span><b>${M(j-o.custo)}</b></div><div><span>Diferen\xE7a</span><b class="neg">${M(j-o.venda)}</b></div>`,m.disabled=!(+i.value>0),m.dataset.novo=g};i.oninput=r,r();const p=()=>R(".item-prep",s).map(u=>({desc:l("[data-f=desc]",u).value.trim(),pecas:ra(l("[data-f=pecas]",u).value),horas:ra(l("[data-f=horas]",u).value)})).filter(u=>u.desc||u.pecas||u.horas),d=()=>p().reduce((u,g)=>u+g.pecas+g.horas*x.cfg.valorHora,0),$=()=>{const u=d();l("#tot-prep",s).innerHTML=`Total: <b>${M(u)}</b>${e.preparoEst?` \xB7 previsto ${M(e.preparoEst)} \xB7 <span class="${u>e.preparoEst?"neg":"pos"}">${u>e.preparoEst?"+":""}${M(u-e.preparoEst)}</span>`:""}`};l("#itens-prep",s).addEventListener("input",$),$(),l("#add-item",s).onclick=()=>{l("#itens-prep",s).insertAdjacentHTML("beforeend",oo({})),R(".item-prep",s).at(-1).querySelector("input").focus()},l("#g-prep-ok",s).onclick=()=>{const u=p(),g=d();if(!u.length){A("Adicione ao menos um item de preparo.",!0);return}x.registrarPreparo(b,e.id,g,z()),b.preparos[e.id].itens=u,e.preparo=Math.round(g),L("preparo",`Preparo de ${e.marca} ${e.modelo} registrado: ${M(g)}`,{ref:e.id}),T(),Pa(),A("Preparo registrado: "+M(g)+"."),Z()},l("#g-vender",s).onclick=()=>{const u=ra(l("#g-venda",s).value),g=l("#g-data",s).value;if(!(u>0)){l("#g-venda",s).focus(),A("Informe o valor da venda.",!0);return}if(!g||g<e.entrada){A("A data da venda n\xE3o pode ser antes da troca.",!0);return}const j=u-e.pago-e.preparo,S=l("#g-com",s).value.trim(),H=l("#g-jur",s).value.trim();va("Registrar venda?",`${e.marca} ${e.modelo} vendida por ${M(u)} em ${N(g)}. Resultado bruto: ${M(j)} (${P(j/u)}). A m\xE1quina sai do p\xE1tio.`,"Registrar venda",()=>{x.registrarVenda(b,e.id,u,g),e.vendido=Math.round(u),e.saida=g,e.diasPatio=le(e.entrada,g);const O={};S&&(O.comissao=ra(S)),H&&(O.juros=ra(H)),Object.keys(O).length&&(e.custos=Object.assign({},e.custos,x.registrarCustos(b,e.id,O,D().nome))),L("venda",`Venda registrada: ${e.marca} ${e.modelo} por ${M(u)}`,{ref:e.id}),T(),Pa(),A("Venda registrada. Veja o previsto x realizado em Intelig\xEAncia de trocas."),Z()})},m.onclick=()=>va("Aplicar novo pre\xE7o?",`O an\xFAncio passa de ${M(e.anuncio)} para ${M(+m.dataset.novo)}.`,"Aplicar",()=>{const u={data:z(),valor:+m.dataset.novo,motivo:"Redu\xE7\xE3o de pre\xE7o"};(b.precos[e.id]=b.precos[e.id]||[]).push(u),e.precos=(e.precos||[]).concat(u),e.anuncio=u.valor,L("preco",`Pre\xE7o de ${e.marca} ${e.modelo} alterado para ${M(u.valor)}`,{ref:e.id}),T(),A("Novo pre\xE7o aplicado."),Z()})})}const Sa={periodo:"tudo",tipo:"",resultado:""};function Jo(){const a=Sa.periodo==="tudo"?"":(()=>{const u=new Date;return u.setMonth(u.getMonth()-+Sa.periodo),u.toISOString().slice(0,10)})(),e=I.vendidas().filter(u=>(!a||u.saida>=a)&&(!Sa.tipo||u.tipo===Sa.tipo)&&(!Sa.resultado||(Sa.resultado==="pos"?I.resultado(u)>=0:I.resultado(u)<0))).sort((u,g)=>g.saida.localeCompare(u.saida)),o=e.map(u=>{const g=Ba(u);return{t:u,r:g,dif:g?u.pago-g.teto:0,res:I.resultado(u),m:I.margem(u)}}),t=o.filter(u=>u.res<0),s=o.reduce((u,g)=>u+Math.max(0,g.dif),0),i=[{r:"Pago acima do recomendado",v:s,cls:"critico",extra:`${o.filter(u=>u.dif>0).length} trocas`},{r:"Preparo acima do previsto",v:o.reduce((u,g)=>u+Math.max(0,g.t.preparo-(g.t.preparoEst||g.t.preparo)),0),cls:"alerta",extra:`${o.filter(u=>u.t.preparoEst&&u.t.preparo>u.t.preparoEst).length} trocas`},{r:"Venda abaixo da estimativa",v:o.reduce((u,g)=>u+Math.max(0,(g.r?g.r.venda:g.t.vendido)-g.t.vendido),0),cls:"atencao",extra:`${o.filter(u=>u.r&&u.r.venda>u.t.vendido).length} trocas`},{r:"P\xE1tio acima de 90 dias",v:o.reduce((u,g)=>u+I.custoFinanceiro(g.t,Math.max(0,g.t.diasPatio-90)),0),cls:"neutro",extra:`custo financeiro estimado (${P(x.cfg.jurosMes)} a.m.), n\xE3o \xE9 preju\xEDzo realizado`}].sort((u,g)=>g.v-u.v),n=Q.validar(),m=Object.keys(n.porTipo).sort((u,g)=>n.porTipo[g].n-n.porTipo[u].n),r=o.filter(u=>u.r).slice(0,12),p={};e.forEach(u=>{const g=new Date(u.saida+"T12:00:00"),j=g.getFullYear()+" T"+(Math.floor(g.getMonth()/3)+1);(p[j]=p[j]||[]).push(I.margem(u))});const d=Object.keys(p).sort().map(u=>({r:u.slice(2),v:p[u].reduce((g,j)=>g+j,0)/p[u].length})),$=Object.keys(V).map(u=>({r:V[u].split(" ")[0],v:-t.filter(g=>g.t.tipo===u).reduce((g,j)=>g+j.res,0),cls:"critico",extra:`${t.filter(g=>g.t.tipo===u).length} com preju\xEDzo`})).filter(u=>u.v>0);w.innerHTML=`
+      <div class="titulo"><div><h1>Intelig\xEAncia de trocas</h1><p>Onde a revenda ganhou e onde perdeu dinheiro nas trocas j\xE1 vendidas.</p></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="exportar">${_('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Exportar</button>${la([{nome:"Venda antiga \xE0 m\xE3o",desc:"Troca que j\xE1 foi vendida",acao:lo},{nome:"Importar planilha",desc:"Hist\xF3rico do seu sistema",acao:()=>{W.modo="minhas",location.hash="#teste"}},{nome:"Puxar de documento",desc:"Foto, PDF ou Excel",acao:()=>{location.hash="#documentos"}}],"Registrar venda antiga")}</div></div>
       <div class="filtros">
-        <div class="campo"><label for="t-per">Período</label><select id="t-per">${[['12', 'Últimos 12 meses'], ['24', 'Últimos 24 meses'], ['tudo', 'Todo o histórico']].map(([v, n]) => `<option value="${v}" ${ft.periodo === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-        <div class="campo"><label for="t-tipo">Categoria</label><select id="t-tipo"><option value="">Todas</option>${Object.keys(NOMES).map((k) => `<option value="${k}" ${ft.tipo === k ? 'selected' : ''}>${NOMES[k]}</option>`).join('')}</select></div>
-        <div class="campo"><label for="t-res">Resultado</label><select id="t-res"><option value="">Todos</option><option value="pos" ${ft.resultado === 'pos' ? 'selected' : ''}>Positivo</option><option value="neg" ${ft.resultado === 'neg' ? 'selected' : ''}>Negativo</option></select></div>
+        <div class="campo"><label for="t-per">Per\xEDodo</label><select id="t-per">${[["12","\xDAltimos 12 meses"],["24","\xDAltimos 24 meses"],["tudo","Todo o hist\xF3rico"]].map(([u,g])=>`<option value="${u}" ${Sa.periodo===u?"selected":""}>${g}</option>`).join("")}</select></div>
+        <div class="campo"><label for="t-tipo">Categoria</label><select id="t-tipo"><option value="">Todas</option>${Object.keys(V).map(u=>`<option value="${u}" ${Sa.tipo===u?"selected":""}>${V[u]}</option>`).join("")}</select></div>
+        <div class="campo"><label for="t-res">Resultado</label><select id="t-res"><option value="">Todos</option><option value="pos" ${Sa.resultado==="pos"?"selected":""}>Positivo</option><option value="neg" ${Sa.resultado==="neg"?"selected":""}>Negativo</option></select></div>
       </div>
       <div class="kpis escalonado">
-        <div class="kpi k-marfim"><span class="rot">${ICO.barras}Trocas vendidas</span><span class="val">${conta(linhas.length, 'int')}</span><span class="exp">Margem média ${pct(linhas.reduce((s, l) => s + l.m, 0) / Math.max(1, linhas.length))}</span></div>
-        <div class="kpi k-salvia"><span class="rot">${ICO.moedas}Resultado bruto acumulado</span><span class="val">${conta(linhas.reduce((s, l) => s + l.res, 0), 'mil')}</span><span class="exp">Venda menos aquisição e preparo.</span></div>
-        <div class="kpi k-risco"><span class="rot">${ICO.alerta}Trocas com prejuízo</span><span class="val">${prej.length} ${prej.length === 1 ? 'troca' : 'trocas'}</span><span class="pilula">${mil(-prej.reduce((s, l) => s + l.res, 0))}</span><span class="exp">Venderam por menos do que custaram.</span></div>
-        <div class="kpi k-marfim"><span class="rot">${ICO.pct}Pago acima do recomendado</span><span class="val">${conta(excesso, 'mil')}</span><span class="exp">Soma do que foi pago além do valor máximo que o Anshur indicaria.</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.barras}Trocas vendidas</span><span class="val">${ia(o.length,"int")}</span><span class="exp">Margem m\xE9dia ${P(o.reduce((u,g)=>u+g.m,0)/Math.max(1,o.length))}</span></div>
+        <div class="kpi k-salvia"><span class="rot">${q.moedas}Resultado bruto acumulado</span><span class="val">${ia(o.reduce((u,g)=>u+g.res,0),"mil")}</span><span class="exp">Venda menos aquisi\xE7\xE3o e preparo.</span></div>
+        <div class="kpi k-risco"><span class="rot">${q.alerta}Trocas com preju\xEDzo</span><span class="val">${t.length} ${t.length===1?"troca":"trocas"}</span><span class="pilula">${E(-t.reduce((u,g)=>u+g.res,0))}</span><span class="exp">Venderam por menos do que custaram.</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.pct}Pago acima do recomendado</span><span class="val">${ia(s,"mil")}</span><span class="exp">Soma do que foi pago al\xE9m do valor m\xE1ximo que o Anshur indicaria.</span></div>
       </div>
       <div class="grade-3">
-        <section class="painel"><div class="painel-cab"><h2>Principais fontes de perda</h2></div>${G.horizontais(fontes)}</section>
-        <section class="painel"><div class="painel-cab"><h2>Margem realizada</h2><p>Por trimestre de venda</p></div>${tri.length > 1 ? G.linha(tri, { formato: (v) => pct(v), altura: 200 }) : '<p class="vazio">Poucos dados no período.</p>'}</section>
-        <section class="painel"><div class="painel-cab"><h2>Perdas por categoria</h2></div>${perdasTipo.length ? G.horizontais(perdasTipo) : '<p class="vazio">Nenhuma troca com prejuízo no filtro.</p>'}</section>
+        <section class="painel"><div class="painel-cab"><h2>Principais fontes de perda</h2></div>${ya.horizontais(i)}</section>
+        <section class="painel"><div class="painel-cab"><h2>Margem realizada</h2><p>Por trimestre de venda</p></div>${d.length>1?ya.linha(d,{formato:u=>P(u),altura:200}):'<p class="vazio">Poucos dados no per\xEDodo.</p>'}</section>
+        <section class="painel"><div class="painel-cab"><h2>Perdas por categoria</h2></div>${$.length?ya.horizontais($):'<p class="vazio">Nenhuma troca com preju\xEDzo no filtro.</p>'}</section>
       </div>
-      <section class="painel bloco"><div class="painel-cab"><h2>Qualidade do motor de avaliação</h2><p>Validação temporal, sem usar a própria venda</p></div>
-        ${val.n >= M.QUALIDADE.minimoValidacao ? `<div class="numeros">
-          <div><span>Vendas previstas e conferidas</span><b>${val.n} de ${val.total}</b></div>
-          <div><span>Erro médio (MAPE)</span><b>${pct(val.mape)}</b></div>
-          <div><span>Erro médio em reais (MAE)</span><b>${mil(val.mae)}</b></div>
-          <div><span>Tendência</span><b>${val.vies < 0 ? 'prevê ' + pct(-val.vies) + ' abaixo' : 'prevê ' + pct(val.vies) + ' acima'}</b></div>
+      <section class="painel bloco"><div class="painel-cab"><h2>Qualidade do motor de avalia\xE7\xE3o</h2><p>Valida\xE7\xE3o temporal, sem usar a pr\xF3pria venda</p></div>
+        ${n.n>=Q.QUALIDADE.minimoValidacao?`<div class="numeros">
+          <div><span>Vendas previstas e conferidas</span><b>${n.n} de ${n.total}</b></div>
+          <div><span>Erro m\xE9dio (MAPE)</span><b>${P(n.mape)}</b></div>
+          <div><span>Erro m\xE9dio em reais (MAE)</span><b>${E(n.mae)}</b></div>
+          <div><span>Tend\xEAncia</span><b>${n.vies<0?"prev\xEA "+P(-n.vies)+" abaixo":"prev\xEA "+P(n.vies)+" acima"}</b></div>
         </div>
         <div class="tabela-wrap" style="margin-top:12px"><table class="tabela"><thead><tr><th>Tipo</th><th class="n">Testes</th><th class="n">MAPE</th><th class="n">MAE</th></tr></thead><tbody>
-          ${tiposVal.map((k) => { const q = val.porTipo[k]; return `<tr><td>${NOMES[k]}</td><td class="n">${q.n}</td><td class="n">${q.n >= M.QUALIDADE.minimoValidacao ? pct(q.mape) : 'amostra pequena'}</td><td class="n">${q.n >= M.QUALIDADE.minimoValidacao ? mil(q.mae) : '—'}</td></tr>`; }).join('')}</tbody></table></div>
-        <p class="nota-rodape">Para cada venda, o motor só conheceu o que já tinha sido vendido antes da data daquela troca. As ${val.total - val.n} vendas mais antigas ficaram sem teste porque ainda não havia histórico suficiente.</p>`
-        : `<p class="vazio">Ainda não há vendas suficientes com data de troca e de venda para medir o erro (mínimo ${M.QUALIDADE.minimoValidacao}).</p>`}
+          ${m.map(u=>{const g=n.porTipo[u];return`<tr><td>${V[u]}</td><td class="n">${g.n}</td><td class="n">${g.n>=Q.QUALIDADE.minimoValidacao?P(g.mape):"amostra pequena"}</td><td class="n">${g.n>=Q.QUALIDADE.minimoValidacao?E(g.mae):"\u2014"}</td></tr>`}).join("")}</tbody></table></div>
+        <p class="nota-rodape">Para cada venda, o motor s\xF3 conheceu o que j\xE1 tinha sido vendido antes da data daquela troca. As ${n.total-n.n} vendas mais antigas ficaram sem teste porque ainda n\xE3o havia hist\xF3rico suficiente.</p>`:`<p class="vazio">Ainda n\xE3o h\xE1 vendas suficientes com data de troca e de venda para medir o erro (m\xEDnimo ${Q.QUALIDADE.minimoValidacao}).</p>`}
       </section>
-      <section class="painel bloco"><div class="painel-cab"><h2>${ICO.linha}Calendário de vendas da região</h2><p>Safra da cana, plantio da soja e o que a sua revenda já vendeu em cada mês</p></div>
-        ${Object.keys(NOMES).map((k) => { const s = SAFRA[k], mesAt = new Date().getMonth(), vendasMes = Array(12).fill(0); C.vendidas().filter((t) => t.tipo === k).forEach((t) => { vendasMes[+t.saida.slice(5, 7) - 1]++; });
-          return `<div style="margin:14px 0 4px"><b style="font-size:17px">${NOMES[k]}</b> <span class="sub">· melhor época: ${s.janela} (${s.motivo})</span></div>
-          <div class="cal">${['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'].map((m, i) => `<span class="${s.meses.includes(i) ? 'on' : ''} ${i === mesAt ? 'hoje' : ''}" title="${vendasMes[i]} vendas da revenda em ${m}">${m}<br><small>${vendasMes[i]}</small></span>`).join('')}</div>`; }).join('')}
-        <p class="nota-rodape">Verde: época de maior procura na região. Número embaixo: quantas máquinas desse tipo a revenda vendeu naquele mês no histórico. Com dados reais, o calendário passa a refletir o giro da própria revenda.</p>
+      <section class="painel bloco"><div class="painel-cab"><h2>${q.linha}Calend\xE1rio de vendas da regi\xE3o</h2><p>Safra da cana, plantio da soja e o que a sua revenda j\xE1 vendeu em cada m\xEAs</p></div>
+        ${Object.keys(V).map(u=>{const g=ye[u],j=new Date().getMonth(),S=Array(12).fill(0);return I.vendidas().filter(H=>H.tipo===u).forEach(H=>{S[+H.saida.slice(5,7)-1]++}),`<div style="margin:14px 0 4px"><b style="font-size:17px">${V[u]}</b> <span class="sub">\xB7 melhor \xE9poca: ${g.janela} (${g.motivo})</span></div>
+          <div class="cal">${["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"].map((H,O)=>`<span class="${g.meses.includes(O)?"on":""} ${O===j?"hoje":""}" title="${S[O]} vendas da revenda em ${H}">${H}<br><small>${S[O]}</small></span>`).join("")}</div>`}).join("")}
+        <p class="nota-rodape">Verde: \xE9poca de maior procura na regi\xE3o. N\xFAmero embaixo: quantas m\xE1quinas desse tipo a revenda vendeu naquele m\xEAs no hist\xF3rico. Com dados reais, o calend\xE1rio passa a refletir o giro da pr\xF3pria revenda.</p>
       </section>
-      <section class="painel bloco"><div class="painel-cab"><h2>Previsto x realizado</h2><p>Últimas vendas com previsão</p></div>
-        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Máquina</th><th class="n">Venda prev. · real</th><th class="n">Preparo prev. · real</th><th class="n">Margem prev. · real</th><th class="n">Pátio prev. · real</th><th>Origem</th></tr></thead><tbody>
-          ${pxr.length ? pxr.map((l) => { const r = l.r, mp = C.margemProjetada(r.venda, l.t.pago + (r.preparo || 0)); return `<tr><td class="maq"><b>${esc(l.t.marca + ' ' + l.t.modelo)}</b><span>${data(l.t.entrada)} → ${data(l.t.saida)}</span></td>
-            <td class="n">${mil(r.venda)} · <b class="${l.t.vendido < r.venda ? 'neg' : 'pos'}">${mil(l.t.vendido)}</b></td><td class="n">${mil(r.preparo || 0)} · <b class="${l.t.preparo > (r.preparo || 0) ? 'neg' : 'pos'}">${mil(l.t.preparo)}</b></td>
-            <td class="n">${pct(mp)} · <b class="${l.m < mp ? 'neg' : 'pos'}">${pct(l.m)}</b></td><td class="n">${r.dias ? r.dias + ' d' : '—'} · <b>${l.t.diasPatio} d</b></td><td>${r.registrado ? '<span class="tag comprovado">Registrado</span>' : '<span class="tag declarado">Reconstituído</span>'}</td></tr>`; }).join('') : '<tr><td colspan="6" class="vazio">Nenhuma venda com previsão no filtro.</td></tr>'}</tbody></table></div>
-        <p class="nota-rodape">Registrado: previsão gravada no dia em que a troca foi fechada no Anshur. Reconstituído: o que o motor diria naquele dia, usando só as vendas anteriores.</p>
+      <section class="painel bloco"><div class="painel-cab"><h2>Previsto x realizado</h2><p>\xDAltimas vendas com previs\xE3o</p></div>
+        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>M\xE1quina</th><th class="n">Venda prev. \xB7 real</th><th class="n">Preparo prev. \xB7 real</th><th class="n">Margem prev. \xB7 real</th><th class="n">P\xE1tio prev. \xB7 real</th><th>Origem</th></tr></thead><tbody>
+          ${r.length?r.map(u=>{const g=u.r,j=I.margemProjetada(g.venda,u.t.pago+(g.preparo||0));return`<tr><td class="maq"><b>${c(u.t.marca+" "+u.t.modelo)}</b><span>${N(u.t.entrada)} \u2192 ${N(u.t.saida)}</span></td>
+            <td class="n">${E(g.venda)} \xB7 <b class="${u.t.vendido<g.venda?"neg":"pos"}">${E(u.t.vendido)}</b></td><td class="n">${E(g.preparo||0)} \xB7 <b class="${u.t.preparo>(g.preparo||0)?"neg":"pos"}">${E(u.t.preparo)}</b></td>
+            <td class="n">${P(j)} \xB7 <b class="${u.m<j?"neg":"pos"}">${P(u.m)}</b></td><td class="n">${g.dias?g.dias+" d":"\u2014"} \xB7 <b>${u.t.diasPatio} d</b></td><td>${g.registrado?'<span class="tag comprovado">Registrado</span>':'<span class="tag declarado">Reconstitu\xEDdo</span>'}</td></tr>`}).join(""):'<tr><td colspan="6" class="vazio">Nenhuma venda com previs\xE3o no filtro.</td></tr>'}</tbody></table></div>
+        <p class="nota-rodape">Registrado: previs\xE3o gravada no dia em que a troca foi fechada no Anshur. Reconstitu\xEDdo: o que o motor diria naquele dia, usando s\xF3 as vendas anteriores.</p>
       </section>
-      <section class="painel bloco"><div class="tabela-wrap"><table class="tabela"><thead><tr><th>Venda</th><th>Máquina</th><th class="n">Recomendado</th><th class="n">Pago</th><th class="n">Diferença</th><th class="n">Preparo</th><th class="n">Venda</th><th class="n">Margem</th><th class="n">Resultado</th></tr></thead>
-        <tbody>${linhas.length ? linhas.map((l) => `<tr><td>${data(l.t.saida)}</td><td class="maq"><b>${esc(l.t.marca + ' ' + l.t.modelo)}</b><span>${l.t.ano} · ${horasTxt(l.t)} · ${l.t.diasPatio} dias</span></td>
-          <td class="n">${l.r ? mil(l.r.teto) : '—'}</td><td class="n">${mil(l.t.pago)}</td><td class="n ${l.dif > 0 ? 'neg' : 'pos'}">${l.dif > 0 ? '+' : ''}${mil(l.dif)}</td><td class="n">${mil(l.t.preparo)}</td><td class="n">${mil(l.t.vendido)}</td>
-          <td class="n ${l.m < 0 ? 'neg' : ''}">${pct(l.m)}</td><td class="n ${l.res < 0 ? 'neg' : 'pos'}">${mil(l.res)}</td></tr>`).join('') : '<tr><td colspan="9" class="vazio">Nenhuma troca com esses filtros.</td></tr>'}</tbody></table></div>
-        <p class="nota-rodape">"Recomendado" é o valor máximo que o Anshur indicaria na data da troca, aprendendo só com as vendas anteriores. A diferença é um ponto para revisar a decisão, não um prejuízo comprovado.</p></section>`;
-    [['t-per', 'periodo'], ['t-tipo', 'tipo'], ['t-res', 'resultado']].forEach(([i, k]) => { $('#' + i).onchange = (e) => { ft[k] = e.target.value; telaTrocas(); }; });
-    $('#exportar').onclick = () => baixarCSV('anshur-trocas.csv', [['Data da venda', 'Máquina', 'Categoria', 'Ano', 'Horas', 'Recomendado', 'Pago', 'Diferença', 'Preparo', 'Venda', 'Margem', 'Resultado', 'Dias no pátio']]
-      .concat(linhas.map((l) => [data(l.t.saida), l.t.marca + ' ' + l.t.modelo, NOMES[l.t.tipo], l.t.ano, l.t.horas, l.r ? l.r.teto : '', l.t.pago, l.dif, l.t.preparo, l.t.vendido, (l.m * 100).toFixed(1).replace('.', ',') + '%', l.res, l.t.diasPatio])));
-    contar();
-  }
-
-  // ---------- TESTE ÀS CEGAS ----------
-  const tc = { modo: OP ? 'minhas' : 'revenda', selecionadas: null, texto: '', previa: null };
-  function telaTeste() {
-    // só trocas que o motor conseguiria avaliar na data em que entraram (validação temporal)
-    const recentes = C.vendidas().filter((t) => rec(t)).sort((a, b) => b.saida.localeCompare(a.saida)).slice(0, 16);
-    if (!tc.selecionadas) tc.selecionadas = new Set(recentes.slice(0, 8).map((t) => t.id));
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Quanto você pagou a mais sem perceber?</h1><p>O Anshur avalia trocas antigas sem ver quanto foi pago, usando só o que tinha sido vendido antes de cada uma. Depois revelamos e comparamos.</p></div>${botaoAdicionar([{ nome: 'Colar ou abrir planilha', desc: 'Trocas antigas do seu sistema', acao: () => { tc.modo = 'minhas'; telaTeste(); } }, { nome: 'Venda antiga à mão', desc: 'Uma troca por vez', acao: addVendaManual }], 'Trazer vendas antigas')}</div>
+      <section class="painel bloco"><div class="tabela-wrap"><table class="tabela"><thead><tr><th>Venda</th><th>M\xE1quina</th><th class="n">Recomendado</th><th class="n">Pago</th><th class="n">Diferen\xE7a</th><th class="n">Preparo</th><th class="n">Venda</th><th class="n">Margem</th><th class="n">Resultado</th></tr></thead>
+        <tbody>${o.length?o.map(u=>`<tr><td>${N(u.t.saida)}</td><td class="maq"><b>${c(u.t.marca+" "+u.t.modelo)}</b><span>${u.t.ano} \xB7 ${pa(u.t)} \xB7 ${u.t.diasPatio} dias</span></td>
+          <td class="n">${u.r?E(u.r.teto):"\u2014"}</td><td class="n">${E(u.t.pago)}</td><td class="n ${u.dif>0?"neg":"pos"}">${u.dif>0?"+":""}${E(u.dif)}</td><td class="n">${E(u.t.preparo)}</td><td class="n">${E(u.t.vendido)}</td>
+          <td class="n ${u.m<0?"neg":""}">${P(u.m)}</td><td class="n ${u.res<0?"neg":"pos"}">${E(u.res)}</td></tr>`).join(""):'<tr><td colspan="9" class="vazio">Nenhuma troca com esses filtros.</td></tr>'}</tbody></table></div>
+        <p class="nota-rodape">"Recomendado" \xE9 o valor m\xE1ximo que o Anshur indicaria na data da troca, aprendendo s\xF3 com as vendas anteriores. A diferen\xE7a \xE9 um ponto para revisar a decis\xE3o, n\xE3o um preju\xEDzo comprovado.</p></section>`,[["t-per","periodo"],["t-tipo","tipo"],["t-res","resultado"]].forEach(([u,g])=>{l("#"+u).onchange=j=>{Sa[g]=j.target.value,Jo()}}),l("#exportar").onclick=()=>Ea("anshur-trocas.csv",[["Data da venda","M\xE1quina","Categoria","Ano","Horas","Recomendado","Pago","Diferen\xE7a","Preparo","Venda","Margem","Resultado","Dias no p\xE1tio"]].concat(o.map(u=>[N(u.t.saida),u.t.marca+" "+u.t.modelo,V[u.t.tipo],u.t.ano,u.t.horas,u.r?u.r.teto:"",u.t.pago,u.dif,u.t.preparo,u.t.vendido,(u.m*100).toFixed(1).replace(".",",")+"%",u.res,u.t.diasPatio]))),$a()}const W={modo:X?"minhas":"revenda",selecionadas:null,texto:"",previa:null};function Ce(){const a=I.vendidas().filter(o=>Ba(o)).sort((o,t)=>t.saida.localeCompare(o.saida)).slice(0,16);W.selecionadas||(W.selecionadas=new Set(a.slice(0,8).map(o=>o.id))),w.innerHTML=`
+      <div class="titulo"><div><h1>Quanto voc\xEA pagou a mais sem perceber?</h1><p>O Anshur avalia trocas antigas sem ver quanto foi pago, usando s\xF3 o que tinha sido vendido antes de cada uma. Depois revelamos e comparamos.</p></div>${la([{nome:"Colar ou abrir planilha",desc:"Trocas antigas do seu sistema",acao:()=>{W.modo="minhas",Ce()}},{nome:"Venda antiga \xE0 m\xE3o",desc:"Uma troca por vez",acao:lo}],"Trazer vendas antigas")}</div>
       <div class="abas-modo" role="group" aria-label="Origem das trocas">
-        <button type="button" data-m="revenda" aria-pressed="${tc.modo === 'revenda'}">${OP ? 'Trocas já importadas' : 'Trocas da demonstração'}</button>
-        <button type="button" data-m="minhas" aria-pressed="${tc.modo === 'minhas'}">${OP ? 'Importar planilha' : 'Usar minhas trocas'}</button>
+        <button type="button" data-m="revenda" aria-pressed="${W.modo==="revenda"}">${X?"Trocas j\xE1 importadas":"Trocas da demonstra\xE7\xE3o"}</button>
+        <button type="button" data-m="minhas" aria-pressed="${W.modo==="minhas"}">${X?"Importar planilha":"Usar minhas trocas"}</button>
       </div>
-      <div id="teste-corpo"></div>`;
-    $$('.abas-modo button', tela).forEach((b) => b.onclick = () => { tc.modo = b.dataset.m; telaTeste(); });
-    const corpo = $('#teste-corpo');
-    if (tc.modo === 'revenda') {
-      if (!recentes.length) { corpo.innerHTML = `<section class="painel vazio">Ainda não há trocas com data suficiente para o teste. <button class="link" type="button" id="ir-imp">Importar planilha</button></section>`; $('#ir-imp').onclick = () => { tc.modo = 'minhas'; telaTeste(); }; return; }
-      corpo.innerHTML = `<section class="painel passo"><div class="painel-cab"><h2>1. Escolha as trocas</h2><p><span id="qtd">${tc.selecionadas.size}</span> selecionadas</p></div>
-        <div class="selecao">${recentes.map((t) => `<label><input type="checkbox" value="${t.id}" ${tc.selecionadas.has(t.id) ? 'checked' : ''}> ${esc(t.marca + ' ' + t.modelo)} · ${t.ano} · ${horasTxt(t)}<span>troca em ${data(t.entrada)}</span></label>`).join('')}</div>
-        <div class="acoes"><button class="btn btn-ouro" type="button" id="rodar">Avaliar sem ver o resultado</button></div></section><div id="revelacao"></div>`;
-      $$('.selecao input', corpo).forEach((c) => c.onchange = () => { c.checked ? tc.selecionadas.add(c.value) : tc.selecionadas.delete(c.value); $('#qtd').textContent = tc.selecionadas.size; });
-      $('#rodar').onclick = (e) => {
-        const casos = recentes.filter((t) => tc.selecionadas.has(t.id));
-        if (casos.length < 3) { toast('Escolha pelo menos 3 trocas.', true); return; }
-        revelar(casos.map((t) => ({ t, r: rec(t) })), false, e.currentTarget);
-      };
-      return;
-    }
-    corpo.innerHTML = `<section class="painel passo"><h2>Use as trocas reais da sua revenda</h2>
-      <p class="sub" style="margin:6px 0 14px">Cole do Excel ou abra o CSV do seu sistema. Os dados são lidos só neste navegador: nada é enviado.</p>
-      <p class="ajuda">Colunas (com ou sem cabeçalho, nesta ordem se não houver): <b>categoria; fabricante; modelo; ano; horas; estado (1 a 5); valor pago na troca; valor vendido; dias no pátio; Fipe (opcional); data da troca; data da venda</b>. Valores podem vir como "R$ 210.000,00". Com as datas, o teste usa só as vendas anteriores a cada troca.</p>
-      <div class="campo" style="margin-top:12px"><label for="cola">Trocas</label><textarea class="cola" id="cola" placeholder="Categoria;Fabricante;Modelo;Ano;Horas;Estado;Valor pago;Valor vendido;Dias;Fipe;Data da troca;Data da venda">${esc(tc.texto)}</textarea></div>
+      <div id="teste-corpo"></div>`,R(".abas-modo button",w).forEach(o=>o.onclick=()=>{W.modo=o.dataset.m,Ce()});const e=l("#teste-corpo");if(W.modo==="revenda"){if(!a.length){e.innerHTML='<section class="painel vazio">Ainda n\xE3o h\xE1 trocas com data suficiente para o teste. <button class="link" type="button" id="ir-imp">Importar planilha</button></section>',l("#ir-imp").onclick=()=>{W.modo="minhas",Ce()};return}e.innerHTML=`<section class="painel passo"><div class="painel-cab"><h2>1. Escolha as trocas</h2><p><span id="qtd">${W.selecionadas.size}</span> selecionadas</p></div>
+        <div class="selecao">${a.map(o=>`<label><input type="checkbox" value="${o.id}" ${W.selecionadas.has(o.id)?"checked":""}> ${c(o.marca+" "+o.modelo)} \xB7 ${o.ano} \xB7 ${pa(o)}<span>troca em ${N(o.entrada)}</span></label>`).join("")}</div>
+        <div class="acoes"><button class="btn btn-ouro" type="button" id="rodar">Avaliar sem ver o resultado</button></div></section><div id="revelacao"></div>`,R(".selecao input",e).forEach(o=>o.onchange=()=>{o.checked?W.selecionadas.add(o.value):W.selecionadas.delete(o.value),l("#qtd").textContent=W.selecionadas.size}),l("#rodar").onclick=o=>{const t=a.filter(s=>W.selecionadas.has(s.id));if(t.length<3){A("Escolha pelo menos 3 trocas.",!0);return}Xo(t.map(s=>({t:s,r:Ba(s)})),!1,o.currentTarget)};return}e.innerHTML=`<section class="painel passo"><h2>Use as trocas reais da sua revenda</h2>
+      <p class="sub" style="margin:6px 0 14px">Cole do Excel ou abra o CSV do seu sistema. Os dados s\xE3o lidos s\xF3 neste navegador: nada \xE9 enviado.</p>
+      <p class="ajuda">Colunas (com ou sem cabe\xE7alho, nesta ordem se n\xE3o houver): <b>categoria; fabricante; modelo; ano; horas; estado (1 a 5); valor pago na troca; valor vendido; dias no p\xE1tio; Fipe (opcional); data da troca; data da venda</b>. Valores podem vir como "R$ 210.000,00". Com as datas, o teste usa s\xF3 as vendas anteriores a cada troca.</p>
+      <div class="campo" style="margin-top:12px"><label for="cola">Trocas</label><textarea class="cola" id="cola" placeholder="Categoria;Fabricante;Modelo;Ano;Horas;Estado;Valor pago;Valor vendido;Dias;Fipe;Data da troca;Data da venda">${c(W.texto)}</textarea></div>
       <div class="acoes"><button class="btn btn-ouro" type="button" id="conferir">Conferir planilha</button><label class="btn btn-linha" style="cursor:pointer">Abrir arquivo (CSV ou Excel)<input type="file" accept=".csv,.txt,.tsv,.xlsx,.xls,.ods,text/csv" id="arquivo" class="sr"></label><button class="btn btn-linha" type="button" id="modelo">Baixar planilha modelo</button></div>
-      <div id="previa"></div></section>${blocoSync()}<div id="revelacao"></div>`;
-    ligarBotoesSync(corpo);
-    $('#cola').oninput = (e) => { tc.texto = e.target.value; tc.previa = null; $('#previa').innerHTML = ''; };
-    $('#modelo').onclick = baixarModeloTrocas;
-    $('#arquivo').onchange = async (e) => { const f = e.target.files[0]; if (!f) return; e.target.value = ''; try { const l = await lerTexto(f, () => {}); tc.texto = l.texto || ''; $('#cola').value = tc.texto; conferir(); } catch (er) { toast(`Não foi possível ler o arquivo: ${er.message}`, true); } };
-    $('#conferir').onclick = conferir;
-    if (tc.previa) mostrarPrevia();
-  }
-
-  function conferir() {
-    if (!tc.texto.trim()) { toast('Cole as trocas ou abra um arquivo.', true); return; }
-    tc.previa = window.IMPORTAR.ler(tc.texto, { refDe: M.refDe, anoMax: anoAtual });
-    mostrarPrevia();
-  }
-  function mostrarPrevia() {
-    const p = tc.previa, caixa = $('#previa'); if (!caixa) return;
-    caixa.innerHTML = `<div class="conta" style="margin-top:16px"><b>${p.aceitas.length} ${p.aceitas.length === 1 ? 'troca aceita' : 'trocas aceitas'}</b> · ${p.rejeitadas.length} ${p.rejeitadas.length === 1 ? 'rejeitada' : 'rejeitadas'} · ${p.comDatas ? 'com datas: teste temporal' : 'sem datas: cada troca é testada com as outras'}</div>
-      ${p.rejeitadas.length ? `<div class="tabela-wrap" style="margin-top:10px"><table class="tabela"><thead><tr><th>Linha</th><th>Motivo</th><th>Conteúdo</th></tr></thead><tbody>${p.rejeitadas.slice(0, 12).map((r) => `<tr><td>${r.linha}</td><td class="neg">${esc(r.motivo)}</td><td class="sub">${esc(r.texto)}</td></tr>`).join('')}</tbody></table></div>${p.rejeitadas.length > 12 ? `<p class="nota-rodape">E mais ${p.rejeitadas.length - 12} linhas rejeitadas.</p>` : ''}` : ''}
-      ${p.aceitas.length ? `<div class="tabela-wrap" style="margin-top:10px"><table class="tabela"><thead><tr><th>Máquina</th><th class="n">Ano</th><th class="n">Horas</th><th class="n">Pago</th><th class="n">Vendido</th><th>Troca → venda</th></tr></thead><tbody>${p.aceitas.slice(0, 8).map((t) => `<tr><td class="maq"><b>${esc(t.marca + ' ' + t.modelo)}</b><span>${NOMES[t.tipo]}</span></td><td class="n">${t.ano}</td><td class="n">${t.horas.toLocaleString('pt-BR')}</td><td class="n">${real(t.pago)}</td><td class="n">${real(t.vendido)}</td><td>${t.entrada ? data(t.entrada) + ' → ' + data(t.saida) : '—'}</td></tr>`).join('')}</tbody></table></div>${p.aceitas.length > 8 ? `<p class="nota-rodape">Mostrando 8 de ${p.aceitas.length}.</p>` : ''}` : ''}
-      <div class="acoes"><button class="btn btn-ouro" type="button" id="rodar-minhas" ${p.aceitas.length < 5 ? 'disabled' : ''}>Avaliar sem ver o resultado</button>${p.comDatas ? `<button class="btn btn-linha" type="button" id="salvar-hist" ${p.aceitas.length < 5 ? 'disabled' : ''}>Usar como histórico da minha revenda</button>` : ''}</div>
-      ${p.aceitas.length < 5 ? '<p class="nota-rodape neg">São precisas pelo menos 5 trocas válidas.</p>' : ''}${!p.comDatas && p.aceitas.length ? '<p class="nota-rodape">Para usar como histórico da revenda, inclua as datas da troca e da venda.</p>' : ''}`;
-    const rodar = $('#rodar-minhas', caixa);
-    if (rodar) rodar.onclick = (e) => {
-      const h = p.aceitas;
-      const casos = h.map((t) => ({ t, r: M.avaliar(t, { historico: h, excluir: t.id, ate: p.comDatas ? t.entrada : undefined, semValidacao: true }) }));
-      revelar(casos, true, e.currentTarget, p.comDatas);
-    };
-    const sh = $('#salvar-hist', caixa);
-    if (sh) sh.onclick = () => confirmar('Usar como histórico da sua revenda?', `As ${p.aceitas.length} trocas vão para o ambiente com dados reais (separado da demonstração), ${K.nuvem ? 'guardadas na conta da revenda' : 'guardadas neste navegador e enviadas para a conta quando você entrar'}. O Anshur passa a avaliar com base nelas.`, 'Usar como histórico', () => {
-      const op = K.repo.ler('op');
-      const chave = (t) => [t.tipo, t.modelo, t.ano, t.horas, t.pago, t.vendido].join('|');
-      const ja = new Set((op.historico || []).map(chave));
-      const novas = p.aceitas.filter((t) => !ja.has(chave(t))).map((t, i) => ({ ...t, id: 'H' + ((op.historico || []).length + i + 1), ficha: { motor: t.cond / 20, transmissao: t.cond / 20, hidraulico: t.cond / 20, pneus: t.cond / 20, cabine: t.cond / 20, lataria: t.cond / 20 }, manutencoes: [] }));
-      op.historico = (op.historico || []).concat(novas);
-      if (!K.repo.gravar(op, 'op')) { toast('Não foi possível salvar neste navegador.', true); return; }
-      K.repo.trocarAmbiente('op'); location.hash = '#trocas'; K.recarregar();
-    });
-  }
-
-  function revelar(casosBrutos, importadas, botao, temporal = true) {
-    const caixa = $('#revelacao');
-    const res = casosBrutos.filter((c) => c.r);
-    if (!res.length) { toast('Não foi possível avaliar essas trocas: histórico insuficiente antes delas.', true); return; }
-    botao.classList.add('carregando');
-    caixa.innerHTML = `<section class="placar bloco" aria-live="polite"><span class="sub">Avaliando ${res.length} trocas sem ver o valor pago…</span><div class="grande" id="placar-val">—</div><p id="placar-txt"></p></section>
-      <div class="cegas">${res.map((c, i) => `<article class="cega" id="cega-${i}"><h3>${esc(c.t.marca + ' ' + c.t.modelo)} · ${c.t.ano} · ${horasTxt(c.t)}</h3>
-        <div class="linhas"><div><span>Anshur recomendaria até</span><b class="oculto" data-a>calculando</b></div><div><span>A revenda pagou</span><b class="oculto" data-p>••••••</b></div><div><span>Vendeu por</span><b class="oculto" data-v>••••••</b></div><div><span>Diferença</span><b class="oculto" data-d>••••••</b></div></div></article>`).join('')}</div>`;
-    caixa.scrollIntoView({ behavior: reduzido ? 'auto' : 'smooth', block: 'start' });
-    const passo = reduzido ? 0 : 420;
-    res.forEach((c, i) => {
-      const card = $('#cega-' + i, caixa), dif = c.t.pago - c.r.teto;
-      setTimeout(() => { const a = $('[data-a]', card); a.textContent = real(c.r.teto); a.className = 'revela'; }, passo * i + 200);
-      setTimeout(() => {
-        const p = $('[data-p]', card), v = $('[data-v]', card), d = $('[data-d]', card);
-        p.textContent = real(c.t.pago); v.textContent = real(c.t.vendido);
-        const margemSe = (c.t.vendido - Math.min(c.t.pago, c.r.teto) - (c.t.preparo || 0)) / c.t.vendido, margemFoi = C.margem(c.t);
-        d.innerHTML = dif > 0 ? `<span class="neg">${real(dif)} acima (${pct(dif / c.r.teto)})</span>` : `<span class="pos">${real(-dif)} abaixo</span>`;
-        [p, v, d].forEach((x) => { x.className = 'revela'; });
-        if (dif > 0) card.insertAdjacentHTML('beforeend', `<p class="nota-rodape revela">Margem foi ${pct(margemFoi)}; pagando o recomendado seria ${pct(margemSe)}. Previsão de venda: ${real(c.r.venda)}.</p>`);
-        card.classList.add('revelada', dif > 0 ? 'pagou-mais' : 'pagou-menos');
-      }, passo * i + 200 + passo * 0.7);
-    });
-    setTimeout(() => {
-      botao.classList.remove('carregando');
-      const mais = res.filter((c) => c.t.pago > c.r.teto), menos = res.filter((c) => c.t.pago <= c.r.teto);
-      const soma = mais.reduce((s, c) => s + c.t.pago - c.r.teto, 0);
-      const erroVenda = res.reduce((s, c) => s + Math.abs(c.r.venda - c.t.vendido) / c.t.vendido, 0) / res.length;
-      const el = $('#placar-val', caixa); el.dataset.conta = soma; el.dataset.fmt = 'real'; contar(caixa);
-      $('.placar .sub', caixa).textContent = `Em ${mais.length} de ${res.length} trocas a revenda pagou acima do valor máximo que o Anshur indicaria`;
-      $('#placar-txt', caixa).innerHTML = `Nas outras ${menos.length}, pagou dentro do recomendado. Nessas trocas o Anshur errou o preço de venda em ${pct(erroVenda)} em média. A diferença é uma oportunidade de revisar a decisão, não prejuízo comprovado: a avaliação também pode errar.${importadas ? (temporal ? ' Cada troca foi avaliada só com as vendas anteriores a ela.' : ' Sem datas, cada troca foi avaliada com as outras da planilha; com poucas trocas a estimativa é preliminar.') : ''}
-        <span class="acoes" style="display:flex"><button class="btn btn-linha" type="button" id="repetir">Repetir com outras trocas</button>${importadas ? '' : '<a class="btn btn-linha" href="#trocas">Ver inteligência de trocas</a>'}</span>`;
-      $('#repetir', caixa).onclick = () => { caixa.innerHTML = ''; window.scrollTo({ top: 0, behavior: reduzido ? 'auto' : 'smooth' }); };
-    }, passo * res.length + 200 + passo);
-  }
-
-  // ---------- PASSAPORTES ----------
-  function telaPassaportes() {
-    const itens = C.patio().map(infoPatio).sort((a, b) => b.t.entrada.localeCompare(a.t.entrada));
-    if (!itens.length) { tela.innerHTML = '<div class="titulo"><div><h1>Passaportes</h1><p>Nenhuma máquina no pátio. Ao fechar uma troca, o passaporte é criado automaticamente.</p></div></div><a class="btn btn-ouro" href="#avaliar">Avaliar uma troca</a>'; return; }
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Passaportes</h1><p>A ficha pública de cada usado do pátio: o comprador aponta o celular no QR Code e vê inspeção, documentos e manutenções.</p></div>${botaoAdicionar([{ nome: 'Máquina no pátio', desc: 'O passaporte é criado junto', acao: () => addMaquinaManual() }], 'Cadastrar máquina no pátio')}</div>
-      <div class="cartoes escalonado">${itens.map((i) => {
-        const comp = (i.t.manutencoes || []).filter((m) => m.comNota).length, tot = (i.t.manutencoes || []).length;
-        return `<article class="cartao-pp"><img class="pp-foto" src="${F.de(i.t).propria ? F.de(i.t).u : F.mini(F.de(i.t).u)}" alt="${esc(i.t.marca + ' ' + i.t.modelo)}" loading="lazy"><span class="id">ANS-${esc(i.t.id)}</span><h2 style="font-size:17px">${esc(i.t.marca + ' ' + i.t.modelo)}</h2>
-          <p class="sub">${NOMES[i.t.tipo]} · ${i.t.ano} · ${horasTxt(i.t)} · anunciado ${mil(i.t.anuncio)}</p>
-          <p class="sub"><span class="tag comprovado">${comp} comprovadas</span> <span class="tag declarado">${tot - comp} declaradas</span></p>
-          <div class="acoes" style="margin-top:4px"><a class="btn btn-ouro" href="passaporte.html?id=${i.t.id}">Abrir</a><button class="btn btn-linha" type="button" data-copiar="${i.t.id}">Copiar link</button></div></article>`;
-      }).join('')}</div>`;
-    $$('[data-copiar]', tela).forEach((b) => b.onclick = async () => {
-      const url = new URL('passaporte.html?id=' + b.dataset.copiar, location.href).href;
-      try { await navigator.clipboard.writeText(url); toast('Link do passaporte copiado.'); } catch (e) { toast('Não foi possível copiar. Link: ' + url, true); }
-    });
-  }
-
-  // histórico de oficina por modelo: defeitos em garantia e quanto o preparo passou do previsto nas trocas
-  function historicoModelo(modelo) {
-    const gar = (A.garantias || []).filter((g) => g.modelo === modelo);
-    const grupos = {}; gar.forEach((g) => { const x = (grupos[g.servico] = grupos[g.servico] || { servico: g.servico, n: 0, soma: 0 }); x.n++; x.soma += g.valor; });
-    const defeitos = Object.values(grupos).map((d) => ({ ...d, media: d.soma / d.n })).sort((a, b) => b.n - a.n || b.media - a.media);
-    const trocas = A.trocas.filter((t) => t.modelo === modelo && t.preparoEst);
-    const reserva = trocas.length ? Math.round(trocas.reduce((s, t) => s + Math.max(0, t.preparo - t.preparoEst), 0) / trocas.length / 100) * 100 : 0;
-    return { n: gar.length + trocas.length, defeitos, trocas: trocas.length, reserva };
-  }
-
-  // ---------- VENDEDORES ----------
-  function porVendedor() {
-    const g = {};
-    C.vendidas().forEach((t) => {
-      const v = t.vendedor || 'Sem vendedor'; const r = rec(t);
-      const x = (g[v] = g[v] || { nome: v, trocas: 0, resultado: 0, venda: 0, acima: 0, nAcima: 0, dias: 0, prej: 0 });
-      x.trocas++; x.resultado += C.resultado(t); x.venda += t.vendido; x.dias += t.diasPatio || 0;
-      if (C.resultado(t) < 0) x.prej++;
-      if (r && t.pago > r.teto) { x.acima += t.pago - r.teto; x.nAcima++; }
-    });
-    return Object.values(g).map((x) => { const bruta = x.venda * K.cfg.comissaoPct, desconto = Math.min(bruta, x.acima * K.cfg.descontoAcima); return { ...x, margem: x.resultado / x.venda, diasMedio: x.dias / x.trocas, comissao: bruta, desconto, comissaoFinal: bruta - desconto }; }).sort((a, b) => b.resultado - a.resultado);
-  }
-  function telaVendedores() {
-    const vs = porVendedor();
-    if (!vs.length) { tela.innerHTML = '<div class="titulo"><div><h1>Vendedores</h1><p>Sem trocas vendidas ainda.</p></div></div>'; return; }
-    const melhorMargem = vs.slice().sort((a, b) => b.margem - a.margem)[0];
-    const maisAcima = vs.slice().sort((a, b) => b.acima - a.acima)[0];
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Vendedores</h1><p>Quem traz resultado nas trocas e quem paga caro demais no usado.</p></div>${botaoAdicionar([{ nome: 'Adicionar vendedor', desc: 'Entra na equipe com perfil de vendedor', acao: () => addUsuario({ perfil: 'vendedor', nome: '', email: '' }) }], 'Novo vendedor')}</div>
+      <div id="previa"></div></section>${ks()}<div id="revelacao"></div>`,l("#cola").oninput=o=>{W.texto=o.target.value,W.previa=null,l("#previa").innerHTML=""},l("#modelo").onclick=Vo,l("#arquivo").onchange=async o=>{const t=o.target.files[0];if(t){o.target.value="";try{const s=await uo(t,()=>{});W.texto=s.texto||"",l("#cola").value=W.texto,Qo()}catch(s){A(`N\xE3o foi poss\xEDvel ler o arquivo: ${s.message}`,!0)}}},l("#conferir").onclick=Qo,W.previa&&Wo()}function Qo(){if(!W.texto.trim()){A("Cole as trocas ou abra um arquivo.",!0);return}W.previa=window.IMPORTAR.ler(W.texto,{refDe:Q.refDe,anoMax:Da}),Wo()}function Wo(){const a=W.previa,e=l("#previa");if(!e)return;e.innerHTML=`<div class="conta" style="margin-top:16px"><b>${a.aceitas.length} ${a.aceitas.length===1?"troca aceita":"trocas aceitas"}</b> \xB7 ${a.rejeitadas.length} ${a.rejeitadas.length===1?"rejeitada":"rejeitadas"} \xB7 ${a.comDatas?"com datas: teste temporal":"sem datas: cada troca \xE9 testada com as outras"}</div>
+      ${a.rejeitadas.length?`<div class="tabela-wrap" style="margin-top:10px"><table class="tabela"><thead><tr><th>Linha</th><th>Motivo</th><th>Conte\xFAdo</th></tr></thead><tbody>${a.rejeitadas.slice(0,12).map(s=>`<tr><td>${s.linha}</td><td class="neg">${c(s.motivo)}</td><td class="sub">${c(s.texto)}</td></tr>`).join("")}</tbody></table></div>${a.rejeitadas.length>12?`<p class="nota-rodape">E mais ${a.rejeitadas.length-12} linhas rejeitadas.</p>`:""}`:""}
+      ${a.aceitas.length?`<div class="tabela-wrap" style="margin-top:10px"><table class="tabela"><thead><tr><th>M\xE1quina</th><th class="n">Ano</th><th class="n">Horas</th><th class="n">Pago</th><th class="n">Vendido</th><th>Troca \u2192 venda</th></tr></thead><tbody>${a.aceitas.slice(0,8).map(s=>`<tr><td class="maq"><b>${c(s.marca+" "+s.modelo)}</b><span>${V[s.tipo]}</span></td><td class="n">${s.ano}</td><td class="n">${s.horas.toLocaleString("pt-BR")}</td><td class="n">${M(s.pago)}</td><td class="n">${M(s.vendido)}</td><td>${s.entrada?N(s.entrada)+" \u2192 "+N(s.saida):"\u2014"}</td></tr>`).join("")}</tbody></table></div>${a.aceitas.length>8?`<p class="nota-rodape">Mostrando 8 de ${a.aceitas.length}.</p>`:""}`:""}
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="rodar-minhas" ${a.aceitas.length<5?"disabled":""}>Avaliar sem ver o resultado</button>${a.comDatas?`<button class="btn btn-linha" type="button" id="salvar-hist" ${a.aceitas.length<5?"disabled":""}>Usar como hist\xF3rico da minha revenda</button>`:""}</div>
+      ${a.aceitas.length<5?'<p class="nota-rodape neg">S\xE3o precisas pelo menos 5 trocas v\xE1lidas.</p>':""}${!a.comDatas&&a.aceitas.length?'<p class="nota-rodape">Para usar como hist\xF3rico da revenda, inclua as datas da troca e da venda.</p>':""}`;const o=l("#rodar-minhas",e);o&&(o.onclick=s=>{const i=a.aceitas,n=i.map(m=>({t:m,r:Q.avaliar(m,{historico:i,excluir:m.id,ate:a.comDatas?m.entrada:void 0,semValidacao:!0})}));Xo(n,!0,s.currentTarget,a.comDatas)});const t=l("#salvar-hist",e);t&&(t.onclick=()=>va("Usar como hist\xF3rico da sua revenda?",`As ${a.aceitas.length} trocas v\xE3o para o ambiente com dados reais (separado da demonstra\xE7\xE3o), ${x.nuvem?"guardadas na conta da revenda":"guardadas neste navegador e enviadas para a conta quando voc\xEA entrar"}. O Anshur passa a avaliar com base nelas.`,"Usar como hist\xF3rico",()=>{const s=x.repo.ler("op"),i=r=>[r.tipo,r.modelo,r.ano,r.horas,r.pago,r.vendido].join("|"),n=new Set((s.historico||[]).map(i)),m=a.aceitas.filter(r=>!n.has(i(r))).map((r,p)=>({...r,id:"H"+((s.historico||[]).length+p+1),ficha:{motor:r.cond/20,transmissao:r.cond/20,hidraulico:r.cond/20,pneus:r.cond/20,cabine:r.cond/20,lataria:r.cond/20},manutencoes:[]}));if(s.historico=(s.historico||[]).concat(m),!x.repo.gravar(s,"op")){A("N\xE3o foi poss\xEDvel salvar neste navegador.",!0);return}x.repo.trocarAmbiente("op"),location.hash="#trocas",x.recarregar()}))}function Xo(a,e,o,t=!0){const s=l("#revelacao"),i=a.filter(m=>m.r);if(!i.length){A("N\xE3o foi poss\xEDvel avaliar essas trocas: hist\xF3rico insuficiente antes delas.",!0);return}o.classList.add("carregando"),s.innerHTML=`<section class="placar bloco" aria-live="polite"><span class="sub">Avaliando ${i.length} trocas sem ver o valor pago\u2026</span><div class="grande" id="placar-val">\u2014</div><p id="placar-txt"></p></section>
+      <div class="cegas">${i.map((m,r)=>`<article class="cega" id="cega-${r}"><h3>${c(m.t.marca+" "+m.t.modelo)} \xB7 ${m.t.ano} \xB7 ${pa(m.t)}</h3>
+        <div class="linhas"><div><span>Anshur recomendaria at\xE9</span><b class="oculto" data-a>calculando</b></div><div><span>A revenda pagou</span><b class="oculto" data-p>\u2022\u2022\u2022\u2022\u2022\u2022</b></div><div><span>Vendeu por</span><b class="oculto" data-v>\u2022\u2022\u2022\u2022\u2022\u2022</b></div><div><span>Diferen\xE7a</span><b class="oculto" data-d>\u2022\u2022\u2022\u2022\u2022\u2022</b></div></div></article>`).join("")}</div>`,s.scrollIntoView({behavior:Fa?"auto":"smooth",block:"start"});const n=Fa?0:420;i.forEach((m,r)=>{const p=l("#cega-"+r,s),d=m.t.pago-m.r.teto;setTimeout(()=>{const $=l("[data-a]",p);$.textContent=M(m.r.teto),$.className="revela"},n*r+200),setTimeout(()=>{const $=l("[data-p]",p),u=l("[data-v]",p),g=l("[data-d]",p);$.textContent=M(m.t.pago),u.textContent=M(m.t.vendido);const j=(m.t.vendido-Math.min(m.t.pago,m.r.teto)-(m.t.preparo||0))/m.t.vendido,S=I.margem(m.t);g.innerHTML=d>0?`<span class="neg">${M(d)} acima (${P(d/m.r.teto)})</span>`:`<span class="pos">${M(-d)} abaixo</span>`,[$,u,g].forEach(H=>{H.className="revela"}),d>0&&p.insertAdjacentHTML("beforeend",`<p class="nota-rodape revela">Margem foi ${P(S)}; pagando o recomendado seria ${P(j)}. Previs\xE3o de venda: ${M(m.r.venda)}.</p>`),p.classList.add("revelada",d>0?"pagou-mais":"pagou-menos")},n*r+200+n*.7)}),setTimeout(()=>{o.classList.remove("carregando");const m=i.filter(u=>u.t.pago>u.r.teto),r=i.filter(u=>u.t.pago<=u.r.teto),p=m.reduce((u,g)=>u+g.t.pago-g.r.teto,0),d=i.reduce((u,g)=>u+Math.abs(g.r.venda-g.t.vendido)/g.t.vendido,0)/i.length,$=l("#placar-val",s);$.dataset.conta=p,$.dataset.fmt="real",$a(s),l(".placar .sub",s).textContent=`Em ${m.length} de ${i.length} trocas a revenda pagou acima do valor m\xE1ximo que o Anshur indicaria`,l("#placar-txt",s).innerHTML=`Nas outras ${r.length}, pagou dentro do recomendado. Nessas trocas o Anshur errou o pre\xE7o de venda em ${P(d)} em m\xE9dia. A diferen\xE7a \xE9 uma oportunidade de revisar a decis\xE3o, n\xE3o preju\xEDzo comprovado: a avalia\xE7\xE3o tamb\xE9m pode errar.${e?t?" Cada troca foi avaliada s\xF3 com as vendas anteriores a ela.":" Sem datas, cada troca foi avaliada com as outras da planilha; com poucas trocas a estimativa \xE9 preliminar.":""}
+        <span class="acoes" style="display:flex"><button class="btn btn-linha" type="button" id="repetir">Repetir com outras trocas</button>${e?"":'<a class="btn btn-linha" href="#trocas">Ver intelig\xEAncia de trocas</a>'}</span>`,l("#repetir",s).onclick=()=>{s.innerHTML="",window.scrollTo({top:0,behavior:Fa?"auto":"smooth"})}},n*i.length+200+n)}function xs(){const a=I.patio().map(Ta).sort((e,o)=>o.t.entrada.localeCompare(e.t.entrada));if(!a.length){w.innerHTML='<div class="titulo"><div><h1>Passaportes</h1><p>Nenhuma m\xE1quina no p\xE1tio. Ao fechar uma troca, o passaporte \xE9 criado automaticamente.</p></div></div><a class="btn btn-ouro" href="#avaliar">Avaliar uma troca</a>';return}w.innerHTML=`
+      <div class="titulo"><div><h1>Passaportes</h1><p>A ficha p\xFAblica de cada usado do p\xE1tio: o comprador aponta o celular no QR Code e v\xEA inspe\xE7\xE3o, documentos e manuten\xE7\xF5es.</p></div>${la([{nome:"M\xE1quina no p\xE1tio",desc:"O passaporte \xE9 criado junto",acao:()=>ve()}],"Cadastrar m\xE1quina no p\xE1tio")}</div>
+      <div class="cartoes escalonado">${a.map(e=>{const o=(e.t.manutencoes||[]).filter(s=>s.comNota).length,t=(e.t.manutencoes||[]).length;return`<article class="cartao-pp"><img class="pp-foto" src="${ha.de(e.t).propria?ha.de(e.t).u:ha.mini(ha.de(e.t).u)}" alt="${c(e.t.marca+" "+e.t.modelo)}" loading="lazy"><span class="id">ANS-${c(e.t.id)}</span><h2 style="font-size:17px">${c(e.t.marca+" "+e.t.modelo)}</h2>
+          <p class="sub">${V[e.t.tipo]} \xB7 ${e.t.ano} \xB7 ${pa(e.t)} \xB7 anunciado ${E(e.t.anuncio)}</p>
+          <p class="sub"><span class="tag comprovado">${o} comprovadas</span> <span class="tag declarado">${t-o} declaradas</span></p>
+          <div class="acoes" style="margin-top:4px"><a class="btn btn-ouro" href="passaporte.html?id=${e.t.id}">Abrir</a><button class="btn btn-linha" type="button" data-copiar="${e.t.id}">Copiar link</button></div></article>`}).join("")}</div>`,R("[data-copiar]",w).forEach(e=>e.onclick=async()=>{const o=new URL("passaporte.html?id="+e.dataset.copiar,location.href).href;try{await navigator.clipboard.writeText(o),A("Link do passaporte copiado.")}catch{A("N\xE3o foi poss\xEDvel copiar. Link: "+o,!0)}})}function to(a){const e=(y.garantias||[]).filter(n=>n.modelo===a),o={};e.forEach(n=>{const m=o[n.servico]=o[n.servico]||{servico:n.servico,n:0,soma:0};m.n++,m.soma+=n.valor});const t=Object.values(o).map(n=>({...n,media:n.soma/n.n})).sort((n,m)=>m.n-n.n||m.media-n.media),s=y.trocas.filter(n=>n.modelo===a&&n.preparoEst),i=s.length?Math.round(s.reduce((n,m)=>n+Math.max(0,m.preparo-m.preparoEst),0)/s.length/100)*100:0;return{n:e.length+s.length,defeitos:t,trocas:s.length,reserva:i}}function js(){const a={};return I.vendidas().forEach(e=>{const o=e.vendedor||"Sem vendedor",t=Ba(e),s=a[o]=a[o]||{nome:o,trocas:0,resultado:0,venda:0,acima:0,nAcima:0,dias:0,prej:0};s.trocas++,s.resultado+=I.resultado(e),s.venda+=e.vendido,s.dias+=e.diasPatio||0,I.resultado(e)<0&&s.prej++,t&&e.pago>t.teto&&(s.acima+=e.pago-t.teto,s.nAcima++)}),Object.values(a).map(e=>{const o=e.venda*x.cfg.comissaoPct,t=Math.min(o,e.acima*x.cfg.descontoAcima);return{...e,margem:e.resultado/e.venda,diasMedio:e.dias/e.trocas,comissao:o,desconto:t,comissaoFinal:o-t}}).sort((e,o)=>o.resultado-e.resultado)}function Ms(){const a=js();if(!a.length){w.innerHTML='<div class="titulo"><div><h1>Vendedores</h1><p>Sem trocas vendidas ainda.</p></div></div>';return}const e=a.slice().sort((t,s)=>s.margem-t.margem)[0],o=a.slice().sort((t,s)=>s.acima-t.acima)[0];w.innerHTML=`
+      <div class="titulo"><div><h1>Vendedores</h1><p>Quem traz resultado nas trocas e quem paga caro demais no usado.</p></div>${la([{nome:"Adicionar vendedor",desc:"Entra na equipe com perfil de vendedor",acao:()=>Te({perfil:"vendedor",nome:"",email:""})}],"Novo vendedor")}</div>
       <div class="kpis escalonado">
-        <div class="kpi k-marfim"><span class="rot">${ICO.moedas}Melhor resultado</span><span class="val">${esc(vs[0].nome)}</span><span class="exp">${mil(vs[0].resultado)} em ${vs[0].trocas} trocas</span></div>
-        <div class="kpi k-salvia"><span class="rot">${ICO.pct}Melhor margem</span><span class="val">${pct(melhorMargem.margem)}</span><span class="exp">${esc(melhorMargem.nome)}</span></div>
-        <div class="kpi k-risco"><span class="rot">${ICO.alerta}Mais pago acima</span><span class="val">${mil(maisAcima.acima)}</span><span class="exp">${esc(maisAcima.nome)} · ${maisAcima.nAcima} trocas acima do recomendado</span></div>
-        <div class="kpi k-marfim"><span class="rot">${ICO.barras}Equipe</span><span class="val">${vs.length}</span><span class="exp">${vs.reduce((s, x) => s + x.trocas, 0)} trocas vendidas</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.moedas}Melhor resultado</span><span class="val">${c(a[0].nome)}</span><span class="exp">${E(a[0].resultado)} em ${a[0].trocas} trocas</span></div>
+        <div class="kpi k-salvia"><span class="rot">${q.pct}Melhor margem</span><span class="val">${P(e.margem)}</span><span class="exp">${c(e.nome)}</span></div>
+        <div class="kpi k-risco"><span class="rot">${q.alerta}Mais pago acima</span><span class="val">${E(o.acima)}</span><span class="exp">${c(o.nome)} \xB7 ${o.nAcima} trocas acima do recomendado</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.barras}Equipe</span><span class="val">${a.length}</span><span class="exp">${a.reduce((t,s)=>t+s.trocas,0)} trocas vendidas</span></div>
       </div>
-      <section class="painel"><div class="painel-cab"><h2>${ICO.alvo}Ranking por resultado bruto</h2><p>Venda menos aquisição e preparo</p></div>
-        <div class="ranking escalonado">${vs.map((x, i) => `<div class="rank ${i === 0 ? 'ouro' : ''}"><span class="pos">${i + 1}º</span><div><b>${esc(x.nome)}</b><span>${x.trocas} trocas · margem ${pct(x.margem)} · ${Math.round(x.diasMedio)} dias de pátio em média · ${x.prej} com prejuízo</span></div>
-          <div class="num"><b>${mil(x.resultado)}</b><span class="${x.acima > 0 ? 'neg' : ''}">${mil(x.acima)} pago acima</span></div></div>`).join('')}</div>
-        <p class="nota-rodape">"Pago acima" compara o valor pago na troca com o máximo que o Anshur indicaria na data, usando só as vendas anteriores. É um ponto para conversar com o vendedor, não uma acusação.</p></section>
-      <section class="painel bloco"><div class="painel-cab"><h2>${ICO.moedas}Comissão atrelada ao usado</h2><p>Regra da revenda: ${pct(K.cfg.comissaoPct)} da venda, menos ${pct(K.cfg.descontoAcima, 0)} do que foi pago acima do recomendado</p></div>
-        <div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Vendedor</th><th class="n">Comissão cheia</th><th class="n">Desconto por troca acima</th><th class="n">Comissão final</th></tr></thead><tbody>
-        ${vs.map((x) => `<tr><td><b>${esc(x.nome)}</b></td><td class="n">${real(x.comissao)}</td><td class="n ${x.desconto > 0 ? 'neg' : ''}">${x.desconto > 0 ? '−' : ''}${real(x.desconto)}</td><td class="n forte">${real(x.comissaoFinal)}</td></tr>`).join('')}</tbody></table></div>
-        <p class="nota-rodape">Percentuais configuráveis em Premissas. Trocas acima do recomendado exigem a aprovação de um gerente, registrada com nome e motivo.</p></section>`;
-    contar();
-  }
-
-  // ---------- GARANTIAS ----------
-  const fg = { status: '' };
-  function telaGarantias() {
-    const lista = (A.garantias || []).slice().sort((a, b) => b.data.localeCompare(a.data));
-    if (!lista.length) { tela.innerHTML = `<div class="titulo"><div><h1>Garantias a receber</h1><p>Nenhuma ordem de serviço em garantia cadastrada.</p></div>${botaoAdicionar([{ nome: 'OS à mão', desc: 'Serviço feito em garantia', acao: () => addGarantia() }, { nome: 'Puxar de documento', desc: 'Foto ou PDF', acao: () => { location.hash = '#documentos'; } }], 'Registrar OS em garantia')}</div>`; return; }
-    const aReceber = lista.filter((g) => g.status === 'aguardando');
-    const glosa = lista.reduce((s, g) => s + (g.status === 'parcial' || g.status === 'negado' ? g.valor - g.pago : 0), 0);
-    const vencidas = aReceber.filter((g) => diasDesde(g.data) > 60);
-    const filtrada = lista.filter((g) => !fg.status || g.status === fg.status);
-    const NOME = { pago: 'Pago', parcial: 'Pago a menos', negado: 'Negado', aguardando: 'Aguardando' };
-    const CLS = { pago: 'baixo', parcial: 'medio', negado: 'alto', aguardando: 'medio' };
-    const porMarca = {}; lista.forEach((g) => { if (g.status !== 'pago') porMarca[g.marca] = (porMarca[g.marca] || 0) + g.valor - g.pago; });
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Garantias a receber</h1><p>Serviços que a oficina fez em garantia e o que o fabricante ainda não pagou ou pagou a menos.</p></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="exp-gar">Exportar cobrança</button>${botaoAdicionar([{ nome: 'OS à mão', desc: 'Serviço feito em garantia', acao: () => addGarantia() }, { nome: 'Puxar de documento', desc: 'Foto ou PDF da OS ou do extrato', acao: () => { location.hash = '#documentos'; } }], 'Registrar OS em garantia')}</div></div>
+      <section class="painel"><div class="painel-cab"><h2>${q.alvo}Ranking por resultado bruto</h2><p>Venda menos aquisi\xE7\xE3o e preparo</p></div>
+        <div class="ranking escalonado">${a.map((t,s)=>`<div class="rank ${s===0?"ouro":""}"><span class="pos">${s+1}\xBA</span><div><b>${c(t.nome)}</b><span>${t.trocas} trocas \xB7 margem ${P(t.margem)} \xB7 ${Math.round(t.diasMedio)} dias de p\xE1tio em m\xE9dia \xB7 ${t.prej} com preju\xEDzo</span></div>
+          <div class="num"><b>${E(t.resultado)}</b><span class="${t.acima>0?"neg":""}">${E(t.acima)} pago acima</span></div></div>`).join("")}</div>
+        <p class="nota-rodape">"Pago acima" compara o valor pago na troca com o m\xE1ximo que o Anshur indicaria na data, usando s\xF3 as vendas anteriores. \xC9 um ponto para conversar com o vendedor, n\xE3o uma acusa\xE7\xE3o.</p></section>
+      <section class="painel bloco"><div class="painel-cab"><h2>${q.moedas}Comiss\xE3o atrelada ao usado</h2><p>Regra da revenda: ${P(x.cfg.comissaoPct)} da venda, menos ${P(x.cfg.descontoAcima,0)} do que foi pago acima do recomendado</p></div>
+        <div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Vendedor</th><th class="n">Comiss\xE3o cheia</th><th class="n">Desconto por troca acima</th><th class="n">Comiss\xE3o final</th></tr></thead><tbody>
+        ${a.map(t=>`<tr><td><b>${c(t.nome)}</b></td><td class="n">${M(t.comissao)}</td><td class="n ${t.desconto>0?"neg":""}">${t.desconto>0?"\u2212":""}${M(t.desconto)}</td><td class="n forte">${M(t.comissaoFinal)}</td></tr>`).join("")}</tbody></table></div>
+        <p class="nota-rodape">Percentuais configur\xE1veis em Premissas. Trocas acima do recomendado exigem a aprova\xE7\xE3o de um gerente, registrada com nome e motivo.</p></section>`,$a()}const Re={status:""};function Ko(){const a=(y.garantias||[]).slice().sort((r,p)=>p.data.localeCompare(r.data));if(!a.length){w.innerHTML=`<div class="titulo"><div><h1>Garantias a receber</h1><p>Nenhuma ordem de servi\xE7o em garantia cadastrada.</p></div>${la([{nome:"OS \xE0 m\xE3o",desc:"Servi\xE7o feito em garantia",acao:()=>co()},{nome:"Puxar de documento",desc:"Foto ou PDF",acao:()=>{location.hash="#documentos"}}],"Registrar OS em garantia")}</div>`;return}const e=a.filter(r=>r.status==="aguardando"),o=a.reduce((r,p)=>r+(p.status==="parcial"||p.status==="negado"?p.valor-p.pago:0),0),t=e.filter(r=>qa(r.data)>60),s=a.filter(r=>!Re.status||r.status===Re.status),i={pago:"Pago",parcial:"Pago a menos",negado:"Negado",aguardando:"Aguardando"},n={pago:"baixo",parcial:"medio",negado:"alto",aguardando:"medio"},m={};a.forEach(r=>{r.status!=="pago"&&(m[r.marca]=(m[r.marca]||0)+r.valor-r.pago)}),w.innerHTML=`
+      <div class="titulo"><div><h1>Garantias a receber</h1><p>Servi\xE7os que a oficina fez em garantia e o que o fabricante ainda n\xE3o pagou ou pagou a menos.</p></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="exp-gar">Exportar cobran\xE7a</button>${la([{nome:"OS \xE0 m\xE3o",desc:"Servi\xE7o feito em garantia",acao:()=>co()},{nome:"Puxar de documento",desc:"Foto ou PDF da OS ou do extrato",acao:()=>{location.hash="#documentos"}}],"Registrar OS em garantia")}</div></div>
       <div class="kpis escalonado">
-        <div class="kpi k-marfim"><span class="rot">${ICO.moedas}A receber do fabricante</span><span class="val">${conta(aReceber.reduce((s, g) => s + g.valor, 0), 'mil')}</span><span class="exp">${aReceber.length} ordens aguardando pagamento</span></div>
-        <div class="kpi k-risco"><span class="rot">${ICO.alerta}Glosado ou negado</span><span class="val">${conta(glosa, 'mil')}</span><span class="exp">Diferença entre o serviço feito e o que foi pago</span></div>
-        <div class="kpi k-risco"><span class="rot">${ICO.alto}Paradas há +60 dias</span><span class="val">${vencidas.length}</span><span class="exp">${mil(vencidas.reduce((s, g) => s + g.valor, 0))} esperando há mais de 2 meses</span></div>
-        <div class="kpi k-salvia"><span class="rot">${ICO.baixo}Recebido no ano</span><span class="val">${conta(lista.reduce((s, g) => s + g.pago, 0), 'mil')}</span><span class="exp">${lista.filter((g) => g.status === 'pago').length} ordens pagas integralmente</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.moedas}A receber do fabricante</span><span class="val">${ia(e.reduce((r,p)=>r+p.valor,0),"mil")}</span><span class="exp">${e.length} ordens aguardando pagamento</span></div>
+        <div class="kpi k-risco"><span class="rot">${q.alerta}Glosado ou negado</span><span class="val">${ia(o,"mil")}</span><span class="exp">Diferen\xE7a entre o servi\xE7o feito e o que foi pago</span></div>
+        <div class="kpi k-risco"><span class="rot">${q.alto}Paradas h\xE1 +60 dias</span><span class="val">${t.length}</span><span class="exp">${E(t.reduce((r,p)=>r+p.valor,0))} esperando h\xE1 mais de 2 meses</span></div>
+        <div class="kpi k-salvia"><span class="rot">${q.baixo}Recebido no ano</span><span class="val">${ia(a.reduce((r,p)=>r+p.pago,0),"mil")}</span><span class="exp">${a.filter(r=>r.status==="pago").length} ordens pagas integralmente</span></div>
       </div>
       <div class="grade-2 larga">
-        <section class="painel"><div class="painel-cab"><h2>${ICO.etiqueta}Ordens de serviço em garantia</h2></div>
-          <div class="filtros"><div class="campo"><label for="g-st">Situação</label><select id="g-st"><option value="">Todas</option>${Object.keys(NOME).map((k) => `<option value="${k}" ${fg.status === k ? 'selected' : ''}>${NOME[k]}</option>`).join('')}</select></div></div>
-          <div class="tabela-wrap"><table class="tabela"><thead><tr><th>OS</th><th>Serviço</th><th class="n">Valor</th><th class="n">Pago</th><th>Situação</th></tr></thead><tbody>
-          ${filtrada.map((g) => `<tr><td><b>${g.os}</b><br><span class="sub">${data(g.data)} · ${diasDesde(g.data)} dias</span></td><td><b>${esc(g.servico)}</b><br><span class="sub">${esc(g.marca)} · ${esc(g.cliente)}${g.motivo ? ' · ' + esc(g.motivo) : ''}</span></td><td class="n">${real(g.valor)}</td><td class="n">${real(g.pago)}</td><td><span class="risco ${CLS[g.status]}">${NOME[g.status]}</span></td></tr>`).join('')}</tbody></table></div></section>
-        <section class="painel"><div class="painel-cab"><h2>${ICO.barras}Pendente por fabricante</h2></div>${G.horizontais(Object.entries(porMarca).sort((a, b) => b[1] - a[1]).map(([m, v]) => ({ r: m, v, cls: 'alerta' })))}
-          <p class="nota-rodape">Na implantação, o Anshur lê as OS e os extratos de garantia que a revenda já recebe e cruza os dois todo mês.</p></section>
-      </div>`;
-    $('#g-st').onchange = (e) => { fg.status = e.target.value; telaGarantias(); };
-    $('#exp-gar').onclick = () => baixarCSV('anshur-garantias.csv', [['OS', 'Data', 'Fabricante', 'Serviço', 'Cliente', 'Valor', 'Pago', 'Diferença', 'Situação', 'Motivo']].concat(lista.filter((g) => g.status !== 'pago').map((g) => [g.os, data(g.data), g.marca, g.servico, g.cliente, g.valor, g.pago, g.valor - g.pago, NOME[g.status], g.motivo])));
-    contar();
-  }
-
-  // ---------- ESTOQUE FINANCIADO ----------
-  function jurosFin(f) {
-    const hoje = hojeISO(), inicio = (() => { const d = new Date(f.entrada + 'T12:00:00'); d.setDate(d.getDate() + f.carencia); return d.toISOString().slice(0, 10); })();
-    const fim = f.quitacao || hoje;
-    const total = fim > inicio ? f.valor * f.taxaMes * diasEntre(inicio, fim) / 30 : 0;
-    // juros depois da venda: do maior entre venda e fim da carência até a quitação (ou hoje)
-    const iniPos = f.venda ? (f.venda > inicio ? f.venda : inicio) : null;
-    const aposVenda = iniPos && fim > iniPos ? f.valor * f.taxaMes * diasEntre(iniPos, fim) / 30 : 0;
-    return { total, aposVenda, inicio, emCarencia: hoje < inicio };
-  }
-  function telaFinanciamento() {
-    const lista = (A.financiadas || []).map((f) => ({ f, j: jurosFin(f) })).sort((a, b) => b.j.aposVenda - a.j.aposVenda);
-    if (!lista.length) { tela.innerHTML = `<div class="titulo"><div><h1>Estoque financiado</h1><p>Nenhuma máquina financiada cadastrada.</p></div>${botaoAdicionar([{ nome: 'Máquina financiada à mão', desc: 'Chassi, valor, banco e taxa', acao: () => addFinanciada() }, { nome: 'Puxar de documento', desc: 'Contrato ou extrato', acao: () => { location.hash = '#documentos'; } }], 'Cadastrar máquina financiada')}</div>`; return; }
-    const vendidasAbertas = lista.filter((x) => x.f.venda && !x.f.quitacao);
-    const perdido = lista.reduce((s, x) => s + x.j.aposVenda, 0);
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Estoque financiado</h1><p>Máquinas novas no floor plan: juros que continuam correndo depois que a máquina já foi vendida.</p></div>${botaoAdicionar([{ nome: 'Máquina financiada à mão', desc: 'Chassi, valor, banco e taxa', acao: () => addFinanciada() }, { nome: 'Puxar de documento', desc: 'Contrato ou extrato do banco', acao: () => { location.hash = '#documentos'; } }], 'Cadastrar máquina financiada')}</div>
+        <section class="painel"><div class="painel-cab"><h2>${q.etiqueta}Ordens de servi\xE7o em garantia</h2></div>
+          <div class="filtros"><div class="campo"><label for="g-st">Situa\xE7\xE3o</label><select id="g-st"><option value="">Todas</option>${Object.keys(i).map(r=>`<option value="${r}" ${Re.status===r?"selected":""}>${i[r]}</option>`).join("")}</select></div></div>
+          <div class="tabela-wrap"><table class="tabela"><thead><tr><th>OS</th><th>Servi\xE7o</th><th class="n">Valor</th><th class="n">Pago</th><th>Situa\xE7\xE3o</th></tr></thead><tbody>
+          ${s.map(r=>`<tr><td><b>${r.os}</b><br><span class="sub">${N(r.data)} \xB7 ${qa(r.data)} dias</span></td><td><b>${c(r.servico)}</b><br><span class="sub">${c(r.marca)} \xB7 ${c(r.cliente)}${r.motivo?" \xB7 "+c(r.motivo):""}</span></td><td class="n">${M(r.valor)}</td><td class="n">${M(r.pago)}</td><td><span class="risco ${n[r.status]}">${i[r.status]}</span></td></tr>`).join("")}</tbody></table></div></section>
+        <section class="painel"><div class="painel-cab"><h2>${q.barras}Pendente por fabricante</h2></div>${ya.horizontais(Object.entries(m).sort((r,p)=>p[1]-r[1]).map(([r,p])=>({r,v:p,cls:"alerta"})))}
+          <p class="nota-rodape">Na implanta\xE7\xE3o, o Anshur l\xEA as OS e os extratos de garantia que a revenda j\xE1 recebe e cruza os dois todo m\xEAs.</p></section>
+      </div>`,l("#g-st").onchange=r=>{Re.status=r.target.value,Ko()},l("#exp-gar").onclick=()=>Ea("anshur-garantias.csv",[["OS","Data","Fabricante","Servi\xE7o","Cliente","Valor","Pago","Diferen\xE7a","Situa\xE7\xE3o","Motivo"]].concat(a.filter(r=>r.status!=="pago").map(r=>[r.os,N(r.data),r.marca,r.servico,r.cliente,r.valor,r.pago,r.valor-r.pago,i[r.status],r.motivo]))),$a()}function so(a){const e=z(),o=(()=>{const m=new Date(a.entrada+"T12:00:00");return m.setDate(m.getDate()+a.carencia),m.toISOString().slice(0,10)})(),t=a.quitacao||e,s=t>o?a.valor*a.taxaMes*le(o,t)/30:0,i=a.venda?a.venda>o?a.venda:o:null,n=i&&t>i?a.valor*a.taxaMes*le(i,t)/30:0;return{total:s,aposVenda:n,inicio:o,emCarencia:e<o}}function As(){const a=(y.financiadas||[]).map(t=>({f:t,j:so(t)})).sort((t,s)=>s.j.aposVenda-t.j.aposVenda);if(!a.length){w.innerHTML=`<div class="titulo"><div><h1>Estoque financiado</h1><p>Nenhuma m\xE1quina financiada cadastrada.</p></div>${la([{nome:"M\xE1quina financiada \xE0 m\xE3o",desc:"Chassi, valor, banco e taxa",acao:()=>po()},{nome:"Puxar de documento",desc:"Contrato ou extrato",acao:()=>{location.hash="#documentos"}}],"Cadastrar m\xE1quina financiada")}</div>`;return}const e=a.filter(t=>t.f.venda&&!t.f.quitacao),o=a.reduce((t,s)=>t+s.j.aposVenda,0);w.innerHTML=`
+      <div class="titulo"><div><h1>Estoque financiado</h1><p>M\xE1quinas novas no floor plan: juros que continuam correndo depois que a m\xE1quina j\xE1 foi vendida.</p></div>${la([{nome:"M\xE1quina financiada \xE0 m\xE3o",desc:"Chassi, valor, banco e taxa",acao:()=>po()},{nome:"Puxar de documento",desc:"Contrato ou extrato do banco",acao:()=>{location.hash="#documentos"}}],"Cadastrar m\xE1quina financiada")}</div>
       <div class="kpis escalonado">
-        <div class="kpi k-marfim"><span class="rot">${ICO.moedas}Financiado em estoque</span><span class="val">${conta(lista.filter((x) => !x.f.venda).reduce((s, x) => s + x.f.valor, 0), 'mil')}</span><span class="exp">${lista.filter((x) => !x.f.venda).length} máquinas novas no pátio</span></div>
-        <div class="kpi k-risco"><span class="rot">${ICO.alerta}Juros pagos após a venda</span><span class="val">${conta(perdido, 'mil')}</span><span class="exp">Dinheiro que dava para ter economizado quitando no dia da venda</span></div>
-        <div class="kpi k-risco"><span class="rot">${ICO.alto}Vendidas e não quitadas</span><span class="val">${vendidasAbertas.length}</span><span class="exp">${mil(vendidasAbertas.reduce((s, x) => s + x.f.valor, 0))} ainda devendo ao banco</span></div>
-        <div class="kpi k-salvia"><span class="rot">${ICO.barras}Juros totais do período</span><span class="val">${conta(lista.reduce((s, x) => s + x.j.total, 0), 'mil')}</span><span class="exp">Taxa de ${pct(lista[0].f.taxaMes)} ao mês após ${lista[0].f.carencia} dias de carência</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.moedas}Financiado em estoque</span><span class="val">${ia(a.filter(t=>!t.f.venda).reduce((t,s)=>t+s.f.valor,0),"mil")}</span><span class="exp">${a.filter(t=>!t.f.venda).length} m\xE1quinas novas no p\xE1tio</span></div>
+        <div class="kpi k-risco"><span class="rot">${q.alerta}Juros pagos ap\xF3s a venda</span><span class="val">${ia(o,"mil")}</span><span class="exp">Dinheiro que dava para ter economizado quitando no dia da venda</span></div>
+        <div class="kpi k-risco"><span class="rot">${q.alto}Vendidas e n\xE3o quitadas</span><span class="val">${e.length}</span><span class="exp">${E(e.reduce((t,s)=>t+s.f.valor,0))} ainda devendo ao banco</span></div>
+        <div class="kpi k-salvia"><span class="rot">${q.barras}Juros totais do per\xEDodo</span><span class="val">${ia(a.reduce((t,s)=>t+s.j.total,0),"mil")}</span><span class="exp">Taxa de ${P(a[0].f.taxaMes)} ao m\xEAs ap\xF3s ${a[0].f.carencia} dias de car\xEAncia</span></div>
       </div>
-      <section class="painel"><div class="painel-cab"><h2>${ICO.etiqueta}Máquinas financiadas</h2><p>Ordenado pelo juro pago depois da venda</p></div>
-        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Máquina</th><th class="n">Valor</th><th>Entrada</th><th>Venda</th><th>Quitação</th><th class="n">Juros até hoje</th><th class="n">Por dia</th><th class="n">Juros após venda</th><th>Situação</th></tr></thead><tbody>
-        ${lista.map(({ f, j }) => { const sit = !f.venda ? (j.emCarencia ? ['baixo', 'Em carência'] : ['medio', 'No pátio, pagando juros']) : !f.quitacao ? ['alto', 'Vendida, quitar já'] : j.aposVenda > 0 ? ['medio', 'Quitada com atraso'] : ['baixo', 'Quitada no prazo']; return `<tr><td class="maq">${fotoMini(f)}<span><b>${esc(f.marca + ' ' + f.modelo)}</b><span>${f.chassi} · ${esc(f.banco)}</span></span></td><td class="n">${mil(f.valor)}</td><td>${data(f.entrada)}</td><td>${data(f.venda)}</td><td>${data(f.quitacao)}</td><td class="n">${real(j.total)}</td><td class="n ${!f.quitacao && !j.emCarencia ? 'neg forte' : ''}">${!f.quitacao && !j.emCarencia ? real(f.valor * f.taxaMes / 30) : '—'}</td><td class="n ${j.aposVenda > 0 ? 'neg forte' : ''}">${real(j.aposVenda)}</td><td><span class="risco ${sit[0]}">${sit[1]}</span></td></tr>`; }).join('')}</tbody></table></div>
-        <p class="nota-rodape">Na implantação, o Anshur cruza o extrato do floor plan com as notas de venda e avisa no mesmo dia em que uma máquina financiada é vendida.</p></section>`;
-    contar();
-  }
-
-  // ---------- ALERTAS ----------
-  function listaAlertas() {
-    const out = [];
-    C.patio().map(infoPatio).forEach((i) => {
-      if (i.dias > 90) out.push({ id: 'p90-' + i.t.id, cat: 'Estoque', nivel: 'alto', titulo: `${i.t.marca} ${i.t.modelo} passou de 90 dias no pátio`, txt: `${mil(i.t.pago)} parados há ${i.dias} dias · ${i.acao}`, ir: '#patio' });
-      else if (i.dias > 60 && i.dias <= 67) out.push({ id: 'p60-' + i.t.id, cat: 'Estoque', nivel: 'medio', titulo: `${i.t.marca} ${i.t.modelo} entrou na faixa de alerta`, txt: `${i.dias} dias no pátio`, ir: '#patio' });
-      if (i.margem < 0.06) out.push({ id: 'mg-' + i.t.id, cat: 'Financeiro', nivel: 'alto', titulo: `Margem baixa: ${i.t.marca} ${i.t.modelo}`, txt: `Margem projetada de ${pct(i.margem)}`, ir: '#patio' });
-    });
-    (A.financiadas || []).forEach((f) => { if (f.venda && !f.quitacao) out.push({ id: 'fp-' + f.chassi, cat: 'Financeiro', nivel: 'alto', titulo: `Quitar ${f.marca} ${f.modelo} com o banco`, txt: `Vendida em ${data(f.venda)} e o juro continua correndo`, ir: '#financiamento' }); });
-    const gv = (A.garantias || []).filter((g) => g.status === 'aguardando' && diasDesde(g.data) > 60);
-    if (gv.length) out.push({ id: 'gar-' + gv.length, cat: 'Garantia', nivel: 'medio', titulo: `${gv.length} garantias paradas há mais de 60 dias`, txt: `${mil(gv.reduce((s, g) => s + g.valor, 0))} para cobrar do fabricante`, ir: '#garantias' });
-    const ult = estado.fechadas.slice(-3).filter((t) => t.previsto && t.pago > t.previsto.teto);
-    ult.forEach((t) => out.push({ id: 'ac-' + t.id, cat: 'Comercial', nivel: 'medio', titulo: `Troca acima do recomendado: ${t.marca} ${t.modelo}`, txt: `Pago ${real(t.pago)}, máximo indicado ${real(t.previsto.teto)}`, ir: '#patio' }));
-    (A.trocas || []).filter((t) => !t.vendido && t.preparoEst && t.preparo > t.preparoEst * 1.4).forEach((t) => out.push({ id: 'of-' + t.id, cat: 'Oficina', nivel: 'medio', titulo: `Preparo acima do previsto: ${t.marca} ${t.modelo}`, txt: `${real(t.preparo)} contra ${real(t.preparoEst)} previstos`, ir: '#patio' }));
-    (estado.pendentes || []).filter((p) => p.status === 'pendente').forEach((p) => out.push({ id: 'ap-' + p.id, cat: 'Comercial', nivel: 'alto', titulo: `Aprovação pedida: ${p.maq.marca} ${p.maq.modelo}`, txt: `${p.por} quer pagar ${real(p.valor)}, ${real(p.valor - p.rec.teto)} acima do máximo`, ir: '#aprovacoes' }));
-    C.patio().forEach((t) => { const cs = compradoresPara(t); if (cs.length) out.push({ id: 'cp-' + t.id + '-' + cs.length, cat: 'Comercial', nivel: 'medio', titulo: `${cs.length} ${cs.length === 1 ? 'comprador procura' : 'compradores procuram'} ${t.marca} ${t.modelo}`, txt: cs.slice(0, 2).map((c) => c.nome).join(', ') + (cs.length > 2 ? ' e outros' : ''), ir: '#compradores' }); });
-    Object.keys(NOMES).forEach((k) => { const v = variacaoMercado(k); if (v != null && v < -0.05) out.push({ id: 'mk-' + k + '-' + Math.round(v * 100), cat: 'Mercado', nivel: 'alto', titulo: `Mercado de ${NOMES[k].toLowerCase()} caiu ${pct(-v)}`, txt: 'Anúncios e leilões dos últimos 2 meses: cuidado ao pagar na troca', ir: '#mercado' }); });
-    return out.sort((a, b) => (a.nivel === 'alto' ? 0 : 1) - (b.nivel === 'alto' ? 0 : 1));
-  }
-  function abrirAlertas() {
-    const l = listaAlertas();
-    abrirCamada('gaveta', `<h2 style="font-size:24px">Alertas de hoje</h2><p class="sub">${l.length} pontos que pedem atenção do dono.</p>
-      <ul class="alertas">${l.map((a) => `<li class="${a.nivel}">${a.nivel === 'alto' ? ICO.alto : ICO.medio}<a href="${a.ir}" class="link-alerta" style="color:inherit;text-decoration:none"><b>${esc(a.titulo)}</b><span>${esc(a.txt)}</span></a></li>`).join('') || '<li class="info">' + ICO.baixo + '<div><b>Tudo em ordem</b><span>Nenhum alerta agora.</span></div></li>'}</ul>`, (c) => { $$('.link-alerta', c).forEach((a) => a.onclick = () => fecharCamada(true)); });
-  }
-
-  // ---------- RELATÓRIO DO MÊS ----------
-  function telaRelatorio() {
-    const hoje = new Date(), mesIni = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1).toISOString().slice(0, 10), mesFim = new Date(hoje.getFullYear(), hoje.getMonth(), 0).toISOString().slice(0, 10);
-    const nomeMes = new Date(mesIni + 'T12:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-    const vend = C.vendidas().filter((t) => t.saida >= mesIni && t.saida <= mesFim);
-    const entr = A.trocas.filter((t) => t.entrada >= mesIni && t.entrada <= mesFim);
-    const itens = C.patio().map(infoPatio);
-    const res = vend.reduce((s, t) => s + C.resultado(t), 0), venda = vend.reduce((s, t) => s + t.vendido, 0);
-    const acima = vend.concat(entr).filter((t, i, a) => a.indexOf(t) === i).reduce((s, t) => { const r = rec(t); return s + (r && t.pago > r.teto ? t.pago - r.teto : 0); }, 0);
-    const al = listaAlertas().filter((a) => a.nivel === 'alto').slice(0, 5);
-    const gar = (A.garantias || []).filter((g) => g.status === 'aguardando').reduce((s, g) => s + g.valor, 0);
-    const fin = (A.financiadas || []).reduce((s, f) => s + jurosFin(f).aposVenda, 0);
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Relatório do dono</h1><p>Resumo de ${nomeMes} para ler em 2 minutos ou imprimir.</p></div><div class="acoes"><button class="btn btn-ouro" type="button" onclick="print()">Imprimir ou salvar PDF</button></div></div>
+      <section class="painel"><div class="painel-cab"><h2>${q.etiqueta}M\xE1quinas financiadas</h2><p>Ordenado pelo juro pago depois da venda</p></div>
+        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>M\xE1quina</th><th class="n">Valor</th><th>Entrada</th><th>Venda</th><th>Quita\xE7\xE3o</th><th class="n">Juros at\xE9 hoje</th><th class="n">Por dia</th><th class="n">Juros ap\xF3s venda</th><th>Situa\xE7\xE3o</th></tr></thead><tbody>
+        ${a.map(({f:t,j:s})=>{const i=t.venda?t.quitacao?s.aposVenda>0?["medio","Quitada com atraso"]:["baixo","Quitada no prazo"]:["alto","Vendida, quitar j\xE1"]:s.emCarencia?["baixo","Em car\xEAncia"]:["medio","No p\xE1tio, pagando juros"];return`<tr><td class="maq">${ue(t)}<span><b>${c(t.marca+" "+t.modelo)}</b><span>${t.chassi} \xB7 ${c(t.banco)}</span></span></td><td class="n">${E(t.valor)}</td><td>${N(t.entrada)}</td><td>${N(t.venda)}</td><td>${N(t.quitacao)}</td><td class="n">${M(s.total)}</td><td class="n ${!t.quitacao&&!s.emCarencia?"neg forte":""}">${!t.quitacao&&!s.emCarencia?M(t.valor*t.taxaMes/30):"\u2014"}</td><td class="n ${s.aposVenda>0?"neg forte":""}">${M(s.aposVenda)}</td><td><span class="risco ${i[0]}">${i[1]}</span></td></tr>`}).join("")}</tbody></table></div>
+        <p class="nota-rodape">Na implanta\xE7\xE3o, o Anshur cruza o extrato do floor plan com as notas de venda e avisa no mesmo dia em que uma m\xE1quina financiada \xE9 vendida.</p></section>`,$a()}function me(){const a=[];I.patio().map(Ta).forEach(t=>{t.dias>90?a.push({id:"p90-"+t.t.id,cat:"Estoque",nivel:"alto",titulo:`${t.t.marca} ${t.t.modelo} passou de 90 dias no p\xE1tio`,txt:`${E(t.t.pago)} parados h\xE1 ${t.dias} dias \xB7 ${t.acao}`,ir:"#patio"}):t.dias>60&&t.dias<=67&&a.push({id:"p60-"+t.t.id,cat:"Estoque",nivel:"medio",titulo:`${t.t.marca} ${t.t.modelo} entrou na faixa de alerta`,txt:`${t.dias} dias no p\xE1tio`,ir:"#patio"}),t.margem<.06&&a.push({id:"mg-"+t.t.id,cat:"Financeiro",nivel:"alto",titulo:`Margem baixa: ${t.t.marca} ${t.t.modelo}`,txt:`Margem projetada de ${P(t.margem)}`,ir:"#patio"})}),(y.financiadas||[]).forEach(t=>{t.venda&&!t.quitacao&&a.push({id:"fp-"+t.chassi,cat:"Financeiro",nivel:"alto",titulo:`Quitar ${t.marca} ${t.modelo} com o banco`,txt:`Vendida em ${N(t.venda)} e o juro continua correndo`,ir:"#financiamento"})});const e=(y.garantias||[]).filter(t=>t.status==="aguardando"&&qa(t.data)>60);return e.length&&a.push({id:"gar-"+e.length,cat:"Garantia",nivel:"medio",titulo:`${e.length} garantias paradas h\xE1 mais de 60 dias`,txt:`${E(e.reduce((t,s)=>t+s.valor,0))} para cobrar do fabricante`,ir:"#garantias"}),b.fechadas.slice(-3).filter(t=>t.previsto&&t.pago>t.previsto.teto).forEach(t=>a.push({id:"ac-"+t.id,cat:"Comercial",nivel:"medio",titulo:`Troca acima do recomendado: ${t.marca} ${t.modelo}`,txt:`Pago ${M(t.pago)}, m\xE1ximo indicado ${M(t.previsto.teto)}`,ir:"#patio"})),(y.trocas||[]).filter(t=>!t.vendido&&t.preparoEst&&t.preparo>t.preparoEst*1.4).forEach(t=>a.push({id:"of-"+t.id,cat:"Oficina",nivel:"medio",titulo:`Preparo acima do previsto: ${t.marca} ${t.modelo}`,txt:`${M(t.preparo)} contra ${M(t.preparoEst)} previstos`,ir:"#patio"})),(b.pendentes||[]).filter(t=>t.status==="pendente").forEach(t=>a.push({id:"ap-"+t.id,cat:"Comercial",nivel:"alto",titulo:`Aprova\xE7\xE3o pedida: ${t.maq.marca} ${t.maq.modelo}`,txt:`${t.por} quer pagar ${M(t.valor)}, ${M(t.valor-t.rec.teto)} acima do m\xE1ximo`,ir:"#aprovacoes"})),I.patio().forEach(t=>{const s=Va(t);s.length&&a.push({id:"cp-"+t.id+"-"+s.length,cat:"Comercial",nivel:"medio",titulo:`${s.length} ${s.length===1?"comprador procura":"compradores procuram"} ${t.marca} ${t.modelo}`,txt:s.slice(0,2).map(i=>i.nome).join(", ")+(s.length>2?" e outros":""),ir:"#compradores"})}),Object.keys(V).forEach(t=>{const s=Oe(t);s!=null&&s<-.05&&a.push({id:"mk-"+t+"-"+Math.round(s*100),cat:"Mercado",nivel:"alto",titulo:`Mercado de ${V[t].toLowerCase()} caiu ${P(-s)}`,txt:"An\xFAncios e leil\xF5es dos \xFAltimos 2 meses: cuidado ao pagar na troca",ir:"#mercado"})}),a.sort((t,s)=>(t.nivel==="alto"?0:1)-(s.nivel==="alto"?0:1))}function Oi(){const a=me();oa("gaveta",`<h2 style="font-size:24px">Alertas de hoje</h2><p class="sub">${a.length} pontos que pedem aten\xE7\xE3o do dono.</p>
+      <ul class="alertas">${a.map(e=>`<li class="${e.nivel}">${e.nivel==="alto"?q.alto:q.medio}<a href="${e.ir}" class="link-alerta" style="color:inherit;text-decoration:none"><b>${c(e.titulo)}</b><span>${c(e.txt)}</span></a></li>`).join("")||'<li class="info">'+q.baixo+"<div><b>Tudo em ordem</b><span>Nenhum alerta agora.</span></div></li>"}</ul>`,e=>{R(".link-alerta",e).forEach(o=>o.onclick=()=>U(!0))})}function ys(){const a=new Date,e=new Date(a.getFullYear(),a.getMonth()-1,1).toISOString().slice(0,10),o=new Date(a.getFullYear(),a.getMonth(),0).toISOString().slice(0,10),t=new Date(e+"T12:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"}),s=I.vendidas().filter(g=>g.saida>=e&&g.saida<=o),i=y.trocas.filter(g=>g.entrada>=e&&g.entrada<=o),n=I.patio().map(Ta),m=s.reduce((g,j)=>g+I.resultado(j),0),r=s.reduce((g,j)=>g+j.vendido,0),p=s.concat(i).filter((g,j,S)=>S.indexOf(g)===j).reduce((g,j)=>{const S=Ba(j);return g+(S&&j.pago>S.teto?j.pago-S.teto:0)},0),d=me().filter(g=>g.nivel==="alto").slice(0,5),$=(y.garantias||[]).filter(g=>g.status==="aguardando").reduce((g,j)=>g+j.valor,0),u=(y.financiadas||[]).reduce((g,j)=>g+so(j).aposVenda,0);w.innerHTML=`
+      <div class="titulo"><div><h1>Relat\xF3rio do dono</h1><p>Resumo de ${t} para ler em 2 minutos ou imprimir.</p></div><div class="acoes"><button class="btn btn-ouro" type="button" onclick="print()">Imprimir ou salvar PDF</button></div></div>
       <article class="relatorio">
         <img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="200" height="50">
-        <p class="sub" style="margin-top:8px">${esc(A.revenda.nome)} · ${esc(A.revenda.cidade)} · emitido em ${new Date().toLocaleDateString('pt-BR')}</p>
-        <h2>O mês em números</h2>
-        <div class="numeros"><div><span>Trocas que entraram</span><b>${entr.length}</b></div><div><span>Usados vendidos</span><b>${vend.length}</b></div><div><span>Faturamento com usados</span><b>${mil(venda)}</b></div>
-          <div><span>Resultado bruto</span><b class="${res < 0 ? 'neg' : 'pos'}">${mil(res)}</b></div><div><span>Margem realizada</span><b>${venda ? pct(res / venda) : '—'}</b></div><div><span>Pago acima do recomendado</span><b class="${acima > 0 ? 'neg' : ''}">${mil(acima)}</b></div></div>
-        <h2>Onde está o dinheiro hoje</h2>
-        <ul><li>${mil(C.capitalImobilizado())} parados em ${itens.length} usados no pátio; ${itens.filter((i) => i.dias > 90).length} passaram de 90 dias.</li>
-          <li>Custo financeiro estimado do estoque até hoje: ${mil(itens.reduce((s, i) => s + i.juros, 0))} (premissa ${pct(K.cfg.jurosMes)} ao mês).</li>
-          <li>${mil(gar)} em garantias esperando pagamento do fabricante.</li>
-          <li>${mil(fin)} de juros do estoque financiado pagos depois da venda.</li></ul>
+        <p class="sub" style="margin-top:8px">${c(y.revenda.nome)} \xB7 ${c(y.revenda.cidade)} \xB7 emitido em ${new Date().toLocaleDateString("pt-BR")}</p>
+        <h2>O m\xEAs em n\xFAmeros</h2>
+        <div class="numeros"><div><span>Trocas que entraram</span><b>${i.length}</b></div><div><span>Usados vendidos</span><b>${s.length}</b></div><div><span>Faturamento com usados</span><b>${E(r)}</b></div>
+          <div><span>Resultado bruto</span><b class="${m<0?"neg":"pos"}">${E(m)}</b></div><div><span>Margem realizada</span><b>${r?P(m/r):"\u2014"}</b></div><div><span>Pago acima do recomendado</span><b class="${p>0?"neg":""}">${E(p)}</b></div></div>
+        <h2>Onde est\xE1 o dinheiro hoje</h2>
+        <ul><li>${E(I.capitalImobilizado())} parados em ${n.length} usados no p\xE1tio; ${n.filter(g=>g.dias>90).length} passaram de 90 dias.</li>
+          <li>Custo financeiro estimado do estoque at\xE9 hoje: ${E(n.reduce((g,j)=>g+j.juros,0))} (premissa ${P(x.cfg.jurosMes)} ao m\xEAs).</li>
+          <li>${E($)} em garantias esperando pagamento do fabricante.</li>
+          <li>${E(u)} de juros do estoque financiado pagos depois da venda.</li></ul>
         <h2>O que fazer esta semana</h2>
-        <ul>${al.length ? al.map((a) => `<li><b>${esc(a.titulo)}</b>: ${esc(a.txt)}.</li>`).join('') : '<li>Nenhum ponto crítico.</li>'}</ul>
-        <h2>Qualidade das avaliações</h2>
-        <p>${(() => { const v = M.validar(); return v.n >= M.QUALIDADE.minimoValidacao ? `Nas ${v.n} vendas conferidas, o Anshur errou o preço de venda em ${pct(v.mape)} em média (${mil(v.mae)} por máquina). Quanto mais trocas a revenda registra, mais preciso ele fica.` : 'Ainda não há vendas suficientes para medir o erro.'; })()}</p>
-        <p class="nota-rodape">Valores estimados são estimativas, não resultados garantidos. ${OP ? '' : 'Revenda e dados fictícios, só para demonstração.'}</p>
-      </article>`;
-  }
-
-  // ---------- SINCRONIZAÇÃO AUTOMÁTICA COM A PASTA DO SISTEMA ----------
-  // O sistema da revenda (DMS) exporta um relatório de trocas para uma pasta todo dia; o Anshur lê o arquivo
-  // mais novo sempre que abre. Funciona no Chrome e no Edge do computador (File System Access API).
-  const idb = (modo, fn) => new Promise((ok, erro) => {
-    const req = indexedDB.open('anshur', 1);
-    req.onupgradeneeded = () => req.result.createObjectStore('kv');
-    req.onerror = () => erro(req.error);
-    req.onsuccess = () => { const tx = req.result.transaction('kv', modo), st = tx.objectStore('kv'); const r = fn(st); tx.oncomplete = () => ok(r && r.result); tx.onerror = () => erro(tx.error); };
-  });
-  // A leitura da pasta do sistema (DMS) agora fica na tela "Trazer do meu sistema" (areas/importar.js, regras em dms.js):
-  // lê a pasta inteira (CSV, TXT, Excel, subpastas), mostra a prévia antes de gravar e cada importação pode ser desfeita.
-  function blocoSync() {
-    const pastas = ((estado.dms && estado.dms.pastas) || []).slice().sort((a, b) => String(b.ultima && b.ultima.quando).localeCompare(String(a.ultima && a.ultima.quando)));
-    const u = pastas[0] && pastas[0].ultima;
-    return `<section class="painel bloco"><h2>${ICO.linha}Trazer do meu sistema atual</h2>
-      <p class="sub" style="margin:6px 0 12px">O Anshur lê as exportações do seu sistema (DMS/ERP) numa pasta do computador ou em arquivos: vendas de usados, trocas, estoque e clientes, em CSV, TXT ou Excel. Você confere a prévia antes de gravar e pode desfazer depois.</p>
-      ${u ? `<p class="conta">Última sincronização (${esc(pastas[0].nome)}): ${new Date(u.quando).toLocaleString('pt-BR')} · ${u.novos || 0} novos · ${u.atualizados || 0} atualizados${u.erros ? ` · ${u.erros} linhas com erro` : ''}.</p>` : ''}
-      ${pode('importar') ? '<div class="acoes"><a class="btn btn-ouro" href="#/config/importar">Trazer do meu sistema</a></div>' : '<p class="conta">A importação é feita pelo dono ou pelo gerente.</p>'}</section>`;
-  }
-  function ligarBotoesSync() { /* o bloco só tem um link para a tela de importação */ }
-
-  // =====================================================================================
-  // V5: fotos, usuários e permissões, auditoria, adicionar em todas as páginas, documentos,
-  // configurações, relatórios por período, busca global, notificações, comparação e instalação
-  // =====================================================================================
-  const F = window.FOTOS;
-  const fotoMini = (t, cls = 'maq-foto') => { const f = F.de(t); const src = f.propria ? f.u : F.mini(f.u); return `<img class="${cls}" src="${src}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;maq-ico&quot;>${ICO[t.tipo] ? '' : ''}</span>'">`; };
-  const eu = () => K.usuarioAtual();
-  const PERM = {
-    dono: ['hoje', 'implantacao', 'visao', 'avaliar', 'patio', 'trocas', 'teste', 'passaportes', 'vendedores', 'garantias', 'financiamento', 'relatorio', 'documentos', 'atividades', 'usuarios', 'config', 'compradores', 'mercado', 'aprovacoes', 'rotina', 'memoria', 'historico'],
-    gerente: ['hoje', 'implantacao', 'visao', 'avaliar', 'patio', 'trocas', 'teste', 'passaportes', 'vendedores', 'garantias', 'financiamento', 'relatorio', 'documentos', 'atividades', 'compradores', 'mercado', 'aprovacoes', 'rotina', 'memoria', 'historico'],
-    vendedor: ['hoje', 'visao', 'avaliar', 'patio', 'passaportes', 'documentos', 'compradores', 'mercado', 'aprovacoes', 'rotina', 'memoria'],
-    oficina: ['hoje', 'patio', 'passaportes', 'garantias', 'documentos', 'rotina'],
-    financeiro: ['hoje', 'visao', 'patio', 'trocas', 'garantias', 'financiamento', 'relatorio', 'documentos', 'atividades', 'rotina', 'memoria', 'historico'],
-    auditor: ['hoje', 'visao', 'patio', 'trocas', 'vendedores', 'garantias', 'financiamento', 'relatorio', 'atividades', 'aprovacoes', 'rotina', 'memoria', 'historico']
-  };
-  const permArea = (aba) => (window.ANSHUR_AREAS ? window.ANSHUR_AREAS.permissao(aba) : null);
-  const pode = (aba) => aba === 'perfil' || aba === 'inicio' || (permArea(aba) ? permArea(aba).includes(eu().perfil) : (PERM[eu().perfil] || PERM.dono).includes(aba));
-  const podeAprovar = () => ['dono', 'gerente'].includes(eu().perfil);
-  const log = (tipo, texto, extra) => { K.registrar(tipo, texto, extra); };
-
-  // ---------- botão Adicionar (manual ou puxando de documento) ----------
-  // rótulo sempre diz o que vai ser criado; com uma opção só, o botão faz direto (sem menu)
-  function botaoAdicionar(opcoes, rotulo, secundario) {
-    if (eu().perfil === 'auditor') return '<span class="tag declarado">Só leitura</span>';
-    const id = 'add' + Math.random().toString(36).slice(2, 7), cls = secundario ? 'btn-linha' : 'btn-ouro';
-    if (opcoes.length === 1) {
-      setTimeout(() => { const b = document.getElementById(id); if (b) b.onclick = () => opcoes[0].acao(); });
-      return `<button class="btn ${cls}" type="button" id="${id}" title="${esc(opcoes[0].desc || '')}">${ic('<path d="M12 5v14M5 12h14"/>')}${esc(rotulo || opcoes[0].nome)}</button>`;
-    }
-    const seta = '<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';
-    setTimeout(() => {
-      const b = document.getElementById(id); if (!b) return;
-      const m = b.nextElementSibling;
-      b.onclick = (e) => { e.stopPropagation(); m.hidden = !m.hidden; b.setAttribute('aria-expanded', !m.hidden); };
-      document.addEventListener('click', () => { m.hidden = true; }, { once: true });
-      $$('button', m).forEach((x, i) => x.onclick = () => { m.hidden = true; opcoes[i].acao(); });
-    });
-    return `<div class="add-wrap"><button class="btn ${cls}" type="button" id="${id}" aria-haspopup="menu" aria-expanded="false">${secundario ? '' : ic('<path d="M12 5v14M5 12h14"/>')}${esc(rotulo || 'Adicionar')}${seta}</button>
-      <div class="add-menu" role="menu" hidden>${opcoes.map((o) => `<button type="button" role="menuitem"><b>${esc(o.nome)}</b><span>${esc(o.desc)}</span></button>`).join('')}</div></div>`;
-  }
-  const lista = (id, itens) => `<datalist id="${id}">${[...new Set(itens.filter(Boolean))].map((v) => `<option value="${esc(v)}">`).join('')}</datalist>`;
-  const sugestoes = () => lista('dl-marca', A.modelos.map((m) => m.marca)) + lista('dl-modelo', A.modelos.map((m) => m.modelo)) + lista('dl-vend', VENDEDORES()) + lista('dl-cidade', ['Orlândia, SP', 'Sertãozinho, SP', 'Morro Agudo, SP', 'Guaíra, SP', 'Bebedouro, SP', 'Jaboticabal, SP', 'Ituverava, SP', 'São Joaquim da Barra, SP', 'Batatais, SP', 'Franca, SP', 'Ribeirão Preto, SP'])
-    + lista('dl-banco', ['Banco da montadora', 'Banco do Brasil', 'Sicredi', 'Bradesco', 'Santander']) + lista('dl-servico', (A.garantias || []).map((g) => g.servico));
-
-  // formulário genérico com sugestões que aceitam texto livre
-  function formulario(titulo, campos, valores, aoSalvar, sub = '') {
-    abrirCamada('modal', `<h2>${esc(titulo)}</h2>${sub ? `<p class="sub">${sub}</p>` : ''}${sugestoes()}
-      <form class="campos" style="margin-top:14px" novalidate>${campos.map((c) => `<div class="campo ${c.inteiro ? 'inteiro' : ''}"><label for="fm-${c.k}">${esc(c.r)}${c.obr ? ' *' : ''}${c.conf ? ` <span class="conf-campo ${c.conf}">${c.conf === 'alta' ? 'lido com segurança' : c.conf === 'media' ? 'confira' : 'não encontrado'}</span>` : ''}</label>
-        ${c.tipo === 'select' ? `<select id="fm-${c.k}">${c.ops.map(([v, n]) => `<option value="${esc(v)}" ${String(valores[c.k] ?? '') === String(v) ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>`
-        : `<input id="fm-${c.k}" ${c.lista ? `list="${c.lista}"` : ''} type="${c.tipo === 'data' ? 'date' : 'text'}" ${c.num ? 'inputmode="decimal"' : ''} value="${esc(valores[c.k] ?? '')}" placeholder="${esc(c.ph || '')}" autocomplete="off">`}<span class="erro-campo" id="er-${c.k}"></span></div>`).join('')}
-      </form><div class="acoes"><button class="btn btn-ouro" type="button" id="fm-ok">Salvar</button><button class="btn btn-linha" type="button" id="fm-nao">Cancelar</button></div>`, (cx) => {
-      $('#fm-nao', cx).onclick = () => fecharCamada();
-      $('#fm-ok', cx).onclick = () => {
-        const v = {}; let ok = true;
-        campos.forEach((c) => { const el = $('#fm-' + c.k, cx); let x = el.value.trim(); if (c.num) x = x ? num(x) : ''; v[c.k] = x;
-          const er = $('#er-' + c.k, cx); er.textContent = c.obr && (x === '' || (c.num && !(x > 0))) ? 'Preencha este campo.' : ''; if (er.textContent) ok = false; });
-        if (!ok) { toast('Confira os campos marcados.', true); return; }
-        aoSalvar(v);
-      };
-    });
-  }
-  const CAMPOS_MAQ = [
-    { k: 'tipo', r: 'Categoria', tipo: 'select', ops: Object.entries(NOMES), obr: true }, { k: 'marca', r: 'Fabricante', lista: 'dl-marca', obr: true },
-    { k: 'modelo', r: 'Modelo', lista: 'dl-modelo', obr: true }, { k: 'ano', r: 'Ano', num: true, obr: true }, { k: 'horas', r: 'Horas', num: true },
-    { k: 'pago', r: 'Valor pago na troca (R$)', num: true, obr: true }, { k: 'preparo', r: 'Preparo (R$)', num: true }, { k: 'entrada', r: 'Data de entrada', tipo: 'data', obr: true },
-    { k: 'anuncio', r: 'Preço anunciado (R$)', num: true }, { k: 'vendedor', r: 'Vendedor', lista: 'dl-vend' }, { k: 'origem', r: 'Origem / cliente', lista: 'dl-cidade', ph: 'Faz. Santa Helena, Orlândia' },
-    { k: 'referencia', r: 'Fipe da máquina (se o modelo for novo)', num: true }, { k: 'chassi', r: 'Chassi / número de série' }
-  ];
-  function criarMaquina(v, extra = {}) {
-    const est = 3, cond = 70;
-    const id = 'M' + String(estado.fechadas.length + 1).padStart(3, '0') + (OP ? 'R' : '') + (NV ? Math.random().toString(36).slice(2, 6).toUpperCase() : '');
-    const t = { id, tipo: v.tipo, marca: v.marca, modelo: v.modelo, ano: +v.ano, horas: +v.horas || 0, cond, ficha: { motor: est, transmissao: est, hidraulico: est, pneus: est, cabine: est, lataria: est },
-      pago: Math.round(v.pago), preparo: Math.round(v.preparo || 0), preparoEst: null, vendido: v.vendido ? Math.round(v.vendido) : null, entrada: v.entrada, saida: v.saida || null,
-      diasPatio: v.saida ? diasEntre(v.entrada, v.saida) : null, anuncio: Math.round(v.anuncio || v.pago * 1.15), precos: [{ data: v.entrada, valor: Math.round(v.anuncio || v.pago * 1.15), motivo: 'Anúncio inicial' }],
-      vendedor: v.vendedor || eu().nome, origem: v.origem || 'Cadastro manual', idAgro: false, manutencoes: [], fotos: [], chassi: v.chassi || '', preparoInformado: v.preparo !== '' && v.preparo != null, ...extra };
-    if (v.referencia) t.referencia = v.referencia;
-    if (!M.catalogo(t) && v.referencia) A.modelos.push({ tipo: t.tipo, marca: t.marca, modelo: t.modelo, base: v.referencia, hAno: 800, importado: true });
-    estado.fechadas.push(t); A.trocas.push({ ...t }); return t;
-  }
-  // depois: quem chamou continua na própria tela (ex.: implantação) em vez de ir para o pátio
-  function addMaquinaManual(pre = {}, docId, depois) {
-    formulario('Adicionar máquina ao pátio', CAMPOS_MAQ, { tipo: 'trator', entrada: hojeISO(), ...pre }, (v) => {
-      const t = criarMaquina(v, docId ? { docs: [docId] } : {}); salvar(); cacheLimpa();
-      log('maquina', `Máquina adicionada ao pátio: ${t.marca} ${t.modelo} por ${real(t.pago)}`, { ref: t.id });
-      fecharCamada(true); toast('Máquina adicionada ao pátio.'); if (typeof depois === 'function') { depois(t); return; } location.hash = '#patio'; rota();
-    }, 'Sugestões aparecem enquanto você digita, mas pode escrever qualquer valor.');
-  }
-  function addVendaManual() {
-    formulario('Adicionar venda antiga', CAMPOS_MAQ.concat([{ k: 'vendido', r: 'Valor vendido (R$)', num: true, obr: true }, { k: 'saida', r: 'Data da venda', tipo: 'data', obr: true }]), { tipo: 'trator' }, (v) => {
-      if (v.saida < v.entrada) { toast('A venda não pode ser antes da troca.', true); return; }
-      const t = criarMaquina(v); salvar(); cacheLimpa(); log('venda', `Venda antiga registrada: ${t.marca} ${t.modelo} por ${real(t.vendido)}`, { ref: t.id });
-      fecharCamada(true); toast('Venda adicionada ao histórico.'); rota();
-    });
-  }
-  function addGarantia(pre = {}, docId) {
-    formulario('Adicionar OS de garantia', [{ k: 'os', r: 'Número da OS', obr: true }, { k: 'data', r: 'Data', tipo: 'data', obr: true }, { k: 'marca', r: 'Fabricante', lista: 'dl-marca', obr: true }, { k: 'modelo', r: 'Modelo', lista: 'dl-modelo' },
-      { k: 'servico', r: 'Serviço', lista: 'dl-servico', obr: true, inteiro: true }, { k: 'cliente', r: 'Cliente', lista: 'dl-cidade' }, { k: 'valor', r: 'Valor do serviço (R$)', num: true, obr: true }, { k: 'pago', r: 'Pago pelo fabricante (R$)', num: true },
-      { k: 'status', r: 'Situação', tipo: 'select', ops: [['aguardando', 'Aguardando'], ['pago', 'Pago'], ['parcial', 'Pago a menos'], ['negado', 'Negado']] }, { k: 'motivo', r: 'Motivo (se pago a menos ou negado)' }],
-    { data: hojeISO(), status: 'aguardando', ...pre }, (v) => {
-      const g = { ...v, valor: Math.round(v.valor), pago: Math.round(v.pago || 0), docs: docId ? [docId] : [] };
-      estado.extras.garantias.push(g); A.garantias.push(g); salvar(); log('garantia', `OS de garantia ${g.os} cadastrada (${real(g.valor)})`);
-      fecharCamada(true); toast('OS de garantia adicionada.'); location.hash = '#garantias'; rota();
-    });
-  }
-  function addFinanciada(pre = {}, docId) {
-    formulario('Adicionar máquina financiada', [{ k: 'chassi', r: 'Chassi', obr: true }, { k: 'tipo', r: 'Categoria', tipo: 'select', ops: Object.entries(NOMES) }, { k: 'marca', r: 'Fabricante', lista: 'dl-marca', obr: true }, { k: 'modelo', r: 'Modelo', lista: 'dl-modelo', obr: true },
-      { k: 'valor', r: 'Valor financiado (R$)', num: true, obr: true }, { k: 'banco', r: 'Banco', lista: 'dl-banco' }, { k: 'taxa', r: 'Taxa ao mês (%)', num: true }, { k: 'carencia', r: 'Carência (dias)', num: true },
-      { k: 'entrada', r: 'Entrada no estoque', tipo: 'data', obr: true }, { k: 'venda', r: 'Data da venda', tipo: 'data' }, { k: 'quitacao', r: 'Data da quitação', tipo: 'data' }],
-    { tipo: 'trator', taxa: '1,1', carencia: 90, entrada: hojeISO(), ...pre }, (v) => {
-      const f = { chassi: v.chassi, tipo: v.tipo, marca: v.marca, modelo: v.modelo, valor: Math.round(v.valor), banco: v.banco || '—', taxaMes: (v.taxa || 1.1) / 100, carencia: +v.carencia || 0, entrada: v.entrada, venda: v.venda || null, quitacao: v.quitacao || null, docs: docId ? [docId] : [] };
-      estado.extras.financiadas.push(f); A.financiadas.push(f); salvar(); log('financiamento', `Máquina financiada cadastrada: ${f.marca} ${f.modelo} (${real(f.valor)})`);
-      fecharCamada(true); toast('Máquina financiada adicionada.'); location.hash = '#financiamento'; rota();
-    });
-  }
-  function addUsuario(u) {
-    if (K.nuvem) { location.hash = '#usuarios'; return; }
-    formulario(u ? 'Editar usuário' : 'Adicionar usuário', [{ k: 'nome', r: 'Nome', obr: true }, { k: 'email', r: 'E-mail' }, { k: 'perfil', r: 'Perfil', tipo: 'select', ops: Object.entries(K.PERFIS) }], u || { perfil: 'vendedor' }, (v) => {
-      if (u) { Object.assign(u, v); log('usuario', `Usuário ${v.nome} alterado para ${K.PERFIS[v.perfil]}`); }
-      else { estado.usuarios.push({ id: 'u' + Date.now(), ...v }); log('usuario', `Usuário ${v.nome} criado como ${K.PERFIS[v.perfil]}`); }
-      salvar(); fecharCamada(true); toast('Usuário salvo.'); rota();
-    });
-  }
-
-  // ---------- documentos: fotos, PDFs e planilhas viram sugestões de preenchimento ----------
-  const idbDoc = (modo, fn) => idb(modo, fn);
-  const carregar = (src) => new Promise((ok, erro) => { if ([...document.scripts].some((s) => s.src === src)) return ok(); const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => erro(new Error('Sem internet para carregar o leitor.')); document.head.appendChild(s); });
-  async function lerTexto(arquivo, progresso) {
-    const nome = arquivo.name.toLowerCase();
-    if (/\.(csv|txt|tsv)$/.test(nome)) return { tipo: 'planilha', texto: window.DMS ? window.DMS.decodificar(new Uint8Array(await arquivo.arrayBuffer())).texto : await arquivo.text() };
-    if (/\.(xlsx|xls|ods)$/.test(nome)) {
-      progresso('Abrindo a planilha…'); await carregar('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
-      let wb; try { wb = window.XLSX.read(await arquivo.arrayBuffer(), { type: 'array', dateNF: 'dd/mm/yyyy' }); } catch (e) { throw new Error(/password|encrypt/i.test(String(e && e.message)) ? 'planilha protegida por senha: tire a senha no Excel e salve de novo' : 'não foi possível abrir esta planilha'); }
-      return { tipo: 'planilha', texto: window.XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]], { FS: ';' }) };
-    }
-    if (/\.pdf$/.test(nome)) {
-      progresso('Lendo o PDF…'); await carregar('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      const pdf = await window.pdfjsLib.getDocument({ data: await arquivo.arrayBuffer() }).promise; let txt = '';
-      for (let p = 1; p <= Math.min(pdf.numPages, 8); p++) { const c = await (await pdf.getPage(p)).getTextContent(); txt += c.items.map((i) => i.str).join(' ') + '\n'; }
-      if (txt.trim().length > 30) return { tipo: 'pdf', texto: txt };
-      return { tipo: 'pdf', texto: '', aviso: 'Este PDF é uma imagem escaneada; tire uma foto da página para ler o texto.' };
-    }
-    if (/^image\//.test(arquivo.type)) {
-      progresso('Lendo o texto da foto (pode levar até 1 minuto)…');
-      await carregar('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js');
-      const r = await window.Tesseract.recognize(arquivo, 'por', { logger: (m) => { if (m.status === 'recognizing text') progresso(`Lendo o texto da foto… ${Math.round(m.progress * 100)}%`); } });
-      return { tipo: 'foto', texto: r.data.text };
-    }
-    throw new Error('Formato não aceito. Use foto, PDF, CSV ou Excel.');
-  }
-  // extrai campos do texto e diz o quanto confia em cada um
-  function extrair(texto) {
-    const t = ' ' + texto.replace(/\s+/g, ' ') + ' ', low = t.toLowerCase(), c = {};
-    const achar = (re) => { const m = t.match(re); return m ? m[1].trim() : ''; };
-    const tipo = /colhed|colheit|cana/.test(low) ? 'colhedora' : /pulveriz/.test(low) ? 'pulverizador' : /plantadeir|semeadeir/.test(low) ? 'plantadeira' : /trator/.test(low) ? 'trator' : '';
-    if (tipo) c.tipo = { v: tipo, conf: 'media' };
-    const marca = [...new Set(A.modelos.map((m) => m.marca))].find((m) => low.includes(m.toLowerCase())) || (/deere/.test(low) ? 'John Deere' : /massey/.test(low) ? 'Massey Ferguson' : /case/.test(low) ? 'Case IH' : '');
-    if (marca) c.marca = { v: marca, conf: 'alta' };
-    const mod = A.modelos.find((m) => low.includes(m.modelo.toLowerCase().replace(/^mf /, '')));
-    if (mod) { c.modelo = { v: mod.modelo, conf: 'alta' }; c.tipo = { v: mod.tipo, conf: 'alta' }; if (!c.marca) c.marca = { v: mod.marca, conf: 'alta' }; }
-    const ano = achar(/(?:ano(?: de)?(?: fabrica[çc][ãa]o| modelo)?|fab\.?)\s*[:\-]?\s*((?:19|20)\d{2})/i) || achar(/\b((?:20[0-2]\d|199\d))\b/);
-    if (ano) c.ano = { v: ano, conf: /ano/i.test(t) ? 'alta' : 'media' };
-    const horas = achar(/(?:hor[íi]metro|horas)\s*[:\-]?\s*([\d.]{2,7})/i) || achar(/([\d.]{3,7})\s*(?:h|hs|horas)\b/i);
-    if (horas) c.horas = { v: horas.replace(/\./g, ''), conf: 'alta' };
-    const chassi = achar(/(?:chassi|s[ée]rie|n[ºo°]?\s*de\s*s[ée]rie|pin)\s*[:\-]?\s*([A-Z0-9]{6,20})/i);
-    if (chassi) c.chassi = { v: chassi.toUpperCase(), conf: 'alta' };
-    const valores = [...t.matchAll(/R\$\s*([\d.]+,\d{2}|[\d.]{4,})/g)].map((m) => window.IMPORTAR.dinheiro(m[1])).filter((v) => v > 1000).sort((a, b) => b - a);
-    if (valores.length) c.valor = { v: String(valores[0]), conf: valores.length === 1 ? 'alta' : 'media' };
-    const datas = [...t.matchAll(/\b(\d{2}\/\d{2}\/\d{4})\b/g)].map((m) => window.IMPORTAR.dataISO(m[1])).filter((d) => d && d !== 'invalida');
-    if (datas.length) c.data = { v: datas[0], conf: datas.length === 1 ? 'alta' : 'media' };
-    const cnpj = achar(/(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/); if (cnpj) c.cnpj = { v: cnpj, conf: 'alta' };
-    const os = achar(/(?:ordem de servi[çc]o|o\.?s\.?)\s*(?:n[ºo°]\.?)?\s*[:\-]?\s*([A-Z0-9\-]{3,12})/i); if (os) c.os = { v: os, conf: 'media' };
-    const cliente = achar(/(?:cliente|propriet[áa]rio|comprador|emitente)\s*[:\-]\s*([A-ZÁÉÍÓÚÂÊÔÃÕÇa-záéíóúâêôãõç .]{4,50}?)(?=\s(?:cpf|cnpj|endere|cidade|rua|av\.|trator|colhed|pulveriz|plantad|ano|hor|chassi|s[ée]rie|valor|data|modelo)|\s{2}|$)/i); if (cliente) c.cliente = { v: cliente, conf: 'media' };
-    const destino = /garantia/.test(low) ? 'garantia' : /floor ?plan|financiad|cédula|alienação/.test(low) ? 'financiada' : 'maquina';
-    return { campos: c, destino };
-  }
-  function telaDocumentos() {
-    const docs = estado.documentos.slice().reverse();
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Central de documentos</h1><p>Mande foto de nota, ordem de serviço, contrato, PDF ou planilha. O Anshur lê, sugere o preenchimento e você confere antes de salvar.</p></div>${botaoAdicionar([{ nome: 'Escolher arquivo', desc: 'Foto, PDF, CSV ou Excel', acao: () => $('#doc-arq').click() }, { nome: 'Cadastrar sem documento', desc: 'Máquina, garantia ou financiamento à mão', acao: () => addMaquinaManual() }], 'Enviar documento')}</div>
+        <ul>${d.length?d.map(g=>`<li><b>${c(g.titulo)}</b>: ${c(g.txt)}.</li>`).join(""):"<li>Nenhum ponto cr\xEDtico.</li>"}</ul>
+        <h2>Qualidade das avalia\xE7\xF5es</h2>
+        <p>${(()=>{const g=Q.validar();return g.n>=Q.QUALIDADE.minimoValidacao?`Nas ${g.n} vendas conferidas, o Anshur errou o pre\xE7o de venda em ${P(g.mape)} em m\xE9dia (${E(g.mae)} por m\xE1quina). Quanto mais trocas a revenda registra, mais preciso ele fica.`:"Ainda n\xE3o h\xE1 vendas suficientes para medir o erro."})()}</p>
+        <p class="nota-rodape">Valores estimados s\xE3o estimativas, n\xE3o resultados garantidos. ${X?"":"Revenda e dados fict\xEDcios, s\xF3 para demonstra\xE7\xE3o."}</p>
+      </article>`}const qs=(a,e)=>new Promise((o,t)=>{const s=indexedDB.open("anshur",1);s.onupgradeneeded=()=>s.result.createObjectStore("kv"),s.onerror=()=>t(s.error),s.onsuccess=()=>{const i=s.result.transaction("kv",a),n=i.objectStore("kv"),m=e(n);i.oncomplete=()=>o(m&&m.result),i.onerror=()=>t(i.error)}});function ks(){const a=(b.dms&&b.dms.pastas||[]).slice().sort((o,t)=>String(t.ultima&&t.ultima.quando).localeCompare(String(o.ultima&&o.ultima.quando))),e=a[0]&&a[0].ultima;return`<section class="painel bloco"><h2>${q.linha}Trazer do meu sistema atual</h2>
+      <p class="sub" style="margin:6px 0 12px">O Anshur l\xEA as exporta\xE7\xF5es do seu sistema (DMS/ERP) numa pasta do computador ou em arquivos: vendas de usados, trocas, estoque e clientes, em CSV, TXT ou Excel. Voc\xEA confere a pr\xE9via antes de gravar e pode desfazer depois.</p>
+      ${e?`<p class="conta">\xDAltima sincroniza\xE7\xE3o (${c(a[0].nome)}): ${new Date(e.quando).toLocaleString("pt-BR")} \xB7 ${e.novos||0} novos \xB7 ${e.atualizados||0} atualizados${e.erros?` \xB7 ${e.erros} linhas com erro`:""}.</p>`:""}
+      ${ta("importar")?'<div class="acoes"><a class="btn btn-ouro" href="#/config/importar">Trazer do meu sistema</a></div>':'<p class="conta">A importa\xE7\xE3o \xE9 feita pelo dono ou pelo gerente.</p>'}</section>`}function Ii(){}const ha=window.FOTOS,ue=(a,e="maq-foto")=>{const o=ha.de(a),t=o.propria?o.u:ha.mini(o.u);return`<img class="${e}" src="${t}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;maq-ico&quot;>${q[a.tipo],""}</span>'">`},D=()=>x.usuarioAtual(),Pe={dono:["hoje","implantacao","visao","avaliar","patio","trocas","teste","passaportes","vendedores","garantias","financiamento","relatorio","documentos","atividades","usuarios","config","compradores","mercado","aprovacoes","rotina","memoria","historico"],gerente:["hoje","implantacao","visao","avaliar","patio","trocas","teste","passaportes","vendedores","garantias","financiamento","relatorio","documentos","atividades","compradores","mercado","aprovacoes","rotina","memoria","historico"],vendedor:["hoje","visao","avaliar","patio","passaportes","documentos","compradores","mercado","aprovacoes","rotina","memoria"],oficina:["hoje","patio","passaportes","garantias","documentos","rotina"],financeiro:["hoje","visao","patio","trocas","garantias","financiamento","relatorio","documentos","atividades","rotina","memoria","historico"],auditor:["hoje","visao","patio","trocas","vendedores","garantias","financiamento","relatorio","atividades","aprovacoes","rotina","memoria","historico"]},Yo=a=>window.ANSHUR_AREAS?window.ANSHUR_AREAS.permissao(a):null,ta=a=>a==="perfil"||a==="inicio"||(Yo(a)?Yo(a).includes(D().perfil):(Pe[D().perfil]||Pe.dono).includes(a)),Es=()=>["dono","gerente"].includes(D().perfil),L=(a,e,o)=>{x.registrar(a,e,o)};function la(a,e,o){if(D().perfil==="auditor")return'<span class="tag declarado">S\xF3 leitura</span>';const t="add"+Math.random().toString(36).slice(2,7),s=o?"btn-linha":"btn-ouro";if(a.length===1)return setTimeout(()=>{const n=document.getElementById(t);n&&(n.onclick=()=>a[0].acao())}),`<button class="btn ${s}" type="button" id="${t}" title="${c(a[0].desc||"")}">${_('<path d="M12 5v14M5 12h14"/>')}${c(e||a[0].nome)}</button>`;const i='<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';return setTimeout(()=>{const n=document.getElementById(t);if(!n)return;const m=n.nextElementSibling;n.onclick=r=>{r.stopPropagation(),m.hidden=!m.hidden,n.setAttribute("aria-expanded",!m.hidden)},document.addEventListener("click",()=>{m.hidden=!0},{once:!0}),R("button",m).forEach((r,p)=>r.onclick=()=>{m.hidden=!0,a[p].acao()})}),`<div class="add-wrap"><button class="btn ${s}" type="button" id="${t}" aria-haspopup="menu" aria-expanded="false">${o?"":_('<path d="M12 5v14M5 12h14"/>')}${c(e||"Adicionar")}${i}</button>
+      <div class="add-menu" role="menu" hidden>${a.map(n=>`<button type="button" role="menuitem"><b>${c(n.nome)}</b><span>${c(n.desc)}</span></button>`).join("")}</div></div>`}const wa=(a,e)=>`<datalist id="${a}">${[...new Set(e.filter(Boolean))].map(o=>`<option value="${c(o)}">`).join("")}</datalist>`,io=()=>wa("dl-marca",y.modelos.map(a=>a.marca))+wa("dl-modelo",y.modelos.map(a=>a.modelo))+wa("dl-vend",No())+wa("dl-cidade",["Orl\xE2ndia, SP","Sert\xE3ozinho, SP","Morro Agudo, SP","Gua\xEDra, SP","Bebedouro, SP","Jaboticabal, SP","Ituverava, SP","S\xE3o Joaquim da Barra, SP","Batatais, SP","Franca, SP","Ribeir\xE3o Preto, SP"])+wa("dl-banco",["Banco da montadora","Banco do Brasil","Sicredi","Bradesco","Santander"])+wa("dl-servico",(y.garantias||[]).map(a=>a.servico));function ba(a,e,o,t,s=""){oa("modal",`<h2>${c(a)}</h2>${s?`<p class="sub">${s}</p>`:""}${io()}
+      <form class="campos" style="margin-top:14px" novalidate>${e.map(i=>`<div class="campo ${i.inteiro?"inteiro":""}"><label for="fm-${i.k}">${c(i.r)}${i.obr?" *":""}${i.conf?` <span class="conf-campo ${i.conf}">${i.conf==="alta"?"lido com seguran\xE7a":i.conf==="media"?"confira":"n\xE3o encontrado"}</span>`:""}</label>
+        ${i.tipo==="select"?`<select id="fm-${i.k}">${i.ops.map(([n,m])=>`<option value="${c(n)}" ${String(o[i.k]??"")===String(n)?"selected":""}>${c(m)}</option>`).join("")}</select>`:`<input id="fm-${i.k}" ${i.lista?`list="${i.lista}"`:""} type="${i.tipo==="data"?"date":"text"}" ${i.num?'inputmode="decimal"':""} value="${c(o[i.k]??"")}" placeholder="${c(i.ph||"")}" autocomplete="off">`}<span class="erro-campo" id="er-${i.k}"></span></div>`).join("")}
+      </form><div class="acoes"><button class="btn btn-ouro" type="button" id="fm-ok">Salvar</button><button class="btn btn-linha" type="button" id="fm-nao">Cancelar</button></div>`,i=>{l("#fm-nao",i).onclick=()=>U(),l("#fm-ok",i).onclick=()=>{const n={};let m=!0;if(e.forEach(r=>{let d=l("#fm-"+r.k,i).value.trim();r.num&&(d=d?ra(d):""),n[r.k]=d;const $=l("#er-"+r.k,i);$.textContent=r.obr&&(d===""||r.num&&!(d>0))?"Preencha este campo.":"",$.textContent&&(m=!1)}),!m){A("Confira os campos marcados.",!0);return}t(n)}})}const no=[{k:"tipo",r:"Categoria",tipo:"select",ops:Object.entries(V),obr:!0},{k:"marca",r:"Fabricante",lista:"dl-marca",obr:!0},{k:"modelo",r:"Modelo",lista:"dl-modelo",obr:!0},{k:"ano",r:"Ano",num:!0,obr:!0},{k:"horas",r:"Horas",num:!0},{k:"pago",r:"Valor pago na troca (R$)",num:!0,obr:!0},{k:"preparo",r:"Preparo (R$)",num:!0},{k:"entrada",r:"Data de entrada",tipo:"data",obr:!0},{k:"anuncio",r:"Pre\xE7o anunciado (R$)",num:!0},{k:"vendedor",r:"Vendedor",lista:"dl-vend"},{k:"origem",r:"Origem / cliente",lista:"dl-cidade",ph:"Faz. Santa Helena, Orl\xE2ndia"},{k:"referencia",r:"Fipe da m\xE1quina (se o modelo for novo)",num:!0},{k:"chassi",r:"Chassi / n\xFAmero de s\xE9rie"}];function ro(a,e={}){const i={id:"M"+String(b.fechadas.length+1).padStart(3,"0")+(X?"R":"")+(C?Math.random().toString(36).slice(2,6).toUpperCase():""),tipo:a.tipo,marca:a.marca,modelo:a.modelo,ano:+a.ano,horas:+a.horas||0,cond:70,ficha:{motor:3,transmissao:3,hidraulico:3,pneus:3,cabine:3,lataria:3},pago:Math.round(a.pago),preparo:Math.round(a.preparo||0),preparoEst:null,vendido:a.vendido?Math.round(a.vendido):null,entrada:a.entrada,saida:a.saida||null,diasPatio:a.saida?le(a.entrada,a.saida):null,anuncio:Math.round(a.anuncio||a.pago*1.15),precos:[{data:a.entrada,valor:Math.round(a.anuncio||a.pago*1.15),motivo:"An\xFAncio inicial"}],vendedor:a.vendedor||D().nome,origem:a.origem||"Cadastro manual",idAgro:!1,manutencoes:[],fotos:[],chassi:a.chassi||"",preparoInformado:a.preparo!==""&&a.preparo!=null,...e};return a.referencia&&(i.referencia=a.referencia),!Q.catalogo(i)&&a.referencia&&y.modelos.push({tipo:i.tipo,marca:i.marca,modelo:i.modelo,base:a.referencia,hAno:800,importado:!0}),b.fechadas.push(i),y.trocas.push({...i}),i}function ve(a={},e,o){ba("Adicionar m\xE1quina ao p\xE1tio",no,{tipo:"trator",entrada:z(),...a},t=>{const s=ro(t,e?{docs:[e]}:{});if(T(),Pa(),L("maquina",`M\xE1quina adicionada ao p\xE1tio: ${s.marca} ${s.modelo} por ${M(s.pago)}`,{ref:s.id}),U(!0),A("M\xE1quina adicionada ao p\xE1tio."),typeof o=="function"){o(s);return}location.hash="#patio",Z()},"Sugest\xF5es aparecem enquanto voc\xEA digita, mas pode escrever qualquer valor.")}function lo(){ba("Adicionar venda antiga",no.concat([{k:"vendido",r:"Valor vendido (R$)",num:!0,obr:!0},{k:"saida",r:"Data da venda",tipo:"data",obr:!0}]),{tipo:"trator"},a=>{if(a.saida<a.entrada){A("A venda n\xE3o pode ser antes da troca.",!0);return}const e=ro(a);T(),Pa(),L("venda",`Venda antiga registrada: ${e.marca} ${e.modelo} por ${M(e.vendido)}`,{ref:e.id}),U(!0),A("Venda adicionada ao hist\xF3rico."),Z()})}function co(a={},e){ba("Adicionar OS de garantia",[{k:"os",r:"N\xFAmero da OS",obr:!0},{k:"data",r:"Data",tipo:"data",obr:!0},{k:"marca",r:"Fabricante",lista:"dl-marca",obr:!0},{k:"modelo",r:"Modelo",lista:"dl-modelo"},{k:"servico",r:"Servi\xE7o",lista:"dl-servico",obr:!0,inteiro:!0},{k:"cliente",r:"Cliente",lista:"dl-cidade"},{k:"valor",r:"Valor do servi\xE7o (R$)",num:!0,obr:!0},{k:"pago",r:"Pago pelo fabricante (R$)",num:!0},{k:"status",r:"Situa\xE7\xE3o",tipo:"select",ops:[["aguardando","Aguardando"],["pago","Pago"],["parcial","Pago a menos"],["negado","Negado"]]},{k:"motivo",r:"Motivo (se pago a menos ou negado)"}],{data:z(),status:"aguardando",...a},o=>{const t={...o,valor:Math.round(o.valor),pago:Math.round(o.pago||0),docs:e?[e]:[]};b.extras.garantias.push(t),y.garantias.push(t),T(),L("garantia",`OS de garantia ${t.os} cadastrada (${M(t.valor)})`),U(!0),A("OS de garantia adicionada."),location.hash="#garantias",Z()})}function po(a={},e){ba("Adicionar m\xE1quina financiada",[{k:"chassi",r:"Chassi",obr:!0},{k:"tipo",r:"Categoria",tipo:"select",ops:Object.entries(V)},{k:"marca",r:"Fabricante",lista:"dl-marca",obr:!0},{k:"modelo",r:"Modelo",lista:"dl-modelo",obr:!0},{k:"valor",r:"Valor financiado (R$)",num:!0,obr:!0},{k:"banco",r:"Banco",lista:"dl-banco"},{k:"taxa",r:"Taxa ao m\xEAs (%)",num:!0},{k:"carencia",r:"Car\xEAncia (dias)",num:!0},{k:"entrada",r:"Entrada no estoque",tipo:"data",obr:!0},{k:"venda",r:"Data da venda",tipo:"data"},{k:"quitacao",r:"Data da quita\xE7\xE3o",tipo:"data"}],{tipo:"trator",taxa:"1,1",carencia:90,entrada:z(),...a},o=>{const t={chassi:o.chassi,tipo:o.tipo,marca:o.marca,modelo:o.modelo,valor:Math.round(o.valor),banco:o.banco||"\u2014",taxaMes:(o.taxa||1.1)/100,carencia:+o.carencia||0,entrada:o.entrada,venda:o.venda||null,quitacao:o.quitacao||null,docs:e?[e]:[]};b.extras.financiadas.push(t),y.financiadas.push(t),T(),L("financiamento",`M\xE1quina financiada cadastrada: ${t.marca} ${t.modelo} (${M(t.valor)})`),U(!0),A("M\xE1quina financiada adicionada."),location.hash="#financiamento",Z()})}function Te(a){if(x.nuvem){location.hash="#usuarios";return}ba(a?"Editar usu\xE1rio":"Adicionar usu\xE1rio",[{k:"nome",r:"Nome",obr:!0},{k:"email",r:"E-mail"},{k:"perfil",r:"Perfil",tipo:"select",ops:Object.entries(x.PERFIS)}],a||{perfil:"vendedor"},e=>{a?(Object.assign(a,e),L("usuario",`Usu\xE1rio ${e.nome} alterado para ${x.PERFIS[e.perfil]}`)):(b.usuarios.push({id:"u"+Date.now(),...e}),L("usuario",`Usu\xE1rio ${e.nome} criado como ${x.PERFIS[e.perfil]}`)),T(),U(!0),A("Usu\xE1rio salvo."),Z()})}const Zo=(a,e)=>qs(a,e),mo=a=>new Promise((e,o)=>{if([...document.scripts].some(s=>s.src===a))return e();const t=document.createElement("script");t.src=a,t.onload=e,t.onerror=()=>o(new Error("Sem internet para carregar o leitor.")),document.head.appendChild(t)});async function uo(a,e){const o=a.name.toLowerCase();if(/\.(csv|txt|tsv)$/.test(o))return{tipo:"planilha",texto:window.DMS?window.DMS.decodificar(new Uint8Array(await a.arrayBuffer())).texto:await a.text()};if(/\.(xlsx|xls|ods)$/.test(o)){e("Abrindo a planilha\u2026"),await mo("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js");let t;try{t=window.XLSX.read(await a.arrayBuffer(),{type:"array",dateNF:"dd/mm/yyyy"})}catch(s){throw new Error(/password|encrypt/i.test(String(s&&s.message))?"planilha protegida por senha: tire a senha no Excel e salve de novo":"n\xE3o foi poss\xEDvel abrir esta planilha")}return{tipo:"planilha",texto:window.XLSX.utils.sheet_to_csv(t.Sheets[t.SheetNames[0]],{FS:";"})}}if(/\.pdf$/.test(o)){e("Lendo o PDF\u2026"),await mo("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"),window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";const t=await window.pdfjsLib.getDocument({data:await a.arrayBuffer()}).promise;let s="";for(let i=1;i<=Math.min(t.numPages,8);i++){const n=await(await t.getPage(i)).getTextContent();s+=n.items.map(m=>m.str).join(" ")+`
+`}return s.trim().length>30?{tipo:"pdf",texto:s}:{tipo:"pdf",texto:"",aviso:"Este PDF \xE9 uma imagem escaneada; tire uma foto da p\xE1gina para ler o texto."}}if(/^image\//.test(a.type))return e("Lendo o texto da foto (pode levar at\xE9 1 minuto)\u2026"),await mo("https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"),{tipo:"foto",texto:(await window.Tesseract.recognize(a,"por",{logger:s=>{s.status==="recognizing text"&&e(`Lendo o texto da foto\u2026 ${Math.round(s.progress*100)}%`)}})).data.text};throw new Error("Formato n\xE3o aceito. Use foto, PDF, CSV ou Excel.")}function Ss(a){const e=" "+a.replace(/\s+/g," ")+" ",o=e.toLowerCase(),t={},s=O=>{const aa=e.match(O);return aa?aa[1].trim():""},i=/colhed|colheit|cana/.test(o)?"colhedora":/pulveriz/.test(o)?"pulverizador":/plantadeir|semeadeir/.test(o)?"plantadeira":/trator/.test(o)?"trator":"";i&&(t.tipo={v:i,conf:"media"});const n=[...new Set(y.modelos.map(O=>O.marca))].find(O=>o.includes(O.toLowerCase()))||(/deere/.test(o)?"John Deere":/massey/.test(o)?"Massey Ferguson":/case/.test(o)?"Case IH":"");n&&(t.marca={v:n,conf:"alta"});const m=y.modelos.find(O=>o.includes(O.modelo.toLowerCase().replace(/^mf /,"")));m&&(t.modelo={v:m.modelo,conf:"alta"},t.tipo={v:m.tipo,conf:"alta"},t.marca||(t.marca={v:m.marca,conf:"alta"}));const r=s(/(?:ano(?: de)?(?: fabrica[çc][ãa]o| modelo)?|fab\.?)\s*[:\-]?\s*((?:19|20)\d{2})/i)||s(/\b((?:20[0-2]\d|199\d))\b/);r&&(t.ano={v:r,conf:/ano/i.test(e)?"alta":"media"});const p=s(/(?:hor[íi]metro|horas)\s*[:\-]?\s*([\d.]{2,7})/i)||s(/([\d.]{3,7})\s*(?:h|hs|horas)\b/i);p&&(t.horas={v:p.replace(/\./g,""),conf:"alta"});const d=s(/(?:chassi|s[ée]rie|n[ºo°]?\s*de\s*s[ée]rie|pin)\s*[:\-]?\s*([A-Z0-9]{6,20})/i);d&&(t.chassi={v:d.toUpperCase(),conf:"alta"});const $=[...e.matchAll(/R\$\s*([\d.]+,\d{2}|[\d.]{4,})/g)].map(O=>window.IMPORTAR.dinheiro(O[1])).filter(O=>O>1e3).sort((O,aa)=>aa-O);$.length&&(t.valor={v:String($[0]),conf:$.length===1?"alta":"media"});const u=[...e.matchAll(/\b(\d{2}\/\d{2}\/\d{4})\b/g)].map(O=>window.IMPORTAR.dataISO(O[1])).filter(O=>O&&O!=="invalida");u.length&&(t.data={v:u[0],conf:u.length===1?"alta":"media"});const g=s(/(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/);g&&(t.cnpj={v:g,conf:"alta"});const j=s(/(?:ordem de servi[çc]o|o\.?s\.?)\s*(?:n[ºo°]\.?)?\s*[:\-]?\s*([A-Z0-9\-]{3,12})/i);j&&(t.os={v:j,conf:"media"});const S=s(/(?:cliente|propriet[áa]rio|comprador|emitente)\s*[:\-]\s*([A-ZÁÉÍÓÚÂÊÔÃÕÇa-záéíóúâêôãõç .]{4,50}?)(?=\s(?:cpf|cnpj|endere|cidade|rua|av\.|trator|colhed|pulveriz|plantad|ano|hor|chassi|s[ée]rie|valor|data|modelo)|\s{2}|$)/i);S&&(t.cliente={v:S,conf:"media"});const H=/garantia/.test(o)?"garantia":/floor ?plan|financiad|cédula|alienação/.test(o)?"financiada":"maquina";return{campos:t,destino:H}}function at(){const a=b.documentos.slice().reverse();w.innerHTML=`
+      <div class="titulo"><div><h1>Central de documentos</h1><p>Mande foto de nota, ordem de servi\xE7o, contrato, PDF ou planilha. O Anshur l\xEA, sugere o preenchimento e voc\xEA confere antes de salvar.</p></div>${la([{nome:"Escolher arquivo",desc:"Foto, PDF, CSV ou Excel",acao:()=>l("#doc-arq").click()},{nome:"Cadastrar sem documento",desc:"M\xE1quina, garantia ou financiamento \xE0 m\xE3o",acao:()=>ve()}],"Enviar documento")}</div>
       <label class="soltar" id="soltar"><input type="file" id="doc-arq" accept="image/*,.pdf,.csv,.txt,.xlsx,.xls,.ods" multiple class="sr">
-        ${ic('<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>', 'ico grande')}<b>Arraste arquivos aqui ou toque para escolher</b><span>Fotos (JPG, PNG), PDF, CSV e Excel · também dá para tirar foto pelo celular</span></label>
+        ${_('<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',"ico grande")}<b>Arraste arquivos aqui ou toque para escolher</b><span>Fotos (JPG, PNG), PDF, CSV e Excel \xB7 tamb\xE9m d\xE1 para tirar foto pelo celular</span></label>
       <div id="doc-proc"></div>
-      <section class="painel bloco"><div class="painel-cab"><h2>${ICO.etiqueta}Documentos recebidos</h2><p>${docs.length} ${docs.length === 1 ? 'documento' : 'documentos'}</p></div>
-        ${docs.length ? `<div class="tabela-wrap"><table class="tabela"><thead><tr><th>Arquivo</th><th>Tipo</th><th>Virou</th><th>Por</th><th>Quando</th><th></th></tr></thead><tbody>
-          ${docs.map((d) => `<tr><td><b>${esc(d.nome)}</b><br><span class="sub">${Math.round(d.tamanho / 1024)} KB</span></td><td>${esc(d.tipo)}</td><td>${esc(d.virou || 'Arquivado')}</td><td>${esc(d.usuario)}</td><td>${new Date(d.quando).toLocaleString('pt-BR')}</td><td><button class="link" type="button" data-ver="${d.id}">Ver original</button></td></tr>`).join('')}</tbody></table></div>`
-        : '<p class="vazio">Nenhum documento ainda. Comece mandando a foto de uma nota fiscal ou de uma ordem de serviço.</p>'}</section>`;
-    const inp = $('#doc-arq'), zona = $('#soltar');
-    inp.onchange = () => processar([...inp.files]);
-    zona.ondragover = (e) => { e.preventDefault(); zona.classList.add('sobre'); }; zona.ondragleave = () => zona.classList.remove('sobre');
-    zona.ondrop = (e) => { e.preventDefault(); zona.classList.remove('sobre'); processar([...e.dataTransfer.files]); };
-    $$('[data-ver]', tela).forEach((b) => b.onclick = async () => {
-      const d = estado.documentos.find((x) => x.id === b.dataset.ver);
-      if (K.nuvem && d && d.caminho) { const w = window.open('', '_blank'); try { const url = await K.nuvem.abrirDoc(d.caminho); if (w) w.location = url; else location.href = url; } catch (e) { if (w) w.close(); toast(e.message, true); } return; }
-      try { const blob = await idbDoc('readonly', (st) => st.get('doc:' + b.dataset.ver)); if (!blob) { toast('Original não está neste aparelho.', true); return; } window.open(URL.createObjectURL(blob), '_blank'); } catch (e) { toast('Não foi possível abrir o original.', true); }
-    });
-  }
-  async function processar(arquivos) {
-    const caixa = $('#doc-proc'); if (!arquivos.length) return;
-    for (const arq of arquivos) {
-      if (K.nuvem && arq.size > K.nuvem.limiteDoc) { toast(`${arq.name}: arquivo acima de 10 MB.`, true); continue; }
-      if (arq.size > 15 * 1024 * 1024) { toast(`${arq.name}: arquivo acima de 15 MB.`, true); continue; }
-      caixa.innerHTML = `<section class="painel bloco"><div class="carregando-linha"><span class="giro"></span><b id="doc-st">Recebendo ${esc(arq.name)}…</b></div></section>`;
-      const prog = (m) => { const s = $('#doc-st'); if (s) s.textContent = m; };
-      let lido;
-      try { lido = await lerTexto(arq, prog); } catch (e) { caixa.innerHTML = `<section class="painel bloco"><p class="neg">${esc(arq.name)}: ${esc(e.message)}</p></section>`; continue; }
-      const id = 'd' + Date.now();
-      try { await idbDoc('readwrite', (st) => st.put(arq, 'doc:' + id)); } catch (e) { /* original fica só nesta sessão */ }
-      const doc = { id, nome: arq.name, tamanho: arq.size, tipo: { planilha: 'Planilha', pdf: 'PDF', foto: 'Foto' }[lido.tipo], quando: new Date().toISOString(), usuario: eu().nome, virou: '' };
-      if (K.nuvem) { prog('Guardando o original na pasta da revenda…'); try { doc.caminho = await K.nuvem.subirDoc(id, arq); } catch (e) { toast(`${arq.name}: o original não foi guardado no servidor (${e.message}).`, true); } }
-      estado.documentos.push(doc); salvar(); log('documento', `Documento recebido: ${arq.name}`);
-      if (lido.tipo === 'planilha') {
-        const p = window.IMPORTAR.ler(lido.texto, { refDe: M.refDe, anoMax: anoAtual });
-        caixa.innerHTML = `<section class="painel bloco"><h2>${esc(arq.name)}</h2><p class="conta">${p.aceitas.length} linhas reconhecidas como trocas · ${p.rejeitadas.length} com problema.</p>
-          <div class="acoes"><button class="btn btn-ouro" type="button" id="pl-teste">Levar para o teste às cegas</button>${p.comDatas && p.aceitas.length >= 5 ? '<button class="btn btn-linha" type="button" id="pl-hist">Usar como histórico da minha revenda</button>' : ''}</div></section>`;
-        $('#pl-teste').onclick = () => { tc.texto = lido.texto; tc.modo = 'minhas'; tc.previa = p; doc.virou = 'Teste às cegas'; salvar(); location.hash = '#teste'; };
-        const h = $('#pl-hist'); if (h) h.onclick = () => { tc.texto = lido.texto; tc.modo = 'minhas'; tc.previa = p; doc.virou = 'Histórico'; salvar(); location.hash = '#teste'; setTimeout(() => $('#salvar-hist') && $('#salvar-hist').click(), 600); };
-        continue;
-      }
-      const ex = extrair(lido.texto || '');
-      const n = Object.keys(ex.campos).length;
-      caixa.innerHTML = `<section class="painel bloco"><h2>${esc(arq.name)}</h2>
-        ${lido.aviso ? `<p class="conta neg">${esc(lido.aviso)}</p>` : `<p class="conta">${n ? `Encontramos ${n} ${n === 1 ? 'informação' : 'informações'}. Escolha o que este documento vai virar; os campos já vêm sugeridos e você corrige o que quiser.` : 'Não conseguimos ler informações úteis. Você pode preencher à mão; o documento fica anexado.'}</p>`}
-        <details class="texto-lido"><summary>Ver o texto que foi lido</summary><pre>${esc((lido.texto || '').slice(0, 3000))}</pre></details>
-        <div class="acoes"><button class="btn ${ex.destino === 'maquina' ? 'btn-ouro' : 'btn-linha'}" type="button" data-d="maquina">Máquina no pátio</button><button class="btn ${ex.destino === 'garantia' ? 'btn-ouro' : 'btn-linha'}" type="button" data-d="garantia">OS de garantia</button><button class="btn ${ex.destino === 'financiada' ? 'btn-ouro' : 'btn-linha'}" type="button" data-d="financiada">Máquina financiada</button><button class="btn btn-linha" type="button" data-d="arquivar">Só arquivar</button></div></section>`;
-      $$('[data-d]', caixa).forEach((b) => b.onclick = () => {
-        const c = ex.campos, val = (k) => (c[k] ? c[k].v : ''), d = b.dataset.d;
-        const marcar = (campos) => campos.map((x) => { const mapa = { pago: 'valor', valor: 'valor', entrada: 'data', data: 'data' }; const kk = c[x.k] ? x.k : mapa[x.k]; return { ...x, conf: c[kk] ? (c[kk].conf === 'alta' ? 'alta' : 'media') : (x.obr ? 'baixa' : '') }; });
-        if (d === 'arquivar') { doc.virou = 'Arquivado'; salvar(); toast('Documento arquivado.'); telaDocumentos(); return; }
-        if (d === 'maquina') { const campos = CAMPOS_MAQ; formularioDoc('Máquina no pátio', marcar(campos), { tipo: val('tipo') || 'trator', marca: val('marca'), modelo: val('modelo'), ano: val('ano'), horas: val('horas'), pago: val('valor'), entrada: val('data') || hojeISO(), chassi: val('chassi'), origem: val('cliente') }, (v) => { const t = criarMaquina(v, { docs: [id] }); doc.virou = `Máquina ${t.marca} ${t.modelo}`; log('maquina', `Máquina criada a partir do documento ${arq.name}`, { ref: t.id }); return '#patio'; }); }
-        if (d === 'garantia') { fecharCamada(true); addGarantia({ os: val('os'), data: val('data') || hojeISO(), marca: val('marca'), modelo: val('modelo'), valor: val('valor'), cliente: val('cliente') }, id); doc.virou = 'OS de garantia'; salvar(); }
-        if (d === 'financiada') { fecharCamada(true); addFinanciada({ chassi: val('chassi'), tipo: val('tipo') || 'trator', marca: val('marca'), modelo: val('modelo'), valor: val('valor'), entrada: val('data') || hojeISO() }, id); doc.virou = 'Máquina financiada'; salvar(); }
-      });
-    }
-  }
-  function formularioDoc(titulo, campos, valores, criar) {
-    formulario(titulo, campos, valores, (v) => { const destino = criar(v); salvar(); cacheLimpa(); fecharCamada(true); toast('Salvo a partir do documento. Nada foi gravado sem a sua confirmação.'); location.hash = destino; rota(); },
-      'Verde: lido com segurança. Amarelo: confira. Vermelho: não encontramos, preencha.');
-  }
-
-  // ---------- usuários e permissões ----------
-  function telaUsuarios() {
-    if (K.nuvem) return telaEquipe();
-    const paginas = [['visao', 'Visão geral'], ['avaliar', 'Avaliar troca'], ['patio', 'Pátio'], ['trocas', 'Inteligência'], ['vendedores', 'Vendedores'], ['garantias', 'Garantias'], ['financiamento', 'Financiado'], ['relatorio', 'Relatórios'], ['config', 'Configurações']];
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Usuários e permissões</h1><p>Quem usa o Anshur e o que cada perfil pode ver e fazer.</p></div>${botaoAdicionar([{ nome: 'Adicionar usuário', desc: 'Nome, e-mail e perfil', acao: () => addUsuario() }], 'Novo usuário')}</div>
+      <section class="painel bloco"><div class="painel-cab"><h2>${q.etiqueta}Documentos recebidos</h2><p>${a.length} ${a.length===1?"documento":"documentos"}</p></div>
+        ${a.length?`<div class="tabela-wrap"><table class="tabela"><thead><tr><th>Arquivo</th><th>Tipo</th><th>Virou</th><th>Por</th><th>Quando</th><th></th></tr></thead><tbody>
+          ${a.map(t=>`<tr><td><b>${c(t.nome)}</b><br><span class="sub">${Math.round(t.tamanho/1024)} KB</span></td><td>${c(t.tipo)}</td><td>${c(t.virou||"Arquivado")}</td><td>${c(t.usuario)}</td><td>${new Date(t.quando).toLocaleString("pt-BR")}</td><td><button class="link" type="button" data-ver="${t.id}">Ver original</button></td></tr>`).join("")}</tbody></table></div>`:'<p class="vazio">Nenhum documento ainda. Comece mandando a foto de uma nota fiscal ou de uma ordem de servi\xE7o.</p>'}</section>`;const e=l("#doc-arq"),o=l("#soltar");e.onchange=()=>et([...e.files]),o.ondragover=t=>{t.preventDefault(),o.classList.add("sobre")},o.ondragleave=()=>o.classList.remove("sobre"),o.ondrop=t=>{t.preventDefault(),o.classList.remove("sobre"),et([...t.dataTransfer.files])},R("[data-ver]",w).forEach(t=>t.onclick=async()=>{const s=b.documentos.find(i=>i.id===t.dataset.ver);if(x.nuvem&&s&&s.caminho){const i=window.open("","_blank");try{const n=await x.nuvem.abrirDoc(s.caminho);i?i.location=n:location.href=n}catch(n){i&&i.close(),A(n.message,!0)}return}try{const i=await Zo("readonly",n=>n.get("doc:"+t.dataset.ver));if(!i){A("Original n\xE3o est\xE1 neste aparelho.",!0);return}window.open(URL.createObjectURL(i),"_blank")}catch{A("N\xE3o foi poss\xEDvel abrir o original.",!0)}})}async function et(a){const e=l("#doc-proc");if(a.length)for(const o of a){if(x.nuvem&&o.size>x.nuvem.limiteDoc){A(`${o.name}: arquivo acima de 10 MB.`,!0);continue}if(o.size>15*1024*1024){A(`${o.name}: arquivo acima de 15 MB.`,!0);continue}e.innerHTML=`<section class="painel bloco"><div class="carregando-linha"><span class="giro"></span><b id="doc-st">Recebendo ${c(o.name)}\u2026</b></div></section>`;const t=p=>{const d=l("#doc-st");d&&(d.textContent=p)};let s;try{s=await uo(o,t)}catch(p){e.innerHTML=`<section class="painel bloco"><p class="neg">${c(o.name)}: ${c(p.message)}</p></section>`;continue}const i="d"+Date.now();try{await Zo("readwrite",p=>p.put(o,"doc:"+i))}catch{}const n={id:i,nome:o.name,tamanho:o.size,tipo:{planilha:"Planilha",pdf:"PDF",foto:"Foto"}[s.tipo],quando:new Date().toISOString(),usuario:D().nome,virou:""};if(x.nuvem){t("Guardando o original na pasta da revenda\u2026");try{n.caminho=await x.nuvem.subirDoc(i,o)}catch(p){A(`${o.name}: o original n\xE3o foi guardado no servidor (${p.message}).`,!0)}}if(b.documentos.push(n),T(),L("documento",`Documento recebido: ${o.name}`),s.tipo==="planilha"){const p=window.IMPORTAR.ler(s.texto,{refDe:Q.refDe,anoMax:Da});e.innerHTML=`<section class="painel bloco"><h2>${c(o.name)}</h2><p class="conta">${p.aceitas.length} linhas reconhecidas como trocas \xB7 ${p.rejeitadas.length} com problema.</p>
+          <div class="acoes"><button class="btn btn-ouro" type="button" id="pl-teste">Levar para o teste \xE0s cegas</button>${p.comDatas&&p.aceitas.length>=5?'<button class="btn btn-linha" type="button" id="pl-hist">Usar como hist\xF3rico da minha revenda</button>':""}</div></section>`,l("#pl-teste").onclick=()=>{W.texto=s.texto,W.modo="minhas",W.previa=p,n.virou="Teste \xE0s cegas",T(),location.hash="#teste"};const d=l("#pl-hist");d&&(d.onclick=()=>{W.texto=s.texto,W.modo="minhas",W.previa=p,n.virou="Hist\xF3rico",T(),location.hash="#teste",setTimeout(()=>l("#salvar-hist")&&l("#salvar-hist").click(),600)});continue}const m=Ss(s.texto||""),r=Object.keys(m.campos).length;e.innerHTML=`<section class="painel bloco"><h2>${c(o.name)}</h2>
+        ${s.aviso?`<p class="conta neg">${c(s.aviso)}</p>`:`<p class="conta">${r?`Encontramos ${r} ${r===1?"informa\xE7\xE3o":"informa\xE7\xF5es"}. Escolha o que este documento vai virar; os campos j\xE1 v\xEAm sugeridos e voc\xEA corrige o que quiser.`:"N\xE3o conseguimos ler informa\xE7\xF5es \xFAteis. Voc\xEA pode preencher \xE0 m\xE3o; o documento fica anexado."}</p>`}
+        <details class="texto-lido"><summary>Ver o texto que foi lido</summary><pre>${c((s.texto||"").slice(0,3e3))}</pre></details>
+        <div class="acoes"><button class="btn ${m.destino==="maquina"?"btn-ouro":"btn-linha"}" type="button" data-d="maquina">M\xE1quina no p\xE1tio</button><button class="btn ${m.destino==="garantia"?"btn-ouro":"btn-linha"}" type="button" data-d="garantia">OS de garantia</button><button class="btn ${m.destino==="financiada"?"btn-ouro":"btn-linha"}" type="button" data-d="financiada">M\xE1quina financiada</button><button class="btn btn-linha" type="button" data-d="arquivar">S\xF3 arquivar</button></div></section>`,R("[data-d]",e).forEach(p=>p.onclick=()=>{const d=m.campos,$=j=>d[j]?d[j].v:"",u=p.dataset.d,g=j=>j.map(S=>{const H={pago:"valor",valor:"valor",entrada:"data",data:"data"},O=d[S.k]?S.k:H[S.k];return{...S,conf:d[O]?d[O].conf==="alta"?"alta":"media":S.obr?"baixa":""}});if(u==="arquivar"){n.virou="Arquivado",T(),A("Documento arquivado."),at();return}u==="maquina"&&ws("M\xE1quina no p\xE1tio",g(no),{tipo:$("tipo")||"trator",marca:$("marca"),modelo:$("modelo"),ano:$("ano"),horas:$("horas"),pago:$("valor"),entrada:$("data")||z(),chassi:$("chassi"),origem:$("cliente")},S=>{const H=ro(S,{docs:[i]});return n.virou=`M\xE1quina ${H.marca} ${H.modelo}`,L("maquina",`M\xE1quina criada a partir do documento ${o.name}`,{ref:H.id}),"#patio"}),u==="garantia"&&(U(!0),co({os:$("os"),data:$("data")||z(),marca:$("marca"),modelo:$("modelo"),valor:$("valor"),cliente:$("cliente")},i),n.virou="OS de garantia",T()),u==="financiada"&&(U(!0),po({chassi:$("chassi"),tipo:$("tipo")||"trator",marca:$("marca"),modelo:$("modelo"),valor:$("valor"),entrada:$("data")||z()},i),n.virou="M\xE1quina financiada",T())})}}function ws(a,e,o,t){ba(a,e,o,s=>{const i=t(s);T(),Pa(),U(!0),A("Salvo a partir do documento. Nada foi gravado sem a sua confirma\xE7\xE3o."),location.hash=i,Z()},"Verde: lido com seguran\xE7a. Amarelo: confira. Vermelho: n\xE3o encontramos, preencha.")}function Cs(){if(x.nuvem)return Rs();const a=[["visao","Vis\xE3o geral"],["avaliar","Avaliar troca"],["patio","P\xE1tio"],["trocas","Intelig\xEAncia"],["vendedores","Vendedores"],["garantias","Garantias"],["financiamento","Financiado"],["relatorio","Relat\xF3rios"],["config","Configura\xE7\xF5es"]];w.innerHTML=`
+      <div class="titulo"><div><h1>Usu\xE1rios e permiss\xF5es</h1><p>Quem usa o Anshur e o que cada perfil pode ver e fazer.</p></div>${la([{nome:"Adicionar usu\xE1rio",desc:"Nome, e-mail e perfil",acao:()=>Te()}],"Novo usu\xE1rio")}</div>
       <section class="painel"><div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Nome</th><th>Perfil</th><th>E-mail</th><th>Atividades</th><th></th></tr></thead><tbody>
-        ${estado.usuarios.map((u) => `<tr><td>${avatarHTML(u, 36)} <b>${esc(u.nome)}</b>${u.id === eu().id ? ' <span class="tag comprovado">você</span>' : ''}</td><td>${K.PERFIS[u.perfil]}</td><td>${esc(u.email || '—')}</td><td>${estado.atividades.filter((a) => a.usuario === u.nome).length}</td>
-          <td style="white-space:nowrap"><button class="link" type="button" data-entrar="${u.id}">Entrar como</button> · <button class="link" type="button" data-editar="${u.id}">Editar</button>${u.perfil !== 'dono' ? ` · <button class="link neg" type="button" data-tirar="${u.id}">Remover</button>` : ''}</td></tr>`).join('')}</tbody></table></div></section>
-      <section class="painel bloco"><div class="painel-cab"><h2>${ICO.alvo}O que cada perfil acessa</h2></div>
-        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Perfil</th>${paginas.map(([, n]) => `<th class="n">${n}</th>`).join('')}<th class="n">Aprovar acima do teto</th></tr></thead><tbody>
-        ${Object.entries(K.PERFIS).map(([p, n]) => `<tr><td><b>${n}</b></td>${paginas.map(([k]) => `<td class="n">${PERM[p].includes(k) ? '<span class="pos">✓</span>' : '<span class="sub">—</span>'}</td>`).join('')}<td class="n">${['dono', 'gerente'].includes(p) ? '<span class="pos">✓</span>' : '<span class="sub">—</span>'}</td></tr>`).join('')}</tbody></table></div>
-        <p class="nota-rodape">Nesta versão, "Entrar como" serve para ver o sistema como cada pessoa. O login com senha por usuário entra na versão com servidor.</p></section>`;
-    $$('[data-entrar]', tela).forEach((b) => b.onclick = () => { estado.usuarioAtual = b.dataset.entrar; salvar(); log('usuario', `Entrou como ${eu().nome}`); toast('Agora você está vendo como ' + eu().nome + '.'); location.hash = pode('visao') ? '#visao' : '#patio'; K.recarregar(); });
-    $$('[data-editar]', tela).forEach((b) => b.onclick = () => addUsuario(estado.usuarios.find((u) => u.id === b.dataset.editar)));
-    $$('[data-tirar]', tela).forEach((b) => b.onclick = () => { const u = estado.usuarios.find((x) => x.id === b.dataset.tirar); confirmar(`Remover ${u.nome}?`, 'A pessoa deixa de aparecer na lista. As atividades dela continuam no histórico.', 'Remover', () => { estado.usuarios = estado.usuarios.filter((x) => x !== u); log('usuario', `Usuário ${u.nome} removido`); salvar(); rota(); }); });
-  }
-
-  // link do convite com copiar e mandar pelo WhatsApp (tela Equipe e implantação guiada)
-  function mostrarConvite(caixa, link, email) {
-    const txt = `Você foi convidado para o Anshur da ${A.revenda.nome}. Crie sua conta com o e-mail ${email} neste link (vale 7 dias): ${link}`;
-    caixa.innerHTML = `<div class="campo" style="margin-top:12px"><label for="cv-url">Link do convite para ${esc(email)}</label><input id="cv-url" readonly value="${esc(link)}"></div>
-      <div class="acoes"><button class="btn btn-linha" type="button" id="cv-copiar">Copiar link</button><a class="btn btn-linha" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">Mandar pelo WhatsApp</a></div>`;
-    $('#cv-copiar', caixa).onclick = () => { $('#cv-url', caixa).select(); (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast('Link copiado.'), () => { document.execCommand('copy'); toast('Link copiado.'); }); };
-  }
-  // equipe com conta: convites por link, perfil e lojas definidos pelo dono, conferidos pelo servidor
-  function telaEquipe() {
-    const NV = K.nuvem, souDono = eu().perfil === 'dono', gere = ['dono', 'gerente'].includes(eu().perfil) && !NV.somenteLeitura;
-    const perfisConvite = Object.entries(K.PERFIS).filter(([p]) => souDono || !['dono', 'gerente'].includes(p));
-    const paginas = [['visao', 'Visão geral'], ['avaliar', 'Avaliar troca'], ['patio', 'Pátio'], ['trocas', 'Inteligência'], ['vendedores', 'Vendedores'], ['garantias', 'Garantias'], ['financiamento', 'Financiado'], ['relatorio', 'Relatórios'], ['config', 'Configurações']];
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Equipe e acessos</h1><p>Cada pessoa entra com o próprio e-mail e senha. O perfil define o que ela vê e faz, e o servidor confere.</p></div></div>
-      ${gere ? `<section class="painel"><h2>${ICO.alvo}Convidar pessoa</h2>
+        ${b.usuarios.map(e=>`<tr><td>${Ne(e,36)} <b>${c(e.nome)}</b>${e.id===D().id?' <span class="tag comprovado">voc\xEA</span>':""}</td><td>${x.PERFIS[e.perfil]}</td><td>${c(e.email||"\u2014")}</td><td>${b.atividades.filter(o=>o.usuario===e.nome).length}</td>
+          <td style="white-space:nowrap"><button class="link" type="button" data-entrar="${e.id}">Entrar como</button> \xB7 <button class="link" type="button" data-editar="${e.id}">Editar</button>${e.perfil!=="dono"?` \xB7 <button class="link neg" type="button" data-tirar="${e.id}">Remover</button>`:""}</td></tr>`).join("")}</tbody></table></div></section>
+      <section class="painel bloco"><div class="painel-cab"><h2>${q.alvo}O que cada perfil acessa</h2></div>
+        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Perfil</th>${a.map(([,e])=>`<th class="n">${e}</th>`).join("")}<th class="n">Aprovar acima do teto</th></tr></thead><tbody>
+        ${Object.entries(x.PERFIS).map(([e,o])=>`<tr><td><b>${o}</b></td>${a.map(([t])=>`<td class="n">${Pe[e].includes(t)?'<span class="pos">\u2713</span>':'<span class="sub">\u2014</span>'}</td>`).join("")}<td class="n">${["dono","gerente"].includes(e)?'<span class="pos">\u2713</span>':'<span class="sub">\u2014</span>'}</td></tr>`).join("")}</tbody></table></div>
+        <p class="nota-rodape">Nesta vers\xE3o, "Entrar como" serve para ver o sistema como cada pessoa. O login com senha por usu\xE1rio entra na vers\xE3o com servidor.</p></section>`,R("[data-entrar]",w).forEach(e=>e.onclick=()=>{b.usuarioAtual=e.dataset.entrar,T(),L("usuario",`Entrou como ${D().nome}`),A("Agora voc\xEA est\xE1 vendo como "+D().nome+"."),location.hash=ta("visao")?"#visao":"#patio",x.recarregar()}),R("[data-editar]",w).forEach(e=>e.onclick=()=>Te(b.usuarios.find(o=>o.id===e.dataset.editar))),R("[data-tirar]",w).forEach(e=>e.onclick=()=>{const o=b.usuarios.find(t=>t.id===e.dataset.tirar);va(`Remover ${o.nome}?`,"A pessoa deixa de aparecer na lista. As atividades dela continuam no hist\xF3rico.","Remover",()=>{b.usuarios=b.usuarios.filter(t=>t!==o),L("usuario",`Usu\xE1rio ${o.nome} removido`),T(),Z()})})}function ot(a,e,o){const t=`Voc\xEA foi convidado para o Anshur da ${y.revenda.nome}. Crie sua conta com o e-mail ${o} neste link (vale 7 dias): ${e}`;a.innerHTML=`<div class="campo" style="margin-top:12px"><label for="cv-url">Link do convite para ${c(o)}</label><input id="cv-url" readonly value="${c(e)}"></div>
+      <div class="acoes"><button class="btn btn-linha" type="button" id="cv-copiar">Copiar link</button><a class="btn btn-linha" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(t)}">Mandar pelo WhatsApp</a></div>`,l("#cv-copiar",a).onclick=()=>{l("#cv-url",a).select(),(navigator.clipboard?navigator.clipboard.writeText(e):Promise.reject()).then(()=>A("Link copiado."),()=>{document.execCommand("copy"),A("Link copiado.")})}}function Rs(){const a=x.nuvem,e=D().perfil==="dono",o=["dono","gerente"].includes(D().perfil)&&!a.somenteLeitura,t=Object.entries(x.PERFIS).filter(([r])=>e||!["dono","gerente"].includes(r)),s=[["visao","Vis\xE3o geral"],["avaliar","Avaliar troca"],["patio","P\xE1tio"],["trocas","Intelig\xEAncia"],["vendedores","Vendedores"],["garantias","Garantias"],["financiamento","Financiado"],["relatorio","Relat\xF3rios"],["config","Configura\xE7\xF5es"]];w.innerHTML=`
+      <div class="titulo"><div><h1>Equipe e acessos</h1><p>Cada pessoa entra com o pr\xF3prio e-mail e senha. O perfil define o que ela v\xEA e faz, e o servidor confere.</p></div></div>
+      ${o?`<section class="painel"><h2>${q.alvo}Convidar pessoa</h2>
         <form id="cv-f" class="campos" style="margin-top:12px" novalidate><div class="campo"><label for="cv-email">E-mail da pessoa</label><input id="cv-email" type="email" autocomplete="off" required></div>
-        <div class="campo"><label for="cv-perfil">Perfil</label><select id="cv-perfil">${perfisConvite.map(([p, n]) => `<option value="${p}" ${p === 'vendedor' ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+        <div class="campo"><label for="cv-perfil">Perfil</label><select id="cv-perfil">${t.map(([r,p])=>`<option value="${r}" ${r==="vendedor"?"selected":""}>${p}</option>`).join("")}</select></div>
         <div class="acoes inteiro"><button class="btn btn-ouro" type="submit">Gerar convite</button></div></form>
         <div id="cv-link"></div>
-        <p class="nota-rodape">O convite vale 7 dias e só funciona com o e-mail convidado. Mande o link por WhatsApp ou e-mail: a pessoa cria a conta com esse e-mail e entra direto na revenda.</p></section>` : ''}
-      <section class="painel bloco"><div class="painel-cab"><h2>Pessoas com acesso</h2><p>${estado.usuarios.length}</p></div>
-        <div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th>${estado.lojas.length ? '<th>Lojas (vazio = todas)</th>' : ''}<th></th></tr></thead><tbody>
-        ${estado.usuarios.map((u) => `<tr><td>${avatarHTML(u, 36)} <b>${esc(u.nome)}</b>${u.id === eu().id ? ' <span class="tag comprovado">você</span>' : ''}</td><td>${esc(u.email || '—')}</td>
-          <td>${souDono && !NV.offline ? `<select data-perfil="${esc(u.id)}" aria-label="Perfil de ${esc(u.nome)}">${Object.entries(K.PERFIS).map(([p, n]) => `<option value="${p}" ${u.perfil === p ? 'selected' : ''}>${n}</option>`).join('')}</select>` : K.PERFIS[u.perfil]}</td>
-          ${estado.lojas.length ? `<td>${souDono && !NV.offline ? `<input data-lojas="${esc(u.id)}" value="${esc((u.lojas || []).join(', '))}" list="dl-lojas" placeholder="Todas" aria-label="Lojas de ${esc(u.nome)}">` : esc((u.lojas || []).join(', ') || 'Todas')}</td>` : ''}
-          <td style="white-space:nowrap">${souDono && !NV.offline ? `<button class="link" type="button" data-guardar="${esc(u.id)}">Salvar</button>${u.id !== eu().id ? ` · <button class="link neg" type="button" data-tirar="${esc(u.id)}">Remover acesso</button>` : ''}` : ''}</td></tr>`).join('')}</tbody></table></div>
-        ${lista('dl-lojas', estado.lojas)}</section>
-      ${gere ? '<section class="painel bloco" id="cv-pend"><h2>Convites em aberto</h2><p class="sub">Carregando…</p></section>' : ''}
-      <section class="painel bloco"><div class="painel-cab"><h2>${ICO.alvo}O que cada perfil acessa</h2></div>
-        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Perfil</th>${paginas.map(([, n]) => `<th class="n">${n}</th>`).join('')}<th class="n">Aprovar acima do teto</th></tr></thead><tbody>
-        ${Object.entries(K.PERFIS).map(([p, n]) => `<tr><td><b>${n}</b></td>${paginas.map(([k]) => `<td class="n">${PERM[p].includes(k) ? '<span class="pos">✓</span>' : '<span class="sub">—</span>'}</td>`).join('')}<td class="n">${['dono', 'gerente'].includes(p) ? '<span class="pos">✓</span>' : '<span class="sub">—</span>'}</td></tr>`).join('')}</tbody></table></div>
-        <p class="nota-rodape">O auditor só lê: o servidor recusa qualquer gravação dele. A restrição por loja vale nas telas; os dados da revenda são um conjunto único.</p></section>`;
-    const mostrarLink = (link, email) => mostrarConvite($('#cv-link'), link, email);
-    const carregarConvites = async () => {
-      const box = $('#cv-pend'); if (!box) return;
-      try {
-        const l = await NV.convites();
-        box.innerHTML = `<h2>Convites em aberto</h2>${l.length ? `<div class="tabela-wrap"><table class="tabela"><thead><tr><th>E-mail</th><th>Perfil</th><th>Vence</th><th></th></tr></thead><tbody>${l.map((c) => `<tr><td>${esc(c.email)}</td><td>${K.PERFIS[c.perfil]}</td><td>${new Date(c.expira).toLocaleDateString('pt-BR')}${new Date(c.expira) < new Date() ? ' <span class="neg">vencido</span>' : ''}</td><td><button class="link neg" type="button" data-cancelar="${esc(c.id)}">Cancelar</button></td></tr>`).join('')}</tbody></table></div>` : '<p class="vazio">Nenhum convite em aberto.</p>'}`;
-        $$('[data-cancelar]', box).forEach((b) => b.onclick = async () => { try { await NV.cancelarConvite(b.dataset.cancelar); toast('Convite cancelado.'); carregarConvites(); } catch (e) { toast(e.message, true); } });
-      } catch (e) { box.innerHTML = `<h2>Convites em aberto</h2><p class="neg">${esc(e.message)}</p>`; }
-    };
-    const f = $('#cv-f');
-    if (f) f.onsubmit = async (e) => {
-      e.preventDefault();
-      const email = $('#cv-email').value.trim().toLowerCase(), perfil = $('#cv-perfil').value, bt = f.querySelector('button');
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('Confira o e-mail.', true); $('#cv-email').focus(); return; }
-      bt.disabled = true;
-      try { const link = await NV.convidar(email, perfil); log('equipe', `Convite gerado para ${email} como ${K.PERFIS[perfil]}`); salvar(); mostrarLink(link, email); carregarConvites(); }
-      catch (er) { toast(er.message, true); }
-      bt.disabled = false;
-    };
-    $$('[data-guardar]', tela).forEach((b) => b.onclick = async () => {
-      const id = b.dataset.guardar, u = estado.usuarios.find((x) => x.id === id);
-      const perfil = $(`[data-perfil="${id}"]`).value, campo = $(`[data-lojas="${id}"]`);
-      const lojas = campo ? campo.value.split(',').map((x) => x.trim()).filter(Boolean) : null;
-      try { await NV.alterarMembro(id, perfil, lojas, u.nome); log('equipe', `${u.nome}: perfil ${K.PERFIS[perfil]}${lojas && lojas.length ? ', lojas ' + lojas.join(', ') : ''}`); salvar(); toast('Acesso atualizado.'); K.recarregar(); }
-      catch (e) { toast(e.message, true); }
-    });
-    $$('[data-tirar]', tela).forEach((b) => b.onclick = () => { const u = estado.usuarios.find((x) => x.id === b.dataset.tirar); confirmar(`Remover o acesso de ${u.nome}?`, 'A pessoa deixa de entrar nesta revenda na hora. As atividades dela continuam no histórico.', 'Remover acesso', async () => {
-      try { await NV.removerMembro(u.id); log('equipe', `Acesso de ${u.nome} removido`); salvar(); toast('Acesso removido.'); K.recarregar(); } catch (e) { toast(e.message, true); }
-    }); });
-    carregarConvites();
-  }
-
-  // ---------- configurações ----------
-  // dados da revenda: o mesmo salvamento em Configurações e na implantação guiada
-  function salvarDadosRevenda({ nome, cnpj, cidade, marcas }) {
-    if (K.nuvem && nome.length >= 2 && ['dono', 'gerente'].includes(eu().perfil)) K.nuvem.renomear(nome, cidade).catch((e) => toast(e.message, true));
-    estado.nomeRevenda = nome; estado.cnpj = cnpj; estado.cidadeRevenda = cidade; estado.marcasRevenda = marcas;
-    salvar(); log('config', 'Dados da revenda atualizados');
-  }
-  const camposRevenda = (p) => `${sugestoes()}<div class="campos" style="margin-top:12px">
-            <div class="campo"><label for="${p}-nome">Nome da revenda</label><input id="${p}-nome" value="${esc(estado.nomeRevenda || A.revenda.nome)}"></div>
-            <div class="campo"><label for="${p}-cnpj">CNPJ</label><input id="${p}-cnpj" value="${esc(estado.cnpj || '')}" placeholder="00.000.000/0000-00" inputmode="numeric"></div>
-            <div class="campo"><label for="${p}-cid">Cidade</label><input id="${p}-cid" list="dl-cidade" value="${esc(estado.cidadeRevenda || A.revenda.cidade)}"></div>
-            <div class="campo"><label for="${p}-marcas">Marcas que a revenda representa</label><input id="${p}-marcas" list="dl-marca" value="${esc(estado.marcasRevenda || '')}" placeholder="Ex.: Case IH, Jacto"></div>
-          </div>`;
-  const lerCamposRevenda = (p) => ({ nome: $('#' + p + '-nome').value.trim(), cnpj: $('#' + p + '-cnpj').value.trim(), cidade: $('#' + p + '-cid').value.trim(), marcas: $('#' + p + '-marcas').value.trim() });
-  // alçadas de aprovação: a mesma tabela em Configurações e na implantação guiada
-  const tabelaAlcadas = () => `<div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Tipo</th><th class="n">Vendedor libera até (R$)</th><th class="n">Gerente libera até (R$)</th><th>Acima disso</th></tr></thead><tbody>
-        ${Object.entries(alcadas()).map(([k, a]) => `<tr><td><b>${NOMES[k]}</b></td><td class="n"><input class="campo-in" style="max-width:150px;text-align:right" data-alc="${k}|vendedor" inputmode="numeric" aria-label="${NOMES[k]}: vendedor libera até" value="${a.vendedor.toLocaleString('pt-BR')}"></td><td class="n"><input class="campo-in" style="max-width:150px;text-align:right" data-alc="${k}|gerente" inputmode="numeric" aria-label="${NOMES[k]}: gerente libera até" value="${a.gerente.toLocaleString('pt-BR')}"></td><td>Só o dono</td></tr>`).join('')}</tbody></table></div>`;
-  function salvarAlcadas(raiz) { const n = {}; $$('[data-alc]', raiz).forEach((i) => { const [k, q] = i.dataset.alc.split('|'); n[k] = n[k] || {}; n[k][q] = Math.max(0, num(i.value) || 0); }); Object.values(n).forEach((a) => { if (a.gerente < a.vendedor) a.gerente = a.vendedor; }); estado.alcadas = n; log('config', 'Alçadas de aprovação alteradas'); salvar(); }
-  function telaConfig() {
-    const impl = situacaoImpl(), pi = IMPL.progresso(impl), fimImpl = IMPL.concluida(implEstado(), impl);
-    const verImpl = IMPL.podeVer(eu().perfil);
-    const CATS = [['revenda', 'Revenda', 'Dados cadastrais, lojas e marcas', ICO.camadas], ['operacao', 'Operação', 'Regras comerciais, alçadas e catálogo', ICO.moedas], ['equipe', 'Equipe', 'Usuários, convites e permissões', '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M17 11a3 3 0 1 0 0-6M22 21v-1a5 5 0 0 0-4-4.9"/></svg>'],
-      ['dados', 'Dados e integrações', 'Importação, documentos, IA, cópias e privacidade', ICO.linha], ['sistema', 'Sistema', 'Avisos, instalação, preferências e segurança', ICO.alerta]];
-    const cab = (id, t, d) => `<header class="cfg-cat-cab" id="cfg-${id}" tabindex="-1"><h2>${t}</h2><p>${d}</p></header>`;
-    const nUs = estado.usuarios.length, convites = (implEstado() || {}).convites || 0;
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Configurações</h1><p>Tudo o que define como a ${esc(A.revenda.nome)} usa o Anshur, organizado por assunto.</p></div></div>
-      ${verImpl && !fimImpl ? `<section class="painel impl-atalho" id="c-impl"><div class="impl-atalho-txt"><h2>${ICO.baixo}Implantação guiada · ${pi.texto}</h2>
-        <div class="progresso"><i style="width:${pi.pct * 100}%"></i></div>
-        <p class="sub">Próxima: <b>${esc((impl.find((e) => !e.ok) || {}).titulo || '')}</b>. Cada etapa tem a ação ali mesmo, sem precisar de ninguém da Blue Rose.</p></div>
-        <a class="btn btn-ouro" href="#/config/implantacao">${pi.feitas ? 'Continuar implantação' : 'Começar a implantação'}</a></section>` : ''}
+        <p class="nota-rodape">O convite vale 7 dias e s\xF3 funciona com o e-mail convidado. Mande o link por WhatsApp ou e-mail: a pessoa cria a conta com esse e-mail e entra direto na revenda.</p></section>`:""}
+      <section class="painel bloco"><div class="painel-cab"><h2>Pessoas com acesso</h2><p>${b.usuarios.length}</p></div>
+        <div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th>${b.lojas.length?"<th>Lojas (vazio = todas)</th>":""}<th></th></tr></thead><tbody>
+        ${b.usuarios.map(r=>`<tr><td>${Ne(r,36)} <b>${c(r.nome)}</b>${r.id===D().id?' <span class="tag comprovado">voc\xEA</span>':""}</td><td>${c(r.email||"\u2014")}</td>
+          <td>${e&&!a.offline?`<select data-perfil="${c(r.id)}" aria-label="Perfil de ${c(r.nome)}">${Object.entries(x.PERFIS).map(([p,d])=>`<option value="${p}" ${r.perfil===p?"selected":""}>${d}</option>`).join("")}</select>`:x.PERFIS[r.perfil]}</td>
+          ${b.lojas.length?`<td>${e&&!a.offline?`<input data-lojas="${c(r.id)}" value="${c((r.lojas||[]).join(", "))}" list="dl-lojas" placeholder="Todas" aria-label="Lojas de ${c(r.nome)}">`:c((r.lojas||[]).join(", ")||"Todas")}</td>`:""}
+          <td style="white-space:nowrap">${e&&!a.offline?`<button class="link" type="button" data-guardar="${c(r.id)}">Salvar</button>${r.id!==D().id?` \xB7 <button class="link neg" type="button" data-tirar="${c(r.id)}">Remover acesso</button>`:""}`:""}</td></tr>`).join("")}</tbody></table></div>
+        ${wa("dl-lojas",b.lojas)}</section>
+      ${o?'<section class="painel bloco" id="cv-pend"><h2>Convites em aberto</h2><p class="sub">Carregando\u2026</p></section>':""}
+      <section class="painel bloco"><div class="painel-cab"><h2>${q.alvo}O que cada perfil acessa</h2></div>
+        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Perfil</th>${s.map(([,r])=>`<th class="n">${r}</th>`).join("")}<th class="n">Aprovar acima do teto</th></tr></thead><tbody>
+        ${Object.entries(x.PERFIS).map(([r,p])=>`<tr><td><b>${p}</b></td>${s.map(([d])=>`<td class="n">${Pe[r].includes(d)?'<span class="pos">\u2713</span>':'<span class="sub">\u2014</span>'}</td>`).join("")}<td class="n">${["dono","gerente"].includes(r)?'<span class="pos">\u2713</span>':'<span class="sub">\u2014</span>'}</td></tr>`).join("")}</tbody></table></div>
+        <p class="nota-rodape">O auditor s\xF3 l\xEA: o servidor recusa qualquer grava\xE7\xE3o dele. A restri\xE7\xE3o por loja vale nas telas; os dados da revenda s\xE3o um conjunto \xFAnico.</p></section>`;const i=(r,p)=>ot(l("#cv-link"),r,p),n=async()=>{const r=l("#cv-pend");if(r)try{const p=await a.convites();r.innerHTML=`<h2>Convites em aberto</h2>${p.length?`<div class="tabela-wrap"><table class="tabela"><thead><tr><th>E-mail</th><th>Perfil</th><th>Vence</th><th></th></tr></thead><tbody>${p.map(d=>`<tr><td>${c(d.email)}</td><td>${x.PERFIS[d.perfil]}</td><td>${new Date(d.expira).toLocaleDateString("pt-BR")}${new Date(d.expira)<new Date?' <span class="neg">vencido</span>':""}</td><td><button class="link neg" type="button" data-cancelar="${c(d.id)}">Cancelar</button></td></tr>`).join("")}</tbody></table></div>`:'<p class="vazio">Nenhum convite em aberto.</p>'}`,R("[data-cancelar]",r).forEach(d=>d.onclick=async()=>{try{await a.cancelarConvite(d.dataset.cancelar),A("Convite cancelado."),n()}catch($){A($.message,!0)}})}catch(p){r.innerHTML=`<h2>Convites em aberto</h2><p class="neg">${c(p.message)}</p>`}},m=l("#cv-f");m&&(m.onsubmit=async r=>{r.preventDefault();const p=l("#cv-email").value.trim().toLowerCase(),d=l("#cv-perfil").value,$=m.querySelector("button");if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p)){A("Confira o e-mail.",!0),l("#cv-email").focus();return}$.disabled=!0;try{const u=await a.convidar(p,d);L("equipe",`Convite gerado para ${p} como ${x.PERFIS[d]}`),T(),i(u,p),n()}catch(u){A(u.message,!0)}$.disabled=!1}),R("[data-guardar]",w).forEach(r=>r.onclick=async()=>{const p=r.dataset.guardar,d=b.usuarios.find(j=>j.id===p),$=l(`[data-perfil="${p}"]`).value,u=l(`[data-lojas="${p}"]`),g=u?u.value.split(",").map(j=>j.trim()).filter(Boolean):null;try{await a.alterarMembro(p,$,g,d.nome),L("equipe",`${d.nome}: perfil ${x.PERFIS[$]}${g&&g.length?", lojas "+g.join(", "):""}`),T(),A("Acesso atualizado."),x.recarregar()}catch(j){A(j.message,!0)}}),R("[data-tirar]",w).forEach(r=>r.onclick=()=>{const p=b.usuarios.find(d=>d.id===r.dataset.tirar);va(`Remover o acesso de ${p.nome}?`,"A pessoa deixa de entrar nesta revenda na hora. As atividades dela continuam no hist\xF3rico.","Remover acesso",async()=>{try{await a.removerMembro(p.id),L("equipe",`Acesso de ${p.nome} removido`),T(),A("Acesso removido."),x.recarregar()}catch(d){A(d.message,!0)}})}),n()}function tt({nome:a,cnpj:e,cidade:o,marcas:t}){x.nuvem&&a.length>=2&&["dono","gerente"].includes(D().perfil)&&x.nuvem.renomear(a,o).catch(s=>A(s.message,!0)),b.nomeRevenda=a,b.cnpj=e,b.cidadeRevenda=o,b.marcasRevenda=t,T(),L("config","Dados da revenda atualizados")}const st=a=>`${io()}<div class="campos" style="margin-top:12px">
+            <div class="campo"><label for="${a}-nome">Nome da revenda</label><input id="${a}-nome" value="${c(b.nomeRevenda||y.revenda.nome)}"></div>
+            <div class="campo"><label for="${a}-cnpj">CNPJ</label><input id="${a}-cnpj" value="${c(b.cnpj||"")}" placeholder="00.000.000/0000-00" inputmode="numeric"></div>
+            <div class="campo"><label for="${a}-cid">Cidade</label><input id="${a}-cid" list="dl-cidade" value="${c(b.cidadeRevenda||y.revenda.cidade)}"></div>
+            <div class="campo"><label for="${a}-marcas">Marcas que a revenda representa</label><input id="${a}-marcas" list="dl-marca" value="${c(b.marcasRevenda||"")}" placeholder="Ex.: Case IH, Jacto"></div>
+          </div>`,it=a=>({nome:l("#"+a+"-nome").value.trim(),cnpj:l("#"+a+"-cnpj").value.trim(),cidade:l("#"+a+"-cid").value.trim(),marcas:l("#"+a+"-marcas").value.trim()}),nt=()=>`<div class="tabela-wrap"><table class="tabela grande"><thead><tr><th>Tipo</th><th class="n">Vendedor libera at\xE9 (R$)</th><th class="n">Gerente libera at\xE9 (R$)</th><th>Acima disso</th></tr></thead><tbody>
+        ${Object.entries($o()).map(([a,e])=>`<tr><td><b>${V[a]}</b></td><td class="n"><input class="campo-in" style="max-width:150px;text-align:right" data-alc="${a}|vendedor" inputmode="numeric" aria-label="${V[a]}: vendedor libera at\xE9" value="${e.vendedor.toLocaleString("pt-BR")}"></td><td class="n"><input class="campo-in" style="max-width:150px;text-align:right" data-alc="${a}|gerente" inputmode="numeric" aria-label="${V[a]}: gerente libera at\xE9" value="${e.gerente.toLocaleString("pt-BR")}"></td><td>S\xF3 o dono</td></tr>`).join("")}</tbody></table></div>`;function rt(a){const e={};R("[data-alc]",a).forEach(o=>{const[t,s]=o.dataset.alc.split("|");e[t]=e[t]||{},e[t][s]=Math.max(0,ra(o.value)||0)}),Object.values(e).forEach(o=>{o.gerente<o.vendedor&&(o.gerente=o.vendedor)}),b.alcadas=e,L("config","Al\xE7adas de aprova\xE7\xE3o alteradas"),T()}function Ps(){const a=ee(),e=K.progresso(a),o=K.concluida(xa(),a),t=K.podeVer(D().perfil),s=[["revenda","Revenda","Dados cadastrais, lojas e marcas",q.camadas],["operacao","Opera\xE7\xE3o","Regras comerciais, al\xE7adas e cat\xE1logo",q.moedas],["equipe","Equipe","Usu\xE1rios, convites e permiss\xF5es",'<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M17 11a3 3 0 1 0 0-6M22 21v-1a5 5 0 0 0-4-4.9"/></svg>'],["dados","Dados e integra\xE7\xF5es","Importa\xE7\xE3o, documentos, IA, c\xF3pias e privacidade",q.linha],["sistema","Sistema","Avisos, instala\xE7\xE3o, prefer\xEAncias e seguran\xE7a",q.alerta]],i=(d,$,u)=>`<header class="cfg-cat-cab" id="cfg-${d}" tabindex="-1"><h2>${$}</h2><p>${u}</p></header>`,n=b.usuarios.length,m=(xa()||{}).convites||0;w.innerHTML=`
+      <div class="titulo"><div><h1>Configura\xE7\xF5es</h1><p>Tudo o que define como a ${c(y.revenda.nome)} usa o Anshur, organizado por assunto.</p></div></div>
+      ${t&&!o?`<section class="painel impl-atalho" id="c-impl"><div class="impl-atalho-txt"><h2>${q.baixo}Implanta\xE7\xE3o guiada \xB7 ${e.texto}</h2>
+        <div class="progresso"><i style="width:${e.pct*100}%"></i></div>
+        <p class="sub">Pr\xF3xima: <b>${c((a.find(d=>!d.ok)||{}).titulo||"")}</b>. Cada etapa tem a a\xE7\xE3o ali mesmo, sem precisar de ningu\xE9m da Blue Rose.</p></div>
+        <a class="btn btn-ouro" href="#/config/implantacao">${e.feitas?"Continuar implanta\xE7\xE3o":"Come\xE7ar a implanta\xE7\xE3o"}</a></section>`:""}
       <div class="cfg-layout">
-        <nav class="cfg-nav" aria-label="Assuntos das configurações">${CATS.map(([id, t, d, ic_]) => `<a href="#cfg-${id}" data-cfg="${id}">${ic_}<span><b>${t}</b><small>${d}</small></span></a>`).join('')}</nav>
+        <nav class="cfg-nav" aria-label="Assuntos das configura\xE7\xF5es">${s.map(([d,$,u,g])=>`<a href="#cfg-${d}" data-cfg="${d}">${g}<span><b>${$}</b><small>${u}</small></span></a>`).join("")}</nav>
         <div class="cfg-conteudo">
-          ${cab('revenda', 'Revenda', 'Quem é a revenda, onde ela atende e quais marcas representa.')}
-          <section class="painel"><h2>${ICO.camadas}Dados da revenda</h2>${camposRevenda('c')}<div class="acoes"><button class="btn btn-ouro" type="button" id="c-salvar">Salvar dados da revenda</button></div></section>
-          ${blocoLojas()}
-          ${cab('operacao', 'Operação', 'As regras que o Anshur usa para avaliar, aprovar e calcular margem.')}
-          <section class="painel"><h2>${ICO.moedas}Regras comerciais</h2>
-            <div class="numeros"><div><span>Margem-alvo</span><b>${pct(K.cfg.margemAlvo, 0)}</b></div><div><span>Custo do capital</span><b>${pct(K.cfg.jurosMes)} a.m.</b></div><div><span>Comissão</span><b>${pct(K.cfg.comissaoPct)}</b></div>
-              <div><span>Desconto por troca acima</span><b>${pct(K.cfg.descontoAcima, 0)}</b></div><div><span>Hora da oficina</span><b>${real(K.cfg.valorHora)}</b></div><div><span>Base do custo</span><b>${K.cfg.baseJuros === 'total' ? 'Pago + preparo' : 'Valor pago'}</b></div></div>
+          ${i("revenda","Revenda","Quem \xE9 a revenda, onde ela atende e quais marcas representa.")}
+          <section class="painel"><h2>${q.camadas}Dados da revenda</h2>${st("c")}<div class="acoes"><button class="btn btn-ouro" type="button" id="c-salvar">Salvar dados da revenda</button></div></section>
+          ${$t()}
+          ${i("operacao","Opera\xE7\xE3o","As regras que o Anshur usa para avaliar, aprovar e calcular margem.")}
+          <section class="painel"><h2>${q.moedas}Regras comerciais</h2>
+            <div class="numeros"><div><span>Margem-alvo</span><b>${P(x.cfg.margemAlvo,0)}</b></div><div><span>Custo do capital</span><b>${P(x.cfg.jurosMes)} a.m.</b></div><div><span>Comiss\xE3o</span><b>${P(x.cfg.comissaoPct)}</b></div>
+              <div><span>Desconto por troca acima</span><b>${P(x.cfg.descontoAcima,0)}</b></div><div><span>Hora da oficina</span><b>${M(x.cfg.valorHora)}</b></div><div><span>Base do custo</span><b>${x.cfg.baseJuros==="total"?"Pago + preparo":"Valor pago"}</b></div></div>
             <div class="acoes"><button class="btn btn-linha" type="button" id="c-prem">Alterar regras comerciais</button></div></section>
-          <section class="painel"><h2>${ICO.alvo}Alçadas de aprovação por tipo de máquina</h2><p class="sub" style="margin:6px 0 12px">Quanto acima do valor máximo cada um pode liberar. Acima da alçada do gerente, só o dono libera. Zero = qualquer valor acima precisa de aprovação.</p>
-            ${tabelaAlcadas()}
-            <div class="acoes"><button class="btn btn-ouro" type="button" id="c-alc">Salvar alçadas</button></div></section>
-          <section class="painel"><h2>${ICO.barras}Catálogo de modelos</h2><p class="sub" style="margin:6px 0 10px">Referências de preço usadas pelo motor. Modelos novos entram com a Fipe.</p>
-            <div class="tabela-wrap tabela-rola"><table class="tabela"><thead><tr><th>Modelo</th><th>Categoria</th><th class="n">Referência</th></tr></thead><tbody>${A.modelos.map((m) => `<tr><td><b>${esc(m.marca)}</b> ${esc(m.modelo)}</td><td>${NOMES[m.tipo]}</td><td class="n">${mil(m.base)}</td></tr>`).join('')}</tbody></table></div>
-            <div class="acoes"><button class="btn btn-linha" type="button" id="c-modelo">${ic('<path d="M12 5v14M5 12h14"/>')}Novo modelo no catálogo</button></div></section>
-          ${cab('equipe', 'Equipe', 'Quem usa o Anshur, com qual perfil, e os convites em aberto.')}
-          <section class="painel"><h2>${CATS[2][3]}Usuários e permissões</h2><p class="sub" style="margin:6px 0 12px">${nUs} ${nUs === 1 ? 'pessoa' : 'pessoas'} com acesso${convites ? ` · ${convites} ${convites === 1 ? 'convite enviado' : 'convites enviados'} pela implantação` : ''}. Cada perfil (dono, gerente, vendedor, oficina, financeiro, auditor) vê só o que precisa.</p>
-            <div class="acoes">${pode('usuarios') && !somenteLeitura() ? `<button class="btn btn-ouro" type="button" id="c-usuario">${ic('<path d="M12 5v14M5 12h14"/>')}Novo usuário</button>` : ''}<a class="btn btn-linha" href="#/config/usuarios">Ver usuários e perfis</a><a class="btn btn-linha" href="#/config/perfil">Meu perfil</a></div></section>
-          ${cab('dados', 'Dados e integrações', 'O que entra no Anshur, o que sai dele e como os dados ficam protegidos.')}
-          <section class="painel"><h2>${ICO.linha}Integrações e dados</h2>
-            <ul class="lista-motivos" style="margin-top:8px"><li><span>Importação do sistema atual (DMS)</span><b>${(estado.dms && estado.dms.pastas && estado.dms.pastas.length) || estado.ultimaSync ? 'Pasta ligada' : (estado.dms && estado.dms.lotes && estado.dms.lotes.length) ? 'Por arquivos' : 'Ainda não'}</b></li><li><span>Documentos recebidos</span><b>${estado.documentos.length}</b></li><li><span>Atividades registradas</span><b>${estado.atividades.length}</b></li></ul>
-            <div class="acoes"><a class="btn btn-linha" href="#/config/importar">Trazer do meu sistema</a><a class="btn btn-linha" href="#/config/documentos">Central de documentos</a><a class="btn btn-linha" href="#/config/cadastros">Clientes e fornecedores</a><button class="btn btn-linha" type="button" id="c-backup">Baixar cópia de segurança</button><label class="btn btn-linha" style="cursor:pointer">Restaurar cópia<input type="file" accept=".json" id="c-restaura" class="sr"></label></div></section>
-          ${K.nuvem && !K.nuvem.offline && ['dono', 'gerente', 'auditor'].includes(eu().perfil) ? '<section class="painel" id="c-copias"><h2>Cópias diárias no servidor</h2><div class="esqueleto" aria-hidden="true"><i></i><i></i><i></i></div><p class="sub" role="status">Carregando as cópias…</p></section>' : ''}
-          ${blocoIAConfig()}${blocoLGPD()}
-          ${cab('sistema', 'Sistema', 'Avisos por e-mail, instalação neste aparelho, preferências e segurança.')}
-          ${blocoAvisos()}
-          <section class="painel"><h2>${ICO.alerta}Este aparelho e segurança</h2><p class="sub" style="margin:6px 0 12px">Preferências valem só para você, neste aparelho. A segurança explica onde os dados ficam.</p>
-            <div class="acoes"><button class="btn btn-linha" type="button" data-preferencias>Preferências deste aparelho</button><button class="btn btn-linha" type="button" id="c-instalar">Instalar o app</button><button class="btn btn-linha" type="button" id="c-seg">Segurança dos dados</button>${verImpl && fimImpl ? '<a class="btn btn-linha" href="#/config/implantacao">Rever a implantação guiada</a>' : ''}</div></section>
-          ${blocoInstalar()}
+          <section class="painel"><h2>${q.alvo}Al\xE7adas de aprova\xE7\xE3o por tipo de m\xE1quina</h2><p class="sub" style="margin:6px 0 12px">Quanto acima do valor m\xE1ximo cada um pode liberar. Acima da al\xE7ada do gerente, s\xF3 o dono libera. Zero = qualquer valor acima precisa de aprova\xE7\xE3o.</p>
+            ${nt()}
+            <div class="acoes"><button class="btn btn-ouro" type="button" id="c-alc">Salvar al\xE7adas</button></div></section>
+          <section class="painel"><h2>${q.barras}Cat\xE1logo de modelos</h2><p class="sub" style="margin:6px 0 10px">Refer\xEAncias de pre\xE7o usadas pelo motor. Modelos novos entram com a Fipe.</p>
+            <div class="tabela-wrap tabela-rola"><table class="tabela"><thead><tr><th>Modelo</th><th>Categoria</th><th class="n">Refer\xEAncia</th></tr></thead><tbody>${y.modelos.map(d=>`<tr><td><b>${c(d.marca)}</b> ${c(d.modelo)}</td><td>${V[d.tipo]}</td><td class="n">${E(d.base)}</td></tr>`).join("")}</tbody></table></div>
+            <div class="acoes"><button class="btn btn-linha" type="button" id="c-modelo">${_('<path d="M12 5v14M5 12h14"/>')}Novo modelo no cat\xE1logo</button></div></section>
+          ${i("equipe","Equipe","Quem usa o Anshur, com qual perfil, e os convites em aberto.")}
+          <section class="painel"><h2>${s[2][3]}Usu\xE1rios e permiss\xF5es</h2><p class="sub" style="margin:6px 0 12px">${n} ${n===1?"pessoa":"pessoas"} com acesso${m?` \xB7 ${m} ${m===1?"convite enviado":"convites enviados"} pela implanta\xE7\xE3o`:""}. Cada perfil (dono, gerente, vendedor, oficina, financeiro, auditor) v\xEA s\xF3 o que precisa.</p>
+            <div class="acoes">${ta("usuarios")&&!Na()?`<button class="btn btn-ouro" type="button" id="c-usuario">${_('<path d="M12 5v14M5 12h14"/>')}Novo usu\xE1rio</button>`:""}<a class="btn btn-linha" href="#/config/usuarios">Ver usu\xE1rios e perfis</a><a class="btn btn-linha" href="#/config/perfil">Meu perfil</a></div></section>
+          ${i("dados","Dados e integra\xE7\xF5es","O que entra no Anshur, o que sai dele e como os dados ficam protegidos.")}
+          <section class="painel"><h2>${q.linha}Integra\xE7\xF5es e dados</h2>
+            <ul class="lista-motivos" style="margin-top:8px"><li><span>Importa\xE7\xE3o do sistema atual (DMS)</span><b>${b.dms&&b.dms.pastas&&b.dms.pastas.length||b.ultimaSync?"Pasta ligada":b.dms&&b.dms.lotes&&b.dms.lotes.length?"Por arquivos":"Ainda n\xE3o"}</b></li><li><span>Documentos recebidos</span><b>${b.documentos.length}</b></li><li><span>Atividades registradas</span><b>${b.atividades.length}</b></li></ul>
+            <div class="acoes"><a class="btn btn-linha" href="#/config/importar">Trazer do meu sistema</a><a class="btn btn-linha" href="#/config/documentos">Central de documentos</a><a class="btn btn-linha" href="#/config/cadastros">Clientes e fornecedores</a><button class="btn btn-linha" type="button" id="c-backup">Baixar c\xF3pia de seguran\xE7a</button><label class="btn btn-linha" style="cursor:pointer">Restaurar c\xF3pia<input type="file" accept=".json" id="c-restaura" class="sr"></label></div></section>
+          ${x.nuvem&&!x.nuvem.offline&&["dono","gerente","auditor"].includes(D().perfil)?'<section class="painel" id="c-copias"><h2>C\xF3pias di\xE1rias no servidor</h2><div class="esqueleto" aria-hidden="true"><i></i><i></i><i></i></div><p class="sub" role="status">Carregando as c\xF3pias\u2026</p></section>':""}
+          ${ni()}${Ys()}
+          ${i("sistema","Sistema","Avisos por e-mail, instala\xE7\xE3o neste aparelho, prefer\xEAncias e seguran\xE7a.")}
+          ${St()}
+          <section class="painel"><h2>${q.alerta}Este aparelho e seguran\xE7a</h2><p class="sub" style="margin:6px 0 12px">Prefer\xEAncias valem s\xF3 para voc\xEA, neste aparelho. A seguran\xE7a explica onde os dados ficam.</p>
+            <div class="acoes"><button class="btn btn-linha" type="button" data-preferencias>Prefer\xEAncias deste aparelho</button><button class="btn btn-linha" type="button" id="c-instalar">Instalar o app</button><button class="btn btn-linha" type="button" id="c-seg">Seguran\xE7a dos dados</button>${t&&o?'<a class="btn btn-linha" href="#/config/implantacao">Rever a implanta\xE7\xE3o guiada</a>':""}</div></section>
+          ${bo()}
         </div>
-      </div>`;
-    $('#c-salvar').onclick = () => { salvarDadosRevenda(lerCamposRevenda('c')); toast('Dados da revenda salvos.'); setTimeout(() => K.recarregar(), 600); };
-    $('#c-prem').onclick = abrirPremissas; ligarLGPD(); ligarLojas(); ligarIAConfig(); ligarAvisos();
-    const cu = $('#c-usuario'); if (cu) cu.onclick = () => addUsuario();
-    $('#c-seg').onclick = () => $('#m-seg').click();
-    // menu de assuntos: leva até a seção e marca onde a pessoa está
-    $$('.cfg-nav a', tela).forEach((l) => l.onclick = (e) => { e.preventDefault(); const alvo = $('#cfg-' + l.dataset.cfg); alvo.scrollIntoView({ behavior: reduzido ? 'auto' : 'smooth', block: 'start' }); alvo.focus({ preventScroll: true }); });
-    if ('IntersectionObserver' in window) {
-      const obs = new IntersectionObserver((ents) => { ents.forEach((en) => { if (!en.isIntersecting) return; const id = en.target.id.slice(4); $$('.cfg-nav a', tela).forEach((l) => { if (l.dataset.cfg === id) l.setAttribute('aria-current', 'true'); else l.removeAttribute('aria-current'); }); }); }, { rootMargin: '-15% 0px -70% 0px' });
-      $$('.cfg-cat-cab', tela).forEach((h) => obs.observe(h));
-    }
-    $('#c-alc').onclick = () => { salvarAlcadas(tela); toast('Alçadas salvas.'); rota(); };
-    $('#c-modelo').onclick = () => formulario('Adicionar modelo ao catálogo', [{ k: 'tipo', r: 'Categoria', tipo: 'select', ops: Object.entries(NOMES) }, { k: 'marca', r: 'Fabricante', lista: 'dl-marca', obr: true }, { k: 'modelo', r: 'Modelo', lista: 'dl-modelo', obr: true }, { k: 'base', r: 'Referência de preço seminovo (R$)', num: true, obr: true }], { tipo: 'trator' }, (v) => {
-      A.modelos.push({ tipo: v.tipo, marca: v.marca, modelo: v.modelo, base: v.base, hAno: { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270, implemento: 0 }[v.tipo], importado: true });
-      estado.modelosExtra = (estado.modelosExtra || []).concat([{ tipo: v.tipo, marca: v.marca, modelo: v.modelo, base: v.base }]); salvar(); log('config', `Modelo ${v.marca} ${v.modelo} adicionado ao catálogo`); fecharCamada(true); toast('Modelo adicionado.'); rota();
-    });
-    const caixaCopias = $('#c-copias');
-    if (caixaCopias) K.nuvem.copias().then((l) => {
-      const dono = eu().perfil === 'dono';
-      caixaCopias.innerHTML = `<h2>Cópias diárias no servidor</h2><p class="sub" style="margin:6px 0 10px">Todo dia de madrugada o servidor guarda uma cópia dos dados da revenda e mantém os últimos 30 dias. ${dono ? 'Restaurar troca os dados atuais pelos daquele dia (fica registrado na trilha).' : 'Só o dono pode restaurar.'}</p>
-        ${l.length ? `<div class="tabela-wrap"><table class="tabela"><thead><tr><th>Dia</th><th>Versão</th><th>Guardada em</th><th></th></tr></thead><tbody>${l.map((c) => `<tr><td>${data(c.dia)}</td><td>${c.versao}</td><td>${new Date(c.criado).toLocaleString('pt-BR')}</td><td>${dono ? `<button class="link" type="button" data-restaurar="${esc(c.dia)}">Restaurar</button>` : ''}</td></tr>`).join('')}</tbody></table></div>` : '<p class="vazio">A primeira cópia é feita esta madrugada.</p>'}
-        <p class="nota-rodape">As cópias ficam no mesmo banco de dados; para ter uma cópia fora dele, use "Baixar cópia de segurança".</p>`;
-      $$('[data-restaurar]', caixaCopias).forEach((b) => b.onclick = () => confirmar(`Restaurar a cópia de ${data(b.dataset.restaurar)}?`, 'Os dados atuais da revenda serão trocados pelos daquele dia, para todos da equipe. Antes, baixe uma cópia de segurança se quiser guardar a versão atual.', 'Restaurar', async () => {
-        try { await K.nuvem.restaurarCopia(b.dataset.restaurar); toast('Cópia restaurada.'); setTimeout(() => location.reload(), 700); } catch (e) { toast(e.message, true); }
-      }));
-    }, () => { caixaCopias.innerHTML = '<h2>Cópias diárias no servidor</h2><div class="estado-erro" role="alert"><b>Não foi possível carregar as cópias agora.</b><p>Nada foi alterado nos seus dados. Verifique a internet e abra esta tela de novo.</p></div>'; });
-    $('#c-backup').onclick = () => { const url = URL.createObjectURL(new Blob([JSON.stringify(estado, null, 1)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = `anshur-copia-${hojeISO()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); log('config', 'Cópia de segurança baixada'); salvar(); toast('Cópia de segurança gerada.'); };
-    $('#c-restaura').onchange = (e) => { const f = e.target.files[0]; if (!f) return; f.text().then((tx) => { let d; try { d = JSON.parse(tx); } catch (er) { toast('Arquivo inválido.', true); return; } if (!d || !Array.isArray(d.fechadas)) { toast('Este arquivo não é uma cópia do Anshur.', true); return; } confirmar('Restaurar esta cópia?', 'Os dados atuais deste ambiente serão substituídos pelos da cópia.', 'Restaurar', () => { K.repo.gravar(d); K.recarregar(); }); }); };
-    $('#c-instalar').onclick = simularInstalacao;
-  }
-  // primeiros passos = as etapas da implantação guiada (uma lista só), com o que dá para detectar sozinho
-  const implEstado = () => estado.implantacao || null;
-  const sinaisImpl = () => ({ cnpj: estado.cnpj, lojas: estado.lojas.length, config: Object.keys(estado.config || {}).length, alcadas: !!estado.alcadas, usuarios: estado.usuarios.length,
-    vendidas: C.vendidas(A.todasTrocas).length, patio: C.patio(A.todasTrocas).length, avaliacoes: estado.avaliacoes.length + estado.fechadas.filter((t) => t.previsto).length,
-    instalado: !!(window.ANSHUR_INSTALAR && window.ANSHUR_INSTALAR.instalado()), avisos: !!estado.avisos });
-  const situacaoImpl = () => IMPL.situacao(implEstado(), sinaisImpl());
-
-  // ---------- instalação (simulação) ----------
-  let promptInstalar = null;
-  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); promptInstalar = e; });
-  // instalação de verdade: pedido do navegador quando existe; senão, o caminho daquele aparelho (instalar.js)
-  const INS = window.ANSHUR_INSTALAR;
-  const enderecoApp = () => location.origin + location.pathname.replace(/index\.html$/, '') + (OP ? '?entrar' : '');
-  function carregarQR() {
-    if (window.qrcode) return Promise.resolve();
-    return new Promise((ok, erro) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js'; sc.onload = ok; sc.onerror = erro; document.head.appendChild(sc); });
-  }
-  async function abrirInstalacao(alvo) {
-    if (!INS) return;
-    if (INS.instalado()) { toast('O Anshur já está aberto como aplicativo neste aparelho.'); return; }
-    const ins = INS.instrucoes(alvo);
-    if (ins.modo === 'pedido') {
-      const r = await INS.pedir();
-      if (r === 'aceito') { toast('Pronto: o Anshur foi instalado neste aparelho.'); atualizarInstalar(); return; }
-      if (r === 'recusado') { toast('Instalação cancelada. Dá para instalar depois pelo mesmo botão.'); return; }
-    }
-    const fim = ins.modo === 'pedido' ? INS.instrucoes(alvo, INS.detectar(), false) : ins, url = enderecoApp();
-    abrirCamada('modal instala-modal', `<div class="instala-topo"><img src="icone-192.png" alt="" width="56" height="56"><div><h2>${esc(fim.titulo)}</h2><p class="sub">Abre pela tela inicial, em janela própria, e funciona sem internet no pátio.</p></div></div>
-      ${fim.modo === 'outro-aparelho' && alvo === 'celular' ? '<div class="qr-instalar" id="ins-qr" aria-label="QR Code com o endereço do Anshur"></div>' : ''}
-      <ol class="passos-instalar">${fim.passos.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>
-      ${fim.modo === 'outro-aparelho' ? `<div class="campo"><label for="ins-url">Endereço do Anshur</label><input id="ins-url" readonly value="${esc(url)}"></div><div class="acoes"><button class="btn btn-linha" type="button" id="ins-copiar">Copiar endereço</button></div>` : ''}`, (c) => {
-      const cp = $('#ins-copiar', c); if (cp) cp.onclick = () => { const inp = $('#ins-url', c); inp.select(); (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => toast('Endereço copiado.'), () => { document.execCommand('copy'); toast('Endereço copiado.'); }); };
-      const q = $('#ins-qr', c); if (q) carregarQR().then(() => { const qr = window.qrcode(0, 'M'); qr.addData(url); qr.make(); q.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); }, () => { q.remove(); });
-    });
-  }
-  function simularInstalacao() { abrirInstalacao(INS && INS.detectar().celular ? 'celular' : 'computador'); }
-  function blocoInstalar() {
-    if (!INS || INS.instalado()) return '';
-    const d = INS.detectar();
-    return `<section class="painel instalar-bloco" id="bloco-instalar"><h2><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Instalar o Anshur</h2>
-      <p class="sub">Vira um aplicativo: ícone próprio, abre em tela cheia e funciona sem internet no pátio. Grátis, sem loja de aplicativos.</p>
-      <div class="acoes"><button class="btn ${d.celular ? 'btn-linha' : 'btn-ouro'}" type="button" data-instalar="computador"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v11H3zM8 20h8M12 16v4"/></svg>Instalar no computador</button>
-      <button class="btn ${d.celular ? 'btn-ouro' : 'btn-linha'}" type="button" data-instalar="celular"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10v20H7zM11 18h2"/></svg>Instalar no celular</button></div></section>`;
-  }
-  function atualizarInstalar() {
-    const sim = INS && INS.instalado(); const b = $('#instalar-btn'); if (b) b.hidden = !!sim;
-    const mi = $('#m-instalar'); if (mi) mi.hidden = !!sim;
-    if (sim) { const bl = $('#bloco-instalar'); if (bl) bl.remove(); }
-  }
-  document.addEventListener('click', (e) => { const b = e.target.closest('[data-instalar]'); if (b) { e.preventDefault(); abrirInstalacao(b.dataset.instalar); } });
-  window.addEventListener('anshur:instalar', atualizarInstalar);
-
-  // ---------- relatórios diário, semanal e mensal ----------
-  let periodo = 'semanal';
-  function janela(p, deslocar = 0) {
-    const hoje = new Date(hojeISO() + 'T12:00:00');
-    const fim = new Date(hoje), ini = new Date(hoje);
-    if (p === 'diario') { fim.setDate(fim.getDate() - deslocar); ini.setDate(ini.getDate() - deslocar); }
-    if (p === 'semanal') { fim.setDate(fim.getDate() - 7 * deslocar); ini.setDate(fim.getDate() - 6); }
-    if (p === 'mensal') { fim.setMonth(fim.getMonth() - deslocar); ini.setTime(fim.getTime()); ini.setDate(1); if (deslocar) { fim.setDate(1); fim.setMonth(fim.getMonth() + 1); fim.setDate(0); } }
-    return [ini.toISOString().slice(0, 10), fim.toISOString().slice(0, 10)];
-  }
-  function metricas([ini, fim]) {
-    const dentro = (d) => d && d >= ini && d <= fim;
-    const vend = A.trocas.filter((t) => t.vendido && dentro(t.saida)), entr = A.trocas.filter((t) => dentro(t.entrada));
-    const venda = vend.reduce((s, t) => s + t.vendido, 0), res = vend.reduce((s, t) => s + C.resultado(t), 0);
-    const acima = entr.reduce((s, t) => { const r = rec(t); return s + (r && t.pago > r.teto ? t.pago - r.teto : 0); }, 0);
-    const garRec = (A.garantias || []).filter((g) => dentro(g.data) && g.pago > 0).reduce((s, g) => s + g.pago, 0);
-    const atv = estado.atividades.filter((a) => dentro(a.quando.slice(0, 10)));
-    return { vend, entr, venda, res, margem: venda ? res / venda : NaN, acima, garRec, atv, aval: estado.avaliacoes.filter((a) => dentro(a.data)).length, comprado: entr.reduce((s, t) => s + t.pago, 0), dias: vend.length ? vend.reduce((s, t) => s + (t.diasPatio || 0), 0) / vend.length : NaN };
-  }
-  function telaRelatorios() {
-    if (periodo === 'margem') return telaMargem();
-    const atual = janela(periodo), ant = janela(periodo, 1), m = metricas(atual), p = metricas(ant);
-    const nomeP = { diario: 'Diário', semanal: 'Semanal', mensal: 'Mensal' }[periodo];
-    const delta = (a, b, inverso) => { if (!isFinite(a) || !isFinite(b) || b === 0) return '<span class="sub">sem comparação</span>'; const d = (a - b) / Math.abs(b); const bom = inverso ? d < 0 : d > 0; return `<span class="${bom ? 'pos' : 'neg'}">${d > 0 ? '▲' : '▼'} ${pct(Math.abs(d), 0)}</span> <span class="sub">vs período anterior</span>`; };
-    const itens = C.patio().map(infoPatio), al = listaAlertas().filter((a) => !estado.resolvidos[a.id]).slice(0, 6);
-    const porV = {}; m.vend.forEach((t) => { const v = t.vendedor || '—'; porV[v] = porV[v] || { n: 0, res: 0 }; porV[v].n++; porV[v].res += C.resultado(t); });
-    log('relatorio', `Relatório ${nomeP.toLowerCase()} aberto`); salvar();
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Relatórios</h1><p>${nomeP}: ${data(atual[0])}${atual[0] !== atual[1] ? ' a ' + data(atual[1]) : ''}, comparado com ${data(ant[0])}${ant[0] !== ant[1] ? ' a ' + data(ant[1]) : ''}.</p></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="r-csv">Exportar CSV</button><button class="btn btn-linha" type="button" onclick="print()">Imprimir ou PDF</button>${botaoAdicionar([{ nome: 'Anotação no relatório', desc: 'Fica no histórico de atividades do período', acao: () => formulario('Adicionar anotação', [{ k: 'texto', r: 'Anotação', obr: true, inteiro: true }], {}, (v) => { log('anotacao', v.texto); salvar(); fecharCamada(true); toast('Anotação registrada.'); rota(); }) }], 'Nova anotação', true)}</div></div>
-      ${abasRel()}
+      </div>`,l("#c-salvar").onclick=()=>{tt(it("c")),A("Dados da revenda salvos."),setTimeout(()=>x.recarregar(),600)},l("#c-prem").onclick=Ya,Zs(),xt(),ri(),wt();const r=l("#c-usuario");if(r&&(r.onclick=()=>Te()),l("#c-seg").onclick=()=>l("#m-seg").click(),R(".cfg-nav a",w).forEach(d=>d.onclick=$=>{$.preventDefault();const u=l("#cfg-"+d.dataset.cfg);u.scrollIntoView({behavior:Fa?"auto":"smooth",block:"start"}),u.focus({preventScroll:!0})}),"IntersectionObserver"in window){const d=new IntersectionObserver($=>{$.forEach(u=>{if(!u.isIntersecting)return;const g=u.target.id.slice(4);R(".cfg-nav a",w).forEach(j=>{j.dataset.cfg===g?j.setAttribute("aria-current","true"):j.removeAttribute("aria-current")})})},{rootMargin:"-15% 0px -70% 0px"});R(".cfg-cat-cab",w).forEach($=>d.observe($))}l("#c-alc").onclick=()=>{rt(w),A("Al\xE7adas salvas."),Z()},l("#c-modelo").onclick=()=>ba("Adicionar modelo ao cat\xE1logo",[{k:"tipo",r:"Categoria",tipo:"select",ops:Object.entries(V)},{k:"marca",r:"Fabricante",lista:"dl-marca",obr:!0},{k:"modelo",r:"Modelo",lista:"dl-modelo",obr:!0},{k:"base",r:"Refer\xEAncia de pre\xE7o seminovo (R$)",num:!0,obr:!0}],{tipo:"trator"},d=>{y.modelos.push({tipo:d.tipo,marca:d.marca,modelo:d.modelo,base:d.base,hAno:{trator:750,colhedora:2600,pulverizador:820,plantadeira:270,implemento:0}[d.tipo],importado:!0}),b.modelosExtra=(b.modelosExtra||[]).concat([{tipo:d.tipo,marca:d.marca,modelo:d.modelo,base:d.base}]),T(),L("config",`Modelo ${d.marca} ${d.modelo} adicionado ao cat\xE1logo`),U(!0),A("Modelo adicionado."),Z()});const p=l("#c-copias");p&&x.nuvem.copias().then(d=>{const $=D().perfil==="dono";p.innerHTML=`<h2>C\xF3pias di\xE1rias no servidor</h2><p class="sub" style="margin:6px 0 10px">Todo dia de madrugada o servidor guarda uma c\xF3pia dos dados da revenda e mant\xE9m os \xFAltimos 30 dias. ${$?"Restaurar troca os dados atuais pelos daquele dia (fica registrado na trilha).":"S\xF3 o dono pode restaurar."}</p>
+        ${d.length?`<div class="tabela-wrap"><table class="tabela"><thead><tr><th>Dia</th><th>Vers\xE3o</th><th>Guardada em</th><th></th></tr></thead><tbody>${d.map(u=>`<tr><td>${N(u.dia)}</td><td>${u.versao}</td><td>${new Date(u.criado).toLocaleString("pt-BR")}</td><td>${$?`<button class="link" type="button" data-restaurar="${c(u.dia)}">Restaurar</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:'<p class="vazio">A primeira c\xF3pia \xE9 feita esta madrugada.</p>'}
+        <p class="nota-rodape">As c\xF3pias ficam no mesmo banco de dados; para ter uma c\xF3pia fora dele, use "Baixar c\xF3pia de seguran\xE7a".</p>`,R("[data-restaurar]",p).forEach(u=>u.onclick=()=>va(`Restaurar a c\xF3pia de ${N(u.dataset.restaurar)}?`,"Os dados atuais da revenda ser\xE3o trocados pelos daquele dia, para todos da equipe. Antes, baixe uma c\xF3pia de seguran\xE7a se quiser guardar a vers\xE3o atual.","Restaurar",async()=>{try{await x.nuvem.restaurarCopia(u.dataset.restaurar),A("C\xF3pia restaurada."),setTimeout(()=>location.reload(),700)}catch(g){A(g.message,!0)}}))},()=>{p.innerHTML='<h2>C\xF3pias di\xE1rias no servidor</h2><div class="estado-erro" role="alert"><b>N\xE3o foi poss\xEDvel carregar as c\xF3pias agora.</b><p>Nada foi alterado nos seus dados. Verifique a internet e abra esta tela de novo.</p></div>'}),l("#c-backup").onclick=()=>{const d=URL.createObjectURL(new Blob([JSON.stringify(b,null,1)],{type:"application/json"})),$=document.createElement("a");$.href=d,$.download=`anshur-copia-${z()}.json`,$.click(),setTimeout(()=>URL.revokeObjectURL(d),1e3),L("config","C\xF3pia de seguran\xE7a baixada"),T(),A("C\xF3pia de seguran\xE7a gerada.")},l("#c-restaura").onchange=d=>{const $=d.target.files[0];$&&$.text().then(u=>{let g;try{g=JSON.parse(u)}catch{A("Arquivo inv\xE1lido.",!0);return}if(!g||!Array.isArray(g.fechadas)){A("Este arquivo n\xE3o \xE9 uma c\xF3pia do Anshur.",!0);return}va("Restaurar esta c\xF3pia?","Os dados atuais deste ambiente ser\xE3o substitu\xEDdos pelos da c\xF3pia.","Restaurar",()=>{x.repo.gravar(g),x.recarregar()})})},l("#c-instalar").onclick=ho}const xa=()=>b.implantacao||null,De=()=>({cnpj:b.cnpj,lojas:b.lojas.length,config:Object.keys(b.config||{}).length,alcadas:!!b.alcadas,usuarios:b.usuarios.length,vendidas:I.vendidas(y.todasTrocas).length,patio:I.patio(y.todasTrocas).length,avaliacoes:b.avaliacoes.length+b.fechadas.filter(a=>a.previsto).length,instalado:!!(window.ANSHUR_INSTALAR&&window.ANSHUR_INSTALAR.instalado()),avisos:!!b.avisos}),ee=()=>K.situacao(xa(),De());let Ts=null;window.addEventListener("beforeinstallprompt",a=>{a.preventDefault(),Ts=a});const ca=window.ANSHUR_INSTALAR,Ds=()=>location.origin+location.pathname.replace(/index\.html$/,"")+(X?"?entrar":"");function Ls(){return window.qrcode?Promise.resolve():new Promise((a,e)=>{const o=document.createElement("script");o.src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js",o.onload=a,o.onerror=e,document.head.appendChild(o)})}async function vo(a){if(!ca)return;if(ca.instalado()){A("O Anshur j\xE1 est\xE1 aberto como aplicativo neste aparelho.");return}const e=ca.instrucoes(a);if(e.modo==="pedido"){const s=await ca.pedir();if(s==="aceito"){A("Pronto: o Anshur foi instalado neste aparelho."),fo();return}if(s==="recusado"){A("Instala\xE7\xE3o cancelada. D\xE1 para instalar depois pelo mesmo bot\xE3o.");return}}const o=e.modo==="pedido"?ca.instrucoes(a,ca.detectar(),!1):e,t=Ds();oa("modal instala-modal",`<div class="instala-topo"><img src="icone-192.png" alt="" width="56" height="56"><div><h2>${c(o.titulo)}</h2><p class="sub">Abre pela tela inicial, em janela pr\xF3pria, e funciona sem internet no p\xE1tio.</p></div></div>
+      ${o.modo==="outro-aparelho"&&a==="celular"?'<div class="qr-instalar" id="ins-qr" aria-label="QR Code com o endere\xE7o do Anshur"></div>':""}
+      <ol class="passos-instalar">${o.passos.map(s=>`<li>${c(s)}</li>`).join("")}</ol>
+      ${o.modo==="outro-aparelho"?`<div class="campo"><label for="ins-url">Endere\xE7o do Anshur</label><input id="ins-url" readonly value="${c(t)}"></div><div class="acoes"><button class="btn btn-linha" type="button" id="ins-copiar">Copiar endere\xE7o</button></div>`:""}`,s=>{const i=l("#ins-copiar",s);i&&(i.onclick=()=>{l("#ins-url",s).select(),(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>A("Endere\xE7o copiado."),()=>{document.execCommand("copy"),A("Endere\xE7o copiado.")})});const n=l("#ins-qr",s);n&&Ls().then(()=>{const m=window.qrcode(0,"M");m.addData(t),m.make(),n.innerHTML=m.createSvgTag({cellSize:4,margin:2,scalable:!0})},()=>{n.remove()})})}function ho(){vo(ca&&ca.detectar().celular?"celular":"computador")}function bo(){if(!ca||ca.instalado())return"";const a=ca.detectar();return`<section class="painel instalar-bloco" id="bloco-instalar"><h2><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Instalar o Anshur</h2>
+      <p class="sub">Vira um aplicativo: \xEDcone pr\xF3prio, abre em tela cheia e funciona sem internet no p\xE1tio. Gr\xE1tis, sem loja de aplicativos.</p>
+      <div class="acoes"><button class="btn ${a.celular?"btn-linha":"btn-ouro"}" type="button" data-instalar="computador"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v11H3zM8 20h8M12 16v4"/></svg>Instalar no computador</button>
+      <button class="btn ${a.celular?"btn-ouro":"btn-linha"}" type="button" data-instalar="celular"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10v20H7zM11 18h2"/></svg>Instalar no celular</button></div></section>`}function fo(){const a=ca&&ca.instalado(),e=l("#instalar-btn");e&&(e.hidden=!!a);const o=l("#m-instalar");if(o&&(o.hidden=!!a),a){const t=l("#bloco-instalar");t&&t.remove()}}document.addEventListener("click",a=>{const e=a.target.closest("[data-instalar]");e&&(a.preventDefault(),vo(e.dataset.instalar))}),window.addEventListener("anshur:instalar",fo);let Ia="semanal";function dt(a,e=0){const o=new Date(z()+"T12:00:00"),t=new Date(o),s=new Date(o);return a==="diario"&&(t.setDate(t.getDate()-e),s.setDate(s.getDate()-e)),a==="semanal"&&(t.setDate(t.getDate()-7*e),s.setDate(t.getDate()-6)),a==="mensal"&&(t.setMonth(t.getMonth()-e),s.setTime(t.getTime()),s.setDate(1),e&&(t.setDate(1),t.setMonth(t.getMonth()+1),t.setDate(0))),[s.toISOString().slice(0,10),t.toISOString().slice(0,10)]}function lt([a,e]){const o=d=>d&&d>=a&&d<=e,t=y.trocas.filter(d=>d.vendido&&o(d.saida)),s=y.trocas.filter(d=>o(d.entrada)),i=t.reduce((d,$)=>d+$.vendido,0),n=t.reduce((d,$)=>d+I.resultado($),0),m=s.reduce((d,$)=>{const u=Ba($);return d+(u&&$.pago>u.teto?$.pago-u.teto:0)},0),r=(y.garantias||[]).filter(d=>o(d.data)&&d.pago>0).reduce((d,$)=>d+$.pago,0),p=b.atividades.filter(d=>o(d.quando.slice(0,10)));return{vend:t,entr:s,venda:i,res:n,margem:i?n/i:NaN,acima:m,garRec:r,atv:p,aval:b.avaliacoes.filter(d=>o(d.data)).length,comprado:s.reduce((d,$)=>d+$.pago,0),dias:t.length?t.reduce((d,$)=>d+($.diasPatio||0),0)/t.length:NaN}}function go(){if(Ia==="margem")return oe();const a=dt(Ia),e=dt(Ia,1),o=lt(a),t=lt(e),s={diario:"Di\xE1rio",semanal:"Semanal",mensal:"Mensal"}[Ia],i=(p,d,$)=>{if(!isFinite(p)||!isFinite(d)||d===0)return'<span class="sub">sem compara\xE7\xE3o</span>';const u=(p-d)/Math.abs(d);return`<span class="${($?u<0:u>0)?"pos":"neg"}">${u>0?"\u25B2":"\u25BC"} ${P(Math.abs(u),0)}</span> <span class="sub">vs per\xEDodo anterior</span>`},n=I.patio().map(Ta),m=me().filter(p=>!b.resolvidos[p.id]).slice(0,6),r={};o.vend.forEach(p=>{const d=p.vendedor||"\u2014";r[d]=r[d]||{n:0,res:0},r[d].n++,r[d].res+=I.resultado(p)}),L("relatorio",`Relat\xF3rio ${s.toLowerCase()} aberto`),T(),w.innerHTML=`
+      <div class="titulo"><div><h1>Relat\xF3rios</h1><p>${s}: ${N(a[0])}${a[0]!==a[1]?" a "+N(a[1]):""}, comparado com ${N(e[0])}${e[0]!==e[1]?" a "+N(e[1]):""}.</p></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="r-csv">Exportar CSV</button><button class="btn btn-linha" type="button" onclick="print()">Imprimir ou PDF</button>${la([{nome:"Anota\xE7\xE3o no relat\xF3rio",desc:"Fica no hist\xF3rico de atividades do per\xEDodo",acao:()=>ba("Adicionar anota\xE7\xE3o",[{k:"texto",r:"Anota\xE7\xE3o",obr:!0,inteiro:!0}],{},p=>{L("anotacao",p.texto),T(),U(!0),A("Anota\xE7\xE3o registrada."),Z()})}],"Nova anota\xE7\xE3o",!0)}</div></div>
+      ${ct()}
       <article class="relatorio" style="max-width:none">
-        <img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="190" height="48"><p class="sub" style="margin-top:6px">${esc(A.revenda.nome)} · relatório ${nomeP.toLowerCase()} · emitido em ${new Date().toLocaleString('pt-BR')} por ${esc(eu().nome)}</p>
+        <img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="190" height="48"><p class="sub" style="margin-top:6px">${c(y.revenda.nome)} \xB7 relat\xF3rio ${s.toLowerCase()} \xB7 emitido em ${new Date().toLocaleString("pt-BR")} por ${c(D().nome)}</p>
         <div class="kpis" style="margin-top:18px">
-          <div class="kpi k-marfim"><span class="rot">${ICO.barras}Usados vendidos</span><span class="val">${m.vend.length}</span><span class="exp">${delta(m.vend.length, p.vend.length)}</span></div>
-          <div class="kpi k-salvia"><span class="rot">${ICO.moedas}Resultado bruto</span><span class="val">${mil(m.res)}</span><span class="exp">${delta(m.res, p.res)}</span></div>
-          <div class="kpi k-marfim"><span class="rot">${ICO.pct}Margem realizada</span><span class="val">${isFinite(m.margem) ? pct(m.margem) : '—'}</span><span class="exp">${delta(m.margem, p.margem)}</span></div>
-          <div class="kpi k-risco"><span class="rot">${ICO.alerta}Pago acima do recomendado</span><span class="val">${mil(m.acima)}</span><span class="exp">${delta(m.acima, p.acima, true)}</span></div>
+          <div class="kpi k-marfim"><span class="rot">${q.barras}Usados vendidos</span><span class="val">${o.vend.length}</span><span class="exp">${i(o.vend.length,t.vend.length)}</span></div>
+          <div class="kpi k-salvia"><span class="rot">${q.moedas}Resultado bruto</span><span class="val">${E(o.res)}</span><span class="exp">${i(o.res,t.res)}</span></div>
+          <div class="kpi k-marfim"><span class="rot">${q.pct}Margem realizada</span><span class="val">${isFinite(o.margem)?P(o.margem):"\u2014"}</span><span class="exp">${i(o.margem,t.margem)}</span></div>
+          <div class="kpi k-risco"><span class="rot">${q.alerta}Pago acima do recomendado</span><span class="val">${E(o.acima)}</span><span class="exp">${i(o.acima,t.acima,!0)}</span></div>
         </div>
-        <div class="numeros"><div><span>Trocas que entraram</span><b>${m.entr.length} · ${mil(m.comprado)}</b></div><div><span>Faturamento com usados</span><b>${mil(m.venda)}</b></div><div><span>Tempo médio até vender</span><b>${isFinite(m.dias) ? Math.round(m.dias) + ' dias' : '—'}</b></div>
-          <div><span>Avaliações feitas</span><b>${m.aval}</b></div><div><span>Garantias recebidas</span><b>${mil(m.garRec)}</b></div><div><span>Capital imobilizado hoje</span><b>${mil(C.capitalImobilizado())}</b></div></div>
-        ${!m.vend.length && !m.entr.length ? `<p class="conta">Sem trocas nem vendas neste período. ${periodo === 'diario' ? 'Veja o relatório semanal ou mensal para ter números.' : ''}</p>` : ''}
-        <h2>Prioridades</h2><ul>${al.map((a) => `<li><b>${esc(a.titulo)}</b>: ${esc(a.txt)}.</li>`).join('') || '<li>Nenhum ponto crítico.</li>'}</ul>
-        ${Object.keys(porV).length ? `<h2>Vendedores no período</h2><ul>${Object.entries(porV).sort((a, b) => b[1].res - a[1].res).map(([v, x]) => `<li><b>${esc(v)}</b>: ${x.n} ${x.n === 1 ? 'venda' : 'vendas'}, resultado ${mil(x.res)}.</li>`).join('')}</ul>` : ''}
-        <h2>Máquinas que mais pesam hoje</h2><ul>${itens.sort((a, b) => b.risco - a.risco).slice(0, 5).map((i) => `<li>${esc(i.t.marca + ' ' + i.t.modelo)}: ${i.dias} dias, ${mil(i.t.pago)} parados, margem estimada ${pct(i.margem)}. ${esc(i.acao)}.</li>`).join('')}</ul>
-        <h2>O que aconteceu no sistema</h2><ul>${m.atv.slice(0, 10).map((a) => `<li>${new Date(a.quando).toLocaleString('pt-BR')} · ${esc(a.usuario)}: ${esc(a.texto)}</li>`).join('') || '<li>Nenhuma atividade registrada no período.</li>'}</ul>
-        <p class="nota-rodape">Cada número vem dos registros do sistema. Valores estimados são estimativas. ${OP ? '' : 'Revenda e dados fictícios.'}</p></article>`;
-    $$('[data-per]', tela).forEach((b) => b.onclick = () => { periodo = b.dataset.per; telaRelatorios(); });
-    $('#r-csv').onclick = () => baixarCSV(`anshur-relatorio-${periodo}-${hojeISO()}.csv`, [['Indicador', 'Período atual', 'Período anterior'], ['Usados vendidos', m.vend.length, p.vend.length], ['Resultado bruto', Math.round(m.res), Math.round(p.res)], ['Margem realizada', isFinite(m.margem) ? (m.margem * 100).toFixed(1) + '%' : '', isFinite(p.margem) ? (p.margem * 100).toFixed(1) + '%' : ''], ['Pago acima do recomendado', Math.round(m.acima), Math.round(p.acima)], ['Trocas que entraram', m.entr.length, p.entr.length], ['Faturamento com usados', Math.round(m.venda), Math.round(p.venda)], ['Garantias recebidas', Math.round(m.garRec), Math.round(p.garRec)]]);
-  }
-
-  const abasRel = () => `<div class="abas-modo" role="group" aria-label="Tipo de relatório">${[['diario', 'Diário'], ['semanal', 'Semanal'], ['mensal', 'Mensal'], ['margem', 'Margem por marca']].map(([k, n]) => `<button type="button" data-per="${k}" aria-pressed="${periodo === k}">${n}</button>`).join('')}</div>`;
-
-  // ---------- RELATÓRIO DE MARGEM LÍQUIDA POR MARCA (e por tipo) ----------
-  // Só operações concluídas (vendidas). Real = preparo e comissão registrados; estimada = falta algum (sinalizado). Nada é inventado.
-  const fm = { de: '', ate: '', loja: null, agrupar: 'marca' };
-  const nomeMes = (m) => { const [a, b] = m.split('-'); return new Date(+a, +b - 1, 15).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).replace('.', ''); };
-  const podeLancarCustos = () => ['dono', 'gerente', 'financeiro'].includes(eu().perfil) && !(NV && NV.somenteLeitura);
-  const pctCSV = (v) => (isFinite(v) ? (v * 100).toFixed(1).replace('.', ',') : '');
-  function telaMargem() {
-    const lojasVer = K.lojasPermitidas || estado.lojas;
-    if (fm.loja === null) fm.loja = estado.lojaAtual && lojasVer.includes(estado.lojaAtual) ? estado.lojaAtual : '';
-    if (fm.loja && !lojasVer.includes(fm.loja)) fm.loja = '';
-    const base = A.todasTrocas || A.trocas, mesHoje = hojeISO().slice(0, 7);
-    const vendMeses = base.filter((t) => t.vendido && t.saida).map((t) => t.saida.slice(0, 7));
-    const primeiro = vendMeses.length ? vendMeses.reduce((a, b) => (a < b ? a : b)) : mesHoje;
-    const meses = []; for (let [a, m] = primeiro.split('-').map(Number); `${a}-${String(m).padStart(2, '0')}` <= mesHoje; m === 12 ? (m = 1, a++) : m++) meses.push(`${a}-${String(m).padStart(2, '0')}`);
-    if (!fm.ate || !meses.includes(fm.ate)) fm.ate = mesHoje;
-    if (!fm.de || !meses.includes(fm.de)) { const d = new Date(mesHoje + '-15T12:00:00'); d.setMonth(d.getMonth() - 11); fm.de = d.toISOString().slice(0, 7) < primeiro ? primeiro : d.toISOString().slice(0, 7); }
-    if (fm.de > fm.ate) [fm.de, fm.ate] = [fm.ate, fm.de];
-    const r = K.relatorioMargem(base, { de: fm.de, ate: fm.ate, loja: fm.loja, lojas: K.lojasPermitidas, agrupar: fm.agrupar });
-    const nomeG = fm.agrupar === 'tipo' ? 'Tipo' : 'Marca', rotG = (c) => (fm.agrupar === 'tipo' ? NOMES[c] || c : c);
-    const pc = (v) => (isFinite(v) ? pct(v) : '—'), neg = (v) => (v < 0 ? 'neg' : '');
-    const sitG = (x) => (x.status === 'real' ? '<span class="tag comprovado">Real</span>' : `<span class="tag declarado">Estimada</span><span class="sub mg-falta">${[x.faltaPreparo ? `${x.faltaPreparo} sem preparo` : '', x.faltaComissao ? `${x.faltaComissao} sem comissão` : ''].filter(Boolean).join(' · ')}</span>`);
-    const sitO = (o) => (o.status === 'real' ? '<span class="tag comprovado">Real</span>' : `<span class="tag declarado">Estimada</span><span class="sub mg-falta">falta ${o.faltando.join(' e ')}${o.preparoPrevisto ? ` (preparo previsto ${real(o.preparoPrevisto)}, não somado)` : ''}</span>`);
-    const lancar = podeLancarCustos();
-    const periodoTxt = fm.de === fm.ate ? nomeMes(fm.de) : `${nomeMes(fm.de)} a ${nomeMes(fm.ate)}`;
-    const opt = (lista, sel) => lista.map(([v, n]) => `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(n)}</option>`).join('');
-    const mesesOpt = meses.slice().reverse().map((m) => [m, nomeMes(m)]);
-    const linhaNum = (x) => `<td class="n">${real(x.receita)}</td><td class="n">${real(x.aquisicao)}</td><td class="n">${real(x.preparo)}</td><td class="n">${real(x.juros)}</td><td class="n">${real(x.comissao)}</td><td class="n">${real(x.despesas || 0)}</td><td class="n forte ${neg(x.margem)}">${real(x.margem)}</td><td class="n ${neg(x.margem)}">${pc(x.pct)}</td>`;
-    const cab = `<th class="n">Receita</th><th class="n">Aquisição</th><th class="n">Preparo</th><th class="n">Juros floor plan</th><th class="n">Comissão</th><th class="n" title="Frete, documentação e outras pagas no Financeiro">Outras despesas</th><th class="n">Margem líquida</th><th class="n">%</th>`;
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Relatórios</h1><p>Margem líquida por ${nomeG.toLowerCase()} das operações concluídas (vendidas), mês a mês.</p></div>
+        <div class="numeros"><div><span>Trocas que entraram</span><b>${o.entr.length} \xB7 ${E(o.comprado)}</b></div><div><span>Faturamento com usados</span><b>${E(o.venda)}</b></div><div><span>Tempo m\xE9dio at\xE9 vender</span><b>${isFinite(o.dias)?Math.round(o.dias)+" dias":"\u2014"}</b></div>
+          <div><span>Avalia\xE7\xF5es feitas</span><b>${o.aval}</b></div><div><span>Garantias recebidas</span><b>${E(o.garRec)}</b></div><div><span>Capital imobilizado hoje</span><b>${E(I.capitalImobilizado())}</b></div></div>
+        ${!o.vend.length&&!o.entr.length?`<p class="conta">Sem trocas nem vendas neste per\xEDodo. ${Ia==="diario"?"Veja o relat\xF3rio semanal ou mensal para ter n\xFAmeros.":""}</p>`:""}
+        <h2>Prioridades</h2><ul>${m.map(p=>`<li><b>${c(p.titulo)}</b>: ${c(p.txt)}.</li>`).join("")||"<li>Nenhum ponto cr\xEDtico.</li>"}</ul>
+        ${Object.keys(r).length?`<h2>Vendedores no per\xEDodo</h2><ul>${Object.entries(r).sort((p,d)=>d[1].res-p[1].res).map(([p,d])=>`<li><b>${c(p)}</b>: ${d.n} ${d.n===1?"venda":"vendas"}, resultado ${E(d.res)}.</li>`).join("")}</ul>`:""}
+        <h2>M\xE1quinas que mais pesam hoje</h2><ul>${n.sort((p,d)=>d.risco-p.risco).slice(0,5).map(p=>`<li>${c(p.t.marca+" "+p.t.modelo)}: ${p.dias} dias, ${E(p.t.pago)} parados, margem estimada ${P(p.margem)}. ${c(p.acao)}.</li>`).join("")}</ul>
+        <h2>O que aconteceu no sistema</h2><ul>${o.atv.slice(0,10).map(p=>`<li>${new Date(p.quando).toLocaleString("pt-BR")} \xB7 ${c(p.usuario)}: ${c(p.texto)}</li>`).join("")||"<li>Nenhuma atividade registrada no per\xEDodo.</li>"}</ul>
+        <p class="nota-rodape">Cada n\xFAmero vem dos registros do sistema. Valores estimados s\xE3o estimativas. ${X?"":"Revenda e dados fict\xEDcios."}</p></article>`,R("[data-per]",w).forEach(p=>p.onclick=()=>{Ia=p.dataset.per,go()}),l("#r-csv").onclick=()=>Ea(`anshur-relatorio-${Ia}-${z()}.csv`,[["Indicador","Per\xEDodo atual","Per\xEDodo anterior"],["Usados vendidos",o.vend.length,t.vend.length],["Resultado bruto",Math.round(o.res),Math.round(t.res)],["Margem realizada",isFinite(o.margem)?(o.margem*100).toFixed(1)+"%":"",isFinite(t.margem)?(t.margem*100).toFixed(1)+"%":""],["Pago acima do recomendado",Math.round(o.acima),Math.round(t.acima)],["Trocas que entraram",o.entr.length,t.entr.length],["Faturamento com usados",Math.round(o.venda),Math.round(t.venda)],["Garantias recebidas",Math.round(o.garRec),Math.round(t.garRec)]])}const ct=()=>`<div class="abas-modo" role="group" aria-label="Tipo de relat\xF3rio">${[["diario","Di\xE1rio"],["semanal","Semanal"],["mensal","Mensal"],["margem","Margem por marca"]].map(([a,e])=>`<button type="button" data-per="${a}" aria-pressed="${Ia===a}">${e}</button>`).join("")}</div>`,F={de:"",ate:"",loja:null,agrupar:"marca"},he=a=>{const[e,o]=a.split("-");return new Date(+e,+o-1,15).toLocaleDateString("pt-BR",{month:"short",year:"numeric"}).replace(".","")},Os=()=>["dono","gerente","financeiro"].includes(D().perfil)&&!(C&&C.somenteLeitura),Le=a=>isFinite(a)?(a*100).toFixed(1).replace(".",","):"";function oe(){const a=x.lojasPermitidas||b.lojas;F.loja===null&&(F.loja=b.lojaAtual&&a.includes(b.lojaAtual)?b.lojaAtual:""),F.loja&&!a.includes(F.loja)&&(F.loja="");const e=y.todasTrocas||y.trocas,o=z().slice(0,7),t=e.filter(f=>f.vendido&&f.saida).map(f=>f.saida.slice(0,7)),s=t.length?t.reduce((f,k)=>f<k?f:k):o,i=[];for(let[f,k]=s.split("-").map(Number);`${f}-${String(k).padStart(2,"0")}`<=o;k===12?(k=1,f++):k++)i.push(`${f}-${String(k).padStart(2,"0")}`);if((!F.ate||!i.includes(F.ate))&&(F.ate=o),!F.de||!i.includes(F.de)){const f=new Date(o+"-15T12:00:00");f.setMonth(f.getMonth()-11),F.de=f.toISOString().slice(0,7)<s?s:f.toISOString().slice(0,7)}F.de>F.ate&&([F.de,F.ate]=[F.ate,F.de]);const n=x.relatorioMargem(e,{de:F.de,ate:F.ate,loja:F.loja,lojas:x.lojasPermitidas,agrupar:F.agrupar}),m=F.agrupar==="tipo"?"Tipo":"Marca",r=f=>F.agrupar==="tipo"&&V[f]||f,p=f=>isFinite(f)?P(f):"\u2014",d=f=>f<0?"neg":"",$=f=>f.status==="real"?'<span class="tag comprovado">Real</span>':`<span class="tag declarado">Estimada</span><span class="sub mg-falta">${[f.faltaPreparo?`${f.faltaPreparo} sem preparo`:"",f.faltaComissao?`${f.faltaComissao} sem comiss\xE3o`:""].filter(Boolean).join(" \xB7 ")}</span>`,u=f=>f.status==="real"?'<span class="tag comprovado">Real</span>':`<span class="tag declarado">Estimada</span><span class="sub mg-falta">falta ${f.faltando.join(" e ")}${f.preparoPrevisto?` (preparo previsto ${M(f.preparoPrevisto)}, n\xE3o somado)`:""}</span>`,g=Os(),j=F.de===F.ate?he(F.de):`${he(F.de)} a ${he(F.ate)}`,S=(f,k)=>f.map(([sa,da])=>`<option value="${c(sa)}" ${sa===k?"selected":""}>${c(da)}</option>`).join(""),H=i.slice().reverse().map(f=>[f,he(f)]),O=f=>`<td class="n">${M(f.receita)}</td><td class="n">${M(f.aquisicao)}</td><td class="n">${M(f.preparo)}</td><td class="n">${M(f.juros)}</td><td class="n">${M(f.comissao)}</td><td class="n">${M(f.despesas||0)}</td><td class="n forte ${d(f.margem)}">${M(f.margem)}</td><td class="n ${d(f.margem)}">${p(f.pct)}</td>`,aa='<th class="n">Receita</th><th class="n">Aquisi\xE7\xE3o</th><th class="n">Preparo</th><th class="n">Juros floor plan</th><th class="n">Comiss\xE3o</th><th class="n" title="Frete, documenta\xE7\xE3o e outras pagas no Financeiro">Outras despesas</th><th class="n">Margem l\xEDquida</th><th class="n">%</th>';w.innerHTML=`
+      <div class="titulo"><div><h1>Relat\xF3rios</h1><p>Margem l\xEDquida por ${m.toLowerCase()} das opera\xE7\xF5es conclu\xEDdas (vendidas), m\xEAs a m\xEAs.</p></div>
         <div class="acoes"><button class="btn btn-linha" type="button" id="mg-csv">Exportar CSV</button><button class="btn btn-linha" type="button" id="mg-print">Imprimir ou PDF</button></div></div>
-      ${abasRel()}
+      ${ct()}
       <div class="campos filtros-margem" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:16px">
-        <div class="campo"><label for="mg-de">De</label><select id="mg-de">${opt(mesesOpt, fm.de)}</select></div>
-        <div class="campo"><label for="mg-ate">Até</label><select id="mg-ate">${opt(mesesOpt, fm.ate)}</select></div>
-        ${lojasVer.length ? `<div class="campo"><label for="mg-loja">Loja</label><select id="mg-loja">${opt([['', K.lojasPermitidas ? 'Minhas lojas' : 'Todas as lojas']].concat(lojasVer.map((l) => [l, l])), fm.loja)}</select></div>` : ''}
-        <div class="campo"><label for="mg-agr">Agrupar por</label><select id="mg-agr">${opt([['marca', 'Marca'], ['tipo', 'Tipo de máquina']], fm.agrupar)}</select></div>
+        <div class="campo"><label for="mg-de">De</label><select id="mg-de">${S(H,F.de)}</select></div>
+        <div class="campo"><label for="mg-ate">At\xE9</label><select id="mg-ate">${S(H,F.ate)}</select></div>
+        ${a.length?`<div class="campo"><label for="mg-loja">Loja</label><select id="mg-loja">${S([["",x.lojasPermitidas?"Minhas lojas":"Todas as lojas"]].concat(a.map(f=>[f,f])),F.loja)}</select></div>`:""}
+        <div class="campo"><label for="mg-agr">Agrupar por</label><select id="mg-agr">${S([["marca","Marca"],["tipo","Tipo de m\xE1quina"]],F.agrupar)}</select></div>
       </div>
       <article class="relatorio relatorio-margem" style="max-width:none">
         <img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="190" height="48">
-        <p class="sub" style="margin-top:6px">${esc(A.revenda.nome)} · ${fm.loja ? 'loja ' + esc(fm.loja) : K.lojasPermitidas ? 'lojas ' + esc(K.lojasPermitidas.join(', ')) : 'todas as lojas'} · ${esc(periodoTxt)} · emitido em ${new Date().toLocaleString('pt-BR')} por ${esc(eu().nome)}</p>
-        <h2 style="margin-top:14px">Margem líquida por ${nomeG.toLowerCase()}</h2>
-        <div class="numeros"><div><span>Operações concluídas</span><b>${r.total.n} <small class="sub">(${r.total.nReal} reais · ${r.total.nEst} estimadas)</small></b></div><div><span>Receita (vendas)</span><b>${mil(r.total.receita)}</b></div>
-          <div><span>Custos registrados</span><b>${mil(r.total.aquisicao + r.total.preparo + r.total.juros + r.total.comissao + (r.total.despesas || 0))}</b></div><div><span>Margem líquida</span><b class="${neg(r.total.margem)}">${mil(r.total.margem)}</b></div><div><span>Margem líquida %</span><b class="${neg(r.total.margem)}">${pc(r.total.pct)}</b></div></div>
-        ${r.total.nEst ? `<p class="conta">${r.total.nEst} de ${r.total.n} operações estão com margem <b>estimada</b>: faltam custos registrados (${[r.total.faltaPreparo ? `preparo em ${r.total.faltaPreparo}` : '', r.total.faltaComissao ? `comissão em ${r.total.faltaComissao}` : ''].filter(Boolean).join(', ')}). O Anshur não inventa custo: a margem dessas operações usa só o que foi registrado e pode ser menor.${lancar ? ' Lance os custos em cada operação, abaixo.' : ''}</p>` : ''}
-        ${!r.total.n ? '<p class="conta">Nenhuma operação concluída (vendida) neste período e nesta loja.</p>' : `
-        <div class="tabela-wrap"><table class="tabela" id="mg-grupos"><thead><tr><th>${nomeG}</th><th class="n">Vendas</th>${cab}<th>Situação</th></tr></thead><tbody>
-          ${r.grupos.map((g) => `<tr><td><b>${esc(rotG(g.chave))}</b></td><td class="n">${g.n}</td>${linhaNum(g)}<td>${sitG(g)}</td></tr>`).join('')}
-          <tr class="mg-total"><td><b>Total</b></td><td class="n"><b>${r.total.n}</b></td>${linhaNum(r.total)}<td>${sitG(r.total)}</td></tr></tbody></table></div>
-        <h2>Mês a mês</h2>
-        <div class="tabela-wrap"><table class="tabela" id="mg-meses"><thead><tr><th>Mês</th><th>${nomeG}</th><th class="n">Vendas</th><th class="n">Receita</th><th class="n">Margem líquida</th><th class="n">%</th><th>Situação</th></tr></thead><tbody>
-          ${r.meses.map((x) => `<tr><td>${esc(nomeMes(x.mes))}</td><td>${esc(rotG(x.chave))}</td><td class="n">${x.n}</td><td class="n">${real(x.receita)}</td><td class="n forte ${neg(x.margem)}">${real(x.margem)}</td><td class="n ${neg(x.margem)}">${pc(x.pct)}</td><td>${x.status === 'real' ? '<span class="tag comprovado">Real</span>' : '<span class="tag declarado">Estimada</span>'}</td></tr>`).join('')}</tbody></table></div>
-        <h2>Operações</h2>
-        <div class="tabela-wrap"><table class="tabela" id="mg-ops"><thead><tr><th>Venda</th><th>Máquina</th>${lojasVer.length ? '<th>Loja</th>' : ''}${cab}<th>Situação</th>${lancar ? '<th class="sem-impressao"></th>' : ''}</tr></thead><tbody>
-          ${r.operacoes.map((o) => `<tr data-op="${esc(o.id)}"><td>${data(o.saida)}</td><td class="maq"><span><b>${esc(o.marca + ' ' + o.modelo)}</b><span>${esc(NOMES[o.tipo] || o.tipo)} · ${o.ano || ''}${o.pecas != null ? ` · peças ${real(o.pecas)}, mão de obra ${real(o.maoDeObra)} (${(o.horasOficina || 0).toLocaleString('pt-BR')} h)` : ''}</span></span></td>${lojasVer.length ? `<td>${esc(o.loja || '—')}</td>` : ''}${linhaNum(o)}<td>${sitO(o)}</td>${lancar ? `<td class="sem-impressao"><button class="link" type="button" data-custos="${esc(o.id)}">Lançar custos</button></td>` : ''}</tr>`).join('')}</tbody></table></div>`}
-        <p class="nota-rodape">Margem líquida = venda − valor pago na troca − preparo (peças e horas) − juros do floor plan − comissão − outras despesas pagas no Financeiro ligadas à máquina (frete, documentação). Real: preparo e comissão registrados. Estimada: falta algum desses custos; a margem mostrada usa só os custos registrados e pode ser menor. Juros do floor plan entram quando registrados (usado fora do floor plan não tem juros). Só operações vendidas, pela data da venda. ${OP ? '' : 'Revenda e dados fictícios.'}</p>
-      </article>`;
-    $$('[data-per]', tela).forEach((b) => b.onclick = () => { periodo = b.dataset.per; telaRelatorios(); });
-    $('#mg-de').onchange = (e) => { fm.de = e.target.value; telaMargem(); };
-    $('#mg-ate').onchange = (e) => { fm.ate = e.target.value; telaMargem(); };
-    const sl = $('#mg-loja'); if (sl) sl.onchange = (e) => { fm.loja = e.target.value; telaMargem(); };
-    $('#mg-agr').onchange = (e) => { fm.agrupar = e.target.value; telaMargem(); };
-    $('#mg-print').onclick = () => print();
-    $('#mg-csv').onclick = () => {
-      const L = [['Mês', 'Data da venda', 'Operação', 'Tipo', 'Marca', 'Modelo', 'Ano', 'Loja', 'Receita', 'Aquisição', 'Preparo', 'Peças', 'Mão de obra', 'Juros floor plan', 'Comissão', 'Outras despesas', 'Margem líquida', 'Margem %', 'Situação', 'Custos faltando']]
-        .concat(r.operacoes.map((o) => [o.mes, o.saida, o.id, NOMES[o.tipo] || o.tipo, o.marca, o.modelo, o.ano, o.loja, o.receita, o.aquisicao, o.preparo, o.pecas ?? '', o.maoDeObra ?? '', o.juros, o.comissao, o.despesas || 0, o.margem, pctCSV(o.pct), o.status === 'real' ? 'Real' : 'Estimada', o.faltando.join(', ')]))
-        .concat([[], [nomeG, 'Vendas', 'Reais', 'Estimadas', 'Receita', 'Aquisição', 'Preparo', 'Juros floor plan', 'Comissão', 'Outras despesas', 'Margem líquida', 'Margem %']])
-        .concat(r.grupos.concat([Object.assign({ chave: 'Total' }, r.total)]).map((g) => [rotG(g.chave), g.n, g.nReal, g.nEst, g.receita, g.aquisicao, g.preparo, g.juros, g.comissao, g.despesas || 0, g.margem, pctCSV(g.pct)]));
-      baixarCSV(`anshur-margem-por-${fm.agrupar}-${fm.de}-a-${fm.ate}${fm.loja ? '-' + fm.loja.replace(/\W+/g, '-') : ''}.csv`, L);
-    };
-    $$('[data-custos]', tela).forEach((b) => b.onclick = () => {
-      const t = base.find((x) => x.id === b.dataset.custos); if (!t) return;
-      const o = K.margemOperacao(t), cu = t.custos || {};
-      const campos = [{ k: 'comissao', r: 'Comissão paga (R$)', num: true, ph: 'Vazio = não registrada' }, { k: 'juros', r: 'Juros do floor plan (R$)', num: true, ph: 'Vazio = sem juros registrados' }]
-        .concat(o.faltando.includes('preparo') ? [{ k: 'preparo', r: 'Preparo total: peças + mão de obra (R$)', num: true, ph: o.preparoPrevisto ? 'Previsto: ' + real(o.preparoPrevisto) : 'Vazio = não registrado' }] : []);
-      formulario(`Custos da venda: ${t.marca} ${t.modelo}`, campos, { comissao: cu.comissao ?? '', juros: cu.juros ?? '' }, (v) => {
-        const cs = {}; if (v.comissao !== '') cs.comissao = v.comissao; if (v.juros !== '') cs.juros = v.juros;
-        if (!Object.keys(cs).length && (v.preparo === '' || v.preparo === undefined)) { toast('Informe pelo menos um custo.', true); return; }
-        if (Object.keys(cs).length) t.custos = Object.assign({}, t.custos, K.registrarCustos(estado, t.id, cs, eu().nome));
-        if (v.preparo !== '' && v.preparo !== undefined) { K.registrarPreparo(estado, t.id, v.preparo, hojeISO()); t.preparo = Math.round(v.preparo); t.preparoRegistrado = hojeISO(); }
-        log('venda', `Custos lançados: ${t.marca} ${t.modelo}${cs.comissao != null ? ', comissão ' + real(cs.comissao) : ''}${cs.juros != null ? ', juros ' + real(cs.juros) : ''}${v.preparo !== '' && v.preparo !== undefined ? ', preparo ' + real(v.preparo) : ''}`, { ref: t.id });
-        salvar(); cacheLimpa(); fecharCamada(true); toast('Custos lançados.'); telaMargem();
-      }, 'Só o que foi realmente pago. Campo vazio continua como não registrado.');
-    });
-  }
-
-  // ---------- auditoria ----------
-  function telaAtividades() {
-    const l = estado.atividades;
-    tela.innerHTML = `<div class="titulo"><div><h1>Atividades</h1><p>Tudo o que foi feito no sistema, por quem e quando.</p></div>${botaoAdicionar([{ nome: 'Anotação', desc: 'Registro manual (visita, ligação, combinado)', acao: () => formulario('Adicionar anotação', [{ k: 'texto', r: 'O que aconteceu', obr: true, inteiro: true }], {}, (v) => { log('anotacao', v.texto); salvar(); fecharCamada(true); toast('Anotação registrada.'); rota(); }) }], 'Nova anotação')}</div>
-      <section class="painel">${l.length ? `<ul class="linha-tempo grande">${l.slice(0, 200).map((a) => `<li><b>${esc(a.texto)}</b><span>${new Date(a.quando).toLocaleString('pt-BR')} · ${esc(a.usuario)} (${K.PERFIS[a.perfil] || ''})</span></li>`).join('')}</ul>` : '<p class="vazio">Nenhuma atividade ainda. Avaliações, trocas, vendas, documentos e mudanças de regra aparecem aqui.</p>'}
-      <p class="nota-rodape">${K.nuvem ? 'Trocas, aprovações, preços, vendas, convites e exclusões também vão para a trilha do servidor, abaixo, que ninguém da revenda consegue alterar ou apagar.' : 'Na demonstração o registro fica neste navegador. Na conta da revenda, as atividades críticas vão também para uma trilha no servidor que não pode ser alterada.'}</p></section>
-      ${K.nuvem && !K.nuvem.offline ? '<section class="painel bloco" id="ev-srv"><h2>Trilha do servidor</h2><p class="sub">Carregando…</p></section>' : ''}`;
-    const box = $('#ev-srv');
-    if (box) K.nuvem.eventosServidor().then((ev) => {
-      const nome = (id) => { const u = estado.usuarios.find((x) => x.id === id); return u ? u.nome : 'pessoa removida'; };
-      box.innerHTML = `<h2>Trilha do servidor</h2><p class="sub" style="margin-bottom:8px">Registro só de inclusão: não tem edição nem exclusão.</p>${ev.length ? `<ul class="linha-tempo grande">${ev.map((a) => `<li><b>${esc(a.texto)}</b><span>${new Date(a.quando).toLocaleString('pt-BR')} · ${esc(nome(a.usuario))} · ${esc(a.tipo)}</span></li>`).join('')}</ul>` : '<p class="vazio">Nenhum registro ainda.</p>'}`;
-    }, (e) => { box.innerHTML = `<h2>Trilha do servidor</h2><p class="neg">${esc(e.message)}</p>`; });
-  }
-
-  // ---------- busca global (Ctrl+K) ----------
-  function abrirBusca() {
-    const acoes = [['Nova avaliação', '#avaliar'], ['Ver pátio', '#patio'], ['Relatório semanal', '#relatorio'], ['Central de documentos', '#documentos'], ['Configurações', '#config'], ['Usuários', '#usuarios'], ['Garantias a receber', '#garantias'], ['Estoque financiado', '#financiamento'], ['Teste às cegas', '#teste'], ['Atividades', '#atividades']].filter(([, h]) => pode(h.slice(1)));
-    abrirCamada('modal busca-modal', `<input class="busca-in" id="busca" placeholder="Buscar máquina, chassi, OS, vendedor, página…" autocomplete="off" aria-label="Buscar"><div id="busca-res" class="busca-res"></div><p class="nota-rodape">Setas para navegar, Enter para abrir, Esc para fechar.</p>`, (c) => {
-      const inp = $('#busca', c), res = $('#busca-res', c); let sel = 0, itens = [];
-      const desenha = () => {
-        const q = inp.value.trim().toLowerCase();
-        const maq = A.trocas.filter((t) => !q || [t.marca, t.modelo, t.id, t.chassi, t.vendedor, t.origem].join(' ').toLowerCase().includes(q)).slice(0, 6).map((t) => ({ g: t.vendido ? 'Vendidas' : 'No pátio', n: `${t.marca} ${t.modelo} · ${t.ano}`, d: t.vendido ? `vendida ${data(t.saida)} por ${mil(t.vendido)}` : `${diasDesde(t.entrada)} dias no pátio`, ir: () => { location.hash = t.vendido ? '#trocas' : '#patio'; setTimeout(() => !t.vendido && detalheMaquina(t.id), 300); } }));
-        const gar = (A.garantias || []).filter((g) => q && [g.os, g.servico, g.cliente, g.marca].join(' ').toLowerCase().includes(q)).slice(0, 4).map((g) => ({ g: 'Garantias', n: `${g.os} · ${g.servico}`, d: `${g.marca} · ${real(g.valor)}`, ir: () => { location.hash = '#garantias'; } }));
-        const fin = (A.financiadas || []).filter((f) => q && [f.chassi, f.modelo, f.marca].join(' ').toLowerCase().includes(q)).slice(0, 4).map((f) => ({ g: 'Financiadas', n: `${f.marca} ${f.modelo}`, d: f.chassi, ir: () => { location.hash = '#financiamento'; } }));
-        const pag = acoes.concat(acoesDasAreas()).filter(([n], i, l) => (!q || n.toLowerCase().includes(q)) && l.findIndex((x) => x[0] === n) === i).slice(0, q ? 8 : 5).map(([n, h]) => ({ g: 'Ir para', n, d: '', ir: () => { location.hash = h; } }));
-        const deAreas = q ? areasVisiveis().filter((a) => a.pronta && a.buscar).flatMap((a) => { try { return a.buscar(q, UI) || []; } catch (er) { return []; } }) : [];
-        itens = [...pag, ...maq, ...gar, ...fin, ...deAreas]; sel = Math.min(sel, Math.max(0, itens.length - 1));
-        let g = ''; res.innerHTML = itens.map((x, i) => `${x.g !== g ? `<div class="busca-g">${(g = x.g)}</div>` : ''}<button type="button" class="busca-it ${i === sel ? 'sel' : ''}" data-i="${i}"><b>${esc(x.n)}</b><span>${esc(x.d)}</span></button>`).join('') || '<p class="vazio">Nada encontrado.</p>';
-        $$('.busca-it', res).forEach((b) => b.onclick = () => { fecharCamada(true); itens[+b.dataset.i].ir(); });
-      };
-      inp.oninput = () => { sel = 0; desenha(); };
-      inp.onkeydown = (e) => { if (e.key === 'ArrowDown') { sel = Math.min(itens.length - 1, sel + 1); desenha(); e.preventDefault(); } if (e.key === 'ArrowUp') { sel = Math.max(0, sel - 1); desenha(); e.preventDefault(); } if (e.key === 'Enter' && itens[sel]) { fecharCamada(true); itens[sel].ir(); } };
-      desenha(); setTimeout(() => inp.focus(), 80);
-    });
-  }
-  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); abrirBusca(); } });
-
-  // ---------- comparação de máquinas ----------
-  const comparar = new Set();
-  function abrirComparacao() {
-    const l = [...comparar].map((id) => A.trocas.find((t) => t.id === id)).filter(Boolean).map(infoPatio);
-    if (l.length < 2) { toast('Marque 2 ou 3 máquinas para comparar.', true); return; }
-    const linhas = [['Foto', (i) => `<img src="${F.de(i.t).propria ? F.de(i.t).u : F.mini(F.de(i.t).u)}" alt="" style="width:100%;max-width:220px;border-radius:10px;aspect-ratio:4/3;object-fit:cover">`], ['Ano · horas', (i) => `${i.t.ano} · ${horasTxt(i.t)}`], ['Aquisição', (i) => real(i.t.pago)], ['Preparação', (i) => real(i.t.preparo)], ['Custo financeiro', (i) => real(i.juros)], ['Dias no pátio', (i) => `<span class="dias ${i.faixa}">${i.dias} dias</span>`], ['Venda estimada', (i) => real(i.venda)], ['Margem esperada', (i) => `<b class="${i.margem < 0.06 ? 'neg' : 'pos'}">${pct(i.margem)}</b>`], ['Risco de oficina', (i) => { const h = historicoModelo(i.t.modelo); return h.reserva ? real(h.reserva) + ' em média' : 'sem histórico'; }], ['Época de venda', (i) => esc((SAFRA[i.t.tipo] || {}).janela || '—')], ['Recomendação', (i) => esc(i.acao)]];
-    abrirCamada('gaveta larga', `<h2 style="font-size:24px">Comparar máquinas</h2><div class="tabela-wrap" style="margin-top:14px"><table class="tabela grande comparar"><thead><tr><th></th>${l.map((i) => `<th>${esc(i.t.marca + ' ' + i.t.modelo)}</th>`).join('')}</tr></thead><tbody>${linhas.map(([n, f]) => `<tr><td><b>${n}</b></td>${l.map((i) => `<td>${f(i)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`);
-  }
-
-  // ---------- notificações com categoria e "resolvido" ----------
-  function abrirNotificacoes() {
-    const l = listaAlertas(); let filtro = 'abertos';
-    const desenha = (c) => {
-      const v = l.filter((a) => (filtro === 'abertos' ? !estado.resolvidos[a.id] : !!estado.resolvidos[a.id]));
-      $('#notif', c).innerHTML = v.map((a) => `<li class="${a.nivel}">${a.nivel === 'alto' ? ICO.alto : ICO.medio}<div><span class="cat">${esc(a.cat)}</span><b>${esc(a.titulo)}</b><span>${esc(a.txt)}</span><span class="acoes" style="margin-top:8px;display:flex"><a class="btn btn-linha" href="${a.ir}" data-ir>Abrir</a>${filtro === 'abertos' ? `<button class="btn btn-linha" type="button" data-res="${a.id}">Marcar como resolvido</button>` : `<button class="btn btn-linha" type="button" data-reab="${a.id}">Reabrir</button>`}</span></div></li>`).join('') || `<li class="info">${ICO.baixo}<div><b>${filtro === 'abertos' ? 'Tudo em ordem' : 'Nada resolvido ainda'}</b></div></li>`;
-      $$('[data-ir]', c).forEach((x) => x.onclick = () => fecharCamada(true));
-      $$('[data-res]', c).forEach((x) => x.onclick = () => { estado.resolvidos[x.dataset.res] = { por: eu().nome, quando: new Date().toISOString() }; log('alerta', 'Alerta resolvido: ' + l.find((a) => a.id === x.dataset.res).titulo); salvar(); desenha(c); atualizarSino(); toast('Marcado como resolvido.'); });
-      $$('[data-reab]', c).forEach((x) => x.onclick = () => { delete estado.resolvidos[x.dataset.reab]; salvar(); desenha(c); atualizarSino(); });
-    };
-    abrirCamada('gaveta', `<h2 style="font-size:24px">Notificações</h2><div class="abas-modo" style="margin-top:12px"><button type="button" data-f="abertos" aria-pressed="true">Abertas</button><button type="button" data-f="resolvidos" aria-pressed="false">Resolvidas</button></div><ul class="alertas" id="notif"></ul>`, (c) => {
-      $$('[data-f]', c).forEach((b) => b.onclick = () => { filtro = b.dataset.f; $$('[data-f]', c).forEach((x) => x.setAttribute('aria-pressed', x === b)); desenha(c); });
-      desenha(c);
-    });
-  }
-  function atualizarSino() { const n = listaAlertas().filter((a) => !estado.resolvidos[a.id]).length; const b = $('#sino-n'); b.hidden = !n; b.textContent = n; }
-
-  // =====================================================================================
-  // V6: compradores e casamento com o pátio, monitor de mercado, aprovações, horímetro suspeito,
-  // troca em grãos (barter) e exportação para o sistema da revenda
-  // =====================================================================================
-  // ---------- compradores ----------
-  function compradoresPara(t) {
-    return (A.compradores || []).filter((c) => c.tipo === t.tipo && (!c.marcas || c.marcas === t.marca) && t.ano >= (+c.anoMin || 0) && (!c.precoMax || (t.anuncio || t.pago * 1.15) <= c.precoMax * 1.08))
-      .map((c) => ({ c, folga: c.precoMax ? c.precoMax - (t.anuncio || 0) : 0 })).sort((a, b) => b.folga - a.folga).map((x) => x.c);
-  }
-  function addComprador(pre = {}) {
-    formulario('Adicionar comprador interessado', [{ k: 'nome', r: 'Nome', obr: true }, { k: 'fazenda', r: 'Fazenda / empresa' }, { k: 'cidade', r: 'Cidade', lista: 'dl-cidade' }, { k: 'telefone', r: 'Telefone' },
-      { k: 'tipo', r: 'Procura', tipo: 'select', ops: Object.entries(NOMES) }, { k: 'marcas', r: 'Marca preferida (opcional)', lista: 'dl-marca' }, { k: 'anoMin', r: 'Ano mínimo', num: true }, { k: 'precoMax', r: 'Paga até (R$)', num: true, obr: true }, { k: 'obs', r: 'Observação', inteiro: true }],
-    { tipo: 'trator', ...pre }, (v) => {
-      const c = { id: 'C' + Date.now(), ...v, desde: hojeISO() }; estado.extras.compradores.push(c); A.compradores.push(c); salvar();
-      const m = C.patio().filter((t) => compradoresPara(t).includes(c)); log('comprador', `Comprador ${c.nome} cadastrado procurando ${NOMES[c.tipo].toLowerCase()}`);
-      fecharCamada(true); toast(m.length ? `${c.nome} combina com ${m.length} ${m.length === 1 ? 'máquina' : 'máquinas'} do pátio.` : 'Comprador cadastrado. Avisaremos quando entrar uma máquina que combine.'); rota();
-    });
-  }
-  function telaCompradores() {
-    const l = A.compradores || [];
-    const patio = C.patio();
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Compradores</h1><p>Quem está procurando máquina. Quando entra um usado que combina, o Anshur avisa na hora.</p></div>${botaoAdicionar([{ nome: 'Comprador à mão', desc: 'Nome, o que procura e quanto paga', acao: () => addComprador() }, { nome: 'Importar lista', desc: 'Planilha de contatos', acao: () => { location.hash = '#documentos'; } }], 'Novo comprador')}</div>
+        <p class="sub" style="margin-top:6px">${c(y.revenda.nome)} \xB7 ${F.loja?"loja "+c(F.loja):x.lojasPermitidas?"lojas "+c(x.lojasPermitidas.join(", ")):"todas as lojas"} \xB7 ${c(j)} \xB7 emitido em ${new Date().toLocaleString("pt-BR")} por ${c(D().nome)}</p>
+        <h2 style="margin-top:14px">Margem l\xEDquida por ${m.toLowerCase()}</h2>
+        <div class="numeros"><div><span>Opera\xE7\xF5es conclu\xEDdas</span><b>${n.total.n} <small class="sub">(${n.total.nReal} reais \xB7 ${n.total.nEst} estimadas)</small></b></div><div><span>Receita (vendas)</span><b>${E(n.total.receita)}</b></div>
+          <div><span>Custos registrados</span><b>${E(n.total.aquisicao+n.total.preparo+n.total.juros+n.total.comissao+(n.total.despesas||0))}</b></div><div><span>Margem l\xEDquida</span><b class="${d(n.total.margem)}">${E(n.total.margem)}</b></div><div><span>Margem l\xEDquida %</span><b class="${d(n.total.margem)}">${p(n.total.pct)}</b></div></div>
+        ${n.total.nEst?`<p class="conta">${n.total.nEst} de ${n.total.n} opera\xE7\xF5es est\xE3o com margem <b>estimada</b>: faltam custos registrados (${[n.total.faltaPreparo?`preparo em ${n.total.faltaPreparo}`:"",n.total.faltaComissao?`comiss\xE3o em ${n.total.faltaComissao}`:""].filter(Boolean).join(", ")}). O Anshur n\xE3o inventa custo: a margem dessas opera\xE7\xF5es usa s\xF3 o que foi registrado e pode ser menor.${g?" Lance os custos em cada opera\xE7\xE3o, abaixo.":""}</p>`:""}
+        ${n.total.n?`
+        <div class="tabela-wrap"><table class="tabela" id="mg-grupos"><thead><tr><th>${m}</th><th class="n">Vendas</th>${aa}<th>Situa\xE7\xE3o</th></tr></thead><tbody>
+          ${n.grupos.map(f=>`<tr><td><b>${c(r(f.chave))}</b></td><td class="n">${f.n}</td>${O(f)}<td>${$(f)}</td></tr>`).join("")}
+          <tr class="mg-total"><td><b>Total</b></td><td class="n"><b>${n.total.n}</b></td>${O(n.total)}<td>${$(n.total)}</td></tr></tbody></table></div>
+        <h2>M\xEAs a m\xEAs</h2>
+        <div class="tabela-wrap"><table class="tabela" id="mg-meses"><thead><tr><th>M\xEAs</th><th>${m}</th><th class="n">Vendas</th><th class="n">Receita</th><th class="n">Margem l\xEDquida</th><th class="n">%</th><th>Situa\xE7\xE3o</th></tr></thead><tbody>
+          ${n.meses.map(f=>`<tr><td>${c(he(f.mes))}</td><td>${c(r(f.chave))}</td><td class="n">${f.n}</td><td class="n">${M(f.receita)}</td><td class="n forte ${d(f.margem)}">${M(f.margem)}</td><td class="n ${d(f.margem)}">${p(f.pct)}</td><td>${f.status==="real"?'<span class="tag comprovado">Real</span>':'<span class="tag declarado">Estimada</span>'}</td></tr>`).join("")}</tbody></table></div>
+        <h2>Opera\xE7\xF5es</h2>
+        <div class="tabela-wrap"><table class="tabela" id="mg-ops"><thead><tr><th>Venda</th><th>M\xE1quina</th>${a.length?"<th>Loja</th>":""}${aa}<th>Situa\xE7\xE3o</th>${g?'<th class="sem-impressao"></th>':""}</tr></thead><tbody>
+          ${n.operacoes.map(f=>`<tr data-op="${c(f.id)}"><td>${N(f.saida)}</td><td class="maq"><span><b>${c(f.marca+" "+f.modelo)}</b><span>${c(V[f.tipo]||f.tipo)} \xB7 ${f.ano||""}${f.pecas!=null?` \xB7 pe\xE7as ${M(f.pecas)}, m\xE3o de obra ${M(f.maoDeObra)} (${(f.horasOficina||0).toLocaleString("pt-BR")} h)`:""}</span></span></td>${a.length?`<td>${c(f.loja||"\u2014")}</td>`:""}${O(f)}<td>${u(f)}</td>${g?`<td class="sem-impressao"><button class="link" type="button" data-custos="${c(f.id)}">Lan\xE7ar custos</button></td>`:""}</tr>`).join("")}</tbody></table></div>`:'<p class="conta">Nenhuma opera\xE7\xE3o conclu\xEDda (vendida) neste per\xEDodo e nesta loja.</p>'}
+        <p class="nota-rodape">Margem l\xEDquida = venda \u2212 valor pago na troca \u2212 preparo (pe\xE7as e horas) \u2212 juros do floor plan \u2212 comiss\xE3o \u2212 outras despesas pagas no Financeiro ligadas \xE0 m\xE1quina (frete, documenta\xE7\xE3o). Real: preparo e comiss\xE3o registrados. Estimada: falta algum desses custos; a margem mostrada usa s\xF3 os custos registrados e pode ser menor. Juros do floor plan entram quando registrados (usado fora do floor plan n\xE3o tem juros). S\xF3 opera\xE7\xF5es vendidas, pela data da venda. ${X?"":"Revenda e dados fict\xEDcios."}</p>
+      </article>`,R("[data-per]",w).forEach(f=>f.onclick=()=>{Ia=f.dataset.per,go()}),l("#mg-de").onchange=f=>{F.de=f.target.value,oe()},l("#mg-ate").onchange=f=>{F.ate=f.target.value,oe()};const h=l("#mg-loja");h&&(h.onchange=f=>{F.loja=f.target.value,oe()}),l("#mg-agr").onchange=f=>{F.agrupar=f.target.value,oe()},l("#mg-print").onclick=()=>print(),l("#mg-csv").onclick=()=>{const f=[["M\xEAs","Data da venda","Opera\xE7\xE3o","Tipo","Marca","Modelo","Ano","Loja","Receita","Aquisi\xE7\xE3o","Preparo","Pe\xE7as","M\xE3o de obra","Juros floor plan","Comiss\xE3o","Outras despesas","Margem l\xEDquida","Margem %","Situa\xE7\xE3o","Custos faltando"]].concat(n.operacoes.map(k=>[k.mes,k.saida,k.id,V[k.tipo]||k.tipo,k.marca,k.modelo,k.ano,k.loja,k.receita,k.aquisicao,k.preparo,k.pecas??"",k.maoDeObra??"",k.juros,k.comissao,k.despesas||0,k.margem,Le(k.pct),k.status==="real"?"Real":"Estimada",k.faltando.join(", ")])).concat([[],[m,"Vendas","Reais","Estimadas","Receita","Aquisi\xE7\xE3o","Preparo","Juros floor plan","Comiss\xE3o","Outras despesas","Margem l\xEDquida","Margem %"]]).concat(n.grupos.concat([Object.assign({chave:"Total"},n.total)]).map(k=>[r(k.chave),k.n,k.nReal,k.nEst,k.receita,k.aquisicao,k.preparo,k.juros,k.comissao,k.despesas||0,k.margem,Le(k.pct)]));Ea(`anshur-margem-por-${F.agrupar}-${F.de}-a-${F.ate}${F.loja?"-"+F.loja.replace(/\W+/g,"-"):""}.csv`,f)},R("[data-custos]",w).forEach(f=>f.onclick=()=>{const k=e.find(ea=>ea.id===f.dataset.custos);if(!k)return;const sa=x.margemOperacao(k),da=k.custos||{},Y=[{k:"comissao",r:"Comiss\xE3o paga (R$)",num:!0,ph:"Vazio = n\xE3o registrada"},{k:"juros",r:"Juros do floor plan (R$)",num:!0,ph:"Vazio = sem juros registrados"}].concat(sa.faltando.includes("preparo")?[{k:"preparo",r:"Preparo total: pe\xE7as + m\xE3o de obra (R$)",num:!0,ph:sa.preparoPrevisto?"Previsto: "+M(sa.preparoPrevisto):"Vazio = n\xE3o registrado"}]:[]);ba(`Custos da venda: ${k.marca} ${k.modelo}`,Y,{comissao:da.comissao??"",juros:da.juros??""},ea=>{const Aa={};if(ea.comissao!==""&&(Aa.comissao=ea.comissao),ea.juros!==""&&(Aa.juros=ea.juros),!Object.keys(Aa).length&&(ea.preparo===""||ea.preparo===void 0)){A("Informe pelo menos um custo.",!0);return}Object.keys(Aa).length&&(k.custos=Object.assign({},k.custos,x.registrarCustos(b,k.id,Aa,D().nome))),ea.preparo!==""&&ea.preparo!==void 0&&(x.registrarPreparo(b,k.id,ea.preparo,z()),k.preparo=Math.round(ea.preparo),k.preparoRegistrado=z()),L("venda",`Custos lan\xE7ados: ${k.marca} ${k.modelo}${Aa.comissao!=null?", comiss\xE3o "+M(Aa.comissao):""}${Aa.juros!=null?", juros "+M(Aa.juros):""}${ea.preparo!==""&&ea.preparo!==void 0?", preparo "+M(ea.preparo):""}`,{ref:k.id}),T(),Pa(),U(!0),A("Custos lan\xE7ados."),oe()},"S\xF3 o que foi realmente pago. Campo vazio continua como n\xE3o registrado.")})}function Is(){const a=b.atividades;w.innerHTML=`<div class="titulo"><div><h1>Atividades</h1><p>Tudo o que foi feito no sistema, por quem e quando.</p></div>${la([{nome:"Anota\xE7\xE3o",desc:"Registro manual (visita, liga\xE7\xE3o, combinado)",acao:()=>ba("Adicionar anota\xE7\xE3o",[{k:"texto",r:"O que aconteceu",obr:!0,inteiro:!0}],{},o=>{L("anotacao",o.texto),T(),U(!0),A("Anota\xE7\xE3o registrada."),Z()})}],"Nova anota\xE7\xE3o")}</div>
+      <section class="painel">${a.length?`<ul class="linha-tempo grande">${a.slice(0,200).map(o=>`<li><b>${c(o.texto)}</b><span>${new Date(o.quando).toLocaleString("pt-BR")} \xB7 ${c(o.usuario)} (${x.PERFIS[o.perfil]||""})</span></li>`).join("")}</ul>`:'<p class="vazio">Nenhuma atividade ainda. Avalia\xE7\xF5es, trocas, vendas, documentos e mudan\xE7as de regra aparecem aqui.</p>'}
+      <p class="nota-rodape">${x.nuvem?"Trocas, aprova\xE7\xF5es, pre\xE7os, vendas, convites e exclus\xF5es tamb\xE9m v\xE3o para a trilha do servidor, abaixo, que ningu\xE9m da revenda consegue alterar ou apagar.":"Na demonstra\xE7\xE3o o registro fica neste navegador. Na conta da revenda, as atividades cr\xEDticas v\xE3o tamb\xE9m para uma trilha no servidor que n\xE3o pode ser alterada."}</p></section>
+      ${x.nuvem&&!x.nuvem.offline?'<section class="painel bloco" id="ev-srv"><h2>Trilha do servidor</h2><p class="sub">Carregando\u2026</p></section>':""}`;const e=l("#ev-srv");e&&x.nuvem.eventosServidor().then(o=>{const t=s=>{const i=b.usuarios.find(n=>n.id===s);return i?i.nome:"pessoa removida"};e.innerHTML=`<h2>Trilha do servidor</h2><p class="sub" style="margin-bottom:8px">Registro s\xF3 de inclus\xE3o: n\xE3o tem edi\xE7\xE3o nem exclus\xE3o.</p>${o.length?`<ul class="linha-tempo grande">${o.map(s=>`<li><b>${c(s.texto)}</b><span>${new Date(s.quando).toLocaleString("pt-BR")} \xB7 ${c(t(s.usuario))} \xB7 ${c(s.tipo)}</span></li>`).join("")}</ul>`:'<p class="vazio">Nenhum registro ainda.</p>'}`},o=>{e.innerHTML=`<h2>Trilha do servidor</h2><p class="neg">${c(o.message)}</p>`})}function pt(){const a=[["Nova avalia\xE7\xE3o","#avaliar"],["Ver p\xE1tio","#patio"],["Relat\xF3rio semanal","#relatorio"],["Central de documentos","#documentos"],["Configura\xE7\xF5es","#config"],["Usu\xE1rios","#usuarios"],["Garantias a receber","#garantias"],["Estoque financiado","#financiamento"],["Teste \xE0s cegas","#teste"],["Atividades","#atividades"]].filter(([,e])=>ta(e.slice(1)));oa("modal busca-modal",'<input class="busca-in" id="busca" placeholder="Buscar m\xE1quina, chassi, OS, vendedor, p\xE1gina\u2026" autocomplete="off" aria-label="Buscar"><div id="busca-res" class="busca-res"></div><p class="nota-rodape">Setas para navegar, Enter para abrir, Esc para fechar.</p>',e=>{const o=l("#busca",e),t=l("#busca-res",e);let s=0,i=[];const n=()=>{const m=o.value.trim().toLowerCase(),r=y.trocas.filter(j=>!m||[j.marca,j.modelo,j.id,j.chassi,j.vendedor,j.origem].join(" ").toLowerCase().includes(m)).slice(0,6).map(j=>({g:j.vendido?"Vendidas":"No p\xE1tio",n:`${j.marca} ${j.modelo} \xB7 ${j.ano}`,d:j.vendido?`vendida ${N(j.saida)} por ${E(j.vendido)}`:`${qa(j.entrada)} dias no p\xE1tio`,ir:()=>{location.hash=j.vendido?"#trocas":"#patio",setTimeout(()=>!j.vendido&&we(j.id),300)}})),p=(y.garantias||[]).filter(j=>m&&[j.os,j.servico,j.cliente,j.marca].join(" ").toLowerCase().includes(m)).slice(0,4).map(j=>({g:"Garantias",n:`${j.os} \xB7 ${j.servico}`,d:`${j.marca} \xB7 ${M(j.valor)}`,ir:()=>{location.hash="#garantias"}})),d=(y.financiadas||[]).filter(j=>m&&[j.chassi,j.modelo,j.marca].join(" ").toLowerCase().includes(m)).slice(0,4).map(j=>({g:"Financiadas",n:`${j.marca} ${j.modelo}`,d:j.chassi,ir:()=>{location.hash="#financiamento"}})),$=a.concat(mi()).filter(([j],S,H)=>(!m||j.toLowerCase().includes(m))&&H.findIndex(O=>O[0]===j)===S).slice(0,m?8:5).map(([j,S])=>({g:"Ir para",n:j,d:"",ir:()=>{location.hash=S}})),u=m?Ka().filter(j=>j.pronta&&j.buscar).flatMap(j=>{try{return j.buscar(m,Ra)||[]}catch{return[]}}):[];i=[...$,...r,...p,...d,...u],s=Math.min(s,Math.max(0,i.length-1));let g="";t.innerHTML=i.map((j,S)=>`${j.g!==g?`<div class="busca-g">${g=j.g}</div>`:""}<button type="button" class="busca-it ${S===s?"sel":""}" data-i="${S}"><b>${c(j.n)}</b><span>${c(j.d)}</span></button>`).join("")||'<p class="vazio">Nada encontrado.</p>',R(".busca-it",t).forEach(j=>j.onclick=()=>{U(!0),i[+j.dataset.i].ir()})};o.oninput=()=>{s=0,n()},o.onkeydown=m=>{m.key==="ArrowDown"&&(s=Math.min(i.length-1,s+1),n(),m.preventDefault()),m.key==="ArrowUp"&&(s=Math.max(0,s-1),n(),m.preventDefault()),m.key==="Enter"&&i[s]&&(U(!0),i[s].ir())},n(),setTimeout(()=>o.focus(),80)})}document.addEventListener("keydown",a=>{(a.ctrlKey||a.metaKey)&&a.key.toLowerCase()==="k"&&(a.preventDefault(),pt())});const Wa=new Set;function Vs(){const a=[...Wa].map(o=>y.trocas.find(t=>t.id===o)).filter(Boolean).map(Ta);if(a.length<2){A("Marque 2 ou 3 m\xE1quinas para comparar.",!0);return}const e=[["Foto",o=>`<img src="${ha.de(o.t).propria?ha.de(o.t).u:ha.mini(ha.de(o.t).u)}" alt="" style="width:100%;max-width:220px;border-radius:10px;aspect-ratio:4/3;object-fit:cover">`],["Ano \xB7 horas",o=>`${o.t.ano} \xB7 ${pa(o.t)}`],["Aquisi\xE7\xE3o",o=>M(o.t.pago)],["Prepara\xE7\xE3o",o=>M(o.t.preparo)],["Custo financeiro",o=>M(o.juros)],["Dias no p\xE1tio",o=>`<span class="dias ${o.faixa}">${o.dias} dias</span>`],["Venda estimada",o=>M(o.venda)],["Margem esperada",o=>`<b class="${o.margem<.06?"neg":"pos"}">${P(o.margem)}</b>`],["Risco de oficina",o=>{const t=to(o.t.modelo);return t.reserva?M(t.reserva)+" em m\xE9dia":"sem hist\xF3rico"}],["\xC9poca de venda",o=>c((ye[o.t.tipo]||{}).janela||"\u2014")],["Recomenda\xE7\xE3o",o=>c(o.acao)]];oa("gaveta larga",`<h2 style="font-size:24px">Comparar m\xE1quinas</h2><div class="tabela-wrap" style="margin-top:14px"><table class="tabela grande comparar"><thead><tr><th></th>${a.map(o=>`<th>${c(o.t.marca+" "+o.t.modelo)}</th>`).join("")}</tr></thead><tbody>${e.map(([o,t])=>`<tr><td><b>${o}</b></td>${a.map(s=>`<td>${t(s)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`)}function Ns(){const a=me();let e="abertos";const o=t=>{const s=a.filter(i=>e==="abertos"?!b.resolvidos[i.id]:!!b.resolvidos[i.id]);l("#notif",t).innerHTML=s.map(i=>`<li class="${i.nivel}">${i.nivel==="alto"?q.alto:q.medio}<div><span class="cat">${c(i.cat)}</span><b>${c(i.titulo)}</b><span>${c(i.txt)}</span><span class="acoes" style="margin-top:8px;display:flex"><a class="btn btn-linha" href="${i.ir}" data-ir>Abrir</a>${e==="abertos"?`<button class="btn btn-linha" type="button" data-res="${i.id}">Marcar como resolvido</button>`:`<button class="btn btn-linha" type="button" data-reab="${i.id}">Reabrir</button>`}</span></div></li>`).join("")||`<li class="info">${q.baixo}<div><b>${e==="abertos"?"Tudo em ordem":"Nada resolvido ainda"}</b></div></li>`,R("[data-ir]",t).forEach(i=>i.onclick=()=>U(!0)),R("[data-res]",t).forEach(i=>i.onclick=()=>{b.resolvidos[i.dataset.res]={por:D().nome,quando:new Date().toISOString()},L("alerta","Alerta resolvido: "+a.find(n=>n.id===i.dataset.res).titulo),T(),o(t),te(),A("Marcado como resolvido.")}),R("[data-reab]",t).forEach(i=>i.onclick=()=>{delete b.resolvidos[i.dataset.reab],T(),o(t),te()})};oa("gaveta",'<h2 style="font-size:24px">Notifica\xE7\xF5es</h2><div class="abas-modo" style="margin-top:12px"><button type="button" data-f="abertos" aria-pressed="true">Abertas</button><button type="button" data-f="resolvidos" aria-pressed="false">Resolvidas</button></div><ul class="alertas" id="notif"></ul>',t=>{R("[data-f]",t).forEach(s=>s.onclick=()=>{e=s.dataset.f,R("[data-f]",t).forEach(i=>i.setAttribute("aria-pressed",i===s)),o(t)}),o(t)})}function te(){const a=me().filter(o=>!b.resolvidos[o.id]).length,e=l("#sino-n");e.hidden=!a,e.textContent=a}function Va(a){return(y.compradores||[]).filter(e=>e.tipo===a.tipo&&(!e.marcas||e.marcas===a.marca)&&a.ano>=(+e.anoMin||0)&&(!e.precoMax||(a.anuncio||a.pago*1.15)<=e.precoMax*1.08)).map(e=>({c:e,folga:e.precoMax?e.precoMax-(a.anuncio||0):0})).sort((e,o)=>o.folga-e.folga).map(e=>e.c)}function zs(a={}){ba("Adicionar comprador interessado",[{k:"nome",r:"Nome",obr:!0},{k:"fazenda",r:"Fazenda / empresa"},{k:"cidade",r:"Cidade",lista:"dl-cidade"},{k:"telefone",r:"Telefone"},{k:"tipo",r:"Procura",tipo:"select",ops:Object.entries(V)},{k:"marcas",r:"Marca preferida (opcional)",lista:"dl-marca"},{k:"anoMin",r:"Ano m\xEDnimo",num:!0},{k:"precoMax",r:"Paga at\xE9 (R$)",num:!0,obr:!0},{k:"obs",r:"Observa\xE7\xE3o",inteiro:!0}],{tipo:"trator",...a},e=>{const o={id:"C"+Date.now(),...e,desde:z()};b.extras.compradores.push(o),y.compradores.push(o),T();const t=I.patio().filter(s=>Va(s).includes(o));L("comprador",`Comprador ${o.nome} cadastrado procurando ${V[o.tipo].toLowerCase()}`),U(!0),A(t.length?`${o.nome} combina com ${t.length} ${t.length===1?"m\xE1quina":"m\xE1quinas"} do p\xE1tio.`:"Comprador cadastrado. Avisaremos quando entrar uma m\xE1quina que combine."),Z()})}function Fs(){const a=y.compradores||[],e=I.patio();w.innerHTML=`
+      <div class="titulo"><div><h1>Compradores</h1><p>Quem est\xE1 procurando m\xE1quina. Quando entra um usado que combina, o Anshur avisa na hora.</p></div>${la([{nome:"Comprador \xE0 m\xE3o",desc:"Nome, o que procura e quanto paga",acao:()=>zs()},{nome:"Importar lista",desc:"Planilha de contatos",acao:()=>{location.hash="#documentos"}}],"Novo comprador")}</div>
       <div class="kpis escalonado">
-        <div class="kpi k-marfim"><span class="rot">${ICO.alvo}Compradores ativos</span><span class="val">${l.length}</span></div>
-        <div class="kpi k-salvia"><span class="rot">${ICO.baixo}Máquinas com comprador</span><span class="val">${patio.filter((t) => compradoresPara(t).length).length} de ${patio.length}</span></div>
-        <div class="kpi k-marfim"><span class="rot">${ICO.moedas}Dinheiro procurando máquina</span><span class="val">${mil(l.reduce((s, c) => s + (+c.precoMax || 0), 0))}</span></div>
-        <div class="kpi k-risco"><span class="rot">${ICO.alerta}Pátio sem comprador</span><span class="val">${patio.filter((t) => !compradoresPara(t).length).length}</span><span class="exp">Máquinas que precisam de divulgação</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.alvo}Compradores ativos</span><span class="val">${a.length}</span></div>
+        <div class="kpi k-salvia"><span class="rot">${q.baixo}M\xE1quinas com comprador</span><span class="val">${e.filter(o=>Va(o).length).length} de ${e.length}</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.moedas}Dinheiro procurando m\xE1quina</span><span class="val">${E(a.reduce((o,t)=>o+(+t.precoMax||0),0))}</span></div>
+        <div class="kpi k-risco"><span class="rot">${q.alerta}P\xE1tio sem comprador</span><span class="val">${e.filter(o=>!Va(o).length).length}</span><span class="exp">M\xE1quinas que precisam de divulga\xE7\xE3o</span></div>
       </div>
-      <section class="painel"><div class="painel-cab"><h2>${ICO.etiqueta}Casamentos do pátio</h2><p>Máquina parada e quem procura</p></div>
-        ${patio.map((t) => { const cs = compradoresPara(t); return cs.length ? `<div class="casa">${fotoMini(t)}<div><b>${esc(t.marca + ' ' + t.modelo)} · ${t.ano}</b><span>${diasDesde(t.entrada)} dias no pátio · anunciado ${mil(t.anuncio)}</span></div><div class="casa-c">${cs.slice(0, 3).map((c) => `<span class="tag comprovado">${esc(c.nome)} · até ${mil(c.precoMax)}</span>`).join('')}${cs.length > 3 ? `<span class="sub">+${cs.length - 3}</span>` : ''}</div></div>` : ''; }).join('') || '<p class="vazio">Nenhum casamento ainda.</p>'}
+      <section class="painel"><div class="painel-cab"><h2>${q.etiqueta}Casamentos do p\xE1tio</h2><p>M\xE1quina parada e quem procura</p></div>
+        ${e.map(o=>{const t=Va(o);return t.length?`<div class="casa">${ue(o)}<div><b>${c(o.marca+" "+o.modelo)} \xB7 ${o.ano}</b><span>${qa(o.entrada)} dias no p\xE1tio \xB7 anunciado ${E(o.anuncio)}</span></div><div class="casa-c">${t.slice(0,3).map(s=>`<span class="tag comprovado">${c(s.nome)} \xB7 at\xE9 ${E(s.precoMax)}</span>`).join("")}${t.length>3?`<span class="sub">+${t.length-3}</span>`:""}</div></div>`:""}).join("")||'<p class="vazio">Nenhum casamento ainda.</p>'}
       </section>
-      <section class="painel bloco"><div class="tabela-wrap"><table class="tabela"><thead><tr><th>Comprador</th><th>Procura</th><th class="n">Ano mínimo</th><th class="n">Paga até</th><th>Desde</th><th>Combina com</th></tr></thead><tbody>
-        ${l.map((c) => { const m = patio.filter((t) => compradoresPara(t).includes(c)); return `<tr><td><b>${esc(c.nome)}</b><br><span class="sub">${esc([c.fazenda, c.cidade, mascarar(c.telefone)].filter(Boolean).join(' · '))}</span></td><td>${NOMES[c.tipo]}${c.marcas ? ' ' + esc(c.marcas) : ''}<br><span class="sub">${esc(c.obs || '')}</span></td><td class="n">${c.anoMin || '—'}</td><td class="n">${mil(+c.precoMax || 0)}</td><td>${data(c.desde)}</td><td>${m.length ? m.map((t) => esc(t.modelo)).join(', ') : '<span class="sub">nada no pátio</span>'}</td></tr>`; }).join('') || '<tr><td colspan="6" class="vazio">Nenhum comprador cadastrado.</td></tr>'}</tbody></table></div></section>`;
-    contar();
-  }
-
-  // ---------- monitor de mercado (anúncios e leilões observados) ----------
-  function indiceMercado(tipo) {
-    // preço observado / referência do modelo ajustada por idade, agrupado por mês
-    const meses = {};
-    (A.anuncios || []).filter((a) => a.tipo === tipo).forEach((a) => {
-      const ref = M.refDe(a); if (!ref) return;
-      const esperado = ref * Math.pow(0.9, Math.max(0, new Date(a.data).getFullYear() - a.ano - 1));
-      const k = a.data.slice(0, 7); (meses[k] = meses[k] || []).push(a.preco / esperado);
-    });
-    return Object.keys(meses).sort().map((k) => ({ r: new Date(k + '-15T12:00:00').toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''), k, v: meses[k].reduce((s, x) => s + x, 0) / meses[k].length * 100, n: meses[k].length }));
-  }
-  function variacaoMercado(tipo) {
-    const ix = indiceMercado(tipo); if (ix.length < 3) return null;
-    const rec = ix.slice(-2), ant = ix.slice(-5, -2);
-    const m = (l) => l.reduce((s, x) => s + x.v, 0) / l.length;
-    return ant.length ? m(rec) / m(ant) - 1 : null;
-  }
-  function addAnuncio() {
-    formulario('Registrar anúncio ou leilão', [{ k: 'fonte', r: 'Onde viu', tipo: 'select', ops: [['Agrofy', 'Agrofy'], ['Mercado Máquinas', 'Mercado Máquinas'], ['Leilão', 'Leilão'], ['Revenda concorrente', 'Revenda concorrente'], ['Outro', 'Outro']] }, { k: 'data', r: 'Data', tipo: 'data', obr: true },
-      { k: 'tipo', r: 'Categoria', tipo: 'select', ops: Object.entries(NOMES) }, { k: 'marca', r: 'Fabricante', lista: 'dl-marca', obr: true }, { k: 'modelo', r: 'Modelo', lista: 'dl-modelo', obr: true }, { k: 'ano', r: 'Ano', num: true, obr: true }, { k: 'horas', r: 'Horas', num: true }, { k: 'preco', r: 'Preço (R$)', num: true, obr: true }, { k: 'cidade', r: 'Cidade', lista: 'dl-cidade' }],
-    { data: hojeISO(), fonte: 'Agrofy', tipo: 'trator' }, (v) => { const a = { id: 'AN' + Date.now(), ...v }; estado.extras.anuncios.push(a); A.anuncios.push(a); salvar(); log('mercado', `Anúncio registrado: ${a.marca} ${a.modelo} ${a.ano} por ${real(a.preco)} (${a.fonte})`); fecharCamada(true); toast('Anúncio registrado no monitor.'); rota(); });
-  }
-  function telaMercado() {
-    const tipos = Object.keys(NOMES);
-    const cores = { trator: '#3E6B57', colhedora: '#C1A36A', pulverizador: '#71877B', plantadeira: '#202D35' };
-    const anunciosRec = (A.anuncios || []).slice().sort((a, b) => b.data.localeCompare(a.data));
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Monitor de mercado</h1><p>Anúncios e leilões de fora da revenda: se o mercado de um tipo de máquina cai, o Anshur avisa antes de você pagar caro na troca.</p></div>${botaoAdicionar([{ nome: 'Anúncio ou leilão à mão', desc: 'Preço, ano, horas e onde viu', acao: addAnuncio }, { nome: 'Importar lista de anúncios', desc: 'Planilha exportada ou copiada do portal', acao: () => { location.hash = '#documentos'; } }], 'Registrar anúncio')}</div>
-      <div class="kpis escalonado">${tipos.map((k) => { const v = variacaoMercado(k); return `<div class="kpi ${v != null && v < -0.05 ? 'k-risco' : v != null && v > 0.03 ? 'k-salvia' : 'k-marfim'}"><span class="rot">${ICO[k]}${NOMES[k]}</span><span class="val">${v == null ? '—' : (v > 0 ? '▲ ' : '▼ ') + pct(Math.abs(v))}</span><span class="exp">${v == null ? 'Poucos anúncios ainda' : 'Últimos 2 meses contra os 3 anteriores'}</span></div>`; }).join('')}</div>
-      <section class="painel"><div class="painel-cab"><h2>${ICO.linha}Índice de preço observado</h2><p>100 = preço esperado pela referência do modelo</p></div>
-        ${tipos.map((k) => { const ix = indiceMercado(k); return ix.length > 1 ? `<div style="margin:10px 0 2px"><b style="color:${cores[k]}">${NOMES[k]}</b> <span class="sub">${ix.reduce((s, x) => s + x.n, 0)} anúncios</span></div>${G.linha(ix.slice(-7), { formato: (v) => Math.round(v) + '', altura: 130, largura: innerWidth >= 960 ? 1100 : 560 })}` : ''; }).join('') || '<p class="vazio">Registre anúncios para formar o índice.</p>'}</section>
-      <section class="painel bloco"><div class="painel-cab"><h2>${ICO.etiqueta}Anúncios e leilões registrados</h2><p>${anunciosRec.length}</p></div>
-        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Data</th><th>Máquina</th><th class="n">Horas</th><th class="n">Preço</th><th>Onde</th></tr></thead><tbody>
-        ${anunciosRec.slice(0, 40).map((a) => `<tr><td>${data(a.data)}</td><td><b>${esc(a.marca + ' ' + a.modelo)}</b> · ${a.ano}<br><span class="sub">${esc(a.cidade || '')}</span></td><td class="n">${(+a.horas || 0).toLocaleString('pt-BR')}</td><td class="n forte">${real(a.preco)}</td><td>${esc(a.fonte)}</td></tr>`).join('')}</tbody></table></div>
-        <p class="nota-rodape">${OP ? '' : 'Anúncios fictícios para a demonstração. '}Na revenda, a equipe registra o que vê nos portais e leilões, ou importa a lista; o Anshur não copia dados de sites de terceiros.</p></section>`;
-    contar();
-  }
-
-  // ---------- horímetro suspeito ----------
-  function checaHorimetro(maq) {
-    const avisos = [];
-    if (semHoras(maq.tipo)) return avisos; // implemento não tem horímetro
-    const hAno = (M.catalogo(maq) || {}).hAno || { trator: 750, colhedora: 2600, pulverizador: 820, plantadeira: 270 }[maq.tipo] || 800;
-    const idade = Math.max(1, anoAtual - maq.ano), esperado = hAno * idade;
-    if (maq.horas > 0 && maq.horas < esperado * 0.35) avisos.push(`Horas muito abaixo do normal: ${horasTxt(maq)} para ${idade} anos de uso (o comum seria perto de ${Math.round(esperado / 100) * 100} h). Confira o painel e o histórico de revisões.`);
-    if (maq.horas > esperado * 2) avisos.push(`Horas muito acima do normal para a idade: ${horasTxt(maq)}. Revise o estado do motor e da transmissão.`);
-    const mans = (maq.manutencoes || []).filter((m) => +m.horas > maq.horas);
-    if (mans.length) avisos.push(`Há revisão registrada com ${(+mans[0].horas).toLocaleString('pt-BR')} h, mais do que o horímetro mostra hoje: possível troca ou adulteração do horímetro.`);
-    return avisos;
-  }
-
-  // ---------- aprovações (trava sem furo) ----------
-  function telaAprovacoes() {
-    const l = estado.pendentes.slice().reverse();
-    tela.innerHTML = `<div class="titulo"><div><h1>Aprovações</h1><p>Trocas que o vendedor quer fechar acima do valor máximo. Só entram no pátio depois que um gerente ou o dono aprovar.</p></div></div>
-      ${NV && NV.semInternet() ? '<p class="conta">Sem internet: os pedidos aparecem, mas aprovar ou recusar só funciona com internet.</p>' : ''}
-      <section class="painel">${l.length ? l.map((p) => `<div class="aprov ${p.status}"><div><b>${esc(p.maq.marca + ' ' + p.maq.modelo)} · ${p.maq.ano} · ${horasTxt(p.maq)}</b>${p.semInternet ? ' <span class="tag declarado">Feito sem internet</span>' : ''}
-        <span>Pedido por ${esc(p.por)} em ${new Date(p.quando).toLocaleString('pt-BR')} · quer pagar <b class="neg">${real(p.valor)}</b>, máximo recomendado ${real(p.rec.teto)} (<b class="neg">+${real(p.valor - p.rec.teto)}</b>)</span>
-        <span>Motivo: ${esc(p.motivo || '—')}</span>${p.status !== 'pendente' ? `<span>${p.status === 'aprovada' ? 'Aprovada' : 'Recusada'} por ${esc(p.decisao.por)} em ${new Date(p.decisao.quando).toLocaleString('pt-BR')}</span>` : ''}</div>
-        ${p.retrato ? `<button class="link" type="button" data-rt="${p.retrato}">Ver retrato da avaliação</button>` : ''}
-        ${p.status === 'pendente' ? (podeLiberar(p.nivel || 'gerente') ? `<div class="acoes" style="margin:0"><button class="btn btn-ouro" type="button" data-apr="${p.id}">Aprovar</button><button class="btn btn-perigo" type="button" data-rec="${p.id}">Recusar</button></div>` : `<span class="tag declarado">${p.nivel === 'dono' ? 'Aguardando o dono' : 'Aguardando gerente'}</span>`) : `<span class="tag ${p.status === 'aprovada' ? 'comprovado' : 'declarado'}">${p.status === 'aprovada' ? 'Aprovada' : 'Recusada'}</span>`}</div>`).join('') : '<p class="vazio">Nenhuma troca esperando aprovação.</p>'}</section>`;
-    $$('[data-apr]', tela).forEach((b) => b.onclick = () => decidir(b.dataset.apr, true));
-    $$('[data-rt]', tela).forEach((b) => b.onclick = () => verRetrato(b.dataset.rt));
-    $$('[data-rec]', tela).forEach((b) => b.onclick = () => decidir(b.dataset.rec, false));
-  }
-  async function decidir(id, aprova) {
-    const p = estado.pendentes.find((x) => x.id === id); if (!p || !podeLiberar(p.nivel || 'gerente')) return;
-    if (NV && NV.semInternet()) { toast('Aprovar ou recusar só com internet: a troca só conta depois que a decisão é salva no servidor.', true); return; }
-    if (aprova && !(await confirmaPin())) return;
-    p.status = aprova ? 'aprovada' : 'recusada'; p.decisao = { por: eu().nome, quando: new Date().toISOString() };
-    if (aprova) {
-      const t = K.fecharTroca(estado, p.maq, p.rec, p.valor, p.data, { ...p.extra, retrato: p.retrato, aprovacao: { por: eu().nome, motivo: p.motivo, excesso: p.valor - p.rec.teto, data: hojeISO() } });
-      A.trocas.push({ ...t }); log('aprovacao', `Troca acima do teto aprovada: ${t.marca} ${t.modelo} por ${real(t.pago)} (pedido de ${p.por})`, { ref: t.id });
-    } else log('aprovacao', `Troca acima do teto recusada: ${p.maq.marca} ${p.maq.modelo} (pedido de ${p.por})`);
-    salvar(); cacheLimpa(); atualizarSino();
-    if (NV) { const ok = await NV.descarregar(); if (!ok) { toast('A decisão ainda não chegou ao servidor: fica guardada neste aparelho e é enviada quando a conexão voltar.', true); rota(); return; } }
-    toast(aprova ? 'Aprovada: a máquina entrou no pátio.' : 'Recusada. O vendedor vê a decisão.'); rota();
-  }
-
-  // ---------- troca em grãos (barter) ----------
-  const GRAOS = { soja: { nome: 'Soja (saca 60 kg)', preco: 128 }, milho: { nome: 'Milho (saca 60 kg)', preco: 62 }, cana: { nome: 'Cana (tonelada)', preco: 155 } };
-  function blocoBarter(valor, id) {
-    const b = estado.barter || { grao: 'soja', preco: GRAOS.soja.preco };
-    return `<section class="painel bloco" id="${id}"><h2>${ICO.moedas}Troca paga em grãos (barter)</h2>
-      <div class="campos" style="margin-top:10px"><div class="campo"><label for="${id}-g">Produto</label><select id="${id}-g">${Object.entries(GRAOS).map(([k, g]) => `<option value="${k}" ${b.grao === k ? 'selected' : ''}>${g.nome}</option>`).join('')}</select></div>
-      <div class="campo"><label for="${id}-p">Preço de hoje (R$ por unidade)</label><input id="${id}-p" inputmode="decimal" value="${String(b.preco).replace('.', ',')}"></div></div>
-      <div class="numeros" id="${id}-r"></div><p class="nota-rodape">O preço do grão é informado pela revenda (bolsa, trading ou cooperativa do dia). Simulação de queda mostra quanto a troca passa a valer.</p></section>`;
-  }
-  function ligarBarter(raiz, valor, id) {
-    const g = $('#' + id + '-g', raiz), p = $('#' + id + '-p', raiz), r = $('#' + id + '-r', raiz); if (!g) return;
-    const calc = (gravar = true) => {
-      const preco = num(p.value) || GRAOS[g.value].preco;
-      // só grava quando a pessoa muda o grão ou o preço (abrir a tela não é alteração)
-      if (gravar && JSON.stringify(estado.barter) !== JSON.stringify({ grao: g.value, preco })) { estado.barter = { grao: g.value, preco }; salvar(); }
-      const un = g.value === 'cana' ? 'toneladas' : 'sacas', q = valor / preco;
-      r.innerHTML = `<div><span>Valor máximo em ${un}</span><b>${Math.round(q).toLocaleString('pt-BR')}</b></div><div><span>Se o grão cair 10%, a troca vale</span><b class="neg">${real(q * preco * 0.9)}</b></div><div><span>Se o grão subir 10%, a troca vale</span><b class="pos">${real(q * preco * 1.1)}</b></div>`;
-    };
-    g.onchange = () => { p.value = String(GRAOS[g.value].preco).replace('.', ','); calc(); }; p.oninput = () => calc(); calc(false);
-  }
-
-  // ---------- exportar a troca para o sistema da revenda ----------
-  function exportarParaDMS(t) {
-    baixarCSV(`anshur-troca-${t.id}.csv`, [['Campo', 'Valor'], ['Código Anshur', t.id], ['Categoria', NOMES[t.tipo]], ['Fabricante', t.marca], ['Modelo', t.modelo], ['Ano', t.ano], ['Horas', t.horas], ['Chassi', t.chassi || ''], ['Valor pago na troca', t.pago], ['Valor máximo recomendado', t.previsto ? t.previsto.teto : ''], ['Preparo previsto', t.preparoEst || ''], ['Preço anunciado', t.anuncio], ['Vendedor', t.vendedor || ''], ['Aprovado por', t.aprovacao ? t.aprovacao.por : ''], ['Data de entrada', data(t.entrada)]]);
-    log('exportacao', `Troca ${t.marca} ${t.modelo} exportada para o sistema da revenda`, { ref: t.id }); salvar();
-  }
-
-  // =====================================================================================
-  // V7: alçadas por tipo de máquina, retrato imutável da avaliação e contraproposta guiada
-  // =====================================================================================
-  const ALCADA_PADRAO = { trator: { vendedor: 5000, gerente: 40000 }, colhedora: { vendedor: 0, gerente: 0 }, pulverizador: { vendedor: 3000, gerente: 30000 }, plantadeira: { vendedor: 3000, gerente: 20000 }, implemento: { vendedor: 1000, gerente: 10000 } };
-  const alcadas = () => Object.assign({}, ALCADA_PADRAO, estado.alcadas || {});
-  // nível de quem pode liberar um valor acima do teto: livre (o próprio vendedor), gerente ou dono
-  function nivelExigido(tipo, excesso) {
-    if (excesso <= 0) return 'livre';
-    const a = alcadas()[tipo] || { vendedor: 0, gerente: 0 };
-    return excesso <= a.vendedor ? 'livre' : excesso <= a.gerente ? 'gerente' : 'dono';
-  }
-  const podeLiberar = (nivel) => nivel === 'livre' || eu().perfil === 'dono' || (nivel === 'gerente' && eu().perfil === 'gerente');
-  const NOME_NIVEL = { livre: 'dentro da alçada do vendedor', gerente: 'precisa do gerente', dono: 'só o dono libera' };
-
-  // retrato da avaliação: congela tudo o que o sistema mostrou e gera um código que denuncia qualquer alteração
-  async function sha256(txt) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt)); return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join(''); }
-  async function tirarRetrato(maq, r, extra = {}) {
-    const corpo = { versao: 1, quando: new Date().toISOString(), usuario: eu().nome, perfil: eu().perfil, revenda: A.revenda.nome,
-      maquina: { tipo: maq.tipo, marca: maq.marca, modelo: maq.modelo, ano: maq.ano, horas: maq.horas, inspecao: maq.cond },
-      recomendacao: { valorMaximo: r.teto, faixa: r.faixa, vendaEstimada: r.venda, preparo: r.preparo, margem: r.margemSobreVenda, qualidade: r.confianca, erroHistorico: r.qualidade ? r.qualidade.mape : null, vendasUsadas: r.base },
-      premissas: { margemAlvo: r.margem, jurosMes: K.cfg.jurosMes }, mercado: variacaoMercado(maq.tipo), compradores: compradoresPara({ ...maq, anuncio: Math.round(r.venda * 1.08) }).length,
-      horimetro: checaHorimetro({ ...maq, manutencoes: [] }), alertasMostrados: r.limites, ...extra };
-    const json = JSON.stringify(corpo), hash = await sha256(json);
-    const id = 'R' + Date.now();
-    estado.retratos = estado.retratos || {}; estado.retratos[id] = { json, hash };
-    return { id, hash };
-  }
-  async function verRetrato(id) {
-    const rt = (estado.retratos || {})[id]; if (!rt) { toast('Retrato não encontrado neste aparelho.', true); return; }
-    const ok = (await sha256(rt.json)) === rt.hash, c = JSON.parse(rt.json);
-    abrirCamada('modal retrato-modal', `<div class="retrato">
+      <section class="painel bloco"><div class="tabela-wrap"><table class="tabela"><thead><tr><th>Comprador</th><th>Procura</th><th class="n">Ano m\xEDnimo</th><th class="n">Paga at\xE9</th><th>Desde</th><th>Combina com</th></tr></thead><tbody>
+        ${a.map(o=>{const t=e.filter(s=>Va(s).includes(o));return`<tr><td><b>${c(o.nome)}</b><br><span class="sub">${c([o.fazenda,o.cidade,gt(o.telefone)].filter(Boolean).join(" \xB7 "))}</span></td><td>${V[o.tipo]}${o.marcas?" "+c(o.marcas):""}<br><span class="sub">${c(o.obs||"")}</span></td><td class="n">${o.anoMin||"\u2014"}</td><td class="n">${E(+o.precoMax||0)}</td><td>${N(o.desde)}</td><td>${t.length?t.map(s=>c(s.modelo)).join(", "):'<span class="sub">nada no p\xE1tio</span>'}</td></tr>`}).join("")||'<tr><td colspan="6" class="vazio">Nenhum comprador cadastrado.</td></tr>'}</tbody></table></div></section>`,$a()}function mt(a){const e={};return(y.anuncios||[]).filter(o=>o.tipo===a).forEach(o=>{const t=Q.refDe(o);if(!t)return;const s=t*Math.pow(.9,Math.max(0,new Date(o.data).getFullYear()-o.ano-1)),i=o.data.slice(0,7);(e[i]=e[i]||[]).push(o.preco/s)}),Object.keys(e).sort().map(o=>({r:new Date(o+"-15T12:00:00").toLocaleDateString("pt-BR",{month:"short"}).replace(".",""),k:o,v:e[o].reduce((t,s)=>t+s,0)/e[o].length*100,n:e[o].length}))}function Oe(a){const e=mt(a);if(e.length<3)return null;const o=e.slice(-2),t=e.slice(-5,-2),s=i=>i.reduce((n,m)=>n+m.v,0)/i.length;return t.length?s(o)/s(t)-1:null}function Hs(){ba("Registrar an\xFAncio ou leil\xE3o",[{k:"fonte",r:"Onde viu",tipo:"select",ops:[["Agrofy","Agrofy"],["Mercado M\xE1quinas","Mercado M\xE1quinas"],["Leil\xE3o","Leil\xE3o"],["Revenda concorrente","Revenda concorrente"],["Outro","Outro"]]},{k:"data",r:"Data",tipo:"data",obr:!0},{k:"tipo",r:"Categoria",tipo:"select",ops:Object.entries(V)},{k:"marca",r:"Fabricante",lista:"dl-marca",obr:!0},{k:"modelo",r:"Modelo",lista:"dl-modelo",obr:!0},{k:"ano",r:"Ano",num:!0,obr:!0},{k:"horas",r:"Horas",num:!0},{k:"preco",r:"Pre\xE7o (R$)",num:!0,obr:!0},{k:"cidade",r:"Cidade",lista:"dl-cidade"}],{data:z(),fonte:"Agrofy",tipo:"trator"},a=>{const e={id:"AN"+Date.now(),...a};b.extras.anuncios.push(e),y.anuncios.push(e),T(),L("mercado",`An\xFAncio registrado: ${e.marca} ${e.modelo} ${e.ano} por ${M(e.preco)} (${e.fonte})`),U(!0),A("An\xFAncio registrado no monitor."),Z()})}function Bs(){const a=Object.keys(V),e={trator:"#3E6B57",colhedora:"#C1A36A",pulverizador:"#71877B",plantadeira:"#202D35"},o=(y.anuncios||[]).slice().sort((t,s)=>s.data.localeCompare(t.data));w.innerHTML=`
+      <div class="titulo"><div><h1>Monitor de mercado</h1><p>An\xFAncios e leil\xF5es de fora da revenda: se o mercado de um tipo de m\xE1quina cai, o Anshur avisa antes de voc\xEA pagar caro na troca.</p></div>${la([{nome:"An\xFAncio ou leil\xE3o \xE0 m\xE3o",desc:"Pre\xE7o, ano, horas e onde viu",acao:Hs},{nome:"Importar lista de an\xFAncios",desc:"Planilha exportada ou copiada do portal",acao:()=>{location.hash="#documentos"}}],"Registrar an\xFAncio")}</div>
+      <div class="kpis escalonado">${a.map(t=>{const s=Oe(t);return`<div class="kpi ${s!=null&&s<-.05?"k-risco":s!=null&&s>.03?"k-salvia":"k-marfim"}"><span class="rot">${q[t]}${V[t]}</span><span class="val">${s==null?"\u2014":(s>0?"\u25B2 ":"\u25BC ")+P(Math.abs(s))}</span><span class="exp">${s==null?"Poucos an\xFAncios ainda":"\xDAltimos 2 meses contra os 3 anteriores"}</span></div>`}).join("")}</div>
+      <section class="painel"><div class="painel-cab"><h2>${q.linha}\xCDndice de pre\xE7o observado</h2><p>100 = pre\xE7o esperado pela refer\xEAncia do modelo</p></div>
+        ${a.map(t=>{const s=mt(t);return s.length>1?`<div style="margin:10px 0 2px"><b style="color:${e[t]}">${V[t]}</b> <span class="sub">${s.reduce((i,n)=>i+n.n,0)} an\xFAncios</span></div>${ya.linha(s.slice(-7),{formato:i=>Math.round(i)+"",altura:130,largura:innerWidth>=960?1100:560})}`:""}).join("")||'<p class="vazio">Registre an\xFAncios para formar o \xEDndice.</p>'}</section>
+      <section class="painel bloco"><div class="painel-cab"><h2>${q.etiqueta}An\xFAncios e leil\xF5es registrados</h2><p>${o.length}</p></div>
+        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Data</th><th>M\xE1quina</th><th class="n">Horas</th><th class="n">Pre\xE7o</th><th>Onde</th></tr></thead><tbody>
+        ${o.slice(0,40).map(t=>`<tr><td>${N(t.data)}</td><td><b>${c(t.marca+" "+t.modelo)}</b> \xB7 ${t.ano}<br><span class="sub">${c(t.cidade||"")}</span></td><td class="n">${(+t.horas||0).toLocaleString("pt-BR")}</td><td class="n forte">${M(t.preco)}</td><td>${c(t.fonte)}</td></tr>`).join("")}</tbody></table></div>
+        <p class="nota-rodape">${X?"":"An\xFAncios fict\xEDcios para a demonstra\xE7\xE3o. "}Na revenda, a equipe registra o que v\xEA nos portais e leil\xF5es, ou importa a lista; o Anshur n\xE3o copia dados de sites de terceiros.</p></section>`,$a()}function Ie(a){const e=[];if(ka(a.tipo))return e;const o=(Q.catalogo(a)||{}).hAno||{trator:750,colhedora:2600,pulverizador:820,plantadeira:270}[a.tipo]||800,t=Math.max(1,Da-a.ano),s=o*t;a.horas>0&&a.horas<s*.35&&e.push(`Horas muito abaixo do normal: ${pa(a)} para ${t} anos de uso (o comum seria perto de ${Math.round(s/100)*100} h). Confira o painel e o hist\xF3rico de revis\xF5es.`),a.horas>s*2&&e.push(`Horas muito acima do normal para a idade: ${pa(a)}. Revise o estado do motor e da transmiss\xE3o.`);const i=(a.manutencoes||[]).filter(n=>+n.horas>a.horas);return i.length&&e.push(`H\xE1 revis\xE3o registrada com ${(+i[0].horas).toLocaleString("pt-BR")} h, mais do que o hor\xEDmetro mostra hoje: poss\xEDvel troca ou adultera\xE7\xE3o do hor\xEDmetro.`),e}function Us(){const a=b.pendentes.slice().reverse();w.innerHTML=`<div class="titulo"><div><h1>Aprova\xE7\xF5es</h1><p>Trocas que o vendedor quer fechar acima do valor m\xE1ximo. S\xF3 entram no p\xE1tio depois que um gerente ou o dono aprovar.</p></div></div>
+      ${C&&C.semInternet()?'<p class="conta">Sem internet: os pedidos aparecem, mas aprovar ou recusar s\xF3 funciona com internet.</p>':""}
+      <section class="painel">${a.length?a.map(e=>`<div class="aprov ${e.status}"><div><b>${c(e.maq.marca+" "+e.maq.modelo)} \xB7 ${e.maq.ano} \xB7 ${pa(e.maq)}</b>${e.semInternet?' <span class="tag declarado">Feito sem internet</span>':""}
+        <span>Pedido por ${c(e.por)} em ${new Date(e.quando).toLocaleString("pt-BR")} \xB7 quer pagar <b class="neg">${M(e.valor)}</b>, m\xE1ximo recomendado ${M(e.rec.teto)} (<b class="neg">+${M(e.valor-e.rec.teto)}</b>)</span>
+        <span>Motivo: ${c(e.motivo||"\u2014")}</span>${e.status!=="pendente"?`<span>${e.status==="aprovada"?"Aprovada":"Recusada"} por ${c(e.decisao.por)} em ${new Date(e.decisao.quando).toLocaleString("pt-BR")}</span>`:""}</div>
+        ${e.retrato?`<button class="link" type="button" data-rt="${e.retrato}">Ver retrato da avalia\xE7\xE3o</button>`:""}
+        ${e.status==="pendente"?se(e.nivel||"gerente")?`<div class="acoes" style="margin:0"><button class="btn btn-ouro" type="button" data-apr="${e.id}">Aprovar</button><button class="btn btn-perigo" type="button" data-rec="${e.id}">Recusar</button></div>`:`<span class="tag declarado">${e.nivel==="dono"?"Aguardando o dono":"Aguardando gerente"}</span>`:`<span class="tag ${e.status==="aprovada"?"comprovado":"declarado"}">${e.status==="aprovada"?"Aprovada":"Recusada"}</span>`}</div>`).join(""):'<p class="vazio">Nenhuma troca esperando aprova\xE7\xE3o.</p>'}</section>`,R("[data-apr]",w).forEach(e=>e.onclick=()=>ut(e.dataset.apr,!0)),R("[data-rt]",w).forEach(e=>e.onclick=()=>bt(e.dataset.rt)),R("[data-rec]",w).forEach(e=>e.onclick=()=>ut(e.dataset.rec,!1))}async function ut(a,e){const o=b.pendentes.find(t=>t.id===a);if(!(!o||!se(o.nivel||"gerente"))){if(C&&C.semInternet()){A("Aprovar ou recusar s\xF3 com internet: a troca s\xF3 conta depois que a decis\xE3o \xE9 salva no servidor.",!0);return}if(!(e&&!await Xs())){if(o.status=e?"aprovada":"recusada",o.decisao={por:D().nome,quando:new Date().toISOString()},e){const t=x.fecharTroca(b,o.maq,o.rec,o.valor,o.data,{...o.extra,retrato:o.retrato,aprovacao:{por:D().nome,motivo:o.motivo,excesso:o.valor-o.rec.teto,data:z()}});y.trocas.push({...t}),L("aprovacao",`Troca acima do teto aprovada: ${t.marca} ${t.modelo} por ${M(t.pago)} (pedido de ${o.por})`,{ref:t.id})}else L("aprovacao",`Troca acima do teto recusada: ${o.maq.marca} ${o.maq.modelo} (pedido de ${o.por})`);if(T(),Pa(),te(),C&&!await C.descarregar()){A("A decis\xE3o ainda n\xE3o chegou ao servidor: fica guardada neste aparelho e \xE9 enviada quando a conex\xE3o voltar.",!0),Z();return}A(e?"Aprovada: a m\xE1quina entrou no p\xE1tio.":"Recusada. O vendedor v\xEA a decis\xE3o."),Z()}}}const be={soja:{nome:"Soja (saca 60 kg)",preco:128},milho:{nome:"Milho (saca 60 kg)",preco:62},cana:{nome:"Cana (tonelada)",preco:155}};function Gs(a,e){const o=b.barter||{grao:"soja",preco:be.soja.preco};return`<section class="painel bloco" id="${e}"><h2>${q.moedas}Troca paga em gr\xE3os (barter)</h2>
+      <div class="campos" style="margin-top:10px"><div class="campo"><label for="${e}-g">Produto</label><select id="${e}-g">${Object.entries(be).map(([t,s])=>`<option value="${t}" ${o.grao===t?"selected":""}>${s.nome}</option>`).join("")}</select></div>
+      <div class="campo"><label for="${e}-p">Pre\xE7o de hoje (R$ por unidade)</label><input id="${e}-p" inputmode="decimal" value="${String(o.preco).replace(".",",")}"></div></div>
+      <div class="numeros" id="${e}-r"></div><p class="nota-rodape">O pre\xE7o do gr\xE3o \xE9 informado pela revenda (bolsa, trading ou cooperativa do dia). Simula\xE7\xE3o de queda mostra quanto a troca passa a valer.</p></section>`}function _s(a,e,o){const t=l("#"+o+"-g",a),s=l("#"+o+"-p",a),i=l("#"+o+"-r",a);if(!t)return;const n=(m=!0)=>{const r=ra(s.value)||be[t.value].preco;m&&JSON.stringify(b.barter)!==JSON.stringify({grao:t.value,preco:r})&&(b.barter={grao:t.value,preco:r},T());const p=t.value==="cana"?"toneladas":"sacas",d=e/r;i.innerHTML=`<div><span>Valor m\xE1ximo em ${p}</span><b>${Math.round(d).toLocaleString("pt-BR")}</b></div><div><span>Se o gr\xE3o cair 10%, a troca vale</span><b class="neg">${M(d*r*.9)}</b></div><div><span>Se o gr\xE3o subir 10%, a troca vale</span><b class="pos">${M(d*r*1.1)}</b></div>`};t.onchange=()=>{s.value=String(be[t.value].preco).replace(".",","),n()},s.oninput=()=>n(),n(!1)}function Js(a){Ea(`anshur-troca-${a.id}.csv`,[["Campo","Valor"],["C\xF3digo Anshur",a.id],["Categoria",V[a.tipo]],["Fabricante",a.marca],["Modelo",a.modelo],["Ano",a.ano],["Horas",a.horas],["Chassi",a.chassi||""],["Valor pago na troca",a.pago],["Valor m\xE1ximo recomendado",a.previsto?a.previsto.teto:""],["Preparo previsto",a.preparoEst||""],["Pre\xE7o anunciado",a.anuncio],["Vendedor",a.vendedor||""],["Aprovado por",a.aprovacao?a.aprovacao.por:""],["Data de entrada",N(a.entrada)]]),L("exportacao",`Troca ${a.marca} ${a.modelo} exportada para o sistema da revenda`,{ref:a.id}),T()}const Qs={trator:{vendedor:5e3,gerente:4e4},colhedora:{vendedor:0,gerente:0},pulverizador:{vendedor:3e3,gerente:3e4},plantadeira:{vendedor:3e3,gerente:2e4},implemento:{vendedor:1e3,gerente:1e4}},$o=()=>Object.assign({},Qs,b.alcadas||{});function vt(a,e){if(e<=0)return"livre";const o=$o()[a]||{vendedor:0,gerente:0};return e<=o.vendedor?"livre":e<=o.gerente?"gerente":"dono"}const se=a=>a==="livre"||D().perfil==="dono"||a==="gerente"&&D().perfil==="gerente",ht={livre:"dentro da al\xE7ada do vendedor",gerente:"precisa do gerente",dono:"s\xF3 o dono libera"};async function Ve(a){const e=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(a));return[...new Uint8Array(e)].map(o=>o.toString(16).padStart(2,"0")).join("")}async function xo(a,e,o={}){const t={versao:1,quando:new Date().toISOString(),usuario:D().nome,perfil:D().perfil,revenda:y.revenda.nome,maquina:{tipo:a.tipo,marca:a.marca,modelo:a.modelo,ano:a.ano,horas:a.horas,inspecao:a.cond},recomendacao:{valorMaximo:e.teto,faixa:e.faixa,vendaEstimada:e.venda,preparo:e.preparo,margem:e.margemSobreVenda,qualidade:e.confianca,erroHistorico:e.qualidade?e.qualidade.mape:null,vendasUsadas:e.base},premissas:{margemAlvo:e.margem,jurosMes:x.cfg.jurosMes},mercado:Oe(a.tipo),compradores:Va({...a,anuncio:Math.round(e.venda*1.08)}).length,horimetro:Ie({...a,manutencoes:[]}),alertasMostrados:e.limites,...o},s=JSON.stringify(t),i=await Ve(s),n="R"+Date.now();return b.retratos=b.retratos||{},b.retratos[n]={json:s,hash:i},{id:n,hash:i}}async function bt(a){const e=(b.retratos||{})[a];if(!e){A("Retrato n\xE3o encontrado neste aparelho.",!0);return}const o=await Ve(e.json)===e.hash,t=JSON.parse(e.json);oa("modal retrato-modal",`<div class="retrato">
       <img class="logo-img" src="logo/anshur-logo.png?v=5" alt="Anshur" width="150" height="38">
-      <h2 style="margin-top:12px">Retrato da avaliação</h2>
-      <p class="sub">Gerado em ${new Date(c.quando).toLocaleString('pt-BR')} por ${esc(c.usuario)} (${K.PERFIS[c.perfil] || ''}) · ${esc(c.revenda)}</p>
-      <p class="selo-verif ${ok ? 'ok' : 'falha'}">${ok ? ICO.baixo + 'Íntegro: nada foi alterado desde a avaliação' : ICO.alto + 'ALTERADO: o conteúdo não bate com o código original'}</p>
-      <div class="numeros"><div><span>Máquina</span><b>${esc(c.maquina.marca + ' ' + c.maquina.modelo)} · ${c.maquina.ano}</b></div><div><span>Horas · inspeção</span><b>${(+c.maquina.horas).toLocaleString('pt-BR')} h · ${c.maquina.inspecao}/100</b></div><div><span>Valor máximo recomendado</span><b>${real(c.recomendacao.valorMaximo)}</b></div>
-        <div><span>Venda estimada</span><b>${real(c.recomendacao.vendaEstimada)}</b></div><div><span>Qualidade da estimativa</span><b>${esc(c.recomendacao.qualidade)}</b></div><div><span>Margem-alvo do dia</span><b>${pct(c.premissas.margemAlvo, 0)}</b></div>
-        ${c.valorPago != null ? `<div><span>Valor pago</span><b class="${c.valorPago > c.recomendacao.valorMaximo ? 'neg' : 'pos'}">${real(c.valorPago)}</b></div>` : ''}${c.decisao ? `<div><span>Decisão</span><b>${esc(c.decisao)}</b></div>` : ''}</div>
-      ${(c.horimetro || []).length || c.mercado != null || (c.alertasMostrados || []).length ? `<h3 style="margin-top:14px">Alertas que o sistema mostrou</h3><ul>${[...(c.horimetro || []), ...(c.mercado != null && c.mercado < -0.05 ? [`Mercado caindo ${pct(-c.mercado)} em 2 meses`] : []), ...(c.alertasMostrados || [])].map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
-      ${c.ia ? `<h3 style="margin-top:14px">IA nas fotos</h3><p>${esc(c.ia)}</p>` : ''}
-      <p class="codigo">Código de verificação (SHA-256): <code>${rt.hash}</code></p></div>
-      <div class="acoes"><button class="btn btn-ouro" type="button" onclick="print()">Imprimir ou salvar PDF</button></div>`);
-  }
-
-  // contraproposta: como cobrir a diferença sem pagar acima do teto
-  function contraproposta(excesso, r) {
-    const nova = (A.financiadas || []).find((f) => f.chassi === av.nova);
-    const b = estado.barter || { grao: 'soja', preco: GRAOS.soja.preco }, un = b.grao === 'cana' ? 'toneladas de cana' : 'sacas de ' + b.grao;
-    const parcela = Math.ceil(excesso / 3 / 100) * 100;
-    return [
-      { t: 'Desconto na máquina nova', d: `Em vez de pagar ${real(excesso)} a mais no usado, dê ${real(excesso)} de desconto${nova ? ` no ${nova.marca} ${nova.modelo}` : ' na máquina nova'}. O usado entra pelo teto (${real(r.teto)}) e a margem do usado fica protegida.` },
-      { t: 'Diferença em grãos', d: `O cliente recebe o teto em dinheiro e a diferença em ${Math.round(excesso / b.preco).toLocaleString('pt-BR')} ${un} (preço do dia ${real(b.preco)}), entregues na colheita.` },
-      { t: 'Diferença na venda do usado', d: `Pague ${real(r.teto)} agora e combine repassar até ${real(excesso)} quando o usado for vendido acima de ${real(r.venda)}. A revenda só divide o que realmente ganhar.` },
-      { t: 'Prazo em vez de valor', d: `Mantenha o teto e ofereça o pagamento da máquina nova em 3 parcelas a mais, equivalente a cerca de ${real(parcela)} por parcela de folga para o cliente.` }
-    ];
-  }
-
-  // ---------- MEU PERFIL ----------
-  const iniciais = (n) => String(n || '?').split(' ').filter(Boolean).map((x) => x[0]).slice(0, 2).join('').toUpperCase();
-  const avatarHTML = (u, tam = 46) => u.foto ? `<img class="foto-perfil" src="${u.foto}" alt="" width="${tam}" height="${tam}">` : `<span class="foto-perfil vazia" style="width:${tam}px;height:${tam}px;font-size:${Math.round(tam / 2.6)}px">${esc(iniciais(u.nome))}</span>`;
-  function atualizarAvatar() { const b = $('#perfil'); const u = eu(); b.innerHTML = u.foto ? `<img src="${u.foto}" alt="">` : esc(iniciais(u.nome)); b.classList.toggle('com-foto', !!u.foto); b.setAttribute('aria-label', 'Perfil de ' + u.nome); }
-  function telaPerfil() {
-    const u = eu();
-    const minhas = estado.atividades.filter((a) => a.usuario === u.nome);
-    const aval = minhas.filter((a) => a.tipo === 'avaliacao').length, trocas = minhas.filter((a) => a.tipo === 'troca').length;
-    const pend = (estado.pendentes || []).filter((p) => p.status === 'pendente' && (p.por === u.nome || podeLiberar(p.nivel || 'gerente'))).length;
-    const pref = u.notif || { Estoque: true, Financeiro: true, Comercial: true, Oficina: true, Garantia: true, Mercado: true };
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Meu perfil</h1><p>Seus dados, sua foto e como o Anshur fala com você.</p></div></div>
+      <h2 style="margin-top:12px">Retrato da avalia\xE7\xE3o</h2>
+      <p class="sub">Gerado em ${new Date(t.quando).toLocaleString("pt-BR")} por ${c(t.usuario)} (${x.PERFIS[t.perfil]||""}) \xB7 ${c(t.revenda)}</p>
+      <p class="selo-verif ${o?"ok":"falha"}">${o?q.baixo+"\xCDntegro: nada foi alterado desde a avalia\xE7\xE3o":q.alto+"ALTERADO: o conte\xFAdo n\xE3o bate com o c\xF3digo original"}</p>
+      <div class="numeros"><div><span>M\xE1quina</span><b>${c(t.maquina.marca+" "+t.maquina.modelo)} \xB7 ${t.maquina.ano}</b></div><div><span>Horas \xB7 inspe\xE7\xE3o</span><b>${(+t.maquina.horas).toLocaleString("pt-BR")} h \xB7 ${t.maquina.inspecao}/100</b></div><div><span>Valor m\xE1ximo recomendado</span><b>${M(t.recomendacao.valorMaximo)}</b></div>
+        <div><span>Venda estimada</span><b>${M(t.recomendacao.vendaEstimada)}</b></div><div><span>Qualidade da estimativa</span><b>${c(t.recomendacao.qualidade)}</b></div><div><span>Margem-alvo do dia</span><b>${P(t.premissas.margemAlvo,0)}</b></div>
+        ${t.valorPago!=null?`<div><span>Valor pago</span><b class="${t.valorPago>t.recomendacao.valorMaximo?"neg":"pos"}">${M(t.valorPago)}</b></div>`:""}${t.decisao?`<div><span>Decis\xE3o</span><b>${c(t.decisao)}</b></div>`:""}</div>
+      ${(t.horimetro||[]).length||t.mercado!=null||(t.alertasMostrados||[]).length?`<h3 style="margin-top:14px">Alertas que o sistema mostrou</h3><ul>${[...t.horimetro||[],...t.mercado!=null&&t.mercado<-.05?[`Mercado caindo ${P(-t.mercado)} em 2 meses`]:[],...t.alertasMostrados||[]].map(s=>`<li>${c(s)}</li>`).join("")}</ul>`:""}
+      ${t.ia?`<h3 style="margin-top:14px">IA nas fotos</h3><p>${c(t.ia)}</p>`:""}
+      <p class="codigo">C\xF3digo de verifica\xE7\xE3o (SHA-256): <code>${e.hash}</code></p></div>
+      <div class="acoes"><button class="btn btn-ouro" type="button" onclick="print()">Imprimir ou salvar PDF</button></div>`)}function Ws(a,e){const o=(y.financiadas||[]).find(n=>n.chassi===v.nova),t=b.barter||{grao:"soja",preco:be.soja.preco},s=t.grao==="cana"?"toneladas de cana":"sacas de "+t.grao,i=Math.ceil(a/3/100)*100;return[{t:"Desconto na m\xE1quina nova",d:`Em vez de pagar ${M(a)} a mais no usado, d\xEA ${M(a)} de desconto${o?` no ${o.marca} ${o.modelo}`:" na m\xE1quina nova"}. O usado entra pelo teto (${M(e.teto)}) e a margem do usado fica protegida.`},{t:"Diferen\xE7a em gr\xE3os",d:`O cliente recebe o teto em dinheiro e a diferen\xE7a em ${Math.round(a/t.preco).toLocaleString("pt-BR")} ${s} (pre\xE7o do dia ${M(t.preco)}), entregues na colheita.`},{t:"Diferen\xE7a na venda do usado",d:`Pague ${M(e.teto)} agora e combine repassar at\xE9 ${M(a)} quando o usado for vendido acima de ${M(e.venda)}. A revenda s\xF3 divide o que realmente ganhar.`},{t:"Prazo em vez de valor",d:`Mantenha o teto e ofere\xE7a o pagamento da m\xE1quina nova em 3 parcelas a mais, equivalente a cerca de ${M(i)} por parcela de folga para o cliente.`}]}const ft=a=>String(a||"?").split(" ").filter(Boolean).map(e=>e[0]).slice(0,2).join("").toUpperCase(),Ne=(a,e=46)=>a.foto?`<img class="foto-perfil" src="${a.foto}" alt="" width="${e}" height="${e}">`:`<span class="foto-perfil vazia" style="width:${e}px;height:${e}px;font-size:${Math.round(e/2.6)}px">${c(ft(a.nome))}</span>`;function ze(){const a=l("#perfil"),e=D();a.innerHTML=e.foto?`<img src="${e.foto}" alt="">`:c(ft(e.nome)),a.classList.toggle("com-foto",!!e.foto),a.setAttribute("aria-label","Perfil de "+e.nome)}function fe(){const a=D(),e=b.atividades.filter(p=>p.usuario===a.nome),o=e.filter(p=>p.tipo==="avaliacao").length,t=e.filter(p=>p.tipo==="troca").length,s=(b.pendentes||[]).filter(p=>p.status==="pendente"&&(p.por===a.nome||se(p.nivel||"gerente"))).length,i=a.notif||{Estoque:!0,Financeiro:!0,Comercial:!0,Oficina:!0,Garantia:!0,Mercado:!0};w.innerHTML=`
+      <div class="titulo"><div><h1>Meu perfil</h1><p>Seus dados, sua foto e como o Anshur fala com voc\xEA.</p></div></div>
       <div class="grade-2">
         <section class="painel perfil-cartao">
           <div class="perfil-topo">
-            <label class="perfil-foto" title="Trocar foto">${avatarHTML(u, 120)}<input type="file" accept="image/*" capture="user" id="pf-foto" class="sr"><span class="perfil-foto-acao">${ic('<path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>')}</span></label>
-            <div><h2 style="font-size:28px">${esc(u.nome)}</h2><p class="sub" style="font-size:17px">${K.PERFIS[u.perfil]} · ${esc(A.revenda.nome)}</p>
-              ${u.foto ? '<button class="link" type="button" id="pf-tira">Remover foto</button>' : '<p class="ajuda">Toque na foto para colocar a sua.</p>'}</div>
+            <label class="perfil-foto" title="Trocar foto">${Ne(a,120)}<input type="file" accept="image/*" capture="user" id="pf-foto" class="sr"><span class="perfil-foto-acao">${_('<path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>')}</span></label>
+            <div><h2 style="font-size:28px">${c(a.nome)}</h2><p class="sub" style="font-size:17px">${x.PERFIS[a.perfil]} \xB7 ${c(y.revenda.nome)}</p>
+              ${a.foto?'<button class="link" type="button" id="pf-tira">Remover foto</button>':'<p class="ajuda">Toque na foto para colocar a sua.</p>'}</div>
           </div>
-          <div class="numeros" style="margin-top:20px"><div><span>Avaliações feitas</span><b>${aval}</b></div><div><span>Trocas fechadas</span><b>${trocas}</b></div><div><span>Pendências para você</span><b class="${pend ? 'neg' : ''}">${pend}</b></div></div>
+          <div class="numeros" style="margin-top:20px"><div><span>Avalia\xE7\xF5es feitas</span><b>${o}</b></div><div><span>Trocas fechadas</span><b>${t}</b></div><div><span>Pend\xEAncias para voc\xEA</span><b class="${s?"neg":""}">${s}</b></div></div>
         </section>
-        <section class="painel"><h2>${ICO.etiqueta}Informações pessoais</h2>${sugestoes()}
+        <section class="painel"><h2>${q.etiqueta}Informa\xE7\xF5es pessoais</h2>${io()}
           <div class="campos" style="margin-top:12px">
-            <div class="campo"><label for="pf-nome">Nome completo</label><input id="pf-nome" value="${esc(u.nome)}" autocomplete="name"></div>
-            <div class="campo"><label for="pf-apelido">Como prefere ser chamado</label><input id="pf-apelido" value="${esc(u.apelido || '')}" placeholder="Ex.: Seu Antônio"></div>
-            <div class="campo"><label for="pf-cargo">Cargo</label><input id="pf-cargo" list="dl-cargos" value="${esc(u.cargo || K.PERFIS[u.perfil])}">${lista('dl-cargos', ['Proprietário', 'Diretor comercial', 'Gerente de usados', 'Gerente de loja', 'Vendedor', 'Avaliador', 'Chefe de oficina', 'Financeiro'])}</div>
-            <div class="campo"><label for="pf-loja">Loja / unidade</label><input id="pf-loja" list="dl-cidade" value="${esc(u.loja || A.revenda.cidade)}"></div>
-            <div class="campo"><label for="pf-email">E-mail</label><input id="pf-email" type="email" value="${esc(u.email || '')}" autocomplete="email" ${K.nuvem ? 'readonly title="E-mail da conta de acesso"' : ''}></div>
-            <div class="campo"><label for="pf-tel">Celular / WhatsApp</label><input id="pf-tel" inputmode="tel" value="${esc(u.telefone || '')}" placeholder="(16) 99999-0000" autocomplete="tel"></div>
-            <div class="campo"><label for="pf-desde">Na revenda desde</label><input id="pf-desde" type="date" value="${esc(u.desde || '')}"></div>
-            ${u.perfil === 'vendedor' ? `<div class="campo"><label for="pf-meta">Meta de trocas por mês</label><input id="pf-meta" inputmode="numeric" value="${esc(u.meta || '')}"></div>` : `<div class="campo"><label for="pf-ass">Assinatura nos relatórios</label><input id="pf-ass" value="${esc(u.assinatura || '')}" placeholder="Ex.: Antônio Silva, diretor"></div>`}
-            <div class="campo inteiro"><label for="pf-bio">Observações</label><textarea id="pf-bio" rows="2" placeholder="Especialidade, marcas que conhece, região que atende">${esc(u.bio || '')}</textarea></div>
+            <div class="campo"><label for="pf-nome">Nome completo</label><input id="pf-nome" value="${c(a.nome)}" autocomplete="name"></div>
+            <div class="campo"><label for="pf-apelido">Como prefere ser chamado</label><input id="pf-apelido" value="${c(a.apelido||"")}" placeholder="Ex.: Seu Ant\xF4nio"></div>
+            <div class="campo"><label for="pf-cargo">Cargo</label><input id="pf-cargo" list="dl-cargos" value="${c(a.cargo||x.PERFIS[a.perfil])}">${wa("dl-cargos",["Propriet\xE1rio","Diretor comercial","Gerente de usados","Gerente de loja","Vendedor","Avaliador","Chefe de oficina","Financeiro"])}</div>
+            <div class="campo"><label for="pf-loja">Loja / unidade</label><input id="pf-loja" list="dl-cidade" value="${c(a.loja||y.revenda.cidade)}"></div>
+            <div class="campo"><label for="pf-email">E-mail</label><input id="pf-email" type="email" value="${c(a.email||"")}" autocomplete="email" ${x.nuvem?'readonly title="E-mail da conta de acesso"':""}></div>
+            <div class="campo"><label for="pf-tel">Celular / WhatsApp</label><input id="pf-tel" inputmode="tel" value="${c(a.telefone||"")}" placeholder="(16) 99999-0000" autocomplete="tel"></div>
+            <div class="campo"><label for="pf-desde">Na revenda desde</label><input id="pf-desde" type="date" value="${c(a.desde||"")}"></div>
+            ${a.perfil==="vendedor"?`<div class="campo"><label for="pf-meta">Meta de trocas por m\xEAs</label><input id="pf-meta" inputmode="numeric" value="${c(a.meta||"")}"></div>`:`<div class="campo"><label for="pf-ass">Assinatura nos relat\xF3rios</label><input id="pf-ass" value="${c(a.assinatura||"")}" placeholder="Ex.: Ant\xF4nio Silva, diretor"></div>`}
+            <div class="campo inteiro"><label for="pf-bio">Observa\xE7\xF5es</label><textarea id="pf-bio" rows="2" placeholder="Especialidade, marcas que conhece, regi\xE3o que atende">${c(a.bio||"")}</textarea></div>
           </div>
           <div class="acoes"><button class="btn btn-ouro" type="button" id="pf-salvar">Salvar perfil</button></div></section>
       </div>
       <div class="grade-2 bloco">
-        <section class="painel"><h2>${ICO.alerta}Notificações que você quer receber</h2>
-          <div class="checks" style="margin-top:12px">${Object.keys(pref).map((k) => `<label class="check"><input type="checkbox" data-pref="${k}" ${pref[k] ? 'checked' : ''}> ${k}</label>`).join('')}</div>
-          <input type="checkbox" id="pf-resumo" hidden ${u.resumo ? 'checked' : ''}>
-          <p class="nota-rodape">Estas escolhas valem para o sino. O aviso por e-mail (dias úteis às 7h, só quando há algo para fazer) é ligado pelo dono em Configurações › Avisos.</p>
-          <div class="acoes"><button class="btn btn-linha" type="button" id="pf-notif">Salvar preferências</button></div></section>
-        <section class="painel"><h2>${ICO.alvo}Segurança</h2>
-          ${['dono', 'gerente'].includes(u.perfil) ? `<p class="sub" style="margin:6px 0 12px">Com um PIN, ninguém aprova troca acima do teto usando o seu nome sem saber o código.</p>
-          <div class="campos"><div class="campo"><label for="pf-pin">${u.pin ? 'Novo PIN de aprovação' : 'Criar PIN de aprovação'} (4 a 6 números)</label><input id="pf-pin" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></div></div>
-          <div class="acoes"><button class="btn btn-linha" type="button" id="pf-pin-ok">${u.pin ? 'Trocar PIN' : 'Criar PIN'}</button>${u.pin ? '<span class="tag comprovado">PIN ativo</span>' : ''}</div>` : '<p class="sub" style="margin-top:6px">Seu perfil não aprova trocas acima do teto.</p>'}
-          <ul class="lista-motivos" style="margin-top:14px"><li><span>Último acesso</span><b>${new Date(u.ultimoAcesso || Date.now()).toLocaleString('pt-BR')}</b></li><li><span>Atividades registradas</span><b>${minhas.length}</b></li></ul>
-          <div class="acoes"><a class="btn btn-linha" href="#atividades">Ver minhas atividades</a>${K.nuvem ? '<button class="btn btn-linha" type="button" id="pf-sair">Sair da conta</button>' : estado.usuarios.length > 1 && pode('usuarios') ? '<a class="btn btn-linha" href="#usuarios">Trocar de usuário</a>' : ''}</div></section>
-      </div>`;
-    $('#pf-foto').onchange = (e) => {
-      const f = e.target.files[0]; if (!f) return;
-      const img = new Image(), url = URL.createObjectURL(f);
-      img.onload = () => { const lado = Math.min(img.width, img.height), cv = document.createElement('canvas'); cv.width = cv.height = 256; cv.getContext('2d').drawImage(img, (img.width - lado) / 2, (img.height - lado) / 2, lado, lado, 0, 0, 256, 256); u.foto = cv.toDataURL('image/jpeg', 0.82); URL.revokeObjectURL(url); salvar(); log('perfil', 'Foto do perfil atualizada'); atualizarAvatar(); toast('Foto atualizada.'); telaPerfil(); };
-      img.onerror = () => toast('Não foi possível ler essa imagem.', true); img.src = url;
-    };
-    const sairBt = $('#pf-sair'); if (sairBt) sairBt.onclick = () => K.nuvem.sair();
-    const tira = $('#pf-tira'); if (tira) tira.onclick = () => { delete u.foto; salvar(); atualizarAvatar(); telaPerfil(); };
-    $('#pf-salvar').onclick = () => {
-      const nome = $('#pf-nome').value.trim(), email = $('#pf-email').value.trim();
-      if (!nome) { toast('O nome não pode ficar vazio.', true); $('#pf-nome').focus(); return; }
-      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('Confira o e-mail.', true); $('#pf-email').focus(); return; }
-      const antes = u.nome;
-      Object.assign(u, { nome, email, apelido: $('#pf-apelido').value.trim(), cargo: $('#pf-cargo').value.trim(), loja: $('#pf-loja').value.trim(), telefone: $('#pf-tel').value.trim(), desde: $('#pf-desde').value, bio: $('#pf-bio').value.trim() });
-      if ($('#pf-meta')) u.meta = $('#pf-meta').value.trim(); if ($('#pf-ass')) u.assinatura = $('#pf-ass').value.trim();
-      // mantém o histórico ligado ao novo nome
-      if (antes !== nome) estado.atividades.forEach((a) => { if (a.usuario === antes) a.usuario = nome; });
-      if (K.nuvem && antes !== nome) K.nuvem.alterarMembro(u.id, u.perfil, null, nome).catch(() => {});
-      log('perfil', 'Perfil atualizado'); salvar(); atualizarAvatar(); toast('Perfil salvo.'); telaPerfil();
-    };
-    $('#pf-notif').onclick = () => { u.notif = {}; $$('[data-pref]', tela).forEach((c) => { u.notif[c.dataset.pref] = c.checked; }); u.resumo = $('#pf-resumo').checked; salvar(); atualizarSino(); toast('Preferências salvas.'); };
-    const pin = $('#pf-pin-ok'); if (pin) pin.onclick = async () => { const v = $('#pf-pin').value; if (!/^\d{4,6}$/.test(v)) { toast('O PIN precisa ter de 4 a 6 números.', true); return; } u.pin = await sha256(u.id + ':' + v); log('perfil', 'PIN de aprovação ' + (u.pin ? 'definido' : 'alterado')); salvar(); toast('PIN salvo. Ele será pedido em cada aprovação.'); telaPerfil(); };
-  }
-  // aprovação com PIN, quando a pessoa definiu um
-  async function confirmaPin() {
-    const u = eu(); if (!u.pin) return true;
-    return new Promise((ok) => {
-      abrirCamada('modal', `<h2>Confirme com o seu PIN</h2><p class="sub">Aprovação acima do teto em nome de ${esc(u.nome)}.</p><div class="campo" style="margin-top:12px"><label for="pin-in">PIN</label><input id="pin-in" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div><div class="acoes"><button class="btn btn-ouro" type="button" id="pin-ok">Confirmar</button><button class="btn btn-linha" type="button" id="pin-nao">Cancelar</button></div>`, (c) => {
-        $('#pin-nao', c).onclick = () => { fecharCamada(); ok(false); };
-        $('#pin-ok', c).onclick = async () => { if ((await sha256(u.id + ':' + $('#pin-in', c).value)) === u.pin) { fecharCamada(true); ok(true); } else { toast('PIN incorreto.', true); log('seguranca', 'PIN de aprovação incorreto'); salvar(); } };
-      });
-    });
-  }
-
-  // =====================================================================================
-  // V8: várias lojas, auditor, privacidade (LGPD), manter ou vender, anúncio para portais
-  // =====================================================================================
-  function seletorLoja() {
-    const sm = $('#loja-sel-m'), lm = sm && sm.closest('label');
-    [$('#loja-sel'), sm].forEach((s) => {
-      if (!s) return;
-      if (!estado.lojas.length) { s.hidden = true; if (s === sm && lm) lm.hidden = true; return; }
-      const permitidas = K.lojasPermitidas && K.lojasPermitidas.length ? K.lojasPermitidas : null;
-      s.innerHTML = (permitidas ? '' : `<option value="">Todas as lojas</option>`) + (permitidas || estado.lojas).map((l) => `<option ${estado.lojaAtual === l ? 'selected' : ''}>${esc(l)}</option>`).join('');
-      s.onchange = () => { estado.lojaAtual = s.value; K.lembrarLoja(s.value); salvar(); log('loja', s.value ? `Vendo a loja ${s.value}` : 'Vendo todas as lojas'); salvar(); K.recarregar(); };
-    });
-  }
-  const somenteLeitura = () => eu().perfil === 'auditor';
-  // privacidade: contatos mascarados para quem não precisa ver
-  const mascarar = (txt) => (estado.lgpd && estado.lgpd.mascarar && ['vendedor', 'oficina', 'auditor'].includes(eu().perfil) && txt ? String(txt).replace(/\d(?=\d{2})/g, '•') : txt);
-  function blocoLGPD() {
-    const g = estado.lgpd || { mascarar: true, retencao: 60 };
-    return `<section class="painel bloco"><h2>${ICO.alvo}Privacidade e LGPD</h2>
-      <div class="campos" style="margin-top:12px"><label class="check"><input type="checkbox" id="lg-masc" ${g.mascarar ? 'checked' : ''}> Esconder telefone e documentos de clientes para vendedor, oficina e auditor</label>
-      <div class="campo"><label for="lg-ret">Guardar dados de clientes por (meses)</label><input id="lg-ret" inputmode="numeric" value="${g.retencao}"></div></div>
-      <div class="campos" style="margin-top:12px"><div class="campo"><label for="lg-tit">Pedido de um titular (nome do cliente ou comprador)</label><input id="lg-tit" list="dl-titulares">${lista('dl-titulares', (A.compradores || []).map((c) => c.nome).concat(A.trocas.map((t) => t.origem)))}</div></div>
+        <section class="painel"><h2>${q.alerta}Notifica\xE7\xF5es que voc\xEA quer receber</h2>
+          <div class="checks" style="margin-top:12px">${Object.keys(i).map(p=>`<label class="check"><input type="checkbox" data-pref="${p}" ${i[p]?"checked":""}> ${p}</label>`).join("")}</div>
+          <input type="checkbox" id="pf-resumo" hidden ${a.resumo?"checked":""}>
+          <p class="nota-rodape">Estas escolhas valem para o sino. O aviso por e-mail (dias \xFAteis \xE0s 7h, s\xF3 quando h\xE1 algo para fazer) \xE9 ligado pelo dono em Configura\xE7\xF5es \u203A Avisos.</p>
+          <div class="acoes"><button class="btn btn-linha" type="button" id="pf-notif">Salvar prefer\xEAncias</button></div></section>
+        <section class="painel"><h2>${q.alvo}Seguran\xE7a</h2>
+          ${["dono","gerente"].includes(a.perfil)?`<p class="sub" style="margin:6px 0 12px">Com um PIN, ningu\xE9m aprova troca acima do teto usando o seu nome sem saber o c\xF3digo.</p>
+          <div class="campos"><div class="campo"><label for="pf-pin">${a.pin?"Novo PIN de aprova\xE7\xE3o":"Criar PIN de aprova\xE7\xE3o"} (4 a 6 n\xFAmeros)</label><input id="pf-pin" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></div></div>
+          <div class="acoes"><button class="btn btn-linha" type="button" id="pf-pin-ok">${a.pin?"Trocar PIN":"Criar PIN"}</button>${a.pin?'<span class="tag comprovado">PIN ativo</span>':""}</div>`:'<p class="sub" style="margin-top:6px">Seu perfil n\xE3o aprova trocas acima do teto.</p>'}
+          <ul class="lista-motivos" style="margin-top:14px"><li><span>\xDAltimo acesso</span><b>${new Date(a.ultimoAcesso||Date.now()).toLocaleString("pt-BR")}</b></li><li><span>Atividades registradas</span><b>${e.length}</b></li></ul>
+          <div class="acoes"><a class="btn btn-linha" href="#atividades">Ver minhas atividades</a>${x.nuvem?'<button class="btn btn-linha" type="button" id="pf-sair">Sair da conta</button>':b.usuarios.length>1&&ta("usuarios")?'<a class="btn btn-linha" href="#usuarios">Trocar de usu\xE1rio</a>':""}</div></section>
+      </div>`,l("#pf-foto").onchange=p=>{const d=p.target.files[0];if(!d)return;const $=new Image,u=URL.createObjectURL(d);$.onload=()=>{const g=Math.min($.width,$.height),j=document.createElement("canvas");j.width=j.height=256,j.getContext("2d").drawImage($,($.width-g)/2,($.height-g)/2,g,g,0,0,256,256),a.foto=j.toDataURL("image/jpeg",.82),URL.revokeObjectURL(u),T(),L("perfil","Foto do perfil atualizada"),ze(),A("Foto atualizada."),fe()},$.onerror=()=>A("N\xE3o foi poss\xEDvel ler essa imagem.",!0),$.src=u};const n=l("#pf-sair");n&&(n.onclick=()=>x.nuvem.sair());const m=l("#pf-tira");m&&(m.onclick=()=>{delete a.foto,T(),ze(),fe()}),l("#pf-salvar").onclick=()=>{const p=l("#pf-nome").value.trim(),d=l("#pf-email").value.trim();if(!p){A("O nome n\xE3o pode ficar vazio.",!0),l("#pf-nome").focus();return}if(d&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d)){A("Confira o e-mail.",!0),l("#pf-email").focus();return}const $=a.nome;Object.assign(a,{nome:p,email:d,apelido:l("#pf-apelido").value.trim(),cargo:l("#pf-cargo").value.trim(),loja:l("#pf-loja").value.trim(),telefone:l("#pf-tel").value.trim(),desde:l("#pf-desde").value,bio:l("#pf-bio").value.trim()}),l("#pf-meta")&&(a.meta=l("#pf-meta").value.trim()),l("#pf-ass")&&(a.assinatura=l("#pf-ass").value.trim()),$!==p&&b.atividades.forEach(u=>{u.usuario===$&&(u.usuario=p)}),x.nuvem&&$!==p&&x.nuvem.alterarMembro(a.id,a.perfil,null,p).catch(()=>{}),L("perfil","Perfil atualizado"),T(),ze(),A("Perfil salvo."),fe()},l("#pf-notif").onclick=()=>{a.notif={},R("[data-pref]",w).forEach(p=>{a.notif[p.dataset.pref]=p.checked}),a.resumo=l("#pf-resumo").checked,T(),te(),A("Prefer\xEAncias salvas.")};const r=l("#pf-pin-ok");r&&(r.onclick=async()=>{const p=l("#pf-pin").value;if(!/^\d{4,6}$/.test(p)){A("O PIN precisa ter de 4 a 6 n\xFAmeros.",!0);return}a.pin=await Ve(a.id+":"+p),L("perfil","PIN de aprova\xE7\xE3o "+(a.pin?"definido":"alterado")),T(),A("PIN salvo. Ele ser\xE1 pedido em cada aprova\xE7\xE3o."),fe()})}async function Xs(){const a=D();return a.pin?new Promise(e=>{oa("modal",`<h2>Confirme com o seu PIN</h2><p class="sub">Aprova\xE7\xE3o acima do teto em nome de ${c(a.nome)}.</p><div class="campo" style="margin-top:12px"><label for="pin-in">PIN</label><input id="pin-in" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div><div class="acoes"><button class="btn btn-ouro" type="button" id="pin-ok">Confirmar</button><button class="btn btn-linha" type="button" id="pin-nao">Cancelar</button></div>`,o=>{l("#pin-nao",o).onclick=()=>{U(),e(!1)},l("#pin-ok",o).onclick=async()=>{await Ve(a.id+":"+l("#pin-in",o).value)===a.pin?(U(!0),e(!0)):(A("PIN incorreto.",!0),L("seguranca","PIN de aprova\xE7\xE3o incorreto"),T())}})}):!0}function Ks(){const a=l("#loja-sel-m"),e=a&&a.closest("label");[l("#loja-sel"),a].forEach(o=>{if(!o)return;if(!b.lojas.length){o.hidden=!0,o===a&&e&&(e.hidden=!0);return}const t=x.lojasPermitidas&&x.lojasPermitidas.length?x.lojasPermitidas:null;o.innerHTML=(t?"":'<option value="">Todas as lojas</option>')+(t||b.lojas).map(s=>`<option ${b.lojaAtual===s?"selected":""}>${c(s)}</option>`).join(""),o.onchange=()=>{b.lojaAtual=o.value,x.lembrarLoja(o.value),T(),L("loja",o.value?`Vendo a loja ${o.value}`:"Vendo todas as lojas"),T(),x.recarregar()}})}const Na=()=>D().perfil==="auditor",gt=a=>b.lgpd&&b.lgpd.mascarar&&["vendedor","oficina","auditor"].includes(D().perfil)&&a?String(a).replace(/\d(?=\d{2})/g,"\u2022"):a;function Ys(){const a=b.lgpd||{mascarar:!0,retencao:60};return`<section class="painel bloco"><h2>${q.alvo}Privacidade e LGPD</h2>
+      <div class="campos" style="margin-top:12px"><label class="check"><input type="checkbox" id="lg-masc" ${a.mascarar?"checked":""}> Esconder telefone e documentos de clientes para vendedor, oficina e auditor</label>
+      <div class="campo"><label for="lg-ret">Guardar dados de clientes por (meses)</label><input id="lg-ret" inputmode="numeric" value="${a.retencao}"></div></div>
+      <div class="campos" style="margin-top:12px"><div class="campo"><label for="lg-tit">Pedido de um titular (nome do cliente ou comprador)</label><input id="lg-tit" list="dl-titulares">${wa("dl-titulares",(y.compradores||[]).map(e=>e.nome).concat(y.trocas.map(e=>e.origem)))}</div></div>
       <div class="acoes"><button class="btn btn-linha" type="button" id="lg-salvar">Salvar regras</button><button class="btn btn-linha" type="button" id="lg-exp">Exportar dados do titular</button><button class="btn btn-perigo" type="button" id="lg-anon">Anonimizar titular</button></div>
-      <p class="nota-rodape">Atende os pedidos de acesso e de eliminação previstos na LGPD. A anonimização troca nome e contato por "Titular anonimizado" e fica registrada nas atividades.</p></section>`;
-  }
-  function ligarLGPD() {
-    const b = $('#lg-salvar'); if (!b) return;
-    b.onclick = () => { estado.lgpd = { mascarar: $('#lg-masc').checked, retencao: Math.max(1, num($('#lg-ret').value) || 60) }; log('lgpd', 'Regras de privacidade alteradas'); salvar(); toast('Regras de privacidade salvas.'); };
-    const achar = () => { const n = $('#lg-tit').value.trim().toLowerCase(); if (!n) { toast('Informe o nome do titular.', true); return null; } return { n, comp: (A.compradores || []).filter((c) => c.nome.toLowerCase().includes(n)), trocas: A.todasTrocas.filter((t) => String(t.origem).toLowerCase().includes(n)) }; };
-    $('#lg-exp').onclick = () => { const r = achar(); if (!r) return; const url = URL.createObjectURL(new Blob([JSON.stringify({ titular: r.n, compradores: r.comp, maquinas: r.trocas.map((t) => ({ id: t.id, origem: t.origem, entrada: t.entrada, modelo: t.modelo })) }, null, 1)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = 'dados-do-titular.json'; a.click(); log('lgpd', `Dados exportados a pedido do titular "${r.n}"`); salvar(); toast(`${r.comp.length + r.trocas.length} registros exportados.`); };
-    $('#lg-anon').onclick = () => { const r = achar(); if (!r) return; confirmar('Anonimizar este titular?', `${r.comp.length + r.trocas.length} registros terão nome e contato apagados. Não dá para desfazer.`, 'Anonimizar', () => {
-      r.comp.forEach((c) => { Object.assign(c, { nome: 'Titular anonimizado', telefone: '', fazenda: '', obs: '' }); const x = estado.extras.compradores.find((y) => y.id === c.id); if (x) Object.assign(x, c); });
-      r.trocas.forEach((t) => { t.origem = 'Titular anonimizado'; [...estado.fechadas, ...(estado.historico || [])].filter((y) => y.id === t.id).forEach((y) => { y.origem = t.origem; }); });
-      log('lgpd', `Titular anonimizado (${r.comp.length + r.trocas.length} registros)`); salvar(); toast('Titular anonimizado.'); rota(); }); };
-  }
-  function blocoLojas() {
-    return `<section class="painel bloco"><h2>${ICO.camadas}Lojas e unidades</h2><p class="sub" style="margin:6px 0 10px">Cada máquina pertence a uma loja. O dono vê tudo junto ou uma loja por vez; o motor de avaliação aprende com todas.</p>
-      <div class="cartoes-lojas">${estado.lojas.map((l) => { const ts = A.todasTrocas.filter((t) => t.loja === l); const p = ts.filter((t) => !t.vendido); return `<div class="loja-c"><b>${esc(l)}</b><span>${p.length} no pátio · ${mil(p.reduce((s, t) => s + t.pago, 0))} parados</span><span>${ts.filter((t) => t.vendido).length} vendidas</span></div>`; }).join('') || '<p class="vazio">Nenhuma loja cadastrada.</p>'}</div>
-      <div class="acoes"><button class="btn btn-linha" type="button" id="lj-add">Adicionar loja</button></div></section>`;
-  }
-  function ligarLojas() { const b = $('#lj-add'); if (b) b.onclick = () => formulario('Adicionar loja', [{ k: 'nome', r: 'Nome da loja (cidade ou unidade)', lista: 'dl-cidade', obr: true }], {}, (v) => { if (estado.lojas.includes(v.nome)) { toast('Essa loja já existe.', true); return; } estado.lojas.push(v.nome); log('loja', `Loja ${v.nome} adicionada`); salvar(); fecharCamada(true); toast('Loja adicionada.'); K.recarregar(); }); }
-
-  // manter ou vender agora (custo de ficar mais 6 ou 12 meses)
-  function manterOuVender(i) {
-    const t = i.t, h = historicoModelo(t.modelo);
-    const cenario = (meses) => { const juros = C.custoFinanceiro(t, meses * 30), deprec = i.venda * (1 - Math.pow(0.9, meses / 12)), oficina = (h.reserva || t.preparo * 0.15) * meses / 12; return { meses, juros, deprec, oficina, total: juros + deprec + oficina }; };
-    const c6 = cenario(6), c12 = cenario(12);
-    return `<section class="painel" style="margin-top:6px"><h2>Manter ou vender agora?</h2><p class="sub" style="margin:4px 0 10px">Quanto custa segurar esta máquina, além do que já foi gasto.</p>
+      <p class="nota-rodape">Atende os pedidos de acesso e de elimina\xE7\xE3o previstos na LGPD. A anonimiza\xE7\xE3o troca nome e contato por "Titular anonimizado" e fica registrada nas atividades.</p></section>`}function Zs(){const a=l("#lg-salvar");if(!a)return;a.onclick=()=>{b.lgpd={mascarar:l("#lg-masc").checked,retencao:Math.max(1,ra(l("#lg-ret").value)||60)},L("lgpd","Regras de privacidade alteradas"),T(),A("Regras de privacidade salvas.")};const e=()=>{const o=l("#lg-tit").value.trim().toLowerCase();return o?{n:o,comp:(y.compradores||[]).filter(t=>t.nome.toLowerCase().includes(o)),trocas:y.todasTrocas.filter(t=>String(t.origem).toLowerCase().includes(o))}:(A("Informe o nome do titular.",!0),null)};l("#lg-exp").onclick=()=>{const o=e();if(!o)return;const t=URL.createObjectURL(new Blob([JSON.stringify({titular:o.n,compradores:o.comp,maquinas:o.trocas.map(i=>({id:i.id,origem:i.origem,entrada:i.entrada,modelo:i.modelo}))},null,1)],{type:"application/json"})),s=document.createElement("a");s.href=t,s.download="dados-do-titular.json",s.click(),L("lgpd",`Dados exportados a pedido do titular "${o.n}"`),T(),A(`${o.comp.length+o.trocas.length} registros exportados.`)},l("#lg-anon").onclick=()=>{const o=e();o&&va("Anonimizar este titular?",`${o.comp.length+o.trocas.length} registros ter\xE3o nome e contato apagados. N\xE3o d\xE1 para desfazer.`,"Anonimizar",()=>{o.comp.forEach(t=>{Object.assign(t,{nome:"Titular anonimizado",telefone:"",fazenda:"",obs:""});const s=b.extras.compradores.find(i=>i.id===t.id);s&&Object.assign(s,t)}),o.trocas.forEach(t=>{t.origem="Titular anonimizado",[...b.fechadas,...b.historico||[]].filter(s=>s.id===t.id).forEach(s=>{s.origem=t.origem})}),L("lgpd",`Titular anonimizado (${o.comp.length+o.trocas.length} registros)`),T(),A("Titular anonimizado."),Z()})}}function $t(){return`<section class="painel bloco"><h2>${q.camadas}Lojas e unidades</h2><p class="sub" style="margin:6px 0 10px">Cada m\xE1quina pertence a uma loja. O dono v\xEA tudo junto ou uma loja por vez; o motor de avalia\xE7\xE3o aprende com todas.</p>
+      <div class="cartoes-lojas">${b.lojas.map(a=>{const e=y.todasTrocas.filter(t=>t.loja===a),o=e.filter(t=>!t.vendido);return`<div class="loja-c"><b>${c(a)}</b><span>${o.length} no p\xE1tio \xB7 ${E(o.reduce((t,s)=>t+s.pago,0))} parados</span><span>${e.filter(t=>t.vendido).length} vendidas</span></div>`}).join("")||'<p class="vazio">Nenhuma loja cadastrada.</p>'}</div>
+      <div class="acoes"><button class="btn btn-linha" type="button" id="lj-add">Adicionar loja</button></div></section>`}function xt(){const a=l("#lj-add");a&&(a.onclick=()=>ba("Adicionar loja",[{k:"nome",r:"Nome da loja (cidade ou unidade)",lista:"dl-cidade",obr:!0}],{},e=>{if(b.lojas.includes(e.nome)){A("Essa loja j\xE1 existe.",!0);return}b.lojas.push(e.nome),L("loja",`Loja ${e.nome} adicionada`),T(),U(!0),A("Loja adicionada."),x.recarregar()}))}function ai(a){const e=a.t,o=to(e.modelo),t=n=>{const m=I.custoFinanceiro(e,n*30),r=a.venda*(1-Math.pow(.9,n/12)),p=(o.reserva||e.preparo*.15)*n/12;return{meses:n,juros:m,deprec:r,oficina:p,total:m+r+p}},s=t(6),i=t(12);return`<section class="painel" style="margin-top:6px"><h2>Manter ou vender agora?</h2><p class="sub" style="margin:4px 0 10px">Quanto custa segurar esta m\xE1quina, al\xE9m do que j\xE1 foi gasto.</p>
       <div class="tabela-wrap"><table class="tabela"><thead><tr><th></th><th class="n">Mais 6 meses</th><th class="n">Mais 12 meses</th></tr></thead><tbody>
-      <tr><td>Custo do dinheiro</td><td class="n">${real(c6.juros)}</td><td class="n">${real(c12.juros)}</td></tr><tr><td>Perda de valor (≈10% ao ano)</td><td class="n">${real(c6.deprec)}</td><td class="n">${real(c12.deprec)}</td></tr>
-      <tr><td>Oficina provável do modelo</td><td class="n">${real(c6.oficina)}</td><td class="n">${real(c12.oficina)}</td></tr><tr><td><b>Total de segurar</b></td><td class="n neg forte">${real(c6.total)}</td><td class="n neg forte">${real(c12.total)}</td></tr></tbody></table></div>
-      <p class="conta">Vender hoje com desconto de até <b>${real(c6.total)}</b> ainda sai mais barato do que segurar 6 meses.</p></section>`;
-  }
-  // anúncio pronto para os portais
-  function gerarAnuncio(t) {
-    const i = infoPatio(t), f = [0, 1, 2].map((k) => F.de(t, k)), link = new URL('passaporte.html?id=' + t.id, location.href).href;
-    const titulo = `${NOMES[t.tipo]} ${t.marca} ${t.modelo} ${t.ano} · ${horasTxt(t)}`;
-    const texto = `${titulo}\n\n${t.marca} ${t.modelo}, ano ${t.ano}, ${horasTxt(t)}oras. Inspeção da revenda: ${t.cond}/100.\n${(t.manutencoes || []).filter((m) => m.comNota).length} manutenções com nota fiscal.\nPreço: ${real(t.anuncio)}.\n\nFicha completa, fotos e histórico: ${link}\n${A.revenda.nome} · ${t.loja || A.revenda.cidade}`;
-    abrirCamada('modal', `<h2>Anúncio pronto</h2><p class="sub">Copie e cole no Agrofy, Mercado Máquinas, Facebook ou WhatsApp. O link leva ao passaporte com QR Code.</p>
-      <div class="campo" style="margin-top:12px"><label for="an-tit">Título</label><input id="an-tit" value="${esc(titulo)}"></div>
-      <div class="campo" style="margin-top:10px"><label for="an-txt">Descrição</label><textarea id="an-txt" rows="9">${esc(texto)}</textarea></div>
-      <div class="galeria-mini">${f.map((x) => `<img src="${x.propria ? x.u : F.mini(x.u)}" alt="">`).join('')}</div>
-      <div class="acoes"><button class="btn btn-ouro" type="button" id="an-cp">Copiar anúncio</button><button class="btn btn-linha" type="button" id="an-csv">Baixar planilha para importar no portal</button></div>
-      <p class="nota-rodape">Publicação automática nos portais depende de cada portal liberar integração.</p>`, (c) => {
-      $('#an-cp', c).onclick = async () => { try { await navigator.clipboard.writeText($('#an-tit', c).value + '\n\n' + $('#an-txt', c).value); toast('Anúncio copiado.'); log('anuncio', `Anúncio gerado: ${titulo}`, { ref: t.id }); salvar(); } catch (e) { toast('Selecione o texto e copie.', true); } };
-      $('#an-csv', c).onclick = () => baixarCSV(`anuncio-${t.id}.csv`, [['titulo', 'categoria', 'marca', 'modelo', 'ano', 'horas', 'preco', 'cidade', 'descricao', 'link'], [titulo, NOMES[t.tipo], t.marca, t.modelo, t.ano, t.horas, t.anuncio, t.loja || A.revenda.cidade, $('#an-txt', c).value, link]]);
-    });
-  }
+      <tr><td>Custo do dinheiro</td><td class="n">${M(s.juros)}</td><td class="n">${M(i.juros)}</td></tr><tr><td>Perda de valor (\u224810% ao ano)</td><td class="n">${M(s.deprec)}</td><td class="n">${M(i.deprec)}</td></tr>
+      <tr><td>Oficina prov\xE1vel do modelo</td><td class="n">${M(s.oficina)}</td><td class="n">${M(i.oficina)}</td></tr><tr><td><b>Total de segurar</b></td><td class="n neg forte">${M(s.total)}</td><td class="n neg forte">${M(i.total)}</td></tr></tbody></table></div>
+      <p class="conta">Vender hoje com desconto de at\xE9 <b>${M(s.total)}</b> ainda sai mais barato do que segurar 6 meses.</p></section>`}function ei(a){const e=Ta(a),o=[0,1,2].map(n=>ha.de(a,n)),t=new URL("passaporte.html?id="+a.id,location.href).href,s=`${V[a.tipo]} ${a.marca} ${a.modelo} ${a.ano} \xB7 ${pa(a)}`,i=`${s}
 
-  // =====================================================================================
-  // V9: hábito e valor acumulado (ético): Central "Hoje", rotina por perfil, memória comercial,
-  // histórico vivo, IA própria da revenda e avisos por e-mail. Nada prende dados: exportação continua livre.
-  // =====================================================================================
-  const PERFIL_NOME = (p) => K.PERFIS[p] || p;
-  const primeiroNome = (u) => { if (u.apelido) return u.apelido; const l = String(u.nome || '').split(' ').filter(Boolean); return l.slice(0, /^(seu|dona|dr|dra|sr|sra)\.?$/i.test(l[0] || '') ? 2 : 1).join(' '); };
-  const mesCurto = (m) => { const [a, b] = m.split('-'); return new Date(+a, +b - 1, 15).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '') + '/' + a.slice(2); };
-  function ctxDia(perfil = eu().perfil) {
-    const loja = estado.lojaAtual || '';
-    const rascunho = rascunhoDe && av.horas && ['vendedor', 'gerente', 'dono'].includes(perfil) ? `${av.marca} ${av.modelo} ${av.ano} · passo ${av.passo} de 4 · guardada ${new Date(rascunhoDe).toLocaleString('pt-BR')}` : null;
-    return { hoje: hojeISO(), perfil, nome: eu().nome, trocas: A.trocas, avaliacoes: estado.avaliacoes.filter((a) => !loja || !a.loja || a.loja === loja), pendentes: estado.pendentes,
-      garantias: A.garantias, financiadas: A.financiadas, compradores: A.compradores, revenda: A.revenda.nome, podeLiberar, janela: 7, rascunho, margemDe: (t) => infoPatio(t).margem, feitos: estado.rituais || {} };
-  }
-  const CAT_NOME = { aprovar: 'Aprovação', pedido: 'Seu pedido', avaliacao: 'Avaliação', rascunho: 'Avaliação', comprador: 'Comprador', faixa: 'Pátio', margem: 'Margem', preparo: 'Oficina', garantia: 'Garantia', floor: 'Floor plan', comissao: 'Financeiro', conferir: 'Auditoria' };
-  function botaoAcao(a, cls = 'btn-ouro') {
-    const b = a.botao || {};
-    if (b.href) return `<a class="btn ${cls}" href="${esc(b.href)}" target="_blank" rel="noopener" data-whats="${esc(a.id)}">${esc(b.rotulo)}</a>`;
-    if (b.ir) return `<a class="btn ${cls}" href="${b.ir}">${esc(b.rotulo)}</a>`;
-    return `<button class="btn ${cls}" type="button" data-acao="${esc(b.acao)}" data-ref="${esc(a.ref || '')}">${esc(b.rotulo)}</button>`;
-  }
-  function ligarAcoes(raiz) {
-    $$('[data-acao="maquina"]', raiz).forEach((b) => b.onclick = () => detalheMaquina(b.dataset.ref));
-    $$('[data-acao="avaliacao"]', raiz).forEach((b) => b.onclick = () => retornoAvaliacao(b.dataset.ref));
-    $$('[data-whats]', raiz).forEach((b) => b.addEventListener('click', () => { log('contato', 'WhatsApp aberto para comprador compatível'); salvar(); }));
-  }
-  // retorno ao cliente de uma avaliação parada: virou troca, desistiu ou ainda negociando (lembra em 3 dias)
-  function retornoAvaliacao(id) {
-    const a = estado.avaliacoes.find((x) => x.id === id); if (!a) return;
-    if (somenteLeitura()) { toast('Seu perfil é só de leitura.', true); return; }
-    abrirCamada('modal', `<h2>Retorno da avaliação</h2><p class="sub">${esc(a.maq.marca + ' ' + a.maq.modelo + ' ' + a.maq.ano)} · máximo ${real(a.teto)} · ${data(a.data)}</p>
-      <div class="acoes" style="flex-direction:column;align-items:stretch"><button class="btn btn-ouro" type="button" data-st="troca">Virou troca</button><button class="btn btn-linha" type="button" data-st="negociando">Ainda negociando (lembrar em 3 dias)</button><button class="btn btn-linha" type="button" data-st="desistiu">Cliente desistiu</button></div>`, (c) => {
-      $$('[data-st]', c).forEach((b) => b.onclick = () => {
-        const st = b.dataset.st, d = new Date(hojeISO() + 'T12:00:00'); d.setDate(d.getDate() + 3);
-        if (st === 'negociando') a.lembrar = d.toISOString().slice(0, 10); else { a.status = st; delete a.lembrar; }
-        a.retorno = { por: eu().nome, quando: new Date().toISOString(), status: st };
-        log('avaliacao', `Retorno da avaliação ${a.maq.marca} ${a.maq.modelo}: ${{ troca: 'virou troca', desistiu: 'cliente desistiu', negociando: 'ainda negociando' }[st]}`); salvar(); fecharCamada(true); toast('Retorno registrado.'); rota();
-      });
-    });
-  }
+${a.marca} ${a.modelo}, ano ${a.ano}, ${pa(a)}oras. Inspe\xE7\xE3o da revenda: ${a.cond}/100.
+${(a.manutencoes||[]).filter(n=>n.comNota).length} manuten\xE7\xF5es com nota fiscal.
+Pre\xE7o: ${M(a.anuncio)}.
 
-  // ---------- CENTRAL DO DIA ("Hoje") ----------
-  function telaHoje() {
-    if (!A.todasTrocas.length && !estado.avaliacoes.length) return semDados();
-    const t0 = performance.now(), u = eu(), acoes = tarefasDoDia(), prioridades = acoes.slice(0, 3);
-    const minhas = rituaisTodos().filter((r) => r.perfil === u.perfil && (r.periodo === 'dia' || new Date().getDay() === 1 || r.qtd));
-    const v = M.validar(), vend = A.todasTrocas.filter((t) => t.vendido && t.saida).length;
-    const h = new Date().getHours(), saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-    const grupos = {}; acoes.slice(3).forEach((a) => { const g = a.catNome || CAT_NOME[a.cat] || a.cat; (grupos[g] = grupos[g] || []).push(a); });
-    tela.innerHTML = `
-      <div class="titulo"><div><h1>Tarefas do dia</h1><p>${saud}, ${esc(primeiroNome(u))} · ${esc(PERFIL_NOME(u.perfil))} · ${estado.lojaAtual ? 'loja ' + esc(estado.lojaAtual) : estado.lojas.length ? 'todas as lojas' : esc(A.revenda.nome)} · ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}</p></div>
-        <div class="acoes">${pode('avaliar') && !somenteLeitura() ? '<a class="btn btn-ouro" href="#avaliar">Nova avaliação</a>' : ''}${pode('visao') ? '<a class="btn btn-linha" href="#visao">Visão geral</a>' : ''}</div></div>
+Ficha completa, fotos e hist\xF3rico: ${t}
+${y.revenda.nome} \xB7 ${a.loja||y.revenda.cidade}`;oa("modal",`<h2>An\xFAncio pronto</h2><p class="sub">Copie e cole no Agrofy, Mercado M\xE1quinas, Facebook ou WhatsApp. O link leva ao passaporte com QR Code.</p>
+      <div class="campo" style="margin-top:12px"><label for="an-tit">T\xEDtulo</label><input id="an-tit" value="${c(s)}"></div>
+      <div class="campo" style="margin-top:10px"><label for="an-txt">Descri\xE7\xE3o</label><textarea id="an-txt" rows="9">${c(i)}</textarea></div>
+      <div class="galeria-mini">${o.map(n=>`<img src="${n.propria?n.u:ha.mini(n.u)}" alt="">`).join("")}</div>
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="an-cp">Copiar an\xFAncio</button><button class="btn btn-linha" type="button" id="an-csv">Baixar planilha para importar no portal</button></div>
+      <p class="nota-rodape">Publica\xE7\xE3o autom\xE1tica nos portais depende de cada portal liberar integra\xE7\xE3o.</p>`,n=>{l("#an-cp",n).onclick=async()=>{try{await navigator.clipboard.writeText(l("#an-tit",n).value+`
+
+`+l("#an-txt",n).value),A("An\xFAncio copiado."),L("anuncio",`An\xFAncio gerado: ${s}`,{ref:a.id}),T()}catch{A("Selecione o texto e copie.",!0)}},l("#an-csv",n).onclick=()=>Ea(`anuncio-${a.id}.csv`,[["titulo","categoria","marca","modelo","ano","horas","preco","cidade","descricao","link"],[s,V[a.tipo],a.marca,a.modelo,a.ano,a.horas,a.anuncio,a.loja||y.revenda.cidade,l("#an-txt",n).value,t]])})}const ie=a=>x.PERFIS[a]||a,jt=a=>{if(a.apelido)return a.apelido;const e=String(a.nome||"").split(" ").filter(Boolean);return e.slice(0,/^(seu|dona|dr|dra|sr|sra)\.?$/i.test(e[0]||"")?2:1).join(" ")},Mt=a=>{const[e,o]=a.split("-");return new Date(+e,+o-1,15).toLocaleDateString("pt-BR",{month:"short"}).replace(".","")+"/"+e.slice(2)};function jo(a=D().perfil){const e=b.lojaAtual||"",o=Ua&&v.horas&&["vendedor","gerente","dono"].includes(a)?`${v.marca} ${v.modelo} ${v.ano} \xB7 passo ${v.passo} de 4 \xB7 guardada ${new Date(Ua).toLocaleString("pt-BR")}`:null;return{hoje:z(),perfil:a,nome:D().nome,trocas:y.trocas,avaliacoes:b.avaliacoes.filter(t=>!e||!t.loja||t.loja===e),pendentes:b.pendentes,garantias:y.garantias,financiadas:y.financiadas,compradores:y.compradores,revenda:y.revenda.nome,podeLiberar:se,janela:7,rascunho:o,margemDe:t=>Ta(t).margem,feitos:b.rituais||{}}}const Mo={aprovar:"Aprova\xE7\xE3o",pedido:"Seu pedido",avaliacao:"Avalia\xE7\xE3o",rascunho:"Avalia\xE7\xE3o",comprador:"Comprador",faixa:"P\xE1tio",margem:"Margem",preparo:"Oficina",garantia:"Garantia",floor:"Floor plan",comissao:"Financeiro",conferir:"Auditoria"};function Ao(a,e="btn-ouro"){const o=a.botao||{};return o.href?`<a class="btn ${e}" href="${c(o.href)}" target="_blank" rel="noopener" data-whats="${c(a.id)}">${c(o.rotulo)}</a>`:o.ir?`<a class="btn ${e}" href="${o.ir}">${c(o.rotulo)}</a>`:`<button class="btn ${e}" type="button" data-acao="${c(o.acao)}" data-ref="${c(a.ref||"")}">${c(o.rotulo)}</button>`}function At(a){R('[data-acao="maquina"]',a).forEach(e=>e.onclick=()=>we(e.dataset.ref)),R('[data-acao="avaliacao"]',a).forEach(e=>e.onclick=()=>oi(e.dataset.ref)),R("[data-whats]",a).forEach(e=>e.addEventListener("click",()=>{L("contato","WhatsApp aberto para comprador compat\xEDvel"),T()}))}function oi(a){const e=b.avaliacoes.find(o=>o.id===a);if(e){if(Na()){A("Seu perfil \xE9 s\xF3 de leitura.",!0);return}oa("modal",`<h2>Retorno da avalia\xE7\xE3o</h2><p class="sub">${c(e.maq.marca+" "+e.maq.modelo+" "+e.maq.ano)} \xB7 m\xE1ximo ${M(e.teto)} \xB7 ${N(e.data)}</p>
+      <div class="acoes" style="flex-direction:column;align-items:stretch"><button class="btn btn-ouro" type="button" data-st="troca">Virou troca</button><button class="btn btn-linha" type="button" data-st="negociando">Ainda negociando (lembrar em 3 dias)</button><button class="btn btn-linha" type="button" data-st="desistiu">Cliente desistiu</button></div>`,o=>{R("[data-st]",o).forEach(t=>t.onclick=()=>{const s=t.dataset.st,i=new Date(z()+"T12:00:00");i.setDate(i.getDate()+3),s==="negociando"?e.lembrar=i.toISOString().slice(0,10):(e.status=s,delete e.lembrar),e.retorno={por:D().nome,quando:new Date().toISOString(),status:s},L("avaliacao",`Retorno da avalia\xE7\xE3o ${e.maq.marca} ${e.maq.modelo}: ${{troca:"virou troca",desistiu:"cliente desistiu",negociando:"ainda negociando"}[s]}`),T(),U(!0),A("Retorno registrado."),Z()})})}}function ti(){if(!y.todasTrocas.length&&!b.avaliacoes.length)return zo();const a=performance.now(),e=D(),o=Nt(),t=o.slice(0,3),s=yt().filter(d=>d.perfil===e.perfil&&(d.periodo==="dia"||new Date().getDay()===1||d.qtd)),i=Q.validar(),n=y.todasTrocas.filter(d=>d.vendido&&d.saida).length,m=new Date().getHours(),r=m<12?"Bom dia":m<18?"Boa tarde":"Boa noite",p={};o.slice(3).forEach(d=>{const $=d.catNome||Mo[d.cat]||d.cat;(p[$]=p[$]||[]).push(d)}),w.innerHTML=`
+      <div class="titulo"><div><h1>Tarefas do dia</h1><p>${r}, ${c(jt(e))} \xB7 ${c(ie(e.perfil))} \xB7 ${b.lojaAtual?"loja "+c(b.lojaAtual):b.lojas.length?"todas as lojas":c(y.revenda.nome)} \xB7 ${new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long"})}</p></div>
+        <div class="acoes">${ta("avaliar")&&!Na()?'<a class="btn btn-ouro" href="#avaliar">Nova avalia\xE7\xE3o</a>':""}${ta("visao")?'<a class="btn btn-linha" href="#visao">Vis\xE3o geral</a>':""}</div></div>
       <section class="prioridades" aria-label="As 3 prioridades de hoje">
-        ${prioridades.length ? prioridades.map((a, i) => `<article class="prio n${a.nivel}"><span class="prio-n" aria-hidden="true">${i + 1}</span><div><span class="cat">${esc(a.catNome || CAT_NOME[a.cat] || a.cat)}</span><h2>${esc(a.titulo)}</h2><p>${esc(a.txt)}</p>
-          <div class="acoes">${botaoAcao(a)}${a.extra ? `<a class="btn btn-linha" href="${a.extra.ir}">${esc(a.extra.rotulo)}</a>` : ''}${(a.whats || []).slice(1).map((w) => `<a class="btn btn-linha" href="${esc(w.href)}" target="_blank" rel="noopener" data-whats="${esc(a.id)}">WhatsApp de ${esc(String(w.nome).split(' ')[0])}</a>`).join('')}</div></div></article>`).join('')
-          : `<article class="prio n3"><span class="prio-n" aria-hidden="true">${ICO.baixo}</span><div><span class="cat">Em dia</span><h2>Nada urgente para você hoje</h2><p>Nenhuma aprovação, conta vencida, OS atrasada, retorno de cliente ou máquina mudando de faixa no seu perfil.</p><div class="acoes"><a class="btn btn-linha" href="#/">Voltar ao portal</a></div></div></article>`}
+        ${t.length?t.map((d,$)=>`<article class="prio n${d.nivel}"><span class="prio-n" aria-hidden="true">${$+1}</span><div><span class="cat">${c(d.catNome||Mo[d.cat]||d.cat)}</span><h2>${c(d.titulo)}</h2><p>${c(d.txt)}</p>
+          <div class="acoes">${Ao(d)}${d.extra?`<a class="btn btn-linha" href="${d.extra.ir}">${c(d.extra.rotulo)}</a>`:""}${(d.whats||[]).slice(1).map(u=>`<a class="btn btn-linha" href="${c(u.href)}" target="_blank" rel="noopener" data-whats="${c(d.id)}">WhatsApp de ${c(String(u.nome).split(" ")[0])}</a>`).join("")}</div></div></article>`).join(""):`<article class="prio n3"><span class="prio-n" aria-hidden="true">${q.baixo}</span><div><span class="cat">Em dia</span><h2>Nada urgente para voc\xEA hoje</h2><p>Nenhuma aprova\xE7\xE3o, conta vencida, OS atrasada, retorno de cliente ou m\xE1quina mudando de faixa no seu perfil.</p><div class="acoes"><a class="btn btn-linha" href="#/">Voltar ao portal</a></div></div></article>`}
       </section>
-      ${acoes.length > 3 ? `<section class="painel bloco"><div class="painel-cab"><h2>${ICO.alvo}Também para hoje</h2><p>${acoes.length - 3} ${acoes.length - 3 === 1 ? 'ação' : 'ações'}, cada uma com o botão que resolve</p></div>
-        ${Object.entries(grupos).map(([cat, l]) => `<h3 class="grupo-acao">${esc(cat)} <span class="sub">${l.length}</span></h3><ul class="acoes-dia">${l.map((a) => `<li class="n${a.nivel}"><div><b>${esc(a.titulo)}</b><span>${esc(a.txt)}</span></div>${botaoAcao(a, 'btn-linha')}</li>`).join('')}</ul>`).join('')}</section>` : ''}
+      ${o.length>3?`<section class="painel bloco"><div class="painel-cab"><h2>${q.alvo}Tamb\xE9m para hoje</h2><p>${o.length-3} ${o.length-3===1?"a\xE7\xE3o":"a\xE7\xF5es"}, cada uma com o bot\xE3o que resolve</p></div>
+        ${Object.entries(p).map(([d,$])=>`<h3 class="grupo-acao">${c(d)} <span class="sub">${$.length}</span></h3><ul class="acoes-dia">${$.map(u=>`<li class="n${u.nivel}"><div><b>${c(u.titulo)}</b><span>${c(u.txt)}</span></div>${Ao(u,"btn-linha")}</li>`).join("")}</ul>`).join("")}</section>`:""}
       <div class="grade-2 bloco">
-        <section class="painel"><div class="painel-cab"><h2>${ICO.baixo}Sua rotina</h2><p>${esc(PERFIL_NOME(u.perfil))}</p></div>
-          <ul class="rotina">${minhas.map((r) => itemRitual(r)).join('') || '<li class="vazio">Sem rotina para o seu perfil.</li>'}</ul>
+        <section class="painel"><div class="painel-cab"><h2>${q.baixo}Sua rotina</h2><p>${c(ie(e.perfil))}</p></div>
+          <ul class="rotina">${s.map(d=>qt(d)).join("")||'<li class="vazio">Sem rotina para o seu perfil.</li>'}</ul>
           <div class="acoes"><a class="btn btn-linha" href="#rotina">Rotina da equipe</a></div></section>
-        ${pode('memoria') ? `<section class="painel"><div class="painel-cab"><h2>${ICO.linha}O que a revenda já aprendeu</h2></div>
-          <div class="numeros"><div><span>Trocas vendidas na memória</span><b>${vend}</b></div><div><span>Erro médio no teste às cegas</span><b>${v.n >= M.QUALIDADE.minimoValidacao ? pct(v.mape) : 'medindo'}</b></div><div><span>Avaliações feitas</span><b>${estado.avaliacoes.length}</b></div></div>
-          <p class="conta">Cada troca vendida entra na referência interna da revenda e o erro é medido de novo. É a memória da revenda, não valor de mercado.</p>
-          <div class="acoes"><a class="btn btn-linha" href="#memoria">Ver a memória comercial</a></div></section>` : ''}
+        ${ta("memoria")?`<section class="painel"><div class="painel-cab"><h2>${q.linha}O que a revenda j\xE1 aprendeu</h2></div>
+          <div class="numeros"><div><span>Trocas vendidas na mem\xF3ria</span><b>${n}</b></div><div><span>Erro m\xE9dio no teste \xE0s cegas</span><b>${i.n>=Q.QUALIDADE.minimoValidacao?P(i.mape):"medindo"}</b></div><div><span>Avalia\xE7\xF5es feitas</span><b>${b.avaliacoes.length}</b></div></div>
+          <p class="conta">Cada troca vendida entra na refer\xEAncia interna da revenda e o erro \xE9 medido de novo. \xC9 a mem\xF3ria da revenda, n\xE3o valor de mercado.</p>
+          <div class="acoes"><a class="btn btn-linha" href="#memoria">Ver a mem\xF3ria comercial</a></div></section>`:""}
       </div>
-      <p class="nota-rodape" id="hoje-tempo">Junta o que pede atenção em todos os sistemas que você usa (Usados, Máquinas Novas, Financeiro, Oficina, Peças, Vendas e Fiscal). Montado em ${Math.max(1, Math.round(performance.now() - t0))} ms; cada item vem de um registro real.</p>`;
-    ligarAcoes(tela); ligarRituais(tela);
-  }
-
-  // ---------- ROTINA POR PERFIL ----------
-  // rotina dos usados (retencao.js) + a de cada sistema (rotina() de cada área), com a mesma chave de dia/semana
-  function rituaisTodos() {
-    const ctx = ctxDia(), h = hojeISO(), base = RT.rituais(ctx);
-    const extra = AR ? AR.rotinas(estado, eu(), UI).map((r) => { const chave = RT.chavePeriodo(r.periodo, h) + '|' + r.perfil + '|' + r.id, feito = (estado.rituais || {})[chave] || null; return Object.assign({}, r, { chave, feito, emDia: !feito && r.qtd === 0 }); }) : [];
-    return base.concat(extra);
-  }
-  function itemRitual(r) {
-    const meu = r.perfil === eu().perfil && !somenteLeitura();
-    const st = r.feito ? `<span class="tag comprovado">Feito por ${esc(r.feito.por)} · ${new Date(r.feito.quando).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>` : r.emDia ? '<span class="tag comprovado">Em dia: nada pendente</span>' : '';
-    return `<li class="${r.feito || r.emDia ? 'ok' : ''}">${meu && !r.emDia ? `<label class="check"><input type="checkbox" data-ritual="${esc(r.chave)}" ${r.feito ? 'checked' : ''} ${r.feito && r.feito.por !== eu().nome ? 'disabled' : ''}> <span>` : '<span>'}<b>${esc(r.titulo)}</b>${r.qtd ? ` <span class="pilula">${r.qtd}</span>` : ''} <span class="sub">${r.periodo === 'dia' ? 'hoje' : 'esta semana'}</span>${meu && !r.emDia ? '</span></label>' : '</span>'} <a class="link" href="${r.ir}">abrir</a> ${st}</li>`;
-  }
-  function ligarRituais(raiz) {
-    $$('[data-ritual]', raiz).forEach((c) => c.onchange = () => {
-      estado.rituais = estado.rituais || {};
-      if (c.checked) estado.rituais[c.dataset.ritual] = { por: eu().nome, quando: new Date().toISOString() }; else delete estado.rituais[c.dataset.ritual];
-      log('rotina', `${c.checked ? 'Concluiu' : 'Reabriu'}: ${c.closest('li').querySelector('b').textContent}`); salvar(); rota();
-    });
-  }
-  function telaRotina() {
-    const todos = rituaisTodos(), ver = ['dono', 'gerente', 'auditor'].includes(eu().perfil);
-    const exec = RT.execucaoRituais(estado.rituais, hojeISO(), 4);
-    const perfis = ver ? Object.keys(K.PERFIS) : [eu().perfil];
-    const resp = (p) => estado.usuarios.filter((x) => x.perfil === p).map((x) => x.nome);
-    tela.innerHTML = `<div class="titulo"><div><h1>Rotina da equipe</h1><p>O que cada perfil faz todo dia e toda semana, gerado dos dados de hoje. ${ver ? 'Você vê o que foi feito, por quem e quando, sem precisar cobrar.' : 'Marque o que já fez: o gerente e o dono veem sem precisar perguntar.'}</p></div></div>
-      <div class="grade-2">${perfis.map((p) => { const l = todos.filter((r) => r.perfil === p), feitos = l.filter((r) => r.feito || r.emDia).length; return `<section class="painel"><div class="painel-cab"><h2>${esc(PERFIL_NOME(p))}</h2><p>${feitos} de ${l.length} em dia</p></div>
-        <p class="sub">Responsáveis: ${esc(resp(p).join(', ') || 'ninguém com este perfil ainda')}</p>
-        <div class="progresso"><i style="width:${l.length ? feitos / l.length * 100 : 0}%"></i></div>
-        <ul class="rotina">${l.map(itemRitual).join('')}</ul></section>`; }).join('')}</div>
-      ${ver ? `<section class="painel bloco"><div class="painel-cab"><h2>${ICO.barras}Execução nas últimas 4 semanas</h2><p>Tarefas concluídas</p></div>
-        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Perfil</th><th class="n">Concluídas</th><th>Quem fez</th></tr></thead><tbody>
-        ${Object.keys(K.PERFIS).map((p) => { const e = exec[p]; return `<tr><td><b>${esc(PERFIL_NOME(p))}</b></td><td class="n">${e ? e.n : 0}</td><td>${e ? Object.entries(e.pessoas).map(([n, q]) => `${esc(n)} (${q})`).join(', ') : '<span class="sub">—</span>'}</td></tr>`; }).join('')}</tbody></table></div>
-        <p class="nota-rodape">Só mostra o que foi feito. O Anshur não manda cobrança nem notificação para a equipe por causa da rotina.</p></section>` : ''}`;
-    ligarRituais(tela);
-  }
-
-  // ---------- MEMÓRIA COMERCIAL ----------
-  function telaMemoria() {
-    const v = M.validar(), mem = RT.memoriaComercial(A.todasTrocas, v.testes), ev = mem.evolucao.slice(-12);
-    const comErro = ev.filter((e) => e.erro != null);
-    const largura = innerWidth >= 960 ? 1100 : 560;
-    const tabela = (titulo, l, extra = '') => `<section class="painel bloco"><div class="painel-cab"><h2>${titulo}</h2><p>${l.length}</p></div><div class="tabela-wrap"><table class="tabela"><thead><tr><th>${extra || 'Grupo'}</th><th class="n">Vendas na memória</th><th class="n">Venda média</th><th class="n">Última venda</th><th class="n">Erro medido</th><th>Confiança</th></tr></thead><tbody>
-      ${l.slice(0, 20).map((x) => `<tr><td><b>${esc(NOMES[x.chave] || x.chave)}</b></td><td class="n">${x.amostras}</td><td class="n">${mil(x.mediaVenda)}</td><td class="n">${data(x.ultima)} · ${mil(x.ultimoPreco)}</td><td class="n">${x.erro != null ? pct(x.erro) + ` <span class="sub">(${x.testes})</span>` : '<span class="sub">poucos testes</span>'}</td><td><span class="conf ${x.confianca}">${x.confianca}</span></td></tr>`).join('')}</tbody></table></div></section>`;
-    tela.innerHTML = `<div class="titulo"><div><h1>Memória comercial</h1><p>A referência de preço que a ${esc(A.revenda.nome)} construiu com as próprias trocas vendidas. Cresce a cada venda e é testada às cegas. <b>Não é valor de mercado</b> nem tabela: é o histórico desta revenda.</p></div>
-        <div class="acoes"><a class="btn btn-linha" href="#teste">Teste às cegas</a><button class="btn btn-linha" type="button" id="mem-csv">Exportar CSV</button></div></div>
+      <p class="nota-rodape" id="hoje-tempo">Junta o que pede aten\xE7\xE3o em todos os sistemas que voc\xEA usa (Usados, M\xE1quinas Novas, Financeiro, Oficina, Pe\xE7as, Vendas e Fiscal). Montado em ${Math.max(1,Math.round(performance.now()-a))} ms; cada item vem de um registro real.</p>`,At(w),kt(w)}function yt(){const a=jo(),e=z(),o=na.rituais(a),t=B?B.rotinas(b,D(),Ra).map(s=>{const i=na.chavePeriodo(s.periodo,e)+"|"+s.perfil+"|"+s.id,n=(b.rituais||{})[i]||null;return Object.assign({},s,{chave:i,feito:n,emDia:!n&&s.qtd===0})}):[];return o.concat(t)}function qt(a){const e=a.perfil===D().perfil&&!Na(),o=a.feito?`<span class="tag comprovado">Feito por ${c(a.feito.por)} \xB7 ${new Date(a.feito.quando).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span>`:a.emDia?'<span class="tag comprovado">Em dia: nada pendente</span>':"";return`<li class="${a.feito||a.emDia?"ok":""}">${e&&!a.emDia?`<label class="check"><input type="checkbox" data-ritual="${c(a.chave)}" ${a.feito?"checked":""} ${a.feito&&a.feito.por!==D().nome?"disabled":""}> <span>`:"<span>"}<b>${c(a.titulo)}</b>${a.qtd?` <span class="pilula">${a.qtd}</span>`:""} <span class="sub">${a.periodo==="dia"?"hoje":"esta semana"}</span>${e&&!a.emDia?"</span></label>":"</span>"} <a class="link" href="${a.ir}">abrir</a> ${o}</li>`}function kt(a){R("[data-ritual]",a).forEach(e=>e.onchange=()=>{b.rituais=b.rituais||{},e.checked?b.rituais[e.dataset.ritual]={por:D().nome,quando:new Date().toISOString()}:delete b.rituais[e.dataset.ritual],L("rotina",`${e.checked?"Concluiu":"Reabriu"}: ${e.closest("li").querySelector("b").textContent}`),T(),Z()})}function si(){const a=yt(),e=["dono","gerente","auditor"].includes(D().perfil),o=na.execucaoRituais(b.rituais,z(),4),t=e?Object.keys(x.PERFIS):[D().perfil],s=i=>b.usuarios.filter(n=>n.perfil===i).map(n=>n.nome);w.innerHTML=`<div class="titulo"><div><h1>Rotina da equipe</h1><p>O que cada perfil faz todo dia e toda semana, gerado dos dados de hoje. ${e?"Voc\xEA v\xEA o que foi feito, por quem e quando, sem precisar cobrar.":"Marque o que j\xE1 fez: o gerente e o dono veem sem precisar perguntar."}</p></div></div>
+      <div class="grade-2">${t.map(i=>{const n=a.filter(r=>r.perfil===i),m=n.filter(r=>r.feito||r.emDia).length;return`<section class="painel"><div class="painel-cab"><h2>${c(ie(i))}</h2><p>${m} de ${n.length} em dia</p></div>
+        <p class="sub">Respons\xE1veis: ${c(s(i).join(", ")||"ningu\xE9m com este perfil ainda")}</p>
+        <div class="progresso"><i style="width:${n.length?m/n.length*100:0}%"></i></div>
+        <ul class="rotina">${n.map(qt).join("")}</ul></section>`}).join("")}</div>
+      ${e?`<section class="painel bloco"><div class="painel-cab"><h2>${q.barras}Execu\xE7\xE3o nas \xFAltimas 4 semanas</h2><p>Tarefas conclu\xEDdas</p></div>
+        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Perfil</th><th class="n">Conclu\xEDdas</th><th>Quem fez</th></tr></thead><tbody>
+        ${Object.keys(x.PERFIS).map(i=>{const n=o[i];return`<tr><td><b>${c(ie(i))}</b></td><td class="n">${n?n.n:0}</td><td>${n?Object.entries(n.pessoas).map(([m,r])=>`${c(m)} (${r})`).join(", "):'<span class="sub">\u2014</span>'}</td></tr>`}).join("")}</tbody></table></div>
+        <p class="nota-rodape">S\xF3 mostra o que foi feito. O Anshur n\xE3o manda cobran\xE7a nem notifica\xE7\xE3o para a equipe por causa da rotina.</p></section>`:""}`,kt(w)}function ii(){const a=Q.validar(),e=na.memoriaComercial(y.todasTrocas,a.testes),o=e.evolucao.slice(-12),t=o.filter(n=>n.erro!=null),s=innerWidth>=960?1100:560,i=(n,m,r="")=>`<section class="painel bloco"><div class="painel-cab"><h2>${n}</h2><p>${m.length}</p></div><div class="tabela-wrap"><table class="tabela"><thead><tr><th>${r||"Grupo"}</th><th class="n">Vendas na mem\xF3ria</th><th class="n">Venda m\xE9dia</th><th class="n">\xDAltima venda</th><th class="n">Erro medido</th><th>Confian\xE7a</th></tr></thead><tbody>
+      ${m.slice(0,20).map(p=>`<tr><td><b>${c(V[p.chave]||p.chave)}</b></td><td class="n">${p.amostras}</td><td class="n">${E(p.mediaVenda)}</td><td class="n">${N(p.ultima)} \xB7 ${E(p.ultimoPreco)}</td><td class="n">${p.erro!=null?P(p.erro)+` <span class="sub">(${p.testes})</span>`:'<span class="sub">poucos testes</span>'}</td><td><span class="conf ${p.confianca}">${p.confianca}</span></td></tr>`).join("")}</tbody></table></div></section>`;w.innerHTML=`<div class="titulo"><div><h1>Mem\xF3ria comercial</h1><p>A refer\xEAncia de pre\xE7o que a ${c(y.revenda.nome)} construiu com as pr\xF3prias trocas vendidas. Cresce a cada venda e \xE9 testada \xE0s cegas. <b>N\xE3o \xE9 valor de mercado</b> nem tabela: \xE9 o hist\xF3rico desta revenda.</p></div>
+        <div class="acoes"><a class="btn btn-linha" href="#teste">Teste \xE0s cegas</a><button class="btn btn-linha" type="button" id="mem-csv">Exportar CSV</button></div></div>
       <div class="kpis escalonado">
-        <div class="kpi k-marfim"><span class="rot">${ICO.camadas}Trocas vendidas na memória</span><span class="val">${conta(mem.total, 'int')}</span><span class="exp">Cada uma melhora a próxima avaliação</span></div>
-        <div class="kpi k-salvia"><span class="rot">${ICO.alvo}Erro médio no teste às cegas</span><span class="val">${v.n >= M.QUALIDADE.minimoValidacao ? pct(v.mape) : '—'}</span><span class="exp">${v.n} vendas previstas sem ver o resultado</span></div>
-        <div class="kpi k-marfim"><span class="rot">${ICO.moedas}Erro médio em reais</span><span class="val">${v.n >= M.QUALIDADE.minimoValidacao ? mil(v.mae) : '—'}</span><span class="exp">Por máquina, no preço de venda</span></div>
-        <div class="kpi k-marfim"><span class="rot">${ICO.barras}Modelos com histórico</span><span class="val">${mem.porModelo.length}</span><span class="exp">${mem.porModelo.filter((m) => m.amostras >= 3).length} com 3 ou mais vendas</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.camadas}Trocas vendidas na mem\xF3ria</span><span class="val">${ia(e.total,"int")}</span><span class="exp">Cada uma melhora a pr\xF3xima avalia\xE7\xE3o</span></div>
+        <div class="kpi k-salvia"><span class="rot">${q.alvo}Erro m\xE9dio no teste \xE0s cegas</span><span class="val">${a.n>=Q.QUALIDADE.minimoValidacao?P(a.mape):"\u2014"}</span><span class="exp">${a.n} vendas previstas sem ver o resultado</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.moedas}Erro m\xE9dio em reais</span><span class="val">${a.n>=Q.QUALIDADE.minimoValidacao?E(a.mae):"\u2014"}</span><span class="exp">Por m\xE1quina, no pre\xE7o de venda</span></div>
+        <div class="kpi k-marfim"><span class="rot">${q.barras}Modelos com hist\xF3rico</span><span class="val">${e.porModelo.length}</span><span class="exp">${e.porModelo.filter(n=>n.amostras>=3).length} com 3 ou mais vendas</span></div>
       </div>
       <div class="grade-2">
-        <section class="painel"><div class="painel-cab"><h2>${ICO.linha}Vendas acumuladas na memória</h2><p>Por mês</p></div>${ev.length > 1 ? G.linha(ev.map((e) => ({ r: mesCurto(e.mes), v: e.amostras })), { formato: (x) => Math.round(x) + '', altura: 170, largura: Math.min(560, largura) }) : '<p class="vazio">Ainda poucas vendas.</p>'}</section>
-        <section class="painel"><div class="painel-cab"><h2>${ICO.alvo}Erro do teste às cegas ao longo do tempo</h2><p>Média das últimas 12 previsões</p></div>${comErro.length > 1 ? G.linha(comErro.map((e) => ({ r: mesCurto(e.mes), v: e.erro })), { formato: (x) => pct(x), altura: 170, largura: Math.min(560, largura) }) : '<p class="vazio">O erro aparece depois de algumas vendas testadas.</p>'}
-          <p class="nota-rodape">Cada previsão usou só as vendas anteriores a ela. O gráfico mostra, sem maquiagem, se o erro está caindo ou subindo; com mais trocas registradas a tendência é cair.</p></section>
+        <section class="painel"><div class="painel-cab"><h2>${q.linha}Vendas acumuladas na mem\xF3ria</h2><p>Por m\xEAs</p></div>${o.length>1?ya.linha(o.map(n=>({r:Mt(n.mes),v:n.amostras})),{formato:n=>Math.round(n)+"",altura:170,largura:Math.min(560,s)}):'<p class="vazio">Ainda poucas vendas.</p>'}</section>
+        <section class="painel"><div class="painel-cab"><h2>${q.alvo}Erro do teste \xE0s cegas ao longo do tempo</h2><p>M\xE9dia das \xFAltimas 12 previs\xF5es</p></div>${t.length>1?ya.linha(t.map(n=>({r:Mt(n.mes),v:n.erro})),{formato:n=>P(n),altura:170,largura:Math.min(560,s)}):'<p class="vazio">O erro aparece depois de algumas vendas testadas.</p>'}
+          <p class="nota-rodape">Cada previs\xE3o usou s\xF3 as vendas anteriores a ela. O gr\xE1fico mostra, sem maquiagem, se o erro est\xE1 caindo ou subindo; com mais trocas registradas a tend\xEAncia \xE9 cair.</p></section>
       </div>
-      <section class="painel bloco"><div class="painel-cab"><h2>${ICO.baixo}Últimas vendas que entraram na memória</h2></div>
-        <ul class="linha-tempo grande">${mem.recentes.map((x) => `<li><b>${esc(x.maq)} vendida por ${mil(x.vendido)}</b><span>${data(x.quando)} · agora ${x.doModelo} ${x.doModelo === 1 ? 'venda' : 'vendas'} deste modelo e ${x.doTipo} de ${esc(NOMES[x.tipo].toLowerCase())} na memória</span></li>`).join('') || '<li>Nenhuma venda ainda.</li>'}</ul></section>
-      ${tabela(`${ICO.camadas}Por tipo de máquina`, mem.porTipo, 'Tipo')}${tabela(`${ICO.etiqueta}Por marca`, mem.porMarca, 'Marca')}${tabela(`${ICO.etiqueta}Por modelo`, mem.porModelo, 'Modelo')}
-      <p class="nota-rodape">Confiança: alta = 12+ vendas e erro até 6%; moderada = 8+ vendas e erro até 10%; abaixo disso, baixa. Os dados são da revenda e saem em CSV ou na cópia de segurança quando ela quiser.</p>`;
-    $('#mem-csv').onclick = () => baixarCSV(`anshur-memoria-${hojeISO()}.csv`, [['Grupo', 'Chave', 'Vendas', 'Venda média', 'Última venda', 'Último preço', 'Erro medido', 'Testes', 'Confiança']].concat(...[['tipo', mem.porTipo], ['marca', mem.porMarca], ['modelo', mem.porModelo]].map(([g, l]) => l.map((x) => [g, x.chave, x.amostras, Math.round(x.mediaVenda), x.ultima, x.ultimoPreco, x.erro != null ? pctCSV(x.erro) : '', x.testes, x.confianca]))));
-    contar();
-  }
-
-  // ---------- HISTÓRICO VIVO ----------
-  const fh = { tipo: '', marca: '', modelo: '', loja: '', de: '', ate: '' };
-  function telaHistorico() {
-    const tl = RT.linhaDoTempo(estado, A.todasTrocas.filter((t) => !K.lojasPermitidas || !K.lojasPermitidas.length || K.lojasPermitidas.includes(t.loja)), { ...fh, loja: fh.loja || estado.lojaAtual || '' });
-    const marcas = [...new Set(A.todasTrocas.map((t) => t.marca).filter(Boolean))].sort(), modelos = [...new Set(A.todasTrocas.filter((t) => !fh.marca || t.marca === fh.marca).map((t) => t.modelo))].sort();
-    const TIPOS_EV = { avaliacao: 'Avaliações', decisao: 'Decisões da IA', troca: 'Trocas', aprovacao: 'Aprovações', negociacao: 'Negociações de preço', venda: 'Vendas e margens' };
-    const ind = (titulo, l) => `<section class="painel"><div class="painel-cab"><h2>${titulo}</h2></div><div class="tabela-wrap"><table class="tabela"><thead><tr><th></th><th class="n">Avaliações</th><th class="n">Trocas</th><th class="n">Vendas</th><th class="n">Margem média</th></tr></thead><tbody>${l.slice(0, 12).map((x) => `<tr><td><b>${esc(x.chave)}</b></td><td class="n">${x.avaliacoes}</td><td class="n">${x.trocas}</td><td class="n">${x.vendas}</td><td class="n ${x.margem != null && x.margem < 0.06 ? 'neg' : ''}">${x.margem != null ? pct(x.margem) : '—'}</td></tr>`).join('') || '<tr><td colspan="5" class="vazio">Nada no filtro.</td></tr>'}</tbody></table></div></section>`;
-    const opt = (l, v, todos) => `<option value="">${todos}</option>` + l.map((x) => `<option ${x === v ? 'selected' : ''}>${esc(x)}</option>`).join('');
-    tela.innerHTML = `<div class="titulo"><div><h1>Histórico vivo</h1><p>Tudo o que a revenda decidiu e aprendeu: avaliações, decisões, aprovações, negociações, vendas e margens, numa linha do tempo.</p></div><div class="acoes"><button class="btn btn-linha" type="button" id="hv-csv">Exportar CSV</button></div></div>
+      <section class="painel bloco"><div class="painel-cab"><h2>${q.baixo}\xDAltimas vendas que entraram na mem\xF3ria</h2></div>
+        <ul class="linha-tempo grande">${e.recentes.map(n=>`<li><b>${c(n.maq)} vendida por ${E(n.vendido)}</b><span>${N(n.quando)} \xB7 agora ${n.doModelo} ${n.doModelo===1?"venda":"vendas"} deste modelo e ${n.doTipo} de ${c(V[n.tipo].toLowerCase())} na mem\xF3ria</span></li>`).join("")||"<li>Nenhuma venda ainda.</li>"}</ul></section>
+      ${i(`${q.camadas}Por tipo de m\xE1quina`,e.porTipo,"Tipo")}${i(`${q.etiqueta}Por marca`,e.porMarca,"Marca")}${i(`${q.etiqueta}Por modelo`,e.porModelo,"Modelo")}
+      <p class="nota-rodape">Confian\xE7a: alta = 12+ vendas e erro at\xE9 6%; moderada = 8+ vendas e erro at\xE9 10%; abaixo disso, baixa. Os dados s\xE3o da revenda e saem em CSV ou na c\xF3pia de seguran\xE7a quando ela quiser.</p>`,l("#mem-csv").onclick=()=>Ea(`anshur-memoria-${z()}.csv`,[["Grupo","Chave","Vendas","Venda m\xE9dia","\xDAltima venda","\xDAltimo pre\xE7o","Erro medido","Testes","Confian\xE7a"]].concat(...[["tipo",e.porTipo],["marca",e.porMarca],["modelo",e.porModelo]].map(([n,m])=>m.map(r=>[n,r.chave,r.amostras,Math.round(r.mediaVenda),r.ultima,r.ultimoPreco,r.erro!=null?Le(r.erro):"",r.testes,r.confianca])))),$a()}const ja={tipo:"",marca:"",modelo:"",loja:"",de:"",ate:""};function Et(){const a=na.linhaDoTempo(b,y.todasTrocas.filter(m=>!x.lojasPermitidas||!x.lojasPermitidas.length||x.lojasPermitidas.includes(m.loja)),{...ja,loja:ja.loja||b.lojaAtual||""}),e=[...new Set(y.todasTrocas.map(m=>m.marca).filter(Boolean))].sort(),o=[...new Set(y.todasTrocas.filter(m=>!ja.marca||m.marca===ja.marca).map(m=>m.modelo))].sort(),t={avaliacao:"Avalia\xE7\xF5es",decisao:"Decis\xF5es da IA",troca:"Trocas",aprovacao:"Aprova\xE7\xF5es",negociacao:"Negocia\xE7\xF5es de pre\xE7o",venda:"Vendas e margens"},s=(m,r)=>`<section class="painel"><div class="painel-cab"><h2>${m}</h2></div><div class="tabela-wrap"><table class="tabela"><thead><tr><th></th><th class="n">Avalia\xE7\xF5es</th><th class="n">Trocas</th><th class="n">Vendas</th><th class="n">Margem m\xE9dia</th></tr></thead><tbody>${r.slice(0,12).map(p=>`<tr><td><b>${c(p.chave)}</b></td><td class="n">${p.avaliacoes}</td><td class="n">${p.trocas}</td><td class="n">${p.vendas}</td><td class="n ${p.margem!=null&&p.margem<.06?"neg":""}">${p.margem!=null?P(p.margem):"\u2014"}</td></tr>`).join("")||'<tr><td colspan="5" class="vazio">Nada no filtro.</td></tr>'}</tbody></table></div></section>`,i=(m,r,p)=>`<option value="">${p}</option>`+m.map(d=>`<option ${d===r?"selected":""}>${c(d)}</option>`).join("");w.innerHTML=`<div class="titulo"><div><h1>Hist\xF3rico vivo</h1><p>Tudo o que a revenda decidiu e aprendeu: avalia\xE7\xF5es, decis\xF5es, aprova\xE7\xF5es, negocia\xE7\xF5es, vendas e margens, numa linha do tempo.</p></div><div class="acoes"><button class="btn btn-linha" type="button" id="hv-csv">Exportar CSV</button></div></div>
       <div class="filtros filtros-hist">
-        <div class="campo"><label for="hv-tipo">Evento</label><select id="hv-tipo"><option value="">Todos</option>${Object.entries(TIPOS_EV).map(([k, n]) => `<option value="${k}" ${fh.tipo === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-        <div class="campo"><label for="hv-marca">Marca</label><select id="hv-marca">${opt(marcas, fh.marca, 'Todas')}</select></div>
-        <div class="campo"><label for="hv-modelo">Modelo</label><select id="hv-modelo">${opt(modelos, fh.modelo, 'Todos')}</select></div>
-        ${estado.lojas.length ? `<div class="campo"><label for="hv-loja">Loja</label><select id="hv-loja">${opt(K.lojasPermitidas && K.lojasPermitidas.length ? K.lojasPermitidas : estado.lojas, fh.loja || estado.lojaAtual, 'Todas')}</select></div>` : ''}
-        <div class="campo"><label for="hv-de">De</label><input id="hv-de" type="date" value="${fh.de}"></div><div class="campo"><label for="hv-ate">Até</label><input id="hv-ate" type="date" value="${fh.ate}"></div>
+        <div class="campo"><label for="hv-tipo">Evento</label><select id="hv-tipo"><option value="">Todos</option>${Object.entries(t).map(([m,r])=>`<option value="${m}" ${ja.tipo===m?"selected":""}>${r}</option>`).join("")}</select></div>
+        <div class="campo"><label for="hv-marca">Marca</label><select id="hv-marca">${i(e,ja.marca,"Todas")}</select></div>
+        <div class="campo"><label for="hv-modelo">Modelo</label><select id="hv-modelo">${i(o,ja.modelo,"Todos")}</select></div>
+        ${b.lojas.length?`<div class="campo"><label for="hv-loja">Loja</label><select id="hv-loja">${i(x.lojasPermitidas&&x.lojasPermitidas.length?x.lojasPermitidas:b.lojas,ja.loja||b.lojaAtual,"Todas")}</select></div>`:""}
+        <div class="campo"><label for="hv-de">De</label><input id="hv-de" type="date" value="${ja.de}"></div><div class="campo"><label for="hv-ate">At\xE9</label><input id="hv-ate" type="date" value="${ja.ate}"></div>
       </div>
-      <div class="grade-2">${ind(`${ICO.etiqueta}Por marca`, tl.porMarca)}${ind(`${ICO.etiqueta}Por modelo`, tl.porModelo)}</div>
-      ${estado.lojas.length ? `<div class="bloco">${ind(`${ICO.camadas}Por loja`, tl.porLoja)}</div>` : ''}
-      <section class="painel bloco"><div class="painel-cab"><h2>${ICO.linha}Linha do tempo</h2><p>${tl.eventos.length} ${tl.eventos.length === 1 ? 'registro' : 'registros'}${tl.eventos.length > 250 ? ' (mostrando os 250 mais recentes)' : ''}</p></div>
-        <ul class="linha-tempo grande hv">${tl.eventos.slice(0, 250).map((e) => `<li class="ev-${e.tipo}"><b>${esc(e.titulo)}</b><span>${data(e.quando)} · ${esc(TIPOS_EV[e.tipo] || e.tipo)}${e.loja ? ' · ' + esc(e.loja) : ''} · ${esc(e.txt)}</span></li>`).join('') || '<li>Nada no filtro.</li>'}</ul></section>`;
-    const ligar = (id, k) => { const el = $(id); if (el) el.onchange = () => { fh[k] = el.value; if (k === 'marca') fh.modelo = ''; telaHistorico(); }; };
-    ligar('#hv-tipo', 'tipo'); ligar('#hv-marca', 'marca'); ligar('#hv-modelo', 'modelo'); ligar('#hv-loja', 'loja'); ligar('#hv-de', 'de'); ligar('#hv-ate', 'ate');
-    $('#hv-csv').onclick = () => baixarCSV(`anshur-historico-${hojeISO()}.csv`, [['Data', 'Evento', 'Título', 'Detalhe', 'Marca', 'Modelo', 'Loja', 'Valor', 'Margem']].concat(tl.eventos.map((e) => [e.quando, TIPOS_EV[e.tipo] || e.tipo, e.titulo, e.txt, e.marca, e.modelo, e.loja, e.valor != null ? Math.round(e.valor) : '', e.margem != null ? pctCSV(e.margem) : ''])));
-  }
-
-  // ---------- CONFIGURAÇÕES › INTELIGÊNCIA ARTIFICIAL e › AVISOS (só o dono) ----------
-  function blocoIAConfig() {
-    if (eu().perfil !== 'dono') return '';
-    return `<section class="painel bloco" id="cfg-ia"><h2>${ICO.alvo}Inteligência artificial</h2>
-      <p class="sub" style="margin:6px 0 10px">Usada na avaliação das fotos. Padrão: <b>IA da Blue Rose (Gemini grátis)</b>, 30 análises por dia para a revenda. Se preferir, conecte a chave da sua conta do Gemini ou da OpenAI: ela fica cifrada no servidor, ninguém a vê de novo (só o final) e não há limite nosso.</p>
-      <div id="ia-status" class="conta">${NV ? 'Carregando…' : 'Demonstração: usando a IA de exemplo (nada sai deste aparelho).'}</div>
+      <div class="grade-2">${s(`${q.etiqueta}Por marca`,a.porMarca)}${s(`${q.etiqueta}Por modelo`,a.porModelo)}</div>
+      ${b.lojas.length?`<div class="bloco">${s(`${q.camadas}Por loja`,a.porLoja)}</div>`:""}
+      <section class="painel bloco"><div class="painel-cab"><h2>${q.linha}Linha do tempo</h2><p>${a.eventos.length} ${a.eventos.length===1?"registro":"registros"}${a.eventos.length>250?" (mostrando os 250 mais recentes)":""}</p></div>
+        <ul class="linha-tempo grande hv">${a.eventos.slice(0,250).map(m=>`<li class="ev-${m.tipo}"><b>${c(m.titulo)}</b><span>${N(m.quando)} \xB7 ${c(t[m.tipo]||m.tipo)}${m.loja?" \xB7 "+c(m.loja):""} \xB7 ${c(m.txt)}</span></li>`).join("")||"<li>Nada no filtro.</li>"}</ul></section>`;const n=(m,r)=>{const p=l(m);p&&(p.onchange=()=>{ja[r]=p.value,r==="marca"&&(ja.modelo=""),Et()})};n("#hv-tipo","tipo"),n("#hv-marca","marca"),n("#hv-modelo","modelo"),n("#hv-loja","loja"),n("#hv-de","de"),n("#hv-ate","ate"),l("#hv-csv").onclick=()=>Ea(`anshur-historico-${z()}.csv`,[["Data","Evento","T\xEDtulo","Detalhe","Marca","Modelo","Loja","Valor","Margem"]].concat(a.eventos.map(m=>[m.quando,t[m.tipo]||m.tipo,m.titulo,m.txt,m.marca,m.modelo,m.loja,m.valor!=null?Math.round(m.valor):"",m.margem!=null?Le(m.margem):""])))}function ni(){return D().perfil!=="dono"?"":`<section class="painel bloco" id="cfg-ia"><h2>${q.alvo}Intelig\xEAncia artificial</h2>
+      <p class="sub" style="margin:6px 0 10px">Usada na avalia\xE7\xE3o das fotos. Padr\xE3o: <b>IA da Blue Rose (Gemini gr\xE1tis)</b>, 30 an\xE1lises por dia para a revenda. Se preferir, conecte a chave da sua conta do Gemini ou da OpenAI: ela fica cifrada no servidor, ningu\xE9m a v\xEA de novo (s\xF3 o final) e n\xE3o h\xE1 limite nosso.</p>
+      <div id="ia-status" class="conta">${C?"Carregando\u2026":"Demonstra\xE7\xE3o: usando a IA de exemplo (nada sai deste aparelho)."}</div>
       <div class="campos" style="margin-top:12px">
-        <div class="campo"><label for="ia-prov">Provedor da chave própria</label><select id="ia-prov"><option value="gemini">Google Gemini</option><option value="openai">OpenAI</option></select></div>
-        <div class="campo"><label for="ia-modelo">Modelo (opcional)</label><input id="ia-modelo" list="dl-ia-modelos" placeholder="gemini-3.5-flash-lite" autocomplete="off">${lista('dl-ia-modelos', ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gpt-5-mini', 'gpt-5'])}</div>
-        <div class="campo inteiro"><label for="ia-chave">Chave de API</label><input id="ia-chave" type="password" autocomplete="off" spellcheck="false" placeholder="Cole aqui a chave (AIza… ou sk-…)"></div>
+        <div class="campo"><label for="ia-prov">Provedor da chave pr\xF3pria</label><select id="ia-prov"><option value="gemini">Google Gemini</option><option value="openai">OpenAI</option></select></div>
+        <div class="campo"><label for="ia-modelo">Modelo (opcional)</label><input id="ia-modelo" list="dl-ia-modelos" placeholder="gemini-3.5-flash-lite" autocomplete="off">${wa("dl-ia-modelos",["gemini-3.5-flash-lite","gemini-3.5-flash","gpt-5-mini","gpt-5"])}</div>
+        <div class="campo inteiro"><label for="ia-chave">Chave de API</label><input id="ia-chave" type="password" autocomplete="off" spellcheck="false" placeholder="Cole aqui a chave (AIza\u2026 ou sk-\u2026)"></div>
       </div>
-      <div class="acoes"><button class="btn btn-linha" type="button" id="ia-testar">Testar</button><button class="btn btn-ouro" type="button" id="ia-salvar">Salvar chave própria</button><button class="btn btn-linha" type="button" id="ia-voltar">Voltar para a IA da Blue Rose</button></div>
-      <p class="nota-rodape">Testar faz uma chamada mínima e mostra se funcionou; nada é salvo no teste. O custo do uso da sua chave é cobrado pela sua conta no Google ou na OpenAI.</p></section>`;
-  }
-  function ligarIAConfig() {
-    const box = $('#cfg-ia'); if (!box) return;
-    const st = $('#ia-status'), chave = $('#ia-chave'), prov = $('#ia-prov'), mod = $('#ia-modelo');
-    prov.onchange = () => { mod.placeholder = prov.value === 'openai' ? 'gpt-5-mini' : 'gemini-3.5-flash-lite'; };
-    const mostra = (s) => { st.innerHTML = s.propria ? `Usando a <b>chave própria ${s.provedor === 'openai' ? 'da OpenAI' : 'do Gemini'}</b> (••••${esc(s.final || '')}), modelo ${esc(s.modelo)}. Sem limite nosso.` : `Usando a <b>IA da Blue Rose (Gemini grátis)</b>, modelo ${esc(s.modelo)} · ${s.restantes != null ? s.restantes + ' de ' + s.limite + ' análises restantes hoje' : ''}`; };
-    const demo = () => estado.demoIA || { propria: false, provedor: 'blue_rose', modelo: 'gemini-3.5-flash-lite', restantes: 30, limite: 30 };
-    const carregar = () => (NV ? NV.ia('status').then(mostra, (e) => { st.textContent = e.message; }) : mostra(demo()));
-    carregar();
-    const pronto = (b, sim, t) => { b.disabled = sim; if (t) b.textContent = t; };
-    $('#ia-testar').onclick = async (e) => {
-      const b = e.currentTarget; pronto(b, true, 'Testando…');
-      try {
-        if (!NV) { await new Promise((ok) => setTimeout(ok, 400)); toast(chave.value.trim() ? 'Demonstração: o teste real chama a IA só na conta da revenda. Formato da chave conferido.' : 'Demonstração: IA de exemplo funcionando.'); }
-        else { const r = await NV.ia('testar', { provedor: prov.value, chave: chave.value.trim(), modelo: mod.value.trim() }); toast(r.ok ? `Funcionou (${r.provedor === 'blue_rose' ? 'IA da Blue Rose' : r.provedor === 'openai' ? 'OpenAI' : 'Gemini'}, ${r.modelo}).` : r.erro, !r.ok); }
-      } catch (er) { toast(er.message, true); }
-      pronto(b, false, 'Testar');
-    };
-    $('#ia-salvar').onclick = async (e) => {
-      const k = chave.value.trim(); if (k.length < 20 || /\s/.test(k)) { toast('Cole a chave completa (sem espaços).', true); chave.focus(); return; }
-      const b = e.currentTarget; pronto(b, true, 'Conferindo e salvando…');
-      try {
-        if (!NV) { estado.demoIA = { propria: true, provedor: prov.value, modelo: mod.value.trim() || (prov.value === 'openai' ? 'gpt-5-mini' : 'gemini-3.5-flash-lite'), final: k.slice(-4) }; salvar(); toast('Demonstração: só o final da chave foi guardado; a chave em si não sai daqui.'); }
-        else { const r = await NV.ia('salvar', { provedor: prov.value, chave: k, modelo: mod.value.trim() }); if (!r.ok) throw new Error(r.erro); toast('Chave própria salva e cifrada no servidor.'); }
-        chave.value = ''; carregar();
-      } catch (er) { toast(er.message, true); }
-      pronto(b, false, 'Salvar chave própria');
-    };
-    $('#ia-voltar').onclick = () => confirmar('Voltar para a IA da Blue Rose?', 'A chave própria é apagada do servidor. A revenda volta a usar o Gemini grátis da Blue Rose (30 análises por dia).', 'Voltar e apagar a chave', async () => {
-      try { if (!NV) { delete estado.demoIA; salvar(); } else await NV.ia('remover'); toast('Voltou para a IA da Blue Rose; a chave própria foi apagada.'); carregar(); } catch (er) { toast(er.message, true); }
-    });
-  }
-  function blocoAvisos() {
-    if (eu().perfil !== 'dono') return '';
-    return `<section class="painel bloco" id="cfg-avisos"><h2>${ICO.alerta}Avisos</h2>
-      <p class="sub" style="margin:6px 0 10px">Um e-mail por dia útil às 7h com o que pede atenção (avaliação parada, aprovação esperando, máquina mudando de faixa, garantia perto de 60 dias, comprador para máquina nova, com o link do WhatsApp pronto). <b>Só sai quando há algo relevante</b>; dia sem nada, sem e-mail. Padrão: só para o dono.</p>
-      <div class="campos"><div class="campo"><label for="av-freq">Frequência</label><select id="av-freq"><option value="diario">Diário (dias úteis, 7h)</option><option value="semanal">Semanal (segunda, 7h)</option><option value="desligado">Desligado</option></select></div></div>
-      <span class="rot-campo" style="margin-top:12px;display:block">Quem recebe</span><div class="checks" id="av-dest">Carregando…</div>
+      <div class="acoes"><button class="btn btn-linha" type="button" id="ia-testar">Testar</button><button class="btn btn-ouro" type="button" id="ia-salvar">Salvar chave pr\xF3pria</button><button class="btn btn-linha" type="button" id="ia-voltar">Voltar para a IA da Blue Rose</button></div>
+      <p class="nota-rodape">Testar faz uma chamada m\xEDnima e mostra se funcionou; nada \xE9 salvo no teste. O custo do uso da sua chave \xE9 cobrado pela sua conta no Google ou na OpenAI.</p></section>`}function ri(){if(!l("#cfg-ia"))return;const e=l("#ia-status"),o=l("#ia-chave"),t=l("#ia-prov"),s=l("#ia-modelo");t.onchange=()=>{s.placeholder=t.value==="openai"?"gpt-5-mini":"gemini-3.5-flash-lite"};const i=p=>{e.innerHTML=p.propria?`Usando a <b>chave pr\xF3pria ${p.provedor==="openai"?"da OpenAI":"do Gemini"}</b> (\u2022\u2022\u2022\u2022${c(p.final||"")}), modelo ${c(p.modelo)}. Sem limite nosso.`:`Usando a <b>IA da Blue Rose (Gemini gr\xE1tis)</b>, modelo ${c(p.modelo)} \xB7 ${p.restantes!=null?p.restantes+" de "+p.limite+" an\xE1lises restantes hoje":""}`},n=()=>b.demoIA||{propria:!1,provedor:"blue_rose",modelo:"gemini-3.5-flash-lite",restantes:30,limite:30},m=()=>C?C.ia("status").then(i,p=>{e.textContent=p.message}):i(n());m();const r=(p,d,$)=>{p.disabled=d,$&&(p.textContent=$)};l("#ia-testar").onclick=async p=>{const d=p.currentTarget;r(d,!0,"Testando\u2026");try{if(!C)await new Promise($=>setTimeout($,400)),A(o.value.trim()?"Demonstra\xE7\xE3o: o teste real chama a IA s\xF3 na conta da revenda. Formato da chave conferido.":"Demonstra\xE7\xE3o: IA de exemplo funcionando.");else{const $=await C.ia("testar",{provedor:t.value,chave:o.value.trim(),modelo:s.value.trim()});A($.ok?`Funcionou (${$.provedor==="blue_rose"?"IA da Blue Rose":$.provedor==="openai"?"OpenAI":"Gemini"}, ${$.modelo}).`:$.erro,!$.ok)}}catch($){A($.message,!0)}r(d,!1,"Testar")},l("#ia-salvar").onclick=async p=>{const d=o.value.trim();if(d.length<20||/\s/.test(d)){A("Cole a chave completa (sem espa\xE7os).",!0),o.focus();return}const $=p.currentTarget;r($,!0,"Conferindo e salvando\u2026");try{if(!C)b.demoIA={propria:!0,provedor:t.value,modelo:s.value.trim()||(t.value==="openai"?"gpt-5-mini":"gemini-3.5-flash-lite"),final:d.slice(-4)},T(),A("Demonstra\xE7\xE3o: s\xF3 o final da chave foi guardado; a chave em si n\xE3o sai daqui.");else{const u=await C.ia("salvar",{provedor:t.value,chave:d,modelo:s.value.trim()});if(!u.ok)throw new Error(u.erro);A("Chave pr\xF3pria salva e cifrada no servidor.")}o.value="",m()}catch(u){A(u.message,!0)}r($,!1,"Salvar chave pr\xF3pria")},l("#ia-voltar").onclick=()=>va("Voltar para a IA da Blue Rose?","A chave pr\xF3pria \xE9 apagada do servidor. A revenda volta a usar o Gemini gr\xE1tis da Blue Rose (30 an\xE1lises por dia).","Voltar e apagar a chave",async()=>{try{C?await C.ia("remover"):(delete b.demoIA,T()),A("Voltou para a IA da Blue Rose; a chave pr\xF3pria foi apagada."),m()}catch(p){A(p.message,!0)}})}function St(){return D().perfil!=="dono"?"":`<section class="painel bloco" id="cfg-avisos"><h2>${q.alerta}Avisos</h2>
+      <p class="sub" style="margin:6px 0 10px">Um e-mail por dia \xFAtil \xE0s 7h com o que pede aten\xE7\xE3o (avalia\xE7\xE3o parada, aprova\xE7\xE3o esperando, m\xE1quina mudando de faixa, garantia perto de 60 dias, comprador para m\xE1quina nova, com o link do WhatsApp pronto). <b>S\xF3 sai quando h\xE1 algo relevante</b>; dia sem nada, sem e-mail. Padr\xE3o: s\xF3 para o dono.</p>
+      <div class="campos"><div class="campo"><label for="av-freq">Frequ\xEAncia</label><select id="av-freq"><option value="diario">Di\xE1rio (dias \xFAteis, 7h)</option><option value="semanal">Semanal (segunda, 7h)</option><option value="desligado">Desligado</option></select></div></div>
+      <span class="rot-campo" style="margin-top:12px;display:block">Quem recebe</span><div class="checks" id="av-dest">Carregando\u2026</div>
       <div class="acoes"><button class="btn btn-ouro" type="button" id="av-salvar">Salvar avisos</button><button class="btn btn-linha" type="button" id="av-previa">Ver como fica o e-mail</button></div>
-      <div id="av-envios"></div></section>`;
-  }
-  function ligarAvisos() {
-    const box = $('#cfg-avisos'); if (!box) return;
-    const pessoas = estado.usuarios.filter((u) => NV ? u.email : true);
-    const desenha = (cfg) => {
-      const dest = cfg && cfg.destinatarios && cfg.destinatarios.length ? cfg.destinatarios : pessoas.filter((u) => u.perfil === 'dono').map((u) => u.id);
-      $('#av-freq').value = (cfg && cfg.frequencia) || 'diario';
-      $('#av-dest').innerHTML = pessoas.map((u) => `<label class="check"><input type="checkbox" data-dest="${esc(u.id)}" ${dest.includes(u.id) ? 'checked' : ''}> ${esc(u.nome)} <span class="sub">· ${esc(PERFIL_NOME(u.perfil))}${u.email ? ' · ' + esc(u.email) : ''}</span></label>`).join('') || '<p class="sub">Ninguém com e-mail na equipe.</p>';
-    };
-    if (NV) {
-      NV.avisos().then(desenha, (e) => { $('#av-dest').textContent = e.message; });
-      NV.envios().then((l) => { $('#av-envios').innerHTML = l.length ? `<p class="conta">Últimos envios: ${l.slice(0, 6).map((x) => `${data(x.dia)} para ${esc((estado.usuarios.find((u) => u.id === x.usuario) || {}).nome || 'pessoa removida')} (${x.itens} ${x.itens === 1 ? 'item' : 'itens'}, ${x.status})`).join('; ')}.</p>` : '<p class="conta">Nenhum e-mail enviado ainda.</p>'; }, () => {});
-    } else desenha(estado.avisos);
-    $('#av-salvar').onclick = async () => {
-      const freq = $('#av-freq').value, dest = $$('[data-dest]', box).filter((c) => c.checked).map((c) => c.dataset.dest);
-      try { if (NV) await NV.salvarAvisos(freq, dest); else { estado.avisos = { frequencia: freq, destinatarios: dest }; log('config', `Avisos por e-mail: ${freq}`); salvar(); } toast(freq === 'desligado' ? 'Avisos desligados.' : 'Avisos salvos.'); } catch (e) { toast(e.message, true); }
-    };
-    $('#av-previa').onclick = () => {
-      const u = eu(), { acoes } = RT.acoesDoDia(Object.assign(ctxDia('dono'), { rascunho: null, janela: 1 }));
-      const em = RT.resumoEmail({ revenda: A.revenda.nome, nome: u.nome, acoes, link: location.origin + location.pathname, hoje: hojeISO(), frequencia: $('#av-freq').value });
-      abrirCamada('modal', em ? `<h2>${esc(em.assunto)}</h2><p class="sub">Prévia com os dados de agora${OP ? '' : ' (demonstração: nenhum e-mail é enviado)'}.</p><div class="previa-email">${em.html}</div>` : '<h2>Nada a enviar agora</h2><p class="sub">Com os dados de hoje não há nada relevante: nesse caso o Anshur não manda e-mail.</p>');
-    };
-  }
-
-  // ---------- demonstração: dados fictícios para a Central, a rotina, a IA e o histórico aparecerem funcionando ----------
-  function semearDemo() {
-    if (OP || estado.semente9) return;
-    const dAtras = (n) => { const d = new Date(hojeISO() + 'T12:00:00'); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); };
-    const mod = (tipo, i = 0) => A.modelos.filter((m) => m.tipo === tipo)[i] || A.modelos[0];
-    const maqDe = (m, ano, horas, cond) => ({ tipo: m.tipo, marca: m.marca, modelo: m.modelo, ano, horas, cond, ficha: { motor: 4, transmissao: 4, hidraulico: 3, pneus: 3, cabine: 4, lataria: 3 } });
-    const avs = [[mod('trator', 1), 2021, 3800, 70, 3, 'Rodrigo'], [mod('pulverizador', 0), 2020, 4100, 66, 6, 'Marcos'], [mod('trator', 3), 2019, 5200, 62, 12, 'Fernanda']];
-    avs.forEach(([m, ano, h, c, d, por], i) => { const maq = maqDe(m, ano, h, c), r = M.avaliar(maq, { semValidacao: true }); if (!r) return;
-      estado.avaliacoes.push({ id: 'AVD' + i, data: dAtras(d), por, loja: estado.lojas[i % estado.lojas.length] || '', status: i === 2 ? 'desistiu' : 'aberta', maq, teto: r.teto, venda: r.venda, preparo: r.preparo, faixa: r.faixa, confianca: r.confianca, amostras: r.base, premissas: { margemAlvo: r.margem },
-        ...(i === 0 ? { ia: { exemplo: true, provedor: 'exemplo', fotos: 11, resumo: 'EXEMPLO (demonstração): IA sugeriu Motor 3, Transmissão 4, Hidráulico 3, Pneus 2, Cabine 4, Lataria 3; o avaliador aceitou 5, alterou 1 (Pneus: 2→3); avarias: 1 confirmadas, 0 descartadas.' } } : {}) }); });
-    // troca recente que combina com um comprador cadastrado (para o "comprador compatível" aparecer)
-    for (const c of A.compradores) {
-      const ms = A.modelos.filter((m) => m.tipo === c.tipo && (!c.marcas || m.marca === c.marcas)); let feito = false;
-      for (const m of ms) { const maq = maqDe(m, Math.max(+c.anoMin || 0, anoAtual - 4), 2800, 78), r = M.avaliar(maq, { semValidacao: true }); if (!r) continue;
-        const t = K.fecharTroca(estado, maq, r, r.teto, dAtras(2), { vendedor: 'Rodrigo', origem: 'Faz. Recreio', loja: estado.lojas[0] || '' });
-        if (RT.compradoresPara(t, A.compradores).length) { A.trocas.push({ ...t }); feito = true; break; } estado.fechadas.pop(); }
-      if (feito) break;
-    }
-    // pedido de aprovação acima do teto esperando o gerente
-    const mp = maqDe(mod('colhedora', 0), anoAtual - 5, 14000, 68), rp = M.avaliar(mp, { semValidacao: true });
-    if (rp) estado.pendentes.push({ id: 'PD1', nivel: 'gerente', quando: new Date(Date.now() - 5 * 3600e3).toISOString(), por: 'Tiago', maq: mp, rec: { teto: rp.teto, venda: rp.venda, preparo: rp.preparo, dias: rp.dias, margem: rp.margem, margemSobreVenda: rp.margemSobreVenda, confianca: rp.confianca, doTipo: rp.doTipo }, valor: rp.teto + 25000, data: hojeISO(), motivo: 'Cliente fecha a colhedora nova se pagarmos isso no usado', status: 'pendente', extra: { vendedor: 'Tiago', origem: 'Usina fictícia', fotos: [] } });
-    // rotina: o que a equipe fictícia já concluiu
-    const ch = (per, perfil, id, dias) => RT.chavePeriodo(per, dAtras(dias)) + '|' + perfil + '|' + id;
-    estado.rituais = Object.assign({}, estado.rituais, { [ch('dia', 'vendedor', 'compradores', 0)]: { por: 'Rodrigo', quando: new Date(Date.now() - 2 * 3600e3).toISOString() }, [ch('semana', 'financeiro', 'comissoes', 0)]: { por: 'Lúcia', quando: new Date(Date.now() - 26 * 3600e3).toISOString() },
-      [ch('dia', 'gerente', 'faixas', 1)]: { por: 'Carlos', quando: new Date(Date.now() - 22 * 3600e3).toISOString() }, [ch('dia', 'vendedor', 'retorno', 1)]: { por: 'Marcos', quando: new Date(Date.now() - 25 * 3600e3).toISOString() }, [ch('dia', 'oficina', 'preparo', 2)]: { por: 'Zé da Oficina', quando: new Date(Date.now() - 50 * 3600e3).toISOString() } });
-    estado.semente9 = true; salvar(); cacheLimpa();
-  }
-
-  // ---------- rotas com transição ----------
-  const TELAS = { visao: telaVisao, avaliar: telaAvaliar, patio: telaPatio, trocas: telaTrocas, teste: telaTeste, passaportes: telaPassaportes, vendedores: telaVendedores, garantias: telaGarantias, financiamento: telaFinanciamento, relatorio: telaRelatorios, mensal: telaRelatorio, documentos: telaDocumentos, usuarios: telaUsuarios, config: telaConfig, atividades: telaAtividades, compradores: telaCompradores, mercado: telaMercado, aprovacoes: telaAprovacoes, perfil: telaPerfil, hoje: telaHoje, rotina: telaRotina, memoria: telaMemoria, historico: telaHistorico };
-  function moverIndicador() {
-    const ativo = $('.menu a[aria-current="page"]'), ind = $('.menu-indicador');
-    if (!ativo || !ind) return;
-    if (matchMedia('(min-width: 960px)').matches) { ind.style.transform = `translateY(${ativo.offsetTop}px)`; ind.style.width = ''; }
-    else { ind.style.transform = `translateX(${ativo.offsetLeft}px)`; ind.style.width = ativo.offsetWidth + 'px'; }
-  }
-  // =====================================================================================
-  // PORTAL E SISTEMAS (modelo dos ERPs: portal com os sistemas e cada sistema com cabeçalho, menu e tela inicial próprios)
-  // Endereços: #/ (portal), #/hoje, #/rotina, #/<sistema>/<tela> (ex.: #/financeiro/fin-pagar). Cada sistema pode ficar
-  // aberto numa aba própria do navegador; endereços antigos (#tela) continuam valendo e viram o endereço novo.
-  // =====================================================================================
-  const AR = window.ANSHUR_AREAS;
-  const lsG = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
-  const lsS = (k, v) => { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) { /* sem armazenamento */ } };
-  const chaveU = (k) => `anshur-${k}:${NV ? NV.revenda.id : OP ? 'op' : 'demo'}:${eu().id}`; // por revenda e pessoa, só neste aparelho
-  const telaDe = (aba) => TELAS[aba] || (AR && AR.tela(aba) ? () => AR.tela(aba)(UI) : null);
-  const itensVisiveis = (a) => (AR ? AR.itens(a).filter((x) => pode(x.aba) && telaDe(x.aba)) : []);
-  const areaVisivel = (a) => (a.pronta ? itensVisiveis(a).length > 0 && (!a.perfis || a.perfis.includes(eu().perfil)) : (!a.perfis || a.perfis.includes(eu().perfil)));
-  const areasVisiveis = () => (AR ? AR.lista().filter(areaVisivel) : []);
-  const inicioDaArea = (a) => { const l = itensVisiveis(a); return (l.find((x) => x.aba === a.inicio) || l[0] || {}).aba || 'inicio'; };
-  const PORTAL = { inicio: 'Portal', hoje: 'Tarefas do dia', rotina: 'Rotina da equipe' };
-  const urlSis = (id, aba) => '#/' + id + (aba ? '/' + aba : '');
-  const urlPortal = (p) => '#/' + (p && p !== 'inicio' ? p : '');
-  const abrirDireto = () => { const a = AR && AR.area(lsG(chaveU('area-fixa'))); return a && a.pronta && areaVisivel(a) ? urlSis(a.id) : ''; };
-  const acoesDasAreas = () => [['Portal: todos os sistemas', '#/'], ['Tarefas do dia', '#/hoje'], ['Rotina da equipe', '#/rotina']].concat(areasVisiveis().filter((a) => a.pronta).flatMap((a) => [['Sistema ' + a.nome, urlSis(a.id)]].concat(itensVisiveis(a).map((x) => [`${x.rotulo} · ${a.nome}`, urlSis(a.id, x.aba)]))));
-  let areaAtual = lsG(chaveU('area')) || '';
-  const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
-  const ICO_AREAS = '<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>';
-  const ICO_NOVA_ABA = '<path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>';
-  const ICO_ESTRELA = '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/>';
-  // favoritos e recentes: por pessoa, neste aparelho
-  const lerJ = (k, p) => { try { return JSON.parse(lsG(chaveU(k))) || p; } catch (e) { return p; } };
-  const favoritos = () => lerJ('favoritos', []);
-  const recentes = () => lerJ('recentes', []);
-  function lembrarRecente(sis, aba) {
-    const l = recentes().filter((x) => !(x.sis === sis && x.aba === aba)); l.unshift({ sis, aba, quando: new Date().toISOString() });
-    lsS(chaveU('recentes'), JSON.stringify(l.slice(0, 8)));
-  }
-  let menuDe = null;
-  // quantas telas cabem como aba no computador (as outras vão para "Mais"); no celular as telas ficam na folha "Mais"
-  const abasVisiveis = () => (innerWidth >= 1280 ? 6 : innerWidth >= 1000 ? 5 : 4);
-  // ordem das abas: tela inicial do sistema, os atalhos escolhidos pela área e depois a ordem do menu
-  function ordemAbas(a, its) {
-    const pri = [a.inicio].concat(a.atalhos || []), peso = (x) => { const i = pri.indexOf(x.aba); return i < 0 ? 99 : i; };
-    return its.slice().sort((x, y) => peso(x) - peso(y) || its.indexOf(x) - its.indexOf(y));
-  }
-  const ICO_INICIO = '<path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6"/>';
-  const ICO_MAIS = '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>';
-  const ICO_AVISOS = '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>';
-  function montarMenu(id) {
-    const chave = (id || 'portal') + ':' + abasVisiveis(); if (menuDe === chave) return; menuDe = chave;
-    const a = id && AR.area(id);
-    const grupos = a ? a.menu.map((g) => ({ grupo: g.grupo, its: g.itens.filter((x) => pode(x.aba) && telaDe(x.aba)) })).filter((g) => g.its.length) : [];
-    const todos = a ? grupos.flatMap((g) => g.its.map((x) => Object.assign({ grupo: g.grupo }, x))).filter((x, i, l) => l.findIndex((y) => y.aba === x.aba) === i) : [];
-    const ordem = a ? ordemAbas(a, todos) : [];
-    // computador: abas da área (até 6, com ícone) e "Mais" com o resto, agrupado pelo assunto
-    const n = ordem.length <= abasVisiveis() ? ordem.length : abasVisiveis() - 1;
-    const vis = ordem.slice(0, n), resto = todos.filter((x) => !vis.includes(x));
-    const seta = '<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';
-    const gruposResto = [...new Set(resto.map((x) => x.grupo))];
-    $('#sis-barra').innerHTML = vis.map((x) => `<a class="sb-item" href="${urlSis(a.id, x.aba)}" data-aba="${x.aba}">${svgI(x.icone)}<span>${esc(x.rotulo)}</span></a>`).join('')
-      + (resto.length ? `<div class="sb-grupo sb-mais"><button type="button" class="sb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="sb-pop-mais">${svgI(ICO_MAIS)}<span>Mais</span>${seta}</button><div class="sb-pop" id="sb-pop-mais" role="menu" hidden>${gruposResto.map((g) => `${gruposResto.length > 1 ? `<p class="sb-pop-g">${esc(g)}</p>` : ''}${resto.filter((x) => x.grupo === g).map((x) => `<a role="menuitem" href="${urlSis(a.id, x.aba)}" data-aba="${x.aba}">${svgI(x.icone)}<span>${esc(x.rotulo)}</span></a>`).join('')}`).join('')}</div></div>` : '');
-    // computador: sistemas à esquerda (recolhível)
-    const as = areasVisiveis();
-    $('#lat-areas').innerHTML = `<a href="#/" class="lat-item" data-ir-inicio>${svgI(ICO_INICIO)}<span>Início</span></a>` + as.map((x) => x.pronta
-      ? `<a href="${urlSis(x.id)}" class="lat-item" data-area="${x.id}" ${a && x.id === a.id ? 'aria-current="true"' : ''}>${svgI(x.icone)}<span>${esc(x.nome)}</span></a>`
-      : `<a href="#/" class="lat-item breve" data-breve="${x.id}">${svgI(x.icone)}<span>${esc(x.nome)}</span></a>`).join('');
-    // cabeçalho da área: onde a pessoa está (sistema › tela) e a ação principal do sistema
-    const nomeSis = $('#sis-nome');
-    nomeSis.href = a ? urlSis(a.id) : '#/';
-    nomeSis.innerHTML = a ? `<span class="sis-ico">${svgI(a.icone)}</span><span class="sis-txt"><b>${esc(a.nome)}</b></span>` : '';
-    nomeSis.setAttribute('aria-label', a ? `${a.nome}: tela inicial do sistema` : 'Início');
-    document.title = a ? `Anshur ${a.nome} · ${A.revenda.nome}` : `Anshur · ${A.revenda.nome}`;
-    const nova = $('.cab-nova');
-    if (nova) { const ac = a && a.acao ? a.acao : null; nova.hidden = !ac || somenteLeitura(); if (ac) { nova.href = /^#\//.test(ac.href) ? ac.href : urlSis(a.id, ac.href.slice(1)); $('span', nova).textContent = ac.rotulo; nova.setAttribute('aria-label', ac.rotulo); nova.onclick = ac.novo && a.novo ? (e) => { e.preventDefault(); a.novo(UI); } : null; } }
-    // celular: barra fixa com Início + 3 destinos + Mais
-    const usados = AR.area('usados'), temUsados = usados && areaVisivel(usados) && usados.pronta;
-    const destinos = a ? ordem.slice(0, 3).map((x) => ({ href: urlSis(a.id, x.aba), aba: x.aba, ico: x.icone, rot: ({ 'Implantação': 'Implantar', 'Documentos': 'Docs', 'Movimentos': 'Movim.' })[x.curto || x.rotulo] || x.curto || x.rotulo }))
-      : [temUsados ? { href: urlSis('usados'), area: 'usados', ico: usados.icone, rot: 'Usados' } : null,
-        temUsados && pode('avaliar') ? { href: urlSis('usados', 'avaliar'), aba: 'avaliar', ico: '<path d="M4 7h13l-3-3M20 17H7l3 3"/>', rot: 'Avaliar' } : null,
-        { href: '#/hoje', aba: 'hoje', ico: ICO_AVISOS, rot: 'Avisos' }].filter(Boolean);
-    const outros = as.filter((x) => x.pronta && !destinos.some((d) => d.area === x.id));
-    while (!a && destinos.length < 3 && outros.length) { const x = outros.shift(); destinos.splice(destinos.length - 1, 0, { href: urlSis(x.id), area: x.id, ico: x.icone, rot: x.curto || x.nome }); }
-    $('#menu').innerHTML = `<a href="#/" class="atalho" data-aba="inicio" data-ir-inicio>${svgI(ICO_INICIO)}<span>Início</span></a>`
-      + destinos.map((d) => `<a href="${d.href}" class="atalho" ${d.aba ? `data-aba="${d.aba}"` : `data-area-barra="${d.area}"`}>${svgI(d.ico)}<span>${esc(d.rot)}</span></a>`).join('')
-      + `<button type="button" id="menu-mais" class="menu-mais" aria-expanded="false" aria-controls="menu-folha">${svgI(ICO_MAIS)}<span>Mais</span></button>`;
-    // folha "Mais" (celular): todas as telas do sistema por assunto, os outros sistemas e as opções da pessoa
-    const linhaF = (href, ico, rot, extra = '') => `<a href="${href}" ${extra}>${svgI(ico)}<span>${esc(rot)}</span></a>`;
-    $('#menu-folha').innerHTML = `<div class="folha-cab"><b>${a ? esc(a.nome) : 'Mais opções'}</b><button type="button" class="fechar" data-fecha-folha aria-label="Fechar">×</button></div>
-      ${a ? grupos.map((g) => `<p class="folha-g">${esc(g.grupo)}</p><div class="folha-lista">${g.its.map((x) => linhaF(urlSis(a.id, x.aba), x.icone, x.rotulo, `data-aba="${x.aba}"`)).join('')}</div>`).join('') : ''}
-      <p class="folha-g">${a ? 'Outros sistemas' : 'Sistemas'}</p><div class="folha-lista">${linhaF('#/', ICO_INICIO, 'Início', 'data-ir-inicio')}${as.filter((x) => x.pronta && (!a || x.id !== a.id)).map((x) => linhaF(urlSis(x.id), x.icone, x.nome, `data-area="${x.id}"`)).join('')}</div>
-      <p class="folha-g">Você</p><div class="folha-lista">${linhaF('#/hoje', ICO_AVISOS, 'Tarefas do dia', 'data-aba="hoje"')}${linhaF('#/rotina', '<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>', 'Rotina da equipe', 'data-aba="rotina"')}<button type="button" data-preferencias>${svgI('<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM4 12h2M18 12h2M12 4v2M12 18v2"/>')}<span>Preferências deste aparelho</span></button>${INS && !INS.instalado() ? `<button type="button" data-instalar-m>${svgI('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}<span>Instalar o aplicativo</span></button>` : ''}${linhaF('#/config/perfil', '<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 21a7 7 0 0 1 14 0"/>', 'Meu perfil', 'data-aba="perfil"')}</div>`;
-    document.body.dataset.modo = a ? 'sistema' : 'portal';
-    document.body.dataset.areaAtual = id || 'inicio';
-  }
-  // menus suspensos da barra do sistema: clique abre, clique fora / Esc fecha, setas andam entre os itens
-  const fecharSuspensos = (exceto) => $$('#sis-barra .sb-btn').forEach((b) => { if (b === exceto) return; b.setAttribute('aria-expanded', 'false'); b.nextElementSibling.hidden = true; });
-  $('#sis-barra').addEventListener('click', (e) => {
-    const b = e.target.closest('.sb-btn');
-    if (b) { const abrir = b.getAttribute('aria-expanded') !== 'true'; fecharSuspensos(b); b.setAttribute('aria-expanded', abrir); b.nextElementSibling.hidden = !abrir; if (abrir) { const l = b.nextElementSibling.querySelector('a'); if (l && e.detail === 0) l.focus(); } return; }
-    if (e.target.closest('a')) fecharSuspensos();
-  });
-  $('#sis-barra').addEventListener('keydown', (e) => {
-    const pop = e.target.closest('.sb-pop'), b = e.target.closest('.sb-grupo') && e.target.closest('.sb-grupo').querySelector('.sb-btn');
-    if (e.key === 'Escape' && b) { fecharSuspensos(); b.focus(); return; }
-    if (!pop || !['ArrowDown', 'ArrowUp'].includes(e.key)) return;
-    const l = $$('a', pop), i = l.indexOf(document.activeElement); (l[(i + (e.key === 'ArrowDown' ? 1 : -1) + l.length) % l.length]).focus(); e.preventDefault();
-  });
-  document.addEventListener('click', (e) => { if (!e.target.closest('#sis-barra')) fecharSuspensos(); });
-  // abas que não cabem na largura (nomes longos, tela estreita) vão para "Mais": a página nunca rola para o lado
-  const SETA_MAIS = '<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';
-  function encaixarAbas() {
-    const bar = $('#sis-barra'); if (!bar || !bar.offsetParent) return;
-    const rotulos = () => $$('.sb-grupo', bar).forEach((g) => { const at = g.querySelector('a[aria-current]'); g.classList.toggle('atual', !!at); const sp = $('.sb-btn > span', g); if (sp) sp.textContent = at ? 'Mais: ' + at.textContent.trim() : 'Mais'; });
-    for (let i = 0; i < 12; i++) {
-      rotulos(); if (bar.scrollWidth <= bar.clientWidth + 1) break;
-      const its = $$(':scope > a.sb-item', bar); if (its.length <= 2) break;
-      let mais = $('.sb-mais', bar);
-      if (!mais) { bar.insertAdjacentHTML('beforeend', `<div class="sb-grupo sb-mais"><button type="button" class="sb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="sb-pop-mais">${svgI(ICO_MAIS)}<span>Mais</span>${SETA_MAIS}</button><div class="sb-pop" id="sb-pop-mais" role="menu" hidden></div></div>`); mais = $('.sb-mais', bar); }
-      const ult = its[its.length - 1]; ult.className = ''; ult.setAttribute('role', 'menuitem'); $('.sb-pop', mais).prepend(ult);
-    }
-    rotulos();
-  }
-  // celular: folha "Mais" (todas as telas do sistema, os outros sistemas e as opções da pessoa)
-  function abrirFolha(sim) {
-    const f = $('#menu-folha'), fu = $('#menu-fundo'), b = $('#menu-mais'); if (!f) return;
-    f.hidden = !sim; fu.hidden = !sim; document.body.classList.toggle('menu-aberto', sim); if (b) b.setAttribute('aria-expanded', sim);
-    if (sim) setTimeout(() => { const l = f.querySelector('a[aria-current]') || f.querySelector('a, button'); if (l) l.focus(); }, 30);
-  }
-  const fecharFolha = () => { const f = $('#menu-folha'); if (f && !f.hidden) abrirFolha(false); };
-  document.addEventListener('click', (e) => {
-    if (e.target.closest('#menu-mais')) { abrirFolha($('#menu-folha').hidden); return; }
-    if (e.target.closest('#menu-fundo, [data-fecha-folha]')) { abrirFolha(false); return; }
-    if (e.target.closest('[data-preferencias]')) { e.preventDefault(); fecharFolha(); abrirPreferencias(); return; }
-    if (e.target.closest('[data-instalar-m]')) { fecharFolha(); simularInstalacao(); return; }
-    if (e.target.closest('#menu-folha a')) fecharFolha();
-  });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.body.classList.contains('menu-aberto')) { abrirFolha(false); const b = $('#menu-mais'); if (b) b.focus(); } });
-  // computador: lista dos sistemas à esquerda, recolhível (fica lembrado neste aparelho)
-  const latRec = () => lsG(chaveU('lateral')) === 'recolhida';
-  function aplicarLateral() { const r = latRec(), b = $('#lat-recolher'); document.body.classList.toggle('lat-recolhida', r); b.setAttribute('aria-expanded', String(!r)); b.title = r ? 'Mostrar os nomes dos sistemas' : 'Recolher a lista de sistemas'; }
-  $('#lat-recolher').onclick = () => { lsS(chaveU('lateral'), latRec() ? '' : 'recolhida'); aplicarLateral(); };
-  aplicarLateral();
-  function irArea(id) {
-    const a = AR.area(id); if (!a) return;
-    if (!a.pronta) { abrirEmBreve(a); return; }
-    fecharTrocaArea();
-    const alvo = urlSis(id);
-    if (location.hash === alvo) rota(); else location.hash = alvo;
-  }
-  function abrirEmBreve(a) {
-    abrirCamada('modal', `<div class="instala-topo"><span class="area-ico">${svgI(a.icone)}</span><div><h2>${esc(a.nome)}</h2><p class="sub"><span class="tag declarado">Em breve</span> Este sistema ainda está sendo construído.</p></div></div>
-      ${a.previsto && a.previsto.length ? `<p style="margin:14px 0 6px;font-weight:650">O que vai ter</p><ul class="passos-instalar">${a.previsto.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
-      ${a.jaExiste ? `<p class="nota-rodape" style="margin-top:12px">${esc(a.jaExiste)}</p>` : ''}<p class="nota-rodape">Enquanto isso, a revenda continua usando o sistema atual para esta parte. Nada aqui é demonstração disfarçada.</p>`);
-  }
-  // seletor de sistemas (ícone de grade no canto): volta ao portal ou abre outro sistema, aqui ou em nova aba
-  function fecharTrocaArea() { const p = $('#area-pop'); if (p) p.remove(); $$('.area-troca').forEach((b) => b.setAttribute('aria-expanded', 'false')); }
-  function abrirTrocaArea(botao) {
-    if ($('#area-pop')) { fecharTrocaArea(); return; }
-    const r = botao.getBoundingClientRect(), as = areasVisiveis();
-    const pop = document.createElement('div'); pop.id = 'area-pop'; pop.className = 'area-pop'; pop.setAttribute('role', 'menu'); pop.setAttribute('aria-label', 'Sistemas');
-    pop.innerHTML = `<a href="#/" role="menuitem" data-ir-inicio class="pop-portal">${svgI('<path d="M10 19l-7-7 7-7M3 12h18"/>')}<span><b>Voltar ao início</b><small>O que fazer hoje, números e todos os sistemas do dia</small></span></a>` + as.map((a) => a.pronta
-      ? `<div class="pop-linha"><a href="${urlSis(a.id)}" role="menuitem" data-area="${a.id}" class="${a.id === areaAtual && document.body.dataset.modo === 'sistema' ? 'atual' : ''}">${svgI(a.icone)}<span><b>${esc(a.nome)}</b><small>${esc(a.descricao.split(/[,.]/)[0])}</small></span></a><a class="pop-aba" href="${urlSis(a.id)}" target="_blank" rel="noopener" title="Abrir ${esc(a.nome)} em nova aba" aria-label="Abrir ${esc(a.nome)} em nova aba">${svgI(ICO_NOVA_ABA)}</a></div>`
-      : `<a href="#/" role="menuitem" data-breve="${a.id}" class="breve">${svgI(a.icone)}<span><b>${esc(a.nome)}</b><small>Em breve</small></span></a>`).join('');
-    document.body.appendChild(pop);
-    const larg = Math.min(360, innerWidth - 16); pop.style.width = larg + 'px';
-    pop.style.left = Math.max(8, Math.min(r.left, innerWidth - larg - 8)) + 'px'; pop.style.top = (r.bottom + 6) + 'px';
-    botao.setAttribute('aria-expanded', 'true');
-    $('[data-ir-inicio]', pop).onclick = () => fecharTrocaArea();
-    setTimeout(() => (pop.querySelector('a.atual') || pop.querySelector('a')).focus(), 30);
-    pop.onkeydown = (e) => { const l = $$('a[role="menuitem"]', pop), i = l.indexOf(document.activeElement); if (e.key === 'ArrowDown') { (l[i + 1] || l[0]).focus(); e.preventDefault(); } if (e.key === 'ArrowUp') { (l[i - 1] || l[l.length - 1]).focus(); e.preventDefault(); } if (e.key === 'Escape') { fecharTrocaArea(); botao.focus(); } };
-  }
-  document.addEventListener('click', (e) => {
-    const tr = e.target.closest('.area-troca'); if (tr) { e.preventDefault(); e.stopPropagation(); abrirTrocaArea(tr); return; }
-    const fav = e.target.closest('[data-fav]'); if (fav) { e.preventDefault(); const l = favoritos(), id = fav.dataset.fav; lsS(chaveU('favoritos'), JSON.stringify(l.includes(id) ? l.filter((x) => x !== id) : l.concat(id))); toast(l.includes(id) ? 'Tirado dos favoritos.' : 'Sistema nos favoritos: aparece primeiro no início.'); fav.setAttribute('aria-pressed', String(!l.includes(id))); if (document.body.dataset.modo === 'portal') telaInicio(); return; }
-    if (e.target.closest('[target="_blank"]')) { fecharTrocaArea(); return; }
-    const ar = e.target.closest('[data-area]'); if (ar && !e.ctrlKey && !e.metaKey && !e.shiftKey) { e.preventDefault(); fecharTrocaArea(); document.body.classList.remove('menu-aberto'); irArea(ar.dataset.area); return; }
-    const br = e.target.closest('[data-breve]'); if (br) { e.preventDefault(); fecharTrocaArea(); document.body.classList.remove('menu-aberto'); abrirEmBreve(AR.area(br.dataset.breve)); return; }
-    if ($('#area-pop') && !e.target.closest('#area-pop')) fecharTrocaArea();
-  });
-  // troca de sistema pelo teclado: Alt+1…9 na ordem do portal; Alt+0 volta ao portal
-  document.addEventListener('keydown', (e) => {
-    if (!e.altKey || e.ctrlKey || !/^[0-9]$/.test(e.key)) return;
-    if (e.key === '0') { e.preventDefault(); location.hash = '#/'; return; }
-    const a = areasVisiveis().filter((x) => x.pronta)[+e.key - 1]; if (a) { e.preventDefault(); irArea(a.id); }
-  });
-
-  // ---------- tarefas do dia de todos os sistemas (Usados pela retencao.js + o que cada área registra em hoje()) ----------
-  const ORDEM_CAT = { aprovar: 0, rascunho: 1, comprador: 2, floor: 3, avaliacao: 4 };
-  function tarefasDoDia() {
-    const u = eu(), ctx = ctxDia(), { acoes } = RT.acoesDoDia(ctx);
-    const dasAreas = AR ? AR.tarefas(estado, u, UI, (a) => areaVisivel(a)) : [];
-    const todas = acoes.map((x) => Object.assign({ area: 'usados' }, x)).concat(dasAreas).filter((a) => !estado.resolvidos[a.id]);
-    return todas.sort((a, b) => a.nivel - b.nivel || (ORDEM_CAT[a.cat] ?? 9) - (ORDEM_CAT[b.cat] ?? 9) || (b.valor || 0) - (a.valor || 0));
-  }
-
-  // ---------- INÍCIO (painel de trabalho): o que fazer hoje, números da revenda, atalhos e sistemas ----------
-  const ICO_SETA = '<path d="M5 12h14M13 6l6 6-6 6"/>';
-  // número curto do cartão do sistema (o primeiro trecho do número vivo da área)
-  function numeroArea(a) { let n = null; try { n = a.numero ? a.numero(UI) : null; } catch (er) { n = null; } return n; }
-  // indicadores com dados de verdade, só das áreas que a pessoa vê; variação só quando existe comparação real
-  function indicadoresPortal() {
-    const l = [], vis = (id) => { const a = AR.area(id); return a && a.pronta && areaVisivel(a); };
-    if (vis('usados') && pode('patio')) {
-      const p = C.patio(), v = p.filter((t) => diasDesde(t.entrada) > 90).length;
-      l.push({ id: 'patio', rot: 'Capital parado no pátio', ico: '<path d="M3 20V9l9-5 9 5v11M7 20v-6h10v6"/>', val: mil(C.capitalImobilizado()), exp: `${p.length} ${p.length === 1 ? 'máquina' : 'máquinas'} no pátio${v ? ` · ${v} há mais de 90 dias` : ''}`, per: 'Hoje', alerta: v > 0, ir: urlSis('usados', 'patio') });
-    }
-    if (vis('relatorios') || (vis('usados') && pode('trocas'))) {
-      const vend = C.vendidas(), noPer = (a, b) => vend.filter((t) => t.saida && diasDesde(t.saida) >= a && diasDesde(t.saida) <= b);
-      const ag = noPer(0, 30), ant = noPer(31, 60), soma = (x) => x.reduce((s, t) => s + (t.vendido || 0), 0), sa = soma(ag), sb = soma(ant);
-      l.push({ id: 'vendas', rot: 'Usados vendidos', ico: '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>', val: mil(sa), exp: `${ag.length} ${ag.length === 1 ? 'máquina vendida' : 'máquinas vendidas'}`, per: 'Últimos 30 dias', varia: sb > 0 ? (sa - sb) / sb : null, ir: vis('relatorios') && pode('relatorio') ? urlSis('relatorios') : urlSis('usados', 'trocas') });
-    }
-    if (vis('financeiro') && window.FINANCEIRO) {
-      try {
-        const F = window.FINANCEIRO; F.garantir(estado);
-        const r = F.resumo(estado, { hoje: hojeISO(), loja: estado.lojaAtual || '', lojas: K.lojasPermitidas, ctx: { trocas: A.todasTrocas || A.trocas || [], financiadas: A.financiadas || [], cfg: K.cfg, hoje: hojeISO() } });
-        l.push({ id: 'receber', rot: 'Contas a receber', ico: '<path d="M4 7h16v12H4zM4 11h16M8 15h3"/>', val: mil(r.receberVencido.valor + r.receber7.valor), exp: `${r.receberVencido.n ? `${r.receberVencido.n} ${r.receberVencido.n === 1 ? 'vencida' : 'vencidas'} · ` : ''}${r.receber7.n} nos próximos 7 dias`, per: 'Vencidas e 7 dias', alerta: r.receberVencido.n > 0, ir: urlSis('financeiro', 'fin-receber') });
-        l.push({ id: 'saldo', rot: 'Saldo em bancos e caixa', ico: '<path d="M3 10l9-6 9 6M5 10v9M19 10v9M9 10v9M15 10v9M3 21h18"/>', val: mil(r.saldo), exp: `a pagar hoje: ${mil(r.pagarHoje.valor)}`, per: 'Hoje', ir: urlSis('financeiro') });
-      } catch (er) { /* sem financeiro: segue com os outros */ }
-    }
-    ['crm', 'oficina', 'novas', 'pecas'].forEach((id) => {
-      if (!vis(id)) return; const a = AR.area(id), n = numeroArea(a); if (!n) return;
-      const [t1, ...resto] = String(n.texto).split(' · ');
-      l.push({ id, rot: a.nome, ico: a.icone, val: n.valor, exp: t1 + (resto[0] ? ' · ' + resto[0] : ''), per: 'Agora', alerta: !!n.alerta, ir: urlSis(id) });
-    });
-    return l.slice(0, 4);
-  }
-  // atalhos de trabalho: no máximo 6, só do que a pessoa pode fazer
-  function atalhosPortal() {
-    const l = [], vis = (id) => { const a = AR.area(id); return a && a.pronta && areaVisivel(a) ? a : null; };
-    const deAcao = (id, rot) => { const a = vis(id); if (!a || !a.acao || somenteLeitura()) return null; const ab = a.acao.href.replace(/^#\/?([^/]*\/)?/, ''); if (!pode(ab)) return null; return { rot: rot || a.acao.rotulo, ico: a.icone, href: /^#\//.test(a.acao.href) ? a.acao.href : urlSis(id, ab), novo: a.acao.novo && a.novo ? id : '' }; };
-    const u = vis('usados');
-    if (u && pode('avaliar') && !somenteLeitura()) l.push({ rot: 'Avaliar troca', ico: '<path d="M4 7h13l-3-3M20 17H7l3 3"/>', href: urlSis('usados', 'avaliar'), destaque: true });
-    if (u && pode('patio')) l.push({ rot: 'Consultar pátio', ico: '<path d="M3 20V9l9-5 9 5v11M7 20v-6h10v6"/>', href: urlSis('usados', 'patio') });
-    [deAcao('crm', 'Nova oportunidade'), deAcao('oficina', 'Abrir OS'), deAcao('pecas', 'Entrada de peças')].forEach((x) => { if (x) l.push(x); });
-    if (vis('financeiro')) l.push({ rot: 'Consultar financeiro', ico: AR.area('financeiro').icone, href: urlSis('financeiro') });
-    if (l.length < 6) [deAcao('novas', 'Nova proposta'), vis('relatorios') ? { rot: 'Ver relatórios', ico: AR.area('relatorios').icone, href: urlSis('relatorios') } : null].forEach((x) => { if (x && l.length < 6) l.push(x); });
-    if (l.length && !l.some((x) => x.destaque)) l[0].destaque = true;
-    return l.slice(0, 6);
-  }
-  function telaInicio() {
-    const as = areasVisiveis(), fixa = lsG(chaveU('area-fixa')) || '', favs = favoritos();
-    const h = new Date().getHours(), saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite', nome = primeiroNome(eu());
-    const prontas = as.filter((a) => a.pronta).sort((x, y) => (favs.includes(y.id) ? 1 : 0) - (favs.includes(x.id) ? 1 : 0)), breves = as.filter((a) => !a.pronta);
-    const ordem = as.filter((a) => a.pronta);
-    const cartao = (a) => {
-      if (!a.pronta) return `<div class="area-caixa"><button type="button" class="area-cartao breve" data-breve="${a.id}"><span class="area-ico">${svgI(a.icone)}</span><span class="area-txt"><span class="area-nome">${esc(a.nome)}</span><span class="area-num">Em breve</span></span></button></div>`;
-      const n = numeroArea(a), i = ordem.indexOf(a), curto = n ? String(n.texto).split(' · ')[0] : '';
-      return `<div class="area-caixa" data-sis="${a.id}"><a class="area-cartao ${favs.includes(a.id) ? 'favorito' : ''}" href="${urlSis(a.id)}" data-area="${a.id}" ${i >= 0 && i < 9 ? `aria-keyshortcuts="Alt+${i + 1}"` : ''}><span class="area-ico">${svgI(a.icone)}</span><span class="area-txt"><span class="area-nome">${esc(a.nome)}${a.id === fixa ? '<span class="tag comprovado">Abre direto</span>' : ''}${favs.includes(a.id) ? '<span class="tag declarado">Favorito</span>' : ''}</span>
-        <span class="area-num ${n && n.alerta ? 'alerta' : ''}">${n ? `<b>${esc(n.valor)}</b> ${esc(curto)}` : esc(a.descricao.split(/[,.]/)[0])}</span><span class="area-desc sr">${esc(a.descricao)}</span></span><span class="area-ir" aria-hidden="true">${svgI(ICO_SETA)}</span></a></div>`;
-    };
-    const tarefas = tarefasDoDia(), urg = tarefas.filter((x) => x.nivel <= 2);
-    const rec = recentes().map((r) => { const a = AR.area(r.sis), x = a && itensVisiveis(a).find((y) => y.aba === r.aba); return a && x && areaVisivel(a) ? { a, x } : null; }).filter(Boolean).slice(0, 4);
-    const kpis = indicadoresPortal(), ats = atalhosPortal();
-    const icoTarefa = (t) => { const a = AR.area(t.area); return svgI(t.cat === 'aprovar' ? '<path d="M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/>' : t.cat === 'comprador' ? '<path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM3 21a9 9 0 0 1 18 0"/>' : a ? a.icone : ICO_AVISOS); };
-    const dataLonga = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-    const contexto = `${esc(A.revenda.nome)} · ${estado.lojaAtual ? 'loja ' + esc(estado.lojaAtual) : estado.lojas.length > 1 ? 'todas as lojas' : esc(PERFIL_NOME(eu().perfil))}`;
-    const cont = areaAtual && AR.area(areaAtual) && areaVisivel(AR.area(areaAtual)) && AR.area(areaAtual).pronta ? AR.area(areaAtual) : null;
-    tela.innerHTML = `<div class="portal">
-      <div class="titulo portal-ola"><div><h1>${saud}${nome ? ', ' + esc(nome) : ''}</h1><p><span class="ola-data">${svgI('<path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/>')}${esc(dataLonga.charAt(0).toUpperCase() + dataLonga.slice(1))}</span><span class="ola-ctx">${contexto}</span></p></div>
-        ${cont ? `<a class="btn btn-linha" href="${urlSis(cont.id)}" data-area="${cont.id}">Continuar em ${esc(cont.nome)}${svgI(ICO_SETA)}</a>` : ''}</div>
-      ${avisoImplantacao()}
+      <div id="av-envios"></div></section>`}function wt(){const a=l("#cfg-avisos");if(!a)return;const e=b.usuarios.filter(t=>C?t.email:!0),o=t=>{const s=t&&t.destinatarios&&t.destinatarios.length?t.destinatarios:e.filter(i=>i.perfil==="dono").map(i=>i.id);l("#av-freq").value=t&&t.frequencia||"diario",l("#av-dest").innerHTML=e.map(i=>`<label class="check"><input type="checkbox" data-dest="${c(i.id)}" ${s.includes(i.id)?"checked":""}> ${c(i.nome)} <span class="sub">\xB7 ${c(ie(i.perfil))}${i.email?" \xB7 "+c(i.email):""}</span></label>`).join("")||'<p class="sub">Ningu\xE9m com e-mail na equipe.</p>'};C?(C.avisos().then(o,t=>{l("#av-dest").textContent=t.message}),C.envios().then(t=>{l("#av-envios").innerHTML=t.length?`<p class="conta">\xDAltimos envios: ${t.slice(0,6).map(s=>`${N(s.dia)} para ${c((b.usuarios.find(i=>i.id===s.usuario)||{}).nome||"pessoa removida")} (${s.itens} ${s.itens===1?"item":"itens"}, ${s.status})`).join("; ")}.</p>`:'<p class="conta">Nenhum e-mail enviado ainda.</p>'},()=>{})):o(b.avisos),l("#av-salvar").onclick=async()=>{const t=l("#av-freq").value,s=R("[data-dest]",a).filter(i=>i.checked).map(i=>i.dataset.dest);try{C?await C.salvarAvisos(t,s):(b.avisos={frequencia:t,destinatarios:s},L("config",`Avisos por e-mail: ${t}`),T()),A(t==="desligado"?"Avisos desligados.":"Avisos salvos.")}catch(i){A(i.message,!0)}},l("#av-previa").onclick=()=>{const t=D(),{acoes:s}=na.acoesDoDia(Object.assign(jo("dono"),{rascunho:null,janela:1})),i=na.resumoEmail({revenda:y.revenda.nome,nome:t.nome,acoes:s,link:location.origin+location.pathname,hoje:z(),frequencia:l("#av-freq").value});oa("modal",i?`<h2>${c(i.assunto)}</h2><p class="sub">Pr\xE9via com os dados de agora${X?"":" (demonstra\xE7\xE3o: nenhum e-mail \xE9 enviado)"}.</p><div class="previa-email">${i.html}</div>`:'<h2>Nada a enviar agora</h2><p class="sub">Com os dados de hoje n\xE3o h\xE1 nada relevante: nesse caso o Anshur n\xE3o manda e-mail.</p>')}}function di(){if(X||b.semente9)return;const a=m=>{const r=new Date(z()+"T12:00:00");return r.setDate(r.getDate()-m),r.toISOString().slice(0,10)},e=(m,r=0)=>y.modelos.filter(p=>p.tipo===m)[r]||y.modelos[0],o=(m,r,p,d)=>({tipo:m.tipo,marca:m.marca,modelo:m.modelo,ano:r,horas:p,cond:d,ficha:{motor:4,transmissao:4,hidraulico:3,pneus:3,cabine:4,lataria:3}});[[e("trator",1),2021,3800,70,3,"Rodrigo"],[e("pulverizador",0),2020,4100,66,6,"Marcos"],[e("trator",3),2019,5200,62,12,"Fernanda"]].forEach(([m,r,p,d,$,u],g)=>{const j=o(m,r,p,d),S=Q.avaliar(j,{semValidacao:!0});S&&b.avaliacoes.push({id:"AVD"+g,data:a($),por:u,loja:b.lojas[g%b.lojas.length]||"",status:g===2?"desistiu":"aberta",maq:j,teto:S.teto,venda:S.venda,preparo:S.preparo,faixa:S.faixa,confianca:S.confianca,amostras:S.base,premissas:{margemAlvo:S.margem},...g===0?{ia:{exemplo:!0,provedor:"exemplo",fotos:11,resumo:"EXEMPLO (demonstra\xE7\xE3o): IA sugeriu Motor 3, Transmiss\xE3o 4, Hidr\xE1ulico 3, Pneus 2, Cabine 4, Lataria 3; o avaliador aceitou 5, alterou 1 (Pneus: 2\u21923); avarias: 1 confirmadas, 0 descartadas."}}:{}})});for(const m of y.compradores){const r=y.modelos.filter(d=>d.tipo===m.tipo&&(!m.marcas||d.marca===m.marcas));let p=!1;for(const d of r){const $=o(d,Math.max(+m.anoMin||0,Da-4),2800,78),u=Q.avaliar($,{semValidacao:!0});if(!u)continue;const g=x.fecharTroca(b,$,u,u.teto,a(2),{vendedor:"Rodrigo",origem:"Faz. Recreio",loja:b.lojas[0]||""});if(na.compradoresPara(g,y.compradores).length){y.trocas.push({...g}),p=!0;break}b.fechadas.pop()}if(p)break}const s=o(e("colhedora",0),Da-5,14e3,68),i=Q.avaliar(s,{semValidacao:!0});i&&b.pendentes.push({id:"PD1",nivel:"gerente",quando:new Date(Date.now()-5*36e5).toISOString(),por:"Tiago",maq:s,rec:{teto:i.teto,venda:i.venda,preparo:i.preparo,dias:i.dias,margem:i.margem,margemSobreVenda:i.margemSobreVenda,confianca:i.confianca,doTipo:i.doTipo},valor:i.teto+25e3,data:z(),motivo:"Cliente fecha a colhedora nova se pagarmos isso no usado",status:"pendente",extra:{vendedor:"Tiago",origem:"Usina fict\xEDcia",fotos:[]}});const n=(m,r,p,d)=>na.chavePeriodo(m,a(d))+"|"+r+"|"+p;b.rituais=Object.assign({},b.rituais,{[n("dia","vendedor","compradores",0)]:{por:"Rodrigo",quando:new Date(Date.now()-2*36e5).toISOString()},[n("semana","financeiro","comissoes",0)]:{por:"L\xFAcia",quando:new Date(Date.now()-26*36e5).toISOString()},[n("dia","gerente","faixas",1)]:{por:"Carlos",quando:new Date(Date.now()-22*36e5).toISOString()},[n("dia","vendedor","retorno",1)]:{por:"Marcos",quando:new Date(Date.now()-25*36e5).toISOString()},[n("dia","oficina","preparo",2)]:{por:"Z\xE9 da Oficina",quando:new Date(Date.now()-50*36e5).toISOString()}}),b.semente9=!0,T(),Pa()}const yo={visao:rs,avaliar:Xe,patio:eo,trocas:Jo,teste:Ce,passaportes:xs,vendedores:Ms,garantias:Ko,financiamento:As,relatorio:go,mensal:ys,documentos:at,usuarios:Cs,config:Ps,atividades:Is,compradores:Fs,mercado:Bs,aprovacoes:Us,perfil:fe,hoje:ti,rotina:si,memoria:ii,historico:Et};function Vi(){const a=l('.menu a[aria-current="page"]'),e=l(".menu-indicador");!a||!e||(matchMedia("(min-width: 960px)").matches?(e.style.transform=`translateY(${a.offsetTop}px)`,e.style.width=""):(e.style.transform=`translateX(${a.offsetLeft}px)`,e.style.width=a.offsetWidth+"px"))}const B=window.ANSHUR_AREAS,Xa=a=>{try{return localStorage.getItem(a)}catch{return null}},ne=(a,e)=>{try{e?localStorage.setItem(a,e):localStorage.removeItem(a)}catch{}},fa=a=>`anshur-${a}:${C?C.revenda.id:X?"op":"demo"}:${D().id}`,ge=a=>yo[a]||(B&&B.tela(a)?()=>B.tela(a)(Ra):null),re=a=>B?B.itens(a).filter(e=>ta(e.aba)&&ge(e.aba)):[],La=a=>a.pronta?re(a).length>0&&(!a.perfis||a.perfis.includes(D().perfil)):!a.perfis||a.perfis.includes(D().perfil),Ka=()=>B?B.lista().filter(La):[],li=a=>{const e=re(a);return(e.find(o=>o.aba===a.inicio)||e[0]||{}).aba||"inicio"},Ct={inicio:"Portal",hoje:"Tarefas do dia",rotina:"Rotina da equipe"},J=(a,e)=>"#/"+a+(e?"/"+e:""),ci=a=>"#/"+(a&&a!=="inicio"?a:""),pi=()=>{const a=B&&B.area(Xa(fa("area-fixa")));return a&&a.pronta&&La(a)?J(a.id):""},mi=()=>[["Portal: todos os sistemas","#/"],["Tarefas do dia","#/hoje"],["Rotina da equipe","#/rotina"]].concat(Ka().filter(a=>a.pronta).flatMap(a=>[["Sistema "+a.nome,J(a.id)]].concat(re(a).map(e=>[`${e.rotulo} \xB7 ${a.nome}`,J(a.id,e.aba)]))));let Ma=Xa(fa("area"))||"";const G=a=>`<svg viewBox="0 0 24 24" aria-hidden="true">${a}</svg>`,Ni='<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>',ui='<path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>',vi='<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/>',Rt=(a,e)=>{try{return JSON.parse(Xa(fa(a)))||e}catch{return e}},qo=()=>Rt("favoritos",[]),Pt=()=>Rt("recentes",[]);function hi(a,e){const o=Pt().filter(t=>!(t.sis===a&&t.aba===e));o.unshift({sis:a,aba:e,quando:new Date().toISOString()}),ne(fa("recentes"),JSON.stringify(o.slice(0,8)))}let ko=null;const Eo=()=>innerWidth>=1280?6:innerWidth>=1e3?5:4;function bi(a,e){const o=[a.inicio].concat(a.atalhos||[]),t=s=>{const i=o.indexOf(s.aba);return i<0?99:i};return e.slice().sort((s,i)=>t(s)-t(i)||e.indexOf(s)-e.indexOf(i))}const So='<path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6"/>',Fe='<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>',wo='<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>';function Tt(a){const e=(a||"portal")+":"+Eo();if(ko===e)return;ko=e;const o=a&&B.area(a),t=o?o.menu.map(h=>({grupo:h.grupo,its:h.itens.filter(f=>ta(f.aba)&&ge(f.aba))})).filter(h=>h.its.length):[],s=o?t.flatMap(h=>h.its.map(f=>Object.assign({grupo:h.grupo},f))).filter((h,f,k)=>k.findIndex(sa=>sa.aba===h.aba)===f):[],i=o?bi(o,s):[],n=i.length<=Eo()?i.length:Eo()-1,m=i.slice(0,n),r=s.filter(h=>!m.includes(h)),p='<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>',d=[...new Set(r.map(h=>h.grupo))];l("#sis-barra").innerHTML=m.map(h=>`<a class="sb-item" href="${J(o.id,h.aba)}" data-aba="${h.aba}">${G(h.icone)}<span>${c(h.rotulo)}</span></a>`).join("")+(r.length?`<div class="sb-grupo sb-mais"><button type="button" class="sb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="sb-pop-mais">${G(Fe)}<span>Mais</span>${p}</button><div class="sb-pop" id="sb-pop-mais" role="menu" hidden>${d.map(h=>`${d.length>1?`<p class="sb-pop-g">${c(h)}</p>`:""}${r.filter(f=>f.grupo===h).map(f=>`<a role="menuitem" href="${J(o.id,f.aba)}" data-aba="${f.aba}">${G(f.icone)}<span>${c(f.rotulo)}</span></a>`).join("")}`).join("")}</div></div>`:"");const $=Ka();l("#lat-areas").innerHTML=`<a href="#/" class="lat-item" data-ir-inicio>${G(So)}<span>In\xEDcio</span></a>`+$.map(h=>h.pronta?`<a href="${J(h.id)}" class="lat-item" data-area="${h.id}" ${o&&h.id===o.id?'aria-current="true"':""}>${G(h.icone)}<span>${c(h.nome)}</span></a>`:`<a href="#/" class="lat-item breve" data-breve="${h.id}">${G(h.icone)}<span>${c(h.nome)}</span></a>`).join("");const u=l("#sis-nome");u.href=o?J(o.id):"#/",u.innerHTML=o?`<span class="sis-ico">${G(o.icone)}</span><span class="sis-txt"><b>${c(o.nome)}</b></span>`:"",u.setAttribute("aria-label",o?`${o.nome}: tela inicial do sistema`:"In\xEDcio"),document.title=o?`Anshur ${o.nome} \xB7 ${y.revenda.nome}`:`Anshur \xB7 ${y.revenda.nome}`;const g=l(".cab-nova");if(g){const h=o&&o.acao?o.acao:null;g.hidden=!h||Na(),h&&(g.href=/^#\//.test(h.href)?h.href:J(o.id,h.href.slice(1)),l("span",g).textContent=h.rotulo,g.setAttribute("aria-label",h.rotulo),g.onclick=h.novo&&o.novo?f=>{f.preventDefault(),o.novo(Ra)}:null)}const j=B.area("usados"),S=j&&La(j)&&j.pronta,H=o?i.slice(0,3).map(h=>({href:J(o.id,h.aba),aba:h.aba,ico:h.icone,rot:{Implanta\u00E7\u00E3o:"Implantar",Documentos:"Docs",Movimentos:"Movim."}[h.curto||h.rotulo]||h.curto||h.rotulo})):[S?{href:J("usados"),area:"usados",ico:j.icone,rot:"Usados"}:null,S&&ta("avaliar")?{href:J("usados","avaliar"),aba:"avaliar",ico:'<path d="M4 7h13l-3-3M20 17H7l3 3"/>',rot:"Avaliar"}:null,{href:"#/hoje",aba:"hoje",ico:wo,rot:"Avisos"}].filter(Boolean),O=$.filter(h=>h.pronta&&!H.some(f=>f.area===h.id));for(;!o&&H.length<3&&O.length;){const h=O.shift();H.splice(H.length-1,0,{href:J(h.id),area:h.id,ico:h.icone,rot:h.curto||h.nome})}l("#menu").innerHTML=`<a href="#/" class="atalho" data-aba="inicio" data-ir-inicio>${G(So)}<span>In\xEDcio</span></a>`+H.map(h=>`<a href="${h.href}" class="atalho" ${h.aba?`data-aba="${h.aba}"`:`data-area-barra="${h.area}"`}>${G(h.ico)}<span>${c(h.rot)}</span></a>`).join("")+`<button type="button" id="menu-mais" class="menu-mais" aria-expanded="false" aria-controls="menu-folha">${G(Fe)}<span>Mais</span></button>`;const aa=(h,f,k,sa="")=>`<a href="${h}" ${sa}>${G(f)}<span>${c(k)}</span></a>`;l("#menu-folha").innerHTML=`<div class="folha-cab"><b>${o?c(o.nome):"Mais op\xE7\xF5es"}</b><button type="button" class="fechar" data-fecha-folha aria-label="Fechar">\xD7</button></div>
+      ${o?t.map(h=>`<p class="folha-g">${c(h.grupo)}</p><div class="folha-lista">${h.its.map(f=>aa(J(o.id,f.aba),f.icone,f.rotulo,`data-aba="${f.aba}"`)).join("")}</div>`).join(""):""}
+      <p class="folha-g">${o?"Outros sistemas":"Sistemas"}</p><div class="folha-lista">${aa("#/",So,"In\xEDcio","data-ir-inicio")}${$.filter(h=>h.pronta&&(!o||h.id!==o.id)).map(h=>aa(J(h.id),h.icone,h.nome,`data-area="${h.id}"`)).join("")}</div>
+      <p class="folha-g">Voc\xEA</p><div class="folha-lista">${aa("#/hoje",wo,"Tarefas do dia",'data-aba="hoje"')}${aa("#/rotina",'<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',"Rotina da equipe",'data-aba="rotina"')}<button type="button" data-preferencias>${G('<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM4 12h2M18 12h2M12 4v2M12 18v2"/>')}<span>Prefer\xEAncias deste aparelho</span></button>${ca&&!ca.instalado()?`<button type="button" data-instalar-m>${G('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}<span>Instalar o aplicativo</span></button>`:""}${aa("#/config/perfil",'<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 21a7 7 0 0 1 14 0"/>',"Meu perfil",'data-aba="perfil"')}</div>`,document.body.dataset.modo=o?"sistema":"portal",document.body.dataset.areaAtual=a||"inicio"}const $e=a=>R("#sis-barra .sb-btn").forEach(e=>{e!==a&&(e.setAttribute("aria-expanded","false"),e.nextElementSibling.hidden=!0)});l("#sis-barra").addEventListener("click",a=>{const e=a.target.closest(".sb-btn");if(e){const o=e.getAttribute("aria-expanded")!=="true";if($e(e),e.setAttribute("aria-expanded",o),e.nextElementSibling.hidden=!o,o){const t=e.nextElementSibling.querySelector("a");t&&a.detail===0&&t.focus()}return}a.target.closest("a")&&$e()}),l("#sis-barra").addEventListener("keydown",a=>{const e=a.target.closest(".sb-pop"),o=a.target.closest(".sb-grupo")&&a.target.closest(".sb-grupo").querySelector(".sb-btn");if(a.key==="Escape"&&o){$e(),o.focus();return}if(!e||!["ArrowDown","ArrowUp"].includes(a.key))return;const t=R("a",e),s=t.indexOf(document.activeElement);t[(s+(a.key==="ArrowDown"?1:-1)+t.length)%t.length].focus(),a.preventDefault()}),document.addEventListener("click",a=>{a.target.closest("#sis-barra")||$e()});const fi='<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';function Dt(){const a=l("#sis-barra");if(!a||!a.offsetParent)return;const e=()=>R(".sb-grupo",a).forEach(o=>{const t=o.querySelector("a[aria-current]");o.classList.toggle("atual",!!t);const s=l(".sb-btn > span",o);s&&(s.textContent=t?"Mais: "+t.textContent.trim():"Mais")});for(let o=0;o<12&&(e(),!(a.scrollWidth<=a.clientWidth+1));o++){const t=R(":scope > a.sb-item",a);if(t.length<=2)break;let s=l(".sb-mais",a);s||(a.insertAdjacentHTML("beforeend",`<div class="sb-grupo sb-mais"><button type="button" class="sb-btn" aria-haspopup="true" aria-expanded="false" aria-controls="sb-pop-mais">${G(Fe)}<span>Mais</span>${fi}</button><div class="sb-pop" id="sb-pop-mais" role="menu" hidden></div></div>`),s=l(".sb-mais",a));const i=t[t.length-1];i.className="",i.setAttribute("role","menuitem"),l(".sb-pop",s).prepend(i)}e()}function He(a){const e=l("#menu-folha"),o=l("#menu-fundo"),t=l("#menu-mais");e&&(e.hidden=!a,o.hidden=!a,document.body.classList.toggle("menu-aberto",a),t&&t.setAttribute("aria-expanded",a),a&&setTimeout(()=>{const s=e.querySelector("a[aria-current]")||e.querySelector("a, button");s&&s.focus()},30))}const Be=()=>{const a=l("#menu-folha");a&&!a.hidden&&He(!1)};document.addEventListener("click",a=>{if(a.target.closest("#menu-mais")){He(l("#menu-folha").hidden);return}if(a.target.closest("#menu-fundo, [data-fecha-folha]")){He(!1);return}if(a.target.closest("[data-preferencias]")){a.preventDefault(),Be(),Mi();return}if(a.target.closest("[data-instalar-m]")){Be(),ho();return}a.target.closest("#menu-folha a")&&Be()}),document.addEventListener("keydown",a=>{if(a.key==="Escape"&&document.body.classList.contains("menu-aberto")){He(!1);const e=l("#menu-mais");e&&e.focus()}});const Lt=()=>Xa(fa("lateral"))==="recolhida";function Ot(){const a=Lt(),e=l("#lat-recolher");document.body.classList.toggle("lat-recolhida",a),e.setAttribute("aria-expanded",String(!a)),e.title=a?"Mostrar os nomes dos sistemas":"Recolher a lista de sistemas"}l("#lat-recolher").onclick=()=>{ne(fa("lateral"),Lt()?"":"recolhida"),Ot()},Ot();function Co(a){const e=B.area(a);if(!e)return;if(!e.pronta){It(e);return}za();const o=J(a);location.hash===o?Z():location.hash=o}function It(a){oa("modal",`<div class="instala-topo"><span class="area-ico">${G(a.icone)}</span><div><h2>${c(a.nome)}</h2><p class="sub"><span class="tag declarado">Em breve</span> Este sistema ainda est\xE1 sendo constru\xEDdo.</p></div></div>
+      ${a.previsto&&a.previsto.length?`<p style="margin:14px 0 6px;font-weight:650">O que vai ter</p><ul class="passos-instalar">${a.previsto.map(e=>`<li>${c(e)}</li>`).join("")}</ul>`:""}
+      ${a.jaExiste?`<p class="nota-rodape" style="margin-top:12px">${c(a.jaExiste)}</p>`:""}<p class="nota-rodape">Enquanto isso, a revenda continua usando o sistema atual para esta parte. Nada aqui \xE9 demonstra\xE7\xE3o disfar\xE7ada.</p>`)}function za(){const a=l("#area-pop");a&&a.remove(),R(".area-troca").forEach(e=>e.setAttribute("aria-expanded","false"))}function gi(a){if(l("#area-pop")){za();return}const e=a.getBoundingClientRect(),o=Ka(),t=document.createElement("div");t.id="area-pop",t.className="area-pop",t.setAttribute("role","menu"),t.setAttribute("aria-label","Sistemas"),t.innerHTML=`<a href="#/" role="menuitem" data-ir-inicio class="pop-portal">${G('<path d="M10 19l-7-7 7-7M3 12h18"/>')}<span><b>Voltar ao in\xEDcio</b><small>O que fazer hoje, n\xFAmeros e todos os sistemas do dia</small></span></a>`+o.map(i=>i.pronta?`<div class="pop-linha"><a href="${J(i.id)}" role="menuitem" data-area="${i.id}" class="${i.id===Ma&&document.body.dataset.modo==="sistema"?"atual":""}">${G(i.icone)}<span><b>${c(i.nome)}</b><small>${c(i.descricao.split(/[,.]/)[0])}</small></span></a><a class="pop-aba" href="${J(i.id)}" target="_blank" rel="noopener" title="Abrir ${c(i.nome)} em nova aba" aria-label="Abrir ${c(i.nome)} em nova aba">${G(ui)}</a></div>`:`<a href="#/" role="menuitem" data-breve="${i.id}" class="breve">${G(i.icone)}<span><b>${c(i.nome)}</b><small>Em breve</small></span></a>`).join(""),document.body.appendChild(t);const s=Math.min(360,innerWidth-16);t.style.width=s+"px",t.style.left=Math.max(8,Math.min(e.left,innerWidth-s-8))+"px",t.style.top=e.bottom+6+"px",a.setAttribute("aria-expanded","true"),l("[data-ir-inicio]",t).onclick=()=>za(),setTimeout(()=>(t.querySelector("a.atual")||t.querySelector("a")).focus(),30),t.onkeydown=i=>{const n=R('a[role="menuitem"]',t),m=n.indexOf(document.activeElement);i.key==="ArrowDown"&&((n[m+1]||n[0]).focus(),i.preventDefault()),i.key==="ArrowUp"&&((n[m-1]||n[n.length-1]).focus(),i.preventDefault()),i.key==="Escape"&&(za(),a.focus())}}document.addEventListener("click",a=>{const e=a.target.closest(".area-troca");if(e){a.preventDefault(),a.stopPropagation(),gi(e);return}const o=a.target.closest("[data-fav]");if(o){a.preventDefault();const i=qo(),n=o.dataset.fav;ne(fa("favoritos"),JSON.stringify(i.includes(n)?i.filter(m=>m!==n):i.concat(n))),A(i.includes(n)?"Tirado dos favoritos.":"Sistema nos favoritos: aparece primeiro no in\xEDcio."),o.setAttribute("aria-pressed",String(!i.includes(n))),document.body.dataset.modo==="portal"&&Po();return}if(a.target.closest('[target="_blank"]')){za();return}const t=a.target.closest("[data-area]");if(t&&!a.ctrlKey&&!a.metaKey&&!a.shiftKey){a.preventDefault(),za(),document.body.classList.remove("menu-aberto"),Co(t.dataset.area);return}const s=a.target.closest("[data-breve]");if(s){a.preventDefault(),za(),document.body.classList.remove("menu-aberto"),It(B.area(s.dataset.breve));return}l("#area-pop")&&!a.target.closest("#area-pop")&&za()}),document.addEventListener("keydown",a=>{if(!a.altKey||a.ctrlKey||!/^[0-9]$/.test(a.key))return;if(a.key==="0"){a.preventDefault(),location.hash="#/";return}const e=Ka().filter(o=>o.pronta)[+a.key-1];e&&(a.preventDefault(),Co(e.id))});const Vt={aprovar:0,rascunho:1,comprador:2,floor:3,avaliacao:4};function Nt(){const a=D(),e=jo(),{acoes:o}=na.acoesDoDia(e),t=B?B.tarefas(b,a,Ra,i=>La(i)):[];return o.map(i=>Object.assign({area:"usados"},i)).concat(t).filter(i=>!b.resolvidos[i.id]).sort((i,n)=>i.nivel-n.nivel||(Vt[i.cat]??9)-(Vt[n.cat]??9)||(n.valor||0)-(i.valor||0))}const Ro='<path d="M5 12h14M13 6l6 6-6 6"/>';function zt(a){let e=null;try{e=a.numero?a.numero(Ra):null}catch{e=null}return e}function $i(){const a=[],e=o=>{const t=B.area(o);return t&&t.pronta&&La(t)};if(e("usados")&&ta("patio")){const o=I.patio(),t=o.filter(s=>qa(s.entrada)>90).length;a.push({id:"patio",rot:"Capital parado no p\xE1tio",ico:'<path d="M3 20V9l9-5 9 5v11M7 20v-6h10v6"/>',val:E(I.capitalImobilizado()),exp:`${o.length} ${o.length===1?"m\xE1quina":"m\xE1quinas"} no p\xE1tio${t?` \xB7 ${t} h\xE1 mais de 90 dias`:""}`,per:"Hoje",alerta:t>0,ir:J("usados","patio")})}if(e("relatorios")||e("usados")&&ta("trocas")){const o=I.vendidas(),t=(p,d)=>o.filter($=>$.saida&&qa($.saida)>=p&&qa($.saida)<=d),s=t(0,30),i=t(31,60),n=p=>p.reduce((d,$)=>d+($.vendido||0),0),m=n(s),r=n(i);a.push({id:"vendas",rot:"Usados vendidos",ico:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',val:E(m),exp:`${s.length} ${s.length===1?"m\xE1quina vendida":"m\xE1quinas vendidas"}`,per:"\xDAltimos 30 dias",varia:r>0?(m-r)/r:null,ir:e("relatorios")&&ta("relatorio")?J("relatorios"):J("usados","trocas")})}if(e("financeiro")&&window.FINANCEIRO)try{const o=window.FINANCEIRO;o.garantir(b);const t=o.resumo(b,{hoje:z(),loja:b.lojaAtual||"",lojas:x.lojasPermitidas,ctx:{trocas:y.todasTrocas||y.trocas||[],financiadas:y.financiadas||[],cfg:x.cfg,hoje:z()}});a.push({id:"receber",rot:"Contas a receber",ico:'<path d="M4 7h16v12H4zM4 11h16M8 15h3"/>',val:E(t.receberVencido.valor+t.receber7.valor),exp:`${t.receberVencido.n?`${t.receberVencido.n} ${t.receberVencido.n===1?"vencida":"vencidas"} \xB7 `:""}${t.receber7.n} nos pr\xF3ximos 7 dias`,per:"Vencidas e 7 dias",alerta:t.receberVencido.n>0,ir:J("financeiro","fin-receber")}),a.push({id:"saldo",rot:"Saldo em bancos e caixa",ico:'<path d="M3 10l9-6 9 6M5 10v9M19 10v9M9 10v9M15 10v9M3 21h18"/>',val:E(t.saldo),exp:`a pagar hoje: ${E(t.pagarHoje.valor)}`,per:"Hoje",ir:J("financeiro")})}catch{}return["crm","oficina","novas","pecas"].forEach(o=>{if(!e(o))return;const t=B.area(o),s=zt(t);if(!s)return;const[i,...n]=String(s.texto).split(" \xB7 ");a.push({id:o,rot:t.nome,ico:t.icone,val:s.valor,exp:i+(n[0]?" \xB7 "+n[0]:""),per:"Agora",alerta:!!s.alerta,ir:J(o)})}),a.slice(0,4)}function xi(){const a=[],e=s=>{const i=B.area(s);return i&&i.pronta&&La(i)?i:null},o=(s,i)=>{const n=e(s);if(!n||!n.acao||Na())return null;const m=n.acao.href.replace(/^#\/?([^/]*\/)?/,"");return ta(m)?{rot:i||n.acao.rotulo,ico:n.icone,href:/^#\//.test(n.acao.href)?n.acao.href:J(s,m),novo:n.acao.novo&&n.novo?s:""}:null},t=e("usados");return t&&ta("avaliar")&&!Na()&&a.push({rot:"Avaliar troca",ico:'<path d="M4 7h13l-3-3M20 17H7l3 3"/>',href:J("usados","avaliar"),destaque:!0}),t&&ta("patio")&&a.push({rot:"Consultar p\xE1tio",ico:'<path d="M3 20V9l9-5 9 5v11M7 20v-6h10v6"/>',href:J("usados","patio")}),[o("crm","Nova oportunidade"),o("oficina","Abrir OS"),o("pecas","Entrada de pe\xE7as")].forEach(s=>{s&&a.push(s)}),e("financeiro")&&a.push({rot:"Consultar financeiro",ico:B.area("financeiro").icone,href:J("financeiro")}),a.length<6&&[o("novas","Nova proposta"),e("relatorios")?{rot:"Ver relat\xF3rios",ico:B.area("relatorios").icone,href:J("relatorios")}:null].forEach(s=>{s&&a.length<6&&a.push(s)}),a.length&&!a.some(s=>s.destaque)&&(a[0].destaque=!0),a.slice(0,6)}function Po(){const a=Ka(),e=Xa(fa("area-fixa"))||"",o=qo(),t=new Date().getHours(),s=t<12?"Bom dia":t<18?"Boa tarde":"Boa noite",i=jt(D()),n=a.filter(h=>h.pronta).sort((h,f)=>(o.includes(f.id)?1:0)-(o.includes(h.id)?1:0)),m=a.filter(h=>!h.pronta),r=a.filter(h=>h.pronta),p=h=>{if(!h.pronta)return`<div class="area-caixa"><button type="button" class="area-cartao breve" data-breve="${h.id}"><span class="area-ico">${G(h.icone)}</span><span class="area-txt"><span class="area-nome">${c(h.nome)}</span><span class="area-num">Em breve</span></span></button></div>`;const f=zt(h),k=r.indexOf(h),sa=f?String(f.texto).split(" \xB7 ")[0]:"";return`<div class="area-caixa" data-sis="${h.id}"><a class="area-cartao ${o.includes(h.id)?"favorito":""}" href="${J(h.id)}" data-area="${h.id}" ${k>=0&&k<9?`aria-keyshortcuts="Alt+${k+1}"`:""}><span class="area-ico">${G(h.icone)}</span><span class="area-txt"><span class="area-nome">${c(h.nome)}${h.id===e?'<span class="tag comprovado">Abre direto</span>':""}${o.includes(h.id)?'<span class="tag declarado">Favorito</span>':""}</span>
+        <span class="area-num ${f&&f.alerta?"alerta":""}">${f?`<b>${c(f.valor)}</b> ${c(sa)}`:c(h.descricao.split(/[,.]/)[0])}</span><span class="area-desc sr">${c(h.descricao)}</span></span><span class="area-ir" aria-hidden="true">${G(Ro)}</span></a></div>`},d=Nt(),$=d.filter(h=>h.nivel<=2),u=Pt().map(h=>{const f=B.area(h.sis),k=f&&re(f).find(sa=>sa.aba===h.aba);return f&&k&&La(f)?{a:f,x:k}:null}).filter(Boolean).slice(0,4),g=$i(),j=xi(),S=h=>{const f=B.area(h.area);return G(h.cat==="aprovar"?'<path d="M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/>':h.cat==="comprador"?'<path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM3 21a9 9 0 0 1 18 0"/>':f?f.icone:wo)},H=new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}),O=`${c(y.revenda.nome)} \xB7 ${b.lojaAtual?"loja "+c(b.lojaAtual):b.lojas.length>1?"todas as lojas":c(ie(D().perfil))}`,aa=Ma&&B.area(Ma)&&La(B.area(Ma))&&B.area(Ma).pronta?B.area(Ma):null;w.innerHTML=`<div class="portal">
+      <div class="titulo portal-ola"><div><h1>${s}${i?", "+c(i):""}</h1><p><span class="ola-data">${G('<path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/>')}${c(H.charAt(0).toUpperCase()+H.slice(1))}</span><span class="ola-ctx">${O}</span></p></div>
+        ${aa?`<a class="btn btn-linha" href="${J(aa.id)}" data-area="${aa.id}">Continuar em ${c(aa.nome)}${G(Ro)}</a>`:""}</div>
+      ${yi()}
       <div class="portal-grade">
-        <section class="painel avisos-dia portal-hoje" aria-labelledby="h-hoje"><div class="painel-cab"><h2 id="h-hoje">${svgI('<path d="M9 11l3 3 8-8M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11"/>')}O que fazer hoje</h2>${tarefas.length ? `<span class="contador" title="${urg.length} para hoje · ${tarefas.length} no total">${tarefas.length}</span>` : ''}</div>
-          ${tarefas.length ? `<p class="sub hoje-resumo">${urg.length} para hoje · ${tarefas.length} no total, de todos os sistemas que você usa</p><ul class="acoes-dia">${tarefas.slice(0, 5).map((a, i) => `<li class="n${a.nivel}${i === 0 ? ' primeira' : ''}"><span class="tarefa-ico" aria-hidden="true">${icoTarefa(a)}</span><div class="tarefa-txt"><span class="cat">${esc(a.catNome || CAT_NOME[a.cat] || 'Usados')}</span><b>${esc(a.titulo)}</b><span>${esc(a.txt)}</span></div>${botaoAcao(a, i === 0 ? 'btn-ouro' : 'btn-linha')}</li>`).join('')}</ul>
-            <div class="acoes"><a class="btn btn-linha" href="#/hoje">Ver todas as pendências (${tarefas.length})</a><a class="btn btn-linha" href="#/rotina">Rotina da equipe</a></div>`
-          : `<div class="estado-vazio ok">${svgI('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}<b>Está tudo em dia.</b><p>Nenhuma pendência precisa da sua atenção agora.</p><a class="btn btn-linha" href="#/rotina">Ver a rotina da equipe</a></div>`}
-          ${rec.length ? `<div class="recentes"><h3 class="areas-sub">Abertos por último</h3><div class="chips">${rec.map(({ a, x }) => `<a class="chip" href="${urlSis(a.id, x.aba)}">${svgI(x.icone || a.icone)}<span>${esc(x.rotulo)}<small>${esc(a.nome)}</small></span></a>`).join('')}</div></div>` : ''}
+        <section class="painel avisos-dia portal-hoje" aria-labelledby="h-hoje"><div class="painel-cab"><h2 id="h-hoje">${G('<path d="M9 11l3 3 8-8M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11"/>')}O que fazer hoje</h2>${d.length?`<span class="contador" title="${$.length} para hoje \xB7 ${d.length} no total">${d.length}</span>`:""}</div>
+          ${d.length?`<p class="sub hoje-resumo">${$.length} para hoje \xB7 ${d.length} no total, de todos os sistemas que voc\xEA usa</p><ul class="acoes-dia">${d.slice(0,5).map((h,f)=>`<li class="n${h.nivel}${f===0?" primeira":""}"><span class="tarefa-ico" aria-hidden="true">${S(h)}</span><div class="tarefa-txt"><span class="cat">${c(h.catNome||Mo[h.cat]||"Usados")}</span><b>${c(h.titulo)}</b><span>${c(h.txt)}</span></div>${Ao(h,f===0?"btn-ouro":"btn-linha")}</li>`).join("")}</ul>
+            <div class="acoes"><a class="btn btn-linha" href="#/hoje">Ver todas as pend\xEAncias (${d.length})</a><a class="btn btn-linha" href="#/rotina">Rotina da equipe</a></div>`:`<div class="estado-vazio ok">${G('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}<b>Est\xE1 tudo em dia.</b><p>Nenhuma pend\xEAncia precisa da sua aten\xE7\xE3o agora.</p><a class="btn btn-linha" href="#/rotina">Ver a rotina da equipe</a></div>`}
+          ${u.length?`<div class="recentes"><h3 class="areas-sub">Abertos por \xFAltimo</h3><div class="chips">${u.map(({a:h,x:f})=>`<a class="chip" href="${J(h.id,f.aba)}">${G(f.icone||h.icone)}<span>${c(f.rotulo)}<small>${c(h.nome)}</small></span></a>`).join("")}</div></div>`:""}
         </section>
         <div class="portal-dir">
-          ${kpis.length ? `<section class="painel portal-numeros" aria-labelledby="h-num"><div class="painel-cab"><h2 id="h-num">${svgI('<path d="M5 20V10M12 20V4M19 20v-7"/>')}Números da revenda</h2><p>${estado.lojaAtual ? 'Loja ' + esc(estado.lojaAtual) : estado.lojas.length > 1 ? 'Todas as lojas' : esc(A.revenda.nome)}</p></div>
-            <div class="kpis-portal">${kpis.map((k) => `<a class="kpi-p ${k.alerta ? 'alerta' : ''}" href="${k.ir}" data-kpi="${k.id}"><span class="kpi-p-rot">${svgI(k.ico)}${esc(k.rot)}</span><b class="kpi-p-val">${esc(k.val)}</b><span class="kpi-p-exp">${esc(k.exp)}</span><span class="kpi-p-per">${k.varia != null ? `<span class="varia ${k.varia >= 0 ? 'sobe' : 'desce'}">${k.varia >= 0 ? '▲' : '▼'} ${pct(Math.abs(k.varia), 0)}</span> vs. 30 dias anteriores` : esc(k.per)}</span></a>`).join('')}</div></section>` : ''}
-          ${ats.length ? `<section class="portal-atalhos" aria-labelledby="h-at"><h2 class="sec-tit" id="h-at">${svgI('<path d="M13 3L4 14h7l-1 7 9-11h-7z"/>')}Acesso rápido</h2>
-            <div class="atalhos">${ats.map((x) => `<a class="atalho-btn ${x.destaque ? 'destaque' : ''}" href="${x.href}" ${x.novo ? `data-atalho-novo="${x.novo}"` : ''}>${svgI(x.ico)}<span>${esc(x.rot)}</span>${svgI(ICO_SETA).replace('<svg', '<svg class="seta-at"')}</a>`).join('')}</div></section>` : ''}
-          <section class="portal-sistemas" aria-labelledby="h-sis"><h2 class="sec-tit" id="h-sis">${svgI(ICO_MAIS)}Sistemas</h2>
-            ${['Comercial', 'Operação', 'Gestão'].map((g) => { const l = prontas.filter((a) => (GRUPO_AREA[a.id] || 'Gestão') === g); return l.length ? `<div class="sis-grupo"><h3 class="sis-grupo-tit">${g}</h3><div class="areas-grade">${l.map(cartao).join('')}</div></div>` : ''; }).join('')}
-            ${breves.length ? `<div class="sis-grupo"><h3 class="sis-grupo-tit">Em construção</h3><div class="areas-grade breves">${breves.map(cartao).join('')}</div></div>` : ''}
+          ${g.length?`<section class="painel portal-numeros" aria-labelledby="h-num"><div class="painel-cab"><h2 id="h-num">${G('<path d="M5 20V10M12 20V4M19 20v-7"/>')}N\xFAmeros da revenda</h2><p>${b.lojaAtual?"Loja "+c(b.lojaAtual):b.lojas.length>1?"Todas as lojas":c(y.revenda.nome)}</p></div>
+            <div class="kpis-portal">${g.map(h=>`<a class="kpi-p ${h.alerta?"alerta":""}" href="${h.ir}" data-kpi="${h.id}"><span class="kpi-p-rot">${G(h.ico)}${c(h.rot)}</span><b class="kpi-p-val">${c(h.val)}</b><span class="kpi-p-exp">${c(h.exp)}</span><span class="kpi-p-per">${h.varia!=null?`<span class="varia ${h.varia>=0?"sobe":"desce"}">${h.varia>=0?"\u25B2":"\u25BC"} ${P(Math.abs(h.varia),0)}</span> vs. 30 dias anteriores`:c(h.per)}</span></a>`).join("")}</div></section>`:""}
+          ${j.length?`<section class="portal-atalhos" aria-labelledby="h-at"><h2 class="sec-tit" id="h-at">${G('<path d="M13 3L4 14h7l-1 7 9-11h-7z"/>')}Acesso r\xE1pido</h2>
+            <div class="atalhos">${j.map(h=>`<a class="atalho-btn ${h.destaque?"destaque":""}" href="${h.href}" ${h.novo?`data-atalho-novo="${h.novo}"`:""}>${G(h.ico)}<span>${c(h.rot)}</span>${G(Ro).replace("<svg",'<svg class="seta-at"')}</a>`).join("")}</div></section>`:""}
+          <section class="portal-sistemas" aria-labelledby="h-sis"><h2 class="sec-tit" id="h-sis">${G(Fe)}Sistemas</h2>
+            ${["Comercial","Opera\xE7\xE3o","Gest\xE3o"].map(h=>{const f=n.filter(k=>(ji[k.id]||"Gest\xE3o")===h);return f.length?`<div class="sis-grupo"><h3 class="sis-grupo-tit">${h}</h3><div class="areas-grade">${f.map(p).join("")}</div></div>`:""}).join("")}
+            ${m.length?`<div class="sis-grupo"><h3 class="sis-grupo-tit">Em constru\xE7\xE3o</h3><div class="areas-grade breves">${m.map(p).join("")}</div></div>`:""}
           </section>
         </div>
-      </div></div>`;
-    ligarAcoes(tela);
-    $$('[data-atalho-novo]', tela).forEach((b) => b.onclick = (e) => { const a = AR.area(b.dataset.atalhoNovo); if (!a || !a.novo) return; e.preventDefault(); location.hash = b.getAttribute('href'); setTimeout(() => a.novo(UI), 200); });
-  }
-  const GRUPO_AREA = { usados: 'Comercial', novas: 'Comercial', crm: 'Comercial', oficina: 'Operação', pecas: 'Operação', financeiro: 'Gestão', fiscal: 'Gestão', relatorios: 'Gestão', config: 'Gestão' };
-  // preferências deste aparelho (saíram do painel): onde o Anshur abre, sistemas favoritos e instalação
-  function abrirPreferencias() {
-    const pm = $('#perfil-menu'); if (pm && !pm.hidden) { pm.hidden = true; $('#perfil').setAttribute('aria-expanded', 'false'); }
-    const ordem = areasVisiveis().filter((a) => a.pronta), fixa = lsG(chaveU('area-fixa')) || '', favs = favoritos();
-    abrirCamada('modal pref-modal', `<h2>Preferências deste aparelho</h2><p class="sub">Para ${esc(eu().nome)}, só neste aparelho. Nada muda para o resto da equipe.</p>
-      <div class="campo" style="margin-top:20px"><label for="in-fixa">Ao abrir o Anshur, mostrar</label><select id="in-fixa"><option value="">O início (o que fazer hoje e os sistemas)</option>${ordem.map((a) => `<option value="${a.id}" ${a.id === fixa ? 'selected' : ''}>Direto o sistema ${esc(a.nome)}</option>`).join('')}</select></div>
-      <fieldset class="pref-favs"><legend>Sistemas favoritos</legend><p class="ajuda">Os favoritos aparecem primeiro na lista de sistemas do início.</p>
-        <div class="pref-lista">${ordem.map((a) => `<button type="button" class="pref-fav" data-fav="${a.id}" aria-pressed="${favs.includes(a.id)}">${svgI(ICO_ESTRELA)}<span>${esc(a.nome)}</span></button>`).join('')}</div></fieldset>
-      ${blocoInstalar()}
-      <p class="nota-rodape">Dica: cada sistema também abre numa aba própria do navegador (Ctrl + clique no sistema).</p>`, (c) => {
-      $('#in-fixa', c).onchange = (e) => { lsS(chaveU('area-fixa'), e.target.value); toast(e.target.value ? `O Anshur vai abrir direto no ${AR.area(e.target.value).nome}.` : 'O Anshur vai abrir no início.'); if (document.body.dataset.modo === 'portal') telaInicio(); };
-    });
-  }
-  TELAS.inicio = telaInicio;
-
-  // =====================================================================================
-  // IMPLANTAÇÃO GUIADA: a revenda se implanta sozinha, etapa por etapa, sem reunião nem visita.
-  // Regras puras em implantacao.js; aqui a tela, que reaproveita o que já existe (dados da revenda, lojas, premissas,
-  // alçadas, convites, importador do histórico, cadastro de máquina, avaliação, instalação e avisos).
-  // Progresso em estado.implantacao (vai para a nuvem); a etapa aberta fica neste aparelho.
-  // =====================================================================================
-  const IMPL_VOLTA = 'anshur-impl-volta';
-  const ssG = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
-  const ssS = (k, v) => { try { if (v != null && v !== '') sessionStorage.setItem(k, v); else sessionStorage.removeItem(k); } catch (e) { /* sem armazenamento */ } };
-  const ICO_OK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-  const implGravar = (imp) => { estado.implantacao = imp; salvar(); };
-  const implBase = () => implEstado() || IMPL.novo(hojeISO());
-  const implGuardada = () => lsG(chaveU('impl-etapa'));
-  const implGuardar = (v) => lsS(chaveU('impl-etapa'), String(v));
-  let implPrevia = null; // planilha lida, esperando a conferência (só nesta tela)
-
-  // aviso fixo do painel inicial enquanto a implantação não termina (só dono e gerente; o dono pode esconder)
-  function avisoImplantacao() {
-    const lista = situacaoImpl();
-    if (!IMPL.mostrarAviso({ imp: implEstado(), perfil: eu().perfil, lista })) return '';
-    const p = IMPL.progresso(lista), prox = lista.find((e) => !e.ok) || lista[0];
-    return `<section class="impl-aviso" aria-label="Implantação guiada"><span class="impl-aviso-ico" aria-hidden="true">${svgI('<path d="M4 20h16M6 20V10l6-5 6 5v10M10 14l1.5 1.5L15 12"/>')}</span><div class="impl-aviso-txt"><b>Implantação guiada · ${p.texto}</b><span>Próxima: ${esc(prox.titulo)}</span>
-      <div class="progresso" aria-hidden="true"><i style="width:${p.pct * 100}%"></i></div></div>
-      <div class="impl-aviso-acoes"><a class="btn btn-ouro" href="#/config/implantacao">Continuar implantação</a>${eu().perfil === 'dono' ? '<button class="btn btn-linha" type="button" data-impl-esconder>Esconder</button>' : ''}</div></section>`;
-  }
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('[data-impl-esconder]')) return;
-    implGravar(Object.assign(implBase(), { escondido: true })); log('implantacao', 'Aviso da implantação escondido do painel');
-    toast('Aviso escondido. A implantação continua em Configurações › Implantação guiada.'); rota();
-  });
-
-  // o que já está feito em cada etapa (texto curto, usado na etapa e no resumo final)
-  function resumoImpl(id) {
-    const s = sinaisImpl(), lojas = estado.lojas;
-    return {
-      revenda: `${A.revenda.nome}${estado.cnpj ? ' · CNPJ ' + estado.cnpj : ' · sem CNPJ'}${estado.cidadeRevenda ? ' · ' + estado.cidadeRevenda : ''}`,
-      lojas: lojas.length ? `${lojas.length} ${lojas.length === 1 ? 'loja' : 'lojas'}: ${lojas.join(', ')}` : 'Uma loja só',
-      regras: `Margem-alvo ${pct(K.cfg.margemAlvo, 0)}, custo do capital ${pct(K.cfg.jurosMes)} ao mês, comissão ${pct(K.cfg.comissaoPct)}${estado.alcadas ? ', alçadas definidas' : ''}`,
-      equipe: `${s.usuarios} ${s.usuarios === 1 ? 'pessoa' : 'pessoas'} com acesso${(implEstado() || {}).convites ? ` · ${implEstado().convites} ${implEstado().convites === 1 ? 'convite' : 'convites'} pela implantação` : ''}`,
-      historico: `${s.vendidas} ${s.vendidas === 1 ? 'troca vendida' : 'trocas vendidas'} no histórico`,
-      estoque: `${s.patio} ${s.patio === 1 ? 'máquina' : 'máquinas'} no pátio hoje`,
-      avaliacao: `${s.avaliacoes} ${s.avaliacoes === 1 ? 'avaliação registrada' : 'avaliações registradas'}`,
-      instalar: [s.instalado ? 'Instalado neste aparelho' : '', s.avisos || (implEstado() || {}).avisos ? 'avisos por e-mail escolhidos' : ''].filter(Boolean).join(' · ') || 'Marcada como feita'
-    }[id] || '';
-  }
-
-  function telaImplantacao() {
-    if (ssG(IMPL_VOLTA) != null) ssS(IMPL_VOLTA, '');
-    if (!implEstado()) implGravar(IMPL.novo(hojeISO()));
-    desenharImpl(IMPL.inicial(situacaoImpl(), implGuardada()));
-  }
-  function irEtapa(i) {
-    implGuardar(i); implPrevia = null; desenharImpl(i);
-    window.scrollTo({ top: 0, behavior: reduzido ? 'auto' : 'smooth' });
-  }
-  function desenharImpl(i) {
-    const lista = situacaoImpl(), p = IMPL.progresso(lista);
-    tela.innerHTML = `<div class="titulo"><div><h1>Implantação guiada</h1><p>Oito etapas para a ${esc(A.revenda.nome)} começar a usar o Anshur por conta própria. Pode parar e continuar depois, em qualquer aparelho: o progresso fica salvo na revenda.</p></div></div>
-      <section class="painel impl-topo" aria-label="Progresso da implantação"><div class="impl-prog"><b>${p.texto}</b><span>${IMPL.todasFeitas(lista) ? 'tudo pronto' : 'concluídas'}</span></div>
-        <div class="progresso grande" role="progressbar" aria-label="Etapas concluídas" aria-valuemin="0" aria-valuemax="${p.total}" aria-valuenow="${p.feitas}"><i style="width:${p.pct * 100}%"></i></div>
-        <ol class="impl-trilha">${lista.map((e, k) => `<li><button type="button" data-impl-ir="${k}" class="${e.ok ? 'ok' : e.pulada ? 'pulada' : ''}" ${k === i ? 'aria-current="step"' : ''} aria-label="Etapa ${e.n}: ${esc(e.titulo)}${e.ok ? ', concluída' : e.pulada ? ', pulada' : ''}"><span class="impl-n">${e.ok ? ICO_OK : e.n}</span><span class="impl-rot">${esc(e.curto)}</span></button></li>`).join('')}</ol></section>
-      <div id="impl-corpo"></div>`;
-    $$('[data-impl-ir]', tela).forEach((b) => { b.onclick = () => irEtapa(+b.dataset.implIr); });
-    if (i === 'fim') implFim(lista); else implEtapa(lista, i);
-  }
-
-  // ação de cada etapa: html (feita ali mesmo), ligar (eventos) e antes (roda no "Concluir e seguir"; false = não segue)
-  const ACAO_IMPL = {
-    revenda: {
-      html: () => camposRevenda('im'),
-      antes: () => {
-        const v = lerCamposRevenda('im');
-        if (v.nome.length < 2) { toast('Informe o nome da revenda.', true); $('#im-nome').focus(); return false; }
-        if (v.cnpj && K.digitos(v.cnpj).length !== 14) { toast('O CNPJ tem 14 números. Confira.', true); $('#im-cnpj').focus(); return false; }
-        salvarDadosRevenda(v); A.revenda.nome = v.nome; if (v.cidade) A.revenda.cidade = v.cidade;
-        const r = $('#revenda'); if (r && r.lastChild && r.lastChild.nodeType === 3) r.lastChild.textContent = v.nome;
-        return true;
-      }
-    },
-    lojas: {
-      html: () => `${blocoLojas()}<p class="nota-rodape">${estado.lojas.length ? 'Cada loja nova aparece no seletor de loja do cabeçalho.' : 'A revenda tem uma loja só? Não precisa cadastrar nada: toque em "Concluir e seguir".'}</p>`,
-      ligar: () => ligarLojas()
-    },
-    regras: {
-      html: () => `<div class="numeros"><div><span>Margem-alvo na troca</span><b>${pct(K.cfg.margemAlvo, 0)}</b></div><div><span>Custo do capital</span><b>${pct(K.cfg.jurosMes)} ao mês</b></div><div><span>Comissão do vendedor</span><b>${pct(K.cfg.comissaoPct)}</b></div></div>
-        <div class="acoes"><button class="btn btn-linha" type="button" id="im-prem">Alterar margem, custo do capital e comissão</button></div>
-        <h3 class="impl-h3">Alçadas de aprovação</h3><p class="sub" style="margin-bottom:10px">Quanto acima do valor máximo cada um pode pagar sem pedir aprovação. Acima da alçada do gerente, só o dono libera. Zero = qualquer valor acima precisa de aprovação.</p>
-        ${tabelaAlcadas()}<p class="nota-rodape">As alçadas são salvas quando você toca em "Concluir e seguir".</p>`,
-      ligar: () => { $('#im-prem').onclick = abrirPremissas; },
-      antes: () => { salvarAlcadas($('#impl-acao')); return true; }
-    },
-    equipe: {
-      html: () => {
-        const souDono = eu().perfil === 'dono', semGerente = !estado.usuarios.some((u) => u.perfil === 'gerente');
-        const perfis = ['gerente', 'vendedor', 'oficina', 'financeiro', 'auditor'].filter((p) => souDono || p !== 'gerente');
-        const padrao = souDono && semGerente ? 'gerente' : 'vendedor';
-        return `<ul class="impl-pessoas" id="im-equipe">${pessoasImpl()}</ul>
-          <form id="im-cv" class="campos" style="margin-top:14px" novalidate>${NV ? '' : '<div class="campo"><label for="im-cv-nome">Nome da pessoa</label><input id="im-cv-nome" autocomplete="off"></div>'}
+      </div></div>`,At(w),R("[data-atalho-novo]",w).forEach(h=>h.onclick=f=>{const k=B.area(h.dataset.atalhoNovo);!k||!k.novo||(f.preventDefault(),location.hash=h.getAttribute("href"),setTimeout(()=>k.novo(Ra),200))})}const ji={usados:"Comercial",novas:"Comercial",crm:"Comercial",oficina:"Opera\xE7\xE3o",pecas:"Opera\xE7\xE3o",financeiro:"Gest\xE3o",fiscal:"Gest\xE3o",relatorios:"Gest\xE3o",config:"Gest\xE3o"};function Mi(){const a=l("#perfil-menu");a&&!a.hidden&&(a.hidden=!0,l("#perfil").setAttribute("aria-expanded","false"));const e=Ka().filter(s=>s.pronta),o=Xa(fa("area-fixa"))||"",t=qo();oa("modal pref-modal",`<h2>Prefer\xEAncias deste aparelho</h2><p class="sub">Para ${c(D().nome)}, s\xF3 neste aparelho. Nada muda para o resto da equipe.</p>
+      <div class="campo" style="margin-top:20px"><label for="in-fixa">Ao abrir o Anshur, mostrar</label><select id="in-fixa"><option value="">O in\xEDcio (o que fazer hoje e os sistemas)</option>${e.map(s=>`<option value="${s.id}" ${s.id===o?"selected":""}>Direto o sistema ${c(s.nome)}</option>`).join("")}</select></div>
+      <fieldset class="pref-favs"><legend>Sistemas favoritos</legend><p class="ajuda">Os favoritos aparecem primeiro na lista de sistemas do in\xEDcio.</p>
+        <div class="pref-lista">${e.map(s=>`<button type="button" class="pref-fav" data-fav="${s.id}" aria-pressed="${t.includes(s.id)}">${G(vi)}<span>${c(s.nome)}</span></button>`).join("")}</div></fieldset>
+      ${bo()}
+      <p class="nota-rodape">Dica: cada sistema tamb\xE9m abre numa aba pr\xF3pria do navegador (Ctrl + clique no sistema).</p>`,s=>{l("#in-fixa",s).onchange=i=>{ne(fa("area-fixa"),i.target.value),A(i.target.value?`O Anshur vai abrir direto no ${B.area(i.target.value).nome}.`:"O Anshur vai abrir no in\xEDcio."),document.body.dataset.modo==="portal"&&Po()}})}yo.inicio=Po;const xe="anshur-impl-volta",Ft=a=>{try{return sessionStorage.getItem(a)}catch{return null}},To=(a,e)=>{try{e!=null&&e!==""?sessionStorage.setItem(a,e):sessionStorage.removeItem(a)}catch{}},Ht='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',Ca=a=>{b.implantacao=a,T()},Oa=()=>xa()||K.novo(z()),Ai=()=>Xa(fa("impl-etapa")),Bt=a=>ne(fa("impl-etapa"),String(a));let _a=null;function yi(){const a=ee();if(!K.mostrarAviso({imp:xa(),perfil:D().perfil,lista:a}))return"";const e=K.progresso(a),o=a.find(t=>!t.ok)||a[0];return`<section class="impl-aviso" aria-label="Implanta\xE7\xE3o guiada"><span class="impl-aviso-ico" aria-hidden="true">${G('<path d="M4 20h16M6 20V10l6-5 6 5v10M10 14l1.5 1.5L15 12"/>')}</span><div class="impl-aviso-txt"><b>Implanta\xE7\xE3o guiada \xB7 ${e.texto}</b><span>Pr\xF3xima: ${c(o.titulo)}</span>
+      <div class="progresso" aria-hidden="true"><i style="width:${e.pct*100}%"></i></div></div>
+      <div class="impl-aviso-acoes"><a class="btn btn-ouro" href="#/config/implantacao">Continuar implanta\xE7\xE3o</a>${D().perfil==="dono"?'<button class="btn btn-linha" type="button" data-impl-esconder>Esconder</button>':""}</div></section>`}document.addEventListener("click",a=>{a.target.closest("[data-impl-esconder]")&&(Ca(Object.assign(Oa(),{escondido:!0})),L("implantacao","Aviso da implanta\xE7\xE3o escondido do painel"),A("Aviso escondido. A implanta\xE7\xE3o continua em Configura\xE7\xF5es \u203A Implanta\xE7\xE3o guiada."),Z())});function Ut(a){const e=De(),o=b.lojas;return{revenda:`${y.revenda.nome}${b.cnpj?" \xB7 CNPJ "+b.cnpj:" \xB7 sem CNPJ"}${b.cidadeRevenda?" \xB7 "+b.cidadeRevenda:""}`,lojas:o.length?`${o.length} ${o.length===1?"loja":"lojas"}: ${o.join(", ")}`:"Uma loja s\xF3",regras:`Margem-alvo ${P(x.cfg.margemAlvo,0)}, custo do capital ${P(x.cfg.jurosMes)} ao m\xEAs, comiss\xE3o ${P(x.cfg.comissaoPct)}${b.alcadas?", al\xE7adas definidas":""}`,equipe:`${e.usuarios} ${e.usuarios===1?"pessoa":"pessoas"} com acesso${(xa()||{}).convites?` \xB7 ${xa().convites} ${xa().convites===1?"convite":"convites"} pela implanta\xE7\xE3o`:""}`,historico:`${e.vendidas} ${e.vendidas===1?"troca vendida":"trocas vendidas"} no hist\xF3rico`,estoque:`${e.patio} ${e.patio===1?"m\xE1quina":"m\xE1quinas"} no p\xE1tio hoje`,avaliacao:`${e.avaliacoes} ${e.avaliacoes===1?"avalia\xE7\xE3o registrada":"avalia\xE7\xF5es registradas"}`,instalar:[e.instalado?"Instalado neste aparelho":"",e.avisos||(xa()||{}).avisos?"avisos por e-mail escolhidos":""].filter(Boolean).join(" \xB7 ")||"Marcada como feita"}[a]||""}function qi(){Ft(xe)!=null&&To(xe,""),xa()||Ca(K.novo(z())),de(K.inicial(ee(),Ai()))}function je(a){Bt(a),_a=null,de(a),window.scrollTo({top:0,behavior:Fa?"auto":"smooth"})}function de(a){const e=ee(),o=K.progresso(e);w.innerHTML=`<div class="titulo"><div><h1>Implanta\xE7\xE3o guiada</h1><p>Oito etapas para a ${c(y.revenda.nome)} come\xE7ar a usar o Anshur por conta pr\xF3pria. Pode parar e continuar depois, em qualquer aparelho: o progresso fica salvo na revenda.</p></div></div>
+      <section class="painel impl-topo" aria-label="Progresso da implanta\xE7\xE3o"><div class="impl-prog"><b>${o.texto}</b><span>${K.todasFeitas(e)?"tudo pronto":"conclu\xEDdas"}</span></div>
+        <div class="progresso grande" role="progressbar" aria-label="Etapas conclu\xEDdas" aria-valuemin="0" aria-valuemax="${o.total}" aria-valuenow="${o.feitas}"><i style="width:${o.pct*100}%"></i></div>
+        <ol class="impl-trilha">${e.map((t,s)=>`<li><button type="button" data-impl-ir="${s}" class="${t.ok?"ok":t.pulada?"pulada":""}" ${s===a?'aria-current="step"':""} aria-label="Etapa ${t.n}: ${c(t.titulo)}${t.ok?", conclu\xEDda":t.pulada?", pulada":""}"><span class="impl-n">${t.ok?Ht:t.n}</span><span class="impl-rot">${c(t.curto)}</span></button></li>`).join("")}</ol></section>
+      <div id="impl-corpo"></div>`,R("[data-impl-ir]",w).forEach(t=>{t.onclick=()=>je(+t.dataset.implIr)}),a==="fim"?wi(e):Si(e,a)}const ki={revenda:{html:()=>st("im"),antes:()=>{const a=it("im");if(a.nome.length<2)return A("Informe o nome da revenda.",!0),l("#im-nome").focus(),!1;if(a.cnpj&&x.digitos(a.cnpj).length!==14)return A("O CNPJ tem 14 n\xFAmeros. Confira.",!0),l("#im-cnpj").focus(),!1;tt(a),y.revenda.nome=a.nome,a.cidade&&(y.revenda.cidade=a.cidade);const e=l("#revenda");return e&&e.lastChild&&e.lastChild.nodeType===3&&(e.lastChild.textContent=a.nome),!0}},lojas:{html:()=>`${$t()}<p class="nota-rodape">${b.lojas.length?"Cada loja nova aparece no seletor de loja do cabe\xE7alho.":'A revenda tem uma loja s\xF3? N\xE3o precisa cadastrar nada: toque em "Concluir e seguir".'}</p>`,ligar:()=>xt()},regras:{html:()=>`<div class="numeros"><div><span>Margem-alvo na troca</span><b>${P(x.cfg.margemAlvo,0)}</b></div><div><span>Custo do capital</span><b>${P(x.cfg.jurosMes)} ao m\xEAs</b></div><div><span>Comiss\xE3o do vendedor</span><b>${P(x.cfg.comissaoPct)}</b></div></div>
+        <div class="acoes"><button class="btn btn-linha" type="button" id="im-prem">Alterar margem, custo do capital e comiss\xE3o</button></div>
+        <h3 class="impl-h3">Al\xE7adas de aprova\xE7\xE3o</h3><p class="sub" style="margin-bottom:10px">Quanto acima do valor m\xE1ximo cada um pode pagar sem pedir aprova\xE7\xE3o. Acima da al\xE7ada do gerente, s\xF3 o dono libera. Zero = qualquer valor acima precisa de aprova\xE7\xE3o.</p>
+        ${nt()}<p class="nota-rodape">As al\xE7adas s\xE3o salvas quando voc\xEA toca em "Concluir e seguir".</p>`,ligar:()=>{l("#im-prem").onclick=Ya},antes:()=>(rt(l("#impl-acao")),!0)},equipe:{html:()=>{const a=D().perfil==="dono",e=!b.usuarios.some(s=>s.perfil==="gerente"),o=["gerente","vendedor","oficina","financeiro","auditor"].filter(s=>a||s!=="gerente"),t=a&&e?"gerente":"vendedor";return`<ul class="impl-pessoas" id="im-equipe">${_t()}</ul>
+          <form id="im-cv" class="campos" style="margin-top:14px" novalidate>${C?"":'<div class="campo"><label for="im-cv-nome">Nome da pessoa</label><input id="im-cv-nome" autocomplete="off"></div>'}
             <div class="campo"><label for="im-cv-email">E-mail da pessoa</label><input id="im-cv-email" type="email" autocomplete="off"></div>
-            <div class="campo"><label for="im-cv-perfil">Perfil</label><select id="im-cv-perfil">${perfis.map((p) => `<option value="${p}" ${p === padrao ? 'selected' : ''}>${esc(K.PERFIS[p])}</option>`).join('')}</select></div>
-            <div class="acoes" style="margin-top:0;grid-column:1 / -1"><button class="btn btn-ouro" type="submit">${NV ? 'Gerar convite' : 'Convidar'}</button></div></form>
+            <div class="campo"><label for="im-cv-perfil">Perfil</label><select id="im-cv-perfil">${o.map(s=>`<option value="${s}" ${s===t?"selected":""}>${c(x.PERFIS[s])}</option>`).join("")}</select></div>
+            <div class="acoes" style="margin-top:0;grid-column:1 / -1"><button class="btn btn-ouro" type="submit">${C?"Gerar convite":"Convidar"}</button></div></form>
           <div id="im-cv-link"></div>
-          <p class="nota-rodape">${NV ? 'O convite vale 7 dias e só funciona com o e-mail convidado. A pessoa cria a senha e entra direto na revenda.' : OP ? 'Sem a conta da revenda, a pessoa fica cadastrada só neste navegador.' : 'Demonstração: o convite é simulado e nada é enviado.'} Perfis, lojas e remoção de acesso ficam em <a class="link" href="#usuarios">Usuários</a>.</p>`;
-      },
-      ligar: () => {
-        const f = $('#im-cv'); if (!f) return;
-        f.onsubmit = async (ev) => {
-          ev.preventDefault();
-          const email = $('#im-cv-email').value.trim().toLowerCase(), perfil = $('#im-cv-perfil').value, nomeEl = $('#im-cv-nome'), nome = nomeEl ? nomeEl.value.trim() : '', bt = f.querySelector('button[type="submit"]');
-          if (NV || email) { if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('Confira o e-mail.', true); $('#im-cv-email').focus(); return; } }
-          if (!NV && nome.length < 2) { toast('Informe o nome da pessoa.', true); nomeEl.focus(); return; }
-          const caixa = $('#im-cv-link'); bt.disabled = true;
-          try {
-            if (NV) {
-              const link = await NV.convidar(email, perfil); log('equipe', `Convite gerado para ${email} como ${K.PERFIS[perfil]} (implantação)`);
-              const imp = implBase(); imp.convites = (imp.convites || 0) + 1; implGravar(imp); mostrarConvite(caixa, link, email);
-            } else {
-              estado.usuarios.push({ id: 'u' + Date.now(), nome, email, perfil }); log('usuario', `Usuário ${nome} criado como ${K.PERFIS[perfil]} (implantação)`);
-              const imp = implBase(); imp.convites = (imp.convites || 0) + 1; implGravar(imp);
-              const txt = `Você foi convidado para o Anshur da ${A.revenda.nome} como ${K.PERFIS[perfil]}. Crie sua conta${email ? ' com o e-mail ' + email : ''} pelo link do convite.`;
-              caixa.innerHTML = `<p class="impl-detectado" role="status">${ICO.baixo}<span>${esc(nome)} entrou na equipe como ${esc(K.PERFIS[perfil])}. ${OP ? 'Com a conta da revenda, cada pessoa recebe um link e entra com a própria senha.' : 'Demonstração: o convite foi simulado e nada foi enviado. Na versão contratada, a pessoa recebe um link para criar a senha.'}</span></p>
-                <div class="acoes"><a class="btn btn-linha" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">Ver a mensagem do convite</a></div>`;
-              f.reset(); $('#im-equipe').innerHTML = pessoasImpl();
-            }
-          } catch (er) { toast(er.message, true); }
-          bt.disabled = false;
-        };
-      }
-    },
-    historico: {
-      html: () => {
-        const n = C.vendidas(A.todasTrocas).length, u = (implEstado() || {}).importacao;
-        return `<p class="impl-numero"><b>${n}</b><span>${n === 1 ? 'troca vendida' : 'trocas vendidas'} no histórico${n < IMPL.MIN_HISTORICO ? ` · o Anshur precisa de pelo menos ${IMPL.MIN_HISTORICO}` : ''}</span></p>
-          <div class="impl-dms"><div><b>Trazer do meu sistema atual</b><span>Aponte a pasta onde o seu sistema exporta as vendas de usados (ou escolha os arquivos). O Anshur reconhece as colunas, mostra a prévia e você grava.</span></div><button class="btn btn-ouro" type="button" id="im-dms">Trazer do meu sistema atual</button></div>
+          <p class="nota-rodape">${C?"O convite vale 7 dias e s\xF3 funciona com o e-mail convidado. A pessoa cria a senha e entra direto na revenda.":X?"Sem a conta da revenda, a pessoa fica cadastrada s\xF3 neste navegador.":"Demonstra\xE7\xE3o: o convite \xE9 simulado e nada \xE9 enviado."} Perfis, lojas e remo\xE7\xE3o de acesso ficam em <a class="link" href="#usuarios">Usu\xE1rios</a>.</p>`},ligar:()=>{const a=l("#im-cv");a&&(a.onsubmit=async e=>{e.preventDefault();const o=l("#im-cv-email").value.trim().toLowerCase(),t=l("#im-cv-perfil").value,s=l("#im-cv-nome"),i=s?s.value.trim():"",n=a.querySelector('button[type="submit"]');if((C||o)&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(o)){A("Confira o e-mail.",!0),l("#im-cv-email").focus();return}if(!C&&i.length<2){A("Informe o nome da pessoa.",!0),s.focus();return}const m=l("#im-cv-link");n.disabled=!0;try{if(C){const r=await C.convidar(o,t);L("equipe",`Convite gerado para ${o} como ${x.PERFIS[t]} (implanta\xE7\xE3o)`);const p=Oa();p.convites=(p.convites||0)+1,Ca(p),ot(m,r,o)}else{b.usuarios.push({id:"u"+Date.now(),nome:i,email:o,perfil:t}),L("usuario",`Usu\xE1rio ${i} criado como ${x.PERFIS[t]} (implanta\xE7\xE3o)`);const r=Oa();r.convites=(r.convites||0)+1,Ca(r);const p=`Voc\xEA foi convidado para o Anshur da ${y.revenda.nome} como ${x.PERFIS[t]}. Crie sua conta${o?" com o e-mail "+o:""} pelo link do convite.`;m.innerHTML=`<p class="impl-detectado" role="status">${q.baixo}<span>${c(i)} entrou na equipe como ${c(x.PERFIS[t])}. ${X?"Com a conta da revenda, cada pessoa recebe um link e entra com a pr\xF3pria senha.":"Demonstra\xE7\xE3o: o convite foi simulado e nada foi enviado. Na vers\xE3o contratada, a pessoa recebe um link para criar a senha."}</span></p>
+                <div class="acoes"><a class="btn btn-linha" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(p)}">Ver a mensagem do convite</a></div>`,a.reset(),l("#im-equipe").innerHTML=_t()}}catch(r){A(r.message,!0)}n.disabled=!1})}},historico:{html:()=>{const a=I.vendidas(y.todasTrocas).length,e=(xa()||{}).importacao;return`<p class="impl-numero"><b>${a}</b><span>${a===1?"troca vendida":"trocas vendidas"} no hist\xF3rico${a<K.MIN_HISTORICO?` \xB7 o Anshur precisa de pelo menos ${K.MIN_HISTORICO}`:""}</span></p>
+          <div class="impl-dms"><div><b>Trazer do meu sistema atual</b><span>Aponte a pasta onde o seu sistema exporta as vendas de usados (ou escolha os arquivos). O Anshur reconhece as colunas, mostra a pr\xE9via e voc\xEA grava.</span></div><button class="btn btn-ouro" type="button" id="im-dms">Trazer do meu sistema atual</button></div>
           <p class="rot-campo" style="margin-top:14px">Ou pela planilha modelo do Anshur</p>
           <ol class="impl-sub">
-            <li><div><b>Baixe a planilha modelo</b><span>Colunas: categoria, fabricante, modelo, ano, horas, estado (1 a 5), valor pago na troca, valor vendido, dias no pátio, Fipe (opcional), data da troca e data da venda. Apague a linha de exemplo antes de enviar.</span></div><button class="btn btn-linha" type="button" id="im-modelo">${ic('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Baixar planilha modelo</button></li>
-            <li><div><b>Envie a planilha</b><span>A planilha preenchida ou a exportação do seu sistema atual, em CSV ou Excel. O Anshur reconhece as colunas pelo nome.</span></div><label class="btn btn-ouro impl-arquivo">${ic('<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>')}Enviar planilha<input type="file" id="im-arq" accept=".csv,.txt,.xlsx,.xls,.ods" class="sr"></label></li>
-            <li><div><b>Confira o que entrou</b><span>Antes de entrar no histórico, você vê quantas trocas foram lidas e quais linhas têm problema.</span></div></li>
+            <li><div><b>Baixe a planilha modelo</b><span>Colunas: categoria, fabricante, modelo, ano, horas, estado (1 a 5), valor pago na troca, valor vendido, dias no p\xE1tio, Fipe (opcional), data da troca e data da venda. Apague a linha de exemplo antes de enviar.</span></div><button class="btn btn-linha" type="button" id="im-modelo">${_('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')}Baixar planilha modelo</button></li>
+            <li><div><b>Envie a planilha</b><span>A planilha preenchida ou a exporta\xE7\xE3o do seu sistema atual, em CSV ou Excel. O Anshur reconhece as colunas pelo nome.</span></div><label class="btn btn-ouro impl-arquivo">${_('<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>')}Enviar planilha<input type="file" id="im-arq" accept=".csv,.txt,.xlsx,.xls,.ods" class="sr"></label></li>
+            <li><div><b>Confira o que entrou</b><span>Antes de entrar no hist\xF3rico, voc\xEA v\xEA quantas trocas foram lidas e quais linhas t\xEAm problema.</span></div></li>
           </ol>
-          <details class="impl-colar"><summary>Ou cole as linhas copiadas do Excel</summary><div class="campo" style="margin-top:10px"><label for="im-cola">Linhas da planilha</label><textarea class="cola" id="im-cola" placeholder="${esc(IMPL.MODELO.cabecalho.join(';'))}"></textarea></div><div class="acoes"><button class="btn btn-linha" type="button" id="im-conferir">Conferir linhas</button></div></details>
-          <div id="im-previa">${implPrevia ? previaImpl() : ''}</div>
-          ${u && !implPrevia ? `<div class="impl-ultima"><b>Última planilha: ${esc(u.arquivo)}</b><span>${data(String(u.quando).slice(0, 10))} · ${u.entraram} ${u.entraram === 1 ? 'troca entrou' : 'trocas entraram'} no histórico · ${u.problemas} ${u.problemas === 1 ? 'linha com problema' : 'linhas com problema'}</span>
-            ${u.avisos && u.avisos.length ? `<ul>${u.avisos.map((a) => `<li>Linha ${a.linha}: ${esc(a.motivo)}</li>`).join('')}</ul>` : ''}</div>` : ''}
-          <p class="nota-rodape">Prefere uma por vez? <button class="link" type="button" id="im-manual">Adicionar uma venda antiga à mão</button>. O seu sistema exporta todo dia numa pasta? <button class="link" type="button" id="im-dms2">Ligar a pasta do sistema</button>.</p>`;
-      },
-      ligar: (i) => {
-        $('#im-modelo').onclick = baixarModeloTrocas;
-        $('#im-manual').onclick = addVendaManual;
-        $('#im-dms').onclick = $('#im-dms2').onclick = () => irImportarDms(i);
-        $('#im-arq').onchange = async (ev) => {
-          const f = ev.target.files[0]; if (!f) return;
-          const caixa = $('#im-previa'); caixa.innerHTML = `<div class="carregando-linha" style="margin-top:12px"><span class="giro"></span><b id="im-st">Lendo ${esc(f.name)}…</b></div>`;
-          try { const l = await lerTexto(f, (m) => { const s = $('#im-st'); if (s) s.textContent = m; }); lerPlanilhaImpl(l.texto || '', f.name, i); }
-          catch (er) { caixa.innerHTML = `<p class="neg" style="margin-top:12px">${esc(f.name)}: ${esc(er.message)}</p>`; }
-          ev.target.value = '';
-        };
-        $('#im-conferir').onclick = () => { const t = $('#im-cola').value; if (!t.trim()) { toast('Cole as linhas da planilha.', true); return; } lerPlanilhaImpl(t, 'linhas coladas', i); };
-        ligarPreviaImpl(i);
-      }
-    },
-    estoque: {
-      html: () => {
-        const p = C.patio(A.todasTrocas), cap = p.reduce((s, t) => s + t.pago, 0), ult = p.slice().sort((a, b) => String(b.entrada).localeCompare(String(a.entrada))).slice(0, 5);
-        return `<p class="impl-numero"><b>${p.length}</b><span>${p.length === 1 ? 'máquina' : 'máquinas'} no pátio hoje${p.length ? ' · ' + mil(cap) + ' parados' : ''}</span></p>
-          ${ult.length ? `<ul class="impl-lista">${ult.map((t) => `<li><b>${esc(t.marca + ' ' + t.modelo)}</b><span>${t.ano} · ${horasTxt(t)} · ${diasDesde(t.entrada)} dias no pátio</span></li>`).join('')}</ul>` : ''}
-          <div class="acoes"><button class="btn btn-ouro" type="button" id="im-dms">Trazer do meu sistema atual</button><button class="btn btn-linha" type="button" id="im-maq">${ic('<path d="M12 5v14M5 12h14"/>')}Cadastrar máquina do pátio</button><a class="btn btn-linha" href="#documentos">Puxar de nota, foto ou PDF</a>${p.length ? '<a class="btn btn-linha" href="#patio">Ver o pátio</a>' : ''}</div>`;
-      },
-      ligar: (i) => { $('#im-dms').onclick = () => irImportarDms(i); $('#im-maq').onclick = () => addMaquinaManual({}, undefined, (t) => { if (A.todasTrocas !== A.trocas && !A.todasTrocas.some((x) => x.id === t.id)) A.todasTrocas.push({ ...t }); desenharImpl(i); }); }
-    },
-    avaliacao: {
-      html: () => `<p class="impl-numero"><b>${sinaisImpl().avaliacoes}</b><span>${sinaisImpl().avaliacoes === 1 ? 'avaliação registrada' : 'avaliações registradas'}</span></p>
-        <ol class="passos-instalar"><li>Toque em "Fazer a avaliação agora".</li><li>Informe a máquina, as horas e o estado; se quiser, tire as fotos guiadas.</li><li>Veja o valor máximo a pagar e registre a avaliação.</li><li>Toque em "Voltar à implantação", no alto da tela.</li></ol>
-        <div class="acoes"><button class="btn btn-ouro" type="button" id="im-avaliar">Fazer a avaliação agora</button></div>`,
-      ligar: (i) => { $('#im-avaliar').onclick = () => { ssS(IMPL_VOLTA, String(i)); location.hash = '#/usados/avaliar'; }; }
-    },
-    instalar: {
-      html: () => `${INS && INS.instalado() ? `<p class="impl-detectado">${ICO.baixo}<span>O Anshur já está instalado neste aparelho. Falta o outro (computador ou celular)? Abra o Anshur nele e use o botão Instalar do cabeçalho.</span></p>` : blocoInstalar()}
-        ${eu().perfil === 'dono' ? blocoAvisos() : '<p class="nota-rodape">Os avisos por e-mail são escolhidos pelo dono.</p>'}`,
-      ligar: (i) => {
-        ligarAvisos();
-        // avisos escolhidos = etapa feita: redesenha para a barra de progresso e a trilha mostrarem na hora
-        const b = $('#av-salvar'); if (b) b.addEventListener('click', () => { const imp = implBase(); if (!imp.avisos) { imp.avisos = true; implGravar(imp); setTimeout(() => { if ($('#impl-acao')) desenharImpl(i); }, 600); } });
-      }
-    }
-  };
-  // abre a importação do sistema atual com a faixa "Voltar à implantação" no alto
-  const irImportarDms = (i) => { ssS(IMPL_VOLTA, String(i)); location.hash = '#/config/importar'; };
-  const pessoasImpl = () => estado.usuarios.map((u) => `<li>${avatarHTML(u, 32)}<span><b>${esc(u.nome)}</b><small>${esc(K.PERFIS[u.perfil] || u.perfil)}${u.email ? ' · ' + esc(u.email) : ''}</small></span></li>`).join('');
-
-  // planilha do histórico: lê com o importador, separa o que não pode entrar e mostra para conferir
-  function lerPlanilhaImpl(texto, arquivo, i) {
-    const p = window.IMPORTAR.ler(texto, { refDe: M.refDe, anoMax: anoAtual });
-    const chave = (t) => [t.tipo, K.normal(t.modelo), t.ano, t.horas, t.pago, t.vendido].join('|');
-    const ja = new Set(A.todasTrocas.map(chave));
-    const rejeitadas = p.rejeitadas.slice(), aceitas = [], repetidas = [];
-    p.aceitas.forEach((t) => {
-      const linha = +String(t.id).slice(1);
-      if (IMPL.ehExemplo(t)) rejeitadas.push({ linha, motivo: 'linha de exemplo do modelo: apague ou troque pelos seus dados' });
-      else if (!t.entrada || !t.saida) rejeitadas.push({ linha, motivo: 'sem data da troca ou da venda: o histórico precisa das duas' });
-      else if (ja.has(chave(t))) repetidas.push(t);
-      else aceitas.push(t);
-    });
-    rejeitadas.sort((a, b) => a.linha - b.linha);
-    implPrevia = { arquivo, aceitas, rejeitadas, repetidas };
-    $('#im-previa').innerHTML = previaImpl(); ligarPreviaImpl(i);
-  }
-  function previaImpl() {
-    const p = implPrevia; if (!p) return '';
-    return `<div class="impl-previa" aria-live="polite"><p class="conta"><b>${p.aceitas.length} ${p.aceitas.length === 1 ? 'troca pronta' : 'trocas prontas'} para entrar</b> · ${p.rejeitadas.length} ${p.rejeitadas.length === 1 ? 'linha com problema' : 'linhas com problema'}${p.repetidas.length ? ` · ${p.repetidas.length} já ${p.repetidas.length === 1 ? 'estava' : 'estavam'} no histórico` : ''} · ${esc(p.arquivo)}</p>
-      ${p.rejeitadas.length ? `<div class="tabela-wrap" style="margin-top:10px"><table class="tabela"><thead><tr><th>Linha</th><th>O que corrigir</th></tr></thead><tbody>${p.rejeitadas.slice(0, 12).map((r) => `<tr><td>${r.linha}</td><td class="neg">${esc(r.motivo)}</td></tr>`).join('')}</tbody></table></div>${p.rejeitadas.length > 12 ? `<p class="nota-rodape">E mais ${p.rejeitadas.length - 12} linhas com problema.</p>` : ''}` : ''}
-      ${p.aceitas.length ? `<div class="tabela-wrap" style="margin-top:10px"><table class="tabela"><thead><tr><th>Máquina</th><th class="n">Ano</th><th class="n">Pago</th><th class="n">Vendido</th><th>Troca → venda</th></tr></thead><tbody>${p.aceitas.slice(0, 6).map((t) => `<tr><td class="maq"><b>${esc((t.marca ? t.marca + ' ' : '') + t.modelo)}</b><span>${NOMES[t.tipo]}</span></td><td class="n">${t.ano}</td><td class="n">${real(t.pago)}</td><td class="n">${real(t.vendido)}</td><td>${data(t.entrada)} → ${data(t.saida)}</td></tr>`).join('')}</tbody></table></div>${p.aceitas.length > 6 ? `<p class="nota-rodape">Mostrando 6 de ${p.aceitas.length}.</p>` : ''}` : ''}
-      <div class="acoes"><button class="btn btn-ouro" type="button" id="im-importar" ${p.aceitas.length ? '' : 'disabled'}>Colocar ${p.aceitas.length} ${p.aceitas.length === 1 ? 'troca' : 'trocas'} no histórico</button><button class="btn btn-linha" type="button" id="im-cancelar">Cancelar</button></div></div>`;
-  }
-  function ligarPreviaImpl(i) {
-    const b = $('#im-importar'), c = $('#im-cancelar');
-    if (c) c.onclick = () => { implPrevia = null; $('#im-previa').innerHTML = ''; };
-    if (b) b.onclick = () => {
-      const p = implPrevia; if (!p || !p.aceitas.length) return;
-      const n = importarHistorico(p.aceitas);
-      const imp = implBase(); imp.importacao = { quando: new Date().toISOString(), arquivo: p.arquivo, entraram: n, problemas: p.rejeitadas.length, avisos: p.rejeitadas.slice(0, 12).map((r) => ({ linha: r.linha, motivo: r.motivo })) };
-      log('importacao', `Histórico importado na implantação: ${n} ${n === 1 ? 'troca' : 'trocas'} (${p.arquivo})`); implGravar(imp); implGuardar(i);
-      toast(`${n} ${n === 1 ? 'troca entrou' : 'trocas entraram'} no histórico.`); implPrevia = null;
-      setTimeout(() => K.recarregar(), 700); // o motor e as telas passam a usar o histórico novo
-    };
-  }
-  // mesmo formato do "Usar como histórico" e da sincronização com a pasta do sistema
-  function importarHistorico(aceitas) {
-    const chave = (t) => [t.tipo, t.modelo, t.ano, t.horas, t.pago, t.vendido].join('|');
-    const ficha = (t) => ({ motor: t.cond / 20, transmissao: t.cond / 20, hidraulico: t.cond / 20, pneus: t.cond / 20, cabine: t.cond / 20, lataria: t.cond / 20 });
-    if (OP) {
-      const ja = new Set((estado.historico || []).map(chave));
-      const novas = aceitas.filter((t) => !ja.has(chave(t))).map((t, k) => ({ ...t, id: 'H' + ((estado.historico || []).length + k + 1), ficha: ficha(t), manutencoes: [] }));
-      estado.historico = (estado.historico || []).concat(novas); salvar(); return novas.length;
-    }
-    // demonstração: entram como trocas vendidas da revenda fictícia (somem em "Restaurar dados demonstrativos")
-    const ja = new Set(A.todasTrocas.map(chave)), base = Date.now().toString(36).toUpperCase();
-    const novas = aceitas.filter((t) => !ja.has(chave(t))).map((t, k) => ({ ...t, id: 'IMP' + base + k, ficha: ficha(t), manutencoes: [], fotos: [], anuncio: t.vendido, vendedor: 'Histórico importado', idAgro: false }));
-    estado.fechadas.push(...novas); salvar(); return novas.length;
-  }
-
-  function implEtapa(lista, i) {
-    const e = lista[i], a = ACAO_IMPL[e.id] || {}, imp = implEstado() || {}, f = (imp.feitas || {})[e.id], ultima = i === lista.length - 1;
-    const tag = e.ok ? `<span class="tag comprovado">${e.auto ? 'Concluída' : 'Marcada como feita'}</span>` : e.pulada ? '<span class="tag declarado">Pulada por agora</span>' : '';
-    $('#impl-corpo').innerHTML = `<section class="painel impl-etapa passo" aria-labelledby="impl-t">
-      <div class="impl-etapa-cab"><span class="impl-num">Etapa ${e.n} de ${lista.length}</span>${tag}</div>
-      <h2 id="impl-t" tabindex="-1">${esc(e.titulo)}</h2>
-      <div class="impl-guia"><p><b>Por que importa.</b> ${esc(e.porque)}</p><p><b>O que fazer.</b> ${esc(e.fazer)}</p></div>
-      <div class="impl-acao" id="impl-acao">${a.html ? a.html(i) : ''}</div>
-      ${e.auto ? `<p class="impl-detectado">${ICO.baixo}<span>Feito: ${esc(resumoImpl(e.id))}.</span></p>` : e.manual && f ? `<p class="impl-detectado">${ICO.baixo}<span>Marcada como feita por ${esc(f.por || 'alguém da equipe')} em ${data(String(f.quando).slice(0, 10))}. <button class="link" type="button" id="impl-desmarcar">Desmarcar</button></span></p>` : ''}
-      <div class="impl-nav"><button class="btn btn-linha" type="button" id="impl-voltar" ${i === 0 ? 'disabled' : ''}>${ic('<path d="M15 6l-6 6 6 6"/>')}Voltar</button>
-        <span class="impl-nav-dir">${e.ok ? '' : '<button class="btn btn-linha" type="button" id="impl-pular">Pular por agora</button>'}<button class="btn btn-ouro" type="button" id="impl-ok">${e.ok ? (ultima ? 'Ver o resumo' : 'Seguir') : ultima ? 'Concluir' : 'Concluir e seguir'}${ic('<path d="M9 6l6 6-6 6"/>')}</button></span></div></section>`;
-    if (a.ligar) a.ligar(i);
-    $('#impl-voltar').onclick = () => irEtapa(Math.max(0, i - 1));
-    const pu = $('#impl-pular'); if (pu) pu.onclick = () => { implGravar(IMPL.pular(implBase(), e.id)); const k = IMPL.proxima(situacaoImpl(), i); irEtapa(k < 0 ? 'fim' : k); };
-    const dm = $('#impl-desmarcar'); if (dm) dm.onclick = () => { implGravar(IMPL.desmarcar(implBase(), e.id)); log('implantacao', `Implantação: etapa "${e.titulo}" desmarcada`); desenharImpl(i); };
-    $('#impl-ok').onclick = async (ev) => {
-      if (a.antes) { const bt = ev.currentTarget; bt.disabled = true; let ok = false; try { ok = await a.antes(); } finally { bt.disabled = false; } if (ok === false) return; }
-      if (!e.manual) { implGravar(IMPL.marcar(implBase(), e.id, eu().nome)); log('implantacao', `Implantação: etapa "${e.titulo}" concluída`); }
-      const k = IMPL.proxima(situacaoImpl(), i); irEtapa(k < 0 ? 'fim' : k);
-    };
-  }
-  function implFim(lista) {
-    const falta = lista.filter((e) => !e.ok), imp = implBase();
-    if (!falta.length && !imp.concluida) { imp.concluida = hojeISO(); implGravar(imp); log('implantacao', 'Implantação concluída'); }
-    const ajuda = `<div class="impl-ajuda"><h3 class="impl-h3">Precisa de ajuda?</h3><p>Escreva pela conversa no WhatsApp com a Blue Rose, a mesma em que o Anshur foi contratado. O atendimento é por escrito: mande a dúvida e, se der, um print da tela. Não precisa marcar reunião nem ligação.</p></div>`;
-    $('#impl-corpo').innerHTML = `<section class="painel impl-etapa impl-fim passo" aria-labelledby="impl-t">
-      ${falta.length ? `<h2 id="impl-t" tabindex="-1">Falta pouco: ${falta.length} ${falta.length === 1 ? 'etapa' : 'etapas'}</h2><p class="sub">O que já está pronto continua valendo. As etapas que faltam podem ser feitas a qualquer hora.</p>`
-        : `<div class="impl-feito">${ICO_OK}</div><h2 id="impl-t" tabindex="-1">Implantação concluída</h2><p class="sub">A ${esc(A.revenda.nome)} está pronta para usar o Anshur no dia a dia${imp.concluida ? ` (concluída em ${data(imp.concluida)})` : ''}.</p>`}
-      <ul class="impl-resumo">${lista.map((e, k) => `<li class="${e.ok ? 'ok' : ''}">${e.ok ? ICO.baixo : '<span class="bolinha"></span>'}<span><b>${esc(e.titulo)}</b><span>${e.ok ? esc(resumoImpl(e.id)) : e.pulada ? 'Pulada por agora' : 'Ainda não feita'}</span></span>${e.ok ? '' : `<button class="btn btn-linha" type="button" data-impl-ir="${k}">Fazer agora</button>`}</li>`).join('')}</ul>
-      ${ajuda}
-      <div class="impl-nav"><button class="btn btn-linha" type="button" data-impl-ir="0">Rever as etapas</button><span class="impl-nav-dir">${falta.length && !imp.concluida ? '<button class="btn btn-linha" type="button" id="impl-encerrar">Encerrar assim mesmo</button>' : ''}<a class="btn btn-ouro" href="#/">Ir para o portal</a></span></div></section>`;
-    $$('[data-impl-ir]', $('#impl-corpo')).forEach((b) => { b.onclick = () => irEtapa(+b.dataset.implIr); });
-    const en = $('#impl-encerrar'); if (en) en.onclick = () => confirmar('Encerrar a implantação?', 'O aviso some do painel. As etapas que faltam continuam em Configurações › Implantação guiada.', 'Encerrar', () => { implGravar(Object.assign(implBase(), { concluida: hojeISO() })); log('implantacao', 'Implantação encerrada com etapas pendentes'); toast('Implantação encerrada.'); desenharImpl('fim'); });
-  }
-  TELAS.implantacao = telaImplantacao;
-  // faixa "voltar à implantação" enquanto a pessoa faz a primeira avaliação em outra tela
-  // fica fora da área da tela (antes do <main>): as telas que se redesenham sozinhas não apagam a faixa
-  function atualizarFaixaImpl(aba) {
-    const ant = $('#impl-volta'); if (ant) ant.remove();
-    const v = ssG(IMPL_VOLTA); if (aba === 'implantacao' || v == null || !IMPL.podeVer(eu().perfil)) return;
-    const e = IMPL.ETAPAS[+v] || IMPL.ETAPAS[6];
-    tela.insertAdjacentHTML('beforebegin', `<div class="impl-volta" id="impl-volta" role="region" aria-label="Implantação guiada"><span>Implantação · etapa ${(+v || 0) + 1} de ${IMPL.TOTAL}: <b>${esc(e.titulo)}</b></span><a class="btn btn-ouro" href="#/config/implantacao">Voltar à implantação</a></div>`);
-  }
-
-  // endereço → { sis, aba }: portal, sistema ou endereço antigo (#tela)
-  function resolver(primeiraVez) {
-    let h = (location.hash || '').slice(1);
-    if (!h) { const d = primeiraVez ? abrirDireto() : ''; h = d ? d.slice(1) : '/'; }
-    if (h[0] === '/') {
-      const [s = '', b = ''] = h.slice(1).split('/');
-      if (!s || PORTAL[s]) return { sis: null, aba: s || 'inicio' };
-      const a = AR.area(s); if (!a || !a.pronta || !areaVisivel(a)) return { sis: null, aba: 'inicio' };
-      if (!b || !telaDe(b) || !pode(b)) return { sis: s, aba: inicioDaArea(a) };
-      if (itensVisiveis(a).some((x) => x.aba === b)) return { sis: s, aba: b };
-      const outra = AR.areaDaAba(b, s); // tela de outro sistema: abre no sistema dela
-      return outra && outra !== s ? { sis: outra, aba: b } : { sis: s, aba: b };
-    }
-    if (PORTAL[h]) return { sis: null, aba: h };
-    if (!telaDe(h) || !pode(h)) return { sis: null, aba: 'inicio' };
-    const ar = AR.areaDaAba(h, areaAtual) || (areaAtual && AR.area(areaAtual) && areaVisivel(AR.area(areaAtual)) ? areaAtual : null);
-    return { sis: ar, aba: h };
-  }
-  let primeira = true;
-  function rota() {
-    const r = resolver(primeira), canon = r.sis ? urlSis(r.sis, r.aba) : urlPortal(r.aba);
-    if (location.hash !== canon) history.replaceState(null, '', canon);
-    if (r.sis) { areaAtual = r.sis; lsS(chaveU('area'), r.sis); lembrarRecente(r.sis, r.aba); }
-    montarMenu(r.sis);
-    fecharTrocaArea(); fecharSuspensos();
-    $$('.menu a, #sis-barra a').forEach((a) => { if (a.dataset.aba === r.aba) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-    $$('#menu-folha a[data-aba]').forEach((a) => { if (a.dataset.aba === r.aba) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-    encaixarAbas();
-    const itAtual = r.sis && itensVisiveis(AR.area(r.sis)).find((x) => x.aba === r.aba);
-    $('#mig-aba').textContent = itAtual ? itAtual.rotulo : r.sis ? (AR.item(r.aba) || {}).rotulo || '' : '';
-    $('#mig-aba').closest('.migalhas').classList.toggle('so-area', !$('#mig-aba').textContent || (r.sis && $('#mig-aba').textContent === AR.area(r.sis).nome));
-    // celular: a barra de baixo marca "Mais" quando a tela atual não está nela
-    const mm = $('#menu-mais'); if (mm) mm.classList.toggle('ativo', !$('#menu a[aria-current="page"]') && r.aba !== 'inicio');
-    fecharFolha();
-    fecharCamada(true);
-    const fn = telaDe(r.aba);
-    // o botão principal do cabeçalho some quando a própria tela já mostra o mesmo botão (sem ação repetida na tela)
-    const semRepetir = () => { const nv = $('.cab-nova'); if (!nv) return; const t = ($('span', nv).textContent || '').trim().toLowerCase(); nv.classList.toggle('repetido', (!!t && $$('.titulo a, .titulo button', tela).some((b) => b.textContent.trim().toLowerCase() === t)) || (!!r.sis && nv.getAttribute('href') === urlSis(r.sis, r.aba) && !nv.onclick) || $$('.titulo .btn-ouro', tela).length > 0); };
-    const desenhar = () => { tela.classList.remove('saindo'); fn(); atualizarFaixaImpl(r.aba); semRepetir(); tela.classList.remove('entrando'); void tela.offsetWidth; tela.classList.add('entrando'); };
-    if (primeira || reduzido) { primeira = false; desenhar(); return; }
-    tela.classList.add('saindo');
-    setTimeout(() => { desenhar(); window.scrollTo(0, 0); }, 120);
-  }
-  // ---------- duas ou mais abas abertas (ex.: Financeiro numa, Oficina noutra) ----------
-  // A gravação junta o que cada aba mudou (comum.js); quando outra aba grava, esta se atualiza sozinha se estiver parada
-  // (ou escondida) e, se a pessoa estiver no meio de um formulário, avisa com o botão "Atualizar" para não perder o que digitou.
-  let atualizarPendente = false;
-  const ocupada = () => !!($('#camada') && $('#camada').children.length) || /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '') && document.activeElement.id !== 'portal-q';
-  function atualizarDeOutraAba() {
-    if (document.hidden || !ocupada()) { atualizarPendente = false; location.reload(); return; }
-    if (atualizarPendente) return; atualizarPendente = true;
-    toast('Outra aba do Anshur salvou alterações. Termine o que está fazendo e toque em Atualizar.');
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-ouro aviso-abas'; b.textContent = 'Atualizar com a outra aba'; b.onclick = () => location.reload(); document.body.appendChild(b);
-  }
-  if (K.aoMudarEmOutraAba) K.aoMudarEmOutraAba(atualizarDeOutraAba);
-  $('#sino').onclick = abrirNotificacoes; seletorLoja(); if (somenteLeitura()) document.body.classList.add('so-leitura');
-  $('#busca-btn').onclick = abrirBusca; $('#instalar-btn').onclick = simularInstalacao; atualizarInstalar();
-  // com conta, abrir o app não grava nada (evita versão nova a cada acesso e conflito com quem está usando)
-  atualizarAvatar(); eu().ultimoAcesso = new Date().toISOString(); if (!K.nuvem) salvar();
-  $$('.menu a').forEach((a) => { if (!pode(a.dataset.aba)) a.hidden = true; });
-  $$('.menu-grupo').forEach((g) => { let x = g.nextElementSibling, algum = false; while (x && x.tagName === 'A') { if (!x.hidden) algum = true; x = x.nextElementSibling; } g.hidden = !algum; });
-  semearDemo();
-  // contexto que cada área (areas/*.js) recebe para desenhar as próprias telas: as mesmas ferramentas do app
-  const UI = { A, K, C, G, M, estado, tela, $, $$, ICO, ic, esc, real, mil, pct, data, hojeISO, diasDesde, diasEntre, num, NOMES, OP, NV, toast, abrirCamada, fecharCamada, confirmar, formulario, baixarCSV, salvar,
-    log, eu, pode, rota, conta, contar, mascarar, somenteLeitura, fotoMini, irArea, abrirInstalacao };
-  // pasta do sistema já liberada (Chrome/Edge): confere se o sistema exportou algo novo e avisa; a gravação passa sempre pela prévia
-  if (window.DMS_UI && pode('importar')) setTimeout(() => { window.DMS_UI.verificarAoAbrir(UI).catch(() => {}); }, 2500);
-  Object.assign(UI, { SAFRA, alcadas }); // calendário de safra e alçadas dos usados, reutilizados por Máquinas Novas e CRM
-  window.ANSHUR_UI = UI;
-  if (AR) AR.lista().forEach((a) => { if (a.iniciar) try { a.iniciar(UI); } catch (e) { console.error('Área ' + a.id, e); } });
-  atualizarSino();
-  window.addEventListener('hashchange', rota);
-  // a quantidade de abas visíveis muda com a largura: remonta o menu quando cruza um limite
-  let redimTimer = null;
-  window.addEventListener('resize', () => { clearTimeout(redimTimer); redimTimer = setTimeout(() => { const r = resolver(false); if (!r.sis) return; menuDe = null; montarMenu(r.sis); $$('.menu a, #sis-barra a, #menu-folha a[data-aba]').forEach((a) => { if (a.dataset.aba === r.aba) a.setAttribute('aria-current', 'page'); }); encaixarAbas(); }, 150); });
-  // com conta: o que o app ajustou só para abrir (padrões, lojas, perfis do servidor) não vira alteração a enviar
-  if (NV && NV.marcarVista) NV.marcarVista(estado);
-  // revenda recém-criada (dono ou gerente, nada importado ainda): a implantação guiada abre sozinha
-  if (IMPL.deveAbrirSozinha({ imp: estado.implantacao, perfil: eu().perfil, ambiente: OP ? 'op' : 'demo', temDados: A.todasTrocas.length > 0 || (estado.historico || []).length > 0 || estado.avaliacoes.length > 0 })) {
-    estado.implantacao = IMPL.novo(hojeISO()); salvar(); history.replaceState(null, '', '#/config/implantacao');
-  }
-  rota();
-})();
+          <details class="impl-colar"><summary>Ou cole as linhas copiadas do Excel</summary><div class="campo" style="margin-top:10px"><label for="im-cola">Linhas da planilha</label><textarea class="cola" id="im-cola" placeholder="${c(K.MODELO.cabecalho.join(";"))}"></textarea></div><div class="acoes"><button class="btn btn-linha" type="button" id="im-conferir">Conferir linhas</button></div></details>
+          <div id="im-previa">${_a?Qt():""}</div>
+          ${e&&!_a?`<div class="impl-ultima"><b>\xDAltima planilha: ${c(e.arquivo)}</b><span>${N(String(e.quando).slice(0,10))} \xB7 ${e.entraram} ${e.entraram===1?"troca entrou":"trocas entraram"} no hist\xF3rico \xB7 ${e.problemas} ${e.problemas===1?"linha com problema":"linhas com problema"}</span>
+            ${e.avisos&&e.avisos.length?`<ul>${e.avisos.map(o=>`<li>Linha ${o.linha}: ${c(o.motivo)}</li>`).join("")}</ul>`:""}</div>`:""}
+          <p class="nota-rodape">Prefere uma por vez? <button class="link" type="button" id="im-manual">Adicionar uma venda antiga \xE0 m\xE3o</button>. O seu sistema exporta todo dia numa pasta? <button class="link" type="button" id="im-dms2">Ligar a pasta do sistema</button>.</p>`},ligar:a=>{l("#im-modelo").onclick=Vo,l("#im-manual").onclick=lo,l("#im-dms").onclick=l("#im-dms2").onclick=()=>Gt(a),l("#im-arq").onchange=async e=>{const o=e.target.files[0];if(!o)return;const t=l("#im-previa");t.innerHTML=`<div class="carregando-linha" style="margin-top:12px"><span class="giro"></span><b id="im-st">Lendo ${c(o.name)}\u2026</b></div>`;try{const s=await uo(o,i=>{const n=l("#im-st");n&&(n.textContent=i)});Jt(s.texto||"",o.name,a)}catch(s){t.innerHTML=`<p class="neg" style="margin-top:12px">${c(o.name)}: ${c(s.message)}</p>`}e.target.value=""},l("#im-conferir").onclick=()=>{const e=l("#im-cola").value;if(!e.trim()){A("Cole as linhas da planilha.",!0);return}Jt(e,"linhas coladas",a)},Wt(a)}},estoque:{html:()=>{const a=I.patio(y.todasTrocas),e=a.reduce((t,s)=>t+s.pago,0),o=a.slice().sort((t,s)=>String(s.entrada).localeCompare(String(t.entrada))).slice(0,5);return`<p class="impl-numero"><b>${a.length}</b><span>${a.length===1?"m\xE1quina":"m\xE1quinas"} no p\xE1tio hoje${a.length?" \xB7 "+E(e)+" parados":""}</span></p>
+          ${o.length?`<ul class="impl-lista">${o.map(t=>`<li><b>${c(t.marca+" "+t.modelo)}</b><span>${t.ano} \xB7 ${pa(t)} \xB7 ${qa(t.entrada)} dias no p\xE1tio</span></li>`).join("")}</ul>`:""}
+          <div class="acoes"><button class="btn btn-ouro" type="button" id="im-dms">Trazer do meu sistema atual</button><button class="btn btn-linha" type="button" id="im-maq">${_('<path d="M12 5v14M5 12h14"/>')}Cadastrar m\xE1quina do p\xE1tio</button><a class="btn btn-linha" href="#documentos">Puxar de nota, foto ou PDF</a>${a.length?'<a class="btn btn-linha" href="#patio">Ver o p\xE1tio</a>':""}</div>`},ligar:a=>{l("#im-dms").onclick=()=>Gt(a),l("#im-maq").onclick=()=>ve({},void 0,e=>{y.todasTrocas!==y.trocas&&!y.todasTrocas.some(o=>o.id===e.id)&&y.todasTrocas.push({...e}),de(a)})}},avaliacao:{html:()=>`<p class="impl-numero"><b>${De().avaliacoes}</b><span>${De().avaliacoes===1?"avalia\xE7\xE3o registrada":"avalia\xE7\xF5es registradas"}</span></p>
+        <ol class="passos-instalar"><li>Toque em "Fazer a avalia\xE7\xE3o agora".</li><li>Informe a m\xE1quina, as horas e o estado; se quiser, tire as fotos guiadas.</li><li>Veja o valor m\xE1ximo a pagar e registre a avalia\xE7\xE3o.</li><li>Toque em "Voltar \xE0 implanta\xE7\xE3o", no alto da tela.</li></ol>
+        <div class="acoes"><button class="btn btn-ouro" type="button" id="im-avaliar">Fazer a avalia\xE7\xE3o agora</button></div>`,ligar:a=>{l("#im-avaliar").onclick=()=>{To(xe,String(a)),location.hash="#/usados/avaliar"}}},instalar:{html:()=>`${ca&&ca.instalado()?`<p class="impl-detectado">${q.baixo}<span>O Anshur j\xE1 est\xE1 instalado neste aparelho. Falta o outro (computador ou celular)? Abra o Anshur nele e use o bot\xE3o Instalar do cabe\xE7alho.</span></p>`:bo()}
+        ${D().perfil==="dono"?St():'<p class="nota-rodape">Os avisos por e-mail s\xE3o escolhidos pelo dono.</p>'}`,ligar:a=>{wt();const e=l("#av-salvar");e&&e.addEventListener("click",()=>{const o=Oa();o.avisos||(o.avisos=!0,Ca(o),setTimeout(()=>{l("#impl-acao")&&de(a)},600))})}}},Gt=a=>{To(xe,String(a)),location.hash="#/config/importar"},_t=()=>b.usuarios.map(a=>`<li>${Ne(a,32)}<span><b>${c(a.nome)}</b><small>${c(x.PERFIS[a.perfil]||a.perfil)}${a.email?" \xB7 "+c(a.email):""}</small></span></li>`).join("");function Jt(a,e,o){const t=window.IMPORTAR.ler(a,{refDe:Q.refDe,anoMax:Da}),s=p=>[p.tipo,x.normal(p.modelo),p.ano,p.horas,p.pago,p.vendido].join("|"),i=new Set(y.todasTrocas.map(s)),n=t.rejeitadas.slice(),m=[],r=[];t.aceitas.forEach(p=>{const d=+String(p.id).slice(1);K.ehExemplo(p)?n.push({linha:d,motivo:"linha de exemplo do modelo: apague ou troque pelos seus dados"}):!p.entrada||!p.saida?n.push({linha:d,motivo:"sem data da troca ou da venda: o hist\xF3rico precisa das duas"}):i.has(s(p))?r.push(p):m.push(p)}),n.sort((p,d)=>p.linha-d.linha),_a={arquivo:e,aceitas:m,rejeitadas:n,repetidas:r},l("#im-previa").innerHTML=Qt(),Wt(o)}function Qt(){const a=_a;return a?`<div class="impl-previa" aria-live="polite"><p class="conta"><b>${a.aceitas.length} ${a.aceitas.length===1?"troca pronta":"trocas prontas"} para entrar</b> \xB7 ${a.rejeitadas.length} ${a.rejeitadas.length===1?"linha com problema":"linhas com problema"}${a.repetidas.length?` \xB7 ${a.repetidas.length} j\xE1 ${a.repetidas.length===1?"estava":"estavam"} no hist\xF3rico`:""} \xB7 ${c(a.arquivo)}</p>
+      ${a.rejeitadas.length?`<div class="tabela-wrap" style="margin-top:10px"><table class="tabela"><thead><tr><th>Linha</th><th>O que corrigir</th></tr></thead><tbody>${a.rejeitadas.slice(0,12).map(e=>`<tr><td>${e.linha}</td><td class="neg">${c(e.motivo)}</td></tr>`).join("")}</tbody></table></div>${a.rejeitadas.length>12?`<p class="nota-rodape">E mais ${a.rejeitadas.length-12} linhas com problema.</p>`:""}`:""}
+      ${a.aceitas.length?`<div class="tabela-wrap" style="margin-top:10px"><table class="tabela"><thead><tr><th>M\xE1quina</th><th class="n">Ano</th><th class="n">Pago</th><th class="n">Vendido</th><th>Troca \u2192 venda</th></tr></thead><tbody>${a.aceitas.slice(0,6).map(e=>`<tr><td class="maq"><b>${c((e.marca?e.marca+" ":"")+e.modelo)}</b><span>${V[e.tipo]}</span></td><td class="n">${e.ano}</td><td class="n">${M(e.pago)}</td><td class="n">${M(e.vendido)}</td><td>${N(e.entrada)} \u2192 ${N(e.saida)}</td></tr>`).join("")}</tbody></table></div>${a.aceitas.length>6?`<p class="nota-rodape">Mostrando 6 de ${a.aceitas.length}.</p>`:""}`:""}
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="im-importar" ${a.aceitas.length?"":"disabled"}>Colocar ${a.aceitas.length} ${a.aceitas.length===1?"troca":"trocas"} no hist\xF3rico</button><button class="btn btn-linha" type="button" id="im-cancelar">Cancelar</button></div></div>`:""}function Wt(a){const e=l("#im-importar"),o=l("#im-cancelar");o&&(o.onclick=()=>{_a=null,l("#im-previa").innerHTML=""}),e&&(e.onclick=()=>{const t=_a;if(!t||!t.aceitas.length)return;const s=Ei(t.aceitas),i=Oa();i.importacao={quando:new Date().toISOString(),arquivo:t.arquivo,entraram:s,problemas:t.rejeitadas.length,avisos:t.rejeitadas.slice(0,12).map(n=>({linha:n.linha,motivo:n.motivo}))},L("importacao",`Hist\xF3rico importado na implanta\xE7\xE3o: ${s} ${s===1?"troca":"trocas"} (${t.arquivo})`),Ca(i),Bt(a),A(`${s} ${s===1?"troca entrou":"trocas entraram"} no hist\xF3rico.`),_a=null,setTimeout(()=>x.recarregar(),700)})}function Ei(a){const e=n=>[n.tipo,n.modelo,n.ano,n.horas,n.pago,n.vendido].join("|"),o=n=>({motor:n.cond/20,transmissao:n.cond/20,hidraulico:n.cond/20,pneus:n.cond/20,cabine:n.cond/20,lataria:n.cond/20});if(X){const n=new Set((b.historico||[]).map(e)),m=a.filter(r=>!n.has(e(r))).map((r,p)=>({...r,id:"H"+((b.historico||[]).length+p+1),ficha:o(r),manutencoes:[]}));return b.historico=(b.historico||[]).concat(m),T(),m.length}const t=new Set(y.todasTrocas.map(e)),s=Date.now().toString(36).toUpperCase(),i=a.filter(n=>!t.has(e(n))).map((n,m)=>({...n,id:"IMP"+s+m,ficha:o(n),manutencoes:[],fotos:[],anuncio:n.vendido,vendedor:"Hist\xF3rico importado",idAgro:!1}));return b.fechadas.push(...i),T(),i.length}function Si(a,e){const o=a[e],t=ki[o.id]||{},s=xa()||{},i=(s.feitas||{})[o.id],n=e===a.length-1,m=o.ok?`<span class="tag comprovado">${o.auto?"Conclu\xEDda":"Marcada como feita"}</span>`:o.pulada?'<span class="tag declarado">Pulada por agora</span>':"";l("#impl-corpo").innerHTML=`<section class="painel impl-etapa passo" aria-labelledby="impl-t">
+      <div class="impl-etapa-cab"><span class="impl-num">Etapa ${o.n} de ${a.length}</span>${m}</div>
+      <h2 id="impl-t" tabindex="-1">${c(o.titulo)}</h2>
+      <div class="impl-guia"><p><b>Por que importa.</b> ${c(o.porque)}</p><p><b>O que fazer.</b> ${c(o.fazer)}</p></div>
+      <div class="impl-acao" id="impl-acao">${t.html?t.html(e):""}</div>
+      ${o.auto?`<p class="impl-detectado">${q.baixo}<span>Feito: ${c(Ut(o.id))}.</span></p>`:o.manual&&i?`<p class="impl-detectado">${q.baixo}<span>Marcada como feita por ${c(i.por||"algu\xE9m da equipe")} em ${N(String(i.quando).slice(0,10))}. <button class="link" type="button" id="impl-desmarcar">Desmarcar</button></span></p>`:""}
+      <div class="impl-nav"><button class="btn btn-linha" type="button" id="impl-voltar" ${e===0?"disabled":""}>${_('<path d="M15 6l-6 6 6 6"/>')}Voltar</button>
+        <span class="impl-nav-dir">${o.ok?"":'<button class="btn btn-linha" type="button" id="impl-pular">Pular por agora</button>'}<button class="btn btn-ouro" type="button" id="impl-ok">${o.ok?n?"Ver o resumo":"Seguir":n?"Concluir":"Concluir e seguir"}${_('<path d="M9 6l6 6-6 6"/>')}</button></span></div></section>`,t.ligar&&t.ligar(e),l("#impl-voltar").onclick=()=>je(Math.max(0,e-1));const r=l("#impl-pular");r&&(r.onclick=()=>{Ca(K.pular(Oa(),o.id));const d=K.proxima(ee(),e);je(d<0?"fim":d)});const p=l("#impl-desmarcar");p&&(p.onclick=()=>{Ca(K.desmarcar(Oa(),o.id)),L("implantacao",`Implanta\xE7\xE3o: etapa "${o.titulo}" desmarcada`),de(e)}),l("#impl-ok").onclick=async d=>{if(t.antes){const u=d.currentTarget;u.disabled=!0;let g=!1;try{g=await t.antes()}finally{u.disabled=!1}if(g===!1)return}o.manual||(Ca(K.marcar(Oa(),o.id,D().nome)),L("implantacao",`Implanta\xE7\xE3o: etapa "${o.titulo}" conclu\xEDda`));const $=K.proxima(ee(),e);je($<0?"fim":$)}}function wi(a){const e=a.filter(i=>!i.ok),o=Oa();!e.length&&!o.concluida&&(o.concluida=z(),Ca(o),L("implantacao","Implanta\xE7\xE3o conclu\xEDda"));const t='<div class="impl-ajuda"><h3 class="impl-h3">Precisa de ajuda?</h3><p>Escreva pela conversa no WhatsApp com a Blue Rose, a mesma em que o Anshur foi contratado. O atendimento \xE9 por escrito: mande a d\xFAvida e, se der, um print da tela. N\xE3o precisa marcar reuni\xE3o nem liga\xE7\xE3o.</p></div>';l("#impl-corpo").innerHTML=`<section class="painel impl-etapa impl-fim passo" aria-labelledby="impl-t">
+      ${e.length?`<h2 id="impl-t" tabindex="-1">Falta pouco: ${e.length} ${e.length===1?"etapa":"etapas"}</h2><p class="sub">O que j\xE1 est\xE1 pronto continua valendo. As etapas que faltam podem ser feitas a qualquer hora.</p>`:`<div class="impl-feito">${Ht}</div><h2 id="impl-t" tabindex="-1">Implanta\xE7\xE3o conclu\xEDda</h2><p class="sub">A ${c(y.revenda.nome)} est\xE1 pronta para usar o Anshur no dia a dia${o.concluida?` (conclu\xEDda em ${N(o.concluida)})`:""}.</p>`}
+      <ul class="impl-resumo">${a.map((i,n)=>`<li class="${i.ok?"ok":""}">${i.ok?q.baixo:'<span class="bolinha"></span>'}<span><b>${c(i.titulo)}</b><span>${i.ok?c(Ut(i.id)):i.pulada?"Pulada por agora":"Ainda n\xE3o feita"}</span></span>${i.ok?"":`<button class="btn btn-linha" type="button" data-impl-ir="${n}">Fazer agora</button>`}</li>`).join("")}</ul>
+      ${t}
+      <div class="impl-nav"><button class="btn btn-linha" type="button" data-impl-ir="0">Rever as etapas</button><span class="impl-nav-dir">${e.length&&!o.concluida?'<button class="btn btn-linha" type="button" id="impl-encerrar">Encerrar assim mesmo</button>':""}<a class="btn btn-ouro" href="#/">Ir para o portal</a></span></div></section>`,R("[data-impl-ir]",l("#impl-corpo")).forEach(i=>{i.onclick=()=>je(+i.dataset.implIr)});const s=l("#impl-encerrar");s&&(s.onclick=()=>va("Encerrar a implanta\xE7\xE3o?","O aviso some do painel. As etapas que faltam continuam em Configura\xE7\xF5es \u203A Implanta\xE7\xE3o guiada.","Encerrar",()=>{Ca(Object.assign(Oa(),{concluida:z()})),L("implantacao","Implanta\xE7\xE3o encerrada com etapas pendentes"),A("Implanta\xE7\xE3o encerrada."),de("fim")}))}yo.implantacao=qi;function Ci(a){const e=l("#impl-volta");e&&e.remove();const o=Ft(xe);if(a==="implantacao"||o==null||!K.podeVer(D().perfil))return;const t=K.ETAPAS[+o]||K.ETAPAS[6];w.insertAdjacentHTML("beforebegin",`<div class="impl-volta" id="impl-volta" role="region" aria-label="Implanta\xE7\xE3o guiada"><span>Implanta\xE7\xE3o \xB7 etapa ${(+o||0)+1} de ${K.TOTAL}: <b>${c(t.titulo)}</b></span><a class="btn btn-ouro" href="#/config/implantacao">Voltar \xE0 implanta\xE7\xE3o</a></div>`)}function Xt(a){let e=(location.hash||"").slice(1);if(!e){const t=a?pi():"";e=t?t.slice(1):"/"}if(e[0]==="/"){const[t="",s=""]=e.slice(1).split("/");if(!t||Ct[t])return{sis:null,aba:t||"inicio"};const i=B.area(t);if(!i||!i.pronta||!La(i))return{sis:null,aba:"inicio"};if(!s||!ge(s)||!ta(s))return{sis:t,aba:li(i)};if(re(i).some(m=>m.aba===s))return{sis:t,aba:s};const n=B.areaDaAba(s,t);return n&&n!==t?{sis:n,aba:s}:{sis:t,aba:s}}return Ct[e]?{sis:null,aba:e}:!ge(e)||!ta(e)?{sis:null,aba:"inicio"}:{sis:B.areaDaAba(e,Ma)||(Ma&&B.area(Ma)&&La(B.area(Ma))?Ma:null),aba:e}}let Do=!0;function Z(){const a=Xt(Do),e=a.sis?J(a.sis,a.aba):ci(a.aba);location.hash!==e&&history.replaceState(null,"",e),a.sis&&(Ma=a.sis,ne(fa("area"),a.sis),hi(a.sis,a.aba)),Tt(a.sis),za(),$e(),R(".menu a, #sis-barra a").forEach(m=>{m.dataset.aba===a.aba?m.setAttribute("aria-current","page"):m.removeAttribute("aria-current")}),R("#menu-folha a[data-aba]").forEach(m=>{m.dataset.aba===a.aba?m.setAttribute("aria-current","page"):m.removeAttribute("aria-current")}),Dt();const o=a.sis&&re(B.area(a.sis)).find(m=>m.aba===a.aba);l("#mig-aba").textContent=o?o.rotulo:a.sis&&(B.item(a.aba)||{}).rotulo||"",l("#mig-aba").closest(".migalhas").classList.toggle("so-area",!l("#mig-aba").textContent||a.sis&&l("#mig-aba").textContent===B.area(a.sis).nome);const t=l("#menu-mais");t&&t.classList.toggle("ativo",!l('#menu a[aria-current="page"]')&&a.aba!=="inicio"),Be(),U(!0);const s=ge(a.aba),i=()=>{const m=l(".cab-nova");if(!m)return;const r=(l("span",m).textContent||"").trim().toLowerCase();m.classList.toggle("repetido",!!r&&R(".titulo a, .titulo button",w).some(p=>p.textContent.trim().toLowerCase()===r)||!!a.sis&&m.getAttribute("href")===J(a.sis,a.aba)&&!m.onclick||R(".titulo .btn-ouro",w).length>0)},n=()=>{w.classList.remove("saindo"),s(),Ci(a.aba),i(),w.classList.remove("entrando"),w.offsetWidth,w.classList.add("entrando")};if(Do||Fa){Do=!1,n();return}w.classList.add("saindo"),setTimeout(()=>{n(),window.scrollTo(0,0)},120)}let Lo=!1;const Ri=()=>!!(l("#camada")&&l("#camada").children.length)||/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement||{}).tagName||"")&&document.activeElement.id!=="portal-q";function Pi(){if(document.hidden||!Ri()){Lo=!1,location.reload();return}if(Lo)return;Lo=!0,A("Outra aba do Anshur salvou altera\xE7\xF5es. Termine o que est\xE1 fazendo e toque em Atualizar.");const a=document.createElement("button");a.type="button",a.className="btn btn-ouro aviso-abas",a.textContent="Atualizar com a outra aba",a.onclick=()=>location.reload(),document.body.appendChild(a)}x.aoMudarEmOutraAba&&x.aoMudarEmOutraAba(Pi),l("#sino").onclick=Ns,Ks(),Na()&&document.body.classList.add("so-leitura"),l("#busca-btn").onclick=pt,l("#instalar-btn").onclick=ho,fo(),ze(),D().ultimoAcesso=new Date().toISOString(),x.nuvem||T(),R(".menu a").forEach(a=>{ta(a.dataset.aba)||(a.hidden=!0)}),R(".menu-grupo").forEach(a=>{let e=a.nextElementSibling,o=!1;for(;e&&e.tagName==="A";)e.hidden||(o=!0),e=e.nextElementSibling;a.hidden=!o}),di();const Ra={A:y,K:x,C:I,G:ya,M:Q,estado:b,tela:w,$:l,$$:R,ICO:q,ic:_,esc:c,real:M,mil:E,pct:P,data:N,hojeISO:z,diasDesde:qa,diasEntre:le,num:ra,NOMES:V,OP:X,NV:C,toast:A,abrirCamada:oa,fecharCamada:U,confirmar:va,formulario:ba,baixarCSV:Ea,salvar:T,log:L,eu:D,pode:ta,rota:Z,conta:ia,contar:$a,mascarar:gt,somenteLeitura:Na,fotoMini:ue,irArea:Co,abrirInstalacao:vo};window.DMS_UI&&ta("importar")&&setTimeout(()=>{window.DMS_UI.verificarAoAbrir(Ra).catch(()=>{})},2500),Object.assign(Ra,{SAFRA:ye,alcadas:$o}),window.ANSHUR_UI=Ra,B&&B.lista().forEach(a=>{if(a.iniciar)try{a.iniciar(Ra)}catch(e){console.error("\xC1rea "+a.id,e)}}),te(),window.addEventListener("hashchange",Z);let Kt=null;window.addEventListener("resize",()=>{clearTimeout(Kt),Kt=setTimeout(()=>{const a=Xt(!1);a.sis&&(ko=null,Tt(a.sis),R(".menu a, #sis-barra a, #menu-folha a[data-aba]").forEach(e=>{e.dataset.aba===a.aba&&e.setAttribute("aria-current","page")}),Dt())},150)}),C&&C.marcarVista&&C.marcarVista(b),K.deveAbrirSozinha({imp:b.implantacao,perfil:D().perfil,ambiente:X?"op":"demo",temDados:y.todasTrocas.length>0||(b.historico||[]).length>0||b.avaliacoes.length>0})&&(b.implantacao=K.novo(z()),T(),history.replaceState(null,"","#/config/implantacao")),Z()})();

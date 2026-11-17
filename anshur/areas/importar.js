@@ -1,310 +1,56 @@
-// Tela "Trazer do meu sistema": a revenda traz sozinha os dados do sistema atual (DMS/ERP).
-// Escolhe a pasta de exportação (ou os arquivos), confere as colunas, vê a PRÉVIA e grava em lote; cada importação pode
-// ser desfeita. As regras ficam em dms.js; aqui só a tela, a leitura dos arquivos e a pasta lembrada (Chrome/Edge).
-// Nada sai do aparelho além do que já é salvo no estado da revenda (mesmo caminho de sempre: anshur_salvar com conta).
-(function (raiz) {
-  const R = raiz.ANSHUR_AREAS, D = raiz.DMS; if (!R || !D) return;
-  const XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-  const ICO = '<path d="M4 4h7l2 2h7v6M4 4v16h8M16 15v6M13 18l3 3 3-3"/>';
-  let U = null;
-  // estado desta tela (sobrevive a redesenhos; some ao recarregar a página)
-  const S = { origem: null, tabelas: [], fora: [], semMudanca: [], lidos: [], previa: null, lendo: '', filtro: null, mostrar: 30, abertas: new Set(), handle: null, verificado: false };
-  const esc = (s) => U.esc(s);
-  const n = (v, um, varios) => `${v} ${v === 1 ? um : varios}`;
-  const temPastaFS = () => typeof window !== 'undefined' && 'showDirectoryPicker' in window;
-  const temPastaInput = () => typeof document !== 'undefined' && 'webkitdirectory' in document.createElement('input');
-  const pode = () => ['dono', 'gerente'].includes(U.eu().perfil) && !U.somenteLeitura();
-  const amb = () => (U.OP ? 'op' : 'demo') + (U.NV && U.NV.revenda ? ':' + U.NV.revenda.id : '');
-
-  // ---------- pasta lembrada (IndexedDB do navegador; o handle não vai para o servidor) ----------
-  const idb = (modo, fn) => new Promise((ok, erro) => {
-    if (typeof indexedDB === 'undefined') { erro(new Error('sem IndexedDB')); return; }
-    const req = indexedDB.open('anshur', 1);
-    req.onupgradeneeded = () => req.result.createObjectStore('kv');
-    req.onerror = () => erro(req.error);
-    req.onsuccess = () => { try { const tx = req.result.transaction('kv', modo), r = fn(tx.objectStore('kv')); tx.oncomplete = () => ok(r && r.result); tx.onerror = () => erro(tx.error); tx.onabort = () => erro(tx.error); } catch (e) { erro(e); } };
-  });
-  const chaveIdb = () => 'pasta-dms:' + amb();
-  async function handleSalvo() { if (S.handle) return S.handle; try { S.handle = await idb('readonly', (st) => st.get(chaveIdb())) || null; } catch (e) { S.handle = null; } return S.handle; }
-  async function lembrarHandle(h) { S.handle = h; try { await idb('readwrite', (st) => st.put(h, chaveIdb())); } catch (e) { /* navegador sem suporte: vale só nesta sessão */ } }
-  async function permissao(h, pedir) {
-    if (!h || typeof h.queryPermission !== 'function') return 'granted';
-    let p = await h.queryPermission({ mode: 'read' });
-    if (p !== 'granted' && pedir) p = await h.requestPermission({ mode: 'read' });
-    return p;
-  }
-  // percorre a pasta e as subpastas (até 6 níveis, 3.000 arquivos); pastas ocultas e temporárias ficam de fora
-  async function listarHandle(h, pre = '', out = [], prof = 0) {
-    for await (const e of h.values()) {
-      const cam = pre ? pre + '/' + e.name : e.name;
-      if (e.kind === 'directory') { if (prof < 6 && !/^[.~$]/.test(e.name)) await listarHandle(e, cam, out, prof + 1); }
-      else if (out.length < 3000) out.push({ caminho: cam, nome: e.name, ent: e });
-    }
-    return out;
-  }
-  const carregarXLSX = () => new Promise((ok) => {
-    if (window.XLSX) { ok(window.XLSX); return; }
-    const s = document.createElement('script'); s.src = XLSX_URL; s.onload = () => ok(window.XLSX || null); s.onerror = () => ok(null); document.head.appendChild(s);
-  });
-  const pausa = () => new Promise((r) => setTimeout(r, 0));
-
-  const ctxPrevia = () => ({ ambiente: U.OP ? 'op' : 'demo', existentes: U.A.todasTrocas || U.A.trocas, catalogo: U.A.modelos, refDe: U.M.refDe, lojas: U.estado.lojas || [], lojaPadrao: U.estado.lojaAtual || (U.estado.lojas || [])[0] || '', anoMax: new Date().getFullYear(), hoje: U.hojeISO() });
-  const pastaRegistro = () => (S.origem && S.origem.pasta ? (D.garantirDms(U.estado).pastas.find((p) => p.id === S.origem.id) || null) : null);
-  function recalcular() { S.previa = S.tabelas.length ? D.previa(S.tabelas, U.estado, ctxPrevia()) : null; if (S.previa && (!S.filtro || !contaFiltro(S.filtro))) S.filtro = filtroInicial(); }
-
-  // lista de arquivos (da pasta ou escolhidos) → só lê os que são dados e, numa pasta já sincronizada, só os que mudaram
-  async function lerLista(lista, origem, aoMudar) {
-    S.origem = origem; S.tabelas = []; S.fora = []; S.semMudanca = []; S.lidos = []; S.previa = null; S.mostrar = 30; S.filtro = null;
-    const dados = [];
-    lista.forEach((f) => { if (D.ehDado(f.nome)) dados.push(f); else S.fora.push({ caminho: f.caminho, motivo: /^~\$/.test(f.nome) ? 'arquivo temporário do Excel' : 'não é planilha nem texto exportado' }); });
-    for (const f of dados) { if (!f.file && f.ent) { try { f.file = await f.ent.getFile(); } catch (e) { S.fora.push({ caminho: f.caminho, motivo: 'o navegador não deixou abrir', erro: true }); continue; } } if (f.file) { f.tamanho = f.file.size; f.modificado = f.file.lastModified; } }
-    const prontos = dados.filter((f) => f.file);
-    const pasta = pastaRegistro();
-    const sep = pasta ? D.mudados(pasta, prontos) : { ler: prontos, iguais: [] };
-    S.semMudanca = sep.iguais;
-    let XLSX = null;
-    if (sep.ler.some((f) => /\.(xlsx|xlsm|xls|ods)$/i.test(f.nome))) { S.lendo = 'Abrindo o leitor de Excel…'; if (aoMudar) aoMudar(); XLSX = await carregarXLSX(); }
-    const perfis = D.garantirDms(U.estado).perfis;
-    for (let i = 0; i < sep.ler.length; i++) {
-      const f = sep.ler[i]; S.lendo = `Lendo ${f.caminho} (${i + 1} de ${sep.ler.length})…`; if (aoMudar) aoMudar(); await pausa();
-      let r;
-      try { r = D.lerArquivo({ nome: f.nome, caminho: f.caminho, bytes: f.tamanho > D.LIMITE_BYTES ? { byteLength: f.tamanho } : new Uint8Array(await f.file.arrayBuffer()), XLSX }); }
-      catch (e) { r = { erro: 'não foi possível ler o arquivo' }; }
-      S.lidos.push(f);
-      if (r.tabelas) r.tabelas.forEach((t) => { const pt = D.prepararTabela(t, perfis); if (t.linhas.length - 1 > D.LIMITE_LINHAS) pt.cortada = true; S.tabelas.push(pt); });
-      else S.fora.push({ caminho: f.caminho, motivo: r.erro || r.ignorado, erro: !!r.erro });
-    }
-    S.lendo = ''; recalcular();
-  }
-
-  // ---------- escolher a origem ----------
-  async function escolherPastaFS() {
-    let h;
-    try { h = await window.showDirectoryPicker({ mode: 'read', id: 'anshur-dms' }); } catch (e) { if (e && e.name !== 'AbortError') U.toast('Não foi possível abrir a pasta.', true); return; }
-    await lembrarHandle(h);
-    await lerDaPasta(h, true);
-  }
-  async function lerDaPasta(h, pedir) {
-    if (await permissao(h, pedir) !== 'granted') { U.toast('O navegador não liberou a leitura da pasta. Toque em "Sincronizar de novo" e permita.', true); return; }
-    S.lendo = 'Procurando arquivos na pasta…'; desenhar();
-    let lista;
-    try { lista = await listarHandle(h); } catch (e) { S.lendo = ''; U.toast('A pasta não pôde ser lida (foi movida ou apagada?). Escolha de novo.', true); desenhar(); return; }
-    await lerLista(lista, { tipo: 'pasta', pasta: true, id: 'fs:' + h.name, nome: h.name, fs: true }, desenhar);
-    desenhar();
-  }
-  async function arquivosEscolhidos(input, comoPasta) {
-    const fs = Array.from(input.files || []); input.value = '';
-    if (!fs.length) return;
-    let origem;
-    if (comoPasta) { const raizNome = (fs[0].webkitRelativePath || '').split('/')[0] || 'pasta'; origem = { tipo: 'pasta', pasta: true, id: 'dir:' + raizNome, nome: raizNome }; }
-    else origem = { tipo: 'arquivos', pasta: false, id: 'arquivos', nome: n(fs.length, 'arquivo escolhido', 'arquivos escolhidos') };
-    const lista = fs.map((f) => ({ caminho: comoPasta && f.webkitRelativePath ? f.webkitRelativePath.split('/').slice(1).join('/') : f.name, nome: f.name, file: f }));
-    await lerLista(lista, origem, desenhar); desenhar();
-  }
-  async function sincronizarDeNovo() {
-    const h = await handleSalvo();
-    if (h) { await lerDaPasta(h, true); return; }
-    const inp = U.$('#dms-pasta-in'); if (inp) inp.click();
-  }
-
-  // ---------- gravar e desfazer ----------
-  function gravar() {
-    const p = S.previa, c = p && p.contagens; if (!c || !c.gravar) return;
-    if (!pode()) { U.toast('Só o dono ou o gerente importam dados.', true); return; }
-    U.confirmar(`Gravar ${n(c.gravar, 'registro', 'registros')}?`, `Entram ${n(c.novos, 'registro novo', 'registros novos')}${c.atualizados ? ` e ${n(c.atualizados, 'atualização', 'atualizações')}` : ''}. ${c.erros ? `${n(c.erros, 'linha com erro fica', 'linhas com erro ficam')} de fora. ` : ''}Antes de gravar o Anshur guarda um ponto de restauração: dá para desfazer esta importação inteira depois, num toque.`, 'Gravar', () => {
-      const agora = new Date().toISOString();
-      const lote = D.gravar(U.estado, p, { usuario: U.eu().nome, agora, origem: { tipo: S.origem.tipo, nome: S.origem.nome }, tabelas: S.tabelas,
-        arquivos: S.tabelas.map((t) => ({ origem: t.origem, codificacao: t.codificacao, linhas: t.linhas.length - t.cabIdx - 1 })) });
-      if (S.origem.pasta) D.registrarPasta(U.estado, S.origem, S.lidos.concat(S.semMudanca), { lidos: S.lidos.length, semMudanca: S.semMudanca.length, novos: c.novos, atualizados: c.atualizados, iguais: c.iguais, erros: c.erros, lote: lote.id }, agora);
-      U.log('importacao', `Importação do sistema (${S.origem.nome}): ${n(lote.contagens.criados, 'registro novo', 'registros novos')}, ${n(c.atualizados, 'atualização', 'atualizações')}, ${n(c.erros, 'linha com erro', 'linhas com erro')}`, { ref: lote.id });
-      U.salvar();
-      try { sessionStorage.setItem('anshur-dms-feito', lote.id); } catch (e) { /* sem armazenamento */ }
-      U.toast(`${n(c.gravar, 'registro gravado', 'registros gravados')}.`);
-      limpar();
-      setTimeout(() => U.K.recarregar(), 700); // pátio, histórico e avaliador passam a usar os dados novos
-    });
-  }
-  // nada a gravar numa pasta: marca a sincronização (para a próxima ler só o que mudar)
-  function concluirSemGravar() {
-    const p = S.previa, c = p ? p.contagens : { iguais: 0, erros: 0 };
-    if (S.origem && S.origem.pasta) { D.registrarPasta(U.estado, S.origem, S.lidos.concat(S.semMudanca), { lidos: S.lidos.length, semMudanca: S.semMudanca.length, novos: 0, atualizados: 0, iguais: c.iguais || 0, erros: c.erros || 0, lote: null }, new Date().toISOString()); U.salvar(); }
-    U.toast('Tudo em dia: nada novo para gravar.'); limpar(); desenhar();
-  }
-  function limpar() { Object.assign(S, { origem: null, tabelas: [], fora: [], semMudanca: [], lidos: [], previa: null, lendo: '', filtro: null, mostrar: 30 }); S.abertas.clear(); }
-  function desfazer(id) {
-    const lote = D.garantirDms(U.estado).lotes.find((l) => l.id === id); if (!lote || lote.desfeito) return;
-    const mov = D.movimentosDepois(U.estado, lote);
-    U.confirmar('Desfazer esta importação?', `Saem ${n(lote.criados.length, 'registro que entrou', 'registros que entraram')} nela${lote.atualizados.length ? ` e ${n(lote.atualizados.length, 'registro alterado volta', 'registros alterados voltam')} ao que eram antes` : ''}.${mov ? ` Atenção: ${n(mov, 'lançamento feito depois', 'lançamentos feitos depois')} nesses registros (venda, preço, preparo, custo ou movimento de peça) também ${mov === 1 ? 'sai' : 'saem'}.` : ''} O resto da revenda não muda.`, 'Desfazer', () => {
-      const r = D.desfazer(U.estado, id, { usuario: U.eu().nome });
-      if (!r.ok) { U.toast(r.motivo, true); return; }
-      U.log('importacao', `Importação desfeita: ${n(r.removidos, 'registro removido', 'registros removidos')}, ${n(r.restaurados, 'restaurado', 'restaurados')}`, { ref: id });
-      U.salvar(); U.toast('Importação desfeita.');
-      try { sessionStorage.removeItem('anshur-dms-feito'); } catch (e) { /* sem armazenamento */ }
-      setTimeout(() => U.K.recarregar(), 700);
-    });
-  }
-
-  // ---------- desenho ----------
-  const FILTROS = [['duplicado', 'Duplicados'], ['novo', 'Novos'], ['erro', 'Com erro'], ['igual', 'Já importados'], ['aviso', 'Com aviso'], ['ignorada', 'Ignorados']];
-  const doFiltro = (f) => (S.previa ? S.previa.itens.filter((it) => (f === 'aviso' ? it.avisos && it.avisos.length && !['erro', 'ignorada'].includes(it.status) : it.status === f)) : []);
-  const contaFiltro = (f) => doFiltro(f).length;
-  const filtroInicial = () => (FILTROS.find(([f]) => contaFiltro(f)) || ['novo'])[0];
-  const ENT_CURTO = { historico: 'Histórico (vendida)', estoque: 'Pátio', clientes: 'Cliente', pecas: 'Peça' };
-  function descricao(it) {
-    const r = it.reg;
-    if (!r) return { t: it.origem, d: '' };
-    if (it.ent === 'clientes') return { t: r.nome || r.documento || 'Cliente', d: [r.documento, r.cidade, r.telefone].filter(Boolean).join(' · ') };
-    if (it.ent === 'pecas') return { t: [r.codigo, r.descricao].filter(Boolean).join(' · ') || 'Peça', d: [r.marca, r.aplicacao, `${(r.quantidade || 0).toLocaleString('pt-BR')} em estoque${r.loja ? ' (' + r.loja + ')' : ''}`, r.custo > 0 ? 'custo ' + r.custo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '', r.preco > 0 ? 'venda ' + r.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '', r.local].filter(Boolean).join(' · ') };
-    const t = [r.marca, r.modelo].filter(Boolean).join(' ') + (r.ano >= 1950 ? ' · ' + r.ano : '');
-    const val = [r.pago > 0 ? U.real(r.pago) : '', r.vendido > 0 ? U.real(r.vendido) : ''].filter(Boolean).join(' → ');
-    const dts = [r.entrada ? U.data(r.entrada) : '', r.saida ? U.data(r.saida) : ''].filter(Boolean).join(' → ');
-    return { t: t || 'Máquina', d: [r.horas ? r.horas.toLocaleString('pt-BR') + ' h' : '', r.chassi || r.serie || '', val, dts].filter(Boolean).join(' · ') };
-  }
-  const ROT_DECISAO = { atualizar: 'Atualizar o que já existe', pular: 'Pular (não importar)', novo: 'Importar como novo' };
-  function htmlItem(it) {
-    const d = descricao(it), cls = { novo: 'ok', duplicado: 'dup', igual: 'igual', erro: 'erro', ignorada: 'igual' }[it.status] || '';
-    return `<li class="dms-item ${cls}"><div class="dms-item-txt"><b>${esc(d.t)}${it.ent ? ` <span class="dms-ent">${esc(ENT_CURTO[it.ent] || '')}</span>` : ''}</b>${d.d ? `<span>${esc(d.d)}</span>` : ''}
-      <small>${esc(it.origem)} · linha ${it.linha}</small>${it.motivo ? `<em class="${it.status === 'erro' ? 'neg' : ''}">${esc(it.motivo)}</em>` : ''}${it.avisos && it.avisos.length && it.status !== 'erro' ? `<em class="dms-aviso">${esc(it.avisos.join('; '))}</em>` : ''}</div>
-      ${it.status === 'duplicado' ? `<div class="campo dms-decisao"><label for="dec-${it.n}">O que fazer</label><select id="dec-${it.n}" data-dec="${it.n}">${it.opcoes.map((o) => `<option value="${o}" ${it.decisao === o ? 'selected' : ''}>${ROT_DECISAO[o]}</option>`).join('')}</select></div>` : ''}</li>`;
-  }
-  function exemplos(t, i) {
-    const out = [];
-    for (let k = t.cabIdx + 1; k < t.linhas.length && out.length < 2; k++) {
-      const v = t.linhas[k][i]; if (v === '' || v == null) continue;
-      let s = String(v); if (typeof v === 'number' && ['entrada', 'saida'].includes(t.mapa[i]) && D.dataISO(v) !== 'invalida') s += ` (${U.data(D.dataISO(v))})`;
-      out.push(s.length > 28 ? s.slice(0, 27) + '…' : s);
-    }
-    return out.join(' · ');
-  }
-  function htmlTabela(t, idx) {
-    const rec = t.mapa.filter(Boolean).length, dados = Math.max(0, t.linhas.length - t.cabIdx - 1);
-    const fonte = t.perfil ? '<span class="tag comprovado">perfil salvo reaplicado</span>' : t.semCab ? '<span class="tag declarado">sem cabeçalho: ordem da planilha modelo</span>' : '';
-    const opts = (sel) => `<option value="">Não importar esta coluna</option>${D.camposDe(t.entidade).map(([k, r]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}`;
-    return `<details class="dms-arq" data-tab="${idx}" ${S.abertas.has(t.origem) ? 'open' : ''}><summary><span class="dms-arq-nome"><b>${esc(t.origem)}</b>
-        <small>${n(dados, 'linha', 'linhas')} · ${esc(t.codificacao)}${t.separador ? ' · separado por ' + esc(t.separador) : ''} · ${rec} de ${t.cab.length} colunas reconhecidas</small></span>${fonte}<span class="dms-arq-ent">${esc(D.ENTIDADES[t.entidade] || '')}</span></summary>
+(function(y){const E=y.ANSHUR_AREAS,m=y.DMS;if(!E||!m)return;const R="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",da='<path d="M4 4h7l2 2h7v6M4 4v16h8M16 15v6M13 18l3 3 3-3"/>';let n=null;const o={origem:null,tabelas:[],fora:[],semMudanca:[],lidos:[],previa:null,lendo:"",filtro:null,mostrar:30,abertas:new Set,handle:null,verificado:!1},p=e=>n.esc(e),c=(e,a,s)=>`${e} ${e===1?a:s}`,j=()=>typeof window<"u"&&"showDirectoryPicker"in window,k=()=>typeof document<"u"&&"webkitdirectory"in document.createElement("input"),b=()=>["dono","gerente"].includes(n.eu().perfil)&&!n.somenteLeitura(),N=()=>(n.OP?"op":"demo")+(n.NV&&n.NV.revenda?":"+n.NV.revenda.id:""),A=(e,a)=>new Promise((s,r)=>{if(typeof indexedDB>"u"){r(new Error("sem IndexedDB"));return}const i=indexedDB.open("anshur",1);i.onupgradeneeded=()=>i.result.createObjectStore("kv"),i.onerror=()=>r(i.error),i.onsuccess=()=>{try{const l=i.result.transaction("kv",e),t=a(l.objectStore("kv"));l.oncomplete=()=>s(t&&t.result),l.onerror=()=>r(l.error),l.onabort=()=>r(l.error)}catch(l){r(l)}}}),D=()=>"pasta-dms:"+N();async function I(){if(o.handle)return o.handle;try{o.handle=await A("readonly",e=>e.get(D()))||null}catch{o.handle=null}return o.handle}async function X(e){o.handle=e;try{await A("readwrite",a=>a.put(e,D()))}catch{}}async function M(e,a){if(!e||typeof e.queryPermission!="function")return"granted";let s=await e.queryPermission({mode:"read"});return s!=="granted"&&a&&(s=await e.requestPermission({mode:"read"})),s}async function q(e,a="",s=[],r=0){for await(const i of e.values()){const l=a?a+"/"+i.name:i.name;i.kind==="directory"?r<6&&!/^[.~$]/.test(i.name)&&await q(i,l,s,r+1):s.length<3e3&&s.push({caminho:l,nome:i.name,ent:i})}return s}const F=()=>new Promise(e=>{if(window.XLSX){e(window.XLSX);return}const a=document.createElement("script");a.src=R,a.onload=()=>e(window.XLSX||null),a.onerror=()=>e(null),document.head.appendChild(a)}),_=()=>new Promise(e=>setTimeout(e,0)),H=()=>({ambiente:n.OP?"op":"demo",existentes:n.A.todasTrocas||n.A.trocas,catalogo:n.A.modelos,refDe:n.M.refDe,lojas:n.estado.lojas||[],lojaPadrao:n.estado.lojaAtual||(n.estado.lojas||[])[0]||"",anoMax:new Date().getFullYear(),hoje:n.hojeISO()}),V=()=>o.origem&&o.origem.pasta&&m.garantirDms(n.estado).pastas.find(e=>e.id===o.origem.id)||null;function $(){o.previa=o.tabelas.length?m.previa(o.tabelas,n.estado,H()):null,o.previa&&(!o.filtro||!z(o.filtro))&&(o.filtro=J())}async function S(e,a,s){o.origem=a,o.tabelas=[],o.fora=[],o.semMudanca=[],o.lidos=[],o.previa=null,o.mostrar=30,o.filtro=null;const r=[];e.forEach(u=>{m.ehDado(u.nome)?r.push(u):o.fora.push({caminho:u.caminho,motivo:/^~\$/.test(u.nome)?"arquivo tempor\xE1rio do Excel":"n\xE3o \xE9 planilha nem texto exportado"})});for(const u of r){if(!u.file&&u.ent)try{u.file=await u.ent.getFile()}catch{o.fora.push({caminho:u.caminho,motivo:"o navegador n\xE3o deixou abrir",erro:!0});continue}u.file&&(u.tamanho=u.file.size,u.modificado=u.file.lastModified)}const i=r.filter(u=>u.file),l=V(),t=l?m.mudados(l,i):{ler:i,iguais:[]};o.semMudanca=t.iguais;let d=null;t.ler.some(u=>/\.(xlsx|xlsm|xls|ods)$/i.test(u.nome))&&(o.lendo="Abrindo o leitor de Excel\u2026",s&&s(),d=await F());const f=m.garantirDms(n.estado).perfis;for(let u=0;u<t.ler.length;u++){const h=t.ler[u];o.lendo=`Lendo ${h.caminho} (${u+1} de ${t.ler.length})\u2026`,s&&s(),await _();let g;try{g=m.lerArquivo({nome:h.nome,caminho:h.caminho,bytes:h.tamanho>m.LIMITE_BYTES?{byteLength:h.tamanho}:new Uint8Array(await h.file.arrayBuffer()),XLSX:d})}catch{g={erro:"n\xE3o foi poss\xEDvel ler o arquivo"}}o.lidos.push(h),g.tabelas?g.tabelas.forEach(x=>{const C=m.prepararTabela(x,f);x.linhas.length-1>m.LIMITE_LINHAS&&(C.cortada=!0),o.tabelas.push(C)}):o.fora.push({caminho:h.caminho,motivo:g.erro||g.ignorado,erro:!!g.erro})}o.lendo="",$()}async function U(){let e;try{e=await window.showDirectoryPicker({mode:"read",id:"anshur-dms"})}catch(a){a&&a.name!=="AbortError"&&n.toast("N\xE3o foi poss\xEDvel abrir a pasta.",!0);return}await X(e),await L(e,!0)}async function L(e,a){if(await M(e,a)!=="granted"){n.toast('O navegador n\xE3o liberou a leitura da pasta. Toque em "Sincronizar de novo" e permita.',!0);return}o.lendo="Procurando arquivos na pasta\u2026",v();let s;try{s=await q(e)}catch{o.lendo="",n.toast("A pasta n\xE3o p\xF4de ser lida (foi movida ou apagada?). Escolha de novo.",!0),v();return}await S(s,{tipo:"pasta",pasta:!0,id:"fs:"+e.name,nome:e.name,fs:!0},v),v()}async function P(e,a){const s=Array.from(e.files||[]);if(e.value="",!s.length)return;let r;if(a){const l=(s[0].webkitRelativePath||"").split("/")[0]||"pasta";r={tipo:"pasta",pasta:!0,id:"dir:"+l,nome:l}}else r={tipo:"arquivos",pasta:!1,id:"arquivos",nome:c(s.length,"arquivo escolhido","arquivos escolhidos")};const i=s.map(l=>({caminho:a&&l.webkitRelativePath?l.webkitRelativePath.split("/").slice(1).join("/"):l.name,nome:l.name,file:l}));await S(i,r,v),v()}async function G(){const e=await I();if(e){await L(e,!0);return}const a=n.$("#dms-pasta-in");a&&a.click()}function K(){const e=o.previa,a=e&&e.contagens;if(!(!a||!a.gravar)){if(!b()){n.toast("S\xF3 o dono ou o gerente importam dados.",!0);return}n.confirmar(`Gravar ${c(a.gravar,"registro","registros")}?`,`Entram ${c(a.novos,"registro novo","registros novos")}${a.atualizados?` e ${c(a.atualizados,"atualiza\xE7\xE3o","atualiza\xE7\xF5es")}`:""}. ${a.erros?`${c(a.erros,"linha com erro fica","linhas com erro ficam")} de fora. `:""}Antes de gravar o Anshur guarda um ponto de restaura\xE7\xE3o: d\xE1 para desfazer esta importa\xE7\xE3o inteira depois, num toque.`,"Gravar",()=>{const s=new Date().toISOString(),r=m.gravar(n.estado,e,{usuario:n.eu().nome,agora:s,origem:{tipo:o.origem.tipo,nome:o.origem.nome},tabelas:o.tabelas,arquivos:o.tabelas.map(i=>({origem:i.origem,codificacao:i.codificacao,linhas:i.linhas.length-i.cabIdx-1}))});o.origem.pasta&&m.registrarPasta(n.estado,o.origem,o.lidos.concat(o.semMudanca),{lidos:o.lidos.length,semMudanca:o.semMudanca.length,novos:a.novos,atualizados:a.atualizados,iguais:a.iguais,erros:a.erros,lote:r.id},s),n.log("importacao",`Importa\xE7\xE3o do sistema (${o.origem.nome}): ${c(r.contagens.criados,"registro novo","registros novos")}, ${c(a.atualizados,"atualiza\xE7\xE3o","atualiza\xE7\xF5es")}, ${c(a.erros,"linha com erro","linhas com erro")}`,{ref:r.id}),n.salvar();try{sessionStorage.setItem("anshur-dms-feito",r.id)}catch{}n.toast(`${c(a.gravar,"registro gravado","registros gravados")}.`),w(),setTimeout(()=>n.K.recarregar(),700)})}}function T(){const e=o.previa,a=e?e.contagens:{iguais:0,erros:0};o.origem&&o.origem.pasta&&(m.registrarPasta(n.estado,o.origem,o.lidos.concat(o.semMudanca),{lidos:o.lidos.length,semMudanca:o.semMudanca.length,novos:0,atualizados:0,iguais:a.iguais||0,erros:a.erros||0,lote:null},new Date().toISOString()),n.salvar()),n.toast("Tudo em dia: nada novo para gravar."),w(),v()}function w(){Object.assign(o,{origem:null,tabelas:[],fora:[],semMudanca:[],lidos:[],previa:null,lendo:"",filtro:null,mostrar:30}),o.abertas.clear()}function Y(e){const a=m.garantirDms(n.estado).lotes.find(r=>r.id===e);if(!a||a.desfeito)return;const s=m.movimentosDepois(n.estado,a);n.confirmar("Desfazer esta importa\xE7\xE3o?",`Saem ${c(a.criados.length,"registro que entrou","registros que entraram")} nela${a.atualizados.length?` e ${c(a.atualizados.length,"registro alterado volta","registros alterados voltam")} ao que eram antes`:""}.${s?` Aten\xE7\xE3o: ${c(s,"lan\xE7amento feito depois","lan\xE7amentos feitos depois")} nesses registros (venda, pre\xE7o, preparo, custo ou movimento de pe\xE7a) tamb\xE9m ${s===1?"sai":"saem"}.`:""} O resto da revenda n\xE3o muda.`,"Desfazer",()=>{const r=m.desfazer(n.estado,e,{usuario:n.eu().nome});if(!r.ok){n.toast(r.motivo,!0);return}n.log("importacao",`Importa\xE7\xE3o desfeita: ${c(r.removidos,"registro removido","registros removidos")}, ${c(r.restaurados,"restaurado","restaurados")}`,{ref:e}),n.salvar(),n.toast("Importa\xE7\xE3o desfeita.");try{sessionStorage.removeItem("anshur-dms-feito")}catch{}setTimeout(()=>n.K.recarregar(),700)})}const O=[["duplicado","Duplicados"],["novo","Novos"],["erro","Com erro"],["igual","J\xE1 importados"],["aviso","Com aviso"],["ignorada","Ignorados"]],B=e=>o.previa?o.previa.itens.filter(a=>e==="aviso"?a.avisos&&a.avisos.length&&!["erro","ignorada"].includes(a.status):a.status===e):[],z=e=>B(e).length,J=()=>(O.find(([e])=>z(e))||["novo"])[0],W={historico:"Hist\xF3rico (vendida)",estoque:"P\xE1tio",clientes:"Cliente",pecas:"Pe\xE7a"};function Q(e){const a=e.reg;if(!a)return{t:e.origem,d:""};if(e.ent==="clientes")return{t:a.nome||a.documento||"Cliente",d:[a.documento,a.cidade,a.telefone].filter(Boolean).join(" \xB7 ")};if(e.ent==="pecas")return{t:[a.codigo,a.descricao].filter(Boolean).join(" \xB7 ")||"Pe\xE7a",d:[a.marca,a.aplicacao,`${(a.quantidade||0).toLocaleString("pt-BR")} em estoque${a.loja?" ("+a.loja+")":""}`,a.custo>0?"custo "+a.custo.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}):"",a.preco>0?"venda "+a.preco.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}):"",a.local].filter(Boolean).join(" \xB7 ")};const s=[a.marca,a.modelo].filter(Boolean).join(" ")+(a.ano>=1950?" \xB7 "+a.ano:""),r=[a.pago>0?n.real(a.pago):"",a.vendido>0?n.real(a.vendido):""].filter(Boolean).join(" \u2192 "),i=[a.entrada?n.data(a.entrada):"",a.saida?n.data(a.saida):""].filter(Boolean).join(" \u2192 ");return{t:s||"M\xE1quina",d:[a.horas?a.horas.toLocaleString("pt-BR")+" h":"",a.chassi||a.serie||"",r,i].filter(Boolean).join(" \xB7 ")}}const Z={atualizar:"Atualizar o que j\xE1 existe",pular:"Pular (n\xE3o importar)",novo:"Importar como novo"};function aa(e){const a=Q(e);return`<li class="dms-item ${{novo:"ok",duplicado:"dup",igual:"igual",erro:"erro",ignorada:"igual"}[e.status]||""}"><div class="dms-item-txt"><b>${p(a.t)}${e.ent?` <span class="dms-ent">${p(W[e.ent]||"")}</span>`:""}</b>${a.d?`<span>${p(a.d)}</span>`:""}
+      <small>${p(e.origem)} \xB7 linha ${e.linha}</small>${e.motivo?`<em class="${e.status==="erro"?"neg":""}">${p(e.motivo)}</em>`:""}${e.avisos&&e.avisos.length&&e.status!=="erro"?`<em class="dms-aviso">${p(e.avisos.join("; "))}</em>`:""}</div>
+      ${e.status==="duplicado"?`<div class="campo dms-decisao"><label for="dec-${e.n}">O que fazer</label><select id="dec-${e.n}" data-dec="${e.n}">${e.opcoes.map(r=>`<option value="${r}" ${e.decisao===r?"selected":""}>${Z[r]}</option>`).join("")}</select></div>`:""}</li>`}function ea(e,a){const s=[];for(let r=e.cabIdx+1;r<e.linhas.length&&s.length<2;r++){const i=e.linhas[r][a];if(i===""||i==null)continue;let l=String(i);typeof i=="number"&&["entrada","saida"].includes(e.mapa[a])&&m.dataISO(i)!=="invalida"&&(l+=` (${n.data(m.dataISO(i))})`),s.push(l.length>28?l.slice(0,27)+"\u2026":l)}return s.join(" \xB7 ")}function oa(e,a){const s=e.mapa.filter(Boolean).length,r=Math.max(0,e.linhas.length-e.cabIdx-1),i=e.perfil?'<span class="tag comprovado">perfil salvo reaplicado</span>':e.semCab?'<span class="tag declarado">sem cabe\xE7alho: ordem da planilha modelo</span>':"",l=t=>`<option value="">N\xE3o importar esta coluna</option>${m.camposDe(e.entidade).map(([d,f])=>`<option value="${d}" ${t===d?"selected":""}>${p(f)}</option>`).join("")}`;return`<details class="dms-arq" data-tab="${a}" ${o.abertas.has(e.origem)?"open":""}><summary><span class="dms-arq-nome"><b>${p(e.origem)}</b>
+        <small>${c(r,"linha","linhas")} \xB7 ${p(e.codificacao)}${e.separador?" \xB7 separado por "+p(e.separador):""} \xB7 ${s} de ${e.cab.length} colunas reconhecidas</small></span>${i}<span class="dms-arq-ent">${p(m.ENTIDADES[e.entidade]||"")}</span></summary>
       <div class="dms-arq-corpo">
-        ${t.cortada ? `<p class="nota-rodape neg">Arquivo muito grande: só as primeiras ${D.LIMITE_LINHAS.toLocaleString('pt-BR')} linhas entram. Exporte por período.</p>` : ''}
-        <div class="dms-arq-op"><div class="campo"><label for="ent-${idx}">O que este arquivo traz</label><select id="ent-${idx}" data-ent="${idx}">${Object.entries(D.ENTIDADES).map(([k, r]) => `<option value="${k}" ${t.entidade === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></div>
-          ${t.entidade !== 'clientes' && t.entidade !== 'ignorar' && t.entidade !== 'pecas' ? `<div class="campo"><label for="tp-${idx}">Categoria quando a linha não disser</label><select id="tp-${idx}" data-tp="${idx}"><option value="">Não preencher (a linha precisa dizer)</option>${Object.entries(U.NOMES).map(([k, r]) => `<option value="${k}" ${t.tipoPadrao === k ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></div>` : ''}</div>
+        ${e.cortada?`<p class="nota-rodape neg">Arquivo muito grande: s\xF3 as primeiras ${m.LIMITE_LINHAS.toLocaleString("pt-BR")} linhas entram. Exporte por per\xEDodo.</p>`:""}
+        <div class="dms-arq-op"><div class="campo"><label for="ent-${a}">O que este arquivo traz</label><select id="ent-${a}" data-ent="${a}">${Object.entries(m.ENTIDADES).map(([t,d])=>`<option value="${t}" ${e.entidade===t?"selected":""}>${p(d)}</option>`).join("")}</select></div>
+          ${e.entidade!=="clientes"&&e.entidade!=="ignorar"&&e.entidade!=="pecas"?`<div class="campo"><label for="tp-${a}">Categoria quando a linha n\xE3o disser</label><select id="tp-${a}" data-tp="${a}"><option value="">N\xE3o preencher (a linha precisa dizer)</option>${Object.entries(n.NOMES).map(([t,d])=>`<option value="${t}" ${e.tipoPadrao===t?"selected":""}>${p(d)}</option>`).join("")}</select></div>`:""}</div>
         <p class="rot-campo" style="margin-top:14px">Colunas do arquivo e o campo do Anshur</p>
-        <ul class="dms-mapa">${t.cab.map((h, i) => `<li class="${t.mapa[i] ? '' : 'sem'}"><div><b>${esc(h || 'Coluna ' + (i + 1))}</b><small>${esc(exemplos(t, i)) || 'vazia'}</small></div>
-          <select aria-label="Campo do Anshur para a coluna ${esc(h || i + 1)}" data-col="${idx}:${i}">${opts(t.mapa[i])}</select></li>`).join('')}</ul>
-        <p class="nota-rodape">O que você escolher aqui fica salvo como perfil desta exportação e volta sozinho na próxima importação ou sincronização.</p>
-      </div></details>`;
-  }
-  function htmlPrevia() {
-    const p = S.previa; if (!p) return '';
-    const c = p.contagens;
-    const kpi = (rot, val, exp, cls = '') => `<div class="kpi dms-kpi ${cls}"><span class="rot">${rot}</span><b class="val">${val}</b><span class="exp">${exp}</span></div>`;
-    const lista = doFiltro(S.filtro), vis = lista.slice(0, S.mostrar);
-    return `<section class="painel bloco" aria-labelledby="dms-pv"><div class="painel-cab"><h2 id="dms-pv">3. Prévia: nada foi gravado ainda</h2></div>
+        <ul class="dms-mapa">${e.cab.map((t,d)=>`<li class="${e.mapa[d]?"":"sem"}"><div><b>${p(t||"Coluna "+(d+1))}</b><small>${p(ea(e,d))||"vazia"}</small></div>
+          <select aria-label="Campo do Anshur para a coluna ${p(t||d+1)}" data-col="${a}:${d}">${l(e.mapa[d])}</select></li>`).join("")}</ul>
+        <p class="nota-rodape">O que voc\xEA escolher aqui fica salvo como perfil desta exporta\xE7\xE3o e volta sozinho na pr\xF3xima importa\xE7\xE3o ou sincroniza\xE7\xE3o.</p>
+      </div></details>`}function sa(){const e=o.previa;if(!e)return"";const a=e.contagens,s=(l,t,d,f="")=>`<div class="kpi dms-kpi ${f}"><span class="rot">${l}</span><b class="val">${t}</b><span class="exp">${d}</span></div>`,r=B(o.filtro),i=r.slice(0,o.mostrar);return`<section class="painel bloco" aria-labelledby="dms-pv"><div class="painel-cab"><h2 id="dms-pv">3. Pr\xE9via: nada foi gravado ainda</h2></div>
       <div class="kpis dms-kpis" aria-live="polite">
-        ${kpi('Novos', c.novos, [c.historico ? n(c.historico, 'no histórico', 'no histórico') : '', c.estoque ? n(c.estoque, 'no pátio', 'no pátio') : '', c.clientes ? n(c.clientes, 'cliente', 'clientes') : '', c.pecas ? n(c.pecas, 'peça', 'peças') : ''].filter(Boolean).join(' · ') || 'nenhum', 'ok')}
-        ${kpi('Atualizados', c.atualizados, 'registros que já existiam')}
-        ${kpi('Duplicados', c.duplicados, c.duplicados ? `${c.pulados} ${c.pulados === 1 ? 'pulado' : 'pulados'}, você decide` : 'nenhum', c.duplicados ? 'dup' : '')}
-        ${kpi('Com erro', c.erros, c.erros ? 'ficam de fora, veja o motivo' : 'nenhum', c.erros ? 'erro' : '')}
+        ${s("Novos",a.novos,[a.historico?c(a.historico,"no hist\xF3rico","no hist\xF3rico"):"",a.estoque?c(a.estoque,"no p\xE1tio","no p\xE1tio"):"",a.clientes?c(a.clientes,"cliente","clientes"):"",a.pecas?c(a.pecas,"pe\xE7a","pe\xE7as"):""].filter(Boolean).join(" \xB7 ")||"nenhum","ok")}
+        ${s("Atualizados",a.atualizados,"registros que j\xE1 existiam")}
+        ${s("Duplicados",a.duplicados,a.duplicados?`${a.pulados} ${a.pulados===1?"pulado":"pulados"}, voc\xEA decide`:"nenhum",a.duplicados?"dup":"")}
+        ${s("Com erro",a.erros,a.erros?"ficam de fora, veja o motivo":"nenhum",a.erros?"erro":"")}
       </div>
-      <p class="conta">${n(c.iguais, 'linha já estava', 'linhas já estavam')} no Anshur (não muda nada) · ${n(c.ignoradas, 'linha ignorada', 'linhas ignoradas')} (total, rodapé ou vazia)${c.avisos ? ` · ${n(c.avisos, 'linha com aviso', 'linhas com aviso')}` : ''}</p>
-      <div class="dms-chips" role="group" aria-label="Filtrar a prévia">${FILTROS.map(([f, r]) => { const q = contaFiltro(f); return q ? `<button type="button" class="chip" data-filtro="${f}" aria-pressed="${S.filtro === f}">${r} <b>${q}</b></button>` : ''; }).join('')}</div>
-      ${S.filtro === 'duplicado' && lista.length > 1 ? `<div class="acoes dms-todos"><span class="sub">Para todos os duplicados:</span><button class="btn btn-linha" type="button" data-todos="atualizar">Atualizar</button><button class="btn btn-linha" type="button" data-todos="pular">Pular</button><button class="btn btn-linha" type="button" data-todos="novo">Importar como novos</button></div>` : ''}
-      <ul class="dms-lista">${vis.map(htmlItem).join('')}</ul>
-      ${lista.length > vis.length ? `<button class="btn btn-linha" type="button" id="dms-mais">Mostrar mais ${Math.min(30, lista.length - vis.length)} de ${lista.length - vis.length}</button>` : ''}
-      <div class="acoes dms-gravar">${c.gravar ? `<button class="btn btn-ouro" type="button" id="dms-gravar" ${pode() ? '' : 'disabled'}>Gravar ${n(c.gravar, 'registro', 'registros')}</button>` : `<button class="btn btn-ouro" type="button" id="dms-concluir">Nada novo: concluir</button>`}<button class="btn btn-linha" type="button" id="dms-cancelar">Cancelar</button></div>
-      ${pode() ? '' : '<p class="nota-rodape">Só o dono ou o gerente gravam a importação.</p>'}</section>`;
-  }
-  function htmlLotes() {
-    const lotes = D.garantirDms(U.estado).lotes.slice().reverse().slice(0, 12); if (!lotes.length) return '';
-    let feito = null; try { feito = sessionStorage.getItem('anshur-dms-feito'); } catch (e) { /* sem armazenamento */ }
-    return `<section class="painel bloco" aria-labelledby="dms-lt"><h2 id="dms-lt">Importações feitas</h2>
-      <ul class="dms-lotes">${lotes.map((l) => { const c = l.contagens || {};
-        return `<li class="${l.id === feito && !l.desfeito ? 'recente' : ''}"><div><b>${new Date(l.quando).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })} · ${esc(l.origem && l.origem.nome || 'arquivos')}</b>
-          <span>${n(c.novos != null ? c.novos : l.criados.length, 'novo', 'novos')} · ${n(l.atualizados.length + Math.max(0, (c.atualizados || 0) - l.atualizados.length), 'atualizado', 'atualizados')} · ${n(c.erros || 0, 'linha com erro', 'linhas com erro')}${l.usuario ? ' · por ' + esc(l.usuario) : ''}</span>
-          ${l.desfeito ? `<small>Desfeita em ${new Date(l.desfeito.quando).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}${l.desfeito.usuario ? ' por ' + esc(l.desfeito.usuario) : ''}: ${n(l.desfeito.removidos, 'registro saiu', 'registros saíram')}.</small>` : ''}
-          ${l.erros && l.erros.length && !l.desfeito ? `<details><summary>Linhas que ficaram de fora</summary><ul>${l.erros.slice(0, 15).map((e) => `<li>${esc(e.origem)}, linha ${e.linha}: ${esc(e.motivo)}</li>`).join('')}</ul></details>` : ''}</div>
-          ${l.desfeito ? '<span class="tag declarado">Desfeita</span>' : pode() ? `<button class="btn btn-linha" type="button" data-desfazer="${esc(l.id)}">Desfazer esta importação</button>` : ''}</li>`; }).join('')}</ul></section>`;
-  }
-  function htmlOrigem() {
-    const pastas = D.garantirDms(U.estado).pastas.slice().sort((a, b) => String(b.ultima && b.ultima.quando).localeCompare(String(a.ultima && a.ultima.quando)));
-    const pasta = pastas[0], u = pasta && pasta.ultima;
-    const fs = temPastaFS(), dir = temPastaInput();
-    return `<section class="painel bloco" aria-labelledby="dms-or"><h2 id="dms-or">1. De onde vêm os dados</h2>
-      <p class="sub" style="margin:6px 0 4px">Peça ao seu sistema para exportar o relatório de usados e implementos (vendas, trocas e estoque) e, se quiser, os clientes e o estoque de peças (código, descrição, aplicação, quantidade, custo, preço e localização), em CSV, TXT ou Excel, numa pasta do computador. O Anshur lê a pasta inteira, inclusive as subpastas, e ignora o que não for planilha.</p>
-      ${pasta ? `<div class="dms-pasta"><div><b>Pasta ligada: ${esc(pasta.nome)}</b><span>${u ? `Última sincronização ${new Date(u.quando).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}: ${n(u.novos || 0, 'novo', 'novos')}, ${n(u.atualizados || 0, 'atualizado', 'atualizados')}, ${n(u.erros || 0, 'linha com erro', 'linhas com erro')} · ${n((u.lidos || 0), 'arquivo lido', 'arquivos lidos')}${u.semMudanca ? `, ${u.semMudanca} sem mudança` : ''}` : 'Ainda não sincronizada'}</span></div>
-        <button class="btn btn-ouro" type="button" id="dms-sinc" ${S.lendo ? 'disabled' : ''}>Sincronizar de novo</button></div>` : ''}
+      <p class="conta">${c(a.iguais,"linha j\xE1 estava","linhas j\xE1 estavam")} no Anshur (n\xE3o muda nada) \xB7 ${c(a.ignoradas,"linha ignorada","linhas ignoradas")} (total, rodap\xE9 ou vazia)${a.avisos?` \xB7 ${c(a.avisos,"linha com aviso","linhas com aviso")}`:""}</p>
+      <div class="dms-chips" role="group" aria-label="Filtrar a pr\xE9via">${O.map(([l,t])=>{const d=z(l);return d?`<button type="button" class="chip" data-filtro="${l}" aria-pressed="${o.filtro===l}">${t} <b>${d}</b></button>`:""}).join("")}</div>
+      ${o.filtro==="duplicado"&&r.length>1?'<div class="acoes dms-todos"><span class="sub">Para todos os duplicados:</span><button class="btn btn-linha" type="button" data-todos="atualizar">Atualizar</button><button class="btn btn-linha" type="button" data-todos="pular">Pular</button><button class="btn btn-linha" type="button" data-todos="novo">Importar como novos</button></div>':""}
+      <ul class="dms-lista">${i.map(aa).join("")}</ul>
+      ${r.length>i.length?`<button class="btn btn-linha" type="button" id="dms-mais">Mostrar mais ${Math.min(30,r.length-i.length)} de ${r.length-i.length}</button>`:""}
+      <div class="acoes dms-gravar">${a.gravar?`<button class="btn btn-ouro" type="button" id="dms-gravar" ${b()?"":"disabled"}>Gravar ${c(a.gravar,"registro","registros")}</button>`:'<button class="btn btn-ouro" type="button" id="dms-concluir">Nada novo: concluir</button>'}<button class="btn btn-linha" type="button" id="dms-cancelar">Cancelar</button></div>
+      ${b()?"":'<p class="nota-rodape">S\xF3 o dono ou o gerente gravam a importa\xE7\xE3o.</p>'}</section>`}function ta(){const e=m.garantirDms(n.estado).lotes.slice().reverse().slice(0,12);if(!e.length)return"";let a=null;try{a=sessionStorage.getItem("anshur-dms-feito")}catch{}return`<section class="painel bloco" aria-labelledby="dms-lt"><h2 id="dms-lt">Importa\xE7\xF5es feitas</h2>
+      <ul class="dms-lotes">${e.map(s=>{const r=s.contagens||{};return`<li class="${s.id===a&&!s.desfeito?"recente":""}"><div><b>${new Date(s.quando).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})} \xB7 ${p(s.origem&&s.origem.nome||"arquivos")}</b>
+          <span>${c(r.novos!=null?r.novos:s.criados.length,"novo","novos")} \xB7 ${c(s.atualizados.length+Math.max(0,(r.atualizados||0)-s.atualizados.length),"atualizado","atualizados")} \xB7 ${c(r.erros||0,"linha com erro","linhas com erro")}${s.usuario?" \xB7 por "+p(s.usuario):""}</span>
+          ${s.desfeito?`<small>Desfeita em ${new Date(s.desfeito.quando).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})}${s.desfeito.usuario?" por "+p(s.desfeito.usuario):""}: ${c(s.desfeito.removidos,"registro saiu","registros sa\xEDram")}.</small>`:""}
+          ${s.erros&&s.erros.length&&!s.desfeito?`<details><summary>Linhas que ficaram de fora</summary><ul>${s.erros.slice(0,15).map(i=>`<li>${p(i.origem)}, linha ${i.linha}: ${p(i.motivo)}</li>`).join("")}</ul></details>`:""}</div>
+          ${s.desfeito?'<span class="tag declarado">Desfeita</span>':b()?`<button class="btn btn-linha" type="button" data-desfazer="${p(s.id)}">Desfazer esta importa\xE7\xE3o</button>`:""}</li>`}).join("")}</ul></section>`}function ra(){const a=m.garantirDms(n.estado).pastas.slice().sort((l,t)=>String(t.ultima&&t.ultima.quando).localeCompare(String(l.ultima&&l.ultima.quando)))[0],s=a&&a.ultima,r=j(),i=k();return`<section class="painel bloco" aria-labelledby="dms-or"><h2 id="dms-or">1. De onde v\xEAm os dados</h2>
+      <p class="sub" style="margin:6px 0 4px">Pe\xE7a ao seu sistema para exportar o relat\xF3rio de usados e implementos (vendas, trocas e estoque) e, se quiser, os clientes e o estoque de pe\xE7as (c\xF3digo, descri\xE7\xE3o, aplica\xE7\xE3o, quantidade, custo, pre\xE7o e localiza\xE7\xE3o), em CSV, TXT ou Excel, numa pasta do computador. O Anshur l\xEA a pasta inteira, inclusive as subpastas, e ignora o que n\xE3o for planilha.</p>
+      ${a?`<div class="dms-pasta"><div><b>Pasta ligada: ${p(a.nome)}</b><span>${s?`\xDAltima sincroniza\xE7\xE3o ${new Date(s.quando).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})}: ${c(s.novos||0,"novo","novos")}, ${c(s.atualizados||0,"atualizado","atualizados")}, ${c(s.erros||0,"linha com erro","linhas com erro")} \xB7 ${c(s.lidos||0,"arquivo lido","arquivos lidos")}${s.semMudanca?`, ${s.semMudanca} sem mudan\xE7a`:""}`:"Ainda n\xE3o sincronizada"}</span></div>
+        <button class="btn btn-ouro" type="button" id="dms-sinc" ${o.lendo?"disabled":""}>Sincronizar de novo</button></div>`:""}
       <div class="acoes">
-        ${fs ? `<button class="btn ${pasta ? 'btn-linha' : 'btn-ouro'}" type="button" id="dms-pasta" ${S.lendo ? 'disabled' : ''}>${pasta ? 'Escolher outra pasta' : 'Escolher a pasta do sistema'}</button>` : ''}
-        ${dir && fs ? '<input type="file" id="dms-pasta-in" webkitdirectory multiple class="sr" tabindex="-1" aria-hidden="true">' : ''}
-        ${dir && !fs ? `<label class="btn ${pasta ? 'btn-linha' : 'btn-ouro'}">${pasta ? 'Escolher outra pasta' : 'Escolher a pasta do sistema'}<input type="file" id="dms-pasta-in" webkitdirectory multiple class="sr"></label>` : ''}
+        ${r?`<button class="btn ${a?"btn-linha":"btn-ouro"}" type="button" id="dms-pasta" ${o.lendo?"disabled":""}>${a?"Escolher outra pasta":"Escolher a pasta do sistema"}</button>`:""}
+        ${i&&r?'<input type="file" id="dms-pasta-in" webkitdirectory multiple class="sr" tabindex="-1" aria-hidden="true">':""}
+        ${i&&!r?`<label class="btn ${a?"btn-linha":"btn-ouro"}">${a?"Escolher outra pasta":"Escolher a pasta do sistema"}<input type="file" id="dms-pasta-in" webkitdirectory multiple class="sr"></label>`:""}
         <label class="btn btn-linha">Escolher arquivos<input type="file" id="dms-arq-in" multiple accept=".csv,.txt,.tsv,.xlsx,.xlsm,.xls,.ods,text/csv,text/plain" class="sr"></label>
       </div>
       <details class="dms-compat"><summary>O que funciona em cada navegador e os limites</summary><ul>
-        <li><b>Chrome e Edge no computador:</b> você escolhe a pasta uma vez e o Anshur lembra. Ao abrir, ele confere sozinho se o sistema exportou algo novo; "Sincronizar de novo" lê só os arquivos que mudaram.</li>
-        <li><b>Firefox, Safari e celular:</b> o navegador não deixa o site lembrar a pasta. Escolha a pasta${dir ? '' : ' (este navegador só permite escolher arquivos)'} ou os arquivos a cada vez; o Anshur grava só o que for novo, nunca duplica.</li>
-        <li><b>Arquivos:</b> CSV e TXT separados por ponto e vírgula, vírgula, tabulação ou barra vertical, em UTF-8 ou Windows-1252 (Latin-1); Excel .xlsx, .xls e .ods (cada aba é lida separada; o leitor de Excel precisa de internet na primeira vez). TXT de colunas alinhadas por espaço, sem separador, não é reconhecido: exporte em CSV ou Excel.</li>
-        <li><b>Limites:</b> até 30 MB por arquivo e ${D.LIMITE_LINHAS.toLocaleString('pt-BR')} linhas por aba; acima disso, exporte por período. Planilha com senha não abre: tire a senha no Excel e salve de novo.</li>
-        <li><b>Privacidade:</b> os arquivos são lidos neste aparelho e não são enviados a ninguém. Só os registros que você gravar entram nos dados da revenda${U.NV ? ', guardados na conta da revenda como qualquer outro cadastro' : U.OP ? ', guardados neste navegador' : ' (demonstração: entram na revenda fictícia)'}.</li></ul></details></section>`;
-  }
-  function desenhar() {
-    if (!U || !U.tela || !U.tela.querySelector('#dms-raiz')) return;
-    const r = U.tela.querySelector('#dms-raiz');
-    const temArq = S.tabelas.length || S.fora.length || S.semMudanca.length;
-    r.innerHTML = `${htmlOrigem()}
-      ${S.lendo ? `<div class="carregando-linha dms-lendo" role="status"><span class="giro"></span><b>${esc(S.lendo)}</b></div>` : ''}
-      ${!S.lendo && temArq ? `<section class="painel bloco" aria-labelledby="dms-ar"><h2 id="dms-ar">2. Confira as colunas</h2>
-        <p class="sub" style="margin:6px 0 12px">${esc(S.origem ? S.origem.nome : '')}: ${n(S.tabelas.length, 'tabela lida', 'tabelas lidas')}. O Anshur reconheceu as colunas pelo nome; abra um arquivo para conferir ou corrigir.</p>
-        ${S.tabelas.map(htmlTabela).join('')}
-        ${S.semMudanca.length ? `<p class="conta">${n(S.semMudanca.length, 'arquivo sem mudança', 'arquivos sem mudança')} desde a última sincronização (não ${S.semMudanca.length === 1 ? 'foi lido' : 'foram lidos'}): ${esc(S.semMudanca.slice(0, 6).map((f) => f.caminho).join(', '))}${S.semMudanca.length > 6 ? '…' : ''}</p>` : ''}
-        ${S.fora.length ? `<div class="dms-fora"><p class="rot-campo">Fora da importação</p><ul>${S.fora.map((f) => `<li class="${f.erro ? 'neg' : ''}"><b>${esc(f.caminho)}</b>: ${esc(f.motivo)}</li>`).join('')}</ul></div>` : ''}
-        ${!S.tabelas.length ? '<div class="acoes"><button class="btn btn-ouro" type="button" id="dms-concluir2">Concluir</button></div>' : ''}</section>` : ''}
-      ${!S.lendo ? htmlPrevia() : ''}
-      ${htmlLotes()}`;
-    ligar(r);
-  }
-  function ligar(r) {
-    const $ = (s) => r.querySelector(s), $$ = (s) => Array.from(r.querySelectorAll(s));
-    const b = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
-    b('#dms-pasta', escolherPastaFS); b('#dms-sinc', sincronizarDeNovo); b('#dms-gravar', gravar); b('#dms-concluir', concluirSemGravar); b('#dms-concluir2', concluirSemGravar);
-    b('#dms-cancelar', () => { limpar(); desenhar(); });
-    b('#dms-mais', () => { S.mostrar += 30; desenhar(); });
-    const pi = $('#dms-pasta-in'); if (pi) pi.onchange = () => arquivosEscolhidos(pi, true);
-    const ai = $('#dms-arq-in'); if (ai) ai.onchange = () => arquivosEscolhidos(ai, false);
-    $$('details.dms-arq').forEach((d) => d.addEventListener('toggle', () => { const t = S.tabelas[+d.dataset.tab]; if (!t) return; if (d.open) S.abertas.add(t.origem); else S.abertas.delete(t.origem); }));
-    $$('[data-ent]').forEach((s) => s.onchange = () => { D.trocarEntidade(S.tabelas[+s.dataset.ent], s.value); recalcular(); desenhar(); });
-    $$('[data-tp]').forEach((s) => s.onchange = () => { const t = S.tabelas[+s.dataset.tp]; t.tipoPadrao = s.value; t.perfil = null; recalcular(); desenhar(); });
-    $$('[data-col]').forEach((s) => s.onchange = () => {
-      const [ti, ci] = s.dataset.col.split(':').map(Number), t = S.tabelas[ti];
-      if (s.value) t.mapa.forEach((k, i) => { if (k === s.value && i !== ci) t.mapa[i] = null; }); // um campo, uma coluna
-      t.mapa[ci] = s.value || null; t.origemMapa[ci] = 'manual'; t.perfil = null;
-      if (t.entidade === 'ignorar') t.entidade = D.entidadeSugerida(t.mapa);
-      recalcular(); desenhar();
-    });
-    $$('[data-filtro]').forEach((x) => x.onclick = () => { S.filtro = x.dataset.filtro; S.mostrar = 30; desenhar(); });
-    $$('[data-dec]').forEach((s) => s.onchange = () => { D.decidir(S.previa, +s.dataset.dec, s.value); desenhar(); });
-    $$('[data-todos]').forEach((x) => x.onclick = () => { D.decidirTodos(S.previa, x.dataset.todos); desenhar(); });
-    $$('[data-desfazer]').forEach((x) => x.onclick = () => desfazer(x.dataset.desfazer));
-  }
-  function tela(ui) {
-    U = ui;
-    ui.tela.innerHTML = `<div class="titulo"><div><h1>Trazer do meu sistema</h1><p>Os dados do seu sistema atual (vendas de usados e implementos, trocas, estoque, clientes e peças) entram no Anshur sem digitar nada. Você confere tudo antes de gravar e pode desfazer depois.</p></div></div>
-      <div id="dms-raiz" class="dms"></div>`;
-    desenhar();
-  }
-
-  // ao abrir o app (Chrome/Edge com a pasta já liberada): confere se o sistema exportou algo novo, sem gravar nada
-  async function verificarAoAbrir(ui) {
-    U = ui; if (S.verificado || !temPastaFS() || !pode()) return; S.verificado = true;
-    const h = await handleSalvo(); if (!h) return;
-    try { if (await permissao(h, false) !== 'granted') return; } catch (e) { return; }
-    const pasta = D.garantirDms(U.estado).pastas.find((p) => p.id === 'fs:' + h.name);
-    let lista; try { lista = await listarHandle(h); } catch (e) { return; }
-    const dados = []; for (const f of lista.filter((x) => D.ehDado(x.nome))) { try { const fl = await f.ent.getFile(); dados.push({ caminho: f.caminho, tamanho: fl.size, modificado: fl.lastModified }); } catch (e) { /* segue */ } }
-    if (pasta && !D.mudados(pasta, dados).ler.length) return;
-    await lerLista(lista, { tipo: 'pasta', pasta: true, id: 'fs:' + h.name, nome: h.name, fs: true });
-    const c = S.previa && S.previa.contagens;
-    if (c && c.gravar) U.toast(`O seu sistema exportou ${n(c.gravar, 'registro novo ou alterado', 'registros novos ou alterados')} na pasta ${h.name}. Confira em Configurações › Trazer do meu sistema antes de gravar.`);
-    desenhar();
-  }
-
-  R.registrar({ id: 'config', telas: { importar: tela }, permissoes: { importar: ['dono', 'gerente'] }, dados: { dms: ['perfis', 'lotes', 'pastas'] } });
-  raiz.DMS_UI = { verificarAoAbrir, _estado: S };
-})(typeof window !== 'undefined' ? window : globalThis);
+        <li><b>Chrome e Edge no computador:</b> voc\xEA escolhe a pasta uma vez e o Anshur lembra. Ao abrir, ele confere sozinho se o sistema exportou algo novo; "Sincronizar de novo" l\xEA s\xF3 os arquivos que mudaram.</li>
+        <li><b>Firefox, Safari e celular:</b> o navegador n\xE3o deixa o site lembrar a pasta. Escolha a pasta${i?"":" (este navegador s\xF3 permite escolher arquivos)"} ou os arquivos a cada vez; o Anshur grava s\xF3 o que for novo, nunca duplica.</li>
+        <li><b>Arquivos:</b> CSV e TXT separados por ponto e v\xEDrgula, v\xEDrgula, tabula\xE7\xE3o ou barra vertical, em UTF-8 ou Windows-1252 (Latin-1); Excel .xlsx, .xls e .ods (cada aba \xE9 lida separada; o leitor de Excel precisa de internet na primeira vez). TXT de colunas alinhadas por espa\xE7o, sem separador, n\xE3o \xE9 reconhecido: exporte em CSV ou Excel.</li>
+        <li><b>Limites:</b> at\xE9 30 MB por arquivo e ${m.LIMITE_LINHAS.toLocaleString("pt-BR")} linhas por aba; acima disso, exporte por per\xEDodo. Planilha com senha n\xE3o abre: tire a senha no Excel e salve de novo.</li>
+        <li><b>Privacidade:</b> os arquivos s\xE3o lidos neste aparelho e n\xE3o s\xE3o enviados a ningu\xE9m. S\xF3 os registros que voc\xEA gravar entram nos dados da revenda${n.NV?", guardados na conta da revenda como qualquer outro cadastro":n.OP?", guardados neste navegador":" (demonstra\xE7\xE3o: entram na revenda fict\xEDcia)"}.</li></ul></details></section>`}function v(){if(!n||!n.tela||!n.tela.querySelector("#dms-raiz"))return;const e=n.tela.querySelector("#dms-raiz"),a=o.tabelas.length||o.fora.length||o.semMudanca.length;e.innerHTML=`${ra()}
+      ${o.lendo?`<div class="carregando-linha dms-lendo" role="status"><span class="giro"></span><b>${p(o.lendo)}</b></div>`:""}
+      ${!o.lendo&&a?`<section class="painel bloco" aria-labelledby="dms-ar"><h2 id="dms-ar">2. Confira as colunas</h2>
+        <p class="sub" style="margin:6px 0 12px">${p(o.origem?o.origem.nome:"")}: ${c(o.tabelas.length,"tabela lida","tabelas lidas")}. O Anshur reconheceu as colunas pelo nome; abra um arquivo para conferir ou corrigir.</p>
+        ${o.tabelas.map(oa).join("")}
+        ${o.semMudanca.length?`<p class="conta">${c(o.semMudanca.length,"arquivo sem mudan\xE7a","arquivos sem mudan\xE7a")} desde a \xFAltima sincroniza\xE7\xE3o (n\xE3o ${o.semMudanca.length===1?"foi lido":"foram lidos"}): ${p(o.semMudanca.slice(0,6).map(s=>s.caminho).join(", "))}${o.semMudanca.length>6?"\u2026":""}</p>`:""}
+        ${o.fora.length?`<div class="dms-fora"><p class="rot-campo">Fora da importa\xE7\xE3o</p><ul>${o.fora.map(s=>`<li class="${s.erro?"neg":""}"><b>${p(s.caminho)}</b>: ${p(s.motivo)}</li>`).join("")}</ul></div>`:""}
+        ${o.tabelas.length?"":'<div class="acoes"><button class="btn btn-ouro" type="button" id="dms-concluir2">Concluir</button></div>'}</section>`:""}
+      ${o.lendo?"":sa()}
+      ${ta()}`,na(e)}function na(e){const a=t=>e.querySelector(t),s=t=>Array.from(e.querySelectorAll(t)),r=(t,d)=>{const f=a(t);f&&(f.onclick=d)};r("#dms-pasta",U),r("#dms-sinc",G),r("#dms-gravar",K),r("#dms-concluir",T),r("#dms-concluir2",T),r("#dms-cancelar",()=>{w(),v()}),r("#dms-mais",()=>{o.mostrar+=30,v()});const i=a("#dms-pasta-in");i&&(i.onchange=()=>P(i,!0));const l=a("#dms-arq-in");l&&(l.onchange=()=>P(l,!1)),s("details.dms-arq").forEach(t=>t.addEventListener("toggle",()=>{const d=o.tabelas[+t.dataset.tab];d&&(t.open?o.abertas.add(d.origem):o.abertas.delete(d.origem))})),s("[data-ent]").forEach(t=>t.onchange=()=>{m.trocarEntidade(o.tabelas[+t.dataset.ent],t.value),$(),v()}),s("[data-tp]").forEach(t=>t.onchange=()=>{const d=o.tabelas[+t.dataset.tp];d.tipoPadrao=t.value,d.perfil=null,$(),v()}),s("[data-col]").forEach(t=>t.onchange=()=>{const[d,f]=t.dataset.col.split(":").map(Number),u=o.tabelas[d];t.value&&u.mapa.forEach((h,g)=>{h===t.value&&g!==f&&(u.mapa[g]=null)}),u.mapa[f]=t.value||null,u.origemMapa[f]="manual",u.perfil=null,u.entidade==="ignorar"&&(u.entidade=m.entidadeSugerida(u.mapa)),$(),v()}),s("[data-filtro]").forEach(t=>t.onclick=()=>{o.filtro=t.dataset.filtro,o.mostrar=30,v()}),s("[data-dec]").forEach(t=>t.onchange=()=>{m.decidir(o.previa,+t.dataset.dec,t.value),v()}),s("[data-todos]").forEach(t=>t.onclick=()=>{m.decidirTodos(o.previa,t.dataset.todos),v()}),s("[data-desfazer]").forEach(t=>t.onclick=()=>Y(t.dataset.desfazer))}function ia(e){n=e,e.tela.innerHTML=`<div class="titulo"><div><h1>Trazer do meu sistema</h1><p>Os dados do seu sistema atual (vendas de usados e implementos, trocas, estoque, clientes e pe\xE7as) entram no Anshur sem digitar nada. Voc\xEA confere tudo antes de gravar e pode desfazer depois.</p></div></div>
+      <div id="dms-raiz" class="dms"></div>`,v()}async function la(e){if(n=e,o.verificado||!j()||!b())return;o.verificado=!0;const a=await I();if(!a)return;try{if(await M(a,!1)!=="granted")return}catch{return}const s=m.garantirDms(n.estado).pastas.find(t=>t.id==="fs:"+a.name);let r;try{r=await q(a)}catch{return}const i=[];for(const t of r.filter(d=>m.ehDado(d.nome)))try{const d=await t.ent.getFile();i.push({caminho:t.caminho,tamanho:d.size,modificado:d.lastModified})}catch{}if(s&&!m.mudados(s,i).ler.length)return;await S(r,{tipo:"pasta",pasta:!0,id:"fs:"+a.name,nome:a.name,fs:!0});const l=o.previa&&o.previa.contagens;l&&l.gravar&&n.toast(`O seu sistema exportou ${c(l.gravar,"registro novo ou alterado","registros novos ou alterados")} na pasta ${a.name}. Confira em Configura\xE7\xF5es \u203A Trazer do meu sistema antes de gravar.`),v()}E.registrar({id:"config",telas:{importar:ia},permissoes:{importar:["dono","gerente"]},dados:{dms:["perfis","lotes","pastas"]}}),y.DMS_UI={verificarAoAbrir:la,_estado:o}})(typeof window<"u"?window:globalThis);

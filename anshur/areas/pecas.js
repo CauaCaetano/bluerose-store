@@ -1,425 +1,106 @@
-// Área PEÇAS E ESTOQUE: telas. As regras (puras, testadas) estão em areas/pecas-regras.js (window.PECAS).
-// Segue o padrão das áreas (README › Áreas): menu, telas, permissões, número da entrada, busca, dados (fila offline) e demonstração.
-// Permissões: dono, gerente, oficina e financeiro lançam (compra, balcão, transferência); inventário com ajuste só dono e gerente;
-// auditor só lê; vendedor não vê. Compra gera conta a pagar e venda de balcão gera conta a receber pelo FINANCEIRO.criar.
-(function (raiz) {
-  const P = raiz.PECAS, R = raiz.ANSHUR_AREAS;
-  if (!R) return;
-  // sem as regras (areas/pecas-regras.js não carregou): fica honesta como "Em breve", sem tela
-  if (!P) { R.registrar({ id: 'pecas', nome: 'Peças e Estoque', curto: 'Peças', ordem: 50, pronta: false, perfis: ['dono', 'gerente', 'oficina', 'financeiro', 'auditor'], descricao: 'Catálogo, SKU, localização, entradas, saídas, inventário, compras, curva ABC, giro e estoque parado.', icone: '<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>', previsto: ['Catálogo de peças com SKU e localização', 'Entradas, saídas, transferências entre lojas e inventário', 'Fornecedores, compras e estoque mínimo', 'Custos e compras no Financeiro'], jaExiste: 'Hoje: compras de peças podem ser lançadas como contas a pagar no Financeiro.' }); return; }
-  const VER = ['dono', 'gerente', 'oficina', 'financeiro', 'auditor'];
-  let U = null;
-  const F = () => raiz.FINANCEIRO || null;
-  const est = () => U.estado;
-  const brl = (v) => (+v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  const dBR = (iso) => (iso ? String(iso).slice(0, 10).split('-').reverse().join('/') : '—');
-  const q3 = (v) => (+v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
-  const esc = (s) => U.esc(s);
-  const quem = () => U.eu().nome;
-  const leitura = () => !!(U.NV && U.NV.somenteLeitura);
-  const editor = () => P.podeEditar(U.eu().perfil) && !leitura();
-  const ajustador = () => P.podeAjustar(U.eu().perfil) && !leitura();
-  const lojas = () => U.K.lojasPermitidas || U.estado.lojas || [];
-  const fl = () => ({ loja: U.estado.lojaAtual || '', lojas: U.K.lojasPermitidas });
-  const lojaPadrao = () => U.estado.lojaAtual || lojas()[0] || '';
-  const opt = (pares, sel) => pares.map(([v, n]) => `<option value="${esc(v)}" ${String(sel) === String(v) ? 'selected' : ''}>${esc(n)}</option>`).join('');
-  const optLojas = (sel, vazio) => (lojas().length ? opt((vazio ? [['', vazio]] : []).concat(lojas().map((l) => [l, l])), sel) : '<option value="">Loja principal</option>');
-  const nomeForn = (id) => { const c = id && U.K.cad.fornecedor(id); return c ? c.nome : ''; };
-  const nomeCli = (id) => { const c = id && U.K.cad.cliente(id); return c ? c.nome : ''; };
-  const ic = (d) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
-  const I = {
-    caixa: ic('<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>'), entra: ic('<path d="M12 19V5M6 11l6-6 6 6"/>'), sai: ic('<path d="M12 5v14M6 13l6 6 6-6"/>'),
-    alerta: ic('<path d="M12 3 2 20h20L12 3zM12 10v4M12 17v.5"/>'), troca: ic('<path d="M4 7h13l-3-3M20 17H7l3 3"/>'), lista: ic('<path d="M9 6h11M9 12h11M9 18h11M4 6h.5M4 12h.5M4 18h.5"/>'),
-    carrinho: ic('<path d="M3 4h2l2.4 11h11L21 7H7M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>'), doc: ic('<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5"/>'),
-    barras: ic('<path d="M4 20h16M7 16v-5M11 16V7M15 16v-7M19 16V5"/>'), mais: ic('<path d="M12 5v14M5 12h14"/>'), zap: ic('<path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/>')
-  };
-  const cab = (t, s, b = '') => `<div class="titulo"><div><h1>${t}</h1><p>${s}</p></div>${b ? `<div class="fin-acoes">${b}</div>` : ''}</div>`;
-  const vazio = (t) => `<p class="vazio">${t}</p>`;
-  // registro: Atividades (ui.log); 'pecas' está em CRITICOS (comum.js) e vai para a trilha do servidor, como o Financeiro
-  function gravar(texto) {
-    U.log('pecas', texto);
-    U.salvar();
-  }
-  const tentar = (fn) => { try { return fn(); } catch (e) { U.toast(e.message, true); return null; } };
-  estilo();
-
-  // ---------- campo de peça (busca por SKU, código do fabricante ou descrição) ----------
-  const rotPeca = (p) => `${p.sku} · ${p.descricao}${p.codFab ? ' · ' + p.codFab : ''}`;
-  const dlPecas = () => `<datalist id="dl-pc">${P.ativas(est()).map((p) => `<option value="${esc(rotPeca(p))}">`).join('')}</datalist>`;
-  const lerPeca = (v) => { const s = String(v || '').trim(); if (!s) return null; const sku = s.split(' · ')[0]; return P.ativas(est()).find((p) => rotPeca(p) === s || P.normal(p.sku) === P.normal(sku) || (p.codFab && P.normal(p.codFab) === P.normal(s))) || null; };
-
-  // ---------- PAINEL ----------
-  function telaPainel() {
-    P.garantir(est());
-    const r = P.resumo(est(), fl()), ab = P.abaixoMinimo(est(), fl()), pp = P.garantir(est());
-    const movs = pp.movimentos.filter((m) => !fl().loja || m.loja === fl().loja || m.para === fl().loja).slice().sort((a, b) => String(b.quando).localeCompare(String(a.quando))).slice(0, 10);
-    const abc = P.curvaABC(est(), { hoje: U.hojeISO(), loja: fl().loja });
-    const par = P.parado(est(), { hoje: U.hojeISO(), ...fl() });
-    U.tela.innerHTML = cab('Peças e Estoque', `Saldo e custo médio recalculados de cada movimento${fl().loja ? ' · loja ' + esc(fl().loja) : ''}. Compra vira conta a pagar; venda de balcão, conta a receber.`, botoes()) + `
+(function(D){const l=D.PECAS,ca=D.ANSHUR_AREAS;if(!ca)return;if(!l){ca.registrar({id:"pecas",nome:"Pe\xE7as e Estoque",curto:"Pe\xE7as",ordem:50,pronta:!1,perfis:["dono","gerente","oficina","financeiro","auditor"],descricao:"Cat\xE1logo, SKU, localiza\xE7\xE3o, entradas, sa\xEDdas, invent\xE1rio, compras, curva ABC, giro e estoque parado.",icone:'<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',previsto:["Cat\xE1logo de pe\xE7as com SKU e localiza\xE7\xE3o","Entradas, sa\xEDdas, transfer\xEAncias entre lojas e invent\xE1rio","Fornecedores, compras e estoque m\xEDnimo","Custos e compras no Financeiro"],jaExiste:"Hoje: compras de pe\xE7as podem ser lan\xE7adas como contas a pagar no Financeiro."});return}const B=["dono","gerente","oficina","financeiro","auditor"];let a=null;const T=()=>D.FINANCEIRO||null,u=()=>a.estado,b=e=>(+e||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}),E=e=>e?String(e).slice(0,10).split("-").reverse().join("/"):"\u2014",x=e=>(+e||0).toLocaleString("pt-BR",{maximumFractionDigits:3}),r=e=>a.esc(e),P=()=>a.eu().nome,va=()=>!!(a.NV&&a.NV.somenteLeitura),M=()=>l.podeEditar(a.eu().perfil)&&!va(),$a=()=>l.podeAjustar(a.eu().perfil)&&!va(),O=()=>a.K.lojasPermitidas||a.estado.lojas||[],$=()=>({loja:a.estado.lojaAtual||"",lojas:a.K.lojasPermitidas}),K=()=>a.estado.lojaAtual||O()[0]||"",aa=(e,t)=>e.map(([n,s])=>`<option value="${r(n)}" ${String(t)===String(n)?"selected":""}>${r(s)}</option>`).join(""),R=(e,t)=>O().length?aa((t?[["",t]]:[]).concat(O().map(n=>[n,n])),e):'<option value="">Loja principal</option>',U=e=>{const t=e&&a.K.cad.fornecedor(e);return t?t.nome:""},Ea=e=>{const t=e&&a.K.cad.cliente(e);return t?t.nome:""},S=e=>`<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${e}</svg>`,v={caixa:S('<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>'),entra:S('<path d="M12 19V5M6 11l6-6 6 6"/>'),sai:S('<path d="M12 5v14M6 13l6 6 6-6"/>'),alerta:S('<path d="M12 3 2 20h20L12 3zM12 10v4M12 17v.5"/>'),troca:S('<path d="M4 7h13l-3-3M20 17H7l3 3"/>'),lista:S('<path d="M9 6h11M9 12h11M9 18h11M4 6h.5M4 12h.5M4 18h.5"/>'),carrinho:S('<path d="M3 4h2l2.4 11h11L21 7H7M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>'),doc:S('<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5"/>'),barras:S('<path d="M4 20h16M7 16v-5M11 16V7M15 16v-7M19 16V5"/>'),mais:S('<path d="M12 5v14M5 12h14"/>'),zap:S('<path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/>')},X=(e,t,n="")=>`<div class="titulo"><div><h1>${e}</h1><p>${t}</p></div>${n?`<div class="fin-acoes">${n}</div>`:""}</div>`,y=e=>`<p class="vazio">${e}</p>`;function A(e){a.log("pecas",e),a.salvar()}const F=e=>{try{return e()}catch(t){return a.toast(t.message,!0),null}};ka();const Y=e=>`${e.sku} \xB7 ${e.descricao}${e.codFab?" \xB7 "+e.codFab:""}`,la=()=>`<datalist id="dl-pc">${l.ativas(u()).map(e=>`<option value="${r(Y(e))}">`).join("")}</datalist>`,oa=e=>{const t=String(e||"").trim();if(!t)return null;const n=t.split(" \xB7 ")[0];return l.ativas(u()).find(s=>Y(s)===t||l.normal(s.sku)===l.normal(n)||s.codFab&&l.normal(s.codFab)===l.normal(t))||null};function qa(){l.garantir(u());const e=l.resumo(u(),$()),t=l.abaixoMinimo(u(),$()),s=l.garantir(u()).movimentos.filter(i=>!$().loja||i.loja===$().loja||i.para===$().loja).slice().sort((i,p)=>String(p.quando).localeCompare(String(i.quando))).slice(0,10),o=l.curvaABC(u(),{hoje:a.hojeISO(),loja:$().loja}),c=l.parado(u(),{hoje:a.hojeISO(),...$()});a.tela.innerHTML=X("Pe\xE7as e Estoque",`Saldo e custo m\xE9dio recalculados de cada movimento${$().loja?" \xB7 loja "+r($().loja):""}. Compra vira conta a pagar; venda de balc\xE3o, conta a receber.`,ea())+`
       <div class="kpis fin-k">
-        <a class="kpi k-marfim" href="#pc-catalogo"><span class="rot">${I.caixa}Estoque a custo</span><span class="val">${brl(r.valor)}</span><span class="exp">${r.itens} ${r.itens === 1 ? 'peça com saldo' : 'peças com saldo'}</span></a>
-        <a class="kpi ${r.abaixo ? 'k-risco' : 'k-salvia'}" href="#pc-compras"><span class="rot">${I.alerta}Abaixo do mínimo</span><span class="val">${r.abaixo}</span><span class="exp">${r.abaixo ? 'veja o pedido sugerido' : 'tudo acima do mínimo'}</span></a>
-        <a class="kpi" href="#pc-compras"><span class="rot">${I.carrinho}Pedidos em aberto</span><span class="val">${r.pedidosAbertos}</span><span class="exp">esperando o fornecedor</span></a>
-        <a class="kpi" href="#pc-abc"><span class="rot">${I.barras}Consumo em 12 meses</span><span class="val">${brl(abc.total)}</span><span class="exp">${abc.resumo.A.n} itens fazem a classe A</span></a>
+        <a class="kpi k-marfim" href="#pc-catalogo"><span class="rot">${v.caixa}Estoque a custo</span><span class="val">${b(e.valor)}</span><span class="exp">${e.itens} ${e.itens===1?"pe\xE7a com saldo":"pe\xE7as com saldo"}</span></a>
+        <a class="kpi ${e.abaixo?"k-risco":"k-salvia"}" href="#pc-compras"><span class="rot">${v.alerta}Abaixo do m\xEDnimo</span><span class="val">${e.abaixo}</span><span class="exp">${e.abaixo?"veja o pedido sugerido":"tudo acima do m\xEDnimo"}</span></a>
+        <a class="kpi" href="#pc-compras"><span class="rot">${v.carrinho}Pedidos em aberto</span><span class="val">${e.pedidosAbertos}</span><span class="exp">esperando o fornecedor</span></a>
+        <a class="kpi" href="#pc-abc"><span class="rot">${v.barras}Consumo em 12 meses</span><span class="val">${b(o.total)}</span><span class="exp">${o.resumo.A.n} itens fazem a classe A</span></a>
       </div>
       <div class="grade-2">
-        <section class="painel"><div class="painel-cab"><h2>${I.alerta}Abaixo do mínimo</h2><p><a class="link" href="#pc-compras">Pedido sugerido</a></p></div>
-          ${ab.length ? `<ul class="fin-saldos">${ab.slice(0, 8).map((x) => `<li><span><b>${esc(x.peca.descricao)}</b><span>${esc(x.peca.sku)}${x.loja ? ' · ' + esc(x.loja) : ''} · mínimo ${q3(x.minimo)}</span></span><b class="${x.saldo <= 0 ? 'neg' : ''}">${q3(x.saldo)} ${esc(x.peca.unidade)}</b></li>`).join('')}</ul>` : vazio('Nenhuma peça abaixo do mínimo.')}</section>
-        <section class="painel"><div class="painel-cab"><h2>${I.lista}Últimas movimentações</h2><p><a class="link" href="#pc-mov">Ver todas</a></p></div>${tabelaMov(movs, true)}</section>
+        <section class="painel"><div class="painel-cab"><h2>${v.alerta}Abaixo do m\xEDnimo</h2><p><a class="link" href="#pc-compras">Pedido sugerido</a></p></div>
+          ${t.length?`<ul class="fin-saldos">${t.slice(0,8).map(i=>`<li><span><b>${r(i.peca.descricao)}</b><span>${r(i.peca.sku)}${i.loja?" \xB7 "+r(i.loja):""} \xB7 m\xEDnimo ${x(i.minimo)}</span></span><b class="${i.saldo<=0?"neg":""}">${x(i.saldo)} ${r(i.peca.unidade)}</b></li>`).join("")}</ul>`:y("Nenhuma pe\xE7a abaixo do m\xEDnimo.")}</section>
+        <section class="painel"><div class="painel-cab"><h2>${v.lista}\xDAltimas movimenta\xE7\xF5es</h2><p><a class="link" href="#pc-mov">Ver todas</a></p></div>${ra(s,!0)}</section>
       </div>
-      <section class="painel bloco" id="pc-parado"><div class="painel-cab"><h2>${I.caixa}Estoque parado</h2><p><a class="link" href="#pc-abc">Giro e curva ABC</a></p></div>
-        <p class="sub" style="margin:4px 0 10px">Peças com saldo e sem nenhuma saída (OS ou balcão) há ${par.dias} dias ou mais: ${brl(par.valor)} a custo em ${par.linhas.length} ${par.linhas.length === 1 ? 'item' : 'itens'}. Dinheiro parado na prateleira: promoção, devolução ao fornecedor ou transferência para outra loja.</p>
-        ${par.linhas.length ? `<ul class="fin-saldos">${par.linhas.slice(0, 8).map((x) => `<li class="clicavel" tabindex="0" data-peca="${esc(x.peca.id)}"><span><b>${esc(x.peca.descricao)}</b><span>${esc(x.peca.sku)}${x.peca.local ? ' · ' + esc(x.peca.local) : ''} · ${x.ultimaSaida ? 'última saída há ' + x.semSaidaDias + ' dias' : 'nunca saiu (entrou há ' + x.semSaidaDias + ' dias)'}</span></span><b>${brl(x.valor)}</b></li>`).join('')}</ul>` : vazio(`Nenhuma peça parada há ${par.dias} dias ou mais.`)}</section>`;
-    ligarBotoes();
-  }
-  const botoes = () => (editor() ? `<button class="btn btn-ouro" type="button" data-pc="entrada">${I.entra}<span>Entrada (compra)</span></button><button class="btn btn-linha" type="button" data-pc="xml">${I.doc}<span>Importar XML</span></button><button class="btn btn-linha" type="button" data-pc="balcao">${I.sai}<span>Venda de balcão</span></button><button class="btn btn-linha" type="button" data-pc="transf">${I.troca}<span>Transferir</span></button>` : '<span class="tag declarado">Só leitura</span>');
-  function ligarBotoes(raizEl = U.tela) {
-    U.$$('[data-pc]', raizEl).forEach((b) => b.onclick = () => ({ entrada: () => formEntrada(), xml: importarXML, balcao: () => formBalcao(), transf: () => formTransf(), peca: () => formPeca() })[b.dataset.pc]());
-    U.$$('[data-peca]', raizEl).forEach((b) => { b.onclick = () => detalhePeca(b.dataset.peca); b.onkeydown = (e) => { if (e.key === 'Enter') detalhePeca(b.dataset.peca); }; });
-  }
-  function tabelaMov(movs, curto) {
-    if (!movs.length) return vazio('Nenhum movimento ainda.');
-    const nome = { entrada: 'Entrada', saida: 'Saída', transf: 'Transferência', ajuste: 'Ajuste', devolucao: 'Devolução' };
-    return `<div class="tabela-wrap"><table class="tabela fin-tab"><thead><tr><th class="oc-esconde">Data</th><th>Peça</th><th class="n">Qtd</th>${curto ? '' : '<th class="n oc-esconde">Custo un.</th><th class="oc-esconde">Por</th>'}</tr></thead><tbody>
-      ${movs.map((m) => { const p = P.peca(est(), m.peca), sinal = m.tipo === 'saida' || (m.tipo === 'ajuste' && m.qtd < 0) ? '−' : m.tipo === 'transf' ? '' : '+';
-        return `<tr data-peca="${esc(m.peca)}" class="clicavel" tabindex="0"><td class="oc-esconde">${dBR(m.data)}</td><td><b>${esc(p ? p.descricao : 'Peça removida')}</b><span class="fin-sub"><span class="ofc-so-cel">${dBR(m.data)} · </span>${nome[m.tipo]} · ${esc(P.ORIGENS[m.origem] || '')}${m.obs ? ' · ' + esc(m.obs) : ''}${m.tipo === 'transf' ? ` · ${esc(m.loja)} → ${esc(m.para)}` : m.loja ? ' · ' + esc(m.loja) : ''}</span></td>
-          <td class="n ${sinal === '−' ? 'neg' : sinal === '+' ? 'pos' : ''}">${sinal}${q3(Math.abs(m.qtd))}</td>${curto ? '' : `<td class="n oc-esconde">${brl(m.custo)}</td><td class="oc-esconde">${esc(m.por || '')}</td>`}</tr>`; }).join('')}</tbody></table></div>`;
-  }
-
-  // ---------- CATÁLOGO ----------
-  const fc = { q: '', modelo: '', so: '' };
-  function telaCatalogo() {
-    const lista = P.estoque(est(), fl()).filter((e) => (!fc.q || P.buscar(est(), fc.q).some((p) => p.id === e.peca.id)) && (!fc.modelo || P.compativel(e.peca, fc.modelo)));
-    const ab = new Set(P.abaixoMinimo(est(), fl()).map((x) => x.peca.id));
-    const l2 = lista.filter((e) => fc.so !== 'abaixo' || ab.has(e.peca.id)).filter((e) => fc.so !== 'saldo' || e.qtd > 0).sort((a, b) => a.peca.descricao.localeCompare(b.peca.descricao));
-    U.tela.innerHTML = cab('Catálogo de peças', 'Código (SKU), código do fabricante, compatibilidade, localização no almoxarifado, custo médio e preço de venda.', editor() ? `<button class="btn btn-ouro" type="button" data-pc="peca">${I.mais}<span>Nova peça</span></button>` + botoes().replace(/btn-ouro/, 'btn-linha') : '<span class="tag declarado">Só leitura</span>') + `
+      <section class="painel bloco" id="pc-parado"><div class="painel-cab"><h2>${v.caixa}Estoque parado</h2><p><a class="link" href="#pc-abc">Giro e curva ABC</a></p></div>
+        <p class="sub" style="margin:4px 0 10px">Pe\xE7as com saldo e sem nenhuma sa\xEDda (OS ou balc\xE3o) h\xE1 ${c.dias} dias ou mais: ${b(c.valor)} a custo em ${c.linhas.length} ${c.linhas.length===1?"item":"itens"}. Dinheiro parado na prateleira: promo\xE7\xE3o, devolu\xE7\xE3o ao fornecedor ou transfer\xEAncia para outra loja.</p>
+        ${c.linhas.length?`<ul class="fin-saldos">${c.linhas.slice(0,8).map(i=>`<li class="clicavel" tabindex="0" data-peca="${r(i.peca.id)}"><span><b>${r(i.peca.descricao)}</b><span>${r(i.peca.sku)}${i.peca.local?" \xB7 "+r(i.peca.local):""} \xB7 ${i.ultimaSaida?"\xFAltima sa\xEDda h\xE1 "+i.semSaidaDias+" dias":"nunca saiu (entrou h\xE1 "+i.semSaidaDias+" dias)"}</span></span><b>${b(i.valor)}</b></li>`).join("")}</ul>`:y(`Nenhuma pe\xE7a parada h\xE1 ${c.dias} dias ou mais.`)}</section>`,J()}const ea=()=>M()?`<button class="btn btn-ouro" type="button" data-pc="entrada">${v.entra}<span>Entrada (compra)</span></button><button class="btn btn-linha" type="button" data-pc="xml">${v.doc}<span>Importar XML</span></button><button class="btn btn-linha" type="button" data-pc="balcao">${v.sai}<span>Venda de balc\xE3o</span></button><button class="btn btn-linha" type="button" data-pc="transf">${v.troca}<span>Transferir</span></button>`:'<span class="tag declarado">S\xF3 leitura</span>';function J(e=a.tela){a.$$("[data-pc]",e).forEach(t=>t.onclick=()=>({entrada:()=>ua(),xml:ya,balcao:()=>ja(),transf:()=>xa(),peca:()=>ha()})[t.dataset.pc]()),a.$$("[data-peca]",e).forEach(t=>{t.onclick=()=>ta(t.dataset.peca),t.onkeydown=n=>{n.key==="Enter"&&ta(t.dataset.peca)}})}function ra(e,t){if(!e.length)return y("Nenhum movimento ainda.");const n={entrada:"Entrada",saida:"Sa\xEDda",transf:"Transfer\xEAncia",ajuste:"Ajuste",devolucao:"Devolu\xE7\xE3o"};return`<div class="tabela-wrap"><table class="tabela fin-tab"><thead><tr><th class="oc-esconde">Data</th><th>Pe\xE7a</th><th class="n">Qtd</th>${t?"":'<th class="n oc-esconde">Custo un.</th><th class="oc-esconde">Por</th>'}</tr></thead><tbody>
+      ${e.map(s=>{const o=l.peca(u(),s.peca),c=s.tipo==="saida"||s.tipo==="ajuste"&&s.qtd<0?"\u2212":s.tipo==="transf"?"":"+";return`<tr data-peca="${r(s.peca)}" class="clicavel" tabindex="0"><td class="oc-esconde">${E(s.data)}</td><td><b>${r(o?o.descricao:"Pe\xE7a removida")}</b><span class="fin-sub"><span class="ofc-so-cel">${E(s.data)} \xB7 </span>${n[s.tipo]} \xB7 ${r(l.ORIGENS[s.origem]||"")}${s.obs?" \xB7 "+r(s.obs):""}${s.tipo==="transf"?` \xB7 ${r(s.loja)} \u2192 ${r(s.para)}`:s.loja?" \xB7 "+r(s.loja):""}</span></td>
+          <td class="n ${c==="\u2212"?"neg":c==="+"?"pos":""}">${c}${x(Math.abs(s.qtd))}</td>${t?"":`<td class="n oc-esconde">${b(s.custo)}</td><td class="oc-esconde">${r(s.por||"")}</td>`}</tr>`}).join("")}</tbody></table></div>`}const q={q:"",modelo:"",so:""};function da(){const e=l.estoque(u(),$()).filter(o=>(!q.q||l.buscar(u(),q.q).some(c=>c.id===o.peca.id))&&(!q.modelo||l.compativel(o.peca,q.modelo))),t=new Set(l.abaixoMinimo(u(),$()).map(o=>o.peca.id)),n=e.filter(o=>q.so!=="abaixo"||t.has(o.peca.id)).filter(o=>q.so!=="saldo"||o.qtd>0).sort((o,c)=>o.peca.descricao.localeCompare(c.peca.descricao));a.tela.innerHTML=X("Cat\xE1logo de pe\xE7as","C\xF3digo (SKU), c\xF3digo do fabricante, compatibilidade, localiza\xE7\xE3o no almoxarifado, custo m\xE9dio e pre\xE7o de venda.",M()?`<button class="btn btn-ouro" type="button" data-pc="peca">${v.mais}<span>Nova pe\xE7a</span></button>`+ea().replace(/btn-ouro/,"btn-linha"):'<span class="tag declarado">S\xF3 leitura</span>')+`
       <section class="painel"><div class="fin-filtros">
-        <div class="abas-modo" role="group" aria-label="Mostrar">${[['', 'Todas'], ['saldo', 'Com saldo'], ['abaixo', 'Abaixo do mínimo']].map(([v, n]) => `<button type="button" data-so="${v}" aria-pressed="${fc.so === v}">${n}</button>`).join('')}</div>
-        <div class="campos fin-campos"><div class="campo"><label for="pc-q">Buscar</label><input id="pc-q" value="${esc(fc.q)}" placeholder="SKU, código do fabricante, descrição, local"></div>
-          <div class="campo"><label for="pc-mod">Serve no modelo</label><input id="pc-mod" list="dl-modelo-pc" value="${esc(fc.modelo)}" placeholder="Ex.: 6125J"><datalist id="dl-modelo-pc">${[...new Set(U.A.modelos.map((m) => m.modelo))].map((m) => `<option value="${esc(m)}">`).join('')}</datalist></div></div></div>
-        ${l2.length ? `<div class="tabela-wrap"><table class="tabela fin-tab"><thead><tr><th>Peça</th><th class="oc-esconde">Local</th><th class="n">Saldo</th><th class="n oc-esconde">Custo médio</th><th class="n">Preço</th></tr></thead><tbody>
-          ${l2.map((e) => `<tr data-peca="${esc(e.peca.id)}" class="clicavel" tabindex="0"><td><b>${esc(e.peca.descricao)}</b><span class="fin-sub">${esc(e.peca.sku)}${e.peca.codFab ? ' · ' + esc(e.peca.codFab) : ''}${e.peca.marca ? ' · ' + esc(e.peca.marca) : ''}${(e.peca.compat || []).length ? ' · serve em ' + esc(e.peca.compat.slice(0, 3).join(', ')) : ''}</span></td>
-            <td class="oc-esconde">${esc(e.peca.local || '—')}</td><td class="n ${e.qtd < 0 ? 'neg' : ''}">${q3(e.qtd)} ${esc(e.peca.unidade)}${ab.has(e.peca.id) ? ' <span class="sit sit-vencido">mínimo</span>' : ''}</td><td class="n oc-esconde">${brl(e.custoMedio)}</td><td class="n">${brl(e.peca.preco)}</td></tr>`).join('')}</tbody></table></div>`
-        : vazio(P.ativas(est()).length ? 'Nenhuma peça com estes filtros.' : 'Nenhuma peça cadastrada. Comece por "Nova peça" ou importe o XML de uma nota de compra.')}
-        <div class="fin-rodape"><span>${l2.length} peças · ${brl(l2.reduce((s, e) => s + Math.max(0, e.valor), 0))} a custo</span><button class="btn btn-linha" type="button" id="pc-csv">Exportar planilha</button></div></section>`;
-    U.$$('[data-so]', U.tela).forEach((b) => b.onclick = () => { fc.so = b.dataset.so; telaCatalogo(); });
-    const at = (id, k) => { const el = U.$(id); el.oninput = () => { fc[k] = el.value; clearTimeout(at.t); at.t = setTimeout(() => { telaCatalogo(); const i = U.$(id); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 300); }; };
-    at('#pc-q', 'q'); at('#pc-mod', 'modelo');
-    U.$('#pc-csv').onclick = () => U.baixarCSV(`anshur-pecas-${U.hojeISO()}.csv`, [['SKU', 'Código do fabricante', 'Descrição', 'Marca', 'Compatível com', 'Local', 'Unidade', 'Saldo', 'Custo médio', 'Valor a custo', 'Preço de venda']]
-      .concat(l2.map((e) => [e.peca.sku, e.peca.codFab, e.peca.descricao, e.peca.marca, (e.peca.compat || []).join(', '), e.peca.local, e.peca.unidade, String(e.qtd).replace('.', ','), String(e.custoMedio).replace('.', ','), String(e.valor).replace('.', ','), String(e.peca.preco).replace('.', ',')])));
-    ligarBotoes();
-  }
-  function detalhePeca(id) {
-    const p = P.peca(est(), id); if (!p) return;
-    const pos = P.posicao(est(), id), movs = P.garantir(est()).movimentos.filter((m) => m.peca === id).slice().sort((a, b) => String(b.data).localeCompare(String(a.data)) || String(b.quando).localeCompare(String(a.quando)));
-    U.abrirCamada('gaveta', `<span class="tag comprovado">${esc(p.sku)}</span><h2 style="font-size:22px;margin-top:10px">${esc(p.descricao)}</h2><p class="sub">${[p.codFab && 'Fabricante: ' + p.codFab, p.marca, p.local && 'Local ' + p.local, P.UNIDADES[p.unidade]].filter(Boolean).map(esc).join(' · ')}</p>
-      <div class="det"><div><span>Saldo total</span><b>${q3(pos.qtd)} ${esc(p.unidade)}</b></div><div><span>Custo médio</span><b>${brl(pos.custoMedio)}</b></div><div><span>Valor a custo</span><b>${brl(pos.valor)}</b></div><div><span>Preço de venda</span><b>${brl(p.preco)}</b></div>
-        ${Object.keys(Object.assign({}, pos.porLoja, p.minimos)).filter((l) => l).map((l) => `<div><span>${esc(l)}</span><b>${q3(pos.porLoja[l] || 0)}${p.minimos[l] ? ` <small class="sub">(mín. ${q3(p.minimos[l])})</small>` : ''}</b></div>`).join('')}</div>
-      ${(p.compat || []).length ? `<p class="conta">Serve em: ${esc(p.compat.join(', '))}</p>` : ''}${p.fornecedor ? `<p class="conta">Fornecedor habitual: ${esc(nomeForn(p.fornecedor))}</p>` : ''}
-      <div class="acoes">${editor() ? '<button class="btn btn-ouro" type="button" id="dp-ed">Editar</button><button class="btn btn-linha" type="button" id="dp-tr">Transferir</button><button class="btn btn-linha" type="button" id="dp-en">Entrada</button>' : ''}</div>
-      <section style="margin-top:16px"><h2 style="font-size:18px;margin-bottom:8px">Movimentos (kardex)</h2>${tabelaMov(movs.slice(0, 60))}</section>`, (c) => {
-      const b = (s, f) => { const el = U.$(s, c); if (el) el.onclick = f; };
-      b('#dp-ed', () => formPeca(p)); b('#dp-tr', () => formTransf({ peca: p.id })); b('#dp-en', () => formEntrada({ itens: [{ peca: p.id, qtd: 1, custo: pos.custoMedio || '' }] }));
-    });
-  }
-  function formPeca(p = null) {
-    if (!editor()) { U.toast('Seu perfil não cadastra peças.', true); return; }
-    const v = p || { unidade: 'un', minimos: {} }, ls = lojas().length ? lojas() : [''];
-    U.abrirCamada('modal larga-modal', `<h2>${p ? 'Editar peça' : 'Nova peça'}</h2><form class="campos" style="margin-top:12px" novalidate>
-      <div class="campo inteiro"><label for="fp-desc">Descrição *</label><input id="fp-desc" value="${esc(v.descricao || '')}" placeholder="Ex.: Filtro de óleo do motor"></div>
-      <div class="campo"><label for="fp-sku">Código (SKU)</label><input id="fp-sku" value="${esc(v.sku || '')}" placeholder="Vazio = ${esc(P.proximoSku(est()))}"></div>
-      <div class="campo"><label for="fp-fab">Código do fabricante</label><input id="fp-fab" value="${esc(v.codFab || '')}"></div>
-      <div class="campo"><label for="fp-marca">Marca</label><input id="fp-marca" value="${esc(v.marca || '')}"></div>
-      <div class="campo"><label for="fp-un">Unidade</label><select id="fp-un">${opt(Object.entries(P.UNIDADES), v.unidade)}</select></div>
-      <div class="campo inteiro"><label for="fp-compat">Serve nos modelos (separe por vírgula)</label><input id="fp-compat" value="${esc((v.compat || []).join(', '))}" placeholder="Ex.: 6125J, MF 4709"></div>
-      <div class="campo"><label for="fp-local">Localização no almoxarifado</label><input id="fp-local" value="${esc(v.local || '')}" placeholder="Ex.: Corredor A, prateleira 3"></div>
-      <div class="campo"><label for="fp-preco">Preço de venda (R$)</label><input id="fp-preco" inputmode="decimal" value="${v.preco ? String(v.preco).replace('.', ',') : ''}" ${p && !ajustador() && p.preco ? 'disabled title="Só dono e gerente mudam preço"' : ''}></div>
-      <div class="campo inteiro"><label for="fp-forn">Fornecedor habitual</label><input id="fp-forn" list="dl-fp-forn" value="${esc(nomeForn(v.fornecedor))}" autocomplete="off"><datalist id="dl-fp-forn">${U.K.cad.fornecedores().map((c) => `<option value="${esc(c.nome)}">`).join('')}</datalist></div>
-      ${ls.map((l, i) => `<div class="campo"><label for="fp-min${i}">Estoque mínimo${l ? ' · ' + esc(l) : ''}</label><input id="fp-min${i}" inputmode="decimal" value="${(v.minimos || {})[l] || ''}" placeholder="0 = sem alerta"></div>`).join('')}
-      </form><div class="acoes"><button class="btn btn-ouro" type="button" id="fp-ok">Salvar</button><button class="btn btn-linha" type="button" id="fp-nao">Cancelar</button></div>`, (c) => {
-      U.$('#fp-nao', c).onclick = () => U.fecharCamada();
-      U.$('#fp-ok', c).onclick = () => {
-        const minimos = {}; ls.forEach((l, i) => { minimos[l] = U.num(U.$('#fp-min' + i, c).value); });
-        const fn = U.$('#fp-forn', c).value.trim(), fo = fn ? U.K.cad.garantir('fornecedores', { nome: fn }) : null;
-        const x = tentar(() => P.salvarPeca(est(), { id: p ? p.id : undefined, descricao: U.$('#fp-desc', c).value, sku: U.$('#fp-sku', c).value, codFab: U.$('#fp-fab', c).value, marca: U.$('#fp-marca', c).value, unidade: U.$('#fp-un', c).value,
-          compat: U.$('#fp-compat', c).value, local: U.$('#fp-local', c).value, preco: U.$('#fp-preco', c).disabled ? p.preco : U.num(U.$('#fp-preco', c).value), minimos, fornecedor: fo ? fo.id : '' }, quem()));
-        if (!x) return;
-        gravar(`${p ? 'Peça alterada' : 'Peça cadastrada'}: ${x.sku} ${x.descricao}`); U.toast(p ? 'Peça salva.' : 'Peça cadastrada.'); U.fecharCamada(true); U.rota();
-      };
-    });
-  }
-
-  // ---------- linhas de itens (entrada e balcão) ----------
-  function linhaItem(it = {}, preco) {
-    const p = it.peca ? P.peca(est(), it.peca) : null;
-    return `<div class="ofc-linha pc-item"><div class="campo"><label>Peça</label><input data-f="peca" list="dl-pc" value="${p ? esc(rotPeca(p)) : ''}" placeholder="SKU, código ou descrição" autocomplete="off"></div>
-      <div class="campo"><label>Qtd</label><input data-f="qtd" inputmode="decimal" value="${it.qtd != null ? String(it.qtd).replace('.', ',') : '1'}"></div>
-      <div class="campo"><label>${preco ? 'Preço un. (R$)' : 'Custo un. (R$)'}</label><input data-f="valor" inputmode="decimal" value="${it[preco ? 'preco' : 'custo'] != null && it[preco ? 'preco' : 'custo'] !== '' ? String(it[preco ? 'preco' : 'custo']).replace('.', ',') : ''}"></div>
-      <button class="btn btn-linha btn-p" type="button" data-tirar aria-label="Tirar item">×</button></div>`;
-  }
-  function ligarItens(c, preco, aoMudar) {
-    const box = U.$('#pc-itens', c);
-    const ler = () => U.$$('.pc-item', c).map((l) => { const p = lerPeca(U.$('[data-f=peca]', l).value); return { linha: l, peca: p ? p.id : '', texto: U.$('[data-f=peca]', l).value.trim(), qtd: U.num(U.$('[data-f=qtd]', l).value), valor: U.num(U.$('[data-f=valor]', l).value) }; });
-    box.addEventListener('input', (e) => {
-      const l = e.target.closest('.pc-item');
-      if (l && e.target.dataset.f === 'peca') { const p = lerPeca(e.target.value), v = U.$('[data-f=valor]', l); if (p && !v.value) v.value = String(preco ? p.preco : P.posicao(est(), p.id).custoMedio || '').replace('.', ','); }
-      aoMudar(ler());
-    });
-    box.addEventListener('click', (e) => { const b = e.target.closest('[data-tirar]'); if (b) { if (U.$$('.pc-item', c).length > 1) b.closest('.pc-item').remove(); aoMudar(ler()); } });
-    U.$('#pc-add', c).onclick = () => { box.insertAdjacentHTML('beforeend', linhaItem({}, preco)); U.$$('.pc-item', c).at(-1).querySelector('input').focus(); };
-    aoMudar(ler()); return ler;
-  }
-
-  // ---------- ENTRADA (compra) ----------
-  function formEntrada(pre = {}) {
-    if (!editor()) { U.toast('Seu perfil não lança entradas.', true); return; }
-    U.abrirCamada('modal larga-modal', `<h2>Entrada de peças (compra)</h2><p class="sub">Entra no estoque pelo custo (frete rateado) e vira conta a pagar no Financeiro, categoria "Compra de peças" (estoque).</p>${dlPecas()}
+        <div class="abas-modo" role="group" aria-label="Mostrar">${[["","Todas"],["saldo","Com saldo"],["abaixo","Abaixo do m\xEDnimo"]].map(([o,c])=>`<button type="button" data-so="${o}" aria-pressed="${q.so===o}">${c}</button>`).join("")}</div>
+        <div class="campos fin-campos"><div class="campo"><label for="pc-q">Buscar</label><input id="pc-q" value="${r(q.q)}" placeholder="SKU, c\xF3digo do fabricante, descri\xE7\xE3o, local"></div>
+          <div class="campo"><label for="pc-mod">Serve no modelo</label><input id="pc-mod" list="dl-modelo-pc" value="${r(q.modelo)}" placeholder="Ex.: 6125J"><datalist id="dl-modelo-pc">${[...new Set(a.A.modelos.map(o=>o.modelo))].map(o=>`<option value="${r(o)}">`).join("")}</datalist></div></div></div>
+        ${n.length?`<div class="tabela-wrap"><table class="tabela fin-tab"><thead><tr><th>Pe\xE7a</th><th class="oc-esconde">Local</th><th class="n">Saldo</th><th class="n oc-esconde">Custo m\xE9dio</th><th class="n">Pre\xE7o</th></tr></thead><tbody>
+          ${n.map(o=>`<tr data-peca="${r(o.peca.id)}" class="clicavel" tabindex="0"><td><b>${r(o.peca.descricao)}</b><span class="fin-sub">${r(o.peca.sku)}${o.peca.codFab?" \xB7 "+r(o.peca.codFab):""}${o.peca.marca?" \xB7 "+r(o.peca.marca):""}${(o.peca.compat||[]).length?" \xB7 serve em "+r(o.peca.compat.slice(0,3).join(", ")):""}</span></td>
+            <td class="oc-esconde">${r(o.peca.local||"\u2014")}</td><td class="n ${o.qtd<0?"neg":""}">${x(o.qtd)} ${r(o.peca.unidade)}${t.has(o.peca.id)?' <span class="sit sit-vencido">m\xEDnimo</span>':""}</td><td class="n oc-esconde">${b(o.custoMedio)}</td><td class="n">${b(o.peca.preco)}</td></tr>`).join("")}</tbody></table></div>`:y(l.ativas(u()).length?"Nenhuma pe\xE7a com estes filtros.":'Nenhuma pe\xE7a cadastrada. Comece por "Nova pe\xE7a" ou importe o XML de uma nota de compra.')}
+        <div class="fin-rodape"><span>${n.length} pe\xE7as \xB7 ${b(n.reduce((o,c)=>o+Math.max(0,c.valor),0))} a custo</span><button class="btn btn-linha" type="button" id="pc-csv">Exportar planilha</button></div></section>`,a.$$("[data-so]",a.tela).forEach(o=>o.onclick=()=>{q.so=o.dataset.so,da()});const s=(o,c)=>{const i=a.$(o);i.oninput=()=>{q[c]=i.value,clearTimeout(s.t),s.t=setTimeout(()=>{da();const p=a.$(o);p.focus(),p.setSelectionRange(p.value.length,p.value.length)},300)}};s("#pc-q","q"),s("#pc-mod","modelo"),a.$("#pc-csv").onclick=()=>a.baixarCSV(`anshur-pecas-${a.hojeISO()}.csv`,[["SKU","C\xF3digo do fabricante","Descri\xE7\xE3o","Marca","Compat\xEDvel com","Local","Unidade","Saldo","Custo m\xE9dio","Valor a custo","Pre\xE7o de venda"]].concat(n.map(o=>[o.peca.sku,o.peca.codFab,o.peca.descricao,o.peca.marca,(o.peca.compat||[]).join(", "),o.peca.local,o.peca.unidade,String(o.qtd).replace(".",","),String(o.custoMedio).replace(".",","),String(o.valor).replace(".",","),String(o.peca.preco).replace(".",",")]))),J()}function ta(e){const t=l.peca(u(),e);if(!t)return;const n=l.posicao(u(),e),s=l.garantir(u()).movimentos.filter(o=>o.peca===e).slice().sort((o,c)=>String(c.data).localeCompare(String(o.data))||String(c.quando).localeCompare(String(o.quando)));a.abrirCamada("gaveta",`<span class="tag comprovado">${r(t.sku)}</span><h2 style="font-size:22px;margin-top:10px">${r(t.descricao)}</h2><p class="sub">${[t.codFab&&"Fabricante: "+t.codFab,t.marca,t.local&&"Local "+t.local,l.UNIDADES[t.unidade]].filter(Boolean).map(r).join(" \xB7 ")}</p>
+      <div class="det"><div><span>Saldo total</span><b>${x(n.qtd)} ${r(t.unidade)}</b></div><div><span>Custo m\xE9dio</span><b>${b(n.custoMedio)}</b></div><div><span>Valor a custo</span><b>${b(n.valor)}</b></div><div><span>Pre\xE7o de venda</span><b>${b(t.preco)}</b></div>
+        ${Object.keys(Object.assign({},n.porLoja,t.minimos)).filter(o=>o).map(o=>`<div><span>${r(o)}</span><b>${x(n.porLoja[o]||0)}${t.minimos[o]?` <small class="sub">(m\xEDn. ${x(t.minimos[o])})</small>`:""}</b></div>`).join("")}</div>
+      ${(t.compat||[]).length?`<p class="conta">Serve em: ${r(t.compat.join(", "))}</p>`:""}${t.fornecedor?`<p class="conta">Fornecedor habitual: ${r(U(t.fornecedor))}</p>`:""}
+      <div class="acoes">${M()?'<button class="btn btn-ouro" type="button" id="dp-ed">Editar</button><button class="btn btn-linha" type="button" id="dp-tr">Transferir</button><button class="btn btn-linha" type="button" id="dp-en">Entrada</button>':""}</div>
+      <section style="margin-top:16px"><h2 style="font-size:18px;margin-bottom:8px">Movimentos (kardex)</h2>${ra(s.slice(0,60))}</section>`,o=>{const c=(i,p)=>{const d=a.$(i,o);d&&(d.onclick=p)};c("#dp-ed",()=>ha(t)),c("#dp-tr",()=>xa({peca:t.id})),c("#dp-en",()=>ua({itens:[{peca:t.id,qtd:1,custo:n.custoMedio||""}]}))})}function ha(e=null){if(!M()){a.toast("Seu perfil n\xE3o cadastra pe\xE7as.",!0);return}const t=e||{unidade:"un",minimos:{}},n=O().length?O():[""];a.abrirCamada("modal larga-modal",`<h2>${e?"Editar pe\xE7a":"Nova pe\xE7a"}</h2><form class="campos" style="margin-top:12px" novalidate>
+      <div class="campo inteiro"><label for="fp-desc">Descri\xE7\xE3o *</label><input id="fp-desc" value="${r(t.descricao||"")}" placeholder="Ex.: Filtro de \xF3leo do motor"></div>
+      <div class="campo"><label for="fp-sku">C\xF3digo (SKU)</label><input id="fp-sku" value="${r(t.sku||"")}" placeholder="Vazio = ${r(l.proximoSku(u()))}"></div>
+      <div class="campo"><label for="fp-fab">C\xF3digo do fabricante</label><input id="fp-fab" value="${r(t.codFab||"")}"></div>
+      <div class="campo"><label for="fp-marca">Marca</label><input id="fp-marca" value="${r(t.marca||"")}"></div>
+      <div class="campo"><label for="fp-un">Unidade</label><select id="fp-un">${aa(Object.entries(l.UNIDADES),t.unidade)}</select></div>
+      <div class="campo inteiro"><label for="fp-compat">Serve nos modelos (separe por v\xEDrgula)</label><input id="fp-compat" value="${r((t.compat||[]).join(", "))}" placeholder="Ex.: 6125J, MF 4709"></div>
+      <div class="campo"><label for="fp-local">Localiza\xE7\xE3o no almoxarifado</label><input id="fp-local" value="${r(t.local||"")}" placeholder="Ex.: Corredor A, prateleira 3"></div>
+      <div class="campo"><label for="fp-preco">Pre\xE7o de venda (R$)</label><input id="fp-preco" inputmode="decimal" value="${t.preco?String(t.preco).replace(".",","):""}" ${e&&!$a()&&e.preco?'disabled title="S\xF3 dono e gerente mudam pre\xE7o"':""}></div>
+      <div class="campo inteiro"><label for="fp-forn">Fornecedor habitual</label><input id="fp-forn" list="dl-fp-forn" value="${r(U(t.fornecedor))}" autocomplete="off"><datalist id="dl-fp-forn">${a.K.cad.fornecedores().map(s=>`<option value="${r(s.nome)}">`).join("")}</datalist></div>
+      ${n.map((s,o)=>`<div class="campo"><label for="fp-min${o}">Estoque m\xEDnimo${s?" \xB7 "+r(s):""}</label><input id="fp-min${o}" inputmode="decimal" value="${(t.minimos||{})[s]||""}" placeholder="0 = sem alerta"></div>`).join("")}
+      </form><div class="acoes"><button class="btn btn-ouro" type="button" id="fp-ok">Salvar</button><button class="btn btn-linha" type="button" id="fp-nao">Cancelar</button></div>`,s=>{a.$("#fp-nao",s).onclick=()=>a.fecharCamada(),a.$("#fp-ok",s).onclick=()=>{const o={};n.forEach((d,m)=>{o[d]=a.num(a.$("#fp-min"+m,s).value)});const c=a.$("#fp-forn",s).value.trim(),i=c?a.K.cad.garantir("fornecedores",{nome:c}):null,p=F(()=>l.salvarPeca(u(),{id:e?e.id:void 0,descricao:a.$("#fp-desc",s).value,sku:a.$("#fp-sku",s).value,codFab:a.$("#fp-fab",s).value,marca:a.$("#fp-marca",s).value,unidade:a.$("#fp-un",s).value,compat:a.$("#fp-compat",s).value,local:a.$("#fp-local",s).value,preco:a.$("#fp-preco",s).disabled?e.preco:a.num(a.$("#fp-preco",s).value),minimos:o,fornecedor:i?i.id:""},P()));p&&(A(`${e?"Pe\xE7a alterada":"Pe\xE7a cadastrada"}: ${p.sku} ${p.descricao}`),a.toast(e?"Pe\xE7a salva.":"Pe\xE7a cadastrada."),a.fecharCamada(!0),a.rota())}})}function pa(e={},t){const n=e.peca?l.peca(u(),e.peca):null;return`<div class="ofc-linha pc-item"><div class="campo"><label>Pe\xE7a</label><input data-f="peca" list="dl-pc" value="${n?r(Y(n)):""}" placeholder="SKU, c\xF3digo ou descri\xE7\xE3o" autocomplete="off"></div>
+      <div class="campo"><label>Qtd</label><input data-f="qtd" inputmode="decimal" value="${e.qtd!=null?String(e.qtd).replace(".",","):"1"}"></div>
+      <div class="campo"><label>${t?"Pre\xE7o un. (R$)":"Custo un. (R$)"}</label><input data-f="valor" inputmode="decimal" value="${e[t?"preco":"custo"]!=null&&e[t?"preco":"custo"]!==""?String(e[t?"preco":"custo"]).replace(".",","):""}"></div>
+      <button class="btn btn-linha btn-p" type="button" data-tirar aria-label="Tirar item">\xD7</button></div>`}function ga(e,t,n){const s=a.$("#pc-itens",e),o=()=>a.$$(".pc-item",e).map(c=>{const i=oa(a.$("[data-f=peca]",c).value);return{linha:c,peca:i?i.id:"",texto:a.$("[data-f=peca]",c).value.trim(),qtd:a.num(a.$("[data-f=qtd]",c).value),valor:a.num(a.$("[data-f=valor]",c).value)}});return s.addEventListener("input",c=>{const i=c.target.closest(".pc-item");if(i&&c.target.dataset.f==="peca"){const p=oa(c.target.value),d=a.$("[data-f=valor]",i);p&&!d.value&&(d.value=String(t?p.preco:l.posicao(u(),p.id).custoMedio||"").replace(".",","))}n(o())}),s.addEventListener("click",c=>{const i=c.target.closest("[data-tirar]");i&&(a.$$(".pc-item",e).length>1&&i.closest(".pc-item").remove(),n(o()))}),a.$("#pc-add",e).onclick=()=>{s.insertAdjacentHTML("beforeend",pa({},t)),a.$$(".pc-item",e).at(-1).querySelector("input").focus()},n(o()),o}function ua(e={}){if(!M()){a.toast("Seu perfil n\xE3o lan\xE7a entradas.",!0);return}a.abrirCamada("modal larga-modal",`<h2>Entrada de pe\xE7as (compra)</h2><p class="sub">Entra no estoque pelo custo (frete rateado) e vira conta a pagar no Financeiro, categoria "Compra de pe\xE7as" (estoque).</p>${la()}
       <form class="campos" style="margin-top:12px" novalidate>
-        <div class="campo"><label for="pe-forn">Fornecedor *</label><input id="pe-forn" list="dl-pe-forn" value="${esc(pre.fornecedorNome || nomeForn(pre.fornecedor))}" autocomplete="off" placeholder="Acha no cadastro ou cria"><datalist id="dl-pe-forn">${U.K.cad.fornecedores().map((c) => `<option value="${esc(c.nome)}">`).join('')}</datalist></div>
-        <div class="campo"><label for="pe-nota">Nº da nota</label><input id="pe-nota" value="${esc(pre.nota || '')}"></div>
-        <div class="campo"><label for="pe-data">Data da entrada</label><input id="pe-data" type="date" value="${pre.data || U.hojeISO()}"></div>
-        <div class="campo"><label for="pe-loja">Loja</label><select id="pe-loja">${optLojas(pre.loja || lojaPadrao())}</select></div>
-        <div class="campo"><label for="pe-frete">Frete (R$)</label><input id="pe-frete" inputmode="decimal" value="${pre.frete ? String(pre.frete).replace('.', ',') : ''}"></div>
-        <div class="campo"><label for="pe-venc">Vencimento</label><input id="pe-venc" type="date" value="${pre.vencimento || P.somarDias(U.hojeISO(), 30)}"></div>
-        <div class="campo"><label for="pe-parc">Parcelas</label><input id="pe-parc" inputmode="numeric" value="${pre.parcelas || 1}"></div>
+        <div class="campo"><label for="pe-forn">Fornecedor *</label><input id="pe-forn" list="dl-pe-forn" value="${r(e.fornecedorNome||U(e.fornecedor))}" autocomplete="off" placeholder="Acha no cadastro ou cria"><datalist id="dl-pe-forn">${a.K.cad.fornecedores().map(t=>`<option value="${r(t.nome)}">`).join("")}</datalist></div>
+        <div class="campo"><label for="pe-nota">N\xBA da nota</label><input id="pe-nota" value="${r(e.nota||"")}"></div>
+        <div class="campo"><label for="pe-data">Data da entrada</label><input id="pe-data" type="date" value="${e.data||a.hojeISO()}"></div>
+        <div class="campo"><label for="pe-loja">Loja</label><select id="pe-loja">${R(e.loja||K())}</select></div>
+        <div class="campo"><label for="pe-frete">Frete (R$)</label><input id="pe-frete" inputmode="decimal" value="${e.frete?String(e.frete).replace(".",","):""}"></div>
+        <div class="campo"><label for="pe-venc">Vencimento</label><input id="pe-venc" type="date" value="${e.vencimento||l.somarDias(a.hojeISO(),30)}"></div>
+        <div class="campo"><label for="pe-parc">Parcelas</label><input id="pe-parc" inputmode="numeric" value="${e.parcelas||1}"></div>
       </form>
-      <div id="pc-itens" style="display:grid;gap:8px;margin-top:14px">${(pre.itens && pre.itens.length ? pre.itens : [{}]).map((i) => linhaItem(i, false)).join('')}</div>
-      <div class="acoes" style="margin-top:10px"><button class="btn btn-linha" type="button" id="pc-add">${I.mais}Mais uma peça</button><span class="conta" id="pe-tot" style="margin:0"></span></div>
-      <div class="acoes"><button class="btn btn-ouro" type="button" id="pe-ok">Lançar entrada</button><button class="btn btn-linha" type="button" id="pe-nao">Cancelar</button></div>`, (c) => {
-      const tot = (l) => { const s = l.reduce((a, i) => a + i.qtd * i.valor, 0) + U.num(U.$('#pe-frete', c).value); U.$('#pe-tot', c).innerHTML = `Total da nota: <b>${brl(s)}</b>`; };
-      const ler = ligarItens(c, false, tot); U.$('#pe-frete', c).oninput = () => tot(ler());
-      U.$('#pe-nao', c).onclick = () => U.fecharCamada();
-      U.$('#pe-ok', c).onclick = () => {
-        const itens = ler().filter((i) => i.texto || i.qtd);
-        const semPeca = itens.find((i) => !i.peca); if (semPeca) { U.toast(`"${semPeca.texto || 'item'}" não está no catálogo. Cadastre a peça antes.`, true); return; }
-        const fn = U.$('#pe-forn', c).value.trim(); if (!fn) { U.toast('Informe o fornecedor.', true); return; }
-        const fo = U.K.cad.garantir('fornecedores', { nome: fn });
-        const cp = tentar(() => P.entradaCompra(est(), { data: U.$('#pe-data', c).value, loja: U.$('#pe-loja', c).value, fornecedor: fo.id, fornecedorNome: fo.nome, nota: U.$('#pe-nota', c).value, frete: U.num(U.$('#pe-frete', c).value),
-          vencimento: U.$('#pe-venc', c).value, parcelas: Math.max(1, Math.floor(U.num(U.$('#pe-parc', c).value) || 1)), pedido: pre.pedido || '', origem: pre.origem || 'manual', itens: itens.map((i) => ({ peca: i.peca, qtd: i.qtd, custo: i.valor })) }, quem(), undefined, F()));
-        if (!cp) return;
-        gravar(`Entrada de peças${cp.nota ? ' NF ' + cp.nota : ''} · ${fo.nome} · ${brl(cp.total)} (${cp.itens.length} itens)${cp.lancamentos.length ? ' · conta a pagar criada' : ''}`);
-        U.toast(`Entrada lançada: ${brl(cp.total)}${cp.lancamentos.length ? ' · conta a pagar no Financeiro' : ''}.`); U.fecharCamada(true); U.rota();
-      };
-    });
-  }
-  // ---------- importar XML da NF-e de compra ----------
-  function importarXML() {
-    if (!editor()) return;
-    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.xml,text/xml,application/xml';
-    inp.onchange = async () => {
-      const arq = inp.files[0]; if (!arq) return;
-      let nfe; try { nfe = P.lerNFe(await arq.text()); } catch (e) { U.toast(e.message, true); return; }
-      const itens = P.casarNFe(est(), nfe), cat = P.ativas(est());
-      U.abrirCamada('modal larga-modal', `<h2>NF-e ${esc(nfe.numero)} · ${esc(nfe.fornecedor.nome)}</h2><p class="sub">${dBR(nfe.data)} · ${itens.length} itens · total ${brl(nfe.total)}${nfe.frete ? ' · frete ' + brl(nfe.frete) : ''}${nfe.duplicatas.length ? ` · ${nfe.duplicatas.length} ${nfe.duplicatas.length === 1 ? 'vencimento' : 'parcelas'} a partir de ${dBR(nfe.duplicatas[0].vencimento)}` : ''}. Confira a peça de cada linha; sem par, o Anshur cadastra a peça nova.</p>
-        <div style="display:grid;gap:10px;margin-top:12px">${itens.map((i, k) => `<div class="campo"><label for="nx-${k}">${esc(i.descricao)} · ${q3(i.qtd)} ${esc(i.unidade)} × ${brl(i.custo)}${i.cProd ? ' · cód. ' + esc(i.cProd) : ''}</label>
-          <select id="nx-${k}">${opt([['', 'Cadastrar como peça nova']].concat(cat.map((p) => [p.id, rotPeca(p)])), i.peca)}</select></div>`).join('')}</div>
-        <div class="campos" style="margin-top:12px"><div class="campo"><label for="nx-loja">Loja da entrada</label><select id="nx-loja">${optLojas(lojaPadrao())}</select></div></div>
-        <div class="acoes"><button class="btn btn-ouro" type="button" id="nx-ok">Lançar entrada</button><button class="btn btn-linha" type="button" id="nx-nao">Cancelar</button></div>`, (c) => {
-        U.$('#nx-nao', c).onclick = () => U.fecharCamada();
-        U.$('#nx-ok', c).onclick = () => {
-          const fo = U.K.cad.garantir('fornecedores', { nome: nfe.fornecedor.nome, documento: nfe.fornecedor.documento, cidade: nfe.fornecedor.cidade });
-          let novas = 0;
-          const linhas = itens.map((i, k) => {
-            let id = U.$('#nx-' + k, c).value;
-            if (!id) { const p = tentar(() => P.salvarPeca(est(), { descricao: i.descricao, codFab: i.cProd, unidade: P.UNIDADES[i.unidade] ? i.unidade : 'un', fornecedor: fo.id }, quem())); if (!p) return null; id = p.id; novas++; }
-            return { peca: id, qtd: i.qtd, custo: i.custo };
-          });
-          if (linhas.some((x) => !x)) return;
-          const cp = tentar(() => P.entradaCompra(est(), { data: nfe.data || U.hojeISO(), loja: U.$('#nx-loja', c).value, fornecedor: fo.id, fornecedorNome: fo.nome, nota: nfe.numero, frete: nfe.frete, origem: 'xml',
-            vencimento: nfe.duplicatas.length ? nfe.duplicatas[0].vencimento : P.somarDias(nfe.data || U.hojeISO(), 30), parcelas: Math.max(1, nfe.duplicatas.length), itens: linhas }, quem(), undefined, F()));
-          if (!cp) return;
-          gravar(`NF-e ${nfe.numero} importada (XML) · ${fo.nome} · ${brl(cp.total)}${novas ? ` · ${novas} peças novas cadastradas` : ''}`);
-          U.toast(`NF-e ${nfe.numero} lançada${novas ? ` (${novas} peças novas)` : ''}.`); U.fecharCamada(true); U.rota();
-        };
-      });
-    };
-    inp.click();
-  }
-
-  // ---------- VENDA DE BALCÃO ----------
-  function formBalcao(pre = {}) {
-    if (!editor()) { U.toast('Seu perfil não vende no balcão.', true); return; }
-    const fin = F() ? F().garantir(est()) : null, contas = fin ? fin.contas.filter((x) => !x.inativa) : [];
-    U.abrirCamada('modal larga-modal', `<h2>Venda de peças no balcão</h2><p class="sub">Sai do estoque pelo custo médio e vira conta a receber ("Venda de peças"), com o custo para a DRE.</p>${dlPecas()}
+      <div id="pc-itens" style="display:grid;gap:8px;margin-top:14px">${(e.itens&&e.itens.length?e.itens:[{}]).map(t=>pa(t,!1)).join("")}</div>
+      <div class="acoes" style="margin-top:10px"><button class="btn btn-linha" type="button" id="pc-add">${v.mais}Mais uma pe\xE7a</button><span class="conta" id="pe-tot" style="margin:0"></span></div>
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="pe-ok">Lan\xE7ar entrada</button><button class="btn btn-linha" type="button" id="pe-nao">Cancelar</button></div>`,t=>{const n=o=>{const c=o.reduce((i,p)=>i+p.qtd*p.valor,0)+a.num(a.$("#pe-frete",t).value);a.$("#pe-tot",t).innerHTML=`Total da nota: <b>${b(c)}</b>`},s=ga(t,!1,n);a.$("#pe-frete",t).oninput=()=>n(s()),a.$("#pe-nao",t).onclick=()=>a.fecharCamada(),a.$("#pe-ok",t).onclick=()=>{const o=s().filter(m=>m.texto||m.qtd),c=o.find(m=>!m.peca);if(c){a.toast(`"${c.texto||"item"}" n\xE3o est\xE1 no cat\xE1logo. Cadastre a pe\xE7a antes.`,!0);return}const i=a.$("#pe-forn",t).value.trim();if(!i){a.toast("Informe o fornecedor.",!0);return}const p=a.K.cad.garantir("fornecedores",{nome:i}),d=F(()=>l.entradaCompra(u(),{data:a.$("#pe-data",t).value,loja:a.$("#pe-loja",t).value,fornecedor:p.id,fornecedorNome:p.nome,nota:a.$("#pe-nota",t).value,frete:a.num(a.$("#pe-frete",t).value),vencimento:a.$("#pe-venc",t).value,parcelas:Math.max(1,Math.floor(a.num(a.$("#pe-parc",t).value)||1)),pedido:e.pedido||"",origem:e.origem||"manual",itens:o.map(m=>({peca:m.peca,qtd:m.qtd,custo:m.valor}))},P(),void 0,T()));d&&(A(`Entrada de pe\xE7as${d.nota?" NF "+d.nota:""} \xB7 ${p.nome} \xB7 ${b(d.total)} (${d.itens.length} itens)${d.lancamentos.length?" \xB7 conta a pagar criada":""}`),a.toast(`Entrada lan\xE7ada: ${b(d.total)}${d.lancamentos.length?" \xB7 conta a pagar no Financeiro":""}.`),a.fecharCamada(!0),a.rota())}})}function ya(){if(!M())return;const e=document.createElement("input");e.type="file",e.accept=".xml,text/xml,application/xml",e.onchange=async()=>{const t=e.files[0];if(!t)return;let n;try{n=l.lerNFe(await t.text())}catch(c){a.toast(c.message,!0);return}const s=l.casarNFe(u(),n),o=l.ativas(u());a.abrirCamada("modal larga-modal",`<h2>NF-e ${r(n.numero)} \xB7 ${r(n.fornecedor.nome)}</h2><p class="sub">${E(n.data)} \xB7 ${s.length} itens \xB7 total ${b(n.total)}${n.frete?" \xB7 frete "+b(n.frete):""}${n.duplicatas.length?` \xB7 ${n.duplicatas.length} ${n.duplicatas.length===1?"vencimento":"parcelas"} a partir de ${E(n.duplicatas[0].vencimento)}`:""}. Confira a pe\xE7a de cada linha; sem par, o Anshur cadastra a pe\xE7a nova.</p>
+        <div style="display:grid;gap:10px;margin-top:12px">${s.map((c,i)=>`<div class="campo"><label for="nx-${i}">${r(c.descricao)} \xB7 ${x(c.qtd)} ${r(c.unidade)} \xD7 ${b(c.custo)}${c.cProd?" \xB7 c\xF3d. "+r(c.cProd):""}</label>
+          <select id="nx-${i}">${aa([["","Cadastrar como pe\xE7a nova"]].concat(o.map(p=>[p.id,Y(p)])),c.peca)}</select></div>`).join("")}</div>
+        <div class="campos" style="margin-top:12px"><div class="campo"><label for="nx-loja">Loja da entrada</label><select id="nx-loja">${R(K())}</select></div></div>
+        <div class="acoes"><button class="btn btn-ouro" type="button" id="nx-ok">Lan\xE7ar entrada</button><button class="btn btn-linha" type="button" id="nx-nao">Cancelar</button></div>`,c=>{a.$("#nx-nao",c).onclick=()=>a.fecharCamada(),a.$("#nx-ok",c).onclick=()=>{const i=a.K.cad.garantir("fornecedores",{nome:n.fornecedor.nome,documento:n.fornecedor.documento,cidade:n.fornecedor.cidade});let p=0;const d=s.map((f,g)=>{let j=a.$("#nx-"+g,c).value;if(!j){const C=F(()=>l.salvarPeca(u(),{descricao:f.descricao,codFab:f.cProd,unidade:l.UNIDADES[f.unidade]?f.unidade:"un",fornecedor:i.id},P()));if(!C)return null;j=C.id,p++}return{peca:j,qtd:f.qtd,custo:f.custo}});if(d.some(f=>!f))return;const m=F(()=>l.entradaCompra(u(),{data:n.data||a.hojeISO(),loja:a.$("#nx-loja",c).value,fornecedor:i.id,fornecedorNome:i.nome,nota:n.numero,frete:n.frete,origem:"xml",vencimento:n.duplicatas.length?n.duplicatas[0].vencimento:l.somarDias(n.data||a.hojeISO(),30),parcelas:Math.max(1,n.duplicatas.length),itens:d},P(),void 0,T()));m&&(A(`NF-e ${n.numero} importada (XML) \xB7 ${i.nome} \xB7 ${b(m.total)}${p?` \xB7 ${p} pe\xE7as novas cadastradas`:""}`),a.toast(`NF-e ${n.numero} lan\xE7ada${p?` (${p} pe\xE7as novas)`:""}.`),a.fecharCamada(!0),a.rota())}})},e.click()}function ja(e={}){if(!M()){a.toast("Seu perfil n\xE3o vende no balc\xE3o.",!0);return}const t=T()?T().garantir(u()):null,n=t?t.contas.filter(s=>!s.inativa):[];a.abrirCamada("modal larga-modal",`<h2>Venda de pe\xE7as no balc\xE3o</h2><p class="sub">Sai do estoque pelo custo m\xE9dio e vira conta a receber ("Venda de pe\xE7as"), com o custo para a DRE.</p>${la()}
       <form class="campos" style="margin-top:12px" novalidate>
-        <div class="campo"><label for="pb-cli">Cliente</label><input id="pb-cli" list="dl-pb-cli" autocomplete="off" placeholder="Acha no cadastro ou cria"><datalist id="dl-pb-cli">${U.K.cad.clientes().map((c) => `<option value="${esc(c.nome)}">`).join('')}</datalist></div>
-        <div class="campo"><label for="pb-loja">Loja</label><select id="pb-loja">${optLojas(lojaPadrao())}</select></div>
-        <div class="campo"><label for="pb-data">Data</label><input id="pb-data" type="date" value="${U.hojeISO()}"></div>
-        <div class="campo"><label for="pb-venc">Vencimento</label><input id="pb-venc" type="date" value="${U.hojeISO()}"></div>
+        <div class="campo"><label for="pb-cli">Cliente</label><input id="pb-cli" list="dl-pb-cli" autocomplete="off" placeholder="Acha no cadastro ou cria"><datalist id="dl-pb-cli">${a.K.cad.clientes().map(s=>`<option value="${r(s.nome)}">`).join("")}</datalist></div>
+        <div class="campo"><label for="pb-loja">Loja</label><select id="pb-loja">${R(K())}</select></div>
+        <div class="campo"><label for="pb-data">Data</label><input id="pb-data" type="date" value="${a.hojeISO()}"></div>
+        <div class="campo"><label for="pb-venc">Vencimento</label><input id="pb-venc" type="date" value="${a.hojeISO()}"></div>
         <div class="campo"><label for="pb-desc">Desconto (R$)</label><input id="pb-desc" inputmode="decimal"></div>
-        ${contas.length ? `<div class="campo"><label for="pb-conta">Já recebido em</label><select id="pb-conta">${opt([['', 'Ainda não (fica a receber)']].concat(contas.map((x) => [x.id, x.nome])), '')}</select></div>` : ''}
+        ${n.length?`<div class="campo"><label for="pb-conta">J\xE1 recebido em</label><select id="pb-conta">${aa([["","Ainda n\xE3o (fica a receber)"]].concat(n.map(s=>[s.id,s.nome])),"")}</select></div>`:""}
       </form>
-      <div id="pc-itens" style="display:grid;gap:8px;margin-top:14px">${(pre.itens || [{}]).map((i) => linhaItem(i, true)).join('')}</div>
-      <div class="acoes" style="margin-top:10px"><button class="btn btn-linha" type="button" id="pc-add">${I.mais}Mais uma peça</button><span class="conta" id="pb-tot" style="margin:0"></span></div>
-      <div class="acoes"><button class="btn btn-ouro" type="button" id="pb-ok">Registrar venda</button><button class="btn btn-linha" type="button" id="pb-nao">Cancelar</button></div>`, (c) => {
-      const tot = (l) => { const s = l.reduce((a, i) => a + i.qtd * i.valor, 0) - U.num(U.$('#pb-desc', c).value), loja = U.$('#pb-loja', c).value;
-        const falta = l.filter((i) => i.peca && P.posicao(est(), i.peca, { loja }).qtd < i.qtd);
-        U.$('#pb-tot', c).innerHTML = `Total: <b>${brl(Math.max(0, s))}</b>${falta.length ? ` · <span class="neg">sem saldo: ${falta.map((i) => esc(P.peca(est(), i.peca).descricao) + ' (tem ' + q3(P.posicao(est(), i.peca, { loja }).qtd) + ')').join(', ')}</span>` : ''}`; };
-      const ler = ligarItens(c, true, tot); U.$('#pb-desc', c).oninput = () => tot(ler()); U.$('#pb-loja', c).onchange = () => tot(ler());
-      U.$('#pb-nao', c).onclick = () => U.fecharCamada();
-      U.$('#pb-ok', c).onclick = () => {
-        const itens = ler().filter((i) => i.texto || i.qtd); const sem = itens.find((i) => !i.peca); if (sem) { U.toast(`"${sem.texto || 'item'}" não está no catálogo.`, true); return; }
-        const cn = U.$('#pb-cli', c).value.trim(), cl = cn ? U.K.cad.garantir('clientes', { nome: cn }) : null, conta = U.$('#pb-conta', c) ? U.$('#pb-conta', c).value : '';
-        const v = tentar(() => P.vendaBalcao(est(), { data: U.$('#pb-data', c).value, loja: U.$('#pb-loja', c).value, cliente: cl ? cl.id : '', clienteNome: cl ? cl.nome : '', desconto: U.num(U.$('#pb-desc', c).value), vencimento: U.$('#pb-venc', c).value,
-          recebido: conta ? { conta, forma: 'pix' } : null, sufixo: U.NV ? '-' + Math.random().toString(36).slice(2, 5).toUpperCase() : '', itens: itens.map((i) => ({ peca: i.peca, qtd: i.qtd, preco: i.valor })) }, quem(), undefined, F()));
-        if (!v) return;
-        gravar(`Venda de balcão ${v.numero}${cl ? ' · ' + cl.nome : ''} · ${brl(v.total)} (custo ${brl(v.custo)})${conta ? ' · recebida' : ' · a receber'}`);
-        U.toast(`Venda ${v.numero} registrada: ${brl(v.total)}.`); U.fecharCamada(true); U.rota();
-      };
-    });
-  }
-  // ---------- TRANSFERÊNCIA ----------
-  function formTransf(pre = {}) {
-    if (!editor()) return;
-    if (lojas().length < 2) { U.toast('Transferência precisa de duas lojas (Configurações › Lojas).', true); return; }
-    const p = pre.peca ? P.peca(est(), pre.peca) : null;
-    U.abrirCamada('modal', `<h2>Transferir entre lojas</h2>${dlPecas()}<form class="campos" style="margin-top:12px" novalidate>
-      <div class="campo inteiro"><label for="pt-peca">Peça</label><input id="pt-peca" list="dl-pc" value="${p ? esc(rotPeca(p)) : ''}" autocomplete="off"></div>
-      <div class="campo"><label for="pt-de">De</label><select id="pt-de">${optLojas(lojaPadrao())}</select></div><div class="campo"><label for="pt-para">Para</label><select id="pt-para">${optLojas(lojas().find((l) => l !== lojaPadrao()))}</select></div>
-      <div class="campo"><label for="pt-qtd">Quantidade</label><input id="pt-qtd" inputmode="decimal" value="1"></div><div class="campo"><label for="pt-data">Data</label><input id="pt-data" type="date" value="${U.hojeISO()}"></div>
+      <div id="pc-itens" style="display:grid;gap:8px;margin-top:14px">${(e.itens||[{}]).map(s=>pa(s,!0)).join("")}</div>
+      <div class="acoes" style="margin-top:10px"><button class="btn btn-linha" type="button" id="pc-add">${v.mais}Mais uma pe\xE7a</button><span class="conta" id="pb-tot" style="margin:0"></span></div>
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="pb-ok">Registrar venda</button><button class="btn btn-linha" type="button" id="pb-nao">Cancelar</button></div>`,s=>{const o=i=>{const p=i.reduce((f,g)=>f+g.qtd*g.valor,0)-a.num(a.$("#pb-desc",s).value),d=a.$("#pb-loja",s).value,m=i.filter(f=>f.peca&&l.posicao(u(),f.peca,{loja:d}).qtd<f.qtd);a.$("#pb-tot",s).innerHTML=`Total: <b>${b(Math.max(0,p))}</b>${m.length?` \xB7 <span class="neg">sem saldo: ${m.map(f=>r(l.peca(u(),f.peca).descricao)+" (tem "+x(l.posicao(u(),f.peca,{loja:d}).qtd)+")").join(", ")}</span>`:""}`},c=ga(s,!0,o);a.$("#pb-desc",s).oninput=()=>o(c()),a.$("#pb-loja",s).onchange=()=>o(c()),a.$("#pb-nao",s).onclick=()=>a.fecharCamada(),a.$("#pb-ok",s).onclick=()=>{const i=c().filter(j=>j.texto||j.qtd),p=i.find(j=>!j.peca);if(p){a.toast(`"${p.texto||"item"}" n\xE3o est\xE1 no cat\xE1logo.`,!0);return}const d=a.$("#pb-cli",s).value.trim(),m=d?a.K.cad.garantir("clientes",{nome:d}):null,f=a.$("#pb-conta",s)?a.$("#pb-conta",s).value:"",g=F(()=>l.vendaBalcao(u(),{data:a.$("#pb-data",s).value,loja:a.$("#pb-loja",s).value,cliente:m?m.id:"",clienteNome:m?m.nome:"",desconto:a.num(a.$("#pb-desc",s).value),vencimento:a.$("#pb-venc",s).value,recebido:f?{conta:f,forma:"pix"}:null,sufixo:a.NV?"-"+Math.random().toString(36).slice(2,5).toUpperCase():"",itens:i.map(j=>({peca:j.peca,qtd:j.qtd,preco:j.valor}))},P(),void 0,T()));g&&(A(`Venda de balc\xE3o ${g.numero}${m?" \xB7 "+m.nome:""} \xB7 ${b(g.total)} (custo ${b(g.custo)})${f?" \xB7 recebida":" \xB7 a receber"}`),a.toast(`Venda ${g.numero} registrada: ${b(g.total)}.`),a.fecharCamada(!0),a.rota())}})}function xa(e={}){if(!M())return;if(O().length<2){a.toast("Transfer\xEAncia precisa de duas lojas (Configura\xE7\xF5es \u203A Lojas).",!0);return}const t=e.peca?l.peca(u(),e.peca):null;a.abrirCamada("modal",`<h2>Transferir entre lojas</h2>${la()}<form class="campos" style="margin-top:12px" novalidate>
+      <div class="campo inteiro"><label for="pt-peca">Pe\xE7a</label><input id="pt-peca" list="dl-pc" value="${t?r(Y(t)):""}" autocomplete="off"></div>
+      <div class="campo"><label for="pt-de">De</label><select id="pt-de">${R(K())}</select></div><div class="campo"><label for="pt-para">Para</label><select id="pt-para">${R(O().find(n=>n!==K()))}</select></div>
+      <div class="campo"><label for="pt-qtd">Quantidade</label><input id="pt-qtd" inputmode="decimal" value="1"></div><div class="campo"><label for="pt-data">Data</label><input id="pt-data" type="date" value="${a.hojeISO()}"></div>
       <p class="conta inteiro" id="pt-saldo" style="margin:0"></p></form>
-      <div class="acoes"><button class="btn btn-ouro" type="button" id="pt-ok">Transferir</button><button class="btn btn-linha" type="button" id="pt-nao">Cancelar</button></div>`, (c) => {
-      const saldo = () => { const x = lerPeca(U.$('#pt-peca', c).value); U.$('#pt-saldo', c).textContent = x ? `Saldo em ${U.$('#pt-de', c).value}: ${q3(P.posicao(est(), x.id, { loja: U.$('#pt-de', c).value }).qtd)} ${x.unidade}` : ''; };
-      U.$('#pt-peca', c).oninput = saldo; U.$('#pt-de', c).onchange = saldo; saldo();
-      U.$('#pt-nao', c).onclick = () => U.fecharCamada();
-      U.$('#pt-ok', c).onclick = () => {
-        const x = lerPeca(U.$('#pt-peca', c).value); if (!x) { U.toast('Escolha a peça do catálogo.', true); return; }
-        const m = tentar(() => P.transferir(est(), { peca: x.id, qtd: U.num(U.$('#pt-qtd', c).value), de: U.$('#pt-de', c).value, para: U.$('#pt-para', c).value, data: U.$('#pt-data', c).value }, quem()));
-        if (!m) return; gravar(`Transferência: ${q3(m.qtd)} × ${x.descricao} de ${m.loja} para ${m.para}`); U.toast('Transferência registrada.'); U.fecharCamada(true); U.rota();
-      };
-    });
-  }
-
-  // ---------- MOVIMENTAÇÕES ----------
-  const fm = { tipo: '', q: '' };
-  function telaMov() {
-    const l = P.garantir(est()).movimentos.filter((m) => (!fl().loja || m.loja === fl().loja || m.para === fl().loja) && (!fm.tipo || m.tipo === fm.tipo) && (!fm.q || P.normal([P.nomePeca(P.peca(est(), m.peca)), m.obs, m.por].join(' ')).includes(P.normal(fm.q))))
-      .sort((a, b) => String(b.data).localeCompare(String(a.data)) || String(b.quando).localeCompare(String(a.quando)));
-    U.tela.innerHTML = cab('Movimentações', 'Entradas, saídas (OS e balcão), transferências, ajustes de inventário e devoluções. Nada é apagado: corrige-se com outro movimento.', botoes()) + `
-      <section class="painel"><div class="fin-filtros"><div class="abas-modo" role="group" aria-label="Tipo">${[['', 'Todos'], ['entrada', 'Entradas'], ['saida', 'Saídas'], ['transf', 'Transferências'], ['ajuste', 'Ajustes'], ['devolucao', 'Devoluções']].map(([v, n]) => `<button type="button" data-tp="${v}" aria-pressed="${fm.tipo === v}">${n}</button>`).join('')}</div>
-        <div class="campos fin-campos"><div class="campo"><label for="pm-q">Buscar</label><input id="pm-q" value="${esc(fm.q)}" placeholder="Peça, nota, OS, pessoa"></div></div></div>
-        ${tabelaMov(l.slice(0, 300))}<div class="fin-rodape"><span>${l.length} movimentos${l.length > 300 ? ' (mostrando 300)' : ''}</span><button class="btn btn-linha" type="button" id="pm-csv">Exportar planilha</button></div></section>`;
-    U.$$('[data-tp]', U.tela).forEach((b) => b.onclick = () => { fm.tipo = b.dataset.tp; telaMov(); });
-    const q = U.$('#pm-q'); q.oninput = () => { fm.q = q.value; clearTimeout(telaMov.t); telaMov.t = setTimeout(() => { telaMov(); const i = U.$('#pm-q'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 300); };
-    U.$('#pm-csv').onclick = () => U.baixarCSV(`anshur-movimentos-pecas-${U.hojeISO()}.csv`, [['Data', 'Tipo', 'Origem', 'SKU', 'Peça', 'Quantidade', 'Custo unitário', 'Loja', 'Para', 'Obs', 'Por', 'Id']]
-      .concat(l.map((m) => { const p = P.peca(est(), m.peca) || {}; return [dBR(m.data), m.tipo, P.ORIGENS[m.origem] || '', p.sku, p.descricao, String(m.qtd).replace('.', ','), String(m.custo || '').replace('.', ','), m.loja, m.para || '', m.obs || '', m.por || '', m.id]; })));
-    ligarBotoes();
-  }
-
-  // ---------- INVENTÁRIO ----------
-  let invLoja = '';
-  function telaInventario() {
-    invLoja = invLoja || lojaPadrao();
-    const lst = P.estoque(est(), { loja: invLoja }).filter((e) => e.qtd !== 0 || (e.peca.minimos || {})[invLoja]).sort((a, b) => String(a.peca.local).localeCompare(String(b.peca.local)) || a.peca.descricao.localeCompare(b.peca.descricao));
-    const hist = P.garantir(est()).inventarios.slice().sort((a, b) => String(b.data).localeCompare(String(a.data)));
-    const pode = ajustador();
-    U.tela.innerHTML = cab('Inventário', 'Conte o que tem na prateleira. Cada diferença vira um ajuste com motivo (perda, quebra, erro de lançamento). Ordem por localização, para contar andando.', '') + `
-      <section class="painel"><div class="campos fin-campos" style="margin-bottom:12px"><div class="campo"><label for="iv-loja">Loja</label><select id="iv-loja">${optLojas(invLoja)}</select></div>
-        <div class="campo"><label for="iv-data">Data da contagem</label><input id="iv-data" type="date" value="${U.hojeISO()}"></div><div class="campo"><label for="iv-mot">Motivo geral das diferenças</label><input id="iv-mot" placeholder="Ex.: inventário mensal"></div></div>
-        ${!pode ? '<p class="conta">Só o dono e o gerente fazem ajuste de inventário. Você pode conferir os saldos abaixo.</p>' : ''}
-        ${lst.length ? `<div class="tabela-wrap"><table class="tabela fin-tab"><thead><tr><th>Peça</th><th class="n">Sistema</th><th class="n">Contado</th><th>Motivo da diferença</th></tr></thead><tbody>
-          ${lst.map((e, i) => `<tr data-iv="${esc(e.peca.id)}"><td><b>${esc(e.peca.descricao)}</b><span class="fin-sub">${esc(e.peca.sku)}${e.peca.local ? ' · ' + esc(e.peca.local) : ''}</span></td><td class="n">${q3(e.qtd)}</td>
-            <td class="n"><input class="ofc-num" data-cont aria-label="Contado de ${esc(e.peca.descricao)}" inputmode="decimal" ${pode ? '' : 'disabled'}></td><td><input class="ofc-mot" data-mot aria-label="Motivo ${i + 1}" placeholder="se diferente" ${pode ? '' : 'disabled'}></td></tr>`).join('')}</tbody></table></div>`
-        : vazio('Nenhuma peça com saldo nesta loja.')}
-        ${pode && lst.length ? '<div class="acoes"><button class="btn btn-ouro" type="button" id="iv-ok">Fechar inventário e ajustar</button></div>' : ''}</section>
-      <section class="painel bloco"><div class="painel-cab"><h2>${I.lista}Inventários feitos</h2></div>
-        ${hist.length ? `<ul class="fin-saldos">${hist.slice(0, 12).map((v) => `<li><span><b>${dBR(v.data)}${v.loja ? ' · ' + esc(v.loja) : ''}</b><span>${v.itens.length} peças contadas · ${v.itens.filter((i) => i.diferenca).length} diferenças · por ${esc(v.por)}${v.motivo ? ' · ' + esc(v.motivo) : ''}</span></span><b class="${v.ajuste < 0 ? 'neg' : ''}">${brl(v.ajuste)}</b></li>`).join('')}</ul>` : vazio('Nenhum inventário ainda.')}</section>`;
-    U.$('#iv-loja').onchange = (e) => { invLoja = e.target.value; telaInventario(); };
-    const b = U.$('#iv-ok'); if (b) b.onclick = () => {
-      const contagens = U.$$('[data-iv]', U.tela).map((tr) => ({ peca: tr.dataset.iv, contado: U.$('[data-cont]', tr).value.trim() === '' ? '' : U.num(U.$('[data-cont]', tr).value), motivo: U.$('[data-mot]', tr).value.trim() })).filter((x) => x.contado !== '');
-      const inv = tentar(() => P.inventario(est(), { loja: invLoja, data: U.$('#iv-data').value, motivo: U.$('#iv-mot').value, contagens }, quem()));
-      if (!inv) return; gravar(`Inventário ${invLoja || ''} fechado: ${inv.itens.length} peças, ${inv.itens.filter((i) => i.diferenca).length} diferenças, ajuste ${brl(inv.ajuste)}`); U.toast('Inventário fechado.'); telaInventario();
-    };
-  }
-
-  // ---------- COMPRAS: mínimo, pedido sugerido, pedidos e compras ----------
-  function telaCompras() {
-    const P0 = P.garantir(est()), ab = P.abaixoMinimo(est(), fl()), sug = P.pedidoSugerido(est(), fl());
-    const abertos = P0.pedidos.filter((p) => p.status === 'aberto' && (!fl().loja || p.loja === fl().loja)), compras = P0.compras.slice().sort((a, b) => String(b.data).localeCompare(String(a.data))).slice(0, 15);
-    const podeFin = F() && F().podeVer(U.eu().perfil) && raiz.FINANCEIRO_UI;
-    U.tela.innerHTML = cab('Compras e estoque mínimo', 'O que está abaixo do mínimo, o pedido sugerido por fornecedor (repõe até 2× o mínimo) e as compras lançadas.', editor() ? `<button class="btn btn-ouro" type="button" data-pc="entrada">${I.entra}<span>Entrada (compra)</span></button><button class="btn btn-linha" type="button" data-pc="xml">${I.doc}<span>Importar XML</span></button>` : '') + `
-      <section class="painel"><div class="painel-cab"><h2>${I.carrinho}Pedido sugerido</h2><p>${ab.length} ${ab.length === 1 ? 'peça abaixo' : 'peças abaixo'} do mínimo</p></div>
-        ${sug.length ? sug.map((g, k) => { const fo = U.K.cad.fornecedor(g.fornecedor); return `<div class="ofc-bloco"><div class="painel-cab" style="margin-bottom:8px"><h3 style="font-size:17px">${esc(fo ? fo.nome : 'Sem fornecedor habitual')}${g.loja ? ' · ' + esc(g.loja) : ''}</h3><p>${brl(g.total)} a custo médio</p></div>
-          <ul class="lista-motivos">${g.itens.map((i) => { const p = P.peca(est(), i.peca); return `<li><span>${esc(p.descricao)} <small class="sub">${esc(p.sku)}</small></span><b>${q3(i.qtd)} ${esc(p.unidade)}</b></li>`; }).join('')}</ul>
-          ${editor() ? `<div class="acoes"><button class="btn btn-ouro btn-p" type="button" data-gerar="${k}">Gerar pedido</button>${fo && fo.telefone ? `<a class="btn btn-linha btn-p" target="_blank" rel="noopener" href="https://wa.me/${('55' + String(fo.telefone).replace(/\D/g, '')).replace(/^5555/, '55')}?text=${encodeURIComponent(P.textoPedido({ numero: 'sugerido', loja: g.loja, itens: g.itens }, { revenda: U.A.revenda.nome, nome: (id) => P.nomePeca(P.peca(est(), id)) }))}">${I.zap}Mandar ao fornecedor</a>` : ''}</div>` : ''}</div>`; }).join('') : vazio('Nada para pedir: nenhuma peça abaixo do mínimo (ou já está num pedido em aberto).')}</section>
+      <div class="acoes"><button class="btn btn-ouro" type="button" id="pt-ok">Transferir</button><button class="btn btn-linha" type="button" id="pt-nao">Cancelar</button></div>`,n=>{const s=()=>{const o=oa(a.$("#pt-peca",n).value);a.$("#pt-saldo",n).textContent=o?`Saldo em ${a.$("#pt-de",n).value}: ${x(l.posicao(u(),o.id,{loja:a.$("#pt-de",n).value}).qtd)} ${o.unidade}`:""};a.$("#pt-peca",n).oninput=s,a.$("#pt-de",n).onchange=s,s(),a.$("#pt-nao",n).onclick=()=>a.fecharCamada(),a.$("#pt-ok",n).onclick=()=>{const o=oa(a.$("#pt-peca",n).value);if(!o){a.toast("Escolha a pe\xE7a do cat\xE1logo.",!0);return}const c=F(()=>l.transferir(u(),{peca:o.id,qtd:a.num(a.$("#pt-qtd",n).value),de:a.$("#pt-de",n).value,para:a.$("#pt-para",n).value,data:a.$("#pt-data",n).value},P()));c&&(A(`Transfer\xEAncia: ${x(c.qtd)} \xD7 ${o.descricao} de ${c.loja} para ${c.para}`),a.toast("Transfer\xEAncia registrada."),a.fecharCamada(!0),a.rota())}})}const L={tipo:"",q:""};function Z(){const e=l.garantir(u()).movimentos.filter(n=>(!$().loja||n.loja===$().loja||n.para===$().loja)&&(!L.tipo||n.tipo===L.tipo)&&(!L.q||l.normal([l.nomePeca(l.peca(u(),n.peca)),n.obs,n.por].join(" ")).includes(l.normal(L.q)))).sort((n,s)=>String(s.data).localeCompare(String(n.data))||String(s.quando).localeCompare(String(n.quando)));a.tela.innerHTML=X("Movimenta\xE7\xF5es","Entradas, sa\xEDdas (OS e balc\xE3o), transfer\xEAncias, ajustes de invent\xE1rio e devolu\xE7\xF5es. Nada \xE9 apagado: corrige-se com outro movimento.",ea())+`
+      <section class="painel"><div class="fin-filtros"><div class="abas-modo" role="group" aria-label="Tipo">${[["","Todos"],["entrada","Entradas"],["saida","Sa\xEDdas"],["transf","Transfer\xEAncias"],["ajuste","Ajustes"],["devolucao","Devolu\xE7\xF5es"]].map(([n,s])=>`<button type="button" data-tp="${n}" aria-pressed="${L.tipo===n}">${s}</button>`).join("")}</div>
+        <div class="campos fin-campos"><div class="campo"><label for="pm-q">Buscar</label><input id="pm-q" value="${r(L.q)}" placeholder="Pe\xE7a, nota, OS, pessoa"></div></div></div>
+        ${ra(e.slice(0,300))}<div class="fin-rodape"><span>${e.length} movimentos${e.length>300?" (mostrando 300)":""}</span><button class="btn btn-linha" type="button" id="pm-csv">Exportar planilha</button></div></section>`,a.$$("[data-tp]",a.tela).forEach(n=>n.onclick=()=>{L.tipo=n.dataset.tp,Z()});const t=a.$("#pm-q");t.oninput=()=>{L.q=t.value,clearTimeout(Z.t),Z.t=setTimeout(()=>{Z();const n=a.$("#pm-q");n.focus(),n.setSelectionRange(n.value.length,n.value.length)},300)},a.$("#pm-csv").onclick=()=>a.baixarCSV(`anshur-movimentos-pecas-${a.hojeISO()}.csv`,[["Data","Tipo","Origem","SKU","Pe\xE7a","Quantidade","Custo unit\xE1rio","Loja","Para","Obs","Por","Id"]].concat(e.map(n=>{const s=l.peca(u(),n.peca)||{};return[E(n.data),n.tipo,l.ORIGENS[n.origem]||"",s.sku,s.descricao,String(n.qtd).replace(".",","),String(n.custo||"").replace(".",","),n.loja,n.para||"",n.obs||"",n.por||"",n.id]}))),J()}let I="";function ma(){I=I||K();const e=l.estoque(u(),{loja:I}).filter(o=>o.qtd!==0||(o.peca.minimos||{})[I]).sort((o,c)=>String(o.peca.local).localeCompare(String(c.peca.local))||o.peca.descricao.localeCompare(c.peca.descricao)),t=l.garantir(u()).inventarios.slice().sort((o,c)=>String(c.data).localeCompare(String(o.data))),n=$a();a.tela.innerHTML=X("Invent\xE1rio","Conte o que tem na prateleira. Cada diferen\xE7a vira um ajuste com motivo (perda, quebra, erro de lan\xE7amento). Ordem por localiza\xE7\xE3o, para contar andando.","")+`
+      <section class="painel"><div class="campos fin-campos" style="margin-bottom:12px"><div class="campo"><label for="iv-loja">Loja</label><select id="iv-loja">${R(I)}</select></div>
+        <div class="campo"><label for="iv-data">Data da contagem</label><input id="iv-data" type="date" value="${a.hojeISO()}"></div><div class="campo"><label for="iv-mot">Motivo geral das diferen\xE7as</label><input id="iv-mot" placeholder="Ex.: invent\xE1rio mensal"></div></div>
+        ${n?"":'<p class="conta">S\xF3 o dono e o gerente fazem ajuste de invent\xE1rio. Voc\xEA pode conferir os saldos abaixo.</p>'}
+        ${e.length?`<div class="tabela-wrap"><table class="tabela fin-tab"><thead><tr><th>Pe\xE7a</th><th class="n">Sistema</th><th class="n">Contado</th><th>Motivo da diferen\xE7a</th></tr></thead><tbody>
+          ${e.map((o,c)=>`<tr data-iv="${r(o.peca.id)}"><td><b>${r(o.peca.descricao)}</b><span class="fin-sub">${r(o.peca.sku)}${o.peca.local?" \xB7 "+r(o.peca.local):""}</span></td><td class="n">${x(o.qtd)}</td>
+            <td class="n"><input class="ofc-num" data-cont aria-label="Contado de ${r(o.peca.descricao)}" inputmode="decimal" ${n?"":"disabled"}></td><td><input class="ofc-mot" data-mot aria-label="Motivo ${c+1}" placeholder="se diferente" ${n?"":"disabled"}></td></tr>`).join("")}</tbody></table></div>`:y("Nenhuma pe\xE7a com saldo nesta loja.")}
+        ${n&&e.length?'<div class="acoes"><button class="btn btn-ouro" type="button" id="iv-ok">Fechar invent\xE1rio e ajustar</button></div>':""}</section>
+      <section class="painel bloco"><div class="painel-cab"><h2>${v.lista}Invent\xE1rios feitos</h2></div>
+        ${t.length?`<ul class="fin-saldos">${t.slice(0,12).map(o=>`<li><span><b>${E(o.data)}${o.loja?" \xB7 "+r(o.loja):""}</b><span>${o.itens.length} pe\xE7as contadas \xB7 ${o.itens.filter(c=>c.diferenca).length} diferen\xE7as \xB7 por ${r(o.por)}${o.motivo?" \xB7 "+r(o.motivo):""}</span></span><b class="${o.ajuste<0?"neg":""}">${b(o.ajuste)}</b></li>`).join("")}</ul>`:y("Nenhum invent\xE1rio ainda.")}</section>`,a.$("#iv-loja").onchange=o=>{I=o.target.value,ma()};const s=a.$("#iv-ok");s&&(s.onclick=()=>{const o=a.$$("[data-iv]",a.tela).map(i=>({peca:i.dataset.iv,contado:a.$("[data-cont]",i).value.trim()===""?"":a.num(a.$("[data-cont]",i).value),motivo:a.$("[data-mot]",i).value.trim()})).filter(i=>i.contado!==""),c=F(()=>l.inventario(u(),{loja:I,data:a.$("#iv-data").value,motivo:a.$("#iv-mot").value,contagens:o},P()));c&&(A(`Invent\xE1rio ${I||""} fechado: ${c.itens.length} pe\xE7as, ${c.itens.filter(i=>i.diferenca).length} diferen\xE7as, ajuste ${b(c.ajuste)}`),a.toast("Invent\xE1rio fechado."),ma())})}function ba(){const e=l.garantir(u()),t=l.abaixoMinimo(u(),$()),n=l.pedidoSugerido(u(),$()),s=e.pedidos.filter(i=>i.status==="aberto"&&(!$().loja||i.loja===$().loja)),o=e.compras.slice().sort((i,p)=>String(p.data).localeCompare(String(i.data))).slice(0,15),c=T()&&T().podeVer(a.eu().perfil)&&D.FINANCEIRO_UI;a.tela.innerHTML=X("Compras e estoque m\xEDnimo","O que est\xE1 abaixo do m\xEDnimo, o pedido sugerido por fornecedor (rep\xF5e at\xE9 2\xD7 o m\xEDnimo) e as compras lan\xE7adas.",M()?`<button class="btn btn-ouro" type="button" data-pc="entrada">${v.entra}<span>Entrada (compra)</span></button><button class="btn btn-linha" type="button" data-pc="xml">${v.doc}<span>Importar XML</span></button>`:"")+`
+      <section class="painel"><div class="painel-cab"><h2>${v.carrinho}Pedido sugerido</h2><p>${t.length} ${t.length===1?"pe\xE7a abaixo":"pe\xE7as abaixo"} do m\xEDnimo</p></div>
+        ${n.length?n.map((i,p)=>{const d=a.K.cad.fornecedor(i.fornecedor);return`<div class="ofc-bloco"><div class="painel-cab" style="margin-bottom:8px"><h3 style="font-size:17px">${r(d?d.nome:"Sem fornecedor habitual")}${i.loja?" \xB7 "+r(i.loja):""}</h3><p>${b(i.total)} a custo m\xE9dio</p></div>
+          <ul class="lista-motivos">${i.itens.map(m=>{const f=l.peca(u(),m.peca);return`<li><span>${r(f.descricao)} <small class="sub">${r(f.sku)}</small></span><b>${x(m.qtd)} ${r(f.unidade)}</b></li>`}).join("")}</ul>
+          ${M()?`<div class="acoes"><button class="btn btn-ouro btn-p" type="button" data-gerar="${p}">Gerar pedido</button>${d&&d.telefone?`<a class="btn btn-linha btn-p" target="_blank" rel="noopener" href="https://wa.me/${("55"+String(d.telefone).replace(/\D/g,"")).replace(/^5555/,"55")}?text=${encodeURIComponent(l.textoPedido({numero:"sugerido",loja:i.loja,itens:i.itens},{revenda:a.A.revenda.nome,nome:m=>l.nomePeca(l.peca(u(),m))}))}">${v.zap}Mandar ao fornecedor</a>`:""}</div>`:""}</div>`}).join(""):y("Nada para pedir: nenhuma pe\xE7a abaixo do m\xEDnimo (ou j\xE1 est\xE1 num pedido em aberto).")}</section>
       <div class="grade-2 bloco">
-        <section class="painel"><div class="painel-cab"><h2>${I.lista}Pedidos em aberto</h2></div>
-          ${abertos.length ? `<ul class="fin-saldos">${abertos.map((p) => `<li><span><b>${esc(p.numero)} · ${esc(nomeForn(p.fornecedor) || 'Sem fornecedor')}</b><span>${dBR(p.data)}${p.loja ? ' · ' + esc(p.loja) : ''} · ${p.itens.length} itens · ${brl(p.total)}</span>
-            ${editor() ? `<span class="acoes" style="margin-top:6px"><button class="btn btn-ouro btn-p" type="button" data-receber="${esc(p.id)}">Receber</button><button class="btn btn-linha btn-p" type="button" data-cancelar="${esc(p.id)}">Cancelar</button></span>` : ''}</span></li>`).join('')}</ul>` : vazio('Nenhum pedido em aberto.')}</section>
-        <section class="painel"><div class="painel-cab"><h2>${I.entra}Compras lançadas</h2></div>
-          ${compras.length ? `<ul class="fin-saldos">${compras.map((c) => `<li><span><b>${c.nota ? 'NF ' + esc(c.nota) : 'Sem nota'} · ${esc(c.fornecedorNome || nomeForn(c.fornecedor) || '—')}</b><span>${dBR(c.data)}${c.loja ? ' · ' + esc(c.loja) : ''} · ${c.itens.length} itens${c.origem === 'xml' ? ' · XML' : ''}${c.lancamentos.length ? ` · ${podeFin ? `<button class="link" type="button" data-lanc-fin="${esc(c.lancamentos[0])}">conta a pagar</button>` : 'conta a pagar'}` : ''}</span></span><b>${brl(c.total)}</b></li>`).join('')}</ul>` : vazio('Nenhuma compra lançada.')}</section>
-      </div>`;
-    U.$$('[data-gerar]', U.tela).forEach((b) => b.onclick = () => { const g = sug[+b.dataset.gerar]; const p = tentar(() => P.criarPedido(est(), { fornecedor: g.fornecedor, loja: g.loja, itens: g.itens, sufixo: U.NV ? '-' + Math.random().toString(36).slice(2, 5).toUpperCase() : '' }, quem())); if (!p) return; gravar(`Pedido de compra ${p.numero} gerado · ${nomeForn(p.fornecedor) || 'sem fornecedor'} · ${brl(p.total)}`); U.toast(`Pedido ${p.numero} gerado.`); telaCompras(); });
-    U.$$('[data-receber]', U.tela).forEach((b) => b.onclick = () => { const p = P0.pedidos.find((x) => x.id === b.dataset.receber); formEntrada({ fornecedor: p.fornecedor, loja: p.loja, pedido: p.id, origem: 'pedido', itens: p.itens.map((i) => ({ peca: i.peca, qtd: i.qtd, custo: i.custo })) }); });
-    U.$$('[data-cancelar]', U.tela).forEach((b) => b.onclick = () => U.confirmar('Cancelar o pedido?', 'O pedido sai da lista de abertos e as peças voltam ao pedido sugerido.', 'Cancelar pedido', () => { const p = tentar(() => P.cancelarPedido(est(), b.dataset.cancelar, 'cancelado na tela', quem())); if (p) { gravar(`Pedido ${p.numero} cancelado`); telaCompras(); } }));
-    U.$$('[data-lanc-fin]', U.tela).forEach((b) => b.onclick = () => raiz.FINANCEIRO_UI.detalhe(b.dataset.lancFin));
-    ligarBotoes();
-  }
-
-  // ---------- CURVA ABC ----------
-  let abcDias = 365;
-  function telaABC() {
-    const c = P.curvaABC(est(), { hoje: U.hojeISO(), dias: abcDias, loja: fl().loja });
-    const g = new Map(P.giro(est(), { hoje: U.hojeISO(), dias: abcDias, loja: fl().loja }).map((x) => [x.peca.id, x]));
-    const cob = (x) => (!x || !(x.qtd > 0) ? '—' : x.cobertura === Infinity ? 'sem saída' : x.cobertura > 999 ? '999+ dias' : x.cobertura + ' dias');
-    const giroTxt = (x) => (!x || x.giro == null ? '—' : x.giro.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '×');
-    U.tela.innerHTML = cab('Curva ABC e giro', 'Peças ordenadas pelo valor consumido (OS e balcão, a custo). A: até 80% do valor; B: até 95%; C: o resto e o que não girou. Giro = consumo levado para 12 meses ÷ estoque a custo hoje; cobertura = quantos dias o saldo dura no ritmo do período. Estoque mínimo e compras devem olhar primeiro a classe A; a classe C sem saída é estoque parado.', '') + `
-      <div class="kpis fin-k fin-kpis3">${['A', 'B', 'C'].map((k) => `<div class="kpi ${k === 'A' ? 'k-marfim' : ''}"><span class="rot">${I.barras}Classe ${k}</span><span class="val">${c.resumo[k].n}</span><span class="exp">${brl(c.resumo[k].valor)} consumidos</span></div>`).join('')}</div>
-      <section class="painel"><div class="fin-filtros"><div class="abas-modo" role="group" aria-label="Período">${[[90, '90 dias'], [180, '6 meses'], [365, '12 meses']].map(([v, n]) => `<button type="button" data-dias="${v}" aria-pressed="${abcDias === v}">${n}</button>`).join('')}</div></div>
-        ${c.linhas.length ? `<div class="tabela-wrap"><table class="tabela fin-tab"><thead><tr><th>Classe</th><th>Peça</th><th class="n">Consumo</th><th class="n">Giro/ano</th><th class="n oc-esconde">Cobertura</th><th class="n oc-esconde">% acumulado</th></tr></thead><tbody>
-          ${c.linhas.map((l) => { const x = g.get(l.peca.id); return `<tr data-peca="${esc(l.peca.id)}" class="clicavel" tabindex="0"><td><span class="risco ${l.classe === 'A' ? 'alto' : l.classe === 'B' ? 'medio' : 'baixo'}">${l.classe}</span></td><td><b>${esc(l.peca.descricao)}</b><span class="fin-sub">${esc(l.peca.sku)}${l.semGiro ? ' · sem giro no período' : ''}${x && x.qtd > 0 ? ' · ' + q3(x.qtd) + ' ' + esc(l.peca.unidade) + ' em estoque' : ''}</span></td><td class="n">${brl(l.valor)}</td><td class="n">${giroTxt(x)}</td><td class="n oc-esconde">${cob(x)}</td><td class="n oc-esconde">${l.valor ? U.pct(l.acumulado) : '—'}</td></tr>`; }).join('')}</tbody></table></div>` : vazio('Nenhuma peça cadastrada.')}</section>`;
-    U.$$('[data-dias]', U.tela).forEach((b) => b.onclick = () => { abcDias = +b.dataset.dias; telaABC(); });
-    ligarBotoes();
-  }
-
-  // ---------- demonstração: dados fictícios coerentes com os modelos da demo ----------
-  function semear(ui) {
-    U = ui; const e = ui.estado; if (ui.OP) return; // nunca no ambiente real
-    const PP = P.garantir(e); if (PP.semente) return;
-    const Fin = raiz.FINANCEIRO, hoje = ui.hojeISO(), d = (n) => P.somarDias(hoje, -n), ag = (n) => new Date(Date.now() - n * 864e5).toISOString();
-    const ls = e.lojas.length ? e.lojas : [''], l0 = ls[0], l1 = ls[1] || l0, l2 = ls[2] || l0;
-    const fo = ['Distribuidora Agro Peças (fictícia)', 'Lubrificantes Mogiana (fictícia)', 'Pneus Campo Forte (fictícia)', 'Hidráulica Paulista (fictícia)']
-      .map((n, i) => ui.K.garantirCadastro(e, 'fornecedores', { nome: n, cidade: ['Ribeirão Preto', 'Orlândia', 'Sertãozinho', 'Franca'][i], telefone: `(16) 3${String(721 + i * 13)}-${String(4100 + i * 77)}` }));
-    // [descrição, cód. fabricante (fictício), marca, compatível, local, unidade, preço, mínimo loja 0, fornecedor]
-    const CAT = [
-      ['Filtro de óleo do motor', 'FX-10021', 'John Deere', '6125J, CH570', 'A-01-1', 'un', 189, 6, 0], ['Filtro de combustível primário', 'FX-10044', 'John Deere', '6125J, CH570', 'A-01-2', 'un', 236, 4, 0],
-      ['Filtro de ar externo', 'FX-20310', 'Massey Ferguson', 'MF 4709', 'A-02-1', 'un', 412, 3, 0], ['Filtro hidráulico', 'FX-20377', 'New Holland', 'T7.245', 'A-02-2', 'un', 365, 3, 0],
-      ['Óleo de motor 15W40 (balde 20 L)', 'LB-1540', 'Lubrax', 'todos', 'B-01-1', 'un', 640, 8, 1], ['Óleo hidráulico/transmissão (balde 20 L)', 'LB-HT20', 'Lubrax', 'todos', 'B-01-2', 'un', 720, 6, 1],
-      ['Graxa de lítio (balde 20 kg)', 'LB-GX20', 'Lubrax', 'todos', 'B-02-1', 'un', 590, 2, 1], ['Correia do alternador', 'FX-30981', 'Valtra', 'A134', 'C-01-4', 'un', 318, 2, 0],
-      ['Faca do picador (jogo)', 'FX-41200', 'Case IH', 'Austoft 8810, CH570', 'D-03-1', 'jg', 2480, 2, 0], ['Disco do corte de base', 'FX-41255', 'Case IH', 'Austoft 8810', 'D-03-2', 'un', 1350, 4, 0],
-      ['Bico de pulverização leque 110°', 'FX-52010', 'Jacto', 'Uniport 3030, Imperador 3.0', 'E-01-1', 'un', 38, 40, 0], ['Mangueira hidráulica 1/2" (metro)', 'HD-12M', 'Hidráulica', 'todos', 'E-02-3', 'm', 74, 20, 3],
-      ['Kit de vedação de cilindro', 'HD-KV80', 'Hidráulica', 'MF 4709, A134, Farmall 130A', 'E-02-4', 'kit', 289, 3, 3], ['Lâmpada de farol de trabalho LED', 'FX-60110', 'Universal', 'todos', 'F-01-1', 'un', 196, 4, 0],
-      ['Pneu dianteiro 14.9-24', 'PN-14924', 'Pneus', '6125J, MF 4709, A134', 'Pátio coberto', 'un', 3890, 2, 2], ['Disco de corte da plantadeira 18"', 'FX-70318', 'Jumil', 'JM3090 Exacta, Absoluta 34', 'G-01-2', 'un', 412, 6, 0]
-    ];
-    const ps = CAT.map(([desc, cod, marca, compat, local, un, preco, min, f], ix) => P.salvarPeca(e, { descricao: desc, codFab: cod, marca, compat: compat === 'todos' ? '' : compat, local, unidade: un, preco, fornecedor: fo[f].id, minimos: Object.assign({ [l0]: min }, l1 !== l0 && [0, 1, 4, 11, 12].includes(ix) ? { [l1]: Math.ceil(min / 2) } : {}) }, 'Carlos', ag(120)));
-    const custo = (i) => Math.round(CAT[i][6] * 0.62 * 100) / 100;
-    const conta = Fin && Fin.conta(e, 'CT-BB') ? 'CT-BB' : '';
-    const compra = (dias, f, loja, nota, itens) => { const c = P.entradaCompra(e, { data: d(dias), loja, fornecedor: fo[f].id, fornecedorNome: fo[f].nome, nota, frete: 120, vencimento: d(dias - 28), itens: itens.map(([i, q]) => ({ peca: ps[i].id, qtd: q, custo: custo(i) })) }, 'Lúcia', ag(dias), Fin);
-      if (Fin && conta) c.lancamentos.forEach((id) => { const l = e.fin.lancamentos.find((x) => x.id === id); if (l && l.vencimento < d(2)) Fin.baixar(e, id, { data: l.vencimento, forma: 'boleto', conta }, 'Lúcia', ag(dias - 28)); }); return c; };
-    compra(95, 0, l0, '58113', [[0, 18], [1, 10], [2, 6], [3, 5], [7, 4], [8, 3], [9, 8], [10, 80], [13, 8], [15, 10]]);
-    compra(80, 1, l0, '20977', [[4, 16], [5, 10], [6, 4]]);
-    compra(70, 2, l0, '7741', [[14, 4]]);
-    compra(64, 3, l1, '3302', [[11, 30], [12, 6]]);
-    compra(40, 0, l1, '58790', [[0, 8], [1, 4]]);
-    compra(18, 1, l0, '21430', [[4, 6], [5, 4]]);
-    if (l1 !== l0) P.transferir(e, { peca: ps[4].id, qtd: 4, de: l0, para: l1, data: d(30) }, 'Carlos', ag(30));
-    if (l2 !== l0) P.transferir(e, { peca: ps[11].id, qtd: 10, de: l1, para: l2, data: d(25) }, 'Carlos', ag(25));
-    // balcão: clientes do cadastro comum (os mesmos do Financeiro)
-    const cli = ui.K.cad.clientes();
-    [[33, [[10, 24], [4, 2]], 0, true], [12, [[0, 3], [5, 1]], 3, true], [3, [[8, 1]], 5, false]].forEach(([dias, its, ci, rec]) => {
-      try { P.vendaBalcao(e, { data: d(dias), loja: l0, cliente: cli[ci] ? cli[ci].id : '', clienteNome: cli[ci] ? cli[ci].nome : '', vencimento: rec ? d(dias) : d(dias - 15), recebido: rec && conta ? { conta, forma: 'pix' } : null, itens: its.map(([i, q]) => ({ peca: ps[i].id, qtd: q, preco: CAT[i][6] })) }, 'Carlos', ag(dias), Fin); } catch (er) { /* sem saldo: ignora na demo */ }
-    });
-    try { P.inventario(e, { loja: l0, data: d(20), motivo: '', contagens: [{ peca: ps[10].id, contado: Math.max(0, P.posicao(e, ps[10].id, { loja: l0 }).qtd - 3), motivo: 'Bicos quebrados no manuseio' }, { peca: ps[13].id, contado: P.posicao(e, ps[13].id, { loja: l0 }).qtd }] }, 'Carlos', ag(20)); } catch (er) { /* nada */ }
-    P.criarPedido(e, { fornecedor: fo[3].id, loja: l1, itens: [{ peca: ps[12].id, qtd: 4, custo: custo(12) }], data: d(2) }, 'Carlos', ag(2));
-    PP.semente = true;
-    return ps;
-  }
-
-  // ---------- estilo das duas áreas (Oficina e Peças), injetado uma vez; mesma paleta e classes base ----------
-  function estilo() {
-    if (typeof document === 'undefined' || document.getElementById('ofc-estilo')) return;
-    const s = document.createElement('style'); s.id = 'ofc-estilo';
-    s.textContent = `.ofc-quadro{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));margin-bottom:16px}
+        <section class="painel"><div class="painel-cab"><h2>${v.lista}Pedidos em aberto</h2></div>
+          ${s.length?`<ul class="fin-saldos">${s.map(i=>`<li><span><b>${r(i.numero)} \xB7 ${r(U(i.fornecedor)||"Sem fornecedor")}</b><span>${E(i.data)}${i.loja?" \xB7 "+r(i.loja):""} \xB7 ${i.itens.length} itens \xB7 ${b(i.total)}</span>
+            ${M()?`<span class="acoes" style="margin-top:6px"><button class="btn btn-ouro btn-p" type="button" data-receber="${r(i.id)}">Receber</button><button class="btn btn-linha btn-p" type="button" data-cancelar="${r(i.id)}">Cancelar</button></span>`:""}</span></li>`).join("")}</ul>`:y("Nenhum pedido em aberto.")}</section>
+        <section class="painel"><div class="painel-cab"><h2>${v.entra}Compras lan\xE7adas</h2></div>
+          ${o.length?`<ul class="fin-saldos">${o.map(i=>`<li><span><b>${i.nota?"NF "+r(i.nota):"Sem nota"} \xB7 ${r(i.fornecedorNome||U(i.fornecedor)||"\u2014")}</b><span>${E(i.data)}${i.loja?" \xB7 "+r(i.loja):""} \xB7 ${i.itens.length} itens${i.origem==="xml"?" \xB7 XML":""}${i.lancamentos.length?` \xB7 ${c?`<button class="link" type="button" data-lanc-fin="${r(i.lancamentos[0])}">conta a pagar</button>`:"conta a pagar"}`:""}</span></span><b>${b(i.total)}</b></li>`).join("")}</ul>`:y("Nenhuma compra lan\xE7ada.")}</section>
+      </div>`,a.$$("[data-gerar]",a.tela).forEach(i=>i.onclick=()=>{const p=n[+i.dataset.gerar],d=F(()=>l.criarPedido(u(),{fornecedor:p.fornecedor,loja:p.loja,itens:p.itens,sufixo:a.NV?"-"+Math.random().toString(36).slice(2,5).toUpperCase():""},P()));d&&(A(`Pedido de compra ${d.numero} gerado \xB7 ${U(d.fornecedor)||"sem fornecedor"} \xB7 ${b(d.total)}`),a.toast(`Pedido ${d.numero} gerado.`),ba())}),a.$$("[data-receber]",a.tela).forEach(i=>i.onclick=()=>{const p=e.pedidos.find(d=>d.id===i.dataset.receber);ua({fornecedor:p.fornecedor,loja:p.loja,pedido:p.id,origem:"pedido",itens:p.itens.map(d=>({peca:d.peca,qtd:d.qtd,custo:d.custo}))})}),a.$$("[data-cancelar]",a.tela).forEach(i=>i.onclick=()=>a.confirmar("Cancelar o pedido?","O pedido sai da lista de abertos e as pe\xE7as voltam ao pedido sugerido.","Cancelar pedido",()=>{const p=F(()=>l.cancelarPedido(u(),i.dataset.cancelar,"cancelado na tela",P()));p&&(A(`Pedido ${p.numero} cancelado`),ba())})),a.$$("[data-lanc-fin]",a.tela).forEach(i=>i.onclick=()=>D.FINANCEIRO_UI.detalhe(i.dataset.lancFin)),J()}let na=365;function Ca(){const e=l.curvaABC(u(),{hoje:a.hojeISO(),dias:na,loja:$().loja}),t=new Map(l.giro(u(),{hoje:a.hojeISO(),dias:na,loja:$().loja}).map(o=>[o.peca.id,o])),n=o=>!o||!(o.qtd>0)?"\u2014":o.cobertura===1/0?"sem sa\xEDda":o.cobertura>999?"999+ dias":o.cobertura+" dias",s=o=>!o||o.giro==null?"\u2014":o.giro.toLocaleString("pt-BR",{maximumFractionDigits:1})+"\xD7";a.tela.innerHTML=X("Curva ABC e giro","Pe\xE7as ordenadas pelo valor consumido (OS e balc\xE3o, a custo). A: at\xE9 80% do valor; B: at\xE9 95%; C: o resto e o que n\xE3o girou. Giro = consumo levado para 12 meses \xF7 estoque a custo hoje; cobertura = quantos dias o saldo dura no ritmo do per\xEDodo. Estoque m\xEDnimo e compras devem olhar primeiro a classe A; a classe C sem sa\xEDda \xE9 estoque parado.","")+`
+      <div class="kpis fin-k fin-kpis3">${["A","B","C"].map(o=>`<div class="kpi ${o==="A"?"k-marfim":""}"><span class="rot">${v.barras}Classe ${o}</span><span class="val">${e.resumo[o].n}</span><span class="exp">${b(e.resumo[o].valor)} consumidos</span></div>`).join("")}</div>
+      <section class="painel"><div class="fin-filtros"><div class="abas-modo" role="group" aria-label="Per\xEDodo">${[[90,"90 dias"],[180,"6 meses"],[365,"12 meses"]].map(([o,c])=>`<button type="button" data-dias="${o}" aria-pressed="${na===o}">${c}</button>`).join("")}</div></div>
+        ${e.linhas.length?`<div class="tabela-wrap"><table class="tabela fin-tab"><thead><tr><th>Classe</th><th>Pe\xE7a</th><th class="n">Consumo</th><th class="n">Giro/ano</th><th class="n oc-esconde">Cobertura</th><th class="n oc-esconde">% acumulado</th></tr></thead><tbody>
+          ${e.linhas.map(o=>{const c=t.get(o.peca.id);return`<tr data-peca="${r(o.peca.id)}" class="clicavel" tabindex="0"><td><span class="risco ${o.classe==="A"?"alto":o.classe==="B"?"medio":"baixo"}">${o.classe}</span></td><td><b>${r(o.peca.descricao)}</b><span class="fin-sub">${r(o.peca.sku)}${o.semGiro?" \xB7 sem giro no per\xEDodo":""}${c&&c.qtd>0?" \xB7 "+x(c.qtd)+" "+r(o.peca.unidade)+" em estoque":""}</span></td><td class="n">${b(o.valor)}</td><td class="n">${s(c)}</td><td class="n oc-esconde">${n(c)}</td><td class="n oc-esconde">${o.valor?a.pct(o.acumulado):"\u2014"}</td></tr>`}).join("")}</tbody></table></div>`:y("Nenhuma pe\xE7a cadastrada.")}</section>`,a.$$("[data-dias]",a.tela).forEach(o=>o.onclick=()=>{na=+o.dataset.dias,Ca()}),J()}function Ma(e){a=e;const t=e.estado;if(e.OP)return;const n=l.garantir(t);if(n.semente)return;const s=D.FINANCEIRO,o=e.hojeISO(),c=h=>l.somarDias(o,-h),i=h=>new Date(Date.now()-h*864e5).toISOString(),p=t.lojas.length?t.lojas:[""],d=p[0],m=p[1]||d,f=p[2]||d,g=["Distribuidora Agro Pe\xE7as (fict\xEDcia)","Lubrificantes Mogiana (fict\xEDcia)","Pneus Campo Forte (fict\xEDcia)","Hidr\xE1ulica Paulista (fict\xEDcia)"].map((h,k)=>e.K.garantirCadastro(t,"fornecedores",{nome:h,cidade:["Ribeir\xE3o Preto","Orl\xE2ndia","Sert\xE3ozinho","Franca"][k],telefone:`(16) 3${String(721+k*13)}-${String(4100+k*77)}`})),j=[["Filtro de \xF3leo do motor","FX-10021","John Deere","6125J, CH570","A-01-1","un",189,6,0],["Filtro de combust\xEDvel prim\xE1rio","FX-10044","John Deere","6125J, CH570","A-01-2","un",236,4,0],["Filtro de ar externo","FX-20310","Massey Ferguson","MF 4709","A-02-1","un",412,3,0],["Filtro hidr\xE1ulico","FX-20377","New Holland","T7.245","A-02-2","un",365,3,0],["\xD3leo de motor 15W40 (balde 20 L)","LB-1540","Lubrax","todos","B-01-1","un",640,8,1],["\xD3leo hidr\xE1ulico/transmiss\xE3o (balde 20 L)","LB-HT20","Lubrax","todos","B-01-2","un",720,6,1],["Graxa de l\xEDtio (balde 20 kg)","LB-GX20","Lubrax","todos","B-02-1","un",590,2,1],["Correia do alternador","FX-30981","Valtra","A134","C-01-4","un",318,2,0],["Faca do picador (jogo)","FX-41200","Case IH","Austoft 8810, CH570","D-03-1","jg",2480,2,0],["Disco do corte de base","FX-41255","Case IH","Austoft 8810","D-03-2","un",1350,4,0],["Bico de pulveriza\xE7\xE3o leque 110\xB0","FX-52010","Jacto","Uniport 3030, Imperador 3.0","E-01-1","un",38,40,0],['Mangueira hidr\xE1ulica 1/2" (metro)',"HD-12M","Hidr\xE1ulica","todos","E-02-3","m",74,20,3],["Kit de veda\xE7\xE3o de cilindro","HD-KV80","Hidr\xE1ulica","MF 4709, A134, Farmall 130A","E-02-4","kit",289,3,3],["L\xE2mpada de farol de trabalho LED","FX-60110","Universal","todos","F-01-1","un",196,4,0],["Pneu dianteiro 14.9-24","PN-14924","Pneus","6125J, MF 4709, A134","P\xE1tio coberto","un",3890,2,2],['Disco de corte da plantadeira 18"',"FX-70318","Jumil","JM3090 Exacta, Absoluta 34","G-01-2","un",412,6,0]],C=j.map(([h,k,N,z,V,W,H,w,fa],Fa)=>l.salvarPeca(t,{descricao:h,codFab:k,marca:N,compat:z==="todos"?"":z,local:V,unidade:W,preco:H,fornecedor:g[fa].id,minimos:Object.assign({[d]:w},m!==d&&[0,1,4,11,12].includes(Fa)?{[m]:Math.ceil(w/2)}:{})},"Carlos",i(120))),Sa=h=>Math.round(j[h][6]*.62*100)/100,sa=s&&s.conta(t,"CT-BB")?"CT-BB":"",Q=(h,k,N,z,V)=>{const W=l.entradaCompra(t,{data:c(h),loja:N,fornecedor:g[k].id,fornecedorNome:g[k].nome,nota:z,frete:120,vencimento:c(h-28),itens:V.map(([H,w])=>({peca:C[H].id,qtd:w,custo:Sa(H)}))},"L\xFAcia",i(h),s);return s&&sa&&W.lancamentos.forEach(H=>{const w=t.fin.lancamentos.find(fa=>fa.id===H);w&&w.vencimento<c(2)&&s.baixar(t,H,{data:w.vencimento,forma:"boleto",conta:sa},"L\xFAcia",i(h-28))}),W};Q(95,0,d,"58113",[[0,18],[1,10],[2,6],[3,5],[7,4],[8,3],[9,8],[10,80],[13,8],[15,10]]),Q(80,1,d,"20977",[[4,16],[5,10],[6,4]]),Q(70,2,d,"7741",[[14,4]]),Q(64,3,m,"3302",[[11,30],[12,6]]),Q(40,0,m,"58790",[[0,8],[1,4]]),Q(18,1,d,"21430",[[4,6],[5,4]]),m!==d&&l.transferir(t,{peca:C[4].id,qtd:4,de:d,para:m,data:c(30)},"Carlos",i(30)),f!==d&&l.transferir(t,{peca:C[11].id,qtd:10,de:m,para:f,data:c(25)},"Carlos",i(25));const ia=e.K.cad.clientes();[[33,[[10,24],[4,2]],0,!0],[12,[[0,3],[5,1]],3,!0],[3,[[8,1]],5,!1]].forEach(([h,k,N,z])=>{try{l.vendaBalcao(t,{data:c(h),loja:d,cliente:ia[N]?ia[N].id:"",clienteNome:ia[N]?ia[N].nome:"",vencimento:c(z?h:h-15),recebido:z&&sa?{conta:sa,forma:"pix"}:null,itens:k.map(([V,W])=>({peca:C[V].id,qtd:W,preco:j[V][6]}))},"Carlos",i(h),s)}catch{}});try{l.inventario(t,{loja:d,data:c(20),motivo:"",contagens:[{peca:C[10].id,contado:Math.max(0,l.posicao(t,C[10].id,{loja:d}).qtd-3),motivo:"Bicos quebrados no manuseio"},{peca:C[13].id,contado:l.posicao(t,C[13].id,{loja:d}).qtd}]},"Carlos",i(20))}catch{}return l.criarPedido(t,{fornecedor:g[3].id,loja:m,itens:[{peca:C[12].id,qtd:4,custo:Sa(12)}],data:c(2)},"Carlos",i(2)),n.semente=!0,C}function ka(){if(typeof document>"u"||document.getElementById("ofc-estilo"))return;const e=document.createElement("style");e.id="ofc-estilo",e.textContent=`.ofc-quadro{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));margin-bottom:16px}
 .ofc-col{background:#FDFBF6;border:1px solid var(--borda);border-radius:14px;padding:12px;display:grid;gap:10px;align-content:start;min-width:0}
 .ofc-col h3{font-size:15.5px;display:flex;justify-content:space-between;gap:8px;align-items:center}
 .ofc-card{display:grid;gap:3px;text-align:left;background:#fff;border:1px solid var(--borda);border-radius:12px;padding:12px;font:inherit;color:inherit;cursor:pointer;min-width:0;width:100%;transition:border-color var(--t)}
@@ -439,43 +120,4 @@
 .ofc-so-cel{display:none}
 .ofc-relogio{font-variant-numeric:tabular-nums;font-weight:800;font-size:22px}
 .ofc-linha input,.ofc-linha select{min-width:0;width:100%}
-@media (max-width:600px){.ofc-linha{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ofc-linha>:first-child,.ofc-linha>.btn{grid-column:1/-1}.oc-esconde{display:none}.ofc-so-cel{display:inline}.ofc-check li{grid-template-columns:1fr}}`;
-    document.head.appendChild(s);
-  }
-
-  // ---------- busca global ----------
-  function buscar(q, ui) {
-    if (!q || q.length < 2 || !P.podeVer(ui.eu().perfil)) return [];
-    U = ui;
-    return P.buscar(ui.estado, q).slice(0, 6).map((p) => { const pos = P.posicao(ui.estado, p.id, { loja: ui.estado.lojaAtual || '' }); return { g: 'Peças', n: `${p.sku} · ${p.descricao}`, d: `${q3(pos.qtd)} ${p.unidade} em estoque · ${brl(p.preco)}${p.local ? ' · ' + p.local : ''}`, ir: () => { location.hash = '#pc-catalogo'; setTimeout(() => detalhePeca(p.id), 320); } }; });
-  }
-
-  const T = (fn) => (ui) => { U = ui; P.garantir(ui.estado); fn(); };
-  const IT = (aba, rotulo, curto, icone) => ({ aba, rotulo, curto, icone });
-  R.registrar({
-    id: 'pecas', nome: 'Peças e Estoque', curto: 'Peças', ordem: 50, pronta: true, inicio: 'pc-painel', perfis: VER,
-    descricao: 'Catálogo, SKU, localização, entradas, saídas, inventário, compras, curva ABC, giro e estoque parado.',
-    icone: '<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',
-    acao: { rotulo: 'Entrada de peças', href: '#pc-mov', novo: true },
-    atalhos: ['pc-painel', 'pc-catalogo', 'pc-mov', 'pc-compras'],
-    dados: { pecas: ['catalogo', 'movimentos', 'inventarios', 'pedidos', 'compras', 'vendas'], cadastros: ['clientes', 'fornecedores'] },
-    menu: [
-      { grupo: 'Estoque', itens: [IT('pc-painel', 'Painel de peças', 'Painel', '<path d="M4 13h6V4H4zM14 20h6V11h-6zM14 4v4h6V4zM4 20h6v-4H4z"/>'), IT('pc-catalogo', 'Catálogo de peças', 'Catálogo', '<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>'), IT('pc-mov', 'Movimentações', 'Movimentos', '<path d="M4 7h13l-3-3M20 17H7l3 3"/>')] },
-      { grupo: 'Controle', itens: [IT('pc-compras', 'Compras e estoque mínimo', 'Compras', '<path d="M3 4h2l2.4 11h11L21 7H7M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>'), IT('pc-inventario', 'Inventário', 'Inventário', '<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>'), IT('pc-abc', 'Curva ABC e giro', 'ABC', '<path d="M4 20h16M7 16v-5M11 16V7M15 16v-7M19 16V5"/>')] }
-    ],
-    telas: { 'pc-painel': T(telaPainel), 'pc-catalogo': T(telaCatalogo), 'pc-mov': T(telaMov), 'pc-inventario': T(telaInventario), 'pc-compras': T(telaCompras), 'pc-abc': T(telaABC) },
-    permissoes: { 'pc-painel': VER, 'pc-catalogo': VER, 'pc-mov': VER, 'pc-inventario': VER, 'pc-compras': VER, 'pc-abc': VER },
-    numero: (ui) => { U = ui; P.garantir(ui.estado); const r = P.resumo(ui.estado, { loja: ui.estado.lojaAtual || '', lojas: ui.K.lojasPermitidas }); return { valor: String(r.abaixo), texto: `${r.abaixo === 1 ? 'peça abaixo' : 'peças abaixo'} do mínimo · ${brl(r.valor)} em estoque`, alerta: r.abaixo > 0 }; },
-    // tarefas do dia e rotina: peças abaixo do estoque mínimo
-    hoje: (estado, u, ui) => {
-      if (!['dono', 'gerente', 'oficina', 'financeiro'].includes(u.perfil)) return [];
-      const ab = P.abaixoMinimo(estado, { loja: estado.lojaAtual || '', lojas: ui.K.lojasPermitidas }); if (!ab.length) return [];
-      return [{ id: 'pc-min-' + ab.length, cat: 'pecas', catNome: 'Peças', nivel: 2, valor: ab.reduce((s, x) => s + x.sugerido * (x.custo || 0), 0), titulo: `${ab.length} ${ab.length === 1 ? 'peça está' : 'peças estão'} abaixo do estoque mínimo`, txt: ab.slice(0, 3).map((x) => `${x.peca.descricao} (${x.loja}: tem ${x.saldo}, mínimo ${x.minimo})`).join(' · '), botao: { rotulo: 'Ver o que comprar', ir: '#/pecas/pc-compras' } }];
-    },
-    rotina: (estado) => [{ perfil: 'oficina', periodo: 'semana', id: 'pc-minimo', titulo: 'Pedir as peças abaixo do estoque mínimo', qtd: P.abaixoMinimo(estado, {}).length, ir: '#/pecas/pc-compras' }],
-    buscar,
-    novo: (ui) => { U = ui; if (!editor()) { ui.toast('Seu perfil não lança peças.', true); return; } ui.abrirCamada('modal', `<h2>Peças</h2><p class="sub">O que você vai lançar?</p><div class="acoes" style="flex-wrap:wrap">${botoes()}<button class="btn btn-linha" type="button" data-pc="peca">${I.mais}<span>Nova peça</span></button></div>`, (c) => ligarBotoes(c)); },
-    iniciar: (ui) => { if (ui.OP) return; const antes = P.garantir(ui.estado).semente; semear(ui); if (!antes) ui.salvar(); }
-  });
-  raiz.PECAS_UI = { semear, detalhePeca: (id) => detalhePeca(id), formBalcao: (p) => formBalcao(p) };
-})(typeof window !== 'undefined' ? window : globalThis);
+@media (max-width:600px){.ofc-linha{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ofc-linha>:first-child,.ofc-linha>.btn{grid-column:1/-1}.oc-esconde{display:none}.ofc-so-cel{display:inline}.ofc-check li{grid-template-columns:1fr}}`,document.head.appendChild(e)}function Pa(e,t){return!e||e.length<2||!l.podeVer(t.eu().perfil)?[]:(a=t,l.buscar(t.estado,e).slice(0,6).map(n=>{const s=l.posicao(t.estado,n.id,{loja:t.estado.lojaAtual||""});return{g:"Pe\xE7as",n:`${n.sku} \xB7 ${n.descricao}`,d:`${x(s.qtd)} ${n.unidade} em estoque \xB7 ${b(n.preco)}${n.local?" \xB7 "+n.local:""}`,ir:()=>{location.hash="#pc-catalogo",setTimeout(()=>ta(n.id),320)}}}))}const G=e=>t=>{a=t,l.garantir(t.estado),e()},_=(e,t,n,s)=>({aba:e,rotulo:t,curto:n,icone:s});ca.registrar({id:"pecas",nome:"Pe\xE7as e Estoque",curto:"Pe\xE7as",ordem:50,pronta:!0,inicio:"pc-painel",perfis:B,descricao:"Cat\xE1logo, SKU, localiza\xE7\xE3o, entradas, sa\xEDdas, invent\xE1rio, compras, curva ABC, giro e estoque parado.",icone:'<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',acao:{rotulo:"Entrada de pe\xE7as",href:"#pc-mov",novo:!0},atalhos:["pc-painel","pc-catalogo","pc-mov","pc-compras"],dados:{pecas:["catalogo","movimentos","inventarios","pedidos","compras","vendas"],cadastros:["clientes","fornecedores"]},menu:[{grupo:"Estoque",itens:[_("pc-painel","Painel de pe\xE7as","Painel",'<path d="M4 13h6V4H4zM14 20h6V11h-6zM14 4v4h6V4zM4 20h6v-4H4z"/>'),_("pc-catalogo","Cat\xE1logo de pe\xE7as","Cat\xE1logo",'<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>'),_("pc-mov","Movimenta\xE7\xF5es","Movimentos",'<path d="M4 7h13l-3-3M20 17H7l3 3"/>')]},{grupo:"Controle",itens:[_("pc-compras","Compras e estoque m\xEDnimo","Compras",'<path d="M3 4h2l2.4 11h11L21 7H7M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>'),_("pc-inventario","Invent\xE1rio","Invent\xE1rio",'<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>'),_("pc-abc","Curva ABC e giro","ABC",'<path d="M4 20h16M7 16v-5M11 16V7M15 16v-7M19 16V5"/>')]}],telas:{"pc-painel":G(qa),"pc-catalogo":G(da),"pc-mov":G(Z),"pc-inventario":G(ma),"pc-compras":G(ba),"pc-abc":G(Ca)},permissoes:{"pc-painel":B,"pc-catalogo":B,"pc-mov":B,"pc-inventario":B,"pc-compras":B,"pc-abc":B},numero:e=>{a=e,l.garantir(e.estado);const t=l.resumo(e.estado,{loja:e.estado.lojaAtual||"",lojas:e.K.lojasPermitidas});return{valor:String(t.abaixo),texto:`${t.abaixo===1?"pe\xE7a abaixo":"pe\xE7as abaixo"} do m\xEDnimo \xB7 ${b(t.valor)} em estoque`,alerta:t.abaixo>0}},hoje:(e,t,n)=>{if(!["dono","gerente","oficina","financeiro"].includes(t.perfil))return[];const s=l.abaixoMinimo(e,{loja:e.lojaAtual||"",lojas:n.K.lojasPermitidas});return s.length?[{id:"pc-min-"+s.length,cat:"pecas",catNome:"Pe\xE7as",nivel:2,valor:s.reduce((o,c)=>o+c.sugerido*(c.custo||0),0),titulo:`${s.length} ${s.length===1?"pe\xE7a est\xE1":"pe\xE7as est\xE3o"} abaixo do estoque m\xEDnimo`,txt:s.slice(0,3).map(o=>`${o.peca.descricao} (${o.loja}: tem ${o.saldo}, m\xEDnimo ${o.minimo})`).join(" \xB7 "),botao:{rotulo:"Ver o que comprar",ir:"#/pecas/pc-compras"}}]:[]},rotina:e=>[{perfil:"oficina",periodo:"semana",id:"pc-minimo",titulo:"Pedir as pe\xE7as abaixo do estoque m\xEDnimo",qtd:l.abaixoMinimo(e,{}).length,ir:"#/pecas/pc-compras"}],buscar:Pa,novo:e=>{if(a=e,!M()){e.toast("Seu perfil n\xE3o lan\xE7a pe\xE7as.",!0);return}e.abrirCamada("modal",`<h2>Pe\xE7as</h2><p class="sub">O que voc\xEA vai lan\xE7ar?</p><div class="acoes" style="flex-wrap:wrap">${ea()}<button class="btn btn-linha" type="button" data-pc="peca">${v.mais}<span>Nova pe\xE7a</span></button></div>`,t=>J(t))},iniciar:e=>{if(e.OP)return;const t=l.garantir(e.estado).semente;Ma(e),t||e.salvar()}}),D.PECAS_UI={semear:Ma,detalhePeca:e=>ta(e),formBalcao:e=>ja(e)}})(typeof window<"u"?window:globalThis);
