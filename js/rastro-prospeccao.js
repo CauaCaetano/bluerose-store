@@ -36,6 +36,8 @@
     } catch (e) { /* sem rede: não atrapalha a página */ }
   }
   enviar('abriu_link');
+  // link da prospecção que leva direto ao teste às cegas (anshur/teste-as-cegas.html?p=CODIGO): abrir já conta como teste
+  if (/teste-as-cegas/.test(location.pathname)) enviar('teste_cegas');
   function tipoDoClique(el) {
     var href = (el.getAttribute('href') || '').toLowerCase(), txt = (el.textContent || '').toLowerCase();
     if (el.hasAttribute('data-contratar') || /^\s*assinar/.test(txt)) return 'assinar';

@@ -21,31 +21,29 @@
     return (new Date(D.hoje + 'T12:00:00') - new Date(p.anuncios_data + 'T12:00:00')) / 864e5 < 30;
   }
 
-  // textos propostos (prospeccao-mensagens-para-aprovar.md), com as variáveis preenchidas
+  // textos v2 aprovados pelo dono em 17/11/2026 (prospeccao-mensagens-v2-para-aprovar.md): benefícios, um pedido só
+  function linkTeste(p) { return SITE + 'anshur/teste-as-cegas.html?p=' + p.codigo; }
   function mensagem(p, acao) {
-    var lugar = p.cidade + '/' + p.uf, l = link(p);
+    var lugar = p.cidade + '/' + p.uf, l = link(p), lt = linkTeste(p), e = p.empresa;
     if (acao === 'retomada1') return [
-      'Olá! Passando apenas para retomar minha mensagem anterior sobre o Anshur.',
-      'É um sistema desenvolvido para organizar a operação de revendas agrícolas, especialmente avaliações de troca, máquinas usadas, pátio, vendas e gestão.',
-      'Se quiser conhecer sem compromisso, a demonstração está disponível aqui: ' + l,
-      'Também existe um teste gratuito com cinco trocas antigas da própria revenda.',
-      'Se não for um assunto de interesse agora, sem problema. Basta me avisar e encerro os contatos. Obrigado!'].join('\n\n');
+      'Olá! Retomando rápido a mensagem sobre o usado da troca.',
+      'Uma conta simples: se em uma troca de trator a revenda paga R$ 20 mil acima do que devia, esse valor sai direto do lucro da venda. Basta evitar isso *uma vez* para pagar 10 meses do Anshur (R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade).',
+      'Quer ver se isso acontece aí? O teste com as trocas de vocês mostra na hora:\n' + lt,
+      'Se preferir só olhar o sistema funcionando: ' + l,
+      'Se não for o momento, me avisa e eu paro por aqui.'].join('\n\n');
     if (acao === 'retomada2') return [
-      'Olá! Esta é minha última mensagem sobre o Anshur para não insistir.',
-      'Caso faça sentido conhecer um sistema de gestão desenvolvido para revendas de máquinas agrícolas, você pode explorar a demonstração e conhecer as condições de contratação diretamente pelo site.',
-      'Demonstração: ' + l + '\nPreço: R$ 2.000/mês por revenda, com todas as lojas incluídas, sem implantação e sem fidelidade.',
-      'Se não houver interesse, não faremos novos contatos. Obrigado pela atenção!\nBlue Rose Express'].join('\n\n');
-    var terceiro = recente(p)
-      ? 'Vi que a ' + p.empresa + ' possui aproximadamente ' + p.anuncios_usados + ' anúncios de máquinas usadas em ' + lugar + '.'
-      : 'Encontrei a ' + p.empresa + ' em uma pesquisa de revendas da região de ' + lugar + ' e vi que vocês trabalham com máquinas usadas.';
-    return ['Olá! Tudo bem?',
-      'Sou da Blue Rose Express e gostaria de apresentar o Anshur, um sistema de gestão desenvolvido para revendas de máquinas agrícolas.',
-      terceiro,
-      'O Anshur reúne avaliação de trocas, estoque, pátio, vendas, oficina, peças e financeiro em um único sistema.',
-      'Temos uma demonstração gratuita, sem cadastro, e também um teste às cegas em que a própria revenda pode analisar cinco trocas antigas.',
-      'Se tiver interesse, deixo os links:\nDemonstração: ' + l + '\nTeste às cegas: https://bluerose-store.com/anshur/teste-as-cegas.html',
-      'O valor é R$ 2.000/mês por revenda, incluindo todas as lojas, sem taxa de implantação e sem fidelidade. A contratação pode ser feita diretamente pelo site, sem reunião ou ligação.',
-      'Se não for do interesse da empresa, basta avisar que não faremos novos contatos. Obrigado!'].join('\n\n');
+      'Olá! Última mensagem para não incomodar.',
+      'Fica o resumo: o Anshur ajuda a ' + e + ' a não pagar caro no usado da troca, a enxergar o dinheiro parado no pátio e a só fechar acima do valor máximo com aprovação do gerente ou do dono.',
+      'Contratação direto pelo site, sem reunião: R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade. Cancela quando quiser.',
+      'Teste com as trocas de vocês: ' + lt + '\nDemonstração: ' + l,
+      'Obrigado pela atenção!\nBlue Rose Express'].join('\n\n');
+    return ['Olá, tudo bem?',
+      'Vi que a ' + e + ' trabalha com máquinas usadas em ' + lugar + ', por isso a mensagem.',
+      'Em revenda, boa parte do lucro da venda da máquina nova vai embora no usado que entra na troca: paga-se um pouco a mais para fechar o negócio, a máquina fica parada no pátio e, quando vende, a margem já sumiu.',
+      'O Anshur mostra *antes de fechar* o valor máximo que a ' + e + ' pode pagar naquele usado sem perder dinheiro, com base nas trocas que vocês mesmos já venderam.',
+      'Dá para conferir isso com números de vocês, de graça e sem cadastro: coloque 5 trocas antigas e veja, troca por troca, quanto teria ficado no caixa:\n' + lt,
+      'Leva uns 5 minutos e nada sai do seu computador.',
+      'Se não fizer sentido para vocês, é só me avisar que não mando mais mensagem.'].join('\n\n');
   }
 
   function acaoNaFila(id) {
