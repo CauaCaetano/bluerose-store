@@ -20,6 +20,9 @@
       };
     });
   });
+  // Arca (18/11/2026): o Financeiro Essencial virou o Arca, financeiro para empresas, feito para o computador.
+  // O id, a chave dos dados e o catálogo continuam os do Financeiro Essencial (assinantes e pagamentos seguem valendo); mudam nome, pasta, página e logo.
+  Object.assign(out.financeiroessencial, { nome: 'Arca', nomeCategoria: 'Arca', nomeVersao: '', pasta: 'arca', entrada: 'app.html', pagina: 'arca.html', logo: 'img/logos/arca/arca-simbolo-256.png?v=1', marcaPropria: true });
   // linha Vexorin: sistemas fora das 3 versões, com o mesmo login, teste, assinatura, equipe e nuvem
   out.vetnature = { id: 'vetnature', categoria: 'vetnature', versao: '', nome: 'VetNature', nomeCategoria: 'VetNature', nomeVersao: '', pasta: 'vetnature', entrada: 'index.html',
     chave: 'vetnature-demo-v2', mensal: 129, exemplo: 1, pagina: 'index.html#produtos', logo: 'img/logos/vetnature-192.png' };

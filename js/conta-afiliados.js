@@ -182,7 +182,7 @@
   // links por sistema (mesmo código de afiliado em cada página; cookies.js grava o código e conta.js conta a visita em qualquer página)
   var PAGINAS = [
     ['veltria-agenda.html', 'Veltria Agenda', 'Agenda e atendimento', 'calendario'],
-    ['veltria-financeiro.html', 'Veltria Financeiro', 'Controle financeiro', 'moedas'],
+    ['arca.html', 'Arca', 'Financeiro da empresa', 'moedas'],
     ['peplo.html', 'Peplo', 'Para loja de roupas', 'cabide'],
     ['annona.html', 'Annona', 'Para mercadinho', 'cesta'],
     ['atria.html', 'Atria', 'Para construção e reforma', 'capacete'],

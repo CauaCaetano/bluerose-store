@@ -146,15 +146,15 @@
   },
   {
    "id": "financeiro",
-   "nome": "Veltria Financeiro",
-   "pagina": "veltria-financeiro.html",
-   "ramo": "Caixa e cobranças",
-   "para": "Para autônomo, MEI e prestador de serviço, no app de celular Essencial.",
+   "nome": "Arca",
+   "pagina": "arca.html",
+   "ramo": "Financeiro da empresa",
+   "para": "Para empresa pequena, média e grande, feito para o computador e com versão de celular.",
    "mensal": "a partir de R$ 59",
    "extra": "sem entrada, ou R$ 566 por ano",
-   "demo": "demos/sistemas/financeiro-essencial/?celular=1",
+   "demo": "demos/sistemas/arca/app.html",
    "teste": "app/financeiroessencial/",
-   "linha": "Veltria",
+   "linha": "",
    "palavras": [
     "financeiro",
     "fluxo de caixa",
@@ -163,7 +163,13 @@
     "assistencia tecnica",
     "prestador",
     "cobranca",
-    "conta azul"
+    "conta azul",
+    "centro de custo",
+    "conciliação bancária",
+    "reservas",
+    "sistema financeiro para empresas",
+    "arca",
+    "veltria financeiro"
    ],
    "negocio": "Assistência técnica e serviços"
   },
@@ -952,38 +958,38 @@
    ]
   },
   "sis-financeiro": {
-   "nome": "Veltria Financeiro",
+   "nome": "Arca",
    "sistema": "financeiro",
-   "fala": "Esta é a página do Veltria Financeiro. Quer ver como ele funciona?",
+   "fala": "Esta é a página do Arca, o financeiro da empresa. Quer ver como ele funciona?",
    "perguntas": [
     {
-     "p": "Para quem é o Veltria Financeiro?",
+     "p": "Para quem é o Arca?",
      "e": "explaining",
      "r": [
-      "Para autônomo, MEI e prestador de serviço. No app de celular Essencial: o que entra dividido em potes, cobrança com PIX e lembrete no WhatsApp, limite do MEI e DAS à vista e contas fixas."
+      "Para empresa pequena, média e grande que quer o caixa em ordem no computador (e no celular): o que entra dividido em reservas para imposto, fornecedores, folha e emergência, contas a pagar e a receber com PIX e lembrete no WhatsApp, fluxo de caixa de até 90 dias, conciliação do extrato OFX/CSV e relatórios por centro de custo."
      ],
      "k": [
       [
        "Abrir a demonstração",
-       "demos/sistemas/financeiro-essencial/?celular=1"
+       "demos/sistemas/arca/app.html"
       ]
      ]
     },
     {
-     "p": "Quanto custa o Veltria Financeiro?",
+     "p": "Quanto custa o Arca?",
      "e": "explaining",
      "r": [
-      "É vendido na versão Essencial: R$ 59 por mês (app de celular para autônomo e MEI). Sem entrada e sem fidelidade."
+      "R$ 59 por mês, ou R$ 566 por ano (20% a menos). Um plano só, com equipe sem limite. Sem entrada e sem fidelidade."
      ],
      "k": [
       [
        "Pague aqui",
-       "veltria-financeiro.html#precos"
+       "arca.html#precos"
       ]
      ]
     },
     {
-     "p": "Como testo o Veltria Financeiro?",
+     "p": "Como testo o Arca?",
      "e": "idea",
      "r": [
       "Abra a demonstração agora, sem cadastro. Se gostar, assine pelo botão Pague aqui, no Pix ou no cartão."
@@ -991,11 +997,11 @@
      "k": [
       [
        "Abrir a demonstração",
-       "demos/sistemas/financeiro-essencial/?celular=1"
+       "demos/sistemas/arca/app.html"
       ],
       [
        "Pague aqui",
-       "veltria-financeiro.html#precos"
+       "arca.html#precos"
       ]
      ]
     },
