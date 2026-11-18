@@ -1,12 +1,12 @@
 // Atria · gestão: obras, orçamento, proposta comercial, cobrança com Pix, materiais, lojas, preços, clientes,
 // financeiro, ferramentas de bancada e mensagens prontas.
-import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=16';
-import { cena, TIPOS_CENA } from './cenas.js?v=16';
-import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=16';
-import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=16';
-import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=16';
+import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=17';
+import { cena, TIPOS_CENA } from './cenas.js?v=17';
+import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=17';
+import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=17';
+import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=17';
 import { qrSVG } from '../base/qr.js';
-import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=16';
+import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=17';
 
 // jeitos de cobrar: os do ofício da obra (ou da pessoa) primeiro, depois os outros
 export const modosObra = (o) => [...new Set([...((OFICIOS[o.oficio] || {}).cobra || []), ...juntar(db.perfil, 'cobra'), ...Object.keys(MODOS_COBRAR)])];
@@ -38,7 +38,7 @@ export function precosDe(mat) {
   db.precos.filter((p) => sa(p.mat) === k).forEach((p) => { if (!porLoja[p.loja] || porLoja[p.loja].data < p.data) porLoja[p.loja] = p; });
   return Object.values(porLoja).sort((a, b) => a.preco - b.preco);
 }
-export const melhorPreco = (mat) => precosDe(mat)[0] || null;
+export const melhorPreco = (mat) => { const ps = precosDe(mat); return ps.find((p) => p.loja === 'tabela') || ps[0] || null; }; // o preço fixo da tabela vem antes do mais barato
 const mediana = (l) => { const s = [...l].sort((a, b) => a - b), m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
 export function economiaLista(o) {
   let total = 0; const itens = [];
@@ -685,23 +685,38 @@ let buscaPreco = '';
 TELAS.precos = () => {
   const mats = [...new Set(db.precos.map((p) => p.mat))].filter((m) => !buscaPreco || sa(m).includes(sa(buscaPreco))).sort();
   // cesta: soma dos materiais que todas as lojas têm
-  const lojasCom = db.lojas.filter((l) => db.precos.some((p) => p.loja === l.id));
+  const lojasCom = db.lojas.filter((l) => l.id !== 'tabela' && db.precos.some((p) => p.loja === l.id)); // a tabela fixa não entra na comparação de lojas
   const comuns = [...new Set(db.precos.map((p) => p.mat))].filter((m) => lojasCom.every((l) => precosDe(m).some((p) => p.loja === l.id)));
   const cesta = lojasCom.map((l) => ({ l, v: comuns.reduce((s, m) => s + precosDe(m).find((p) => p.loja === l.id).preco, 0) })).sort((a, b) => a.v - b.v);
-  return `${cab('Preços', 'Onde cada material está mais barato', { dica: 'Registre o preço de cada nota ou orçamento que receber. O Atria marca o mais barato em verde e avisa preço fora do normal em vermelho.' })}
+  return `${cab('Preços', 'Sua tabela de materiais e onde cada um está mais barato', { dica: 'Cadastre seus materiais com o preço que você paga (a loja é opcional). Nos orçamentos e na lista de material, o Atria já põe o preço da sua tabela. Toque num preço para mudar ou apagar.' })}
     ${db.precos.some((p) => p.exemplo) ? '<p class="explica"><b>Demonstração:</b> lojas e preços de exemplo. No app de verdade, os preços são os que você registra.</p>' : ''}
     ${cesta.length > 1 ? `<div class="cartao"><b>Cesta de ${comuns.length} materiais</b><small class="mudo" style="display:block;margin-bottom:6px">mesmos itens, somados em cada loja</small>${cesta.map((x, i) => `<div class="preco-linha ${i === 0 ? 'melhor' : ''}"><span>${i === 0 ? '★ ' : ''}${t(x.l.nome)}</span><b>${din(x.v)}</b><span class="barra-preco"><i style="width:${Math.round(x.v / cesta[cesta.length - 1].v * 100)}%"></i></span></div>`).join('')}</div>` : ''}
     <label class="busca" style="margin-top:12px">${ico('lupa')}<input type="search" data-busca-preco value="${t(buscaPreco)}" placeholder="Buscar material" aria-label="Buscar material"></label>
-    <div class="lista">${mats.map((m) => { const ps = precosDe(m), med = mediana(ps.map((p) => p.preco)), max = Math.max(...ps.map((p) => p.preco)); return `<div class="cartao"><b style="font-size:14.5px">${t(m)}</b>${ps.map((p, i) => { const alto = ps.length > 2 && p.preco > med * 1.3; return `<div class="preco-linha ${i === 0 && ps.length > 1 ? 'melhor' : ''} ${alto ? 'alto' : ''}"><span>${t(nomeLoja(p.loja))}</span><b>${din(p.preco)}</b><span class="barra-preco"><i style="width:${Math.round(p.preco / max * 100)}%"></i></span><small>${dataBR(p.data)} · ${t(p.fonte)}${alto ? ' · ⚠ preço fora do normal' : ''}${p.exemplo ? ' · exemplo' : ''}</small></div>`; }).join('')}${ps.length > 1 ? `<small class="mudo" style="font-size:12px">Diferença de ${din(max - ps[0].preco)} (${Math.round((max / ps[0].preco - 1) * 100)}%) entre a mais cara e a mais barata.</small>` : ''}</div>`; }).join('') || '<div class="vazio"><b>Nenhum preço ainda</b>Registre o primeiro.</div>'}</div>
-    <button type="button" class="bt cheio largo" style="margin-top:14px" data-acao="novo-preco">${ico('mais')}Registrar preço</button>`;
+    <div class="lista">${mats.map((m) => { const ps = precosDe(m), med = mediana(ps.map((p) => p.preco)), max = Math.max(...ps.map((p) => p.preco)); return `<div class="cartao"><b style="font-size:14.5px">${t(m)}</b>${ps.map((p, i) => { const alto = ps.length > 2 && p.preco > med * 1.3; return `<div class="preco-linha ${i === 0 && ps.length > 1 ? 'melhor' : ''} ${alto ? 'alto' : ''}" role="button" tabindex="0" style="cursor:pointer" data-acao="editar-preco" data-id="${p.id}" aria-label="Editar o preço de ${t(m)} em ${t(nomeLoja(p.loja))}"><span>${t(nomeLoja(p.loja))}</span><b>${din(p.preco)}</b><span class="barra-preco"><i style="width:${Math.round(p.preco / max * 100)}%"></i></span><small>${dataBR(p.data)} · ${t(p.fonte)}${alto ? ' · ⚠ preço fora do normal' : ''}${p.exemplo ? ' · exemplo' : ''}</small></div>`; }).join('')}${ps.length > 1 ? `<small class="mudo" style="font-size:12px">Diferença de ${din(max - ps[0].preco)} (${Math.round((max / ps[0].preco - 1) * 100)}%) entre a mais cara e a mais barata.</small>` : ''}</div>`; }).join('') || '<div class="vazio"><b>Nenhum preço ainda</b>Registre o primeiro.</div>'}</div>
+    <button type="button" class="bt cheio largo" style="margin-top:14px" data-acao="novo-preco">${ico('mais')}Pôr material na tabela</button>`;
 };
 TELAS.precos.montar = (tela) => { const i = $('[data-busca-preco]', tela); i.oninput = () => { buscaPreco = i.value; const p = i.selectionStart; repinta(); const n = $('[data-busca-preco]'); n.focus(); n.setSelectionRange(p, p); }; };
-ACOES['novo-preco'] = () => formulario({ titulo: 'Registrar preço', rotulo: 'Registrar',
-  campos: [{ n: 'mat', r: 'Material', obrig: true, lista: [...new Set(db.precos.map((p) => p.mat))] }, { n: 'loja', r: 'Loja', obrig: true, lista: db.lojas.map((l) => l.nome) },
+// loja vazia = "Minha tabela": o preço fixo que a pessoa usa nos orçamentos
+const lojaTabela = () => { let l = db.lojas.find((x) => x.id === 'tabela'); if (!l) { l = { id: 'tabela', nome: 'Minha tabela', manual: true }; db.lojas.push(l); } return l; };
+ACOES['editar-preco'] = (b) => {
+  const p = achar('precos', b.dataset.id); if (!p) return;
+  formulario({ titulo: 'Editar preço', rotulo: 'Salvar',
+    campos: [{ n: 'mat', r: 'Material', obrig: true, valor: p.mat }, { n: 'preco', r: 'Preço por unidade', tipo: 'din', meio: true, obrig: true, valor: p.preco }, { n: 'un', r: 'Unidade', meio: true, valor: p.un || 'un', lista: UNS },
+      { n: 'loja', r: 'Loja (opcional)', valor: p.loja === 'tabela' ? '' : nomeLoja(p.loja), lista: db.lojas.filter((l) => l.id !== 'tabela').map((l) => l.nome) }],
+    extraPe: `<button type="button" class="bt leve p" data-tirar style="color:var(--brasa)">${ico('lixo')}</button>`,
+    depois: (f, api) => { f.querySelector('[data-tirar]').onclick = () => { db.precos = db.precos.filter((x) => x !== p); grava(); api.fechar(); repinta(); toast('Preço apagado'); }; },
+    salvar: (v) => {
+      if (!v.preco) return 'Escreva o preço.';
+      let l = v.loja ? db.lojas.find((x) => sa(x.nome) === sa(v.loja)) : lojaTabela(); if (!l) { l = { id: uid('l'), nome: v.loja, manual: true }; db.lojas.push(l); }
+      Object.assign(p, { mat: v.mat, preco: v.preco, un: v.un || 'un', loja: l.id, data: hoje(), exemplo: false }); grava(); repinta(); toast('Preço salvo');
+    } });
+};
+ACOES['novo-preco'] = () => formulario({ titulo: 'Pôr material na tabela', rotulo: 'Salvar na tabela',
+  campos: [{ n: 'mat', r: 'Material', obrig: true, lista: [...new Set([...db.precos.map((p) => p.mat), ...materiaisSugeridos(db.perfil).map(([n]) => n)])] }, { n: 'loja', r: 'Loja (opcional)', dica: 'Deixe vazio para ser o seu preço fixo.', lista: db.lojas.filter((l) => l.id !== 'tabela').map((l) => l.nome) },
     { n: 'preco', r: 'Preço por unidade', tipo: 'din', meio: true, obrig: true }, { n: 'un', r: 'Unidade', meio: true, valor: 'un', lista: UNS }, { n: 'fonte', r: 'De onde veio', valor: 'nota', lista: ['nota', 'orçamento', 'balcão', 'site da loja'] }],
   salvar: (v) => {
     if (!v.preco) return 'Escreva o preço.';
-    let l = db.lojas.find((x) => sa(x.nome) === sa(v.loja)); if (!l) { l = { id: uid('l'), nome: v.loja, manual: true }; db.lojas.push(l); }
+    let l = v.loja ? db.lojas.find((x) => sa(x.nome) === sa(v.loja)) : lojaTabela(); if (!l) { l = { id: uid('l'), nome: v.loja, manual: true }; db.lojas.push(l); }
     const ps = precosDe(v.mat), med = ps.length ? mediana(ps.map((p) => p.preco)) : 0;
     db.precos.push({ id: uid('pr'), mat: v.mat, un: v.un, loja: l.id, preco: v.preco, data: hoje(), fonte: v.fonte || 'nota' }); grava(); repinta();
     if (med && v.preco > med * 1.3) toast(`Atenção: ${Math.round((v.preco / med - 1) * 100)}% acima do normal para esse material`, 'erro');
