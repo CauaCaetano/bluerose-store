@@ -206,7 +206,7 @@
     blocoAf.hidden = false;
     blocoAf.innerHTML = '<div class="afp afp-painel" data-codigo="' + esc(d.codigo) + '">' +
       // menu da área (no celular vira abas roláveis)
-      '<nav class="afp-menu" aria-label="Área do afiliado"><div class="afp-menu-tit"><img class="afp-menu-rosa" src="img/blue-rose-logo-128.png" alt="" width="34" height="34"><span>Área do Afiliado</span></div><ul>' +
+      '<nav class="afp-menu" aria-label="Área do afiliado"><div class="afp-menu-tit"><img class="afp-menu-rosa" src="img/blue-rose-logo-96.webp" alt="" width="34" height="34"><span>Área do Afiliado</span></div><ul>' +
         MENU.map(function (m, i) { return '<li><a href="#' + m[0] + '"' + (i ? '' : ' aria-current="true"') + '>' + ico(m[2]) + '<span class="afp-longo">' + esc(m[1]) + '</span><span class="afp-curto" aria-hidden="true">' + esc(m[3]) + '</span></a></li>'; }).join('') +
         '</ul><hr><a class="afp-menu-sair" href="./">' + ico('sair') + '<span>Voltar ao site</span></a></nav>' +
 
