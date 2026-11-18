@@ -39,9 +39,9 @@ svg { stroke-width: 1.55; }
 
 /* ---------------------------------------------------------------- topo com a loja (arara, manequim e provador atrás) */
 .principal { position: relative; isolation: isolate; }
-.cena { position: absolute; z-index: -1; top: 0; right: 0; width: min(862px, 72%); height: 236px; background: url(img/cena-loja.webp) right top / auto 100% no-repeat; pointer-events: none;
-  -webkit-mask: linear-gradient(90deg, transparent 0, #000 16%) , linear-gradient(180deg, #000 70%, transparent 100%); -webkit-mask-composite: source-in;
-  mask: linear-gradient(90deg, transparent 0, #000 16%), linear-gradient(180deg, #000 70%, transparent 100%); mask-composite: intersect; }
+.cena { position: absolute; z-index: -1; top: 0; right: 0; width: min(862px, 72%); height: 236px; background: url(img/cena-loja.webp?v=2) right top / auto 100% no-repeat; pointer-events: none;
+  -webkit-mask: linear-gradient(90deg, transparent 0, #000 18%, #000 80%, transparent 100%) , linear-gradient(180deg, #000 45%, transparent 100%); -webkit-mask-composite: source-in;
+  mask: linear-gradient(90deg, transparent 0, #000 18%, #000 80%, transparent 100%), linear-gradient(180deg, #000 45%, transparent 100%); mask-composite: intersect; }
 [data-tela="vender"] .cena, [data-tela="sacola"] .cena { right: 420px; width: 560px; height: 205px; background-position: 4% top; }
 [data-tela="inicio"] .cena { height: 248px; }
 .principal:not([data-tela="inicio"]):not([data-tela="vender"]):not([data-tela="sacola"]) .cena { height: 135px; width: min(640px, 55%); right: 150px; background-position: 6% 8%; background-size: auto 230px; }
@@ -109,7 +109,7 @@ main { position: relative; z-index: 1; max-width: none; padding: 0 10px 40px 16p
 /* ---------------------------------------------------------------- etiqueta de tecido com cordão e borla (recorte do conceito, 9 partes) */
 .etq, .etq-titulo { --k: .69; position: relative; display: inline-flex; align-items: center; box-sizing: border-box; border-style: solid; border-color: transparent;
   border-width: calc(32px * var(--k)) calc(27px * var(--k)) calc(42px * var(--k)) calc(102px * var(--k));
-  border-image: url(img/etiqueta.webp) 32 27 42 102 fill / calc(32px * var(--k)) calc(27px * var(--k)) calc(42px * var(--k)) calc(102px * var(--k)) round stretch;
+  border-image: url(img/etiqueta.webp?v=2) 32 27 42 102 fill / calc(32px * var(--k)) calc(27px * var(--k)) calc(42px * var(--k)) calc(102px * var(--k)) round stretch;
   color: #FFF8F4; text-decoration: none; filter: drop-shadow(0 8px 10px rgba(80, 30, 40, .22)); }
 .etq-titulo { height: 113px; margin: 0; padding: 0 16px 6px 0; gap: 16px; font: 600 45px/1 var(--serif); color: #FFF8F4; letter-spacing: -.01em; white-space: nowrap; }
 .etq-titulo .etq-ic svg { width: 40px; height: 40px; color: var(--ouro); stroke-width: 1.6; display: block; }
@@ -648,7 +648,7 @@ main { position: relative; z-index: 1; max-width: none; padding: 0 10px 40px 16p
 .etq-txt b { font-size: 35px; }
 .etq-hoje .etq-ic2 { margin-right: -14px; }
 .etq-hoje .etq-ic2 svg { width: 40px; height: 52px; }
-.topo::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 26px; background: linear-gradient(180deg, rgba(248, 241, 236, .55), rgba(248, 241, 236, 0)); pointer-events: none; }
+.topo::after { content: none; }
 [data-tela="vender"] .cena, [data-tela="sacola"] .cena { right: 0; width: 980px; background-position: left top; }
 .esc-cab { position: relative; padding-right: 22px; }
 .fechar-sel { position: absolute; right: -4px; top: -4px; }
