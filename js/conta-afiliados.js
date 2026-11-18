@@ -295,10 +295,17 @@
         '<div><dt>Comissão</dt><dd>' + pct + '% por até ' + esc(d.meses) + ' meses</dd></div>' +
         '<div><dt>Pagamento</dt><dd>Pix todo dia 10, a partir de ' + reais2(minimo) + '</dd></div>' +
         (d.anshur_meses ? '<div><dt>Meses de Anshur ganhos</dt><dd>' + esc(d.anshur_meses) + ' (acesso até ' + dia(d.anshur_ate) + ')</dd></div>' : '') +
-      '</dl><p class="afp-sub">A venda conta quando a pessoa cria uma conta nova pelo seu link. Pagamento estornado cancela a comissão. <a href="#regras">Ler todas as regras</a> · <a href="conta.html">Minha conta</a></p></section>' +
+      '</dl><p class="afp-sub">A venda conta quando a pessoa cria uma conta nova pelo seu link. Pagamento estornado cancela a comissão. <a href="conta.html">Minha conta</a></p><div class="afp-regras" id="af-regras-conf"></div></section>' +
       '<p class="afp-sr" id="af-copiado" role="status" aria-live="polite"></p>' +
       '</div></div>';
     pagQR(d.codigo, -1);
+    // regras e ganhos da página vão para dentro de Configurações (a página em volta fica escondida)
+    var rc = document.getElementById('af-regras-conf');
+    if (rc) ['t-ganhos', 't-regras'].forEach(function (id) {
+      var h = document.getElementById(id), w = h && h.parentNode; if (!w) return;
+      var c = w.cloneNode(true); c.querySelectorAll('[id]').forEach(function (x) { x.removeAttribute('id'); }); c.querySelectorAll('.ctas').forEach(function (x) { x.remove(); });
+      c.className = 'afp-regras-bloco'; rc.appendChild(c);
+    });
     cliente.auth.getSession().then(function (r) {
       var u = r.data.session && r.data.session.user; if (!u) return;
       var nome = String((u.user_metadata && (u.user_metadata.nome || u.user_metadata.full_name || u.user_metadata.name)) || '').trim().split(/\s+/)[0];

@@ -291,3 +291,12 @@
 /* afiliado logado em afiliados.html: só o painel (sem a página de divulgação em volta) */
 .afp-so-painel main>section:not(#painel),.afp-so-painel .rodape-site{display:none!important}
 .afp-so-painel main{padding-top:0}
+.afp-regras{margin-top:22px;border-top:1px solid rgba(16,27,54,.12);padding-top:6px}
+.afp-regras-bloco{margin-top:18px}
+.afp-regras-bloco .sec-title{font-size:1.35rem;margin:0 0 12px}
+.afp-regras-bloco .af-cartoes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.afp-regras-bloco .af-cartoes article{padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.6);border:1px solid rgba(16,27,54,.1)}
+.afp-regras-bloco .af-cartoes h3{font-size:1rem;margin:0 0 6px}
+.afp-regras-bloco .af-cartoes p,.afp-regras-bloco .af-exemplo,.afp-regras-bloco .af-regras{font-size:.92rem;line-height:1.55}
+.afp-regras-bloco .af-regras{padding-left:1.2em;display:grid;gap:8px}
+.afp-regras-bloco .af-cartoes h3{color:#16213f!important}
