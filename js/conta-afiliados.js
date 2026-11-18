@@ -196,7 +196,7 @@
   function pagPainel(d) {
     var link = linkDe(d.codigo), pct = Number(d.pct), msg = mensagem(link), prox = proximoPagamento();
     var lista = d.lista || [], temBase = lista.some(function (x) { return x.base != null; });
-    var secao = document.getElementById('painel'); if (secao) secao.classList.add('afp-modo-painel');
+    var secao = document.getElementById('painel'); if (secao) { secao.classList.add('afp-modo-painel'); if (document.body.classList.contains('pg-afiliados') || /afiliados\.html/.test(location.pathname)) { document.body.classList.add('afp-so-painel'); if (!document.body.dataset.afpTopo) { document.body.dataset.afpTopo = 1; window.scrollTo(0, 0); } } }
     var botaoCopiar = function (attr, rotulo, cls) { return '<button type="button" class="afp-bt-copiar' + (cls ? ' ' + cls : '') + '" ' + attr + (rotulo ? ' aria-label="' + esc(rotulo) + '"' : '') + '>' + ico('copiar') + '<span>Copiar</span></button>'; };
     var numero = function (classe, icone, rotulo, valor, extra, depois) { return '<div class="afp-num ' + classe + '"><dt>' + ico(icone) + '<span>' + esc(rotulo) + '</span>' + (extra || '') + '</dt><dd>' + valor + (depois || '') + '</dd></div>'; };
     // mínimo para receber (vem do servidor; R$ 50 de reserva)

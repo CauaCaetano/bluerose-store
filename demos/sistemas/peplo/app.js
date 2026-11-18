@@ -5,6 +5,7 @@
 
 import { qrSVG } from '../base/qr.js';
 const CHAVE = 'peplo-v1';
+const EXEMPLO = 2; // muda quando a loja de exemplo muda: quem tinha a demonstração aberta recebe a nova (18/11/2026: reformulação boutique)
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const t = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -28,7 +29,7 @@ const horaBR = (iso) => (iso && iso.length > 10 ? new Date(iso).toLocaleTimeStri
 const agora = () => { const d = new Date(); return `${isoD(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; };
 const telLimpo = (tel) => String(tel || '').replace(/\D/g, '');
 const zap = (tel, m) => `https://wa.me/${telLimpo(tel).length >= 12 ? '' : '55'}${telLimpo(tel)}?text=${encodeURIComponent(m)}`;
-const FORMAS = { dinheiro: 'Dinheiro', pix: 'Pix', debito: 'Cartão de débito', credito: 'Cartão de crédito', fiado: 'Fiado', loja: 'Crédito da loja' };
+const FORMAS = { dinheiro: 'Dinheiro', pix: 'Pix', debito: 'Cartão de débito', credito: 'Cartão de crédito', fiado: 'Crediário', loja: 'Crédito da loja' };
 const ICONE_CAT = {
   Vestidos: '<path d="M9 3h6l-1 4 4 13H6l4-13z"/><path d="M9 3l-1 2M15 3l1 2"/>',
   Blusas: '<path d="M8 4l4 2 4-2 4 4-3 3v9H7v-9L4 8z"/>',
@@ -55,77 +56,89 @@ const MSGS = {
 // ------------------------------------------------------------------ demonstração: a Boutique Bella
 function rnd(sem) { let a = sem >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let x = Math.imul(a ^ (a >>> 15), 1 | a); x ^= x + Math.imul(x ^ (x >>> 7), 61 | x); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }
 function inicial() {
-  const r = rnd(20261107), esc_ = (l) => l[Math.floor(r() * l.length)], h = hoje();
-  const C = { preto: { n: 'Preto', h: '#1f1d1b' }, branco: { n: 'Branco', h: '#f4f1ea' }, vinho: { n: 'Vinho', h: '#6b2338' }, nude: { n: 'Nude', h: '#d9b99b' }, azul: { n: 'Azul jeans', h: '#4a6a8f' }, claro: { n: 'Jeans claro', h: '#9db4cc' }, rosa: { n: 'Rosa', h: '#e3a3b5' }, verde: { n: 'Verde oliva', h: '#6e7444' }, caramelo: { n: 'Caramelo', h: '#a0683a' }, off: { n: 'Off-white', h: '#ede4d3' }, marinho: { n: 'Marinho', h: '#22304a' }, estampa: { n: 'Estampado', h: '#b5677f' }, roxo: { n: 'Roxo', h: '#5b3a7a' }, xadrez: { n: 'Xadrez azul', h: '#7a86a8' } };
+  const r = rnd(20261118), esc_ = (l) => l[Math.floor(r() * l.length)], h = hoje();
+  const C = { preto: { n: 'Preto', h: '#1f1d1b' }, branco: { n: 'Branco', h: '#f4f1ea' }, vinho: { n: 'Vinho', h: '#6b2338' }, nude: { n: 'Nude', h: '#d9b99b' }, azul: { n: 'Azul clássico', h: '#3e5f8a' }, claro: { n: 'Jeans claro', h: '#9db4cc' }, rosa: { n: 'Rosa', h: '#e3a3b5' }, verde: { n: 'Verde oliva', h: '#5f6b2e' }, caramelo: { n: 'Caramelo', h: '#a0683a' }, off: { n: 'Off-white', h: '#efe6d6' }, marinho: { n: 'Marinho', h: '#22304a' }, estampa: { n: 'Estampado', h: '#c98a8a' }, roxo: { n: 'Roxo', h: '#5b3a7a' }, xadrez: { n: 'Xadrez azul', h: '#7a86a8' } };
   const PMG = ['P', 'M', 'G', 'GG', 'XG'], PLUS = ['G1', 'G2', 'G3', 'G4'], NUM = ['36', '38', '40', '42', '44', '46', '48'], NUMP = ['46', '48', '50', '52', '54'];
+  const PV = 'Coleção Primavera/Verão', OI = 'Coleção Outono/Inverno', FESTA = 'Coleção Festa', ESS = 'Linha Essenciais', JEANS = 'Linha Jeans';
+  // [id, nome, categoria, código, custo, preço, tamanhos, cores, giro, coleção, foto] · a ordem é a da vitrine do Vender
   const def = [
-    ['Vestido Midi Floral', 'Vestidos', 'VM-1021', 8900, 21900, PMG, ['estampa', 'preto'], 'giro'],
-    ['Vestido Longo Alcinha', 'Vestidos', 'VL-1033', 9800, 24900, PMG, ['roxo', 'vinho'], 'parado'],
-    ['Vestido Tubinho', 'Vestidos', 'VT-1040', 7400, 17900, PMG, ['preto', 'nude'], 'giro'],
-    ['Suéter Tricot Listrado', 'Blusas', 'BT-5502', 5200, 12900, PMG, ['marinho', 'off'], 'parado'],
-    ['Blusa Cetim Manga Longa', 'Blusas', 'BC-5510', 4600, 11900, PMG, ['rosa', 'nude', 'branco'], 'giro'],
-    ['Body Canelado', 'Blusas', 'BD-5521', 2900, 6990, PMG, ['preto', 'branco', 'nude'], 'forte'],
-    ['Camiseta Básica Algodão', 'Camisetas', 'CB-1001', 1800, 4990, PMG, ['preto', 'branco', 'vinho'], 'forte'],
-    ['Camiseta Estampa Boho', 'Camisetas', 'CE-1007', 2400, 5990, PMG, ['off', 'rosa'], 'giro'],
-    ['Calça Jeans Reta', 'Calças', 'CJ-3301', 6400, 15900, NUM, ['azul', 'claro'], 'forte'],
-    ['Calça Alfaiataria', 'Calças', 'CA-3312', 6900, 16900, NUM, ['preto', 'caramelo', 'off'], 'giro'],
-    ['Calça Pantalona Linho', 'Calças', 'CP-3320', 7600, 18900, NUM, ['nude', 'off'], 'parado'],
-    ['Saia Midi Plissada', 'Saias', 'SM-4401', 4800, 12900, PMG, ['off', 'preto', 'nude'], 'giro'],
-    ['Saia Jeans Curta', 'Saias', 'SJ-4410', 3900, 9900, NUM, ['azul', 'claro'], 'giro'],
-    ['Jaqueta Jeans Oversized', 'Jaquetas', 'JJ-6601', 9200, 22900, PMG, ['azul', 'claro'], 'parado'],
-    ['Blazer Linho Acinturado', 'Jaquetas', 'BZ-6610', 11800, 27900, PMG, ['nude', 'preto'], 'giro'],
-    ['Short Alfaiataria Xadrez', 'Shorts', 'SA-7701', 3600, 8990, NUM, ['xadrez', 'preto'], 'giro'],
-    ['Short Jeans Destroyed', 'Shorts', 'SD-7710', 3200, 7990, NUM, ['azul'], 'parado'],
-    ['Bolsa Tiracolo Couro', 'Acessórios', 'AC-9901', 6800, 15900, ['Único'], ['caramelo', 'preto'], 'giro'],
-    ['Cinto Fivela Dourada', 'Acessórios', 'AC-9910', 1900, 4990, ['P', 'M', 'G'], ['preto', 'caramelo'], 'giro'],
-    ['Lenço de Seda Animal Print', 'Acessórios', 'AC-9920', 2200, 5990, ['Único'], ['caramelo', 'preto'], 'giro'],
-    ['Conjunto Cropped e Saia Floral', 'Saias', 'CS-4430', 8800, 19900, PMG, ['estampa', 'off'], 'parado'],
-    ['Camisa Social Feminina', 'Blusas', 'CS-5530', 5400, 13900, PMG, ['branco', 'marinho'], 'giro'],
-    ['Vestido Envelope Plus', 'Vestidos', 'VP-1050', 9400, 22900, PLUS, ['vinho', 'preto'], 'giro'],
-    ['Calça Jeans Plus Cintura Alta', 'Calças', 'CJ-3340', 7200, 17900, NUMP, ['azul', 'preto'], 'forte'],
+    [1, 'Vestido Midi Floral', 'Vestidos', 'VM-1021', 8900, 21900, PMG, ['estampa', 'preto', 'vinho', 'nude'], 'forte', PV, 'img/peca-vestido-midi-floral.webp'],
+    [2, 'Vestido Longo Alcinha', 'Vestidos', 'VL-1033', 10200, 24900, PMG, ['vinho', 'preto'], 'giro', FESTA, 'img/peca-vestido-longo-alcinha.webp'],
+    [5, 'Blusa Cetim Manga Longa', 'Blusas', 'BC-5510', 4600, 11900, PMG, ['off', 'nude'], 'forte', ESS, 'img/peca-blusa-cetim.webp'],
+    [4, 'Suéter Tricot Listrado', 'Blusas', 'BT-5502', 5200, 12900, PMG, ['marinho', 'off'], 'giro', OI, 'img/peca-sueter-tricot.webp'],
+    [9, 'Calça Jeans Reta', 'Calças', 'CJ-6601', 7800, 17900, PMG, ['azul', 'preto'], 'forte', JEANS, 'img/peca-calca-jeans-reta.webp'],
+    [15, 'Blazer Alfaiataria', 'Casacos', 'BZ-7701', 12400, 29900, PMG, ['caramelo', 'preto'], 'giro', OI, 'img/peca-blazer-alfaiataria.webp'],
+    [7, 'Camiseta Básica', 'Camisetas', 'CB-1007', 1800, 4990, PMG, ['branco', 'preto', 'vinho'], 'forte', ESS, 'img/peca-camiseta-basica.webp'],
+    [10, 'Calça Alfaiataria', 'Calças', 'CA-3212', 9200, 22900, PMG, ['verde', 'preto', 'off'], 'giro', PV, 'img/peca-calca-alfaiataria.webp'],
+    [3, 'Vestido Tubinho', 'Vestidos', 'VT-1040', 7400, 17900, PMG, ['preto', 'nude'], 'giro', FESTA, 'fotos/p3.jpg'],
+    [6, 'Body Canelado', 'Blusas', 'BD-5521', 2900, 6990, PMG, ['preto', 'branco', 'nude'], 'forte', ESS, 'fotos/p6.jpg'],
+    [8, 'Camiseta Estampa Boho', 'Camisetas', 'CE-1007', 2400, 5990, PMG, ['off', 'rosa'], 'giro', PV, 'fotos/p8.jpg'],
+    [11, 'Calça Pantalona Linho', 'Calças', 'CP-3320', 7600, 18900, NUM, ['nude', 'off'], 'parado', PV, 'fotos/p11.jpg'],
+    [12, 'Saia Midi Plissada', 'Saias', 'SM-4401', 4800, 12900, PMG, ['off', 'preto', 'nude'], 'giro', PV, 'fotos/p12.jpg'],
+    [13, 'Saia Jeans Curta', 'Saias', 'SJ-4410', 3900, 9900, NUM, ['azul', 'claro'], 'giro', JEANS, 'fotos/p13.jpg'],
+    [14, 'Jaqueta Jeans Oversized', 'Casacos', 'JJ-6601', 9200, 22900, PMG, ['azul', 'claro'], 'parado', JEANS, 'fotos/p14.jpg'],
+    [16, 'Short Alfaiataria Xadrez', 'Shorts', 'SA-7701', 3600, 8990, NUM, ['xadrez', 'preto'], 'giro', PV, 'fotos/p16.jpg'],
+    [17, 'Short Jeans Destroyed', 'Shorts', 'SD-7710', 3200, 7990, NUM, ['azul'], 'parado', JEANS, 'fotos/p17.jpg'],
+    [18, 'Bolsa Tiracolo Couro', 'Acessórios', 'AC-9901', 6800, 15900, ['Único'], ['caramelo', 'preto'], 'giro', '', 'fotos/p18.jpg'],
+    [19, 'Cinto Fivela Dourada', 'Acessórios', 'AC-3011', 2400, 5990, ['P', 'M', 'G'], ['caramelo', 'preto'], 'giro', '', 'fotos/p19.jpg'],
+    [20, 'Lenço de Seda Animal Print', 'Acessórios', 'AC-9920', 2200, 5990, ['Único'], ['caramelo', 'preto'], 'giro', '', 'fotos/p20.jpg'],
+    [21, 'Conjunto Cropped e Saia Floral', 'Saias', 'CS-4430', 8800, 19900, PMG, ['estampa', 'off'], 'parado', PV, 'fotos/p21.jpg'],
+    [22, 'Camisa Social Feminina', 'Blusas', 'CS-5530', 5400, 13900, PMG, ['branco', 'marinho'], 'giro', ESS, 'fotos/p22.jpg'],
+    [23, 'Vestido Envelope Plus', 'Vestidos', 'VP-1050', 9400, 22900, PLUS, ['vinho', 'preto'], 'giro', FESTA, 'fotos/p23.jpg'],
+    [24, 'Calça Jeans Plus Cintura Alta', 'Calças', 'CJ-3340', 7200, 17900, NUMP, ['azul', 'preto'], 'giro', JEANS, 'fotos/p24.jpg'],
   ];
-  const produtos = def.map(([nome, cat, cod, custo, preco, tam, cores, giro], i) => ({
-    id: `p${i + 1}`, nome, cat, cod, marca: '', forn: i % 3 ? 'Ateliê Rosa Confecções' : 'Brás Moda Atacado', foto: `fotos/p${i + 1}.jpg`, custo, preco, min: tam.length === 1 ? 2 : 1, tam, cores: cores.map((k) => ({ ...C[k] })), q: {}, criado: somaDias(h, -150), arquivado: false, giro,
+  const produtos = def.map(([n, nome, cat, cod, custo, preco, tam, cores, giro, colecao, foto], i) => ({
+    id: `p${n}`, nome, cat, cod, marca: '', colecao, forn: i % 3 ? 'Ateliê Rosa Confecções' : 'Brás Moda Atacado', foto, custo, preco, min: tam.length === 1 ? 2 : 1, tam, cores: cores.map((k) => ({ ...C[k] })), q: {}, criado: somaDias(h, -150), arquivado: false, giro,
   }));
   const fornecedores = [{ id: 'f1', nome: 'Brás Moda Atacado', tel: '11987650001' }, { id: 'f2', nome: 'Ateliê Rosa Confecções', tel: '19992340044' }];
-  const NOMES = ['Ana Souza', 'Carla Mendes', 'Juliana Alves', 'Fernanda Lima', 'Patrícia Rocha', 'Beatriz Costa', 'Mariana Ribeiro', 'Camila Duarte', 'Larissa Prado', 'Renata Barros', 'Aline Teixeira', 'Gabriela Nunes', 'Tatiane Freitas', 'Débora Campos', 'Vanessa Moura', 'Simone Araújo', 'Cristina Pires', 'Luana Batista', 'Helena Castro', 'Rosângela Dias'];
-  const clientes = NOMES.map((nome, i) => ({ id: `c${i + 1}`, nome, tel: `1699${String(1100000 + i * 7311).slice(0, 7)}`, cpf: '', nasc: `19${70 + (i * 3) % 30}-${pad((i % 12) + 1)}-${pad((i * 7) % 27 + 1)}`, end: '', limite: [30000, 50000, 80000, 40000][i % 4], obs: '', bloqueado: false, credito: 0, criado: somaDias(h, -160) }));
-  const MAUS = new Set(['c1', 'c2', 'c5', 'c9', 'c14']); // não pagam em dia
-  clientes.find((c) => c.id === 'c9').bloqueado = true; clientes.find((c) => c.id === 'c9').obs = 'Bloqueada no fiado até acertar o atraso.';
-  const db = { v: 1, tema: 'ameixa', loja: { nome: 'Boutique Bella', slogan: 'Roupas e acessórios', dono: 'Bella', tel: '16991500746', cidade: 'Orlândia, SP', pix: 'boutiquebella@pix.com', logo: '' },
-    cfg: { limitePadrao: 30000, alertaPct: 80, bloqueioDias: 15, bloqueioAuto: true, juros: { ativo: false, multaPct: 2, jurosMesPct: 1, carencia: 3 }, parados: [30, 60, 90], minimo: 1, msgs: {} },
-    usuarios: EQUIPE(), usuario: 'u1', meta: 2500000, atividades: [],
+  const NOMES = ['Ana Souza', 'Carla Mendes', 'Juliana Alves', 'Fernanda Lima', 'Patrícia Rocha', 'Beatriz Costa', 'Mariana Ribeiro', 'Camila Duarte', 'Larissa Prado', 'Renata Barros', 'Aline Teixeira', 'Gabriela Nunes', 'Tatiane Freitas', 'Débora Campos', 'Vanessa Moura', 'Simone Araújo', 'Cristina Pires', 'Luana Batista', 'Helena Castro', 'Rosângela Dias',
+    'Isabela Martins', 'Letícia Gomes', 'Natália Cardoso', 'Priscila Ramos', 'Bruna Carvalho', 'Daniela Lopes', 'Elaine Moreira', 'Flávia Rezende', 'Giovana Pacheco', 'Jéssica Fonseca', 'Karina Vieira', 'Lívia Andrade', 'Marcela Pinto', 'Nathália Borges', 'Paula Siqueira', 'Raquel Coelho', 'Sabrina Melo', 'Talita Rangel', 'Viviane Lacerda', 'Yasmin Torres'];
+  // aniversário: Ana amanhã e Patrícia em 5 dias (as outras espalhadas pelo ano)
+  const niver = (ano, d) => `${ano}${somaDias(h, d).slice(4)}`;
+  const clientes = NOMES.map((nome, i) => ({ id: `c${i + 1}`, nome, tel: `1699${String(1100000 + i * 7311).slice(0, 7)}`, cpf: '', nasc: i === 0 ? niver(1991, 1) : i === 4 ? niver(1987, 5) : `19${70 + (i * 3) % 30}-${pad(((i + 5) % 12) + 1)}-${pad((i * 7) % 27 + 1)}`, end: '', limite: [30000, 50000, 80000, 40000][i % 4], obs: '', bloqueado: false, credito: 0, criado: somaDias(h, -160), foto: i === 0 ? 'img/cliente-ana.webp' : i === 4 ? 'img/cliente-patricia.webp' : '' }));
+  // nenhuma outra cliente faz aniversário nos próximos 7 dias por acaso
+  clientes.forEach((c, i) => { if (i !== 0 && i !== 4) { const k = c.nasc.slice(5); for (let d = 0; d <= 8; d++) if (somaDias(h, d).slice(5) === k) c.nasc = `${c.nasc.slice(0, 5)}${somaDias(h, 40 + i).slice(5)}`; } });
+  const MAUS = new Set(['c2', 'c9', 'c14', 'c27']); // não pagam em dia
+  const VIP = ['c1', 'c3', 'c6', 'c12', 'c21'];
+  clientes.find((c) => c.id === 'c9').bloqueado = true; clientes.find((c) => c.id === 'c9').obs = 'Bloqueada no crediário até acertar o atraso.';
+  const db = { v: 1, exemplo: EXEMPLO, tema: 'ameixa', loja: { nome: 'Boutique Bella', slogan: 'Roupas e acessórios', dono: 'Bella', tel: '16991500746', cidade: 'Orlândia, SP', pix: 'boutiquebella@pix.com', logo: '' },
+    cfg: { limitePadrao: 30000, alertaPct: 80, bloqueioDias: 15, bloqueioAuto: true, juros: { ativo: false, multaPct: 2, jurosMesPct: 1, carencia: 3 }, parados: [30, 60, 90], minimo: 1, msgs: {}, vipMin: 300000 },
+    usuarios: EQUIPE(), usuario: 'u1', meta: 0, metas: {}, atividades: [],
     clientes, produtos, fornecedores, vendas: [], parcelas: [], pagamentos: [], acordos: [], cobrancas: [], movs: [], compras: [], excecoes: [], avarias: [], caixa: { aberto: null, historico: [] }, n: 1000 };
-  // estoque de partida (entrada há 150 dias) e uma reposição há 40 dias
-  const entra = (p, qtd, data, ref) => p.cores.forEach((c) => p.tam.forEach((tm) => { const k = `${c.n}|${tm}`; p.q[k] = (p.q[k] || 0) + qtd; db.movs.push({ id: uid('m'), data, p: p.id, cor: c.n, tam: tm, q: qtd, tipo: 'entrada', ref }); }));
-  produtos.forEach((p) => entra(p, p.giro === 'forte' ? 6 : p.giro === 'parado' ? 3 : 4, `${somaDias(h, -150)}T10:00:00`, 'Estoque inicial'));
-  db.compras.push({ id: 'cp1', data: somaDias(h, -150), forn: 'Brás Moda Atacado', itens: [], total: produtos.reduce((s, p) => s + p.custo * p.cores.length * p.tam.length * (p.giro === 'forte' ? 6 : p.giro === 'parado' ? 3 : 4), 0), forma: 'Boleto 30/60', obs: 'Estoque inicial da loja' });
-  const repor = produtos.filter((p) => p.giro === 'forte');
-  repor.forEach((p) => entra(p, 3, `${somaDias(h, -40)}T09:30:00`, 'Compra cp2'));
-  db.compras.push({ id: 'cp2', data: somaDias(h, -40), forn: 'Ateliê Rosa Confecções', itens: repor.map((p) => ({ p: p.id, qtd: p.cores.length * p.tam.length * 3, custo: p.custo })), total: repor.reduce((s, p) => s + p.custo * p.cores.length * p.tam.length * 3, 0), forma: 'Pix', obs: 'Reposição dos mais vendidos' });
-  // vendas dos últimos 120 dias; as "paradas" só vendem no começo
-  const caixaHoje = 'cx-hoje';
+  // estoque: entrada há 150 dias e reposições a cada mês (o que não gira não é reposto)
+  const alvo = (p) => (p.giro === 'forte' ? 6 : p.giro === 'parado' ? 3 : 4);
+  const entra = (p, qtd, data, ref, cor, tm) => { const k = `${cor}|${tm}`; p.q[k] = (p.q[k] || 0) + qtd; db.movs.push({ id: uid('m'), data, p: p.id, cor, tam: tm, q: qtd, tipo: 'entrada', ref }); };
+  produtos.forEach((p) => p.cores.forEach((c) => p.tam.forEach((tm) => entra(p, alvo(p), `${somaDias(h, -150)}T10:00:00`, 'Estoque inicial', c.n, tm))));
+  db.compras.push({ id: 'cp1', data: somaDias(h, -150), forn: 'Brás Moda Atacado', itens: [], total: produtos.reduce((s, p) => s + p.custo * p.cores.length * p.tam.length * alvo(p), 0), forma: 'Boleto 30/60', obs: 'Estoque inicial da loja' });
+  const repoe = (d, nc) => {
+    const dia = somaDias(h, d), itens = [];
+    produtos.filter((p) => p.giro !== 'parado').forEach((p, i) => { let n = 0; p.cores.forEach((c, ci) => p.tam.forEach((tm, ti) => { const k = `${c.n}|${tm}`, falta = alvo(p) + 1 - (p.q[k] || 0); if (falta > 0 && (d < -20 || (i + ci + ti) % 4)) { entra(p, falta, `${dia}T09:30:00`, `Compra ${nc}`, c.n, tm); n += falta; } })); if (n) itens.push({ p: p.id, qtd: n, custo: p.custo }); });
+    db.compras.push({ id: nc, data: dia, forn: nc === 'cp3' || nc === 'cp5' ? 'Brás Moda Atacado' : 'Ateliê Rosa Confecções', itens, total: itens.reduce((s, x) => s + x.qtd * x.custo, 0), forma: nc === 'cp5' ? 'Pix' : 'Boleto 30 dias', obs: 'Reposição do que vendeu' });
+  };
+  // vendas dos últimos 120 dias; as peças "paradas" só vendem no começo
+  const caixaHoje = 'cx-hoje', REP = { '-95': 'cp2', '-65': 'cp3', '-35': 'cp4', '-12': 'cp5' };
   for (let d = -120; d <= 0; d++) {
-    const dia = somaDias(h, d), n = d === 0 ? 4 : Math.floor(r() * 3.2);
+    if (REP[d]) repoe(d, REP[d]);
+    const dia = somaDias(h, d), fds = new Date(`${dia}T12:00`).getDay(), n = d === 0 ? 11 : fds === 0 ? 0 : Math.floor(r() * 4.5) + (fds === 6 ? 4 : 2);
     for (let k = 0; k < n; k++) {
       const pode = produtos.filter((p) => (p.giro !== 'parado' || d < -85) && Object.values(p.q).some((x) => x > 0));
       if (!pode.length) break;
-      const itens = []; const ni = r() < 0.7 ? 1 : 2;
+      const itens = []; const ni = r() < 0.55 ? 1 : r() < 0.75 ? 2 : 3;
       for (let j = 0; j < ni; j++) {
-        const p = esc_(pode), vars = Object.entries(p.q).filter(([, x]) => x > 0); if (!vars.length) continue;
+        const p = r() < 0.45 ? esc_(pode.filter((x) => x.giro === 'forte').concat(pode.slice(0, 2))) : esc_(pode), vars = Object.entries(p.q).filter(([, x]) => x > 0); if (!vars.length) continue;
         const [kk] = esc_(vars), [cor, tam] = kk.split('|');
         if (itens.some((x) => x.p === p.id && x.cor === cor && x.tam === tam)) continue;
         itens.push({ p: p.id, nome: p.nome, cor, tam, qtd: 1, preco: p.preco, custo: p.custo });
       }
       if (!itens.length) continue;
       const total = itens.reduce((s, x) => s + x.preco * x.qtd, 0), desc = r() < 0.15 ? Math.round(total * 0.05 / 100) * 100 : 0, liq = total - desc;
-      const cli = r() < 0.75 ? esc_(clientes) : null, sorte = r();
+      const cli = r() < 0.16 ? esc_(clientes.filter((c) => VIP.includes(c.id))) : r() < 0.78 ? esc_(clientes) : null, sorte = r();
       let pag;
-      if (cli && sorte < 0.3 && !(cli.id === 'c9' && d > -60)) pag = [{ f: 'fiado', v: liq }];
-      else if (cli && sorte < 0.38) pag = [{ f: 'pix', v: Math.round(liq / 2) }, { f: 'fiado', v: liq - Math.round(liq / 2) }];
-      else pag = [{ f: esc_(['pix', 'pix', 'pix', 'dinheiro', 'dinheiro', 'credito', 'credito', 'debito']), v: liq }];
+      if (cli && sorte < 0.12 && !(cli.id === 'c9' && d > -60)) pag = [{ f: 'fiado', v: liq }];
+      else if (cli && sorte < 0.17) pag = [{ f: 'pix', v: Math.round(liq / 2) }, { f: 'fiado', v: liq - Math.round(liq / 2) }];
+      else pag = [{ f: esc_(['pix', 'pix', 'pix', 'dinheiro', 'dinheiro', 'credito', 'credito', 'credito', 'debito']), v: liq }];
       const hora = `${pad(9 + Math.floor(r() * 9))}:${pad(Math.floor(r() * 60))}:00`;
-      const v = { id: uid('v'), n: ++db.n, data: `${dia}T${hora}`, vend: esc_(['u1', 'u2', 'u2', 'u3']), cli: cli ? cli.id : null, itens, sub: total, desc, total: liq, pag, devol: [], caixa: d === 0 ? caixaHoje : `cx${d}` };
+      const v = { id: uid('v'), n: ++db.n, data: `${dia}T${hora}`, vend: esc_(['u1', 'u2', 'u2', 'u3', 'u3']), cli: cli ? cli.id : null, itens, sub: total, desc, total: liq, pag, devol: [], caixa: d === 0 ? caixaHoje : `cx${d}` };
       itens.forEach((x) => { const p = produtos.find((y) => y.id === x.p); p.q[`${x.cor}|${x.tam}`] -= x.qtd; db.movs.push({ id: uid('m'), data: v.data, p: x.p, cor: x.cor, tam: x.tam, q: -x.qtd, tipo: 'venda', ref: v.id }); });
       const fiado = pag.find((x) => x.f === 'fiado');
       if (fiado) {
@@ -152,16 +165,29 @@ function inicial() {
       db.vendas.push(v);
     }
   }
+  // duas trocas hoje (tamanho que não serviu): a peça volta para a arara e o valor vira crédito
+  db.vendas.filter((v) => v.cli && v.data.slice(0, 10) < h && v.data.slice(0, 10) >= somaDias(h, -6) && !v.pag.some((x) => x.f === 'fiado')).slice(-2).forEach((v, i) => {
+    const x = v.itens[0], c = clientes.find((y) => y.id === v.cli), val = x.preco; x.devolvido = 1;
+    const p = produtos.find((y) => y.id === x.p); p.q[`${x.cor}|${x.tam}`] += 1;
+    db.movs.push({ id: uid('m'), data: `${h}T${i ? '15:10' : '11:25'}:00`, p: x.p, cor: x.cor, tam: x.tam, q: 1, tipo: 'devolucao', ref: v.id, motivo: 'Tamanho não serviu' });
+    c.credito = (c.credito || 0) + val;
+    v.devol.push({ data: `${h}T${i ? '15:10' : '11:25'}:00`, valor: val, cond: 'revenda', motivo: 'Tamanho não serviu', destino: 'troca', destinoTxt: 'crédito na loja', tipo: 'troca' });
+  });
   // pagamentos e cobranças de hoje, para a tela do dia ter vida
   const hojeAberta = db.parcelas.find((x) => x.saldo > 0 && x.venc < h && !MAUS.has(x.cli));
   if (hojeAberta) { const pg = { id: uid('pg'), data: `${h}T10:40:00`, cli: hojeAberta.cli, v: hojeAberta.saldo, f: 'pix', parcelas: [{ id: hojeAberta.id, v: hojeAberta.saldo }], caixa: caixaHoje }; db.pagamentos.push(pg); hojeAberta.pags.push(pg.id); hojeAberta.saldo = 0; }
   db.caixa.aberto = { id: caixaHoje, abertura: `${h}T08:55:00`, inicial: 20000, movs: [{ id: uid('cm'), t: 'despesa', v: 3500, desc: 'Café e água da loja', data: `${h}T09:10:00`, f: 'dinheiro' }] };
   for (let d = -5; d < 0; d++) db.caixa.historico.push({ id: `cx${d}`, abertura: `${somaDias(h, d)}T09:00:00`, fechamento: `${somaDias(h, d)}T18:30:00`, inicial: 20000, contado: null, esperado: null, dif: d === -3 ? -500 : 0, obs: d === -3 ? 'Faltaram R$ 5,00 (troco)' : '' });
   db.cobrancas.push({ id: uid('cb'), cli: 'c2', data: `${somaDias(h, -2)}T14:00:00`, modelo: 'atraso' });
+  // metas: a do mês passado e a deste mês, um pouco acima do ritmo da loja (arredondadas no milhar)
+  const mesDe = (iso) => iso.slice(0, 7), ritmo = db.vendas.filter((v) => v.data.slice(0, 10) >= somaDias(h, -60)).reduce((s, v) => s + v.total, 0) / 60;
+  const m0 = mesDe(h), m1 = mesDe(somaMes(`${m0}-01`, -1)), m2 = mesDe(somaMes(`${m0}-01`, -2)), diasMes = (m) => new Date(Number(m.slice(0, 4)), Number(m.slice(5, 7)), 0).getDate();
+  [[m2, 0.95], [m1, 1.08], [m0, 1.3]].forEach(([m, k]) => { db.metas[m] = Math.round(ritmo * diasMes(m) * k / 100000) * 100000; });
+  db.meta = db.metas[m0];
   return db;
 }
 
-const PERMS = [['custo', 'Ver custo e lucro'], ['desconto', 'Desconto acima do limite'], ['liberar', 'Liberar fiado fora da regra'], ['caixa', 'Abrir e fechar o caixa'], ['relatorios', 'Ver relatórios']];
+const PERMS = [['custo', 'Ver custo e lucro'], ['desconto', 'Desconto acima do limite'], ['liberar', 'Liberar crediário fora da regra'], ['caixa', 'Abrir e fechar o caixa'], ['relatorios', 'Ver relatórios']];
 const EQUIPE = () => [
   { id: 'u1', nome: 'Bella Martins', perfil: 'dona', tel: '16991500746', email: 'bella@boutiquebella.com', foto: '', nasc: '', descMax: 100, perms: {}, pin: '' },
   { id: 'u2', nome: 'Júlia Santos', perfil: 'vendedora', tel: '16992223344', email: '', foto: '', nasc: '', descMax: 10, perms: { caixa: true }, pin: '' },
@@ -170,10 +196,15 @@ const EQUIPE = () => [
 let db;
 try { db = JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) { db = null; }
 if (new URLSearchParams(location.search).has('novo') || !db || !db.produtos) db = inicial();
+// demonstração: quem tinha a loja de exemplo antiga recebe a nova (a antiga fica guardada numa cópia); a conta de verdade nunca é trocada
+if (!window.veltriaConta && (db.exemplo || 1) < EXEMPLO) { try { localStorage.setItem(`${CHAVE}-antes-do-exemplo-${EXEMPLO}`, JSON.stringify(db)); } catch (e) { /* sem espaço */ } db = inicial(); }
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch (e) { toast('Não consegui salvar neste aparelho (sem espaço). Faça uma cópia em Configurações.', true); } };
 // dados de antes desta versão: ganham equipe, meta e registro de atividades
 if (!db.usuarios) { db.usuarios = EQUIPE(); db.usuario = 'u1'; }
 db.meta = db.meta || 2500000; db.atividades = db.atividades || [];
+// 18/11/2026: meta por mês (seletor no Início, valor em Configurações), cliente VIP, coleção da peça
+db.metas = db.metas || {}; db.cfg.vipMin = db.cfg.vipMin ?? 300000;
+db.produtos.forEach((p) => { if (p.colecao === undefined) p.colecao = ''; });
 db.notas = db.notas || [];
 db.fiscal = db.fiscal || { usar: false, ambiente: '2', regime: '1', razao: '', cnpj: '', ie: '', rua: '', numero: '', bairro: '', cidade: '', codMun: '', uf: 'SP', cep: '', cscId: '', serie: 1, proximo: 1 };
 const NOTA_LIGADA = false; // 07/11/2026: dono decidiu deixar o Peplo sem nota fiscal por enquanto
@@ -216,19 +247,19 @@ const statusParc = (p) => (p.status === 'renegociada' ? 'renegociada' : p.status
 const ROT_PARC = { paga: ['ok', 'Paga'], vencida: ['mal', 'Vencida'], parcial: ['atn', 'Paga em parte'], hoje: ['atn', 'Vence hoje'], pendente: ['', 'A vencer'], renegociada: ['ac', 'Renegociada'], cancelada: ['', 'Cancelada'] };
 function situacao(c) {
   const ab = aberto(c.id), ven = vencido(c.id), atr = maiorAtraso(c.id);
-  if (c.bloqueado) return { k: 'bloq', tag: 'mal', txt: 'Bloqueada no fiado' };
+  if (c.bloqueado) return { k: 'bloq', tag: 'mal', txt: 'Bloqueada no crediário' };
   if (db.cfg.bloqueioAuto && atr > db.cfg.bloqueioDias) return { k: 'bloq', tag: 'mal', txt: `Bloqueio automático (${atr} dias)` };
   if (ven > 0) return { k: 'atraso', tag: 'mal', txt: `Em atraso · ${atr} dias` };
   if (c.limite && ab >= c.limite) return { k: 'limite', tag: 'atn', txt: 'Limite usado' };
   if (c.limite && ab >= c.limite * db.cfg.alertaPct / 100) return { k: 'perto', tag: 'atn', txt: 'Perto do limite' };
   if (ab > 0) return { k: 'emdia', tag: 'ok', txt: 'Em dia' };
-  return { k: 'sem', tag: '', txt: 'Sem fiado' };
+  return { k: 'sem', tag: '', txt: 'Sem crediário' };
 }
-// pode vender fiado? (venda à vista nunca é bloqueada)
+// pode vender crediário? (venda à vista nunca é bloqueada)
 function podeFiado(c, valor) {
-  if (!c) return { ok: false, motivo: 'Escolha a cliente para vender no fiado.' };
+  if (!c) return { ok: false, motivo: 'Escolha a cliente para vender no crediário.' };
   const s = situacao(c), disp = (c.limite || 0) - aberto(c.id);
-  if (s.k === 'bloq') return { ok: false, motivo: c.bloqueado ? `${c.nome} está bloqueada no fiado.` : `${c.nome} está bloqueada no fiado (${s.txt.toLowerCase()}).`, excecao: true };
+  if (s.k === 'bloq') return { ok: false, motivo: c.bloqueado ? `${c.nome} está bloqueada no crediário.` : `${c.nome} está bloqueada no crediário (${s.txt.toLowerCase()}).`, excecao: true };
   if (s.k === 'atraso') return { ok: false, motivo: `${c.nome} tem ${din(vencido(c.id))} vencido.`, excecao: true };
   if (valor > disp) return { ok: false, motivo: `Passa do limite: ela tem ${din(Math.max(0, disp))} disponível de ${din(c.limite || 0)}.`, excecao: true };
   return { ok: true, disp };
@@ -472,8 +503,8 @@ function ajustaAbas(raiz = document) {
   });
 }
 const ADD = {
-  venda: ['ir-vender', 'Venda', 'abre o caixa de venda'], cliente: ['nova-cli', 'Cliente', 'nome, WhatsApp e limite do fiado'], caderno: ['fiado-caderno', 'Fiado do caderno', 'dívida antiga anotada à mão'],
-  receber: ['receber-escolher', 'Pagamento recebido', 'baixa no fiado de uma cliente'], peca: ['nova-peca', 'Peça', 'com cores, tamanhos e quantidades'], compra: ['nova-compra', 'Chegada de mercadoria', 'entrada no estoque'],
+  venda: ['ir-vender', 'Venda', 'abre o caixa de venda'], cliente: ['nova-cli', 'Cliente', 'nome, WhatsApp e limite do crediário'], caderno: ['fiado-caderno', 'Crediário do caderno', 'dívida antiga anotada à mão'],
+  receber: ['receber-escolher', 'Pagamento recebido', 'baixa no crediário de uma cliente'], peca: ['nova-peca', 'Peça', 'com cores, tamanhos e quantidades'], compra: ['nova-compra', 'Chegada de mercadoria', 'entrada no estoque'],
   despesa: ['mov-despesa', 'Despesa', 'sai do caixa do dia'], retirada: ['mov-retirada', 'Retirada', 'dinheiro tirado da gaveta'], reforco: ['mov-reforco', 'Reforço de troco', 'dinheiro posto na gaveta'],
   cadernoTodo: ['passar-caderno', 'Passar o caderno inteiro', 'várias clientes de uma vez, em lista'],
   impCli: ['importar-clientes', 'Clientes de uma planilha', 'importa nome, WhatsApp e quanto devem'], impPeca: ['importar-pecas', 'Peças de uma planilha', 'importa cor, tamanho e quantidade'],
@@ -510,17 +541,17 @@ let estado = { fiadoFiltro: 'todos', estoqueAba: 'pecas', busca: '', relPer: 'me
 const GUIA = [
   ['Primeiros passos (10 minutos)', [
     ['Ponha a cara da sua loja', 'Em Configurações, “A marca da sua loja”: logo, nome, frase, WhatsApp, chave Pix e a cor do sistema. Tudo aparece no topo, nos recibos e nas cobranças.'],
-    ['Defina as regras do fiado', 'Em Configurações, “Regras do fiado”: o limite da cliente nova, quando avisar que está perto do limite e com quantos dias de atraso o fiado bloqueia sozinho. Juros e multa ficam desligados, a não ser que você ligue.'],
-    ['Passe o seu caderno', 'Em Fiado, “Adicionar” e “Passar o caderno inteiro”: uma linha por cliente, com nome, WhatsApp, quanto deve e quando vence. Se tiver planilha, use “Clientes de uma planilha”.'],
+    ['Defina as regras do crediário', 'Em Configurações, “Regras do crediário”: o limite da cliente nova, quando avisar que está perto do limite e com quantos dias de atraso o crediário bloqueia sozinho. Juros e multa ficam desligados, a não ser que você ligue.'],
+    ['Passe o seu caderno', 'Em Crediário, “Adicionar” e “Passar o caderno inteiro”: uma linha por cliente, com nome, WhatsApp, quanto deve e quando vence. Se tiver planilha, use “Clientes de uma planilha”.'],
     ['Cadastre as peças', 'Em Estoque, “Adicionar” e “Peça”: nome, categoria, custo, preço, foto, tamanhos (atalhos de PP a G5 e de 34 a 56), cores e quantas tem de cada. Também dá para importar de planilha.'],
     ['Chame a equipe', 'No Painel do dono, “Adicionar” e “Pessoa da equipe”. Marque o que cada vendedora pode fazer (ver custo, dar desconto, mexer no caixa) e a comissão dela.'],
   ]],
   ['O dia a dia', [
     ['Abra o caixa', 'Em Caixa do dia, digite o troco que está na gaveta. Se esquecer, ele abre sozinho na primeira venda.'],
-    ['Venda', 'Em Vender, toque na peça (ou passe o leitor de código de barras), escolha cor e tamanho, ponha a cliente e o pagamento. Dá para dividir: parte no Pix, parte no fiado. O estoque baixa na hora.'],
-    ['Venda no fiado', 'Escolha “Fiado”, as parcelas e o 1º vencimento. Se a cliente estiver atrasada ou sem limite, o Peplo avisa; só a senha da dona libera a exceção.'],
-    ['Receba e cobre', 'Em Fiado, “Receber” baixa o pagamento (pode ser só uma parte) e gera o recibo para mandar no WhatsApp. “Cobrar” abre o WhatsApp da cliente com a mensagem pronta.'],
-    ['Troque ou devolva', 'Em Vendas e trocas, abra a venda e toque em “Troca ou devolução”: a peça volta ao estoque (ou vai como avaria) e o valor vira crédito, abate do fiado ou volta em dinheiro.'],
+    ['Venda', 'Em Vender, toque na peça (ou passe o leitor de código de barras), escolha cor e tamanho, ponha a cliente e o pagamento. Dá para dividir: parte no Pix, parte no crediário. O estoque baixa na hora.'],
+    ['Venda no crediário', 'Escolha “Crediário”, as parcelas e o 1º vencimento. Se a cliente estiver atrasada ou sem limite, o Peplo avisa; só a senha da dona libera a exceção.'],
+    ['Receba e cobre', 'Em Crediário, “Receber” baixa o pagamento (pode ser só uma parte) e gera o recibo para mandar no WhatsApp. “Cobrar” abre o WhatsApp da cliente com a mensagem pronta.'],
+    ['Troque ou devolva', 'Em Vendas e trocas, abra a venda e toque em “Troca ou devolução”: a peça volta ao estoque (ou vai como avaria) e o valor vira crédito, abate do crediário ou volta em dinheiro.'],
     ['Feche o caixa', 'No fim do dia, “Fechar caixa”: conte o dinheiro da gaveta e o Peplo mostra se bateu ou a diferença.'],
   ]],
   ['Estoque e compras', [
@@ -530,7 +561,7 @@ const GUIA = [
     ['Liquidação', 'Em Estoque, aba Liquidação: escolha a categoria, o desconto e as datas. No período, o Vender já usa o preço com desconto. Use a aba Parados para escolher o que liquidar.'],
   ]],
   ['Números e controle', [
-    ['Relatórios ao vivo', 'Em Relatórios: diário, semanal e mensal. Vendas, lucro bruto, dinheiro que entrou, fiado, inadimplência e o que mais vende.'],
+    ['Relatórios ao vivo', 'Em Relatórios: diário, semanal e mensal. Vendas, lucro bruto, dinheiro que entrou, crediário, inadimplência e o que mais vende.'],
     ['Painel do dono', 'Meta do mês com a projeção, vendas e comissão de cada vendedora, quem pode o quê e tudo o que aconteceu na loja.'],
     ['Duas lojas ou mais', 'Em Configurações, “Lojas”: cadastre a filial e escolha em cada aparelho por qual loja ele vende. Em Estoque, “Todas as lojas” mostra as lojas lado a lado, as vendas do mês de cada uma e transfere peças.'],
     ['Cartão', 'Em Configurações, ponha as taxas da sua maquininha. No Caixa do dia, “Conferir com o extrato” mostra o que bateu.'],
@@ -547,14 +578,14 @@ const TELAS = {
     return `<section class="ola"><h1>${saudacao()}${db.loja.dono ? `, ${t(db.loja.dono)}` : ''}</h1><p>${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })} · resumo da ${t(db.loja.nome)} · <span class="vivo"><i></i>ao vivo</span></p><div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">${addBt('venda', 'cliente', 'caderno', 'receber', 'peca', 'compra', 'despesa')}<a class="bt" href="#fiado/vencidas">${ico('zap')}Cobrar atrasadas</a></div></section>
       <div class="grade g4 kpis cascata" style="margin-bottom:16px">
         ${kpi('bolsa', '', 'Vendido hoje', n.liquido, `${n.vs.length} ${n.vs.length === 1 ? 'venda' : 'vendas'}${pode('custo') ? ` · lucro bruto ${din(n.lucro)}` : ''}`, '#relatorios')}
-        ${kpi('moedas', '', 'Recebido hoje', n.recebido, `${din(n.recebidoFiado)} veio do fiado`, '#caixa')}
-        ${kpi('cartao', '', 'Fiado em aberto', ab, `${dev} ${dev === 1 ? 'cliente' : 'clientes'}`, '#fiado')}
-        ${kpi('alerta', ven ? 'mal' : '', 'Fiado vencido', ven, `${at.length} ${at.length === 1 ? 'cliente' : 'clientes'}`, '#fiado/vencidas')}
+        ${kpi('moedas', '', 'Recebido hoje', n.recebido, `${din(n.recebidoFiado)} veio do crediário`, '#caixa')}
+        ${kpi('cartao', '', 'Crediário em aberto', ab, `${dev} ${dev === 1 ? 'cliente' : 'clientes'}`, '#fiado')}
+        ${kpi('alerta', ven ? 'mal' : '', 'Crediário vencido', ven, `${at.length} ${at.length === 1 ? 'cliente' : 'clientes'}`, '#fiado/vencidas')}
       </div>
       <div class="grade g-21 cascata" style="margin-bottom:16px">
         <section class="cartao"><div class="cartao-cab"><h2>${ico('sino')}Atenção à sua loja</h2></div>${avisos().map((a) => `<a class="aviso" href="${a.ir}"><span class="ic ${a.ic}">${ico(a.ic === 'mal' ? 'alerta' : a.ic === 'atn' ? 'caixa' : 'cabide')}</span><span>${t(a.txt)}</span><span class="seta">${ico('seta')}</span></a>`).join('') || '<p class="vazio"><b>Tudo em ordem</b>Nenhuma pendência na loja agora.</p>'}</section>
         <section class="cartao"><div class="cartao-cab"><h2>${ico('gente')}Quem está me devendo</h2><a class="link" href="#fiado">Ver todas</a></div>
-          ${at.length ? `<ul class="lista">${at.slice(0, 5).map((c) => `<li><a class="cresce" href="#cliente/${c.id}" style="text-decoration:none;color:inherit"><b>${t(c.nome)}</b><small>${din(aberto(c.id))} em aberto · ${maiorAtraso(c.id)} dias de atraso</small></a><span class="tag mal num">${din(vencido(c.id))}</span><a class="bt pq zap" href="${zap(c.tel, msg('atraso', c))}" target="_blank" rel="noopener" data-cobra="${c.id}" aria-label="Cobrar ${t(c.nome)} no WhatsApp">${ico('zap')}</a></li>`).join('')}</ul>` : '<p class="vazio"><b>Ninguém em atraso</b>Todas as clientes do fiado estão em dia.</p>'}
+          ${at.length ? `<ul class="lista">${at.slice(0, 5).map((c) => `<li><a class="cresce" href="#cliente/${c.id}" style="text-decoration:none;color:inherit"><b>${t(c.nome)}</b><small>${din(aberto(c.id))} em aberto · ${maiorAtraso(c.id)} dias de atraso</small></a><span class="tag mal num">${din(vencido(c.id))}</span><a class="bt pq zap" href="${zap(c.tel, msg('atraso', c))}" target="_blank" rel="noopener" data-cobra="${c.id}" aria-label="Cobrar ${t(c.nome)} no WhatsApp">${ico('zap')}</a></li>`).join('')}</ul>` : '<p class="vazio"><b>Ninguém em atraso</b>Todas as clientes do crediário estão em dia.</p>'}
         </section>
       </div>
       <div class="grade g2 cascata">
@@ -587,16 +618,16 @@ const TELAS = {
           <div class="cartao-cab"><h2>${ico('bolsa')}Sacola</h2>${sac.length ? '<button type="button" class="link" data-acao="esvaziar">Esvaziar</button>' : ''}</div>
           ${sac.length ? `<ul class="itens-sacola">${sac.map((x, i) => `<li><span style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t(x.nome)}</b><small class="mudo"><span class="bolinha" style="background:${t(x.h)}"></span>${t(x.cor)} · ${t(x.tam)} · ${din(x.preco)}</small></span><span class="q"><button type="button" data-q="${i}" data-d="-1" aria-label="Menos">−</button><b>${x.qtd}</b><button type="button" data-q="${i}" data-d="1" aria-label="Mais">+</button></span></li>`).join('')}</ul>` : '<p class="vazio" style="padding:14px 0"><b>Sacola vazia</b>Escolha as peças ao lado.</p>'}
           <div class="campos" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
-            <label class="campo">Cliente<input id="v-cli" list="dl-cli" value="${t(estado.vCli)}" placeholder="Opcional (obrigatória no fiado)" autocomplete="off">${listaClientes()}</label>
+            <label class="campo">Cliente<input id="v-cli" list="dl-cli" value="${t(estado.vCli)}" placeholder="Opcional (obrigatória no crediário)" autocomplete="off">${listaClientes()}</label>
             <label class="campo">Desconto (R$)<input id="v-desc" inputmode="decimal" value="${campoDin(estado.desc)}" placeholder="0,00"></label>
           </div>
-          ${c ? `<p class="mudo" style="font-size:13px;margin:6px 0 0">${t(c.nome)} · <span class="tag ${situacao(c).tag}">${situacao(c).txt}</span> · disponível no fiado ${din(Math.max(0, (c.limite || 0) - aberto(c.id)))}${cred ? ` · crédito na loja ${din(cred)}` : ''}</p>` : estado.vCli ? '<p class="mudo" style="font-size:13px;margin:6px 0 0">Cliente nova: será cadastrada ao finalizar.</p>' : ''}
+          ${c ? `<p class="mudo" style="font-size:13px;margin:6px 0 0">${t(c.nome)} · <span class="tag ${situacao(c).tag}">${situacao(c).txt}</span> · disponível no crediário ${din(Math.max(0, (c.limite || 0) - aberto(c.id)))}${cred ? ` · crédito na loja ${din(cred)}` : ''}</p>` : estado.vCli ? '<p class="mudo" style="font-size:13px;margin:6px 0 0">Cliente nova: será cadastrada ao finalizar.</p>' : ''}
           <div class="total"><span>Total</span><b data-total>${din(total)}</b></div>
           <p class="campo" style="margin:0 0 6px">Pagamento</p>
           ${estado.pag.map((x, i) => `<div class="pag-linha"><select data-pf="${i}" aria-label="Forma de pagamento">${formas.map(([k, n]) => `<option value="${k}" ${x.f === k ? 'selected' : ''}>${n}</option>`).join('')}</select><input data-pv="${i}" inputmode="decimal" value="${campoDin(x.v)}" placeholder="0,00" aria-label="Valor">${estado.pag.length > 1 ? `<button type="button" class="x" data-tira="${i}" aria-label="Tirar">×</button>` : '<span></span>'}</div>${x.f === 'credito' ? `<label class="campo" style="margin:-2px 0 8px;max-width:200px">Parcelas no cartão<select data-pp="${i}">${Array.from({ length: 10 }, (_, k) => `<option value="${k + 1}" ${(x.parc || 1) === k + 1 ? 'selected' : ''}>${k + 1}×${k ? '' : ' (à vista)'}</option>`).join('')}</select></label>` : ''}`).join('')}
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button type="button" class="link" data-acao="dividir">+ Dividir em outra forma</button>${falta !== 0 && sac.length ? `<button type="button" class="link" data-acao="completar">Pôr o que falta (${din(falta)})</button>` : ''}</div>
           ${fiadoV ? `<div class="campos" style="margin-top:12px;grid-template-columns:repeat(3,minmax(0,1fr))"><label class="campo">Parcelas<select id="p-n">${Array.from({ length: 12 }, (_, i) => `<option ${estado.parc.n === i + 1 ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label><label class="campo">A cada<select id="p-int"><option value="mes" ${estado.parc.int === 'mes' ? 'selected' : ''}>mês</option><option value="15" ${estado.parc.int === '15' ? 'selected' : ''}>15 dias</option><option value="7" ${estado.parc.int === '7' ? 'selected' : ''}>semana</option></select></label><label class="campo">1º vencimento<input id="p-prim" type="date" value="${estado.parc.prim}"></label></div>
-            <p class="mudo" style="font-size:13px;margin:6px 0 0">${estado.parc.n}× de ${din(Math.floor(fiadoV / estado.parc.n))} no fiado</p>` : ''}
+            <p class="mudo" style="font-size:13px;margin:6px 0 0">${estado.parc.n}× de ${din(Math.floor(fiadoV / estado.parc.n))} no crediário</p>` : ''}
           ${falta > 0 && sac.length ? `<div class="caixa-aviso atn">Faltam ${din(falta)} para fechar o total.</div>` : falta < 0 ? `<div class="caixa-aviso atn">Pagamento passa ${din(-falta)} do total${estado.pag.some((x) => x.f === 'dinheiro') ? ` (troco de ${din(-falta)})` : ''}.</div>` : ''}
           ${fiadoV && !pf.ok ? `<div class="caixa-aviso mal">${t(pf.motivo)}${pf.excecao ? (estado.excecao ? `<br><b>Exceção liberada:</b> ${t(estado.excecao)}` : ' <button type="button" class="link" data-acao="excecao">Liberar exceção</button>') : ''}</div>` : ''}
           ${db.fiscal.usar ? `<div class="campos" style="margin-top:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end"><label class="troca" style="padding:0"><span>Emitir NFC-e</span><input type="checkbox" id="v-nota" ${estado.nota === false ? '' : 'checked'}></label><label class="campo">CPF na nota (opcional)<input id="v-cpf" inputmode="numeric" value="${t(estado.cpf || '')}" placeholder="000.000.000-00"></label></div>${!fiscalPronto() ? '<p class="mudo" style="font-size:12.5px;margin:6px 0 0">Complete os dados fiscais em Configurações para emitir.</p>' : !emiteAqui() ? '<p class="mudo" style="font-size:12.5px;margin:6px 0 0">A emissão de verdade está em liberação. Avisaremos quando estiver pronta.</p>' : ''}` : ''}
@@ -634,7 +665,7 @@ const TELAS = {
     if (f === 'quitadas') l = l.filter((c) => !aberto(c.id));
     if (f === 'todos') l = l.filter((c) => aberto(c.id) > 0);
     l.sort((a, b) => vencido(b.id) - vencido(a.id) || aberto(b.id) - aberto(a.id));
-    return `<div class="cab"><div><h1>Fiado</h1><p>Quem deve, quanto, desde quando. Cobre com um toque e receba em parte ou tudo.</p></div><div class="acoes"><button type="button" class="bt" data-acao="exportar-fiado">Planilha</button>${addBt('cadernoTodo', 'caderno', 'receber', 'cliente', 'impCli')}</div></div>
+    return `<div class="cab"><div><h1>Crediário</h1><p>Quem deve, quanto, desde quando. Cobre com um toque e receba em parte ou tudo.</p></div><div class="acoes"><button type="button" class="bt" data-acao="exportar-fiado">Planilha</button>${addBt('cadernoTodo', 'caderno', 'receber', 'cliente', 'impCli')}</div></div>
       <div class="grade g4 kpis cascata" style="margin-bottom:18px">
         <div class="cartao kpi"><span class="kpi-ic">${ico('cartao')}</span><span><small>A receber</small><b data-conta="${totalAberto()}">${din(totalAberto())}</b><em>${devedoras().length} clientes</em></span></div>
         <div class="cartao kpi ${ven ? 'mal' : ''}"><span class="kpi-ic mal">${ico('alerta')}</span><span><small>Vencido</small><b data-conta="${ven}">${din(ven)}</b><em>${atrasadas().length} em atraso</em></span></div>
@@ -654,7 +685,7 @@ const TELAS = {
     const ps = parcelasDe(c.id).sort((a, b) => a.venc.localeCompare(b.venc)), vs = db.vendas.filter((v) => v.cli === c.id).sort((a, b) => b.data.localeCompare(a.data));
     const pgs = db.pagamentos.filter((p) => p.cli === c.id).sort((a, b) => b.data.localeCompare(a.data)), cbs = db.cobrancas.filter((x) => x.cli === c.id).sort((a, b) => b.data.localeCompare(a.data));
     const abertasL = ps.filter((p) => p.saldo > 0 && p.status === 'aberta'), hist = ps.filter((p) => !(p.saldo > 0 && p.status === 'aberta'));
-    return `<a href="#fiado" class="link" style="display:inline-block;margin-bottom:12px">← Fiado</a>
+    return `<a href="#fiado" class="link" style="display:inline-block;margin-bottom:12px">← Crediário</a>
       <div class="cab"><div><h1>${t(c.nome)}</h1><p>${t(c.tel ? c.tel.replace(/^(\d{2})(\d{5})(\d+)$/, '($1) $2-$3') : 'Sem telefone')}${c.nasc ? ` · aniversário ${dataBR(c.nasc).slice(0, 5)}` : ''} · <span class="tag ${s.tag}">${s.txt}</span></p></div>
         <div class="acoes">${ab ? `<a class="bt zap" href="${zap(c.tel, msg(modeloCobranca(c), c))}" target="_blank" rel="noopener" data-cobra="${c.id}">${ico('zap')}Cobrar</a><button type="button" class="bt cheio" data-receber="${c.id}">Receber pagamento</button>` : ''}<button type="button" class="bt" data-editar-cli="${c.id}">Editar</button></div></div>
       <div class="grade g4 kpis cascata" style="margin-bottom:16px">
@@ -674,7 +705,7 @@ const TELAS = {
         <section class="cartao"><div class="cartao-cab"><h2>Limite e regras</h2></div>
           <div class="barra-lim ${s.tag}" style="margin-bottom:8px"><i style="width:${c.limite ? Math.min(100, Math.round(ab / c.limite * 100)) : 0}%"></i></div>
           <p class="mudo" style="font-size:13.5px;margin:0 0 12px">Usou ${din(ab)} de ${din(c.limite || 0)}. Venda à vista nunca é bloqueada.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="bt pq" data-limite="${c.id}">Alterar limite</button><button type="button" class="bt pq ${c.bloqueado ? '' : 'perigo'}" data-bloq="${c.id}">${c.bloqueado ? 'Desbloquear fiado' : 'Bloquear fiado'}</button><button type="button" class="bt pq" data-extrato="${c.id}">${ico('recibo')}Extrato</button></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="bt pq" data-limite="${c.id}">Alterar limite</button><button type="button" class="bt pq ${c.bloqueado ? '' : 'perigo'}" data-bloq="${c.id}">${c.bloqueado ? 'Desbloquear crediário' : 'Bloquear crediário'}</button><button type="button" class="bt pq" data-extrato="${c.id}">${ico('recibo')}Extrato</button></div>
           ${c.obs ? `<p style="margin:14px 0 0;font-size:14px"><b>Observação:</b> ${t(c.obs)}</p>` : ''}
           <div class="cartao-cab" style="margin-top:18px"><h2>Compras</h2></div>
           ${vs.length ? `<ul class="lista">${vs.slice(0, 8).map((v) => `<li><span class="cresce"><b>${din(v.total)} · ${v.itens.map((x) => t(x.nome)).join(', ')}</b><small>${dataBR(v.data)} · ${v.pag.map((x) => FORMAS[x.f]).join(' + ')}</small></span><button type="button" class="bt pq" data-venda="${v.id}">Abrir</button></li>`).join('')}</ul>` : '<p class="mudo">Nenhuma compra.</p>'}
@@ -767,15 +798,15 @@ const TELAS = {
     if (!cx) return `<div class="cab"><div><h1>Caixa</h1><p>Abra o caixa com o troco que está na gaveta.</p></div></div>
       <section class="cartao" style="max-width:520px"><label class="campo">Troco inicial (R$)<input id="cx-ini" inputmode="decimal" placeholder="200,00"></label><button type="button" class="bt cheio largo" style="margin-top:12px" data-acao="abrir-caixa">Abrir caixa</button></section>${hist}`;
     const r = resumoCaixa(cx), linha = (n, v, cls = '') => `<li><span class="cresce">${n}</span><b class="num ${cls}">${din(v)}</b></li>`;
-    return `<div class="cab"><div><h1>Caixa do dia</h1><p>Aberto às ${horaBR(cx.abertura)} de ${dataBR(cx.abertura)} · ${r.vendas} vendas. Pix, cartão e fiado não entram na gaveta.</p></div><div class="acoes">${addBt('despesa', 'retirada', 'reforco', 'receber')}<button type="button" class="bt" data-acao="fechar-caixa">Fechar caixa</button></div></div>
+    return `<div class="cab"><div><h1>Caixa do dia</h1><p>Aberto às ${horaBR(cx.abertura)} de ${dataBR(cx.abertura)} · ${r.vendas} vendas. Pix, cartão e crediário não entram na gaveta.</p></div><div class="acoes">${addBt('despesa', 'retirada', 'reforco', 'receber')}<button type="button" class="bt" data-acao="fechar-caixa">Fechar caixa</button></div></div>
       <div class="grade g4 kpis cascata" style="margin-bottom:16px">
         <div class="cartao kpi"><span class="kpi-ic ouro">${ico('moedas')}</span><span><small>Dinheiro esperado na gaveta</small><b data-conta="${r.esperado}">${din(r.esperado)}</b><em>troco ${din(cx.inicial)}</em></span></div>
         <div class="cartao kpi"><span class="kpi-ic">${ico('cartao')}</span><span><small>Pix</small><b>${din(r.pix + r.recPix)}</b><em>vendas + fiado recebido</em></span></div>
         <div class="cartao kpi"><span class="kpi-ic">${ico('cartao')}</span><span><small>Cartão</small><b>${din(r.debito + r.credito + r.recCartao)}</b><em>débito ${din(r.debito)} · crédito ${din(r.credito)}</em></span></div>
-        <div class="cartao kpi"><span class="kpi-ic mal">${ico('recibo')}</span><span><small>Vendido no fiado</small><b>${din(r.fiado)}</b><em>entra quando receber</em></span></div>
+        <div class="cartao kpi"><span class="kpi-ic mal">${ico('recibo')}</span><span><small>Vendido no crediário</small><b>${din(r.fiado)}</b><em>entra quando receber</em></span></div>
       </div>
       <div class="grade g2">
-        <section class="cartao"><div class="cartao-cab"><h2>Conta da gaveta</h2></div><ul class="lista">${linha('Troco inicial', cx.inicial)}${linha('Vendas em dinheiro', r.dinheiro)}${linha('Fiado recebido em dinheiro', r.recDinheiro)}${linha('Reforços', r.reforcos)}${linha('Despesas pagas em dinheiro', -r.despDinheiro, 'mudo')}${linha('Retiradas', -r.retiradas, 'mudo')}${linha('Reembolsos em dinheiro', -r.reembolsos, 'mudo')}<li><span class="cresce"><b>Esperado na gaveta</b></span><b class="num" style="font-size:20px">${din(r.esperado)}</b></li></ul></section>
+        <section class="cartao"><div class="cartao-cab"><h2>Conta da gaveta</h2></div><ul class="lista">${linha('Troco inicial', cx.inicial)}${linha('Vendas em dinheiro', r.dinheiro)}${linha('Crediário recebido em dinheiro', r.recDinheiro)}${linha('Reforços', r.reforcos)}${linha('Despesas pagas em dinheiro', -r.despDinheiro, 'mudo')}${linha('Retiradas', -r.retiradas, 'mudo')}${linha('Reembolsos em dinheiro', -r.reembolsos, 'mudo')}<li><span class="cresce"><b>Esperado na gaveta</b></span><b class="num" style="font-size:20px">${din(r.esperado)}</b></li></ul></section>
         <section class="cartao"><div class="cartao-cab"><h2>Lançamentos do caixa</h2></div><ul class="lista">${cx.movs.slice().reverse().map((m) => `<li><span class="cresce"><b>${t(m.desc || m.t)}</b><small>${horaBR(m.data)} · ${{ despesa: 'Despesa', retirada: 'Retirada', reforco: 'Reforço', reembolso: 'Reembolso' }[m.t]}${m.f && m.f !== 'dinheiro' ? ` · ${FORMAS[m.f]}` : ''}</small></span><b class="num">${m.t === 'reforco' ? '+' : '−'}${din(m.v)}</b></li>`).join('') || '<p class="mudo">Nenhuma despesa, retirada ou reforço hoje.</p>'}</ul></section>
       </div>
       <section class="cartao" style="margin-top:16px"><div class="cartao-cab"><h2>${ico('cartao')}Cartão: a receber e conferência</h2><button type="button" class="bt pq" data-acao="conferir-extrato">Conferir com o extrato</button></div>${(() => { const l = vendasCartao(45), aRec = l.filter((x) => x.prev >= hoje()); return `<div class="grade g4 kpis" style="margin-bottom:12px"><div class="kpi"><span><small>Cartão a receber</small><b>${din(aRec.reduce((s2, x) => s2 + x.liquido, 0))}</b><em>líquido, já sem a taxa</em></span></div><div class="kpi"><span><small>Taxas da maquininha (45 dias)</small><b>${din(l.reduce((s2, x) => s2 + x.taxa, 0))}</b><em>débito ${db.cfg.taxas.debito}% · crédito ${db.cfg.taxas.credito}%</em></span></div><div class="kpi ok"><span><small>Conferidas com o extrato</small><b>${l.filter((x) => x.ok).length} de ${l.length}</b><em>vendas no cartão</em></span></div></div>
@@ -794,14 +825,14 @@ const TELAS = {
     const rec = { dinheiro: 0, pix: 0, debito: 0, credito: 0 }; n.vs.forEach((v) => v.pag.forEach((x) => { if (rec[x.f] !== undefined) rec[x.f] += x.v; })); n.pgs.forEach((p) => { if (rec[p.f] !== undefined) rec[p.f] += p.v; });
     const inad = totalAberto() ? Math.round(totalVencido() / totalAberto() * 100) : 0;
     const k = (rot, v, sub, cls = '') => `<div class="cartao kpi ${cls}"><span><small>${rot}</small><b>${v}</b><em>${sub}</em></span></div>`;
-    return `<div class="cab"><div><h1>Relatórios</h1><p>${ini === fim ? dataBR(ini) : `${dataBR(ini)} a ${dataBR(fim)}`} · <span class="vivo"><i></i>ao vivo, atualizado às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span><br>Venda no fiado não é dinheiro recebido; faturamento não é lucro.</p></div><div class="acoes"><button type="button" class="bt" data-acao="csv-vendas">Planilha das vendas</button><button type="button" class="bt" data-acao="imprimir">Imprimir</button>${addBt('venda', 'despesa')}</div></div>
+    return `<div class="cab"><div><h1>Relatórios</h1><p>${ini === fim ? dataBR(ini) : `${dataBR(ini)} a ${dataBR(fim)}`} · <span class="vivo"><i></i>ao vivo, atualizado às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span><br>Venda no crediário não é dinheiro recebido; faturamento não é lucro.</p></div><div class="acoes"><button type="button" class="bt" data-acao="csv-vendas">Planilha das vendas</button><button type="button" class="bt" data-acao="imprimir">Imprimir</button>${addBt('venda', 'despesa')}</div></div>
       ${abas(pers, estado.relPer, 'data-per')}
       ${estado.relPer === 'livre' ? `<div class="campos" style="max-width:420px;margin-bottom:16px"><label class="campo">De<input type="date" id="rel-de" value="${ini}"></label><label class="campo">Até<input type="date" id="rel-ate" value="${fim}"></label></div>` : ''}
       <div class="grade g4 cascata" style="margin-bottom:16px">
         ${k('Vendas líquidas', din(n.liquido), `${n.vs.length} vendas · ticket ${din(n.ticket)}`)}
         ${pode('custo') ? k('Lucro bruto', din(n.lucro), `${n.liquido ? Math.round(n.lucro / n.liquido * 100) : 0}% · custo das peças ${din(n.cmv)}`, 'ok') : k('Lucro bruto', '—', 'só a dona vê')}
-        ${k('Dinheiro que entrou', din(n.recebido), `${din(n.recebidoFiado)} de fiado recebido`)}
-        ${k('Vendido no fiado', din(n.fiadoVendido), `a receber hoje ${din(totalAberto())}`)}
+        ${k('Dinheiro que entrou', din(n.recebido), `${din(n.recebidoFiado)} de crediário recebido`)}
+        ${k('Vendido no crediário', din(n.fiadoVendido), `a receber hoje ${din(totalAberto())}`)}
         ${k('Faturamento bruto', din(n.bruto), 'antes de descontos e devoluções')}
         ${k('Descontos', din(n.desc), 'dados no balcão')}
         ${k('Devoluções', din(n.devol), 'trocas e estornos')}
@@ -821,16 +852,16 @@ const TELAS = {
   config() {
     if (!dona()) return `<div class="cab"><div><h1>Configurações</h1><p>Só a dona mexe nas configurações da loja.</p></div></div>`;
     const L = db.loja, j = db.cfg.juros, ini = String(L.nome || 'L').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
-    return `<div class="cab"><div><h1>Configurações</h1><p>A cara da sua loja, as regras do fiado e a cópia de segurança.</p></div><div class="acoes"><a class="bt cheio" href="#guia">${ico('recibo')}Guia de como usar</a><button type="button" class="bt" data-acao="instalar">Instalar o app</button></div></div>
+    return `<div class="cab"><div><h1>Configurações</h1><p>A cara da sua loja, as regras do crediário e a cópia de segurança.</p></div><div class="acoes"><a class="bt cheio" href="#guia">${ico('recibo')}Guia de como usar</a><button type="button" class="bt" data-acao="instalar">Instalar o app</button></div></div>
       <div class="grade g2">
         <section class="cartao"><div class="cartao-cab"><h2>A marca da sua loja</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">Sua logo e o nome aparecem no topo, nos recibos e nas mensagens. Quem você convidar vê igual.</p>
           <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px"><span class="loja-logo" style="width:72px;height:72px;font-size:24px">${L.logo ? `<img src="${t(L.logo)}" alt="">` : t(ini)}</span><div style="display:flex;gap:8px;flex-wrap:wrap"><label class="bt pq cheio" for="logo-in">${L.logo ? 'Trocar logo' : 'Pôr a logo'}</label><input type="file" id="logo-in" accept="image/*" class="sr">${L.logo ? '<button type="button" class="bt pq" data-acao="tira-logo">Tirar</button>' : ''}</div></div>
           <div class="campos">${[['nome', 'Nome da loja'], ['slogan', 'Frase abaixo do nome'], ['dono', 'Seu nome (para a saudação)'], ['tel', 'WhatsApp da loja'], ['cidade', 'Cidade'], ['pix', 'Chave Pix (vai nas cobranças)']].map(([k, n]) => `<label class="campo">${n}<input data-loja="${k}" value="${t(L[k] || '')}"></label>`).join('')}</div>
           <p class="campo" style="margin:16px 0 8px">Cor do sistema</p><div class="temas">${TEMAS.map(([k, n, a, b]) => `<button type="button" data-tema="${k}" aria-pressed="${(db.tema || 'ameixa') === k}" style="--a:${a};--b:${b}"><i></i>${n}</button>`).join('')}</div>
         </section>
-        <section class="cartao"><div class="cartao-cab"><h2>Regras do fiado</h2></div>
+        <section class="cartao"><div class="cartao-cab"><h2>Regras do crediário</h2></div>
           <div class="campos"><label class="campo">Limite de cliente nova (R$)<input data-cfgd="limitePadrao" inputmode="decimal" value="${campoDin(db.cfg.limitePadrao)}"></label><label class="campo">Avisar quando usar (%) do limite<input data-cfg="alertaPct" type="number" min="10" max="100" value="${db.cfg.alertaPct}"></label>
-          <label class="campo inteiro troca" style="color:var(--texto)"><span>Bloquear fiado sozinho de quem passar do prazo</span><input type="checkbox" data-cfgb="bloqueioAuto" ${db.cfg.bloqueioAuto ? 'checked' : ''}></label>
+          <label class="campo inteiro troca" style="color:var(--texto)"><span>Bloquear o crediário sozinho de quem passar do prazo</span><input type="checkbox" data-cfgb="bloqueioAuto" ${db.cfg.bloqueioAuto ? 'checked' : ''}></label>
           <label class="campo">Dias de atraso para bloquear<input data-cfg="bloqueioDias" type="number" min="1" value="${db.cfg.bloqueioDias}"></label></div>
           <label class="troca" style="margin-top:8px"><span><b>Cobrar juros e multa no atraso</b><br><small class="mudo">Desligado por padrão. Se ligar, combine antes com a cliente.</small></span><input type="checkbox" data-juros="ativo" ${j.ativo ? 'checked' : ''}></label>
           ${j.ativo ? `<div class="campos"><label class="campo">Multa (%)<input data-juros="multaPct" type="number" step="0.1" min="0" max="2" value="${j.multaPct}"><small>Pelo Código de Defesa do Consumidor, no máximo 2%.</small></label><label class="campo">Juros ao mês (%)<input data-juros="jurosMesPct" type="number" step="0.1" min="0" value="${j.jurosMesPct}"></label><label class="campo">Carência (dias)<input data-juros="carencia" type="number" min="0" value="${j.carencia}"></label></div>` : ''}
@@ -849,13 +880,13 @@ const TELAS = {
           <label class="campo">Série<input data-fiscal="serie" type="number" min="1" value="${db.fiscal.serie}"></label><label class="campo">Próximo número<input data-fiscal="proximo" type="number" min="1" value="${db.fiscal.proximo}"></label></div>
           ${emiteAqui() ? '' : '<div class="caixa-aviso ac" style="margin-top:12px">A emissão de NFC-e pelo Peplo está em fase de liberação. Você já pode deixar os dados prontos: avisaremos pelo e-mail e aqui no sistema quando estiver liberada para a sua loja. Na demonstração você vê como a nota fica.</div>'}<p class="mudo" style="font-size:13px;margin:12px 0 0"><b>Certificado digital e código CSC:</b> por segurança, eles não ficam neste aparelho. Na conta, você envia o arquivo do certificado (.pfx), a senha e o CSC numa tela própria, e eles ficam guardados cifrados no servidor, que é quem fala com a SEFAZ. ${fiscalPronto() ? '<span class="tag ok">Dados da loja completos</span>' : '<span class="tag atn">Faltam dados da loja</span>'}</p>` : ''}
       </section>` : ''}
-      <section class="cartao" style="margin-top:16px"><div class="cartao-cab"><h2>Lojas</h2>${dona() ? `<button type="button" class="bt pq" data-acao="nova-loja">${ico('mais')}Nova loja</button>` : ''}</div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">Tem filial? Cadastre aqui, na mesma assinatura. Cada loja tem o próprio estoque e o próprio caixa; clientes, fiado e relatórios ficam juntos.</p>
+      <section class="cartao" style="margin-top:16px"><div class="cartao-cab"><h2>Lojas</h2>${dona() ? `<button type="button" class="bt pq" data-acao="nova-loja">${ico('mais')}Nova loja</button>` : ''}</div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">Tem filial? Cadastre aqui, na mesma assinatura. Cada loja tem o próprio estoque e o próprio caixa; clientes, crediário e relatórios ficam juntos.</p>
         <div class="campos">${db.lojas.map((l) => `<label class="campo">Nome da loja<input data-filial-nome="${l.id}" value="${t(l.nome)}" ${dona() ? '' : 'disabled'}></label>`).join('')}
         <label class="campo">Este aparelho vende pela<select data-filial-atual>${db.lojas.map((l) => `<option value="${l.id}" ${l.id === lojaAtual() ? 'selected' : ''}>${t(l.nome)}</option>`).join('')}</select><small>Escolha em cada celular ou computador.</small></label></div></section>
       <section class="cartao" style="margin-top:16px"><div class="cartao-cab"><h2>Mensagens de cobrança no WhatsApp</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">As palavras entre chaves viram os dados de cada cliente: {nome}, {valor}, {venc}, {saldo}, {dias}, {loja}, {pix}, {acordo}. Deixe em branco para voltar ao texto sugerido.</p>
         <div class="grade g2">${Object.entries(MSGS).map(([k, m]) => `<label class="campo">${m.titulo}<textarea data-msg="${k}" rows="4">${t((db.cfg.msgs || {})[k] || m.sug)}</textarea></label>`).join('')}</div></section>
       <div class="grade g2" style="margin-top:16px">
-        <section class="cartao"><div class="cartao-cab"><h2>Cópia de segurança</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">Baixe um arquivo com tudo (clientes, fiado, estoque, vendas e caixa) e guarde. Para voltar, é só carregar o arquivo.</p>
+        <section class="cartao"><div class="cartao-cab"><h2>Cópia de segurança</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">Baixe um arquivo com tudo (clientes, crediário, estoque, vendas e caixa) e guarde. Para voltar, é só carregar o arquivo.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="bt" data-acao="backup">Baixar cópia</button><label class="bt" for="backup-in">Carregar cópia</label><input type="file" id="backup-in" accept="application/json,.json" class="sr"></div></section>
         <section class="cartao"><div class="cartao-cab"><h2>Assinatura</h2></div><p style="margin:0 0 6px"><b>Peplo · R$ 59/mês</b></p><p class="mudo" style="margin:0 0 12px;font-size:13.5px">Pagamento na hora no Pix ou no cartão, sem fidelidade. Na demonstração nada é cobrado.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="bt cheio" href="../../../peplo.html#precos" data-plano="basico">Assinar o Peplo</a><button type="button" class="bt perigo" data-acao="recomecar">Recomeçar a demonstração</button></div></section>
@@ -880,8 +911,8 @@ const TELAS = {
       <div class="grade g2">
         <section class="cartao"><div style="display:flex;gap:16px;align-items:center;margin-bottom:16px"><span class="foto-perfil">${u.foto ? `<img src="${t(u.foto)}" alt="">` : t(iniciais(u.nome))}</span><div style="display:grid;gap:8px"><b style="font-family:var(--serif);font-size:22px">${t(u.nome)}</b><div style="display:flex;gap:8px;flex-wrap:wrap"><label class="bt pq cheio" for="foto-eu">${u.foto ? 'Trocar foto' : 'Pôr foto'}</label><input type="file" id="foto-eu" accept="image/*" class="sr">${u.foto ? '<button type="button" class="bt pq" data-acao="tira-foto-eu">Tirar</button>' : ''}</div></div></div>
           <div class="campos">${[['nome', 'Nome'], ['tel', 'WhatsApp'], ['email', 'E-mail'], ['nasc', 'Aniversário', 'date']].map(([k, n, tp]) => `<label class="campo">${n}<input data-eu="${k}" ${tp ? `type="${tp}"` : ''} value="${t(u[k] || '')}"></label>`).join('')}</div>
-          <p class="campo" style="margin:16px 0 8px">Abrir o sistema em</p><div class="chips">${[['inicio', 'Visão geral'], ['vender', 'Vender'], ['fiado', 'Fiado']].map(([k, n]) => `<button type="button" data-abrir-em="${k}" aria-pressed="${(u.abrirEm || 'inicio') === k}">${n}</button>`).join('')}</div>
-          <p class="campo" style="margin:16px 0 6px">Senha de liberação (4 números)</p><p class="mudo" style="font-size:13px;margin:0 0 8px">${u.perfil === 'dona' ? 'Usada para liberar fiado fora da regra e desconto acima do limite quando a vendedora pedir.' : 'Usada para confirmar ações sensíveis.'} ${u.pin ? 'Já cadastrada.' : 'Ainda não cadastrada (na demonstração, a senha da dona é 1234).'}</p>
+          <p class="campo" style="margin:16px 0 8px">Abrir o sistema em</p><div class="chips">${[['inicio', 'Visão geral'], ['vender', 'Vender'], ['fiado', 'Crediário']].map(([k, n]) => `<button type="button" data-abrir-em="${k}" aria-pressed="${(u.abrirEm || 'inicio') === k}">${n}</button>`).join('')}</div>
+          <p class="campo" style="margin:16px 0 6px">Senha de liberação (4 números)</p><p class="mudo" style="font-size:13px;margin:0 0 8px">${u.perfil === 'dona' ? 'Usada para liberar crediário fora da regra e desconto acima do limite quando a vendedora pedir.' : 'Usada para confirmar ações sensíveis.'} ${u.pin ? 'Já cadastrada.' : 'Ainda não cadastrada (na demonstração, a senha da dona é 1234).'}</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="pin-novo" inputmode="numeric" maxlength="4" placeholder="••••" style="width:110px;min-height:42px;border-radius:10px;border:1px solid var(--linha);text-align:center;letter-spacing:6px"><button type="button" class="bt" data-acao="salvar-pin">Salvar senha</button></div>
         </section>
         <section class="cartao"><div class="cartao-cab"><h2>Minhas vendas</h2><span class="vivo" style="margin-left:auto"><i></i>ao vivo</span></div>
@@ -896,7 +927,7 @@ const TELAS = {
     const h = hoje(), ini = `${h.slice(0, 8)}01`, n = numeros(ini, h), diaMes = Number(h.slice(8)), ultimo = new Date(Number(h.slice(0, 4)), Number(h.slice(5, 7)), 0).getDate();
     const proj = Math.round(n.liquido / diaMes * ultimo), pct = db.meta ? Math.min(100, Math.round(n.liquido / db.meta * 100)) : 0;
     const porVend = db.usuarios.map((u) => { const vs = n.vs.filter((v) => v.vend === u.id), tot = vs.reduce((s, v) => s + v.total, 0); return { u, vs, tot, desc: vs.reduce((s, v) => s + v.desc, 0), fiado: vs.reduce((s, v) => s + v.pag.filter((x) => x.f === 'fiado').reduce((a, x) => a + x.v, 0), 0) }; });
-    const ativ = [...db.atividades, ...db.excecoes.map((e) => ({ data: e.data, quem: '', txt: `Fiado liberado fora da regra para ${(cli(e.cli) || {}).nome || 'cliente'}: ${din(e.valor)} (${e.motivo})`, tipo: 'excecao' })), ...db.movs.filter((m) => m.tipo === 'ajuste' || m.tipo === 'avaria').map((m) => ({ data: m.data, quem: '', txt: `${m.tipo === 'ajuste' ? 'Ajuste de estoque' : 'Avaria'}: ${(prod(m.p) || {}).nome} ${m.cor} ${m.tam} (${m.q > 0 ? '+' : ''}${m.q}) ${m.motivo || ''}`, tipo: 'estoque' })), ...CX().historico.filter((c) => c.dif).map((c) => ({ data: c.fechamento, quem: '', txt: `Caixa fechou com diferença de ${din(c.dif)}${c.obs ? ` (${c.obs})` : ''}`, tipo: 'caixa' }))].sort((a, b) => String(b.data).localeCompare(String(a.data))).slice(0, 25);
+    const ativ = [...db.atividades, ...db.excecoes.map((e) => ({ data: e.data, quem: '', txt: `Crediário liberado fora da regra para ${(cli(e.cli) || {}).nome || 'cliente'}: ${din(e.valor)} (${e.motivo})`, tipo: 'excecao' })), ...db.movs.filter((m) => m.tipo === 'ajuste' || m.tipo === 'avaria').map((m) => ({ data: m.data, quem: '', txt: `${m.tipo === 'ajuste' ? 'Ajuste de estoque' : 'Avaria'}: ${(prod(m.p) || {}).nome} ${m.cor} ${m.tam} (${m.q > 0 ? '+' : ''}${m.q}) ${m.motivo || ''}`, tipo: 'estoque' })), ...CX().historico.filter((c) => c.dif).map((c) => ({ data: c.fechamento, quem: '', txt: `Caixa fechou com diferença de ${din(c.dif)}${c.obs ? ` (${c.obs})` : ''}`, tipo: 'caixa' }))].sort((a, b) => String(b.data).localeCompare(String(a.data))).slice(0, 25);
     return `<div class="cab"><div><h1>Painel do dono</h1><p>Meta, equipe, quem pode o quê e tudo o que aconteceu na loja.</p></div><div class="acoes">${addBt('usuario')}</div></div>
       <div class="grade g-21" style="margin-bottom:16px">
         <section class="cartao"><div class="cartao-cab"><h2>${ico('lucro')}Meta do mês</h2><span class="vivo" style="margin-left:auto"><i></i>ao vivo</span></div>
@@ -904,9 +935,9 @@ const TELAS = {
           <div class="meta"><i style="width:${pct}%"></i></div>
           <p class="mudo" style="margin:0 0 12px;font-size:13.5px">No ritmo de hoje a loja fecha o mês em <b style="color:${proj >= db.meta ? 'var(--ok)' : 'var(--mal)'}">${din(proj)}</b>. ${proj >= db.meta ? 'Vai bater a meta.' : `Faltam ${din(db.meta - n.liquido)} em ${ultimo - diaMes} dias: ${din(Math.max(0, Math.round((db.meta - n.liquido) / Math.max(1, ultimo - diaMes))))} por dia.`}</p>
           <label class="campo" style="max-width:240px">Meta de vendas do mês (R$)<input data-meta inputmode="decimal" value="${campoDin(db.meta)}"></label></section>
-        <section class="cartao"><div class="cartao-cab"><h2>${ico('moedas')}Dinheiro do mês</h2></div><ul class="lista"><li><span class="cresce">Vendas líquidas</span><b class="num">${din(n.liquido)}</b></li><li><span class="cresce">Lucro bruto</span><b class="num" style="color:var(--ok)">${din(n.lucro)}</b></li><li><span class="cresce">Despesas do caixa</span><b class="num">${din(n.despesas)}</b></li><li><span class="cresce">Fiado a receber</span><b class="num">${din(totalAberto())}</b></li><li><span class="cresce">Fiado vencido</span><b class="num" style="color:var(--mal)">${din(totalVencido())}</b></li></ul></section>
+        <section class="cartao"><div class="cartao-cab"><h2>${ico('moedas')}Dinheiro do mês</h2></div><ul class="lista"><li><span class="cresce">Vendas líquidas</span><b class="num">${din(n.liquido)}</b></li><li><span class="cresce">Lucro bruto</span><b class="num" style="color:var(--ok)">${din(n.lucro)}</b></li><li><span class="cresce">Despesas do caixa</span><b class="num">${din(n.despesas)}</b></li><li><span class="cresce">Crediário a receber</span><b class="num">${din(totalAberto())}</b></li><li><span class="cresce">Crediário vencido</span><b class="num" style="color:var(--mal)">${din(totalVencido())}</b></li></ul></section>
       </div>
-      <section class="cartao" style="margin-bottom:16px"><div class="cartao-cab"><h2>${ico('gente')}Equipe no mês</h2></div><div class="tabela-wrap"><table class="tabela cartoes"><thead><tr><th>Pessoa</th><th class="n">Vendas</th><th class="n">Vendido</th><th class="n">Ticket</th><th class="n">Descontos</th><th class="n">No fiado</th><th class="n">Comissão</th><th></th></tr></thead><tbody>${porVend.map((x) => `<tr><td><b>${t(x.u.nome)}</b><br><small class="mudo">${x.u.perfil === 'dona' ? 'Dona' : 'Vendedora'}${x.u.id === db.usuario ? ' · você' : ''}</small></td><td class="n" data-r="Vendas">${x.vs.length}</td><td class="n" data-r="Vendido"><b>${din(x.tot)}</b></td><td class="n" data-r="Ticket">${din(x.vs.length ? Math.round(x.tot / x.vs.length) : 0)}</td><td class="n" data-r="Descontos">${din(x.desc)}</td><td class="n" data-r="Fiado">${din(x.fiado)}</td><td class="n" data-r="Comissão">${x.u.comissao ? `<b>${din(comissaoDe(x.u, x.vs))}</b><br><small class="mudo">${x.u.comissao}%</small>` : '—'}</td><td>${x.u.id === db.usuario ? '' : `<button type="button" class="bt pq" data-entrar-como="${x.u.id}">Ver como ${t(x.u.nome.split(' ')[0])}</button>`}</td></tr>`).join('')}</tbody></table></div></section>
+      <section class="cartao" style="margin-bottom:16px"><div class="cartao-cab"><h2>${ico('gente')}Equipe no mês</h2></div><div class="tabela-wrap"><table class="tabela cartoes"><thead><tr><th>Pessoa</th><th class="n">Vendas</th><th class="n">Vendido</th><th class="n">Ticket</th><th class="n">Descontos</th><th class="n">No crediário</th><th class="n">Comissão</th><th></th></tr></thead><tbody>${porVend.map((x) => `<tr><td><b>${t(x.u.nome)}</b><br><small class="mudo">${x.u.perfil === 'dona' ? 'Dona' : 'Vendedora'}${x.u.id === db.usuario ? ' · você' : ''}</small></td><td class="n" data-r="Vendas">${x.vs.length}</td><td class="n" data-r="Vendido"><b>${din(x.tot)}</b></td><td class="n" data-r="Ticket">${din(x.vs.length ? Math.round(x.tot / x.vs.length) : 0)}</td><td class="n" data-r="Descontos">${din(x.desc)}</td><td class="n" data-r="Crediário">${din(x.fiado)}</td><td class="n" data-r="Comissão">${x.u.comissao ? `<b>${din(comissaoDe(x.u, x.vs))}</b><br><small class="mudo">${x.u.comissao}%</small>` : '—'}</td><td>${x.u.id === db.usuario ? '' : `<button type="button" class="bt pq" data-entrar-como="${x.u.id}">Ver como ${t(x.u.nome.split(' ')[0])}</button>`}</td></tr>`).join('')}</tbody></table></div></section>
       <section class="cartao" style="margin-bottom:16px"><div class="cartao-cab"><h2>${ico('ok')}Quem pode o quê</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">A dona pode tudo. Para a vendedora, marque o que ela pode fazer sem pedir a sua senha.</p>
         <div class="tabela-wrap"><div class="perm"><b style="text-align:left">Pessoa</b>${PERMS.map(([, n]) => `<b>${n}</b>`).join('')}${db.usuarios.filter((u) => u.perfil !== 'dona').map((u) => `<span><b>${t(u.nome)}</b><br><small class="mudo">desconto até <input data-desc-max="${u.id}" type="number" min="0" max="100" value="${u.descMax}" style="width:52px;border:1px solid var(--linha);border-radius:6px;padding:2px 4px">% · comissão <input data-comissao="${u.id}" type="number" min="0" max="50" step="0.5" value="${u.comissao || 0}" style="width:56px;border:1px solid var(--linha);border-radius:6px;padding:2px 4px">%</small></span>${PERMS.map(([k]) => `<label><input type="checkbox" data-perm="${u.id}.${k}" ${(u.perms || {})[k] ? 'checked' : ''} aria-label="${t(u.nome)}: ${k}"></label>`).join('')}`).join('')}</div></div></section>
       <section class="cartao"><div class="cartao-cab"><h2>${ico('recibo')}O que aconteceu na loja</h2></div><ul class="lista">${ativ.map((a) => `<li><span class="cresce"><b style="white-space:normal">${t(a.txt)}</b><small>${dataBR(a.data)} ${horaBR(a.data)}${a.quem ? ` · ${t(a.quem)}` : ''}</small></span></li>`).join('') || '<p class="mudo">Nada registrado ainda.</p>'}</ul></section>`;
@@ -959,7 +990,7 @@ const totalSacola = () => Math.max(0, estado.sacola.reduce((s, x) => s + x.preco
 // com uma forma só, o valor acompanha o total da sacola
 function ajustaPagamento() { if (estado.pag.length === 1) estado.pag[0].v = totalSacola(); }
 function liberarExcecao() {
-  if (!pode('liberar')) return pedirSenha('Liberar fiado fora da regra precisa da senha da dona.', () => { abrirExcecao(); });
+  if (!pode('liberar')) return pedirSenha('Liberar crediário fora da regra precisa da senha da dona.', () => { abrirExcecao(); });
   abrirExcecao();
 }
 // senha de 4 números da dona (na demonstração é 1234); compara pelo resumo SHA-256, a senha não fica guardada
@@ -970,8 +1001,8 @@ function pedirSenha(motivo, ok) {
   });
 }
 function abrirExcecao() {
-  abrir(`<h2>Liberar exceção no fiado</h2><p class="mudo">Fica registrado quem liberou, quando, o valor e o motivo.</p><label class="campo">Quem está liberando<input id="ex-quem" value="${t(db.loja.dono || '')}"></label><label class="campo" style="margin-top:10px">Motivo<textarea id="ex-mot" placeholder="Ex.: cliente antiga, combinou de pagar sexta"></textarea></label><div class="acoes"><button type="button" class="bt cheio" data-ok>Liberar</button></div>`, (j) => {
-    $('[data-ok]', j).onclick = () => { const q = $('#ex-quem', j).value.trim(), m = $('#ex-mot', j).value.trim(); if (!q || m.length < 5) { toast('Diga quem libera e o motivo.', true); return; } estado.excecao = `${q}: ${m}`; registra(`Exceção no fiado liberada: ${m}`, 'excecao'); fechar(); mostra(); };
+  abrir(`<h2>Liberar exceção no crediário</h2><p class="mudo">Fica registrado quem liberou, quando, o valor e o motivo.</p><label class="campo">Quem está liberando<input id="ex-quem" value="${t(db.loja.dono || '')}"></label><label class="campo" style="margin-top:10px">Motivo<textarea id="ex-mot" placeholder="Ex.: cliente antiga, combinou de pagar sexta"></textarea></label><div class="acoes"><button type="button" class="bt cheio" data-ok>Liberar</button></div>`, (j) => {
+    $('[data-ok]', j).onclick = () => { const q = $('#ex-quem', j).value.trim(), m = $('#ex-mot', j).value.trim(); if (!q || m.length < 5) { toast('Diga quem libera e o motivo.', true); return; } estado.excecao = `${q}: ${m}`; registra(`Exceção no crediário liberada: ${m}`, 'excecao'); fechar(); mostra(); };
   });
 }
 function finalizarVenda() {
@@ -1034,7 +1065,7 @@ function devolver(v) {
     ${v.itens.map((x, i) => { const pode = x.qtd - (x.devolvido || 0); return `<div class="troca" style="border-bottom:1px solid var(--linha-2)"><span><b>${t(x.nome)}</b><br><small class="mudo">${t(x.cor)} · ${t(x.tam)} · ${din(Math.round(x.preco * fator))} cada</small></span><select data-dv="${i}" ${pode ? '' : 'disabled'} style="min-height:40px;border-radius:10px;border:1px solid var(--linha);padding:4px 8px">${Array.from({ length: pode + 1 }, (_, k) => `<option value="${k}">${k}</option>`).join('')}</select></div>`; }).join('')}
     <div class="campos" style="margin-top:14px"><label class="campo">Como voltou a peça<select id="dv-cond"><option value="revenda">Boa, volta para a arara</option><option value="avaria">Com defeito ou avaria</option></select></label>
     <label class="campo">Motivo<input id="dv-mot" list="dl-mot" placeholder="Ex.: tamanho não serviu"><datalist id="dl-mot"><option value="Tamanho não serviu"><option value="Não gostou da cor"><option value="Defeito na costura"><option value="Arrependimento"></datalist></label>
-    <label class="campo inteiro">O que fazer com o valor<select id="dv-dest">${abertasVenda.length ? '<option value="fiado">Abater do fiado desta compra</option>' : ''}${c ? '<option value="troca">Troca: vira crédito e já abre uma venda nova</option><option value="credito">Guardar como crédito para a cliente</option>' : ''}<option value="dinheiro">Devolver em dinheiro (sai do caixa)</option><option value="pix">Devolver no Pix</option></select></label></div>
+    <label class="campo inteiro">O que fazer com o valor<select id="dv-dest">${abertasVenda.length ? '<option value="fiado">Abater do crediário desta compra</option>' : ''}${c ? '<option value="troca">Troca: vira crédito e já abre uma venda nova</option><option value="credito">Guardar como crédito para a cliente</option>' : ''}<option value="dinheiro">Devolver em dinheiro (sai do caixa)</option><option value="pix">Devolver no Pix</option></select></label></div>
     <p class="mudo" data-dv-total style="margin:10px 0 0">Valor: ${din(0)}</p>
     <div class="acoes"><button type="button" class="bt cheio" data-ok>Confirmar</button></div>`, (j) => {
     const valor = () => v.itens.reduce((s, x, i) => s + Math.round(x.preco * fator) * Number($(`[data-dv="${i}"]`, j).value || 0), 0);
@@ -1045,7 +1076,7 @@ function devolver(v) {
       v.itens.forEach((x, i) => { const n = Number($(`[data-dv="${i}"]`, j).value || 0); if (!n) return; x.devolvido = (x.devolvido || 0) + n; const p = prod(x.p);
         if (cond === 'revenda') mover(p, x.cor, x.tam, n, 'devolucao', v.id, mot); else { db.avarias.push({ data: agora(), p: x.p, cor: x.cor, tam: x.tam, q: n, motivo: mot, venda: v.id }); db.movs.push({ id: uid('m'), data: agora(), p: x.p, cor: x.cor, tam: x.tam, q: 0, tipo: 'avaria', ref: v.id, motivo: `${n} peça(s) com avaria: ${mot}` }); } });
       let txt = '';
-      if (dest === 'fiado') { let resto = val; abertasVenda.sort((a, b) => b.venc.localeCompare(a.venc)).forEach((p) => { const a = Math.min(resto, p.saldo); p.saldo -= a; p.valor -= a; resto -= a; }); if (resto > 0 && c) c.credito = (c.credito || 0) + resto; txt = 'abatido do fiado'; }
+      if (dest === 'fiado') { let resto = val; abertasVenda.sort((a, b) => b.venc.localeCompare(a.venc)).forEach((p) => { const a = Math.min(resto, p.saldo); p.saldo -= a; p.valor -= a; resto -= a; }); if (resto > 0 && c) c.credito = (c.credito || 0) + resto; txt = 'abatido do crediário'; }
       if (dest === 'credito' || dest === 'troca') { c.credito = (c.credito || 0) + val; txt = 'crédito na loja'; }
       if (dest === 'dinheiro' || dest === 'pix') { const cx = caixaAtual(); cx.movs.push({ id: uid('cm'), t: 'reembolso', v: val, desc: `Devolução venda nº ${v.n}`, data: agora(), f: dest }); txt = `devolvido no ${dest === 'pix' ? 'Pix' : 'dinheiro'}`; }
       v.devol.push({ data: agora(), valor: val, cond, motivo: mot, destino: dest, destinoTxt: txt, tipo: dest === 'troca' ? 'troca' : 'devolucao' });
@@ -1118,14 +1149,14 @@ function renegociar(c) {
   });
 }
 function extrato(c) {
-  const linhas = [...db.vendas.filter((v) => v.cli === c.id && v.pag.some((x) => x.f === 'fiado')).map((v) => [v.data, `Compra nº ${v.n} no fiado`, v.pag.filter((x) => x.f === 'fiado').reduce((s, x) => s + x.v, 0)]), ...db.pagamentos.filter((p) => p.cli === c.id).map((p) => [p.data, `Pagamento (${FORMAS[p.f]})${p.obs ? ` · ${p.obs}` : ''}`, -p.v]), ...db.acordos.filter((a) => a.cli === c.id).map((a) => [a.data, `Acordo: ${a.n}× (renegociação)`, 0])].sort((a, b) => a[0].localeCompare(b[0]));
+  const linhas = [...db.vendas.filter((v) => v.cli === c.id && v.pag.some((x) => x.f === 'fiado')).map((v) => [v.data, `Compra nº ${v.n} no crediário`, v.pag.filter((x) => x.f === 'fiado').reduce((s, x) => s + x.v, 0)]), ...db.pagamentos.filter((p) => p.cli === c.id).map((p) => [p.data, `Pagamento (${FORMAS[p.f]})${p.obs ? ` · ${p.obs}` : ''}`, -p.v]), ...db.acordos.filter((a) => a.cli === c.id).map((a) => [a.data, `Acordo: ${a.n}× (renegociação)`, 0])].sort((a, b) => a[0].localeCompare(b[0]));
   let s = 0;
-  abrir(`<h2>Extrato de ${t(c.nome)}</h2><p class="mudo">Tudo o que comprou no fiado e pagou.</p><div class="recibo"><h3>${t(db.loja.nome)}</h3>${linhas.map(([d, desc, v]) => { s += v; return `<div class="linha-r"><span><small class="mudo">${dataBR(d)}</small> ${t(desc)}</span><span class="num">${v ? (v > 0 ? '+' : '−') + din(Math.abs(v)) : ''}</span></div>`; }).join('')}<hr><div class="linha-r"><b>Em aberto hoje</b><b>${din(aberto(c.id))}</b></div></div>
+  abrir(`<h2>Extrato de ${t(c.nome)}</h2><p class="mudo">Tudo o que comprou no crediário e pagou.</p><div class="recibo"><h3>${t(db.loja.nome)}</h3>${linhas.map(([d, desc, v]) => { s += v; return `<div class="linha-r"><span><small class="mudo">${dataBR(d)}</small> ${t(desc)}</span><span class="num">${v ? (v > 0 ? '+' : '−') + din(Math.abs(v)) : ''}</span></div>`; }).join('')}<hr><div class="linha-r"><b>Em aberto hoje</b><b>${din(aberto(c.id))}</b></div></div>
     <div class="acoes"><button type="button" class="bt" data-imp>Imprimir</button></div>`, (j) => { $('[data-imp]', j).onclick = () => { document.body.classList.add('imprime-janela'); print(); }; }, true);
 }
 function formCliente(c) {
   const novo = !c; c = c || { nome: '', tel: '', cpf: '', nasc: '', end: '', limite: db.cfg.limitePadrao, obs: '' };
-  abrir(`<h2>${novo ? 'Nova cliente' : 'Editar cliente'}</h2><div class="campos" style="margin-top:12px"><label class="campo inteiro">Nome<input id="fc-nome" value="${t(c.nome)}" required></label><label class="campo">WhatsApp<input id="fc-tel" inputmode="tel" value="${t(c.tel)}" placeholder="(16) 99999-9999"></label><label class="campo">Limite no fiado (R$)<input id="fc-lim" inputmode="decimal" value="${campoDin(c.limite)}"></label><label class="campo">CPF (opcional)<input id="fc-cpf" inputmode="numeric" value="${t(c.cpf)}"></label><label class="campo">Aniversário (opcional)<input id="fc-nasc" type="date" value="${t(c.nasc)}"></label><label class="campo inteiro">Endereço (opcional)<input id="fc-end" value="${t(c.end)}"></label><label class="campo inteiro">Observação<textarea id="fc-obs">${t(c.obs)}</textarea></label></div>
+  abrir(`<h2>${novo ? 'Nova cliente' : 'Editar cliente'}</h2><div class="campos" style="margin-top:12px"><label class="campo inteiro">Nome<input id="fc-nome" value="${t(c.nome)}" required></label><label class="campo">WhatsApp<input id="fc-tel" inputmode="tel" value="${t(c.tel)}" placeholder="(16) 99999-9999"></label><label class="campo">Limite no crediário (R$)<input id="fc-lim" inputmode="decimal" value="${campoDin(c.limite)}"></label><label class="campo">CPF (opcional)<input id="fc-cpf" inputmode="numeric" value="${t(c.cpf)}"></label><label class="campo">Aniversário (opcional)<input id="fc-nasc" type="date" value="${t(c.nasc)}"></label><label class="campo inteiro">Endereço (opcional)<input id="fc-end" value="${t(c.end)}"></label><label class="campo inteiro">Observação<textarea id="fc-obs">${t(c.obs)}</textarea></label></div>
     <div class="acoes"><button type="button" class="bt cheio" data-ok>Salvar</button></div>`, (j) => {
     $('[data-ok]', j).onclick = () => {
       const nome = $('#fc-nome', j).value.trim(); if (nome.length < 2) { toast('Escreva o nome da cliente.', true); return; }
@@ -1137,18 +1168,18 @@ function formCliente(c) {
   });
 }
 function fiadoCaderno() {
-  abrir(`<h2>Lançar fiado do caderno</h2><p class="mudo">Passe para o sistema o que está anotado à mão. Fica no fiado da cliente, com vencimento, como qualquer outra compra.</p>
+  abrir(`<h2>Lançar fiado do caderno</h2><p class="mudo">Passe para o sistema o que está anotado à mão. Fica no crediário da cliente, com vencimento, como qualquer outra compra.</p>
     <div class="campos"><label class="campo inteiro">Cliente<input id="fd-cli" list="dl-cli" placeholder="Nome (se for nova, é cadastrada)">${listaClientes()}</label><label class="campo">WhatsApp (se for nova)<input id="fd-tel" inputmode="tel"></label><label class="campo">Quanto ela deve (R$)<input id="fd-v" inputmode="decimal"></label>
     <label class="campo">Data da compra<input type="date" id="fd-data" value="${hoje()}"></label><label class="campo">O que comprou<input id="fd-desc" list="dl-fd" placeholder="Ex.: 2 blusas e 1 calça"><datalist id="dl-fd"><option value="Compras anotadas no caderno"><option value="Saldo antigo"></datalist></label>
     <label class="campo">Parcelas<select id="fd-n">${Array.from({ length: 12 }, (_, i) => `<option>${i + 1}</option>`).join('')}</select></label><label class="campo">Vencimento (1ª)<input type="date" id="fd-venc" value="${somaDias(hoje(), 30)}"><small>Se já venceu, ponha a data antiga: entra como atrasada.</small></label></div>
-    <div class="acoes"><button type="button" class="bt cheio" data-ok>Lançar no fiado</button></div>`, (j) => {
+    <div class="acoes"><button type="button" class="bt cheio" data-ok>Lançar no crediário</button></div>`, (j) => {
     $('[data-ok]', j).onclick = () => {
       const nome = $('#fd-cli', j).value.trim(), v = lerDin($('#fd-v', j).value), n = Number($('#fd-n', j).value), venc = $('#fd-venc', j).value || somaDias(hoje(), 30);
       if (nome.length < 2) { toast('Escreva o nome da cliente.', true); return; } if (v <= 0) { toast('Digite quanto ela deve.', true); return; }
       let c = acharCli(nome); if (!c) { c = { id: uid('c'), nome, tel: telLimpo($('#fd-tel', j).value), cpf: '', nasc: '', end: '', limite: Math.max(db.cfg.limitePadrao, v), obs: '', bloqueado: false, credito: 0, criado: hoje() }; db.clientes.push(c); }
-      const base = Math.floor(v / n), desc = $('#fd-desc', j).value.trim() || 'Fiado do caderno';
+      const base = Math.floor(v / n), desc = $('#fd-desc', j).value.trim() || 'Crediário do caderno';
       for (let i = 0; i < n; i++) db.parcelas.push({ id: uid('pc'), cli: c.id, venda: null, caderno: desc, data: $('#fd-data', j).value || hoje(), num: i + 1, de: n, valor: i === n - 1 ? v - base * (n - 1) : base, saldo: i === n - 1 ? v - base * (n - 1) : base, venc: somaMes(venc, i), pags: [], status: 'aberta' });
-      registra(`Fiado do caderno lançado para ${c.nome}: ${din(v)} (${desc})`, 'fiado'); grava(); fechar(); location.hash = `#cliente/${c.id}`; mostra(); toast(`${din(v)} lançado no fiado de ${c.nome.split(' ')[0]}.`);
+      registra(`Crediário do caderno lançado para ${c.nome}: ${din(v)} (${desc})`, 'fiado'); grava(); fechar(); location.hash = `#cliente/${c.id}`; mostra(); toast(`${din(v)} lançado no crediário de ${c.nome.split(' ')[0]}.`);
     };
   });
 }
@@ -1158,7 +1189,7 @@ function passarCaderno() {
   abrir(`<h2>Passar o caderno inteiro</h2><p class="mudo">Uma linha por cliente: nome, WhatsApp, quanto deve e quando vence (se já venceu, ponha a data antiga). Aperte Enter para ir ao próximo campo. Quem já está cadastrada só ganha a dívida.</p>
     <div class="tabela-wrap"><table class="tabela cd-tab"><thead><tr><th>Cliente</th><th>WhatsApp</th><th>Deve (R$)</th><th>Vence em</th></tr></thead><tbody data-cd-linhas>${Array.from({ length: n }, (_, i) => linha(i)).join('')}</tbody></table></div>${listaClientes()}
     <button type="button" class="link" data-cd-mais style="margin-top:8px">+ Mais 10 linhas</button><p class="mudo" data-cd-res style="margin:8px 0 0"></p>
-    <div class="acoes"><button type="button" class="bt cheio" data-ok>Lançar tudo no fiado</button></div>`, (j) => {
+    <div class="acoes"><button type="button" class="bt cheio" data-ok>Lançar tudo no crediário</button></div>`, (j) => {
     const ler = () => { const l = []; for (let i = 0; i < n; i++) { const g = (k) => ($(`[data-cd="${i}.${k}"]`, j) || {}).value || ''; const nome = g('nome').trim(), v = lerDin(g('v')); if (nome.length >= 2 && v > 0) l.push({ nome, tel: telLimpo(g('tel')), v, venc: g('venc') || somaDias(hoje(), 30) }); } return l; };
     const res = () => { const l = ler(); $('[data-cd-res]', j).textContent = l.length ? `${l.length} ${l.length === 1 ? 'cliente' : 'clientes'} · ${din(l.reduce((s, x) => s + x.v, 0))} no total` : ''; };
     j.addEventListener('input', res);
@@ -1167,8 +1198,8 @@ function passarCaderno() {
     $('[data-ok]', j).onclick = () => {
       const l = ler(); if (!l.length) { toast('Preencha ao menos uma linha com nome e valor.', true); return; }
       l.forEach((x) => { let c = acharCli(x.nome); if (!c) { c = { id: uid('c'), nome: x.nome, tel: x.tel, cpf: '', nasc: '', end: '', limite: Math.max(db.cfg.limitePadrao, x.v), obs: '', bloqueado: false, credito: 0, criado: hoje() }; db.clientes.push(c); } else if (x.tel && !c.tel) c.tel = x.tel;
-        db.parcelas.push({ id: uid('pc'), cli: c.id, venda: null, caderno: 'Fiado do caderno', data: hoje(), num: 1, de: 1, valor: x.v, saldo: x.v, venc: x.venc, pags: [], status: 'aberta' }); });
-      registra(`Caderno passado para o sistema: ${l.length} clientes, ${din(l.reduce((s, x) => s + x.v, 0))}`, 'fiado'); grava(); fechar(); location.hash = '#fiado'; mostra(); toast(`${l.length} clientes lançadas no fiado.`);
+        db.parcelas.push({ id: uid('pc'), cli: c.id, venda: null, caderno: 'Crediário do caderno', data: hoje(), num: 1, de: 1, valor: x.v, saldo: x.v, venc: x.venc, pags: [], status: 'aberta' }); });
+      registra(`Caderno passado para o sistema: ${l.length} clientes, ${din(l.reduce((s, x) => s + x.v, 0))}`, 'fiado'); grava(); fechar(); location.hash = '#fiado'; mostra(); toast(`${l.length} clientes lançadas no crediário.`);
     };
   }, true);
 }
@@ -1436,7 +1467,7 @@ document.addEventListener('click', (e) => {
   if (d.extrato) return extrato(cli(d.extrato));
   if (d.editarCli) return formCliente(cli(d.editarCli));
   if (d.limite) { const c = cli(d.limite); return abrir(`<h2>Limite de ${t(c.nome)}</h2><p class="mudo">Hoje ela deve ${din(aberto(c.id))}.</p><label class="campo">Novo limite (R$)<input id="nl" inputmode="decimal" value="${campoDin(c.limite)}"></label><div class="acoes"><button type="button" class="bt cheio" data-ok>Salvar</button></div>`, (j) => { $('[data-ok]', j).onclick = () => { c.limite = lerDin($('#nl', j).value); grava(); fechar(); mostra(); toast('Limite salvo.'); }; }); }
-  if (d.bloq) { const c = cli(d.bloq); c.bloqueado = !c.bloqueado; grava(); mostra(); return toast(c.bloqueado ? `${c.nome} bloqueada no fiado (à vista continua).` : `${c.nome} liberada no fiado.`); }
+  if (d.bloq) { const c = cli(d.bloq); c.bloqueado = !c.bloqueado; grava(); mostra(); return toast(c.bloqueado ? `${c.nome} bloqueada no crediário (à vista continua).` : `${c.nome} liberada no crediário.`); }
   if (d.ff) { estado.fiadoFiltro = d.ff; location.hash = '#fiado'; return mostra(); }
   if (d.ea) { estado.estoqueAba = d.ea; if (location.hash !== '#estoque') location.hash = '#estoque'; return mostra(); }
   if (d.per) { estado.relPer = d.per; return mostra(); }

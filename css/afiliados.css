@@ -287,3 +287,7 @@
 .afp-min-barra i{display:block;height:100%;border-radius:inherit;background:var(--afp-ouro)}
 .afp-num-prox .afp-min{color:#c9d2e6}
 #afiliado .afp-min-aviso{margin:12px 0 0;padding:10px 14px;border-left:3px solid var(--afp-ouro);border-radius:6px;background:rgba(193,163,106,.12);font-size:13.5px;color:#4a3d27}
+
+/* afiliado logado em afiliados.html: só o painel (sem a página de divulgação em volta) */
+.afp-so-painel main>section:not(#painel),.afp-so-painel .rodape-site{display:none!important}
+.afp-so-painel main{padding-top:0}
