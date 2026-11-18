@@ -1,4 +1,4 @@
-/* Link de agendamento da Veltria Agenda Essencial (a cliente marca pelo celular). Cores da logo da Agenda. */
+/* Link de agendamento do Jano (ex-Veltria Agenda Essencial) (a cliente marca pelo celular). Cores da logo da Agenda. */
 :root { --tinta: #14203a; --rosa: #b86b78; --rosa-claro: #f3dfe0; --cobre: #b5764d; --papel: #fbf8f4; --linha: #e8dfd6; --mudo: #6d6a73; }
 * { box-sizing: border-box; }
 body { margin: 0; min-height: 100vh; background: radial-gradient(120% 60% at 50% 0%, #f6ebe7, var(--papel) 60%); color: var(--tinta); font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; }

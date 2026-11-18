@@ -11,7 +11,7 @@
   var CAT = {
     gestao: ['Veltria Gestão', 'estoque loja mercado distribuidora atacado varejo vendas pedidos compras fornecedores nota fiscal nfe xml código de barras etiquetas caixa pdv inventário'],
     crm: ['Veltria CRM', 'vendas funil clientes propostas orçamentos metas leads negociações agenda atividades whatsapp'],
-    agenda: ['Veltria Agenda', 'agenda agendamento horários salão barbearia estética manicure comanda comissão caixa clientes whatsapp lembrete'],
+    agenda: ['Jano', 'agenda agendamento horários salão barbearia estética manicure comanda comissão caixa clientes whatsapp lembrete'],
     juridico: ['Veltria Jurídico', 'advocacia advogado processos prazos agenda audiências intimações honorários clientes'],
     financeiro: ['Arca', 'financeiro contas pagar receber caixa fluxo dre conciliação extrato banco cobrança boleto pix ordem de serviço assistência técnica'],
     clinica: ['Veltria Clínica', 'clínica consultório médico dentista agenda consultas pacientes prontuário receitas convênios'],

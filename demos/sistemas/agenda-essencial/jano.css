@@ -1,0 +1,306 @@
+/* Jano · agenda e atendimento (ex-Veltria Agenda Essencial, 18/11/2026)
+   Visual "fastos romanos": o calendário gravado em pedra. Travertino, tinta, mínio (o vermelho dos dias de festa
+   nos calendários romanos), bronze e pátina. Carregado DEPOIS do estilo.css: só muda a aparência;
+   chave, dados, telas e funções são as mesmas. As 6 cores de Configurações › Sua marca continuam valendo
+   (cada uma troca a cor de destaque: --noite = tinta de destaque, --rose = medalhão). */
+:root {
+  --trav: #efe6d6; --trav-2: #f6f0e4; --pedra: #d8cab2; --pedra-2: #e6dac6; --pedra-esc: #b9a688;
+  --tinta: #221d1a; --minio: #a2402e; --minio-esc: #842f21; --bronze: #9a7b4f; --bronze-cl: #c9b48f; --patina: #5c7a6e;
+  --romana: 'Cinzel', 'Trajan Pro', Georgia, serif;
+  /* variáveis do estilo.css apontando para a pedra */
+  --porc: #efe6d6; --porc-2: #f6f0e4; --nude: #d8cab2; --tx: #221d1a; --tx-2: #554b42; --tx-3: #6e6356; --azul: #6e6356;
+  --verde: #4d6b5f; --verm: #9b3a2a;
+  --serif: 'Cinzel', Georgia, serif;
+  /* textura de pedra (ruído leve, sem imagem externa) */
+  --grao: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .38  0 0 0 0 .3  0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+/* cor de destaque: padrão = mínio; as outras são as que a pessoa escolhe (as chaves dos temas não mudam) */
+html:not([data-tema]), html[data-tema="rose"] { --noite: #a2402e; --noite-2: #842f21; --noite-3: #221d1a; --rose: #9a7b4f; --rose-esc: #7a5f39; }
+html[data-tema="salvia"] { --noite: #3d5c4d; --noite-2: #2c4639; --noite-3: #1f3229; --rose: #8ea883; --rose-esc: #4f6b45; }
+html[data-tema="terracota"] { --noite: #8f4a2c; --noite-2: #6e3820; --noite-3: #2a1e19; --rose: #c98a68; --rose-esc: #8a5236; }
+html[data-tema="oceano"] { --noite: #23505c; --noite-2: #173b45; --noite-3: #0f2a32; --rose: #86b8bd; --rose-esc: #3f747a; }
+html[data-tema="ameixa"] { --noite: #6a3a58; --noite-2: #4e3245; --noite-3: #2a1925; --rose: #c992ab; --rose-esc: #8a5070; }
+html[data-tema="grafite"] { --noite: #393c43; --noite-2: #27292e; --noite-3: #1b1c20; --rose: #b8955a; --rose-esc: #7f6532; }
+
+body { background: var(--trav) var(--grao); color: var(--tinta); }
+a { color: var(--noite); }
+:focus-visible { outline: 3px solid var(--bronze); outline-offset: 2px; }
+
+/* faixa da demonstração (só na demo aberta) */
+.demo-topo { background: var(--tinta); }
+.demo-topo a { color: var(--bronze-cl); }
+
+/* topo: placa de pedra com filete de bronze, foto redonda com aro de bronze */
+.topo { background: var(--pedra-2) var(--grao); color: var(--tinta); border-bottom: 1px solid var(--bronze-cl); box-shadow: inset 0 -3px 0 -2px var(--trav-2), 0 6px 14px -12px rgba(34, 29, 26, .45); }
+.quem b { font: 600 1.02rem/1.25 var(--romana); letter-spacing: .04em; text-transform: uppercase; color: var(--tinta); }
+.quem small { color: var(--tx-2); }
+.ini { border-radius: 50%; background: var(--noite); color: var(--trav); font: 600 .9rem var(--romana); box-shadow: 0 0 0 2px var(--trav-2), 0 0 0 3.5px var(--bronze); }
+.ini.com-foto { background: var(--trav-2); }
+.ini.grande { border-radius: 50%; font-size: 1.4rem; }
+.bt-ia { border-radius: 50%; background: var(--trav-2); border: 1px solid var(--bronze-cl); color: var(--noite); }
+
+/* títulos em capital romana (curtos); o resto em letra de leitura */
+h1 { font: 600 1.45rem/1.2 var(--romana); letter-spacing: .03em; text-transform: uppercase; color: var(--tinta); }
+h2 { font: 600 .82rem var(--romana); letter-spacing: .1em; text-transform: uppercase; color: var(--tx-2); }
+.folha h2 { font: 600 1.15rem/1.3 var(--romana); letter-spacing: .03em; text-transform: none; color: var(--tinta); }
+.ola-t { font: 600 1.4rem/1.2 var(--romana); letter-spacing: .03em; text-transform: uppercase; }
+.ola-s a { color: var(--noite); }
+.sub { color: var(--tx-2); }
+
+/* faixa dos dias: tábuas de pedra gravadas */
+.dias button { background: var(--pedra-2) var(--grao); border: 1px solid var(--pedra-esc); border-radius: 8px; box-shadow: inset 0 1px 0 var(--trav-2), inset 0 -2px 0 rgba(34, 29, 26, .08); color: var(--tinta); padding: 7px 0 6px; }
+.dias button small { color: var(--tx-2); font: 600 .66rem var(--romana); letter-spacing: .08em; text-transform: uppercase; }
+.dias button b { font: 600 1.18rem var(--romana); }
+.dias button i { background: var(--noite); }
+.dias button[aria-pressed="true"] { background: var(--noite); border-color: var(--noite-2); color: var(--trav); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .14); }
+.dias button[aria-pressed="true"] small { color: var(--trav); opacity: .85; } .dias button[aria-pressed="true"] i { background: var(--trav); }
+.ir-data label { color: var(--tx-2); }
+
+/* relógio de sol: mostrador de pedra, linhas das horas gravadas, ponteiro de bronze (o gnômon) */
+.relogio { filter: drop-shadow(0 10px 14px rgba(34, 29, 26, .14)); }
+.relogio .rl-face { fill: var(--pedra-2); stroke: var(--pedra-esc); stroke-width: 1.5; }
+.relogio .rl-aro { fill: none; stroke: var(--bronze-cl); stroke-width: 1; }
+.relogio .rl-pista { fill: none; stroke: #e2d5bf; stroke-width: 28; }
+.relogio .rl-miolo { fill: var(--trav-2); stroke: var(--pedra-esc); stroke-width: 1; }
+.relogio .rl-linha { stroke: var(--pedra-esc); stroke-width: .8; opacity: .55; }
+.relogio .rl-marca { stroke: var(--bronze); stroke-width: 2; }
+.relogio .rl-hora { fill: var(--tx-2); font: 600 12px 'Outfit', system-ui, sans-serif; }
+.relogio .rl-gnomon { fill: var(--bronze); stroke: var(--rose-esc); stroke-width: .8; }
+.relogio .rl-gnomon-c { fill: var(--bronze); stroke: var(--trav-2); stroke-width: 1.5; }
+.relogio .arco { stroke: var(--trav-2); }
+.relogio .centro small { color: var(--tx-2); font: 600 .66rem var(--romana); letter-spacing: .12em; text-transform: uppercase; }
+.relogio .centro b { font: 600 1.35rem var(--romana); color: var(--tinta); }
+.relogio .centro span { color: var(--tx-2); }
+.legenda-c { color: var(--tx-2); }
+
+/* cartões: placas de pedra clara com filete de bronze */
+.cartao { background: var(--trav-2); border: 1px solid var(--bronze-cl); border-radius: 10px; box-shadow: inset 0 0 0 3px var(--trav-2), inset 0 0 0 4px rgba(201, 180, 143, .35), 0 6px 14px -12px rgba(34, 29, 26, .4); }
+.hora { border-bottom: 1px solid var(--pedra); }
+.hora .h { font: 600 1rem var(--romana); color: var(--tinta); }
+.hora small, .mini { color: var(--tx-3); }
+.livre { color: var(--tx-3); }
+.selo { background: var(--pedra-2); color: var(--tx-2); border: 1px solid var(--pedra); }
+.selo.ok { background: #dfe7df; color: #3d5c4d; border-color: #c7d4c8; }
+.selo.at { background: #f1e3c8; color: #6e4f1d; border-color: #e2cfa6; }
+.selo.ru, .selo.rs { background: #f2dcd5; color: #8a3324; border-color: #e5c3b8; }
+
+/* botões: cheio = mínio (ou a cor escolhida) com capitais; contorno = tinta */
+.bt { border-radius: 8px; border-color: var(--tinta); color: var(--tinta); background: var(--trav-2); }
+.bt.cheio { background: var(--noite); border-color: var(--noite-2); color: var(--trav-2); font-family: var(--romana); letter-spacing: .06em; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 4px 10px -6px rgba(34, 29, 26, .6); }
+.bt.rose { background: var(--noite); border-color: var(--noite-2); color: var(--trav-2); }
+.bt.pq { border-radius: 7px; }
+
+/* campos */
+.campo { color: var(--tx-2); }
+.campo input, .campo select, .campo textarea, .busca, .ir-data input, .r-data input, .form-ia input, .msg-ed textarea { background: var(--trav-2); border: 1px solid var(--pedra-esc); border-radius: 8px; color: var(--tinta); }
+.servicos button { background: var(--trav-2); border: 1px solid var(--pedra); border-radius: 8px; }
+.servicos button b { font: 600 .84rem 'Outfit', system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; } /* a Cinzel desenha o 1 como I */
+.servicos button[aria-pressed="true"] { border-color: var(--noite); box-shadow: 0 0 0 1.5px var(--noite); background: #fbf7ef; }
+.horarios button, .chips button, .temas button { background: var(--trav-2); border: 1px solid var(--pedra-esc); border-radius: 7px; }
+.horarios button { font-family: var(--romana); font-weight: 600; }
+.horarios button[aria-pressed="true"], .chips button[aria-pressed="true"] { background: var(--noite); border-color: var(--noite-2); color: var(--trav-2); }
+.troca input { accent-color: var(--noite); }
+.passos { color: var(--tx-2); }
+
+/* o que o cliente vê (link) */
+.vitrine { background: var(--trav-2); border: 1px solid var(--bronze-cl); border-radius: 10px; }
+.vitrine header { background: var(--pedra-2) var(--grao); color: var(--tinta); border-bottom: 1px solid var(--bronze-cl); }
+.vitrine header b { font: 600 1.1rem var(--romana); letter-spacing: .04em; text-transform: uppercase; }
+
+/* Mais, assistente, folhas */
+.lista-mais a { border-bottom: 1px solid var(--pedra); color: var(--tinta); }
+.lista-mais b { font: 600 .9rem var(--romana); letter-spacing: .04em; text-transform: uppercase; }
+.lista-mais small { color: var(--tx-3); }
+.fala.ia { background: var(--trav-2); border: 1px solid var(--pedra); }
+.fala.eu { background: var(--noite); color: var(--trav-2); }
+.folha { background: var(--trav) var(--grao); border-top: 3px solid var(--bronze-cl); }
+.veu { background: rgba(34, 29, 26, .5); }
+.toast { background: var(--tinta); color: var(--trav-2); border-left-color: var(--noite); }
+.creditos { color: var(--tx-3); font-family: var(--romana); letter-spacing: .06em; }
+.creditos img { display: block; width: 92px; height: auto; margin: 0 auto 6px; }
+.novidades li { border-left-color: var(--noite); }
+.temas button[aria-pressed="true"] { border-color: var(--noite); box-shadow: 0 0 0 1.5px var(--noite); }
+.serv-ed { border-bottom: 1px solid var(--pedra); }
+.serv-ed input { background: var(--trav-2); border: 1px solid var(--pedra-esc); }
+.barras i { background: var(--noite); }
+.barras small, .serv-ed label { color: var(--tx-3); }
+.r-num { font-family: var(--romana); font-weight: 600; }
+.fm-det p { border-bottom: 1px solid var(--pedra); }
+.fm-det summary { color: var(--noite); }
+
+/* barra de baixo: placa de pedra; aba atual em destaque; o + num medalhão de bronze */
+.pilula { background: var(--pedra-2) var(--grao); border: 1px solid var(--bronze-cl); border-radius: 18px; box-shadow: inset 0 1px 0 var(--trav-2), 0 14px 26px -14px rgba(34, 29, 26, .55); }
+.pilula a { color: var(--tx-2); font: 600 .78rem var(--romana); letter-spacing: .06em; text-transform: uppercase; border-radius: 10px; }
+.pilula a[aria-current="page"] { background: var(--noite); color: var(--trav-2); }
+.pilula .mais-um { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #d9c08f 0, var(--bronze) 55%, #6f5733 100%); color: var(--trav-2); font: 600 1.7rem/1 var(--romana); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .25), inset 0 0 0 4px rgba(111, 87, 51, .45), 0 4px 10px -4px rgba(34, 29, 26, .6); text-shadow: 0 1px 0 rgba(34, 29, 26, .5); }
+.pilula .mais-um[aria-current="page"] { background: radial-gradient(circle at 35% 30%, #d9c08f 0, var(--bronze) 55%, #6f5733 100%); }
+.pilula.seis a { font-size: .7rem; letter-spacing: .03em; padding: 10px 6px; }
+@media (max-width: 360px) { .pilula a { letter-spacing: .02em; font-size: .72rem; padding: 10px 9px; } .pilula.seis a { font-size: .64rem; padding: 10px 4px; } }
+
+/* computador (Ver na web) */
+@media (min-width: 900px) { html.web .relogio { width: min(400px, 86vw); } }
+
+/* ===== 18/11 (2): só celular, barra nova, Agora, ficha, Vitrine e animações ===== */
+.bt-ia { padding: 0; overflow: hidden; background: transparent; border: 0; box-shadow: 0 2px 6px -2px rgba(34, 29, 26, .45); }
+.bt-ia img { width: 100%; height: 100%; display: block; }
+.bt svg, .vt-tit svg, h2 svg, .agora-prox svg, .aviso-linha svg, .ficha-niver svg { width: 18px; height: 18px; flex: none; }
+h2 svg { vertical-align: -3px; margin-right: 6px; color: var(--noite); }
+h2 small { font: 500 .74rem 'Outfit', sans-serif; letter-spacing: 0; text-transform: none; color: var(--tx-3); }
+.vk-instalar { display: none !important; } /* o Jano instala só no celular: o botão fica em Configurações */
+
+/* AGORA: atendimento em andamento (anel que esvazia) e contagem para o próximo */
+.agora { position: relative; margin: 12px 0 6px; padding: 30px 14px 12px; background: var(--trav-2) var(--grao); border: 1px solid var(--bronze-cl); border-radius: 12px; box-shadow: inset 0 0 0 3px var(--trav-2), inset 0 0 0 4px rgba(201, 180, 143, .4), 0 10px 20px -16px rgba(34, 29, 26, .6); }
+.agora.so-prox { padding: 6px 10px; }
+.agora-fita { position: absolute; top: -1px; left: -1px; margin: 0; padding: 4px 18px 4px 14px; background: var(--noite); color: var(--trav-2); font: 600 .9rem var(--romana); letter-spacing: .12em; text-transform: uppercase; border-radius: 12px 0 14px 0; }
+.agora-corpo { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 10px; align-items: center; }
+.agora-corpo small { display: block; color: var(--tx-2); font-size: .8rem; }
+.agora-corpo b { display: block; font: 600 1.28rem/1.2 var(--romana); overflow-wrap: anywhere; }
+.agora-corpo span { display: flex; align-items: center; gap: 6px; color: var(--tx-2); font-size: .86rem; margin-top: 2px; }
+.agora-corpo span i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.agora-anel { position: relative; width: 96px; height: 96px; }
+.agora-anel svg { width: 100%; height: 100%; stroke: none; transform: rotate(-90deg); }
+.an-fundo { fill: var(--pedra-2); stroke: var(--pedra); stroke-width: 7; }
+.an-prog { fill: none; stroke: var(--patina); stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset .9s linear; }
+.agora-anel > span { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; line-height: 1; }
+.agora-anel > span small { font: 600 .58rem var(--romana); letter-spacing: .1em; text-transform: uppercase; color: var(--tx-2); }
+.agora-anel > span b { font: 600 1.6rem var(--romana); margin: 2px 0; }
+.agora-bts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
+.agora-bts .bt { padding: 0 6px; font-size: .8rem; gap: 4px; min-height: 40px; }
+.agora-bts .bt svg { width: 16px; height: 16px; }
+.agora-prox { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; margin-top: 10px; padding: 9px 10px; border: 1px solid var(--pedra-esc); border-radius: 8px; background: var(--pedra-2); text-decoration: none; color: var(--tinta); }
+.agora.so-prox .agora-prox { margin: 0; border: 0; background: none; }
+.agora-prox svg { color: var(--noite); }
+.agora-prox span { font-weight: 600; color: var(--noite); } .agora-prox b { font: 600 1.02rem var(--romana); font-variant-numeric: tabular-nums; color: var(--noite); }
+.agora-prox b i { font-style: normal; display: inline-block; }
+.agora-prox small { color: var(--tx-2); font-size: .82rem; white-space: nowrap; }
+.aviso-linha { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; margin: 8px 0 0; padding: 10px 12px; border: 1px solid var(--bronze-cl); border-radius: 10px; background: var(--trav-2); text-decoration: none; color: var(--tinta); }
+.aviso-linha svg { color: var(--noite); width: 22px; height: 22px; }
+.aviso-linha b { display: block; font-size: .92rem; } .aviso-linha small { color: var(--tx-2); font-size: .8rem; } .aviso-linha > i { font-style: normal; color: var(--tx-3); font-size: 1.3rem; }
+
+/* clientes e ficha (as duas faces) */
+.nome-cli { all: unset; cursor: pointer; display: block; border-radius: 6px; }
+.nome-cli:focus-visible { outline: 3px solid var(--bronze); }
+.ficha-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ficha-topo h2 { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.ficha-ic { display: flex; gap: 6px; flex: none; }
+.ic-bt { width: 40px; min-height: 40px; padding: 0; }
+.faces { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0 6px; }
+.face { background: var(--trav-2); border: 1px solid var(--bronze-cl); border-radius: 10px; overflow: hidden; min-width: 0; }
+.face h3 { margin: 0; padding: 7px 10px; font: 600 .86rem var(--romana); letter-spacing: .08em; text-transform: uppercase; color: var(--trav-2); }
+.face.ja h3 { background: var(--minio); text-align: left; } .face.vai h3 { background: var(--patina); text-align: right; }
+.face p { margin: 0; padding: 7px 10px; border-top: 1px solid var(--pedra); font-size: .8rem; }
+.face p b { display: block; font-size: .82rem; } .face p small { color: var(--tx-2); }
+.faces-moeda { position: absolute; left: 50%; top: -8px; translate: -50% 0; width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 3px 8px -3px rgba(34, 29, 26, .6); }
+.faces-moeda img { width: 100%; height: 100%; display: block; }
+.ficha-h { margin: 14px 0 6px; font: 600 .82rem var(--romana); letter-spacing: .1em; text-transform: uppercase; color: var(--tx-2); }
+.ficha-niver { display: flex; align-items: center; gap: 8px; justify-content: center; margin: 10px 0 0; padding: 8px; border: 1px solid var(--bronze-cl); border-radius: 8px; background: var(--trav-2); font-size: .9rem; }
+.ficha-niver svg { color: var(--noite); }
+.niver { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.niver > div { min-width: 0; }
+
+/* vitrine */
+.vt-link { display: grid; gap: 8px; }
+.vt-tit { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 600; }
+.vt-tit svg { color: var(--noite); }
+.vt-url { display: flex; gap: 8px; align-items: center; }
+.vt-url span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 9px 10px; background: #fbf7ef; border: 1px solid var(--pedra-esc); border-radius: 8px; font-size: .86rem; }
+.vt-grade { display: grid; gap: 8px; margin-bottom: 6px; }
+.vt-grade:not(.mini-grade) { grid-template-columns: 1fr 1fr; }
+.vt-grade > p { grid-column: 1 / -1; }
+.vt-par { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; border-radius: 8px; overflow: hidden; border: 1px solid var(--bronze-cl); }
+.mini-grade { grid-template-columns: 1fr 1fr; }
+.vt-foto { position: relative; display: block; padding: 0; border: 0; background: var(--pedra-2); aspect-ratio: 3 / 4; cursor: pointer; overflow: hidden; }
+.vt-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vt-foto.vazio { cursor: default; background: repeating-linear-gradient(45deg, var(--pedra-2) 0 8px, var(--trav-2) 8px 16px); }
+.vt-foto i { position: absolute; left: 0; right: 0; bottom: 0; font: 600 .62rem var(--romana); letter-spacing: .08em; text-transform: uppercase; font-style: normal; color: var(--trav-2); padding: 4px 0; text-align: center; }
+.r-antes { background: rgba(162, 64, 46, .92); } .r-depois { background: rgba(92, 122, 110, .95); }
+.vt-videos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+.vt-videos > p { grid-column: 1 / -1; }
+.vt-vid { position: relative; padding: 0; border: 1px solid var(--bronze-cl); border-radius: 8px; overflow: hidden; aspect-ratio: 3 / 4; background: var(--tinta); cursor: pointer; }
+.vt-vid img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .9; }
+.vt-play { position: absolute; left: 50%; top: 50%; width: 38px; height: 38px; translate: -50% -50%; border-radius: 50%; background: rgba(34, 29, 26, .55); box-shadow: inset 0 0 0 2px rgba(246, 240, 228, .8); }
+.vt-play::after { content: ""; position: absolute; left: 15px; top: 11px; border-left: 12px solid var(--trav-2); border-top: 8px solid transparent; border-bottom: 8px solid transparent; }
+.vt-vid i { position: absolute; right: 6px; bottom: 6px; font-style: normal; font: 600 .74rem 'Outfit', sans-serif; color: #fff; background: rgba(34, 29, 26, .7); padding: 1px 6px; border-radius: 6px; }
+.vt-postar { margin-top: 6px; min-height: 52px; font-size: 1rem; }
+.vt-redes { display: flex; justify-content: center; gap: 14px; margin: 10px 0 2px; }
+.vt-redes button { width: 52px; height: 52px; border-radius: 12px; border: 1px solid var(--bronze-cl); background: var(--trav-2); color: var(--noite); display: grid; place-items: center; cursor: pointer; }
+.vt-redes svg { width: 26px; height: 26px; }
+.vt-grande { width: 100%; max-height: 60vh; object-fit: contain; border-radius: 10px; background: var(--tinta); display: block; }
+.px-previa { margin: 10px 0; display: grid; place-items: center; min-height: 120px; background: var(--pedra-2); border-radius: 10px; padding: 8px; }
+.px-previa img, .px-previa video { max-width: 100%; max-height: 44vh; border-radius: 6px; box-shadow: 0 6px 14px -8px rgba(34, 29, 26, .6); }
+.midia-bts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.midia-bts .bt { padding: 0 4px; gap: 4px; font-size: .8rem; }
+.esc-lista { display: grid; gap: 6px; max-height: 50vh; overflow-y: auto; }
+.esc-cli { justify-content: flex-start; }
+
+/* barra de baixo nova: 5 abas fixas */
+.pilula { gap: 0; padding: 5px; left: 12px; right: 12px; translate: none; justify-content: space-between; max-width: 460px; margin: 0 auto; }
+.pilula a { flex: 1; text-align: center; padding: 11px 4px; font-size: .74rem; letter-spacing: .05em; }
+.pilula .mais-um { flex: none; width: 52px; height: 52px; margin: -14px 4px 0; font-size: 1.9rem; }
+@media (max-width: 360px) { .pilula a { font-size: .66rem; letter-spacing: .02em; padding: 11px 2px; } .pilula .mais-um { width: 48px; height: 48px; } }
+
+/* ===== animações: só transform e opacity, curtas, desligadas para quem pede menos movimento ===== */
+@keyframes j-entra-frente { from { opacity: 0; transform: translateX(22px); } to { opacity: 1; transform: none; } }
+@keyframes j-entra-tras { from { opacity: 0; transform: translateX(-22px); } to { opacity: 1; transform: none; } }
+@keyframes j-sobe { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes j-veu { from { opacity: 0; } to { opacity: 1; } }
+@keyframes j-folha { from { transform: translateY(40px); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes j-tic { from { opacity: .3; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+@keyframes j-arco { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: none; } }
+@keyframes j-selo { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.8); } 18% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.04); } }
+@keyframes j-gira { from { transform: rotate(-90deg); } to { transform: rotate(270deg); } }
+@media (prefers-reduced-motion: no-preference) {
+  #tela.anima[data-dir="frente"] { animation: j-entra-frente .26s cubic-bezier(.2, .8, .2, 1) both; }
+  #tela.anima[data-dir="tras"] { animation: j-entra-tras .26s cubic-bezier(.2, .8, .2, 1) both; }
+  #tela.anima .cartao, #tela.anima .agora, #tela.anima .aviso-linha, #tela.anima .lista-mais a, #tela.anima .vt-par, #tela.anima .vt-vid { animation: j-sobe .3s cubic-bezier(.2, .8, .2, 1) both; }
+  #tela.anima > :nth-child(2) { animation-delay: .03s; } #tela.anima > :nth-child(3) { animation-delay: .06s; } #tela.anima > :nth-child(4) { animation-delay: .09s; } #tela.anima > :nth-child(5) { animation-delay: .12s; } #tela.anima > :nth-child(n+6) { animation-delay: .15s; }
+  .lista-mais a:nth-child(2) { animation-delay: .02s; } .lista-mais a:nth-child(3) { animation-delay: .04s; } .lista-mais a:nth-child(4) { animation-delay: .06s; } .lista-mais a:nth-child(n+5) { animation-delay: .08s; }
+  .relogio .arco { transform-box: view-box; transform-origin: 160px 160px; animation: j-arco .32s cubic-bezier(.2, .8, .2, 1) both; }
+  .veu { animation: j-veu .2s ease both; }
+  .veu .folha { animation: j-folha .26s cubic-bezier(.2, .8, .2, 1) both; }
+  .veu.saindo { opacity: 0; transition: opacity .17s ease; } .veu.saindo .folha { transform: translateY(30px); transition: transform .17s ease; }
+  .bt, .pilula a, .dias button, .horarios button, .chips button, .servicos button, .vt-foto, .vt-vid, .vt-redes button, .lista-mais a, .hora, .bt-ia { transition: transform .12s ease, opacity .12s ease; }
+  .bt:active, .pilula a:active, .dias button:active, .horarios button:active, .chips button:active, .servicos button:active, .vt-foto:active, .vt-vid:active, .vt-redes button:active, .bt-ia:active { transform: scale(.95); }
+  .lista-mais a:active, .hora:active { transform: scale(.985); }
+  .pilula .mais-um:active { transform: scale(.9) rotate(45deg); }
+  .agora-prox b i.tic { animation: j-tic .25s ease-out; }
+  .toast { animation: j-sobe .22s ease both; }
+}
+.selado { position: fixed; left: 50%; top: 42%; z-index: 80; pointer-events: none; display: grid; justify-items: center; gap: 6px; padding: 18px 26px; border-radius: 16px; background: rgba(246, 240, 228, .96); border: 1px solid var(--bronze-cl); box-shadow: 0 18px 40px -18px rgba(34, 29, 26, .7); animation: j-selo .95s ease both; }
+.selado svg { width: 76px; height: 76px; stroke: none; }
+.sl-anel { fill: none; stroke: var(--noite); stroke-width: 5; stroke-dasharray: 189; stroke-dashoffset: 189; transform-origin: 40px 40px; transform: rotate(-90deg); animation: j-anel .35s .05s cubic-bezier(.4, 0, .2, 1) forwards; }
+.sl-ok { fill: none; stroke: var(--patina); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 40; stroke-dashoffset: 40; animation: j-ok .22s .32s ease-out forwards; }
+@keyframes j-anel { to { stroke-dashoffset: 0; } } @keyframes j-ok { to { stroke-dashoffset: 0; } }
+.selado b { font: 600 1rem var(--romana); letter-spacing: .1em; text-transform: uppercase; color: var(--tinta); }
+@media (prefers-reduced-motion: reduce) { .selado { display: none; } }
+#tela:focus, #tela:focus-visible { outline: none; }
+.demo-topo { flex-wrap: wrap; gap: 6px 10px; padding: 6px 10px; }
+html, body { overflow-x: clip; } /* app de celular: nada arrasta a tela para o lado (a faixa dos dias rola dentro dela) */
+.agora-anel { width: 104px; height: 104px; }
+.agora-anel > span { inset: 16px; }
+.agora-anel > span small { font-size: .5rem; letter-spacing: .08em; }
+.agora-anel > span b { font-size: 1.45rem; margin: 1px 0; }
+.agora-corpo { grid-template-columns: minmax(0, 1fr) 104px; }
+.vt-url { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+.agora-anel > span small:first-child { display: none; } /* "faltam" vai no rótulo de leitura (aria-label); dentro do anel fica só o número e "min" */
+@media (max-width: 380px) { .agora-bts .bt svg { display: none; } .agora-bts .bt { font-size: .76rem; } }
+
+/* boas-vindas da atualização: 3 partes que deslizam */
+.folha.folha-bv { padding: 18px 0 calc(16px + env(safe-area-inset-bottom)); max-height: 92vh; display: flex; flex-direction: column; }
+.bv { display: flex; flex-direction: column; min-height: 0; }
+.bv-trilho { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; outline: none; }
+.bv-trilho::-webkit-scrollbar { display: none; }
+.bv-parte { flex: 0 0 100%; scroll-snap-align: start; padding: 0 20px; box-sizing: border-box; max-height: calc(92vh - 110px); overflow-y: auto; }
+.bv-parte h2 { font: 600 1.2rem/1.3 var(--romana); letter-spacing: .03em; margin: 6px 0 8px; }
+.bv-logo { display: block; width: 150px; height: auto; margin: 0 auto 6px; }
+.bv-calma { margin: 14px 0 4px; padding: 10px 12px; border-left: 3px solid var(--patina); background: var(--trav-2); border-radius: 0 8px 8px 0; font-weight: 600; color: var(--tinta); }
+.bv-pe { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px 0; border-top: 1px solid var(--pedra); margin-top: 10px; }
+.bv-pontos { display: flex; gap: 6px; } .bv-pontos i { width: 8px; height: 8px; border-radius: 50%; background: var(--pedra-esc); transition: transform .2s ease, background .2s ease; }
+.bv-pontos i.on { background: var(--noite); transform: scale(1.35); }
+.bv-pe .bt { min-width: 140px; }
+@media (prefers-reduced-motion: no-preference) {
+  .folha-bv .bv-logo { animation: j-moeda .5s cubic-bezier(.2, .8, .2, 1) both; }
+  .folha-bv .novidades li { animation: j-sobe .3s cubic-bezier(.2, .8, .2, 1) both; }
+  .folha-bv .novidades li:nth-child(2) { animation-delay: .05s; } .folha-bv .novidades li:nth-child(3) { animation-delay: .1s; } .folha-bv .novidades li:nth-child(4) { animation-delay: .15s; } .folha-bv .novidades li:nth-child(5) { animation-delay: .2s; }
+}
+@keyframes j-moeda { from { opacity: 0; transform: rotate(-25deg) scale(.7); } to { opacity: 1; transform: none; } }

@@ -6,40 +6,39 @@
 <script src="../../../js/idioma.js?v=18"></script>
 <script src="../../../js/campos-livres.js?v=3" defer></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Veltria Agenda Essencial</title>
+<title>Jano · agenda e atendimento</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#242d46">
+<meta name="theme-color" content="#e6dac6">
 <link rel="icon" href="icone-192.png" type="image/png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icone-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Meu Relógio">
+<meta name="apple-mobile-web-app-title" content="Jano">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilo.css?v=14">
+<link rel="stylesheet" href="jano.css?v=4">
 <script>try{var d=JSON.parse(localStorage.getItem("veltria-agenda-essencial-v3")||"null");if(d&&d.tema)document.documentElement.dataset.tema=d.tema}catch(e){}</script>
-<script src="../base/versoes.js?v=49"></script>
+<script src="../base/versoes.js?v=50"></script>
 <script src="../base/conta-nuvem.js?v=61"></script>
-<script src="../base/ver-web.js?v=2"></script>
 </head>
 <body>
-<div class="demo-topo"><a href="../../../veltria-agenda.html">Voltar ao site</a><button type="button" id="recomecar">Recomeçar</button><a href="index.html?celular=1">Ver no celular</a></div>
+<div class="demo-topo"><a href="../../../jano.html">Voltar ao site</a><button type="button" id="recomecar">Recomeçar</button><a href="index.html?celular=1">Moldura de celular</a></div>
 <header class="topo">
   <a class="quem" href="#config" aria-label="Sua marca no app (trocar foto, nome e cor)"><span class="ini" id="iniciais" aria-hidden="true">LS</span><div><b id="nome-studio">Studio Lia Nails</b><small id="nome-pro">Lia Santos · manicure e nail designer</small></div></a>
-  <button type="button" class="bt-ia" data-ir="ia" aria-label="Assistente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M18 15c.3 1.7 1 2.4 2.7 2.7-1.7.3-2.4 1-2.7 2.7-.3-1.7-1-2.4-2.7-2.7 1.7-.3 2.4-1 2.7-2.7z"/></svg></button>
+  <button type="button" class="bt-ia" data-ir="ia" aria-label="Assistente do Jano"><img src="../../../img/logos/jano/jano-simbolo-96.webp" alt="" width="40" height="40"></button>
 </header>
 <main id="tela" tabindex="-1"></main>
 <nav class="pilula" aria-label="Partes do app">
-  <a href="#dia" data-aba="dia">Dia</a>
+  <a href="#dia" data-aba="dia">Hoje</a>
   <a href="#clientes" data-aba="clientes">Clientes</a>
   <a href="#novo" data-aba="novo" class="mais-um" aria-label="Novo horário">+</a>
-  <a href="#link" data-aba="link">Link</a>
-  <a href="#fimdomes" data-aba="fimdomes" class="aba-mes" hidden>Fim do mês</a>
+  <a href="#link" data-aba="link">Vitrine</a>
   <a href="#mais" data-aba="mais">Mais</a>
 </nav>
 <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
-<script type="module" src="app.js?v=23"></script>
+<script type="module" src="app.js?v=27"></script>
 <script src="../base/camada.js?v=22" defer></script>
 </body>
 </html>

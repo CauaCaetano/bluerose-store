@@ -122,8 +122,8 @@
   },
   {
    "id": "agenda",
-   "nome": "Veltria Agenda",
-   "pagina": "veltria-agenda.html",
+   "nome": "Jano",
+   "pagina": "jano.html",
    "ramo": "Agenda e atendimento",
    "para": "Para salões, estética e barbearias, no app de celular Essencial.",
    "mensal": "a partir de R$ 49",
@@ -858,12 +858,12 @@
    ]
   },
   "sis-agenda": {
-   "nome": "Veltria Agenda",
+   "nome": "Jano",
    "sistema": "agenda",
-   "fala": "Esta é a página do Veltria Agenda. Quer ver como ele funciona?",
+   "fala": "Esta é a página do Jano. Quer ver como ele funciona?",
    "perguntas": [
     {
-     "p": "Para quem é o Veltria Agenda?",
+     "p": "Para quem é o Jano?",
      "e": "explaining",
      "r": [
       "Para salões, estética, barbearias e clínicas. É o sistema de agenda e atendimento."
@@ -876,7 +876,7 @@
      ]
     },
     {
-     "p": "Quanto custa o Veltria Agenda?",
+     "p": "Quanto custa o Jano?",
      "e": "explaining",
      "r": [
       "É vendido na versão Essencial: R$ 49 por mês (app de celular para quem atende sozinha). Sem entrada e sem fidelidade."
@@ -884,12 +884,12 @@
      "k": [
       [
        "Pague aqui",
-       "veltria-agenda.html#precos"
+       "jano.html#precos"
       ]
      ]
     },
     {
-     "p": "Como testo o Veltria Agenda?",
+     "p": "Como testo o Jano?",
      "e": "idea",
      "r": [
       "Abra a demonstração agora, sem cadastro. Se gostar, assine pelo botão Pague aqui, no Pix ou no cartão."
@@ -901,7 +901,7 @@
       ],
       [
        "Pague aqui",
-       "veltria-agenda.html#precos"
+       "jano.html#precos"
       ]
      ]
     },

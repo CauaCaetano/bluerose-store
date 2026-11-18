@@ -33,9 +33,9 @@
 
   // textos dos sistemas (aguardam a aprovação do dono em cada aba): benefício da página de cada sistema, preço e o link
   var SIS = {
-    agenda: { pag: 'veltria-agenda.html', nome: 'Veltria Agenda', preco: 'R$ 49/mês (ou R$ 470/ano)', ramo: 'atende com hora marcada',
+    agenda: { pag: 'jano.html', nome: 'Jano', preco: 'R$ 49/mês (ou R$ 470/ano)', ramo: 'atende com hora marcada',
       dor: 'Quem marca horário pelo WhatsApp passa o dia respondendo "tem horário?" e ainda perde dinheiro com cliente que falta.',
-      ganho: 'No Veltria Agenda a cliente marca sozinha pelo seu link, o sinal no Pix segura o horário e a confirmação sai pronta. Menos falta, menos horário vazio e menos tempo no WhatsApp.',
+      ganho: 'No Jano a cliente marca sozinha pelo seu link, o sinal no Pix segura o horário e a confirmação sai pronta. Menos falta, menos horário vazio e menos tempo no WhatsApp.',
       conta: 'Uma falta por semana num serviço de R$ 60 são uns R$ 240 por mês. Evitar só uma já paga o mês do sistema.' },
     financeiro: { pag: 'arca.html', nome: 'Arca', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'tem uma empresa',
       dor: 'Na empresa, o dinheiro do imposto e da folha se mistura com o do dia a dia, cliente atrasa sem ninguém cobrar e o extrato do banco nunca bate com a planilha.',

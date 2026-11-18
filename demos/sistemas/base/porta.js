@@ -148,10 +148,11 @@ function telaManutencao(podeEntrar) {
 // 07/11/2026: CRM, Oficina e Farmácia saíram da venda em todas as versões; 10/11/2026: Jurídico também
 const SAIU = ['crm', 'oficina', 'farmacia', 'juridico'].includes(V.categoria);
 const FORA = !MANUTENCAO && (SAIU || V.versao === 'completo' || V.versao === 'avancado');
+const ESS = (window.VELTRIA_VERSOES || {})[V.categoria + 'essencial']; // 18/11/2026: o Agenda Essencial virou o Jano (marca própria)
 function telaFora(podeEntrar) {
   return new Promise((ok) => {
-    const f = tela(`<h1>${esc(V.nome)} saiu da venda</h1><p class="p-sub">${SAIU ? `O ${esc(V.nomeCategoria)} não está mais à venda. Quem já tem acesso continua entrando normalmente.` : `Agora a ${esc(V.nomeCategoria)} é vendida só na versão Essencial, o app de celular. Quem já tem acesso a esta versão continua entrando normalmente.`}</p>
-      <a class="p-bt" style="display:grid;place-items:center;text-decoration:none" href="${SAIU ? `${RAIZ}sistemas.html` : `${RAIZ}app/${V.categoria}essencial/`}">${SAIU ? 'Ver os sistemas à venda' : `Conhecer o ${esc(V.nomeCategoria)} Essencial`}</a>
+    const f = tela(`<h1>${esc(V.nome)} saiu da venda</h1><p class="p-sub">${SAIU ? `O ${esc(V.nomeCategoria)} não está mais à venda. Quem já tem acesso continua entrando normalmente.` : `Agora a ${esc(V.nomeCategoria)} é vendida só ${ESS && ESS.marcaPropria ? `como ${esc(ESS.nome)}` : 'na versão Essencial'}, o app de celular. Quem já tem acesso a esta versão continua entrando normalmente.`}</p>
+      <a class="p-bt" style="display:grid;place-items:center;text-decoration:none" href="${SAIU ? `${RAIZ}sistemas.html` : `${RAIZ}app/${V.categoria}essencial/`}">${SAIU ? 'Ver os sistemas à venda' : `Conhecer o ${esc(ESS && ESS.marcaPropria ? ESS.nome : V.nomeCategoria + ' Essencial')}`}</a>
       ${podeEntrar ? '<p class="p-ou">Já tem acesso a esta versão?</p><button type="button" class="p-bt p-bt-2" data-entrar>Entrar</button>' : ''}
       <p class="p-links"><a href="${RAIZ}${V.pagina}">Voltar ao site</a></p>`);
     const b = f.querySelector('[data-entrar]'); if (b) b.onclick = () => ok();

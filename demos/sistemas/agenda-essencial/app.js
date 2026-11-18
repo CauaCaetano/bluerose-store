@@ -1,10 +1,11 @@
-// Veltria Agenda Essencial · app de celular de quem atende com hora marcada (beleza, barbearia, consultório, aulas,
+// Jano · agenda e atendimento (ex-Veltria Agenda Essencial; nome trocado em 18/11/2026: a CHAVE, os dados e o id agendaessencial continuam os mesmos) · app de celular de quem atende com hora marcada (beleza, barbearia, consultório, aulas,
 // pet, serviços em casa...). O tipo de negócio troca a lista de serviços; o resto é igual para todos.
 // O dia de trabalho num relógio (8h às 20h, uma volta), horários com sinal por PIX, confirmação no WhatsApp,
 // link para a cliente marcar sozinha, lista de espera para encaixe, fichas com retorno sugerido, caixa,
 // assistente, painel do dono, configurações e assinatura. Dados de exemplo neste aparelho (?novo recomeça).
 
-const CHAVE = 'veltria-agenda-essencial-v3';
+import * as M from './midia.js?v=1';
+const CHAVE = 'veltria-agenda-essencial-v3'; // NÃO MUDAR: chave dos dados da assinante (igual em base/versoes.js)
 const din = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const t = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const sa = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -72,9 +73,9 @@ function secMsgs() {
     <p class="mini" style="margin:0 0 6px">Pode usar: ${m.vars.map((v) => `<button type="button" class="msg-var" data-mvar="${k}" data-v="${v}" title="${VAR_NOME[v]}">{${v}}</button>`).join(' ')}</p>
     <p class="mini msg-previa" data-mprev="${k}"><b>Como chega:</b> ${t(msg(k, ex))}</p></div>`).join('')}`;
 }
-const TEMAS = [['rose', 'Rosé', '#242d46', '#c69c9a'], ['salvia', 'Sálvia', '#2c4639', '#a9bf9c'], ['terracota', 'Terracota', '#3a2a24', '#c98a68'], ['oceano', 'Oceano', '#173b45', '#86b8bd'], ['ameixa', 'Ameixa', '#3a2433', '#d29ab3'], ['grafite', 'Grafite e ouro', '#27292e', '#cdaa6b']];
+const TEMAS = [['rose', 'Mínio e bronze', '#a2402e', '#9a7b4f'], ['salvia', 'Sálvia', '#3d5c4d', '#8ea883'], ['terracota', 'Terracota', '#8f4a2c', '#c98a68'], ['oceano', 'Oceano', '#23505c', '#86b8bd'], ['ameixa', 'Ameixa', '#6a3a58', '#c992ab'], ['grafite', 'Grafite e ouro', '#393c43', '#b8955a']];
 const temaAtual = () => TEMAS.find((x) => x[0] === db.tema) || TEMAS[0];
-function aplicaTema() { const m = temaAtual(); document.documentElement.dataset.tema = m[0]; const mt = document.querySelector('meta[name="theme-color"]'); if (mt) mt.content = m[2]; }
+function aplicaTema() { const m = temaAtual(); document.documentElement.dataset.tema = m[0]; const mt = document.querySelector('meta[name="theme-color"]'); if (mt) mt.content = '#e6dac6'; } // topo claro de pedra (jano.css)
 const primeiroNome = () => String(db.pro || '').trim().split(' ')[0];
 const saudacao = () => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; };
 // foto ou logo da pessoa: quadrado de 192 px em JPEG, pequeno para caber na nuvem junto com a agenda
@@ -89,28 +90,45 @@ function lerFoto(arq) {
   });
 }
 // novidades da atualização: aparece uma vez em cada aparelho; a marca fica fora dos dados da agenda
-const NOVIDADES = 'agenda-essencial-novidades', VISTA = '2026-11-09';
+const NOVIDADES = 'agenda-essencial-novidades', VISTA = '2026-11-18';
 function novidades() {
   if (window !== window.top || document.querySelector('.trava, .veu')) return;
   try { if (localStorage.getItem(NOVIDADES) === VISTA) return; } catch { return; }
   const visto = () => { try { localStorage.setItem(NOVIDADES, VISTA); } catch { /* sem espaço: mostra de novo na próxima */ } };
-  if (!db.clientes.length && !db.ags.length) { visto(); return; } // conta nova: não há o que contar de novidade
-  visto(); // 09/11: marca ao mostrar: aparece uma vez só, mesmo se o app for fechado com o aviso aberto
-  folha(`<h2>Pagamento no fim do mês</h2><p class="sub">Para quem não paga no dia. Sua agenda, seus clientes e os valores continuam do mesmo jeito.</p>
-    <ul class="novidades"><li><b>Escolha "No fim do mês" no cliente</b><span>Em Clientes › Editar. Ou marque todos de uma vez em Mais › Configurações › Pagamento dos clientes.</span></li>
-    <li><b>Os atendimentos somam sozinhos</b><span>Ao tocar em Atendido, o valor vai para a conta do mês, sem pedir pagamento no dia.</span></li>
-    <li><b>Tela Fim do mês</b><span>Mostra quem falta pagar, marca o que foi pago (até em partes) e cobra no WhatsApp com a lista do mês.</span></li></ul>
-    <div style="display:grid;gap:8px"><a class="bt cheio largo" href="#fimdomes" data-fecha>Ver o Fim do mês</a><button type="button" class="bt largo" data-fecha>Ver depois</button></div>`, (f) => {
-    const veu = f.parentElement;
-    veu.addEventListener('click', (e) => { if (e.target === veu || e.target.closest('[data-fecha]')) visto(); });
-    veu.addEventListener('keydown', (e) => { if (e.key === 'Escape') visto(); });
+  if (!db.clientes.length && !db.ags.length) { visto(); return; } // conta nova, do zero: só a apresentação normal
+  visto(); // marca ao mostrar: aparece uma vez só por aparelho, mesmo se o app for fechado com a tela aberta
+  boasVindas();
+}
+// boas-vindas da atualização (18/11/2026): 3 partes que deslizam; "Ver de novo" fica no Mais
+function boasVindas() {
+  const it = (t1, t2) => `<li><b>${t1}</b><span>${t2}</span></li>`;
+  folha(`<div class="bv" aria-roledescription="apresentação">
+    <div class="bv-trilho" tabindex="0">
+      <section class="bv-parte" aria-label="1 de 3"><img class="bv-logo" src="../../../img/logos/jano/jano-completa-480.webp" alt="Jano · agenda e atendimento" width="200" height="233">
+        <h2>O Veltria Agenda agora se chama Jano</h2><p class="sub">Jano é o deus romano dos começos, de quem vem a palavra janeiro. Tem duas faces: uma olha o histórico de cada cliente, a outra os próximos horários.</p>
+        <p class="bv-calma">Seus clientes, horários e histórico continuam todos aqui.</p></section>
+      <section class="bv-parte" aria-label="2 de 3"><h2>A cara nova</h2><p class="sub">O dia virou um relógio de sol e a barra de baixo ficou com cinco lugares:</p>
+        <ul class="novidades">${it('Hoje', 'o relógio do dia, o atendimento de agora e o próximo cliente')}${it('Clientes', 'a ficha de cada um: o que já fez e o que vai fazer')}${it('+ Novo horário', 'no botão de bronze do meio')}${it('Vitrine', 'seu link, os pedidos, as fotos e os vídeos')}${it('Mais', 'Fim do mês, Resumo, Caixa, Configurações')}</ul>
+        <p class="mini">A cor que você escolheu continua a mesma.</p></section>
+      <section class="bv-parte" aria-label="3 de 3"><h2>Funções novas</h2>
+        <ul class="novidades">${it('Agora', 'os minutos que faltam do atendimento e a contagem para o próximo cliente')}${it('Antes e depois', 'fotos no horário do cliente, guardadas no seu celular')}${it('Vídeos de até 30 s', 'grave o resultado do atendimento')}${it('Postar nas redes', 'imagem pronta e legenda copiada para Instagram, WhatsApp ou TikTok')}${it('Aniversários e lembretes de amanhã', 'mensagem pronta no WhatsApp, um toque em cada')}</ul>
+        <p class="bv-calma">Seus clientes, horários e histórico continuam todos aqui.</p></section>
+    </div>
+    <div class="bv-pe"><div class="bv-pontos" aria-hidden="true"><i class="on"></i><i></i><i></i></div><button type="button" class="bt cheio" data-bv-ir>Próximo</button></div>
+    </div>`, (f, fecha) => {
+    f.classList.add('folha-bv');
+    const tr = f.querySelector('.bv-trilho'), bt = f.querySelector('[data-bv-ir]'), pts = f.querySelectorAll('.bv-pontos i');
+    const atual = () => Math.round(tr.scrollLeft / Math.max(1, tr.clientWidth));
+    const marca = () => { const i = atual(); pts.forEach((p, k) => p.classList.toggle('on', k === i)); bt.textContent = i >= 2 ? 'Começar' : 'Próximo'; };
+    tr.addEventListener('scroll', () => requestAnimationFrame(marca), { passive: true });
+    bt.addEventListener('click', () => { const i = atual(); if (i >= 2) fecha(); else tr.scrollTo({ left: (i + 1) * tr.clientWidth, behavior: calmo() ? 'auto' : 'smooth' }); });
   });
 }
 const zap = (tel, m) => `https://wa.me/55${String(tel).replace(/\D/g, '')}?text=${encodeURIComponent(m)}`;
 const $ = (s) => document.querySelector(s);
 
 // tipos de negócio: cada um preenche os 6 serviços (nome, minutos, preço, cor, dias para voltar)
-const COR = ['#c69c9a', '#8c99b0', '#9a6d6b', '#323d5c', '#4f7d68', '#c9a46a'];
+const COR = ['#a2402e', '#4a5d73', '#9a7b4f', '#6b4f6a', '#5c7a6e', '#c08a3e']; // 18/11: mínio, ardósia, bronze, ameixa-terra, pátina, ocre (só serviços novos; os já salvos mantêm a cor)
 const mod = (nome, l) => ({ nome, servicos: l.map(([n, min, preco, ret], i) => ({ id: 's' + (i + 1), nome: n, min, preco, cor: COR[i], retorno: ret })) });
 const MODELOS = {
   geral: mod('Atendimento geral', [['Atendimento 30 min', 30, 80, 30], ['Atendimento 1 hora', 60, 140, 30], ['Avaliação', 45, 120, 60], ['Sessão longa', 120, 260, 30], ['Retorno', 40, 90, 21], ['Visita em domicílio', 60, 160, 30]]),
@@ -229,7 +247,7 @@ function toast(m) { const a = document.createElement('div'); a.className = 'toas
 function folha(html, liga) {
   const v = document.createElement('div'); v.className = 'veu'; v.innerHTML = `<div class="folha" role="dialog" aria-modal="true">${html}</div>`;
   const antes = document.activeElement; document.body.append(v);
-  const fecha = () => { v.remove(); antes?.focus?.(); };
+  const fecha = () => { if (v.classList.contains('saindo')) return; v.classList.add('saindo'); setTimeout(() => v.remove(), calmo() ? 0 : 170); antes?.focus?.(); };
   v.addEventListener('click', (e) => { if (e.target === v || e.target.closest('[data-fecha]')) fecha(); });
   v.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecha(); });
   setTimeout(() => (v.querySelector('input, select') || v.querySelector('button'))?.focus(), 40);
@@ -245,10 +263,11 @@ const pt = (r, a) => [160 + r * Math.cos(a), 160 + r * Math.sin(a)].map((n) => n
 function fatia(h1, h2, r1, r2) { const a1 = ang(h1), a2 = ang(h2 - 0.001), g = h2 - h1 > 6 ? 1 : 0; const [x1, y1] = pt(r2, a1), [x2, y2] = pt(r2, a2), [x3, y3] = pt(r1, a2), [x4, y4] = pt(r1, a1); return `M${x1} ${y1}A${r2} ${r2} 0 ${g} 1 ${x2} ${y2}L${x3} ${y3}A${r1} ${r1} 0 ${g} 0 ${x4} ${y4}Z`; }
 function relogio(d) {
   const l = doDia(d), agora = new Date(), hA = agora.getHours() + agora.getMinutes() / 60, prox = l.find((a) => d > 0 || (d === 0 && a.ini >= hA - 0.25 && a.st !== 'feito')) || null, prev = l.reduce((s, a) => s + preco(a), 0);
-  const marcas = Array.from({ length: 12 }, (_, i) => { const h = db.abre + i, [x, y] = pt(146, ang(h)), [a1, b1] = pt(100, ang(h)), [a2, b2] = pt(106, ang(h)); return `<line x1="${a1}" y1="${b1}" x2="${a2}" y2="${b2}" stroke="#d6c5b8" stroke-width="2"/><text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Outfit" font-size="12" fill="#8a8d99">${h}h</text>`; }).join('');
-  const arcos = l.map((a) => `<path class="arco" data-ag="${a.id}" d="${fatia(a.ini, fim(a), 108, 136)}" fill="${serv(a.serv).cor}" opacity="${a.st === 'faltou' ? 0.3 : a.st === 'feito' ? 0.55 : 1}" stroke="#f5eee7" stroke-width="2"><title>${hh(a.ini)} ${t(cli(a.cli).nome)} · ${t(serv(a.serv).nome)}</title></path>`).join('');
-  const ponteiro = d === 0 && hA >= db.abre && hA <= db.fecha ? (() => { const [x, y] = pt(140, ang(hA)), [x0, y0] = pt(98, ang(hA)); return `<line x1="${x0}" y1="${y0}" x2="${x}" y2="${y}" style="stroke:var(--noite)" stroke-width="3" stroke-linecap="round"/><circle cx="${x0}" cy="${y0}" r="4" style="fill:var(--noite)"/>`; })() : '';
-  return `<div class="relogio"><svg viewBox="0 0 320 320" role="img" aria-label="Relógio do dia com ${l.length} atendimentos"><circle cx="160" cy="160" r="152" fill="#fbf7f3" stroke="#e6dbd1"/><circle cx="160" cy="160" r="122" fill="none" stroke="#ece2d8" stroke-width="28"/>${marcas}${arcos}${ponteiro}</svg>
+  const marcas = Array.from({ length: 12 }, (_, i) => { const h = db.abre + i, [x, y] = pt(146, ang(h)), [a1, b1] = pt(100, ang(h)), [a2, b2] = pt(106, ang(h)); return `<line x1="${a1}" y1="${b1}" x2="${a2}" y2="${b2}" class="rl-marca"/><text class="rl-hora" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central">${h}h</text>`; }).join('');
+  const linhas = Array.from({ length: 12 }, (_, i) => { const [a1, b1] = pt(58, ang(db.abre + i)), [a2, b2] = pt(94, ang(db.abre + i)); return `<line class="rl-linha" x1="${a1}" y1="${b1}" x2="${a2}" y2="${b2}"/>`; }).join('');
+  const arcos = l.map((a) => `<path class="arco" data-ag="${a.id}" d="${fatia(a.ini, fim(a), 108, 136)}" fill="${serv(a.serv).cor}" opacity="${a.st === 'faltou' ? 0.3 : a.st === 'feito' ? 0.55 : 1}" stroke-width="2"><title>${hh(a.ini)} ${t(cli(a.cli).nome)} · ${t(serv(a.serv).nome)}</title></path>`).join('');
+  const ponteiro = d === 0 && hA >= db.abre && hA <= db.fecha ? (() => { const [x, y] = pt(140, ang(hA)), [x0, y0] = pt(98, ang(hA)); const a = ang(hA), b = (r, d) => pt(r, a + d), [x1, y1] = b(98, 0.05), [x2, y2] = b(98, -0.05); return `<path class="rl-gnomon" d="M${x1} ${y1}L${x} ${y}L${x2} ${y2}Z"/><circle class="rl-gnomon-c" cx="${x0}" cy="${y0}" r="4.5"/>`; })() : '';
+  return `<div class="relogio"><svg viewBox="0 0 320 320" role="img" aria-label="Relógio do dia com ${l.length} atendimentos"><circle class="rl-face" cx="160" cy="160" r="152"/><circle class="rl-aro" cx="160" cy="160" r="146"/><circle class="rl-pista" cx="160" cy="160" r="122"/><circle class="rl-miolo" cx="160" cy="160" r="98"/>${linhas}${marcas}${arcos}${ponteiro}</svg>
     <div class="centro">${prox ? `<small>próxima</small><b>${hh(prox.ini)}</b><span>${t(cli(prox.cli).nome.split(' ')[0])} · ${t(serv(prox.serv).nome)}</span>` : l.length ? '<small>dia encerrado</small><b>✓</b>' : '<small>dia livre</small><b>—</b>'}<span style="margin-top:4px">${l.length} horário(s) · ${din(prev)}</span></div></div>`;
 }
 
@@ -257,7 +276,7 @@ const T = {
   dia() {
     const l = doDia(dia), usados = [...new Set(l.map((a) => a.serv))], hj = doDia(0), falta = hj.filter((a) => a.st === 'marcado' || a.st === 'confirmado');
     const ola = `<section class="ola" aria-label="Resumo de hoje"><p class="ola-t">${saudacao()}${primeiroNome() ? `, ${t(primeiroNome())}` : ''}</p><p class="ola-s">${hj.length ? `Hoje: ${hj.length} ${hj.length === 1 ? 'horário' : 'horários'} · ${din(hj.reduce((s, a) => s + preco(a), 0))}${falta.length ? ` · faltam ${falta.length}` : ' · tudo atendido'}` : 'Hoje a agenda está livre.'}${db.pedidos.length ? ` · <a href="#link">${db.pedidos.length} ${db.pedidos.length === 1 ? 'pedido novo' : 'pedidos novos'}</a>` : ''}</p>${olaFimMes()}</section>`;
-    return `${ola}<div class="dias" role="group" aria-label="Escolher o dia">${Array.from({ length: 8 }, (_, i) => i - 1).map((o) => `<button type="button" data-dia="${o}" aria-pressed="${o === dia}"><small>${data(o).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')}</small><b>${data(o).getDate()}</b>${doDia(o).length ? '<i></i>' : ''}</button>`).join('')}</div>
+    return `${ola}${dia === 0 ? cartaoAgora() : ''}${dia === 0 ? avisosHoje() : ''}<div class="dias" role="group" aria-label="Escolher o dia">${Array.from({ length: 8 }, (_, i) => i - 1).map((o) => `<button type="button" data-dia="${o}" aria-pressed="${o === dia}"><small>${data(o).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')}</small><b>${data(o).getDate()}</b>${doDia(o).length ? '<i></i>' : ''}</button>`).join('')}</div>
       <div class="ir-data"><label>Ir para outra data<input type="date" id="ir-dia" value="${iso(dia)}"></label>${dia !== 0 ? '<button type="button" class="bt pq" data-dia="0">Hoje</button>' : ''}</div>
       ${relogio(dia)}<div class="legenda-c">${usados.map((s) => `<span style="--c:${serv(s).cor}">${t(serv(s).nome)}</span>`).join('')}</div>
       <div class="tit-linha"><h2>${(Math.abs(dia) > 1 ? data(dia).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : nomeDia(dia)).replace(/^./, (x) => x.toUpperCase())}</h2><a class="bt pq" href="#resumo" data-res-dia="${dia}">Resumo do dia</a></div><div class="cartao">${l.map((a) => { const c = cli(a.cli), s = serv(a.serv); return `<div class="hora" data-ag="${a.id}" role="button" tabindex="0" style="position:relative"><span class="h">${hh(a.ini)}</span><span><b>${t(c.nome)}</b><small>${t(s.nome)} · ${s.min} min · ${din(preco(a))}${a.sinal ? ` · sinal ${din(a.sinal.valor)} ${a.sinal.pago ? 'pago' : 'pendente'}` : ''}</small></span><span class="selo ${ST[a.st][1]}">${ST[a.st][0]}</span></div>`; }).join('') || `<p class="livre">Nenhum horário neste dia. ${dia >= 0 ? `<button type="button" class="bt pq" data-novo-dia="${dia}">Marcar neste dia</button>` : ''}</p>`}</div>
@@ -287,14 +306,31 @@ const T = {
     const l = db.clientes.map((c) => ({ ...c, s: serv(c.serv), atraso: -c.ultima - serv(c.serv).retorno, marcada: db.ags.some((a) => a.cli === c.id && a.dia >= 0 && a.st !== 'cancelado') })).sort((a, b) => (b.atraso > 0 && !b.marcada) - (a.atraso > 0 && !a.marcada) || b.atraso - a.atraso);
     const chamar = l.filter((c) => c.ultima && c.atraso >= 0 && !c.marcada);
     return `<h1>Clientes</h1><p class="sub">${db.clientes.length} clientes. ${chamar.length ? `${chamar.length} já passaram do tempo de voltar e não têm horário marcado (aparecem primeiro).` : 'Todos em dia.'}</p><input type="search" id="busca-cli" class="busca" placeholder="Procurar cliente pelo nome" aria-label="Procurar cliente"><button type="button" class="bt cheio largo" data-acao="add-cliente" style="margin-bottom:12px">+ Adicionar cliente</button>
-      ${l.map((c) => `<div class="cartao" data-nome-cli="${t(sa(c.nome))}"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>${t(c.nome)}</b><small class="mini" style="display:block">${c.ultima ? `${t(c.s.nome)} há ${-c.ultima} dias · volta a cada ${c.s.retorno} dias` : 'cliente novo'}${c.valor != null ? ` · paga ${din(c.valor)}` : ''}${mensal(c) ? ' · paga no fim do mês' : ''}${c.faltas ? ` · ${c.faltas} falta(s)` : ''}</small></div>${c.marcada ? '<span class="selo ok">tem horário</span>' : !c.ultima ? '<span class="selo">novo</span>' : c.atraso >= 0 ? '<span class="selo rs">hora de chamar</span>' : `<span class="selo">em ${-c.atraso} dias</span>`}</div>
-        <div class="linha">${c.ultima && !c.marcada && c.atraso >= 0 && c.tel ? `<a class="bt pq rose" target="_blank" rel="noopener" href="${zap(c.tel, msg('retorno', { nome: c.nome.split(' ')[0], profissional: db.pro.split(' ')[0], dias: -c.ultima, servico: c.s.nome.toLowerCase(), link: LINK }))}">Chamar no WhatsApp</a>` : ''}<button type="button" class="bt pq" data-marca-cli="${c.id}">Marcar horário</button><button type="button" class="bt pq" data-edita-cli="${c.id}">Editar</button></div></div>`).join('')}`;
+      ${l.map((c) => `<div class="cartao" data-nome-cli="${t(sa(c.nome))}"><div style="display:flex;justify-content:space-between;gap:10px"><div><button type="button" class="nome-cli" data-ficha="${c.id}"><b>${t(c.nome)}</b>${niverHoje(c) ? ' <span class="selo at">aniversário hoje</span>' : ''}</button><small class="mini" style="display:block">${c.ultima ? `${t(c.s.nome)} há ${-c.ultima} dias · volta a cada ${c.s.retorno} dias` : 'cliente novo'}${c.valor != null ? ` · paga ${din(c.valor)}` : ''}${mensal(c) ? ' · paga no fim do mês' : ''}${c.faltas ? ` · ${c.faltas} falta(s)` : ''}</small></div>${c.marcada ? '<span class="selo ok">tem horário</span>' : !c.ultima ? '<span class="selo">novo</span>' : c.atraso >= 0 ? '<span class="selo rs">hora de chamar</span>' : `<span class="selo">em ${-c.atraso} dias</span>`}</div>
+        <div class="linha">${c.ultima && !c.marcada && c.atraso >= 0 && c.tel ? `<a class="bt pq rose" target="_blank" rel="noopener" href="${zap(c.tel, msg('retorno', { nome: c.nome.split(' ')[0], profissional: db.pro.split(' ')[0], dias: -c.ultima, servico: c.s.nome.toLowerCase(), link: LINK }))}">Chamar no WhatsApp</a>` : ''}<button type="button" class="bt pq" data-marca-cli="${c.id}">Marcar horário</button><button type="button" class="bt pq" data-ficha="${c.id}">Ficha</button><button type="button" class="bt pq" data-edita-cli="${c.id}">Editar</button></div></div>`).join('')}`;
   },
   link() {
-    return `<h1>Seu link de agendamento</h1><p class="sub">Coloque na bio do Instagram ou no Google. O cliente escolhe serviço e horário; você só aprova.</p>
-      <div class="linha" style="margin-bottom:14px"><button type="button" class="bt cheio" data-acao="copiar">Copiar link</button><a class="bt" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`Marque seu horário comigo por aqui: ${LINK}`)}">Mandar no WhatsApp</a></div>
+    return `<h1>Vitrine</h1><p class="sub">Seu link de agendamento, as fotos de antes e depois, os vídeos e o que postar nas redes.</p>
       ${db.pedidos.length ? `<h2>Pedidos que chegaram</h2>${db.pedidos.map((p) => `<div class="cartao"><b>${t(p.nome)}</b><small class="mini" style="display:block">${t(serv(p.serv).nome)} · ${nomeDia(p.dia)} às ${hh(p.ini)}</small><div class="linha"><button type="button" class="bt pq cheio" data-acao="aceitar" data-p="${p.id}">Aceitar</button><button type="button" class="bt pq" data-acao="recusar" data-p="${p.id}">Sugerir outro horário</button></div></div>`).join('')}` : ''}
-      <h2>O que o cliente vê</h2><div class="vitrine"><header><b>${t(db.studio)}</b><small>${t(db.pro)} · ${t(db.ramo)}</small></header><div class="corpo">${db.servicos.slice(0, 4).map((s) => `<div class="hora" style="cursor:default"><span class="h" style="font-size:.9rem">${s.min}′</span><span><b>${t(s.nome)}</b><small>${livres(1, s.min).slice(0, 3).map(hh).join(' · ')} amanhã</small></span><span>${din(s.preco)}</span></div>`).join('')}<p class="mini">Serviço acima de ${din(db.sinalAcima)} pede sinal de ${db.sinalPct}% no PIX para garantir o horário.</p></div></div>`;
+      <div class="cartao vt-link"><p class="vt-tit">${ICO.elo}Seu link de agendamento</p><div class="vt-url"><span>${t(LINK.replace(/^https:\/\//, ''))}</span><button type="button" class="bt pq cheio" data-acao="copiar">Copiar</button></div><a class="mini" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`Marque seu horário comigo por aqui: ${LINK}`)}">Mandar o link no WhatsApp</a></div>
+      <div class="tit-linha"><h2>${ICO.par}Antes e depois</h2><button type="button" class="bt pq" data-acao="novo-ad">+ Fotos</button></div>
+      <div class="vt-grade" id="vt-ad"><p class="mini">Carregando…</p></div>
+      <div class="tit-linha"><h2>${ICO.video}Vídeos <small>(até ${M.LIMITE_S} s)</small></h2><button type="button" class="bt pq" data-acao="novo-video">+ Vídeo</button></div>
+      <div class="vt-videos" id="vt-vid"><p class="mini">Carregando…</p></div>
+      <button type="button" class="bt cheio largo vt-postar" data-acao="postar">${ICO.partilha}Postar nas redes</button>
+      <div class="vt-redes"><button type="button" data-acao="postar" aria-label="Postar no Instagram">${ICO.insta}</button><button type="button" data-acao="postar" aria-label="Postar no WhatsApp">${ICO.zap}</button><button type="button" data-acao="postar" aria-label="Postar no TikTok">${ICO.tiktok}</button></div>
+      <p class="mini" style="text-align:center;margin-top:4px">Fotos e vídeos ficam guardados neste celular. Poste só com a autorização do cliente.</p>
+      <h2>O que o cliente vê no link</h2><div class="vitrine"><header><b>${t(db.studio)}</b><small>${t(db.pro)} · ${t(db.ramo)}</small></header><div class="corpo">${db.servicos.slice(0, 4).map((s) => `<div class="hora" style="cursor:default"><span class="h" style="font-size:.9rem">${s.min}′</span><span><b>${t(s.nome)}</b><small>${livres(1, s.min).slice(0, 3).map(hh).join(' · ')} amanhã</small></span><span>${din(s.preco)}</span></div>`).join('')}<p class="mini">Serviço acima de ${din(db.sinalAcima)} pede sinal de ${db.sinalPct}% no PIX para garantir o horário.</p></div></div>`;
+  },
+  aniversarios() {
+    const l = db.clientes.filter((c) => c.nasc).map((c) => ({ c, f: faltaNiver(c) })).sort((a, b) => a.f - b.f);
+    return `<a href="#mais">← Mais</a><h1>Aniversários</h1><p class="sub">${l.length ? 'Mande os parabéns no dia: o cliente lembra de quem lembrou dele.' : 'Ainda não há aniversários anotados. Anote na ficha de cada cliente (Clientes › Editar).'}</p>
+      ${l.map(({ c, f }) => `<div class="cartao niver"><div><b>${t(c.nome)}</b><small class="mini" style="display:block">${t(c.nasc)} · ${f === 0 ? '<b style="color:var(--noite)">hoje</b>' : f === 1 ? 'amanhã' : `em ${f} dias`}</small></div>${c.tel ? `<a class="bt pq ${f === 0 ? 'cheio' : ''}" target="_blank" rel="noopener" href="${zap(c.tel, `Feliz aniversário, ${c.nome.split(' ')[0]}! 🎉 Que seu novo ano seja lindo. Um abraço de ${db.pro.split(' ')[0]} (${db.studio}).`)}">Parabéns</a>` : '<span class="mini">sem WhatsApp</span>'}</div>`).join('')}`;
+  },
+  lembretes() {
+    const l = doDia(1).filter((a) => a.st === 'marcado' || a.st === 'confirmado');
+    return `<a href="#mais">← Mais</a><h1>Lembretes de amanhã</h1><p class="sub">${l.length ? `${l.length} ${l.length === 1 ? 'horário' : 'horários'} amanhã. Um toque em cada um abre o WhatsApp com a mensagem pronta.` : 'Amanhã a agenda está livre.'}</p>
+      ${l.map((a) => { const c = cli(a.cli), s = serv(a.serv); return `<div class="cartao niver"><div><b>${hh(a.ini)} · ${t(c.nome)}</b><small class="mini" style="display:block">${t(s.nome)}${a.st === 'confirmado' ? ' · já confirmou' : ''}</small></div>${c.tel ? `<a class="bt pq ${a.st === 'confirmado' ? '' : 'cheio'}" target="_blank" rel="noopener" data-lembra="${a.id}" href="${zap(c.tel, msg('confirmar', { nome: c.nome.split(' ')[0], servico: s.nome.toLowerCase(), dia: nomeDia(a.dia), hora: hh(a.ini), sinal: a.sinal && !a.sinal.pago ? `Sinal de ${din(a.sinal.valor)} no PIX ${db.pix}.` : '' }))}">Lembrar</a>` : '<span class="mini">sem WhatsApp</span>'}</div>`; }).join('')}`;
   },
   espera() {
     return `<a href="#dia">← Dia</a><h1>Lista de espera</h1><p class="sub">Quem quer um encaixe. Quando alguém desmarca, ofereça o horário por aqui.</p>${db.espera.map((e) => `<div class="cartao"><b>${t(e.nome)}</b><small class="mini" style="display:block">${t(e.quer)} · ${t(e.quando)}</small><div class="linha"><a class="bt pq rose" target="_blank" rel="noopener" href="${zap(e.tel, msg('espera', { nome: e.nome.split(' ')[0], servico: e.quer.toLowerCase() }))}">Oferecer horário</a><button type="button" class="bt pq" data-acao="tira-espera" data-e="${e.id}">Já marcou</button></div></div>`).join('') || '<p class="livre">Ninguém esperando.</p>'}<button type="button" class="bt largo" data-acao="add-espera">+ Pôr na lista</button>`;
@@ -363,8 +399,8 @@ const T = {
   },
   mais() {
     const fmx = contaMes(mesDe(0));
-    const l = [['fimdomes', 'Fim do mês', fmx.falta ? `${din(fmx.falta)} a receber de quem paga no fim do mês` : 'quem paga no fim do mês: a receber, cobrar e marcar pago'], ['resumo', 'Resumo', 'do dia, do mês e do ano'], ['ia', 'Assistente', 'pergunte da sua agenda e dos clientes'], ['caixa', 'Caixa', 'quanto entrou e o que as faltas custaram'], ['espera', 'Lista de espera', `${db.espera.length} esperando encaixe`], ['assinatura', 'Minha assinatura', estAss()], ['dono', 'Painel do dono', 'ajudante e o que ela vê'], ['config', 'Configurações', 'sua foto e cor, tipo de negócio, horário, pagamento, serviços, sinal, PIX']];
-    return `<h1>Mais</h1><div class="lista-mais">${l.map(([k, n, s]) => `<a href="#${k}"><span><b>${n}</b><small>${t(s)}</small></span><span aria-hidden="true">›</span></a>`).join('')}<a href="#mais" data-acao="menu-comum"><span><b>Planilhas e busca</b><small>importar do Excel, exportar, procurar, imprimir, instalar o app</small></span><span aria-hidden="true">›</span></a></div><p class="creditos">Agenda feita com Veltria · Blue Rose</p>`;
+    const l = [['fimdomes', 'Fim do mês', fmx.falta ? `${din(fmx.falta)} a receber de quem paga no fim do mês` : 'quem paga no fim do mês: a receber, cobrar e marcar pago'], ['lembretes', 'Lembretes de amanhã', `${doDia(1).filter((a) => a.st === 'marcado').length} para confirmar no WhatsApp`], ['aniversarios', 'Aniversários', niverMes()], ['resumo', 'Resumo', 'do dia, do mês e do ano'], ['ia', 'Assistente', 'pergunte da sua agenda e dos clientes'], ['caixa', 'Caixa', 'quanto entrou e o que as faltas custaram'], ['espera', 'Lista de espera', `${db.espera.length} esperando encaixe`], ['assinatura', 'Minha assinatura', estAss()], ['dono', 'Painel do dono', 'ajudante e o que ela vê'], ['config', 'Configurações', 'sua foto e cor, tipo de negócio, horário, pagamento, serviços, sinal, PIX'], ['bv', 'O que mudou no Jano', 'ver de novo a apresentação da atualização']];
+    return `<h1>Mais</h1><div class="lista-mais">${l.map(([k, n, s]) => `<a href="#${k === 'bv' ? 'mais' : k}"${k === 'bv' ? ' data-acao="ver-bv"' : ''}><span><b>${n}</b><small>${t(s)}</small></span><span aria-hidden="true">›</span></a>`).join('')}<a href="#mais" data-acao="menu-comum"><span><b>Planilhas e busca</b><small>importar do Excel, exportar, procurar, imprimir, instalar o app</small></span><span aria-hidden="true">›</span></a></div><p class="creditos"><img src="../../../img/logos/jano/jano-completa-480.webp" alt="Jano" width="92" height="88" loading="lazy">Jano · agenda e atendimento · Blue Rose</p>`;
   },
   ia() {
     const conv = db.conversa.length ? db.conversa : [{ ia: 1, t: `Oi, ${db.pro.split(' ')[0]}! Eu vejo sua agenda e seus clientes. Pergunte do seu jeito. Na versão contratada são 20 perguntas grátis por dia.` }];
@@ -401,6 +437,186 @@ const T = {
       <h2>Serviços</h2><div class="cartao">${db.servicos.map((s, i) => `<div class="serv-ed"><span class="h" style="color:${s.cor}">●</span><input data-sv="${i}.nome" value="${t(s.nome)}" aria-label="Nome do serviço"><label>min<input data-sv="${i}.min" type="number" min="5" step="5" value="${s.min}"></label><label>R$<input data-sv="${i}.preco" type="number" min="0" step="0.01" value="${s.preco}"></label></div>`).join('')}</div><button type="button" class="bt largo" data-acao="add-serv">+ Adicionar serviço</button>${secMsgs()}<h2>App no celular</h2><p class="mini" style="margin-top:-6px">Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><button type="button" class="bt largo" data-acao="instalar">Instalar o app</button><p class="mini" style="margin-bottom:120px">Funciona sem internet: o que você marcar sobe quando a conexão voltar.</p>`;
   },
 };
+
+// ------------------------------------------------------------------ Jano: agora, ficha, aniversários, vitrine (18/11/2026)
+const calmo = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const celular = () => matchMedia('(pointer: coarse)').matches || innerWidth < 820;
+const ic = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ICO = {
+  camera: ic('<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'), video: ic('<rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/>'),
+  elo: ic('<path d="M10 14a4 4 0 0 0 5.6 0l3-3a4 4 0 0 0-5.6-5.6l-1 1"/><path d="M14 10a4 4 0 0 0-5.6 0l-3 3a4 4 0 0 0 5.6 5.6l1-1"/>'), par: ic('<rect x="3" y="5" width="8" height="14" rx="1"/><rect x="13" y="5" width="8" height="14" rx="1"/>'),
+  partilha: ic('<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/>'),
+  insta: ic('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6"/>'), zap: ic('<path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1.2-1.4-2-1-1 .8a4 4 0 0 1-2.1-2.1l.8-1-1-2z"/>'),
+  tiktok: ic('<path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.5 2.5 2.3 4 5 4"/>'), ampulheta: ic('<path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9"/>'),
+  tel: ic('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>'), lapis: ic('<path d="M4 20h4L19 9l-4-4L4 16z"/>'),
+  bolo: ic('<path d="M4 21h16v-8H4zM4 16c2 1.5 4 1.5 6 0s4-1.5 6 0 3 1 4 0M12 9v4M12 5c.8.8.8 2 0 2.6-.8-.6-.8-1.8 0-2.6"/>'), agenda: ic('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+};
+const horaAgora = () => { const d = new Date(); return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600; };
+function agoraInfo() {
+  const hA = horaAgora(), l = doDia(0).filter((a) => a.st === 'marcado' || a.st === 'confirmado');
+  return { hA, em: l.find((a) => a.ini <= hA && fim(a) > hA) || null, prox: l.find((a) => a.ini > hA) || null };
+}
+const RAIO = 30, VOLTA = 2 * Math.PI * RAIO;
+function relogioTempo(n) { // "1:05:30" ou "42:10"
+  const tot = Math.max(0, Math.round(n * 3600)), h = Math.floor(tot / 3600), m = Math.floor((tot % 3600) / 60), x = tot % 60;
+  return h ? `${h}:${pad(m)}<i>:${pad(x)}</i>` : `${pad(m)}<i>:${pad(x)}</i>`;
+}
+function cartaoAgora() {
+  const { hA, em, prox } = agoraInfo();
+  if (!em && !prox) return '';
+  const linhaProx = prox ? `<a class="agora-prox" href="#dia" data-ag="${prox.id}">${ICO.ampulheta}<span>Próxima em <b data-regressiva="${prox.ini}">${relogioTempo(prox.ini - hA)}</b></span><small>${t(cli(prox.cli).nome.split(' ')[0])} · ${hh(prox.ini)}</small></a>` : '';
+  if (!em) return `<section class="agora so-prox" aria-label="Próximo atendimento">${linhaProx}</section>`;
+  const c = cli(em.cli), s = serv(em.serv), dur = fim(em) - em.ini, prog = Math.min(1, Math.max(0, (hA - em.ini) / dur)), falta = Math.max(0, Math.ceil((fim(em) - hA) * 60));
+  return `<section class="agora" aria-label="Atendimento em andamento"><p class="agora-fita">Agora</p>
+    <div class="agora-corpo"><div><small>Em atendimento</small><b>${t(c.nome)}</b><span><i style="background:${s.cor}"></i>${t(s.nome)} · até ${hh(fim(em))}</span></div>
+    <div class="agora-anel" role="img" aria-label="Faltam ${falta} minutos"><svg viewBox="0 0 80 80"><circle class="an-fundo" cx="40" cy="40" r="${RAIO}"/><circle class="an-prog" data-anel="${em.ini}|${fim(em)}" cx="40" cy="40" r="${RAIO}" stroke-dasharray="${VOLTA.toFixed(1)}" stroke-dashoffset="${(VOLTA * (1 - prog)).toFixed(1)}"/></svg><span><small>faltam</small><b data-falta="${fim(em)}">${falta}</b><small>min</small></span></div></div>
+    <div class="agora-bts"><button type="button" class="bt pq" data-agora-mid="antes" data-ag="${em.id}">${ICO.camera}Foto antes</button><button type="button" class="bt pq" data-agora-mid="depois" data-ag="${em.id}">${ICO.camera}Foto depois</button><button type="button" class="bt pq cheio" data-ag="${em.id}">Atendido</button></div>${linhaProx}</section>`;
+}
+// relógio vivo: a contagem e o anel andam a cada segundo; quando um atendimento começa ou termina, o Hoje se refaz sozinho
+let estadoAgora = '';
+setInterval(() => {
+  if (document.hidden) return;
+  const { hA, em, prox } = agoraInfo(), novo = `${em?.id || ''}|${prox?.id || ''}`;
+  if ((location.hash.slice(1) || 'dia') === 'dia' && dia === 0 && estadoAgora && novo !== estadoAgora && !document.querySelector('.veu') && !document.activeElement?.matches?.('input, textarea, select')) { estadoAgora = novo; mostra(); return; }
+  estadoAgora = novo;
+  document.querySelectorAll('[data-regressiva]').forEach((b) => { b.innerHTML = relogioTempo(Number(b.dataset.regressiva) - hA); const i = b.querySelector('i'); if (i && !calmo()) i.classList.add('tic'); });
+  document.querySelectorAll('[data-falta]').forEach((b) => { b.textContent = Math.max(0, Math.ceil((Number(b.dataset.falta) - hA) * 60)); });
+  document.querySelectorAll('[data-anel]').forEach((c) => { const [i, f] = c.dataset.anel.split('|').map(Number), p = Math.min(1, Math.max(0, (hA - i) / (f - i))); c.setAttribute('stroke-dashoffset', (VOLTA * (1 - p)).toFixed(1)); });
+}, 1000);
+// aniversários: "dd/mm" no cliente (campo novo e opcional)
+function lerNiver(v) { const x = String(v || '').trim(); if (!x) return ''; const m = x.match(/^(\d{1,2})\s*[/.-]\s*(\d{1,2})$/); if (!m) return false; const d = +m[1], mm = +m[2]; if (mm < 1 || mm > 12 || d < 1 || d > 31) return false; return `${pad(d)}/${pad(mm)}`; }
+function faltaNiver(c) { const [d, m] = String(c.nasc || '').split('/').map(Number); if (!d || !m) return 999; const h = new Date(); h.setHours(0, 0, 0, 0); let a = new Date(h.getFullYear(), m - 1, d); if (a < h) a = new Date(h.getFullYear() + 1, m - 1, d); return Math.round((a - h) / 864e5); }
+const niverHoje = (c) => !!c.nasc && faltaNiver(c) === 0;
+function niverMes() { const n = db.clientes.filter((c) => c.nasc && faltaNiver(c) <= 30).length; return n ? `${n} nos próximos 30 dias` : 'parabéns no WhatsApp no dia certo'; }
+function avisosHoje() {
+  const nv = db.clientes.filter(niverHoje), amanha = doDia(1).filter((a) => a.st === 'marcado'), tarde = new Date().getHours() >= 12;
+  return `${nv.length ? `<a class="aviso-linha" href="#aniversarios">${ICO.bolo}<span><b>${nv.length === 1 ? `${t(nv[0].nome.split(' ')[0])} faz aniversário hoje` : `${nv.length} aniversários hoje`}</b><small>Mandar os parabéns</small></span><i>›</i></a>` : ''}${tarde && amanha.length ? `<a class="aviso-linha" href="#lembretes">${ICO.zap}<span><b>${amanha.length} ${amanha.length === 1 ? 'cliente' : 'clientes'} para lembrar de amanhã</b><small>Um toque em cada um</small></span><i>›</i></a>` : ''}`;
+}
+// confirmação de horário salvo: o anel do relógio completa a volta
+function selado(txt) {
+  if (calmo()) return;
+  const d = document.createElement('div'); d.className = 'selado'; d.setAttribute('aria-hidden', 'true');
+  d.innerHTML = `<svg viewBox="0 0 80 80"><circle class="sl-anel" cx="40" cy="40" r="30"/><path class="sl-ok" d="M27 41l9 9 17-19"/></svg><b>${t(txt)}</b>`;
+  document.body.append(d); setTimeout(() => d.remove(), 950);
+}
+// ------------------------------------------------------------------ ficha do cliente: as duas faces de Jano (o que já fez e o que vai fazer)
+function abreFicha(id) {
+  const c = db.clientes.find((x) => x.id === id); if (!c) return;
+  const ja = db.ags.filter((a) => a.cli === c.id && a.dia <= 0 && (a.st === 'feito' || a.st === 'faltou')).sort((a, b) => b.dia - a.dia || b.ini - a.ini);
+  const vai = db.ags.filter((a) => a.cli === c.id && a.dia >= 0 && (a.st === 'marcado' || a.st === 'confirmado')).sort((a, b) => a.dia - b.dia || a.ini - b.ini);
+  const dt = (a) => data(a.dia).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  const feitos = ja.filter((a) => a.st === 'feito'), gasto = feitos.reduce((s2, a) => s2 + preco(a), 0);
+  folha(`<div class="ficha-topo"><h2>${t(c.nome)}</h2><div class="ficha-ic">${c.tel ? `<a class="bt pq ic-bt" target="_blank" rel="noopener" href="${zap(c.tel, `Oi, ${c.nome.split(' ')[0]}!`)}" aria-label="WhatsApp">${ICO.zap}</a><a class="bt pq ic-bt" href="tel:${t(String(c.tel).replace(/\D/g, ''))}" aria-label="Ligar">${ICO.tel}</a>` : ''}<button type="button" class="bt pq ic-bt" data-edita-cli="${c.id}" data-fecha aria-label="Editar">${ICO.lapis}</button></div></div>
+    <p class="sub">${feitos.length} atendimento(s) · ${din(gasto)}${c.faltas ? ` · ${c.faltas} falta(s)` : ''}${c.obs ? ` · ${t(c.obs)}` : ''}</p>
+    <div class="faces"><section class="face ja"><h3>Já veio</h3>${ja.slice(0, 4).map((a) => `<p><b>${dt(a)}</b><small>${t(serv(a.serv).nome)} · ${a.st === 'faltou' ? 'faltou' : din(preco(a))}</small></p>`).join('') || '<p class="mini">Ainda não veio.</p>'}</section>
+    <span class="faces-moeda" aria-hidden="true"><img src="../../../img/logos/jano/jano-simbolo-96.webp" alt="" width="44" height="44"></span>
+    <section class="face vai"><h3>Vai vir</h3>${vai.slice(0, 4).map((a) => `<p><b>${dt(a)} · ${hh(a.ini)}</b><small>${t(serv(a.serv).nome)}</small></p>`).join('') || '<p class="mini">Nada marcado.</p>'}</section></div>
+    <h3 class="ficha-h">Antes e depois</h3><div class="vt-grade mini-grade" data-ficha-fotos><p class="mini">Carregando…</p></div>
+    ${c.nasc ? `<p class="ficha-niver">${ICO.bolo}Aniversário: <b>${t(c.nasc)}</b>${niverHoje(c) ? ' · <b>hoje</b>' : ''}</p>` : ''}
+    <div style="display:grid;gap:8px;margin-top:12px"><button type="button" class="bt cheio largo" data-marca-cli="${c.id}" data-fecha>${ICO.agenda}Marcar novo horário</button><button type="button" class="bt largo" data-q="fotos">${ICO.camera}Foto de antes</button><button type="button" class="bt largo" data-fecha style="border-style:dashed">Fechar</button></div>`, (f) => {
+    midias({ cli: c.id }).then((l) => { midiaCache = l; const g = f.querySelector('[data-ficha-fotos]'); if (g) g.innerHTML = gradePares(l) || '<p class="mini">Nenhuma foto ainda. No horário do cliente, toque em Foto antes e Foto depois.</p>'; });
+    f.querySelector('[data-q="fotos"]').addEventListener('click', () => novaMidia({ tipo: 'antes', cli: c.id, serv: c.serv, par: uid() }));
+  });
+}
+// ------------------------------------------------------------------ vitrine: fotos e vídeos (guardados no aparelho) e postagem
+const EX = [ // exemplos só da demonstração (arquivos do site, não ficam no aparelho)
+  { id: 'ex1a', nome: 'Carla', tipo: 'antes', par: 'ex1', src: 'img/ex-antes-1.webp', dias: -12, serv: 's3' }, { id: 'ex1d', nome: 'Carla', tipo: 'depois', par: 'ex1', src: 'img/ex-depois-1.webp', dias: -12, serv: 's3' },
+  { id: 'ex2a', nome: 'Tainá', tipo: 'antes', par: 'ex2', src: 'img/ex-antes-2.webp', dias: -6, serv: 's1' }, { id: 'ex2d', nome: 'Tainá', tipo: 'depois', par: 'ex2', src: 'img/ex-depois-2.webp', dias: -6, serv: 's1' },
+  { id: 'ex3v', nome: 'Carla', tipo: 'video', par: 'ex3', src: 'img/ex-video-1.mp4', capa: 'img/ex-video-1.webp', dur: 9, dias: -12, serv: 's3' },
+];
+async function midias(filtro = {}) {
+  let l = await M.listar(filtro).catch(() => []);
+  if (M.CONTA() === 'demo') {
+    const ex = EX.map((x) => { const c = db.clientes.find((k) => k.nome.startsWith(x.nome)); return c ? { ...x, cli: c.id, capa: x.capa || x.src, quando: iso(x.dias), exemplo: true } : null; }).filter(Boolean);
+    l = l.concat(ex.filter((x) => (!filtro.cli || x.cli === filtro.cli) && (!filtro.tipo || x.tipo === filtro.tipo)));
+  }
+  return l;
+}
+function pares(l) { const m = new Map(); l.filter((x) => x.tipo !== 'video').forEach((x) => { const k = x.par || x.id; if (!m.has(k)) m.set(k, { par: k, cli: x.cli, quando: x.quando }); m.get(k)[x.tipo] = x; }); return [...m.values()].sort((a, b) => String(b.quando).localeCompare(String(a.quando))); }
+const miniatura = (x, rot) => (x ? `<button type="button" class="vt-foto" data-ver-mid="${x.id}"><img src="${t(x.capa)}" alt="${rot} de ${t(cli(x.cli).nome)}" loading="lazy"><i class="${rot === 'Antes' ? 'r-antes' : 'r-depois'}">${rot}</i></button>` : `<span class="vt-foto vazio"><i class="${rot === 'Antes' ? 'r-antes' : 'r-depois'}">${rot}</i></span>`);
+function gradePares(l) { return pares(l).map((p) => `<div class="vt-par">${miniatura(p.antes, 'Antes')}${miniatura(p.depois, 'Depois')}</div>`).join(''); }
+let midiaCache = [];
+async function preencheVitrine() {
+  const l = await midias(); midiaCache = l;
+  const g = document.getElementById('vt-ad'), v = document.getElementById('vt-vid'); if (!g || !v) return;
+  g.innerHTML = gradePares(l) || '<p class="mini">Nenhuma foto ainda. No horário do cliente, toque em Foto antes e Foto depois, ou em + Fotos aqui.</p>';
+  const vids = l.filter((x) => x.tipo === 'video');
+  v.innerHTML = vids.map((x) => `<button type="button" class="vt-vid" data-ver-mid="${x.id}"><img src="${t(x.capa)}" alt="Vídeo de ${t(cli(x.cli).nome)}" loading="lazy"><span class="vt-play" aria-hidden="true"></span><i>0:${pad(x.dur || 0)}</i></button>`).join('') || `<p class="mini">Nenhum vídeo ainda. Grave até ${M.LIMITE_S} segundos do atendimento.</p>`;
+}
+// escolher o cliente (lista com busca) e seguir
+function escolheCliente(titulo, depois) {
+  folha(`<h2>${t(titulo)}</h2><p class="sub">De qual cliente?</p><input type="search" class="busca" id="esc-busca" placeholder="Procurar pelo nome" aria-label="Procurar cliente"><div class="esc-lista">${db.clientes.slice().sort((a, b) => b.ultima - a.ultima).map((c) => `<button type="button" class="bt largo esc-cli" data-esc="${c.id}" data-n="${t(sa(c.nome))}">${t(c.nome)}</button>`).join('')}</div>`, (f, fecha) => {
+    f.querySelector('#esc-busca').addEventListener('input', (e) => { const q = sa(e.target.value.trim()); f.querySelectorAll('[data-esc]').forEach((b) => { b.hidden = q && !b.dataset.n.includes(q); }); });
+    f.querySelectorAll('[data-esc]').forEach((b) => b.addEventListener('click', () => { const c = db.clientes.find((x) => x.id === b.dataset.esc); fecha(); setTimeout(() => depois(c), calmo() ? 0 : 180); }));
+  });
+}
+// tirar foto ou gravar vídeo pela câmera do celular (ou escolher da galeria) e guardar no aparelho
+function novaMidia(o, pronto) {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = o.tipo === 'video' ? 'video/*' : 'image/*'; inp.setAttribute('capture', 'environment'); inp.className = 'sr'; inp.dataset.jano = o.tipo; document.body.append(inp);
+  inp.addEventListener('change', async () => {
+    const arq = inp.files && inp.files[0]; inp.remove(); if (!arq) return;
+    try {
+      const r = o.tipo === 'video' ? await M.lerVideo(arq) : await M.lerFoto(arq);
+      await M.guardar({ id: uid(), cli: o.cli, ag: o.ag || null, serv: o.serv || null, par: o.par || uid(), tipo: o.tipo, quando: isoHoje(), blob: r.blob, capa: r.capa, dur: r.dur || 0 });
+      midiaCache = [];
+      toast(o.tipo === 'video' ? `Vídeo guardado (${r.dur} s). Está na Vitrine.` : o.tipo === 'antes' ? 'Foto de antes guardada. No fim, tire a de depois.' : 'Foto de depois guardada. Já dá para postar na Vitrine.');
+      pronto?.(); if (location.hash === '#link') preencheVitrine();
+    } catch (e) { toast(e.message || 'Não deu para guardar.'); }
+  });
+  inp.click();
+}
+async function verMidia(id) {
+  let l = midiaCache.length ? midiaCache : await midias(); let x = l.find((y) => y.id === id); if (!x) { l = await midias(); x = l.find((y) => y.id === id); } if (!x) return;
+  const c = cli(x.cli), u = x.blob ? URL.createObjectURL(x.blob) : x.src, par = x.tipo === 'video' ? null : pares(l).find((p) => p.par === (x.par || x.id));
+  folha(`<h2>${t(c.nome)}</h2><p class="sub">${x.tipo === 'video' ? `Vídeo · ${x.dur || 0} s` : x.tipo === 'antes' ? 'Antes' : 'Depois'} · ${dataBR(x.quando)}${x.exemplo ? ' · exemplo da demonstração' : ''}</p>
+    ${x.tipo === 'video' ? `<video class="vt-grande" src="${t(u)}" playsinline controls autoplay muted loop></video>` : `<img class="vt-grande" src="${t(u)}" alt="">`}
+    <div style="display:grid;gap:8px;margin-top:12px"><button type="button" class="bt cheio largo" data-q="postar">${ICO.partilha}Postar nas redes</button>${par && !par.depois && !x.exemplo ? '<button type="button" class="bt largo" data-q="depois">Tirar a foto de depois</button>' : ''}${x.exemplo ? '' : '<button type="button" class="bt largo" data-q="apagar" style="color:var(--verm)">Apagar do celular</button>'}<button type="button" class="bt largo" data-fecha style="border-style:dashed">Fechar</button></div>`, (f, fecha) => {
+    f.querySelector('[data-q="postar"]').addEventListener('click', () => { fecha(); setTimeout(() => abrePostar(x.tipo === 'video' ? { video: x } : par), calmo() ? 0 : 180); });
+    f.querySelector('[data-q="depois"]')?.addEventListener('click', () => { fecha(); novaMidia({ tipo: 'depois', cli: x.cli, ag: x.ag, serv: x.serv, par: x.par }); });
+    f.querySelector('[data-q="apagar"]')?.addEventListener('click', async () => { if (!confirm('Apagar do celular? Não dá para desfazer.')) return; await M.apagar(x.id).catch(() => {}); midiaCache = []; fecha(); toast('Apagado do celular.'); if (location.hash === '#link') preencheVitrine(); });
+  });
+}
+// legenda pronta por tipo de negócio e serviço
+const TAGS = { beleza: '#unhas #manicure #nailart #unhasdecoradas', barbearia: '#barbearia #barber #cortemasculino #barba', saude: '#saude #bemestar #cuidado', aulas: '#treino #aulaparticular #personal', pet: '#petshop #banhoetosa #pets', casa: '#servicos #manutencao #casa', geral: '#beleza #autocuidado #agendamento' };
+function legenda(servico, v = 0) {
+  const s = String(servico || 'atendimento').toLowerCase(), st = db.studio, pro = db.pro.split(' ')[0], tipo = db.tipo || 'geral';
+  const gancho = tipo === 'saude' ? ['Cuidado com hora marcada e atenção total.', `Mais um ${s} com calma e cuidado.`, 'Seu horário é só seu.'] : ['Do antes ao depois ✨', 'Olha a diferença 👇', `Mais um ${s} feito com capricho.`];
+  const meio = [`${s.replace(/^./, (x) => x.toUpperCase())} no ${st}, com ${pro}.`, `Feito com calma, do jeito que você pediu, no ${st}.`, `Cada detalhe pensado para você sair feliz. ${st}.`];
+  return `${gancho[v % 3]}\n\n${meio[v % 3]}\n\nAgende pelo link: ${LINK}\n\n${TAGS[tipo] || TAGS.geral}`;
+}
+async function abrePostar(alvo) {
+  if (!alvo) { const l = midiaCache.length ? midiaCache : await midias(), p = pares(l).find((x) => x.antes && x.depois) || pares(l)[0], vid = l.find((x) => x.tipo === 'video'); alvo = p || (vid ? { video: vid } : null); }
+  if (!alvo) { toast('Tire primeiro as fotos de antes e depois ou grave um vídeo.'); return; }
+  const item = alvo.video || alvo.depois || alvo.antes, s = serv(item.serv).nome, c = cli(item.cli);
+  let formato = 'feed', v = 0;
+  folha(`<h2>Postar nas redes</h2><p class="sub">${alvo.video ? 'Vai o próprio vídeo' : 'O Jano monta a imagem com as fotos e o nome do seu espaço'} e a legenda já copiada. Você escolhe a rede no celular (Instagram, WhatsApp, TikTok) e publica.</p>
+    ${alvo.video ? '' : `<div class="chips" role="group" aria-label="Formato">${Object.entries(M.FORMATOS).map(([k, F]) => `<button type="button" data-fmt="${k}" aria-pressed="${k === formato}">${F.nome}</button>`).join('')}</div>`}
+    <div class="px-previa" data-previa><p class="mini">Montando…</p></div>
+    <label class="campo">Legenda (vai copiada)<textarea data-leg rows="7">${t(legenda(s))}</textarea></label>
+    <button type="button" class="bt pq" data-outra style="margin:-4px 0 10px">Outra legenda</button>
+    <label class="troca"><span>${t(c.nome.split(' ')[0])} autorizou postar<br><small class="mini">Peça antes. Sem autorização, não poste fotos do cliente.</small></span><input type="checkbox" data-autoriza></label>
+    <button type="button" class="bt cheio largo" data-postar-ok disabled>${ICO.partilha}Escolher a rede e postar</button><button type="button" class="bt largo" data-fecha style="border-style:dashed;margin-top:8px">Fechar</button>`, (f, fecha) => {
+    let arq = null;
+    const previa = async () => {
+      const box = f.querySelector('[data-previa]');
+      try {
+        arq = alvo.video ? await M.arquivoVideo(alvo.video) : await M.montarPost(alvo.antes, alvo.depois, formato, { studio: db.studio, servico: s, chamada: `Agende: ${LINK.replace(/^https:\/\//, '')}` });
+        const u = URL.createObjectURL(arq); box.innerHTML = alvo.video ? `<video src="${u}" playsinline muted loop autoplay></video>` : `<img src="${u}" alt="Prévia do post" class="${formato}">`;
+      } catch { box.innerHTML = '<p class="mini">Não deu para montar a prévia neste aparelho.</p>'; }
+    };
+    f.querySelectorAll('[data-fmt]').forEach((b) => b.addEventListener('click', () => { formato = b.dataset.fmt; f.querySelectorAll('[data-fmt]').forEach((o) => o.setAttribute('aria-pressed', String(o === b))); previa(); }));
+    f.querySelector('[data-outra]').addEventListener('click', () => { v++; f.querySelector('[data-leg]').value = legenda(s, v); });
+    const ok = f.querySelector('[data-postar-ok]'); f.querySelector('[data-autoriza]').addEventListener('change', (e) => { ok.disabled = !e.target.checked; });
+    ok.addEventListener('click', async () => {
+      if (!arq) await previa(); if (!arq) return;
+      const r = await M.compartilhar(arq, f.querySelector('[data-leg]').value);
+      if (r === 'ok') { fecha(); toast('Pronto! A legenda está copiada: é só colar.'); }
+      else if (r === 'baixou') toast('Arquivo salvo e legenda copiada. Abra a rede e poste.');
+      else if (r === 'erro') toast('O celular não abriu o compartilhar. Tente de novo.');
+    });
+    previa();
+  });
+}
 
 // soma de um período: recebido (com o sinal pago), a receber, faltas, por serviço, por forma de pagamento e por cliente
 const mesDe = (o) => { const d = data(o); return d.getFullYear() * 12 + d.getMonth(); };
@@ -467,17 +683,23 @@ function responde(p) {
 function mostra() {
   const r = location.hash.slice(1) || 'dia', tela = $('#tela');
   tela.innerHTML = (T[r] || T.dia)();
-  const temMes = db.clientes.some(mensal) || db.ags.some((a) => a.mes), abaFm = document.querySelector('.pilula [data-aba="fimdomes"]'); if (abaFm) abaFm.hidden = !temMes;
-  document.querySelector('.pilula')?.classList.toggle('seis', temMes);
-  const aba = { espera: 'dia', resumo: 'mais', ia: 'mais', caixa: 'mais', assinatura: 'mais', dono: 'mais', config: 'mais', fimdomes: temMes ? 'fimdomes' : 'mais' }[r] ?? r;
+  const aba = { espera: 'dia', resumo: 'mais', ia: 'mais', caixa: 'mais', assinatura: 'mais', dono: 'mais', config: 'mais', fimdomes: 'mais', aniversarios: 'mais', lembretes: 'mais' }[r] ?? r;
   document.querySelectorAll('.pilula a').forEach((l) => { if (l.dataset.aba === aba) l.setAttribute('aria-current', 'page'); else l.removeAttribute('aria-current'); });
   aplicaTema(); $('#nome-studio').textContent = db.studio; $('#nome-pro').textContent = `${db.pro} · ${db.ramo}`; const ini = $('#iniciais'); if (db.foto) { ini.innerHTML = `<img src="${t(db.foto)}" alt="">`; ini.classList.add('com-foto'); } else { ini.textContent = db.pro.split(' ').map((p) => p[0]).slice(0, 2).join(''); ini.classList.remove('com-foto'); }
   if (!db.assinatura.renova && db.assinatura.status !== 'vencida' && r !== 'assinatura') tela.insertAdjacentHTML('afterbegin', `<p class="cartao" style="margin-top:12px;padding:8px 12px;background:#f1dfdd">Assinatura cancelada: você usa por mais ${db.assinatura.proxima} dias. <a href="#assinatura">Reativar</a></p>`);
   trava(r);
+  if (r === 'link') preencheVitrine();
   if (r === 'ia') { const el = $('#ia-boneco'); if (el) import('../base/assistente-ia.js?v=2').then((m) => { const b = m.personagemIA(el, db.conversa.length ? 'parado' : 'ola'); if (!db.conversa.length) b.estado('ola', 2600); else if (/Pensando/.test(db.conversa[db.conversa.length - 1].t)) b.estado('pensando'); else b.estado('explicando', 4000); }).catch(() => el.remove()); }
-  document.title = `${{ dia: 'Dia', resumo: 'Resumo', novo: rasc.remarca ? 'Remarcar' : 'Novo horário', clientes: 'Clientes', fimdomes: 'Fim do mês', link: 'Link', espera: 'Lista de espera', caixa: 'Caixa', mais: 'Mais', ia: 'Assistente', assinatura: 'Minha assinatura', dono: 'Painel do dono', config: 'Configurações' }[r] || 'Dia'} · ${db.studio || 'Agenda'}`;
+  document.title = `${{ dia: 'Dia', resumo: 'Resumo', novo: rasc.remarca ? 'Remarcar' : 'Novo horário', clientes: 'Clientes', fimdomes: 'Fim do mês', link: 'Vitrine', aniversarios: 'Aniversários', lembretes: 'Lembretes', espera: 'Lista de espera', caixa: 'Caixa', mais: 'Mais', ia: 'Assistente', assinatura: 'Minha assinatura', dono: 'Painel do dono', config: 'Configurações' }[r] || 'Dia'} · ${db.studio || 'Agenda'}`;
 }
-addEventListener('hashchange', () => { mostra(); $('#tela').focus({ preventScroll: true }); scrollTo(0, 0); });
+const ORDEM = { dia: 0, clientes: 1, novo: 2, link: 3, mais: 4 };
+let rotaAntes = location.hash.slice(1) || 'dia';
+addEventListener('hashchange', () => {
+  const r = location.hash.slice(1) || 'dia', o1 = ORDEM[rotaAntes] ?? 5, o2 = ORDEM[r] ?? 5, tela = $('#tela');
+  tela.dataset.dir = o2 < o1 ? 'tras' : 'frente'; rotaAntes = r;
+  mostra(); tela.classList.remove('anima'); void tela.offsetWidth; tela.classList.add('anima');
+  tela.focus({ preventScroll: true }); scrollTo(0, 0);
+});
 function trava(r) {
   document.querySelector('.trava')?.remove();
   if (db.assinatura.status !== 'vencida' || r === 'assinatura') return;
@@ -527,7 +749,8 @@ function abreHorario(id) {
   const v = preco(a);
   folha(`<h2>${hh(a.ini)} · ${t(c.nome)}</h2><p class="sub">${t(s.nome)} · ${s.min} min · ${din(v)}${a.valor != null ? ' (combinado)' : ''} · ${nomeDia(a.dia)}</p>${a.sinal ? `<p class="cartao" style="padding:8px 12px">Sinal de ${din(a.sinal.valor)}: <b>${a.sinal.pago ? 'pago' : 'esperando o PIX'}</b>${a.sinal.pago ? '' : ' <button type="button" class="bt pq" data-sinal-ok>Caiu</button>'}</p>` : ''}${a.mes && a.st === 'feito' ? `<p class="cartao" style="padding:8px 12px">Na conta do fim do mês (${MES[mesDe(a.dia) % 12]}): ${a.pago + sinalPg(a) >= v ? 'pago' : 'esperando o pagamento'}. <a href="#fimdomes" data-fm="${mesDe(a.dia)}" data-fecha>Ver o Fim do mês</a></p>` : ''}
     <div style="display:grid;gap:8px">${a.st === 'feito' || a.st === 'faltou' ? '' : `${c.tel ? '' : '<p class="mini" style="margin:0">Sem WhatsApp anotado: edite o cliente em Clientes para confirmar por aqui.</p>'}<a class="bt rose largo" ${c.tel ? '' : 'hidden'} target="_blank" rel="noopener" href="${zap(c.tel, msg('confirmar', { nome: c.nome.split(' ')[0], servico: s.nome.toLowerCase(), dia: nomeDia(a.dia), hora: hh(a.ini), sinal: a.sinal && !a.sinal.pago ? `Sinal de ${din(a.sinal.valor)} no PIX ${db.pix}.` : '' }))}" data-confirmou>Confirmar no WhatsApp</a>
-    ${mensal(c) ? `<button type="button" class="bt cheio largo" data-conta-mes>Atendido: vai para a conta de ${MES[mesDe(a.dia) % 12]} (${din(v - sinalPg(a))})</button><button type="button" class="bt largo" data-receber>Pagou hoje: receber agora</button>` : `<button type="button" class="bt cheio largo" data-receber>Atendido: receber ${din(v - (a.sinal?.pago ? a.sinal.valor : 0))}</button>`}<div class="linha" style="margin:0"><button type="button" class="bt pq" data-remarcar>Remarcar</button><button type="button" class="bt pq" data-faltou>Faltou</button><button type="button" class="bt pq" data-desmarcar>Desmarcar</button></div>${a.serie ? '<button type="button" class="bt largo" data-desmarcar-serie>Desmarcar este e os próximos</button>' : ''}`}${a.serie ? '' : '<button type="button" class="bt largo" data-repetir>Repetir toda semana</button>'}<button type="button" class="bt largo" data-fecha style="border-style:dashed">Fechar</button></div>`, (f, fecha) => {
+    ${mensal(c) ? `<button type="button" class="bt cheio largo" data-conta-mes>Atendido: vai para a conta de ${MES[mesDe(a.dia) % 12]} (${din(v - sinalPg(a))})</button><button type="button" class="bt largo" data-receber>Pagou hoje: receber agora</button>` : `<button type="button" class="bt cheio largo" data-receber>Atendido: receber ${din(v - (a.sinal?.pago ? a.sinal.valor : 0))}</button>`}<div class="linha" style="margin:0"><button type="button" class="bt pq" data-remarcar>Remarcar</button><button type="button" class="bt pq" data-faltou>Faltou</button><button type="button" class="bt pq" data-desmarcar>Desmarcar</button></div>${a.serie ? '<button type="button" class="bt largo" data-desmarcar-serie>Desmarcar este e os próximos</button>' : ''}`}${a.serie ? '' : '<button type="button" class="bt largo" data-repetir>Repetir toda semana</button>'}<div class="midia-bts"><button type="button" class="bt pq" data-mid="antes">${ICO.camera}Foto antes</button><button type="button" class="bt pq" data-mid="depois">${ICO.camera}Foto depois</button><button type="button" class="bt pq" data-mid="video">${ICO.video}Vídeo</button></div><button type="button" class="bt largo" data-fecha style="border-style:dashed">Fechar</button></div>`, (f, fecha) => {
+    f.querySelectorAll('[data-mid]').forEach((b) => b.addEventListener('click', () => novaMidia({ tipo: b.dataset.mid, cli: a.cli, ag: a.id, serv: a.serv, par: a.id })));
     const ok = (fn, msg) => () => { fn(); grava(); fecha(); mostra(); if (msg) toast(msg); };
     f.querySelector('[data-sinal-ok]')?.addEventListener('click', ok(() => { a.sinal.pago = true; }, 'Sinal recebido. Horário garantido.'));
     f.querySelector('[data-confirmou]')?.addEventListener('click', () => { if (a.st === 'marcado') a.st = 'confirmado'; grava(); setTimeout(() => { fecha(); mostra(); }, 200); });
@@ -592,7 +815,7 @@ const ACOES = {
     const rr = !velho && rasc.rep ? lerRep($('#rep-box'), rasc.dia) : null, rep = rr ? repetir(novo, rr) : null;
     const txtMarcado = rep ? `Marcado ${textoRep(rr)}: ${rep.n + 1} horários até ${data(rep.ate).toLocaleDateString('pt-BR')}${rep.choques ? ` (${rep.choques} encostam em outro horário; confira no dia)` : ''}.`
       : `${velho ? 'Remarcado' : 'Marcado'}: ${s.nome.toLowerCase()} ${nomeDia(rasc.dia).split(',')[0]} às ${hh(rasc.ini)}${sinal && !velho ? `. Sinal de ${din(sinal.valor)} pedido no PIX` : ''}.`;
-    dia = rasc.dia; rasc = { ...RASC(), serv: rasc.serv, dia: rasc.dia }; grava(); location.hash = '#dia'; toast(txtMarcado);
+    dia = rasc.dia; rasc = { ...RASC(), serv: rasc.serv, dia: rasc.dia }; grava(); location.hash = '#dia'; selado(velho ? 'Remarcado' : 'Marcado'); toast(txtMarcado);
     if (!velho && db.msgAuto !== false && c.tel) window.open(zap(c.tel, msg('marcado', { nome: c.nome.split(' ')[0], servico: s.nome.toLowerCase(), dia: nomeDia(novo.dia), hora: hh(novo.ini) })), '_blank', 'noopener');
   },
   'todos-mes': () => {
@@ -614,26 +837,32 @@ const ACOES = {
   'fm-excel': () => exportaMes(fm.n ?? mesDe(0), 'xlsx'),
   'fm-csv': () => exportaMes(fm.n ?? mesDe(0), 'csv'),
   'sem-remarcar': () => { rasc = RASC(); location.hash = '#dia'; },
-  'add-cliente': () => folha(`<h2>Adicionar cliente</h2><form><label class="campo">Nome<input name="n" required autocomplete="off"></label><label class="campo">WhatsApp<input name="t" inputmode="tel"></label><label class="campo">Quanto vai pagar (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Deixe vazio para usar o preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}">${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Forma de pagamento<select name="p"><option value="atendimento">No atendimento</option><option value="mes" ${db.pagPadrao === 'mes' ? 'selected' : ''}>No fim do mês</option></select></label><label class="campo">Anotação (opcional)<input name="o" placeholder="Ex.: prefere de manhã"></label><button class="bt cheio largo">Salvar cliente</button></form>`, (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => {
+  'add-cliente': () => folha(`<h2>Adicionar cliente</h2><form><label class="campo">Nome<input name="n" required autocomplete="off"></label><label class="campo">WhatsApp<input name="t" inputmode="tel"></label><label class="campo">Quanto vai pagar (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Deixe vazio para usar o preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}">${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Forma de pagamento<select name="p"><option value="atendimento">No atendimento</option><option value="mes" ${db.pagPadrao === 'mes' ? 'selected' : ''}>No fim do mês</option></select></label><label class="campo">Aniversário (dia/mês, opcional)<input name="b" inputmode="numeric" maxlength="5" placeholder="12/03"></label><label class="campo">Anotação (opcional)<input name="o" placeholder="Ex.: prefere de manhã"></label><button class="bt cheio largo">Salvar cliente</button></form>`, (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => {
     e.preventDefault(); const x = new FormData(e.target), nome = String(x.get('n')).trim(); if (!nome) return;
     if (db.clientes.some((c) => sa(c.nome) === sa(nome))) { toast('Já existe um cliente com esse nome.'); return; }
     const v = String(x.get('v') || '').trim();
-    db.clientes.push({ id: uid(), nome, tel: String(x.get('t') || ''), ultima: 0, serv: x.get('s'), faltas: 0, valor: v === '' ? null : Number(v), obs: String(x.get('o') || ''), pagamento: x.get('p') === 'mes' ? 'mes' : 'atendimento' });
+    const nc = { id: uid(), nome, tel: String(x.get('t') || ''), ultima: 0, serv: x.get('s'), faltas: 0, valor: v === '' ? null : Number(v), obs: String(x.get('o') || ''), pagamento: x.get('p') === 'mes' ? 'mes' : 'atendimento' };
+    const nb = lerNiver(x.get('b')); if (nb === false) { toast('Aniversário: escreva dia/mês, como 12/03.'); return; } if (nb) nc.nasc = nb; db.clientes.push(nc);
     grava(); fecha(); mostra(); toast(v === '' ? `${nome.split(' ')[0]} adicionado.` : `${nome.split(' ')[0]} adicionado, pagando ${din(Number(v))}.`);
   })),
   'edita-cli': (id) => { const c = db.clientes.find((x) => x.id === id); if (!c) return; const futuro = db.ags.filter((a) => a.cli === c.id && a.dia >= 0 && (a.st === 'marcado' || a.st === 'confirmado'));
-    folha(`<h2>Editar cliente</h2><form><label class="campo">Nome<input name="n" required value="${t(c.nome)}"></label><label class="campo">WhatsApp<input name="t" inputmode="tel" value="${t(c.tel)}"></label><label class="campo">Quanto paga (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" value="${c.valor ?? ''}" placeholder="Vazio = preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}" ${x.id === c.serv ? 'selected' : ''}>${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Forma de pagamento<select name="p"><option value="atendimento">No atendimento</option><option value="mes" ${mensal(c) ? 'selected' : ''}>No fim do mês</option></select></label><label class="campo">Anotação<input name="o" value="${t(c.obs || '')}"></label><button class="bt cheio largo">Salvar</button></form><button type="button" class="bt largo" data-apaga style="margin-top:8px;color:var(--verm)">${futuro.length ? `Apagar (tem ${futuro.length} horário(s) marcado(s))` : 'Apagar cliente'}</button>`, (f, fecha) => {
-      f.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); const x = new FormData(e.target), nome = String(x.get('n')).trim(); if (!nome) return; if (db.clientes.some((o) => o !== c && sa(o.nome) === sa(nome))) { toast('Já existe outro cliente com esse nome.'); return; } const v = String(x.get('v') || '').trim(); Object.assign(c, { nome, tel: String(x.get('t') || ''), valor: v === '' ? null : Number(v), serv: x.get('s'), obs: String(x.get('o') || ''), pagamento: x.get('p') === 'mes' ? 'mes' : 'atendimento' }); grava(); fecha(); mostra(); toast('Cliente salvo.'); });
+    folha(`<h2>Editar cliente</h2><form><label class="campo">Nome<input name="n" required value="${t(c.nome)}"></label><label class="campo">WhatsApp<input name="t" inputmode="tel" value="${t(c.tel)}"></label><label class="campo">Quanto paga (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" value="${c.valor ?? ''}" placeholder="Vazio = preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}" ${x.id === c.serv ? 'selected' : ''}>${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Forma de pagamento<select name="p"><option value="atendimento">No atendimento</option><option value="mes" ${mensal(c) ? 'selected' : ''}>No fim do mês</option></select></label><label class="campo">Aniversário (dia/mês, opcional)<input name="b" inputmode="numeric" maxlength="5" placeholder="12/03" value="${t(c.nasc || '')}"></label><label class="campo">Anotação<input name="o" value="${t(c.obs || '')}"></label><button class="bt cheio largo">Salvar</button></form><button type="button" class="bt largo" data-apaga style="margin-top:8px;color:var(--verm)">${futuro.length ? `Apagar (tem ${futuro.length} horário(s) marcado(s))` : 'Apagar cliente'}</button>`, (f, fecha) => {
+      f.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); const x = new FormData(e.target), nome = String(x.get('n')).trim(); if (!nome) return; if (db.clientes.some((o) => o !== c && sa(o.nome) === sa(nome))) { toast('Já existe outro cliente com esse nome.'); return; } const v = String(x.get('v') || '').trim(), nb = lerNiver(x.get('b')); if (nb === false) { toast('Aniversário: escreva dia/mês, como 12/03.'); return; } Object.assign(c, { nome, tel: String(x.get('t') || ''), valor: v === '' ? null : Number(v), serv: x.get('s'), obs: String(x.get('o') || ''), pagamento: x.get('p') === 'mes' ? 'mes' : 'atendimento' }); if (nb) c.nasc = nb; else delete c.nasc; grava(); fecha(); mostra(); toast('Cliente salvo.'); });
       f.querySelector('[data-apaga]').addEventListener('click', () => { if (!confirm(futuro.length ? `Apagar ${c.nome} e desmarcar ${futuro.length} horário(s)?` : `Apagar ${c.nome}?`)) return; futuro.forEach((a) => { a.st = 'cancelado'; }); db.clientes = db.clientes.filter((o) => o !== c); grava(); fecha(); mostra(); toast('Cliente apagado.'); });
     }); },
   'menu-comum': () => { const b = document.querySelector('.vk-mais'); if (b) b.click(); else toast('Abra de novo em alguns segundos.'); }, // menu da camada (o ••• fica escondido)
   instalar: () => {
+    if (!celular()) { toast('O Jano é app de celular: abra a sua conta no celular e instale por lá.'); return; }
     if (!window.veltriaInstalar) { toast('Na demonstração não instala. Entre na sua conta para instalar o seu app.'); return; }
     const msg = { instalado: 'Você já está no app instalado.', ok: 'Pronto: o app está na tela de início.', iphone: 'No iPhone: toque em Compartilhar e depois em Adicionar à Tela de Início.', manual: 'No menu do navegador (⋮), toque em Instalar app ou Adicionar à tela inicial.' };
     window.veltriaInstalar().then((r) => { if (msg[r]) toast(msg[r]); });
   },
   'tira-foto': () => { delete db.foto; grava(); mostra(); toast('Foto tirada. O topo mostra as suas iniciais.'); },
   'add-serv': () => { const i = db.servicos.length; db.servicos.push({ id: 's' + Date.now().toString(36), nome: 'Novo serviço', min: 60, preco: 0, cor: COR[i % COR.length], retorno: 30 }); grava(); mostra(); setTimeout(() => document.querySelector(`[data-sv="${i}.nome"]`)?.select(), 30); },
+  'novo-ad': () => escolheCliente('Fotos de antes e depois', (c) => { const par = uid(); folha(`<h2>${t(c.nome.split(' ')[0])}: antes e depois</h2><p class="sub">Tire a foto de antes e, no fim do atendimento, a de depois. As duas ficam juntas na Vitrine e na ficha.</p><div style="display:grid;gap:8px"><button type="button" class="bt cheio largo" data-q="antes">${ICO.camera}Foto antes</button><button type="button" class="bt largo" data-q="depois">${ICO.camera}Foto depois</button><button type="button" class="bt largo" data-fecha style="border-style:dashed">Pronto</button></div>`, (f) => f.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => novaMidia({ tipo: b.dataset.q, cli: c.id, serv: c.serv, par }, () => { b.disabled = true; b.textContent = b.dataset.q === 'antes' ? 'Antes guardada ✓' : 'Depois guardada ✓'; })))); }),
+  'novo-video': () => escolheCliente('Vídeo curto', (c) => novaMidia({ tipo: 'video', cli: c.id, serv: c.serv, par: uid() })),
+  postar: () => abrePostar(null),
+  'ver-bv': () => boasVindas(),
   copiar: () => { navigator.clipboard?.writeText(LINK).catch(() => {}); toast('Link copiado. Cole na bio do Instagram.'); },
   aceitar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); let c = db.clientes.find((x) => x.nome === p.nome); if (!c) { c = { id: uid(), nome: p.nome, tel: p.tel, ultima: 0, serv: p.serv, faltas: 0, ...(db.pagPadrao === 'mes' ? { pagamento: 'mes' } : {}) }; db.clientes.push(c); } db.ags.push({ id: uid(), dia: p.dia, ini: p.ini, cli: c.id, serv: p.serv, st: 'confirmado', pago: 0, valor: c.valor ?? null, sinal: serv(p.serv).preco >= db.sinalAcima ? { valor: Math.round(serv(p.serv).preco * db.sinalPct / 100), pago: true } : null }); db.pedidos = db.pedidos.filter((x) => x !== p); grava(); mostra(); toast(`Horário de ${p.nome.split(' ')[0]} confirmado. Abrindo o WhatsApp para avisar.`); window.open(zap(p.tel, msg('aceito', { nome: p.nome.split(' ')[0], servico: serv(p.serv).nome.toLowerCase(), dia: nomeDia(p.dia), hora: hh(p.ini) })), '_blank', 'noopener'); },
   recusar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); window.open(zap(p.tel, msg('recusado', { nome: p.nome.split(' ')[0], horarios: livres(p.dia, serv(p.serv).min).slice(0, 3).map(hh).join(', ') })), '_blank', 'noopener'); },
@@ -658,12 +887,16 @@ document.addEventListener('click', (e) => {
   const fpg = el.closest('[data-fm-pagar]'); if (fpg) { pagarFm(fpg.dataset.fmPagar, fm.n ?? mesDe(0)); return; }
   const fcb = el.closest('[data-fm-cobrar]'); if (fcb) { cobrarFm(fcb.dataset.fmCobrar, fm.n ?? mesDe(0)); return; }
   const fdp = el.closest('[data-fm-despag]'); if (fdp) { const p = (db.pagMes || []).find((x) => x.id === fdp.dataset.fmDespag); if (p && confirm(`Desfazer o pagamento de ${din(p.valor)} de ${cli(p.cli).nome.split(' ')[0]} (${dataBR(p.data)})?`)) { const n = fm.n ?? mesDe(0); db.pagMes = db.pagMes.filter((x) => x !== p); realoca(p.cli, n); grava(); mostra(); toast('Pagamento desfeito.'); } return; }
-  const ag = el.closest('[data-ag]'); if (ag && !el.closest('.folha')) { abreHorario(ag.dataset.ag); return; }
+  const ag = el.closest('[data-ag]'); if (ag && !el.closest('.folha') && !el.closest('[data-agora-mid]')) { e.preventDefault(); abreHorario(ag.dataset.ag); return; }
   const rd = el.closest('[data-res-dia]'); if (rd) { res = { ...res, modo: 'dia', d: Number(rd.dataset.resDia) }; return; }
   const d = el.closest('[data-dia]'); if (d) { dia = Number(d.dataset.dia); mostra(); return; }
   const nv = el.closest('[data-novo-dia]'); if (nv) { rasc = { ...RASC(), dia: Number(nv.dataset.novoDia) }; location.hash = '#novo'; return; }
   const mc = el.closest('[data-marca-cli]'); if (mc) { const c = db.clientes.find((x) => x.id === mc.dataset.marcaCli); rasc = { ...RASC(), cli: c.nome, tel: c.tel || '', serv: db.servicos.some((s) => s.id === c.serv) ? c.serv : RASC().serv }; location.hash = '#novo'; return; }
   const ec = el.closest('[data-edita-cli]'); if (ec) { ACOES['edita-cli'](ec.dataset.editaCli); return; }
+  const fi = el.closest('[data-ficha]'); if (fi) { abreFicha(fi.dataset.ficha); return; }
+  const mid = el.closest('[data-ver-mid]'); if (mid) { verMidia(mid.dataset.verMid); return; }
+  const agm = el.closest('[data-agora-mid]'); if (agm) { const a = db.ags.find((x) => x.id === agm.dataset.ag); if (a) novaMidia({ tipo: agm.dataset.agoraMid, cli: a.cli, ag: a.id, serv: a.serv, par: a.id }); return; }
+  const lb = el.closest('[data-lembra]'); if (lb) { const a = db.ags.find((x) => x.id === lb.dataset.lembra); if (a && a.st === 'marcado') { a.st = 'confirmado'; grava(); setTimeout(mostra, 300); } }
   const rm = el.closest('[data-rmodo]'); if (rm) { res.modo = rm.dataset.rmodo; mostra(); return; }
   const rp = el.closest('[data-rpasso]'); if (rp) { const k = { dia: 'd', mes: 'm', ano: 'a' }[res.modo]; res[k] += Number(rp.dataset.rpasso); mostra(); return; }
   const sv = el.closest('[data-serv]'); if (sv) { guarda(); rasc.serv = sv.dataset.serv; rasc.ini = null; mostra(); return; }

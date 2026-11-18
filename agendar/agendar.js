@@ -1,4 +1,4 @@
-// Link de agendamento da Veltria Agenda Essencial: bluerose-store.com/agendar/?e=<id da empresa>.
+// Link de agendamento do Jano (ex-Veltria Agenda Essencial): bluerose-store.com/agendar/?e=<id da empresa>.
 // A cliente escolhe serviço, dia e horário livre e deixa nome e WhatsApp; o pedido vai para a função
 // veltria_agenda_pedir (Supabase) e aparece no app da profissional, em Pedidos, para aprovar ou recusar.
 // Só vê serviços, horário de funcionamento e horários ocupados (sem nomes de outras clientes).

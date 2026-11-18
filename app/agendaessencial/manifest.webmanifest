@@ -1,12 +1,12 @@
 {
-  "name": "Veltria Agenda Essencial",
-  "short_name": "Agenda Essencial",
+  "name": "Jano · agenda e atendimento",
+  "short_name": "Jano",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "../../",
   "display": "standalone",
-  "background_color": "#11151d",
-  "theme_color": "#141820",
+  "background_color": "#221d1a",
+  "theme_color": "#221d1a",
   "icons": [
     {
       "src": "../../demos/sistemas/agenda-essencial/icone-192.png",
