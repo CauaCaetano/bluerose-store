@@ -715,3 +715,4 @@ main { position: relative; z-index: 1; max-width: none; padding: 0 10px 40px 16p
 .bxg { table-layout: auto; } .bxg td:first-child { width: 99%; min-width: 190px; } .bxg th:not(:first-child) { min-width: 38px; }
 @media (min-width: 861px) { .etq-txt b { font-size: 33px; } .etq-hoje .etq-ic2 { margin-right: -18px; } }
 .bxg td:first-child { min-width: 0; } .bxg th:not(:first-child) { min-width: 0; } .bxg td:not(:first-child) > span { width: 32px; height: 32px; } .bxg td:not(:first-child) { padding: 8px 1px; } .bx-peca b { max-width: 140px; }
+@media (max-width: 400px) { .meta-cab { flex-wrap: wrap; row-gap: 8px; } .meta-cab > div { flex: 1 0 auto; min-width: max-content; } .meta-cab .mes-sel { margin-left: auto; } }
