@@ -357,6 +357,32 @@ const ICO = {
   mesa: '<path d="M4 9h16M6 9v11M18 9v11M8 9V5h8v4"/>', taca: '<path d="M7 3h10l-1 7a4 4 0 0 1-8 0zM12 14v6M8 21h8"/>', trofeu: '<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8l-1-4H9z"/>',
   relat: '<path d="M4 19h16M7 15v-3M12 15V8M17 15v-6"/>', barras: '<path d="M4 6v12M7 6v12M10 6v12M14 6v12M16.5 6v12M20 6v12"/>', xml: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13l-2 2 2 2M15 13l2 2-2 2"/>', subir: '<path d="M12 20V8M7 13l5-5 5 5M5 4h14"/>', pct: '<path d="M6 18L18 6"/><circle cx="7.5" cy="7.5" r="2"/><circle cx="16.5" cy="16.5" r="2"/>',
 };
+Object.assign(ICO, {
+  sino: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  registradora: '<path d="M4 20h16l-1.5-7h-13z"/><path d="M7 13V8h10v5M9 5h6v3H9zM8 16h2M12 16h2M16 16h0"/>',
+  teclado: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h0M10 10h0M13 10h0M16 10h0M7 14h10"/>',
+  cesta: '<path d="M4 10h16l-1.6 9H5.6z"/><path d="M8 10l3-6M16 10l-3-6M9 13v4M12 13v4M15 13v4"/>',
+  bolsa: '<path d="M6 8h12l1 12H5z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  garrafa: '<path d="M10 3h4v4l2 3v10.5a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5V10l2-3z"/><path d="M8 13h8"/>',
+  maca: '<path d="M12 8c-2-1.6-7-1.2-7 3.6 0 4 2.8 8.4 4.8 8.4 1 0 1.4-.5 2.2-.5s1.2.5 2.2.5c2 0 4.8-4.4 4.8-8.4 0-4.8-5-5.2-7-3.6z"/><path d="M12 8c0-2 .8-3.6 2.6-4.4"/>',
+  pao: '<path d="M4 15c0-4.4 3.6-8 8-8s8 3.6 8 8v2H4z"/><path d="M9 10.5l-1 3M12.5 9.6l-.6 3.6M16 10.6l-1 2.8"/>',
+  leite: '<path d="M8 3h8v3l2 3v12H6V9l2-3z"/><path d="M6 9h12M10 13h4"/>',
+  spray: '<path d="M8 9h7v12H8z"/><path d="M9.5 9V6h4l3-2M11.5 6V4M17.5 7h1M17.5 9.5h1"/>',
+  doce: '<circle cx="12" cy="12" r="4"/><path d="M8.5 10L4 7v10l4.5-3M15.5 10L20 7v10l-4.5-3"/>',
+  fogo: '<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-6 1 1 2 2 3 2 0-2-1-4 0-6z"/>',
+  ampulheta: '<path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9"/>',
+  planilha: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 15h7M9 18h7M12 12v6"/>',
+  etiqueta: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.4"/>',
+  engrenagem: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  moedas: '<ellipse cx="9" cy="7" rx="5" ry="2.2"/><path d="M4 7v3c0 1.2 2.2 2.2 5 2.2s5-1 5-2.2V7M4 10v3c0 1.2 2.2 2.2 5 2.2M4 13v3c0 1.2 2.2 2.2 5 2.2"/><ellipse cx="15" cy="14" rx="5" ry="2.2"/><path d="M10 14v3c0 1.2 2.2 2.2 5 2.2s5-1 5-2.2v-3"/>',
+  pix: '<path d="M12 3l4 4-4 4-4-4zM12 13l4 4-4 4-4-4zM3 12l4-4 4 4-4 4zM13 12l4-4 4 4-4 4z"/>',
+  cartao: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/>',
+  nota: '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9v0M18 15v0"/>',
+  pessoa: '<circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/>',
+  okc: '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>',
+});
+// ícone de cada categoria pelas palavras do nome (o dono pode criar a categoria que quiser)
+const ICO_CAT = (c) => { const x = sa(c); return /bebida|cervej|destil|refri|vinho|suco/.test(x) ? 'garrafa' : /horti|frut|verdur|legum|feira/.test(x) ? 'maca' : /padar|pao|bolo/.test(x) ? 'pao' : /latic|frio|leite|queij/.test(x) ? 'leite' : /limpez|higien|perfum/.test(x) ? 'spray' : /bombon|doce|chocol/.test(x) ? 'doce' : /churras|carne|acoug|carvao/.test(x) ? 'fogo' : /mercear|grao|cereal/.test(x) ? 'bolsa' : 'cesta'; };
 const ico = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k] || ''}</svg>`;
 function toast(m, erro = false) { const d = document.createElement('div'); d.className = `toast${erro ? ' erro' : ''}`; d.textContent = m; $('#toasts').append(d); setTimeout(() => d.remove(), 4200); }
 let aoFechar = null;
@@ -369,6 +395,15 @@ function abrir(html, ligar, larga = false) {
 function fechar() { const c = $('#camada'); c.hidden = true; c.innerHTML = ''; paraCamera(); if (aoFechar) { const f = aoFechar; aoFechar = null; f(); } }
 $('#camada').addEventListener('mousedown', (e) => { if (e.target.id === 'camada') fechar(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#camada').hidden) fechar(); });
+document.addEventListener('keydown', (e) => {
+  if (telaAtual !== 'vender' || !$('#camada').hidden || !['F2', 'F3', 'F4', 'F5'].includes(e.key)) return;
+  e.preventDefault();
+  if (e.key === 'F2') { const l = $('#leitor'); if (l) { l.focus(); l.select(); } return; }
+  if (!estado.venda.itens.length) { toast('Passe um produto primeiro.', true); return; }
+  if (e.key === 'F3') { const b = $('[data-acao="desconto"]'); if (b) b.click(); return; }
+  if (e.key === 'F4') { estado.venda.forma = 'fiado'; mostra(); }
+  receberCupom();
+});
 const cab = (titulo, sub = '') => `<header class="j-cab"><div><h2>${titulo}</h2>${sub ? `<p>${sub}</p>` : ''}</div><button type="button" class="icone-bt" data-fechar aria-label="Fechar">${ico('x')}</button></header>`;
 function confirmar(titulo, texto, rot, acao, perigo = false) {
   abrir(`${cab(titulo)}<p class="j-txt">${texto}</p><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt ${perigo ? 'perigo' : 'cheio'}" data-sim>${rot}</button></footer>`, (j) => $('[data-sim]', j).addEventListener('click', () => { fechar(); acao(); }));
@@ -463,10 +498,12 @@ function codigoLido(c) {
 // ------------------------------------------------------------------ marca e menu
 function marca() {
   const h = new Date().getHours(), s = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-  $('#saudacao').textContent = `${s}, ${db.loja.nome}`;
+  $('#saudacao').textContent = `${s},
+${db.loja.nome}`;
   const nv = vencendo(7).length, nf = devedores().filter((c) => contaFiado(c.id).atraso > 0).length, nc = baixos().length;
   const n = (id, v) => { const e = $(id); e.hidden = !v; e.textContent = v; };
   n('#n-val', nv); n('#n-fiado', nf); n('#n-compras', nc);
+  const na = avisos().n; $$('.sino-n').forEach((e) => { e.hidden = !na; e.textContent = na > 99 ? '99+' : na; });
   document.title = `${db.loja.nome} · Annona`;
   $('#lat-loja-ini').textContent = iniciais(db.loja.nome); $('#lat-loja-nome').textContent = db.loja.nome;
   const lc = $('#lat-caixa'), cx0 = CXA(); lc.textContent = cx0.aberto ? `${nomeTerm(TERM())} aberto desde ${horaBR(cx0.ab)}` : `${nomeTerm(TERM())} fechado`; lc.classList.toggle('fechado', !cx0.aberto);
@@ -474,6 +511,19 @@ function marca() {
 }
 
 const TELAS = {};
+// avisos do sino: o que vence, o que repor e quem está com o fiado atrasado
+function avisos() {
+  const v = vencendo(7), r = baixos(), f = devedores().filter((c) => contaFiado(c.id).atraso > 0);
+  return { v, r, f, n: v.length + r.length + f.length };
+}
+function abreAvisos() {
+  const a = avisos();
+  abrir(`${cab('Avisos', a.n ? `${a.n} ${a.n === 1 ? 'coisa' : 'coisas'} para olhar hoje` : 'Tudo em ordem')}<div class="avisos">
+    <section><h4>${ico('cal')}Vence em 7 dias <b>${a.v.length}</b></h4>${a.v.length ? `<ul class="lista-foto">${a.v.slice(0, 5).map((l) => `<li>${foto(l.p, 'mini')}<span><b>${t(l.p.nome)}</b><small>${dias(hoje(), l.val) < 0 ? 'Venceu' : 'Vence'} em ${dataBR(l.val)}</small></span><span class="tag ambar">${qtdTxt(l.p, l.q)}</span></li>`).join('')}</ul><a class="bt mini" href="#validades" data-fechar>Ver validades</a>` : '<p class="mudo">Nada vencendo.</p>'}</section>
+    <section><h4>${ico('alerta')}Repor agora <b>${a.r.length}</b></h4>${a.r.length ? `<ul class="lista-foto">${a.r.slice(0, 5).map((p) => `<li>${foto(p, 'mini')}<span><b>${t(p.nome)}</b><small>Estoque: ${qtdTxt(p)} · mín. ${numBR(p.min, 1)}</small></span></li>`).join('')}</ul><a class="bt mini" href="#compras" data-fechar>Ver lista de compras</a>` : '<p class="mudo">Nada abaixo do mínimo.</p>'}</section>
+    <section><h4>${ico('gente')}Fiado atrasado <b>${a.f.length}</b></h4>${a.f.length ? `<ul class="lista-foto">${a.f.slice(0, 5).map((c) => `<li><span class="av">${t(iniciais(c.nome))}</span><span><b>${t(c.nome)}</b><small>${contaFiado(c.id).atraso} dias de atraso</small></span><span class="tag verm">${din(contaFiado(c.id).saldo)}</span></li>`).join('')}</ul><a class="bt mini" href="#fiado" data-fechar>Ver o fiado</a>` : '<p class="mudo">Ninguém atrasado.</p>'}</section>
+  </div><footer class="j-pe"><button type="button" class="bt cheio" data-fechar>Ok</button></footer>`);
+}
 // ------------------------------------------------------------------ equipe, permissões e registro do que aconteceu
 const PERMS = [['custo', 'Ver custo e lucro'], ['desconto', 'Dar desconto'], ['cancelar', 'Cancelar venda'], ['fiado', 'Fiado acima do limite'], ['caixa', 'Abrir, sangrar e fechar o caixa'], ['estoque', 'Corrigir estoque e registrar perda'], ['entradas', 'Dar entrada e mudar preço'], ['relatorios', 'Ver relatórios']];
 const PAPEL = { dono: 'Dono', caixa: 'Caixa', garcom: 'Garçom do bar', repositor: 'Repositor' };
@@ -531,33 +581,44 @@ TELAS.painel = () => {
   const h = hoje(), vh = vendasEntre(h, h), tot = vh.reduce((s, v) => s + v.total, 0), luc = vh.reduce((s, v) => s + lucroVenda(v), 0);
   const hm = new Date().toTimeString().slice(0, 5), ontem = vendasEntre(somaDias(h, -1), somaDias(h, -1)).filter((v) => v.data.slice(11, 16) <= hm), totO = ontem.reduce((s, v) => s + v.total, 0), lucO = ontem.reduce((s, v) => s + lucroVenda(v), 0);
   const varia = (a, b) => (b > 0 ? Math.round(((a - b) / b) * 1000) / 10 : 0);
-  const chip = (x, rot = 'em relação a ontem') => `<span class="var ${x >= 0 ? 'sobe' : 'desce'}"><i>${x >= 0 ? '↗' : '↘'} ${x >= 0 ? '+' : '−'}${Math.abs(x).toLocaleString('pt-BR')}%</i> ${rot}</span>`;
+  const chip = (x, rot = 'em relação a ontem') => `<span class="var ${x >= 0 ? 'sobe' : 'desce'}"><i>${x >= 0 ? '▲' : '▼'} ${x >= 0 ? '+' : '−'}${Math.abs(x).toLocaleString('pt-BR')}%</i> <span>${rot}</span></span>`;
   const sem = [], ant = []; for (let i = 6; i >= 0; i--) { const d = somaDias(h, -i); sem.push([d, vendasEntre(d, d).reduce((s, v) => s + v.total, 0)]); ant.push(vendasEntre(somaDias(d, -7), somaDias(d, -7)).reduce((s, v) => s + v.total, 0)); }
   const totS = sem.reduce((s, x) => s + x[1], 0), totA = ant.reduce((s, x) => s + x, 0);
-  // mais vendidos de hoje (ou da semana, se o dia ainda está começando), com lucro
+  // mais vendidos de hoje (ou da semana, se o dia ainda está começando): quantidade, quanto entrou e o lucro
   const base = vh.length >= 5 ? vh : vendasEntre(somaDias(h, -6), h), por = {};
-  base.forEach((v) => v.itens.forEach((x) => { const p = prod(x.p); if (!p) return; por[p.id] ||= { p, q: 0, l: 0, doses: 0 }; por[p.id].q += x.dose ? 0 : x.q; por[p.id].doses += x.dose ? x.q : 0; por[p.id].l += Math.round(x.q * (x.preco - x.custo)); }));
-  const top = Object.values(por).sort((a, b) => b.l - a.l).slice(0, 10);
-  const vence = vencendo(7).slice(0, 3), repor = baixos().slice(0, 3);
+  base.forEach((v) => v.itens.forEach((x) => { const p = prod(x.p); if (!p) return; por[p.id] ||= { p, q: 0, r: 0, l: 0 }; por[p.id].q += x.q; por[p.id].r += Math.round(x.q * x.preco); por[p.id].l += Math.round(x.q * (x.preco - x.custo)); }));
+  const top = Object.values(por).sort((a, b) => b.r - a.r).slice(0, 10);
+  const venc = vencendo(7), vence = venc.slice(0, 3), rep0 = baixos(), repor = rep0.slice(0, 3), par = parados();
+  const unTxt = (p, q) => (p.un === 'kg' ? `${numBR(q, 1)} kg` : `${numBR(q, 0)} un`);
+  const c = CXA(), rc = c.aberto ? resumoCaixa() : null;
   return `<section class="kpis">
-    <a class="kpi" href="#relatorios"><span class="k-ico verde">${ico('sacola')}</span><div><small>Vendas de hoje</small><b>${din(tot)}</b>${chip(varia(tot, totO), 'em relação a ontem até esta hora')}</div></a>
-    <a class="kpi" href="#relatorios"><span class="k-ico verde">${ico('moeda')}</span><div><small>Lucro de hoje</small><b>${pode('custo') ? din(luc) : '••••'}</b>${pode('custo') ? chip(varia(luc, lucO), 'em relação a ontem até esta hora') : '<span class="var">só o dono vê</span>'}</div></a>
+    <a class="kpi" href="#relatorios"><span class="k-ico verde">${ico('sacola')}</span><div><small>Vendas de hoje</small><b>${din(tot)}</b>${chip(varia(tot, totO))}</div></a>
+    <a class="kpi" href="#relatorios"><span class="k-ico verde">${ico('moedas')}</span><div><small>Lucro de hoje</small><b>${pode('custo') ? din(luc) : '••••'}</b>${pode('custo') ? chip(varia(luc, lucO)) : '<span class="var">só o dono vê</span>'}</div></a>
     <a class="kpi" href="#fiado"><span class="k-ico ouro">${ico('gente')}</span><div><small>Fiado a receber</small><b>${din(totalFiado())}</b><span class="var">${devedores().length} cliente${devedores().length === 1 ? '' : 's'} com conta aberta</span></div></a>
     <a class="kpi" href="#estoque"><span class="k-ico azul">${ico('caixa')}</span><div><small>Valor em estoque</small><b>${din(valorEstoque())}</b><span class="var">pelo preço de custo</span></div></a>
   </section>
+  <section class="resumo-cel">
+    <a class="bloco" href="#validades"><h3>${ico('cal')}Vence em 7 dias</h3><p><b>${venc.length} produto${venc.length === 1 ? '' : 's'}</b>${venc.length ? `<small>(total: ${numBR(venc.reduce((a, l) => a + l.q, 0), 1)} ${venc.every((l) => l.p.un === 'kg') ? 'kg' : 'un'})</small>` : '<small>nada vencendo</small>'}</p>${ico('seta')}</a>
+    <a class="bloco" href="#compras"><h3>${ico('alerta')}Repor agora</h3><p><b>${rep0.length} produto${rep0.length === 1 ? '' : 's'}</b><small>(abaixo do mín.)</small></p>${ico('seta')}</a>
+  </section>
   <section class="painel-meio">
-    <article class="bloco grafico"><header><h3>${ico('relat')}Vendas da semana</h3>${chip(varia(totS, totA), 'em relação à semana anterior')}</header>${linha(sem)}<p class="mudo">Total dos 7 dias: <b>${din(totS)}</b></p></article>
+    <article class="bloco grafico"><header><h3>${ico('relat')}Vendas da semana</h3>${chip(varia(totS, totA), 'em relação à semana anterior')}</header>${linha(sem)}<p class="fita">Total dos 7 dias: <b>${din(totS)}</b></p></article>
     <article class="bloco"><header><h3>${ico('cal')}Vence em 7 dias</h3><a class="seta-link" href="#validades" aria-label="Ver validades">${ico('seta')}</a></header>
-      ${vence.length ? `<ul class="lista-foto">${vence.map((l) => { const d = dias(h, l.val); return `<li>${foto(l.p)}<span><b>${t(l.p.nome)}</b><small>${d < 0 ? `Venceu em ${dataBR(l.val)}` : `Vence em ${dataBR(l.val).slice(0, 5)}`}</small></span><span class="tag ${d <= 2 ? 'verm' : 'ambar'}">${qtdTxt(l.p, l.q)}</span></li>`; }).join('')}</ul>` : '<p class="vazio">Nada vencendo nos próximos 7 dias.</p>'}</article>
+      ${vence.length ? `<ul class="lista-foto">${vence.map((l) => { const d = dias(h, l.val); return `<li>${foto(l.p)}<span><b>${t(l.p.nome)}</b><small>${d < 0 ? `Venceu em ${dataBR(l.val)}` : `Vence em ${dataBR(l.val)}`}</small></span><span class="tag ${d <= 2 ? 'verm' : 'ambar'}">${qtdTxt(l.p, l.q)}</span></li>`; }).join('')}</ul>` : '<p class="vazio">Nada vencendo nos próximos 7 dias.</p>'}</article>
     <article class="bloco"><header><h3>${ico('alerta')}Repor agora</h3><a class="seta-link" href="#compras" aria-label="Ver lista de compras">${ico('seta')}</a></header>
       ${repor.length ? `<ul class="lista-foto">${repor.map((p) => `<li>${foto(p)}<span><b>${t(p.nome)}</b><small>Estoque: ${qtdTxt(p)}</small></span><span class="tag ambar">Mín. ${numBR(p.min, 1)}</span></li>`).join('')}</ul>` : '<p class="vazio">Nenhum produto abaixo do mínimo.</p>'}</article>
   </section>
   <section class="painel-baixo">
     <article class="bloco"><header><h3>${ico('trofeu')}Mais vendidos ${base === vh ? 'hoje' : 'da semana'}</h3><span class="carro-bts"><button type="button" class="icone-bt" data-carro="-1" aria-label="Anteriores">‹</button><button type="button" class="icone-bt" data-carro="1" aria-label="Próximos">›</button></span></header>
-      <div class="carrossel" id="carrossel">${top.map((x) => `<a class="vitrine" href="#estoque" data-prod-v="${x.p.id}">${foto(x.p, 'grande')}<b>${t(x.p.nome)}</b><small>${x.q ? `${x.p.un === 'kg' ? `${numBR(x.q, 1)} kg` : `${numBR(x.q, 0)} un`} vendid${x.p.un === 'kg' ? 'os' : 'as'}` : ''}</small>${pode('custo') ? `<span class="lucro">↗ Lucro: ${din(x.l)}</span>` : ''}</a>`).join('') || '<p class="vazio">Ainda sem vendas.</p>'}</div></article>
+      <div class="carrossel" id="carrossel">${top.map((x) => `<a class="vitrine caixote" href="#estoque" data-prod-v="${x.p.id}"><span class="cx-foto">${foto(x.p, 'grande')}${pode('custo') ? `<i class="lucro" title="Lucro">↗ ${din(x.l)}</i>` : ''}</span><span class="rotulo"><b>${t(x.p.nome)}</b><small>${unTxt(x.p, x.q)} • ${din(x.r)}</small></span></a>`).join('') || '<p class="vazio">Ainda sem vendas.</p>'}</div></article>
     <article class="bloco"><header><h3>${ico('caixa')}Parados há 30 dias</h3><a class="seta-link" href="#estoque" data-ir-parados aria-label="Ver parados no estoque">${ico('seta')}</a></header>
-      ${parados().length ? `<ul class="lista-foto">${parados().slice(0, 3).map((p) => `<li>${foto(p)}<span><b>${t(p.nome)}</b><small>${ultimaVenda(p) ? `Última venda em ${dataBR(ultimaVenda(p))}` : 'Nunca vendeu'}</small></span><span class="tag cinza">${din(Math.round(p.q * p.custo))}</span></li>`).join('')}</ul><p class="mudo">Dinheiro parado: <b>${din(parados().reduce((a, p) => a + p.q * p.custo, 0))}</b></p>` : '<p class="vazio">Nenhum produto parado. Tudo girando.</p>'}
-      ${caixaTxt()}</article>
+      ${par.length ? `<ul class="lista-foto">${par.slice(0, 3).map((p) => `<li>${foto(p)}<span><b>${t(p.nome)}</b><small>${ultimaVenda(p) ? `Última venda há ${dias(ultimaVenda(p))} dias` : 'Nunca vendeu'}</small></span><span class="tag verm">${din(Math.round(p.q * p.custo))}</span></li>`).join('')}</ul><p class="mudo">Dinheiro parado: <b>${din(par.reduce((a, p) => a + p.q * p.custo, 0))}</b></p>` : '<p class="vazio">Nenhum produto parado. Tudo girando.</p>'}</article>
+  </section>
+  <section class="balcao">
+    <a class="quadro-caixa${c.aberto ? '' : ' fechado'}" href="#caixa">
+      <span class="qc-tit">${ico('registradora')}<span><b>${c.aberto ? 'Caixa aberto' : 'Caixa fechado'}<i class="qc-luz"></i></b><small>${c.aberto ? `${t(nomeTerm(TERM()))} · aberto ${c.ab.slice(0, 10) === h ? 'hoje' : `em ${dataBR(c.ab)}`} às ${horaBR(c.ab)}` : `${t(nomeTerm(TERM()))} · toque para abrir`}</small></span></span>
+      ${rc ? `<span class="qc-n"><small>Vendas no caixa</small><b>${din(rc.total)}</b></span><span class="qc-n"><small>Sangria</small><b>${din(rc.san)}</b></span><span class="qc-n"><small>Suprimento</small><b>${din(rc.sup)}</b></span><span class="qc-op"><small>${t(nomeTerm(TERM()))}</small><b>Operador: ${t((c.quem || eu().nome).split(' ')[0])}</b></span>` : '<span class="qc-n"><b class="qc-abrir">Abrir o caixa</b></span>'}
+    </a>
   </section>`;
 };
 // gráfico de linha suave (SVG) com área, pontos e o maior dia destacado
@@ -617,30 +678,41 @@ function quanto(p, ok) {
   ok(1, false);
 }
 TELAS.vender = () => {
-  const v = estado.venda, tot = totalVenda(), sub = v.itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0);
-  const rapidos = maisVendidos(10);
-  return `<section class="pdv">
+  const v = estado.venda, tot = totalVenda(), sub = v.itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0), f = v.forma || 'dinheiro';
+  const vc = estado.vcat || '', ordem = maisVendidos(400), lista = vc ? ordem.filter((p) => p.cat === vc).concat(ativos().filter((p) => p.cat === vc && !ordem.includes(p))) : maisVendidos(12);
+  const c = CXA(), nIt = v.itens.reduce((a, x) => a + (prod(x.p) && prod(x.p).un === 'kg' ? 1 : x.q), 0);
+  const rec = lerDin(v.receb || ''), troco = rec > tot ? rec - tot : 0;
+  const FPG = [['dinheiro', 'nota', 'Dinheiro'], ['pix', 'pix', 'Pix'], ['debito', 'cartao', 'Débito'], ['credito', 'cartao', 'Crédito'], ['fiado', 'pessoa', 'Fiado']];
+  return `<section class="pdv-cab">
+    <div class="pdv-tit">${ico('sacola')}<div><h2>Vender (Caixa)</h2><p>Registre as vendas do balcão.</p></div></div>
+    <a class="cx-cartao${c.aberto ? '' : ' fechado'}" href="#caixa">${ico('registradora')}<span><b><i class="qc-luz"></i>${t(nomeTerm(TERM()))}<span class="cx-st"> – ${c.aberto ? 'Aberto' : 'Fechado'}</span></b><small>Operador: ${t(eu().nome.split(' ')[0])}</small></span></a>
+    <div class="atalhos"><b>${ico('teclado')}Atalhos de teclado</b><span><kbd>F2</kbd>Buscar</span><span><kbd>F3</kbd>Desconto</span><span><kbd>F4</kbd>Cliente (Fiado)</span><span><kbd>F5</kbd>Pagamento</span></div>
+  </section>
+  <section class="pdv">
     <div class="pdv-esq">
-      <form class="leitor" id="f-leitor" autocomplete="off"><span>${ico('busca')}</span><input id="leitor" placeholder="Passe o código no leitor ou digite o nome" aria-label="Código de barras ou nome do produto" autofocus><button type="button" class="icone-bt" data-acao="camera-venda" aria-label="Ler código pela câmera">${ico('cam')}</button></form>
+      <form class="leitor" id="f-leitor" autocomplete="off"><span>${ico('busca')}</span><input id="leitor" placeholder="Passe o código no leitor ou digite o nome do produto" aria-label="Código de barras ou nome do produto" autofocus><button type="button" class="icone-bt" data-acao="camera-venda" aria-label="Ler código pela câmera">${ico('cam')}</button></form>
       <div class="sugestoes" id="sugestoes"></div>
-      <h3 class="mini-tit">Mais vendidos</h3>
-      <div class="rapidos">${rapidos.map((p) => `<button type="button" class="rapido" data-por="${p.id}">${foto(p)}<b>${t(p.nome)}</b><span>${din(precoAgora(p))}${p.un === 'kg' ? '/kg' : ''}</span>${hhAgora(p) ? '<i class="hh-on">happy hour agora</i>' : ''}${p.dose ? `<i>dose ${din(p.dose.preco)}</i>` : ''}</button>`).join('')}</div>
+      <div class="trilho-cat"><div class="cats-etq" role="toolbar" aria-label="Categorias">${[['', 'Todos', 'cesta'], ...cats().map((x) => [x, x, ICO_CAT(x)])].map(([k, n, i]) => `<button type="button" class="etq-pend${vc === k ? ' on' : ''}" data-vcat="${t(k)}" aria-pressed="${vc === k}">${ico(i)}<span>${t(n)}</span></button>`).join('')}</div></div>
+      <div class="caixotes">${lista.map((p) => `<button type="button" class="caixote-p" data-por="${p.id}"><span class="cx-foto">${foto(p)}</span><span class="gondola"><b>${t(p.nome)}</b><span class="preco">${din(precoAgora(p))}${p.un === 'kg' ? '<small> / kg</small>' : ''}</span></span></button>`).join('') || '<p class="vazio">Nenhum produto nesta categoria.</p>'}</div>
     </div>
-    <aside class="pdv-dir bloco">
-      <header><h3>${ico('sacola')}Venda no balcão</h3>${v.itens.length ? '<button type="button" class="link" data-acao="limpar-venda">Limpar</button>' : ''}</header>
-      ${v.itens.length ? `<ul class="itens">${v.itens.map((x, i) => itemLinha(x, i, 'venda')).join('')}</ul>` : '<p class="vazio">Passe o primeiro produto no leitor, digite o nome ou toque num dos mais vendidos.</p>'}
-      <dl class="soma"><div><dt>Subtotal</dt><dd>${din(sub)}</dd></div>${v.desc ? `<div><dt>Desconto</dt><dd>− ${din(v.desc)}</dd></div>` : ''}<div class="total"><dt>Total</dt><dd>${din(tot)}</dd></div></dl>
-      <div class="pdv-acoes"><button type="button" class="bt" data-acao="desconto" ${v.itens.length ? '' : 'disabled'}>Desconto</button><button type="button" class="bt cheio verde grande" data-acao="pagar-venda" ${v.itens.length ? '' : 'disabled'}>Receber ${din(tot)}</button></div>
-      ${CXA().aberto ? '' : '<p class="aviso-mini">Este caixa está fechado. Você pode vender; o dinheiro entra no próximo caixa aberto.</p>'}
-    </aside></section>`;
+    <aside class="pdv-dir cupom-v" id="cupom" aria-label="Cupom da venda">
+      <header><h3>${ico('sacola')}Cupom da venda</h3>${v.itens.length ? '<button type="button" class="link" data-acao="limpar-venda">Limpar</button>' : ''}</header>
+      ${v.itens.length ? `<ul class="itens">${v.itens.map((x, i) => itemLinha(x, i, 'venda')).join('')}</ul>` : '<p class="vazio">Passe o primeiro produto no leitor, digite o nome ou toque num caixote.</p>'}
+      <dl class="soma"><div><dt>Subtotal (${numBR(nIt, 0)} ${nIt === 1 ? 'item' : 'itens'})</dt><dd>${din(sub)}</dd></div><div class="desc-l"><dt>Desconto <button type="button" class="pct" data-acao="desconto" aria-label="Dar desconto" ${v.itens.length ? '' : 'disabled'}>%</button></dt><dd class="${v.desc ? 'desc-v' : ''}">${v.desc ? `− ${din(v.desc)}` : din(0)}</dd></div></dl>
+      <div class="total-pagar"><span>Total a pagar</span><b>${din(tot)}</b></div>
+      <div class="formas-pg" role="radiogroup" aria-label="Forma de pagamento">${FPG.map(([k, i, n]) => `<button type="button" class="fpg${f === k ? ' on' : ''}" data-fpg="${k}" role="radio" aria-checked="${f === k}">${ico(i)}<span>${n}</span></button>`).join('')}</div>
+      ${f === 'dinheiro' ? `<div class="receb-troco"><label>Recebido<input id="pg-receb" inputmode="decimal" placeholder="R$ 0,00" value="${t(v.receb || '')}"></label><div class="troco"><span>Troco</span><b id="pg-troco">${din(troco)}</b></div></div>` : f === 'fiado' ? '<p class="dica-pg">No Receber você escolhe o cliente do fiado.</p>' : f === 'pix' ? '<p class="dica-pg">No Receber aparece o QR do Pix com o valor.</p>' : ''}
+      <button type="button" class="bt receber" data-acao="receber-cupom" ${v.itens.length ? '' : 'disabled'}>${ico('okc')}Receber ${din(tot)}</button>
+      ${v.itens.length ? '<button type="button" class="link dividir" data-acao="pagar-venda">Dividir em mais de uma forma</button>' : ''}
+      ${c.aberto ? '' : '<p class="aviso-mini">Este caixa está fechado. Você pode vender; o dinheiro entra no próximo caixa aberto.</p>'}
+    </aside></section>
+  ${v.itens.length ? `<div class="barra-cupom"><a href="#cupom" data-ir-cupom>${ico('sacola')}<span>${numBR(nIt, 0)} ${nIt === 1 ? 'item' : 'itens'} · <b>${din(tot)}</b></span></a><button type="button" class="bt receber" data-ir-cupom>${ico('ok')}Receber</button></div>` : ''}`;
 };
 function itemLinha(x, i, onde) {
   const p = prod(x.p), kg = p && p.un === 'kg' && !x.dose;
-  const CZ = { novo: ['Na fila da cozinha', 'ambar'], prep: ['Preparando', 'ambar'], pronto: ['Pronto: levar à mesa', 'verde'], entregue: ['Entregue', 'cinza'] };
-  const extra = [x.hh ? '<span class="tag ouro-tag">happy hour</span>' : '', x.cz ? `<span class="tag ${CZ[x.cz][1]}">${CZ[x.cz][0]}</span>` : '', (x.adics || []).length ? `<small class="adic">+ ${t(x.adics.map((a) => a.n).join(', '))}</small>` : '', x.obs ? `<small class="obs">“${t(x.obs)}”</small>` : ''].join('');
-  return `<li>${foto(p, 'mini')}<div><b>${t(x.nome)}</b><small>${kg ? `${numBR(x.q)} kg × ${din(x.preco)}` : `${din(x.preco)} cada`}</small>${extra}${onde !== 'venda' && p && !x.dose && (p.cozinha || (p.adics || []).length) ? `<button type="button" class="link mini-link" data-obs="${onde}:${i}">${x.obs || (x.adics || []).length ? 'Mudar observação' : '+ Observação ou adicional'}</button>` : ''}${x.cz === 'pronto' ? `<button type="button" class="link mini-link" data-entregue="${onde}:${i}">Marcar como entregue</button>` : ''}</div>
-    <div class="qtd">${kg ? '' : `<button type="button" class="icone-bt" data-menos="${onde}:${i}" aria-label="Tirar um">${ico('menos')}</button><span>${numBR(x.q, 0)}</span><button type="button" class="icone-bt" data-mais="${onde}:${i}" aria-label="Mais um">${ico('mais')}</button>`}</div>
-    <b class="vl">${din(Math.round(x.q * x.preco))}</b><button type="button" class="icone-bt" data-tira="${onde}:${i}" aria-label="Tirar ${t(x.nome)}">${ico('lixo')}</button></li>`;
+  return `<li>${foto(p, 'mini')}<div><b>${t(x.nome)}</b><small>${kg ? `${numBR(x.q)} kg × ${din(x.preco)}/kg` : `${numBR(x.q, 0)} un × ${din(x.preco)}`}</small></div>
+    <div class="qtd"><button type="button" class="icone-bt" data-menos="${onde}:${i}" aria-label="Tirar ${kg ? '100 g' : 'um'}">${ico('menos')}</button><input class="q-in" data-q="${onde}:${i}" value="${kg ? numBR(x.q) : numBR(x.q, 0)}" inputmode="decimal" aria-label="Quantidade de ${t(x.nome)}"><button type="button" class="icone-bt" data-mais="${onde}:${i}" aria-label="Mais ${kg ? '100 g' : 'um'}">${ico('mais')}</button></div>
+    <b class="vl">${din(Math.round(x.q * x.preco))}</b><button type="button" class="icone-bt tira" data-tira="${onde}:${i}" aria-label="Tirar ${t(x.nome)}">${ico('x')}</button></li>`;
 }
 function maisVendidos(n) {
   const c = {}; vendasEntre(somaDias(hoje(), -29), hoje()).forEach((v) => v.itens.forEach((x) => { c[x.p] = (c[x.p] || 0) + (x.dose ? x.q * 0.4 : x.q); }));
@@ -673,7 +745,7 @@ function lerNoBalcao(txt) {
 }
 
 // pagamento (balcão e mesa usam o mesmo)
-function pagar({ itens, desc = 0, servico = 0, titulo, origem, mesa = null, depois }) {
+function pagar({ itens, desc = 0, servico = 0, titulo, origem, mesa = null, depois, preForma = '' }) {
   const bruto = itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0), total = Math.max(0, bruto - desc + servico);
   const pag = [];
   const resta = () => total - pag.reduce((s, x) => s + x.v, 0);
@@ -720,15 +792,29 @@ function pagar({ itens, desc = 0, servico = 0, titulo, origem, mesa = null, depo
       }
       pag.push({ f, v }); ex.innerHTML = ''; desenha(j);
     }));
-    $('#pg-fim', j).addEventListener('click', () => {
-      const venda = { id: uid('v'), cx: TERM(), n: (db.vendas.at(-1) || { n: 0 }).n + 1, data: agora(), itens: itens.map((x) => ({ ...x })), total, desc, servico, pag: pag.map((x) => ({ ...x })), origem, mesa, vend: db.usuario };
-      venda.itens.forEach((x) => { const p = prod(x.p); if (p) baixar(p, qBaixa(x)); });
-      pag.filter((x) => x.f === 'fiado').forEach((x) => db.fiado.push({ id: uid('f'), cli: x.cli, data: venda.data, tipo: 'compra', v: x.v, venda: venda.id, obs: `Venda nº ${venda.n}` }));
-      if (desc) registra(`Desconto de ${din(desc)} na venda nº ${venda.n}`, 'desconto');
-      db.vendas.push(venda); grava(); fechar(); depois && depois(venda); comprovante(venda);
-    });
+    $('#pg-fim', j).addEventListener('click', () => fechaVenda({ itens, total, desc, servico, pag, origem, mesa, depois }));
+    if (preForma) setTimeout(() => { const b = $(`[data-f="${preForma}"]`, j); if (b) b.click(); }, 30);
   });
   abrirPg();
+}
+// grava a venda, baixa o estoque, lança o fiado e mostra o comprovante
+function fechaVenda({ itens, total, desc = 0, servico = 0, pag, origem, mesa = null, depois }) {
+  const venda = { id: uid('v'), cx: TERM(), n: (db.vendas.at(-1) || { n: 0 }).n + 1, data: agora(), itens: itens.map((x) => ({ ...x })), total, desc, servico, pag: pag.map((x) => ({ ...x })), origem, mesa, vend: db.usuario };
+  venda.itens.forEach((x) => { const p = prod(x.p); if (p) baixar(p, qBaixa(x)); });
+  pag.filter((x) => x.f === 'fiado').forEach((x) => db.fiado.push({ id: uid('f'), cli: x.cli, data: venda.data, tipo: 'compra', v: x.v, venda: venda.id, obs: `Venda nº ${venda.n}` }));
+  if (desc) registra(`Desconto de ${din(desc)} na venda nº ${venda.n}`, 'desconto');
+  db.vendas.push(venda); grava(); fechar(); depois && depois(venda); comprovante(venda);
+}
+// Receber do cupom: dinheiro, débito e crédito fecham na hora; Pix (QR) e fiado (cliente) abrem a janela já na forma escolhida
+const vendaNova = () => { estado.venda = { itens: [], cli: '', desc: 0, forma: 'dinheiro', receb: '' }; };
+function receberCupom() {
+  const v = estado.venda; if (!v.itens.length) { toast('Passe um produto primeiro.', true); return; }
+  const tot = totalVenda(), f = v.forma || 'dinheiro', depois = () => { vendaNova(); mostra(); };
+  if (f === 'pix' || f === 'fiado') { pagar({ itens: v.itens, desc: v.desc, titulo: 'Receber', origem: 'balcao', preForma: f, depois }); return; }
+  let pg;
+  if (f === 'dinheiro') { const rec = lerDin(v.receb || ''); if (rec && rec < tot) { toast(`Recebido menor que o total (falta ${din(tot - rec)}). Use "Dividir em mais de uma forma".`, true); return; } pg = [{ f, v: tot, troco: rec > tot ? rec - tot : 0 }]; }
+  else pg = [{ f, v: tot }];
+  fechaVenda({ itens: v.itens, total: tot, desc: v.desc, pag: pg, origem: 'balcao', depois });
 }
 // imprime direto por um quadro escondido (sem abrir janela). No Chrome aberto com --kiosk-printing, sai sem perguntar nada.
 function imprimir(txt) {
@@ -787,13 +873,31 @@ TELAS.estoque = () => {
   const f = sa(estado.filtro), c = estado.cat;
   const pr = new Set(parados().map((x) => x.id)), l = ativos().filter((p) => (!c || (c === '_baixo' ? baixos().includes(p) : c === '_parado' ? pr.has(p.id) : p.cat === c)) && (!f || sa(p.nome).includes(f) || p.cod.includes(estado.filtro.trim()))).sort((a, b) => a.cat.localeCompare(b.cat) || a.nome.localeCompare(b.nome));
   const nBaixo = baixos().length;
-  return `<section class="cab-tela"><div><h2>Estoque</h2><p>${ativos().length} produtos · ${din(valorEstoque())} em mercadoria pelo custo.</p></div><div class="acoes"><button type="button" class="bt" data-acao="exportar-estoque">Planilha</button><button type="button" class="bt" data-acao="importar">Importar planilha</button><button type="button" class="bt" data-acao="reajuste">Reajustar preços</button><button type="button" class="bt" data-acao="etiquetas">${ico('imp')}Imprimir etiquetas</button><button type="button" class="bt cheio" data-acao="novo-produto">${ico('mais')}Novo produto</button></div></section>
+  const sel = (l.find((p) => p.id === estado.sel) || l[0] || null);
+  return `<section class="cab-tela com-ico">${ico('caixa')}<div><h2>Estoque</h2><p>${ativos().length} produtos · ${din(valorEstoque())} em mercadoria pelo custo</p></div><div class="acoes"><button type="button" class="bt verde-claro" data-acao="exportar-estoque">${ico('planilha')}Planilha</button><button type="button" class="bt" data-acao="importar" title="Importar planilha">Importar</button><button type="button" class="bt" data-acao="reajuste">${ico('etiqueta')}Reajustar preços</button><button type="button" class="bt" data-acao="etiquetas">${ico('imp')}Imprimir etiquetas</button><button type="button" class="bt cheio" data-acao="novo-produto">${ico('mais')}Novo produto</button></div></section>
+  <div class="est-grade"><div class="est-esq">
   <form class="leitor" id="f-busca-est" autocomplete="off"><span>${ico('busca')}</span><input id="busca-est" value="${t(estado.filtro)}" placeholder="Buscar pelo nome ou passar o código" aria-label="Buscar produto"><button type="button" class="icone-bt" data-acao="camera-estoque" aria-label="Ler código pela câmera">${ico('cam')}</button></form>
-  <div class="chips"><button type="button" class="chip${!c ? ' on' : ''}" data-cat="">Todos</button><button type="button" class="chip alerta${c === '_baixo' ? ' on' : ''}" data-cat="_baixo">Repor (${nBaixo})</button><button type="button" class="chip${c === '_parado' ? ' on' : ''}" data-cat="_parado">Parados há 30 dias (${pr.size})</button>${cats().map((x) => `<button type="button" class="chip${c === x ? ' on' : ''}" data-cat="${t(x)}">${t(x)}</button>`).join('')}</div>
-  <section class="bloco sem-pad"><table class="tab grande"><thead><tr><th>Produto</th><th>Estoque</th><th class="so-pc">Mínimo</th><th class="so-pc">Custo</th><th>Preço</th><th class="so-pc">Margem</th><th class="so-pc">Dura</th><th class="so-pc">Validade mais próxima</th></tr></thead><tbody>
-  ${l.map((p) => { const s = situ(p), lv = (p.lotes || []).filter((x) => x.val).sort((a, b) => a.val.localeCompare(b.val))[0]; return `<tr class="clica" data-prod="${p.id}"><td><span class="com-foto">${foto(p, 'mini')}<span><b>${t(p.nome)}</b><small class="cod">${t(p.cat)} · <span class="cod-num">${tipoBarras(p.cod).tipo ? `<span class="mini-barras" title="Código de barras ${t(tipoBarras(p.cod).tipo)}">${ico('barras')}</span>` : ''}${t(p.cod)}</span>${p.dose ? ` · dose ${p.dose.doseMl} ml` : ''}</small></span></span></td><td><span class="tag ${s === 'ok' ? 'verde' : s === 'baixo' ? 'ambar' : 'verm'}">${qtdTxt(p)}</span></td><td class="so-pc">${qtdTxt(p, p.min)}</td><td class="so-pc">${din(p.custo)}</td><td>${din(p.preco)}${p.un === 'kg' ? '/kg' : ''}${p.dose ? `<small class="cod">dose ${din(p.dose.preco)}</small>` : ''}${p.hh ? `<small class="cod hh-txt">${t(hhTxt(p))}</small>` : ''}</td><td class="so-pc">${margem(p.preco, p.custo).toLocaleString('pt-BR')}%</td><td class="so-pc"><span class="tag ${duraTxt(p) === 'parado' ? 'cinza' : duraDias(p) < 7 ? 'ambar' : 'verde'}">${duraTxt(p)}</span></td><td class="so-pc">${lv ? `<span class="tag ${dias(hoje(), lv.val) <= 7 ? 'ambar' : 'cinza'}">${dataBR(lv.val)}</span>` : '<span class="mudo">—</span>'}</td></tr>`; }).join('') || '<tr><td colspan="8" class="vazio">Nenhum produto encontrado.</td></tr>'}
-  </tbody></table></section>`;
+  <div class="trilho-cat"><div class="cats-etq">${[['', 'Todos', 'cesta'], ['_baixo', `Repor (${nBaixo})`, 'alerta'], ['_parado', `Parados há 30 dias (${pr.size})`, 'ampulheta'], ...cats().map((x) => [x, x, ICO_CAT(x)])].map(([k, n, i]) => `<button type="button" class="chip etq-pend${c === k ? ' on' : ''}${k === '_baixo' ? ' alerta' : ''}" data-cat="${t(k)}" aria-pressed="${c === k}">${ico(i)}<span>${t(n)}</span></button>`).join('')}</div></div>
+  <section class="bloco sem-pad tab-est"><table class="tab grande"><thead><tr><th>Produto</th><th>Estoque</th><th class="so-pc">Mínimo</th><th class="so-pc">Custo</th><th>Preço</th><th class="so-pc">Margem</th><th class="so-pc">Dura</th><th class="so-pc">Validade <small>(lote próximo)</small></th><th class="so-pc" aria-label="Abrir"></th></tr></thead><tbody>
+  ${l.map((p) => { const s = situ(p), lv = (p.lotes || []).filter((x) => x.val).sort((a, b) => a.val.localeCompare(b.val))[0]; return `<tr class="clica${sel && sel.id === p.id ? ' sel' : ''}" data-prod="${p.id}"><td class="c-prod"><span class="com-foto">${foto(p, 'mini')}<span><b>${t(p.nome)}</b><small class="cod"><span class="cat-txt">${t(p.cat)} · </span><span class="cod-num">${tipoBarras(p.cod).tipo ? `<span class="mini-barras" title="Código de barras ${t(tipoBarras(p.cod).tipo)}">${ico('barras')}</span>` : ''}${t(p.cod)}</span>${p.dose ? ` · dose ${p.dose.doseMl} ml` : ''}</small></span></span></td><td class="c-est"><span class="tag ${s === 'ok' ? 'verde' : s === 'baixo' ? 'ambar' : 'verm'}"><i class="so-cel">Estoque: </i>${qtdTxt(p)}</span></td><td class="so-pc">${qtdTxt(p, p.min)}</td><td class="so-pc">${din(p.custo)}</td><td class="c-preco">${din(p.preco)}${p.un === 'kg' ? '/kg' : ''}${p.dose ? `<small class="cod">dose ${din(p.dose.preco)}</small>` : ''}${p.hh ? `<small class="cod hh-txt">${t(hhTxt(p))}</small>` : ''}</td><td class="so-pc c-marg">${margem(p.preco, p.custo).toLocaleString('pt-BR')}%</td><td class="c-dura"><span class="dura ${duraTxt(p) === 'parado' ? 'parado' : duraDias(p) < 7 ? 'curta' : ''}">${ico('cal')}${duraTxt(p) === '—' ? '—' : `<i class="so-cel">Dura </i>${duraTxt(p)}`}</span></td><td class="so-pc c-val">${lv ? `<span class="val${dias(hoje(), lv.val) <= 7 ? ' perto' : ''}">${ico('cal')}${dataBR(lv.val)}</span>` : '<span class="mudo">—</span>'}</td><td class="c-seta">${ico('seta')}</td></tr>`; }).join('') || '<tr><td colspan="9" class="vazio">Nenhum produto encontrado.</td></tr>'}
+  </tbody></table></section></div>
+  ${sel ? `<aside class="ficha-lado">${ficha(sel)}</aside>` : ''}</div>`;
 };
+function ficha(p) {
+  const s = situ(p), lotes = (p.lotes || []).filter((l) => l.q > 0.0005).sort((a, b) => String(a.val || '9').localeCompare(String(b.val || '9')));
+  const de = somaDias(hoje(), -6), ag = {};
+  movimentos(p).filter((m) => m.d.slice(0, 10) >= de).forEach((m) => { const tipo = m.t.startsWith('Perda') ? 'Perda' : m.t.startsWith('Ajuste') ? 'Ajuste' : m.t; const k = `${m.d.slice(0, 10)}|${tipo}`; ag[k] ||= { d: m.d.slice(0, 10), t: tipo, q: 0, mot: m.t.match(/\((.*)\)/) }; ag[k].q = r3(ag[k].q + m.q); });
+  const hist = Object.values(ag).sort((a, b) => b.d.localeCompare(a.d)).slice(0, 5);
+  return `<div class="ficha" data-ficha="${p.id}">
+    <header><h3>${t(p.nome)}</h3><p>Cód. de barras: ${t(p.cod || '—')}<br>Categoria: ${t(p.cat || '—')}</p></header>
+    <div class="ficha-cx"><span class="caixote-g">${foto(p, 'grande')}</span><div class="gondola g-grande"><b>${t(p.nome)}</b><span class="preco">${din(p.preco)}${p.un === 'kg' ? '<small> / kg</small>' : ''}</span>${p.cod && tipoBarras(p.cod).tipo ? barrasSVG(p.cod, { alt: 26, numeros: false }) : ''}</div></div>
+    <div class="ficha-n"><div class="fn ${s === 'ok' ? 'ok' : s === 'baixo' ? 'baixo' : 'zero'}">${ico('moedas')}<span><small>Estoque atual</small><b>${p.semEstoque ? '—' : qtdTxt(p)}</b></span></div><div class="fn min">${ico('alerta')}<span><small>Estoque mínimo</small><b>${qtdTxt(p, p.min)}</b></span></div></div>
+    <section class="ficha-bl"><h4>${ico('relat')}Histórico <small>(últimos 7 dias)</small></h4>${hist.length ? `<ul class="hist-mini">${hist.map((m) => `<li class="${m.q >= 0 ? 'mais' : 'menos'}"><i>${m.q >= 0 ? '+' : '−'}</i><span>${m.t}: ${qtdTxt(p, Math.abs(m.q))}${m.t === 'Perda' && m.mot ? ` (${t(m.mot[1].toLowerCase())})` : ''}</span><time>${dataBR(m.d)}</time></li>`).join('')}</ul>` : '<p class="mudo">Sem movimento nos últimos 7 dias.</p>'}<button type="button" class="link" data-f-hist="${p.id}">Ver o histórico inteiro</button></section>
+    <section class="ficha-bl"><h4>${ico('cal')}Lotes e validade</h4>${lotes.length ? `<table class="lotes"><thead><tr><th>Lote</th><th>Validade</th><th>Quant.</th></tr></thead><tbody>${lotes.slice(0, 4).map((l) => `<tr><td>${t(l.lote || '—')}</td><td${l.val && dias(hoje(), l.val) <= 7 ? ' class="verm-txt"' : ''}>${dataBR(l.val) || '—'}</td><td><span class="tag ${l.val && dias(hoje(), l.val) <= 7 ? 'ambar' : 'verde'}">${qtdTxt(p, l.q)}</span></td></tr>`).join('')}</tbody></table>` : '<p class="mudo">Nenhum lote com validade. Dê entrada com o lote e a validade para acompanhar aqui.</p>'}</section>
+    <div class="ficha-acoes"><button type="button" class="bt verde" data-f-ent="${p.id}">${ico('mais')}Dar entrada</button><button type="button" class="bt perigo" data-f-perda="${p.id}">${ico('lixo')}Registrar perda</button><button type="button" class="bt" data-f-ajuste="${p.id}">${ico('lapis')}Corrigir estoque</button><button type="button" class="bt" data-f-edit="${p.id}">${ico('engrenagem')}Editar produto</button></div>
+  </div>`;
+}
+function abreFicha(p) { abrir(`${cab('Produto')}${ficha(p)}`, null, true); }
 function formProduto(base = {}) {
   const p = base.id ? base : { nome: '', cat: '', un: 'un', custo: 0, preco: 0, q: 0, min: 0, forn: '', cod: '', ...base };
   const ed = !!p.id;
@@ -857,7 +961,7 @@ function formProduto(base = {}) {
   });
 }
 // histórico do produto: tudo o que entrou e saiu, do mais novo ao mais antigo, com o saldo depois de cada movimento
-function historico(p) {
+function movimentos(p) {
   const mv = [];
   db.entradas.forEach((e) => e.itens.filter((x) => x.p === p.id).forEach((x) => mv.push({ d: `${e.data}T08:00:00`, t: 'Entrada', q: x.q, ref: `${(forn(e.forn) || {}).nome || 'Fornecedor'}${e.nota ? ` · nota ${e.nota}` : ''}` })));
   db.vendas.forEach((v) => v.itens.filter((x) => x.p === p.id).forEach((x) => { mv.push({ d: v.data, t: 'Venda', q: -x.q, ref: `nº ${v.n} · ${nomeU(v.vend)}` }); if (v.cancelada) mv.push({ d: v.cancelada.data, t: 'Venda cancelada', q: x.q, ref: `nº ${v.n} · ${v.cancelada.motivo}` }); }));
@@ -865,6 +969,10 @@ function historico(p) {
   (db.ajustes || []).filter((x) => x.p === p.id).forEach((x) => mv.push({ d: x.data, t: `Ajuste (${x.motivo})`, q: x.q, ref: x.obs || '' }));
   mv.sort((a, b) => b.d.localeCompare(a.d));
   let saldo = p.q; mv.forEach((m) => { m.saldo = saldo; saldo = r3(saldo - m.q); });
+  return mv;
+}
+function historico(p) {
+  const mv = movimentos(p);
   const ent = mv.filter((m) => m.q > 0 && m.t === 'Entrada').reduce((a, m) => a + m.q, 0), sai = mv.filter((m) => m.t === 'Venda').reduce((a, m) => a - m.q, 0), per = mv.filter((m) => m.t.startsWith('Perda')).reduce((a, m) => a - m.q, 0);
   abrir(`${cab(`Histórico: ${t(p.nome)}`, `Agora: ${qtdTxt(p)} · entrou ${numBR(ent)} · vendeu ${numBR(sai)} · perdeu ${numBR(per)}`)}<div class="hist"><table class="tab"><thead><tr><th>Quando</th><th>O que foi</th><th>Qtd.</th><th>Ficou</th></tr></thead><tbody>${mv.slice(0, 120).map((m) => `<tr><td>${dataBR(m.d)} <small class="cod">${horaBR(m.d)}</small></td><td>${t(m.t)}<small class="cod">${t(m.ref)}</small></td><td class="${m.q < 0 ? 'verm-txt' : 'ok-txt'}">${m.q > 0 ? '+' : ''}${numBR(m.q)}</td><td>${numBR(m.saldo)}</td></tr>`).join('') || '<tr><td colspan="4" class="vazio">Nenhum movimento ainda.</td></tr>'}</tbody></table></div><footer class="j-pe"><button type="button" class="bt cheio" data-fechar>Ok</button></footer>`, null, true);
 }
@@ -976,7 +1084,7 @@ TELAS.entradas = (sub) => {
 };
 function formEntrada(pre = null) {
   const linhas = pre ? pre.itens : [{ nome: '', q: '', custo: '', lote: '', val: '' }];
-  abrir(`${cab(pre ? 'Conferir a nota' : 'Dar entrada', pre ? `${t(pre.fornNome || '')} · nota ${t(pre.nota || '')}` : 'Mercadoria que chegou')}<form class="form" id="f-ent">
+  abrir(`${cab(pre && !pre.manual ? 'Conferir a nota' : 'Dar entrada', pre && !pre.manual ? `${t(pre.fornNome || '')} · nota ${t(pre.nota || '')}` : 'Mercadoria que chegou')}<form class="form" id="f-ent">
     <div class="duas"><label>Fornecedor<input name="forn" list="dl-forn" value="${t(pre ? pre.fornNome : '')}" placeholder="Nome do fornecedor"></label><label>Número da nota<input name="nota" value="${t(pre ? pre.nota : '')}" placeholder="Opcional"></label></div>
     <div class="ent-linhas" id="ent-linhas"></div>
     <button type="button" class="bt" data-mais-linha>${ico('mais')}Mais um produto</button>
@@ -1243,8 +1351,21 @@ const GUIA = [
   ['Vários caixas e balança', 'Em Configurações, crie o Caixa 2, o Caixa 3… e em cada computador escolha qual caixa ele é: cada um abre, faz sangria e fecha separado. Com balança etiquetadora, ligue “Ler a etiqueta da balança” e preencha o código PLU do produto.'],
   ['Caixa do dia e relatórios', 'Abra o caixa com o troco e feche contando a gaveta. Nos relatórios, veja vendas, lucro de verdade (já tirando as perdas) e quais produtos dão mais lucro.'],
 ];
+// movimentações: tudo o que entrou e saiu do estoque (entradas, vendas, perdas e ajustes), de todos os produtos
+TELAS.movimentacoes = () => {
+  const k = estado.mper || '7', tp = estado.mtipo || '', [de, ate] = periodo(k), b = sa(estado.mbusca || '');
+  const mv = ativos().flatMap((p) => movimentos(p).map((m) => ({ ...m, p }))).filter((m) => m.d.slice(0, 10) >= de && m.d.slice(0, 10) <= ate)
+    .filter((m) => !tp || (tp === 'Perda' ? m.t.startsWith('Perda') : tp === 'Ajuste' ? m.t.startsWith('Ajuste') : m.t === tp)).filter((m) => !b || sa(m.p.nome).includes(b)).sort((a, x) => x.d.localeCompare(a.d));
+  const soma = (f) => mv.filter(f).reduce((a, m) => a + Math.round(Math.abs(m.q) * m.p.custo), 0);
+  return `<section class="cab-tela com-ico">${ico('cal')}<div><h2>Movimentações</h2><p>Tudo o que entrou e saiu do estoque: entradas, vendas, perdas e correções.</p></div><div class="acoes"><button type="button" class="bt" data-acao="exportar-mov">${ico('planilha')}Planilha</button><button type="button" class="bt cheio ouro" data-acao="nova-entrada">${ico('mais')}Dar entrada</button></div></section>
+  <div class="chips">${[['hoje', 'Hoje'], ['7', '7 dias'], ['30', '30 dias'], ['mes', 'Este mês']].map(([v, n]) => `<button type="button" class="chip${k === v ? ' on' : ''}" data-mper="${v}">${n}</button>`).join('')}<span class="chips-sep"></span>${[['', 'Tudo'], ['Entrada', 'Entradas'], ['Venda', 'Vendas'], ['Perda', 'Perdas'], ['Ajuste', 'Correções']].map(([v, n]) => `<button type="button" class="chip${tp === v ? ' on' : ''}" data-mtipo="${v}">${n}</button>`).join('')}</div>
+  <section class="cartoes tres"><div class="cartao"><span class="c-ico verde">${ico('mais')}</span><div><small>Entrou (pelo custo)</small><b>${din(soma((m) => m.t === 'Entrada'))}</b></div></div><div class="cartao"><span class="c-ico azul">${ico('sacola')}</span><div><small>Saiu em vendas (pelo custo)</small><b>${din(soma((m) => m.t === 'Venda'))}</b></div></div><div class="cartao"><span class="c-ico ouro">${ico('alerta')}</span><div><small>Perdas</small><b>${din(soma((m) => m.t.startsWith('Perda')))}</b></div></div></section>
+  <form class="leitor" id="f-mbusca" autocomplete="off"><span>${ico('busca')}</span><input id="mbusca" value="${t(estado.mbusca || '')}" placeholder="Filtrar pelo nome do produto" aria-label="Filtrar movimentações"></form>
+  <section class="bloco sem-pad"><table class="tab grande"><thead><tr><th>Quando</th><th>Produto</th><th>O que foi</th><th>Qtd.</th><th class="so-pc">Ficou</th></tr></thead><tbody>
+  ${mv.slice(0, 300).map((m) => `<tr class="clica" data-prod="${m.p.id}"><td>${dataBR(m.d)} <small class="cod">${horaBR(m.d)}</small></td><td><span class="com-foto">${foto(m.p, 'mini')}<b>${t(m.p.nome)}</b></span></td><td>${t(m.t)}<small class="cod">${t(m.ref)}</small></td><td class="${m.q < 0 ? 'verm-txt' : 'ok-txt'}"><b>${m.q > 0 ? '+' : '−'}${qtdTxt(m.p, Math.abs(m.q))}</b></td><td class="so-pc">${qtdTxt(m.p, m.saldo)}</td></tr>`).join('') || '<tr><td colspan="5" class="vazio">Nenhuma movimentação neste período.</td></tr>'}</tbody></table>${mv.length > 300 ? `<p class="dica pad">Mostrando as 300 mais recentes de ${mv.length}. Baixe a planilha para ver todas.</p>` : ''}</section>`;
+};
 TELAS.guia = () => `<section class="cab-tela"><div><h2>Como usar o Annona</h2><p>${GUIA.length} passos, do cadastro ao lucro.</p></div></section><ol class="guia">${GUIA.map(([a, b]) => `<li><b>${a}</b><p>${b}</p></li>`).join('')}</ol>`;
-TELAS.mais = () => `<section class="cab-tela"><div><h2>Mais</h2></div></section><nav class="mais-grade">${$$('#menu a').map((a) => `<a href="${a.getAttribute('href')}">${a.querySelector('svg').outerHTML}<span>${a.querySelector('span').textContent}</span></a>`).join('')}</nav>`;
+TELAS.mais = () => `<section class="cab-tela"><div><h2>Mais</h2></div></section><nav class="mais-grade">${$$('#menu a').map((a) => `<a href="${a.getAttribute('href')}">${a.querySelector('svg').outerHTML}<span>${a.querySelector('span').textContent}</span></a>`).join('')}${instalado() ? '' : `<button type="button" data-acao="instalar">${ico('subir')}<span>Instalar o app</span></button>`}</nav>`;
 
 // ------------------------------------------------------------------ rotas
 let telaAtual = '';
@@ -1253,7 +1374,7 @@ function rota() {
   const tela = $('#tela'), mudou = nome !== telaAtual; telaAtual = nome;
   tela.innerHTML = TELAS[nome](sub);
   $$('[data-aba]').forEach((a) => a.classList.toggle('on', a.dataset.aba === nome));
-  $('.topo').classList.toggle('so-painel', nome !== 'painel');
+  $('.topo').classList.toggle('so-painel', nome !== 'painel'); document.body.dataset.tela = nome;
   $('#topo-sub').textContent = nome === 'painel' ? 'Veja o resumo do seu negócio hoje.' : db.loja.slogan || '';
   marca(); liga();
   const te = $('#topo-eu'); te.textContent = iniciais(eu().nome); te.title = `${eu().nome} · ${PAPEL[eu().perfil] || ''}`;
@@ -1287,6 +1408,9 @@ function sugere(inp, ao) {
 function contaInv(cod) { const p = ativos().find((x) => x.cod === String(cod).trim()); const it = p && estado.invent.itens.find((x) => x.p === p.id); if (!it) { toast('Esse código não está nesta contagem.', true); return; } it.c = r3((it.c || 0) + 1); mostra(); toast(`${p.nome}: ${numBR(it.c)}`); }
 
 function liga() {
+  $$('[data-q]').forEach((inp) => inp.addEventListener('change', () => { const [, i] = inp.dataset.q.split(':'), it = estado.venda.itens[Number(i)]; if (!it) return; const q = r3(lerNum(inp.value)); if (q > 0) it.q = q; else estado.venda.itens.splice(Number(i), 1); mostra(); }));
+  const pr = $('#pg-receb'); if (pr) { pr.addEventListener('input', () => { estado.venda.receb = pr.value; const r = lerDin(pr.value), tot = totalVenda(); $('#pg-troco').textContent = din(r > tot ? r - tot : 0); }); pr.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); receberCupom(); } }); }
+  const fmb = $('#f-mbusca'); if (fmb) { const i = $('#mbusca'); fmb.addEventListener('submit', (e) => e.preventDefault()); i.addEventListener('input', () => { estado.mbusca = i.value; const pos = i.selectionStart; mostra(); const n2 = $('#mbusca'); n2.focus(); n2.setSelectionRange(pos, pos); }); }
   const fl = $('#f-leitor'); if (fl) { const i = $('#leitor'); fl.addEventListener('submit', (e) => { e.preventDefault(); const v = i.value; i.value = ''; $('#sugestoes').innerHTML = ''; lerNoBalcao(v); }); i.addEventListener('input', () => sugere(i, poeNaVenda)); }
   const fb = $('#f-busca-est'); if (fb) { const i = $('#busca-est'); fb.addEventListener('submit', (e) => { e.preventDefault(); const p = ativos().find((x) => x.cod === i.value.trim()); if (p) formProduto(p); else if (/^\d{8,14}$/.test(i.value.trim())) formProduto({ cod: i.value.trim() }); }); i.addEventListener('input', () => { estado.filtro = i.value; const pos = i.selectionStart; mostra(); const n = $('#busca-est'); n.focus(); n.setSelectionRange(pos, pos); }); }
   const fvb = $('#f-vbusca'); if (fvb) { const i = $('#vbusca'); fvb.addEventListener('submit', (e) => e.preventDefault()); i.addEventListener('input', () => { estado.vbusca = i.value; const pos = i.selectionStart; mostra(); const n2 = $('#vbusca'); n2.focus(); n2.setSelectionRange(pos, pos); }); }
@@ -1307,6 +1431,21 @@ function liga() {
 
 // cliques
 document.addEventListener('click', (e) => {
+  const av = e.target.closest('[data-avisos]'); if (av) { abreAvisos(); return; }
+  const pv = e.target.closest('[data-prod-v]'); if (pv) { estado.sel = pv.dataset.prodV; estado.cat = ''; estado.filtro = ''; return; }
+  const ic = e.target.closest('[data-ir-cupom]'); if (ic) { e.preventDefault(); const cp = $('#cupom'); if (cp) { cp.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
+  const fb = e.target.closest('[data-f-ent], [data-f-perda], [data-f-ajuste], [data-f-edit], [data-f-hist]');
+  if (fb) {
+    const d = fb.dataset, p = prod(d.fEnt || d.fPerda || d.fAjuste || d.fEdit || d.fHist); if (!p) return;
+    if (d.fEnt) liberar('entradas', 'dar entrada de mercadoria', () => formEntrada({ manual: true, itens: [{ nome: p.nome, q: '', custo: p.custo, lote: '', val: '' }] }));
+    else if (d.fPerda) liberar('estoque', 'registrar perda', () => formPerda(p.id));
+    else if (d.fAjuste) liberar('estoque', 'corrigir o estoque', () => ajusteEstoque(p));
+    else if (d.fHist) historico(p);
+    else formProduto(p);
+    return;
+  }
+}, true);
+document.addEventListener('click', (e) => {
   const b = e.target.closest('button, tr.clica, [data-cat], [data-rel], [data-vper], [data-ir-parados]'); if (!b || b.closest('#camada')) return;
   const ds = b.dataset;
   if (b.matches('[data-ir-parados]')) { estado.cat = '_parado'; }
@@ -1314,14 +1453,19 @@ document.addEventListener('click', (e) => {
   if (ds.por) { poeNaVenda(prod(ds.por)); return; }
   for (const k of ['menos', 'mais', 'tira']) if (ds[k]) {
     const [onde, i] = ds[k].split(':'), lista = estado.venda.itens, it = lista[Number(i)];
-    if (k === 'tira' || (k === 'menos' && it.q <= 1)) lista.splice(Number(i), 1); else it.q = r3(it.q + (k === 'mais' ? 1 : -1));
+    const pp = prod(it.p), passo = pp && pp.un === 'kg' && !it.dose ? 0.1 : 1;
+    if (k === 'tira' || (k === 'menos' && it.q <= passo + 0.0005)) lista.splice(Number(i), 1); else it.q = r3(it.q + (k === 'mais' ? passo : -passo));
     if (onde !== 'venda') grava(); mostra(); return;
   }
   if (ds.cat !== undefined && b.classList.contains('chip')) { estado.cat = ds.cat; mostra(); return; }
   if (ds.rel) { estado.rel = ds.rel; mostra(); return; }
   if (ds.vper) { estado.vper = ds.vper; mostra(); return; }
   if (ds.venda) { detalheVenda(db.vendas.find((v) => v.id === ds.venda)); return; }
-  if (ds.prod) { formProduto(prod(ds.prod)); return; }
+  if (ds.prod) { const p = prod(ds.prod); if (!p) return; if (telaAtual === 'estoque' && matchMedia('(min-width: 1281px)').matches) { estado.sel = p.id; mostra(); return; } if (telaAtual === 'estoque' || telaAtual === 'movimentacoes') { abreFicha(p); return; } formProduto(p); return; }
+  if (ds.vcat !== undefined) { estado.vcat = ds.vcat; mostra(); return; }
+  if (ds.fpg) { estado.venda.forma = ds.fpg; mostra(); if (ds.fpg === 'dinheiro') setTimeout(() => { const r = $('#pg-receb'); if (r) r.focus(); }, 30); return; }
+  if (ds.mper) { estado.mper = ds.mper; mostra(); return; }
+  if (ds.mtipo !== undefined && b.classList.contains('chip')) { estado.mtipo = ds.mtipo; mostra(); return; }
   if (ds.entrada) { const en = db.entradas.find((x) => x.id === ds.entrada); abrir(`${cab(`Entrada de ${dataBR(en.data)}`, `${t((forn(en.forn) || {}).nome || '')}${en.nota ? ` · nota ${t(en.nota)}` : ''}`)}<table class="tab"><thead><tr><th>Produto</th><th>Qtd.</th><th>Custo</th><th>Lote</th><th>Validade</th></tr></thead><tbody>${en.itens.map((x) => { const p = prod(x.p); return `<tr><td>${t(p ? p.nome : '—')}</td><td>${p ? qtdTxt(p, x.q) : x.q}</td><td>${din(x.custo)}</td><td>${t(x.lote || '—')}</td><td>${dataBR(x.val) || '—'}</td></tr>`; }).join('')}</tbody></table><footer class="j-pe"><b>Total ${din(en.total)}</b><button type="button" class="bt cheio" data-fechar>Ok</button></footer>`, null, true); return; }
   if (ds.perdaLote && !pode('estoque')) { liberar('estoque', 'jogar fora lote vencido', () => toast('Liberado. Toque em Jogar fora de novo.')); return; }
   if (ds.perdaLote) { const [pid, lid] = ds.perdaLote.split(':'), p = prod(pid), l = p.lotes.find((x) => x.id === lid); confirmar('Jogar fora o lote vencido', `${qtdTxt(p, l.q)} de ${t(p.nome)} (lote ${t(l.lote || '—')}) saem do estoque como perda por vencimento: ${din(Math.round(l.q * p.custo))}.`, 'Registrar perda', () => { db.perdas.push({ id: uid('x'), data: agora(), p: p.id, q: l.q, motivo: 'Venceu', custo: Math.round(l.q * p.custo), obs: `Lote ${l.lote || ''}` }); p.q = r3(p.q - l.q); p.lotes = p.lotes.filter((x) => x.id !== lid); grava(); mostra(); toast('Lote vencido tirado do estoque.'); }, true); return; }
@@ -1338,9 +1482,11 @@ document.addEventListener('click', (e) => {
   const id = ds.id, A = {
     'camera-venda': () => lerCamera(lerNoBalcao), 'camera-estoque': () => lerCamera((c) => { const p = ativos().find((x) => x.cod === c); if (p) formProduto(p); else formProduto({ cod: c }); }),
     'camera-inv': () => lerCamera(contaInv),
-    'limpar-venda': () => { estado.venda = { itens: [], cli: '', desc: 0 }; mostra(); },
+    'limpar-venda': () => { vendaNova(); mostra(); },
+    'receber-cupom': receberCupom, instalar: () => instalar(),
+    'exportar-mov': () => { const [de, ate] = periodo(estado.mper || '7'); const l = ativos().flatMap((p) => movimentos(p).map((m) => ({ ...m, p }))).filter((m) => m.d.slice(0, 10) >= de && m.d.slice(0, 10) <= ate).sort((a, x) => x.d.localeCompare(a.d)); baixarArq(`movimentacoes-${hoje()}.csv`, csv([['Data', 'Hora', 'Produto', 'O que foi', 'Detalhe', 'Quantidade', 'Ficou'], ...l.map((m) => [dataBR(m.d), horaBR(m.d), m.p.nome, m.t, m.ref, numBR(m.q), numBR(m.saldo)])])); },
     desconto: () => liberar('desconto', 'desconto na venda', () => abrir(`${cab('Desconto na venda')}<form class="form"><label>Desconto (R$)<input name="d" inputmode="decimal" value="${campoDin(estado.venda.desc)}"></label><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Aplicar</button></footer></form>`, (j) => $('form', j).addEventListener('submit', (ev) => { ev.preventDefault(); const sub = estado.venda.itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0); estado.venda.desc = Math.min(sub, lerDin(ev.target.d.value)); fechar(); mostra(); }))),
-    'pagar-venda': () => pagar({ itens: estado.venda.itens, desc: estado.venda.desc, titulo: 'Receber', origem: 'balcao', depois: () => { estado.venda = { itens: [], cli: '', desc: 0 }; mostra(); } }),
+    'pagar-venda': () => pagar({ itens: estado.venda.itens, desc: estado.venda.desc, titulo: 'Receber', origem: 'balcao', depois: () => { vendaNova(); mostra(); } }),
     'caderno-todo': cadernoTodo,
     'novo-produto': () => formProduto(), reajuste, etiquetas: () => escolherEtiquetas(), 'nova-entrada': () => liberar('entradas', 'dar entrada de mercadoria', () => formEntrada()), 'nova-perda': () => liberar('estoque', 'registrar perda', () => formPerda()), 'nova-pessoa': novaPessoa,
     'novo-cliente': () => formCliente(), 'editar-cliente': () => formCliente(cli(id)), receber: () => receber(cli(id)),
