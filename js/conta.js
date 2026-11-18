@@ -16,12 +16,20 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
 
   function sessaoGuardada() { try { var s = JSON.parse(localStorage.getItem(CHAVE) || 'null'); return s && s.user ? s : null; } catch (e) { return null; } }
   function carregar(src) { return new Promise(function (ok, falha) { if (document.querySelector('script[src="' + src + '"]')) return ok(); var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = falha; document.head.appendChild(s); }); }
+  // pico de acessos ou banco fora do ar: nada fica girando para sempre; a pessoa recebe um aviso claro e pode tentar de novo
+  var DEMORA = 'O servidor está demorando para responder (muita gente ao mesmo tempo ou instabilidade). Tente de novo em alguns minutos.';
+  function comPrazo(promessa, ms) { return Promise.race([promessa, new Promise(function (ok, falha) { setTimeout(function () { var e = new Error(DEMORA); e.demora = true; falha(e); }, ms); })]); }
+  function buscar(url, op, ms) {
+    var ctl = window.AbortController ? new AbortController() : null, t = ctl && setTimeout(function () { ctl.abort(); }, ms || 20000);
+    if (ctl) op.signal = ctl.signal;
+    return fetch(url, op).then(function (r) { clearTimeout(t); return r; }, function (e) { clearTimeout(t); var x = new Error(e && e.name === 'AbortError' ? DEMORA : 'Sem conexão com o servidor agora. Confira a internet e tente de novo.'); x.demora = true; throw x; });
+  }
   // uma conexão só, mesmo quando várias partes da página pedem ao mesmo tempo (lista, suporte, indicação)
   var clientePromessa = null;
   function sb() {
     if (cliente) return Promise.resolve(cliente);
     if (clientePromessa) return clientePromessa;
-    return (clientePromessa = carregar(raiz + 'app/config.js').then(function () { return carregar(raiz + 'demos/sistemas/base/supabase.js'); }).then(function () {
+    return (clientePromessa = comPrazo(carregar(raiz + 'app/config.js').then(function () { return carregar(raiz + 'demos/sistemas/base/supabase.js'); }), 20000).then(function () {
       var c = window.NEXO_NUVEM;
       cliente = window.supabase.createClient(c.url, c.chave, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: CHAVE } });
       cliente.auth.onAuthStateChange(function () { marcarMenu(); });
@@ -73,14 +81,24 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
     if (/already registered|already been registered/i.test(m)) return 'Já existe uma conta com esse e-mail. Use "Entrar".';
     if (/password/i.test(m)) return 'A senha precisa ter pelo menos 8 caracteres.';
     if (/rate limit|too many/i.test(m)) return 'Muitas tentativas seguidas. Espere um minuto e tente de novo.';
+    if (e && e.demora) return m;
+    if (/failed to fetch|networkerror|load failed|network request failed|fetch failed|timeout|AuthRetryableFetchError|50[234]/i.test(m + ' ' + ((e && e.name) || ''))) return 'O servidor está demorando para responder (muita gente ao mesmo tempo ou instabilidade). Tente de novo em alguns minutos.';
     return m || 'Algo deu errado. Tente de novo.';
   };
   // ------------------------------------------------ entrar com o Google (aparece só quando o Google está ligado no Supabase)
   var googleOk = null;
   function googleLigado() {
     if (googleOk) return googleOk;
-    googleOk = sb().then(function () { var c = window.NEXO_NUVEM; return fetch(c.url + '/auth/v1/settings', { headers: { apikey: c.chave } }); })
-      .then(function (r) { return r.json(); }).then(function (j) { return !!(j.external && j.external.google); }).catch(function () { return false; });
+    // a resposta fica guardada 12 h neste navegador: quem volta à tela de login não pergunta de novo ao servidor
+    var GK = 'br-google-ligado', guardado = null;
+    try { guardado = JSON.parse(localStorage.getItem(GK) || 'null'); } catch (e) { guardado = null; }
+    if (guardado && Date.now() - guardado.t < 432e5) return (googleOk = Promise.resolve(!!guardado.ok));
+    googleOk = sb().then(function () { var c = window.NEXO_NUVEM; return buscar(c.url + '/auth/v1/settings', { headers: { apikey: c.chave } }, 8000); })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        var ok = !!(j.external && j.external.google);
+        try { localStorage.setItem(GK, JSON.stringify({ ok: ok, t: Date.now() })); } catch (e) { /* sem armazenamento */ }
+        return ok;
+      }).catch(function () { googleOk = null; return false; });
     return googleOk;
   }
   function entrarGoogle(bt, erro) {
@@ -109,7 +127,7 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       var v = { nome: f.nome && f.nome.value.trim(), email: f.email.value.trim(), senha: f.senha && f.senha.value };
       bt.disabled = true; erro.textContent = '';
       try { localStorage.setItem('nexo-volta', location.href); } catch (x) { /* ok */ }
-      sb().then(function (c) {
+      comPrazo(sb().then(function (c) {
         if (modo === 'entrar') return c.auth.signInWithPassword({ email: v.email, password: v.senha }).then(function (r) { if (r.error) throw r.error; marcarMenu(); dlg.close(); resolver(r.data.session); });
         if (modo === 'esqueci') return c.auth.resetPasswordForEmail(v.email, { redirectTo: location.origin + '/app/' }).then(function (r) { if (r.error) throw r.error; janela('<h3 id="conta-t">Confira o seu e-mail</h3><p class="conta-sub">Se existir uma conta com ' + esc(v.email) + ', o link para criar uma senha nova chega em instantes.</p>'); });
         return senhaVazada(v.senha).then(function (vazou) {
@@ -120,7 +138,7 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
           janela('<span class="eyebrow">Quase lá</span><h3 id="conta-t">Confirme o seu e-mail</h3><p class="conta-sub">Enviamos um link para <b>' + esc(v.email) + '</b>. Abra o link e você volta para cá, já com a conta ativa.</p><p class="conta-sub">Não chegou? Veja a caixa de spam ou promoções.</p>');
           });
         });
-      }).catch(function (x) { erro.textContent = erroAuth(x); bt.disabled = false; });
+      }), 30000).catch(function (x) { erro.textContent = erroAuth(x); bt.disabled = false; });
     };
   }
   // programa de indicação: quem chegou por um link de indicação fica ligado a quem indicou (uma vez por conta)
@@ -142,8 +160,8 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
   // ------------------------------------------------ pagamento (servidor cria o link no Mercado Pago)
   function chamar(corpo) {
     return sb().then(function (c) { return c.auth.getSession(); }).then(function (r) {
-      return fetch(FUNC, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (r.data.session ? r.data.session.access_token : '') }, body: JSON.stringify(corpo) });
-    }).then(function (r) { return r.json().then(function (j) { if (!r.ok) { var e = new Error(j.erro || 'Erro ' + r.status); e.dados = j; throw e; } return j; }); });
+      return buscar(FUNC, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (r.data.session ? r.data.session.access_token : '') }, body: JSON.stringify(corpo) }, 25000);
+    }).then(function (r) { return r.json().catch(function () { return { erro: r.status >= 500 || r.status === 429 ? DEMORA : 'Erro ' + r.status }; }).then(function (j) { if (!r.ok) { var e = new Error(j.erro || 'Erro ' + r.status); e.dados = j; throw e; } return j; }); });
   }
   function pagar(produto, op) {
     op = op || {};
@@ -291,7 +309,9 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
     var pIndica = new URLSearchParams(location.search), codIndica = pIndica.get('indica') || pIndica.get('ref');
     if (codIndica && /^[A-Za-z0-9]{8}$/.test(codIndica) && !sessionStorage.getItem('br-visita-' + codIndica)) {
       sessionStorage.setItem('br-visita-' + codIndica, '1');
-      sb().then(function (c) { return c.rpc('nexo_afiliado_clique', { p_codigo: codIndica }); }).catch(function () {});
+      // direto no banco, sem baixar a biblioteca do Supabase (link mandado para muita gente ao mesmo tempo não pesa a página)
+      var CHAVE_PUB = 'sb_publishable_nrMgwLCtiojWE-yWMeZK7g_iinpfY_5', BANCO = FUNC.split('/functions/')[0];
+      buscar(BANCO + '/rest/v1/rpc/nexo_afiliado_clique', { method: 'POST', keepalive: true, credentials: 'omit', headers: { apikey: CHAVE_PUB, Authorization: 'Bearer ' + CHAVE_PUB, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_codigo: codIndica }) }, 10000).catch(function () {});
     }
   } catch (e) { /* segue sem contar */ }
 

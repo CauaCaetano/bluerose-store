@@ -18,7 +18,7 @@
   var esc = C.esc, reais = C.reais, cliente = null;
   function dia(d) { return d ? String(d).slice(8, 10) + '/' + String(d).slice(5, 7) + '/' + String(d).slice(0, 4) : ''; }
   function rpc(nome, args) {
-    return cliente.rpc(nome, args || {}).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data; });
+    return (cliente ? Promise.resolve(cliente) : C.sb().then(function (c) { cliente = c; return c; })).then(function (c) { return c.rpc(nome, args || {}); }).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data; });
   }
   function numeros(lista) {
     return '<dl class="af-numeros">' + lista.map(function (n) { return '<div><dt>' + esc(n[0]) + '</dt><dd>' + esc(n[1]) + '</dd></div>'; }).join('') + '</dl>';
@@ -456,6 +456,8 @@
     painelAfiliado().catch(function () { if (naPagina) pagErro(); });
     painelDono().catch(function () {});
   }
+  // visitante sem conta na página de Afiliados: mostra "Entrar / Criar conta" sem baixar a biblioteca do banco (só baixa quando clicar)
+  if (naPagina && !C.sessao()) { pedirLogin(); return; }
   C.sb().then(function (c) {
     cliente = c;
     c.auth.onAuthStateChange(function (ev, s) {

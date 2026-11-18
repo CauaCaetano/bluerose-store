@@ -80,8 +80,22 @@
   var origemGuardada = function () { try { return JSON.parse(lerCookie('br_origem') || 'null'); } catch (e) { return null; } };
 
   // ---------------------------------------------------------------- medição (estatística)
+  // clique repetido no mesmo botão (duplo clique, ansiedade num pico) conta uma vez a cada 10 s nesta aba
+  var ultimos = {};
   function medir(evento) {
     if (!window.brConsentimento('estatistica')) return;
+    var k = evento + '|' + location.pathname, agora = Date.now();
+    if (ultimos[k] && agora - ultimos[k] < 10000) return;
+    ultimos[k] = agora;
+    if (evento === 'pagina' && document.readyState !== 'complete') {
+      var foi = false, uma = function () { if (!foi) { foi = true; medir2(evento); } };
+      window.addEventListener('load', uma, { once: true }); window.addEventListener('pagehide', uma, { once: true }); // saiu antes de abrir tudo: conta mesmo assim
+      return;
+    }
+    medir2(evento);
+  }
+  // a visita é gravada depois que a página terminou de abrir: não disputa a rede com fotos e fontes no celular
+  function medir2(evento) {
     var o = window.brConsentimento('marketing') ? (origemGuardada() || origemNova) : null;
     enviar('site_metricas', {
       vid: vid(), sessao: sessao(), evento: evento, pagina: (location.pathname + (location.hash && location.hash.length < 30 ? location.hash : '')).slice(0, 160),

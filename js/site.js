@@ -409,8 +409,11 @@
     };
     /* Grava o pedido na fila do Escritório (Supabase). A chave pública só pode inserir. */
     var enviarParaOTime = function () {
+      // banco lento ou fora do ar: em 15 s desiste e cai no WhatsApp (o .catch abaixo), sem deixar o botão travado
+      var ctl = window.AbortController ? new AbortController() : null;
+      if (ctl) setTimeout(function () { ctl.abort(); }, 15000);
       return fetch(LEADS.url.replace(/\/$/, '') + '/rest/v1/leads_site', {
-        method: 'POST',
+        method: 'POST', signal: ctl ? ctl.signal : undefined,
         headers: { apikey: LEADS.chave, Authorization: 'Bearer ' + LEADS.chave, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
         body: JSON.stringify({
           nome: valor('nome').slice(0, 120),

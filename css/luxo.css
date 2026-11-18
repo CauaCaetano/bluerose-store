@@ -143,6 +143,8 @@ main { position: relative; }
 main::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: 0; height: 460px; pointer-events: none;
   background: url("../img/canto-se.webp") left top / 400px auto no-repeat, url("../img/canto-sd.webp") right top / 400px auto no-repeat; }
 .rodape-site { position: relative; background: url("../img/canto-ie.webp") left bottom / 400px auto no-repeat, url("../img/canto-id.webp") right bottom / 400px auto no-repeat; }
+/* os cantos só baixam quando o rodapé se aproxima (js/idioma.js marca .cantos-tarde no <html> e .cantos-ok no rodapé) */
+.cantos-tarde .rodape-site:not(.cantos-ok) { background-image: none; }
 @media (max-width: 1299px) {
   main > section:not(.ini-hero)::after, main > section.ini-hero::before { display: none; }
   main::before { height: 260px; background-size: 210px auto, 210px auto; opacity: .7; }

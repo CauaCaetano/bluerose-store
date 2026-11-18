@@ -175,7 +175,10 @@
     this.gestoRaro();
     this.ajustarAoAvisoDeCookies();
     this.naoCobrir();
-    this.carregarDados().then(function () { if (self.k) self.acompanharPagina(); });
+    // as respostas prontas (38 KB) vêm depois que a página terminou de abrir, quando o aparelho está livre; abrir o painel antes busca na hora
+    var depois = function () { self.carregarDados().then(function () { if (self.k) self.acompanharPagina(); }); };
+    var ocioso = function () { if (window.requestIdleCallback) requestIdleCallback(depois, { timeout: 3000 }); else setTimeout(depois, 1200); };
+    if (document.readyState === 'complete') ocioso(); else window.addEventListener('load', ocioso, { once: true });
   };
 
   VirtualAssistant.prototype.carregarDados = function () {

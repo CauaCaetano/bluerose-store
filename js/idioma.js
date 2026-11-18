@@ -14,6 +14,21 @@
   'use strict';
   if (window.__brIdioma) return;
 
+  // Cantos pintados do rodapé (2 × 73 KB): só baixam quando o rodapé chega perto da tela, em todas as páginas
+  // (o css/luxo.css segura a imagem enquanto o <html> tem .cantos-tarde e o rodapé não tem .cantos-ok; a home já fazia isso pelo inicio.js)
+  (function () {
+    if (!('IntersectionObserver' in window)) return;
+    document.documentElement.classList.add('cantos-tarde');
+    var ver = function () {
+      var r = document.querySelector('.rodape-site'); if (!r) return;
+      var obs = new IntersectionObserver(function (es) {
+        if (es.some(function (e) { return e.isIntersecting; })) { r.classList.add('cantos-ok'); obs.disconnect(); }
+      }, { rootMargin: '600px 0px' });
+      obs.observe(r);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ver); else ver();
+  })();
+
   var IDIOMAS = [
     { id: 'pt-BR', nome: 'Português (Brasil)', curto: 'BR', moeda: 'BRL' },
     { id: 'pt-PT', nome: 'Português (Portugal)', curto: 'PT', moeda: 'EUR' },
