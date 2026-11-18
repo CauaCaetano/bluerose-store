@@ -316,9 +316,7 @@ function etiquetas(p) {
     $('[data-ok]', j).onclick = () => {
       const l = []; $$('[data-et]', j).forEach((i) => { const [cor, tam] = i.dataset.et.split('|'); for (let k = 0; k < Math.min(200, Number(i.value) || 0); k++) l.push({ cor, tam }); });
       if (!l.length) { toast('Escolha ao menos uma etiqueta.', true); return; }
-      const w = open('', '_blank'); if (!w) { toast('O navegador bloqueou a janela de impressão.', true); return; }
-      w.document.write(`<!doctype html><meta charset="utf-8"><title>Etiquetas</title><style>body{font:11px Inter,Arial,sans-serif;margin:8mm}.g{display:grid;grid-template-columns:repeat(3,62mm);gap:3mm}.e{border:1px dashed #bbb;border-radius:2mm;padding:2.5mm;height:32mm;display:grid;grid-template-rows:auto auto 1fr auto}.e b{font-size:12px}.e .pr{font-size:15px;font-weight:700}.barras-svg{width:100%;height:11mm}.c{font-size:9px;letter-spacing:.06em;text-align:center}</style><div class="g">${l.map((x) => `<div class="e"><span>${t(db.loja.nome)}</span><b>${t(p.nome)} · ${t(x.cor)} · ${t(x.tam)}</b><span class="pr">${din(precoAtual(p))}</span><div>${barras(codVar(p, x.cor, x.tam))}<div class="c">${codVar(p, x.cor, x.tam)}</div></div></div>`).join('')}</div><script>setTimeout(()=>print(),300)<\/script>`);
-      w.document.close(); fechar(); toast(`${l.length} etiquetas prontas para imprimir.`);
+      if (imprimirEtiquetas(l.map((x) => ({ p, ...x })))) fechar();
     };
   });
 }
@@ -529,15 +527,229 @@ function marca() {
   $('#loja-logo').innerHTML = L.logo ? `<img src="${t(L.logo)}" alt="">` : t(ini);
   $('#loja-nome').textContent = L.nome || 'Sua loja'; $('#loja-slogan').textContent = variasLojas() ? nomeLoja(lojaAtual()) : (L.slogan || '');
   document.documentElement.dataset.tema = db.tema || 'ameixa';
-  const u = eu(), te = $('#topo-eu'); if (te) { te.innerHTML = u.foto ? `<img src="${t(u.foto)}" alt="">` : t(iniciais(u.nome)); te.title = `${u.nome} · meu perfil`; }
+  const u = eu(), te = $('#topo-eu'); if (te) { te.innerHTML = `<span class="eu-foto">${u.foto ? `<img src="${t(u.foto)}" alt="">` : t(iniciais(u.nome))}</span><span class="eu-ola">Olá, ${t(u.nome.split(' ')[0])}</span>${icb('baixo')}`; te.title = `${u.nome} · meu perfil e mais opções`; }
   const at = atrasadas().length, bx = produtosBaixos().length, av = avisos().length;
-  const nf = $('#n-fiado'); nf.hidden = !at; nf.textContent = at;
+  // o crediário é uma função entre muitas: os atrasos aparecem no sino, sem número vermelho no menu
+  const nf = $('#n-fiado'); nf.hidden = true; nf.textContent = at;
   const ne = $('#n-estoque'); ne.hidden = !bx; ne.textContent = bx;
   const na = $('#n-avisos'); na.hidden = !av; na.textContent = av;
 }
 
+
+// ------------------------------------------------------------------ boutique (18/11/2026): ícones, etiqueta de título e os números novos
+const ICB = {
+  inicio: '<path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>',
+  vender: '<path d="M2.5 4h2.6l2.3 11h10.8l2.2-8H6.2"/><circle cx="9" cy="19.2" r="1.3"/><circle cx="17" cy="19.2" r="1.3"/>',
+  vendas: '<path d="M4 8h15l-3.5-3.5"/><path d="M20 16H5l3.5 3.5"/>',
+  estoque: '<path d="M12 3 20 7v10l-8 4-8-4V7z"/><path d="M4 7l8 4 8-4M12 11v10"/>',
+  etiquetas: '<path d="M3.5 12.3V4.5a1 1 0 0 1 1-1h7.8l8.2 8.2a1.4 1.4 0 0 1 0 2l-6.6 6.6a1.4 1.4 0 0 1-2 0z"/><circle cx="8.3" cy="8.3" r="1.6"/>',
+  clientes: '<circle cx="9" cy="8" r="3.4"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="M15.5 4.8a3.3 3.3 0 0 1 0 6.4M17.6 14.2A6 6 0 0 1 21.2 20"/>',
+  fiado: '<rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 9.5h19M6 14.5h4"/>',
+  compras: '<path d="M2.5 6.5h11v9h-11z"/><path d="M13.5 9.5h4l3 3.2v2.8h-7"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/>',
+  caixa: '<path d="M3.5 13h17v7h-17z"/><path d="M5.5 13 7 8h10l1.5 5"/><path d="M9 8V4.5h6V8M9 16.5h6"/>',
+  relatorios: '<path d="M3 20.5h18M6 17V11M10.5 17V6M15 17v-7.5M19.5 17V4"/>',
+  config: '<circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3.9a7.7 7.7 0 0 0-2.6-1.5L14.2 2.5h-4l-.4 2.5a7.7 7.7 0 0 0-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-.9a7.7 7.7 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.7 7.7 0 0 0 2.6-1.5l2.3.9 2-3.4z"/>',
+  dono: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  perfil: '<circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/>',
+  guia: '<path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 7h7M9 11h5"/>',
+  mais: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  notas: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  bolsa: '<path d="M5 8.5h14l-1 12H6z"/><path d="M8.5 8.5V7a3.5 3.5 0 0 1 7 0v1.5"/>',
+  vestido: '<path d="M9 2.5v3.2L7.4 8.6 9.6 11 5 21h14l-4.6-10 2.2-2.4L15 5.7V2.5"/><path d="M9 5.7c1 .8 2 1.2 3 1.2s2-.4 3-1.2M9.6 11h4.8"/>',
+  alvo: '<circle cx="11" cy="13" r="8"/><circle cx="11" cy="13" r="4.5"/><circle cx="11" cy="13" r="1.2"/><path d="M11 13l8.5-8.5M16.5 4.5h3v3"/>',
+  calendario: '<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  registradora: '<path d="M3.5 13.5h17V20h-17z"/><path d="M5.5 13.5l1.2-4.5h10.6l1.2 4.5"/><path d="M8.5 9V5h7v4"/><path d="M10 7h4M7 16.5h2M11 16.5h2M15 16.5h2"/>',
+  entrada: '<path d="M12 3.5 19.5 7v9.5L12 20.5 4.5 16.5V7z"/><path d="M4.5 7 12 11l7.5-4M12 11v9.5"/>',
+  etiqueta: '<path d="M3.5 12.3V4.5a1 1 0 0 1 1-1h7.8l8.2 8.2a1.4 1.4 0 0 1 0 2l-6.6 6.6a1.4 1.4 0 0 1-2 0z"/><circle cx="8.3" cy="8.3" r="1.6"/>',
+  maisCirc: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v9M7.5 12h9"/>',
+  trocas: '<path d="M4 8h15l-3.5-3.5"/><path d="M20 16H5l3.5 3.5"/>',
+  pessoas: '<circle cx="9" cy="8" r="3.4"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="M15.5 4.8a3.3 3.3 0 0 1 0 6.4M17.6 14.2A6 6 0 0 1 21.2 20"/>',
+  cartao: '<rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 9.5h19M6 14.5h4"/>',
+  barrasV: '<path d="M3 20.5h18M6 18V10M10.5 18V6M15 18v-8M19.5 18V8"/>',
+  moedas: '<ellipse cx="12" cy="6" rx="7.5" ry="2.8"/><path d="M4.5 6v4c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V6"/><path d="M4.5 10v4c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-4"/><path d="M4.5 14v4c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-4"/>',
+  cabide: '<path d="M12 8.5V7.6c0-.9.6-1.4 1.3-1.9A2 2 0 1 0 10 4.2"/><path d="M12 8.5 2.8 15.2c-.7.5-.4 1.6.5 1.6h17.4c.9 0 1.2-1.1.5-1.6z"/>',
+  ampulheta: '<path d="M6.5 3h11M6.5 21h11"/><path d="M7.5 3c0 4.5 4.5 6 4.5 9s-4.5 4.5-4.5 9M16.5 3c0 4.5-4.5 6-4.5 9s4.5 4.5 4.5 9"/>',
+  presente: '<rect x="3.5" y="9" width="17" height="4" rx="1"/><path d="M5 13v7.5h14V13M12 9v11.5"/><path d="M12 9c-1.5-3.5-5.5-4.5-5.5-2 0 1.5 2.5 2 5.5 2zM12 9c1.5-3.5 5.5-4.5 5.5-2 0 1.5-2.5 2-5.5 2z"/>',
+  busca: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+  codigo: '<path d="M3.5 5v14M6.5 5v14M9 5v14M12.5 5v14M14.5 5v14M17.5 5v14M20.5 5v14"/>',
+  x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  lixo: '<path d="M4 6.5h16M9.5 6.5V4h5v2.5M6 6.5l1 14h10l1-14M10 10.5v6M14 10.5v6"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  coroa: '<path d="M3.5 8.5l4.5 4 4-7 4 7 4.5-4-1.5 10h-14z"/>',
+  pix: '<path d="M12 2.8 21.2 12 12 21.2 2.8 12z"/><path d="M8.2 8.8 12 12.6l3.8-3.8M8.2 15.2 12 11.4l3.8 3.8"/>',
+  dinheiro: '<rect x="2.5" y="6" width="19" height="12" rx="1.5"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/>',
+  dividir: '<path d="M6 4v5.5c0 2 1 3 3 4.5l3 2M18 4v5.5c0 2-1 3-3 4.5l-3 2v4"/><path d="M4 6l2-2 2 2M16 6l2-2 2 2"/>',
+  pontos: '<circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/>',
+  folha: '<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19c3-4 6-7 10-9"/>',
+  caminhao: '<path d="M2.5 6.5h11v9h-11z"/><path d="M13.5 9.5h4l3 3.2v2.8h-7"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/>',
+  giro: '<path d="M20 11a8 8 0 0 0-14.5-4.5L3.5 9"/><path d="M3.5 4v5h5"/><path d="M4 13a8 8 0 0 0 14.5 4.5l2-2.5"/><path d="M20.5 20v-5h-5"/>',
+  tendencia: '<path d="M3 20.5h18M5.5 18v-3.5M9.5 18v-6M13.5 18v-4.5M17.5 18v-8"/><path d="M4.5 11.5l5-4.5 4 3 6-6M15.5 4h4.5v4.5"/>',
+  impressora: '<path d="M6.5 9V3.5h11V9"/><rect x="3" y="9" width="18" height="8" rx="1.5"/><path d="M6.5 14h11v6.5h-11z"/>',
+  seta: '<path d="M9 6l6 6-6 6"/>', baixo: '<path d="M7 10l5 5 5-5"/>', zap: ICO.zap, ok: ICO.ok, recibo: ICO.recibo,
+  sair: '<path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/>', ajuda: '<path d="M4 20l1.4-4A8 8 0 1 1 8 18.6z"/>', instalar: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+};
+const icb = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICB[k] || ''}</svg>`;
+// título de cada tela dentro da etiqueta de tecido com borla
+const cab = (k, nome, txt = '', acoes = '', forte = '') => `<div class="cab cab-etq"><h1 class="etq-titulo"><span class="etq-ic">${icb(k)}</span><span class="etq-nome">${nome}</span></h1>${txt || forte ? `<div class="cab-txt">${forte ? `<b>${forte}</b>` : ''}${txt ? `<p>${txt}</p>` : ''}</div>` : ''}${acoes ? `<div class="acoes">${acoes}</div>` : ''}</div>`;
+const fotoPeca = (p, cls = '') => `<span class="foto ${cls}">${p.foto ? `<img src="${t(p.foto)}" alt="" loading="lazy">` : `<svg viewBox="0 0 24 24">${ICONE_CAT[p.cat] || ICONE_CAT.Acessórios}</svg>`}</span>`;
+const fotoCli = (c, cls = '') => `<span class="foto-cli ${cls}">${c.foto ? `<img src="${t(c.foto)}" alt="" loading="lazy">` : t(iniciais(c.nome))}</span>`;
+const ORDEM_CAT = ['Vestidos', 'Blusas', 'Calças', 'Saias', 'Casacos', 'Jaquetas', 'Acessórios', 'Camisetas', 'Shorts'];
+const categorias = (l = ativos()) => [...new Set(l.map((p) => p.cat))].sort((a, b) => ((ORDEM_CAT.indexOf(a) + 1) || 99) - ((ORDEM_CAT.indexOf(b) + 1) || 99) || a.localeCompare(b));
+const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const mesAtual = () => hoje().slice(0, 7);
+const nomeMes = (ym) => MESES[Number(ym.slice(5, 7)) - 1] || '';
+const ultimoDia = (ym) => isoD(new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)), 0));
+const metaDe = (ym) => (db.metas && db.metas[ym] !== undefined ? db.metas[ym] : ym === mesAtual() ? db.meta || 0 : 0);
+const vendidoNoMes = (ym) => { const fim = ultimoDia(ym); return numeros(`${ym}-01`, fim > hoje() ? hoje() : fim).liquido; };
+const comprasCli = (cid, d = 365) => { const ini = somaDias(hoje(), -d); return db.vendas.filter((v) => v.cli === cid && !v.cancelada && v.data.slice(0, 10) >= ini).reduce((s, v) => s + v.total - (v.devol || []).reduce((a, x) => a + x.valor, 0), 0); };
+const vip = (c) => !!c && comprasCli(c.id) >= (db.cfg.vipMin || 300000);
+// próximo aniversário (29/02 vira 01/03 nos anos que não têm)
+function proximoNiver(c) {
+  if (!c || !/^\d{4}-\d{2}-\d{2}/.test(c.nasc || '')) return null;
+  const h = hoje(), md = c.nasc.slice(5, 10), noAno = (a) => { const d = `${a}-${md}`; return isoD(new Date(`${d}T12:00`)) === d ? d : `${a}-03-01`; };
+  let d = noAno(Number(h.slice(0, 4))); if (d < h) d = noAno(Number(h.slice(0, 4)) + 1);
+  return { data: d, dias: dias(h, d) };
+}
+const aniversariantes = (n = 7) => db.clientes.map((c) => ({ c, ...proximoNiver(c) })).filter((x) => x.data && x.dias <= n).sort((a, b) => a.dias - b.dias || a.c.nome.localeCompare(b.c.nome));
+const quandoNiver = (x) => `${Number(x.data.slice(8))} de ${MESES[Number(x.data.slice(5, 7)) - 1]} (${x.dias === 0 ? 'hoje' : x.dias === 1 ? 'amanhã' : `em ${x.dias} dias`})`;
+const msgNiver = (c) => `Oi, ${c.nome.split(' ')[0]}! A ${db.loja.nome} deseja um feliz aniversário! Preparamos um presente para você: passe na loja nesta semana e ganhe um mimo especial na sua compra. Um beijo!`;
+const clientesAtivos = (d = 90) => { const ini = somaDias(hoje(), -d); return new Set(db.vendas.filter((v) => v.cli && !v.cancelada && v.data.slice(0, 10) >= ini).map((v) => v.cli)).size; };
+const trocasDe = (d = hoje()) => db.vendas.flatMap((v) => v.devol || []).filter((x) => String(x.data).slice(0, 10) === d);
+const comissoesMes = () => { const n = numeros(`${mesAtual()}-01`, hoje()); return db.usuarios.reduce((s, u) => s + comissaoDe(u, n.vs.filter((v) => v.vend === u.id)), 0); };
+const pecasNoEstoque = () => ativos().reduce((s, p) => s + totalPecas(p), 0);
+const valorEstoque = (custo = pode('custo')) => ativos().reduce((s, p) => s + totalPecas(p) * (custo ? p.custo : p.preco), 0);
+function maisVendidas(ini, fim) {
+  const m = {}; numeros(ini, fim).vs.forEach((v) => v.itens.forEach((x) => { const q = x.qtd - (x.devolvido || 0); if (q > 0) m[x.p] = (m[x.p] || 0) + q; }));
+  return Object.entries(m).map(([id, q]) => ({ p: prod(id), q })).filter((x) => x.p).sort((a, b) => b.q - a.q || a.p.nome.localeCompare(b.p.nome));
+}
+// giro do estoque: peças vendidas nos últimos 30 dias sobre as peças que estão na loja
+const giroMes = () => { const ini = somaDias(hoje(), -30), vend = db.movs.filter((m) => m.tipo === 'venda' && String(m.data).slice(0, 10) >= ini && (m.loja || 'l1') === lojaAtual()).reduce((s, m) => s - m.q, 0), est = pecasNoEstoque(); return est ? vend / est : 0; };
+const fmtN = (n, c = 1) => n.toLocaleString('pt-BR', { minimumFractionDigits: c, maximumFractionDigits: c });
+const celular = () => matchMedia('(max-width: 860px)').matches;
+// grade cor x tamanho: célula vermelha quando chega no mínimo, cinza quando zerou, traço quando a peça não tem o tamanho
+function celulaQ(p, cor, tm) {
+  if (!p.tam.includes(tm)) return '<td class="sem">–</td>';
+  const q = qtd(p, cor, tm); return `<td class="${q <= 0 ? 'zero' : q <= p.min ? 'baixo' : ''}">${q}</td>`;
+}
+
+// ------------------------------------------------------------------ vender (18/11/2026): peça escolhida ao lado da vitrine e a sacola de papel
+const dispVar = (p, cor, tm) => qtd(p, cor, tm) - noCarrinho(p.id, cor, tm);
+function novaSel(p) { const c = p.cores.find((x) => p.tam.some((tm) => dispVar(p, x.n, tm) > 0)) || p.cores[0]; return { p: p.id, cor: c.n, tam: null, q: 1 }; }
+function painelSel(sel) {
+  if (!sel) return '<aside class="cartao escolha vazia"><p><b>Toque numa peça</b>Escolha a cor, o tamanho e a quantidade aqui. Com o leitor, passe o código e a peça vai direto para a sacola.</p></aside>';
+  const p = prod(sel.p), pa = precoAtual(p), nTam = sel.tam ? dispVar(p, sel.cor, sel.tam) : 0, nCor = p.tam.reduce((s, tm) => s + Math.max(0, dispVar(p, sel.cor, tm)), 0);
+  return `<aside class="cartao escolha" id="escolha" aria-label="Peça escolhida">
+    <div class="esc-cab">${fotoPeca(p, 'esc-foto')}<div><b>${t(p.nome)}</b><small>${t(p.cod)}</small><strong>${pa < p.preco ? `<s>${din(p.preco)}</s> ` : ''}${din(pa)}</strong></div><button type="button" class="fechar-sel" data-acao="fecha-sel" aria-label="Fechar">${icb('x')}</button></div>
+    <p class="esc-rot">Cor</p><div class="cores">${p.cores.map((c) => `<button type="button" data-sc="${t(c.n)}" aria-pressed="${c.n === sel.cor}" ${p.tam.some((tm) => dispVar(p, c.n, tm) > 0) ? '' : 'disabled'}><i style="background:${t(c.h)}"></i>${t(c.n)}${c.n === sel.cor ? `<span class="ok-c">${icb('check')}</span>` : ''}</button>`).join('')}</div>
+    <p class="esc-rot">Tamanho</p><div class="tams">${p.tam.map((tm) => { const d = dispVar(p, sel.cor, tm); return `<button type="button" data-st="${t(tm)}" aria-pressed="${tm === sel.tam}" ${d > 0 ? '' : 'disabled'} title="${Math.max(0, d)} em estoque">${t(tm)}</button>`; }).join('')}</div>
+    <div class="esc-pe"><div class="esc-est">${icb('estoque')}<span>${sel.tam ? `Estoque: ${nTam} ${nTam === 1 ? 'unidade' : 'unidades'}<small>(${t(sel.cor)} / ${t(sel.tam)})</small>` : `Escolha o tamanho<small>${nCor} em ${t(sel.cor)}</small>`}</span></div>
+    <div class="esc-q"><p class="esc-rot">Quantidade</p><div class="qtd"><button type="button" data-sq="-1" aria-label="Menos">−</button><b>${sel.q}</b><button type="button" data-sq="1" aria-label="Mais">+</button></div></div></div>
+    <button type="button" class="bt cheio largo por" data-acao="por-sel">${icb('maisCirc')}Adicionar à sacola</button>
+  </aside>`;
+}
+function ajustaDesc() {
+  const sub = estado.sacola.reduce((s, x) => s + x.preco * x.qtd, 0), v = Number(estado.descVal) || 0;
+  estado.desc = estado.descModo === 'rs' ? Math.min(sub, Math.max(0, v)) : Math.round(sub * Math.min(100, Math.max(0, v)) / 100);
+  return estado.desc;
+}
+const FORMAS_BT = [['pix', 'Pix', 'pix'], ['credito', 'Crédito', 'cartao'], ['debito', 'Débito', 'cartao'], ['dinheiro', 'Dinheiro', 'dinheiro'], ['fiado', 'Crediário', 'fiado']];
+function sacolaHTML() {
+  const sac = estado.sacola; ajustaDesc();
+  const sub = sac.reduce((s, x) => s + x.preco * x.qtd, 0), total = Math.max(0, sub - estado.desc), nIt = sac.reduce((s, x) => s + x.qtd, 0);
+  const c = acharCli(estado.vCli), pago = estado.pag.reduce((s, x) => s + (x.v || 0), 0), falta = total - pago;
+  const fiadoV = estado.pag.filter((x) => x.f === 'fiado').reduce((s, x) => s + (x.v || 0), 0), pf = fiadoV ? podeFiado(c, fiadoV) : { ok: true };
+  const cred = c ? c.credito || 0 : 0, formas = Object.entries(FORMAS).filter(([k]) => k !== 'loja' || cred > 0);
+  const nv = c ? proximoNiver(c) : null, umaForma = !estado.dividir, f0 = estado.pag[0] || { f: 'pix' };
+  const bts = [...FORMAS_BT, ...(cred > 0 ? [['loja', 'Crédito loja', 'presente']] : [])];
+  return `<div class="sac-topo" aria-hidden="true"></div><div class="sac-corpo">
+    <div class="sac-cab"><h2>${icb('bolsa')}Sacola de venda</h2>${sac.length ? `<button type="button" class="bt pq limpar" data-acao="esvaziar">${icb('lixo')}Limpar</button>` : ''}</div>
+    ${sac.length ? `<ul class="sac-itens">${sac.map((x, i) => { const p = prod(x.p) || { cod: '', foto: '', cat: '' }; return `<li>${fotoPeca(p, 'mini')}<span class="it-txt"><b>${t(x.nome)}</b><small>${t(p.cod)} · ${t(x.cor)} · ${t(x.tam)}</small></span><span class="q"><button type="button" data-q="${i}" data-d="-1" aria-label="Menos">−</button><b>${x.qtd}</b><button type="button" data-q="${i}" data-d="1" aria-label="Mais">+</button></span><b class="it-preco">${x.preco < (x.cheio || x.preco) ? `<s>${din(x.cheio * x.qtd)}</s>` : ''}${din(x.preco * x.qtd)}</b><button type="button" class="it-tira" data-rm="${i}" aria-label="Tirar ${t(x.nome)}">${icb('x')}</button></li>`; }).join('')}</ul>` : '<p class="sac-vazia"><b>Sacola vazia</b>Toque nas peças ou passe o leitor de código de barras.</p>'}
+    <div class="sac-bloco"><p class="sac-rot">${icb('perfil')}Cliente</p>
+      <div class="cli-linha"><label class="cli-campo"><span class="sr">Cliente</span><input id="v-cli" list="dl-cli" value="${t(estado.vCli)}" placeholder="Nome da cliente (opcional)" autocomplete="off">${listaClientes()}${estado.vCli ? `<button type="button" class="limpa" data-acao="limpa-cli" aria-label="Tirar a cliente">${icb('x')}</button>` : ''}</label><button type="button" class="bt-ic" data-acao="busca-cli" aria-label="Procurar cliente">${icb('busca')}</button></div>
+      ${c ? `<p class="cli-info"><span>${nv ? `Aniversário: ${dataBR(nv.data).slice(0, 5)} · ` : ''}Compras: ${din(comprasCli(c.id))}${cred ? ` · Crédito na loja: ${din(cred)}` : ''}</span>${vip(c) ? `<b class="vip">${icb('coroa')}Cliente VIP</b>` : ''}</p>` : estado.vCli ? '<p class="cli-info"><span>Cliente nova: será cadastrada ao finalizar.</span></p>' : ''}</div>
+    <div class="sac-bloco desc-linha"><p class="sac-rot">${icb('etiqueta')}Desconto</p><div class="seg" role="group" aria-label="Desconto em porcentagem ou em reais"><button type="button" data-dm="pct" aria-pressed="${estado.descModo !== 'rs'}">%</button><button type="button" data-dm="rs" aria-pressed="${estado.descModo === 'rs'}">R$</button></div><input id="v-desc" inputmode="decimal" value="${estado.descModo === 'rs' ? campoDin(estado.descVal) || '0,00' : String(estado.descVal || 0).replace('.', ',')}" aria-label="Valor do desconto"></div>
+    <div class="sac-tot"><div><span>Subtotal (${nIt} ${nIt === 1 ? 'item' : 'itens'})</span><span>${din(sub)}</span></div><div><span>Desconto</span><span>${estado.desc ? '−' : ''}${din(estado.desc)}</span></div><div class="grande"><b>Total da venda</b><b data-total>${din(total)}</b></div></div>
+    <div class="sac-pag-cab"><p class="sac-rot">${icb('cartao')}Forma de pagamento</p><button type="button" class="link" data-acao="dividir2">${icb('dividir')}${umaForma ? 'Dividir pagamento' : 'Pagar numa forma só'}</button></div>
+    ${umaForma ? `<div class="formas">${bts.map(([k, n, ic]) => `<button type="button" data-forma="${k}" aria-pressed="${f0.f === k}">${f0.f === k ? `<span class="ok-c">${icb('check')}</span>` : ''}${icb(ic)}<span>${n}</span></button>`).join('')}</div>
+      ${f0.f === 'credito' ? `<label class="campo pag-extra">Parcelas no cartão<select data-pp="0">${Array.from({ length: 10 }, (_, k) => `<option value="${k + 1}" ${(f0.parc || 1) === k + 1 ? 'selected' : ''}>${k + 1}×${k ? ` de ${din(Math.round(total / (k + 1)))}` : ' (à vista)'}</option>`).join('')}</select></label>` : ''}
+      ${f0.f === 'dinheiro' && sac.length ? `<label class="campo pag-extra">Recebido em dinheiro (para o troco)<input data-pv="0" inputmode="decimal" value="${campoDin(f0.v)}"></label>` : ''}`
+    : `${estado.pag.map((x, i) => `<div class="pag-linha"><select data-pf="${i}" aria-label="Forma de pagamento">${formas.map(([k, n]) => `<option value="${k}" ${x.f === k ? 'selected' : ''}>${n}</option>`).join('')}</select><input data-pv="${i}" inputmode="decimal" value="${campoDin(x.v)}" placeholder="0,00" aria-label="Valor">${estado.pag.length > 1 ? `<button type="button" class="x" data-tira="${i}" aria-label="Tirar">×</button>` : '<span></span>'}</div>${x.f === 'credito' ? `<label class="campo pag-extra">Parcelas no cartão<select data-pp="${i}">${Array.from({ length: 10 }, (_, k) => `<option value="${k + 1}" ${(x.parc || 1) === k + 1 ? 'selected' : ''}>${k + 1}×${k ? '' : ' (à vista)'}</option>`).join('')}</select></label>` : ''}`).join('')}
+      <div class="pag-links"><button type="button" class="link" data-acao="dividir">+ Outra forma</button>${falta !== 0 && sac.length ? `<button type="button" class="link" data-acao="completar">Pôr o que falta (${din(falta)})</button>` : ''}</div>`}
+    ${fiadoV ? `<div class="campos cred-campos"><label class="campo">Parcelas<select id="p-n">${Array.from({ length: 12 }, (_, i) => `<option ${estado.parc.n === i + 1 ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label><label class="campo">A cada<select id="p-int"><option value="mes" ${estado.parc.int === 'mes' ? 'selected' : ''}>mês</option><option value="15" ${estado.parc.int === '15' ? 'selected' : ''}>15 dias</option><option value="7" ${estado.parc.int === '7' ? 'selected' : ''}>semana</option></select></label><label class="campo">1º vencimento<input id="p-prim" type="date" value="${estado.parc.prim}"></label></div>
+      <p class="mudo cred-txt">${estado.parc.n}× de ${din(Math.floor(fiadoV / estado.parc.n))} no crediário${c ? ` · ${t(situacao(c).txt)} · disponível ${din(Math.max(0, (c.limite || 0) - aberto(c.id)))}` : ''}</p>` : ''}
+    ${falta > 0 && sac.length ? `<div class="caixa-aviso atn">Faltam ${din(falta)} para fechar o total.</div>` : falta < 0 ? `<div class="caixa-aviso atn">Pagamento passa ${din(-falta)} do total${estado.pag.some((x) => x.f === 'dinheiro') ? ` (troco de ${din(-falta)})` : ''}.</div>` : ''}
+    ${fiadoV && !pf.ok ? `<div class="caixa-aviso mal">${t(pf.motivo)}${pf.excecao ? (estado.excecao ? `<br><b>Exceção liberada:</b> ${t(estado.excecao)}` : ' <button type="button" class="link" data-acao="excecao">Liberar exceção</button>') : ''}</div>` : ''}
+    ${db.fiscal.usar ? `<div class="campos" style="margin-top:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end"><label class="troca" style="padding:0"><span>Emitir NFC-e</span><input type="checkbox" id="v-nota" ${estado.nota === false ? '' : 'checked'}></label><label class="campo">CPF na nota (opcional)<input id="v-cpf" inputmode="numeric" value="${t(estado.cpf || '')}" placeholder="000.000.000-00"></label></div>` : ''}
+    <button type="button" class="bt cheio largo finalizar" data-acao="finalizar" ${sac.length ? '' : 'disabled'}>${icb('check')}Finalizar venda (F12)</button>
+  </div>`;
+}
+
+// ------------------------------------------------------------------ etiquetas: impressão de várias peças de uma vez
+function imprimirEtiquetas(l) {
+  if (!l.length) { toast('Escolha ao menos uma etiqueta.', true); return false; }
+  const w = open('', '_blank'); if (!w) { toast('O navegador bloqueou a janela de impressão.', true); return false; }
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>Etiquetas</title><style>body{font:11px Arial,sans-serif;margin:8mm}.g{display:grid;grid-template-columns:repeat(3,62mm);gap:3mm}.e{border:1px dashed #bbb;border-radius:2mm;padding:2.5mm;height:32mm;display:grid;grid-template-rows:auto auto 1fr auto;break-inside:avoid}.e b{font-size:12px}.e .pr{font-size:15px;font-weight:700}.barras-svg{width:100%;height:11mm}.c{font-size:9px;letter-spacing:.06em;text-align:center}</style><div class="g">${l.map(({ p, cor, tam }) => `<div class="e"><span>${t(db.loja.nome)}</span><b>${t(p.nome)} · ${t(cor)} · ${t(tam)}</b><span class="pr">${din(precoAtual(p))}</span><div>${barras(codVar(p, cor, tam))}<div class="c">${codVar(p, cor, tam)}</div></div></div>`).join('')}</div><script>setTimeout(()=>print(),300)<\/script>`);
+  w.document.close(); toast(`${l.length} ${l.length === 1 ? 'etiqueta pronta' : 'etiquetas prontas'} para imprimir.`); return true;
+}
+
+// ------------------------------------------------------------------ estoque (18/11/2026): tabela com grade cor x tamanho, filtros e resumo
+function estoqueTabela() {
+  const f = estado.est, b = sa(estado.busca), bx = new Set(produtosBaixos()), prs = parados(), pr = new Set(prs.map((x) => x.p));
+  const passa = (p, semCat) => (semCat || f.cat === 'Todas' || p.cat === f.cat) && (!f.col || p.colecao === f.col) && (!f.forn || p.forn === f.forn) && (!f.baixo || bx.has(p)) && (!f.parados || pr.has(p)) && (!b || sa(`${p.nome} ${p.cod} ${p.cat} ${p.colecao || ''}`).includes(b));
+  const base = ativos().filter((p) => passa(p, true)), l = base.filter((p) => passa(p)), cats = categorias(ativos());
+  const cols = [...new Set(ativos().map((p) => p.colecao).filter(Boolean))].sort(), forns = [...new Set(ativos().map((p) => p.forn).filter(Boolean))].sort();
+  const pecas = pecasNoEstoque(), unPar = prs.reduce((s, x) => s + totalPecas(x.p), 0), giro = giroMes();
+  const porCat = {}; ativos().forEach((p) => { porCat[p.cat] = (porCat[p.cat] || 0) + totalPecas(p); });
+  const catOrd = Object.entries(porCat).sort((a, z) => z[1] - a[1]), top4 = catOrd.slice(0, 4), outros = catOrd.slice(4).reduce((s, x) => s + x[1], 0);
+  const barrasCat = [...top4, ...(outros ? [['Outros', outros]] : [])];
+  // dica automática: o que repor primeiro, ou o que liquidar
+  const bxCat = {}; [...bx].forEach((p) => { bxCat[p.cat] = (bxCat[p.cat] || 0) + 1; });
+  const bxTop = Object.entries(bxCat).sort((a, z) => z[1] - a[1]).slice(0, 2).map(([c]) => `“${t(c)}”`);
+  const dica = bx.size ? `Reponha ${bx.size} ${bx.size === 1 ? 'peça' : 'peças'} com estoque baixo${bxTop.length ? ` em ${bxTop.join(' e ')}` : ''}.` : prs.length ? `${unPar} peças paradas há mais de ${db.cfg.parados[1]} dias: que tal uma liquidação dessas peças?` : 'Estoque em dia: nenhum tamanho no mínimo e nada parado.';
+  let cabAnt = null;
+  const linhas = l.map((p) => {
+    const usa = cabAnt && p.tam.every((tm) => cabAnt.includes(tm)) ? cabAnt : p.tam, mostraCab = usa !== cabAnt; cabAnt = usa;
+    return `<div class="est-linha" role="row" data-peca="${p.id}" tabindex="0">
+      <div class="est-peca">${fotoPeca(p)}<div><b>${t(p.nome)}</b><small>${t(p.cod)}</small><span class="chips-p"><i class="chip-cat">${t(p.cat)}</i>${p.colecao ? `<i class="chip-col">${t(p.colecao)}</i>` : ''}</span></div></div>
+      <div class="est-grade"><table class="gq">${mostraCab ? `<thead><tr><th></th>${usa.map((tm) => `<th>${t(tm)}</th>`).join('')}</tr></thead>` : ''}<tbody>${p.cores.map((c) => `<tr><th><i style="background:${t(c.h)}"></i>${t(c.n)}</th>${usa.map((tm) => celulaQ(p, c.n, tm)).join('')}</tr>`).join('')}</tbody></table></div>
+      <div class="est-n custo">${pode('custo') ? din(p.custo) : '—'}</div>
+      <div class="est-n preco">${precoAtual(p) < p.preco ? `<s>${din(p.preco)}</s>` : ''}<b>${din(precoAtual(p))}</b></div>
+      <details class="mais-op"><summary aria-label="Mais opções da peça">${icb('pontos')}</summary><div class="op-menu"><button type="button" data-editar-peca="${p.id}">Editar peça</button><button type="button" data-etiquetas="${p.id}">Etiquetas</button><button type="button" data-repor="${p.id}">Entrada de estoque</button><button type="button" data-transf="${p.id}">Transferir entre lojas</button><button type="button" data-arquivar-p="${p.id}">Arquivar</button></div></details>
+    </div>`;
+  }).join('');
+  const filtro = (ic, rot, attr, val, ops) => `<label class="filtro">${icb(ic)}<span><small>${rot}</small><select ${attr} aria-label="${rot}"><option value="">Todas</option>${ops.map((o) => `<option ${o === val ? 'selected' : ''}>${t(o)}</option>`).join('')}</select></span>${icb('baixo')}</label>`;
+  return `${cab('estoque', 'Estoque', 'Controle completo do seu estoque por peça, cor e tamanho, em todas as lojas.', `<button type="button" class="bt cheio" data-acao="nova-peca">${icb('maisCirc')}Nova peça</button><button type="button" class="bt" data-acao="nova-compra">${icb('entrada')}Entrada de<br>estoque</button><a class="bt" href="#etiquetas">${icb('codigo')}Imprimir<br>etiquetas</a><button type="button" class="bt" data-acao="transferir">${icb('trocas')}Transferir<br>entre lojas</button>`)}
+    <div class="est-filtros">
+      <label class="filtro">${icb('vestido')}<span><small>Categoria</small><select data-ef="cat" aria-label="Categoria"><option value="Todas">Todas</option>${cats.map((c) => `<option ${c === f.cat ? 'selected' : ''}>${t(c)}</option>`).join('')}</select></span>${icb('baixo')}</label>
+      ${filtro('folha', 'Coleção', 'data-ef="col"', f.col, cols).replace('<option value="">Todas</option>', '<option value="">Todas</option>')}
+      ${filtro('caminhao', 'Fornecedor', 'data-ef="forn"', f.forn, forns).replace('>Todas<', '>Todos<')}
+      <label class="filtro chk"><input type="checkbox" data-ef-b="baixo" ${f.baixo ? 'checked' : ''}><span><b>Estoque baixo</b><small>(${bx.size} ${bx.size === 1 ? 'item' : 'itens'})</small></span></label>
+      <label class="filtro chk"><input type="checkbox" data-ef-b="parados" ${f.parados ? 'checked' : ''}><span><b>Peças paradas</b><small>(${prs.length} ${prs.length === 1 ? 'item' : 'itens'})</small></span></label>
+      <label class="busca est-busca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><span class="sr">Buscar peça</span><input id="est-busca" placeholder="Buscar peça (nome, referência ou código)" value="${t(estado.busca)}" autocomplete="off"></label>
+    </div>
+    <div class="est-corpo">
+      <div class="est-esq">
+        <div class="pilulas abas-cat" role="tablist">${[['Todas', `Todas as peças (${base.length})`], ...cats.map((c) => [c, `${t(c)} (${base.filter((p) => p.cat === c).length})`])].map(([c, n]) => `<button type="button" role="tab" data-ef-cat="${t(c)}" aria-selected="${c === f.cat}">${c !== 'Todas' ? `<svg viewBox="0 0 24 24">${ICONE_CAT[c] || ICONE_CAT.Acessórios}</svg>` : ''}${n}</button>`).join('')}</div>
+        <div class="cartao est-tab" role="table"><div class="est-cab" role="row"><span>Peça / Referência</span><span>Cores e grade de tamanhos <small>(quantidade em estoque)</small></span><span class="est-n">Custo</span><span class="est-n">Preço</span><span></span></div>
+          ${linhas || '<p class="vazio"><b>Nenhuma peça neste filtro</b>Tire um filtro ou cadastre a peça em “Nova peça”.</p>'}</div>
+      </div>
+      <aside class="est-lado">
+        <section class="papel resumo"><i class="alfinete" aria-hidden="true"></i><h2>${icb('estoque')}Resumo do estoque</h2>
+          <div class="valor-total">${icb('vestido')}<span><small>Valor total em estoque${pode('custo') ? '' : ' (preço de venda)'}</small><b data-conta="${valorEstoque()}">${din(valorEstoque())}</b></span></div>
+          <div class="res-linha">${icb('estoque')}<span><small>Total de peças</small><b>${pecas.toLocaleString('pt-BR')} un.</b></span></div>
+          <a class="res-linha rosa" href="#estoque/paradas">${icb('cabide')}<span><small>Peças paradas</small><b>${unPar.toLocaleString('pt-BR')} un.</b></span></a>
+          <div class="res-linha">${icb('giro')}<span><small>Giro do estoque</small><b>${fmtN(giro)} ${giro >= 1.95 ? 'vezes' : 'vez'} / mês</b></span></div>
+          <h3>Estoque por categoria</h3>
+          ${barrasCat.map(([c, q]) => `<div class="cat-barra"><span>${c === 'Outros' ? '<i class="pontinhos">••</i>' : `<svg viewBox="0 0 24 24">${ICONE_CAT[c] || ICONE_CAT.Acessórios}</svg>`}${t(c)}</span><span class="trilho"><i style="width:${pecas ? Math.round(q / pecas * 100) : 0}%"></i></span><b>${pecas ? Math.round(q / pecas * 100) : 0}%</b></div>`).join('')}
+        </section>
+        <section class="papel rosa dica"><i class="alfinete" aria-hidden="true"></i>${icb('tendencia')}<div><h2>Dica do Peplo</h2><p>${dica}</p></div></section>
+        <section class="cartao mais-est"><h3>Mais do estoque</h3><a href="#estoque/promos">${icb('etiqueta')}Liquidação e promoções</a><a href="#estoque/paradas">${icb('ampulheta')}Peças paradas em detalhe</a><a href="#estoque/movs">${icb('trocas')}Movimentações</a>${variasLojas() ? `<a href="#estoque/lojas">${icb('estoque')}Todas as lojas</a>` : ''}<button type="button" data-acao="novo-pedido">${icb('caminhao')}Pedido de compra</button><button type="button" data-acao="importar-pecas">${icb('entrada')}Peças de uma planilha</button><button type="button" data-acao="exportar-estoque">${icb('recibo')}Baixar a planilha do estoque</button></section>
+      </aside>
+    </div>`;
+}
+
 // ------------------------------------------------------------------ telas
-let estado = { fiadoFiltro: 'todos', estoqueAba: 'pecas', busca: '', relPer: 'mes', relDe: '', relAte: '', vendAba: 'vender', cliBusca: '', sacola: [], vCli: '', desc: 0, pag: [{ f: 'pix', v: 0 }], parc: { n: 1, int: 'mes', prim: somaMes(hoje(), 1) }, excecao: null };
+let estado = { fiadoFiltro: 'todos', estoqueAba: 'pecas', busca: '', relPer: 'mes', relDe: '', relAte: '', vendAba: 'vender', cliBusca: '', sacola: [], vCli: '', desc: 0, descModo: 'pct', descVal: 0, dividir: false, cat: 'Todas', sel: null, selFechada: false, metaMes: '', est: { cat: 'Todas', col: '', forn: '', baixo: false, parados: false }, pag: [{ f: 'pix', v: 0 }], parc: { n: 1, int: 'mes', prim: somaMes(hoje(), 1) }, excecao: null };
 const GUIA = [
   ['Primeiros passos (10 minutos)', [
     ['Ponha a cara da sua loja', 'Em Configurações, “A marca da sua loja”: logo, nome, frase, WhatsApp, chave Pix e a cor do sistema. Tudo aparece no topo, nos recibos e nas cobranças.'],
@@ -572,80 +784,110 @@ const saudacao = () => { const h = new Date().getHours(); return h < 12 ? 'Bom d
 
 const TELAS = {
   inicio() {
-    const n = numeros(hoje(), hoje()), ab = totalAberto(), ven = totalVencido(), dev = devedoras().length, at = atrasadas();
-    const pr = parados(), bxp = produtosBaixos(), pecas = ativos().reduce((s, p) => s + totalPecas(p), 0);
-    const kpi = (ic, cls, rot, val, sub, ir) => `<a class="cartao kpi ${cls}" href="${ir}"><span class="kpi-ic ${cls === 'mal' ? 'mal' : ic === 'moedas' ? 'ouro' : ''}">${ico(ic)}</span><span><small>${rot}</small><b data-conta="${val}">${din(val)}</b><em>${sub}</em></span></a>`;
-    return `<section class="ola"><h1>${saudacao()}${db.loja.dono ? `, ${t(db.loja.dono)}` : ''}</h1><p>${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })} · resumo da ${t(db.loja.nome)} · <span class="vivo"><i></i>ao vivo</span></p><div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">${addBt('venda', 'cliente', 'caderno', 'receber', 'peca', 'compra', 'despesa')}<a class="bt" href="#fiado/vencidas">${ico('zap')}Cobrar atrasadas</a></div></section>
-      <div class="grade g4 kpis cascata" style="margin-bottom:16px">
-        ${kpi('bolsa', '', 'Vendido hoje', n.liquido, `${n.vs.length} ${n.vs.length === 1 ? 'venda' : 'vendas'}${pode('custo') ? ` · lucro bruto ${din(n.lucro)}` : ''}`, '#relatorios')}
-        ${kpi('moedas', '', 'Recebido hoje', n.recebido, `${din(n.recebidoFiado)} veio do crediário`, '#caixa')}
-        ${kpi('cartao', '', 'Crediário em aberto', ab, `${dev} ${dev === 1 ? 'cliente' : 'clientes'}`, '#fiado')}
-        ${kpi('alerta', ven ? 'mal' : '', 'Crediário vencido', ven, `${at.length} ${at.length === 1 ? 'cliente' : 'clientes'}`, '#fiado/vencidas')}
+    const h = hoje(), n = numeros(h, h), pecasHoje = n.vs.reduce((s, v) => s + v.itens.reduce((a, x) => a + x.qtd - (x.devolvido || 0), 0), 0);
+    const ym = estado.metaMes || mesAtual(), meta = metaDe(ym), feito = vendidoNoMes(ym), pct = meta ? Math.round(feito / meta * 100) : 0;
+    const meses = [0, -1, -2, -3, -4, -5].map((k) => somaMes(`${mesAtual()}-01`, k).slice(0, 7));
+    const iniMes = `${mesAtual()}-01`, nm = numeros(iniMes, h), top = maisVendidas(iniMes, h).slice(0, 3);
+    // estoque baixo por grade: as combinações peça + cor com mais tamanhos no mínimo
+    const bxCor = {}; baixos().forEach((x) => { const k = `${x.p.id}|${x.cor}`; (bxCor[k] ||= { p: x.p, cor: x.cor, n: 0 }).n++; });
+    const linhasBx = Object.values(bxCor).sort((a, b) => b.n - a.n || a.p.nome.localeCompare(b.p.nome)).slice(0, 3);
+    const tamsCab = linhasBx.length ? linhasBx[0].p.tam : ['P', 'M', 'G', 'GG', 'XG'];
+    const pr = parados(), unPar = pr.reduce((s, x) => s + totalPecas(x.p), 0), niver = aniversariantes(7);
+    const ab = totalAberto(), trocas = trocasDe(h).length, est = valorEstoque();
+    const kpi = (ic, rot, val, ir, cls = '', fmt = '') => `<a class="kpi6 ${cls}" href="${ir}">${icb(ic)}<span><small>${rot}</small><b ${fmt === 'txt' ? '' : `data-conta="${val}"`}>${fmt === 'txt' ? val : din(val)}</b></span></a>`;
+    const corH = (p, cor) => (p.cores.find((c) => c.n === cor) || {}).h || '#ccc';
+    return `<section class="ini-ola"><h1>${saudacao()}${db.loja.dono ? `, ${t(db.loja.dono)}` : ''}!</h1><i class="titulo-traco" aria-hidden="true"></i><p>Aqui está o movimento da sua loja hoje.</p></section>
+      <div class="ini-hero cascata">
+        <a class="etq etq-hoje" href="#vendas" aria-label="Vendas de hoje: ${din(n.liquido)}"><span class="etq-ic">${icb('bolsa')}</span><span class="etq-txt"><small>Vendas de hoje</small><b data-conta="${n.liquido}">${din(n.liquido)}</b><em>${n.vs.length} ${n.vs.length === 1 ? 'venda' : 'vendas'} <i>•</i> ${pecasHoje} ${pecasHoje === 1 ? 'peça' : 'peças'}</em></span><span class="etq-ic2">${icb('vestido')}</span></a>
+        <section class="cartao meta-cartao"><div class="meta-cab"><span class="meta-ic">${icb('alvo')}</span><div><h2>Meta do mês</h2><b class="meta-v">${meta ? din(meta) : 'Sem meta'}</b></div>
+          <label class="mes-sel">${icb('calendario')}<select data-meta-mes aria-label="Mês da meta">${meses.map((m) => `<option value="${m}" ${m === ym ? 'selected' : ''}>${nomeMes(m).replace(/^./, (x) => x.toUpperCase())}${m.slice(0, 4) !== mesAtual().slice(0, 4) ? ` ${m.slice(0, 4)}` : ''}</option>`).join('')}</select></label></div>
+          <div class="meta-barra"><i style="width:${Math.min(100, pct)}%"></i></div>
+          <div class="meta-pe"><span>${din(feito)} (${pct}%)</span><span>${!meta ? (dona() ? '<a class="link" href="#config/meta">Definir a meta</a>' : 'Meta não definida') : feito >= meta ? '<b class="ok-t">Meta batida!</b>' : `Falta ${din(meta - feito)}`}</span></div></section>
+        <section class="papel atalhos"><i class="alfinete" aria-hidden="true"></i><h2>Atalhos rápidos</h2><div class="atalhos-l">
+          <a href="#vender">${icb('registradora')}<span>Vender<br>(F2)</span></a><button type="button" data-acao="nova-compra">${icb('entrada')}<span>Entrada<br>de estoque</span></button><a href="#etiquetas">${icb('etiqueta')}<span>Emitir<br>etiquetas</span></a><button type="button" data-acao="novo-pedido">${icb('maisCirc')}<span>Nova<br>compra</span></button></div></section>
+        <nav class="atalhos-cel" aria-label="Atalhos"><a href="#vender">${icb('vender')}<span>Vender<small>(F2)</small></span></a><a href="#estoque">${icb('estoque')}<span>Estoque</span></a><a href="#etiquetas">${icb('codigo')}<span>Etiquetas</span></a><a href="#clientes">${icb('clientes')}<span>Clientes</span></a></nav>
       </div>
-      <div class="grade g-21 cascata" style="margin-bottom:16px">
-        <section class="cartao"><div class="cartao-cab"><h2>${ico('sino')}Atenção à sua loja</h2></div>${avisos().map((a) => `<a class="aviso" href="${a.ir}"><span class="ic ${a.ic}">${ico(a.ic === 'mal' ? 'alerta' : a.ic === 'atn' ? 'caixa' : 'cabide')}</span><span>${t(a.txt)}</span><span class="seta">${ico('seta')}</span></a>`).join('') || '<p class="vazio"><b>Tudo em ordem</b>Nenhuma pendência na loja agora.</p>'}</section>
-        <section class="cartao"><div class="cartao-cab"><h2>${ico('gente')}Quem está me devendo</h2><a class="link" href="#fiado">Ver todas</a></div>
-          ${at.length ? `<ul class="lista">${at.slice(0, 5).map((c) => `<li><a class="cresce" href="#cliente/${c.id}" style="text-decoration:none;color:inherit"><b>${t(c.nome)}</b><small>${din(aberto(c.id))} em aberto · ${maiorAtraso(c.id)} dias de atraso</small></a><span class="tag mal num">${din(vencido(c.id))}</span><a class="bt pq zap" href="${zap(c.tel, msg('atraso', c))}" target="_blank" rel="noopener" data-cobra="${c.id}" aria-label="Cobrar ${t(c.nome)} no WhatsApp">${ico('zap')}</a></li>`).join('')}</ul>` : '<p class="vazio"><b>Ninguém em atraso</b>Todas as clientes do crediário estão em dia.</p>'}
-        </section>
+      <div class="kpis6 cascata">
+        ${kpi('estoque', 'Estoque', est, '#estoque')}
+        ${kpi('trocas', 'Trocas hoje', `${trocas} ${trocas === 1 ? 'troca' : 'trocas'}`, '#vendas', '', 'txt')}
+        ${kpi('pessoas', 'Clientes', `${clientesAtivos()} ativos`, '#clientes', '', 'txt')}
+        ${kpi('cartao', 'Crediário', ab, '#fiado', 'rosa')}
+        ${kpi('barrasV', 'Vendas no mês', nm.liquido, '#relatorios')}
+        ${kpi('moedas', 'Comissões (mês)', comissoesMes(), dona() ? '#dono' : '#perfil')}
       </div>
-      <div class="grade g2 cascata">
-        <section class="cartao"><div class="cartao-cab"><h2>${ico('cabide')}Peças paradas</h2><a class="link" href="#estoque/parados">Ver todas</a></div>
-          <p class="mudo" style="margin:-6px 0 8px;font-size:13.5px">Sem venda há mais de ${db.cfg.parados[1]} dias · ${din(pr.reduce((s, x) => s + totalPecas(x.p) * x.p.custo, 0))} de dinheiro parado</p>
-          ${pr.length ? `<ul class="lista">${pr.slice(0, 4).map((x) => `<li>${iconePeca(x.p)}<span class="cresce"><b>${t(x.p.nome)}</b><small>${t(x.p.cod)} · ${totalPecas(x.p)} un.</small></span><span class="tag ${x.tag}">${x.dias} dias</span></li>`).join('')}</ul>` : '<p class="vazio"><b>Nada parado</b>Todas as peças venderam nos últimos dias.</p>'}
-        </section>
-        <section class="cartao"><div class="cartao-cab"><h2>${ico('caixa')}Estoque baixo</h2><a class="link" href="#estoque/baixo">Ver todos</a></div>
-          ${bxp.length ? bxp.slice(0, 2).map((p) => `<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px">${iconePeca(p)}<div style="min-width:0;flex:1"><b>${t(p.nome)}</b><small class="mudo" style="display:block;margin-bottom:6px">${t(p.cod)} · mínimo ${p.min} por tamanho</small>${grade(p)}</div></div>`).join('') : '<p class="vazio"><b>Estoque em dia</b>Nenhum tamanho abaixo do mínimo.</p>'}
-          <p class="mudo" style="margin:4px 0 0;font-size:13px">${pecas} peças na loja · ${din(ativos().reduce((s, p) => s + totalPecas(p) * p.custo, 0))} pelo custo</p>
-        </section>
+      <div class="ini-grade cascata">
+        <section class="cartao top-vendas"><div class="cartao-cab"><h2>${icb('cabide')}Peças mais vendidas <small>(mês)</small></h2><a class="link" href="#relatorios">Ver todas ›</a></div>
+          ${top.length ? `<ol class="ranking">${top.map((x, i) => `<li><span class="rk-foto">${fotoPeca(x.p)}<b class="rk rk${i + 1}">${i + 1}º</b></span><span class="rk-txt"><b>${t(x.p.nome)}</b><small>${t(x.p.cod)} <i>•</i> ${x.q} un.</small><strong>${din(precoAtual(x.p))}</strong></span></li>`).join('')}</ol>` : '<p class="vazio"><b>Nenhuma venda no mês</b>As peças que mais saem aparecem aqui.</p>'}</section>
+        <section class="cartao baixo-grade"><div class="cartao-cab"><h2>${icb('estoque')}Estoque baixo por grade</h2><a class="link" href="#estoque/baixo">Ver estoque ›</a></div>
+          ${linhasBx.length ? `<table class="bxg"><thead><tr><th>Peça / Cor</th>${tamsCab.map((tm) => `<th>${t(tm)}</th>`).join('')}</tr></thead><tbody>${linhasBx.map((x) => { const igual = x.p.tam.every((tm) => tamsCab.includes(tm)); return `<tr data-peca="${x.p.id}" tabindex="0"><td><span class="bx-peca">${fotoPeca(x.p)}<span><b>${t(x.p.nome)}</b><small>${t(x.p.cod)}</small><em><i style="background:${t(corH(x.p, x.cor))}"></i>${t(x.cor)}</em></span></span></td>${igual ? tamsCab.map((tm) => celulaQ(x.p, x.cor, tm)).join('') : `<td colspan="${tamsCab.length}"><span class="bx-outra">${x.p.tam.map((tm) => `<span><small>${t(tm)}</small>${celulaQ(x.p, x.cor, tm).replace(/<\/?td/g, (m) => m.replace('td', 'b'))}</span>`).join('')}</span></td>`}</tr>`; }).join('')}</tbody></table>` : '<p class="vazio"><b>Estoque em dia</b>Nenhum tamanho no mínimo.</p>'}</section>
+        <div class="ini-lado">
+          <section class="cartao parados-c"><div class="cartao-cab"><h2>${icb('ampulheta')}Peças paradas</h2><a class="link" href="#estoque/paradas">Ver todas ›</a></div>
+            <a class="parados-faixa" href="#estoque/paradas"><i class="pecas-dobradas" aria-hidden="true"></i><span><b>${unPar} ${unPar === 1 ? 'peça' : 'peças'}</b><small>sem venda há mais de ${db.cfg.parados[1]} dias</small></span></a></section>
+          <section class="cartao niver"><div class="cartao-cab"><h2>${icb('presente')}Aniversariantes <small>(7 dias)</small></h2><button type="button" class="link" data-acao="ver-niver">Ver todos ›</button></div>
+            ${niver.length ? `<ul class="niver-l">${niver.slice(0, 2).map((x) => `<li>${fotoCli(x.c)}<a class="cresce" href="#cliente/${x.c.id}"><b>${t(x.c.nome)}</b><small>${quandoNiver(x)}</small></a>${x.c.tel ? `<a class="bt-presente" href="${zap(x.c.tel, msgNiver(x.c))}" target="_blank" rel="noopener" aria-label="Mandar parabéns para ${t(x.c.nome)} no WhatsApp" title="Mandar parabéns no WhatsApp">${icb('presente')}</a>` : ''}</li>`).join('')}</ul>` : '<p class="vazio"><b>Ninguém nesta semana</b>Ponha o aniversário no cadastro da cliente.</p>'}</section>
+        </div>
       </div>`;
   },
 
   vender() {
-    const sac = estado.sacola, sub = sac.reduce((s, x) => s + x.preco * x.qtd, 0), total = Math.max(0, sub - estado.desc);
-    const c = acharCli(estado.vCli), pago = estado.pag.reduce((s, x) => s + (x.v || 0), 0), falta = total - pago;
-    const fiadoV = estado.pag.filter((x) => x.f === 'fiado').reduce((s, x) => s + (x.v || 0), 0);
-    const pf = fiadoV ? podeFiado(c, fiadoV) : { ok: true };
-    const cred = c ? c.credito || 0 : 0;
-    const busca = sa(estado.busca), lista = ativos().filter((p) => !busca || sa(`${p.nome} ${p.cod} ${p.cat}`).includes(busca));
-    const formas = Object.entries(FORMAS).filter(([k]) => k !== 'loja' || cred > 0);
-    return `<div class="cab"><div><h1>Vender</h1><p>Toque na peça, escolha cor e tamanho. O estoque baixa na hora da venda.</p></div><div class="acoes"><a class="bt" href="#vendas">${ico('recibo')}Vendas e trocas</a>${addBt('cliente', 'peca', 'caderno')}</div></div>
-      <div class="pdv">
-        <section>
-          <label class="busca" style="display:block;margin-bottom:14px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Buscar peça</span><input id="pdv-busca" placeholder="Buscar peça ou passar o leitor de código de barras" value="${t(estado.busca)}" autocomplete="off"></label>
-          <div class="produtos cascata">${lista.map((p) => { const tot = totalPecas(p); return `<button type="button" class="cartao prod" data-escolher="${p.id}" ${tot ? '' : 'disabled style="opacity:.55"'}><span class="prod-topo">${iconePeca(p)}<div><b>${t(p.nome)}</b><small>${t(p.cod)} · ${p.cores.length} ${p.cores.length === 1 ? 'cor' : 'cores'} · ${p.tam.join(' ')}</small></div></span><span class="prod-rodape"><span>${tot ? `${tot} em estoque` : 'Esgotada'}</span>${precoAtual(p) < p.preco ? `<b><s class="mudo" style="font-weight:500;font-size:13px">${din(p.preco)}</s> ${din(precoAtual(p))}</b>` : `<b>${din(p.preco)}</b>`}</span></button>`; }).join('') || '<p class="vazio"><b>Nenhuma peça encontrada</b>Confira o nome ou cadastre a peça em Estoque.</p>'}</div>
+    const busca = sa(estado.busca), cat = estado.cat || 'Todas', cats = categorias();
+    const lista = ativos().filter((p) => (cat === 'Todas' || p.cat === cat) && (!busca || sa(`${p.nome} ${p.cod} ${p.cat} ${p.colecao || ''}`).includes(busca)));
+    let sel = estado.sel && prod(estado.sel.p) && !prod(estado.sel.p).arquivado ? estado.sel : null;
+    if (!sel && !estado.selFechada) { const p0 = lista.find((p) => totalPecas(p) > 0); if (p0) sel = estado.sel = novaSel(p0); }
+    const qSac = estado.sacola.reduce((s, x) => s + x.qtd, 0);
+    return `<div class="pdv2">
+      <div class="pdv-esq">
+        ${cab('vender', 'Vender', 'Venda rápida, troca e várias formas de pagamento.', '', `Caixa da ${t(db.loja.nome)}`)}
+        <div class="pdv-busca"><label class="busca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><span class="sr">Buscar peça</span><input id="pdv-busca" placeholder="Busque por nome, referência ou leia o código de barras" value="${t(estado.busca)}" autocomplete="off"></label><button type="button" class="bt-ic leitor" data-acao="leitor" aria-label="Ler código de barras" title="Leitor de código de barras">${icb('codigo')}</button><button type="button" class="bt cheio nova-peca" data-acao="nova-peca">${icb('maisCirc')}Nova peça (F8)</button></div>
+        <div class="pilulas" role="tablist" aria-label="Categorias">${[['Todas', ''], ...cats.map((c) => [c, ICONE_CAT[c] || ICONE_CAT.Acessórios])].map(([c, ic]) => `<button type="button" role="tab" data-cat="${t(c)}" aria-selected="${c === cat}">${ic ? `<svg viewBox="0 0 24 24">${ic}</svg>` : ''}${t(c)}</button>`).join('')}</div>
+        <div class="pdv-meio${sel ? ' com-sel' : ''}">
+          <div class="vitrine cascata">${lista.map((p) => { const tot = totalPecas(p), pa = precoAtual(p); return `<button type="button" class="peca-c${sel && sel.p === p.id ? ' sel' : ''}" data-pick="${p.id}" ${tot ? '' : 'aria-disabled="true"'}>${fotoPeca(p)}${tot ? '' : '<em class="esgotada">Esgotada</em>'}<b>${t(p.nome)}</b><small>${t(p.cod)}</small><strong>${pa < p.preco ? `<s>${din(p.preco)}</s>` : ''}${din(pa)}</strong></button>`; }).join('') || '<p class="vazio"><b>Nenhuma peça encontrada</b>Confira o nome ou cadastre a peça em Estoque.</p>'}</div>
+          ${painelSel(sel)}
+        </div>
+      </div>
+      <aside class="sacola2" id="sacola" aria-label="Sacola de venda">${sacolaHTML()}</aside>
+      <a class="sacola-bt${qSac ? '' : ' vazia'}" href="#sacola">${icb('bolsa')}<span>Sacola (${qSac} ${qSac === 1 ? 'item' : 'itens'})</span><b>${din(totalSacola())}</b></a>
+    </div>`;
+  },
+
+  sacola() {
+    if (!celular()) return TELAS.vender();
+    return `<div class="sacola-tela"><a class="link voltar" href="#vender">← Continuar vendendo</a><section class="sacola2" aria-label="Sacola de venda">${sacolaHTML()}</section></div>`;
+  },
+
+  etiquetas() {
+    const b = sa(estado.etqBusca || ''), cat = estado.etqCat || 'Todas', marc = estado.etqSel || (estado.etqSel = {}), modo = estado.etqModo || 'estoque';
+    const l = ativos().filter((p) => (cat === 'Todas' || p.cat === cat) && (!b || sa(`${p.nome} ${p.cod} ${p.cat}`).includes(b)));
+    const nMarc = Object.keys(marc).filter((k) => marc[k] && prod(k)).length, ex = l[0] || ativos()[0];
+    const qtdEt = (p) => (modo === 'estoque' ? totalPecas(p) : p.cores.length * p.tam.length);
+    const totalEt = Object.keys(marc).filter((k) => marc[k] && prod(k)).reduce((s, k) => s + qtdEt(prod(k)), 0);
+    return `${cab('etiquetas', 'Etiquetas', 'Preço e código de barras de cada cor e tamanho. No Vender, o leitor põe a peça certa na sacola.', `<button type="button" class="bt" data-acao="etq-todas">${nMarc && nMarc === l.length ? 'Desmarcar todas' : 'Marcar todas'}</button><button type="button" class="bt cheio" data-acao="etq-imprimir" ${nMarc ? '' : 'disabled'}>${icb('impressora')}Imprimir ${totalEt ? `${totalEt} ${totalEt === 1 ? 'etiqueta' : 'etiquetas'}` : 'marcadas'}</button>`)}
+      <div class="etq-grade">
+        <section class="cartao">
+          <label class="busca" style="display:block;margin-bottom:12px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><span class="sr">Buscar peça</span><input id="etq-busca" placeholder="Buscar peça (nome, referência ou código)" value="${t(estado.etqBusca || '')}" autocomplete="off"></label>
+          <div class="pilulas pq">${['Todas', ...categorias()].map((c) => `<button type="button" data-etq-cat="${t(c)}" aria-selected="${c === cat}">${t(c)}</button>`).join('')}</div>
+          <ul class="etq-l">${l.map((p) => `<li><label class="etq-marca"><input type="checkbox" data-etq-p="${p.id}" ${marc[p.id] ? 'checked' : ''} aria-label="Incluir ${t(p.nome)}"></label>${fotoPeca(p)}<span class="cresce"><b>${t(p.nome)}</b><small>${t(p.cod)} · ${totalPecas(p)} em estoque · ${p.cores.length} ${p.cores.length === 1 ? 'cor' : 'cores'} · ${p.tam.join(' ')}</small></span><strong>${din(precoAtual(p))}</strong><button type="button" class="bt pq" data-etiquetas="${p.id}">Escolher quantidades</button></li>`).join('') || '<li><p class="vazio"><b>Nenhuma peça</b>Confira a busca.</p></li>'}</ul>
         </section>
-        <aside class="cartao sacola" aria-label="Sacola">
-          <div class="cartao-cab"><h2>${ico('bolsa')}Sacola</h2>${sac.length ? '<button type="button" class="link" data-acao="esvaziar">Esvaziar</button>' : ''}</div>
-          ${sac.length ? `<ul class="itens-sacola">${sac.map((x, i) => `<li><span style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t(x.nome)}</b><small class="mudo"><span class="bolinha" style="background:${t(x.h)}"></span>${t(x.cor)} · ${t(x.tam)} · ${din(x.preco)}</small></span><span class="q"><button type="button" data-q="${i}" data-d="-1" aria-label="Menos">−</button><b>${x.qtd}</b><button type="button" data-q="${i}" data-d="1" aria-label="Mais">+</button></span></li>`).join('')}</ul>` : '<p class="vazio" style="padding:14px 0"><b>Sacola vazia</b>Escolha as peças ao lado.</p>'}
-          <div class="campos" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
-            <label class="campo">Cliente<input id="v-cli" list="dl-cli" value="${t(estado.vCli)}" placeholder="Opcional (obrigatória no crediário)" autocomplete="off">${listaClientes()}</label>
-            <label class="campo">Desconto (R$)<input id="v-desc" inputmode="decimal" value="${campoDin(estado.desc)}" placeholder="0,00"></label>
-          </div>
-          ${c ? `<p class="mudo" style="font-size:13px;margin:6px 0 0">${t(c.nome)} · <span class="tag ${situacao(c).tag}">${situacao(c).txt}</span> · disponível no crediário ${din(Math.max(0, (c.limite || 0) - aberto(c.id)))}${cred ? ` · crédito na loja ${din(cred)}` : ''}</p>` : estado.vCli ? '<p class="mudo" style="font-size:13px;margin:6px 0 0">Cliente nova: será cadastrada ao finalizar.</p>' : ''}
-          <div class="total"><span>Total</span><b data-total>${din(total)}</b></div>
-          <p class="campo" style="margin:0 0 6px">Pagamento</p>
-          ${estado.pag.map((x, i) => `<div class="pag-linha"><select data-pf="${i}" aria-label="Forma de pagamento">${formas.map(([k, n]) => `<option value="${k}" ${x.f === k ? 'selected' : ''}>${n}</option>`).join('')}</select><input data-pv="${i}" inputmode="decimal" value="${campoDin(x.v)}" placeholder="0,00" aria-label="Valor">${estado.pag.length > 1 ? `<button type="button" class="x" data-tira="${i}" aria-label="Tirar">×</button>` : '<span></span>'}</div>${x.f === 'credito' ? `<label class="campo" style="margin:-2px 0 8px;max-width:200px">Parcelas no cartão<select data-pp="${i}">${Array.from({ length: 10 }, (_, k) => `<option value="${k + 1}" ${(x.parc || 1) === k + 1 ? 'selected' : ''}>${k + 1}×${k ? '' : ' (à vista)'}</option>`).join('')}</select></label>` : ''}`).join('')}
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button type="button" class="link" data-acao="dividir">+ Dividir em outra forma</button>${falta !== 0 && sac.length ? `<button type="button" class="link" data-acao="completar">Pôr o que falta (${din(falta)})</button>` : ''}</div>
-          ${fiadoV ? `<div class="campos" style="margin-top:12px;grid-template-columns:repeat(3,minmax(0,1fr))"><label class="campo">Parcelas<select id="p-n">${Array.from({ length: 12 }, (_, i) => `<option ${estado.parc.n === i + 1 ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label><label class="campo">A cada<select id="p-int"><option value="mes" ${estado.parc.int === 'mes' ? 'selected' : ''}>mês</option><option value="15" ${estado.parc.int === '15' ? 'selected' : ''}>15 dias</option><option value="7" ${estado.parc.int === '7' ? 'selected' : ''}>semana</option></select></label><label class="campo">1º vencimento<input id="p-prim" type="date" value="${estado.parc.prim}"></label></div>
-            <p class="mudo" style="font-size:13px;margin:6px 0 0">${estado.parc.n}× de ${din(Math.floor(fiadoV / estado.parc.n))} no crediário</p>` : ''}
-          ${falta > 0 && sac.length ? `<div class="caixa-aviso atn">Faltam ${din(falta)} para fechar o total.</div>` : falta < 0 ? `<div class="caixa-aviso atn">Pagamento passa ${din(-falta)} do total${estado.pag.some((x) => x.f === 'dinheiro') ? ` (troco de ${din(-falta)})` : ''}.</div>` : ''}
-          ${fiadoV && !pf.ok ? `<div class="caixa-aviso mal">${t(pf.motivo)}${pf.excecao ? (estado.excecao ? `<br><b>Exceção liberada:</b> ${t(estado.excecao)}` : ' <button type="button" class="link" data-acao="excecao">Liberar exceção</button>') : ''}</div>` : ''}
-          ${db.fiscal.usar ? `<div class="campos" style="margin-top:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end"><label class="troca" style="padding:0"><span>Emitir NFC-e</span><input type="checkbox" id="v-nota" ${estado.nota === false ? '' : 'checked'}></label><label class="campo">CPF na nota (opcional)<input id="v-cpf" inputmode="numeric" value="${t(estado.cpf || '')}" placeholder="000.000.000-00"></label></div>${!fiscalPronto() ? '<p class="mudo" style="font-size:12.5px;margin:6px 0 0">Complete os dados fiscais em Configurações para emitir.</p>' : !emiteAqui() ? '<p class="mudo" style="font-size:12.5px;margin:6px 0 0">A emissão de verdade está em liberação. Avisaremos quando estiver pronta.</p>' : ''}` : ''}
-          <button type="button" class="bt cheio largo" style="margin-top:12px;min-height:50px" data-acao="finalizar" ${sac.length ? '' : 'disabled'}>${ico('ok')}Finalizar venda</button>
+        <aside class="etq-lado">
+          <section class="papel"><i class="alfinete" aria-hidden="true"></i><h2>Como sai a etiqueta</h2>
+            ${ex ? `<div class="etq-modelo"><span>${t(db.loja.nome)}</span><b>${t(ex.nome)} · ${t(ex.cores[0].n)} · ${t(ex.tam[0])}</b><strong>${din(precoAtual(ex))}</strong>${barras(codVar(ex, ex.cores[0].n, ex.tam[0]), 40)}<small>${codVar(ex, ex.cores[0].n, ex.tam[0])}</small></div>` : ''}
+            <p class="campo" style="margin:14px 0 6px">Quantas etiquetas por peça marcada</p>
+            <div class="seg-l"><button type="button" data-etq-modo="estoque" aria-pressed="${modo === 'estoque'}">Uma por peça em estoque</button><button type="button" data-etq-modo="grade" aria-pressed="${modo === 'grade'}">Uma de cada cor e tamanho</button></div>
+            <p class="mudo" style="font-size:13px;margin:10px 0 0">Folha A4 com 3 colunas (62 × 32 mm). Para escolher a quantidade de cada cor e tamanho, use “Escolher quantidades” na peça.</p></section>
         </aside>
       </div>`;
   },
 
   notas() {
-    if (!db.fiscal.usar) return `<div class="cab"><div><h1>Notas fiscais</h1><p>A nota fiscal está desligada. Ligue em Configurações, se a sua loja precisa emitir NFC-e.</p></div><div class="acoes"><a class="bt cheio" href="#config">Ir para Configurações</a></div></div>`;
+    if (!db.fiscal.usar) return `${cab('notas', `Notas fiscais`, `A nota fiscal está desligada. Ligue em Configurações, se a sua loja precisa emitir NFC-e.`, `<a class="bt cheio" href="#config">Ir para Configurações</a>`)}`;
     const l = db.notas.slice().reverse();
-    return `<div class="cab"><div><h1>Notas fiscais</h1><p>NFC-e emitidas nas vendas. ${db.fiscal.ambiente === '2' ? 'Ambiente de homologação (teste, sem valor fiscal).' : 'Ambiente de produção.'}</p></div><div class="acoes"><button type="button" class="bt" data-acao="xml-notas">Baixar para o contador</button><a class="bt cheio" href="#vender">${ico('mais')}Nova venda</a></div></div>
+    return `${cab('notas', `Notas fiscais`, `NFC-e emitidas nas vendas. ${db.fiscal.ambiente === '2' ? 'Ambiente de homologação (teste, sem valor fiscal).' : 'Ambiente de produção.'}`, `<button type="button" class="bt" data-acao="xml-notas">Baixar para o contador</button><a class="bt cheio" href="#vender">${ico('mais')}Nova venda</a>`)}
       <section class="cartao"><div class="tabela-wrap"><table class="tabela cartoes"><thead><tr><th>Nº</th><th>Data</th><th>Venda</th><th>CPF</th><th class="n">Valor</th><th>Situação</th><th></th></tr></thead><tbody>${l.map((n) => { const v = db.vendas.find((x) => x.id === n.venda) || {}; const st = { demonstracao: ['ac', 'Demonstração'], pendente: ['atn', 'Aguardando SEFAZ'], autorizada: ['ok', 'Autorizada'], cancelada: ['', 'Cancelada'], rejeitada: ['mal', 'Rejeitada'] }[n.status] || ['', n.status]; return `<tr><td>${n.numero}</td><td data-r="Data">${dataBR(n.data)} ${horaBR(n.data)}</td><td data-r="Venda">nº ${v.n || '—'}</td><td data-r="CPF">${n.cpf ? '•••' + n.cpf.slice(-4) : '—'}</td><td class="n">${din(n.valor)}</td><td><span class="tag ${st[0]}">${st[1]}</span></td><td><button type="button" class="bt pq" data-nota="${n.id}">Abrir</button></td></tr>`; }).join('') || '<tr><td colspan="7"><p class="vazio"><b>Nenhuma nota ainda</b>Na próxima venda, deixe marcado “Emitir NFC-e”.</p></td></tr>'}</tbody></table></div></section>`;
   },
 
   vendas() {
     const l = db.vendas.slice().sort((a, b) => b.data.localeCompare(a.data)).slice(0, 80);
-    return `<div class="cab"><div><h1>Vendas e trocas</h1><p>As últimas vendas. Toque numa venda para ver o comprovante, trocar ou devolver.</p></div><div class="acoes">${addBt('venda', 'cliente', 'caderno')}</div></div>
+    return `${cab('vendas', `Vendas e trocas`, `As últimas vendas. Toque numa venda para ver o comprovante, trocar ou devolver.`, `${addBt('venda', 'cliente', 'caderno')}`)}
       <section class="cartao"><div class="tabela-wrap"><table class="tabela cartoes"><thead><tr><th>Nº</th><th>Data</th><th>Cliente</th><th>Peças</th><th>Pagamento</th><th class="n">Total</th><th></th></tr></thead><tbody>
       ${l.map((v) => `<tr><td data-r="Nº">${v.n}</td><td data-r="Data">${dataBR(v.data)} ${horaBR(v.data)}</td><td data-r="Cliente">${t(v.cli ? (cli(v.cli) || {}).nome : 'Sem cliente')}</td><td data-r="Peças">${v.itens.reduce((s, x) => s + x.qtd, 0)}</td><td data-r="Pagamento">${v.pag.map((x) => FORMAS[x.f]).join(' + ')}${v.devol && v.devol.length ? ' <span class="tag ac">troca/devolução</span>' : ''}${v.cancelada ? ' <span class="tag mal">cancelada</span>' : ''}</td><td class="n">${din(v.total)}</td><td><button type="button" class="bt pq" data-venda="${v.id}">Abrir</button></td></tr>`).join('')}
       </tbody></table></div></section>`;
@@ -665,7 +907,7 @@ const TELAS = {
     if (f === 'quitadas') l = l.filter((c) => !aberto(c.id));
     if (f === 'todos') l = l.filter((c) => aberto(c.id) > 0);
     l.sort((a, b) => vencido(b.id) - vencido(a.id) || aberto(b.id) - aberto(a.id));
-    return `<div class="cab"><div><h1>Crediário</h1><p>Quem deve, quanto, desde quando. Cobre com um toque e receba em parte ou tudo.</p></div><div class="acoes"><button type="button" class="bt" data-acao="exportar-fiado">Planilha</button>${addBt('cadernoTodo', 'caderno', 'receber', 'cliente', 'impCli')}</div></div>
+    return `${cab('fiado', `Crediário`, `Quem deve, quanto, desde quando. Cobre com um toque e receba em parte ou tudo.`, `<button type="button" class="bt" data-acao="exportar-fiado">Planilha</button>${addBt('cadernoTodo', 'caderno', 'receber', 'cliente', 'impCli')}`)}
       <div class="grade g4 kpis cascata" style="margin-bottom:18px">
         <div class="cartao kpi"><span class="kpi-ic">${ico('cartao')}</span><span><small>A receber</small><b data-conta="${totalAberto()}">${din(totalAberto())}</b><em>${devedoras().length} clientes</em></span></div>
         <div class="cartao kpi ${ven ? 'mal' : ''}"><span class="kpi-ic mal">${ico('alerta')}</span><span><small>Vencido</small><b data-conta="${ven}">${din(ven)}</b><em>${atrasadas().length} em atraso</em></span></div>
@@ -685,9 +927,8 @@ const TELAS = {
     const ps = parcelasDe(c.id).sort((a, b) => a.venc.localeCompare(b.venc)), vs = db.vendas.filter((v) => v.cli === c.id).sort((a, b) => b.data.localeCompare(a.data));
     const pgs = db.pagamentos.filter((p) => p.cli === c.id).sort((a, b) => b.data.localeCompare(a.data)), cbs = db.cobrancas.filter((x) => x.cli === c.id).sort((a, b) => b.data.localeCompare(a.data));
     const abertasL = ps.filter((p) => p.saldo > 0 && p.status === 'aberta'), hist = ps.filter((p) => !(p.saldo > 0 && p.status === 'aberta'));
-    return `<a href="#fiado" class="link" style="display:inline-block;margin-bottom:12px">← Crediário</a>
-      <div class="cab"><div><h1>${t(c.nome)}</h1><p>${t(c.tel ? c.tel.replace(/^(\d{2})(\d{5})(\d+)$/, '($1) $2-$3') : 'Sem telefone')}${c.nasc ? ` · aniversário ${dataBR(c.nasc).slice(0, 5)}` : ''} · <span class="tag ${s.tag}">${s.txt}</span></p></div>
-        <div class="acoes">${ab ? `<a class="bt zap" href="${zap(c.tel, msg(modeloCobranca(c), c))}" target="_blank" rel="noopener" data-cobra="${c.id}">${ico('zap')}Cobrar</a><button type="button" class="bt cheio" data-receber="${c.id}">Receber pagamento</button>` : ''}<button type="button" class="bt" data-editar-cli="${c.id}">Editar</button></div></div>
+    return `<a href="#clientes" class="link" style="display:inline-block;margin-bottom:12px">← Clientes</a>
+      ${cab('clientes', `${t(c.nome)}`, `${t(c.tel ? c.tel.replace(/^(\d{2})(\d{5})(\d+)$/, '($1) $2-$3') : 'Sem telefone')}${c.nasc ? ` · aniversário ${dataBR(c.nasc).slice(0, 5)}` : ''} · <span class="tag ${s.tag}">${s.txt}</span>`, `${ab ? `<a class="bt zap" href="${zap(c.tel, msg(modeloCobranca(c), c))}" target="_blank" rel="noopener" data-cobra="${c.id}">${ico('zap')}Cobrar</a><button type="button" class="bt cheio" data-receber="${c.id}">Receber pagamento</button>` : ''}<button type="button" class="bt" data-editar-cli="${c.id}">Editar</button>`)}
       <div class="grade g4 kpis cascata" style="margin-bottom:16px">
         <div class="cartao kpi"><span class="kpi-ic">${ico('cartao')}</span><span><small>Em aberto</small><b>${din(ab)}</b><em>${abertasL.length} ${abertasL.length === 1 ? 'parcela' : 'parcelas'}</em></span></div>
         <div class="cartao kpi ${vencido(c.id) ? 'mal' : ''}"><span class="kpi-ic mal">${ico('alerta')}</span><span><small>Vencido</small><b>${din(vencido(c.id))}</b><em>${maiorAtraso(c.id) ? `maior atraso ${maiorAtraso(c.id)} dias` : 'nada vencido'}</em></span></div>
@@ -717,14 +958,15 @@ const TELAS = {
 
   clientes() {
     const b = sa(estado.cliBusca), l = db.clientes.filter((c) => !b || sa(`${c.nome} ${c.tel}`).includes(b)).sort((a, z) => a.nome.localeCompare(z.nome));
-    return `<div class="cab"><div><h1>Clientes</h1><p>${db.clientes.length} clientes. A etiqueta mostra na hora quem tem pendência.</p></div><div class="acoes">${addBt('cliente', 'cadernoTodo', 'caderno', 'impCli')}</div></div>
+    return `${cab('clientes', `Clientes`, `${db.clientes.length} clientes. A etiqueta mostra na hora quem tem pendência.`, `${addBt('cliente', 'cadernoTodo', 'caderno', 'impCli')}`)}
       <label class="busca" style="display:block;margin-bottom:14px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Buscar cliente</span><input id="cli-busca" placeholder="Buscar por nome ou telefone" value="${t(estado.cliBusca)}" autocomplete="off"></label>
       <section class="cartao"><ul class="lista">${l.map((c) => { const s = situacao(c); return `<li><a class="cresce" href="#cliente/${c.id}" style="text-decoration:none;color:inherit"><b>${t(c.nome)}</b><small>${t(c.tel)} · ${aberto(c.id) ? `${din(aberto(c.id))} em aberto` : 'nada em aberto'} · limite ${din(c.limite || 0)}</small></a><span class="tag ${s.tag}">${s.txt}</span></li>`; }).join('') || '<p class="vazio"><b>Nenhuma cliente</b>Cadastre com o botão acima.</p>'}</ul></section>`;
   },
 
   estoque(sub) {
-    const a = sub || estado.estoqueAba;
-    const tabs = [['pecas', 'Peças'], ['baixo', `Estoque baixo (${produtosBaixos().length})`], ['parados', `Parados (${parados().length})`], ['promos', 'Liquidação'], ['movs', 'Movimentações'], ...(variasLojas() ? [['lojas', 'Todas as lojas']] : [])];
+    if (!sub || sub === 'pecas' || sub === 'baixo' || sub === 'parados') { if (sub === 'baixo' || sub === 'parados') { estado.est = { cat: 'Todas', col: '', forn: '', baixo: sub === 'baixo', parados: sub === 'parados' }; history.replaceState(null, '', '#estoque'); } return estoqueTabela(); }
+    const a = sub === 'paradas' ? 'parados' : sub;
+    const tabs = [['parados', `Peças paradas (${parados().length})`], ['promos', 'Liquidação'], ['movs', 'Movimentações'], ...(variasLojas() ? [['lojas', 'Todas as lojas']] : [])];
     let corpo = '';
     if (a === 'pecas') {
       const b = sa(estado.busca), l = ativos().filter((p) => !b || sa(`${p.nome} ${p.cod} ${p.cat}`).includes(b));
@@ -760,7 +1002,8 @@ const TELAS = {
       const l = db.movs.slice().sort((x, y) => y.data.localeCompare(x.data)).slice(0, 120);
       corpo = `<section class="cartao"><div class="tabela-wrap"><table class="tabela cartoes"><thead><tr><th>Data</th><th>Peça</th><th>Cor · tamanho</th><th>Tipo</th><th class="n">Qtd.</th><th>Motivo</th></tr></thead><tbody>${l.map((m) => { const p = prod(m.p) || { nome: '?' }, tp = TIPO[m.tipo] || ['', m.tipo]; return `<tr><td data-r="Data">${dataBR(m.data)} ${horaBR(m.data)}</td><td><b>${t(p.nome)}</b></td><td data-r="Variação">${t(m.cor)} · ${t(m.tam)}</td><td><span class="tag ${tp[0]}">${tp[1]}</span></td><td class="n" data-r="Quantidade">${m.q > 0 ? '+' : ''}${m.q}</td><td data-r="Motivo">${variasLojas() ? `<b>${t(nomeLoja(m.loja || 'l1'))}</b> · ` : ''}${t(m.motivo || m.ref || '')}</td></tr>`; }).join('')}</tbody></table></div></section>`;
     }
-    return `<div class="cab"><div><h1>Estoque</h1><p>${ativos().reduce((s, p) => s + totalPecas(p), 0)} peças · ${din(ativos().reduce((s, p) => s + totalPecas(p) * p.custo, 0))} pelo custo · cada cor e tamanho contado separado.</p></div><div class="acoes"><button type="button" class="bt" data-acao="exportar-estoque">Planilha</button>${addBt('peca', 'compra', 'pedido', 'promo', 'impPeca')}</div></div>
+    const NOMES_EXTRA = { parados: 'Peças paradas', promos: 'Liquidação e promoções', movs: 'Movimentações', lojas: 'Todas as lojas' };
+    return `${cab('estoque', 'Estoque', `${NOMES_EXTRA[a] || ''} · ${pecasNoEstoque().toLocaleString('pt-BR')} peças na loja.`, `<a class="bt" href="#estoque">← Voltar à tabela</a><button type="button" class="bt" data-acao="exportar-estoque">Planilha</button>${addBt('peca', 'compra', 'pedido', 'promo', 'impPeca')}`)}
       ${abas(tabs, a, 'data-ea')}${corpo}`;
   },
 
@@ -788,17 +1031,17 @@ const TELAS = {
       const l = Object.values(porF).sort((x, y) => y.vendido - x.vendido), tot = l.reduce((s2, x) => s2 + x.vendido, 0) || 1; let ac = 0;
       corpo = `<section class="cartao"><p class="mudo" style="margin:0 0 12px;font-size:13.5px">Últimos 12 meses. Classe A: os fornecedores que trazem 80% das vendas; B: os próximos 15%; C: o resto. Margem = quanto sobra das peças vendidas depois do custo.</p><div class="tabela-wrap"><table class="tabela cartoes"><thead><tr><th>Fornecedor</th><th>Classe</th><th class="n">Comprado</th><th class="n">Vendido</th><th class="n">Margem</th><th class="n">% das vendas</th></tr></thead><tbody>${l.map((x) => { const antes = ac / tot; ac += x.vendido; const cl = antes < 0.8 ? 'A' : antes < 0.95 ? 'B' : 'C'; return `<tr><td><b>${t(x.f.nome)}</b>${x.f.tel ? `<br><small class="mudo">${t(x.f.tel)}</small>` : ''}</td><td data-r="Classe"><span class="tag ${cl === 'A' ? 'ok' : cl === 'B' ? 'atn' : ''}">${cl}</span></td><td class="n" data-r="Comprado">${din(x.comprado)}</td><td class="n" data-r="Vendido">${din(x.vendido)}</td><td class="n" data-r="Margem">${x.vendido ? `${Math.round((x.vendido - x.custoVendido) / x.vendido * 100)}%` : '—'}</td><td class="n" data-r="Participação">${Math.round(x.vendido / tot * 100)}%</td></tr>`; }).join('')}</tbody></table></div></section>`;
     }
-    return `<div class="cab"><div><h1>Compras e fornecedores</h1><p>Pedido feito na viagem de compra, chegada por cor e tamanho, margem de cada lote e quem são os melhores fornecedores.</p></div><div class="acoes">${addBt('pedido', 'compra', 'peca', 'forn')}</div></div>
+    return `${cab('compras', `Compras`, `Pedidos, fornecedores e chegadas. Pedido feito na viagem de compra, chegada por cor e tamanho, margem de cada lote e quem são os melhores fornecedores.`, `${addBt('pedido', 'compra', 'peca', 'forn')}`)}
       ${abas(tabs, aba, 'data-ca')}${corpo}`;
   },
 
   caixa() {
     const cx = CX().aberto;
     const hist = `<section class="cartao" style="margin-top:16px"><div class="cartao-cab"><h2>Fechamentos anteriores</h2></div><ul class="lista">${CX().historico.slice().reverse().slice(0, 12).map((h) => `<li><span class="cresce"><b>${dataBR(h.abertura)}</b><small>aberto ${horaBR(h.abertura)} · fechado ${horaBR(h.fechamento)}${h.obs ? ` · ${t(h.obs)}` : ''}</small></span><span class="tag ${h.dif ? 'mal' : 'ok'}">${h.dif ? `diferença ${din(h.dif)}` : 'bateu'}</span></li>`).join('') || '<p class="mudo">Nenhum fechamento ainda.</p>'}</ul></section>`;
-    if (!cx) return `<div class="cab"><div><h1>Caixa</h1><p>Abra o caixa com o troco que está na gaveta.</p></div></div>
+    if (!cx) return `${cab('caixa', `Caixa`, `Abra o caixa com o troco que está na gaveta.`, ``)}
       <section class="cartao" style="max-width:520px"><label class="campo">Troco inicial (R$)<input id="cx-ini" inputmode="decimal" placeholder="200,00"></label><button type="button" class="bt cheio largo" style="margin-top:12px" data-acao="abrir-caixa">Abrir caixa</button></section>${hist}`;
     const r = resumoCaixa(cx), linha = (n, v, cls = '') => `<li><span class="cresce">${n}</span><b class="num ${cls}">${din(v)}</b></li>`;
-    return `<div class="cab"><div><h1>Caixa do dia</h1><p>Aberto às ${horaBR(cx.abertura)} de ${dataBR(cx.abertura)} · ${r.vendas} vendas. Pix, cartão e crediário não entram na gaveta.</p></div><div class="acoes">${addBt('despesa', 'retirada', 'reforco', 'receber')}<button type="button" class="bt" data-acao="fechar-caixa">Fechar caixa</button></div></div>
+    return `${cab('caixa', `Caixa do dia`, `Aberto às ${horaBR(cx.abertura)} de ${dataBR(cx.abertura)} · ${r.vendas} vendas. Pix, cartão e crediário não entram na gaveta.`, `${addBt('despesa', 'retirada', 'reforco', 'receber')}<button type="button" class="bt" data-acao="fechar-caixa">Fechar caixa</button>`)}
       <div class="grade g4 kpis cascata" style="margin-bottom:16px">
         <div class="cartao kpi"><span class="kpi-ic ouro">${ico('moedas')}</span><span><small>Dinheiro esperado na gaveta</small><b data-conta="${r.esperado}">${din(r.esperado)}</b><em>troco ${din(cx.inicial)}</em></span></div>
         <div class="cartao kpi"><span class="kpi-ic">${ico('cartao')}</span><span><small>Pix</small><b>${din(r.pix + r.recPix)}</b><em>vendas + fiado recebido</em></span></div>
@@ -816,7 +1059,7 @@ const TELAS = {
   relatorios() {
     const [ini, fim] = periodo(estado.relPer, estado.relDe, estado.relAte), n = numeros(ini, fim);
     const pers = [['hoje', 'Diário'], ['semana', 'Semanal'], ['mes', 'Mensal'], ['passado', 'Mês passado'], ['livre', 'Escolher datas']];
-    if (!pode('relatorios')) return `<div class="cab"><div><h1>Relatórios</h1><p>Seu acesso não mostra os relatórios. Peça para a dona liberar em Painel do dono.</p></div></div>`;
+    if (!pode('relatorios')) return `${cab('relatorios', `Relatórios`, `Seu acesso não mostra os relatórios. Peça para a dona liberar em Painel do dono.`, ``)}`;
     const porProd = {}; n.vs.forEach((v) => v.itens.forEach((x) => { const k = x.p; porProd[k] = porProd[k] || { nome: x.nome, q: 0, v: 0 }; porProd[k].q += x.qtd; porProd[k].v += x.preco * x.qtd; }));
     const top = Object.values(porProd).sort((a, b) => b.v - a.v).slice(0, 8), maxTop = Math.max(1, ...top.map((x) => x.v));
     const porCat = {}; n.vs.forEach((v) => v.itens.forEach((x) => { const c = (prod(x.p) || {}).cat || 'Outras'; porCat[c] = (porCat[c] || 0) + x.preco * x.qtd; }));
@@ -825,7 +1068,7 @@ const TELAS = {
     const rec = { dinheiro: 0, pix: 0, debito: 0, credito: 0 }; n.vs.forEach((v) => v.pag.forEach((x) => { if (rec[x.f] !== undefined) rec[x.f] += x.v; })); n.pgs.forEach((p) => { if (rec[p.f] !== undefined) rec[p.f] += p.v; });
     const inad = totalAberto() ? Math.round(totalVencido() / totalAberto() * 100) : 0;
     const k = (rot, v, sub, cls = '') => `<div class="cartao kpi ${cls}"><span><small>${rot}</small><b>${v}</b><em>${sub}</em></span></div>`;
-    return `<div class="cab"><div><h1>Relatórios</h1><p>${ini === fim ? dataBR(ini) : `${dataBR(ini)} a ${dataBR(fim)}`} · <span class="vivo"><i></i>ao vivo, atualizado às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span><br>Venda no crediário não é dinheiro recebido; faturamento não é lucro.</p></div><div class="acoes"><button type="button" class="bt" data-acao="csv-vendas">Planilha das vendas</button><button type="button" class="bt" data-acao="imprimir">Imprimir</button>${addBt('venda', 'despesa')}</div></div>
+    return `${cab('relatorios', `Relatórios`, `${ini === fim ? dataBR(ini) : `${dataBR(ini)} a ${dataBR(fim)}`} · <span class="vivo"><i></i>ao vivo, atualizado às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span><br>Venda no crediário não é dinheiro recebido; faturamento não é lucro.`, `<button type="button" class="bt" data-acao="csv-vendas">Planilha das vendas</button><button type="button" class="bt" data-acao="imprimir">Imprimir</button>${addBt('venda', 'despesa')}`)}
       ${abas(pers, estado.relPer, 'data-per')}
       ${estado.relPer === 'livre' ? `<div class="campos" style="max-width:420px;margin-bottom:16px"><label class="campo">De<input type="date" id="rel-de" value="${ini}"></label><label class="campo">Até<input type="date" id="rel-ate" value="${fim}"></label></div>` : ''}
       <div class="grade g4 cascata" style="margin-bottom:16px">
@@ -850,9 +1093,9 @@ const TELAS = {
   },
 
   config() {
-    if (!dona()) return `<div class="cab"><div><h1>Configurações</h1><p>Só a dona mexe nas configurações da loja.</p></div></div>`;
+    if (!dona()) return `${cab('config', `Configurações`, `Só a dona mexe nas configurações da loja.`, ``)}`;
     const L = db.loja, j = db.cfg.juros, ini = String(L.nome || 'L').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
-    return `<div class="cab"><div><h1>Configurações</h1><p>A cara da sua loja, as regras do crediário e a cópia de segurança.</p></div><div class="acoes"><a class="bt cheio" href="#guia">${ico('recibo')}Guia de como usar</a><button type="button" class="bt" data-acao="instalar">Instalar o app</button></div></div>
+    return `${cab('config', `Configurações`, `A cara da sua loja, as regras do crediário e a cópia de segurança.`, `<a class="bt cheio" href="#guia">${ico('recibo')}Guia de como usar</a><button type="button" class="bt" data-acao="instalar">Instalar o app</button>`)}
       <div class="grade g2">
         <section class="cartao"><div class="cartao-cab"><h2>A marca da sua loja</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">Sua logo e o nome aparecem no topo, nos recibos e nas mensagens. Quem você convidar vê igual.</p>
           <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px"><span class="loja-logo" style="width:72px;height:72px;font-size:24px">${L.logo ? `<img src="${t(L.logo)}" alt="">` : t(ini)}</span><div style="display:flex;gap:8px;flex-wrap:wrap"><label class="bt pq cheio" for="logo-in">${L.logo ? 'Trocar logo' : 'Pôr a logo'}</label><input type="file" id="logo-in" accept="image/*" class="sr">${L.logo ? '<button type="button" class="bt pq" data-acao="tira-logo">Tirar</button>' : ''}</div></div>
@@ -894,20 +1137,20 @@ const TELAS = {
   },
 
   guia() {
-    return `<div class="cab"><div><h1>Guia de como usar</h1><p>Do primeiro dia ao fechamento do mês, em passos curtos. Toque em cada assunto.</p></div><div class="acoes"><button type="button" class="bt" data-acao="instalar">Instalar o app</button><button type="button" class="bt zap" data-acao="ajuda">${ico('zap')}Falar com uma pessoa</button></div></div>
+    return `${cab('guia', `Guia de uso`, `Do primeiro dia ao fechamento do mês, em passos curtos. Toque em cada assunto.`, `<button type="button" class="bt" data-acao="instalar">Instalar o app</button><button type="button" class="bt zap" data-acao="ajuda">${ico('zap')}Falar com uma pessoa</button>`)}
       <div class="grade cascata">${GUIA.map(([g, itens], gi) => `<section class="cartao"><div class="cartao-cab"><h2><span class="tag ac" style="font-family:var(--sans)">${gi + 1}</span>${t(g)}</h2></div>${itens.map(([titulo, txt]) => `<details class="guia-item"><summary>${t(titulo)}</summary><p>${t(txt)}</p></details>`).join('')}</section>`).join('')}</div>`;
   },
 
   mais() {
-    const G = [['A loja', [['#relatorios', 'lucro', 'Relatórios']]], ['Vendas', [['#vendas', 'recibo', 'Vendas e trocas'], ['#clientes', 'gente', 'Clientes']]], ['Mercadoria', [['#compras', 'bolsa', 'Compras e fornecedores']]], ['Dinheiro', [['#caixa', 'moedas', 'Caixa do dia']]], ['Sistema', [['#perfil', 'gente', 'Meu perfil'], ['#dono', 'ok', 'Painel do dono'], ['#config', 'cabide', 'Configurações'], ['#guia', 'recibo', 'Guia de como usar']]]];
-    return `<div class="cab"><div><h1>Mais</h1><p>Tudo da loja, por assunto.</p></div></div>${G.map(([g, it]) => `<p class="campo" style="margin:16px 0 8px;letter-spacing:.06em;text-transform:uppercase;font-size:12px">${g}</p><div class="mais-lista cascata">${it.map(([h, i, n]) => `<a href="${h}">${ico(i)}${n}</a>`).join('')}</div>`).join('')}
-      <button type="button" class="bt largo" style="margin-top:18px" data-acao="instalar">Instalar o app no celular</button><button type="button" class="bt largo zap" style="margin-top:10px" data-acao="ajuda">${ico('zap')}Falar com uma pessoa da equipe</button>`;
+    const G = [['A loja', [['#vendas', 'vendas', 'Vendas e trocas'], ['#etiquetas', 'etiquetas', 'Etiquetas'], ['#fiado', 'fiado', 'Crediário'], ['#compras', 'compras', 'Compras'], ['#caixa', 'caixa', 'Caixa'], ['#relatorios', 'relatorios', 'Relatórios']]], ['Sistema', [['#config', 'config', 'Configurações'], ['#perfil', 'perfil', 'Meu perfil'], ...(dona() ? [['#dono', 'dono', 'Painel do dono']] : []), ['#guia', 'guia', 'Guia de como usar']]]];
+    return `${cab('mais', 'Mais', 'Tudo da loja, por assunto.')}${G.map(([g, it]) => `<p class="mais-grupo">${g}</p><div class="mais-lista cascata">${it.map(([h, i, n]) => `<a href="${h}">${icb(i)}${n}</a>`).join('')}</div>`).join('')}
+      <button type="button" class="bt largo" style="margin-top:18px" data-acao="instalar">${icb('instalar')}Instalar o app no celular</button><button type="button" class="bt largo zap" style="margin-top:10px" data-acao="ajuda">${ico('zap')}Falar com uma pessoa da equipe</button>`;
   },
 
   perfil() {
     const u = eu(), h = hoje(), ini = `${h.slice(0, 8)}01`, mv = db.vendas.filter((v) => v.vend === u.id && !v.cancelada && v.data.slice(0, 10) >= ini), tot = mv.reduce((s, v) => s + v.total, 0);
     const hj = mv.filter((v) => v.data.slice(0, 10) === h);
-    return `<div class="cab"><div><h1>Meu perfil</h1><p>${u.perfil === 'dona' ? 'Dona da loja · acesso completo' : `Vendedora · ${t(db.loja.nome)}`}</p></div></div>
+    return `${cab('perfil', `Meu perfil`, `${u.perfil === 'dona' ? 'Dona da loja · acesso completo' : `Vendedora · ${t(db.loja.nome)}`}`, ``)}
       <div class="grade g2">
         <section class="cartao"><div style="display:flex;gap:16px;align-items:center;margin-bottom:16px"><span class="foto-perfil">${u.foto ? `<img src="${t(u.foto)}" alt="">` : t(iniciais(u.nome))}</span><div style="display:grid;gap:8px"><b style="font-family:var(--serif);font-size:22px">${t(u.nome)}</b><div style="display:flex;gap:8px;flex-wrap:wrap"><label class="bt pq cheio" for="foto-eu">${u.foto ? 'Trocar foto' : 'Pôr foto'}</label><input type="file" id="foto-eu" accept="image/*" class="sr">${u.foto ? '<button type="button" class="bt pq" data-acao="tira-foto-eu">Tirar</button>' : ''}</div></div></div>
           <div class="campos">${[['nome', 'Nome'], ['tel', 'WhatsApp'], ['email', 'E-mail'], ['nasc', 'Aniversário', 'date']].map(([k, n, tp]) => `<label class="campo">${n}<input data-eu="${k}" ${tp ? `type="${tp}"` : ''} value="${t(u[k] || '')}"></label>`).join('')}</div>
@@ -923,12 +1166,12 @@ const TELAS = {
   },
 
   dono() {
-    if (!dona()) return `<div class="cab"><div><h1>Painel do dono</h1><p>Só a dona da loja vê este painel.</p></div></div><section class="cartao"><p class="vazio"><b>Acesso da dona</b>Volte para a sua conta para ver.</p><button type="button" class="bt largo" data-entrar-como="u1">Voltar para a conta da dona (demonstração)</button></section>`;
+    if (!dona()) return `${cab('dono', `Painel do dono`, `Só a dona da loja vê este painel.`, ``)}<section class="cartao"><p class="vazio"><b>Acesso da dona</b>Volte para a sua conta para ver.</p><button type="button" class="bt largo" data-entrar-como="u1">Voltar para a conta da dona (demonstração)</button></section>`;
     const h = hoje(), ini = `${h.slice(0, 8)}01`, n = numeros(ini, h), diaMes = Number(h.slice(8)), ultimo = new Date(Number(h.slice(0, 4)), Number(h.slice(5, 7)), 0).getDate();
     const proj = Math.round(n.liquido / diaMes * ultimo), pct = db.meta ? Math.min(100, Math.round(n.liquido / db.meta * 100)) : 0;
     const porVend = db.usuarios.map((u) => { const vs = n.vs.filter((v) => v.vend === u.id), tot = vs.reduce((s, v) => s + v.total, 0); return { u, vs, tot, desc: vs.reduce((s, v) => s + v.desc, 0), fiado: vs.reduce((s, v) => s + v.pag.filter((x) => x.f === 'fiado').reduce((a, x) => a + x.v, 0), 0) }; });
     const ativ = [...db.atividades, ...db.excecoes.map((e) => ({ data: e.data, quem: '', txt: `Crediário liberado fora da regra para ${(cli(e.cli) || {}).nome || 'cliente'}: ${din(e.valor)} (${e.motivo})`, tipo: 'excecao' })), ...db.movs.filter((m) => m.tipo === 'ajuste' || m.tipo === 'avaria').map((m) => ({ data: m.data, quem: '', txt: `${m.tipo === 'ajuste' ? 'Ajuste de estoque' : 'Avaria'}: ${(prod(m.p) || {}).nome} ${m.cor} ${m.tam} (${m.q > 0 ? '+' : ''}${m.q}) ${m.motivo || ''}`, tipo: 'estoque' })), ...CX().historico.filter((c) => c.dif).map((c) => ({ data: c.fechamento, quem: '', txt: `Caixa fechou com diferença de ${din(c.dif)}${c.obs ? ` (${c.obs})` : ''}`, tipo: 'caixa' }))].sort((a, b) => String(b.data).localeCompare(String(a.data))).slice(0, 25);
-    return `<div class="cab"><div><h1>Painel do dono</h1><p>Meta, equipe, quem pode o quê e tudo o que aconteceu na loja.</p></div><div class="acoes">${addBt('usuario')}</div></div>
+    return `${cab('dono', `Painel do dono`, `Meta, equipe, quem pode o quê e tudo o que aconteceu na loja.`, `${addBt('usuario')}`)}
       <div class="grade g-21" style="margin-bottom:16px">
         <section class="cartao"><div class="cartao-cab"><h2>${ico('lucro')}Meta do mês</h2><span class="vivo" style="margin-left:auto"><i></i>ao vivo</span></div>
           <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><b style="font-size:28px" data-conta="${n.liquido}">${din(n.liquido)}</b><span class="mudo">de ${din(db.meta)} · ${pct}%</span></div>
@@ -949,11 +1192,12 @@ function rota() {
   const [nome, arg] = (location.hash.slice(1) || 'inicio').split('/');
   const f = TELAS[nome] || TELAS.inicio, tela = $('#tela');
   tela.innerHTML = f(arg); tela.classList.remove('entra'); void tela.offsetWidth; tela.classList.add('entra');
-  const aba = nome === 'cliente' ? 'fiado' : nome === 'vendas' ? 'vendas' : TELAS[nome] ? nome : 'inicio';
+  const aba = nome === 'cliente' ? 'clientes' : nome === 'sacola' ? 'vender' : TELAS[nome] ? nome : 'inicio';
+  $('#principal').dataset.tela = TELAS[nome] ? nome : 'inicio';
   const mn = $('#menu a[data-aba="notas"]'); if (mn) mn.hidden = !db.fiscal.usar;
   $$('[data-aba]').forEach((a) => a.toggleAttribute('aria-current', false));
   $$(`[data-aba="${aba}"]`).forEach((a) => a.setAttribute('aria-current', 'page'));
-  if (['vendas', 'clientes', 'compras', 'caixa', 'relatorios', 'config', 'perfil', 'dono', 'guia', 'notas'].includes(nome)) $$('.barra [data-aba="mais"]').forEach((a) => a.setAttribute('aria-current', 'page'));
+  if (['vendas', 'etiquetas', 'fiado', 'compras', 'caixa', 'relatorios', 'config', 'perfil', 'dono', 'guia', 'notas'].includes(nome)) $$('.barra [data-aba="mais"]').forEach((a) => a.setAttribute('aria-current', 'page'));
   marca(); contar(tela); requestAnimationFrame(() => ajustaAbas(tela));
   if (!rota.mesma) scrollTo({ top: 0 }); rota.mesma = false;
 }
@@ -986,7 +1230,7 @@ function escolherPeca(p) {
   });
 }
 const noCarrinho = (pid, cor, tam) => estado.sacola.filter((x) => x.p === pid && x.cor === cor && x.tam === tam).reduce((s, x) => s + x.qtd, 0);
-const totalSacola = () => Math.max(0, estado.sacola.reduce((s, x) => s + x.preco * x.qtd, 0) - estado.desc);
+const totalSacola = () => Math.max(0, estado.sacola.reduce((s, x) => s + x.preco * x.qtd, 0) - ajustaDesc());
 // com uma forma só, o valor acompanha o total da sacola
 function ajustaPagamento() { if (estado.pag.length === 1) estado.pag[0].v = totalSacola(); }
 function liberarExcecao() {
@@ -1006,7 +1250,7 @@ function abrirExcecao() {
   });
 }
 function finalizarVenda() {
-  const sac = estado.sacola; if (!sac.length) return;
+  const sac = estado.sacola; if (!sac.length) return; ajustaDesc();
   const sub = sac.reduce((s, x) => s + x.preco * x.qtd, 0), total = Math.max(0, sub - estado.desc);
   if (estado.desc > sub) return toast('O desconto é maior que o total.', true);
   const pags = estado.pag.filter((x) => x.v > 0), pago = pags.reduce((s, x) => s + x.v, 0);
@@ -1039,8 +1283,8 @@ function finalizarVenda() {
   if (db.fiscal.usar && estado.nota !== false && fiscalPronto() && !emiteAqui()) setTimeout(() => toast('A emissão de NFC-e pelo Peplo está em liberação. Avisaremos quando estiver pronta; esta venda ficou sem nota.', true), 400);
   const nota = comNota ? emitirNota(v, cpfNota) : null;
   grava();
-  estado = { ...estado, cpf: '', descLiberado: false, sacola: [], vCli: '', desc: 0, pag: [{ f: 'pix', v: 0 }], parc: { n: 1, int: 'mes', prim: somaMes(hoje(), 1) }, excecao: null, busca: '' };
-  mostra(); if (nota) danfe(nota); else comprovante(v);
+  estado = { ...estado, cpf: '', descLiberado: false, sacola: [], vCli: '', desc: 0, descVal: 0, dividir: false, sel: null, selFechada: false, pag: [{ f: 'pix', v: 0 }], parc: { n: 1, int: 'mes', prim: somaMes(hoje(), 1) }, excecao: null, busca: '' };
+  if (location.hash === '#sacola') location.hash = '#vender'; else mostra(); if (nota) danfe(nota); else comprovante(v);
 }
 function comprovante(v) {
   const c = v.cli ? cli(v.cli) : null, ps = db.parcelas.filter((p) => p.venda === v.id && !p.acordo);
@@ -1456,6 +1700,19 @@ document.addEventListener('click', (e) => {
   const el = e.target.closest('button, a, [data-peca]'); if (!el) return;
   const d = el.dataset, ac = d.acao;
   if (d.escolher) return escolherPeca(prod(d.escolher));
+  if (d.pick) { const p = prod(d.pick); if (!totalPecas(p)) return toast(`${p.nome} está esgotada. Registre a chegada em Estoque.`, true); estado.sel = novaSel(p); estado.selFechada = false; mostra(); if (celular()) { const x = $('#escolha'); if (x) x.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
+  if (d.sc && estado.sel) { const p = prod(estado.sel.p); estado.sel.cor = d.sc; if (estado.sel.tam && dispVar(p, d.sc, estado.sel.tam) < 1) estado.sel.tam = null; estado.sel.q = 1; return mostra(); }
+  if (d.st && estado.sel) { estado.sel.tam = d.st; estado.sel.q = 1; return mostra(); }
+  if (d.sq && estado.sel) { const p = prod(estado.sel.p), max = estado.sel.tam ? dispVar(p, estado.sel.cor, estado.sel.tam) : 1; if (!estado.sel.tam) return toast('Escolha o tamanho.', true); estado.sel.q = Math.max(1, Math.min(max, estado.sel.q + Number(d.sq))); return mostra(); }
+  if (d.cat) { estado.cat = d.cat; estado.sel = null; estado.selFechada = false; return mostra(); }
+  if (d.rm !== undefined) { estado.sacola.splice(Number(d.rm), 1); if (!estado.sacola.length) estado.excecao = null; ajustaPagamento(); return mostra(); }
+  if (d.forma) { estado.dividir = false; estado.pag = [{ f: d.forma, v: totalSacola(), parc: 1 }]; estado.excecao = null; return mostra(); }
+  if (d.dm) { if (estado.descModo !== d.dm) { estado.descModo = d.dm; estado.descVal = 0; ajustaPagamento(); } return mostra(); }
+  if (d.efCat) { estado.est.cat = d.efCat; return mostra(); }
+  if (d.etqCat) { estado.etqCat = d.etqCat; return mostra(); }
+  if (d.etqModo) { estado.etqModo = d.etqModo; return mostra(); }
+  if (d.editarPeca) { el.closest('details')?.removeAttribute('open'); return formPeca(prod(d.editarPeca)); }
+  if (d.arquivarP) { el.closest('details')?.removeAttribute('open'); const p = prod(d.arquivarP); return confirmar(`Arquivar ${p.nome}?`, 'A peça sai do Vender e do estoque, mas o histórico de vendas continua. Dá para voltar em Editar peça.', 'Arquivar', () => { p.arquivado = true; registra(`Peça arquivada: ${p.nome}`, 'estoque'); grava(); mostra(); toast('Peça arquivada.'); }, true); }
   if (d.q !== undefined) { const x = estado.sacola[Number(d.q)]; const p = prod(x.p), novo = x.qtd + Number(d.d); if (novo <= 0) estado.sacola.splice(Number(d.q), 1); else if (Number(d.d) > 0 && qtd(p, x.cor, x.tam) < noCarrinho(x.p, x.cor, x.tam) + 1) toast('Não tem mais desse tamanho.', true); else x.qtd = novo; ajustaPagamento(); return mostra(); }
   if (d.tira !== undefined) { estado.pag.splice(Number(d.tira), 1); ajustaPagamento(); return mostra(); }
   if (d.venda) return comprovante(db.vendas.find((v) => v.id === d.venda));
@@ -1469,11 +1726,11 @@ document.addEventListener('click', (e) => {
   if (d.limite) { const c = cli(d.limite); return abrir(`<h2>Limite de ${t(c.nome)}</h2><p class="mudo">Hoje ela deve ${din(aberto(c.id))}.</p><label class="campo">Novo limite (R$)<input id="nl" inputmode="decimal" value="${campoDin(c.limite)}"></label><div class="acoes"><button type="button" class="bt cheio" data-ok>Salvar</button></div>`, (j) => { $('[data-ok]', j).onclick = () => { c.limite = lerDin($('#nl', j).value); grava(); fechar(); mostra(); toast('Limite salvo.'); }; }); }
   if (d.bloq) { const c = cli(d.bloq); c.bloqueado = !c.bloqueado; grava(); mostra(); return toast(c.bloqueado ? `${c.nome} bloqueada no crediário (à vista continua).` : `${c.nome} liberada no crediário.`); }
   if (d.ff) { estado.fiadoFiltro = d.ff; location.hash = '#fiado'; return mostra(); }
-  if (d.ea) { estado.estoqueAba = d.ea; if (location.hash !== '#estoque') location.hash = '#estoque'; return mostra(); }
+  if (d.ea) { estado.estoqueAba = d.ea; location.hash = `#estoque/${d.ea === 'parados' ? 'paradas' : d.ea}`; return; }
   if (d.per) { estado.relPer = d.per; return mostra(); }
-  if (d.transf) return formTransf(prod(d.transf));
-  if (d.peca && !e.target.closest('button')) return formPeca(prod(d.peca));
-  if (d.repor) return formCompra(d.repor);
+  if (d.transf) { el.closest('details')?.removeAttribute('open'); return formTransf(prod(d.transf)); }
+  if (d.peca && !e.target.closest('button, details, a')) return formPeca(prod(d.peca));
+  if (d.repor) { el.closest('details')?.removeAttribute('open'); return formCompra(d.repor); }
   if (d.mov) return movCaixa(d.mov);
   if (d.nota) { fechar(); return danfe(db.notas.find((x) => x.id === d.nota)); }
   if (d.emitir) { const v = db.vendas.find((x) => x.id === d.emitir); const n = emitirNota(v, ''); grava(); fechar(); return danfe(n); }
@@ -1481,7 +1738,7 @@ document.addEventListener('click', (e) => {
   if (d.ca) { estado.comprasAba = d.ca; if (!location.hash.startsWith('#compras')) location.hash = '#compras'; return mostra(); }
   if (d.receberPedido) return receberPedido(db.pedidos.find((x) => x.id === d.receberPedido));
   if (d.cancelarPedido) { const pd = db.pedidos.find((x) => x.id === d.cancelarPedido); return confirmar('Cancelar o que falta deste pedido?', 'O que já chegou continua no estoque. O resto sai do pedido.', 'Cancelar o resto', () => { pd.itens.forEach((it) => { it.q = { ...(it.rec || {}) }; }); pd.status = 'recebido'; registra(`Pedido nº ${pd.n}: o que faltava foi cancelado`, 'compra'); grava(); mostra(); }, true); }
-  if (d.etiquetas) return etiquetas(prod(d.etiquetas));
+  if (d.etiquetas) { el.closest('details')?.removeAttribute('open'); return etiquetas(prod(d.etiquetas)); }
   if (d.tiraPromo) { db.promos = db.promos.filter((x) => x.id !== d.tiraPromo); grava(); mostra(); return toast('Promoção tirada.'); }
   if (d.entrarComo) { db.usuario = d.entrarComo; grava(); registra(`Entrou como ${eu().nome} (demonstração)`, 'acesso'); location.hash = d.entrarComo === 'u1' ? '#dono' : '#inicio'; mostra(); return toast(`Agora você vê o sistema como ${eu().nome.split(' ')[0]}.`); }
   if (d.abrirEm) { eu().abrirEm = d.abrirEm; grava(); mostra(); return toast('Salvo.'); }
@@ -1493,6 +1750,31 @@ document.addEventListener('click', (e) => {
     dividir: () => { const falta = totalSacola() - estado.pag.reduce((s, x) => s + (x.v || 0), 0); estado.pag.push({ f: estado.pag.some((x) => x.f === 'fiado') ? 'dinheiro' : 'fiado', v: Math.max(0, falta) }); mostra(); },
     completar: () => { const falta = totalSacola() - estado.pag.reduce((s, x) => s + (x.v || 0), 0), u = estado.pag[estado.pag.length - 1]; u.v = Math.max(0, (u.v || 0) + falta); mostra(); },
     excecao: liberarExcecao, finalizar: finalizarVenda,
+    'por-sel': () => {
+      const s2 = estado.sel; if (!s2) return; const p = prod(s2.p);
+      if (!s2.tam) { toast('Escolha o tamanho.', true); return; }
+      if (dispVar(p, s2.cor, s2.tam) < s2.q) { toast(`Só tem ${Math.max(0, dispVar(p, s2.cor, s2.tam))} de ${s2.cor} ${s2.tam}.`, true); return; }
+      const ja = estado.sacola.find((x) => x.p === p.id && x.cor === s2.cor && x.tam === s2.tam);
+      if (ja) ja.qtd += s2.q; else estado.sacola.push({ p: p.id, nome: p.nome, cor: s2.cor, tam: s2.tam, h: (p.cores.find((x) => x.n === s2.cor) || {}).h, qtd: s2.q, preco: precoAtual(p), cheio: p.preco, custo: p.custo });
+      toast(`${p.nome} (${s2.cor}, ${s2.tam}) na sacola.`); estado.sel = { ...s2, tam: null, q: 1 }; ajustaPagamento(); mostra();
+    },
+    'fecha-sel': () => { estado.sel = null; estado.selFechada = true; mostra(); },
+    leitor: () => { const n = $('#pdv-busca'); if (n) { n.value = ''; estado.busca = ''; n.focus(); } toast('Pode passar o leitor: o código entra na busca e a peça vai direto para a sacola, com cor e tamanho.'); },
+    'limpa-cli': () => { estado.vCli = ''; estado.excecao = null; mostra(); },
+    'busca-cli': () => abrir(`<h2>Escolher a cliente</h2><label class="busca" style="display:block;margin:10px 0"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><input id="bc" placeholder="Nome ou telefone" autocomplete="off"></label><ul class="lista" data-res></ul><div class="acoes"><button type="button" class="bt" data-nova>${icb('maisCirc')}Cadastrar cliente nova</button></div>`, (j) => {
+      const lista = (b) => db.clientes.filter((c) => !b || sa(`${c.nome} ${c.tel}`).includes(b)).sort((a, z) => comprasCli(z.id) - comprasCli(a.id)).slice(0, 12).map((c) => `<li>${fotoCli(c)}<button type="button" class="cresce linha-bt" data-esc-cli="${t(c.nome)}"><b>${t(c.nome)}</b><small>Compras: ${din(comprasCli(c.id))}${vip(c) ? ' · Cliente VIP' : ''}</small></button></li>`).join('') || '<li class="mudo">Ninguém com esse nome.</li>';
+      $('[data-res]', j).innerHTML = lista(''); $('#bc', j).addEventListener('input', (e) => { $('[data-res]', j).innerHTML = lista(sa(e.target.value)); });
+      j.addEventListener('click', (e) => { const b = e.target.closest('[data-esc-cli]'); if (b) { estado.vCli = b.dataset.escCli; estado.excecao = null; fechar(); mostra(); } if (e.target.closest('[data-nova]')) { fechar(); formCliente(); } });
+    }),
+    dividir2: () => {
+      if (estado.dividir) { estado.dividir = false; estado.pag = [{ f: (estado.pag[0] || {}).f || 'pix', v: totalSacola() }]; }
+      else { const tot = totalSacola(), a = Math.round(tot / 2 / 100) * 100, f0 = (estado.pag[0] || {}).f || 'pix'; estado.dividir = true; estado.pag = [{ f: f0, v: a }, { f: f0 === 'pix' ? 'credito' : 'pix', v: tot - a }]; }
+      estado.excecao = null; mostra();
+    },
+    'ver-niver': () => { const l = aniversariantes(31); abrir(`<h2>Aniversariantes</h2><p class="mudo">Os próximos 30 dias. Mande os parabéns com um mimo: é a mensagem que mais traz cliente de volta.</p><ul class="lista niver-l">${l.map((x) => `<li>${fotoCli(x.c)}<a class="cresce" href="#cliente/${x.c.id}" data-fecha><b>${t(x.c.nome)}</b><small>${quandoNiver(x)} · compras ${din(comprasCli(x.c.id))}</small></a>${x.c.tel ? `<a class="bt-presente" href="${zap(x.c.tel, msgNiver(x.c))}" target="_blank" rel="noopener" aria-label="Mandar parabéns para ${t(x.c.nome)}">${icb('presente')}</a>` : ''}</li>`).join('') || '<li class="mudo">Nenhum aniversário nos próximos 30 dias. Ponha a data no cadastro da cliente.</li>'}</ul>`, (j) => { j.addEventListener('click', (e) => { if (e.target.closest('[data-fecha]')) fechar(); }); }); },
+    'etq-todas': () => { const b = sa(estado.etqBusca || ''), cat = estado.etqCat || 'Todas', l = ativos().filter((p) => (cat === 'Todas' || p.cat === cat) && (!b || sa(`${p.nome} ${p.cod} ${p.cat}`).includes(b))), m = estado.etqSel ||= {}, todas = l.every((p) => m[p.id]); l.forEach((p) => { m[p.id] = !todas; }); mostra(); },
+    'etq-imprimir': () => { const m = estado.etqSel || {}, l = []; Object.keys(m).filter((k) => m[k] && prod(k)).forEach((k) => { const p = prod(k); p.cores.forEach((c) => p.tam.forEach((tm) => { const n = (estado.etqModo || 'estoque') === 'estoque' ? Math.max(0, qtd(p, c.n, tm)) : 1; for (let i = 0; i < Math.min(200, n); i++) l.push({ p, cor: c.n, tam: tm }); })); }); if (imprimirEtiquetas(l)) registra(`${l.length} etiquetas impressas`, 'estoque'); },
+    transferir: () => { if (!variasLojas()) return confirmar('Transferir entre lojas', 'Para transferir peças, cadastre a segunda loja em Configurações, “Lojas”. Cada loja tem o próprio estoque e o próprio caixa.', 'Ir para Configurações', () => { location.hash = '#config'; }); abrir(`<h2>Transferir entre lojas</h2><p class="mudo">Qual peça vai de uma loja para a outra?</p><label class="campo">Peça<input id="tp" list="dl-tp" placeholder="Nome ou código"><datalist id="dl-tp">${ativos().map((p) => `<option value="${t(p.nome)}">`).join('')}</datalist></label><div class="acoes"><button type="button" class="bt cheio" data-ok>Continuar</button></div>`, (j) => { $('[data-ok]', j).onclick = () => { const v = sa($('#tp', j).value), p = ativos().find((x) => sa(x.nome) === v || sa(x.cod) === v); if (!p) { toast('Escolha uma peça da lista.', true); return; } fechar(); formTransf(p); }; }); },
     'ir-vender': () => { location.hash = '#vender'; }, 'xml-notas': () => baixar(`notas-${hoje()}.csv`, csv([['Número', 'Série', 'Data', 'Chave', 'CPF', 'Valor', 'Situação'], ...db.notas.map((n) => [n.numero, n.serie, `${dataBR(n.data)} ${horaBR(n.data)}`, n.chave, n.cpf, campoDin(n.valor), n.status])])), 'novo-pedido': formPedido, 'nova-promo': formPromo, 'conferir-extrato': conferirExtrato, 'fiado-caderno': fiadoCaderno, 'passar-caderno': passarCaderno, ajuda: () => window.open(`https://wa.me/5516991500746?text=${encodeURIComponent(`Olá! Uso o Peplo na ${db.loja.nome} e preciso de ajuda.`)}`, '_blank', 'noopener'), 'receber-escolher': receberEscolher,
     'mov-despesa': () => movCaixa('despesa'), 'mov-retirada': () => movCaixa('retirada'), 'mov-reforco': () => movCaixa('reforco'),
     'importar-clientes': () => importar('clientes'), 'importar-pecas': () => importar('pecas'), instalar,
@@ -1525,6 +1807,7 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.closest('[data-peca]') && e.target.matches('[data-peca]')) formPeca(prod(e.target.dataset.peca)); });
 document.addEventListener('input', (e) => {
   const el = e.target;
+  if (el.id === 'etq-busca') { estado.etqBusca = el.value; const pos = el.selectionStart; mostra(); const n = $('#etq-busca'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }
   if (el.id === 'pdv-busca' || el.id === 'est-busca') { estado.busca = el.value; const pos = el.selectionStart; mostra(); const n = $(`#${el.id}`); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }
   if (el.id === 'cli-busca') { estado.cliBusca = el.value; const pos = el.selectionStart; mostra(); const n = $('#cli-busca'); n.focus(); n.setSelectionRange(pos, pos); }
 });
@@ -1533,7 +1816,12 @@ document.addEventListener('change', (e) => {
   if (el.id === 'v-cli') { estado.vCli = el.value; estado.excecao = null; mostra(); }
   if (el.id === 'v-nota') { estado.nota = el.checked; }
   if (el.id === 'v-cpf') { estado.cpf = el.value; }
-  if (el.id === 'v-desc') { estado.desc = lerDin(el.value); ajustaPagamento(); mostra(); }
+  if (el.id === 'v-desc') { estado.descVal = estado.descModo === 'rs' ? lerDin(el.value) : Math.min(100, Math.max(0, Number(String(el.value).replace(',', '.').replace(/[^\d.]/g, '')) || 0)); ajustaPagamento(); mostra(); }
+  if (el.matches('[data-meta-mes]')) { estado.metaMes = el.value; mostra(); }
+  if (d.ef) { estado.est[d.ef] = el.value || (d.ef === 'cat' ? 'Todas' : ''); mostra(); }
+  if (d.efB) { estado.est[d.efB] = el.checked; mostra(); }
+  if (d.etqP) { (estado.etqSel ||= {})[d.etqP] = el.checked; mostra(); }
+  if (d.metaM) { const v = lerDin(el.value); if (v) db.metas[d.metaM] = v; else delete db.metas[d.metaM]; if (d.metaM === mesAtual()) db.meta = v; grava(); toast('Meta salva.'); }
   if (d.pf !== undefined) { estado.pag[Number(d.pf)].f = el.value; estado.excecao = null; mostra(); }
   if (d.pv !== undefined) { estado.pag[Number(d.pv)].v = lerDin(el.value); mostra(); }
   if (d.pp !== undefined) { estado.pag[Number(d.pp)].parc = Number(el.value); mostra(); }
@@ -1569,6 +1857,24 @@ document.addEventListener('change', (e) => {
 // simulação da assinatura na demonstração (a conta de verdade é tratada pela base)
 addEventListener('message', (e) => { if (e.origin === location.origin && e.data && e.data.simular === 'normal') { mostra(); } });
 $('#bt-instalar').onclick = instalar;
+// menu do usuário no topo: perfil, painel do dono, guia, ajuda e instalar
+function menuEu(abre) {
+  const m = $('#eu-menu'), b = $('#topo-eu'), u = eu(); if (!m) return;
+  if (!abre) { m.hidden = true; b.setAttribute('aria-expanded', 'false'); return; }
+  m.innerHTML = `<p class="eu-quem"><b>${t(u.nome)}</b><small>${u.perfil === 'dona' ? 'Dona da loja' : 'Vendedora'} · ${t(db.loja.nome)}</small></p><a href="#perfil">${icb('perfil')}Meu perfil</a>${dona() ? `<a href="#dono">${icb('dono')}Painel do dono</a>` : ''}<a href="#config">${icb('config')}Configurações</a><a href="#guia">${icb('guia')}Guia de como usar</a><button type="button" data-acao="ajuda">${icb('ajuda')}Falar com a gente</button><button type="button" data-acao="instalar">${icb('instalar')}Instalar o app</button>`;
+  m.hidden = false; b.setAttribute('aria-expanded', 'true');
+}
+$('#topo-eu').addEventListener('click', (e) => { e.stopPropagation(); menuEu($('#eu-menu').hidden); });
+document.addEventListener('click', (e) => { if (!e.target.closest('.topo-eu-box') || e.target.closest('#eu-menu a, #eu-menu button')) menuEu(false); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') menuEu(false); });
+// F2 vender · F8 nova peça · F12 finalizar a venda
+addEventListener('keydown', (e) => {
+  if (!['F2', 'F8', 'F12'].includes(e.key) || !$('#camada').hidden) return;
+  const tela = (location.hash.slice(1) || 'inicio').split('/')[0];
+  if (e.key === 'F2') { e.preventDefault(); if (tela !== 'vender') location.hash = '#vender'; setTimeout(() => { const n = $('#pdv-busca'); if (n) n.focus(); }, 60); }
+  if (e.key === 'F8') { e.preventDefault(); formPeca(); }
+  if (e.key === 'F12' && (tela === 'vender' || tela === 'sacola') && estado.sacola.length) { e.preventDefault(); finalizarVenda(); }
+});
 addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#bt-busca').click(); } });
 // ao vivo: as telas de números se atualizam sozinhas (sem atrapalhar quem está digitando ou com uma janela aberta)
 setInterval(() => { const n = (location.hash.slice(1) || 'inicio').split('/')[0]; if (['inicio', 'relatorios', 'caixa', 'dono', 'fiado'].includes(n) && $('#camada').hidden && !document.activeElement.matches('input,textarea,select') && !document.querySelector('details.add[open]')) mostra(); }, 20000);

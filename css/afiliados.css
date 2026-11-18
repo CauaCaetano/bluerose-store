@@ -300,3 +300,15 @@
 .afp-regras-bloco .af-cartoes p,.afp-regras-bloco .af-exemplo,.afp-regras-bloco .af-regras{font-size:.92rem;line-height:1.55}
 .afp-regras-bloco .af-regras{padding-left:1.2em;display:grid;gap:8px}
 .afp-regras-bloco .af-cartoes h3{color:#16213f!important}
+.afp-fora{display:none!important}
+.afp-corpo:not([data-aba=afp-inicio]) .afp-linha3{display:block}
+.afp-corpo:not([data-aba=afp-inicio]) .afp-linha3>*,.afp-corpo:not([data-aba=afp-inicio]) .afp-col>*{margin-bottom:18px}
+/* chave Pix: campo inteiro embaixo do título, botão ao lado */
+.afp-pix{grid-template-columns:40px minmax(0,1fr)}
+.afp-pix-form{grid-column:1/-1;flex-wrap:nowrap;margin-top:6px}
+.afp-pix-form input{padding:0 14px}
+.afp-pix-salvar{position:static;height:42px;padding:0 18px;flex:none}
+.afp-pix-form [role=status]{position:absolute;top:100%;left:0}
+#afiliado .afp-pix-aviso{grid-column:1/-1}
+@media (max-width:760px){.afp-pix-salvar{height:50px}}
+.afp-so-painel .afp-painel{min-height:calc(100vh - 128px)}

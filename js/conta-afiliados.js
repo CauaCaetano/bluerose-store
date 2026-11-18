@@ -273,7 +273,7 @@
           '</section>' +
           '<section class="afp-pix" id="afp-pagamentos" aria-labelledby="afp-t-pix">' + ico('pix', 'afp-pix-ico') +
             '<div class="afp-pix-txt"><h3 id="afp-t-pix">Sua chave Pix para recebimento</h3><p>É aqui que enviamos suas comissões todo dia 10 (a partir de ' + reais2(minimo) + ').</p></div>' +
-            '<form class="afp-pix-form" id="af-pix"><label><span class="afp-sr">Chave Pix</span><input name="pix" maxlength="140" required autocomplete="off" placeholder="CPF, e-mail, celular ou chave aleatória" value="' + esc(d.pix || '') + '"></label>' +
+            '<form class="afp-pix-form" id="af-pix"><label><span class="afp-sr">Chave Pix</span><input name="pix" maxlength="140" required autocomplete="off" placeholder="Sua chave Pix" value="' + esc(d.pix || '') + '"></label>' +
               '<button class="afp-pix-salvar">Salvar</button><span role="status" aria-live="polite"></span></form>' +
             '<p class="afp-pix-aviso">' + (d.pix ? '' : '<b>Você ainda não informou a chave:</b> sem ela, o pagamento fica parado. ') + 'Ao trocar a chave, confirmamos a troca com você por outro canal antes do próximo pagamento.</p>' +
           '</section>' +
@@ -328,17 +328,25 @@
   function reais2(n) { return 'R$ ' + Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   // menu: marca a seção visível
   var observador = null;
+  // menu lateral = abas: cada item mostra só a sua parte do painel
+  var ABAS = [['.afp-ola', 'afp-inicio'], ['.afp-linha1', 'afp-inicio afp-links'], ['.afp-numeros', 'afp-inicio afp-vendas afp-pagamentos'], ['.afp-min-aviso', 'afp-inicio afp-pagamentos'],
+    ['.afp-linha3', 'afp-inicio afp-links afp-vendas afp-pagamentos'], ['#afp-links', 'afp-inicio afp-links'], ['.afp-col', 'afp-inicio afp-vendas afp-pagamentos'],
+    ['#afp-vendas', 'afp-inicio afp-vendas'], ['#afp-pagamentos', 'afp-inicio afp-pagamentos'], ['#afp-materiais', 'afp-materiais'], ['#afp-config', 'afp-config']];
+  function mostrarAba(aba) {
+    var corpo = blocoAf.querySelector('.afp-corpo'); if (!corpo) return;
+    corpo.setAttribute('data-aba', aba);
+    ABAS.forEach(function (a) { blocoAf.querySelectorAll(a[0]).forEach(function (el) { el.classList.toggle('afp-fora', a[1].split(' ').indexOf(aba) < 0); }); });
+    blocoAf.querySelectorAll('.afp-menu ul a').forEach(function (a) { if (a.getAttribute('href') === '#' + aba) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+  }
   function menuAtivo() {
     if (observador) observador.disconnect();
-    if (!('IntersectionObserver' in window)) return;
-    var links = blocoAf.querySelectorAll('.afp-menu ul a');
-    observador = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        links.forEach(function (a) { if (a.getAttribute('href') === '#' + e.target.id) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+    blocoAf.querySelectorAll('.afp-menu ul a').forEach(function (a) {
+      a.addEventListener('click', function (ev) {
+        ev.preventDefault(); mostrarAba(a.getAttribute('href').slice(1));
+        var p = document.getElementById('painel'); if (p && p.getBoundingClientRect().top < 0) p.scrollIntoView({ block: 'start' });
       });
-    }, { rootMargin: '-30% 0px -60% 0px' });
-    MENU.forEach(function (m) { var el = document.getElementById(m[0]); if (el) observador.observe(el); });
+    });
+    mostrarAba('afp-inicio');
   }
 
   // QR: reaproveita o gerador do site (módulo local, sem CDN)
