@@ -14,3 +14,8 @@
 .af-regras{margin:22px 0 0;padding-left:22px;display:grid;gap:10px;max-width:820px}
 .af-sec .ctas{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px}
 .af-painel-sec .af-principal{max-width:820px;margin:0 auto;padding:24px;border-radius:18px;background:rgba(255,255,255,.75);border:1px solid rgba(16,27,54,.14);box-shadow:0 12px 30px -18px rgba(16,27,54,.35)}
+
+/* acentos da serifada (Cormorant) nas letras minúsculas: a fonte original deixa o acento alto e deslocado ("você", "Olá");
+   esta cópia só com as letras acentuadas traz o acento para perto da letra e centralizado (18/11) */
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:500;font-display:swap;src:url('../fonts/cormorant-500-acentos.woff2') format('woff2');unicode-range:U+E0-E2,U+E8-EA,U+EC-EE,U+F2-F4,U+F9-FB,U+FD,U+FF}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:600;font-display:swap;src:url('../fonts/cormorant-600-acentos.woff2') format('woff2');unicode-range:U+E0-E2,U+E8-EA,U+EC-EE,U+F2-F4,U+F9-FB,U+FD,U+FF}
