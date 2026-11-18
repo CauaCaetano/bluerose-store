@@ -1,12 +1,12 @@
 // Atria · gestão: obras, orçamento, proposta comercial, cobrança com Pix, materiais, lojas, preços, clientes,
 // financeiro, ferramentas de bancada e mensagens prontas.
-import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=17';
-import { cena, TIPOS_CENA } from './cenas.js?v=17';
-import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=17';
-import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=17';
-import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=17';
+import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=18';
+import { cena, TIPOS_CENA } from './cenas.js?v=18';
+import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=18';
+import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=18';
+import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=18';
 import { qrSVG } from '../base/qr.js';
-import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=17';
+import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=18';
 
 // jeitos de cobrar: os do ofício da obra (ou da pessoa) primeiro, depois os outros
 export const modosObra = (o) => [...new Set([...((OFICIOS[o.oficio] || {}).cobra || []), ...juntar(db.perfil, 'cobra'), ...Object.keys(MODOS_COBRAR)])];
@@ -20,14 +20,18 @@ export const cliente = (id) => achar('clientes', id) || { nome: 'Cliente', tel: 
 // ------------------------------------------------------------------ contas da obra
 export function totais(o) {
   const r = o.orc || {};
-  const mat = (o.mats || []).reduce((s, m) => s + Math.round(m.qtd * m.preco), 0);
+  const matBase = (o.mats || []).reduce((s, m) => s + Math.round(m.qtd * m.preco), 0);
+  const perda = Math.round(matBase * (r.perda || 0) / 100); // sobra de chapa, quebra, retalho
+  const mat = matBase + perda;
   const margem = Math.round(mat * (r.margem || 0) / 100);
   const mo = r.modo === 'empreitada' ? (r.valorUn || 0) : Math.round((r.valorUn || 0) * (r.qtd || 0));
-  const sub = mo + mat + margem + (r.desloc || 0);
+  const despesas = r.despesas || 0; // desgaste de ferramenta, frete, fita, cola: valor fechado
+  const sub = mo + mat + margem + (r.desloc || 0) + despesas;
   const imposto = Math.round(sub * (r.imposto || 0) / 100); // impostos sobre o valor do serviço (NF, Simples, ISS)
-  const total = sub + imposto;
+  const cartao = Math.round((sub + imposto) * (r.cartao || 0) / 100); // taxa da maquininha repassada
+  const total = sub + imposto + cartao;
   const entrada = Math.round(total * (r.entradaPct || 0) / 100);
-  return { mat, margem, matCobrado: mat + margem, mo, desloc: r.desloc || 0, imposto, total, entrada, saldo: Math.max(0, total - (o.recebido || 0)), lucro: mo + margem };
+  return { matBase, perda, mat, margem, matCobrado: mat + margem, mo, desloc: r.desloc || 0, despesas, imposto, cartao, total, entrada, saldo: Math.max(0, total - (o.recebido || 0)), lucro: mo + margem };
 }
 export const obrasAtivas = () => db.obras.filter((o) => o.status !== 'concluida');
 export const aReceber = () => db.obras.filter((o) => o.orc && o.orc.status === 'aprovado').map((o) => ({ o, v: totais(o).saldo })).filter((x) => x.v > 0);
@@ -190,7 +194,7 @@ TELAS.obra = (id) => {
     <h2 class="sec">Dinheiro da obra</h2>
     <div class="cartao"><div class="valores">
       <div><span>Mão de obra</span><b>${din(tt.mo)}</b></div><div><span>Materiais (com ${o.orc.margem}% de margem)</span><b>${din(tt.matCobrado)}</b></div>
-      ${tt.desloc ? `<div><span>Deslocamento</span><b>${din(tt.desloc)}</b></div>` : ''}${tt.imposto ? `<div><span>Impostos (${numBR(o.orc.imposto)}%)</span><b>${din(tt.imposto)}</b></div>` : ''}<div class="total"><span>Total para o cliente</span><b>${din(tt.total)}</b></div>
+      ${tt.desloc ? `<div><span>Deslocamento</span><b>${din(tt.desloc)}</b></div>` : ''}${tt.despesas ? `<div><span>Despesas</span><b>${din(tt.despesas)}</b></div>` : ''}${tt.imposto ? `<div><span>Impostos (${numBR(o.orc.imposto)}%)</span><b>${din(tt.imposto)}</b></div>` : ''}${tt.cartao ? `<div><span>Taxa do cartão (${numBR(o.orc.cartao)}%)</span><b>${din(tt.cartao)}</b></div>` : ''}<div class="total"><span>Total para o cliente</span><b>${din(tt.total)}</b></div>
       <div><span>Recebido</span><b style="color:var(--musgo)">${din(o.recebido)}</b></div><div><span>Falta receber</span><b>${din(tt.saldo)}</b></div>
       <div><span>Seu lucro (mão de obra + margem)</span><b>${din(tt.lucro)}</b></div></div>
       <div class="acoes"><a class="bt cheio p" href="#orcamento/${o.id}">${ico('doc')}Orçamento ${o.orc.status === 'rascunho' ? '' : `· ${{ enviado: 'enviado', aprovado: 'aprovado', recusado: 'recusado' }[o.orc.status]}`}</a><button type="button" class="bt p" data-acao="pix" data-id="${o.id}">${ico('pix')}Cobrar no Pix</button><button type="button" class="bt p" data-acao="receber" data-id="${o.id}">${ico('moeda')}Recebi</button></div></div>
@@ -348,7 +352,8 @@ TELAS.orcamento = (id) => {
       <div class="duas" style="margin-top:10px"><label class="campo"><span>${MODOS_COBRAR[r.modo].rot}</span><input data-orc="valorUn" data-din inputmode="decimal" value="${campoDin(r.valorUn)}"></label>
       ${r.modo === 'empreitada' ? '' : `<label class="campo"><span>Quantos (${MODOS_COBRAR[r.modo].un})</span><input data-orc="qtd" inputmode="decimal" value="${numBR(r.qtd)}"></label>`}
       <label class="campo"><span>Deslocamento</span><input data-orc="desloc" data-din inputmode="decimal" value="${campoDin(r.desloc)}"></label><label class="campo"><span>Margem no material (%)</span><input data-orc="margem" inputmode="decimal" value="${numBR(r.margem)}"></label>
-      <label class="campo"><span>Impostos (%)</span><input data-orc="imposto" inputmode="decimal" value="${numBR(r.imposto || 0)}" placeholder="Ex.: 6 do Simples"></label>
+      <label class="campo"><span>Perdas no material (%)</span><input data-orc="perda" inputmode="decimal" value="${numBR(r.perda || 0)}"></label><label class="campo"><span>Despesas (desgaste, frete…)</span><input data-orc="despesas" data-din inputmode="decimal" value="${campoDin(r.despesas || 0)}"></label>
+      <label class="campo"><span>Impostos (%)</span><input data-orc="imposto" inputmode="decimal" value="${numBR(r.imposto || 0)}" placeholder="Ex.: 6 do Simples"></label><label class="campo"><span>Taxa do cartão (%)</span><input data-orc="cartao" inputmode="decimal" value="${numBR(r.cartao || 0)}"></label>
       <label class="campo"><span>Entrada (%)</span><input data-orc="entradaPct" inputmode="decimal" value="${numBR(r.entradaPct)}"></label><label class="campo"><span>Parcelas do resto</span><input data-orc="parcelas" inputmode="numeric" value="${parcelas}"></label>
       <label class="campo"><span>Prazo (dias)</span><input data-orc="prazo" inputmode="numeric" value="${r.prazo}"></label><label class="campo"><span>Validade (dias)</span><input data-orc="validade" inputmode="numeric" value="${r.validade}"></label></div>
       <label style="display:flex;gap:10px;align-items:center;font-weight:600;font-size:14px"><input type="checkbox" data-orc-itens ${r.mostrarItens ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--cedro)">Mostrar os materiais item a item para o cliente</label>
@@ -364,8 +369,8 @@ TELAS.orcamento = (id) => {
       <div class="doc-cab"><img src="simbolo.svg?v=2" alt="" width="50" height="50"><div><b>${t(eu.nome)}</b><small class="mudo">${t(nomeOficios(eu))} · ${t(eu.cidade)}-${t(eu.uf)} · WhatsApp ${t(eu.zap)}</small></div></div>
       <p style="margin:14px 0 0"><b>Orçamento para ${t(c.nome)}</b><br><span class="mudo">${t(o.titulo)} · ${dataBR(hoje())}</span></p>
       <h3>Mão de obra</h3><table><tr><td>${r.modo === 'empreitada' ? 'Serviço completo (empreitada)' : `${numBR(r.qtd)} ${MODOS_COBRAR[r.modo].un} × ${din(r.valorUn)}`}</td><td>${din(tt.mo)}</td></tr>${tt.desloc ? `<tr><td>Deslocamento</td><td>${din(tt.desloc)}</td></tr>` : ''}</table>
-      <h3>Materiais</h3><table>${r.mostrarItens && o.mats.length ? o.mats.map((m) => `<tr><td>${numBR(m.qtd)} ${t(m.un)} · ${t(m.nome)}</td><td>${din(Math.round(m.qtd * m.preco * (1 + r.margem / 100)))}</td></tr>`).join('') : `<tr><td>Materiais (${o.mats.length} itens)</td><td>${din(tt.matCobrado)}</td></tr>`}</table>
-      ${tt.imposto ? `<table><tr><td>Impostos (${numBR(r.imposto)}%)</td><td>${din(tt.imposto)}</td></tr></table>` : ''}
+      <h3>Materiais</h3><table>${r.mostrarItens && o.mats.length ? o.mats.map((m) => `<tr><td>${numBR(m.qtd)} ${t(m.un)} · ${t(m.nome)}</td><td>${din(Math.round(m.qtd * m.preco * (1 + (r.perda || 0) / 100) * (1 + r.margem / 100)))}</td></tr>`).join('') : `<tr><td>Materiais (${o.mats.length} itens)</td><td>${din(tt.matCobrado)}</td></tr>`}</table>
+      ${tt.despesas || tt.imposto || tt.cartao ? `<table>${tt.despesas ? `<tr><td>Despesas</td><td>${din(tt.despesas)}</td></tr>` : ''}${tt.imposto ? `<tr><td>Impostos (${numBR(r.imposto)}%)</td><td>${din(tt.imposto)}</td></tr>` : ''}${tt.cartao ? `<tr><td>Taxa do cartão (${numBR(r.cartao)}%)</td><td>${din(tt.cartao)}</td></tr>` : ''}</table>` : ''}
       <table><tr class="tot"><td>Total</td><td>${din(tt.total)}</td></tr></table>
       ${(o.fotosProj || []).length ? `<h3>Fotos do projeto</h3><div class="doc-fotos">${o.fotosProj.map((f, i) => `<img src="${f}" alt="Projeto, foto ${i + 1}">`).join('')}</div>` : ''}
       <h3>Pagamento</h3><p style="margin:0">${r.entradaPct ? `Entrada de ${numBR(r.entradaPct)}%: <b>${din(tt.entrada)}</b> na aprovação. ` : ''}${resto > 0 ? `Restante: ${parcelas > 1 ? `${parcelas}x de ${din(Math.round(resto / parcelas))}` : `${din(resto)} na entrega`}.` : ''} Pix, dinheiro ou transferência.</p>
