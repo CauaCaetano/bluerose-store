@@ -312,3 +312,6 @@
 #afiliado .afp-pix-aviso{grid-column:1/-1}
 @media (max-width:760px){.afp-pix-salvar{height:50px}}
 .afp-so-painel .afp-painel{min-height:calc(100vh - 128px)}
+.afp-menu-rosa{width:34px;height:34px;flex:none;object-fit:contain}
+@media (max-width:760px){.afp-menu-rosa{width:30px;height:30px}}
+@media (min-width:761px){.afp-menu-tit{white-space:nowrap;gap:9px;font-size:21px;margin-left:8px}}
