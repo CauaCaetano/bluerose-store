@@ -199,7 +199,7 @@ try { db = JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) { db =
 if (new URLSearchParams(location.search).has('novo') || !db || !db.produtos) db = inicial();
 // demonstração: quem tinha a loja de exemplo antiga recebe a nova (a antiga fica guardada numa cópia); a conta de verdade nunca é trocada
 if (!window.veltriaConta && (db.exemplo || 1) < EXEMPLO) { try { localStorage.setItem(`${CHAVE}-antes-do-exemplo-${EXEMPLO}`, JSON.stringify(db)); } catch (e) { /* sem espaço */ } db = inicial(); }
-const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch (e) { toast('Não consegui salvar neste aparelho (sem espaço). Faça uma cópia em Configurações.', true); } };
+const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch (e) { setTimeout(() => { try { toast('Não consegui salvar neste aparelho (sem espaço). Faça uma cópia em Configurações.', true); } catch (_) { /* tela ainda montando */ } }, 0); } }; // 18/11: o aviso espera a tela montar (antes travava a demonstração com o armazenamento cheio)
 // dados de antes desta versão: ganham equipe, meta e registro de atividades
 if (!db.usuarios) { db.usuarios = EQUIPE(); db.usuario = 'u1'; }
 db.meta = db.meta || 2500000; db.atividades = db.atividades || [];
