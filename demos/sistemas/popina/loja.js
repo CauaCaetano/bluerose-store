@@ -4,7 +4,7 @@
 // COMPATIBILIDADE: os dados do Popina antigo abrem aqui sem perder nada. Os campos das funções que saíram (rodízio, eventos,
 // portaria, vitrine, cupons, reservas, produção...) continuam guardados como estão: esta versão só não os mostra.
 // Nada aqui apaga campo antigo; tudo é alterado no lugar.
-import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=41';
+import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=42';
 
 export const CHAVE = 'popina-v1';
 export const CONTA = window.veltriaConta || null;

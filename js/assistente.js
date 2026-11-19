@@ -24,7 +24,7 @@
     avatar: 'img/assistente-avatar.webp?v=2',
     folhas: ['expressoes', 'fala', 'pensando', 'ideia', 'joinha', 'gesto'],   // img/assistente/<nome>.webp
     versaoFolhas: 2,
-    dados: 'js/assistente-dados.json?v=23',
+    dados: 'js/assistente-dados.json?v=24',
   };
   var reduzMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   var semMovimento = function () { return !!(reduzMov && reduzMov.matches); };
@@ -76,7 +76,7 @@
     if (!s) return null;
     return {
       estado: 'explaining',
-      texto: [s.nome + ' (' + s.ramo.toLowerCase() + '): ' + s.para, s.mensal + ' por mês, ' + s.extra + '. Dá para abrir a demonstração agora, sem cadastro, e pagar na página do sistema, no Pix ou no cartão.'],
+      texto: [s.nome + ' (' + s.ramo.toLowerCase() + '): ' + s.para, s.mensal + ' por mês, ' + s.extra + '. Dá para abrir a demonstração agora, sem cadastro, testar 7 dias grátis no plano mensal (pede o cartão, nada é cobrado antes do 8º dia) ou pagar na página do sistema, no Pix ou no cartão.'],
       links: [{ rotulo: 'Ver a página do ' + s.nome, href: s.pagina }, { rotulo: 'Abrir a demonstração', href: s.demo }, { rotulo: 'Pague aqui', href: s.pagina + '#precos' }],
     };
   };

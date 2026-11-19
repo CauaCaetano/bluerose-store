@@ -1,18 +1,18 @@
 // Popina · liga tudo: as 5 abas, a cor do restaurante, a marca (plano com a sua marca), a faixa da demonstração,
 // o aviso de pedido novo e o primeiro uso.
-import './salao.js?v=41';
-import './pedidos.js?v=41';
-import './cozinha.js?v=41';
-import './caixa.js?v=41';
-import './gestao.js?v=41';
-import './cadastro.js?v=41';
-import './relatorios.js?v=41';
-import { esquema, comoUsar } from './configuracoes.js?v=41';
-import { talvezAbrirInicio } from './inicio.js?v=41';
-import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila } from './loja.js?v=41';
-import { iniciarRotas, ir } from './nucleo.js?v=41';
-import { ico, toast, bip, confirma, $ } from './ui.js?v=41';
-import { conferirNovos } from './cozinha.js?v=41';
+import './salao.js?v=42';
+import './pedidos.js?v=42';
+import './cozinha.js?v=42';
+import './caixa.js?v=42';
+import './gestao.js?v=42';
+import './cadastro.js?v=42';
+import './relatorios.js?v=42';
+import { esquema, comoUsar } from './configuracoes.js?v=42';
+import { talvezAbrirInicio } from './inicio.js?v=42';
+import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila } from './loja.js?v=42';
+import { iniciarRotas, ir } from './nucleo.js?v=42';
+import { ico, toast, bip, confirma, $ } from './ui.js?v=42';
+import { conferirNovos } from './cozinha.js?v=42';
 
 const real = !!CONTA;
 // ------------------------------------------------------------------ as 5 abas (links #: as permissões da equipe usam estes)

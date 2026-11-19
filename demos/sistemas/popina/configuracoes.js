@@ -3,12 +3,12 @@
 // Um visual só (o dono tirou os vários visuais): o esquema troca só os tons da casa (o marrom do menu e o destaque),
 // sempre dentro da identidade "taberna"; a cor da marca do restaurante continua livre.
 // Guarda só campos novos em db.config.loja.esquema e db.config.perfis[e-mail]: nada do que já existe muda de nome.
-import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=41';
-import { ir, rota } from './nucleo.js?v=41';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=41';
-import { G, volta, reduzir, planoMarca } from './gestao.js?v=41';
-import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=41';
-import { recomecar } from './loja.js?v=41';
+import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=42';
+import { ir, rota } from './nucleo.js?v=42';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=42';
+import { G, volta, reduzir, planoMarca } from './gestao.js?v=42';
+import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=42';
+import { recomecar } from './loja.js?v=42';
 
 // ------------------------------------------------------------------ esquemas de cor (identidade do Popina)
 // escuro: menu do computador, faixa e etiquetas escuras · destaque: a cor dos botões (vira a cor da marca ao escolher)
@@ -83,7 +83,7 @@ G.config = {
       </section>
     </div>
     <section class="cartao cfg-sec" id="cfg-marca"><h2>Sua marca</h2>
-      <p class="mudo">O nome do restaurante vai no topo, no recibo impresso e no cardápio do cliente; o logo e a cor da marca, no cardápio${window.popinaPlano === 'marca' ? ' e no topo do sistema' : ' (no plano com a sua marca, também no topo do sistema)'}.</p>
+      <p class="mudo">O nome do restaurante vai no topo, no recibo impresso e no cardápio do cliente; o logo e a cor da marca, no cardápio${window.popinaPlano === 'marca' ? ' e no topo do sistema' : ''}.</p>
       <div class="duas" style="margin-top:12px"><div>
         <div class="cfg-eu"><div class="logo-prev" data-logo-prev style="${L.logo ? `background-image:url('${t(L.logo)}')` : ''}">${L.logo ? '' : t((c.nome || 'R')[0])}</div>
           ${g ? `<div class="linha-bts"><label class="bt">${ico('mais2')}${L.logo ? 'Trocar o logo' : 'Enviar o logo'}<input type="file" accept="image/*" data-logo hidden></label>${L.logo ? '<button type="button" class="bt" data-tira-logo>Tirar</button>' : ''}</div>` : ''}</div>
@@ -94,7 +94,7 @@ G.config = {
         <div class="cores">${CORES.map((x) => `<button type="button" data-cor="${x}" style="background:${x}" class="${x.toLowerCase() === String(cor).toLowerCase() ? 'on' : ''}" aria-label="Cor ${x}" ${g ? '' : 'disabled'}></button>`).join('')}${g ? `<label class="bt pq" style="min-height:48px">Outra<input type="color" data-cor-livre value="${t(cor)}" style="width:28px;height:28px;border:0;padding:0;background:none"></label>` : ''}</div>
         <p class="mudo" style="margin-top:10px">Se a cor ficar clara demais, o Popina escurece um pouco para dar leitura.</p>
       </div></div>
-      <div style="margin-top:14px">${planoMarca()}</div>
+      ${planoMarca() ? `<div style="margin-top:14px">${planoMarca()}</div>` : ''}
     </section>
     <section class="cartao cfg-sec" id="cfg-guia"><h2>Guia: como usar</h2>
       <p class="mudo">Um passo a passo curto de cada tela. Também abre a qualquer hora pelo botão <b>?</b> no topo.</p>

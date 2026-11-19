@@ -36,6 +36,7 @@
     var m = { pendente: ['Aguardando o Mercado Pago', 'al'], teste: ['Em teste', 'ok'], ativa: ['Ativa', 'ok'], paga: ['Paga', 'ok'], cancelada: ['Cancelada', ''], recusada: ['Não liberada', 'er'], expirada: ['Não concluída', ''] }[a.status] || [a.status, ''];
     if (a.forma === 'pix' && a.status === 'ativa' && a.pago_ate < hojeISO) m = ['Pix vencido', 'al'];
     if (a.forma === 'pix' && a.status === 'pendente') m = ['Aguardando o Pix', 'al'];
+    if (a.status === 'teste' && a.teste_ate) m = ['Em teste até ' + data(a.teste_ate).slice(0, 5), 'ok']; // teste grátis de 7 dias (19/11/2026)
     return '<span class="conta-et ' + m[1] + '">' + esc(m[0]) + '</span>';
   }
   function barraTeste(a) {
@@ -226,7 +227,8 @@
       return;
     }
     if (c) {
-      if (!confirm('Cancelar? Não haverá novas cobranças. O acesso continua até o fim do período que já está valendo.')) return;
+      var emTeste = c.textContent.indexOf('teste') >= 0;
+      if (!confirm(emTeste ? 'Cancelar o teste grátis? Nada será cobrado. O acesso continua até o último dia do teste.' : 'Cancelar? Não haverá novas cobranças. O acesso continua até o fim do período que já está valendo.')) return;
       c.disabled = true; c.textContent = 'Cancelando…';
       C.chamar({ acao: 'cancelar', id: c.getAttribute('data-cancelar') }).then(carregar).catch(function (x) { alert(x.message); c.disabled = false; });
     }

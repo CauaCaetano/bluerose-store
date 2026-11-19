@@ -1,10 +1,10 @@
 // Popina · salão (o que fazer agora e as mesas), a comanda de qualquer conta e o lançar itens do garçom.
 import { db, t, din, tempo, comanda, comandaDaMesa, abrirMesa, adicionarItem, enviar, mudarStatus, cancelarItem, transferir, juntarMesas, conta, valorItem, itensValidos,
-  fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2 } from './loja.js?v=41';
-import { registrar, acao, ir } from './nucleo.js?v=41';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=41';
-import { formOpcoes, temOpcoes } from './opcoes.js?v=41';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=41';
+  fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2 } from './loja.js?v=42';
+import { registrar, acao, ir } from './nucleo.js?v=42';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=42';
+import { formOpcoes, temOpcoes } from './opcoes.js?v=42';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=42';
 
 const ESTADO = { livre: 'Livre', ocupada: 'Ocupada', conta: 'Pediu a conta', pronto: 'Prato pronto', chamou: 'Chamou', qr: 'Pedido do QR' };
 const nMesas = () => Math.max(1, Math.min(200, Number(db.config.mesas) || 10));

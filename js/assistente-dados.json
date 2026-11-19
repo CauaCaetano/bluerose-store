@@ -48,7 +48,7 @@
  "faq": [
   {
    "pergunta": "Posso testar antes de contratar?",
-   "resposta": "Sim. Os sistemas abrem no navegador com dados de exemplo, sem cadastro, com as mesmas telas da assinatura."
+   "resposta": "Sim. Os sistemas abrem no navegador com dados de exemplo, sem cadastro, com as mesmas telas da assinatura. E o Jano, o Arca, o Peplo, o Annona, o Atria e o Popina têm teste grátis de 7 dias no plano mensal, com os dados da sua empresa: pede o cartão no Mercado Pago, mas nada é cobrado antes do 8º dia, e você cancela quando quiser em Minha conta. Um teste por pessoa."
   },
   {
    "pergunta": "Tem mais de um plano?",
@@ -180,7 +180,7 @@
    "ramo": "Restaurante, lanchonete, pizzaria e bar",
    "para": "Para restaurantes, lanchonetes, pizzarias e bares: comanda no celular do garçom, tela da cozinha e do bar, cardápio com QR na mesa, delivery com taxa por bairro, caixa com Pix, troco e conta dividida, impressão na térmica de 80 mm e fechamento do dia no WhatsApp.",
    "mensal": "R$ 79",
-   "extra": "sem teste grátis (a demonstração é aberta), ou R$ 758 por ano; equipe e aparelhos sem limite; não emite nota fiscal",
+   "extra": "teste grátis de 7 dias no mensal (pede o cartão, nada é cobrado antes do 8º dia), ou R$ 758 por ano; equipe e aparelhos sem limite; não emite nota fiscal",
    "demo": "demos/sistemas/popina/app.html",
    "teste": "app/popina/",
    "linha": "Marca própria da Blue Rose",
@@ -736,10 +736,17 @@
      "contato": true
     },
     {
+     "p": "Tem teste grátis?",
+     "e": "confident",
+     "r": [
+      "Sim, no Jano, no Arca, no Peplo, no Annona, no Atria e no Popina: 7 dias grátis no plano mensal, com os dados da sua empresa. Pede o cartão no Mercado Pago, mas nada é cobrado antes do 8º dia; cancele quando quiser em Minha conta e não paga nada. Um teste por pessoa. A demonstração com dados de exemplo também abre sem cadastro."
+     ]
+    },
+    {
      "p": "Como cancelo a assinatura?",
      "e": "confident",
      "r": [
-      "Aqui mesmo, em Minha conta. O acesso continua até o fim do período pago."
+      "Aqui mesmo, em Minha conta. O acesso continua até o fim do período pago (ou do teste grátis); cancelando no teste, nada é cobrado."
      ]
     },
     {

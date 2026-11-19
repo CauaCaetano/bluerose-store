@@ -1,4 +1,4 @@
-// Veltria · porta de entrada das versões (app/<id>/): conta, assinatura no Mercado Pago (sem teste grátis desde 10/11/2026),
+// Veltria · porta de entrada das versões (app/<id>/): conta, assinatura no Mercado Pago (teste grátis de 7 dias com cartão: fora de 10/11 a 19/11/2026; hoje só onde V.semTeste não está ligado),
 // empresa (nexo_espacos) e os dados da empresa na nuvem (nexo_registros, coleção _estado). Depois de tudo certo,
 // abre a tela do sistema em modo conta (?conta=<id>), onde conta-nuvem.js guarda cada alteração no banco.
 import './mesclar.js?v=1'; // window.veltriaMesclar: junta o que ficou só neste aparelho com a nuvem
@@ -86,20 +86,20 @@ function telaPlano({ email, venceu, semTeste, motivo, upgrade }) {
     // sistemas sem teste grátis (V.semTeste, ex.: Peplo): paga na hora no cartão aqui ou no Pix pela página do sistema
     if (V.semTeste) semTeste = true;
     const f = tela(`<h1>${upgrade ? `Mude para o ${esc(V.nome)} Pro` : venceu ? 'O acesso venceu' : `Comece a usar o ${esc(V.nome)}`}</h1>
-      <p class="p-sub">${upgrade ? `Tudo o que você já tem, mais ${esc(V.planos.pro.det.replace(/^tudo do Básico \+ /, ''))}. A assinatura do Básico é encerrada quando o Pro começar, sem cobrança em dobro. Prefere Pix? <a href="${RAIZ}${V.pagina}#precos">Pague com Pix pela página do ${esc(V.nome)}</a>.` : venceu ? 'Seus dados estão guardados. Assine para voltar a usar de onde parou.' : V.semTeste ? `Assine e o ${esc(V.nome)} fica liberado assim que o pagamento for aprovado. Sem fidelidade: cancele quando quiser em Minha conta. Prefere Pix? <a href="${RAIZ}${V.pagina}#precos">Pague com Pix pela página do ${esc(V.nome)}</a>.` : 'Teste 7 dias grátis com os dados da sua empresa. Cadastre o cartão no Mercado Pago: nada é cobrado nos 7 dias e, se não cancelar, a assinatura do plano escolhido começa no 8º dia.'}</p>
+      <p class="p-sub">${upgrade ? `Tudo o que você já tem, mais ${esc(V.planos.pro.det.replace(/^tudo do Básico \+ /, ''))}. A assinatura do Básico é encerrada quando o Pro começar, sem cobrança em dobro. Prefere Pix? <a href="${RAIZ}${V.pagina}#precos">Pague com Pix pela página do ${esc(V.nome)}</a>.` : venceu ? 'Seus dados estão guardados. Assine para voltar a usar de onde parou.' : V.semTeste ? `Assine e o ${esc(V.nome)} fica liberado assim que o pagamento for aprovado. Sem fidelidade: cancele quando quiser em Minha conta. Prefere Pix? <a href="${RAIZ}${V.pagina}#precos">Pague com Pix pela página do ${esc(V.nome)}</a>.` : 'Teste 7 dias grátis com os dados da sua empresa. Cadastre o cartão no Mercado Pago: nada é cobrado nos 7 dias e, se não cancelar, a assinatura mensal começa no 8º dia. Cancele quando quiser em Minha conta.'}</p>
       ${motivo ? `<p class="p-aviso">${esc(motivo)}</p>` : ''}
-      ${venceu || semTeste || upgrade ? '' : `<button class="p-bt" data-teste>Começar os 7 dias grátis</button><p class="p-ou">ou assine agora</p>`}
+      ${venceu || semTeste || upgrade ? '' : `<button class="p-bt" data-teste>Começar os 7 dias grátis</button><p class="p-ou">o teste é no plano mensal escolhido · ou assine agora</p>`}
       <form novalidate><fieldset class="p-planos"><legend>Plano</legend>${opcoes.map(([suf, nome, valor, det], i) => `<label><input type="radio" name="plano" value="${suf}" ${i === Math.max(0, marcado) ? 'checked' : ''}><span><b>${nome}</b><em>${reais(valor)}${suf.includes('anual') ? '/ano' : '/mês'}</em><small>${det}</small></span></label>`).join('')}</fieldset>
       <label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="${esc(email)}" required><small>A assinatura fica nessa conta do Mercado Pago, no cartão. Sem fidelidade: cancele quando quiser em Minha conta.</small></label>
-      <label class="p-aceite"><input type="checkbox" name="ok" required><span>Tenho 18 anos ou mais e aceito os <a href="${RAIZ}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática do plano escolhido.</span></label>
+      <label class="p-aceite"><input type="checkbox" name="ok" required><span>Tenho 18 anos ou mais e aceito os <a href="${RAIZ}termos.html" target="_blank" rel="noopener">Termos de Serviço</a> e a cobrança automática do plano escolhido${venceu || semTeste || upgrade ? '' : ' (no teste grátis, só a partir do 8º dia, se eu não cancelar)'}.</span></label>
       <p class="p-erro" role="alert"></p><button class="p-bt ${venceu || semTeste || upgrade ? '' : 'p-bt-2'}">Assinar no Mercado Pago</button></form>
       <p class="p-links">${upgrade ? `<a href="${RAIZ}demos/sistemas/${V.pasta}/${V.entrada}?conta=${V.id}">Voltar ao app</a><span>·</span>` : ''}<a href="${RAIZ}demos/sistemas/${V.pasta}/">Ver a demonstração</a><span>·</span><a href="${RAIZ}conta.html">Minha conta</a><span>·</span><a href="#" data-sair>Sair</a></p>`);
     f.querySelector('[data-sair]').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.reload(); };
     const form = f.querySelector('form'), erro = f.querySelector('.p-erro');
     f.querySelector('[data-teste]')?.addEventListener('click', async (e) => {
-      if (!form.reportValidity()) return;   // o teste também pede o e-mail do Mercado Pago e o aceite
+      if (!form.reportValidity()) return;   // o teste também pede o e-mail do Mercado Pago e o aceite; é sempre no plano mensal (o anual escolhido vira o mensal do mesmo plano)
       const bt = e.currentTarget; bt.disabled = true; bt.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
-      try { const j = await pagamentos({ acao: 'iniciar', produto: `a-sis-${V.id}${form.plano.value}`, teste: true, email_mp: form.mp.value.trim() }); location.href = j.link; }
+      try { const j = await pagamentos({ acao: 'iniciar', produto: `a-sis-${V.id}${form.plano.value.replace(/-anual$/, '')}`, teste: true, email_mp: form.mp.value.trim() }); location.href = j.link; }
       catch (x) { bt.disabled = false; bt.textContent = 'Começar os 7 dias grátis'; if (x.dados?.sem_teste) { bt.remove(); f.querySelector('.p-ou')?.remove(); erro.textContent = `${x.message} Escolha um plano abaixo.`; } else erro.textContent = x.message; }
     });
     form.onsubmit = async (e) => {

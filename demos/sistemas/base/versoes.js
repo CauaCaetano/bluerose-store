@@ -16,34 +16,34 @@
         id: c + v[0], categoria: c, versao: v[0], nome: 'Veltria ' + CAT[c][0] + ' ' + v[1], nomeCategoria: 'Veltria ' + CAT[c][0], nomeVersao: v[1],
         pasta: pasta, entrada: i === 0 ? 'app.html' : 'index.html', chave: CHAVE_DIFERENTE[pasta] || 'veltria-' + pasta + '-v1',
         mensal: CAT[c][1][i], exemplo: EXEMPLO[c + v[0]] || 1, pagina: 'veltria-' + c + '.html', logo: CAT[c][2] ? 'img/logos/veltria-' + CAT[c][2] + '-simbolo.png?v=6' : 'img/veltria-256.png',
-        semTeste: true, // 10/11/2026: sem teste grátis para clientes novos (paga no cartão aqui ou no Pix pela página)
+        semTeste: true, // 10/11/2026: sem teste grátis para clientes novos; desde 19/11/2026 o Jano e o Arca voltam a ter (semTeste: false abaixo)
       };
     });
   });
   // Arca (18/11/2026): o Financeiro Essencial virou o Arca, financeiro para empresas, feito para o computador.
   // O id, a chave dos dados e o catálogo continuam os do Financeiro Essencial (assinantes e pagamentos seguem valendo); mudam nome, pasta, página e logo.
-  Object.assign(out.financeiroessencial, { nome: 'Arca', nomeCategoria: 'Arca', nomeVersao: '', pasta: 'arca', entrada: 'app.html', pagina: 'arca.html', logo: 'img/logos/arca/arca-simbolo-256.png?v=1', marcaPropria: true });
+  Object.assign(out.financeiroessencial, { nome: 'Arca', nomeCategoria: 'Arca', nomeVersao: '', pasta: 'arca', entrada: 'app.html', pagina: 'arca.html', logo: 'img/logos/arca/arca-simbolo-256.png?v=1', marcaPropria: true, semTeste: false }); // 19/11/2026: teste grátis de 7 dias de volta (cartão no Mercado Pago)
   // Jano (18/11/2026): o Agenda Essencial virou o Jano (agenda e atendimento), com visual de calendário romano.
   // O id, a pasta (agenda-essencial), a chave dos dados, a porta app/agendaessencial/ e o catálogo continuam os mesmos
   // (há assinante real com dados): mudam só o nome mostrado, a página e a logo.
-  Object.assign(out.agendaessencial, { nome: 'Jano', nomeCategoria: 'Jano', nomeVersao: '', pagina: 'jano.html', logo: 'img/logos/jano/jano-simbolo-256.png?v=1', marcaPropria: true });
+  Object.assign(out.agendaessencial, { nome: 'Jano', nomeCategoria: 'Jano', nomeVersao: '', pagina: 'jano.html', logo: 'img/logos/jano/jano-simbolo-256.png?v=1', marcaPropria: true, semTeste: false }); // 19/11/2026: teste de 7 dias de volta
   // linha Vexorin: sistemas fora das 3 versões, com o mesmo login, teste, assinatura, equipe e nuvem
   out.vetnature = { id: 'vetnature', categoria: 'vetnature', versao: '', nome: 'VetNature', nomeCategoria: 'VetNature', nomeVersao: '', pasta: 'vetnature', entrada: 'index.html',
     chave: 'vetnature-demo-v2', mensal: 129, exemplo: 1, pagina: 'index.html#produtos', logo: 'img/logos/vetnature-192.png' };
-  // Peplo: sistema da loja de roupas (marca própria, fora da linha Veltria), mesma conta, nuvem e equipe; sem teste grátis (paga na hora, Pix ou cartão)
+  // Peplo: sistema da loja de roupas (marca própria, fora da linha Veltria), mesma conta, nuvem e equipe; teste grátis de 7 dias com cartão (de volta em 19/11/2026), Pix ou cartão
   out.peplo = { id: 'peplo', categoria: 'peplo', versao: '', nome: 'Peplo', nomeCategoria: 'Peplo', nomeVersao: '', pasta: 'peplo', entrada: 'app.html',
-    chave: 'peplo-v1', mensal: 59, exemplo: 1, pagina: 'peplo.html', logo: 'img/logos/peplo-simbolo.png', semTeste: true };
-  // Annona: estoque e vendas do mercadinho e do bar (marca própria, fora da Veltria); sem teste grátis, Pix ou cartão
+    chave: 'peplo-v1', mensal: 59, exemplo: 1, pagina: 'peplo.html', logo: 'img/logos/peplo-simbolo.png' };
+  // Annona: estoque e vendas do mercadinho e do bar (marca própria, fora da Veltria); teste grátis de 7 dias com cartão (19/11/2026), Pix ou cartão
   out.annona = { id: 'annona', categoria: 'annona', versao: '', nome: 'Annona', nomeCategoria: 'Annona', nomeVersao: '', pasta: 'annona', entrada: 'app.html',
-    chave: 'annona-v1', mensal: 59, exemplo: 1, pagina: 'annona.html', logo: 'img/logos/annona-simbolo.png', semTeste: true };
-  // Atria: app de celular para profissionais da construção e da reforma (marca própria); sem teste grátis, mensal R$ 39 ou anual R$ 374
+    chave: 'annona-v1', mensal: 59, exemplo: 1, pagina: 'annona.html', logo: 'img/logos/annona-simbolo.png' };
+  // Atria: app de celular para profissionais da construção e da reforma (marca própria); teste grátis de 7 dias no mensal (19/11/2026), mensal R$ 39 ou anual R$ 374
   out.atria = { id: 'atria', categoria: 'atria', versao: '', nome: 'Atria', nomeCategoria: 'Atria', nomeVersao: '', pasta: 'atria', entrada: 'app.html',
-    chave: 'atria-v1', mensal: 39, anual: 374, exemplo: 1, pagina: 'atria.html', logo: 'demos/sistemas/atria/icone-192.png?v=2', semTeste: true,
+    chave: 'atria-v1', mensal: 39, anual: 374, exemplo: 1, pagina: 'atria.html', logo: 'demos/sistemas/atria/icone-192.png?v=2',
     // 12/11/2026: dois planos. Básico R$ 39 (anual R$ 374) e Pro R$ 50 (anual R$ 480) com Achar trabalho e lojas e preços
     planos: { basico: 'tudo, menos Achar trabalho e lojas e preços', pro: { mensal: 50, anual: 480, det: 'tudo do Básico + Achar trabalho (50 por mês) e lojas e preços' } } };
   // Popina: restaurante, lanchonete, pizzaria e bar (marca própria, 15/11/2026): comanda no celular, cozinha, caixa com Pix,
-  // cardápio online com QR e delivery, estoque por ficha técnica; sem teste grátis, mensal R$ 79 ou anual R$ 758
+  // cardápio online com QR e delivery, estoque por ficha técnica; teste grátis de 7 dias no mensal (19/11/2026), mensal R$ 79 ou anual R$ 758
   out.popina = { id: 'popina', categoria: 'popina', versao: '', nome: 'Popina', nomeCategoria: 'Popina', nomeVersao: '', pasta: 'popina', entrada: 'app.html',
-    chave: 'popina-v1', mensal: 79, anual: 758, exemplo: 1, pagina: 'popina.html', logo: 'img/logos/popina-simbolo.png', semTeste: true };
+    chave: 'popina-v1', mensal: 79, anual: 758, exemplo: 1, pagina: 'popina.html', logo: 'img/logos/popina-simbolo.png' };
   window.VELTRIA_VERSOES = out;
 })();

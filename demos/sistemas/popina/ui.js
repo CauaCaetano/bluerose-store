@@ -87,7 +87,7 @@ export function autorizar({ titulo, texto = '', motivos = null, pedirPin = false
       const mot = $('[data-motivo]', f);
       $$('[data-mot]', f).forEach((b) => { b.onclick = () => { $$('[data-mot]', f).forEach((x) => x.classList.toggle('on', x === b)); mot.value = b.dataset.mot; }; });
       $('[data-sim]', f).onclick = async () => {
-        const { pinConfere } = await import('./loja.js?v=41');
+        const { pinConfere } = await import('./loja.js?v=42');
         const motivo = mot ? mot.value.trim() : '';
         if (mot && motivo.length < 3) { toast('Escolha ou escreva o motivo'); return mot.focus(); }
         const pin = $('[data-pin]', f);

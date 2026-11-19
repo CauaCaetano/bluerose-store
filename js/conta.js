@@ -3,8 +3,10 @@
  * Navegar não exige login. Comprar e assinar exigem:
  * BR_CONTA.exigirLogin() abre a janela de entrar/criar conta e devolve a sessão.
  * BR_CONTA.pagar(produto, { teste, emailMp }) cria o pagamento no servidor e leva ao Mercado Pago.
- * BR_CONTA.teste(app, nome, mensal, direto) abre a janela da assinatura. Desde 10/11/2026 não há teste grátis para clientes novos:
- * os botões (data-assinar-app, e data-teste nas páginas antigas) abrem sempre a assinatura direta, no cartão ou no Pix.
+ * BR_CONTA.teste(app, nome, mensal, direto, produto) abre a janela do teste grátis (direto = false) ou da assinatura (direto = true).
+ * Botões: data-assinar-app abre a assinatura direta (cartão ou Pix); data-teste abre o teste grátis de 7 dias com cartão no
+ * Mercado Pago (sem teste de 10/11 a 19/11/2026; de volta em 19/11 no Jano, Arca, Peplo, Annona, Atria e Popina, só no mensal).
+ * data-produto escolhe outro plano mensal do mesmo sistema (ex.: a-sis-atria-pro).
  */
 // não abre dentro de página de outro site (clickjacking)
 if (window.top !== window.self) { try { if (window.top.location.origin !== location.origin) throw 0; } catch (e) { window.top.location.href = location.href; } }
@@ -251,7 +253,7 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
       var oferta = n > 0 ? '<li class="conta-oferta"><b>Oferta de lançamento:</b> ' + reais(metade) + '/mês nos 3 primeiros meses, depois ' + reais(mensal) + '/mês. Restam ' + n + (n === 1 ? ' vaga' : ' vagas') + '.</li>' : '';
       var d = janela('<span class="eyebrow">' + (direto ? (pro && sm[1][app] ? 'Mudar para o Pro' : 'Assinatura') : 'Teste grátis de 7 dias') + '</span><h3 id="conta-t">' + esc(nome) + '</h3>' + (direto ?
         '<ul class="conta-lista">' + oferta + '<li>Assinatura de <b>' + reais(n > 0 ? metade : mensal) + '/mês</b> no cartão, pelo Mercado Pago. Sem fidelidade.</li><li>O sistema fica liberado assim que o pagamento é confirmado.</li><li>Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>.</li></ul>' :
-        '<ul class="conta-lista"><li>Use com os dados da sua empresa por <b>7 dias sem pagar nada</b>.</li><li>Para começar, <b>cadastre o cartão no Mercado Pago</b>. Nada é cobrado nos 7 dias.</li><li>Se não cancelar, a assinatura de ' + reais(mensal) + '/mês começa no 8º dia, com tudo o que você cadastrou. Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>.</li>' + oferta + '</ul>') +
+        '<ul class="conta-lista"><li>Use com os dados da sua empresa por <b>7 dias grátis</b>.</li><li>Para começar, <b>cadastre o cartão no Mercado Pago</b>. Nada é cobrado antes do 8º dia.</li><li>Se não cancelar, a assinatura de ' + reais(mensal) + '/mês começa no 8º dia, com tudo o que você cadastrou. Cancele quando quiser em <a href="' + raiz + 'conta.html">Minha conta</a>: cancelando no teste, nada é cobrado.</li><li>Um teste grátis por pessoa.</li></ul>') +
         '<form class="conta-form" novalidate>' + (true ? '<label>E-mail da sua conta do Mercado Pago<input name="mp" type="email" value="' + esc(s.user.email) + '" required><small>' + (direto ? 'A assinatura fica na conta do Mercado Pago com este e-mail.' : 'O cartão do teste fica na conta do Mercado Pago com este e-mail.') + '</small></label>' : '') +
         '<label class="conta-aceite"><input type="checkbox" name="ok" required> <span>Tenho 18 anos ou mais. Li e aceito os <a href="' + raiz + 'termos.html" target="_blank" rel="noopener">Termos de Serviço</a>' + (direto ? ' e, no cartão, a cobrança mensal' : ' e a cobrança mensal depois dos 7 dias, se eu não cancelar') + '.</span></label>' +
         '<p class="conta-erro" role="alert"></p><button class="btn btn-primary" type="submit">' + (direto ? 'Assinar agora' : 'Começar o teste grátis') + '</button>' +
@@ -261,7 +263,7 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
         e.preventDefault(); if (!f.reportValidity()) return;
         bt.disabled = true; bt.textContent = 'Abrindo o Mercado Pago…'; erro.textContent = '';
         (direto ? assinarDireto(app, f.mp.value.trim(), produto)
-          : chamar({ acao: 'iniciar', produto: 'a-sis-' + app, teste: true, email_mp: f.mp.value.trim() }).then(function (j) { location.href = j.link; })
+          : chamar({ acao: 'iniciar', produto: produto || 'a-sis-' + app, teste: true, email_mp: f.mp.value.trim() }).then(function (j) { location.href = j.link; })
         ).catch(function (x) {
           bt.disabled = false; bt.textContent = direto ? 'Assinar agora' : 'Começar o teste grátis';
           if (x.dados && x.dados.sem_teste) {
@@ -281,20 +283,22 @@ if (window.top !== window.self) { try { if (window.top.location.origin !== locat
     });
   }
 
-  // botões "Pague aqui" (data-assinar-app). Desde 10/11/2026 não há teste grátis: data-teste, que sobrou em alguma página, também vai à assinatura
+  // botões "Pague aqui" (data-assinar-app) vão à assinatura; "Testar 7 dias grátis" (data-teste) abre o teste grátis com cartão (19/11/2026)
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-teste],[data-assinar-app]'); if (!b) return;
     e.preventDefault();
-    teste(b.getAttribute('data-assinar-app') || b.getAttribute('data-teste'), b.getAttribute('data-teste-nome') || 'sistema', Number(b.getAttribute('data-teste-mensal')) || 0, true, b.getAttribute('data-produto') || '');
+    var ehTeste = !b.hasAttribute('data-assinar-app');
+    teste(b.getAttribute('data-assinar-app') || b.getAttribute('data-teste'), b.getAttribute('data-teste-nome') || 'sistema', Number(b.getAttribute('data-teste-mensal')) || 0, !ehTeste, b.getAttribute('data-produto') || '');
   });
 
-  // páginas dos sistemas: quem já tem o sistema vê "Abrir o sistema" no lugar do "Pague aqui"
+  // páginas dos sistemas: quem já tem o sistema vê "Abrir o sistema" no lugar do "Pague aqui"; o "Testar 7 dias grátis" some
   function ajustarBotoes() {
-    var bts = [].slice.call(document.querySelectorAll('a.btn[data-assinar-app], a.btn[data-teste]')); if (!bts.length) return;
+    var bts = [].slice.call(document.querySelectorAll('a.btn[data-assinar-app], a.btn[data-teste], button[data-teste]')); if (!bts.length) return;
     if (!sessaoGuardada()) return;
     acessos().then(function (m) {
       bts.forEach(function (b) {
         var app = b.getAttribute('data-assinar-app') || b.getAttribute('data-teste'); if (!m[app]) return;
+        if (!b.hasAttribute('data-assinar-app') && (b.tagName === 'BUTTON' || document.querySelector('[data-assinar-app="' + app + '"]'))) { (b.closest('.pl-teste') || b).style.display = 'none'; return; }
         b.removeAttribute('data-assinar-app'); b.removeAttribute('data-teste'); b.href = raiz + 'app/' + app + '/'; b.textContent = 'Abrir o sistema';
         var cta = b.closest('.np-cta'); if (!cta) return;
         var sec = cta.closest('.np-final'), h = sec && sec.querySelector('h2');

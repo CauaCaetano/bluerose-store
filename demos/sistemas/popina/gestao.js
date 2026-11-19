@@ -1,11 +1,11 @@
 // Popina · Gestão: o menu e as telas do dono (restaurante, mesas e QR, equipe, minha conta). As outras telas da Gestão
 // (cardápio, estoque, clientes, entregadores, relatórios) entram por G em cadastro.js e relatorios.js.
-import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=41';
-import { registrar, acao, ir } from './nucleo.js?v=41';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=41';
+import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=42';
+import { registrar, acao, ir } from './nucleo.js?v=42';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=42';
 import { qrSVG } from '../base/qr.js';
-import { DIAS } from './opcoes.js?v=41';
-import { imprimir } from './imprimir.js?v=41';
+import { DIAS } from './opcoes.js?v=42';
+import { imprimir } from './imprimir.js?v=42';
 
 export const G = {};      // sub-telas: G[nome] = { titulo, html(), montar(el) }
 export const volta = (titulo, sub = '') => `<button type="button" class="voltar" data-ir="mais">${ico('voltar')}Gestão</button><div class="cab"><div><h1>${titulo}</h1>${sub ? `<p>${sub}</p>` : ''}</div></div>`;
@@ -188,8 +188,11 @@ acao('pessoa-ed', (b) => {
 });
 
 // ------------------------------------------------------------------ minha conta e o plano com a sua marca
+// 19/11/2026: o plano "com a sua marca" saiu da venda (o Popina tem um plano só). Quem já tem continua com tudo funcionando;
+// para quem não tem, o cartão nem aparece (nada de oferta nem de prévia na demonstração).
 export function planoMarca() {
   const m = window.popinaPlano === 'marca';
+  if (!m) return '';
   return `<div class="cartao"><h2>Popina com a sua marca</h2>
     ${m ? '<p class="aviso ok">Ativo: o topo do sistema e o cardápio mostram só o seu logo e o seu nome.</p>' : '<p>Por R$ 129/mês (ou R$ 1.238/ano), o nome Popina sai do topo do sistema e do cardápio do cliente: aparecem só o seu logo e o seu nome, e o link do cardápio fica sem o nome do sistema.</p>'}
     <div class="linha-bts" style="margin-top:12px">${CONTA ? (m ? '' : '<a class="bt cheio" target="_top" href="/popina.html#precos">Ver o plano</a>') : `<button type="button" class="bt ${m ? '' : 'cheio'}" data-prever-marca>${m ? 'Voltar ao plano normal' : 'Ver como fica na demonstração'}</button>`}</div></div>`;

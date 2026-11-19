@@ -138,6 +138,7 @@
       var a = sel, rot = ROTULO[a.status] || [a.status, ''], fim = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop();
       var pix = a.forma === 'pix', brinde = !!a.brinde, gratis = !brinde && !Number(a.valor);
       if (pix && a.status === 'ativa' && a.pago_ate && a.pago_ate < hojeISO()) rot = ['Pix vencido', 'atn'];
+      if (a.status === 'teste' && a.teste_ate) rot = ['Em teste até ' + data(a.teste_ate).slice(0, 5), 'ok']; // teste grátis de 7 dias (19/11/2026)
       var sit = a.status === 'teste' ? 'Teste até ' + data(a.teste_ate) + (a.proxima_cobranca ? ' · primeira cobrança em ' + data(a.proxima_cobranca) : '')
         : a.status === 'ativa' ? (pix ? (a.pago_ate >= hojeISO() ? 'Ativa · paga até ' + data(a.pago_ate) : 'Venceu em ' + data(a.pago_ate)) : 'Ativa' + (a.pago_ate ? ' · paga até ' + data(a.pago_ate) : '') + (a.proxima_cobranca ? ' · próxima cobrança em ' + data(a.proxima_cobranca) : ''))
         : a.status === 'cancelada' ? 'Cancelada · ' + (fim && fim >= hojeISO() ? 'acesso até ' + data(fim) : 'acesso encerrado')
@@ -163,11 +164,12 @@
       if (b.dataset.brAss !== 'cancelar') return; // Renovar é um link comum para Minha conta
       e.preventDefault();
       var fim = sel.status === 'teste' ? sel.teste_ate : sel.pago_ate;
-      confirmar(el, [sel.status === 'teste' ? 'Cancelar o teste?' : 'Cancelar a assinatura?', 'Não haverá novas cobranças.' + (fim ? ' O acesso continua até ' + data(fim) + '.' : ' O acesso continua até o fim do período que já está valendo.') + ' Para voltar depois, é só assinar de novo.'], 'Sim, cancelar', function (bs) {
+      confirmar(el, [sel.status === 'teste' ? 'Cancelar o teste?' : 'Cancelar a assinatura?', (sel.status === 'teste' ? 'Nada será cobrado.' : 'Não haverá novas cobranças.') + (fim ? ' O acesso continua até ' + data(fim) + '.' : ' O acesso continua até o fim do período que já está valendo.') + ' Para voltar depois, é só assinar de novo.'], 'Sim, cancelar', function (bs) {
         bs.disabled = true; bs.textContent = 'Cancelando…';
+        var eraTeste = sel.status === 'teste';
         N.pagamentos({ acao: 'cancelar', id: sel.id }).then(function (r) {
           sel = Object.assign({}, sel, { status: sel.status === 'pendente' ? 'expirada' : 'cancelada' });
-          pintaDono(['Assinatura cancelada. Não haverá novas cobranças' + (r && r.ate ? '; o acesso continua até ' + esc(data(r.ate)) : '') + '.', 'ok']);
+          pintaDono([(eraTeste ? 'Teste cancelado. Nada será cobrado' : 'Assinatura cancelada. Não haverá novas cobranças') + (r && r.ate ? '; o acesso continua até ' + esc(data(r.ate)) : '') + '.', 'ok']);
         }).catch(function (x) { msg(el, esc(x && x.message ? x.message : 'Não foi possível cancelar agora. Tente de novo.'), 'erro'); });
       });
     });
