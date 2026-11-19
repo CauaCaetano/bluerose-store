@@ -1,16 +1,16 @@
 // Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=31';
-import './cozinha.js?v=31';
-import './caixa.js?v=31';
-import './pedidos.js?v=31';
-import './mais.js?v=31';
-import './gestao.js?v=32';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=31';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=31';
-import { ico, folha, $, $$, toast, bip, confirma } from './ui.js?v=31';
-import './ajuda.js?v=31';
-import './tutorial.js?v=31';
-import { abrirEscolha } from './escolha.js?v=31';
+import './salao.js?v=34';
+import './cozinha.js?v=34';
+import './caixa.js?v=34';
+import './pedidos.js?v=34';
+import './mais.js?v=34';
+import './gestao.js?v=34';
+import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=34';
+import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=34';
+import { ico, folha, $, $$, toast, bip, confirma } from './ui.js?v=34';
+import './ajuda.js?v=34';
+import './tutorial.js?v=34';
+import { abrirEscolha } from './escolha.js?v=34';
 
 const q = new URLSearchParams(location.search);
 if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);

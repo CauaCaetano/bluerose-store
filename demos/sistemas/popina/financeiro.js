@@ -2,10 +2,10 @@
 // fiado (conta do cliente), fluxo de caixa, DRE gerencial e margem por canal. Cada tela entra na Gestão (#mais/<id>).
 // Dados: db.fornecedores, db.notasCompra, db.contas, db.fiado { lanc, limites }, db.lotes e db.config.fin.
 // A entrada no estoque usa entradaCompra (a mesma da tela de Estoque); o custo teórico usa custoVenda (o mesmo CMV dos relatórios).
-import { db, t, din, dinCurto, grava, r2, uid, insumo, entradaCompra, custoVenda, custoPrato, partes, auditar, quemAgora, ouvir, clientePorTel, ondeComanda, lojaCfg, movimento, fmtQtd, CONTA, APARELHO } from './loja.js?v=31';
-import { acao, ir } from './nucleo.js?v=31';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=31';
-import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=31';
+import { db, t, din, dinCurto, grava, r2, uid, insumo, entradaCompra, custoVenda, custoPrato, partes, auditar, quemAgora, ouvir, clientePorTel, ondeComanda, lojaCfg, movimento, fmtQtd, CONTA, APARELHO } from './loja.js?v=34';
+import { acao, ir } from './nucleo.js?v=34';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=34';
+import { TELAS_MAIS, MONTAR, volta } from './mais.js?v=34';
 
 // entradas do hub da Gestão: [id, nome, ícone, detalhe]
 export const HUB_FINANCEIRO = [

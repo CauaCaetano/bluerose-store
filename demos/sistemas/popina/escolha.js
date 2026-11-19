@@ -1,8 +1,8 @@
 // Popina · escolha do template (tipo de casa): na primeira entrada e ao trocar em Gestão › Aparência.
 // Lista os 14 tipos; ao tocar num, mostra fotos reais (carrossel), as funções que vêm nele, "Usar este template" e "Voltar".
-import { PERFIS, MODULOS, diferenca } from './perfis.js?v=31';
-import { lojaCfg, setLoja } from './loja.js?v=31';
-import { ico, toast } from './ui.js?v=31';
+import { PERFIS, MODULOS, diferenca } from './perfis.js?v=34';
+import { lojaCfg, setLoja } from './loja.js?v=34';
+import { ico, toast } from './ui.js?v=34';
 
 export const TIPOS = [['basico', 'Básico'], ['taverna', 'Taverna'], ['luxo', 'Luxo'], ['realeza', 'Realeza'], ['japones', 'Japonês'], ['italiano', 'Italiano'], ['churrascaria', 'Churrascaria'],
   ['mexicano', 'Mexicano'], ['pizzaria', 'Pizzaria'], ['hamburgueria', 'Hamburgueria'], ['pub', 'Bar e pub'], ['chines', 'Chinês'], ['balada', 'Balada'], ['cafeteria', 'Cafeteria']];

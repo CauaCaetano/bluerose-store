@@ -209,7 +209,7 @@ export function estadoInicial(agora = Date.now()) {
   const pedidosQR = [{ id: 'q1', mesa: 2, ts: agora - 3 * MIN, itens: [{ prod: 'xburger', qtd: 2, obs: '' }, { prod: 'refri', qtd: 2, obs: '' }], nome: 'Mesa 2 (QR)' }];
   const vendas = historico(agora), ctl = controleExemplo(vendas, agora);
   return {
-    versao: 1, exemplo: 9, criado: agora, reservas, fila, eventos, vitrine, vitrineHist, barris, portaria, vip, camaroteRes, empresas, faturados, config: JSON.parse(JSON.stringify(CONFIG)), categorias: CATEGORIAS.map((c) => ({ ...c })),
+    versao: 1, exemplo: 10, criado: agora, reservas, fila, eventos, vitrine, vitrineHist, barris, portaria, vip, camaroteRes, empresas, faturados, config: JSON.parse(JSON.stringify(CONFIG)), categorias: CATEGORIAS.map((c) => ({ ...c })),
     produtos: PRODUTOS.map((p) => JSON.parse(JSON.stringify(p))), insumos: INSUMOS.map((i) => ({ ...i })), bairros: BAIRROS.map((b) => ({ ...b })),
     comandas, chamados, pedidosQR, vendas, numPedido: 43,
     clientes: CLIENTES.map((c) => ({ ...c })), entregadores: ENTREGADORES.map((e) => ({ ...e })), cupons: CUPONS.map((c) => ({ ...c })),
@@ -299,9 +299,9 @@ function historico(agora) {
   const v = []; let seed = 7;
   const r = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
   const formas = ['Pix', 'Pix', 'Cartão de débito', 'Cartão de crédito', 'Cartão de crédito', 'Dinheiro'];
-  for (let d = 30; d >= 0; d--) {
+  for (let d = 10; d >= 0; d--) { // 19/11: 10 dias (era 30) para não encher o navegador
     const dia = new Date(agora - d * 864e5); const sem = dia.getDay();
-    const qtd = sem === 1 ? 0 : Math.round((sem === 5 || sem === 6 ? 34 : sem === 0 ? 26 : 16) * (0.8 + r() * 0.4));
+    const qtd = sem === 1 ? 0 : Math.round((sem === 5 || sem === 6 ? 14 : sem === 0 ? 10 : 6) * (0.8 + r() * 0.4));
     for (let k = 0; k < qtd; k++) {
       const h = r() < 0.4 ? 12 + r() * 2 : 19 + r() * 3.5; const ts = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate(), Math.floor(h), Math.floor((h % 1) * 60)).getTime();
       if (ts > agora - 10 * 60e3) continue; // hoje: só o que já passou

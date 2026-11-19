@@ -5,7 +5,7 @@
 
 import { qrSVG } from '../base/qr.js';
 const CHAVE = 'peplo-v1';
-const EXEMPLO = 2; // muda quando a loja de exemplo muda: quem tinha a demonstração aberta recebe a nova (18/11/2026: reformulação boutique)
+const EXEMPLO = 3; // 19/11: exemplo menor (30 dias) para não encher o navegador
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const t = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -122,13 +122,13 @@ function inicial() {
     produtos.filter((p) => p.giro !== 'parado').forEach((p, i) => { let n = 0; p.cores.forEach((c, ci) => p.tam.forEach((tm, ti) => { const k = `${c.n}|${tm}`, falta = alvo(p) - (p.q[k] || 0); if (falta > 0 && (d < -20 || (i + ci + ti) % 4)) { entra(p, falta, `${dia}T09:30:00`, `Compra ${nc}`, c.n, tm); n += falta; } })); if (n) itens.push({ p: p.id, qtd: n, custo: p.custo }); });
     db.compras.push({ id: nc, data: dia, forn: nc === 'cp3' || nc === 'cp5' ? 'Brás Moda Atacado' : 'Ateliê Rosa Confecções', itens, total: itens.reduce((s, x) => s + x.qtd * x.custo, 0), forma: nc === 'cp5' ? 'Pix' : 'Boleto 30 dias', obs: 'Reposição do que vendeu' });
   };
-  // vendas dos últimos 120 dias; as peças "paradas" só vendem no começo
-  const caixaHoje = 'cx-hoje', REP = { '-95': 'cp2', '-65': 'cp3', '-35': 'cp4', '-12': 'cp5' };
-  for (let d = -120; d <= 0; d++) {
+  // vendas dos últimos 30 dias (19/11: era 120; exemplo menor); as peças "paradas" não vendem
+  const caixaHoje = 'cx-hoje', REP = { '-25': 'cp2', '-18': 'cp3', '-10': 'cp4', '-4': 'cp5' };
+  for (let d = -30; d <= 0; d++) {
     if (REP[d]) repoe(d, REP[d]);
-    const dia = somaDias(h, d), fds = new Date(`${dia}T12:00`).getDay(), n = d === 0 ? 11 : fds === 0 ? 0 : Math.floor(r() * 4.5) + (fds === 6 ? 4 : 2);
+    const dia = somaDias(h, d), fds = new Date(`${dia}T12:00`).getDay(), n = d === 0 ? 11 : fds === 0 ? 0 : Math.floor(r() * 3) + (fds === 6 ? 3 : 1);
     for (let k = 0; k < n; k++) {
-      const pode = produtos.filter((p) => (p.giro !== 'parado' || d < -85) && Object.values(p.q).some((x) => x > 0));
+      const pode = produtos.filter((p) => p.giro !== 'parado' && Object.values(p.q).some((x) => x > 0));
       if (!pode.length) break;
       const itens = []; const ni = r() < 0.55 ? 1 : r() < 0.75 ? 2 : 3;
       for (let j = 0; j < ni; j++) {
@@ -204,7 +204,7 @@ let db;
 try { db = JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) { db = null; }
 if (new URLSearchParams(location.search).has('novo') || !db || !db.produtos) db = inicial();
 // demonstração: quem tinha a loja de exemplo antiga recebe a nova (a antiga fica guardada numa cópia); a conta de verdade nunca é trocada
-if (!window.veltriaConta && (db.exemplo || 1) < EXEMPLO) { try { localStorage.setItem(`${CHAVE}-antes-do-exemplo-${EXEMPLO}`, JSON.stringify(db)); } catch (e) { /* sem espaço */ } db = inicial(); }
+if (!window.veltriaConta && (db.exemplo || 1) < EXEMPLO) { db = inicial(); } // 19/11: sem cópia do exemplo antigo (enchia o navegador)
 if (!window.veltriaConta && db && db.exemplo === EXEMPLO) fotosDeCorExemplo(db.produtos);
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch (e) { setTimeout(() => { try { toast('Não consegui salvar neste aparelho (sem espaço). Faça uma cópia em Configurações.', true); } catch (_) { /* tela ainda montando */ } }, 0); } }; // 18/11: o aviso espera a tela montar (antes travava a demonstração com o armazenamento cheio)
 // dados de antes desta versão: ganham equipe, meta e registro de atividades

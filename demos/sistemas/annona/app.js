@@ -191,7 +191,7 @@ function inicial() {
   // vendas dos últimos 28 dias (mais na sexta e no sábado); os produtos marcados como parados não vendem
   const vendaveis = produtos.filter((p) => !p.parado), vendas = [], formas = ['dinheiro', 'pix', 'pix', 'debito', 'credito', 'debito', 'pix'];
   for (let d = 27; d >= 0; d--) {
-    const dia = somaDias(h, -d), sem = new Date(`${dia}T12:00`).getDay(), hAgora = new Date().getHours(), n = Math.round([58, 44, 46, 49, 55, 74, 86][sem] * (0.88 + r() * 0.24));
+    const dia = somaDias(h, -d), sem = new Date(`${dia}T12:00`).getDay(), hAgora = new Date().getHours(), n = Math.round([10, 7, 8, 8, 9, 12, 14][sem] * (0.88 + r() * 0.24)); // 19/11: exemplo menor (era 44 a 86 por dia) para não encher o navegador
     for (let k = 0; k < n; k++) {
       const itens = [], ni = 1 + Math.floor(r() * 4);
       for (let j = 0; j < ni; j++) {
@@ -253,6 +253,7 @@ function inicial() {
 let db = null;
 const novo = new URLSearchParams(location.search).has('novo'), pediuInstalar = new URLSearchParams(location.search).has('instalar');
 try { db = novo ? null : JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) { db = null; }
+if (db && db.demo && !window.veltriaConta && (db.vendas || []).length > 600) db = null; // 19/11: exemplo antigo e grande vira o novo, menor
 if (!db || !Array.isArray(db.produtos)) { db = window.veltriaConta ? vazio() : inicial(); if (db.demo) { const s30 = db.vendas.reduce((s, v) => s + v.total, 0); db.meta = Math.round((s30 / 28) * 30 * 1.15 / 100000) * 100000; } }
 function vazio() { return { v: 1, loja: { nome: (window.veltriaConta && window.veltriaConta.empresa) || 'Meu comércio', slogan: '', tel: '', cidade: '', pix: '', prazo: 30, limite: 20000, servico: 10 }, usuarios: [{ id: 'u1', nome: 'Dono', perfil: 'dono', pin: '', perms: {} }], usuario: 'u1', meta: 0, atividades: [], fornecedores: [], produtos: [], clientes: [], fiado: [], vendas: [], mesas: [], entradas: [], perdas: [], caixa: { aberto: false, movs: [] }, caixas: [], inventarios: [], pedidos: [], ajustes: [] }; }
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch (e) { toast('Não consegui salvar neste aparelho (sem espaço). Faça uma cópia em Configurações.', true); } };
