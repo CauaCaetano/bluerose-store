@@ -558,3 +558,11 @@ kbd { display: inline-grid; place-items: center; min-width: 34px; height: 30px; 
 .linha .balao { fill: #E3F2E8; stroke: #1B7058; stroke-width: 1.5; }
 .linha .balao-t { fill: #145238; font-size: 15px; font-weight: 800; }
 .linha .balao-t, .linha .eixo { stroke: none; paint-order: normal; }
+
+/* 19/11 (pedido do dono): sem Coliseu em lugar nenhum; queijo e tomates do balcão fora (as fotos vinham cortadas na beira) */
+.lat-coliseu { display: none !important; }
+.topo::after { content: none !important; background: none !important; }
+.balcao::after { display: none !important; }
+.balcao::before { display: none !important; }
+.grafico::after { display: none !important; } /* 19/11: a vila encostava no texto do título */
+.esc-caixa { white-space: nowrap; min-width: max-content; } /* 19/11: "Este aparelho é o" não corta */
