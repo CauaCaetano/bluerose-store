@@ -115,7 +115,7 @@ main { position: relative; z-index: 1; max-width: none; padding: 0 10px 40px 16p
 /* ---------------------------------------------------------------- etiqueta de tecido com cordão e borla (recorte do conceito, 9 partes) */
 .etq, .etq-titulo { --k: .69; position: relative; display: inline-flex; align-items: center; box-sizing: border-box; border-style: solid; border-color: transparent;
   border-width: calc(32px * var(--k)) calc(27px * var(--k)) calc(42px * var(--k)) calc(102px * var(--k));
-  border-image: url(img/etiqueta.webp?v=4) 32 27 42 102 fill / calc(32px * var(--k)) calc(27px * var(--k)) calc(42px * var(--k)) calc(102px * var(--k)) round stretch;
+  border-image: url(img/etiqueta.webp?v=5) 32 27 42 102 fill / calc(32px * var(--k)) calc(27px * var(--k)) calc(42px * var(--k)) calc(102px * var(--k)) round stretch;
   color: #FFF8F4; text-decoration: none; filter: drop-shadow(0 8px 10px rgba(80, 30, 40, .22)); }
 .etq-titulo { height: 113px; margin: 0; padding: 0 16px 6px 0; gap: 16px; font: 600 45px/1 var(--serif); color: #FFF8F4; letter-spacing: -.01em; white-space: nowrap; }
 .etq-titulo .etq-ic svg { width: 40px; height: 40px; color: var(--ouro); stroke-width: 1.6; display: block; }
@@ -771,11 +771,11 @@ main { position: relative; z-index: 1; max-width: none; padding: 0 10px 40px 16p
 
 /* ---------------------------------------------------------------- pente fino 18/11 (2ª rodada): etiqueta, sacola e tema */
 /* etiqueta do título e "Vendas de hoje" na cor do sistema (mesma etiqueta recolorida; cordão e borla continuam dourados) */
-html[data-tema="champagne"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-champagne.webp?v=2); }
-html[data-tema="salvia"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-salvia.webp?v=2); }
-html[data-tema="petroleo"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-petroleo.webp?v=2); }
-html[data-tema="rose"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-rose.webp?v=2); }
-html[data-tema="grafite"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-grafite.webp?v=2); }
+html[data-tema="champagne"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-champagne.webp?v=3); }
+html[data-tema="salvia"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-salvia.webp?v=3); }
+html[data-tema="petroleo"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-petroleo.webp?v=3); }
+html[data-tema="rose"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-rose.webp?v=3); }
+html[data-tema="grafite"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-grafite.webp?v=3); }
 /* seletor de cor: o visto vai para o canto, por fora do botão, e o nome da cor aparece inteiro */
 .cores button { overflow: visible; text-overflow: clip; white-space: normal; line-height: 1.1; text-align: left; min-height: 35px; height: auto; padding: 6px 10px; }
 .cores .ok-c { position: absolute; top: -7px; right: -6px; margin: 0; width: 19px; height: 19px; border: 2px solid var(--cartao); box-sizing: content-box; }

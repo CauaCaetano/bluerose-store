@@ -566,3 +566,4 @@ kbd { display: inline-grid; place-items: center; min-width: 34px; height: 30px; 
 .balcao::before { display: none !important; }
 .grafico::after { display: none !important; } /* 19/11: a vila encostava no texto do título */
 .esc-caixa { white-space: nowrap; min-width: max-content; } /* 19/11: "Este aparelho é o" não corta */
+.lat-cordao { display: none !important; } /* 19/11 (pedido do dono): sem o cordão com borla no menu */
