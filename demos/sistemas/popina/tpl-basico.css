@@ -99,3 +99,22 @@ body.tpl-basico .link-cardapio{padding:12px 14px!important;box-sizing:border-box
 /* pente-fino 16/11 (g1): "Nada aqui." e o aviso do caixa vazio estavam claros demais */
 body.tpl-basico .vazio-quadro{color:var(--b-mudo)!important;border-color:var(--b-borda)!important}
 body.tpl-basico .caixa-det .vazio,body.tpl-basico .caixa-det .vazio b{color:#4B5563!important}
+/* pente fino 18/11 (2): tudo o que é cor de identidade segue a "Cor do restaurante" (Gestão › Aparência), e nada do visual Taverna sobra no Básico */
+body.tpl-basico .nav a.on::before{background:var(--b-cor)!important;border-color:var(--b-cor)!important;color:var(--b-cor)!important}
+body.tpl-basico .nav .contador:not(:empty),body.tpl-basico .gestao-nav em.badge,body.tpl-basico .gestao-corpo .sec-tit em.badge,body.tpl-basico .gestao-corpo h2 em.badge,body.tpl-basico b>em.badge,body.tpl-basico span>em.badge{background:var(--b-cor)!important;color:#fff!important}
+body.tpl-basico li.baixo>em.badge{background:#C0392B!important}
+body.tpl-basico button.link,body.tpl-basico a.link,body.tpl-basico .link{color:var(--b-cor)!important;text-decoration-color:currentColor!important}
+body.tpl-basico .link .ico{color:currentColor!important;stroke:currentColor!important}
+body.tpl-basico .tpl.on,body.tpl-basico .estilo.on{border-color:var(--b-cor)!important;box-shadow:0 0 0 2px var(--b-cor)!important}
+body.tpl-basico .tpl.on em,body.tpl-basico .estilo.on em{background:var(--b-cor)!important;color:#fff!important}
+body.tpl-basico .chips>.chip:not(.on),body.tpl-basico .chip:not(.on){background:#fff!important;border-color:var(--b-borda)!important;color:var(--b-tinta)!important;box-shadow:none!important}
+body.tpl-basico .busca,body.tpl-basico .gestao-corpo .busca{background:#fff!important;border:1px solid var(--b-borda)!important;border-radius:10px!important}
+body.tpl-basico .gestao-corpo .kpis>div{border:1px solid var(--b-borda)!important;border-image:none!important;border-radius:14px!important;background:#fff!important;box-shadow:0 1px 2px rgba(16,24,40,.06)!important}
+body.tpl-basico .gestao-corpo .barras i,body.tpl-basico .gestao-corpo .barras>div>i,body.tpl-basico .gestao-corpo .prop>i,body.tpl-basico .gestao-corpo .rank i{background:var(--b-cor)!important}
+body.tpl-basico .guia-barra{background:var(--b-borda)!important}body.tpl-basico .guia-barra>i,body.tpl-basico .guia-passos li.feito .guia-marca{background:var(--b-cor)!important;border-color:var(--b-cor)!important}body.tpl-basico .guia-passos li:not(.feito) .guia-marca{border-color:var(--b-borda)!important}
+body.tpl-basico .r4-barra>i{background:var(--b-verde)!important}body.tpl-basico .r4-barra.ruim>i{background:#C0392B!important}
+body.tpl-basico .interruptor input:checked+span{background:var(--b-cor)!important}
+body.tpl-basico .tp-nome .sem-foto{background:#F3F4F6!important}
+body.tpl-basico .kds .tk-ico,body.tpl-basico .kds .tk-ico .ico{color:var(--b-cor)!important}
+body.tpl-basico .dica-ico,body.tpl-basico .dica-ico .ico,body.tpl-basico .fila-item.chamou .fila-ico,body.tpl-basico .fila-item.chamou .fila-ico .ico{color:var(--b-cor)!important;stroke:var(--b-cor)!important}
+body.tpl-basico .gestao-corpo :is(input,select,textarea):not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]){background:#fff!important;border-color:var(--b-borda)!important}

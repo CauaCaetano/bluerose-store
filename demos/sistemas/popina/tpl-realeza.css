@@ -158,3 +158,5 @@ body.tpl-realeza .gestao-corpo .r4-card h2{font-family:var(--r-tit)!important;co
 body.tpl-realeza [data-tela=mesa] .barra-acoes::after{display:none!important}
 body.tpl-realeza [data-tela=mesa] .barra-acoes{padding-bottom:10px!important}
 body.tpl-realeza .gestao-corpo .resumo-dia>.ka.alerta{border-image:none!important;border:2px solid var(--r-carm)!important}
+/* pente fino 18/11 (2): os cartões de resumo (Relatórios, Conciliação, DRE) com o cartão do template, sem o pergaminho do Taverna */
+body.tpl-realeza .gestao-corpo .kpis>div{border:1px solid #C9A04A!important;border-image:none!important;border-radius:14px!important;background:#FBF5E6!important;box-shadow:0 10px 26px -20px rgba(120,90,30,.55)!important}

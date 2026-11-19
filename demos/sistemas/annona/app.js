@@ -1548,3 +1548,16 @@ $('#recomecar').addEventListener('click', () => confirmar('Recomeçar a demonstr
 if (window.veltriaConta) document.body.classList.add('na-conta');
 if (!location.hash && eu().abrir && eu().abrir !== 'painel') history.replaceState(null, '', `#${eu().abrir}`);
 rota();
+
+// pente fino 2 (18/11): no celular as tabelas viram linhas; cada célula leva o nome da coluna (só aparência, nada de dados)
+(() => {
+  const rotula = (raiz) => raiz.querySelectorAll?.('table.tab:not(.perm)').forEach((tb) => {
+    if (tb.closest('.tab-est')) return;
+    const ths = [...tb.querySelectorAll('thead th')].map((th) => th.textContent.trim());
+    if (!ths.length) return;
+    tb.classList.add('rotula');
+    tb.querySelectorAll('tbody tr').forEach((tr) => [...tr.children].forEach((td, i) => { if (ths[i]) td.dataset.r = ths[i]; }));
+  });
+  rotula(document);
+  new MutationObserver(() => rotula(document)).observe(document.body, { childList: true, subtree: true });
+})();

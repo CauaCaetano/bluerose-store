@@ -4,7 +4,7 @@ import './cozinha.js?v=31';
 import './caixa.js?v=31';
 import './pedidos.js?v=31';
 import './mais.js?v=31';
-import './gestao.js?v=31';
+import './gestao.js?v=32';
 import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=31';
 import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=31';
 import { ico, folha, $, $$, toast, bip, confirma } from './ui.js?v=31';
@@ -83,7 +83,7 @@ addEventListener('online', conexao); addEventListener('offline', conexao); conex
 if (!real) {
   const f = document.createElement('div'); f.className = 'demo-faixa';
   // tudo na mesma aba (pedido do dono): nada de abrir aba nova; sempre dá para voltar ao site
-  f.innerHTML = `<a href="../../../popina.html">← Voltar ao site</a><span><b>Demonstração</b> · restaurante de exemplo</span>
+  f.innerHTML = `<a target="_top" href="../../../popina.html">← Voltar ao site</a><span><b>Demonstração</b> · restaurante de exemplo</span>
     ${q.get('papel') === 'cozinha' ? `<a href="app.html">${ico('salao')}Voltar ao sistema</a>` : `<a href="app.html?papel=cozinha#cozinha">${ico('cozinha')}Ver a tela da cozinha</a>`}
     <a href="${linkCardapio('mesa=4')}">${ico('qr')}Cardápio do cliente</a>
     <button type="button" data-recomecar>Recomeçar</button>`;

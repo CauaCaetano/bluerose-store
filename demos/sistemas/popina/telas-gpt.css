@@ -841,4 +841,11 @@ html,body{overflow-x:clip}
 /* celular: o topo fica sólido (o texto da tela não aparece por trás do nome do restaurante ao rolar) */
 @media (max-width:899px){.topo{background:var(--perg)}}
 /* comanda de pedido no celular estreito: o botão "Entregue" desce para a linha de baixo em vez de ser cortado */
-@media (max-width:400px){.ticket.pd footer{flex-wrap:wrap!important;row-gap:8px}.ticket.pd footer .bt{padding:0 12px;margin-left:auto}}
+.ticket.pd footer{flex-wrap:wrap!important;row-gap:8px}.ticket.pd footer .bt{margin-left:auto}@media (max-width:400px){.ticket.pd footer .bt{padding:0 12px}}
+/* demonstração: o "Voltar ao site" fica visível também na primeira tela, a escolha do template (no celular ela começa logo abaixo da faixa) */
+@media (max-width:899px){body:has(>.esc)>.demo-faixa{position:fixed;top:0;left:0;right:0;z-index:9001;margin:0!important}body:has(>.demo-faixa)>.esc{top:var(--df-h,40px)}}
+@media (min-width:900px){body:has(>.esc)>.demo-faixa{z-index:9001}}
+/* pente fino 18/11 (2), computador 1280 a 1920: a placa da coluna de pedidos não deixa o texto sair da placa (quebra em 2 linhas quando a coluna é estreita) e a faixa da conta no caixa não quebra "Mesa 5" */
+@media (min-width:900px){.pd-quadro .placa{white-space:normal!important;line-height:1.08;text-align:center;font-size:clamp(13px,1.05vw,18.5px)!important}.pd-quadro .placa span{font-size:inherit!important;white-space:nowrap}}
+.cab-conta .fita{white-space:nowrap}
+@media (min-width:900px){.cab-conta .fita{font-size:clamp(20px,1.8vw,30px)!important}}

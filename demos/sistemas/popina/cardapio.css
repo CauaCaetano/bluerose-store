@@ -342,3 +342,5 @@ body.est-moderno:not(.cv) .cli-id-txt{padding-top:44px}
 /* visual Taverna em celular estreito: "Chamar garçom" e "Ver a conta" cabem lado a lado (antes o segundo saía da tela) */
 body.est-rustico .cli-modo-bts{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (max-width:379px){body.est-rustico .cli-modo-bts{gap:8px!important}body.est-rustico .cli-modo-bts .bt{font-size:14.5px!important;gap:6px!important;padding:4px 8px!important;white-space:normal;line-height:1.15;text-align:center}body.est-rustico .cli-modo-bts .bt .ico{width:20px!important;height:20px!important;flex:none}}
+/* pente fino 18/11 (2): nos visuais Básico e Rústico do cardápio, todo botão principal (Escolha, Adicionar, Mandar para o garçom…) segue a cor do restaurante */
+body.cliente:not(.cv){--terra:var(--marca,#B4532F);--terra2:color-mix(in srgb,var(--marca,#B4532F) 80%,#000);--terra-cl:color-mix(in srgb,var(--marca,#B4532F) 16%,#fff)}

@@ -309,3 +309,24 @@ html, body { overflow-x: clip; } /* app de celular: nada arrasta a tela para o l
 .demo-topo .br-idi button { color: var(--trav-2); border-color: rgba(239, 230, 214, .45); }
 .form-ia input { min-width: 0; } .form-ia .bt { flex: none; }
 .bt { text-align: center; line-height: 1.25; padding-top: 6px; padding-bottom: 6px; }
+
+/* pente fino 2 (18/11): a cor escolhida em Configurações vale para TODA cor de identidade
+   (faixa "Já veio/Vai vir", rótulos antes/depois, botão + de bronze, molduras e detalhes de bronze).
+   Fotos, cores dos serviços e cores de situação (confirmou, atrasado...) não mudam. Só aparência: chaves e dados iguais. */
+html[data-tema="salvia"]    { --patina: #4f6b45; }
+html[data-tema="terracota"] { --patina: #8a5236; }
+html[data-tema="oceano"]    { --patina: #3f747a; }
+html[data-tema="ameixa"]    { --patina: #8a5070; }
+html[data-tema="grafite"]   { --patina: #7f6532; }
+html[data-tema] { --minio: var(--noite); --minio-esc: var(--noite-2); --bronze: var(--rose-esc); }
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  html[data-tema]:not([data-tema="rose"]) { --bronze: color-mix(in srgb, var(--rose) 70%, var(--rose-esc)); --bronze-cl: color-mix(in srgb, var(--rose) 55%, #efe6d6); }
+  html[data-tema]:not([data-tema="rose"]) .pilula .mais-um,
+  html[data-tema]:not([data-tema="rose"]) .pilula .mais-um[aria-current="page"] { background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--rose) 45%, #fff) 0, var(--bronze) 55%, color-mix(in srgb, var(--rose-esc) 70%, #000) 100%); }
+  html[data-tema]:not([data-tema="rose"]) .cartao { box-shadow: inset 0 0 0 3px var(--trav-2), inset 0 0 0 4px color-mix(in srgb, var(--bronze-cl) 35%, transparent), 0 6px 14px -12px rgba(34, 29, 26, .4); }
+  .r-antes { background: color-mix(in srgb, var(--minio) 92%, transparent); } .r-depois { background: color-mix(in srgb, var(--patina) 95%, transparent); }
+}
+html[data-tema="rose"], html:not([data-tema]) { --bronze: #9a7b4f; }
+/* faixa de dias: o último dia esmaece na beira em vez de aparecer cortado reto */
+.dias { padding-right: 28px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+html[data-tema]:not([data-tema="rose"]) .pilula .mais-um { color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .55); }

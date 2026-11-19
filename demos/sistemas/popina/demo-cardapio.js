@@ -3,7 +3,7 @@
 if (!new URLSearchParams(location.search).get('r')) {
   const f = document.createElement('div');
   f.className = 'demo-cardapio';
-  f.innerHTML = '<a href="../../../popina.html">← Voltar ao site</a><a href="app.html">Voltar à demonstração</a><span>Cardápio que o cliente vê pelo QR da mesa</span>';
+  f.innerHTML = '<a target="_top" href="../../../popina.html">← Voltar ao site</a><a href="app.html">Voltar à demonstração</a><span>Cardápio que o cliente vê pelo QR da mesa</span>';
   document.body.prepend(f);
 }
 

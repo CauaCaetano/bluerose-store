@@ -1,6 +1,6 @@
 // Jano (ex-Veltria Agenda Essencial) · abre sem internet: marca agora, sobe quando a conexão voltar.
-const CACHE = 'agenda-essencial-v32';
-const ARQUIVOS = ['app.html', 'app.js?v=27', 'midia.js?v=1', 'estilo.css?v=14', 'jano.css?v=5', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png'];
+const CACHE = 'agenda-essencial-v33';
+const ARQUIVOS = ['app.html', 'app.js?v=27', 'midia.js?v=1', 'estilo.css?v=14', 'jano.css?v=6', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((l) => Promise.all(l.filter((k) => k !== CACHE && k.startsWith(CACHE.replace(/v\d+$/, ''))).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {

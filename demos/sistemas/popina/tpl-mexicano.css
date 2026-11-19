@@ -182,3 +182,5 @@ body.tpl-mexicano .prancheta,body.tpl-mexicano .ticket-dia,body.tpl-mexicano .co
 @media (min-width:900px){body.tpl-mexicano .salao-dir::before{content:none!important;display:none!important}}
 @media (max-width:899px){body.tpl-mexicano .area-cab .fita{border-width:0 34px!important;font-size:15px!important;height:46px!important}
   body.tpl-mexicano .area-cab>span{font-size:13.5px}}
+/* pente fino 18/11 (2): os cartões de resumo (Relatórios, Conciliação, DRE) com o cartão do template, sem o pergaminho do Taverna */
+body.tpl-mexicano .gestao-corpo .kpis>div{border:1px solid var(--l-borda)!important;border-image:none!important;border-radius:14px!important;background:rgba(255,253,248,.96)!important;box-shadow:0 10px 26px -20px rgba(120,90,30,.55)!important}

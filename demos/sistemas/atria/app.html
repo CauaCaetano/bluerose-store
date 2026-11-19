@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Rethink+Sans:wght@400;500;600;700&family=Azeret+Mono:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=10">
+<link rel="stylesheet" href="estilo.css?v=11">
 <link rel="stylesheet" href="conceitos.css?v=6">
 <link rel="stylesheet" href="mais.css?v=6">
 <script>
@@ -42,7 +42,7 @@
 <script src="../../../js/envio-demo.js?v=1"></script>
 </head>
 <body>
-<div class="demo-faixa" id="faixa"><a href="../../../atria.html">← Voltar ao site</a><b>Demonstração</b><span class="df-espaco"></span><button type="button" data-acao="recomecar">Recomeçar</button><details class="df-menu"><summary aria-label="Mais opções da demonstração">•••</summary><div class="df-pop"><p>Dados de exemplo: nada sai de verdade.</p><a href="../../../atria.html" target="_top">Ver o site do Atria</a></div></details></div>
+<div class="demo-faixa" id="faixa"><a target="_top" href="../../../atria.html">← Voltar ao site</a><b>Demonstração</b><span class="df-espaco"></span><button type="button" data-acao="recomecar">Recomeçar</button><details class="df-menu"><summary aria-label="Mais opções da demonstração">•••</summary><div class="df-pop"><p>Dados de exemplo: nada sai de verdade.</p><a href="../../../atria.html" target="_top">Ver o site do Atria</a></div></details></div>
 <main id="tela" tabindex="-1" aria-live="polite"></main>
 <nav class="barra" aria-label="Partes do app">
   <a href="#inicio" data-aba="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Início</a>
@@ -61,7 +61,7 @@
       <h1>Atria<br><em>no bolso</em> da obra</h1>
       <p>O app de quem ergue, reforma e conserta: pedreiro, azulejista, carpinteiro, eletricista, pintor e todo profissional da construção. Ao lado, a demonstração funcionando.</p>
       <div class="qr-caixa"><span data-qr></span><p><b>Abra no seu celular</b><br>Aponte a câmera para o código. No celular dá para instalar e usar até sem internet.</p></div>
-      <a class="bt escuro" href="../../../atria.html">Conhecer o Atria</a>
+      <a target="_top" class="bt escuro" href="../../../atria.html">Conhecer o Atria</a>
     </div>
   </div>
 </template>
@@ -78,6 +78,6 @@
     document.title = 'Atria · feito para o celular';
   }
 </script>
-<script type="module" src="app.js?v=18"></script>
+<script type="module" src="app.js?v=19"></script>
 </body>
 </html>

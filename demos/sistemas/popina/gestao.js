@@ -402,7 +402,7 @@ TELAS_MAIS.conta = () => {
     <button type="button" class="cartao-acao" data-conta="convidar">${ico('mais2')}<b>Convidar pessoa</b><span>Garçons, cozinha e caixa, cada um com o próprio login.</span></button>
     <button type="button" class="cartao-acao sair" data-conta="sair">${ico('voltar')}<b>Sair</b><span>Sai deste aparelho. Seus dados ficam guardados na nuvem.</span></button>
   </div>
-  ${real ? '' : `<p class="aviso ouro">Isto é a demonstração. Para ter tudo isso de verdade, assine em <a href="../../../popina.html#precos">bluerose-store.com/popina</a>.</p>`}
+  ${real ? '' : `<p class="aviso ouro">Isto é a demonstração. Para ter tudo isso de verdade, assine em <a target="_top" href="../../../popina.html#precos">bluerose-store.com/popina</a>.</p>`}
   ${blocoMarca(true)}`;
 };
 MONTAR.conta = (el) => MONTAR.marca(el);

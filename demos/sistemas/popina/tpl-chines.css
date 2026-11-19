@@ -199,3 +199,5 @@ body.tpl-chines .barra-acoes .bt{white-space:nowrap!important;font-size:15px!imp
 
 /* 16/11 pente-fino: o topo era meio transparente; ao rolar, a placa da mesa e os títulos apareciam por trás do nome do restaurante */
 body.tpl-chines .topo{background:#FFFCF5!important}
+/* pente fino 18/11 (2): os cartões de resumo (Relatórios, Conciliação, DRE) com o cartão do template, sem o pergaminho do Taverna */
+body.tpl-chines .gestao-corpo .kpis>div{border:1px solid var(--l-borda)!important;border-image:none!important;border-radius:14px!important;background:rgba(255,253,248,.96)!important;box-shadow:0 10px 26px -20px rgba(120,90,30,.55)!important}

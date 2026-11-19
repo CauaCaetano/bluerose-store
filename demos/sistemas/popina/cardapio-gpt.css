@@ -96,3 +96,11 @@ body.est-rustico .cli-tags{position:static!important;margin:0 0 3px}
 body.est-rustico .cli-prod-txt b{padding-right:0!important}
 body.est-rustico .cli-prod-txt p{padding-right:36px!important}
 body.est-rustico .cli-fita-linha{min-width:0}body.est-rustico .cli-aqueduto{width:auto!important;flex:1 1 0;min-width:0;max-width:180px;margin-right:0}body.est-rustico .cli-fita{flex:none}
+/* pente fino 18/11 (2): no Rústico, preço, botão +, borda dos botões, faixa da mesa, categoria escolhida e barra do pedido seguem a cor do restaurante.
+   As pinceladas continuam com a textura da imagem original, tingidas com a cor escolhida (luminosidade da imagem + cor do restaurante). */
+body.est-rustico .cli-preco{color:color-mix(in srgb,var(--marca,#B4532F) 72%,#000)!important}
+body.est-rustico .cli-mais{background:var(--marca,#B4532F)!important}
+body.est-rustico .cli-modo-bts .bt{border-color:color-mix(in srgb,var(--marca,#B4532F) 45%,#F3E3CC)!important}
+body.est-rustico .cli-fita{border-image:none!important;border-color:transparent!important;background:url(img/c-fita-mesa.webp?v=1) 0 0/100% 100% border-box,var(--marca,#B4532F)!important;background-blend-mode:luminosity!important;background-clip:border-box!important;-webkit-mask-box-image:url(img/c-fita-mesa.webp?v=1) 0 30 0 50 stretch}
+body.est-rustico .cli-cats a.on{border-image:none!important;border-color:transparent!important;background:url(img/c-chip-on.webp?v=1) 0 0/100% 100% border-box,var(--marca,#B4532F)!important;background-blend-mode:luminosity!important;background-clip:border-box!important;-webkit-mask-box-image:url(img/c-chip-on.webp?v=1) 0 8 0 26 stretch}
+body.est-rustico .cli-ver{border-color:transparent;border-image:none;background:url(img/c-barra.webp?v=1) 0 0/100% 100% border-box,var(--marca,#B4532F);background-blend-mode:luminosity;background-clip:border-box;-webkit-mask-box-image:url(img/c-barra.webp?v=1) 0 30 0 54 stretch}

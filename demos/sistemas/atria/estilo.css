@@ -398,7 +398,7 @@ h2.sec a, h2.sec button { font: 600 13px var(--f-txt); text-transform: none; let
 .dica-flutua button { border: 0; background: transparent; font-weight: 700; color: #7A5E36; cursor: pointer; padding: 0 2px; }
 
 /* ------------------------------------------------------------- moldura no computador */
-.moldura-pagina { min-height: 100dvh; display: grid; grid-template-columns: auto minmax(0, 380px); gap: 64px; align-items: center; justify-content: center; padding: 32px; background: radial-gradient(1200px 600px at 20% 0%, #F8F5F0, transparent), repeating-linear-gradient(92deg, rgba(70,90,106,.035) 0 2px, transparent 2px 14px), var(--serragem); }
+.moldura-pagina { min-height: 100dvh; display: grid; grid-template-columns: auto minmax(0, 380px); gap: 64px; align-items: center; justify-content: center; padding: 32px; background: radial-gradient(1200px 600px at 20% 0%, #F8F5F0, transparent), var(--serragem); }
 .celular { width: 412px; height: min(880px, calc(100dvh - 64px)); border-radius: 54px; background: #23272E; padding: 14px; box-shadow: 0 50px 90px -40px rgba(30,35,45,.7), inset 0 0 0 2px #434A54; position: relative; }
 .celular::before { content: ''; position: absolute; top: 24px; left: 50%; width: 110px; height: 30px; margin-left: -55px; border-radius: 20px; background: #000; z-index: 2; }
 .cel-tela { height: 100%; border-radius: 42px; overflow: hidden; display: flex; flex-direction: column; background: var(--grafite); }
@@ -598,3 +598,8 @@ html.letra-grande .folha .duas, html.letra-grande .folha .dois-num { grid-templa
 .duas:has([data-corte="chapa"]) { grid-template-columns: 1.6fr 1fr; }
 .peca-linha { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, .7fr) auto; }
 .peca-linha input { padding: 0 6px; }
+
+/* faixa da demonstração ("Voltar ao site · Demonstração · Recomeçar") sempre visível: no cadastro da 1ª vez ela fica por cima e o cadastro começa logo abaixo; no passeio guiado ela não fica escurecida */
+body:has(> .onb) .demo-faixa { position: fixed; left: 0; right: 0; top: 0; z-index: 101; }
+body:has(> .onb) .onb { top: calc(40px + env(safe-area-inset-top)); }
+body:has(> .tour) .demo-faixa { z-index: 101; }

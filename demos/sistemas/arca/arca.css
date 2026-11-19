@@ -389,3 +389,7 @@ main { padding: 22px 28px 48px; min-width: 0; outline: none; animation: entra .2
   .razao.por-cc td:nth-child(3)::before { content: "saiu "; color: var(--mudo); font-weight: 400; }
   .bloco > table.razao.por-cc { display: table; }
 }
+/* pente fino 2: nome das reservas não encosta na beira da gaveta em 1361–1600 px */
+@media (min-width: 1361px) and (max-width: 1600px) { .g-nome { font-size: .82rem; letter-spacing: 0; } }
+/* fluxo de caixa no celular: o gráfico cabe inteiro na tela (sem pedaço escondido de lado), com letra maior */
+@media (max-width: 760px) { .graf-cx { overflow: visible; padding: 0 14px; } .graf { min-width: 0; overflow: visible; } .graf text { font-size: 22px; } .g-rot text { font-size: 24px; } }

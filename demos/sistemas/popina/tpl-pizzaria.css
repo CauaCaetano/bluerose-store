@@ -187,3 +187,5 @@ body.tpl-pizzaria .g-card h2.g-fita{font-size:18px!important}
 body.tpl-pizzaria .fita,body.tpl-pizzaria .fita.verde,body.tpl-pizzaria .g-fita,body.tpl-pizzaria .kds-col .placa,body.tpl-pizzaria .cab-comanda .fita-mesa,body.tpl-pizzaria .cab-conta .fita{border-image:url(img/tp-placa.webp?v=2) 0 58 0 140 fill stretch!important;clip-path:none!important}
 body.tpl-pizzaria .prancheta,body.tpl-pizzaria .ticket-dia,body.tpl-pizzaria .comanda-papel,body.tpl-pizzaria .cartao-caixa{border-image:url(img/tp-moldura.webp?v=2) 18 20 20 20 stretch!important}
 @media (min-width:900px){body.tpl-pizzaria main::after{background-image:url(img/tp-balcao.webp?v=2)!important}}
+/* pente fino 18/11 (2): os cartões de resumo (Relatórios, Conciliação, DRE) com o cartão do template, sem o pergaminho do Taverna */
+body.tpl-pizzaria .gestao-corpo .kpis>div{border:1px solid var(--l-borda)!important;border-image:none!important;border-radius:14px!important;background:rgba(255,253,248,.96)!important;box-shadow:0 10px 26px -20px rgba(120,90,30,.55)!important}
