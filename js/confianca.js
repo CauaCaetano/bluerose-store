@@ -25,7 +25,7 @@
   var B = {
     teste: {
       t: 'Teste antes de assinar',
-      l: ['Demonstração grátis e sem cadastro, com dados de exemplo.', 'Teste grátis de 7 dias no plano mensal: pede o cartão, nada é cobrado antes do 8º dia.', 'Sem fidelidade: cancele em Minha conta.'],
+      l: ['Demonstração grátis e sem cadastro, com dados de exemplo.', 'Teste grátis de 7 dias no plano mensal: pede o cartão, nada é cobrado antes do 8º dia e avisamos por e-mail 2 dias antes do fim.', 'Sem fidelidade: cancele em Minha conta.'],
       a: '#teste', m: 'Como funciona'
     },
     pagamento: {
