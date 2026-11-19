@@ -162,3 +162,39 @@
 .bt, button, h1, h2, h3, .atalho, .linha .txt b { text-wrap: balance; }
 p, small, li, .explica { text-wrap: pretty; }
 .atalho small { text-wrap: balance; }
+
+/* ---------- Configurações (19/11/2026): seções, esquema de cores e a marca ---------- */
+/* esquemas: trocam a cor de ação e de informação no app inteiro; o fundo travertino e o grafite continuam */
+html[data-esquema="musgo"] { --cedro: #4F6E5A; --cedro-esc: #3B5444; --cedro-claro: #E1EAE3; --giz: #4F6E5A; --giz-claro: #E3ECE5; }
+html[data-esquema="petroleo"] { --cedro: #2F5A66; --cedro-esc: #22444E; --cedro-claro: #E0EBEE; --giz: #3B6673; --giz-claro: #E2EDF0; }
+html[data-esquema="barro"] { --cedro: #94513F; --cedro-esc: #743D2F; --cedro-claro: #F2E2DC; --giz: #94513F; --giz-claro: #F4E6E1; }
+html[data-esquema="champagne"] { --cedro: #86683F; --cedro-esc: #6A512F; --cedro-claro: #F1E8DA; --giz: #7A5E38; --giz-claro: #F3EBDD; --trena: #5E7486; --trena-claro: #E1E7EC; }
+html[data-esquema="grafite"] { --cedro: #2E333B; --cedro-esc: #1F2329; --cedro-claro: #E4E5E7; --giz: #434A54; --giz-claro: #E6E7E9; }
+.cfg-nav { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 10px; margin: 0 0 4px; scrollbar-width: none; }
+.cfg-nav::-webkit-scrollbar { display: none; }
+.cfg-nav a { flex: none; min-height: 40px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: 999px; background: var(--aparas); box-shadow: inset 0 0 0 1.5px var(--linha); color: var(--grafite); text-decoration: none; font-weight: 650; font-size: 14px; }
+.cfg-sec { scroll-margin-top: 56px; margin-top: 12px; }
+.cfg-t { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font: 800 22px/1 var(--f-tit); text-transform: uppercase; letter-spacing: .02em; }
+.cfg-t svg { width: 22px; height: 22px; color: var(--giz); }
+.cfg-t-fora { margin: 18px 0 10px; }
+.cfg-txt { margin: -4px 0 12px; font-size: 13.5px; line-height: 1.45; }
+.cfg-eu { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; min-width: 0; }
+.cfg-eu b { display: block; font-weight: 700; overflow-wrap: anywhere; }
+.cfg-eu small { color: var(--mudo); font-size: 13px; }
+.cfg-eu .acoes { margin: 0; }
+.cfg-logo { width: 64px; height: 64px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1.5px var(--linha); display: grid; place-items: center; overflow: hidden; flex: none; }
+.cfg-logo img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+.campo input[readonly] { background: var(--serragem); color: var(--grafite); }
+.cfg-temas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.cfg-temas button { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 12px; border-radius: var(--r-p); border: 1.5px solid var(--linha); background: #fff; color: var(--grafite); font-weight: 650; cursor: pointer; text-align: left; }
+.cfg-temas button i { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--a) 55%, var(--b) 55%); flex: none; }
+.cfg-temas button[aria-pressed="true"] { border-color: var(--cedro); box-shadow: 0 0 0 3px var(--cedro-claro); }
+.cfg-como { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.cfg-como .bt { justify-content: flex-start; min-height: 44px; }
+.cfg-passos { margin: 4px 0 8px; padding-left: 20px; display: grid; gap: 8px; line-height: 1.45; }
+.cfg-engr { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--aparas); box-shadow: inset 0 0 0 1.5px var(--linha); color: var(--grafite); flex: none; }
+.pc-cfg { position: absolute; right: 10px; bottom: 10px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--grafite); background: var(--serragem); box-shadow: inset 0 0 0 1.5px rgba(46,51,59,.18); }
+.cv-logo { object-fit: contain; background: #fff; border-radius: 8px; }
+/* bloco "Minha assinatura" (base/assinatura.css) com as cores do Atria; segue o esquema escolhido */
+.br-ass { --ass-cor: var(--cedro); --ass-cor-txt: #fff; --ass-texto: var(--grafite); --ass-mudo: var(--mudo); --ass-fundo: var(--aparas); --ass-linha: var(--linha); --ass-raio: var(--r); --ass-perigo: var(--brasa); --ass-ok: #4A6B55; --ass-atn: #7A5A1E; --ass-titulo: var(--f-tit); box-shadow: var(--sombra); }
+.br-ass .br-ass-t { font-weight: 800; font-size: 22px; text-transform: uppercase; letter-spacing: .02em; }

@@ -1,7 +1,7 @@
 // Atria · funções essenciais da auditoria (11/11/2026): agenda com lembrete no calendário do celular,
 // recibo de pagamento (inclusive parcial), ajudantes por diária, MEI (limite do ano e DAS) e resumo do mês.
-import { $, $$, t, din, dinCurto, lerDin, hoje, somaDias, dias, dataBR, quando, uid, ico, av, db, grava, achar, toast, folha, formulario, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js?v=18';
-import { totais, cliente, somaPeriodo, intervalo, abrirMensagens } from './gestao.js?v=18';
+import { $, $$, t, din, dinCurto, lerDin, hoje, somaDias, dias, dataBR, quando, uid, ico, av, db, grava, achar, toast, folha, formulario, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js?v=19';
+import { totais, cliente, somaPeriodo, intervalo, abrirMensagens } from './gestao.js?v=19';
 
 export const TELAS = {};
 export const ACOES = {};
@@ -41,7 +41,7 @@ TELAS.recibo = (id) => {
   return `${cab('Recibo', `nº ${n}`)}
     <div class="acoes so-tela" style="margin-top:0"><button type="button" class="bt p" data-acao="imprimir">${ico('doc')}PDF / imprimir</button><button type="button" class="bt zap p" data-acao="recibo-zap" data-id="${f.id}">${ico('zap')}Mandar no WhatsApp</button></div>
     <article class="doc" id="doc">
-      <div class="doc-cab"><img src="simbolo.svg?v=2" alt="" width="50" height="50"><div><b>${t(eu.nome)}</b><small class="mudo">${t(eu.cidade)}-${t(eu.uf)} · WhatsApp ${t(eu.zap)}</small></div></div>
+      <div class="doc-cab"><img src="${eu.logo || 'simbolo.svg?v=2'}" alt="" width="50" height="50" style="object-fit:contain"><div><b>${t(eu.marca || eu.nome)}</b><small class="mudo">${eu.marca ? `${t(eu.nome)} · ` : ''}${t(eu.cidade)}-${t(eu.uf)} · WhatsApp ${t(eu.zap)}</small></div></div>
       <h3 style="margin-top:18px">Recibo nº ${n}</h3>
       <p style="font-size:15px;line-height:1.6;margin:0">Recebi de <b>${t(c ? c.nome : 'cliente')}</b> a quantia de <b>${din(f.valor)}</b>${o ? `, referente a <b>${t(o.titulo.toLowerCase())}</b>` : ''}, pago${f.desc && /\((Pix|Dinheiro|Cartão|Transferência)\)$/i.test(f.desc) ? ` no ${t(f.desc.match(/\(([^)]+)\)$/)[1])}` : ''} em ${dataBR(f.data)}.</p>
       ${tt ? `<table style="margin-top:12px"><tr><td>Total do serviço</td><td>${din(tt.total)}</td></tr><tr><td>Pago até agora (com este)</td><td>${din(pagoAte)}</td></tr><tr class="tot"><td>${resta ? 'Falta pagar' : 'Quitado'}</td><td>${din(resta)}</td></tr></table>` : ''}
@@ -51,7 +51,7 @@ TELAS.recibo = (id) => {
 ACOES['recibo-zap'] = (b) => {
   const f = achar('fin', b.dataset.id), o = f.obra ? achar('obras', f.obra) : null, c = o ? cliente(o.cliente) : null, tt = o ? totais(o) : null;
   const pago = o ? db.fin.filter((x) => x.obra === o.id && x.tipo === 'e' && x.pago && x.data <= f.data).reduce((s, x) => s + x.valor, 0) : f.valor;
-  abrirZap(c ? c.tel : '', `*Recibo* · ${db.perfil.nome}\nRecebi de ${c ? c.nome : 'você'} ${din(f.valor)}${o ? ` referente a ${o.titulo.toLowerCase()}` : ''} em ${dataBR(f.data)}.${tt ? `\nTotal do serviço: ${din(tt.total)}\nPago até agora: ${din(pago)}\n${tt.total - pago > 0 ? `Falta: ${din(tt.total - pago)}` : 'Serviço quitado. Obrigado!'}` : ''}`);
+  abrirZap(c ? c.tel : '', `*Recibo* · ${db.perfil.marca || db.perfil.nome}\nRecebi de ${c ? c.nome : 'você'} ${din(f.valor)}${o ? ` referente a ${o.titulo.toLowerCase()}` : ''} em ${dataBR(f.data)}.${tt ? `\nTotal do serviço: ${din(tt.total)}\nPago até agora: ${din(pago)}\n${tt.total - pago > 0 ? `Falta: ${din(tt.total - pago)}` : 'Serviço quitado. Obrigado!'}` : ''}`);
 };
 
 // ------------------------------------------------------------------ ajudantes por diária

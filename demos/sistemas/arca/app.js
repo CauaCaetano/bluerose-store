@@ -649,8 +649,8 @@ const T = {
       <section class="bloco">${titulo(IC.recibo, 'Recibos')}<p class="mini">Para cliente que pede comprovante. Cada recibo ganha número e fica guardado. Nota fiscal (NF-e e NFS-e) não é emitida pelo Arca: <b>em breve</b>.</p><div class="linha"><button type="button" class="bt" data-acao="recibo">Fazer um recibo</button><a class="bt" href="#recibos">Ver os recibos</a></div></section>`;
   },
   mais() {
-    const l = [['caixa', 'Contas e saldos', 'bancos, transferências e reservas', IC.cofre], ['lancamentos', 'Lançamentos', 'o livro-razão completo', IC.livro], ['pagar', 'A pagar', 'fornecedores, boletos e fixas', IC.doc], ['aprovacoes', 'Aprovações', `${pendAprov().length} esperando`, IC.escudo], ['receber', 'A receber e cobrança', 'Pix, régua e inadimplência', IC.cobrar], ['conciliacao', 'Conciliação', 'extrato OFX/CSV e regras', IC.transf], ['fluxo', 'Fluxo de caixa', 'realizado, previsto e cenários', IC.cal], ['orcamento', 'Orçamento', 'orçado x realizado', IC.coluna], ['relatorios', 'Relatórios', 'DRE, DFC, indicadores e exportar', IC.doc], ['impostos', 'Impostos', 'provisão e calendário', IC.coluna], ['plano', 'Plano de contas', 'categorias, centros e projetos', IC.livro], ['equipe', 'Equipe e auditoria', 'perfis, alçada e fechamento', IC.equipe], ['ia', 'Assistente', 'pergunte sobre o caixa', IC.ia], ['hoje', 'Pendências', `${N.pendencias(db).length} agora`, IC.alerta], ['recibos', 'Recibos', 'emitidos e numerados', IC.recibo], ['assinatura', 'Minha assinatura', estAss(), IC.cartao], ['config', 'Configurações', 'empresas, Pix e avisos', IC.ajustes]];
-    return `${cabeca('Mais')}<div class="bloco lista-mais">${l.map(([k, n, s, ic]) => `<a href="#${k}"><span class="ic">${ic}</span><span><b>${n}</b><small>${t(s)}</small></span><span aria-hidden="true">›</span></a>`).join('')}</div>`;
+    const l = [['caixa', 'Contas e saldos', 'bancos, transferências e reservas', IC.cofre], ['lancamentos', 'Lançamentos', 'o livro-razão completo', IC.livro], ['pagar', 'A pagar', 'fornecedores, boletos e fixas', IC.doc], ['aprovacoes', 'Aprovações', `${pendAprov().length} esperando`, IC.escudo], ['receber', 'A receber e cobrança', 'Pix, régua e inadimplência', IC.cobrar], ['conciliacao', 'Conciliação', 'extrato OFX/CSV e regras', IC.transf], ['fluxo', 'Fluxo de caixa', 'realizado, previsto e cenários', IC.cal], ['orcamento', 'Orçamento', 'orçado x realizado', IC.coluna], ['relatorios', 'Relatórios', 'DRE, DFC, indicadores e exportar', IC.doc], ['impostos', 'Impostos', 'provisão e calendário', IC.coluna], ['plano', 'Plano de contas', 'categorias, centros e projetos', IC.livro], ['equipe', 'Equipe e auditoria', 'perfis, alçada e fechamento', IC.equipe], ['ia', 'Assistente', 'pergunte sobre o caixa', IC.ia], ['hoje', 'Pendências', `${N.pendencias(db).length} agora`, IC.alerta], ['recibos', 'Recibos', 'emitidos e numerados', IC.recibo], ['config/cfg-assinatura', 'Minha assinatura', 'plano, renovar e cancelar', IC.cartao], ['config', 'Configurações', 'perfil, cores, marca, empresas e avisos', IC.ajustes]];
+    return `${cabeca('Mais')}<div class="bloco lista-mais">${[...l, ['config/cfg-guia', 'Guia: como usar', 'um passo a passo de cada tela', IC.livro]].filter((x, i, v) => v.findIndex((y) => y[0] === x[0]) === i).map(([k, n, s, ic]) => `<a href="#${k}"><span class="ic">${ic}</span><span><b>${n}</b><small>${t(s)}</small></span><span aria-hidden="true">›</span></a>`).join('')}</div>`;
   },
   conciliacao() {
     if (previa) return T.importar();
@@ -693,13 +693,11 @@ const T = {
       <form class="form-ia" id="f-ia"><input id="q-ia" placeholder="Pergunte" aria-label="Pergunta"><button class="bt cheio">Enviar</button></form></section>`;
   },
   assinatura() {
+    // a assinatura fica em Configurações (bloco compartilhado). Aqui: o mesmo bloco, mais o "Pagar aqui" da demonstração quando a simulação do site deixa a assinatura vencida
     const a = db.assinatura;
-    const topo = a.status === 'vencida' ? `<section class="bloco alerta"><b class="sai">Assinatura vencida</b><p class="mini">O pagamento de ${din(a.valor * 100)} não foi aprovado. Seus dados estão guardados.</p></section>`
-      : a.renova ? `<section class="bloco"><b>Ativa</b><p class="mini">Plano Assinatura · ${din(a.valor * 100)} por mês · próxima cobrança ${dia(a.proxima)}.</p></section>`
-        : `<section class="bloco"><b>Cancelada</b><p class="mini">Você usa tudo até ${dia(a.proxima)}. Depois disso nada mais é cobrado.</p></section>`;
-    return `${cabeca('Minha assinatura', `A mesma da sua conta no site. Sem fidelidade.${CONTA === 'demo' ? ' Nesta demonstração os pagamentos são simulados.' : ''}`)}${topo}
-      <div class="linha">${a.status === 'vencida' ? '<button type="button" class="bt cheio" data-acao="pagar">Pagar aqui</button><a class="bt" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Renovar no site</a>' : a.renova ? '<button type="button" class="bt" data-acao="cancelar">Cancelar assinatura</button>' : '<button type="button" class="bt cheio" data-acao="reativar">Reativar</button>'}</div>
-      <section class="bloco">${titulo(IC.cartao, 'Pagamentos')}${a.pagos.length ? `<table class="razao"><tbody>${a.pagos.map((d) => `<tr><td>Mensalidade</td><td class="num">${dataC(d)}</td><td class="dir num">${din(a.valor * 100)}</td></tr>`).join('')}</tbody></table>` : '<p class="mini">Nenhum ainda.</p>'}</section>`;
+    return `${cabeca('Minha assinatura', `A mesma da sua conta no site. Sem fidelidade.${DEMO ? ' Nesta demonstração os pagamentos são simulados.' : ''}`)}
+      ${DEMO && a.status === 'vencida' ? `<section class="bloco alerta"><b class="sai">Assinatura vencida (simulação)</b><p class="mini">O pagamento de ${din(a.valor * 100)} não foi aprovado. Seus dados estão guardados.</p><div class="linha"><button type="button" class="bt cheio" data-acao="pagar">Pagar aqui</button></div></section>` : ''}
+      <div id="ass-slot"></div><p class="mini" style="margin-top:12px"><a href="#config">Voltar para Configurações</a></p>`;
   },
   equipe() {
     const real = !!document.querySelector('[data-vc="equipe"]'), aud = db.historico.slice(0, 150), meses = E.mesesAte(N.hojeISO().slice(0, 7), 6).slice(0, 5);
@@ -715,14 +713,32 @@ const T = {
       <section class="bloco">${secao('Auditoria · quem fez o quê', `<select id="aud-pessoa" aria-label="Filtrar por pessoa"><option value="">Todas as pessoas</option>${db.usuarios.map((u) => `<option value="${u.id}">${t(u.nome)}</option>`).join('')}</select>`)}${tabela('auditoria', [['Quando'], ['Quem'], ['O que aconteceu']], aud.map((h) => `<tr data-por="${t(h.por || '')}">${td('Quando', h.quando ? new Date(h.quando).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : dia(h.dia), 'num nw')}${td('Quem', t(nomeUsu(h.por) || '—'))}${td('O que', t(h.oque))}</tr>`), 'Nada registrado ainda.')}<p class="mini">Guardamos os ${aud.length} registros mais novos (até 300).</p></section>`;
   },
   config() {
-    const f = N.faturamentoAno(db);
-    return `${cabeca('Configurações')}<section class="bloco">${secao('Empresas do grupo', pode('cadastros') ? '<button type="button" class="bt pq cheio" data-acao="empresa-ed">+ Empresa</button>' : '')}${tabela('emps', [['Empresa'], ['CNPJ'], ['Regime'], ['Contas', 'dir'], ['']], db.empresas.map((e) => `<tr>${td('Empresa', `<b>${t(e.nome)}</b>`)}${td('CNPJ', t(e.cnpj || '—'))}${td('Regime', REGIMES[e.regime] || '')}${td('Contas', String(db.bancos.filter((b) => b.emp === e.id).length), 'dir')}<td class="acoes"><button type="button" class="bt pq" data-acao="empresa-ed" data-e="${e.id}">Editar</button></td></tr>`))}</section>
-      <div class="rel-grade"><section class="bloco">${titulo(IC.ajustes, 'Grupo e cobrança')}${[['negocio', 'Nome do grupo (aparece no topo)'], ['dono', 'Nome do responsável'], ['pix', 'Chave Pix das cobranças'], ['cidade', 'Cidade (vai no Pix)']].map(([k, n]) => `<label class="campo">${n}<input data-cfg="${k}" value="${t(db[k])}" maxlength="80" ${ro()}></label>`).join('')}</section>
-      <section class="bloco">${titulo(IC.relogio, 'Avisos e faturamento')}<label class="campo">Faturamento deste ano antes de usar o Arca (R$)<input data-cfg-fat inputmode="decimal" value="${(f.antes / 100).toFixed(2).replace('.', ',')}" ${ro()}></label><p class="mini">O faturamento do ano é esse valor + as entradas marcadas como receita neste ano.</p>
-      <label class="campo">Avisar contas que vencem em até (dias)<input data-cfg-aviso type="number" min="0" max="30" inputmode="numeric" value="${Number.isInteger(db.avisoDias) ? db.avisoDias : 3}" ${ro()}></label></section></div>
-      <section class="bloco"><div class="linha"><a class="bt" href="#caixa">Contas bancárias</a><a class="bt" href="#plano">Plano de contas e centros de custo</a><a class="bt" href="#divisao">Divisão das reservas</a><a class="bt" href="#equipe">Equipe, alçada e fechamento</a><a class="bt" href="#historico">Histórico</a><a class="bt" href="#conciliacao">Cópia de segurança</a><a class="bt" href="#assinatura">Minha assinatura</a></div>
-      <p class="mini">Atalhos: <b>Ctrl K</b> ou <b>/</b> busca em tudo · <b>N</b> novo lançamento · <b>G</b> e depois <b>P</b> painel, <b>L</b> lançamentos, <b>A</b> a pagar, <b>R</b> a receber, <b>F</b> fluxo, <b>C</b> conciliação, <b>D</b> DRE · <b>?</b> mostra todos.</p>
-      <p class="mini">Os dados ficam neste aparelho e, com a sua conta, na nuvem. Sem internet, o que você lançar sobe quando a conexão voltar.</p></section>`;
+    const f = N.faturamentoAno(db), u = usuarioAtual || {}, cargo = E.PERFIS[u.perfil]?.nome || 'Equipe', tm = db.tema && TEMAS.some((x) => x[0] === db.tema) ? db.tema : 'tesouro';
+    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-empresa', 'Empresas e avisos'], ['cfg-mais', 'Outras configurações'], ['cfg-assinatura', 'Minha assinatura']];
+    return `${cabeca('Configurações', 'Seu perfil, as cores, a marca do grupo, o guia, as empresas, os avisos e a sua assinatura.')}
+      <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<a href="#config/${id}">${n}</a>`).join('')}</nav>
+      <div class="rel-grade">
+      <section class="bloco cfg-sec" id="cfg-perfil">${titulo(IC.equipe, 'Perfil')}
+        <div class="cfg-eu"><span class="cfg-foto">${u.foto ? `<img src="${t(u.foto)}" alt="">` : t(iniciais(u.nome))}</span><div><b>${t(u.nome || '—')}</b><small>${t(cargo)} · ${t(db.negocio)}</small></div></div>
+        <label class="campo">E-mail da conta<input id="cfg-email" readonly value="${t(u.contato || '')}" aria-describedby="cfg-email-d"><small id="cfg-email-d" class="mini">Só leitura: é o e-mail do login.</small></label>
+        <label class="campo">Cargo<input readonly value="${t(cargo)}"></label>
+        <div class="linha"><label class="bt pq cheio" for="foto-eu">${u.foto ? 'Trocar foto' : 'Pôr foto'}</label><input type="file" id="foto-eu" accept="image/*" class="sr">${u.foto ? '<button type="button" class="bt pq" data-acao="tira-foto-eu">Tirar foto</button>' : ''}${pode('equipe') ? `<button type="button" class="bt pq" data-acao="usuario-ed" data-u="${t(u.id || '')}">Editar nome</button>` : ''}<button type="button" class="bt pq" data-acao="trocar-usuario">Trocar quem está usando</button><button type="button" class="bt pq" data-acao="trocar-senha" data-so-conta hidden>Trocar a senha do login</button><button type="button" class="bt pq" data-acao="sair-conta" data-so-conta hidden>Sair</button></div></section>
+      <section class="bloco cfg-sec" id="cfg-cores">${titulo(IC.cofre, 'Esquema de cores')}<p class="mini">A cor vale no Arca inteiro: menu, botões, gráficos, recibos e o topo. Quem usa o Arca com você vê igual.</p>
+        <div class="temas">${TEMAS.map(([k, n, a, b]) => `<button type="button" data-tema="${k}" aria-pressed="${tm === k}" style="--a:${a};--b:${b}" ${ro()}><i aria-hidden="true"></i>${n}</button>`).join('')}</div>
+        ${pode('cadastros') ? '' : '<p class="mini">Só quem cuida dos cadastros troca as cores.</p>'}</section>
+      </div>
+      <section class="bloco cfg-sec" id="cfg-marca">${titulo(IC.escudo, 'Sua marca')}<p class="mini">A logo e o nome do grupo aparecem no topo, nos recibos e nas cobranças por Pix e WhatsApp.</p>
+        <div class="cfg-eu"><span class="cfg-logo">${db.logo ? `<img src="${t(db.logo)}" alt="Logo de ${t(db.negocio)}">` : t(iniciais(db.negocio))}</span>${pode('cadastros') ? `<div class="linha"><label class="bt pq cheio" for="logo-in">${db.logo ? 'Trocar logo' : 'Pôr a logo'}</label><input type="file" id="logo-in" accept="image/*" class="sr">${db.logo ? '<button type="button" class="bt pq" data-acao="tira-logo">Tirar</button>' : ''}</div>` : `<div><b>${t(db.negocio)}</b></div>`}</div>
+        <div class="cfg-campos">${[['negocio', 'Nome do grupo (aparece no topo)'], ['dono', 'Nome do responsável (assina os recibos)'], ['cnpj', 'CNPJ (vai nos recibos)'], ['pix', 'Chave Pix das cobranças'], ['cidade', 'Cidade (vai no Pix)']].map(([k, n]) => `<label class="campo">${n}<input data-cfg="${k}" value="${t(db[k] || '')}" maxlength="80" ${ro()}></label>`).join('')}</div></section>
+      <section class="bloco cfg-sec" id="cfg-guia">${titulo(IC.livro, 'Guia: como usar')}<p class="mini">Um passo a passo curto de cada tela. No computador, abre a qualquer hora pelo botão <b>?</b> no topo; no celular, em Mais, “Guia: como usar”.</p>
+        <div class="cfg-como">${COMO_ORDEM.map((k) => `<button type="button" class="bt pq" data-como="${k}">${t(COMO[k][0])}</button>`).join('')}</div>
+        <div class="linha"><button type="button" class="bt pq" data-acao="atalhos">Atalhos de teclado</button></div></section>
+      <section class="bloco cfg-sec" id="cfg-empresa">${secao('Empresas do grupo', pode('cadastros') ? '<button type="button" class="bt pq cheio" data-acao="empresa-ed">+ Empresa</button>' : '')}${tabela('emps', [['Empresa'], ['CNPJ'], ['Regime'], ['Contas', 'dir'], ['']], db.empresas.map((e) => `<tr>${td('Empresa', `<b>${t(e.nome)}</b>`)}${td('CNPJ', t(e.cnpj || '—'))}${td('Regime', REGIMES[e.regime] || '')}${td('Contas', String(db.bancos.filter((b) => b.emp === e.id).length), 'dir')}<td class="acoes"><button type="button" class="bt pq" data-acao="empresa-ed" data-e="${e.id}">Editar</button></td></tr>`))}
+        <div class="cfg-campos" style="margin-top:12px"><label class="campo">Faturamento deste ano antes de usar o Arca (R$)<input data-cfg-fat inputmode="decimal" value="${(f.antes / 100).toFixed(2).replace('.', ',')}" ${ro()}><small class="mini">O faturamento do ano é esse valor + as entradas marcadas como receita neste ano.</small></label>
+        <label class="campo">Avisar contas que vencem em até (dias)<input data-cfg-aviso type="number" min="0" max="30" inputmode="numeric" value="${Number.isInteger(db.avisoDias) ? db.avisoDias : 3}" ${ro()}></label></div></section>
+      <section class="bloco cfg-sec" id="cfg-mais">${titulo(IC.ajustes, 'Outras configurações')}<div class="linha"><a class="bt" href="#caixa">Contas bancárias</a><a class="bt" href="#plano">Plano de contas e centros de custo</a><a class="bt" href="#divisao">Divisão das reservas</a><a class="bt" href="#equipe">Equipe, alçada e fechamento</a><a class="bt" href="#historico">Histórico</a><a class="bt" href="#conciliacao">Cópia de segurança</a></div>
+        <p class="mini">Os dados ficam neste aparelho e, com a sua conta, na nuvem. Sem internet, o que você lançar sobe quando a conexão voltar.</p></section>
+      <div class="cfg-sec" id="cfg-assinatura"><div id="ass-slot"></div></div>`;
   },
   caixa() {
     const sb = E.saldosBancos(db), sd = N.saldos(db), emps = empSel ? [emp(empSel)] : db.empresas;
@@ -808,6 +824,54 @@ function responde(p) {
 }
 function baixa(nome, conteudo, tipo) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([conteudo], { type: tipo })); a.download = nome; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 
+// ------------------------------------------------------------------ Configurações: cores, marca, guia e assinatura (19/11/2026)
+// Esquemas de cor da identidade do Arca (cofre romano + livro-razão): troca a tinta do menu e o tom de destaque em todo o sistema.
+const TEMAS = [['tesouro', 'Tesouro (padrão)', '#17243a', '#773c45'], ['purpura', 'Púrpura imperial', '#2a1a33', '#6b3a63'], ['bronze', 'Bronze antigo', '#2b2117', '#7a5230'], ['oliva', 'Oliveira', '#1f2a22', '#4f6a45'], ['egeu', 'Mar Egeu', '#10303d', '#2f5f6e'], ['marmore', 'Mármore e grafite', '#26282d', '#6a4b3c']];
+const iniciais = (n) => String(n || '?').split(/\s+/).filter(Boolean).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
+const COMO = {
+  painel: ['Painel executivo', ['O resumo do grupo: saldo, o que entra e sai nos próximos dias e os alertas.', 'Toque num número para abrir a lista dele.', 'Use os filtros do topo para ver uma empresa ou um centro de custo.']],
+  caixa: ['Contas e saldos', ['O saldo de cada conta bancária vem dos lançamentos.', '“Transferir entre contas” move dinheiro entre contas e entre empresas.', 'As reservas dividem cada entrada sozinhas (impostos, folha, reserva).']],
+  lancamentos: ['Lançamentos', ['O livro-razão: tudo o que entrou e saiu.', 'Filtre por período e tipo; abra um lançamento para editar ou anexar o comprovante.']],
+  pagar: ['A pagar', ['Fornecedores, boletos, guias e contas fixas.', '“Pagar” baixa a conta; acima da alçada, ela vai para Aprovações.', 'Marque várias para pagar em lote.']],
+  aprovacoes: ['Aprovações', ['Pagamentos acima da alçada esperando o aprovador ou o dono.', 'Quem lançou não aprova o próprio pagamento.']],
+  receber: ['A receber e cobrança', ['Quem deve, quanto e quando vence.', '“Cobrar” manda Pix, WhatsApp ou e-mail com a mensagem pronta.', '“Receber” dá baixa e pode gerar recibo.']],
+  conciliacao: ['Conciliação', ['Traga o extrato OFX ou CSV de cada conta.', 'O Arca sugere o par de cada linha; confira antes de gravar.']],
+  fluxo: ['Fluxo de caixa', ['O saldo previsto dia a dia, com o que vai entrar e sair.', 'Veja com antecedência se o caixa fica negativo.']],
+  orcamento: ['Orçamento', ['Defina quanto pode gastar por categoria no mês.', 'Compare o previsto com o realizado.']],
+  impostos: ['Impostos', ['Estimativa pelo regime de cada empresa e o calendário das guias.', 'Lance a guia em A pagar para não esquecer.']],
+  relatorios: ['DRE, DFC e indicadores', ['Escolha o período e a empresa.', 'Baixe em planilha ou o pacote do contador.']],
+  plano: ['Plano de contas', ['Categorias, centros de custo e projetos.', 'Um lançamento pode ser rateado entre vários centros.']],
+  equipe: ['Equipe e auditoria', ['Quem usa o Arca e com qual perfil.', 'Alçada de aprovação, fechamento do mês e o registro de tudo.']],
+  config: ['Configurações', ['Perfil, cores, sua marca, guia, empresas, avisos e a sua assinatura.', 'Os atalhos no alto levam direto a cada seção.']],
+};
+const COMO_ORDEM = Object.keys(COMO);
+function comoUsar(k) {
+  const c = COMO[k] || COMO.painel;
+  folha(`<h2>Como usar: ${t(c[0])}</h2><ol class="como-lista">${c[1].map((x) => `<li>${t(x)}</li>`).join('')}</ol><div class="linha"><a class="bt" href="#config/cfg-guia" data-fecha>Todas as telas</a><button type="button" class="bt cheio" data-fecha>Entendi</button></div>`);
+}
+function aplicaMarca() {
+  document.documentElement.dataset.tema = db.tema && TEMAS.some((x) => x[0] === db.tema) && db.tema !== 'tesouro' ? db.tema : '';
+  const l = $('#logo-neg'); if (l) { if (db.logo) { l.src = db.logo; l.hidden = false; } else { l.removeAttribute('src'); l.hidden = true; } }
+}
+// a imagem escolhida vira um quadrado pequeno (cabe nos dados sem pesar)
+function imagemPequena(arq, lado = 256) {
+  return new Promise((ok, falha) => {
+    if (!arq || !/^image\//.test(arq.type)) return falha(new Error('Escolha uma imagem.'));
+    const img = new Image(), url = URL.createObjectURL(arq);
+    img.onload = () => { const k = Math.min(1, lado / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); ok(c.toDataURL('image/png')); };
+    img.onerror = () => { URL.revokeObjectURL(url); falha(new Error('Não deu para abrir essa imagem.')); };
+    img.src = url;
+  });
+}
+// o bloco "Minha assinatura" (base/assinatura.js) fica montado entre um redesenho e outro
+let blocoAss = null;
+function posConfig(tela) {
+  const slot = tela.querySelector('#ass-slot');
+  if (slot && window.BRAssinatura) { if (blocoAss) slot.replaceWith(blocoAss); else blocoAss = BRAssinatura.montar(slot, { app: 'financeiroessencial', nome: 'Arca', mensal: (window.VELTRIA_VERSOES?.financeiroessencial?.mensal) || 59, pagina: 'arca.html' }); }
+  const em = tela.querySelector('#cfg-email');
+  if (em && window.BRAssinatura) BRAssinatura.conta().then((c) => { if (c.modo === 'conta') { if (c.email) em.value = c.email; tela.querySelectorAll('[data-so-conta]').forEach((b) => { b.hidden = false; }); } });
+}
+
 // ------------------------------------------------------------------ navegação e trava
 const NOMES = { painel: 'Painel executivo', caixa: 'Contas e saldos', reserva: 'Reserva', lancamentos: 'Lançamentos', mov: 'Lançamento', lancar: 'Lançar', receber: 'A receber', pagar: 'A pagar', aprovacoes: 'Aprovações', agenda: 'Agenda de pagamentos', fluxo: 'Fluxo de caixa', orcamento: 'Orçamento', conciliacao: 'Conciliação', importar: 'Conferir extrato', relatorios: 'Relatórios', impostos: 'Impostos', plano: 'Plano de contas', mais: 'Mais', ia: 'Assistente', assinatura: 'Minha assinatura', equipe: 'Equipe e auditoria', config: 'Configurações', historico: 'Histórico', recibos: 'Recibos', hoje: 'Pendências', divisao: 'Divisão', conferir: 'Conferir reservas' };
 const ABA = { reserva: 'caixa', divisao: 'caixa', hoje: 'painel', conferir: 'painel', mov: 'lancamentos', lancar: '', importar: 'conciliacao', historico: 'equipe', assinatura: 'config', ia: '', agenda: 'pagar', recibos: 'impostos' };
@@ -818,6 +882,8 @@ function mostra() {
   if (!db.empresas.some((e) => e.id === empSel)) empSel = '';
   tela.innerHTML = T[r](a);
   tela.dataset.tela = r;
+  aplicaMarca(); if (r === 'config' || r === 'assinatura') posConfig(tela);
+  if (r === 'config' && a && document.getElementById(a)) setTimeout(() => document.getElementById(a).scrollIntoView({ block: 'start' }), 60);
   const aba = ABA[r] ?? r;
   document.querySelectorAll('.menu a, .nav-cel a').forEach((l) => { if (l.dataset.aba === aba || (l.closest('.nav-cel') && ['pagar', 'receber', 'lancamentos'].includes(aba) && l.dataset.aba === 'mais')) l.setAttribute('aria-current', 'page'); else l.removeAttribute('aria-current'); });
   const np = alertas().length, na = pendAprov().length;
@@ -859,6 +925,12 @@ function somaDiv() {
 
 // ------------------------------------------------------------------ ações
 const ACOES = {
+  como: () => comoUsar($('#tela').dataset.tela || 'painel'),
+  atalhos: () => ajudaAtalhos(),
+  'tira-logo': () => { if (!pode('cadastros')) return; db.logo = ''; grava(); mostra(); },
+  'tira-foto-eu': () => { const u = db.usuarios.find((x) => x.id === usuarioAtual?.id); if (u) { delete u.foto; grava(); defineUsuario(); mostra(); } },
+  'trocar-senha': () => { if (!window.veltriaNuvem) return; window.veltriaNuvem.trocarSenha().then((e) => aviso(`Mandamos o link para criar a senha nova em ${e}.`)).catch((x) => aviso(x.message || 'Não deu para mandar agora.', true)); },
+  'sair-conta': () => folha('<h2>Sair da conta?</h2><p class="sub">O que você fez já está salvo na nuvem. Para voltar, entre com o seu e-mail e a senha.</p><div class="linha"><button type="button" class="bt cheio" data-sim>Sair</button><button type="button" class="bt" data-fecha>Ficar</button></div>', (f, fecha) => f.querySelector('[data-sim]').addEventListener('click', () => { fecha(); window.veltriaNuvem?.sair(); })),
   'editar-mov': (d) => {
     const m = db.movs.find((x) => x.id === d.m); if (!m) return;
     formFolha(`<h2>Editar ${m.tipo === 'entra' ? 'entrada' : m.tipo === 'sai' ? 'saída' : 'movimento'}</h2>${campoValor('v', 'Valor (R$)', m.c)}<label class="campo">Descrição<input name="desc" value="${t(m.desc)}" maxlength="120"></label>${campoData('dia', 'Data', m.dia)}${m.tipo === 'entra' || m.tipo === 'sai' ? campoCC(m.cc) : ''}
@@ -1240,7 +1312,7 @@ const acaoComPerm = (nome) => { const p = PRECISA[nome]; if (p && !pode(p)) { av
 function somaRat() { const el = $('#rat-soma'); if (!el || !rascunho?.rat?.length) return; const s = rascunho.rat.reduce((a, x) => a + (Number(x.pct) || 0), 0); el.innerHTML = s === 100 ? 'Soma: <b>100%</b>' : `Soma: <b class="sai">${s}%</b> (precisa dar 100%)`; }
 function verRecibo(r) {
   const txt = `Recibo nº ${r.num}. Recebi de ${r.cli} a quantia de ${din(r.c)}, referente a ${r.ref}. ${db.negocio}${db.cnpj ? ` · CNPJ ${db.cnpj}` : ''} · ${N.dataDe(r.dia).toLocaleDateString('pt-BR')}`;
-  folha(`<h2>Recibo nº ${r.num}</h2><div class="recibo"><h3>Recibo nº ${r.num} · ${din(r.c)}</h3><p>${t(txt)}</p><p style="margin-top:28px;border-top:1px solid #999;padding-top:4px;width:70%">${t(db.dono)}</p></div><div class="linha"><a class="bt cheio" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">Mandar no WhatsApp</a><button type="button" class="bt" onclick="print()">Imprimir ou PDF</button><button type="button" class="bt" data-fecha>Fechar</button></div>`);
+  folha(`<h2>Recibo nº ${r.num}</h2><div class="recibo">${db.logo ? `<img class="recibo-logo" src="${t(db.logo)}" alt="Logo de ${t(db.negocio)}">` : ''}<h3>Recibo nº ${r.num} · ${din(r.c)}</h3><p>${t(txt)}</p><p style="margin-top:28px;border-top:1px solid #999;padding-top:4px;width:70%">${t(db.dono)}</p></div><div class="linha"><a class="bt cheio" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">Mandar no WhatsApp</a><button type="button" class="bt" onclick="print()">Imprimir ou PDF</button><button type="button" class="bt" data-fecha>Fechar</button></div>`);
 }
 function restaura(txt, origem) {
   let d; try { d = JSON.parse(txt); } catch { return aviso('Esse arquivo não é uma cópia do Arca (nem do antigo Veltria Financeiro).', true); }
@@ -1265,6 +1337,8 @@ document.addEventListener('click', (e) => {
   const lc = el.closest('[data-lancar]'); if (lc) { rascunho = novoRascunho(lc.dataset.lancar, rascunho?.pote); location.hash = '#lancar'; mostra(); return; }
   const ps2 = el.closest('[data-passo]'); if (ps2) { const i = $(`#f-div input[name="${ps2.dataset.k}"]`); i.value = Math.max(0, Math.min(100, (Number(i.value) || 0) + Number(ps2.dataset.passo))); somaDiv(); return; }
   const prr = el.closest('[data-per-r]'); if (prr) { perResumo = prr.dataset.perR; mostra(); return; }
+  const cm = el.closest('[data-como]'); if (cm) { comoUsar(cm.dataset.como); return; }
+  const tm = el.closest('.temas [data-tema]'); if (tm && !tm.disabled) { if (!pode('cadastros')) return aviso('Só quem cuida dos cadastros troca as cores.', true); db.tema = tm.dataset.tema; grava(); mostra(); aviso(`Cores: ${TEMAS.find((x) => x[0] === db.tema)[1]}.`); return; }
   const sg = el.closest('[data-sug]'); if (sg) { $('#q-ia').value = sg.dataset.sug; $('#f-ia').requestSubmit(); }
 });
 document.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[role="button"]')) { e.preventDefault(); e.target.click(); } });
@@ -1309,6 +1383,8 @@ document.addEventListener('change', (e) => {
   if ('cfgFat' in el.dataset) { const c = N.centavos(el.value || '0'); if (!Number.isInteger(c) || c < 0) return aviso('Valor inválido.', true); db.fatInicial = { ano: new Date().getFullYear(), c }; grava(); mostra(); aviso('Faturamento salvo.'); }
   if (el.id === 'dia-l' && el.value) { const d = N.diaDe(el.value); if (!Number.isFinite(d) || d > 0) return aviso('Escolha hoje ou uma data passada.', true); guardaRascunho(); rascunho.dia = d; mostra(); }
   if (el.id === 'arq-extrato' && el.files[0]) { const arq = el.files[0]; if (arq.size > 5e6) return aviso('Arquivo grande demais (máximo 5 MB).', true); arq.text().then((txt) => { const r = N.lerExtrato(txt, arq.name); if (!r.linhas.length) aviso('Nenhum lançamento pôde ser lido. Veja o motivo abaixo.', true); abreExtrato(arq.name, r.linhas, r.erros); }); }
+  if (el.id === 'logo-in' && el.files[0]) { if (!pode('cadastros')) return aviso('Só quem cuida dos cadastros troca a logo.', true); imagemPequena(el.files[0]).then((d) => { db.logo = d; hist('Trocou a logo do grupo'); grava(); mostra(); aviso('Logo salva.'); }).catch((x) => aviso(x.message, true)); }
+  if (el.id === 'foto-eu' && el.files[0]) { imagemPequena(el.files[0], 160).then((d) => { const u = db.usuarios.find((x) => x.id === usuarioAtual?.id); if (!u) return; u.foto = d; grava(); defineUsuario(); mostra(); aviso('Foto salva.'); }).catch((x) => aviso(x.message, true)); }
   if (el.id === 'restaurar' && el.files[0]) { el.files[0].text().then((txt) => restaura(txt, `a cópia ${el.files[0].name}`)); }
 });
 addEventListener('message', (e) => {

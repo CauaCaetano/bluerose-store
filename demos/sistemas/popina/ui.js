@@ -15,7 +15,7 @@ const P = {
   qr: '<rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2"/>',
   moto: '<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l-2-7h3l2 3M6 14l3-5h3"/>', sacola: '<path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   estoque: '<path d="M4 8l8-4 8 4-8 4-8-4z"/><path d="M4 8v8l8 4 8-4V8"/><path d="M12 12v8"/>', grafico: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
-  cardapio: '<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"/><path d="M9 9h5M9 13h5"/>', ajustes: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>',
+  cardapio: '<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"/><path d="M9 9h5M9 13h5"/>', ajustes: '<circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3.9a7.7 7.7 0 0 0-2.6-1.5L14.2 2.5h-4l-.4 2.5a7.7 7.7 0 0 0-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-.9a7.7 7.7 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.7 7.7 0 0 0 2.6-1.5l2.3.9 2-3.4z"/>',
   pix: '<path d="M12 3l9 9-9 9-9-9 9-9z"/><path d="M8 12h8"/>', dinheiro: '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>',
   cartao: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>', zap: '<path d="M4 20l1.3-4A8 8 0 1 1 8 18.7L4 20z"/>',
   lixo: '<path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/>', relogio: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>', busca: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
@@ -87,7 +87,7 @@ export function autorizar({ titulo, texto = '', motivos = null, pedirPin = false
       const mot = $('[data-motivo]', f);
       $$('[data-mot]', f).forEach((b) => { b.onclick = () => { $$('[data-mot]', f).forEach((x) => x.classList.toggle('on', x === b)); mot.value = b.dataset.mot; }; });
       $('[data-sim]', f).onclick = async () => {
-        const { pinConfere } = await import('./loja.js?v=40');
+        const { pinConfere } = await import('./loja.js?v=41');
         const motivo = mot ? mot.value.trim() : '';
         if (mot && motivo.length < 3) { toast('Escolha ou escreva o motivo'); return mot.focus(); }
         const pin = $('[data-pin]', f);

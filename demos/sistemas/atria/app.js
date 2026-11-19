@@ -3,18 +3,18 @@
 // achar trabalho (mural do app e achados na internet), clientes e obras, orçamento, proposta, Pix, lista de materiais,
 // lojas da cidade (OpenStreetMap), comparador de preços, dinheiro (lucro do dia, da semana e do mês) e ajuda automática.
 // Dados no aparelho (localStorage); na conta, o conta-nuvem.js leva para a nuvem. ?novo recomeça a demonstração.
-import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=18';
-import { cena, TIPOS_CENA } from './cenas.js?v=18';
-import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js?v=18';
-import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js?v=18';
+import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=19';
+import { cena, TIPOS_CENA } from './cenas.js?v=19';
+import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js?v=19';
+import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js?v=19';
 import { qrSVG } from '../base/qr.js';
-import { instalarConceitos, CONCEITO } from './conceitos.js?v=18';
-import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js?v=18';
-import { ganchos } from './gestao.js?v=18';
-import { ligarVoz } from './base.js?v=18';
-import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=18';
-import * as MAIS from './mais.js?v=18';
-import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=18';
+import { instalarConceitos, CONCEITO } from './conceitos.js?v=19';
+import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js?v=19';
+import { ganchos } from './gestao.js?v=19';
+import { ligarVoz } from './base.js?v=19';
+import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=19';
+import * as MAIS from './mais.js?v=19';
+import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=19';
 
 
 // ================================================================== telas e ações
@@ -28,6 +28,7 @@ Object.assign(TELAS, MAIS.TELAS); Object.assign(ACOES, MAIS.ACOES);
 // atualizações do Achar trabalho por mês. Na conta, o plano vem da empresa (conta-nuvem.js: window.atriaPlano);
 // na demonstração fica tudo liberado, com o selo "Pro" nesses itens.
 const ehPro = () => !window.atriaPlano || window.atriaPlano === 'pro';
+export const ENGRENAGEM = () => `<a class="cfg-engr" href="#ajustes" aria-label="Configurações" title="Configurações">${ico('config', 'width="22" height="22"')}</a>`;
 const SELO_PRO = '<span class="selo-pro" aria-label="do plano Pro">Pro</span>';
 const LINK_PRO = '../../../app/atria/?plano=pro';
 function painelPro(nome) {
@@ -361,7 +362,7 @@ const numBR1 = (n) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1, mini
 TELAS.comunidade = () => {
   const posts = meusPosts(), ofs = meusOficios(eu()), media = db.avaliacoes.reduce((s, a) => s + a.nota, 0) / db.avaliacoes.length;
   const feitas = db.obras.filter((o) => o.status === 'concluida').length, grade = posts.filter((x) => (abaPerfil === 'ad' ? x.tipo === 'ad' : x.tipo !== 'ad'));
-  return `${cab('Vitrine', 'Seu portfólio de antes e depois', { voltar: false, dica: 'Aqui ficam só os seus trabalhos. Toque em Postar para mandar um antes e depois para o Instagram, o Facebook ou o Status do WhatsApp.' })}
+  return `${cab('Vitrine', 'Seu portfólio de antes e depois', { voltar: false, direita: ENGRENAGEM(), dica: 'Aqui ficam só os seus trabalhos. Toque em Postar para mandar um antes e depois para o Instagram, o Facebook ou o Status do WhatsApp.' })}
     <div class="cartao vt-topo">${avEu('g')}<div class="vt-id"><b>${t(eu().nome)}</b><small>${t(ofs.map((o) => o.nome).join(' · '))}</small><small>${ico('pin', 'width="14" height="14" style="vertical-align:-2px"')} ${t(eu().cidade)} e até ${eu().raio} km</small></div></div>
     <button type="button" class="bt cheio largo" data-acao="postar-escolher" style="margin-top:10px;min-height:56px">${ico('partilhar')}Postar nas redes</button><div class="acoes" style="margin-top:8px"><button type="button" class="bt leve" data-acao="cartao">${ico('zap')}Cartão de visita</button><button type="button" class="bt leve" data-acao="editar-perfil">${ico('lapis')}Editar</button></div>
     <div class="stats"><div><b>${feitas}</b><small>obras feitas</small></div><div><b>${posts.length}</b><small>no portfólio</small></div><div><b>${numBR1(media)}</b><small>avaliação <span class="exemplo" style="font-size:9px;padding:2px 5px">exemplo</span></small></div></div>
@@ -407,7 +408,7 @@ ACOES['apagar-post'] = (b) => confirmar('Tirar do portfólio?', 'O trabalho sai 
 // cartão de visita: QR que abre o WhatsApp do profissional (funciona sem servidor)
 ACOES.cartao = () => {
   const ofs = meusOficios(eu()), link = zap(eu().zap, `Oi, ${eu().apelido}! Vi seu cartão e queria um orçamento.`);
-  folha({ titulo: 'Cartão de visita', corpo: `<div class="cartao-visita"><div><img class="cv-marca" src="simbolo-claro.svg?v=2" alt="" width="34" height="34"><h3>${t(eu().nome)}</h3><p>${t(ofs.map((x) => x.nome).join(' · '))}</p><p style="margin-top:8px;opacity:.85">${t(eu().cidade)}-${t(eu().uf)} · WhatsApp ${t(eu().zap)}</p><p style="margin-top:10px;color:var(--trena);font-weight:700">Aponte a câmera e fale comigo</p></div><div class="qr">${qrSVG(link, 92, '#2E333B')}</div></div>
+  folha({ titulo: 'Cartão de visita', corpo: `<div class="cartao-visita"><div>${eu().logo ? `<img class="cv-marca cv-logo" src="${eu().logo}" alt="" width="34" height="34">` : '<img class="cv-marca" src="simbolo-claro.svg?v=2" alt="" width="34" height="34">'}<h3>${t(eu().marca || eu().nome)}</h3>${eu().marca ? `<p style="margin:0 0 4px">${t(eu().nome)}</p>` : ''}<p>${t(ofs.map((x) => x.nome).join(' · '))}</p><p style="margin-top:8px;opacity:.85">${t(eu().cidade)}-${t(eu().uf)} · WhatsApp ${t(eu().zap)}</p><p style="margin-top:10px;color:var(--trena);font-weight:700">Aponte a câmera e fale comigo</p></div><div class="qr">${qrSVG(link, 92, '#2E333B')}</div></div>
       <p class="mudo" style="font-size:12.5px">O QR abre o seu WhatsApp com a mensagem pronta. Mostre na obra, imprima no adesivo do carro ou mande junto com o antes e depois.</p>`,
     pe: `<button type="button" class="bt leve p" data-c>${ico('copiar')}Copiar link</button><button type="button" class="bt zap" data-z>${ico('zap')}Mandar no WhatsApp</button>`,
     aoAbrir: (f) => { const txt = `${eu().nome} · ${ofs.map((x) => x.nome).join(', ')} em ${eu().cidade}.\nOrçamento sem compromisso: ${link}`; $('[data-c]', f).onclick = () => copiar(link); $('[data-z]', f).onclick = () => abrirZap('', txt); } });
@@ -495,7 +496,7 @@ ACOES['editar-perfil'] = () => {
 // ------------------------------------------------------------------ gestão (central)
 TELAS.gestao = () => {
   const rec = aReceber().reduce((s, x) => s + x.v, 0), [a, b] = intervalo('mes'), m = somaPeriodo(a, b);
-  return `${cab('Gestão', 'Obras, clientes, material e dinheiro', { voltar: false })}
+  return `${cab('Gestão', 'Obras, clientes, material e dinheiro', { voltar: false, direita: ENGRENAGEM() })}
     <a class="bloco largo escuro" href="#financeiro" data-tour="dinheiro"><span class="ic">${ico('moeda')}</span><span><b>Dinheiro</b><small>Lucro do mês ${din(m.l)} · a receber ${din(rec)}</small></span>${ico('setaDir', 'width="20" height="20"')}</a>
     <div class="mosaico" style="margin-top:10px">
       <a class="bloco" href="#obras"><span class="ic">${ico('capacete')}</span><span><b>Obras</b><small>${obrasAtivas().length} ativas · ${db.obras.filter((o) => o.status === 'orcamento').length} orçamentos</small></span></a>
@@ -510,24 +511,86 @@ TELAS.gestao = () => {
       <button type="button" class="bloco" data-acao="mensagens"><span class="ic">${ico('zap')}</span><span><b>Mensagens</b><small>Prontas para cada momento</small></span></button>
       <button type="button" class="bloco" data-acao="pix"><span class="ic">${ico('pix')}</span><span><b>Pix</b><small>QR e copia e cola</small></span></button>
     </div>
-    <a class="linha" href="#ajustes" style="margin-top:12px"><span class="ic">${ico('config')}</span><span class="txt"><b>Ajustes</b><small>Perfil, ofícios, chave Pix, meta, instalar o app</small></span>${ico('setaDir', 'width="18" height="18"')}</a>`;
+    <a class="linha" href="#ajustes" style="margin-top:12px"><span class="ic">${ico('config')}</span><span class="txt"><b>Configurações</b><small>Perfil, cores, sua marca, guia, Pix e assinatura</small></span>${ico('setaDir', 'width="18" height="18"')}</a>`;
 };
 TELAS.listas = () => `${cab('Material', 'Listas de cada obra')}<div class="lista">${db.obras.filter((o) => o.mats.length || o.status !== 'concluida').map((o) => { const e = economiaLista(o); return `<a class="linha" href="#materiais/${o.id}"><span class="ic">${ico('lista')}</span><span class="txt"><b>${t(o.titulo)}</b><small>${o.mats.length} itens · ${o.mats.filter((m) => !m.comprado).length} a comprar${e.total ? ` · economize ${din(e.total)}` : ''}</small></span><span class="dir"><b>${dinCurto(totais(o).mat)}</b></span></a>`; }).join('')}</div>`;
 
-TELAS.ajustes = () => `${cab('Ajustes')}
+// ================================================================== Configurações (19/11/2026)
+// Uma tela só, em seções: Perfil, Cores, Sua marca, Guia, Ajustes do app e Minha assinatura (base/assinatura.js).
+// O endereço continua #ajustes (links antigos e permissões da equipe); #config abre a mesma tela.
+// Esquema de cores: db.perfil.esquema (novo, opcional); sem ele fica a Ardósia de sempre.
+export const ESQUEMAS = [
+  ['ardosia', 'Ardósia', '#5E7486', '#C2A37A'], ['musgo', 'Musgo', '#4F6E5A', '#C2A37A'], ['petroleo', 'Petróleo', '#2F5A66', '#C2A37A'],
+  ['barro', 'Barro', '#94513F', '#C2A37A'], ['champagne', 'Champagne', '#86683F', '#5E7486'], ['grafite', 'Grafite', '#2E333B', '#C2A37A'],
+];
+const aplicaEsquema = () => { const k = (db.perfil && db.perfil.esquema) || 'ardosia'; document.documentElement.dataset.esquema = k; };
+// "Como usar" curto de cada tela (abre aqui e pelo ? das telas)
+const COMO = {
+  inicio: ['casa', 'Início', ['A primeira frase diz a próxima coisa a fazer: toque no botão dela.', 'Os botões grandes levam a orçar, cobrar no Pix e achar trabalho.', 'Embaixo, o lucro do mês: toque para ver o dia e a semana.']],
+  trabalhos: ['lupa', 'Trabalhos', ['Pedidos de serviço na sua cidade e os achados na internet.', 'Toque em “Tenho interesse” para falar com o cliente no WhatsApp.', 'Puxe a tela para baixo para atualizar.']],
+  orcar: ['doc', 'Orçar', ['Escolha o serviço, as medidas e o preço: o total sai na hora.', 'A lista de material vem pronta e dá para mandar o orçamento no WhatsApp.']],
+  comunidade: ['antesdepois', 'Vitrine', ['Seu portfólio de antes e depois.', '“Postar nas redes” prepara a foto para Instagram, Facebook e Status.', 'O cartão de visita tem QR que abre o seu WhatsApp.']],
+  gestao: ['grafico', 'Gestão', ['Obras, agenda, clientes, ajudantes, material e dinheiro.', 'Cada bloco abre a sua parte. Configurações fica no fim da tela.']],
+  obras: ['capacete', 'Obras', ['Orçamentos, obras em andamento e concluídas.', 'Dentro da obra: etapas, fotos, material, parcelas e recibos.']],
+  financeiro: ['moeda', 'Dinheiro', ['O que entrou, o que saiu e o lucro do dia, da semana e do mês.', '“Recebi” e “Gastei” no botão + lançam na hora.']],
+  ferramentas: ['ferramenta', 'Bancada', ['Calculadoras do seu ofício: piso, tinta, blocos, traço, corte.', 'O resultado pode ir direto para a lista de material da obra.']],
+};
+const COMO_ORDEM = ['inicio', 'trabalhos', 'orcar', 'comunidade', 'gestao', 'obras', 'financeiro', 'ferramentas'];
+const comoUsar = (k) => { const c = COMO[k] || COMO.inicio; folha({ titulo: `Como usar: ${c[1]}`, corpo: `<ol class="cfg-passos">${c[2].map((x) => `<li>${t(x)}</li>`).join('')}</ol>`, pe: `<a class="bt leve" href="#${k === 'orcar' ? 'orcar' : k}" data-fecha-folha>Abrir ${t(c[1])}</a><button type="button" class="bt cheio" data-fecha-folha>Entendi</button>`, aoAbrir: (f, api) => $$('[data-fecha-folha]', f).forEach((b) => b.addEventListener('click', () => api.fechar())) }); };
+ACOES.como = (b) => comoUsar(b.dataset.k);
+let blocoAss = null;
+TELAS.ajustes = () => {
+  const p = eu(), esq = p.esquema || 'ardosia', conta = !!(window.BRAssinatura && BRAssinatura.emConta());
+  const papel = conta && window.veltriaNuvem ? window.veltriaNuvem.papel() : 'dono';
+  const cargo = papel === 'dono' ? 'Dono do app · profissional' : papel === 'admin' ? 'Administrador' : 'Equipe';
+  const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-app', 'Ajustes'], ['cfg-assinatura', 'Assinatura']];
+  return `${cab('Configurações', 'Perfil, cores, marca, guia e assinatura')}
+  <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<a href="#ajustes" data-acao="cfg-ir" data-alvo="${id}">${n}</a>`).join('')}</nav>
+  <section class="cartao cfg-sec" id="cfg-perfil" aria-labelledby="cfg-perfil-t"><h2 class="cfg-t" id="cfg-perfil-t">${ico('gente')}Perfil</h2>
+    <div class="cfg-eu">${avEu('g')}<div><b>${t(p.nome)}</b><small>${t(nomeOficios(p))} · ${t(p.cidade)}-${t(p.uf)}</small></div></div>
+    <label class="campo"><span>E-mail da conta</span><input id="cfg-email" readonly value="${conta ? '' : 'voce@exemplo.com.br'}" aria-describedby="cfg-email-d"><small class="mudo" id="cfg-email-d">Só leitura: é o e-mail do login.</small></label>
+    <label class="campo"><span>Cargo</span><input readonly value="${t(cargo)}"></label>
+    <div class="acoes"><button type="button" class="bt cheio" data-acao="editar-perfil">${ico('lapis')}Editar perfil e ofícios</button>${conta ? `<button type="button" class="bt leve" data-acao="cfg-senha">Trocar a senha</button><button type="button" class="bt leve" data-acao="cfg-sair">Sair</button>` : ''}</div></section>
+  <section class="cartao cfg-sec" id="cfg-cores" aria-labelledby="cfg-cores-t"><h2 class="cfg-t" id="cfg-cores-t">${ico('olho')}Esquema de cores</h2><p class="mudo cfg-txt">A cor vale no app inteiro: botões, menus, gráficos e destaques. Fica guardada com os seus dados.</p>
+    <div class="cfg-temas" role="group" aria-label="Esquema de cores">${ESQUEMAS.map(([k, n, a, b]) => `<button type="button" data-acao="esquema" data-k="${k}" aria-pressed="${esq === k}" style="--a:${a};--b:${b}"><i aria-hidden="true"></i>${n}</button>`).join('')}</div></section>
+  <section class="cartao cfg-sec" id="cfg-marca" aria-labelledby="cfg-marca-t"><h2 class="cfg-t" id="cfg-marca-t">${ico('estrela')}Sua marca</h2><p class="mudo cfg-txt">O nome do seu negócio e a sua logo aparecem no recibo, na proposta e no cartão de visita. Sem eles, vai o seu nome com o símbolo do Atria.</p>
+    <div class="cfg-eu"><span class="cfg-logo">${p.logo ? `<img src="${p.logo}" alt="Sua logo">` : `<img src="simbolo.svg?v=2" alt="" width="40" height="40">`}</span><div class="acoes" style="margin:0"><label class="bt leve p" for="cfg-logo-in">${p.logo ? 'Trocar a logo' : 'Pôr a logo'}</label><input type="file" id="cfg-logo-in" accept="image/*" class="so-leitor">${p.logo ? '<button type="button" class="bt leve p" data-acao="cfg-tira-logo">Tirar</button>' : ''}</div></div>
+    <label class="campo"><span>Nome do negócio (opcional)</span><input id="cfg-marca-nome" maxlength="60" value="${t(p.marca || '')}" placeholder="Ex.: ${t(p.apelido || 'Marcos')} Reformas"></label>
+    <button type="button" class="bt leve" data-acao="cfg-marca-salvar">Salvar o nome</button></section>
+  <section class="cartao cfg-sec" id="cfg-guia" aria-labelledby="cfg-guia-t"><h2 class="cfg-t" id="cfg-guia-t">${ico('ajuda')}Guia: como usar</h2><p class="mudo cfg-txt">Um passo a passo curto de cada tela. Nas telas, o <b>?</b> no alto também explica.</p>
+    <div class="cfg-como">${COMO_ORDEM.map((k) => `<button type="button" class="bt leve p" data-acao="como" data-k="${k}">${ico(COMO[k][0])}${COMO[k][1]}</button>`).join('')}</div>
+    <div class="lista" style="margin-top:12px">
+      <button type="button" class="linha" data-acao="tour"><span class="ic">${ico('ajuda')}</span><span class="txt"><b>Ver de novo a apresentação</b><small>O passeio que mostra onde fica cada coisa</small></span></button>
+      <button type="button" class="linha" data-acao="cadastro"><span class="ic">${ico('lapis')}</span><span class="txt"><b>Refazer o cadastro</b><small>Nome, foto, cidade e ofícios</small></span></button></div></section>
+  <section class="cfg-sec" id="cfg-app" aria-labelledby="cfg-app-t"><h2 class="cfg-t cfg-t-fora" id="cfg-app-t">${ico('config')}Ajustes do app</h2>
   <div class="lista">
-    <button type="button" class="linha" data-acao="editar-perfil"><span class="ic">${ico('gente')}</span><span class="txt"><b>Perfil e ofícios</b><small>${t(nomeOficios(eu()))}</small></span></button>
     <button type="button" class="linha" data-acao="chave-pix"><span class="ic">${ico('pix')}</span><span class="txt"><b>Chave Pix</b><small>${db.pix && !db.pix.exemplo ? 'cadastrada neste celular' : 'chave de exemplo: cadastre a sua'}</small></span></button>
-    <button type="button" class="linha" data-acao="meta"><span class="ic">${ico('grafico')}</span><span class="txt"><b>Meta do mês</b><small>${din(eu().meta)} de lucro</small></span></button>
-    <button type="button" class="linha" data-acao="letra-grande" role="switch" aria-checked="${!!eu().letraGrande}"><span class="ic">${ico('olho')}</span><span class="txt"><b>Letra grande</b><small>${eu().letraGrande ? 'Ligada: tudo 12% maior' : 'Para celular simples ou para ler no sol'}</small></span></button>
+    <button type="button" class="linha" data-acao="meta"><span class="ic">${ico('grafico')}</span><span class="txt"><b>Meta do mês</b><small>${din(p.meta)} de lucro</small></span></button>
+    <button type="button" class="linha" data-acao="letra-grande" role="switch" aria-checked="${!!p.letraGrande}"><span class="ic">${ico('olho')}</span><span class="txt"><b>Letra grande</b><small>${p.letraGrande ? 'Ligada: tudo 12% maior' : 'Para celular simples ou para ler no sol'}</small></span></button>
     <button type="button" class="linha" data-acao="instalar"><span class="ic">${ico('casa')}</span><span class="txt"><b>Instalar o app</b><small>Ícone na tela do celular, abre sem internet</small></span></button>
-    <button type="button" class="linha" data-acao="tour"><span class="ic">${ico('ajuda')}</span><span class="txt"><b>Ver o passeio de novo</b><small>Mostra onde fica cada coisa</small></span></button>
-    <button type="button" class="linha" data-acao="cadastro"><span class="ic">${ico('lapis')}</span><span class="txt"><b>Refazer o cadastro</b><small>Nome, foto, cidade e ofícios</small></span></button>
     <button type="button" class="linha" data-acao="exportar"><span class="ic">${ico('doc')}</span><span class="txt"><b>Cópia de segurança</b><small>Baixa um arquivo com todos os dados</small></span></button>
     ${ehReal() ? '' : `<button type="button" class="linha" data-acao="recomecar"><span class="ic">${ico('recarregar')}</span><span class="txt"><b>Recomeçar a demonstração</b><small>Volta os dados de exemplo</small></span></button>`}
-  </div>
-  ${ehReal() ? `<div class="cartao" style="margin-top:14px"><b>Sua assinatura: Atria ${ehPro() ? 'Pro' : 'Básico'}</b><p style="margin:6px 0 0">Cobrança, cartão e cancelamento ficam em Minha conta. Sem fidelidade.</p><div class="acoes">${ehPro() ? '' : `<a class="bt cheio" href="${LINK_PRO}">Mudar para o Pro</a>`}<a target="_top" class="bt leve" href="../../../conta.html">Minha conta</a></div></div>`
-    : `<div class="cartao" style="margin-top:14px"><b>Assinatura do Atria</b><p style="margin:6px 0 0">Básico R$ 39 por mês (R$ 374 por ano) ou Pro R$ 50 por mês (R$ 480 por ano), com o Achar trabalho e as lojas e preços. Sem fidelidade: cancela quando quiser.</p><div class="acoes"><a target="_top" class="bt cheio" href="../../../app/atria/">Assinar</a><a target="_top" class="bt leve" href="../../../atria.html">Conhecer o Atria</a></div></div>`}`;
+  </div></section>
+  <div class="cfg-sec" id="cfg-assinatura"><div id="ass-slot"></div>
+  ${ehReal() ? (ehPro() ? '' : `<div class="cartao" style="margin-top:12px"><b>Plano Pro</b><p class="mudo" style="margin:6px 0 0">Achar trabalho na internet e as lojas e preços da cidade. Sem fidelidade.</p><div class="acoes"><a class="bt cheio" href="${LINK_PRO}">Mudar para o Pro</a></div></div>`)
+    : `<p class="mudo cfg-txt" style="margin-top:10px">Básico R$ 39 por mês (R$ 374 por ano) ou Pro R$ 50 por mês (R$ 480 por ano), com o Achar trabalho e as lojas e preços. Sem fidelidade.</p>`}</div>`;
+};
+TELAS.ajustes.montar = (el) => {
+  const slot = $('#ass-slot', el);
+  if (slot && window.BRAssinatura) { if (blocoAss) slot.replaceWith(blocoAss); else blocoAss = BRAssinatura.montar(slot, { app: 'atria', nome: 'Atria', mensal: 39, anual: 374, pagina: 'atria.html', titulo: 'h2' }); }
+  const em = $('#cfg-email', el);
+  if (em && window.BRAssinatura && BRAssinatura.emConta()) BRAssinatura.conta().then((c) => { em.value = c.email || ''; });
+  const li = $('#cfg-logo-in', el);
+  if (li) li.onchange = async (e) => { const a = e.target.files[0]; if (!a) return; eu().logo = await lerFoto(a, 400); grava(); repinta(); toast('Logo salva: aparece no recibo, na proposta e no cartão'); };
+  if (TELAS.ajustes.alvo) { const a = $(`#${TELAS.ajustes.alvo}`, el); TELAS.ajustes.alvo = null; if (a) setTimeout(() => a.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); }
+};
+TELAS.config = TELAS.ajustes;
+ACOES['cfg-ir'] = (b) => { const a = document.getElementById(b.dataset.alvo); if (a) a.scrollIntoView({ behavior: reduzido() ? 'auto' : 'smooth', block: 'start' }); };
+ACOES.esquema = (b) => { eu().esquema = b.dataset.k; grava(); aplicaEsquema(); repinta(); toast(`Cor ${ESQUEMAS.find((x) => x[0] === b.dataset.k)[1]} no app inteiro`); };
+ACOES['cfg-marca-salvar'] = () => { const v = ($('#cfg-marca-nome') || {}).value || ''; eu().marca = v.trim().slice(0, 60); grava(); repinta(); toast(v.trim() ? 'Nome do negócio salvo' : 'Sem nome do negócio: vai o seu nome'); };
+ACOES['cfg-tira-logo'] = () => { eu().logo = ''; grava(); repinta(); toast('Logo tirada'); };
+ACOES['cfg-senha'] = () => { if (!window.veltriaNuvem) return; window.veltriaNuvem.trocarSenha().then((e) => toast(`Mandamos o link da senha nova para ${e}`)).catch((x) => toast(x.message || 'Não deu para mandar agora')); };
+ACOES['cfg-sair'] = () => confirmar('Sair da conta?', 'O que você fez já está salvo na nuvem. Para voltar, entre com o seu e-mail e a senha.', 'Sair', () => window.veltriaNuvem && window.veltriaNuvem.sair());
 ACOES['letra-grande'] = () => { eu().letraGrande = !eu().letraGrande; grava(); document.documentElement.classList.toggle('letra-grande', !!eu().letraGrande); repinta(); toast(eu().letraGrande ? 'Letra grande ligada' : 'Letra normal'); };
 ACOES.recomecar = () => confirmar('Recomeçar a demonstração?', 'Os dados de exemplo voltam ao começo neste celular.', 'Recomeçar', () => { try { localStorage.removeItem(CHAVE); } catch { /* sem acesso */ } location.replace(location.pathname); });
 ACOES.exportar = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(db)], { type: 'application/json' })); a.download = `atria-copia-${hoje()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast('Cópia baixada'); };
@@ -535,7 +598,7 @@ ACOES.cadastro = () => cadastro(true);
 ACOES.tour = () => { ir('inicio'); setTimeout(tour, 450); };
 ACOES.voltar = () => { if (pilha.length > 1) history.back(); else ir(PAI[rotaAtual().nome] || 'inicio'); };
 ACOES.dica = (b) => folha({ titulo: 'Dica', corpo: `<div class="dica-flutua" style="animation:none">${ico('luz')}<p>${t(b.dataset.dica)}</p></div>` });
-const PAI = { ...MAIS.PAI_MAIS, diarias: 'equipe', post: 'comunidade', orcar: 'inicio', trabalhos: 'inicio', agenda: 'gestao', equipe: 'gestao', recibo: 'financeiro', obra: 'obras', obras: 'gestao', clientes: 'gestao', cliente: 'clientes', materiais: 'listas', listas: 'gestao', lojas: 'gestao', precos: 'gestao', financeiro: 'gestao', ferramentas: 'gestao', corte: 'ferramentas', medidas: 'ferramentas', calc: 'ferramentas', modelo: 'ferramentas', orcamento: 'obras', proposta: 'obras', trabalho: 'trabalhos', perfil: 'comunidade', post: 'comunidade', ajustes: 'gestao' };
+const PAI = { ...MAIS.PAI_MAIS, diarias: 'equipe', post: 'comunidade', orcar: 'inicio', trabalhos: 'inicio', agenda: 'gestao', equipe: 'gestao', recibo: 'financeiro', obra: 'obras', obras: 'gestao', clientes: 'gestao', cliente: 'clientes', materiais: 'listas', listas: 'gestao', lojas: 'gestao', precos: 'gestao', financeiro: 'gestao', ferramentas: 'gestao', corte: 'ferramentas', medidas: 'ferramentas', calc: 'ferramentas', modelo: 'ferramentas', orcamento: 'obras', proposta: 'obras', trabalho: 'trabalhos', perfil: 'comunidade', post: 'comunidade', ajustes: 'gestao', config: 'gestao' };
 
 // instalar
 let pedidoInstalar = null;
@@ -761,6 +824,7 @@ function iniciar() {
   addEventListener('online', () => { const s = $('[data-sinc]'); if (s) { s.classList.remove('off'); s.textContent = 'tudo salvo'; } toast('Internet de volta'); });
   addEventListener('offline', () => { const s = $('[data-sinc]'); if (s) { s.classList.add('off'); s.textContent = 'sem internet, salvando no celular'; } toast('Sem internet: tudo continua salvo no celular'); });
   document.documentElement.classList.toggle('letra-grande', !!(db.perfil && db.perfil.letraGrande));
+  aplicaEsquema();
   instalarConceitos({ TELAS, ACOES, sugestoes });
   ligarGestos();
   navegar(); barraBadges();

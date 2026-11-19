@@ -1,12 +1,12 @@
 // Atria · gestão: obras, orçamento, proposta comercial, cobrança com Pix, materiais, lojas, preços, clientes,
 // financeiro, ferramentas de bancada e mensagens prontas.
-import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=18';
-import { cena, TIPOS_CENA } from './cenas.js?v=18';
-import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=18';
-import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=18';
-import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=18';
+import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=19';
+import { cena, TIPOS_CENA } from './cenas.js?v=19';
+import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=19';
+import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=19';
+import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=19';
 import { qrSVG } from '../base/qr.js';
-import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=18';
+import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=19';
 
 // jeitos de cobrar: os do ofício da obra (ou da pessoa) primeiro, depois os outros
 export const modosObra = (o) => [...new Set([...((OFICIOS[o.oficio] || {}).cobra || []), ...juntar(db.perfil, 'cobra'), ...Object.keys(MODOS_COBRAR)])];
@@ -450,7 +450,7 @@ TELAS.proposta = (id) => {
         <div style="position:absolute;inset:auto 0 0 0;height:10px;background:repeating-linear-gradient(90deg,#C2A37A 0 1px,transparent 1px 10px)"></div>
         <small style="letter-spacing:.14em;text-transform:uppercase;color:var(--trena)">Proposta comercial</small>
         <b style="display:block;font:800 30px/1 var(--f-tit);text-transform:uppercase;margin:6px 0">${t(o.titulo)}</b>
-        <span>Para ${t(c.nome)} · ${dataBR(hoje())}</span><br><span style="opacity:.75">${t(eu.nome)} · ${t(nomeOficios(eu))} · ${t(eu.cidade)}-${t(eu.uf)} · ${t(eu.zap)}</span></div>
+        <span>Para ${t(c.nome)} · ${dataBR(hoje())}</span><br><span style="opacity:.75">${eu.marca ? `${t(eu.marca)} · ` : ''}${t(eu.nome)} · ${t(nomeOficios(eu))} · ${t(eu.cidade)}-${t(eu.uf)} · ${t(eu.zap)}</span></div>
       ${SECOES.map(([k, r]) => `<section data-acao="prop-editar" data-id="${o.id}" data-k="${k}" style="cursor:pointer;border-radius:8px"><h3>${r}</h3><p style="margin:0;white-space:pre-line">${t(o.prop[k])}</p></section>`).join('')}
       <div class="assina"><span>${t(eu.nome)}</span><span>${t(c.nome)}</span></div>
     </article>`;

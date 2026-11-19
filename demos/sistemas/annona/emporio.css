@@ -60,13 +60,13 @@ body:not([data-tela="painel"]) .topo { display: none; }
 /* botões, campos e chips com cara de empório */
 .bt { background: #FFF8EF; border-color: #E5D0BC; color: var(--tinta); border-radius: 10px; }
 .bt:hover { border-color: #D3B392; background: #FFF4E6; }
-.bt.cheio { background: linear-gradient(180deg, #8E2747, #6A1528); border-color: #5A1022; color: #FFF6EA; box-shadow: 0 2px 0 #4A0C1C; }
+.bt.cheio { background: linear-gradient(180deg, var(--rubi-cl, #8E2747), var(--rubi-lat, #6A1528)); border-color: var(--rubi-esc, #5A1022); color: #FFF6EA; box-shadow: 0 2px 0 #4A0C1C; }
 .bt.verde { background: linear-gradient(180deg, #2C9A72, var(--verde-pg)); border-color: var(--verde-pg-2); color: #fff; box-shadow: 0 2px 0 #0F5139, 0 4px 10px rgba(30, 126, 92, .25); }
 .bt.ouro { background: linear-gradient(180deg, #F7D584, #E3AE4A); border-color: #C99236; color: var(--tinta); box-shadow: 0 2px 0 #B07E26, 0 4px 10px rgba(200, 150, 50, .25); }
 .bt.verde-claro { background: #E6F2E8; border-color: #B9D8BF; color: #1D5E3F; }
 .bt.perigo { background: #FFF4F2; }
 .chip { background: #FFF8EF; border-color: #E5D0BC; color: var(--tinta); }
-.chip.on { background: linear-gradient(180deg, #8E2747, #6A1528); border-color: #5A1022; }
+.chip.on { background: linear-gradient(180deg, var(--rubi-cl, #8E2747), var(--rubi-lat, #6A1528)); border-color: var(--rubi-esc, #5A1022); }
 .icone-bt { background: #FFF8EF; border-color: #E5D0BC; }
 .leitor { background: #FFFAF3; border: 2px solid #E2BF73; border-radius: 12px; box-shadow: inset 0 1px 3px rgba(120, 80, 30, .12), 0 2px 8px rgba(120, 70, 30, .08); padding: 8px 8px 8px 16px; }
 .leitor > span svg { width: 26px; height: 26px; color: var(--tinta); }
@@ -104,7 +104,7 @@ body:not([data-tela="painel"]) .topo { display: none; }
 .kpi::after { content: ''; position: absolute; left: 0; top: -12px; width: 46px; height: 74px; background: url(img/barbante.webp) 0 0 / 46px 74px no-repeat; z-index: 2; }
 .kpi .k-ico { width: auto; height: auto; background: none !important; border-radius: 0; margin-top: 4px; }
 .kpi .k-ico svg { width: 34px; height: 34px; stroke-width: 1.7; }
-.k-ico.verde { color: var(--verde-pg); } .k-ico.ouro { color: #C48A22; } .k-ico.azul { color: #8E2747; }
+.k-ico.verde { color: var(--verde-pg); } .k-ico.ouro { color: #C48A22; } .k-ico.azul { color: var(--rubi-cl, #8E2747); }
 .kpi small { font-size: 17px; color: var(--texto); font-weight: 500; }
 .kpi b { font: 800 clamp(22px, 2.05vw, 31px)/1.2 var(--tit); color: var(--tinta); margin: 2px 0 6px; }
 .kpi .var { font-size: 14.5px; color: var(--texto); display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
@@ -408,8 +408,8 @@ kbd { display: inline-grid; place-items: center; min-width: 34px; height: 30px; 
   .barra a { color: #FFF3E0; font: 700 14px var(--tit); gap: 3px; padding: 6px 8px; border-radius: 10px; min-width: 64px; text-shadow: 0 1px 2px rgba(0,0,0,.45); }
   .barra a svg { width: 27px; height: 27px; }
   .barra a.on { background: linear-gradient(180deg, #F7D888, #E3AE4A); color: var(--tinta); text-shadow: none; box-shadow: 0 2px 0 #A87828; }
-  .barra .barra-vender { width: 70px; height: 70px; min-width: 0; padding: 0; margin-top: -30px; background: radial-gradient(circle at 40% 35%, #9A2E50, #6A1528 70%); border: 4px solid #E7B755; box-shadow: 0 0 0 2px #8F6A3A, 0 6px 14px rgba(40, 10, 10, .45); color: #FFF3E0 !important; }
-  .barra .barra-vender.on { background: radial-gradient(circle at 40% 35%, #9A2E50, #6A1528 70%); }
+  .barra .barra-vender { width: 70px; height: 70px; min-width: 0; padding: 0; margin-top: -30px; background: radial-gradient(circle at 40% 35%, var(--rubi-cl2, #9A2E50), var(--rubi-lat, #6A1528) 70%); border: 4px solid #E7B755; box-shadow: 0 0 0 2px #8F6A3A, 0 6px 14px rgba(40, 10, 10, .45); color: #FFF3E0 !important; }
+  .barra .barra-vender.on { background: radial-gradient(circle at 40% 35%, var(--rubi-cl2, #9A2E50), var(--rubi-lat, #6A1528) 70%); }
   .barra .barra-vender svg { width: 34px; height: 34px; stroke-width: 2.4; }
   /* vender no celular */
   .pdv-cab { gap: 10px; margin-bottom: 12px; flex-wrap: nowrap; }
@@ -585,3 +585,53 @@ kbd { display: inline-grid; place-items: center; min-width: 34px; height: 30px; 
 .bt.receber:disabled { opacity: 1; color: #2E5E4C; }
 /* menu lateral: o fim da lista esmaece por inteiro (antes um pedacinho de ícone aparecia como risco no pé) */
 .menu { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 8px, #000 calc(100% - 34px), transparent calc(100% - 6px)); mask-image: linear-gradient(180deg, transparent 0, #000 8px, #000 calc(100% - 34px), transparent calc(100% - 6px)); }
+
+/* ---------------------------------------------------------------- esquemas de cor (Configurações, 19/11/2026)
+   Trocam só o rubi (menu, botões, chips, ícones, topo do celular e o botão Vender); ouro, pergaminho e verde ficam. */
+:root { --rubi-cl: #8E2747; --rubi-cl2: #9A2E50; }
+[data-tema="oliva"] { --azul: #4E5B26; --azul-2: #3B4520; --azul-claro: #EEF0E2; --rubi-lat: #3F4A1E; --rubi-esc: #2E3716; --tinta: #2F3517; --tinta-2: #3E4520; --rubi-cl: #5E6C2E; --rubi-cl2: #6B7A35; }
+[data-tema="terracota"] { --azul: #9A4A25; --azul-2: #7A3A1C; --azul-claro: #F6E9E1; --rubi-lat: #7E3B1D; --rubi-esc: #5C2A14; --tinta: #4A2416; --tinta-2: #5E2E1B; --rubi-cl: #A1532B; --rubi-cl2: #AE6034; }
+[data-tema="purpura"] { --azul: #5B2A6E; --azul-2: #452055; --azul-claro: #EFE7F3; --rubi-lat: #4A2159; --rubi-esc: #351741; --tinta: #34183F; --tinta-2: #44204F; --rubi-cl: #66307A; --rubi-cl2: #733A88; }
+[data-tema="tirreno"] { --azul: #1F4E6B; --azul-2: #183D54; --azul-claro: #E5EEF3; --rubi-lat: #1A4058; --rubi-esc: #122E40; --tinta: #16303F; --tinta-2: #1D3D50; --rubi-cl: #285E80; --rubi-cl2: #2F6A8E; }
+.demo-topo { background: var(--azul-2); }
+/* ---------------------------------------------------------------- Configurações em seções */
+.cfg-nav { flex-wrap: nowrap; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: thin; position: sticky; top: 0; z-index: 3; background: linear-gradient(var(--parede) 80%, transparent); }
+.cfg-nav .chip { flex: none; text-decoration: none; color: var(--tinta); font-weight: 600; min-height: 40px; display: inline-flex; align-items: center; background: #FFF8EF; }
+.cfg-nav .chip:hover, .cfg-nav .chip:focus-visible { border-color: var(--rubi-cl); }
+.cfg-sec { scroll-margin-top: 70px; min-width: 0; }
+.cfg-grade { margin-bottom: 0; } .cfg-grade .bloco { margin-bottom: 20px; }
+.cfg-mudo { color: var(--ardosia); font-weight: 500; font-size: 12.5px; }
+.cfg-bts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.cfg-como { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr)); gap: 8px; }
+.cfg-como .bt { justify-content: flex-start; }
+.cfg-logo { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.cfg-logo b { display: block; font: 800 18px var(--tit); }
+.cfg-logo-img, .topo-loja > span { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 16px; background: var(--azul-claro); color: var(--azul); font: 800 22px var(--tit); overflow: hidden; border: 2px solid var(--ouro); flex: none; }
+.cfg-logo-img img, .topo-loja img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.form input[readonly] { background: #F6EEE8; color: var(--texto); }
+.temas { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 10px; }
+.temas button { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 12px; border-radius: 12px; border: 1.5px solid var(--linha); background: #FFF8EF; cursor: pointer; font-weight: 700; color: var(--tinta); text-align: left; }
+.temas button i { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--a) 55%, var(--b) 55%); flex: none; }
+.temas button[aria-pressed="true"] { border-color: var(--rubi-cl); box-shadow: 0 0 0 3px var(--azul-claro); }
+.temas button[disabled] { cursor: default; }
+.como-lista { margin: 4px 0 16px; padding-left: 22px; display: grid; gap: 8px; }
+.cupom-logo { display: block; max-width: 120px; max-height: 70px; margin: 0 auto 8px; object-fit: contain; }
+.topo-loja { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--tinta); font: 700 14px var(--tit); max-width: 220px; min-width: 0; }
+.topo-loja > span { width: 38px; height: 38px; border-radius: 10px; font-size: 14px; border-width: 1.5px; }
+.topo-loja b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cel-cfg { display: none; }
+@media (max-width: 860px) {
+  .topo-loja { display: none; }
+  .cel-cfg { display: grid; place-items: center; width: 44px; height: 44px; color: #FBEFDA; }
+  .cel-cfg svg { width: 26px; height: 26px; }
+}
+/* bloco "Minha assinatura" (base/assinatura.css) com as cores do Annona: segue o esquema escolhido */
+.br-ass { --ass-cor: var(--rubi-lat); --ass-cor-txt: #FFF6EA; --ass-texto: var(--texto); --ass-mudo: #6E5A55; --ass-fundo: var(--branco); --ass-linha: var(--linha); --ass-raio: var(--raio); --ass-perigo: #A3283A; --ass-ok: #1D6B4A; --ass-atn: #8A5A0B; --ass-titulo: var(--tit); box-shadow: var(--sombra); margin-bottom: 20px; }
+.cab-tela .cab-como { width: 42px; height: 42px; border-radius: 50%; background: #FFF8EF; border-color: #E8D3C2; color: var(--tinta); align-self: center; }
+.cab-tela .acoes + .cab-como { margin-left: 0; }
+.cab-tela > div + .cab-como { margin-left: auto; }
+/* etiqueta ativa das categorias é uma imagem rubi: nos outros esquemas, gira a matiz para a cor escolhida */
+[data-tema="oliva"] .etq-pend.on { filter: hue-rotate(95deg) saturate(.75); }
+[data-tema="terracota"] .etq-pend.on { filter: hue-rotate(38deg); }
+[data-tema="purpura"] .etq-pend.on { filter: hue-rotate(-55deg); }
+[data-tema="tirreno"] .etq-pend.on { filter: hue-rotate(-140deg) saturate(.85); }

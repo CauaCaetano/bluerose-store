@@ -820,3 +820,24 @@ html[data-tema="grafite"] :is(.etq, .etq-titulo) { border-image-source: url(img/
   .gradeq td { min-width: 0; }
   .gradeq { border-spacing: 3px; }
 }
+
+/* ---------- Configurações em seções (19/11/2026) ---------- */
+.cfg-nav { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; margin: 0 0 8px; scrollbar-width: thin; position: sticky; top: 0; z-index: 3; background: linear-gradient(var(--fundo) 80%, transparent); }
+.cfg-nav a { flex: none; min-height: 40px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: 999px; border: 1px solid var(--linha); background: var(--cartao); color: var(--texto); text-decoration: none; font-weight: 600; font-size: 14px; }
+.cfg-nav a:hover, .cfg-nav a:focus-visible { border-color: var(--ac); color: var(--ac-forte); }
+.cfg-sec { scroll-margin-top: 76px; min-width: 0; }
+.cfg-txt { margin: -6px 0 12px; font-size: 13.5px; }
+.cfg-eu { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; min-width: 0; }
+.cfg-eu b { display: block; font-family: var(--serif); font-size: 20px; overflow-wrap: anywhere; }
+.cfg-eu small { color: var(--mudo); }
+.cfg-eu .foto-perfil { width: 64px; height: 64px; font-size: 22px; }
+.cfg-bts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.cfg-como { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr)); gap: 8px; }
+.cfg-como .bt { justify-content: flex-start; }
+input[readonly] { background: var(--linha-2); color: var(--texto); }
+.temas button[disabled] { cursor: default; }
+.como-lista { margin: 10px 0 16px; padding-left: 20px; display: grid; gap: 8px; }
+/* bloco "Minha assinatura" (base/assinatura.css) com as cores do Peplo: segue o esquema escolhido */
+.br-ass { --ass-cor: var(--ac); --ass-cor-txt: #fff; --ass-texto: var(--texto); --ass-mudo: var(--mudo); --ass-fundo: var(--cartao); --ass-linha: var(--linha); --ass-raio: var(--raio); --ass-perigo: var(--mal); --ass-ok: var(--ok); --ass-atn: var(--atn); --ass-titulo: var(--serif); box-shadow: var(--sombra); }
+[data-so-conta][hidden] { display: none !important; }
+@media (max-width: 480px) { .topo-como { display: none; } }

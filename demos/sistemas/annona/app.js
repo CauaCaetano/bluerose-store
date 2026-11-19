@@ -260,6 +260,11 @@ const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } c
 if (novo) { grava(); history.replaceState(null, '', location.pathname + location.hash); }
 if (db.mesas && db.mesas.length) db.mesas = [];
 window.veltriaDados = () => db;
+// esquema de cores (Configurações): muda o rubi do sistema inteiro (menu, botões, etiquetas, topo do celular); o ouro e o pergaminho ficam
+const TEMAS = [['vinha', 'Vinha (padrão)', '#7A1F3D', '#E2B24E'], ['oliva', 'Oliva', '#4E5B26', '#E2B24E'], ['terracota', 'Terracota', '#9A4A25', '#E2B24E'], ['purpura', 'Púrpura imperial', '#5B2A6E', '#E2B24E'], ['tirreno', 'Mar Tirreno', '#1F4E6B', '#E2B24E']];
+const temaAtual = () => (TEMAS.some((x) => x[0] === db.tema) ? db.tema : 'vinha');
+function aplicaTema() { const k = temaAtual(); document.documentElement.dataset.tema = k; const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = TEMAS.find((x) => x[0] === k)[2]; }
+aplicaTema();
 
 // vários caixas: o Caixa 1 fica em db.caixa (como sempre); os outros em db.caixasT; cada aparelho guarda qual é o seu
 db.terminais ||= [{ id: 'c1', nome: 'Caixa 1' }]; db.caixasT ||= {};
@@ -349,6 +354,7 @@ const lucroVenda = (v) => v.total - custoVenda(v);
 
 // ------------------------------------------------------------------ interface comum
 const ICO = {
+  engrenagem: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>', mais: '<path d="M12 5v14M5 12h14"/>', menos: '<path d="M5 12h14"/>', cam: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
   zap: '<path d="M4 20l1.4-4A8 8 0 1 1 8 18.6z"/><path d="M9 9.5c.5 2 2 3.5 4 4l1.2-1.2 2 1-.6 1.6c-3.5 0-7-3.5-7-7l1.6-.6 1 2z"/>',
   lixo: '<path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/>', lapis: '<path d="M4 20l4-1 11-11-3-3L5 16z"/>', ok: '<path d="M5 12l4 4 10-10"/>', seta: '<path d="M9 6l6 6-6 6"/>',
@@ -507,6 +513,7 @@ ${db.loja.nome}`;
   const na = avisos().n; $$('.sino-n').forEach((e) => { e.hidden = !na; e.textContent = na > 99 ? '99+' : na; });
   document.title = `${db.loja.nome} · Annona`;
   $('#lat-loja-ini').textContent = iniciais(db.loja.nome); $('#lat-loja-nome').textContent = db.loja.nome;
+  const tl = $('#topo-loja'); if (tl) { tl.querySelector('span').innerHTML = db.loja.logo ? `<img src="${t(db.loja.logo)}" alt="">` : t(iniciais(db.loja.nome)); tl.querySelector('b').textContent = db.loja.nome; }
   const lc = $('#lat-caixa'), cx0 = CXA(); lc.textContent = cx0.aberto ? `${nomeTerm(TERM())} aberto desde ${horaBR(cx0.ab)}` : `${nomeTerm(TERM())} fechado`; lc.classList.toggle('fechado', !cx0.aberto);
   $('#lat-eu-av').textContent = iniciais(eu().nome); $('#lat-eu-nome').textContent = eu().nome; $('#lat-eu-papel').textContent = PAPEL[eu().perfil] || '';
 }
@@ -820,7 +827,7 @@ function receberCupom() {
 // imprime direto por um quadro escondido (sem abrir janela). No Chrome aberto com --kiosk-printing, sai sem perguntar nada.
 function imprimir(txt) {
   let f = $('#quadro-imp'); if (!f) { f = document.createElement('iframe'); f.id = 'quadro-imp'; f.title = 'impressão'; f.style.cssText = 'position:fixed;width:0;height:0;border:0;right:0;bottom:0'; document.body.append(f); }
-  const d = f.contentDocument; d.open(); d.write(`<!doctype html><meta charset="utf-8"><style>@page{size:80mm auto;margin:3mm}body{margin:0;font:12.5px/1.35 monospace;white-space:pre-wrap;width:74mm}</style>${t(txt)}`); d.close();
+  const d = f.contentDocument; d.open(); d.write(`<!doctype html><meta charset="utf-8"><style>@page{size:80mm auto;margin:3mm}body{margin:0;font:12.5px/1.35 monospace;white-space:pre-wrap;width:74mm}img{display:block;max-width:36mm;max-height:22mm;margin:0 auto 2mm}</style>${db.loja.logo ? `<img src="${t(db.loja.logo)}" alt="">` : ''}${t(txt)}`); d.close();
   setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('Não consegui imprimir. Confira a impressora.', true); } }, 60);
 }
 function comprovante(v) {
@@ -829,7 +836,7 @@ function comprovante(v) {
   const txt = `${db.loja.nome}\nVenda nº ${v.n} · ${dataBR(v.data)} ${horaBR(v.data)}\n\n${linhas.join('\n')}\n${v.servico ? `Serviço ${din(v.servico)}\n` : ''}${v.desc ? `Desconto −${din(v.desc)}\n` : ''}Total ${din(v.total)}\n${v.pag.map((x) => `${FORMAS[x.f]} ${din(x.v)}`).join('\n')}\n\nComprovante sem valor fiscal. Obrigado pela preferência!`;
   const fi = v.pag.find((x) => x.f === 'fiado'), assina = fi && cl ? `\n\nReconheço que fiquei devendo ${din(fi.v)}\nao ${db.loja.nome} por esta compra.\n\n\n______________________________\n${cl.nome}` : '';
   const duasVias = assina ? `${txt}${assina}\n\n1ª via: fica com o comércio\n\n- - - - - - - - - - - - - - - -\n\n${txt}\n\n2ª via: do cliente` : txt;
-  abrir(`${cab('Venda concluída', `Nº ${v.n} · ${din(v.total)}`)}<pre class="cupom">${t(assina ? txt + assina : txt)}</pre><footer class="j-pe"><button type="button" class="bt" data-imp>${ico('imp')}${assina ? 'Imprimir 2 vias' : 'Imprimir'}</button>${cl && cl.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(cl.tel, txt)}">${ico('zap')}Mandar no WhatsApp</a>` : ''}<button type="button" class="bt cheio" data-fechar>Nova venda</button></footer>`, (j) => {
+  abrir(`${cab('Venda concluída', `Nº ${v.n} · ${din(v.total)}`)}${db.loja.logo ? `<img class="cupom-logo" src="${t(db.loja.logo)}" alt="${t(db.loja.nome)}">` : ''}<pre class="cupom">${t(assina ? txt + assina : txt)}</pre><footer class="j-pe"><button type="button" class="bt" data-imp>${ico('imp')}${assina ? 'Imprimir 2 vias' : 'Imprimir'}</button>${cl && cl.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(cl.tel, txt)}">${ico('zap')}Mandar no WhatsApp</a>` : ''}<button type="button" class="bt cheio" data-fechar>Nova venda</button></footer>`, (j) => {
     $('[data-imp]', j).addEventListener('click', () => imprimir(duasVias));
     if (db.loja.impAuto) imprimir(duasVias);
     setTimeout(() => $('[data-imp]', j).focus(), 40); // Enter imprime
@@ -1320,22 +1327,83 @@ TELAS.relatorios = () => {
 };
 
 // ------------------------------------------------------------------ configurações e guia
-TELAS.config = () => `<section class="cab-tela"><div><h2>Configurações</h2><p>Dados do comércio, fiado, impressão e cópia dos dados.</p></div></section>
-  <section class="bloco"><form class="form duas" id="f-loja">
-    <label>Nome do comércio<input name="nome" value="${t(db.loja.nome)}" required></label><label>Frase curta<input name="slogan" value="${t(db.loja.slogan)}"></label>
-    <label>WhatsApp do comércio<input name="tel" value="${t(db.loja.tel)}" inputmode="tel"></label><label>Cidade<input name="cidade" value="${t(db.loja.cidade)}"></label>
-    <label class="toda">Chave Pix (aparece no QR da venda e na cobrança do fiado)<input name="pix" value="${t(db.loja.pix)}" placeholder="CPF, CNPJ, celular, e-mail ou chave aleatória"></label>
-    <label>Prazo do fiado (dias)<input name="prazo" type="number" min="1" max="120" value="${db.loja.prazo}"></label><label>Limite padrão de cliente novo (R$)<input name="limite" value="${campoDin(db.loja.limite)}" inputmode="decimal"></label>
-    <label class="check toda"><input type="checkbox" name="impAuto" ${db.loja.impAuto ? 'checked' : ''}> Imprimir o comprovante sozinho ao concluir a venda (impressora térmica de 80 mm)</label>
+TELAS.config = () => {
+  const L = db.loja, u = eu(), d = dono(), cargo = PAPEL[u.perfil] || 'Equipe', tm = TEMAS.find((x) => x[0] === temaAtual()) || TEMAS[0];
+  const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-fiado', 'Fiado e impressão'], ['cfg-caixas', 'Caixas'], ['cfg-balanca', 'Balança'], ['cfg-copia', 'Cópia'], ['cfg-assinatura', 'Minha assinatura']];
+  return `<section class="cab-tela com-ico">${ico('engrenagem')}<div><h2>Configurações</h2><p>${d ? 'Seu perfil, as cores, a marca do comércio, o guia, o caixa e a sua assinatura.' : 'Seu perfil, o guia, o caixa deste aparelho e a assinatura do comércio.'}</p></div></section>
+  <nav class="chips cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<a class="chip" href="#config/${id}">${n}</a>`).join('')}</nav>
+  <div class="grade2 cfg-grade">
+    <section class="bloco cfg-sec" id="cfg-perfil"><header><h3>${ico('gente')}Perfil</h3></header>
+      <div class="perfil-topo"><span class="av grande">${t(iniciais(u.nome))}</span><div><b>${t(u.nome)}</b><small>${t(cargo)} · ${t(L.nome)}</small></div></div>
+      <div class="form duas"><label>E-mail da conta<input id="cfg-email" readonly value="${t(u.email || '')}" aria-describedby="cfg-email-d"><small id="cfg-email-d" class="cfg-mudo">Só leitura: é o e-mail do login.</small></label><label>Cargo<input readonly value="${t(cargo)}"></label></div>
+      <div class="acoes cfg-bts"><a class="bt cheio" href="#perfil">Editar nome e senha de 4 números</a><button type="button" class="bt" data-acao="trocar-senha" data-so-conta hidden>Trocar a senha do login</button><button type="button" class="bt" data-acao="sair-conta" data-so-conta hidden>Sair</button></div></section>
+    <section class="bloco cfg-sec" id="cfg-cores"><header><h3>${ico('pct')}Esquema de cores</h3></header><p class="dica">A cor vale no sistema inteiro: menu, botões, etiquetas e o topo do celular. ${d ? 'Quem você convidar vê igual.' : 'Só o dono troca a cor do comércio.'}</p>
+      <div class="temas">${d ? TEMAS.map(([k, n, a, b]) => `<button type="button" data-tema="${k}" aria-pressed="${temaAtual() === k}" style="--a:${a};--b:${b}"><i></i>${n}</button>`).join('') : `<button type="button" aria-pressed="true" disabled style="--a:${tm[2]};--b:${tm[3]}"><i></i>${tm[1]}</button>`}</div></section>
+  </div>
+  <section class="bloco cfg-sec" id="cfg-marca"><header><h3>${ico('trofeu')}Sua marca</h3></header><p class="dica">O nome e a logo do comércio aparecem no topo, no comprovante da venda (na tela e impresso) e nas mensagens de WhatsApp para clientes e fornecedores. A chave Pix vai no QR da venda e na cobrança do fiado.</p>
+    <div class="cfg-logo"><span class="cfg-logo-img">${L.logo ? `<img src="${t(L.logo)}" alt="Logo do comércio">` : t(iniciais(L.nome))}</span>${d ? `<div class="acoes"><label class="bt cheio" for="logo-in">${L.logo ? 'Trocar a logo' : 'Pôr a logo'}</label><input type="file" id="logo-in" accept="image/*" hidden>${L.logo ? '<button type="button" class="bt" data-acao="tira-logo">Tirar</button>' : ''}</div>` : `<div><b>${t(L.nome)}</b><small class="cfg-mudo">Só o dono muda a logo e os dados do comércio.</small></div>`}</div>
+    ${d ? `<form class="form duas" id="f-loja" data-f-loja>
+      <label>Nome do comércio<input name="nome" value="${t(L.nome)}" required></label><label>Frase curta<input name="slogan" value="${t(L.slogan)}"></label>
+      <label>WhatsApp do comércio<input name="tel" value="${t(L.tel)}" inputmode="tel"></label><label>Cidade<input name="cidade" value="${t(L.cidade)}"></label>
+      <label class="toda">Chave Pix (aparece no QR da venda e na cobrança do fiado)<input name="pix" value="${t(L.pix)}" placeholder="CPF, CNPJ, celular, e-mail ou chave aleatória"></label>
+      <footer class="j-pe toda"><button class="bt cheio">Salvar</button></footer></form>` : ''}</section>
+  <section class="bloco cfg-sec" id="cfg-guia"><header><h3>${ico('relat')}Guia: como usar</h3></header><p class="dica">Um passo a passo curto de cada tela. Também abre a qualquer hora pelo botão <b>?</b> no topo.</p>
+    <div class="cfg-como">${COMO_ORDEM.filter((k) => d || k !== 'dono').map((k) => `<button type="button" class="bt" data-guia-tela="${k}">${COMO[k][0]}</button>`).join('')}</div>
+    <div class="acoes cfg-bts"><a class="bt cheio" href="#guia">Guia completo, do cadastro ao lucro</a></div></section>
+  <section class="bloco cfg-sec" id="cfg-fiado"><header><h3>${ico('gente')}Fiado e impressão</h3></header><form class="form duas" id="f-fiado-imp" data-f-loja>
+    <label>Prazo do fiado (dias)<input name="prazo" type="number" min="1" max="120" value="${L.prazo}"></label><label>Limite padrão de cliente novo (R$)<input name="limite" value="${campoDin(L.limite)}" inputmode="decimal"></label>
+    <label class="check toda"><input type="checkbox" name="impAuto" ${L.impAuto ? 'checked' : ''}> Imprimir o comprovante sozinho ao concluir a venda (impressora térmica de 80 mm)</label>
     <p class="dica toda">Para sair direto, sem a janela de impressão: no computador do caixa, abra o Chrome pelo atalho com <b>--kiosk-printing</b> no fim (botão direito no atalho → Propriedades → Destino). A impressora térmica precisa ser a padrão do Windows.</p>
     <footer class="j-pe toda"><button class="bt cheio">Salvar</button></footer></form></section>
-  <section class="bloco"><header><h3>Caixas</h3><button type="button" class="link" data-acao="novo-caixa">+ Novo caixa</button></header><p class="dica">Cada caixa abre, faz sangria e fecha separado. Em cada computador ou celular do caixa, escolha qual caixa ele é.</p><ul class="lista-simples">${db.terminais.map((x) => `<li><b>${t(x.nome)}</b><span>${x.id === TERM() ? 'este aparelho' : ''}</span>${x.id !== TERM() ? `<button type="button" class="link" data-usar-term="${x.id}">Usar neste aparelho</button>` : ''}</li>`).join('')}</ul></section>
-  <section class="bloco"><header><h3>Balança etiquetadora</h3></header><form class="form duas" id="f-bal"><label class="check toda"><input type="checkbox" name="ativo" ${db.loja.bal && db.loja.bal.ativo ? 'checked' : ''}> Ler a etiqueta da balança (código de barras que começa com 2)</label>
+  <section class="bloco cfg-sec" id="cfg-caixas"><header><h3>Caixas</h3><button type="button" class="link" data-acao="novo-caixa">+ Novo caixa</button></header><p class="dica">Cada caixa abre, faz sangria e fecha separado. Em cada computador ou celular do caixa, escolha qual caixa ele é.</p><ul class="lista-simples">${db.terminais.map((x) => `<li><b>${t(x.nome)}</b><span>${x.id === TERM() ? 'este aparelho' : ''}</span>${x.id !== TERM() ? `<button type="button" class="link" data-usar-term="${x.id}">Usar neste aparelho</button>` : ''}</li>`).join('')}</ul></section>
+  <section class="bloco cfg-sec" id="cfg-balanca"><header><h3>Balança etiquetadora</h3></header><form class="form duas" id="f-bal"><label class="check toda"><input type="checkbox" name="ativo" ${db.loja.bal && db.loja.bal.ativo ? 'checked' : ''}> Ler a etiqueta da balança (código de barras que começa com 2)</label>
     <label>A etiqueta traz<select name="tipo"><option value="preco"${(db.loja.bal || {}).tipo !== 'peso' ? ' selected' : ''}>O preço (R$)</option><option value="peso"${(db.loja.bal || {}).tipo === 'peso' ? ' selected' : ''}>O peso (kg)</option></select></label>
     <label>Dígitos do código do produto (PLU)<select name="dig"><option value="4"${(db.loja.bal || {}).dig !== 5 ? ' selected' : ''}>4 (2 CCCC 0 VVVVVV D)</option><option value="5"${(db.loja.bal || {}).dig === 5 ? ' selected' : ''}>5 (2 CCCCC VVVVVV D)</option></select></label>
     <p class="dica toda">No cadastro de cada produto de balança, preencha o “Código na balança (PLU)” igual ao da balança. Ao passar a etiqueta no caixa, o produto e o peso entram sozinhos.</p><footer class="j-pe toda"><button class="bt cheio">Salvar</button></footer></form></section>
-  <section class="bloco"><header><h3>Cópia dos dados</h3></header><p class="dica">Guarde uma cópia de tudo num arquivo. Na conta, os dados já ficam na nuvem; a cópia é uma garantia a mais.</p><div class="acoes"><button type="button" class="bt" data-acao="copia">Baixar cópia</button><label class="bt">Restaurar cópia<input type="file" accept=".json,application/json" id="restaura" hidden></label></div></section>
-  <section class="bloco"><header><h3>Nota fiscal</h3></header><p class="dica">O Annona não emite nota fiscal. A venda gera um comprovante sem valor fiscal para imprimir ou mandar no WhatsApp. Quem precisa de NFC-e continua usando o emissor que já tem e usa o Annona para estoque, validade, vendas, fiado, compras e lucro.</p></section>`;
+  <section class="bloco cfg-sec" id="cfg-copia"><header><h3>Cópia dos dados</h3></header><p class="dica">Guarde uma cópia de tudo num arquivo. Na conta, os dados já ficam na nuvem; a cópia é uma garantia a mais.</p><div class="acoes"><button type="button" class="bt" data-acao="copia">Baixar cópia</button><label class="bt">Restaurar cópia<input type="file" accept=".json,application/json" id="restaura" hidden></label>${window.BRAssinatura && BRAssinatura.emConta() ? '' : '<button type="button" class="bt perigo" data-acao="recomecar-demo">Recomeçar a demonstração</button>'}</div></section>
+  <section class="bloco cfg-sec" id="cfg-nota"><header><h3>Nota fiscal</h3></header><p class="dica">O Annona não emite nota fiscal. A venda gera um comprovante sem valor fiscal para imprimir ou mandar no WhatsApp. Quem precisa de NFC-e continua usando o emissor que já tem e usa o Annona para estoque, validade, vendas, fiado, compras e lucro.</p></section>
+  <div class="cfg-sec" id="cfg-assinatura"><div id="ass-slot"></div></div>`;
+};
+// "Como usar" curto de cada tela: botão ? do topo (na tela em que a pessoa está) e Configurações, Guia
+const COMO = {
+  painel: ['Painel', ['O resumo do dia: vendas, lucro, o que vence e o que repor.', 'Toque num número para abrir a lista dele.', 'Os botões Vender e Dar entrada ficam sempre no alto.']],
+  vender: ['Vender (Caixa)', ['Passe o código de barras ou digite o nome do produto.', 'Produto de balança pede o peso (ou lê a etiqueta da balança).', 'Receber: dinheiro mostra o troco, Pix mostra o QR; também cartão e fiado. F2 leitor, F3 desconto, F4 fiado.']],
+  vendas: ['Vendas', ['Tudo o que foi vendido, com busca.', 'Toque numa venda para ver os itens, imprimir de novo ou cancelar: o estoque volta sozinho.']],
+  fiado: ['Fiado', ['Quem deve, quanto e há quantos dias.', 'Receber baixa o pagamento e manda o recibo no WhatsApp.', 'Passe o caderno inteiro de uma vez em “Passar do caderno”.']],
+  caixa: ['Caixa do dia', ['Abra com o troco da gaveta.', 'Sangria e suprimento ficam registrados.', 'No fim do dia, feche contando a gaveta: o Annona mostra se bateu.']],
+  estoque: ['Estoque', ['Cada produto com quanto tem, quanto vende por dia e quantos dias dura.', 'Novo produto: passe o código e o nome e a foto podem vir sozinhos.', 'No produto: entrada, perda, correção e histórico.']],
+  entradas: ['Entradas', ['Ler o XML da nota traz produto, quantidade, custo, lote e validade.', 'Sem nota, dê entrada à mão.']],
+  validades: ['Validades e Lotes', ['O que venceu, o que vence em 7 e em 30 dias.', 'Faça oferta antes de vencer ou jogue fora o lote vencido.']],
+  compras: ['Compras', ['A lista do que repor, por fornecedor, pela média de venda.', 'Mande o pedido pronto no WhatsApp do fornecedor.']],
+  perdas: ['Perdas e quebras', ['Quebrou, venceu ou sumiu: registre aqui.', 'O lucro dos relatórios já desconta as perdas.']],
+  inventario: ['Inventário', ['Conte a prateleira (dá para passar o leitor).', 'No fim, o estoque se corrige e aparece o que sumiu sem explicação.']],
+  relatorios: ['Relatórios', ['Escolha o período no alto.', 'Vendas, lucro de verdade e os produtos que dão mais lucro.', 'Baixe em planilha para o contador.']],
+  movimentacoes: ['Movimentações', ['Tudo o que entrou e saiu do estoque, com filtro por tipo e por produto.']],
+  dono: ['Painel do dono', ['O mês do comércio num olhar.', 'Equipe: quem pode o quê e a senha de liberação.']],
+  config: ['Configurações', ['Perfil, cores, sua marca, guia, fiado, caixas, balança e a sua assinatura.', 'Use os atalhos no alto para ir direto a uma seção.']],
+};
+const COMO_ORDEM = ['painel', 'vender', 'vendas', 'fiado', 'caixa', 'estoque', 'entradas', 'validades', 'compras', 'perdas', 'inventario', 'relatorios', 'movimentacoes', 'dono', 'config'];
+function comoUsar(k) {
+  const c = COMO[k] || COMO.painel;
+  abrir(`${cab(`Como usar: ${t(c[0])}`)}<ol class="como-lista">${c[1].map((x) => `<li>${t(x)}</li>`).join('')}</ol><footer class="j-pe"><a class="bt" href="#guia" data-fechar>Guia completo</a><a class="bt" href="#config/cfg-guia" data-fechar>Todas as telas</a><button type="button" class="bt cheio" data-fechar>Entendi</button></footer>`);
+}
+// Configurações: o bloco "Minha assinatura" (base/assinatura.js) fica montado entre um redesenho e outro
+let blocoAss = null;
+function posConfig(tela, sub) {
+  const slot = $('#ass-slot', tela);
+  if (slot && window.BRAssinatura) { if (blocoAss) slot.replaceWith(blocoAss); else blocoAss = BRAssinatura.montar(slot, { app: 'annona', nome: 'Annona', mensal: 59, pagina: 'annona.html' }); }
+  const em = $('#cfg-email', tela);
+  if (em && window.BRAssinatura) BRAssinatura.conta().then((c) => { if (c.email) em.value = c.email; if (c.modo === 'conta') $$('[data-so-conta]', tela).forEach((b) => { b.hidden = false; }); });
+  const alvo = sub && document.getElementById(sub); if (alvo) setTimeout(() => alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+}
+// logo do comércio: reduzida para 256 px (fica nos dados, então vai junto na nuvem e na cópia)
+function lerLogo(arq) {
+  if (!arq || !/^image\//.test(arq.type)) { toast('Escolha uma imagem.', true); return; }
+  const img = new Image(), url = URL.createObjectURL(arq);
+  img.onload = () => { const k = Math.min(1, 256 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); db.loja.logo = c.toDataURL('image/png'); registra('Logo do comércio trocada', 'geral'); grava(); mostra(); toast('Logo salva. Ela aparece no topo e no comprovante.'); };
+  img.onerror = () => { URL.revokeObjectURL(url); toast('Não consegui ler essa imagem.', true); };
+  img.src = url;
+}
 const GUIA = [
   ['Cadastre os produtos', 'Em Estoque, toque em Novo produto e passe o código de barras no leitor (ou na câmera do celular): se o produto estiver na base aberta, o nome e a foto aparecem sozinhos. Quem já tem planilha usa Importar planilha.'],
   ['Dê entrada pela nota', 'Em Entradas, toque em Ler o XML da nota. O Annona traz produto, quantidade, custo, lote e validade. Nota em caixa (CX C/12) vira unidade com o custo certo.'],
@@ -1378,6 +1446,8 @@ function rota() {
   $('.topo').classList.toggle('so-painel', nome !== 'painel'); document.body.dataset.tela = nome;
   $('#topo-sub').textContent = nome === 'painel' ? 'Veja o resumo do seu negócio hoje.' : db.loja.slogan || '';
   marca(); liga();
+  if (nome === 'config') posConfig(tela, sub);
+  const ct = $('.cab-tela', tela); if (ct && COMO[nome]) ct.insertAdjacentHTML('beforeend', '<button type="button" class="icone-bt cab-como" data-guia-tela="' + nome + '" aria-label="Como usar esta tela" title="Como usar esta tela"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"/><path d="M12 16.8v.2"/></svg></button>');
   const te = $('#topo-eu'); te.textContent = iniciais(eu().nome); te.title = `${eu().nome} · ${PAPEL[eu().perfil] || ''}`;
   if (mudou) { window.scrollTo(0, 0); tela.focus({ preventScroll: true }); anima(tela); }
   const l = $('#leitor') || $('#leitor-mesa') || $('#inv-cod'); if (l && matchMedia('(pointer:fine)').matches) l.focus();
@@ -1423,7 +1493,8 @@ function liga() {
   const fmt = $('#f-meta'); if (fmt) fmt.m.addEventListener('change', () => { db.meta = lerDin(fmt.m.value); grava(); mostra(); toast('Meta salva.'); });
   $$('[data-conta]').forEach((inp) => inp.addEventListener('change', () => { const it = estado.invent.itens.find((x) => x.p === inp.dataset.conta); it.c = inp.value.trim() === '' ? null : r3(lerNum(inp.value)); inp.closest('tr').classList.toggle('feito', it.c !== null); }));
   const fa = $('#f-abre'); if (fa) fa.addEventListener('submit', (e) => { e.preventDefault(); if (!pode('caixa')) { liberar('caixa', 'abrir o caixa', () => fa.requestSubmit()); return; } poeCXA(TERM(), { aberto: true, ab: agora(), troco: lerDin(e.target.troco.value), movs: [], quem: eu().nome }); registra(`${nomeTerm(TERM())} aberto com ${din(CXA().troco)} de troco`, 'caixa'); grava(); mostra(); toast('Caixa aberto. Boas vendas!'); });
-  const flj = $('#f-loja'); if (flj) flj.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; Object.assign(db.loja, { nome: f.nome.value.trim(), slogan: f.slogan.value.trim(), tel: f.tel.value.trim(), cidade: f.cidade.value.trim(), pix: f.pix.value.trim(), prazo: Math.max(1, Number(f.prazo.value) || 30), limite: lerDin(f.limite.value), impAuto: f.impAuto.checked }); grava(); mostra(); toast('Configurações salvas.'); });
+  $$('[data-f-loja]').forEach((flj) => flj.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target, n = {}; ['nome', 'slogan', 'tel', 'cidade', 'pix'].forEach((k) => { if (f[k]) n[k] = f[k].value.trim(); }); if (f.prazo) n.prazo = Math.max(1, Number(f.prazo.value) || 30); if (f.limite) n.limite = lerDin(f.limite.value); if (f.impAuto) n.impAuto = f.impAuto.checked; Object.assign(db.loja, n); grava(); mostra(); toast('Configurações salvas.'); }));
+  const lgi = $('#logo-in'); if (lgi) lgi.addEventListener('change', () => { lerLogo(lgi.files[0]); lgi.value = ''; });
   const fbal = $('#f-bal'); if (fbal) fbal.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; db.loja.bal = { ativo: f.ativo.checked, tipo: f.tipo.value, dig: Number(f.dig.value) }; grava(); toast('Balança salva.'); });
   const xml = $('#xml'); if (xml) xml.addEventListener('click', (e) => { if (!pode('entradas')) { e.preventDefault(); liberar('entradas', 'dar entrada pela nota', () => xml.click()); } });
   if (xml) xml.addEventListener('change', () => { const a = xml.files[0]; if (!a) return; a.text().then((txt) => { try { formEntrada(lerXML(txt)); } catch (e) { toast('Esse arquivo não parece o XML de uma nota fiscal (NF-e).', true); } }); xml.value = ''; });
@@ -1478,6 +1549,8 @@ document.addEventListener('click', (e) => {
   }
   if (ds.edforn) { formForn(forn(ds.edforn)); return; }
   if (ds.usarTerm) { try { localStorage.setItem('annona-caixa', ds.usarTerm); } catch (e2) { /* sem armazenamento */ } mostra(); toast(`Este aparelho agora é o ${nomeTerm(ds.usarTerm)}.`); return; }
+  if (ds.guiaTela) { comoUsar(ds.guiaTela); return; }
+  if (ds.tema && b.closest('.temas')) { if (!dono()) { toast('Só o dono troca a cor.', true); return; } db.tema = ds.tema; grava(); aplicaTema(); mostra(); toast(`Cor ${TEMAS.find((x) => x[0] === ds.tema)[1]} aplicada no sistema inteiro.`); return; }
   if (ds.como) { db.usuario = ds.como; grava(); location.hash = `#${eu().abrir || 'painel'}`; mostra(); toast(`Agora você vê o sistema como ${eu().nome}.`); return; }
   if (ds.tiraU) { const u = db.usuarios.find((x) => x.id === ds.tiraU); confirmar('Tirar da equipe', `${t(u.nome)} perde o acesso. As vendas dela continuam nos relatórios.`, 'Tirar', () => { db.usuarios = db.usuarios.filter((x) => x.id !== u.id); registra(`${u.nome} saiu da equipe`, 'equipe'); grava(); mostra(); }, true); return; }
   const id = ds.id, A = {
@@ -1496,6 +1569,11 @@ document.addEventListener('click', (e) => {
     caderno: () => { const c = cli(id); abrir(`${cab('Passar do caderno', t(c.nome))}<form class="form"><label>Valor que ele já devia (R$)<input name="v" inputmode="decimal" required></label><label>Data da compra no caderno<input name="d" type="date" value="${hoje()}"></label><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Lançar</button></footer></form>`, (j) => $('form', j).addEventListener('submit', (ev) => { ev.preventDefault(); const v = lerDin(ev.target.v.value); if (v <= 0) return; db.fiado.push({ id: uid('f'), cli: c.id, data: `${ev.target.d.value}T12:00:00`, tipo: 'compra', v, obs: 'Do caderno' }); grava(); fechar(); mostra(); toast('Dívida do caderno lançada.'); })); },
     'novo-forn': () => formForn(), sangria: () => liberar('caixa', 'sangria do caixa', () => movCaixa('sangria')), suprimento: () => liberar('caixa', 'suprimento do caixa', () => movCaixa('suprimento')), 'fechar-caixa': () => liberar('caixa', 'fechar o caixa', fecharCaixa),
     'inv-cancelar': () => { estado.invent = null; mostra(); }, 'inv-fim': fimInventario,
+    'guia-tela': () => comoUsar(telaAtual),
+    'tira-logo': () => { db.loja.logo = ''; grava(); mostra(); toast('Logo tirada.'); },
+    'trocar-senha': () => { if (!window.veltriaNuvem) return; window.veltriaNuvem.trocarSenha().then((em) => toast(`Mandamos o link para criar a senha nova em ${em}.`)).catch((x) => toast(x.message || 'Não deu para mandar agora.', true)); },
+    'sair-conta': () => confirmar('Sair da conta?', 'O que você fez já está salvo na nuvem. Para voltar, entre com o seu e-mail e a senha.', 'Sair', () => window.veltriaNuvem && window.veltriaNuvem.sair()),
+    'recomecar-demo': () => { const r = $('#recomecar'); if (r) r.click(); },
     copia: () => baixarArq(`annona-copia-${hoje()}.json`, JSON.stringify(db), 'application/json'),
     'exportar-estoque': () => baixarArq(`estoque-${hoje()}.csv`, csv([['Produto', 'Código', 'Categoria', 'Unidade', 'Estoque', 'Mínimo', 'Custo', 'Preço'], ...ativos().map((p) => [p.nome, p.cod, p.cat, UN[p.un], numBR(p.q), numBR(p.min), campoDin(p.custo), campoDin(p.preco)])])),
     'exportar-rel': () => { const [de, ate] = periodo(estado.rel); baixarArq(`vendas-${de}-a-${ate}.csv`, csv([['Nº', 'Data', 'Hora', 'Quem vendeu', 'Itens', 'Total', 'Lucro', 'Pagamento'], ...vendasEntre(de, ate).map((v) => [v.n, dataBR(v.data), horaBR(v.data), nomeU(v.vend), v.itens.map((x) => `${numBR(x.q)} ${x.nome}`).join(', '), campoDin(v.total), campoDin(lucroVenda(v)), v.pag.map((x) => FORMAS[x.f]).join(' + ')])])); },

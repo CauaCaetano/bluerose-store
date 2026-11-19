@@ -1,11 +1,11 @@
 // Popina · Gestão: o menu e as telas do dono (restaurante, mesas e QR, equipe, minha conta). As outras telas da Gestão
 // (cardápio, estoque, clientes, entregadores, relatórios) entram por G em cadastro.js e relatorios.js.
-import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=40';
-import { registrar, acao, ir } from './nucleo.js?v=40';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=40';
+import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=41';
+import { registrar, acao, ir } from './nucleo.js?v=41';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=41';
 import { qrSVG } from '../base/qr.js';
-import { DIAS } from './opcoes.js?v=40';
-import { imprimir } from './imprimir.js?v=40';
+import { DIAS } from './opcoes.js?v=41';
+import { imprimir } from './imprimir.js?v=41';
 
 export const G = {};      // sub-telas: G[nome] = { titulo, html(), montar(el) }
 export const volta = (titulo, sub = '') => `<button type="button" class="voltar" data-ir="mais">${ico('voltar')}Gestão</button><div class="cab"><div><h1>${titulo}</h1>${sub ? `<p>${sub}</p>` : ''}</div></div>`;
@@ -18,7 +18,7 @@ const MENU = [
   ['entregadores', 'Entregadores', 'moto', 'Quem leva e o acerto do dia'],
   ['equipe', 'Equipe', 'pessoas', 'Garçons, convites, o que cada um vê e a senha do gerente'],
   ['restaurante', 'Restaurante', 'loja', 'Nome, contato, horários, logo, cor, Pix e entrega'],
-  ['conta', 'Minha conta', 'ajustes', 'Assinatura, perfil, sair e o plano com a sua marca'],
+  ['config', 'Configurações', 'ajustes', 'Perfil, cores, sua marca, guia, impressão e assinatura'],
   ['inicio', 'Primeiros passos', 'check', 'Pratos, mesas e equipe em 3 passos'],
 ];
 registrar('mais', {
@@ -65,13 +65,8 @@ G.restaurante = {
         <label class="campo"><span>Frase do cardápio</span><input name="boasVindas" maxlength="80" value="${t(L.boasVindas || '')}" placeholder="Ex.: Lanches, pizzas e prato feito"></label>
         <label class="campo"><span>Aviso no cardápio (opcional)</span><input name="aviso" maxlength="120" value="${t(L.aviso || '')}" placeholder="Ex.: Sábado tem feijoada"></label>
       </div>
-      <div class="cartao"><h2>Logo e cor</h2>
-        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="logo-prev" data-logo-prev style="${L.logo ? `background-image:url('${t(L.logo)}')` : ''}">${L.logo ? '' : t((c.nome || 'R')[0])}</div>
-          <div class="linha-bts"><label class="bt">${ico('mais2')}${L.logo ? 'Trocar o logo' : 'Enviar o logo'}<input type="file" accept="image/*" data-logo hidden></label>${L.logo ? '<button type="button" class="bt" data-tira-logo>Tirar</button>' : ''}</div></div>
-        <p class="campo" style="margin-top:14px"><span>Cor de destaque (uma só)</span></p>
-        <div class="cores">${CORES.map((x) => `<button type="button" data-cor="${x}" style="background:${x}" class="${x.toLowerCase() === String(cor).toLowerCase() ? 'on' : ''}" aria-label="Cor ${x}"></button>`).join('')}<label class="bt pq" style="min-height:48px">Outra<input type="color" data-cor-livre value="${t(cor)}" style="width:28px;height:28px;border:0;padding:0;background:none"></label></div>
-        <p class="mudo" style="margin-top:10px">A cor aparece nos botões, nas abas e no cardápio do cliente. Se ficar clara demais, o Popina escurece um pouco para dar leitura.</p>
-      </div>
+      <div class="cartao"><h2>Logo e cor</h2><p class="mudo">O logo, a cor da marca e o esquema de cores ficam em Configurações, “Sua marca” e “Esquema de cores”.</p>
+        <div class="linha-bts" style="margin-top:12px"><button type="button" class="bt" data-ir="mais/config/cfg-marca">${ico('ajustes')}Abrir Sua marca</button></div></div>
       <div class="cartao"><h2>Pix do restaurante</h2>
         <label class="campo"><span>Chave Pix</span><input name="pix" maxlength="80" value="${t(c.pix?.exemplo ? '' : c.pix?.chave || '')}" placeholder="CPF, CNPJ, e-mail, celular ou chave aleatória"><small>Aparece como QR com o valor na hora de fechar a conta. O dinheiro cai direto na sua conta.</small></label>
       </div>
@@ -95,10 +90,6 @@ G.restaurante = {
   },
   montar(el) {
     const f = $('[data-rest]', el); if (!f) return;
-    $$('[data-cor]', f).forEach((b) => { b.onclick = () => { setLoja({ cor: b.dataset.cor }); toast('Cor trocada'); }; });
-    $('[data-cor-livre]', f).onchange = (e) => { setLoja({ cor: e.target.value }); toast('Cor trocada'); };
-    $('[data-logo]', f).onchange = async (e) => { const a = e.target.files?.[0]; if (!a) return; try { setLoja({ logo: await reduzir(a, 320, 320) }); toast('Logo salvo'); } catch { toast('Não deu para ler esta imagem'); } };
-    $('[data-tira-logo]', f)?.addEventListener('click', () => { setLoja({ logo: '' }); toast('Logo tirado'); });
     $('[data-mais-bairro]', f).onclick = () => $('[data-bairros]', f).insertAdjacentHTML('beforeend', '<div class="grade2" data-b><input aria-label="Bairro" data-bn placeholder="Bairro"><input aria-label="Taxa" inputmode="decimal" data-bt placeholder="0,00"></div>');
     $$('[data-dia]', f).forEach((d) => {
       $('[data-aberto]', d).onchange = (e) => { $('[data-turnos]', d).hidden = !e.target.checked; };
@@ -197,31 +188,12 @@ acao('pessoa-ed', (b) => {
 });
 
 // ------------------------------------------------------------------ minha conta e o plano com a sua marca
-function planoMarca() {
+export function planoMarca() {
   const m = window.popinaPlano === 'marca';
   return `<div class="cartao"><h2>Popina com a sua marca</h2>
     ${m ? '<p class="aviso ok">Ativo: o topo do sistema e o cardápio mostram só o seu logo e o seu nome.</p>' : '<p>Por R$ 129/mês (ou R$ 1.238/ano), o nome Popina sai do topo do sistema e do cardápio do cliente: aparecem só o seu logo e o seu nome, e o link do cardápio fica sem o nome do sistema.</p>'}
     <div class="linha-bts" style="margin-top:12px">${CONTA ? (m ? '' : '<a class="bt cheio" target="_top" href="/popina.html#precos">Ver o plano</a>') : `<button type="button" class="bt ${m ? '' : 'cheio'}" data-prever-marca>${m ? 'Voltar ao plano normal' : 'Ver como fica na demonstração'}</button>`}</div></div>`;
 }
-G.conta = {
-  titulo: 'Minha conta',
-  html() {
-    const real = CONTA && window.veltriaAbrir;
-    return volta('Minha conta', real ? `${t(CONTA.empresa || db.config.nome)} · ${window.veltriaAbrir.papel === 'dono' ? 'dono' : 'equipe'}` : 'Na conta de verdade, aqui ficam o perfil, a assinatura e a saída') + `
-    <div class="menu-g">
-      <button type="button" data-conta="perfil"><span class="ico-g">${ico('pessoas')}</span><span><b>Meu perfil</b><small>E-mail, cargo e o que você pode ver</small></span></button>
-      <button type="button" data-conta="assinatura"><span class="ico-g">${ico('cartao')}</span><span><b>Assinatura</b><small>Plano, próxima cobrança e anual com desconto</small></span></button>
-      <button type="button" data-conta="configuracoes"><span class="ico-g">${ico('ajustes')}</span><span><b>Dados da empresa</b><small>Nome e cidade da conta</small></span></button>
-      <button type="button" data-conta="sair"><span class="ico-g">${ico('voltar')}</span><span><b>Sair</b><small>Os dados ficam guardados na nuvem</small></span></button>
-    </div>
-    <div style="margin-top:16px">${planoMarca()}</div>
-    ${real ? '' : `<div class="cartao"><h2>Demonstração</h2><p class="mudo" style="margin-bottom:12px">Tudo o que você fez aqui fica só neste navegador.</p><div class="linha-bts"><button type="button" class="bt" data-recomecar>${ico('troca')}Recomeçar a demonstração</button><a class="bt cheio" target="_top" href="../../../popina.html#precos">Assinar o Popina</a></div></div>`}`;
-  },
-  montar(el) {
-    $('[data-prever-marca]', el)?.addEventListener('click', () => { window.popinaPlano = window.popinaPlano === 'marca' ? 'basico' : 'marca'; dispatchEvent(new Event('popina-plano')); toast(window.popinaPlano === 'marca' ? 'Assim fica com a sua marca: veja o topo' : 'De volta ao plano normal'); ir('mais/conta'); });
-    $('[data-recomecar]', el)?.addEventListener('click', async () => { if (await confirma('Recomeçar a demonstração? Tudo volta ao exemplo do início.', 'Recomeçar', true)) { recomecar(); toast('Demonstração recomeçada'); ir('salao'); } });
-  },
-};
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-conta]'); if (!b) return;
   const f = window.veltriaAbrir?.[b.dataset.conta];

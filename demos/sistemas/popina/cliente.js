@@ -2,8 +2,8 @@
 // ?mesa=N: pede da mesa (o garçom confere), chama o garçom e pede a conta.  Sem mesa: entrega ou retirada, com taxa por bairro e troco.
 // r=<restaurante>: o cardápio de verdade (nuvem). Sem r: o restaurante de exemplo deste aparelho (demonstração).
 // Todo pedido também pode ir para o WhatsApp do restaurante (link wa.me com o pedido escrito).
-import { ico, folha, toast, $, $$ } from './ui.js?v=40';
-import { formOpcoes, temOpcoes, abertoAgora, textoHorarios } from './opcoes.js?v=40';
+import { ico, folha, toast, $, $$ } from './ui.js?v=41';
+import { formOpcoes, temOpcoes, abertoAgora, textoHorarios } from './opcoes.js?v=41';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -243,7 +243,7 @@ $('#cli-q').addEventListener('input', (e) => { busca = e.target.value.trim(); li
 function tudo() { aplicarCor(); topo(); caixaModo(); $('#cli-aviso').innerHTML = `${!aberto() && !mesa ? '<p class="aviso">Fechado agora. Veja os horários acima.</p>' : ''}${L.aviso ? `<p class="aviso azul">${t(L.aviso)}</p>` : ''}`; lista(); rodape(); sacola = guardado(`sacola-${mesa || modo}`) || []; sacola = sacola.filter((x) => P(x.prod)); barra(); }
 async function iniciar() {
   if (!R) {
-    loja = await import('./loja.js?v=40'); doExemplo();
+    loja = await import('./loja.js?v=41'); doExemplo();
     loja.ouvir(() => { doExemplo(); if (!document.querySelector('.folha-fundo')) { aplicarCor(); topo(); lista(); } });
     tudo(); return;
   }

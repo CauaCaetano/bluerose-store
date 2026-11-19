@@ -399,7 +399,7 @@ const T = {
   },
   mais() {
     const fmx = contaMes(mesDe(0));
-    const l = [['fimdomes', 'Fim do mês', fmx.falta ? `${din(fmx.falta)} a receber de quem paga no fim do mês` : 'quem paga no fim do mês: a receber, cobrar e marcar pago'], ['lembretes', 'Lembretes de amanhã', `${doDia(1).filter((a) => a.st === 'marcado').length} para confirmar no WhatsApp`], ['aniversarios', 'Aniversários', niverMes()], ['resumo', 'Resumo', 'do dia, do mês e do ano'], ['ia', 'Assistente', 'pergunte da sua agenda e dos clientes'], ['caixa', 'Caixa', 'quanto entrou e o que as faltas custaram'], ['espera', 'Lista de espera', `${db.espera.length} esperando encaixe`], ['assinatura', 'Minha assinatura', estAss()], ['dono', 'Painel do dono', 'ajudante e o que ela vê'], ['config', 'Configurações', 'sua foto e cor, tipo de negócio, horário, pagamento, serviços, sinal, PIX'], ['bv', 'O que mudou no Jano', 'ver de novo a apresentação da atualização']];
+    const l = [['fimdomes', 'Fim do mês', fmx.falta ? `${din(fmx.falta)} a receber de quem paga no fim do mês` : 'quem paga no fim do mês: a receber, cobrar e marcar pago'], ['lembretes', 'Lembretes de amanhã', `${doDia(1).filter((a) => a.st === 'marcado').length} para confirmar no WhatsApp`], ['aniversarios', 'Aniversários', niverMes()], ['resumo', 'Resumo', 'do dia, do mês e do ano'], ['ia', 'Assistente', 'pergunte da sua agenda e dos clientes'], ['caixa', 'Caixa', 'quanto entrou e o que as faltas custaram'], ['espera', 'Lista de espera', `${db.espera.length} esperando encaixe`], ['assinatura', 'Minha assinatura', window.BRAssinatura && BRAssinatura.emConta() ? 'plano, situação, renovar e cancelar' : estAss()], ['dono', 'Painel do dono', 'ajudante e o que ela vê'], ['config', 'Configurações', 'perfil, cores, sua marca, guia, horário, serviços, mensagens e assinatura'], ['bv', 'O que mudou no Jano', 'ver de novo a apresentação da atualização']];
     return `<h1>Mais</h1><div class="lista-mais">${l.map(([k, n, s]) => `<a href="#${k === 'bv' ? 'mais' : k}"${k === 'bv' ? ' data-acao="ver-bv"' : ''}><span><b>${n}</b><small>${t(s)}</small></span><span aria-hidden="true">›</span></a>`).join('')}<a href="#mais" data-acao="menu-comum"><span><b>Planilhas e busca</b><small>importar do Excel, exportar, procurar, imprimir, instalar o app</small></span><span aria-hidden="true">›</span></a></div><p class="creditos"><img src="../../../img/logos/jano/jano-completa-480.webp" alt="Jano" width="92" height="88" loading="lazy">Jano · agenda e atendimento · Blue Rose</p>`;
   },
   ia() {
@@ -409,13 +409,9 @@ const T = {
       <form class="form-ia" id="f-ia"><input id="q-ia" placeholder="Pergunte" aria-label="Pergunta"><button class="bt cheio">Enviar</button></form>`;
   },
   assinatura() {
-    const a = db.assinatura;
-    const topo = a.status === 'vencida' ? `<div class="cartao" style="border-color:var(--verm)"><b style="color:var(--verm)">Assinatura vencida</b><p class="mini" style="margin:4px 0 0">O pagamento de ${din(a.valor)} não foi aprovado. Sua agenda e os clientes estão guardados.</p></div>`
-      : a.renova ? `<div class="cartao"><b>Ativa</b><p class="mini" style="margin:4px 0 0">Plano Assinatura · ${din(a.valor)} por mês · próxima cobrança em ${a.proxima} dias.</p></div>`
-        : `<div class="cartao" style="border-color:var(--rose)"><b>Cancelada</b><p class="mini" style="margin:4px 0 0">Você usa tudo por mais ${a.proxima} dias. Depois disso nada mais é cobrado.</p></div>`;
-    return `<a href="#mais">← Mais</a><h1>Minha assinatura</h1><p class="sub">A mesma da sua conta no site. Sem fidelidade.</p>${topo}
-      <div class="linha">${a.status === 'vencida' ? '<button type="button" class="bt cheio" data-acao="pagar">Pagar aqui no app</button><a class="bt" target="_blank" rel="noopener" href="https://bluerose-store.com/conta.html">Renovar no site</a>' : a.renova ? '<button type="button" class="bt" data-acao="cancelar">Cancelar assinatura</button>' : '<button type="button" class="bt cheio" data-acao="reativar">Reativar</button>'}</div>
-      <h2>Pagamentos</h2><div class="cartao">${a.pagos.map((d) => `<div class="hora" style="cursor:default"><span class="h">✓</span><span>Mensalidade<small>${data(d).toLocaleDateString('pt-BR')}</small></span><span>${din(a.valor)}</span></div>`).join('')}</div>`;
+    const a = db.assinatura, demo = !(window.BRAssinatura && BRAssinatura.emConta());
+    return `<a href="#mais">← Mais</a><h1>Minha assinatura</h1><p class="sub">A mesma da sua conta no site. Sem fidelidade. Também fica em Configurações.</p><div id="ass-slot"></div>
+      ${demo && a.pagos && a.pagos.length ? `<h2>Pagamentos (exemplo)</h2><div class="cartao">${a.pagos.map((d) => `<div class="hora" style="cursor:default"><span class="h">✓</span><span>Mensalidade<small>${data(d).toLocaleDateString('pt-BR')}</small></span><span>${din(a.valor)}</span></div>`).join('')}</div>` : ''}<div style="height:110px" aria-hidden="true"></div>`;
   },
   dono() {
     return `<a href="#mais">← Mais</a><h1>Painel do dono</h1><p class="sub">Quem te ajuda entra com o próprio celular e só vê o que você deixar.</p>
@@ -425,16 +421,31 @@ const T = {
   },
   config() {
     const foto = db.foto ? `<img src="${t(db.foto)}" alt="">` : t(db.pro.split(' ').map((p) => p[0]).slice(0, 2).join(''));
-    return `<a href="#mais">← Mais</a><h1>Configurações</h1><h2>Sua marca no app</h2><p class="mini" style="margin-top:-6px">O app fica com a sua cara: sua foto ou logo no topo e a cor que você escolher. Quem você convidar vê igual.</p>
-      <div class="cartao marca"><span class="ini grande" aria-hidden="true">${foto}</span><div class="marca-bts"><label class="bt pq cheio" for="foto-in">${db.foto ? 'Trocar foto ou logo' : 'Pôr foto ou logo'}</label><input type="file" id="foto-in" accept="image/*" class="sr">${db.foto ? '<button type="button" class="bt pq" data-acao="tira-foto">Tirar a foto</button>' : ''}</div></div>
-      <p class="campo" style="margin:0 0 6px">Cor do app</p><div class="temas" role="group" aria-label="Cor do app">${TEMAS.map(([k, n, a, b]) => `<button type="button" data-cor-tema="${k}" aria-pressed="${temaAtual()[0] === k}" style="--a:${a};--b:${b}"><i aria-hidden="true"></i>${n}</button>`).join('')}</div>
-      <h2>Tipo de negócio</h2><p class="mini" style="margin-top:-6px">Troca os serviços de exemplo. Você ajusta nomes, tempos e preços logo abaixo.</p><div class="chips">${Object.entries(MODELOS).map(([k, m]) => `<button type="button" data-tipo="${k}" aria-pressed="${(db.tipo || 'geral') === k}">${m.nome}</button>`).join('')}</div>${[['studio', 'Nome do espaço'], ['pro', 'Seu nome'], ['ramo', 'O que você faz'], ['pix', 'Chave PIX do sinal']].map(([k, n]) => `<label class="campo">${n}<input data-cfg="${k}" value="${t(db[k])}"></label>`).join('')}
+    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-negocio', 'Negócio e horário'], ['pagamento', 'Pagamento'], ['cfg-servicos', 'Serviços'], ['cfg-msgs', 'Mensagens'], ['cfg-assinatura', 'Minha assinatura']];
+    return `<a href="#mais">← Mais</a><h1>Configurações</h1><p class="sub">Seu perfil, as cores, a sua marca, o guia, o seu negócio e a sua assinatura.</p>
+      <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<button type="button" data-sec="${id}">${n}</button>`).join('')}</nav>
+      <section class="cfg-sec" id="cfg-perfil"><h2>Perfil</h2><div class="cartao cfg-eu"><span class="ini grande" aria-hidden="true">${foto}</span><div><b>${t(db.pro)}</b><small id="cfg-cargo-txt">Dono(a) · ${t(db.studio)}</small></div></div>
+        <label class="campo">Seu nome<input data-cfg="pro" value="${t(db.pro)}"></label>
+        <label class="campo">E-mail da conta<input id="cfg-email" readonly value="voce@exemplo.com.br" aria-describedby="cfg-email-d"><small id="cfg-email-d" class="mini">Só leitura: é o e-mail do login.</small></label>
+        <label class="campo">Cargo<input id="cfg-cargo" readonly value="Dono(a)"></label>
+        <div class="linha cfg-bts"><button type="button" class="bt pq" data-acao="trocar-senha" data-so-conta hidden>Trocar a senha</button><button type="button" class="bt pq" data-acao="sair-conta" data-so-conta hidden>Sair</button></div></section>
+      <section class="cfg-sec" id="cfg-cores"><h2>Esquema de cores</h2><p class="mini cfg-txt">A cor vale no app inteiro: botões, relógio do dia, barra de baixo e vitrine. Quem você convidar vê igual.</p>
+        <div class="temas" role="group" aria-label="Cor do app">${TEMAS.map(([k, n, a, b]) => `<button type="button" data-cor-tema="${k}" aria-pressed="${temaAtual()[0] === k}" style="--a:${a};--b:${b}"><i aria-hidden="true"></i>${n}</button>`).join('')}</div></section>
+      <section class="cfg-sec" id="cfg-marca"><h2>Sua marca no app</h2><p class="mini cfg-txt">Sua foto ou logo e o nome do espaço aparecem no topo, na vitrine e nas mensagens para os clientes.</p>
+        <div class="cartao marca"><span class="ini grande" aria-hidden="true">${foto}</span><div class="marca-bts"><label class="bt pq cheio" for="foto-in">${db.foto ? 'Trocar foto ou logo' : 'Pôr foto ou logo'}</label><input type="file" id="foto-in" accept="image/*" class="sr">${db.foto ? '<button type="button" class="bt pq" data-acao="tira-foto">Tirar a foto</button>' : ''}</div></div>
+        ${[['studio', 'Nome do espaço'], ['ramo', 'O que você faz']].map(([k, n]) => `<label class="campo">${n}<input data-cfg="${k}" value="${t(db[k])}"></label>`).join('')}</section>
+      <section class="cfg-sec" id="cfg-guia"><h2>Guia: como usar</h2><p class="mini cfg-txt">Um passo a passo curto de cada tela. Também abre a qualquer hora pelo botão <b>?</b> no topo.</p>
+        <div class="cfg-como">${COMO_ORDEM.map((k) => `<button type="button" class="bt pq" data-como="${k}">${COMO[k][0]}</button>`).join('')}</div>
+        <button type="button" class="bt largo" data-acao="ver-bv" style="margin-top:10px">Ver de novo a apresentação</button></section>
+      <section class="cfg-sec" id="cfg-negocio"><h2>Tipo de negócio</h2><p class="mini" style="margin-top:-6px">Troca os serviços de exemplo. Você ajusta nomes, tempos e preços logo abaixo.</p><div class="chips">${Object.entries(MODELOS).map(([k, m]) => `<button type="button" data-tipo="${k}" aria-pressed="${(db.tipo || 'geral') === k}">${m.nome}</button>`).join('')}</div><label class="campo">Chave PIX do sinal<input data-cfg="pix" value="${t(db.pix)}"></label>
       <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end"><label class="campo">Começo às<input data-cfg="abre" type="number" value="${db.abre}"></label><label class="campo">Término às<input data-cfg="fecha" type="number" value="${db.fecha}"></label><label class="campo">Sinal (%)<input data-cfg="sinalPct" type="number" value="${db.sinalPct}"></label><label class="campo">Pedir sinal acima de (R$)<input data-cfg="sinalAcima" type="number" value="${db.sinalAcima}"></label><label class="campo" style="grid-column:1/-1">Horários sugeridos de quanto em quanto<select data-cfg="passo">${[10, 15, 20, 30, 60].map((m) => `<option value="${m}" ${(db.passo || 30) === m ? 'selected' : ''}>${m} minutos</option>`).join('')}</select></label></div>
+      </section>
       <h2 id="pagamento">Pagamento dos clientes</h2><p class="mini" style="margin-top:-6px">Quem paga no fim do mês não precisa pagar no dia: os atendimentos somam na tela Fim do mês. ${db.clientes.filter(mensal).length} de ${db.clientes.length} clientes pagam no fim do mês.</p>
       <label class="campo">Clientes novos pagam<select id="pag-padrao"><option value="atendimento" ${db.pagPadrao === 'mes' ? '' : 'selected'}>No atendimento</option><option value="mes" ${db.pagPadrao === 'mes' ? 'selected' : ''}>No fim do mês</option></select></label>
       ${db.pagPadrao === 'mes' ? '' : '<p class="mini" style="margin:-6px 0 10px">Se a maioria dos seus clientes paga no fim do mês, escolha "No fim do mês".</p>'}
       <button type="button" class="bt largo" data-acao="todos-mes">Marcar todos os clientes como fim do mês</button>
-      <h2>Serviços</h2><div class="cartao">${db.servicos.map((s, i) => `<div class="serv-ed"><span class="h" style="color:${s.cor}">●</span><input data-sv="${i}.nome" value="${t(s.nome)}" aria-label="Nome do serviço"><label>min<input data-sv="${i}.min" type="number" min="5" step="5" value="${s.min}"></label><label>R$<input data-sv="${i}.preco" type="number" min="0" step="0.01" value="${s.preco}"></label></div>`).join('')}</div><button type="button" class="bt largo" data-acao="add-serv">+ Adicionar serviço</button>${secMsgs()}<h2>App no celular</h2><p class="mini" style="margin-top:-6px">Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><button type="button" class="bt largo" data-acao="instalar">Instalar o app</button><p class="mini" style="margin-bottom:120px">Funciona sem internet: o que você marcar sobe quando a conexão voltar.</p>`;
+      <h2 id="cfg-servicos" class="cfg-sec">Serviços</h2><div class="cartao">${db.servicos.map((s, i) => `<div class="serv-ed"><span class="h" style="color:${s.cor}">●</span><input data-sv="${i}.nome" value="${t(s.nome)}" aria-label="Nome do serviço"><label>min<input data-sv="${i}.min" type="number" min="5" step="5" value="${s.min}"></label><label>R$<input data-sv="${i}.preco" type="number" min="0" step="0.01" value="${s.preco}"></label></div>`).join('')}</div><button type="button" class="bt largo" data-acao="add-serv">+ Adicionar serviço</button><div class="cfg-sec" id="cfg-msgs">${secMsgs()}</div><h2>App no celular</h2><p class="mini" style="margin-top:-6px">Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><button type="button" class="bt largo" data-acao="instalar">Instalar o app</button><p class="mini">Funciona sem internet: o que você marcar sobe quando a conexão voltar.</p>
+      <div class="cfg-sec" id="cfg-assinatura"><div id="ass-slot"></div></div><div style="height:110px" aria-hidden="true"></div>`;
   },
 };
 
@@ -679,6 +690,39 @@ function responde(p) {
   return `Ainda não sei responder isso. Posso falar da agenda (hoje, amanhã), horários livres, quem chamar, faltas, sinais pendentes, lista de espera, um cliente pelo nome, quanto entrou no dia, na semana, no mês e no ano, e escrever os lembretes. Hoje: ${h.lista.length} horário(s), ${din(h.rec)} recebido e ${din(h.prev)} a receber.`;
 }
 
+// "Como usar" curto de cada tela: abre pelo botão ? do topo (na tela em que a pessoa está) e em Configurações › Guia
+const COMO = {
+  dia: ['Hoje', ['O relógio mostra o dia: cada arco é um atendimento.', 'Toque num horário para confirmar, receber, remarcar ou marcar falta.', 'Os dias no alto (ou “Ir para outra data”) trocam o dia.']],
+  novo: ['Novo horário', ['Escolha o serviço, o dia e um horário livre (ou digite outro).', 'Ponha o cliente e o WhatsApp.', '“Marcar” salva e abre a mensagem de confirmação.']],
+  clientes: ['Clientes', ['Quem passou do tempo de voltar aparece primeiro.', 'Toque no cliente para ver a ficha, as fotos e marcar de novo.']],
+  link: ['Vitrine', ['Copie o seu link de agendamento e ponha na bio.', 'Fotos de antes e depois e vídeos curtos para postar nas redes.', 'Pedidos que chegam pelo link aparecem aqui.']],
+  fimdomes: ['Fim do mês', ['Quem paga no fim do mês: quanto falta receber.', '“Cobrar” manda a conta no WhatsApp; “Pago” dá baixa.']],
+  resumo: ['Resumo', ['O dia, o mês e o ano: quanto entrou e quanto falta.', 'Como os clientes pagaram.']],
+  caixa: ['Caixa', ['Quanto entrou e o que as faltas custaram.']],
+  ia: ['Assistente', ['Pergunte da sua agenda e dos clientes, do seu jeito.', 'Ele também escreve os lembretes de amanhã.']],
+  dono: ['Painel do dono', ['Convide quem te ajuda e escolha o que a pessoa vê.']],
+  config: ['Configurações', ['Perfil, cores, sua marca, guia, negócio, horário, serviços, mensagens e assinatura.', 'Use os atalhos no alto para ir direto a uma seção.']],
+};
+const COMO_ORDEM = ['dia', 'novo', 'clientes', 'link', 'fimdomes', 'resumo', 'caixa', 'ia', 'dono', 'config'];
+function comoUsar(k) {
+  const c = COMO[k] || COMO.dia;
+  folha(`<h2>Como usar: ${t(c[0])}</h2><ol class="como-lista">${c[1].map((x) => `<li>${t(x)}</li>`).join('')}</ol><div class="linha"><button type="button" class="bt cheio" data-fecha>Entendi</button><a class="bt" href="#config" data-fecha data-ir-guia>Todas as telas</a></div>`);
+}
+// "Minha assinatura" (base/assinatura.js): o bloco fica montado entre um redesenho e outro (não recarrega nem perde o estado)
+let blocoAss = null;
+function posConfig(tela) {
+  const slot = tela.querySelector('#ass-slot');
+  if (slot && window.BRAssinatura) { if (blocoAss) slot.replaceWith(blocoAss); else blocoAss = BRAssinatura.montar(slot, { app: 'agendaessencial', nome: 'Jano', pagina: 'jano.html' }); }
+  const em = tela.querySelector('#cfg-email');
+  if (em && window.BRAssinatura) BRAssinatura.conta().then((c) => {
+    if (c.email) em.value = c.email;
+    const cargo = { dono: 'Dono(a)', admin: 'Administrador(a)', membro: 'Ajudante' }[c.papel] || 'Equipe', ci = tela.querySelector('#cfg-cargo'), ct = tela.querySelector('#cfg-cargo-txt');
+    if (ci) ci.value = cargo; if (ct) ct.textContent = `${cargo} · ${db.studio}`;
+    if (c.modo === 'conta') tela.querySelectorAll('[data-so-conta]').forEach((b) => { b.hidden = false; });
+  });
+}
+const rotaAtual = () => (location.hash.slice(1) || 'dia');
+
 // ------------------------------------------------------------------ navegação, trava e pagamento
 function mostra() {
   const r = location.hash.slice(1) || 'dia', tela = $('#tela');
@@ -688,6 +732,7 @@ function mostra() {
   aplicaTema(); $('#nome-studio').textContent = db.studio; $('#nome-pro').textContent = `${db.pro} · ${db.ramo}`; const ini = $('#iniciais'); if (db.foto) { ini.innerHTML = `<img src="${t(db.foto)}" alt="">`; ini.classList.add('com-foto'); } else { ini.textContent = db.pro.split(' ').map((p) => p[0]).slice(0, 2).join(''); ini.classList.remove('com-foto'); }
   if (!db.assinatura.renova && db.assinatura.status !== 'vencida' && r !== 'assinatura') tela.insertAdjacentHTML('afterbegin', `<p class="cartao" style="margin-top:12px;padding:8px 12px;background:#f1dfdd">Assinatura cancelada: você usa por mais ${db.assinatura.proxima} dias. <a href="#assinatura">Reativar</a></p>`);
   trava(r);
+  if (r === 'config' || r === 'assinatura') posConfig(tela);
   if (r === 'link') preencheVitrine();
   if (r === 'ia') { const el = $('#ia-boneco'); if (el) import('../base/assistente-ia.js?v=2').then((m) => { const b = m.personagemIA(el, db.conversa.length ? 'parado' : 'ola'); if (!db.conversa.length) b.estado('ola', 2600); else if (/Pensando/.test(db.conversa[db.conversa.length - 1].t)) b.estado('pensando'); else b.estado('explicando', 4000); }).catch(() => el.remove()); }
   document.title = `${{ dia: 'Dia', resumo: 'Resumo', novo: rasc.remarca ? 'Remarcar' : 'Novo horário', clientes: 'Clientes', fimdomes: 'Fim do mês', link: 'Vitrine', aniversarios: 'Aniversários', lembretes: 'Lembretes', espera: 'Lista de espera', caixa: 'Caixa', mais: 'Mais', ia: 'Assistente', assinatura: 'Minha assinatura', dono: 'Painel do dono', config: 'Configurações' }[r] || 'Dia'} · ${db.studio || 'Agenda'}`;
@@ -863,6 +908,9 @@ const ACOES = {
   'novo-video': () => escolheCliente('Vídeo curto', (c) => novaMidia({ tipo: 'video', cli: c.id, serv: c.serv, par: uid() })),
   postar: () => abrePostar(null),
   'ver-bv': () => boasVindas(),
+  como: () => comoUsar(rotaAtual()),
+  'trocar-senha': () => { if (!window.veltriaNuvem) return; window.veltriaNuvem.trocarSenha().then((e) => toast(`Mandamos o link para criar a senha nova em ${e}.`)).catch((x) => toast(x.message || 'Não deu para mandar agora.')); },
+  'sair-conta': () => { if (confirm('Sair da conta? O que você fez já está salvo na nuvem.') && window.veltriaNuvem) window.veltriaNuvem.sair(); },
   copiar: () => { navigator.clipboard?.writeText(LINK).catch(() => {}); toast('Link copiado. Cole na bio do Instagram.'); },
   aceitar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); let c = db.clientes.find((x) => x.nome === p.nome); if (!c) { c = { id: uid(), nome: p.nome, tel: p.tel, ultima: 0, serv: p.serv, faltas: 0, ...(db.pagPadrao === 'mes' ? { pagamento: 'mes' } : {}) }; db.clientes.push(c); } db.ags.push({ id: uid(), dia: p.dia, ini: p.ini, cli: c.id, serv: p.serv, st: 'confirmado', pago: 0, valor: c.valor ?? null, sinal: serv(p.serv).preco >= db.sinalAcima ? { valor: Math.round(serv(p.serv).preco * db.sinalPct / 100), pago: true } : null }); db.pedidos = db.pedidos.filter((x) => x !== p); grava(); mostra(); toast(`Horário de ${p.nome.split(' ')[0]} confirmado. Abrindo o WhatsApp para avisar.`); window.open(zap(p.tel, msg('aceito', { nome: p.nome.split(' ')[0], servico: serv(p.serv).nome.toLowerCase(), dia: nomeDia(p.dia), hora: hh(p.ini) })), '_blank', 'noopener'); },
   recusar: (d) => { const p = db.pedidos.find((x) => x.id === d.p); window.open(zap(p.tel, msg('recusado', { nome: p.nome.split(' ')[0], horarios: livres(p.dia, serv(p.serv).min).slice(0, 3).map(hh).join(', ') })), '_blank', 'noopener'); },
@@ -904,6 +952,8 @@ document.addEventListener('click', (e) => {
   const hr = el.closest('[data-hr]'); if (hr) { guarda(); rasc.ini = Number(hr.dataset.hr); mostra(); return; }
   const sg = el.closest('[data-sug]'); if (sg) { $('#q-ia').value = sg.dataset.sug; $('#f-ia').requestSubmit(); return; }
   const tp = el.closest('[data-tipo]'); if (tp) { const m = MODELOS[tp.dataset.tipo]; db.tipo = tp.dataset.tipo; db.servicos = m.servicos.map((x) => ({ ...x })); if (db.ramo === 'atendimento com hora marcada' || Object.values(MODELOS).some((x) => x.nome.toLowerCase() === db.ramo)) db.ramo = m.nome.toLowerCase(); grava(); mostra(); toast(`Serviços de ${m.nome.toLowerCase()} carregados. Ajuste os preços abaixo.`); return; }
+  const cm = el.closest('[data-como]'); if (cm) { comoUsar(cm.dataset.como); return; }
+  const sc = el.closest('[data-sec]'); if (sc) { document.getElementById(sc.dataset.sec)?.scrollIntoView({ behavior: calmo() ? 'auto' : 'smooth', block: 'start' }); return; }
   const tm = el.closest('[data-cor-tema]'); if (tm) { db.tema = tm.dataset.corTema; grava(); mostra(); toast(`Cor ${temaAtual()[1].toLowerCase()} aplicada.`); return; }
   const pl = el.closest('[data-plano]'); if (pl) { db.plano = pl.dataset.plano; db.assinatura.valor = db.plano === 'pro' ? 109 : 49; grava(); mostra(); return; }
   const ac = el.closest('[data-acao]'); if (ac && ACOES[ac.dataset.acao]) ACOES[ac.dataset.acao](ac.dataset);

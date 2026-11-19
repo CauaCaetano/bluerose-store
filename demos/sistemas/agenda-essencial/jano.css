@@ -337,3 +337,24 @@ html[data-tema]:not([data-tema="rose"]) .pilula .mais-um { color: #fff; text-sha
   .dias button small { font-size: .6rem; letter-spacing: .04em; }
   .dias button b { font-size: 1.05rem; }
 }
+
+/* ---------- Configurações em seções (19/11/2026): engrenagem e "?" no topo, atalhos, perfil, guia e "Minha assinatura" ---------- */
+.topo-bts { display: flex; align-items: center; gap: 6px; flex: none; }
+.topo-bt { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--trav-2); border: 1px solid var(--bronze-cl); color: var(--tinta); cursor: pointer; flex: none; padding: 0; }
+.topo-bt svg { width: 22px; height: 22px; }
+.quem { min-width: 0; flex: 1 1 auto; } .quem > div { min-width: 0; } .quem b, .quem small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.cfg-nav { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; margin: 6px 0 0; scrollbar-width: none; }
+.cfg-nav::-webkit-scrollbar { display: none; }
+.cfg-nav button { flex: none; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--pedra-esc); background: var(--trav-2); color: var(--tinta); font-weight: 600; font-size: .85rem; cursor: pointer; }
+.cfg-sec { scroll-margin-top: 76px; }
+.cfg-txt { margin: -4px 0 10px; }
+.cfg-eu { display: flex; gap: 12px; align-items: center; } .cfg-eu > div { min-width: 0; } .cfg-eu b { display: block; font: 600 1.05rem var(--romana); overflow-wrap: anywhere; } .cfg-eu small { color: var(--tx-2); font-size: .85rem; }
+.cfg-bts { flex-wrap: wrap; }
+.cfg-como { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)); gap: 8px; }
+.campo input[readonly] { background: var(--pedra-2); color: var(--tinta); }
+[data-so-conta][hidden] { display: none !important; }
+.como-lista { margin: 8px 0 16px; padding-left: 20px; display: grid; gap: 8px; }
+#cfg-assinatura { margin-top: 22px; }
+/* bloco compartilhado com as cores do Jano: segue o esquema escolhido */
+.br-ass { --ass-cor: var(--noite); --ass-cor-txt: var(--trav-2); --ass-texto: var(--tinta); --ass-mudo: var(--tx-2); --ass-fundo: var(--trav-2); --ass-linha: var(--bronze-cl); --ass-raio: 10px; --ass-perigo: var(--verm); --ass-ok: var(--verde); --ass-atn: #7a5a24; --ass-titulo: var(--romana); }
+.br-ass .br-ass-t { font-size: 1rem; letter-spacing: .06em; text-transform: uppercase; color: var(--tinta); }

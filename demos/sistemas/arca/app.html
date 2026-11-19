@@ -19,9 +19,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="arca.css?v=5">
+<link rel="stylesheet" href="arca.css?v=6">
+<link rel="stylesheet" href="../base/assinatura.css?v=1">
 <script src="../base/versoes.js?v=50"></script>
-<script src="../base/conta-nuvem.js?v=61"></script>
+<script src="../base/conta-nuvem.js?v=62"></script>
+<script src="../base/assinatura.js?v=1"></script>
 </head>
 <body>
 <a class="pular" href="#tela">Pular para o conteúdo</a>
@@ -56,11 +58,14 @@
   <div class="corpo">
     <header class="topo">
       <img class="topo-simbolo" src="../../../img/logos/arca/arca-simbolo-256.png?v=1" alt="" width="256" height="185">
+      <img class="logo-neg" id="logo-neg" alt="" hidden>
       <div class="empresa"><b id="nome-neg">Grupo Vale Norte Distribuidora</b><small id="hoje-txt"></small></div>
       <label class="filtro-topo emp-filtro"><span>Empresa</span><select id="emp-filtro" aria-label="Filtrar por empresa"></select></label>
       <label class="filtro-topo cc-filtro"><span>Centro de custo</span><select id="cc-filtro" aria-label="Filtrar por centro de custo"></select></label>
       <button type="button" class="busca-bt" data-acao="procurar" aria-label="Busca global (Ctrl K)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span>Buscar no Arca…</span><kbd>Ctrl K</kbd></button>
       <button type="button" class="usuario-bt" data-acao="trocar-usuario" aria-label="Quem está usando"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span id="usuario-nome">—</span></button>
+      <button type="button" class="topo-ic" data-acao="como" aria-label="Como usar esta tela" title="Como usar esta tela"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"/><path d="M12 16.8v.2"/></svg></button>
+      <a class="topo-ic" href="#config" aria-label="Configurações" title="Configurações"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></a>
       <a class="bt-ia" href="#ia" aria-label="Assistente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg><span>Assistente</span></a>
     </header>
     <main id="tela" tabindex="-1"></main>
@@ -75,6 +80,6 @@
 </nav>
 <datalist id="lista-cc"></datalist><datalist id="lista-proj"></datalist>
 <div class="avisos" id="avisos" role="status" aria-live="polite"></div>
-<script type="module" src="app.js?v=3"></script>
+<script type="module" src="app.js?v=4"></script>
 </body>
 </html>

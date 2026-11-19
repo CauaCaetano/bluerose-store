@@ -1,21 +1,24 @@
 // Popina · liga tudo: as 5 abas, a cor do restaurante, a marca (plano com a sua marca), a faixa da demonstração,
 // o aviso de pedido novo e o primeiro uso.
-import './salao.js?v=40';
-import './pedidos.js?v=40';
-import './cozinha.js?v=40';
-import './caixa.js?v=40';
-import './gestao.js?v=40';
-import './cadastro.js?v=40';
-import './relatorios.js?v=40';
-import { talvezAbrirInicio } from './inicio.js?v=40';
-import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila } from './loja.js?v=40';
-import { iniciarRotas, ir } from './nucleo.js?v=40';
-import { ico, toast, bip, confirma, $ } from './ui.js?v=40';
-import { conferirNovos } from './cozinha.js?v=40';
+import './salao.js?v=41';
+import './pedidos.js?v=41';
+import './cozinha.js?v=41';
+import './caixa.js?v=41';
+import './gestao.js?v=41';
+import './cadastro.js?v=41';
+import './relatorios.js?v=41';
+import { esquema, comoUsar } from './configuracoes.js?v=41';
+import { talvezAbrirInicio } from './inicio.js?v=41';
+import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila } from './loja.js?v=41';
+import { iniciarRotas, ir } from './nucleo.js?v=41';
+import { ico, toast, bip, confirma, $ } from './ui.js?v=41';
+import { conferirNovos } from './cozinha.js?v=41';
 
 const real = !!CONTA;
 // ------------------------------------------------------------------ as 5 abas (links #: as permissões da equipe usam estes)
 const ABAS = [['salao', 'Salão', 'mesa'], ['pedidos', 'Pedidos', 'sacola'], ['cozinha', 'Cozinha', 'chef'], ['caixa', 'Caixa', 'dinheiro'], ['mais', 'Gestão', 'grafico']];
+// topo: Como usar esta tela (?) e Configurações (engrenagem), para todos (botões, não links: as permissões da equipe não escondem)
+$('#topo-bts').innerHTML = `<button type="button" class="topo-bt" data-como-agora aria-label="Como usar esta tela" title="Como usar esta tela"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"/><path d="M12 16.8v.2"/></svg><span>Como usar</span></button><button type="button" class="topo-bt" data-ir="mais/config" aria-label="Configurações" title="Configurações">${ico('ajustes')}<span>Configurações</span></button>`;
 $('#nav').innerHTML = ABAS.map(([h, n, i]) => `<a href="#${h}" data-aba="${h}">${ico(i)}<span>${n}</span><em data-cont="${h}"></em></a>`).join('');
 
 // ------------------------------------------------------------------ cor do restaurante com leitura garantida (contraste AA)
@@ -27,7 +30,9 @@ const escurece = (rgb, alvo, fundo) => { let c = [...rgb]; for (let k = 0; k < 4
 function aplicarCor() {
   const base = hex(corLoja()), branco = [255, 255, 255], creme = [247, 240, 230];
   const bt = escurece(base, 4.6, branco), tinta = escurece(base, 5.2, creme);
-  const r = document.documentElement.style;
+  const r = document.documentElement.style, E = esquema();
+  r.setProperty('--marrom', E.escuro); r.setProperty('--marrom2', E.escuro2);
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', E.escuro);
   r.setProperty('--loja', paraHex(bt)); r.setProperty('--loja-txt', '#fff'); r.setProperty('--loja-tinta', paraHex(tinta));
   r.setProperty('--loja-suave', paraHex(base.map((v) => v * 0.16 + 255 * 0.84)));
 }

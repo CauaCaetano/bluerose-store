@@ -621,6 +621,19 @@
   // plano da empresa (nexo_espacos.nivel, trazido pela porta): o Básico não tem Achar trabalho nem lojas e preços
   // o sistema pode abrir perfil, equipe, convites, assinatura e configurações de dentro das próprias telas (Popina: Mais › Minha conta)
   window.veltriaAbrir = { perfil: perfil, equipe: equipe, convidar: function () { equipe(true); }, configuracoes: configuracoes, assinatura: assinatura, sair: sair, sairApagar: sairApagar, papel: info.dono ? 'dono' : (info.papel || 'membro') };
+  // Configurações das telas (base/assinatura.js): "Minha assinatura" e o perfil da conta. Só lê; não mexe nos dados da empresa.
+  // pagamentos: as ações que já existem em nexo-pagamentos (status, cancelar); o servidor só devolve e só cancela as assinaturas do próprio login.
+  window.veltriaNuvem = {
+    app: app, empresa: function () { return info.empresa; }, plano: function () { return info.plano; }, ate: function () { return info.ate; }, nivel: function () { return info.nivel; }, donoDaEmpresa: !!info.dono, raiz: RAIZ,
+    pagamentos: pagamentos,
+    eu: function () { return cliente().then(function (sb) { return sb.auth.getUser(); }).then(function (u) { return (u.data && u.data.user) || null; }); },
+    // quem é o dono da empresa (para o convidado ver quem assinou, com o e-mail mascarado)
+    dono: function () { return cliente().then(function (sb) { return sb.from('nexo_membros').select('email,papel,usuario').eq('espaco', info.espaco).eq('papel', 'dono').maybeSingle(); }).then(function (r) { return (r && r.data) || null; }); },
+    papel: function () { return info.dono ? 'dono' : (info.papel || 'membro'); },
+    // trocar a senha: manda o link de senha nova para o e-mail do login (o mesmo "Esqueci a senha" da entrada)
+    trocarSenha: function () { return cliente().then(function (sb) { return sb.auth.getUser().then(function (u) { var e = u.data && u.data.user && u.data.user.email; if (!e) throw new Error('Entre de novo na conta.'); return sb.auth.resetPasswordForEmail(e, { redirectTo: RAIZ + 'app/' }).then(function (r) { if (r.error) throw r.error; return e; }); }); }); },
+    sair: function () { sair(); }
+  };
   if (app === 'atria') window.atriaPlano = info && info.nivel === 'pro' ? 'pro' : 'basico';
   // Popina: plano "com a sua marca" (nivel pro) põe o logo e o nome do restaurante no lugar do Popina
   if (app === 'popina') { window.popinaPlano = info && info.nivel === 'pro' ? 'marca' : 'basico'; dispatchEvent(new Event('popina-plano')); }

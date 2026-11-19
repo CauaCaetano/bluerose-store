@@ -19,15 +19,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Manrope:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilo.css?v=8">
-<link rel="stylesheet" href="emporio.css?v=6">
+<link rel="stylesheet" href="emporio.css?v=7">
+<link rel="stylesheet" href="../base/assinatura.css?v=1">
 <script src="../base/versoes.js?v=49"></script>
-<script src="../base/conta-nuvem.js?v=61"></script>
+<script src="../base/conta-nuvem.js?v=62"></script>
+<script src="../base/assinatura.js?v=1"></script>
+<script>try{var d=JSON.parse(localStorage.getItem("annona-v1")||"null");if(d&&d.tema)document.documentElement.dataset.tema=d.tema}catch(e){}</script>
 </head>
 <body>
 <div class="demo-topo"><a target="_top" href="../../../annona.html">Voltar ao site</a><span>Demonstração com o Mercadinho São José</span><button type="button" id="recomecar">Recomeçar</button></div>
 <header class="cel-topo" aria-label="Annona">
   <a class="cel-menu" href="#mais" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></a>
   <a class="cel-marca" href="#painel" aria-label="Annona, painel"><img src="simbolo.svg" alt="" width="40" height="40"><span><b>ANNONA</b><small>Estoque e Vendas</small></span></a>
+  <a class="cel-cfg" href="#config" aria-label="Configurações"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></a>
   <button type="button" class="cel-sino" data-avisos aria-label="Avisos"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><b class="sino-n" hidden></b></button>
 </header>
 <div class="casca">
@@ -67,6 +71,9 @@
     <header class="topo">
       <div class="topo-txt"><h1 id="saudacao">Bom dia</h1><p id="topo-sub">Veja o resumo do seu negócio hoje.</p></div>
       <div class="topo-acoes">
+        <a class="topo-loja" id="topo-loja" href="#config/cfg-marca" aria-label="A marca do comércio (trocar logo e nome)"><span aria-hidden="true">MS</span><b>Mercadinho</b></a>
+        <button type="button" class="icone-bt" data-acao="guia-tela" aria-label="Como usar esta tela" title="Como usar esta tela"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"/><path d="M12 16.8v.2"/></svg></button>
+        <a class="icone-bt" href="#config" aria-label="Configurações" title="Configurações"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></a>
         <button type="button" class="icone-bt" id="bt-instalar" aria-label="Instalar o app" title="Instalar o app"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
         <button type="button" class="icone-bt sino" data-avisos aria-label="Avisos" title="Avisos"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><b class="sino-n" hidden></b></button>
         <a class="topo-eu" href="#perfil" id="topo-eu" aria-label="Meu perfil"></a>
@@ -86,6 +93,6 @@
 </nav>
 <div class="camada" id="camada" hidden></div>
 <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
-<script type="module" src="app.js?v=13"></script>
+<script type="module" src="app.js?v=14"></script>
 </body>
 </html>

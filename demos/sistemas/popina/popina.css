@@ -390,3 +390,36 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--loja);bo
 .duas>*,.cab>*{min-width:0}
 @media (max-width:420px){.bt.grande{font-size:17px;padding-left:12px;padding-right:12px}}
 .tk.cozinha small{font-size:15px;font-weight:700}
+
+/* ------------------------------------------------------------ Configurações (19/11/2026) */
+.topo-bts{display:flex;gap:4px;flex:none}
+.topo-bt{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:12px;border:0;background:none;color:var(--marrom);cursor:pointer}
+.topo-bt span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.topo-bt:hover{background:var(--papel2)}
+@media (min-width:1024px){
+  .topo-bts{flex-direction:column;gap:4px;order:3;margin-top:auto}
+  .topo-bt{display:flex;justify-content:flex-start;gap:14px;width:auto;min-height:48px;height:auto;padding:0 14px;color:#F4E4D4;font-weight:700;font-size:16px}
+  .topo-bt span{position:static;width:auto;height:auto;overflow:visible;clip:auto}
+  .topo-bt:hover{background:var(--marrom2)}
+  .ao-vivo{margin-top:0;order:4}
+}
+.cfg-nav{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin:0 0 6px;scrollbar-width:thin}
+.cfg-nav button{flex:none;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--linha2);background:var(--papel);color:var(--tinta);font-weight:700;font-size:15px;cursor:pointer}
+.cfg-nav button:hover{border-color:var(--loja)}
+.cfg-sec{scroll-margin-top:80px;min-width:0}
+.cfg-sec h2{margin-bottom:6px}
+.cfg-eu{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:10px 0 12px}
+.cfg-foto{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:var(--loja-suave) center/cover no-repeat;color:var(--loja-tinta);font:800 28px var(--fonte-tit);flex:none;border:2px solid var(--linha)}
+.esquemas{display:grid;gap:8px;margin-top:12px}
+.esquemas button{display:flex;align-items:center;gap:12px;text-align:left;min-height:56px;padding:8px 12px;border-radius:var(--raio-bt);border:1.5px solid var(--linha);background:var(--papel);color:var(--tinta);cursor:pointer}
+.esquemas button i{width:34px;height:34px;border-radius:50%;flex:none;background:linear-gradient(135deg,var(--e1) 50%,var(--e2) 50%)}
+.esquemas button small{display:block;color:var(--mudo);font-size:14px;font-weight:500}
+.esquemas button[aria-pressed=true]{border-color:var(--loja);box-shadow:0 0 0 3px var(--loja-suave)}
+.esquemas button[disabled]{cursor:default}
+.cfg-como{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,170px),1fr));gap:8px;margin-top:12px}
+.cfg-como .bt{justify-content:flex-start}
+input[readonly]{background:var(--papel2)}
+.como-lista{margin:0;padding-left:22px;display:grid;gap:10px}
+.br-ass{--ass-cor:var(--loja);--ass-cor-txt:var(--loja-txt);--ass-texto:var(--tinta);--ass-mudo:var(--mudo);--ass-fundo:var(--papel);--ass-linha:var(--linha);--ass-raio:var(--raio);--ass-perigo:var(--perigo);--ass-ok:var(--ok);--ass-atn:var(--aviso-tinta);--ass-titulo:var(--fonte);box-shadow:var(--sombra);margin-top:16px}
+.br-ass .br-ass-t{font-size:22px;font-weight:800}
+#cfg-marca,#cfg-guia,#cfg-restaurante{margin-top:16px}

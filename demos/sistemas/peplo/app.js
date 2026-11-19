@@ -768,6 +768,35 @@ function estoqueTabela() {
     </div>`;
 }
 
+// "Como usar" curto de cada tela: abre pelo botão ? do topo (na tela em que a pessoa está) e em Configurações, Guia
+const COMO = {
+  inicio: ['inicio', 'Início', ['O resumo do dia: vendas, caixa, crediário vencendo e aniversariantes.', 'Toque num número para abrir a lista dele.', 'A barra da meta mostra quanto falta para bater a meta do mês.']],
+  vender: ['vender', 'Vender', ['Toque na peça ou passe o leitor de código de barras.', 'Escolha cor e tamanho, ponha a cliente e a forma de pagamento.', 'Dá para dividir o pagamento (parte no Pix, parte no crediário). O estoque baixa na hora.']],
+  vendas: ['vendas', 'Vendas e trocas', ['Todas as vendas, da mais nova para a mais antiga.', 'Abra uma venda para mandar o comprovante ou fazer troca e devolução.', 'Na troca, a peça volta ao estoque e o valor vira crédito, abatimento ou dinheiro.']],
+  estoque: ['estoque', 'Estoque', ['Cada peça com as cores, os tamanhos e quantas tem de cada.', '“Adicionar” cadastra peça nova ou importa de planilha.', 'As abas mostram peças paradas, promoções e as movimentações.']],
+  etiquetas: ['etiquetas', 'Etiquetas', ['Escolha as peças e quantas etiquetas de cada.', 'Imprima em impressora comum ou de etiqueta, com código de barras.']],
+  clientes: ['clientes', 'Clientes', ['Ficha de cada cliente: compras, crediário, aniversário e tamanho.', 'O selo VIP aparece para quem compra acima do valor de Configurações.']],
+  fiado: ['fiado', 'Crediário', ['Quem deve, quanto e quando vence.', '“Receber” baixa o pagamento (pode ser parte) e gera o recibo.', '“Cobrar” abre o WhatsApp da cliente com a mensagem pronta.']],
+  compras: ['compras', 'Compras', ['Pedidos aos fornecedores e a chegada da mercadoria.', 'Na chegada, digite quantas peças vieram de cada cor e tamanho: o estoque sobe sozinho.']],
+  caixa: ['caixa', 'Caixa', ['Abra o caixa com o troco da gaveta (ou ele abre na primeira venda).', 'Lance despesas, retiradas e reforços.', 'No fim do dia, “Fechar caixa”: conte o dinheiro e veja se bateu.']],
+  relatorios: ['relatorios', 'Relatórios', ['Escolha o período no alto.', 'Vendas, lucro, peças que mais saem, vendedoras e crediário.', 'Baixe em planilha para mandar ao contador.']],
+  dono: ['dono', 'Painel do dono', ['O mês da loja num olhar e a projeção até o fim do mês.', 'Equipe: o que cada pessoa pode fazer e a comissão.']],
+  config: ['config', 'Configurações', ['Perfil, cores, sua marca, guia, regras da loja e a sua assinatura.', 'Use os atalhos no alto para ir direto a uma seção.']],
+};
+const COMO_ORDEM = ['inicio', 'vender', 'vendas', 'estoque', 'etiquetas', 'clientes', 'fiado', 'compras', 'caixa', 'relatorios', 'dono', 'config'];
+function comoUsar(k) {
+  const c = COMO[k] || COMO.inicio;
+  abrir(`<h2>Como usar: ${t(c[1])}</h2><ol class="como-lista">${c[2].map((x) => `<li>${t(x)}</li>`).join('')}</ol><div class="acoes"><a class="bt" href="#guia" data-fecha-como>Guia completo</a><a class="bt" href="#config/cfg-guia" data-fecha-como>Todas as telas</a><button type="button" class="bt cheio" data-fecha-como>Entendi</button></div>`, (j) => { $$('[data-fecha-como]', j).forEach((b) => b.addEventListener('click', fechar)); });
+}
+// Configurações: o bloco "Minha assinatura" (base/assinatura.js) fica montado entre um redesenho e outro (não recarrega nem perde o estado)
+let blocoAss = null;
+function posConfig(tela) {
+  const slot = $('#ass-slot', tela);
+  if (slot && window.BRAssinatura) { if (blocoAss) slot.replaceWith(blocoAss); else blocoAss = BRAssinatura.montar(slot, { app: 'peplo', nome: 'Peplo', mensal: 59, pagina: 'peplo.html' }); }
+  const em = $('#cfg-email', tela);
+  if (em && window.BRAssinatura) BRAssinatura.conta().then((c) => { if (c.email) em.value = c.email; if (c.modo === 'conta') $$('[data-so-conta]', tela).forEach((b) => { b.hidden = false; }); });
+}
+
 // ------------------------------------------------------------------ telas
 let estado = { fiadoFiltro: 'todos', estoqueAba: 'pecas', busca: '', relPer: 'mes', relDe: '', relAte: '', vendAba: 'vender', cliBusca: '', sacola: [], vCli: '', desc: 0, descModo: 'pct', descVal: 0, dividir: false, cat: 'Todas', sel: null, selFechada: false, metaMes: '', est: { cat: 'Todas', col: '', forn: '', baixo: false, parados: false }, pag: [{ f: 'pix', v: 0 }], parc: { n: 1, int: 'mes', prim: somaMes(hoje(), 1) }, excecao: null };
 const GUIA = [
@@ -1116,15 +1145,27 @@ const TELAS = {
   },
 
   config() {
-    if (!dona()) return `${cab('config', `Configurações`, `Só a dona mexe nas configurações da loja.`, ``)}`;
-    const L = db.loja, j = db.cfg.juros, ini = String(L.nome || 'L').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
-    return `${cab('config', `Configurações`, `A cara da sua loja, as regras do crediário e a cópia de segurança.`, `<a class="bt" href="#perfil">${icb('perfil')}Meu perfil</a><a class="bt" href="#dono">${icb('dono')}Painel do dono</a><a class="bt" href="#guia">${icb('guia')}Guia de uso</a><button type="button" class="bt" data-acao="instalar">${icb('instalar')}Instalar o app</button>`)}
+    const L = db.loja, j = db.cfg.juros, d = dona(), u = eu(), ini = String(L.nome || 'L').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
+    const cargo = u.perfil === 'dona' ? 'Dona da loja' : (u.cargo || 'Vendedora'), tm = TEMAS.find((x) => x[0] === (db.tema || 'ameixa')) || TEMAS[0];
+    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ...(d ? [['cfg-loja', 'Regras da loja'], ['cfg-copia', 'Cópia de segurança']] : []), ['cfg-assinatura', 'Minha assinatura']];
+    return `${cab('config', `Configurações`, d ? `Seu perfil, as cores, a marca da loja, o guia, as regras da loja e a sua assinatura.` : `Seu perfil, o guia e a assinatura da loja. Cores, marca e regras, só a dona muda.`, `${d ? `<a class="bt" href="#dono">${icb('dono')}Painel do dono</a>` : ''}<button type="button" class="bt" data-acao="instalar">${icb('instalar')}Instalar o app</button>`)}
+      <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<a href="#config/${id}">${n}</a>`).join('')}</nav>
       <div class="grade g2">
-        <section class="cartao"><div class="cartao-cab"><h2>A marca da sua loja</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">Sua logo e o nome aparecem no topo, nos recibos e nas mensagens. Quem você convidar vê igual.</p>
-          <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px"><span class="loja-logo" style="width:72px;height:72px;font-size:24px">${L.logo ? `<img src="${t(L.logo)}" alt="">` : t(ini)}</span><div style="display:flex;gap:8px;flex-wrap:wrap"><label class="bt pq cheio" for="logo-in">${L.logo ? 'Trocar logo' : 'Pôr a logo'}</label><input type="file" id="logo-in" accept="image/*" class="sr">${L.logo ? '<button type="button" class="bt pq" data-acao="tira-logo">Tirar</button>' : ''}</div></div>
-          <div class="campos">${[['nome', 'Nome da loja'], ['slogan', 'Frase abaixo do nome'], ['dono', 'Seu nome (para a saudação)'], ['tel', 'WhatsApp da loja'], ['cidade', 'Cidade'], ['pix', 'Chave Pix (vai nas cobranças)']].map(([k, n]) => `<label class="campo">${n}<input data-loja="${k}" value="${t(L[k] || '')}"></label>`).join('')}</div>
-          <p class="campo" style="margin:16px 0 8px">Cor do sistema</p><div class="temas">${TEMAS.map(([k, n, a, b]) => `<button type="button" data-tema="${k}" aria-pressed="${(db.tema || 'ameixa') === k}" style="--a:${a};--b:${b}"><i></i>${n}</button>`).join('')}</div>
-        </section>
+        <section class="cartao cfg-sec" id="cfg-perfil"><div class="cartao-cab"><h2>${icb('perfil')}Perfil</h2></div>
+          <div class="cfg-eu"><span class="foto-perfil">${u.foto ? `<img src="${t(u.foto)}" alt="">` : t(iniciais(u.nome))}</span><div><b>${t(u.nome)}</b><small>${t(cargo)} · ${t(L.nome)}</small></div></div>
+          <div class="campos"><label class="campo">E-mail da conta<input id="cfg-email" readonly value="${t(u.email || '')}" aria-describedby="cfg-email-d"><small id="cfg-email-d">Só leitura: é o e-mail do login.</small></label><label class="campo">Cargo<input readonly value="${t(cargo)}"></label></div>
+          <div class="cfg-bts"><a class="bt pq cheio" href="#perfil">Editar nome, foto e senha de liberação</a><button type="button" class="bt pq" data-acao="trocar-senha" data-so-conta hidden>Trocar a senha do login</button><button type="button" class="bt pq" data-acao="sair-conta" data-so-conta hidden>Sair</button></div></section>
+        <section class="cartao cfg-sec" id="cfg-cores"><div class="cartao-cab"><h2>${icb('etiqueta')}Esquema de cores</h2></div><p class="mudo cfg-txt">A cor vale no sistema inteiro: menu, botões, etiquetas, gráficos e recibos. ${d ? 'Quem você convidar vê igual.' : 'Só a dona troca a cor da loja.'}</p>
+          ${d ? `<div class="temas">${TEMAS.map(([k, n, a, b]) => `<button type="button" data-tema="${k}" aria-pressed="${(db.tema || 'ameixa') === k}" style="--a:${a};--b:${b}"><i></i>${n}</button>`).join('')}</div>` : `<div class="temas"><button type="button" aria-pressed="true" disabled style="--a:${tm[2]};--b:${tm[3]}"><i></i>${tm[1]}</button></div>`}</section>
+      </div>
+      <section class="cartao cfg-sec" id="cfg-marca" style="margin-top:16px"><div class="cartao-cab"><h2>${icb('coroa')}Sua marca</h2></div><p class="mudo cfg-txt">Sua logo e o nome aparecem no topo, nos recibos, nas etiquetas e nas mensagens de cobrança. Quem você convidar vê igual.</p>
+        <div class="cfg-eu"><span class="loja-logo" style="width:72px;height:72px;font-size:24px">${L.logo ? `<img src="${t(L.logo)}" alt="">` : t(ini)}</span>${d ? `<div style="display:flex;gap:8px;flex-wrap:wrap"><label class="bt pq cheio" for="logo-in">${L.logo ? 'Trocar logo' : 'Pôr a logo'}</label><input type="file" id="logo-in" accept="image/*" class="sr">${L.logo ? '<button type="button" class="bt pq" data-acao="tira-logo">Tirar</button>' : ''}</div>` : `<div><b>${t(L.nome)}</b><small>${t(L.slogan || '')}</small></div>`}</div>
+        ${d ? `<div class="campos">${[['nome', 'Nome da loja'], ['slogan', 'Frase abaixo do nome'], ['dono', 'Seu nome (para a saudação)'], ['tel', 'WhatsApp da loja'], ['cidade', 'Cidade'], ['pix', 'Chave Pix (vai nas cobranças)']].map(([k, n]) => `<label class="campo">${n}<input data-loja="${k}" value="${t(L[k] || '')}"></label>`).join('')}</div>` : '<p class="mudo cfg-txt" style="margin:12px 0 0">Só a dona muda a logo, o nome, o WhatsApp e a chave Pix.</p>'}</section>
+      <section class="cartao cfg-sec" id="cfg-guia" style="margin-top:16px"><div class="cartao-cab"><h2>${icb('guia')}Guia: como usar</h2></div><p class="mudo cfg-txt">Um passo a passo curto de cada tela. Também abre a qualquer hora pelo botão <b>?</b> no topo.</p>
+        <div class="cfg-como">${COMO_ORDEM.filter((k) => d || !['dono', 'relatorios', 'compras'].includes(k)).map((k) => `<button type="button" class="bt pq" data-como="${k}">${icb(COMO[k][0])}${COMO[k][1]}</button>`).join('')}</div>
+        <div class="cfg-bts" style="margin-top:12px"><a class="bt pq cheio" href="#guia">Guia completo, do primeiro dia ao fim do mês</a><button type="button" class="bt pq zap" data-acao="ajuda">${ico('zap')}Falar com uma pessoa</button></div></section>
+      ${d ? `<div id="cfg-loja" class="cfg-sec" style="margin-top:16px">
+      <div>
         <section class="cartao"><div class="cartao-cab"><h2>Regras do crediário</h2></div>
           <div class="campos"><label class="campo">Limite de cliente nova (R$)<input data-cfgd="limitePadrao" inputmode="decimal" value="${campoDin(db.cfg.limitePadrao)}"></label><label class="campo">Avisar quando usar (%) do limite<input data-cfg="alertaPct" type="number" min="10" max="100" value="${db.cfg.alertaPct}"></label>
           <label class="campo inteiro troca" style="color:var(--texto)"><span>Bloquear o crediário sozinho de quem passar do prazo</span><input type="checkbox" data-cfgb="bloqueioAuto" ${db.cfg.bloqueioAuto ? 'checked' : ''}></label>
@@ -1157,12 +1198,10 @@ const TELAS = {
         <label class="campo">Este aparelho vende pela<select data-filial-atual>${db.lojas.map((l) => `<option value="${l.id}" ${l.id === lojaAtual() ? 'selected' : ''}>${t(l.nome)}</option>`).join('')}</select><small>Escolha em cada celular ou computador.</small></label></div></section>
       <section class="cartao" style="margin-top:16px"><div class="cartao-cab"><h2>Mensagens de cobrança no WhatsApp</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">As palavras entre chaves viram os dados de cada cliente: {nome}, {valor}, {venc}, {saldo}, {dias}, {loja}, {pix}, {acordo}. Deixe em branco para voltar ao texto sugerido.</p>
         <div class="grade g2">${Object.entries(MSGS).map(([k, m]) => `<label class="campo">${m.titulo}<textarea data-msg="${k}" rows="4">${t((db.cfg.msgs || {})[k] || m.sug)}</textarea></label>`).join('')}</div></section>
-      <div class="grade g2" style="margin-top:16px">
-        <section class="cartao"><div class="cartao-cab"><h2>Cópia de segurança</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">Baixe um arquivo com tudo (clientes, crediário, estoque, vendas e caixa) e guarde. Para voltar, é só carregar o arquivo.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="bt" data-acao="backup">Baixar cópia</button><label class="bt" for="backup-in">Carregar cópia</label><input type="file" id="backup-in" accept="application/json,.json" class="sr"></div></section>
-        <section class="cartao"><div class="cartao-cab"><h2>Assinatura</h2></div><p style="margin:0 0 6px"><b>Peplo · R$ 59/mês</b></p><p class="mudo" style="margin:0 0 12px;font-size:13.5px">Pagamento na hora no Pix ou no cartão, sem fidelidade. Na demonstração nada é cobrado.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="bt cheio" href="../../../peplo.html#precos" data-plano="basico">Assinar o Peplo</a><button type="button" class="bt perigo" data-acao="recomecar">Recomeçar a demonstração</button></div></section>
-      </div>`;
+      </div>
+      <section class="cartao cfg-sec" id="cfg-copia" style="margin-top:16px"><div class="cartao-cab"><h2>Cópia de segurança</h2></div><p class="mudo cfg-txt">Baixe um arquivo com tudo (clientes, crediário, estoque, vendas e caixa) e guarde. Para voltar, é só carregar o arquivo.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="bt" data-acao="backup">Baixar cópia</button><label class="bt" for="backup-in">Carregar cópia</label><input type="file" id="backup-in" accept="application/json,.json" class="sr">${window.BRAssinatura && BRAssinatura.emConta() ? '' : '<button type="button" class="bt perigo" data-acao="recomecar">Recomeçar a demonstração</button>'}</div></section>` : ''}
+      <div class="cfg-sec" id="cfg-assinatura" style="margin-top:16px"><div id="ass-slot"></div></div>`;
   },
 
   guia() {
@@ -1173,7 +1212,7 @@ const TELAS = {
   mais() {
     const G = [['A loja', [['#vendas', 'vendas', 'Vendas e trocas'], ['#etiquetas', 'etiquetas', 'Etiquetas'], ['#fiado', 'fiado', 'Crediário'], ['#compras', 'compras', 'Compras'], ['#caixa', 'caixa', 'Caixa'], ['#relatorios', 'relatorios', 'Relatórios']]], ['Sistema', [['#config', 'config', 'Configurações'], ['#perfil', 'perfil', 'Meu perfil'], ...(dona() ? [['#dono', 'dono', 'Painel do dono']] : []), ['#guia', 'guia', 'Guia de como usar']]]];
     return `${cab('mais', 'Mais', 'Tudo da loja, por assunto.')}${G.map(([g, it]) => `<p class="mais-grupo">${g}</p><div class="mais-lista cascata">${it.map(([h, i, n]) => `<a href="${h}">${icb(i)}${n}</a>`).join('')}</div>`).join('')}
-      <button type="button" class="bt largo" style="margin-top:18px" data-acao="instalar">${icb('instalar')}Instalar o app no celular</button><button type="button" class="bt largo zap" style="margin-top:10px" data-acao="ajuda">${ico('zap')}Falar com uma pessoa da equipe</button>`;
+      <button type="button" class="bt largo" style="margin-top:18px" data-como="${estado.ultimaTela || 'inicio'}">${icb('guia')}Como usar esta tela</button><button type="button" class="bt largo" style="margin-top:10px" data-acao="instalar">${icb('instalar')}Instalar o app no celular</button><button type="button" class="bt largo zap" style="margin-top:10px" data-acao="ajuda">${ico('zap')}Falar com uma pessoa da equipe</button>`;
   },
 
   perfil() {
@@ -1232,6 +1271,8 @@ function rota() {
   $$(`[data-aba="${aba}"]`).forEach((a) => a.setAttribute('aria-current', 'page'));
   if (['vendas', 'etiquetas', 'fiado', 'compras', 'caixa', 'relatorios', 'config', 'perfil', 'dono', 'guia', 'notas'].includes(nome)) $$('.barra [data-aba="mais"]').forEach((a) => a.setAttribute('aria-current', 'page'));
   marca(); contar(tela); requestAnimationFrame(() => ajustaAbas(tela));
+  if (nome === 'config') posConfig(tela);
+  if (TELAS[nome] && !['mais', 'guia'].includes(nome)) estado.ultimaTela = COMO[nome] ? nome : (nome === 'cliente' ? 'clientes' : nome === 'sacola' ? 'vender' : estado.ultimaTela);
   if (!rota.mesma) scrollTo({ top: 0 }); rota.mesma = false;
   if (nome === 'config' && arg && document.getElementById(arg)) setTimeout(() => document.getElementById(arg).scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
@@ -1780,6 +1821,7 @@ document.addEventListener('click', (e) => {
   if (d.entrarComo) { db.usuario = d.entrarComo; grava(); registra(`Entrou como ${eu().nome} (demonstração)`, 'acesso'); location.hash = d.entrarComo === 'u1' ? '#dono' : '#inicio'; mostra(); return toast(`Agora você vê o sistema como ${eu().nome.split(' ')[0]}.`); }
   if (d.abrirEm) { eu().abrirEm = d.abrirEm; grava(); mostra(); return toast('Salvo.'); }
   if (el.closest('.add-menu')) el.closest('details').removeAttribute('open');
+  if (d.como) return comoUsar(d.como);
   if (d.tema && el.closest('.temas')) { db.tema = d.tema; grava(); mostra(); return toast(`Cor ${TEMAS.find((x) => x[0] === d.tema)[1].toLowerCase()} aplicada.`); }
   if (!ac) return;
   ({
@@ -1817,6 +1859,9 @@ document.addEventListener('click', (e) => {
     'importar-clientes': () => importar('clientes'), 'importar-pecas': () => importar('pecas'), instalar,
     'nova-loja': () => { if (!dona()) return toast('Só a dona cadastra lojas.', true); db.lojas.push({ id: uid('l'), nome: `Loja ${db.lojas.length + 1}` }); registra('Loja nova cadastrada', 'geral'); grava(); mostra(); toast('Loja criada. Dê o nome dela e transfira as peças em Estoque.'); },
     'tira-foto-eu': () => { eu().foto = ''; grava(); mostra(); },
+    como: () => comoUsar(($('#principal').dataset.tela) || 'inicio'),
+    'trocar-senha': () => { if (!window.veltriaNuvem) return; window.veltriaNuvem.trocarSenha().then((e) => toast(`Mandamos o link para criar a senha nova em ${e}.`)).catch((x) => toast(x.message || 'Não deu para mandar agora.', true)); },
+    'sair-conta': () => confirmar('Sair da conta?', 'O que você fez já está salvo na nuvem. Para voltar, entre com o seu e-mail e a senha.', 'Sair', () => window.veltriaNuvem && window.veltriaNuvem.sair()),
     'salvar-pin': async () => { const p = ($('#pin-novo') || {}).value || ''; if (!/^\d{4}$/.test(p)) { toast('A senha tem 4 números.', true); return; } eu().pin = await resumoPin(p); grava(); mostra(); toast('Senha salva.'); },
     'novo-usuario': () => abrir(`<h2>Pessoa da equipe</h2><p class="mudo">Na conta de verdade ela recebe o convite e entra com o próprio login.</p><div class="campos"><label class="campo inteiro">Nome<input id="nu-n"></label><label class="campo">WhatsApp<input id="nu-t" inputmode="tel"></label><label class="campo">Desconto sem pedir (%)<input id="nu-d" type="number" min="0" max="100" value="5"></label></div><div class="acoes"><button type="button" class="bt cheio" data-ok>Pôr na equipe</button></div>`, (j) => { $('[data-ok]', j).onclick = () => { const n = $('#nu-n', j).value.trim(); if (n.length < 2) { toast('Escreva o nome.', true); return; } db.usuarios.push({ id: uid('u'), nome: n, perfil: 'vendedora', tel: telLimpo($('#nu-t', j).value), email: '', foto: '', nasc: '', descMax: Number($('#nu-d', j).value) || 0, perms: {}, pin: '' }); registra(`${n} entrou na equipe`, 'equipe'); grava(); fechar(); mostra(); toast(`${n} está na equipe.`); }; }),
     'nova-cli': () => formCliente(), 'nova-peca': () => formPeca(), 'nova-compra': () => formCompra(),

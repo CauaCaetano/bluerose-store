@@ -1,0 +1,33 @@
+/* Blue Rose · bloco "Minha assinatura" (base/assinatura.js), igual em todos os sistemas.
+   Cada sistema só troca as variáveis, no seu próprio CSS:
+   --ass-cor (botão principal e destaques)   --ass-cor-txt (texto sobre a cor)   --ass-texto   --ass-mudo
+   --ass-fundo   --ass-linha   --ass-raio   --ass-perigo   --ass-ok   --ass-atn   --ass-titulo (fonte do título)
+   Os padrões herdam do sistema (currentColor), então o bloco nunca fica com cor de outro sistema. */
+.br-ass{--_cor:var(--ass-cor,currentColor);--_txt:var(--ass-texto,inherit);--_mudo:var(--ass-mudo,inherit);--_linha:var(--ass-linha,rgba(127,127,127,.28));
+  color:var(--_txt);background:var(--ass-fundo,transparent);border:1px solid var(--_linha);border-radius:var(--ass-raio,14px);padding:18px;display:grid;gap:12px;min-width:0;font:inherit}
+.br-ass *{box-sizing:border-box}
+.br-ass-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.br-ass-t{margin:0;font-family:var(--ass-titulo,inherit);font-size:1.15rem;line-height:1.25}
+.br-ass-et{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 11px;font-size:.82rem;font-weight:600;border:1px solid currentColor;white-space:nowrap}
+.br-ass-et::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.br-ass-et.ok{color:var(--ass-ok,#1d6b3a)}.br-ass-et.atn{color:var(--ass-atn,#8a5a00)}.br-ass-et.erro{color:var(--ass-perigo,#a3271b)}.br-ass-et.off{color:var(--_mudo)}
+.br-ass-dados{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px 18px}
+.br-ass-dados div{min-width:0;border-top:1px solid var(--_linha);padding-top:8px}
+.br-ass-dados dt{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--_mudo);margin:0 0 2px}
+.br-ass-dados dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.br-ass-nota,.br-ass-mudo{margin:0;font-size:.88rem;color:var(--_mudo);line-height:1.45}
+.br-ass-aviso{margin:0;font-size:.9rem;line-height:1.45;border-left:3px solid var(--_cor);padding:6px 0 6px 10px}
+.br-ass-bts{display:flex;gap:8px;flex-wrap:wrap}
+.br-ass-bt{min-height:44px;padding:0 18px;border-radius:calc(var(--ass-raio,14px) - 4px);border:1px solid var(--_cor);background:transparent;color:var(--_txt);font:600 .95rem/1 inherit;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;flex:0 1 auto}
+.br-ass-bt.cheio{background:var(--_cor);color:var(--ass-cor-txt,#fff)}
+.br-ass-bt.perigo{border-color:var(--ass-perigo,#a3271b);color:var(--ass-perigo,#a3271b)}
+.br-ass-bt:hover:not([disabled]){filter:brightness(.94)}
+.br-ass-bt:focus-visible,.br-ass-link:focus-visible{outline:3px solid var(--_cor);outline-offset:2px}
+.br-ass-bt[disabled]{cursor:not-allowed;opacity:1;background:transparent;color:var(--_mudo);border-color:var(--_linha);border-style:dashed}
+.br-ass-link{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-weight:600}
+.br-ass-msg:empty{display:none}
+.br-ass-msg{font-size:.92rem;line-height:1.45}
+.br-ass-msg.ok{color:var(--ass-ok,#1d6b3a)}.br-ass-msg.erro{color:var(--ass-perigo,#a3271b)}
+.br-ass-conf{border:1px solid var(--ass-perigo,#a3271b);border-radius:calc(var(--ass-raio,14px) - 4px);padding:12px 14px;display:grid;gap:6px;color:var(--_txt)}
+.br-ass-conf p{margin:0}
+@media (max-width:480px){.br-ass{padding:14px}.br-ass-bts .br-ass-bt{flex:1 1 130px}}
