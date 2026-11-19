@@ -12,8 +12,9 @@
   // Trutina saiu da prospecção em 17/11 (dados ficam no banco); 17/11: uma aba para cada sistema à venda no site
   var PRODUTOS = {
     anshur: { nome: 'Anshur', alvo: 'revendas de máquinas' },
-    agenda: { nome: 'Agenda', alvo: 'salões, barbearias, estética e quem atende com hora marcada' },
-    financeiro: { nome: 'Financeiro', alvo: 'autônomos, MEIs e prestadores de serviço' },
+    // 19/11: agenda = Jano (ex-Veltria Agenda) e financeiro = Arca (ex-Veltria Financeiro); as chaves seguem as antigas no banco
+    agenda: { nome: 'Jano', alvo: 'salões, barbearias, manicures, estética, clínicas, consultórios, personais e pet shops que atendem com hora marcada' },
+    financeiro: { nome: 'Arca', alvo: 'empresas pequenas, médias e grandes (comércio, indústria, distribuidoras, serviços com equipe, transportadoras e agro), não MEI' },
     peplo: { nome: 'Peplo', alvo: 'lojas de roupas' },
     annona: { nome: 'Annona', alvo: 'mercadinhos, mercearias e empórios' },
     atria: { nome: 'Atria', alvo: 'profissionais da construção e da reforma' },
@@ -35,11 +36,11 @@
   var SIS = {
     agenda: { pag: 'jano.html', nome: 'Jano', preco: 'R$ 49/mês (ou R$ 470/ano)', ramo: 'atende com hora marcada',
       dor: 'Quem marca horário pelo WhatsApp passa o dia respondendo "tem horário?" e ainda perde dinheiro com cliente que falta.',
-      ganho: 'No Jano a cliente marca sozinha pelo seu link, o sinal no Pix segura o horário e a confirmação sai pronta. Menos falta, menos horário vazio e menos tempo no WhatsApp.',
+      ganho: 'O Jano é um app de celular para quem atende com hora marcada: a cliente marca sozinha pelo seu link, o sinal no Pix segura o horário e a confirmação e o lembrete saem prontos. Menos falta, menos horário vazio e menos tempo no WhatsApp.',
       conta: 'Uma falta por semana num serviço de R$ 60 são uns R$ 240 por mês. Evitar só uma já paga o mês do sistema.' },
     financeiro: { pag: 'arca.html', nome: 'Arca', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'tem uma empresa',
       dor: 'Na empresa, o dinheiro do imposto e da folha se mistura com o do dia a dia, cliente atrasa sem ninguém cobrar e o extrato do banco nunca bate com a planilha.',
-      ganho: 'O Arca, no computador e no celular, divide cada entrada em reservas (imposto, fornecedores, folha, emergência), manda a cobrança com Pix e lembrete no WhatsApp, mostra o fluxo de caixa de até 90 dias e confere o extrato do banco.',
+      ganho: 'O Arca é o financeiro da empresa, feito para usar no computador: divide cada entrada em reservas (imposto, fornecedores, folha, emergência), manda a cobrança com Pix e lembrete no WhatsApp, mostra o fluxo de caixa de até 90 dias e confere o extrato do banco.',
       conta: 'Receber em dia um único cliente que costuma atrasar já paga alguns meses do sistema.' },
     peplo: { pag: 'peplo.html', nome: 'Peplo', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'vende roupa',
       dor: 'Em loja de roupas, o tamanho e a cor acabam sem ninguém perceber, a fila trava no caixa e no fim do mês ninguém sabe o que vendeu e o que encalhou.',
@@ -291,6 +292,8 @@
         return '<button type="button" role="tab" class="pp-produto' + (produto === k ? ' on' : '') + '" data-produto="' + k + '" aria-selected="' + (produto === k) + '">' + esc(PRODUTOS[k].nome) + ' <b>' + (tot[k] || 0) + '</b></button>';
       }).join('') + '</div>' +
       '<p class="ind-regras"><b>' + esc(PRODUTOS[produto].nome) + ':</b> ' + D.prospects.length + ' ' + esc(PRODUTOS[produto].alvo) + ', só com contato comercial publicado. O painel monta a mensagem e abre o WhatsApp; quem envia é você. Nada sai sozinho.</p>' +
+      // 19/11: cidades de onde a fila puxa contato novo (anshur_prosp_fila devolve "cidades"; nulo = Brasil todo)
+      '<p class="ind-regras pp-cidades"><b>Cidades da fila:</b> ' + esc(D.fila && D.fila.cidades && D.fila.cidades.length ? D.fila.cidades.join(' e ') : 'Brasil todo') + '. Contato novo só entra na fila de hoje se for dessas cidades.</p>' +
       '<div class="pp-aprov' + (c.textos_aprovados ? ' ok' : '') + '">' + (c.textos_aprovados
         ? '<p><b>Textos aprovados</b> em ' + dia(c.aprovado_em) + '. O botão de abrir o WhatsApp está ligado.</p><button type="button" class="btn btn-ghost" data-aprovar="0">Desfazer a aprovação</button>'
         : '<p><b>Textos ainda não aprovados.</b> Leia as mensagens nos cartões; enquanto não aprovar, o botão de abrir o WhatsApp fica desligado.</p><button type="button" class="btn btn-primary" data-aprovar="1">Textos aprovados</button>') +
