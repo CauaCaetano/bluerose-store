@@ -51,3 +51,15 @@
 .pm-logos ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px}
 .pm-logos li{display:grid;justify-items:center;gap:6px;padding:10px 6px 8px;border-radius:12px;background:rgba(251,243,232,.92);color:#3B2A22;font-size:13px;font-weight:600;text-align:center}
 .pm-logos img{width:72px;height:72px;object-fit:contain}
+
+/* 19/11/2026: vídeo motion rodando dentro da tela do notebook das fotos (Peplo, Annona, Anshur).
+   .mk-pos tem o tamanho da foto; o vídeo fica no retângulo da tela (--x/--y/--w/--h em % da foto).
+   js/nb-tela.js só põe o endereço do vídeo quando ele chega perto e só toca enquanto aparece. */
+.mk-pos { position: relative; display: block; }
+.mk-caixa { position: absolute; inset: 0; pointer-events: none; }
+.mk-caixa video.mk-tela { position: absolute; left: var(--x); top: var(--y); width: var(--w); height: var(--h); max-width: none; object-fit: cover; background: #0b0d12; border: 0; border-radius: 1px; box-shadow: none; margin: 0; }
+.hq-an-midia .mk-mascara { -webkit-mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 70%, transparent 100%); mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 70%, transparent 100%); }
+/* sem barra nem botão de play do navegador nos vídeos das telas */
+.tela-motion::-webkit-media-controls, .tela-motion::-webkit-media-controls-enclosure, .tela-motion::-webkit-media-controls-panel { display: none !important; }
+.tela-motion::-webkit-media-controls-start-playback-button, .tela-motion::-webkit-media-controls-overlay-play-button { display: none !important; -webkit-appearance: none; }
+@media (prefers-reduced-motion: reduce) { .tela-motion { animation: none; } }

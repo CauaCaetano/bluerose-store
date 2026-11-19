@@ -14,7 +14,8 @@
   if (document.readyState === 'complete') cantosTopo(); else addEventListener('load', cantosTopo);
 
   // a tela do notebook só baixa depois do load, e só roda enquanto está visível; sem movimento fica na capa
-  var tela = document.querySelector('.hn-note-tela');
+  // 19/11: o vídeo motion do notebook (com data-src) é ligado pelo js/nb-tela.js
+  var tela = document.querySelector('.hn-note-tela:not([data-src])');
   var economia = navigator.connection && navigator.connection.saveData;
   if (tela && !economia && window.matchMedia && matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window) {
     var ligaTela = function () {
