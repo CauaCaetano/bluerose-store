@@ -105,7 +105,6 @@ h2.sec a, h2.sec button { font: 600 13px var(--f-txt); text-transform: none; let
 .sinc::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px rgba(95,127,106,.18); }
 .sinc.off { color: var(--cedro); }
 .lucro { background: var(--grafite); color: #F4EFE8; border-radius: 22px; padding: 18px 18px 16px; position: relative; overflow: hidden; box-shadow: 0 18px 40px -22px rgba(46,51,59,.8); }
-.lucro::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(100deg, rgba(255,255,255,.025) 0 2px, transparent 2px 9px); pointer-events: none; }
 .lucro .seg { background: rgba(255,255,255,.08); margin-bottom: 14px; }
 .lucro .seg button { color: rgba(244,239,232,.7); }
 .lucro .seg button[aria-pressed="true"] { color: var(--grafite); }
@@ -469,7 +468,6 @@ html[data-dir="esq"]::view-transition-new(tela) { animation: entraEsq .24s var(-
 /* ------------------------------------------------------------- cadastro da 1ª vez */
 .onb { position: fixed; inset: 0; z-index: 95; background: var(--serragem); display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; padding: max(14px, env(safe-area-inset-top)) 20px max(14px, env(safe-area-inset-bottom)); animation: aparece .25s ease-out both; overflow: hidden; }
 .onb.sai { animation: some .25s ease-in both; }
-.onb::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 220px; background: repeating-linear-gradient(92deg, rgba(70,90,106,.06) 0 2px, transparent 2px 14px); pointer-events: none; }
 .onb-topo { display: flex; align-items: center; gap: 12px; position: relative; min-height: 36px; }
 .onb-passos { flex: 1; display: grid; grid-auto-flow: column; gap: 6px; }
 .onb-passos i { height: 5px; border-radius: 3px; background: var(--lixa); transition: background .3s; }
@@ -591,3 +589,12 @@ html.letra-grande .folha .duas, html.letra-grande .folha .dois-num { grid-templa
 .orc-foto-mais { aspect-ratio: 4/3; display: grid; place-items: center; align-content: center; gap: 4px; border: 2px dashed var(--cedro, #8a5a2b); border-radius: 10px; color: var(--cedro-esc, #5b3a1a); font-weight: 700; font-size: 13px; cursor: pointer; }
 .doc-fotos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .doc-fotos img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 6px; display: block; break-inside: avoid; }
+
+/* pente fino 18/11: campos lado a lado com o rótulo em 1 ou 2 linhas ficam com a caixa na mesma altura;
+   campo sozinho no fim da dupla ocupa a linha toda (a lista não corta o texto); chapa do plano de corte mais larga */
+.duas > .campo, .conv > .campo { grid-template-rows: 1fr; }
+.duas > .campo > span:first-child, .conv > .campo > span:first-child { align-self: end; }
+.duas > .campo:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.duas:has([data-corte="chapa"]) { grid-template-columns: 1.6fr 1fr; }
+.peca-linha { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, .7fr) auto; }
+.peca-linha input { padding: 0 6px; }

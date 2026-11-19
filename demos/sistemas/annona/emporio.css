@@ -469,3 +469,53 @@ kbd { display: inline-grid; place-items: center; min-width: 34px; height: 30px; 
 }
 @keyframes balanca { 0% { transform: rotate(-6deg); } 40% { transform: rotate(4deg); } 70% { transform: rotate(-2deg); } 100% { transform: none; } }
 @media print { .cel-topo, .barra-cupom { display: none !important; } }
+
+/* ---------------------------------------------------------------- pente fino 18/11: nada desenhado atrás do texto, nada cortado */
+/* ramos de oliveira numa faixa própria acima do título, esmaecendo nas beiras (sem borda reta) */
+.principal { padding-top: 54px; }
+.principal::before, .principal::after { height: 50px; }
+.principal::before { width: 170px; background-size: contain; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 46px), linear-gradient(180deg, #000 55%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 46px), linear-gradient(180deg, #000 55%, transparent 100%); -webkit-mask-composite: source-in; mask-composite: intersect; }
+.principal::after { width: 100px; -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%); mask-image: linear-gradient(180deg, #000 55%, transparent 100%); }
+/* etiquetas do painel: as 4 com o mesmo papel e a mesma altura */
+.kpi:nth-child(3)::before { display: block; }
+.kpi:nth-child(n+3) { border-top: 0; }
+/* total do caixa e do painel do dono numa linha só */
+.soma .total { font-size: 22px; align-items: baseline; gap: 12px; }
+.soma .total dt { font-size: 17px; line-height: 1.25; }
+.soma .total dd { white-space: nowrap; }
+/* cabeçalho de quadro: o título não esmaga e o selo desce quando não cabe */
+.bloco > header { flex-wrap: wrap; }
+.bloco > header h3 { flex: 0 1 auto; min-width: 0; }
+/* Mais: Instalar o app igual aos outros botões */
+.mais-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mais-grade button { display: flex; align-items: center; gap: 10px; background: var(--branco); border-radius: 14px; padding: 14px; box-shadow: var(--sombra); font-weight: 600; color: var(--texto); text-align: left; }
+.mais-grade button svg { width: 20px; height: 20px; color: var(--azul); }
+.mais-grade a, .mais-grade button { min-width: 0; hyphens: auto; }
+@media (max-width: 400px) { .mais-grade a, .mais-grade button { padding: 12px 10px; gap: 8px; font-size: 14.5px; } .qc-tit b { font-size: 18px; } .qc-op { min-width: 0; } .quadro-caixa > span { padding: 0 6px; } }
+.leitor input { text-overflow: ellipsis; }
+/* vila do gráfico: no canto ao lado do título, não atrás do "em relação à semana anterior" */
+.grafico::after { top: 0; width: 130px; height: 46px; opacity: .45; background-position: right top; }
+.grafico > header .var { position: relative; z-index: 1; }
+/* valor das etiquetas não encosta na beira do papel */
+.kpi b { font-size: clamp(20px, 1.75vw, 28px); }
+@media (max-width: 860px) {
+  .principal { padding-top: 40px; }
+  .principal::before { width: 116px; height: 36px; top: 0; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 34px), linear-gradient(180deg, #000 50%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 34px), linear-gradient(180deg, #000 50%, transparent 100%); }
+  .principal::after { width: 68px; height: 36px; top: 0; }
+  /* Coliseu do painel: só uma marca d'água bem clara no canto, esmaecida para não brigar com a saudação */
+  /* Coliseu do painel: sobe para a faixa dos ramos, entre os dois, longe da saudação */
+  .topo::after { top: -42px; right: 72px; width: 76px; height: 38px; opacity: .55; background-position: center bottom; -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent 100%); mask-image: linear-gradient(180deg, #000 60%, transparent 100%); }
+  .grafico::after { width: 92px; height: 40px; }
+  .kpi b { font-size: 22px; }
+  .kpi::before, .kpi + .kpi::before, .kpi:nth-child(3)::before { display: block; inset: 10px 0 0 0; border: 0; }
+  /* tabelas: mais justas e roláveis de lado em vez de cortadas */
+  .bloco.sem-pad { overflow-x: auto; overflow-y: hidden; }
+  .tab.grande th, .tab.grande td { padding: 8px 6px; }
+  .tab.grande th:first-child, .tab.grande td:first-child { padding-left: 10px; }
+  .tab.grande { font-size: 14.5px; }
+  /* botões de cima das telas quebram linha em vez de sumir na beira */
+  .cab-tela.com-ico .acoes { flex-wrap: wrap; overflow-x: visible; }
+  /* estoque: o estoque fica embaixo da foto e não passa por cima do "Dura" */
+  .tab-est .c-est { padding-left: 0 !important; }
+  .soma .total { font-size: 21px; } .soma .total dt { font-size: 16px; }
+}

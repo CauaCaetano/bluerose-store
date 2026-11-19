@@ -816,3 +816,29 @@ html,body{overflow-x:clip}
   .topo-dir{margin-right:0!important;gap:6px!important;flex:none}
 }
 @media (min-width:900px) and (max-width:1039px){#nav a span{font-size:13.5px!important}#nav a{padding:8px 7px!important}}
+/* pente fino 18/11: nada cortado, nada por trás do texto */
+/* rodapé das folhas: com 3 botões no celular, o último desce para a linha de baixo em vez de sair da tela */
+.folha-pe{flex-wrap:wrap}.folha-pe>.bt{min-width:fit-content}
+/* campos lado a lado: rótulo de 1 e de 2 linhas, a caixa fica na mesma altura */
+.duas-c:not(:has(>.campo>:is(input,select,textarea)~*))>.campo,.tres-c:not(:has(>.campo>:is(input,select,textarea)~*))>.campo{justify-content:flex-end}
+/* "Falta" na faixa verde do total: vermelho sobre verde não dava para ler */
+.conta-det .totais .total.falta b{color:inherit}
+.conta-det .totais .total,.comanda-papel .totais .total{gap:10px}
+@media (max-width:420px){.conta-det .totais .total span,.comanda-papel .totais .total span{font-size:22px!important}.conta-det .totais .total b,.comanda-papel .totais .total b{font-size:24px!important;white-space:nowrap}}
+/* números dos cartões de resumo (relatórios, conciliação): o "R$" não fica sozinho numa linha */
+@media (max-width:599px){.kpis b{font-size:clamp(17px,5vw,22px)!important;white-space:nowrap}}
+/* vendas por hora no celular: as horas não se encostam */
+@media (max-width:599px){.g-cols{gap:3px}.g-cols small{font-size:10px!important;letter-spacing:-.02em;white-space:nowrap}}
+/* tutorial: o negrito dentro do texto fica na mesma linha (antes cada palavra em negrito quebrava a frase) */
+.tut-cartao p b{display:inline;font-size:inherit;font-weight:700;margin:0}
+/* computador: o desenho ao lado do título do Salão fica ao lado, não atrás das letras */
+@media (min-width:900px){.cab-salao .aqueduto-img{position:static!important;margin-left:14px!important;align-self:center}}
+/* computador: a faixa da demonstração (fixa embaixo) não cobre o fim da tela */
+@media (min-width:900px){body:not(.cliente):has(.demo-faixa) #tela{padding-bottom:84px}}
+@media (max-width:420px){.g-cols>div:nth-child(even) small{visibility:hidden}}
+/* celular estreito: o título "O que fazer agora" cabe entre os dois ramos de louro */
+@media (max-width:400px){.prancheta-cab h2{font-size:17px!important;letter-spacing:0}}
+/* celular: o topo fica sólido (o texto da tela não aparece por trás do nome do restaurante ao rolar) */
+@media (max-width:899px){.topo{background:var(--perg)}}
+/* comanda de pedido no celular estreito: o botão "Entregue" desce para a linha de baixo em vez de ser cortado */
+@media (max-width:400px){.ticket.pd footer{flex-wrap:wrap!important;row-gap:8px}.ticket.pd footer .bt{padding:0 12px;margin-left:auto}}

@@ -337,3 +337,8 @@ body.cli-entrando :is(.cli-dest,.cli-prod):nth-child(n+5){animation-delay:.48s}
 body.cliente .toast{top:16px;bottom:auto!important;transform:translate(-50%,-20px)}
 body.cliente .toast.on{transform:translate(-50%,0)}
 body.cliente .folha button:disabled,body.cliente .folha .bt:disabled{opacity:1!important;background:#E6E0D6!important;color:#4A4038!important;border-color:#D2C9BB!important}
+/* pente fino 18/11: no visual moderno, o nome do restaurante não encosta na foto da capa */
+body.est-moderno:not(.cv) .cli-id-txt{padding-top:44px}
+/* visual Taverna em celular estreito: "Chamar garçom" e "Ver a conta" cabem lado a lado (antes o segundo saía da tela) */
+body.est-rustico .cli-modo-bts{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:379px){body.est-rustico .cli-modo-bts{gap:8px!important}body.est-rustico .cli-modo-bts .bt{font-size:14.5px!important;gap:6px!important;padding:4px 8px!important;white-space:normal;line-height:1.15;text-align:center}body.est-rustico .cli-modo-bts .bt .ico{width:20px!important;height:20px!important;flex:none}}

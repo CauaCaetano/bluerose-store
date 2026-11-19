@@ -10,7 +10,7 @@
 .pc-prox { display: inline-flex; align-items: center; min-height: 54px; box-shadow: inset 0 0 0 1.5px rgba(46,51,59,.25); padding: 0 22px; border-radius: 999px; border: 0; background: var(--trena); color: var(--grafite); font-weight: 700; font-size: 15.5px; text-decoration: none; cursor: pointer; }
 .pc-fuste { display: grid; gap: 10px; margin: 0 14px; }
 .pc-tambor { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 12px; min-height: 76px; padding: 0 18px; border-radius: 4px; text-decoration: none; color: var(--grafite);
-  background: repeating-linear-gradient(90deg, rgba(46,51,59,.05) 0 2px, transparent 2px 16px), linear-gradient(90deg, #E9E2D7, #FBF9F5 30%, #FBF9F5 70%, #E9E2D7); box-shadow: inset 0 0 0 1.5px rgba(46,51,59,.14); transition: transform .12s; }
+  background: linear-gradient(90deg, #E9E2D7, #FBF9F5 30%, #FBF9F5 70%, #E9E2D7); box-shadow: inset 0 0 0 1.5px rgba(46,51,59,.14); transition: transform .12s; }
 .pc-tambor:active { transform: scale(.98); }
 .pc-tambor svg:first-child { color: var(--giz); justify-self: center; }
 .pc-tambor b { font: 800 24px/1 var(--f-tit); text-transform: uppercase; letter-spacing: .03em; }
@@ -47,7 +47,7 @@
 .orc-ok { position: sticky; z-index: 5; bottom: calc(var(--barra-h) + 12px + env(safe-area-inset-bottom)); box-shadow: 0 10px 24px -10px rgba(30,35,45,.55); margin-top: 16px; width: 100%; min-height: 64px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 0; background: var(--grafite); color: var(--serragem); font: 700 17px var(--f-txt); cursor: pointer; }
 .orc-dica { text-align: center; color: var(--mudo); font-size: 13.5px; }
 /* C: tambores da coluna */
-.orc-c .orc-passos li { border-radius: 4px; background: repeating-linear-gradient(90deg, rgba(46,51,59,.035) 0 2px, transparent 2px 16px), var(--aparas); }
+.orc-c .orc-passos li { border-radius: 4px; background: var(--aparas); }
 .orc-c .orc-n { background: var(--trena); color: var(--grafite); }
 .orc-c .orc-chip { border-radius: 999px; } .orc-c .orc-in { border-radius: 6px; }
 .orc-c .orc-ok { border-radius: 999px; background: var(--trena); color: var(--grafite); }
@@ -56,7 +56,7 @@
 /* o mesmo estilo de coluna nas outras telas: cabeçalho com friso, cartões de pedra, cantos quase retos */
 .conc-c { --r: 6px; --r-p: 4px; }
 .conc-c .cab { border-bottom: 1.5px solid var(--lixa); box-shadow: 0 4px 0 -2.5px var(--aparas), 0 5px 0 -2px var(--lixa); margin-bottom: 14px; padding-bottom: 12px; }
-.conc-c .bloco { background: repeating-linear-gradient(90deg, rgba(46,51,59,.035) 0 2px, transparent 2px 16px), var(--aparas); }
+.conc-c .bloco { background: var(--aparas); }
 .conc-c .bloco.escuro { background: var(--aparas); color: var(--grafite); box-shadow: inset 4px 0 0 var(--trena), var(--sombra); }
 .conc-c .bloco.escuro small { color: var(--mudo); } .conc-c .bloco.escuro .ic { background: var(--trena-claro); color: #7A5E36; }
 .conc-c .seg { border-radius: 6px; } .conc-c .seg button, .conc-c .seg i { border-radius: 4px; }
