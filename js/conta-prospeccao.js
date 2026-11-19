@@ -40,7 +40,7 @@
       conta: 'Uma falta por semana num serviço de R$ 60 são uns R$ 240 por mês. Evitar só uma já paga o mês do sistema.' },
     financeiro: { pag: 'arca.html', nome: 'Arca', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'tem uma empresa',
       dor: 'Na empresa, o dinheiro do imposto e da folha se mistura com o do dia a dia, cliente atrasa sem ninguém cobrar e o extrato do banco nunca bate com a planilha.',
-      ganho: 'O Arca é o financeiro da empresa, feito para usar no computador: divide cada entrada em reservas (imposto, fornecedores, folha, emergência), manda a cobrança com Pix e lembrete no WhatsApp, mostra o fluxo de caixa de até 90 dias e confere o extrato do banco.',
+      ganho: 'O Arca é o financeiro completo da empresa, feito para usar no computador: contas a pagar e a receber de uma ou várias empresas, aprovação de pagamento, cobrança com Pix e lembrete no WhatsApp, conciliação do extrato do banco, fluxo de caixa, orçamento e DRE, e o pacote do mês pronto para o contador.',
       conta: 'Receber em dia um único cliente que costuma atrasar já paga alguns meses do sistema.' },
     peplo: { pag: 'peplo.html', nome: 'Peplo', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'vende roupa',
       dor: 'Em loja de roupas, o tamanho e a cor acabam sem ninguém perceber, a fila trava no caixa e no fim do mês ninguém sabe o que vendeu e o que encalhou.',
@@ -56,7 +56,7 @@
       conta: 'Fechar um serviço a mais por mês por mandar o orçamento na hora já paga o app várias vezes.' },
     popina: { pag: 'popina.html', nome: 'Popina', preco: 'R$ 79/mês (ou R$ 758/ano)', ramo: 'tem restaurante',
       dor: 'Em restaurante, pedido anotado no papel atrasa a cozinha, sai errado e some na hora de fechar a conta.',
-      ganho: 'No Popina o pedido sai do celular do garçom e aparece na cozinha na hora, a mesa tem cardápio digital com QR, o delivery tem taxa por bairro e o caixa fecha com Pix e divisão de conta.',
+      ganho: 'O Popina é simples de usar: o garçom anota no celular e o pedido aparece (e imprime) na cozinha na hora, o balcão chama pelo nome ou senha, a mesa tem cardápio com QR, o pedido do delivery chega também no WhatsApp e o caixa fecha com Pix, troco, 10% e conta dividida.',
       conta: 'Um pedido errado a menos por dia já paga o sistema no mês.' }
   };
   function mensagemSistema(p, acao) {
@@ -64,19 +64,20 @@
     if (acao === 'retomada1') return [
       'Olá! Retomando rápido a mensagem sobre o ' + s.nome + '.',
       s.conta,
-      'Dá para ver funcionando, sem cadastro: ' + l,
+      'Dá para ver funcionando, sem cadastro, e testar *7 dias grátis*: ' + l,
       'Se não for o momento, me avisa e eu paro por aqui.'].join('\n\n');
     if (acao === 'retomada2') return [
       'Olá! Última mensagem para não incomodar.',
       'Fica o resumo: ' + s.ganho,
-      'Custa ' + s.preco + ', direto pelo site, sem fidelidade. Detalhes: ' + l,
+      'Custa ' + s.preco + ', direto pelo site, sem fidelidade, e dá para testar *7 dias grátis* antes (nada é cobrado nos 7 dias). Detalhes: ' + l,
       'Obrigado pela atenção!\nBlue Rose Express'].join('\n\n');
     return ['Olá, tudo bem?',
       'Sou da Blue Rose Express, de Orlândia. Vi o perfil de ' + e + ' em ' + p.cidade + ', por isso a mensagem.',
       s.dor,
       s.ganho,
       'Dá para ver funcionando, sem cadastro: ' + l,
-      'Custa ' + s.preco + ', sem fidelidade. Se não fizer sentido, é só me avisar que não mando mais mensagem.'].join('\n\n');
+      'Custa ' + s.preco + ', sem fidelidade, e você pode testar *7 dias grátis* antes de pagar (nada é cobrado nos 7 dias e dá para cancelar quando quiser).',
+      'Se não fizer sentido, é só me avisar que não mando mais mensagem.'].join('\n\n');
   }
   function recente(p) {
     if (!p.anuncios_data || !p.anuncios_usados) return false;
