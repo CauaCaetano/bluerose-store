@@ -5,7 +5,7 @@
 
 import { qrSVG } from '../base/qr.js';
 const CHAVE = 'peplo-v1';
-const EXEMPLO = 3; // 19/11: exemplo menor (30 dias) para não encher o navegador
+const EXEMPLO = 4; // 19/11: exemplo menor (30 dias) para não encher o navegador; 4: crediário com parcelas pagas, vencidas e vencendo
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const t = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -172,6 +172,18 @@ function inicial() {
       db.vendas.push(v);
     }
   }
+  // crediário de compras anteriores aos 30 dias do exemplo (19/11): sem isso o Crediário ficava sem parcela paga no mês, vencida ou vencendo
+  [['c2', 18900, -24, 0], ['c9', 24900, -16, 0], ['c14', 12900, -9, 0], ['c27', 17900, -33, 0], ['c1', 21900, -12, 1], ['c3', 29900, -8, 1], ['c6', 11900, -5, 1], ['c12', 13800, -15, 1], ['c4', 16900, 3, 0], ['c5', 9900, 6, 0], ['c8', 14900, 2, 0]].forEach(([cid, valor, dv, paga], i) => {
+    if (!clientes.some((x) => x.id === cid)) return;
+    const venc = somaDias(h, dv), pc = { id: uid('pc'), cli: cid, venda: null, caderno: 'Compra anterior ao sistema', data: somaDias(venc, -30), num: 1, de: 1, valor, saldo: valor, venc, pags: [], status: 'aberta' };
+    db.parcelas.push(pc);
+    if (paga) {
+      const dp = somaDias(venc, (i % 3) - 1) > h ? h : somaDias(venc, (i % 3) - 1), pg = { id: uid('pg'), data: `${dp}T15:20:00`, cli: cid, v: valor, f: ['pix', 'dinheiro', 'pix'][i % 3], parcelas: [{ id: pc.id, v: valor }], caixa: dp === h ? caixaHoje : `cx${dias(h, dp)}` };
+      db.pagamentos.push(pg); pc.saldo = 0; pc.pags.push(pg.id);
+    }
+  });
+  // número da venda em ordem de data (o sorteio cria as vendas fora de ordem dentro do dia)
+  db.vendas.sort((a, b) => a.data.localeCompare(b.data)).forEach((v, i) => { v.n = 1001 + i; }); db.n = 1000 + db.vendas.length;
   // duas trocas hoje (tamanho que não serviu): a peça volta para a arara e o valor vira crédito
   db.vendas.filter((v) => v.cli && v.data.slice(0, 10) < h && v.data.slice(0, 10) >= somaDias(h, -6) && !v.pag.some((x) => x.f === 'fiado')).slice(-2).forEach((v, i) => {
     const x = v.itens[0], c = clientes.find((y) => y.id === v.cli), val = x.preco; x.devolvido = 1;
@@ -924,7 +936,7 @@ const TELAS = {
         <div class="cartao kpi"><span class="kpi-ic">${ico('cartao')}</span><span><small>A receber</small><b data-conta="${totalAberto()}">${din(totalAberto())}</b><em>${devedoras().length} clientes</em></span></div>
         <div class="cartao kpi ${ven ? 'mal' : ''}"><span class="kpi-ic mal">${ico('alerta')}</span><span><small>Vencido</small><b data-conta="${ven}">${din(ven)}</b><em>${atrasadas().length} em atraso</em></span></div>
         <div class="cartao kpi"><span class="kpi-ic ouro">${ico('calendario')}</span><span><small>Vence em 7 dias</small><b data-conta="${prox7}">${din(prox7)}</b><em>lembre antes de vencer</em></span></div>
-        <div class="cartao kpi ok"><span class="kpi-ic ok">${ico('moedas')}</span><span><small>Recebido no mês</small><b data-conta="${recMes}">${din(recMes)}</b><em>${rec}% recuperado</em></span></div>
+        <div class="cartao kpi ok"><span class="kpi-ic ok">${ico('moedas')}</span><span><small>Recebido no mês</small><b data-conta="${recMes}">${din(recMes)}</b><em>${recMes + ven ? `${rec}% recuperado` : 'nada vencido no mês'}</em></span></div>
       </div>
       ${abas(filtros, f, 'data-ff')}
       <section class="cartao">${l.length ? `<ul class="lista">${l.map((c) => { const s = situacao(c), ab = aberto(c.id), lim = c.limite || 0, pct = lim ? Math.min(100, Math.round(ab / lim * 100)) : 0; return `<li style="flex-wrap:wrap">
@@ -971,7 +983,7 @@ const TELAS = {
     const b = sa(estado.cliBusca), l = db.clientes.filter((c) => !b || sa(`${c.nome} ${c.tel}`).includes(b)).sort((a, z) => a.nome.localeCompare(z.nome));
     return `${cab('clientes', `Clientes`, `${db.clientes.length} clientes · ${clientesAtivos()} compraram nos últimos 90 dias · ${aniversariantes(7).length} fazem aniversário nesta semana.`, `${addBt('cliente', 'cadernoTodo', 'caderno', 'impCli')}`)}
       <label class="busca" style="display:block;margin-bottom:14px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="sr">Buscar cliente</span><input id="cli-busca" placeholder="Buscar por nome ou telefone" value="${t(estado.cliBusca)}" autocomplete="off"></label>
-      <section class="cartao"><ul class="lista cli-lista">${l.map((c) => { const s = situacao(c), nv = proximoNiver(c), cp = comprasCli(c.id); return `<li>${fotoCli(c)}<a class="cresce" href="#cliente/${c.id}" style="text-decoration:none;color:inherit"><b>${t(c.nome)}</b><small>${t(c.tel ? c.tel.replace(/^(\d{2})(\d{5})(\d+)$/, '($1) $2-$3') : 'sem telefone')} · compras em 12 meses ${din(cp)}${nv ? ` · aniversário ${dataBR(nv.data).slice(0, 5)}${nv.dias <= 7 ? ` (${nv.dias === 0 ? 'hoje' : nv.dias === 1 ? 'amanhã' : `em ${nv.dias} dias`})` : ''}` : ''}${aberto(c.id) ? ` · crediário ${din(aberto(c.id))}` : ''}</small></a>${vip(c) ? `<b class="vip">${icb('coroa')}VIP</b>` : ''}${s.k !== 'sem' && s.k !== 'emdia' ? `<span class="tag ${s.tag}">${s.txt}</span>` : ''}</li>`; }).join('') || '<p class="vazio"><b>Nenhuma cliente</b>Cadastre com o botão acima.</p>'}</ul></section>`;
+      <section class="cartao"><ul class="lista cli-lista">${l.map((c) => { const s = situacao(c), nv = proximoNiver(c), cp = comprasCli(c.id); return `<li>${fotoCli(c)}<a class="cresce" href="#cliente/${c.id}" style="text-decoration:none;color:inherit"><b>${t(c.nome)}</b><small>${t(c.tel ? c.tel.replace(/^(\d{2})(\d{5})(\d+)$/, '($1) $2-$3') : 'sem telefone')} · ${cp ? `compras em 12 meses ${din(cp)}` : 'sem compra recente'}${nv ? ` · aniversário ${dataBR(nv.data).slice(0, 5)}${nv.dias <= 7 ? ` (${nv.dias === 0 ? 'hoje' : nv.dias === 1 ? 'amanhã' : `em ${nv.dias} dias`})` : ''}` : ''}${aberto(c.id) ? ` · crediário ${din(aberto(c.id))}` : ''}</small></a>${vip(c) ? `<b class="vip">${icb('coroa')}VIP</b>` : ''}${s.k !== 'sem' && s.k !== 'emdia' ? `<span class="tag ${s.tag}">${s.txt}</span>` : ''}</li>`; }).join('') || '<p class="vazio"><b>Nenhuma cliente</b>Cadastre com o botão acima.</p>'}</ul></section>`;
   },
 
   estoque(sub) {

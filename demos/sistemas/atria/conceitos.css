@@ -107,3 +107,7 @@
 .px-sim img { width: 100%; border-radius: 4px; box-shadow: var(--sombra); }
 .px-sim pre { margin: 0; white-space: pre-wrap; font: 13px/1.45 var(--f-txt); background: var(--aparas); padding: 10px; border-radius: 6px; }
 .px-link span { font-size: 12px; word-break: break-all; }
+
+/* pente fino 18/11 (3): volutas do capitel do Início inteiras (antes eram arcos com um quarto faltando, parecendo bolinha cortada) */
+.pc-capitel::before, .pc-capitel::after { border-right-color: var(--trena); width: 24px; height: 24px; top: 14px; background: radial-gradient(circle, var(--trena) 0 3px, transparent 3.5px); transform: none; }
+.pc-capitel::before { left: 16px; } .pc-capitel::after { right: 16px; }

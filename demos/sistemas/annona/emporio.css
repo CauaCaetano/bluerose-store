@@ -567,3 +567,21 @@ kbd { display: inline-grid; place-items: center; min-width: 34px; height: 30px; 
 .grafico::after { display: none !important; } /* 19/11: a vila encostava no texto do título */
 .esc-caixa { white-space: nowrap; min-width: max-content; } /* 19/11: "Este aparelho é o" não corta */
 .lat-cordao { display: none !important; } /* 19/11 (pedido do dono): sem o cordão com borla no menu */
+
+/* ---------------------------------------------------------------- pente fino 3 (19/11) */
+/* barbante das etiquetas do painel e ramos de oliveira: as imagens traziam fiapos e papel de fundo; saem (o dono prefere sem) */
+@media (min-width: 861px) { .kpi::after { display: none; } .kpi::before { inset: 0; } .kpi { padding-left: 24px; } }
+.principal::before, .principal::after { display: none !important; }
+.principal { padding-top: 22px; }
+@media (max-width: 860px) { .principal { padding-top: 14px; } }
+/* etiquetas de categoria: recorte limpo (sem pedaço de trilho e fundo claro em volta da etiqueta) */
+.etq-pend { background-image: url(img/etq-cat-2.webp); }
+.etq-pend.on, .etq-pend.chip.on { background-image: url(img/etq-cat-on-2.webp); }
+/* caixotes do caixa: a etiqueta de preço cabe dentro do caixote (antes "600 ml" e o preço passavam da beira) */
+.caixote-p { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.gondola { min-width: 0; }
+.gondola .preco { font-size: 19px; padding: 3px 12px; }
+/* Receber desativado ainda legível */
+.bt.receber:disabled { opacity: 1; color: #2E5E4C; }
+/* menu lateral: o fim da lista esmaece por inteiro (antes um pedacinho de ícone aparecia como risco no pé) */
+.menu { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 8px, #000 calc(100% - 34px), transparent calc(100% - 6px)); mask-image: linear-gradient(180deg, transparent 0, #000 8px, #000 calc(100% - 34px), transparent calc(100% - 6px)); }

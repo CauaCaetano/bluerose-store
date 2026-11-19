@@ -191,7 +191,7 @@ function inicial() {
   // vendas dos últimos 28 dias (mais na sexta e no sábado); os produtos marcados como parados não vendem
   const vendaveis = produtos.filter((p) => !p.parado), vendas = [], formas = ['dinheiro', 'pix', 'pix', 'debito', 'credito', 'debito', 'pix'];
   for (let d = 27; d >= 0; d--) {
-    const dia = somaDias(h, -d), sem = new Date(`${dia}T12:00`).getDay(), hAgora = new Date().getHours(), n = Math.round([10, 7, 8, 8, 9, 12, 14][sem] * (0.88 + r() * 0.24)); // 19/11: exemplo menor (era 44 a 86 por dia) para não encher o navegador
+    const dia = somaDias(h, -d), sem = new Date(`${dia}T12:00`).getDay(), hAgora = new Date().getHours(), n0 = Math.round([10, 7, 8, 8, 9, 12, 14][sem] * (0.88 + r() * 0.24)), n = d === 0 ? Math.round(n0 * Math.min(1, Math.max(0, (hAgora - 6) / 14))) : n0; // 19/11: exemplo menor (era 44 a 86 por dia) para não encher o navegador; hoje: o ritmo do dia todo, só até agora
     for (let k = 0; k < n; k++) {
       const itens = [], ni = 1 + Math.floor(r() * 4);
       for (let j = 0; j < ni; j++) {
@@ -199,8 +199,8 @@ function inicial() {
         const q = p.un === 'kg' ? r3(0.2 + r() * 1.3) : 1 + Math.floor(r() * (p.cat === 'Cervejas' ? 6 : 2));
         itens.push({ p: p.id, nome: p.nome, q, preco: p.preco, custo: p.custo });
       }
-      const total = itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0), hora = sem >= 5 || sem === 0 ? 8 + Math.floor(r() * 15) : 7 + Math.floor(r() * 14);
-      if (d === 0 && hora > hAgora) continue; // hoje: só as vendas até agora
+      const total = itens.reduce((s, x) => s + Math.round(x.q * x.preco), 0), hora = d === 0 ? 7 + Math.floor(r() * Math.max(1, Math.min(14, hAgora - 6))) : sem >= 5 || sem === 0 ? 8 + Math.floor(r() * 15) : 7 + Math.floor(r() * 14);
+      if (d === 0 && (hAgora < 7 || hora > hAgora)) continue; // hoje: só as vendas até agora
       const f = formas[Math.floor(r() * formas.length)];
       vendas.push({ id: uid('v'), cx: r() < 0.6 ? 'c1' : 'c2', n: vendas.length + 1, data: `${dia}T${pad(Math.min(hora, 23))}:${pad(Math.floor(r() * 60))}:00`, itens, total, desc: 0, pag: [{ f, v: total }], origem: 'balcao', vend: r() < 0.55 ? 'u2' : r() < 0.6 ? 'u1' : 'u3' });
     }

@@ -115,7 +115,7 @@ main { position: relative; z-index: 1; max-width: none; padding: 0 10px 40px 16p
 /* ---------------------------------------------------------------- etiqueta de tecido com cordão e borla (recorte do conceito, 9 partes) */
 .etq, .etq-titulo { --k: .69; position: relative; display: inline-flex; align-items: center; box-sizing: border-box; border-style: solid; border-color: transparent;
   border-width: calc(32px * var(--k)) calc(27px * var(--k)) calc(42px * var(--k)) calc(102px * var(--k));
-  border-image: url(img/etiqueta.webp?v=5) 32 27 42 102 fill / calc(32px * var(--k)) calc(27px * var(--k)) calc(42px * var(--k)) calc(102px * var(--k)) round stretch;
+  border-image: url(img/etiqueta.webp?v=6) 32 27 42 102 fill / calc(32px * var(--k)) calc(27px * var(--k)) calc(42px * var(--k)) calc(102px * var(--k)) round stretch;
   color: #FFF8F4; text-decoration: none; filter: drop-shadow(0 8px 10px rgba(80, 30, 40, .22)); }
 .etq-titulo { height: 113px; margin: 0; padding: 0 16px 6px 0; gap: 16px; font: 600 45px/1 var(--serif); color: #FFF8F4; letter-spacing: -.01em; white-space: nowrap; }
 .etq-titulo .etq-ic svg { width: 40px; height: 40px; color: var(--ouro); stroke-width: 1.6; display: block; }
@@ -771,11 +771,11 @@ main { position: relative; z-index: 1; max-width: none; padding: 0 10px 40px 16p
 
 /* ---------------------------------------------------------------- pente fino 18/11 (2ª rodada): etiqueta, sacola e tema */
 /* etiqueta do título e "Vendas de hoje" na cor do sistema (mesma etiqueta recolorida; cordão e borla continuam dourados) */
-html[data-tema="champagne"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-champagne.webp?v=3); }
-html[data-tema="salvia"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-salvia.webp?v=3); }
-html[data-tema="petroleo"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-petroleo.webp?v=3); }
-html[data-tema="rose"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-rose.webp?v=3); }
-html[data-tema="grafite"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-grafite.webp?v=3); }
+html[data-tema="champagne"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-champagne.webp?v=4); }
+html[data-tema="salvia"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-salvia.webp?v=4); }
+html[data-tema="petroleo"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-petroleo.webp?v=4); }
+html[data-tema="rose"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-rose.webp?v=4); }
+html[data-tema="grafite"] :is(.etq, .etq-titulo) { border-image-source: url(img/etiqueta-grafite.webp?v=4); }
 /* seletor de cor: o visto vai para o canto, por fora do botão, e o nome da cor aparece inteiro */
 .cores button { overflow: visible; text-overflow: clip; white-space: normal; line-height: 1.1; text-align: left; min-height: 35px; height: auto; padding: 6px 10px; }
 .cores .ok-c { position: absolute; top: -7px; right: -6px; margin: 0; width: 19px; height: 19px; border: 2px solid var(--cartao); box-sizing: content-box; }
@@ -797,4 +797,26 @@ html[data-tema="grafite"] :is(.etq, .etq-titulo) { border-image-source: url(img/
   :is([data-tela="vender"], [data-tela="sacola"]) .cena {
     -webkit-mask: linear-gradient(90deg, transparent 0, #000 30%, #000 62%, transparent 76%), linear-gradient(180deg, #000 60%, transparent 100%); -webkit-mask-composite: source-in;
     mask: linear-gradient(90deg, transparent 0, #000 30%, #000 62%, transparent 76%), linear-gradient(180deg, #000 60%, transparent 100%); mask-composite: intersect; }
+}
+
+/* ---------------------------------------------------------------- pente fino 19/11 (3ª rodada) */
+/* selos 1º, 2º e 3º: número legível sobre o ouro, a prata e o bronze */
+.rk { text-shadow: 0 1px 1px rgba(40, 20, 0, .55); }
+.rk1 { background: linear-gradient(160deg, #C9973F, #8E5E1C); } .rk2 { background: linear-gradient(160deg, #9C9893, #6A655F); } .rk3 { background: linear-gradient(160deg, #B0703F, #7A4422); }
+/* etiquetas de situação com contraste suficiente */
+:root { --ok: #33694C; --atn: #7E5612; }
+.mais-g h3, .mais-sec, .mais-grupo { color: #6E5246; }
+/* estoque baixo por grade: nome da peça inteiro também no computador */
+.bx-peca b { white-space: normal; overflow: visible; text-overflow: clip; max-width: 170px; line-height: 1.2; }
+/* gráfico "Vendas por dia": todas as barras na mesma linha de base e cabendo no cartão do celular */
+.barras div { grid-template-rows: minmax(0, 1fr) auto; min-width: 0; }
+.barras i { align-self: end; }
+@media (max-width: 860px) { .barras { gap: 3px; } .barras span { font-size: 9.5px; letter-spacing: -.02em; } }
+.temas button { text-align: left; line-height: 1.15; }
+/* grades com quantidades (chegada, cadastro, etiquetas) cabem na janela do celular sem cortar a última coluna */
+@media (max-width: 480px) {
+  .gradeq input { width: 40px; padding: 0 2px; }
+  .gradeq th.cor { white-space: normal; max-width: 78px; font-size: 12.5px; line-height: 1.15; }
+  .gradeq td { min-width: 0; }
+  .gradeq { border-spacing: 3px; }
 }

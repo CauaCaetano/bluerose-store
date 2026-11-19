@@ -188,7 +188,7 @@
       meusApps = {}; l.forEach(function (x) { if (x.app && ['teste', 'ativa', 'paga', 'pendente'].indexOf(x.status) >= 0) meusApps[x.app] = 1; });
       if (!doCache) indicacao();
       raiz.innerHTML = aviso + (doCache ? '<div class="conta-aviso" data-aviso-cache>Atualizando a lista…</div>' : '') + busca() + (l.length ? '<details class="conta-pasta" id="conta-pasta"' + (termo || pastaAberta() ? ' open' : '') + '><summary><span class="conta-pasta-ico" aria-hidden="true"></span><span class="conta-titulo">Sistemas</span><span class="conta-pasta-n">' + l.length + '</span></summary><div class="conta-pasta-corpo">' + l.map(cartao).join('') + '</div></details>' :
-        '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp?v=11" alt="" loading="lazy"><img src="img/sistemas/agenda.webp?v=11" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp?v=11" alt="" loading="lazy"></div><h3>Você ainda não tem assinaturas</h3><p>Escolha um dos sistemas, veja a demonstração e assine pelo botão Pague aqui.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
+        '<div class="conta-vazio"><div class="conta-vazio-fotos" aria-hidden="true"><img src="img/sistemas/crm.webp?v=11" alt="" loading="lazy"><img src="img/sistemas/agenda.webp?v=12" alt="" loading="lazy"><img src="img/sistemas/financeiro.webp?v=11" alt="" loading="lazy"></div><h3>Você ainda não tem assinaturas</h3><p>Escolha um dos sistemas, veja a demonstração e assine pelo botão Pague aqui.</p><a class="btn btn-primary" href="sistemas.html">Ver os sistemas</a></div>');
       if (termo) filtrar();
     }
   }

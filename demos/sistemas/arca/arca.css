@@ -393,3 +393,5 @@ main { padding: 22px 28px 48px; min-width: 0; outline: none; animation: entra .2
 @media (min-width: 1361px) and (max-width: 1600px) { .g-nome { font-size: .82rem; letter-spacing: 0; } }
 /* fluxo de caixa no celular: o gráfico cabe inteiro na tela (sem pedaço escondido de lado), com letra maior */
 @media (max-width: 760px) { .graf-cx { overflow: visible; padding: 0 14px; } .graf { min-width: 0; overflow: visible; } .graf text { font-size: 22px; } .g-rot text { font-size: 24px; } }
+/* pente fino 3: "Ver tudo" na faixa bordô com contraste AA */
+.faixa-t.bordo .ver { color: #ecdcc2; }

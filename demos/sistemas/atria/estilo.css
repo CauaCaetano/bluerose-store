@@ -603,3 +603,6 @@ html.letra-grande .folha .duas, html.letra-grande .folha .dois-num { grid-templa
 body:has(> .onb) .demo-faixa { position: fixed; left: 0; right: 0; top: 0; z-index: 101; }
 body:has(> .onb) .onb { top: calc(40px + env(safe-area-inset-top)); }
 body:has(> .tour) .demo-faixa { z-index: 101; }
+/* contrato: "Quem compra o material?" com respiro abaixo dos botões */
+.mx-opc { margin-top: 12px; }
+.mx-opc > small { display: block; margin-bottom: 6px; }
