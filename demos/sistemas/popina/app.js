@@ -1,105 +1,76 @@
-// Popina · liga tudo: telas, navegação, faixa da demonstração e o papel deste aparelho.
-import './salao.js?v=34';
-import './cozinha.js?v=34';
-import './caixa.js?v=34';
-import './pedidos.js?v=34';
-import './mais.js?v=34';
-import './gestao.js?v=34';
-import { db, recomecar, ouvir, linkCardapio, CONTA, lojaCfg } from './loja.js?v=34';
-import { iniciarRotas, PAPEIS, papel, setPapel, ir } from './nucleo.js?v=34';
-import { ico, folha, $, $$, toast, bip, confirma } from './ui.js?v=34';
-import './ajuda.js?v=34';
-import './tutorial.js?v=34';
-import { abrirEscolha } from './escolha.js?v=34';
+// Popina · liga tudo: as 5 abas, a cor do restaurante, a marca (plano com a sua marca), a faixa da demonstração,
+// o aviso de pedido novo e o primeiro uso.
+import './salao.js?v=40';
+import './pedidos.js?v=40';
+import './cozinha.js?v=40';
+import './caixa.js?v=40';
+import './gestao.js?v=40';
+import './cadastro.js?v=40';
+import './relatorios.js?v=40';
+import { talvezAbrirInicio } from './inicio.js?v=40';
+import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila } from './loja.js?v=40';
+import { iniciarRotas, ir } from './nucleo.js?v=40';
+import { ico, toast, bip, confirma, $ } from './ui.js?v=40';
+import { conferirNovos } from './cozinha.js?v=40';
 
-const q = new URLSearchParams(location.search);
-if (q.get('papel') && PAPEIS[q.get('papel')]) setPapel(q.get('papel'), true);
 const real = !!CONTA;
-// pedido, chamado ou conta que chegou pelo cardápio online: som e aviso em todos os aparelhos ligados
-addEventListener('popina-chegou', (e) => { bip(); toast(e.detail === 1 ? 'Chegou um pedido pelo cardápio online' : `Chegaram ${e.detail} pedidos pelo cardápio online`); });
+// ------------------------------------------------------------------ as 5 abas (links #: as permissões da equipe usam estes)
+const ABAS = [['salao', 'Salão', 'mesa'], ['pedidos', 'Pedidos', 'sacola'], ['cozinha', 'Cozinha', 'chef'], ['caixa', 'Caixa', 'dinheiro'], ['mais', 'Gestão', 'grafico']];
+$('#nav').innerHTML = ABAS.map(([h, n, i]) => `<a href="#${h}" data-aba="${h}">${ico(i)}<span>${n}</span><em data-cont="${h}"></em></a>`).join('');
 
-// navegação: barra de baixo no celular, trilho à esquerda no tablet/computador
-const ABAS = [['salao', 'Salão', 'salao'], ['pedidos', 'Pedidos', 'pedidos'], ['cozinha', 'Cozinha', 'cozinha'], ['caixa', 'Caixa', 'caixa'], ['mais', 'Gestão', 'mais']];
-// o menu mora dentro do topo: no computador fica no meio da barra; no celular vira a barra de baixo
-document.querySelector('.topo').insertBefore($('#nav'), document.querySelector('.ao-vivo'));
-const ICO_ABA = { salao: 'mesa', pedidos: 'pedidos', cozinha: 'cozinha', caixa: 'cartao', mais: 'louro' };
-$('#nav').innerHTML = ABAS.map(([h, n]) => `<a href="#${h}" data-aba="${h}">${ico(ICO_ABA[h])}<span>${n}</span><em class="contador" data-cont="${h}"></em></a>`).join('');
-// à direita do topo (como no conceito do salão): sino com as pendências, e o perfil com as iniciais do restaurante
-const dirTopo = document.createElement('div'); dirTopo.className = 'topo-dir';
-dirTopo.innerHTML = `<a class="topo-sino" href="#salao" aria-label="Pendências do salão">${ico('sino')}<em data-sino></em></a><span class="topo-div" aria-hidden="true"></span>
-  <button type="button" class="topo-perfil" aria-label="Conta e opções"><span data-iniciais></span>${ico('chevron')}</button>`;
-document.querySelector('.topo').append(dirTopo);
-$('.topo-perfil').onclick = () => folha({ titulo: db.config.nome || 'Conta', corpo: `<div class="lista-bts">
-  <button type="button" class="bt" data-m="nova">${ico('mais2')}Nova comanda</button>
-  <button type="button" class="bt" data-m="planta">${ico('planta')}Planta do salão</button>
-  ${real ? '' : `<a class="bt" href="app.html?papel=cozinha#cozinha">${ico('cozinha')}Ver a tela da cozinha</a>
-  <a class="bt" href="${linkCardapio('mesa=4')}">${ico('qr')}Cardápio do cliente</a>`}
-  <a class="bt" href="#mais/conta" data-fechar>${ico('pessoas')}Minha conta e equipe</a>
-  ${real ? '' : `<button type="button" class="bt" data-m="recomecar">${ico('troca')}Recomeçar a demonstração</button>`}</div>`,
-aoAbrir: (f, fechar) => $$('[data-m]', f).forEach((b) => { b.onclick = () => { fechar(); const m = b.dataset.m;
-  if (m === 'recomecar') confirma('Recomeçar a demonstração? Tudo o que você fez aqui volta ao exemplo do início.', 'Recomeçar', true).then((ok) => { if (ok) { recomecar(); ir('salao'); toast('Demonstração recomeçada'); } });
-  else { const x = document.createElement('button'); x.dataset.acao = m === 'nova' ? 'nova-comanda' : 'planta'; x.hidden = true; document.body.append(x); x.click(); x.remove(); } }; }) });
-function contadores() {
-  const fila = db.comandas.reduce((s, c) => s + c.itens.filter((i) => i.status === 'pronto').length, 0) + db.chamados.filter((x) => !x.atendido).length + db.pedidosQR.length + db.comandas.filter((c) => c.pediuConta).length;
-  const coz = db.comandas.reduce((s, c) => s + c.itens.filter((i) => i.status === 'novo' && !i.cancelado).length, 0);
-  const ped = db.comandas.filter((c) => c.tipo !== 'mesa').length;
-  [['salao', fila], ['cozinha', coz], ['pedidos', ped]].forEach(([k, n]) => { const e = $(`[data-cont="${k}"]`); if (e) e.textContent = n ? n : ''; });
-  marcaTopo();
-  $('[data-sino]').textContent = fila || '';
-  $('[data-iniciais]').textContent = (db.config.nome || 'P').split(/\s+/).filter((w) => w.length > 2 || /^[A-ZÀ-Ú]/.test(w)).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || 'P';
+// ------------------------------------------------------------------ cor do restaurante com leitura garantida (contraste AA)
+const hex = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16));
+const lum = ([r, g, b]) => { const f = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+const contraste = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const paraHex = (rgb) => '#' + rgb.map((c) => Math.round(Math.max(0, Math.min(255, c))).toString(16).padStart(2, '0')).join('');
+const escurece = (rgb, alvo, fundo) => { let c = [...rgb]; for (let k = 0; k < 40 && contraste(c, fundo) < alvo; k++) c = c.map((v) => v * 0.93); return c; };
+function aplicarCor() {
+  const base = hex(corLoja()), branco = [255, 255, 255], creme = [247, 240, 230];
+  const bt = escurece(base, 4.6, branco), tinta = escurece(base, 5.2, creme);
+  const r = document.documentElement.style;
+  r.setProperty('--loja', paraHex(bt)); r.setProperty('--loja-txt', '#fff'); r.setProperty('--loja-tinta', paraHex(tinta));
+  r.setProperty('--loja-suave', paraHex(base.map((v) => v * 0.16 + 255 * 0.84)));
 }
-// plano "Popina com a sua marca": o topo mostra o logo e o nome do restaurante no lugar do Popina
-const logoPopina = (tp) => (tp === 'taverna' ? 'simbolo.png?v=1' : `img/logo-${tp}.webp?v=1`);
+// ------------------------------------------------------------------ topo: Popina, ou o logo e o nome do restaurante no plano com a sua marca
 function marcaTopo() {
-  const m = window.popinaPlano === 'marca', L = lojaCfg(), img = document.querySelector('.topo > img'), b = document.querySelector('.topo > div > b');
+  const m = window.popinaPlano === 'marca', L = lojaCfg(), img = $('#topo-logo');
   window.popinaNome = db.config.nome;
-  if (b) b.textContent = m ? db.config.nome : 'POPINA';
-  $('#topo-nome').textContent = m ? (db.config.cidade || '') : db.config.nome;
+  $('#topo-titulo').textContent = m ? db.config.nome || 'Restaurante' : 'Popina';
+  $('#topo-nome').textContent = m ? db.config.cidade || '' : db.config.nome || '';
+  const src = m && L.logo ? L.logo : 'simbolo.png?v=1';
+  if (img.getAttribute('src') !== src) img.src = src;
+  img.hidden = m && !L.logo;
   document.body.classList.toggle('marca-propria', m);
-  // template escolhido em Gestão › Aparência (Taverna é o visual de base; Luxo e Realeza vêm por cima)
-  // Básico é o padrão de quem começa; a demonstração usa o Taverna (dados.js)
-  const TPLS = ['basico', 'taverna', 'luxo', 'realeza', 'japones', 'italiano', 'churrascaria', 'mexicano', 'pizzaria', 'hamburgueria', 'pub', 'chines', 'balada', 'cafeteria'], tp = TPLS.includes(L.template) ? L.template : 'basico';
-  const V = window.POPINA_TPLV || {};
-  if (V[tp] && !document.querySelector(`link[data-tpl="${tp}"]`)) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = `tpl-${tp}.css?v=${V[tp]}`; l.dataset.tpl = tp; document.head.append(l); }
-  TPLS.forEach((x) => document.body.classList.toggle(`tpl-${x}`, x === tp));
-  // logo do Popina no estilo do template (o Taverna usa o original); no plano com a marca, o logo do restaurante
-  if (img) { const src = m && L.logo ? L.logo : logoPopina(tp); if (img.getAttribute('src') !== src) img.src = src; img.style.objectFit = 'contain'; }
-  if (window.POPINA_ICONE && window.POPINA_ICONE_ATUAL !== tp) { window.POPINA_ICONE_ATUAL = tp; window.POPINA_ICONE(tp); }
-  if (/^#[0-9a-f]{6}$/i.test(L.cor || '')) document.body.style.setProperty('--loja-cor', L.cor);
 }
 addEventListener('popina-plano', () => { marcaTopo(); dispatchEvent(new HashChangeEvent('hashchange')); });
+function contadores() {
+  const coz = db.comandas.reduce((s, c) => s + c.itens.filter((i) => i.status === 'novo' && !i.cancelado).length, 0);
+  const ped = db.comandas.filter((c) => c.tipo !== 'mesa').length;
+  const cx = db.comandas.filter((c) => c.pediuConta).length;
+  [['salao', fila().length], ['cozinha', coz], ['pedidos', ped], ['caixa', cx]].forEach(([k, n]) => { const e = $(`[data-cont="${k}"]`); if (e) e.textContent = n ? (n > 99 ? '99+' : n) : ''; });
+  aplicarCor(); marcaTopo(); conferirNovos();
+}
 ouvir(contadores);
-// conexão: sem internet, cada aparelho guarda o que foi feito e envia quando ela voltar
+// pedido, chamado ou conta que chegou pelo cardápio online
+addEventListener('popina-chegou', (e) => { bip(); toast(e.detail === 1 ? 'Chegou um pedido pelo cardápio online' : `Chegaram ${e.detail} pedidos pelo cardápio online`); });
+// sem internet: guarda neste aparelho e sobe quando voltar
 function conexao() {
-  const on = navigator.onLine, el = $('.ao-vivo'); if (!el) return;
-  el.classList.toggle('off', !on);
-  el.innerHTML = on ? '<i></i>Ao vivo' : '<i></i>Sem internet';
-  el.title = on ? 'Os aparelhos do restaurante se atualizam sozinhos' : 'O que você fizer fica guardado neste aparelho e vai para os outros assim que a internet voltar';
-  if (!on) toast('Sem internet: o que você fizer fica guardado aqui e sobe quando a conexão voltar');
+  const on = navigator.onLine, el = $('#ao-vivo'); if (!el) return;
+  el.classList.toggle('off', !on); el.innerHTML = on ? '<i></i>Ao vivo' : '<i></i>Sem internet';
+  el.title = on ? 'Os aparelhos do restaurante se atualizam sozinhos' : 'O que você fizer fica guardado aqui e vai para os outros aparelhos quando a internet voltar';
 }
-addEventListener('online', conexao); addEventListener('offline', conexao); conexao();
+addEventListener('online', conexao); addEventListener('offline', () => { conexao(); toast('Sem internet: o que você fizer fica guardado aqui'); }); conexao();
 
-// faixa da demonstração (some na conta real)
+// ------------------------------------------------------------------ faixa da demonstração (some na conta real)
 if (!real) {
+  document.body.classList.add('demo');
   const f = document.createElement('div'); f.className = 'demo-faixa';
-  // tudo na mesma aba (pedido do dono): nada de abrir aba nova; sempre dá para voltar ao site
-  f.innerHTML = `<a target="_top" href="../../../popina.html">← Voltar ao site</a><span><b>Demonstração</b> · restaurante de exemplo</span>
-    ${q.get('papel') === 'cozinha' ? `<a href="app.html">${ico('salao')}Voltar ao sistema</a>` : `<a href="app.html?papel=cozinha#cozinha">${ico('cozinha')}Ver a tela da cozinha</a>`}
-    <a href="${linkCardapio('mesa=4')}">${ico('qr')}Cardápio do cliente</a>
-    <button type="button" data-recomecar>Recomeçar</button>`;
+  f.innerHTML = `<a target="_top" href="../../../popina.html">← Voltar ao site</a><span class="sep">·</span><button type="button" data-recomecar>Recomeçar</button><span class="sep">·</span>
+    <a href="${linkCardapio('mesa=4')}">Cardápio do cliente</a><span class="demo-rot"><b>Demonstração</b> · lanchonete de exemplo</span>`;
   document.body.prepend(f);
-  $('[data-recomecar]', f).onclick = async () => { if (!(await confirma('Recomeçar a demonstração? Tudo o que você fez aqui volta ao exemplo do início.', 'Recomeçar', true))) return; recomecar(); ir('salao'); toast('Demonstração recomeçada'); };
+  f.querySelector('[data-recomecar]').onclick = async () => { if (!(await confirma('Recomeçar a demonstração? Tudo o que você fez volta ao exemplo do início.', 'Recomeçar', true))) return; recomecar(); ir('salao'); toast('Demonstração recomeçada'); };
 }
-document.body.addEventListener('pointerdown', () => { document.body.dataset.tocou = '1'; }, { once: true });
-
-// primeira entrada do dono: escolher o tipo da casa (template); só depois pergunta o papel do aparelho
-const escolher = !lojaCfg().escolhido && !q.get('papel') && (!papel() || papel() === 'dono');
-const perguntarPapel = () => folha({ titulo: 'Quem vai usar este aparelho?', corpo: `<p class="mudo">Cada celular, tablet ou computador do restaurante abre direto na tela que precisa. Dá para trocar depois em Gestão › Este aparelho.</p>
-    <div class="papeis">${Object.entries(PAPEIS).map(([k, [nome]]) => `<button type="button" class="papel" data-p="${k}"><b>${nome}</b><small>${{ garcom: 'Celular do garçom: fila do que fazer e as mesas', cozinha: 'Tela da cozinha e do bar', caixa: 'Computador do caixa: fechar contas', dono: 'Vê tudo, relatórios e ajustes' }[k]}</small></button>`).join('')}</div>`,
-  aoAbrir: (fo, fechar) => $$('[data-p]', fo).forEach((b) => { b.onclick = () => { setPapel(b.dataset.p); fechar(); ir(PAPEIS[b.dataset.p][1]); }; }) });
-if (escolher) setTimeout(() => abrirEscolha({ primeira: true, aoFechar: () => { if (!papel() && !q.get('papel')) setTimeout(perguntarPapel, 250); } }), 200);
-else if (!papel() && !q.get('papel')) setTimeout(perguntarPapel, 300);
+aplicarCor(); marcaTopo();
 iniciarRotas(); contadores();
-// a primeira tela já está desenhada: some a abertura (setTimeout, porque requestAnimationFrame para em aba escondida)
-setTimeout(() => { document.body.classList.add('pronto'); setTimeout(() => document.getElementById('abertura')?.remove(), 400); }, 0);
+talvezAbrirInicio();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});

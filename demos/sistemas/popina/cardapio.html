@@ -10,41 +10,23 @@
 <link rel="icon" href="icone-192.png?v=1" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,700;1,9..144,800&family=Libre+Caslon+Text:wght@400;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&family=Cinzel:wght@600;700&family=Shippori+Mincho:wght@600;700;800&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=5">
-<link rel="stylesheet" href="cardapio.css?v=20">
-<link rel="stylesheet" href="cardapio-gpt.css?v=6">
-<link rel="stylesheet" href="cardapio-tpl.css?v=30">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,800&display=swap">
+<link rel="stylesheet" href="popina.css?v=1">
+<link rel="stylesheet" href="cardapio.css?v=30">
 </head>
 <body class="cliente">
-<div class="cli-pagina">
-  <div class="cli-principal">
-    <header class="cli-capa" id="cli-capa">
-      <div class="cli-capa-foto" id="cli-capa-foto"></div><div id="cli-status"></div>
-      <div class="cli-id">
-        <div class="cli-logo" id="cli-logo" aria-hidden="true"></div>
-        <div class="cli-id-txt">
-          <h1 id="cli-nome">Cardápio</h1>
-          <p id="cli-boas"></p>
-          </div>
-      </div>
-    </header>
-        <div id="cli-modo" class="cli-modo"></div>
-    <div id="cli-aviso"></div>
-    <div class="cli-barra-busca" id="cli-nav">
-      <label class="cli-busca"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" id="cli-q" placeholder="Buscar no cardápio" aria-label="Buscar no cardápio"></label>
-      <nav class="cli-cats" id="cli-cats" aria-label="Categorias"></nav>
-    </div>
-    <main id="cli-lista" class="cli-lista"><p class="cli-carregando">Abrindo o cardápio…</p></main>
-    <div id="cli-aviso-fim"></div>
-    <div class="cli-pills" id="cli-pills"></div>
-    <footer class="cli-rodape" id="cli-rodape"></footer>
-  </div>
-  <aside class="cli-sacola-lado" id="cli-sacola-lado" aria-label="Seu pedido"></aside>
+<div class="cli">
+  <header id="cli-topo" class="cli-topo"></header>
+  <div id="cli-modo" class="cli-sec"></div>
+  <div id="cli-aviso" class="cli-sec"></div>
+  <div class="cli-nav"><label class="busca"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input type="search" id="cli-q" placeholder="Buscar no cardápio" aria-label="Buscar no cardápio"></label>
+    <nav class="chips" id="cli-cats" aria-label="Categorias"></nav></div>
+  <main id="cli-lista" class="cli-lista"><p class="vazio">Abrindo o cardápio…</p></main>
+  <footer class="cli-rodape" id="cli-rodape"></footer>
 </div>
-<div class="cli-barra" id="cli-barra"></div>
-<script src="demo-cardapio.js?v=3"></script>
+<div class="cli-barra" id="cli-barra" hidden></div>
+<script src="demo-cardapio.js?v=4"></script>
 <script src="../../../app/config.js"></script>
-<script type="module" src="cliente.js?v=34"></script>
+<script type="module" src="cliente.js?v=40"></script>
 </body>
 </html>

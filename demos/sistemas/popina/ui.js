@@ -1,5 +1,5 @@
 // Popina · peças da interface: ícones, folha que sobe de baixo, aviso rápido, confirmação.
-import { t, pinConfere } from './loja.js?v=34';
+const t = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const $ = (s, el = document) => el.querySelector(s);
 export const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
@@ -73,24 +73,25 @@ export function confirma(msg, sim = 'Confirmar', perigo = false) {
       aoAbrir: (f, fechar) => { $('[data-sim]', f).onclick = () => { ok(true); fechar(); }; }, aoFechar: () => ok(false) });
   });
 }
-// motivo (sugestões + texto livre) e PIN do gerente numa folha só; devolve { motivo, el } ou null se a pessoa voltou
+// motivo (sugestões + texto livre) e Senha do gerente numa folha só; devolve { motivo, el } ou null se a pessoa voltou
 export function autorizar({ titulo, texto = '', motivos = null, pedirPin = false, sim = 'Confirmar', perigo = false, extra = '' }) {
   return new Promise((ok) => {
     let feito = false;
     folha({ titulo, corpo: `${texto ? `<p class="mudo">${texto}</p>` : ''}${extra}
       ${motivos ? `<div class="campo"><span>Motivo</span><div class="chips quebra">${motivos.map((m) => `<button type="button" class="chip" data-mot="${t(m)}">${t(m)}</button>`).join('')}</div>
         <input data-motivo maxlength="140" placeholder="Ou escreva o motivo" aria-label="Motivo"></div>` : ''}
-      ${pedirPin ? `<label class="campo"><span>PIN do gerente</span><input data-pin type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="4 números"></label>` : ''}`,
+      ${pedirPin ? `<label class="campo"><span>Senha do gerente</span><input data-pin type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="4 números"></label>` : ''}`,
     pe: `<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt ${perigo ? 'perigo' : 'cheio'}" data-sim>${sim}</button>`,
     aoFechar: () => { if (!feito) ok(null); },
     aoAbrir: (f, fechar) => {
       const mot = $('[data-motivo]', f);
       $$('[data-mot]', f).forEach((b) => { b.onclick = () => { $$('[data-mot]', f).forEach((x) => x.classList.toggle('on', x === b)); mot.value = b.dataset.mot; }; });
-      $('[data-sim]', f).onclick = () => {
+      $('[data-sim]', f).onclick = async () => {
+        const { pinConfere } = await import('./loja.js?v=40');
         const motivo = mot ? mot.value.trim() : '';
         if (mot && motivo.length < 3) { toast('Escolha ou escreva o motivo'); return mot.focus(); }
         const pin = $('[data-pin]', f);
-        if (pin && !pinConfere(pin.value)) { toast('PIN errado'); pin.value = ''; return pin.focus(); }
+        if (pin && !pinConfere(pin.value)) { toast('Senha errada'); pin.value = ''; return pin.focus(); }
         feito = true; ok({ motivo, pin: !!pin, el: f }); fechar();
       };
     } });

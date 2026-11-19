@@ -6,7 +6,7 @@
   var s = document.currentScript, K = s && s.getAttribute('data-chave');
   if (!K || /[?&]conta=/.test(location.search)) return;
   var F = K + '-reparo', ERROS = [];
-  var DEMOS = /^(peplo-v1|annona-v1|atria-v1|popina-v1|arca-demo-v1|vetnature-demo-v2|veltria-(agenda|crm|farmacia|financeiro|gestao|juridico|obras|oficina)-(essencial|completo|avancado|proto|simples)-v\d+)$/;
+  var DEMOS = /^(peplo-v1|annona-v1|atria-v1|popina-v1|arca-demo-v\d+|vetnature-demo-v2|veltria-(agenda|crm|farmacia|financeiro|gestao|juridico|obras|oficina)-(essencial|completo|avancado|proto|simples)-v\d+)$/;
   // guarda o motivo (erro de script ou arquivo que não carregou) para mostrar no aviso
   addEventListener('error', function (e) { var t = e.target; ERROS.push(t && t !== window && (t.src || t.href) ? 'Não carregou: ' + (t.src || t.href).replace(location.origin, '') : (e.message || 'erro') + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '')); }, true);
   addEventListener('unhandledrejection', function (e) { ERROS.push('Promessa: ' + String(e.reason && (e.reason.message || e.reason)).slice(0, 200)); });
