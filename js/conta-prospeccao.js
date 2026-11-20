@@ -18,7 +18,9 @@
     peplo: { nome: 'Peplo', alvo: 'lojas de roupas' },
     annona: { nome: 'Annona', alvo: 'mercadinhos, mercearias e empórios' },
     atria: { nome: 'Atria', alvo: 'profissionais da construção e da reforma' },
-    popina: { nome: 'Popina', alvo: 'restaurantes, lanchonetes, pizzarias e bares' }
+    popina: { nome: 'Popina', alvo: 'restaurantes, lanchonetes, pizzarias e bares' },
+    // 20/11: Tecton (construção): um sistema, três ramos; o texto muda pelo ramo do prospect (categorias[0] ou "Ramo:" nas notas)
+    tecton: { nome: 'Tecton', alvo: 'construtoras e empreiteiras, lojas de material de construção e imobiliárias, incorporadoras e loteadoras' }
   };
   var produto = (function () { try { return PRODUTOS[localStorage.getItem('br-prosp-produto')] ? localStorage.getItem('br-prosp-produto') : 'anshur'; } catch (e) { return 'anshur'; } })();
   var ETAPAS = [['novo', 'Novo'], ['contatado', 'Contatado'], ['retomada1', 'Retomada 1'], ['retomada2', 'Retomada 2'], ['abriu_link', 'Abriu o link'],
@@ -57,10 +59,41 @@
     popina: { pag: 'popina.html', nome: 'Popina', preco: 'R$ 79/mês (ou R$ 758/ano)', ramo: 'tem restaurante',
       dor: 'Em restaurante, pedido anotado no papel atrasa a cozinha, sai errado e some na hora de fechar a conta.',
       ganho: 'O Popina é simples de usar: o garçom anota no celular e o pedido aparece (e imprime) na cozinha na hora, o balcão chama pelo nome ou senha, a mesa tem cardápio com QR, o pedido do delivery chega também no WhatsApp e o caixa fecha com Pix, troco, 10% e conta dividida.',
-      conta: 'Um pedido errado a menos por dia já paga o sistema no mês.' }
+      conta: 'Um pedido errado a menos por dia já paga o sistema no mês.' },
+    tecton: { pag: 'tecton.html', nome: 'Tecton', preco: 'R$ 129/mês (ou R$ 1.238/ano)', ramo: 'trabalha com construção',
+      ramos: {
+        construtora: { ramo: 'toca obras',
+          dor: 'Em construtora, o cronograma escorrega, a medição atrasa e só no fim se descobre se a obra deu lucro, enquanto o cliente liga pedindo notícia.',
+          ganho: 'Com o Tecton, cada obra mostra na hora se está no prazo e dando lucro: cronograma, medições, diário com foto e o resultado de cada obra, e o cliente acompanha tudo por um link, sem precisar ligar. Funciona no computador e no celular do canteiro.',
+          conta: 'Pegar a tempo um único estouro de material ou uma medição esquecida já paga vários meses do sistema.' },
+        loja: { ramo: 'vende material de construção',
+          dor: 'Em loja de material, o orçamento do WhatsApp se perde, a entrega sai sem conferência e o fiado do profissional cresce sem limite.',
+          ganho: 'Com o Tecton, o balcão vende rápido e o orçamento sai pronto no WhatsApp, as entregas ficam agendadas e conferidas, cada obra tem a sua conta e o fiado do profissional tem limite. Funciona no computador do balcão e no celular de quem entrega.',
+          conta: 'Receber um único fiado que ia ficar para trás já paga vários meses do sistema.' },
+        imobiliaria: { ramo: 'vende e aluga imóveis',
+          dor: 'Em imobiliária, o espelho de vendas vive em planilha, parcela e aluguel atrasam sem ninguém ver e a comissão vira discussão.',
+          ganho: 'Com o Tecton, o espelho de vendas mostra na hora o que está livre, reservado e vendido, os contratos geram as parcelas sozinhos, o aluguel entra com o repasse ao proprietário já calculado e cada corretor vê a sua comissão. Funciona no computador e no celular.',
+          conta: 'Cobrar em dia um único aluguel ou parcela atrasada já paga o mês do sistema.' }
+      } }
   };
+  // texto do sistema; no Tecton, o do ramo do prospect (construtora, loja ou imobiliária)
+  function ramoTecton(p) {
+    var c = String((p.categorias || [])[0] || ''), n = String(p.notas || '');
+    if (/^(construtora|loja|imobiliaria)$/.test(c)) return c;
+    if (/Ramo: loja/i.test(n)) return 'loja';
+    if (/Ramo: imobili/i.test(n)) return 'imobiliaria';
+    return 'construtora';
+  }
+  function textosSis(p) {
+    var s = SIS[p.produto], r = s.ramos && s.ramos[ramoTecton(p)];
+    if (!r) return s;
+    var o = {}, k;
+    for (k in s) o[k] = s[k];
+    for (k in r) o[k] = r[k];
+    return o;
+  }
   function mensagemSistema(p, acao) {
-    var s = SIS[p.produto], l = link(p), e = String(p.empresa || '').split(' - ')[0].split(' (')[0];
+    var s = textosSis(p), l = link(p), e = String(p.empresa || '').split(' - ')[0].split(' (')[0];
     if (acao === 'retomada1') return [
       'Olá! Retomando rápido a mensagem sobre o ' + s.nome + '.',
       s.conta,
