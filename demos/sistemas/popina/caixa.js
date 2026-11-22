@@ -2,15 +2,15 @@
 // sangria e suprimento, e o fechamento do dia com o resumo pronto para mandar no WhatsApp do dono.
 import { db, t, din, r2, num, vir, tempo, hora, conta, comanda, pagar, partes, darDesconto, ondeComanda, quemPediu, caixaResumo, abrirCaixa, movimento, fecharCaixa,
   regras, temPin, euSou, setEuSou, quemAgora, grava, FORMA_FIADO, registrarFiado, receberFiado, clientesFiado, saldoFiado, nomeFiado, soDig, fone, zap, vendaDeHoje, cancelarVenda,
-  inicioDoDia, pagamentosVenda, itensValidos } from './loja.js?v=46';
-import { registrar, acao, ir } from './nucleo.js?v=46';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=46';
-import { pix } from './pix.js?v=46';
+  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=47';
+import { registrar, acao, ir } from './nucleo.js?v=47';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=47';
+import { pix } from './pix.js?v=47';
 import { qrSVG } from '../base/qr.js';
-import { blocoTotais, voltar, rotaComanda } from './salao.js?v=46';
-import { novoPedidoFolha } from './pedidos.js?v=46';
-import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=46';
-import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=46';
+import { blocoTotais, voltar, rotaComanda } from './salao.js?v=47';
+import { novoPedidoFolha } from './pedidos.js?v=47';
+import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=47';
+import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=47';
 
 const FORMAS = [['Pix', 'pix'], ['Dinheiro', 'dinheiro'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao'], [FORMA_FIADO, 'etiqueta']];
 const rotuloForma = (f) => (f === FORMA_FIADO ? 'Fiado' : f.replace('Cartão de débito', 'Débito').replace('Cartão de crédito', 'Crédito'));
@@ -118,8 +118,12 @@ registrar('fechar', {
         ${c0 ? '<p class="mudo" style="margin-top:12px">Pago. O pedido continua no quadro de Pedidos até você tocar em Entregue.</p>' : ''}</div>`;
     }
     const v = conta(c), e = (estado[c.id] ||= { dividir: 1 });
-    const n = e.dividir, pt = n > 1 ? partes(v.total, n) : null, pagas = (c.pagamentos || []).length;
-    const sugestao = pt ? Math.min(v.falta, pt[Math.min(pagas, n - 1)]) : v.falta;
+    const n = e.dividir, porItem = n === 'item', pt = !porItem && n > 1 ? partes(v.total, n) : null, pagas = (c.pagamentos || []).length;
+    const sugestao = porItem ? 0 : pt ? Math.min(v.falta, pt[Math.min(pagas, n - 1)]) : v.falta;
+    const pg = pagoPorItem(c);
+    const selItem = (i) => { const l = livreDoItem(c, i, pg); if (l <= 0) return '<span class="etq livre">Pago</span>';
+      return i.kg || l <= 1 ? `<input type="checkbox" data-it="${i.id}" data-max="${i.kg ? i.qtd : l}" aria-label="Pagar ${t(i.nome)}">`
+        : `<select data-it="${i.id}" aria-label="Quantos ${t(i.nome)}">${Array.from({ length: l + 1 }, (_, k) => `<option value="${k}">${k}</option>`).join('')}</select>`; };
     return `${voltar(rotaComanda(c), c.tipo === 'mesa' ? `Mesa ${c.mesa}` : 'Pedido')}
     <div class="cab"><div><h1>Fechar conta · ${t(c.tipo === 'mesa' ? `Mesa ${c.mesa}` : quemPediu(c))}</h1><p>${t(ondeComanda(c))}${c.pessoas && c.tipo === 'mesa' ? ` · ${c.pessoas} pessoas` : ''}${c.garcom ? ` · ${t(c.garcom)}` : ''}</p></div></div>
     <div class="duas lado"><div class="cartao"><h2>Consumo</h2>
@@ -131,7 +135,9 @@ registrar('fechar', {
     </div>
     <div class="cartao"><h2>Pagamento</h2>
       <p class="campo"><span style="font-weight:700">Dividir a conta</span></p>
-      <div class="chips quebra" role="group" aria-label="Dividir">${[1, 2, 3, 4, 5, 6].map((k) => `<button type="button" class="chip" data-div="${k}" aria-pressed="${n === k}">${k === 1 ? 'Não dividir' : `${k} pessoas`}</button>`).join('')}</div>
+      <div class="chips quebra" role="group" aria-label="Dividir">${[1, 2, 3, 4, 5, 6].map((k) => `<button type="button" class="chip" data-div="${k}" aria-pressed="${n === k}">${k === 1 ? 'Não dividir' : `${k} pessoas`}</button>`).join('')}<button type="button" class="chip" data-div="item" aria-pressed="${porItem}">Por item</button></div>
+      ${porItem ? `<p class="mudo" style="margin:6px 0">Marque o que esta pessoa consumiu. O valor já leva ${v.servico ? `os ${v.pctServ}% e ` : ''}o desconto na mesma proporção.</p>
+        <ul class="itens">${itensValidos(c).map((i) => `<li><span class="q">${i.kg ? '' : `${i.qtd}×`}</span><div class="nm"><b>${t(i.nome)}</b></div><span class="v">${din(valorItem(i))}</span><label style="margin-left:10px">${selItem(i)}</label></li>`).join('')}</ul>` : ''}
       ${pt ? `<p class="aviso ok" style="margin:6px 0 12px">Cada pessoa paga <b>${din(pt[0])}</b>${pt[n - 1] !== pt[0] ? ` (a última, ${din(pt[n - 1])})` : ''}. Já pagaram ${Math.min(pagas, n)} de ${n}.</p>` : ''}
       <label class="campo"><span>Valor deste pagamento (R$)</span><input data-valor inputmode="decimal" value="${vir(sugestao.toFixed(2))}"></label>
       <div class="formas">${FORMAS.map(([f, i]) => `<button type="button" class="forma" data-forma="${t(f)}">${ico(i)}${rotuloForma(f)}</button>`).join('')}</div>
@@ -142,11 +148,13 @@ registrar('fechar', {
   montar(el, id) {
     const c = comanda(id); if (!c || c.quitado) return;
     const serv = $('[data-serv]', el); if (serv) serv.onchange = () => { c.servico = serv.checked; grava(); };
-    $$('[data-div]', el).forEach((b) => { b.onclick = () => { estado[c.id].dividir = Number(b.dataset.div); ir(`fechar/${id}`); }; });
+    $$('[data-div]', el).forEach((b) => { b.onclick = () => { estado[c.id].dividir = b.dataset.div === 'item' ? 'item' : Number(b.dataset.div); ir(`fechar/${id}`); }; });
+    const selDe = () => { const s = {}; $$('[data-it]', el).forEach((x) => { const q = x.type === 'checkbox' ? (x.checked ? Number(x.dataset.max) || 1 : 0) : Number(x.value); if (q > 0) s[x.dataset.it] = q; }); return s; };
+    $$('[data-it]', el).forEach((x) => { x.onchange = () => { $('[data-valor]', el).value = vir(valorDosItens(c, selDe()).toFixed(2)); }; });
     $$('[data-forma]', el).forEach((b) => { b.onclick = () => {
       const valor = r2(Math.min(num($('[data-valor]', el).value), conta(c).falta));
       if (!(valor > 0)) return toast('Escreva o valor do pagamento');
-      const f = b.dataset.forma, fim = (extra = {}) => { const fechou = valor >= conta(c).falta - 0.009; pagar(c, f, valor, extra); toast(fechou ? 'Conta fechada' : `${din(valor)} recebido`); if (fechou) ir(`fechar/${id}`); };
+      const f = b.dataset.forma, fim = (extra = {}) => { const fechou = valor >= conta(c).falta - 0.009; const s = estado[c.id]?.dividir === 'item' ? selDe() : null; pagar(c, f, valor, s && Object.keys(s).length ? { ...extra, itens: s } : extra); toast(fechou ? 'Conta fechada' : `${din(valor)} recebido`); if (fechou) ir(`fechar/${id}`); };
       if (f === 'Pix') pixFolha(c, valor, () => fim());
       else if (f === 'Dinheiro') dinheiroFolha(valor, (troco, dado) => fim(troco ? { troco, dado } : {}));
       else if (f === FORMA_FIADO) fiadoFolha(c, valor, (cid) => fim({ fiado: cid }));

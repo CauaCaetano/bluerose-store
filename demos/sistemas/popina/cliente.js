@@ -5,8 +5,8 @@
 // Todo pedido também pode ir para o WhatsApp do restaurante (link wa.me com o pedido escrito).
 // COMPATIBILIDADE: o pedido continua com os mesmos campos (nome, tel, end, bairro, pagar, troco, itens). Os novos (ref, cupom, desconto,
 // taxa, total, agendado) só se somam; o que o sistema do dono ainda não lê vai também escrito no endereço, no pagamento e na observação.
-import { ico, folha, toast, $, $$ } from './ui.js?v=46';
-import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=46';
+import { ico, folha, toast, $, $$ } from './ui.js?v=47';
+import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=47';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -525,7 +525,7 @@ function carregarSacola() {
 function tudo() { aplicarCor(); topo(); caixaModo(); aviso(); lista(); rodape(); carregarSacola(); barra(); ultimo(); }
 async function iniciar() {
   if (!R) {
-    loja = await import('./loja.js?v=46'); doExemplo();
+    loja = await import('./loja.js?v=47'); doExemplo();
     loja.ouvir(() => { doExemplo(); if (!document.querySelector('.folha-fundo, .cx-tela-fundo')) { aplicarCor(); topo(); lista(); } });
     tudo(); return;
   }

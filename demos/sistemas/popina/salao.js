@@ -1,13 +1,13 @@
 // Popina · salão (o que fazer agora e as mesas), a comanda de qualquer conta e o lançar itens do garçom.
-import { db, t, din, tempo, comanda, comandaDaMesa, abrirMesa, adicionarItem, enviar, mudarStatus, cancelarItem, transferir, juntarMesas, conta, valorItem, itensValidos,
+import { db, t, din, tempo, comanda, comandaDaMesa, abrirMesa, adicionarItem, enviar, mudarStatus, cancelarItem, transferir, juntarMesas, moverItens, livreDoItem, pagoPorItem, conta, valorItem, itensValidos,
   fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2,
-  aguardaAceite } from './loja.js?v=46';
-import { escolherEntregador } from './pedidos.js?v=46';
-import { registrar, acao, ir } from './nucleo.js?v=46';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=46';
-import { formOpcoes, temOpcoes } from './opcoes.js?v=46';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=46';
-import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=46';
+  aguardaAceite } from './loja.js?v=47';
+import { escolherEntregador } from './pedidos.js?v=47';
+import { registrar, acao, ir } from './nucleo.js?v=47';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=47';
+import { formOpcoes, temOpcoes } from './opcoes.js?v=47';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=47';
+import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=47';
 
 const ESTADO = { livre: 'Livre', ocupada: 'Ocupada', conta: 'Pediu a conta', pronto: 'Prato pronto', chamou: 'Chamou', qr: 'Pedido do QR' };
 const nMesas = () => Math.max(1, Math.min(200, Number(db.config.mesas) || 10));
@@ -129,6 +129,7 @@ export function telaComanda(c) {
         ${vivos.some((i) => i.status !== 'rascunho') ? `<button type="button" class="bt" data-acao="imp-coz" data-id="${c.id}">${ico('cozinha')}Imprimir pedido da cozinha</button>` : ''}
         ${c.tipo === 'mesa' ? `<button type="button" class="bt" data-acao="pediu-conta" data-id="${c.id}">${ico('conta')}${c.pediuConta ? 'Tirar “pediu a conta”' : 'Pediu a conta'}</button>
           <button type="button" class="bt" data-acao="trocar-mesa" data-id="${c.id}">${ico('troca')}Trocar de mesa</button>
+          ${vivos.length ? `<button type="button" class="bt" data-acao="passar-itens" data-id="${c.id}">${ico('troca')}Passar itens para outra mesa</button>` : ''}
           <button type="button" class="bt" data-acao="juntar" data-id="${c.id}">${ico('mais2')}Juntar outra mesa</button>
           <button type="button" class="bt" data-acao="pessoas" data-id="${c.id}">${ico('pessoas')}Pessoas: ${c.pessoas || 1}</button>` : ''}
         <button type="button" class="bt" data-acao="hist" data-id="${c.id}">${ico('relogio')}O que aconteceu</button>
@@ -168,6 +169,30 @@ acao('trocar-mesa', (b) => {
   const livres = Array.from({ length: nMesas() }, (_, k) => k + 1).filter((m) => !comandaDaMesa(m));
   folha({ titulo: `Mesa ${c.mesa} vai para qual mesa?`, corpo: livres.length ? `<div class="chips quebra">${livres.map((m) => `<button type="button" class="chip" data-m="${m}">Mesa ${m}</button>`).join('')}</div>` : '<p class="vazio">Nenhuma mesa livre.</p>',
     aoAbrir: (f, fechar) => $$('[data-m]', f).forEach((x) => { x.onclick = () => { const m = Number(x.dataset.m); if (transferir(c, m)) { fechar(); toast(`Agora é a mesa ${m}`); ir(`mesa/${m}`); } }; }) });
+});
+acao('passar-itens', (b) => {
+  const c = comanda(b.dataset.id); if (!c) return;
+  const pg = pagoPorItem(c), itens = itensValidos(c).filter((i) => livreDoItem(c, i, pg) > 0);
+  const mesas = Array.from({ length: nMesas() }, (_, k) => k + 1).filter((m) => m !== c.mesa);
+  let mesa = 0;
+  const qtdSel = (i) => { const l = livreDoItem(c, i, pg); return i.kg || l <= 1 ? `<input type="checkbox" data-it="${i.id}" data-max="${l}" aria-label="Passar ${t(i.nome)}">`
+    : `<select data-it="${i.id}" aria-label="Quantos ${t(i.nome)}">${Array.from({ length: l + 1 }, (_, k) => `<option value="${k}">${k}</option>`).join('')}</select>`; };
+  folha({ titulo: `Passar itens da mesa ${c.mesa}`, corpo: itens.length ? `<p class="mudo" style="margin-bottom:8px">Marque o que vai mudar de mesa (no item com mais de 1, escolha quantos).</p>
+    <ul class="itens">${itens.map((i) => `<li><span class="q">${i.kg ? '' : `${livreDoItem(c, i, pg)}×`}</span><div class="nm"><b>${t(i.nome)}</b><small>${din(valorItem(i))}</small></div><label class="v">${qtdSel(i)}</label></li>`).join('')}</ul>
+    <p class="campo" style="margin-top:12px"><span style="font-weight:700">Para qual mesa?</span></p>
+    <div class="chips quebra">${mesas.map((m) => { const o = comandaDaMesa(m); return `<button type="button" class="chip" data-m="${m}" aria-pressed="false">Mesa ${m}${o ? ` · ${din(conta(o).total)}` : ' (livre)'}</button>`; }).join('')}</div>`
+    : '<p class="vazio">Não há itens para passar.</p>',
+  pe: '<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio grande" data-ok>Passar</button>',
+  aoAbrir: (f, fechar) => {
+    $$('[data-m]', f).forEach((x) => { x.onclick = () => { mesa = Number(x.dataset.m); $$('[data-m]', f).forEach((y) => y.setAttribute('aria-pressed', y === x)); }; });
+    $('[data-ok]', f).onclick = () => {
+      const sel = {}; $$('[data-it]', f).forEach((x) => { const q = x.type === 'checkbox' ? (x.checked ? Number(x.dataset.max) || 1 : 0) : Number(x.value); if (q > 0) sel[x.dataset.it] = q; });
+      if (!Object.keys(sel).length) return toast('Marque pelo menos um item');
+      if (!mesa) return toast('Escolha a mesa');
+      const d = moverItens(c, mesa, sel); if (!d) return toast('Não deu para passar os itens');
+      fechar(); toast(`Itens passados para a mesa ${mesa}`); ir(db.comandas.includes(c) ? `mesa/${c.mesa}` : `mesa/${mesa}`);
+    };
+  } });
 });
 acao('juntar', (b) => {
   const c = comanda(b.dataset.id); if (!c) return;

@@ -4,7 +4,7 @@
 // COMPATIBILIDADE: os dados do Popina antigo abrem aqui sem perder nada. Os campos das funções que saíram (rodízio, eventos,
 // portaria, vitrine, cupons, reservas, produção...) continuam guardados como estão: esta versão só não os mostra.
 // Nada aqui apaga campo antigo; tudo é alterado no lugar.
-import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=46';
+import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=47';
 
 export const CHAVE = 'popina-v1';
 export const CONTA = window.veltriaConta || null;
@@ -243,6 +243,39 @@ export function juntarMesas(destino, origem) {
   db.comandas = db.comandas.filter((x) => x !== origem);
   db.chamados = db.chamados.filter((x) => x.mesa !== origem.mesa);
   grava(); return true;
+}
+// quanto de cada item já foi pago na divisão por item (pagamento com itens: { idDoItem: qtd })
+export function pagoPorItem(c) {
+  const m = {}; (c.pagamentos || []).forEach((p) => Object.entries(p.itens || {}).forEach(([id, q]) => { m[id] = r2((m[id] || 0) + (Number(q) || 0)); }));
+  return m;
+}
+export const livreDoItem = (c, i, pg = pagoPorItem(c)) => (i.cancelado ? 0 : r2(Math.max(0, i.qtd - (pg[i.id] || 0))));
+// valor de uma escolha de itens: o consumo deles + a mesma proporção de 10%, couvert e desconto da conta
+export function valorDosItens(c, sel) {
+  const v = conta(c);
+  const s = Object.entries(sel || {}).reduce((a, [id, q]) => { const i = c.itens.find((x) => x.id === id && !x.cancelado); return i && i.qtd > 0 ? a + valorItem(i) / i.qtd * Math.min(Number(q) || 0, i.qtd) : a; }, 0);
+  return r2(Math.min(v.falta, v.sub ? s * (v.total / v.sub) : s));
+}
+// passa itens (ou parte da quantidade) para outra mesa; abre a mesa se estiver livre; a mesa de origem fecha se ficar vazia e sem pagamento
+export function moverItens(origem, mesa, sel) {
+  mesa = Number(mesa);
+  if (!origem || !db.comandas.includes(origem) || !mesa || origem.mesa === mesa) return false;
+  const pg = pagoPorItem(origem);
+  const lista = Object.entries(sel || {}).map(([id, q]) => [origem.itens.find((i) => i.id === id && !i.cancelado), Number(q) || 0])
+    .filter(([i, q]) => i && q > 0 && livreDoItem(origem, i, pg) > 0);
+  if (!lista.length) return false;
+  const destino = comandaDaMesa(mesa) || abrirMesa(mesa, 1, origem.garcom || '');
+  const nomes = [];
+  lista.forEach(([i, q]) => {
+    q = i.kg ? i.qtd : Math.min(q, livreDoItem(origem, i, pg));
+    if (q >= i.qtd) { origem.itens = origem.itens.filter((x) => x !== i); destino.itens.push(i); }
+    else { i.qtd = r2(i.qtd - q); destino.itens.push({ ...i, id: uid('i'), qtd: q, adic: [...(i.adic || [])] }); }
+    nomes.push(`${i.kg ? '' : `${q}× `}${i.nome}`);
+  });
+  marcar(origem, 'trocou', `Passou para a mesa ${mesa}: ${nomes.join(', ')}`);
+  marcar(destino, 'trocou', `Veio da mesa ${origem.mesa}: ${nomes.join(', ')}`);
+  if (!origem.itens.length && !(origem.pagamentos || []).length) db.comandas = db.comandas.filter((x) => x !== origem);
+  grava(); return destino;
 }
 // pagamento parcial ou total; quando o total foi pago, a conta fecha e vira venda
 export function pagar(c, forma, valor, extra = {}) {

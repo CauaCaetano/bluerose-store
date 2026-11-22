@@ -87,12 +87,12 @@ export function autorizar({ titulo, texto = '', motivos = null, pedirPin = false
       const mot = $('[data-motivo]', f);
       $$('[data-mot]', f).forEach((b) => { b.onclick = () => { $$('[data-mot]', f).forEach((x) => x.classList.toggle('on', x === b)); mot.value = b.dataset.mot; }; });
       $('[data-sim]', f).onclick = async () => {
-        const { pinConfere } = await import('./loja.js?v=46');
+        const { pinConfere } = await import('./loja.js?v=47');
         const motivo = mot ? mot.value.trim() : '';
         if (mot && motivo.length < 3) { toast('Escolha ou escreva o motivo'); return mot.focus(); }
         const pin = $('[data-pin]', f);
         // vale a senha do gerente ou o PIN pessoal de quem é Gerente na Equipe
-        const { pinDeGerente } = await import('./equipe.js?v=46');
+        const { pinDeGerente } = await import('./equipe.js?v=47');
         if (pin && !pinConfere(pin.value) && !pinDeGerente(pin.value)) { toast('Senha errada'); pin.value = ''; return pin.focus(); }
         feito = true; ok({ motivo, pin: !!pin, el: f }); fechar();
       };
