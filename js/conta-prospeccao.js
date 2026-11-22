@@ -125,11 +125,11 @@
       s.pergunta ? s.pergunta + ' Pergunto porque ' + minusc(s.dor) : s.dor,
       (s.cena ? s.cena + ' ' : '') + 'É isso que o ' + s.nome + ' faz.',
       ben,
-      s.conta,
+      (s.beneficios ? '' : s.conta),
       'Você pode ver funcionando agora, sem cadastro: ' + l,
       'E o risco é zero: são *7 dias grátis*, nada é cobrado nesse período e dá para cancelar quando quiser. Depois, ' + s.preco + ', sem fidelidade.',
       'Posso te mandar o passo a passo para começar o teste hoje?',
-      'Se não fizer sentido, me avisa que eu não mando mais.'].join('\n\n');
+      'Se não fizer sentido, me avisa que eu não mando mais.'].filter(Boolean).join('\n\n');
   }
   function recente(p) {
     if (!p.anuncios_data || !p.anuncios_usados) return false;
