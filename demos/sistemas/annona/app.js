@@ -710,6 +710,7 @@ TELAS.vender = () => {
       <div class="total-pagar"><span>Total a pagar</span><b>${din(tot)}</b></div>
       <div class="formas-pg" role="radiogroup" aria-label="Forma de pagamento">${FPG.map(([k, i, n]) => `<button type="button" class="fpg${f === k ? ' on' : ''}" data-fpg="${k}" role="radio" aria-checked="${f === k}">${ico(i)}<span>${n}</span></button>`).join('')}</div>
       ${f === 'dinheiro' ? `<div class="receb-troco"><label>Recebido<input id="pg-receb" inputmode="decimal" placeholder="R$ 0,00" value="${t(v.receb || '')}"></label><div class="troco"><span>Troco</span><b id="pg-troco">${din(troco)}</b></div></div>` : f === 'fiado' ? '<p class="dica-pg">No Receber você escolhe o cliente do fiado.</p>' : f === 'pix' ? '<p class="dica-pg">No Receber aparece o QR do Pix com o valor.</p>' : ''}
+      ${notaEmite() ? `<label class="cpf-nota">CPF na nota <small>(opcional)</small><input id="v-cpf" inputmode="numeric" maxlength="18" placeholder="Só se o cliente pedir" value="${t(v.cpf || '')}" autocomplete="off"></label>` : ''}
       <button type="button" class="bt receber" data-acao="receber-cupom" ${v.itens.length ? '' : 'disabled'}>${ico('okc')}Receber ${din(tot)}</button>
       ${v.itens.length ? '<button type="button" class="link dividir" data-acao="pagar-venda">Dividir em mais de uma forma</button>' : ''}
       ${c.aberto ? '' : '<p class="aviso-mini">Este caixa está fechado. Você pode vender; o dinheiro entra no próximo caixa aberto.</p>'}
@@ -807,11 +808,14 @@ function pagar({ itens, desc = 0, servico = 0, titulo, origem, mesa = null, depo
 }
 // grava a venda, baixa o estoque, lança o fiado e mostra o comprovante
 function fechaVenda({ itens, total, desc = 0, servico = 0, pag, origem, mesa = null, depois }) {
+  const cpfNota = origem === 'balcao' ? soNum(estado.venda.cpf) : '';
   const venda = { id: uid('v'), cx: TERM(), n: (db.vendas.at(-1) || { n: 0 }).n + 1, data: agora(), itens: itens.map((x) => ({ ...x })), total, desc, servico, pag: pag.map((x) => ({ ...x })), origem, mesa, vend: db.usuario };
   venda.itens.forEach((x) => { const p = prod(x.p); if (p) baixar(p, qBaixa(x)); });
   pag.filter((x) => x.f === 'fiado').forEach((x) => db.fiado.push({ id: uid('f'), cli: x.cli, data: venda.data, tipo: 'compra', v: x.v, venda: venda.id, obs: `Venda nº ${venda.n}` }));
   if (desc) registra(`Desconto de ${din(desc)} na venda nº ${venda.n}`, 'desconto');
   db.vendas.push(venda); grava(); fechar(); depois && depois(venda); comprovante(venda);
+  // NFC-e pelo emissor do comércio: sai sozinha ao concluir (com o CPF do cupom, se tiver)
+  if (notaEmite() && NF().auto !== false) { emitirNfce(venda, cpfNota.length === 11 || cpfNota.length === 14 ? cpfNota : '').then((n) => { if ($(`#camada [data-cupom-venda="${venda.id}"]`)) { comprovante(venda, true); if (n && db.loja.impAuto) imprimirDanfe(venda); } }); }
 }
 // Receber do cupom: dinheiro, débito e crédito fecham na hora; Pix (QR) e fiado (cliente) abrem a janela já na forma escolhida
 const vendaNova = () => { estado.venda = { itens: [], cli: '', desc: 0, forma: 'dinheiro', receb: '' }; };
@@ -830,16 +834,305 @@ function imprimir(txt) {
   const d = f.contentDocument; d.open(); d.write(`<!doctype html><meta charset="utf-8"><style>@page{size:80mm auto;margin:3mm}body{margin:0;font:12.5px/1.35 monospace;white-space:pre-wrap;width:74mm}img{display:block;max-width:36mm;max-height:22mm;margin:0 auto 2mm}</style>${db.loja.logo ? `<img src="${t(db.loja.logo)}" alt="">` : ''}${t(txt)}`); d.close();
   setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('Não consegui imprimir. Confira a impressora.', true); } }, 60);
 }
-function comprovante(v) {
+function comprovante(v, deNovo = false) {
   const c = v.pag.find((x) => x.cli), cl = c && cli(c.cli);
   const linhas = v.itens.map((x) => `${numBR(x.q, 3)} ${x.nome}${(x.adics || []).length ? ` (+ ${x.adics.map((a) => a.n).join(', ')})` : ''} ${din(Math.round(x.q * x.preco))}`);
   const txt = `${db.loja.nome}\nVenda nº ${v.n} · ${dataBR(v.data)} ${horaBR(v.data)}\n\n${linhas.join('\n')}\n${v.servico ? `Serviço ${din(v.servico)}\n` : ''}${v.desc ? `Desconto −${din(v.desc)}\n` : ''}Total ${din(v.total)}\n${v.pag.map((x) => `${FORMAS[x.f]} ${din(x.v)}`).join('\n')}\n\nComprovante sem valor fiscal. Obrigado pela preferência!`;
   const fi = v.pag.find((x) => x.f === 'fiado'), assina = fi && cl ? `\n\nReconheço que fiquei devendo ${din(fi.v)}\nao ${db.loja.nome} por esta compra.\n\n\n______________________________\n${cl.nome}` : '';
   const duasVias = assina ? `${txt}${assina}\n\n1ª via: fica com o comércio\n\n- - - - - - - - - - - - - - - -\n\n${txt}\n\n2ª via: do cliente` : txt;
-  abrir(`${cab('Venda concluída', `Nº ${v.n} · ${din(v.total)}`)}${db.loja.logo ? `<img class="cupom-logo" src="${t(db.loja.logo)}" alt="${t(db.loja.nome)}">` : ''}<pre class="cupom">${t(assina ? txt + assina : txt)}</pre><footer class="j-pe"><button type="button" class="bt" data-imp>${ico('imp')}${assina ? 'Imprimir 2 vias' : 'Imprimir'}</button>${cl && cl.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(cl.tel, txt)}">${ico('zap')}Mandar no WhatsApp</a>` : ''}<button type="button" class="bt cheio" data-fechar>Nova venda</button></footer>`, (j) => {
+  abrir(`${cab('Venda concluída', `Nº ${v.n} · ${din(v.total)}`)}${db.loja.logo ? `<img class="cupom-logo" src="${t(db.loja.logo)}" alt="${t(db.loja.nome)}">` : ''}<pre class="cupom" data-cupom-venda="${t(v.id)}">${t(assina ? txt + assina : txt)}</pre>${blocoNf(v)}<footer class="j-pe"><button type="button" class="bt" data-imp>${ico('imp')}${assina ? 'Imprimir 2 vias' : 'Imprimir'}</button>${cl && cl.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(cl.tel, txt)}">${ico('zap')}Mandar no WhatsApp</a>` : ''}<button type="button" class="bt cheio" data-fechar>Nova venda</button></footer>`, (j) => {
     $('[data-imp]', j).addEventListener('click', () => imprimir(duasVias));
-    if (db.loja.impAuto) imprimir(duasVias);
+    ligaBlocoNf(j, v);
+    if (db.loja.impAuto && !deNovo) imprimir(duasVias);
     setTimeout(() => $('[data-imp]', j).focus(), 40); // Enter imprime
+  });
+}
+
+// ------------------------------------------------------------------ nota fiscal na venda (NFC-e, modelo 65) · "use o emissor que você já tem" (22/11/2026)
+// Não confundir com a entrada pela nota do fornecedor (XML): aqui é a NFC-e que o comércio dá ao cliente.
+// Configurações › Nota fiscal › "Como você emite nota hoje?" (NF().modo):
+//   api      → a conta do próprio comércio num emissor (Brasil NFe ou Focus NFe). O token vai para a função nexo-nfce e fica cifrado
+//              no servidor; o certificado A1 e o CSC ficam no painel do emissor dele. A NFC-e sai ao concluir a venda.
+//   outro    → emite no PDV, no emissor dele ou pelo contador: marca "Nota emitida em outro sistema" e exporta as vendas (CSV por item, XML simples).
+//   bluerose → a Blue Rose emite (em breve).   nao → não emite (ex.: MEI): nada aparece.
+// Só acrescenta campos: db.nf, produto.fiscal {ncm, cfop, csosn, cest, xml}, venda.nfce / venda.nfOutro / venda.nfErro.
+// O NCM que vem no XML de entrada do fornecedor é aproveitado (quando o produto ainda não tem). Token, certificado e senha nunca ficam aqui.
+const NF = () => (db.nf ||= {}); // db pode ser trocado (cópia restaurada, nuvem): sempre pelo NF()
+const NF_SUG = [ // mercadinho no Simples Nacional, SP. Confirme sempre com o contador.
+  [/cerveja|chope|chopp/, { ncm: '22030000', cfop: '5405', csosn: '500', cest: '0302100' }],
+  [/refrigerante|refri\b|guarana|coca/, { ncm: '22021000', cfop: '5405', csosn: '500', cest: '0301100' }],
+  [/agua mineral|agua\b/, { ncm: '22011000', cfop: '5405', csosn: '500', cest: '0300100' }],
+  [/energetico/, { ncm: '22029900', cfop: '5405', csosn: '500', cest: '' }],
+  [/cachaca|pinga/, { ncm: '22084000', cfop: '5405', csosn: '500', cest: '' }],
+  [/vodca|vodka/, { ncm: '22086000', cfop: '5405', csosn: '500', cest: '' }],
+  [/uisque|whisky/, { ncm: '22083020', cfop: '5405', csosn: '500', cest: '' }],
+  [/conhaque/, { ncm: '22082000', cfop: '5405', csosn: '500', cest: '' }],
+  [/sorvete|picole|acai/, { ncm: '21050010', cfop: '5405', csosn: '500', cest: '2300100' }],
+  [/arroz/, { ncm: '10063021' }], [/feijao/, { ncm: '07133319' }], [/acucar/, { ncm: '17019900' }], [/oleo de soja|oleo/, { ncm: '15079011' }],
+  [/cafe/, { ncm: '09012100' }], [/macarrao|espaguete/, { ncm: '19021900' }], [/leite/, { ncm: '04012010' }], [/iogurte/, { ncm: '04032000' }],
+  [/mucarela|queijo/, { ncm: '04061010' }], [/presunto/, { ncm: '16024100' }], [/manteiga/, { ncm: '04051000' }],
+  [/pao frances/, { ncm: '19059010' }], [/pao|bolo/, { ncm: '19059090' }],
+  [/tomate/, { ncm: '07020000', csosn: '103' }], [/banana/, { ncm: '08039000', csosn: '103' }], [/batata palha/, { ncm: '20052000' }], [/batata/, { ncm: '07019000', csosn: '103' }],
+  [/detergente|sabao/, { ncm: '34022000' }], [/papel higienico/, { ncm: '48181000' }], [/sabonete/, { ncm: '34011190' }],
+  [/carvao/, { ncm: '44029000' }], [/gelo/, { ncm: '22019000' }], [/linguica/, { ncm: '16010000' }], [/picanha|carne|alcatra/, { ncm: '02013000' }],
+  [/amendoim/, { ncm: '20081100' }], [/vinagre/, { ncm: '22090000' }], [/fermento/, { ncm: '21023000' }], [/chocolate/, { ncm: '18069000' }],
+];
+const NF_PROV = { brasilnfe: ['Brasil NFe', 'No painel da Brasil NFe: Empresas › a sua empresa › Token da empresa.'], focus: ['Focus NFe', 'No painel da Focus NFe: Minhas empresas › a sua empresa › Tokens (use o de homologação para testar).'] };
+const NF_MODOS = [
+  ['api', 'Tenho conta num emissor de nota on-line', 'Brasil NFe ou Focus NFe. Você cola o token da sua conta e a NFC-e sai pelo Annona ao concluir a venda.'],
+  ['outro', 'Emito no meu PDV, no meu emissor ou pelo contador', 'O Annona não emite: você marca a nota na venda e exporta as vendas.'],
+  ['bluerose', 'Quero que a Blue Rose emita', 'A gente cuida do emissor para você.'],
+  ['nao', 'Não emito nota (ex.: MEI)', 'Nada de nota aparece no caixa.'],
+];
+const NF_TPAG = { dinheiro: '01', credito: '03', debito: '04', fiado: '05', pix: '17' };
+const modoNota = () => NF().modo || '';
+const notaEmite = () => modoNota() === 'api';
+const notaAtiva = () => ['api', 'outro'].includes(modoNota());
+const nfSimples = () => (NF().regime || '1') !== '3';
+const soNum = (x) => String(x || '').replace(/\D/g, '');
+const nfConta = () => !!window.veltriaConta;
+let nfStatus = null; // o que a função diz da conta do emissor (conectado, provedor). Nunca o token.
+const nfChama = (body) => (nfConta() && window.nexoNfce ? window.nexoNfce(body) : Promise.resolve({ ok: false, mensagem: 'Entre na conta para usar a nota fiscal.' }));
+function nfLerStatus() {
+  if (!nfConta()) { nfStatus = { conectado: !!NF().conectadoDemo, provedor: NF().provedor || null, demo: true }; return Promise.resolve(nfStatus); }
+  return nfChama({ acao: 'status' }).then((s) => (nfStatus = s || {})).catch(() => (nfStatus = {}));
+}
+function fiscalProd(p) {
+  const x = p || {}, f = x.fiscal || {}, nome = sa(`${x.nome || ''} ${x.cat || ''}`), s = (NF_SUG.find(([r]) => r.test(nome)) || [null, {}])[1];
+  const base = { ncm: s.ncm || '', cfop: s.cfop || '5102', csosn: s.csosn || '102', cest: s.cest || '' };
+  if (!nfSimples()) base.csosn = base.csosn === '500' ? '60' : base.csosn === '103' ? '40' : '00';
+  return { ...base, ...Object.fromEntries(Object.entries(f).filter(([, v]) => v !== '' && v != null)), sug: !soNum(f.ncm), xml: !!f.xml };
+}
+const nfceOk = (v) => v && v.nfce && v.nfce.status === 'autorizada';
+// a venda vira o pedido de nota (em reais); desconto rateado; serviço como "outras despesas"
+function pedidoNota(v, cpf = '') {
+  const its = v.itens.filter((x) => x.q > 0 && x.preco > 0).map((x) => { const p = prod(x.p), f = fiscalProd(p || { nome: x.nome }), c = Math.round(x.q * x.preco);
+    return { codigo: String((p && p.cod) || x.p).slice(0, 60), nome: String(x.nome).slice(0, 120), ncm: soNum(f.ncm), cfop: f.cfop, cst: f.csosn, cest: soNum(f.cest), orig: '0', un: p && p.un === 'kg' && !x.dose ? 'KG' : 'UN', qtd: r3(x.q), unit: x.preco / 100, c, dc: 0, oc: 0 }; });
+  const soma = its.reduce((s, i) => s + i.c, 0);
+  const ratear = (valor, k) => { let resto = valor; its.forEach((i, n) => { const p = n === its.length - 1 ? resto : Math.round(valor * i.c / (soma || 1)); i[k] = k === 'dc' ? Math.min(i.c, p) : p; resto -= i[k]; }); };
+  if (v.desc > 0) ratear(Math.min(v.desc, soma), 'dc'); if (v.servico > 0) ratear(v.servico, 'oc');
+  const pagamentos = v.pag.map((x) => ({ tpag: NF_TPAG[x.f] || '99', valor: (x.v + (x.troco || 0)) / 100, troco: (x.troco || 0) / 100 })).filter((x) => x.valor > 0);
+  const ref = `${String(v.id).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 44)}${v.nfTentativas ? `-${v.nfTentativas}` : ''}`;
+  return { ref, cpf: soNum(cpf), cnpj: soNum(NF().cnpj), piscofins: '49', pagamentos, itens: its.map(({ c, dc, oc, ...i }) => ({ ...i, total: c / 100, desc: dc / 100, outro: oc / 100 })) };
+}
+function dv11(s) { let p = 2, soma = 0; for (let k = s.length - 1; k >= 0; k--) { soma += Number(s[k]) * p; p = p === 9 ? 2 : p + 1; } const r = soma % 11; return r < 2 ? 0 : 11 - r; }
+function notaExemplo(n) {
+  const d = new Date(), aamm = `${String(d.getFullYear()).slice(2)}${pad(d.getMonth() + 1)}`, numero = db.vendas.filter((x) => x.nfce && x.nfce.demo).length + 1;
+  const base = `35${aamm}${(n.cnpj || '12345678000190').padStart(14, '0').slice(0, 14)}65001${String(numero).padStart(9, '0')}1${String(Math.floor(Math.random() * 1e8)).padStart(8, '0')}`, chave = base + dv11(base);
+  return { ok: true, demo: true, chave, numero, serie: 1, protocolo: `135${aamm}${String(Date.now()).slice(-9)}`, ambiente: 'homologacao', provedor: 'demo',
+    qrcode: `https://www.homologacao.nfce.fazenda.sp.gov.br/qrcode?p=${chave}|2|2|1|${'0'.repeat(40)}`, url_consulta: 'https://www.homologacao.nfce.fazenda.sp.gov.br/consulta', autorizada_em: d.toISOString() };
+}
+const nfEmAndamento = new Set();
+async function emitirNfce(v, cpf = '') {
+  if (!v || v.cancelada) { toast('Esta venda foi cancelada.', true); return null; }
+  if (nfceOk(v)) return v.nfce;
+  if (nfEmAndamento.has(v.id)) return null;
+  const n = pedidoNota(v, cpf), falta = n.itens.find((i) => !/^\d{8}$/.test(i.ncm));
+  if (falta) { v.nfErro = { data: agora(), msg: `Falta o NCM de ${falta.nome}. Veja Configurações › Nota fiscal › Dados fiscais dos produtos.` }; grava(); toast(v.nfErro.msg, true); return null; }
+  nfEmAndamento.add(v.id); toast('Emitindo a NFC-e...');
+  let r; try { r = nfConta() ? await nfChama({ acao: 'emitir', venda: v.id, nota: n }) : await new Promise((ok) => setTimeout(() => ok(notaExemplo(n)), 600)); } catch (e) { r = { ok: false, mensagem: 'Sem internet agora. Tente de novo.' }; }
+  nfEmAndamento.delete(v.id);
+  const venda = db.vendas.find((x) => x.id === v.id) || v;
+  if (!r || !r.ok) {
+    venda.nfTentativas = (venda.nfTentativas || 0) + (r && r.desligado ? 0 : 1); venda.nfErro = { data: agora(), msg: String((r && r.mensagem) || 'A nota não foi autorizada.').slice(0, 300) }; grava();
+    toast(r && r.desligado ? 'Conecte a conta do seu emissor em Configurações › Nota fiscal.' : `A NFC-e não saiu: ${venda.nfErro.msg}`, true); return null;
+  }
+  venda.nfce = { status: 'autorizada', chave: String(r.chave || ''), numero: r.numero || null, serie: r.serie || null, protocolo: String(r.protocolo || ''), ambiente: r.ambiente || 'homologacao', provedor: r.provedor || '',
+    qrcode: String(r.qrcode || '').slice(0, 1200), url: String(r.url_consulta || '').slice(0, 300), autorizada: (r.autorizada_em && new Date(r.autorizada_em).getTime()) || Date.now(), data: agora(), cpf: n.cpf, quem: eu().nome, ...(r.demo ? { demo: true } : {}) };
+  delete venda.nfErro; registra(`NFC-e${venda.nfce.numero ? ` nº ${venda.nfce.numero}` : ''} da venda nº ${venda.n}${venda.nfce.ambiente !== 'producao' ? ' (teste, sem valor fiscal)' : ''}`, 'fiscal'); grava();
+  toast(`NFC-e${venda.nfce.numero ? ` nº ${venda.nfce.numero}` : ''} autorizada.`);
+  return venda.nfce;
+}
+const nfMinutos = (v) => Math.max(0, 30 - Math.floor((Date.now() - ((v.nfce && v.nfce.autorizada) || 0)) / 60e3));
+async function cancelarNfce(v, motivo) {
+  if (!nfceOk(v)) return false;
+  if (!nfMinutos(v)) { toast('Passou dos 30 minutos: em SP a NFC-e não cancela mais. Fale com o seu contador.', true); return false; }
+  let x; try { x = nfConta() && !v.nfce.demo ? await nfChama({ acao: 'cancelar', chave: v.nfce.chave, motivo }) : { ok: true, protocolo: `135${Date.now().toString().slice(-12)}` }; } catch (e) { x = { ok: false, mensagem: 'Sem internet agora.' }; }
+  if (!x || !x.ok) { toast((x && x.mensagem) || 'A SEFAZ não aceitou o cancelamento.', true); return false; }
+  v.nfce = { ...v.nfce, status: 'cancelada', cancelada: { data: agora(), motivo, quem: eu().nome, protocolo: x.protocolo || '' } };
+  registra(`NFC-e${v.nfce.numero ? ` nº ${v.nfce.numero}` : ''} cancelada: ${motivo}`, 'fiscal'); grava(); toast('NFC-e cancelada.'); return true;
+}
+function pedirCancelarNfce(v) {
+  const min = nfMinutos(v);
+  if (!min) { abrir(`${cab('Esta nota não cancela mais')}<p class="j-txt">Passou dos 30 minutos: em São Paulo a NFC-e não cancela mais. Fale com o seu contador para acertar a nota.</p><footer class="j-pe"><button type="button" class="bt cheio" data-fechar>Entendi</button></footer>`); return; }
+  abrir(`${cab(`Cancelar a NFC-e${v.nfce.numero ? ` nº ${v.nfce.numero}` : ''}`, `faltam ${min} min`)}<form class="form"><label>Motivo (vai para a SEFAZ, pelo menos 15 letras)<input name="m" list="dl-nfm" maxlength="255" value="Cliente desistiu da compra" required></label><datalist id="dl-nfm"><option value="Cliente desistiu da compra"><option value="Venda lançada em duplicidade"><option value="Erro nos itens ou no valor da venda"></datalist>
+    <p class="dica">A venda continua no Annona. Se o cliente devolveu tudo, cancele também a venda em Vendas (o estoque volta).</p><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio perigo">Cancelar a nota</button></footer></form>`, (j) => {
+    $('form', j).addEventListener('submit', async (e) => { e.preventDefault(); const m = e.target.m.value.trim(); if (m.length < 15) { toast('Escreva o motivo com pelo menos 15 letras.', true); return; } e.target.querySelector('.perigo').disabled = true; if (await cancelarNfce(v, m)) { fechar(); mostra(); detalheVenda(v); } else e.target.querySelector('.perigo').disabled = false; });
+  });
+}
+// DANFE NFC-e de 80 mm, com o QR da consulta
+function danfeNfce(v) {
+  const n = v.nfce || {}, E = NF(), teste = n.ambiente !== 'producao', p = pedidoNota(v, n.cpf), bruto = p.itens.reduce((s, i) => s + i.total, 0);
+  const cnpj = soNum(E.cnpj).replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') || '—', FP = { '01': 'Dinheiro', '03': 'Cartão de crédito', '04': 'Cartão de débito', '05': 'Crédito loja', '17': 'Pix' };
+  return `<div class="danfe">${teste ? '<p class="c"><b>EMITIDA EM AMBIENTE DE HOMOLOGAÇÃO · SEM VALOR FISCAL</b></p>' : ''}
+    <p class="c"><b>${t(E.razao || db.loja.nome)}</b><br>CNPJ ${t(cnpj)}${E.ie ? ` · IE ${t(E.ie)}` : ''}<br>${t([E.rua && `${E.rua}, ${E.numero || 'S/N'}`, E.bairro, (E.cidade || db.loja.cidade) && `${E.cidade || db.loja.cidade} - SP`].filter(Boolean).join(' · '))}</p><hr>
+    <p class="c">DANFE NFC-e · Documento Auxiliar da Nota Fiscal de Consumidor Eletrônica</p><hr>
+    ${p.itens.map((i, k) => `<div class="l"><span>${pad(k + 1)} ${t(i.codigo)} ${t(i.nome)}<br>${numBR(i.qtd)} ${i.un} × ${din(Math.round(i.unit * 100))}</span><span>${din(Math.round(i.total * 100))}</span></div>`).join('')}<hr>
+    <div class="l"><span>Qtd. total de itens</span><span>${p.itens.length}</span></div><div class="l"><span>Valor total R$</span><span>${din(Math.round(bruto * 100))}</span></div>
+    ${v.desc ? `<div class="l"><span>Desconto R$</span><span>− ${din(v.desc)}</span></div>` : ''}${v.servico ? `<div class="l"><span>Acréscimos R$</span><span>${din(v.servico)}</span></div>` : ''}<div class="l"><b>Valor a pagar R$</b><b>${din(v.total)}</b></div>
+    <div class="l"><small>FORMA DE PAGAMENTO</small><small>VALOR PAGO R$</small></div>${p.pagamentos.map((x) => `<div class="l"><span>${FP[x.tpag] || 'Outros'}</span><span>${din(Math.round(x.valor * 100))}</span></div>`).join('')}
+    ${p.pagamentos.some((x) => x.troco) ? `<div class="l"><span>Troco R$</span><span>${din(Math.round(p.pagamentos.reduce((s, x) => s + x.troco, 0) * 100))}</span></div>` : ''}<hr>
+    <p class="c"><b>Consulte pela chave de acesso em</b><br><small>${t(n.url || `https://www.${teste ? 'homologacao.' : ''}nfce.fazenda.sp.gov.br/consulta`)}</small></p><p class="c chave">${t(String(n.chave || '').replace(/(\d{4})(?=\d)/g, '$1 '))}</p><hr>
+    <p class="c">${n.cpf ? `CONSUMIDOR ${n.cpf.length === 14 ? 'CNPJ' : 'CPF'} ${t(n.cpf.length === 11 ? n.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : n.cpf)}` : 'CONSUMIDOR NÃO IDENTIFICADO'}</p><hr>
+    <p class="c"><b>NFC-e nº ${String(n.numero || '').padStart(9, '0')} Série ${String(n.serie || 1).padStart(3, '0')} ${dataBR(n.data || v.data)} ${horaBR(n.data || v.data)}</b><br>Protocolo de autorização: ${t(n.protocolo || '—')}</p>
+    ${n.qrcode ? `<div class="qr">${qrSVG(n.qrcode, 150, '#000')}</div>` : ''}<p class="c"><small>Tributos aproximados (Lei 12.741/2012): consulte o seu contador</small></p>
+    ${teste ? '<p class="c"><b>SEM VALOR FISCAL</b></p>' : ''}${n.status === 'cancelada' ? '<p class="c"><b>NOTA CANCELADA</b></p>' : ''}</div>`;
+}
+function imprimirDanfe(v) {
+  let f = $('#quadro-danfe'); if (!f) { f = document.createElement('iframe'); f.id = 'quadro-danfe'; f.title = 'impressão da nota'; f.style.cssText = 'position:fixed;width:0;height:0;border:0;right:0;bottom:0'; document.body.append(f); }
+  const d = f.contentDocument; d.open();
+  d.write(`<!doctype html><meta charset="utf-8"><title>DANFE NFC-e</title><style>@page{size:80mm auto;margin:3mm}body{margin:0;width:74mm;font:11.5px/1.35 ui-monospace,Consolas,monospace;color:#000}.c{text-align:center;margin:4px 0}.l{display:flex;justify-content:space-between;gap:8px;margin:2px 0}.chave{font-size:11px;word-spacing:2px}hr{border:0;border-top:1px dashed #000;margin:6px 0}.qr{display:grid;place-items:center;margin:6px 0}small{font-size:10px;word-break:break-all}</style>${danfeNfce(v)}`);
+  d.close(); setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('Não consegui imprimir. Confira a impressora.', true); } }, 80);
+}
+function verDanfe(v) {
+  const n = v.nfce || {}, min = nfceOk(v) ? nfMinutos(v) : 0;
+  abrir(`${cab(`NFC-e${n.numero ? ` nº ${n.numero}` : ''}`, n.status === 'cancelada' ? `Cancelada: ${t((n.cancelada || {}).motivo || '')}` : n.ambiente !== 'producao' ? (n.demo ? 'Demonstração: nota de exemplo, sem valor fiscal' : 'Homologação (teste, sem valor fiscal)') : 'Autorizada pela SEFAZ')}
+    <div class="cupom danfe-tela">${danfeNfce(v)}</div>
+    <footer class="j-pe">${min ? `<button type="button" class="bt perigo" data-nf-canc>Cancelar a nota (${min} min)</button>` : ''}<button type="button" class="bt" data-fechar>Fechar</button><button type="button" class="bt cheio" data-nf-imp>${ico('imp')}Imprimir (80 mm)</button></footer>`, (j) => {
+    $('[data-nf-imp]', j).addEventListener('click', () => imprimirDanfe(v));
+    const c = $('[data-nf-canc]', j); if (c) c.addEventListener('click', () => pedirCancelarNfce(v));
+  });
+}
+function pedirEmitir(v) {
+  abrir(`${cab(`Emitir NFC-e · ${din(v.total)}`, `Venda nº ${v.n}`)}<form class="form"><label>CPF ou CNPJ na nota (opcional)<input name="cpf" inputmode="numeric" maxlength="18" placeholder="Só se o cliente pedir" autocomplete="off"></label>
+    <p class="dica">${nfConta() ? (NF().ambiente === 'producao' ? 'A nota sai valendo (produção).' : 'Ambiente de teste (homologação): a nota não tem valor fiscal.') : 'Demonstração: sai uma nota de exemplo, sem valor fiscal.'}</p>${v.nfErro ? `<p class="faixa-alerta">${ico('alerta')} ${t(v.nfErro.msg)}</p>` : ''}
+    <footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Emitir</button></footer></form>`, (j) => {
+    $('form', j).addEventListener('submit', async (e) => { e.preventDefault(); const c = soNum(e.target.cpf.value); if (c && c.length !== 11 && c.length !== 14) { toast('Escreva o CPF (11 números) ou o CNPJ (14).', true); return; } fechar(); const n = await emitirNfce(v, c); if (n) { mostra(); verDanfe(v); } });
+  });
+}
+function marcarOutro(v) {
+  abrir(`${cab('Nota emitida em outro sistema', `Venda nº ${v.n} · ${din(v.total)}`)}<form class="form"><label>Número ou chave da nota (opcional)<input name="ref" maxlength="60" value="${t((v.nfOutro || {}).ref || '')}" placeholder="Ex.: 1234 ou a chave de 44 números"></label><p class="dica">Serve só para você saber quais vendas já têm nota.</p>
+    <footer class="j-pe">${v.nfOutro ? '<button type="button" class="bt" data-tirar>Desmarcar</button>' : '<button type="button" class="bt" data-fechar>Voltar</button>'}<button class="bt cheio">Marcar</button></footer></form>`, (j) => {
+    $('form', j).addEventListener('submit', (e) => { e.preventDefault(); v.nfOutro = { ref: e.target.ref.value.trim().slice(0, 60), data: agora(), quem: eu().nome }; grava(); fechar(); mostra(); toast('Venda marcada com nota.'); });
+    const tr = $('[data-tirar]', j); if (tr) tr.addEventListener('click', () => { delete v.nfOutro; grava(); fechar(); mostra(); toast('Marca tirada.'); });
+  });
+}
+// o pedaço de nota que aparece no comprovante e no detalhe da venda
+function blocoNf(v) {
+  const m = modoNota(); if (!m || m === 'nao' || m === 'bluerose' || (v.cancelada && !v.nfce)) return '';
+  if (m === 'outro') return v.cancelada ? '' : `<p class="nf-linha">${v.nfOutro ? `<span class="tag verde">Nota em outro sistema${v.nfOutro.ref ? `: ${t(v.nfOutro.ref)}` : ''}</span>` : ''}<button type="button" class="bt" data-nf-outro>${ico('nota')}${v.nfOutro ? 'Mudar' : 'Nota emitida em outro sistema'}</button></p>`;
+  const n = v.nfce;
+  if (n && n.status === 'autorizada') return `<p class="nf-linha"><span class="tag verde">NFC-e${n.numero ? ` nº ${n.numero}` : ''}${n.ambiente !== 'producao' ? ' (teste)' : ''}</span><button type="button" class="bt" data-nf-ver>${ico('imp')}DANFE da nota</button></p>`;
+  if (n && n.status === 'cancelada') return `<p class="nf-linha"><span class="tag cinza">NFC-e${n.numero ? ` nº ${n.numero}` : ''} cancelada</span>${v.cancelada ? '' : '<button type="button" class="bt" data-nf-emitir>Emitir de novo</button>'}</p>`;
+  if (v.cancelada) return '';
+  return `<p class="nf-linha">${nfEmAndamento.has(v.id) ? '<span class="tag ambar">Emitindo a NFC-e...</span>' : `<button type="button" class="bt cheio" data-nf-emitir>${ico('nota')}Emitir NFC-e</button>`}${v.nfErro ? `<small class="nf-erro">${t(v.nfErro.msg)}</small>` : ''}</p>`;
+}
+function ligaBlocoNf(j, v, depois) {
+  const b = (s, f) => { const x = $(s, j); if (x) x.addEventListener('click', f); };
+  b('[data-nf-outro]', () => marcarOutro(v)); b('[data-nf-ver]', () => verDanfe(v)); b('[data-nf-emitir]', () => pedirEmitir(v));
+  if (depois) depois();
+}
+// exportar vendas para o emissor ou o contador: CSV (uma linha por item) e XML simples (não é documento fiscal)
+const NF_PER = [['hoje', 'Hoje'], ['ontem', 'Ontem'], ['7', '7 dias'], ['mes', 'Este mês'], ['mespassado', 'Mês passado']];
+function nfPeriodo(k) {
+  const h = hoje();
+  if (k === 'ontem') return [somaDias(h, -1), somaDias(h, -1)];
+  if (k === 'mespassado') { const [y, m] = h.split('-').map(Number), d = new Date(y, m - 2, 1), fim = new Date(y, m - 1, 0); return [isoD(d), isoD(fim)]; }
+  return periodo(k);
+}
+const nfSituacao = (v) => (v.cancelada ? 'venda cancelada' : nfceOk(v) ? 'NFC-e autorizada' : v.nfOutro ? 'nota em outro sistema' : v.nfce && v.nfce.status === 'cancelada' ? 'NFC-e cancelada' : 'sem nota');
+const nfRef = (v) => (nfceOk(v) ? `${v.nfce.numero || ''} ${v.nfce.chave || ''}`.trim() : v.nfOutro ? v.nfOutro.ref || '' : v.nfce ? `${v.nfce.numero || ''} ${v.nfce.chave || ''}`.trim() : '');
+const n2c = (c) => campoDin(c) || '0,00';
+const xEsc = (s) => String(s ?? '').replace(/[<>&"']/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[c]);
+function nfCSV(l) {
+  const linhas = [['Data', 'Hora', 'Venda', 'Caixa', 'Produto', 'Código', 'NCM', 'CFOP', 'CSOSN/CST', 'CEST', 'Qtde', 'Unidade', 'Valor unitário', 'Valor do item', 'Desconto do item', 'Acréscimo do item', 'Total da venda', 'Pagamentos', 'CPF/CNPJ', 'Nota (número/chave)', 'Situação']];
+  l.forEach((v) => { const p = pedidoNota(v, (v.nfce || {}).cpf || ''), pg = v.pag.map((x) => `${FORMAS[x.f]} ${n2c(x.v)}`).join(' + ');
+    p.itens.forEach((i) => linhas.push([dataBR(v.data), horaBR(v.data), v.n, nomeTerm(v.cx || 'c1'), i.nome, i.codigo, i.ncm, i.cfop, i.cst, i.cest, numBR(i.qtd), i.un, n2c(Math.round(i.unit * 100)), n2c(Math.round(i.total * 100)), n2c(Math.round(i.desc * 100)), n2c(Math.round(i.outro * 100)), n2c(v.total), pg, p.cpf, nfRef(v), nfSituacao(v)])); });
+  return csv(linhas);
+}
+function nfXML(l, de, ate) {
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<!-- Vendas do Annona para lançar no emissor ou mandar ao contador. NÃO é documento fiscal. -->\n<vendasAnnona versao="1" comercio="${xEsc(NF().razao || db.loja.nome)}" cnpj="${soNum(NF().cnpj)}" de="${de}" ate="${ate}" gerado="${new Date().toISOString()}">\n${l.map((v) => { const p = pedidoNota(v, (v.nfce || {}).cpf || '');
+    return `  <venda numero="${v.n}" data="${xEsc(v.data)}" total="${(v.total / 100).toFixed(2)}" desconto="${((v.desc || 0) / 100).toFixed(2)}" situacao="${xEsc(nfSituacao(v))}"${p.cpf ? ` cpf="${p.cpf}"` : ''}${v.nfce && v.nfce.chave ? ` chaveNFCe="${v.nfce.chave}"` : ''}${v.nfOutro && v.nfOutro.ref ? ` notaOutroSistema="${xEsc(v.nfOutro.ref)}"` : ''}>\n${p.itens.map((i) => `    <item codigo="${xEsc(i.codigo)}" descricao="${xEsc(i.nome)}" ncm="${i.ncm}" cfop="${i.cfop}" csosn="${i.cst}"${i.cest ? ` cest="${i.cest}"` : ''} un="${i.un}" qtd="${i.qtd}" vUnit="${i.unit.toFixed(2)}" vProd="${i.total.toFixed(2)}" vDesc="${i.desc.toFixed(2)}" vOutro="${i.outro.toFixed(2)}"/>`).join('\n')}\n${p.pagamentos.map((x) => `    <pagamento tPag="${x.tpag}" vPag="${x.valor.toFixed(2)}"${x.troco ? ` vTroco="${x.troco.toFixed(2)}"` : ''}/>`).join('\n')}\n  </venda>`; }).join('\n')}\n</vendasAnnona>\n`;
+}
+function exportarNf() {
+  let per = 'hoje', soSem = false;
+  const lista = () => { const [de, ate] = nfPeriodo(per); return db.vendas.filter((v) => v.data.slice(0, 10) >= de && v.data.slice(0, 10) <= ate && (!soSem || (!v.cancelada && !nfceOk(v) && !v.nfOutro))); };
+  const resumo = () => { const l = lista(); return `${l.length} venda${l.length === 1 ? '' : 's'} · ${din(l.filter((v) => !v.cancelada).reduce((s, v) => s + v.total, 0))}`; };
+  abrir(`${cab('Exportar vendas', 'Para o seu emissor ou o contador')}<div class="form"><p class="dica">O CSV abre no Excel: uma linha por item, com NCM, CFOP e CSOSN. O XML simples não é documento fiscal.</p>
+    <div class="chips">${NF_PER.map(([k, n]) => `<button type="button" class="chip${k === per ? ' on' : ''}" data-nfper="${k}">${n}</button>`).join('')}</div>
+    <label class="check"><input type="checkbox" id="nf-sosem"> Só as vendas sem nota</label><p class="nf-res" data-res>${resumo()}</p>
+    <footer class="j-pe"><button type="button" class="bt" data-nfxml>XML simples</button><button type="button" class="bt cheio" data-nfcsv>${ico('planilha')}Baixar CSV</button></footer></div>`, (j) => {
+    const atual = () => { $('[data-res]', j).textContent = resumo(); };
+    $$('[data-nfper]', j).forEach((b) => b.addEventListener('click', () => { per = b.dataset.nfper; $$('[data-nfper]', j).forEach((x) => x.classList.toggle('on', x === b)); atual(); }));
+    $('#nf-sosem', j).addEventListener('change', (e) => { soSem = e.target.checked; atual(); });
+    $('[data-nfcsv]', j).addEventListener('click', () => { const l = lista(); if (!l.length) { toast('Nada para exportar neste período.', true); return; } baixarArq(`vendas-annona-${per}-${hoje()}.csv`, nfCSV(l)); toast('CSV baixado.'); });
+    $('[data-nfxml]', j).addEventListener('click', () => { const l = lista(); if (!l.length) { toast('Nada para exportar neste período.', true); return; } const [de, ate] = nfPeriodo(per); baixarArq(`vendas-annona-${per}-${hoje()}.xml`, nfXML(l, de, ate), 'application/xml'); toast('XML baixado.'); });
+  });
+}
+// dados fiscais dos produtos (sugestão do ramo, ou o NCM que veio no XML do fornecedor)
+const NF_CFOP = [['5102', '5102 · revenda'], ['5405', '5405 · revenda com ICMS já pago (ST)'], ['5101', '5101 · produção própria']];
+const NF_CSOSN = () => (nfSimples() ? [['102', '102 · Simples, sem crédito'], ['500', '500 · ICMS já cobrado antes (ST)'], ['103', '103 · isento no Simples'], ['300', '300 · imune'], ['400', '400 · não tributada']] : [['00', '00 · tributada'], ['60', '60 · ICMS cobrado antes (ST)'], ['40', '40 · isenta'], ['41', '41 · não tributada']]);
+const nfOp = (l, v) => l.map(([k, n]) => `<option value="${k}"${String(v) === k ? ' selected' : ''}>${n}</option>`).join('');
+function dadosFiscais() {
+  let busca = '', soSem = false;
+  const linhas = () => ativos().filter((p) => (!busca || sa(p.nome).includes(sa(busca)) || p.cod === busca.trim()) && (!soSem || !soNum((p.fiscal || {}).ncm))).sort((a, b) => a.cat.localeCompare(b.cat) || a.nome.localeCompare(b.nome)).map((p) => { const f = fiscalProd(p);
+    return `<div class="nf-prod" data-nfp="${p.id}"><div class="nf-prod-nome"><b>${t(p.nome)}</b><small class="cod">${t(p.cat)} · ${t(p.cod)}</small>${f.xml ? '<span class="tag verde">do XML do fornecedor</span>' : f.sug ? `<span class="tag ${f.ncm ? 'ambar' : 'verm'}">${f.ncm ? 'sugestão' : 'falta o NCM'}</span>` : ''}</div>
+      <label>NCM<input data-k="ncm" inputmode="numeric" maxlength="10" value="${t(f.ncm)}"></label><label>CFOP<select data-k="cfop">${nfOp(NF_CFOP, f.cfop)}</select></label><label>${nfSimples() ? 'CSOSN' : 'CST'}<select data-k="csosn">${nfOp(NF_CSOSN(), f.csosn)}</select></label><label>CEST<input data-k="cest" inputmode="numeric" maxlength="9" value="${t(f.cest)}" placeholder="se tiver ST"></label></div>`; }).join('') || '<p class="vazio">Nenhum produto.</p>';
+  abrir(`${cab('Dados fiscais dos produtos', 'NCM, CFOP, CSOSN e CEST de cada produto')}<div class="form"><p class="faixa-alerta">${ico('alerta')}<span>Já vem com sugestões comuns de mercadinho no ${nfSimples() ? 'Simples Nacional' : 'regime normal'} e com o NCM que veio no XML das notas de entrada. <b>Confirme com o seu contador</b> antes de emitir valendo.</span></p>
+    <div class="duas"><label>Buscar<input id="nf-busca" placeholder="Nome ou código"></label><label class="check"><input type="checkbox" id="nf-sosemncm"> Só os que ainda não têm NCM salvo</label></div>
+    <div class="nf-prods" id="nf-prods">${linhas()}</div>
+    <footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio" data-nfsalva>Salvar</button></footer></div>`, (j) => {
+    const lerTela = () => { let ruim = ''; $$('[data-nfp]', j).forEach((c) => { const p = prod(c.dataset.nfp); if (!p) return; const ncm = soNum($('[data-k="ncm"]', c).value); if (ncm && ncm.length !== 8) { ruim = ruim || p.nome; return; }
+      const novo = { ncm, cfop: $('[data-k="cfop"]', c).value, csosn: $('[data-k="csosn"]', c).value, cest: soNum($('[data-k="cest"]', c).value).slice(0, 7) };
+      if (ncm) p.fiscal = { ...(p.fiscal || {}), ...novo }; }); return ruim; };
+    const redesenha = () => { lerTela(); $('#nf-prods', j).innerHTML = linhas(); };
+    $('#nf-busca', j).addEventListener('input', (e) => { busca = e.target.value; redesenha(); });
+    $('#nf-sosemncm', j).addEventListener('change', (e) => { soSem = e.target.checked; redesenha(); });
+    $('[data-nfsalva]', j).addEventListener('click', () => { const ruim = lerTela(); grava(); if (ruim) { toast(`O NCM tem 8 números: confira ${ruim}.`, true); return; } fechar(); mostra(); toast('Dados fiscais salvos.'); });
+  }, true);
+}
+// NCM do XML de entrada: só preenche quem ainda não tem NCM salvo (nunca troca o que o dono escolheu)
+function fiscalDoXml(p, x) {
+  if (!p || !x || !/^\d{8}$/.test(x.ncm || '') || soNum((p.fiscal || {}).ncm)) return;
+  p.fiscal = { ncm: x.ncm, cest: soNum(x.cest).slice(0, 7), cfop: x.st ? '5405' : '5102', csosn: x.st ? (nfSimples() ? '500' : '60') : (nfSimples() ? '102' : '00'), xml: true };
+}
+// a seção nas Configurações
+function secaoNf() {
+  const m = modoNota(), E = NF(), s = nfStatus || {}, pv = E.provedor || 'brasilnfe', con = !!s.conectado && s.provedor === pv, d = dono();
+  const semNcm = ativos().filter((p) => !soNum((p.fiscal || {}).ncm)).length;
+  const modos = `<div class="nf-modos" role="radiogroup" aria-label="Como você emite nota hoje?">${NF_MODOS.map(([k, n, ds]) => `<button type="button" class="nf-modo${m === k ? ' on' : ''}" role="radio" aria-checked="${m === k}" data-nfmodo="${k}" ${d ? '' : 'disabled'}><b>${n}${k === 'bluerose' ? ' <span class="tag ambar">em breve</span>' : ''}</b><small>${ds}</small></button>`).join('')}</div>`;
+  const emit = `<p class="dica toda" style="margin:6px 0 0">Dados do comércio (saem no DANFE):</p>${[['razao', 'Razão social'], ['cnpj', 'CNPJ'], ['ie', 'Inscrição estadual'], ['rua', 'Rua'], ['numero', 'Número'], ['bairro', 'Bairro'], ['cidade', 'Cidade (SP)']].map(([k, n]) => `<label>${n}<input name="${k}" value="${t(E[k] || (k === 'cidade' ? db.loja.cidade : '') || '')}"${['cnpj', 'ie', 'numero'].includes(k) ? ' inputmode="numeric"' : ''}></label>`).join('')}
+    <label>Regime<select name="regime"><option value="1"${(E.regime || '1') === '1' ? ' selected' : ''}>Simples Nacional</option><option value="4"${E.regime === '4' ? ' selected' : ''}>MEI</option><option value="3"${E.regime === '3' ? ' selected' : ''}>Regime normal</option></select></label>`;
+  const bts = `<div class="acoes cfg-bts"><button type="button" class="bt" data-nfdados>${ico('etiqueta')}Dados fiscais dos produtos${semNcm ? ` (${semNcm} sem NCM salvo)` : ''}</button><button type="button" class="bt" data-nfexp>${ico('planilha')}Exportar vendas</button></div>`;
+  let corpo = '';
+  if (!d && m) corpo = `<p class="dica">${m === 'api' ? 'A NFC-e sai pelo emissor do comércio ao concluir a venda.' : m === 'outro' ? 'Marque na venda quando a nota sair em outro sistema.' : ''} Só o dono muda esta parte.</p>`;
+  else if (m === 'api') corpo = `<form class="form duas" id="f-nf"><div class="toda"><p class="dica" style="margin:0 0 8px">A conta do comércio no emissor:</p><div class="chips">${Object.entries(NF_PROV).map(([k, [n]]) => `<button type="button" class="chip${pv === k ? ' on' : ''}" data-nfprov="${k}">${n}</button>`).join('')}</div></div>
+    <p class="toda ${con ? 'nf-ok' : 'dica'}" style="margin:0">${con ? `${ico('ok')} Conectado à ${NF_PROV[pv][0]}. O token está guardado cifrado no servidor e não aparece aqui.` : 'O certificado A1 e o CSC da SEFAZ ficam no painel do seu emissor. Aqui só vai o token.'}</p>
+    <label class="toda">Token da sua conta ${NF_PROV[pv][0]}<input name="token" type="password" autocomplete="off" spellcheck="false" maxlength="300" placeholder="${con ? 'Guardado. Cole outro só para trocar' : 'Cole aqui o token'}"><small class="cfg-mudo">${NF_PROV[pv][1]} A nota sai pela sua conta e você paga direto ao seu emissor.</small></label>
+    <div class="toda"><p class="dica" style="margin:0 0 8px">Ambiente</p><div class="chips">${[['homologacao', 'Teste (homologação)'], ['producao', 'Valendo (produção)']].map(([k, n]) => `<button type="button" class="chip${(E.ambiente || 'homologacao') === k ? ' on' : ''}" data-nfamb="${k}">${n}</button>`).join('')}</div></div>
+    <label class="check toda"><input type="checkbox" name="auto"${E.auto !== false ? ' checked' : ''}> Emitir a NFC-e sozinho ao concluir a venda (com o CPF, se digitado no cupom)</label>
+    ${emit}<footer class="j-pe toda"><button type="button" class="bt" data-nfdesc ${con ? '' : 'hidden'}>Desconectar</button><button class="bt cheio">${con ? 'Salvar' : 'Salvar e conectar'}</button></footer></form>${bts}
+    <p class="dica">NFC-e de SP: cancela em até 30 minutos, com motivo. Depois disso, fale com o seu contador. Confira NCM, CFOP e CSOSN com ele.</p>`;
+  else if (m === 'outro') corpo = `<p class="dica">No comprovante e no detalhe de cada venda aparece "Nota emitida em outro sistema" (com o número, se quiser). No fim do dia, exporte as vendas para o seu emissor ou para o contador.</p>${bts}`;
+  else if (m === 'bluerose') corpo = '<p class="faixa-alerta">Ainda não disponível. Enquanto isso, conecte a conta do seu emissor (Brasil NFe ou Focus NFe) ou marque as notas que você emite no seu PDV.</p>';
+  else if (m === 'nao') corpo = '<p class="dica">Tudo certo: nada de nota aparece no caixa. Dá para mudar quando quiser.</p>';
+  return `<section class="bloco cfg-sec" id="cfg-nota"><header><h3>${ico('nota')}Nota fiscal na venda (NFC-e)</h3></header><p class="dica">Como você emite nota hoje? O Annona usa o emissor que você já tem e não cobra nada a mais por nota. (A entrada pelo XML do fornecedor continua em Entradas.)</p>${modos}${corpo}</section>`;
+}
+function ligaNf() {
+  const sec = $('#cfg-nota'); if (!sec) return;
+  if (!nfStatus && notaEmite()) nfLerStatus().then(() => { if ($('#cfg-nota')) mostra(); });
+  $$('[data-nfmodo]', sec).forEach((b) => b.addEventListener('click', () => { NF().modo = b.dataset.nfmodo; if (NF().auto === undefined) NF().auto = true; registra(`Nota fiscal: ${NF_MODOS.find((x) => x[0] === b.dataset.nfmodo)[1].toLowerCase()}`, 'fiscal'); grava(); mostra(); }));
+  $$('[data-nfprov]', sec).forEach((b) => b.addEventListener('click', () => { NF().provedor = b.dataset.nfprov; grava(); mostra(); }));
+  $$('[data-nfamb]', sec).forEach((b) => b.addEventListener('click', () => {
+    const k = b.dataset.nfamb, ok = () => { NF().ambiente = k; grava(); mostra(); toast(k === 'producao' ? 'Emitindo valendo (produção).' : 'Ambiente de teste.'); if (nfConta() && nfStatus && nfStatus.conectado && nfStatus.provedor === (NF().provedor || 'brasilnfe')) nfChama({ acao: 'conectar', provedor: NF().provedor || 'brasilnfe', ambiente: k }).then(nfLerStatus); };
+    if (k === 'producao') confirmar('Emitir valendo?', 'As notas passam a ter valor fiscal. Teste antes em homologação.', 'Sim, valendo', ok); else ok();
+  }));
+  const bd = $('[data-nfdados]', sec); if (bd) bd.addEventListener('click', dadosFiscais);
+  const be = $('[data-nfexp]', sec); if (be) be.addEventListener('click', exportarNf);
+  const bx = $('[data-nfdesc]', sec); if (bx) bx.addEventListener('click', () => confirmar('Desconectar o emissor?', 'O token é apagado do servidor. As notas já emitidas continuam guardadas.', 'Desconectar', async () => { if (nfConta()) await nfChama({ acao: 'desconectar' }); else { NF().conectadoDemo = false; grava(); } await nfLerStatus(); mostra(); toast('Desconectado.'); }, true));
+  const f = $('#f-nf', sec); if (f) f.addEventListener('submit', async (e) => {
+    e.preventDefault(); const tk = f.token.value.trim(), pv = NF().provedor || 'brasilnfe';
+    ['razao', 'cnpj', 'ie', 'rua', 'numero', 'bairro', 'cidade', 'regime'].forEach((k) => { NF()[k] = ['cnpj', 'ie'].includes(k) ? soNum(f[k].value) : f[k].value.trim(); });
+    NF().auto = f.auto.checked; NF().provedor = pv; grava();
+    if (NF().cnpj && NF().cnpj.length !== 14) { toast('O CNPJ tem 14 números.', true); return; }
+    if (pv === 'focus' && NF().cnpj.length !== 14) { toast('A Focus NFe pede o CNPJ do comércio.', true); return; }
+    if (!nfConta()) { if (!tk && !NF().conectadoDemo) { toast('Cole o token da sua conta.', true); return; } NF().conectadoDemo = true; grava(); nfStatus = { conectado: true, provedor: pv, demo: true }; mostra(); toast('Demonstração: conectado (nada foi enviado).'); return; }
+    if (!tk && nfStatus && nfStatus.conectado && nfStatus.provedor === pv) { toast('Salvo.'); return; }
+    const bt = f.querySelector('.cheio'); bt.disabled = true;
+    const r = await nfChama({ acao: 'conectar', provedor: pv, token: tk, ambiente: NF().ambiente || 'homologacao' });
+    f.token.value = '';
+    if (!r || !r.ok) { bt.disabled = false; toast((r && (r.erro || r.mensagem)) || 'Não deu para conectar.', true); return; }
+    await nfLerStatus(); mostra(); toast(`Conectado à ${NF_PROV[pv][0]}.`);
   });
 }
 
@@ -849,11 +1142,11 @@ TELAS.vendas = () => {
   const k = estado.vper || 'hoje', [de, ate] = periodo(k), b = sa(estado.vbusca || '');
   const l = db.vendas.filter((v) => v.data.slice(0, 10) >= de && v.data.slice(0, 10) <= ate).filter((v) => !b || String(v.n) === b || v.itens.some((x) => sa(x.nome).includes(b)) || v.pag.some((x) => x.cli && sa((cli(x.cli) || {}).nome).includes(b))).reverse();
   const ok = l.filter((v) => !v.cancelada), tot = ok.reduce((a, v) => a + v.total, 0), canc = l.filter((v) => v.cancelada);
-  return `<section class="cab-tela"><div><h2>Vendas</h2><p>${ok.length} venda${ok.length === 1 ? '' : 's'} · ${din(tot)}${canc.length ? ` · ${canc.length} cancelada${canc.length === 1 ? '' : 's'}` : ''}</p></div><div class="acoes"><button type="button" class="bt" data-acao="exportar-vendas">Planilha</button><a class="bt cheio" href="#vender">${ico('mais')}Nova venda</a></div></section>
+  return `<section class="cab-tela"><div><h2>Vendas</h2><p>${ok.length} venda${ok.length === 1 ? '' : 's'} · ${din(tot)}${canc.length ? ` · ${canc.length} cancelada${canc.length === 1 ? '' : 's'}` : ''}</p></div><div class="acoes">${notaAtiva() ? '<button type="button" class="bt" data-acao="exportar-nf">Para o contador</button>' : ''}<button type="button" class="bt" data-acao="exportar-vendas">Planilha</button><a class="bt cheio" href="#vender">${ico('mais')}Nova venda</a></div></section>
   <div class="chips">${[['hoje', 'Hoje'], ['7', '7 dias'], ['30', '30 dias'], ['mes', 'Este mês']].map(([v, n]) => `<button type="button" class="chip${k === v ? ' on' : ''}" data-vper="${v}">${n}</button>`).join('')}</div>
   <form class="leitor" id="f-vbusca" autocomplete="off"><span>${ico('busca')}</span><input id="vbusca" value="${t(estado.vbusca || '')}" placeholder="Número da venda, produto ou cliente do fiado" aria-label="Buscar venda"></form>
   <section class="bloco sem-pad"><table class="tab grande"><thead><tr><th>Nº</th><th>Quando</th><th>Itens</th><th class="so-pc">Pagamento</th><th class="so-pc">Quem vendeu</th><th>Total</th></tr></thead><tbody>
-  ${l.slice(0, 300).map((v) => `<tr class="clica${v.cancelada ? ' cancelada' : ''}" data-venda="${v.id}"><td><b>${v.n}</b></td><td>${dataBR(v.data)} <small class="cod">${horaBR(v.data)}</small></td><td>${t(v.itens.map((x) => x.nome).slice(0, 2).join(', '))}${v.itens.length > 2 ? ` <small class="cod">+${v.itens.length - 2}</small>` : ''}</td><td class="so-pc">${v.pag.map((x) => FORMAS[x.f]).join(' + ')}</td><td class="so-pc">${t(nomeU(v.vend))}</td><td>${v.cancelada ? `<span class="tag verm">Cancelada</span> <s>${din(v.total)}</s>` : `<b>${din(v.total)}</b>`}</td></tr>`).join('') || '<tr><td colspan="6" class="vazio">Nenhuma venda no período.</td></tr>'}
+  ${l.slice(0, 300).map((v) => `<tr class="clica${v.cancelada ? ' cancelada' : ''}" data-venda="${v.id}"><td><b>${v.n}</b></td><td>${dataBR(v.data)} <small class="cod">${horaBR(v.data)}</small></td><td>${t(v.itens.map((x) => x.nome).slice(0, 2).join(', '))}${v.itens.length > 2 ? ` <small class="cod">+${v.itens.length - 2}</small>` : ''}</td><td class="so-pc">${v.pag.map((x) => FORMAS[x.f]).join(' + ')}</td><td class="so-pc">${t(nomeU(v.vend))}</td><td>${v.cancelada ? `<span class="tag verm">Cancelada</span> <s>${din(v.total)}</s>` : `<b>${din(v.total)}</b>`}${nfceOk(v) ? ' <span class="tag verde">NFC-e</span>' : v.nfOutro ? ' <span class="tag cinza">nota</span>' : ''}</td></tr>`).join('') || '<tr><td colspan="6" class="vazio">Nenhuma venda no período.</td></tr>'}
   </tbody></table></section>`;
 };
 function detalheVenda(v) {
@@ -861,15 +1154,17 @@ function detalheVenda(v) {
   abrir(`${cab(`Venda nº ${v.n}`, `${dataBR(v.data)} às ${horaBR(v.data)} · ${t(nomeU(v.vend))}`)}${v.cancelada ? `<p class="faixa-alerta">${ico('alerta')} Cancelada em ${dataBR(v.cancelada.data)} por ${t(v.cancelada.quem)}: ${t(v.cancelada.motivo)}</p>` : ''}
     <table class="tab"><thead><tr><th>Produto</th><th>Qtd.</th><th>Preço</th><th>Total</th></tr></thead><tbody>${v.itens.map((x) => `<tr><td>${t(x.nome)}</td><td>${numBR(x.q)}</td><td>${din(x.preco)}</td><td>${din(Math.round(x.q * x.preco))}</td></tr>`).join('')}</tbody></table>
     <dl class="soma">${v.desc ? `<div><dt>Desconto</dt><dd>− ${din(v.desc)}</dd></div>` : ''}<div class="total"><dt>Total</dt><dd>${din(v.total)}</dd></div>${v.pag.map((x) => `<div><dt>${FORMAS[x.f]}${x.cli ? ` · ${t((cli(x.cli) || {}).nome || '')}` : ''}</dt><dd>${din(x.v)}</dd></div>`).join('')}${pode('custo') ? `<div><dt>Lucro</dt><dd class="ok-txt">${din(luc)}</dd></div>` : ''}</dl>
-    <footer class="j-pe">${v.cancelada ? '' : '<button type="button" class="bt perigo" data-cancelar>Cancelar a venda</button>'}<button type="button" class="bt" data-reimp>${ico('imp')}Imprimir de novo</button><button type="button" class="bt cheio" data-fechar>Ok</button></footer>`, (j) => {
-    $('[data-reimp]', j).addEventListener('click', () => { fechar(); comprovante(v); });
+    ${blocoNf(v)}<footer class="j-pe">${v.cancelada ? '' : '<button type="button" class="bt perigo" data-cancelar>Cancelar a venda</button>'}<button type="button" class="bt" data-reimp>${ico('imp')}Imprimir de novo</button><button type="button" class="bt cheio" data-fechar>Ok</button></footer>`, (j) => {
+    $('[data-reimp]', j).addEventListener('click', () => { fechar(); comprovante(v, true); });
+    ligaBlocoNf(j, v);
     const bc = $('[data-cancelar]', j); if (bc) bc.addEventListener('click', () => liberar('cancelar', `cancelar a venda nº ${v.n}`, () => cancelarVenda(v)));
   }, true);
 }
 function cancelarVenda(v) {
-  abrir(`${cab(`Cancelar a venda nº ${v.n}`, din(v.total))}<form class="form"><label>Motivo<select name="m"><option>Cliente desistiu da compra</option><option>Lançada errada</option><option>Troca de produto</option><option>Devolução</option><option>Outro</option></select></label><label>Observação<input name="obs" placeholder="Opcional"></label><p class="dica">Os produtos voltam para o estoque${v.pag.some((x) => x.f === 'fiado') ? ' e o valor sai do fiado do cliente' : ''}. Se o cliente pagou em dinheiro, devolva pelo caixa (sangria).</p><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio perigo">Cancelar a venda</button></footer></form>`, (j) => {
-    $('form', j).addEventListener('submit', (e) => {
+  abrir(`${cab(`Cancelar a venda nº ${v.n}`, din(v.total))}<form class="form"><label>Motivo<select name="m"><option>Cliente desistiu da compra</option><option>Lançada errada</option><option>Troca de produto</option><option>Devolução</option><option>Outro</option></select></label><label>Observação<input name="obs" placeholder="Opcional"></label><p class="dica">Os produtos voltam para o estoque${v.pag.some((x) => x.f === 'fiado') ? ' e o valor sai do fiado do cliente' : ''}. Se o cliente pagou em dinheiro, devolva pelo caixa (sangria).</p>${nfceOk(v) ? (nfMinutos(v) ? `<label class="check"><input type="checkbox" name="nf" checked> Cancelar também a NFC-e${v.nfce.numero ? ` nº ${v.nfce.numero}` : ''} (faltam ${nfMinutos(v)} min)</label>` : `<p class="faixa-alerta">${ico('alerta')} A NFC-e${v.nfce.numero ? ` nº ${v.nfce.numero}` : ''} passou dos 30 minutos e não cancela mais. Fale com o seu contador para acertar a nota.</p>`) : ''}<footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio perigo">Cancelar a venda</button></footer></form>`, (j) => {
+    $('form', j).addEventListener('submit', async (e) => {
       e.preventDefault(); const f = e.target, motivo = f.m.value + (f.obs.value.trim() ? `: ${f.obs.value.trim()}` : '');
+      if (f.nf && f.nf.checked && nfceOk(v)) { f.querySelector('.perigo').disabled = true; const ok = await cancelarNfce(v, `Cancelamento da venda: ${motivo}`.slice(0, 255)); if (!ok) { f.querySelector('.perigo').disabled = false; return; } }
       v.itens.forEach((x) => { const p = prod(x.p); if (p) devolver(p, x.q); });
       db.fiado = db.fiado.filter((x) => x.venda !== v.id);
       v.cancelada = { data: agora(), motivo, quem: eu().nome };
@@ -1100,7 +1395,7 @@ function formEntrada(pre = null) {
     <footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio ouro">Dar entrada no estoque</button></footer>
   </form>${listaProdutos()}<datalist id="dl-forn">${db.fornecedores.map((f) => `<option value="${t(f.nome)}">`).join('')}</datalist>`, (j) => {
     const box = $('#ent-linhas', j);
-    const linha = (x) => { const d = document.createElement('div'); d.className = 'ent-linha'; d.innerHTML = `<label class="ent-nome">Produto${x.cEAN ? `<small>${t(x.cEAN)}</small>` : ''}<input name="p" list="dl-prod" value="${t(x.nome)}" required placeholder="Nome ou código"></label>${x.fator !== undefined ? `<label>Vem em<input name="fator" inputmode="numeric" value="${x.fator}" title="Unidades por embalagem"><small>${t(x.uCom || '')} c/ unid.</small></label>` : ''}<label>Qtd.<input name="q" inputmode="decimal" value="${x.q === '' ? '' : numBR(x.q)}" required></label><label>Custo un.<input name="custo" inputmode="decimal" value="${x.custo === '' ? '' : campoDin(x.custo)}"></label><label>Lote<input name="lote" value="${t(x.lote || '')}"></label><label>Validade<input name="val" type="date" value="${t(x.val || '')}"></label>${x.novo ? `<label>Preço de venda<input name="preco" inputmode="decimal" placeholder="novo produto"></label>` : ''}<button type="button" class="icone-bt" data-tira-l aria-label="Tirar linha">${ico('lixo')}</button>`; $('[data-tira-l]', d).addEventListener('click', () => { d.remove(); soma(); }); box.append(d); };
+    const linha = (x) => { const d = document.createElement('div'); d.className = 'ent-linha'; if (x.ncm) Object.assign(d.dataset, { ncm: x.ncm, cest: x.cest || '', st: x.st ? '1' : '' }); d.innerHTML = `<label class="ent-nome">Produto${x.cEAN ? `<small>${t(x.cEAN)}</small>` : ''}<input name="p" list="dl-prod" value="${t(x.nome)}" required placeholder="Nome ou código"></label>${x.fator !== undefined ? `<label>Vem em<input name="fator" inputmode="numeric" value="${x.fator}" title="Unidades por embalagem"><small>${t(x.uCom || '')} c/ unid.</small></label>` : ''}<label>Qtd.<input name="q" inputmode="decimal" value="${x.q === '' ? '' : numBR(x.q)}" required></label><label>Custo un.<input name="custo" inputmode="decimal" value="${x.custo === '' ? '' : campoDin(x.custo)}"></label><label>Lote<input name="lote" value="${t(x.lote || '')}"></label><label>Validade<input name="val" type="date" value="${t(x.val || '')}"></label>${x.novo ? `<label>Preço de venda<input name="preco" inputmode="decimal" placeholder="novo produto"></label>` : ''}<button type="button" class="icone-bt" data-tira-l aria-label="Tirar linha">${ico('lixo')}</button>`; $('[data-tira-l]', d).addEventListener('click', () => { d.remove(); soma(); }); box.append(d); };
     const soma = () => { let tot = 0; $$('.ent-linha', box).forEach((d) => { const fa = d.querySelector('[name=fator]'); tot += Math.round(lerNum($('[name=q]', d).value) * lerDin($('[name=custo]', d).value) * (fa ? 1 : 1)); }); $('#ent-total', j).innerHTML = `Total da entrada: <b>${din(tot)}</b>`; };
     linhas.forEach(linha); soma(); box.addEventListener('input', soma);
     $('[data-mais-linha]', j).addEventListener('click', () => { linha({ nome: '', q: '', custo: '', lote: '', val: '' }); $$('[name=p]', box).at(-1).focus(); });
@@ -1113,6 +1408,7 @@ function formEntrada(pre = null) {
         const q = r3(lerNum($('[name=q]', d).value) * fa), custo = Math.round(lerDin($('[name=custo]', d).value) / fa), pv = $('[name=preco]', d);
         if (!nome || q <= 0) { erro = 'Confira produto e quantidade em todas as linhas.'; return; }
         if (!p) { const preco = pv ? lerDin(pv.value) : 0; p = { id: uid('p'), nome, cat: 'Outros', un: 'un', custo, preco: preco || Math.round(custo * 1.4), q: 0, min: 0, forn: fo ? fo.id : '', cod: (d.querySelector('small') || {}).textContent && eanValido(d.querySelector('small').textContent) ? d.querySelector('small').textContent : ean13(`2${String(Date.now() + itens.length).slice(-11)}`), lotes: [], criado: hoje() }; db.produtos.push(p); }
+        if (d.dataset.ncm) fiscalDoXml(p, { ncm: d.dataset.ncm, cest: d.dataset.cest, st: d.dataset.st === '1' });
         itens.push({ p: p.id, q, custo, lote: $('[name=lote]', d).value.trim(), val: $('[name=val]', d).value });
       });
       if (erro || !itens.length) { toast(erro || 'Coloque pelo menos um produto.', true); return; }
@@ -1132,7 +1428,9 @@ function lerXML(txt) {
     const pr = d.getElementsByTagName('prod')[0], cEAN = /^\d{8,14}$/.test(g(pr, 'cEAN')) ? g(pr, 'cEAN') : '', xProd = g(pr, 'xProd'), uCom = g(pr, 'uCom'), q = Number(g(pr, 'qCom')) || 0, vUn = Number(g(pr, 'vUnCom')) || 0;
     const ex = cEAN && ativos().find((p) => p.cod === cEAN), ras = d.getElementsByTagName('rastro')[0];
     const caixa = /^(CX|FD|PCT|PC|DZ|EMB|SC|FARDO|CAIXA|PACOTE)$/i.test(uCom), m = xProd.match(/(?:C\/|X)\s*(\d{1,3})\b/i), fator = caixa && m ? Number(m[1]) : 1;
-    return { nome: ex ? ex.nome : xProd, cEAN, uCom, q, custo: Math.round(vUn * 100), fator: caixa ? fator : undefined, lote: ras ? g(ras, 'nLote') : '', val: ras ? g(ras, 'dVal').slice(0, 10) : '', novo: !ex };
+    // NCM e CEST do fornecedor; ST quando ele cobrou/recolheu o ICMS antes (CST 10/30/60/70, CSOSN 201/202/203/500 ou vICMSST)
+    const imp = d.getElementsByTagName('ICMS')[0], cst = imp ? g(imp, 'CST') || g(imp, 'CSOSN') : '', st = ['10', '30', '60', '70', '201', '202', '203', '500'].includes(cst) || Number(imp ? g(imp, 'vICMSST') : 0) > 0;
+    return { nome: ex ? ex.nome : xProd, cEAN, uCom, q, custo: Math.round(vUn * 100), fator: caixa ? fator : undefined, lote: ras ? g(ras, 'nLote') : '', val: ras ? g(ras, 'dVal').slice(0, 10) : '', novo: !ex, ncm: g(pr, 'NCM'), cest: g(pr, 'CEST'), st };
   });
   return { fornNome: emit ? g(emit, 'xFant') || g(emit, 'xNome') : '', cnpj: emit ? g(emit, 'CNPJ') : '', nota: g(x, 'nNF'), itens };
 }
@@ -1329,7 +1627,7 @@ TELAS.relatorios = () => {
 // ------------------------------------------------------------------ configurações e guia
 TELAS.config = () => {
   const L = db.loja, u = eu(), d = dono(), cargo = PAPEL[u.perfil] || 'Equipe', tm = TEMAS.find((x) => x[0] === temaAtual()) || TEMAS[0];
-  const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-fiado', 'Fiado e impressão'], ['cfg-caixas', 'Caixas'], ['cfg-balanca', 'Balança'], ['cfg-copia', 'Cópia'], ['cfg-assinatura', 'Minha assinatura']];
+  const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-fiado', 'Fiado e impressão'], ['cfg-caixas', 'Caixas'], ['cfg-balanca', 'Balança'], ['cfg-copia', 'Cópia'], ['cfg-nota', 'Nota fiscal'], ['cfg-assinatura', 'Minha assinatura']];
   return `<section class="cab-tela com-ico">${ico('engrenagem')}<div><h2>Configurações</h2><p>${d ? 'Seu perfil, as cores, a marca do comércio, o guia, o caixa e a sua assinatura.' : 'Seu perfil, o guia, o caixa deste aparelho e a assinatura do comércio.'}</p></div></section>
   <nav class="chips cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<a class="chip" href="#config/${id}">${n}</a>`).join('')}</nav>
   <div class="grade2 cfg-grade">
@@ -1361,7 +1659,7 @@ TELAS.config = () => {
     <label>Dígitos do código do produto (PLU)<select name="dig"><option value="4"${(db.loja.bal || {}).dig !== 5 ? ' selected' : ''}>4 (2 CCCC 0 VVVVVV D)</option><option value="5"${(db.loja.bal || {}).dig === 5 ? ' selected' : ''}>5 (2 CCCCC VVVVVV D)</option></select></label>
     <p class="dica toda">No cadastro de cada produto de balança, preencha o “Código na balança (PLU)” igual ao da balança. Ao passar a etiqueta no caixa, o produto e o peso entram sozinhos.</p><footer class="j-pe toda"><button class="bt cheio">Salvar</button></footer></form></section>
   <section class="bloco cfg-sec" id="cfg-copia"><header><h3>Cópia dos dados</h3></header><p class="dica">Guarde uma cópia de tudo num arquivo. Na conta, os dados já ficam na nuvem; a cópia é uma garantia a mais.</p><div class="acoes"><button type="button" class="bt" data-acao="copia">Baixar cópia</button><label class="bt">Restaurar cópia<input type="file" accept=".json,application/json" id="restaura" hidden></label>${window.BRAssinatura && BRAssinatura.emConta() ? '' : '<button type="button" class="bt perigo" data-acao="recomecar-demo">Recomeçar a demonstração</button>'}</div></section>
-  <section class="bloco cfg-sec" id="cfg-nota"><header><h3>Nota fiscal</h3></header><p class="dica">O Annona não emite nota fiscal. A venda gera um comprovante sem valor fiscal para imprimir ou mandar no WhatsApp. Quem precisa de NFC-e continua usando o emissor que já tem e usa o Annona para estoque, validade, vendas, fiado, compras e lucro.</p></section>
+  ${secaoNf()}
   <div class="cfg-sec" id="cfg-assinatura"><div id="ass-slot"></div></div>`;
 };
 // "Como usar" curto de cada tela: botão ? do topo (na tela em que a pessoa está) e Configurações, Guia
@@ -1479,6 +1777,8 @@ function sugere(inp, ao) {
 function contaInv(cod) { const p = ativos().find((x) => x.cod === String(cod).trim()); const it = p && estado.invent.itens.find((x) => x.p === p.id); if (!it) { toast('Esse código não está nesta contagem.', true); return; } it.c = r3((it.c || 0) + 1); mostra(); toast(`${p.nome}: ${numBR(it.c)}`); }
 
 function liga() {
+  const vcpf = $('#v-cpf'); if (vcpf) vcpf.addEventListener('input', () => { estado.venda.cpf = vcpf.value; });
+  ligaNf();
   $$('[data-q]').forEach((inp) => inp.addEventListener('change', () => { const [, i] = inp.dataset.q.split(':'), it = estado.venda.itens[Number(i)]; if (!it) return; const q = r3(lerNum(inp.value)); if (q > 0) it.q = q; else estado.venda.itens.splice(Number(i), 1); mostra(); }));
   const pr = $('#pg-receb'); if (pr) { pr.addEventListener('input', () => { estado.venda.receb = pr.value; const r = lerDin(pr.value), tot = totalVenda(); $('#pg-troco').textContent = din(r > tot ? r - tot : 0); }); pr.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); receberCupom(); } }); }
   const fmb = $('#f-mbusca'); if (fmb) { const i = $('#mbusca'); fmb.addEventListener('submit', (e) => e.preventDefault()); i.addEventListener('input', () => { estado.mbusca = i.value; const pos = i.selectionStart; mostra(); const n2 = $('#mbusca'); n2.focus(); n2.setSelectionRange(pos, pos); }); }
@@ -1579,6 +1879,7 @@ document.addEventListener('click', (e) => {
     'exportar-rel': () => { const [de, ate] = periodo(estado.rel); baixarArq(`vendas-${de}-a-${ate}.csv`, csv([['Nº', 'Data', 'Hora', 'Quem vendeu', 'Itens', 'Total', 'Lucro', 'Pagamento'], ...vendasEntre(de, ate).map((v) => [v.n, dataBR(v.data), horaBR(v.data), nomeU(v.vend), v.itens.map((x) => `${numBR(x.q)} ${x.nome}`).join(', '), campoDin(v.total), campoDin(lucroVenda(v)), v.pag.map((x) => FORMAS[x.f]).join(' + ')])])); },
     importar: importarPlanilha,
     'novo-caixa': () => liberar('caixa', 'criar um caixa', () => { const n = db.terminais.length + 1; db.terminais.push({ id: `c${Date.now().toString(36)}`, nome: `Caixa ${n}` }); registra(`Caixa ${n} criado`, 'caixa'); grava(); mostra(); toast(`Caixa ${n} criado. No aparelho dele, toque em Usar neste aparelho.`); }),
+    'exportar-nf': exportarNf,
     'exportar-vendas': () => { const [de, ate] = periodo(estado.vper || 'hoje'); baixarArq(`vendas-${de}-a-${ate}.csv`, csv([['Nº', 'Data', 'Hora', 'Situação', 'Itens', 'Total', 'Pagamento', 'Quem vendeu'], ...db.vendas.filter((v) => v.data.slice(0, 10) >= de && v.data.slice(0, 10) <= ate).map((v) => [v.n, dataBR(v.data), horaBR(v.data), v.cancelada ? `Cancelada: ${v.cancelada.motivo}` : 'Concluída', v.itens.map((x) => `${numBR(x.q)} ${x.nome}`).join(', '), campoDin(v.total), v.pag.map((x) => FORMAS[x.f]).join(' + '), nomeU(v.vend)])])); },
   };
   if (ds.acao && A[ds.acao]) A[ds.acao]();

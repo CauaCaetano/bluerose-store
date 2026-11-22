@@ -635,3 +635,39 @@ kbd { display: inline-grid; place-items: center; min-width: 34px; height: 30px; 
 [data-tema="terracota"] .etq-pend.on { filter: hue-rotate(38deg); }
 [data-tema="purpura"] .etq-pend.on { filter: hue-rotate(-55deg); }
 [data-tema="tirreno"] .etq-pend.on { filter: hue-rotate(-140deg) saturate(.85); }
+
+/* nota fiscal na venda (22/11/2026): NFC-e pelo emissor do comércio */
+.cpf-nota { display: grid; gap: 6px; font: 700 14px var(--tit); color: var(--tinta, var(--texto)); margin: 0 0 12px; }
+.cpf-nota small { font-weight: 500; color: var(--ardosia); }
+.cpf-nota input { min-height: 46px; border: 1.5px solid #E2BF73; border-radius: 9px; padding: 0 12px; font: 600 17px var(--corpo); background: #fff; width: 100%; min-width: 0; }
+.nf-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 0; }
+.nf-erro { flex-basis: 100%; color: var(--verm); font-size: 13px; }
+.nf-modos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px; }
+.nf-modo { display: grid; gap: 4px; text-align: left; padding: 12px 14px; border: 1px solid var(--linha); border-radius: 12px; background: var(--branco); cursor: pointer; font: 500 14px var(--corpo); color: var(--texto); min-width: 0; }
+.nf-modo b { font: 700 14.5px var(--tit); }
+.nf-modo small { color: var(--ardosia); font-size: 12.5px; }
+.nf-modo.on { border: 2px solid var(--azul); background: var(--azul-claro); }
+.nf-modo:disabled { cursor: default; opacity: .8; }
+.nf-ok { color: var(--verde-2); background: var(--verde-claro); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; display: flex; gap: 8px; align-items: center; }
+.nf-ok svg { width: 18px; height: 18px; flex: none; }
+.nf-res { background: var(--verde-claro); color: var(--verde-2); border-radius: 10px; padding: 10px 12px; margin: 0; font-weight: 600; }
+.nf-prods { display: grid; gap: 10px; max-height: 52vh; overflow: auto; padding-right: 4px; }
+.nf-prod { display: grid; grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)); gap: 8px; align-items: end; border-bottom: 1px solid var(--linha); padding: 0 0 10px; }
+.nf-prod-nome { display: grid; gap: 2px; align-self: center; min-width: 0; }
+.nf-prod-nome .tag { justify-self: start; }
+.nf-prod label { font-size: 12.5px; min-width: 0; }
+.nf-prod input, .nf-prod select { min-height: 40px !important; font-size: 14px !important; min-width: 0; width: 100%; }
+.danfe-tela { white-space: normal; max-height: 60vh; }
+.danfe .c { text-align: center; margin: 4px 0; }
+.danfe .l { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; }
+.danfe .l span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.danfe .chave { word-spacing: 3px; overflow-wrap: anywhere; }
+.danfe hr { border: 0; border-top: 1px dashed #D9C3CC; margin: 8px 0; }
+.danfe .qr { display: grid; place-items: center; margin: 8px 0; }
+.danfe .qr svg { width: 150px; height: 150px; max-width: none; }
+.danfe small { overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .nf-modos { grid-template-columns: minmax(0, 1fr); }
+  .nf-prod { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nf-prod-nome { grid-column: 1 / -1; }
+}

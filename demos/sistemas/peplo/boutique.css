@@ -841,3 +841,14 @@ input[readonly] { background: var(--linha-2); color: var(--texto); }
 .br-ass { --ass-cor: var(--ac); --ass-cor-txt: #fff; --ass-texto: var(--texto); --ass-mudo: var(--mudo); --ass-fundo: var(--cartao); --ass-linha: var(--linha); --ass-raio: var(--raio); --ass-perigo: var(--mal); --ass-ok: var(--ok); --ass-atn: var(--atn); --ass-titulo: var(--serif); box-shadow: var(--sombra); }
 [data-so-conta][hidden] { display: none !important; }
 @media (max-width: 480px) { .topo-como { display: none; } }
+
+/* nota fiscal (22/11/2026): DANFE NFC-e na tela, no mesmo papel do recibo */
+.danfe-tela .danfe { font: 12.5px/1.4 ui-monospace, Consolas, monospace; }
+.danfe .c { text-align: center; margin: 4px 0; }
+.danfe .l { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; }
+.danfe .l span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.danfe .chave { word-spacing: 3px; overflow-wrap: anywhere; }
+.danfe .qr { display: grid; place-items: center; margin: 8px 0; }
+.danfe .qr svg { width: 150px; height: 150px; max-width: none; }
+.danfe small { overflow-wrap: anywhere; }
+.seg-l button small { font-weight: 400; }
