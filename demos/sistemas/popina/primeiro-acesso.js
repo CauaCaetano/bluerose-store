@@ -6,8 +6,8 @@
 // dados da empresa (localStorage popina-v1; na conta real, conta-nuvem.js sobe junto para a nuvem, como o logo já subia).
 // Quem vê: só o dono da conta (os convidados da equipe nunca) e a demonstração (com "Pular e ver o exemplo").
 // Dados antigos: só acrescenta db.config.inicio.marca = true ao terminar ou pular; quem já tem nome, logo e capa não vê.
-import { db, t, grava, CONTA, lojaCfg, setLoja } from './loja.js?v=50';
-import { ico, toast, $ } from './ui.js?v=50';
+import { db, t, grava, CONTA, lojaCfg, setLoja } from './loja.js?v=51';
+import { ico, toast, $ } from './ui.js?v=51';
 
 const ini = () => (db.config.inicio ||= {});
 const NOME_VAZIO = ['', 'meu restaurante'];
@@ -71,7 +71,7 @@ export function abrirPrimeiroAcesso({ refazer = false, depois } = {}) {
   const st = refazer ? { passo: 0, nome: nomeAtual, logo: L.logo || '', capa: L.capa || '', gerar: null } : { passo: 0, nome: '', logo: '', capa: '', gerar: null };
   const f = document.createElement('div'); f.className = 'pa-fundo'; aberto = f;
   f.innerHTML = `<section class="pa" role="dialog" aria-modal="true" aria-labelledby="pa-tit">
-    <header class="pa-cab"><img src="simbolo.png?v=1" alt="Popina" width="40" height="34"><ol class="pa-pontos" aria-hidden="true"><li></li><li></li><li></li></ol><span class="pa-num" data-num></span></header>
+    <header class="pa-cab"><img src="simbolo.png?v=2" alt="Popina" width="40" height="34"><ol class="pa-pontos" aria-hidden="true"><li></li><li></li><li></li></ol><span class="pa-num" data-num></span></header>
     <div class="pa-corpo" data-corpo></div>
     <footer class="pa-pe" data-pe></footer>
     ${demo && !refazer ? '<button type="button" class="pa-pular" data-pular>Pular e ver o exemplo</button>' : ''}

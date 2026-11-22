@@ -1,20 +1,20 @@
 // Popina · liga tudo: as 5 abas, a cor do restaurante, a marca (plano com a sua marca), a faixa da demonstração,
 // o aviso de pedido novo e o primeiro uso.
-import './salao.js?v=50';
-import './pedidos.js?v=50';
-import './cozinha.js?v=50';
-import './caixa.js?v=50';
-import './gestao.js?v=50';
-import './cadastro.js?v=50';
-import './relatorios.js?v=50';
-import { esquema, comoUsar } from './configuracoes.js?v=50';
-import { talvezAbrirInicio } from './inicio.js?v=50';
-import { talvezPrimeiroAcesso } from './primeiro-acesso.js?v=50';
-import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila, t } from './loja.js?v=50';
-import { iniciarRotas, ir } from './nucleo.js?v=50';
-import { ico, toast, bip, confirma, $ } from './ui.js?v=50';
-import { conferirNovos } from './cozinha.js?v=50';
-import { montarMenu } from './menu.js?v=50';
+import './salao.js?v=51';
+import './pedidos.js?v=51';
+import './cozinha.js?v=51';
+import './caixa.js?v=51';
+import './gestao.js?v=51';
+import './cadastro.js?v=51';
+import './relatorios.js?v=51';
+import { esquema, comoUsar } from './configuracoes.js?v=51';
+import { talvezAbrirInicio } from './inicio.js?v=51';
+import { talvezPrimeiroAcesso } from './primeiro-acesso.js?v=51';
+import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila, t } from './loja.js?v=51';
+import { iniciarRotas, ir } from './nucleo.js?v=51';
+import { ico, toast, bip, confirma, $ } from './ui.js?v=51';
+import { conferirNovos } from './cozinha.js?v=51';
+import { montarMenu } from './menu.js?v=51';
 
 const real = !!CONTA;
 // ------------------------------------------------------------------ as 5 abas (links #: as permissões da equipe usam estes)
@@ -34,7 +34,7 @@ const contraste = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, 
 const paraHex = (rgb) => '#' + rgb.map((c) => Math.round(Math.max(0, Math.min(255, c))).toString(16).padStart(2, '0')).join('');
 const escurece = (rgb, alvo, fundo) => { let c = [...rgb]; for (let k = 0; k < 40 && contraste(c, fundo) < alvo; k++) c = c.map((v) => v * 0.93); return c; };
 function aplicarCor() {
-  const base = hex(corLoja()), branco = [255, 255, 255], creme = [247, 246, 242];
+  const base = hex(corLoja()), branco = [255, 255, 255], creme = [250, 246, 240];
   const bt = escurece(base, 4.6, branco), tinta = escurece(base, 5.2, creme);
   const r = document.documentElement.style, E = esquema();
   r.setProperty('--marrom', E.escuro); r.setProperty('--marrom2', E.escuro2);
@@ -46,11 +46,12 @@ function aplicarCor() {
 function marcaTopo() {
   const m = window.popinaPlano === 'marca', L = lojaCfg(), img = $('#topo-logo');
   window.popinaNome = db.config.nome;
-  $('#topo-titulo').textContent = m ? db.config.nome || 'Restaurante' : 'Popina';
+  $('#topo-titulo').textContent = m ? db.config.nome || 'Restaurante' : 'opina'; // o P é o símbolo (#topo-p)
+  $('#topo-p').style.display = m ? 'none' : '';
   $('#topo-nome').textContent = m ? db.config.cidade || '' : db.config.nome || '';
-  const src = m && L.logo ? L.logo : 'simbolo.png?v=1';
+  const src = m && L.logo ? L.logo : 'simbolo.png?v=2';
   if (img.getAttribute('src') !== src) img.src = src;
-  img.hidden = m && !L.logo;
+  img.hidden = !m || !L.logo;
   document.body.classList.toggle('marca-propria', m);
   // logo, capa e nome do restaurante (primeiro acesso / Configurações › Sua marca): no topo do sistema
   const id = $('#loja-id'), nome = db.config.nome || '';

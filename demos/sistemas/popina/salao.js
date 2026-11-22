@@ -1,13 +1,13 @@
 // Popina · salão (o que fazer agora e as mesas), a comanda de qualquer conta e o lançar itens do garçom.
 import { db, t, din, tempo, comanda, comandaDaMesa, abrirMesa, adicionarItem, enviar, mudarStatus, cancelarItem, transferir, juntarMesas, moverItens, livreDoItem, pagoPorItem, conta, valorItem, itensValidos,
   fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2,
-  aguardaAceite } from './loja.js?v=50';
-import { escolherEntregador } from './pedidos.js?v=50';
-import { registrar, acao, ir } from './nucleo.js?v=50';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=50';
-import { formOpcoes, temOpcoes } from './opcoes.js?v=50';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=50';
-import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=50';
+  aguardaAceite } from './loja.js?v=51';
+import { escolherEntregador } from './pedidos.js?v=51';
+import { registrar, acao, ir } from './nucleo.js?v=51';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=51';
+import { formOpcoes, temOpcoes } from './opcoes.js?v=51';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=51';
+import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=51';
 
 const ESTADO = { livre: 'Livre', ocupada: 'Ocupada', conta: 'Pediu a conta', pronto: 'Prato pronto', chamou: 'Chamou', qr: 'Pedido do QR' };
 const nMesas = () => Math.max(1, Math.min(200, Number(db.config.mesas) || 10));

@@ -2,9 +2,9 @@
    texto quase preto, menu grafite e UMA cor de destaque sóbria (verde-esmeralda; o restaurante pode trocar).
    Letras e botões grandes, legíveis no sol. Celular: barra de baixo com 5 abas. Computador: menu escuro à esquerda. */
 :root{
-  --fundo:#F7F6F2;--papel:#FFFFFF;--papel2:#EFEEE9;--linha:#E4E1DA;--linha2:#CFCBC2;
-  --tinta:#1A1D1B;--mudo:#5B615D;--marrom:#141816;--marrom2:#262C29;
-  --loja:#1B6B4A;--loja-txt:#fff;--loja-suave:#E6F2EC;--loja-tinta:#155A3D;
+  --fundo:#FAF6F0;--papel:#FFFFFF;--papel2:#F3EDE4;--linha:#E8E0D5;--linha2:#D5CABC;
+  --tinta:#24181A;--mudo:#66585A;--marrom:#2A1519;--marrom2:#3D2027;--ouro:#D9A441;
+  --loja:#6B2737;--loja-txt:#fff;--loja-suave:#F5E8EA;--loja-tinta:#561E2C;
   --ok:#2F6B3A;--ok-suave:#E3EED9;--ok-tinta:#2B5216;
   --aviso:#F5DE85;--aviso-tinta:#4A3500;--perigo:#A3261B;--perigo-suave:#F8DDD8;
   --azul-suave:#DCE8F1;--azul-tinta:#1D4462;
@@ -609,3 +609,8 @@ body.gaveta-aberta{overflow:hidden}
   .mg-lista{margin-top:0}
   .nav a{min-height:48px}
 }
+
+/* 22/11: logo nova, o P com o ponto dourado faz o P de Popina */
+.topo-p{width:31px;height:35px;flex:none;color:var(--loja);margin:0 -10px 0 0;align-self:center;transform:translateY(4px)}
+body:not(.marca-propria) .marca div{align-self:center}
+@media (min-width:1024px){.topo-p{width:36px;height:41px;color:#F7EFE6;margin-right:-12px;transform:translateY(5px)}}

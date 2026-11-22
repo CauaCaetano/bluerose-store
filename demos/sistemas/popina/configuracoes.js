@@ -3,27 +3,28 @@
 // Um visual só (o dono tirou os vários visuais): o esquema troca só os tons da casa (o marrom do menu e o destaque),
 // sempre dentro da identidade "taberna"; a cor da marca do restaurante continua livre.
 // Guarda só campos novos em db.config.loja.esquema e db.config.perfis[e-mail]: nada do que já existe muda de nome.
-import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=50';
-import { ir, rota } from './nucleo.js?v=50';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=50';
-import { G, volta, reduzir, planoMarca } from './gestao.js?v=50';
-import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=50';
-import { recomecar } from './loja.js?v=50';
-import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=50';
+import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=51';
+import { ir, rota } from './nucleo.js?v=51';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=51';
+import { G, volta, reduzir, planoMarca } from './gestao.js?v=51';
+import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=51';
+import { recomecar } from './loja.js?v=51';
+import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=51';
 
 // ------------------------------------------------------------------ esquemas de cor (identidade do Popina)
 // escuro: menu do computador, faixa e etiquetas escuras · destaque: a cor dos botões (vira a cor da marca ao escolher)
 // 22/11/2026: paletas clean (o dono recusou o laranja). Fundo claro e texto escuro sempre iguais; muda o menu escuro e o destaque.
-// Os ids antigos (taberna, vinho, oliva, brasa, azulejo) caem no padrão Esmeralda.
+// Os ids antigos (taberna, oliva, brasa, azulejo) caem no padrão Vinho (22/11: logo P com o ponto dourado).
 export const ESQUEMAS = [
-  { id: 'esmeralda', nome: 'Esmeralda', escuro: '#141816', escuro2: '#262C29', destaque: '#1B6B4A', txt: 'Verde-esmeralda sóbrio, o padrão do Popina' },
+  { id: 'vinho', nome: 'Vinho', escuro: '#2A1519', escuro2: '#3D2027', destaque: '#6B2737', txt: 'Vinho com dourado, o padrão do Popina' },
+  { id: 'esmeralda', nome: 'Esmeralda', escuro: '#141816', escuro2: '#262C29', destaque: '#1B6B4A', txt: 'Verde-esmeralda sóbrio' },
   { id: 'grafite', nome: 'Grafite', escuro: '#17191C', escuro2: '#2A2D31', destaque: '#33383D', txt: 'Preto e cinza, sem cor nenhuma' },
   { id: 'ardosia', nome: 'Ardósia', escuro: '#252433', escuro2: '#363549', destaque: '#54528F', txt: 'Violeta-ardósia discreto' },
   { id: 'indigo', nome: 'Índigo', escuro: '#12151C', escuro2: '#232836', destaque: '#274C8E', txt: 'Azul índigo profundo' },
   { id: 'ameixa', nome: 'Ameixa', escuro: '#161216', escuro2: '#2A222A', destaque: '#6A2C5A', txt: 'Ameixa escura' },
 ];
 export const esquema = () => ESQUEMAS.find((e) => e.id === lojaCfg().esquema) || ESQUEMAS[0];
-const CORES = ['#1B6B4A', '#2F5D46', '#33383D', '#54528F', '#274C8E', '#3F5872', '#6A2C5A', '#8A3047', '#5B4A7A', '#1A1D1B'];
+const CORES = ['#6B2737', '#1B6B4A', '#2F5D46', '#33383D', '#54528F', '#274C8E', '#3F5872', '#6A2C5A', '#8A3047', '#5B4A7A', '#1A1D1B'];
 
 // ------------------------------------------------------------------ "Como usar" de cada tela
 export const COMO = {
