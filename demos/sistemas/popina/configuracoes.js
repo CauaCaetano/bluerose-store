@@ -3,15 +3,16 @@
 // Um visual só (o dono tirou os vários visuais): o esquema troca só os tons da casa (o marrom do menu e o destaque),
 // sempre dentro da identidade "taberna"; a cor da marca do restaurante continua livre.
 // Guarda só campos novos em db.config.loja.esquema e db.config.perfis[e-mail]: nada do que já existe muda de nome.
-import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=54';
-import { ir, rota } from './nucleo.js?v=54';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=54';
-import { G, volta, reduzir, planoMarca } from './gestao.js?v=54';
-import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=54';
-import { recomecar } from './loja.js?v=54';
-import * as som from './som.js?v=54';
-import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=54';
-import { secaoNf, montarNf } from './nota-fiscal.js?v=54';
+import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=55';
+import { ir, rota } from './nucleo.js?v=55';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=55';
+import { G, volta, reduzir, planoMarca } from './gestao.js?v=55';
+import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=55';
+import { recomecar } from './loja.js?v=55';
+import * as som from './som.js?v=55';
+import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=55';
+import { secaoNf, montarNf } from './nota-fiscal.js?v=55';
+import { blocoConfig as blocoIfood, montarConfig as montarIfood } from './ifood.js?v=55';
 
 // ------------------------------------------------------------------ esquemas de cor (identidade do Popina)
 // escuro: menu do computador, faixa e etiquetas escuras · destaque: a cor dos botões (vira a cor da marca ao escolher)
@@ -31,7 +32,7 @@ const CORES = ['#6B2737', '#1B6B4A', '#2F5D46', '#33383D', '#54528F', '#274C8E',
 // ------------------------------------------------------------------ "Como usar" de cada tela
 export const COMO = {
   salao: ['Salão', ['Cada quadrado é uma mesa: livre, ocupada, pediu a conta ou com prato pronto.', 'Toque na mesa para abrir, lançar itens e mandar para a cozinha.', 'Pedidos e chamados que chegam pelo QR da mesa aparecem no alto.']],
-  pedidos: ['Pedidos', ['Balcão, retirada e delivery num lugar só.', '“Novo pedido” lança na hora; os do cardápio online entram sozinhos.', 'Toque no pedido para mudar a situação, imprimir ou mandar no WhatsApp.']],
+  pedidos: ['Pedidos', ['Balcão, retirada e delivery num lugar só.', '“Novo pedido” lança na hora; os do cardápio online entram sozinhos.', 'Toque no pedido para mudar a situação, imprimir ou mandar no WhatsApp.', '“Pedido do iFood”: copie o pedido no Gestor de Pedidos do iFood e cole aqui; ele vai para a cozinha com o selo do iFood.']],
   cozinha: ['Cozinha', ['O que precisa ser feito, do mais antigo para o mais novo.', 'Toque em “Pronto” quando sair: o garçom fica sabendo.', '“Imprimir sozinho” manda cada pedido novo para a impressora.']],
   caixa: ['Caixa', ['As contas abertas e as que pediram para fechar.', 'Receba em Pix (QR com o valor), cartão, dinheiro ou dividido.', 'No fim do dia, feche o caixa e mande o resumo ao dono.']],
   mais: ['Gestão', ['Cardápio, mesas e QR, estoque, relatórios, clientes, entregadores e equipe.', 'Configurações reúne perfil, cores, marca, guia, impressão e assinatura.']],
@@ -69,7 +70,7 @@ G.config = {
   html() {
     const L = lojaCfg(), c = db.config, E = esquema(), pf = perfil(), g = gestor(), cor = corLoja();
     const nome = pf.nome || (conta.modo === 'demo' ? 'Você' : ''), ini = (nome || conta.email || '?').trim()[0].toUpperCase();
-    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-restaurante', 'Restaurante e impressão'], ['cfg-nota', 'Nota fiscal'], ['cfg-sons', 'Sons'], ['cfg-assinatura', 'Minha assinatura']];
+    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-restaurante', 'Restaurante e impressão'], ['cfg-nota', 'Nota fiscal'], ['cfg-ifood', 'iFood'], ['cfg-sons', 'Sons'], ['cfg-assinatura', 'Minha assinatura']];
     return volta('Configurações', g ? 'Seu perfil, as cores, a marca, o guia, a impressão e a assinatura' : 'Seu perfil, o guia e a assinatura. Cores, marca e restaurante, só o dono muda') + `
     <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<button type="button" data-ir="mais/config/${id}">${n}</button>`).join('')}</nav>
     <div class="duas">
@@ -119,6 +120,7 @@ G.config = {
       <p class="mudo" style="margin-top:8px">No recibo saem o nome, o endereço e o WhatsApp do restaurante.</p>
     </section>
     ${secaoNf(g)}
+    ${blocoIfood(g)}
     <section class="cartao cfg-sec" id="cfg-sons"><h2>Sons</h2>
       <p class="mudo">Vale só neste aparelho. O alto-falante no topo também liga e desliga.</p>
       <label class="liga" style="margin-top:12px">Sons do sistema<small>Pedido novo, enviado para a cozinha, prato pronto, pagamento e aviso de erro</small><input type="checkbox" data-som-on ${som.somLigado() ? 'checked' : ''}></label>
@@ -142,6 +144,7 @@ G.config = {
     $('[data-som-teste]', el)?.addEventListener('click', () => { if (!som.somLigado()) return toast('Os sons estão desligados'); som.novo(); });
     if (!gestor()) return;
     montarNf(el, () => ir(location.hash.slice(1)));
+    montarIfood(el);
     $('[data-prever-marca]', el)?.addEventListener('click', () => { window.popinaPlano = window.popinaPlano === 'marca' ? 'basico' : 'marca'; dispatchEvent(new Event('popina-plano')); toast(window.popinaPlano === 'marca' ? 'Assim fica com a sua marca: veja o topo' : 'De volta ao plano normal'); });
     $$('[data-esquema]', el).forEach((b) => { b.onclick = () => { const e = ESQUEMAS.find((x) => x.id === b.dataset.esquema); setLoja({ esquema: e.id, cor: e.destaque }); toast(`Esquema ${e.nome} aplicado`); }; });
     $$('[data-cor]', el).forEach((b) => { b.onclick = () => { setLoja({ cor: b.dataset.cor }); toast('Cor da marca trocada'); }; });

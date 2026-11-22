@@ -6,13 +6,13 @@
 // db.equipe (convites da demonstração) e db.config.regras (senha do gerente) continuam valendo como estavam. Na conta real,
 // os convites, cargos e telas de nexo_membros seguem pelo fluxo de conta-nuvem.js (window.veltriaAbrir), sem mudar nada.
 import { db, t, din, r2, uid, grava, CONTA, ESPACO, regras, setRegras, temPin, fone, soDig, zap, euSou, setEuSou, num,
-  inicioDoDia, hora, acertoEntregadores } from './loja.js?v=54';
-import { acao, ir } from './nucleo.js?v=54';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=54';
+  inicioDoDia, hora, acertoEntregadores } from './loja.js?v=55';
+import { acao, ir } from './nucleo.js?v=55';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=55';
 
 // estilo próprio da Equipe (não mexe no popina.css)
 if (!document.querySelector('link[data-equipe-css]')) {
-  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'equipe.css?v=54'; l.dataset.equipeCss = '1'; document.head.appendChild(l);
+  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'equipe.css?v=55'; l.dataset.equipeCss = '1'; document.head.appendChild(l);
 }
 
 // ------------------------------------------------------------------ funções e modelos de permissão

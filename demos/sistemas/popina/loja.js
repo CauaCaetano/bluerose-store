@@ -4,7 +4,7 @@
 // COMPATIBILIDADE: os dados do Popina antigo abrem aqui sem perder nada. Os campos das funções que saíram (rodízio, eventos,
 // portaria, vitrine, cupons, reservas, produção...) continuam guardados como estão: esta versão só não os mostra.
 // Nada aqui apaga campo antigo; tudo é alterado no lugar.
-import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=54';
+import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=55';
 
 export const CHAVE = 'popina-v1';
 export const CONTA = window.veltriaConta || null;
@@ -302,6 +302,7 @@ export function fechar(c) {
     garcom: c.garcom || '', entregador: c.entregador || '', cliente: c.cliente?.tel ? soDig(c.cliente.tel) : '', ...(c.cliente?.nome ? { nomeCliente: c.cliente.nome } : {}),
     pessoas: c.pessoas || 0, servicoOn: !!c.servico, couvertOn: c.couvert !== false, aberta: c.aberta, hist: c.hist || [],
     ...(c.modo ? { modo: c.modo } : {}), ...(c.origem ? { origem: c.origem } : {}),
+    ...(c.ifood ? { ifood: { codigo: c.ifood.codigo || '', entregaPor: c.ifood.entregaPor || '', ...(c.ifood.exemplo ? { exemplo: true } : {}) } } : {}), // pedido do iFood (22/11): o número e quem entregou
     ...(v.desconto ? { descontoMotivo: c.descontoInfo?.motivo || '', descontoQuem: c.descontoInfo?.quem || '' } : {}) });
   registrarCliente(c, v.total);
   if (c.quitado) { grava(); return true; }

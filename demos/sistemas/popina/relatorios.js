@@ -1,8 +1,9 @@
 // Popina · relatórios simples: quanto vendeu, o que mais sai, em que horário e cada garçom.
-import { db, t, din, r2, inicioDoDia, pagamentosVenda, FORMA_FIADO } from './loja.js?v=54';
-import { ir } from './nucleo.js?v=54';
-import { $$ } from './ui.js?v=54';
-import { G, volta } from './gestao.js?v=54';
+import { db, t, din, r2, inicioDoDia, pagamentosVenda, FORMA_FIADO } from './loja.js?v=55';
+import { ir } from './nucleo.js?v=55';
+import { $$ } from './ui.js?v=55';
+import { G, volta } from './gestao.js?v=55';
+import { blocoRelatorio } from './ifood.js?v=55';
 
 let periodo = 'hoje';
 const PER = [['hoje', 'Hoje'], ['ontem', 'Ontem'], ['7', '7 dias'], ['30', '30 dias']];
@@ -42,6 +43,7 @@ G.relatorios = {
       <div class="cartao"><h2>Por tipo</h2>${barras(Object.entries(tipos).sort((a, b) => b[1] - a[1]))}</div>
       <div class="cartao"><h2>Por origem do pedido</h2>${barras(Object.entries(origens).sort((a, b) => b[1][1] - a[1][1]).map(([k, [, v]]) => [k, v]))}
         <p class="mudo" style="margin-top:8px">${Object.entries(origens).sort((a, b) => b[1][0] - a[1][0]).map(([k, [q, v]]) => `${t(k)}: ${q} ${q === 1 ? 'pedido' : 'pedidos'}, média ${din(v / q)}`).join(' · ')}</p></div>
+      ${blocoRelatorio(vs)}
       ${recusados.length ? `<div class="cartao"><h2>Por que recusou</h2>${barras(Object.entries(recusados.reduce((o, r) => { const k = r.motivo || 'Sem motivo'; o[k] = (o[k] || 0) + 1; return o; }, {})).sort((a, b) => b[1] - a[1]), (q) => `${q}×`)}</div>` : ''}
       ${Object.keys(dias).length ? `<div class="cartao"><h2>Por dia</h2>${barras(Object.entries(dias))}</div>` : ''}
       <div class="cartao"><h2>Garçons</h2>${Object.keys(garc).length ? `<div class="rolo" style="box-shadow:none"><table class="tabela"><thead><tr><th>Garçom</th><th class="n">Mesas</th><th class="n">Vendido</th><th class="n">10%</th></tr></thead><tbody>${Object.entries(garc).sort((a, b) => b[1].total - a[1].total).map(([g, x]) => `<tr><td><b>${t(g)}</b></td><td class="n">${x.mesas}</td><td class="n">${din(x.total)}</td><td class="n"><b>${din(x.servico)}</b></td></tr>`).join('')}</tbody></table></div>` : '<p class="mudo">Nenhuma mesa fechada no período.</p>'}</div>

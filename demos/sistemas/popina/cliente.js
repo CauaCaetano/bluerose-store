@@ -5,12 +5,12 @@
 // Todo pedido também pode ir para o WhatsApp do restaurante (link wa.me com o pedido escrito).
 // COMPATIBILIDADE: o pedido continua com os mesmos campos (nome, tel, end, bairro, pagar, troco, itens). Os novos (ref, cupom, desconto,
 // taxa, total, agendado) só se somam; o que o sistema do dono ainda não lê vai também escrito no endereço, no pagamento e na observação.
-import { ico, folha, toast, $, $$ } from './ui.js?v=54';
-import * as som from './som.js?v=54';
+import { ico, folha, toast, $, $$ } from './ui.js?v=55';
+import * as som from './som.js?v=55';
 // cardápio do cliente: só um toque leve ao pôr na sacola e ao mandar o pedido; mudo no link "Som" do topo (vale neste celular)
 som.chaveSom('popina-som-cli', false);
-import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=54';
-import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=54';
+import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=55';
+import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=55';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -697,7 +697,7 @@ async function posConta() {
 async function iniciar() {
   if (!mesa) { conta = criarConta({ real: !!R }); conta.ouvir(() => { if (M) topo(); }); }
   if (!R) {
-    loja = await import('./loja.js?v=54'); doExemplo();
+    loja = await import('./loja.js?v=55'); doExemplo();
     loja.ouvir(() => { doExemplo(); if (!document.querySelector('.folha-fundo, .cx-tela-fundo')) { aplicarCor(); topo(); lista(); } });
     tudo(); posConta(); return;
   }

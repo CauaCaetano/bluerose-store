@@ -3,17 +3,19 @@
 // 22/11/2026, pedido do dono: em vez de dezenas de atalhos na Gestão, as telas ficam no menu, divididas por categoria.
 // Os itens são botões (data-ir / data-acao), nunca links com #: as permissões da equipe continuam valendo pela aba
 // Gestão (#mais). Quem não vê a Gestão não vê as categorias; o link do delivery aparece para todos.
-import { db, t, lojaCfg, linkCardapio, estoqueBaixo, lojaPausada, ouvir } from './loja.js?v=54';
-import { acao } from './nucleo.js?v=54';
-import { ico, folha, toast, $ } from './ui.js?v=54';
+import { db, t, lojaCfg, linkCardapio, estoqueBaixo, lojaPausada, ouvir } from './loja.js?v=55';
+import { acao } from './nucleo.js?v=55';
+import { ico, folha, toast, $ } from './ui.js?v=55';
 import { qrSVG } from '../base/qr.js';
-import { imprimir } from './imprimir.js?v=54';
+import { imprimir } from './imprimir.js?v=55';
 
 // [chave, título, ícone, itens: [rótulo, ícone, destino (rota) ou ação]]
 export const GRUPOS = [
   ['delivery', 'Delivery', 'moto', [
     ['Meu link e QR do delivery', 'link', { acao: 'link-delivery' }],
     ['Pausar pedidos online', 'alerta', { acao: 'ped-pausa' }],
+    ['Pedido do iFood (colar)', 'sacola', { acao: 'ifood-colar' }],
+    ['iFood: comissão', 'etiqueta', { ir: 'mais/config/cfg-ifood' }],
     ['Bairros, taxas e entrega', 'pino', { ir: 'mais/restaurante/rest-entrega' }],
     ['Horários de funcionamento', 'relogio', { ir: 'mais/restaurante/rest-horarios' }],
     ['Cupons de desconto', 'etiqueta', { ir: 'mais/cupons' }],

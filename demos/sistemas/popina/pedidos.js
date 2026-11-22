@@ -3,11 +3,12 @@
 // No celular, uma coluna por vez (as abas de cima trocam). O novo pedido (nome ou telefone do cliente, endereço, taxa por bairro e troco).
 import { db, t, din, tempo, minutos, conta, novoPedido, itensValidos, ondeComanda, tipoNome, quemPediu, clientePorTel, soDig, num, vir, hora, lojaCfg, comanda,
   etapa, aguardaAceite, aceitarPedido, recusarPedido, MOTIVOS_RECUSA, marcarPronto, saiuEntrega, concluirPedido, enviar, inicioDoDia, zap, fone,
-  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=54';
-import { registrar, acao, ir } from './nucleo.js?v=54';
-import { ico, folha, toast, autorizar, novidades, $, $$ } from './ui.js?v=54';
-import * as som from './som.js?v=54';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=54';
+  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=55';
+import { registrar, acao, ir } from './nucleo.js?v=55';
+import { ico, folha, toast, autorizar, novidades, $, $$ } from './ui.js?v=55';
+import * as som from './som.js?v=55';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=55';
+import { colarIfood, ehIfood, nomeEntrega } from './ifood.js?v=55';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* nada */ } };
@@ -16,7 +17,7 @@ let colSel = '';
 const COLS = [['novo', 'Novos'], ['preparo', 'Na cozinha'], ['pronto', 'Prontos e na rua'], ['feito', 'Concluídos']];
 const abertos = () => db.comandas.filter((c) => c.tipo !== 'mesa');
 // origem curta para o cartão
-const ORIGEM = { 'Cardápio online': ['Online', 'link'], 'Telefone ou WhatsApp': ['Telefone/WhatsApp', 'zap'], WhatsApp: ['WhatsApp', 'zap'], Telefone: ['Telefone', 'fala'], Balcão: ['Balcão', 'loja'] };
+const ORIGEM = { 'Cardápio online': ['Online', 'link'], 'Telefone ou WhatsApp': ['Telefone/WhatsApp', 'zap'], WhatsApp: ['WhatsApp', 'zap'], Telefone: ['Telefone', 'fala'], Balcão: ['Balcão', 'loja'], iFood: ['iFood', 'sacola'] };
 const origemDe = (c) => ORIGEM[c.origem] || [c.origem || (c.tipo === 'delivery' ? 'Telefone/WhatsApp' : 'Balcão'), c.tipo === 'delivery' ? 'zap' : 'loja'];
 export function situacao(c) {
   const it = itensValidos(c), e = etapa(c);
@@ -33,11 +34,12 @@ function cartao(c) {
   const v = conta(c), e = etapa(c), [st, cl] = situacao(c), [org, oi] = origemDe(c), espera = aguardaAceite(c);
   // tempo: desde que chegou; amarelo e vermelho conforme o atraso (o novo do online fica vermelho em 3 min sem aceitar)
   const m = Math.floor(minutos(c.aberta)), cor = espera ? (m >= 3 ? 'atrasado' : 'medio') : m >= 40 ? 'atrasado' : m >= 25 ? 'medio' : '';
-  const pago = v.falta <= 0.009 ? '<span class="etq livre">Pago</span>' : c.pagarNaEntrega ? `<span class="etq">Paga na entrega: ${t(c.pagarNaEntrega.replace(/ \(troco.*\)$/, ''))}</span>` : '<span class="etq">A pagar</span>';
+  const pago = v.falta <= 0.009 ? `<span class="etq livre">${ehIfood(c) ? 'Pago no iFood' : 'Pago'}</span>` : c.pagarNaEntrega ? `<span class="etq">Paga na entrega: ${t(c.pagarNaEntrega.replace(/ \(troco.*\)$/, ''))}</span>` : '<span class="etq">A pagar</span>';
   let bts = '';
   if (espera) bts = `<button type="button" class="bt perigo" data-acao="ped-recusar" data-id="${c.id}">Recusar</button><button type="button" class="bt cheio" data-acao="ped-aceitar" data-id="${c.id}">${ico('check')}Aceitar</button>`;
   else if (e === 'novo') bts = itensValidos(c).length ? `<button type="button" class="bt cheio" data-acao="ped-mandar" data-id="${c.id}">${ico('cozinha')}Mandar para a cozinha</button>` : `<button type="button" class="bt cheio" data-ir="lancar/${c.id}">${ico('mais2')}Lançar itens</button>`;
   else if (e === 'preparo') bts = `<button type="button" class="bt ok" data-acao="ped-pronto" data-id="${c.id}">${ico('check')}Está pronto</button>`;
+  else if (c.tipo === 'delivery' && ehIfood(c) && c.ifood?.entregaPor === 'IFOOD' && !['saiu', 'entregue'].includes(c.entrega)) bts = `<button type="button" class="bt cheio" data-acao="ped-ifood-entregador" data-id="${c.id}">${ico('moto')}Entregue ao entregador do iFood</button>`;
   else if (c.tipo === 'delivery' && !['saiu', 'entregue'].includes(c.entrega)) bts = `<button type="button" class="bt cheio" data-acao="ped-saiu" data-id="${c.id}">${ico('moto')}Saiu para entrega</button>`;
   else bts = `<button type="button" class="bt ok" data-acao="ped-entregue" data-id="${c.id}">${ico('check')}${c.tipo === 'delivery' && c.entrega === 'entregue' ? 'Receber' : v.falta > 0.009 ? 'Entregue e cobrar' : 'Entregue'}</button>`;
   const entregador = c.entregador ? (db.entregadores || []).find((x) => x.id === c.entregador)?.nome : '';
@@ -46,7 +48,7 @@ function cartao(c) {
       <span class="pc-l1">${c.senha ? `<span class="senha" title="Senha">${c.senha}</span>` : ''}<span class="pc-nome"><b>${t(c.cliente?.nome || ondeComanda(c))}</b><small>${tipoNome(c)} #${c.num ?? ''}${c.tipo === 'delivery' && c.cliente?.bairro ? ` · ${t(c.cliente.bairro)}` : ''}</small></span>
         <span class="pc-tempo ${cor}" title="Chegou às ${hora(c.aberta)}">${ico('relogio')}${tempo(c.aberta)}</span></span>
       ${c.agendado ? `<span class="etq saiu">${ico('relogio')}Agendado para ${new Date(c.agendado).toDateString() === new Date().toDateString() ? '' : `${new Date(c.agendado).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} `}${hora(c.agendado)}</span>` : ''}
-      <span class="pc-org">${ico(oi)}${t(org)}${entregador ? ` · ${ico('moto')}${t(entregador)}` : ''}${c.cupom ? ` · cupom ${t(c.cupom)}` : ''}</span>
+      ${ehIfood(c) ? `<span class="pc-org"><span class="selo-ifood">iFood</span>${c.ifood?.codigo ? `<b>#${t(c.ifood.codigo)}</b>` : ''}<span>· ${nomeEntrega(c)}</span>${c.ifood?.coleta ? `<span>· coleta <b>${t(c.ifood.coleta)}</b></span>` : ''}${c.ifood?.exemplo ? '<span class="etq">exemplo</span>' : ''}${entregador ? ` · ${ico('moto')}${t(entregador)}` : ''}</span>` : `<span class="pc-org">${ico(oi)}${t(org)}${entregador ? ` · ${ico('moto')}${t(entregador)}` : ''}${c.cupom ? ` · cupom ${t(c.cupom)}` : ''}</span>`}
       <span class="pc-itens">${itensTxt(c) || '<span class="mudo">Nada lançado</span>'}</span>
       <span class="pc-l3"><span class="etq ${cl}">${st}</span>${pago}<b class="num">${din(v.total)}</b></span>
     </button>
@@ -71,6 +73,7 @@ registrar('pedidos', {
     const P = lojaPausada(), esperando = por.novo.filter(aguardaAceite).length;
     return `<div class="cab"><div><h1>Pedidos</h1><p>${l.length ? `${l.length} ${l.length === 1 ? 'pedido aberto' : 'pedidos abertos'}` : 'Balcão, retirada e entrega'}${esperando ? ` · <b class="alerta-txt">${esperando} esperando aceitar</b>` : ''}</p></div>
       <div class="acoes"><button type="button" class="bt so-pc" data-acao="link-delivery">${ico('link')}Meu link de delivery</button><button type="button" class="bt ${P ? 'perigo cheio' : ''}" data-acao="ped-pausa">${ico(P ? 'alerta' : 'loja')}${P ? `Pausado${P.ate ? ` até ${hora(P.ate)}` : ''} · voltar` : 'Pausar pedidos online'}</button>
+        <button type="button" class="bt bt-ifood" data-acao="ifood-colar" title="Cole o texto do pedido que chegou no iFood"><span class="selo-ifood">iFood</span>Pedido do iFood</button>
         <button type="button" class="bt-ico" data-acao="ped-ajustes" aria-label="Som e aceitar sozinho" title="Som e aceitar sozinho">${ico('ajustes')}</button>
         <button type="button" class="bt cheio grande" data-novo-ped>${ico('mais2')}Novo pedido</button></div></div>
     ${P ? `<p class="aviso perigo">O cardápio online está pausado${P.motivo ? ` (${t(P.motivo)})` : ''}: os clientes veem a loja fechada.</p>` : ''}
@@ -111,6 +114,8 @@ export function escolherEntregador(c) {
     $$('[data-e]', f).forEach((x) => { x.onclick = () => vai(x.dataset.e); }); $('[data-sem]', f).onclick = () => vai('');
   } });
 }
+// entrega feita pelo entregador do iFood: saiu com ele, o pedido sai do quadro (pago no app; se faltar receber, vai para o caixa)
+acao('ped-ifood-entregador', (b) => { const c = doId(b); if (!c) return; saiuEntrega(c, ''); const r = concluirPedido(c); if (r === 'pagar') { toast('Agora receba o pagamento'); ir(`fechar/${c.id}`); } else if (r) toast(`#${c.ifood?.codigo || c.num} saiu com o entregador do iFood`); });
 acao('ped-entregue', (b) => { const c = doId(b); if (!c) return; const r = concluirPedido(c); if (r === 'pagar') { toast('Agora receba o pagamento'); ir(`fechar/${c.id}`); } else if (r) toast(`#${c.num} entregue`); });
 acao('ped-imp', (b) => { const c = doId(b); if (!c) return; if (etapa(c) === 'pronto' || c.tipo === 'delivery' && etapa(c) !== 'novo') imprimirConta(c); else imprimirCozinha(c, itensValidos(c)); });
 acao('ped-pausa', () => {
@@ -141,7 +146,8 @@ const ORIGENS = ['WhatsApp', 'Telefone', 'Balcão'];
 export function novoPedidoFolha(tipoIni = 'balcao') {
   let tipo = tipoIni;
   const bairros = db.bairros || [];
-  const corpo = () => `<div class="chips quebra" role="group" aria-label="Tipo">${[['balcao', 'Balcão'], ['retirada', 'Retirada'], ['delivery', 'Entrega']].map(([k, n]) => `<button type="button" class="chip" data-t="${k}" aria-pressed="${tipo === k}">${n}</button>`).join('')}</div>
+  const corpo = () => `<button type="button" class="bt pq bt-ifood" data-ifood style="margin-bottom:12px"><span class="selo-ifood">iFood</span>Chegou no iFood? Cole o pedido</button>
+    <div class="chips quebra" role="group" aria-label="Tipo">${[['balcao', 'Balcão'], ['retirada', 'Retirada'], ['delivery', 'Entrega']].map(([k, n]) => `<button type="button" class="chip" data-t="${k}" aria-pressed="${tipo === k}">${n}</button>`).join('')}</div>
     <div style="margin-top:14px">
     ${tipo !== 'balcao' ? `<p class="campo"><span>Pediu por</span></p><div class="chips quebra" role="group" aria-label="Pediu por">${ORIGENS.map((o, k) => `<button type="button" class="chip" data-org="${o}" aria-pressed="${k === 0}">${o}</button>`).join('')}</div>
       <label class="campo" style="margin-top:10px"><span>Telefone (WhatsApp)</span><input data-tel inputmode="tel" autocomplete="off" placeholder="16 99999-9999"></label><p class="mudo" data-cli-info></p>` : ''}
@@ -154,6 +160,7 @@ export function novoPedidoFolha(tipoIni = 'balcao') {
   folha({ titulo: 'Novo pedido', corpo: `<div data-c>${corpo()}</div>`, pe: '<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio grande" data-ok>Criar e lançar itens</button>',
     aoAbrir: (f, fechar) => {
       const ligar = () => {
+        $('[data-ifood]', f).onclick = () => { fechar(); setTimeout(() => colarIfood(), 240); };
         $$('[data-t]', f).forEach((b) => { b.onclick = () => { tipo = b.dataset.t; $('[data-c]', f).innerHTML = corpo(); ligar(); }; });
         $$('[data-org]', f).forEach((b) => { b.onclick = () => $$('[data-org]', f).forEach((x) => x.setAttribute('aria-pressed', x === b)); });
         const tel = $('[data-tel]', f);
