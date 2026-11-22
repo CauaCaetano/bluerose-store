@@ -6,9 +6,9 @@
 // A integração automática (Merchant API) está pronta no servidor (função popina-ifood), DESLIGADA até existir CNPJ.
 // Campos novos só: comanda.ifood { codigo, entregaPor, coleta, localizador, fone, pago, colado, exemplo } e
 // config.loja.ifoodComissao (%). Nada do que já existe muda.
-import { db, t, din, r2, uid, num, vir, conta, novoPedido, aceitarPedido, marcar, ativos, lojaCfg, setLoja, quemAgora, agendadoDe } from './loja.js?v=55';
-import { acao, ir } from './nucleo.js?v=55';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=55';
+import { db, t, din, r2, uid, num, vir, conta, novoPedido, aceitarPedido, marcar, ativos, lojaCfg, setLoja, quemAgora, agendadoDe } from './loja.js?v=56';
+import { acao, ir } from './nucleo.js?v=56';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=56';
 
 // ------------------------------------------------------------------ leitura do texto
 const sem = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -268,29 +268,37 @@ export function colarIfood(textoIni = '') {
     <label class="campo" style="margin-top:10px"><span>Texto do pedido</span><textarea data-txt rows="10" spellcheck="false" placeholder="Cole aqui o pedido do iFood">${t(texto)}</textarea></label>
     <p class="mudo" style="margin:10px 0 6px">${real() ? 'Quer ver como funciona? Use um texto de exemplo:' : 'Demonstração: use um pedido de exemplo (fictício):'}</p>
     <div class="chips quebra">${EXEMPLOS.map(([n], k) => `<button type="button" class="chip" data-ex="${k}">${t(n)}</button>`).join('')}</div>`;
-  const linhaItem = (i, k) => `<div class="if-item" data-k="${k}">
+  // amarelo = o leitor não tem certeza (banca 2): item sem par no cardápio, endereço sem número/bairro, valores que não fecham
+  const duv = (cond) => (cond ? ' duvida' : '');
+  const dica = (cond, txt) => (cond ? `<small class="dica-duv">${ico('alerta')}${t(txt)}</small>` : '');
+  const linhaItem = (i, k) => `<div class="if-item${i.prod ? '' : ' duvida'}" data-k="${k}">
       <input data-q inputmode="numeric" value="${i.qtd}" aria-label="Quantidade" placeholder="Qtd">
       <input data-n maxlength="120" value="${t(i.nome)}" aria-label="Item" placeholder="Item">
       <input data-v inputmode="decimal" value="${vir(r2(i.total + (i.opcoes || []).reduce((s, o) => s + o.preco, 0)).toFixed(2))}" aria-label="Valor do item (R$)" placeholder="Valor R$" title="Valor total da linha, com os complementos">
       <button type="button" class="bt-ico" data-tira aria-label="Tirar o item">${ico('lixo')}</button>
       <select data-p aria-label="Item do cardápio">${opcoesCardapio(i.prod)}</select>
+      <small class="dica-duv if-dica-item">${ico('alerta')}Não achei no cardápio: escolha ao lado qual é (ou deixe sem ligar)</small>
       ${(i.opcoes || []).length || i.obs ? `<small class="mudo">${(i.opcoes || []).map((o) => `+ ${o.qtd > 1 ? `${o.qtd}× ` : ''}${t(o.nome)}${o.preco ? ` ${din(o.preco)}` : ''}`).join(' · ')}${i.obs ? `${(i.opcoes || []).length ? ' · ' : ''}Obs.: ${t(i.obs)}` : ''}</small>` : ''}</div>`;
   const passo2 = () => {
     const d = lido.dados, f = lido.faltou, ent = d.tipo === 'TAKEOUT' ? 'TAKEOUT' : d.entregaPor === 'MERCHANT' ? 'MERCHANT' : 'IFOOD';
-    return `${f.length ? `<p class="aviso">Não achei ${f.join(', ')}. Confira e complete abaixo.</p>` : '<p class="aviso ok">Pedido reconhecido. Confira e toque em Criar o pedido.</p>'}
-    <div class="grade2"><label class="campo"><span>Nº do pedido no iFood</span><input data-cod maxlength="12" value="${t(d.codigo)}" inputmode="numeric"></label>
-      <label class="campo"><span>Cliente</span><input data-cli maxlength="80" value="${t(d.cliente.nome)}"></label></div>
+    const semNum = ent !== 'TAKEOUT' && !/\d/.test(d.endereco?.texto || ''), semBai = ent !== 'TAKEOUT' && !d.endereco?.bairro, semPg = d.pagamento.online == null;
+    const semTroco = d.pagamento.online === false && d.pagamento.forma === 'Dinheiro' && !d.pagamento.trocoPara, semCasar = d.itens.filter((i) => !i.prod).length;
+    const nDuv = [!d.codigo, !d.cliente.nome, semNum, semBai, semPg, semTroco].filter(Boolean).length + semCasar;
+    return `${f.length ? `<p class="aviso">Não achei ${f.join(', ')}. Confira e complete abaixo.</p>` : nDuv ? '' : '<p class="aviso ok">Pedido reconhecido. Confira e toque em Criar o pedido.</p>'}
+    ${nDuv ? `<p class="aviso amarelo" data-aviso-duv>${ico('alerta')}<span>O que está em <b>amarelo</b> eu não tenho certeza. Confira com a tela do iFood antes de criar.</span></p>` : ''}
+    <div class="grade2"><label class="campo${duv(!d.codigo, '')}"><span>Nº do pedido no iFood</span><input data-cod maxlength="12" value="${t(d.codigo)}" inputmode="numeric">${dica(!d.codigo, 'Não achei o número: copie do iFood')}</label>
+      <label class="campo${duv(!d.cliente.nome, '')}"><span>Cliente</span><input data-cli maxlength="80" value="${t(d.cliente.nome)}">${dica(!d.cliente.nome, 'Não achei o nome do cliente')}</label></div>
     <p class="campo"><span>Entrega</span></p><div class="chips quebra" role="group" aria-label="Entrega">${[['IFOOD', 'Entrega iFood'], ['MERCHANT', 'Entrega própria'], ['TAKEOUT', 'Retirada']].map(([k, n]) => `<button type="button" class="chip" data-ent="${k}" aria-pressed="${ent === k}">${n}</button>`).join('')}</div>
-    <div data-end-bloco ${ent === 'TAKEOUT' ? 'hidden' : ''}><label class="campo" style="margin-top:10px"><span>Endereço</span><input data-end maxlength="160" value="${t(d.endereco?.texto || '')}"></label>
-      <div class="grade2"><label class="campo"><span>Bairro</span><input data-bai maxlength="80" value="${t(d.endereco?.bairro || '')}"></label><label class="campo"><span>Referência</span><input data-ref maxlength="120" value="${t(d.endereco?.referencia || '')}"></label></div></div>
+    <div data-end-bloco ${ent === 'TAKEOUT' ? 'hidden' : ''}><label class="campo${duv(semNum, '')}" style="margin-top:10px"><span>Endereço</span><input data-end maxlength="160" value="${t(d.endereco?.texto || '')}">${dica(semNum, d.endereco?.texto ? 'Endereço sem número: confira a rua e o número' : 'Não achei o endereço: copie do iFood')}</label>
+      <div class="grade2"><label class="campo${duv(semBai, '')}"><span>Bairro</span><input data-bai maxlength="80" value="${t(d.endereco?.bairro || '')}">${dica(semBai, 'Não achei o bairro')}</label><label class="campo"><span>Referência</span><input data-ref maxlength="120" value="${t(d.endereco?.referencia || '')}"></label></div></div>
     <p class="campo" style="margin-top:6px"><span>Itens</span></p><div class="if-itens" data-itens>${d.itens.map(linhaItem).join('')}</div>
     <button type="button" class="bt pq" data-mais-item>${ico('mais2')}Pôr item</button>
     <div class="grade2" style="margin-top:12px"><label class="campo"><span>Taxa de entrega</span><input data-taxa inputmode="decimal" value="${vir(d.taxa.toFixed(2))}"></label>
       <label class="campo"><span>Desconto ou cupom</span><input data-desc inputmode="decimal" value="${vir(d.descontos.toFixed(2))}"></label></div>
-    <p class="campo"><span>Pagamento</span></p><div class="chips quebra" role="group" aria-label="Pagamento">${[['app', 'Pago no app do iFood'], ['entrega', ent === 'TAKEOUT' ? 'Cobrar na retirada' : 'Cobrar na entrega']].map(([k, n]) => `<button type="button" class="chip" data-pg="${k}" aria-pressed="${(d.pagamento.online === false ? 'entrega' : d.pagamento.online ? 'app' : '') === k}">${n}</button>`).join('')}</div>
+    <p class="campo${duv(semPg, '')}"><span>Pagamento</span>${dica(semPg, 'Não deu para saber: foi pago no app ou cobra na entrega?')}</p><div class="chips quebra" role="group" aria-label="Pagamento">${[['app', 'Pago no app do iFood'], ['entrega', ent === 'TAKEOUT' ? 'Cobrar na retirada' : 'Cobrar na entrega']].map(([k, n]) => `<button type="button" class="chip" data-pg="${k}" aria-pressed="${(d.pagamento.online === false ? 'entrega' : d.pagamento.online ? 'app' : '') === k}">${n}</button>`).join('')}</div>
     <div class="grade2" data-pg-bloco ${d.pagamento.online === false ? '' : 'hidden'}><label class="campo" style="margin-top:10px"><span>Forma</span><select data-forma>${['Dinheiro', 'Cartão de crédito', 'Cartão de débito', 'Pix', 'Vale-refeição', 'Cartão na entrega'].map((x) => `<option ${x === d.pagamento.forma ? 'selected' : ''}>${x}</option>`).join('')}</select></label>
-      <label class="campo" style="margin-top:10px"><span>Troco para</span><input data-troco inputmode="decimal" value="${d.pagamento.trocoPara ? vir(d.pagamento.trocoPara.toFixed(2)) : ''}" placeholder="Sem troco"></label></div>
-    <p class="if-total">Total no Popina: <b data-total></b>${d.total ? ` <span class="mudo">· o iFood mostrou ${din(d.total)}</span>` : ''}</p>`;
+      <label class="campo${duv(semTroco, '')}" style="margin-top:10px"><span>Troco para</span><input data-troco inputmode="decimal" value="${d.pagamento.trocoPara ? vir(d.pagamento.trocoPara.toFixed(2)) : ''}" placeholder="Sem troco">${dica(semTroco, 'Paga em dinheiro: o cliente pediu troco?')}</label></div>
+    <p class="if-total" data-if-total>Total no Popina: <b data-total></b>${d.total ? ` <span class="mudo">· o iFood mostrou ${din(d.total)}</span>` : ''}</p><small class="dica-duv" data-dica-total hidden>${ico('alerta')}Não fecha com o total do iFood: confira o valor de cada item, a taxa e o desconto.</small>`;
   };
   folha({ titulo: 'Pedido do iFood', larga: true, corpo: '<div data-c></div>', pe: '<div data-pe class="linha-bts" style="width:100%;justify-content:flex-end"></div>',
     aoAbrir: (f, fechar) => {
@@ -309,7 +317,12 @@ export function colarIfood(textoIni = '') {
         d.pagamento.forma = $('[data-forma]', f).value; d.pagamento.trocoPara = num($('[data-troco]', f).value);
       };
       const somar = () => { if (!lido) return; ler(); const d = lido.dados; const s = d.itens.reduce((k, i) => k + i.total + (i.opcoes || []).reduce((m, o) => m + o.preco, 0), 0) + (d.tipo === 'TAKEOUT' ? 0 : d.taxa) - d.descontos;
-        $('[data-total]', f).textContent = din(Math.max(0, r2(s))); };
+        $('[data-total]', f).textContent = din(Math.max(0, r2(s)));
+        // amarelo ao vivo: o total que não fecha e o item ainda sem par no cardápio
+        const naoFecha = d.total > 0 && Math.abs(r2(s) - d.total) >= 0.01;
+        $('[data-if-total]', f).classList.toggle('duvida', naoFecha); $('[data-dica-total]', f).hidden = !naoFecha;
+        $$('.if-item', f).forEach((el) => el.classList.toggle('duvida', !$('[data-p]', el).value));
+        $$('.campo.duvida input', f).forEach((i) => { if (i.value.trim() && !['data-end', 'data-troco'].some((a) => i.hasAttribute(a))) i.closest('.campo').classList.remove('duvida'); }); };
       const mostrar1 = () => {
         lido = null; C.innerHTML = passo1();
         PE.innerHTML = '<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio grande" data-ler>Reconhecer o pedido</button>';

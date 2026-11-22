@@ -673,3 +673,37 @@ h2 .selo-ifood{font-size:14px;margin-right:6px;vertical-align:middle}
 .folha kbd{font:inherit;font-size:.9em;padding:0 5px;border:1px solid var(--linha2);border-radius:5px;background:var(--papel2)}
 .kpis-pq b{font-size:22px}
 @media (max-width:560px){.if-item{grid-template-columns:52px minmax(0,1fr) 44px}.if-item [data-v]{grid-column:1/3}.if-item [data-tira]{grid-row:1;grid-column:3}}
+
+/* ------------------------------------------------------------ banca 2 (22/11): abas do quadro, caixa, quilo, marmita, despacho, iFood amarelo, nota passo a passo */
+@media (max-width:1099px){.quadro-abas{display:grid;grid-template-columns:1fr 1fr;gap:8px;overflow:visible;padding-bottom:4px}.quadro-abas .chip{justify-content:center;white-space:normal;text-align:center;line-height:1.15;padding:4px 10px;font-size:15px}}
+.cx-resumo{display:grid;gap:14px;background:var(--papel);border:2px solid var(--loja);border-radius:var(--raio);padding:16px;box-shadow:var(--sombra)}
+.cx-res-topo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cx-res-topo small{display:block;color:var(--mudo);font-weight:700;font-size:15px}.cx-res-topo b{display:block;font-size:32px;font-weight:800;line-height:1.15}.cx-res-topo span{font-size:14px;color:var(--mudo)}
+.cx-gaveta{background:var(--ok-suave);border-radius:12px;padding:10px 12px}.cx-gaveta b{color:var(--ok-tinta)}
+.cx-formas{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.cx-formas li{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--linha);border-radius:12px;background:var(--fundo);font-weight:700}
+.cx-formas li .ico{width:22px;height:22px;flex:none}.cx-formas li b{margin-left:auto;font-size:18px}
+@media (max-width:480px){.cx-res-topo{grid-template-columns:1fr}.cx-res-topo b{font-size:28px}.cx-formas{grid-template-columns:1fr 1fr}.cx-formas li{flex-wrap:wrap;gap:4px}.cx-formas li b{margin-left:0;width:100%}}
+.peso{display:grid;gap:10px}
+.peso-kg{font-size:18px;font-weight:700;padding:10px 14px;border-radius:12px;background:var(--papel2)}.peso-kg b{font-size:24px;margin-left:6px}
+.folha .peso .campo input[data-g]{font-size:34px;font-weight:800;min-height:68px;text-align:center;font-variant-numeric:tabular-nums}
+.peso-res{font-size:20px;font-weight:700;text-align:center;padding:12px;border-radius:12px;background:var(--ok-suave);color:var(--ok-tinta)}.peso-res b{font-size:30px;display:block}
+.lote-l{display:grid;gap:8px}
+.lote-it{display:flex;align-items:center;gap:12px;padding:12px;border:2px solid var(--linha);border-radius:12px;background:var(--papel);cursor:pointer;min-width:0}
+.lote-it input{width:26px;height:26px;flex:none;accent-color:var(--loja)}.lote-it span{flex:1;min-width:0}.lote-it span b{display:block}.lote-it small{color:var(--mudo);overflow-wrap:anywhere}
+.lote-it:has(input:checked){border-color:var(--loja)}
+.despacho-bt{width:100%}
+.tk-corte{border-top:2px dashed #000;margin:10px 0;break-after:page;page-break-after:always}
+.tk.etiqueta h2{font-size:26px}.tk.etiqueta td{font-size:16px;padding:2px 0}
+.bt-marmita .ico{color:var(--loja)}
+/* iFood: o que o leitor não tem certeza fica amarelo, com a dica de como corrigir */
+.duvida{background:#FFF4BF;outline:2px solid #E3B71E;outline-offset:2px;border-radius:10px}
+.campo.duvida{padding:6px 8px}
+.dica-duv{display:flex;align-items:center;gap:6px;margin-top:4px;color:#6B4E00;font-weight:700;font-size:14px}.dica-duv .ico{width:16px;height:16px;flex:none}
+.campo:not(.duvida)>.dica-duv,.if-item:not(.duvida) .if-dica-item{display:none}
+.if-item .if-dica-item{grid-column:1/-1}
+.aviso.amarelo{background:#FFF4BF;color:#5A4200;display:flex;gap:8px;align-items:flex-start}.aviso.amarelo .ico{flex:none;margin-top:2px}
+.nf-guia{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;margin:10px 0 14px;padding:14px;border-radius:14px;background:var(--papel2)}
+.nf-guia small{display:block;color:var(--mudo)}
+.nf-passo{font-size:14px;font-weight:800;color:var(--mudo);text-transform:uppercase;letter-spacing:.04em}
+.nf-perg{font-size:22px;margin:4px 0 12px}

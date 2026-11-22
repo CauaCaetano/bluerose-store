@@ -2,22 +2,33 @@
 // sangria e suprimento, e o fechamento do dia com o resumo pronto para mandar no WhatsApp do dono.
 import { db, t, din, r2, num, vir, tempo, hora, conta, comanda, pagar, partes, darDesconto, ondeComanda, quemPediu, caixaResumo, abrirCaixa, movimento, fecharCaixa,
   regras, temPin, euSou, setEuSou, quemAgora, grava, FORMA_FIADO, registrarFiado, receberFiado, clientesFiado, saldoFiado, nomeFiado, soDig, fone, zap, vendaDeHoje, cancelarVenda,
-  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=55';
-import { registrar, acao, ir } from './nucleo.js?v=55';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=55';
-import * as som from './som.js?v=55';
-import { pix } from './pix.js?v=55';
+  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=56';
+import { registrar, acao, ir } from './nucleo.js?v=56';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=56';
+import * as som from './som.js?v=56';
+import { pix } from './pix.js?v=56';
 import { qrSVG } from '../base/qr.js';
-import { blocoTotais, voltar, rotaComanda } from './salao.js?v=55';
-import { novoPedidoFolha } from './pedidos.js?v=55';
-import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=55';
-import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=55';
-import { blocoNotaVenda, etiquetaNota, botaoNota, modoNf, cancelarNota, minutosParaCancelar } from './nota-fiscal.js?v=55';
+import { blocoTotais, voltar, rotaComanda } from './salao.js?v=56';
+import { novoPedidoFolha } from './pedidos.js?v=56';
+import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=56';
+import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=56';
+import { blocoNotaVenda, etiquetaNota, botaoNota, modoNf, cancelarNota, minutosParaCancelar } from './nota-fiscal.js?v=56';
 
 const FORMAS = [['Pix', 'pix'], ['Dinheiro', 'dinheiro'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao'], [FORMA_FIADO, 'etiqueta']];
 const rotuloForma = (f) => (f === FORMA_FIADO ? 'Fiado' : f.replace('Cartão de débito', 'Débito').replace('Cartão de crédito', 'Crédito'));
 
 // ------------------------------------------------------------------ tela do caixa
+// resumo do dia no topo (banca 2): vendido por forma (dinheiro, Pix, cartão, iFood, fiado), o esperado na gaveta e Fechar o dia
+const GRUPO_FORMA = (f) => (f === 'Dinheiro' ? 'Dinheiro' : f === 'Pix' ? 'Pix' : f === FORMA_FIADO ? 'Fiado' : /ifood/i.test(f) ? 'iFood' : /cart|d[eé]bito|cr[eé]dito|vale/i.test(f) ? 'Cartão' : 'Outros');
+function cartaoResumo(r) {
+  const g = {}; Object.entries(r.porForma).forEach(([f, v]) => { const k = GRUPO_FORMA(f); g[k] = r2((g[k] || 0) + v); });
+  const ord = ['Dinheiro', 'Pix', 'Cartão', 'iFood', 'Fiado', 'Outros'].filter((k) => k === 'Dinheiro' || k === 'Pix' || k === 'Cartão' || g[k]);
+  const icoDe = { Dinheiro: 'dinheiro', Pix: 'pix', Cartão: 'cartao', iFood: 'sacola', Fiado: 'etiqueta', Outros: 'moedas' };
+  return `<section class="cx-resumo" aria-label="Resumo de hoje"><div class="cx-res-topo"><div><small>Vendido hoje</small><b class="num">${din(r.total)}</b><span>${r.vendas.length} ${r.vendas.length === 1 ? 'venda' : 'vendas'}</span></div>
+      <div class="cx-gaveta"><small>Esperado na gaveta</small><b class="num">${din(r.dinheiroNaGaveta)}</b><span>troco ${din(db.caixa.troco)} + dinheiro${r.sangria ? ` − sangria ${din(r.sangria)}` : ''}${r.suprimento ? ` + ${din(r.suprimento)}` : ''}</span></div></div>
+    <ul class="cx-formas">${ord.map((k) => `<li>${ico(icoDe[k])}<span>${k}</span><b class="num">${din(g[k] || 0)}</b></li>`).join('')}</ul>
+    <button type="button" class="bt escuro grande largo" data-ir="fechamento">${ico('conta')}Fechar o dia</button></section>`;
+}
 registrar('caixa', {
   titulo: 'Caixa',
   html() {
@@ -34,11 +45,8 @@ registrar('caixa', {
         <div class="linha-bts" style="margin-top:14px"><button type="button" class="bt" data-ir="fechamento">${ico('grafico')}Resumo de hoje</button></div>${lista}`;
     }
     const r = caixaResumo();
-    return `<div class="cab"><div><h1>Caixa</h1><p>Aberto às ${hora(db.caixa.aberto)}${db.caixa.operador ? ` por ${t(db.caixa.operador)}` : ''}</p></div>
-      <div class="acoes"><button type="button" class="bt escuro grande" data-ir="fechamento">${ico('conta')}Fechar o dia</button></div></div>
-    <div class="kpis"><div><small>Vendido no caixa</small><b>${din(r.total)}</b><span>${r.vendas.length} ${r.vendas.length === 1 ? 'venda' : 'vendas'}</span></div>
-      <div><small>Dinheiro na gaveta</small><b>${din(r.dinheiroNaGaveta)}</b><span>troco ${din(db.caixa.troco)}${r.sangria ? ` · sangria ${din(r.sangria)}` : ''}</span></div>
-      <div><small>No Pix</small><b>${din(r.porForma.Pix || 0)}</b><span>cartão ${din((r.porForma['Cartão de débito'] || 0) + (r.porForma['Cartão de crédito'] || 0))}</span></div></div>
+    return `<div class="cab"><div><h1>Caixa</h1><p>Aberto às ${hora(db.caixa.aberto)}${db.caixa.operador ? ` por ${t(db.caixa.operador)}` : ''}</p></div></div>
+    ${cartaoResumo(r)}
     <div class="linha-bts" style="margin-top:14px"><button type="button" class="bt" data-acao="mov" data-t="sangria">${ico('moedas')}Sangria (tirar)</button><button type="button" class="bt" data-acao="mov" data-t="suprimento">${ico('moedas')}Suprimento (pôr)</button>
       <button type="button" class="bt" data-acao="receber-fiado">${ico('etiqueta')}Receber fiado</button><button type="button" class="bt" data-ir="vendas">${ico('relogio')}Vendas de hoje</button></div>
     ${lista}`;

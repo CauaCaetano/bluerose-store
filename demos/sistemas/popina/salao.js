@@ -1,13 +1,14 @@
 // Popina · salão (o que fazer agora e as mesas), a comanda de qualquer conta e o lançar itens do garçom.
 import { db, t, din, tempo, comanda, comandaDaMesa, abrirMesa, adicionarItem, enviar, mudarStatus, cancelarItem, transferir, juntarMesas, moverItens, livreDoItem, pagoPorItem, conta, valorItem, itensValidos,
   fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2,
-  aguardaAceite } from './loja.js?v=55';
-import { escolherEntregador } from './pedidos.js?v=55';
-import { registrar, acao, ir } from './nucleo.js?v=55';
-import { ico, folha, toast, confirma, autorizar, novidades, $, $$ } from './ui.js?v=55';
-import { formOpcoes, temOpcoes } from './opcoes.js?v=55';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=55';
-import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=55';
+  aguardaAceite } from './loja.js?v=56';
+import { escolherEntregador } from './pedidos.js?v=56';
+import { registrar, acao, ir } from './nucleo.js?v=56';
+import { ico, folha, toast, confirma, autorizar, novidades, $, $$ } from './ui.js?v=56';
+import { formOpcoes, temOpcoes } from './opcoes.js?v=56';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=56';
+import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=56';
+import { marmitaAtiva } from './marmita.js?v=56';
 
 const ESTADO = { livre: 'Livre', ocupada: 'Ocupada', conta: 'Pediu a conta', pronto: 'Prato pronto', chamou: 'Chamou', qr: 'Pedido do QR' };
 const nMesas = () => Math.max(1, Math.min(200, Number(db.config.mesas) || 10));
@@ -231,6 +232,7 @@ registrar('lancar', {
     const rasc = c.itens.filter((i) => i.status === 'rascunho'), n = rasc.reduce((s, i) => s + i.qtd, 0);
     return `${voltar(rotaComanda(c), `Voltar para ${c.tipo === 'mesa' ? `a mesa ${c.mesa}` : 'o pedido'}`)}
       <div class="cab"><div><h1>${t(c.tipo === 'mesa' ? `Mesa ${c.mesa}` : quemPediu(c))}</h1><p>Toque no + para pôr na comanda${c.tipo !== 'mesa' ? ` · ${n} ${n === 1 ? 'item' : 'itens'} · ${din(conta(c).total)}` : ''}</p></div></div>
+      ${marmitaAtiva() && !c.quitado ? `<div class="linha-bts" style="margin-bottom:10px"><button type="button" class="bt grande bt-marmita" data-acao="marmita" data-id="${c.id}">${ico('cloche')}Marmita rápida</button></div>` : ''}
       <label class="busca">${ico('busca')}<input type="search" data-busca value="${t(busca)}" placeholder="Nome ou código do prato" aria-label="Buscar prato ou bebida pelo nome ou código" autocomplete="off" enterkeyhint="done"></label>
       <div class="chips" role="group" aria-label="Categorias"><button type="button" class="chip" data-cat="" aria-pressed="${!catSel}">Todos</button>${cats.map((k) => `<button type="button" class="chip" data-cat="${t(k.id)}" aria-pressed="${catSel === k.id}">${t(k.nome)}</button>`).join('')}</div>
       <div class="prods">${l.map((p) => { const k = noRasc(c, p.id);
@@ -266,6 +268,7 @@ acao('add', (b) => {
   abrirOpcoes(c, p);
 });
 export function abrirOpcoes(c, p, aoPor) {
+  if (p.porKg && !p.grupos?.length && !p.adicionais?.length && !p.tamanhos?.length) return pesoFolha(c, p, aoPor);
   const fo = formOpcoes(p, { produtos: ativos(), garcom: true });
   folha({ titulo: p.nome, corpo: `${p.desc ? `<p class="mudo" style="margin-bottom:12px">${t(p.desc)}</p>` : ''}${fo.html}`,
     pe: '<button type="button" class="bt cheio grande" data-ok>Pôr na comanda</button>',
@@ -274,5 +277,26 @@ export function abrirOpcoes(c, p, aoPor) {
       fo.ligar($('.folha-corpo', f), () => { bt.textContent = `Pôr na comanda · ${din(fo.total())}`; });
       bt.onclick = () => { const falta = fo.falta(); if (falta) return toast(falta); const v = fo.valor(); adicionarItem(c, v); fechar(); toast(`+${v.qtd} ${p.nome}`); aoPor?.(); };
     } });
+}
+// por quilo: tela só do peso. Digita os gramas da balança (450) ou o quilo com vírgula (0,450) e vê o valor na hora.
+const pesoKg = (v) => { const x = String(v || '').trim().replace(/\s/g, ''); if (!x) return 0; const n = Number(x.replace(',', '.')); if (!(n > 0)) return 0;
+  return Math.round((/[.,]/.test(x) ? n : n / 1000) * 1000) / 1000; };
+export function pesoFolha(c, p, aoPor) {
+  folha({ titulo: p.nome, corpo: `<div class="peso">
+      <p class="peso-kg">Preço do quilo <b>${din(p.preco)}</b></p>
+      <label class="campo"><span>Peso na balança, em gramas</span><input data-g inputmode="decimal" autocomplete="off" placeholder="Ex.: 450" aria-describedby="peso-res"></label>
+      <p class="peso-res" id="peso-res" data-res aria-live="polite">Digite o peso</p>
+      <p class="mudo">Pode digitar 450 (gramas) ou 0,450 (quilo).</p></div>`,
+  pe: '<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio grande" data-ok>Pôr na comanda</button>',
+  aoAbrir: (f, fechar) => {
+    const inp = $('[data-g]', f), bt = $('[data-ok]', f), res = $('[data-res]', f);
+    const calc = () => { const kg = pesoKg(inp.value), v = r2(p.preco * kg);
+      res.innerHTML = kg > 0 && kg < 30 ? `${(kg * 1000).toLocaleString('pt-BR', { maximumFractionDigits: 0 })} g × ${din(p.preco)}/kg = <b>${din(v)}</b>` : 'Digite o peso';
+      bt.textContent = kg > 0 && kg < 30 ? `Pôr ${din(v)}` : 'Pôr na comanda'; return kg; };
+    inp.oninput = calc;
+    const por = () => { const kg = calc(); if (!(kg > 0 && kg < 30)) { toast('Digite o peso da balança'); return inp.focus(); } adicionarItem(c, { prodId: p.id, kg }); fechar(); toast(`+ ${p.nome} · ${din(r2(p.preco * kg))}`); aoPor?.(); };
+    inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); por(); } };
+    bt.onclick = por;
+  } });
 }
 export { r2 };

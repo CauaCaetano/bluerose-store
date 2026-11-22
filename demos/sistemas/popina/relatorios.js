@@ -1,9 +1,9 @@
 // Popina · relatórios simples: quanto vendeu, o que mais sai, em que horário e cada garçom.
-import { db, t, din, r2, inicioDoDia, pagamentosVenda, FORMA_FIADO } from './loja.js?v=55';
-import { ir } from './nucleo.js?v=55';
-import { $$ } from './ui.js?v=55';
-import { G, volta } from './gestao.js?v=55';
-import { blocoRelatorio } from './ifood.js?v=55';
+import { db, t, din, r2, inicioDoDia, pagamentosVenda, FORMA_FIADO } from './loja.js?v=56';
+import { ir } from './nucleo.js?v=56';
+import { $$ } from './ui.js?v=56';
+import { G, volta } from './gestao.js?v=56';
+import { blocoRelatorio } from './ifood.js?v=56';
 
 let periodo = 'hoje';
 const PER = [['hoje', 'Hoje'], ['ontem', 'Ontem'], ['7', '7 dias'], ['30', '30 dias']];

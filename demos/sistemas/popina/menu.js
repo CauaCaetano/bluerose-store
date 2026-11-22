@@ -3,11 +3,11 @@
 // 22/11/2026, pedido do dono: em vez de dezenas de atalhos na Gestão, as telas ficam no menu, divididas por categoria.
 // Os itens são botões (data-ir / data-acao), nunca links com #: as permissões da equipe continuam valendo pela aba
 // Gestão (#mais). Quem não vê a Gestão não vê as categorias; o link do delivery aparece para todos.
-import { db, t, lojaCfg, linkCardapio, estoqueBaixo, lojaPausada, ouvir } from './loja.js?v=55';
-import { acao } from './nucleo.js?v=55';
-import { ico, folha, toast, $ } from './ui.js?v=55';
+import { db, t, lojaCfg, linkCardapio, estoqueBaixo, lojaPausada, ouvir } from './loja.js?v=56';
+import { acao } from './nucleo.js?v=56';
+import { ico, folha, toast, $ } from './ui.js?v=56';
 import { qrSVG } from '../base/qr.js';
-import { imprimir } from './imprimir.js?v=55';
+import { imprimir } from './imprimir.js?v=56';
 
 // [chave, título, ícone, itens: [rótulo, ícone, destino (rota) ou ação]]
 export const GRUPOS = [
@@ -23,6 +23,7 @@ export const GRUPOS = [
   ['cardapio', 'Cardápio', 'cardapio', [
     ['Pratos, preços e complementos', 'cardapio', { ir: 'mais/cardapio' }],
     ['Categorias do cardápio', 'prato', { acao: 'cats-ed' }],
+    ['Marmitas do dia', 'cloche', { ir: 'mais/marmita' }],
     ['Estoque e compras', 'estoque', { ir: 'mais/estoque' }],
   ]],
   ['salao', 'Salão', 'mesa', [
@@ -44,6 +45,7 @@ export const GRUPOS = [
     ['Pix do restaurante', 'pix', { ir: 'mais/restaurante/rest-pix' }],
     ['Logo, cor e marca', 'folha', { ir: 'mais/config/cfg-marca' }],
     ['Impressora', 'impressora', { ir: 'mais/config/cfg-restaurante' }],
+    ['Nota fiscal', 'conta', { ir: 'mais/config/cfg-nota' }],
     ['Configurações e assinatura', 'ajustes', { ir: 'mais/config' }],
     ['Primeiros passos', 'check', { ir: 'mais/inicio' }],
   ]],

@@ -3,12 +3,13 @@
 // No celular, uma coluna por vez (as abas de cima trocam). O novo pedido (nome ou telefone do cliente, endereço, taxa por bairro e troco).
 import { db, t, din, tempo, minutos, conta, novoPedido, itensValidos, ondeComanda, tipoNome, quemPediu, clientePorTel, soDig, num, vir, hora, lojaCfg, comanda,
   etapa, aguardaAceite, aceitarPedido, recusarPedido, MOTIVOS_RECUSA, marcarPronto, saiuEntrega, concluirPedido, enviar, inicioDoDia, zap, fone,
-  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=55';
-import { registrar, acao, ir } from './nucleo.js?v=55';
-import { ico, folha, toast, autorizar, novidades, $, $$ } from './ui.js?v=55';
-import * as som from './som.js?v=55';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=55';
-import { colarIfood, ehIfood, nomeEntrega } from './ifood.js?v=55';
+  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=56';
+import { registrar, acao, ir } from './nucleo.js?v=56';
+import { ico, folha, toast, autorizar, novidades, $, $$ } from './ui.js?v=56';
+import * as som from './som.js?v=56';
+import { imprimirConta, imprimirCozinha, abrirImpressao, htmlRecibo } from './imprimir.js?v=56';
+import { colarIfood, ehIfood, nomeEntrega } from './ifood.js?v=56';
+import { marmitaAtiva, marmitaFolha } from './marmita.js?v=56';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* nada */ } };
@@ -75,12 +76,13 @@ registrar('pedidos', {
       <div class="acoes"><button type="button" class="bt so-pc" data-acao="link-delivery">${ico('link')}Meu link de delivery</button><button type="button" class="bt ${P ? 'perigo cheio' : ''}" data-acao="ped-pausa">${ico(P ? 'alerta' : 'loja')}${P ? `Pausado${P.ate ? ` até ${hora(P.ate)}` : ''} · voltar` : 'Pausar pedidos online'}</button>
         <button type="button" class="bt bt-ifood" data-acao="ifood-colar" title="Cole o texto do pedido que chegou no iFood"><span class="selo-ifood">iFood</span>Pedido do iFood</button>
         <button type="button" class="bt-ico" data-acao="ped-ajustes" aria-label="Som e aceitar sozinho" title="Som e aceitar sozinho">${ico('ajustes')}</button>
+        ${marmitaAtiva() ? `<button type="button" class="bt grande bt-marmita" data-acao="marmita">${ico('cloche')}Marmita</button>` : ''}
         <button type="button" class="bt cheio grande" data-novo-ped>${ico('mais2')}Novo pedido</button></div></div>
     ${P ? `<p class="aviso perigo">O cardápio online está pausado${P.motivo ? ` (${t(P.motivo)})` : ''}: os clientes veem a loja fechada.</p>` : ''}
     <div class="chips quadro-abas" role="tablist" aria-label="Colunas">${COLS.map(([k, n]) => `<button type="button" class="chip" role="tab" data-col="${k}" aria-selected="${sel === k}" aria-pressed="${sel === k}">${n} <b>${cont[k]}</b></button>`).join('')}</div>
     <div class="quadro" data-sel="${sel}">${COLS.map(([k, n]) => `<section class="coluna" data-c="${k}" aria-label="${n}"><h2>${n} <b>${cont[k]}</b></h2>
       ${k === 'feito' ? (feitos.length ? `<ul class="lista-l pfs">${feitos.slice(0, 30).map(linhaFeito).join('')}</ul>` : '<p class="vazio">Os pedidos entregues hoje aparecem aqui.</p>')
-        : por[k].map(cartao).join('') || `<p class="vazio">${{ novo: 'Nenhum pedido novo. Os do cardápio online chegam aqui com um aviso sonoro.', preparo: 'Nada na cozinha agora.', pronto: 'Nenhum pedido pronto ou na rua.' }[k]}</p>`}</section>`).join('')}</div>`;
+        : (k === 'pronto' && paraDespachar().length >= 2 ? `<button type="button" class="bt cheio grande despacho-bt" data-acao="ped-lote">${ico('moto')}Despachar vários (${paraDespachar().length})</button>` : '') + por[k].map(cartao).join('') || `<p class="vazio">${{ novo: 'Nenhum pedido novo. Os do cardápio online chegam aqui com um aviso sonoro.', preparo: 'Nada na cozinha agora.', pronto: 'Nenhum pedido pronto ou na rua.' }[k]}</p>`}</section>`).join('')}</div>`;
   },
   montar(el) {
     $$('[data-col]', el).forEach((b) => { b.onclick = () => { colSel = b.dataset.col; ir('pedidos'); }; });
@@ -102,6 +104,35 @@ acao('ped-recusar', async (b) => {
   else toast('Pedido recusado');
 });
 acao('ped-saiu', (b) => { const c = doId(b); if (c) escolherEntregador(c); });
+// despacho em lote: pedidos de entrega própria prontos (ainda não saíram) vão juntos com o mesmo entregador
+export const paraDespachar = () => abertos().filter((c) => c.tipo === 'delivery' && etapa(c) === 'pronto' && !['saiu', 'entregue'].includes(c.entrega) && !(ehIfood(c) && c.ifood?.entregaPor === 'IFOOD'));
+acao('ped-lote', () => {
+  const l = paraDespachar(); if (!l.length) return toast('Nenhum pedido de entrega pronto');
+  const ents = db.entregadores || [];
+  let ent = '';
+  const naRua = ents.map((e) => [e, db.comandas.filter((x) => x.entregador === e.id && x.entrega === 'saiu').length]).filter(([, n]) => n);
+  folha({ titulo: 'Despachar vários pedidos', larga: true, corpo: `<p class="grupo-tit" style="margin-top:0">1. Marque os pedidos</p>
+    <div class="lote-l">${l.map((c) => `<label class="lote-it"><input type="checkbox" data-lc="${c.id}" checked><span><b>#${c.num} ${t(c.cliente?.nome || quemPediu(c))}</b><small>${t(c.cliente?.end || '')}${c.cliente?.bairro ? ` · ${t(c.cliente.bairro)}` : ''}</small></span><b class="num">${din(conta(c).total)}</b></label>`).join('')}</div>
+    ${ents.length ? `<p class="grupo-tit">2. Quem vai levar</p><div class="chips quebra">${ents.map((e) => `<button type="button" class="chip grande" data-le="${e.id}" aria-pressed="false">${ico('moto')}${t(e.nome)}</button>`).join('')}</div>
+      ${naRua.length ? `<p class="mudo" style="margin-top:6px">Na rua agora: ${naRua.map(([e, n]) => `${t(e.nome)} com ${n}`).join(' · ')}</p>` : ''}` : '<p class="mudo">Cadastre os entregadores em Gestão › Entregadores para escolher quem leva.</p>'}
+    <label class="liga" style="margin-top:14px">Imprimir as vias da entrega (uma por pedido)<input type="checkbox" data-via ${ler('popina-via-entrega', '1') === '1' ? 'checked' : ''}></label>`,
+  pe: '<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio grande" data-ok></button>',
+  aoAbrir: (f, fechar) => {
+    const marcados = () => $$('[data-lc]', f).filter((x) => x.checked).map((x) => comanda(x.dataset.lc)).filter(Boolean);
+    const atual = () => { const n = marcados().length; $('[data-ok]', f).innerHTML = `${ico('moto')}Saiu para entrega (${n})`; };
+    $$('[data-lc]', f).forEach((x) => { x.onchange = atual; }); atual();
+    $$('[data-le]', f).forEach((b) => { b.onclick = () => { ent = b.dataset.le; $$('[data-le]', f).forEach((x) => x.setAttribute('aria-pressed', x === b)); }; });
+    $('[data-ok]', f).onclick = () => {
+      const sel = marcados(); if (!sel.length) return toast('Marque pelo menos um pedido');
+      if (ents.length && !ent) return toast('Escolha quem vai levar');
+      const via = $('[data-via]', f).checked; gravar('popina-via-entrega', via ? '1' : '0');
+      sel.forEach((c) => saiuEntrega(c, ent)); fechar();
+      const nome = ents.find((e) => e.id === ent)?.nome;
+      toast(`${sel.length} ${sel.length === 1 ? 'pedido saiu' : 'pedidos saíram'}${nome ? ` com ${nome}` : ''}`);
+      if (via) setTimeout(() => abrirImpressao(`Vias da entrega · ${sel.length} pedidos`, (fm) => sel.map((c) => htmlRecibo(c, fm)).join('<div class="tk-corte"></div>')), 260);
+    };
+  } });
+});
 export function escolherEntregador(c) {
   const l = db.entregadores || [];
   if (!l.length) { saiuEntrega(c, ''); toast('Saiu para entrega'); return; }
@@ -146,7 +177,7 @@ const ORIGENS = ['WhatsApp', 'Telefone', 'Balcão'];
 export function novoPedidoFolha(tipoIni = 'balcao') {
   let tipo = tipoIni;
   const bairros = db.bairros || [];
-  const corpo = () => `<button type="button" class="bt pq bt-ifood" data-ifood style="margin-bottom:12px"><span class="selo-ifood">iFood</span>Chegou no iFood? Cole o pedido</button>
+  const corpo = () => `<div class="linha-bts" style="margin-bottom:12px"><button type="button" class="bt pq bt-ifood" data-ifood><span class="selo-ifood">iFood</span>Chegou no iFood? Cole o pedido</button>${marmitaAtiva() && tipo === 'balcao' ? `<button type="button" class="bt pq bt-marmita" data-marmita>${ico('cloche')}Marmita rápida</button>` : ''}</div>
     <div class="chips quebra" role="group" aria-label="Tipo">${[['balcao', 'Balcão'], ['retirada', 'Retirada'], ['delivery', 'Entrega']].map(([k, n]) => `<button type="button" class="chip" data-t="${k}" aria-pressed="${tipo === k}">${n}</button>`).join('')}</div>
     <div style="margin-top:14px">
     ${tipo !== 'balcao' ? `<p class="campo"><span>Pediu por</span></p><div class="chips quebra" role="group" aria-label="Pediu por">${ORIGENS.map((o, k) => `<button type="button" class="chip" data-org="${o}" aria-pressed="${k === 0}">${o}</button>`).join('')}</div>
@@ -161,6 +192,7 @@ export function novoPedidoFolha(tipoIni = 'balcao') {
     aoAbrir: (f, fechar) => {
       const ligar = () => {
         $('[data-ifood]', f).onclick = () => { fechar(); setTimeout(() => colarIfood(), 240); };
+        $('[data-marmita]', f)?.addEventListener('click', () => { fechar(); setTimeout(() => marmitaFolha(), 240); });
         $$('[data-t]', f).forEach((b) => { b.onclick = () => { tipo = b.dataset.t; $('[data-c]', f).innerHTML = corpo(); ligar(); }; });
         $$('[data-org]', f).forEach((b) => { b.onclick = () => $$('[data-org]', f).forEach((x) => x.setAttribute('aria-pressed', x === b)); });
         const tel = $('[data-tel]', f);

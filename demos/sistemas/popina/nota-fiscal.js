@@ -8,11 +8,11 @@
 //   nao      → não emite (ex.: MEI): nada aparece.
 // Na demonstração tudo é simulado (nota de exemplo, ambiente de teste). Só acrescenta campos: db.config.nf,
 // produto.fiscal e venda.nfce / venda.nfOutro. Nenhum token, certificado ou senha fica no navegador.
-import { db, t, din, r2, soDig, grava, CONTA, prod, ativos, pagamentosVenda, quemAgora, auditar, FORMA_FIADO, inicioDoDia, ymd } from './loja.js?v=55';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=55';
-import { abrirImpressao } from './imprimir.js?v=55';
+import { db, t, din, r2, soDig, grava, CONTA, prod, ativos, pagamentosVenda, quemAgora, auditar, FORMA_FIADO, inicioDoDia, ymd } from './loja.js?v=56';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=56';
+import { abrirImpressao } from './imprimir.js?v=56';
 import { qrSVG } from '../base/qr.js';
-import { acao } from './nucleo.js?v=55';
+import { acao } from './nucleo.js?v=56';
 
 // ------------------------------------------------------------------ configuração
 export const nf = () => db.config.nf || {};
@@ -267,7 +267,7 @@ export function folhaProdutos() {
       <div class="grade2"><label class="campo"><span>CFOP</span><select data-cfop>${CFOP_OP.map(([k, n]) => `<option value="${k}" ${f.cfop === k ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
       <label class="campo"><span>${simples() ? 'CSOSN' : 'CST do ICMS'}</span><select data-cst>${CST_OP().map(([k, n]) => `<option value="${k}" ${f.cst === k ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
       <label class="campo" style="margin:0"><span>Classificação IBS/CBS (cClassTrib, reforma) · opcional</span><input data-cclass inputmode="numeric" maxlength="6" value="${t(f.cclass || '')}" placeholder="Deixe em branco se o contador não pediu"></label></div>`; };
-  folha({ titulo: 'Dados fiscais dos produtos', larga: true, corpo: `<p class="aviso">Já vem com padrões comuns para lanchonete e restaurante no ${simples() ? 'Simples Nacional' : 'regime normal'}. <b>Confirme com o seu contador</b> antes de emitir valendo.</p>
+  folha({ titulo: 'Ajustes do contador', larga: true, corpo: `<p class="mudo" style="margin-bottom:8px">Códigos fiscais de cada produto (NCM, CFOP, CSOSN). Você não precisa mexer: mostre esta tela ao seu contador.</p><p class="aviso">Já vem com padrões comuns para lanchonete e restaurante no ${simples() ? 'Simples Nacional' : 'regime normal'}. <b>Confirme com o seu contador</b> antes de emitir valendo.</p>
       <div style="margin-top:12px">${l.map(linha).join('') || '<p class="mudo">Cadastre os pratos no Cardápio primeiro.</p>'}</div>`,
   pe: '<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio grande" data-ok>Salvar</button>',
   aoAbrir: (f, fechar) => { $('[data-ok]', f).onclick = () => {
@@ -277,6 +277,94 @@ export function folhaProdutos() {
       p.fiscal = { ...(p.fiscal || {}), ncm, cest: soDig($('[data-cest]', c).value).slice(0, 7), cfop: $('[data-cfop]', c).value, cst: $('[data-cst]', c).value, cclass: soDig($('[data-cclass]', c).value).slice(0, 6) }; });
     grava(); if (ruim) return toast(`O NCM tem 8 números: confira ${ruim}`, 'erro'); fechar(); toast('Dados fiscais salvos');
   }; } });
+}
+
+
+// ------------------------------------------------------------------ assistente passo a passo (banca 2): linguagem de quem não é contador
+// 1. Você já emite nota? Onde?  2. Cole a chave do seu emissor (só se usa um)  3. Os códigos fiscais já vêm prontos  4. Teste
+const PERGUNTA = [
+  ['api', 'Sim, num emissor na internet', 'Brasil NFe, Focus NFe ou outro site de nota que te dá uma "chave" (token).'],
+  ['outro', 'Sim, no meu caixa antigo ou o contador faz', 'O Popina não emite: você marca a nota na venda e manda as vendas ao contador.'],
+  ['nao', 'Não emito', 'MEI ou ainda não precisa. Nada de nota aparece no caixa.'],
+  ['sei', 'Não sei', 'Sem problema: começa como "o contador faz". Dá para mudar quando quiser.'],
+];
+async function notaTeste() {
+  const p = ativos().find((x) => !x.porKg && Number(x.preco) > 0) || { id: 'teste', nome: 'Item de teste', preco: 1 };
+  const v = { id: `teste-${Date.now().toString(36)}`, ts: Date.now(), onde: 'Nota de teste', itens: [{ prod: p.id, nome: p.nome, qtd: 1, preco: Number(p.preco) || 1 }], total: Number(p.preco) || 1, pagamentos: [{ forma: 'Pix', valor: Number(p.preco) || 1 }] };
+  const n = notaDaVenda(v);
+  let r; try { r = CONTA ? await chamar({ acao: 'emitir', venda: v.id, nota: n }) : notaDeExemplo(n); } catch { r = { ok: false, mensagem: 'Sem internet agora. Tente de novo.' }; }
+  if (!r?.ok) return { erro: String(r?.mensagem || 'A nota de teste não saiu') };
+  v.nfce = { status: 'autorizada', chave: r.chave, numero: r.numero || null, serie: r.serie || null, protocolo: r.protocolo || '', ambiente: 'homologacao', qrcode: String(r.qrcode || ''), url: String(r.url_consulta || ''), ts: Date.now(), autorizada: Date.now(), cpf: '' };
+  return { v };
+}
+export function assistenteNf(redesenhar = () => {}) {
+  let passo = 1, modo = modoNf() || '', prov = nf().provedor || 'brasilnfe';
+  const total = () => (modo === 'api' ? 4 : modo === 'nao' ? 2 : 3);
+  const num = () => (modo === 'api' ? passo : modo === 'nao' ? (passo === 1 ? 1 : 2) : { 1: 1, 3: 2, 4: 3 }[passo]);
+  const corpo = () => {
+    const cab = `<p class="nf-passo">Passo ${num()} de ${total()}</p>`;
+    if (passo === 1) return `${cab}<h3 class="nf-perg">Você já emite nota fiscal? Onde?</h3>
+      <div class="menu-g" role="radiogroup" aria-label="Você já emite nota?">${PERGUNTA.map(([k, n, d]) => `<button type="button" role="radio" aria-checked="${modo === k}" data-m="${k}"><span class="ico-g">${ico(k === 'api' ? 'link' : k === 'outro' ? 'conta' : k === 'nao' ? 'fechar' : 'fala')}</span><span><b>${n}</b><small>${d}</small></span></button>`).join('')}</div>`;
+    if (passo === 2) return `${cab}<h3 class="nf-perg">Cole a chave do seu emissor</h3>
+      <div class="chips quebra" role="group" aria-label="Seu emissor">${Object.entries(PROVEDORES).map(([k, x]) => `<button type="button" class="chip" data-prov="${k}" aria-pressed="${prov === k}">${x.nome}</button>`).join('')}</div>
+      <p class="aviso azul" style="margin:10px 0"><b>Onde achar:</b> <span data-onde>${t(PROVEDORES[prov].onde)}</span> Copie e cole abaixo.</p>
+      <label class="campo"><span>Chave (token)</span><input data-tk type="password" autocomplete="off" spellcheck="false" maxlength="300" placeholder="${servidor?.conectado ? 'Já guardada. Cole outra só para trocar' : 'Cole aqui'}"></label>
+      <label class="campo"><span>CNPJ do restaurante</span><input data-cnpj inputmode="numeric" maxlength="18" value="${t(nf().emitente?.cnpj || '')}" placeholder="Só números"></label>
+      <p class="mudo">Não sabe a chave? Toque em Voltar e escolha "o contador faz" ou "Não emito". Dá para mudar depois.</p>`;
+    if (passo === 3) return `${cab}<h3 class="nf-perg">Os códigos fiscais já vêm prontos</h3>
+      <p class="aviso ok">${ico('check')} Seus ${ativos().length} produtos já vêm com o código fiscal mais comum de lanchonete e restaurante (refrigerante, cerveja e água com o deles).</p>
+      <p style="margin-top:12px">Peça ao seu contador para conferir uma vez. Se ele quiser mudar algo, é em <b>Ajustes do contador</b>.</p>
+      <div class="linha-bts" style="margin-top:12px"><button type="button" class="bt" data-ajustes>${ico('ajustes')}Ajustes do contador</button></div>`;
+    // passo 4: teste
+    if (modo === 'api') return `${cab}<h3 class="nf-perg">Teste</h3>
+      <p>Vamos emitir uma nota de teste, sem valor fiscal, para ver se está tudo certo.</p>
+      ${!CONTA ? '<p class="aviso azul" style="margin-top:10px">Demonstração: sai uma nota de exemplo.</p>' : ''}
+      ${nf().ambiente === 'producao' ? '<p class="aviso" style="margin-top:10px">Você está emitindo valendo. O teste só roda no ambiente de teste: faça a primeira venda e confira a nota.</p>' : '<div class="linha-bts" style="margin-top:12px"><button type="button" class="bt cheio grande" data-teste>Emitir nota de teste</button></div>'}
+      <p data-res-teste style="margin-top:12px"></p>`;
+    return `${cab}<h3 class="nf-perg">${modo === 'nao' ? 'Pronto' : 'Teste'}</h3>${modo === 'nao' ? '<p>Nada de nota aparece no caixa. Se um dia precisar, é só voltar aqui.</p>'
+      : '<p>Feche uma venda no Caixa: na conta fechada aparece <b>Nota emitida em outro sistema</b> para você marcar. No fim do dia, <b>Exportar vendas</b> gera o arquivo para o contador.</p>'}`;
+  };
+  folha({ titulo: 'Nota fiscal passo a passo', corpo: '<div data-nf-c></div>', pe: '<div data-nf-pe class="linha-bts" style="width:100%;justify-content:flex-end"></div>',
+    aoAbrir: (f, fechar) => {
+      const C = $('[data-nf-c]', f), PE = $('[data-nf-pe]', f);
+      const fim = () => { setNf({ modo: modo === 'sei' ? 'outro' : modo }); fechar(); toast('Nota fiscal configurada'); redesenhar(); };
+      const mostrar = () => {
+        C.innerHTML = corpo(); f.querySelector('.folha-corpo').scrollTop = 0;
+        const ultimo = passo === 4;
+        PE.innerHTML = `${passo > 1 ? '<button type="button" class="bt" data-volta>Voltar</button>' : '<button type="button" class="bt" data-fechar>Agora não</button>'}<button type="button" class="bt cheio grande" data-segue>${ultimo ? `${ico('check')}Concluir` : 'Continuar'}</button>`;
+        $$('[data-m]', C).forEach((b) => { b.onclick = () => { modo = b.dataset.m; $$('[data-m]', C).forEach((x) => x.setAttribute('aria-checked', x === b)); }; });
+        $$('[data-prov]', C).forEach((b) => { b.onclick = () => { prov = b.dataset.prov; $$('[data-prov]', C).forEach((x) => x.setAttribute('aria-pressed', x === b)); $('[data-onde]', C).textContent = PROVEDORES[prov].onde; }; });
+        $('[data-ajustes]', C)?.addEventListener('click', folhaProdutos);
+        $('[data-teste]', C)?.addEventListener('click', async (ev) => {
+          ev.currentTarget.disabled = true; const out = $('[data-res-teste]', C); out.className = 'mudo'; out.textContent = 'Emitindo a nota de teste...';
+          const r = await notaTeste(); ev.currentTarget.disabled = false;
+          if (r.erro) { out.className = 'aviso perigo'; out.textContent = `Não saiu: ${r.erro}. Confira a chave no passo 2.`; return; }
+          out.className = 'aviso ok'; out.innerHTML = `${ico('check')} Deu certo! A nota de teste foi autorizada. <button type="button" class="bt pq" data-ver>${ico('impressora')}Ver a nota</button>`;
+          $('[data-ver]', out).onclick = () => imprimirDanfe(r.v);
+        });
+        $('[data-volta]', PE)?.addEventListener('click', () => { passo = passo === 4 ? (modo === 'nao' ? 1 : 3) : passo === 3 ? (modo === 'api' ? 2 : 1) : 1; mostrar(); });
+        $('[data-segue]', PE).onclick = async () => {
+          if (passo === 1) { if (!modo) return toast('Escolha uma opção'); if (modo === 'nao') { passo = 4; return mostrar(); } passo = modo === 'api' ? 2 : 3; return mostrar(); }
+          if (passo === 2) {
+            const tk = $('[data-tk]', C).value.trim(), cnpj = soDig($('[data-cnpj]', C).value);
+            if (cnpj && cnpj.length !== 14) return toast('O CNPJ tem 14 números', 'erro');
+            setNf({ modo: 'api', provedor: prov, emitente: { ...(nf().emitente || {}), ...(cnpj ? { cnpj } : {}) } });
+            if (!CONTA) { if (!tk && !nf().conectadoDemo) return toast('Cole a chave do seu emissor', 'erro'); setNf({ conectadoDemo: true }); servidor = { ...(servidor || {}), conectado: true, provedor: prov }; }
+            else if (tk || !(servidor?.conectado && servidor.provedor === prov)) {
+              if (!tk) return toast('Cole a chave do seu emissor', 'erro');
+              const b = $('[data-segue]', PE); b.disabled = true;
+              const r = await chamar({ acao: 'conectar', provedor: prov, token: tk, ambiente: nf().ambiente || 'homologacao' }); b.disabled = false;
+              if (!r?.ok) return toast(r?.erro || r?.mensagem || 'Não deu para conectar. Confira a chave.', 'erro');
+              await lerStatus();
+            }
+            passo = 3; return mostrar();
+          }
+          if (passo === 3) { passo = 4; return mostrar(); }
+          fim();
+        };
+      };
+      mostrar();
+    } });
 }
 
 // ------------------------------------------------------------------ a seção nas Configurações
@@ -295,7 +383,7 @@ export function secaoNf(g) {
       <div class="grade2"><label class="campo"><span>Telefone</span><input data-e="telefone" inputmode="tel" maxlength="16" value="${v_(E, 'telefone')}"></label><label class="campo"><span>E-mail</span><input data-e="email" type="email" maxlength="80" value="${v_(E, 'email')}"></label></div>` : ''}`;
   const ambiente = `<p class="campo"><span>Ambiente</span></p><div class="chips quebra" role="group" aria-label="Ambiente">${[['homologacao', 'Teste (homologação)'], ['producao', 'Valendo (produção)']].map(([k, n]) => `<button type="button" class="chip" data-nf-amb="${k}" aria-pressed="${(N.ambiente || 'homologacao') === k}">${n}</button>`).join('')}</div>`;
   const comum = `<label class="liga" style="margin-top:8px">Emitir sozinho ao fechar a conta<small>Sem CPF na nota. Desligado: aparece o botão "Emitir NFC-e".</small><input type="checkbox" data-nf-auto ${N.auto ? 'checked' : ''}></label>
-    <div class="linha-bts" style="margin-top:12px"><button type="button" class="bt" data-nf-produtos>${ico('cardapio')}Dados fiscais dos produtos${semNcm().length ? ` (${semNcm().length} com sugestão)` : ''}</button><button type="button" class="bt" data-nf-exportar>${ico('grafico')}Exportar vendas</button></div>`;
+    <div class="linha-bts" style="margin-top:12px"><button type="button" class="bt" data-nf-produtos>${ico('ajustes')}Ajustes do contador</button><button type="button" class="bt" data-nf-exportar>${ico('grafico')}Exportar vendas</button></div>`;
   let corpo = '';
   if (m === 'api') {
     const p = N.provedor || 'brasilnfe', con = s.conectado && s.provedor === p;
@@ -318,10 +406,11 @@ export function secaoNf(g) {
       ${ambiente}<div class="linha-bts" style="margin-top:12px"><button type="button" class="bt cheio" data-nf-bluerose>${ico('check')}Enviar e cadastrar</button></div></div>${comum}`;
   } else if (m === 'outro') {
     corpo = `<p class="mudo">Na conta fechada e em Vendas de hoje aparece "Nota emitida em outro sistema" (com o número, se quiser). No fim do dia, exporte as vendas para o seu emissor ou para o contador.</p>
-      <div class="linha-bts" style="margin-top:12px"><button type="button" class="bt cheio" data-nf-exportar>${ico('grafico')}Exportar vendas</button><button type="button" class="bt" data-nf-produtos>${ico('cardapio')}Dados fiscais dos produtos</button></div>`;
+      <div class="linha-bts" style="margin-top:12px"><button type="button" class="bt cheio" data-nf-exportar>${ico('grafico')}Exportar vendas</button><button type="button" class="bt" data-nf-produtos>${ico('ajustes')}Ajustes do contador</button></div>`;
   } else if (m === 'nao') corpo = '<p class="mudo">Tudo certo: nada de nota fiscal aparece no caixa. Dá para mudar quando quiser.</p>';
-  const contador = emite() ? '<p class="mudo" style="margin-top:12px">NFC-e de SP: cancela em até 30 minutos, com motivo. Confira NCM, CFOP e CSOSN com o seu contador.</p>' : '';
-  return `<section class="cartao cfg-sec" id="cfg-nota" style="min-width:0;overflow-wrap:anywhere"><h2>Nota fiscal</h2><p class="mudo">Como você emite nota hoje? ${g ? '' : 'Só o dono muda.'}</p>${cartoes}${g ? corpo : ''}${contador}</section>`;
+  const contador = emite() ? '<p class="mudo" style="margin-top:12px">NFC-e de SP: cancela em até 30 minutos, com motivo. Os códigos fiscais já vêm prontos; peça ao contador para conferir em Ajustes do contador.</p>' : '';
+  const guia = g ? `<div class="nf-guia"><div><b>${m ? 'Quer refazer com calma?' : 'Comece por aqui'}</b><small>4 perguntas simples, sem termos de contador.</small></div><button type="button" class="bt cheio grande" data-nf-guia>${ico('check')}Configurar passo a passo</button></div>` : '';
+  return `<section class="cartao cfg-sec" id="cfg-nota" style="min-width:0;overflow-wrap:anywhere"><h2>Nota fiscal</h2>${guia}<p class="mudo">Como você emite nota hoje? ${g ? '' : 'Só o dono muda.'}</p>${cartoes}${g ? corpo : ''}${contador}</section>`;
 }
 export function montarNf(el, redesenhar) {
   if (!servidor) lerStatus().then(() => { if (document.getElementById('cfg-nota')) redesenhar(); });
@@ -334,6 +423,7 @@ export function montarNf(el, redesenhar) {
   }; });
   $('[data-nf-auto]', sec)?.addEventListener('change', (e) => { setNf({ auto: e.target.checked }); toast(e.target.checked ? 'Emitir sozinho: ligado' : 'Emitir sozinho: desligado'); });
   $$('[data-nf-produtos]', sec).forEach((b) => { b.onclick = folhaProdutos; });
+  $('[data-nf-guia]', sec)?.addEventListener('click', () => assistenteNf(redesenhar));
   $$('[data-nf-exportar]', sec).forEach((b) => { b.onclick = folhaExportar; });
   const lerEmitente = () => { const e = { ...(nf().emitente || {}) }; $$('[data-e]', sec).forEach((i) => { e[i.dataset.e] = ['cnpj', 'ie', 'cep', 'codMunicipio', 'telefone'].includes(i.dataset.e) ? soDig(i.value) : i.value.trim(); }); return e; };
   $('[data-nf-conectar]', sec)?.addEventListener('click', async (ev) => {
