@@ -40,49 +40,49 @@
       dor: 'Quem marca horário pelo WhatsApp passa o dia respondendo "tem horário?" e ainda perde dinheiro com cliente que falta.',
       ganho: 'O Jano é um app de celular para quem atende com hora marcada: a cliente marca sozinha pelo seu link, o sinal no Pix segura o horário e a confirmação e o lembrete saem prontos. Menos falta, menos horário vazio e menos tempo no WhatsApp.',
       conta: 'Uma falta por semana num serviço de R$ 60 são uns R$ 240 por mês. Evitar só uma já paga o mês do sistema.',
-        pergunta: 'Hoje a marcação de horário aí é toda pelo WhatsApp?', cena: 'Imagina acordar com a agenda da semana cheia, cada cliente marcando sozinha pelo seu link e o sinal já pago no Pix, sem você responder "tem horário?" o dia inteiro.' },
+        pergunta: 'Hoje a marcação de horário aí é toda pelo WhatsApp?', beneficios: ['a cliente marca sozinha pelo seu link, a qualquer hora', 'o sinal no Pix segura o horário e diminui a falta', 'confirmação e lembrete prontos para o WhatsApp', 'agenda e histórico de cada cliente no celular'], cena: 'Imagina acordar com a agenda da semana cheia, cada cliente marcando sozinha pelo seu link e o sinal já pago no Pix, sem você responder "tem horário?" o dia inteiro.' },
     financeiro: { pag: 'arca.html', nome: 'Arca', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'tem uma empresa',
       dor: 'Na empresa, o dinheiro do imposto e da folha se mistura com o do dia a dia, cliente atrasa sem ninguém cobrar e o extrato do banco nunca bate com a planilha.',
       ganho: 'O Arca é o financeiro completo da empresa, feito para usar no computador: contas a pagar e a receber de uma ou várias empresas, aprovação de pagamento, cobrança com Pix e lembrete no WhatsApp, conciliação do extrato do banco, fluxo de caixa, orçamento e DRE, e o pacote do mês pronto para o contador.',
       conta: 'Receber em dia um único cliente que costuma atrasar já paga alguns meses do sistema.',
-        pergunta: 'Hoje o financeiro da empresa fica em planilha ou em algum sistema?', cena: 'Imagina abrir o computador na segunda e ver numa tela só quanto entra, quanto sai e quem está atrasado, com o lembrete de cobrança saindo sozinho.' },
+        pergunta: 'Hoje o financeiro da empresa fica em planilha ou em algum sistema?', beneficios: ['contas a pagar e a receber de uma ou várias empresas', 'cobrança com Pix e lembrete no WhatsApp', 'extrato do banco conferido e fluxo de caixa de 30, 60 e 90 dias', 'DRE e o pacote do mês pronto para o contador'], cena: 'Imagina abrir o computador na segunda e ver numa tela só quanto entra, quanto sai e quem está atrasado, com o lembrete de cobrança saindo sozinho.' },
     peplo: { pag: 'peplo.html', nome: 'Peplo', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'vende roupa',
       dor: 'Em loja de roupas, o tamanho e a cor acabam sem ninguém perceber, a fila trava no caixa e no fim do mês ninguém sabe o que vendeu e o que encalhou.',
       ganho: 'O Peplo vende rápido no caixa com leitor de código de barras e pagamento dividido em Pix, cartão e dinheiro, controla o estoque por tamanho e cor, faz trocas, compras e o caixa do dia e mostra as mais vendidas e as peças paradas. Se a loja vende no crediário, também tem limite por cliente.',
       conta: 'Liquidar a tempo uma única peça que ia encalhar já paga o mês do sistema.',
-        pergunta: 'Hoje o estoque por tamanho e cor aí é no caderno, na planilha ou de cabeça?', cena: 'Imagina saber na hora, pelo celular, qual tamanho acabou e qual peça está parada há 60 dias, antes de virar prejuízo.' },
+        pergunta: 'Hoje o estoque por tamanho e cor aí é no caderno, na planilha ou de cabeça?', beneficios: ['venda rápida com leitor de código de barras e pagamento dividido', 'estoque por tamanho e cor, sempre certo', 'trocas e crediário com limite por cliente', 'as mais vendidas e as peças paradas na tela'], cena: 'Imagina saber na hora, pelo celular, qual tamanho acabou e qual peça está parada há 60 dias, antes de virar prejuízo.' },
     annona: { pag: 'annona.html', nome: 'Annona', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'tem mercadinho',
       dor: 'Em mercadinho, o lucro vai embora na mercadoria que vence na prateleira e no fiado sem controle, e no fim do mês fica difícil saber quanto sobrou.',
       ganho: 'O Annona controla o estoque com código de barras e validade por lote, dá entrada pela nota (XML), mostra o que está parado, o fiado com limite e o lucro de cada produto.',
       conta: 'Deixar de perder algumas caixas de produto vencido por mês já paga o sistema.',
-        pergunta: 'Hoje vocês controlam a validade dos produtos de algum jeito ou só olhando a prateleira?', cena: 'Imagina o sistema te avisar antes do produto vencer, com tempo de fazer promoção em vez de jogar no lixo.' },
+        pergunta: 'Hoje vocês controlam a validade dos produtos de algum jeito ou só olhando a prateleira?', beneficios: ['estoque com código de barras e validade por lote', 'entrada da mercadoria direto pela nota (XML)', 'fiado com limite por cliente', 'o lucro de cada produto e o que está parado'], cena: 'Imagina o sistema te avisar antes do produto vencer, com tempo de fazer promoção em vez de jogar no lixo.' },
     atria: { pag: 'atria.html', nome: 'Atria', preco: 'R$ 39/mês no Básico (o Pro, com busca de trabalho, é R$ 50)', ramo: 'trabalha com obra e reforma',
       dor: 'Quem trabalha com obra perde serviço por demorar no orçamento e perde dinheiro cobrando no improviso.',
       ganho: 'O Atria é um app de celular que faz o orçamento por m², diária ou empreitada, cobra no Pix direto na sua conta, monta seu portfólio de antes e depois e funciona até sem internet. No Pro, ainda mostra trabalho na sua cidade.',
       conta: 'Fechar um serviço a mais por mês por mandar o orçamento na hora já paga o app várias vezes.',
-        pergunta: 'Hoje você manda orçamento escrito à mão ou digitado no WhatsApp?', cena: 'Imagina sair da visita e mandar na hora um orçamento bonito, com o seu nome e o Pix, antes de o concorrente terminar a conta.' },
+        pergunta: 'Hoje você manda orçamento escrito à mão ou digitado no WhatsApp?', beneficios: ['orçamento por m², diária ou empreitada em minutos', 'cobrança no Pix direto na sua conta', 'portfólio de antes e depois para mostrar ao cliente', 'funciona até sem internet, no canteiro'], cena: 'Imagina sair da visita e mandar na hora um orçamento bonito, com o seu nome e o Pix, antes de o concorrente terminar a conta.' },
     popina: { pag: 'popina.html', nome: 'Popina', preco: 'R$ 79/mês (ou R$ 758/ano)', ramo: 'tem restaurante',
       dor: 'Em restaurante, pedido anotado no papel atrasa a cozinha, sai errado e some na hora de fechar a conta.',
       ganho: 'O Popina é simples de usar: o restaurante ganha um cardápio online com link próprio (sem comissão por pedido), o cliente pede pelo celular e o pedido chega com aviso na tela, vai para a cozinha na hora e o cliente acompanha até a entrega. No salão, o garçom anota no celular e o caixa fecha com Pix, troco, 10% e conta dividida.',
       conta: 'Um pedido errado a menos por dia já paga o sistema no mês.',
-        pergunta: 'Hoje os pedidos de delivery aí chegam pelo WhatsApp e alguém anota à mão?', cena: 'Imagina uma sexta à noite cheia: o cliente abre o seu link, escolhe o lanche e o pedido aparece na tela com aviso, direto para a cozinha, sem ninguém digitar nada e sem pagar comissão por pedido.' },
+        pergunta: 'Hoje os pedidos de delivery aí chegam pelo WhatsApp e alguém anota à mão?', beneficios: ['cardápio online com link próprio, sem comissão por pedido', 'pedido chega com aviso e vai direto para a cozinha', 'o cliente acompanha o pedido até a entrega', 'mesa com QR, conta dividida e caixa com Pix'], cena: 'Imagina uma sexta à noite cheia: o cliente abre o seu link, escolhe o lanche e o pedido aparece na tela com aviso, direto para a cozinha, sem ninguém digitar nada e sem pagar comissão por pedido.' },
     tecton: { pag: 'tecton.html', nome: 'Tecton', preco: 'R$ 129/mês (ou R$ 1.238/ano)', ramo: 'trabalha com construção',
       ramos: {
         construtora: { ramo: 'toca obras',
           dor: 'Em construtora, o cronograma escorrega, a medição atrasa e só no fim se descobre se a obra deu lucro, enquanto o cliente liga pedindo notícia.',
           ganho: 'Com o Tecton, cada obra mostra na hora se está no prazo e dando lucro: cronograma, medições, diário com foto e o resultado de cada obra, e o cliente acompanha tudo por um link, sem precisar ligar. Funciona no computador e no celular do canteiro.',
           conta: 'Pegar a tempo um único estouro de material ou uma medição esquecida já paga vários meses do sistema.',
-        pergunta: 'Hoje o acompanhamento das obras aí é em planilha?', cena: 'Imagina abrir uma tela e ver na hora qual obra está atrasada e qual está dando prejuízo, com o cliente acompanhando por um link sem te ligar.' },
+        pergunta: 'Hoje o acompanhamento das obras aí é em planilha?', beneficios: ['cronograma e medições de cada obra', 'diário de obra com foto, pelo celular', 'o lucro de cada obra na hora', 'o cliente acompanha por um link, sem ligar'], cena: 'Imagina abrir uma tela e ver na hora qual obra está atrasada e qual está dando prejuízo, com o cliente acompanhando por um link sem te ligar.' },
         loja: { ramo: 'vende material de construção',
           dor: 'Em loja de material, o orçamento do WhatsApp se perde, a entrega sai sem conferência e o fiado do profissional cresce sem limite.',
           ganho: 'Com o Tecton, o balcão vende rápido e o orçamento sai pronto no WhatsApp, as entregas ficam agendadas e conferidas, cada obra tem a sua conta e o fiado do profissional tem limite. Funciona no computador do balcão e no celular de quem entrega.',
           conta: 'Receber um único fiado que ia ficar para trás já paga vários meses do sistema.',
-        pergunta: 'Hoje os orçamentos do balcão saem pelo WhatsApp escritos à mão?', cena: 'Imagina o orçamento saindo pronto no WhatsApp do cliente em um minuto e cada fiado de profissional com limite, sem surpresa no fim do mês.' },
+        pergunta: 'Hoje os orçamentos do balcão saem pelo WhatsApp escritos à mão?', beneficios: ['balcão rápido e orçamento pronto no WhatsApp', 'entregas agendadas e conferidas', 'uma conta para cada obra do cliente', 'fiado do profissional com limite'], cena: 'Imagina o orçamento saindo pronto no WhatsApp do cliente em um minuto e cada fiado de profissional com limite, sem surpresa no fim do mês.' },
         imobiliaria: { ramo: 'vende e aluga imóveis',
           dor: 'Em imobiliária, o espelho de vendas vive em planilha, parcela e aluguel atrasam sem ninguém ver e a comissão vira discussão.',
           ganho: 'Com o Tecton, o espelho de vendas mostra na hora o que está livre, reservado e vendido, os contratos geram as parcelas sozinhos, o aluguel entra com o repasse ao proprietário já calculado e cada corretor vê a sua comissão. Funciona no computador e no celular.',
           conta: 'Cobrar em dia um único aluguel ou parcela atrasada já paga o mês do sistema.',
-        pergunta: 'Hoje o espelho de vendas e os aluguéis ficam em planilha?', cena: 'Imagina ver numa tela só o que está livre, reservado e vendido, e os aluguéis entrando com o repasse ao proprietário já calculado.' }
+        pergunta: 'Hoje o espelho de vendas e os aluguéis ficam em planilha?', beneficios: ['espelho de vendas na hora: livre, reservado e vendido', 'parcelas geradas sozinhas pelo contrato', 'aluguel com o repasse ao proprietário calculado', 'a comissão de cada corretor sem discussão'], cena: 'Imagina ver numa tela só o que está livre, reservado e vendido, e os aluguéis entrando com o repasse ao proprietário já calculado.' }
       } }
   };
   // texto do sistema; no Tecton, o do ramo do prospect (construtora, loja ou imobiliária)
@@ -107,6 +107,7 @@
   function minusc(t) { t = String(t || ''); return t ? t.charAt(0).toLowerCase() + t.slice(1) : t; }
   function mensagemSistema(p, acao) {
     var s = textosSis(p), l = link(p), e = String(p.empresa || '').split(' - ')[0].split(' (')[0];
+    var ben = s.beneficios ? '*O que você ganha com o ' + s.nome + ':*\n' + s.beneficios.map(function (b) { return '• ' + b; }).join('\n') : s.ganho;
     if (acao === 'retomada1') return [
       'Oi! Voltando rapidinho sobre o ' + s.nome + '.',
       s.conta,
@@ -115,13 +116,16 @@
       'Faz sentido testar os *7 dias grátis* ainda essa semana?'].join('\n\n');
     if (acao === 'retomada2') return [
       'Oi! Última mensagem, prometo.',
-      'Não vou insistir: se agora não é o momento, tudo bem. Só deixo o resumo para quando precisar: ' + s.ganho,
+      'Não vou insistir: se agora não é o momento, tudo bem. Só deixo o resumo para quando precisar.',
+      ben,
       s.preco + ', sem fidelidade, com *7 dias grátis* para testar (nada é cobrado nesse período): ' + l,
       'Se um dia quiser, é só responder esta mensagem. Abraço!\nBlue Rose Express'].join('\n\n');
     return ['Olá, tudo bem?',
       'Aqui é da Blue Rose Express, de Orlândia. Encontrei o perfil de ' + e + ', aqui de ' + p.cidade + ', e quis te mostrar uma coisa rápida.',
       s.pergunta ? s.pergunta + ' Pergunto porque ' + minusc(s.dor) : s.dor,
-      (s.cena ? s.cena + ' ' : '') + 'É isso que o ' + s.nome + ' faz. ' + s.conta,
+      (s.cena ? s.cena + ' ' : '') + 'É isso que o ' + s.nome + ' faz.',
+      ben,
+      s.conta,
       'Você pode ver funcionando agora, sem cadastro: ' + l,
       'E o risco é zero: são *7 dias grátis*, nada é cobrado nesse período e dá para cancelar quando quiser. Depois, ' + s.preco + ', sem fidelidade.',
       'Posso te mandar o passo a passo para começar o teste hoje?',
@@ -137,46 +141,55 @@
   // Trutina (conferência de safra): textos aguardando a aprovação do dono no painel (botão "Textos aprovados" da aba Trutina)
   // associação, sindicato ou cooperativa: proposta de parceria para os associados, não venda direta
   function mensagemParceiro(p, acao, l, e) {
+    var ben = '*O que o associado ganha:*\n• peso, descontos, ATR, preço e valor conferidos com o contrato\n• as diferenças em reais, carga por carga\n• a mensagem pronta para cobrar o armazém ou a usina\n• as 20 primeiras cargas de graça';
     if (acao === 'retomada1') return [
-      'Olá! Retomando a mensagem sobre a conferência das cargas para os associados.',
+      'Oi! Voltando rapidinho sobre a conferência das cargas para os associados.',
       'Uma conta simples: numa entrega de 20 mil sacas, R$ 0,50 a menos por saca no desconto ou no preço são R$ 10 mil. Na cana, um ponto de ATR mal apurado em todas as cargas pesa da mesma forma.',
-      'Para a ' + e + ' não tem custo nenhum: cada associado confere as 20 primeiras cargas de graça, e a entidade oferece isso como um benefício a mais.',
+      'Para a ' + e + ' não tem custo nenhum: é um benefício a mais que a entidade oferece, sem trabalho para vocês.',
       'Como funciona: ' + l,
-      'Se não for o momento, me avisa e eu paro por aqui.'].join('\n\n');
+      'Faz sentido eu te mandar um texto pronto para divulgar aos associados?'].join('\n\n');
     if (acao === 'retomada2') return [
-      'Olá! Última mensagem para não incomodar.',
-      'Se fizer sentido oferecer aos associados: eles mandam o contrato, os romaneios ou tickets e a liquidação (foto ou PDF) e recebem em poucas horas as diferenças de peso, descontos, ATR, preço e valor, carga por carga.',
-      'As 20 primeiras cargas de cada associado são grátis e não há custo para a entidade. Detalhes: ' + l,
-      'Obrigado pela atenção!\nBlue Rose Express'].join('\n\n');
+      'Oi! Última mensagem, prometo.',
+      'Não vou insistir: se agora não é o momento, tudo bem. Só deixo o resumo.',
+      ben,
+      'Não há custo para a entidade. Detalhes: ' + l,
+      'Se um dia quiser, é só responder esta mensagem. Abraço!\nBlue Rose Express'].join('\n\n');
     return ['Olá, tudo bem?',
-      'Sou da Blue Rose Express, de Orlândia. Escrevo para a ' + e + ' porque temos um serviço que pode ser um benefício para os associados.',
-      'Quando a safra é entregue, quase nenhum produtor confere carga por carga se o peso, os descontos de umidade e impureza, o ATR, o preço e o valor pago batem com o contrato. Uma diferença pequena por carga vira muito dinheiro no fim da safra.',
-      'A gente faz essa conferência: o produtor manda o contrato, os romaneios e a liquidação (foto ou PDF) e recebe em poucas horas as diferenças em reais, com a mensagem pronta para cobrar o armazém ou a usina.',
-      'Para o associado, as *20 primeiras cargas são grátis*. Para a entidade, não há custo nenhum. Basta divulgar, se achar que vale.',
+      'Aqui é da Blue Rose Express, de Orlândia. Escrevo para a ' + e + ' porque temos um serviço que pode virar um benefício para os associados.',
+      'Hoje os associados conferem carga por carga se o que receberam bate com o contrato? Pergunto porque quase ninguém confere, e uma diferença pequena por carga vira muito dinheiro no fim da safra.',
+      'Imagina o associado mandar foto do contrato, dos romaneios e da liquidação e receber em poucas horas a lista das diferenças em reais. É isso que a gente faz.',
+      ben,
+      'Para a entidade não há custo nenhum: basta divulgar, se achar que vale.',
       'Como funciona: ' + l,
-      'Se não fizer sentido, é só me avisar que não mando mais mensagem.'].join('\n\n');
+      'Posso te mandar um texto pronto para divulgar aos associados?',
+      'Se não fizer sentido, me avisa que eu não mando mais.'].join('\n\n');
   }
   function mensagemSafra(p, acao) {
     var l = link(p), e = String(p.empresa || '').split(' - ')[0].split(' (')[0];
     if (/^Tipo: parceiro/.test(p.notas || '')) return mensagemParceiro(p, acao, l, e);
+    var cult = /(cana|usina)/i.test((p.categorias || []).join(' ') + ' ' + (p.justificativa || '')) ? 'cana' : 'grãos';
+    var ben = '*O que você ganha:*\n• peso, descontos de umidade e impureza, preço e valor conferidos com o contrato\n• as diferenças em reais, carga por carga\n• a mensagem pronta para cobrar o armazém ou a usina\n• é só mandar foto ou PDF, sem planilha';
     if (acao === 'retomada1') return [
-      'Olá! Retomando a mensagem sobre a conferência da safra.',
+      'Oi! Voltando rapidinho sobre a conferência da safra.',
       'Uma conta simples: numa entrega de 20 mil sacas, R$ 0,50 a menos por saca no desconto ou no preço são R$ 10 mil que ficaram no armazém. É esse tipo de diferença que a gente acha, carga por carga.',
-      'As 20 primeiras cargas a gente confere de graça. Depois, só cobra se achar diferença maior que o valor do serviço.',
+      'E não dá trabalho: é só mandar as fotos ou os PDFs que você já tem.',
       'Como funciona: ' + l,
-      'Se não for o momento, me avisa e eu paro por aqui.'].join('\n\n');
+      'Faz sentido conferir as 20 primeiras cargas de graça essa semana?'].join('\n\n');
     if (acao === 'retomada2') return [
-      'Olá! Última mensagem para não incomodar.',
-      'Se quiser conferir a safra: manda por aqui o contrato, os romaneios e a liquidação (foto ou PDF), e devolvemos em poucas horas as diferenças de peso, desconto de umidade/impureza, preço e valor, já com a mensagem pronta para cobrar o armazém ou a usina.',
+      'Oi! Última mensagem, prometo.',
+      'Não vou insistir: se agora não é o momento, tudo bem. Só deixo o resumo para quando precisar.',
+      ben,
       'As 20 primeiras cargas são grátis. Detalhes: ' + l,
-      'Obrigado pela atenção!\nBlue Rose Express'].join('\n\n');
+      'Se um dia quiser, é só responder esta mensagem. Abraço!\nBlue Rose Express'].join('\n\n');
     return ['Olá, tudo bem?',
-      'Vi que ' + e + ' trabalha com ' + (/(cana|usina)/i.test((p.categorias || []).join(' ') + ' ' + (p.justificativa || '')) ? 'cana' : 'grãos') + ' em ' + p.cidade + '/' + p.uf + ', por isso a mensagem.',
-      'Quando a safra é entregue, quase ninguém confere carga por carga se o peso, o desconto de umidade e impureza, o preço e o valor pago batem com o contrato. Uma diferença pequena por carga vira muito dinheiro no fim da safra.',
-      'A gente faz essa conferência por você: manda por aqui o contrato, os romaneios e a liquidação (pode ser foto ou PDF) e em poucas horas recebe as diferenças em reais, com a mensagem pronta para cobrar o armazém ou a usina.',
-      'As *20 primeiras cargas são grátis*. Depois, só cobra se achar diferença maior que o valor do serviço.',
+      'Aqui é da Blue Rose Express, de Orlândia. Encontrei ' + e + ', que trabalha com ' + cult + ' em ' + p.cidade + '/' + p.uf + ', e quis te mostrar uma coisa rápida.',
+      'Hoje alguém confere carga por carga se o que foi pago bate com o contrato? Pergunto porque quase ninguém confere, e uma diferença pequena por carga vira muito dinheiro no fim da safra.',
+      'Imagina mandar foto do contrato, dos romaneios e da liquidação e receber em poucas horas as diferenças em reais, já com a mensagem pronta para cobrar. É isso que a gente faz por você.',
+      ben,
+      'E o risco é zero: as *20 primeiras cargas são grátis*. Depois, só cobra se achar diferença maior que o valor do serviço.',
       'Como funciona: ' + l,
-      'Se não fizer sentido, é só me avisar que não mando mais mensagem.'].join('\n\n');
+      'Posso te explicar o que mandar para conferir as primeiras cargas?',
+      'Se não fizer sentido, me avisa que eu não mando mais.'].join('\n\n');
   }
   function mensagem(p, acao) {
     if (p.produto === 'safra') return mensagemSafra(p, acao);
@@ -185,28 +198,30 @@
     // oferta de fundador só aparece enquanto houver vaga (some sozinha quando as 3 forem usadas)
     var vagas = Math.max(0, 3 - FUND.length);
     var fund = function (t) { return vagas ? [t] : []; };
+    var ben = '*O que a ' + e + ' ganha com o Anshur:*\n• o valor máximo do usado antes de fechar a troca\n• o dinheiro parado no pátio à vista\n• acima do máximo, só com aprovação do gerente ou do dono\n• todas as lojas no mesmo lugar';
     if (acao === 'retomada1') return [
-      'Olá! Retomando rápido a mensagem sobre o usado da troca.',
+      'Oi! Voltando rapidinho sobre o usado da troca.',
       'Uma conta simples: se em uma troca de trator a revenda paga R$ 20 mil acima do que devia, esse valor sai direto do lucro da venda. Basta evitar isso *uma vez* para pagar 10 meses do Anshur (R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade).',
-      'Quer ver se isso acontece aí? O teste com as trocas de vocês mostra na hora:\n' + lt].concat(fund(
+      'Muita revenda me diz que já avalia bem. O teste mostra em 5 minutos, com as trocas de vocês, se é verdade:\n' + lt].concat(fund(
       'E ainda há vaga na oferta de fundador: as 3 primeiras revendas usam o *1º mês sem custo*.'), [
-      'Se preferir só olhar o sistema funcionando: ' + l,
-      'Se não for o momento, me avisa e eu paro por aqui.']).join('\n\n');
+      'Faz sentido fazer o teste ainda essa semana?']).join('\n\n');
     if (acao === 'retomada2') return [
-      'Olá! Última mensagem para não incomodar.',
-      'Fica o resumo: o Anshur ajuda a ' + e + ' a não pagar caro no usado da troca, a enxergar o dinheiro parado no pátio e a só fechar acima do valor máximo com aprovação do gerente ou do dono.',
+      'Oi! Última mensagem, prometo.',
+      'Não vou insistir: se agora não é o momento, tudo bem. Só deixo o resumo para quando precisar.',
+      ben,
       'Contratação direto pelo site, sem reunião: R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade. Cancela quando quiser.'].concat(fund(
-      'Se entrar agora, ainda pega uma das últimas vagas de fundador: *1º mês sem custo*.'), [
+      'Ainda dá para pegar uma das vagas de fundador: *1º mês sem custo*.'), [
       'Teste com as trocas de vocês: ' + lt + '\nDemonstração: ' + l,
-      'Obrigado pela atenção!\nBlue Rose Express']).join('\n\n');
+      'Se um dia quiser, é só responder esta mensagem. Abraço!\nBlue Rose Express']).join('\n\n');
     return ['Olá, tudo bem?',
-      'Vi que a ' + e + ' trabalha com máquinas usadas em ' + lugar + ', por isso a mensagem.',
-      'Em revenda, boa parte do lucro da venda da máquina nova vai embora no usado que entra na troca: paga-se um pouco a mais para fechar o negócio, a máquina fica parada no pátio e, quando vende, a margem já sumiu.',
-      'O Anshur mostra *antes de fechar* o valor máximo que a ' + e + ' pode pagar naquele usado sem perder dinheiro, com base nas trocas que vocês mesmos já venderam.',
-      'Dá para conferir isso com números de vocês, de graça e sem cadastro: coloque 5 trocas antigas e veja, troca por troca, quanto teria ficado no caixa:\n' + lt,
-      'Leva uns 5 minutos e nada sai do seu computador.'].concat(fund(
+      'Aqui é da Blue Rose Express, de Orlândia. Encontrei a ' + e + ', que trabalha com máquinas usadas em ' + lugar + ', e quis te mostrar uma coisa rápida.',
+      'Hoje vocês definem quanto pagar no usado da troca pela experiência do avaliador ou pelas trocas que já venderam? Pergunto porque em revenda boa parte do lucro da máquina nova vai embora no usado: paga-se um pouco a mais para fechar, a máquina fica parada no pátio e, quando vende, a margem já sumiu.',
+      'Imagina o vendedor abrir a avaliação e já ver o valor máximo que dá para pagar naquele usado sem perder dinheiro, com base nas trocas que vocês mesmos já venderam. É isso que o Anshur faz.',
+      ben,
+      'Dá para provar isso com os números de vocês, de graça e sem cadastro: coloque 5 trocas antigas e veja, troca por troca, quanto teria ficado no caixa (leva uns 5 minutos e nada sai do seu computador):\n' + lt].concat(fund(
       'E as 3 primeiras revendas que entrarem usam o *1º mês sem custo* (oferta de fundador).'), [
-      'Se não fizer sentido para vocês, é só me avisar que não mando mais mensagem.']).join('\n\n');
+      'Posso te mandar o passo a passo do teste?',
+      'Se não fizer sentido, me avisa que eu não mando mais.']).join('\n\n');
   }
 
   function acaoNaFila(id) {
