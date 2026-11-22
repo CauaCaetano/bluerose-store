@@ -1,21 +1,21 @@
 // Popina · liga tudo: as 5 abas, a cor do restaurante, a marca (plano com a sua marca), a faixa da demonstração,
 // o aviso de pedido novo e o primeiro uso.
-import './salao.js?v=52';
-import './pedidos.js?v=52';
-import './cozinha.js?v=52';
-import './caixa.js?v=52';
-import './gestao.js?v=52';
-import './cadastro.js?v=52';
-import './relatorios.js?v=52';
-import { esquema, comoUsar } from './configuracoes.js?v=52';
-import { talvezAbrirInicio } from './inicio.js?v=52';
-import { talvezPrimeiroAcesso } from './primeiro-acesso.js?v=52';
-import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila, t } from './loja.js?v=52';
-import { iniciarRotas, ir } from './nucleo.js?v=52';
-import { ico, toast, confirma, $ } from './ui.js?v=52';
-import * as som from './som.js?v=52';
-import { conferirNovos } from './cozinha.js?v=52';
-import { montarMenu } from './menu.js?v=52';
+import './salao.js?v=53';
+import './pedidos.js?v=53';
+import './cozinha.js?v=53';
+import './caixa.js?v=53';
+import './gestao.js?v=53';
+import './cadastro.js?v=53';
+import './relatorios.js?v=53';
+import { esquema, comoUsar } from './configuracoes.js?v=53';
+import { talvezAbrirInicio } from './inicio.js?v=53';
+import { talvezPrimeiroAcesso } from './primeiro-acesso.js?v=53';
+import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila, t } from './loja.js?v=53';
+import { iniciarRotas, ir } from './nucleo.js?v=53';
+import { ico, toast, confirma, $ } from './ui.js?v=53';
+import * as som from './som.js?v=53';
+import { conferirNovos } from './cozinha.js?v=53';
+import { montarMenu } from './menu.js?v=53';
 
 const real = !!CONTA;
 // ------------------------------------------------------------------ as 5 abas (links #: as permissões da equipe usam estes)
@@ -95,7 +95,7 @@ if (!real) {
   document.body.classList.add('demo');
   const f = document.createElement('div'); f.className = 'demo-faixa';
   f.innerHTML = `<a target="_top" href="../../../popina.html">← Voltar ao site</a><span class="sep">·</span><button type="button" data-recomecar>Recomeçar</button><span class="sep">·</span>
-    <a href="${linkCardapio('mesa=4')}">Cardápio do cliente</a><span class="demo-rot"><b>Demonstração</b> · lanchonete de exemplo</span>`;
+    <a href="${linkCardapio('mesa=4')}">Cardápio do cliente</a><span class="demo-rot"><b>Demonstração</b> · restaurante de exemplo</span>`;
   document.body.prepend(f);
   f.querySelector('[data-recomecar]').onclick = async () => { if (!(await confirma('Recomeçar a demonstração? Tudo o que você fez volta ao exemplo do início.', 'Recomeçar', true))) return; recomecar(); ir('salao'); toast('Demonstração recomeçada'); };
 }

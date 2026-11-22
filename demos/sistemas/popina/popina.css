@@ -68,6 +68,11 @@ main#tela{display:block;padding:16px 16px calc(var(--nav-h) + 28px + env(safe-ar
 .demo-faixa a,.demo-faixa button{color:#F4F6F4;background:none;border:0;padding:6px 0;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-weight:700;min-height:32px}
 .demo-faixa span{opacity:.92}
 .demo-faixa .sep{opacity:.5}
+/* aviso do exemplo (22/11): faixa no fluxo logo abaixo da faixa da demonstração; não cobre mesas, legenda nem botões */
+.demo-aviso{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--aviso);color:var(--aviso-tinta);font-size:14px;font-weight:700;line-height:1.35}
+.demo-aviso span{flex:1}
+.demo-aviso button{flex:none;min-height:40px;min-width:56px;padding:0 14px;border-radius:10px;border:2px solid currentColor;background:none;color:inherit;font-weight:800;cursor:pointer}
+@media (min-width:1024px){.demo-aviso{margin-left:var(--lado)}}
 @media (min-width:1024px){.demo-faixa{margin-left:var(--lado)}}
 
 /* ------------------------------------------------------------ peças */
@@ -240,9 +245,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--loja);bo
 .kds{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));align-items:start}
 .ko{display:flex;flex-direction:column;border-radius:var(--raio);background:var(--papel);border:2px solid var(--linha);box-shadow:var(--sombra);overflow:hidden}
 .ko-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:var(--ok-suave)}
-.ko-cab b{font-size:22px;font-weight:800}
+.ko-cab>div{min-width:0}
+.ko-cab b{display:block;font-size:22px;font-weight:800;line-height:1.2;overflow-wrap:anywhere}
 .ko-cab small{display:block;font-size:14px;font-weight:700;color:var(--mudo)}
-.ko-cab .tempo{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:#fff;font-size:22px;font-weight:800;color:var(--ok-tinta)}
+.ko-cab .tempo{flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:#fff;font-size:22px;font-weight:800;color:var(--ok-tinta)}
 .ko.medio .ko-cab{background:var(--aviso)}.ko.medio .tempo{color:var(--aviso-tinta)}
 .ko.atrasado{border-color:var(--perigo)}.ko.atrasado .ko-cab{background:var(--perigo-suave)}.ko.atrasado .tempo{background:var(--perigo);color:#fff}
 .ko ul{list-style:none;margin:0;padding:6px 14px}
@@ -509,9 +515,10 @@ body.pa-aberto{overflow:hidden}
 @keyframes pc-pisca{50%{box-shadow:0 0 0 5px rgba(163,38,27,.18),var(--sombra)}}
 .pc-abre{display:grid;gap:6px;padding:12px 14px;border:0;background:none;text-align:left;cursor:pointer;width:100%}
 .pc-abre:hover{background:var(--fundo)}
-.pc-l1{display:flex;align-items:flex-start;gap:8px;min-width:0}
+.pc-l1{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;min-width:0}
+.pc-l1 .pc-nome{flex:1 1 96px}
 .pc .senha{display:inline-grid;place-items:center;min-width:42px;height:42px;padding:0 8px;border-radius:12px;background:var(--marrom);color:#fff;font-weight:800;font-size:19px;flex:none}
-.pc-nome{flex:1;min-width:0}.pc-nome b{display:block;font-size:18px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pc-nome small{color:var(--mudo);font-weight:600;font-size:14px}
+.pc-nome{flex:1;min-width:0}.pc-nome b{display:block;font-size:18px;font-weight:800;line-height:1.2;overflow-wrap:anywhere}.pc-nome small{color:var(--mudo);font-weight:600;font-size:14px}
 .pc-tempo{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:var(--ok-suave);color:var(--ok-tinta);font-weight:800;font-size:16px;white-space:nowrap;flex:none}
 .pc-tempo .ico{width:18px;height:18px}
 .pc-tempo.medio{background:var(--aviso);color:var(--aviso-tinta)}.pc-tempo.atrasado{background:var(--perigo);color:#fff}
@@ -519,7 +526,10 @@ body.pa-aberto{overflow:hidden}
 .pc-itens{font-size:15px;line-height:1.4}
 .pc-l3{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.pc-l3 .etq{font-size:13px}.pc-l3 b{margin-left:auto;font-size:18px;font-weight:800}
 .pc-bts{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border-top:1px solid var(--linha);background:var(--fundo)}
-.pc-bts .bt{flex:1 1 104px;min-width:0;padding-left:10px;padding-right:10px}
+.pc-bts .bt{flex:1 1 104px;min-width:0;padding-left:10px;padding-right:10px;min-height:56px}
+.pc-bts .bt-ico,.ko-pe .bt-ico{width:56px;height:56px;flex:none;border:2px solid var(--linha2);background:var(--papel)}
+/* 22/11: de 1100 a 1499 px o quadro tem 3 colunas largas; Concluídos vai para baixo, na largura toda */
+@media (min-width:1100px) and (max-width:1499px){.quadro{grid-template-columns:repeat(3,minmax(0,1fr))}.quadro .coluna[data-c="feito"]{grid-column:1/-1;min-height:0}}
 .pfs .pf.rec .tx b{text-decoration:line-through;color:var(--mudo)}
 .chip.grande{min-height:56px;font-size:18px;padding:0 18px;gap:8px}
 .cod{display:inline-block;margin-right:6px;padding:0 6px;border-radius:6px;background:var(--papel2);border:1px solid var(--linha);font:700 13px/20px ui-monospace,monospace;color:var(--mudo);vertical-align:2px}
@@ -641,3 +651,5 @@ body:not(.marca-propria) .marca div{align-self:center}
 @media (prefers-reduced-motion:reduce){.check-ok svg path{stroke-dasharray:none;stroke-dashoffset:0}}
 /* celular estreito: com o alto-falante são 4 botões no topo; um pouco mais justos para o nome caber */
 @media (max-width:430px){.topo-bt{width:40px}.topo-bts{gap:0}.topo{gap:8px;padding:0 10px}}
+/* 22/11: prato por quilo fica óbvio na hora de lançar */
+.prod .preco .etq.kg{margin-left:6px;background:var(--aviso);color:var(--aviso-tinta);font-size:12px;vertical-align:1px}

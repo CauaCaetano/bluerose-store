@@ -1,13 +1,13 @@
 // Popina · salão (o que fazer agora e as mesas), a comanda de qualquer conta e o lançar itens do garçom.
 import { db, t, din, tempo, comanda, comandaDaMesa, abrirMesa, adicionarItem, enviar, mudarStatus, cancelarItem, transferir, juntarMesas, moverItens, livreDoItem, pagoPorItem, conta, valorItem, itensValidos,
   fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2,
-  aguardaAceite } from './loja.js?v=52';
-import { escolherEntregador } from './pedidos.js?v=52';
-import { registrar, acao, ir } from './nucleo.js?v=52';
-import { ico, folha, toast, confirma, autorizar, novidades, $, $$ } from './ui.js?v=52';
-import { formOpcoes, temOpcoes } from './opcoes.js?v=52';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=52';
-import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=52';
+  aguardaAceite } from './loja.js?v=53';
+import { escolherEntregador } from './pedidos.js?v=53';
+import { registrar, acao, ir } from './nucleo.js?v=53';
+import { ico, folha, toast, confirma, autorizar, novidades, $, $$ } from './ui.js?v=53';
+import { formOpcoes, temOpcoes } from './opcoes.js?v=53';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=53';
+import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=53';
 
 const ESTADO = { livre: 'Livre', ocupada: 'Ocupada', conta: 'Pediu a conta', pronto: 'Prato pronto', chamou: 'Chamou', qr: 'Pedido do QR' };
 const nMesas = () => Math.max(1, Math.min(200, Number(db.config.mesas) || 10));
@@ -234,7 +234,7 @@ registrar('lancar', {
       <label class="busca">${ico('busca')}<input type="search" data-busca value="${t(busca)}" placeholder="Nome ou código do prato" aria-label="Buscar prato ou bebida pelo nome ou código" autocomplete="off" enterkeyhint="done"></label>
       <div class="chips" role="group" aria-label="Categorias"><button type="button" class="chip" data-cat="" aria-pressed="${!catSel}">Todos</button>${cats.map((k) => `<button type="button" class="chip" data-cat="${t(k.id)}" aria-pressed="${catSel === k.id}">${t(k.nome)}</button>`).join('')}</div>
       <div class="prods">${l.map((p) => { const k = noRasc(c, p.id);
-        return `<div class="prod">${fotoProd(p)}<div class="tx"><b>${p.codigo ? `<span class="cod">${t(p.codigo)}</span>` : ''}${t(p.nome)}</b>${p.desc ? `<small>${t(p.desc)}</small>` : ''}<span class="preco">${p.porKg ? `${din(p.preco)} o quilo` : `${p.tamanhos?.length ? 'a partir de ' : ''}${din(aPartir(p))}`}</span></div>
+        return `<div class="prod">${fotoProd(p)}<div class="tx"><b>${p.codigo ? `<span class="cod">${t(p.codigo)}</span>` : ''}${t(p.nome)}</b>${p.desc ? `<small>${t(p.desc)}</small>` : ''}<span class="preco">${p.porKg ? `${din(p.preco)} o quilo <span class="etq kg">Por quilo: pede o peso</span>` : `${p.tamanhos?.length ? 'a partir de ' : ''}${din(aPartir(p))}`}</span></div>
           <button type="button" class="prod-add" data-acao="add" data-c="${c.id}" data-p="${t(p.id)}" aria-label="Pôr ${t(p.nome)}">+${k ? `<em>${k}</em>` : ''}</button></div>`; }).join('') || '<p class="vazio">Nada encontrado.</p>'}</div>
       ${c.tipo !== 'mesa' && !c.quitado && itensValidos(c).length ? `<div class="barra-fixa">${n ? `<button type="button" class="bt grande" data-acao="mandar" data-id="${c.id}">${ico('cozinha')}Mandar (${n})</button>` : ''}<button type="button" class="bt cheio grande" data-acao="cobrar" data-id="${c.id}">${ico('conta')}Cobrar ${din(conta(c).falta)}</button></div>`
         : n ? `<div class="barra-fixa"><button type="button" class="bt grande" data-ir="${rotaComanda(c)}">Ver comanda</button><button type="button" class="bt cheio grande" data-acao="mandar" data-id="${c.id}">${ico('cozinha')}Mandar para a cozinha (${n})</button></div>` : ''}`;

@@ -1,5 +1,5 @@
 // Popina · peças da interface: ícones, folha que sobe de baixo, aviso rápido, confirmação.
-import * as som from './som.js?v=52';
+import * as som from './som.js?v=53';
 const t = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const $ = (s, el = document) => el.querySelector(s);
 export const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -94,12 +94,12 @@ export function autorizar({ titulo, texto = '', motivos = null, pedirPin = false
       const mot = $('[data-motivo]', f);
       $$('[data-mot]', f).forEach((b) => { b.onclick = () => { $$('[data-mot]', f).forEach((x) => x.classList.toggle('on', x === b)); mot.value = b.dataset.mot; }; });
       $('[data-sim]', f).onclick = async () => {
-        const { pinConfere } = await import('./loja.js?v=52');
+        const { pinConfere } = await import('./loja.js?v=53');
         const motivo = mot ? mot.value.trim() : '';
         if (mot && motivo.length < 3) { toast('Escolha ou escreva o motivo', 'erro'); return mot.focus(); }
         const pin = $('[data-pin]', f);
         // vale a senha do gerente ou o PIN pessoal de quem é Gerente na Equipe
-        const { pinDeGerente } = await import('./equipe.js?v=52');
+        const { pinDeGerente } = await import('./equipe.js?v=53');
         if (pin && !pinConfere(pin.value) && !pinDeGerente(pin.value)) { toast('Senha errada', 'erro'); pin.value = ''; return pin.focus(); }
         feito = true; ok({ motivo, pin: !!pin, el: f }); fechar();
       };

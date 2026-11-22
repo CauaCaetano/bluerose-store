@@ -3,14 +3,14 @@
 // Um visual só (o dono tirou os vários visuais): o esquema troca só os tons da casa (o marrom do menu e o destaque),
 // sempre dentro da identidade "taberna"; a cor da marca do restaurante continua livre.
 // Guarda só campos novos em db.config.loja.esquema e db.config.perfis[e-mail]: nada do que já existe muda de nome.
-import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=52';
-import { ir, rota } from './nucleo.js?v=52';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=52';
-import { G, volta, reduzir, planoMarca } from './gestao.js?v=52';
-import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=52';
-import { recomecar } from './loja.js?v=52';
-import * as som from './som.js?v=52';
-import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=52';
+import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=53';
+import { ir, rota } from './nucleo.js?v=53';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=53';
+import { G, volta, reduzir, planoMarca } from './gestao.js?v=53';
+import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=53';
+import { recomecar } from './loja.js?v=53';
+import * as som from './som.js?v=53';
+import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=53';
 
 // ------------------------------------------------------------------ esquemas de cor (identidade do Popina)
 // escuro: menu do computador, faixa e etiquetas escuras · destaque: a cor dos botões (vira a cor da marca ao escolher)

@@ -6,8 +6,8 @@
 // dados da empresa (localStorage popina-v1; na conta real, conta-nuvem.js sobe junto para a nuvem, como o logo já subia).
 // Quem vê: só o dono da conta (os convidados da equipe nunca) e a demonstração (com "Pular e ver o exemplo").
 // Dados antigos: só acrescenta db.config.inicio.marca = true ao terminar ou pular; quem já tem nome, logo e capa não vê.
-import { db, t, grava, CONTA, lojaCfg, setLoja } from './loja.js?v=52';
-import { ico, toast, $ } from './ui.js?v=52';
+import { db, t, grava, CONTA, lojaCfg, setLoja } from './loja.js?v=53';
+import { ico, toast, $ } from './ui.js?v=53';
 
 const ini = () => (db.config.inicio ||= {});
 const NOME_VAZIO = ['', 'meu restaurante'];
@@ -83,7 +83,7 @@ export function abrirPrimeiroAcesso({ refazer = false, depois } = {}) {
     if (concluiu || !refazer) { ini().marca = true; grava(); }
     depois?.(concluiu);
   };
-  $('[data-pular]', f)?.addEventListener('click', () => { fechar(false); toast('Esta é a lanchonete de exemplo. Quando quiser, ponha a sua marca em Configurações'); });
+  $('[data-pular]', f)?.addEventListener('click', () => { fechar(false); avisoExemplo(); });
 
   function prevImg(tipo) {
     const u = st[tipo]; if (!u) return '';
@@ -150,4 +150,15 @@ export function abrirPrimeiroAcesso({ refazer = false, depois } = {}) {
 export function talvezPrimeiroAcesso(seguir) {
   if (!precisaPrimeiroAcesso()) return seguir();
   abrirPrimeiroAcesso({ depois: () => seguir() });
+}
+
+// aviso do exemplo: uma vez, numa faixa logo abaixo da faixa da demonstração (não flutua por cima das mesas nem da legenda)
+function avisoExemplo() {
+  const txt = 'Este é um restaurante de exemplo. Ponha a sua marca em Configurações quando quiser.';
+  const faixa = $('.demo-faixa'); if (!faixa) return toast(txt);
+  $('.demo-aviso')?.remove();
+  const a = document.createElement('div'); a.className = 'demo-aviso'; a.setAttribute('role', 'status');
+  a.innerHTML = `<span>${txt}</span><button type="button">Ok</button>`;
+  a.querySelector('button').onclick = () => a.remove();
+  faixa.after(a);
 }

@@ -5,12 +5,12 @@
 // Todo pedido também pode ir para o WhatsApp do restaurante (link wa.me com o pedido escrito).
 // COMPATIBILIDADE: o pedido continua com os mesmos campos (nome, tel, end, bairro, pagar, troco, itens). Os novos (ref, cupom, desconto,
 // taxa, total, agendado) só se somam; o que o sistema do dono ainda não lê vai também escrito no endereço, no pagamento e na observação.
-import { ico, folha, toast, $, $$ } from './ui.js?v=52';
-import * as som from './som.js?v=52';
+import { ico, folha, toast, $, $$ } from './ui.js?v=53';
+import * as som from './som.js?v=53';
 // cardápio do cliente: só um toque leve ao pôr na sacola e ao mandar o pedido; mudo no link "Som" do topo (vale neste celular)
 som.chaveSom('popina-som-cli', false);
-import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=52';
-import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=52';
+import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=53';
+import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=53';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -417,22 +417,31 @@ function abrirSacola() {
       $$('[name=apelido]', f).forEach((r) => { r.onchange = () => { st.apelido = r.value; }; });
       const poe = (k, v) => { st[k] = v; const i = $(`[data-f=${k}]`, f); if (i) i.value = v; };
       const stCep = (html, erro = false) => { const el = $('[data-cep-st]', f); if (el) { el.innerHTML = html; el.classList.toggle('erro', erro); } };
+      const FORA = '[fora]'; // marca interna: o aviso é de cidade fora da entrega
       const casar = (bairro, cidade) => {
         const bs = M.bairros || [];
         if (!bs.length) { if (bairro) poe('bairroTxt', bairro); return ''; }
         const b = casarBairro(bs, bairro, cidade); if (b) { poe('bairro', b); tot(); return ''; }
         const cids = [...new Set(bs.map((x) => x.cidade).filter(Boolean))], fora = cidade && cids.length && !cids.some((c) => c.toLowerCase() === cidade.toLowerCase());
-        return fora ? ` <b>Este restaurante entrega em ${t(cids.join(', '))}.</b>` : bairro ? ` <b>${t(bairro)}</b> não está na lista de entrega: escolha o bairro mais próximo.` : ' Escolha o bairro abaixo.';
+        // só a cidade de fora vira aviso (laranja); bairro fora da lista ou CEP geral é texto neutro
+        return fora ? FORA + ` Este restaurante entrega em <b>${t(cids.join(', '))}</b>. Confira o CEP ou escolha um bairro da lista.` : bairro ? ` <b>${t(bairro)}</b> não está na lista: escolha o bairro mais próximo.` : ' Escolha o bairro abaixo.';
       };
+      const stAviso = (base, aviso) => stCep(base + aviso.replace(FORA, ''), aviso.startsWith(FORA));
       const consultarCep = async (d) => {
         stCep('Buscando o CEP…');
         try {
           const r = await buscarCep(d); if (soDig(st.cep) !== d) return;
           st.cidade = r.cidade; if (r.rua) poe('rua', r.rua);
           const aviso = casar(r.bairro, r.cidade);
-          stCep(`${r.rua ? `${ico('check')}${t(r.rua)}${r.bairro ? ` · ${t(r.bairro)}` : ''}` : `CEP geral de ${t(r.cidade)}: escreva a rua.`} · ${t(r.cidade)}/${t(r.uf)}.${aviso}`, !!aviso);
+          if (r.rua) stAviso(`${ico('check')}${t(r.rua)}${r.bairro ? ` · ${t(r.bairro)}` : ''} · ${t(r.cidade)}/${t(r.uf)}.`, aviso);
+          else if (aviso.startsWith(FORA)) stAviso(`${t(r.cidade)}/${t(r.uf)}.`, aviso);
+          else stCep(`CEP geral da cidade${r.cidade ? ` (${t(r.cidade)}/${t(r.uf)})` : ''}: escolha o bairro e digite a rua.`);
           if (!st.semNum) $(r.rua ? '[data-f=numero]' : '[data-f=rua]', f)?.focus();
-        } catch (e) { stCep(t(e.message), true); }
+        } catch (e) {
+          // CEP não achado ou sem internet: segue normal, sem vermelho
+          stCep(/consultar/i.test(e.message) ? t(e.message) : d.endsWith('000') ? 'CEP geral da cidade: escolha o bairro e digite a rua.' : 'Não achamos este CEP: escolha o bairro e digite a rua.');
+          $('[data-f=rua]', f)?.focus();
+        }
       };
       const cepI = $('[data-f=cep]', f);
       cepI?.addEventListener('input', () => { const d = soDig(cepI.value).slice(0, 8); cepI.value = cepBonito(d); st.cep = cepI.value; if (d.length === 8 && d !== ultimoCep) { ultimoCep = d; consultarCep(d); } else if (d.length < 8) ultimoCep = ''; });
@@ -444,7 +453,7 @@ function abrirSacola() {
           if (r.rua || v?.rua) poe('rua', r.rua || v.rua); if (r.numero && !st.semNum) poe('numero', r.numero);
           st.cidade = v?.cidade || r.cidade;
           const aviso = casar(v?.bairro || r.bairro, st.cidade);
-          stCep(`${ico('check')}Achamos: ${t(st.rua || 'rua não identificada')}${r.numero ? `, ${t(r.numero)}` : ''}${st.cidade ? ` · ${t(st.cidade)}` : ''}. Confira o número.${aviso}`, !!aviso);
+          stAviso(`${ico('check')}Achamos: ${t(st.rua || 'rua não identificada')}${r.numero ? `, ${t(r.numero)}` : ''}${st.cidade ? ` · ${t(st.cidade)}` : ''}. Confira o número.`, aviso);
           $('[data-f=numero]', f)?.focus();
         } catch (er) { stCep(t(er.message), true); }
         b.disabled = false;
@@ -688,7 +697,7 @@ async function posConta() {
 async function iniciar() {
   if (!mesa) { conta = criarConta({ real: !!R }); conta.ouvir(() => { if (M) topo(); }); }
   if (!R) {
-    loja = await import('./loja.js?v=52'); doExemplo();
+    loja = await import('./loja.js?v=53'); doExemplo();
     loja.ouvir(() => { doExemplo(); if (!document.querySelector('.folha-fundo, .cx-tela-fundo')) { aplicarCor(); topo(); lista(); } });
     tudo(); posConta(); return;
   }
