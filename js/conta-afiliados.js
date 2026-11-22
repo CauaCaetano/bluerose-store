@@ -187,6 +187,7 @@
     ['annona.html', 'Annona', 'Para mercadinho', 'cesta'],
     ['atria.html', 'Atria', 'Para construção e reforma', 'capacete'],
     ['popina.html', 'Popina', 'Para restaurante', 'cloche'],
+    ['tecton.html', 'Tecton', 'Para construtora, loja de material e imobiliária', 'capacete'],
     ['anshur.html', 'Anshur', 'Para revenda de máquinas', 'camadas'],
     ['sistemas.html#sob-medida', 'Sistema sob medida', 'Feito do zero para a empresa', 'engrenagem']
   ];

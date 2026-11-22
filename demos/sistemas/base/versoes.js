@@ -45,5 +45,10 @@
   // cardápio online com QR e delivery, estoque por ficha técnica; teste grátis de 7 dias no mensal (19/11/2026), mensal R$ 79 ou anual R$ 758
   out.popina = { id: 'popina', categoria: 'popina', versao: '', nome: 'Popina', nomeCategoria: 'Popina', nomeVersao: '', pasta: 'popina', entrada: 'app.html',
     chave: 'popina-v1', mensal: 79, anual: 758, exemplo: 1, pagina: 'popina.html', logo: 'img/logos/popina-simbolo.png' };
+  // Tecton (20/11/2026): construtora e empreiteira, loja de material de construção e imobiliária num sistema só (marca própria),
+  // no computador e no celular; a empresa escolhe o ramo no primeiro uso e liga um segundo em Configurações.
+  // Mensal R$ 129 ou anual R$ 1.238 (20% a menos), teste grátis de 7 dias no mensal. Catálogo: a-sis-tecton e a-sis-tecton-anual.
+  out.tecton = { id: 'tecton', categoria: 'tecton', versao: '', nome: 'Tecton', nomeCategoria: 'Tecton', nomeVersao: '', pasta: 'tecton', entrada: 'app.html',
+    chave: 'tecton-v1', mensal: 129, anual: 1238, exemplo: 1, pagina: 'tecton.html', logo: 'img/logos/tecton-simbolo.png' };
   window.VELTRIA_VERSOES = out;
 })();

@@ -321,7 +321,7 @@
   // as telas que a pessoa não vê somem do menu (aplicarPermissoes, ao abrir o sistema).
   var CARGOS = { vetnature: ['Veterinário(a)', 'Recepção', 'Banho e tosa', 'Gerente'], agenda: ['Recepção', 'Profissional', 'Gerente', 'Caixa'], crm: ['Vendedor', 'Pré-vendas', 'Gerente comercial', 'Financeiro'], farmacia: ['Balconista', 'Farmacêutico', 'Caixa', 'Gerente'],
     financeiro: ['Financeiro', 'Contador', 'Gerente', 'Auxiliar'], gestao: ['Caixa', 'Estoquista', 'Vendedor', 'Gerente'], juridico: ['Advogado', 'Estagiário', 'Secretária', 'Financeiro'],
-    obras: ['Engenheiro', 'Mestre de obras', 'Compras', 'Financeiro'], oficina: ['Mecânico', 'Recepção', 'Peças', 'Gerente'], popina: ['Garçom', 'Cozinha', 'Bar', 'Caixa', 'Entregador', 'Gerente'] }[app.replace(/(essencial|completo|avancado)$/, '')] || ['Gerente', 'Atendimento', 'Financeiro'];
+    obras: ['Engenheiro', 'Mestre de obras', 'Compras', 'Financeiro'], oficina: ['Mecânico', 'Recepção', 'Peças', 'Gerente'], popina: ['Garçom', 'Cozinha', 'Bar', 'Caixa', 'Entregador', 'Gerente'], tecton: ['Engenheiro', 'Mestre de obras', 'Compras', 'Caixa', 'Vendedor', 'Corretor', 'Financeiro'] }[app.replace(/(essencial|completo|avancado)$/, '')] || ['Gerente', 'Atendimento', 'Financeiro'];
   function telasDoMenu() {
     var vistas = {}, l = [];
     document.querySelectorAll('a[href^="#"]').forEach(function (a) {

@@ -8,7 +8,7 @@
   function dia(d) { return d ? String(d).slice(8, 10) + '/' + String(d).slice(5, 7) + '/' + String(d).slice(0, 4) : '—'; }
   function rpc(nome) { return cliente.rpc(nome).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data; }); }
   function numeros(l) { return '<dl class="af-numeros">' + l.map(function (n) { return '<div><dt>' + esc(n[0]) + '</dt><dd>' + esc(n[1]) + '</dd></div>'; }).join('') + '</dl>'; }
-  var SIS = { anshur: 'Anshur', popina: 'Popina', peplo: 'Peplo', annona: 'Annona', atria: 'Atria', ofixl: 'Ofixl', vetnature: 'VetNature' };
+  var SIS = { anshur: 'Anshur', popina: 'Popina', tecton: 'Tecton', peplo: 'Peplo', annona: 'Annona', atria: 'Atria', ofixl: 'Ofixl', vetnature: 'VetNature' };
   function sistema(app) {
     if (!app) return '—';
     if (SIS[app]) return SIS[app];

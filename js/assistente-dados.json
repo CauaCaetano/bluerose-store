@@ -48,7 +48,7 @@
  "faq": [
   {
    "pergunta": "Posso testar antes de contratar?",
-   "resposta": "Sim. Os sistemas abrem no navegador com dados de exemplo, sem cadastro, com as mesmas telas da assinatura. E o Jano, o Arca, o Peplo, o Annona, o Atria e o Popina têm teste grátis de 7 dias no plano mensal, com os dados da sua empresa: pede o cartão no Mercado Pago, mas nada é cobrado antes do 8º dia, e você cancela quando quiser em Minha conta. Um teste por pessoa."
+   "resposta": "Sim. Os sistemas abrem no navegador com dados de exemplo, sem cadastro, com as mesmas telas da assinatura. E o Jano, o Arca, o Peplo, o Annona, o Atria, o Popina e o Tecton têm teste grátis de 7 dias no plano mensal, com os dados da sua empresa: pede o cartão no Mercado Pago, mas nada é cobrado antes do 8º dia, e você cancela quando quiser em Minha conta. Um teste por pessoa."
   },
   {
    "pergunta": "Tem mais de um plano?",
@@ -201,6 +201,46 @@
     "hamburgueria"
    ],
    "negocio": "Restaurante e lanchonete"
+  },
+  {
+   "id": "tecton",
+   "nome": "Tecton",
+   "pagina": "tecton.html",
+   "ramo": "Construtora, loja de material de construção e imobiliária",
+   "para": "Para construtoras e empreiteiras (obras com cronograma, orçamento com BDI, medições, aditivos, diário com fotos e link para o cliente), lojas de material de construção (balcão com código de barras, orçamento no WhatsApp, entregas, conta da obra e fiado) e imobiliárias e incorporadoras (espelho de vendas, contratos com parcelas e correção, aluguel com repasse e comissões). A empresa escolhe o ramo e vê só as telas dele.",
+   "mensal": "R$ 129",
+   "extra": "teste grátis de 7 dias no mensal (pede o cartão, nada é cobrado antes do 8º dia), ou R$ 1.238 por ano; equipe e aparelhos sem limite; não emite nota fiscal nem boleto",
+   "demo": "demos/sistemas/tecton/app.html",
+   "teste": "app/tecton/",
+   "linha": "Marca própria da Blue Rose",
+   "palavras": [
+    "construtora",
+    "empreiteira",
+    "obra",
+    "obras",
+    "cronograma",
+    "medição",
+    "medicao",
+    "diário de obra",
+    "diario de obra",
+    "bdi",
+    "loja de material",
+    "material de construção",
+    "material de construcao",
+    "depósito",
+    "deposito",
+    "conta da obra",
+    "imobiliária",
+    "imobiliaria",
+    "incorporadora",
+    "lançamento",
+    "espelho de vendas",
+    "aluguel",
+    "repasse",
+    "corretor",
+    "tecton"
+   ],
+   "negocio": "Construção e imóveis"
   }
  ],
  "contextos": {
@@ -463,7 +503,7 @@
      "r": [],
      "l": [
       "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
-      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês e Popina R$ 79/mês. No plano anual, 20% a menos."
+      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês, Popina R$ 79/mês e Tecton R$ 129/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
@@ -635,7 +675,7 @@
      "r": [],
      "l": [
       "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
-      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês e Popina R$ 79/mês. No plano anual, 20% a menos."
+      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês, Popina R$ 79/mês e Tecton R$ 129/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
@@ -739,7 +779,7 @@
      "p": "Tem teste grátis?",
      "e": "confident",
      "r": [
-      "Sim, no Jano, no Arca, no Peplo, no Annona, no Atria e no Popina: 7 dias grátis no plano mensal, com os dados da sua empresa. Pede o cartão no Mercado Pago, mas nada é cobrado antes do 8º dia; cancele quando quiser em Minha conta e não paga nada. Um teste por pessoa. A demonstração com dados de exemplo também abre sem cadastro."
+      "Sim, no Jano, no Arca, no Peplo, no Annona, no Atria, no Popina e no Tecton: 7 dias grátis no plano mensal, com os dados da sua empresa. Pede o cartão no Mercado Pago, mas nada é cobrado antes do 8º dia; cancele quando quiser em Minha conta e não paga nada. Um teste por pessoa. A demonstração com dados de exemplo também abre sem cadastro."
      ]
     },
     {
@@ -918,7 +958,7 @@
      "r": [],
      "l": [
       "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
-      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês e Popina R$ 79/mês. No plano anual, 20% a menos."
+      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês, Popina R$ 79/mês e Tecton R$ 129/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
@@ -1018,7 +1058,7 @@
      "r": [],
      "l": [
       "Assinatura (plano único): equipe sem limite, histórico de quem fez o quê e até 10 empresas, hospedagem, atualizações e cópias de segurança. Sem entrada e sem fidelidade.",
-      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês e Popina R$ 79/mês. No plano anual, 20% a menos."
+      "Preço por sistema: Atria R$ 39/mês, Agenda R$ 49/mês, Financeiro, Peplo e Annona R$ 59/mês, Popina R$ 79/mês e Tecton R$ 129/mês. No plano anual, 20% a menos."
      ],
      "k": [
       [
