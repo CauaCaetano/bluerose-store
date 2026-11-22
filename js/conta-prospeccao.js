@@ -58,7 +58,7 @@
       conta: 'Fechar um serviço a mais por mês por mandar o orçamento na hora já paga o app várias vezes.' },
     popina: { pag: 'popina.html', nome: 'Popina', preco: 'R$ 79/mês (ou R$ 758/ano)', ramo: 'tem restaurante',
       dor: 'Em restaurante, pedido anotado no papel atrasa a cozinha, sai errado e some na hora de fechar a conta.',
-      ganho: 'O Popina é simples de usar: o garçom anota no celular e o pedido aparece (e imprime) na cozinha na hora, o balcão chama pelo nome ou senha, a mesa tem cardápio com QR, o pedido do delivery chega também no WhatsApp e o caixa fecha com Pix, troco, 10% e conta dividida.',
+      ganho: 'O Popina é simples de usar: o restaurante ganha um cardápio online com link próprio (sem comissão por pedido), o cliente pede pelo celular e o pedido chega com aviso na tela, vai para a cozinha na hora e o cliente acompanha até a entrega. No salão, o garçom anota no celular e o caixa fecha com Pix, troco, 10% e conta dividida.',
       conta: 'Um pedido errado a menos por dia já paga o sistema no mês.' },
     tecton: { pag: 'tecton.html', nome: 'Tecton', preco: 'R$ 129/mês (ou R$ 1.238/ano)', ramo: 'trabalha com construção',
       ramos: {
