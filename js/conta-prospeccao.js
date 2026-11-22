@@ -39,41 +39,50 @@
     agenda: { pag: 'jano.html', nome: 'Jano', preco: 'R$ 49/mês (ou R$ 470/ano)', ramo: 'atende com hora marcada',
       dor: 'Quem marca horário pelo WhatsApp passa o dia respondendo "tem horário?" e ainda perde dinheiro com cliente que falta.',
       ganho: 'O Jano é um app de celular para quem atende com hora marcada: a cliente marca sozinha pelo seu link, o sinal no Pix segura o horário e a confirmação e o lembrete saem prontos. Menos falta, menos horário vazio e menos tempo no WhatsApp.',
-      conta: 'Uma falta por semana num serviço de R$ 60 são uns R$ 240 por mês. Evitar só uma já paga o mês do sistema.' },
+      conta: 'Uma falta por semana num serviço de R$ 60 são uns R$ 240 por mês. Evitar só uma já paga o mês do sistema.',
+        pergunta: 'Hoje a marcação de horário aí é toda pelo WhatsApp?', cena: 'Imagina acordar com a agenda da semana cheia, cada cliente marcando sozinha pelo seu link e o sinal já pago no Pix, sem você responder "tem horário?" o dia inteiro.' },
     financeiro: { pag: 'arca.html', nome: 'Arca', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'tem uma empresa',
       dor: 'Na empresa, o dinheiro do imposto e da folha se mistura com o do dia a dia, cliente atrasa sem ninguém cobrar e o extrato do banco nunca bate com a planilha.',
       ganho: 'O Arca é o financeiro completo da empresa, feito para usar no computador: contas a pagar e a receber de uma ou várias empresas, aprovação de pagamento, cobrança com Pix e lembrete no WhatsApp, conciliação do extrato do banco, fluxo de caixa, orçamento e DRE, e o pacote do mês pronto para o contador.',
-      conta: 'Receber em dia um único cliente que costuma atrasar já paga alguns meses do sistema.' },
+      conta: 'Receber em dia um único cliente que costuma atrasar já paga alguns meses do sistema.',
+        pergunta: 'Hoje o financeiro da empresa fica em planilha ou em algum sistema?', cena: 'Imagina abrir o computador na segunda e ver numa tela só quanto entra, quanto sai e quem está atrasado, com o lembrete de cobrança saindo sozinho.' },
     peplo: { pag: 'peplo.html', nome: 'Peplo', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'vende roupa',
       dor: 'Em loja de roupas, o tamanho e a cor acabam sem ninguém perceber, a fila trava no caixa e no fim do mês ninguém sabe o que vendeu e o que encalhou.',
       ganho: 'O Peplo vende rápido no caixa com leitor de código de barras e pagamento dividido em Pix, cartão e dinheiro, controla o estoque por tamanho e cor, faz trocas, compras e o caixa do dia e mostra as mais vendidas e as peças paradas. Se a loja vende no crediário, também tem limite por cliente.',
-      conta: 'Liquidar a tempo uma única peça que ia encalhar já paga o mês do sistema.' },
+      conta: 'Liquidar a tempo uma única peça que ia encalhar já paga o mês do sistema.',
+        pergunta: 'Hoje o estoque por tamanho e cor aí é no caderno, na planilha ou de cabeça?', cena: 'Imagina saber na hora, pelo celular, qual tamanho acabou e qual peça está parada há 60 dias, antes de virar prejuízo.' },
     annona: { pag: 'annona.html', nome: 'Annona', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'tem mercadinho',
       dor: 'Em mercadinho, o lucro vai embora na mercadoria que vence na prateleira e no fiado sem controle, e no fim do mês fica difícil saber quanto sobrou.',
       ganho: 'O Annona controla o estoque com código de barras e validade por lote, dá entrada pela nota (XML), mostra o que está parado, o fiado com limite e o lucro de cada produto.',
-      conta: 'Deixar de perder algumas caixas de produto vencido por mês já paga o sistema.' },
+      conta: 'Deixar de perder algumas caixas de produto vencido por mês já paga o sistema.',
+        pergunta: 'Hoje vocês controlam a validade dos produtos de algum jeito ou só olhando a prateleira?', cena: 'Imagina o sistema te avisar antes do produto vencer, com tempo de fazer promoção em vez de jogar no lixo.' },
     atria: { pag: 'atria.html', nome: 'Atria', preco: 'R$ 39/mês no Básico (o Pro, com busca de trabalho, é R$ 50)', ramo: 'trabalha com obra e reforma',
       dor: 'Quem trabalha com obra perde serviço por demorar no orçamento e perde dinheiro cobrando no improviso.',
       ganho: 'O Atria é um app de celular que faz o orçamento por m², diária ou empreitada, cobra no Pix direto na sua conta, monta seu portfólio de antes e depois e funciona até sem internet. No Pro, ainda mostra trabalho na sua cidade.',
-      conta: 'Fechar um serviço a mais por mês por mandar o orçamento na hora já paga o app várias vezes.' },
+      conta: 'Fechar um serviço a mais por mês por mandar o orçamento na hora já paga o app várias vezes.',
+        pergunta: 'Hoje você manda orçamento escrito à mão ou digitado no WhatsApp?', cena: 'Imagina sair da visita e mandar na hora um orçamento bonito, com o seu nome e o Pix, antes de o concorrente terminar a conta.' },
     popina: { pag: 'popina.html', nome: 'Popina', preco: 'R$ 79/mês (ou R$ 758/ano)', ramo: 'tem restaurante',
       dor: 'Em restaurante, pedido anotado no papel atrasa a cozinha, sai errado e some na hora de fechar a conta.',
       ganho: 'O Popina é simples de usar: o restaurante ganha um cardápio online com link próprio (sem comissão por pedido), o cliente pede pelo celular e o pedido chega com aviso na tela, vai para a cozinha na hora e o cliente acompanha até a entrega. No salão, o garçom anota no celular e o caixa fecha com Pix, troco, 10% e conta dividida.',
-      conta: 'Um pedido errado a menos por dia já paga o sistema no mês.' },
+      conta: 'Um pedido errado a menos por dia já paga o sistema no mês.',
+        pergunta: 'Hoje os pedidos de delivery aí chegam pelo WhatsApp e alguém anota à mão?', cena: 'Imagina uma sexta à noite cheia: o cliente abre o seu link, escolhe o lanche e o pedido aparece na tela com aviso, direto para a cozinha, sem ninguém digitar nada e sem pagar comissão por pedido.' },
     tecton: { pag: 'tecton.html', nome: 'Tecton', preco: 'R$ 129/mês (ou R$ 1.238/ano)', ramo: 'trabalha com construção',
       ramos: {
         construtora: { ramo: 'toca obras',
           dor: 'Em construtora, o cronograma escorrega, a medição atrasa e só no fim se descobre se a obra deu lucro, enquanto o cliente liga pedindo notícia.',
           ganho: 'Com o Tecton, cada obra mostra na hora se está no prazo e dando lucro: cronograma, medições, diário com foto e o resultado de cada obra, e o cliente acompanha tudo por um link, sem precisar ligar. Funciona no computador e no celular do canteiro.',
-          conta: 'Pegar a tempo um único estouro de material ou uma medição esquecida já paga vários meses do sistema.' },
+          conta: 'Pegar a tempo um único estouro de material ou uma medição esquecida já paga vários meses do sistema.',
+        pergunta: 'Hoje o acompanhamento das obras aí é em planilha?', cena: 'Imagina abrir uma tela e ver na hora qual obra está atrasada e qual está dando prejuízo, com o cliente acompanhando por um link sem te ligar.' },
         loja: { ramo: 'vende material de construção',
           dor: 'Em loja de material, o orçamento do WhatsApp se perde, a entrega sai sem conferência e o fiado do profissional cresce sem limite.',
           ganho: 'Com o Tecton, o balcão vende rápido e o orçamento sai pronto no WhatsApp, as entregas ficam agendadas e conferidas, cada obra tem a sua conta e o fiado do profissional tem limite. Funciona no computador do balcão e no celular de quem entrega.',
-          conta: 'Receber um único fiado que ia ficar para trás já paga vários meses do sistema.' },
+          conta: 'Receber um único fiado que ia ficar para trás já paga vários meses do sistema.',
+        pergunta: 'Hoje os orçamentos do balcão saem pelo WhatsApp escritos à mão?', cena: 'Imagina o orçamento saindo pronto no WhatsApp do cliente em um minuto e cada fiado de profissional com limite, sem surpresa no fim do mês.' },
         imobiliaria: { ramo: 'vende e aluga imóveis',
           dor: 'Em imobiliária, o espelho de vendas vive em planilha, parcela e aluguel atrasam sem ninguém ver e a comissão vira discussão.',
           ganho: 'Com o Tecton, o espelho de vendas mostra na hora o que está livre, reservado e vendido, os contratos geram as parcelas sozinhos, o aluguel entra com o repasse ao proprietário já calculado e cada corretor vê a sua comissão. Funciona no computador e no celular.',
-          conta: 'Cobrar em dia um único aluguel ou parcela atrasada já paga o mês do sistema.' }
+          conta: 'Cobrar em dia um único aluguel ou parcela atrasada já paga o mês do sistema.',
+        pergunta: 'Hoje o espelho de vendas e os aluguéis ficam em planilha?', cena: 'Imagina ver numa tela só o que está livre, reservado e vendido, e os aluguéis entrando com o repasse ao proprietário já calculado.' }
       } }
   };
   // texto do sistema; no Tecton, o do ramo do prospect (construtora, loja ou imobiliária)
@@ -92,25 +101,31 @@
     for (k in r) o[k] = r[k];
     return o;
   }
+  // 22/11/2026: textos no método de linha reta (Belfort), sem prometer o que não é verdade: abre com contexto e uma pergunta
+  // que qualifica, mostra a cena do resultado com certeza, baixa o risco (7 dias grátis, sem fidelidade) e fecha com sim/não.
+  // As retomadas dão um ângulo novo (loop na objeção de tempo) e a última tira a pressão.
+  function minusc(t) { t = String(t || ''); return t ? t.charAt(0).toLowerCase() + t.slice(1) : t; }
   function mensagemSistema(p, acao) {
     var s = textosSis(p), l = link(p), e = String(p.empresa || '').split(' - ')[0].split(' (')[0];
     if (acao === 'retomada1') return [
-      'Olá! Retomando rápido a mensagem sobre o ' + s.nome + '.',
+      'Oi! Voltando rapidinho sobre o ' + s.nome + '.',
       s.conta,
-      'Dá para ver funcionando, sem cadastro, e testar *7 dias grátis*: ' + l,
-      'Se não for o momento, me avisa e eu paro por aqui.'].join('\n\n');
+      'Muita gente me diz que não tem tempo de aprender sistema novo. Por isso ele já vem pronto para usar, e eu te ajudo a configurar por mensagem, sem você parar o trabalho.',
+      'Dá uma olhada, leva 2 minutos e não precisa cadastro: ' + l,
+      'Faz sentido testar os *7 dias grátis* ainda essa semana?'].join('\n\n');
     if (acao === 'retomada2') return [
-      'Olá! Última mensagem para não incomodar.',
-      'Fica o resumo: ' + s.ganho,
-      'Custa ' + s.preco + ', direto pelo site, sem fidelidade, e dá para testar *7 dias grátis* antes (nada é cobrado nos 7 dias). Detalhes: ' + l,
-      'Obrigado pela atenção!\nBlue Rose Express'].join('\n\n');
+      'Oi! Última mensagem, prometo.',
+      'Não vou insistir: se agora não é o momento, tudo bem. Só deixo o resumo para quando precisar: ' + s.ganho,
+      s.preco + ', sem fidelidade, com *7 dias grátis* para testar (nada é cobrado nesse período): ' + l,
+      'Se um dia quiser, é só responder esta mensagem. Abraço!\nBlue Rose Express'].join('\n\n');
     return ['Olá, tudo bem?',
-      'Sou da Blue Rose Express, de Orlândia. Vi o perfil de ' + e + ' em ' + p.cidade + ', por isso a mensagem.',
-      s.dor,
-      s.ganho,
-      'Dá para ver funcionando, sem cadastro: ' + l,
-      'Custa ' + s.preco + ', sem fidelidade, e você pode testar *7 dias grátis* antes de pagar (nada é cobrado nos 7 dias e dá para cancelar quando quiser).',
-      'Se não fizer sentido, é só me avisar que não mando mais mensagem.'].join('\n\n');
+      'Aqui é da Blue Rose Express, de Orlândia. Vi ' + e + ' em ' + p.cidade + ' e quis te mostrar uma coisa rápida.',
+      s.pergunta ? s.pergunta + ' Pergunto porque ' + minusc(s.dor) : s.dor,
+      (s.cena ? s.cena + ' ' : '') + 'É isso que o ' + s.nome + ' faz. ' + s.conta,
+      'Você pode ver funcionando agora, sem cadastro: ' + l,
+      'E o risco é zero: são *7 dias grátis*, nada é cobrado nesse período e dá para cancelar quando quiser. Depois, ' + s.preco + ', sem fidelidade.',
+      'Posso te mandar o passo a passo para começar o teste hoje?',
+      'Se não fizer sentido, me avisa que eu não mando mais.'].join('\n\n');
   }
   function recente(p) {
     if (!p.anuncios_data || !p.anuncios_usados) return false;
