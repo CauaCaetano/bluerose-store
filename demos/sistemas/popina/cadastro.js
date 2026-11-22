@@ -1,14 +1,14 @@
 // Popina · cadastros da Gestão: cardápio (pratos, tamanhos, meio a meio, por quilo, complementos, foto e o que tira do estoque),
 // estoque simples (o que tem, o que acaba, contagem, perdas e lista de compras), clientes com fiado e entregadores com o acerto.
 import { db, t, din, r2, num, vir, uid, grava, prod, insumo, saldo, estoqueBaixo, entradaCompra, registrarPerda, ajustarEstoque, fmtQtd, MOTIVOS_PERDA,
-  clientesFiado, saldoFiado, limiteFiado, nomeFiado, fone, zap, soDig, acertoEntregadores, inicioDoDia, hora, aPartir } from './loja.js?v=45';
-import { acao, ir } from './nucleo.js?v=45';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=45';
-import { G, volta, reduzir } from './gestao.js?v=45';
-import { fotoProd } from './salao.js?v=45';
-import { cardapioExemplo } from './dados.js?v=45';
-import { receberFiadoFolha } from './caixa.js?v=45';
-import { imprimir } from './imprimir.js?v=45';
+  clientesFiado, saldoFiado, limiteFiado, nomeFiado, fone, zap, soDig, acertoEntregadores, inicioDoDia, hora, aPartir } from './loja.js?v=46';
+import { acao, ir } from './nucleo.js?v=46';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=46';
+import { G, volta, reduzir } from './gestao.js?v=46';
+import { fotoProd } from './salao.js?v=46';
+import { cardapioExemplo } from './dados.js?v=46';
+import { receberFiadoFolha } from './caixa.js?v=46';
+import { imprimir } from './imprimir.js?v=46';
 
 // ------------------------------------------------------------------ cardápio
 let catG = '';
@@ -21,7 +21,7 @@ G.cardapio = {
       ${db.produtos.length ? '' : `<button type="button" class="bt" data-acao="usar-exemplo">${ico('troca')}Começar com o cardápio de exemplo</button>`}</div>
     <div class="chips" role="group" aria-label="Categorias"><button type="button" class="chip" data-catg="" aria-pressed="${!catG}">Todos</button>${cats.map((k) => `<button type="button" class="chip" data-catg="${t(k.id)}" aria-pressed="${catG === k.id}">${t(k.nome)}</button>`).join('')}</div>
     <div class="prods">${l.map((p) => `<div class="prod ${p.ativo === false ? 'off' : ''}">${fotoProd(p)}<div class="tx"><b>${t(p.nome)}</b><small>${t(cats.find((k) => k.id === p.cat)?.nome || 'Sem categoria')}${p.tamanhos?.length ? ` · ${p.tamanhos.length} tamanhos` : ''}${p.pizza ? ' · meio a meio' : ''}${p.porKg ? ' · por quilo' : ''}${(p.grupos || []).length ? ` · ${p.grupos.length} complementos` : ''}</small>
-      <span class="preco">${p.porKg ? `${din(p.preco)}/kg` : din(aPartir(p))}</span></div>
+      <span class="preco">${p.codigo ? `<span class="cod">${t(p.codigo)}</span>` : ''}${p.porKg ? `${din(p.preco)}/kg` : din(aPartir(p))}</span>${p.ativo === false ? '<span class="etq alerta">Esgotado</span>' : ''}</div>
       <label class="liga" style="border:0;min-height:0;padding:0" title="${p.ativo === false ? 'Fora do cardápio' : 'No cardápio'}"><span class="sr">No cardápio</span><input type="checkbox" data-ativo="${t(p.id)}" ${p.ativo === false ? '' : 'checked'}></label>
       <button type="button" class="bt-ico" data-acao="prod-ed" data-id="${t(p.id)}" aria-label="Editar ${t(p.nome)}">${ico('ajustes')}</button></div>`).join('') || '<p class="vazio">Nenhum prato ainda. Toque em “Novo prato”.</p>'}</div>`;
   },
@@ -62,6 +62,7 @@ acao('prod-ed', (b) => {
     <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px"><div class="logo-prev" data-foto-prev style="background-size:cover;${foto ? `background-image:url('${t(foto)}')` : ''}">${foto ? '' : ico('prato')}</div>
       <div class="linha-bts"><label class="bt">${ico('mais2')}${foto ? 'Trocar a foto' : 'Pôr foto'}<input type="file" accept="image/*" data-foto hidden></label>${foto ? '<button type="button" class="bt" data-tira-foto>Tirar</button>' : ''}</div></div>
     <label class="campo"><span>Nome</span><input data-n maxlength="60" value="${t(p?.nome || '')}" placeholder="Ex.: X-Salada"></label>
+    <label class="campo"><span>Código (opcional)</span><input data-cod maxlength="12" value="${t(p?.codigo || '')}" placeholder="Ex.: 12" autocomplete="off"><small>Para achar rápido no balcão: digite o código e aperte Enter.</small></label>
     <div class="grade2"><label class="campo"><span>Preço (R$)</span><input data-pr inputmode="decimal" value="${p ? vir(Number(p.preco).toFixed(2)) : ''}" placeholder="0,00"></label>
       <label class="campo"><span>Categoria</span><select data-cat>${db.categorias.map((k) => `<option value="${t(k.id)}" ${k.id === (p?.cat || catG) ? 'selected' : ''}>${t(k.nome)}</option>`).join('')}</select></label></div>
     <label class="campo"><span>Descrição (opcional)</span><input data-d maxlength="140" value="${t(p?.desc || '')}" placeholder="O que vem no prato"></label>
@@ -94,7 +95,9 @@ acao('prod-ed', (b) => {
       const ficha = $$('[data-fi]', f).map((r) => ({ insumo: $('[data-fins]', r).value, qtd: num($('[data-fq]', r).value) })).filter((x) => x.insumo && x.qtd > 0);
       // tamanho guarda o "fator" (quanto tira do estoque): proporcional ao preço do maior tamanho
       const maior = tamanhos.length ? Math.max(...tamanhos.map((x) => x.preco)) : 0;
-      const d = { nome, preco, cat: $('[data-cat]', f).value, desc: $('[data-d]', f).value.trim(), setor: $('[data-setor][aria-pressed=true]', f)?.dataset.setor || 'cozinha', foto,
+      const codigo = $('[data-cod]', f).value.trim();
+      if (codigo && db.produtos.some((x) => x !== p && String(x.codigo || '').toLowerCase() === codigo.toLowerCase())) return toast(`O código ${codigo} já é de outro prato`);
+      const d = { nome, preco, codigo, cat: $('[data-cat]', f).value, desc: $('[data-d]', f).value.trim(), setor: $('[data-setor][aria-pressed=true]', f)?.dataset.setor || 'cozinha', foto,
         destaque: $('[data-dest]', f).checked, pizza: $('[data-pizza]', f).checked, porKg: $('[data-kg]', f).checked,
         tamanhos: tamanhos.map((x) => ({ ...x, fator: (p?.tamanhos || []).find((y) => y.nome === x.nome)?.fator ?? (maior ? Math.round((x.preco / maior) * 100) / 100 : 1) })), grupos, adicionais: linhas($('[data-adic]', f).value), ficha };
       if (!d.tamanhos.length) d.tamanhos = []; // sem tamanho: o preço de cima
@@ -189,7 +192,10 @@ acao('cli-ver', (b) => {
   const lanc = (db.fiado?.lanc || []).filter((l) => l.cliente === cid).sort((a, x) => x.ts - a.ts), s = saldoFiado(cid);
   folha({ titulo: c.nome || fone(c.tel), corpo: `<p><a class="bt" target="_blank" rel="noopener" href="${zap(c.tel, `Olá, ${(c.nome || '').split(' ')[0]}!`)}">${ico('zap')}${t(fone(c.tel))}</a></p>
     <ul class="lista-l" style="margin-top:10px"><li><div class="tx">Pedidos</div><b>${c.pedidos || 0}</b></li><li><div class="tx">Gastou no total</div><b>${din(c.total || 0)}</b></li>${c.end ? `<li><div class="tx">Endereço</div><b>${t(c.end)}${c.bairro ? ` · ${t(c.bairro)}` : ''}</b></li>` : ''}
+      ${(() => { const h = db.vendas.filter((v) => v.cliente === soDig(c.tel) && !v.cancelado).sort((a, x) => x.ts - a.ts); return h.length ? `<li><div class="tx">Média por pedido</div><b>${din(h.reduce((a, v) => a + v.total, 0) / h.length)}</b></li>` : ''; })()}
       <li><div class="tx">Fiado: deve</div><b>${din(s)}</b></li><li><div class="tx">Limite do fiado</div><b><input data-lim inputmode="decimal" style="width:120px;min-height:44px" value="${vir(limiteFiado(cid))}" aria-label="Limite do fiado"></b></li></ul>
+    ${(() => { const h = db.vendas.filter((v) => v.cliente === soDig(c.tel)).sort((a, x) => x.ts - a.ts).slice(0, 15);
+      return `<p class="grupo-tit">Pedidos (${h.length ? `últimos ${h.length}` : 'nenhum registrado ainda'})</p>${h.length ? `<ul class="lista-l">${h.map((v) => `<li><div class="tx"><b>${new Date(v.ts).toLocaleDateString('pt-BR')} ${hora(v.ts)} · ${t(v.onde || '')}${v.cancelado ? ' · cancelada' : ''}</b><small>${t((v.itens || []).map((i) => `${i.kg ? '' : `${i.qtd}× `}${i.nome}`).join(', '))}</small></div><b class="num">${din(v.total)}</b></li>`).join('')}</ul>` : ''}`; })()}
     ${lanc.length ? `<p class="grupo-tit">Extrato do fiado</p><ul class="lista-l">${lanc.slice(0, 30).map((l) => `<li><div class="tx"><b>${l.tipo === 'compra' ? 'Comprou' : `Pagou (${t(l.forma || '')})`}</b><small>${new Date(l.ts).toLocaleDateString('pt-BR')} ${hora(l.ts)}${l.onde ? ` · ${t(l.onde)}` : ''}</small></div><b class="num">${l.tipo === 'compra' ? '' : '− '}${din(l.valor)}</b></li>`).join('')}</ul>` : ''}`,
   pe: `${s > 0.009 ? `<button type="button" class="bt cheio grande" data-rec>${ico('moedas')}Receber</button>` : ''}<button type="button" class="bt grande" data-salvar-lim>Salvar limite</button>`,
   aoAbrir: (f, fechar) => {
@@ -202,17 +208,31 @@ acao('cli-ver', (b) => {
 G.entregadores = {
   titulo: 'Entregadores',
   html() {
-    const ac = acertoEntregadores(inicioDoDia());
+    const ac = acertoEntregadores(inicioDoDia()), acertos = (db.acertos || []).filter((a) => a.ts >= inicioDoDia());
     return volta('Entregadores', 'Quem leva cada pedido e o acerto das taxas de hoje') + `
     <div class="linha-bts" style="margin-bottom:14px"><button type="button" class="bt cheio grande" data-acao="entregador-ed">${ico('mais2')}Novo entregador</button></div>
     <div class="rolo"><table class="tabela"><thead><tr><th>Entregador</th><th class="n">Entregas hoje</th><th class="n">Taxas hoje</th><th class="n">Recebeu em dinheiro</th><th></th></tr></thead><tbody>
-    ${(db.entregadores || []).map((e) => { const a = ac[e.id] || { entregas: 0, taxas: 0, dinheiro: 0 };
-      return `<tr><td><b>${t(e.nome)}</b><small>${t(fone(e.tel))}</small></td><td class="n">${a.entregas}</td><td class="n"><b>${din(a.taxas)}</b></td><td class="n">${din(a.dinheiro)}</td>
-      <td class="n">${e.tel ? `<a class="bt-ico" target="_blank" rel="noopener" href="${zap(e.tel, `Acerto de hoje no ${db.config.nome}: ${a.entregas} entregas, ${din(a.taxas)} de taxas. Dinheiro recebido dos clientes: ${din(a.dinheiro)}.`)}" aria-label="Mandar o acerto">${ico('zap')}</a>` : ''}<button type="button" class="bt-ico" data-acao="entregador-ed" data-id="${t(e.id)}" aria-label="Editar">${ico('ajustes')}</button></td></tr>`; }).join('') || '<tr><td colspan="5" class="mudo">Cadastre os entregadores: ao marcar “Saiu para entrega”, você escolhe quem levou.</td></tr>'}
+    ${(db.entregadores || []).map((e) => { const a = ac[e.id] || { entregas: 0, taxas: 0, dinheiro: 0 }, rua = db.comandas.filter((x) => x.entregador === e.id && x.entrega === 'saiu').length, ok = acertos.filter((x) => x.entregador === e.id).at(-1);
+      return `<tr><td><b>${t(e.nome)}</b><small>${t(fone(e.tel))}${rua ? ` · <b>${rua} na rua agora</b>` : ''}${ok ? ` · acertado às ${hora(ok.ts)}` : ''}</small></td><td class="n">${a.entregas}</td><td class="n"><b>${din(a.taxas)}</b></td><td class="n">${din(a.dinheiro)}</td>
+      <td class="n"><button type="button" class="bt pq" data-acao="acerto" data-id="${t(e.id)}">Acerto</button>${e.tel ? `<a class="bt-ico" target="_blank" rel="noopener" href="${zap(e.tel, `Acerto de hoje no ${db.config.nome}: ${a.entregas} entregas, ${din(a.taxas)} de taxas. Dinheiro recebido dos clientes: ${din(a.dinheiro)}.`)}" aria-label="Mandar o acerto">${ico('zap')}</a>` : ''}<button type="button" class="bt-ico" data-acao="entregador-ed" data-id="${t(e.id)}" aria-label="Editar">${ico('ajustes')}</button></td></tr>`; }).join('') || '<tr><td colspan="5" class="mudo">Cadastre os entregadores: ao marcar “Saiu para entrega”, você escolhe quem levou.</td></tr>'}
     </tbody></table></div>
     <p class="mudo" style="margin-top:10px">“Recebeu em dinheiro” é o que o entregador cobrou dos clientes e precisa devolver ao caixa.</p>`;
   },
 };
+// acerto do dia: as entregas de hoje, quanto pagar de taxa e quanto ele devolve do dinheiro dos clientes
+acao('acerto', (b) => {
+  const e = (db.entregadores || []).find((x) => x.id === b.dataset.id); if (!e) return;
+  const h = inicioDoDia(), l = db.vendas.filter((v) => v.ts >= h && v.entregador === e.id && !v.cancelado).sort((a, x) => a.ts - x.ts);
+  const a = acertoEntregadores(h)[e.id] || { entregas: 0, taxas: 0, dinheiro: 0 }, saldo = r2(a.dinheiro - a.taxas);
+  const rua = db.comandas.filter((x) => x.entregador === e.id && x.entrega === 'saiu');
+  folha({ titulo: `Acerto de ${e.nome} · hoje`, larga: true, corpo: `${rua.length ? `<p class="aviso">${rua.length} ${rua.length === 1 ? 'entrega ainda está' : 'entregas ainda estão'} na rua e não entram nesta conta.</p>` : ''}
+    <ul class="lista-l">${l.map((v) => `<li><div class="tx"><b>${hora(v.entregue || v.ts)} · ${t(v.nomeCliente || v.onde || '')}</b><small>${t(v.onde || '')} · ${t(pagamentosDe(v))}</small></div><b class="num">${din(v.entrega || 0)}</b></li>`).join('') || '<li class="mudo">Nenhuma entrega fechada hoje.</li>'}</ul>
+    <div class="totais"><div><span>Taxas para pagar a ele (${a.entregas})</span><span class="num">${din(a.taxas)}</span></div><div><span>Dinheiro que ele recebeu dos clientes</span><span class="num">${din(a.dinheiro)}</span></div>
+      <div class="total"><span>${saldo >= 0 ? 'Ele devolve ao caixa' : 'O caixa paga a ele'}</span><span class="num">${din(Math.abs(saldo))}</span></div></div>`,
+  pe: `${e.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(e.tel, `Acerto de hoje no ${db.config.nome}: ${a.entregas} entregas, ${din(a.taxas)} de taxas. Dinheiro recebido dos clientes: ${din(a.dinheiro)}. ${saldo >= 0 ? `Devolver ao caixa: ${din(saldo)}` : `O caixa te paga: ${din(-saldo)}`}.`)}">${ico('zap')}Mandar</a>` : ''}<button type="button" class="bt cheio grande" data-ok>Marcar como acertado</button>`,
+  aoAbrir: (f, fechar) => { $('[data-ok]', f).onclick = () => { (db.acertos ||= []).push({ id: uid('ac'), ts: Date.now(), entregador: e.id, entregas: a.entregas, taxas: a.taxas, dinheiro: a.dinheiro, saldo }); if (db.acertos.length > 500) db.acertos.splice(0, db.acertos.length - 500); grava(); fechar(); toast(`Acerto de ${e.nome} registrado`); }; } });
+});
+const pagamentosDe = (v) => (v.pagamentos?.length ? v.pagamentos : [{ forma: v.forma }]).map((p) => p.forma).join(' + ');
 acao('entregador-ed', (b) => {
   const e = b.dataset.id ? db.entregadores.find((x) => x.id === b.dataset.id) : null;
   folha({ titulo: e ? e.nome : 'Novo entregador', corpo: `<label class="campo"><span>Nome</span><input data-n value="${t(e?.nome || '')}"></label><label class="campo"><span>WhatsApp</span><input data-t inputmode="tel" value="${t(fone(e?.tel || ''))}"></label>${e ? '<button type="button" class="bt perigo" data-apagar>Tirar da lista</button>' : ''}`,

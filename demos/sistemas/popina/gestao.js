@@ -1,18 +1,19 @@
 // Popina · Gestão: o menu e as telas do dono (restaurante, mesas e QR, equipe, minha conta). As outras telas da Gestão
 // (cardápio, estoque, clientes, entregadores, relatórios) entram por G em cadastro.js e relatorios.js.
-import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=45';
-import { registrar, acao, ir } from './nucleo.js?v=45';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=45';
+import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=46';
+import { registrar, acao, ir } from './nucleo.js?v=46';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=46';
 import { qrSVG } from '../base/qr.js';
-import { DIAS } from './opcoes.js?v=45';
-import { imprimir } from './imprimir.js?v=45';
-import { telaEquipe } from './equipe.js?v=45';
+import { DIAS } from './opcoes.js?v=46';
+import { imprimir } from './imprimir.js?v=46';
+import { telaEquipe } from './equipe.js?v=46';
 
 export const G = {};      // sub-telas: G[nome] = { titulo, html(), montar(el) }
 export const volta = (titulo, sub = '') => `<button type="button" class="voltar" data-ir="mais">${ico('voltar')}Gestão</button><div class="cab"><div><h1>${titulo}</h1>${sub ? `<p>${sub}</p>` : ''}</div></div>`;
 const MENU = [
   ['cardapio', 'Cardápio', 'cardapio', 'Pratos, preços, tamanhos, fotos e complementos'],
   ['mesas', 'Mesas e QR', 'qr', 'Quantas mesas, QR de cada mesa e link do delivery'],
+  ['cupons', 'Cupons', 'etiqueta', 'Código de desconto ou entrega grátis no cardápio online'],
   ['estoque', 'Estoque', 'estoque', 'O que tem, o que está acabando e a lista de compras'],
   ['relatorios', 'Relatórios', 'grafico', 'Vendas, mais vendidos, horários e garçons'],
   ['clientes', 'Clientes e fiado', 'pessoas', 'Quem pede, quanto gasta e quem deve'],
@@ -109,6 +110,48 @@ G.restaurante = {
     };
   },
 };
+
+// ------------------------------------------------------------------ cupons do cardápio online (config.loja.cupons)
+const TIPOS_CUPOM = [['pct', '% de desconto'], ['valor', 'R$ de desconto'], ['frete', 'Entrega grátis']];
+const descCupom = (k) => (k.tipo === 'frete' ? 'Entrega grátis' : k.tipo === 'pct' ? `${vir(Number(k.valor) || 0)}% de desconto` : `${din(k.valor)} de desconto`);
+G.cupons = {
+  titulo: 'Cupons',
+  html() {
+    const l = Array.isArray(lojaCfg().cupons) ? lojaCfg().cupons : [];
+    return volta('Cupons', 'O cliente digita o código no cardápio online e o desconto já vem no pedido') + `
+    <div class="linha-bts" style="margin-bottom:14px"><button type="button" class="bt cheio grande" data-acao="cupom-ed">${ico('mais2')}Novo cupom</button></div>
+    <div class="cartao"><ul class="lista-l">${l.map((k) => `<li><div class="tx"><b><span class="cod">${t(k.codigo)}</span>${descCupom(k)}</b><small>${Number(k.minimo) ? `pedido mínimo ${din(k.minimo)} · ` : ''}${k.validade ? `até ${new Date(`${k.validade}T12:00`).toLocaleDateString('pt-BR')} · ` : ''}usado ${Number(k.usos) || 0}${Number(k.limite) ? ` de ${k.limite}` : ''} ${Number(k.usos) === 1 ? 'vez' : 'vezes'}</small></div>
+      <label class="liga" style="border:0;min-height:0;padding:0"><span class="sr">Ativo</span><input type="checkbox" data-cup-on="${t(k.id)}" ${k.ativo === false ? '' : 'checked'}></label>
+      <button type="button" class="bt-ico" data-acao="cupom-ed" data-id="${t(k.id)}" aria-label="Editar ${t(k.codigo)}">${ico('ajustes')}</button></li>`).join('') || '<li class="mudo">Nenhum cupom. Crie um para divulgar no Instagram ou no status do WhatsApp (ex.: PRIMEIRA10).</li>'}</ul></div>`;
+  },
+  montar(el) { $$('[data-cup-on]', el).forEach((i) => { i.onchange = () => { const k = (lojaCfg().cupons || []).find((x) => x.id === i.dataset.cupOn); if (k) { k.ativo = i.checked; grava(); toast(i.checked ? `${k.codigo} ligado` : `${k.codigo} desligado`); } }; }); },
+};
+acao('cupom-ed', (b) => {
+  const l = Array.isArray(lojaCfg().cupons) ? lojaCfg().cupons : [], k = b.dataset.id ? l.find((x) => x.id === b.dataset.id) : null;
+  let tipo = k?.tipo || 'pct';
+  folha({ titulo: k ? `Cupom ${k.codigo}` : 'Novo cupom', corpo: `<label class="campo"><span>Código (o cliente digita)</span><input data-cod maxlength="20" value="${t(k?.codigo || '')}" placeholder="Ex.: PRIMEIRA10" autocomplete="off" style="text-transform:uppercase"></label>
+    <div class="chips quebra" role="group" aria-label="Tipo">${TIPOS_CUPOM.map(([x, n]) => `<button type="button" class="chip" data-tp="${x}" aria-pressed="${tipo === x}">${n}</button>`).join('')}</div>
+    <div class="grade2" style="margin-top:12px"><label class="campo" data-val-l ${tipo === 'frete' ? 'hidden' : ''}><span data-val-n>${tipo === 'pct' ? 'Quantos %' : 'Quantos R$'}</span><input data-val inputmode="decimal" value="${k?.valor ? vir(k.valor) : ''}" placeholder="10"></label>
+      <label class="campo"><span>Pedido mínimo (R$, opcional)</span><input data-min inputmode="decimal" value="${Number(k?.minimo) ? vir(k.minimo) : ''}" placeholder="0,00"></label></div>
+    <div class="grade2"><label class="campo"><span>Vale até (opcional)</span><input type="date" data-ate value="${t(k?.validade || '')}"></label>
+      <label class="campo"><span>Quantas vezes pode usar (opcional)</span><input data-lim inputmode="numeric" value="${Number(k?.limite) || ''}" placeholder="Sem limite"></label></div>
+    ${k ? '<button type="button" class="bt perigo" data-apagar>Apagar cupom</button>' : ''}`,
+  pe: '<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio grande" data-ok>Salvar</button>',
+  aoAbrir: (f, fechar) => {
+    $$('[data-tp]', f).forEach((x) => { x.onclick = () => { tipo = x.dataset.tp; $$('[data-tp]', f).forEach((y) => y.setAttribute('aria-pressed', y === x)); $('[data-val-l]', f).hidden = tipo === 'frete'; $('[data-val-n]', f).textContent = tipo === 'pct' ? 'Quantos %' : 'Quantos R$'; }; });
+    $('[data-apagar]', f)?.addEventListener('click', async () => { if (!(await confirma(`Apagar o cupom ${k.codigo}?`, 'Apagar', true))) return; setLoja({ cupons: l.filter((x) => x !== k) }); fechar(); toast('Cupom apagado'); });
+    $('[data-ok]', f).onclick = () => {
+      const codigo = $('[data-cod]', f).value.trim().toUpperCase().replace(/\s+/g, ''), valor = r2(num($('[data-val]', f).value));
+      if (codigo.length < 3) return toast('O código precisa de pelo menos 3 letras ou números');
+      if (l.some((x) => x !== k && String(x.codigo).toUpperCase() === codigo)) return toast('Já existe um cupom com este código');
+      if (tipo !== 'frete' && !(valor > 0)) return toast('Escreva o valor do desconto');
+      if (tipo === 'pct' && valor > 100) return toast('O desconto vai até 100%');
+      const d = { codigo, tipo, valor: tipo === 'frete' ? 0 : valor, minimo: r2(num($('[data-min]', f).value)), validade: $('[data-ate]', f).value || '', limite: Math.max(0, Math.round(num($('[data-lim]', f).value))) };
+      if (k) Object.assign(k, d); else l.push({ id: uid('cp'), ativo: true, usos: 0, criado: Date.now(), ...d });
+      setLoja({ cupons: l }); fechar(); toast('Cupom salvo');
+    };
+  } });
+});
 
 // ------------------------------------------------------------------ mesas e QR
 const nMesas = () => Math.max(1, Math.min(200, Number(db.config.mesas) || 10));

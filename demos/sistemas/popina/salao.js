@@ -1,11 +1,13 @@
 // Popina · salão (o que fazer agora e as mesas), a comanda de qualquer conta e o lançar itens do garçom.
 import { db, t, din, tempo, comanda, comandaDaMesa, abrirMesa, adicionarItem, enviar, mudarStatus, cancelarItem, transferir, juntarMesas, conta, valorItem, itensValidos,
-  fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2 } from './loja.js?v=45';
-import { registrar, acao, ir } from './nucleo.js?v=45';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=45';
-import { formOpcoes, temOpcoes } from './opcoes.js?v=45';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=45';
-import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=45';
+  fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2,
+  aguardaAceite } from './loja.js?v=46';
+import { escolherEntregador } from './pedidos.js?v=46';
+import { registrar, acao, ir } from './nucleo.js?v=46';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=46';
+import { formOpcoes, temOpcoes } from './opcoes.js?v=46';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=46';
+import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=46';
 
 const ESTADO = { livre: 'Livre', ocupada: 'Ocupada', conta: 'Pediu a conta', pronto: 'Prato pronto', chamou: 'Chamou', qr: 'Pedido do QR' };
 const nMesas = () => Math.max(1, Math.min(200, Number(db.config.mesas) || 10));
@@ -95,11 +97,12 @@ export function blocoTotais(c) {
 }
 function infoCliente(c) {
   const cl = c.cliente || {}; if (c.tipo === 'mesa') return '';
-  const ent = { novo: 'Recebido', preparo: 'Preparando', saiu: 'Saiu para entrega' }[c.entrega] || '';
+  const ent = { novo: 'Recebido', preparo: 'Preparando', saiu: 'Saiu para entrega', entregue: 'Entregue' }[c.entrega] || '';
   const entregador = c.entregador ? (db.entregadores || []).find((e) => e.id === c.entregador)?.nome || '' : '';
   return `<div class="cartao"><h2>${t(cl.nome || 'Cliente')}</h2>
     ${cl.tel ? `<p><a href="${zap(cl.tel, `Olá, ${(cl.nome || '').split(' ')[0]}! Aqui é do ${db.config.nome}.`)}" target="_blank" rel="noopener" class="bt pq">${ico('zap')}${t(fone(cl.tel))}</a></p>` : ''}
-    ${c.tipo === 'delivery' ? `<p style="margin-top:8px"><b>Entregar em:</b> ${t(cl.end || 'sem endereço')}${cl.bairro ? ` · ${t(cl.bairro)}` : ''}</p>` : ''}
+    ${c.tipo === 'delivery' ? `<p style="margin-top:8px"><b>Entregar em:</b> ${t(cl.end || 'sem endereço')}${cl.bairro ? ` · ${t(cl.bairro)}` : ''}</p>${cl.ref ? `<p><b>Referência:</b> ${t(cl.ref)}</p>` : ''}` : ''}
+    ${c.agendado ? `<p style="margin-top:6px"><span class="etq saiu">Agendado para ${new Date(c.agendado).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span></p>` : ''}
     ${c.pagarNaEntrega ? `<p><b>Paga na entrega:</b> ${t(c.pagarNaEntrega)}${c.trocoPara ? ` · levar troco para ${din(c.trocoPara)} (troco de ${din(Math.max(0, c.trocoPara - conta(c).falta))})` : ''}</p>` : c.trocoPara ? `<p><b>Troco para:</b> ${din(c.trocoPara)}</p>` : ''}
     ${c.tipo === 'delivery' ? `<p style="margin-top:8px"><span class="etq ${c.entrega === 'saiu' ? 'saiu' : 'prep'}">${ent}</span>${entregador ? ` com ${t(entregador)}` : ''}${c.saiu ? ` às ${hora(c.saiu)}` : ''}</p>` : ''}
     ${c.origem ? `<p class="mudo" style="margin-top:6px">Pedido feito: ${t(c.origem)} · ${hora(c.aberta)}</p>` : ''}</div>`;
@@ -110,7 +113,7 @@ export function telaComanda(c) {
   const prontos = vivos.filter((i) => i.status === 'pronto').length;
   return `${voltar(voltarPara(c), c.tipo === 'mesa' ? 'Salão' : 'Pedidos')}
     <div class="com-cab"><h1>${t(c.tipo === 'mesa' ? `Mesa ${c.mesa}` : quemPediu(c))}</h1>${c.senha ? `<span class="etq novo">Senha ${c.senha}</span>` : ''}
-      <span class="info">${c.tipo === 'mesa' ? `${c.pessoas || 1} ${c.pessoas === 1 ? 'pessoa' : 'pessoas'}${c.garcom ? ` · ${t(c.garcom)}` : ''}` : t(ondeComanda(c))} · aberta há ${tempo(c.aberta)}</span>${c.pediuConta ? '<span class="etq prep">Pediu a conta</span>' : ''}</div>
+      <span class="info">${c.tipo === 'mesa' ? `${c.pessoas || 1} ${c.pessoas === 1 ? 'pessoa' : 'pessoas'}${c.garcom ? ` · ${t(c.garcom)}` : ''}` : t(ondeComanda(c))} · aberta há ${tempo(c.aberta)}</span>${c.pediuConta ? '<span class="etq prep">Pediu a conta</span>' : ''}${c.quitado ? '<span class="etq livre">Pago</span>' : ''}</div>
     <div class="duas lado"><div>
       ${infoCliente(c)}
       <div class="cartao">${vivos.length || c.itens.length ? grupos.filter(([, l]) => l.length).map(([n, l]) => `<p class="grupo-tit">${n}</p><ul class="itens">${l.map((i) => linhaItem(c, i)).join('')}</ul>`).join('') : '<p class="vazio">Nada lançado ainda. Toque em “Lançar itens”.</p>'}
@@ -118,7 +121,9 @@ export function telaComanda(c) {
     </div><div>
       <div class="cartao"><h2>Ações</h2><div class="linha-bts">
         ${prontos ? `<button type="button" class="bt ok" data-acao="entregar" data-id="${c.id}">${ico('check')}Entreguei os prontos</button>` : ''}
-        ${c.tipo === 'delivery' && c.entrega !== 'saiu' ? `<button type="button" class="bt" data-acao="saiu" data-id="${c.id}">${ico('moto')}Saiu para entrega</button>` : ''}
+        ${aguardaAceite(c) ? `<button type="button" class="bt cheio" data-acao="ped-aceitar" data-id="${c.id}">${ico('check')}Aceitar o pedido</button><button type="button" class="bt perigo" data-acao="ped-recusar" data-id="${c.id}">Recusar</button>` : ''}
+        ${c.tipo === 'delivery' && !['saiu', 'entregue'].includes(c.entrega) ? `<button type="button" class="bt" data-acao="saiu" data-id="${c.id}">${ico('moto')}Saiu para entrega</button>` : ''}
+        ${c.tipo !== 'mesa' && (c.quitado || c.entrega === 'saiu') ? `<button type="button" class="bt ok" data-acao="ped-entregue" data-id="${c.id}">${ico('check')}Entregue</button>` : ''}
         ${c.tipo === 'balcao' && prontos ? `<button type="button" class="bt" data-acao="chamar-cli" data-id="${c.id}">${ico('fala')}Chamar ${c.senha ? `senha ${c.senha}` : 'cliente'}</button>` : ''}
         <button type="button" class="bt" data-acao="imp-conta" data-id="${c.id}">${ico('impressora')}Imprimir conta</button>
         ${vivos.some((i) => i.status !== 'rascunho') ? `<button type="button" class="bt" data-acao="imp-coz" data-id="${c.id}">${ico('cozinha')}Imprimir pedido da cozinha</button>` : ''}
@@ -131,6 +136,7 @@ export function telaComanda(c) {
     </div></div>
     <div class="barra-fixa"><button type="button" class="bt grande" data-ir="lancar/${c.id}">${ico('mais2')}Lançar itens</button>
       ${rasc.length ? `<button type="button" class="bt cheio grande" data-acao="mandar" data-id="${c.id}">${ico('cozinha')}Mandar (${rasc.reduce((s, i) => s + i.qtd, 0)})</button>`
+        : c.quitado ? `<button type="button" class="bt ok grande" data-acao="ped-entregue" data-id="${c.id}">${ico('check')}Pago · Entregue</button>`
         : `<button type="button" class="bt cheio grande" data-ir="fechar/${c.id}" ${v.total <= 0 && !c.itens.length ? 'disabled' : ''}>${ico('conta')}Fechar conta</button>`}</div>`;
 }
 registrar('mesa', {
@@ -149,13 +155,7 @@ acao('mandar', (b) => { const c = comanda(b.dataset.id); if (!c) return; const n
 acao('imp-coz', (b) => { const c = comanda(b.dataset.id); if (!c) return; const l = itensValidos(c).filter((i) => !['rascunho', 'entregue'].includes(i.status)); imprimirCozinha(c, l.length ? l : itensValidos(c).filter((i) => i.status !== 'rascunho')); });
 acao('pediu-conta', (b) => { const c = comanda(b.dataset.id); if (!c) return; c.pediuConta = c.pediuConta ? 0 : Date.now(); if (!c.pediuConta) delete c.pediuConta; grava(); });
 acao('chamar-cli', (b) => { const c = comanda(b.dataset.id); if (!c) return; c.itens.filter((i) => i.status === 'pronto').forEach((i) => { i.status = 'entregue'; i.entregue = Date.now(); }); c.chamada = Date.now(); grava(); toast(`Chame: ${c.senha ? `senha ${c.senha}` : ''} ${c.cliente?.nome || ''}`.trim()); });
-acao('saiu', (b) => {
-  const c = comanda(b.dataset.id); if (!c) return; const l = db.entregadores || [];
-  const sai = (id) => { c.entrega = 'saiu'; c.saiu = Date.now(); if (id) c.entregador = id; c.itens.filter((i) => ['pronto', 'novo', 'preparo'].includes(i.status) && !i.cancelado).forEach((i) => { i.status = 'entregue'; i.entregue = Date.now(); }); marcar(c, 'saiu', 'Saiu para entrega'); grava(); toast('Saiu para entrega'); };
-  if (!l.length) return sai('');
-  folha({ titulo: 'Quem vai levar?', corpo: `<div class="chips quebra">${l.map((e) => `<button type="button" class="chip" data-e="${e.id}">${t(e.nome)}</button>`).join('')}</div>`,
-    aoAbrir: (f, fechar) => $$('[data-e]', f).forEach((x) => { x.onclick = () => { sai(x.dataset.e); fechar(); }; }) });
-});
+acao('saiu', (b) => { const c = comanda(b.dataset.id); if (c) escolherEntregador(c); });
 acao('item-tirar', async (b) => {
   const c = comanda(b.dataset.c), i = c?.itens.find((x) => x.id === b.dataset.i); if (!i) return;
   if (i.status === 'rascunho') { cancelarItem(c, i); toast('Item tirado'); return; }
@@ -198,24 +198,39 @@ registrar('lancar', {
     this.aba = c.tipo === 'mesa' ? 'salao' : 'pedidos';
     const cats = db.categorias.filter((k) => ativos().some((p) => p.cat === k.id));
     const q = busca.trim().toLowerCase();
-    const l = ativos().filter((p) => (!catSel || p.cat === catSel) && (!q || `${p.nome} ${p.desc || ''}`.toLowerCase().includes(q)));
+    const l = achar(q);
     const rasc = c.itens.filter((i) => i.status === 'rascunho'), n = rasc.reduce((s, i) => s + i.qtd, 0);
     return `${voltar(rotaComanda(c), `Voltar para ${c.tipo === 'mesa' ? `a mesa ${c.mesa}` : 'o pedido'}`)}
-      <div class="cab"><div><h1>${t(c.tipo === 'mesa' ? `Mesa ${c.mesa}` : quemPediu(c))}</h1><p>Toque no + para pôr na comanda</p></div></div>
-      <label class="busca">${ico('busca')}<input type="search" data-busca value="${t(busca)}" placeholder="Buscar prato ou bebida" aria-label="Buscar prato ou bebida" autocomplete="off"></label>
+      <div class="cab"><div><h1>${t(c.tipo === 'mesa' ? `Mesa ${c.mesa}` : quemPediu(c))}</h1><p>Toque no + para pôr na comanda${c.tipo !== 'mesa' ? ` · ${n} ${n === 1 ? 'item' : 'itens'} · ${din(conta(c).total)}` : ''}</p></div></div>
+      <label class="busca">${ico('busca')}<input type="search" data-busca value="${t(busca)}" placeholder="Nome ou código do prato" aria-label="Buscar prato ou bebida pelo nome ou código" autocomplete="off" enterkeyhint="done"></label>
       <div class="chips" role="group" aria-label="Categorias"><button type="button" class="chip" data-cat="" aria-pressed="${!catSel}">Todos</button>${cats.map((k) => `<button type="button" class="chip" data-cat="${t(k.id)}" aria-pressed="${catSel === k.id}">${t(k.nome)}</button>`).join('')}</div>
       <div class="prods">${l.map((p) => { const k = noRasc(c, p.id);
-        return `<div class="prod">${fotoProd(p)}<div class="tx"><b>${t(p.nome)}</b>${p.desc ? `<small>${t(p.desc)}</small>` : ''}<span class="preco">${p.porKg ? `${din(p.preco)} o quilo` : `${p.tamanhos?.length ? 'a partir de ' : ''}${din(aPartir(p))}`}</span></div>
+        return `<div class="prod">${fotoProd(p)}<div class="tx"><b>${p.codigo ? `<span class="cod">${t(p.codigo)}</span>` : ''}${t(p.nome)}</b>${p.desc ? `<small>${t(p.desc)}</small>` : ''}<span class="preco">${p.porKg ? `${din(p.preco)} o quilo` : `${p.tamanhos?.length ? 'a partir de ' : ''}${din(aPartir(p))}`}</span></div>
           <button type="button" class="prod-add" data-acao="add" data-c="${c.id}" data-p="${t(p.id)}" aria-label="Pôr ${t(p.nome)}">+${k ? `<em>${k}</em>` : ''}</button></div>`; }).join('') || '<p class="vazio">Nada encontrado.</p>'}</div>
-      ${n ? `<div class="barra-fixa"><button type="button" class="bt grande" data-ir="${rotaComanda(c)}">Ver comanda</button><button type="button" class="bt cheio grande" data-acao="mandar" data-id="${c.id}">${ico('cozinha')}Mandar para a cozinha (${n})</button></div>` : ''}`;
+      ${c.tipo !== 'mesa' && !c.quitado && itensValidos(c).length ? `<div class="barra-fixa">${n ? `<button type="button" class="bt grande" data-acao="mandar" data-id="${c.id}">${ico('cozinha')}Mandar (${n})</button>` : ''}<button type="button" class="bt cheio grande" data-acao="cobrar" data-id="${c.id}">${ico('conta')}Cobrar ${din(conta(c).falta)}</button></div>`
+        : n ? `<div class="barra-fixa"><button type="button" class="bt grande" data-ir="${rotaComanda(c)}">Ver comanda</button><button type="button" class="bt cheio grande" data-acao="mandar" data-id="${c.id}">${ico('cozinha')}Mandar para a cozinha (${n})</button></div>` : ''}`;
   },
   montar(el, id) {
     const i = $('[data-busca]', el);
-    if (i) { i.oninput = () => { busca = i.value; const pos = i.selectionStart; ir(`lancar/${id}`); const n = $('[data-busca]'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }; }
+    if (i) {
+      i.oninput = () => { busca = i.value; const pos = i.selectionStart; ir(`lancar/${id}`); const n = $('[data-busca]'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } };
+      // PDV: código ou nome + Enter põe o primeiro da lista (o código exato vem primeiro)
+      i.onkeydown = (e) => { if (e.key !== 'Enter') return; e.preventDefault(); const p = achar(busca.trim().toLowerCase())[0], c = comanda(id); if (!p || !c) return toast('Nada encontrado');
+        busca = ''; if (temOpcoes(p)) { ir(`lancar/${id}`); abrirOpcoes(c, p); } else { adicionarItem(c, { prodId: p.id, qtd: 1 }); toast(`+1 ${p.nome}`); ir(`lancar/${id}`); } setTimeout(() => $('[data-busca]')?.focus(), 30); };
+    }
     $$('[data-cat]', el).forEach((b) => { b.onclick = () => { catSel = b.dataset.cat; ir(`lancar/${id}`); }; });
   },
 });
 document.addEventListener('popina-tela', (e) => { if (e.detail.nome !== 'lancar') { busca = ''; } });
+// busca do lançar: código igual primeiro, depois o código que começa assim, depois o nome
+function achar(q) {
+  const l = ativos().filter((p) => (!catSel || p.cat === catSel || q) && (!q || `${p.nome} ${p.desc || ''} ${p.codigo || ''}`.toLowerCase().includes(q)));
+  if (!q) return l;
+  const nota = (p) => { const cd = String(p.codigo || '').toLowerCase(); return cd === q ? 0 : cd && cd.startsWith(q) ? 1 : p.nome.toLowerCase().startsWith(q) ? 2 : 3; };
+  return l.sort((a, b) => nota(a) - nota(b));
+}
+// PDV do balcão: manda o que falta para a cozinha (bebida do bar sai direto se o restaurante não usa a tela do bar) e vai cobrar
+acao('cobrar', (b) => { const c = comanda(b.dataset.id); if (!c) return; enviar(c); ir(`fechar/${c.id}`); });
 acao('add', (b) => {
   const c = comanda(b.dataset.c), p = prod(b.dataset.p); if (!c || !p) return;
   if (!temOpcoes(p)) { adicionarItem(c, { prodId: p.id, qtd: 1 }); toast(`+1 ${p.nome}`); return; }

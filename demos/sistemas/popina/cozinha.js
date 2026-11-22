@@ -1,9 +1,9 @@
 // Popina · tela da cozinha: os pedidos na ordem em que chegaram, com o tempo de cada um bem grande.
 // Começar → Pronto. Imprime o pedido (80 mm ou A4) num toque, e pode imprimir sozinho quando o pedido chega.
-import { db, t, comanda, mudarStatus, quemPediu, tipoNome, minutos, hora, grava } from './loja.js?v=45';
-import { registrar, acao, ir } from './nucleo.js?v=45';
-import { ico, toast, bip, folha, $, $$ } from './ui.js?v=45';
-import { htmlCozinha, imprimir, imprimirCozinha, autoImprimir, setAutoImprimir, formatoPadrao } from './imprimir.js?v=45';
+import { db, t, comanda, mudarStatus, quemPediu, tipoNome, minutos, hora, grava } from './loja.js?v=46';
+import { registrar, acao, ir } from './nucleo.js?v=46';
+import { ico, toast, bip, folha, $, $$ } from './ui.js?v=46';
+import { htmlCozinha, imprimir, imprimirCozinha, autoImprimir, setAutoImprimir, formatoPadrao } from './imprimir.js?v=46';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 let setor = ler('popina-setor', ''), aba = 'fazer';

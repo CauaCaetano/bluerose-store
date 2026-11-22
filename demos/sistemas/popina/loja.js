@@ -4,7 +4,7 @@
 // COMPATIBILIDADE: os dados do Popina antigo abrem aqui sem perder nada. Os campos das funções que saíram (rodízio, eventos,
 // portaria, vitrine, cupons, reservas, produção...) continuam guardados como estão: esta versão só não os mostra.
 // Nada aqui apaga campo antigo; tudo é alterado no lugar.
-import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=45';
+import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=46';
 
 export const CHAVE = 'popina-v1';
 export const CONTA = window.veltriaConta || null;
@@ -251,11 +251,17 @@ export function pagar(c, forma, valor, extra = {}) {
   if (conta(c).falta <= 0.009) fechar(c);
   return true;
 }
+// balcão, retirada e entrega pagos antes de terminar: a venda já entra no caixa ("quitado"), mas o pedido continua no quadro
+// e na cozinha até alguém tocar em "Entregue". A mesa fecha na hora, como sempre.
+export const faltaEntregar = (c) => c.tipo !== 'mesa' && ['balcao', 'delivery'].includes(c.tipo)
+  && (c.tipo === 'delivery' ? c.entrega !== 'entregue' : itensValidos(c).some((i) => i.status !== 'entregue'));
 export function fechar(c) {
-  if (!db.comandas.includes(c)) return false;
+  if (!db.comandas.includes(c) || c.quitado) return false;
   const v = conta(c);
   marcar(c, 'fechou', `Conta fechada · ${din(v.total)}`);
-  db.vendas.push({ id: db.vendas.some((x) => x.id === c.id) ? `${c.id}-${Date.now().toString(36)}` : c.id, ts: Date.now(), tipo: c.tipo, mesa: c.mesa, num: c.num,
+  const vid = db.vendas.some((x) => x.id === c.id) ? `${c.id}-${Date.now().toString(36)}` : c.id;
+  if (faltaEntregar(c)) { c.quitado = Date.now(); c.vendaId = vid; }
+  db.vendas.push({ id: vid, ts: Date.now(), tipo: c.tipo, mesa: c.mesa, num: c.num,
     itens: itensValidos(c).map((i) => ({ prod: i.prod, nome: i.nome, qtd: i.qtd, preco: r2(valorItem(i) / i.qtd), setor: i.setor, ...(i.kg ? { kg: i.kg } : {}), ...(i.fator ? { fator: i.fator } : {}), ...(i.meia ? { meia: i.meia } : {}) })),
     total: v.total, servico: v.servico, couvert: v.couvert, entrega: v.entrega, desconto: v.desconto, onde: ondeComanda(c),
     ...(v.rodizio ? { rodizio: v.rodizio, rodizioPessoas: c.rodizio } : {}), ...(v.ingresso ? { ingresso: v.ingresso } : {}), ...(v.consumacao ? { consumacao: v.consumacao } : {}),
@@ -265,9 +271,107 @@ export function fechar(c) {
     ...(c.modo ? { modo: c.modo } : {}), ...(c.origem ? { origem: c.origem } : {}),
     ...(v.desconto ? { descontoMotivo: c.descontoInfo?.motivo || '', descontoQuem: c.descontoInfo?.quem || '' } : {}) });
   registrarCliente(c, v.total);
+  if (c.quitado) { grava(); return true; }
   db.comandas = db.comandas.filter((x) => x !== c);
   db.chamados = db.chamados.filter((x) => x.mesa !== c.mesa || c.tipo !== 'mesa');
   grava(); return true;
+}
+
+// ------------------------------------------------------------------ quadro de pedidos: aceitar, recusar, pronto e entregue
+// pedido do cardápio online que ninguém aceitou ainda (toca até alguém aceitar ou recusar)
+export const aguardaAceite = (c) => c.tipo !== 'mesa' && !c.aceito && !c.quitado && c.origem === 'Cardápio online'
+  && itensValidos(c).length > 0 && itensValidos(c).every((i) => i.status === 'rascunho');
+// em que coluna do quadro o pedido está: novo, preparo ou pronto (os concluídos já são vendas)
+export function etapa(c) {
+  const it = itensValidos(c);
+  if (c.tipo === 'delivery' && ['saiu', 'entregue'].includes(c.entrega)) return 'pronto';
+  if (!it.length || it.every((i) => i.status === 'rascunho')) return 'novo';
+  if (it.some((i) => ['novo', 'preparo'].includes(i.status))) return 'preparo';
+  return 'pronto';
+}
+export function aceitarPedido(c) {
+  if (!db.comandas.includes(c)) return 0;
+  c.aceito = Date.now(); if (c.tipo === 'delivery' && (!c.entrega || c.entrega === 'novo')) c.entrega = 'preparo';
+  marcar(c, 'aceitou', 'Pedido aceito'); return enviar(c);
+}
+export const MOTIVOS_RECUSA = ['Acabou um item do pedido', 'Fora da área de entrega', 'Estamos fechando', 'Muito movimento agora', 'Pedido repetido'];
+export function recusarPedido(c, motivo = '', quem = quemAgora(c)) {
+  if (!db.comandas.includes(c)) return false;
+  const total = conta(c).total, ts = Date.now();
+  c.itens.forEach((i) => { if (i.cancelado) return; if (i.status === 'novo') baixar(i, -1); i.cancelado = { motivo, ts, quem }; });
+  c.recusado = { motivo, ts, quem };
+  marcar(c, 'recusou', `Pedido recusado${motivo ? ` (${motivo})` : ''}`, quem);
+  const r = (db.recusados ||= []);
+  r.push({ id: c.id, ts, num: c.num, tipo: c.tipo, ...(c.modo ? { modo: c.modo } : {}), onde: ondeComanda(c), aberta: c.aberta, origem: c.origem || '', cliente: { nome: c.cliente?.nome || '', tel: c.cliente?.tel || '' }, total, motivo, quem });
+  if (r.length > 300) r.splice(0, r.length - 300);
+  auditar('recusar-pedido', { quem, num: c.num, valor: total, motivo });
+  db.comandas = db.comandas.filter((x) => x !== c);
+  grava(); return true;
+}
+// sem tela da cozinha: o próprio quadro marca tudo como pronto
+export function marcarPronto(c) {
+  const agora = Date.now(); let n = 0;
+  c.itens.forEach((i) => { if (!i.cancelado && ['novo', 'preparo'].includes(i.status)) { i.status = 'pronto'; i.pronto = agora; n++; } });
+  if (n) { marcar(c, 'pronto', 'Marcou o pedido como pronto'); grava(); }
+  return n;
+}
+export function saiuEntrega(c, entregador = '') {
+  c.entrega = 'saiu'; c.saiu = Date.now(); if (entregador) c.entregador = entregador;
+  c.itens.filter((i) => ['pronto', 'novo', 'preparo'].includes(i.status) && !i.cancelado).forEach((i) => { i.status = 'entregue'; i.entregue = Date.now(); });
+  const nome = entregador ? (db.entregadores || []).find((e) => e.id === entregador)?.nome || '' : '';
+  marcar(c, 'saiu', `Saiu para entrega${nome ? ` com ${nome}` : ''}`);
+  if (c.vendaId) { const v = db.vendas.find((x) => x.id === c.vendaId); if (v && entregador) v.entregador = entregador; }
+  grava();
+}
+// "Entregue": tira do quadro. Se ainda falta receber, devolve 'pagar' (a tela leva para fechar a conta).
+export function concluirPedido(c) {
+  if (!db.comandas.includes(c)) return false;
+  const agora = Date.now();
+  if (c.tipo === 'delivery') c.entrega = 'entregue';
+  c.itens.forEach((i) => { if (!i.cancelado && i.status !== 'entregue') { i.status = 'entregue'; i.entregue = agora; } });
+  c.concluido = agora; marcar(c, 'entregou', c.tipo === 'delivery' ? 'Entregue ao cliente' : 'Entregue no balcão');
+  if (c.quitado) {
+    const v = db.vendas.find((x) => x.id === c.vendaId);
+    if (v) { v.entregue = agora; if (c.entregador) v.entregador = c.entregador; v.hist = c.hist || v.hist; }
+    db.comandas = db.comandas.filter((x) => x !== c); grava(); return true;
+  }
+  if (conta(c).falta <= 0.009) return fechar(c);
+  grava(); return 'pagar';
+}
+// loja pausada: o cardápio online mostra "pausado" e não deixa pedir (ate = 0: até alguém voltar)
+export function lojaPausada() { const p = lojaCfg().pausada; return p && (!p.ate || p.ate > Date.now()) ? p : null; }
+export function pausarLoja(minutos = 0, motivo = '') { setLoja({ pausada: { ts: Date.now(), ate: minutos ? Date.now() + minutos * 60e3 : 0, motivo, quem: quemAgora() } }); auditar('pausar-loja', { motivo, valor: minutos }); }
+export function voltarLoja() { setLoja({ pausada: null }); }
+export const aceiteAuto = () => !!lojaCfg().aceiteAuto;
+// pedido agendado pelo cardápio: aceita ISO ("2026-11-22T19:30"), número (ms) ou só "19:30" (hoje); devolve ms ou 0
+export function agendadoDe(v) {
+  if (!v) return 0;
+  if (typeof v === 'number') return v > 1e12 ? v : 0;
+  const s = String(v).trim(), m = /^(\d{1,2}):(\d{2})$/.exec(s);
+  if (m) { const d = new Date(); d.setHours(Number(m[1]), Number(m[2]), 0, 0); return d.getTime(); }
+  const ms = Date.parse(s); return Number.isFinite(ms) ? ms : 0;
+}
+// cupons do cardápio online (config.loja.cupons): tipo 'pct' (% dos itens), 'valor' (R$) ou 'frete' (entrega grátis)
+export const cupons = () => (Array.isArray(lojaCfg().cupons) ? lojaCfg().cupons : []);
+export function cupomValido(codigo, subtotal = 0, agora = Date.now()) {
+  const cod = String(codigo || '').trim().toUpperCase(); if (!cod) return null;
+  const k = cupons().find((x) => String(x.codigo || '').toUpperCase() === cod);
+  if (!k || k.ativo === false) return null;
+  if (k.validade && agora > new Date(`${k.validade}T23:59:59`).getTime()) return null;
+  if (Number(k.limite) > 0 && (Number(k.usos) || 0) >= Number(k.limite)) return null;
+  if (Number(k.minimo) > 0 && subtotal < Number(k.minimo) - 0.009) return null;
+  return k;
+}
+export function aplicarCupom(c, codigo) {
+  const v = conta(c), k = cupomValido(codigo, v.sub); if (!k) return false;
+  if (k.tipo === 'frete') c.taxaEntrega = 0;
+  else {
+    const d = r2(Math.min(v.sub, k.tipo === 'pct' ? v.sub * (Number(k.valor) || 0) / 100 : Number(k.valor) || 0));
+    if (d > 0) { c.desconto = d; c.descontoInfo = { motivo: `Cupom ${k.codigo}`, quem: 'Cardápio online', ts: Date.now() }; }
+  }
+  c.cupom = k.codigo; k.usos = (Number(k.usos) || 0) + 1;
+  marcar(c, 'desconto', `Cupom ${k.codigo}`, 'Cardápio online');
+  return true;
 }
 // dividir por pessoas: valor de cada parte (a última leva os centavos que sobram)
 export function partes(total, n) {
@@ -339,9 +443,10 @@ export function movimento(tipo, valor, motivo, quem = quemAgora()) {
   db.caixa.movimentos.push({ tipo, valor: r2(valor), motivo, ts: Date.now(), quem });
   auditar(tipo, { quem, valor: r2(valor), motivo }); grava();
 }
-export function fecharCaixa(contado, motivo = '', quem = quemAgora()) {
+// conferencia: { 'Cartão de débito': 120.5, Pix: 300 } (o que a maquininha e o extrato mostram), opcional
+export function fecharCaixa(contado, motivo = '', quem = quemAgora(), conferencia = null) {
   const r = caixaResumo();
-  (db.fechamentos ||= []).push({ ...db.caixa, id: uid('f'), fechado: Date.now(), fechadoPor: quem, motivo, abertas: db.comandas.map((c) => c.id),
+  (db.fechamentos ||= []).push({ ...db.caixa, id: uid('f'), fechado: Date.now(), fechadoPor: quem, motivo, abertas: db.comandas.filter((c) => !c.quitado).map((c) => c.id), ...(conferencia ? { conferencia } : {}),
     resumo: { total: r.total, vendas: r.vendas.length, porForma: r.porForma, sangria: r.sangria, suprimento: r.suprimento, servico: r.servico, gaveta: r.dinheiroNaGaveta, contado: r2(contado), diferenca: r2(contado - r.dinheiroNaGaveta) } });
   if (r2(contado - r.dinheiroNaGaveta)) auditar('caixa-diferenca', { quem, valor: r2(contado - r.dinheiroNaGaveta), motivo });
   db.caixa = null; grava(); return db.fechamentos.at(-1);
@@ -478,9 +583,16 @@ window.popinaChegou = (lista) => {
       const c = comandaDaMesa(r.mesa); if (c && !c.pediuConta) { c.pediuConta = ts; novos++; }
     } else if (r.tipo === 'delivery' || r.tipo === 'balcao') {
       const itens = itensLimpos(d.itens); if (!itens.length || comanda(id)) return;
-      const c = novoPedido(r.tipo, { nome: String(d.nome || '').slice(0, 80), tel: String(d.tel || ''), end: r.tipo === 'delivery' ? String(d.end || '').slice(0, 160) : '', bairro: r.tipo === 'delivery' ? String(d.bairro || '') : '' },
-        { origem: 'Cardápio online', pagarNaEntrega: String(d.pagar || '').slice(0, 60), id, ...(r.tipo === 'balcao' ? { modo: 'retirada' } : {}), ...(Number(d.troco) > 0 ? { trocoPara: r2(Math.min(5000, Number(d.troco))) } : {}) });
+      const c = novoPedido(r.tipo, { nome: String(d.nome || '').slice(0, 80), tel: String(d.tel || ''), end: r.tipo === 'delivery' ? String(d.end || '').slice(0, 160) : '', bairro: r.tipo === 'delivery' ? String(d.bairro || '') : '',
+          ...(d.referencia ? { ref: String(d.referencia).slice(0, 120) } : {}) },
+        { origem: 'Cardápio online', ...(agendadoDe(d.agendado) ? { agendado: agendadoDe(d.agendado) } : {}), pagarNaEntrega: String(d.pagar || '').slice(0, 60), id, ...(r.tipo === 'balcao' ? { modo: 'retirada' } : {}), ...(Number(d.troco) > 0 ? { trocoPara: r2(Math.min(5000, Number(d.troco))) } : {}) });
       itens.forEach((i) => adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic, meia: i.meia, tam: i.tam }));
+      // cupom do cardápio: conferido aqui de novo (código, validade, mínimo e limite de usos)
+      // a taxa, o desconto e o total que o cardápio manda são só conferência: valem a taxa do bairro e o cupom conferido aqui
+      if (d.cupom && !aplicarCupom(c, String(d.cupom).slice(0, 30))) marcar(c, 'desconto', `Cupom ${String(d.cupom).slice(0, 30)} não vale (sem desconto)`, 'Cardápio online');
+      if (Number(d.total) > 0 && Math.abs(Number(d.total) - conta(c).total) >= 0.01) marcar(c, 'aviso', `O cliente viu ${din(Number(d.total))} no cardápio; a conta ficou ${din(conta(c).total)}`, 'Cardápio online');
+      // aceitar sozinho (Pedidos › ajustes): vai direto para a cozinha
+      if (aceiteAuto()) aceitarPedido(c);
       novos++;
     }
     // reservas, cupons e encomendas saíram desta versão: o que chegar assim é ignorado

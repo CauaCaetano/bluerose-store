@@ -1,8 +1,8 @@
 // Popina · funciona sem internet: guarda as telas e as fotos; os dados ficam no aparelho e sobem quando a rede volta.
-const CACHE = 'popina-v45';
-const BASE = ['app.html', 'cardapio.html', 'popina.css?v=45', 'cardapio.css?v=45', 'simbolo.png?v=1', 'icone-192.png?v=1',
-  'app.js?v=45', 'nucleo.js?v=45', 'loja.js?v=45', 'dados.js?v=45', 'ui.js?v=45', 'pix.js?v=45', 'opcoes.js?v=45', 'imprimir.js?v=45', 'salao.js?v=45', 'pedidos.js?v=45',
-  'cozinha.js?v=45', 'caixa.js?v=45', 'gestao.js?v=45', 'cadastro.js?v=45', 'relatorios.js?v=45', 'inicio.js?v=45', 'cliente.js?v=45', 'configuracoes.js?v=45', 'primeiro-acesso.js?v=45', '../base/qr.js', '../base/assinatura.js?v=2', '../base/assinatura.css?v=1'];
+const CACHE = 'popina-v46';
+const BASE = ['app.html', 'cardapio.html', 'popina.css?v=46', 'cardapio.css?v=46', 'simbolo.png?v=1', 'icone-192.png?v=1',
+  'app.js?v=46', 'nucleo.js?v=46', 'loja.js?v=46', 'dados.js?v=46', 'ui.js?v=46', 'pix.js?v=46', 'opcoes.js?v=46', 'imprimir.js?v=46', 'salao.js?v=46', 'pedidos.js?v=46',
+  'cozinha.js?v=46', 'caixa.js?v=46', 'gestao.js?v=46', 'cadastro.js?v=46', 'relatorios.js?v=46', 'inicio.js?v=46', 'cliente.js?v=46', 'configuracoes.js?v=46', 'primeiro-acesso.js?v=46', '../base/qr.js', '../base/assinatura.js?v=2', '../base/assinatura.css?v=1'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(BASE)).catch(() => {})); self.skipWaiting(); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k))))); self.clients.claim(); });
 // rede primeiro (sempre a versão nova), cache quando estiver sem internet

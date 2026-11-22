@@ -2,15 +2,15 @@
 // sangria e suprimento, e o fechamento do dia com o resumo pronto para mandar no WhatsApp do dono.
 import { db, t, din, r2, num, vir, tempo, hora, conta, comanda, pagar, partes, darDesconto, ondeComanda, quemPediu, caixaResumo, abrirCaixa, movimento, fecharCaixa,
   regras, temPin, euSou, setEuSou, quemAgora, grava, FORMA_FIADO, registrarFiado, receberFiado, clientesFiado, saldoFiado, nomeFiado, soDig, fone, zap, vendaDeHoje, cancelarVenda,
-  inicioDoDia, pagamentosVenda, itensValidos } from './loja.js?v=45';
-import { registrar, acao, ir } from './nucleo.js?v=45';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=45';
-import { pix } from './pix.js?v=45';
+  inicioDoDia, pagamentosVenda, itensValidos } from './loja.js?v=46';
+import { registrar, acao, ir } from './nucleo.js?v=46';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=46';
+import { pix } from './pix.js?v=46';
 import { qrSVG } from '../base/qr.js';
-import { blocoTotais, voltar, rotaComanda } from './salao.js?v=45';
-import { novoPedidoFolha } from './pedidos.js?v=45';
-import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=45';
-import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=45';
+import { blocoTotais, voltar, rotaComanda } from './salao.js?v=46';
+import { novoPedidoFolha } from './pedidos.js?v=46';
+import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=46';
+import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=46';
 
 const FORMAS = [['Pix', 'pix'], ['Dinheiro', 'dinheiro'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao'], [FORMA_FIADO, 'etiqueta']];
 const rotuloForma = (f) => (f === FORMA_FIADO ? 'Fiado' : f.replace('Cartão de débito', 'Débito').replace('Cartão de crédito', 'Crédito'));
@@ -19,7 +19,7 @@ const rotuloForma = (f) => (f === FORMA_FIADO ? 'Fiado' : f.replace('Cartão de 
 registrar('caixa', {
   titulo: 'Caixa',
   html() {
-    const abertas = [...db.comandas].sort((a, b) => (b.pediuConta ? 1 : 0) - (a.pediuConta ? 1 : 0) || a.aberta - b.aberta);
+    const abertas = db.comandas.filter((c) => !c.quitado).sort((a, b) => (b.pediuConta ? 1 : 0) - (a.pediuConta ? 1 : 0) || a.aberta - b.aberta);
     const lista = `<div class="sec"><h2>Contas abertas (${abertas.length})</h2><button type="button" class="bt" data-acao="venda-rapida">${ico('mais2')}Venda no balcão</button></div>
       <div class="contas-ab">${abertas.map((c) => { const v = conta(c);
         return `<button type="button" class="conta-linha ${c.pediuConta ? 'pediu' : ''}" data-ir="fechar/${c.id}"><span><b>${t(c.tipo === 'mesa' ? `Mesa ${c.mesa}` : quemPediu(c))}</b><small>${c.tipo === 'mesa' ? `${c.pessoas || 1} ${c.pessoas === 1 ? 'pessoa' : 'pessoas'}` : t(ondeComanda(c))} · ${tempo(c.aberta)}${c.pediuConta ? ' · pediu a conta' : ''}${v.pago ? ` · pago ${din(v.pago)}` : ''}</small></span><span class="v">${din(v.falta || v.total)}</span></button>`; }).join('') || '<p class="vazio">Nenhuma conta aberta.</p>'}</div>`;
@@ -109,12 +109,13 @@ function dinheiroFolha(valor, concluir) {
 registrar('fechar', {
   aba: 'caixa', titulo: 'Fechar conta',
   html(id) {
-    const c = comanda(id);
+    const c0 = comanda(id), c = c0?.quitado ? null : c0;
     if (!c) {
-      const v = db.vendas.find((x) => x.id === id || x.id.startsWith(`${id}-`));
+      const v = c0?.vendaId ? db.vendas.find((x) => x.id === c0.vendaId) : db.vendas.find((x) => x.id === id || x.id.startsWith(`${id}-`));
       return `${voltar('caixa', 'Caixa')}<div class="cartao" style="text-align:center;max-width:560px;margin:20px auto"><div style="display:grid;place-items:center;margin-bottom:10px;color:var(--ok)">${ico('okcirc', 'style="width:64px;height:64px"')}</div>
         <h1 style="font-size:28px;margin-bottom:6px">${v ? 'Conta fechada' : 'Esta conta não está mais aberta'}</h1>${v ? `<p class="mudo">${t(v.onde || '')} · ${din(v.total)}${(v.pagamentos || []).reduce((s, p) => s + (p.troco || 0), 0) ? ` · troco ${din(v.pagamentos.reduce((s, p) => s + (p.troco || 0), 0))}` : ''}</p>` : ''}
-        <div class="linha-bts" style="justify-content:center;margin-top:16px">${v ? `<button type="button" class="bt grande" data-acao="recibo-venda" data-id="${t(v.id)}">${ico('impressora')}Imprimir recibo</button>` : ''}<button type="button" class="bt cheio grande" data-ir="${v?.tipo === 'mesa' ? 'salao' : 'caixa'}">Pronto</button></div></div>`;
+        <div class="linha-bts" style="justify-content:center;margin-top:16px">${v ? `<button type="button" class="bt grande" data-acao="recibo-venda" data-id="${t(v.id)}">${ico('impressora')}Imprimir recibo</button>` : ''}<button type="button" class="bt cheio grande" data-ir="${v?.tipo === 'mesa' ? 'salao' : c0 ? 'pedidos' : 'caixa'}">${c0 ? 'Voltar aos pedidos' : 'Pronto'}</button></div>
+        ${c0 ? '<p class="mudo" style="margin-top:12px">Pago. O pedido continua no quadro de Pedidos até você tocar em Entregue.</p>' : ''}</div>`;
     }
     const v = conta(c), e = (estado[c.id] ||= { dividir: 1 });
     const n = e.dividir, pt = n > 1 ? partes(v.total, n) : null, pagas = (c.pagamentos || []).length;
@@ -139,7 +140,7 @@ registrar('fechar', {
     </div></div>`;
   },
   montar(el, id) {
-    const c = comanda(id); if (!c) return;
+    const c = comanda(id); if (!c || c.quitado) return;
     const serv = $('[data-serv]', el); if (serv) serv.onchange = () => { c.servico = serv.checked; grava(); };
     $$('[data-div]', el).forEach((b) => { b.onclick = () => { estado[c.id].dividir = Number(b.dataset.div); ir(`fechar/${id}`); }; });
     $$('[data-forma]', el).forEach((b) => { b.onclick = () => {
@@ -206,9 +207,11 @@ export function resumoDia() {
   const tipos = {}; r.vendas.forEach((v) => { const k = v.tipo === 'mesa' ? 'Salão' : v.tipo === 'delivery' ? 'Entrega' : 'Balcão e retirada'; tipos[k] = r2((tipos[k] || 0) + v.total); });
   const garc = {}; r.vendas.filter((v) => v.garcom).forEach((v) => { garc[v.garcom] = r2((garc[v.garcom] || 0) + (v.servico || 0)); });
   const top = {}; r.vendas.forEach((v) => (v.itens || []).forEach((i) => { const k = i.nome.replace(/ \(.*\)$/, '').replace(/ · .*$/, ''); top[k] = (top[k] || 0) + (i.kg ? 1 : i.qtd); }));
-  return { ...r, desde, formas, tipos, garc, top: Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 5), abertas: db.comandas.length, ticket: r.vendas.length ? r2(r.total / r.vendas.length) : 0 };
+  return { ...r, desde, formas, tipos, garc, top: Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 5), abertas: db.comandas.filter((c) => !c.quitado).length, ticket: r.vendas.length ? r2(r.total / r.vendas.length) : 0 };
 }
-export function textoResumo(x, contado = null) {
+// formas que dá para conferir fora do sistema (maquininha e extrato do Pix)
+const conferiveis = (x) => x.formas.filter((f) => f !== 'Dinheiro' && f !== FORMA_FIADO && (x.porForma[f] || 0) > 0);
+export function textoResumo(x, contado = null, conf = null) {
   const d = new Date(), L = [];
   L.push(`*${db.config.nome} · fechamento de ${d.toLocaleDateString('pt-BR')}*`);
   L.push(`Vendido: *${din(x.total)}* em ${x.vendas.length} ${x.vendas.length === 1 ? 'venda' : 'vendas'} (média ${din(x.ticket)})`);
@@ -217,6 +220,7 @@ export function textoResumo(x, contado = null) {
   if (x.servico) L.push('', `Taxa de serviço (10%): ${din(x.servico)}${Object.keys(x.garc).length ? ` · ${Object.entries(x.garc).map(([g, v]) => `${g} ${din(v)}`).join(', ')}` : ''}`);
   if (x.entregas) L.push(`Taxas de entrega: ${din(x.entregas)}`);
   if (db.caixa) { L.push('', '*Gaveta*', `Troco inicial: ${din(db.caixa.troco)}`); if (x.sangria) L.push(`Sangrias: − ${din(x.sangria)}`); if (x.suprimento) L.push(`Suprimentos: + ${din(x.suprimento)}`); L.push(`Dinheiro esperado: ${din(x.dinheiroNaGaveta)}`); if (contado != null) L.push(`Contado: ${din(contado)} (${contado - x.dinheiroNaGaveta === 0 ? 'bateu' : `diferença ${din(contado - x.dinheiroNaGaveta)}`})`); }
+  if (conf) { L.push('', '*Conferência*'); Object.entries(conf).forEach(([f, v]) => { const d = r2(v - (x.porForma[f] || 0)); L.push(`• ${rotuloForma(f)}: ${din(v)} (${Math.abs(d) < 0.01 ? 'bateu' : `diferença ${din(d)}`})`); }); }
   if (x.fiadoRec) L.push(`Fiado recebido: ${din(x.fiadoRec)}`);
   if (x.cancelados) L.push(`Vendas canceladas: ${x.cancelados}`);
   if (x.abertas) L.push(`Contas ainda abertas: ${x.abertas}`);
@@ -249,25 +253,31 @@ registrar('fechamento', {
     </div><div>
       ${x.abertas ? `<p class="aviso" style="margin-bottom:14px">Ainda há ${x.abertas} ${x.abertas === 1 ? 'conta aberta' : 'contas abertas'}. Elas continuam abertas para amanhã se você fechar o caixa agora.</p>` : ''}
       <div class="cartao"><h2>Conferir e fechar</h2>
-        ${db.caixa ? `<label class="campo"><span>Dinheiro contado na gaveta (R$)</span><input data-contado inputmode="decimal" placeholder="${vir(x.dinheiroNaGaveta.toFixed(2))}"></label><p data-dif class="mudo" style="margin:-6px 0 12px"></p>` : ''}
+        ${db.caixa ? `<label class="campo"><span>Dinheiro contado na gaveta (R$)</span><input data-contado inputmode="decimal" placeholder="${vir(x.dinheiroNaGaveta.toFixed(2))}"></label><p data-dif class="mudo" style="margin:-6px 0 12px"></p>
+          ${conferiveis(x).length ? `<p class="grupo-tit">Confira também (opcional)</p><p class="mudo" style="margin-bottom:8px">Escreva o que a maquininha e o extrato do Pix mostram.</p>
+          <div class="conf">${conferiveis(x).map((f) => `<label class="campo"><span>${t(rotuloForma(f))} · no sistema ${din(x.porForma[f])}</span><input data-conf="${t(f)}" inputmode="decimal" placeholder="${vir(x.porForma[f].toFixed(2))}"><small data-cdif></small></label>`).join('')}</div>` : ''}` : ''}
         <div class="linha-bts">
           <a class="bt ok grande largo" data-zap target="_blank" rel="noopener" href="${zap(zapDono, textoResumo(x))}">${ico('zap')}Mandar no WhatsApp${zapDono ? '' : ' (escolha o contato)'}</a>
           <button type="button" class="bt grande" data-imp-fech>${ico('impressora')}Imprimir</button>
           ${db.caixa ? `<button type="button" class="bt escuro grande" data-fechar-cx>${ico('cofre')}Fechar o caixa</button>` : ''}</div>
         <p class="mudo" style="margin-top:10px">${zapDono ? `Vai para o WhatsApp do dono: ${t(fone(zapDono))}. Troque em Gestão › Restaurante.` : 'Cadastre o WhatsApp do dono em Gestão › Restaurante para o resumo ir direto.'}</p></div>
-      ${ult.length ? `<div class="cartao"><h2>Caixas fechados</h2><ul class="lista-l">${ult.map((f) => `<li><div class="tx"><b>${new Date(f.fechado).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })} · ${din(f.resumo?.total)}</b><small>${f.resumo?.vendas || 0} vendas · ${t(f.fechadoPor || f.operador || '')}${f.resumo?.diferenca ? ` · diferença ${din(f.resumo.diferenca)}` : ' · gaveta bateu'}</small></div></li>`).join('')}</ul></div>` : ''}
+      ${ult.length ? `<div class="cartao"><h2>Caixas fechados</h2><ul class="lista-l">${ult.map((f) => `<li><div class="tx"><b>${new Date(f.fechado).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })} · ${din(f.resumo?.total)}</b><small>${f.resumo?.vendas || 0} vendas · ${t(f.fechadoPor || f.operador || '')}${f.resumo?.diferenca ? ` · diferença ${din(f.resumo.diferenca)}` : ' · gaveta bateu'}${f.conferencia && Object.entries(f.conferencia).some(([k, v]) => Math.abs(v - (f.resumo?.porForma?.[k] || 0)) >= 0.01) ? ' · maquininha ou Pix com diferença' : ''}</small></div></li>`).join('')}</ul></div>` : ''}
     </div></div>`;
   },
   montar(el) {
     const x = resumoDia(), inp = $('[data-contado]', el), zapDono = db.config.whatsappDono || db.config.whatsapp || '';
     const contado = () => (inp && inp.value.trim() ? num(inp.value) : null);
-    if (inp) inp.oninput = () => { const c = contado(); $('[data-dif]', el).textContent = c == null ? '' : Math.abs(c - x.dinheiroNaGaveta) < 0.01 ? 'Bateu certinho.' : `Diferença de ${din(c - x.dinheiroNaGaveta)}.`; $('[data-zap]', el).href = zap(zapDono, textoResumo(x, c)); };
+    const conf = () => { const o = {}; $$('[data-conf]', el).forEach((i) => { if (i.value.trim()) o[i.dataset.conf] = num(i.value); }); return Object.keys(o).length ? o : null; };
+    if (inp) inp.oninput = () => { const c = contado(); $('[data-dif]', el).textContent = c == null ? '' : Math.abs(c - x.dinheiroNaGaveta) < 0.01 ? 'Bateu certinho.' : `Diferença de ${din(c - x.dinheiroNaGaveta)}.`; $('[data-zap]', el).href = zap(zapDono, textoResumo(x, c, conf())); };
+    $$('[data-conf]', el).forEach((i) => { i.oninput = () => { const f = i.dataset.conf, d = r2(num(i.value) - (x.porForma[f] || 0)), s = i.parentElement.querySelector('[data-cdif]');
+      s.textContent = !i.value.trim() ? '' : Math.abs(d) < 0.01 ? 'Bateu.' : `Diferença de ${din(d)}${d < 0 ? ' (veio menos)' : ''}.`; s.className = !i.value.trim() || Math.abs(d) < 0.01 ? '' : 'alerta-txt'; $('[data-zap]', el).href = zap(zapDono, textoResumo(x, contado(), conf())); }; });
     $('[data-imp-fech]', el).onclick = () => abrirImpressao('Fechamento do dia', (f) => htmlFechamento(x, contado(), f));
     $('[data-fechar-cx]', el)?.addEventListener('click', async () => {
       const c = contado(); if (c == null) { toast('Conte o dinheiro da gaveta e escreva o valor'); inp.focus(); return; }
       if (!(await confirma(`Fechar o caixa com ${din(c)} na gaveta?`, 'Fechar o caixa'))) return;
-      const txt = textoResumo(x, c);
-      fecharCaixa(c, Math.abs(c - x.dinheiroNaGaveta) >= 0.01 ? 'Diferença na conferência' : '', quemAgora());
+      const cf = conf(), txt = textoResumo(x, c, cf);
+      const difForma = cf && Object.entries(cf).some(([f, v]) => Math.abs(v - (x.porForma[f] || 0)) >= 0.01);
+      fecharCaixa(c, Math.abs(c - x.dinheiroNaGaveta) >= 0.01 || difForma ? 'Diferença na conferência' : '', quemAgora(), cf);
       folha({ titulo: 'Caixa fechado', corpo: `<p class="aviso ok">Caixa fechado com ${din(c)} na gaveta. Mande o resumo para o dono:</p><pre style="white-space:pre-wrap;font:15px/1.45 var(--fonte);background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:12px;margin-top:12px">${t(txt.replace(/[*_]/g, ''))}</pre>`,
         pe: `<a class="bt ok grande" target="_blank" rel="noopener" href="${zap(zapDono, txt)}" data-fechar>${ico('zap')}Mandar no WhatsApp</a>` });
     });
