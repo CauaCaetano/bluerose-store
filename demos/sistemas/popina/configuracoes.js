@@ -3,14 +3,15 @@
 // Um visual só (o dono tirou os vários visuais): o esquema troca só os tons da casa (o marrom do menu e o destaque),
 // sempre dentro da identidade "taberna"; a cor da marca do restaurante continua livre.
 // Guarda só campos novos em db.config.loja.esquema e db.config.perfis[e-mail]: nada do que já existe muda de nome.
-import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=53';
-import { ir, rota } from './nucleo.js?v=53';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=53';
-import { G, volta, reduzir, planoMarca } from './gestao.js?v=53';
-import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=53';
-import { recomecar } from './loja.js?v=53';
-import * as som from './som.js?v=53';
-import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=53';
+import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=54';
+import { ir, rota } from './nucleo.js?v=54';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=54';
+import { G, volta, reduzir, planoMarca } from './gestao.js?v=54';
+import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=54';
+import { recomecar } from './loja.js?v=54';
+import * as som from './som.js?v=54';
+import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=54';
+import { secaoNf, montarNf } from './nota-fiscal.js?v=54';
 
 // ------------------------------------------------------------------ esquemas de cor (identidade do Popina)
 // escuro: menu do computador, faixa e etiquetas escuras · destaque: a cor dos botões (vira a cor da marca ao escolher)
@@ -41,7 +42,7 @@ export const COMO = {
   clientes: ['Clientes e fiado', ['Quem pede, quanto gasta e quem deve.', 'Receba o fiado e mande a cobrança pelo WhatsApp.']],
   equipe: ['Equipe', ['Cada funcionário tem foto, função e um PIN de 4 números: toque no nome no topo para trocar de usuário e bater o ponto.', 'A função já traz as permissões; ajuste o desconto, o cancelamento e a sangria de cada um.', 'Em “Fechamento do dia” sai o 10% de cada garçom e o acerto de cada entregador.']],
   restaurante: ['Restaurante', ['Nome, contato, horários, Pix, entrega e taxas por bairro.', 'Fora do horário o cardápio online mostra “fechado”.']],
-  config: ['Configurações', ['Perfil, esquema de cores, sua marca, guia, impressão e assinatura.', 'Use os atalhos no alto para ir direto a uma seção.']],
+  config: ['Configurações', ['Perfil, esquema de cores, sua marca, guia, impressão, nota fiscal e assinatura.', 'Use os atalhos no alto para ir direto a uma seção.']],
 };
 const ORDEM = ['salao', 'pedidos', 'cozinha', 'caixa', 'cardapio', 'mesas', 'estoque', 'relatorios', 'clientes', 'equipe', 'restaurante', 'config'];
 export function comoUsar(k) {
@@ -68,7 +69,7 @@ G.config = {
   html() {
     const L = lojaCfg(), c = db.config, E = esquema(), pf = perfil(), g = gestor(), cor = corLoja();
     const nome = pf.nome || (conta.modo === 'demo' ? 'Você' : ''), ini = (nome || conta.email || '?').trim()[0].toUpperCase();
-    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-restaurante', 'Restaurante e impressão'], ['cfg-sons', 'Sons'], ['cfg-assinatura', 'Minha assinatura']];
+    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-restaurante', 'Restaurante e impressão'], ['cfg-nota', 'Nota fiscal'], ['cfg-sons', 'Sons'], ['cfg-assinatura', 'Minha assinatura']];
     return volta('Configurações', g ? 'Seu perfil, as cores, a marca, o guia, a impressão e a assinatura' : 'Seu perfil, o guia e a assinatura. Cores, marca e restaurante, só o dono muda') + `
     <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<button type="button" data-ir="mais/config/${id}">${n}</button>`).join('')}</nav>
     <div class="duas">
@@ -117,6 +118,7 @@ G.config = {
       <label class="liga" style="margin-top:12px">Imprimir sozinho cada pedido novo na Cozinha<input type="checkbox" data-auto-imp ${autoImprimir() ? 'checked' : ''}></label>
       <p class="mudo" style="margin-top:8px">No recibo saem o nome, o endereço e o WhatsApp do restaurante.</p>
     </section>
+    ${secaoNf(g)}
     <section class="cartao cfg-sec" id="cfg-sons"><h2>Sons</h2>
       <p class="mudo">Vale só neste aparelho. O alto-falante no topo também liga e desliga.</p>
       <label class="liga" style="margin-top:12px">Sons do sistema<small>Pedido novo, enviado para a cozinha, prato pronto, pagamento e aviso de erro</small><input type="checkbox" data-som-on ${som.somLigado() ? 'checked' : ''}></label>
@@ -139,6 +141,7 @@ G.config = {
     $('[data-som-vol]', el)?.addEventListener('change', (e) => { som.setVolume(e.target.value); som.novo(); });
     $('[data-som-teste]', el)?.addEventListener('click', () => { if (!som.somLigado()) return toast('Os sons estão desligados'); som.novo(); });
     if (!gestor()) return;
+    montarNf(el, () => ir(location.hash.slice(1)));
     $('[data-prever-marca]', el)?.addEventListener('click', () => { window.popinaPlano = window.popinaPlano === 'marca' ? 'basico' : 'marca'; dispatchEvent(new Event('popina-plano')); toast(window.popinaPlano === 'marca' ? 'Assim fica com a sua marca: veja o topo' : 'De volta ao plano normal'); });
     $$('[data-esquema]', el).forEach((b) => { b.onclick = () => { const e = ESQUEMAS.find((x) => x.id === b.dataset.esquema); setLoja({ esquema: e.id, cor: e.destaque }); toast(`Esquema ${e.nome} aplicado`); }; });
     $$('[data-cor]', el).forEach((b) => { b.onclick = () => { setLoja({ cor: b.dataset.cor }); toast('Cor da marca trocada'); }; });

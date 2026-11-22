@@ -1,7 +1,7 @@
 // Popina · impressão pelo navegador: pedido da cozinha e recibo na impressora térmica de 80 mm, ou em folha A4.
 // Usa o window.print() do navegador com CSS de impressão (@page de 80 mm ou A4). Não precisa instalar nada.
-import { db, t, din, conta, itensValidos, valorItem, ondeComanda, quemPediu, hora, lojaCfg, fone } from './loja.js?v=53';
-import { folha, toast, $, $$, ico } from './ui.js?v=53';
+import { db, t, din, conta, itensValidos, valorItem, ondeComanda, quemPediu, hora, lojaCfg, fone } from './loja.js?v=54';
+import { folha, toast, $, $$, ico } from './ui.js?v=54';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* nada */ } };

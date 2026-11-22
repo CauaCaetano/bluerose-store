@@ -637,6 +637,13 @@
   if (app === 'atria') window.atriaPlano = info && info.nivel === 'pro' ? 'pro' : 'basico';
   // Popina: plano "com a sua marca" (nivel pro) põe o logo e o nome do restaurante no lugar do Popina
   if (app === 'popina') { window.popinaPlano = info && info.nivel === 'pro' ? 'marca' : 'basico'; dispatchEvent(new Event('popina-plano')); }
+  // Popina: nota fiscal (NFC-e) pela função popina-nfce. Os tokens e o certificado vão só para o servidor; nada volta para cá.
+  if (app === 'popina') window.popinaNfce = function (body) {
+    return cliente().then(function (sb) { return sb.functions.invoke('popina-nfce', { body: Object.assign({}, body, { espaco: info.espaco }) }); }).then(function (r) {
+      if (r.error) return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { return { ok: false, mensagem: j.erro || j.mensagem || 'Não deu para falar com o servidor agora.' }; });
+      return r.data || {};
+    });
+  };
   if (app === 'atria') window.atriaAcharTrabalho = function (o) {
     return chamaAtria('achar-trabalho', { cidade: o.cidade, oficios: o.oficios, auto: !!o.auto }).then(function (d) {
       var l = d.achados || []; l.info = { gratis_mes: d.gratis_mes, gratis_restantes: d.gratis_restantes, gratis_global_acabou: d.gratis_global_acabou, saldo: d.saldo, pago: d.pago }; return l;

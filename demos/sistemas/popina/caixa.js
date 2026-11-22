@@ -2,16 +2,17 @@
 // sangria e suprimento, e o fechamento do dia com o resumo pronto para mandar no WhatsApp do dono.
 import { db, t, din, r2, num, vir, tempo, hora, conta, comanda, pagar, partes, darDesconto, ondeComanda, quemPediu, caixaResumo, abrirCaixa, movimento, fecharCaixa,
   regras, temPin, euSou, setEuSou, quemAgora, grava, FORMA_FIADO, registrarFiado, receberFiado, clientesFiado, saldoFiado, nomeFiado, soDig, fone, zap, vendaDeHoje, cancelarVenda,
-  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=53';
-import { registrar, acao, ir } from './nucleo.js?v=53';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=53';
-import * as som from './som.js?v=53';
-import { pix } from './pix.js?v=53';
+  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=54';
+import { registrar, acao, ir } from './nucleo.js?v=54';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=54';
+import * as som from './som.js?v=54';
+import { pix } from './pix.js?v=54';
 import { qrSVG } from '../base/qr.js';
-import { blocoTotais, voltar, rotaComanda } from './salao.js?v=53';
-import { novoPedidoFolha } from './pedidos.js?v=53';
-import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=53';
-import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=53';
+import { blocoTotais, voltar, rotaComanda } from './salao.js?v=54';
+import { novoPedidoFolha } from './pedidos.js?v=54';
+import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=54';
+import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=54';
+import { blocoNotaVenda, etiquetaNota, botaoNota, modoNf, cancelarNota, minutosParaCancelar } from './nota-fiscal.js?v=54';
 
 const FORMAS = [['Pix', 'pix'], ['Dinheiro', 'dinheiro'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao'], [FORMA_FIADO, 'etiqueta']];
 const rotuloForma = (f) => (f === FORMA_FIADO ? 'Fiado' : f.replace('Cartão de débito', 'Débito').replace('Cartão de crédito', 'Crédito'));
@@ -118,6 +119,7 @@ registrar('fechar', {
       return `${voltar('caixa', 'Caixa')}<div class="cartao" style="text-align:center;max-width:560px;margin:20px auto"><div class="${acabou === id && v ? 'check-ok' : ''}" style="display:grid;place-items:center;margin-bottom:10px;color:var(--ok)">${ico('okcirc', 'style="width:64px;height:64px"')}</div>
         <h1 style="font-size:28px;margin-bottom:6px">${v ? 'Conta fechada' : 'Esta conta não está mais aberta'}</h1>${v ? `<p class="mudo">${t(v.onde || '')} · ${din(v.total)}${(v.pagamentos || []).reduce((s, p) => s + (p.troco || 0), 0) ? ` · troco ${din(v.pagamentos.reduce((s, p) => s + (p.troco || 0), 0))}` : ''}</p>` : ''}
         <div class="linha-bts" style="justify-content:center;margin-top:16px">${v ? `<button type="button" class="bt grande" data-acao="recibo-venda" data-id="${t(v.id)}">${ico('impressora')}Imprimir recibo</button>` : ''}<button type="button" class="bt cheio grande" data-ir="${v?.tipo === 'mesa' ? 'salao' : c0 ? 'pedidos' : 'caixa'}">${c0 ? 'Voltar aos pedidos' : 'Pronto'}</button></div>
+        ${v ? blocoNotaVenda(v, acabou === id) : ''}
         ${c0 ? '<p class="mudo" style="margin-top:12px">Pago. O pedido continua no quadro de Pedidos até você tocar em Entregue.</p>' : ''}</div>`;
     }
     const v = conta(c), e = (estado[c.id] ||= { dividir: 1 });
@@ -196,10 +198,10 @@ registrar('vendas', {
   aba: 'caixa', titulo: 'Vendas de hoje',
   html() {
     const l = db.vendas.filter(vendaDeHoje).sort((a, b) => b.ts - a.ts);
-    return `${voltar('caixa', 'Caixa')}<div class="cab"><div><h1>Vendas de hoje</h1><p>${l.filter((v) => !v.cancelado).length} vendas · ${din(l.filter((v) => !v.cancelado).reduce((s, v) => s + v.total, 0))}</p></div></div>
+    return `${voltar('caixa', 'Caixa')}<div class="cab"><div><h1>Vendas de hoje</h1><p>${l.filter((v) => !v.cancelado).length} vendas · ${din(l.filter((v) => !v.cancelado).reduce((s, v) => s + v.total, 0))}</p></div>${modoNf() && modoNf() !== 'nao' ? `<button type="button" class="bt" data-acao="nf-exportar">${ico('grafico')}Exportar vendas</button>` : ''}</div>
     <div class="rolo"><table class="tabela"><thead><tr><th>Hora</th><th>Onde</th><th>Pagamento</th><th class="n">Total</th><th></th></tr></thead><tbody>
-    ${l.map((v) => `<tr${v.cancelado ? ' style="opacity:.55"' : ''}><td>${hora(v.ts)}</td><td><b>${t(v.onde || v.tipo)}</b>${v.cancelado ? `<small>Cancelada: ${t(v.cancelado.motivo || '')}</small>` : ''}</td><td>${t(pagamentosVenda(v).map((p) => rotuloForma(p.forma)).join(' + '))}</td><td class="n">${din(v.total)}</td>
-      <td class="n"><button type="button" class="bt-ico" data-acao="recibo-venda" data-id="${t(v.id)}" aria-label="Imprimir recibo">${ico('impressora')}</button>${v.cancelado ? '' : `<button type="button" class="bt-ico" data-acao="cancelar-venda" data-id="${t(v.id)}" aria-label="Cancelar venda">${ico('lixo')}</button>`}</td></tr>`).join('') || '<tr><td colspan="5" class="mudo">Nenhuma venda hoje ainda.</td></tr>'}
+    ${l.map((v) => `<tr${v.cancelado ? ' style="opacity:.55"' : ''}><td>${hora(v.ts)}</td><td><b>${t(v.onde || v.tipo)}</b>${v.cancelado ? `<small>Cancelada: ${t(v.cancelado.motivo || '')}</small>` : ''}${etiquetaNota(v)}</td><td>${t(pagamentosVenda(v).map((p) => rotuloForma(p.forma)).join(' + '))}</td><td class="n">${din(v.total)}</td>
+      <td class="n">${botaoNota(v)}<button type="button" class="bt-ico" data-acao="recibo-venda" data-id="${t(v.id)}" aria-label="Imprimir recibo">${ico('impressora')}</button>${v.cancelado ? '' : `<button type="button" class="bt-ico" data-acao="cancelar-venda" data-id="${t(v.id)}" aria-label="Cancelar venda">${ico('lixo')}</button>`}</td></tr>`).join('') || '<tr><td colspan="5" class="mudo">Nenhuma venda hoje ainda.</td></tr>'}
     </tbody></table></div>`;
   },
 });
@@ -208,6 +210,8 @@ acao('cancelar-venda', async (b) => {
   if (!podeCancelar()) return toast('Você não pode cancelar. Chame o gerente para entrar no topo.');
   const r = await autorizar({ titulo: `Cancelar a venda de ${din(v.total)}?`, texto: 'A venda fica marcada como cancelada e sai do faturamento. Devolva o dinheiro ao cliente se for o caso.', motivos: ['Cobrado em dobro', 'Lançado errado', 'Cliente desistiu'], pedirPin: precisaGerente('cancelar'), sim: 'Cancelar a venda', perigo: true });
   if (!r) return; cancelarVenda(v, r.motivo, r.pin ? `${quemAgora()} · senha do gerente` : quemAgora()); toast('Venda cancelada');
+  // a venda tinha NFC-e: dentro dos 30 minutos, oferece cancelar a nota também
+  if (v.nfce?.status === 'autorizada' && minutosParaCancelar(v)) setTimeout(() => cancelarNota(v), 300);
 });
 
 // ------------------------------------------------------------------ fechamento do dia

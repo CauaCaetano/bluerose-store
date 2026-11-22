@@ -374,6 +374,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--loja);bo
 .tk .grande td{font-size:16px;font-weight:800}
 .tk .obs{font-weight:800}
 .tk.cozinha{font-size:16px}
+/* DANFE NFC-e (22/11/2026): letra menor para caber nos 72 mm úteis da térmica */
+.tk.danfe{font-size:11.5px}
+.tk.danfe small{font-size:10px}
+.tk.danfe .grande td{font-size:14px}
+.tk.danfe svg{width:38mm;height:38mm}
 .tk.cozinha td{font-size:17px;font-weight:700}
 .tk.a4{width:auto;max-width:180mm;font:14px/1.5 var(--fonte)}
 .tk.a4 h1{font-size:24px;text-align:left}
