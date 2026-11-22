@@ -40,49 +40,49 @@
       dor: 'Quem marca horário pelo WhatsApp passa o dia respondendo "tem horário?" e ainda perde dinheiro com cliente que falta.',
       ganho: 'O Jano é um app de celular para quem atende com hora marcada: a cliente marca sozinha pelo seu link, o sinal no Pix segura o horário e a confirmação e o lembrete saem prontos. Menos falta, menos horário vazio e menos tempo no WhatsApp.',
       conta: 'Uma falta por semana num serviço de R$ 60 são uns R$ 240 por mês. Evitar só uma já paga o mês do sistema.',
-        pergunta: 'Hoje a marcação de horário aí é toda pelo WhatsApp?', beneficios: ['a cliente marca sozinha pelo seu link, a qualquer hora', 'o sinal no Pix segura o horário e diminui a falta', 'confirmação e lembrete prontos para o WhatsApp', 'agenda e histórico de cada cliente no celular'], cena: 'Imagina acordar com a agenda da semana cheia, cada cliente marcando sozinha pelo seu link e o sinal já pago no Pix, sem você responder "tem horário?" o dia inteiro.' },
+        pergunta: 'Hoje a marcação de horário aí é toda pelo WhatsApp?', beneficios: ['mais horas livres: você para de responder "tem horário?" o dia inteiro', 'menos dinheiro perdido com cliente que falta', 'agenda cheia até de madrugada, enquanto você dorme', 'cliente que volta mais, porque é lembrada na hora certa'], cena: 'Imagina acordar com a agenda da semana cheia, cada cliente marcando sozinha pelo seu link e o sinal já pago no Pix, sem você responder "tem horário?" o dia inteiro.' },
     financeiro: { pag: 'arca.html', nome: 'Arca', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'tem uma empresa',
       dor: 'Na empresa, o dinheiro do imposto e da folha se mistura com o do dia a dia, cliente atrasa sem ninguém cobrar e o extrato do banco nunca bate com a planilha.',
       ganho: 'O Arca é o financeiro completo da empresa, feito para usar no computador: contas a pagar e a receber de uma ou várias empresas, aprovação de pagamento, cobrança com Pix e lembrete no WhatsApp, conciliação do extrato do banco, fluxo de caixa, orçamento e DRE, e o pacote do mês pronto para o contador.',
       conta: 'Receber em dia um único cliente que costuma atrasar já paga alguns meses do sistema.',
-        pergunta: 'Hoje o financeiro da empresa fica em planilha ou em algum sistema?', beneficios: ['contas a pagar e a receber de uma ou várias empresas', 'cobrança com Pix e lembrete no WhatsApp', 'extrato do banco conferido e fluxo de caixa de 30, 60 e 90 dias', 'DRE e o pacote do mês pronto para o contador'], cena: 'Imagina abrir o computador na segunda e ver numa tela só quanto entra, quanto sai e quem está atrasado, com o lembrete de cobrança saindo sozinho.' },
+        pergunta: 'Hoje o financeiro da empresa fica em planilha ou em algum sistema?', beneficios: ['saber todo dia quanto a empresa realmente tem e vai ter', 'receber mais em dia, sem precisar ficar cobrando', 'parar de perder horas conferindo extrato e planilha', 'fechar o mês com o contador sem correria'], cena: 'Imagina abrir o computador na segunda e ver numa tela só quanto entra, quanto sai e quem está atrasado, com o lembrete de cobrança saindo sozinho.' },
     peplo: { pag: 'peplo.html', nome: 'Peplo', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'vende roupa',
       dor: 'Em loja de roupas, o tamanho e a cor acabam sem ninguém perceber, a fila trava no caixa e no fim do mês ninguém sabe o que vendeu e o que encalhou.',
       ganho: 'O Peplo vende rápido no caixa com leitor de código de barras e pagamento dividido em Pix, cartão e dinheiro, controla o estoque por tamanho e cor, faz trocas, compras e o caixa do dia e mostra as mais vendidas e as peças paradas. Se a loja vende no crediário, também tem limite por cliente.',
       conta: 'Liquidar a tempo uma única peça que ia encalhar já paga o mês do sistema.',
-        pergunta: 'Hoje o estoque por tamanho e cor aí é no caderno, na planilha ou de cabeça?', beneficios: ['venda rápida com leitor de código de barras e pagamento dividido', 'estoque por tamanho e cor, sempre certo', 'trocas e crediário com limite por cliente', 'as mais vendidas e as peças paradas na tela'], cena: 'Imagina saber na hora, pelo celular, qual tamanho acabou e qual peça está parada há 60 dias, antes de virar prejuízo.' },
+        pergunta: 'Hoje o estoque por tamanho e cor aí é no caderno, na planilha ou de cabeça?', beneficios: ['não perder venda por achar que tem a peça e não ter', 'menos dinheiro parado em roupa encalhada', 'fila andando rápido no caixa, cliente mais satisfeita', 'saber no fim do mês quanto vendeu e quanto lucrou'], cena: 'Imagina saber na hora, pelo celular, qual tamanho acabou e qual peça está parada há 60 dias, antes de virar prejuízo.' },
     annona: { pag: 'annona.html', nome: 'Annona', preco: 'R$ 59/mês (ou R$ 566/ano)', ramo: 'tem mercadinho',
       dor: 'Em mercadinho, o lucro vai embora na mercadoria que vence na prateleira e no fiado sem controle, e no fim do mês fica difícil saber quanto sobrou.',
       ganho: 'O Annona controla o estoque com código de barras e validade por lote, dá entrada pela nota (XML), mostra o que está parado, o fiado com limite e o lucro de cada produto.',
       conta: 'Deixar de perder algumas caixas de produto vencido por mês já paga o sistema.',
-        pergunta: 'Hoje vocês controlam a validade dos produtos de algum jeito ou só olhando a prateleira?', beneficios: ['estoque com código de barras e validade por lote', 'entrada da mercadoria direto pela nota (XML)', 'fiado com limite por cliente', 'o lucro de cada produto e o que está parado'], cena: 'Imagina o sistema te avisar antes do produto vencer, com tempo de fazer promoção em vez de jogar no lixo.' },
+        pergunta: 'Hoje vocês controlam a validade dos produtos de algum jeito ou só olhando a prateleira?', beneficios: ['menos produto vencido indo para o lixo', 'fiado que volta para o caixa', 'comprar só o que vende, sem dinheiro parado na prateleira', 'saber de verdade quanto sobrou no fim do mês'], cena: 'Imagina o sistema te avisar antes do produto vencer, com tempo de fazer promoção em vez de jogar no lixo.' },
     atria: { pag: 'atria.html', nome: 'Atria', preco: 'R$ 39/mês no Básico (o Pro, com busca de trabalho, é R$ 50)', ramo: 'trabalha com obra e reforma',
       dor: 'Quem trabalha com obra perde serviço por demorar no orçamento e perde dinheiro cobrando no improviso.',
       ganho: 'O Atria é um app de celular que faz o orçamento por m², diária ou empreitada, cobra no Pix direto na sua conta, monta seu portfólio de antes e depois e funciona até sem internet. No Pro, ainda mostra trabalho na sua cidade.',
       conta: 'Fechar um serviço a mais por mês por mandar o orçamento na hora já paga o app várias vezes.',
-        pergunta: 'Hoje você manda orçamento escrito à mão ou digitado no WhatsApp?', beneficios: ['orçamento por m², diária ou empreitada em minutos', 'cobrança no Pix direto na sua conta', 'portfólio de antes e depois para mostrar ao cliente', 'funciona até sem internet, no canteiro'], cena: 'Imagina sair da visita e mandar na hora um orçamento bonito, com o seu nome e o Pix, antes de o concorrente terminar a conta.' },
+        pergunta: 'Hoje você manda orçamento escrito à mão ou digitado no WhatsApp?', beneficios: ['fechar mais serviço, porque o orçamento chega antes do concorrente', 'passar mais confiança com um orçamento profissional', 'receber mais rápido e sem calote', 'parar de perder noite fazendo conta'], cena: 'Imagina sair da visita e mandar na hora um orçamento bonito, com o seu nome e o Pix, antes de o concorrente terminar a conta.' },
     popina: { pag: 'popina.html', nome: 'Popina', preco: 'R$ 79/mês (ou R$ 758/ano)', ramo: 'tem restaurante',
       dor: 'Em restaurante, pedido anotado no papel atrasa a cozinha, sai errado e some na hora de fechar a conta.',
       ganho: 'O Popina é simples de usar: o restaurante ganha um cardápio online com link próprio (sem comissão por pedido), o cliente pede pelo celular e o pedido chega com aviso na tela, vai para a cozinha na hora e o cliente acompanha até a entrega. No salão, o garçom anota no celular e o caixa fecha com Pix, troco, 10% e conta dividida.',
       conta: 'Um pedido errado a menos por dia já paga o sistema no mês.',
-        pergunta: 'Hoje os pedidos de delivery aí chegam pelo WhatsApp e alguém anota à mão?', beneficios: ['cardápio online com link próprio, sem comissão por pedido', 'pedido chega com aviso e vai direto para a cozinha', 'o cliente acompanha o pedido até a entrega', 'mesa com QR, conta dividida e caixa com Pix'], cena: 'Imagina uma sexta à noite cheia: o cliente abre o seu link, escolhe o lanche e o pedido aparece na tela com aviso, direto para a cozinha, sem ninguém digitar nada e sem pagar comissão por pedido.' },
+        pergunta: 'Hoje os pedidos de delivery aí chegam pelo WhatsApp e alguém anota à mão?', beneficios: ['mais pedidos sem pagar comissão para aplicativo', 'menos pedido errado e menos cliente reclamando', 'cozinha e entrega sem correria na hora do movimento', 'cliente que volta a pedir, porque foi fácil e chegou certo'], cena: 'Imagina uma sexta à noite cheia: o cliente abre o seu link, escolhe o lanche e o pedido aparece na tela com aviso, direto para a cozinha, sem ninguém digitar nada e sem pagar comissão por pedido.' },
     tecton: { pag: 'tecton.html', nome: 'Tecton', preco: 'R$ 129/mês (ou R$ 1.238/ano)', ramo: 'trabalha com construção',
       ramos: {
         construtora: { ramo: 'toca obras',
           dor: 'Em construtora, o cronograma escorrega, a medição atrasa e só no fim se descobre se a obra deu lucro, enquanto o cliente liga pedindo notícia.',
           ganho: 'Com o Tecton, cada obra mostra na hora se está no prazo e dando lucro: cronograma, medições, diário com foto e o resultado de cada obra, e o cliente acompanha tudo por um link, sem precisar ligar. Funciona no computador e no celular do canteiro.',
           conta: 'Pegar a tempo um único estouro de material ou uma medição esquecida já paga vários meses do sistema.',
-        pergunta: 'Hoje o acompanhamento das obras aí é em planilha?', beneficios: ['cronograma e medições de cada obra', 'diário de obra com foto, pelo celular', 'o lucro de cada obra na hora', 'o cliente acompanha por um link, sem ligar'], cena: 'Imagina abrir uma tela e ver na hora qual obra está atrasada e qual está dando prejuízo, com o cliente acompanhando por um link sem te ligar.' },
+        pergunta: 'Hoje o acompanhamento das obras aí é em planilha?', beneficios: ['saber a tempo se a obra está dando lucro ou prejuízo', 'menos atraso e menos dinheiro perdido em material', 'cliente tranquilo, sem ligar toda hora pedindo notícia', 'mais tempo para fechar obra nova'], cena: 'Imagina abrir uma tela e ver na hora qual obra está atrasada e qual está dando prejuízo, com o cliente acompanhando por um link sem te ligar.' },
         loja: { ramo: 'vende material de construção',
           dor: 'Em loja de material, o orçamento do WhatsApp se perde, a entrega sai sem conferência e o fiado do profissional cresce sem limite.',
           ganho: 'Com o Tecton, o balcão vende rápido e o orçamento sai pronto no WhatsApp, as entregas ficam agendadas e conferidas, cada obra tem a sua conta e o fiado do profissional tem limite. Funciona no computador do balcão e no celular de quem entrega.',
           conta: 'Receber um único fiado que ia ficar para trás já paga vários meses do sistema.',
-        pergunta: 'Hoje os orçamentos do balcão saem pelo WhatsApp escritos à mão?', beneficios: ['balcão rápido e orçamento pronto no WhatsApp', 'entregas agendadas e conferidas', 'uma conta para cada obra do cliente', 'fiado do profissional com limite'], cena: 'Imagina o orçamento saindo pronto no WhatsApp do cliente em um minuto e cada fiado de profissional com limite, sem surpresa no fim do mês.' },
+        pergunta: 'Hoje os orçamentos do balcão saem pelo WhatsApp escritos à mão?', beneficios: ['vender mais, porque o orçamento sai na hora', 'menos entrega errada e menos viagem perdida', 'fiado que volta para o caixa', 'balcão andando rápido no horário de pico'], cena: 'Imagina o orçamento saindo pronto no WhatsApp do cliente em um minuto e cada fiado de profissional com limite, sem surpresa no fim do mês.' },
         imobiliaria: { ramo: 'vende e aluga imóveis',
           dor: 'Em imobiliária, o espelho de vendas vive em planilha, parcela e aluguel atrasam sem ninguém ver e a comissão vira discussão.',
           ganho: 'Com o Tecton, o espelho de vendas mostra na hora o que está livre, reservado e vendido, os contratos geram as parcelas sozinhos, o aluguel entra com o repasse ao proprietário já calculado e cada corretor vê a sua comissão. Funciona no computador e no celular.',
           conta: 'Cobrar em dia um único aluguel ou parcela atrasada já paga o mês do sistema.',
-        pergunta: 'Hoje o espelho de vendas e os aluguéis ficam em planilha?', beneficios: ['espelho de vendas na hora: livre, reservado e vendido', 'parcelas geradas sozinhas pelo contrato', 'aluguel com o repasse ao proprietário calculado', 'a comissão de cada corretor sem discussão'], cena: 'Imagina ver numa tela só o que está livre, reservado e vendido, e os aluguéis entrando com o repasse ao proprietário já calculado.' }
+        pergunta: 'Hoje o espelho de vendas e os aluguéis ficam em planilha?', beneficios: ['vender mais rápido, com a informação certa na hora', 'aluguel e parcela recebidos em dia', 'proprietário satisfeito e repasse sem erro', 'fim da discussão de comissão na equipe'], cena: 'Imagina ver numa tela só o que está livre, reservado e vendido, e os aluguéis entrando com o repasse ao proprietário já calculado.' }
       } }
   };
   // texto do sistema; no Tecton, o do ramo do prospect (construtora, loja ou imobiliária)
@@ -141,7 +141,7 @@
   // Trutina (conferência de safra): textos aguardando a aprovação do dono no painel (botão "Textos aprovados" da aba Trutina)
   // associação, sindicato ou cooperativa: proposta de parceria para os associados, não venda direta
   function mensagemParceiro(p, acao, l, e) {
-    var ben = '*O que o associado ganha:*\n• peso, descontos, ATR, preço e valor conferidos com o contrato\n• as diferenças em reais, carga por carga\n• a mensagem pronta para cobrar o armazém ou a usina\n• as 20 primeiras cargas de graça';
+    var ben = '*O que o associado ganha:*\n• receber o dinheiro que ficou para trás no armazém ou na usina\n• vender a próxima safra sabendo exatamente o que conferir\n• mais segurança para negociar e cobrar\n• e a entidade oferece um benefício a mais, sem custo';
     if (acao === 'retomada1') return [
       'Oi! Voltando rapidinho sobre a conferência das cargas para os associados.',
       'Uma conta simples: numa entrega de 20 mil sacas, R$ 0,50 a menos por saca no desconto ou no preço são R$ 10 mil. Na cana, um ponto de ATR mal apurado em todas as cargas pesa da mesma forma.',
@@ -168,7 +168,7 @@
     var l = link(p), e = String(p.empresa || '').split(' - ')[0].split(' (')[0];
     if (/^Tipo: parceiro/.test(p.notas || '')) return mensagemParceiro(p, acao, l, e);
     var cult = /(cana|usina)/i.test((p.categorias || []).join(' ') + ' ' + (p.justificativa || '')) ? 'cana' : 'grãos';
-    var ben = '*O que você ganha:*\n• peso, descontos de umidade e impureza, preço e valor conferidos com o contrato\n• as diferenças em reais, carga por carga\n• a mensagem pronta para cobrar o armazém ou a usina\n• é só mandar foto ou PDF, sem planilha';
+    var ben = '*O que você ganha:*\n• receber o dinheiro que ficou para trás no armazém ou na usina\n• segurança de que foi pago o que estava no contrato\n• argumento pronto para negociar a próxima safra\n• tudo isso sem perder tempo com planilha';
     if (acao === 'retomada1') return [
       'Oi! Voltando rapidinho sobre a conferência da safra.',
       'Uma conta simples: numa entrega de 20 mil sacas, R$ 0,50 a menos por saca no desconto ou no preço são R$ 10 mil que ficaram no armazém. É esse tipo de diferença que a gente acha, carga por carga.',
@@ -198,7 +198,7 @@
     // oferta de fundador só aparece enquanto houver vaga (some sozinha quando as 3 forem usadas)
     var vagas = Math.max(0, 3 - FUND.length);
     var fund = function (t) { return vagas ? [t] : []; };
-    var ben = '*O que a ' + e + ' ganha com o Anshur:*\n• o valor máximo do usado antes de fechar a troca\n• o dinheiro parado no pátio à vista\n• acima do máximo, só com aprovação do gerente ou do dono\n• todas as lojas no mesmo lugar';
+    var ben = '*O que a ' + e + ' ganha com o Anshur:*\n• mais lucro em cada troca, sem pagar caro no usado\n• menos dinheiro parado no pátio\n• vendedor negociando com segurança, sem depender do "achismo"\n• o dono no controle de todas as lojas, sem estar em todas';
     if (acao === 'retomada1') return [
       'Oi! Voltando rapidinho sobre o usado da troca.',
       'Uma conta simples: se em uma troca de trator a revenda paga R$ 20 mil acima do que devia, esse valor sai direto do lucro da venda. Basta evitar isso *uma vez* para pagar 10 meses do Anshur (R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade).',
