@@ -1,10 +1,11 @@
 // Popina · salão (o que fazer agora e as mesas), a comanda de qualquer conta e o lançar itens do garçom.
 import { db, t, din, tempo, comanda, comandaDaMesa, abrirMesa, adicionarItem, enviar, mudarStatus, cancelarItem, transferir, juntarMesas, conta, valorItem, itensValidos,
-  fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2 } from './loja.js?v=42';
-import { registrar, acao, ir } from './nucleo.js?v=42';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=42';
-import { formOpcoes, temOpcoes } from './opcoes.js?v=42';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=42';
+  fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2 } from './loja.js?v=45';
+import { registrar, acao, ir } from './nucleo.js?v=45';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=45';
+import { formOpcoes, temOpcoes } from './opcoes.js?v=45';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=45';
+import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=45';
 
 const ESTADO = { livre: 'Livre', ocupada: 'Ocupada', conta: 'Pediu a conta', pronto: 'Prato pronto', chamou: 'Chamou', qr: 'Pedido do QR' };
 const nMesas = () => Math.max(1, Math.min(200, Number(db.config.mesas) || 10));
@@ -48,6 +49,8 @@ acao('entregar', (b) => { const c = comanda(b.dataset.id); if (!c) return; c.ite
 acao('imp-conta', (b) => { const c = comanda(b.dataset.id); if (c) imprimirConta(c); });
 
 function escolherGarcom(depois) {
+  // com funcionários cadastrados (Gestão › Equipe), entra pela foto e pelo PIN pessoal
+  if (pessoas().length) return trocarUsuario(depois ? (n) => n && depois(n) : () => ir(location.hash.slice(1) || 'salao'));
   const l = db.config.garcons || [];
   folha({ titulo: 'Quem está usando este celular?', corpo: `<p class="mudo" style="margin-bottom:12px">O nome vai nas mesas que você abrir e no relatório de garçons.</p>
     ${l.length ? `<div class="chips quebra">${l.map((n) => `<button type="button" class="chip" data-g="${t(n)}" aria-pressed="${n === euSou()}">${t(n)}</button>`).join('')}</div>` : ''}
@@ -156,7 +159,8 @@ acao('saiu', (b) => {
 acao('item-tirar', async (b) => {
   const c = comanda(b.dataset.c), i = c?.itens.find((x) => x.id === b.dataset.i); if (!i) return;
   if (i.status === 'rascunho') { cancelarItem(c, i); toast('Item tirado'); return; }
-  const r = await autorizar({ titulo: `Cancelar ${i.qtd}× ${i.nome}?`, texto: i.status === 'novo' ? 'A cozinha ainda não começou.' : 'Este item já foi para a cozinha.', motivos: ['Lançado errado', 'Cliente desistiu', 'Demorou demais', 'Saiu errado'], pedirPin: temPin(), sim: 'Cancelar o item', perigo: true });
+  if (!podeCancelar()) return toast('Você não pode cancelar. Chame o gerente para entrar no topo.');
+  const r = await autorizar({ titulo: `Cancelar ${i.qtd}× ${i.nome}?`, texto: i.status === 'novo' ? 'A cozinha ainda não começou.' : 'Este item já foi para a cozinha.', motivos: ['Lançado errado', 'Cliente desistiu', 'Demorou demais', 'Saiu errado'], pedirPin: precisaGerente('cancelar'), sim: 'Cancelar o item', perigo: true });
   if (!r) return; cancelarItem(c, i, r.motivo, r.pin ? `${euSou() || 'Equipe'} · senha do gerente` : undefined); toast('Item cancelado');
 });
 acao('trocar-mesa', (b) => {

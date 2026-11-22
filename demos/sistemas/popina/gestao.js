@@ -1,11 +1,12 @@
 // Popina · Gestão: o menu e as telas do dono (restaurante, mesas e QR, equipe, minha conta). As outras telas da Gestão
 // (cardápio, estoque, clientes, entregadores, relatórios) entram por G em cadastro.js e relatorios.js.
-import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=42';
-import { registrar, acao, ir } from './nucleo.js?v=42';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=42';
+import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=45';
+import { registrar, acao, ir } from './nucleo.js?v=45';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=45';
 import { qrSVG } from '../base/qr.js';
-import { DIAS } from './opcoes.js?v=42';
-import { imprimir } from './imprimir.js?v=42';
+import { DIAS } from './opcoes.js?v=45';
+import { imprimir } from './imprimir.js?v=45';
+import { telaEquipe } from './equipe.js?v=45';
 
 export const G = {};      // sub-telas: G[nome] = { titulo, html(), montar(el) }
 export const volta = (titulo, sub = '') => `<button type="button" class="voltar" data-ir="mais">${ico('voltar')}Gestão</button><div class="cab"><div><h1>${titulo}</h1>${sub ? `<p>${sub}</p>` : ''}</div></div>`;
@@ -16,7 +17,7 @@ const MENU = [
   ['relatorios', 'Relatórios', 'grafico', 'Vendas, mais vendidos, horários e garçons'],
   ['clientes', 'Clientes e fiado', 'pessoas', 'Quem pede, quanto gasta e quem deve'],
   ['entregadores', 'Entregadores', 'moto', 'Quem leva e o acerto do dia'],
-  ['equipe', 'Equipe', 'pessoas', 'Garçons, convites, o que cada um vê e a senha do gerente'],
+  ['equipe', 'Equipe', 'pessoas', 'Funcionários, PIN, permissões, ponto, escala e o fechamento de cada um'],
   ['restaurante', 'Restaurante', 'loja', 'Nome, contato, horários, logo, cor, Pix e entrega'],
   ['config', 'Configurações', 'ajustes', 'Perfil, cores, sua marca, guia, impressão e assinatura'],
   ['inicio', 'Primeiros passos', 'check', 'Pratos, mesas e equipe em 3 passos'],
@@ -135,57 +136,8 @@ G.mesas = {
   },
 };
 
-// ------------------------------------------------------------------ equipe
-const CARGOS = [['Garçom', 'Salão e pedidos'], ['Cozinha', 'Só a tela da cozinha'], ['Caixa', 'Caixa, pedidos e salão'], ['Entregador', 'Pedidos'], ['Gerente', 'Tudo, menos a assinatura']];
-G.equipe = {
-  titulo: 'Equipe',
-  html() {
-    const R = regras(), g = db.config.garcons || [], real = CONTA && window.veltriaAbrir;
-    return volta('Equipe', 'Quem trabalha, o que cada um vê e a senha do gerente') + `<div class="duas"><div>
-      <div class="cartao"><h2>Convites</h2><p class="mudo" style="margin-bottom:12px">Cada pessoa entra com o próprio e-mail e só vê as telas que você liberar (Salão, Pedidos, Cozinha, Caixa ou Gestão).</p>
-      ${real ? `<div class="linha-bts"><button type="button" class="bt cheio" data-conta="convidar">${ico('mais2')}Convidar pessoa</button><button type="button" class="bt" data-conta="equipe">${ico('ajustes')}Ver e editar a equipe</button></div>`
-        : `<div class="linha-bts"><button type="button" class="bt cheio" data-acao="pessoa-ed">${ico('mais2')}Convidar pessoa</button></div>
-        <ul class="lista-l" style="margin-top:8px"><li><div class="tx"><b>Você</b><small>Dono · vê tudo</small></div></li>${(db.equipe || []).map((p) => `<li><div class="tx"><b>${t(p.nome || p.email)}</b><small>${t(p.cargo || '')} · ${p.telas ? p.telas.map((h) => h.slice(1)).join(', ') : 'tudo'}${p.soVer ? ' · só ver' : ''} · ${p.aceito ? 'ativo' : 'convite enviado'}</small></div><button type="button" class="bt-ico" data-acao="pessoa-ed" data-id="${t(p.id)}" aria-label="Editar">${ico('ajustes')}</button></li>`).join('')}</ul>`}
-      <p class="campo" style="margin-top:12px"><span>Cargos sugeridos</span></p><ul class="lista-l">${CARGOS.map(([c, d]) => `<li><div class="tx"><b>${c}</b><small>${d}</small></div></li>`).join('')}</ul></div>
-    </div><div>
-      <div class="cartao"><h2>Garçons</h2><p class="mudo">Os nomes aparecem para escolher ao abrir a mesa e no relatório de garçons.</p>
-        <div class="chips quebra" style="margin:10px 0">${g.map((n, k) => `<span class="chip">${t(n)} <button type="button" class="bt-ico" style="width:32px;height:32px" data-tira-g="${k}" aria-label="Tirar ${t(n)}">${ico('fechar')}</button></span>`).join('') || '<span class="mudo">Nenhum ainda.</span>'}</div>
-        <div style="display:flex;gap:8px"><input data-novo-g maxlength="30" placeholder="Nome do garçom" aria-label="Nome do garçom"><button type="button" class="bt" data-mais-g>Pôr</button></div></div>
-      <div class="cartao"><h2>Senha do gerente</h2><p class="mudo" style="margin-bottom:12px">Pedida para cancelar item já mandado para a cozinha, cancelar venda e dar desconto acima do limite.</p>
-        <div class="grade2"><label class="campo"><span>Senha (4 números)</span><input data-pin type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="${temPin() ? '••••' : 'sem senha'}"></label>
-        <label class="campo"><span>Desconto sem senha até (%)</span><input data-lim inputmode="numeric" value="${R.limiteDesconto}"></label></div>
-        <div class="linha-bts"><button type="button" class="bt cheio" data-salvar-pin>${ico('check')}Salvar</button>${temPin() ? '<button type="button" class="bt" data-tira-pin>Tirar a senha</button>' : ''}</div></div>
-    </div></div>`;
-  },
-  montar(el) {
-    $('[data-mais-g]', el).onclick = () => { const n = $('[data-novo-g]', el).value.trim(); if (!n) return; db.config.garcons = [...(db.config.garcons || []).filter((x) => x !== n), n]; grava(); };
-    $$('[data-tira-g]', el).forEach((b) => { b.onclick = () => { db.config.garcons = (db.config.garcons || []).filter((_, k) => k !== Number(b.dataset.tiraG)); grava(); }; });
-    $('[data-salvar-pin]', el).onclick = () => { const p = $('[data-pin]', el).value.trim(); if (p && !/^\d{4}$/.test(p)) return toast('A senha tem 4 números'); setRegras({ ...(p ? { pin: p } : {}), limiteDesconto: Math.max(0, Math.min(100, Math.round(num($('[data-lim]', el).value)))) }); toast('Salvo'); };
-    $('[data-tira-pin]', el)?.addEventListener('click', async () => { if (await confirma('Tirar a senha do gerente? Qualquer pessoa poderá cancelar e dar desconto.', 'Tirar', true)) { setRegras({ pin: '' }); toast('Senha tirada'); } });
-  },
-};
-acao('pessoa-ed', (b) => {
-  const p = b.dataset.id ? (db.equipe || []).find((x) => x.id === b.dataset.id) : null;
-  const telas = [['#salao', 'Salão'], ['#pedidos', 'Pedidos'], ['#cozinha', 'Cozinha'], ['#caixa', 'Caixa'], ['#mais', 'Gestão']];
-  folha({ titulo: p ? p.email : 'Convidar pessoa', corpo: `<label class="campo"><span>E-mail da pessoa</span><input data-email type="email" value="${t(p?.email || '')}" ${p ? 'readonly' : ''}></label>
-    <label class="campo"><span>Nome</span><input data-nome value="${t(p?.nome || '')}"></label>
-    <p class="campo"><span>Cargo</span></p><div class="chips quebra">${CARGOS.map(([c]) => `<button type="button" class="chip" data-cargo="${c}" aria-pressed="${p?.cargo === c}">${c}</button>`).join('')}</div>
-    <p class="campo" style="margin-top:12px"><span>Telas que vê</span></p><div class="chips quebra">${telas.map(([h, n]) => `<label class="chip"><input type="checkbox" value="${h}" ${!p?.telas || p.telas.includes(h) ? 'checked' : ''}> ${n}</label>`).join('')}</div>
-    <label class="liga" style="margin-top:12px">Só ver, sem alterar nada<input type="checkbox" data-sover ${p?.soVer ? 'checked' : ''}></label>
-    ${p ? '<button type="button" class="bt perigo" data-apagar style="margin-top:12px">Tirar da equipe</button>' : '<p class="mudo" style="margin-top:12px">Na demonstração, o convite não sai por e-mail.</p>'}`,
-  pe: `<button type="button" class="bt cheio grande" data-ok>${p ? 'Salvar' : 'Mandar convite'}</button>`,
-  aoAbrir: (f, fechar) => {
-    $$('[data-cargo]', f).forEach((x) => { x.onclick = () => $$('[data-cargo]', f).forEach((y) => y.setAttribute('aria-pressed', y === x)); });
-    $('[data-apagar]', f)?.addEventListener('click', async () => { if (await confirma(`Tirar ${p.email} da equipe?`, 'Tirar', true)) { db.equipe = db.equipe.filter((x) => x !== p); grava(); fechar(); } });
-    $('[data-ok]', f).onclick = () => {
-      const email = $('[data-email]', f).value.trim().toLowerCase(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast('Confira o e-mail');
-      const sel = $$('.chip input:checked', f).map((i) => i.value);
-      const d = { nome: $('[data-nome]', f).value.trim(), cargo: $('[data-cargo][aria-pressed=true]', f)?.dataset.cargo || 'Equipe', telas: sel.length === telas.length ? null : sel, soVer: $('[data-sover]', f).checked };
-      if (p) Object.assign(p, d); else (db.equipe ||= []).push({ id: uid('p'), email, aceito: false, ...d });
-      grava(); fechar(); toast(p ? 'Salvo' : 'Convite criado');
-    };
-  } });
-});
+// ------------------------------------------------------------------ equipe (funcionários, PIN, permissões, ponto, escala e fechamento): equipe.js
+G.equipe = telaEquipe;
 
 // ------------------------------------------------------------------ minha conta e o plano com a sua marca
 // 19/11/2026: o plano "com a sua marca" saiu da venda (o Popina tem um plano só). Quem já tem continua com tudo funcionando;

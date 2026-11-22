@@ -3,24 +3,27 @@
 // Um visual só (o dono tirou os vários visuais): o esquema troca só os tons da casa (o marrom do menu e o destaque),
 // sempre dentro da identidade "taberna"; a cor da marca do restaurante continua livre.
 // Guarda só campos novos em db.config.loja.esquema e db.config.perfis[e-mail]: nada do que já existe muda de nome.
-import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=42';
-import { ir, rota } from './nucleo.js?v=42';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=42';
-import { G, volta, reduzir, planoMarca } from './gestao.js?v=42';
-import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=42';
-import { recomecar } from './loja.js?v=42';
+import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=45';
+import { ir, rota } from './nucleo.js?v=45';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=45';
+import { G, volta, reduzir, planoMarca } from './gestao.js?v=45';
+import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=45';
+import { recomecar } from './loja.js?v=45';
+import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=45';
 
 // ------------------------------------------------------------------ esquemas de cor (identidade do Popina)
 // escuro: menu do computador, faixa e etiquetas escuras · destaque: a cor dos botões (vira a cor da marca ao escolher)
+// 22/11/2026: paletas clean (o dono recusou o laranja). Fundo claro e texto escuro sempre iguais; muda o menu escuro e o destaque.
+// Os ids antigos (taberna, vinho, oliva, brasa, azulejo) caem no padrão Esmeralda.
 export const ESQUEMAS = [
-  { id: 'taberna', nome: 'Taberna', escuro: '#4A2416', escuro2: '#5E3020', destaque: '#B4532F', txt: 'Marrom e telha, o padrão do Popina' },
-  { id: 'vinho', nome: 'Adega', escuro: '#47161F', escuro2: '#5C2029', destaque: '#8C2F39', txt: 'Vinho escuro e bordô' },
-  { id: 'oliva', nome: 'Oliva', escuro: '#2F3318', escuro2: '#3F4422', destaque: '#5F6B2B', txt: 'Verde-oliva e azeite' },
-  { id: 'brasa', nome: 'Brasa', escuro: '#2A221D', escuro2: '#3A302A', destaque: '#C2410C', txt: 'Carvão e laranja da brasa' },
-  { id: 'azulejo', nome: 'Azulejo', escuro: '#1B2C42', escuro2: '#273D57', destaque: '#1F4E79', txt: 'Azul de azulejo de boteco' },
+  { id: 'esmeralda', nome: 'Esmeralda', escuro: '#141816', escuro2: '#262C29', destaque: '#1B6B4A', txt: 'Verde-esmeralda sóbrio, o padrão do Popina' },
+  { id: 'grafite', nome: 'Grafite', escuro: '#17191C', escuro2: '#2A2D31', destaque: '#33383D', txt: 'Preto e cinza, sem cor nenhuma' },
+  { id: 'ardosia', nome: 'Ardósia', escuro: '#252433', escuro2: '#363549', destaque: '#54528F', txt: 'Violeta-ardósia discreto' },
+  { id: 'indigo', nome: 'Índigo', escuro: '#12151C', escuro2: '#232836', destaque: '#274C8E', txt: 'Azul índigo profundo' },
+  { id: 'ameixa', nome: 'Ameixa', escuro: '#161216', escuro2: '#2A222A', destaque: '#6A2C5A', txt: 'Ameixa escura' },
 ];
 export const esquema = () => ESQUEMAS.find((e) => e.id === lojaCfg().esquema) || ESQUEMAS[0];
-const CORES = ['#B4532F', '#9A3412', '#8C2F39', '#B91C1C', '#5F6B2B', '#2F6B3A', '#1F5E5B', '#1F4E79', '#5B3F8C', '#4A2416', '#A16207', '#C2410C'];
+const CORES = ['#1B6B4A', '#2F5D46', '#33383D', '#54528F', '#274C8E', '#3F5872', '#6A2C5A', '#8A3047', '#5B4A7A', '#1A1D1B'];
 
 // ------------------------------------------------------------------ "Como usar" de cada tela
 export const COMO = {
@@ -34,7 +37,7 @@ export const COMO = {
   estoque: ['Estoque', ['O que tem e o que está acabando.', 'A lista de compras se monta sozinha com o que está baixo.']],
   relatorios: ['Relatórios', ['Escolha o período no alto.', 'Vendas, mais vendidos, horários de movimento e garçons.']],
   clientes: ['Clientes e fiado', ['Quem pede, quanto gasta e quem deve.', 'Receba o fiado e mande a cobrança pelo WhatsApp.']],
-  equipe: ['Equipe', ['Convide cada pessoa com o próprio e-mail e escolha as telas que ela vê.', 'A senha do gerente protege cancelamentos e descontos grandes.']],
+  equipe: ['Equipe', ['Cada funcionário tem foto, função e um PIN de 4 números: toque no nome no topo para trocar de usuário e bater o ponto.', 'A função já traz as permissões; ajuste o desconto, o cancelamento e a sangria de cada um.', 'Em “Fechamento do dia” sai o 10% de cada garçom e o acerto de cada entregador.']],
   restaurante: ['Restaurante', ['Nome, contato, horários, Pix, entrega e taxas por bairro.', 'Fora do horário o cardápio online mostra “fechado”.']],
   config: ['Configurações', ['Perfil, esquema de cores, sua marca, guia, impressão e assinatura.', 'Use os atalhos no alto para ir direto a uma seção.']],
 };
@@ -83,12 +86,12 @@ G.config = {
       </section>
     </div>
     <section class="cartao cfg-sec" id="cfg-marca"><h2>Sua marca</h2>
-      <p class="mudo">O nome do restaurante vai no topo, no recibo impresso e no cardápio do cliente; o logo e a cor da marca, no cardápio${window.popinaPlano === 'marca' ? ' e no topo do sistema' : ''}.</p>
+      <p class="mudo">O nome, o logo e a capa da loja vão no topo do sistema, no cardápio do cliente e (o nome e o logo) no recibo impresso; a cor da marca, nos botões e no cardápio.</p>
       <div class="duas" style="margin-top:12px"><div>
         <div class="cfg-eu"><div class="logo-prev" data-logo-prev style="${L.logo ? `background-image:url('${t(L.logo)}')` : ''}">${L.logo ? '' : t((c.nome || 'R')[0])}</div>
           ${g ? `<div class="linha-bts"><label class="bt">${ico('mais2')}${L.logo ? 'Trocar o logo' : 'Enviar o logo'}<input type="file" accept="image/*" data-logo hidden></label>${L.logo ? '<button type="button" class="bt" data-tira-logo>Tirar</button>' : ''}</div>` : ''}</div>
         <label class="campo"><span>Nome do restaurante</span><input data-nome-rest maxlength="60" value="${t(c.nome || '')}" ${g ? '' : 'readonly'}></label>
-        ${g ? `<button type="button" class="bt cheio" data-salvar-nome>${ico('check')}Salvar o nome</button>` : ''}
+        ${g ? `<div class="linha-bts"><button type="button" class="bt cheio" data-salvar-nome>${ico('check')}Salvar o nome</button><button type="button" class="bt" data-refazer-marca>${ico('troca')}${L.capa ? 'Trocar logo e capa' : 'Pôr logo e capa da loja'}</button></div>` : ''}
       </div><div>
         <p class="campo"><span>Cor da marca (os botões e o cardápio)</span></p>
         <div class="cores">${CORES.map((x) => `<button type="button" data-cor="${x}" style="background:${x}" class="${x.toLowerCase() === String(cor).toLowerCase() ? 'on' : ''}" aria-label="Cor ${x}" ${g ? '' : 'disabled'}></button>`).join('')}${g ? `<label class="bt pq" style="min-height:48px">Outra<input type="color" data-cor-livre value="${t(cor)}" style="width:28px;height:28px;border:0;padding:0;background:none"></label>` : ''}</div>
@@ -106,7 +109,7 @@ G.config = {
       ${g ? `<div class="menu-g" style="margin:12px 0">
         <button type="button" data-ir="mais/restaurante"><span class="ico-g">${ico('loja')}</span><span><b>Restaurante</b><small>Contato, horários, Pix${c.pix?.chave && !c.pix?.exemplo ? ' (cadastrado)' : ''}, entrega e taxas</small></span></button>
         <button type="button" data-ir="mais/mesas"><span class="ico-g">${ico('qr')}</span><span><b>Mesas e QR</b><small>${Number(c.mesas) || 10} mesas, QR e link do delivery</small></span></button>
-        <button type="button" data-ir="mais/equipe"><span class="ico-g">${ico('pessoas')}</span><span><b>Equipe</b><small>Convites, garçons e a senha do gerente</small></span></button></div>` : ''}
+        <button type="button" data-ir="mais/equipe"><span class="ico-g">${ico('pessoas')}</span><span><b>Equipe</b><small>Funcionários, PIN, ponto e a senha do gerente</small></span></button></div>` : ''}
       <p class="campo"><span>Papel da impressora</span></p>
       <div class="chips quebra">${[['80', 'Térmica de 80 mm'], ['a4', 'Folha A4']].map(([k, n]) => `<button type="button" class="chip" data-papel="${k}" aria-pressed="${formatoPadrao() === k}">${n}</button>`).join('')}</div>
       <label class="liga" style="margin-top:12px">Imprimir sozinho cada pedido novo na Cozinha<input type="checkbox" data-auto-imp ${autoImprimir() ? 'checked' : ''}></label>
@@ -132,6 +135,7 @@ G.config = {
     $('[data-cor-livre]', el)?.addEventListener('change', (e) => { setLoja({ cor: e.target.value }); toast('Cor da marca trocada'); });
     $('[data-logo]', el)?.addEventListener('change', async (e) => { const a = e.target.files?.[0]; if (!a) return; try { setLoja({ logo: await reduzir(a, 320, 320) }); toast('Logo salvo'); } catch { toast('Não deu para ler esta imagem'); } });
     $('[data-tira-logo]', el)?.addEventListener('click', () => { setLoja({ logo: '' }); toast('Logo tirado'); });
+    $('[data-refazer-marca]', el)?.addEventListener('click', () => abrirPrimeiroAcesso({ refazer: true }));
     $('[data-salvar-nome]', el)?.addEventListener('click', () => { const n = $('[data-nome-rest]', el).value.trim(); if (!n) return toast('Escreva o nome do restaurante'); db.config.nome = n.slice(0, 60); grava(); toast('Salvo'); });
     $$('[data-papel]', el).forEach((b) => { b.onclick = () => { setFormato(b.dataset.papel); toast(b.dataset.papel === 'a4' ? 'Impressão em folha A4' : 'Impressão na térmica de 80 mm'); ir(location.hash.slice(1)); }; });
     $('[data-auto-imp]', el)?.addEventListener('change', (e) => { setAutoImprimir(e.target.checked); toast(e.target.checked ? 'Imprimir sozinho: ligado' : 'Imprimir sozinho: desligado'); });

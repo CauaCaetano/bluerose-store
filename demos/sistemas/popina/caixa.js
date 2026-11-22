@@ -2,14 +2,15 @@
 // sangria e suprimento, e o fechamento do dia com o resumo pronto para mandar no WhatsApp do dono.
 import { db, t, din, r2, num, vir, tempo, hora, conta, comanda, pagar, partes, darDesconto, ondeComanda, quemPediu, caixaResumo, abrirCaixa, movimento, fecharCaixa,
   regras, temPin, euSou, setEuSou, quemAgora, grava, FORMA_FIADO, registrarFiado, receberFiado, clientesFiado, saldoFiado, nomeFiado, soDig, fone, zap, vendaDeHoje, cancelarVenda,
-  inicioDoDia, pagamentosVenda, itensValidos } from './loja.js?v=42';
-import { registrar, acao, ir } from './nucleo.js?v=42';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=42';
-import { pix } from './pix.js?v=42';
+  inicioDoDia, pagamentosVenda, itensValidos } from './loja.js?v=45';
+import { registrar, acao, ir } from './nucleo.js?v=45';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=45';
+import { pix } from './pix.js?v=45';
 import { qrSVG } from '../base/qr.js';
-import { blocoTotais, voltar, rotaComanda } from './salao.js?v=42';
-import { novoPedidoFolha } from './pedidos.js?v=42';
-import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=42';
+import { blocoTotais, voltar, rotaComanda } from './salao.js?v=45';
+import { novoPedidoFolha } from './pedidos.js?v=45';
+import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=45';
+import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=45';
 
 const FORMAS = [['Pix', 'pix'], ['Dinheiro', 'dinheiro'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao'], [FORMA_FIADO, 'etiqueta']];
 const rotuloForma = (f) => (f === FORMA_FIADO ? 'Fiado' : f.replace('Cartão de débito', 'Débito').replace('Cartão de crédito', 'Crédito'));
@@ -51,7 +52,9 @@ acao('mov', (b) => {
   folha({ titulo: tipo === 'sangria' ? 'Sangria: tirar dinheiro da gaveta' : 'Suprimento: pôr dinheiro na gaveta', corpo: `<label class="campo"><span>Valor (R$)</span><input data-v inputmode="decimal" placeholder="0,00"></label>
     <label class="campo"><span>Motivo</span><input data-m maxlength="80" placeholder="${tipo === 'sangria' ? 'Ex.: depósito no banco, pagar o gás' : 'Ex.: mais troco'}"></label>`,
   pe: '<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio grande" data-ok>Registrar</button>',
-  aoAbrir: (f, fechar) => { $('[data-ok]', f).onclick = () => { const v = num($('[data-v]', f).value); if (!(v > 0)) return toast('Escreva o valor'); movimento(tipo, v, $('[data-m]', f).value.trim() || (tipo === 'sangria' ? 'Sangria' : 'Suprimento')); fechar(); toast(`${tipo === 'sangria' ? 'Sangria' : 'Suprimento'} de ${din(v)} registrado`); }; } });
+  aoAbrir: (f, fechar) => { $('[data-ok]', f).onclick = async () => { const v = num($('[data-v]', f).value); if (!(v > 0)) return toast('Escreva o valor');
+    if (tipo === 'sangria' && precisaGerente('sangria')) { const r = await autorizar({ titulo: `Sangria de ${din(v)}`, texto: 'Quem está no aparelho não faz sangria sozinho.', pedirPin: true, sim: 'Autorizar' }); if (!r) return; }
+    movimento(tipo, v, $('[data-m]', f).value.trim() || (tipo === 'sangria' ? 'Sangria' : 'Suprimento')); fechar(); toast(`${tipo === 'sangria' ? 'Sangria' : 'Suprimento'} de ${din(v)} registrado`); }; } });
 });
 acao('receber-fiado', () => receberFiadoFolha());
 export function receberFiadoFolha(cidIni = '') {
@@ -151,7 +154,7 @@ registrar('fechar', {
   },
 });
 acao('desconto', async (b) => {
-  const c = comanda(b.dataset.id); if (!c) return; const v = conta(c), lim = Number(regras().limiteDesconto) || 0;
+  const c = comanda(b.dataset.id); if (!c) return; const v = conta(c), lim = Number(limiteDesconto()) || 0;
   folha({ titulo: 'Desconto', corpo: `<div class="grade2"><label class="campo"><span>Em reais (R$)</span><input data-r inputmode="decimal" value="${c.desconto ? vir(c.desconto) : ''}" placeholder="0,00"></label><label class="campo"><span>Ou em %</span><input data-p inputmode="decimal" placeholder="Ex.: 10"></label></div>
     <label class="campo"><span>Motivo</span><input data-m maxlength="80" value="${t(c.descontoInfo?.motivo || '')}" placeholder="Ex.: cliente de sempre, demora"></label>
     ${temPin() ? `<p class="mudo">Acima de ${lim}% pede a senha do gerente.</p>` : ''}`,
@@ -190,7 +193,8 @@ registrar('vendas', {
 });
 acao('cancelar-venda', async (b) => {
   const v = db.vendas.find((x) => x.id === b.dataset.id); if (!v) return;
-  const r = await autorizar({ titulo: `Cancelar a venda de ${din(v.total)}?`, texto: 'A venda fica marcada como cancelada e sai do faturamento. Devolva o dinheiro ao cliente se for o caso.', motivos: ['Cobrado em dobro', 'Lançado errado', 'Cliente desistiu'], pedirPin: temPin(), sim: 'Cancelar a venda', perigo: true });
+  if (!podeCancelar()) return toast('Você não pode cancelar. Chame o gerente para entrar no topo.');
+  const r = await autorizar({ titulo: `Cancelar a venda de ${din(v.total)}?`, texto: 'A venda fica marcada como cancelada e sai do faturamento. Devolva o dinheiro ao cliente se for o caso.', motivos: ['Cobrado em dobro', 'Lançado errado', 'Cliente desistiu'], pedirPin: precisaGerente('cancelar'), sim: 'Cancelar a venda', perigo: true });
   if (!r) return; cancelarVenda(v, r.motivo, r.pin ? `${quemAgora()} · senha do gerente` : quemAgora()); toast('Venda cancelada');
 });
 

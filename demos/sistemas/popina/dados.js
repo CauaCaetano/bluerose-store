@@ -53,7 +53,7 @@ export const CONFIG = {
   garcons: ['Rafael', 'Bruna', 'Diego'],
   regras: { pin: '1234', limiteDesconto: 10 },
   fin: { limiteFiado: 300 },
-  loja: { cor: '#B4532F', logo: '', capa: 'fotos/capa.webp', boasVindas: 'Lanches, pizzas e prato feito', endereco: 'Praça da Matriz, 45 · Centro', instagram: '', aviso: '',
+  loja: { cor: '#1B6B4A', logo: '', capa: 'fotos/capa.webp', boasVindas: 'Lanches, pizzas e prato feito', endereco: 'Praça da Matriz, 45 · Centro', instagram: '', aviso: '',
     horarios: [[['18:00', '23:30']], [], [['11:00', '14:30'], ['18:00', '23:00']], [['11:00', '14:30'], ['18:00', '23:00']], [['11:00', '14:30'], ['18:00', '23:00']], [['11:00', '14:30'], ['18:00', '23:59']], [['11:00', '15:00'], ['18:00', '23:59']]],
     aceitaQR: true, delivery: true, retirada: true, pedidoMinimo: 20, tempoEntrega: '40 a 50 min', tempoRetirada: '20 min', pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], couvert: 0 },
   inicio: { feito: true },

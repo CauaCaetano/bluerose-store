@@ -1,7 +1,7 @@
 // Popina · impressão pelo navegador: pedido da cozinha e recibo na impressora térmica de 80 mm, ou em folha A4.
 // Usa o window.print() do navegador com CSS de impressão (@page de 80 mm ou A4). Não precisa instalar nada.
-import { db, t, din, conta, itensValidos, valorItem, ondeComanda, quemPediu, hora, lojaCfg, fone } from './loja.js?v=42';
-import { folha, toast, $, $$, ico } from './ui.js?v=42';
+import { db, t, din, conta, itensValidos, valorItem, ondeComanda, quemPediu, hora, lojaCfg, fone } from './loja.js?v=45';
+import { folha, toast, $, $$, ico } from './ui.js?v=45';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* nada */ } };
@@ -14,7 +14,7 @@ const data = (ts = Date.now()) => new Date(ts).toLocaleString('pt-BR', { day: '2
 const adicTxt = (i) => (i.adic || []).map((a) => a.nome.replace(/^[^:]+: /, '') + (a.preco ? ` (+${din(a.preco)})` : '')).join(', ');
 const cabLoja = () => {
   const L = lojaCfg(), c = db.config;
-  return `<h1>${t(c.nome || 'Restaurante')}</h1>${L.endereco ? `<p class="c">${t(L.endereco)}</p>` : ''}${c.whatsapp ? `<p class="c">${t(fone(c.whatsapp))}</p>` : ''}`;
+  return `${L.logo ? `<img class="tk-logo" src="${t(L.logo)}" alt="">` : ''}<h1>${t(c.nome || 'Restaurante')}</h1>${L.endereco ? `<p class="c">${t(L.endereco)}</p>` : ''}${c.whatsapp ? `<p class="c">${t(fone(c.whatsapp))}</p>` : ''}`;
 };
 // pedido da cozinha: letras grandes, só o que importa para preparar (sem preço)
 export function htmlCozinha(c, itens, f = formatoPadrao()) {

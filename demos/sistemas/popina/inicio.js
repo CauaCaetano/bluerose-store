@@ -1,11 +1,11 @@
 // Popina · primeiro uso guiado em 3 passos: pratos, mesas e equipe. Abre sozinho na conta nova (sem pratos);
 // depois fica em Gestão › Primeiros passos. O que foi feito fica em db.config.inicio.
-import { db, t, din, r2, num, uid, grava, CONTA, linkCardapio } from './loja.js?v=42';
-import { ir } from './nucleo.js?v=42';
-import { ico, toast, $ } from './ui.js?v=42';
-import { G, volta } from './gestao.js?v=42';
-import { cardapioExemplo } from './dados.js?v=42';
-import { imprimir } from './imprimir.js?v=42';
+import { db, t, din, r2, num, uid, grava, CONTA, linkCardapio } from './loja.js?v=45';
+import { ir } from './nucleo.js?v=45';
+import { ico, toast, $ } from './ui.js?v=45';
+import { G, volta } from './gestao.js?v=45';
+import { cardapioExemplo } from './dados.js?v=45';
+import { imprimir } from './imprimir.js?v=45';
 import { qrSVG } from '../base/qr.js';
 
 const ini = () => (db.config.inicio ||= {});

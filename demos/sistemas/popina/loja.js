@@ -4,7 +4,7 @@
 // COMPATIBILIDADE: os dados do Popina antigo abrem aqui sem perder nada. Os campos das funções que saíram (rodízio, eventos,
 // portaria, vitrine, cupons, reservas, produção...) continuam guardados como estão: esta versão só não os mostra.
 // Nada aqui apaga campo antigo; tudo é alterado no lugar.
-import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=42';
+import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=45';
 
 export const CHAVE = 'popina-v1';
 export const CONTA = window.veltriaConta || null;
@@ -75,7 +75,7 @@ export const ativos = () => db.produtos.filter((p) => p.ativo !== false);
 
 // ------------------------------------------------------------------ o restaurante: a cara e as regras
 export const LOJA_PADRAO = {
-  cor: '#B4532F', logo: '', capa: '', boasVindas: '', endereco: '', instagram: '', aviso: '',
+  cor: '#1B6B4A', logo: '', capa: '', boasVindas: '', endereco: '', instagram: '', aviso: '',
   // horários por dia da semana (0 = domingo): lista de turnos [abre, fecha]
   horarios: [[['11:00', '15:00']], [], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:00']], [['11:00', '15:00'], ['18:00', '23:59']], [['11:00', '15:30'], ['18:00', '23:59']]],
   aceitaQR: true, delivery: true, retirada: true, pedidoMinimo: 0, tempoEntrega: '40 a 60 min', tempoRetirada: '20 a 30 min',
@@ -84,7 +84,11 @@ export const LOJA_PADRAO = {
 export const lojaCfg = () => ({ ...LOJA_PADRAO, ...(db.config.loja || {}) });
 export function setLoja(parcial) { db.config.loja = { ...(db.config.loja || {}), ...parcial }; grava(); }
 export const nomeMesa = (n) => `Mesa ${n}`;
-export const corLoja = () => (/^#[0-9a-f]{6}$/i.test(lojaCfg().cor || '') ? lojaCfg().cor : '#B4532F');
+// 22/11/2026: o laranja/telha saiu da paleta. As cores antigas que vinham do esquema "Taberna"/"Brasa" viram o padrão novo
+// só na tela (o valor guardado não muda: quem escolher outra cor depois, grava por cima).
+export const COR_PADRAO = '#1B6B4A';
+const CORES_ANTIGAS = ['#b4532f', '#c2410c', '#9a3412'];
+export const corLoja = () => { const c = String(lojaCfg().cor || '').toLowerCase(); return /^#[0-9a-f]{6}$/.test(c) && !CORES_ANTIGAS.includes(c) ? c : COR_PADRAO; };
 
 // ------------------------------------------------------------------ valores da conta
 const adicDe = (i) => (i.adic || []).reduce((s, a) => s + (Number(a.preco) || 0), 0);

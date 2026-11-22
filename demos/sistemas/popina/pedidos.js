@@ -1,8 +1,8 @@
 // Popina · pedidos de balcão, retirada e entrega numa lista só, e o novo pedido (nome ou número do cliente, endereço,
 // taxa por bairro e troco). Os pedidos do cardápio online caem aqui sozinhos.
-import { db, t, din, tempo, conta, novoPedido, itensValidos, ondeComanda, tipoNome, quemPediu, clientePorTel, soDig, num, vir, hora, lojaCfg } from './loja.js?v=42';
-import { registrar, ir } from './nucleo.js?v=42';
-import { ico, folha, toast, $, $$ } from './ui.js?v=42';
+import { db, t, din, tempo, conta, novoPedido, itensValidos, ondeComanda, tipoNome, quemPediu, clientePorTel, soDig, num, vir, hora, lojaCfg } from './loja.js?v=45';
+import { registrar, ir } from './nucleo.js?v=45';
+import { ico, folha, toast, $, $$ } from './ui.js?v=45';
 
 let filtro = '';
 const FILTROS = [['', 'Todos'], ['balcao', 'Balcão'], ['retirada', 'Retirada'], ['delivery', 'Entrega']];
