@@ -3,10 +3,10 @@
 // No celular, uma coluna por vez (as abas de cima trocam). O novo pedido (nome ou telefone do cliente, endereço, taxa por bairro e troco).
 import { db, t, din, tempo, minutos, conta, novoPedido, itensValidos, ondeComanda, tipoNome, quemPediu, clientePorTel, soDig, num, vir, hora, lojaCfg, comanda,
   etapa, aguardaAceite, aceitarPedido, recusarPedido, MOTIVOS_RECUSA, marcarPronto, saiuEntrega, concluirPedido, enviar, inicioDoDia, zap, fone,
-  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=47';
-import { registrar, acao, ir } from './nucleo.js?v=47';
-import { ico, folha, toast, bip, autorizar, $, $$ } from './ui.js?v=47';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=47';
+  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=48';
+import { registrar, acao, ir } from './nucleo.js?v=48';
+import { ico, folha, toast, bip, autorizar, $, $$ } from './ui.js?v=48';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=48';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* nada */ } };
@@ -69,7 +69,7 @@ registrar('pedidos', {
     const sel = colSel || (por.novo.length ? 'novo' : por.preparo.length ? 'preparo' : por.pronto.length ? 'pronto' : 'novo');
     const P = lojaPausada(), esperando = por.novo.filter(aguardaAceite).length;
     return `<div class="cab"><div><h1>Pedidos</h1><p>${l.length ? `${l.length} ${l.length === 1 ? 'pedido aberto' : 'pedidos abertos'}` : 'Balcão, retirada e entrega'}${esperando ? ` · <b class="alerta-txt">${esperando} esperando aceitar</b>` : ''}</p></div>
-      <div class="acoes"><button type="button" class="bt ${P ? 'perigo cheio' : ''}" data-acao="ped-pausa">${ico(P ? 'alerta' : 'loja')}${P ? `Pausado${P.ate ? ` até ${hora(P.ate)}` : ''} · voltar` : 'Pausar pedidos online'}</button>
+      <div class="acoes"><button type="button" class="bt so-pc" data-acao="link-delivery">${ico('link')}Meu link de delivery</button><button type="button" class="bt ${P ? 'perigo cheio' : ''}" data-acao="ped-pausa">${ico(P ? 'alerta' : 'loja')}${P ? `Pausado${P.ate ? ` até ${hora(P.ate)}` : ''} · voltar` : 'Pausar pedidos online'}</button>
         <button type="button" class="bt-ico" data-acao="ped-ajustes" aria-label="Som e aceitar sozinho" title="Som e aceitar sozinho">${ico('ajustes')}</button>
         <button type="button" class="bt cheio grande" data-novo-ped>${ico('mais2')}Novo pedido</button></div></div>
     ${P ? `<p class="aviso perigo">O cardápio online está pausado${P.motivo ? ` (${t(P.motivo)})` : ''}: os clientes veem a loja fechada.</p>` : ''}

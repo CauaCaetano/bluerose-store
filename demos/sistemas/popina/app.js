@@ -1,26 +1,31 @@
 // Popina · liga tudo: as 5 abas, a cor do restaurante, a marca (plano com a sua marca), a faixa da demonstração,
 // o aviso de pedido novo e o primeiro uso.
-import './salao.js?v=47';
-import './pedidos.js?v=47';
-import './cozinha.js?v=47';
-import './caixa.js?v=47';
-import './gestao.js?v=47';
-import './cadastro.js?v=47';
-import './relatorios.js?v=47';
-import { esquema, comoUsar } from './configuracoes.js?v=47';
-import { talvezAbrirInicio } from './inicio.js?v=47';
-import { talvezPrimeiroAcesso } from './primeiro-acesso.js?v=47';
-import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila, t } from './loja.js?v=47';
-import { iniciarRotas, ir } from './nucleo.js?v=47';
-import { ico, toast, bip, confirma, $ } from './ui.js?v=47';
-import { conferirNovos } from './cozinha.js?v=47';
+import './salao.js?v=48';
+import './pedidos.js?v=48';
+import './cozinha.js?v=48';
+import './caixa.js?v=48';
+import './gestao.js?v=48';
+import './cadastro.js?v=48';
+import './relatorios.js?v=48';
+import { esquema, comoUsar } from './configuracoes.js?v=48';
+import { talvezAbrirInicio } from './inicio.js?v=48';
+import { talvezPrimeiroAcesso } from './primeiro-acesso.js?v=48';
+import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila, t } from './loja.js?v=48';
+import { iniciarRotas, ir } from './nucleo.js?v=48';
+import { ico, toast, bip, confirma, $ } from './ui.js?v=48';
+import { conferirNovos } from './cozinha.js?v=48';
+import { montarMenu } from './menu.js?v=48';
 
 const real = !!CONTA;
 // ------------------------------------------------------------------ as 5 abas (links #: as permissões da equipe usam estes)
 const ABAS = [['salao', 'Salão', 'mesa'], ['pedidos', 'Pedidos', 'sacola'], ['cozinha', 'Cozinha', 'chef'], ['caixa', 'Caixa', 'dinheiro'], ['mais', 'Gestão', 'grafico']];
 // topo: Como usar esta tela (?) e Configurações (engrenagem), para todos (botões, não links: as permissões da equipe não escondem)
-$('#topo-bts').innerHTML = `<button type="button" class="topo-bt" data-como-agora aria-label="Como usar esta tela" title="Como usar esta tela"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"/><path d="M12 16.8v.2"/></svg><span>Como usar</span></button><button type="button" class="topo-bt" data-ir="mais/config" aria-label="Configurações" title="Configurações">${ico('ajustes')}<span>Configurações</span></button>`;
-$('#nav').innerHTML = ABAS.map(([h, n, i]) => `<a href="#${h}" data-aba="${h}">${ico(i)}<span>${n}</span><em data-cont="${h}"></em></a>`).join('');
+$('#topo-bts').innerHTML = `<button type="button" class="topo-bt topo-link so-cel" data-acao="link-delivery" aria-label="Meu link de delivery" title="Meu link de delivery">${ico('link')}<span>Meu link</span></button><button type="button" class="topo-bt" data-como-agora aria-label="Como usar esta tela" title="Como usar esta tela"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"/><path d="M12 16.8v.2"/></svg><span>Como usar</span></button><button type="button" class="topo-bt" data-ir="mais/config" aria-label="Configurações" title="Configurações">${ico('ajustes')}<span>Configurações</span></button>`;
+// no celular, a 5ª aba mostra "Menu" e abre a gaveta com as categorias (o nome da tela continua Gestão para as permissões)
+$('#nav').innerHTML = ABAS.map(([h, n, i]) => (h === 'mais'
+  ? `<a href="#${h}" data-aba="${h}"><span class="so-pc-i">${ico(i)}</span><span class="so-cel-i">${ico('menu')}</span><span data-cel="Menu">${n}</span><em data-cont="${h}"></em></a>`
+  : `<a href="#${h}" data-aba="${h}">${ico(i)}<span>${n}</span><em data-cont="${h}"></em></a>`)).join('');
+montarMenu();
 
 // ------------------------------------------------------------------ cor do restaurante com leitura garantida (contraste AA)
 const hex = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16));

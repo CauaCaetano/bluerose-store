@@ -1,14 +1,14 @@
 // Popina · cadastros da Gestão: cardápio (pratos, tamanhos, meio a meio, por quilo, complementos, foto e o que tira do estoque),
 // estoque simples (o que tem, o que acaba, contagem, perdas e lista de compras), clientes com fiado e entregadores com o acerto.
 import { db, t, din, r2, num, vir, uid, grava, prod, insumo, saldo, estoqueBaixo, entradaCompra, registrarPerda, ajustarEstoque, fmtQtd, MOTIVOS_PERDA,
-  clientesFiado, saldoFiado, limiteFiado, nomeFiado, fone, zap, soDig, acertoEntregadores, inicioDoDia, hora, aPartir } from './loja.js?v=47';
-import { acao, ir } from './nucleo.js?v=47';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=47';
-import { G, volta, reduzir } from './gestao.js?v=47';
-import { fotoProd } from './salao.js?v=47';
-import { cardapioExemplo } from './dados.js?v=47';
-import { receberFiadoFolha } from './caixa.js?v=47';
-import { imprimir } from './imprimir.js?v=47';
+  clientesFiado, saldoFiado, limiteFiado, nomeFiado, fone, zap, soDig, acertoEntregadores, inicioDoDia, hora, aPartir } from './loja.js?v=48';
+import { acao, ir } from './nucleo.js?v=48';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=48';
+import { G, volta, reduzir } from './gestao.js?v=48';
+import { fotoProd } from './salao.js?v=48';
+import { cardapioExemplo } from './dados.js?v=48';
+import { receberFiadoFolha } from './caixa.js?v=48';
+import { imprimir } from './imprimir.js?v=48';
 
 // ------------------------------------------------------------------ cardápio
 let catG = '';

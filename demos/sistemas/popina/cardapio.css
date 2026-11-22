@@ -327,3 +327,60 @@ body.cliente.cx-travado .toast{bottom:calc(100px + env(safe-area-inset-bottom))}
 .cliente .cx-cupom input{box-shadow:none!important;border:1px solid var(--cx-linha)!important;border-radius:10px!important}
 .cliente .cx-cupom input:focus{border-color:var(--loja,#1B6B4A)!important;box-shadow:0 0 0 1px var(--loja,#1B6B4A)!important}
 .cliente .cx-ops [data-livre]{width:calc(100% - 32px)!important;max-width:calc(100% - 32px)}
+
+/* conta opcional do cliente e endereço fácil (CEP, localização, salvos) */
+.cx-campo span i{font-style:normal;font-weight:600;color:var(--cx-mudo)}
+.cx-conta-cx{display:grid;gap:6px}
+.cx-conta-cx>b{font-size:16px;font-weight:800}
+.cx-conta-bts{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin:6px 0 2px}
+.cx-conta-bts .cx-bt,.cx-entrar .cx-bt{justify-content:center;gap:8px;min-height:48px}
+.cx-google{background:#fff;border:1px solid #DADCE0;color:#1F1F1F;font-weight:700}
+.cx-g{width:20px;height:20px;flex:none}
+.cx-conta-ok{display:flex;align-items:center;gap:12px}
+.cx-conta-ok .tx{flex:1;min-width:0;display:grid}
+.cx-conta-ok .tx small{color:var(--cx-mudo);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cx-conta-ico{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--loja-suave,#E8F3EE);color:var(--loja,#1B6B4A);flex:none}
+.cx-ends{margin-bottom:10px}
+.cx-ends .cx-pg>span{min-height:56px;padding-top:8px;padding-bottom:8px}
+.cx-end-tx{display:grid;gap:1px;min-width:0}
+.cx-end-tx small{font-weight:600;font-size:13px;color:var(--cx-mudo);overflow:hidden;text-overflow:ellipsis}
+.cx-endform[hidden]{display:none}
+.cx-cep{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
+.cx-cep .cx-campo{margin-bottom:0}
+.cx-local{min-height:48px;gap:6px;padding:0 12px;font-size:14px;white-space:nowrap}
+.cx-local:disabled{opacity:.6}
+.cx-cep-st{min-height:0;margin:6px 0 12px;font-size:13px;font-weight:600;color:var(--cx-mudo);line-height:1.4}
+.cx-cep-st:empty{margin:0 0 8px}
+.cx-cep-st .ico{width:15px;height:15px;vertical-align:-3px;margin-right:4px;color:var(--ok,#15803D)}
+.cx-cep-st.erro{color:#9A3412}
+.cx-duas{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:8px}
+.cx-duas .cx-campo{margin-bottom:6px}
+.cx-check{display:inline-flex;align-items:center;gap:8px;min-height:36px;margin:0 0 10px;font-size:14px;font-weight:600;cursor:pointer}
+.cx-check input{width:20px;height:20px;margin:0;accent-color:var(--loja,#1B6B4A)}
+.cliente .cx-campo input:disabled{background:var(--cx-cinza)}
+.cx-chips{display:flex;flex-wrap:wrap;gap:8px}
+.cx-chips label{cursor:pointer}
+.cx-chips input{position:absolute;opacity:0;pointer-events:none}
+.cx-chips span{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border:1px solid var(--cx-linha);border-radius:999px;font-weight:700;font-size:14px}
+.cx-chips input:checked+span{border:2px solid var(--loja,#1B6B4A);padding:0 15px;color:var(--loja,#1B6B4A)}
+.cx-chips input:focus-visible+span{outline:2px solid var(--loja,#1B6B4A);outline-offset:2px}
+.cx-entrar{display:grid;gap:12px}
+.cx-entrar form{display:grid}
+.cx-entrar .cx-cep-st{margin:0 0 10px}
+.cx-ou{display:flex;align-items:center;gap:10px;color:var(--cx-mudo);font-size:13px;font-weight:600}
+.cx-ou::before,.cx-ou::after{content:"";flex:1;height:1px;background:var(--cx-linha)}
+.cx-sem{justify-self:center;min-height:44px}
+.cx-entrar .cx-seg button{grid-template-columns:1fr;text-align:center;min-height:44px}
+.cx-minha h3{font-size:15px;font-weight:800;margin:18px 0 8px}
+.cx-minha-quem{display:flex;align-items:center;gap:10px;margin:0}
+.cx-minha-quem .ico{width:36px;height:36px;padding:7px;border-radius:50%;background:var(--loja-suave,#E8F3EE);color:var(--loja,#1B6B4A);flex:none}
+.cx-minha-quem span,.cx-lista-end li>span{display:grid;min-width:0;flex:1}
+.cx-minha-quem small,.cx-lista-end small{color:var(--cx-mudo);font-size:13px;overflow-wrap:anywhere}
+.cx-lista-end{list-style:none;margin:0;padding:0}
+.cx-lista-end li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--cx-linha)}
+.cx-lista-end li:last-child{border-bottom:0}
+.cx-lista-end li>.ico{color:var(--cx-mudo);flex:none}
+@media (max-width:360px){.cx-conta-bts{grid-template-columns:1fr}.cx-local span{display:none}}
+.cx-pg .cx-end-tx{display:grid;gap:1px;min-height:0;padding:0;border:0;border-radius:0;font-weight:800}
+.cx-pg input:checked+span .cx-end-tx{border:0;padding:0}
+.cx-nw{white-space:nowrap}

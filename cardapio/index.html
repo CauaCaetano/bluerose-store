@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <!-- cópia gerada de demos/sistemas/popina/cardapio.html (alias.py): mesmo cardápio, endereço sem o nome do sistema -->
 <base href="/demos/sistemas/popina/">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co wss://yihnfzwtkqdfnwziutqa.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://yihnfzwtkqdfnwziutqa.supabase.co wss://yihnfzwtkqdfnwziutqa.supabase.co https://viacep.com.br https://nominatim.openstreetmap.org; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cardápio</title>
 <meta name="robots" content="noindex">
@@ -13,8 +13,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,800&display=swap">
-<link rel="stylesheet" href="popina.css?v=45">
-<link rel="stylesheet" href="cardapio.css?v=45">
+<link rel="stylesheet" href="popina.css?v=48">
+<link rel="stylesheet" href="cardapio.css?v=48">
 </head>
 <body class="cliente">
 <header id="cx-capa" class="cx-capa"></header>
@@ -22,6 +22,7 @@
   <div class="cx-principal">
     <div id="cli-modo" class="cx-modo"></div>
     <div id="cli-aviso" class="cx-aviso"></div>
+    <div id="cli-ultimo" class="cx-ultimo"></div>
     <div class="cx-nav" id="cx-nav">
       <label class="cx-busca"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input type="search" id="cli-q" placeholder="Buscar no cardápio" aria-label="Buscar no cardápio" autocomplete="off"></label>
       <nav class="cx-abas" id="cli-cats" aria-label="Categorias"></nav>
@@ -34,6 +35,6 @@
 <div class="cx-barra" id="cli-barra" hidden></div>
 <script src="demo-cardapio.js?v=4"></script>
 <script src="../../../app/config.js"></script>
-<script type="module" src="cliente.js?v=45"></script>
+<script type="module" src="cliente.js?v=48"></script>
 </body>
 </html>

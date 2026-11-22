@@ -1,11 +1,11 @@
 // Popina · primeiro uso guiado em 3 passos: pratos, mesas e equipe. Abre sozinho na conta nova (sem pratos);
 // depois fica em Gestão › Primeiros passos. O que foi feito fica em db.config.inicio.
-import { db, t, din, r2, num, uid, grava, CONTA, linkCardapio } from './loja.js?v=47';
-import { ir } from './nucleo.js?v=47';
-import { ico, toast, $ } from './ui.js?v=47';
-import { G, volta } from './gestao.js?v=47';
-import { cardapioExemplo } from './dados.js?v=47';
-import { imprimir } from './imprimir.js?v=47';
+import { db, t, din, r2, num, uid, grava, CONTA, linkCardapio } from './loja.js?v=48';
+import { ir } from './nucleo.js?v=48';
+import { ico, toast, $ } from './ui.js?v=48';
+import { G, volta } from './gestao.js?v=48';
+import { cardapioExemplo } from './dados.js?v=48';
+import { imprimir } from './imprimir.js?v=48';
 import { qrSVG } from '../base/qr.js';
 
 const ini = () => (db.config.inicio ||= {});
@@ -28,6 +28,8 @@ G.inicio = {
       `<label class="campo"><span>Garçons (separe por vírgula)</span><input data-gs placeholder="Ex.: Rafael, Bruna" value="${t((db.config.garcons || []).join(', '))}"></label>
        <div class="linha-bts"><button type="button" class="bt cheio" data-equipe>${ico('check')}Salvar</button><button type="button" class="bt" data-conta="convidar">${ico('pessoas')}Convidar por e-mail</button><button type="button" class="bt" data-ir="mais/equipe">Senha do gerente</button></div>`)}
     </div>
+    <div class="cartao" style="margin-top:18px"><h2>Seu link de delivery</h2><p class="mudo">Mande para os clientes e ponha na bio do Instagram: eles pedem pelo celular e o pedido chega em Pedidos.</p>
+      <div class="linha-bts" style="margin-top:10px"><button type="button" class="bt cheio grande" data-acao="link-delivery">${ico('link')}Meu link de delivery</button></div></div>
     <div class="linha-bts" style="margin-top:18px"><button type="button" class="bt cheio grande" data-pronto>${ico('check')}${p1 && p2 && p3 ? 'Pronto, começar a usar' : 'Fazer isso depois'}</button></div>`;
   },
   montar(el) {

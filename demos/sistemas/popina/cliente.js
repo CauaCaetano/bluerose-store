@@ -5,8 +5,9 @@
 // Todo pedido também pode ir para o WhatsApp do restaurante (link wa.me com o pedido escrito).
 // COMPATIBILIDADE: o pedido continua com os mesmos campos (nome, tel, end, bairro, pagar, troco, itens). Os novos (ref, cupom, desconto,
 // taxa, total, agendado) só se somam; o que o sistema do dono ainda não lê vai também escrito no endereço, no pagamento e na observação.
-import { ico, folha, toast, $, $$ } from './ui.js?v=47';
-import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=47';
+import { ico, folha, toast, $, $$ } from './ui.js?v=48';
+import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=48';
+import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=48';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -18,11 +19,15 @@ const t = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<'
 const r2 = (v) => Math.round((Number(v) || 0) * 100) / 100;
 const soDig = (s) => String(s || '').replace(/\D/g, '');
 const num = (v) => { const s = String(v ?? '').trim(); return Number(/,/.test(s) ? s.replace(/\./g, '').replace(',', '.') : s) || 0; };
+let conta = null; // conta opcional do cliente (Google ou e-mail); null na mesa
 let M = null, L = null, modo = mesa ? 'mesa' : 'delivery', sacola = [], busca = '', loja = null, maisPedidos = new Set();
 const P = (id) => M.produtos.find((p) => p.id === id);
 const guardado = (k, v) => { try { const o = JSON.parse(localStorage.getItem(CHAVE_LOCAL) || '{}'); if (v === undefined) return o[k]; if (v === null) delete o[k]; else o[k] = v; localStorage.setItem(CHAVE_LOCAL, JSON.stringify(o)); } catch { /* sem acesso */ } return undefined; };
 const LOJA_PADRAO = { cor: '#1B6B4A', horarios: [], aceitaQR: true, delivery: true, retirada: true, pagamentos: ['Pix', 'Cartão na entrega', 'Dinheiro'], pedidoMinimo: 0, tempoEntrega: '', tempoRetirada: '' };
 const SVG_COMP = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1"/></svg>';
+const SVG_PESSOA = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+const SVG_G = '<svg class="cx-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 6.9-10.3 6.9-17.7z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.7-6c-2.2 1.5-5 2.3-8.2 2.3-6.2 0-11.5-4.1-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>';
+const SVG_EMAIL = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5L12 13l8.5-6.5"/></svg>';
 const SVG_LAPIS = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
 
 // só na demonstração: bairros de Orlândia e de Sales Oliveira e dois cupons para testar (o restaurante de verdade usa os dele)
@@ -152,10 +157,11 @@ function topo() {
   $('#cx-capa').innerHTML = `<div class="cx-banner${L.capa ? '' : ' sem'}" ${L.capa ? `style="background-image:url('${t(L.capa)}')"` : ''} role="img" aria-label="Foto do restaurante"></div>
     <div class="cx-cab"><div class="cx-logo" ${lg ? `style="background-image:url('${t(lg)}')"` : ''}>${lg ? '' : t(ini)}</div>
       <div class="cx-ident"><h1>${t(M.nome)}</h1>${L.boasVindas ? `<p class="cx-sub">${t(L.boasVindas)}</p>` : ''}
-        <p class="cx-st"><span class="cx-estado ${ab ? 'on' : 'off'}">${ab ? 'Aberto agora' : `Fechado${prox ? ` · abre ${quandoTxt(prox)}` : ' agora'}`}</span><button type="button" class="cx-link" data-horarios>Horários</button>${L.endereco ? `<a class="cx-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${L.endereco} ${M.cidade || ''}`)}">Endereço</a>` : ''}${zap ? `<a class="cx-link" target="_blank" rel="noopener" href="https://wa.me/55${zap.replace(/^55/, '')}">WhatsApp</a>` : ''}${mesa ? '' : `<button type="button" class="cx-link" data-compartilhar>${SVG_COMP}Compartilhar</button>`}</p></div></div>
+        <p class="cx-st"><span class="cx-estado ${ab ? 'on' : 'off'}">${ab ? 'Aberto agora' : `Fechado${prox ? ` · abre ${quandoTxt(prox)}` : ' agora'}`}</span><button type="button" class="cx-link" data-horarios>Horários</button>${L.endereco ? `<a class="cx-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${L.endereco} ${M.cidade || ''}`)}">Endereço</a>` : ''}${zap ? `<a class="cx-link" target="_blank" rel="noopener" href="https://wa.me/55${zap.replace(/^55/, '')}">WhatsApp</a>` : ''}${mesa ? '' : `<button type="button" class="cx-link" data-compartilhar>${SVG_COMP}Compartilhar</button>`}${conta ? `<button type="button" class="cx-link" data-minhaconta>${SVG_PESSOA}${conta.estado() ? 'Minha conta' : 'Entrar'}</button>` : ''}</p></div></div>
     ${info.length ? `<ul class="cx-info">${info.map((x) => `<li>${x}</li>`).join('')}</ul>` : ''}`;
   $('[data-horarios]').onclick = () => folha({ titulo: 'Horários', corpo: `${L.endereco ? `<p class="mudo" style="margin-bottom:10px">${t(L.endereco)}${M.cidade ? ` · ${t(M.cidade)}` : ''}</p>` : ''}<ul class="lista-l">${textoHorarios(L.horarios).map((x, k) => `<li${k === new Date().getDay() ? ' style="font-weight:800"' : ''}><div class="tx">${t(x)}</div></li>`).join('')}</ul>` });
   $('[data-compartilhar]')?.addEventListener('click', compartilhar);
+  $('[data-minhaconta]')?.addEventListener('click', () => (conta.estado() ? minhaConta() : entrarConta()));
 }
 function opsModo() { return [['delivery', 'Entrega', L.delivery !== false], ['balcao', 'Retirada', L.retirada !== false]].filter((x) => x[2]); }
 function caixaModo() {
@@ -292,6 +298,7 @@ const textoCupom = (c) => c.txt || (c.tipo === 'frete' ? 'Entrega grátis' : c.t
 // ------------------------------------------------------------------ sacola + finalizar (entrega ou retirada, endereço, quando, dados, pagamento, cupom e resumo)
 const bairroDe = (b) => (M.bairros || []).find((x) => x.nome === b);
 const taxaBairro = (b) => r2(bairroDe(b)?.taxa || 0);
+const cepBonito = (v) => { const d = soDig(v).slice(0, 8); return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d; };
 const foneBonito = (v) => { const d = soDig(v).slice(0, 11); if (d.length < 3) return d; if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`; if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`; return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`; };
 function opcoesBairro(sel) {
   const bs = M.bairros || [], cidades = [...new Set(bs.map((b) => b.cidade || ''))];
@@ -302,7 +309,15 @@ function abrirSacola() {
   if (!sacola.length) return;
   const cli = guardado('cliente') || {};
   const fechado = !aberto() && !mesa, slots = mesa ? [] : horariosAgendar();
-  const st = { nome: cli.nome || '', tel: cli.tel ? foneBonito(cli.tel) : '', end: cli.end || '', bairro: bairroDe(cli.bairro) ? cli.bairro : '', ref: cli.ref || '', pg: (L.pagamentos || [])[0] || '', troco: '', obs: '', cupom: '', quando: fechado ? String(slots[0] || '') : '' };
+  const st = { nome: cli.nome || '', tel: cli.tel ? foneBonito(cli.tel) : '', end: cli.end || '', bairro: bairroDe(cli.bairro) ? cli.bairro : '', ref: cli.ref || '', pg: (L.pagamentos || [])[0] || '', troco: '', obs: '', cupom: '', quando: fechado ? String(slots[0] || '') : '',
+    cep: cli.cep ? cepBonito(cli.cep) : '', rua: cli.rua || '', numero: cli.numero || '', compl: cli.compl || '', bairroTxt: cli.bairroTxt || '', cidade: cli.cidade || '', semNum: !!cli.semNum, endId: '', apelido: 'Casa' };
+  // endereço guardado do jeito antigo (uma linha só): separa rua, número e complemento
+  if (!st.rua && st.end) { const m = st.end.split(' · ')[0].match(/^(.*?),\s*(\d+[a-z]?)\s*(?:,\s*(.*))?$/i); if (m) Object.assign(st, { rua: m[1], numero: m[2], compl: m[3] || '' }); else st.rua = st.end.split(' · ')[0]; }
+  const ends = () => (conta?.estado()?.enderecos || []);
+  const usarEnd = (e) => { e = endLimpo(e); Object.assign(st, { endId: e.id, apelido: e.apelido, cep: e.cep ? cepBonito(e.cep) : '', rua: e.rua, numero: e.numero, semNum: !e.numero, compl: e.compl, ref: e.ref, cidade: e.cidade,
+    bairro: bairroDe(e.bairro) ? e.bairro : casarBairro(M.bairros, e.bairro, e.cidade), bairroTxt: (M.bairros || []).length ? '' : e.bairro }); };
+  const daConta = () => { const c = conta?.estado(); if (!c) return; if (c.nome) st.nome = c.nome; if (c.telefone) st.tel = foneBonito(c.telefone); if (ends().length) usarEnd(ends()[0]); else st.endId = 'novo'; };
+  daConta();
   const pgs = () => (L.pagamentos || []);
   const nomePg = (f) => (modo === 'balcao' ? f.replace(' na entrega', ' na retirada') : f);
   const ops = opsModo(), zap = soDig(M.whatsapp);
@@ -310,24 +325,46 @@ function abrirSacola() {
   const cupomOk = () => { const c = acharCupom(st.cupom); return c && !erroCupom(c, subtotal()) ? c : null; };
   const desconto = () => valorCupom(cupomOk(), subtotal(), taxa());
   const total = () => r2(subtotal() + taxa() - desconto());
+  const blocoConta = () => {
+    if (!conta) return '';
+    const c = conta.estado();
+    return c ? `<section class="cx-bloco cx-conta-ok"><span class="cx-conta-ico">${SVG_PESSOA}</span><div class="tx"><b>Olá, ${t((c.nome || 'cliente').split(' ')[0])}</b><small>${c.via === 'google' ? 'Entrou com Google' : c.via === 'exemplo' ? 'Conta de exemplo' : 'Entrou com e-mail'}${c.email ? ` · ${t(c.email)}` : ''}</small></div><button type="button" class="cx-link" data-minha>Minha conta</button></section>`
+      : `<section class="cx-bloco cx-conta-cx"><b>Peça mais rápido com uma conta</b><small class="cx-mudo">Endereços salvos e dados preenchidos no próximo pedido. É opcional.</small>
+        <div class="cx-conta-bts"><button type="button" class="cx-bt cx-google" data-google>${SVG_G}<span>Entrar com Google</span></button><button type="button" class="cx-bt" data-email-conta>${SVG_EMAIL}<span>Com e-mail</span></button></div>
+        <small class="cx-mudo">Ou continue sem conta: é só preencher abaixo.</small></section>`;
+  };
+  let ultimoCep = soDig(st.cep);
   const gruposSlots = () => { const g = {}; slots.forEach((v) => { const k = new Date(v).toDateString(); (g[k] ||= []).push(v); }); return Object.values(g); };
   const corpo = () => `
     <section class="cx-bloco"><div class="cx-bloco-cab"><h3>Seu pedido</h3><button type="button" class="cx-link" data-voltar>Adicionar mais itens</button></div>${itensHtml(true)}</section>
     ${mesa ? `<section class="cx-bloco"><h3>Mesa ${mesa}</h3><label class="cx-campo"><span>Seu nome (opcional)</span><input data-f="nome" maxlength="40" autocomplete="name" value="${t(st.nome)}"></label></section>` : `
     ${ops.length > 1 ? `<section class="cx-bloco"><h3>Como quer receber?</h3><div class="cx-seg">${ops.map(([k, n]) => `<button type="button" data-modo2="${k}" aria-pressed="${modo === k}">${k === 'delivery' ? ico('moto') : ico('sacola')}<span>${n}</span><small>${k === 'delivery' ? t(L.tempoEntrega || '') : t(L.tempoRetirada || '')}</small></button>`).join('')}</div></section>` : ''}
+    ${blocoConta()}
     ${modo === 'delivery' ? `<section class="cx-bloco"><h3>Endereço de entrega</h3>
-      <label class="cx-campo"><span>Rua, número e complemento</span><input data-f="end" maxlength="120" autocomplete="street-address" value="${t(st.end)}" placeholder="Ex.: Rua 7, 120, casa dos fundos"></label>
-      ${(M.bairros || []).length ? `<label class="cx-campo"><span>Bairro</span><select data-f="bairro">${opcoesBairro(st.bairro)}</select>${zap ? `<small class="cx-mudo">Não achou o bairro? <a class="cx-link" target="_blank" rel="noopener" href="https://wa.me/55${zap.replace(/^55/, '')}?text=${encodeURIComponent('Olá! Vocês entregam no meu bairro?')}">Pergunte no WhatsApp</a></small>` : ''}</label>` : ''}
-      <label class="cx-campo"><span>Ponto de referência (opcional)</span><input data-f="ref" maxlength="60" value="${t(st.ref)}" placeholder="Ex.: perto da padaria, portão azul"></label></section>`
+      ${ends().length ? `<div class="cx-pgs cx-ends" role="radiogroup" aria-label="Endereços salvos">${ends().map((e) => `<label class="cx-pg"><input type="radio" name="endsalvo" value="${t(e.id)}" ${st.endId === e.id ? 'checked' : ''}><span>${ico('pino')}<span class="cx-end-tx"><b>${t(e.apelido)}</b><small>${t(endLinha(e))}${e.bairro ? ` · ${t(e.bairro)}` : ''}</small></span></span></label>`).join('')}
+        <label class="cx-pg"><input type="radio" name="endsalvo" value="novo" ${st.endId === 'novo' ? 'checked' : ''}><span>${ico('mais2')}Outro endereço</span></label></div>` : ''}
+      <div class="cx-endform" data-endform ${ends().length && st.endId !== 'novo' ? 'hidden' : ''}>
+      <div class="cx-cep"><label class="cx-campo"><span>CEP</span><input data-f="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9" value="${t(st.cep)}" placeholder="00000-000"></label>
+        <button type="button" class="cx-bt cx-local" data-local>${ico('pino')}<span>Usar minha localização</span></button></div>
+      <p class="cx-cep-st" data-cep-st role="status">${st.cep ? '' : 'Digite o CEP e a rua e o bairro aparecem sozinhos.'}</p>
+      <label class="cx-campo"><span>Rua</span><input data-f="rua" maxlength="100" autocomplete="address-line1" value="${t(st.rua)}" placeholder="Ex.: Rua Seis"></label>
+      <div class="cx-duas"><label class="cx-campo"><span>Número</span><input data-f="numero" maxlength="12" inputmode="numeric" autocomplete="off" value="${t(st.numero)}" ${st.semNum ? 'disabled placeholder="s/n"' : 'placeholder="120"'}></label>
+        <label class="cx-campo"><span>Complemento <i>(opcional)</i></span><input data-f="compl" maxlength="60" autocomplete="address-line2" value="${t(st.compl)}" placeholder="Apto, bloco, fundos"></label></div>
+      <label class="cx-check"><input type="checkbox" data-semnum ${st.semNum ? 'checked' : ''}><span>Sem número</span></label>
+      ${(M.bairros || []).length ? `<label class="cx-campo"><span>Bairro</span><select data-f="bairro">${opcoesBairro(st.bairro)}</select>${zap ? `<small class="cx-mudo">Não achou o bairro? <a class="cx-link" target="_blank" rel="noopener" href="https://wa.me/55${zap.replace(/^55/, '')}?text=${encodeURIComponent('Olá! Vocês entregam no meu bairro?')}">Pergunte no WhatsApp</a></small>` : ''}</label>`
+        : `<label class="cx-campo"><span>Bairro</span><input data-f="bairroTxt" maxlength="60" value="${t(st.bairroTxt)}"></label>`}
+      <label class="cx-campo"><span>Ponto de referência <i>(opcional)</i></span><input data-f="ref" maxlength="60" value="${t(st.ref)}" placeholder="Ex.: perto da padaria, portão azul"></label>
+      ${conta?.estado() ? `<div class="cx-campo"><span>Salvar como</span><div class="cx-chips" role="radiogroup" aria-label="Salvar como">${['Casa', 'Trabalho', 'Outro'].map((a) => `<label><input type="radio" name="apelido" value="${a}" ${st.apelido === a ? 'checked' : ''}><span>${a}</span></label>`).join('')}</div><small class="cx-mudo">Fica salvo na sua conta para o próximo pedido.</small></div>` : ''}
+      </div>${ends().length && st.endId !== 'novo' && (M.bairros || []).length && !st.bairro ? `<p class="cx-nota" style="margin-top:10px">Este endereço está num bairro fora da lista de entrega. Escolha <b>Outro endereço</b> e o bairro mais próximo.</p>` : ''}</section>`
     : `<section class="cx-bloco"><h3>Retirada no balcão</h3><p class="cx-mudo">${L.endereco ? `${t(L.endereco)}${M.cidade ? ` · ${t(M.cidade)}` : ''}` : t(M.nome)}${L.tempoRetirada ? `<br>Fica pronto em ${t(L.tempoRetirada)}` : ''}</p></section>`}
     ${slots.length ? `<section class="cx-bloco"><h3>Quando?</h3>${fechado ? `<p class="cx-mudo" style="margin-bottom:10px">O restaurante está fechado agora. Escolha o horário e o pedido fica agendado.</p>` : ''}
       <div class="cx-pgs" role="radiogroup" aria-label="Quando">${fechado ? '' : `<label class="cx-pg"><input type="radio" name="quando" value="" ${st.quando ? '' : 'checked'}><span>${ico('relogio')}O quanto antes${modo === 'delivery' && L.tempoEntrega ? ` · ${t(L.tempoEntrega)}` : modo === 'balcao' && L.tempoRetirada ? ` · ${t(L.tempoRetirada)}` : ''}</span></label>`}
       <label class="cx-pg"><input type="radio" name="quando" value="agendar" ${st.quando ? 'checked' : ''}><span>${ico('calendario')}Agendar</span></label></div>
       <label class="cx-campo" data-quando-l ${st.quando ? '' : 'hidden'}><span>Horário</span><select data-f="quando">${gruposSlots().map((g) => `<optgroup label="${t(diaTxt(g[0]).replace(/^./, (c) => c.toUpperCase()))} ${dataCurta(g[0])}">${g.map((v) => `<option value="${v}" ${String(v) === st.quando ? 'selected' : ''}>${horaTxt(v)}</option>`).join('')}</optgroup>`).join('')}</select></label></section>` : ''}
-    <section class="cx-bloco"><div class="cx-bloco-cab"><h3>Seus dados</h3>${cli.nome ? '<button type="button" class="cx-link" data-esquecer>Esquecer meus dados</button>' : ''}</div>
+    <section class="cx-bloco"><div class="cx-bloco-cab"><h3>Seus dados</h3>${cli.nome && !conta?.estado() ? '<button type="button" class="cx-link" data-esquecer>Esquecer meus dados</button>' : ''}</div>
       <label class="cx-campo"><span>Nome</span><input data-f="nome" maxlength="60" autocomplete="name" value="${t(st.nome)}"></label>
-      <label class="cx-campo"><span>WhatsApp com DDD</span><input data-f="tel" inputmode="tel" autocomplete="tel" value="${t(st.tel)}" placeholder="(16) 99999-9999"></label>
-      <p class="cx-mudo">Seus dados ficam guardados só neste aparelho para o próximo pedido.</p></section>
+      <label class="cx-campo"><span>WhatsApp com DDD</span><input data-f="tel" type="tel" inputmode="tel" autocomplete="tel" value="${t(st.tel)}" placeholder="(16) 99999-9999"></label>
+      <p class="cx-mudo">${conta?.estado() ? 'Seus dados e endereços ficam salvos na sua conta.' : 'Seus dados ficam guardados só neste aparelho para o próximo pedido.'}</p></section>
     ${pgs().length ? `<section class="cx-bloco"><h3>Forma de pagamento</h3><div class="cx-pgs" role="radiogroup" aria-label="Forma de pagamento">${pgs().map((f) => `<label class="cx-pg"><input type="radio" name="pg" value="${t(f)}" ${st.pg === f ? 'checked' : ''}><span>${f === 'Pix' ? ico('pix') : /dinheiro/i.test(f) ? ico('dinheiro') : ico('cartao')}${t(nomePg(f))}</span></label>`).join('')}</div>
       <label class="cx-campo" data-troco-l ${st.pg === 'Dinheiro' ? '' : 'hidden'}><span>Troco para quanto? (deixe vazio se não precisa)</span><input data-f="troco" inputmode="decimal" placeholder="Ex.: 50" value="${t(st.troco)}"></label>
       <p class="cx-mudo cx-pg-nota">O pagamento é feito ${modo === 'delivery' ? 'na entrega' : 'na retirada'}.</p></section>` : ''}
@@ -363,7 +400,50 @@ function abrirSacola() {
       const tel = $('[data-f=tel]', f); if (tel) tel.addEventListener('input', () => { const p = tel.selectionStart === tel.value.length; tel.value = foneBonito(tel.value); st.tel = tel.value; if (p) tel.setSelectionRange(tel.value.length, tel.value.length); });
       $('[data-cupom]', f)?.addEventListener('click', () => { ler(); st.cupom = st.cupom.trim().toUpperCase(); $('[data-f=cupom]', f).value = st.cupom; tot(); if (cupomOk()) toast('Cupom aplicado'); });
       $('[data-f=cupom]', f)?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('[data-cupom]', f).click(); } });
-      $('[data-esquecer]', f)?.addEventListener('click', () => { guardado('cliente', null); Object.assign(st, { nome: '', tel: '', end: '', bairro: '', ref: '' }); Object.keys(cli).forEach((k) => delete cli[k]); montar(); toast('Seus dados foram apagados deste aparelho'); });
+      $('[data-esquecer]', f)?.addEventListener('click', () => { guardado('cliente', null); Object.assign(st, { nome: '', tel: '', end: '', bairro: '', ref: '', cep: '', rua: '', numero: '', compl: '', bairroTxt: '', cidade: '', semNum: false }); Object.keys(cli).forEach((k) => delete cli[k]); montar(); toast('Seus dados foram apagados deste aparelho'); });
+      // conta (opcional)
+      const depoisDeEntrar = () => { if (!document.body.contains(f)) return; ler(); daConta(); montar(); };
+      $('[data-google]', f)?.addEventListener('click', () => entrarGoogle(depoisDeEntrar));
+      $('[data-email-conta]', f)?.addEventListener('click', () => entrarConta({ aoEntrar: depoisDeEntrar }));
+      $('[data-minha]', f)?.addEventListener('click', () => minhaConta(() => { if (!document.body.contains(f)) return; ler(); if (!conta.estado()) st.endId = ''; else if (!ends().some((e) => e.id === st.endId)) daConta(); montar(); }));
+      // endereço: salvos em 1 toque, CEP, localização, sem número
+      $$('[name=endsalvo]', f).forEach((r) => { r.onchange = () => { ler(); if (r.value === 'novo') { Object.assign(st, { endId: 'novo', cep: '', rua: '', numero: '', compl: '', ref: '', bairro: '', bairroTxt: '', cidade: '', semNum: false, apelido: ends().some((e) => e.apelido === 'Casa') ? 'Trabalho' : 'Casa' }); ultimoCep = ''; } else { const e = ends().find((x) => x.id === r.value); if (e) usarEnd(e); } montar(); if (r.value === 'novo') $('[data-f=cep]', f)?.focus(); }; });
+      $$('[name=apelido]', f).forEach((r) => { r.onchange = () => { st.apelido = r.value; }; });
+      const poe = (k, v) => { st[k] = v; const i = $(`[data-f=${k}]`, f); if (i) i.value = v; };
+      const stCep = (html, erro = false) => { const el = $('[data-cep-st]', f); if (el) { el.innerHTML = html; el.classList.toggle('erro', erro); } };
+      const casar = (bairro, cidade) => {
+        const bs = M.bairros || [];
+        if (!bs.length) { if (bairro) poe('bairroTxt', bairro); return ''; }
+        const b = casarBairro(bs, bairro, cidade); if (b) { poe('bairro', b); tot(); return ''; }
+        const cids = [...new Set(bs.map((x) => x.cidade).filter(Boolean))], fora = cidade && cids.length && !cids.some((c) => c.toLowerCase() === cidade.toLowerCase());
+        return fora ? ` <b>Este restaurante entrega em ${t(cids.join(', '))}.</b>` : bairro ? ` <b>${t(bairro)}</b> não está na lista de entrega: escolha o bairro mais próximo.` : ' Escolha o bairro abaixo.';
+      };
+      const consultarCep = async (d) => {
+        stCep('Buscando o CEP…');
+        try {
+          const r = await buscarCep(d); if (soDig(st.cep) !== d) return;
+          st.cidade = r.cidade; if (r.rua) poe('rua', r.rua);
+          const aviso = casar(r.bairro, r.cidade);
+          stCep(`${r.rua ? `${ico('check')}${t(r.rua)}${r.bairro ? ` · ${t(r.bairro)}` : ''}` : `CEP geral de ${t(r.cidade)}: escreva a rua.`} · ${t(r.cidade)}/${t(r.uf)}.${aviso}`, !!aviso);
+          if (!st.semNum) $(r.rua ? '[data-f=numero]' : '[data-f=rua]', f)?.focus();
+        } catch (e) { stCep(t(e.message), true); }
+      };
+      const cepI = $('[data-f=cep]', f);
+      cepI?.addEventListener('input', () => { const d = soDig(cepI.value).slice(0, 8); cepI.value = cepBonito(d); st.cep = cepI.value; if (d.length === 8 && d !== ultimoCep) { ultimoCep = d; consultarCep(d); } else if (d.length < 8) ultimoCep = ''; });
+      $('[data-local]', f)?.addEventListener('click', async (e) => {
+        const b = e.currentTarget; b.disabled = true; stCep('Procurando onde você está…');
+        try {
+          const r = await minhaLocalizacao(); let v = null;
+          if (r.cep.length === 8) { try { v = await buscarCep(r.cep); } catch { v = null; } poe('cep', cepBonito(r.cep)); ultimoCep = r.cep; }
+          if (r.rua || v?.rua) poe('rua', r.rua || v.rua); if (r.numero && !st.semNum) poe('numero', r.numero);
+          st.cidade = v?.cidade || r.cidade;
+          const aviso = casar(v?.bairro || r.bairro, st.cidade);
+          stCep(`${ico('check')}Achamos: ${t(st.rua || 'rua não identificada')}${r.numero ? `, ${t(r.numero)}` : ''}${st.cidade ? ` · ${t(st.cidade)}` : ''}. Confira o número.${aviso}`, !!aviso);
+          $('[data-f=numero]', f)?.focus();
+        } catch (er) { stCep(t(er.message), true); }
+        b.disabled = false;
+      });
+      $('[data-semnum]', f)?.addEventListener('change', (e) => { st.semNum = e.target.checked; const n = $('[data-f=numero]', f); n.disabled = st.semNum; n.placeholder = st.semNum ? 's/n' : '120'; if (st.semNum) poe('numero', ''); else n.focus(); });
       tot();
     };
     montar();
@@ -377,20 +457,30 @@ function abrirSacola() {
       const itens = sacola.map((x, k) => ({ prod: x.prod, qtd: x.qtd, tam: x.tam || '', meia: x.meia || null, adic: x.adic || [], obs: [k === 0 ? marcaAg : '', x.obs, obs && k === sacola.length - 1 ? obs : ''].filter(Boolean).join(', ') }));
       let dados = null;
       if (!mesa) {
-        const tel = soDig(st.tel), end = st.end.trim(), bairro = st.bairro, ref = st.ref.trim();
-        if (modo === 'delivery' && !end) return avisa('Escreva o endereço', '[data-f=end]');
-        if (modo === 'delivery' && (M.bairros || []).length && !bairro) return avisa('Escolha o bairro', '[data-f=bairro]');
+        const tel = soDig(st.tel), bairro = st.bairro, ref = st.ref.trim(), rua = st.rua.trim(), numero = st.semNum ? '' : st.numero.trim(), compl = st.compl.trim(), cep = soDig(st.cep), bairroTxt = (st.bairroTxt || '').trim();
+        const abrirForm = () => { const fm = $('[data-endform]', f); if (fm?.hidden) { st.endId = 'novo'; montar(); } };
+        if (modo === 'delivery' && !rua) { abrirForm(); return avisa('Escreva a rua (ou digite o CEP)', '[data-f=cep]'); }
+        if (modo === 'delivery' && !numero && !st.semNum && !/\d/.test(rua)) { abrirForm(); return avisa('Escreva o número da casa (ou marque "Sem número")', '[data-f=numero]'); }
+        if (modo === 'delivery' && (M.bairros || []).length && !bairro) { abrirForm(); return avisa('Escolha o bairro', '[data-f=bairro]'); }
+        const end = [[rua, numero || (st.semNum ? 's/n' : '')].filter(Boolean).join(', '), compl].filter(Boolean).join(', ') + (bairroTxt && !(M.bairros || []).length ? ` · ${bairroTxt}` : '');
         if (nome.length < 2) return avisa('Escreva seu nome', '[data-f=nome]');
         if (tel.length < 10) return avisa('Escreva seu WhatsApp com DDD', '[data-f=tel]');
         if (faltaMinimo()) return toast(`O pedido mínimo para entrega é ${din(L.pedidoMinimo)}`);
         if (st.cupom && !cupomOk()) return avisa(erroCupom(acharCupom(st.cupom), subtotal()) || 'Confira o cupom', '[data-f=cupom]');
         const pg = st.pg || '', troco = /dinheiro/i.test(pg) ? r2(num(st.troco)) : 0;
         if (troco && troco < total()) return avisa(`O troco precisa ser para mais de ${din(total())}`, '[data-f=troco]');
-        guardado('cliente', { nome, tel, end, bairro, ref });
+        guardado('cliente', { nome, tel, end, bairro, ref, cep, rua, numero, compl, bairroTxt, cidade: st.cidade || '', semNum: st.semNum });
         const cup = cupomOk(), ds = desconto();
+        // mesmos campos de sempre (end continua com o endereço inteiro escrito); cep, rua, numero, compl e cidade só se somam
         dados = { nome, tel, end: modo === 'delivery' ? [end, ref ? `Ref.: ${ref}` : ''].filter(Boolean).join(' · ').slice(0, 160) : '', bairro: modo === 'delivery' ? bairro : '',
           pagar: `${pg}${troco ? ` (troco para ${din(troco)})` : ''}${cup ? ` · cupom ${cup.codigo}` : ''}`, troco, itens,
-          ref, taxa: taxa(), total: total(), ...(cup ? { cupom: cup.codigo, desconto: ds } : {}), ...(ag ? { agendado: { ts: ag, texto: quandoTxt(ag) } } : {}) };
+          ref, taxa: taxa(), total: total(), ...(cup ? { cupom: cup.codigo, desconto: ds } : {}), ...(ag ? { agendado: { ts: ag, texto: quandoTxt(ag) } } : {}),
+          ...(modo === 'delivery' ? { cep, rua, numero: numero || (st.semNum ? 's/n' : ''), compl, cidade: st.cidade || '' } : {}) };
+        const c = conta?.estado();
+        if (c) {
+          const lista = modo === 'delivery' ? juntarEnd(c.enderecos, { id: st.endId && st.endId !== 'novo' ? st.endId : undefined, apelido: st.apelido, cep, rua, numero, compl, bairro: bairro || bairroTxt, cidade: st.cidade, ref }) : c.enderecos;
+          conta.salvar({ nome, telefone: tel, enderecos: lista }).catch(() => {}); // nunca segura o pedido
+        }
       }
       bt.disabled = true; const txt = bt.innerHTML; bt.innerHTML = '<span>Mandando…</span>';
       const msg = textoZap(dados, nome, obs, ag);
@@ -399,7 +489,7 @@ function abrirSacola() {
         if (r?.erro) throw new Error(r.erro);
         const feito = { id: r.id, num: r.num || '', senha: r.senha || 0, modo, ts: Date.now(), itens: sacola.map((x) => ({ ...x })), sub: subtotal(), taxa: taxa(), desconto: desconto(), total: total(), msg, agendado: ag || 0, end: dados?.end || '', bairro: dados?.bairro || '', pagar: dados?.pagar || '', etapa: 'recebido' };
         sacola = []; salvarSacola(); barra(); fechar();
-        if (mesa) confirmadoMesa(r, msg); else { guardado('ultimo', feito); ultimo(); acompanhar(feito); }
+        if (mesa) confirmadoMesa(r, msg); else { guardado('ultimo', feito); guardado('pedidos', [feito, ...(guardado('pedidos') || []).filter((x) => x?.id !== feito.id)].slice(0, 10)); ultimo(); acompanhar(feito); }
       } catch (er) { bt.disabled = false; bt.innerHTML = txt; mostrarFalha(msg, er); }
     };
   } });
@@ -445,7 +535,7 @@ const idxEtapa = (u) => { const e = u.etapa || 'recebido'; return u.modo === 'de
 const rotuloEtapa = (u) => { if (u.etapa === 'recusado') return 'Pedido recusado pelo restaurante' + (u.motivo ? ': ' + u.motivo : ''); if (u.modo === 'delivery' && u.etapa === 'pronto') return 'Pronto, esperando o entregador'; return (PASSOS[u.modo] || PASSOS.delivery)[idxEtapa(u)][1]; };
 const ativo = (u) => u && u.id && !u.fim && Date.now() - u.ts < 12 * 3600e3;
 async function lerStatus(u) {
-  try { const s = await api.status(u.id, u.modo); if (s?.etapa) { u.etapa = s.etapa; if (s.motivo) u.motivo = s.motivo; if (s.etapa === 'entregue' || s.etapa === 'recusado') u.fim = true; const g = guardado('ultimo'); if (g?.id === u.id) guardado('ultimo', u); } } catch { /* sem internet: fica como estava */ }
+  try { const s = await api.status(u.id, u.modo); if (s?.etapa) { u.etapa = s.etapa; if (s.motivo) u.motivo = s.motivo; if (s.etapa === 'entregue' || s.etapa === 'recusado') u.fim = true; const g = guardado('ultimo'); if (g?.id === u.id) guardado('ultimo', u); const h = guardado('pedidos'); if (Array.isArray(h) && h.some((x) => x?.id === u.id)) guardado('pedidos', h.map((x) => (x?.id === u.id ? u : x))); } } catch { /* sem internet: fica como estava */ }
   return u;
 }
 function acompanhar(u) {
@@ -496,6 +586,64 @@ function ultimo() {
   clearInterval(tmUlt);
   if (ativo(u)) tmUlt = setInterval(async () => { if (document.visibilityState !== 'visible' || $('.cx-acomp-tela')) return; const antes = u.etapa; await lerStatus(u); if (u.etapa !== antes || u.fim) ultimo(); }, 20000);
 }
+// ------------------------------------------------------------------ conta do cliente (opcional): Google, e-mail e senha, endereços e meus pedidos
+async function entrarGoogle(depois) {
+  if (!conta.real) { toast('Na demonstração, entra como cliente de exemplo'); await conta.google(); toast('Pronto! Você entrou como Cliente de exemplo'); depois?.(); return; }
+  try { guardado('reabrirSacola', sacola.length ? 1 : null); await conta.google(); } catch { guardado('reabrirSacola', null); toast('Não deu para abrir o Google agora. Tente com e-mail ou continue sem conta.'); }
+}
+function entrarConta({ aoEntrar, aba = 'entrar' } = {}) {
+  let modoC = aba;
+  const corpo = () => `<div class="cx-entrar">
+    <button type="button" class="cx-bt cx-google largo" data-g>${SVG_G}<span>Entrar com Google</span></button>
+    ${conta.real ? '' : '<p class="cx-mudo">Na demonstração, o Google entra como cliente de exemplo.</p>'}
+    <div class="cx-ou"><span>ou com e-mail</span></div>
+    <div class="cx-seg" role="group" aria-label="Entrar ou criar conta"><button type="button" data-aba="entrar" aria-pressed="${modoC === 'entrar'}"><span>Entrar</span></button><button type="button" data-aba="criar" aria-pressed="${modoC === 'criar'}"><span>Criar conta</span></button></div>
+    <form data-form novalidate>
+      ${modoC === 'criar' ? '<label class="cx-campo"><span>Seu nome</span><input name="nome" maxlength="80" autocomplete="name" required></label>' : ''}
+      <label class="cx-campo"><span>E-mail</span><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="120" required></label>
+      <label class="cx-campo"><span>Senha${modoC === 'criar' ? ' <i>(mínimo 6)</i>' : ''}</span><input name="senha" type="password" minlength="6" autocomplete="${modoC === 'criar' ? 'new-password' : 'current-password'}" required></label>
+      <p class="cx-cep-st erro" data-erro role="alert"></p>
+      <button type="submit" class="cx-bt cheio largo" data-ir><span>${modoC === 'criar' ? 'Criar minha conta' : 'Entrar'}</span></button>
+    </form>
+    <button type="button" class="cx-link cx-sem" data-fechar>Continuar sem conta</button></div>`;
+  folha({ titulo: 'Entrar na sua conta', corpo: corpo(), aoAbrir: (f, fechar) => {
+    const ligar = () => {
+      $('[data-g]', f).onclick = async () => { await entrarGoogle(() => { fechar(); aoEntrar?.(); }); };
+      $$('[data-aba]', f).forEach((b) => { b.onclick = () => { modoC = b.dataset.aba; $('.folha-corpo', f).innerHTML = corpo(); ligar(); $('[name=nome],[name=email]', f)?.focus(); }; });
+      $('[data-form]', f).onsubmit = async (e) => {
+        e.preventDefault(); const fd = new FormData(e.target), nome = String(fd.get('nome') || '').trim(), email = String(fd.get('email') || '').trim(), senha = String(fd.get('senha') || '');
+        const erro = (m) => { $('[data-erro]', f).textContent = m; };
+        if (modoC === 'criar' && nome.length < 2) return erro('Escreva seu nome');
+        if (!/^\S+@\S+\.\S+$/.test(email)) return erro('Confira o e-mail');
+        if (conta.real && senha.length < 6) return erro('A senha precisa ter pelo menos 6 caracteres');
+        const bt = $('[data-ir]', f); bt.disabled = true; erro('');
+        try {
+          const r = modoC === 'criar' ? await conta.criar(nome, email, senha) : await conta.entrar(email, senha);
+          if (r.confirmar) { $('.folha-corpo', f).innerHTML = `<p style="font-weight:700">Conta criada! Mandamos um link para <b>${t(email)}</b>.</p><p class="cx-mudo" style="margin-top:8px">Abra o e-mail, toque no link e volte aqui para entrar. Enquanto isso, dá para pedir sem conta.</p><button type="button" class="cx-bt cheio largo" style="margin-top:14px" data-fechar><span>Entendi</span></button>`; return; }
+          fechar(); toast(modoC === 'criar' ? 'Conta criada. Seus próximos pedidos ficam mais rápidos' : 'Pronto! Você entrou'); aoEntrar?.();
+        } catch (er) { erro(er?.message || 'Não deu agora. Tente de novo.'); bt.disabled = false; }
+      };
+    };
+    ligar();
+  } });
+}
+function minhaConta(depois) {
+  const c = conta.estado(); if (!c) return entrarConta({ aoEntrar: depois });
+  const peds = (guardado('pedidos') || []).filter((u) => u?.id && u.itens?.length);
+  const corpo = () => { const x = conta.estado(); return `<div class="cx-minha">
+    <p class="cx-minha-quem">${SVG_PESSOA}<span><b>${t(x.nome || 'Cliente')}</b><small>${t(x.email)}${x.telefone ? ` · ${t(foneBonito(x.telefone))}` : ''}</small></span></p>
+    <h3>Endereços salvos</h3>${x.enderecos.length ? `<ul class="cx-lista-end">${x.enderecos.map((e) => `<li>${ico('pino')}<span><b>${t(e.apelido)}</b><small>${t(endLinha(e))}${e.bairro ? ` · ${t(e.bairro)}` : ''}${e.cep ? ` · <span class="cx-nw">CEP ${t(cepBonito(e.cep))}</span>` : ''}</small></span><button type="button" class="cx-link" data-tirar="${t(e.id)}" aria-label="Tirar o endereço ${t(e.apelido)}">Tirar</button></li>`).join('')}</ul>` : '<p class="cx-mudo">Nenhum ainda. O endereço do próximo pedido fica salvo aqui.</p>'}
+    <h3>Meus pedidos</h3>${peds.length ? `<ul class="cx-lista-end">${peds.map((u, k) => `<li>${ico(u.modo === 'delivery' ? 'moto' : 'sacola')}<span><b>Nº ${t(u.num || '')} · ${din(u.total)}</b><small>${t(new Date(u.ts).toLocaleDateString('pt-BR'))} · ${t(rotuloEtapa(u))}</small></span><button type="button" class="cx-link" data-ped="${k}">${ativo(u) ? 'Acompanhar' : 'Pedir de novo'}</button></li>`).join('')}</ul>` : '<p class="cx-mudo">Os pedidos feitos neste aparelho aparecem aqui.</p>'}
+    </div>`; };
+  folha({ titulo: 'Minha conta', corpo: corpo(), pe: '<button type="button" class="bt grande" data-sair>Sair da conta</button>', aoAbrir: (f, fechar) => {
+    const ligar = () => {
+      $$('[data-tirar]', f).forEach((b) => { b.onclick = async () => { await conta.salvar({ enderecos: conta.estado().enderecos.filter((e) => e.id !== b.dataset.tirar) }).catch(() => toast('Sem internet agora')); $('.folha-corpo', f).innerHTML = corpo(); ligar(); depois?.(); }; });
+      $$('[data-ped]', f).forEach((b) => { b.onclick = () => { const u = peds[Number(b.dataset.ped)]; fechar(); if (ativo(u)) acompanhar(u); else pedirDeNovo(u); }; });
+    };
+    ligar();
+    $('[data-sair]', f).onclick = async () => { await conta.sair(); fechar(); toast('Você saiu da conta. Dá para pedir sem conta normalmente'); depois?.(); };
+  } });
+}
 async function chamar() { try { const r = await api.chamar(); toast(r?.erro ? r.erro : 'O garçom foi chamado'); } catch { toast('Sem internet agora. Chame o garçom com a mão.'); } }
 async function verConta() {
   try {
@@ -523,14 +671,23 @@ function carregarSacola() {
   sacola = (Array.isArray(sacola) ? sacola : []).filter((x) => disponivel(P(x.prod)) && x.qtd > 0);
 }
 function tudo() { aplicarCor(); topo(); caixaModo(); aviso(); lista(); rodape(); carregarSacola(); barra(); ultimo(); }
+// conta opcional: o objeto existe logo (para o botão Entrar), a sessão é lida depois que o cardápio aparece
+async function posConta() {
+  if (!conta) return;
+  await conta.iniciar().catch(() => null);
+  topo();
+  // voltou do Google com a sacola cheia: abre a sacola já preenchida
+  if (conta.estado() && guardado('reabrirSacola')) { guardado('reabrirSacola', null); if (sacola.length) abrirSacola(); }
+}
 async function iniciar() {
+  if (!mesa) { conta = criarConta({ real: !!R }); conta.ouvir(() => { if (M) topo(); }); }
   if (!R) {
-    loja = await import('./loja.js?v=47'); doExemplo();
+    loja = await import('./loja.js?v=48'); doExemplo();
     loja.ouvir(() => { doExemplo(); if (!document.querySelector('.folha-fundo, .cx-tela-fundo')) { aplicarCor(); topo(); lista(); } });
-    tudo(); return;
+    tudo(); posConta(); return;
   }
   try { await daNuvem(); } catch (e) { $('#cli-lista').innerHTML = `<p class="cx-vazio">${t(e.message === 'rede' || /fetch/i.test(e.message) ? 'Sem internet agora. Confira a conexão e recarregue a página.' : e.message)}</p>`; return; }
-  tudo();
+  tudo(); posConta();
   // preço, esgotado ou horário mudou no restaurante: atualiza a cada minuto
   setInterval(() => { if (document.visibilityState === 'visible' && !document.querySelector('.folha-fundo, .cx-tela-fundo')) daNuvem().then(() => { aplicarCor(); topo(); aviso(); lista(); }).catch(() => {}); }, 60000);
 }

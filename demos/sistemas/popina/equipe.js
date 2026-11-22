@@ -6,13 +6,13 @@
 // db.equipe (convites da demonstração) e db.config.regras (senha do gerente) continuam valendo como estavam. Na conta real,
 // os convites, cargos e telas de nexo_membros seguem pelo fluxo de conta-nuvem.js (window.veltriaAbrir), sem mudar nada.
 import { db, t, din, r2, uid, grava, CONTA, ESPACO, regras, setRegras, temPin, fone, soDig, zap, euSou, setEuSou, num,
-  inicioDoDia, hora, acertoEntregadores } from './loja.js?v=47';
-import { acao, ir } from './nucleo.js?v=47';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=47';
+  inicioDoDia, hora, acertoEntregadores } from './loja.js?v=48';
+import { acao, ir } from './nucleo.js?v=48';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=48';
 
 // estilo próprio da Equipe (não mexe no popina.css)
 if (!document.querySelector('link[data-equipe-css]')) {
-  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'equipe.css?v=47'; l.dataset.equipeCss = '1'; document.head.appendChild(l);
+  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'equipe.css?v=48'; l.dataset.equipeCss = '1'; document.head.appendChild(l);
 }
 
 // ------------------------------------------------------------------ funções e modelos de permissão
@@ -220,7 +220,8 @@ function htmlSenha() {
 }
 export const telaEquipe = {
   titulo: 'Equipe',
-  html() {
+  html(sec) {
+    if (sec && ABAS_EQ.some(([k]) => k === sec)) aba = sec;
     preparar();
     const demo = !CONTA ? '<p class="eq-demo">Demonstração: os PINs são 1111 (Rafael), 2222 (Bruna), 3333 (Diego), 4444 (Dona Cida), 5555 (Marcos, gerente) e 6666 (entregadores). Senha do gerente: 1234.</p>' : '';
     return `<button type="button" class="voltar" data-ir="mais">${ico('voltar')}Gestão</button><div class="cab"><div><h1>Equipe</h1><p>Quem trabalha, o que cada um pode fazer, ponto e o fechamento do dia</p></div>
@@ -229,7 +230,7 @@ export const telaEquipe = {
       <div class="eq-corpo">${{ equipe: htmlEquipe, ponto: htmlPonto, dia: htmlDia, senha: htmlSenha }[aba]()}</div>`;
   },
   montar(el) {
-    $$('[data-eq-aba]', el).forEach((b) => { b.onclick = () => { aba = b.dataset.eqAba; ir('mais/equipe'); }; });
+    $$('[data-eq-aba]', el).forEach((b) => { b.onclick = () => { aba = b.dataset.eqAba; ir(`mais/equipe/${aba}`); }; });
     $('[data-salvar-pin]', el)?.addEventListener('click', () => { const p = $('[data-pin]', el).value.trim(); if (p && !/^\d{4}$/.test(p)) return toast('A senha tem 4 números'); setRegras({ ...(p ? { pin: p } : {}), limiteDesconto: Math.max(0, Math.min(100, Math.round(num($('[data-lim]', el).value)))) }); toast('Salvo'); });
     $('[data-tira-pin]', el)?.addEventListener('click', async () => { if (await confirma('Tirar a senha do gerente? Qualquer pessoa poderá cancelar e dar desconto.', 'Tirar', true)) { setRegras({ pin: '' }); toast('Senha tirada'); } });
   },

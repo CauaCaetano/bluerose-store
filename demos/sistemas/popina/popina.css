@@ -525,3 +525,87 @@ body.pa-aberto{overflow:hidden}
 .cod{display:inline-block;margin-right:6px;padding:0 6px;border-radius:6px;background:var(--papel2);border:1px solid var(--linha);font:700 13px/20px ui-monospace,monospace;color:var(--mudo);vertical-align:2px}
 .conf{display:grid;gap:4px}.conf small{display:block;min-height:18px;font-weight:700}
 .tk .grande-tk{font-size:16px;margin:6px 0}
+
+/* ------------------------------------------------------------ menu por categoria (22/11): lateral no computador, gaveta no celular */
+.so-pc,.so-pc-i{display:none}
+.so-cel-i{display:contents}
+.nav a [data-cel]{font-size:0}
+.nav a [data-cel]::after{content:attr(data-cel);font-size:13px}
+.menu-lado{position:fixed;top:0;bottom:0;left:0;z-index:60;width:min(340px,88vw);overflow-y:auto;overscroll-behavior:contain;padding:14px 12px calc(24px + env(safe-area-inset-bottom));padding-top:calc(14px + env(safe-area-inset-top));background:var(--marrom);color:#fff;transform:translateX(-105%);visibility:hidden;transition:transform .22s cubic-bezier(.2,.8,.2,1),visibility .22s;box-shadow:12px 0 40px rgba(0,0,0,.3)}
+body.gaveta-aberta .menu-lado{transform:none;visibility:visible}
+.menu-fundo{position:fixed;inset:0;z-index:55;background:rgba(20,24,22,.5);opacity:0;pointer-events:none;transition:opacity .2s}
+body.gaveta-aberta .menu-fundo{opacity:1;pointer-events:auto}
+body.gaveta-aberta{overflow:hidden}
+.gaveta-cab{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px}
+.gaveta-cab b{font:800 24px/1 var(--fonte-tit);color:#F4F6F4}
+.gaveta-cab .bt-ico{color:#F4F6F4;background:var(--marrom2);border-color:transparent}
+.bt-link-del{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:10px 14px;border:0;border-radius:14px;background:var(--loja);color:var(--loja-txt);text-align:left;cursor:pointer;box-shadow:0 6px 18px -10px rgba(0,0,0,.6);transition:transform .12s,filter .15s}
+.bt-link-del:hover{filter:brightness(1.07)}
+.bt-link-del:active{transform:scale(.98)}
+.bt-link-del .ico{width:26px;height:26px;flex:none}
+.bt-link-del span{display:grid;min-width:0}
+.bt-link-del b{font-size:17px;font-weight:800}
+.bt-link-del small{font-size:13px;font-weight:600;opacity:.9}
+.bt-link-del.grande{min-height:76px;padding:14px 20px}
+.bt-link-del.grande b{font-size:20px}
+.mg-lista{display:grid;gap:4px;margin-top:14px}
+.mg-tit{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:0 10px;border:0;border-radius:10px;background:none;color:#B9C4BE;font:800 13px/1 var(--fonte);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;text-align:left}
+.mg-tit:hover{background:var(--marrom2);color:#F4F6F4}
+.mg-tit .ico{width:20px;height:20px;flex:none}
+.mg-tit span{flex:1}
+.mg-tit [data-seta]{transition:transform .18s;width:18px;height:18px}
+.mg-tit[aria-expanded="false"] [data-seta]{transform:rotate(-90deg)}
+.mg.atual>.mg-tit{color:#F4F6F4}
+.mg-itens{display:grid;gap:2px;padding:0 0 8px 8px}
+.mg-it{display:flex;align-items:center;gap:12px;width:100%;min-height:46px;padding:0 12px;border:0;border-radius:10px;background:none;color:#DCE3DF;font:700 15px/1.2 var(--fonte);text-align:left;cursor:pointer}
+.mg-it:hover{background:var(--marrom2);color:#fff}
+.mg-it .ico{width:20px;height:20px;flex:none;opacity:.85}
+.mg-it span{flex:1}
+.mg-it em{min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--perigo);color:#fff;font:800 12px/22px var(--fonte);font-style:normal;text-align:center}
+.mg-it.on{background:var(--loja);color:var(--loja-txt);box-shadow:inset 3px 0 0 #fff}
+.mg-it.alerta{color:#FFC9BF}
+.menu-lado .mg-it:focus-visible,.menu-lado .mg-tit:focus-visible,.bt-link-del:focus-visible{outline:3px solid #fff;outline-offset:1px}
+/* a visão curta da Gestão: os mesmos itens, em cartões claros */
+.visao-link{max-width:520px;margin-bottom:18px}
+.visao-g{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));align-items:start}
+.visao-g .cartao{margin:0}
+.visao-tit{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.visao-tit .ico{width:22px;height:22px;color:var(--loja-tinta)}
+.visao-itens{display:grid;gap:2px}
+.visao-itens .mg-it{color:var(--tinta);min-height:48px;padding:0 10px}
+.visao-itens .mg-it:hover{background:var(--loja-suave);color:var(--tinta)}
+.visao-itens .mg-it .ico{color:var(--loja-tinta);opacity:1}
+.visao-itens .mg-it.alerta{color:var(--perigo)}
+[id^="rest-"]{scroll-margin-top:calc(var(--topo-h) + 16px)}
+/* a folha do link do delivery */
+.ld-campo input{font-size:17px;font-weight:700;color:var(--loja-tinta);background:var(--loja-suave);border-color:var(--loja)}
+.ld-bts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 18px}
+.ld-bts .bt{white-space:normal;text-align:center}
+.ld-zap{background:#1F8A4C;border-color:#1F8A4C;color:#fff}
+.ld-zap:hover{filter:brightness(1.06)}
+.ld-qr{display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:14px;border:1px solid var(--linha);border-radius:var(--raio);background:var(--papel)}
+.ld-qr-img{flex:none;padding:6px;background:#fff;border-radius:10px;line-height:0}
+.ld-qr>div:last-child{flex:1;min-width:200px}
+.ld-qr b{font-size:18px}
+.ld-dica{margin-top:16px;padding:14px 16px;border-radius:var(--raio);background:var(--loja-suave)}
+.ld-dica ol{margin:8px 0 6px 20px;display:grid;gap:4px}
+@media (max-width:420px){.ld-bts{grid-template-columns:1fr}.ld-qr-img svg{width:180px;height:180px}}
+@media (max-width:1023px){
+  .topo-bts{gap:2px}
+  .topo-link{color:var(--loja-tinta);background:var(--loja-suave)}
+}
+@media (min-width:1024px){
+  .so-cel,.so-cel-i{display:none!important}
+  :root{--lado:256px}
+  .so-pc{display:block}.so-pc-i{display:contents}
+  #link-lado{position:sticky;top:-22px;z-index:2;margin:-8px -14px -6px;padding:8px 14px;background:var(--marrom)}
+  span.so-pc{display:inline}
+  .bt.so-pc{display:inline-flex}
+  .nav a [data-cel]{font-size:inherit}
+  .nav a [data-cel]::after{content:none}
+  .topo{overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--marrom2) transparent;gap:14px}
+  .menu-lado{position:static;width:auto;overflow:visible;padding:0;background:none;transform:none;visibility:visible;box-shadow:none;transition:none;z-index:auto;margin-top:-4px;border-top:1px solid var(--marrom2);padding-top:6px}
+  .gaveta-cab,.menu-fundo{display:none}
+  .mg-lista{margin-top:0}
+  .nav a{min-height:48px}
+}

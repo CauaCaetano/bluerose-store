@@ -1,7 +1,7 @@
 // Popina · registro das telas e das ações, rota pelo endereço (#salao, #mesa/5...) e redesenho quando os dados mudam.
 // Só as 5 abas de baixo são links (#salao, #pedidos, #cozinha, #caixa, #mais): as permissões da equipe escondem por elas.
 // Dentro das telas, tudo é botão com data-ir (nunca link com #), para nenhum botão sumir para quem tem acesso limitado.
-import { ouvir } from './loja.js?v=47';
+import { ouvir } from './loja.js?v=48';
 
 export const TELAS = {};
 export const ACOES = {};

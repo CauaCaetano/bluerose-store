@@ -43,6 +43,7 @@ const P = {
   pino: '<path d="M12 21s-6.5-5.8-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 15.2 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.3"/>',
   loja: '<path d="M4 10h16M5 10V20h14V10M4 10l1.5-5h13L20 10"/><path d="M10 20v-5h4v5"/>',
   link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   cofre: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 11h18M10 14h4"/>',
 };
 export const ico = (n, extra = '') => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" ${extra}>${P[n] || ''}</svg>`;
@@ -87,12 +88,12 @@ export function autorizar({ titulo, texto = '', motivos = null, pedirPin = false
       const mot = $('[data-motivo]', f);
       $$('[data-mot]', f).forEach((b) => { b.onclick = () => { $$('[data-mot]', f).forEach((x) => x.classList.toggle('on', x === b)); mot.value = b.dataset.mot; }; });
       $('[data-sim]', f).onclick = async () => {
-        const { pinConfere } = await import('./loja.js?v=47');
+        const { pinConfere } = await import('./loja.js?v=48');
         const motivo = mot ? mot.value.trim() : '';
         if (mot && motivo.length < 3) { toast('Escolha ou escreva o motivo'); return mot.focus(); }
         const pin = $('[data-pin]', f);
         // vale a senha do gerente ou o PIN pessoal de quem é Gerente na Equipe
-        const { pinDeGerente } = await import('./equipe.js?v=47');
+        const { pinDeGerente } = await import('./equipe.js?v=48');
         if (pin && !pinConfere(pin.value) && !pinDeGerente(pin.value)) { toast('Senha errada'); pin.value = ''; return pin.focus(); }
         feito = true; ok({ motivo, pin: !!pin, el: f }); fechar();
       };

@@ -2,15 +2,15 @@
 // sangria e suprimento, e o fechamento do dia com o resumo pronto para mandar no WhatsApp do dono.
 import { db, t, din, r2, num, vir, tempo, hora, conta, comanda, pagar, partes, darDesconto, ondeComanda, quemPediu, caixaResumo, abrirCaixa, movimento, fecharCaixa,
   regras, temPin, euSou, setEuSou, quemAgora, grava, FORMA_FIADO, registrarFiado, receberFiado, clientesFiado, saldoFiado, nomeFiado, soDig, fone, zap, vendaDeHoje, cancelarVenda,
-  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=47';
-import { registrar, acao, ir } from './nucleo.js?v=47';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=47';
-import { pix } from './pix.js?v=47';
+  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=48';
+import { registrar, acao, ir } from './nucleo.js?v=48';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=48';
+import { pix } from './pix.js?v=48';
 import { qrSVG } from '../base/qr.js';
-import { blocoTotais, voltar, rotaComanda } from './salao.js?v=47';
-import { novoPedidoFolha } from './pedidos.js?v=47';
-import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=47';
-import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=47';
+import { blocoTotais, voltar, rotaComanda } from './salao.js?v=48';
+import { novoPedidoFolha } from './pedidos.js?v=48';
+import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=48';
+import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=48';
 
 const FORMAS = [['Pix', 'pix'], ['Dinheiro', 'dinheiro'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao'], [FORMA_FIADO, 'etiqueta']];
 const rotuloForma = (f) => (f === FORMA_FIADO ? 'Fiado' : f.replace('Cartão de débito', 'Débito').replace('Cartão de crédito', 'Crédito'));

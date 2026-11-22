@@ -1,37 +1,31 @@
 // Popina · Gestão: o menu e as telas do dono (restaurante, mesas e QR, equipe, minha conta). As outras telas da Gestão
 // (cardápio, estoque, clientes, entregadores, relatórios) entram por G em cadastro.js e relatorios.js.
-import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=47';
-import { registrar, acao, ir } from './nucleo.js?v=47';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=47';
+import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=48';
+import { registrar, acao, ir } from './nucleo.js?v=48';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=48';
 import { qrSVG } from '../base/qr.js';
-import { DIAS } from './opcoes.js?v=47';
-import { imprimir } from './imprimir.js?v=47';
-import { telaEquipe } from './equipe.js?v=47';
+import { DIAS } from './opcoes.js?v=48';
+import { imprimir } from './imprimir.js?v=48';
+import { telaEquipe } from './equipe.js?v=48';
+import { htmlVisao } from './menu.js?v=48';
 
 export const G = {};      // sub-telas: G[nome] = { titulo, html(), montar(el) }
 export const volta = (titulo, sub = '') => `<button type="button" class="voltar" data-ir="mais">${ico('voltar')}Gestão</button><div class="cab"><div><h1>${titulo}</h1>${sub ? `<p>${sub}</p>` : ''}</div></div>`;
-const MENU = [
-  ['cardapio', 'Cardápio', 'cardapio', 'Pratos, preços, tamanhos, fotos e complementos'],
-  ['mesas', 'Mesas e QR', 'qr', 'Quantas mesas, QR de cada mesa e link do delivery'],
-  ['cupons', 'Cupons', 'etiqueta', 'Código de desconto ou entrega grátis no cardápio online'],
-  ['estoque', 'Estoque', 'estoque', 'O que tem, o que está acabando e a lista de compras'],
-  ['relatorios', 'Relatórios', 'grafico', 'Vendas, mais vendidos, horários e garçons'],
-  ['clientes', 'Clientes e fiado', 'pessoas', 'Quem pede, quanto gasta e quem deve'],
-  ['entregadores', 'Entregadores', 'moto', 'Quem leva e o acerto do dia'],
-  ['equipe', 'Equipe', 'pessoas', 'Funcionários, PIN, permissões, ponto, escala e o fechamento de cada um'],
-  ['restaurante', 'Restaurante', 'loja', 'Nome, contato, horários, logo, cor, Pix e entrega'],
-  ['config', 'Configurações', 'ajustes', 'Perfil, cores, sua marca, guia, impressão e assinatura'],
-  ['inicio', 'Primeiros passos', 'check', 'Pratos, mesas e equipe em 3 passos'],
-];
+// 22/11/2026: a Gestão virou uma visão curta. As telas ficam no menu lateral (computador) e na gaveta Menu (celular),
+// divididas por categoria (menu.js). Rotas mais/<tela>/<seção> continuam: a seção rola até o cartão com aquele id.
+let rolou = '';
 registrar('mais', {
   titulo: (sub) => (sub && G[sub] ? G[sub].titulo : 'Gestão'),
-  html(sub) {
-    if (sub && G[sub]) return G[sub].html();
-    const baixo = estoqueBaixo().length;
-    return `<div class="cab"><div><h1>Gestão</h1><p>${t(db.config.nome || 'Seu restaurante')}</p></div></div>
-      <div class="menu-g">${MENU.map(([k, n, i, d]) => `<button type="button" data-ir="mais/${k}"><span class="ico-g">${ico(i)}</span><span><b>${n}${k === 'estoque' && baixo ? ` <span class="etq alerta">${baixo} acabando</span>` : ''}</b><small>${d}</small></span></button>`).join('')}</div>`;
+  html(sub, ...r) {
+    if (sub && G[sub]) return G[sub].html(...r);
+    return `<div class="cab"><div><h1>Gestão</h1><p>${t(db.config.nome || 'Seu restaurante')} · tudo também fica no menu ${'<span class="so-pc">ao lado</span><span class="so-cel">(aba Menu, embaixo)</span>'}</p></div></div>${htmlVisao()}`;
   },
-  montar(el, sub) { if (sub && G[sub]) G[sub].montar?.(el); },
+  montar(el, sub, ...r) {
+    if (sub && G[sub]) G[sub].montar?.(el, ...r);
+    const sec = r[0];
+    if (sub !== 'config' && sec && rolou !== location.hash) { const alvo = document.getElementById(sec); if (alvo) { rolou = location.hash; setTimeout(() => alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); } }
+    if (!sec) rolou = '';
+  },
 });
 
 // ------------------------------------------------------------------ restaurante
@@ -58,7 +52,7 @@ G.restaurante = {
     const c = db.config, L = lojaCfg(), cor = L.cor;
     return volta('Restaurante', 'O que o cliente vê no cardápio e o que vai no recibo') + `<form class="duas" data-rest>
     <div>
-      <div class="cartao"><h2>Dados</h2>
+      <div class="cartao" id="rest-dados"><h2>Dados</h2>
         <label class="campo"><span>Nome do restaurante</span><input name="nome" maxlength="60" value="${t(c.nome || '')}" required></label>
         <div class="grade2"><label class="campo"><span>Cidade</span><input name="cidade" maxlength="40" value="${t(c.cidade || '')}"></label><label class="campo"><span>Taxa de serviço (%)</span><input name="servico" inputmode="decimal" value="${vir(c.servico ?? 10)}"></label></div>
         <label class="campo"><span>Endereço</span><input name="endereco" maxlength="120" value="${t(L.endereco || '')}"></label>
@@ -69,12 +63,12 @@ G.restaurante = {
       </div>
       <div class="cartao"><h2>Logo e cor</h2><p class="mudo">O logo, a cor da marca e o esquema de cores ficam em Configurações, “Sua marca” e “Esquema de cores”.</p>
         <div class="linha-bts" style="margin-top:12px"><button type="button" class="bt" data-ir="mais/config/cfg-marca">${ico('ajustes')}Abrir Sua marca</button></div></div>
-      <div class="cartao"><h2>Pix do restaurante</h2>
+      <div class="cartao" id="rest-pix"><h2>Pix do restaurante</h2>
         <label class="campo"><span>Chave Pix</span><input name="pix" maxlength="80" value="${t(c.pix?.exemplo ? '' : c.pix?.chave || '')}" placeholder="CPF, CNPJ, e-mail, celular ou chave aleatória"><small>Aparece como QR com o valor na hora de fechar a conta. O dinheiro cai direto na sua conta.</small></label>
       </div>
     </div>
     <div>
-      <div class="cartao"><h2>Entrega e retirada</h2>
+      <div class="cartao" id="rest-entrega"><h2>Entrega e retirada</h2>
         <label class="liga">Aceita pedido de entrega pelo link<input type="checkbox" name="delivery" ${L.delivery !== false ? 'checked' : ''}></label>
         <label class="liga">Aceita pedido para retirar<input type="checkbox" name="retirada" ${L.retirada !== false ? 'checked' : ''}></label>
         <label class="liga">Cliente pede pelo QR da mesa<input type="checkbox" name="aceitaQR" ${L.aceitaQR !== false ? 'checked' : ''}></label>
@@ -86,7 +80,7 @@ G.restaurante = {
         <p class="campo" style="margin-top:14px"><span>Formas de pagamento na entrega</span></p>
         <div class="chips quebra">${['Pix', 'Cartão na entrega', 'Dinheiro'].map((f) => `<label class="chip"><input type="checkbox" name="pag" value="${f}" ${(L.pagamentos || []).includes(f) ? 'checked' : ''}> ${f}</label>`).join('')}</div>
       </div>
-      <div class="cartao"><h2>Horários</h2><p class="mudo">Fora do horário, o cardápio online mostra "fechado" e não aceita pedido.</p><div data-horas>${DIAS.map((_, k) => linhaHorario(k, L.horarios || [])).join('')}</div></div>
+      <div class="cartao" id="rest-horarios"><h2>Horários</h2><p class="mudo">Fora do horário, o cardápio online mostra "fechado" e não aceita pedido.</p><div data-horas>${DIAS.map((_, k) => linhaHorario(k, L.horarios || [])).join('')}</div></div>
     </div>
     <div class="barra-fixa" style="grid-column:1/-1"><button class="bt cheio grande">${ico('check')}Salvar</button></div></form>`;
   },
@@ -169,7 +163,7 @@ G.mesas = {
       <p class="mudo" style="margin-top:8px">Imprima, recorte e cole em cada mesa. Funciona em qualquer celular, sem baixar aplicativo.</p></div>
     <div class="cartao"><h2>Link do delivery</h2><p class="mudo">Ponha na bio do Instagram, no status do WhatsApp e mande para os clientes.</p>
       <div class="qr-mesa" style="margin:12px 0">${qrSVG(link, 150)}<small style="word-break:break-all">${t(link)}</small></div>
-      <div class="linha-bts"><button type="button" class="bt" data-copiar>${ico('link')}Copiar link</button><a class="bt" target="_blank" rel="noopener" href="${t(link)}">Abrir o cardápio</a></div></div></div>
+      <div class="linha-bts"><button type="button" class="bt cheio" data-acao="link-delivery">${ico('link')}Meu link de delivery</button><button type="button" class="bt" data-copiar>${ico('link')}Copiar link</button><a class="bt" target="_blank" rel="noopener" href="${t(link)}">Abrir o cardápio</a></div></div></div>
     <div class="sec"><h2>QR das mesas</h2></div><div class="qrs">${Array.from({ length: Math.min(nMesas(), 30) }, (_, k) => k + 1).map((m) => `<div class="qr-mesa">${qrSVG(linkCardapio(`mesa=${m}`), 150)}<b>Mesa ${m}</b></div>`).join('')}</div>`;
   },
   montar(el) {
