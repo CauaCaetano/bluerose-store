@@ -119,7 +119,7 @@
       s.preco + ', sem fidelidade, com *7 dias grátis* para testar (nada é cobrado nesse período): ' + l,
       'Se um dia quiser, é só responder esta mensagem. Abraço!\nBlue Rose Express'].join('\n\n');
     return ['Olá, tudo bem?',
-      'Aqui é da Blue Rose Express, de Orlândia. Vi ' + e + ' em ' + p.cidade + ' e quis te mostrar uma coisa rápida.',
+      'Aqui é da Blue Rose Express, de Orlândia. Encontrei o perfil de ' + e + ', aqui de ' + p.cidade + ', e quis te mostrar uma coisa rápida.',
       s.pergunta ? s.pergunta + ' Pergunto porque ' + minusc(s.dor) : s.dor,
       (s.cena ? s.cena + ' ' : '') + 'É isso que o ' + s.nome + ' faz. ' + s.conta,
       'Você pode ver funcionando agora, sem cadastro: ' + l,
