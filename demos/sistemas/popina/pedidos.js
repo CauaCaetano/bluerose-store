@@ -3,10 +3,10 @@
 // No celular, uma coluna por vez (as abas de cima trocam). O novo pedido (nome ou telefone do cliente, endereço, taxa por bairro e troco).
 import { db, t, din, tempo, minutos, conta, novoPedido, itensValidos, ondeComanda, tipoNome, quemPediu, clientePorTel, soDig, num, vir, hora, lojaCfg, comanda,
   etapa, aguardaAceite, aceitarPedido, recusarPedido, MOTIVOS_RECUSA, marcarPronto, saiuEntrega, concluirPedido, enviar, inicioDoDia, zap, fone,
-  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=48';
-import { registrar, acao, ir } from './nucleo.js?v=48';
-import { ico, folha, toast, bip, autorizar, $, $$ } from './ui.js?v=48';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=48';
+  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=49';
+import { registrar, acao, ir } from './nucleo.js?v=49';
+import { ico, folha, toast, bip, autorizar, $, $$ } from './ui.js?v=49';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=49';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* nada */ } };

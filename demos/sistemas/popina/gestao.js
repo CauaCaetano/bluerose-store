@@ -1,13 +1,13 @@
 // Popina · Gestão: o menu e as telas do dono (restaurante, mesas e QR, equipe, minha conta). As outras telas da Gestão
 // (cardápio, estoque, clientes, entregadores, relatórios) entram por G em cadastro.js e relatorios.js.
-import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=48';
-import { registrar, acao, ir } from './nucleo.js?v=48';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=48';
+import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, linkCardapio, regras, setRegras, temPin, fone, soDig, recomecar, estoqueBaixo } from './loja.js?v=49';
+import { registrar, acao, ir } from './nucleo.js?v=49';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=49';
 import { qrSVG } from '../base/qr.js';
-import { DIAS } from './opcoes.js?v=48';
-import { imprimir } from './imprimir.js?v=48';
-import { telaEquipe } from './equipe.js?v=48';
-import { htmlVisao } from './menu.js?v=48';
+import { DIAS } from './opcoes.js?v=49';
+import { imprimir } from './imprimir.js?v=49';
+import { telaEquipe } from './equipe.js?v=49';
+import { htmlVisao } from './menu.js?v=49';
 
 export const G = {};      // sub-telas: G[nome] = { titulo, html(), montar(el) }
 export const volta = (titulo, sub = '') => `<button type="button" class="voltar" data-ir="mais">${ico('voltar')}Gestão</button><div class="cab"><div><h1>${titulo}</h1>${sub ? `<p>${sub}</p>` : ''}</div></div>`;

@@ -3,11 +3,11 @@
 // 22/11/2026, pedido do dono: em vez de dezenas de atalhos na Gestão, as telas ficam no menu, divididas por categoria.
 // Os itens são botões (data-ir / data-acao), nunca links com #: as permissões da equipe continuam valendo pela aba
 // Gestão (#mais). Quem não vê a Gestão não vê as categorias; o link do delivery aparece para todos.
-import { db, t, lojaCfg, linkCardapio, estoqueBaixo, lojaPausada, ouvir } from './loja.js?v=48';
-import { acao } from './nucleo.js?v=48';
-import { ico, folha, toast, $ } from './ui.js?v=48';
+import { db, t, lojaCfg, linkCardapio, estoqueBaixo, lojaPausada, ouvir } from './loja.js?v=49';
+import { acao } from './nucleo.js?v=49';
+import { ico, folha, toast, $ } from './ui.js?v=49';
 import { qrSVG } from '../base/qr.js';
-import { imprimir } from './imprimir.js?v=48';
+import { imprimir } from './imprimir.js?v=49';
 
 // [chave, título, ícone, itens: [rótulo, ícone, destino (rota) ou ação]]
 export const GRUPOS = [
