@@ -5,9 +5,12 @@
 // Todo pedido também pode ir para o WhatsApp do restaurante (link wa.me com o pedido escrito).
 // COMPATIBILIDADE: o pedido continua com os mesmos campos (nome, tel, end, bairro, pagar, troco, itens). Os novos (ref, cupom, desconto,
 // taxa, total, agendado) só se somam; o que o sistema do dono ainda não lê vai também escrito no endereço, no pagamento e na observação.
-import { ico, folha, toast, $, $$ } from './ui.js?v=51';
-import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=51';
-import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=51';
+import { ico, folha, toast, $, $$ } from './ui.js?v=52';
+import * as som from './som.js?v=52';
+// cardápio do cliente: só um toque leve ao pôr na sacola e ao mandar o pedido; mudo no link "Som" do topo (vale neste celular)
+som.chaveSom('popina-som-cli', false);
+import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=52';
+import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=52';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -138,7 +141,7 @@ const vendeOnline = (p) => !p.porKg;
 const disponivel = (p) => !!p && p.ativo !== false && !p.esgotado;
 const ehNovo = (p) => !!p.novo || (Number(p.criado) > 0 && Date.now() - Number(p.criado) < 21 * 864e5);
 const selos = (p) => (!disponivel(p) ? '<i class="cx-selo off">Esgotado</i>' : `${maisPedidos.has(p.id) ? '<i class="cx-selo mais">Mais pedido</i>' : ''}${ehNovo(p) ? '<i class="cx-selo novo">Novo</i>' : ''}`);
-const logoDe = () => L.logo || (!R ? 'img/c-logo-exemplo.webp' : '');
+const logoDe = () => L.logo || (!R ? 'img/c-logo-exemplo.webp?v=2' : '');
 const faixaTaxa = () => { const l = (M.bairros || []).map((b) => Number(b.taxa) || 0); if (!l.length) return ''; const a = Math.min(...l), b = Math.max(...l); return a === b ? din(a) : `${din(a)} a ${din(b)}`; };
 const linkCardapio = () => `${location.origin}${location.pathname}${R ? `?r=${R}` : ''}`;
 async function compartilhar() {
@@ -157,10 +160,11 @@ function topo() {
   $('#cx-capa').innerHTML = `<div class="cx-banner${L.capa ? '' : ' sem'}" ${L.capa ? `style="background-image:url('${t(L.capa)}')"` : ''} role="img" aria-label="Foto do restaurante"></div>
     <div class="cx-cab"><div class="cx-logo" ${lg ? `style="background-image:url('${t(lg)}')"` : ''}>${lg ? '' : t(ini)}</div>
       <div class="cx-ident"><h1>${t(M.nome)}</h1>${L.boasVindas ? `<p class="cx-sub">${t(L.boasVindas)}</p>` : ''}
-        <p class="cx-st"><span class="cx-estado ${ab ? 'on' : 'off'}">${ab ? 'Aberto agora' : `Fechado${prox ? ` · abre ${quandoTxt(prox)}` : ' agora'}`}</span><button type="button" class="cx-link" data-horarios>Horários</button>${L.endereco ? `<a class="cx-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${L.endereco} ${M.cidade || ''}`)}">Endereço</a>` : ''}${zap ? `<a class="cx-link" target="_blank" rel="noopener" href="https://wa.me/55${zap.replace(/^55/, '')}">WhatsApp</a>` : ''}${mesa ? '' : `<button type="button" class="cx-link" data-compartilhar>${SVG_COMP}Compartilhar</button>`}${conta ? `<button type="button" class="cx-link" data-minhaconta>${SVG_PESSOA}${conta.estado() ? 'Minha conta' : 'Entrar'}</button>` : ''}</p></div></div>
+        <p class="cx-st"><span class="cx-estado ${ab ? 'on' : 'off'}">${ab ? 'Aberto agora' : `Fechado${prox ? ` · abre ${quandoTxt(prox)}` : ' agora'}`}</span><button type="button" class="cx-link" data-horarios>Horários</button>${L.endereco ? `<a class="cx-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${L.endereco} ${M.cidade || ''}`)}">Endereço</a>` : ''}${zap ? `<a class="cx-link" target="_blank" rel="noopener" href="https://wa.me/55${zap.replace(/^55/, '')}">WhatsApp</a>` : ''}${mesa ? '' : `<button type="button" class="cx-link" data-compartilhar>${SVG_COMP}Compartilhar</button>`}<button type="button" class="cx-link cx-som" data-som-bt><i data-som-ico></i><span data-som-txt>Som</span></button>${conta ? `<button type="button" class="cx-link" data-minhaconta>${SVG_PESSOA}${conta.estado() ? 'Minha conta' : 'Entrar'}</button>` : ''}</p></div></div>
     ${info.length ? `<ul class="cx-info">${info.map((x) => `<li>${x}</li>`).join('')}</ul>` : ''}`;
   $('[data-horarios]').onclick = () => folha({ titulo: 'Horários', corpo: `${L.endereco ? `<p class="mudo" style="margin-bottom:10px">${t(L.endereco)}${M.cidade ? ` · ${t(M.cidade)}` : ''}</p>` : ''}<ul class="lista-l">${textoHorarios(L.horarios).map((x, k) => `<li${k === new Date().getDay() ? ' style="font-weight:800"' : ''}><div class="tx">${t(x)}</div></li>`).join('')}</ul>` });
   $('[data-compartilhar]')?.addEventListener('click', compartilhar);
+  const sb = $('[data-som-bt]'); if (sb) som.ligarBotao(sb);
   $('[data-minhaconta]')?.addEventListener('click', () => (conta.estado() ? minhaConta() : entrarConta()));
 }
 function opsModo() { return [['delivery', 'Entrega', L.delivery !== false], ['balcao', 'Retirada', L.retirada !== false]].filter((x) => x[2]); }
@@ -263,7 +267,7 @@ function escolher(p, { soVer = false, editar = -1, depois } = {}) {
     bt.onclick = () => { const falta = fo.falta(); if (falta) { toast(falta); const g = $$('.op-grupo.obrig', f).find((x) => !$('input:checked', x)); g?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
       const v = fo.valor(), nova = { prod: p.id, qtd: v.qtd, tam: v.tam, meia: v.meia, adic: v.adic, obs: v.obs, unit: r2(fo.total() / v.qtd) };
       if (ed) sacola.splice(editar, 1, nova); else poeNaSacola(nova);
-      salvarSacola(); barra(); fechar(); depois?.(); toast(ed ? 'Item atualizado' : `${v.qtd}× ${p.nome} na sacola`); };
+      salvarSacola(); if (!ed) som.toque(); barra(); fechar(); depois?.(); toast(ed ? 'Item atualizado' : `${v.qtd}× ${p.nome} na sacola`); };
   } });
 }
 
@@ -278,12 +282,14 @@ function ligarItens(raiz, depois) {
   $$('[data-mais]', raiz).forEach((b) => { b.onclick = () => { const x = sacola[Number(b.dataset.mais)]; x.qtd = Math.min(50, x.qtd + 1); salvarSacola(); barra(); depois(); }; });
   $$('[data-editar]', raiz).forEach((b) => { b.onclick = () => { const k = Number(b.dataset.editar); escolher(P(sacola[k]?.prod), { editar: k, depois }); }; });
 }
+let nAntes = -1;
 function barra() {
-  const n = qtdSacola(), el = $('#cli-barra'), lado = $('#cx-lado'), fm = faltaMinimo();
+  const n = qtdSacola(), el = $('#cli-barra'), lado = $('#cx-lado'), fm = faltaMinimo(), pula = nAntes >= 0 && n > nAntes; nAntes = n;
   const aviso = fm ? `<p class="cx-falta">Faltam <b>${din(fm)}</b> para o pedido mínimo de entrega (${din(L.pedidoMinimo)})</p>` : '';
   el.innerHTML = n ? `${aviso}<button type="button" class="cx-bt cheio" data-sacola><span class="cx-cont">${n}</span><span>Ver sacola</span><b>${din(subtotal())}</b></button>` : '';
   el.hidden = !n; document.body.classList.toggle('com-barra', !!n); document.body.classList.toggle('com-falta', !!(n && fm));
   $('[data-sacola]', el)?.addEventListener('click', abrirSacola);
+  if (pula) $('.cx-cont', el)?.classList.add('pula'); // o número da sacola dá um pulinho ao pôr item
   lado.innerHTML = `<div class="cx-lado-caixa"><h2>Sua sacola</h2>${n ? `${itensHtml(true)}<div class="cx-tot"><div><span>Subtotal</span><b>${din(subtotal())}</b></div></div>${aviso}<button type="button" class="cx-bt cheio" data-sacola2><span>${mesa ? 'Revisar e mandar' : 'Continuar'}</span><b>${din(subtotal())}</b></button>` : `<p class="cx-lado-vazio">${ico('sacola')}Sua sacola está vazia.<br>Escolha um prato no cardápio.</p>`}</div>`;
   ligarItens(lado, () => {}); $('[data-sacola2]', lado)?.addEventListener('click', abrirSacola);
 }
@@ -488,7 +494,7 @@ function abrirSacola() {
         const r = mesa ? await api.mesa(itens) : await api.pedido(modo, dados);
         if (r?.erro) throw new Error(r.erro);
         const feito = { id: r.id, num: r.num || '', senha: r.senha || 0, modo, ts: Date.now(), itens: sacola.map((x) => ({ ...x })), sub: subtotal(), taxa: taxa(), desconto: desconto(), total: total(), msg, agendado: ag || 0, end: dados?.end || '', bairro: dados?.bairro || '', pagar: dados?.pagar || '', etapa: 'recebido' };
-        sacola = []; salvarSacola(); barra(); fechar();
+        sacola = []; salvarSacola(); barra(); fechar(); som.enviado();
         if (mesa) confirmadoMesa(r, msg); else { guardado('ultimo', feito); guardado('pedidos', [feito, ...(guardado('pedidos') || []).filter((x) => x?.id !== feito.id)].slice(0, 10)); ultimo(); acompanhar(feito); }
       } catch (er) { bt.disabled = false; bt.innerHTML = txt; mostrarFalha(msg, er); }
     };
@@ -682,7 +688,7 @@ async function posConta() {
 async function iniciar() {
   if (!mesa) { conta = criarConta({ real: !!R }); conta.ouvir(() => { if (M) topo(); }); }
   if (!R) {
-    loja = await import('./loja.js?v=51'); doExemplo();
+    loja = await import('./loja.js?v=52'); doExemplo();
     loja.ouvir(() => { doExemplo(); if (!document.querySelector('.folha-fundo, .cx-tela-fundo')) { aplicarCor(); topo(); lista(); } });
     tudo(); posConta(); return;
   }

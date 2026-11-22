@@ -1,13 +1,13 @@
 // Popina · salão (o que fazer agora e as mesas), a comanda de qualquer conta e o lançar itens do garçom.
 import { db, t, din, tempo, comanda, comandaDaMesa, abrirMesa, adicionarItem, enviar, mudarStatus, cancelarItem, transferir, juntarMesas, moverItens, livreDoItem, pagoPorItem, conta, valorItem, itensValidos,
   fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2,
-  aguardaAceite } from './loja.js?v=51';
-import { escolherEntregador } from './pedidos.js?v=51';
-import { registrar, acao, ir } from './nucleo.js?v=51';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=51';
-import { formOpcoes, temOpcoes } from './opcoes.js?v=51';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=51';
-import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=51';
+  aguardaAceite } from './loja.js?v=52';
+import { escolherEntregador } from './pedidos.js?v=52';
+import { registrar, acao, ir } from './nucleo.js?v=52';
+import { ico, folha, toast, confirma, autorizar, novidades, $, $$ } from './ui.js?v=52';
+import { formOpcoes, temOpcoes } from './opcoes.js?v=52';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=52';
+import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=52';
 
 const ESTADO = { livre: 'Livre', ocupada: 'Ocupada', conta: 'Pediu a conta', pronto: 'Prato pronto', chamou: 'Chamou', qr: 'Pedido do QR' };
 const nMesas = () => Math.max(1, Math.min(200, Number(db.config.mesas) || 10));
@@ -37,6 +37,10 @@ registrar('salao', {
     <div class="mesas">${Array.from({ length: n }, (_, k) => k + 1).map((m) => { const e = estadoMesa(m), c = comandaDaMesa(m);
       return `<button type="button" class="mesa ${e}" data-acao="mesa" data-n="${m}" aria-label="Mesa ${m}, ${ESTADO[e]}"><span class="n">${m}</span><span class="s">${ESTADO[e]}</span>${c ? `<span class="d">${din(conta(c).total)} · ${tempo(c.aberta)}</span>` : ''}</button>`; }).join('')}</div>
     <div class="legenda">${Object.entries(ESTADO).map(([k, v]) => `<span><i class="mesa ${k}"></i>${v}</span>`).join('')}</div>`;
+  },
+  montar(el) {
+    novidades(el, '.mesas .mesa', { chave: (e) => e.dataset.n, estado: (e) => e.className });
+    novidades(el, '.agora-item', { chave: (e) => e.querySelector('[data-id]')?.dataset.id || e.textContent.slice(0, 40), ctx: String(verTudo) });
   },
 });
 acao('mesa', (b) => { const n = Number(b.dataset.n); if (comandaDaMesa(n)) ir(`mesa/${n}`); else abrirMesaFolha(n); });

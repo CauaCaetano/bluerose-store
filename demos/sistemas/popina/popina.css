@@ -614,3 +614,30 @@ body.gaveta-aberta{overflow:hidden}
 .topo-p{width:31px;height:35px;flex:none;color:var(--loja);margin:0 -10px 0 0;align-self:center;transform:translateY(4px)}
 body:not(.marca-propria) .marca div{align-self:center}
 @media (min-width:1024px){.topo-p{width:36px;height:41px;color:#F7EFE6;margin-right:-12px;transform:translateY(5px)}}
+
+/* 22/11: sons e animações (curtas, só transform/opacity; desligadas em prefers-reduced-motion pela regra acima e pela de baixo) */
+.topo-bt i[data-som-ico]{display:contents}
+.topo-bt[aria-pressed="true"]{color:var(--mudo)}
+@media (min-width:1024px){.topo-bt[aria-pressed="true"]{color:#A99A9C}}
+.bt-ico:active,.topo-bt:active,.cfg-nav button:active,.esquemas button:active,.cores button:active,.coluna .pc button:active{transform:scale(.97)}
+.bt-ico,.topo-bt{transition:transform .12s,background .15s}
+.toast.pula{animation:toast-pula .22s ease-out}
+@keyframes toast-pula{40%{transform:translate(-50%,-4px)}}
+/* cartão de pedido novo entrando no quadro, ticket novo na cozinha */
+.entra-novo{animation:entra-novo .28s cubic-bezier(.2,.8,.2,1) both}
+@keyframes entra-novo{from{opacity:0;transform:translateY(10px) scale(.98)}}
+/* mesa (ou cartão) que mudou de estado: leve pulso */
+.muda{animation:muda-pulso .3s ease-out}
+.mesa.pronto.muda,.mesa.conta.muda{animation:muda-pulso .3s ease-out,pisca 2.4s ease-in-out .3s infinite}
+@keyframes muda-pulso{40%{transform:scale(1.05)}}
+/* check animado ao concluir o pagamento */
+.check-ok svg{animation:check-entra .3s cubic-bezier(.2,.9,.3,1.3) both}
+.check-ok svg path{stroke-dasharray:20;stroke-dashoffset:20;animation:check-traco .28s ease-out .18s forwards}
+@keyframes check-entra{from{opacity:0;transform:scale(.6)}}
+@keyframes check-traco{to{stroke-dashoffset:0}}
+.som-vol{display:flex;align-items:center;gap:12px;margin-top:12px}
+.som-vol input[type=range]{flex:1;accent-color:var(--loja);min-height:44px}
+.som-vol[aria-disabled="true"]{opacity:.5}
+@media (prefers-reduced-motion:reduce){.check-ok svg path{stroke-dasharray:none;stroke-dashoffset:0}}
+/* celular estreito: com o alto-falante são 4 botões no topo; um pouco mais justos para o nome caber */
+@media (max-width:430px){.topo-bt{width:40px}.topo-bts{gap:0}.topo{gap:8px;padding:0 10px}}

@@ -1,4 +1,5 @@
 // Popina · peças da interface: ícones, folha que sobe de baixo, aviso rápido, confirmação.
+import * as som from './som.js?v=52';
 const t = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const $ = (s, el = document) => el.querySelector(s);
 export const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -64,9 +65,14 @@ export function folha({ titulo, corpo, pe = '', larga = false, aoAbrir, aoFechar
   return { el: f, fechar };
 }
 let tt = 0;
-export function toast(msg) {
+// toast(msg, 'toque' | 'enviado' | 'pronto' | 'caixa' | 'erro'): o segundo nome toca o som junto (se o som estiver ligado).
+// Sem o nome, o som sai pelo próprio aviso: falta algo (erro discreto), foi para a cozinha, +1 item, conta/pagamento.
+const SONS = [[/^(Escolha|Escreva|Marque|Conte |Digite|Preencha|Informe|Senha errada|Você não pode|Não deu|Não foi|Nada encontrado|Nada para|Já (tem|existe|é)|Esse PIN|O código .* já)/i, 'erro'],
+  [/para a cozinha/i, 'enviado'], [/^(Conta fechada|.*recebido$|Fiado recebido)/i, 'caixa'], [/^\+\d/, 'toque'], [/: pronto$|^(Salvo|Chamado atendido|Pedido .* aceito)/i, 'toque']];
+export function toast(msg, s = '') {
+  if (s !== false) { const n = s || (som.avisosComSom() ? SONS.find(([r]) => r.test(String(msg)))?.[1] : ''); if (n && som[n]) som[n](); }
   let el = $('.toast'); if (!el) { el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
-  el.textContent = msg; el.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => el.classList.remove('on'), 2600);
+  el.textContent = msg; if (el.classList.contains('on')) { el.classList.remove('pula'); void el.offsetWidth; el.classList.add('pula'); } el.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => el.classList.remove('on'), 2600);
 }
 export function confirma(msg, sim = 'Confirmar', perigo = false) {
   return new Promise((ok) => {
@@ -88,22 +94,32 @@ export function autorizar({ titulo, texto = '', motivos = null, pedirPin = false
       const mot = $('[data-motivo]', f);
       $$('[data-mot]', f).forEach((b) => { b.onclick = () => { $$('[data-mot]', f).forEach((x) => x.classList.toggle('on', x === b)); mot.value = b.dataset.mot; }; });
       $('[data-sim]', f).onclick = async () => {
-        const { pinConfere } = await import('./loja.js?v=51');
+        const { pinConfere } = await import('./loja.js?v=52');
         const motivo = mot ? mot.value.trim() : '';
-        if (mot && motivo.length < 3) { toast('Escolha ou escreva o motivo'); return mot.focus(); }
+        if (mot && motivo.length < 3) { toast('Escolha ou escreva o motivo', 'erro'); return mot.focus(); }
         const pin = $('[data-pin]', f);
         // vale a senha do gerente ou o PIN pessoal de quem é Gerente na Equipe
-        const { pinDeGerente } = await import('./equipe.js?v=51');
-        if (pin && !pinConfere(pin.value) && !pinDeGerente(pin.value)) { toast('Senha errada'); pin.value = ''; return pin.focus(); }
+        const { pinDeGerente } = await import('./equipe.js?v=52');
+        if (pin && !pinConfere(pin.value) && !pinDeGerente(pin.value)) { toast('Senha errada', 'erro'); pin.value = ''; return pin.focus(); }
         feito = true; ok({ motivo, pin: !!pin, el: f }); fechar();
       };
     } });
   });
 }
-// som curto (pedido novo na cozinha, prato pronto no garçom), só depois de algum toque na tela
-let ac = null;
-export function bip(tom = 880) {
-  try { ac ||= new AudioContext(); const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = tom; o.connect(g); g.connect(ac.destination);
-    g.gain.setValueAtTime(0.0001, ac.currentTime); g.gain.exponentialRampToValueAtTime(0.18, ac.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.35);
-    o.start(); o.stop(ac.currentTime + 0.4); } catch { /* sem som */ }
+// som curto de antes (agora em som.js: respeita o mudo e o volume deste aparelho)
+export function bip(tom = 880) { som.tom(tom); }
+
+// cartões novos entram com animação e os que mudaram de estado dão um leve pulso (só no redesenho da mesma tela,
+// no máximo 6 por vez: lista grande nunca anima inteira). ctx: filtro/aba atual; se mudou, nada anima.
+const memoNov = {};
+export function novidades(raiz, sel, { chave = (e) => e.dataset.k, estado = () => '', ctx = '' } = {}) {
+  const els = $$(sel, raiz), ant = memoNov[sel], mapa = new Map(els.map((e) => [chave(e), estado(e)]));
+  memoNov[sel] = { ctx, mapa };
+  if (!ant || ant.ctx !== ctx) return;
+  let n = 0;
+  for (const e of els) {
+    if (n >= 6) break;
+    const k = chave(e);
+    if (!ant.mapa.has(k)) { e.classList.add('entra-novo'); n++; } else if (ant.mapa.get(k) !== mapa.get(k)) { e.classList.add('muda'); n++; }
+  }
 }

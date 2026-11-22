@@ -1,9 +1,10 @@
 // Popina · tela da cozinha: os pedidos na ordem em que chegaram, com o tempo de cada um bem grande.
 // Começar → Pronto. Imprime o pedido (80 mm ou A4) num toque, e pode imprimir sozinho quando o pedido chega.
-import { db, t, comanda, mudarStatus, quemPediu, tipoNome, minutos, hora, grava } from './loja.js?v=51';
-import { registrar, acao, ir } from './nucleo.js?v=51';
-import { ico, toast, bip, folha, $, $$ } from './ui.js?v=51';
-import { htmlCozinha, imprimir, imprimirCozinha, autoImprimir, setAutoImprimir, formatoPadrao } from './imprimir.js?v=51';
+import { db, t, comanda, mudarStatus, quemPediu, tipoNome, minutos, hora, grava } from './loja.js?v=52';
+import { registrar, acao, ir } from './nucleo.js?v=52';
+import { ico, toast, folha, novidades, $, $$ } from './ui.js?v=52';
+import * as som from './som.js?v=52';
+import { htmlCozinha, imprimir, imprimirCozinha, autoImprimir, setAutoImprimir, formatoPadrao } from './imprimir.js?v=52';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 let setor = ler('popina-setor', ''), aba = 'fazer';
@@ -21,7 +22,7 @@ export function tickets() {
 const adicTxt = (i) => (i.adic || []).map((a) => a.nome.replace(/^[^:]+: /, '')).join(', ');
 function ticket(x) {
   const m = Math.floor(minutos(x.enviado)), cl = x.feito ? '' : m >= 20 ? 'atrasado' : m >= 10 ? 'medio' : '';
-  return `<article class="ko ${cl}" aria-label="${t(quemPediu(x.c))}"><header class="ko-cab"><div><b>${t(quemPediu(x.c))}</b><small>${tipoNome(x.c)}${x.c.senha ? ` · senha ${x.c.senha}` : ''} · chegou ${hora(x.enviado)}${x.c.garcom ? ` · ${t(x.c.garcom)}` : ''}</small></div>
+  return `<article data-k="${t(x.chave)}" class="ko ${cl}" aria-label="${t(quemPediu(x.c))}"><header class="ko-cab"><div><b>${t(quemPediu(x.c))}</b><small>${tipoNome(x.c)}${x.c.senha ? ` · senha ${x.c.senha}` : ''} · chegou ${hora(x.enviado)}${x.c.garcom ? ` · ${t(x.c.garcom)}` : ''}</small></div>
     <span class="tempo">${ico('relogio')}${m} min</span></header>
     <ul>${x.itens.map((i) => `<li class="${i.status === 'pronto' ? 'feito' : ''}"><span class="q">${i.kg ? '' : `${i.qtd}×`}</span><div>${t(i.nome)}${adicTxt(i) ? `<small>${t(adicTxt(i))}</small>` : ''}${i.obs ? `<small class="obs">» ${t(i.obs)}</small>` : ''}</div></li>`).join('')}</ul>
     <footer class="ko-pe"><button type="button" class="bt-ico" data-acao="koz-imp" data-k="${t(x.chave)}" aria-label="Imprimir o pedido">${ico('impressora')}</button>
@@ -47,6 +48,7 @@ registrar('cozinha', {
   montar(el) {
     $$('[data-aba-k]', el).forEach((b) => { b.onclick = () => { aba = b.dataset.abaK; ir('cozinha'); }; });
     $$('[data-setor]', el).forEach((b) => { b.onclick = () => { setor = b.dataset.setor; try { localStorage.setItem('popina-setor', setor); } catch { /* nada */ } ir('cozinha'); }; });
+    novidades(el, '.kds .ko', { estado: (e) => e.className, ctx: aba + setor });
   },
 });
 const doTicket = (k) => tickets().find((x) => x.chave === k);
@@ -75,7 +77,7 @@ export function conferirNovos() {
   if (primeira) { primeira = false; novos.forEach((x) => vistos.add(x.chave)); salvarVistos(); return; }
   if (!novos.length) return;
   novos.forEach((x) => vistos.add(x.chave)); salvarVistos();
-  if (location.hash.startsWith('#cozinha')) { bip(660); setTimeout(() => bip(880), 180); }
+  if (location.hash.startsWith('#cozinha')) som.novo();
   if (autoImprimir() && location.hash.startsWith('#cozinha')) imprimir(novos.map((x) => htmlCozinha(x.c, x.itens)).join('<div style="break-after:page"></div>'));
 }
 export { comanda };

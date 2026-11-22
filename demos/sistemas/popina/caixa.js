@@ -2,15 +2,16 @@
 // sangria e suprimento, e o fechamento do dia com o resumo pronto para mandar no WhatsApp do dono.
 import { db, t, din, r2, num, vir, tempo, hora, conta, comanda, pagar, partes, darDesconto, ondeComanda, quemPediu, caixaResumo, abrirCaixa, movimento, fecharCaixa,
   regras, temPin, euSou, setEuSou, quemAgora, grava, FORMA_FIADO, registrarFiado, receberFiado, clientesFiado, saldoFiado, nomeFiado, soDig, fone, zap, vendaDeHoje, cancelarVenda,
-  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=51';
-import { registrar, acao, ir } from './nucleo.js?v=51';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=51';
-import { pix } from './pix.js?v=51';
+  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=52';
+import { registrar, acao, ir } from './nucleo.js?v=52';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=52';
+import * as som from './som.js?v=52';
+import { pix } from './pix.js?v=52';
 import { qrSVG } from '../base/qr.js';
-import { blocoTotais, voltar, rotaComanda } from './salao.js?v=51';
-import { novoPedidoFolha } from './pedidos.js?v=51';
-import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=51';
-import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=51';
+import { blocoTotais, voltar, rotaComanda } from './salao.js?v=52';
+import { novoPedidoFolha } from './pedidos.js?v=52';
+import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=52';
+import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=52';
 
 const FORMAS = [['Pix', 'pix'], ['Dinheiro', 'dinheiro'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao'], [FORMA_FIADO, 'etiqueta']];
 const rotuloForma = (f) => (f === FORMA_FIADO ? 'Fiado' : f.replace('Cartão de débito', 'Débito').replace('Cartão de crédito', 'Crédito'));
@@ -106,13 +107,15 @@ function dinheiroFolha(valor, concluir) {
     $('[data-ok]', f).onclick = () => { const d = num(inp.value) || valor; if (d < valor - 0.009) return toast('O valor dado é menor que o da conta'); fechar(); concluir(r2(d - valor), d); };
   } });
 }
+let acabou = ''; // conta que acabou de fechar aqui: o check anima uma vez só (o relógio redesenha a tela)
 registrar('fechar', {
   aba: 'caixa', titulo: 'Fechar conta',
   html(id) {
     const c0 = comanda(id), c = c0?.quitado ? null : c0;
     if (!c) {
+      setTimeout(() => { acabou = ''; }, 0);
       const v = c0?.vendaId ? db.vendas.find((x) => x.id === c0.vendaId) : db.vendas.find((x) => x.id === id || x.id.startsWith(`${id}-`));
-      return `${voltar('caixa', 'Caixa')}<div class="cartao" style="text-align:center;max-width:560px;margin:20px auto"><div style="display:grid;place-items:center;margin-bottom:10px;color:var(--ok)">${ico('okcirc', 'style="width:64px;height:64px"')}</div>
+      return `${voltar('caixa', 'Caixa')}<div class="cartao" style="text-align:center;max-width:560px;margin:20px auto"><div class="${acabou === id && v ? 'check-ok' : ''}" style="display:grid;place-items:center;margin-bottom:10px;color:var(--ok)">${ico('okcirc', 'style="width:64px;height:64px"')}</div>
         <h1 style="font-size:28px;margin-bottom:6px">${v ? 'Conta fechada' : 'Esta conta não está mais aberta'}</h1>${v ? `<p class="mudo">${t(v.onde || '')} · ${din(v.total)}${(v.pagamentos || []).reduce((s, p) => s + (p.troco || 0), 0) ? ` · troco ${din(v.pagamentos.reduce((s, p) => s + (p.troco || 0), 0))}` : ''}</p>` : ''}
         <div class="linha-bts" style="justify-content:center;margin-top:16px">${v ? `<button type="button" class="bt grande" data-acao="recibo-venda" data-id="${t(v.id)}">${ico('impressora')}Imprimir recibo</button>` : ''}<button type="button" class="bt cheio grande" data-ir="${v?.tipo === 'mesa' ? 'salao' : c0 ? 'pedidos' : 'caixa'}">${c0 ? 'Voltar aos pedidos' : 'Pronto'}</button></div>
         ${c0 ? '<p class="mudo" style="margin-top:12px">Pago. O pedido continua no quadro de Pedidos até você tocar em Entregue.</p>' : ''}</div>`;
@@ -154,7 +157,7 @@ registrar('fechar', {
     $$('[data-forma]', el).forEach((b) => { b.onclick = () => {
       const valor = r2(Math.min(num($('[data-valor]', el).value), conta(c).falta));
       if (!(valor > 0)) return toast('Escreva o valor do pagamento');
-      const f = b.dataset.forma, fim = (extra = {}) => { const fechou = valor >= conta(c).falta - 0.009; const s = estado[c.id]?.dividir === 'item' ? selDe() : null; pagar(c, f, valor, s && Object.keys(s).length ? { ...extra, itens: s } : extra); toast(fechou ? 'Conta fechada' : `${din(valor)} recebido`); if (fechou) ir(`fechar/${id}`); };
+      const f = b.dataset.forma, fim = (extra = {}) => { const fechou = valor >= conta(c).falta - 0.009; const s = estado[c.id]?.dividir === 'item' ? selDe() : null; pagar(c, f, valor, s && Object.keys(s).length ? { ...extra, itens: s } : extra); if (fechou) acabou = id; toast(fechou ? 'Conta fechada' : `${din(valor)} recebido`, 'caixa'); if (fechou) ir(`fechar/${id}`); };
       if (f === 'Pix') pixFolha(c, valor, () => fim());
       else if (f === 'Dinheiro') dinheiroFolha(valor, (troco, dado) => fim(troco ? { troco, dado } : {}));
       else if (f === FORMA_FIADO) fiadoFolha(c, valor, (cid) => fim({ fiado: cid }));
@@ -285,6 +288,7 @@ registrar('fechamento', {
       if (!(await confirma(`Fechar o caixa com ${din(c)} na gaveta?`, 'Fechar o caixa'))) return;
       const cf = conf(), txt = textoResumo(x, c, cf);
       const difForma = cf && Object.entries(cf).some(([f, v]) => Math.abs(v - (x.porForma[f] || 0)) >= 0.01);
+      som.caixa();
       fecharCaixa(c, Math.abs(c - x.dinheiroNaGaveta) >= 0.01 || difForma ? 'Diferença na conferência' : '', quemAgora(), cf);
       folha({ titulo: 'Caixa fechado', corpo: `<p class="aviso ok">Caixa fechado com ${din(c)} na gaveta. Mande o resumo para o dono:</p><pre style="white-space:pre-wrap;font:15px/1.45 var(--fonte);background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:12px;margin-top:12px">${t(txt.replace(/[*_]/g, ''))}</pre>`,
         pe: `<a class="bt ok grande" target="_blank" rel="noopener" href="${zap(zapDono, txt)}" data-fechar>${ico('zap')}Mandar no WhatsApp</a>` });

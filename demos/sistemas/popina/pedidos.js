@@ -3,10 +3,11 @@
 // No celular, uma coluna por vez (as abas de cima trocam). O novo pedido (nome ou telefone do cliente, endereço, taxa por bairro e troco).
 import { db, t, din, tempo, minutos, conta, novoPedido, itensValidos, ondeComanda, tipoNome, quemPediu, clientePorTel, soDig, num, vir, hora, lojaCfg, comanda,
   etapa, aguardaAceite, aceitarPedido, recusarPedido, MOTIVOS_RECUSA, marcarPronto, saiuEntrega, concluirPedido, enviar, inicioDoDia, zap, fone,
-  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=51';
-import { registrar, acao, ir } from './nucleo.js?v=51';
-import { ico, folha, toast, bip, autorizar, $, $$ } from './ui.js?v=51';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=51';
+  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=52';
+import { registrar, acao, ir } from './nucleo.js?v=52';
+import { ico, folha, toast, autorizar, novidades, $, $$ } from './ui.js?v=52';
+import * as som from './som.js?v=52';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=52';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* nada */ } };
@@ -40,7 +41,7 @@ function cartao(c) {
   else if (c.tipo === 'delivery' && !['saiu', 'entregue'].includes(c.entrega)) bts = `<button type="button" class="bt cheio" data-acao="ped-saiu" data-id="${c.id}">${ico('moto')}Saiu para entrega</button>`;
   else bts = `<button type="button" class="bt ok" data-acao="ped-entregue" data-id="${c.id}">${ico('check')}${c.tipo === 'delivery' && c.entrega === 'entregue' ? 'Receber' : v.falta > 0.009 ? 'Entregue e cobrar' : 'Entregue'}</button>`;
   const entregador = c.entregador ? (db.entregadores || []).find((x) => x.id === c.entregador)?.nome : '';
-  return `<article class="pc ${espera ? 'espera' : ''} ${cl === 'pronto' ? 'pronto' : ''}" aria-label="${t(quemPediu(c))}">
+  return `<article data-k="${t(c.id)}" class="pc ${espera ? 'espera' : ''} ${cl === 'pronto' ? 'pronto' : ''}" aria-label="${t(quemPediu(c))}">
     <button type="button" class="pc-abre" data-ir="comanda/${c.id}" aria-label="Abrir o pedido de ${t(quemPediu(c))}">
       <span class="pc-l1">${c.senha ? `<span class="senha" title="Senha">${c.senha}</span>` : ''}<span class="pc-nome"><b>${t(c.cliente?.nome || ondeComanda(c))}</b><small>${tipoNome(c)} #${c.num ?? ''}${c.tipo === 'delivery' && c.cliente?.bairro ? ` · ${t(c.cliente.bairro)}` : ''}</small></span>
         <span class="pc-tempo ${cor}" title="Chegou às ${hora(c.aberta)}">${ico('relogio')}${tempo(c.aberta)}</span></span>
@@ -81,6 +82,7 @@ registrar('pedidos', {
   montar(el) {
     $$('[data-col]', el).forEach((b) => { b.onclick = () => { colSel = b.dataset.col; ir('pedidos'); }; });
     $('[data-novo-ped]', el).onclick = () => novoPedidoFolha();
+    novidades(el, '.quadro .pc', { estado: (e) => (e.closest('.coluna')?.dataset.c || '') + (e.classList.contains('espera') ? 'e' : ''), ctx: colSel || '' });
   },
 });
 const doId = (b) => comanda(b.dataset.id);
@@ -127,12 +129,12 @@ acao('ped-ajustes', () => {
   folha({ titulo: 'Avisos dos pedidos', corpo: `<label class="liga">Tocar enquanto tiver pedido para aceitar<small>Neste aparelho. Toca a cada 15 segundos, em qualquer tela.</small><input type="checkbox" data-som ${somLigado() ? 'checked' : ''}></label>
     <label class="liga">Aceitar sozinho os pedidos do cardápio online<small>Vão direto para a cozinha, sem tocar em Aceitar</small><input type="checkbox" data-auto ${aceiteAuto() ? 'checked' : ''}></label>`,
   aoAbrir: (f) => {
-    $('[data-som]', f).onchange = (e) => { gravar('popina-som-pedidos', e.target.checked ? '1' : '0'); if (e.target.checked) bip(); };
+    $('[data-som]', f).onchange = (e) => { gravar('popina-som-pedidos', e.target.checked ? '1' : '0'); if (e.target.checked) som.novo(); };
     $('[data-auto]', f).onchange = (e) => { setLoja({ aceiteAuto: e.target.checked }); toast(e.target.checked ? 'Os pedidos online vão direto para a cozinha' : 'Você aceita cada pedido online'); };
   } });
 });
 // toca enquanto houver pedido do cardápio online esperando alguém aceitar
-setInterval(() => { if (somLigado() && db.comandas.some(aguardaAceite)) { bip(988); setTimeout(() => bip(784), 200); } }, 15000);
+setInterval(() => { if (somLigado() && db.comandas.some(aguardaAceite)) som.novo(); }, 15000);
 
 // novo pedido: escolhe o tipo; no balcão basta o nome (ou nada: sai com a senha); na entrega, telefone, endereço e bairro
 const ORIGENS = ['WhatsApp', 'Telefone', 'Balcão'];

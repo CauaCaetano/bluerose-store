@@ -3,13 +3,14 @@
 // Um visual só (o dono tirou os vários visuais): o esquema troca só os tons da casa (o marrom do menu e o destaque),
 // sempre dentro da identidade "taberna"; a cor da marca do restaurante continua livre.
 // Guarda só campos novos em db.config.loja.esquema e db.config.perfis[e-mail]: nada do que já existe muda de nome.
-import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=51';
-import { ir, rota } from './nucleo.js?v=51';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=51';
-import { G, volta, reduzir, planoMarca } from './gestao.js?v=51';
-import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=51';
-import { recomecar } from './loja.js?v=51';
-import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=51';
+import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=52';
+import { ir, rota } from './nucleo.js?v=52';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=52';
+import { G, volta, reduzir, planoMarca } from './gestao.js?v=52';
+import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=52';
+import { recomecar } from './loja.js?v=52';
+import * as som from './som.js?v=52';
+import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=52';
 
 // ------------------------------------------------------------------ esquemas de cor (identidade do Popina)
 // escuro: menu do computador, faixa e etiquetas escuras · destaque: a cor dos botões (vira a cor da marca ao escolher)
@@ -67,7 +68,7 @@ G.config = {
   html() {
     const L = lojaCfg(), c = db.config, E = esquema(), pf = perfil(), g = gestor(), cor = corLoja();
     const nome = pf.nome || (conta.modo === 'demo' ? 'Você' : ''), ini = (nome || conta.email || '?').trim()[0].toUpperCase();
-    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-restaurante', 'Restaurante e impressão'], ['cfg-assinatura', 'Minha assinatura']];
+    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-restaurante', 'Restaurante e impressão'], ['cfg-sons', 'Sons'], ['cfg-assinatura', 'Minha assinatura']];
     return volta('Configurações', g ? 'Seu perfil, as cores, a marca, o guia, a impressão e a assinatura' : 'Seu perfil, o guia e a assinatura. Cores, marca e restaurante, só o dono muda') + `
     <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<button type="button" data-ir="mais/config/${id}">${n}</button>`).join('')}</nav>
     <div class="duas">
@@ -116,6 +117,11 @@ G.config = {
       <label class="liga" style="margin-top:12px">Imprimir sozinho cada pedido novo na Cozinha<input type="checkbox" data-auto-imp ${autoImprimir() ? 'checked' : ''}></label>
       <p class="mudo" style="margin-top:8px">No recibo saem o nome, o endereço e o WhatsApp do restaurante.</p>
     </section>
+    <section class="cartao cfg-sec" id="cfg-sons"><h2>Sons</h2>
+      <p class="mudo">Vale só neste aparelho. O alto-falante no topo também liga e desliga.</p>
+      <label class="liga" style="margin-top:12px">Sons do sistema<small>Pedido novo, enviado para a cozinha, prato pronto, pagamento e aviso de erro</small><input type="checkbox" data-som-on ${som.somLigado() ? 'checked' : ''}></label>
+      <div class="som-vol" aria-disabled="${!som.somLigado()}"><span>Volume</span><input type="range" min="0.1" max="1" step="0.1" value="${som.volume()}" data-som-vol aria-label="Volume dos sons" ${som.somLigado() ? '' : 'disabled'}><button type="button" class="bt pq" data-som-teste>Testar</button></div>
+    </section>
     <div class="cfg-sec" id="cfg-assinatura"><div id="ass-slot"></div></div>
     ${CONTA ? '' : `<div class="cartao" style="margin-top:16px"><h2>Demonstração</h2><p class="mudo" style="margin-bottom:12px">Tudo o que você fez aqui fica só neste navegador.</p><div class="linha-bts"><button type="button" class="bt" data-recomecar-cfg>${ico('troca')}Recomeçar a demonstração</button></div></div>`}`;
   },
@@ -129,6 +135,9 @@ G.config = {
     $('[data-tira-foto]', el)?.addEventListener('click', () => { setPerfil({ foto: '' }); toast('Foto tirada'); });
     $('[data-salvar-eu]', el)?.addEventListener('click', () => { setPerfil({ nome: $('[data-nome-eu]', el).value.trim().slice(0, 40) }); toast('Salvo'); });
     $('[data-trocar-senha]', el)?.addEventListener('click', () => { window.veltriaNuvem?.trocarSenha().then((m) => toast(`Mandamos o link da senha nova para ${m}`)).catch((x) => toast(x.message || 'Não deu para mandar agora')); });
+    $('[data-som-on]', el)?.addEventListener('change', (e) => { som.setSom(e.target.checked); const v = $('[data-som-vol]', el); v.disabled = !e.target.checked; v.parentElement.setAttribute('aria-disabled', String(!e.target.checked)); });
+    $('[data-som-vol]', el)?.addEventListener('change', (e) => { som.setVolume(e.target.value); som.novo(); });
+    $('[data-som-teste]', el)?.addEventListener('click', () => { if (!som.somLigado()) return toast('Os sons estão desligados'); som.novo(); });
     if (!gestor()) return;
     $('[data-prever-marca]', el)?.addEventListener('click', () => { window.popinaPlano = window.popinaPlano === 'marca' ? 'basico' : 'marca'; dispatchEvent(new Event('popina-plano')); toast(window.popinaPlano === 'marca' ? 'Assim fica com a sua marca: veja o topo' : 'De volta ao plano normal'); });
     $$('[data-esquema]', el).forEach((b) => { b.onclick = () => { const e = ESQUEMAS.find((x) => x.id === b.dataset.esquema); setLoja({ esquema: e.id, cor: e.destaque }); toast(`Esquema ${e.nome} aplicado`); }; });
@@ -150,3 +159,4 @@ document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-como]'); if (b) { e.preventDefault(); comoUsar(b.dataset.como); return; }
   const q = e.target.closest('[data-como-agora]'); if (q) { e.preventDefault(); comoUsar(telaAtual()); }
 });
+addEventListener('popina-som', () => { if ((location.hash || '').startsWith('#mais/config')) ir(location.hash.slice(1)); });
