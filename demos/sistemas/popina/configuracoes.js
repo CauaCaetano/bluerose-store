@@ -3,13 +3,13 @@
 // Um visual só (o dono tirou os vários visuais): o esquema troca só os tons da casa (o marrom do menu e o destaque),
 // sempre dentro da identidade "taberna"; a cor da marca do restaurante continua livre.
 // Guarda só campos novos em db.config.loja.esquema e db.config.perfis[e-mail]: nada do que já existe muda de nome.
-import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=49';
-import { ir, rota } from './nucleo.js?v=49';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=49';
-import { G, volta, reduzir, planoMarca } from './gestao.js?v=49';
-import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=49';
-import { recomecar } from './loja.js?v=49';
-import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=49';
+import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=50';
+import { ir, rota } from './nucleo.js?v=50';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=50';
+import { G, volta, reduzir, planoMarca } from './gestao.js?v=50';
+import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=50';
+import { recomecar } from './loja.js?v=50';
+import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=50';
 
 // ------------------------------------------------------------------ esquemas de cor (identidade do Popina)
 // escuro: menu do computador, faixa e etiquetas escuras · destaque: a cor dos botões (vira a cor da marca ao escolher)

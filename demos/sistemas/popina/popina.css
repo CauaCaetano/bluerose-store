@@ -598,7 +598,7 @@ body.gaveta-aberta{overflow:hidden}
   .so-cel,.so-cel-i{display:none!important}
   :root{--lado:256px}
   .so-pc{display:block}.so-pc-i{display:contents}
-  #link-lado{position:sticky;top:-22px;z-index:2;margin:-8px -14px -6px;padding:8px 14px;background:var(--marrom)}
+  #link-lado{position:static;margin:0}
   span.so-pc{display:inline}
   .bt.so-pc{display:inline-flex}
   .nav a [data-cel]{font-size:inherit}
