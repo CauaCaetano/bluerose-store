@@ -9,6 +9,7 @@
 
 import * as N0 from './nucleo.js';
 import * as E from './empresa.js';
+import { criar as criarNotaServico } from './nota-servico.js?v=1';
 
 const CONTA = new URLSearchParams(location.search).get('conta') || 'demo';
 const DEMO = CONTA === 'demo';
@@ -278,7 +279,7 @@ function tabelaMovs(ms, { vazioTxt = 'Nada lançado ainda.', soPote } = {}) {
   if (!ms.length) return vazio(vazioTxt);
   return `<div class="tab-rol"><table class="razao movs"><thead><tr><th>Data</th><th>Descrição</th><th>Conta</th><th>Centro de custo</th><th>Categoria</th><th class="dir">Valor</th></tr></thead><tbody>${ms.map((m) => {
     const ef = soPote ? N.efeito(m)[soPote] : null;
-    return `<tr data-ir="mov/${m.id}" role="button" tabindex="0"><td class="num">${dataC(m.dia)}</td><td>${t(m.desc)}${m.cli && !m.desc.includes(m.cli) ? ` <small>${t(m.cli)}</small>` : ''}${m.origem === 'importacao' ? ' <small class="selo-imp">importado</small>' : ''}${m.conc ? ' <small class="conc-ok" title="Conferido com o extrato">✓</small>' : ''}${selos(m)}${m.anexos?.length ? ` <small class="selo">${m.anexos.length} anexo(s)</small>` : ''}</td><td>${contaMov(m)}</td><td>${ccTxt(m)}</td><td>${catMov(m)}</td><td class="dir">${soPote ? `<span class="num ${ef < 0 ? 'sai' : 'en'}">${ef < 0 ? '−' : ''}${din(Math.abs(ef))}</span>` : valorMov(m)}</td></tr>`;
+    return `<tr data-ir="mov/${m.id}" role="button" tabindex="0"><td class="num">${dataC(m.dia)}</td><td>${t(m.desc)}${m.cli && !m.desc.includes(m.cli) ? ` <small>${t(m.cli)}</small>` : ''}${m.origem === 'importacao' ? ' <small class="selo-imp">importado</small>' : ''}${NS.selo(m)}${m.conc ? ' <small class="conc-ok" title="Conferido com o extrato">✓</small>' : ''}${selos(m)}${m.anexos?.length ? ` <small class="selo">${m.anexos.length} anexo(s)</small>` : ''}</td><td>${contaMov(m)}</td><td>${ccTxt(m)}</td><td>${catMov(m)}</td><td class="dir">${soPote ? `<span class="num ${ef < 0 ? 'sai' : 'en'}">${ef < 0 ? '−' : ''}${din(Math.abs(ef))}</span>` : valorMov(m)}</td></tr>`;
   }).join('')}</tbody></table></div>`;
 }
 const pendIcone = (p) => (p.tipo === 'cobrar' ? IC.fone : p.tipo === 'atraso' || p.tipo === 'erro' ? IC.alerta : IC.doc);
@@ -353,7 +354,7 @@ const ro = (a = 'cadastros') => (pode(a) ? '' : 'disabled');
 const PERM = {
   lancar: ['salvar-mov', 'editar-mov', 'apagar-mov', 'mover', 'meta', 'transferir', 'recibo', 'conc-manual'],
   pagar: ['pagar-conta', 'pagar-fixa', 'editar-conta', 'editar-fixa', 'pagar-lote', 'lancar-guia', 'nova-conta'],
-  receber: ['nova-cob', 'editar-cob', 'cobrar', 'receber', 'receber-lote', 'lembrar-todos'],
+  receber: ['nova-cob', 'editar-cob', 'cobrar', 'receber', 'receber-lote', 'lembrar-todos', 'ns-emitir', 'ns-outro', 'ns-cancelar'],
   conciliar: ['extrato-exemplo', 'regra-nova', 'regra-tira'],
   aprovar: ['aprovar', 'recusar'],
   cadastros: ['plano-nova', 'plano-ed', 'plano-ativa', 'banco-ed', 'empresa-ed', 'orc-copiar'],
@@ -487,7 +488,7 @@ const T = {
     const fech = E.fechadoEm(db, m.dia);
     return `${voltar('lancamentos', 'Lançamentos')}<section class="bloco detalhe"><p class="mini">${nome} · ${diaLongo(m.dia)}${fech ? ' · <b>mês fechado</b>' : ''}</p><p class="valor-g ${m.tipo === 'sai' ? 'sai' : ''}">${m.tipo === 'sai' ? '−' : ''}${din(m.c)}</p><p class="sub">${t(m.desc)}${m.cli ? ` · ${t(m.cli)}` : ''}</p>
       <dl class="ficha f4">${m.tipo !== 'transf' && m.tipo !== 'transfb' ? `<div><dt>Empresa</dt><dd>${t(nomeEmp(m))}</dd></div><div><dt>Conta bancária</dt><dd>${t(nomeBanco(m))}</dd></div>` : ''}${m.tipo === 'entra' || m.tipo === 'sai' ? `<div><dt>Categoria</dt><dd>${t(E.catDe(m))} <small class="cod">${E.codigoDaCat(db, E.catDe(m))}</small></dd></div><div><dt>Centro de custo</dt><dd>${ccTxt(m)}</dd></div>` : ''}${m.proj ? `<div><dt>Projeto</dt><dd>${t(m.proj)}</dd></div>` : ''}${m.tags?.length ? `<div><dt>Tags</dt><dd>${m.tags.map((g) => `#${t(g)}`).join(' ')}</dd></div>` : ''}${Number.isFinite(m.dcomp) && m.dcomp !== m.dia ? `<div><dt>Competência</dt><dd>${dataC(m.dcomp)}</dd></div>` : ''}<div><dt>Conciliação</dt><dd>${m.conc ? `conferido com o extrato em ${t(String(m.conc.em).split('-').reverse().join('/'))}` : m.tipo === 'entra' || m.tipo === 'sai' ? 'ainda não conferido' : '—'}</dd></div>${m.por ? `<div><dt>Lançado por</dt><dd>${t(nomeUsu(m.por))}</dd></div>` : ''}${m.anexos?.length ? `<div><dt>Anexos</dt><dd>${clipe(m)}</dd></div>` : ''}</dl>
-      ${det}${lig ? `<p class="mini">${lig}</p>` : ''}${m.editado ? `<p class="mini">Editado em ${new Date(m.editado).toLocaleString('pt-BR')}.</p>` : ''}
+      ${det}${lig ? `<p class="mini">${lig}</p>` : ''}${NS.blocoMov(m)}${m.editado ? `<p class="mini">Editado em ${new Date(m.editado).toLocaleString('pt-BR')}.</p>` : ''}
       ${fech ? `<p class="faixa-aviso">Este lançamento é de um mês fechado (${E.nomeMes(E.mesDe(m.dia))}). Só muda se o dono reabrir o mês.</p>` : `<div class="linha">${m.tipo !== 'transfb' ? `<button type="button" class="bt cheio" data-acao="editar-mov" data-m="${m.id}">Editar</button>` : ''}${m.tipo === 'entra' ? `<button type="button" class="bt" data-acao="recibo" data-m="${m.id}">${IC.recibo} Recibo</button>` : ''}<button type="button" class="bt" data-acao="anexar" data-tipo-a="mov" data-id="${m.id}">${IC.clipe} Anexar</button>${(m.tipo === 'entra' || m.tipo === 'sai') && !m.conc ? `<button type="button" class="bt" data-acao="conc-manual" data-m="${m.id}">Marcar como conferido</button>` : ''}<button type="button" class="bt perigo" data-acao="apagar-mov" data-m="${m.id}">Apagar</button></div>`}</section>`;
   },
   lancar() {
@@ -518,7 +519,7 @@ const T = {
     if (!l.some(([c]) => c.id === selCob)) selCob = l.find(([, s]) => s.falta)?.[0].id || l[0]?.[0].id || '';
     const regua = (c) => `<span class="regua" title="Régua: ${db.regua.dias.map((d) => (d < 0 ? `${-d} dia antes` : d === 0 ? 'no dia' : `${d} dias depois`)).join(', ')}">${db.regua.dias.map((d, i) => `<i class="${c.avisos?.includes(c.vence + d) ? 'feito' : c.vence + d === 0 ? 'hoje' : ''}">${i + 1}</i>`).join('')}</span>`;
     const sit = (c, s) => s.st === 'recebida' ? etq('recebida', 'recebida') : s.st === 'cancelada' ? etq('cancelada', 'cancelada') : s.st === 'atrasada' ? etq('atrasada', `atrasada ${-c.vence} dia(s)`) : s.st === 'hoje' ? etq('hoje', 'vence hoje') : etq('', `vence ${dia(c.vence)}`);
-    const topo = `${cabeca('A receber e cobrança', 'Cobranças com Pix (QR e copia e cola), lembrete por WhatsApp e e-mail pela régua, juros e multa no atraso e inadimplência por cliente.', `<div class="linha">${hojeL.length ? `<button type="button" class="bt" data-acao="lembrar-todos">${IC.sino} Lembrar os de hoje (${hojeL.length})</button>` : ''}<button type="button" class="bt cheio" data-acao="nova-cob">+ Nova cobrança</button></div>`)}
+    const topo = `${cabeca('A receber e cobrança', 'Cobranças com Pix (QR e copia e cola), lembrete por WhatsApp e e-mail pela régua, juros e multa no atraso e inadimplência por cliente.', `<div class="linha">${NS.ativo() ? '<button type="button" class="bt" data-acao="ns-exportar">Notas de serviço</button>' : ''}${hojeL.length ? `<button type="button" class="bt" data-acao="lembrar-todos">${IC.sino} Lembrar os de hoje (${hojeL.length})</button>` : ''}<button type="button" class="bt cheio" data-acao="nova-cob">+ Nova cobrança</button></div>`)}
       ${kpis([kpi(IC.moedas, 'Para receber', din(aberto), `${l.filter(([, s]) => s.falta).length} título(s)`), kpi(IC.alerta, 'Vencido', din(atras), '', atras ? 'ru' : '', 'receber/clientes'), kpi(IC.cal, 'Nos próximos 7 dias', din(sem)), kpi(IC.sino, 'Lembretes de hoje', String(hojeL.length), 'pela régua de cobrança', hojeL.length ? 'at' : '')])}
       ${abas(abaRec, [['cobrancas', 'Cobranças'], ['clientes', 'Inadimplência por cliente'], ['regua', 'Régua de cobrança']], 'data-aba-rec')}`;
     if (abaRec === 'clientes') {
@@ -714,7 +715,7 @@ const T = {
   },
   config() {
     const f = N.faturamentoAno(db), u = usuarioAtual || {}, cargo = E.PERFIS[u.perfil]?.nome || 'Equipe', tm = db.tema && TEMAS.some((x) => x[0] === db.tema) ? db.tema : 'tesouro';
-    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-empresa', 'Empresas e avisos'], ['cfg-mais', 'Outras configurações'], ['cfg-assinatura', 'Minha assinatura']];
+    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-empresa', 'Empresas e avisos'], ['cfg-nota', 'Nota fiscal'], ['cfg-mais', 'Outras configurações'], ['cfg-assinatura', 'Minha assinatura']];
     return `${cabeca('Configurações', 'Seu perfil, as cores, a marca do grupo, o guia, as empresas, os avisos e a sua assinatura.')}
       <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<a href="#config/${id}">${n}</a>`).join('')}</nav>
       <div class="rel-grade">
@@ -736,6 +737,7 @@ const T = {
       <section class="bloco cfg-sec" id="cfg-empresa">${secao('Empresas do grupo', pode('cadastros') ? '<button type="button" class="bt pq cheio" data-acao="empresa-ed">+ Empresa</button>' : '')}${tabela('emps', [['Empresa'], ['CNPJ'], ['Regime'], ['Contas', 'dir'], ['']], db.empresas.map((e) => `<tr>${td('Empresa', `<b>${t(e.nome)}</b>`)}${td('CNPJ', t(e.cnpj || '—'))}${td('Regime', REGIMES[e.regime] || '')}${td('Contas', String(db.bancos.filter((b) => b.emp === e.id).length), 'dir')}<td class="acoes"><button type="button" class="bt pq" data-acao="empresa-ed" data-e="${e.id}">Editar</button></td></tr>`))}
         <div class="cfg-campos" style="margin-top:12px"><label class="campo">Faturamento deste ano antes de usar o Arca (R$)<input data-cfg-fat inputmode="decimal" value="${(f.antes / 100).toFixed(2).replace('.', ',')}" ${ro()}><small class="mini">O faturamento do ano é esse valor + as entradas marcadas como receita neste ano.</small></label>
         <label class="campo">Avisar contas que vencem em até (dias)<input data-cfg-aviso type="number" min="0" max="30" inputmode="numeric" value="${Number.isInteger(db.avisoDias) ? db.avisoDias : 3}" ${ro()}></label></div></section>
+      ${NS.secaoConfig()}
       <section class="bloco cfg-sec" id="cfg-mais">${titulo(IC.ajustes, 'Outras configurações')}<div class="linha"><a class="bt" href="#caixa">Contas bancárias</a><a class="bt" href="#plano">Plano de contas e centros de custo</a><a class="bt" href="#divisao">Divisão das reservas</a><a class="bt" href="#equipe">Equipe, alçada e fechamento</a><a class="bt" href="#historico">Histórico</a><a class="bt" href="#conciliacao">Cópia de segurança</a></div>
         <p class="mini">Os dados ficam neste aparelho e, com a sua conta, na nuvem. Sem internet, o que você lançar sobe quando a conexão voltar.</p></section>
       <div class="cfg-sec" id="cfg-assinatura"><div id="ass-slot"></div></div>`;
@@ -810,7 +812,7 @@ function detalheCob(id) {
     ${s.falta ? `<div class="qr-pix" aria-label="QR code do PIX"></div><p class="mini">PIX copia e cola</p><p class="pix-txt">${db.pix ? 'gerando…' : 'Cadastre a chave PIX em Configurações.'}</p>` : ''}
     <dl class="ficha"><div><dt>Vencimento</dt><dd>${dataC(c.vence)}</dd></div><div><dt>Valor</dt><dd class="num">${din(c.c)}</dd></div><div><dt>Recebido</dt><dd class="num">${din(s.r || 0)}</dd></div><div><dt>Falta</dt><dd class="num ${s.st === 'atrasada' ? 'sai' : ''}">${din(s.falta)}</dd></div><div><dt>WhatsApp</dt><dd>${t(c.tel || '—')}</dd></div><div><dt>Lembretes feitos</dt><dd>${(c.avisos || []).length}</dd></div></dl>
     ${s.falta ? `<div class="linha"><button type="button" class="bt cheio" data-acao="cobrar" data-c="${c.id}">Cobrar (Pix, WhatsApp, e-mail)</button><button type="button" class="bt" data-acao="receber" data-c="${c.id}">Receber</button></div>` : ''}<div class="linha"><button type="button" class="bt pq" data-acao="editar-cob" data-c="${c.id}">Editar ou cancelar</button></div>
-    ${recs.length ? `<p class="mini"><b>Recebimentos</b></p><ul class="recs">${recs.map((m) => `<li><a href="#mov/${m.id}">${dataC(m.dia)}</a><b class="num en">${din(m.c)}</b></li>`).join('')}</ul>` : ''}`;
+    ${recs.length ? `<p class="mini"><b>Recebimentos</b></p><ul class="recs">${recs.map((m) => `<li><a href="#mov/${m.id}">${dataC(m.dia)}${NS.selo(m)}</a><b class="num en">${din(m.c)}</b></li>`).join('')}</ul>` : ''}`;
 }
 const estAss = () => { const a = db.assinatura; return a.status === 'vencida' ? 'vencida: pague para continuar' : a.renova ? `ativa · próxima ${dia(a.proxima)}` : `cancelada · usa até ${dia(a.proxima)}`; };
 function responde(p) {
@@ -866,6 +868,7 @@ function imagemPequena(arq, lado = 256) {
 // o bloco "Minha assinatura" (base/assinatura.js) fica montado entre um redesenho e outro
 let blocoAss = null;
 function posConfig(tela) {
+  NS.ligarConfig(tela);
   const slot = tela.querySelector('#ass-slot');
   if (slot && window.BRAssinatura) { if (blocoAss) slot.replaceWith(blocoAss); else blocoAss = BRAssinatura.montar(slot, { app: 'financeiroessencial', nome: 'Arca', mensal: (window.VELTRIA_VERSOES?.financeiroessencial?.mensal) || 59, pagina: 'arca.html' }); }
   const em = tela.querySelector('#cfg-email');
@@ -924,6 +927,8 @@ function somaDiv() {
 }
 
 // ------------------------------------------------------------------ ações
+// nota fiscal de serviço dos recebimentos (nota-servico.js, 22/11/2026)
+const NS = criarNotaServico({ db: () => db, grava, mostra, aviso, folha, formFolha, baixa, hist: (o) => hist(o), pode, titulo, tabela, td, IC, t, din, dataC, N, E, DEMO });
 const ACOES = {
   como: () => comoUsar($('#tela').dataset.tela || 'painel'),
   atalhos: () => ajudaAtalhos(),
@@ -1123,7 +1128,8 @@ function pacoteContador(mes) {
     { nome: 'Balancete gerencial', linhas: [['Código', 'Categoria', 'Grupo', 'Entradas', 'Saídas'], ...Object.entries(bal).map(([k, v]) => [E.codigoDaCat(db, k), k, E.grupo(E.grupoDaCat(db, k, v.en ? 'entra' : 'sai'))?.nome || '', r2(v.en), r2(v.sa)])] },
     { nome: 'Saldos bancários', linhas: [['Conta', 'Empresa', 'CNPJ', 'Saldo inicial', 'Saldo final'], ...db.bancos.map((b) => [b.nome, emp(b.emp)?.nome || '', emp(b.emp)?.cnpj || '', r2(sbI[b.id] || 0), r2(sbF[b.id] || 0)])] },
     { nome: 'DRE do mês', linhas: [['Linha', 'Competência', 'Caixa'], ...E.dre(db, de, ate, { base: 'competencia' }).linhas.map((l, i) => [l.nome, r2(l.v), r2(E.dre(db, de, ate, { base: 'caixa' }).linhas[i].v)])] },
-  ];
+    NS.abaContador(de, ate), // 22/11/2026: notas de serviço (NFS-e) dos recebimentos do mês
+  ].filter(Boolean);
 }
 // busca global (Ctrl K): telas, lançamentos, contas, cobranças, clientes
 function buscaGlobal() {
@@ -1153,6 +1159,7 @@ function buscaGlobal() {
 }
 function ajudaAtalhos() { folha(`<h2>Atalhos de teclado</h2><table class="razao"><tbody>${[['Ctrl K ou /', 'Busca global'], ['N', 'Novo lançamento'], ['G e depois P', 'Painel executivo'], ['G e depois L', 'Lançamentos'], ['G e depois A', 'A pagar'], ['G e depois R', 'A receber'], ['G e depois F', 'Fluxo de caixa'], ['G e depois C', 'Conciliação'], ['G e depois D', 'DRE e relatórios'], ['G e depois O', 'Orçamento'], ['?', 'Esta ajuda'], ['Esc', 'Fecha janelas']].map(([k, n]) => `<tr><td><kbd>${k}</kbd></td><td>${n}</td></tr>`).join('')}</tbody></table><button type="button" class="bt largo" data-fecha>Fechar</button>`); }
 
+Object.assign(ACOES, NS.acoes);
 Object.assign(ACOES, {
   'salvar-mov': (d, bt) => {
     const r = rascunho; guardaRascunho(); const c = Number(r.valor || 0); if ($('#rec-l')) r.receita = $('#rec-l').checked;

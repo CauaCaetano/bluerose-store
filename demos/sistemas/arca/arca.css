@@ -683,3 +683,16 @@ input[readonly] { background: var(--linho-3); }
 }
 @media (max-width: 1100px) { .empresa { min-width: 0; } .empresa small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cfg-sec { scroll-margin-top: 170px; } }
 @media (max-width: 760px) { .topo [data-acao="como"] { display: none; } }
+
+/* Nota fiscal de serviço (NFS-e) dos recebimentos · 22/11/2026 */
+.ns-modos { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); margin: 8px 0 12px; }
+.ns-modos button { align-items: flex-start; min-height: 64px; }
+.ns-modos button span { display: grid; gap: 3px; min-width: 0; }
+.ns-modos button small { font-weight: 400; color: var(--mudo); line-height: 1.35; }
+.ns-modos button[aria-checked="true"] b { color: var(--bordo); }
+.ns-h3 { margin: 16px 0 6px; font-size: 1rem; }
+.ns-in { width: 100%; min-width: 0; padding: 6px 8px; border: 1px solid #cdbfa5; border-radius: var(--raio); background: var(--linho-2); font: inherit; }
+.ns-bloco { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--linha); }
+.selo.ns-ok { background: #dbe7dd; color: #2f5a41; }
+.ns-cfg .faixa-aviso a { color: inherit; font-weight: 600; }
+.ns-danfse h3 { margin-top: 0; }

@@ -644,6 +644,20 @@
       return r.data || {};
     });
   };
+  // Jano, Atria e Arca: nota de serviço (NFS-e) pela conta do emissor do próprio cliente (22/11/2026).
+  // A função do servidor é configurável (window.VELTRIA_NFSE_FUNCAO; padrão nexo-nfce, com tipo 'nfse'). O token vai
+  // só para o servidor (cifrado em nexo_segredos) e nunca volta para a tela. Sem a função no ar, responde desligado.
+  if (['agendaessencial', 'atria', 'financeiroessencial'].indexOf(app) >= 0) window.veltriaNfse = function (body) {
+    var fn = window.VELTRIA_NFSE_FUNCAO || 'nexo-nfce';
+    return cliente().then(function (sb) { return sb.functions.invoke(fn, { body: Object.assign({}, body, { tipo: 'nfse', app: app, espaco: info.espaco }) }); }).then(function (r) {
+      if (r.error) {
+        var st = r.error.context && r.error.context.status;
+        if (st === 404) return { ok: false, desligado: true, mensagem: 'Emissão pela API ainda não ativada.' };
+        return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { return { ok: false, desligado: !!j.desligado, mensagem: j.erro || j.mensagem || 'Não deu para falar com o servidor agora.' }; });
+      }
+      return r.data || {};
+    }).catch(function () { return { ok: false, mensagem: 'Sem internet agora. Tente de novo.' }; });
+  };
   if (app === 'atria') window.atriaAcharTrabalho = function (o) {
     return chamaAtria('achar-trabalho', { cidade: o.cidade, oficios: o.oficios, auto: !!o.auto }).then(function (d) {
       var l = d.achados || []; l.info = { gratis_mes: d.gratis_mes, gratis_restantes: d.gratis_restantes, gratis_global_acabou: d.gratis_global_acabou, saldo: d.saldo, pago: d.pago }; return l;

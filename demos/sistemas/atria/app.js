@@ -14,6 +14,7 @@ import { ganchos } from './gestao.js?v=19';
 import { ligarVoz } from './base.js?v=19';
 import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=19';
 import * as MAIS from './mais.js?v=19';
+import * as NF from './nota-servico.js?v=1';
 import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=19';
 
 
@@ -22,6 +23,9 @@ const TELAS = { ...TG, ...TX };
 const ACOES = { ...AG, ...AX };
 ganchos.mei = cartaoMei;
 Object.assign(TELAS, MAIS.TELAS); Object.assign(ACOES, MAIS.ACOES);
+Object.assign(TELAS, NF.TELAS); Object.assign(ACOES, NF.ACOES);
+// nota de serviço (22/11/2026): o recibo ganha o bloco da NFS-e (emitir ou anotar o nº), fora da impressão
+{ const reciboBase = TELAS.recibo; TELAS.recibo = (id) => reciboBase(id) + NF.blocoRecibo(id); }
 
 // ------------------------------------------------------------------ plano Pro (12/11/2026)
 // Básico (R$ 39): tudo, menos Achar trabalho (achados na internet) e lojas e preços. Pro (R$ 50): tudo, com 50
@@ -543,8 +547,8 @@ TELAS.ajustes = () => {
   const p = eu(), esq = p.esquema || 'ardosia', conta = !!(window.BRAssinatura && BRAssinatura.emConta());
   const papel = conta && window.veltriaNuvem ? window.veltriaNuvem.papel() : 'dono';
   const cargo = papel === 'dono' ? 'Dono do app · profissional' : papel === 'admin' ? 'Administrador' : 'Equipe';
-  const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-app', 'Ajustes'], ['cfg-assinatura', 'Assinatura']];
-  return `${cab('Configurações', 'Perfil, cores, marca, guia e assinatura')}
+  const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-nota', 'Nota fiscal'], ['cfg-app', 'Ajustes'], ['cfg-assinatura', 'Assinatura']];
+  return `${cab('Configurações', 'Perfil, cores, marca, nota fiscal e assinatura')}
   <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<a href="#ajustes" data-acao="cfg-ir" data-alvo="${id}">${n}</a>`).join('')}</nav>
   <section class="cartao cfg-sec" id="cfg-perfil" aria-labelledby="cfg-perfil-t"><h2 class="cfg-t" id="cfg-perfil-t">${ico('gente')}Perfil</h2>
     <div class="cfg-eu">${avEu('g')}<div><b>${t(p.nome)}</b><small>${t(nomeOficios(p))} · ${t(p.cidade)}-${t(p.uf)}</small></div></div>
@@ -562,6 +566,7 @@ TELAS.ajustes = () => {
     <div class="lista" style="margin-top:12px">
       <button type="button" class="linha" data-acao="tour"><span class="ic">${ico('ajuda')}</span><span class="txt"><b>Ver de novo a apresentação</b><small>O passeio que mostra onde fica cada coisa</small></span></button>
       <button type="button" class="linha" data-acao="cadastro"><span class="ic">${ico('lapis')}</span><span class="txt"><b>Refazer o cadastro</b><small>Nome, foto, cidade e ofícios</small></span></button></div></section>
+  ${NF.secao()}
   <section class="cfg-sec" id="cfg-app" aria-labelledby="cfg-app-t"><h2 class="cfg-t cfg-t-fora" id="cfg-app-t">${ico('config')}Ajustes do app</h2>
   <div class="lista">
     <button type="button" class="linha" data-acao="chave-pix"><span class="ic">${ico('pix')}</span><span class="txt"><b>Chave Pix</b><small>${db.pix && !db.pix.exemplo ? 'cadastrada neste celular' : 'chave de exemplo: cadastre a sua'}</small></span></button>
@@ -576,6 +581,7 @@ TELAS.ajustes = () => {
     : `<p class="mudo cfg-txt" style="margin-top:10px">Básico R$ 39 por mês (R$ 374 por ano) ou Pro R$ 50 por mês (R$ 480 por ano), com o Achar trabalho e as lojas e preços. Sem fidelidade.</p>`}</div>`;
 };
 TELAS.ajustes.montar = (el) => {
+  NF.montarSecao();
   const slot = $('#ass-slot', el);
   if (slot && window.BRAssinatura) { if (blocoAss) slot.replaceWith(blocoAss); else blocoAss = BRAssinatura.montar(slot, { app: 'atria', nome: 'Atria', mensal: 39, anual: 374, pagina: 'atria.html', titulo: 'h2' }); }
   const em = $('#cfg-email', el);
@@ -598,7 +604,7 @@ ACOES.cadastro = () => cadastro(true);
 ACOES.tour = () => { ir('inicio'); setTimeout(tour, 450); };
 ACOES.voltar = () => { if (pilha.length > 1) history.back(); else ir(PAI[rotaAtual().nome] || 'inicio'); };
 ACOES.dica = (b) => folha({ titulo: 'Dica', corpo: `<div class="dica-flutua" style="animation:none">${ico('luz')}<p>${t(b.dataset.dica)}</p></div>` });
-const PAI = { ...MAIS.PAI_MAIS, diarias: 'equipe', post: 'comunidade', orcar: 'inicio', trabalhos: 'inicio', agenda: 'gestao', equipe: 'gestao', recibo: 'financeiro', obra: 'obras', obras: 'gestao', clientes: 'gestao', cliente: 'clientes', materiais: 'listas', listas: 'gestao', lojas: 'gestao', precos: 'gestao', financeiro: 'gestao', ferramentas: 'gestao', corte: 'ferramentas', medidas: 'ferramentas', calc: 'ferramentas', modelo: 'ferramentas', orcamento: 'obras', proposta: 'obras', trabalho: 'trabalhos', perfil: 'comunidade', post: 'comunidade', ajustes: 'gestao', config: 'gestao' };
+const PAI = { ...MAIS.PAI_MAIS, diarias: 'equipe', post: 'comunidade', orcar: 'inicio', trabalhos: 'inicio', agenda: 'gestao', equipe: 'gestao', recibo: 'financeiro', notas: 'financeiro', obra: 'obras', obras: 'gestao', clientes: 'gestao', cliente: 'clientes', materiais: 'listas', listas: 'gestao', lojas: 'gestao', precos: 'gestao', financeiro: 'gestao', ferramentas: 'gestao', corte: 'ferramentas', medidas: 'ferramentas', calc: 'ferramentas', modelo: 'ferramentas', orcamento: 'obras', proposta: 'obras', trabalho: 'trabalhos', perfil: 'comunidade', post: 'comunidade', ajustes: 'gestao', config: 'gestao' };
 
 // instalar
 let pedidoInstalar = null;

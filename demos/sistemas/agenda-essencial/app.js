@@ -5,6 +5,7 @@
 // assistente, painel do dono, configurações e assinatura. Dados de exemplo neste aparelho (?novo recomeça).
 
 import * as M from './midia.js?v=1';
+import * as NF from './nota-servico.js?v=1'; // 22/11/2026: nota fiscal de serviço (NFS-e)
 const CHAVE = 'veltria-agenda-essencial-v3'; // NÃO MUDAR: chave dos dados da assinante (igual em base/versoes.js)
 const din = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const t = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -162,6 +163,7 @@ function inicial() {
 }
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || inicial(); } catch { return inicial(); } })();
 window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
+NF.liga({ db: () => db, grava: () => grava(), toast: (m) => toast(m), folha: (h, l) => folha(h, l), t, din, cli: (id) => cli(id), serv: (id) => serv(id), preco: (a) => preco(a), iso, hh, mostra: () => mostra() });
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { toast('Sem espaço no celular.'); } };
 const serv = (id) => db.servicos.find((s) => s.id === id) || db.servicos[0];
 const cli = (id) => db.clientes.find((c) => c.id === id) || { nome: '—', tel: '' };
@@ -372,7 +374,7 @@ const T = {
     if (res.modo === 'dia') {
       nav = `<button type="button" class="bt pq" data-rpasso="-1" aria-label="Dia anterior">‹</button><label class="r-data"><input type="date" id="r-dia" value="${iso(res.d)}" aria-label="Escolher o dia"></label><button type="button" class="bt pq" data-rpasso="1" aria-label="Próximo dia">›</button>`;
       l = noPeriodo((a) => a.dia === res.d); ant = noPeriodo((a) => a.dia === res.d - 7);
-      extra = `<h2>Horários do dia</h2><div class="cartao">${l.lista.map((a) => `<div class="hora" data-ag="${a.id}" role="button" tabindex="0"><span class="h">${hh(a.ini)}</span><span><b>${t(cli(a.cli).nome)}</b><small>${t(serv(a.serv).nome)}${a.forma ? ` · ${t(a.forma)}` : ''}</small></span><span class="selo ${ST[a.st]?.[1] || ''}">${a.st === 'feito' ? (a.mes && !a.pago && !sinalPg(a) ? 'fim do mês' : din(a.pago + (a.sinal?.pago ? a.sinal.valor : 0))) : ST[a.st]?.[0] || a.st}</span></div>`).join('') || '<p class="livre">Nenhum horário neste dia.</p>'}</div>`;
+      extra = `<h2>Horários do dia</h2><div class="cartao">${l.lista.map((a) => `<div class="hora" data-ag="${a.id}" role="button" tabindex="0"><span class="h">${hh(a.ini)}</span><span><b>${t(cli(a.cli).nome)}</b><small>${t(serv(a.serv).nome)}${a.forma ? ` · ${t(a.forma)}` : ''}${NF.etiqueta(a)}</small></span><span class="selo ${ST[a.st]?.[1] || ''}">${a.st === 'feito' ? (a.mes && !a.pago && !sinalPg(a) ? 'fim do mês' : din(a.pago + (a.sinal?.pago ? a.sinal.valor : 0))) : ST[a.st]?.[0] || a.st}</span></div>`).join('') || '<p class="livre">Nenhum horário neste dia.</p>'}</div>`;
     } else if (res.modo === 'mes') {
       const alvo = mi + res.m, y = Math.floor(alvo / 12), m = alvo % 12, dias = new Date(y, m + 1, 0).getDate();
       nav = `<button type="button" class="bt pq" data-rpasso="-1" aria-label="Mês anterior">‹</button><b class="r-tit">${MES[m][0].toUpperCase() + MES[m].slice(1)} de ${y}</b><button type="button" class="bt pq" data-rpasso="1" aria-label="Próximo mês">›</button>`;
@@ -421,7 +423,7 @@ const T = {
   },
   config() {
     const foto = db.foto ? `<img src="${t(db.foto)}" alt="">` : t(db.pro.split(' ').map((p) => p[0]).slice(0, 2).join(''));
-    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-negocio', 'Negócio e horário'], ['pagamento', 'Pagamento'], ['cfg-servicos', 'Serviços'], ['cfg-msgs', 'Mensagens'], ['cfg-assinatura', 'Minha assinatura']];
+    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-negocio', 'Negócio e horário'], ['pagamento', 'Pagamento'], ['cfg-servicos', 'Serviços'], ['cfg-msgs', 'Mensagens'], ['cfg-nota', 'Nota fiscal'], ['cfg-assinatura', 'Minha assinatura']];
     return `<a href="#mais">← Mais</a><h1>Configurações</h1><p class="sub">Seu perfil, as cores, a sua marca, o guia, o seu negócio e a sua assinatura.</p>
       <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<button type="button" data-sec="${id}">${n}</button>`).join('')}</nav>
       <section class="cfg-sec" id="cfg-perfil"><h2>Perfil</h2><div class="cartao cfg-eu"><span class="ini grande" aria-hidden="true">${foto}</span><div><b>${t(db.pro)}</b><small id="cfg-cargo-txt">Dono(a) · ${t(db.studio)}</small></div></div>
@@ -445,7 +447,7 @@ const T = {
       ${db.pagPadrao === 'mes' ? '' : '<p class="mini" style="margin:-6px 0 10px">Se a maioria dos seus clientes paga no fim do mês, escolha "No fim do mês".</p>'}
       <button type="button" class="bt largo" data-acao="todos-mes">Marcar todos os clientes como fim do mês</button>
       <h2 id="cfg-servicos" class="cfg-sec">Serviços</h2><div class="cartao">${db.servicos.map((s, i) => `<div class="serv-ed"><span class="h" style="color:${s.cor}">●</span><input data-sv="${i}.nome" value="${t(s.nome)}" aria-label="Nome do serviço"><label>min<input data-sv="${i}.min" type="number" min="5" step="5" value="${s.min}"></label><label>R$<input data-sv="${i}.preco" type="number" min="0" step="0.01" value="${s.preco}"></label></div>`).join('')}</div><button type="button" class="bt largo" data-acao="add-serv">+ Adicionar serviço</button><div class="cfg-sec" id="cfg-msgs">${secMsgs()}</div><h2>App no celular</h2><p class="mini" style="margin-top:-6px">Instale na tela de início. O app abre a sua conta: o que você mudar nele aparece no computador e na web, e o que mudar lá aparece no app.</p><button type="button" class="bt largo" data-acao="instalar">Instalar o app</button><p class="mini">Funciona sem internet: o que você marcar sobe quando a conexão voltar.</p>
-      <div class="cfg-sec" id="cfg-assinatura"><div id="ass-slot"></div></div><div style="height:110px" aria-hidden="true"></div>`;
+      ${NF.secao()}<div class="cfg-sec" id="cfg-assinatura"><div id="ass-slot"></div></div><div style="height:110px" aria-hidden="true"></div>`;
   },
 };
 
@@ -733,6 +735,7 @@ function mostra() {
   if (!db.assinatura.renova && db.assinatura.status !== 'vencida' && r !== 'assinatura') tela.insertAdjacentHTML('afterbegin', `<p class="cartao" style="margin-top:12px;padding:8px 12px;background:#f1dfdd">Assinatura cancelada: você usa por mais ${db.assinatura.proxima} dias. <a href="#assinatura">Reativar</a></p>`);
   trava(r);
   if (r === 'config' || r === 'assinatura') posConfig(tela);
+  if (r === 'config') NF.monta(tela);
   if (r === 'link') preencheVitrine();
   if (r === 'ia') { const el = $('#ia-boneco'); if (el) import('../base/assistente-ia.js?v=2').then((m) => { const b = m.personagemIA(el, db.conversa.length ? 'parado' : 'ola'); if (!db.conversa.length) b.estado('ola', 2600); else if (/Pensando/.test(db.conversa[db.conversa.length - 1].t)) b.estado('pensando'); else b.estado('explicando', 4000); }).catch(() => el.remove()); }
   document.title = `${{ dia: 'Dia', resumo: 'Resumo', novo: rasc.remarca ? 'Remarcar' : 'Novo horário', clientes: 'Clientes', fimdomes: 'Fim do mês', link: 'Vitrine', aniversarios: 'Aniversários', lembretes: 'Lembretes', espera: 'Lista de espera', caixa: 'Caixa', mais: 'Mais', ia: 'Assistente', assinatura: 'Minha assinatura', dono: 'Painel do dono', config: 'Configurações' }[r] || 'Dia'} · ${db.studio || 'Agenda'}`;
@@ -794,7 +797,8 @@ function abreHorario(id) {
   const v = preco(a);
   folha(`<h2>${hh(a.ini)} · ${t(c.nome)}</h2><p class="sub">${t(s.nome)} · ${s.min} min · ${din(v)}${a.valor != null ? ' (combinado)' : ''} · ${nomeDia(a.dia)}</p>${a.sinal ? `<p class="cartao" style="padding:8px 12px">Sinal de ${din(a.sinal.valor)}: <b>${a.sinal.pago ? 'pago' : 'esperando o PIX'}</b>${a.sinal.pago ? '' : ' <button type="button" class="bt pq" data-sinal-ok>Caiu</button>'}</p>` : ''}${a.mes && a.st === 'feito' ? `<p class="cartao" style="padding:8px 12px">Na conta do fim do mês (${MES[mesDe(a.dia) % 12]}): ${a.pago + sinalPg(a) >= v ? 'pago' : 'esperando o pagamento'}. <a href="#fimdomes" data-fm="${mesDe(a.dia)}" data-fecha>Ver o Fim do mês</a></p>` : ''}
     <div style="display:grid;gap:8px">${a.st === 'feito' || a.st === 'faltou' ? '' : `${c.tel ? '' : '<p class="mini" style="margin:0">Sem WhatsApp anotado: edite o cliente em Clientes para confirmar por aqui.</p>'}<a class="bt rose largo" ${c.tel ? '' : 'hidden'} target="_blank" rel="noopener" href="${zap(c.tel, msg('confirmar', { nome: c.nome.split(' ')[0], servico: s.nome.toLowerCase(), dia: nomeDia(a.dia), hora: hh(a.ini), sinal: a.sinal && !a.sinal.pago ? `Sinal de ${din(a.sinal.valor)} no PIX ${db.pix}.` : '' }))}" data-confirmou>Confirmar no WhatsApp</a>
-    ${mensal(c) ? `<button type="button" class="bt cheio largo" data-conta-mes>Atendido: vai para a conta de ${MES[mesDe(a.dia) % 12]} (${din(v - sinalPg(a))})</button><button type="button" class="bt largo" data-receber>Pagou hoje: receber agora</button>` : `<button type="button" class="bt cheio largo" data-receber>Atendido: receber ${din(v - (a.sinal?.pago ? a.sinal.valor : 0))}</button>`}<div class="linha" style="margin:0"><button type="button" class="bt pq" data-remarcar>Remarcar</button><button type="button" class="bt pq" data-faltou>Faltou</button><button type="button" class="bt pq" data-desmarcar>Desmarcar</button></div>${a.serie ? '<button type="button" class="bt largo" data-desmarcar-serie>Desmarcar este e os próximos</button>' : ''}`}${a.serie ? '' : '<button type="button" class="bt largo" data-repetir>Repetir toda semana</button>'}<div class="midia-bts"><button type="button" class="bt pq" data-mid="antes">${ICO.camera}Foto antes</button><button type="button" class="bt pq" data-mid="depois">${ICO.camera}Foto depois</button><button type="button" class="bt pq" data-mid="video">${ICO.video}Vídeo</button></div><button type="button" class="bt largo" data-fecha style="border-style:dashed">Fechar</button></div>`, (f, fecha) => {
+    ${mensal(c) ? `<button type="button" class="bt cheio largo" data-conta-mes>Atendido: vai para a conta de ${MES[mesDe(a.dia) % 12]} (${din(v - sinalPg(a))})</button><button type="button" class="bt largo" data-receber>Pagou hoje: receber agora</button>` : `<button type="button" class="bt cheio largo" data-receber>Atendido: receber ${din(v - (a.sinal?.pago ? a.sinal.valor : 0))}</button>`}<div class="linha" style="margin:0"><button type="button" class="bt pq" data-remarcar>Remarcar</button><button type="button" class="bt pq" data-faltou>Faltou</button><button type="button" class="bt pq" data-desmarcar>Desmarcar</button></div>${a.serie ? '<button type="button" class="bt largo" data-desmarcar-serie>Desmarcar este e os próximos</button>' : ''}`}${a.serie ? '' : '<button type="button" class="bt largo" data-repetir>Repetir toda semana</button>'}${NF.bloco(a)}<div class="midia-bts"><button type="button" class="bt pq" data-mid="antes">${ICO.camera}Foto antes</button><button type="button" class="bt pq" data-mid="depois">${ICO.camera}Foto depois</button><button type="button" class="bt pq" data-mid="video">${ICO.video}Vídeo</button></div><button type="button" class="bt largo" data-fecha style="border-style:dashed">Fechar</button></div>`, (f, fecha) => {
+    NF.ligaBloco(f, a, () => { fecha(); mostra(); });
     f.querySelectorAll('[data-mid]').forEach((b) => b.addEventListener('click', () => novaMidia({ tipo: b.dataset.mid, cli: a.cli, ag: a.id, serv: a.serv, par: a.id })));
     const ok = (fn, msg) => () => { fn(); grava(); fecha(); mostra(); if (msg) toast(msg); };
     f.querySelector('[data-sinal-ok]')?.addEventListener('click', ok(() => { a.sinal.pago = true; }, 'Sinal recebido. Horário garantido.'));

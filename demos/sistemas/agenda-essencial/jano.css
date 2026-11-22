@@ -358,3 +358,12 @@ html[data-tema]:not([data-tema="rose"]) .pilula .mais-um { color: #fff; text-sha
 /* bloco compartilhado com as cores do Jano: segue o esquema escolhido */
 .br-ass { --ass-cor: var(--noite); --ass-cor-txt: var(--trav-2); --ass-texto: var(--tinta); --ass-mudo: var(--tx-2); --ass-fundo: var(--trav-2); --ass-linha: var(--bronze-cl); --ass-raio: 10px; --ass-perigo: var(--verm); --ass-ok: var(--verde); --ass-atn: #7a5a24; --ass-titulo: var(--romana); }
 .br-ass .br-ass-t { font-size: 1rem; letter-spacing: .06em; text-transform: uppercase; color: var(--tinta); }
+/* 22/11/2026 · Nota fiscal de serviço: "Como você emite nota hoje?" como tábuas de pedra, uma embaixo da outra */
+.nfs-modos { display: grid; gap: 8px; margin: 0 0 12px; }
+.nfs-modos button { display: grid; gap: 2px; text-align: left; padding: 12px 14px; border: 1px solid var(--pedra-esc); border-radius: 10px; background: var(--trav-2); color: var(--tinta); font: inherit; cursor: pointer; min-height: 48px; }
+.nfs-modos button b { font-family: var(--romana); letter-spacing: .03em; font-size: .95rem; }
+.nfs-modos button small { color: var(--tx-2); font-size: .82rem; }
+.nfs-modos button[aria-checked="true"] { border-color: var(--noite); box-shadow: inset 0 0 0 2px var(--noite); background: var(--pedra-2); }
+.nfs-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 10px; align-items: end; }
+.nfs-bloco { margin: 0; }
+.nfs-bloco .linha { flex-wrap: wrap; gap: 6px; }
