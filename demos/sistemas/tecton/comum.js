@@ -1,7 +1,7 @@
 // Tecton · o que os três ramos têm em comum: menus, painel (cada ramo desenha o seu), clientes e fornecedores, financeiro
 // (pagar, receber e fluxo de caixa), equipe, busca, primeiro uso, Configurações e o guia "Como usar".
 import { db, grava, CONTA, RAMOS, ramoAtual, tela, acao, ir, cab, vazio, ico, t, R$, R0, dataBR, dataCurta, quando, hoje, somaDias, somaMeses, uid, soma, num, n2, pl,
-  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, recibo, imprimir, reduzir, abrirEmpresaDemo, raiz, recomecar, dias } from './nucleo.js?v=2';
+  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, recibo, imprimir, reduzir, abrirEmpresaDemo, raiz, recomecar, dias } from './nucleo.js?v=3';
 
 // ------------------------------------------------------------------ menus de cada ramo (o menu lateral e a barra de baixo)
 // [rota, nome, ícone]; a barra de baixo do celular usa as rotas de BAIXO (no máximo 4 + Mais)
@@ -23,6 +23,9 @@ export const numero = (icone, rot, val, sub = '', ir2 = '') => `<${ir2 ? `button
 // ------------------------------------------------------------------ movimentos: o financeiro junta os lançamentos e o que vem dos ramos
 // cada item: { id, tipo: pagar|receber, desc, valor, venc, pago, pessoa, cat, origem, baixar(dia, forma) }
 export const ORIGENS = []; // cada ramo empurra uma função () => [itens]
+// ganchos opcionais de outros módulos (nota.js): seções a mais nas Configurações e o botão da nota em cada recebimento
+export const SECOES_CFG = []; // { id, nome, html(gestor), montar(el, redesenhar) }
+export const GANCHOS = { movNota: () => '' };
 export function movimentos() {
   const l = db.fin.map((f) => ({ ...f, origem: 'Lançamento', baixar: (dia, forma) => { f.pago = dia; f.forma = forma; }, estornar: () => { f.pago = ''; f.forma = ''; } }));
   ORIGENS.forEach((fn) => { if (db.config.ramos.includes(fn.ramo)) l.push(...fn()); });
@@ -44,7 +47,7 @@ let filtroFin = 'abertos';
 const linhaMov = (m) => `<li><span class="ponto ${m.pago ? 'ok' : vencido(m) ? '' : 'and'}" style="${vencido(m) ? 'border-color:var(--perigo);background:var(--perigo-suave)' : ''}"></span><div class="tx"><b>${t(m.desc)}</b><small>${m.pago ? `${m.tipo === 'pagar' ? 'Pago' : 'Recebido'} em ${dataBR(m.pago)}${m.forma ? ' · ' + t(m.forma) : ''}` : `Vence ${dataBR(m.venc)} (${quando(m.venc)})`}${m.pessoa ? ' · ' + t(nomeDe(m.pessoa)) : ''}${m.origem && m.origem !== 'Lançamento' ? ' · ' + t(m.origem) : ''}</small></div>
   <div class="val ${m.tipo === 'pagar' ? '' : 'verde'}">${m.tipo === 'pagar' ? '−' : '+'} ${R$(m.valor)}${vencido(m) ? '<small class="vermelho">vencida</small>' : ''}</div>
   ${m.pago ? (m.origem === 'Lançamento' ? `<button type="button" class="bt pq" data-acao="fin-estornar" data-id="${t(m.id)}">Desfazer</button>` : '') : `<button type="button" class="bt pq ${m.tipo === 'receber' ? 'cheio' : ''}" data-acao="fin-baixa" data-id="${t(m.id)}">${m.tipo === 'pagar' ? 'Pagar' : 'Receber'}</button>`}
-  ${m.origem === 'Lançamento' ? `<button type="button" class="bt-ico" data-acao="fin-editar" data-id="${t(m.id)}" aria-label="Editar">${ico('lapis')}</button>` : ''}</li>`;
+  ${GANCHOS.movNota(m)}${m.origem === 'Lançamento' ? `<button type="button" class="bt-ico" data-acao="fin-editar" data-id="${t(m.id)}" aria-label="Editar">${ico('lapis')}</button>` : ''}</li>`;
 const achaMov = (id) => movimentos().find((m) => m.id === id);
 acao('fin-baixa', (b) => { const m = achaMov(b.dataset.id); if (m) darBaixa(m); });
 acao('fin-estornar', async (b) => { const f = db.fin.find((x) => x.id === b.dataset.id); if (f && await confirma('Voltar este lançamento para "em aberto"?', 'Desfazer')) { f.pago = ''; f.forma = ''; grava(); } });
@@ -302,7 +305,7 @@ tela('config', {
   html() {
     const c = db.config, pf = perfil(), g = gestor(), E = esquema(), M = c.marca || {};
     const nome = pf.nome || (conta.modo === 'demo' ? 'Você' : ''), ini = (nome || conta.email || '?').trim()[0].toUpperCase();
-    const secs = [['cfg-perfil', 'Perfil'], ['cfg-empresa', 'Empresa'], ['cfg-ramos', 'Ramos'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ['cfg-assinatura', 'Minha assinatura']];
+    const secs = [['cfg-perfil', 'Perfil'], ['cfg-empresa', 'Empresa'], ['cfg-ramos', 'Ramos'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ...SECOES_CFG.map((x) => [x.id, x.nome]), ['cfg-guia', 'Guia'], ['cfg-assinatura', 'Minha assinatura']];
     return cab('Configurações', g ? 'Seu perfil, a empresa, os ramos, as cores, a marca, o guia e a assinatura' : 'Seu perfil, o guia e a assinatura. O resto só o dono muda') +
     `<nav class="cfg-nav" aria-label="Seções">${secs.map(([id, n]) => `<button type="button" class="chip" data-ir="config/${id}">${n}</button>`).join('')}</nav>
     <div class="grade g2">
@@ -328,6 +331,7 @@ tela('config', {
       <div class="cfg-eu"><div class="logo-prev" style="${M.logo ? `background-image:url('${t(M.logo)}')` : ''}">${M.logo ? '' : t((c.nome || 'E')[0])}</div>
         ${g ? `<div class="linha-bts" style="margin:0"><label class="bt">${ico('foto')}${M.logo ? 'Trocar o logo' : 'Enviar o logo'}<input type="file" accept="image/*" data-logo-arq hidden></label>${M.logo ? '<button type="button" class="bt" data-tira-logo>Remover o logo</button>' : ''}</div>` : ''}</div>
       <label class="liga">Mostrar o meu logo e o nome da empresa no topo do sistema<input type="checkbox" data-marca-topo ${M.topo ? 'checked' : ''} ${g ? '' : 'disabled'}></label></section>
+    ${SECOES_CFG.map((x) => x.html(g)).join('')}
     <section class="cartao" id="cfg-guia" style="margin-top:16px"><h2>Guia: como usar</h2><p class="mudo" style="margin-bottom:12px">Um passo a passo curto de cada tela. Também abre pelo botão <b>?</b> no topo.</p>
       <div class="chips">${menuAtual().map(([k]) => COMO[k] ? `<button type="button" class="chip" data-como="${k}">${t(COMO[k][0])}</button>` : '').join('')}</div></section>
     <div id="cfg-assinatura" style="margin-top:16px"><div id="ass-slot"></div></div>
@@ -355,6 +359,7 @@ tela('config', {
     $('[data-tira-logo]', el)?.addEventListener('click', () => { db.config.marca = { ...db.config.marca, logo: '' }; grava(); dispatchEvent(new Event('tecton-marca')); });
     $('[data-marca-topo]', el)?.addEventListener('change', (e) => { db.config.marca = { ...db.config.marca, topo: e.target.checked }; grava(); dispatchEvent(new Event('tecton-marca')); toast(e.target.checked ? 'Sua marca no topo' : 'Tecton no topo'); });
     $$('[data-como]', el).forEach((b) => b.onclick = () => comoUsar(b.dataset.como));
+    SECOES_CFG.forEach((x) => x.montar?.(el, () => ir(`config/${x.id}`)));
     $('[data-recomecar-cfg]', el)?.addEventListener('click', async () => { if (await confirma('Recomeçar a demonstração? Tudo volta ao exemplo do início.', 'Recomeçar', true)) { recomecar(); dispatchEvent(new Event('tecton-ramo')); ir('painel'); toast('Demonstração recomeçada'); } });
   },
 });

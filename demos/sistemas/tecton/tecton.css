@@ -381,6 +381,23 @@ input[type=range]{accent-color:var(--pri);width:100%;min-height:36px}
 .doc .rodape{margin-top:24px;font-size:9pt;color:#444;border-top:1px solid #999;padding-top:6px}
 .doc p{margin:6px 0}
 
+/* nota fiscal (nota.js): "como você emite nota hoje?", dados fiscais e o DANFE NFC-e de 80 mm */
+.nf-modos{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin:4px 0 14px}
+.nf-modos button{display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:10px;border:2px solid var(--linha);background:var(--papel);cursor:pointer;text-align:left;color:var(--tinta);min-width:0}
+.nf-modos button .ico{flex:none;margin-top:2px}
+.nf-modos button b{display:block}
+.nf-modos button small{display:block;color:var(--mudo);font-size:.86rem;margin-top:2px}
+.nf-modos button[aria-checked=true]{border-color:var(--pri);background:var(--pri-suave)}
+.nf-modos button:disabled{cursor:default;opacity:.75}
+.nf-caixa{border:1px solid var(--linha);border-radius:10px;padding:14px;min-width:0}
+.nf-caixa .et{white-space:normal;align-items:flex-start}
+.nf-prod{padding:12px;margin:0 0 10px}
+.danfe{width:72mm;margin:0 auto;font:9pt/1.35 Arial,Helvetica,sans-serif;color:#000}
+.danfe p{margin:2px 0}.danfe .c{text-align:center}.danfe hr{border:0;border-top:1px dashed #000;margin:5px 0}
+.danfe table{width:100%;border-collapse:collapse}.danfe td{padding:1px 0;vertical-align:top;font-size:8.5pt}.danfe td.n{text-align:right;white-space:nowrap;padding-left:6px}
+.danfe tr.g td{font-weight:800;font-size:10pt}.danfe .qr{display:grid;place-items:center;margin:6px 0}
+@media print{#impressao .danfe{width:72mm}}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* rodada 2 da banca */

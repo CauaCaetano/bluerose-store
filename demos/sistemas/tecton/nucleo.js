@@ -44,7 +44,8 @@ export function vazia() {
     pessoas: [], fin: [], equipe: [], avisos: [], docs: [],
     obras: [], trab: [], apont: [], pedidos: [], empreitas: [],
     produtos: [], vendas: [], orcs: [], entregas: [], caminhoes: [], contasObra: [], fiado: [], compras: [], espera: [], devolucoes: [],
-    emps: [], imoveis: [], leads: [], visitas: [], propostas: [], contratos: [], alugueis: [], corretores: [], comissoes: [] };
+    emps: [], imoveis: [], leads: [], visitas: [], propostas: [], contratos: [], alugueis: [], corretores: [], comissoes: [],
+    notas: [] }; // notas: registro das notas emitidas fora do Tecton (nota.js)
 }
 // completa campos que faltam (dados de versões antigas ou de uma conta nova)
 function completa(e) { const v = vazia(); Object.keys(v).forEach((k) => { if (e[k] == null) e[k] = v[k]; }); Object.keys(v.config).forEach((k) => { if (e.config[k] == null) e.config[k] = v.config[k]; }); return e; }

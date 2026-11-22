@@ -7,8 +7,8 @@
 //  - demonstração: na raiz da chave (raiz().ajuste), valendo para as três empresas de exemplo;
 //  - convidado com cargo limitado: só o próprio menu e o próprio painel, em db.config.perfis[e-mail].ajuste e neste aparelho.
 // Sem ajuste (dados de antes, ou quem pulou), tudo continua como era: o menu inteiro do ramo e o painel completo.
-import { db, grava, CONTA, RAMOS, raiz, ramoAtual, abrirEmpresaDemo, tela, TELAS, acao, ir, desenhar, definirPortao, cab, ico, t, $, $$, toast, folha, hoje } from './nucleo.js?v=2';
-import { MENUS, BAIXO, FIM, PAINEIS, COMO } from './comum.js?v=2';
+import { db, grava, CONTA, RAMOS, raiz, ramoAtual, abrirEmpresaDemo, tela, TELAS, acao, ir, desenhar, definirPortao, cab, ico, t, $, $$, toast, folha, hoje } from './nucleo.js?v=3';
+import { MENUS, BAIXO, FIM, PAINEIS, COMO } from './comum.js?v=3';
 
 // ------------------------------------------------------------------ o que perguntar
 // dor: [id, o que a pessoa quer resolver, detalhe, telas que entram no menu, cartões que entram no painel]

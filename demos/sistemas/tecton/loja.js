@@ -2,8 +2,9 @@
 // unidades e fracionado, entregas com roteiro e caminhão, conta da obra, fiado com limite, compras, preço por tabela e
 // desconto por quantidade, relatórios do que gira e do que está parado.
 import { mesAno, db, grava, tela, acao, ir, cab, vazio, barra, ico, t, R$, R0, n2, pc, dataBR, dataCurta, quando, hoje, somaDias, dias, uid, soma, num, fone,
-  folha, editar, campos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, recibo, pl, ACOES, pixCopiaCola } from './nucleo.js?v=2';
-import { PAINEIS, numero, saudacao, ORIGENS, ENTRADAS_CAIXA, RELACIONADOS, BUSCAS, editarPessoa, gestor } from './comum.js?v=2';
+  folha, editar, campos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, recibo, pl, ACOES, pixCopiaCola } from './nucleo.js?v=3';
+import { PAINEIS, numero, saudacao, ORIGENS, ENTRADAS_CAIXA, RELACIONADOS, BUSCAS, editarPessoa, gestor } from './comum.js?v=3';
+import { escolhaNoReceber, aposReceber, etiquetaNota, botaoNota, avisoDevolucao, folhaExportar, modoNf } from './nota.js?v=3';
 
 const R = 'loja';
 const prod = (id) => db.produtos.find((p) => p.id === id);
@@ -157,15 +158,17 @@ function fecharVenda(forma, extra = {}) {
 function agendarEntrega(v, cli, endereco, bairro, dia, cm, modo = 'entrega') { db.entregas.push({ id: uid('en'), modo, venda: v.id, dia, cliente: cli, endereco, bairro, caminhao: cm, ordem: db.entregas.filter((x) => x.dia === dia && x.caminhao === cm).length + 1, status: 'agendada', obs: '', itens: v.itens.map((i) => ({ prod: i.prod, nome: i.nome, un: i.un, qtd: i.qtd, ok: 0 })) }); }
 acao('vender', () => {
   if (!sessao() || sessao().fechado) { if (sessao()?.fechado) { toast(`O ${caixaAtual()} já foi fechado hoje`); return; } abrirCaixa(() => ACOES.vender()); return; }
-  const tot = totalCart(), c = pessoa(cart.cliente);
+  const tot = totalCart(), c = pessoa(cart.cliente), nfE = escolhaNoReceber(cart.cliente, '');
   const { el, fechar } = folha({ titulo: `Receber ${R$(tot)}`, corpo: `<div class="chips" style="margin-bottom:14px">${['Dinheiro', 'Pix', 'Cartão de débito', 'Cartão de crédito'].map((f, i) => `<button type="button" class="chip" data-forma="${f}" aria-pressed="${i === 1}">${f}</button>`).join('')}</div>
     <div data-din hidden><label class="campo"><span>Recebido em dinheiro</span><input data-recebido inputmode="decimal" placeholder="${n2(tot)}"></label><p class="forte" data-troco></p></div>
     <p class="mudo peq" data-pix>Pix: o cliente paga na sua chave e você confere no app do banco. Cartão: passe na sua maquininha.</p>
+    ${nfE.html}
     <p class="forte" style="margin:4px 0 6px">O material</p><div class="chips" style="margin-bottom:10px" role="group" aria-label="Como o material sai">${[['leva', 'Leva agora'], ['entrega', 'Entregar na obra'], ['retira', 'Retira no depósito depois']].map(([k, n], i) => `<button type="button" class="chip" data-modo="${k}" aria-pressed="${i === 0}">${n}</button>`).join('')}</div>
     <div data-ret hidden><p class="mudo peq">O material fica separado no pátio (sai do estoque livre) e aparece em Entregas › Retirada no depósito até o cliente buscar. Quem retirar assina o canhoto.</p></div>
     <div data-ent hidden>${campos([{ k: 'endereco', r: 'Endereço', largo: true }, { k: 'bairro', r: 'Bairro' }, { k: 'dia', r: 'Dia da entrega', tipo: 'date' }, { k: 'caminhao', r: 'Caminhão', tipo: 'select', op: db.caminhoes.map((x) => [x.id, x.nome]) }], { endereco: c?.endereco || '', dia: somaDias(hoje(), 1) })}<p class="mudo peq">${cart.frete ? `Frete de ${R$(cart.frete)} já está no total.` : 'Sem frete no total: para cobrar, volte e ponha o valor no campo Frete.'}</p></div>`,
     pe: `<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt" data-ok="recibo">${ico('imprimir')}Receber e imprimir</button><button type="button" class="bt cheio" data-ok="1">${ico('check')}Recebido</button>` });
   let forma = 'Pix', modo = 'leva';
+  nfE.montar?.(el);
   $$('[data-modo]', el).forEach((b) => b.onclick = () => { modo = b.dataset.modo; $$('[data-modo]', el).forEach((x) => x.setAttribute('aria-pressed', x === b)); $('[data-ent]', el).hidden = modo !== 'entrega'; $('[data-ret]', el).hidden = modo !== 'retira'; });
   $$('[data-forma]', el).forEach((b) => b.onclick = () => { forma = b.dataset.forma; $$('[data-forma]', el).forEach((x) => x.setAttribute('aria-pressed', x === b)); $('[data-din]', el).hidden = forma !== 'Dinheiro'; $('[data-pix]', el).hidden = forma === 'Dinheiro'; });
   $('[data-recebido]', el).oninput = (e) => { const r = num(e.target.value); $('[data-troco]', el).textContent = r >= tot ? `Troco: ${R$(r - tot)}` : r ? `Faltam ${R$(tot - r)}` : ''; };
@@ -174,10 +177,11 @@ acao('vender', () => {
     const ok = e.target.closest('[data-ok]'); if (!ok) return;
     if (forma === 'Dinheiro' && $('[data-recebido]', el).value && num($('[data-recebido]', el).value) < tot) { toast('O valor recebido é menor que o total'); return; }
     const ent = modo === 'entrega'; if (ent && !$('[name=endereco]', el).value.trim()) { toast('Ponha o endereço da entrega'); return; }
-    const cli = cart.cliente, v = fecharVenda(forma);
+    const esc = nfE.ler(el), cli = cart.cliente, v = fecharVenda(forma);
     if (ent) agendarEntrega(v, cli, $('[name=endereco]', el).value.trim(), $('[name=bairro]', el).value.trim(), $('[name=dia]', el).value || hoje(), $('[name=caminhao]', el).value);
     if (modo === 'retira') agendarEntrega(v, cli, 'Retira no depósito', '', hoje(), '', 'retira');
-    grava(); fechar(); toast(ent ? 'Venda feita e entrega agendada' : modo === 'retira' ? 'Venda feita: material separado para retirar' : 'Venda feita'); if (ok.dataset.ok === 'recibo') reciboVenda(v); ir('balcao');
+    grava(); fechar(); toast(ent ? 'Venda feita e entrega agendada' : modo === 'retira' ? 'Venda feita: material separado para retirar' : 'Venda feita'); ir('balcao');
+    aposReceber(v, esc, ok.dataset.ok === 'recibo').then((imp) => { if (ok.dataset.ok === 'recibo' && !imp) reciboVenda(v); });
   });
 });
 function reciboVenda(v) {
@@ -211,13 +215,15 @@ acao('vender-fiado', async () => {
 });
 // vendas do dia, recibo de novo e devolução ou troca
 acao('vendas-dia', () => {
-  const pinta = (q = '') => db.vendas.slice(-60).reverse().filter((v) => !q || `${nomeDe(v.cliente)} ${v.itens.map((i) => i.nome).join(' ')}`.toLowerCase().includes(q)).slice(0, 30).map((v) => `<li><div class="tx"><b>${dataBR(v.dia)} · ${t(v.cliente ? nomeDe(v.cliente) : 'Cliente do balcão')}</b><small>${t(v.forma)}${v.caixa ? ' · ' + t(v.caixa) : ''} · ${t(v.itens.map((i) => `${n2(i.qtd, 3)} ${i.un} ${i.nome}`).join(', '))}</small></div><div class="val">${R$(v.total)}</div><button type="button" class="bt-ico" data-rec="${v.id}" aria-label="Recibo">${ico('imprimir')}</button><button type="button" class="bt pq" data-dev="${v.id}">Devolver</button></li>`).join('');
-  const { el } = folha({ titulo: 'Vendas e devoluções', larga: true, corpo: `<input class="ent" type="search" data-bv placeholder="Procurar por cliente ou produto" aria-label="Procurar venda"><ul class="lista" data-lv style="margin-top:8px">${pinta()}</ul>`, pe: '<button type="button" class="bt cheio" data-fechar>Fechar</button>' });
+  const pinta = (q = '') => db.vendas.slice(-60).reverse().filter((v) => !q || `${nomeDe(v.cliente)} ${v.itens.map((i) => i.nome).join(' ')}`.toLowerCase().includes(q)).slice(0, 30).map((v) => `<li><div class="tx"><b>${dataBR(v.dia)} · ${t(v.cliente ? nomeDe(v.cliente) : 'Cliente do balcão')}</b><small>${t(v.forma)}${v.caixa ? ' · ' + t(v.caixa) : ''} · ${t(v.itens.map((i) => `${n2(i.qtd, 3)} ${i.un} ${i.nome}`).join(', '))}</small>${etiquetaNota(v) ? `<small>${etiquetaNota(v)}</small>` : ''}</div><div class="val">${R$(v.total)}</div><button type="button" class="bt-ico" data-rec="${v.id}" aria-label="Recibo">${ico('imprimir')}</button>${botaoNota(v)}<button type="button" class="bt pq" data-dev="${v.id}">Devolver</button></li>`).join('');
+  const { el } = folha({ titulo: 'Vendas e devoluções', larga: true, corpo: `<input class="ent" type="search" data-bv placeholder="Procurar por cliente ou produto" aria-label="Procurar venda"><ul class="lista" data-lv style="margin-top:8px">${pinta()}</ul>`, pe: `${['api', 'outro'].includes(modoNf()) ? `<button type="button" class="bt" data-acao="nf-exportar">${ico('doc')}Exportar vendas</button>` : ''}<button type="button" class="bt cheio" data-fechar>Fechar</button>` });
   $('[data-bv]', el).oninput = (e) => { $('[data-lv]', el).innerHTML = pinta(e.target.value.toLowerCase()); };
+  const repinta = () => { if (!el.isConnected) { document.removeEventListener('tecton-nota', repinta); return; } $('[data-lv]', el).innerHTML = pinta($('[data-bv]', el).value.toLowerCase()); };
+  document.addEventListener('tecton-nota', repinta);
   el.addEventListener('click', (e) => { const r = e.target.closest('[data-rec]'); if (r) reciboVenda(db.vendas.find((v) => v.id === r.dataset.rec)); const d = e.target.closest('[data-dev]'); if (d) devolver(db.vendas.find((v) => v.id === d.dataset.dev)); });
 });
 function devolver(v) {
-  const { el, fechar } = folha({ titulo: 'Devolução ou troca', corpo: `<p class="mudo" style="margin-bottom:10px">${dataBR(v.dia)} · ${t(v.cliente ? nomeDe(v.cliente) : 'Cliente do balcão')} · ${t(v.forma)}</p>${v.itens.map((i, k) => `<label class="campo"><span>${t(i.nome)} (levou ${n2(i.qtd, 3)} ${t(i.un)} a ${R$(i.unit)})</span><input inputmode="decimal" data-dv="${k}" value="0"></label>`).join('')}
+  const { el, fechar } = folha({ titulo: 'Devolução ou troca', corpo: `${avisoDevolucao(v)}<p class="mudo" style="margin-bottom:10px">${dataBR(v.dia)} · ${t(v.cliente ? nomeDe(v.cliente) : 'Cliente do balcão')} · ${t(v.forma)}</p>${v.itens.map((i, k) => `<label class="campo"><span>${t(i.nome)} (levou ${n2(i.qtd, 3)} ${t(i.un)} a ${R$(i.unit)})</span><input inputmode="decimal" data-dv="${k}" value="0"></label>`).join('')}
     <label class="campo"><span>Como devolver o dinheiro</span><select data-como>${v.forma === 'Fiado' ? '<option value="fiado">Abater do fiado</option>' : v.forma === 'Conta da obra' ? '<option value="conta">Abater da conta da obra</option>' : '<option value="dinheiro">Dinheiro ou Pix de volta</option>'}${v.cliente && v.forma !== 'Fiado' ? '<option value="credito">Crédito para a próxima compra</option>' : ''}</select></label><p class="forte" data-dvt></p>`,
     pe: `<button type="button" class="bt" data-fechar>Cancelar</button><button type="button" class="bt cheio" data-ok>${ico('check')}Registrar devolução</button>` });
   const calc = () => { const l = v.itens.map((i, k) => ({ ...i, qtd: Math.min(i.qtd, Math.max(0, num($(`[data-dv="${k}"]`, el).value))) })).filter((i) => i.qtd > 0); const tot = Math.round(soma(l, (i) => i.qtd * i.unit) * 100) / 100; $('[data-dvt]', el).textContent = tot ? `Valor da devolução: ${R$(tot)}` : ''; return { l, tot }; };

@@ -2,8 +2,8 @@
 // interessados e funil, visitas, propostas e contratos de venda com parcelas e correção, aluguel com repasse e cobrança,
 // obras contratadas (andamento e pagamentos à construtora) e comissões de corretor.
 import { db, grava, tela, acao, ir, cab, vazio, barra, ico, t, R$, R0, n2, pc, dataBR, dataCurta, quando, hoje, somaDias, somaMeses, mesAno, dias, uid, soma, num,
-  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, recibo, reduzir, pl, pixCopiaCola, buscarIndice } from './nucleo.js?v=2';
-import { PAINEIS, numero, saudacao, ORIGENS, RELACIONADOS, BUSCAS, darBaixa, movimentos, editarPessoa } from './comum.js?v=2';
+  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, recibo, reduzir, pl, pixCopiaCola, buscarIndice } from './nucleo.js?v=3';
+import { PAINEIS, numero, saudacao, ORIGENS, RELACIONADOS, BUSCAS, darBaixa, movimentos, editarPessoa } from './comum.js?v=3';
 
 const R = 'imobiliaria';
 const im = (id) => db.imoveis.find((x) => x.id === id);

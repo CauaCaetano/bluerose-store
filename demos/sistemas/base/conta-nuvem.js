@@ -669,6 +669,15 @@
     conferir: function (id) { return chamaAtria('atria-creditos', { acao: 'conferir', id: id }); },
     cancelar: function (id) { return chamaAtria('atria-creditos', { acao: 'cancelar', id: id }); },
   };
+  // Tecton: nota fiscal pela conta do emissor do próprio cliente. A função vem do Tecton (FUNCAO_NF em tecton/nota.js,
+  // padrão 'nexo-nfce' com app 'tecton'); só nomes simples. Tokens vão só para o servidor e nada volta para cá.
+  if (app === 'tecton') window.tectonNfce = function (funcao, body) {
+    if (!/^[a-z0-9-]{3,40}$/.test(String(funcao || ''))) return Promise.resolve({ ok: false, mensagem: 'Função de nota inválida.' });
+    return cliente().then(function (sb) { return sb.functions.invoke(funcao, { body: Object.assign({}, body, { espaco: info.espaco, app: 'tecton' }) }); }).then(function (r) {
+      if (r.error) return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { return { ok: false, mensagem: j.erro || j.mensagem || 'Não deu para falar com o servidor agora.' }; });
+      return r.data || {};
+    });
+  };
   window.veltriaIA = function (pergunta) {
     if (window.veltriaMarca) window.veltriaMarca('ia');
     var d = window.veltriaDados ? window.veltriaDados() : JSON.parse(texto(NS) || '{}'), ver = (window.VELTRIA_VERSOES || {})[app] || {};
