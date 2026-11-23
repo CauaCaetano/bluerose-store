@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aprovar orçamento · oficina</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#F4F0E8">
+<link rel="icon" href="icone-192.png" type="image/png">
+<style>
+:root{--obs:#111820;--graf:#202D35;--ouro:#C1A36A;--marfim:#E9E2D4;--salvia:#71877B;--fundo:#F4F0E8;--borda:#DDD5C6;--cinza:#5B646B;--erro:#B5523B}
+*{box-sizing:border-box}html,body{margin:0}body{font:16px/1.5 Inter,system-ui,Arial,sans-serif;color:var(--obs);background:var(--fundo);padding:20px 16px 40px}
+main{max-width:560px;margin:0 auto;display:grid;gap:14px}.cartao{background:#fff;border:1px solid var(--borda);border-radius:16px;padding:18px}
+h1{font-size:22px;margin:0 0 4px;line-height:1.25}.sub{color:var(--cinza);margin:0;font-size:14.5px}.faixa{height:4px;width:64px;background:var(--ouro);border-radius:4px;margin:0 0 12px}
+ul{list-style:none;padding:0;margin:8px 0 0}li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #EEE8DC}li span{overflow-wrap:anywhere}li b{white-space:nowrap}
+.total{display:flex;justify-content:space-between;font-size:20px;font-weight:700;margin-top:10px}.motivo{background:#FFFCF5;border:1px solid var(--marfim);border-radius:12px;padding:10px 12px;margin-top:12px}
+label{display:block;font-weight:600;margin:0 0 6px}input[type=text]{width:100%;min-height:48px;font:inherit;padding:0 12px;border:1px solid var(--borda);border-radius:12px;background:#fff}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-weight:400}.check input{width:22px;height:22px;margin-top:2px;flex:none}
+.acoes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}button,.btn{min-height:52px;font:inherit;font-weight:700;border-radius:12px;border:1px solid var(--graf);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:0 14px}
+.sim{background:var(--graf);color:#fff}.nao{background:#fff;color:var(--graf)}.ouro{background:var(--ouro);border-color:var(--ouro);color:var(--obs)}button:disabled{opacity:.5;cursor:not-allowed}
+.erro{color:var(--erro);font-weight:600}.ok{border-color:var(--salvia)}.codigo{font-size:26px;letter-spacing:3px;font-weight:700;font-variant-numeric:tabular-nums}.miudo{font-size:13px;color:var(--cinza)}
+pre{white-space:pre-wrap;font:inherit;background:var(--fundo);border-radius:10px;padding:10px;margin:10px 0 0}
+</style>
+</head>
+<body>
+<main id="tela" aria-live="polite">
+  <section class="cartao"><p class="sub">Carregando o orçamento…</p></section>
+</main>
+<noscript><p style="text-align:center">Ative o JavaScript para ver e aprovar o orçamento.</p></noscript>
+<script src="areas/oficina-campo-regras.js?v=39"></script>
+<script src="aprovar.js?v=39"></script>
+</body>
+</html>

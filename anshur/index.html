@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=37">
+<link rel="stylesheet" href="estilo.css?v=39">
 <!-- conta real (entrou pelo login, convite ou app instalado): a faixa de demonstração não aparece -->
 <script>try { if (localStorage.getItem('anshur-ambiente') === 'op' || /[?&](entrar|convite)\b/.test(location.search)) document.documentElement.classList.add('anshur-real'); } catch (e) {}</script>
 </head>
@@ -84,12 +84,12 @@
 <div class="folha" id="menu-folha" role="dialog" aria-modal="true" aria-label="Mais opções" hidden></div>
 <div id="camada"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<script src="instalar.js?v=37"></script>
-<script src="areas.js?v=37"></script>
-<script src="dados.js?v=37"></script>
-<script src="fotos.js?v=37"></script>
+<script src="instalar.js?v=39"></script>
+<script src="areas.js?v=39"></script>
+<script src="dados.js?v=39"></script>
+<script src="fotos.js?v=39"></script>
 <!-- nuvem.js: na demonstração carrega o app na hora; no ambiente real, entra na conta e carrega os dados do servidor antes -->
-<script src="nuvem.js?v=37" data-app="comum.js?v=37 importar.js?v=37 dms.js?v=37 implantacao.js?v=37 motor.js?v=37 mercado.js?v=37 retencao.js?v=37 graficos.js?v=37 areas/nucleo.js?v=37 areas/importar.js?v=37 areas/novas-regras.js?v=37 areas/novas.js?v=37 areas/financeiro-regras.js?v=37 areas/financeiro.js?v=37 areas/pecas-regras.js?v=37 areas/oficina-regras.js?v=37 areas/oficina.js?v=37 areas/pecas.js?v=37 areas/crm-regras.js?v=37 areas/crm.js?v=37 areas/fiscal-regras.js?v=37 areas/fiscal.js?v=37 areas/nota-regras.js?v=37 areas/nota.js?v=37 areas/compras-xml-regras.js?v=37 areas/compras-xml.js?v=37 app.js?v=37"></script>
+<script src="nuvem.js?v=39" data-app="comum.js?v=39 importar.js?v=39 dms.js?v=39 implantacao.js?v=39 motor.js?v=39 mercado.js?v=39 retencao.js?v=39 graficos.js?v=39 areas/nucleo.js?v=39 areas/importar.js?v=39 areas/novas-regras.js?v=39 areas/novas.js?v=39 areas/financeiro-regras.js?v=39 areas/financeiro.js?v=39 areas/pecas-regras.js?v=39 areas/oficina-regras.js?v=39 areas/oficina-campo-regras.js?v=39 areas/oficina-campo.js?v=39 areas/oficina.js?v=39 areas/pecas.js?v=39 areas/crm-regras.js?v=39 areas/crm.js?v=39 areas/fiscal-regras.js?v=39 areas/fiscal.js?v=39 areas/nota-regras.js?v=39 areas/nota.js?v=39 areas/compras-xml-regras.js?v=39 areas/compras-xml.js?v=39 areas/patamar-regras.js?v=39 areas/patamar.js?v=39 app.js?v=39"></script>
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch(() => {}); const tinha = !!navigator.serviceWorker.controller; let novo = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinha) { if (!novo) { novo = true; location.reload(); } return; } performance.getEntriesByType('resource').forEach((r) => { if (/^https:\/\/(cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com)\//.test(r.name)) fetch(r.name, { mode: 'cors', credentials: 'omit' }).catch(() => {}); }); }); }</script>
 </body>
 </html>
