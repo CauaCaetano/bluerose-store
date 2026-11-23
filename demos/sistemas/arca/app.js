@@ -146,6 +146,16 @@ function semente() {
   ];
   return db;
 }
+// 22/11/2026: conta nova de verdade começa em branco (o Grupo Vale Norte é só da demonstração do site). Fica só a estrutura:
+// a empresa com o nome da conta, uma conta bancária, o plano de contas e a divisão padrão das reservas (E.garantir e arruma).
+function vazia() {
+  const nome = (window.veltriaConta && window.veltriaConta.empresa) || 'Minha empresa';
+  return arruma({ formato: N0.FORMATO, exemplo: EXEMPLO, negocio: nome, dono: '', pix: '', cidade: '', cnpj: '', regime: 'simples', centros: [],
+    potes: semente().potes.map((p) => ({ ...p, metaC: 0 })), movs: [], cobrancas: [], contas: [], fixas: [], recibos: [], reciboSeq: 0, historico: [], fatInicial: { ano: new Date().getFullYear(), c: 0 }, avisoDias: 3,
+    assinatura: { valor: 59, status: 'ativa', renova: true, proxima: 30, pagos: [] }, conversa: [], equipe: [], comecouVazia: true });
+}
+const novaBase = () => (DEMO ? semente() : vazia());
+if (!DEMO) window.veltriaComecaVazio = true; // o conta-nuvem não mostra o "ver com exemplos": o convite é o daqui
 let falhaCarga = '', somenteLeitura = false;
 const parece2 = (d) => d && (d.formato >= 2 || d.migracao || (Array.isArray(d.movs) && d.movs.some((m) => Number.isInteger(m.c) && !('valor' in m))) || (Array.isArray(d.potes) && d.potes.some((p) => 'metaC' in p)));
 function arruma(d) {
@@ -167,13 +177,13 @@ function carregar() {
   if (new URLSearchParams(location.search).has('novo')) try { localStorage.removeItem(CHAVE); } catch { /* sem acesso */ }
   if (DEMO) try { localStorage.removeItem('arca-demo-v1'); const v = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (v && (v.exemplo || 0) < EXEMPLO) localStorage.removeItem(CHAVE); } catch { /* exemplo antigo ilegível: recomeça */ try { localStorage.removeItem(CHAVE); } catch { /* sem acesso */ } }
   let txt = null; try { txt = localStorage.getItem(CHAVE); } catch { /* sem acesso */ }
-  if (!txt) return semente();
-  let bruto; try { bruto = JSON.parse(txt); } catch { falhaCarga = 'Os dados guardados neste aparelho estão ilegíveis.'; somenteLeitura = true; return semente(); }
+  if (!txt) return novaBase();
+  let bruto; try { bruto = JSON.parse(txt); } catch { falhaCarga = 'Os dados guardados neste aparelho estão ilegíveis.'; somenteLeitura = true; return novaBase(); }
   if (parece2(bruto)) { const d = arruma(bruto), novo = JSON.stringify(d); if (novo !== txt) try { localStorage.setItem(CHAVE, novo); } catch { /* grava na próxima mudança */ } return d; }
   // formato 1: guarda uma cópia exata antes de converter (Conciliação › Cópia de segurança devolve ela)
   const kb = `${CHAVE}-copia-formato1:${CONTA}`;
-  try { if (!localStorage.getItem(kb)) localStorage.setItem(kb, txt); } catch { falhaCarga = 'Sem espaço para guardar a cópia antes de atualizar os dados.'; somenteLeitura = true; return semente(); }
-  try { const novo = arruma(N.migrar(bruto)); localStorage.setItem(CHAVE, JSON.stringify(novo)); return novo; } catch (e) { falhaCarga = `Não consegui atualizar os dados (${e.message}). Nada foi apagado.`; somenteLeitura = true; return semente(); }
+  try { if (!localStorage.getItem(kb)) localStorage.setItem(kb, txt); } catch { falhaCarga = 'Sem espaço para guardar a cópia antes de atualizar os dados.'; somenteLeitura = true; return novaBase(); }
+  try { const novo = arruma(N.migrar(bruto)); localStorage.setItem(CHAVE, JSON.stringify(novo)); return novo; } catch (e) { falhaCarga = `Não consegui atualizar os dados (${e.message}). Nada foi apagado.`; somenteLeitura = true; return novaBase(); }
 }
 let db = carregar();
 window.veltriaDados = () => db;
@@ -210,6 +220,28 @@ const pote = (k) => db.potes.find((p) => p.k === k);
 const nomePote = (k) => pote(k)?.nome || k;
 const dasFixa = () => db.fixas.find((f) => f.das);
 
+// ------------------------------------------------------------------ conta nova em branco (22/11/2026): trazer o que a empresa já tem
+const passosArca = () => [
+  ['Dados da empresa', 'CNPJ, regime, chave Pix e as contas bancárias', !!(db.cnpj || db.pix), '<a class="bt pq" href="#config">Abrir</a>'],
+  ['Traga as contas a pagar e a receber', 'XML da NF-e, boleto, planilha do Excel ou relatório da maquininha', db.contas.length > 0 || db.cobrancas.length > 0, '<a class="bt pq" href="#trazer">Trazer</a>'],
+  ['Traga o extrato do banco', 'OFX ou CSV, e o Arca concilia com as regras', db.movs.length > 0, '<a class="bt pq" href="#conciliacao">Conciliação</a>'],
+  ['Chame o contador e a equipe', 'cada pessoa com o próprio e-mail e o que pode fazer', (db.usuarios || []).length > 1, '<a class="bt pq" href="#equipe">Equipe</a>'],
+];
+function comecarArca() {
+  if (DEMO || !db.comecouVazia || db.comecarFechado) return '';
+  const ps = passosArca(); if (ps.every((x) => x[2])) return '';
+  const vazia0 = !db.contas.length && !db.cobrancas.length && !db.movs.length;
+  return `<section class="bloco comecar" aria-label="Primeiro dia"><button type="button" class="fecha-x" data-acao="comecar-fechar" aria-label="Fechar o primeiro dia">×</button>
+    <h2>${vazia0 ? 'A empresa começa em branco' : 'Primeiro dia'}</h2><p class="mini">${vazia0 ? 'Você já tem suas contas, boletos e extratos em outro lugar? Quer ajuda para trazer? Nada entra sem você conferir, e nada é apagado.' : `${ps.filter((x) => x[2]).length} de ${ps.length} passos prontos.`}</p>
+    <ol class="comecar-passos">${ps.map(([n, sub, ok, bt]) => `<li class="${ok ? 'ok' : ''}"><i aria-hidden="true">${ok ? '✓' : ''}</i><span><b>${n}</b><small>${sub}</small></span>${ok ? '<em>pronto</em>' : bt}</li>`).join('')}</ol></section>`;
+}
+function conviteArca() {
+  db.conviteVisto = true; grava();
+  folha(`<h2>Bem-vindo ao Arca</h2><p class="sub">${t(db.negocio)} começa em branco, só com o que é seu. Você já tem suas contas, boletos e extratos em outro lugar? Quer ajuda para trazer?</p>
+    <ul class="comecar-lista"><li><b>XML da nota fiscal (NF-e)</b> vira conta a pagar ou a receber, com as parcelas</li><li><b>Boleto</b> pela linha digitável</li><li><b>Planilha</b> de contas do Excel ou do Google Planilhas</li><li><b>Relatório da maquininha</b> e <b>extrato do banco</b> (OFX ou CSV)</li></ul>
+    <div class="linha"><a class="bt cheio" href="#trazer" data-fecha>Trazer do que já uso</a><button type="button" class="bt" data-fecha>Começar do zero</button></div>
+    <p class="mini" style="margin-top:10px">O passo a passo do primeiro dia fica no Painel.</p>`);
+}
 function aviso(m, erro) { const a = document.createElement('div'); a.className = `aviso${erro ? ' ruim' : ''}`; a.textContent = m; $('#avisos').append(a); setTimeout(() => a.remove(), erro ? 5200 : 3200); }
 /** Executa uma operação do núcleo: erro vira mensagem, sucesso grava e redesenha. */
 function faz(fn, ok) { try { const r = fn(); if (r === null) { aviso('Isso já foi lançado.'); return null; } grava(); mostra(); if (ok) aviso(typeof ok === 'function' ? ok(r) : ok); return r ?? true; } catch (e) { aviso(e.message, true); return false; } }
@@ -435,7 +467,7 @@ const T = {
     const hojeP = [...ab.pag.filter((r) => r.x.vence === 0), ...ab.fx.filter((r) => r.s.venceEm === 0)], atrP = [...ab.pag.filter((r) => r.x.vence < 0), ...ab.fx.filter((r) => r.s.st === 'atrasada')];
     const pend = pendAprov(), vencidos = ab.rec.filter((r) => r.s.st === 'atrasada'), ag = agendaSemana(7), al = alertas(), per = E.fluxoPeriodos(db, 'mensal', 'realista', { emp: empSel });
     const emps = empSel ? [emp(empSel)] : db.empresas;
-    return `${cabeca('Painel executivo', `${empSel ? t(emp(empSel).nome) : `Visão consolidada do grupo (${db.empresas.length} ${db.empresas.length > 1 ? 'CNPJs' : 'CNPJ'})`} · ${t(new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' }))}`)}
+    return `${comecarArca()}${cabeca('Painel executivo', `${empSel ? t(emp(empSel).nome) : `Visão consolidada do grupo (${db.empresas.length} ${db.empresas.length > 1 ? 'CNPJs' : 'CNPJ'})`} · ${t(new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' }))}`)}
       ${kpis([kpi(IC.cofre, empSel ? 'Saldo da empresa' : 'Saldo consolidado', din(saldo), `${db.bancos.filter((b) => !empSel || b.emp === empSel).length} conta(s) bancária(s)`, saldo < 0 ? 'ru' : '', 'caixa'),
         kpi(IC.cal, 'Vence hoje', din(hojeP.reduce((a, r) => a + r.s.falta, 0)), `${hojeP.length} título(s)${atrP.length ? ` · ${atrP.length} atrasado(s)` : ''}`, '', 'agenda'),
         kpi(IC.alerta, 'A receber vencido', din(ab.vencido), `${vencidos.length} título(s) · ${new Set(vencidos.map((r) => r.x.cli)).size} cliente(s)`, ab.vencido ? 'ru' : '', 'receber/clientes'),
@@ -1169,6 +1201,7 @@ const IMP = criarImportar({ db: () => db, grava, mostra: () => mostra(), aviso, 
   guardaAnexos: (f) => guardaAnexos(f), campoValor: (...a) => campoValor(...a), campoData: (...a) => campoData(...a), campoBanco: (...a) => campoBanco(...a), valorC: (v) => valorC(v), diaC: (v) => diaC(v) });
 T.trazer = () => IMP.tela();
 Object.assign(ACOES, IMP.acoes);
+ACOES['comecar-fechar'] = () => { db.comecarFechado = true; grava(); mostra(); aviso('O passo a passo saiu do Painel. Trazer do que já usa continua no menu.'); };
 Object.assign(ACOES, {
   'salvar-mov': (d, bt) => {
     const r = rascunho; guardaRascunho(); const c = Number(r.valor || 0); if ($('#rec-l')) r.receita = $('#rec-l').checked;
@@ -1414,6 +1447,15 @@ $('#recomecar').addEventListener('click', () => { try { localStorage.removeItem(
 if (window !== window.top) document.documentElement.classList.add('no-celular');
 if ('serviceWorker' in navigator && window === window.top) navigator.serviceWorker.register('sw.js').catch(() => {});
 try { if (!localStorage.getItem(CHAVE) && !somenteLeitura) grava(); } catch { /* sem acesso ao armazenamento */ }
+// conta nova em branco: uma vez, o convite para trazer contas, boletos e extratos (22/11/2026)
+if (!DEMO && db.comecouVazia && !db.conviteVisto && !somenteLeitura && !db.contas.length && !db.cobrancas.length && !db.movs.length) setTimeout(() => { if (!document.querySelector('.veu')) conviteArca(); }, 900);
+// "Começar do zero" do conta-nuvem: limpa os lançamentos; ficam a empresa (sem a de exemplo), as contas bancárias, o plano e as regras
+window.veltriaZerarProprio = (atual) => {
+  if (atual.negocio === 'Grupo Vale Norte') return vazia();
+  const v = vazia();
+  return arruma({ ...v, negocio: atual.negocio, dono: atual.dono, pix: atual.pix, cidade: atual.cidade, cnpj: atual.cnpj, regime: atual.regime, centros: atual.centros || [], potes: atual.potes || v.potes,
+    empresas: atual.empresas, bancos: atual.bancos, usuarios: atual.usuarios, plano: atual.plano, regras: atual.regras, impostos: atual.impostos, regua: atual.regua, alcada: atual.alcada, comecouVazia: false });
+};
 
 // ------------------------------------------------------------------ ganchos das telas do Arca
 function guardaRascunho() {

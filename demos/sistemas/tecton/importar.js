@@ -6,7 +6,7 @@
 //  3. Construtora: orçamento ou lista da loja de material (foto ou PDF) lido pela IA → itens conferidos antes
 //     de entrar no orçamento da obra ou num pedido de compra.
 // Regra: só acrescenta ou atualiza (pelo código, documento ou nome), nunca apaga. Cada registro novo leva o lote (imp).
-import { db, grava, CONTA, acao, ir, ico, t, R$, n2, num, hoje, somaDias, uid, soma, pl, folha, toast, $, $$, reduzir } from './nucleo.js?v=4';
+import { db, grava, CONTA, acao, ir, ico, t, R$, n2, num, hoje, somaDias, uid, soma, pl, folha, toast, $, $$, reduzir } from './nucleo.js?v=5';
 
 const sem = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 const digitos = (s) => String(s || '').replace(/\D/g, '');

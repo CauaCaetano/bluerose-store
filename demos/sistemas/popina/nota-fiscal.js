@@ -8,11 +8,11 @@
 //   nao      → não emite (ex.: MEI): nada aparece.
 // Na demonstração tudo é simulado (nota de exemplo, ambiente de teste). Só acrescenta campos: db.config.nf,
 // produto.fiscal e venda.nfce / venda.nfOutro. Nenhum token, certificado ou senha fica no navegador.
-import { db, t, din, r2, soDig, grava, CONTA, prod, ativos, pagamentosVenda, quemAgora, auditar, FORMA_FIADO, inicioDoDia, ymd } from './loja.js?v=60';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=60';
-import { abrirImpressao } from './imprimir.js?v=60';
+import { db, t, din, r2, soDig, grava, CONTA, prod, ativos, pagamentosVenda, quemAgora, auditar, FORMA_FIADO, inicioDoDia, ymd } from './loja.js?v=61';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=61';
+import { abrirImpressao } from './imprimir.js?v=61';
 import { qrSVG } from '../base/qr.js';
-import { acao } from './nucleo.js?v=60';
+import { acao } from './nucleo.js?v=61';
 
 // ------------------------------------------------------------------ configuração
 export const nf = () => db.config.nf || {};

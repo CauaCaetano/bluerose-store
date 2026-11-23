@@ -3,20 +3,20 @@
 // achar trabalho (mural do app e achados na internet), clientes e obras, orçamento, proposta, Pix, lista de materiais,
 // lojas da cidade (OpenStreetMap), comparador de preços, dinheiro (lucro do dia, da semana e do mês) e ajuda automática.
 // Dados no aparelho (localStorage); na conta, o conta-nuvem.js leva para a nuvem. ?novo recomeça a demonstração.
-import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=30';
-import { cena, TIPOS_CENA } from './cenas.js?v=30';
-import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js?v=30';
-import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js?v=30';
+import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=31';
+import { cena, TIPOS_CENA } from './cenas.js?v=31';
+import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js?v=31';
+import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js?v=31';
 import { qrSVG } from '../base/qr.js';
-import { instalarConceitos, CONCEITO } from './conceitos.js?v=30';
-import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js?v=30';
-import { ganchos } from './gestao.js?v=30';
-import { ligarVoz } from './base.js?v=30';
-import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=30';
-import * as MAIS from './mais.js?v=30';
+import { instalarConceitos, CONCEITO } from './conceitos.js?v=31';
+import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js?v=31';
+import { ganchos } from './gestao.js?v=31';
+import { ligarVoz } from './base.js?v=31';
+import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=31';
+import * as MAIS from './mais.js?v=31';
 import * as NF from './nota-servico.js?v=1';
-import { ACOES as AI } from './importar.js?v=30'; // 22/11/2026: pedido do WhatsApp e contatos do celular
-import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=30';
+import { ACOES as AI } from './importar.js?v=31'; // 22/11/2026: pedido do WhatsApp e contatos do celular
+import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=31';
 
 
 // ================================================================== telas e ações
@@ -58,8 +58,18 @@ const icOf = (id) => (OFICIOS[id] ? OFICIOS[id].ic : 'ferramenta');
 const nomeOf = (id) => (OFICIOS[id] ? OFICIOS[id].nome : String(id || '').replace(/^outro:/, ''));
 
 // ------------------------------------------------------------------ início
+const CONTA_ATRIA = new URLSearchParams(location.search).has('conta');
+// conta nova em branco (22/11/2026): o primeiro dia aparece como "a próxima coisa a fazer", um passo de cada vez
+const passosAtria = () => [
+  [21, 'zap', 'Recebeu um pedido no WhatsApp? Cole a conversa e ele vira orçamento.', ['Colar pedido', null, { acao: 'pedido-zap' }], db.obras.length > 0],
+  [20, 'gente', 'Traga os seus clientes dos contatos do celular (ou de um arquivo .vcf).', ['Trazer contatos', null, { acao: 'contatos-importar' }], db.clientes.length > 0],
+  [19, 'pix', 'Cadastre a sua chave Pix para cobrar com QR na hora.', ['Cadastrar', null, { acao: 'chave-pix' }], !!(db.pix && db.pix.chave && !db.pix.exemplo)],
+  [18, 'antesdepois', 'Poste um trabalho seu na vitrine, com antes e depois.', ['Postar', null, { acao: 'novo-post' }], db.posts.some((x) => x.autor === 'eu')],
+];
+const primeiroDia = () => CONTA_ATRIA && db.comecouVazia && !db.comecarFechado;
 function sugestoes() {
   const l = [], H = hoje();
+  if (primeiroDia()) passosAtria().filter((x) => !x[4]).forEach(([p, ic, txt, bt]) => l.push({ p, cor: '', ic, txt, bt }));
   db.obras.filter((o) => o.status === 'orcamento' && o.orc.status === 'rascunho').forEach((o) => l.push({ p: 9, cor: 'cedro', ic: 'doc', txt: `<b>${t(o.titulo)}</b> ainda está sem orçamento enviado para ${t(cliente(o.cliente).nome.split(' ')[0])}.`, bt: ['Montar orçamento', `#orcamento/${o.id}`] }));
   db.obras.filter((o) => o.venceSaldo && o.venceSaldo < H && totais(o).saldo > 0).forEach((o) => l.push({ p: 10, cor: 'brasa', ic: 'alerta', txt: `<b>${t(cliente(o.cliente).nome)}</b> está devendo ${din(totais(o).saldo)} há ${dias(o.venceSaldo)} dias.`, bt: ['Lembrar no WhatsApp', null, { acao: 'mensagens', m: 'pagamento', o: o.id }] }));
   obrasAtivas().forEach((o) => { const e = economiaLista(o); if (e.total > 1000) { const it = e.itens.sort((a, b) => b.e - a.e)[0]; l.push({ p: 8, cor: 'musgo', ic: 'moeda', txt: `${t(it.m.nome.split(' (')[0])} está ${din(it.m.preco - it.b.preco)} mais barato na ${t(nomeLojaCurta(it.b.loja))}. Na lista de <b>${t(o.titulo)}</b> dá ${din(e.total)} de economia.`, bt: ['Ver a lista', `#materiais/${o.id}`] }); } });
@@ -638,7 +648,7 @@ function cadastro(refazer) {
   const PASSOS = [
     () => `<div class="onb-marca"><img src="logo.svg?v=2" alt="" width="210" height="208"><h1 class="so-leitor">Atria</h1><p>O app de quem ergue, reforma e conserta.</p></div>
       <ul class="onb-lista"><li>${ico('antesdepois')}Portfólio com antes e depois</li><li>${ico('lupa')}Trabalho na sua cidade</li><li>${ico('lista')}Orçamento, material e Pix</li><li>${ico('grafico')}Lucro do dia, da semana e do mês</li></ul>
-      ${refazer ? '' : '<p class="exemplo" style="margin-top:14px">Demonstração: já vem com dados de exemplo do Marcos</p>'}`,
+      ${refazer || CONTA_ATRIA ? '' : '<p class="exemplo" style="margin-top:14px">Demonstração: já vem com dados de exemplo do Marcos</p>'}`,
     () => `<h2>Como você se chama?</h2><label class="onb-foto"><input type="file" accept="image/*" data-foto aria-label="Foto de perfil">${dados.foto ? `<img src="${dados.foto}" alt="">` : `<span>${ico('camera')}Foto</span>`}</label>
       <label class="campo"><span>Nome</span><input data-v="nome" value="${t(dados.nome)}" autocomplete="name"></label><p class="mudo" style="font-size:13px">A foto aparece no seu perfil e no cartão de visita.</p><button type="button" class="bt leve largo" data-letra style="margin-top:8px">${ico('olho')}${p.letraGrande ? 'Letra grande: ligada' : 'Prefiro letra grande'}</button>`,
     () => `<h2>Onde você trabalha?</h2><div class="duas"><label class="campo"><span>Cidade</span><input data-v="cidade" value="${t(dados.cidade)}"></label><label class="campo"><span>Estado</span><input data-v="uf" value="${t(dados.uf)}" maxlength="2"></label></div>
@@ -648,7 +658,7 @@ function cadastro(refazer) {
       <ul class="onb-lista">${meusOficios({ oficios: sel }).slice(0, 3).map((o) => `<li>${ico(o.ic)}${t(o.nome)}: ${t((o.mats || []).slice(0, 2).map((m) => m[0].split(' (')[0].toLowerCase()).join(', ') || 'orçamento e agenda')}${(o.ferr || []).length ? ' e calculadoras' : ''}</li>`).join('')}</ul>`,
   ];
   const pinta = (dir = 1) => {
-    el.innerHTML = `<div class="onb-topo"><div class="onb-passos">${PASSOS.map((_, i) => `<i class="${i <= passo ? 'on' : ''}"></i>`).join('')}</div>${passo > 0 && passo < 4 ? '<button type="button" class="onb-pular" data-pular>Usar exemplo</button>' : ''}</div>
+    el.innerHTML = `<div class="onb-topo"><div class="onb-passos">${PASSOS.map((_, i) => `<i class="${i <= passo ? 'on' : ''}"></i>`).join('')}</div>${passo > 0 && passo < 4 ? `<button type="button" class="onb-pular" data-pular>${CONTA_ATRIA ? 'Pular' : 'Usar exemplo'}</button>` : ''}</div>
       <div class="onb-corpo" style="animation:${reduzido() ? 'none' : `${dir > 0 ? 'entraDir' : 'entraEsq'} .32s var(--ease) both`}">${PASSOS[passo]()}</div>
       <div class="onb-pe">${passo > 0 ? `<button type="button" class="bt leve" data-volta>${ico('seta')}</button>` : ''}<button type="button" class="bt cheio" data-segue style="flex:1">${passo === 0 ? 'Começar' : passo === 4 ? 'Abrir o meu Atria' : 'Continuar'}</button></div>`;
     $$('[data-v]', el).forEach((i) => { i.oninput = () => { dados[i.dataset.v] = i.value; }; });
@@ -665,10 +675,22 @@ function cadastro(refazer) {
     const v = $('[data-volta]', el); if (v) v.onclick = () => { passo--; pinta(-1); };
     const pu = $('[data-pular]', el); if (pu) pu.onclick = () => { db.cadastro = true; grava(); fecha(); };
   };
-  const fecha = () => { el.classList.add('sai'); setTimeout(() => { el.remove(); ir('inicio'); repinta(); if (!db.tour) setTimeout(tour, 500); }, 260); };
+  const fecha = () => { el.classList.add('sai'); setTimeout(() => { el.remove(); ir('inicio'); repinta(); if (primeiroDia() && !db.conviteVisto) setTimeout(convite, 400); else if (!db.tour) setTimeout(tour, 500); }, 260); };
   pinta();
 }
 
+// conta nova em branco: depois do cadastro, uma vez, o convite para trazer o que a pessoa já tem (22/11/2026)
+function convite() {
+  db.conviteVisto = true; grava();
+  const op = (acao, ic, n, sub) => `<button type="button" class="linha" data-convite="${acao}"><span class="ic">${ico(ic)}</span><span class="txt"><b>${n}</b><small>${sub}</small></span></button>`;
+  folha({ titulo: 'Trazer o que você já tem',
+    corpo: `<p class="explica">O seu Atria começa em branco, só com o que é seu. Já tem clientes e pedidos em outro lugar? Quer ajuda para trazer?</p>
+      <div class="lista">${op('contatos-importar', 'gente', 'Clientes dos contatos', 'do celular ou de um arquivo .vcf ou .csv')}${op('pedido-zap', 'zap', 'Pedido do WhatsApp', 'cole a conversa e ela vira orçamento')}${op('chave-pix', 'pix', 'Sua chave Pix', 'para cobrar com QR na hora')}</div>
+      <p class="mudo" style="font-size:13px;margin-top:12px">Os próximos passos aparecem no alto do Início, um de cada vez.</p>`,
+    pe: '<button type="button" class="bt cheio largo" data-fechar>Começar do zero</button>',
+    aoAbrir: (f, api) => { $$('[data-convite]', f).forEach((b) => { b.onclick = () => { const a = b.dataset.convite; api.fechar(true); setTimeout(() => ACOES[a] && ACOES[a](b), 60); }; }); },
+    aoFechar: () => { if (!db.tour) setTimeout(tour, 500); } });
+}
 function tour() {
   const PASSOS = [
     ['.pc-capitel', 'A próxima coisa a fazer', 'O Atria olha suas obras, clientes e listas e mostra aqui uma coisa só: quem cobrar, o que mandar, o que postar.'],

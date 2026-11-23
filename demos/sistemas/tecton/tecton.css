@@ -732,3 +732,8 @@ body.conversa .demo-faixa .ver-como{display:none}
   .imp-ia tr{border:1.5px solid var(--linha)!important;border-radius:10px;padding:6px 10px!important;margin-bottom:8px}
   .imp-xml tr{padding:10px 0!important}
 }
+
+/* conta nova em branco (22/11/2026): trazer o que a empresa já tem */
+.passos-trazer{margin:0 0 12px;padding:10px 12px;border:1px dashed var(--linha);border-radius:10px}
+.passos-trazer p{margin:0 0 8px}
+.passos-trazer .linha-bts{display:flex;flex-wrap:wrap;gap:8px}

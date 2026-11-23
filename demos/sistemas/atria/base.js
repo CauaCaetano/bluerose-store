@@ -126,9 +126,23 @@ export function carregar() {
       if (!q.has('conta') && Array.isArray(d.posts) && !d.posts.some((p) => p.id === 's9')) { d.posts.push(...videosExemplo((n) => somaDias(hoje(), n))); db = d; grava(); }
       db = d; return db;
     }
-  } catch { /* dado estragado: recomeça com o exemplo */ }
-  db = exemplo(); grava(); return db;
+  } catch { /* dado estragado: recomeça com o exemplo */ if (q.has('conta')) { db = vazio(); return db; } } // na conta não grava por cima do que está lá
+  // 22/11/2026: na conta de verdade o Atria começa em branco (o Marcos e as obras de exemplo são só da demonstração)
+  db = q.has('conta') ? vazio() : exemplo(); grava(); return db;
 }
+// conta nova: só o que as telas precisam para abrir; o nome, a cidade e os ofícios vêm do cadastro do primeiro uso
+function vazio() {
+  return { v: 1, criado: hoje(), cadastro: false, tour: false, dicas: {}, comecouVazia: true,
+    perfil: { nome: '', apelido: '', oficios: [], cidade: '', uf: '', zap: '', foto: '', bio: '', seguidores: 0, meta: 0, margem: 10, raio: 30 },
+    pix: null, clientes: [], obras: [], lojas: [], precos: [], fin: [], perfis: [], posts: [], pedidos: [], avaliacoes: [],
+    achados: null, achadosVistos: {}, achadosSalvos: {}, equipe: [], diarias: [], notifs: [] };
+}
+if (new URLSearchParams(location.search).has('conta')) window.veltriaComecaVazio = true; // o conta-nuvem não mostra o "ver com exemplos"
+// "Começar do zero" do conta-nuvem: fica o cadastro da pessoa (nome, ofícios, cidade, Pix); obras, clientes e dinheiro saem
+window.veltriaZerarProprio = (atual) => {
+  const v = vazio(), p = atual.perfil && atual.perfil.nome !== 'Marcos Tavares' ? atual.perfil : null;
+  return { ...v, cadastro: !!p, tour: !!atual.tour, perfil: p ? { ...p, seguidores: 0 } : v.perfil, pix: atual.pix && !atual.pix.exemplo ? atual.pix : null };
+};
 let avisouCheio = false;
 export function grava() {
   try { localStorage.setItem(CHAVE, JSON.stringify(db)); avisouCheio = false; }

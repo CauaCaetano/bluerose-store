@@ -1,13 +1,13 @@
 // Tecton · liga tudo: o menu do ramo (lateral no computador, barra de baixo no celular), a busca, as cores, a marca,
 // a faixa da demonstração (com "Ver como" para trocar de empresa de exemplo) e o primeiro uso.
-import './dados.js?v=4';
-import { db, CONTA, RAMOS, carregar, raiz, ramoAtual, abrirEmpresaDemo, recomecar, iniciarRotas, desenhar, ir, rota, ouvir, ico, t, $, $$, toast, confirma, definirInicial, dataBR } from './nucleo.js?v=4';
-import { MENUS, BAIXO, FIM, menuAtual, buscar, aplicarEsquema, comoUsar, COMO } from './comum.js?v=4';
-import './construtora.js?v=4';
-import './loja.js?v=4';
-import './imobiliaria.js?v=4';
-import './importar.js?v=4';
-import { menuDe, baixoDe, foraDe } from './ajuste.js?v=4';
+import './dados.js?v=5';
+import { db, CONTA, RAMOS, carregar, raiz, ramoAtual, abrirEmpresaDemo, recomecar, iniciarRotas, desenhar, ir, rota, ouvir, ico, t, $, $$, toast, confirma, definirInicial, dataBR } from './nucleo.js?v=5';
+import { MENUS, BAIXO, FIM, menuAtual, buscar, aplicarEsquema, comoUsar, COMO } from './comum.js?v=5';
+import './construtora.js?v=5';
+import './loja.js?v=5';
+import './imobiliaria.js?v=5';
+import './importar.js?v=5';
+import { menuDe, baixoDe, foraDe } from './ajuste.js?v=5';
 
 carregar();
 definirInicial(() => 'painel');
@@ -55,7 +55,7 @@ function marcarAba(aba) {
 let abaAtual = '';
 const TELA_ABA = () => abaAtual;
 document.addEventListener('tecton-tela', (e) => { abaAtual = e.detail.aba || e.detail.nome; marcarAba(); fecharBusca(); });
-document.addEventListener('click', (e) => { const b = e.target.closest('[data-troca-ramo]'); if (!b) return; db.config.ramo = b.dataset.trocaRamo; import('./nucleo.js?v=4').then((m) => m.grava()); montarMenus(); ir('painel'); });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-troca-ramo]'); if (!b) return; db.config.ramo = b.dataset.trocaRamo; import('./nucleo.js?v=5').then((m) => m.grava()); montarMenus(); ir('painel'); });
 addEventListener('tecton-ramo', () => { montarMenus(); faixa(); });
 addEventListener('tecton-marca', marca);
 ouvir(() => { contadores(); marca(); });

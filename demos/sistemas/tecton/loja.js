@@ -2,9 +2,9 @@
 // unidades e fracionado, entregas com roteiro e caminhão, conta da obra, fiado com limite, compras, preço por tabela e
 // desconto por quantidade, relatórios do que gira e do que está parado.
 import { mesAno, db, grava, tela, acao, ir, cab, vazio, barra, ico, t, R$, R0, n2, pc, dataBR, dataCurta, quando, hoje, somaDias, dias, uid, soma, num, fone,
-  folha, editar, campos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, recibo, pl, ACOES, pixCopiaCola } from './nucleo.js?v=4';
-import { PAINEIS, numero, saudacao, ORIGENS, ENTRADAS_CAIXA, RELACIONADOS, BUSCAS, editarPessoa, gestor } from './comum.js?v=4';
-import { escolhaNoReceber, aposReceber, etiquetaNota, botaoNota, avisoDevolucao, folhaExportar, modoNf } from './nota.js?v=4';
+  folha, editar, campos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, recibo, pl, ACOES, pixCopiaCola } from './nucleo.js?v=5';
+import { PAINEIS, numero, saudacao, ORIGENS, ENTRADAS_CAIXA, RELACIONADOS, BUSCAS, editarPessoa, gestor } from './comum.js?v=5';
+import { escolhaNoReceber, aposReceber, etiquetaNota, botaoNota, avisoDevolucao, folhaExportar, modoNf } from './nota.js?v=5';
 
 const R = 'loja';
 const prod = (id) => db.produtos.find((p) => p.id === id);

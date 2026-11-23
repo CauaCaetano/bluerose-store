@@ -199,7 +199,10 @@ async function entrar() {
   sessionStorage.removeItem('veltria-recarregou');
   try { localStorage.setItem(`nexo-espaco-${V.id}`, esp.id); } catch { /* ok */ }
   carregando('Trazendo os dados da empresa…');
-  const { data: reg } = await sb.from('nexo_registros').select('dados,atualizado').eq('espaco', esp.id).eq('colecao', '_estado').eq('id', 'estado').maybeSingle();
+  const { data: reg, error: erroReg } = await sb.from('nexo_registros').select('dados,atualizado').eq('espaco', esp.id).eq('colecao', '_estado').eq('id', 'estado').maybeSingle();
+  // 22/11/2026: se a leitura falhou, não dá para saber se a empresa é nova; abrir como nova apagaria a cópia deste aparelho
+  // e a tela começaria em branco por cima dos dados da nuvem. Para aqui e pede para tentar de novo.
+  if (erroReg) throw new Error('Não consegui trazer os dados da empresa agora. Nada foi apagado. Confira a internet e tente de novo.');
   const ns = `conta:${esp.id}:${V.chave}`, nsBase = `${ns}:base`;
   // alterações deste aparelho que não chegaram a subir (sem internet, aba fechada no meio): junta com a nuvem, item por item
   const local = localStorage.getItem(ns), base = localStorage.getItem(nsBase);

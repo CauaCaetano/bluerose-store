@@ -1,7 +1,7 @@
 // Atria · funções essenciais da auditoria (11/11/2026): agenda com lembrete no calendário do celular,
 // recibo de pagamento (inclusive parcial), ajudantes por diária, MEI (limite do ano e DAS) e resumo do mês.
-import { $, $$, t, din, dinCurto, lerDin, hoje, somaDias, dias, dataBR, quando, uid, ico, av, db, grava, achar, toast, folha, formulario, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js?v=30';
-import { totais, cliente, somaPeriodo, intervalo, abrirMensagens } from './gestao.js?v=30';
+import { $, $$, t, din, dinCurto, lerDin, hoje, somaDias, dias, dataBR, quando, uid, ico, av, db, grava, achar, toast, folha, formulario, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js?v=31';
+import { totais, cliente, somaPeriodo, intervalo, abrirMensagens } from './gestao.js?v=31';
 
 export const TELAS = {};
 export const ACOES = {};

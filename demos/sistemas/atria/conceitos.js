@@ -2,10 +2,10 @@
 // fuste (3 ações largas caneladas), 3 blocos e a base (lucro do mês, toque abre o Dinheiro); a coluna se ergue ao abrir.
 // A navegação é a base da coluna: 3 degraus (Início, Vitrine, Gestão).
 // Regras: 1 número em destaque, 6 ações grandes (ícone + 1 palavra), próxima ação em 1 frase, toque de 56 px ou mais.
-import { $, $$, t, din, dinCurto, hoje, dias, ico, db, grava, uid, sa, toast, repinta, ir, vibra, somaDias, achar } from './base.js?v=30';
-import { MODOS_COBRAR, meusOficios, principal, nomeOficios } from './oficios.js?v=30';
-import { totais, cliente, somaPeriodo, intervalo, cobrarPix, SERVICOS_SUGERIDOS, CENA_DO_OFICIO, contagemObras } from './gestao.js?v=30';
-import { OFICIOS } from './oficios.js?v=30';
+import { $, $$, t, din, dinCurto, hoje, dias, ico, db, grava, uid, sa, toast, repinta, ir, vibra, somaDias, achar } from './base.js?v=31';
+import { MODOS_COBRAR, meusOficios, principal, nomeOficios } from './oficios.js?v=31';
+import { totais, cliente, somaPeriodo, intervalo, cobrarPix, SERVICOS_SUGERIDOS, CENA_DO_OFICIO, contagemObras } from './gestao.js?v=31';
+import { OFICIOS } from './oficios.js?v=31';
 
 export const CONCEITO = 'c';
 
@@ -33,7 +33,7 @@ export function instalarConceitos({ TELAS, ACOES, sugestoes }) {
       <header class="pc-capitel"><span class="pc-voluta" aria-hidden="true"></span><h1>${saud()}, ${nome()}</h1><p>${s.txt}</p>${btProx(s, 'pc-prox')}<a class="pc-cfg" href="#ajustes" aria-label="Configurações" title="Configurações">${ico('config', 'width="22" height="22"')}</a></header>
       <nav class="pc-fuste" aria-label="Ações principais">${[a1, a2, a4].map((a) => `<a class="pc-tambor" ${alvo(a)} data-tambor="${a[0]}">${icoG(a[1], 34)}<b>${a[2]}${a[0] === 'obras' ? (() => { const n = contagemObras(); return `<small class="pc-sub">${n.afazer} a fazer · ${n.andamento} em andamento</small>`; })() : ''}</b>${a[0] === 'trabalhos' && novosTrab() ? `<span class="pc-selo">${novosTrab()}</span>` : ico('setaDir', 'width="22" height="22"')}</a>`).join('')}</nav>
       <nav class="pc-pequenas" aria-label="Mais ações">${[a3, a5, a6].map((a) => `<a class="pc-bloco" ${alvo(a)}>${icoG(a[1], 28)}<b>${a[2]}</b>${a[0] === 'obras' ? (() => { const n = contagemObras(); return `<small class="pc-sub">${n.afazer} a fazer · ${n.andamento} em andamento</small>`; })() : ''}</a>`).join('')}</nav>
-      <a class="pc-base" href="#financeiro" aria-label="Lucro do mês: abrir o dinheiro"><small>lucro do mês</small><b class="num" data-conta="${l}">${din(l)}</b><span>meta ${dinCurto(meta)} · ver dia e semana</span></a>
+      <a class="pc-base" href="#financeiro" aria-label="Lucro do mês: abrir o dinheiro"><small>lucro do mês</small><b class="num" data-conta="${l}">${din(l)}</b><span>${meta ? `meta ${dinCurto(meta)}` : 'sem meta'} · ver dia e semana</span></a>
     </section>`;
   };
   TELAS.inicio = inicioC;

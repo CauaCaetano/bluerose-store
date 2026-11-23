@@ -7,6 +7,7 @@
 //  - Conta (?conta=tecton): a própria empresa { config: { ramos: ['construtora', ...], ramo }, pessoas, fin, ... }.
 export const CHAVE = 'tecton-v1';
 export const CONTA = new URLSearchParams(location.search).get('conta') === 'tecton';
+if (CONTA) window.veltriaComecaVazio = true; // conta nova já começa vazia e com as 5 perguntas: sem o "ver com exemplos" do conta-nuvem (22/11/2026)
 export const RAMOS = {
   construtora: { nome: 'Construtora e empreiteira', curto: 'Construtora', ico: 'capacete' },
   loja: { nome: 'Loja de material de construção', curto: 'Loja', ico: 'loja' },

@@ -3,18 +3,18 @@
 // Um visual só (o dono tirou os vários visuais): o esquema troca só os tons da casa (o marrom do menu e o destaque),
 // sempre dentro da identidade "taberna"; a cor da marca do restaurante continua livre.
 // Guarda só campos novos em db.config.loja.esquema e db.config.perfis[e-mail]: nada do que já existe muda de nome.
-import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=60';
-import { ir, rota } from './nucleo.js?v=60';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=60';
-import { G, volta, reduzir, planoMarca } from './gestao.js?v=60';
-import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=60';
-import { recomecar } from './loja.js?v=60';
-import * as som from './som.js?v=60';
-import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=60';
-import { secaoNf, montarNf } from './nota-fiscal.js?v=60';
-import { blocoConfig as blocoIfood, montarConfig as montarIfood } from './ifood.js?v=60';
-import { secaoBalanca, montarBalanca } from './quilo.js?v=60';
-import { secaoPoint, montarPoint } from './maquininha.js?v=60';
+import { db, t, grava, CONTA, lojaCfg, setLoja, corLoja } from './loja.js?v=61';
+import { ir, rota } from './nucleo.js?v=61';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=61';
+import { G, volta, reduzir, planoMarca } from './gestao.js?v=61';
+import { formatoPadrao, setFormato, autoImprimir, setAutoImprimir } from './imprimir.js?v=61';
+import { recomecar } from './loja.js?v=61';
+import * as som from './som.js?v=61';
+import { abrirPrimeiroAcesso } from './primeiro-acesso.js?v=61';
+import { secaoNf, montarNf } from './nota-fiscal.js?v=61';
+import { blocoConfig as blocoIfood, montarConfig as montarIfood } from './ifood.js?v=61';
+import { secaoBalanca, montarBalanca } from './quilo.js?v=61';
+import { secaoPoint, montarPoint } from './maquininha.js?v=61';
 
 // ------------------------------------------------------------------ esquemas de cor (identidade do Popina)
 // escuro: menu do computador, faixa e etiquetas escuras · destaque: a cor dos botões (vira a cor da marca ao escolher)

@@ -4,9 +4,9 @@
 //    Sem a IA (ou se ela falhar), o Atria lê o básico aqui mesmo: nome de quem mandou, telefone e endereço.
 //  - Clientes pelos contatos do celular (seletor do Android) ou arquivo .vcf/.csv: só nome e telefone, sem IA.
 // Nada é apagado nem sobrescrito: cliente que já existe só ganha telefone ou endereço se estavam vazios.
-import { t, sa, uid, hoje, somaDias, db, grava, toast, folha, formulario, ir, ico, repinta } from './base.js?v=30';
-import { principal } from './oficios.js?v=30';
-import { SERVICOS_SUGERIDOS, CENA_DO_OFICIO } from './gestao.js?v=30';
+import { t, sa, uid, hoje, somaDias, db, grava, toast, folha, formulario, ir, ico, repinta } from './base.js?v=31';
+import { principal } from './oficios.js?v=31';
+import { SERVICOS_SUGERIDOS, CENA_DO_OFICIO } from './gestao.js?v=31';
 
 export const ACOES = {};
 const soDig = (s) => String(s || '').replace(/\D/g, '');

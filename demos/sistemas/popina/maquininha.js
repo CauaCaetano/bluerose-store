@@ -5,8 +5,8 @@
 // O token vai só para o servidor (cifrado em nexo_segredos); aqui fica só o "ligado" e o nome da maquininha.
 // Demonstração: tudo simulado (maquininha de exemplo que aprova em 3 segundos).
 // Campos novos só: db.config.loja.point { ligado, terminal, conta } e, no pagamento, { maquininha: { id, bandeira, parcelas } }.
-import { db, t, din, CONTA, lojaCfg, setLoja } from './loja.js?v=60';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=60';
+import { db, t, din, CONTA, lojaCfg, setLoja } from './loja.js?v=61';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=61';
 
 // na demonstração já vem uma maquininha de exemplo ligada (dá para desligar em Configurações)
 const P = () => { const x = lojaCfg().point; return x || (CONTA ? {} : { ligado: true, terminal: 'NEWLAND_N950__N950NCB801293324', conta: 'RESTAURANTE EXEMPLO' }); };

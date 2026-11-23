@@ -1,7 +1,7 @@
 // Tecton · o que os três ramos têm em comum: menus, painel (cada ramo desenha o seu), clientes e fornecedores, financeiro
 // (pagar, receber e fluxo de caixa), equipe, busca, primeiro uso, Configurações e o guia "Como usar".
 import { db, grava, CONTA, RAMOS, ramoAtual, tela, acao, ir, cab, vazio, ico, t, R$, R0, dataBR, dataCurta, quando, hoje, somaDias, somaMeses, uid, soma, num, n2, pl,
-  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, recibo, imprimir, reduzir, abrirEmpresaDemo, raiz, recomecar, dias } from './nucleo.js?v=4';
+  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, recibo, imprimir, reduzir, abrirEmpresaDemo, raiz, recomecar, dias } from './nucleo.js?v=5';
 
 // ------------------------------------------------------------------ menus de cada ramo (o menu lateral e a barra de baixo)
 // [rota, nome, ícone]; a barra de baixo do celular usa as rotas de BAIXO (no máximo 4 + Mais)

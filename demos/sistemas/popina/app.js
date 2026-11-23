@@ -1,26 +1,27 @@
 // Popina · liga tudo: as 5 abas, a cor do restaurante, a marca (plano com a sua marca), a faixa da demonstração,
 // o aviso de pedido novo e o primeiro uso.
-import './salao.js?v=60';
-import './pedidos.js?v=60';
-import './cozinha.js?v=60';
-import './caixa.js?v=60';
-import './gestao.js?v=60';
-import './cadastro.js?v=60';
-import './relatorios.js?v=60';
-import { esquema, comoUsar } from './configuracoes.js?v=60';
-import { talvezAbrirInicio } from './inicio.js?v=60';
-import { talvezPrimeiroAcesso } from './primeiro-acesso.js?v=60';
-import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila, t } from './loja.js?v=60';
-import { iniciarRotas, ir } from './nucleo.js?v=60';
-import { ico, toast, confirma, $ } from './ui.js?v=60';
-import * as som from './som.js?v=60';
-import { conferirNovos } from './cozinha.js?v=60';
-import { montarMenu } from './menu.js?v=60';
-import './ifood.js?v=60';
-import './marmita.js?v=60';
-import './importar.js?v=60';
+import './salao.js?v=61';
+import './pedidos.js?v=61';
+import './cozinha.js?v=61';
+import './caixa.js?v=61';
+import './gestao.js?v=61';
+import './cadastro.js?v=61';
+import './relatorios.js?v=61';
+import { esquema, comoUsar } from './configuracoes.js?v=61';
+import { talvezAbrirInicio } from './inicio.js?v=61';
+import { talvezPrimeiroAcesso } from './primeiro-acesso.js?v=61';
+import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila, t } from './loja.js?v=61';
+import { iniciarRotas, ir } from './nucleo.js?v=61';
+import { ico, toast, confirma, $ } from './ui.js?v=61';
+import * as som from './som.js?v=61';
+import { conferirNovos } from './cozinha.js?v=61';
+import { montarMenu } from './menu.js?v=61';
+import './ifood.js?v=61';
+import './marmita.js?v=61';
+import './importar.js?v=61';
 
 const real = !!CONTA;
+if (real) window.veltriaComecaVazio = true; // conta começa em branco; o convite para trazer o cardápio é o do primeiro acesso
 // ------------------------------------------------------------------ as 5 abas (links #: as permissões da equipe usam estes)
 const ABAS = [['salao', 'Salão', 'mesa'], ['pedidos', 'Pedidos', 'sacola'], ['cozinha', 'Cozinha', 'chef'], ['caixa', 'Caixa', 'dinheiro'], ['mais', 'Gestão', 'grafico']];
 // topo: Como usar esta tela (?) e Configurações (engrenagem), para todos (botões, não links: as permissões da equipe não escondem)

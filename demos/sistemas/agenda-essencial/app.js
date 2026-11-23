@@ -101,6 +101,30 @@ function novidades() {
   visto(); // marca ao mostrar: aparece uma vez só por aparelho, mesmo se o app for fechado com a tela aberta
   boasVindas();
 }
+// ------------------------------------------------------------------ conta nova em branco (22/11/2026): trazer o que já tem
+const passosJano = () => [
+  ['Seu tipo de negócio e os preços', 'troca os serviços e você ajusta tempo e valor', db.tipo !== 'geral' || !!db.pro, '<a class="bt pq" href="#config">Ajustar</a>'],
+  ['Traga seus clientes', 'contatos do celular ou arquivo .vcf', db.clientes.length > 0, '<button type="button" class="bt pq" data-acao="importar">Trazer</button>'],
+  ['Traga sua agenda', 'Google Agenda (.ics), foto do caderno ou o primeiro horário', db.ags.length > 0, '<button type="button" class="bt pq" data-acao="importar">Trazer</button>'],
+  ['Mande seu link de agendamento', 'na bio do Instagram e no WhatsApp', !!db.linkVisto, '<a class="bt pq" href="#link">Ver o link</a>'],
+];
+function comecar() {
+  if (!CONTA || !db.comecouVazia || db.comecarFechado) return '';
+  const ps = passosJano(); if (ps.every((x) => x[2])) return '';
+  const vazia = !db.clientes.length && !db.ags.length;
+  return `<section class="cartao comecar" aria-label="Primeiro dia"><button type="button" class="comecar-x" data-acao="comecar-fechar" aria-label="Fechar o primeiro dia">×</button>
+    <h2>${vazia ? 'Sua agenda começa em branco' : 'Primeiro dia'}</h2><p class="mini">${vazia ? 'Já tem seus clientes e horários em outro lugar? Quer ajuda para trazer? Você confere tudo antes de salvar.' : `${ps.filter((x) => x[2]).length} de ${ps.length} passos prontos.`}</p>
+    <ol class="comecar-passos">${ps.map(([n, sub, ok, bt]) => `<li class="${ok ? 'ok' : ''}"><i aria-hidden="true">${ok ? '✓' : ''}</i><span><b>${n}</b><small>${sub}</small></span>${ok ? '<em>pronto</em>' : bt}</li>`).join('')}</ol></section>`;
+}
+function convite() {
+  db.conviteVisto = true; grava();
+  folha(`<h2>Bem-vindo ao Jano</h2><p class="sub">${t(db.studio)} começa em branco, só com o que é seu. Já tem seus clientes e horários em outro lugar? Quer ajuda para trazer?</p>
+    <ul class="novidades"><li><b>Contatos do celular ou .vcf</b><span>nome e WhatsApp de quem é cliente</span></li><li><b>Google Agenda (.ics)</b><span>os horários de hoje em diante</span></li>${window.nexoLer ? '<li><b>Foto do caderno</b><span>a IA lê nome, dia e hora; você confere</span></li>' : ''}</ul>
+    <button type="button" class="bt cheio largo" data-convite-trazer>Trazer clientes e agenda</button><button type="button" class="bt largo" data-fecha style="margin-top:8px">Começar do zero</button>
+    <p class="mini" style="margin-top:10px">O passo a passo do primeiro dia fica no Hoje.</p>`, (f, fecha) => {
+    f.querySelector('[data-convite-trazer]').addEventListener('click', () => { fecha(); setTimeout(() => IMP.abrir(), 200); });
+  });
+}
 // boas-vindas da atualização (18/11/2026): 3 partes que deslizam; "Ver de novo" fica no Mais
 function boasVindas() {
   const it = (t1, t2) => `<li><b>${t1}</b><span>${t2}</span></li>`;
@@ -162,7 +186,16 @@ function inicial() {
   }
   return { studio: 'Espaço Lia Santos', pro: 'Lia Santos', ramo: 'atendimento com hora marcada', tipo: 'geral', passo: 15, pix: '31988870000', abre: 8, fecha: 20, sinalPct: 30, sinalAcima: 100, servicos, clientes, ags, espera: [{ id: uid(), nome: 'Marina Duarte', tel: '31988870020', quer: 'Atendimento 1 hora', quando: 'qualquer tarde' }, { id: uid(), nome: 'Lúcio Faria', tel: '31988870021', quer: 'Avaliação', quando: 'sábado de manhã' }], pedidos: [{ id: uid(), nome: 'Gabriela Nunes', tel: '31988870022', serv: 's4', dia: 2, ini: 15.5 }], plano: 'basico', ajudantes: [{ nome: 'Camila (ajudante)', ve: { agenda: true, valores: false, clientes: true } }], assinatura: { valor: 49, status: 'ativa', renova: true, proxima: 9, pagos: [-21, -51, -81] }, conversa: [] };
 }
-let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || inicial(); } catch { return inicial(); } })();
+// 22/11/2026: conta nova de verdade começa em branco (o exemplo da Lia é só da demonstração do site). Fica só o que a agenda
+// precisa para abrir: o horário de atendimento e os serviços do tipo "Atendimento geral", que a pessoa troca em Configurações.
+// Quem já tem dados na conta (a assinante) não passa por aqui: a chave dela tem os dados e eles abrem como sempre.
+const CONTA = !!window.veltriaConta;
+function vazio() {
+  return { studio: (window.veltriaConta && window.veltriaConta.empresa) || 'Meu espaço', pro: '', ramo: 'atendimento com hora marcada', tipo: 'geral', passo: 15, pix: '', abre: 8, fecha: 20, sinalPct: 30, sinalAcima: 100,
+    servicos: MODELOS.geral.servicos.map((x) => ({ ...x })), clientes: [], ags: [], espera: [], pedidos: [], plano: 'basico', ajudantes: [], assinatura: { valor: 49, status: 'ativa', renova: true, proxima: 30, pagos: [] }, conversa: [], comecouVazia: true };
+}
+if (CONTA) window.veltriaComecaVazio = true; // o conta-nuvem não mostra o "ver com exemplos": o convite é o daqui
+let db = (() => { if (!CONTA && new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); const novoDb = CONTA ? vazio : inicial; try { return JSON.parse(localStorage.getItem(CHAVE)) || novoDb(); } catch { return novoDb(); } })();
 window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 NF.liga({ db: () => db, grava: () => grava(), toast: (m) => toast(m), folha: (h, l) => folha(h, l), t, din, cli: (id) => cli(id), serv: (id) => serv(id), preco: (a) => preco(a), iso, hh, mostra: () => mostra() });
 IMP.liga({ db: () => db, grava: () => grava(), toast: (m) => toast(m), folha: (h, l) => folha(h, l), t, sa, uid, iso, deIso, hh, lerHora, serv: (id) => serv(id), ocupado: (d, h, m, x) => ocupado(d, h, m, x), mostra: () => mostra() });
@@ -280,7 +313,7 @@ const T = {
   dia() {
     const l = doDia(dia), usados = [...new Set(l.map((a) => a.serv))], hj = doDia(0), falta = hj.filter((a) => a.st === 'marcado' || a.st === 'confirmado');
     const ola = `<section class="ola" aria-label="Resumo de hoje"><p class="ola-t">${saudacao()}${primeiroNome() ? `, ${t(primeiroNome())}` : ''}</p><p class="ola-s">${hj.length ? `Hoje: ${hj.length} ${hj.length === 1 ? 'horário' : 'horários'} · ${din(hj.reduce((s, a) => s + preco(a), 0))}${falta.length ? ` · faltam ${falta.length}` : ' · tudo atendido'}` : 'Hoje a agenda está livre.'}${db.pedidos.length ? ` · <a href="#link">${db.pedidos.length} ${db.pedidos.length === 1 ? 'pedido novo' : 'pedidos novos'}</a>` : ''}</p>${olaFimMes()}</section>`;
-    return `${ola}${dia === 0 ? cartaoAgora() : ''}${dia === 0 ? avisosHoje() : ''}<div class="dias" role="group" aria-label="Escolher o dia">${Array.from({ length: 8 }, (_, i) => i - 1).map((o) => `<button type="button" data-dia="${o}" aria-pressed="${o === dia}"><small>${data(o).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')}</small><b>${data(o).getDate()}</b>${doDia(o).length ? '<i></i>' : ''}</button>`).join('')}</div>
+    return `${ola}${dia === 0 ? comecar() : ''}${dia === 0 ? cartaoAgora() : ''}${dia === 0 ? avisosHoje() : ''}<div class="dias" role="group" aria-label="Escolher o dia">${Array.from({ length: 8 }, (_, i) => i - 1).map((o) => `<button type="button" data-dia="${o}" aria-pressed="${o === dia}"><small>${data(o).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')}</small><b>${data(o).getDate()}</b>${doDia(o).length ? '<i></i>' : ''}</button>`).join('')}</div>
       <div class="ir-data"><label>Ir para outra data<input type="date" id="ir-dia" value="${iso(dia)}"></label>${dia !== 0 ? '<button type="button" class="bt pq" data-dia="0">Hoje</button>' : ''}</div>
       ${relogio(dia)}<div class="legenda-c">${usados.map((s) => `<span style="--c:${serv(s).cor}">${t(serv(s).nome)}</span>`).join('')}</div>
       <div class="tit-linha"><h2>${(Math.abs(dia) > 1 ? data(dia).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : nomeDia(dia)).replace(/^./, (x) => x.toUpperCase())}</h2><a class="bt pq" href="#resumo" data-res-dia="${dia}">Resumo do dia</a></div><div class="cartao">${l.map((a) => { const c = cli(a.cli), s = serv(a.serv); return `<div class="hora" data-ag="${a.id}" role="button" tabindex="0" style="position:relative"><span class="h">${hh(a.ini)}</span><span><b>${t(c.nome)}</b><small>${t(s.nome)} · ${s.min} min · ${din(preco(a))}${a.sinal ? ` · sinal ${din(a.sinal.valor)} ${a.sinal.pago ? 'pago' : 'pendente'}` : ''}</small></span><span class="selo ${ST[a.st][1]}">${ST[a.st][0]}</span></div>`; }).join('') || `<p class="livre">Nenhum horário neste dia. ${dia >= 0 ? `<button type="button" class="bt pq" data-novo-dia="${dia}">Marcar neste dia</button>` : ''}</p>`}</div>
@@ -314,6 +347,7 @@ const T = {
         <div class="linha">${c.ultima && !c.marcada && c.atraso >= 0 && c.tel ? `<a class="bt pq rose" target="_blank" rel="noopener" href="${zap(c.tel, msg('retorno', { nome: c.nome.split(' ')[0], profissional: db.pro.split(' ')[0], dias: -c.ultima, servico: c.s.nome.toLowerCase(), link: LINK }))}">Chamar no WhatsApp</a>` : ''}<button type="button" class="bt pq" data-marca-cli="${c.id}">Marcar horário</button><button type="button" class="bt pq" data-ficha="${c.id}">Ficha</button><button type="button" class="bt pq" data-edita-cli="${c.id}">Editar</button></div></div>`).join('')}`;
   },
   link() {
+    if (CONTA && db.comecouVazia && !db.linkVisto) { db.linkVisto = true; grava(); }
     return `<h1>Vitrine</h1><p class="sub">Seu link de agendamento, as fotos de antes e depois, os vídeos e o que postar nas redes.</p>
       ${db.pedidos.length ? `<h2>Pedidos que chegaram</h2>${db.pedidos.map((p) => `<div class="cartao"><b>${t(p.nome)}</b><small class="mini" style="display:block">${t(serv(p.serv).nome)} · ${nomeDia(p.dia)} às ${hh(p.ini)}</small><div class="linha"><button type="button" class="bt pq cheio" data-acao="aceitar" data-p="${p.id}">Aceitar</button><button type="button" class="bt pq" data-acao="recusar" data-p="${p.id}">Sugerir outro horário</button></div></div>`).join('')}` : ''}
       <div class="cartao vt-link"><p class="vt-tit">${ICO.elo}Seu link de agendamento</p><div class="vt-url"><span>${t(LINK.replace(/^https:\/\//, ''))}</span><button type="button" class="bt pq cheio" data-acao="copiar">Copiar</button></div><a class="mini" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`Marque seu horário comigo por aqui: ${LINK}`)}">Mandar o link no WhatsApp</a></div>
@@ -889,6 +923,7 @@ const ACOES = {
   'fm-csv': () => exportaMes(fm.n ?? mesDe(0), 'csv'),
   'sem-remarcar': () => { rasc = RASC(); location.hash = '#dia'; },
   importar: () => IMP.abrir(),
+  'comecar-fechar': () => { db.comecarFechado = true; grava(); mostra(); toast('O passo a passo saiu do Hoje. Trazer contatos e agenda fica em Clientes.'); },
   'add-cliente': () => folha(`<h2>Adicionar cliente</h2><form><label class="campo">Nome<input name="n" required autocomplete="off"></label><label class="campo">WhatsApp<input name="t" inputmode="tel"></label><label class="campo">Quanto vai pagar (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Deixe vazio para usar o preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}">${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Forma de pagamento<select name="p"><option value="atendimento">No atendimento</option><option value="mes" ${db.pagPadrao === 'mes' ? 'selected' : ''}>No fim do mês</option></select></label><label class="campo">Aniversário (dia/mês, opcional)<input name="b" inputmode="numeric" maxlength="5" placeholder="12/03"></label><label class="campo">Anotação (opcional)<input name="o" placeholder="Ex.: prefere de manhã"></label><button class="bt cheio largo">Salvar cliente</button></form>`, (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => {
     e.preventDefault(); const x = new FormData(e.target), nome = String(x.get('n')).trim(); if (!nome) return;
     if (db.clientes.some((c) => sa(c.nome) === sa(nome))) { toast('Já existe um cliente com esse nome.'); return; }
@@ -1009,3 +1044,5 @@ if (window !== window.top) document.documentElement.classList.add('no-celular');
 if ('serviceWorker' in navigator && window === window.top) navigator.serviceWorker.register('sw.js').catch(() => {});
 mostra();
 setTimeout(novidades, 1500); // depois da nuvem: se a conta recarregar a tela, o aviso ainda aparece
+// conta nova em branco: uma vez, o convite para trazer clientes e agenda (22/11/2026)
+if (CONTA && db.comecouVazia && !db.conviteVisto) setTimeout(() => { if (window === window.top && !db.clientes.length && !db.ags.length && !document.querySelector('.trava, .veu')) convite(); }, 1600);

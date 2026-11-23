@@ -5,9 +5,9 @@
 // prato com o mesmo nome, depois de confirmar). Clientes do delivery pelos contatos do celular (Contact Picker no Android)
 // ou por arquivo .vcf/.csv do Google Contatos: só nome e telefone, sem passar pela IA, e quem já está cadastrado fica como está.
 // Nada de buscar o link do cardápio no servidor nem de entrar no iFood: só o que a pessoa trouxe.
-import { db, t, r2, num, vir, uid, grava, soDig } from './loja.js?v=60';
-import { acao, ir } from './nucleo.js?v=60';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=60';
+import { db, t, r2, num, vir, uid, grava, soDig } from './loja.js?v=61';
+import { acao, ir } from './nucleo.js?v=61';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=61';
 
 const sem = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 

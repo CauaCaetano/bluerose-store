@@ -1,6 +1,6 @@
 // Tecton · empresas de exemplo da demonstração (uma por ramo, em Orlândia/SP, cerca de 30 dias de movimento).
 // As datas são contadas a partir do dia em que a pessoa abre a demonstração. Nomes e números são inventados.
-import { vazia, hoje, somaDias, somaMeses, dias, uid, usarSemente } from './nucleo.js?v=4';
+import { vazia, hoje, somaDias, somaMeses, dias, uid, usarSemente } from './nucleo.js?v=5';
 
 // sorteio repetível (a mesma demonstração para todo mundo)
 function sorteio(s) { return () => { s |= 0; s = (s + 0x6D2B79F5) | 0; let x = Math.imul(s ^ (s >>> 15), 1 | s); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }

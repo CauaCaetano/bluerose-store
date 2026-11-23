@@ -252,10 +252,11 @@ function inicial() {
 // ------------------------------------------------------------------ dados
 let db = null;
 const novo = new URLSearchParams(location.search).has('novo'), pediuInstalar = new URLSearchParams(location.search).has('instalar');
-try { db = novo ? null : JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) { db = null; }
+try { db = novo && !window.veltriaConta ? null : JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) { db = null; } // na conta, ?novo nunca troca os dados
+if (window.veltriaConta) window.veltriaComecaVazio = true; // conta nova começa vazia e o convite para trazer os dados é o daqui (22/11/2026)
 if (db && db.demo && !window.veltriaConta && (db.vendas || []).length > 600) db = null; // 19/11: exemplo antigo e grande vira o novo, menor
 if (!db || !Array.isArray(db.produtos)) { db = window.veltriaConta ? vazio() : inicial(); if (db.demo) { const s30 = db.vendas.reduce((s, v) => s + v.total, 0); db.meta = Math.round((s30 / 28) * 30 * 1.15 / 100000) * 100000; } }
-function vazio() { return { v: 1, loja: { nome: (window.veltriaConta && window.veltriaConta.empresa) || 'Meu comércio', slogan: '', tel: '', cidade: '', pix: '', prazo: 30, limite: 20000, servico: 10 }, usuarios: [{ id: 'u1', nome: 'Dono', perfil: 'dono', pin: '', perms: {} }], usuario: 'u1', meta: 0, atividades: [], fornecedores: [], produtos: [], clientes: [], fiado: [], vendas: [], mesas: [], entradas: [], perdas: [], caixa: { aberto: false, movs: [] }, caixas: [], inventarios: [], pedidos: [], ajustes: [] }; }
+function vazio() { return { v: 1, comecouVazia: true, loja: { nome: (window.veltriaConta && window.veltriaConta.empresa) || 'Meu comércio', slogan: '', tel: '', cidade: '', pix: '', prazo: 30, limite: 20000, servico: 10 }, usuarios: [{ id: 'u1', nome: 'Dono', perfil: 'dono', pin: '', perms: {} }], usuario: 'u1', meta: 0, atividades: [], fornecedores: [], produtos: [], clientes: [], fiado: [], vendas: [], mesas: [], entradas: [], perdas: [], caixa: { aberto: false, movs: [] }, caixas: [], inventarios: [], pedidos: [], ajustes: [] }; }
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch (e) { toast('Não consegui salvar neste aparelho (sem espaço). Faça uma cópia em Configurações.', true); } };
 if (novo) { grava(); history.replaceState(null, '', location.pathname + location.hash); }
 if (db.mesas && db.mesas.length) db.mesas = [];
@@ -587,6 +588,35 @@ function novaPessoa() {
 // ------------------------------------------------------------------ telas
 const estado = { venda: { itens: [], cli: '', desc: 0 }, filtro: '', cat: '', rel: '30', invent: null };
 
+// ------------------------------------------------------------------ conta nova em branco (22/11/2026): trazer o que o comércio já tem
+const passosAnnona = () => [
+  ['Traga os produtos', 'planilha do PDV antigo (Excel ou CSV) ou o XML das notas', db.produtos.length > 0, '<button type="button" class="bt mini" data-acao="importar">Trazer</button>'],
+  ['Traga o fiado', 'foto do caderno (a IA lê) ou o caderno inteiro de uma vez', db.fiado.length > 0 || db.clientes.length > 0, '<button type="button" class="bt mini" data-acao="fiado-foto">Foto do caderno</button>'],
+  ['A cara do comércio', 'nome, WhatsApp e chave Pix', !!(db.loja.pix || db.loja.tel), '<a class="bt mini" href="#config">Abrir</a>'],
+  ['Abra o caixa e faça a primeira venda', 'o troco da gaveta e a venda pelo leitor', db.vendas.length > 0, '<a class="bt mini" href="#vender">Vender</a>'],
+];
+function comecarAnnona() {
+  if (!window.veltriaConta || !db.comecouVazia || db.comecarFechado) return '';
+  const ps = passosAnnona(); if (ps.every((x) => x[2])) return '';
+  const vazia = !db.produtos.length && !db.clientes.length;
+  return `<section class="bloco comecar" aria-label="Primeiro dia"><button type="button" class="icone-bt comecar-x" data-acao="comecar-fechar" aria-label="Fechar o primeiro dia">${ico('x')}</button>
+    <h2>${vazia ? 'Seu comércio começa em branco' : 'Primeiro dia'}</h2><p class="j-txt">${vazia ? 'Você já tem seus produtos e o fiado em outro lugar? Quer ajuda para trazer? Nada do que você trouxer apaga o que já está aqui.' : `${ps.filter((x) => x[2]).length} de ${ps.length} passos prontos.`}</p>
+    <ol class="comecar-passos">${ps.map(([n, sub, ok, bt]) => `<li class="${ok ? 'ok' : ''}"><i aria-hidden="true">${ok ? ico('ok') : ''}</i><span><b>${n}</b><small>${sub}</small></span>${ok ? '<em>pronto</em>' : bt}</li>`).join('')}</ol>
+    <p class="comecar-pe"><span>Prefere que a gente ajude? Mande a planilha ou a foto no WhatsApp: respondemos por escrito.</span><a class="bt mini" href="https://wa.me/5516991500746?text=${encodeURIComponent(`Olá! Comecei a usar o Annona na ${db.loja.nome} e quero ajuda para trazer os meus produtos.`)}" target="_blank" rel="noopener">Chamar no WhatsApp</a></p></section>`;
+}
+function conviteAnnona() {
+  db.conviteVisto = true; grava();
+  abrir(`${cab('Bem-vindo ao Annona', 'Seu comércio começa em branco, só com o que é seu')}
+    <p class="j-txt">Você já tem seus produtos e o fiado em outro lugar? Quer ajuda para trazer?</p>
+    <div class="comecar-ops"><button type="button" class="bt" data-conv="importar">${ico('planilha')}<span>Planilha do sistema antigo<small>Excel ou CSV, com as colunas em qualquer ordem</small></span></button>
+      <a class="bt" href="#entradas" data-conv-ir>${ico('xml')}<span>XML das notas do fornecedor<small>em Entradas, “Ler o XML das notas”</small></span></a>
+      <button type="button" class="bt" data-conv="fiado-foto">${ico('cam')}<span>Foto do caderno do fiado<small>a IA lê e você confere antes de salvar</small></span></button></div>
+    <footer class="j-pe"><button type="button" class="bt cheio" data-fechar>Começar do zero</button></footer>
+    <p class="j-txt" style="font-size:13px;margin:10px 0 0">O passo a passo do primeiro dia fica no Painel.</p>`, (j) => {
+    $$('[data-conv]', j).forEach((b) => { b.onclick = () => { const a = b.dataset.conv; fechar(); setTimeout(() => { const x = document.createElement('button'); x.dataset.acao = a; x.hidden = true; document.body.append(x); x.click(); x.remove(); }, 30); }; });
+    const ir = $('[data-conv-ir]', j); if (ir) ir.onclick = () => fechar();
+  });
+}
 TELAS.painel = () => {
   const h = hoje(), vh = vendasEntre(h, h), tot = vh.reduce((s, v) => s + v.total, 0), luc = vh.reduce((s, v) => s + lucroVenda(v), 0);
   const hm = new Date().toTimeString().slice(0, 5), ontem = vendasEntre(somaDias(h, -1), somaDias(h, -1)).filter((v) => v.data.slice(11, 16) <= hm), totO = ontem.reduce((s, v) => s + v.total, 0), lucO = ontem.reduce((s, v) => s + lucroVenda(v), 0);
@@ -601,7 +631,7 @@ TELAS.painel = () => {
   const venc = vencendo(7), vence = venc.slice(0, 3), rep0 = baixos(), repor = rep0.slice(0, 3), par = parados();
   const unTxt = (p, q) => (p.un === 'kg' ? `${numBR(q, 1)} kg` : `${numBR(q, 0)} un`);
   const c = CXA(), rc = c.aberto ? resumoCaixa() : null;
-  return `<section class="kpis">
+  return `${comecarAnnona()}<section class="kpis">
     <a class="kpi" href="#relatorios"><span class="k-ico verde">${ico('sacola')}</span><div><small>Vendas de hoje</small><b>${din(tot)}</b>${chip(varia(tot, totO))}</div></a>
     <a class="kpi" href="#relatorios"><span class="k-ico verde">${ico('moedas')}</span><div><small>Lucro de hoje</small><b>${pode('custo') ? din(luc) : '••••'}</b>${pode('custo') ? chip(varia(luc, lucO)) : '<span class="var">só o dono vê</span>'}</div></a>
     <a class="kpi" href="#fiado"><span class="k-ico ouro">${ico('gente')}</span><div><small>Fiado a receber</small><b>${din(totalFiado())}</b><span class="var">${devedores().length} cliente${devedores().length === 1 ? '' : 's'} com conta aberta</span></div></a>
@@ -1909,6 +1939,7 @@ document.addEventListener('click', (e) => {
     'exportar-estoque': () => baixarArq(`estoque-${hoje()}.csv`, csv([['Produto', 'Código', 'Categoria', 'Unidade', 'Estoque', 'Mínimo', 'Custo', 'Preço'], ...ativos().map((p) => [p.nome, p.cod, p.cat, UN[p.un], numBR(p.q), numBR(p.min), campoDin(p.custo), campoDin(p.preco)])])),
     'exportar-rel': () => { const [de, ate] = periodo(estado.rel); baixarArq(`vendas-${de}-a-${ate}.csv`, csv([['Nº', 'Data', 'Hora', 'Quem vendeu', 'Itens', 'Total', 'Lucro', 'Pagamento'], ...vendasEntre(de, ate).map((v) => [v.n, dataBR(v.data), horaBR(v.data), nomeU(v.vend), v.itens.map((x) => `${numBR(x.q)} ${x.nome}`).join(', '), campoDin(v.total), campoDin(lucroVenda(v)), v.pag.map((x) => FORMAS[x.f]).join(' + ')])])); },
     importar: importarPlanilha, 'conferir-maquininha': conferirMaquininha, 'fiado-foto': fiadoFoto,
+    'comecar-fechar': () => { db.comecarFechado = true; grava(); mostra(); toast('O passo a passo saiu do Painel. As importações continuam em Estoque, Entradas e Fiado.'); },
     'novo-caixa': () => liberar('caixa', 'criar um caixa', () => { const n = db.terminais.length + 1; db.terminais.push({ id: `c${Date.now().toString(36)}`, nome: `Caixa ${n}` }); registra(`Caixa ${n} criado`, 'caixa'); grava(); mostra(); toast(`Caixa ${n} criado. No aparelho dele, toque em Usar neste aparelho.`); }),
     'exportar-nf': exportarNf,
     'exportar-vendas': () => { const [de, ate] = periodo(estado.vper || 'hoje'); baixarArq(`vendas-${de}-a-${ate}.csv`, csv([['Nº', 'Data', 'Hora', 'Situação', 'Itens', 'Total', 'Pagamento', 'Quem vendeu'], ...db.vendas.filter((v) => v.data.slice(0, 10) >= de && v.data.slice(0, 10) <= ate).map((v) => [v.n, dataBR(v.data), horaBR(v.data), v.cancelada ? `Cancelada: ${v.cancelada.motivo}` : 'Concluída', v.itens.map((x) => `${numBR(x.q)} ${x.nome}`).join(', '), campoDin(v.total), v.pag.map((x) => FORMAS[x.f]).join(' + '), nomeU(v.vend)])])); },
@@ -2191,6 +2222,15 @@ if (pediuInstalar) setTimeout(instalar, 600);
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 $('#recomecar').addEventListener('click', () => confirmar('Recomeçar a demonstração?', 'Os dados de exemplo voltam ao começo neste aparelho.', 'Recomeçar', () => { localStorage.removeItem(CHAVE); location.replace(location.pathname); }, true));
 if (window.veltriaConta) document.body.classList.add('na-conta');
+// conta nova em branco: uma vez, o convite para trazer produtos e fiado (22/11/2026)
+if (window.veltriaConta && db.comecouVazia && !db.conviteVisto && !db.produtos.length && !db.clientes.length && !pediuInstalar) setTimeout(() => { if ($('#camada').hidden) conviteAnnona(); }, 700);
+// "Começar do zero" do conta-nuvem: limpa tudo, mas ficam o comércio (sem o de exemplo), os caixas e a equipe de verdade
+window.veltriaZerarProprio = (atual) => {
+  const v = vazio(), exemplo = atual.loja && atual.loja.nome === 'Mercadinho São José', ex = new Set(['Sérgio Andrade', 'Kátia Moreira', 'Rafael Lima']);
+  const us = (atual.usuarios || []).filter((u) => !ex.has(u.nome));
+  return { ...v, loja: atual.loja && !exemplo ? atual.loja : v.loja, terminais: Array.isArray(atual.terminais) && atual.terminais.length ? atual.terminais : [{ id: 'c1', nome: 'Caixa 1' }], caixasT: {},
+    usuarios: us.length ? us : v.usuarios, usuario: us.some((u) => u.id === atual.usuario) ? atual.usuario : (us[0] || v.usuarios[0]).id, fiscal: atual.fiscal };
+};
 if (!location.hash && eu().abrir && eu().abrir !== 'painel') history.replaceState(null, '', `#${eu().abrir}`);
 rota();
 

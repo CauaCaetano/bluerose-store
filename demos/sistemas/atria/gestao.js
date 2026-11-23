@@ -1,12 +1,12 @@
 // Atria · gestão: obras, orçamento, proposta comercial, cobrança com Pix, materiais, lojas, preços, clientes,
 // financeiro, ferramentas de bancada e mensagens prontas.
-import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=30';
-import { cena, TIPOS_CENA } from './cenas.js?v=30';
-import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=30';
-import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=30';
-import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=30';
+import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=31';
+import { cena, TIPOS_CENA } from './cenas.js?v=31';
+import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=31';
+import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=31';
+import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=31';
 import { qrSVG } from '../base/qr.js';
-import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=30';
+import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=31';
 
 // jeitos de cobrar: os do ofício da obra (ou da pessoa) primeiro, depois os outros
 export const modosObra = (o) => [...new Set([...((OFICIOS[o.oficio] || {}).cobra || []), ...juntar(db.perfil, 'cobra'), ...Object.keys(MODOS_COBRAR)])];
@@ -755,7 +755,7 @@ export function grafico(p) {
 export function trena(meta) {
   const [a, b] = intervalo('mes'), l = somaPeriodo(a, b).l, pct = meta ? Math.max(0, Math.min(100, l / meta * 100)) : 0, faltam = Math.max(0, meta - l), diasRest = dias(hoje(), b) + 1;
   return `<div class="trena"><div class="trena-fita" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" aria-label="Meta do mês"><i data-largura="${pct}"></i></div>
-    <div class="trena-txt"><span>Lucro do mês <b>${din(l)}</b> de ${din(meta)}</span><span>${faltam ? `faltam <b>${dinCurto(faltam)}</b> · ${diasRest} dias` : '<b>meta batida!</b>'}</span></div></div>`;
+    <div class="trena-txt"><span>Lucro do mês <b>${din(l)}</b>${meta ? ` de ${din(meta)}` : ''}</span><span>${!meta ? 'sem meta: toque em Mudar' : faltam ? `faltam <b>${dinCurto(faltam)}</b> · ${diasRest} dias` : '<b>meta batida!</b>'}</span></div></div>`;
 }
 TELAS.financeiro = () => {
   const [a, b] = intervalo(periodoFin), s = somaPeriodo(a, b), rec = aReceber(), pag = db.fin.filter((f) => f.tipo === 's' && !f.pago).sort((x, y) => x.data.localeCompare(y.data));

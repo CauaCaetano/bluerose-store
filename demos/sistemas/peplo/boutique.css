@@ -894,3 +894,28 @@ input[readonly] { background: var(--linha-2); color: var(--texto); }
 .imp-opcoes .cartao b { font-family: 'Newsreader', serif; font-size: 18px; }
 .imp-opcoes .cartao span { color: var(--mudo); font-size: 13.5px; }
 @media (max-width: 640px) { .imp-opcoes { grid-template-columns: 1fr; } }
+
+/* conta nova em branco (22/11/2026): trazer o que a loja já tem e o passo a passo do primeiro dia */
+.comecar { position: relative; margin: 0 0 18px; padding: 20px 20px 16px; border: 1px solid var(--ac-claro); background: linear-gradient(170deg, #fff, var(--ac2-claro)); }
+.comecar > .fechar { top: 10px; right: 10px; width: 32px; height: 32px; }
+.comecar-cab { padding-right: 40px; }
+.comecar-cab h2 { font: 600 22px/1.2 var(--serif); color: #2A0E14; }
+.comecar-cab p { margin: 6px 0 0; max-width: 62ch; }
+.comecar-imp { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 16px 0 4px; }
+.comecar-imp button { display: flex; gap: 10px; align-items: flex-start; text-align: left; padding: 12px 14px; border: 1px solid var(--linha); border-radius: var(--raio-p); background: #fff; cursor: pointer; transition: border-color var(--t), transform var(--t); }
+.comecar-imp button:hover { border-color: var(--ac); transform: translateY(-1px); }
+.comecar-imp button svg { color: var(--ac); margin-top: 2px; }
+.comecar-imp span { display: flex; flex-direction: column; font-weight: 600; line-height: 1.3; }
+.comecar-imp small { font-weight: 400; color: var(--mudo); font-size: 13px; margin-top: 2px; }
+.comecar-imp.em-janela { grid-template-columns: 1fr; }
+.comecar-passos { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 2px; }
+.comecar-passos li { display: flex; align-items: center; gap: 12px; padding: 9px 2px; border-top: 1px solid var(--linha-2); }
+.comecar-passos li > i { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--ac2); display: grid; place-items: center; flex: none; }
+.comecar-passos li.ok > i { background: var(--ok); border-color: var(--ok); color: #fff; }
+.comecar-passos li.ok > i svg { width: 14px; height: 14px; stroke-width: 2.4; }
+.comecar-passos li > span { flex: 1; display: flex; flex-direction: column; line-height: 1.3; }
+.comecar-passos li small { color: var(--mudo); font-size: 13px; }
+.comecar-passos li.ok b { color: var(--mudo); font-weight: 500; }
+.comecar-passos em { font-style: normal; font-size: 13px; color: var(--ok); }
+.comecar-pe { margin: 12px 0 0; font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+@media (max-width: 600px) { .comecar { padding: 16px 14px 14px; } .comecar-imp { grid-template-columns: 1fr; } }

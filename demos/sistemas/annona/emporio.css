@@ -713,3 +713,22 @@ kbd { display: inline-grid; place-items: center; min-width: 34px; height: 30px; 
   .cad-linha.cad-foto .tag { grid-column: 2 / -1; justify-self: start; }
   .imp-mapa { grid-template-columns: 1fr 1fr; }
 }
+
+/* conta nova em branco (22/11/2026): trazer o que o comércio já tem e o passo a passo do primeiro dia */
+.comecar { position: relative; }
+.comecar h2 { margin: 0 46px 6px 0; color: var(--tinta); }
+.comecar-x { position: absolute; top: 4px; right: 4px; }
+.comecar-passos { list-style: none; margin: 4px 0 0; padding: 0; }
+.comecar-passos li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--linha); }
+.comecar-passos li > i { width: 24px; height: 24px; flex: none; border-radius: 50%; border: 1.5px solid var(--kraft-borda); display: grid; place-items: center; }
+.comecar-passos li.ok > i { background: var(--verde-pg); border-color: var(--verde-pg); color: #fff; }
+.comecar-passos li.ok > i svg { width: 14px; height: 14px; }
+.comecar-passos li > span { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+.comecar-passos small { opacity: .75; font-size: 13px; }
+.comecar-passos li.ok b { opacity: .6; font-weight: 500; }
+.comecar-passos em { font-style: normal; font-size: 13px; color: var(--verde-pg); }
+.comecar-pe { margin: 12px 0 0; font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+.comecar-ops { display: grid; gap: 10px; margin: 0 0 14px; }
+.comecar-ops .bt { justify-content: flex-start; text-align: left; height: auto; min-height: 56px; padding: 10px 14px; gap: 12px; }
+.comecar-ops .bt span { display: flex; flex-direction: column; line-height: 1.3; }
+.comecar-ops .bt small { font-weight: 400; font-size: 13px; opacity: .75; }

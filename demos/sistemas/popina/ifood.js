@@ -6,9 +6,9 @@
 // A integração automática (Merchant API) está pronta no servidor (função popina-ifood), DESLIGADA até existir CNPJ.
 // Campos novos só: comanda.ifood { codigo, entregaPor, coleta, localizador, fone, pago, colado, exemplo } e
 // config.loja.ifoodComissao (%). Nada do que já existe muda.
-import { db, t, din, r2, uid, num, vir, conta, novoPedido, aceitarPedido, marcar, ativos, lojaCfg, setLoja, quemAgora, agendadoDe } from './loja.js?v=60';
-import { acao, ir } from './nucleo.js?v=60';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=60';
+import { db, t, din, r2, uid, num, vir, conta, novoPedido, aceitarPedido, marcar, ativos, lojaCfg, setLoja, quemAgora, agendadoDe } from './loja.js?v=61';
+import { acao, ir } from './nucleo.js?v=61';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=61';
 
 // ------------------------------------------------------------------ leitura do texto
 const sem = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();

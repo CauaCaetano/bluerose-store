@@ -182,7 +182,7 @@
     d._dia0 = hoje; gravar.call(localStorage, NS, JSON.stringify(d)); info.pendente = true;
   })();
   window.veltriaAndaDias = andaDias; // usado pelo teste (scratchpad/teste_dias.mjs)
-  window.veltriaConta = { espaco: info.espaco, empresa: info.empresa, app: app }; // o link de agendamento da Agenda usa a empresa
+  window.veltriaConta = { espaco: info.espaco, empresa: info.empresa, app: app, novo: !!info.novo }; // novo: empresa sem nada na nuvem (22/11: os apps começam em branco) // o link de agendamento da Agenda usa a empresa
 
   // recarregando: a tela ainda tem os dados antigos na memória; gravar agora apagaria o que chegou da equipe
   var recarregando = false, avisouLeitura = false;
@@ -996,7 +996,8 @@
     f.addEventListener('click', function (e) { var b = e.target.closest('[data-vc]'); if (!b) return; ({ assinatura: assinatura, perfil: perfil, equipe: equipe, config: configuracoes, dados: dadosEditor, zerar: confirmaZerar, sair: sair })[b.dataset.vc](); });
     vigiaNaN(); aplicarPermissoes();
     setTimeout(avisoPagamento, 1200); // depois da tela abrir; não atrapalha as boas-vindas da empresa nova
-    if (info.novo && info.dono && !sessionStorage.getItem('veltria-boas-vindas-' + info.espaco)) { sessionStorage.setItem('veltria-boas-vindas-' + info.espaco, '1'); setTimeout(boasVindas, 600); }
+    // 22/11/2026: o app que já começa em branco (window.veltriaComecaVazio) mostra o próprio convite para trazer os dados; sem "ver com exemplos"
+    if (info.novo && info.dono && !sessionStorage.getItem('veltria-boas-vindas-' + info.espaco)) setTimeout(function () { if (window.veltriaComecaVazio) return; sessionStorage.setItem('veltria-boas-vindas-' + info.espaco, '1'); boasVindas(); }, 600);
     // o app instalado no celular abre pela porta da conta, não pela demonstração
     var man = document.querySelector('link[rel=manifest]'); if (man) man.href = RAIZ + 'app/' + app + '/manifest.webmanifest';
     // links internos da demonstração (voltar ao site, ver no celular) mantêm o modo conta ou levam à conta

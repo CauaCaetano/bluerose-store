@@ -7,8 +7,8 @@
 //  - demonstração: na raiz da chave (raiz().ajuste), valendo para as três empresas de exemplo;
 //  - convidado com cargo limitado: só o próprio menu e o próprio painel, em db.config.perfis[e-mail].ajuste e neste aparelho.
 // Sem ajuste (dados de antes, ou quem pulou), tudo continua como era: o menu inteiro do ramo e o painel completo.
-import { db, grava, CONTA, RAMOS, raiz, ramoAtual, abrirEmpresaDemo, tela, TELAS, acao, ir, desenhar, definirPortao, cab, ico, t, $, $$, toast, folha, hoje } from './nucleo.js?v=4';
-import { MENUS, BAIXO, FIM, PAINEIS, COMO } from './comum.js?v=4';
+import { db, grava, CONTA, RAMOS, raiz, ramoAtual, abrirEmpresaDemo, tela, TELAS, acao, ir, desenhar, definirPortao, cab, ico, t, $, $$, toast, folha, hoje } from './nucleo.js?v=5';
+import { MENUS, BAIXO, FIM, PAINEIS, COMO } from './comum.js?v=5';
 
 // ------------------------------------------------------------------ o que perguntar
 // dor: [id, o que a pessoa quer resolver, detalhe, telas que entram no menu, cartões que entram no painel]
@@ -289,10 +289,21 @@ function listaPassos(r) {
     ...(resp && resp.aparelho !== 'pc' ? [['celular', 'Instale o Tecton no celular', 'abre como um aplicativo, sem loja', null, () => false, 'data-acao="passo-celular"']] : [])];
   return l.map(([id, n, s, , ok, at]) => ({ id, n, s, at, ok: feitos.includes(id) || ok() }));
 }
+// conta nova em branco (22/11/2026): enquanto o ramo está vazio, o convite para trazer o que a empresa já tem
+const IMP_RAMO = {
+  construtora: [['imp-planilha', 'obras', 'Obras de uma planilha'], ['imp-planilha', 'pessoas', 'Clientes e fornecedores']],
+  loja: [['imp-planilha', 'produtos', 'Produtos de uma planilha'], ['imp-xml', '', 'Nota de compra (XML)'], ['imp-planilha', 'pessoas', 'Clientes e fornecedores']],
+  imobiliaria: [['imp-planilha', 'imoveis', 'Imóveis de uma planilha'], ['imp-planilha', 'pessoas', 'Clientes e proprietários']],
+};
+const VAZIO_RAMO = { construtora: () => !tem(db.obras), loja: () => !tem(db.produtos), imobiliaria: () => !tem(db.imoveis) && !tem(db.emps) };
+function htmlTrazer(r) {
+  if (!CONTA || !IMP_RAMO[r] || !VAZIO_RAMO[r]() || tem(db.pessoas)) return '';
+  return `<div class="passos-trazer"><p><b>Já tem isso em outro lugar?</b> Quer ajuda para trazer? Você confere antes de importar e nada é apagado.</p><div class="linha-bts">${IMP_RAMO[r].map(([a, alvo, n]) => `<button type="button" class="bt pq" data-acao="${a}"${alvo ? ` data-alvo="${alvo}"` : ''}>${ico(a === 'imp-xml' ? 'doc' : 'acima')}${t(n)}</button>`).join('')}</div></div>`;
+}
 function htmlPassos(r) {
   const l = listaPassos(r), f = l.filter((x) => x.ok).length;
   if (f === l.length) return '';
-  return `<section class="cartao passos" aria-label="Primeiros passos"><div class="cartao-cab"><h2>Primeiros passos · ${f} de ${l.length}</h2><button type="button" class="bt pq" data-acao="passos-fechar">Esconder</button></div>${'' /* barra */}<div class="barra pri" role="img" aria-label="${f} de ${l.length} feitos"><i style="width:${f / l.length * 100}%"></i></div>
+  return `<section class="cartao passos" aria-label="Primeiros passos"><div class="cartao-cab"><h2>Primeiros passos · ${f} de ${l.length}</h2><button type="button" class="bt pq" data-acao="passos-fechar">Esconder</button></div>${'' /* barra */}<div class="barra pri" role="img" aria-label="${f} de ${l.length} feitos"><i style="width:${f / l.length * 100}%"></i></div>${htmlTrazer(r)}
     <ol class="passos-lista">${l.filter((x) => !x.ok).map((x) => `<li><span class="passo-ok" aria-hidden="true"></span><span class="tx"><b>${t(x.n)}</b><small>${t(x.s)}</small></span><span class="passo-bts"><button type="button" class="bt pq cheio" ${x.at}>Fazer</button><button type="button" class="bt-ico" data-acao="passo-feito" data-id="${x.id}" aria-label="Marcar como feito: ${t(x.n)}" title="Já fiz">${ico('check')}</button></span></li>`).join('')}</ol>
     ${f ? `<details class="passos-feitos"><summary>${ico('check')}${f === 1 ? '1 feito' : `${f} feitos`}</summary><ul>${l.filter((x) => x.ok).map((x) => `<li>${t(x.n)}</li>`).join('')}</ul></details>` : ''}</section>`;
 }

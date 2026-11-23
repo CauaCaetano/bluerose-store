@@ -2,9 +2,9 @@
 // medições, aditivos aprovados pelo cliente, equipes e diárias, compras por obra, diário com fotos, resultado da obra
 // (orçado x realizado), contratos e documentos e o link para o cliente acompanhar.
 import { db, grava, tela, acao, ir, cab, vazio, barra, ico, t, R$, R0, n2, pc, dataBR, dataCurta, quando, hoje, somaDias, dias, uid, soma, num,
-  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, reduzir, CONTA } from './nucleo.js?v=4';
-import { PAINEIS, numero, saudacao, ORIGENS, RELACIONADOS, BUSCAS, darBaixa, movimentos, vencido, doMes, editarPessoa } from './comum.js?v=4';
-import { pl, ouvir } from './nucleo.js?v=4';
+  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, reduzir, CONTA } from './nucleo.js?v=5';
+import { PAINEIS, numero, saudacao, ORIGENS, RELACIONADOS, BUSCAS, darBaixa, movimentos, vencido, doMes, editarPessoa } from './comum.js?v=5';
+import { pl, ouvir } from './nucleo.js?v=5';
 
 const R = 'construtora';
 const obra = (id) => db.obras.find((o) => o.id === id);
@@ -458,7 +458,7 @@ ABA.financeiro = (o) => {
     <details class="ajuda"><summary>Como o gasto é calculado</summary><p class="mudo peq">Gasto = contas a pagar desta obra (pagas ou não). Equipe própria = diárias apontadas e mão de obra lançada por etapa; empreiteiros = medições e adiantamentos pagos às empreitadas${perda ? `; material inclui ${R$(perda)} perdido ou quebrado na descarga (lançado em Compras, na chegada do material)` : ''}.</p></details></div>
   <div class="cartao"><div class="cartao-cab"><h2>Pagar e receber desta obra</h2><button type="button" class="bt pq" data-acao="fin-obra" data-id="${o.id}">${ico('mais2')}Conta desta obra</button></div>${ms.length ? `<ul class="lista">${ms.slice(-8).reverse().map((m) => `<li><div class="tx"><b>${t(m.desc.replace(` · ${o.nome}`, ''))}</b><small><span class="et ${m.tipo === 'receber' ? 'ok' : ''}">${m.tipo === 'receber' ? (m.pago ? 'recebido' : 'a receber') : (m.pago ? 'pago' : 'a pagar')}</span> ${m.pago ? 'em ' + dataBR(m.pago) : 'vence ' + dataBR(m.venc)}</small></div><div class="val ${m.tipo === 'receber' ? 'verde' : ''}">${m.tipo === 'pagar' ? '−' : '+'} ${R$(m.valor)}</div>${m.pago ? '' : `<button type="button" class="bt pq" data-acao="fin-baixa" data-id="${m.id}">${m.tipo === 'pagar' ? 'Pagar' : 'Receber'}</button>`}</li>`).join('')}</ul>${ms.length > 8 ? `<p class="mudo peq">Mostrando as 8 mais recentes de ${ms.length}. Todas em Financeiro.</p>` : ''}` : vazio('Nada lançado para esta obra.')}</div></div>`;
 };
-acao('fin-obra', (b) => import('./comum.js?v=4').then((m) => m.novoLanc({ tipo: 'pagar', obra: b.dataset.id })));
+acao('fin-obra', (b) => import('./comum.js?v=5').then((m) => m.novoLanc({ tipo: 'pagar', obra: b.dataset.id })));
 
 // ------------------------------------------------------------------ contrato e documentos
 ABA.documentos = (o) => `<div class="cartao"><div class="cartao-cab"><h2>Contrato e documentos</h2><div class="linha-bts" style="margin:0"><button type="button" class="bt" data-acao="ctr-obra" data-id="${o.id}">${ico('contrato')}Gerar contrato de empreitada</button><button type="button" class="bt cheio" data-acao="doc-novo" data-obra="${o.id}">${ico('mais2')}Documento</button></div></div>

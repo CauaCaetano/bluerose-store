@@ -212,16 +212,28 @@ const EQUIPE = () => [
   { id: 'u2', nome: 'Júlia Santos', perfil: 'vendedora', tel: '16992223344', email: '', foto: '', nasc: '', descMax: 10, perms: { caixa: true }, pin: '' },
   { id: 'u3', nome: 'Paula Reis', perfil: 'vendedora', tel: '16993334455', email: '', foto: '', nasc: '', descMax: 5, perms: {}, pin: '' },
 ];
+// 22/11/2026: na conta de verdade a loja começa em branco (exemplo só na demonstração do site). Fica só o que a tela precisa
+// para funcionar: a loja 1, o caixa fechado e a dona; nenhuma peça, cliente, venda ou pessoa de exemplo.
+function vazio() {
+  const nome = (window.veltriaConta && window.veltriaConta.empresa) || 'Minha loja';
+  return { v: 1, exemplo: EXEMPLO, tema: 'ameixa', loja: { nome, slogan: '', dono: '', tel: '', cidade: '', pix: '', logo: '' },
+    cfg: { limitePadrao: 30000, alertaPct: 80, bloqueioDias: 15, bloqueioAuto: true, juros: { ativo: false, multaPct: 2, jurosMesPct: 1, carencia: 3 }, parados: [30, 60, 90], minimo: 1, msgs: {}, vipMin: 300000 },
+    usuarios: [{ id: 'u1', nome: 'Dona da loja', perfil: 'dona', tel: '', email: '', foto: '', nasc: '', descMax: 100, perms: {}, pin: '' }], usuario: 'u1', meta: 0, metas: {}, atividades: [],
+    clientes: [], produtos: [], fornecedores: [], vendas: [], parcelas: [], pagamentos: [], acordos: [], cobrancas: [], movs: [], compras: [], excecoes: [], avarias: [], caixa: { aberto: null, historico: [] }, n: 1000,
+    lojas: [{ id: 'l1', nome: 'Loja principal' }], pedidos: [], promos: [], notas: [], pedidosDemo: true, comecouVazia: true };
+}
+if (window.veltriaConta) window.veltriaComecaVazio = true; // o conta-nuvem não mostra o "ver com exemplos": o convite é o daqui
 let db;
 try { db = JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) { db = null; }
-if (new URLSearchParams(location.search).has('novo') || !db || !db.produtos) db = inicial();
+// na conta, ?novo nunca troca os dados da loja (só a demonstração recomeça)
+if ((new URLSearchParams(location.search).has('novo') && !window.veltriaConta) || !db || !db.produtos) db = window.veltriaConta ? (db && !db.produtos ? Object.assign(vazio(), db) : vazio()) : inicial();
 // demonstração: quem tinha a loja de exemplo antiga recebe a nova (a antiga fica guardada numa cópia); a conta de verdade nunca é trocada
 if (!window.veltriaConta && (db.exemplo || 1) < EXEMPLO) { db = inicial(); } // 19/11: sem cópia do exemplo antigo (enchia o navegador)
 if (!window.veltriaConta && db && db.exemplo === EXEMPLO) fotosDeCorExemplo(db.produtos);
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch (e) { setTimeout(() => { try { toast('Não consegui salvar neste aparelho (sem espaço). Faça uma cópia em Configurações.', true); } catch (_) { /* tela ainda montando */ } }, 0); } }; // 18/11: o aviso espera a tela montar (antes travava a demonstração com o armazenamento cheio)
 // dados de antes desta versão: ganham equipe, meta e registro de atividades
 if (!db.usuarios) { db.usuarios = EQUIPE(); db.usuario = 'u1'; }
-db.meta = db.meta || 2500000; db.atividades = db.atividades || [];
+if (db.meta == null) db.meta = 2500000; db.atividades = db.atividades || [];
 // 18/11/2026: meta por mês (seletor no Início, valor em Configurações), cliente VIP, coleção da peça
 db.metas = db.metas || {}; db.cfg.vipMin = db.cfg.vipMin ?? 300000;
 db.produtos.forEach((p) => { if (p.colecao === undefined) p.colecao = ''; });
@@ -237,7 +249,7 @@ const CX = () => (lojaAtual() === 'l1' ? db.caixa : ((db.caixas ||= {})[lojaAtua
 db.pedidos = db.pedidos || []; db.promos = db.promos || []; db.cfg.comissaoPct = db.cfg.comissaoPct ?? 3;
 db.cfg.taxas = db.cfg.taxas || { debito: 1.39, credito: 3.15, parcelado: 4.69, prazoDebito: 1, prazoCredito: 30 };
 db.usuarios.forEach((u) => { if (u.comissao === undefined) u.comissao = u.perfil === 'dona' ? 0 : db.cfg.comissaoPct; });
-if (!db.pedidosDemo && !db.pedidos.length && db.produtos.some((p) => p.id === 'p9')) {
+if (!window.veltriaConta && !db.pedidosDemo && !db.pedidos.length && db.produtos.some((p) => p.id === 'p9')) {
   // demonstração: um pedido do Brás em aberto (metade já chegou) e a liquidação de inverno preparada
   const p9 = db.produtos.find((x) => x.id === 'p9'), p6 = db.produtos.find((x) => x.id === 'p6'), q9 = {}, q6 = {}, r9 = {};
   p9.cores.forEach((c) => p9.tam.slice(0, 5).forEach((tm) => { q9[`${c.n}|${tm}`] = 4; r9[`${c.n}|${tm}`] = 2; }));
@@ -1057,6 +1069,45 @@ const GUIA = [
     ['Cópia de segurança', 'Com a assinatura, tudo fica na nuvem e aparece no celular e no computador. Em Configurações você também baixa uma cópia em arquivo quando quiser.'],
   ]],
 ];
+// ------------------------------------------------------------------ conta nova: trazer o que a loja já tem (22/11/2026)
+// Só na conta de verdade que começou em branco (db.comecouVazia). Some sozinho quando os 5 passos ficam prontos ou quando a dona fecha.
+const IMP_LOJA = [
+  ['importar-pecas', 'Peças de uma planilha', 'Excel ou CSV, inclusive do Bling e do Tiny'],
+  ['importar-xml', 'Nota fiscal de compra (XML)', 'as peças da nota com cor, tamanho e custo'],
+  ['importar-clientes', 'Clientes de uma planilha', 'nome, WhatsApp e quanto devem'],
+  ['fiado-foto', 'Foto do caderno do fiado', 'a IA lê e você confere antes de salvar'],
+  ['passar-caderno', 'Passar o caderno à mão', 'uma linha por cliente'],
+];
+const passosLoja = () => [
+  ['A cara da loja', 'logo, WhatsApp e chave Pix', !!(db.loja.logo || db.loja.pix || db.loja.tel), '<a class="bt pq" href="#config">Abrir</a>'],
+  ['Traga as peças', 'planilha ou nota XML', db.produtos.length > 0, '<button type="button" class="bt pq" data-acao="importar-estoque">Trazer</button>'],
+  ['Traga as clientes e o crediário', 'planilha ou foto do caderno', db.clientes.length > 0, '<button type="button" class="bt pq" data-acao="importar-clientes">Trazer</button>'],
+  ['Abra o caixa e faça a primeira venda', 'o troco da gaveta e a venda em Vender', db.vendas.length > 0, '<a class="bt pq" href="#vender">Vender</a>'],
+  ['Chame a equipe', 'cada vendedora com o próprio login', db.usuarios.length > 1, '<button type="button" class="bt pq" data-acao="novo-usuario">Convidar</button>'],
+];
+const mostraComecar = () => emConta() && db.comecouVazia && !db.cfg.comecarFechado && passosLoja().some((x) => !x[2]);
+function comecarHTML() {
+  if (!mostraComecar()) return '';
+  const ps = passosLoja(), feitos = ps.filter((x) => x[2]).length, vazia = !db.produtos.length && !db.clientes.length;
+  return `<section class="cartao comecar" aria-label="Primeiro dia"><button type="button" class="fechar" data-acao="comecar-fechar" aria-label="Fechar o primeiro dia">×</button>
+    <div class="comecar-cab"><h2>${vazia ? 'Sua loja começa em branco' : 'Primeiro dia'}</h2><p class="mudo">${vazia ? 'Você já tem suas peças e clientes em outro lugar? Quer ajuda para trazer? Nada do que você trouxer apaga o que já está aqui.' : `${feitos} de ${ps.length} passos prontos.`}</p></div>
+    ${vazia ? `<div class="comecar-imp">${IMP_LOJA.slice(0, 4).map(([a, n, sub]) => `<button type="button" data-acao="${a}">${ico('mais')}<span>${n}<small>${sub}</small></span></button>`).join('')}</div>` : ''}
+    <ol class="comecar-passos">${ps.map(([n, sub, ok, bt]) => `<li class="${ok ? 'ok' : ''}"><i aria-hidden="true">${ok ? ico('ok') : ''}</i><span><b>${n}</b><small>${sub}</small></span>${ok ? '<em>pronto</em>' : bt}</li>`).join('')}</ol>
+    <p class="mudo comecar-pe"><span>Prefere que a gente ajude? Mande a planilha ou a foto no WhatsApp: respondemos por escrito.</span><button type="button" class="bt pq" data-acao="ajuda">Chamar no WhatsApp</button></p></section>`;
+}
+function conviteLoja() {
+  db.cfg.conviteVisto = true; grava();
+  abrir(`<h2>Bem-vinda ao Peplo</h2><p class="mudo">A ${t(db.loja.nome)} começa em branco, só com o que é seu. Você já tem suas peças e clientes em outro lugar? Quer ajuda para trazer?</p>
+    <div class="comecar-imp em-janela">${IMP_LOJA.map(([a, n, sub]) => `<button type="button" data-acao="${a}">${ico('mais')}<span>${n}<small>${sub}</small></span></button>`).join('')}</div>
+    <div class="acoes"><button type="button" class="bt" data-acao="ajuda">Pedir ajuda no WhatsApp</button><button type="button" class="bt cheio" data-fechar-convite>Começar cadastrando à mão</button></div>
+    <p class="mudo" style="font-size:13px;margin:10px 0 0">O passo a passo do primeiro dia fica no Início.</p>`, (j) => { $('[data-fechar-convite]', j).onclick = fechar; });
+}
+// "Começar do zero" do conta-nuvem: limpa tudo, mas fica a marca, as regras, as lojas e a equipe de verdade (sem a de exemplo)
+window.veltriaZerarProprio = (atual) => {
+  const v = vazio(), ex = new Set(EQUIPE().map((u) => u.nome)), us = (atual.usuarios || []).filter((u) => !ex.has(u.nome));
+  return { ...v, tema: atual.tema || v.tema, loja: atual.loja && atual.loja.nome !== 'Boutique Bella' ? atual.loja : v.loja, cfg: atual.cfg || v.cfg, fiscal: atual.fiscal,
+    lojas: Array.isArray(atual.lojas) && atual.lojas.length ? atual.lojas : v.lojas, usuarios: us.length ? us : v.usuarios, usuario: us.some((u) => u.id === atual.usuario) ? atual.usuario : (us[0] || v.usuarios[0]).id };
+};
 const saudacao = () => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; };
 
 const TELAS = {
@@ -1077,7 +1128,7 @@ const TELAS = {
     const ab = totalAberto(), trocas = trocasDe(h).length, est = valorEstoque();
     const kpi = (ic, rot, val, ir, cls = '', fmt = '') => `<a class="kpi6 ${cls}" href="${ir}">${icb(ic)}<span><small>${rot}</small><b ${fmt === 'txt' ? '' : `data-conta="${val}"`}>${fmt === 'txt' ? val : din(val)}</b></span></a>`;
     const corH = (p, cor) => (p.cores.find((c) => c.n === cor) || {}).h || '#ccc';
-    return `<section class="ini-ola"><h1>${saudacao()}${db.loja.dono ? `, ${t(db.loja.dono)}` : ''}!</h1><i class="titulo-traco" aria-hidden="true"></i><p>Aqui está o movimento da sua loja hoje.</p></section>
+    return `${comecarHTML()}<section class="ini-ola"><h1>${saudacao()}${db.loja.dono ? `, ${t(db.loja.dono)}` : ''}!</h1><i class="titulo-traco" aria-hidden="true"></i><p>Aqui está o movimento da sua loja hoje.</p></section>
       <div class="ini-hero cascata">
         <a class="etq etq-hoje" href="#vendas" aria-label="Vendas de hoje: ${din(n.liquido)}"><span class="etq-ic">${icb('bolsa')}</span><span class="etq-txt"><small>Vendas de hoje</small><b data-conta="${n.liquido}">${din(n.liquido)}</b><em>${n.vs.length} ${n.vs.length === 1 ? 'venda' : 'vendas'} <i>•</i> ${pecasHoje} ${pecasHoje === 1 ? 'peça' : 'peças'}</em></span><span class="etq-ic2">${icb('vestido')}</span></a>
         <section class="cartao meta-cartao"><div class="meta-cab"><span class="meta-ic">${icb('alvo')}</span><div><h2>Meta do mês</h2><b class="meta-v">${meta ? din(meta) : 'Sem meta'}</b></div>
@@ -2347,7 +2398,7 @@ document.addEventListener('click', (e) => {
     transferir: () => { if (!variasLojas()) return confirmar('Transferir entre lojas', 'Para transferir peças, cadastre a segunda loja em Configurações, “Lojas”. Cada loja tem o próprio estoque e o próprio caixa.', 'Ir para Configurações', () => { location.hash = '#config'; }); abrir(`<h2>Transferir entre lojas</h2><p class="mudo">Qual peça vai de uma loja para a outra?</p><label class="campo">Peça<input id="tp" list="dl-tp" placeholder="Nome ou código"><datalist id="dl-tp">${ativos().map((p) => `<option value="${t(p.nome)}">`).join('')}</datalist></label><div class="acoes"><button type="button" class="bt cheio" data-ok>Continuar</button></div>`, (j) => { $('[data-ok]', j).onclick = () => { const v = sa($('#tp', j).value), p = ativos().find((x) => sa(x.nome) === v || sa(x.cod) === v); if (!p) { toast('Escolha uma peça da lista.', true); return; } fechar(); formTransf(p); }; }); },
     'ir-vender': () => { location.hash = '#vender'; }, 'xml-notas': () => baixar(`notas-${hoje()}.csv`, csv([['Número', 'Série', 'Data', 'Chave', 'CPF', 'Valor', 'Situação'], ...db.notas.map((n) => [n.numero, n.serie, `${dataBR(n.data)} ${horaBR(n.data)}`, n.chave, n.cpf, campoDin(n.valor), n.status])])), 'novo-pedido': formPedido, 'nova-promo': formPromo, 'conferir-extrato': conferirExtrato, 'fiado-caderno': fiadoCaderno, 'passar-caderno': () => passarCaderno(), 'fiado-foto': fiadoFoto, 'importar-xml': importarXmlCompra, 'importar-estoque': importarEstoque, ajuda: () => window.open(`https://wa.me/5516991500746?text=${encodeURIComponent(`Olá! Uso o Peplo na ${db.loja.nome} e preciso de ajuda.`)}`, '_blank', 'noopener'), 'receber-escolher': receberEscolher,
     'mov-despesa': () => movCaixa('despesa'), 'mov-retirada': () => movCaixa('retirada'), 'mov-reforco': () => movCaixa('reforco'),
-    'importar-clientes': () => importar('clientes'), 'importar-pecas': () => importar('pecas'), instalar,
+    'importar-clientes': () => importar('clientes'), 'comecar-fechar': () => { db.cfg.comecarFechado = true; grava(); mostra(); toast('O passo a passo saiu do Início. As importações continuam em Estoque e Clientes.'); }, 'importar-pecas': () => importar('pecas'), instalar,
     'nova-loja': () => { if (!dona()) return toast('Só a dona cadastra lojas.', true); db.lojas.push({ id: uid('l'), nome: `Loja ${db.lojas.length + 1}` }); registra('Loja nova cadastrada', 'geral'); grava(); mostra(); toast('Loja criada. Dê o nome dela e transfira as peças em Estoque.'); },
     'tira-foto-eu': () => { eu().foto = ''; grava(); mostra(); },
     como: () => comoUsar(($('#principal').dataset.tela) || 'inicio'),
@@ -2455,6 +2506,8 @@ setInterval(() => { const n = (location.hash.slice(1) || 'inicio').split('/')[0]
 // abre na tela que a pessoa escolheu no perfil
 if (!location.hash && eu().abrirEm && eu().abrirEm !== 'inicio') location.hash = `#${eu().abrirEm}`;
 if (new URLSearchParams(location.search).has('instalar')) setTimeout(instalar, 900);
+// conta nova em branco: uma vez, o convite para trazer o que a loja já tem
+else if (emConta() && db.comecouVazia && !db.cfg.conviteVisto && !db.produtos.length && !db.clientes.length) setTimeout(() => { if ($('#camada').hidden) conviteLoja(); }, 700);
 $('#recomecar').addEventListener('click', () => { localStorage.removeItem(CHAVE); location.replace(location.pathname); });
 if ('serviceWorker' in navigator && window === window.top) navigator.serviceWorker.register('sw.js').catch(() => {});
 rota();
