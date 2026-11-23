@@ -5,12 +5,12 @@
 // Todo pedido também pode ir para o WhatsApp do restaurante (link wa.me com o pedido escrito).
 // COMPATIBILIDADE: o pedido continua com os mesmos campos (nome, tel, end, bairro, pagar, troco, itens). Os novos (ref, cupom, desconto,
 // taxa, total, agendado) só se somam; o que o sistema do dono ainda não lê vai também escrito no endereço, no pagamento e na observação.
-import { ico, folha, toast, $, $$ } from './ui.js?v=56';
-import * as som from './som.js?v=56';
+import { ico, folha, toast, $, $$ } from './ui.js?v=57';
+import * as som from './som.js?v=57';
 // cardápio do cliente: só um toque leve ao pôr na sacola e ao mandar o pedido; mudo no link "Som" do topo (vale neste celular)
 som.chaveSom('popina-som-cli', false);
-import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=56';
-import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=56';
+import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=57';
+import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=57';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -66,7 +66,7 @@ const api = {
     if (R) return rpc('popina_pedir', { p_espaco: R, p_tipo: tipo, p_mesa: null, p_dados: d });
     const { novoPedido, adicionarItem, itensLimpos } = loja;
     const c = novoPedido(tipo, { nome: d.nome, tel: d.tel, end: d.end, bairro: d.bairro }, { origem: 'Cardápio online', pagarNaEntrega: d.pagar, ...(tipo === 'balcao' ? { modo: 'retirada' } : {}), ...(d.troco > 0 ? { trocoPara: d.troco } : {}),
-      ...(tipo === 'delivery' && d.taxa > 0 ? { taxaEntrega: d.taxa } : {}), ...(d.desconto > 0 ? { desconto: d.desconto, cupom: d.cupom } : {}), ...(d.agendado ? { agendadoPara: d.agendado.ts } : {}) });
+      ...(tipo === 'delivery' && d.taxa > 0 ? { taxaEntrega: d.taxa } : {}), ...(d.desconto > 0 ? { desconto: d.desconto, cupom: d.cupom } : {}), ...(d.agendado ? { agendado: d.agendado.ts } : {}) });
     itensLimpos(d.itens).forEach((i) => adicionarItem(c, { prodId: i.prod, qtd: i.qtd, obs: i.obs, adic: i.adic, meia: i.meia, tam: i.tam }));
     return { ok: true, id: c.id, num: c.num, senha: c.senha || 0 };
   },
@@ -295,7 +295,9 @@ function barra() {
 }
 
 // ------------------------------------------------------------------ cupom
-const cupons = () => (Array.isArray(L.cupons) ? L.cupons : !R ? CUPONS_DEMO : []).filter((c) => c && c.codigo && c.ativo !== false && !(c.ate && Date.now() > Number(c.ate)));
+const cupons = () => (Array.isArray(L.cupons) ? L.cupons : !R ? CUPONS_DEMO : []).filter((c) => c && c.codigo && c.ativo !== false && !(c.ate && Date.now() > Number(c.ate))
+  // o Popina guarda a validade como data ("2026-12-31") e o limite de usos; o sistema do dono confere de novo ao receber
+  && !(c.validade && Date.now() > new Date(`${c.validade}T23:59:59`).getTime()) && !(Number(c.limite) > 0 && (Number(c.usos) || 0) >= Number(c.limite)));
 const acharCupom = (cod) => cupons().find((c) => String(c.codigo).toUpperCase() === String(cod || '').trim().toUpperCase()) || null;
 function erroCupom(c, sub) { if (!c) return 'Cupom não encontrado'; if (c.minimo && sub < c.minimo) return `Vale para pedidos a partir de ${din(c.minimo)}`; if (c.tipo === 'frete' && modo !== 'delivery') return 'Este cupom é só para entrega'; return ''; }
 function valorCupom(c, sub, taxa) { if (!c || erroCupom(c, sub)) return 0; if (c.tipo === 'frete') return r2(taxa); if (c.tipo === 'pct') return r2(sub * Math.min(100, Number(c.valor) || 0) / 100); return r2(Math.min(sub, Number(c.valor) || 0)); }
@@ -697,7 +699,7 @@ async function posConta() {
 async function iniciar() {
   if (!mesa) { conta = criarConta({ real: !!R }); conta.ouvir(() => { if (M) topo(); }); }
   if (!R) {
-    loja = await import('./loja.js?v=56'); doExemplo();
+    loja = await import('./loja.js?v=57'); doExemplo();
     loja.ouvir(() => { doExemplo(); if (!document.querySelector('.folha-fundo, .cx-tela-fundo')) { aplicarCor(); topo(); lista(); } });
     tudo(); posConta(); return;
   }

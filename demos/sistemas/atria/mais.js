@@ -3,7 +3,7 @@
 // e medição por foto com objeto de referência. Depois: RDO (relatório diário), validade do EPI, cronograma com
 // alerta de atraso, fornecedores de chapas e etiquetas do plano de corte. Tudo fica no aparelho (db + grava()).
 // Dinheiro em centavos.
-import { $, $$, t, din, dinCurto, lerNum, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js?v=19';
+import { $, $$, t, din, dinCurto, lerNum, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, abrirZap, repinta, ir, cab, vibra } from './base.js?v=20';
 import { totais, cliente, STATUS } from './gestao.js?v=19';
 import { meusOficios } from './oficios.js?v=19';
 import { planoDeCorte } from './ferramentas.js?v=19';

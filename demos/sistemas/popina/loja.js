@@ -4,7 +4,7 @@
 // COMPATIBILIDADE: os dados do Popina antigo abrem aqui sem perder nada. Os campos das funções que saíram (rodízio, eventos,
 // portaria, vitrine, cupons, reservas, produção...) continuam guardados como estão: esta versão só não os mostra.
 // Nada aqui apaga campo antigo; tudo é alterado no lugar.
-import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=56';
+import { estadoInicial, estadoVazio, EXEMPLO } from './dados.js?v=57';
 
 export const CHAVE = 'popina-v1';
 export const CONTA = window.veltriaConta || null;
@@ -379,6 +379,8 @@ export function voltarLoja() { setLoja({ pausada: null }); }
 export const aceiteAuto = () => !!lojaCfg().aceiteAuto;
 // pedido agendado pelo cardápio: aceita ISO ("2026-11-22T19:30"), número (ms) ou só "19:30" (hoje); devolve ms ou 0
 export function agendadoDe(v) {
+  if (!v) return 0;
+  if (typeof v === 'object') v = v.ts ?? v.quando ?? 0; // o cardápio online manda { ts, texto }
   if (!v) return 0;
   if (typeof v === 'number') return v > 1e12 ? v : 0;
   const s = String(v).trim(), m = /^(\d{1,2}):(\d{2})$/.exec(s);

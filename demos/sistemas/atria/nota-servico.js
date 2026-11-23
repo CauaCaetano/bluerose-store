@@ -8,7 +8,7 @@
 //   nao   → não emite: nada de nota aparece.
 // Só acrescenta campos: db.nf, fin.nfse, fin.nfOutro e cliente.doc / cliente.email. Nenhum token fica no aparelho.
 // Na demonstração tudo é simulado (nota de exemplo, ambiente de teste).
-import { $, $$, t, din, dataBR, hoje, somaDias, ico, db, grava, achar, toast, folha, repinta, ir, cab } from './base.js?v=19';
+import { $, $$, t, din, dataBR, hoje, somaDias, ico, db, grava, achar, toast, folha, repinta, ir, cab } from './base.js?v=20';
 import { cliente } from './gestao.js?v=19';
 
 export const TELAS = {};

@@ -116,8 +116,9 @@ const videosExemplo = (d) => [
 export function carregar() {
   const q = new URLSearchParams(location.search);
   if (q.has('novo')) { try { localStorage.removeItem(CHAVE); } catch { /* sem acesso */ } }
-  // quem abriu quando o app se chamava Fortis continua com os dados
-  try { if (!localStorage.getItem(CHAVE) && localStorage.getItem('fortis-v1')) localStorage.setItem(CHAVE, localStorage.getItem('fortis-v1')); } catch { /* sem acesso */ }
+  // quem abriu quando o app se chamava Fortis continua com os dados (só na demonstração: na conta, 'fortis-v1' solto neste
+  // aparelho é o exemplo antigo e não pode subir para a empresa; os dados da conta vêm da nuvem pela porta)
+  try { if (!q.has('conta') && !localStorage.getItem(CHAVE) && localStorage.getItem('fortis-v1')) localStorage.setItem(CHAVE, localStorage.getItem('fortis-v1')); } catch { /* sem acesso */ }
   try {
     const d = JSON.parse(localStorage.getItem(CHAVE) || 'null');
     if (d && d.v === 1) {

@@ -1,6 +1,6 @@
 // Atria · gestão: obras, orçamento, proposta comercial, cobrança com Pix, materiais, lojas, preços, clientes,
 // financeiro, ferramentas de bancada e mensagens prontas.
-import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=19';
+import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=20';
 import { cena, TIPOS_CENA } from './cenas.js?v=19';
 import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=19';
 import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=19';

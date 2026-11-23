@@ -578,7 +578,9 @@ TELAS.dono = () => {
 };
 function novaPessoa() {
   abrir(`${cab('Pessoa na equipe', window.veltriaConta ? 'Na conta, ela recebe o convite e entra com o próprio login.' : 'Na demonstração, a pessoa fica só neste aparelho.')}<form class="form"><label>Nome<input name="nome" required></label><label>Função<select name="p"><option value="caixa">Caixa</option><option value="repositor">Repositor</option></select></label><label>WhatsApp<input name="tel" inputmode="tel"></label><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Pôr na equipe</button></footer></form>`, (j) => {
-    $('form', j).addEventListener('submit', (e) => { e.preventDefault(); const f = e.target, perms = f.p.value === 'repositor' ? { estoque: true, entradas: true } : {}; db.usuarios.push({ id: uid('u'), nome: f.nome.value.trim(), perfil: f.p.value, tel: f.tel.value.trim(), perms }); registra(`${f.nome.value.trim()} entrou na equipe (${PAPEL[f.p.value]})`, 'equipe'); grava(); fechar(); mostra(); });
+    $('form', j).addEventListener('submit', (e) => { e.preventDefault(); const f = e.target, perms = f.p.value === 'repositor' ? { estoque: true, entradas: true } : {}; db.usuarios.push({ id: uid('u'), nome: f.nome.value.trim(), perfil: f.p.value, tel: f.tel.value.trim(), perms }); registra(`${f.nome.value.trim()} entrou na equipe (${PAPEL[f.p.value]})`, 'equipe'); grava(); fechar(); mostra();
+      // na conta, o convite de verdade (login próprio) sai pela equipe da nuvem; sem isso a pessoa ficava só na lista
+      if (window.veltriaConta && window.veltriaAbrir && window.veltriaAbrir.convidar) window.veltriaAbrir.convidar(); });
   });
 }
 

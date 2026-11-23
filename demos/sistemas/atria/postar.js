@@ -1,7 +1,7 @@
 // Atria · "Postar": monta a imagem no formato de cada rede (feed 4:5, Stories e Status 9:16, Facebook 4:5) com a marca do
 // profissional, gera a legenda e o funil (chamada para o WhatsApp, sequência de posts e respostas prontas) e abre a rede pelo
 // compartilhamento do próprio celular, com a legenda já copiada. Sem servidor: quem aperta "publicar" é a pessoa, na rede.
-import { $, $$, t, ico, db, grava, toast, folha, copiar, comIA, abrirZap, zap, telLimpo, vibra } from './base.js?v=19';
+import { $, $$, t, ico, db, grava, toast, folha, copiar, comIA, abrirZap, zap, telLimpo, vibra } from './base.js?v=20';
 import { cena, fotoCena, cenaDesenho } from './cenas.js?v=19';
 import { arquivoDoVideo } from './midia.js?v=19';
 // post com vídeo (vitrine): compartilha o próprio vídeo, com a legenda copiada

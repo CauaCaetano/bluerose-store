@@ -3,7 +3,7 @@
 // achar trabalho (mural do app e achados na internet), clientes e obras, orçamento, proposta, Pix, lista de materiais,
 // lojas da cidade (OpenStreetMap), comparador de preços, dinheiro (lucro do dia, da semana e do mês) e ajuda automática.
 // Dados no aparelho (localStorage); na conta, o conta-nuvem.js leva para a nuvem. ?novo recomeça a demonstração.
-import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=19';
+import { $, $$, t, sa, din, dinCurto, lerDin, uid, hoje, somaDias, dias, dataBR, dataCurta, haQuanto, quando, zap, abrirZap, av, ico, vibra, reduzido, db, carregar, grava, achar, toast, folha, folhaAtual, formulario, confirmar, copiar, comIA, repinta, ir, cab, CHAVE } from './base.js?v=20';
 import { cena, TIPOS_CENA } from './cenas.js?v=19';
 import { OFICIOS, ORDEM_OFICIOS, meusOficios, principal, nomeOficios, juntar } from './oficios.js?v=19';
 import { TELAS as TG, ACOES as AG, totais, cliente, obrasAtivas, aReceber, economiaLista, somaPeriodo, intervalo, trena, grafico, mensagem, abrirMensagens, novaObra, cobrarPix, cadastrarPix, lancar, formCliente, ligarSeg, CENA_DO_OFICIO } from './gestao.js?v=19';
@@ -11,7 +11,7 @@ import { qrSVG } from '../base/qr.js';
 import { instalarConceitos, CONCEITO } from './conceitos.js?v=19';
 import { TELAS as TX, ACOES as AX, cartaoMei } from './extras.js?v=19';
 import { ganchos } from './gestao.js?v=19';
-import { ligarVoz } from './base.js?v=19';
+import { ligarVoz } from './base.js?v=20';
 import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=19';
 import * as MAIS from './mais.js?v=19';
 import * as NF from './nota-servico.js?v=1';

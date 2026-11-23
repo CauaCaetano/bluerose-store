@@ -6,8 +6,8 @@
 // dados da empresa (localStorage popina-v1; na conta real, conta-nuvem.js sobe junto para a nuvem, como o logo já subia).
 // Quem vê: só o dono da conta (os convidados da equipe nunca) e a demonstração (com "Pular e ver o exemplo").
 // Dados antigos: só acrescenta db.config.inicio.marca = true ao terminar ou pular; quem já tem nome, logo e capa não vê.
-import { db, t, grava, CONTA, lojaCfg, setLoja } from './loja.js?v=56';
-import { ico, toast, $ } from './ui.js?v=56';
+import { db, t, grava, CONTA, lojaCfg, setLoja } from './loja.js?v=57';
+import { ico, toast, $ } from './ui.js?v=57';
 
 const ini = () => (db.config.inicio ||= {});
 const NOME_VAZIO = ['', 'meu restaurante'];
