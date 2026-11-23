@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=43">
+<link rel="stylesheet" href="estilo.css?v=44">
 <!-- conta real (entrou pelo login, convite ou app instalado): a faixa de demonstração não aparece -->
 <script>try { if (localStorage.getItem('anshur-ambiente') === 'op' || /[?&](entrar|convite)\b/.test(location.search)) document.documentElement.classList.add('anshur-real'); } catch (e) {}</script>
 </head>
@@ -84,12 +84,12 @@
 <div class="folha" id="menu-folha" role="dialog" aria-modal="true" aria-label="Mais opções" hidden></div>
 <div id="camada"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<script src="instalar.js?v=43"></script>
-<script src="areas.js?v=43"></script>
-<script src="dados.js?v=43"></script>
-<script src="fotos.js?v=43"></script>
+<script src="instalar.js?v=44"></script>
+<script src="areas.js?v=44"></script>
+<script src="dados.js?v=44"></script>
+<script src="fotos.js?v=44"></script>
 <!-- nuvem.js: na demonstração carrega o app na hora; no ambiente real, entra na conta e carrega os dados do servidor antes -->
-<script src="nuvem.js?v=43" data-app="comum.js?v=43 importar.js?v=43 implantacao.js?v=43 motor.js?v=43 mercado.js?v=43 retencao.js?v=43 graficos.js?v=43 areas/nucleo.js?v=43 areas/novas-regras.js?v=43 areas/novas.js?v=43 areas/financeiro-regras.js?v=43 areas/financeiro.js?v=43 areas/floor-regras.js?v=43 areas/floor.js?v=43 areas/pecas-regras.js?v=43 areas/pecas-compras-regras.js?v=43 areas/oficina-regras.js?v=43 areas/oficina-campo-regras.js?v=43 areas/oficina-campo.js?v=43 areas/oficina.js?v=43 areas/pecas.js?v=43 areas/pecas-compras.js?v=43 areas/crm-regras.js?v=43 areas/crm.js?v=43 areas/fiscal-regras.js?v=43 areas/fiscal.js?v=43 areas/nota-regras.js?v=43 areas/nota.js?v=43 areas/patamar-regras.js?v=43 areas/patamar.js?v=43 acesso.js?v=43 app.js?v=43"></script>
+<script src="nuvem.js?v=44" data-app="comum.js?v=44 importar.js?v=44 implantacao.js?v=44 motor.js?v=44 mercado.js?v=44 retencao.js?v=44 graficos.js?v=44 areas/nucleo.js?v=44 areas/novas-regras.js?v=44 areas/novas.js?v=44 areas/financeiro-regras.js?v=44 areas/financeiro.js?v=44 areas/floor-regras.js?v=44 areas/floor.js?v=44 areas/pecas-regras.js?v=44 areas/pecas-compras-regras.js?v=44 areas/oficina-regras.js?v=44 areas/oficina-campo-regras.js?v=44 areas/oficina-campo.js?v=44 areas/oficina.js?v=44 areas/pecas.js?v=44 areas/pecas-compras.js?v=44 areas/crm-regras.js?v=44 areas/crm.js?v=44 areas/fiscal-regras.js?v=44 areas/fiscal.js?v=44 areas/nota-regras.js?v=44 areas/nota.js?v=44 areas/nota-extra-regras.js?v=44 areas/nota-extra.js?v=44 areas/patamar-regras.js?v=44 areas/patamar.js?v=44 acesso.js?v=44 app.js?v=44"></script>
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch(() => {}); const tinha = !!navigator.serviceWorker.controller; let novo = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinha) { if (!novo) { novo = true; location.reload(); } return; } performance.getEntriesByType('resource').forEach((r) => { if (/^https:\/\/(cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com)\//.test(r.name)) fetch(r.name, { mode: 'cors', credentials: 'omit' }).catch(() => {}); }); }); }</script>
 </body>
 </html>
