@@ -10,14 +10,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="passaporte.css?v=42">
+<link rel="stylesheet" href="passaporte.css?v=43">
 </head>
 <body>
 <header class="pp-cab"><a class="pp-marca" href="./#passaportes" id="marca" aria-label="Anshur"></a><span class="pp-demo">Dados demonstrativos</span></header>
 <main id="tela"></main>
-<script src="dados.js?v=42"></script>
+<script src="dados.js?v=43"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<script src="nuvem.js?v=42" data-app="comum.js?v=42 fotos.js?v=42 passaporte.js?v=42"></script>
+<script src="nuvem.js?v=43" data-app="comum.js?v=43 fotos.js?v=43 passaporte.js?v=43"></script>
 <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch(() => {}); const tinha = !!navigator.serviceWorker.controller; let novo = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinha) { if (!novo) { novo = true; location.reload(); } return; } performance.getEntriesByType('resource').forEach((r) => { if (/^https:\/\/(cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com)\//.test(r.name)) fetch(r.name, { mode: 'cors', credentials: 'omit' }).catch(() => {}); }); }); }</script>
 </body>
 </html>
