@@ -3,13 +3,14 @@
 // No celular, uma coluna por vez (as abas de cima trocam). O novo pedido (nome ou telefone do cliente, endereço, taxa por bairro e troco).
 import { db, t, din, tempo, minutos, conta, novoPedido, itensValidos, ondeComanda, tipoNome, quemPediu, clientePorTel, soDig, num, vir, hora, lojaCfg, comanda,
   etapa, aguardaAceite, aceitarPedido, recusarPedido, MOTIVOS_RECUSA, marcarPronto, saiuEntrega, concluirPedido, enviar, inicioDoDia, zap, fone,
-  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=59';
-import { registrar, acao, ir } from './nucleo.js?v=59';
-import { ico, folha, toast, autorizar, novidades, $, $$ } from './ui.js?v=59';
-import * as som from './som.js?v=59';
-import { imprimirConta, imprimirCozinha, abrirImpressao, htmlRecibo } from './imprimir.js?v=59';
-import { colarIfood, ehIfood, nomeEntrega } from './ifood.js?v=59';
-import { marmitaAtiva, marmitaFolha } from './marmita.js?v=59';
+  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=60';
+import { registrar, acao, ir } from './nucleo.js?v=60';
+import { ico, folha, toast, autorizar, novidades, $, $$ } from './ui.js?v=60';
+import * as som from './som.js?v=60';
+import { imprimirConta, imprimirCozinha, abrirImpressao, htmlRecibo } from './imprimir.js?v=60';
+import { colarIfood, ehIfood, nomeEntrega } from './ifood.js?v=60';
+import { marmitaAtiva, marmitaFolha } from './marmita.js?v=60';
+import { temQuilo, quiloFolha } from './quilo.js?v=60';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* nada */ } };
@@ -177,7 +178,7 @@ const ORIGENS = ['WhatsApp', 'Telefone', 'Balcão'];
 export function novoPedidoFolha(tipoIni = 'balcao') {
   let tipo = tipoIni;
   const bairros = db.bairros || [];
-  const corpo = () => `<div class="linha-bts" style="margin-bottom:12px"><button type="button" class="bt pq bt-ifood" data-ifood><span class="selo-ifood">iFood</span>Chegou no iFood? Cole o pedido</button>${marmitaAtiva() && tipo === 'balcao' ? `<button type="button" class="bt pq bt-marmita" data-marmita>${ico('cloche')}Marmita rápida</button>` : ''}</div>
+  const corpo = () => `<div class="linha-bts" style="margin-bottom:12px"><button type="button" class="bt pq bt-ifood" data-ifood><span class="selo-ifood">iFood</span>Chegou no iFood? Cole o pedido</button>${marmitaAtiva() && tipo === 'balcao' ? `<button type="button" class="bt pq bt-marmita" data-marmita>${ico('cloche')}Marmita rápida</button>` : ''}${temQuilo() && tipo === 'balcao' ? `<button type="button" class="bt pq" data-quilo>${ico('estoque')}Quilo no balcão</button>` : ''}</div>
     <div class="chips quebra" role="group" aria-label="Tipo">${[['balcao', 'Balcão'], ['retirada', 'Retirada'], ['delivery', 'Entrega']].map(([k, n]) => `<button type="button" class="chip" data-t="${k}" aria-pressed="${tipo === k}">${n}</button>`).join('')}</div>
     <div style="margin-top:14px">
     ${tipo !== 'balcao' ? `<p class="campo"><span>Pediu por</span></p><div class="chips quebra" role="group" aria-label="Pediu por">${ORIGENS.map((o, k) => `<button type="button" class="chip" data-org="${o}" aria-pressed="${k === 0}">${o}</button>`).join('')}</div>
@@ -193,6 +194,7 @@ export function novoPedidoFolha(tipoIni = 'balcao') {
       const ligar = () => {
         $('[data-ifood]', f).onclick = () => { fechar(); setTimeout(() => colarIfood(), 240); };
         $('[data-marmita]', f)?.addEventListener('click', () => { fechar(); setTimeout(() => marmitaFolha(), 240); });
+        $('[data-quilo]', f)?.addEventListener('click', () => { fechar(); setTimeout(() => quiloFolha(), 240); });
         $$('[data-t]', f).forEach((b) => { b.onclick = () => { tipo = b.dataset.t; $('[data-c]', f).innerHTML = corpo(); ligar(); }; });
         $$('[data-org]', f).forEach((b) => { b.onclick = () => $$('[data-org]', f).forEach((x) => x.setAttribute('aria-pressed', x === b)); });
         const tel = $('[data-tel]', f);

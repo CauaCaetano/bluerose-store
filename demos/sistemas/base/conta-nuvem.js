@@ -727,6 +727,13 @@
       return r.data || {};
     });
   };
+  // Popina: maquininha Mercado Pago Point pela conta do próprio restaurante (função popina-point). O token só vai para o servidor.
+  if (app === 'popina') window.popinaPoint = function (body) {
+    return cliente().then(function (sb) { return sb.functions.invoke('popina-point', { body: Object.assign({}, body, { espaco: info.espaco }) }); }).then(function (r) {
+      if (r.error) return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { return { ok: false, mensagem: j.erro || j.mensagem || 'Não deu para falar com o servidor agora.' }; });
+      return r.data || {};
+    }).catch(function () { return { ok: false, mensagem: 'Sem internet agora. Tente de novo.' }; });
+  };
   // Jano, Atria e Arca: nota de serviço (NFS-e) pela conta do emissor do próprio cliente (22/11/2026).
   // A função do servidor é configurável (window.VELTRIA_NFSE_FUNCAO; padrão nexo-nfce, com tipo 'nfse'). O token vai
   // só para o servidor (cifrado em nexo_segredos) e nunca volta para a tela. Sem a função no ar, responde desligado.

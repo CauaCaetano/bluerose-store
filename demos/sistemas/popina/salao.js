@@ -1,14 +1,15 @@
 // Popina · salão (o que fazer agora e as mesas), a comanda de qualquer conta e o lançar itens do garçom.
 import { db, t, din, tempo, comanda, comandaDaMesa, abrirMesa, adicionarItem, enviar, mudarStatus, cancelarItem, transferir, juntarMesas, moverItens, livreDoItem, pagoPorItem, conta, valorItem, itensValidos,
   fila, estadoMesa, atenderChamado, confirmarQR, recusarQR, ondeComanda, quemPediu, tipoNome, prod, ativos, aPartir, euSou, setEuSou, temPin, grava, marcar, fone, zap, hora, r2,
-  aguardaAceite } from './loja.js?v=59';
-import { escolherEntregador } from './pedidos.js?v=59';
-import { registrar, acao, ir } from './nucleo.js?v=59';
-import { ico, folha, toast, confirma, autorizar, novidades, $, $$ } from './ui.js?v=59';
-import { formOpcoes, temOpcoes } from './opcoes.js?v=59';
-import { imprimirConta, imprimirCozinha } from './imprimir.js?v=59';
-import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=59';
-import { marmitaAtiva } from './marmita.js?v=59';
+  aguardaAceite } from './loja.js?v=60';
+import { escolherEntregador } from './pedidos.js?v=60';
+import { registrar, acao, ir } from './nucleo.js?v=60';
+import { ico, folha, toast, confirma, autorizar, novidades, $, $$ } from './ui.js?v=60';
+import { formOpcoes, temOpcoes } from './opcoes.js?v=60';
+import { imprimirConta, imprimirCozinha } from './imprimir.js?v=60';
+import { trocarUsuario, pessoas, precisaGerente, podeCancelar } from './equipe.js?v=60';
+import { marmitaAtiva } from './marmita.js?v=60';
+import { botaoBalanca, ligarBalanca } from './quilo.js?v=60';
 
 const ESTADO = { livre: 'Livre', ocupada: 'Ocupada', conta: 'Pediu a conta', pronto: 'Prato pronto', chamou: 'Chamou', qr: 'Pedido do QR' };
 const nMesas = () => Math.max(1, Math.min(200, Number(db.config.mesas) || 10));
@@ -284,7 +285,7 @@ const pesoKg = (v) => { const x = String(v || '').trim().replace(/\s/g, ''); if 
 export function pesoFolha(c, p, aoPor) {
   folha({ titulo: p.nome, corpo: `<div class="peso">
       <p class="peso-kg">Preço do quilo <b>${din(p.preco)}</b></p>
-      <label class="campo"><span>Peso na balança, em gramas</span><input data-g inputmode="decimal" autocomplete="off" placeholder="Ex.: 450" aria-describedby="peso-res"></label>
+      <div class="peso-linha"><label class="campo"><span>Peso na balança, em gramas</span><input data-g inputmode="decimal" autocomplete="off" placeholder="Ex.: 450" aria-describedby="peso-res"></label>${botaoBalanca()}</div>
       <p class="peso-res" id="peso-res" data-res aria-live="polite">Digite o peso</p>
       <p class="mudo">Pode digitar 450 (gramas) ou 0,450 (quilo).</p></div>`,
   pe: '<button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio grande" data-ok>Pôr na comanda</button>',
@@ -293,7 +294,7 @@ export function pesoFolha(c, p, aoPor) {
     const calc = () => { const kg = pesoKg(inp.value), v = r2(p.preco * kg);
       res.innerHTML = kg > 0 && kg < 30 ? `${(kg * 1000).toLocaleString('pt-BR', { maximumFractionDigits: 0 })} g × ${din(p.preco)}/kg = <b>${din(v)}</b>` : 'Digite o peso';
       bt.textContent = kg > 0 && kg < 30 ? `Pôr ${din(v)}` : 'Pôr na comanda'; return kg; };
-    inp.oninput = calc;
+    inp.oninput = calc; ligarBalanca(f, inp, calc);
     const por = () => { const kg = calc(); if (!(kg > 0 && kg < 30)) { toast('Digite o peso da balança'); return inp.focus(); } adicionarItem(c, { prodId: p.id, kg }); fechar(); toast(`+ ${p.nome} · ${din(r2(p.preco * kg))}`); aoPor?.(); };
     inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); por(); } };
     bt.onclick = por;

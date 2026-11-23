@@ -2,17 +2,19 @@
 // sangria e suprimento, e o fechamento do dia com o resumo pronto para mandar no WhatsApp do dono.
 import { db, t, din, r2, num, vir, tempo, hora, conta, comanda, pagar, partes, darDesconto, ondeComanda, quemPediu, caixaResumo, abrirCaixa, movimento, fecharCaixa,
   regras, temPin, euSou, setEuSou, quemAgora, grava, FORMA_FIADO, registrarFiado, receberFiado, clientesFiado, saldoFiado, nomeFiado, soDig, fone, zap, vendaDeHoje, cancelarVenda,
-  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=59';
-import { registrar, acao, ir } from './nucleo.js?v=59';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=59';
-import * as som from './som.js?v=59';
-import { pix } from './pix.js?v=59';
+  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=60';
+import { registrar, acao, ir } from './nucleo.js?v=60';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=60';
+import * as som from './som.js?v=60';
+import { pix } from './pix.js?v=60';
 import { qrSVG } from '../base/qr.js';
-import { blocoTotais, voltar, rotaComanda } from './salao.js?v=59';
-import { novoPedidoFolha } from './pedidos.js?v=59';
-import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=59';
-import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=59';
-import { blocoNotaVenda, etiquetaNota, botaoNota, modoNf, cancelarNota, minutosParaCancelar } from './nota-fiscal.js?v=59';
+import { blocoTotais, voltar, rotaComanda } from './salao.js?v=60';
+import { novoPedidoFolha } from './pedidos.js?v=60';
+import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=60';
+import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=60';
+import { blocoNotaVenda, etiquetaNota, botaoNota, modoNf, cancelarNota, minutosParaCancelar } from './nota-fiscal.js?v=60';
+import { temQuilo, imprimirEtiquetaQuilo } from './quilo.js?v=60';
+import { maquininhaLigada, cobrarNaMaquininha } from './maquininha.js?v=60';
 
 const FORMAS = [['Pix', 'pix'], ['Dinheiro', 'dinheiro'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao'], [FORMA_FIADO, 'etiqueta']];
 const rotuloForma = (f) => (f === FORMA_FIADO ? 'Fiado' : f.replace('Cartão de débito', 'Débito').replace('Cartão de crédito', 'Crédito'));
@@ -25,7 +27,7 @@ function cartaoResumo(r) {
   const ord = ['Dinheiro', 'Pix', 'Cartão', 'iFood', 'Fiado', 'Outros'].filter((k) => k === 'Dinheiro' || k === 'Pix' || k === 'Cartão' || g[k]);
   const icoDe = { Dinheiro: 'dinheiro', Pix: 'pix', Cartão: 'cartao', iFood: 'sacola', Fiado: 'etiqueta', Outros: 'moedas' };
   return `<section class="cx-resumo" aria-label="Resumo de hoje"><div class="cx-res-topo"><div><small>Vendido hoje</small><b class="num">${din(r.total)}</b><span>${r.vendas.length} ${r.vendas.length === 1 ? 'venda' : 'vendas'}</span></div>
-      <div class="cx-gaveta"><small>Esperado na gaveta</small><b class="num">${din(r.dinheiroNaGaveta)}</b><span>troco ${din(db.caixa.troco)} + dinheiro${r.sangria ? ` − sangria ${din(r.sangria)}` : ''}${r.suprimento ? ` + ${din(r.suprimento)}` : ''}</span></div></div>
+      <div class="cx-gaveta"><small>Esperado na gaveta</small><b class="num">${din(r.dinheiroNaGaveta)}</b><span class="cx-conta">${[`troco ${din(db.caixa.troco)}`, `+ dinheiro ${din(r2(r.dinheiroNaGaveta - db.caixa.troco + (r.sangria || 0) - (r.suprimento || 0)))}`, r.sangria ? `− sangria ${din(r.sangria)}` : '', r.suprimento ? `+ suprimento ${din(r.suprimento)}` : ''].filter(Boolean).map((x) => `<i>${x}</i>`).join('')}</span></div></div>
     <ul class="cx-formas">${ord.map((k) => `<li>${ico(icoDe[k])}<span>${k}</span><b class="num">${din(g[k] || 0)}</b></li>`).join('')}</ul>
     <button type="button" class="bt escuro grande largo" data-ir="fechamento">${ico('conta')}Fechar o dia</button></section>`;
 }
@@ -33,7 +35,7 @@ registrar('caixa', {
   titulo: 'Caixa',
   html() {
     const abertas = db.comandas.filter((c) => !c.quitado).sort((a, b) => (b.pediuConta ? 1 : 0) - (a.pediuConta ? 1 : 0) || a.aberta - b.aberta);
-    const lista = `<div class="sec"><h2>Contas abertas (${abertas.length})</h2><button type="button" class="bt" data-acao="venda-rapida">${ico('mais2')}Venda no balcão</button></div>
+    const lista = `<div class="sec"><h2>Contas abertas (${abertas.length})</h2><div class="linha-bts">${temQuilo() ? `<button type="button" class="bt" data-acao="quilo-balcao">${ico('estoque')}Quilo no balcão</button>` : ''}<button type="button" class="bt" data-acao="venda-rapida">${ico('mais2')}Venda no balcão</button></div></div>
       <div class="contas-ab">${abertas.map((c) => { const v = conta(c);
         return `<button type="button" class="conta-linha ${c.pediuConta ? 'pediu' : ''}" data-ir="fechar/${c.id}"><span><b>${t(c.tipo === 'mesa' ? `Mesa ${c.mesa}` : quemPediu(c))}</b><small>${c.tipo === 'mesa' ? `${c.pessoas || 1} ${c.pessoas === 1 ? 'pessoa' : 'pessoas'}` : t(ondeComanda(c))} · ${tempo(c.aberta)}${c.pediuConta ? ' · pediu a conta' : ''}${v.pago ? ` · pago ${din(v.pago)}` : ''}</small></span><span class="v">${din(v.falta || v.total)}</span></button>`; }).join('') || '<p class="vazio">Nenhuma conta aberta.</p>'}</div>`;
     if (!db.caixa) {
@@ -117,16 +119,18 @@ function dinheiroFolha(valor, concluir) {
   } });
 }
 let acabou = ''; // conta que acabou de fechar aqui: o check anima uma vez só (o relógio redesenha a tela)
+let etqAuto = ''; // quilo no balcão: a etiqueta sai sozinha quando a conta fecha (uma vez)
 registrar('fechar', {
   aba: 'caixa', titulo: 'Fechar conta',
   html(id) {
     const c0 = comanda(id), c = c0?.quitado ? null : c0;
     if (!c) {
       setTimeout(() => { acabou = ''; }, 0);
+      if (etqAuto === id) { etqAuto = ''; const vq = db.vendas.find((x) => x.id === id || x.id.startsWith(`${id}-`)); if (vq) setTimeout(() => imprimirEtiquetaQuilo(etqDaVenda(vq)), 350); }
       const v = c0?.vendaId ? db.vendas.find((x) => x.id === c0.vendaId) : db.vendas.find((x) => x.id === id || x.id.startsWith(`${id}-`));
       return `${voltar('caixa', 'Caixa')}<div class="cartao" style="text-align:center;max-width:560px;margin:20px auto"><div class="${acabou === id && v ? 'check-ok' : ''}" style="display:grid;place-items:center;margin-bottom:10px;color:var(--ok)">${ico('okcirc', 'style="width:64px;height:64px"')}</div>
         <h1 style="font-size:28px;margin-bottom:6px">${v ? 'Conta fechada' : 'Esta conta não está mais aberta'}</h1>${v ? `<p class="mudo">${t(v.onde || '')} · ${din(v.total)}${(v.pagamentos || []).reduce((s, p) => s + (p.troco || 0), 0) ? ` · troco ${din(v.pagamentos.reduce((s, p) => s + (p.troco || 0), 0))}` : ''}</p>` : ''}
-        <div class="linha-bts" style="justify-content:center;margin-top:16px">${v ? `<button type="button" class="bt grande" data-acao="recibo-venda" data-id="${t(v.id)}">${ico('impressora')}Imprimir recibo</button>` : ''}<button type="button" class="bt cheio grande" data-ir="${v?.tipo === 'mesa' ? 'salao' : c0 ? 'pedidos' : 'caixa'}">${c0 ? 'Voltar aos pedidos' : 'Pronto'}</button></div>
+        <div class="linha-bts" style="justify-content:center;margin-top:16px">${v && (v.itens || []).some((i) => i.kg) ? `<button type="button" class="bt ok grande" data-acao="etiqueta-quilo" data-id="${t(v.id)}">${ico('etiqueta')}Etiqueta do quilo</button>` : ''}${v ? `<button type="button" class="bt grande" data-acao="recibo-venda" data-id="${t(v.id)}">${ico('impressora')}Imprimir recibo</button>` : ''}<button type="button" class="bt cheio grande" data-ir="${v?.tipo === 'mesa' ? 'salao' : c0 ? 'pedidos' : 'caixa'}">${c0 ? 'Voltar aos pedidos' : 'Pronto'}</button></div>
         ${v ? blocoNotaVenda(v, acabou === id) : ''}
         ${c0 ? '<p class="mudo" style="margin-top:12px">Pago. O pedido continua no quadro de Pedidos até você tocar em Entregue.</p>' : ''}</div>`;
     }
@@ -153,6 +157,7 @@ registrar('fechar', {
         <ul class="itens">${itensValidos(c).map((i) => `<li><span class="q">${i.kg ? '' : `${i.qtd}×`}</span><div class="nm"><b>${t(i.nome)}</b></div><span class="v">${din(valorItem(i))}</span><label style="margin-left:10px">${selItem(i)}</label></li>`).join('')}</ul>` : ''}
       ${pt ? `<p class="aviso ok" style="margin:6px 0 12px">Cada pessoa paga <b>${din(pt[0])}</b>${pt[n - 1] !== pt[0] ? ` (a última, ${din(pt[n - 1])})` : ''}. Já pagaram ${Math.min(pagas, n)} de ${n}.</p>` : ''}
       <label class="campo"><span>Valor deste pagamento (R$)</span><input data-valor inputmode="decimal" value="${vir(sugestao.toFixed(2))}"></label>
+      ${maquininhaLigada() ? `<button type="button" class="bt cheio grande largo bt-maq" data-maq>${ico('cartao')}Cobrar na maquininha</button><p class="mudo maq-ou">ou marque como recebeu:</p>` : ''}
       <div class="formas">${FORMAS.map(([f, i]) => `<button type="button" class="forma" data-forma="${t(f)}">${ico(i)}${rotuloForma(f)}</button>`).join('')}</div>
       ${(c.pagamentos || []).length ? `<ul class="pago-l">${c.pagamentos.map((p) => `<li><span>${ico('check', 'style="width:18px;height:18px;vertical-align:-3px"')} ${t(rotuloForma(p.forma))}${p.troco ? ` · troco ${din(p.troco)}` : ''}</span><span>${din(p.valor)}</span></li>`).join('')}</ul>` : ''}
       <div class="totais"><div class="total"><span>Falta pagar</span><span class="num">${din(v.falta)}</span></div></div>
@@ -164,10 +169,13 @@ registrar('fechar', {
     $$('[data-div]', el).forEach((b) => { b.onclick = () => { estado[c.id].dividir = b.dataset.div === 'item' ? 'item' : Number(b.dataset.div); ir(`fechar/${id}`); }; });
     const selDe = () => { const s = {}; $$('[data-it]', el).forEach((x) => { const q = x.type === 'checkbox' ? (x.checked ? Number(x.dataset.max) || 1 : 0) : Number(x.value); if (q > 0) s[x.dataset.it] = q; }); return s; };
     $$('[data-it]', el).forEach((x) => { x.onchange = () => { $('[data-valor]', el).value = vir(valorDosItens(c, selDe()).toFixed(2)); }; });
+    const valorAgora = () => r2(Math.min(num($('[data-valor]', el).value), conta(c).falta));
+    const receber = (f, valor, extra = {}) => { const fechou = valor >= conta(c).falta - 0.009; if (fechou && c.etiquetaQuilo) etqAuto = id; const s = estado[c.id]?.dividir === 'item' ? selDe() : null; pagar(c, f, valor, s && Object.keys(s).length ? { ...extra, itens: s } : extra); if (fechou) acabou = id; toast(fechou ? 'Conta fechada' : `${din(valor)} recebido`, 'caixa'); if (fechou) ir(`fechar/${id}`); };
+    $('[data-maq]', el)?.addEventListener('click', () => { const valor = valorAgora(); if (!(valor > 0)) return toast('Escreva o valor do pagamento'); cobrarNaMaquininha(c, valor, (f, extra) => receber(f, valor, extra)); });
     $$('[data-forma]', el).forEach((b) => { b.onclick = () => {
-      const valor = r2(Math.min(num($('[data-valor]', el).value), conta(c).falta));
+      const valor = valorAgora();
       if (!(valor > 0)) return toast('Escreva o valor do pagamento');
-      const f = b.dataset.forma, fim = (extra = {}) => { const fechou = valor >= conta(c).falta - 0.009; const s = estado[c.id]?.dividir === 'item' ? selDe() : null; pagar(c, f, valor, s && Object.keys(s).length ? { ...extra, itens: s } : extra); if (fechou) acabou = id; toast(fechou ? 'Conta fechada' : `${din(valor)} recebido`, 'caixa'); if (fechou) ir(`fechar/${id}`); };
+      const f = b.dataset.forma, fim = (extra = {}) => { const fechou = valor >= conta(c).falta - 0.009; if (fechou && c.etiquetaQuilo) etqAuto = id; const s = estado[c.id]?.dividir === 'item' ? selDe() : null; pagar(c, f, valor, s && Object.keys(s).length ? { ...extra, itens: s } : extra); if (fechou) acabou = id; toast(fechou ? 'Conta fechada' : `${din(valor)} recebido`, 'caixa'); if (fechou) ir(`fechar/${id}`); };
       if (f === 'Pix') pixFolha(c, valor, () => fim());
       else if (f === 'Dinheiro') dinheiroFolha(valor, (troco, dado) => fim(troco ? { troco, dado } : {}));
       else if (f === FORMA_FIADO) fiadoFolha(c, valor, (cid) => fim({ fiado: cid }));
@@ -199,6 +207,8 @@ export function comandaDaVenda(v) {
   return { tipo: v.tipo, mesa: v.mesa, num: v.num, pessoas: v.pessoas, cliente: v.cliente ? { tel: v.cliente, nome: v.nomeCliente || '' } : {}, servico: v.servicoOn ?? !!v.servico, taxaEntrega: v.entrega || 0, desconto: v.desconto || 0,
     itens: (v.itens || []).map((i, k) => ({ id: `r${k}`, prod: i.prod, nome: i.nome, qtd: i.qtd, preco: i.preco, adic: [], status: 'entregue', ...(i.kg ? { kg: i.kg } : {}) })), pagamentos: pagamentosVenda(v), modo: v.modo };
 }
+acao('etiqueta-quilo', (b) => { const v = db.vendas.find((x) => x.id === b.dataset.id); if (v) imprimirEtiquetaQuilo(etqDaVenda(v)); });
+const etqDaVenda = (v) => ({ ...comandaDaVenda(v), cliente: { nome: v.nomeCliente || '' } });
 acao('recibo-venda', (b) => { const v = db.vendas.find((x) => x.id === b.dataset.id); if (v) abrirImpressao(`Recibo · ${v.onde || ''}`, (f) => htmlRecibo(comandaDaVenda(v), f, { titulo: 'RECIBO (não é documento fiscal)' })); });
 
 // ------------------------------------------------------------------ vendas de hoje (reimprimir e cancelar)

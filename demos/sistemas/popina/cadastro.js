@@ -1,14 +1,14 @@
 // Popina · cadastros da Gestão: cardápio (pratos, tamanhos, meio a meio, por quilo, complementos, foto e o que tira do estoque),
 // estoque simples (o que tem, o que acaba, contagem, perdas e lista de compras), clientes com fiado e entregadores com o acerto.
 import { db, t, din, r2, num, vir, uid, grava, prod, insumo, saldo, estoqueBaixo, entradaCompra, registrarPerda, ajustarEstoque, fmtQtd, MOTIVOS_PERDA,
-  clientesFiado, saldoFiado, limiteFiado, nomeFiado, fone, zap, soDig, acertoEntregadores, inicioDoDia, hora, aPartir } from './loja.js?v=59';
-import { acao, ir } from './nucleo.js?v=59';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=59';
-import { G, volta, reduzir } from './gestao.js?v=59';
-import { fotoProd } from './salao.js?v=59';
-import { cardapioExemplo } from './dados.js?v=59';
-import { receberFiadoFolha } from './caixa.js?v=59';
-import { imprimir } from './imprimir.js?v=59';
+  clientesFiado, saldoFiado, limiteFiado, nomeFiado, fone, zap, soDig, acertoEntregadores, inicioDoDia, hora, aPartir, pagamentosVenda } from './loja.js?v=60';
+import { acao, ir } from './nucleo.js?v=60';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=60';
+import { G, volta, reduzir } from './gestao.js?v=60';
+import { fotoProd } from './salao.js?v=60';
+import { cardapioExemplo } from './dados.js?v=60';
+import { receberFiadoFolha } from './caixa.js?v=60';
+import { imprimir } from './imprimir.js?v=60';
 
 // ------------------------------------------------------------------ cardápio
 let catG = '';
@@ -211,26 +211,51 @@ G.entregadores = {
     const ac = acertoEntregadores(inicioDoDia()), acertos = (db.acertos || []).filter((a) => a.ts >= inicioDoDia());
     return volta('Entregadores', 'Quem leva cada pedido e o acerto das taxas de hoje') + `
     <div class="linha-bts" style="margin-bottom:14px"><button type="button" class="bt cheio grande" data-acao="entregador-ed">${ico('mais2')}Novo entregador</button></div>
-    <div class="rolo"><table class="tabela"><thead><tr><th>Entregador</th><th class="n">Entregas hoje</th><th class="n">Taxas hoje</th><th class="n">Recebeu em dinheiro</th><th></th></tr></thead><tbody>
+    <div class="rolo"><table class="tabela"><thead><tr><th>Entregador</th><th class="n">Entregas hoje</th><th class="n">Taxas hoje</th><th class="n">Levou de troco</th><th class="n">Recebeu em dinheiro</th><th></th></tr></thead><tbody>
     ${(db.entregadores || []).map((e) => { const a = ac[e.id] || { entregas: 0, taxas: 0, dinheiro: 0 }, rua = db.comandas.filter((x) => x.entregador === e.id && x.entrega === 'saiu').length, ok = acertos.filter((x) => x.entregador === e.id).at(-1);
-      return `<tr><td><b>${t(e.nome)}</b><small>${t(fone(e.tel))}${rua ? ` · <b>${rua} na rua agora</b>` : ''}${ok ? ` · acertado às ${hora(ok.ts)}` : ''}</small></td><td class="n">${a.entregas}</td><td class="n"><b>${din(a.taxas)}</b></td><td class="n">${din(a.dinheiro)}</td>
-      <td class="n"><button type="button" class="bt pq" data-acao="acerto" data-id="${t(e.id)}">Acerto</button>${e.tel ? `<a class="bt-ico" target="_blank" rel="noopener" href="${zap(e.tel, `Acerto de hoje no ${db.config.nome}: ${a.entregas} entregas, ${din(a.taxas)} de taxas. Dinheiro recebido dos clientes: ${din(a.dinheiro)}.`)}" aria-label="Mandar o acerto">${ico('zap')}</a>` : ''}<button type="button" class="bt-ico" data-acao="entregador-ed" data-id="${t(e.id)}" aria-label="Editar">${ico('ajustes')}</button></td></tr>`; }).join('') || '<tr><td colspan="5" class="mudo">Cadastre os entregadores: ao marcar “Saiu para entrega”, você escolhe quem levou.</td></tr>'}
+      return `<tr><td><b>${t(e.nome)}</b><small>${t(fone(e.tel))}${rua ? ` · <b>${rua} na rua agora</b>` : ''}${ok ? ` · acertado às ${hora(ok.ts)}` : ''}</small></td><td class="n">${a.entregas}</td><td class="n"><b>${din(a.taxas)}</b></td><td class="n">${din(trocoLevou(e.id, inicioDoDia()))}</td><td class="n">${din(a.dinheiro)}</td>
+      <td class="n"><button type="button" class="bt pq" data-acao="acerto" data-id="${t(e.id)}">Acerto</button>${e.tel ? `<a class="bt-ico" target="_blank" rel="noopener" href="${zap(e.tel, `Acerto de hoje no ${db.config.nome}: ${a.entregas} entregas, ${din(a.taxas)} de taxas. Dinheiro recebido dos clientes: ${din(a.dinheiro)}.`)}" aria-label="Mandar o acerto">${ico('zap')}</a>` : ''}<button type="button" class="bt-ico" data-acao="entregador-ed" data-id="${t(e.id)}" aria-label="Editar">${ico('ajustes')}</button></td></tr>`; }).join('') || '<tr><td colspan="6" class="mudo">Cadastre os entregadores: ao marcar “Saiu para entrega”, você escolhe quem levou.</td></tr>'}
     </tbody></table></div>
-    <p class="mudo" style="margin-top:10px">“Recebeu em dinheiro” é o que o entregador cobrou dos clientes e precisa devolver ao caixa.</p>`;
+    <p class="mudo" style="margin-top:10px">“Levou de troco” é o dinheiro que saiu do caixa com ele. “Recebeu em dinheiro” é o que cobrou dos clientes. No Acerto sai, numa tela só, quanto ele devolve.</p>`;
   },
 };
-// acerto do dia: as entregas de hoje, quanto pagar de taxa e quanto ele devolve do dinheiro dos clientes
+// acerto do dia (banca 3): numa tela só, o troco que ele levou do caixa, o dinheiro que recebeu dos clientes (quanto deram e o troco
+// de cada um), as taxas dele e quanto devolve. Campo novo só: db.trocoEntregador { [início do dia]: { [entregador]: valor } }.
+const trocoLevou = (eid, h) => Number(db.trocoEntregador?.[h]?.[eid]) || 0;
 acao('acerto', (b) => {
   const e = (db.entregadores || []).find((x) => x.id === b.dataset.id); if (!e) return;
   const h = inicioDoDia(), l = db.vendas.filter((v) => v.ts >= h && v.entregador === e.id && !v.cancelado).sort((a, x) => a.ts - x.ts);
-  const a = acertoEntregadores(h)[e.id] || { entregas: 0, taxas: 0, dinheiro: 0 }, saldo = r2(a.dinheiro - a.taxas);
+  const a = acertoEntregadores(h)[e.id] || { entregas: 0, taxas: 0, dinheiro: 0 };
   const rua = db.comandas.filter((x) => x.entregador === e.id && x.entrega === 'saiu');
-  folha({ titulo: `Acerto de ${e.nome} · hoje`, larga: true, corpo: `${rua.length ? `<p class="aviso">${rua.length} ${rua.length === 1 ? 'entrega ainda está' : 'entregas ainda estão'} na rua e não entram nesta conta.</p>` : ''}
-    <ul class="lista-l">${l.map((v) => `<li><div class="tx"><b>${hora(v.entregue || v.ts)} · ${t(v.nomeCliente || v.onde || '')}</b><small>${t(v.onde || '')} · ${t(pagamentosDe(v))}</small></div><b class="num">${din(v.entrega || 0)}</b></li>`).join('') || '<li class="mudo">Nenhuma entrega fechada hoje.</li>'}</ul>
-    <div class="totais"><div><span>Taxas para pagar a ele (${a.entregas})</span><span class="num">${din(a.taxas)}</span></div><div><span>Dinheiro que ele recebeu dos clientes</span><span class="num">${din(a.dinheiro)}</span></div>
-      <div class="total"><span>${saldo >= 0 ? 'Ele devolve ao caixa' : 'O caixa paga a ele'}</span><span class="num">${din(Math.abs(saldo))}</span></div></div>`,
-  pe: `${e.tel ? `<a class="bt" target="_blank" rel="noopener" href="${zap(e.tel, `Acerto de hoje no ${db.config.nome}: ${a.entregas} entregas, ${din(a.taxas)} de taxas. Dinheiro recebido dos clientes: ${din(a.dinheiro)}. ${saldo >= 0 ? `Devolver ao caixa: ${din(saldo)}` : `O caixa te paga: ${din(-saldo)}`}.`)}">${ico('zap')}Mandar</a>` : ''}<button type="button" class="bt cheio grande" data-ok>Marcar como acertado</button>`,
-  aoAbrir: (f, fechar) => { $('[data-ok]', f).onclick = () => { (db.acertos ||= []).push({ id: uid('ac'), ts: Date.now(), entregador: e.id, entregas: a.entregas, taxas: a.taxas, dinheiro: a.dinheiro, saldo }); if (db.acertos.length > 500) db.acertos.splice(0, db.acertos.length - 500); grava(); fechar(); toast(`Acerto de ${e.nome} registrado`); }; } });
+  const din$ = (v) => pagamentosVenda(v).filter((p) => p.forma === 'Dinheiro');
+  const trocosDados = r2(l.reduce((s, v) => s + din$(v).reduce((k, p) => k + (Number(p.troco) || 0), 0), 0));
+  const linha = (v) => { const pd = din$(v), dado = pd.reduce((s, p) => s + (Number(p.dado) || Number(p.valor) || 0), 0), tr = pd.reduce((s, p) => s + (Number(p.troco) || 0), 0);
+    return `<li><div class="tx"><b>${hora(v.entregue || v.ts)} · ${t(v.nomeCliente || v.onde || '')}</b><small>${t(pagamentosDe(v))}${pd.length ? ` · deu ${din(dado)}${tr ? `, troco ${din(tr)}` : ''}` : ''}</small></div><span class="ac-v"><small>taxa</small><b class="num">${din(v.entrega || 0)}</b></span></li>`; };
+  folha({ titulo: `Acerto de ${e.nome} · hoje`, larga: true, corpo: `${rua.length ? `<p class="aviso">${rua.length} ${rua.length === 1 ? 'entrega ainda está na rua e não entra' : 'entregas ainda estão na rua e não entram'} nesta conta.</p>` : ''}
+    <div class="ac-conta" aria-label="Conta do acerto">
+      <label class="ac-l"><span>Troco que levou do caixa</span><input data-levou inputmode="decimal" value="${trocoLevou(e.id, h) ? vir(trocoLevou(e.id, h).toFixed(2)) : ''}" placeholder="0,00"></label>
+      <div class="ac-l"><span>+ Dinheiro recebido dos clientes<small>${trocosDados ? `já sem os ${din(trocosDados)} de troco que ele deu` : 'o valor das contas pagas em dinheiro'}</small></span><b class="num">${din(a.dinheiro)}</b></div>
+      <div class="ac-l"><span>− Taxas dele (${a.entregas} ${a.entregas === 1 ? 'entrega' : 'entregas'})<small>ele já tira do dinheiro</small></span><b class="num">${din(a.taxas)}</b></div>
+      <div class="ac-l ac-tot"><span data-rot-dev></span><b class="num" data-dev></b></div>
+      <label class="ac-l"><span>Quanto ele entregou (contado)<small>opcional, para conferir</small></span><input data-entregou inputmode="decimal" placeholder="0,00"></label>
+      <p class="ac-dif" data-dif></p>
+    </div>
+    <details class="ac-det"><summary>${l.length === 1 ? 'Ver a entrega de hoje' : `Ver as ${l.length} entregas de hoje`}</summary><ul class="lista-l">${l.map(linha).join('') || '<li class="mudo">Nenhuma entrega fechada hoje.</li>'}</ul></details>`,
+  pe: `<a class="bt" data-zap target="_blank" rel="noopener" ${e.tel ? '' : 'hidden'}>${ico('zap')}Mandar</a><button type="button" class="bt cheio grande" data-ok>Marcar como acertado</button>`,
+  aoAbrir: (f, fechar) => {
+    const lev = () => r2(num($('[data-levou]', f).value)), dev = () => r2(lev() + a.dinheiro - a.taxas);
+    const msg = () => `Acerto de hoje no ${db.config.nome}: ${a.entregas} entregas. Troco levado: ${din(lev())}. Dinheiro dos clientes: ${din(a.dinheiro)}. Suas taxas: ${din(a.taxas)}. ${dev() >= 0 ? `Devolver ao caixa: ${din(dev())}` : `O caixa te paga: ${din(-dev())}`}.`;
+    const calc = () => { const d = dev(); $('[data-rot-dev]', f).textContent = d >= 0 ? '= Ele devolve ao caixa' : '= O caixa paga a ele'; $('[data-dev]', f).textContent = din(Math.abs(d));
+      const en = $('[data-entregou]', f).value.trim(), x = r2(num(en) - Math.max(0, d)), el = $('[data-dif]', f);
+      el.textContent = !en || d < 0 ? '' : Math.abs(x) < 0.01 ? 'Bateu certinho.' : x < 0 ? `Faltam ${din(-x)}.` : `Sobram ${din(x)}.`; el.className = 'ac-dif' + (en && Math.abs(x) >= 0.01 ? ' alerta-txt' : '');
+      if (e.tel) $('[data-zap]', f).href = zap(e.tel, msg()); };
+    $('[data-levou]', f).oninput = calc; $('[data-entregou]', f).oninput = calc; calc();
+    $('[data-ok]', f).onclick = () => {
+      const T = (db.trocoEntregador ||= {}); Object.keys(T).forEach((k) => { if (Number(k) < h - 40 * 864e5) delete T[k]; }); (T[h] ||= {})[e.id] = lev();
+      const en = $('[data-entregou]', f).value.trim();
+      (db.acertos ||= []).push({ id: uid('ac'), ts: Date.now(), entregador: e.id, entregas: a.entregas, taxas: a.taxas, dinheiro: a.dinheiro, saldo: r2(a.dinheiro - a.taxas), trocoLevou: lev(), devolve: dev(), ...(en ? { entregou: r2(num(en)) } : {}) });
+      if (db.acertos.length > 500) db.acertos.splice(0, db.acertos.length - 500); grava(); fechar(); toast(`Acerto de ${e.nome} registrado`); };
+  } });
 });
 const pagamentosDe = (v) => (v.pagamentos?.length ? v.pagamentos : [{ forma: v.forma }]).map((p) => p.forma).join(' + ');
 acao('entregador-ed', (b) => {

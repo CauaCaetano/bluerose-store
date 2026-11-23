@@ -667,7 +667,8 @@ h2 .selo-ifood{font-size:14px;margin-right:6px;vertical-align:middle}
 .if-itens{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
 .if-item{display:grid;grid-template-columns:58px minmax(0,1fr) 104px 44px;gap:8px;align-items:center;padding:10px;border:1px solid var(--linha);border-radius:12px;background:var(--papel)}
 .if-item input,.if-item select{min-height:44px;width:100%;min-width:0}
-.if-item select{grid-column:1/-1}
+.if-item select{min-width:0}
+.if-liga{grid-column:1/-1;display:flex;align-items:center;gap:10px;min-width:0}.if-liga>span{display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:700;color:var(--mudo);white-space:nowrap}.if-liga>span .ico{width:16px;height:16px;color:var(--ok)}.if-liga select{flex:1;min-height:40px;font-size:15px}
 .if-item small{grid-column:1/-1;font-size:14px}
 .if-total{margin-top:14px;font-size:17px}.if-total b{font-size:20px}
 .folha kbd{font:inherit;font-size:.9em;padding:0 5px;border:1px solid var(--linha2);border-radius:5px;background:var(--papel2)}
@@ -679,7 +680,8 @@ h2 .selo-ifood{font-size:14px;margin-right:6px;vertical-align:middle}
 .cx-resumo{display:grid;gap:14px;background:var(--papel);border:2px solid var(--loja);border-radius:var(--raio);padding:16px;box-shadow:var(--sombra)}
 .cx-res-topo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .cx-res-topo small{display:block;color:var(--mudo);font-weight:700;font-size:15px}.cx-res-topo b{display:block;font-size:32px;font-weight:800;line-height:1.15}.cx-res-topo span{font-size:14px;color:var(--mudo)}
-.cx-gaveta{background:var(--ok-suave);border-radius:12px;padding:10px 12px}.cx-gaveta b{color:var(--ok-tinta)}
+.cx-gaveta{background:var(--ok-suave);border-radius:12px;padding:10px 12px;min-width:0}.cx-gaveta b{color:var(--ok-tinta)}
+.cx-conta{display:flex;flex-wrap:wrap;gap:2px 8px}.cx-conta i{font-style:normal;white-space:nowrap}
 .cx-formas{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
 .cx-formas li{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--linha);border-radius:12px;background:var(--fundo);font-weight:700}
 .cx-formas li .ico{width:22px;height:22px;flex:none}.cx-formas li b{margin-left:auto;font-size:18px}
@@ -724,3 +726,35 @@ h2 .selo-ifood{font-size:14px;margin-right:6px;vertical-align:middle}
 .imp-ct.off{opacity:.55}
 .imp-ct small{flex-basis:100%;padding-left:32px}
 .imp-ct small:empty{display:none}
+
+/* acerto do entregador numa tela (banca 3) */
+.ac-conta{display:grid;gap:0;border:2px solid var(--linha);border-radius:14px;background:var(--papel);overflow:hidden}
+.ac-l{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--linha);margin:0}
+.ac-l>span{font-weight:700;font-size:16px;display:grid}.ac-l>span small{font-weight:500;font-size:13px;color:var(--mudo)}
+.ac-l b{font-size:19px;white-space:nowrap}.ac-l input{width:130px;min-height:44px;text-align:right;font-weight:800;font-size:18px}
+.ac-tot{background:var(--ok-suave)}.ac-tot>span,.ac-tot b{font-size:20px;font-weight:800;color:var(--ok-tinta)}
+.ac-dif{margin:0;padding:8px 14px;font-weight:700;min-height:0}.ac-dif:empty{display:none}
+.ac-det{margin-top:12px}.ac-det summary{cursor:pointer;font-weight:700;padding:6px 0}
+.ac-v{display:grid;justify-items:end}.ac-v small{font-size:12px;color:var(--mudo)}
+@media (max-width:480px){.ac-l input{width:110px}.ac-l>span{font-size:15px}}
+.pa-trazer{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:center;margin-top:16px;padding:14px;border:2px dashed var(--loja);border-radius:14px;background:var(--loja-suave,#f6eef0)}
+.pa-trazer>.ico{width:28px;height:28px;color:var(--loja)}.pa-trazer span{display:grid;gap:2px}.pa-trazer small{color:var(--mudo);font-size:14px}.pa-trazer .bt{grid-column:1/-1}
+/* quilo e balança (banca 3) */
+.peso-linha{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}.peso-linha .campo{flex:1;min-width:160px;margin-bottom:0}
+.bt-balanca{min-height:52px;white-space:nowrap}
+.bal-estado{display:inline-flex;align-items:center;gap:6px;font-weight:800;margin-top:10px;padding:6px 12px;border-radius:12px;background:var(--fundo);border:1px solid var(--linha)}
+.bal-estado.ok{background:var(--ok-suave);color:var(--ok-tinta);border-color:transparent}.bal-estado .ico{width:18px;height:18px}
+.lista-solta{margin:8px 0 8px 18px;display:grid;gap:6px}
+.coz-filtros{display:flex;flex-wrap:wrap;gap:0 18px;align-items:center}.coz-filtros .chips{padding-bottom:8px}
+
+/* maquininha Point (banca 3) */
+.bt-maq{margin:4px 0 6px}.maq-ou{margin:0 0 8px;font-size:14px}
+.maq-status{display:grid;justify-items:center;gap:8px;text-align:center;padding:18px 10px;border:2px solid var(--linha);border-radius:16px;background:var(--papel)}
+.maq-status b{font-size:20px}.maq-ico .ico{width:54px;height:54px;color:var(--loja);animation:maq-pulsa 1.4s ease-in-out infinite}
+.maq-status.ok{border-color:var(--ok);background:var(--ok-suave)}.maq-status.ok .ico{color:var(--ok);animation:none}
+.maq-status.erro{border-color:var(--perigo)}.maq-status.erro .ico{color:var(--perigo);animation:none}
+@keyframes maq-pulsa{50%{transform:scale(1.08);opacity:.75}}
+@media (prefers-reduced-motion:reduce){.maq-ico .ico{animation:none}}
+.maq-lista{display:grid;gap:8px;margin-top:8px}
+.maq-op{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border:2px solid var(--linha);border-radius:14px;background:var(--papel);cursor:pointer}
+.maq-op:hover{border-color:var(--loja)}.maq-op .ico{width:28px;height:28px;flex:none}.maq-op span{display:grid}.maq-op small{color:var(--mudo)}

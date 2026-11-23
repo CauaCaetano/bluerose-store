@@ -6,9 +6,9 @@
 // A integração automática (Merchant API) está pronta no servidor (função popina-ifood), DESLIGADA até existir CNPJ.
 // Campos novos só: comanda.ifood { codigo, entregaPor, coleta, localizador, fone, pago, colado, exemplo } e
 // config.loja.ifoodComissao (%). Nada do que já existe muda.
-import { db, t, din, r2, uid, num, vir, conta, novoPedido, aceitarPedido, marcar, ativos, lojaCfg, setLoja, quemAgora, agendadoDe } from './loja.js?v=59';
-import { acao, ir } from './nucleo.js?v=59';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=59';
+import { db, t, din, r2, uid, num, vir, conta, novoPedido, aceitarPedido, marcar, ativos, lojaCfg, setLoja, quemAgora, agendadoDe } from './loja.js?v=60';
+import { acao, ir } from './nucleo.js?v=60';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=60';
 
 // ------------------------------------------------------------------ leitura do texto
 const sem = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -276,8 +276,8 @@ export function colarIfood(textoIni = '') {
       <input data-n maxlength="120" value="${t(i.nome)}" aria-label="Item" placeholder="Item">
       <input data-v inputmode="decimal" value="${vir(r2(i.total + (i.opcoes || []).reduce((s, o) => s + o.preco, 0)).toFixed(2))}" aria-label="Valor do item (R$)" placeholder="Valor R$" title="Valor total da linha, com os complementos">
       <button type="button" class="bt-ico" data-tira aria-label="Tirar o item">${ico('lixo')}</button>
-      <select data-p aria-label="Item do cardápio">${opcoesCardapio(i.prod)}</select>
-      <small class="dica-duv if-dica-item">${ico('alerta')}Não achei no cardápio: escolha ao lado qual é (ou deixe sem ligar)</small>
+      <label class="if-liga"><span>${i.prod ? `${ico('check')}No cardápio é` : 'Qual é no cardápio?'}</span><select data-p aria-label="Qual item do cardápio">${opcoesCardapio(i.prod)}</select></label>
+      <small class="dica-duv if-dica-item">${ico('alerta')}Não achei no cardápio: escolha acima qual é (ou deixe sem ligar)</small>
       ${(i.opcoes || []).length || i.obs ? `<small class="mudo">${(i.opcoes || []).map((o) => `+ ${o.qtd > 1 ? `${o.qtd}× ` : ''}${t(o.nome)}${o.preco ? ` ${din(o.preco)}` : ''}`).join(' · ')}${i.obs ? `${(i.opcoes || []).length ? ' · ' : ''}Obs.: ${t(i.obs)}` : ''}</small>` : ''}</div>`;
   const passo2 = () => {
     const d = lido.dados, f = lido.faltou, ent = d.tipo === 'TAKEOUT' ? 'TAKEOUT' : d.entregaPor === 'MERCHANT' ? 'MERCHANT' : 'IFOOD';
@@ -343,7 +343,7 @@ export function colarIfood(textoIni = '') {
         $$('[data-tira]', f).forEach((b) => { b.onclick = () => { b.closest('.if-item').remove(); redesenha(); }; });
         $('[data-mais-item]', f).onclick = () => { ler(); lido.dados.itens.push({ nome: '', qtd: 1, total: 0, opcoes: [], obs: '', prod: '' }); mostrar2(); $$('.if-item [data-n]', f).at(-1)?.focus(); };
         $$('input, select', C).forEach((x) => x.addEventListener('input', somar));
-        $$('.if-item [data-p]', f).forEach((s) => { s.onchange = () => { const el = s.closest('.if-item'), n = $('[data-n]', el); if (!n.value.trim() && s.value) n.value = db.produtos.find((p) => p.id === s.value)?.nome || ''; somar(); }; });
+        $$('.if-item [data-p]', f).forEach((s) => { s.onchange = () => { const el = s.closest('.if-item'), n = $('[data-n]', el); if (!n.value.trim() && s.value) n.value = db.produtos.find((p) => p.id === s.value)?.nome || ''; const sp = s.closest('.if-liga')?.querySelector('span'); if (sp) sp.innerHTML = s.value ? `${ico('check')}No cardápio é` : 'Qual é no cardápio?'; somar(); }; });
         somar();
         $('[data-de-novo]', f).onclick = mostrar1;
         $('[data-criar]', f).onclick = async () => {

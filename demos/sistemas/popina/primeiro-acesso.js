@@ -6,8 +6,10 @@
 // dados da empresa (localStorage popina-v1; na conta real, conta-nuvem.js sobe junto para a nuvem, como o logo já subia).
 // Quem vê: só o dono da conta (os convidados da equipe nunca) e a demonstração (com "Pular e ver o exemplo").
 // Dados antigos: só acrescenta db.config.inicio.marca = true ao terminar ou pular; quem já tem nome, logo e capa não vê.
-import { db, t, grava, CONTA, lojaCfg, setLoja } from './loja.js?v=59';
-import { ico, toast, $ } from './ui.js?v=59';
+// Banca 3 (22/11): na conta real (que começa em branco), o último passo oferece "Trazer meu cardápio" (importar.js).
+import { db, t, grava, CONTA, lojaCfg, setLoja } from './loja.js?v=60';
+import { ico, toast, $ } from './ui.js?v=60';
+import { ACOES } from './nucleo.js?v=60';
 
 const ini = () => (db.config.inicio ||= {});
 const NOME_VAZIO = ['', 'meu restaurante'];
@@ -66,6 +68,8 @@ let aberto = null;
 export function abrirPrimeiroAcesso({ refazer = false, depois } = {}) {
   if (aberto) return;
   const L = lojaCfg(), demo = !CONTA;
+  // conta real começa em branco (dados de exemplo só na demonstração): oferece trazer o cardápio que ele já tem
+  const trazer = !refazer && !demo && !db.produtos.length;
   const nomeAtual = NOME_VAZIO.includes(String(db.config.nome || '').trim().toLowerCase()) ? '' : db.config.nome || '';
   // primeira vez começa em branco (sem o nome, logo e capa do exemplo); só no "refazer" vem o que já está salvo
   const st = refazer ? { passo: 0, nome: nomeAtual, logo: L.logo || '', capa: L.capa || '', gerar: null } : { passo: 0, nome: '', logo: '', capa: '', gerar: null };
@@ -137,10 +141,12 @@ export function abrirPrimeiroAcesso({ refazer = false, depois } = {}) {
     else {
       corpo.innerHTML = `<h2 id="pa-tit">Ficou assim</h2><p class="mudo">É assim que o cliente vê no cardápio. Dá para trocar quando quiser em Configurações › Sua marca.</p>
         <div class="pa-final">${st.capa ? `<div class="pa-prev-capa" style="background-image:url('${t(st.capa)}')"></div>` : '<div class="pa-prev-capa vazia"></div>'}
-          <div class="pa-final-id">${st.logo ? `<div class="pa-prev-logo" style="background-image:url('${t(st.logo)}')"></div>` : `<div class="pa-prev-logo vazio">${t((st.nome || 'R')[0].toUpperCase())}</div>`}<b>${t(st.nome)}</b></div></div>`;
+          <div class="pa-final-id">${st.logo ? `<div class="pa-prev-logo" style="background-image:url('${t(st.logo)}')"></div>` : `<div class="pa-prev-logo vazio">${t((st.nome || 'R')[0].toUpperCase())}</div>`}<b>${t(st.nome)}</b></div></div>
+        ${trazer ? `<div class="pa-trazer">${ico('cardapio')}<span><b>Já tem seu cardápio em outro lugar?</b><small>Foto do cardápio impresso, print do iFood ou do Instagram, texto colado ou planilha. Você confere antes de salvar.</small></span><button type="button" class="bt grande" data-trazer>Trazer meu cardápio</button></div>` : ''}`;
       pe.innerHTML = `<button type="button" class="bt" data-volta>${ico('voltar')}Voltar</button><button type="button" class="bt cheio grande" data-fim>${ico('check')}${refazer ? 'Pronto' : 'Começar: cardápio, mesas e equipe'}</button>`;
       $('[data-volta]', pe).onclick = () => mostrar(2);
       $('[data-fim]', pe).onclick = () => { fechar(true); toast('Pronto: a sua marca já está no sistema'); };
+      $('[data-trazer]', corpo)?.addEventListener('click', () => { fechar(true); setTimeout(() => ACOES['importar-cardapio']?.(), 150); });
     }
     corpo.scrollTop = 0;
   }
