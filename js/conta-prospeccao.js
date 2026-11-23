@@ -269,6 +269,8 @@
       else botao = '<a class="btn btn-primary pp-zap" data-enviar="' + p.id + '" data-acao="' + acao + '" target="' + (CELULAR ? '_blank' : 'br-whatsapp') + '" rel="noreferrer" href="' +
         (CELULAR ? 'https://wa.me/' + esc(p.whatsapp) + '?text=' : 'https://web.whatsapp.com/send?phone=' + esc(p.whatsapp) + '&text=') + encodeURIComponent(msg) + '">' +
         (CELULAR ? 'Abrir WhatsApp com a mensagem' : 'Mandar pelo WhatsApp Web') + '</a>';
+      // link do WhatsApp só leva texto; o PDF vai como arquivo pelo "Compartilhar" do Windows (a conversa recém-aberta aparece primeiro)
+      if (p.produto === 'anshur' && ap && p.whatsapp && !p.contato_confirmar && !CELULAR) botao += '<button type="button" class="btn btn-ghost" data-pdf="1" title="Abre o Compartilhar do Windows com o PDF; escolha o WhatsApp e a conversa que acabou de abrir">Anexar o PDF</button>';
     }
     return '<article class="pp-cartao" data-id="' + p.id + '">' +
       '<header><h4>' + esc(p.empresa) + '</h4><span class="pp-faixa f' + esc(p.faixa) + '">Faixa ' + esc(p.faixa) + ' · ' + p.pontuacao + ' pts</span>' +
@@ -398,10 +400,24 @@
     return Promise.all([rpc('anshur_prosp_painel', { p_produto: produto }), produto === 'anshur' ? rpc('anshur_fundadores_lista').catch(function () { return null; }) : Promise.resolve(null)])
       .then(function (r) { if (r[1]) FUND = r[1]; if (r[0]) { D = r[0]; desenhar(); } });
   }
+  // Compartilhar do Windows com o arquivo; sem suporte, baixa o PDF para arrastar na conversa
+  function anexarPdf(t) {
+    var nome = 'Anshur-apresentacao.pdf';
+    status(t, 'Preparando o PDF…');
+    fetch(SITE + 'docs/anshur-apresentacao.pdf').then(function (r) { if (!r.ok) throw new Error('PDF não encontrado'); return r.blob(); }).then(function (b) {
+      var f = new File([b], nome, { type: 'application/pdf' });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) {
+        status(t, 'Escolha WhatsApp e a conversa que acabou de abrir.');
+        return navigator.share({ files: [f], title: 'Apresentação do Anshur' }).catch(function (er) { if (er.name !== 'AbortError') throw er; status(t, ''); });
+      }
+      var a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+      status(t, 'PDF baixado em Downloads: arraste para a conversa do WhatsApp.');
+    }).catch(function (er) { status(t, 'Não deu: ' + er.message); });
+  }
   function status(el, t) { var s = el && el.closest('.pp-cartao'); s = s && s.querySelector('.pp-status'); if (s) s.textContent = t; }
 
   bloco.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-produto],[data-aba],[data-ver],[data-etapa],[data-enviar],[data-aprovar],[data-zap]');
+    var t = e.target.closest('[data-produto],[data-aba],[data-ver],[data-etapa],[data-enviar],[data-aprovar],[data-zap],[data-pdf]');
     if (!t) return;
     if (t.dataset.zap) { ZAP = t.dataset.zap; try { localStorage.setItem('br-prosp-zap', ZAP); } catch (er) { /* sem armazenamento */ } desenhar(); return; }
     if (t.dataset.produto) {
@@ -410,6 +426,7 @@
       recarregar().catch(function (er) { alert('Não deu: ' + er.message); });
       return;
     }
+    if (t.dataset.pdf) { anexarPdf(t); return; }
     if (t.dataset.aba) { aba = t.dataset.aba; sel = null; desenhar(); return; }
     if (t.dataset.ver) { sel = Number(t.dataset.ver); desenhar(); var d = document.getElementById('pp-detalhe'); if (d && d.scrollIntoView) d.scrollIntoView({ block: 'start' }); return; }
     if (t.dataset.aprovar) {
