@@ -426,3 +426,9 @@ main.an::before, main.an > section::before, main.an > section::after { content: 
 .an-fund-vagas { font-weight: 700; color: #7A6131; }
 .an-fund-btn { justify-self: start; }
 @media (max-width: 560px) { .an-fund-btn { justify-self: stretch; text-align: center; justify-content: center; } }
+/* Piloto por escrito (23/11/2026) */
+.an-passos.an-piloto-passos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.an-piloto-compromisso { margin: 22px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.an-piloto-compromisso p { margin: 0; padding: 18px 20px; border-radius: 14px; background: var(--an-cartao); border-left: 4px solid var(--an-ouro-esc); font-size: 15.5px; line-height: 1.55; color: var(--an-txt2); }
+.an-piloto-compromisso b { color: var(--an-ob); }
+@media (max-width: 900px) { .an-passos.an-piloto-passos, .an-piloto-compromisso { grid-template-columns: minmax(0, 1fr); } }

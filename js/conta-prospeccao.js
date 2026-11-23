@@ -200,10 +200,11 @@
     // oferta de fundador só aparece enquanto houver vaga (some sozinha quando as 3 forem usadas)
     var vagas = Math.max(0, 3 - FUND.length);
     var fund = function (t) { return vagas ? [t] : []; };
-    var ben = '*Por que vale a pena ter o Anshur:*\n\n✅ *Mais lucro em cada troca:* o teto do usado aparece antes de fechar, e uma troca mal avaliada costuma custar milhares.\n\n✅ *Dinheiro girando, não parado no pátio.*\n\n✅ *Controle de todas as lojas sem estar em todas:* acima do teto, só com a sua aprovação.\n\n✅ *Prova antes de pagar:* o teste é grátis, com as trocas de vocês.';
+    var ben = '*Por que vale a pena ter o Anshur:*\n\n✅ *Mais lucro em cada troca:* o teto do usado aparece antes de fechar, e uma troca mal avaliada costuma custar milhares.\n\n✅ *Dinheiro girando, não parado no pátio.*\n\n✅ *Controle de todas as lojas sem estar em todas:* acima do teto, só com a sua aprovação.\n\n✅ *A gente configura a sua nota e importa o seu sistema junto com você, por escrito, sem reunião:* resposta em até 4 horas úteis e, em até 10 dias úteis, a revenda está rodando.\n\n✅ *A nota é sua:* sai pelo emissor que você já usa, o Anshur só manda os dados da venda para ele. Se a SEFAZ pedir algum ajuste num código, a gente corrige no mesmo dia, por escrito.\n\n✅ *Prova antes de pagar:* o teste é grátis, com as trocas de vocês.';
     if (acao === 'retomada1') return [
       'Oi! Voltando rapidinho sobre o usado da troca.',
       'Uma conta simples: se em uma troca de trator a revenda paga R$ 20 mil acima do que devia, esse valor sai direto do lucro da venda. Basta evitar isso *uma vez* para pagar 10 meses do Anshur (R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade).',
+      'E a implantação não toma o seu tempo: a gente configura a sua nota e importa o seu sistema junto com você, por escrito, sem reunião. A nota continua saindo pelo emissor que vocês já usam.',
       'Muita revenda me diz que já avalia bem. O teste mostra em 5 minutos, com as trocas de vocês, se é verdade:\n' + lt].concat(fund(
       'E ainda há vaga na oferta de fundador: as 3 primeiras revendas usam o *1º mês sem custo*.'), [
       'Faz sentido fazer o teste ainda essa semana?']).join('\n\n');
