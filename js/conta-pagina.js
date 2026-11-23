@@ -3,6 +3,7 @@
   var C = window.BR_CONTA, raiz = document.getElementById('conta-raiz');
   if (!C || !raiz) return;
   var esc = C.esc, reais = C.reais, resumo = document.getElementById('conta-resumo');
+  function appUrl(app) { return app === 'anshur' ? 'anshur/' : 'app/' + esc(app) + '/'; } // o Anshur fica em /anshur/, os outros em app/<sistema>/
   var params = new URLSearchParams(location.search), volta = params.get('volta');
   if (volta && !/^[A-Za-z0-9_-]{1,64}$/.test(volta)) volta = null; /* id de assinatura: só caracteres seguros (UUID ou número) */
   var NOMES = { teste: 'Teste grátis', assinatura: 'Assinatura', compra: 'Compra' };
@@ -91,7 +92,7 @@
     if (a.motivo) linhas.push(a.motivo);
     var fim = [a.teste_ate, a.pago_ate].filter(Boolean).sort().pop();
     var pode = a.app && (['teste', 'ativa', 'paga'].indexOf(a.status) >= 0 || (a.status === 'cancelada' && fim && fim >= hojeISO)); /* cancelada: só enquanto o período pago vale */
-    var abrir = pode ? '<a class="btn btn-primary" href="app/' + esc(a.app) + '/">Abrir o sistema <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>' : '';
+    var abrir = pode ? '<a class="btn btn-primary" href="' + appUrl(a.app) + '">Abrir o sistema <svg class="ico ico-move" aria-hidden="true"><use href="img/icones.svg#i-arrow-right"/></svg></a>' : '';
     var cancelar = !a.brinde && a.tipo !== 'compra' && ['teste', 'ativa'].indexOf(a.status) >= 0 ? '<button type="button" class="conta-link" data-cancelar="' + esc(a.id) + '">' + (a.status === 'teste' ? 'Cancelar o teste' : 'Cancelar a assinatura') + '</button>' : '';
     var assinar = a.app && a.tipo !== 'compra' && !(a.brinde && a.status === 'cancelada' && fim && fim >= hojeISO) && (a.status === 'recusada' || (a.status === 'cancelada' && (!fim || fim < hojeISO))) ? '<button type="button" class="btn btn-primary" data-assinar="a-sis-' + esc(a.app) + '">Assinar por ' + reais(a.valor) + '/mês</button>' : '';
     var foto = '', nomeSis = String(a.nome).replace(/ \((aluguel|assinatura|compra)\)$/, ''), vid = ''; // 18/11: vídeos tutoriais retirados
@@ -108,7 +109,7 @@
     var tk = pode && TOKENS[a.app] && !tokenMostrado[a.app] ? TOKENS[a.app] : null; if (tk) tokenMostrado[a.app] = true;
     var token = tk ? '<div class="conta-token"><small>Token de dono</small><code>' + esc(tk.token) + '</code><span>' + (tk.ativado ? 'Já ativado em ' + data(tk.ativado) + '. Não precisa usar de novo.' : 'Use uma vez, ao criar a sua empresa no sistema. Não compartilhe: a equipe entra pelos convites.') + '</span></div>' : '';
     return '<article data-busca="' + esc(normal((a.nome || '') + ' ' + (CAT[a.app] ? CAT[a.app][0] : ''))) + '" class="conta-item' + (foto ? ' com-foto' : '') + apagado + '">' + foto + '<div class="conta-item-corpo"><div class="conta-item-cab"><div class="conta-item-titulo">' + mini + '<div><small>' + esc(a.brinde ? 'Brinde' : NOMES[a.tipo] || a.tipo) + ' · desde ' + data(a.criado) + '</small><h3>' + esc(nomeSis) + '</h3></div></div>' + etiqueta(a) + '</div>' +
-      barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + (pode ? '<p class="conta-ajuda">' + 'Prefere como programa? <a href="app/' + esc(a.app) + '/?instalar=1">Instale no computador ou no celular</a>: ganha ícone e abre em janela própria. ' + 'Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda.</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + pixBt + cancelar + '</div></div></article>';
+      barraTeste(a) + (linhas.length ? '<p>' + linhas.map(esc).join('<br>') + '</p>' : '') + token + (pode ? '<p class="conta-ajuda">' + 'Prefere como programa? <a href="' + appUrl(a.app) + '?instalar=1">Instale no computador ou no celular</a>: ganha ícone e abre em janela própria. ' + 'Ficou alguma dúvida? Escreva para <a href="mailto:blueroseexpressoficial@gmail.com">blueroseexpressoficial@gmail.com</a>: respondemos em até 1 dia útil e marcamos uma ajuda.</p>' : '') + '<div class="conta-item-bt">' + abrir + assinar + pixBt + cancelar + '</div></div></article>';
   }
   function mostrarResumo(l) {
     if (!resumo) return;
@@ -179,8 +180,8 @@
       var l = j.assinaturas || [], v = !doCache && volta && l.filter(function (x) { return x.id === volta; })[0], aviso = '';
       TOKENS = j.tokens || {}; tokenMostrado = {};
       if (v) {
-        aviso = v.status === 'teste' ? '<div class="conta-aviso ok">Cartão cadastrado. O seu teste grátis está valendo até ' + data(v.teste_ate) + '. <a href="app/' + esc(v.app) + '/">Abrir o sistema agora →</a></div>'
-          : v.status === 'ativa' || v.status === 'paga' ? '<div class="conta-aviso ok">Pagamento confirmado. Obrigado!' + (v.app ? ' <a href="app/' + esc(v.app) + '/">Abrir o sistema →</a>' : '') + '</div>'
+        aviso = v.status === 'teste' ? '<div class="conta-aviso ok">Cartão cadastrado. O seu teste grátis está valendo até ' + data(v.teste_ate) + '. <a href="' + appUrl(v.app) + '">Abrir o sistema agora →</a></div>'
+          : v.status === 'ativa' || v.status === 'paga' ? '<div class="conta-aviso ok">Pagamento confirmado. Obrigado!' + (v.app ? ' <a href="' + appUrl(v.app) + '">Abrir o sistema →</a>' : '') + '</div>'
           : v.status === 'recusada' ? '<div class="conta-aviso er">' + esc(v.motivo || 'Não foi possível liberar o teste.') + '</div>'
           : '<div class="conta-aviso">Ainda não recebemos a confirmação do Mercado Pago. Se você terminou o pagamento, ela chega em alguns minutos: atualize esta página.</div>';
         history.replaceState(null, '', 'conta.html');
