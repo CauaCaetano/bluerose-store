@@ -122,7 +122,7 @@ export function criarConta({ real }) {
     async entrar(email, senha) { const c = await sb(); const { data, error } = await c.auth.signInWithPassword({ email: limpa(email, 120), password: String(senha || '') }); if (error) throw new Error(/invalid/i.test(error.message) ? 'E-mail ou senha não conferem' : /confirm/i.test(error.message) ? 'Confirme o e-mail pelo link que mandamos e entre de novo' : 'Não deu para entrar agora'); await montar(data.user); return { ok: true }; },
     async criar(nome, email, senha) {
       const c = await sb(); const { data, error } = await c.auth.signUp({ email: limpa(email, 120), password: String(senha || ''), options: { emailRedirectTo: volta(), data: { nome: limpa(nome, 80), origem: 'popina-cardapio' } } });
-      if (error) throw new Error(/registered|exists/i.test(error.message) ? 'Este e-mail já tem conta. Use "Entrar".' : /password/i.test(error.message) ? 'A senha precisa ter pelo menos 6 caracteres' : 'Não deu para criar a conta agora');
+      if (error) throw new Error(/registered|exists/i.test(error.message) ? 'Este e-mail já tem conta. Use "Entrar".' : /password/i.test(error.message) ? 'A senha precisa ter pelo menos 8 caracteres e não pode ser uma senha conhecida em vazamentos' : 'Não deu para criar a conta agora');
       if (!data.session) return { ok: true, confirmar: true };
       await c.from('popina_clientes').upsert({ user_id: data.user.id, nome: limpa(nome, 80) }); await montar(data.user); return { ok: true };
     },

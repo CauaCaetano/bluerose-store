@@ -5,12 +5,12 @@
 // Todo pedido também pode ir para o WhatsApp do restaurante (link wa.me com o pedido escrito).
 // COMPATIBILIDADE: o pedido continua com os mesmos campos (nome, tel, end, bairro, pagar, troco, itens). Os novos (ref, cupom, desconto,
 // taxa, total, agendado) só se somam; o que o sistema do dono ainda não lê vai também escrito no endereço, no pagamento e na observação.
-import { ico, folha, toast, $, $$ } from './ui.js?v=61';
-import * as som from './som.js?v=61';
+import { ico, folha, toast, $, $$ } from './ui.js?v=62';
+import * as som from './som.js?v=62';
 // cardápio do cliente: só um toque leve ao pôr na sacola e ao mandar o pedido; mudo no link "Som" do topo (vale neste celular)
 som.chaveSom('popina-som-cli', false);
-import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=61';
-import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=61';
+import { formOpcoes, abertoAgora, textoHorarios, precoTamP, DIAS } from './opcoes.js?v=62';
+import { criarConta, buscarCep, minhaLocalizacao, casarBairro, endLimpo, endLinha, juntarEnd } from './conta-cliente.js?v=62';
 
 const q = new URLSearchParams(location.search);
 const R = /^[0-9a-f-]{36}$/i.test(q.get('r') || '') ? q.get('r') : '';
@@ -618,7 +618,7 @@ function entrarConta({ aoEntrar, aba = 'entrar' } = {}) {
     <form data-form novalidate>
       ${modoC === 'criar' ? '<label class="cx-campo"><span>Seu nome</span><input name="nome" maxlength="80" autocomplete="name" required></label>' : ''}
       <label class="cx-campo"><span>E-mail</span><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="120" required></label>
-      <label class="cx-campo"><span>Senha${modoC === 'criar' ? ' <i>(mínimo 6)</i>' : ''}</span><input name="senha" type="password" minlength="6" autocomplete="${modoC === 'criar' ? 'new-password' : 'current-password'}" required></label>
+      <label class="cx-campo"><span>Senha${modoC === 'criar' ? ' <i>(mínimo 8)</i>' : ''}</span><input name="senha" type="password" minlength="8" autocomplete="${modoC === 'criar' ? 'new-password' : 'current-password'}" required></label>
       <p class="cx-cep-st erro" data-erro role="alert"></p>
       <button type="submit" class="cx-bt cheio largo" data-ir><span>${modoC === 'criar' ? 'Criar minha conta' : 'Entrar'}</span></button>
     </form>
@@ -632,7 +632,7 @@ function entrarConta({ aoEntrar, aba = 'entrar' } = {}) {
         const erro = (m) => { $('[data-erro]', f).textContent = m; };
         if (modoC === 'criar' && nome.length < 2) return erro('Escreva seu nome');
         if (!/^\S+@\S+\.\S+$/.test(email)) return erro('Confira o e-mail');
-        if (conta.real && senha.length < 6) return erro('A senha precisa ter pelo menos 6 caracteres');
+        if (conta.real && senha.length < 8) return erro('A senha precisa ter pelo menos 8 caracteres');
         const bt = $('[data-ir]', f); bt.disabled = true; erro('');
         try {
           const r = modoC === 'criar' ? await conta.criar(nome, email, senha) : await conta.entrar(email, senha);
@@ -699,7 +699,7 @@ async function posConta() {
 async function iniciar() {
   if (!mesa) { conta = criarConta({ real: !!R }); conta.ouvir(() => { if (M) topo(); }); }
   if (!R) {
-    loja = await import('./loja.js?v=61'); doExemplo();
+    loja = await import('./loja.js?v=62'); doExemplo();
     loja.ouvir(() => { doExemplo(); if (!document.querySelector('.folha-fundo, .cx-tela-fundo')) { aplicarCor(); topo(); lista(); } });
     tudo(); posConta(); return;
   }

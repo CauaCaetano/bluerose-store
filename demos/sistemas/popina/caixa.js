@@ -2,19 +2,19 @@
 // sangria e suprimento, e o fechamento do dia com o resumo pronto para mandar no WhatsApp do dono.
 import { db, t, din, r2, num, vir, tempo, hora, conta, comanda, pagar, partes, darDesconto, ondeComanda, quemPediu, caixaResumo, abrirCaixa, movimento, fecharCaixa,
   regras, temPin, euSou, setEuSou, quemAgora, grava, FORMA_FIADO, registrarFiado, receberFiado, clientesFiado, saldoFiado, nomeFiado, soDig, fone, zap, vendaDeHoje, cancelarVenda,
-  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=61';
-import { registrar, acao, ir } from './nucleo.js?v=61';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=61';
-import * as som from './som.js?v=61';
-import { pix } from './pix.js?v=61';
+  inicioDoDia, pagamentosVenda, itensValidos, pagoPorItem, livreDoItem, valorDosItens, valorItem } from './loja.js?v=62';
+import { registrar, acao, ir } from './nucleo.js?v=62';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=62';
+import * as som from './som.js?v=62';
+import { pix } from './pix.js?v=62';
 import { qrSVG } from '../base/qr.js';
-import { blocoTotais, voltar, rotaComanda } from './salao.js?v=61';
-import { novoPedidoFolha } from './pedidos.js?v=61';
-import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=61';
-import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=61';
-import { blocoNotaVenda, etiquetaNota, botaoNota, modoNf, cancelarNota, minutosParaCancelar } from './nota-fiscal.js?v=61';
-import { temQuilo, imprimirEtiquetaQuilo } from './quilo.js?v=61';
-import { maquininhaLigada, cobrarNaMaquininha } from './maquininha.js?v=61';
+import { blocoTotais, voltar, rotaComanda } from './salao.js?v=62';
+import { novoPedidoFolha } from './pedidos.js?v=62';
+import { precisaGerente, limiteDesconto, podeCancelar } from './equipe.js?v=62';
+import { abrirImpressao, htmlRecibo, imprimirConta } from './imprimir.js?v=62';
+import { blocoNotaVenda, etiquetaNota, botaoNota, modoNf, cancelarNota, minutosParaCancelar } from './nota-fiscal.js?v=62';
+import { temQuilo, imprimirEtiquetaQuilo } from './quilo.js?v=62';
+import { maquininhaLigada, cobrarNaMaquininha } from './maquininha.js?v=62';
 
 const FORMAS = [['Pix', 'pix'], ['Dinheiro', 'dinheiro'], ['Cartão de débito', 'cartao'], ['Cartão de crédito', 'cartao'], [FORMA_FIADO, 'etiqueta']];
 const rotuloForma = (f) => (f === FORMA_FIADO ? 'Fiado' : f.replace('Cartão de débito', 'Débito').replace('Cartão de crédito', 'Crédito'));

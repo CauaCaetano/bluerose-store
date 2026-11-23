@@ -9,7 +9,7 @@
 // Nada vai para a nuvem: a escolha da porta e a velocidade ficam só neste computador (localStorage popina-balanca), porque
 // a balança está ligada nele. Sem balança, o peso continua sendo digitado como antes.
 // Demonstração: "Testar com a balança simulada" responde um peso de exemplo (o mesmo caminho do cabo, sem porta).
-import { CONTA } from './loja.js?v=61';
+import { CONTA } from './loja.js?v=62';
 
 const CHAVE = 'popina-balanca';
 const lerCfg = () => { try { return JSON.parse(localStorage.getItem(CHAVE) || '{}') || {}; } catch { return {}; } };

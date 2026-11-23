@@ -4,11 +4,11 @@
 // a etiqueta sai sozinha (se marcado) e o botão "Etiqueta do quilo" fica em destaque para reimprimir.
 // Também liga o botão "Ler da balança" no peso do lançar (salao.js) e a seção Configurações › Balança.
 // Campos novos só: comanda.etiquetaQuilo (true quando veio por aqui). Nada do que já existe muda.
-import { db, t, din, r2, ativos, prod, novoPedido, adicionarItem, venderDireto, hora, quemPediu, CONTA } from './loja.js?v=61';
-import { acao, ir } from './nucleo.js?v=61';
-import { ico, folha, toast, $, $$ } from './ui.js?v=61';
-import { abrirImpressao } from './imprimir.js?v=61';
-import { temSerial, balancaLigada, balancaSimulada, lerPeso, MSG, conectarBalanca, desconectarBalanca, reconectarBalanca, usarSimulada, balancaCfg, trocarVelocidade, VELOCIDADES } from './balanca.js?v=61';
+import { db, t, din, r2, ativos, prod, novoPedido, adicionarItem, venderDireto, hora, quemPediu, CONTA } from './loja.js?v=62';
+import { acao, ir } from './nucleo.js?v=62';
+import { ico, folha, toast, $, $$ } from './ui.js?v=62';
+import { abrirImpressao } from './imprimir.js?v=62';
+import { temSerial, balancaLigada, balancaSimulada, lerPeso, MSG, conectarBalanca, desconectarBalanca, reconectarBalanca, usarSimulada, balancaCfg, trocarVelocidade, VELOCIDADES } from './balanca.js?v=62';
 
 const lerLocal = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 const gravarLocal = (k, v) => { try { localStorage.setItem(k, v); } catch { /* nada */ } };
