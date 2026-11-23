@@ -196,34 +196,54 @@
   function mensagem(p, acao) {
     if (p.produto === 'safra') return mensagemSafra(p, acao);
     if (SIS[p.produto]) return mensagemSistema(p, acao);
-    var lugar = p.cidade + '/' + p.uf, l = link(p), lt = linkTeste(p), e = p.empresa;
+    // 23/11/2026 (v3): linha reta (Belfort) sem mentir nem pressão falsa: contexto local com os anúncios públicos da revenda,
+    // pergunta que qualifica, cena do resultado, benefícios em dinheiro/tempo/controle, características em linha, risco zero,
+    // fechamento sim/não e opt-out. Retomada 1 = objeção "já tenho sistema/DMS"; retomada 2 = tira a pressão e resume.
+    // O PDF vai sem ?p=: PDF não roda o rastro (js/rastro-prospeccao.js), o parâmetro só sujaria o link.
+    var lugar = p.cidade + '/' + p.uf, l = link(p), lt = linkTeste(p), e = String(p.empresa || '').split(' - ')[0].split(' (')[0];
+    var pdf = SITE + 'docs/anshur-apresentacao.pdf';
+    var u = Number(p.anuncios_usados) || 0, pt = p.pontos || {};
+    var u90 = pt.estimado === false && Number(pt.usados_90d) >= 10 ? Number(pt.usados_90d) : 0;
     // oferta de fundador só aparece enquanto houver vaga (some sozinha quando as 3 forem usadas)
     var vagas = Math.max(0, 3 - FUND.length);
     var fund = function (t) { return vagas ? [t] : []; };
-    var ben = '*Por que vale a pena ter o Anshur:*\n\n✅ *Mais lucro em cada troca:* o teto do usado aparece antes de fechar, e uma troca mal avaliada costuma custar milhares.\n\n✅ *Dinheiro girando, não parado no pátio.*\n\n✅ *Controle de todas as lojas sem estar em todas:* acima do teto, só com a sua aprovação.\n\n✅ *A gente configura a sua nota e importa o seu sistema junto com você, por escrito, sem reunião:* resposta em até 4 horas úteis e, em até 10 dias úteis, a revenda está rodando.\n\n✅ *A nota é sua:* sai pelo emissor que você já usa, o Anshur só manda os dados da venda para ele. Se a SEFAZ pedir algum ajuste num código, a gente corrige no mesmo dia, por escrito.\n\n✅ *Prova antes de pagar:* o teste é grátis, com as trocas de vocês.';
+    var links = 'Teste com as trocas de vocês (grátis, sem cadastro): ' + lt + '\nDemonstração: ' + l + '\nApresentação em PDF: ' + pdf;
+    var ben = '*O que muda no caixa e no dia a dia:*\n\n' + [
+      '✅ *Margem protegida na troca:* o vendedor vê o teto do usado antes de fechar; acima dele, só com a sua aprovação. Evitar pagar R$ 20 mil a mais em *uma* troca já paga 10 meses do Anshur.',
+      '✅ *Menos juro de máquina parada:* cada usado mostra há quantos dias está no pátio e quanto já custou de floor plan, com o aviso de "manter ou vender agora" antes de a margem sumir.',
+      '✅ *Giro mais rápido:* o sistema casa cada usado com os compradores que procuram aquele tipo e gera o anúncio pronto.',
+      '✅ *Tempo de volta:* a avaliação sai em minutos, sem ligação nem planilha, e o relatório do dono vem pronto (dia, semana e mês).',
+      '✅ *Controle de todas as lojas sem estar em todas:* cada avaliação fica registrada, com quem aprovou e por quanto.',
+      '✅ *Não é chute:* num teste com 859 anúncios reais escondidos, a estimativa do Anshur errou cerca de 30% menos que a média do mesmo modelo.'].join('\n\n');
+    var car = '*O que vem no Anshur:* avaliação de troca com teto · estoque com idade do pátio · floor plan e juros · aprovação por alçada · compradores e anúncios · oficina e preparo · peças · nota fiscal pelo emissor que vocês já usam · importação do sistema atual · todas as lojas · celular e computador.';
+    var risco = '*Risco zero:* o piloto é por escrito, sem reunião. A gente importa o seu histórico e configura a nota junto com você, responde em até 4 horas úteis e, em até 10 dias úteis, a revenda está rodando. Depois, R$ 2.000/mês cobrindo todas as lojas, sem taxa de implantação e sem fidelidade: cancela quando quiser.';
     if (acao === 'retomada1') return [
-      'Oi! Voltando rapidinho sobre o usado da troca.',
-      'Uma conta simples: se em uma troca de trator a revenda paga R$ 20 mil acima do que devia, esse valor sai direto do lucro da venda. Basta evitar isso *uma vez* para pagar 10 meses do Anshur (R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade).',
-      'E a implantação não toma o seu tempo: a gente configura a sua nota e importa o seu sistema junto com você, por escrito, sem reunião. A nota continua saindo pelo emissor que vocês já usam.',
-      'Muita revenda me diz que já avalia bem. O teste mostra em 5 minutos, com as trocas de vocês, se é verdade:\n' + lt].concat(fund(
+      'Oi! Voltando rapidinho sobre o usado da troca na ' + e + '.',
+      'Muita revenda me responde: "já tenho sistema". Faz sentido, e o Anshur não pede para trocar nada: ele entra *ao lado* do seu DMS ou ERP (TOTVS, Dealernet, NBS, Linx, Sankhya ou planilha), importa o arquivo que ele já exporta e cuida só do que o sistema de gestão não faz: o teto do usado antes de fechar, o custo de cada dia parado e a aprovação do dono. A nota continua saindo pelo emissor que vocês já usam.',
+      'Conta rápida: se o pátio tem R$ 5 milhões em usados parados, a 1,2% ao mês são uns R$ 2 mil por dia de juros. E evitar pagar R$ 20 mil a mais em uma única troca paga 10 meses do Anshur.',
+      'O teste mostra em 5 minutos, com 5 trocas antigas de vocês, quanto teria ficado no caixa (nada sai do seu computador):\n' + lt].concat(fund(
       'E ainda há vaga na oferta de fundador: as 3 primeiras revendas usam o *1º mês sem custo*.'), [
-      'Faz sentido fazer o teste ainda essa semana?']).join('\n\n');
+      'Faz sentido fazer o teste ainda essa semana? Um sim ou um não já me ajuda.']).join('\n\n');
     if (acao === 'retomada2') return [
       'Oi! Última mensagem, prometo.',
       'Não vou insistir: se agora não é o momento, tudo bem. Só deixo o resumo para quando precisar.',
-      ben,
-      'Contratação direto pelo site, sem reunião: R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade. Cancela quando quiser.'].concat(fund(
+      '*Anshur em uma linha:* teto do usado antes de fechar a troca, custo de cada dia de máquina parada e todas as lojas sob o seu controle, ao lado do sistema que vocês já usam.',
+      car,
+      'R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade. Piloto por escrito, rodando em até 10 dias úteis.'].concat(fund(
       'Ainda dá para pegar uma das vagas de fundador: *1º mês sem custo*.'), [
-      'Teste com as trocas de vocês: ' + lt + '\nDemonstração: ' + l,
+      links,
       'Se um dia quiser, é só responder esta mensagem. Abraço!\nBlue Rose Express']).join('\n\n');
     return ['Olá, tudo bem?',
-      'Aqui é da Blue Rose Express, de Orlândia. Encontrei a ' + e + ', que trabalha com máquinas usadas em ' + lugar + ', e quis te mostrar uma coisa rápida.',
-      'Hoje vocês definem quanto pagar no usado da troca pela experiência do avaliador ou pelas trocas que já venderam? Pergunto porque em revenda boa parte do lucro da máquina nova vai embora no usado: paga-se um pouco a mais para fechar, a máquina fica parada no pátio e, quando vende, a margem já sumiu.',
-      'Imagina o vendedor abrir a avaliação e já ver o valor máximo que dá para pagar naquele usado sem perder dinheiro, com base nas trocas que vocês mesmos já venderam. É isso que o Anshur faz.',
+      'Aqui é da Blue Rose Express, de Orlândia/SP. Vi a ' + e + ', em ' + lugar + (u >= 10 ? ', com uns ' + u + ' usados anunciados' + (u90 ? ' (pelo que dá para ver nos anúncios, uns ' + u90 + ' estão no ar há mais de 3 meses)' : '') : '') + ', e quis te mostrar uma coisa rápida.',
+      'Uma pergunta: hoje, como vocês definem quanto pagar no usado da troca, e quanto tempo, em média, uma máquina fica no pátio até vender?',
+      'Pergunto porque é ali que a revenda costuma perder dinheiro sem ver: paga um pouco a mais no usado para fechar o novo, a máquina fica parada, o juro do floor plan corre todo dia e, quando ela vende, a margem já foi. Conta simples: cada R$ 1 milhão parado no pátio custa uns R$ 400 por dia (1,2% ao mês).',
+      'Imagina o vendedor abrir a avaliação no celular e ver, antes de fechar, o máximo que dá para pagar naquele usado sem perder margem. E você, de onde estiver, vendo quais máquinas estão paradas há mais tempo e quanto cada uma já custou. É isso que o Anshur faz.',
       ben,
-      'Dá para provar isso com os números de vocês, de graça e sem cadastro: coloque 5 trocas antigas e veja, troca por troca, quanto teria ficado no caixa (leva uns 5 minutos e nada sai do seu computador):\n' + lt].concat(fund(
-      'E as 3 primeiras revendas que entrarem usam o *1º mês sem custo* (oferta de fundador).'), [
-      'Posso te mandar o passo a passo do teste?',
+      car,
+      risco].concat(fund(
+      'E as 3 primeiras revendas usam o *1º mês sem custo* (oferta de fundador, ainda com vaga).'), [
+      'Dá para provar com os números de vocês, de graça e sem cadastro: coloque 5 trocas antigas e veja, troca por troca, quanto teria ficado no caixa (leva uns 5 minutos e nada sai do seu computador).\n\n' + links,
+      'Posso te mandar o passo a passo do teste? Um sim ou um não já me ajuda.',
       'Se não fizer sentido, me avisa que eu não mando mais.']).join('\n\n');
   }
 
