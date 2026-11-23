@@ -5,7 +5,8 @@
 // assistente, painel do dono, configurações e assinatura. Dados de exemplo neste aparelho (?novo recomeça).
 
 import * as M from './midia.js?v=1';
-import * as NF from './nota-servico.js?v=1'; // 22/11/2026: nota fiscal de serviço (NFS-e)
+import * as NF from './nota-servico.js?v=1';
+import * as IMP from './importar.js?v=1'; // 22/11/2026: trazer contatos, Google Agenda (.ics) e foto do caderno (só acrescenta) // 22/11/2026: nota fiscal de serviço (NFS-e)
 const CHAVE = 'veltria-agenda-essencial-v3'; // NÃO MUDAR: chave dos dados da assinante (igual em base/versoes.js)
 const din = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const t = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -164,6 +165,7 @@ function inicial() {
 let db = (() => { if (new URLSearchParams(location.search).has('novo')) localStorage.removeItem(CHAVE); try { return JSON.parse(localStorage.getItem(CHAVE)) || inicial(); } catch { return inicial(); } })();
 window.veltriaDados = () => db; // modo conta: começar do zero e resumo para a IA
 NF.liga({ db: () => db, grava: () => grava(), toast: (m) => toast(m), folha: (h, l) => folha(h, l), t, din, cli: (id) => cli(id), serv: (id) => serv(id), preco: (a) => preco(a), iso, hh, mostra: () => mostra() });
+IMP.liga({ db: () => db, grava: () => grava(), toast: (m) => toast(m), folha: (h, l) => folha(h, l), t, sa, uid, iso, deIso, hh, lerHora, serv: (id) => serv(id), ocupado: (d, h, m, x) => ocupado(d, h, m, x), mostra: () => mostra() });
 const grava = () => { try { localStorage.setItem(CHAVE, JSON.stringify(db)); } catch { toast('Sem espaço no celular.'); } };
 const serv = (id) => db.servicos.find((s) => s.id === id) || db.servicos[0];
 const cli = (id) => db.clientes.find((c) => c.id === id) || { nome: '—', tel: '' };
@@ -307,7 +309,7 @@ const T = {
   clientes() {
     const l = db.clientes.map((c) => ({ ...c, s: serv(c.serv), atraso: -c.ultima - serv(c.serv).retorno, marcada: db.ags.some((a) => a.cli === c.id && a.dia >= 0 && a.st !== 'cancelado') })).sort((a, b) => (b.atraso > 0 && !b.marcada) - (a.atraso > 0 && !a.marcada) || b.atraso - a.atraso);
     const chamar = l.filter((c) => c.ultima && c.atraso >= 0 && !c.marcada);
-    return `<h1>Clientes</h1><p class="sub">${db.clientes.length} clientes. ${chamar.length ? `${chamar.length} já passaram do tempo de voltar e não têm horário marcado (aparecem primeiro).` : 'Todos em dia.'}</p><input type="search" id="busca-cli" class="busca" placeholder="Procurar cliente pelo nome" aria-label="Procurar cliente"><button type="button" class="bt cheio largo" data-acao="add-cliente" style="margin-bottom:12px">+ Adicionar cliente</button>
+    return `<h1>Clientes</h1><p class="sub">${db.clientes.length} clientes. ${chamar.length ? `${chamar.length} já passaram do tempo de voltar e não têm horário marcado (aparecem primeiro).` : 'Todos em dia.'}</p><input type="search" id="busca-cli" class="busca" placeholder="Procurar cliente pelo nome" aria-label="Procurar cliente"><div class="linha imp-bts"><button type="button" class="bt cheio" data-acao="add-cliente">+ Adicionar cliente</button><button type="button" class="bt" data-acao="importar">Trazer contatos e agenda</button></div>
       ${l.map((c) => `<div class="cartao" data-nome-cli="${t(sa(c.nome))}"><div style="display:flex;justify-content:space-between;gap:10px"><div><button type="button" class="nome-cli" data-ficha="${c.id}"><b>${t(c.nome)}</b>${niverHoje(c) ? ' <span class="selo at">aniversário hoje</span>' : ''}</button><small class="mini" style="display:block">${c.ultima ? `${t(c.s.nome)} há ${-c.ultima} dias · volta a cada ${c.s.retorno} dias` : 'cliente novo'}${c.valor != null ? ` · paga ${din(c.valor)}` : ''}${mensal(c) ? ' · paga no fim do mês' : ''}${c.faltas ? ` · ${c.faltas} falta(s)` : ''}</small></div>${c.marcada ? '<span class="selo ok">tem horário</span>' : !c.ultima ? '<span class="selo">novo</span>' : c.atraso >= 0 ? '<span class="selo rs">hora de chamar</span>' : `<span class="selo">em ${-c.atraso} dias</span>`}</div>
         <div class="linha">${c.ultima && !c.marcada && c.atraso >= 0 && c.tel ? `<a class="bt pq rose" target="_blank" rel="noopener" href="${zap(c.tel, msg('retorno', { nome: c.nome.split(' ')[0], profissional: db.pro.split(' ')[0], dias: -c.ultima, servico: c.s.nome.toLowerCase(), link: LINK }))}">Chamar no WhatsApp</a>` : ''}<button type="button" class="bt pq" data-marca-cli="${c.id}">Marcar horário</button><button type="button" class="bt pq" data-ficha="${c.id}">Ficha</button><button type="button" class="bt pq" data-edita-cli="${c.id}">Editar</button></div></div>`).join('')}`;
   },
@@ -886,6 +888,7 @@ const ACOES = {
   'fm-excel': () => exportaMes(fm.n ?? mesDe(0), 'xlsx'),
   'fm-csv': () => exportaMes(fm.n ?? mesDe(0), 'csv'),
   'sem-remarcar': () => { rasc = RASC(); location.hash = '#dia'; },
+  importar: () => IMP.abrir(),
   'add-cliente': () => folha(`<h2>Adicionar cliente</h2><form><label class="campo">Nome<input name="n" required autocomplete="off"></label><label class="campo">WhatsApp<input name="t" inputmode="tel"></label><label class="campo">Quanto vai pagar (opcional)<input name="v" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Deixe vazio para usar o preço do serviço"></label><label class="campo">Serviço de costume<select name="s">${db.servicos.map((x) => `<option value="${x.id}">${t(x.nome)} · ${din(x.preco)}</option>`).join('')}</select></label><label class="campo">Forma de pagamento<select name="p"><option value="atendimento">No atendimento</option><option value="mes" ${db.pagPadrao === 'mes' ? 'selected' : ''}>No fim do mês</option></select></label><label class="campo">Aniversário (dia/mês, opcional)<input name="b" inputmode="numeric" maxlength="5" placeholder="12/03"></label><label class="campo">Anotação (opcional)<input name="o" placeholder="Ex.: prefere de manhã"></label><button class="bt cheio largo">Salvar cliente</button></form>`, (f, fecha) => f.querySelector('form').addEventListener('submit', (e) => {
     e.preventDefault(); const x = new FormData(e.target), nome = String(x.get('n')).trim(); if (!nome) return;
     if (db.clientes.some((c) => sa(c.nome) === sa(nome))) { toast('Já existe um cliente com esse nome.'); return; }

@@ -707,3 +707,20 @@ h2 .selo-ifood{font-size:14px;margin-right:6px;vertical-align:middle}
 .nf-guia small{display:block;color:var(--mudo)}
 .nf-passo{font-size:14px;font-weight:800;color:var(--mudo);text-transform:uppercase;letter-spacing:.04em}
 .nf-perg{font-size:22px;margin:4px 0 12px}
+/* trazer o que já usa: cardápio por foto, texto ou planilha e clientes pelos contatos (importar.js) */
+.imp-opcoes{display:grid;gap:10px}
+.imp-op{display:flex;align-items:flex-start;gap:14px;width:100%;text-align:left;padding:16px;border:1px solid var(--linha2);border-radius:var(--raio);background:var(--papel);color:var(--tinta);font:inherit;cursor:pointer;min-height:64px}
+.imp-op:hover,.imp-op:focus-within{border-color:var(--loja);background:var(--loja-suave)}
+.imp-op .ico{flex:none;width:28px;height:28px;color:var(--loja-tinta)}
+.imp-op b{display:block;font-size:17px}.imp-op small{display:block;color:var(--mudo);font-size:14px;margin-top:2px}
+.imp-passo{margin-top:10px;padding:10px 14px;border-radius:var(--raio-bt);background:var(--aviso);color:var(--aviso-tinta);font-weight:700}
+.imp-it{border:1px solid var(--linha);border-radius:var(--raio);padding:12px;margin-bottom:10px;background:var(--papel)}
+.imp-it.off{opacity:.5}
+.imp-it-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.imp-marca{display:inline-flex;align-items:center;gap:8px;font-weight:800;min-height:44px;cursor:pointer}
+.imp-marca input,.imp-ct input[type=checkbox]{width:22px;height:22px;accent-color:var(--loja)}
+.etq.ok{background:var(--ok-suave);color:var(--ok-tinta)}
+.imp-cts li.imp-ct{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.imp-ct.off{opacity:.55}
+.imp-ct small{flex-basis:100%;padding-left:32px}
+.imp-ct small:empty{display:none}

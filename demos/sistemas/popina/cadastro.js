@@ -1,14 +1,14 @@
 // Popina · cadastros da Gestão: cardápio (pratos, tamanhos, meio a meio, por quilo, complementos, foto e o que tira do estoque),
 // estoque simples (o que tem, o que acaba, contagem, perdas e lista de compras), clientes com fiado e entregadores com o acerto.
 import { db, t, din, r2, num, vir, uid, grava, prod, insumo, saldo, estoqueBaixo, entradaCompra, registrarPerda, ajustarEstoque, fmtQtd, MOTIVOS_PERDA,
-  clientesFiado, saldoFiado, limiteFiado, nomeFiado, fone, zap, soDig, acertoEntregadores, inicioDoDia, hora, aPartir } from './loja.js?v=57';
-import { acao, ir } from './nucleo.js?v=57';
-import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=57';
-import { G, volta, reduzir } from './gestao.js?v=57';
-import { fotoProd } from './salao.js?v=57';
-import { cardapioExemplo } from './dados.js?v=57';
-import { receberFiadoFolha } from './caixa.js?v=57';
-import { imprimir } from './imprimir.js?v=57';
+  clientesFiado, saldoFiado, limiteFiado, nomeFiado, fone, zap, soDig, acertoEntregadores, inicioDoDia, hora, aPartir } from './loja.js?v=59';
+import { acao, ir } from './nucleo.js?v=59';
+import { ico, folha, toast, confirma, $, $$ } from './ui.js?v=59';
+import { G, volta, reduzir } from './gestao.js?v=59';
+import { fotoProd } from './salao.js?v=59';
+import { cardapioExemplo } from './dados.js?v=59';
+import { receberFiadoFolha } from './caixa.js?v=59';
+import { imprimir } from './imprimir.js?v=59';
 
 // ------------------------------------------------------------------ cardápio
 let catG = '';
@@ -17,7 +17,7 @@ G.cardapio = {
   html() {
     const cats = db.categorias, l = db.produtos.filter((p) => !catG || p.cat === catG);
     return volta('Cardápio', `${db.produtos.length} itens · toque para editar; o interruptor tira do cardápio quando acaba`) + `
-    <div class="linha-bts" style="margin-bottom:12px"><button type="button" class="bt cheio grande" data-acao="prod-ed">${ico('mais2')}Novo prato</button><button type="button" class="bt" data-acao="cats-ed">${ico('cardapio')}Categorias</button>
+    <div class="linha-bts" style="margin-bottom:12px"><button type="button" class="bt cheio grande" data-acao="prod-ed">${ico('mais2')}Novo prato</button><button type="button" class="bt" data-acao="cats-ed">${ico('cardapio')}Categorias</button><button type="button" class="bt" data-acao="importar-cardapio">${ico('folha')}Trazer o meu cardápio</button>
       ${db.produtos.length ? '' : `<button type="button" class="bt" data-acao="usar-exemplo">${ico('troca')}Começar com o cardápio de exemplo</button>`}</div>
     <div class="chips" role="group" aria-label="Categorias"><button type="button" class="chip" data-catg="" aria-pressed="${!catG}">Todos</button>${cats.map((k) => `<button type="button" class="chip" data-catg="${t(k.id)}" aria-pressed="${catG === k.id}">${t(k.nome)}</button>`).join('')}</div>
     <div class="prods">${l.map((p) => `<div class="prod ${p.ativo === false ? 'off' : ''}">${fotoProd(p)}<div class="tx"><b>${t(p.nome)}</b><small>${t(cats.find((k) => k.id === p.cat)?.nome || 'Sem categoria')}${p.tamanhos?.length ? ` · ${p.tamanhos.length} tamanhos` : ''}${p.pizza ? ' · meio a meio' : ''}${p.porKg ? ' · por quilo' : ''}${(p.grupos || []).length ? ` · ${p.grupos.length} complementos` : ''}</small>
@@ -180,7 +180,7 @@ G.clientes = {
       <div class="cartao"><ul class="lista-l">${fiados.map((x) => `<li><div class="tx"><b>${t(x.nome || fone(x.tel))}</b><small>${t(fone(x.tel))} · limite ${din(x.limite)}</small></div><b class="num">${din(x.saldo)}</b>
         <a class="bt-ico" target="_blank" rel="noopener" href="${zap(x.tel, `Olá, ${(x.nome || '').split(' ')[0]}! Sua conta no ${db.config.nome} está em ${din(x.saldo)}. Quando puder, passe aqui ou pague por Pix. Obrigado!`)}" aria-label="Lembrar pelo WhatsApp">${ico('zap')}</a>
         <button type="button" class="bt-ico" data-acao="cli-ver" data-id="${t(x.cid)}" aria-label="Ver ${t(x.nome)}">${ico('dir')}</button></li>`).join('')}</ul></div>` : ''}
-    <div class="sec"><h2>Clientes</h2></div>
+    <div class="sec"><h2>Clientes</h2><button type="button" class="bt" data-acao="importar-contatos">${ico('pessoas')}Trazer dos contatos</button></div>
     <label class="busca">${ico('busca')}<input type="search" data-bcli value="${t(buscaCli)}" placeholder="Buscar por nome ou telefone" aria-label="Buscar cliente"></label>
     <div class="cartao"><ul class="lista-l">${l.slice(0, 60).map((c) => `<li><div class="tx"><b>${t(c.nome || fone(c.tel))}</b><small>${t(fone(c.tel))}${c.bairro ? ` · ${t(c.bairro)}` : ''} · ${c.pedidos || 0} pedidos · ${din(c.total || 0)}${saldoFiado(c.id) > 0.009 ? ` · deve ${din(saldoFiado(c.id))}` : ''}</small></div><button type="button" class="bt-ico" data-acao="cli-ver" data-id="${t(c.id)}" aria-label="Ver ${t(c.nome)}">${ico('dir')}</button></li>`).join('') || '<li class="mudo">Nenhum cliente ainda.</li>'}</ul></div>`;
   },

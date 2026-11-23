@@ -1,12 +1,12 @@
 // Atria · gestão: obras, orçamento, proposta comercial, cobrança com Pix, materiais, lojas, preços, clientes,
 // financeiro, ferramentas de bancada e mensagens prontas.
-import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=20';
-import { cena, TIPOS_CENA } from './cenas.js?v=19';
-import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=19';
-import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=19';
-import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=19';
+import { ligarVoz, $, $$, t, sa, din, dinCurto, lerDin, lerNum, campoDin, numBR, uid, hoje, somaDias, dias, dataBR, dataCurta, quando, agora, zap, abrirZap, av, ico, db, grava, achar, toast, folha, formulario, confirmar, copiar, comIA, repinta, ir, cab, vibra } from './base.js?v=30';
+import { cena, TIPOS_CENA } from './cenas.js?v=30';
+import { ehVideo, guardarArquivoVideo, htmlVideo, LIMITE_S } from './midia.js?v=30';
+import { pixPayload, normalizaChave, TIPOS_CHAVE } from './pix.js?v=30';
+import { planoDeCorte, MODELOS, MODELO_OFICIO, lerPolegada, mm2polFracao, m3Madeira, latasTinta, traco, blocos, piso, TIPOS_BLOCO } from './ferramentas.js?v=30';
 import { qrSVG } from '../base/qr.js';
-import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=19';
+import { OFICIOS, MODOS_COBRAR, meusOficios, principal, nomeOficios, juntar, materiaisSugeridos } from './oficios.js?v=30';
 
 // jeitos de cobrar: os do ofício da obra (ou da pessoa) primeiro, depois os outros
 export const modosObra = (o) => [...new Set([...((OFICIOS[o.oficio] || {}).cobra || []), ...juntar(db.perfil, 'cobra'), ...Object.keys(MODOS_COBRAR)])];
@@ -141,7 +141,7 @@ TELAS.obras = () => {
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px"><label class="busca" style="flex:1 1 170px;min-width:0;margin:0">${ico('lupa')}<input type="search" data-busca-obra value="${t(buscaObra)}" placeholder="Buscar obra ou cliente" aria-label="Buscar obra"></label><button type="button" class="chip" data-acao="filtro-obras" data-f="orcamento" aria-pressed="${filtroObras === 'orcamento'}">Orçamentos <b>${n.orcamento}</b></button></div>
     <h2 class="sec">${rot}</h2>
     <div class="lista">${l.map(cartaoObra).join('') || `<div class="vazio"><b>Nada em ${rot.toLowerCase()}</b>${filtroObras === 'afazer' ? 'Quando o cliente aprovar um orçamento, a obra aparece aqui.' : ''}</div>`}</div>
-    <button type="button" class="bt cheio largo" style="margin-top:14px" data-acao="nova-obra">${ico('mais')}Nova obra ou orçamento</button>`;
+    <div class="imp-bts"><button type="button" class="bt cheio" data-acao="nova-obra">${ico('mais')}Nova obra ou orçamento</button><button type="button" class="bt leve" data-acao="pedido-zap">${ico('zap')}Pedido do WhatsApp</button></div>`;
 };
 TELAS.obras.montar = (tela) => { const i = $('[data-busca-obra]', tela); if (i) i.oninput = () => { buscaObra = i.value; const p = i.selectionStart; repinta(); const n = $('[data-busca-obra]'); n.focus(); n.setSelectionRange(p, p); }; };
 ACOES['filtro-obras'] = (b) => { filtroObras = b.dataset.f; repinta(); };
@@ -591,7 +591,7 @@ TELAS.clientes = () => {
   return `${cab('Clientes', `${db.clientes.length} cadastrados`)}
     <label class="busca">${ico('lupa')}<input type="search" placeholder="Buscar por nome ou telefone" value="${t(buscaCli)}" data-busca-cli aria-label="Buscar cliente"></label>
     <div class="lista">${l.map((c) => { const os = db.obras.filter((o) => o.cliente === c.id), deve = os.reduce((s, o) => s + (o.orc.status === 'aprovado' ? totais(o).saldo : 0), 0); return `<a class="linha" href="#cliente/${c.id}">${av(c.nome)}<span class="txt"><b>${t(c.nome)}</b><small>${os.length} obra${os.length === 1 ? '' : 's'}${c.end ? ` · ${t(c.end)}` : ''}</small></span><span class="dir">${deve ? `<b style="color:var(--cedro)">${dinCurto(deve)}</b><small class="mudo" style="font-size:11px">a receber</small>` : ''}</span></a>`; }).join('') || '<div class="vazio"><b>Ninguém achado</b></div>'}</div>
-    <button type="button" class="bt cheio largo" style="margin-top:14px" data-acao="novo-cliente">${ico('mais')}Novo cliente</button>`;
+    <div class="imp-bts"><button type="button" class="bt cheio" data-acao="novo-cliente">${ico('mais')}Novo cliente</button><button type="button" class="bt leve" data-acao="contatos-importar">${ico('gente')}Trazer dos contatos</button></div>`;
 };
 TELAS.clientes.montar = (tela) => { const i = $('[data-busca-cli]', tela); i.oninput = () => { buscaCli = i.value; const p = i.selectionStart; repinta(); const n = $('[data-busca-cli]'); n.focus(); n.setSelectionRange(p, p); }; };
 export function formCliente(c, depois) {

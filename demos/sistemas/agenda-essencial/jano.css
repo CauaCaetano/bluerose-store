@@ -367,3 +367,14 @@ html[data-tema]:not([data-tema="rose"]) .pilula .mais-um { color: #fff; text-sha
 .nfs-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 10px; align-items: end; }
 .nfs-bloco { margin: 0; }
 .nfs-bloco .linha { flex-wrap: wrap; gap: 6px; }
+/* trazer o que já usa (importar.js, 22/11/2026) */
+.imp-bts { margin: 0 0 12px; } .imp-bts .bt { flex: 1 1 160px; }
+.imp-op { display: grid; gap: 4px; width: 100%; text-align: left; font: inherit; color: var(--tinta); cursor: pointer; position: relative; }
+.imp-op:focus-within, .imp-op:hover { border-color: var(--bronze); }
+.imp-op b { font-family: var(--romana); letter-spacing: .02em; }
+.imp-arq { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.imp-it.off { opacity: .6; }
+.imp-marca { display: flex; align-items: center; gap: 10px; min-height: 44px; flex-wrap: wrap; }
+.imp-marca input { width: 22px; height: 22px; accent-color: var(--noite); }
+.imp-duas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.imp-choque { color: #8a3324; }
