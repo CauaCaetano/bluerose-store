@@ -2,9 +2,9 @@
 // medições, aditivos aprovados pelo cliente, equipes e diárias, compras por obra, diário com fotos, resultado da obra
 // (orçado x realizado), contratos e documentos e o link para o cliente acompanhar.
 import { db, grava, tela, acao, ir, cab, vazio, barra, ico, t, R$, R0, n2, pc, dataBR, dataCurta, quando, hoje, somaDias, dias, uid, soma, num,
-  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, reduzir, CONTA } from './nucleo.js?v=3';
-import { PAINEIS, numero, saudacao, ORIGENS, RELACIONADOS, BUSCAS, darBaixa, movimentos, vencido, doMes, editarPessoa } from './comum.js?v=3';
-import { pl, ouvir } from './nucleo.js?v=3';
+  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, reduzir, CONTA } from './nucleo.js?v=4';
+import { PAINEIS, numero, saudacao, ORIGENS, RELACIONADOS, BUSCAS, darBaixa, movimentos, vencido, doMes, editarPessoa } from './comum.js?v=4';
+import { pl, ouvir } from './nucleo.js?v=4';
 
 const R = 'construtora';
 const obra = (id) => db.obras.find((o) => o.id === id);
@@ -126,7 +126,7 @@ tela('obras', {
   titulo: 'Obras', ramo: R,
   html() {
     const l = db.obras.filter((o) => filtroObra === 'todas' || o.status === filtroObra);
-    return cab('Obras', `${db.obras.filter((o) => o.status === 'andamento').length} em andamento`, `<button type="button" class="bt cheio" data-acao="obra-nova">${ico('mais2')}Nova obra</button>`) +
+    return cab('Obras', `${db.obras.filter((o) => o.status === 'andamento').length} em andamento`, `<button type="button" class="bt" data-acao="imp-planilha" data-alvo="obras">${ico('acima')}Importar planilha</button><button type="button" class="bt cheio" data-acao="obra-nova">${ico('mais2')}Nova obra</button>`) +
       `<div class="chips" style="margin-bottom:12px">${[['andamento', 'Em andamento'], ['orcamento', 'Em orçamento'], ['parada', 'Paradas'], ['entregue', 'Entregues'], ['todas', 'Todas']].map(([k, n]) => `<button type="button" class="chip" data-fo="${k}" aria-pressed="${filtroObra === k}">${n}</button>`).join('')}</div>
       <div class="cartao">${l.length ? l.map(linhaObra).join('') : vazio('Nenhuma obra aqui.', `<button type="button" class="bt cheio" data-acao="obra-nova">${ico('mais2')}Nova obra</button>`)}</div>`;
   },
@@ -181,7 +181,7 @@ MONTA.cronograma = (el, o) => $$('[data-pct]', el).forEach((r) => { r.oninput = 
 // ------------------------------------------------------------------ orçamento (composição por etapa, BDI)
 ABA.orcamento = (o) => {
   const c = custoOrc(o), v = vendaOrc(o);
-  return `<div class="cartao"><div class="cartao-cab"><h2>Orçamento da obra</h2><div class="linha-bts" style="margin:0"><button type="button" class="bt" data-acao="orc-imprimir" data-id="${o.id}">${ico('imprimir')}Imprimir ou PDF</button><button type="button" class="bt cheio" data-acao="orc-item" data-obra="${o.id}">${ico('mais2')}Item</button></div></div>
+  return `<div class="cartao"><div class="cartao-cab"><h2>Orçamento da obra</h2><div class="linha-bts" style="margin:0"><button type="button" class="bt" data-acao="imp-orc-ia" data-obra="${o.id}" data-dest="orc">${ico('foto')}Ler orçamento da loja</button><button type="button" class="bt" data-acao="orc-imprimir" data-id="${o.id}">${ico('imprimir')}Imprimir ou PDF</button><button type="button" class="bt cheio" data-acao="orc-item" data-obra="${o.id}">${ico('mais2')}Item</button></div></div>
     ${o.etapas.map((e) => { const it = o.orc.filter((i) => i.etapa === e.id); return `<h3 style="margin:16px 0 6px;display:flex;justify-content:space-between;gap:8px"><span>${t(e.nome)}</span><span>${R$(custoEtapa(o, e.id))}</span></h3>${it.length ? `<div class="tab-wrap"><table class="tab empilha"><thead><tr><th>Item</th><th>Tipo</th><th class="n">Qtd.</th><th class="n">Unitário</th><th class="n">Total</th><th></th></tr></thead><tbody>${it.map((i) => `<tr><td data-r="Item">${t(i.desc)}</td><td data-r="Tipo">${TIPOS[i.tipo]}</td><td class="n" data-r="Qtd.">${n2(i.qtd)} ${i.un === 'vb' ? '<abbr title="verba: valor fechado do serviço, sem medir quantidade">verba</abbr>' : t(i.un)}</td><td class="n" data-r="Unitário">${R$(i.unit)}</td><td class="n forte" data-r="Total">${R$(i.qtd * i.unit)}</td><td class="n"><button type="button" class="bt-ico" data-acao="orc-item" data-obra="${o.id}" data-id="${i.id}" aria-label="Editar ${t(i.desc)}">${ico('lapis')}</button></td></tr>`).join('')}</tbody></table></div>` : '<p class="mudo peq">Sem itens nesta etapa.</p>'}`; }).join('')}
     <div class="linhas-tot" style="margin-top:16px;max-width:460px;margin-left:auto">${Object.entries(TIPOS).map(([k, n]) => `<div><span>${n}</span><b>${R$(soma(o.orc.filter((i) => i.tipo === k), (i) => i.qtd * i.unit))}</b></div>`).join('')}
       <div><span>Custo direto</span><b>${R$(c)}</b></div><div><label style="display:flex;align-items:center;gap:8px">BDI <input class="ent" style="width:90px;min-height:38px" inputmode="decimal" data-bdi value="${n2(o.bdi)}" aria-label="BDI em porcentagem"> %</label><b>${R$(v - c)}</b></div></div>
@@ -280,12 +280,12 @@ acao('adi-st', (b) => { const [o, a] = achaAdi(b); if (b.dataset.st === 'aprovad
 // ------------------------------------------------------------------ compras por obra
 const pedidoLin = (p) => { const tot = soma(p.itens, (i) => i.qtd * i.unit); return `<li><div class="tx"><b>${t(nomeDe(p.forn))} · ${t(obra(p.obra)?.nome || '')}</b><small>${t(p.itens.map((i) => `${n2(i.qtd)} ${i.un} ${i.desc}`).join(' · '))}</small><small>Pedido ${dataBR(p.dia)} · chega ${dataBR(p.prev)} (${quando(p.prev)})</small></div><div class="val">${R$(tot)}<small><span class="et ${p.status === 'chegou' ? 'ok' : p.status === 'parcial' ? 'atn' : p.prev < hoje() ? 'erro' : 'info'}">${({ pedido: p.prev < hoje() ? 'atrasado' : 'pedido', parcial: 'chegou parte', chegou: 'chegou' })[p.status]}</span></small></div>
   <button type="button" class="bt-ico" data-acao="ped-zap" data-id="${p.id}" aria-label="Mandar pedido no WhatsApp">${ico('zap')}</button>${p.status !== 'chegou' ? `<button type="button" class="bt pq cheio" data-acao="ped-chegou" data-id="${p.id}">O que chegou</button>` : ''}</li>`; };
-ABA.compras = (o) => { const l = db.pedidos.filter((p) => p.obra === o.id); return `<div class="cartao"><div class="cartao-cab"><h2>Compras desta obra</h2><button type="button" class="bt cheio" data-acao="ped-novo" data-obra="${o.id}">${ico('mais2')}Pedido ao fornecedor</button></div>${l.length ? `<ul class="lista">${l.map(pedidoLin).join('')}</ul>` : vazio('Nenhum pedido.')}</div>`; };
+ABA.compras = (o) => { const l = db.pedidos.filter((p) => p.obra === o.id); return `<div class="cartao"><div class="cartao-cab"><h2>Compras desta obra</h2><div class="linha-bts" style="margin:0"><button type="button" class="bt" data-acao="imp-orc-ia" data-obra="${o.id}" data-dest="ped">${ico('foto')}Ler orçamento da loja</button><button type="button" class="bt cheio" data-acao="ped-novo" data-obra="${o.id}">${ico('mais2')}Pedido ao fornecedor</button></div></div>${l.length ? `<ul class="lista">${l.map(pedidoLin).join('')}</ul>` : vazio('Nenhum pedido.')}</div>`; };
 tela('compras', {
   titulo: 'Compras', ramo: R,
   html() {
     const ab = db.pedidos.filter((p) => p.status !== 'chegou').sort((a, b) => a.prev.localeCompare(b.prev)), ok = db.pedidos.filter((p) => p.status === 'chegou');
-    return cab('Compras e material', 'Pedido ao fornecedor por obra e o que já chegou', `<button type="button" class="bt cheio" data-acao="ped-novo">${ico('mais2')}Pedido ao fornecedor</button>`) +
+    return cab('Compras e material', 'Pedido ao fornecedor por obra e o que já chegou', `<button type="button" class="bt" data-acao="imp-orc-ia" data-dest="ped">${ico('foto')}Ler orçamento da loja</button><button type="button" class="bt cheio" data-acao="ped-novo">${ico('mais2')}Pedido ao fornecedor</button>`) +
       `<div class="cartao"><h2>Para chegar</h2>${ab.length ? `<ul class="lista">${ab.map(pedidoLin).join('')}</ul>` : vazio('Nada para chegar.')}</div><div class="cartao"><h2>Já chegou</h2>${ok.length ? `<ul class="lista">${ok.map(pedidoLin).join('')}</ul>` : vazio('Nada ainda.')}</div>`;
   },
 });
@@ -458,7 +458,7 @@ ABA.financeiro = (o) => {
     <details class="ajuda"><summary>Como o gasto é calculado</summary><p class="mudo peq">Gasto = contas a pagar desta obra (pagas ou não). Equipe própria = diárias apontadas e mão de obra lançada por etapa; empreiteiros = medições e adiantamentos pagos às empreitadas${perda ? `; material inclui ${R$(perda)} perdido ou quebrado na descarga (lançado em Compras, na chegada do material)` : ''}.</p></details></div>
   <div class="cartao"><div class="cartao-cab"><h2>Pagar e receber desta obra</h2><button type="button" class="bt pq" data-acao="fin-obra" data-id="${o.id}">${ico('mais2')}Conta desta obra</button></div>${ms.length ? `<ul class="lista">${ms.slice(-8).reverse().map((m) => `<li><div class="tx"><b>${t(m.desc.replace(` · ${o.nome}`, ''))}</b><small><span class="et ${m.tipo === 'receber' ? 'ok' : ''}">${m.tipo === 'receber' ? (m.pago ? 'recebido' : 'a receber') : (m.pago ? 'pago' : 'a pagar')}</span> ${m.pago ? 'em ' + dataBR(m.pago) : 'vence ' + dataBR(m.venc)}</small></div><div class="val ${m.tipo === 'receber' ? 'verde' : ''}">${m.tipo === 'pagar' ? '−' : '+'} ${R$(m.valor)}</div>${m.pago ? '' : `<button type="button" class="bt pq" data-acao="fin-baixa" data-id="${m.id}">${m.tipo === 'pagar' ? 'Pagar' : 'Receber'}</button>`}</li>`).join('')}</ul>${ms.length > 8 ? `<p class="mudo peq">Mostrando as 8 mais recentes de ${ms.length}. Todas em Financeiro.</p>` : ''}` : vazio('Nada lançado para esta obra.')}</div></div>`;
 };
-acao('fin-obra', (b) => import('./comum.js?v=3').then((m) => m.novoLanc({ tipo: 'pagar', obra: b.dataset.id })));
+acao('fin-obra', (b) => import('./comum.js?v=4').then((m) => m.novoLanc({ tipo: 'pagar', obra: b.dataset.id })));
 
 // ------------------------------------------------------------------ contrato e documentos
 ABA.documentos = (o) => `<div class="cartao"><div class="cartao-cab"><h2>Contrato e documentos</h2><div class="linha-bts" style="margin:0"><button type="button" class="bt" data-acao="ctr-obra" data-id="${o.id}">${ico('contrato')}Gerar contrato de empreitada</button><button type="button" class="bt cheio" data-acao="doc-novo" data-obra="${o.id}">${ico('mais2')}Documento</button></div></div>

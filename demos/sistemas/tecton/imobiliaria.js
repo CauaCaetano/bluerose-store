@@ -2,8 +2,8 @@
 // interessados e funil, visitas, propostas e contratos de venda com parcelas e correção, aluguel com repasse e cobrança,
 // obras contratadas (andamento e pagamentos à construtora) e comissões de corretor.
 import { db, grava, tela, acao, ir, cab, vazio, barra, ico, t, R$, R0, n2, pc, dataBR, dataCurta, quando, hoje, somaDias, somaMeses, mesAno, dias, uid, soma, num,
-  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, recibo, reduzir, pl, pixCopiaCola, buscarIndice } from './nucleo.js?v=3';
-import { PAINEIS, numero, saudacao, ORIGENS, RELACIONADOS, BUSCAS, darBaixa, movimentos, editarPessoa } from './comum.js?v=3';
+  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, recibo, reduzir, pl, pixCopiaCola, buscarIndice } from './nucleo.js?v=4';
+import { PAINEIS, numero, saudacao, ORIGENS, RELACIONADOS, BUSCAS, darBaixa, movimentos, editarPessoa } from './comum.js?v=4';
 
 const R = 'imobiliaria';
 const im = (id) => db.imoveis.find((x) => x.id === id);
@@ -95,7 +95,7 @@ document.addEventListener('click', (e) => { const b = e.target.closest('[data-un
 tela('imoveis', {
   titulo: 'Imóveis e lançamentos', ramo: R,
   html(aba = 'lancamentos') {
-    const topo = cab('Imóveis e lançamentos', `${pl(db.emps.length, 'lançamento', 'lançamentos')} · ${pl(db.imoveis.filter((u) => !u.emp).length, 'imóvel avulso', 'imóveis avulsos')}`, aba === 'lancamentos' ? `<button type="button" class="bt cheio" data-acao="emp-ed">${ico('mais2')}Lançamento</button>` : `<button type="button" class="bt cheio" data-acao="im-ed">${ico('mais2')}Imóvel</button>`) +
+    const topo = cab('Imóveis e lançamentos', `${pl(db.emps.length, 'lançamento', 'lançamentos')} · ${pl(db.imoveis.filter((u) => !u.emp).length, 'imóvel avulso', 'imóveis avulsos')}`, aba === 'lancamentos' ? `<button type="button" class="bt cheio" data-acao="emp-ed">${ico('mais2')}Lançamento</button>` : `<button type="button" class="bt" data-acao="imp-planilha" data-alvo="imoveis">${ico('acima')}Importar planilha</button><button type="button" class="bt cheio" data-acao="im-ed">${ico('mais2')}Imóvel</button>`) +
       `<div class="chips" style="margin-bottom:14px">${[['lancamentos', 'Lançamentos'], ['avulsos', 'Imóveis para vender e alugar']].map(([k, n]) => `<button type="button" class="chip" data-ir="imoveis/${k}" aria-pressed="${aba === k}">${n}</button>`).join('')}</div>`;
     if (aba === 'avulsos') {
       const l = db.imoveis.filter((u) => !u.emp);

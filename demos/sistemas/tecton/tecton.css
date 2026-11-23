@@ -704,3 +704,31 @@ body.conversa .demo-faixa .ver-como{display:none}
 .conv-barra{flex-wrap:wrap}
 .conv-barra span{flex:0 0 auto;min-width:58px;white-space:nowrap;overflow-wrap:normal;font-size:.74rem;padding:6px 8px}
 .num span{overflow-wrap:normal}
+
+/* ------------------------------------------------------------------ importar (planilha, XML da nota, orçamento pela IA) */
+.imp-solta{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:22px 14px;margin:12px 0;border:2px dashed var(--linha2);border-radius:12px;background:var(--papel2);color:var(--pri);cursor:pointer;text-align:center;transition:border-color .15s,background .15s}
+.imp-solta:hover,.imp-solta.em-cima,.imp-solta:focus-within{border-color:var(--pri);background:var(--pri-suave)}
+.imp-solta input{position:absolute;width:1px;height:1px;opacity:0}
+.imp-solta .ico{width:28px;height:28px}
+.imp-solta small{color:var(--mudo);font-weight:500}
+.imp-mapa{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 12px;margin-top:10px}
+.imp-nota{border:1.5px solid var(--linha);border-radius:12px;padding:12px;margin-bottom:12px}
+.imp-nota-cab{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:8px}
+.imp-tot{font-size:1.1rem;white-space:nowrap}
+.ent.imp-num{width:96px;text-align:right;min-height:40px}
+.ent.imp-un{width:64px;min-height:40px}
+.ent.imp-sel{min-width:180px;min-height:40px}
+.imp-ia .ent[data-d]{min-width:200px;min-height:40px}
+.imp-lendo{margin-top:10px;font-weight:700;color:var(--pri)}
+.imp-lendo::before{content:'';display:inline-block;width:12px;height:12px;margin-right:8px;border:2px solid var(--pri);border-right-color:transparent;border-radius:50%;animation:imp-gira .8s linear infinite;vertical-align:-1px}
+@keyframes imp-gira{to{transform:rotate(360deg)}}
+@media (max-width:700px){
+  .ent.imp-sel,.imp-ia .ent[data-d]{min-width:0;width:100%}
+  table.tab.empilha.imp-xml td[data-r],table.tab.empilha.imp-ia td[data-r]{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  table.tab.empilha.imp-xml td[data-r]::before,table.tab.empilha.imp-ia td[data-r]::before{flex:0 0 auto}
+  .imp-xml td[data-r="Na nota"],.imp-xml td[data-r="No Tecton"]{flex-direction:column;align-items:stretch!important}
+  .imp-xml td[data-r="Na nota"]>*,.imp-xml td[data-r="No Tecton"]>*{text-align:left}
+  .imp-ia td[data-r="Material"]{flex-direction:column;align-items:stretch!important}
+  .imp-ia tr{border:1.5px solid var(--linha)!important;border-radius:10px;padding:6px 10px!important;margin-bottom:8px}
+  .imp-xml tr{padding:10px 0!important}
+}

@@ -2,9 +2,9 @@
 // unidades e fracionado, entregas com roteiro e caminhão, conta da obra, fiado com limite, compras, preço por tabela e
 // desconto por quantidade, relatórios do que gira e do que está parado.
 import { mesAno, db, grava, tela, acao, ir, cab, vazio, barra, ico, t, R$, R0, n2, pc, dataBR, dataCurta, quando, hoje, somaDias, dias, uid, soma, num, fone,
-  folha, editar, campos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, recibo, pl, ACOES, pixCopiaCola } from './nucleo.js?v=3';
-import { PAINEIS, numero, saudacao, ORIGENS, ENTRADAS_CAIXA, RELACIONADOS, BUSCAS, editarPessoa, gestor } from './comum.js?v=3';
-import { escolhaNoReceber, aposReceber, etiquetaNota, botaoNota, avisoDevolucao, folhaExportar, modoNf } from './nota.js?v=3';
+  folha, editar, campos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, imprimir, recibo, pl, ACOES, pixCopiaCola } from './nucleo.js?v=4';
+import { PAINEIS, numero, saudacao, ORIGENS, ENTRADAS_CAIXA, RELACIONADOS, BUSCAS, editarPessoa, gestor } from './comum.js?v=4';
+import { escolhaNoReceber, aposReceber, etiquetaNota, botaoNota, avisoDevolucao, folhaExportar, modoNf } from './nota.js?v=4';
 
 const R = 'loja';
 const prod = (id) => db.produtos.find((p) => p.id === id);
@@ -268,7 +268,7 @@ tela('estoque', {
   titulo: 'Estoque', ramo: R,
   html(f = 'todos') {
     const l = filtraEstoque(f);
-    return cab('Estoque', `${pl(db.produtos.length, 'produto', 'produtos')} · ${R$(soma(db.produtos, (p) => Math.max(0, p.estoque) * p.custo))} em mercadoria (pelo custo)`, `<button type="button" class="bt" data-acao="tabelas">${ico('porcento')}Tabelas de preço</button><button type="button" class="bt" data-acao="reajuste" data-f="${f}">${ico('grafico')}Reajustar preços</button><button type="button" class="bt cheio" data-acao="prod-ed">${ico('mais2')}Produto</button>`) +
+    return cab('Estoque', `${pl(db.produtos.length, 'produto', 'produtos')} · ${R$(soma(db.produtos, (p) => Math.max(0, p.estoque) * p.custo))} em mercadoria (pelo custo)`, `<button type="button" class="bt" data-acao="imp-planilha" data-alvo="produtos">${ico('acima')}Importar planilha</button><button type="button" class="bt" data-acao="imp-xml">${ico('doc')}Nota de compra (XML)</button><button type="button" class="bt" data-acao="tabelas">${ico('porcento')}Tabelas de preço</button><button type="button" class="bt" data-acao="reajuste" data-f="${f}">${ico('grafico')}Reajustar preços</button><button type="button" class="bt cheio" data-acao="prod-ed">${ico('mais2')}Produto</button>`) +
       `<div class="cartao"><div class="cartao-cab"><div class="chips">${[['todos', 'Todos'], ['baixo', `Abaixo do mínimo (${db.produtos.filter(baixo).length})`], ['parado', `Sem venda há ${PARADO}+ dias (${db.produtos.filter(parado).length})`]].map(([k, n]) => `<button type="button" class="chip" data-ir="estoque/${k}" aria-pressed="${f === k}">${n}</button>`).join('')}</div><input class="ent" style="max-width:320px" type="search" data-busca-e placeholder="Procurar por nome ou código" value="${t(buscaE)}" aria-label="Procurar produto"></div>
       <div class="tab-wrap"><table class="tab empilha"><thead><tr><th>Produto</th><th class="n">Preço e custo</th><th class="n">Estoque</th><th class="n">Margem</th><th>Situação</th><th></th></tr></thead><tbody>${l.map((p) => `<tr><td data-r="Produto"><b>${t(p.nome)}</b><small class="mudo" style="display:block">${p.faixas?.length ? t(p.faixas.map((x) => `${n2(x.min)}+ ${p.un}: −${n2(x.desc)}%`).join(' · ')) : 'sem desconto por quantidade'}${p.lote ? ` · lote ${t(p.lote)}` : ''}</small></td><td class="n" data-r="Preço e custo">${R$(p.preco)}/${t(p.un)}<small class="mudo" style="display:block">custo ${R$(p.custo)}</small></td><td class="n" data-r="Estoque" style="white-space:normal;max-width:200px">${estoqueTxt(p)}</td><td class="n" data-r="Margem">${p.preco ? pc((p.preco - p.custo) / p.preco * 100) : '—'}</td><td data-r="Situação">${situacaoProd(p)}</td>
         <td class="n"><button type="button" class="bt pq" data-acao="prod-ajuste" data-id="${p.id}">Ajustar</button> <button type="button" class="bt-ico" data-acao="prod-ed" data-id="${p.id}" aria-label="Editar ${t(p.nome)}">${ico('lapis')}</button></td></tr>`).join('')}</tbody></table></div>${l.length ? '' : vazio('Nenhum produto aqui.')}</div>`;
@@ -432,7 +432,7 @@ acao('fi-limite', (b) => { $('.folha-fundo')?._fechar(); const p = b.dataset.id 
 tela('reposicao', {
   titulo: 'Compras', ramo: R,
   html() {
-    return cab('Compras dos fornecedores', 'Pedido, recebimento e conta a pagar', `<button type="button" class="bt" data-acao="rep-baixo">${ico('caixa')}Montar com o que está baixo</button><button type="button" class="bt cheio" data-acao="rep-novo">${ico('mais2')}Pedido</button>`) +
+    return cab('Compras dos fornecedores', 'Pedido, recebimento e conta a pagar', `<button type="button" class="bt" data-acao="imp-xml">${ico('doc')}Nota de compra (XML)</button><button type="button" class="bt" data-acao="rep-baixo">${ico('caixa')}Montar com o que está baixo</button><button type="button" class="bt cheio" data-acao="rep-novo">${ico('mais2')}Pedido</button>`) +
       [['pedido', 'Esperando chegar'], ['recebido', 'Recebidos']].map(([k, n]) => { const l = db.compras.filter((c) => c.status === k); return `<div class="cartao"><h2>${n}</h2>${l.length ? `<ul class="lista">${l.map((c) => `<li><div class="tx"><b>${t(nomeDe(c.forn))}</b><small>${dataBR(c.dia)} · ${t(c.itens.map((i) => `${n2(i.qtd)} ${i.un} ${i.nome}`).join(' · '))}</small></div><div class="val">${R$(soma(c.itens, (i) => i.qtd * i.custo))}</div>
         <button type="button" class="bt-ico" data-acao="rep-zap" data-id="${c.id}" aria-label="Mandar pedido no WhatsApp">${ico('zap')}</button>${k === 'pedido' ? `<button type="button" class="bt pq cheio" data-acao="rep-receber" data-id="${c.id}">Chegou</button>` : '<span class="et ok">no estoque</span>'}</li>`).join('')}</ul>` : vazio('Nenhum.')}</div>`; }).join('');
   },

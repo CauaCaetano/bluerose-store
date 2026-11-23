@@ -1144,7 +1144,7 @@ TELAS.vendas = () => {
   const k = estado.vper || 'hoje', [de, ate] = periodo(k), b = sa(estado.vbusca || '');
   const l = db.vendas.filter((v) => v.data.slice(0, 10) >= de && v.data.slice(0, 10) <= ate).filter((v) => !b || String(v.n) === b || v.itens.some((x) => sa(x.nome).includes(b)) || v.pag.some((x) => x.cli && sa((cli(x.cli) || {}).nome).includes(b))).reverse();
   const ok = l.filter((v) => !v.cancelada), tot = ok.reduce((a, v) => a + v.total, 0), canc = l.filter((v) => v.cancelada);
-  return `<section class="cab-tela"><div><h2>Vendas</h2><p>${ok.length} venda${ok.length === 1 ? '' : 's'} · ${din(tot)}${canc.length ? ` · ${canc.length} cancelada${canc.length === 1 ? '' : 's'}` : ''}</p></div><div class="acoes">${notaAtiva() ? '<button type="button" class="bt" data-acao="exportar-nf">Para o contador</button>' : ''}<button type="button" class="bt" data-acao="exportar-vendas">Planilha</button><a class="bt cheio" href="#vender">${ico('mais')}Nova venda</a></div></section>
+  return `<section class="cab-tela"><div><h2>Vendas</h2><p>${ok.length} venda${ok.length === 1 ? '' : 's'} · ${din(tot)}${canc.length ? ` · ${canc.length} cancelada${canc.length === 1 ? '' : 's'}` : ''}</p></div><div class="acoes">${notaAtiva() ? '<button type="button" class="bt" data-acao="exportar-nf">Para o contador</button>' : ''}<button type="button" class="bt" data-acao="conferir-maquininha">Conferir maquininha</button><button type="button" class="bt" data-acao="exportar-vendas">Planilha</button><a class="bt cheio" href="#vender">${ico('mais')}Nova venda</a></div></section>
   <div class="chips">${[['hoje', 'Hoje'], ['7', '7 dias'], ['30', '30 dias'], ['mes', 'Este mês']].map(([v, n]) => `<button type="button" class="chip${k === v ? ' on' : ''}" data-vper="${v}">${n}</button>`).join('')}</div>
   <form class="leitor" id="f-vbusca" autocomplete="off"><span>${ico('busca')}</span><input id="vbusca" value="${t(estado.vbusca || '')}" placeholder="Número da venda, produto ou cliente do fiado" aria-label="Buscar venda"></form>
   <section class="bloco sem-pad"><table class="tab grande"><thead><tr><th>Nº</th><th>Quando</th><th>Itens</th><th class="so-pc">Pagamento</th><th class="so-pc">Quem vendeu</th><th>Total</th></tr></thead><tbody>
@@ -1179,7 +1179,7 @@ TELAS.estoque = () => {
   const pr = new Set(parados().map((x) => x.id)), l = ativos().filter((p) => (!c || (c === '_baixo' ? baixos().includes(p) : c === '_parado' ? pr.has(p.id) : p.cat === c)) && (!f || sa(p.nome).includes(f) || p.cod.includes(estado.filtro.trim()))).sort((a, b) => a.cat.localeCompare(b.cat) || a.nome.localeCompare(b.nome));
   const nBaixo = baixos().length;
   const sel = (l.find((p) => p.id === estado.sel) || l[0] || null);
-  return `<section class="cab-tela com-ico">${ico('caixa')}<div><h2>Estoque</h2><p>${ativos().length} produtos · ${din(valorEstoque())} em mercadoria pelo custo</p></div><div class="acoes"><button type="button" class="bt verde-claro" data-acao="exportar-estoque">${ico('planilha')}Planilha</button><button type="button" class="bt" data-acao="importar" title="Importar planilha">Importar</button><button type="button" class="bt" data-acao="reajuste">${ico('etiqueta')}Reajustar preços</button><button type="button" class="bt" data-acao="etiquetas">${ico('imp')}Imprimir etiquetas</button><button type="button" class="bt cheio" data-acao="novo-produto">${ico('mais')}Novo produto</button></div></section>
+  return `<section class="cab-tela com-ico">${ico('caixa')}<div><h2>Estoque</h2><p>${ativos().length} produtos · ${din(valorEstoque())} em mercadoria pelo custo</p></div><div class="acoes"><button type="button" class="bt verde-claro" data-acao="exportar-estoque">${ico('planilha')}Planilha</button><button type="button" class="bt" data-acao="importar" title="Trazer a planilha do sistema antigo (Excel ou CSV)">Importar planilha</button><button type="button" class="bt" data-acao="reajuste">${ico('etiqueta')}Reajustar preços</button><button type="button" class="bt" data-acao="etiquetas">${ico('imp')}Imprimir etiquetas</button><button type="button" class="bt cheio" data-acao="novo-produto">${ico('mais')}Novo produto</button></div></section>
   <div class="est-grade"><div class="est-esq">
   <form class="leitor" id="f-busca-est" autocomplete="off"><span>${ico('busca')}</span><input id="busca-est" value="${t(estado.filtro)}" placeholder="Buscar pelo nome ou passar o código" aria-label="Buscar produto"><button type="button" class="icone-bt" data-acao="camera-estoque" aria-label="Ler código pela câmera">${ico('cam')}</button></form>
   <div class="trilho-cat"><div class="cats-etq">${[['', 'Todos', 'cesta'], ['_baixo', `Repor (${nBaixo})`, 'alerta'], ['_parado', `Parados há 30 dias (${pr.size})`, 'ampulheta'], ...cats().map((x) => [x, x, ICO_CAT(x)])].map(([k, n, i]) => `<button type="button" class="chip etq-pend${c === k ? ' on' : ''}${k === '_baixo' ? ' alerta' : ''}" data-cat="${t(k)}" aria-pressed="${c === k}">${ico(i)}<span>${t(n)}</span></button>`).join('')}</div></div>
@@ -1382,42 +1382,55 @@ function registraAjuste(p, dif, motivo, obs = '') {
 TELAS.entradas = (sub) => {
   if (sub === 'nova') { setTimeout(() => formEntrada(), 0); location.replace('#entradas'); }
   const l = [...db.entradas].sort((a, b) => b.data.localeCompare(a.data));
-  return `<section class="cab-tela"><div><h2>Entradas de mercadoria</h2><p>Cada entrada soma no estoque, atualiza o custo e guarda o lote com a validade.</p></div><div class="acoes"><label class="bt">${ico('xml')}Ler o XML da nota<input type="file" accept=".xml,text/xml,application/xml" id="xml" hidden></label><button type="button" class="bt cheio" data-acao="nova-entrada">${ico('mais')}Dar entrada</button></div></section>
-  <p class="dica larga">O XML da nota o fornecedor manda por e-mail junto com o boleto. O Annona lê os produtos, as quantidades, o custo, o lote e a validade; você só confere.</p>
+  return `<section class="cab-tela"><div><h2>Entradas de mercadoria</h2><p>Cada entrada soma no estoque, atualiza o custo e guarda o lote com a validade.</p></div><div class="acoes"><label class="bt">${ico('xml')}Ler o XML das notas<input type="file" accept=".xml,text/xml,application/xml" id="xml" multiple hidden></label><button type="button" class="bt cheio" data-acao="nova-entrada">${ico('mais')}Dar entrada</button></div></section>
+  <p class="dica larga">O XML da nota o fornecedor manda por e-mail junto com o boleto. O Annona lê os produtos, as quantidades, o custo, o lote e a validade; você só confere. Pode escolher várias notas de uma vez; nota já lançada não entra de novo.</p>
   <section class="bloco sem-pad"><table class="tab grande"><thead><tr><th>Data</th><th>Fornecedor</th><th class="so-pc">Nota</th><th>Itens</th><th>Total</th></tr></thead><tbody>
   ${l.map((e) => `<tr class="clica" data-entrada="${e.id}"><td>${dataBR(e.data)}</td><td>${t((forn(e.forn) || {}).nome || e.fornNome || '—')}</td><td class="so-pc">${t(e.nota || '—')}</td><td>${e.itens.length}</td><td>${din(e.total)}</td></tr>`).join('') || '<tr><td colspan="5" class="vazio">Nenhuma entrada ainda.</td></tr>'}</tbody></table></section>`;
 };
 function formEntrada(pre = null) {
   const linhas = pre ? pre.itens : [{ nome: '', q: '', custo: '', lote: '', val: '' }];
-  abrir(`${cab(pre && !pre.manual ? 'Conferir a nota' : 'Dar entrada', pre && !pre.manual ? `${t(pre.fornNome || '')} · nota ${t(pre.nota || '')}` : 'Mercadoria que chegou')}<form class="form" id="f-ent">
-    <div class="duas"><label>Fornecedor<input name="forn" list="dl-forn" value="${t(pre ? pre.fornNome : '')}" placeholder="Nome do fornecedor"></label><label>Número da nota<input name="nota" value="${t(pre ? pre.nota : '')}" placeholder="Opcional"></label></div>
+  const multi = pre && pre.notas && pre.notas.length > 1;
+  abrir(`${cab(multi ? `Conferir ${pre.notas.length} notas` : pre && !pre.manual ? 'Conferir a nota' : 'Dar entrada', multi ? 'Os itens de todas as notas juntos; cada nota vira a sua entrada' : pre && !pre.manual ? `${t(pre.fornNome || '')} · nota ${t(pre.nota || '')}` : 'Mercadoria que chegou')}<form class="form" id="f-ent">
+    ${multi ? `<ul class="ent-notas">${pre.notas.map((n, i) => `<li><span class="tag cinza">${i + 1}</span><b>${t(n.fornNome || 'Fornecedor')}</b><small>nota ${t(n.nota || '—')} · ${n.itens.length} ite${n.itens.length === 1 ? 'm' : 'ns'} · ${din(n.itens.reduce((a, x) => a + Math.round(x.q * x.custo), 0))}</small></li>`).join('')}</ul>` : ''}
+    <div class="duas"${multi ? ' hidden' : ''}><label>Fornecedor<input name="forn" list="dl-forn" value="${t(pre ? pre.fornNome : '')}" placeholder="Nome do fornecedor"></label><label>Número da nota<input name="nota" value="${t(pre ? pre.nota : '')}" placeholder="Opcional"></label></div>
     <div class="ent-linhas" id="ent-linhas"></div>
     <button type="button" class="bt" data-mais-linha>${ico('mais')}Mais um produto</button>
     <p class="ent-total" id="ent-total"></p>
     <footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio ouro">Dar entrada no estoque</button></footer>
   </form>${listaProdutos()}<datalist id="dl-forn">${db.fornecedores.map((f) => `<option value="${t(f.nome)}">`).join('')}</datalist>`, (j) => {
     const box = $('#ent-linhas', j);
-    const linha = (x) => { const d = document.createElement('div'); d.className = 'ent-linha'; if (x.ncm) Object.assign(d.dataset, { ncm: x.ncm, cest: x.cest || '', st: x.st ? '1' : '' }); d.innerHTML = `<label class="ent-nome">Produto${x.cEAN ? `<small>${t(x.cEAN)}</small>` : ''}<input name="p" list="dl-prod" value="${t(x.nome)}" required placeholder="Nome ou código"></label>${x.fator !== undefined ? `<label>Vem em<input name="fator" inputmode="numeric" value="${x.fator}" title="Unidades por embalagem"><small>${t(x.uCom || '')} c/ unid.</small></label>` : ''}<label>Qtd.<input name="q" inputmode="decimal" value="${x.q === '' ? '' : numBR(x.q)}" required></label><label>Custo un.<input name="custo" inputmode="decimal" value="${x.custo === '' ? '' : campoDin(x.custo)}"></label><label>Lote<input name="lote" value="${t(x.lote || '')}"></label><label>Validade<input name="val" type="date" value="${t(x.val || '')}"></label>${x.novo ? `<label>Preço de venda<input name="preco" inputmode="decimal" placeholder="novo produto"></label>` : ''}<button type="button" class="icone-bt" data-tira-l aria-label="Tirar linha">${ico('lixo')}</button>`; $('[data-tira-l]', d).addEventListener('click', () => { d.remove(); soma(); }); box.append(d); };
+    const linha = (x) => { const d = document.createElement('div'); d.className = 'ent-linha'; if (x.ni !== undefined) d.dataset.ni = x.ni; if (x.ncm) Object.assign(d.dataset, { ncm: x.ncm, cest: x.cest || '', st: x.st ? '1' : '' }); d.innerHTML = `<label class="ent-nome">Produto${x.cEAN ? `<small>${t(x.cEAN)}</small>` : ''}${x.ni !== undefined && multi ? `<span class="tag cinza ent-ni">nota ${t(pre.notas[x.ni].nota || x.ni + 1)}</span>` : ''}<input name="p" list="dl-prod" value="${t(x.nome)}" required placeholder="Nome ou código"></label>${x.fator !== undefined ? `<label>Vem em<input name="fator" inputmode="numeric" value="${x.fator}" title="Unidades por embalagem"><small>${t(x.uCom || '')} c/ unid.</small></label>` : ''}<label>Qtd.<input name="q" inputmode="decimal" value="${x.q === '' ? '' : numBR(x.q)}" required></label><label>Custo un.<input name="custo" inputmode="decimal" value="${x.custo === '' ? '' : campoDin(x.custo)}"></label><label>Lote<input name="lote" value="${t(x.lote || '')}"></label><label>Validade<input name="val" type="date" value="${t(x.val || '')}"></label>${x.novo ? `<label>Preço de venda<input name="preco" inputmode="decimal" placeholder="novo produto"></label>` : ''}<button type="button" class="icone-bt" data-tira-l aria-label="Tirar linha">${ico('lixo')}</button>`; $('[data-tira-l]', d).addEventListener('click', () => { d.remove(); soma(); }); box.append(d); };
     const soma = () => { let tot = 0; $$('.ent-linha', box).forEach((d) => { const fa = d.querySelector('[name=fator]'); tot += Math.round(lerNum($('[name=q]', d).value) * lerDin($('[name=custo]', d).value) * (fa ? 1 : 1)); }); $('#ent-total', j).innerHTML = `Total da entrada: <b>${din(tot)}</b>`; };
     linhas.forEach(linha); soma(); box.addEventListener('input', soma);
     $('[data-mais-linha]', j).addEventListener('click', () => { linha({ nome: '', q: '', custo: '', lote: '', val: '' }); $$('[name=p]', box).at(-1).focus(); });
     $('form', j).addEventListener('submit', (e) => {
-      e.preventDefault(); const f = e.target, nomeF = f.forn.value.trim();
-      let fo = db.fornecedores.find((x) => sa(x.nome) === sa(nomeF)); if (!fo && nomeF) { fo = { id: uid('f'), nome: nomeF, tel: '', cnpj: pre ? pre.cnpj : '' }; db.fornecedores.push(fo); }
-      const itens = []; let erro = '';
+      e.preventDefault(); const f = e.target;
+      // uma nota (ou a entrada à mão) ou várias: cada grupo acha ou cria o seu fornecedor
+      const grupos = (multi ? pre.notas : [{ fornNome: f.forn.value.trim(), nota: f.nota.value.trim(), cnpj: pre ? pre.cnpj : '', chave: pre ? pre.chave : '' }]).map((n) => {
+        const nomeF = String(n.fornNome || '').trim(); let fo = (n.cnpj && db.fornecedores.find((x) => x.cnpj && soNum(x.cnpj) === soNum(n.cnpj))) || db.fornecedores.find((x) => sa(x.nome) === sa(nomeF));
+        if (!fo && nomeF) { fo = { id: uid('f'), nome: nomeF, tel: '', cnpj: n.cnpj || '' }; db.fornecedores.push(fo); }
+        return { n, fo, itens: [] };
+      });
+      let erro = '', conta = 0;
       $$('.ent-linha', box).forEach((d) => {
+        const gr = grupos[multi ? Number(d.dataset.ni) || 0 : 0], fo = gr.fo;
         const nome = $('[name=p]', d).value.trim(); let p = acharProd(nome); const fa = Math.max(1, lerNum(($('[name=fator]', d) || {}).value) || 1);
         const q = r3(lerNum($('[name=q]', d).value) * fa), custo = Math.round(lerDin($('[name=custo]', d).value) / fa), pv = $('[name=preco]', d);
         if (!nome || q <= 0) { erro = 'Confira produto e quantidade em todas as linhas.'; return; }
-        if (!p) { const preco = pv ? lerDin(pv.value) : 0; p = { id: uid('p'), nome, cat: 'Outros', un: 'un', custo, preco: preco || Math.round(custo * 1.4), q: 0, min: 0, forn: fo ? fo.id : '', cod: (d.querySelector('small') || {}).textContent && eanValido(d.querySelector('small').textContent) ? d.querySelector('small').textContent : ean13(`2${String(Date.now() + itens.length).slice(-11)}`), lotes: [], criado: hoje() }; db.produtos.push(p); }
+        if (!p) { const preco = pv ? lerDin(pv.value) : 0, sm = d.querySelector('.ent-nome small'); p = { id: uid('p'), nome, cat: 'Outros', un: 'un', custo, preco: preco || Math.round(custo * 1.4), q: 0, min: 0, forn: fo ? fo.id : '', cod: sm && eanValido(sm.textContent) ? sm.textContent : ean13(`2${String(Date.now() + conta).slice(-11)}`), lotes: [], criado: hoje() }; db.produtos.push(p); }
         if (d.dataset.ncm) fiscalDoXml(p, { ncm: d.dataset.ncm, cest: d.dataset.cest, st: d.dataset.st === '1' });
-        itens.push({ p: p.id, q, custo, lote: $('[name=lote]', d).value.trim(), val: $('[name=val]', d).value });
+        gr.itens.push({ p: p.id, q, custo, lote: $('[name=lote]', d).value.trim(), val: $('[name=val]', d).value }); conta++;
       });
-      if (erro || !itens.length) { toast(erro || 'Coloque pelo menos um produto.', true); return; }
-      itens.forEach((x) => { const p = prod(x.p); const tot = Math.max(0, p.q) + x.q; if (x.custo > 0) p.custo = Math.round((Math.max(0, p.q) * p.custo + x.q * x.custo) / (tot || 1)); p.q = r3(p.q + x.q); if (x.val || x.lote) (p.lotes ||= []).push({ id: uid('l'), lote: x.lote, val: x.val, q: x.q, ent: hoje() }); if (fo && !p.forn) p.forn = fo.id; });
-      db.entradas.push({ id: uid('e'), data: hoje(), forn: fo ? fo.id : '', nota: f.nota.value.trim(), itens, total: itens.reduce((s, x) => s + Math.round(x.q * x.custo), 0) });
-      registra(`Entrada${f.nota.value.trim() ? ` da nota ${f.nota.value.trim()}` : ''}${fo ? ` (${fo.nome})` : ''}: ${din(db.entradas.at(-1).total)}`, 'entrada');
-      grava(); fechar(); mostra(); toast(`Entrada feita: ${itens.length} produto${itens.length === 1 ? '' : 's'} no estoque.`);
+      if (erro || !conta) { toast(erro || 'Coloque pelo menos um produto.', true); return; }
+      let totGeral = 0, notas = 0;
+      grupos.filter((g) => g.itens.length).forEach(({ n, fo, itens }) => {
+        itens.forEach((x) => { const p = prod(x.p); const tot = Math.max(0, p.q) + x.q; if (x.custo > 0) p.custo = Math.round((Math.max(0, p.q) * p.custo + x.q * x.custo) / (tot || 1)); p.q = r3(p.q + x.q); if (x.val || x.lote) (p.lotes ||= []).push({ id: uid('l'), lote: x.lote, val: x.val, q: x.q, ent: hoje() }); if (fo && !p.forn) p.forn = fo.id; });
+        const ent = { id: uid('e'), data: hoje(), forn: fo ? fo.id : '', nota: String(n.nota || '').trim(), itens, total: itens.reduce((s2, x) => s2 + Math.round(x.q * x.custo), 0) };
+        if (n.chave) ent.chave = n.chave;
+        db.entradas.push(ent); totGeral += ent.total; notas++;
+        registra(`Entrada${ent.nota ? ` da nota ${ent.nota}` : ''}${fo ? ` (${fo.nome})` : ''}: ${din(ent.total)}`, 'entrada');
+      });
+      grava(); fechar(); mostra(); toast(`Entrada feita${notas > 1 ? ` de ${notas} notas` : ''}: ${conta} produto${conta === 1 ? '' : 's'} no estoque${notas > 1 ? `, ${din(totGeral)}` : ''}.`);
     });
   }, true);
 }
@@ -1434,7 +1447,23 @@ function lerXML(txt) {
     const imp = d.getElementsByTagName('ICMS')[0], cst = imp ? g(imp, 'CST') || g(imp, 'CSOSN') : '', st = ['10', '30', '60', '70', '201', '202', '203', '500'].includes(cst) || Number(imp ? g(imp, 'vICMSST') : 0) > 0;
     return { nome: ex ? ex.nome : xProd, cEAN, uCom, q, custo: Math.round(vUn * 100), fator: caixa ? fator : undefined, lote: ras ? g(ras, 'nLote') : '', val: ras ? g(ras, 'dVal').slice(0, 10) : '', novo: !ex, ncm: g(pr, 'NCM'), cest: g(pr, 'CEST'), st };
   });
-  return { fornNome: emit ? g(emit, 'xFant') || g(emit, 'xNome') : '', cnpj: emit ? g(emit, 'CNPJ') : '', nota: g(x, 'nNF'), itens };
+  const inf = x.getElementsByTagName('infNFe')[0], chave = (g(x, 'chNFe') || (inf ? (inf.getAttribute('Id') || '') : '')).replace(/\D/g, '').slice(-44);
+  return { fornNome: emit ? g(emit, 'xFant') || g(emit, 'xNome') : '', cnpj: emit ? g(emit, 'CNPJ') : '', nota: g(x, 'nNF'), chave, itens };
+}
+
+
+// várias notas de uma vez: junta os itens numa conferência só; cada nota vira a sua entrada (fornecedor, número e chave)
+const notaJaLancada = (n) => db.entradas.some((e) => (n.chave && e.chave === n.chave) || (!n.chave && n.nota && e.nota === n.nota && (forn(e.forn) || {}).cnpj && (forn(e.forn) || {}).cnpj === n.cnpj));
+function lerVariosXML(fs) {
+  Promise.all(fs.map((f) => f.text().then((txt) => { try { return { arq: f.name, n: lerXML(txt) }; } catch (e) { return { arq: f.name, erro: true }; } }))).then((r) => {
+    const ruins = r.filter((x) => x.erro).map((x) => x.arq), vistas = new Set(), repetidas = [], boas = [];
+    r.filter((x) => !x.erro).forEach((x) => { const k = x.n.chave || `${x.n.cnpj}-${x.n.nota}`; if (vistas.has(k) || notaJaLancada(x.n)) repetidas.push(`nota ${x.n.nota || x.arq}`); else { vistas.add(k); boas.push(x.n); } });
+    if (ruins.length) toast(`Não parece XML de NF-e: ${ruins.join(', ')}.`, true);
+    if (repetidas.length) toast(`Já lançada${repetidas.length === 1 ? '' : 's'}, ficou de fora: ${repetidas.join(', ')}.`, true);
+    if (!boas.length) return;
+    if (boas.length === 1) { formEntrada(boas[0]); return; }
+    formEntrada({ fornNome: boas[0].fornNome, nota: boas.map((n) => n.nota).join(', '), notas: boas, itens: boas.flatMap((n, ni) => n.itens.map((it) => ({ ...it, ni }))) });
+  });
 }
 
 // ------------------------------------------------------------------ validades
@@ -1453,7 +1482,7 @@ TELAS.fiado = (id) => {
   if (c) return telaCliente(c);
   const l = db.clientes.map((x) => ({ c: x, s: situCli(x) })).sort((a, b) => b.s.k.atraso - a.s.k.atraso || b.s.k.saldo - a.s.k.saldo);
   const atras = l.filter((x) => x.s.k.atraso > 0);
-  return `<section class="cab-tela"><div><h2>Fiado</h2><p>${din(totalFiado())} a receber de ${devedores().length} cliente${devedores().length === 1 ? '' : 's'}. Prazo de ${db.loja.prazo} dias; com mais de 15 dias de atraso o fiado trava sozinho.</p></div><div class="acoes"><button type="button" class="bt" data-acao="caderno-todo">Passar o caderno inteiro</button><button type="button" class="bt cheio" data-acao="novo-cliente">${ico('mais')}Novo cliente</button></div></section>
+  return `<section class="cab-tela"><div><h2>Fiado</h2><p>${din(totalFiado())} a receber de ${devedores().length} cliente${devedores().length === 1 ? '' : 's'}. Prazo de ${db.loja.prazo} dias; com mais de 15 dias de atraso o fiado trava sozinho.</p></div><div class="acoes"><button type="button" class="bt" data-acao="fiado-foto">${ico('cam')}Caderneta por foto</button><button type="button" class="bt" data-acao="caderno-todo">Passar o caderno inteiro</button><button type="button" class="bt cheio" data-acao="novo-cliente">${ico('mais')}Novo cliente</button></div></section>
   ${atras.length ? `<p class="faixa-alerta">${ico('alerta')} ${atras.length} cliente${atras.length === 1 ? '' : 's'} em atraso, somando ${din(atras.reduce((s, x) => s + x.s.k.saldo, 0))}.</p>` : ''}
   <section class="clientes">${l.map(({ c: x, s }) => `<a class="cli" href="#fiado/${x.id}"><span class="av">${t(x.nome.slice(0, 1))}</span><span class="cli-n"><b>${t(x.nome)}</b><small class="st ${s.s}">${s.txt}</small></span><span class="cli-v"><b>${din(s.k.saldo)}</b><small>limite ${din(x.limite)}</small><span class="medidor"><i style="width:${Math.min(100, Math.round((s.k.saldo / (x.limite || 1)) * 100))}%"></i></span></span></a>`).join('') || '<p class="vazio grande">Nenhum cliente no fiado.</p>'}</section>`;
 };
@@ -1799,7 +1828,7 @@ function liga() {
   const lgi = $('#logo-in'); if (lgi) lgi.addEventListener('change', () => { lerLogo(lgi.files[0]); lgi.value = ''; });
   const fbal = $('#f-bal'); if (fbal) fbal.addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; db.loja.bal = { ativo: f.ativo.checked, tipo: f.tipo.value, dig: Number(f.dig.value) }; grava(); toast('Balança salva.'); });
   const xml = $('#xml'); if (xml) xml.addEventListener('click', (e) => { if (!pode('entradas')) { e.preventDefault(); liberar('entradas', 'dar entrada pela nota', () => xml.click()); } });
-  if (xml) xml.addEventListener('change', () => { const a = xml.files[0]; if (!a) return; a.text().then((txt) => { try { formEntrada(lerXML(txt)); } catch (e) { toast('Esse arquivo não parece o XML de uma nota fiscal (NF-e).', true); } }); xml.value = ''; });
+  if (xml) xml.addEventListener('change', () => { const fs = [...xml.files]; xml.value = ''; if (fs.length) lerVariosXML(fs); });
   const rs = $('#restaura'); if (rs) rs.addEventListener('change', () => { const a = rs.files[0]; if (!a) return; a.text().then((txt) => { try { const d = JSON.parse(txt); if (!Array.isArray(d.produtos)) throw new Error('x'); confirmar('Restaurar a cópia', 'Os dados de agora serão trocados pelos da cópia.', 'Restaurar', () => { db = d; grava(); mostra(); toast('Cópia restaurada.'); }, true); } catch (e) { toast('Esse arquivo não é uma cópia do Annona.', true); } }); rs.value = ''; });
 }
 
@@ -1879,26 +1908,260 @@ document.addEventListener('click', (e) => {
     copia: () => baixarArq(`annona-copia-${hoje()}.json`, JSON.stringify(db), 'application/json'),
     'exportar-estoque': () => baixarArq(`estoque-${hoje()}.csv`, csv([['Produto', 'Código', 'Categoria', 'Unidade', 'Estoque', 'Mínimo', 'Custo', 'Preço'], ...ativos().map((p) => [p.nome, p.cod, p.cat, UN[p.un], numBR(p.q), numBR(p.min), campoDin(p.custo), campoDin(p.preco)])])),
     'exportar-rel': () => { const [de, ate] = periodo(estado.rel); baixarArq(`vendas-${de}-a-${ate}.csv`, csv([['Nº', 'Data', 'Hora', 'Quem vendeu', 'Itens', 'Total', 'Lucro', 'Pagamento'], ...vendasEntre(de, ate).map((v) => [v.n, dataBR(v.data), horaBR(v.data), nomeU(v.vend), v.itens.map((x) => `${numBR(x.q)} ${x.nome}`).join(', '), campoDin(v.total), campoDin(lucroVenda(v)), v.pag.map((x) => FORMAS[x.f]).join(' + ')])])); },
-    importar: importarPlanilha,
+    importar: importarPlanilha, 'conferir-maquininha': conferirMaquininha, 'fiado-foto': fiadoFoto,
     'novo-caixa': () => liberar('caixa', 'criar um caixa', () => { const n = db.terminais.length + 1; db.terminais.push({ id: `c${Date.now().toString(36)}`, nome: `Caixa ${n}` }); registra(`Caixa ${n} criado`, 'caixa'); grava(); mostra(); toast(`Caixa ${n} criado. No aparelho dele, toque em Usar neste aparelho.`); }),
     'exportar-nf': exportarNf,
     'exportar-vendas': () => { const [de, ate] = periodo(estado.vper || 'hoje'); baixarArq(`vendas-${de}-a-${ate}.csv`, csv([['Nº', 'Data', 'Hora', 'Situação', 'Itens', 'Total', 'Pagamento', 'Quem vendeu'], ...db.vendas.filter((v) => v.data.slice(0, 10) >= de && v.data.slice(0, 10) <= ate).map((v) => [v.n, dataBR(v.data), horaBR(v.data), v.cancelada ? `Cancelada: ${v.cancelada.motivo}` : 'Concluída', v.itens.map((x) => `${numBR(x.q)} ${x.nome}`).join(', '), campoDin(v.total), v.pag.map((x) => FORMAS[x.f]).join(' + '), nomeU(v.vend)])])); },
   };
   if (ds.acao && A[ds.acao]) A[ds.acao]();
 });
-// planilha CSV (Excel salva em CSV): Produto; Código; Categoria; Estoque; Mínimo; Custo; Preço
-function importarPlanilha() {
-  abrir(`${cab('Importar planilha de produtos', 'Arquivo CSV (no Excel: Salvar como → CSV)')}<p class="j-txt">Colunas reconhecidas: <b>Produto</b>, Código, Categoria, Estoque, Mínimo, Custo, Preço. Produto com o mesmo código é atualizado.</p><div class="form"><input type="file" accept=".csv,text/csv" id="csvf"></div><footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button></footer>`, (j) => {
-    $('#csvf', j).addEventListener('change', (e) => e.target.files[0].text().then((txt) => {
-      const ls = txt.replace(/^﻿/, '').split(/\r?\n/).filter((l) => l.trim()), sep = (ls[0].match(/;/g) || []).length >= (ls[0].match(/,/g) || []).length ? ';' : ',';
-      const corta = (l) => l.split(sep).map((x) => x.replace(/^"|"$/g, '').trim()), cabs = corta(ls[0]).map(sa), col = (...n) => cabs.findIndex((c) => n.some((x) => c.includes(x)));
-      const iN = col('produto', 'nome', 'descricao'), iC = col('codigo', 'barra', 'ean'), iCat = col('categoria', 'grupo'), iQ = col('estoque', 'quantidade', 'qtd'), iM = col('minimo'), iCu = col('custo'), iP = col('preco', 'venda');
-      if (iN < 0) { toast('Não achei a coluna Produto.', true); return; }
-      let n = 0, a = 0;
-      ls.slice(1).forEach((l) => { const c = corta(l), nome = c[iN]; if (!nome) return; const cod = iC >= 0 ? c[iC].replace(/\D/g, '') : '', ex = cod && db.produtos.find((p) => p.cod === cod); const d = { nome, cat: (iCat >= 0 && c[iCat]) || 'Outros', min: iM >= 0 ? lerNum(c[iM]) : 0, custo: iCu >= 0 ? lerDin(c[iCu]) : 0, preco: iP >= 0 ? lerDin(c[iP]) : 0 }; if (ex) { Object.assign(ex, d); if (iQ >= 0) ex.q = r3(lerNum(c[iQ])); a++; } else { db.produtos.push({ id: uid('p'), ...d, un: 'un', q: iQ >= 0 ? r3(lerNum(c[iQ])) : 0, forn: '', cod: cod || ean13(`2${String(Date.now() + n).slice(-11)}`), lotes: [], criado: hoje() }); n++; } });
-      grava(); fechar(); mostra(); toast(`${n} produto${n === 1 ? '' : 's'} novo${n === 1 ? '' : 's'} e ${a} atualizado${a === 1 ? '' : 's'}.`);
-    }));
+// ------------------------------------------------------------------ importar do que o mercadinho já usa (22/11/2026)
+// Tudo só acrescenta ou atualiza depois da conferência; nada é apagado. Leitura local (CSV, XLSX, XML); só a foto da caderneta vai para a IA.
+// .xlsx sem biblioteca (cópia da lógica de base/le-xlsx.js): o .xlsx é um zip; lê a primeira aba e os textos compartilhados
+function lerXlsxAnnona(buf) {
+  const u16 = (b, i) => b[i] | (b[i + 1] << 8), u32 = (b, i) => (b[i] | (b[i + 1] << 8) | (b[i + 2] << 16) | (b[i + 3] << 24)) >>> 0;
+  const b = new Uint8Array(buf); let fim = -1;
+  for (let i = b.length - 22; i >= Math.max(0, b.length - 70000); i--) if (u32(b, i) === 0x06054b50) { fim = i; break; }
+  if (fim < 0) return Promise.reject(new Error('Esse arquivo não parece uma planilha do Excel (.xlsx).'));
+  const n = u16(b, fim + 10), a = {}; let p = u32(b, fim + 16);
+  for (let k = 0; k < n; k++) {
+    const metodo = u16(b, p + 10), tamC = u32(b, p + 20), ln = u16(b, p + 28), le = u16(b, p + 30), lc = u16(b, p + 32), local = u32(b, p + 42);
+    const nome = new TextDecoder().decode(b.subarray(p + 46, p + 46 + ln)), ini = local + 30 + u16(b, local + 26) + u16(b, local + 28);
+    a[nome] = { metodo, dados: b.subarray(ini, ini + tamC) }; p += 46 + ln + le + lc;
+  }
+  const txt = (f) => (!f ? Promise.resolve('') : f.metodo === 0 ? Promise.resolve(new TextDecoder().decode(f.dados)) : new Response(new Blob([f.dados]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text());
+  const colN = (ref) => { const l = ref.replace(/\d+/g, ''); let x = 0; for (let i = 0; i < l.length; i++) x = x * 26 + (l.charCodeAt(i) - 64); return x - 1; };
+  const desfaz = (s) => s.replace(/&#x([0-9a-f]+);/gi, (m, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&#(\d+);/g, (m, d) => String.fromCodePoint(Number(d))).replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
+  const aba = a['xl/worksheets/sheet1.xml'] || a[Object.keys(a).filter((k) => /^xl\/worksheets\/sheet\d+\.xml$/.test(k)).sort()[0]];
+  if (!aba) return Promise.reject(new Error('A planilha não tem nenhuma aba.'));
+  return Promise.all([txt(a['xl/sharedStrings.xml']), txt(aba), txt(a['xl/styles.xml'])]).then((r) => {
+    const comp = []; let m; const re = /<si>([\s\S]*?)<\/si>/g;
+    while ((m = re.exec(r[0]))) comp.push(desfaz((m[1].match(/<t[^>]*>([\s\S]*?)<\/t>/g) || []).map((x) => x.replace(/<[^>]+>/g, '')).join('')));
+    const datas = {}, proprios = {}, xfs = ((r[2].match(/<cellXfs[\s\S]*?<\/cellXfs>/) || [''])[0].match(/<xf [^>]*>/g)) || [];
+    (r[2].match(/<numFmt [^>]*>/g) || []).forEach((f) => { const id = (f.match(/numFmtId="(\d+)"/) || [])[1], c = (f.match(/formatCode="([^"]*)"/) || [])[1] || ''; if (/[dy]/i.test(c) && !/\[h\]/i.test(c)) proprios[id] = 1; });
+    xfs.forEach((x, i) => { const id = Number((x.match(/numFmtId="(\d+)"/) || [])[1]); if ((id >= 14 && id <= 22) || proprios[id]) datas[i] = 1; });
+    const linhas = [], rl = /<row[^>]*>([\s\S]*?)<\/row>/g; let rr;
+    while ((rr = rl.exec(r[1]))) {
+      const lin = [], rc = /<c ([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g; let cc;
+      while ((cc = rc.exec(rr[1]))) {
+        const at = cc[1], ref = (at.match(/r="([A-Z]+\d+)"/) || [])[1], tp = (at.match(/t="(\w+)"/) || [])[1], s = Number((at.match(/s="(\d+)"/) || [])[1]);
+        const v = ((cc[2] || '').match(/<v>([\s\S]*?)<\/v>/) || [])[1]; let val = '';
+        if (tp === 's') val = comp[Number(v)] || '';
+        else if (tp === 'inlineStr') val = desfaz(((cc[2] || '').match(/<t[^>]*>([\s\S]*?)<\/t>/) || [])[1] || '');
+        else if (v != null) { val = desfaz(v); if (datas[s] && /^\d+(\.\d+)?$/.test(val)) { const d = new Date(Date.UTC(1899, 11, 30) + Math.round(Number(val)) * 864e5); val = `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}`; } else if (/^-?\d+\.\d+(E-?\d+)?$/i.test(val)) val = String(Math.round(Number(val) * 1e6) / 1e6).replace('.', ','); }
+        lin[ref ? colN(ref) : lin.length] = val;
+      }
+      for (let i = 0; i < lin.length; i++) if (lin[i] == null) lin[i] = '';
+      if (lin.some((x) => String(x).trim())) linhas.push(lin);
+    }
+    return linhas;
   });
+}
+// CSV com ; , ou tab, aspas e quebra de linha dentro das aspas
+function lerCsvAnnona(txt) {
+  txt = String(txt || '').replace(/^﻿/, '');
+  const prim = txt.split(/\r?\n/).find((l) => l.trim()) || '', conta = (c) => prim.split(c).length - 1;
+  const sep = conta('\t') > conta(';') && conta('\t') > conta(',') ? '\t' : conta(';') >= conta(',') ? ';' : ',';
+  const out = []; let lin = [], cel = '', asp = false;
+  for (let i = 0; i < txt.length; i++) {
+    const ch = txt[i];
+    if (asp) { if (ch === '"') { if (txt[i + 1] === '"') { cel += '"'; i++; } else asp = false; } else cel += ch; continue; }
+    if (ch === '"') asp = true;
+    else if (ch === sep) { lin.push(cel.trim()); cel = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && txt[i + 1] === '\n') i++; lin.push(cel.trim()); if (lin.some((x) => x)) out.push(lin); lin = []; cel = ''; }
+    else cel += ch;
+  }
+  lin.push(cel.trim()); if (lin.some((x) => x)) out.push(lin);
+  return out;
+}
+const lerTabelaArq = (f) => (/\.xlsx$/i.test(f.name) || /spreadsheetml/.test(f.type) ? f.arrayBuffer().then(lerXlsxAnnona) : /\.xls$/i.test(f.name) ? Promise.reject(new Error('Planilha .xls antiga: no Excel, Salvar como → .xlsx ou CSV.')) : f.text().then(lerCsvAnnona));
+// acha a linha do cabeçalho (a que mais bate com os nomes conhecidos nas 10 primeiras)
+function linhaCab(ls, sin) {
+  let melhor = 0, pts = -1;
+  ls.slice(0, 10).forEach((l, i) => { const p = l.filter((c) => c && Object.values(sin).some((ns) => ns.some((n) => sa(c).includes(n)))).length; if (p > pts) { pts = p; melhor = i; } });
+  return melhor;
+}
+const sugereCol = (cabs, nomes, usadas) => { for (const n of nomes) { const i = cabs.findIndex((c, k) => !usadas.has(k) && (sa(c) === n || sa(c).includes(n))); if (i >= 0) { usadas.add(i); return i; } } return -1; };
+const memMapa = {
+  le: (k) => { try { return JSON.parse(localStorage.getItem(`annona-mapa-${k}`) || 'null'); } catch (e) { return null; } },
+  poe: (k, v) => { try { localStorage.setItem(`annona-mapa-${k}`, JSON.stringify(v)); } catch (e) { /* sem armazenamento: só não lembra */ } },
+};
+
+// (1) planilha do PDV antigo: qualquer ordem de coluna, CSV ou XLSX, com o mapeamento sugerido e editável
+const CAMPOS_PROD = [
+  ['nome', 'Produto', ['produto', 'descricao', 'nome', 'mercadoria', 'item']],
+  ['cod', 'Código de barras', ['ean', 'gtin', 'cod barras', 'codigo de barras', 'cod. barras', 'barra', 'codigo', 'cod', 'referencia', 'sku']],
+  ['cat', 'Categoria', ['categoria', 'grupo', 'secao', 'departamento', 'familia', 'setor']],
+  ['un', 'Unidade', ['unidade', 'und', 'un', 'medida']],
+  ['q', 'Estoque', ['estoque atual', 'estoque', 'saldo', 'quantidade', 'qtde', 'qtd', 'qt']],
+  ['min', 'Mínimo', ['minimo', 'est. min', 'estoque min', 'min']],
+  ['custo', 'Custo', ['custo', 'preco de compra', 'compra']],
+  ['preco', 'Preço de venda', ['preco de venda', 'preco venda', 'venda', 'preco', 'valor']],
+];
+function importarPlanilha() {
+  abrir(`${cab('Trazer a planilha do sistema antigo', 'Do jeito que veio: Excel (.xlsx) ou CSV, com as colunas em qualquer ordem')}
+    <p class="j-txt">Exporte a lista de produtos do PDV que você usava (ou a planilha que você mesmo faz). O Annona sugere qual coluna é qual, você confere e só então importa. <b>Produto com o mesmo código é atualizado; o que não existe é criado; nada é apagado.</b></p>
+    <div class="form"><label class="bt cheio imp-arq">${ico('planilha')}Escolher a planilha<input type="file" accept=".xlsx,.csv,.txt,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="csvf" hidden></label></div>
+    <div id="imp-mapa"></div>
+    <footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button type="button" class="bt cheio ouro" data-imp-ok hidden>Importar</button></footer>`, (j) => {
+    let ls = [], ic = 0, mapa = {};
+    const chaveMapa = () => (ls[ic] || []).map(sa).join('|').slice(0, 200);
+    const sugere = () => { const cabs = ls[ic] || [], lembra = memMapa.le(chaveMapa()); if (lembra) { mapa = lembra; return; } const us = new Set(); mapa = {}; CAMPOS_PROD.forEach(([k, , sin]) => { mapa[k] = sugereCol(cabs, sin, us); }); };
+    const desenha = () => {
+      const cabs = ls[ic] || [], pega = (l, k) => (mapa[k] >= 0 ? String(l[mapa[k]] ?? '').trim() : '');
+      const corpo = ls.slice(ic + 1).filter((l) => mapa.nome >= 0 && pega(l, 'nome'));
+      const achar = (l) => { const cod = pega(l, 'cod').replace(/\D/g, ''); return (cod && db.produtos.find((p) => p.cod === cod)) || (!cod && db.produtos.find((p) => sa(p.nome) === sa(pega(l, 'nome')))) || null; };
+      const novos = corpo.filter((l) => !achar(l)).length, vis = CAMPOS_PROD.filter(([k]) => mapa[k] >= 0), pl = (x, s, p) => `${x} ${x === 1 ? s : p}`;
+      $('#imp-mapa', j).innerHTML = `<section class="imp-sec"><h3>Qual coluna é qual</h3><p class="dica">Linha do cabeçalho: <select id="imp-cab" aria-label="Linha do cabeçalho">${ls.slice(0, 10).map((l, i) => `<option value="${i}"${i === ic ? ' selected' : ''}>${i + 1}: ${t(l.filter(Boolean).slice(0, 3).join(' · ').slice(0, 50))}</option>`).join('')}</select></p>
+        <div class="imp-mapa">${CAMPOS_PROD.map(([k, n]) => `<label>${n}${k === 'nome' ? ' <small>obrigatório</small>' : ''}<select data-campo="${k}"><option value="-1">não tem</option>${cabs.map((c, i) => `<option value="${i}"${mapa[k] === i ? ' selected' : ''}>${t(c || `Coluna ${i + 1}`)}</option>`).join('')}</select></label>`).join('')}</div></section>
+        ${mapa.nome >= 0 ? `<section class="imp-sec"><h3>Prévia <span class="selo">${pl(corpo.length, 'produto', 'produtos')}</span> <span class="tag verde">${pl(novos, 'novo', 'novos')}</span> <span class="tag ambar">${pl(corpo.length - novos, 'atualizado', 'atualizados')}</span></h3>
+        <div class="imp-rola"><table class="tab"><thead><tr>${vis.map(([, n]) => `<th>${n}</th>`).join('')}<th></th></tr></thead><tbody>${corpo.slice(0, 8).map((l) => `<tr>${vis.map(([k]) => `<td>${t(pega(l, k))}</td>`).join('')}<td>${achar(l) ? '<span class="tag ambar">atualiza</span>' : '<span class="tag verde">novo</span>'}</td></tr>`).join('')}</tbody></table></div>${corpo.length > 8 ? `<p class="mudo">e mais ${corpo.length - 8}…</p>` : ''}</section>` : '<p class="faixa-alerta">Escolha qual coluna tem o nome do produto.</p>'}`;
+      const ok = $('[data-imp-ok]', j); ok.hidden = !(mapa.nome >= 0 && corpo.length); ok.textContent = `Importar ${pl(corpo.length, 'produto', 'produtos')}`;
+      $('#imp-cab', j).addEventListener('change', (e) => { ic = Number(e.target.value); sugere(); desenha(); });
+      $$('[data-campo]', j).forEach((s) => s.addEventListener('change', () => { mapa[s.dataset.campo] = Number(s.value); desenha(); }));
+      ok.onclick = () => {
+        let n = 0, a = 0; const un = (x) => { const s = sa(x); return /^(kg|quilo|kilo)/.test(s) ? 'kg' : /^(cx|caixa)/.test(s) ? 'cx' : /^(gf|garraf)/.test(s) ? 'gf' : 'un'; };
+        corpo.forEach((l) => {
+          const ex = achar(l), cod = pega(l, 'cod').replace(/\D/g, ''), d = { nome: pega(l, 'nome') };
+          if (pega(l, 'cat')) d.cat = pega(l, 'cat');
+          if (pega(l, 'un')) d.un = un(pega(l, 'un'));
+          if (pega(l, 'min')) d.min = lerNum(pega(l, 'min'));
+          if (pega(l, 'custo')) d.custo = lerDin(pega(l, 'custo'));
+          if (pega(l, 'preco')) d.preco = lerDin(pega(l, 'preco'));
+          const q = pega(l, 'q') ? r3(lerNum(pega(l, 'q'))) : null;
+          if (ex) { Object.assign(ex, d); if (q != null) ex.q = q; if (cod && !ex.cod) ex.cod = cod; a++; }
+          else { db.produtos.push({ id: uid('p'), cat: 'Outros', un: 'un', min: 0, custo: 0, preco: 0, ...d, q: q ?? 0, forn: '', cod: cod || ean13(`2${String(Date.now() + n).slice(-11)}`), lotes: [], criado: hoje(), origem: 'planilha' }); n++; }
+        });
+        memMapa.poe(chaveMapa(), mapa);
+        registra(`Planilha de produtos importada: ${pl(n, 'novo', 'novos')} e ${pl(a, 'atualizado', 'atualizados')}`, 'estoque');
+        grava(); fechar(); mostra(); toast(`${pl(n, 'produto novo', 'produtos novos')} e ${pl(a, 'atualizado', 'atualizados')}.`);
+      };
+    };
+    $('#csvf', j).addEventListener('change', (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      lerTabelaArq(f).then((x) => { if (!x.length) throw new Error('A planilha está vazia.'); ls = x; ic = linhaCab(ls, Object.fromEntries(CAMPOS_PROD.map(([k, , s]) => [k, s]))); sugere(); desenha(); }).catch((er) => toast(er.message || 'Não deu para ler essa planilha.', true));
+      e.target.value = '';
+    });
+  }, true);
+}
+
+// (3a) extrato da maquininha: perfis de coluna por marca; procura cada venda no cartão ou no Pix pelo dia e pelo valor
+const PERFIS_MAQ = {
+  stone: { nome: 'Stone / Ton', data: ['data da venda', 'data venda', 'data'], valor: ['valor bruto', 'valor da venda', 'valor'], tipo: ['produto', 'tipo', 'forma'], status: ['status', 'situacao'] },
+  pagbank: { nome: 'PagBank', data: ['data da transacao', 'data'], valor: ['valor bruto', 'valor'], tipo: ['forma de pagamento', 'meio de pagamento', 'tipo'], status: ['status'] },
+  mercadopago: { nome: 'Mercado Pago', data: ['data de criacao', 'date_created', 'data da compra', 'data'], valor: ['valor bruto', 'valor da compra', 'transaction_amount', 'valor'], tipo: ['meio de pagamento', 'payment_type', 'tipo de pagamento'], status: ['status', 'estado'] },
+  cielo: { nome: 'Cielo', data: ['data da venda', 'data'], valor: ['valor bruto', 'valor da venda', 'valor'], tipo: ['forma de pagamento', 'produto', 'modalidade'], status: ['status'] },
+  infinitepay: { nome: 'InfinitePay', data: ['data e hora', 'data'], valor: ['valor bruto', 'valor'], tipo: ['meio de pagamento', 'meio', 'forma', 'tipo'], status: ['status'] },
+  generico: { nome: 'Outra (data e valor)', data: ['data', 'date', 'dia'], valor: ['valor', 'bruto', 'amount', 'total'], tipo: ['tipo', 'forma', 'meio'], status: ['status'] },
+};
+const isoDe = (s) => { s = String(s || '').trim(); let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/); if (m) return `${m[3].length === 2 ? `20${m[3]}` : m[3]}-${pad(m[2])}-${pad(m[1])}`; m = s.match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[1]}-${m[2]}-${m[3]}` : ''; };
+const formaDe = (s) => { s = sa(s); return /pix/.test(s) ? 'pix' : /debit/.test(s) ? 'debito' : /credit|parcel/.test(s) ? 'credito' : ''; };
+function conferirMaquininha() {
+  abrir(`${cab('Conferir com a maquininha', 'Cartão e Pix: o que a maquininha diz que vendeu e o que o caixa registrou')}
+    <p class="j-txt">Baixe o relatório de vendas no portal ou no app da maquininha (Stone, PagBank, Mercado Pago, Cielo, InfinitePay…) em <b>CSV ou Excel</b> e carregue aqui. O Annona procura cada venda pelo dia e pelo valor. Nada é apagado: as vendas que baterem ficam marcadas como conferidas.</p>
+    <div class="form"><div class="duas"><label>Maquininha<select id="maq-perfil">${Object.entries(PERFIS_MAQ).map(([k, p]) => `<option value="${k}">${p.nome}</option>`).join('')}</select></label><label class="bt imp-arq">${ico('planilha')}Escolher o relatório<input type="file" id="maq-arq" accept=".csv,.xlsx,.txt,text/csv" hidden></label></div>
+    <p class="mudo" id="maq-lido"></p>
+    <label>Ou cole as linhas (data;valor)<textarea id="maq-txt" rows="4" placeholder="data;valor&#10;${dataBR(hoje())};25,90"></textarea></label></div>
+    <div id="maq-res"></div>
+    <footer class="j-pe"><button type="button" class="bt" data-fechar>Fechar</button><button type="button" class="bt cheio" data-maq-ok>Conferir</button></footer>`, (j) => {
+    let tabela = null;
+    $('#maq-arq', j).addEventListener('change', (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      lerTabelaArq(f).then((x) => {
+        tabela = x; const c = sa((x[linhaCab(x, { a: ['data', 'valor'] })] || []).join(' ')), sel = $('#maq-perfil', j);
+        sel.value = /transaction_amount|date_created/.test(c) ? 'mercadopago' : /data da transacao/.test(c) ? 'pagbank' : /data e hora/.test(c) ? 'infinitepay' : /modalidade/.test(c) ? 'cielo' : /data da venda/.test(c) && /produto/.test(c) ? 'stone' : sel.value;
+        $('#maq-txt', j).value = ''; $('#maq-lido', j).textContent = `${f.name}: ${x.length - 1} linha${x.length === 2 ? '' : 's'}. Maquininha reconhecida: ${PERFIS_MAQ[sel.value].nome}.`;
+      }).catch((er) => toast(er.message || 'Não deu para ler esse arquivo.', true));
+      e.target.value = '';
+    });
+    $('[data-maq-ok]', j).addEventListener('click', () => {
+      const ls = $('#maq-txt', j).value.trim() ? lerCsvAnnona($('#maq-txt', j).value) : tabela;
+      if (!ls || !ls.length) { toast('Escolha o relatório ou cole as linhas.', true); return; }
+      const pf = PERFIS_MAQ[$('#maq-perfil', j).value], ic = linhaCab(ls, { d: pf.data, v: pf.valor }), cabs = ls[ic] || [], us = new Set();
+      let iD = sugereCol(cabs, pf.data, us), iV = sugereCol(cabs, pf.valor, us), corpo = ls.slice(ic + 1);
+      const iT = sugereCol(cabs, pf.tipo, us), iS = sugereCol(cabs, pf.status, us);
+      if (iD < 0 || iV < 0) { if (isoDe(cabs[0]) && lerDin(cabs[1])) { corpo = ls; iD = 0; iV = 1; } else { toast('Não achei as colunas de data e de valor nesse arquivo.', true); return; } }
+      const ini = somaDias(hoje(), -60), abertas = [];
+      db.vendas.filter((v) => !v.cancelada && v.data.slice(0, 10) >= ini).forEach((v) => v.pag.forEach((x, i) => { if (['pix', 'debito', 'credito'].includes(x.f) && !x.conferido) abertas.push({ v, i, f: x.f, valor: x.v }); }));
+      const bateu = [], sobrou = []; let ignor = 0, menor = '';
+      corpo.forEach((l) => {
+        const iso = isoDe(l[iD]), val = lerDin(l[iV]), fm = iT >= 0 ? formaDe(l[iT]) : '';
+        if (!iso || val <= 0) return;
+        if (iS >= 0 && /cancel|estorn|negad|recusad|devolv/.test(sa(l[iS]))) { ignor++; return; }
+        if (!menor || iso < menor) menor = iso;
+        let k = abertas.findIndex((x) => x.valor === val && x.v.data.slice(0, 10) === iso && (!fm || x.f === fm));
+        if (k < 0) k = abertas.findIndex((x) => x.valor === val && x.v.data.slice(0, 10) === iso);
+        if (k >= 0) { const x = abertas.splice(k, 1)[0]; x.v.pag[x.i].conferido = true; bateu.push(x); } else sobrou.push({ iso, val, fm });
+      });
+      // no caixa e não na maquininha: só nos dias que o relatório cobre, sem contar hoje
+      const falta = abertas.filter((x) => menor && x.v.data.slice(0, 10) >= menor && x.v.data.slice(0, 10) < hoje());
+      if (bateu.length) { registra(`Maquininha conferida (${pf.nome}): ${bateu.length} venda${bateu.length === 1 ? '' : 's'} bateram`, 'caixa'); grava(); }
+      $('#maq-res', j).innerHTML = `<div class="maq-res"><p class="maq-ok">${ico('ok')}<span><b>${bateu.length}</b> venda${bateu.length === 1 ? '' : 's'} bateram (${din(bateu.reduce((s, x) => s + x.valor, 0))}).${ignor ? ` ${ignor} cancelada${ignor === 1 ? '' : 's'} ou estornada${ignor === 1 ? '' : 's'} na maquininha, fora da conta.` : ''}</span></p>
+        ${sobrou.length ? `<p class="faixa-alerta">${ico('alerta')}<span>Na maquininha e não no caixa (venda sem registro?): ${sobrou.slice(0, 10).map((s) => `${dataBR(s.iso)} ${din(s.val)}${s.fm ? ` ${FORMAS[s.fm]}` : ''}`).join(' · ')}${sobrou.length > 10 ? ` e mais ${sobrou.length - 10}` : ''}</span></p>` : ''}
+        ${falta.length ? `<p class="maq-falta">No caixa e não na maquininha: ${falta.slice(0, 10).map((x) => `venda nº ${x.v.n} de ${dataBR(x.v.data)}, ${din(x.valor)} ${FORMAS[x.f]}`).join(' · ')}${falta.length > 10 ? ` e mais ${falta.length - 10}` : ''}</p>` : ''}</div>`;
+    });
+  }, true);
+}
+
+// (2) caderneta do fiado por foto: aviso de LGPD, a IA lê nome, valor e data, a pessoa confere e só então lança
+function fiadoFoto() {
+  abrir(`${cab('Caderneta do fiado por foto', 'A IA lê a página e você confere linha por linha antes de lançar')}
+    <div class="lgpd-aviso">${ico('alerta')}<div><b>Antes de mandar a foto</b><p>A foto tem o nome e a dívida dos seus clientes. Ela vai para a IA do Google (Gemini) só para ser lida; no plano grátis, o Google pode usar o conteúdo para melhorar os produtos dele. Mande só a página do fiado, sem documento nem rosto de ninguém.</p><p>Se preferir que nada saia do aparelho, <b>digite à mão</b>. Com a chave própria da IA ligada na conta, o envio segue o contrato da loja com o Google.</p></div></div>
+    <label class="check lgpd-ok"><input type="checkbox" id="lgpd-ok"> Entendi e quero mandar a foto</label>
+    <footer class="j-pe"><button type="button" class="bt" data-mao>Digitar à mão</button><label class="bt cheio ouro desligado" id="ff-bt">${ico('cam')}Tirar ou escolher a foto<input type="file" id="ff-arq" accept="image/*" capture="environment" hidden disabled></label></footer>`, (j) => {
+    $('[data-mao]', j).addEventListener('click', () => { fechar(); cadernoTodo(); });
+    $('#lgpd-ok', j).addEventListener('change', (e) => { $('#ff-arq', j).disabled = !e.target.checked; $('#ff-bt', j).classList.toggle('desligado', !e.target.checked); });
+    $('#ff-bt', j).addEventListener('click', (e) => { if ($('#ff-arq', j).disabled) { e.preventDefault(); toast('Marque que entendeu o aviso para mandar a foto.', true); } });
+    $('#ff-arq', j).addEventListener('change', (e) => { const f = e.target.files[0]; if (f) lerCaderneta(f); });
+  });
+}
+// foto grande vira JPEG de até 1600 px (cabe no limite da leitura)
+const fotoMenor = (f) => new Promise((ok, falha) => {
+  const img = new Image(), u = URL.createObjectURL(f);
+  img.onload = () => { const e = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * e); c.height = Math.round(img.height * e); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); ok(c.toDataURL('image/jpeg', 0.85)); };
+  img.onerror = () => { URL.revokeObjectURL(u); falha(new Error('Não deu para abrir essa foto.')); };
+  img.src = u;
+});
+const ESQUEMA_FIADO = [{ nome: 'nome', rotulo: 'Nome do cliente como está escrito' }, { nome: 'valor', rotulo: 'Quanto deve, em reais', tipo: 'numero' }, { nome: 'data', rotulo: 'Data da compra (DD/MM/AAAA), se tiver' }];
+// resposta da leitura: aceita {ok, dados|itens|linhas}, uma lista ou um objeto
+function normalizaLidos(r) {
+  if (r && r.ok === false) throw new Error(r.mensagem || r.erro || 'A leitura não deu certo.');
+  let x = r && (r.dados ?? r.itens ?? r.linhas ?? r.resultado ?? r);
+  if (x && !Array.isArray(x)) x = x.itens || x.linhas || x.clientes || [x];
+  return (Array.isArray(x) ? x : []).filter((o) => o && typeof o === 'object').map((o) => ({ nome: String(o.nome || o.cliente || '').trim(), v: typeof o.valor === 'number' ? Math.round(o.valor * 100) : lerDin(o.valor || o.deve || o.total), d: isoDe(o.data) || hoje() })).filter((o) => o.nome || o.v);
+}
+const paraMao = (j) => $('[data-mao]', j).addEventListener('click', () => { fechar(); cadernoTodo(); });
+function lerCaderneta(f) {
+  abrir(`${cab('Lendo a caderneta…')}<p class="j-txt lendo">A IA está lendo a foto. Leva alguns segundos.</p>`);
+  const demo = !window.veltriaConta;
+  const pede = demo
+    ? new Promise((ok) => setTimeout(() => ok({ ok: true, dados: { itens: [{ nome: 'Dona Cida', valor: 48.5, data: dataBR(somaDias(hoje(), -12)) }, { nome: 'Seu Joaquim', valor: '112,00', data: dataBR(somaDias(hoje(), -5)) }, { nome: 'Marlene do posto', valor: 23.9, data: dataBR(somaDias(hoje(), -2)) }, { nome: 'Toninho', valor: '65,40', data: '' }] } }), 900))
+    : typeof window.nexoLer === 'function' ? fotoMenor(f).then((img) => window.nexoLer({ tipo: 'fiado', destino: 'dívidas da caderneta do fiado (uma por cliente)', imagem: img, pessoas: true, confirmar: () => Promise.resolve(true), esquema: ESQUEMA_FIADO })) : null;
+  if (!pede) { abrir(`${cab('Leitura por foto: em breve')}<p class="j-txt">A leitura da caderneta pela IA está chegando na sua conta. Por enquanto, passe o caderno digitando: uma linha por cliente.</p><footer class="j-pe"><button type="button" class="bt" data-fechar>Fechar</button><button type="button" class="bt cheio" data-mao>Digitar à mão</button></footer>`, paraMao); return; }
+  pede.then((r) => conferirCaderneta(normalizaLidos(r), demo)).catch((er) => abrir(`${cab('Não deu para ler a foto')}<p class="j-txt">${t(er && er.message ? er.message : 'Tente outra foto, com boa luz e a página inteira.')}</p><footer class="j-pe"><button type="button" class="bt" data-fechar>Fechar</button><button type="button" class="bt cheio" data-mao>Digitar à mão</button></footer>`, paraMao));
+}
+function conferirCaderneta(lidos, demo) {
+  const linha = (o = { nome: '', v: 0, d: hoje() }) => { const ja = o.nome && db.clientes.find((x) => sa(x.nome) === sa(o.nome)); return `<div class="cad-linha cad-foto"><input type="checkbox" name="ok" checked aria-label="Lançar esta linha"><input name="n" value="${t(o.nome)}" placeholder="Nome" aria-label="Nome"><input name="v" value="${campoDin(o.v)}" inputmode="decimal" placeholder="Deve R$" aria-label="Quanto deve"><input name="d" type="date" value="${t(o.d)}" aria-label="Data"><span class="tag ${ja ? 'ambar' : 'verde'}">${ja ? 'soma no saldo' : 'cliente novo'}</span></div>`; };
+  abrir(`${cab('Conferir o que a IA leu', `${lidos.length} linha${lidos.length === 1 ? '' : 's'}${demo ? ' (exemplo da demonstração)' : ''}. Corrija o que estiver errado e desmarque o que não for lançar.`)}
+    <form class="form"><div class="cad-cab cad-foto"><span></span><span>Nome</span><span>Deve</span><span>Data</span><span></span></div><div id="cadf">${lidos.map(linha).join('') || linha()}</div>
+    <button type="button" class="bt" data-mais-cad>${ico('mais')}Mais uma linha</button>
+    <p class="dica">Cliente que já está no fiado com o mesmo nome recebe só a dívida, somada ao que já deve. Nada é apagado.</p>
+    <footer class="j-pe"><button type="button" class="bt" data-fechar>Voltar</button><button class="bt cheio">Lançar no fiado</button></footer></form>`, (j) => {
+    $('[data-mais-cad]', j).addEventListener('click', () => $('#cadf', j).insertAdjacentHTML('beforeend', linha()));
+    $('form', j).addEventListener('submit', (e) => {
+      e.preventDefault(); let n = 0, novos = 0, tot = 0;
+      $$('.cad-linha', $('#cadf', j)).forEach((l) => {
+        if (!$('[name=ok]', l).checked) return;
+        const nome = $('[name=n]', l).value.trim(), v = lerDin($('[name=v]', l).value); if (!nome || v <= 0) return;
+        let c = db.clientes.find((x) => sa(x.nome) === sa(nome));
+        if (!c) { c = { id: uid('c'), nome, tel: '', limite: db.loja.limite, bloq: false, desde: hoje() }; db.clientes.push(c); novos++; }
+        db.fiado.push({ id: uid('f'), cli: c.id, data: `${$('[name=d]', l).value || hoje()}T12:00:00`, tipo: 'compra', v, obs: 'Da caderneta (foto)' }); tot += v; n++;
+      });
+      if (!n) { toast('Nenhuma linha com nome e valor para lançar.', true); return; }
+      registra(`Caderneta por foto lançada: ${n} dívida${n === 1 ? '' : 's'} (${novos} cliente${novos === 1 ? '' : 's'} novo${novos === 1 ? '' : 's'}), ${din(tot)}`, 'fiado');
+      grava(); fechar(); mostra(); toast(`${n} dívida${n === 1 ? '' : 's'} lançada${n === 1 ? '' : 's'} no fiado: ${din(tot)}.`);
+    });
+  }, true);
 }
 
 // ------------------------------------------------------------------ instalar o app e demonstração

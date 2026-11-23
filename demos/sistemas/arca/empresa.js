@@ -6,7 +6,7 @@
 // renomeado nem apagado. Um lançamento sem "banco" é da primeira conta bancária; sem "emp", da empresa dessa conta.
 // Valores sempre em centavos inteiros; datas são dias relativos a hoje (como no nucleo.js).
 
-import { situacaoCob, situacaoConta, situacaoFixa, projecao, CATEGORIAS, isoDe, dataDe } from './nucleo.js';
+import { situacaoCob, situacaoConta, situacaoFixa, projecao, CATEGORIAS, isoDe, dataDe } from './nucleo.js?v=2';
 import { DIA_MS } from '../financeiro-comum/dinheiro.js';
 
 // ------------------------------------------------------------------ cadastros com valor padrão
@@ -387,7 +387,7 @@ export function calendarioImpostos(db, n = 60, agora = new Date()) {
 // ------------------------------------------------------------------ cobrança: régua e inadimplência
 /** Marcos da régua (dias em relação ao vencimento) que caem hoje e ainda não foram lembrados. */
 export function lembretesHoje(db) {
-  return db.cobrancas.map((x) => ({ x, s: situacaoCob(db, x) })).filter(({ x, s }) => s.falta > 0 && db.regua.dias.includes(-x.vence) && !(x.avisos || []).includes(0));
+  return db.cobrancas.map((x) => ({ x, s: situacaoCob(db, x) })).filter(({ x, s }) => s.falta > 0 && !x.semRegua && db.regua.dias.includes(-x.vence) && !(x.avisos || []).includes(0));
 }
 export function inadimplencia(db, { emp = '' } = {}) {
   const por = {};

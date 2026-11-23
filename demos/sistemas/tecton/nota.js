@@ -14,8 +14,8 @@
 // Só acrescenta campos: db.config.nf, produto.fiscal, pessoa.fiscal, venda.nf, venda.nfOutro, db.notas (registro das notas
 // de serviço) e db.nfDemo (só na demonstração). Nenhum token, certificado, CSC ou senha fica no navegador.
 // Na demonstração tudo é simulado (nota de exemplo em homologação, chave com dígito verificador certo).
-import { db, grava, CONTA, ramoAtual, acao, ico, t, R$, n2, dataBR, hoje, uid, soma, num, folha, toast, confirma, $, $$, pessoa, nomeDe, imprimir } from './nucleo.js?v=3';
-import { gestor, SECOES_CFG, GANCHOS, movimentos } from './comum.js?v=3';
+import { db, grava, CONTA, ramoAtual, acao, ico, t, R$, n2, dataBR, hoje, uid, soma, num, folha, toast, confirma, $, $$, pessoa, nomeDe, imprimir } from './nucleo.js?v=4';
+import { gestor, SECOES_CFG, GANCHOS, movimentos } from './comum.js?v=4';
 import { qrSVG } from '../base/qr.js';
 
 // ------------------------------------------------------------------ o servidor (configurável: outro agente generaliza a função)

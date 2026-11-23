@@ -1,7 +1,7 @@
 // Tecton · o que os três ramos têm em comum: menus, painel (cada ramo desenha o seu), clientes e fornecedores, financeiro
 // (pagar, receber e fluxo de caixa), equipe, busca, primeiro uso, Configurações e o guia "Como usar".
 import { db, grava, CONTA, RAMOS, ramoAtual, tela, acao, ir, cab, vazio, ico, t, R$, R0, dataBR, dataCurta, quando, hoje, somaDias, somaMeses, uid, soma, num, n2, pl,
-  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, recibo, imprimir, reduzir, abrirEmpresaDemo, raiz, recomecar, dias } from './nucleo.js?v=3';
+  folha, editar, campos, lerCampos, toast, confirma, $, $$, pessoa, nomeDe, whatsapp, recibo, imprimir, reduzir, abrirEmpresaDemo, raiz, recomecar, dias } from './nucleo.js?v=4';
 
 // ------------------------------------------------------------------ menus de cada ramo (o menu lateral e a barra de baixo)
 // [rota, nome, ícone]; a barra de baixo do celular usa as rotas de BAIXO (no máximo 4 + Mais)
@@ -152,7 +152,7 @@ tela('clientes', {
   titulo: 'Clientes e fornecedores',
   html() {
     const q = buscaP.toLowerCase(), l = db.pessoas.filter((p) => filtroP === 'todos' || p.tipo === filtroP || p.tipo === 'ambos').filter((p) => !q || `${p.nome} ${p.fone} ${p.doc}`.toLowerCase().includes(q)).sort((a, b) => a.nome.localeCompare(b.nome));
-    return cab(db.config.ramos.includes('imobiliaria') && db.config.ramos.length === 1 ? 'Clientes e proprietários' : 'Clientes e fornecedores', `${db.pessoas.length} cadastros`, `<button type="button" class="bt cheio" data-acao="pessoa-nova">${ico('mais2')}Novo cadastro</button>`) +
+    return cab(db.config.ramos.includes('imobiliaria') && db.config.ramos.length === 1 ? 'Clientes e proprietários' : 'Clientes e fornecedores', `${db.pessoas.length} cadastros`, `<button type="button" class="bt" data-acao="imp-planilha" data-alvo="pessoas">${ico('acima')}Importar planilha</button><button type="button" class="bt cheio" data-acao="pessoa-nova">${ico('mais2')}Novo cadastro</button>`) +
       `<div class="cartao"><div class="cartao-cab"><div class="chips">${[['todos', 'Todos'], ['cliente', 'Clientes'], ['fornecedor', 'Fornecedores']].map(([k, n]) => `<button type="button" class="chip" data-fp="${k}" aria-pressed="${filtroP === k}">${n}</button>`).join('')}</div>
       <input class="ent" style="max-width:320px" type="search" data-busca-p placeholder="Procurar por nome ou telefone" value="${t(buscaP)}" aria-label="Procurar cadastro"></div>
       ${l.length ? `<ul class="lista">${l.map((p) => `<li><button type="button" class="item-bt" data-ir="pessoa/${p.id}"><span class="cfg-foto" style="width:42px;height:42px;font-size:1rem">${t(p.nome[0] || '?')}</span><span class="tx"><b>${t(p.nome)}</b><small>${t({ cliente: 'Cliente', fornecedor: 'Fornecedor', ambos: 'Cliente e fornecedor' }[p.tipo] || '')}${p.fone ? ' · ' + t(p.fone) : ''}</small></span></button>${p.fone ? `<button type="button" class="bt-ico" data-acao="pessoa-zap" data-id="${p.id}" aria-label="WhatsApp de ${t(p.nome)}">${ico('zap')}</button>` : ''}</li>`).join('')}</ul>` : vazio('Ninguém encontrado.')}</div>`;

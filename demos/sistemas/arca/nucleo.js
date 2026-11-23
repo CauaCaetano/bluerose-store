@@ -263,6 +263,7 @@ export function pendencias(db, agora = new Date()) {
 }
 /** Régua de cobrança: 1 dia antes, no dia e 3 dias depois. Devolve o marco de hoje que ainda não foi lembrado. */
 export function lembreteDoDia(cob) {
+  if (cob.semRegua) return ''; // recebível da maquininha (importar.js): ninguém para lembrar
   const v = cob.vence, marco = v === 1 ? 'vence amanhã' : v === 0 ? 'vence hoje' : v <= -3 && (-v - 3) % 7 === 0 ? `atrasada ${-v} dias` : '';
   return marco && !(cob.avisos || []).includes(0) ? marco : ''; // aviso com dia 0 = já lembrou hoje
 }

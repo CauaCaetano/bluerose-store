@@ -9,11 +9,94 @@
  *  - some a faixa de demonstração e o "Recomeçar"; entra a faixa da conta (empresa, prazo, equipe, assinatura, começar do zero);
  *  - os botões de assinatura e plano das telas abrem a assinatura de verdade (Mercado Pago), não a simulação;
  *  - window.veltriaIA(pergunta): o Assistente das telas responde com a IA (nexo-ia) usando um resumo dos dados da empresa.
+ *  - window.nexoLer({ tipo, texto | imagem | pdf, esquema }): lê foto, PDF ou texto colado pela IA (nexo-ia, extrair); na
+ *    demonstração devolve o exemplo do app. Contrato em tools/funcoes/ia-leitura-LEIA.md.
  * Carregado como script comum no <head>, antes do app.js, para a troca de chave valer desde a primeira leitura.
  */
 (function () {
   var q = new URLSearchParams(location.search), app = q.get('conta');
-  if (!app) { exemploAtual(); return; }
+  if (!app) {
+    exemploAtual();
+    // demonstração: a leitura pela IA devolve o exemplo que o app mandou, depois de um instante (não gasta cota nem sai do aparelho)
+    var pasta = (location.pathname.match(/sistemas\/([a-z-]+)\//) || [])[1];
+    prepararLer({ popina: 'popina', 'agenda-essencial': 'agendaessencial', atria: 'atria', peplo: 'peplo', annona: 'annona', tecton: 'tecton', arca: 'financeiroessencial' }[pasta] || '', function (corpo, o) {
+      return new Promise(function (ok) { setTimeout(ok, 700); }).then(function () {
+        var ex = typeof o.exemplo === 'function' ? o.exemplo(corpo) : o.exemplo;
+        return { ok: true, demo: true, itens: Array.isArray(ex) ? ex.slice(0, 50) : [], restantes: null, propria: false };
+      });
+    }, function () { return Promise.resolve({ demo: true, restantes: null, limite: 20 }); });
+    if (window.nexoLer) window.nexoLer.demo = true;
+    return;
+  }
+  // ---------------------------------------------------------------- leitura pela IA: window.nexoLer (22/11/2026)
+  // "Importar do que o cliente já usa": foto, print, PDF ou texto colado viram campos, pela ação 'extrair' da nexo-ia
+  // (20 leituras por dia por empresa, a mesma cota do assistente). Contrato completo em tools/funcoes/ia-leitura-LEIA.md.
+  // Só nos apps que usam (LER_APPS). Na demonstração não há conta: devolve o exemplo que o próprio app mandou (o.exemplo).
+  // Nunca rejeita: sempre resolve { ok, itens, restantes, propria, demo } ou { ok: false, erro, cancelado, acabou }.
+  function prepararLer(app, chamar, cota) {
+    var LER_APPS = { popina: 1, agendaessencial: 1, atria: 1, peplo: 1, annona: 1, tecton: 1, financeiroessencial: 1 };
+    if (!LER_APPS[app]) return;
+    var hojeSP = function () { return new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10); };
+    function deArquivo(f) { return new Promise(function (ok, falha) { var r = new FileReader(); r.onload = function () { ok(String(r.result)); }; r.onerror = falha; r.readAsDataURL(f); }); }
+    function base64(src) { return (typeof src === 'string' ? Promise.resolve(src) : deArquivo(src)).then(function (u) { var m = /^data:([^;,]+)?(;base64)?,(.*)$/.exec(u); if (!m) throw new Error('Arquivo não reconhecido.'); return { mime: (m[1] || '').toLowerCase(), b64: m[3] }; }); }
+    // foto grande vira JPEG de até 1600 px (cabe no limite da função e gasta menos tempo de envio)
+    function reduzir(src) {
+      return (typeof src === 'string' ? Promise.resolve(src) : deArquivo(src)).then(function (u) {
+        return new Promise(function (ok, falha) {
+          var img = new Image();
+          img.onload = function () { var k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k)); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); ok({ mime: 'image/jpeg', b64: c.toDataURL('image/jpeg', 0.82).split(',')[1] }); };
+          img.onerror = function () { falha(new Error('Não consegui abrir essa imagem. Tente uma foto JPG ou PNG.')); };
+          img.src = u;
+        });
+      });
+    }
+    function campos(e) {
+      if (Array.isArray(e)) return e.map(function (c) { return typeof c === 'string' ? { nome: c, rotulo: c } : c; });
+      return Object.keys(e || {}).map(function (k) { var v = e[k]; return typeof v === 'string' ? { nome: k, rotulo: v } : Object.assign({ nome: k }, v); });
+    }
+    // aviso de LGPD antes de mandar conteúdo com dados de pessoas (nome, telefone, endereço, horário).
+    // O app pode mandar o.confirmar(mensagem) -> Promise<boolean> para mostrar no visual dele; sem isso, esta janela simples.
+    function avisoPadrao(msg) {
+      return new Promise(function (ok) {
+        var v = document.createElement('div');
+        v.setAttribute('role', 'dialog'); v.setAttribute('aria-modal', 'true'); v.className = 'nexo-ler-aviso';
+        v.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.55);font:inherit';
+        v.innerHTML = '<div style="max-width:420px;width:100%;background:#fff;color:#1c1c1c;border-radius:12px;padding:18px 18px 14px;box-shadow:0 18px 50px rgba(0,0,0,.35);line-height:1.45">' +
+          '<b style="display:block;font-size:16px;margin-bottom:6px">Antes de enviar</b><p style="margin:0 0 14px;font-size:14px"></p>' +
+          '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button type="button" data-n style="font:inherit;padding:9px 14px;border-radius:8px;border:1px solid #bbb;background:#fff;color:#1c1c1c;cursor:pointer">Não enviar</button><button type="button" data-s style="font:inherit;padding:9px 14px;border-radius:8px;border:0;background:#1c1c1c;color:#fff;cursor:pointer;font-weight:600">Enviar para leitura</button></div></div>';
+        v.querySelector('p').textContent = msg;
+        var fim = function (r) { v.remove(); ok(r); };
+        v.addEventListener('click', function (ev) { if (ev.target === v || ev.target.closest('[data-n]')) fim(false); else if (ev.target.closest('[data-s]')) fim(true); });
+        v.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') fim(false); });
+        document.body.appendChild(v); v.querySelector('[data-s]').focus();
+      });
+    }
+    var LGPD_IMG = 'A imagem vai para a IA do Google (Gemini) só para ser lida, e o que ela encontrar volta para você conferir antes de salvar. Se tiver nome, telefone ou outros dados de pessoas e você não quiser que saiam do aparelho, não envie: digite à mão.';
+    var LGPD_TXT = 'O texto vai para a IA do Google (Gemini) só para ser lido, e o que ela encontrar volta para você conferir antes de salvar. Se tiver nome, telefone ou outros dados de pessoas e você não quiser que saiam do aparelho, não envie: digite à mão.';
+    window.nexoLer = function (o) {
+      o = o || {};
+      var esquema = campos(o.esquema).filter(function (c) { return c && /^[A-Za-z_][A-Za-z0-9_]{0,39}$/.test(c.nome || ''); }).slice(0, 40);
+      if (!esquema.length) return Promise.resolve({ ok: false, erro: 'Faltou dizer quais campos ler.' });
+      var arq = o.pdf || o.imagem || null, txt = String(o.texto || '').slice(0, 8000).trim();
+      if (!arq && !txt) return Promise.resolve({ ok: false, erro: 'Mande uma foto, um PDF ou um texto.' });
+      var pdf = !!o.pdf || !!(arq && typeof arq !== 'string' && arq.type === 'application/pdf') || (typeof arq === 'string' && /^data:application\/pdf/i.test(arq));
+      if (pdf && arq && typeof arq !== 'string' && arq.size > 4e6) return Promise.resolve({ ok: false, erro: 'PDF grande demais (até 4 MB). Mande as páginas como foto.' });
+      var chave = 'nexo-ler-ok-' + app + '-' + (o.tipo || 'geral'), visto = false;
+      try { visto = !!sessionStorage.getItem(chave); } catch (e) { visto = false; }
+      var msg = arq ? LGPD_IMG : LGPD_TXT;
+      var conf = !o.pessoas || visto ? Promise.resolve(true) : (typeof o.confirmar === 'function' ? Promise.resolve(o.confirmar(msg)) : avisoPadrao(msg));
+      return conf.then(function (sim) {
+        if (!sim) return { ok: false, cancelado: true, erro: 'Nada foi enviado.' };
+        try { sessionStorage.setItem(chave, '1'); } catch (e) { /* sem sessão: pergunta de novo da próxima vez */ }
+        var prep = !arq ? Promise.resolve(null) : pdf ? base64(arq) : reduzir(arq);
+        return prep.then(function (a) {
+          if (a && pdf && a.b64.length > 5.6e6) throw new Error('PDF grande demais (até 4 MB). Mande as páginas como foto.');
+          return chamar({ acao: 'extrair', destino: String(o.destino || o.tipo || 'cadastro').slice(0, 80), campos: esquema, texto: txt, imagem: a ? a.b64 : '', mime: a ? (pdf ? 'application/pdf' : a.mime) : '', hoje: hojeSP() }, o);
+        });
+      }).catch(function (e) { return { ok: false, erro: (e && e.message) || 'Não consegui ler agora. Tente de novo.' }; });
+    };
+    window.nexoLer.cota = cota;
+  }
   // Demonstração: os dados de exemplo ficam no navegador. Quando o exemplo do sistema muda (versoes.js, campo exemplo),
   // quem tinha a demonstração aberta recebe o exemplo novo, com as novidades; o que testou antes fica guardado numa cópia.
   function exemploAtual() {
@@ -685,6 +768,22 @@
       return r.data || {};
     });
   };
+  // leitura pela IA na conta (window.nexoLer; contrato em tools/funcoes/ia-leitura-LEIA.md)
+  prepararLer(app, function (corpo) {
+    return cliente().then(function (sb) { return sb.functions.invoke('nexo-ia', { body: Object.assign({ espaco: info.espaco }, corpo) }); }).then(function (r) {
+      if (r.error) {
+        var st = r.error.context && r.error.context.status;
+        return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { return { ok: false, acabou: st === 429, erro: j.erro || 'A leitura não respondeu agora. Tente de novo em instantes.' }; });
+      }
+      var x = r.data || {};
+      if (x.erro) return { ok: false, erro: x.erro };
+      return { ok: true, demo: false, itens: Array.isArray(x.itens) ? x.itens : [], restantes: typeof x.restantes === 'number' ? x.restantes : null, propria: !!x.propria };
+    }).catch(function () { return { ok: false, erro: 'Sem internet agora. Tente de novo.' }; });
+  }, function () {
+    return cliente().then(function (sb) { return sb.functions.invoke('nexo-ia', { body: { acao: 'status', espaco: info.espaco } }); }).then(function (r) {
+      var x = (r && r.data) || {}; return typeof x.restantes === 'number' ? { restantes: x.restantes, limite: x.limite, propria: !!x.propria } : null;
+    }).catch(function () { return null; });
+  });
   window.veltriaIA = function (pergunta) {
     if (window.veltriaMarca) window.veltriaMarca('ia');
     var d = window.veltriaDados ? window.veltriaDados() : JSON.parse(texto(NS) || '{}'), ver = (window.VELTRIA_VERSOES || {})[app] || {};

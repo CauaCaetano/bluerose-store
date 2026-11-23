@@ -671,3 +671,45 @@ kbd { display: inline-grid; place-items: center; min-width: 34px; height: 30px; 
   .nf-prod { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .nf-prod-nome { grid-column: 1 / -1; }
 }
+
+/* importar do que o mercadinho já usa (22/11/2026): planilha do PDV, maquininha, caderneta por foto e várias notas */
+.imp-arq { justify-self: start; cursor: pointer; }
+.imp-sec { margin: 16px 0 0; padding: 14px 16px; background: var(--fundo); border: 1px solid var(--linha); border-radius: 14px; }
+.imp-sec h3 { margin: 0 0 10px; font: 700 15px/1.3 var(--tit); color: var(--azul-2); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.imp-sec .dica select { min-height: 36px; border: 1px solid #E5D5DC; border-radius: 10px; padding: 0 8px; background: #fff; max-width: 100%; }
+.imp-mapa { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.imp-mapa label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: #5A3A46; }
+.imp-mapa label small { color: var(--ouro-2); font-weight: 600; }
+.imp-mapa select { min-height: 42px; border: 1px solid #E5D5DC; border-radius: 10px; padding: 0 10px; background: #fff; width: 100%; }
+.imp-mapa select:focus { border-color: var(--ouro); outline: 0; box-shadow: 0 0 0 3px rgba(226,178,78,.25); }
+.imp-rola { overflow-x: auto; background: var(--branco); border-radius: 10px; border: 1px solid var(--linha); }
+.imp-rola .tab td, .imp-rola .tab th { white-space: nowrap; }
+.maq-res { display: grid; gap: 10px; margin: 16px 0 0; }
+.maq-res p { margin: 0; }
+.maq-ok { display: flex; gap: 10px; align-items: center; background: var(--verde-claro); color: var(--verde-2); border-radius: 12px; padding: 12px 16px; }
+.maq-falta { background: var(--azul-claro); color: var(--azul-2); border-radius: 12px; padding: 12px 16px; font-size: 14px; }
+.lgpd-aviso { display: flex; gap: 12px; align-items: flex-start; background: var(--ouro-claro); border: 1px solid #F0D8A8; color: #5E430E; border-radius: 14px; padding: 14px 16px; margin: 0 0 14px; }
+.lgpd-aviso > svg { color: var(--ouro-2); margin-top: 2px; }
+.lgpd-aviso p { margin: 6px 0 0; font-size: 14px; }
+.lgpd-ok { display: flex; align-items: center; gap: 10px; font-weight: 600; margin: 0 0 6px; cursor: pointer; }
+.lgpd-ok input { width: 20px; height: 20px; accent-color: var(--azul); }
+.bt.desligado { opacity: .5; }
+.lendo { display: flex; gap: 10px; align-items: center; }
+.lendo::before { content: ''; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--ouro); border-right-color: transparent; animation: gira .8s linear infinite; flex: none; }
+@keyframes gira { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .lendo::before { animation: none; } }
+.cad-cab.cad-foto, .cad-linha.cad-foto { grid-template-columns: 28px 2fr 1fr 1.2fr auto; align-items: center; }
+.cad-linha.cad-foto input[type=checkbox] { width: 20px; height: 20px; min-height: 0; accent-color: var(--azul); }
+#cadf { display: grid; gap: 8px; }
+.ent-notas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ent-notas li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--fundo); border-radius: 10px; padding: 8px 12px; }
+.ent-notas small { color: var(--ardosia); }
+.ent-ni { justify-self: start; font-size: 11px; }
+@media (max-width: 860px) {
+  .cad-linha.cad-foto { grid-template-columns: 28px 1fr 1fr; }
+  .cad-linha.cad-foto input[name=n] { grid-column: 2 / -1; }
+  .cad-linha.cad-foto input[name=v] { grid-column: 2; }
+  .cad-linha.cad-foto input[type=checkbox] { grid-row: 1; }
+  .cad-linha.cad-foto .tag { grid-column: 2 / -1; justify-self: start; }
+  .imp-mapa { grid-template-columns: 1fr 1fr; }
+}
