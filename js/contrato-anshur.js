@@ -1,11 +1,11 @@
 /*
  * Termo de Assinatura do Anshur: texto versionado (docs/contrato-anshur-v1.txt), hash SHA-256 e desenho do texto.
  * O banco (anshur_contratos_versoes) guarda o mesmo texto e o mesmo hash; o aceite só é gravado se o hash bater.
- * Versão nova = arquivo novo (contrato-anshur-v2.txt) + linha nova no banco; a versão 1 nunca é editada.
+ * Versão nova = arquivo novo (contrato-anshur-vN.txt) + linha nova no banco (vigente); versões antigas nunca são editadas.
  */
 (function () {
   'use strict';
-  var VERSAO = 2;
+  var VERSAO = 3;
   var s = document.querySelector('script[src*="js/contrato-anshur.js"]');
   var raiz = s ? s.getAttribute('src').split('js/contrato-anshur.js')[0] : '';
   var ARQUIVO = raiz + 'docs/contrato-anshur-v' + VERSAO + '.txt?v=1';

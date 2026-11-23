@@ -432,3 +432,70 @@ main.an::before, main.an > section::before, main.an > section::after { content: 
 .an-piloto-compromisso p { margin: 0; padding: 18px 20px; border-radius: 14px; background: var(--an-cartao); border-left: 4px solid var(--an-ouro-esc); font-size: 15.5px; line-height: 1.55; color: var(--an-txt2); }
 .an-piloto-compromisso b { color: var(--an-ob); }
 @media (max-width: 900px) { .an-passos.an-piloto-passos, .an-piloto-compromisso { grid-template-columns: minmax(0, 1fr); } }
+
+/* 23/11 · página v44: dor → resultado → como funciona → provas → suporte → preço → FAQ */
+.an-dores-mais { list-style: none; padding: 0; margin: 18px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.an-dores-mais li { display: grid; gap: 6px; padding: 18px 20px; border-radius: var(--an-raio-p, 12px); background: var(--an-cartao); border: 1px solid var(--an-linha); border-left: 4px solid #a2483b; }
+.an-dores-mais b { font-size: 18px; color: var(--an-ob); line-height: 1.25; }
+.an-dores-mais span { font-size: 15.5px; line-height: 1.5; color: var(--an-txt2); }
+
+.an-resultados { list-style: none; padding: 0; margin: 32px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.an-resultados li { display: grid; align-content: start; gap: 8px; padding: 22px; border-radius: 16px; background: var(--an-cartao); border: 1px solid var(--an-linha); border-top: 4px solid var(--an-salvia); }
+.an-resultados .an-res-de { font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #8a3b30; }
+.an-resultados b { font-size: 20px; line-height: 1.25; color: var(--an-ob); }
+.an-resultados span { font-size: 15.5px; line-height: 1.55; color: var(--an-txt2); }
+.an-resultados a { color: var(--an-ob); font-weight: 600; font-size: 15px; }
+
+.an-func { display: grid; gap: clamp(40px, 5vw, 72px); margin-top: clamp(36px, 5vw, 64px); }
+.an-func-linha { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; }
+.an-func-linha.inv > .an-func-img { order: 2; }
+.an-func-img { display: grid; gap: 14px; min-width: 0; }
+.an-func-img.com-cel { display: block; position: relative; padding: 0 14% 56px 0; }
+.an-func-img.com-cel > figure:last-child { position: absolute; right: 0; bottom: 0; width: 27%; filter: drop-shadow(0 24px 30px rgba(17, 24, 32, .35)); }
+.an-func-img .an-cel { border-radius: 18px; border: 5px solid var(--an-ob); }
+.an-func-txt { min-width: 0; }
+.an-func-txt .an-area-rot { margin: 0 0 8px; }
+.an-func-txt h3 { font-size: clamp(26px, 2.8vw, 36px); line-height: 1.08; margin: 0 0 12px; }
+.an-func-txt > p { margin: 0 0 16px; font-size: 17px; line-height: 1.55; }
+.an-func-txt .an-lista li { font-size: 15.5px; }
+.an-func-obs { margin: 14px 0 0 !important; font-size: 14px !important; color: #55626a !important; }
+.an-legenda { margin: 8px 2px 0; font-size: 13px; color: #55626a; }
+
+.an-provas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; margin-top: 28px; }
+.an-provas > div { padding: clamp(20px, 2.6vw, 30px); border-radius: 18px; background: var(--an-cartao); border: 1px solid var(--an-linha); }
+.an-provas > div.ainda { border: 2px dashed rgba(17, 24, 32, .3); background: transparent; }
+.an-provas h3 { font-size: 22px; margin: 0 0 14px; }
+.an-provas ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.an-provas li { display: grid; gap: 3px; padding-left: 16px; border-left: 3px solid var(--an-salvia); }
+.an-provas .ainda li { border-left-color: var(--an-ouro); }
+.an-provas li b { font-size: 16.5px; color: var(--an-ob); line-height: 1.35; }
+.an-provas li span { font-size: 15px; line-height: 1.5; color: var(--an-txt2); }
+
+.an-suporte { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(20px, 3vw, 40px); margin-top: 28px; align-items: start; }
+.an-suporte-prazo { padding: clamp(22px, 3vw, 36px); border-radius: 20px; background: var(--an-ob); }
+.an-suporte-prazo p { margin: 0; color: #cfd6d9 !important; font-size: 16px; line-height: 1.55; }
+.an-suporte-prazo .grande { display: block; margin: 0 0 6px; font-size: clamp(44px, 6vw, 72px); line-height: 1; font-weight: 700; letter-spacing: -0.04em; color: var(--an-ouro); }
+.an-suporte-prazo .rot { display: block; font-size: 20px; font-weight: 700; color: #F6F2EA; margin: 0 0 10px; }
+.an-suporte-prazo hr { border: 0; border-top: 1px solid rgba(233, 226, 212, .2); margin: 20px 0; }
+.an-suporte-lista { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.an-suporte-lista li { display: grid; align-content: start; gap: 5px; padding: 16px 18px; border-radius: 14px; background: var(--an-cartao); border: 1px solid var(--an-linha); border-top: 3px solid var(--an-ouro); }
+.an-suporte-lista b { font-size: 17px; line-height: 1.3; color: var(--an-ob); }
+.an-suporte-lista span { font-size: 15px; line-height: 1.5; color: var(--an-txt2); }
+.an-suporte-lista li.safra { grid-column: 1 / -1; border-top-color: var(--an-salvia); background: rgba(113, 135, 123, .14); }
+
+@media (max-width: 1100px) {
+  .an-dores-mais, .an-resultados { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .an-suporte { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .an-func-linha { grid-template-columns: minmax(0, 1fr); }
+  .an-func-linha.inv > .an-func-img { order: 0; }
+  .an-provas { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .an-dores-mais, .an-resultados, .an-suporte-lista { grid-template-columns: minmax(0, 1fr); }
+  .an-func-img.com-cel { padding: 0 16% 40px 0; }
+  .an-func-img.com-cel > figure:last-child { width: 32%; }
+  .an-func-txt > p { font-size: 16px; }
+  .an-resultados b { font-size: 18px; }
+}

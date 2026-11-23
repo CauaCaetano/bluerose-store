@@ -100,7 +100,7 @@
   function ehAnshur(p) { return /^a-sis-anshur/.test(p || ''); }
   function contratoJs() {
     if (window.BR_CONTRATO) return Promise.resolve(window.BR_CONTRATO);
-    var src = (document.querySelector('script[src*="js/contratar.js"]').getAttribute('src').split('js/contratar.js')[0] || '') + 'js/contrato-anshur.js?v=1';
+    var src = (document.querySelector('script[src*="js/contratar.js"]').getAttribute('src').split('js/contratar.js')[0] || '') + 'js/contrato-anshur.js?v=3';
     return new Promise(function (ok, falha) { var s = document.createElement('script'); s.src = src; s.onload = function () { ok(window.BR_CONTRATO); }; s.onerror = falha; document.head.appendChild(s); });
   }
   var ctr = document.createElement('div'); ctr.className = 'ctr-bloco'; ctr.hidden = true;

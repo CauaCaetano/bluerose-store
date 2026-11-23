@@ -1,0 +1,173 @@
+# Termo de Assinatura do Anshur
+
+Versão 3, de 23 de novembro de 2026 (substitui a versão 2: suporte com prazo de primeira resposta de 4 horas úteis e plantão na safra, piloto por escrito, nota fiscal pelo emissor da Revenda, login com o Google da empresa e avaliação de implementos).
+
+Este Termo é o contrato da assinatura do Anshur. Ele é aceito eletronicamente, no site, antes do pagamento. Leia com atenção: ao marcar a caixa de aceite e seguir para o pagamento, a Revenda concorda com tudo o que está escrito aqui.
+
+## 1. Partes
+
+**Contratada:** Blue Rose Express (BLUE ROSE), nome comercial de Cauã Caetano, inscrito no CPF sob nº 391.135.108-94, com domicílio em Orlândia/SP, e-mail de contato blueroseexpressoficial@gmail.com, doravante "Blue Rose".
+
+**Contratante:** a empresa identificada no aceite eletrônico (razão social e CNPJ), representada pela pessoa que fez o aceite, com o nome e o cargo informados, doravante "Revenda".
+
+A pessoa que faz o aceite declara que tem 18 anos ou mais e poderes para contratar em nome da Revenda. A contratação é feita entre empresas, para uso na atividade da Revenda.
+
+## 2. Objeto
+
+2.1. A Blue Rose concede à Revenda uma licença de uso do Anshur, não exclusiva e intransferível, acessada pela internet, enquanto a assinatura estiver em dia.
+
+2.2. O Anshur é o sistema de gestão para revendas de máquinas agrícolas, com as áreas: Usados e Trocas (avaliação do usado com varejo, atacado e lucro, alçadas de aprovação, pátio, garantias, vendedores, compradores e simulação de financiamento), Máquinas Novas, Financeiro (com estoque financiado, amortizações e auditoria de pátio), Oficina, Peças e Estoque, Vendas e Clientes, Fiscal e Relatórios, com os recursos descritos na página do Anshur no dia da contratação.
+
+2.3. A assinatura cobre todas as lojas da Revenda, sem limite de lojas e de usuários, e todas as áreas do item 2.2.
+
+2.4. A avaliação de usados cobre tratores, colhedoras, pulverizadores (autopropelidos e de arrasto), plantadeiras e os implementos listados na página do Anshur.
+
+2.5. Não fazem parte deste Termo, salvo acordo por escrito: emissão de NFC-e e NFS-e pelo Anshur; a conta e o certificado digital no emissor de notas da Revenda; contabilidade, apuração de tributos e obrigações do contador; integração direta (API) com o sistema de gestão (DMS/ERP) da Revenda; login por SAML ou com conta Microsoft (Azure AD/Entra ID); publicação automática em portais de anúncio.
+
+2.6. **A nota fiscal é sempre da Revenda.** Quando a Revenda conecta a conta dela num emissor de notas compatível (hoje, Focus NFe ou Brasil NFe), o Anshur envia a esse emissor os dados da NF-e (venda, entrada do usado, transferência, devolução e carta de correção), e a nota é emitida pela Revenda, com o certificado digital dela e pela conta dela no emissor. Antes da primeira nota em produção, o Anshur exige uma nota em teste autorizada em homologação. Sugestões de NCM, natureza da operação, CFOP, CST e redução de base de cálculo (como a do Convênio ICMS 52/91) devem ser conferidas pela Revenda ou pelo contador dela, e a responsabilidade pelas obrigações fiscais é da Revenda. A área Fiscal também guarda o XML de documentos emitidos fora do Anshur e monta o pacote do contador. Os relatórios financeiros são gerenciais e não substituem a contabilidade.
+
+## 3. Preço e reajuste
+
+3.1. A assinatura custa **R$ 2.000,00 (dois mil reais) por mês, por Revenda**, cobrindo todas as lojas, sem limite de usuários e com todas as áreas.
+
+3.2. **Não há taxa de implantação.**
+
+3.3. O preço pode ser reajustado com **aviso por escrito de pelo menos 30 (trinta) dias**, enviado ao e-mail da conta que fez a assinatura. O novo valor só vale a partir da primeira cobrança depois do fim do aviso. Se não concordar, a Revenda pode cancelar antes dessa cobrança, sem multa.
+
+3.4. Os valores não incluem tarifas que o banco ou o cartão da Revenda cobrem dela.
+
+## 4. Pagamento e atraso
+
+4.1. O pagamento é feito pelo site, pelo Mercado Pago: no cartão de crédito, com cobrança automática todo mês, ou por Pix, em que cada pagamento vale por 1 (um) mês e a renovação é feita com um novo Pix em Minha conta.
+
+4.2. O acesso é liberado quando o primeiro pagamento é aprovado e só continua com a assinatura em dia.
+
+4.3. Se uma cobrança não for aprovada ou o Pix não for renovado, a Revenda tem **5 (cinco) dias de tolerância** depois do fim do período pago. Passado esse prazo, o acesso fica **suspenso** até o pagamento.
+
+4.4. Durante a suspensão, **os dados não são apagados**: ficam guardados por **90 (noventa) dias**, contados da suspensão, para a Revenda regularizar o pagamento ou pedir a exportação. Se nesse prazo o pagamento não for feito, o contrato termina e aplica-se o item 11.
+
+4.5. O Mercado Pago processa os pagamentos e segue os termos próprios. A Blue Rose não recebe nem guarda o número do cartão.
+
+## 5. Sem fidelidade e cancelamento
+
+5.1. **Não há fidelidade nem multa.** A Revenda cancela quando quiser, em Minha conta, no site.
+
+5.2. Com o cancelamento, nenhuma nova cobrança é feita e o acesso continua **até o fim do período já pago**. O mês já pago não é devolvido em parte, salvo quando a lei exigir.
+
+5.3. A Blue Rose pode encerrar o contrato com aviso por escrito de 30 (trinta) dias, devolvendo a parte proporcional do período pago e não usado. Também pode suspender o acesso de imediato, com aviso, em caso de uso proibido (item 10) ou de risco à segurança de outros clientes.
+
+5.4. Qualquer das partes pode encerrar o contrato se a outra descumprir uma obrigação importante e não corrigir em até 10 (dez) dias depois de avisada por escrito.
+
+## 6. Implantação pela própria Revenda
+
+6.1. A implantação é feita **pela própria Revenda, dentro do sistema**, com o passo a passo da implantação guiada: cadastro das lojas, da equipe, dos perfis de acesso e das alçadas de aprovação, e importação dos dados por planilha.
+
+6.2. A pedido da Revenda, a Blue Rose importa o histórico de trocas a partir de planilha ou da exportação do sistema da Revenda, em até 48 (quarenta e oito) horas úteis depois de receber o arquivo completo.
+
+6.2.1. Quando a importação do sistema da Revenda (DMS/ERP ou telemetria) não reconhecer colunas do arquivo, a Blue Rose ajusta o perfil de importação em até 1 (um) dia útil depois de receber, por escrito, o resumo do "Conferir meu arquivo" ou o arquivo de exemplo.
+
+6.2.2. Piloto: a pedido da Revenda, a implantação é acompanhada por escrito e a Revenda fica pronta para usar em até 10 (dez) dias úteis, contados do recebimento do token do emissor de notas e do arquivo exportado do sistema da Revenda. O prazo fica suspenso enquanto a Blue Rose aguarda resposta, dado ou arquivo da Revenda.
+
+6.3. Financeiro, Peças e Estoque e Oficina podem ser ligados quando a Revenda quiser, uma área de cada vez, sem custo adicional.
+
+6.4. Não há implantação presencial, reunião, ligação, visita nem treinamento ao vivo.
+
+## 7. Suporte por escrito
+
+7.1. O suporte é **só por escrito**: pelo WhatsApp (mensagem de texto) e por e-mail, nos contatos informados no site. Não há atendimento por ligação, reunião ou visita. Cada pedido recebe um **número de chamado** na primeira resposta, e o pedido, as respostas e a solução ficam registrados.
+
+7.2. O horário de atendimento é de segunda a sexta, das 8h às 18h (horário de Brasília), exceto feriados nacionais.
+
+7.3. A Blue Rose envia a primeira resposta por escrito em até **4 (quatro) horas úteis**, contadas dentro do horário do item 7.2. Esse é o prazo da primeira resposta, não o prazo de solução. Chamados que impedem a venda ou a emissão de nota têm prioridade, e a Blue Rose informa por escrito o andamento até a correção.
+
+7.4. **Plantão na safra:** nos meses de safra da região da Revenda, conforme o calendário de safra do Anshur ou o que as partes combinarem por escrito, há plantão por escrito também aos sábados, das 8h às 12h (horário de Brasília), só para chamados que impedem a venda ou a emissão de nota.
+
+7.5. Se a SEFAZ recusar uma nota por causa de um código sugerido pelo Anshur, a Blue Rose corrige e responde por escrito no mesmo dia útil em que o chamado for aberto, dentro do horário do item 7.2.
+
+7.6. A Blue Rose mantém uma base de ajuda com passo a passo: a implantação guiada e os guias dentro do sistema e os passo a passos enviados nos chamados resolvidos.
+
+7.7. O suporte cobre dúvidas de uso e correção de erros do Anshur. Não cobre consultoria fiscal, contábil, jurídica ou de avaliação de mercado, nem problemas no computador, celular, rede ou internet da Revenda, nem falhas da SEFAZ ou do emissor de notas.
+
+## 8. Disponibilidade
+
+8.1. A Blue Rose emprega seus melhores esforços para manter o Anshur no ar, mas **não garante funcionamento sem interrupção** nem um percentual mínimo de disponibilidade.
+
+8.2. Manutenções programadas são avisadas com antecedência sempre que possível.
+
+8.3. O Anshur pode ser instalado no celular ou no computador e guarda no aparelho uma cópia dos dados para consulta e lançamentos sem internet; o que for feito sem conexão é enviado quando ela voltar.
+
+8.4. A Blue Rose não responde por falhas de internet, de energia, dos aparelhos da Revenda ou de serviços de terceiros fora do controle dela (como o provedor de banco de dados e o Mercado Pago).
+
+## 9. Responsabilidades e limites
+
+9.1. **A avaliação do usado, o valor máximo sugerido, a venda prevista, as sugestões da inteligência artificial e os demais indicadores do Anshur são estimativas** feitas a partir dos dados informados pela Revenda. Não são garantia de preço, de prazo de venda nem de resultado. **A decisão final de compra, troca, venda, preço e crédito é sempre da Revenda.**
+
+9.2. A Revenda responde: pela veracidade dos dados que lança ou importa; pelas pessoas a quem dá acesso, pelos perfis e alçadas que define e pelo que elas fazem no sistema; pela guarda das senhas e por remover quem saiu da empresa; pelas obrigações fiscais, contábeis e trabalhistas dela.
+
+9.3. A Blue Rose não responde por lucros cessantes, perda de negócio ou danos indiretos. A responsabilidade total da Blue Rose, por qualquer causa ligada a este Termo, fica limitada ao valor pago pela Revenda nos 12 (doze) meses anteriores ao fato.
+
+9.4. Os limites do item 9.3 não valem em caso de dolo, nem quando a lei não permitir limitar a responsabilidade.
+
+9.5. Nenhum sistema na internet é totalmente imune a ataques. A Blue Rose adota medidas técnicas razoáveis de segurança e responde só por danos causados comprovadamente por falha dela nessas medidas.
+
+## 10. Uso permitido
+
+É proibido usar o Anshur para atividade ilegal, tentar acessar dados de outras revendas, revender ou ceder o acesso a terceiros fora da Revenda, copiar o sistema ou tentar descobrir o seu código, e sobrecarregar o serviço de propósito.
+
+## 11. Dados e LGPD
+
+11.1. **Os dados que a Revenda lança ou importa no Anshur pertencem à Revenda.**
+
+11.2. Para a Lei nº 13.709/2018 (LGPD), **a Revenda é a controladora** dos dados pessoais dos clientes, funcionários e demais pessoas que ela cadastra, e **a Blue Rose é a operadora**: trata esses dados só para o Anshur funcionar, conforme as instruções da Revenda, não os vende e não os usa para outra finalidade. Cabe à Revenda ter base legal para os dados que cadastra e cadastrar só o necessário. Pedidos de titulares que chegarem à Blue Rose são encaminhados à Revenda, e a Blue Rose apoia a Revenda a atendê-los.
+
+11.3. **Onde ficam:** os dados ficam no banco de dados do **Supabase**, em servidores na região de São Paulo, **separados por revenda** (uma revenda não enxerga a outra), com acesso por usuário, perfil e loja, login opcional com o Google da empresa, verificação em 2 etapas e registro de quem fez o quê.
+
+11.4. **Suboperadores:** a Revenda autoriza o uso dos seguintes fornecedores: **Supabase** (banco de dados, login e cópias de segurança); Google (só quando a Revenda usa o login com a conta Google da empresa); o emissor de notas que a Revenda conectar (Focus NFe ou Brasil NFe, contratado pela própria Revenda); **Mercado Pago** (pagamentos, que atua como controlador próprio dos dados de pagamento); GitHub (hospedagem das páginas do site e do sistema, que registra dados técnicos da conexão); Google Gemini (só quando alguém da Revenda usa a sugestão de notas por IA nas fotos; se a Revenda conectar a própria chave do Gemini ou da OpenAI, o uso segue a conta dela); e Google Gmail (envio dos avisos por e-mail). A Blue Rose avisa no site antes de trocar ou acrescentar um suboperador que trate os dados da Revenda.
+
+11.5. **Cópia:** o Anshur faz uma cópia automática diária dos dados de cada revenda, guardada por 30 (trinta) dias.
+
+11.6. **Exportação:** a Revenda pode exportar os seus dados de forma completa (planilha e JSON), a qualquer momento, sem custo.
+
+11.7. **Saída:** no fim do contrato, por qualquer motivo, a Blue Rose entrega à Revenda que pedir os dados completos em formato aberto e os **exclui da base em até 30 (trinta) dias** depois do fim do acesso (ou do prazo do item 4.4, em caso de falta de pagamento). As cópias de segurança automáticas são apagadas no ciclo normal delas. Ficam guardados só os registros que a lei obriga (por exemplo, os de pagamento) e o registro do aceite deste Termo.
+
+11.8. **Incidentes:** se acontecer um incidente de segurança que possa afetar os dados da Revenda, a Blue Rose avisa a Revenda em até 2 (dois) dias úteis depois de confirmá-lo, com o que aconteceu e o que foi feito, para que a Revenda faça as comunicações que a lei exigir.
+
+11.9. A Blue Rose pode usar dados agregados e anonimizados, que não identifiquem a Revenda nem pessoas, apenas para manter e melhorar o Anshur.
+
+## 12. Propriedade intelectual
+
+12.1. O Anshur, o código, as telas, os cálculos, os modelos de avaliação, a marca e os materiais são da Blue Rose. Este Termo dá à Revenda só o direito de uso descrito no item 2, enquanto a assinatura estiver em dia.
+
+12.2. Sugestões de melhoria enviadas pela Revenda podem ser usadas pela Blue Rose no Anshur, sem pagamento e sem que isso dê à Blue Rose direito sobre os dados da Revenda.
+
+## 13. Confidencialidade
+
+13.1. As partes mantêm em sigilo as informações comerciais, financeiras e técnicas da outra parte a que tiverem acesso, inclusive valores de troca, margens, clientes e condições comerciais, durante o contrato e por 2 (dois) anos depois dele.
+
+13.2. Não se aplica a informações públicas, já conhecidas de forma lícita ou cuja divulgação seja exigida por lei ou por ordem judicial.
+
+## 14. Aceite eletrônico e comunicações
+
+14.1. Este Termo é aceito eletronicamente, pela marcação da caixa de aceite no site, com a conta da pessoa que contrata. As partes reconhecem esse aceite como forma válida de concordância, nos termos do art. 10, § 2º, da Medida Provisória nº 2.200-2/2001.
+
+14.2. No aceite, ficam registrados: a conta e o e-mail de quem aceitou, a razão social e o CNPJ da Revenda, o nome e o cargo de quem aceitou, a versão deste Termo, o código de conferência (hash SHA-256) do texto aceito, a data e a hora do servidor e o navegador usado. A Revenda pode baixar ou imprimir o comprovante em Minha conta. Esse registro é guardado durante o contrato e pelos prazos legais depois dele.
+
+14.3. As comunicações entre as partes são feitas por escrito, pelo e-mail da conta que fez a assinatura e pelos contatos de WhatsApp e e-mail informados no site.
+
+## 15. Alterações deste Termo
+
+15.1. A Blue Rose pode publicar novas versões deste Termo. A versão nova é avisada por escrito com pelo menos 30 (trinta) dias de antecedência e passa a valer a partir da primeira renovação depois do fim do aviso. Se não concordar, a Revenda pode cancelar antes, sem multa.
+
+15.2. Cada versão fica guardada com o seu código de conferência, e o comprovante mostra a versão que a Revenda aceitou.
+
+## 16. Disposições gerais
+
+16.1. Para a assinatura do Anshur, este Termo prevalece sobre os Termos de Serviço gerais do site no que forem diferentes. No restante, valem os Termos de Serviço e a Política de Privacidade publicados no site.
+
+16.2. Se uma cláusula for considerada inválida, as demais continuam valendo.
+
+16.3. Não exercer um direito não significa abrir mão dele.
+
+16.4. A Revenda não pode transferir este contrato a terceiros sem concordância por escrito da Blue Rose.
+
+16.5. Este Termo segue as leis do Brasil. Antes de qualquer medida judicial, as partes tentam resolver por escrito. Fica eleito o foro da comarca de Orlândia/SP para as questões deste Termo, ressalvado o direito de a Revenda usar o foro do seu domicílio quando a lei assim garantir.
