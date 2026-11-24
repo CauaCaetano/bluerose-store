@@ -619,6 +619,108 @@ const acoesNf = {
   outro: (b) => { const v = db.vendas.find((x) => x.id === b.dataset.nfid); if (v) { fechar(); folhaOutro(v); } },
 };
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-nf]'); if (b && acoesNf[b.dataset.nf]) acoesNf[b.dataset.nf](b); });
+
+// ------------------------------------------------------------------ maquininha Mercado Pago Point (24/11/2026)
+// Mesmo jeito do Popina: a dona cola o Access Token de produção da conta Mercado Pago DELA e escolhe a Point (Smart ou Pro).
+// Na sacola, com Crédito ou Débito, "Cobrar na maquininha" manda o valor para ela e espera a aprovação (função popina-point,
+// que atende Popina e Peplo). Aprovado → a venda fecha sozinha como Crédito/Débito/Pix, com parcelas e bandeira. O token fica
+// só no servidor (cifrado); aqui fica db.cfg.point { ligado, terminal, conta }. Demonstração: maquininha simulada.
+const maqP = () => db.cfg.point || (emConta() ? {} : { ligado: true, terminal: 'NEWLAND_N950__N950NCB801293324', conta: 'LOJA EXEMPLO' });
+const maqSet = (x) => { db.cfg.point = { ...maqP(), ...x }; grava(); };
+const maqLigada = () => !!(maqP().ligado && maqP().terminal);
+const maqChama = (body) => (emConta() && window.popinaPoint ? window.popinaPoint(body) : Promise.resolve({ ok: false, mensagem: 'Entre na conta para usar a maquininha.' }));
+const maqNome = (id) => String(id || '').replace(/__/, ' · ').replace(/_/g, ' ');
+const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
+let maqSim = 0;
+const maqDemo = {
+  cobrar: async (v) => { await espera(500); return { ok: true, id: `ORDDEMO${++maqSim}`, status: 'at_terminal', t0: Date.now(), valor: v }; },
+  consultar: async (id, t0, f) => (Date.now() - t0 > 3000 ? { ok: true, id, status: 'processed', tipo: f === 'debito' ? 'debit_card' : 'credit_card', bandeira: 'master', parcelas: f === 'credito' ? (estado.pag[0].parc || 1) : 1 } : { ok: true, id, status: 'at_terminal' }),
+  cancelar: async (id) => ({ ok: true, id, status: 'canceled' }),
+};
+const MAQ_FORMA = { credit_card: 'credito', debit_card: 'debito', prepaid_card: 'debito', qr: 'pix', pix: 'pix', bank_transfer: 'pix', account_money: 'pix' };
+function cobrarMaquininha() {
+  if (!finalizarVenda(true)) return; // confere estoque, desconto e pagamento antes de mandar o valor
+  const valor = totalSacola(), f0 = estado.pag[0], ref = `peplo-${Date.now().toString(36)}`;
+  let ordem = null, parar = false;
+  abrir(`<h2>Maquininha · ${din(valor)}</h2><div class="caixa-aviso" data-st style="text-align:center;padding:18px"><b data-tit style="font-size:19px;display:block">Mandando para a maquininha…</b><span class="mudo" data-txt>${t(maqNome(maqP().terminal))}</span></div>
+    ${emConta() ? '' : '<p class="mudo" style="margin-top:10px">Demonstração: a maquininha é simulada e aprova sozinha em 3 segundos.</p>'}
+    <div class="acoes"><button type="button" class="bt" data-cancela>Cancelar a cobrança</button></div>`, async (j) => {
+    const tit = $('[data-tit]', j), txt = $('[data-txt]', j), st = $('[data-st]', j), bt = $('[data-cancela]', j);
+    const fim = (ok, msg) => { parar = true; st.classList.add(ok ? 'ok' : 'mal'); tit.textContent = msg; };
+    bt.onclick = async () => {
+      if (!ordem) { parar = true; fechar(); return; }
+      const r = emConta() ? await maqChama({ acao: 'cancelar', id: ordem.id }) : await maqDemo.cancelar(ordem.id);
+      if (r.ok && r.status === 'canceled') { fim(false, 'Cobrança cancelada'); setTimeout(fechar, 900); }
+      else if (r.ok) txt.textContent = 'Pedido de cancelamento enviado. Se não sumir da maquininha, cancele nela.';
+      else toast(r.mensagem || 'Cancele direto na maquininha', true);
+    };
+    const r = emConta() ? await maqChama({ acao: 'cobrar', valor: valor / 100, ref }) : await maqDemo.cobrar(valor);
+    if (!r.ok) { fim(false, r.mensagem || 'Não deu para mandar para a maquininha'); bt.textContent = 'Voltar'; return; }
+    ordem = r; const t0 = r.t0 || Date.now();
+    tit.textContent = 'Passe o cartão ou aproxime na maquininha'; txt.textContent = `${din(valor)} · esperando a cliente pagar`;
+    for (let k = 0; k < 400 && !parar && document.body.contains(j); k++) {
+      await espera(2500); if (parar || !document.body.contains(j)) break;
+      const s = emConta() ? await maqChama({ acao: 'consultar', id: ordem.id }) : await maqDemo.consultar(ordem.id, t0, f0.f);
+      if (!s.ok) continue; // sem internet por um instante: tenta de novo
+      if (s.status === 'processed') {
+        const forma = MAQ_FORMA[s.tipo] || f0.f, parc = s.parcelas || 1;
+        fim(true, `Aprovado · ${FORMAS[forma]}${parc > 1 ? ` em ${parc}×` : ''}`);
+        // o valor aprovado é o que vale: se a cliente pagou outro tipo na maquininha (débito, Pix), a venda fica com ele
+        estado.pag = [{ f: forma, v: valor, parc, maq: { id: ordem.id, bandeira: s.bandeira || '', parcelas: parc } }];
+        setTimeout(() => { fechar(); finalizarVenda(); registra(`Venda paga na maquininha: ${din(valor)} (${FORMAS[forma]})`, 'caixa'); }, 900);
+        return;
+      }
+      if (['failed', 'canceled', 'expired', 'refunded'].includes(s.status)) {
+        fim(false, { failed: 'Recusado na maquininha', canceled: 'Cancelado na maquininha', expired: 'O tempo acabou', refunded: 'Estornado' }[s.status]);
+        txt.textContent = s.detalhe ? `Motivo: ${s.detalhe}` : 'Tente de novo ou receba de outro jeito.'; bt.textContent = 'Voltar'; ordem = null; return;
+      }
+      if (s.status === 'action_required') txt.textContent = 'A maquininha pediu uma ação: veja a tela dela.';
+    }
+  });
+}
+let maqSrv = null;
+function secaoMaquininha() {
+  const x = maqP(), lig = maqLigada();
+  if (emConta() && !maqSrv) { maqSrv = {}; maqChama({ acao: 'status' }).then((s) => { maqSrv = s || {}; if (s && s.conectado === false && maqP().ligado) { maqSet({ ligado: false, terminal: '' }); mostra(); } }); }
+  if (x.ligado && !x.terminal) setTimeout(maqListar, 0);
+  return `<section class="cartao cfg-sec" id="cfg-maq" style="margin-top:16px"><div class="cartao-cab"><h2>${icb('cartao')}Maquininha</h2></div>
+    <p class="mudo cfg-txt">Com a maquininha <b>Point do Mercado Pago</b> (Point Smart ou Point Pro), a sacola manda o valor direto para ela: ninguém digita o valor e a venda fecha sozinha quando o pagamento é aprovado. O dinheiro cai na sua conta Mercado Pago, com a taxa que você já paga.</p>
+    ${lig ? `<div class="caixa-aviso ok">Ligada: ${t(maqNome(x.terminal))}${x.conta ? ` · conta ${t(x.conta)}` : ''}${emConta() ? '' : ' (exemplo)'}</div>` : ''}
+    ${x.ligado && !x.terminal ? '<p class="mudo">Conta conectada. Agora escolha a maquininha:</p><div data-maq-lista style="display:grid;gap:8px"><p class="mudo">Procurando as maquininhas da sua conta…</p></div>' : ''}
+    ${x.ligado ? `<div class="cfg-bts" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${x.terminal ? '<button type="button" class="bt pq" data-maq="trocar">Trocar a maquininha</button>' : ''}<button type="button" class="bt pq" data-maq="desligar">Desligar</button></div>`
+      : `<ol class="mudo" style="margin:8px 0;padding-left:20px;line-height:1.6"><li>No computador, entre em <b>mercadopago.com.br/developers</b> › <b>Suas integrações</b> e crie uma aplicação (Pagamentos presenciais / Point).</li><li>Em <b>Credenciais de produção</b>, copie o <b>Access Token</b> (começa com APP_USR-).</li><li>No app do Mercado Pago, a maquininha precisa estar ligada a uma loja e a um caixa.</li></ol>
+      <label class="campo">Access Token de produção da sua conta<input id="maq-token" type="password" autocomplete="off" spellcheck="false" placeholder="${emConta() ? 'APP_USR-...' : 'Na demonstração, deixe em branco'}"><small>Fica guardado cifrado no servidor e não aparece de novo nesta tela.</small></label>
+      <div class="cfg-bts" style="margin-top:10px"><button type="button" class="bt pq cheio" data-maq="conectar">Conectar minha conta</button></div>`}
+    <details style="margin-top:10px"><summary class="mudo">E a Stone, PagBank, Cielo ou outra?</summary><p class="mudo" style="margin-top:6px">Essas maquininhas não deixam o sistema mandar o valor para elas. Nelas, continue passando o cartão como hoje e marque Crédito ou Débito na sacola. No fim do mês, confira tudo pelo extrato em Caixa › Conferir com o extrato da maquininha.</p></details>
+  </section>`;
+}
+async function maqListar() {
+  const box = $('[data-maq-lista]'); if (!box) return;
+  const r = emConta() ? await maqChama({ acao: 'terminais' }) : { ok: true, terminais: [{ id: 'GERTEC_MP35P__8701372447323147', modo: 'STANDALONE', caixa: 'Caixa 1' }, { id: 'NEWLAND_N950__N950NCB801293324', modo: 'PDV', caixa: 'Balcão' }] };
+  if (!r.ok) { box.innerHTML = `<div class="caixa-aviso atn">${t(r.mensagem || 'Não deu para listar as maquininhas.')}</div>`; return; }
+  if (!r.terminais?.length) { box.innerHTML = '<div class="caixa-aviso atn">Nenhuma maquininha nesta conta. No app do Mercado Pago, ligue a Point a uma loja e a um caixa e abra esta tela de novo.</div>'; return; }
+  box.innerHTML = r.terminais.map((x) => `<button type="button" class="bt" style="justify-content:flex-start;text-align:left" data-maq="escolher" data-term="${t(x.id)}" data-modo="${t(x.modo)}">${icb('cartao')}<span><b>${t(maqNome(x.id))}</b><br><small class="mudo">${x.caixa ? `Caixa ${t(x.caixa)} · ` : ''}${x.modo === 'PDV' ? 'pronta para receber do sistema' : 'vai passar para o modo PDV (reinicie a maquininha depois)'}</small></span></button>`).join('');
+}
+const acoesMaq = {
+  conectar: async (b) => {
+    const tk = ($('#maq-token') || {}).value?.trim() || '';
+    if (emConta() && !/^APP_USR-/.test(tk)) return toast('Cole o Access Token de produção (começa com APP_USR-).', true);
+    b.disabled = true; const r = emConta() ? await maqChama({ acao: 'conectar', token: tk }) : { ok: true, conta: 'LOJA EXEMPLO' }; b.disabled = false;
+    if (!r.ok) return toast(r.mensagem || 'Não deu para conectar.', true);
+    maqSet({ ligado: true, terminal: '', conta: r.conta || '' }); toast('Conta conectada: agora escolha a maquininha.'); mostra();
+  },
+  escolher: async (b) => {
+    b.disabled = true;
+    const s = emConta() ? await maqChama({ acao: 'escolher', terminal: b.dataset.term, modo: b.dataset.modo }) : { ok: true, terminal: b.dataset.term, reiniciar: b.dataset.modo !== 'PDV' };
+    b.disabled = false; if (!s.ok) return toast(s.mensagem || 'Não deu para escolher esta maquininha.', true);
+    maqSet({ ligado: true, terminal: s.terminal }); registra('Maquininha ligada', 'caixa'); toast(s.reiniciar ? 'Pronto. Reinicie a maquininha para ela entrar no modo PDV.' : 'Maquininha ligada.'); mostra();
+  },
+  trocar: () => { maqSet({ terminal: '' }); mostra(); },
+  desligar: () => confirmar('Desligar a maquininha?', 'A sacola volta a só marcar Crédito ou Débito. O token sai do servidor.', 'Desligar', async () => {
+    if (emConta()) await maqChama({ acao: 'desconectar' }); maqSet({ ligado: false, terminal: '', conta: '' }); maqSrv = null; registra('Maquininha desligada', 'caixa'); mostra(); toast('Maquininha desligada.');
+  }),
+};
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-maq]'); if (b && acoesMaq[b.dataset.maq]) acoesMaq[b.dataset.maq](b); });
 document.addEventListener('change', (e) => { if (e.target.matches('[data-nf-auto]')) { db.fiscal.auto = e.target.checked; grava(); toast(e.target.checked ? '"Emitir NFC-e" já vem marcado.' : '"Emitir NFC-e" vem desmarcado.'); } });
 
 // ------------------------------------------------------------------ liquidação e promoções
@@ -940,7 +1042,7 @@ function sacolaHTML() {
     ${falta > 0 && sac.length ? `<div class="caixa-aviso atn">Faltam ${din(falta)} para fechar o total.</div>` : falta < 0 ? `<div class="caixa-aviso atn">Pagamento passa ${din(-falta)} do total${estado.pag.some((x) => x.f === 'dinheiro') ? ` (troco de ${din(-falta)})` : ''}.</div>` : ''}
     ${fiadoV && !pf.ok ? `<div class="caixa-aviso mal">${t(pf.motivo)}${pf.excecao ? (estado.excecao ? `<br><b>Exceção liberada:</b> ${t(estado.excecao)}` : ' <button type="button" class="link" data-acao="excecao">Liberar exceção</button>') : ''}</div>` : ''}
     ${emiteNf() ? `<div class="campos" style="margin-top:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end"><label class="troca" style="padding:0"><span>Emitir NFC-e</span><input type="checkbox" id="v-nota" ${(estado.nota ?? (db.fiscal.auto !== false)) ? 'checked' : ''}></label><label class="campo">CPF na nota (opcional)<input id="v-cpf" inputmode="numeric" value="${t(estado.cpf || '')}" placeholder="000.000.000-00"></label></div>` : ''}
-    <button type="button" class="bt cheio largo finalizar" data-acao="finalizar" ${sac.length ? '' : 'disabled'}>${icb('check')}Finalizar venda (F12)</button>
+    ${umaForma && maqLigada() && ['credito', 'debito'].includes(f0.f) && sac.length ? `<button type="button" class="bt cheio largo finalizar" data-acao="maquininha">${icb('cartao')}Cobrar ${din(total)} na maquininha</button><button type="button" class="link" data-acao="finalizar" style="display:block;margin:8px auto 0">Já passei o cartão: só finalizar</button>` : `<button type="button" class="bt cheio largo finalizar" data-acao="finalizar" ${sac.length ? '' : 'disabled'}>${icb('check')}Finalizar venda (F12)</button>`}
   </div>`;
 }
 
@@ -1427,7 +1529,7 @@ const TELAS = {
   config() {
     const L = db.loja, j = db.cfg.juros, d = dona(), u = eu(), ini = String(L.nome || 'L').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
     const cargo = u.perfil === 'dona' ? 'Dona da loja' : (u.cargo || 'Vendedora'), tm = TEMAS.find((x) => x[0] === (db.tema || 'ameixa')) || TEMAS[0];
-    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ...(d ? [['cfg-loja', 'Regras da loja'], ['cfg-nota', 'Nota fiscal'], ['cfg-copia', 'Cópia de segurança']] : []), ['cfg-assinatura', 'Minha assinatura']];
+    const secs = [['cfg-perfil', 'Perfil'], ['cfg-cores', 'Cores'], ['cfg-marca', 'Sua marca'], ['cfg-guia', 'Guia'], ...(d ? [['cfg-loja', 'Regras da loja'], ['cfg-nota', 'Nota fiscal'], ['cfg-maq', 'Maquininha'], ['cfg-copia', 'Cópia de segurança']] : []), ['cfg-assinatura', 'Minha assinatura']];
     return `${cab('config', `Configurações`, d ? `Seu perfil, as cores, a marca da loja, o guia, as regras da loja e a sua assinatura.` : `Seu perfil, o guia e a assinatura da loja. Cores, marca e regras, só a dona muda.`, `${d ? `<a class="bt" href="#dono">${icb('dono')}Painel do dono</a>` : ''}<button type="button" class="bt" data-acao="instalar">${icb('instalar')}Instalar o app</button>`)}
       <nav class="cfg-nav" aria-label="Seções das Configurações">${secs.map(([id, n]) => `<a href="#config/${id}">${n}</a>`).join('')}</nav>
       <div class="grade g2">
@@ -1459,6 +1561,7 @@ const TELAS = {
         </section>
       </div>
       ${secaoNota()}
+      ${secaoMaquininha()}
       <div class="grade g2" style="margin-top:16px">
         <section class="cartao" id="meta"><div class="cartao-cab"><h2>${icb('alvo')}Metas de vendas</h2></div><p class="mudo" style="margin:-6px 0 12px;font-size:13.5px">A meta de cada mês aparece no Início, com a barra do que já foi vendido e quanto falta. Deixe em branco o mês sem meta.</p>
           <div class="campos">${[-1, 0, 1, 2].map((k) => somaMes(`${mesAtual()}-01`, k).slice(0, 7)).map((m) => `<label class="campo">${nomeMes(m).replace(/^./, (x) => x.toUpperCase())} de ${m.slice(0, 4)}${m === mesAtual() ? ' (este mês)' : ''}<input data-meta-m="${m}" inputmode="decimal" value="${campoDin(metaDe(m))}" placeholder="0,00"><small>${m <= mesAtual() ? `Vendido: ${din(vendidoNoMes(m))}` : 'Mês que vem'}</small></label>`).join('')}</div></section>
@@ -1597,17 +1700,18 @@ function abrirExcecao() {
     $('[data-ok]', j).onclick = () => { const q = $('#ex-quem', j).value.trim(), m = $('#ex-mot', j).value.trim(); if (!q || m.length < 5) { toast('Diga quem libera e o motivo.', true); return; } estado.excecao = `${q}: ${m}`; registra(`Exceção no crediário liberada: ${m}`, 'excecao'); fechar(); mostra(); };
   });
 }
-function finalizarVenda() {
+function finalizarVenda(conferir = false) {
   const sac = estado.sacola; if (!sac.length) return; ajustaDesc();
   const sub = sac.reduce((s, x) => s + x.preco * x.qtd, 0), total = Math.max(0, sub - estado.desc);
   if (estado.desc > sub) return toast('O desconto é maior que o total.', true);
   const pags = estado.pag.filter((x) => x.v > 0), pago = pags.reduce((s, x) => s + x.v, 0);
   if (pago < total) return toast(`Faltam ${din(total - pago)} no pagamento.`, true);
   const troco = pago - total;
-  if (estado.desc && !pode('desconto') && estado.desc > Math.round(sub * eu().descMax / 100) && !estado.descLiberado) { pedirSenha(`Desconto de ${din(estado.desc)} passa do seu limite de ${eu().descMax}%.`, () => { estado.descLiberado = true; registra(`Desconto de ${din(estado.desc)} liberado com a senha da dona`, 'desconto'); finalizarVenda(); }); return; }
+  if (estado.desc && !pode('desconto') && estado.desc > Math.round(sub * eu().descMax / 100) && !estado.descLiberado) { pedirSenha(`Desconto de ${din(estado.desc)} passa do seu limite de ${eu().descMax}%.`, () => { estado.descLiberado = true; registra(`Desconto de ${din(estado.desc)} liberado com a senha da dona`, 'desconto'); if (conferir) cobrarMaquininha(); else finalizarVenda(); }); return; }
   if (troco > 0 && !pags.some((x) => x.f === 'dinheiro')) return toast('O pagamento passa do total. Ajuste os valores (troco só no dinheiro).', true);
   // estoque: confere de novo na hora (nunca negativo)
   for (const x of sac) { const p = prod(x.p); if (!p || qtd(p, x.cor, x.tam) < noCarrinho(x.p, x.cor, x.tam)) return toast(`Sem estoque de ${x.nome} ${x.cor} ${x.tam}.`, true); }
+  if (conferir) return true;
   let c = acharCli(estado.vCli);
   if (!c && estado.vCli.trim()) { c = { id: uid('c'), nome: estado.vCli.trim(), tel: '', cpf: '', nasc: '', end: '', limite: db.cfg.limitePadrao, obs: '', bloqueado: false, credito: 0, criado: hoje() }; db.clientes.push(c); }
   const fiado = pags.filter((x) => x.f === 'fiado').reduce((s, x) => s + x.v, 0), loja = pags.filter((x) => x.f === 'loja').reduce((s, x) => s + x.v, 0);
@@ -2371,7 +2475,7 @@ document.addEventListener('click', (e) => {
     esvaziar: () => { estado.sacola = []; estado.excecao = null; ajustaPagamento(); mostra(); },
     dividir: () => { const falta = totalSacola() - estado.pag.reduce((s, x) => s + (x.v || 0), 0); estado.pag.push({ f: estado.pag.some((x) => x.f === 'fiado') ? 'dinheiro' : 'fiado', v: Math.max(0, falta) }); mostra(); },
     completar: () => { const falta = totalSacola() - estado.pag.reduce((s, x) => s + (x.v || 0), 0), u = estado.pag[estado.pag.length - 1]; u.v = Math.max(0, (u.v || 0) + falta); mostra(); },
-    excecao: liberarExcecao, finalizar: finalizarVenda,
+    excecao: liberarExcecao, finalizar: () => finalizarVenda(), maquininha: cobrarMaquininha,
     'por-sel': () => {
       const s2 = estado.sel; if (!s2) return; const p = prod(s2.p);
       if (!s2.tam) { toast('Escolha o tamanho.', true); return; }

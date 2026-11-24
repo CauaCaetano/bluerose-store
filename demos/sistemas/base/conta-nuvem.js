@@ -728,7 +728,7 @@
     });
   };
   // Popina: maquininha Mercado Pago Point pela conta do próprio restaurante (função popina-point). O token só vai para o servidor.
-  if (app === 'popina') window.popinaPoint = function (body) {
+  if (app === 'popina' || app === 'peplo') window.popinaPoint = function (body) {
     return cliente().then(function (sb) { return sb.functions.invoke('popina-point', { body: Object.assign({}, body, { espaco: info.espaco }) }); }).then(function (r) {
       if (r.error) return (r.error.context && r.error.context.json ? r.error.context.json().catch(function () { return {}; }) : Promise.resolve({})).then(function (j) { return { ok: false, mensagem: j.erro || j.mensagem || 'Não deu para falar com o servidor agora.' }; });
       return r.data || {};
