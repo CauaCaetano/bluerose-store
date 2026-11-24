@@ -1637,7 +1637,14 @@ const TELAS = {
 };
 
 // ------------------------------------------------------------------ rotas
+// o campo com foco perde o foco antes de redesenhar: o "change" dele roda aqui, e não no meio do innerHTML (erro do navegador)
 function rota() {
+  if (rota.ocupado) { rota.denovo = true; return; }
+  rota.ocupado = true;
+  try { const ae = document.activeElement, tl = $('#tela'); if (ae && tl && tl.contains(ae)) ae.blur(); rotaDesenha(); } finally { rota.ocupado = false; }
+  if (rota.denovo) { rota.denovo = false; mostra(); }
+}
+function rotaDesenha() {
   const [nome, arg] = (location.hash.slice(1) || 'inicio').split('/');
   const f = TELAS[nome] || TELAS.inicio, tela = $('#tela');
   // redesenho da mesma tela (um clique, um número que mudou) não repete a animação de entrada: sem piscar
