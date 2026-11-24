@@ -214,7 +214,7 @@
       '✅ *Giro mais rápido:* o sistema casa cada usado com os compradores que procuram aquele tipo e gera o anúncio pronto.',
       '✅ *Tempo de volta:* a avaliação sai em minutos, sem ligação nem planilha, e o relatório do dono vem pronto (dia, semana e mês).',
       '✅ *Controle de todas as lojas sem estar em todas:* cada avaliação fica registrada, com quem aprovou e por quanto.',
-      '✅ *Não é chute:* num teste com 859 anúncios reais escondidos, a estimativa do Anshur errou cerca de 30% menos que a média do mesmo modelo.'].join('\n\n');
+      '✅ *Não é chute:* testado em mais de 4 mil anúncios públicos de máquinas usadas, o cálculo do Anshur errou 13,5% na mediana, contra 19,2% da média do mesmo modelo.'].join('\n\n');
     var car = '*O que vem no Anshur:* avaliação de troca com teto · estoque com idade do pátio · floor plan e juros · aprovação por alçada · compradores e anúncios · oficina e preparo · peças · nota fiscal pelo emissor que vocês já usam · importação do sistema atual · todas as lojas · celular e computador.';
     var risco = '*Risco zero:* o piloto é por escrito, sem reunião. A gente importa o seu histórico e configura a nota junto com você, responde em até 4 horas úteis e, em até 10 dias úteis, a revenda está rodando. Depois, R$ 2.000/mês cobrindo todas as lojas, sem taxa de implantação e sem fidelidade: cancela quando quiser.';
     if (acao === 'retomada1') return [
