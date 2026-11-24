@@ -8,11 +8,11 @@
 //   nao      → não emite (ex.: MEI): nada aparece.
 // Na demonstração tudo é simulado (nota de exemplo, ambiente de teste). Só acrescenta campos: db.config.nf,
 // produto.fiscal e venda.nfce / venda.nfOutro. Nenhum token, certificado ou senha fica no navegador.
-import { db, t, din, r2, soDig, grava, CONTA, prod, ativos, pagamentosVenda, quemAgora, auditar, FORMA_FIADO, inicioDoDia, ymd } from './loja.js?v=62';
-import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=62';
-import { abrirImpressao } from './imprimir.js?v=62';
+import { db, t, din, r2, soDig, grava, CONTA, prod, ativos, pagamentosVenda, quemAgora, auditar, FORMA_FIADO, inicioDoDia, ymd } from './loja.js?v=63';
+import { ico, folha, toast, confirma, autorizar, $, $$ } from './ui.js?v=63';
+import { abrirImpressao } from './imprimir.js?v=63';
 import { qrSVG } from '../base/qr.js';
-import { acao } from './nucleo.js?v=62';
+import { acao } from './nucleo.js?v=63';
 
 // ------------------------------------------------------------------ configuração
 export const nf = () => db.config.nf || {};
@@ -24,7 +24,7 @@ const PROVEDORES = { brasilnfe: { nome: 'Brasil NFe', onde: 'No painel da Brasil
 const MODOS = [
   ['api', 'Tenho conta numa API de nota', 'Brasil NFe, Focus NFe... Você cola o token da sua conta e a nota sai por ela.'],
   ['outro', 'Emito no meu sistema/PDV ou pelo contador', 'O Popina não emite: você marca a nota na venda e exporta as vendas.'],
-  ['bluerose', 'Quero que a Blue Rose emita', 'Adicional Nota fiscal: a gente cuida da conta do emissor para você.'],
+  // 24/11/2026: opção 'bluerose' fora da tela: a nota é sempre do cliente, pelo emissor dele
   ['nao', 'Não emito (ex.: MEI)', 'Nada de nota aparece no caixa.'],
 ];
 let servidor = null; // status vindo da função (conectado, provedor, ambiente, bluerose_disponivel, adicional)
@@ -124,7 +124,7 @@ export async function cancelarNota(v) {
   if (r.motivo.length < 15) return toast('Escreva o motivo com pelo menos 15 letras', 'erro');
   let x; try { x = CONTA && !v.nfce.demo ? await chamar({ acao: 'cancelar', chave: v.nfce.chave, motivo: r.motivo }) : { ok: true, protocolo: `135${Date.now().toString().slice(-12)}` }; } catch { x = { ok: false, mensagem: 'Sem internet agora.' }; }
   if (!x?.ok) return toast(x?.mensagem || 'A SEFAZ não aceitou o cancelamento', 'erro');
-  v.nfce = { ...v.nfce, status: 'cancelada', cancelada: { ts: Date.now(), motivo: r.motivo, quem: quemAgora(), protocolo: x.protocolo || '' } };
+  v.nfce = { ...v.nfce, status: 'cancelada', cancelada: { ts: Date.now(), motivo: r.motivo, quem: quemAgora(), protocolo: x.protocolo || '' } }; v.nfTentativas = (v.nfTentativas || 0) + 1; // nova nota usa outra referência
   grava(); auditar('nfce-cancelada', { venda: v.id, valor: v.total, motivo: r.motivo }); toast('NFC-e cancelada');
 }
 export function folhaEmitir(v) {

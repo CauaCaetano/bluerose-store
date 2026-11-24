@@ -1,24 +1,24 @@
 // Popina · liga tudo: as 5 abas, a cor do restaurante, a marca (plano com a sua marca), a faixa da demonstração,
 // o aviso de pedido novo e o primeiro uso.
-import './salao.js?v=62';
-import './pedidos.js?v=62';
-import './cozinha.js?v=62';
-import './caixa.js?v=62';
-import './gestao.js?v=62';
-import './cadastro.js?v=62';
-import './relatorios.js?v=62';
-import { esquema, comoUsar } from './configuracoes.js?v=62';
-import { talvezAbrirInicio } from './inicio.js?v=62';
-import { talvezPrimeiroAcesso } from './primeiro-acesso.js?v=62';
-import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila, t } from './loja.js?v=62';
-import { iniciarRotas, ir } from './nucleo.js?v=62';
-import { ico, toast, confirma, $ } from './ui.js?v=62';
-import * as som from './som.js?v=62';
-import { conferirNovos } from './cozinha.js?v=62';
-import { montarMenu } from './menu.js?v=62';
-import './ifood.js?v=62';
-import './marmita.js?v=62';
-import './importar.js?v=62';
+import './salao.js?v=63';
+import './pedidos.js?v=63';
+import './cozinha.js?v=63';
+import './caixa.js?v=63';
+import './gestao.js?v=63';
+import './cadastro.js?v=63';
+import './relatorios.js?v=63';
+import { esquema, comoUsar } from './configuracoes.js?v=63';
+import { talvezAbrirInicio } from './inicio.js?v=63';
+import { talvezPrimeiroAcesso } from './primeiro-acesso.js?v=63';
+import { db, ouvir, CONTA, lojaCfg, corLoja, linkCardapio, recomecar, fila, t } from './loja.js?v=63';
+import { iniciarRotas, ir } from './nucleo.js?v=63';
+import { ico, toast, confirma, $ } from './ui.js?v=63';
+import * as som from './som.js?v=63';
+import { conferirNovos } from './cozinha.js?v=63';
+import { montarMenu } from './menu.js?v=63';
+import './ifood.js?v=63';
+import './marmita.js?v=63';
+import './importar.js?v=63';
 
 const real = !!CONTA;
 if (real) window.veltriaComecaVazio = true; // conta começa em branco; o convite para trazer o cardápio é o do primeiro acesso

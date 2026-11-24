@@ -50,6 +50,8 @@ async function emitir(a, tom) {
       : await new Promise((ok) => setTimeout(() => { const n = db().ags.filter((x) => x.nfse?.demo).length + 101; ok({ ok: true, status: 'autorizada', numero: n, codigo_verificacao: Math.random().toString(36).slice(2, 10).toUpperCase(), pdf: '', ambiente: 'homologacao', demo: true }); }, 600));
   } catch { r = { ok: false, mensagem: 'Sem internet agora. Tente de novo.' }; }
   emAndamento.delete(a.id);
+  // a mesma referência já foi cancelada no servidor (nota refeita depois de cancelar): não é nota nova; a próxima tentativa usa outra referência
+  if (r?.ok && r.status === 'cancelada') r = { ok: false, mensagem: 'Esta nota já tinha sido cancelada. Toque em Emitir de novo para fazer uma nota nova.' };
   if (!r?.ok) { a.nfTentativas = tent + (r?.desligado ? 0 : 1); a.nfErro = String(r?.mensagem || 'A nota não saiu.').slice(0, 300); X.grava(); X.toast(r?.desligado ? 'A emissão pela API ainda não está ativa. Anote a nota feita no Emissor Nacional.' : `A nota não saiu: ${a.nfErro}`); if (r?.desligado) servidor = { ...servidor, desligado: true }; return; }
   a.nfse = { status: r.status === 'processando' ? 'processando' : 'autorizada', ref, numero: r.numero ? String(r.numero).slice(0, 20) : '', codigo: String(r.codigo_verificacao || '').slice(0, 40),
     pdf: /^https:\/\//.test(String(r.pdf || '')) ? String(r.pdf).slice(0, 500) : '', ambiente: r.ambiente || nf().ambiente || 'homologacao', tomador: tom.nome, doc: soDig(tom.doc), ts: Date.now(), ...(r.demo ? { demo: true } : {}) };
@@ -66,7 +68,7 @@ async function cancelar(a, motivo) {
   if (motivo.length < 15) return X.toast('Escreva o motivo com pelo menos 15 letras.'), false;
   const r = CONTA() && !a.nfse.demo ? await chamar({ acao: 'cancelar', ref: a.nfse.ref, motivo }) : { ok: true };
   if (!r?.ok) return X.toast(r?.mensagem || 'A prefeitura não aceitou o cancelamento.'), false;
-  a.nfse = { ...a.nfse, status: 'cancelada', cancelada: { ts: Date.now(), motivo } }; X.grava(); X.toast('Nota cancelada.'); return true;
+  a.nfse = { ...a.nfse, status: 'cancelada', cancelada: { ts: Date.now(), motivo } }; a.nfTentativas = (a.nfTentativas || 0) + 1; X.grava(); X.toast('Nota cancelada.'); return true;
 }
 
 // ------------------------------------------------------------------ o bloco no atendimento (folha do horário)
@@ -84,6 +86,9 @@ export function bloco(a) {
 }
 export function ligaBloco(f, a, pronto) {
   const c = X.cli(a.cli);
+  // modo API e o status do emissor ainda não lido nesta sessão (só era lido ao abrir Configurações): lê agora e redesenha o bloco,
+  // senão o atendimento mostrava "Anotar o nº da NFS-e" no lugar de "Emitir"
+  if (!servidor && nf().modo === 'api') lerStatus().then(() => { const b = f.querySelector('.nfs-bloco'); const novo = b && b.isConnected ? bloco(a) : ''; if (novo) { b.outerHTML = novo; ligaBloco(f, a, pronto); } });
   f.querySelector('[data-nfs-emitir]')?.addEventListener('click', () => {
     f.innerHTML = `<h2>Nota de ${t(c.nome.split(' ')[0])}</h2><p class="sub">${t(descricao(a))} · ${X.din(X.preco(a))}${(nf().ambiente || 'homologacao') !== 'producao' || !CONTA() ? ' · ambiente de teste' : ''}</p>
       <form><label class="campo">Nome de quem recebe a nota<input name="nome" maxlength="115" value="${t(c.nome)}" required></label>

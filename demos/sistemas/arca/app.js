@@ -9,7 +9,7 @@
 
 import * as N0 from './nucleo.js?v=2';
 import * as E from './empresa.js?v=2';
-import { criar as criarNotaServico } from './nota-servico.js?v=1';
+import { criar as criarNotaServico } from './nota-servico.js?v=2';
 import { criar as criarImportar } from './importar.js?v=1';
 
 const CONTA = new URLSearchParams(location.search).get('conta') || 'demo';

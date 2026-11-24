@@ -14,7 +14,7 @@ import { ganchos } from './gestao.js?v=31';
 import { ligarVoz } from './base.js?v=31';
 import { abrirPostar, abrirFunil, legendaModelo, DESTINOS } from './postar.js?v=31';
 import * as MAIS from './mais.js?v=31';
-import * as NF from './nota-servico.js?v=1';
+import * as NF from './nota-servico.js?v=2';
 import { ACOES as AI } from './importar.js?v=31'; // 22/11/2026: pedido do WhatsApp e contatos do celular
 import { ehVideo, guardarArquivoVideo, htmlVideo, ligarVideos, listarVideos, apagarVideo, mb, LIMITE_S, LIMITE_MB } from './midia.js?v=31';
 

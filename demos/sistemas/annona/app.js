@@ -913,7 +913,7 @@ const NF_PROV = { brasilnfe: ['Brasil NFe', 'No painel da Brasil NFe: Empresas �
 const NF_MODOS = [
   ['api', 'Tenho conta num emissor de nota on-line', 'Brasil NFe ou Focus NFe. Você cola o token da sua conta e a NFC-e sai pelo Annona ao concluir a venda.'],
   ['outro', 'Emito no meu PDV, no meu emissor ou pelo contador', 'O Annona não emite: você marca a nota na venda e exporta as vendas.'],
-  ['bluerose', 'Quero que a Blue Rose emita', 'A gente cuida do emissor para você.'],
+  // 24/11/2026: opção 'bluerose' fora da tela: a nota é sempre do cliente, pelo emissor dele
   ['nao', 'Não emito nota (ex.: MEI)', 'Nada de nota aparece no caixa.'],
 ];
 const NF_TPAG = { dinheiro: '01', credito: '03', debito: '04', fiado: '05', pix: '17' };
@@ -981,7 +981,7 @@ async function cancelarNfce(v, motivo) {
   if (!nfMinutos(v)) { toast('Passou dos 30 minutos: em SP a NFC-e não cancela mais. Fale com o seu contador.', true); return false; }
   let x; try { x = nfConta() && !v.nfce.demo ? await nfChama({ acao: 'cancelar', chave: v.nfce.chave, motivo }) : { ok: true, protocolo: `135${Date.now().toString().slice(-12)}` }; } catch (e) { x = { ok: false, mensagem: 'Sem internet agora.' }; }
   if (!x || !x.ok) { toast((x && x.mensagem) || 'A SEFAZ não aceitou o cancelamento.', true); return false; }
-  v.nfce = { ...v.nfce, status: 'cancelada', cancelada: { data: agora(), motivo, quem: eu().nome, protocolo: x.protocolo || '' } };
+  v.nfce = { ...v.nfce, status: 'cancelada', cancelada: { data: agora(), motivo, quem: eu().nome, protocolo: x.protocolo || '' } }; v.nfTentativas = (v.nfTentativas || 0) + 1; // nova nota usa outra referência
   registra(`NFC-e${v.nfce.numero ? ` nº ${v.nfce.numero}` : ''} cancelada: ${motivo}`, 'fiscal'); grava(); toast('NFC-e cancelada.'); return true;
 }
 function pedirCancelarNfce(v) {

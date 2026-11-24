@@ -96,6 +96,8 @@ async function emitir(f, v) {
       : await new Promise((ok) => setTimeout(() => ok({ ok: true, status: 'autorizada', numero: (db.fin || []).filter((x) => x.nfse && x.nfse.demo).length + 1, codigo_verificacao: Math.random().toString(36).slice(2, 10).toUpperCase(), pdf: '', ambiente: 'homologacao', demo: true }), 700));
   } catch { r = { ok: false, mensagem: 'Sem internet agora. Tente de novo.' }; }
   emAndamento.delete(f.id);
+  // a mesma referência já foi cancelada no servidor (nota refeita depois de cancelar): não é nota nova; a próxima tentativa usa outra referência
+  if (r && r.ok && r.status === 'cancelada') r = { ok: false, mensagem: 'Esta nota já tinha sido cancelada. Toque em Emitir de novo para fazer uma nota nova.' };
   if (!r || !r.ok) {
     if (!(r && r.desligado)) f.nfTentativas = (f.nfTentativas || 0) + 1;
     f.nfErro = String((r && r.mensagem) || 'A nota não saiu').slice(0, 240); grava(); repinta();
@@ -149,7 +151,7 @@ function cancelar(f) {
       api.fechar();
       let r; try { r = naConta() && !f.nfse.demo ? await window.veltriaNfse({ acao: 'cancelar', ref: f.nfse.ref, motivo }) : { ok: true }; } catch { r = { ok: false, mensagem: 'Sem internet agora.' }; }
       if (!r || !r.ok) return toast((r && r.mensagem) || 'A prefeitura não aceitou o cancelamento', 'erro');
-      f.nfse = { ...f.nfse, status: 'cancelada', cancelada: { ts: Date.now(), motivo } }; grava(); repinta(); toast('NFS-e cancelada');
+      f.nfse = { ...f.nfse, status: 'cancelada', cancelada: { ts: Date.now(), motivo } }; f.nfTentativas = (f.nfTentativas || 0) + 1; grava(); repinta(); toast('NFS-e cancelada');
     }; } });
 }
 function anotar(f) {
@@ -229,7 +231,8 @@ export function secao() {
 export function montarSecao() { if (!servidor) lerStatus().then(() => { if (document.getElementById('cfg-nota')) repinta(); }); }
 ACOES['nf-modo'] = (b) => { setNf({ modo: b.dataset.k }); repinta(); toast(MODOS.find((x) => x[0] === b.dataset.k)[2]); };
 ACOES['nf-prov'] = (b) => { setNf({ provedor: b.dataset.k }); repinta(); };
-ACOES['nf-amb'] = (b) => { setNf({ ambiente: b.dataset.k }); repinta(); toast(b.dataset.k === 'producao' ? 'Valendo: as notas passam a ter valor fiscal' : 'Ambiente de teste'); };
+// o ambiente vale no servidor (é ele que escolhe teste ou valendo na emissão): já conectado, avisa o servidor na hora, como nos outros sistemas
+ACOES['nf-amb'] = (b) => { setNf({ ambiente: b.dataset.k }); if (naConta() && servidor && servidor.conectado) window.veltriaNfse({ acao: 'conectar', provedor: nf().provedor || 'focus', ambiente: b.dataset.k }).then(lerStatus).then(repinta); repinta(); toast(b.dataset.k === 'producao' ? 'Valendo: as notas passam a ter valor fiscal' : 'Ambiente de teste'); };
 const lerPrestador = () => { const p = { ...(nf().prestador || {}) }; $$('#cfg-nota [data-p]').forEach((i) => { p[i.dataset.p] = i.dataset.p === 'simples' ? i.value === '1' : soDig(i.value); }); return p; };
 ACOES['nf-conectar'] = async (b) => {
   const p = lerPrestador(), tk = ($('#nf-token') || {}).value || '', cod = soDig(($('#nf-cod') || {}).value), prov = nf().provedor || 'focus';

@@ -367,7 +367,7 @@ const PROV_NF = { brasilnfe: ['Brasil NFe', 'No painel da Brasil NFe: Empresas �
 const MODOS_NF = [
   ['api', 'Tenho conta num emissor de nota on-line', 'Brasil NFe ou Focus NFe. Você cola o token da sua conta e a NFC-e sai pelo Peplo ao finalizar a venda.'],
   ['outro', 'Emito no meu PDV, no meu emissor ou pelo contador', 'O Peplo não emite: você marca a nota na venda e exporta as vendas para o emissor ou o contador.'],
-  ['bluerose', 'Quero que a Blue Rose emita', 'A gente cuida do emissor para você.'],
+  // 24/11/2026: opção 'bluerose' fora da tela: a nota é sempre do cliente, pelo emissor dele
   ['nao', 'Não emito nota (ex.: MEI)', 'Nada de nota aparece nas vendas.'],
 ];
 const modoNf = () => db.fiscal.modo || '';
@@ -453,6 +453,7 @@ function cancelarNota(n) {
       let x; try { x = emConta() && !n.demo ? await chamaNf({ acao: 'cancelar', chave: n.chave, motivo }) : { ok: true, protocolo: `135${Date.now().toString().slice(-12)}` }; } catch (er) { x = { ok: false, mensagem: 'Sem internet agora.' }; }
       if (!x || !x.ok) { e.currentTarget.disabled = false; toast((x && x.mensagem) || 'A SEFAZ não aceitou o cancelamento.', true); return; }
       n.status = 'cancelada'; n.cancelada = { data: agora(), motivo, quem: eu().nome, protocolo: x.protocolo || '' };
+      { const vc = db.vendas.find((y) => y.id === n.venda); if (vc) vc.nfTentativas = (vc.nfTentativas || 0) + 1; } // nova nota da mesma venda usa outra referência
       registra(`NFC-e${n.numero ? ` nº ${n.numero}` : ''} cancelada: ${motivo}`, 'fiscal'); grava(); fechar(); mostra(); toast('Nota cancelada.');
     };
   });

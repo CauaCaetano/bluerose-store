@@ -3,14 +3,14 @@
 // No celular, uma coluna por vez (as abas de cima trocam). O novo pedido (nome ou telefone do cliente, endereço, taxa por bairro e troco).
 import { db, t, din, tempo, minutos, conta, novoPedido, itensValidos, ondeComanda, tipoNome, quemPediu, clientePorTel, soDig, num, vir, hora, lojaCfg, comanda,
   etapa, aguardaAceite, aceitarPedido, recusarPedido, MOTIVOS_RECUSA, marcarPronto, saiuEntrega, concluirPedido, enviar, inicioDoDia, zap, fone,
-  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=62';
-import { registrar, acao, ir } from './nucleo.js?v=62';
-import { ico, folha, toast, autorizar, novidades, $, $$ } from './ui.js?v=62';
-import * as som from './som.js?v=62';
-import { imprimirConta, imprimirCozinha, abrirImpressao, htmlRecibo } from './imprimir.js?v=62';
-import { colarIfood, ehIfood, nomeEntrega } from './ifood.js?v=62';
-import { marmitaAtiva, marmitaFolha } from './marmita.js?v=62';
-import { temQuilo, quiloFolha } from './quilo.js?v=62';
+  lojaPausada, pausarLoja, voltarLoja, aceiteAuto, setLoja } from './loja.js?v=63';
+import { registrar, acao, ir } from './nucleo.js?v=63';
+import { ico, folha, toast, autorizar, novidades, $, $$ } from './ui.js?v=63';
+import * as som from './som.js?v=63';
+import { imprimirConta, imprimirCozinha, abrirImpressao, htmlRecibo } from './imprimir.js?v=63';
+import { colarIfood, ehIfood, nomeEntrega } from './ifood.js?v=63';
+import { marmitaAtiva, marmitaFolha } from './marmita.js?v=63';
+import { temQuilo, quiloFolha } from './quilo.js?v=63';
 
 const ler = (k, pad) => { try { return localStorage.getItem(k) ?? pad; } catch { return pad; } };
 const gravar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* nada */ } };

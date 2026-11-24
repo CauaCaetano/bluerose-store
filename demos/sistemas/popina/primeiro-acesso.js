@@ -7,9 +7,9 @@
 // Quem vê: só o dono da conta (os convidados da equipe nunca) e a demonstração (com "Pular e ver o exemplo").
 // Dados antigos: só acrescenta db.config.inicio.marca = true ao terminar ou pular; quem já tem nome, logo e capa não vê.
 // Banca 3 (22/11): na conta real (que começa em branco), o último passo oferece "Trazer meu cardápio" (importar.js).
-import { db, t, grava, CONTA, lojaCfg, setLoja } from './loja.js?v=62';
-import { ico, toast, $ } from './ui.js?v=62';
-import { ACOES } from './nucleo.js?v=62';
+import { db, t, grava, CONTA, lojaCfg, setLoja } from './loja.js?v=63';
+import { ico, toast, $ } from './ui.js?v=63';
+import { ACOES } from './nucleo.js?v=63';
 
 const ini = () => (db.config.inicio ||= {});
 const NOME_VAZIO = ['', 'meu restaurante'];

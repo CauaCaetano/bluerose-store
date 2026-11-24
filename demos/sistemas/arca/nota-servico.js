@@ -141,6 +141,8 @@ export function criar(ctx) {
     } catch { r = { ok: false, mensagem: 'Sem internet agora. Tente de novo.' }; }
     emAndamento.delete(m.id);
     const mv = db().movs.find((x) => x.id === m.id) || m;
+    // a mesma referência já foi cancelada no servidor (nota refeita depois de cancelar): não é nota nova; a próxima tentativa usa outra referência
+    if (r?.ok && r.status === 'cancelada') r = { ok: false, mensagem: 'Esta nota já tinha sido cancelada. Emita de novo para fazer uma nota nova.' };
     if (!r?.ok) {
       mv.nfseTentativas = (mv.nfseTentativas || 0) + (r?.desligado ? 0 : 1); mv.nfseErro = { ts: Date.now(), msg: String(r?.mensagem || r?.erro || 'A prefeitura não autorizou').slice(0, 300) };
       if (r?.desligado && servidor) servidor.desligado = true;
@@ -162,7 +164,7 @@ export function criar(ctx) {
       <label class="campo">Motivo (no mínimo 15 letras)<input name="mot" required maxlength="200" placeholder="Ex.: Serviço lançado em duplicidade"></label>
       <div class="linha"><button class="bt cheio perigo">Cancelar a nota</button><button type="button" class="bt" data-fecha>Voltar</button></div>`, (f) => {
       const motivo = String(f.get('mot') || '').trim(); if (motivo.length < 15) throw new Error('Escreva o motivo com pelo menos 15 letras.');
-      const fim = (x) => { document.querySelector('.veu')?.remove(); if (!x?.ok) return ctx.aviso(x?.mensagem || 'A prefeitura não aceitou o cancelamento.', true); m.nfse = { ...m.nfse, status: 'cancelada', cancelada: { ts: Date.now(), motivo } }; ctx.hist(`Cancelou a NFS-e ${m.nfse.numero || ''}`); ctx.grava(); ctx.mostra(); ctx.aviso('NFS-e cancelada.'); };
+      const fim = (x) => { document.querySelector('.veu')?.remove(); if (!x?.ok) return ctx.aviso(x?.mensagem || 'A prefeitura não aceitou o cancelamento.', true); m.nfse = { ...m.nfse, status: 'cancelada', cancelada: { ts: Date.now(), motivo } }; m.nfseTentativas = (m.nfseTentativas || 0) + 1; ctx.hist(`Cancelou a NFS-e ${m.nfse.numero || ''}`); ctx.grava(); ctx.mostra(); ctx.aviso('NFS-e cancelada.'); };
       if (DEMO || m.nfse.demo) setTimeout(() => fim({ ok: true }), 20); else chamar({ acao: 'cancelar', ref: m.nfse.ref, motivo }).then(fim);
       return false;
     });

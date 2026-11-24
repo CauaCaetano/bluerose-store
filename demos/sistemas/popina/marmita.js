@@ -2,11 +2,11 @@
 // guarnições do dia em 2 ou 3 toques; imprime a etiqueta de montagem (nome, itens, hora) na térmica de 80 mm.
 // O cardápio do dia fica em Gestão › Marmitas (config.loja.marmita). Só acrescenta campos: o item vai para a comanda
 // como um item comum (prod 'marmita', tamanho no nome, escolhas nos complementos), sem mexer nos pratos do cardápio.
-import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, comanda, novoPedido, hora, quemPediu } from './loja.js?v=62';
-import { acao, ir } from './nucleo.js?v=62';
-import { ico, folha, toast, $, $$ } from './ui.js?v=62';
-import { abrirImpressao } from './imprimir.js?v=62';
-import { G, volta } from './gestao.js?v=62';
+import { db, t, din, r2, num, vir, uid, grava, CONTA, lojaCfg, setLoja, comanda, novoPedido, hora, quemPediu } from './loja.js?v=63';
+import { acao, ir } from './nucleo.js?v=63';
+import { ico, folha, toast, $, $$ } from './ui.js?v=63';
+import { abrirImpressao } from './imprimir.js?v=63';
+import { G, volta } from './gestao.js?v=63';
 
 const PADRAO = {
   tamanhos: [{ nome: 'P', preco: 18 }, { nome: 'M', preco: 22 }, { nome: 'G', preco: 26 }],

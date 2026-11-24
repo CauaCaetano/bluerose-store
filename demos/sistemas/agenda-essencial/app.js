@@ -5,7 +5,7 @@
 // assistente, painel do dono, configurações e assinatura. Dados de exemplo neste aparelho (?novo recomeça).
 
 import * as M from './midia.js?v=1';
-import * as NF from './nota-servico.js?v=1';
+import * as NF from './nota-servico.js?v=2';
 import * as IMP from './importar.js?v=1'; // 22/11/2026: trazer contatos, Google Agenda (.ics) e foto do caderno (só acrescenta) // 22/11/2026: nota fiscal de serviço (NFS-e)
 const CHAVE = 'veltria-agenda-essencial-v3'; // NÃO MUDAR: chave dos dados da assinante (igual em base/versoes.js)
 const din = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
