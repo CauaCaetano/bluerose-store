@@ -634,15 +634,20 @@ const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
 let maqSim = 0;
 const maqDemo = {
   cobrar: async (v) => { await espera(500); return { ok: true, id: `ORDDEMO${++maqSim}`, status: 'at_terminal', t0: Date.now(), valor: v }; },
-  consultar: async (id, t0, f) => (Date.now() - t0 > 3000 ? { ok: true, id, status: 'processed', tipo: f === 'debito' ? 'debit_card' : 'credit_card', bandeira: 'master', parcelas: f === 'credito' ? (estado.pag[0].parc || 1) : 1 } : { ok: true, id, status: 'at_terminal' }),
+  consultar: async (id, t0, l) => (Date.now() - t0 > 3000 ? { ok: true, id, status: 'processed', tipo: l.f === 'debito' ? 'debit_card' : 'credit_card', bandeira: 'master', parcelas: l.f === 'credito' ? (l.parc || 1) : 1 } : { ok: true, id, status: 'at_terminal' }),
   cancelar: async (id) => ({ ok: true, id, status: 'canceled' }),
 };
 const MAQ_FORMA = { credit_card: 'credito', debit_card: 'debito', prepaid_card: 'debito', qr: 'pix', pix: 'pix', bank_transfer: 'pix', account_money: 'pix' };
+// cada linha de Crédito/Débito ainda não cobrada vai para a maquininha, uma de cada vez (pagamento dividido: a parte do Pix
+// ou do dinheiro fica como está). Aprovada a última, a venda fecha. A linha cobrada guarda .maq e fica travada na sacola.
+const maqPendentes = () => estado.pag.filter((x) => (x.f === 'credito' || x.f === 'debito') && x.v > 0 && !x.maq);
+const maqCobradas = () => estado.pag.some((x) => x.maq);
 function cobrarMaquininha() {
-  if (!finalizarVenda(true)) return; // confere estoque, desconto e pagamento antes de mandar o valor
-  const valor = totalSacola(), f0 = estado.pag[0], ref = `peplo-${Date.now().toString(36)}`;
+  if (!finalizarVenda(true)) return; // confere estoque, desconto, pagamento e crediário antes de mandar o valor
+  const fila = maqPendentes(); if (!fila.length) { finalizarVenda(); return; }
+  const linha = fila[0], valor = linha.v, f0 = linha, depois = fila.length - 1, ref = `peplo-${Date.now().toString(36)}`;
   let ordem = null, parar = false;
-  abrir(`<h2>Maquininha · ${din(valor)}</h2><div class="caixa-aviso" data-st style="text-align:center;padding:18px"><b data-tit style="font-size:19px;display:block">Mandando para a maquininha…</b><span class="mudo" data-txt>${t(maqNome(maqP().terminal))}</span></div>
+  abrir(`<h2>Maquininha · ${din(valor)}</h2>${estado.pag.length > 1 ? `<p class="mudo">Parte no cartão${depois ? ` (depois vem mais ${depois === 1 ? 'um cartão' : `${depois} cartões`})` : ''}. ${estado.pag.filter((x) => x !== linha && !(x.maq) && !((x.f === 'credito' || x.f === 'debito'))).map((x) => `${FORMAS[x.f]}: ${din(x.v)}`).join(' · ')}</p>` : ''}<div class="caixa-aviso" data-st style="text-align:center;padding:18px"><b data-tit style="font-size:19px;display:block">Mandando para a maquininha…</b><span class="mudo" data-txt>${t(maqNome(maqP().terminal))}</span></div>
     ${emConta() ? '' : '<p class="mudo" style="margin-top:10px">Demonstração: a maquininha é simulada e aprova sozinha em 3 segundos.</p>'}
     <div class="acoes"><button type="button" class="bt" data-cancela>Cancelar a cobrança</button></div>`, async (j) => {
     const tit = $('[data-tit]', j), txt = $('[data-txt]', j), st = $('[data-st]', j), bt = $('[data-cancela]', j);
@@ -660,14 +665,15 @@ function cobrarMaquininha() {
     tit.textContent = 'Passe o cartão ou aproxime na maquininha'; txt.textContent = `${din(valor)} · esperando a cliente pagar`;
     for (let k = 0; k < 400 && !parar && document.body.contains(j); k++) {
       await espera(2500); if (parar || !document.body.contains(j)) break;
-      const s = emConta() ? await maqChama({ acao: 'consultar', id: ordem.id }) : await maqDemo.consultar(ordem.id, t0, f0.f);
+      const s = emConta() ? await maqChama({ acao: 'consultar', id: ordem.id }) : await maqDemo.consultar(ordem.id, t0, linha);
       if (!s.ok) continue; // sem internet por um instante: tenta de novo
       if (s.status === 'processed') {
         const forma = MAQ_FORMA[s.tipo] || f0.f, parc = s.parcelas || 1;
         fim(true, `Aprovado · ${FORMAS[forma]}${parc > 1 ? ` em ${parc}×` : ''}`);
         // o valor aprovado é o que vale: se a cliente pagou outro tipo na maquininha (débito, Pix), a venda fica com ele
-        estado.pag = [{ f: forma, v: valor, parc, maq: { id: ordem.id, bandeira: s.bandeira || '', parcelas: parc } }];
-        setTimeout(() => { fechar(); finalizarVenda(); registra(`Venda paga na maquininha: ${din(valor)} (${FORMAS[forma]})`, 'caixa'); }, 900);
+        Object.assign(linha, { f: forma, parc, maq: { id: ordem.id, bandeira: s.bandeira || '', parcelas: parc } });
+        registra(`Cartão aprovado na maquininha: ${din(valor)} (${FORMAS[forma]})`, 'caixa');
+        setTimeout(() => { fechar(); if (maqPendentes().length) { mostra(); toast('Cartão aprovado. Agora o próximo.'); setTimeout(cobrarMaquininha, 500); } else finalizarVenda(); }, 900);
         return;
       }
       if (['failed', 'canceled', 'expired', 'refunded'].includes(s.status)) {
@@ -1035,14 +1041,14 @@ function sacolaHTML() {
     ${umaForma ? `<div class="formas">${bts.map(([k, n, ic]) => `<button type="button" data-forma="${k}" aria-pressed="${f0.f === k}">${f0.f === k ? `<span class="ok-c">${icb('check')}</span>` : ''}${icb(ic)}<span>${n}</span></button>`).join('')}</div>
       ${f0.f === 'credito' ? `<label class="campo pag-extra">Parcelas no cartão<select data-pp="0">${Array.from({ length: 10 }, (_, k) => `<option value="${k + 1}" ${(f0.parc || 1) === k + 1 ? 'selected' : ''}>${k + 1}×${k ? ` de ${din(Math.round(total / (k + 1)))}` : ' (à vista)'}</option>`).join('')}</select></label>` : ''}
       ${f0.f === 'dinheiro' && sac.length ? `<label class="campo pag-extra">Recebido em dinheiro (para o troco)<input data-pv="0" inputmode="decimal" value="${campoDin(f0.v)}"></label>` : ''}`
-    : `${estado.pag.map((x, i) => `<div class="pag-linha"><select data-pf="${i}" aria-label="Forma de pagamento">${formas.map(([k, n]) => `<option value="${k}" ${x.f === k ? 'selected' : ''}>${n}</option>`).join('')}</select><input data-pv="${i}" inputmode="decimal" value="${campoDin(x.v)}" placeholder="0,00" aria-label="Valor">${estado.pag.length > 1 ? `<button type="button" class="x" data-tira="${i}" aria-label="Tirar">×</button>` : '<span></span>'}</div>${x.f === 'credito' ? `<label class="campo pag-extra">Parcelas no cartão<select data-pp="${i}">${Array.from({ length: 10 }, (_, k) => `<option value="${k + 1}" ${(x.parc || 1) === k + 1 ? 'selected' : ''}>${k + 1}×${k ? '' : ' (à vista)'}</option>`).join('')}</select></label>` : ''}`).join('')}
+    : `${estado.pag.map((x, i) => `<div class="pag-linha"><select data-pf="${i}" aria-label="Forma de pagamento" ${x.maq ? 'disabled title="Já aprovado na maquininha"' : ''}>${formas.map(([k, n]) => `<option value="${k}" ${x.f === k ? 'selected' : ''}>${n}</option>`).join('')}</select><input data-pv="${i}" inputmode="decimal" value="${campoDin(x.v)}" placeholder="0,00" aria-label="Valor" ${x.maq ? 'disabled' : ''}>${x.maq ? '<span title="Aprovado na maquininha">✓</span>' : estado.pag.length > 1 ? `<button type="button" class="x" data-tira="${i}" aria-label="Tirar">×</button>` : '<span></span>'}</div>${x.f === 'credito' ? `<label class="campo pag-extra">Parcelas no cartão<select data-pp="${i}">${Array.from({ length: 10 }, (_, k) => `<option value="${k + 1}" ${(x.parc || 1) === k + 1 ? 'selected' : ''}>${k + 1}×${k ? '' : ' (à vista)'}</option>`).join('')}</select></label>` : ''}`).join('')}
       <div class="pag-links"><button type="button" class="link" data-acao="dividir">+ Outra forma</button>${falta !== 0 && sac.length ? `<button type="button" class="link" data-acao="completar">Pôr o que falta (${din(falta)})</button>` : ''}</div>`}
     ${fiadoV ? `<div class="campos cred-campos"><label class="campo">Parcelas<select id="p-n">${Array.from({ length: 12 }, (_, i) => `<option ${estado.parc.n === i + 1 ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label><label class="campo">A cada<select id="p-int"><option value="mes" ${estado.parc.int === 'mes' ? 'selected' : ''}>mês</option><option value="15" ${estado.parc.int === '15' ? 'selected' : ''}>15 dias</option><option value="7" ${estado.parc.int === '7' ? 'selected' : ''}>semana</option></select></label><label class="campo">1º vencimento<input id="p-prim" type="date" value="${estado.parc.prim}"></label></div>
       <p class="mudo cred-txt">${estado.parc.n}× de ${din(Math.floor(fiadoV / estado.parc.n))} no crediário${c ? ` · ${t(situacao(c).txt)} · disponível ${din(Math.max(0, (c.limite || 0) - aberto(c.id)))}` : ''}</p>` : ''}
     ${falta > 0 && sac.length ? `<div class="caixa-aviso atn">Faltam ${din(falta)} para fechar o total.</div>` : falta < 0 ? `<div class="caixa-aviso atn">Pagamento passa ${din(-falta)} do total${estado.pag.some((x) => x.f === 'dinheiro') ? ` (troco de ${din(-falta)})` : ''}.</div>` : ''}
     ${fiadoV && !pf.ok ? `<div class="caixa-aviso mal">${t(pf.motivo)}${pf.excecao ? (estado.excecao ? `<br><b>Exceção liberada:</b> ${t(estado.excecao)}` : ' <button type="button" class="link" data-acao="excecao">Liberar exceção</button>') : ''}</div>` : ''}
     ${emiteNf() ? `<div class="campos" style="margin-top:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end"><label class="troca" style="padding:0"><span>Emitir NFC-e</span><input type="checkbox" id="v-nota" ${(estado.nota ?? (db.fiscal.auto !== false)) ? 'checked' : ''}></label><label class="campo">CPF na nota (opcional)<input id="v-cpf" inputmode="numeric" value="${t(estado.cpf || '')}" placeholder="000.000.000-00"></label></div>` : ''}
-    ${umaForma && maqLigada() && ['credito', 'debito'].includes(f0.f) && sac.length ? `<button type="button" class="bt cheio largo finalizar" data-acao="maquininha">${icb('cartao')}Cobrar ${din(total)} na maquininha</button><button type="button" class="link" data-acao="finalizar" style="display:block;margin:8px auto 0">Já passei o cartão: só finalizar</button>` : `<button type="button" class="bt cheio largo finalizar" data-acao="finalizar" ${sac.length ? '' : 'disabled'}>${icb('check')}Finalizar venda (F12)</button>`}
+    ${maqLigada() && sac.length && maqPendentes().length ? `<button type="button" class="bt cheio largo finalizar" data-acao="maquininha">${icb('cartao')}Cobrar ${din(maqPendentes().reduce((s, x) => s + x.v, 0))} na maquininha</button><button type="button" class="link" data-acao="finalizar" style="display:block;margin:8px auto 0">Já passei o cartão: só finalizar</button>` : `<button type="button" class="bt cheio largo finalizar" data-acao="finalizar" ${sac.length ? '' : 'disabled'}>${icb('check')}Finalizar venda (F12)</button>`}
   </div>`;
 }
 
@@ -1711,12 +1717,12 @@ function finalizarVenda(conferir = false) {
   if (troco > 0 && !pags.some((x) => x.f === 'dinheiro')) return toast('O pagamento passa do total. Ajuste os valores (troco só no dinheiro).', true);
   // estoque: confere de novo na hora (nunca negativo)
   for (const x of sac) { const p = prod(x.p); if (!p || qtd(p, x.cor, x.tam) < noCarrinho(x.p, x.cor, x.tam)) return toast(`Sem estoque de ${x.nome} ${x.cor} ${x.tam}.`, true); }
-  if (conferir) return true;
   let c = acharCli(estado.vCli);
-  if (!c && estado.vCli.trim()) { c = { id: uid('c'), nome: estado.vCli.trim(), tel: '', cpf: '', nasc: '', end: '', limite: db.cfg.limitePadrao, obs: '', bloqueado: false, credito: 0, criado: hoje() }; db.clientes.push(c); }
+  if (!c && estado.vCli.trim()) { c = { id: uid('c'), nome: estado.vCli.trim(), tel: '', cpf: '', nasc: '', end: '', limite: db.cfg.limitePadrao, obs: '', bloqueado: false, credito: 0, criado: hoje() }; if (!conferir) db.clientes.push(c); }
   const fiado = pags.filter((x) => x.f === 'fiado').reduce((s, x) => s + x.v, 0), loja = pags.filter((x) => x.f === 'loja').reduce((s, x) => s + x.v, 0);
-  if (fiado) { const pf = podeFiado(c, fiado); if (!pf.ok && !(pf.excecao && estado.excecao)) return toast(pf.motivo, true); if (!pf.ok) db.excecoes.push({ data: agora(), cli: c.id, valor: fiado, motivo: estado.excecao }); }
+  if (fiado) { const pf = podeFiado(c, fiado); if (!pf.ok && !(pf.excecao && estado.excecao)) return toast(pf.motivo, true); if (!pf.ok && !conferir) db.excecoes.push({ data: agora(), cli: c.id, valor: fiado, motivo: estado.excecao }); }
   if (loja && (!c || (c.credito || 0) < loja)) return toast('A cliente não tem esse crédito na loja.', true);
+  if (conferir) return true;
   const cx = caixaAtual();
   // troco sai do dinheiro
   const pagFinal = pags.map((x) => ({ ...x })); if (troco > 0) { const d = pagFinal.find((x) => x.f === 'dinheiro'); d.v -= troco; }
@@ -2431,15 +2437,15 @@ document.addEventListener('click', (e) => {
   if (d.sq && estado.sel) { const p = prod(estado.sel.p), max = estado.sel.tam ? dispVar(p, estado.sel.cor, estado.sel.tam) : 1; if (!estado.sel.tam) return toast('Escolha o tamanho.', true); estado.sel.q = Math.max(1, Math.min(max, estado.sel.q + Number(d.sq))); return mostra(); }
   if (d.cat) { estado.cat = d.cat; estado.sel = null; estado.selFechada = false; return mostra(); }
   if (d.rm !== undefined) { estado.sacola.splice(Number(d.rm), 1); if (!estado.sacola.length) estado.excecao = null; ajustaPagamento(); return mostra(); }
-  if (d.forma) { estado.dividir = false; estado.pag = [{ f: d.forma, v: totalSacola(), parc: 1 }]; estado.excecao = null; return mostra(); }
+  if (d.forma) { if (maqCobradas()) { toast('Já tem cartão aprovado na maquininha nesta venda: finalize a venda.', true); return; } estado.dividir = false; estado.pag = [{ f: d.forma, v: totalSacola(), parc: 1 }]; estado.excecao = null; return mostra(); }
   if (d.dm) { if (estado.descModo !== d.dm) { estado.descModo = d.dm; estado.descVal = 0; ajustaPagamento(); } return mostra(); }
   if (d.efCat) { estado.est.cat = d.efCat; return mostra(); }
   if (d.etqCat) { estado.etqCat = d.etqCat; return mostra(); }
   if (d.etqModo) { estado.etqModo = d.etqModo; return mostra(); }
   if (d.editarPeca) { el.closest('details')?.removeAttribute('open'); return formPeca(prod(d.editarPeca)); }
   if (d.arquivarP) { el.closest('details')?.removeAttribute('open'); const p = prod(d.arquivarP); return confirmar(`Arquivar ${p.nome}?`, 'A peça sai do Vender e do estoque, mas o histórico de vendas continua. Dá para voltar em Editar peça.', 'Arquivar', () => { p.arquivado = true; registra(`Peça arquivada: ${p.nome}`, 'estoque'); grava(); mostra(); toast('Peça arquivada.'); }, true); }
-  if (d.q !== undefined) { const x = estado.sacola[Number(d.q)]; const p = prod(x.p), novo = x.qtd + Number(d.d); if (novo <= 0) estado.sacola.splice(Number(d.q), 1); else if (Number(d.d) > 0 && qtd(p, x.cor, x.tam) < noCarrinho(x.p, x.cor, x.tam) + 1) toast('Não tem mais desse tamanho.', true); else x.qtd = novo; ajustaPagamento(); return mostra(); }
-  if (d.tira !== undefined) { estado.pag.splice(Number(d.tira), 1); ajustaPagamento(); return mostra(); }
+  if (d.q !== undefined) { if (maqCobradas()) { toast('Já tem cartão aprovado na maquininha nesta venda: finalize a venda.', true); return; } const x = estado.sacola[Number(d.q)]; const p = prod(x.p), novo = x.qtd + Number(d.d); if (novo <= 0) estado.sacola.splice(Number(d.q), 1); else if (Number(d.d) > 0 && qtd(p, x.cor, x.tam) < noCarrinho(x.p, x.cor, x.tam) + 1) toast('Não tem mais desse tamanho.', true); else x.qtd = novo; ajustaPagamento(); return mostra(); }
+  if (d.tira !== undefined) { if (maqCobradas()) { toast('Já tem cartão aprovado na maquininha nesta venda: finalize a venda.', true); return; } estado.pag.splice(Number(d.tira), 1); ajustaPagamento(); return mostra(); }
   if (d.venda) return comprovante(db.vendas.find((v) => v.id === d.venda));
   if (d.devolver) { fechar(); return devolver(db.vendas.find((v) => v.id === d.devolver)); }
   if (d.receber) return receber(cli(d.receber));
@@ -2472,7 +2478,7 @@ document.addEventListener('click', (e) => {
   if (d.tema && el.closest('.temas')) { db.tema = d.tema; grava(); mostra(); return toast(`Cor ${TEMAS.find((x) => x[0] === d.tema)[1].toLowerCase()} aplicada.`); }
   if (!ac) return;
   ({
-    esvaziar: () => { estado.sacola = []; estado.excecao = null; ajustaPagamento(); mostra(); },
+    esvaziar: () => { if (maqCobradas()) return confirmar('Limpar a sacola?', 'Já tem cartão aprovado na maquininha nesta venda. Se limpar, estorne esse valor na própria maquininha.', 'Limpar mesmo assim', () => { estado.sacola = []; estado.pag = [{ f: 'pix', v: 0 }]; estado.dividir = false; mostra(); }, true); estado.sacola = []; estado.excecao = null; ajustaPagamento(); mostra(); },
     dividir: () => { const falta = totalSacola() - estado.pag.reduce((s, x) => s + (x.v || 0), 0); estado.pag.push({ f: estado.pag.some((x) => x.f === 'fiado') ? 'dinheiro' : 'fiado', v: Math.max(0, falta) }); mostra(); },
     completar: () => { const falta = totalSacola() - estado.pag.reduce((s, x) => s + (x.v || 0), 0), u = estado.pag[estado.pag.length - 1]; u.v = Math.max(0, (u.v || 0) + falta); mostra(); },
     excecao: liberarExcecao, finalizar: () => finalizarVenda(), maquininha: cobrarMaquininha,
@@ -2493,6 +2499,7 @@ document.addEventListener('click', (e) => {
       j.addEventListener('click', (e) => { const b = e.target.closest('[data-esc-cli]'); if (b) { estado.vCli = b.dataset.escCli; estado.excecao = null; fechar(); mostra(); } if (e.target.closest('[data-nova]')) { fechar(); formCliente(); } });
     }),
     dividir2: () => {
+      if (maqCobradas()) { toast('Já tem cartão aprovado na maquininha nesta venda: finalize a venda.', true); return; } 
       if (estado.dividir) { estado.dividir = false; estado.pag = [{ f: (estado.pag[0] || {}).f || 'pix', v: totalSacola() }]; }
       else { const tot = totalSacola(), a = Math.round(tot / 2 / 100) * 100, f0 = (estado.pag[0] || {}).f || 'pix'; estado.dividir = true; estado.pag = [{ f: f0, v: a }, { f: f0 === 'pix' ? 'credito' : 'pix', v: tot - a }]; }
       estado.excecao = null; mostra();
