@@ -9,27 +9,32 @@
   var NOMES = { teste: 'Teste grátis', assinatura: 'Assinatura', compra: 'Compra' };
   var APPS = ['crm', 'agenda', 'financeiro', 'gestao', 'juridico', 'clinica', 'academia', 'restaurante', 'imobiliaria', 'oficina', 'farmacia', 'obras', 'cerimonial', 'pragas', 'ofixl'];
   // catálogo para a busca: o cliente digita o nome (ou o ramo) e o sistema aparece, mesmo os que ele ainda não tem
+  // 24/11/2026: só os sistemas que o site vende hoje (o resto saiu da vitrine)
   var CAT = {
-    gestao: ['Veltria Gestão', 'estoque loja mercado distribuidora atacado varejo vendas pedidos compras fornecedores nota fiscal nfe xml código de barras etiquetas caixa pdv inventário'],
-    crm: ['Veltria CRM', 'vendas funil clientes propostas orçamentos metas leads negociações agenda atividades whatsapp'],
-    agenda: ['Jano', 'agenda agendamento horários salão barbearia estética manicure comanda comissão caixa clientes whatsapp lembrete'],
-    juridico: ['Veltria Jurídico', 'advocacia advogado processos prazos agenda audiências intimações honorários clientes'],
-    financeiro: ['Arca', 'financeiro contas pagar receber caixa fluxo dre conciliação extrato banco cobrança boleto pix ordem de serviço assistência técnica'],
-    clinica: ['Veltria Clínica', 'clínica consultório médico dentista agenda consultas pacientes prontuário receitas convênios'],
-    academia: ['Veltria Academia', 'academia estúdio alunos mensalidades check-in aulas agenda treinos personal'],
-    restaurante: ['Veltria Restaurante', 'restaurante lanchonete pizzaria delivery mesas comandas cozinha cardápio estoque caixa'],
-    imobiliaria: ['Veltria Imobiliária', 'imobiliária imóveis corretor aluguel venda contratos visitas agenda'],
-    oficina: ['Veltria Oficina', 'oficina mecânica carro veículos ordem de serviço orçamento peças estoque agenda revisões'],
-    farmacia: ['Veltria Farmácia', 'farmácia drogaria remédio medicamentos controlados receitas validade lotes estoque caixa pdv nota fiscal nfc-e convênios'],
-    obras: ['Veltria Obras', 'obra obras reforma construção empreiteiro diário cronograma gastos orçamento equipe'],
-    cerimonial: ['Blue Rose Eternize', 'casamento eventos cerimonial festas convidados fornecedores agenda orçamento'],
-    pragas: ['Blue Rose Guard', 'dedetização controle de pragas visitas agenda ordem de serviço certificados contratos'],
-    ofixl: ['Blue Rose Ofixl', 'serviços técnicos ar-condicionado manutenção ordem de serviço agenda técnicos orçamento']
+    agendaessencial: ['Jano', 'agenda agendamento horários salão barbearia estética manicure clientes whatsapp lembrete celular'],
+    financeiroessencial: ['Arca', 'financeiro contas pagar receber caixa fluxo dre conciliação extrato banco cobrança boleto pix empresa'],
+    peplo: ['Peplo', 'loja de roupas moda boutique estoque tamanho cor vendas crediário fiado maquininha nota fiscal nfc-e'],
+    annona: ['Annona', 'mercadinho mercado mercearia estoque vendas caixa balança código de barras nota fiscal'],
+    atria: ['Atria', 'construção obra reforma pedreiro marceneiro eletricista orçamento serviços celular'],
+    popina: ['Popina', 'restaurante lanchonete pizzaria delivery mesas comandas cozinha cardápio qr code ifood'],
+    anshur: ['Anshur', 'revenda máquinas agrícolas trator usado troca avaliação estoque oficina peças floor plan']
   };
   function normal(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
   // saíram da vitrine em 22/10/2026: quem já usa continua vendo, mas não aparecem como sugestão
-  var FORA_DE_VENDA = ['academia', 'restaurante', 'imobiliaria', 'cerimonial', 'pragas', 'clinica', 'juridico']; // Jurídico saiu da venda em 10/11/2026
-  var PAGINA = { obras: 'veltria-obras.html', cerimonial: 'eternize.html', pragas: 'guard.html', ofixl: 'ofixl.html' };
+  var FORA_DE_VENDA = []; // 24/11/2026: o CAT acima já só tem o que está à venda
+  var PAGINA = { agendaessencial: 'jano.html', financeiroessencial: 'arca.html', peplo: 'peplo.html', annona: 'annona.html', atria: 'atria.html', popina: 'popina.html', anshur: 'anshur.html' };
+  // 24/11/2026: a lista mostra os sistemas à venda hoje; de um sistema que saiu do site só aparece o que o cliente paga (teste ou assinatura com valor).
+  // Cortesias e registros encerrados de sistemas antigos ficam no banco, mas não aparecem. De um sistema que está valendo, os registros encerrados somem.
+  var VIVOS = ['teste', 'ativa', 'paga', 'pendente'];
+  function visiveis(l) {
+    var ativo = {}; l.forEach(function (a) { if (a.app && VIVOS.indexOf(a.status) >= 0) ativo[a.app] = 1; });
+    return l.filter(function (a) {
+      var vivo = VIVOS.indexOf(a.status) >= 0, pago = Number(a.valor) > 0;
+      if (a.tipo === 'compra') return a.status === 'paga' || a.status === 'pendente';
+      if (!CAT[a.app]) return vivo && pago;
+      return vivo || !ativo[a.app];
+    });
+  }
   var hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   function data(s) { if (!s) return '—'; var p = String(s).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
   function dias(ate) { return Math.round((new Date(String(ate).slice(0, 10) + 'T12:00:00') - new Date(hojeISO + 'T12:00:00')) / 864e5); }
@@ -177,7 +182,7 @@
   }
   function mostrar(j, doCache) {
     {
-      var l = j.assinaturas || [], v = !doCache && volta && l.filter(function (x) { return x.id === volta; })[0], aviso = '';
+      var todas = j.assinaturas || [], l = visiveis(todas), v = !doCache && volta && todas.filter(function (x) { return x.id === volta; })[0], aviso = '';
       TOKENS = j.tokens || {}; tokenMostrado = {};
       if (v) {
         aviso = v.status === 'teste' ? '<div class="conta-aviso ok">Cartão cadastrado. O seu teste grátis está valendo até ' + data(v.teste_ate) + '. <a href="' + appUrl(v.app) + '">Abrir o sistema agora →</a></div>'
@@ -202,7 +207,7 @@
     if (e.target && e.target.id === 'conta-q' && e.target.value) { var p = document.getElementById('conta-pasta'); if (p) p.open = true; }
   });
   function busca() {
-    return '<div class="conta-busca"><label class="vh" for="conta-q">Procurar sistema</label><input id="conta-q" type="search" value="' + esc(termo) + '" placeholder="Procurar sistema pelo nome (ex.: agenda, farmácia, CRM)" autocomplete="off"><div class="conta-busca-res" data-busca-res></div></div>';
+    return '<div class="conta-busca"><label class="vh" for="conta-q">Procurar sistema</label><input id="conta-q" type="search" value="' + esc(termo) + '" placeholder="Procurar sistema pelo nome (ex.: Jano, Peplo, restaurante)" autocomplete="off"><div class="conta-busca-res" data-busca-res></div></div>';
   }
   // busca: compara com o começo das palavras (nome do sistema, ramo); sugestões de outros sistemas só com 2 letras ou mais
   var termo = '', meusApps = {};
@@ -213,7 +218,7 @@
     var tit = raiz.querySelector('.conta-titulo'); if (tit) tit.style.display = q && !vistos ? 'none' : '';
     var res = raiz.querySelector('[data-busca-res]'); if (!res) return;
     if (!q) { res.innerHTML = ''; return; }
-    var outros = q.length < 2 ? [] : Object.keys(CAT).filter(function (k) { return !meusApps[k] && FORA_DE_VENDA.indexOf(k) < 0 && bate(CAT[k][0], q); });
+    var outros = q.length < 2 ? [] : Object.keys(CAT).filter(function (k) { return !meusApps[k] && FORA_DE_VENDA.indexOf(k) < 0 && bate(CAT[k][0] + ' ' + CAT[k][1], q); });
     res.innerHTML = (vistos ? '' : '<p class="conta-busca-nada">Nenhum dos seus sistemas tem esse nome.</p>') + outros.map(function (k) { var pg = PAGINA[k] || 'veltria-' + k + '.html'; return '<div class="conta-busca-item"><b>' + esc(CAT[k][0]) + '</b><span>' + 'Você ainda não tem este sistema.</span><a class="btn btn-primary" href="' + pg + '#precos">Ver e assinar</a></div>'; }).join('');
   }
   raiz.addEventListener('input', function (e) { if (e.target.id !== 'conta-q') return; termo = e.target.value; filtrar(); });
