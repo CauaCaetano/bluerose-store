@@ -1825,7 +1825,13 @@ function anima(tela) {
     requestAnimationFrame(passo);
   });
 }
-const mostra = () => { const y = window.scrollY; rota(); window.scrollTo(0, y); };
+// clique que tira o foco de um campo: o "change" do campo redesenha a tela no meio do clique e o botão clicado some
+// (o clique se perde). Com o dedo ou o mouse apertado, o redesenho espera soltar e o clique acontecer primeiro.
+let ptrBaixo = 0, mostraPend = false; // ptrBaixo: hora em que apertou (0 = solto); passou de 1,5 s, não espera mais
+addEventListener('pointerdown', () => { ptrBaixo = Date.now(); }, true);
+const soltou = () => { if (!ptrBaixo) return; ptrBaixo = 0; if (mostraPend) { mostraPend = false; setTimeout(mostra, 0); } };
+addEventListener('pointerup', soltou, true); addEventListener('pointercancel', soltou, true); addEventListener('blur', soltou);
+const mostra = () => { if (ptrBaixo && Date.now() - ptrBaixo < 1500) { mostraPend = true; return; } const y = window.scrollY; rota(); window.scrollTo(0, y); };
 addEventListener('hashchange', rota);
 
 // sugestões ao digitar no leitor (balcão e mesa)

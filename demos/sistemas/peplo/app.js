@@ -1664,7 +1664,13 @@ function rotaDesenha() {
   if (!rota.mesma) scrollTo({ top: 0 }); rota.mesma = false;
   if (nome === 'config' && arg && document.getElementById(arg)) setTimeout(() => document.getElementById(arg).scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
-const mostra = () => { rota.mesma = true; rota(); };
+// clique que tira o foco de um campo: o "change" do campo redesenha a tela no meio do clique e o botão clicado some
+// (o clique se perde). Com o dedo ou o mouse apertado, o redesenho espera soltar e o clique acontecer primeiro.
+let ptrBaixo = 0, mostraPend = false; // ptrBaixo: hora em que apertou (0 = solto); passou de 1,5 s, não espera mais
+addEventListener('pointerdown', () => { ptrBaixo = Date.now(); }, true);
+const soltou = () => { if (!ptrBaixo) return; ptrBaixo = 0; if (mostraPend) { mostraPend = false; setTimeout(mostra, 0); } };
+addEventListener('pointerup', soltou, true); addEventListener('pointercancel', soltou, true); addEventListener('blur', soltou);
+const mostra = () => { if (ptrBaixo && Date.now() - ptrBaixo < 1500) { mostraPend = true; return; } rota.mesma = true; rota(); };
 addEventListener('hashchange', rota);
 addEventListener('resize', () => ajustaAbas());
 
