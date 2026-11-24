@@ -219,7 +219,7 @@
     var risco = '*Risco zero:* o piloto é por escrito, sem reunião. A gente importa o seu histórico e configura a nota junto com você, responde em até 4 horas úteis e, em até 10 dias úteis, a revenda está rodando. Depois, R$ 2.000/mês cobrindo todas as lojas, sem taxa de implantação e sem fidelidade: cancela quando quiser.';
     if (acao === 'retomada1') return [
       'Oi! Voltando rapidinho sobre o usado da troca na ' + e + '.',
-      'Muita revenda me responde: "já tenho sistema". Faz sentido, e o Anshur não pede para trocar nada: ele entra *ao lado* do seu DMS ou ERP (TOTVS, Dealernet, NBS, Linx, Sankhya ou planilha), importa o arquivo que ele já exporta e cuida só do que o sistema de gestão não faz: o teto do usado antes de fechar, o custo de cada dia parado e a aprovação do dono. A nota continua saindo pelo emissor que vocês já usam.',
+      'Muita revenda me responde: "já tenho sistema". Faz sentido, e o Anshur foi feito para isso: ele é o sistema completo da revenda (usados e trocas, estoque, vendas, oficina, peças, financeiro e nota) e importa os dados do sistema atual (TOTVS, Dealernet, NBS, Linx, Sankhya ou planilha), sem redigitar. E traz o que os outros não fazem: o teto do usado antes de fechar, o custo de cada dia parado e a aprovação do dono. A nota continua saindo pelo emissor que vocês já usam.',
       'Conta rápida: se o pátio tem R$ 5 milhões em usados parados, a 1,2% ao mês são uns R$ 2 mil por dia de juros. E evitar pagar R$ 20 mil a mais em uma única troca paga 10 meses do Anshur.',
       'O teste mostra em 5 minutos, com 5 trocas antigas de vocês, quanto teria ficado no caixa (nada sai do seu computador):\n' + lt].concat(fund(
       'E ainda há vaga na oferta de fundador: as 3 primeiras revendas usam o *1º mês sem custo*.'), [
@@ -227,7 +227,7 @@
     if (acao === 'retomada2') return [
       'Oi! Última mensagem, prometo.',
       'Não vou insistir: se agora não é o momento, tudo bem. Só deixo o resumo para quando precisar.',
-      '*Anshur em uma linha:* teto do usado antes de fechar a troca, custo de cada dia de máquina parada e todas as lojas sob o seu controle, ao lado do sistema que vocês já usam.',
+      '*Anshur em uma linha:* teto do usado antes de fechar a troca, custo de cada dia de máquina parada e todas as lojas sob o seu controle, num sistema só.',
       car,
       'R$ 2.000/mês, todas as lojas, sem implantação e sem fidelidade. Piloto por escrito, rodando em até 10 dias úteis.'].concat(fund(
       'Ainda dá para pegar uma das vagas de fundador: *1º mês sem custo*.'), [
